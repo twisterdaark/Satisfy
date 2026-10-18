@@ -36,11 +36,14 @@ button:hover{background:var(--btn2)}button.on{background:var(--btn2);outline:2px
 <div class="bar" id="rarBar"><b>ندرة اللوت والضربة:</b></div>
 <div class="panel"><b>سبرايت شيتس</b> <span class="note">كل شيت 10 فريمات × 3 اتجاهات: وقوف (رمشة)، مشي 4، ضرب 3، ألم.</span>
 <div class="sheets" id="sheets"></div></div>
+<div class="panel"><b>الوحوش</b> <span class="note">بنفس ألوان ومقاسات اللعبة: وقوف، مشي 4، هجوم 2، ألم. الدب والدب العملاق متكبّرين ×1.5 زي اللعبة.</span>
+<canvas id="mons" width="480" height="200" style="display:block;width:100%;max-width:100%;aspect-ratio:12/5;image-rendering:pixelated;background:#3d6e36;border-radius:4px;margin-top:8px"></canvas></div>
 </main>
 <script src="fig-data.js"></script>
 <script src="legacy-figure.js"></script>
 <script src="chars.js"></script>
 <script src="vfx.js"></script>
+<script src="monsters.js"></script>
 <script>
 const A=SatArt,C=A.chars,cv=document.getElementById('view'),g=cv.getContext('2d');g.imageSmoothingEnabled=false;
 const FXL={slash:'ضربة سيف',hit:'إصابة',crit:'كريتيكال',block:'صد',fire:'نار',frost:'تلج',bolt:'صاعقة',heal:'علاج',mana:'شحن مانا',levelup:'لفل أب',loot:'شعاع لوت',dust:'تراب',death:'موت',forge:'شرار الحدادة',blood:'دم',stun:'دوخة',rage:'غضب',shadow:'ظل'};
@@ -90,6 +93,22 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;t+=dt;fx.upda
  g.fillStyle='rgba(8,16,36,.7)';g.fillRect(4,4,150,14);g.fillStyle='#e8eef8';g.font='10px monospace';g.direction='ltr';g.fillText('mode: '+mode+'  fx: '+fx.count,8,14);
  requestAnimationFrame(loop);}
 requestAnimationFrame(loop);
+// monster parade: every kind cycles idle, walk, attack, hurt; the attack fires a hit effect
+const M=A.monsters,mc=document.getElementById('mons'),mg=mc.getContext('2d');mg.imageSmoothingEnabled=false;const mfx=A.vfx.create();
+const MN={wolf:'ذئب',pwolf:'ذئب البراري',boar:'خنزير بري',bear:'دب',gbear:'دب عملاق',rabbit:'أرنب',golem:'جولم',cgolem:'جولم كريستال',guardian:'حارس الغابة'};
+const mons=M.KINDS.map(k=>({k,s:M.buildSheet(k)}));
+const slots=[['rabbit',40,70],['wolf',100,70],['pwolf',170,70],['boar',240,70],['golem',320,70],['cgolem',400,70],['bear',60,180],['gbear',160,180],['guardian',300,186]];
+function mFrame(pose,t){const T=M.TIMING[pose],tot=T.reduce((a,b)=>a+b,0);let k=t%tot;for(let i=0;i<T.length;i++){if(k<T[i])return i;k-=T[i];}return 0;}
+let mt=0,mlast=performance.now();const MP=['idle','walk','atk','hurt'],MD=[2,2.4,1.2,.6];
+function mloop(now){const dt=Math.min(.05,(now-mlast)/1000);mlast=now;mt+=dt;mfx.update(dt);mg.fillStyle='#3d6e36';mg.fillRect(0,0,480,200);
+ slots.forEach(([k,x,y],i)=>{const m=mons.find(o=>o.k===k).s,cyc=(mt+i*.5)%6.2;let acc=0,pi=0;while(pi<3&&cyc>=acc+MD[pi]){acc+=MD[pi];pi++;}
+  const pose=MP[pi],f=pose==='hurt'?0:mFrame(pose,cyc-acc),r=M.rect(k,m.W,m.H,pose,f),sc=m.scale,flip=Math.floor((mt+i)/6.2)%2===1;
+  mg.fillStyle='rgba(0,0,0,.28)';mg.beginPath();mg.ellipse(x,y,m.W*sc*.3,2.5*sc,0,0,7);mg.fill();
+  mg.save();mg.translate(x,y);if(flip)mg.scale(-1,1);mg.drawImage(m.canvas,r.sx,r.sy,r.sw,r.sh,Math.round(-m.anchor.x*sc),Math.round(-m.anchor.y*sc),Math.round(m.W*sc),Math.round(m.H*sc));mg.restore();
+  const key=k+pose+f;if(pose==='atk'&&f===1&&m._last!==key)mfx.spawn('hit',x+(flip?-1:1)*m.W*sc*.45,y-m.H*sc*.4,{rarity:0});if(pose==='hurt'&&m._last!==key)mfx.spawn('blood',x,y-m.H*sc*.5,{});m._last=key;
+  mg.fillStyle='#e8eef8';mg.font='9px system-ui';mg.textAlign='center';mg.direction='rtl';mg.fillText(MN[k],x,y+11);});
+ mfx.draw(mg);requestAnimationFrame(mloop);}
+requestAnimationFrame(mloop);
 </script>
 </body>
 </html>

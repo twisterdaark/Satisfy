@@ -29,3 +29,17 @@ test('every VFX preset spawns, decays to zero and never throws',()=>{const V=loa
  for(const k of fx.kinds){assert.ok(fx.spawn(k,100,100,{rarity:4,angle:0,x1:150,y1:90,seed:7}),k);}
  assert.ok(fx.count>50);for(let i=0;i<200;i++){fx.update(1/60);fx.draw(g);}assert.strictEqual(fx.count,0,'particles must expire');
  assert.strictEqual(fx.spawn('nope',0,0),false);assert.strictEqual(V.RARITY.length,5);});
+
+test('monster PAL snapshot matches index.html and every non-humanoid MT type has a sheet',()=>{const html=fs.readFileSync(path.join(__dirname,'..','..','index.html'),'utf8');
+ const M=load('monsters.js').monsters;const line=s=>s.slice(s.indexOf('const PAL='),s.indexOf(';',s.indexOf('const PAL='))+1);
+ assert.strictEqual(line(fs.readFileSync(path.join(dir,'monsters.js'),'utf8')),line(html),'PAL drifted: re-run the snapshot');
+ // drawMon draws these types with dedicated painters; the rest are humanoids drawn from FIG
+ for(const t of ['wolf','pwolf','boar','bear','gbear','rabbit','golem','cgolem','guardian'])assert.ok(M.KINDS.includes(t),'no monster sheet for '+t);
+ assert.strictEqual(M.POSES.map(p=>p.join(':')).join(),'idle:2,walk:4,atk:2,hurt:1');for(const [pose,n] of M.POSES)assert.strictEqual(M.TIMING[pose].length,n,pose);});
+
+test('monster manifest matches the exported PNGs and anchors sit on the feet line',()=>{const M=load('monsters.js').monsters;const mm=JSON.parse(fs.readFileSync(path.join(dir,'sheets','manifest.json'),'utf8')).monsters;
+ const cols=Math.max(...mm.rows.map(r=>r.frames));assert.strictEqual(mm.rows.length,M.POSES.length);
+ for(const k of M.KINDS){const s=mm.sheets[k];assert.ok(s,'missing '+k);const sz=pngSize(path.join(dir,s.file));
+  assert.deepStrictEqual(sz,{w:s.frame.w*cols,h:s.frame.h*mm.rows.length},k);assert.strictEqual(s.anchor.y,s.frame.h,k+' anchor y');assert.ok(s.anchor.x>0&&s.anchor.x<s.frame.w,k+' anchor x');
+  assert.strictEqual(s.scale,M.PAL[k]?M.PAL[k][3]:1,k+' scale');}
+ const r=M.rect('wolf',36,22,'atk',1);assert.strictEqual(r.sx,36);assert.strictEqual(r.sy,22*2);});

@@ -5194,5 +5194,155 @@
     }
    }
   }
+ },
+ "monsters": {
+  "generator": "sprites-original/monsters.js",
+  "rows": [
+   {
+    "pose": "idle",
+    "frames": 2
+   },
+   {
+    "pose": "walk",
+    "frames": 4
+   },
+   {
+    "pose": "atk",
+    "frames": 2
+   },
+   {
+    "pose": "hurt",
+    "frames": 1
+   }
+  ],
+  "timing": {
+   "idle": [
+    0.5,
+    0.5
+   ],
+   "walk": [
+    0.1,
+    0.1,
+    0.1,
+    0.1
+   ],
+   "atk": [
+    0.12,
+    0.16
+   ],
+   "hurt": [
+    0.2
+   ]
+  },
+  "sheets": {
+   "bear": {
+    "file": "sheets/monsters/bear.png",
+    "frame": {
+     "w": 42,
+     "h": 28
+    },
+    "anchor": {
+     "x": 17,
+     "y": 28
+    },
+    "scale": 1.5
+   },
+   "boar": {
+    "file": "sheets/monsters/boar.png",
+    "frame": {
+     "w": 38,
+     "h": 20
+    },
+    "anchor": {
+     "x": 15,
+     "y": 20
+    },
+    "scale": 1.15
+   },
+   "cgolem": {
+    "file": "sheets/monsters/cgolem.png",
+    "frame": {
+     "w": 32,
+     "h": 36
+    },
+    "anchor": {
+     "x": 16,
+     "y": 36
+    },
+    "scale": 1
+   },
+   "gbear": {
+    "file": "sheets/monsters/gbear.png",
+    "frame": {
+     "w": 42,
+     "h": 28
+    },
+    "anchor": {
+     "x": 17,
+     "y": 28
+    },
+    "scale": 1.5
+   },
+   "golem": {
+    "file": "sheets/monsters/golem.png",
+    "frame": {
+     "w": 32,
+     "h": 36
+    },
+    "anchor": {
+     "x": 16,
+     "y": 36
+    },
+    "scale": 1
+   },
+   "guardian": {
+    "file": "sheets/monsters/guardian.png",
+    "frame": {
+     "w": 64,
+     "h": 72
+    },
+    "anchor": {
+     "x": 32,
+     "y": 72
+    },
+    "scale": 1
+   },
+   "pwolf": {
+    "file": "sheets/monsters/pwolf.png",
+    "frame": {
+     "w": 36,
+     "h": 22
+    },
+    "anchor": {
+     "x": 15,
+     "y": 22
+    },
+    "scale": 1
+   },
+   "rabbit": {
+    "file": "sheets/monsters/rabbit.png",
+    "frame": {
+     "w": 16,
+     "h": 14
+    },
+    "anchor": {
+     "x": 8,
+     "y": 14
+    },
+    "scale": 1
+   },
+   "wolf": {
+    "file": "sheets/monsters/wolf.png",
+    "frame": {
+     "w": 36,
+     "h": 22
+    },
+    "anchor": {
+     "x": 15,
+     "y": 22
+    },
+    "scale": 1
+   }
+  }
  }
 }
