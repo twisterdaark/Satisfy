@@ -1013,8 +1013,11 @@ function tryAttack(ax,ay,mul){
 }
 // arrows (bow), magic bolts (staff) and fireballs fly as projectiles
 function shoot(kind,ax,ay,mul,o={}){const sp=kind==='arrow'?260:200;proj.push({kind,x:P.x+ax*6,y:P.y-8+ay*6,vx:ax*sp,vy:ay*sp,t:o.range||(kind==='arrow'?.62:.65),mul,pierce:o.pierce,boom:o.boom,stun:o.stun,hit:new Set()});if(kind==='arrow')noise(.08,.12,3000,0,.6);else tone(kind==='fire'?330:660,.14,'sine',.06,300);}
-function boom(p){SFX.crit();shake=.15;fx.push({ring:true,big:1,x:p.x,y:p.y,t:.5});for(let i=0;i<18;i++)fx.push({x:p.x,y:p.y,vx:(rand()-.5)*120,vy:(rand()-.5)*120,t:.4,c:rand()<.5?'#ff8a1e':'#ffd24a'});mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-p.x,monY(m)-p.y)<30)hitMon(m,p.mul,{});});}
+// any hit that lands on a standing tree chops it, same as a melee swing (max caps how many one hit fells)
+function hitTrees(x,y,r,max){let n=0;for(const tr of vtNear(x,y,r+8)){if(n>=(max||1))break;if((chopped.get(tr.k)||0)>gTime)continue;if(Math.hypot(tr.x-x,tr.y-8-y)<r){chop(tr);n++;}}return n;}
+function boom(p){hitTrees(p.x,p.y,30,3);SFX.crit();shake=.15;fx.push({ring:true,big:1,x:p.x,y:p.y,t:.5});for(let i=0;i<18;i++)fx.push({x:p.x,y:p.y,vx:(rand()-.5)*120,vy:(rand()-.5)*120,t:.4,c:rand()<.5?'#ff8a1e':'#ffd24a'});mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-p.x,monY(m)-p.y)<30)hitMon(m,p.mul,{});});}
 function updateProj(dt){proj=proj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.kind!=='arrow'&&rand()<.7)fx.push({x:p.x,y:p.y,vx:0,vy:0,t:.25,c:p.kind==='fire'?'#ff8a1e':'#9fd8ff',fl:1});
+ if(hitTrees(p.x,p.y,10)){if(p.boom)boom(p);return false;}
  if(p.t<=0||solidT(Math.floor(p.x/TS),Math.floor((p.y+8)/TS))){if(p.boom)boom(p);return false;}
  for(const m of mons){if(m.dead||p.hit.has(m))continue;if(Math.hypot(m.x-p.x,monY(m)-p.y)<MT[m.type].r+5){p.hit.add(m);if(p.boom){boom(p);return false;}if(hitMon(m,p.mul,{kx:Math.sign(p.vx)*.5,ky:Math.sign(p.vy)*.5,stun:p.stun}))SFX.hit();if(!p.pierce)return false;}}
  return true;});}
@@ -1373,7 +1376,7 @@ function slotOfKey(c){let i=KB.indexOf(c);if(i<0&&/^Numpad[1-6]$/.test(c))i=KB.i
 let MSX=null,MSY=null;stage.addEventListener('mousemove',e=>{MSX=e.clientX;MSY=e.clientY;});
 // skills fire toward the mouse cursor (falls back to facing before the mouse has moved)
 const fdir=()=>{if(MSX===null)return [[0,1],[0,-1],[1,0],[-1,0]][P.dir];const b=stage.getBoundingClientRect(),dx=(MSX-b.left)/SC+camXf-P.x,dy=(MSY-b.top)/SC+camYf-(P.y-8),l=Math.hypot(dx,dy)||1;P.dir=Math.abs(dx)>Math.abs(dy)?(dx>0?2:3):(dy>0?0:1);return [dx/l,dy/l];};
-const aoe=(x,y,r,mul,o)=>{let n=0;mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-x,monY(m)-y)<r&&hitMon(m,mul,o||{}))n++;});return n;};
+const aoe=(x,y,r,mul,o)=>{let n=0;hitTrees(x,y,r,3);mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-x,monY(m)-y)<r&&hitMon(m,mul,o||{}))n++;});return n;};
 const SKF={
  strike:()=>{const v=fdir();P.acd=0;tryAttack(v[0],v[1],1.8);shake=.12;},
  whirl:()=>{SFX.swing();setTimeout(SFX.swing,90);fx.push({ring:true,x:P.x,y:P.y-6,t:.25});fx.push({arc:1,x:P.x,y:P.y-8,a:gTime*7,t:.25});if(aoe(P.x,P.y-6,34,1.5))SFX.hit();},
@@ -1383,7 +1386,7 @@ const SKF={
  rain:()=>{const v=fdir(),cx=P.x+v[0]*64,cy=P.y-6+v[1]*64;let i=0;const f=()=>{if(mode!=='play')return;for(let k=0;k<6;k++)fx.push({x:cx+(rand()-.5)*50,y:cy-40,vx:0,vy:260,t:.16,c:'#e8e0d0'});noise(.1,.1,3000);aoe(cx,cy,32,1.4);if(++i<5)setTimeout(f,220);};f();},
  fireball:()=>{const v=fdir();shoot('fire',v[0],v[1],2.4,{boom:1});},
  nova:()=>{SFX.slam();fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});for(let i=0;i<20;i++)fx.push({x:P.x,y:P.y-6,vx:(rand()-.5)*140,vy:(rand()-.5)*140,t:.4,c:'#cfefff'});aoe(P.x,P.y-6,56,.6,{stun:2});},
- bolt:()=>{const v=fdir(),pts=[];let x=P.x,y=P.y-8;for(let i=0;i<=8;i++){pts.push([x+(rand()-.5)*6,y+(rand()-.5)*6]);x+=v[0]*15;y+=v[1]*15;}fx.push({bolt:pts,t:.2});noise(.2,.2,2400);shake=.15;mons.forEach(m=>{if(m.dead)return;const dx=m.x-P.x,dy=monY(m)-(P.y-8),al=dx*v[0]+dy*v[1],pp=Math.abs(dx*v[1]-dy*v[0]);if(al>0&&al<125&&pp<12)hitMon(m,3,{});});},
+ bolt:()=>{const v=fdir(),pts=[];let x=P.x,y=P.y-8;for(let i=0;i<=8;i++){pts.push([x+(rand()-.5)*6,y+(rand()-.5)*6]);x+=v[0]*15;y+=v[1]*15;}fx.push({bolt:pts,t:.2});{let c=0;for(const q of pts){c+=hitTrees(q[0],q[1],10,3-c);if(c>=3)break;}}noise(.2,.2,2400);shake=.15;mons.forEach(m=>{if(m.dead)return;const dx=m.x-P.x,dy=monY(m)-(P.y-8),al=dx*v[0]+dy*v[1],pp=Math.abs(dx*v[1]-dy*v[0]);if(al>0&&al<125&&pp<12)hitMon(m,3,{});});},
  smash:()=>{const v=fdir();P.acd=0;tryAttack(v[0],v[1],2.2);mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-(P.x+v[0]*12),monY(m)-(P.y-6+v[1]*12))<20)m.stun=Math.max(m.stun||0,1.2);});SFX.slam();shake=.2;},
  focus:()=>{S.focus=1;toast(t('focusOn'),'good');SFX.notice();},
  rage:()=>{P.rage=10;toast(t('rageOn'),'good');SFX.level();for(let i=0;i<20;i++)fx.push({x:P.x,y:P.y-8,vx:(rand()-.5)*90,vy:(rand()-.5)*90,t:.5,c:'#ff5a3a'});},
@@ -1516,11 +1519,11 @@ const tip=$('tip');let lastBtn=null;
 UI.addEventListener('pointermove',e=>{const el=e.target.closest('[data-tip]');
  if(el){tip.innerHTML=el.dataset.tip;tip.classList.add('on');const r=stage.getBoundingClientRect();let x=e.clientX-r.left+16,y=e.clientY-r.top+16;if(x+tip.offsetWidth>r.width)x=e.clientX-r.left-tip.offsetWidth-10;if(y+tip.offsetHeight>r.height)y=e.clientY-r.top-tip.offsetHeight-10;tip.style.left=x+'px';tip.style.top=y+'px';}else tip.classList.remove('on');
  const b=e.target.closest('button');if(b!==lastBtn){lastBtn=b;if(b&&!b.disabled)SFX.hover();}});
-try{const l=localStorage.getItem('satisfy_lang');if(l)lang=l;}catch(e){}
+let langSaved=false;try{const l=localStorage.getItem('satisfy_lang');if(l){lang=l;langSaved=true;}}catch(e){}
 $('mini').addEventListener('click',()=>{if(mode==='play')openMap();});
 $('qtext').addEventListener('click',e=>{const pb=e.target.closest('[data-qp]');if(pb){const n=Math.ceil(Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1).length/3)||1;qPage=(qPage+(+pb.dataset.qp)+n)%n;qLast='';SFX.click();return;}const q=e.target.closest('[data-qd]');if(q&&mode==='play')openQD(q.dataset.qd);});
 applyLang();
-setTimeout(()=>{const b=document.querySelector(`.langs button[data-l=${lang}]`);if(b)b.focus();},0);
+if(langSaved)toTitle();else setTimeout(()=>{const b=document.querySelector(`.langs button[data-l=${lang}]`);if(b)b.focus();},0);
 
 /* ---------------- update ---------------- */
 const ZT={};
