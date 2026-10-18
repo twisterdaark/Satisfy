@@ -256,7 +256,7 @@ kbd{font-family:"Press Start 2P",monospace;font-size:calc(var(--u)*.85);backgrou
 button{background:linear-gradient(180deg,rgba(36,52,108,.85),rgba(22,32,74,.85));border:1px solid #a6d6f6;text-shadow:1px 1px 0 var(--ol)}
 .toast{background:rgba(22,30,70,.92);border:0;border-top:2px solid #a6d6f6;border-bottom:2px solid #a6d6f6;border-radius:0;text-shadow:1px 1px 0 var(--ol)}
 .slotb{background:rgba(16,24,56,.55)}
-#forge,#inv,#statusW,#logW,#controls,#mapW{overflow:visible;max-height:none}#logL{max-height:calc(var(--u)*34);overflow:auto}
+#forge,#inv,#statusW,#logW,#controls,#mapW{overflow:visible;max-height:none}#statusW{max-height:86%;display:flex;flex-direction:column}#sbody{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6)}#logL{max-height:calc(var(--u)*34);overflow:auto}
 #tip{background:linear-gradient(180deg,rgba(44,62,128,.8),rgba(26,38,90,.84));margin-top:calc(var(--u)*1.6);padding:calc(var(--u)*.9) calc(var(--u)*1.2);min-width:calc(var(--u)*14)}
 #tip::before{top:calc(var(--u)*-2.3);height:calc(var(--u)*2.6);background:var(--orn) 14% top/auto calc(var(--u)*2.3) no-repeat,var(--bar) center bottom/100% calc(var(--u)*.3) no-repeat;box-shadow:none;filter:drop-shadow(0 0 calc(var(--u)*.4) rgba(170,220,255,.8))}
 @media (prefers-reduced-motion:reduce){.toast,.panel,.pop,#forge.hit,#rays,.key.glow kbd{animation:none}}
