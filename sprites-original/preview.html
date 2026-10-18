@@ -42,6 +42,8 @@ button:hover{background:var(--btn2)}button.on{background:var(--btn2);outline:2px
 <div class="panel"><b>البيوت والعفش</b> <span class="note">كل أنواع المباني اللي في اللعبة بنفس المقاسات ومكان الباب، والبير ولوحة المهام والخيمة والقبر، وعفش البيوت تحت.</span>
 <div class="bar" id="townBar"><button data-town="new" class="on">الرسم الجديد</button><button data-town="old">الرسم القديم</button><button data-town="split">قديم ↔ جديد</button></div>
 <canvas id="town" width="560" height="304" style="display:block;width:100%;max-width:100%;aspect-ratio:560/304;image-rendering:pixelated;border-radius:4px"></canvas></div>
+<div class="panel"><b>أيقونات الحاجات</b> <span class="note">الصف الفوقاني القديم والتحتاني الجديد، بنفس مقاس اللعبة 16×16.</span>
+<canvas id="icons" width="470" height="40" style="display:block;width:100%;max-width:100%;aspect-ratio:470/40;image-rendering:pixelated;background:#0b1020;border-radius:4px;margin-top:8px"></canvas></div>
 <div class="panel"><b>الوحوش</b> <span class="note">بنفس ألوان ومقاسات اللعبة: وقوف، مشي 4، هجوم 2، ألم. الدب والدب العملاق متكبّرين ×1.5 زي اللعبة.</span>
 <canvas id="mons" width="480" height="200" style="display:block;width:100%;max-width:100%;aspect-ratio:12/5;image-rendering:pixelated;background:#3d6e36;border-radius:4px;margin-top:8px"></canvas></div>
 </main>
@@ -54,6 +56,8 @@ button:hover{background:var(--btn2)}button.on{background:var(--btn2);outline:2px
 <script src="tiles.js"></script>
 <script src="legacy-buildings.js"></script>
 <script src="buildings.js"></script>
+<script src="legacy-icons.js"></script>
+<script src="icons.js"></script>
 <script>
 const A=SatArt,C=A.chars,cv=document.getElementById('view'),g=cv.getContext('2d');g.imageSmoothingEnabled=false;
 const FXL={slash:'ضربة سيف',hit:'إصابة',crit:'كريتيكال',block:'صد',fire:'نار',frost:'تلج',bolt:'صاعقة',heal:'علاج',mana:'شحن مانا',levelup:'لفل أب',loot:'شعاع لوت',dust:'تراب',death:'موت',forge:'شرار الحدادة',blood:'دم',stun:'دوخة',rage:'غضب',shadow:'ظل'};
@@ -147,6 +151,8 @@ function town(which){const T=sampleTown(),Wd=T.cols*16,Hd=T.rows*16,gC=document.
 const TWO=town('old'),TWN=town('new');let twMode='new';
 function twDraw(){twg.clearRect(0,0,560,304);if(twMode==='old')twg.drawImage(TWO,0,0);else if(twMode==='split'){twg.drawImage(TWO,0,0,280,304,0,0,280,304);twg.drawImage(TWN,280,0,280,304,280,0,280,304);twg.fillStyle='#ffd23a';twg.fillRect(279,0,2,304);}else twg.drawImage(TWN,0,0);}
 document.getElementById('townBar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;twMode=b.dataset.town;twDraw();});twDraw();
+// item icons: legacy iconC on top, icons.js below
+{const ic=document.getElementById('icons').getContext('2d');SatArt.icons.KEYS.forEach((k,i)=>{const x=Math.round(2+i*16.6);ic.fillStyle='#14223f';ic.fillRect(x,2,16,16);ic.fillRect(x,22,16,16);ic.drawImage(SatArt.legacyIcon(k),x,2);ic.drawImage(SatArt.icons.iconCanvas(k),x,22);});}
 // monster parade: every kind cycles idle, walk, attack, hurt; the attack fires a hit effect
 const M=A.monsters,mc=document.getElementById('mons'),mg=mc.getContext('2d');mg.imageSmoothingEnabled=false;const mfx=A.vfx.create();
 const MN={wolf:'ذئب',pwolf:'ذئب البراري',boar:'خنزير بري',bear:'دب',gbear:'دب عملاق',rabbit:'أرنب',golem:'جولم',cgolem:'جولم كريستال',guardian:'حارس الغابة'};

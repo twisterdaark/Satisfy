@@ -1,4 +1,4 @@
-# Art contract: characters, monsters, terrain, buildings and VFX (SAT-ART-001)
+# Art contract: characters, monsters, terrain, buildings, icons and VFX (SAT-ART-001)
 
 Owner: Claude-B. Integrator: Claude-A. Status: proposal. Nothing here is wired into `index.html` yet.
 
@@ -12,13 +12,15 @@ Owner: Claude-B. Integrator: Claude-A. Status: proposal. Nothing here is wired i
 | `sprites-original/legacy-tiles.js` | Snapshot of today's `drawTile`, `grassTile`, `treeTrunk` and `treeCanopy`. It's used only for the side-by-side preview, and a test fails if `drawTile` drifts. |
 | `sprites-original/buildings.js` | Buildings v2 for all 8 kinds (walls, windows with shutters, doors, signs, shingle roofs, chimneys), plus world props (anvil, well, board, tent, grave) and room props (bed, table, chest, shelf, counter, rack, barrel) |
 | `sprites-original/legacy-buildings.js` | Snapshot of today's `drawBuilding` and prop code, for the preview. A test fails if `drawBuilding` drifts. |
+| `sprites-original/icons.js` | Item icons v2: the same 16×16 keys as `iconC` (weapons, armor, materials, food, arrows, book, slot ghosts) with an outline and a light edge. Exported as `sheets/icons.png`. |
+| `sprites-original/legacy-icons.js` | Snapshot of today's `iconC`, for the preview. A test fails if it drifts. |
 | `sprites-original/vfx.js` | Data-driven cosmetic VFX presets with a tiny particle engine |
 | `sprites-original/fig-data.js` | Snapshot of `FIG`/`LOOK`/`lookFig` from `index.html` @ `ce29772` (PER_CODE). A test fails if `FIG` drifts. |
 | `sprites-original/legacy-figure.js` | Snapshot of today's `figure()`, used only for the side-by-side preview |
 | `sprites-original/sheets/*.png` + `manifest.json` | Exported sheets: every `FIG` entry plus each player hair style, with and without armor. `sheets/monsters/*.png` are listed under `manifest.monsters`. |
 | `sprites-original/preview.html` | Open it locally to see legacy and new side by side, with every VFX preset |
 | `sprites-original/tools/export-sheets.cjs` | Regenerates the PNGs and the manifest (Playwright) |
-| `tests/content/art.test.cjs` | `node --test`: layout, manifest/PNG sizes, hand anchors, FIG, PAL, drawTile and drawBuilding drift, monster coverage and anchors, tile ids, full opaque tiles, building boxes, doors and roof line, prop coverage, VFX lifecycle |
+| `tests/content/art.test.cjs` | `node --test`: layout, manifest/PNG sizes, hand anchors, FIG, PAL, drawTile and drawBuilding drift, monster coverage and anchors, tile ids, full opaque tiles, building boxes, doors and roof line, prop coverage, icon coverage, VFX lifecycle |
 
 All scripts are classic scripts that attach to `window.SatArt` (or `globalThis` in Node). They need no DOM to load; only drawing needs a canvas.
 
@@ -121,6 +123,17 @@ if (S.opt.art === 'v2' && window.SatArt && SatArt.buildings) {
   SatArt.buildings.drawWorld({ gg, og }, { ANVILS, WELLS, BOARD, TENTS, GRAVE, PROPS });
 } else { buildings.forEach(drawBuilding); /* + today's prop code */ }
 ```
+
+## Item icons (icons.js)
+
+`SatArt.icons.iconCanvas(k)` is a drop-in replacement for `iconC(k)`. It takes the same keys and returns the same 16×16 canvas, so `icon(k)` keeps caching the data URL:
+
+```js
+function iconC(k){ if (ICC[k]) return ICC[k]; return ICC[k] = (S.opt.art === 'v2' && window.SatArt && SatArt.icons) ? SatArt.icons.iconCanvas(k) : legacyIconC(k); }
+```
+
+- `iconRGBA(k)` returns raw pixels for tests. `KEYS` lists every key, and a test checks that it covers every key `iconC` handles, every `WSH` weapon and every `RC` item.
+- `sheets/icons.png` is a single strip in `KEYS` order, listed under `manifest.icons`.
 
 ## VFX API
 

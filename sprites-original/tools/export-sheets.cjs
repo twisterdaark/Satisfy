@@ -1,4 +1,4 @@
-// Exports PNG sprite sheets + manifest from chars.js and monsters.js using headless Chromium (Playwright).
+// Exports PNG sprite sheets + manifest from chars.js, monsters.js and icons.js using headless Chromium (Playwright).
 // Run: node sprites-original/tools/export-sheets.cjs   (needs playwright; no repo dependency added)
 'use strict';
 const path=require('path'),fs=require('fs');
@@ -13,7 +13,8 @@ const root=path.join(__dirname,'..'),out=path.join(root,'sheets');
   A.LOOK.hair.forEach((h,i)=>{looks['me_'+h]=A.lookFig({hair:i,hc:0,skin:0,top:0},0);looks['me_'+h+'_armor']=A.lookFig({hair:i,hc:0,skin:0,top:0},1);});
   for(const n in looks){const s=C.buildSheet(looks[n]);o[n]={png:s.canvas.toDataURL('image/png'),hands:s.hands};}
   const M=A.monsters,mo={};for(const k of M.KINDS){const s=M.buildSheet(k);mo[k]={png:s.canvas.toDataURL('image/png'),w:s.W,h:s.H,anchor:s.anchor,scale:s.scale};}
-  return {sheets:o,cols:C.COLS,rows:C.ROWS,timing:C.TIMING,fw:C.FW,fh:C.FH,mons:mo,mposes:M.POSES,mtiming:M.TIMING};});
+  const IC=A.icons,strip=document.createElement('canvas');strip.width=16*IC.KEYS.length;strip.height=16;IC.KEYS.forEach((k,i)=>strip.getContext('2d').drawImage(IC.iconCanvas(k),i*16,0));
+  return {icons:{png:strip.toDataURL('image/png'),keys:IC.KEYS},sheets:o,cols:C.COLS,rows:C.ROWS,timing:C.TIMING,fw:C.FW,fh:C.FH,mons:mo,mposes:M.POSES,mtiming:M.TIMING};});
  const manifest={schema:1,sourceVersion:'ce297728037e368fbfc5a9dce3e5d3eaefd3e17a',generator:'sprites-original/chars.js',
   frame:{w:res.fw,h:res.fh,anchor:{x:8,y:24}},rows:res.rows,mirrorLeftFrom:'s',
   columns:res.cols.map(([pose,f])=>({pose,f})),timing:res.timing,sheets:{}};
@@ -22,5 +23,7 @@ const root=path.join(__dirname,'..'),out=path.join(root,'sheets');
  fs.mkdirSync(path.join(out,'monsters'),{recursive:true});
  manifest.monsters={generator:'sprites-original/monsters.js',rows:res.mposes.map(([pose,frames])=>({pose,frames})),timing:res.mtiming,sheets:{}};
  for(const k of Object.keys(res.mons).sort()){const m=res.mons[k],f='monsters/'+k+'.png';fs.writeFileSync(path.join(out,f),Buffer.from(m.png.split(',')[1],'base64'));manifest.monsters.sheets[k]={file:'sheets/'+f,frame:{w:m.w,h:m.h},anchor:m.anchor,scale:m.scale};}
+ // item icons: one 16px strip in KEYS order
+ fs.writeFileSync(path.join(out,'icons.png'),Buffer.from(res.icons.png.split(',')[1],'base64'));manifest.icons={generator:'sprites-original/icons.js',file:'sheets/icons.png',size:16,keys:res.icons.keys};
  fs.writeFileSync(path.join(out,'manifest.json'),JSON.stringify(manifest,null,1)+'\n');
  console.log('sheets:',Object.keys(manifest.sheets).length,'monsters:',Object.keys(manifest.monsters.sheets).length);await b.close();})();

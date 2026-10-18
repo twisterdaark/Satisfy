@@ -75,3 +75,12 @@ test('buildings v2 cover every kind and prop in index.html and keep footprints, 
   if(k!=='forge'){const px=(i,j)=>Array.from(wl.d.slice((j*wl.w+i)*4,(j*wl.w+i)*4+3)).join();assert.notStrictEqual(px((wl.w>>1)+3,wl.h-6),px(5,wl.h-20),k+' door at the bottom centre');}}
  for(const [k,f] of Object.entries(N.PROP))for(const [x,y,w,h,c] of f(48,{tx:1})){assert.ok(x>=-2&&x+w<=50&&y>=-10&&y+h<=16,`${k} rect out of range`);assert.match(c,/^(#[0-9a-f]{6}|rgba\([^)]+\))$/);}
  for(const [k,f] of Object.entries(N.WORLD))for(const [x,y,w,h,c] of f()){assert.ok(x>=-2&&x+w<=34&&y>=-12&&y+h<=16,`${k} rect out of range`);assert.match(c,/^(#[0-9a-f]{6}|rgba\([^)]+\))$/);}});
+
+test('item icons v2 cover every key iconC handles and every craftable item',()=>{const html=fs.readFileSync(path.join(__dirname,'..','..','index.html'),'utf8');
+ const I=load('icons.js').icons,snap=fs.readFileSync(path.join(dir,'legacy-icons.js'),'utf8'),grab=(s,a,b)=>{const i=s.indexOf(a);return s.slice(i,s.indexOf(b,i));};
+ const src=grab(html,'function iconC(k){','\nfunction icon(k)');assert.strictEqual(grab(snap,'function iconC(k){','\nA.legacyIcon'),src,'iconC drifted: re-run the snapshot');
+ const keys=new Set([...src.matchAll(/k==='(\w+)'/g)].map(m=>m[1]));for(const m of html.match(/const WSH=\{[^\n]+/)[0].matchAll(/(\w+):\{l:/g))keys.add(m[1]);
+ for(const m of html.matchAll(/\{id:'(\w+)',slot:'[wax]'/g))keys.add(m[1]);
+ for(const k of keys)assert.ok(I.KEYS.includes(k),'no v2 icon for '+k);
+ for(const k of I.KEYS){const d=I.iconRGBA(k);assert.strictEqual(d.length,1024);let n=0;for(let i=3;i<1024;i+=4)if(d[i])n++;assert.ok(n>=12,k+' is nearly empty');}
+ const m=JSON.parse(fs.readFileSync(path.join(dir,'sheets','manifest.json'),'utf8')).icons;assert.deepStrictEqual(m.keys,[...I.KEYS]);assert.deepStrictEqual(pngSize(path.join(dir,m.file)),{w:16*I.KEYS.length,h:16});});
