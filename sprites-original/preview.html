@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Satisfy Art Preview</title>
+<style>
+:root{--bg:#0b1020;--panel:rgba(20,34,66,.88);--line:#4a78b8;--text:#e8eef8;--muted:#9fb3d6;--gold:#ffd23a;--btn:#1c3260;--btn2:#2a4a86}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#dfe7f3;--panel:rgba(255,255,255,.92);--line:#6a8cc0;--text:#14203a;--muted:#4a5a78;--gold:#a87a00;--btn:#e4ecf8;--btn2:#cddcf2}}
+:root[data-theme="dark"]{--bg:#0b1020;--panel:rgba(20,34,66,.88);--line:#4a78b8;--text:#e8eef8;--muted:#9fb3d6;--gold:#ffd23a;--btn:#1c3260;--btn2:#2a4a86}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,"Segoe UI",Tahoma,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0 2px;color:var(--gold)}
+p.sub{margin:0 0 12px;color:var(--muted)}
+.stage{position:relative;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#000}
+canvas#view{display:block;width:100%;aspect-ratio:16/9;image-rendering:pixelated;cursor:crosshair}
+.bar{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.bar b{align-self:center;color:var(--muted);font-weight:600;margin-inline-end:4px}
+button{background:var(--btn);color:var(--text);border:1px solid var(--line);border-radius:4px;padding:5px 10px;font:inherit;font-size:14px;cursor:pointer}
+button:hover{background:var(--btn2)}button.on{background:var(--btn2);outline:2px solid var(--gold)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin-top:12px}
+.sheets{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px}
+.sheets figure{margin:0}.sheets canvas{width:100%;image-rendering:pixelated;background:#3d6e36;border-radius:4px}
+.sheets figcaption{font-size:13px;color:var(--muted)}
+.note{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<h1>معاينة الرسم والإيفيكتات</h1>
+<p class="sub">رسّام الشخصيات الجديد (16×24 زي اللعبة) وإيفيكتات القتال. اضغط على الشاشة عشان تشغّل الإيفيكت المختار.</p>
+<div class="stage"><canvas id="view" width="480" height="270"></canvas></div>
+<div class="bar" id="modeBar"><b>الشخصيات:</b><button data-mode="new" class="on">الرسم الجديد</button><button data-mode="old">الرسم القديم</button><button data-mode="split">قديم ↔ جديد</button></div>
+<div class="bar" id="fxBar"><b>الإيفيكت:</b></div>
+<div class="bar" id="rarBar"><b>ندرة اللوت والضربة:</b></div>
+<div class="panel"><b>سبرايت شيتس</b> <span class="note">كل شيت 10 فريمات × 3 اتجاهات: وقوف (رمشة)، مشي 4، ضرب 3، ألم.</span>
+<div class="sheets" id="sheets"></div></div>
+</main>
+<script src="fig-data.js"></script>
+<script src="legacy-figure.js"></script>
+<script src="chars.js"></script>
+<script src="vfx.js"></script>
+<script>
+const A=SatArt,C=A.chars,cv=document.getElementById('view'),g=cv.getContext('2d');g.imageSmoothingEnabled=false;
+const FXL={slash:'ضربة سيف',hit:'إصابة',crit:'كريتيكال',block:'صد',fire:'نار',frost:'تلج',bolt:'صاعقة',heal:'علاج',mana:'شحن مانا',levelup:'لفل أب',loot:'شعاع لوت',dust:'تراب',death:'موت',forge:'شرار الحدادة',blood:'دم',stun:'دوخة',rage:'غضب',shadow:'ظل'};
+const RAR=['عادي','نادر','ملحمي','فريد','أسطوري'];
+let mode='new',fxSel='crit',rar=4;const fx=A.vfx.create();
+// UI
+const fxBar=document.getElementById('fxBar');fx.kinds.forEach(k=>{const b=document.createElement('button');b.textContent=FXL[k]||k;b.dataset.fx=k;if(k===fxSel)b.className='on';fxBar.appendChild(b);});
+const rarBar=document.getElementById('rarBar');RAR.forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;b.dataset.r=i;b.style.color=A.vfx.RARITY[i];if(i===rar)b.className='on';rarBar.appendChild(b);});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const bar=b.parentElement;[...bar.querySelectorAll('button')].forEach(x=>x.classList.toggle('on',x===b));
+ if(b.dataset.mode)mode=b.dataset.mode;if(b.dataset.fx){fxSel=b.dataset.fx;fire(fxSel,240,150);}if(b.dataset.r)rar=+b.dataset.r;});
+cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect();fire(fxSel,(e.clientX-r.left)/r.width*480,(e.clientY-r.top)/r.height*270);});
+function fire(k,x,y){fx.spawn(k,x,y,{rarity:rar,angle:-0.3,x1:x+80,y1:y-10});if(k==='slash'||k==='hit'||k==='crit')shake=k==='crit'?.18:.06;}
+// cast
+const cast=['grid','khan','smith','regas','ta','tm','merchant','baker','oldw','knight','goblin','forc'];
+const sheets={},legacy={};
+cast.forEach(n=>{sheets[n]=C.buildSheet(A.FIG[n]);legacy[n]={};['d','u','s'].forEach(d=>legacy[n][d]=[0,1].map(f=>A.legacyFigure(A.FIG[n],d,f)));});
+const meLook=A.lookFig({hair:0,hc:0,skin:0,top:1},1);sheets.me=C.buildSheet(meLook);legacy.me={};['d','u','s'].forEach(d=>legacy.me[d]=[0,1].map(f=>A.legacyFigure(meLook,d,f)));
+// sheet gallery
+const sh=document.getElementById('sheets');['me',...cast.slice(0,8)].forEach(n=>{const f=document.createElement('figure'),c=document.createElement('canvas');c.width=160;c.height=72;c.getContext('2d').drawImage(sheets[n].canvas,0,0);f.appendChild(c);const cap=document.createElement('figcaption');cap.textContent=n==='me'?'اللاعب (بدرع)':n;f.appendChild(cap);sh.appendChild(f);});
+// background: simple grass tiles and a path, drawn once
+const bg=document.createElement('canvas');bg.width=480;bg.height=270;{const b=bg.getContext('2d');let s=7;const r=()=>(s=(s*16807)%2147483647)/2147483647;
+ for(let y=0;y<270;y+=16)for(let x=0;x<480;x+=16){b.fillStyle=r()<.5?'#4f8a3e':'#4a843a';b.fillRect(x,y,16,16);for(let i=0;i<3;i++){b.fillStyle='#5e9c48';b.fillRect(x+(r()*14|0),y+(r()*14|0),1,2);}}
+ b.fillStyle='#b8925a';b.fillRect(0,196,480,26);b.fillStyle='#a8824e';for(let i=0;i<80;i++)b.fillRect(r()*480|0,196+(r()*26|0),2,1);b.fillStyle='#8a6a3a';b.fillRect(0,196,480,1);b.fillRect(0,221,480,1);}
+// draw helpers
+function drawSheet(n,dir,pose,f,x,y){const R_=C.rect(dir,pose,f),s=sheets[n].canvas;g.fillStyle='rgba(0,0,0,.28)';g.fillRect(x-5,y-1,10,2);
+ if(R_.flip){g.save();g.translate(x,0);g.scale(-1,1);g.drawImage(s,R_.sx,R_.sy,16,24,-8,y-24,16,24);g.restore();}else g.drawImage(s,R_.sx,R_.sy,16,24,x-8,y-24,16,24);}
+function drawOld(n,dir,f,x,y){const d=dir==='l'?'s':dir,c=legacy[n][d][f%2];g.fillStyle='rgba(0,0,0,.28)';g.fillRect(x-5,y-1,10,2);
+ if(dir==='l'){g.save();g.translate(x,0);g.scale(-1,1);g.drawImage(c,-8,y-24);g.restore();}else g.drawImage(c,x-8,y-24);}
+function animFrame(pose,t){const T=C.TIMING[pose];const tot=T.reduce((a,b)=>a+b,0);let k=t%tot;for(let i=0;i<T.length;i++){if(k<T[i])return i;k-=T[i];}return 0;}
+let t=0,last=performance.now(),shake=0,auto=0;
+const POSES=['idle','walk','atk','hurt'];
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;t+=dt;fx.update(dt);shake=Math.max(0,shake-dt);
+ const sx=shake>0?(Math.random()-.5)*4:0,sy=shake>0?(Math.random()-.5)*4:0;g.setTransform(1,0,0,1,Math.round(sx),Math.round(sy));g.drawImage(bg,0,0);
+ // row of NPCs: each cycles idle, walk, attack, hurt in all four directions
+ const dirs=['d','s','u','l'];cast.forEach((n,i)=>{const x=24+i*38,y=70,ph=Math.floor((t+i*.7)/2.4),pose=POSES[ph%4],dir=dirs[Math.floor(ph/4)%4];
+  const useOld=mode==='old'||(mode==='split'&&i%2===0);const f=pose==='walk'?animFrame('walk',t):pose==='atk'?animFrame('atk',t):pose==='idle'?animFrame('idle',t+i):0;
+  if(useOld)drawOld(n,dir,pose==='walk'?(f%2):0,x,y);else drawSheet(n,dir,pose,f,x,y);
+  if(!useOld&&pose==='atk'&&f===1&&Math.random()<dt*6){const hd=sheets[n].hands[dir==='l'?'s':dir].atk[1];}});
+ // the player walks a loop on the road, attacks every few seconds
+ const L=(t*.12)%1,px=40+L*400,py=212,cyc=t%3.2,atk=cyc>2.8;const dir='s',pose=atk?'atk':'walk',f=atk?Math.min(2,Math.floor((cyc-2.8)/.13)):animFrame('walk',t);
+ if(mode==='old')drawOld('me',dir,f,px,py);else drawSheet('me',dir,pose,f,px,py);
+ if(atk&&f===1&&!loop.hit){loop.hit=1;fx.spawn('slash',px+6,py-4,{angle:0,rarity:rar});}if(!atk)loop.hit=0;
+ if(!atk&&Math.floor(t*9)!==loop.st){loop.st=Math.floor(t*9);if(loop.st%4===0)fx.spawn('dust',px-3,py,{n:2});}
+ // auto demo for idle viewers
+ auto-=dt;if(auto<=0){auto=1.4;const k=['crit','fire','frost','bolt','heal','levelup','loot','forge','shadow'][Math.floor(t/1.4)%9];fx.spawn(k,120+((t*97)%240),150,{rarity:rar,x1:300,y1:140});}
+ fx.draw(g);g.setTransform(1,0,0,1,0,0);
+ g.fillStyle='rgba(8,16,36,.7)';g.fillRect(4,4,150,14);g.fillStyle='#e8eef8';g.font='10px monospace';g.direction='ltr';g.fillText('mode: '+mode+'  fx: '+fx.count,8,14);
+ requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
