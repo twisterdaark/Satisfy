@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Satisfy Art Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Single dark look on purpose: matches the game's navy system windows. Layout: one stage, controls below, sheet gallery last. */
+:root{--bg:#0b1020;--panel:#14223f;--line:#4a78b8;--text:#e8eef8;--muted:#9fb3d6;--gold:#ffd23a;--btn:#1c3260;--btn2:#2a4a86;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,"Segoe UI",Tahoma,sans-serif}
+main{max-width:1100px;margin:0 auto;padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:22px;margin:4px 0 2px;color:var(--gold)}
+p.sub{margin:0 0 12px;color:var(--muted)}
+.stage{position:relative;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#000}
+canvas#view{display:block;width:100%;aspect-ratio:16/9;image-rendering:pixelated;cursor:crosshair}
+.bar{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.bar b{align-self:center;color:var(--muted);font-weight:600;margin-inline-end:4px}
+button{background:var(--btn);color:var(--text);border:1px solid var(--line);border-radius:4px;padding:5px 10px;font:inherit;font-size:14px;cursor:pointer}
+button:hover{background:var(--btn2)}button.on{background:var(--btn2);outline:2px solid var(--gold)}button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin-top:12px}
+.sheets{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px}
+.sheets figure{margin:0}.sheets canvas{width:100%;image-rendering:pixelated;background:#3d6e36;border-radius:4px}
+.sheets figcaption{font-size:13px;color:var(--muted)}
+.note{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<h1>معاينة الرسم والإيفيكتات</h1>
+<p class="sub">رسّام الشخصيات الجديد (16×24 زي اللعبة) وإيفيكتات القتال. اضغط على الشاشة عشان تشغّل الإيفيكت المختار.</p>
+<div class="stage"><canvas id="view" width="480" height="270"></canvas></div>
+<div class="bar" id="modeBar"><b>الشخصيات:</b><button data-mode="new" class="on">الرسم الجديد</button><button data-mode="old">الرسم القديم</button><button data-mode="split">قديم ↔ جديد</button></div>
+<div class="bar" id="fxBar"><b>الإيفيكت:</b></div>
+<div class="bar" id="rarBar"><b>ندرة اللوت والضربة:</b></div>
+<div class="panel"><b>سبرايت شيتس</b> <span class="note">كل شيت 10 فريمات × 3 اتجاهات: وقوف (رمشة)، مشي 4، ضرب 3، ألم.</span>
+<div class="sheets" id="sheets"></div></div>
+<div class="panel"><b>الأرض والشجر</b> <span class="note">نفس أنواع البلاطات اللي في اللعبة: حشيش، ورد، طرق، مية، تلج، صخر، سور، سياج خشب، أرضية البيوت، والكهف.</span>
+<div class="bar" id="tileBar"><button data-tile="new" class="on">الرسم الجديد</button><button data-tile="old">الرسم القديم</button><button data-tile="split">قديم ↔ جديد</button><button data-tile="water">مية متحركة</button></div>
+<canvas id="terrain" width="480" height="272" style="display:block;width:100%;max-width:100%;aspect-ratio:30/17;image-rendering:pixelated;border-radius:4px"></canvas></div>
+<div class="panel"><b>البيوت والعفش</b> <span class="note">كل أنواع المباني اللي في اللعبة بنفس المقاسات ومكان الباب، والبير ولوحة المهام والخيمة والقبر، وعفش البيوت تحت.</span>
+<div class="bar" id="townBar"><button data-town="new" class="on">الرسم الجديد</button><button data-town="old">الرسم القديم</button><button data-town="split">قديم ↔ جديد</button></div>
+<canvas id="town" width="560" height="304" style="display:block;width:100%;max-width:100%;aspect-ratio:560/304;image-rendering:pixelated;border-radius:4px"></canvas></div>
+<div class="panel"><b>أيقونات الحاجات</b> <span class="note">الصف الفوقاني القديم والتحتاني الجديد، بنفس مقاس اللعبة 16×16.</span>
+<canvas id="icons" width="470" height="40" style="display:block;width:100%;max-width:100%;aspect-ratio:470/40;image-rendering:pixelated;background:#0b1020;border-radius:4px;margin-top:8px"></canvas></div>
+<div class="panel"><b>الوحوش</b> <span class="note">بنفس ألوان ومقاسات اللعبة: وقوف، مشي 4، هجوم 2، ألم. الدب والدب العملاق متكبّرين ×1.5 زي اللعبة.</span>
+<canvas id="mons" width="480" height="200" style="display:block;width:100%;max-width:100%;aspect-ratio:12/5;image-rendering:pixelated;background:#3d6e36;border-radius:4px;margin-top:8px"></canvas></div>
+</main>
+<script src="fig-data.js"></script>
+<script src="legacy-figure.js"></script>
+<script src="chars.js"></script>
+<script src="vfx.js"></script>
+<script src="monsters.js"></script>
+<script src="legacy-tiles.js"></script>
+<script src="tiles.js"></script>
+<script src="legacy-buildings.js"></script>
+<script src="buildings.js"></script>
+<script src="legacy-icons.js"></script>
+<script src="icons.js"></script>
+<script>
+const A=SatArt,C=A.chars,cv=document.getElementById('view'),g=cv.getContext('2d');g.imageSmoothingEnabled=false;
+const FXL={slash:'ضربة سيف',hit:'إصابة',crit:'كريتيكال',block:'صد',fire:'نار',frost:'تلج',bolt:'صاعقة',heal:'علاج',mana:'شحن مانا',levelup:'لفل أب',loot:'شعاع لوت',dust:'تراب',death:'موت',forge:'شرار الحدادة',blood:'دم',stun:'دوخة',rage:'غضب',shadow:'ظل'};
+const RAR=['عادي','نادر','ملحمي','فريد','أسطوري'];
+let mode='new',fxSel='crit',rar=4;const fx=A.vfx.create();
+// UI
+const fxBar=document.getElementById('fxBar');fx.kinds.forEach(k=>{const b=document.createElement('button');b.textContent=FXL[k]||k;b.dataset.fx=k;if(k===fxSel)b.className='on';fxBar.appendChild(b);});
+const rarBar=document.getElementById('rarBar');RAR.forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;b.dataset.r=i;b.style.color=A.vfx.RARITY[i];if(i===rar)b.className='on';rarBar.appendChild(b);});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const bar=b.parentElement;[...bar.querySelectorAll('button')].forEach(x=>x.classList.toggle('on',x===b));
+ if(b.dataset.mode)mode=b.dataset.mode;if(b.dataset.fx){fxSel=b.dataset.fx;fire(fxSel,240,150);}if(b.dataset.r)rar=+b.dataset.r;});
+cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect();fire(fxSel,(e.clientX-r.left)/r.width*480,(e.clientY-r.top)/r.height*270);});
+function fire(k,x,y){fx.spawn(k,x,y,{rarity:rar,angle:-0.3,x1:x+80,y1:y-10});if(k==='slash'||k==='hit'||k==='crit')shake=k==='crit'?.18:.06;}
+// cast
+const cast=['grid','khan','smith','regas','ta','tm','merchant','baker','oldw','knight','goblin','forc'];
+const sheets={},legacy={};
+cast.forEach(n=>{sheets[n]=C.buildSheet(A.FIG[n]);legacy[n]={};['d','u','s'].forEach(d=>legacy[n][d]=[0,1].map(f=>A.legacyFigure(A.FIG[n],d,f)));});
+const meLook=A.lookFig({hair:0,hc:0,skin:0,top:1},1);sheets.me=C.buildSheet(meLook);legacy.me={};['d','u','s'].forEach(d=>legacy.me[d]=[0,1].map(f=>A.legacyFigure(meLook,d,f)));
+// sheet gallery
+const sh=document.getElementById('sheets');['me',...cast.slice(0,8)].forEach(n=>{const f=document.createElement('figure'),c=document.createElement('canvas');c.width=160;c.height=72;c.getContext('2d').drawImage(sheets[n].canvas,0,0);f.appendChild(c);const cap=document.createElement('figcaption');cap.textContent=n==='me'?'اللاعب (بدرع)':n;f.appendChild(cap);sh.appendChild(f);});
+// background: simple grass tiles and a path, drawn once
+const bg=document.createElement('canvas');bg.width=480;bg.height=270;{const b=bg.getContext('2d');let s=7;const r=()=>(s=(s*16807)%2147483647)/2147483647;
+ for(let y=0;y<270;y+=16)for(let x=0;x<480;x+=16){b.fillStyle=r()<.5?'#4f8a3e':'#4a843a';b.fillRect(x,y,16,16);for(let i=0;i<3;i++){b.fillStyle='#5e9c48';b.fillRect(x+(r()*14|0),y+(r()*14|0),1,2);}}
+ b.fillStyle='#b8925a';b.fillRect(0,196,480,26);b.fillStyle='#a8824e';for(let i=0;i<80;i++)b.fillRect(r()*480|0,196+(r()*26|0),2,1);b.fillStyle='#8a6a3a';b.fillRect(0,196,480,1);b.fillRect(0,221,480,1);}
+// draw helpers
+function drawSheet(n,dir,pose,f,x,y){const R_=C.rect(dir,pose,f),s=sheets[n].canvas;g.fillStyle='rgba(0,0,0,.28)';g.fillRect(x-5,y-1,10,2);
+ if(R_.flip){g.save();g.translate(x,0);g.scale(-1,1);g.drawImage(s,R_.sx,R_.sy,16,24,-8,y-24,16,24);g.restore();}else g.drawImage(s,R_.sx,R_.sy,16,24,x-8,y-24,16,24);}
+function drawOld(n,dir,f,x,y){const d=dir==='l'?'s':dir,c=legacy[n][d][f%2];g.fillStyle='rgba(0,0,0,.28)';g.fillRect(x-5,y-1,10,2);
+ if(dir==='l'){g.save();g.translate(x,0);g.scale(-1,1);g.drawImage(c,-8,y-24);g.restore();}else g.drawImage(c,x-8,y-24);}
+function animFrame(pose,t){const T=C.TIMING[pose];const tot=T.reduce((a,b)=>a+b,0);let k=t%tot;for(let i=0;i<T.length;i++){if(k<T[i])return i;k-=T[i];}return 0;}
+let t=0,last=performance.now(),shake=0,auto=0;
+const POSES=['idle','walk','atk','hurt'];
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;t+=dt;fx.update(dt);shake=Math.max(0,shake-dt);
+ const sx=shake>0?(Math.random()-.5)*4:0,sy=shake>0?(Math.random()-.5)*4:0;g.setTransform(1,0,0,1,Math.round(sx),Math.round(sy));g.drawImage(bg,0,0);
+ // row of NPCs: each cycles idle, walk, attack, hurt in all four directions
+ const dirs=['d','s','u','l'];cast.forEach((n,i)=>{const x=24+i*38,y=70,ph=Math.floor((t+i*.7)/2.4),pose=POSES[ph%4],dir=dirs[Math.floor(ph/4)%4];
+  const useOld=mode==='old'||(mode==='split'&&i%2===0);const f=pose==='walk'?animFrame('walk',t):pose==='atk'?animFrame('atk',t):pose==='idle'?animFrame('idle',t+i):0;
+  if(useOld)drawOld(n,dir,pose==='walk'?(f%2):0,x,y);else drawSheet(n,dir,pose,f,x,y);
+  if(!useOld&&pose==='atk'&&f===1&&Math.random()<dt*6){const hd=sheets[n].hands[dir==='l'?'s':dir].atk[1];}});
+ // the player walks a loop on the road, attacks every few seconds
+ const L=(t*.12)%1,px=40+L*400,py=212,cyc=t%3.2,atk=cyc>2.8;const dir='s',pose=atk?'atk':'walk',f=atk?Math.min(2,Math.floor((cyc-2.8)/.13)):animFrame('walk',t);
+ if(mode==='old')drawOld('me',dir,f,px,py);else drawSheet('me',dir,pose,f,px,py);
+ if(atk&&f===1&&!loop.hit){loop.hit=1;fx.spawn('slash',px+6,py-4,{angle:0,rarity:rar});}if(!atk)loop.hit=0;
+ if(!atk&&Math.floor(t*9)!==loop.st){loop.st=Math.floor(t*9);if(loop.st%4===0)fx.spawn('dust',px-3,py,{n:2});}
+ // auto demo for idle viewers
+ auto-=dt;if(auto<=0){auto=1.4;const k=['crit','fire','frost','bolt','heal','levelup','loot','forge','shadow'][Math.floor(t/1.4)%9];fx.spawn(k,120+((t*97)%240),150,{rarity:rar,x1:300,y1:140});}
+ fx.draw(g);g.setTransform(1,0,0,1,0,0);
+ g.fillStyle='rgba(8,16,36,.7)';g.fillRect(4,4,150,14);g.fillStyle='#e8eef8';g.font='10px monospace';g.direction='ltr';g.fillText('mode: '+mode+'  fx: '+fx.count,8,14);
+ requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+// terrain: the same sample map drawn by the legacy painter and by tiles.js
+// sample 30x17 map covering every tile id; rows >= 13 are "interior" (WMH=13)
+function sampleMap(I){const W=30,H=17,m=new Array(W*H).fill(I.GR),set=(x,y,v)=>{if(x>=0&&y>=0&&x<W&&y<H)m[y*W+x]=v;},fill=(x0,y0,x1,y1,v)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)set(x,y,v);};
+ fill(0,0,29,3,I.SN);[[2,1],[6,2],[11,1],[15,2],[20,1],[25,2]].forEach(([x,y])=>set(x,y,I.TR));
+ fill(0,4,9,5,I.RK);fill(14,5,15,12,I.PA);fill(0,8,29,8,I.PA);fill(15,0,15,4,I.PA);
+ fill(3,9,8,11,I.WA);fill(4,12,6,12,I.WA);fill(19,10,22,11,I.DR);
+ fill(18,4,27,4,I.WL);fill(18,5,18,6,I.WL);fill(10,10,10,12,I.PL);fill(10,6,13,6,I.PL);
+ [[1,7],[12,10],[24,6],[28,10],[2,6]].forEach(([x,y])=>set(x,y,I.TR));[[17,11],[25,11],[22,6],[8,6],[20,7]].forEach(([x,y])=>set(x,y,I.FL));fill(26,9,29,12,I.FL);fill(27,10,28,11,I.GR);
+ fill(0,13,13,13,I.IW);fill(0,14,13,16,I.FW);set(0,14,I.IW);set(13,14,I.IW);fill(15,13,29,13,I.CW);fill(15,14,29,16,I.CF);fill(22,14,23,14,I.CW);
+ return {W,H,m,at:(x,y)=>(x<0||y<0||x>=W||y>=H)?I.CW:m[y*W+x],snowAt:(x,y)=>y<4};}
+
+const TL=SatArt.tiles,tc=document.getElementById('terrain'),tg=tc.getContext('2d');
+function terrain(which,frame){const I=TL.IDS,M=sampleMap(I),gC=document.createElement('canvas'),oC=document.createElement('canvas');gC.width=oC.width=480;gC.height=oC.height=272;
+ const gg=gC.getContext('2d'),og=oC.getContext('2d'),trees=[];const env={gg,og,at:M.at,snowAt:M.snowAt,WMH:13,TS:16,tree:(x,y)=>trees.push([x,y])};
+ if(which==='old'){const L=SatArt.legacyTiles(env);for(let y=0;y<M.H;y++)for(let x=0;x<M.W;x++)L.drawTile(x,y);
+  const tr=document.createElement('canvas');tr.width=tr.height=16;L.treeTrunk(tr.getContext('2d'),0,0);
+  trees.forEach(([x,y],i)=>{gg.drawImage(tr,x*16,y*16);const c=document.createElement('canvas');c.width=28;c.height=26;L.treeCanopy(c.getContext('2d'),6,11,SatArt.legacyTiles.mulberry32(i*977+5));og.drawImage(c,x*16-6,y*16-11);});}
+ else{TL.drawMap(env,M.W,M.H,frame||0);const tr=TL.trunkCanvas();trees.forEach(([x,y],i)=>{gg.drawImage(tr,x*16,y*16);og.drawImage(TL.canopyCanvas(i,M.snowAt(x,y)),x*16-6,y*16-11);});}
+ const f=document.createElement('canvas');f.width=480;f.height=272;const g2=f.getContext('2d');g2.drawImage(gC,0,0);g2.drawImage(oC,0,0);return f;}
+const TOLD=terrain('old'),TNEW=[0,1,2,3].map(f=>terrain('new',f));let tMode='new',tAnim=null;
+function tDraw(){tg.clearRect(0,0,480,272);if(tMode==='old')tg.drawImage(TOLD,0,0);else if(tMode==='split'){tg.drawImage(TOLD,0,0,240,272,0,0,240,272);tg.drawImage(TNEW[0],240,0,240,272,240,0,240,272);tg.fillStyle='#ffd23a';tg.fillRect(239,0,2,272);}else tg.drawImage(TNEW[0],0,0);}
+document.getElementById('tileBar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;clearInterval(tAnim);tMode=b.dataset.tile;
+ if(tMode==='water'){let f=0;tAnim=setInterval(()=>{tg.drawImage(TNEW[f=(f+1)%4],0,0);},220);}else tDraw();});
+tDraw();
+// town: every building kind and prop, legacy painter vs buildings.js
+// sample town: every building kind, world props, and one room strip with every room prop
+function sampleTown(){const B=[{x:1,y:1,w:6,h:5,k:'house'},{x:9,y:1,w:7,h:5,k:'forge'},{x:18,y:1,w:6,h:5,k:'shop'},{x:26,y:1,w:7,h:5,k:'inn'},
+ {x:1,y:9,w:6,h:5,k:'hall'},{x:9,y:9,w:6,h:5,k:'lodge'},{x:17,y:9,w:6,h:5,k:'tower'},{x:25,y:9,w:6,h:5,k:'armory'}];
+ const W={ANVILS:[{tx:16,ty:5}],WELLS:[{tx:8,ty:7}],BOARD:{tx:24,ty:7},TENTS:[[32,9]],GRAVE:{tx:32,ty:13},
+  PROPS:[{k:'bed',tx:1,ty:16,w:2},{k:'table',tx:5,ty:16,w:2},{k:'chest',tx:9,ty:16,w:1},{k:'shelf',tx:12,ty:16,w:3},{k:'counter',tx:17,ty:17,w:4},{k:'rack',tx:23,ty:17,w:1},{k:'barrel',tx:26,ty:17,w:1}]};
+ return {B,W,cols:35,rows:19,floorFrom:15};}
+
+const twc=document.getElementById('town'),twg=twc.getContext('2d');
+function town(which){const T=sampleTown(),Wd=T.cols*16,Hd=T.rows*16,gC=document.createElement('canvas'),oC=document.createElement('canvas');gC.width=oC.width=Wd;gC.height=oC.height=Hd;
+ const gg=gC.getContext('2d'),og=oC.getContext('2d'),env={gg,og,TS:16};
+ // ground from the terrain renderer so both versions sit on the same kind of grass
+ const I=SatArt.tiles.IDS,at=(x,y)=>y>=T.floorFrom?I.FW:I.GR;if(which==='old'){const L=SatArt.legacyTiles({gg,og,at,snowAt:()=>false,WMH:T.floorFrom,TS:16});for(let y=0;y<T.rows;y++)for(let x=0;x<T.cols;x++)L.drawTile(x,y);}
+ else SatArt.tiles.drawMap({gg,og,at,snowAt:()=>false,WMH:T.floorFrom,TS:16},T.cols,T.rows,0);
+ if(which==='old'){const L=SatArt.legacyBuildings(env);T.B.forEach(L.drawBuilding);const w=T.W;L.drawWorld(w.ANVILS,w.WELLS,w.BOARD,w.TENTS,w.GRAVE,w.PROPS);}
+ else{const N=SatArt.buildings;T.B.forEach(b=>N.drawBuilding(env,b));N.drawWorld(env,T.W);}
+ const f=document.createElement('canvas');f.width=Wd;f.height=Hd;const g2=f.getContext('2d');g2.drawImage(gC,0,0);g2.drawImage(oC,0,0);return f;}
+const TWO=town('old'),TWN=town('new');let twMode='new';
+function twDraw(){twg.clearRect(0,0,560,304);if(twMode==='old')twg.drawImage(TWO,0,0);else if(twMode==='split'){twg.drawImage(TWO,0,0,280,304,0,0,280,304);twg.drawImage(TWN,280,0,280,304,280,0,280,304);twg.fillStyle='#ffd23a';twg.fillRect(279,0,2,304);}else twg.drawImage(TWN,0,0);}
+document.getElementById('townBar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;twMode=b.dataset.town;twDraw();});twDraw();
+// item icons: legacy iconC on top, icons.js below
+{const ic=document.getElementById('icons').getContext('2d');SatArt.icons.KEYS.forEach((k,i)=>{const x=Math.round(2+i*16.6);ic.fillStyle='#14223f';ic.fillRect(x,2,16,16);ic.fillRect(x,22,16,16);ic.drawImage(SatArt.legacyIcon(k),x,2);ic.drawImage(SatArt.icons.iconCanvas(k),x,22);});}
+// monster parade: every kind cycles idle, walk, attack, hurt; the attack fires a hit effect
+const M=A.monsters,mc=document.getElementById('mons'),mg=mc.getContext('2d');mg.imageSmoothingEnabled=false;const mfx=A.vfx.create();
+const MN={wolf:'ذئب',pwolf:'ذئب البراري',boar:'خنزير بري',bear:'دب',gbear:'دب عملاق',rabbit:'أرنب',golem:'جولم',cgolem:'جولم كريستال',guardian:'حارس الغابة'};
+const mons=M.KINDS.map(k=>({k,s:M.buildSheet(k)}));
+const slots=[['rabbit',40,70],['wolf',100,70],['pwolf',170,70],['boar',240,70],['golem',320,70],['cgolem',400,70],['bear',60,180],['gbear',160,180],['guardian',300,186]];
+function mFrame(pose,t){const T=M.TIMING[pose],tot=T.reduce((a,b)=>a+b,0);let k=t%tot;for(let i=0;i<T.length;i++){if(k<T[i])return i;k-=T[i];}return 0;}
+let mt=0,mlast=performance.now();const MP=['idle','walk','atk','hurt'],MD=[2,2.4,1.2,.6];
+function mloop(now){const dt=Math.min(.05,(now-mlast)/1000);mlast=now;mt+=dt;mfx.update(dt);mg.fillStyle='#3d6e36';mg.fillRect(0,0,480,200);
+ slots.forEach(([k,x,y],i)=>{const m=mons.find(o=>o.k===k).s,cyc=(mt+i*.5)%6.2;let acc=0,pi=0;while(pi<3&&cyc>=acc+MD[pi]){acc+=MD[pi];pi++;}
+  const pose=MP[pi],f=pose==='hurt'?0:mFrame(pose,cyc-acc),r=M.rect(k,m.W,m.H,pose,f),sc=m.scale,flip=Math.floor((mt+i)/6.2)%2===1;
+  mg.fillStyle='rgba(0,0,0,.28)';mg.beginPath();mg.ellipse(x,y,m.W*sc*.3,2.5*sc,0,0,7);mg.fill();
+  mg.save();mg.translate(x,y);if(flip)mg.scale(-1,1);mg.drawImage(m.canvas,r.sx,r.sy,r.sw,r.sh,Math.round(-m.anchor.x*sc),Math.round(-m.anchor.y*sc),Math.round(m.W*sc),Math.round(m.H*sc));mg.restore();
+  const key=k+pose+f;if(pose==='atk'&&f===1&&m._last!==key)mfx.spawn('hit',x+(flip?-1:1)*m.W*sc*.45,y-m.H*sc*.4,{rarity:0});if(pose==='hurt'&&m._last!==key)mfx.spawn('blood',x,y-m.H*sc*.5,{});m._last=key;
+  mg.fillStyle='#e8eef8';mg.font='9px system-ui';mg.textAlign='center';mg.direction='rtl';mg.fillText(MN[k],x,y+11);});
+ mfx.draw(mg);requestAnimationFrame(mloop);}
+requestAnimationFrame(mloop);
+</script>
+</body>
+</html>
