@@ -3,6 +3,7 @@
 const test=require('node:test'),assert=require('node:assert'),fs=require('fs'),path=require('path'),vm=require('vm');
 const dir=path.join(__dirname,'..','..','sprites-original');
 const load=(...files)=>{const ctx={console};ctx.globalThis=ctx;vm.createContext(ctx);files.forEach(f=>vm.runInContext(fs.readFileSync(path.join(dir,f),'utf8'),ctx,{filename:f}));return ctx.SatArt;};
+const plainObj=o=>JSON.parse(JSON.stringify(o));
 const pngSize=f=>{const b=fs.readFileSync(f);assert.strictEqual(b.toString('ascii',1,4),'PNG');return {w:b.readUInt32BE(16),h:b.readUInt32BE(20)};};
 
 test('art scripts load without a DOM and expose their API',()=>{const A=load('fig-data.js','chars.js','vfx.js');
@@ -43,3 +44,20 @@ test('monster manifest matches the exported PNGs and anchors sit on the feet lin
   assert.deepStrictEqual(sz,{w:s.frame.w*cols,h:s.frame.h*mm.rows.length},k);assert.strictEqual(s.anchor.y,s.frame.h,k+' anchor y');assert.ok(s.anchor.x>0&&s.anchor.x<s.frame.w,k+' anchor x');
   assert.strictEqual(s.scale,M.PAL[k]?M.PAL[k][3]:1,k+' scale');}
  const r=M.rect('wolf',36,22,'atk',1);assert.strictEqual(r.sx,36);assert.strictEqual(r.sy,22*2);});
+
+test('terrain v2 keeps the game tile ids and the legacy snapshot matches index.html',()=>{const html=fs.readFileSync(path.join(__dirname,'..','..','index.html'),'utf8');
+ const T=load('tiles.js','legacy-tiles.js');const line=/const GR=0,[^;]+;/.exec(html)[0];
+ const ids=Object.fromEntries(line.slice(6,-1).split(',').map(p=>{const [k,v]=p.split('=');return [k,+v];}));
+ assert.deepStrictEqual(plainObj(T.tiles.IDS),ids);assert.deepStrictEqual(plainObj(T.legacyTiles.IDS),ids);
+ const snap=fs.readFileSync(path.join(dir,'legacy-tiles.js'),'utf8'),grab=(s,a,b)=>{const i=s.indexOf(a);return s.slice(i,s.indexOf(b,i));};
+ assert.strictEqual(grab(snap,'function drawTile(x,y){','\nreturn {drawTile').replace('if(v===TR&&env.tree)env.tree(x,y,r);','if(v===TR)VT.push(vtree(x,y,r));'),grab(html,'function drawTile(x,y){','\nfunction drawBuilding'),'drawTile drifted: re-run the snapshot');});
+
+test('every tile id renders a full opaque 16x16 ground, deterministic, with overlays near the tile',()=>{const T=load('tiles.js').tiles,I=T.IDS;
+ // a 5x5 neighborhood per id: the id in a plus shape on grass, so edge and corner code paths run
+ for(const [name,id] of Object.entries(I))for(const [snow,WMH] of [[false,120],[true,120],[false,0]]){
+  const at=(x,y)=>(x<0||y<0||x>4||y>4)?I.CW:((x===2||y===2)&&Math.abs(x-2)+Math.abs(y-2)<=1?id:I.GR);const env={at,snowAt:()=>snow,WMH};
+  const a=T.ground(env,2,2,0),b=T.ground(env,2,2,0);assert.strictEqual(a.length,1024,name);
+  for(let i=3;i<1024;i+=4)assert.strictEqual(a[i],255,`${name} pixel ${(i-3)/4} transparent`);assert.deepStrictEqual(Array.from(a),Array.from(b),name+' not deterministic');
+  for(const [x,y,w,h,c] of T.overlay(env,2,2)){assert.ok(x>=0&&x+w<=16&&y>=-10&&y+h<=16,`${name} overlay rect out of range`);assert.match(c,/^#[0-9a-f]{6}$/);}}
+ const w0=T.ground({at:()=>I.WA,snowAt:()=>false,WMH:120},3,3,0),w1=T.ground({at:()=>I.WA,snowAt:()=>false,WMH:120},3,3,1);assert.notDeepStrictEqual(Array.from(w0),Array.from(w1),'water frames should differ');
+ for(const snowy of [false,true]){const c=T.canopyRGBA(3,snowy);assert.strictEqual(c.d.length,28*26*4);let n=0;for(let i=3;i<c.d.length;i+=4)if(c.d[i])n++;assert.ok(n>250&&n<28*26,'canopy coverage '+n);}});

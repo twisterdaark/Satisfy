@@ -36,6 +36,9 @@ button:hover{background:var(--btn2)}button.on{background:var(--btn2);outline:2px
 <div class="bar" id="rarBar"><b>ندرة اللوت والضربة:</b></div>
 <div class="panel"><b>سبرايت شيتس</b> <span class="note">كل شيت 10 فريمات × 3 اتجاهات: وقوف (رمشة)، مشي 4، ضرب 3، ألم.</span>
 <div class="sheets" id="sheets"></div></div>
+<div class="panel"><b>الأرض والشجر</b> <span class="note">نفس أنواع البلاطات اللي في اللعبة: حشيش، ورد، طرق، مية، تلج، صخر، سور، سياج خشب، أرضية البيوت، والكهف.</span>
+<div class="bar" id="tileBar"><button data-tile="new" class="on">الرسم الجديد</button><button data-tile="old">الرسم القديم</button><button data-tile="split">قديم ↔ جديد</button><button data-tile="water">مية متحركة</button></div>
+<canvas id="terrain" width="480" height="272" style="display:block;width:100%;max-width:100%;aspect-ratio:30/17;image-rendering:pixelated;border-radius:4px"></canvas></div>
 <div class="panel"><b>الوحوش</b> <span class="note">بنفس ألوان ومقاسات اللعبة: وقوف، مشي 4، هجوم 2، ألم. الدب والدب العملاق متكبّرين ×1.5 زي اللعبة.</span>
 <canvas id="mons" width="480" height="200" style="display:block;width:100%;max-width:100%;aspect-ratio:12/5;image-rendering:pixelated;background:#3d6e36;border-radius:4px;margin-top:8px"></canvas></div>
 </main>
@@ -44,6 +47,8 @@ button:hover{background:var(--btn2)}button.on{background:var(--btn2);outline:2px
 <script src="chars.js"></script>
 <script src="vfx.js"></script>
 <script src="monsters.js"></script>
+<script src="legacy-tiles.js"></script>
+<script src="tiles.js"></script>
 <script>
 const A=SatArt,C=A.chars,cv=document.getElementById('view'),g=cv.getContext('2d');g.imageSmoothingEnabled=false;
 const FXL={slash:'ضربة سيف',hit:'إصابة',crit:'كريتيكال',block:'صد',fire:'نار',frost:'تلج',bolt:'صاعقة',heal:'علاج',mana:'شحن مانا',levelup:'لفل أب',loot:'شعاع لوت',dust:'تراب',death:'موت',forge:'شرار الحدادة',blood:'دم',stun:'دوخة',rage:'غضب',shadow:'ظل'};
@@ -93,6 +98,30 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;t+=dt;fx.upda
  g.fillStyle='rgba(8,16,36,.7)';g.fillRect(4,4,150,14);g.fillStyle='#e8eef8';g.font='10px monospace';g.direction='ltr';g.fillText('mode: '+mode+'  fx: '+fx.count,8,14);
  requestAnimationFrame(loop);}
 requestAnimationFrame(loop);
+// terrain: the same sample map drawn by the legacy painter and by tiles.js
+// sample 30x17 map covering every tile id; rows >= 13 are "interior" (WMH=13)
+function sampleMap(I){const W=30,H=17,m=new Array(W*H).fill(I.GR),set=(x,y,v)=>{if(x>=0&&y>=0&&x<W&&y<H)m[y*W+x]=v;},fill=(x0,y0,x1,y1,v)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)set(x,y,v);};
+ fill(0,0,29,3,I.SN);[[2,1],[6,2],[11,1],[15,2],[20,1],[25,2]].forEach(([x,y])=>set(x,y,I.TR));
+ fill(0,4,9,5,I.RK);fill(14,5,15,12,I.PA);fill(0,8,29,8,I.PA);fill(15,0,15,4,I.PA);
+ fill(3,9,8,11,I.WA);fill(4,12,6,12,I.WA);fill(19,10,22,11,I.DR);
+ fill(18,4,27,4,I.WL);fill(18,5,18,6,I.WL);fill(10,10,10,12,I.PL);fill(10,6,13,6,I.PL);
+ [[1,7],[12,10],[24,6],[28,10],[2,6]].forEach(([x,y])=>set(x,y,I.TR));[[17,11],[25,11],[22,6],[8,6],[20,7]].forEach(([x,y])=>set(x,y,I.FL));fill(26,9,29,12,I.FL);fill(27,10,28,11,I.GR);
+ fill(0,13,13,13,I.IW);fill(0,14,13,16,I.FW);set(0,14,I.IW);set(13,14,I.IW);fill(15,13,29,13,I.CW);fill(15,14,29,16,I.CF);fill(22,14,23,14,I.CW);
+ return {W,H,m,at:(x,y)=>(x<0||y<0||x>=W||y>=H)?I.CW:m[y*W+x],snowAt:(x,y)=>y<4};}
+
+const TL=SatArt.tiles,tc=document.getElementById('terrain'),tg=tc.getContext('2d');
+function terrain(which,frame){const I=TL.IDS,M=sampleMap(I),gC=document.createElement('canvas'),oC=document.createElement('canvas');gC.width=oC.width=480;gC.height=oC.height=272;
+ const gg=gC.getContext('2d'),og=oC.getContext('2d'),trees=[];const env={gg,og,at:M.at,snowAt:M.snowAt,WMH:13,TS:16,tree:(x,y)=>trees.push([x,y])};
+ if(which==='old'){const L=SatArt.legacyTiles(env);for(let y=0;y<M.H;y++)for(let x=0;x<M.W;x++)L.drawTile(x,y);
+  const tr=document.createElement('canvas');tr.width=tr.height=16;L.treeTrunk(tr.getContext('2d'),0,0);
+  trees.forEach(([x,y],i)=>{gg.drawImage(tr,x*16,y*16);const c=document.createElement('canvas');c.width=28;c.height=26;L.treeCanopy(c.getContext('2d'),6,11,SatArt.legacyTiles.mulberry32(i*977+5));og.drawImage(c,x*16-6,y*16-11);});}
+ else{TL.drawMap(env,M.W,M.H,frame||0);const tr=TL.trunkCanvas();trees.forEach(([x,y],i)=>{gg.drawImage(tr,x*16,y*16);og.drawImage(TL.canopyCanvas(i,M.snowAt(x,y)),x*16-6,y*16-11);});}
+ const f=document.createElement('canvas');f.width=480;f.height=272;const g2=f.getContext('2d');g2.drawImage(gC,0,0);g2.drawImage(oC,0,0);return f;}
+const TOLD=terrain('old'),TNEW=[0,1,2,3].map(f=>terrain('new',f));let tMode='new',tAnim=null;
+function tDraw(){tg.clearRect(0,0,480,272);if(tMode==='old')tg.drawImage(TOLD,0,0);else if(tMode==='split'){tg.drawImage(TOLD,0,0,240,272,0,0,240,272);tg.drawImage(TNEW[0],240,0,240,272,240,0,240,272);tg.fillStyle='#ffd23a';tg.fillRect(239,0,2,272);}else tg.drawImage(TNEW[0],0,0);}
+document.getElementById('tileBar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;clearInterval(tAnim);tMode=b.dataset.tile;
+ if(tMode==='water'){let f=0;tAnim=setInterval(()=>{tg.drawImage(TNEW[f=(f+1)%4],0,0);},220);}else tDraw();});
+tDraw();
 // monster parade: every kind cycles idle, walk, attack, hurt; the attack fires a hit effect
 const M=A.monsters,mc=document.getElementById('mons'),mg=mc.getContext('2d');mg.imageSmoothingEnabled=false;const mfx=A.vfx.create();
 const MN={wolf:'ذئب',pwolf:'ذئب البراري',boar:'خنزير بري',bear:'دب',gbear:'دب عملاق',rabbit:'أرنب',golem:'جولم',cgolem:'جولم كريستال',guardian:'حارس الغابة'};

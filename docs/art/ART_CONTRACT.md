@@ -1,4 +1,4 @@
-# Art contract: character sheets, monster sheets and VFX (SAT-ART-001)
+# Art contract: characters, monsters, terrain and VFX (SAT-ART-001)
 
 Owner: Claude-B. Integrator: Claude-A. Status: proposal. Nothing here is wired into `index.html` yet.
 
@@ -8,13 +8,15 @@ Owner: Claude-B. Integrator: Claude-A. Status: proposal. Nothing here is wired i
 |---|---|
 | `sprites-original/chars.js` | Parametric character renderer v2. It reads the same style configs as `figure()` in `index.html` (`FIG`, `lookFig`). |
 | `sprites-original/monsters.js` | Monster sheet renderer for the 9 non-humanoid types `drawMon` paints by hand (`wolf pwolf boar bear gbear rabbit golem cgolem guardian`). Colors come from a `PAL` snapshot (PER_CODE); a test fails if it drifts. |
+| `sprites-original/tiles.js` | Terrain renderer v2 for the same 15 tile ids as `index.html` (`GR FL PA TR WA CF CW BL WL SN DR RK FW IW PL`), plus new tree trunk and canopy art (green and snowy) |
+| `sprites-original/legacy-tiles.js` | Snapshot of today's `drawTile`, `grassTile`, `treeTrunk` and `treeCanopy`. It's used only for the side-by-side preview, and a test fails if `drawTile` drifts. |
 | `sprites-original/vfx.js` | Data-driven cosmetic VFX presets with a tiny particle engine |
 | `sprites-original/fig-data.js` | Snapshot of `FIG`/`LOOK`/`lookFig` from `index.html` @ `ce29772` (PER_CODE). A test fails if `FIG` drifts. |
 | `sprites-original/legacy-figure.js` | Snapshot of today's `figure()`, used only for the side-by-side preview |
 | `sprites-original/sheets/*.png` + `manifest.json` | Exported sheets: every `FIG` entry plus each player hair style, with and without armor. `sheets/monsters/*.png` are listed under `manifest.monsters`. |
 | `sprites-original/preview.html` | Open it locally to see legacy and new side by side, with every VFX preset |
 | `sprites-original/tools/export-sheets.cjs` | Regenerates the PNGs and the manifest (Playwright) |
-| `tests/content/art.test.cjs` | `node --test`: layout, manifest/PNG sizes, hand anchors, FIG and PAL drift, monster coverage and anchors, VFX lifecycle |
+| `tests/content/art.test.cjs` | `node --test`: layout, manifest/PNG sizes, hand anchors, FIG, PAL and drawTile drift, monster coverage and anchors, tile ids, full opaque tiles, VFX lifecycle |
 
 All scripts are classic scripts that attach to `window.SatArt` (or `globalThis` in Node). They need no DOM to load; only drawing needs a canvas.
 
@@ -77,6 +79,26 @@ function drawMonSheet(m, x, y) {               // returns false to fall back to 
 ```
 
 The field names (`hurtT`, `atkT`, `moving`, `animT`, `face`) are placeholders. Claude-A maps them to whatever the monster state really holds.
+
+## Terrain (tiles.js)
+
+`tiles.js` uses the same `env` that today's `drawTile` already closes over, so the swap is local:
+
+```js
+const env = { gg, og, at, snowAt, WMH, TS, tree: (x, y) => VT.push(vtree(x, y, mulberry32(x*73856093 ^ y*19349663))) };
+if (S.opt.art === 'v2' && window.SatArt && SatArt.tiles) SatArt.tiles.drawMap(env, MW, MH, 0);
+else for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) drawTile(x, y);
+```
+
+- `drawMap` writes the whole ground layer in a single `putImageData`, then draws overlays (cliff lips, wall tops, palisade logs) on `og` with `fillRect`. Transparent gaps between logs stay transparent.
+- `drawTile(env, x, y, frame)` does the same for one tile. Use it if a tile changes at runtime.
+- `ground(env, x, y, frame)` returns the tile's raw 16×16 RGBA and needs no DOM. That's what the tests use.
+- Colors come from short ramps chosen by world-space noise plus 4×4 ordered dithering, so grass and snow patches flow across tile borders instead of repeating per tile.
+- Paths get wobbly grass or snow edges, a shadow line and inner corners. Water gets a sand bank, foam, and a shallow band near the shore.
+- Water has 4 shimmer frames (`frame` 0..3). The engine can either redraw only the water tiles every ~0.2s or keep frame 0.
+- Trees: `trunkCanvas()` replaces `TRK` (16×16). `canopyCanvas(seed, snowy)` replaces `CNV` and `CNS` (28×26, the same offset). Snowy canopies get snow on the lit tops instead of a white band.
+- Cost: the full 160×144 map takes about 0.9 s, measured once at load in headless Chromium with software rendering. The legacy painter takes about 0.27 s. It's a one-time prerender, like today's.
+- Buildings, roofs, props and anvils still use `drawBuilding` and the prop code. Those are the next art pass.
 
 ## VFX API
 
