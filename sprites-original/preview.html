@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Satisfy Art Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <style>
-:root{--bg:#0b1020;--panel:rgba(20,34,66,.88);--line:#4a78b8;--text:#e8eef8;--muted:#9fb3d6;--gold:#ffd23a;--btn:#1c3260;--btn2:#2a4a86}
-@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#dfe7f3;--panel:rgba(255,255,255,.92);--line:#6a8cc0;--text:#14203a;--muted:#4a5a78;--gold:#a87a00;--btn:#e4ecf8;--btn2:#cddcf2}}
-:root[data-theme="dark"]{--bg:#0b1020;--panel:rgba(20,34,66,.88);--line:#4a78b8;--text:#e8eef8;--muted:#9fb3d6;--gold:#ffd23a;--btn:#1c3260;--btn2:#2a4a86}
+/* Single dark look on purpose: matches the game's navy system windows. Layout: one stage, controls below, sheet gallery last. */
+:root{--bg:#0b1020;--panel:#14223f;--line:#4a78b8;--text:#e8eef8;--muted:#9fb3d6;--gold:#ffd23a;--btn:#1c3260;--btn2:#2a4a86;color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,"Segoe UI",Tahoma,sans-serif}
-main{max-width:1100px;margin:0 auto;padding:16px}
+main{max-width:1100px;margin:0 auto;padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1{font-size:22px;margin:4px 0 2px;color:var(--gold)}
 p.sub{margin:0 0 12px;color:var(--muted)}
 .stage{position:relative;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#000}
@@ -18,7 +18,7 @@ canvas#view{display:block;width:100%;aspect-ratio:16/9;image-rendering:pixelated
 .bar{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .bar b{align-self:center;color:var(--muted);font-weight:600;margin-inline-end:4px}
 button{background:var(--btn);color:var(--text);border:1px solid var(--line);border-radius:4px;padding:5px 10px;font:inherit;font-size:14px;cursor:pointer}
-button:hover{background:var(--btn2)}button.on{background:var(--btn2);outline:2px solid var(--gold)}
+button:hover{background:var(--btn2)}button.on{background:var(--btn2);outline:2px solid var(--gold)}button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin-top:12px}
 .sheets{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px}
 .sheets figure{margin:0}.sheets canvas{width:100%;image-rendering:pixelated;background:#3d6e36;border-radius:4px}
