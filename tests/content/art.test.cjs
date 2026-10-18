@@ -61,3 +61,17 @@ test('every tile id renders a full opaque 16x16 ground, deterministic, with over
   for(const [x,y,w,h,c] of T.overlay(env,2,2)){assert.ok(x>=0&&x+w<=16&&y>=-10&&y+h<=16,`${name} overlay rect out of range`);assert.match(c,/^#[0-9a-f]{6}$/);}}
  const w0=T.ground({at:()=>I.WA,snowAt:()=>false,WMH:120},3,3,0),w1=T.ground({at:()=>I.WA,snowAt:()=>false,WMH:120},3,3,1);assert.notDeepStrictEqual(Array.from(w0),Array.from(w1),'water frames should differ');
  for(const snowy of [false,true]){const c=T.canopyRGBA(3,snowy);assert.strictEqual(c.d.length,28*26*4);let n=0;for(let i=3;i<c.d.length;i+=4)if(c.d[i])n++;assert.ok(n>250&&n<28*26,'canopy coverage '+n);}});
+
+test('buildings v2 cover every kind and prop in index.html and keep footprints, doors and the roof line',()=>{const html=fs.readFileSync(path.join(__dirname,'..','..','index.html'),'utf8');
+ const B=load('buildings.js','legacy-buildings.js');const N=B.buildings;
+ const snap=fs.readFileSync(path.join(dir,'legacy-buildings.js'),'utf8'),grab=(s,a,b)=>{const i=s.indexOf(a);return s.slice(i,s.indexOf(b,i));};
+ assert.strictEqual(grab(snap,'function drawBuilding(b){','\nfunction drawWorld'),grab(html,'function drawBuilding(b){','\nfor(let y=0;y<MH;y++)'),'drawBuilding drifted: re-run the snapshot');
+ const kinds=[...new Set([...html.matchAll(/k:'(\w+)'\}/g)].map(m=>m[1]).filter(k=>/^(house|forge|hall|shop|tower|lodge|inn|armory)$/.test(k)))];
+ assert.ok(kinds.length>=8,'kinds found: '+kinds);for(const k of kinds){assert.ok(N.ROOF[k],'roof color for '+k);assert.ok(N.WALLK[k],'wall style for '+k);}
+ const props=[...new Set([...html.matchAll(/P0\('(\w+)'/g)].map(m=>m[1]))];for(const k of props)assert.ok(N.PROP[k],'prop '+k);
+ for(const k of kinds)for(const w of [6,7]){const b={x:3,y:4,w,h:5,k},wl=N.wallRGBA(b),rf=N.roofRGBA(b);
+  assert.deepStrictEqual([wl.x,wl.y,wl.w,wl.h],[48,64+30,w*16,50],k+' wall box');for(let i=3;i<wl.d.length;i+=4)assert.strictEqual(wl.d[i],255,k+' wall has a hole');
+  assert.deepStrictEqual([rf.x,rf.w],[44,w*16+8],k+' roof box');const eave=(rf.h-2)*rf.w*4+3;assert.strictEqual(rf.d[eave],255,k+' eave line');assert.strictEqual(rf.y+rf.h,64+34,k+' roof ends at py+34 like today');
+  if(k!=='forge'){const px=(i,j)=>Array.from(wl.d.slice((j*wl.w+i)*4,(j*wl.w+i)*4+3)).join();assert.notStrictEqual(px((wl.w>>1)+3,wl.h-6),px(5,wl.h-20),k+' door at the bottom centre');}}
+ for(const [k,f] of Object.entries(N.PROP))for(const [x,y,w,h,c] of f(48,{tx:1})){assert.ok(x>=-2&&x+w<=50&&y>=-10&&y+h<=16,`${k} rect out of range`);assert.match(c,/^(#[0-9a-f]{6}|rgba\([^)]+\))$/);}
+ for(const [k,f] of Object.entries(N.WORLD))for(const [x,y,w,h,c] of f()){assert.ok(x>=-2&&x+w<=34&&y>=-12&&y+h<=16,`${k} rect out of range`);assert.match(c,/^(#[0-9a-f]{6}|rgba\([^)]+\))$/);}});

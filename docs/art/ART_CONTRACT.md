@@ -1,4 +1,4 @@
-# Art contract: characters, monsters, terrain and VFX (SAT-ART-001)
+# Art contract: characters, monsters, terrain, buildings and VFX (SAT-ART-001)
 
 Owner: Claude-B. Integrator: Claude-A. Status: proposal. Nothing here is wired into `index.html` yet.
 
@@ -10,13 +10,15 @@ Owner: Claude-B. Integrator: Claude-A. Status: proposal. Nothing here is wired i
 | `sprites-original/monsters.js` | Monster sheet renderer for the 9 non-humanoid types `drawMon` paints by hand (`wolf pwolf boar bear gbear rabbit golem cgolem guardian`). Colors come from a `PAL` snapshot (PER_CODE); a test fails if it drifts. |
 | `sprites-original/tiles.js` | Terrain renderer v2 for the same 15 tile ids as `index.html` (`GR FL PA TR WA CF CW BL WL SN DR RK FW IW PL`), plus new tree trunk and canopy art (green and snowy) |
 | `sprites-original/legacy-tiles.js` | Snapshot of today's `drawTile`, `grassTile`, `treeTrunk` and `treeCanopy`. It's used only for the side-by-side preview, and a test fails if `drawTile` drifts. |
+| `sprites-original/buildings.js` | Buildings v2 for all 8 kinds (walls, windows with shutters, doors, signs, shingle roofs, chimneys), plus world props (anvil, well, board, tent, grave) and room props (bed, table, chest, shelf, counter, rack, barrel) |
+| `sprites-original/legacy-buildings.js` | Snapshot of today's `drawBuilding` and prop code, for the preview. A test fails if `drawBuilding` drifts. |
 | `sprites-original/vfx.js` | Data-driven cosmetic VFX presets with a tiny particle engine |
 | `sprites-original/fig-data.js` | Snapshot of `FIG`/`LOOK`/`lookFig` from `index.html` @ `ce29772` (PER_CODE). A test fails if `FIG` drifts. |
 | `sprites-original/legacy-figure.js` | Snapshot of today's `figure()`, used only for the side-by-side preview |
 | `sprites-original/sheets/*.png` + `manifest.json` | Exported sheets: every `FIG` entry plus each player hair style, with and without armor. `sheets/monsters/*.png` are listed under `manifest.monsters`. |
 | `sprites-original/preview.html` | Open it locally to see legacy and new side by side, with every VFX preset |
 | `sprites-original/tools/export-sheets.cjs` | Regenerates the PNGs and the manifest (Playwright) |
-| `tests/content/art.test.cjs` | `node --test`: layout, manifest/PNG sizes, hand anchors, FIG, PAL and drawTile drift, monster coverage and anchors, tile ids, full opaque tiles, VFX lifecycle |
+| `tests/content/art.test.cjs` | `node --test`: layout, manifest/PNG sizes, hand anchors, FIG, PAL, drawTile and drawBuilding drift, monster coverage and anchors, tile ids, full opaque tiles, building boxes, doors and roof line, prop coverage, VFX lifecycle |
 
 All scripts are classic scripts that attach to `window.SatArt` (or `globalThis` in Node). They need no DOM to load; only drawing needs a canvas.
 
@@ -98,7 +100,27 @@ else for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) drawTile(x, y);
 - Water has 4 shimmer frames (`frame` 0..3). The engine can either redraw only the water tiles every ~0.2s or keep frame 0.
 - Trees: `trunkCanvas()` replaces `TRK` (16×16). `canopyCanvas(seed, snowy)` replaces `CNV` and `CNS` (28×26, the same offset). Snowy canopies get snow on the lit tops instead of a white band.
 - Cost: the full 160×144 map takes about 0.9 s, measured once at load in headless Chromium with software rendering. The legacy painter takes about 0.27 s. It's a one-time prerender, like today's.
-- Buildings, roofs, props and anvils still use `drawBuilding` and the prop code. Those are the next art pass.
+
+## Buildings and props (buildings.js)
+
+- `drawBuilding(env, b)` takes the same `b = {x, y, w, h, k}` as today. It keeps the footprint, the wall box (`py+30` to `py+h`), the door at the bottom centre (12×16), the windows at `px+8` and `px+w-20`, and the roof line ending at `py+34`. Collision, door triggers and room entry don't change.
+- Walls and roofs are built as RGBA (`wallRGBA`, `roofRGBA`, testable in Node) and drawn with `drawImage`. The translucent ground shadow and anything already on `og` stay intact.
+- Wall style per kind:
+  - `house`: planks with flower boxes;
+  - `shop`, `inn`, `hall`: plaster with timber beams;
+  - `lodge`: logs;
+  - `tower`, `armory`, `forge`: stone.
+- Every wall has a stone foundation. Shutter colors follow the roof.
+- Roof colors are the PER_CODE `rc` table from `drawBuilding`, turned into 5-step ramps. Shingles are offset per row, lit from the left, with a ridge highlight and an eave shadow. Houses and the inn get a brick chimney, and the forge keeps its stone stack.
+- The forge's furnace mouth now has a hot core.
+- `drawWorld(env, {ANVILS, WELLS, BOARD, TENTS, GRAVE, PROPS})` draws every world and room prop from the same lists the engine already has. Each prop is a rect list `[x, y, w, h, color, layer]` (layer 0 = `gg`, 1 = `og`), so the over/under split matches today's.
+
+```js
+if (S.opt.art === 'v2' && window.SatArt && SatArt.buildings) {
+  buildings.forEach(b => SatArt.buildings.drawBuilding({ gg, og }, b));
+  SatArt.buildings.drawWorld({ gg, og }, { ANVILS, WELLS, BOARD, TENTS, GRAVE, PROPS });
+} else { buildings.forEach(drawBuilding); /* + today's prop code */ }
+```
 
 ## VFX API
 
