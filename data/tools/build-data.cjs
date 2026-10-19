@@ -17,6 +17,7 @@ function condFromFn(f){
     if((m=/^qDone\('(\w+)'\)$/.exec(p)))return {questDone:m[1]};
     if((m=/^S\.smith>=(\d+)$/.exec(p)))return {smithLv:{gte:+m[1]}};
     if((m=/^S\.cls==='(\w+)'$/.exec(p)))return {cls:m[1]};
+    if(p==='isSm()')return {cls:['smith','pagma']};   // smith or Pagma's Successor (SAT-PAGMA-001)
     throw new Error('no declarative form for: '+p+' in '+body);});
   return parts.length===1?parts[0]:{all:parts};}
 
@@ -61,6 +62,8 @@ function build(T,sourceVersion){
     novice:{id:'novice',start:true,skills:[],src:SRC}}};
   for(const [qid,q] of Object.entries(T.QD))if(q.cls)classes.classes[q.cls]={id:q.cls,quest:qid,trainer:q.by,lv:q.lv,...(q.pre?{pre:q.pre}:{}),item:q.item,
     skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls===q.cls),src:SRC};
+  // legendary classes come from an item, not a trainer, and exist once per world (SAT-PAGMA-001)
+  if(Object.values(T.SKD).some(d=>d.cls==='pagma'))classes.classes.pagma={id:'pagma',legendary:true,source:'pbook',unique:'world',skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls==='pagma'),src:SRC};
 
   return {monsters,quests,recipes,skills,npcs,zones,classes};}
 
