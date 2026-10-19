@@ -43,6 +43,8 @@ function glove(I,a){I.rect(4,6,7,7,a[0]);I.rect(4,12,7,2,a[2]);for(let x=4;x<11;
 function boot(I,a){I.rect(5,2,5,10,a[0]);I.rect(5,10,9,3,a[0]);I.rect(5,13,9,1,a[2]);I.rect(5,2,5,1,a[1]);I.rect(6,5,3,1,a[2]);I.set(13,10,a[1]);}
 function ring(I,c,lt,gem){I.ell(8,10,4.5,4,c);for(let y=8;y<=12;y++)for(let x=6;x<=10;x++){const nx=(x-8)/2.5,ny=(y-10)/2;if(nx*nx+ny*ny<=1)I.d[(y*16+x)*4+3]=0;}
  I.set(5,8,lt);I.set(6,7,lt);I.ell(8,4.5,2,2,gem);I.set(7,4,'#ffffff');}
+function fishI(I,c){I.ell(7,8,5,3,c[0]);I.ell(7,7,4,1.5,c[1]);for(let i=0;i<4;i++)I.rect(12+i,8-i,1,1+i*2,c[2]);I.rect(5,10,5,1,c[2]);I.set(4,7,'#101010');I.set(8,4,c[2]);I.set(9,4,c[2]);}
+function herbI(I,c,c2){I.line(8,14,8,6,'#3a7a2a');I.line(5,14,6,8,'#3a7a2a');I.line(11,14,10,9,'#3a7a2a');I.set(7,11,'#5aa83a');I.set(9,10,'#5aa83a');I.ell(8,5,2,2,c);I.ell(6,8,1.5,1.5,c);I.ell(10,9,1.5,1.5,c);I.set(8,5,c2);I.set(6,8,c2);}
 const DRAW={
  bread:I=>{I.ell(8,9,6,4,'#8a4a1a');I.ell(8,8,6,3,'#c8803a');I.ell(7,7,4,1.5,'#d8964a');for(const x of [5,8,11]){I.set(x,7,'#e8b070');I.set(x+1,8,'#8a4a1a');}},
  wood:I=>{I.rect(2,4,10,4,'#7a4e2c');I.rect(2,4,10,1,'#a06a3a');I.rect(4,9,10,4,'#6e4428');I.rect(4,9,10,1,'#946038');I.ell(12,6,2,2,'#c49a62');I.set(12,6,'#8a5a32');I.ell(14,11,1.5,2,'#c49a62');I.set(14,11,'#8a5a32');I.set(5,6,'#5a3418');I.set(8,11,'#4e2e16');},
@@ -58,6 +60,12 @@ const DRAW={
  mhelm:I=>helm(I,['#a8d0e4','#e0f2fa','#4a7890'],1),
  // mithril ore (SAT-REIDAN-001): pale silver-blue nuggets in dark rock
  mith:I=>{I.ell(8,9,6,5,'#3e4650');I.ell(8,8,5,4,'#5a6470');I.rect(5,7,3,2,'#a8d8f0');I.rect(9,9,2,2,'#c8ecff');I.set(6,7,'#ffffff');I.set(10,6,'#bfe8ff');I.set(4,11,'#2e343c');},
+ // life skills (SAT-LIFE-001): fish, herbs and cooked dishes
+ fish:I=>fishI(I,['#6a8aa8','#8aaac8','#4a6a88']),sfish:I=>fishI(I,['#c8909a','#e8c0c8','#9a6a78']),gfish:I=>{fishI(I,['#d8a830','#f2d060','#a87a18']);I.set(9,5,'#ffffff');I.set(3,11,'#fff3b0');},
+ herb:I=>herbI(I,'#d83a3a','#ff8a7a'),bherb:I=>herbI(I,'#3a7ad8','#bfe8ff'),
+ cfish:I=>{I.line(1,14,14,1,'#8a6a3a');fishI(I,['#a8642a','#c8843a','#6a3a18']);I.set(6,7,'#4a2a10');I.set(8,7,'#4a2a10');I.set(10,7,'#4a2a10');},
+ stew:I=>{I.ell(8,10,6,3.5,'#7a4a2a');I.rect(2,9,13,1,'#9a6a40');I.ell(8,9,5,1.5,'#c8843a');I.set(6,9,'#5aa83a');I.set(9,8,'#d83a3a');I.set(11,9,'#5aa83a');for(const x of [5,8,11]){I.set(x,6,'#e8e8f0');I.set(x+1,4,'#e8e8f0');I.set(x,2,'#e8e8f0');}},
+ feast:I=>{I.ell(8,11,7,3,'#c8ccd6');I.ell(8,10,6,2,'#e8ecf2');I.ell(7,9,4,1.6,'#d8a830');I.ell(7,8,3,1,'#f2d060');I.rect(11,8,2,2,'#a87a18');I.set(4,10,'#5aa83a');I.set(12,11,'#d83a3a');I.set(13,10,'#3a7ad8');},
  cring:I=>ring(I,'#c87a3a','#e8a060','#4ad070'),mring:I=>ring(I,'#c8a050','#f2d27a','#4a90ff'),
  spear:I=>{I.line(2,14,11,5,'#7a5634');I.line(3,14,12,5,'#5a3a20');I.set(6,10,'#c8a050');I.set(7,10,'#c8a050');I.rect(11,3,2,2,'#c4c8d0');I.set(13,2,'#eef0f4');I.set(14,1,'#eef0f4');I.set(12,2,'#c4c8d0');I.set(13,3,'#7a808c');I.set(10,4,'#9a9aa6');I.set(11,5,'#9a9aa6');},
  dagger:I=>{for(let i=0;i<5;i++){I.set(7+i,8-i,'#c4c8d0');I.set(8+i,8-i,'#7a808c');I.set(7+i,7-i,'#eef0f4');}I.line(5,7,8,10,'#9a9aa6');I.line(4,11,6,9,'#6b4428');I.set(3,12,'#c8a050');},
@@ -75,6 +83,6 @@ function iconRGBA(k){const I=Img();
  else if(k==='larmor'||k==='parmor'||k==='marmor'||k==='warmor')armor(I,k);else sword(I,k);
  return finish(I,false);}
 function iconCanvas(k){const c=document.createElement('canvas');c.width=c.height=16;c.getContext('2d').putImageData(new ImageData(iconRGBA(k),16,16),0,0);return c;}
-const KEYS=['rusty','isword','ssword','gsword','bow','sbow','staff','sstaff','hammer','shammer','larmor','parmor','warmor','jaffa','arrows','bread','wood','ore','leather','blue','mstone','book','hpot','mpot','lhelm','ihelm','lgloves','igloves','lboots','iboots','cring','mring','spear','dagger','mith','msword','marmor','mhelm','slotW','slotA','slotH','slotG','slotB','slotX'];
+const KEYS=['rusty','isword','ssword','gsword','bow','sbow','staff','sstaff','hammer','shammer','larmor','parmor','warmor','jaffa','arrows','bread','wood','ore','leather','blue','mstone','book','hpot','mpot','lhelm','ihelm','lgloves','igloves','lboots','iboots','cring','mring','spear','dagger','mith','msword','marmor','mhelm','fish','sfish','gfish','herb','bherb','cfish','stew','feast','slotW','slotA','slotH','slotG','slotB','slotX'];
 A.icons={KEYS,iconRGBA,iconCanvas};
 })(typeof window!=='undefined'?window:globalThis);
