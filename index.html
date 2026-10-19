@@ -3441,7 +3441,7 @@ let last=performance.now(),hudT=0,saveT=0;
 // One bad monster is reset to idle instead of stopping every other monster behind it.
 const ERRS=new Set();
 function gameErr(e,m){if(m){m.st=null;m.tele=0;m.combo=0;m.flee=0;}const k=String(e&&e.message||e);if(ERRS.has(k))return;ERRS.add(k);console.error(e);try{logMsg('ERR '+k+' '+String(e&&e.stack||'').split('\n')[1]);toast(t('gameErr',{e:k.slice(0,90)}),'warn');}catch(_){}}
-function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{update(dt);}catch(e){gameErr(e);}if(NET)try{netTick();}catch(e){gameErr(e);}if(TOUCH)touchTick();try{render(dt);}catch(e){gameErr(e);}
+function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{update(dt);}catch(e){gameErr(e);}if(NET)try{netTick();}catch(e){gameErr(e);}if(TOUCH)try{touchTick();}catch(e){gameErr(e);}try{render(dt);}catch(e){gameErr(e);}
  if(mode==='play')updateKeys();
  if(mode==='create')drawPrev();if(DL&&DL.pv)drawDPrev();
  if(mode==='map'&&(gTime*2|0)!==(Math.max(0,gTime-dt)*2|0))drawMap();
