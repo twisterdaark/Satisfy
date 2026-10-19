@@ -119,7 +119,10 @@
           break;
         }
         case 'party.kick':
-          if (id && pl.party === id && leader === from.uid) { clear(); forget(); emit({ type: 'kicked', handle: from.handle }); }
+          // k === 1: the leader removed us (SAT-ONLINE-037); without it the leader left and the party is over. Either way the
+          // rejoin memo goes, so nothing brings us back to that party by itself; a fresh invite needs Y.
+          if (id && pl.party === id && leader === from.uid) { clear(); forget(); emit({ type: pl.k === 1 ? 'kicked' : 'leaderLeft', handle: from.handle }); }
+          else if (pl.k === 1 && memo && memo.id === pl.party && memo.leader === from.uid) { forget(); emit({ type: 'kicked', handle: from.handle }); } // kicked while we were out of sight
           break;
       }
     });
@@ -194,10 +197,12 @@
         emit({ type: 'ping', uid: self, handle: null, x: x, y: y, self: true });
         return 'sent';
       },
+      /** Leader only: remove a member. They get a notice and are never invited back by the rejoin logic. */
       kick: function (uid) {
         if (!id || leader !== self || !accepted.has(uid)) return false;
-        send('party.kick', uid);
-        accepted.delete(uid);
+        P.send('party.kick', { to: uid, party: id, k: 1 });
+        accepted.delete(uid); recent.delete(uid); outgoing.delete(uid);
+        savedSig = ''; save();
         return true;
       },
       /** Members as seen now: self first, then remotes in the same party (leader view: accepted only). */

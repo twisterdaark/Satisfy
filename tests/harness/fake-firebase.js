@@ -167,7 +167,9 @@
     const pk = Object.keys(v.payload).sort().join(',');
     if (v.payload.to !== seg[1]) return 'inbox payload';
     if (v.type.startsWith('party.')) {
-      if (pk !== (v.type === 'party.ping' ? 'k,n,party,to' : 'party,to')) return 'inbox payload ' + pk;
+      const ok = v.type === 'party.ping' ? ['k,n,party,to'] : v.type === 'party.kick' ? ['party,to', 'k,party,to'] : ['party,to']; // kick k: 1 (SAT-ONLINE-037)
+      if (!ok.includes(pk)) return 'inbox payload ' + pk;
+      if (v.type === 'party.kick' && 'k' in v.payload && v.payload.k !== 1) return 'inbox kick k';
       if (v.type === 'party.ping' && !(v.payload.k >= 0 && v.payload.k <= 1000000000 && v.payload.n >= -2048 && v.payload.n <= 1000000000)) return 'inbox ping';
       if (typeof v.payload.party !== 'string' || v.payload.party.length > 40) return 'inbox party';
     } else if (v.type.startsWith('chat.')) {
