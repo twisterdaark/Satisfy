@@ -10,6 +10,7 @@ const F = require('../harness/fixtures.cjs');
 test.after(() => H.closeBrowser());
 
 const baseline = H.baselineHtml();
+const r0 = H.baselineHtml(H.R0_SHA); // the characterization tests' baseline (R0)
 const skip = baseline ? false : `baseline ${H.BASELINE_SHA.slice(0, 7)} not available in this clone`;
 
 async function scriptedSession(html) {
@@ -85,8 +86,8 @@ test('rollback: a save written by this build loads unchanged in the baseline', {
 
 // Documents the R0 bug this work fixes: on the baseline, a save that fails to load
 // is silently replaced by a fresh game at the next autosave.
-test('characterization: baseline overwrites a corrupt save at autosave', { skip }, async () => {
-  const g = await H.openGame({ html: baseline, storage: { [H.LEGACY_KEY]: F.CORRUPT_RAW } });
+test('characterization: baseline overwrites a corrupt save at autosave', { skip: r0 ? false : 'R0 baseline not available in this clone' }, async () => {
+  const g = await H.openGame({ html: r0, storage: { [H.LEGACY_KEY]: F.CORRUPT_RAW } });
   try {
     await H.continueGame(g);
     await g.step(21 * 20, 50);

@@ -21,6 +21,9 @@ const CURRENT_HTML = process.env.SATISFY_HTML ? path.resolve(process.env.SATISFY
 // newer main (or set SATISFY_BASELINE=<sha> to compare with any other commit).
 // R0 history: ce29772 (pre-online), 1899cdb (+ #6 CSS hotfix), 6ef0595 (+ v2 art, #5), 6295a5f (+ Patrian, AI, wider map), 3c343ec (+ town quests, Piaro balance, Guardian Knight), fe34ae0 (+ equipment, guilds, WS world state, events), daaef26 (+ companions, dragon, auction, Yatan), 7d57d5f (+ siege, Muller).
 const BASELINE_SHA = process.env.SATISFY_BASELINE || '277ac62945bf5be6f14106cb84ad5f0ab6943aec';
+// the R0 baseline (before the safe saves and ids): the characterization tests document its bugs, so they keep it when
+// BASELINE_SHA moves on for the parity tests (it moved in aaa59ee, and the corrupt-save one failed since)
+const R0_SHA = '34b2ea5094d6d1597b4acb67d338d99d8765b745';
 const LEGACY_KEY = 'satisfy_proto_v4';
 const FAKE_FIREBASE = path.join(__dirname, 'fake-firebase.js');
 
@@ -54,14 +57,14 @@ async function closeBrowser() {
 
 // The baseline build is exported as a whole tree (git archive), because index.html loads
 // sibling scripts (src/, sprites-original/) since 4533320.
-function baselineHtml() {
-  const dir = path.join(os.tmpdir(), 'satisfy-baseline-' + BASELINE_SHA.slice(0, 12));
+function baselineHtml(sha = BASELINE_SHA) {
+  const dir = path.join(os.tmpdir(), 'satisfy-baseline-' + sha.slice(0, 12));
   const file = path.join(dir, 'index.html');
   if (fs.existsSync(file)) return file;
-  const archive = () => execFileSync('git', ['-C', ROOT, 'archive', '--format=tar', BASELINE_SHA], { maxBuffer: 256 << 20 });
+  const archive = () => execFileSync('git', ['-C', ROOT, 'archive', '--format=tar', sha], { maxBuffer: 256 << 20 });
   let tar;
   try { tar = archive(); } catch (e) {
-    try { execFileSync('git', ['-C', ROOT, 'fetch', '--depth=1', 'origin', BASELINE_SHA], { stdio: 'ignore' }); tar = archive(); }
+    try { execFileSync('git', ['-C', ROOT, 'fetch', '--depth=1', 'origin', sha], { stdio: 'ignore' }); tar = archive(); }
     catch (e2) { return null; }
   }
   const tmp = dir + '.part-' + process.pid;
@@ -125,6 +128,16 @@ async function openGame(opts = {}) {
  * A fresh isolated browser context with the deterministic init script and no network.
  * @param {{scripts?:string[]}} [opts] extra init scripts (paths), e.g. tests/harness/fake-firebase.js
  */
+/**
+ * An init script that runs the page's Date.now on a fixed moment (moving on in real time). The weather, world events and
+ * sieges follow the wall clock, so a test that compares drawings or monster positions passes at any hour on this one:
+ * 2026-01-05 09:40:30 UTC, clear weather, no event, no siege (SAT-ONLINE-057/062). The offset is fixed when this is
+ * called, so every page of one context shares one clock.
+ */
+function fixedClock(at = 1767606030000) {
+  return { content: `(() => { const real = Date.now.bind(Date), off = ${at} - ${Date.now()}; Date.now = () => real() + off; })();` };
+}
+
 async function newContext(opts = {}) {
   const ctx = await (await browser()).newContext();
   await ctx.addInitScript(INIT_SCRIPT);
@@ -188,6 +201,6 @@ async function snapshot(g) {
 }
 
 module.exports = {
-  ROOT, CURRENT_HTML, BASELINE_SHA, LEGACY_KEY, FAKE_FIREBASE, DEFAULT_LOOK, VOLATILE_S, IDENTITY_S,
+  ROOT, CURRENT_HTML, BASELINE_SHA, R0_SHA, LEGACY_KEY, fixedClock, FAKE_FIREBASE, DEFAULT_LOOK, VOLATILE_S, IDENTITY_S,
   openGame, newContext, closeBrowser, baselineHtml, newGame, continueGame, snapshot,
 };

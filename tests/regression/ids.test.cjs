@@ -9,6 +9,7 @@ const F = require('../harness/fixtures.cjs');
 test.after(() => H.closeBrowser());
 
 const baseline = H.baselineHtml();
+const r0 = H.baselineHtml(H.R0_SHA); // the characterization tests' baseline (R0)
 const skip = baseline ? false : `baseline ${H.BASELINE_SHA.slice(0, 7)} not available in this clone`;
 const ids = (g) => g.eval(() => ({ pid: window.__G.S.pid, items: window.__G.S.items.map((i) => [i.uid, i.iid]) }));
 const quit = async (g) => { await g.eval(() => window.__G.act('quit')); await g.waitMode('title'); };
@@ -97,8 +98,8 @@ test('R0.6: a quest reward is paid once even if the turn-in fires twice', async 
   } finally { await g.close(); }
 });
 
-test('characterization: the baseline paid a quest twice when the turn-in fired twice', { skip }, async () => {
-  const g = await H.openGame({ html: baseline });
+test('characterization: the baseline paid a quest twice when the turn-in fired twice', { skip: r0 ? false : 'R0 baseline not available in this clone' }, async () => {
+  const g = await H.openGame({ html: r0 });
   try {
     await H.newGame(g);
     const q = await pickQuest(g);

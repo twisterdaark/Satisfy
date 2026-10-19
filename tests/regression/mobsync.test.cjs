@@ -26,7 +26,7 @@ const view = (g, r) => g.eval((R) => {
 }, r);
 
 test('online: the same monsters, health and attacks on both screens; the follower is hurt only by replayed attacks', async () => {
-  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE, H.fixedClock()] }); // the weather and events by the clock moved the monsters (SAT-ONLINE-062)
   try {
     const a = await online(ctx, 'a', 'gMsA1', 'Ahmed');
     await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });

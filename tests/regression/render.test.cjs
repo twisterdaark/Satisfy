@@ -13,12 +13,11 @@ const baseline = H.baselineHtml();
 const skip = baseline ? false : `baseline ${H.BASELINE_SHA.slice(0, 7)} not available in this clone`;
 
 // The weather, world events and sieges come from the wall clock, the same on both builds, but what they draw (rain,
-// invaders) takes random numbers in a different order on each build: run both on one fixed moment with clear weather
-// and no event or siege (2026-01-05 09:40:30 UTC), so the test doesn't fail half of the day (SAT-ONLINE-057).
-const CLOCK = `(() => { const real = Date.now.bind(Date), off = 1767606030000 - real(); Date.now = () => real() + off; })();`;
+// invaders) takes random numbers in a different order on each build: run both on H.fixedClock()'s moment with clear
+// weather and no event or siege, so the test doesn't fail half of the day (SAT-ONLINE-057).
 
 async function frameHash(html, setup) {
-  const ctx = await H.newContext({ scripts: [{ content: CLOCK }] });
+  const ctx = await H.newContext({ scripts: [H.fixedClock()] });
   const g = await H.openGame({ html, ctx });
   try {
     await g.page.setViewportSize({ width: 960, height: 540 });
