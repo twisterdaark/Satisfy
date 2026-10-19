@@ -16,7 +16,7 @@
             },
             "m": {
               "$k": {
-                ".validate": "$k.matches(/^[a-z0-9_]{1,16}@-?[0-9]{1,6},-?[0-9]{1,6}$/) && newData.isString() && newData.val().length <= 48"
+                ".validate": "$k.matches(/^[a-z0-9_]{1,16}@-?[0-9]{1,6},-?[0-9]{1,6}$/) && newData.isString() && newData.val().length <= 64"
               }
             },
             "$other": {

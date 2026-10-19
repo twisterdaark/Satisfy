@@ -76,7 +76,8 @@
     var mine = D.ref(db, base + '/' + o.uid), list = D.ref(db, base);
     var inbox = D.ref(db, 'inbox/' + o.uid);
     var handler = null, offs = [], lastSeq = {}, closed = false, offset = 0;
-    var mobs = { offs: null, all: {}, zone: null }; // shared monsters (SAT-ONLINE-026)
+    var MOB_FULL_MS = 5000;
+    var mobs = { offs: null, all: {}, zone: null, last: null, fullT: 0 }; // shared monsters (SAT-ONLINE-026)
     // The node as the server last stored it, or null when it must be written in full (first send,
     // after a reconnect: onDisconnect may have removed it). Later sends update only what changed,
     // so a step sends {x, y, dir, anim, seq, t} instead of the whole public profile (COST_MODEL.md).
@@ -285,10 +286,18 @@
       mobsPut: function (zone, m) {
         if (closed) return;
         if (mobs.zone && (mobs.zone !== zone || !m)) { D.remove(D.ref(db, 'mobs/' + o.world + '/' + mobs.zone + '/' + o.uid)).catch(function () { /* ignore */ }); mobs.zone = null; }
-        if (!zone || !m) return;
-        var ref = D.ref(db, 'mobs/' + o.world + '/' + zone + '/' + o.uid);
-        if (mobs.zone !== zone) { mobs.zone = zone; D.onDisconnect(ref).remove().catch(function () { /* ignore */ }); }
-        D.set(ref, { t: D.serverTimestamp(), m: m }).catch(fail);
+        if (!zone || !m) { mobs.last = null; return; }
+        var ref = D.ref(db, 'mobs/' + o.world + '/' + zone + '/' + o.uid), t = Date.now(), keys = Object.keys(m);
+        if (mobs.zone !== zone) { mobs.zone = zone; mobs.last = null; D.onDisconnect(ref).remove().catch(function () { /* ignore */ }); }
+        // SAT-ONLINE-042: only the monsters that changed since the last write (and nulls for those that left the list), so
+        // sending at once on every new attack doesn't multiply the download; the whole list again every MOB_FULL_MS
+        if (!keys.length) { if (mobs.last && Object.keys(mobs.last).length) D.remove(ref).catch(fail); mobs.last = {}; return; }
+        if (!mobs.last || !Object.keys(mobs.last).length || t - mobs.fullT > MOB_FULL_MS) { mobs.fullT = t; mobs.last = Object.assign({}, m); D.set(ref, { t: D.serverTimestamp(), m: m }).catch(fail); return; }
+        var u = { t: D.serverTimestamp() }, n = 0, k;
+        for (k in m) if (mobs.last[k] !== m[k]) { u['m/' + k] = m[k]; n++; }
+        for (k in mobs.last) if (!(k in m)) { u['m/' + k] = null; n++; }
+        mobs.last = Object.assign({}, m);
+        if (n) D.update(ref, u).catch(fail);
       },
       close: function () {
         if (closed) return;

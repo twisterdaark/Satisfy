@@ -66,7 +66,7 @@
       if (seg.length !== 4 || seg[1] !== 'satisfy' || !/^[A-Za-z0-9_-]{1,24}$/.test(seg[2]) || !user || seg[3] !== user.uid) return 'PERMISSION_DENIED: mobs ' + p;
       if (v === null) return null;
       if (Object.keys(v).sort().join(',') !== 'm,t' || JSON.stringify(v.t) !== JSON.stringify(SV) || !v.m || typeof v.m !== 'object') return 'mobs fields';
-      return Object.keys(v.m).every((k) => /^[a-z0-9_]{1,16}@-?[0-9]{1,6},-?[0-9]{1,6}$/.test(k) && typeof v.m[k] === 'string' && v.m[k].length <= 48) ? null : 'mobs m';
+      return Object.keys(v.m).every((k) => /^[a-z0-9_]{1,16}@-?[0-9]{1,6},-?[0-9]{1,6}$/.test(k) && typeof v.m[k] === 'string' && v.m[k].length <= 64) ? null : 'mobs m';
     }
     if (seg[0] === 'sessions') {
       if (seg.length !== 2 || !user || seg[1] !== user.uid) return 'PERMISSION_DENIED: not your session';
@@ -241,7 +241,13 @@
     // RTDB update(): merge into the stored node (null removes a field), then check the rules on the result
     update: (r, diff) => {
       const cur = data.has(r.path) ? clone(data.get(r.path)) : (pending.has(r.path) ? clone(pending.get(r.path)) : {});
-      for (const k in diff) { if (diff[k] === null) delete cur[k]; else cur[k] = clone(diff[k]); }
+      // a key with slashes ("m/<key>") is a path inside the node, as RTDB update() takes it (SAT-ONLINE-042)
+      for (const k in diff) {
+        const ks = k.split('/'); let o = cur;
+        for (let i = 0; i < ks.length - 1; i++) { if (!o[ks[i]] || typeof o[ks[i]] !== 'object') o[ks[i]] = {}; o = o[ks[i]]; }
+        const last = ks[ks.length - 1];
+        if (diff[k] === null) delete o[last]; else o[last] = clone(diff[k]);
+      }
       if ('t' in diff) cur.t = diff.t; // the rules see the server-time sentinel, as with set()
       const err = rules(r.path, cur, false);
       F.log.push({ op: 'update', path: r.path, err, keys: Object.keys(diff).sort() });
