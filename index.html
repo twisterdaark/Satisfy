@@ -1660,9 +1660,30 @@ const canMake=r=>Object.entries(r.need).every(([k,n])=>(S.mats[k]||0)>=n||(r.alt
 const needTxt=r=>Object.entries(r.need).map(([k,n])=>`${n} ${t(r.alt&&k==='fish'?'fishAny':k)}`).join(' + ');
 function makeLife(k,brew){const r=(brew?BREW:COOK)[k];if(!canMake(r)){SFX.deny();return campMenu();}
  for(const [m,n] of Object.entries(r.need)){if(r.alt&&m==='fish'&&(S.mats.fish||0)<n)S.mats[r.alt]-=n;else S.mats[m]-=n;}
- const sk=brew?'alch':'cook',p=Math.min(.97,(brew?.75:.7)+lifeLv(sk)*.03);
- if(rand()<p){if(brew)S[k]=(S[k]||0)+1;else S.mats[k]=(S.mats[k]||0)+1;lifeXP(sk,r.xp);toast(t(brew?'brewOk':'cookOk',{it:t(k)}),'good');SFX.quest();}
- else{lifeXP(sk,Math.ceil(r.xp/3));toast(t(brew?'brewFail':'cookFail'),'warn');SFX.deny();}hudDirty=true;campMenu();}
+ cookStart(k,brew);}
+/* cooking minigame (owner: 'cooking will be a minigame'; Nitro's campfire): the pot heats from raw to burnt; press E, Space or
+   click while the bar is in the golden part. A better cook gets a wider golden part; harder dishes heat faster. Right in the
+   middle is perfect: one more dish and double life EXP. Too early or too late: the ingredients are lost, a little EXP. */
+let COOKG=null;
+function cookStart(k,brew){const sk=brew?'alch':'cook',r=(brew?BREW:COOK)[k],w=Math.min(.34,.16+lifeLv(sk)*.012);
+ COOKG={k,brew,sk,r,p:0,dur:{cfish:1.7,stew:1.4,feast:1.05,hpot:1.6,mpot:1.3}[k]||1.5,c:.62,w,t:performance.now(),end:0};mode='cook';SFX.click();}
+function cookHit(){const G=COOKG;if(!G||G.end)return;const d=Math.abs(G.p-G.c),ok=d<=G.w/2,perfect=d<=G.w*.12;G.end=performance.now();G.res=perfect?2:ok?1:0;
+ const {k,brew,sk,r}=G;
+ if(ok){const n=perfect?2:1;if(brew)S[k]=(S[k]||0)+n;else S.mats[k]=(S.mats[k]||0)+n;lifeXP(sk,r.xp*(perfect?2:1));toast(perfect?t('cookPerfect',{it:t(k)}):t(brew?'brewOk':'cookOk',{it:t(k)}),'good');perfect?SFX.legendary():SFX.quest();}
+ else{lifeXP(sk,Math.ceil(r.xp/3));toast(t(G.p<G.c?(brew?'brewRaw':'cookRaw'):(brew?'brewFail':'cookFail')),'warn');SFX.deny();}
+ hudDirty=true;setTimeout(()=>{if(COOKG!==G)return;COOKG=null;if(mode==='cook'){mode='play';campMenu();}},650);}
+function cookQuit(){if(!COOKG)return;if(!COOKG.end){COOKG.p=1;cookHit();}}
+function drawCook(){const G=COOKG;if(!G)return;const now=performance.now();if(!G.end){G.p=Math.min(1,(now-G.t)/1000/G.dur);if(G.p>=1)cookHit();}
+ const W=96,H=8,x=Math.round(P.x-W/2),y=Math.round(P.y-52),g0=G.c-G.w/2,g1=G.c+G.w/2;ctx.save();
+ ctx.fillStyle='rgba(8,14,34,.86)';ctx.fillRect(x-6,y-16,W+12,H+28);ctx.strokeStyle='rgba(166,214,246,.9)';ctx.lineWidth=1;ctx.strokeRect(x-6.5,y-16.5,W+13,H+29);
+ const seg=(a,b,c)=>{ctx.fillStyle=c;ctx.fillRect(x+Math.round(a*W),y,Math.max(1,Math.round((b-a)*W)),H);};
+ seg(0,g0,G.brew?'#3a5a8a':'#c8b48a');seg(g0,g1,'#ffc21a');seg(G.c-G.w*.12,G.c+G.w*.12,'#fff2a8');seg(g1,1,G.brew?'#4a2a6a':'#5a2a1a');
+ const cx=x+Math.round(G.p*W);ctx.fillStyle=G.end?(G.res?'#7aff8a':'#ff6a5a'):'#ffffff';ctx.fillRect(cx-1,y-3,2,H+6);
+ ctx.restore();TX.push({s:t(G.end?(G.res===2?'cookPerf':G.res?'cookGood':'cookBad'):(G.brew?'brewHow':'cookHow')),x:P.x,y:y-6,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:8,c:'#ffe7a8'});
+ TX.push({s:t(G.k),x:P.x,y:y+H+10,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#bfe8ff'});
+ if(!G.end&&rand()<.4)fx.push({x:P.x+(rand()-.5)*10,y:P.y-14,vx:(rand()-.5)*8,vy:-14-rand()*10,t:.5,c:G.p>g1?'#5a5a5a':'#e8e8e8',fl:1});}
+Object.assign(STR.ar,{cookHow:'اضغط لما يبقى دهبي',brewHow:'اضغط لما يبقى دهبي',cookPerf:'مظبوط بالظبط!',cookGood:'تمام',cookBad:'باظت',cookPerfect:'طبخة مظبوطة: اتنين {it}!',cookRaw:'لسه نيّة... راحت عليك',brewRaw:'الجرعة لسه ماغلتش... باظت'});
+Object.assign(STR.en,{cookHow:'Press E when it turns golden',brewHow:'Press E when it turns golden',cookPerf:'Perfect!',cookGood:'Good',cookBad:'Ruined',cookPerfect:'Perfect cooking: two {it}!',cookRaw:'Still raw... it fell apart',brewRaw:"It never came to a boil... ruined"});
 function campMenu(){dialog('camp',['campHi'],null,[...Object.keys(COOK).map(k=>({l:t('oCook',{it:t(k),n:needTxt(COOK[k])}),ic:k,poor:!canMake(COOK[k]),st:t(k+'D'),f:()=>makeLife(k,false)})),
  ...Object.keys(BREW).map(k=>({l:t('oBrew',{it:t(k),n:needTxt(BREW[k])}),ic:k,poor:!canMake(BREW[k]),f:()=>makeLife(k,true)})),{l:t('oLeave')}]);}
 function eatDish(k){const d=DISH[k];if(!(S.mats[k]>0))return;S.mats[k]--;P.food=Math.min(100,P.food+d.food);if(d.hp)P.hp=Math.min(maxHP(),P.hp+maxHP()*d.hp);if(d.buf)P.buf={k:d.buf,t:d.bt};vfx('heal',P.x,P.y);toast(t('ateD',{it:t(k)}),'good');SFX.eat();hudDirty=true;}
@@ -1945,6 +1966,7 @@ addEventListener('blur',()=>{for(const k in K)K[k]=false;guardOff();});
 stage.addEventListener('mousedown',e=>{if(e.button===2){if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar,button')){e.preventDefault();guardOn();}return;}if(e.button!==0)return;audio();if(e.target.closest('button'))return;
  if(mode==='forge'&&MG&&!MG.done){e.preventDefault();strike();return;}
  if(mode==='dialog'){advance();return;}
+ if(mode==='cook'){cookHit();return;}
  if(mode==='cut'){if(SM)SM.done();return;}
  if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar')){stage.focus();const b=stage.getBoundingClientRect();const mx=(e.clientX-b.left)/SC+camXf,my=(e.clientY-b.top)/SC+camYf;if(NET&&e.altKey){netPing(mx,my);return;}if(NET&&pctxClick(mx,my,e.ctrlKey||e.shiftKey))return;const dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);}});
 function onKey(c){
@@ -1955,6 +1977,7 @@ function onKey(c){
  }else if(mode==='cut'){if(SM&&(c==='KeyE'||c==='Space'||c==='Enter'))SM.done();else if(CARD&&(c==='KeyE'||c==='Space'||c==='Enter'))CARD('next');else if(CARD&&c==='Escape')CARD('skip');}
  else if(mode==='dialog'&&DL&&DL.optOn){const n=+c.replace(/\D/g,'');if(/^(Digit|Numpad)[1-9]$/.test(c))pickOpt(n-1);else if(c==='ArrowUp'||c==='KeyW')selOpt((DL.sel+DL.opts.length-1)%DL.opts.length);else if(c==='ArrowDown'||c==='KeyS')selOpt((DL.sel+1)%DL.opts.length);else if(c==='KeyE'||c==='Space'||c==='Enter')pickOpt(DL.sel);else if(c==='Escape')pickOpt(DL.opts.length-1);}
  else if(mode==='dialog'){if(c==='KeyE'||c==='Space'||c==='Enter')advance();}
+ else if(mode==='cook'){if(c==='KeyE'||c==='Space'||c==='Enter')cookHit();else if(c==='Escape')cookQuit();}
  else if(mode==='forge'){if(MG&&!MG.done){if(c==='Space')strike();else if(c==='KeyR')reheat();}else if(c==='Escape')closeForge();else if(c==='Enter'&&$('nameIn'))$('nameOk')&&$('nameOk').click();}
  else if(mode==='inv'){if(c==='Escape'||c==='KeyI')closeInv();}
  else if(mode==='equip'){if(c==='Escape'&&!$('eqPick').hidden){$('eqPick').hidden=true;SFX.close();}else if(c==='Escape'||c==='KeyU')closeEquip();}
@@ -2544,7 +2567,7 @@ function drawShrine(o){const x=Math.round(o.x),y=Math.round(o.y),pul=.5+Math.sin
  R(ctx,x-26,y-34,52,26,'#2a2218');R(ctx,x-24,y-32,48,22,'#5a4a36');ctx.globalAlpha=.55+pul*.3;
  R(ctx,x-2,y-26,3,3,'#f2c14e');R(ctx,x-1,y-23,2,7,'#f2c14e');R(ctx,x-4,y-21,8,1,'#f2c14e');R(ctx,x-3,y-16,2,4,'#f2c14e');R(ctx,x+1,y-16,2,4,'#f2c14e');
  for(let i=0;i<12;i++)R(ctx,x+3+i,y-22-i,1,1,'#fff3c8');for(let i=0;i<8;i++)R(ctx,x-18+i*2,y-14-Math.round(Math.sin(i*.8)*3),1,1,'#bfe8ff');ctx.globalAlpha=1;}
-window.__GU={GRAVE,pSpr,SH,setT,at,seeP,enhMenu,ROOMS,buildings,DGATES,loot,TOWNS,npcKO,getMeet:()=>MEET,meetBosses,openStatus,heartsH,gk,FEM,renderTab,setStab:k=>{STAB=k;},buildings,KESAN,petLv,petXP,petB,petFeed,petRest,getPet:()=>PET,buildMe,COS,DYE,styOpts,styList,stySet,cosMenu,cosPick,lookFig,startTower,twL,twNear,towerOpts,getTower:()=>TWR,SETS,setCount,setTier,setBon,wxNow,wxHere,forceWeather:w=>{WXF=w||null;},GEMS,gemMenu,gemPick,dailyList,dlyS,dailyOpts,rankList,rankerOpts,ACH,achTick:()=>{achT=0;achTick(0);},legendReset,mswordAct,becomeSaint,MULL,get SG(){return SG},forceSiege:ms=>{SGF=ms?Date.now()+ms:0;},throneAct,castleTaken,CAST,siegeNext,altarAct,YATAN,auList,auBuy,auCollect,auTick,auMarket,PEAK,dragonDown,get ARN(){return ARN},startArena,arenaLose,toggleRide,dismount,gainMount,buyRide,buyPet,setPet,get PET(){return PET},MOUNTS,PETS,soulAct,becomeBraham,get COMPO(){return COMPO},setComp,COMPS,killMon,get EV(){return EV},forceEvent:(k,ms)=>{evDone=null;EVF=k?{e:EVT.find(e=>e.k===k),until:Date.now()+(ms||60000)}:null;},evNow,EVT,CAMPS,get FISH(){return FISH},startFish,fishAct,nearWater,campMenu,makeLife,eatDish,lifeLv,pickHerb,SHRINES,shrineAct,becomePagma,get WS(){return WS},get RAID(){return RAID},set RAID(v){RAID=v},TERR,TW,createGuild,joinGuild,leaveGuild,bannerAct,captureT,guildPanel,updateTerr,swampAt,REIN,gXPB,gGoldB,ownsT};
+window.__GU={GRAVE,CAMPS,pSpr,SH,setT,at,seeP,enhMenu,ROOMS,buildings,DGATES,loot,TOWNS,npcKO,getMeet:()=>MEET,meetBosses,openStatus,heartsH,gk,FEM,renderTab,setStab:k=>{STAB=k;},buildings,KESAN,petLv,petXP,petB,petFeed,petRest,getPet:()=>PET,buildMe,COS,DYE,styOpts,styList,stySet,cosMenu,cosPick,lookFig,startTower,twL,twNear,towerOpts,getTower:()=>TWR,SETS,setCount,setTier,setBon,wxNow,wxHere,forceWeather:w=>{WXF=w||null;},GEMS,gemMenu,gemPick,dailyList,dlyS,dailyOpts,rankList,rankerOpts,ACH,achTick:()=>{achT=0;achTick(0);},legendReset,mswordAct,becomeSaint,MULL,get SG(){return SG},forceSiege:ms=>{SGF=ms?Date.now()+ms:0;},throneAct,castleTaken,CAST,siegeNext,altarAct,YATAN,auList,auBuy,auCollect,auTick,auMarket,PEAK,dragonDown,get ARN(){return ARN},startArena,arenaLose,toggleRide,dismount,gainMount,buyRide,buyPet,setPet,get PET(){return PET},MOUNTS,PETS,soulAct,becomeBraham,get COMPO(){return COMPO},setComp,COMPS,killMon,get EV(){return EV},forceEvent:(k,ms)=>{evDone=null;EVF=k?{e:EVT.find(e=>e.k===k),until:Date.now()+(ms||60000)}:null;},evNow,EVT,CAMPS,get FISH(){return FISH},startFish,fishAct,nearWater,campMenu,makeLife,eatDish,lifeLv,pickHerb,SHRINES,shrineAct,becomePagma,get WS(){return WS},get RAID(){return RAID},set RAID(v){RAID=v},TERR,TW,createGuild,joinGuild,leaveGuild,bannerAct,captureT,guildPanel,updateTerr,swampAt,REIN,gXPB,gGoldB,ownsT};
 function smithMenu(who,W,A,svc=true){const back={l:t('oBack'),f:()=>shopD(who,'arBuy')},row=([id,g0])=>{const g=price(who,g0);return{l:t('oBuyGear',{it:t(id),g}),ic:id,st:gearCmp(id),poor:S.gold<g,f:()=>buyGear(id,g,who)};};
  return [{l:t('oBuyW'),ic:'slotW',f:()=>dialog(who,['arW'],null,[...W.map(row),back])},{l:t('oBuyA'),ic:'slotA',f:()=>dialog(who,['arA'],null,[...A.map(row),back])},
   ...(svc?svcOpts(who):[])];}
@@ -3447,6 +3470,7 @@ function render(dt){
   if(f.img){ctx.globalAlpha=Math.max(0,f.t/.7);ctx.drawImage(f.img,Math.round(f.x),Math.round(f.y));ctx.globalAlpha=1;return;}
   if(f.coin){R(ctx,f.x-1,f.y-1,3,3,'#8a6418');R(ctx,f.x-1,f.y-1,2,2,f.c);return;}if(f.fl)ctx.globalAlpha=Math.min(1,f.t*1.5)*(.6+.4*Math.sin(f.t*40));R(ctx,f.x,f.y,f.t>.2?2:1,f.t>.2?2:1,f.c);ctx.globalAlpha=1;});
  nums.forEach(n=>TX.push({s:n.s,x:n.x,y:n.y,f:'{s}px "Press Start 2P", monospace',z:n.big?9:7,c:n.c,a:Math.min(1,n.t*2)}));
+ if(COOKG&&P)drawCook();
  ctx.restore();drawWeather();
  if(P&&S&&mode!=='title'&&mode!=='lang'){const k=P.y<WH*TS&&P.x<BW*TS?clamp((P.x-49*TS)/40,0,1):0;if(k>0){dg.globalCompositeOperation='source-over';dg.clearRect(0,0,VW,VH);dg.fillStyle=`rgba(3,12,6,${.62*k})`;dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='destination-out';const px=P.x-camX,py=P.y-8-camY,g=dg.createRadialGradient(px,py,10,px,py,95);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(0,0,VW,VH);ctx.drawImage(darkC,0,0);}
   const hole=(x,y,r)=>{const g=dg.createRadialGradient(x-camX,y-camY,r*.15,x-camX,y-camY,r);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(x-camX-r,y-camY-r,r*2,r*2);};
