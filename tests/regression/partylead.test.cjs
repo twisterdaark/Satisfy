@@ -10,11 +10,11 @@ test.after(() => H.closeBrowser());
 async function settle(...games) {
   for (let i = 0; i < 8; i++) { for (const g of games) await g.step(7); await games[0].page.waitForTimeout(30); }
 }
-async function until(games, fn, ms = 10000) {
+async function until(games, fn, ms = 10000, arg) {
   const end = Date.now() + ms;
   for (;;) {
     let ok = true;
-    for (const g of games) if (!(await g.eval(fn))) { ok = false; break; }
+    for (const g of games) if (!(await g.eval(fn, arg))) { ok = false; break; }
     if (ok) return;
     if (Date.now() > end) throw new Error('timed out waiting for ' + fn);
     for (const g of games) await g.step(10);
@@ -22,6 +22,12 @@ async function until(games, fn, ms = 10000) {
   }
 }
 const party = (g) => g.eval(() => Satisfy.local.net().party);
+async function cardFromList(g, uid) {
+  if (await g.eval(() => document.getElementById('plW').hidden)) await g.page.keyboard.press('KeyO');
+  await until([g], (u) => !!document.querySelector('#plL button.pm[data-uid="' + u + '"]'), 5000, uid);
+  await g.eval((u) => document.querySelector('#plL button.pm[data-uid="' + u + '"]').click(), uid);
+  await g.step(2);
+}
 
 test('the leader leaves without a word: the two members elect one leader and stay together', async () => {
   const ctx = await H.newContext();
@@ -38,9 +44,7 @@ test('the leader leaves without a word: the two members elect one leader and sta
     // A invites both from their cards (U046), they accept with Y
     for (const g of [b, c]) {
       const uid = await g.eval(() => Satisfy.local.net().uid);
-      const p = await a.eval((u) => { const r = Satisfy.local.net().remotes.find((x) => x.uid === u); return window.__G.toScreen(r.x, r.y - 30); }, uid);
-      await a.page.mouse.click(p.x, p.y);
-      await a.step(2);
+      await cardFromList(a, uid); // SAT-ONLINE-036: the card opens from ⋯ in the player list
       await a.eval(() => document.querySelector('#pctx [data-act="pcInvite"]').click());
       await settle(a, b, c);
       await until([g], () => !document.getElementById('partyInv').hidden);
@@ -83,9 +87,7 @@ test('online, members far apart: the leader vanishes, both elect the same leader
     await settle(a, b, c);
     for (const g of [b, c]) {
       const uid = await g.eval(() => Satisfy.local.net().uid);
-      const p = await a.eval((u) => { const r = Satisfy.local.net().remotes.find((x) => x.uid === u); return window.__G.toScreen(r.x, r.y - 30); }, uid); // their name opens the card
-      await a.page.mouse.click(p.x, p.y);
-      await a.step(2);
+      await cardFromList(a, uid); // SAT-ONLINE-036: the card opens from ⋯ in the player list
       await a.eval(() => document.querySelector('#pctx [data-act="pcInvite"]').click());
       await settle(a, b, c);
       await until([g], () => !document.getElementById('partyInv').hidden);

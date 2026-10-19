@@ -82,7 +82,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #partyInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
 #netB{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*.6);padding:calc(var(--u)*.3) calc(var(--u)*1.2);font-size:calc(var(--u)*1.5);color:#9fe0ff;white-space:nowrap;pointer-events:auto;cursor:pointer}
 #plW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*4.4);padding:calc(var(--u)*.8) calc(var(--u)*1.4);width:calc(var(--u)*34);max-height:calc(var(--u)*30);overflow-y:auto;font-size:calc(var(--u)*1.5);pointer-events:auto;z-index:45}
-#plL div{padding:calc(var(--u)*.25) 0;border-bottom:1px solid rgba(255,255,255,.12)}#plL div.me{color:#ffe7a8}
+#plL div{padding:calc(var(--u)*.25) 0;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:calc(var(--u)*.8)}#plL div.me{color:#ffe7a8}#plL .pm{width:auto;min-width:calc(var(--u)*3);padding:0 calc(var(--u)*.8);line-height:1.2;flex:none}
 #plW .row{display:flex;justify-content:center;margin-top:calc(var(--u)*.6)}#plW .row button{width:auto;padding:0 calc(var(--u)*1)}
 #updV{position:absolute;inset:0;z-index:59;pointer-events:auto;background:rgba(4,8,20,.72)}#updW small{opacity:.8}#updW{position:absolute;left:50%;transform:translate(-50%,-50%);top:50%;flex-wrap:wrap;justify-content:center;z-index:60;pointer-events:auto;display:flex;align-items:center;gap:calc(var(--u)*1);padding:calc(var(--u)*.8) calc(var(--u)*1.4);font-size:calc(var(--u)*1.5)}#updW button{font:inherit;cursor:pointer}
 #toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*3.8);z-index:55;pointer-events:none;display:grid;gap:calc(var(--u)*.4);justify-items:center;width:80%}
@@ -395,7 +395,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
       </div>
       <div id="touch" hidden><div id="tStick"><i id="tKnob"></i></div>
         <div id="tAct"><button data-tk="atk" class="big" data-i18n="kA"></button><button data-tk="Space" data-i18n="kD"></button><button data-tk="guard" data-i18n="kG"></button><button data-tk="KeyE" data-i18n="kE"></button></div>
-        <div id="tNet" hidden><button data-tk="KeyP" data-i18n="tParty"></button><button data-tk="KeyK" data-i18n="tDuel"></button><button data-tk="KeyY" data-i18n="tYes"></button><button data-tk="KeyN" data-i18n="tNo"></button><button data-tk="Enter" data-i18n="tChat"></button><button data-tk="ping" data-i18n="tPing"></button><button data-tk="emote" data-i18n="tEmote"></button></div></div>
+        <div id="tNet" hidden><button data-tk="KeyT" data-i18n="tOpt"></button><button data-tk="KeyP" data-i18n="tParty"></button><button data-tk="KeyK" data-i18n="tDuel"></button><button data-tk="KeyY" data-i18n="tYes"></button><button data-tk="KeyN" data-i18n="tNo"></button><button data-tk="Enter" data-i18n="tChat"></button><button data-tk="ping" data-i18n="tPing"></button><button data-tk="emote" data-i18n="tEmote"></button></div></div>
       <div id="skillbar" class="sys"></div>
       <div id="hint" hidden></div>
       <div id="toasts"></div>
@@ -2131,7 +2131,7 @@ stage.addEventListener('mousedown',e=>{if(e.button===2){if(mode==='play'&&!e.tar
  if(mode==='dialog'){advance();return;}
  if(mode==='cook'){cookHit();return;}if(mode==='sew'){sewHit();return;}if(mode==='mix'){if(MIXG)MIXG.h=1;return;}if(mode==='farm'){farmDig();return;}
  if(mode==='cut'){if(SM)SM.done();return;}
- if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar')){stage.focus();const b=stage.getBoundingClientRect();const mx=(e.clientX-b.left)/SC+camXf,my=(e.clientY-b.top)/SC+camYf;if(NET&&e.altKey){netPing(mx,my);return;}if(NET&&pctxClick(mx,my,e.ctrlKey||e.shiftKey))return;const dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);}});
+ if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar')){stage.focus();const b=stage.getBoundingClientRect();const mx=(e.clientX-b.left)/SC+camXf,my=(e.clientY-b.top)/SC+camYf;if(NET&&e.altKey){netPing(mx,my);return;}const dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);}});
 function onKey(c){if(c==="Escape"&&!$("updLog").hidden){updLogClose();return;}
  if(c==='Tab'&&(mode==='play'||mode==='cut')){toggleQuest();return;}
  if(mode==='play'){
@@ -3958,7 +3958,7 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
  else if(ty==='d')s.du=performance.now()+Math.min(600,n(ev[3])*10);}
 // due replays, at where each player is drawn now; players off screen or out of sight just drop theirs
 function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
-function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now();
+function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)
  for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const fs=fxSt(r.sid);fxIn(r,fs);if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
   const k=remoteSpr(r.look,r.arm),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
   // their weapon in hand and each swing once, the way your own is drawn (SAT-ONLINE-026, owner feedback 7): a swing starts when
@@ -3979,7 +3979,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   if(PCTX&&PCTX.uid===r.uid)ents.push({y:r.y-1,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,231,168,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(r.x,r.y+1,9,4,0,0,7);ctx.stroke();ctx.restore();}});
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   TX.push({s:r.handle||'?',x:r.x,y:r.y-28,f:F,z:8,c:foe?'#ff8a7a':mate?'#8dff9a':'#9fe0ff'});
-  if(!mate&&!foe&&mode==='play'&&Math.hypot(r.x-P.x,r.y-P.y)<PARTY_R)TX.push({s:t('pInvite')+(DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?' · '+t('dHint'):''),x:r.x,y:r.y-37,f:F,z:6,c:'#ffe7a8'});}
+  if(near&&r.uid===near.uid&&!foe)TX.push({s:[t('pcHint'),mate?'':t('pInvite'),!mate&&DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?t('dHint'):''].filter(Boolean).join(' · '),x:r.x,y:r.y-37,f:F,z:6,c:'#ffe7a8'});}
  fxRun(seen);for(const sid of FXS.keys())if(!NET.get||!NET.get(sid))FXS.delete(sid);
  duelWatch(ents,myRoom);pingEnts(ents,myRoom,F);const me=emoNow();if(me)emoBubble(ents,me,P.x,P.y,P.dir);
  const ds=DUEL&&DUEL.state();if(ds&&ds.arena&&!myRoom)ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle=ds.phase==='fight'?'rgba(255,120,90,.7)':'rgba(255,210,74,.7)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(ds.arena.x,ds.arena.y,ds.arena.r,0,7);ctx.stroke();ctx.restore();}});}
@@ -4012,6 +4012,7 @@ addEventListener('keydown',e=>{if(!PARTY||mode!=='play'||e.repeat||KB.includes(e
  if(e.code==='Enter'){chatOpen();return;}
  if(e.code==='KeyV'){emoToggle();return;}
  if(e.code==='KeyO'){plOpen();return;}
+ if(e.code==='KeyT'){pctxNear();return;} // SAT-ONLINE-036: the card of the player next to you
  if(duelKey(e.code))return;
  if(e.code==='KeyP')partyInviteNear();else if(e.code==='KeyY'&&PARTY.pendingInvite())partyAct('pAccept');else if(e.code==='KeyN'&&PARTY.pendingInvite())partyAct('pDecline');});
 /* party chat + block list (SAT-ONLINE-016, doc §29 T31). In a party, Enter opens the chat line, Enter sends it to the
@@ -4100,8 +4101,8 @@ function netMini(g,sx,sy,u){const now=performance.now(),id=PARTY&&PARTY.id();
    their public card (name, level, class, title, party, armour) and invite, challenge or block exactly that player:
    the target is their uid, so two players with the same name can't be mixed up. Nothing private is shown: it is only
    the PlayerPublic everyone nearby already receives. Clicking your duel opponent mid-fight still attacks. */
-Object.assign(STR.ar,{pcInvite:'دعوة للبارتي',pcDuel:'مبارزة',pcUnblock:'شيل البلوك',pcUnblocked:'{n} مبقاش عليه بلوك',pcLv:'لفل {n}',pcInParty:'في بارتي',pcMate:'معاك في البارتي',pcArm:'لابس درع',pcGone:'{n} مبقاش قريب'});
-Object.assign(STR.en,{pcInvite:'Invite to party',pcDuel:'Duel',pcUnblock:'Unblock',pcUnblocked:'{n} is not blocked any more',pcLv:'Lv {n}',pcInParty:'In a party',pcMate:'In your party',pcArm:'Wearing armour',pcGone:'{n} is not nearby any more'});
+Object.assign(STR.ar,{pcHint:'[T] خيارات',pcOpt:'خيارات',pcFar:'بعيد: قرّب عشان تدعيه أو تبارزه',pcInvite:'دعوة للبارتي',pcDuel:'مبارزة',pcUnblock:'شيل البلوك',pcUnblocked:'{n} مبقاش عليه بلوك',pcLv:'لفل {n}',pcInParty:'في بارتي',pcMate:'معاك في البارتي',pcArm:'لابس درع',pcGone:'{n} مبقاش قريب'});
+Object.assign(STR.en,{pcHint:'[T] Options',pcOpt:'Options',pcFar:'Far away: come closer to invite or duel',pcInvite:'Invite to party',pcDuel:'Duel',pcUnblock:'Unblock',pcUnblocked:'{n} is not blocked any more',pcLv:'Lv {n}',pcInParty:'In a party',pcMate:'In your party',pcArm:'Wearing armour',pcGone:'{n} is not nearby any more'});
 /* player list (SAT-ONLINE-026, owner feedback 5 and 16): click the online badge, or press O, for everyone signed in to this
    world with their ID, level and place. "Hide my level" publishes level 0, which everyone, the party too, sees as "?". */
 let HIDELV=(()=>{try{return localStorage.getItem('satisfy_hidelv')==='1';}catch(e){return false;}})();
@@ -4113,29 +4114,34 @@ function plHideT(){HIDELV=!HIDELV;try{localStorage.setItem('satisfy_hidelv',HIDE
 function plFill(){const box=$('plL');$('plHide').textContent=t(HIDELV?'plShowLv':'plHideLv');
  const me={self:true,handle:netId||S.look.n,lv:HIDELV?0:S.lv,zone:netZone(P.x,P.y)};
  const show=arr=>{$('plH').textContent=t('plH',{n:arr.length});box.textContent='';for(const r of arr){const d=document.createElement('div');if(r.self)d.className='me';
-  d.textContent=[r.handle||'?',t('lv',{n:lvTxt(r.lv)}),pctxName(r.zone||'')].filter(Boolean).join(' · ');box.appendChild(d);}};
- const near=()=>NET.remotes().map(r=>({handle:r.handle,lv:r.lv,zone:r.zone}));
+  const s=document.createElement('span');s.textContent=[r.handle||'?',t('lv',{n:lvTxt(r.lv)}),pctxName(r.zone||'')].filter(Boolean).join(' · ');d.appendChild(s);
+  if(!r.self&&r.uid){const b=document.createElement('button');b.className='pm';b.dataset.uid=r.uid;b.textContent='⋯';b.dataset.tip=t('pcOpt');b.setAttribute('aria-label',t('pcOpt')+': '+(r.handle||'?'));
+   b.addEventListener('click',()=>{const live=NET&&NET.remotes().find(x=>x.uid===r.uid);if(pctxOpen(live||r,!live))plOpen(false);});d.appendChild(b);}
+  box.appendChild(d);}};
+ const near=()=>NET.remotes().map(r=>({uid:r.uid,sid:r.sid,handle:r.handle,lv:r.lv,zone:r.zone,cls:r.cls,title:r.title,party:r.party,arm:r.arm}));
  if(!(FB&&NETTR&&NETTR.kind==='firebase'))return show([me].concat(near()));
  // the range query only covers nearby players, so the list reads the whole shard once when it opens
  show([me].concat(near()));const D=FB.m.database;D.get(D.ref(FB.db,'presence/'+Satisfy.net.WORLD_ID+'/main')).then(s=>{const v=s.val()||{};
-  show([me].concat(Object.keys(v).filter(k=>k!==NET.uid&&v[k]&&typeof v[k]==='object').map(k=>({handle:v[k].handle,lv:v[k].lv,zone:v[k].zone}))));},()=>{});}
+  show([me].concat(Object.keys(v).filter(k=>k!==NET.uid&&v[k]&&typeof v[k]==='object'&&v[k].uid===k).map(k=>{const o=v[k],str=x=>typeof x==='string'?x:'';
+   return {uid:k,sid:str(o.sid),handle:str(o.handle),lv:+o.lv||0,zone:str(o.zone),cls:str(o.cls),title:str(o.title),party:str(o.party)||null,arm:o.arm?1:0};})));},()=>{});}
 $('netB').addEventListener('click',()=>plOpen());
-function pctxRemote(){return PCTX&&NET?NET.remotes().find(r=>r.uid===PCTX.uid)||null:null;}
-// the visible player whose sprite (16×26 px around the feet) is under the point, nearest first
-// SAT-ONLINE-026 (owner feedback 9): a plain click only opens the card on the name over their head, so clicking to attack
-// while walking past someone no longer opens it; Ctrl or Shift + click opens it on the sprite too.
-function pctxPick(mx,my,body){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=1e9;
- for(const r of NET.remotes()){if((r.room||null)!==myRoom||r.mv!==mapV())continue;const dx=mx-r.x,dy=my-(body?r.y-11:r.y-30),w=body?9:Math.max(12,(r.handle||'?').length*3.2);if(Math.abs(dx)>w||Math.abs(dy)>(body?14:5))continue;const d=dx*dx+dy*dy;if(d<bd){bd=d;best=r;}}return best;}
-function pctxClick(mx,my,body){const r=pctxPick(mx,my,body);if(!r)return false;const st=DUEL&&DUEL.state();if(st&&st.phase==='fight'&&st.foe===r.uid)return false;
- PCTX={uid:r.uid,sid:r.sid,handle:r.handle};pctxSig='';SFX.notice&&SFX.notice();return true;}
+function pctxRemote(){return PCTX&&NET?NET.remotes().find(r=>r.uid===PCTX.uid)||PCTX.snap||null:null;}
+// SAT-ONLINE-036 (owner 2026-10-19): the card opens from a button only, never from a click in the world (a click attacks):
+// the ⋯ next to each name in the player list (O), or T next to a player ("[T] Options" over their head).
+// snap: the list's copy of a player out of range (the whole shard is listed); the card then shows that copy.
+function pctxOpen(r,snap){if(!r||!r.uid||!NET||r.uid===NET.uid)return false;const st=DUEL&&DUEL.state();if(st&&st.phase==='fight'&&st.foe===r.uid)return false;
+ PCTX={uid:r.uid,sid:r.sid,handle:r.handle,snap:snap?r:null};pctxSig='';SFX.notice&&SFX.notice();return true;}
+function pctxNear(){if(!NET||PCTX)return;const r=partyNear();if(r)pctxOpen(r);}
 function pctxName(k){const v=t(k);return v===k?'':v;}
 function pctxUI(live){const W=$('pctx'),r=live?pctxRemote():null;if(PCTX&&!r){if(live&&PCTX.handle)toast(t('pcGone',{n:PCTX.handle}));PCTX=null;}
  if(!PCTX){if(!W.hidden)W.hidden=true;return;}
- const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
+ const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
  $('pctxT').textContent=r.handle||'?';
- $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):''].filter(Boolean).join(' · ');
- $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;}
-function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig='';return;}
+ $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):''].filter(Boolean).join(' · ');
+ $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;
+ // a player out of range (from the list): invites and duels only reach players you can see, so those wait until you are close
+ for(const a of ['pcInvite','pcDuel'])W.querySelector(`[data-act="${a}"]`).disabled=far;}
+function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig='';return;}if(r===PCTX.snap&&(a==='pcInvite'||a==='pcDuel')){toast(t('pcFar'),'warn');return;}
  if(a==='pcInvite'&&PARTY){const res=PARTY.invite(r);toast(t({sent:'pInvSent',busy:'pBusy',full:'pFull',notLeader:'pNotLeader',already:'pcMate'}[res]||'pBusy',{n:r.handle}),res==='sent'?'good':'warn');partySig='';}
  else if(a==='pcDuel'&&DUEL){const st=DUEL.state();if(st.phase!=='idle'&&st.phase!=='over')return;const res=DUEL.challenge(r);toast(t({sent:'dSent',busy:'dBusy',safe:'dSafe',far:'dFar'}[res]||'dBusy',{n:r.handle}),res==='sent'?'good':'warn');duelSig='';}
  else if(a==='pcBlock'){if(isBlocked(r.uid)){BLK.remove(r.uid);toast(t('pcUnblocked',{n:r.handle||'?'}));}else blockUid(r.uid,r.handle);}
@@ -4389,8 +4395,8 @@ if(NETQ==='online'){netBtn();
    a stick on the left moves, Attack/Guard work while held, Dodge and Use tap, and the key hints at the bottom right
    (inventory, status, map, …) become buttons. Online, a row for party (P), duel (K), yes/no (Y/N) and chat. Taps are
    sent as the same key events the keyboard sends, so every screen keeps one input path. */
-Object.assign(STR.ar,{tEmote:'حركة',tPing:'علامة',tParty:'بارتي',tDuel:'مبارزة',tYes:'أيوه',tNo:'لأ',tChat:'شات'});
-Object.assign(STR.en,{tEmote:'Emote',tPing:'Ping',tParty:'Party',tDuel:'Duel',tYes:'Yes',tNo:'No',tChat:'Chat'});
+Object.assign(STR.ar,{tOpt:'خيارات',tEmote:'حركة',tPing:'علامة',tParty:'بارتي',tDuel:'مبارزة',tYes:'أيوه',tNo:'لأ',tChat:'شات'});
+Object.assign(STR.en,{tOpt:'Options',tEmote:'Emote',tPing:'Ping',tParty:'Party',tDuel:'Duel',tYes:'Yes',tNo:'No',tChat:'Chat'});
 const TOUCH=(()=>{const q=new URLSearchParams(location.search).get('touch');if(q==='0')return false;if(q==='1')return true;try{return matchMedia('(pointer: coarse)').matches;}catch(e){return false;}})();
 /* movable HUD (owner request): every box has a grip (⠿) at its corner to drag it anywhere and a – that folds it to a
    small tab (+ opens it again). Places and folds are kept per browser (localStorage satisfy_gui) as fractions of the
