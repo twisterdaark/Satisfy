@@ -173,16 +173,21 @@ async function continueGame(g) {
 
 // Durable state minus clocks that depend on how many frames ran.
 const VOLATILE_S = ['playT', 'bqT', 'immT'];
+// Random per character (SAT-ONLINE-005): S.pid and the item ids derived from it. Baseline builds only
+// make a pid on a guild join, so golden/rollback comparisons drop them; tests/regression/ids.test.cjs checks them.
+const IDENTITY_S = ['pid'];
 async function snapshot(g) {
-  return g.eval((vol) => {
+  return g.eval(([vol, idn]) => {
     const S = JSON.parse(JSON.stringify(window.__G.S));
     for (const k of vol) delete S[k];
+    for (const k of idn) delete S[k];
+    for (const it of S.items || []) delete it.iid;
     const P = window.__G.P;
     return { S, P: { x: P.x, y: P.y, hp: P.hp, mp: P.mp, st: P.st, food: P.food } };
-  }, VOLATILE_S);
+  }, [VOLATILE_S, IDENTITY_S]);
 }
 
 module.exports = {
-  ROOT, CURRENT_HTML, BASELINE_SHA, LEGACY_KEY, FAKE_FIREBASE, DEFAULT_LOOK, VOLATILE_S,
+  ROOT, CURRENT_HTML, BASELINE_SHA, LEGACY_KEY, FAKE_FIREBASE, DEFAULT_LOOK, VOLATILE_S, IDENTITY_S,
   openGame, newContext, closeBrowser, baselineHtml, newGame, continueGame, snapshot,
 };

@@ -10,6 +10,9 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 
 ```html
 <script src="src/core/storage.js"></script>   <!-- Satisfy.storage -->
+<script src="src/core/ids.js"></script>       <!-- Satisfy.ids (SAT-ONLINE-005) -->
+<script src="src/core/state.js"></script>     <!-- Satisfy.state (SAT-ONLINE-005) -->
+<script src="src/core/events.js"></script>    <!-- Satisfy.events (SAT-ONLINE-005) -->
 <script src="src/net/contracts.js"></script>  <!-- Satisfy.net -->
 <script src="src/net/presence.js"></script>   <!-- Satisfy.presence (SAT-ONLINE-002) -->
 <script src="src/net/transport-local.js"></script> <!-- Satisfy.transports -->
@@ -32,6 +35,9 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 | `inGame()` | `false` on title/demo screens. |
 | `playerPublic(ctx?)` | The local player as a `PlayerPublic` (see below), or `null` outside a game. `ctx` may set `uid`, `sid`, `party`, `anim`, `t`. |
 | `backups()` | `{ reason: rawJSON }` for every save backup of the current slot. |
+| `profile()` | `{ pid, schema, durable }`: the durable part of the character (see `Satisfy.state`), deep-copied. `null` outside a game. What a cloud profile will hold (doc §23). |
+| `events()` | The last 200 domain events (oldest first), see `Satisfy.events`. In memory only. |
+| `onEvent(fn)` | Calls `fn(event)` for each new domain event; returns an unsubscribe function. |
 | `net()` | `null` offline; with `?net=local` or a signed-in `?net=online`: `{ mode, state, uid, sid, count, drawn, remotes, stats }`. `state` is one of `NET_STATES`. |
 
 Content tables are **source data for SAT-CONTENT-001 parity tests**. They are not an editing
@@ -45,14 +51,48 @@ interface: changing values happens in `data/**` once the engine reads from it (a
 | `KEY` | `'satisfy_proto_v4'` — historical name, kept for compatibility. |
 | `BACKUP_PREFIX` | `'satisfy_proto_v4.backup.'` + `corrupt` / `from-v<N>` / `newer-v<N>`. |
 | `decode(raw)` | `{ status: 'empty'|'corrupt'|'ok', raw, data?, schema?, error? }`. Never throws. |
-| `encode(S, P, now?)` | `JSON {S, P:{x,y,hp,st,mp,food}, fmt:1, schema, savedAt}`. |
+| `encode(S, P, now?, {WS}?)` | `JSON {S, P:{x,y,hp,st,mp,food}, WS?, fmt:1, schema, savedAt}`. `WS` is the world state (guilds, territories, legends) main saves next to S and P. |
 | `migrate(S, P, ctx)` | Runs the ladder in place; returns applied versions. `ctx = { PTS_LV, spawn:{x,y}, maxHP() }`. |
-| `create(storage, {slot?})` | Adapter with `key`, `exists()`, `read()`, `write(S, P)`, `backup(reason, raw)`, `backups()`. Swallows storage errors. A slot stores under `satisfy_proto_v4@<slot>` (`?slot=` in the URL). |
+| `create(storage, {slot?})` | Adapter with `key`, `exists()`, `read()`, `write(S, P, {WS}?)`, `backup(reason, raw)`, `backups()`. Swallows storage errors. A slot stores under `satisfy_proto_v4@<slot>` (`?slot=` in the URL). |
 | `slotKey(slot)` | Key for a slot; throws on names outside `[A-Za-z0-9_-]{1,16}`. |
 
 Save shape compatibility rule: a save written by any build must load in the previous build.
 Adding a field to `S` needs a default in `freshState()`; changing the meaning of a field needs a
 new ladder step and `SCHEMA + 1`.
+
+## `Satisfy.state`, `Satisfy.ids`, `Satisfy.events` (SAT-ONLINE-005, doc §05 R0.4/R0.5)
+
+See ADR-002. Every key of `S` has one class:
+
+| Class | Keys (examples) | Online meaning |
+|---|---|---|
+| `durable` | `lv`, `xp`, `gold`, `items`, `mats`, `qs`, `sk`, `tl`, `eq`, `aff`, `rep`, `guild`, `life`, … | Character progress. Goes into the cloud profile; a server owns it once it is authoritative. |
+| `session` | `raid`, `zone`, `immT`, `swT`, `unstT`, `giftT`, `bq`, `bqT`, `hits`, `focus` | Saved locally so a reload feels the same; never shared or trusted. |
+| `meta` | `v`, `wv`, `uid`, `pid` | Bookkeeping and ids. |
+
+`P` is volatile (only `P_SAVED` = `x,y,hp,st,mp,food` is saved); UI state is ephemeral; `WS` is world
+state (shared truth online). **Adding a key to `S`: add it to one list in `src/core/state.js`**;
+`tests/unit/state.test.cjs` scans `index.html` and names any key that isn't listed. Unknown keys
+count as durable, so nothing is dropped.
+
+| Member | Notes |
+|---|---|
+| `state.classOf(k)`, `state.split(S)`, `state.profileOf(S)` | Class of a key; deep copies by class plus `unknown` keys; `{ pid, schema, durable }`. |
+| `ids.ensure(S)` | Gives the character `S.pid` (kept if it exists, e.g. from a guild join) and every item `iid = 'it_' + pid + '_' + uid`. Called on save and load. |
+| `ids.itemId(pid, uid)`, `ids.legacyUid(iid)` | The numeric `uid` is the legacy id; `(pid, uid)` is the stable item id. |
+| `ids.uuid()` | RFC 4122 v4 request id. |
+| `events.create({uuid, pid?, now?})` | `emit(type, payload, key?)`, `on(fn)`, `log()`, `seen(key)`, `reset()`. A key already emitted returns `null`. |
+
+Events: `{ id: uuid, key, type, pid, at: S.playT, payload }`.
+
+| Type | When | Key (prefixed with `pid:`) | Payload |
+|---|---|---|---|
+| `monster.kill` | a monster dies (same place quest kill credit is counted) | `kill:<type>:<count>` | `{ monster, n }` |
+| `craft.item.created` | a forge finishes | `craft:item:<uid>` / `craft:arrows:<n>` | `{ recipe, r, slot, itemId }` |
+| `quest.reward.claimed` | a quest turn-in pays out | `claim:<quest>` (null for repeatable quests) | `{ quest, gold, xp, item, cls }` |
+
+`completeQ(id)` now pays only if the quest is still active and ready when it runs: a second call
+(a double click, the dialog callback firing twice) pays nothing.
 
 ## `Satisfy.net` — online contracts (no network yet)
 
@@ -154,4 +194,5 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, additive** (SAT-ONLINE-005): `Satisfy.state`, `Satisfy.ids`, `Satisfy.events`, `Satisfy.local.profile/events/onEvent`, `S.pid` for every character, `item.iid`, storage writes `WS`, `__G.startMG(id)` (test hook).
 - **api 1, additive** (SAT-ONLINE-003): `Satisfy.party`, `Satisfy.net.zonePolicy/SAFE_ZONES`, `net().party`, the RTDB `inbox/`. Presence now checks replays separately for state and messages.
