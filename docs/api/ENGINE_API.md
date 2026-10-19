@@ -284,6 +284,7 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, fix** (SAT-ONLINE-019 review, #49): `mapV()` is hashed at load, from the generated world, before a save replays uprooted stumps (`WS.roots`), so players who uprooted different stumps still match.
 - **api 1, fix** (SAT-ONLINE-010 review, #30): a tab another session replaced saves once, at that moment, then never again (`netNoSave`: no autosave, no save on quit); *Play here* only reloads.
 - **api 1, fix** (SAT-ONLINE-009 review, #29): a member hands a boss hit to the host only while the host has sent `raid.state` for that boss in the last `raid.C.CONFIRM_MS` (1.5 s); otherwise the hit stays local, so tower/trial bosses and bosses the host doesn't have alive can be fought in a party. Only world bosses are shared (`praidShared`). Inbox `k`/`n` go up to 1e9 (trauka has 30M HP): rules change.
 - **api 1, fix** (SAT-ONLINE-003 review, #15): inbox messages are delivered as session `sidOf(m.from, m.sid)`; `from` is what the rules verify, so a party (or duel) message can't be sent in another player's name.

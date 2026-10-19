@@ -5,6 +5,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
+const fs = require('node:fs');
+const path = require('node:path');
 
 test.after(() => H.closeBrowser());
 
@@ -17,9 +19,11 @@ test('a player on another map version is tracked but not drawn, invited or chall
   const ctx = await H.newContext();
   try {
     const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
-    const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
-    // B runs a build whose map differs by one tile (as after an update that only one of them loaded)
-    await b.eval(() => { window.__G.setT(3, 3, window.__G.at(3, 3) === 1 ? 2 : 1); });
+    // B runs a build whose generated map differs by one tile (as after an update that only one of them loaded)
+    const alt = path.join(path.dirname(H.CURRENT_HTML), '.worldid-alt.html');
+    fs.writeFileSync(alt, fs.readFileSync(H.CURRENT_HTML, 'utf8').replace('let MAPV=null;', 'map[MW*NR+3*MW+3]^=1;let MAPV=null;'));
+    let b;
+    try { b = await H.openGame({ ctx, html: alt, query: '?net=local&slot=b' }); } finally { fs.unlinkSync(alt); }
     await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
     await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
     await b.eval(() => { window.__G.P.x += 20; });
@@ -69,5 +73,22 @@ test('the strip between house interiors is "void" online: not a safe town (duels
     assert.equal(await a.eval(() => Satisfy.net.zonePolicy(Satisfy.local.zoneAt(window.__G.P.x, window.__G.P.y)).safe), false);
     assert.doesNotMatch(await a.eval(() => document.getElementById('netB').textContent), /Safe zone/);
     assert.deepEqual(a.errors, []);
+  } finally { await ctx.close(); }
+});
+
+test('review fix (#49): an uprooted stump (or a save that replays them) does not change the map version', async () => {
+  const ctx = await H.newContext();
+  try {
+    const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
+    const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    const mv = (await a.eval(() => Satisfy.local.playerPublic())).mv;
+    await b.eval(() => { window.__G.setT(3, 3, window.__G.at(3, 3) === 1 ? 2 : 1); }); // what uprootTile does to the live map
+    await b.eval(() => { window.__G.P.x += 20; });
+    await settle(a, b);
+    assert.equal((await b.eval(() => Satisfy.local.playerPublic())).mv, mv);
+    assert.equal((await net(a)).drawn, 1, 'still the same map: drawn');
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });

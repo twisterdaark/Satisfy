@@ -3491,6 +3491,7 @@ const NET_INTEREST={radius:800,step:400};
    'void' online, never Winston's safe town (the game's zoneAt falls back to zWin there). */
 let MAPV=null;const netOtherV=new Set();
 function mapV(){if(MAPV)return MAPV;let h=0x811c9dc5;for(let i=0;i<map.length;i++){h^=map[i];h=Math.imul(h,0x01000193);}return MAPV=(h>>>0).toString(16).padStart(8,'0');}
+mapV(); // now, while `map` is still the generated world: a save's uprooted stumps (WS.roots) change it later (#49)
 function netZone(x,y){return y>=WMH*TS&&!dunAt(x,y)&&!roomAt(x,y)?'void':zoneAt(x,y);}
 function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(r.mv===mapV())return true;
  if(!netOtherV.has(r.sid)){netOtherV.add(r.sid);toast(t('netOtherV',{n:r.handle||'?'}),'warn');}return false;}
