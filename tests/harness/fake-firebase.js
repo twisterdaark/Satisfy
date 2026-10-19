@@ -35,7 +35,11 @@
       if (type === l.type) setTimeout(() => l.cb(snap(p, type === 'removed' ? old : v)), 0);
     }
     for (const cb of valueCbs.get(p) || []) setTimeout(() => cb(snap(p, v === undefined ? null : v)), 0);
+    // a value listener on the parent (world/satisfy/own: one record per castle or territory) sees the children together
+    const par = parentOf(p);
+    if (valueCbs.has(par) && !data.has(par)) for (const cb of valueCbs.get(par)) setTimeout(() => cb(snap(par, kidsOf(par))), 0);
   }
+  function kidsOf(par) { const o = {}; for (const [q, x] of data) if (parentOf(q) === par) o[keyOf(q)] = x; return Object.keys(o).length ? o : null; }
   function apply(op, p, v) {
     if (op === 'set') { const old = data.get(p); data.set(p, v); fire(p, old, v); }
     else if (op === 'remove' && data.has(p)) { const old = data.get(p); data.delete(p); fire(p, old, undefined); }
@@ -44,7 +48,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|world)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -67,6 +71,14 @@
       if (v === null) return null;
       if (Object.keys(v).sort().join(',') !== 'm,t' || JSON.stringify(v.t) !== JSON.stringify(SV) || !v.m || typeof v.m !== 'object') return 'mobs fields';
       return Object.keys(v.m).every((k) => /^[a-z0-9_]{1,16}@-?[0-9]{1,6},-?[0-9]{1,6}$/.test(k) && typeof v.m[k] === 'string' && v.m[k].length <= 48) ? null : 'mobs m';
+    }
+    // world/satisfy/own/{castle|territory} = {g, n, c, h, uid, t} (95b5a3b): any signed-in player, as themselves
+    if (seg[0] === 'world') {
+      if (seg.length !== 4 || seg[1] !== 'satisfy' || seg[2] !== 'own' || !/^[a-z0-9_]{1,24}$/.test(seg[3]) || !user) return 'PERMISSION_DENIED: world ' + p;
+      if (v === null) return null;
+      if (Object.keys(v).sort().join(',') !== 'c,g,h,n,t,uid') return 'world own fields';
+      if (!(typeof v.g === 'string' && /^[A-Za-z0-9_:.-]{1,48}$/.test(v.g) && typeof v.n === 'string' && v.n.length >= 1 && v.n.length <= 24 && typeof v.c === 'string' && /^#[0-9a-fA-F]{6}$/.test(v.c) && typeof v.h === 'string' && v.h.length <= 24 && v.uid === user.uid)) return 'world own values';
+      return JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'world own t';
     }
     if (seg[0] === 'sessions') {
       if (seg.length !== 2 || !user || seg[1] !== user.uid) return 'PERMISSION_DENIED: not your session';
@@ -280,12 +292,13 @@
       if (r.path === '.info/serverTimeOffset') { setTimeout(() => cb(snap(r.path, 0)), 0); return () => {}; }
       if (r.path !== '.info/connected') {
         const seg = r.path.split('/');
-        const ok = seg[0] === 'sessions' ? user && seg[1] === user.uid : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own') && !!user;
+        const own = r.path === 'world/satisfy/own';
+        const ok = seg[0] === 'sessions' ? user && seg[1] === user.uid : own ? !!user : seg[0] === 'presence' && seg.length === 4 && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);
         valueCbs.get(r.path).push(cb);
-        setTimeout(() => cb(snap(r.path, data.has(r.path) ? data.get(r.path) : null)), 0);
+        setTimeout(() => cb(snap(r.path, data.has(r.path) ? data.get(r.path) : own ? kidsOf(r.path) : null)), 0);
         return () => { const a = valueCbs.get(r.path) || [], i = a.indexOf(cb); if (i >= 0) a.splice(i, 1); };
       }
       connCbs.push(cb);
