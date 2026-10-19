@@ -3727,6 +3727,7 @@ function update(dt){
   if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}continue;}
   if(m.mvd)m.at=(m.at||0)+dt;m.mvd=0;m.t+=dt;if(m.grdT>0)m.grdT-=dt;m.cd-=dt;if(m.hurt>0)m.hurt-=dt;if(m.weak>0)m.weak-=dt;if(m.stun>0){m.stun-=dt;continue;}
   if(MOBN&&MOBN.host===NET.uid&&MOBN.rs&&MOBN.rs.length&&!b.boss){const tg=mobTarget(m);if(tg){MOBP=P;P=tg;}} // host: it may be after another player
+  if(MOBN&&MOBN.host===NET.uid)m.tgU=P.remote||NET.uid; // SAT-ONLINE-042: the player it is after goes out with each action
   const dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=m.type==='guardian'?10:Math.max(3,b.r-3);
   if(b.boss){
    if(Math.hypot(P.x-m.sx,P.y-m.sy)>b.leash){const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);if(hd>2)move(m,hx/hd*30*dt,hy/hd*30*dt,mr);m.hp=Math.min(m.max,m.hp+m.max*.006*dt);m.tele=0;continue;}
@@ -3736,8 +3737,8 @@ function update(dt){
    const enr=m.hp<m.max/2,sp=b.spd*(enr?1.3:.9)*(1+(m.ph||0)*.08);
    if(m.tele>0){m.tele-=dt;if(m.tele<=0){shake=.4;SFX.slam();if(d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}if(m.type==='guardian')slamAllies(m);for(let i=0;i<24;i++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:'#8a8f99'});}m.scd=(enr?1.7:2.6)-(m.ph||0)*.25;
     if(m.ph>=2)for(let i=0;i<10;i++){const a=i/10*6.283+rand()*.2;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*120,vy:Math.sin(a)*120,t:1.4,m,mv:{mul:.35},sp:'rock',a});}}}
-   else{if(d>14)chase(m,dx,dy,d,sp,mr,dt);m.scd-=dt;if(m.scd<=0&&d<b.slamR*1.5&&seeP(m))m.tele=.9;}
-   if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1.1;}
+   else{if(d>14)chase(m,dx,dy,d,sp,mr,dt);m.scd-=dt;if(m.scd<=0&&d<b.slamR*1.5&&seeP(m)){m.tele=.9;mobActN(m);}}
+   if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1.1;mobBite(m);}
    m.face=dx>0?1:-1;continue;}
   const ag=(b.aggro||(m.agg?80:0))*wxAg,AI=AIK[m.type];
   if(m.evt&&m.goal){if(m.ret){m.ret=0;m.retT=0;m.path=null;}if(!(d<ag&&!P.ghost)&&!(m.eng>0&&d<ag*2.4)){m.eng=Math.max(0,m.eng-dt);m.st=null;m.tele=0;invMarch(m,b,mr,dt);continue;}}
@@ -3747,7 +3748,7 @@ function update(dt){
   // takes it further from you and from its spawn for a while
   const eng=ag&&(!safe||m.evt)&&(d<ag||(m.eng>0&&(d<ag*2.4||m.fl&&m.fd>0&&m.fd<=MFAR)));
   if(eng){m.eng=4;if(!m.goal&&Math.hypot(m.x-m.sx,m.y-m.sy)>(m.fl?MFAR*TS:AI?260:200)){m.ret=1;m.eng=0;m.fl=0;continue;}
-   if(AI){packTick(m,AI,dt);monAct(m,b,AI,dx,dy,d,mr,dt);}else{if(d>6)chase(m,dx,dy,d,b.spd,mr,dt);m.face=dx>0?1:-1;if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;}}}
+   if(AI){packTick(m,AI,dt);monAct(m,b,AI,dx,dy,d,mr,dt);}else{if(d>6)chase(m,dx,dy,d,b.spd,mr,dt);m.face=dx>0?1:-1;if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;mobBite(m);}}}
   else{m.eng-=dt;m.st=null;m.tele=0;m.wt-=dt;if(m.wt<=0){m.wt=1+rand()*2.5;const back=Math.hypot(m.sx-m.x,m.sy-m.y)>50;if(back){const l=Math.hypot(m.sx-m.x,m.sy-m.y);m.wx=(m.sx-m.x)/l;m.wy=(m.sy-m.y)/l;}else if(rand()<.5){m.wx=0;m.wy=0;}else{const a=rand()*6.28;m.wx=Math.cos(a);m.wy=Math.sin(a);}}
    move(m,m.wx*b.spd*.25*dt,m.wy*b.spd*.25*dt,mr);if(m.wx)m.face=m.wx>0?1:-1;}
  }catch(err){gameErr(err,m);}finally{if(MOBP){P=MOBP;MOBP=null;}}}
@@ -3817,11 +3818,11 @@ function monAct(m,b,AI,dx,dy,d,mr,dt){m.atkT=Math.max(0,(m.atkT||0)-dt);
   if(mv.k==='leap'||mv.k==='line'){m.st='dash';m.stT=mv.dashT;m.hitDone=0;m.atkT=mv.dashT+.1;m.dsp=mv.k==='leap'?(m.lL||40)/mv.dashT:mv.dash;
    if(mv.k==='leap')SFX.dodge();else vfx('dust',m.x,m.y,{n:8,angle:Math.atan2(-m.ay,-m.ax)});return;}
   if(mv.k==='blink'){const bx=P.x+fx_*16,by=P.y+fy_*12;vfx('dust',m.x,m.y,{n:6});if(!hitBox(bx,by,mr)){m.x=bx;m.y=by;}vfx('dust',m.x,m.y,{n:6});SFX.dodge();const ax=P.x-m.x,ay=P.y-m.y,al=Math.hypot(ax,ay)||1;m.ax=ax/al;m.ay=ay/al;m.face=ax>0?1:-1;
-   m.mv={k:'arc',tele:.16,reach:26,arc:1.3,mul:mv.mul,rec:mv.rec,cd:mv.cd};m.st='tele';m.stT=m.tele=.16;return;}
+   m.mv={k:'arc',tele:.16,reach:26,arc:1.3,mul:mv.mul,rec:mv.rec,cd:mv.cd,blk:1};m.st='tele';m.stT=m.tele=.16;mobActN(m);return;}
   m.atkT=.25;
   if(mv.k==='ring'){shake=Math.max(shake,.2);SFX.slam();vfx('dust',m.x,m.y,{n:14});for(let k=0;k<16;k++){const a=k/16*6.28;fx.push({x:m.x+Math.cos(a)*mv.reach*.8,y:m.y+Math.sin(a)*mv.reach*.45,vx:Math.cos(a)*30,vy:-rand()*50,t:.45,c:'#8a8f99'});}if(d<mv.reach+4)hitBy(m,b,mv);if(mv.pull&&d<mv.reach*1.6&&seeP(m)&&P.dash<=0)move(P,-fx_*Math.min(mv.pull,d-8),-fy_*Math.min(mv.pull,d-8),4);}
   else if(mv.k==='arc'){const ang=Math.atan2(dy,dx)-Math.atan2(m.ay,m.ax),da=Math.abs(Math.atan2(Math.sin(ang),Math.cos(ang)));vfx('slash',m.x+m.ax*8,m.y-8+m.ay*8,{angle:Math.atan2(m.ay,m.ax),rarity:0});if(d<mv.reach+6&&da<mv.arc)hitBy(m,b,mv);
-   if((m.combo||0)>1){m.combo--;m.stT=m.tele=mv.tele*.6;return;}}
+   if((m.combo||0)>1){m.combo--;m.stT=m.tele=mv.tele*.6;mobActN(m);return;}}
   else if(mv.k==='shot'){eproj.push({x:m.x+m.ax*8,y:m.y-10+m.ay*8,vx:m.ax*mv.spd,vy:m.ay*mv.spd,t:mv.max/mv.spd+.3,m,mv,sp:mv.sp,a:Math.atan2(m.ay,m.ax)});SFX.dodge();}
   else if(mv.k==='buff'){vfx('rage',m.x,m.y);SFX.notice();for(const o of mons)if(!o.dead&&AIK[o.type]===AI&&Math.hypot(o.x-m.x,o.y-m.y)<130){o.sprT=3;o.tired=0;o.cd=Math.min(o.cd,.3);o.eng=4;o.agg=1;}}
   m.st='rec';m.stT=mv.rec;return;}
@@ -3839,7 +3840,7 @@ function monAct(m,b,AI,dx,dy,d,mr,dt){m.atkT=Math.max(0,(m.atkT||0)-dt);
  const ph=phaseOf(m);
  if(ph==='back'&&d<130){const R=AI==='hop'?46:96,tx=P.x-fx_*R,ty=P.y-fy_*R*.8,tdx=tx-m.x,tdy=ty-m.y,td=Math.hypot(tdx,tdy);if(td>6)chase(m,tdx,tdy,td,sp*.9,mr,dt);return;}
  // free: maybe start a move, otherwise position by style
- if(m.cd<=0&&busyIn(m)<2&&seeP(m)){const i=pickMove(m,d);if(i>=0){const v=movesOf(m)[i];m.mv=v;m.last=i;if(v.once)m.once[i]=gTime+v.once;m.st='tele';m.stT=m.tele=v.tele;m.ax=fx_;m.ay=fy_;m.combo=v.combo||0;if(v.k==='leap')m.lL=Math.min(v.max,d)+14;return;}}
+ if(m.cd<=0&&busyIn(m)<2&&seeP(m)){const i=pickMove(m,d);if(i>=0){const v=movesOf(m)[i];m.mv=v;m.last=i;if(v.once)m.once[i]=gTime+v.once;m.st='tele';m.stT=m.tele=v.tele;mobActN(m);m.ax=fx_;m.ay=fy_;m.combo=v.combo||0;if(v.k==='leap')m.lL=Math.min(v.max,d)+14;return;}}
  if(AI==='lunge'||AI==='hop'){const R=AI==='hop'?26:72,a=monHash(m)*6.28+gTime*.35,tx=P.x+Math.cos(a)*R,ty=P.y+Math.sin(a)*R*.72,tdx=tx-m.x,tdy=ty-m.y,td=Math.hypot(tdx,tdy);
   if(td>4)chase(m,tdx,tdy,td,sp,mr,dt);return;}
  if(AI==='charge'){if(d>28)chase(m,dx,dy,d,sp,mr,dt);else move(m,-fx_*sp*.4*dt,-fy_*sp*.4*dt,mr);return;}
@@ -4555,7 +4556,7 @@ function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!ARN&&!TWR&&!solo(P
   // a new host or none: monsters hidden for the old host come back on their own, and copies made from its list go
   mons=mons.filter(m=>!m.mk);for(const m of mons)if(m.hidN){m.hidN=0;m.rt=1;}}
  if(!z)return;
- if(MOBN.host===NET.uid){const t=performance.now();if(t-MOBN.sent>=MOB_MS){MOBN.sent=t;NETTR.mobsPut(z,mobList(rs),NET.uid);MOBN.put=true;}}
+ if(MOBN.host===NET.uid){const t=performance.now();for(const m of mons)if(m.biteT>0)m.biteT-=1/60;if(t-MOBN.sent>=(MOBN.fast?MOB_FAST:MOB_MS)){MOBN.sent=t;MOBN.fast=0;NETTR.mobsPut(z,mobList(rs),NET.uid);MOBN.put=true;}}
  else{if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}mobMake();}}
 // follower: a monster on the host's list that this client never spawned (an event wave, a boss's adds, a squad) is made
 // here from its key, "<type>@<spawn x>,<spawn y>", and then follows the host like the others
@@ -4566,8 +4567,24 @@ let mobMkT=0;function mobMake(){const t=performance.now();if(t-mobMkT<500)return
 function mobList(rs){const o={},pts=[P].concat(rs);let n=0;
  const near=m=>mobOk(m)&&pts.some(p=>Math.abs(p.x-m.x)<MOB_BX&&Math.abs(p.y-m.y)<MOB_BY); // bosses first, so a crowded den never pushes one off the list
  for(const m of mons.filter(m=>MT[m.type].boss&&near(m)).concat(mons.filter(m=>!MT[m.type].boss&&near(m)))){if(n>=MOB_MAX)break;
-  o[mobKey(m)]=Math.round(m.x)+','+Math.round(m.y)+','+(m.dead?0:Math.max(1,Math.round(1000*m.hp/m.max)))+','+((m.dead?1:0)|(m.eng>0?2:0)|(m.face<0?4:0))+','+(m.lv|0);n++;}
+  o[mobKey(m)]=Math.round(m.x)+','+Math.round(m.y)+','+(m.dead?0:Math.max(1,Math.round(1000*m.hp/m.max)))+','+((m.dead?1:0)|(m.eng>0?2:0)|(m.face<0?4:0))+','+(m.lv|0)+mobActS(m);n++;}
  return o;}
+/* SAT-ONLINE-042 (owner 2026-10-19: the red attack zone showed for some players and not others; a monster could chase one
+   player on one screen and bite another on the other). The host's copy is the only one that thinks; each listed monster now
+   also carries what it is doing: ",n,s,i,t,a,l,g" = action number (a new one at every move, slam or bite), state (t
+   telegraph, d dash, r recovery, s a boss's slam, b a bite, 0 nothing), the move's index in its move set (99: the arc after
+   a blink), the state's time left (1/100 s), the aim (radians x 100), the leap length, and a 3-hex hash of the player it is
+   after. A follower replays the same telegraph, dash and strike on its own copy, and the strike only ever hurts its own
+   player, the way the host's strikes only hurt the host's: so everyone sees the same red zone, and dodging it on your
+   screen is dodging it. A new action is sent at once (MOB_FAST), not at the next quarter second. */
+const MOB_FAST=60;
+window.__GM={get host(){return MOBN&&MOBN.host},get group(){return MOBN?MOBN.rs.map(r=>r.uid):[]},get list(){const L=MOBN&&MOBN.all[MOBN.host];return L&&L.m||null}}; // tests
+const uh=u=>{let h=0x811c9dc5;u=String(u||'');for(let i=0;i<u.length;i++){h^=u.charCodeAt(i);h=Math.imul(h,0x01000193);}return ((h>>>0)&0xfff).toString(16);};
+function mobActN(m){if(!MOBN||MOBN.host!==NET.uid)return;m.actN=((m.actN||0)+1)%1000;MOBN.fast=1;}
+function mobBite(m){if(!MOBN||MOBN.host!==NET.uid)return;mobActN(m);m.biteT=.35;}
+function mobActS(m){if(!m.actN||m.dead)return '';const st=m.biteT>0?'b':m.st==='tele'?'t':m.st==='dash'?'d':m.st==='rec'?'r':MT[m.type].boss&&m.tele>0?'s':'0';
+ const mv=m.mv,L=mv&&!mv.blk?movesOf(m).indexOf(mv):-1,i=mv&&mv.blk?99:Math.max(0,L),tl=st==='s'?m.tele:st==='b'?m.biteT:m.stT||0;
+ return ','+m.actN+','+st+','+i+','+Math.max(0,Math.round(tl*100))+','+Math.round(Math.atan2(m.ay||0,m.ax||1)*100)+','+(m.lL|0)+','+uh(m.tgU);}
 // host: the nearest player this monster could be after, as a stand-in that takes no damage here (inv), or null for you
 function mobTarget(m){if(!mobOk(m)||m.dead)return null;const dP=P.ghost||mode==='dead'?1e9:Math.hypot(P.x-m.x,P.y-m.y);let best=null,bd=dP;
  for(const r of MOBN.rs){if(r.anim==='dead')continue;const d=Math.hypot(r.x-m.x,r.y-m.y);if(d<bd&&d<300){bd=d;best=r;}}
@@ -4577,16 +4594,43 @@ function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))ret
  // near you but not on the host's list yet (it lists by where it last saw you): hold still instead of running a second
  // copy that drifts away from the host's (owner report: monsters differed after one of you walked off and came back)
  if(typeof s!=='string'){if(L&&L.m&&(m.mk||Math.abs(P.x-m.x)<MOB_BX*.8&&Math.abs(P.y-m.y)<MOB_BY*.8)){m.led=true;if(!m.dead){m.dead=true;m.dying=0;m.rt=1e9;m.hidN=1;}return true;}return false;}
- const v=s.split(',').map(Number);if(v.length!==5||v.some(x=>!isFinite(x)))return false;const [x,y,hp,fl,lv]=v;m.led=true;
+ const w=s.split(','),v=w.slice(0,5).map(Number);if((w.length!==5&&w.length!==12)||v.some(x=>!isFinite(x)))return false;const [x,y,hp,fl,lv]=v;m.led=true;
  if(fl&1){if(!m.dead){m.dead=true;m.dying=.5;m.rt=25;vfx('death',m.x,m.y);}return true;} // quiet: the kill and its rewards come from the host's message
  if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mk:m.mk,sg:m.sg,nk:m.nk,boss:m.boss},hid=m.hidN;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
  if(m.lv!==lv){m.lv=lv;m.max=Math.round(b.hp*(1+(lv-b.lv[0])*.03));}
  const nh=Math.max(1,Math.round(m.max*hp/1000)),mine=m.pendT&&performance.now()-m.pendT<900;
  if(nh<m.hp){if(!mine&&m.hp-nh>=1){m.hurt=.12;num(m.x,monY(m)-8,String(m.hp-nh),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});}m.hp=nh;}else if(!mine)m.hp=nh; // another player's hit: its number shows here too
- const dx=x-m.x,dy=y-m.y,dd=Math.hypot(dx,dy);if(dd>80){m.x=x;m.y=y;}else if(dd>.5){const st=Math.min(dd,Math.max(40,dd*8)*dt);m.x+=dx/dd*st;m.y+=dy/dd*st;m.at=(m.at||0)+dt;}
- m.face=fl&4?-1:1;m.eng=fl&2?4:0;m.t+=dt;if(m.hurt>0)m.hurt-=dt;m.cd-=dt;m.st=null;m.tele=0;m.ret=0;
- if(fl&2&&(!safe||m.evt)){const d=Math.hypot(P.x-m.x,P.y-m.y);if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;}}
+ const dx=x-m.x,dy=y-m.y,dd=Math.hypot(dx,dy);if(dd>80){m.x=x;m.y=y;}else if(dd>.5&&m.st!=='dash'){ // a replayed dash moves this copy itself, then it settles on the host's spot
+ const st=Math.min(dd,Math.max(40,dd*8)*dt);m.x+=dx/dd*st;m.y+=dy/dd*st;m.at=(m.at||0)+dt;}
+ m.face=fl&4?-1:1;m.eng=fl&2?4:0;m.t+=dt;if(m.hurt>0)m.hurt-=dt;m.cd-=dt;m.ret=0;
+ if(w.length===12)mobAct(m,b,w,safe);else{m.st=null;m.tele=0;}
+ mobReplay(m,b,dt,safe);
  return true;}
+// follower: a new action from the host's list starts here as it did there; the same one keeps the host's aim
+function mobAct(m,b,w,safe){const n=+w[5],sc=w[6],i=+w[7],tl=Math.max(0,+w[8]||0)/100,ang=(+w[9]||0)/100,me=w[11]===uh(NET.uid);
+ if(n===m.rN){if(m.st==='tele'&&sc==='t'){m.ax=Math.cos(ang);m.ay=Math.sin(ang);}return;}
+ m.rN=n;m.ax=Math.cos(ang);m.ay=Math.sin(ang);m.lL=+w[10]||m.lL;
+ if(sc==='b'){m.st=null;m.tele=0;if(me&&(!safe||m.evt)&&mode!=='dead'&&Math.hypot(P.x-m.x,P.y-m.y)<b.r+14&&seeP(m))hurtPlayer(b.dmg,m.lv,m);return;}
+ if(sc==='s'){m.st=null;m.tele=tl;m.rSlam=1;return;}
+ const mv=i===99?{k:'arc',tele:.16,reach:26,arc:1.3,mul:.8,rec:.4,cd:1.3,blk:1}:AIK[m.type]?movesOf(m)[i]:null;
+ if(!mv||!(sc==='t'||sc==='d'||sc==='r')){m.st=null;m.tele=0;return;}
+ m.mv=mv;m.st=sc==='t'?'tele':sc==='d'?'dash':'rec';m.stT=tl;m.tele=sc==='t'?tl:0;m.hitDone=0;if(sc==='d')m.dsp=mv.k==='leap'?(m.lL||40)/(mv.dashT||.3):mv.dash||120;}
+// follower: run the telegraph, dash and strike the host started, against your own player only
+function mobReplay(m,b,dt,safe){const hurt=(!safe||m.evt)&&mode!=='dead',dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=Math.max(3,b.r-3);
+ if(m.rSlam&&m.tele>0){m.tele-=dt;if(m.tele<=0){m.tele=0;m.rSlam=0;shake=Math.max(shake,.3);SFX.slam();if(hurt&&d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}for(let k=0;k<16;k++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:'#8a8f99'});}}return;}
+ const mv=m.mv;if(!mv||!m.st)return;
+ if(m.st==='tele'){m.stT-=dt;m.tele=Math.max(0,m.stT);if(m.stT>0)return;m.tele=0;
+  if(mv.k==='leap'||mv.k==='line'){m.st='dash';m.stT=mv.dashT;m.hitDone=0;m.dsp=mv.k==='leap'?(m.lL||40)/mv.dashT:mv.dash;if(mv.k==='leap')SFX.dodge();return;}
+  if(mv.k==='blink'){m.st=null;return;} // the host sends the arc that comes out of it
+  if(mv.k==='ring'){shake=Math.max(shake,.2);SFX.slam();vfx('dust',m.x,m.y,{n:14});if(hurt&&d<mv.reach+4)hitBy(m,b,mv);}
+  else if(mv.k==='arc'){const ang=Math.atan2(dy,dx)-Math.atan2(m.ay,m.ax),da=Math.abs(Math.atan2(Math.sin(ang),Math.cos(ang)));vfx('slash',m.x+m.ax*8,m.y-8+m.ay*8,{angle:Math.atan2(m.ay,m.ax),rarity:0});if(hurt&&d<mv.reach+6&&da<mv.arc)hitBy(m,b,mv);}
+  else if(mv.k==='shot'){eproj.push({x:m.x+m.ax*8,y:m.y-10+m.ay*8,vx:m.ax*mv.spd,vy:m.ay*mv.spd,t:mv.max/mv.spd+.3,m,mv,sp:mv.sp,a:Math.atan2(m.ay,m.ax),rep:1});SFX.dodge();}
+  else if(mv.k==='buff')vfx('rage',m.x,m.y);
+  m.st='rec';m.stT=mv.rec;return;}
+ if(m.st==='dash'){m.stT-=dt;const step=(m.dsp||0)*dt;if(mv.k==='leap')m.hop=Math.sin(Math.min(1,1-m.stT/mv.dashT)*Math.PI)*Math.min(14,(m.lL||40)*.14);move(m,m.ax*step,m.ay*step,mr);
+  if(!m.hitDone&&hurt&&Math.hypot(P.x-m.x,P.y-m.y)<b.r+9&&seeP(m)){m.hitDone=1;hurtPlayer(b.dmg*mv.mul,m.lv,m);}
+  if(m.stT<=0){m.st='rec';m.stT=mv.rec;m.hop=0;}return;}
+ if(m.st==='rec'){m.stT-=dt;if(m.stT<=0)m.st=null;}}
 // link quality for the badge tooltip (doc U015 latency diagnostics, U020 observability)
 Object.assign(STR.ar,{netLink:'الاتصال: {rtt} · اتبعت {s} · وصل {r} · اترفض {d}',netRtt:'{n} م.ث',netRttNone:'—'});
 Object.assign(STR.en,{netLink:'Link: {rtt} · sent {s} · received {r} · dropped {d}',netRtt:'{n} ms',netRttNone:'—'});
