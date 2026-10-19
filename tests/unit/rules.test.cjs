@@ -171,3 +171,37 @@ test('trades: participants only; each writes its own offer until the swap; the s
   assert.match(led['.write'], /\.child\('it'\)\.child\(\$iid\)\.exists\(\)/, 'only an item its giver offered');
   for (const n of [tr, sides.$uid, done, led]) assert.equal(n.$other['.validate'], false);
 });
+
+// The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing
+// else here parses the expressions. Merging two rules files by hand once lost one; check every expression before a deploy.
+function exprProblem(e) {
+  let depth = 0, quote = null, regex = false, prev = '';
+  for (let i = 0; i < e.length; i++) {
+    const c = e[i];
+    if (quote || regex) {
+      if (c === '\\') { i++; continue; }
+      if (quote && c === quote) quote = null;
+      else if (regex && c === '/') regex = false;
+      continue;
+    }
+    if (c === "'" || c === '"') quote = c;
+    else if (c === '/' && (prev === '(' || prev === ',')) regex = true;
+    else if (c === '(') depth++;
+    else if (c === ')' && --depth < 0) return 'a ) without its ( at ' + i;
+    if (!/\s/.test(c)) prev = c;
+  }
+  return quote ? 'an unclosed string' : regex ? 'an unclosed regex' : depth ? depth + ' unclosed (' : null;
+}
+test('every rule expression is well formed: balanced parentheses, closed strings and regexes', () => {
+  assert.equal(exprProblem("a && (b || c('x)'))"), null);
+  assert.equal(exprProblem("v.matches(/^(a|b)$/) && (x"), '1 unclosed (', 'the checker finds a lost )');
+  const bad = [];
+  (function walk(o, p) {
+    for (const k of Object.keys(o)) {
+      const v = o[k], at = p + '/' + k;
+      if (v && typeof v === 'object') walk(v, at);
+      else if (typeof v === 'string' && /^\.(read|write|validate)$/.test(k)) { const why = exprProblem(v); if (why) bad.push(at + ': ' + why); }
+    }
+  })(rules, '');
+  assert.deepEqual(bad, []);
+});
