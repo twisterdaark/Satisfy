@@ -1422,7 +1422,7 @@ function meetTick(dt){if(!S||!P||ARN||TWR)return;if(S.comp)S.comp=null;const slo
  const M=MEET;if(!M)return;const d=Math.hypot(P.x-M.m.x,P.y-M.m.y);
  if(M.m.hp<M.m.max&&d<300)M.joined=true;}
 function setComp(id){const old=S.comp;S.comp=id||null;COMPO=null;if(id){toast(t('compOn',{n:t(id)}),'good');SFX.quest();dialog(id,['cpGo_'+id]);}else if(old)toast(t('compOff',{n:t(old)}));hudDirty=true;save(true);}
-function compHit(m,mul,crit){if(!m||m.dead)return;const my=monY(m),d=Math.max(1,Math.round(atkV()*mul*lvF(m.lv)*(.9+rand()*.2)*(crit?2:1)));m.hp-=d;if(PRAID)praidHit(m,d);m.hurt=.12;m.agg=1;m.eng=4;
+function compHit(m,mul,crit){if(!m||m.dead)return;const my=monY(m),d=Math.max(1,Math.round(atkV()*mul*lvF(m.lv)*(.9+rand()*.2)*(crit?2:1)));m.hp-=d;netHit(m,d);m.hurt=.12;m.agg=1;m.eng=4;
  num(m.x+(rand()-.5)*8,my-8,String(d),crit?'#ffd24a':'#9fe39a',crit);vfx(crit?'crit':'hit',m.x,my,{});if(m.hp<=0)killMon(m);}
 function updateComp(dt){if(!S||!P)return;meetTick(dt);const c=MEET?COMPS[MEET.id]:null;
  if(!c){COMPO=null;}else if(!COMPO||COMPO.id!==MEET.id)COMPO={id:MEET.id,spr:c.spr,x:MEET.m.x+26,y:MEET.m.y+4,dir:3,frame:0,at:0,cd:1,sk:5};
@@ -1607,7 +1607,7 @@ const NPCF=/^(guard|pcap|coach|tk|ta|tw|tm|regas|khan|smith|armorer)/;
 function npcFight(dt){if(!EV||!EV.e.tw)return;const T=TOWNS.find(T=>T.k===EV.e.tw);if(!T)return;const live=EV.mons.filter(m=>!m.dead);if(!live.length)return;
  for(const n of npcs){if(n.hidden||n.obj||n.y>=WMH*TS||npcKO(n.id)||Math.hypot(n.x-T.rx*TS,n.y-T.ry*TS)>(T.x1-T.x0)*TS)continue;n.acd=(n.acd||0)-dt;if(n.acd>0)continue;
   const ft=NPCF.test(n.id),reach=ft?80:28;let tg=null,bd=reach;for(const m of live){const d=Math.hypot(m.x-n.x,m.y-n.y);if(d<bd){bd=d;tg=m;}}if(!tg)continue;
-  n.acd=ft?1.1:1.7;n.dir=Math.abs(tg.x-n.x)>Math.abs(tg.y-n.y)?(tg.x>n.x?2:3):(tg.y>n.y?0:1);const d=Math.round(tg.max*(ft?.09:.04)*(.85+rand()*.3));tg.hp-=d;if(PRAID&&MT[tg.type])praidHit(tg,d);tg.hurt=.12;tg.nt=n;tg.ntT=3;
+  n.acd=ft?1.1:1.7;n.dir=Math.abs(tg.x-n.x)>Math.abs(tg.y-n.y)?(tg.x>n.x?2:3):(tg.y>n.y?0:1);const d=Math.round(tg.max*(ft?.09:.04)*(.85+rand()*.3));tg.hp-=d;if(MT[tg.type])netHit(tg,d);tg.hurt=.12;tg.nt=n;tg.ntT=3;
   vfx(ft&&bd>30?'hit':'slash',tg.x,monY(tg),{angle:Math.atan2(tg.y-n.y,tg.x-n.x),rarity:1});num(tg.x+(rand()-.5)*8,monY(tg)-12,String(d),'#9fd8ff',false);
   if(tg.hp<=0){tg.dead=true;tg.rt=1e9;dissolve(tg.x,tg.y-8,['#fff','#ff7a5a'],12);}}}
 function startEvent(n){EV={e:n.e,slot:n.slot,end:n.end,kills:0,xp:0,wave:0,mons:[],fallen:0};announce(t('ev_'+n.e.k));SFX.notice();
@@ -2002,7 +2002,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(burn)vfx('fire',m.x,my);if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
  if(burn&&!S.burnSeen){S.burnSeen=1;toast(t('burn'),'good');}else if(burn)num(m.x,my-18,lang==='ar'?'لهب!':'FLAME','#ff9a2a',false);
- if(!(PRAID&&praidHit(m,dmg))&&m.hp<=0)killMon(m);return crit||burn?2:1;}
+ if(!netHit(m,dmg)&&m.hp<=0)killMon(m);return crit||burn?2:1;}
 function tryAttack(ax,ay,mul){
  if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
@@ -2072,7 +2072,7 @@ function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);toast(t('boss
 const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','lgloves','lboots','cring','ihelm','igloves','iboots','parmor','mring'];
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.4:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.25:.1)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.dead=true;if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='bknight'&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord')setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;rareDrop(m,b);petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y))dunBossDown(m);{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.dead=true;if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='bknight'&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord')setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;rareDrop(m,b);petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y))dunBossDown(m);{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  (b.drop||[]).forEach(([k,p])=>{if(rand()<p)addMat(k,1);});
  if(m.lv>=20&&!m.tmp){if(b.boss)addMat('estone',1+(m.lv/50|0));else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
@@ -3167,8 +3167,10 @@ function update(dt){
  const safe=!!inTown(P.x,P.y);
  for(const m of mons){try{
   const b=MT[m.type];
+  if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
   if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}continue;}
   if(m.mvd)m.at=(m.at||0)+dt;m.mvd=0;m.t+=dt;if(m.grdT>0)m.grdT-=dt;m.cd-=dt;if(m.hurt>0)m.hurt-=dt;if(m.weak>0)m.weak-=dt;if(m.stun>0){m.stun-=dt;continue;}
+  if(MOBN&&MOBN.host===NET.uid&&MOBN.rs&&MOBN.rs.length&&!b.boss){const tg=mobTarget(m);if(tg){MOBP=P;P=tg;}} // host: it may be after another player
   const dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=m.type==='guardian'?10:Math.max(3,b.r-3);
   if(b.boss){
    if(Math.hypot(P.x-m.sx,P.y-m.sy)>b.leash){const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);if(hd>2)move(m,hx/hd*30*dt,hy/hd*30*dt,mr);m.hp=Math.min(m.max,m.hp+m.max*.006*dt);m.tele=0;continue;}
@@ -3190,7 +3192,7 @@ function update(dt){
    if(AI){packTick(m,AI,dt);monAct(m,b,AI,dx,dy,d,mr,dt);}else{if(d>6)chase(m,dx,dy,d,b.spd,mr,dt);m.face=dx>0?1:-1;if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;}}}
   else{m.eng-=dt;m.st=null;m.tele=0;m.wt-=dt;if(m.wt<=0){m.wt=1+rand()*2.5;const back=Math.hypot(m.sx-m.x,m.sy-m.y)>50;if(back){const l=Math.hypot(m.sx-m.x,m.sy-m.y);m.wx=(m.sx-m.x)/l;m.wy=(m.sy-m.y)/l;}else if(rand()<.5){m.wx=0;m.wy=0;}else{const a=rand()*6.28;m.wx=Math.cos(a);m.wy=Math.sin(a);}}
    move(m,m.wx*b.spd*.25*dt,m.wy*b.spd*.25*dt,mr);if(m.wx)m.face=m.wx>0?1:-1;}
- }catch(err){gameErr(err,m);}}
+ }catch(err){gameErr(err,m);}finally{if(MOBP){P=MOBP;MOBP=null;}}}
  if(P.rmv>0)P.rmv-=dt;else if(P.rsp)P.rsp=Math.max(0,P.rsp-dt*2);horseRegen(dt);
  updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);updateEvents(dt);updateSiege(dt);achTick(dt);updateWeather(dt);updateComp(dt);updatePet(dt);updateArena(dt);updateTower(dt);updateDragon(dt);updateAuction(dt);
 }
@@ -3515,6 +3517,7 @@ Satisfy.local=Object.freeze({api:1,
  net:()=>NET?{mode:NETQ,state:netState,uid:NET.uid,sid:NET.sid,count:NET.count(),drawn:netDrawn,remotes:NET.remotes(),stats:NET.stats(),
   party:PARTY?{id:PARTY.id(),leader:PARTY.leader(),members:PARTY.members(),invite:PARTY.pendingInvite()}:null,
   duel:DUEL?{...DUEL.state(),challenge:DUEL.pendingChallenge()}:null,
+  mobs:MOBN?{zone:MOBN.zone,host:MOBN.host,put:MOBN.put,players:MOBN.rs.map(r=>r.uid),lists:Object.fromEntries(Object.entries(MOBN.all).map(([u,v])=>[u,Object.keys(v.m||{}).length])),led:mons.filter(m=>m.led).length}:null,
   link:NETTR&&NETTR.netStats?NETTR.netStats():null,
   interest:NETTR&&NETTR.interest?NETTR.interest():null,
   raid:PRAID?{host:PRAID.isHost(),member:PRAID.isMember(),encounters:PRAID.encounters()}:null,
@@ -3558,6 +3561,7 @@ function netTick(){NET.tick();const live=netLive();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
  if(PRAID)PRAID.tick();
+ mobTick(live);
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
  if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,duel:duelPublic()}),netForce);netForce=false;}
  partyUI(live);chatUI(live);pctxUI(live);
@@ -3639,7 +3643,7 @@ function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch
 Object.assign(STR.ar,{pRejoined:'رجعت لبارتي {n}',pYouLead:'القائد مشي: إنت قائد البارتي دلوقتي',pNewLead:'القائد مشي: {n} قائد البارتي دلوقتي',pReplaced:'البارتي اختارت قائد جديد وإنت مش موجود، هترجع لهم'});
 Object.assign(STR.en,{pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore()});duelStart();praidStart();chatStart();if(NETTR&&NETTR.feedOn)NETTR.feedOn('news',newsIn);
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore()});duelStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn)NETTR.feedOn('news',newsIn);
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -3855,6 +3859,58 @@ function praidStart(){PRAID=Satisfy.raid.create({presence:NET,party:PARTY,uid:NE
 // hitMon(): true when a party member's hit was handed to the leader (the local copy keeps its HP)
 // every damage source on a boss goes through here: the player's hits, companions and NPC allies (review of #29)
 function praidHit(m,dmg){if(!MT[m.type].boss)return false;if(PRAID.hit(praidKey(m),dmg)){m.hp+=dmg;return true;}return false;}
+/* shared monsters (SAT-ONLINE-026, owner feedback 8). Every client spawns the same monsters at the same spots (spawnWorld is
+   seeded). In each zone the host is the lowest uid among the players there who see each other: its copies move and fight,
+   and 4 times a second it writes the ones near any of those players to mobs/{world}/{zone}/{its uid} as
+   "x,y,hp per mille,flags (1 dead, 2 fighting, 4 facing left),level". The others follow that list: their copies take the
+   host's position, facing, level, health and deaths, and bite only the player they belong to. The host's copy goes after
+   whichever player is nearest (it reads that player as a stand-in that takes no damage on the host's side). A hit on a
+   followed monster goes to the host (raid.hit "m|<key>"), which applies it; when the monster dies the host tells everyone
+   who hit it (raid.state "m|<key>", k 0) and each of them gets the normal rewards from their own game. Nothing of value
+   moves between players. Bosses stay with the party raid; event and temporary monsters, and those indoors, stay local. */
+var MOBN,MOBP,MOB_MS=250,MOB_MAX=60; // no initial values: ?net=local starts the network above this line
+function mobKey(m){return m.nk||(m.nk=m.type+'@'+(m.sx|0)+','+(m.sy|0));}
+function mobOk(m){const b=MT[m.type];return !!b&&!b.boss&&!m.tmp&&!m.evt&&!m.goal&&m.sy<WMH*TS;}
+function mobByKey(k){for(const m of mons)if(mobOk(m)&&mobKey(m)===k)return m;return null;}
+function mobStart(){if(!NETTR||!NETTR.mobsPut)return;MOBN={zone:null,all:{},host:null,rs:[],sent:0,put:false,seq:0,hits:new Map()};
+ NET.on(ev=>{if(ev.type!=='message'||!MOBN)return;const env=ev.env,pl=env.payload||{};if((env.type!=='raid.hit'&&env.type!=='raid.state')||pl.to!==NET.uid||typeof pl.raid!=='string'||pl.raid.slice(0,2)!=='m|')return;
+  const from=NET.get(ev.sid);if(!from||!from.uid||isBlocked(from.uid))return;const m=mobByKey(pl.raid.slice(2));if(!m||m.dead)return;
+  if(env.type==='raid.hit'){if(MOBN.host!==NET.uid)return;const k=Math.round(+pl.k);if(!(k>=1&&k<=1e6))return;mobHitBy(m,from.uid);
+   m.hp-=k;m.hurt=.15;m.agg=1;m.eng=4;if(m.hp<=0){if(MOBN.hits.get(m).has(NET.uid))killMon(m);else{mobKilled(m);m.dead=true;m.dying=.5;m.rt=25;vfx('death',m.x,m.y);}}}
+  else if(from.uid===MOBN.host&&+pl.k===0){m.mobKill=1;m.hp=0;killMon(m);m.mobKill=0;}});}
+function mobHitBy(m,uid){let h=MOBN.hits.get(m);if(!h)MOBN.hits.set(m,h=new Set());h.add(uid);}
+// host: a monster died; everyone else who hit it gets the kill (and their own rewards)
+function mobKilled(m){const h=MOBN.hits.get(m);MOBN.hits.delete(m);if(!h||MOBN.host!==NET.uid||!mobOk(m))return;for(const u of h)if(u!==NET.uid)NET.send('raid.state',{to:u,raid:'m|'+mobKey(m),k:0,n:1});}
+// every damage source on a monster goes through here; true when the hit was handed to another player (local HP kept)
+function netHit(m,dmg){if(PRAID&&praidHit(m,dmg))return true;if(!MOBN||!MOBN.host||!mobOk(m))return false;
+ if(MOBN.host===NET.uid){mobHitBy(m,NET.uid);return false;}
+ if(!m.led)return false;NET.send('raid.hit',{to:MOBN.host,raid:'m|'+mobKey(m),k:Math.max(1,Math.min(1e6,Math.round(dmg))),n:++MOBN.seq});m.hp+=dmg;return true;}
+function mobTick(live){if(!MOBN)return;const z=live&&P&&!roomAt(P.x,P.y)&&P.y<WMH*TS?netZone(P.x,P.y):null;
+ if(z!==MOBN.zone){if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}MOBN.zone=z;MOBN.all={};MOBN.hits.clear();NETTR.mobsOn(z,a=>{MOBN.all=a;});}
+ if(!z){MOBN.host=null;MOBN.rs=[];return;}
+ const rs=NET.remotes().filter(r=>r.uid&&r.zone===z&&!r.room&&r.mv===mapV()&&!isBlocked(r.uid));MOBN.rs=rs;
+ let h=NET.uid;for(const r of rs)if(r.uid<h)h=r.uid;MOBN.host=rs.length?h:null;
+ if(MOBN.host===NET.uid){const t=performance.now();if(t-MOBN.sent>=MOB_MS){MOBN.sent=t;NETTR.mobsPut(z,mobList(rs),NET.uid);MOBN.put=true;}}
+ else if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}}
+function mobList(rs){const o={},pts=[P].concat(rs);let n=0;
+ for(const m of mons){if(n>=MOB_MAX)break;if(!mobOk(m)||!pts.some(p=>Math.abs(p.x-m.x)<460&&Math.abs(p.y-m.y)<300))continue;
+  o[mobKey(m)]=Math.round(m.x)+','+Math.round(m.y)+','+(m.dead?0:Math.max(1,Math.round(1000*m.hp/m.max)))+','+((m.dead?1:0)|(m.eng>0?2:0)|(m.face<0?4:0))+','+(m.lv|0);n++;}
+ return o;}
+// host: the nearest player this monster could be after, as a stand-in that takes no damage here (inv), or null for you
+function mobTarget(m){if(!mobOk(m)||m.dead)return null;const dP=P.ghost||mode==='dead'?1e9:Math.hypot(P.x-m.x,P.y-m.y);let best=null,bd=dP;
+ for(const r of MOBN.rs){if(r.anim==='dead')continue;const d=Math.hypot(r.x-m.x,r.y-m.y);if(d<bd&&d<300){bd=d;best=r;}}
+ return best?{x:best.x,y:best.y,dir:best.dir,inv:1,dash:0,hp:1,guard:0,gx:0,gy:1,stun:0,ghost:false,remote:best.uid}:null;}
+// follower: drive this copy from the host's list; false when the host doesn't list it (it runs on its own)
+function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))return false;const L=MOBN.all[MOBN.host],s=L&&L.m&&L.m[mobKey(m)];if(typeof s!=='string')return false;
+ const v=s.split(',').map(Number);if(v.length!==5||v.some(x=>!isFinite(x)))return false;const [x,y,hp,fl,lv]=v;m.led=true;
+ if(fl&1){if(!m.dead){m.dead=true;m.dying=.5;m.rt=25;vfx('death',m.x,m.y);}return true;} // quiet: the kill and its rewards come from the host's message
+ if(m.dead){const ty=m.type,ox=m.sx,oy=m.sy;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));m.led=true;m.x=x;m.y=y;vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
+ if(m.lv!==lv){m.lv=lv;m.max=Math.round(b.hp*(1+(lv-b.lv[0])*.03));}
+ const nh=Math.max(1,Math.round(m.max*hp/1000));if(nh<m.hp)m.hurt=.12;m.hp=nh;
+ const dx=x-m.x,dy=y-m.y,dd=Math.hypot(dx,dy);if(dd>80){m.x=x;m.y=y;}else if(dd>.5){const st=Math.min(dd,Math.max(40,dd*8)*dt);m.x+=dx/dd*st;m.y+=dy/dd*st;m.at=(m.at||0)+dt;}
+ m.face=fl&4?-1:1;m.eng=fl&2?4:0;m.t+=dt;if(m.hurt>0)m.hurt-=dt;m.cd-=dt;m.st=null;m.tele=0;m.ret=0;
+ if(fl&2&&(!safe||m.evt)){const d=Math.hypot(P.x-m.x,P.y-m.y);if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;}}
+ return true;}
 // link quality for the badge tooltip (doc U015 latency diagnostics, U020 observability)
 Object.assign(STR.ar,{netLink:'الاتصال: {rtt} · اتبعت {s} · وصل {r} · اترفض {d}',netRtt:'{n} م.ث',netRttNone:'—'});
 Object.assign(STR.en,{netLink:'Link: {rtt} · sent {s} · received {r} · dropped {d}',netRtt:'{n} ms',netRttNone:'—'});

@@ -48,9 +48,11 @@ for (const mode of ['local', 'online']) {
     const { ctx, a, b } = await partyOf2(mode);
     try {
       await settle(a, b);
-      assert.equal(await a.eval(() => document.getElementById('chatW').hidden), false, 'the chat box shows in a party');
+      // no lines yet: no box (owner, SAT-ONLINE-026: don't crowd the screen); Enter brings it up
+      assert.equal(await a.eval(() => document.getElementById('chatW').hidden), true, 'no empty chat box');
       await a.page.keyboard.press('Enter');
       await a.step(2);
+      assert.equal(await a.eval(() => document.getElementById('chatW').hidden), false, 'Enter shows the chat box');
       assert.equal(await a.eval(() => document.activeElement && document.activeElement.id), 'chatIn');
       // P, K, E, I and Space are game keys; inside the chat line they are just letters
       await a.page.keyboard.type('pkei hi <b>bold</b> 👋');

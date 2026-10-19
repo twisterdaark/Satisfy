@@ -22,6 +22,18 @@
       feedSay: function (kind, m) { try { fc(kind).postMessage(JSON.parse(JSON.stringify(m))); } catch (e) { /* closed */ } },
       world: function (fn) { this.feedOn('chat', fn); },
       sayWorld: function (m) { this.feedSay('chat', { from: m.from, h: m.h, text: m.text }); },
+      // shared monsters (SAT-ONLINE-026), the shape of the Firebase transport's: {zone, h, m} on the 'mobs' channel
+      mobsOn: function (zone, fn) {
+        var all = {};
+        if (!zone) { fc('mobs').onmessage = null; return; }
+        fc('mobs').onmessage = function (e) { var v = e.data; if (!v || v.zone !== zone || typeof v.h !== 'string') return; if (v.m) all[v.h] = { t: v.t, m: v.m }; else delete all[v.h]; fn(all); };
+      },
+      mobsPut: function (zone, m, h) {
+        if (this.mz && (this.mz !== zone || !m)) { try { fc('mobs').postMessage({ zone: this.mz, h: h, m: null }); } catch (e) { /* closed */ } this.mz = null; }
+        if (!zone || !m) return;
+        this.mz = zone;
+        try { fc('mobs').postMessage({ zone: zone, h: h, m: m, t: Date.now() }); } catch (e) { /* closed */ }
+      },
       close: function () { handler = null; try { ch.close(); for (var k in feeds) feeds[k].close(); } catch (e) { /* ignore */ } },
     };
   }
