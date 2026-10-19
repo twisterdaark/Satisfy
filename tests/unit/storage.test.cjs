@@ -121,3 +121,17 @@ test('slots: separate key and backups per slot, default untouched, bad names rej
   assert.equal(ST.create(store, { slot: '' }).key, ST.KEY);
   for (const bad of ['../x', 'a b', 'x'.repeat(17), 'é']) assert.throws(() => ST.slotKey(bad), /bad save slot/);
 });
+
+test('replace: keeps the current save as a backup first, refuses junk and a reused backup reason', () => {
+  const store = new MemoryStorage(), a = ST.create(store);
+  a.write({ v: 5, lv: 1 }, { x: 1 });
+  const old = a.read().raw, next = JSON.stringify({ S: { v: 5, lv: 9 }, P: { x: 2 } });
+  assert.equal(a.replace('{oops', 'r1'), false, 'not a save');
+  assert.equal(a.replace(next, 'before-cloud-1'), true);
+  assert.equal(a.read().data.S.lv, 9);
+  assert.equal(a.backups()['before-cloud-1'], old);
+  assert.equal(a.replace(JSON.stringify({ S: { v: 5, lv: 3 }, P: {} }), 'before-cloud-1'), false, 'a backup is never overwritten, so no replace');
+  assert.equal(a.read().data.S.lv, 9);
+  const empty = ST.create(new MemoryStorage());
+  assert.equal(empty.replace(next, 'x'), true, 'nothing to back up on a fresh device');
+});

@@ -51,6 +51,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #partyW{pointer-events:auto;width:calc(var(--u)*26);font-size:calc(var(--u)*1.5)}#partyW .x{font-size:calc(var(--u)*1.3);width:auto;padding:0 calc(var(--u)*.6)}#partyL div{display:flex;justify-content:space-between;gap:calc(var(--u)*1)}#partyL .ld{color:#ffe07a}
 #duelInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*15);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto;border-color:#ff8a6a}#duelInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
 #duelW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*3.4);width:calc(var(--u)*40);padding:calc(var(--u)*.6) calc(var(--u)*1.2);text-align:center;font-size:calc(var(--u)*1.5);pointer-events:auto;border-color:#ff8a6a}#duelW .bars{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*1);margin:calc(var(--u)*.5) 0}#duelW .bar{height:calc(var(--u)*1.2)}#duelW .bar i{background:linear-gradient(90deg,#ff5a4a,#ffb04a)}#duelW .x{font-size:calc(var(--u)*1.3);width:auto;padding:0 calc(var(--u)*.8)}#duelCd{font-size:calc(var(--u)*4);color:var(--gold)}
+#cloudW{left:50%;top:50%;transform:translate(-50%,-50%);width:calc(var(--u)*50);max-height:calc(var(--u)*34);overflow:auto;padding:calc(var(--u)*1.4);font-size:calc(var(--u)*1.6)}#cloudW .x{position:absolute;top:calc(var(--u)*.6);right:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}#cloudN{color:var(--muted,#c8d0e0);margin:calc(var(--u)*.6) 0}#cloudL .cr{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*1);padding:calc(var(--u)*.5) 0;border-top:1px solid rgba(255,255,255,.15)}#cloudL .cr button{width:auto;padding:0 calc(var(--u)*1);font-size:calc(var(--u)*1.4)}
 #partyInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*9);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto}#partyInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
 #netB{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*.6);padding:calc(var(--u)*.3) calc(var(--u)*1.2);font-size:calc(var(--u)*1.5);color:#9fe0ff;white-space:nowrap}
 #toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*13);display:grid;gap:calc(var(--u)*.4);justify-items:center;width:80%}
@@ -418,10 +419,12 @@ button{background:linear-gradient(180deg,rgba(36,52,108,.85),rgba(22,32,74,.85))
         <button data-act="cont" id="contBtn" data-i18n="cont"></button>
         <button data-act="new" data-i18n="newGame"></button>
         <button data-act="online" id="onlineBtn" data-i18n="netSignIn" hidden></button>
+        <button data-act="cloud" id="cloudBtn" hidden></button>
         <button data-act="controls" data-i18n="controls"></button>
         <button data-act="lang" data-i18n="langBtn"></button>
       </div>
       <div class="foot" data-i18n="fanNote"></div>
+      <div id="cloudW" class="panel" hidden><div class="head" id="cloudH"></div><div id="cloudN"></div><div id="cloudL"></div><button class="x" data-act="cloudClose" id="cloudX">✕</button></div>
     </div>
 
     <div id="pauseScreen" class="screen" hidden>
@@ -504,6 +507,7 @@ button{background:linear-gradient(180deg,rgba(36,52,108,.85),rgba(22,32,74,.85))
 <script src="src/net/transport-local.js"></script>
 <script src="src/net/party.js"></script>
 <script src="src/net/duel.js"></script>
+<script src="src/net/cloud.js"></script>
 <script src="src/net/firebase-config.js"></script>
 <script src="src/net/firebase.js"></script>
 <script>
@@ -2885,6 +2889,7 @@ function act(a){
  else if(a==='back'){showOnly(ctrlBack);mode=ctrlBack==='pauseScreen'?'pause':'title';}
  else if(a==='lang'){mode='lang';showOnly('langScreen');}
  else if(a==='online')netSignIn();
+ else if(a==='cloud')cloudOpen();else if(a==='cloudClose')$('cloudW').hidden=true;
  else if(a==='pAccept'||a==='pDecline'||a==='pLeave')partyAct(a);
  else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
@@ -3317,6 +3322,7 @@ function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(
 function netTick(){NET.tick();const live=Satisfy.local.inGame()&&NET_LIVE.includes(mode);
  if(PARTY)PARTY.tick();
  if(DUEL)duelTick(live);
+ if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
  if(live)NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null}));
  partyUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
@@ -3399,7 +3405,31 @@ function duelTick(live){DUEL.tick();const st=DUEL.state();
  $('duelYield').textContent=t('dYield');$('duelYield').hidden=st.phase==='over';}
 function netSetState(s){netState=s;netSig='';}
 function netBtn(){const b=$('onlineBtn');if(!b)return;b.hidden=NETQ!=='online';b.disabled=netState==='AUTHENTICATING'||netState==='JOINING';
- if(netUser){delete b.dataset.i18n;b.textContent=t('netSignedIn',{n:netUser.displayName||netUser.uid.slice(0,6)});}}
+ if(netUser){delete b.dataset.i18n;b.textContent=t('netSignedIn',{n:netUser.displayName||netUser.uid.slice(0,6)});}
+ const c=$('cloudBtn');if(c){c.hidden=!netUser||!FB;c.textContent=t('cloudBtn');}}
+/* cloud saves (SAT-ONLINE-007, doc §06 R1 / §23 / D4): signed in with ?net=online, the title screen can copy this
+   device's character to the Google account and bring a cloud character to this device. Every upload, download and
+   delete needs a second click to confirm; a download keeps the replaced local save as a backup. The public profile
+   (profiles/{uid}) is refreshed on connect and once a minute while playing. */
+Object.assign(STR.ar,{cloudBtn:'حفظ سحابي',cloudH:'الحفظ السحابي (حساب جوجل)',cloudLocal:'على الجهاز ده: {n} · مستوى {lv}',cloudNoLocal:'مفيش شخصية محفوظة على الجهاز ده',cloudNone:'مفيش شخصيات على السحابة لسه',cloudUp:'ارفع',cloudDown:'نزّل',cloudDel:'امسح',cloudSure:'متأكد؟ دوس تاني',cloudLoading:'جاري التحميل…',cloudUpOk:'{n} اترفع على حسابك',cloudDownOk:'{n} نزل على الجهاز ده (القديم محفوظ نسخة احتياطي)',cloudDelOk:'{n} اتمسح من السحابة',cloudErr:'الحفظ السحابي فشل: {e}',cloudSame:'(نفس الشخصية)'});
+Object.assign(STR.en,{cloudBtn:'Cloud saves',cloudH:'Cloud saves (Google account)',cloudLocal:'On this device: {n} · Lv {lv}',cloudNoLocal:'No saved character on this device',cloudNone:'No characters in the cloud yet',cloudUp:'Upload',cloudDown:'Download',cloudDel:'Delete',cloudSure:'Sure? Click again',cloudLoading:'Loading…',cloudUpOk:'{n} uploaded to your account',cloudDownOk:'{n} is on this device now (the old save is kept as a backup)',cloudDelOk:'{n} deleted from the cloud',cloudErr:'Cloud save failed: {e}',cloudSame:'(same character)'});
+let CLOUD=null,cloudProfT=-1e9;
+function cloudApi(){if(!FB||!netUser)return null;if(!CLOUD||CLOUD.uid!==netUser.uid)CLOUD=Satisfy.cloud.create(FB,{uid:netUser.uid});return CLOUD;}
+function cloudErr(e){toast(t('cloudErr',{e:(e&&e.code)||(e&&e.message)||'?'}),'warn');}
+// a button that needs a second click within 4 s
+function armBtn(label,run){const b=document.createElement('button');b.textContent=label;let armed=0;
+ b.onclick=()=>{if(Date.now()-armed<4000){armed=0;b.disabled=true;run();return;}armed=Date.now();b.textContent=t('cloudSure');setTimeout(()=>{if(armed&&Date.now()-armed>=4000){armed=0;b.textContent=label;}},4100);};return b;}
+// the local save, with S.pid filled in (an old save that this build never loaded has none yet)
+function cloudLocal(){const r=STORE.read();if(r.status!=='ok')return null;const d=r.data;if(!Satisfy.ids.isCharId(d.S.pid)){Satisfy.ids.ensure(d.S);if(!STORE.replace(JSON.stringify(d),'before-ids-'+Date.now().toString(36)))return null;}
+ return {raw:STORE.read().raw,pid:d.S.pid,n:(d.S.look&&d.S.look.n)||'?',lv:d.S.lv||1};}
+function cloudOpen(){const C=cloudApi();if(!C)return;$('cloudW').hidden=false;$('cloudH').textContent=t('cloudH');const L=cloudLocal(),N=$('cloudN'),box=$('cloudL');
+ N.textContent=L?t('cloudLocal',{n:L.n,lv:L.lv}):t('cloudNoLocal');if(L)N.appendChild(armBtn(t('cloudUp'),()=>C.upload(L.raw).then(i=>{toast(t('cloudUpOk',{n:i.handle}),'good');cloudOpen();},e=>{cloudErr(e);cloudOpen();})));
+ box.textContent=t('cloudLoading');
+ C.list().then(list=>{box.textContent=list.length?'':t('cloudNone');for(const c of list){const row=document.createElement('div');row.className='cr';row.dataset.pid=c.pid;
+   const lab=document.createElement('span');lab.textContent=`${c.handle} · ${t('lv',{n:c.lv})} · ${t('cl_'+c.cls)} · ${new Date(c.savedAt||c.rev).toLocaleString(lang==='ar'?'ar-EG':'en-GB')}`+(L&&L.pid===c.pid?' '+t('cloudSame'):'');row.appendChild(lab);
+   row.appendChild(armBtn(t('cloudDown'),()=>C.download(c.pid).then(raw=>{if(!raw||!STORE.replace(raw,'before-cloud-'+Date.now().toString(36)))throw new Error('restore');toast(t('cloudDownOk',{n:c.handle}),'good');$('contBtn').disabled=!hasSave();cloudOpen();}).catch(e=>{cloudErr(e);cloudOpen();})));
+   row.appendChild(armBtn(t('cloudDel'),()=>C.remove(c.pid).then(()=>{toast(t('cloudDelOk',{n:c.handle}));cloudOpen();},e=>{cloudErr(e);cloudOpen();})));box.appendChild(row);}},e=>{box.textContent='';cloudErr(e);});}
+function cloudProfile(){const C=cloudApi();if(!C||!S||S.__demo)return;cloudProfT=performance.now();C.writeProfile(S,lang).catch(e=>console.warn('profile write failed',e&&e.code));}
 function netFail(e){netSetState('ERROR');netBtn();toast(t('netFail',{e:(e&&e.code)||(e&&e.message)||'?'}),'warn');}
 function netConnect(sdk,user){if(NET)return;netUser=user;netSetState('JOINING');netBtn();
  const tr=Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)});

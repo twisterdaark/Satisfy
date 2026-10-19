@@ -18,6 +18,7 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 <script src="src/net/transport-local.js"></script> <!-- Satisfy.transports -->
 <script src="src/net/party.js"></script>      <!-- Satisfy.party (SAT-ONLINE-003) -->
 <script src="src/net/duel.js"></script>       <!-- Satisfy.duel (SAT-ONLINE-006) -->
+<script src="src/net/cloud.js"></script>      <!-- Satisfy.cloud (SAT-ONLINE-007) -->
 <script src="src/net/firebase-config.js"></script> <!-- Satisfy.firebaseConfig (public web config) -->
 <script src="src/net/firebase.js"></script>   <!-- Satisfy.firebase (SAT-ONLINE-004), SDK loaded on demand -->
 <script> (()=>{ ...game...; Satisfy.local = Object.freeze({...}) })() </script>
@@ -174,6 +175,27 @@ check; a bar at the top shows both duel HPs and the countdown, with a **Yield** 
 dashed ring. Real death, travel or entering a town forfeits. `Satisfy.local.net().duel` = `state()` plus
 `challenge`.
 
+## `Satisfy.cloud` (SAT-ONLINE-007, doc §06 R1, §23, §24, D4)
+
+`create(sdk, { uid, now? })` on the handle from `Satisfy.firebase.load()`:
+
+| Member | Notes |
+|---|---|
+| `writeProfile(S, lang)` | `profiles/{uid}` = `{ handle, look, language, titleId, classId, lv, revision, t }`, the public profile of §23. Readable by signed-in players, written by the owner; `revision` must go up (read once before the first write, so a device with a slow clock can't be locked out). |
+| `list()` | This account's cloud characters, newest first: `[{ pid, handle, lv, cls, schema, savedAt, rev, size }]` from `cloudIndex/{uid}`. |
+| `upload(raw)` | Copies a save string to `cloudSaves/{uid}/{pid}` then indexes it. Needs `S.pid`; at most `MAX_BLOB` (400 000) characters. |
+| `download(pid)` | The save string, or `null`. |
+| `remove(pid)` | Index first, then the blob. |
+| `profileFrom(S, lang, rev)`, `indexFrom(raw, rev)` | Pure helpers (tests). |
+
+`Satisfy.storage.create(...).replace(raw, reason)` puts a downloaded save in place after keeping the
+current one under `reason` (the game uses `before-cloud-<time>`); it refuses a string that doesn't decode.
+
+A cloud save is a copy of the local save, not an online wallet (D4). Nothing moves without a second
+click (§06: no silent writes; U003). In the game: signed in with `?net=online`, the title screen shows
+**Cloud saves** with this device's character (**Upload**) and the account's characters (**Download**,
+**Delete**). Offline and `?net=local` never show it.
+
 ## `Satisfy.firebase` (SAT-ONLINE-004)
 
 | Member | Notes |
@@ -221,6 +243,7 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, additive** (SAT-ONLINE-007): `Satisfy.cloud`, `storage.replace()`, RTDB `profiles/`, `cloudIndex/`, `cloudSaves/` (rules redeploy), title-screen **Cloud saves**.
 - **api 1, additive** (SAT-ONLINE-006): `Satisfy.duel`, `net().duel`, `S.duels`, RTDB inbox accepts `duel.*` messages with `{to, duel, k?, n?}` (rules redeploy).
 - **api 1, additive** (SAT-ONLINE-005): `Satisfy.state`, `Satisfy.ids`, `Satisfy.events`, `Satisfy.local.profile/events/onEvent`, `S.pid` for every character, `item.iid`, storage writes `WS`, `__G.startMG(id)` (test hook).
 - **api 1, additive** (SAT-ONLINE-003): `Satisfy.party`, `Satisfy.net.zonePolicy/SAFE_ZONES`, `net().party`, the RTDB `inbox/`. Presence now checks replays separately for state and messages.
