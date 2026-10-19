@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20c', ver: '0.48', d: '2026-10-20',
+      ar: ['أونلاين: تراوكا التنين الأحمر واحد في العالم كله: لما حد يقتله بيفضل ميت نص ساعة عند كل اللاعبين، حتى اللي ماكانوش موجودين'],
+      en: ['Online: Trauka the Red Dragon is one for the whole world: once someone kills it, it stays dead for half an hour for every player, even those who were not there'] },
     { v: '2026-10-19u', ver: '0.44', d: '2026-10-19',
       ar: ['أونلاين: مواسم الساحة: كل مبارزة أونلاين بتغير تقييمك في موسم الشهر ده (بتبدأ من 1000)، وزرار "الساحة" في قايمة اللاعبين بيوريك أحسن 10 وتقييمك',
         'كل شهر جديد موسم جديد'],
