@@ -33,10 +33,10 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 | `defs()` | Deep copy of content tables as plain JSON: `MT`, `BOSSES`, `SPAWN`, `QD` (static quests only, no generated board quests), `RC`, `SKD`, `NPCS`, `TOWNS`, `ZR`, `MATS`. Functions (e.g. `RC[i].unlock`) become `{ "$fn": "<source>" }`. Also at `window.__G.defs()`. |
 | `world()` | `{ id: 'satisfy', tile: 16, w: 724, h: 144, outdoorH: 120, zones: [...ZR ids], towns: ['zBai','zWin','zPat','zReid','zRein'] }` (w is the physical width with the wilderness belts, from `MW`; it grows as towns are added). Rows `>= outdoorH` hold house interiors. |
 | `rooms()` | House interiors: `[{ id: 'r<n>', kind: 'house'|'shop'|'armory'|'inn', zone }]`. Ids are stable for a given map. |
-| `zoneAt(x, y)` | Zone id at a pixel position (`'zWin'`, `'zPlains'`, …). |
+| `zoneAt(x, y)` | Zone id at a pixel position (`'zWin'`, `'zPlains'`, …); `'void'` in the interior strip outside every room and dungeon (SAT-ONLINE-019). |
 | `roomAt(x, y)` | `{ id, kind, zone }` if the position is inside a house interior, else `null`. |
 | `inGame()` | `false` on title/demo screens. |
-| `playerPublic(ctx?)` | The local player as a `PlayerPublic` (see below), or `null` outside a game. `ctx` may set `uid`, `sid`, `party`, `anim`, `t`. |
+| `playerPublic(ctx?)` | The local player as a `PlayerPublic` (see below), or `null` outside a game. `ctx` may set `uid`, `sid`, `party`, `anim`, `t`. Always carries `mv`, the map version (SAT-ONLINE-019). |
 | `backups()` | `{ reason: rawJSON }` for every save backup of the current slot. |
 | `profile()` | `{ pid, schema, durable }`: the durable part of the character (see `Satisfy.state`), deep-copied. `null` outside a game. What a cloud profile will hold (doc §23). |
 | `events()` | The last 200 domain events (oldest first), see `Satisfy.events`. In memory only. |
@@ -110,7 +110,7 @@ Events: `{ id: uuid, key, type, pid, at: S.playT, payload }`.
 | `NET_STATES`, `canTransition(a, b)` | Connection state machine (doc §25). |
 | `envelope(type, payload, meta)` | `{ v, type, requestId, sessionId, seq, tick, payload }`, max 2048 bytes. |
 | `ERRORS` | `ZONE_SAFE, CD_ACTIVE, OUT_OF_RANGE, SESSION_STALE, RATE_LIMITED, BAD_MESSAGE` |
-| `SAFE_ZONES`, `zonePolicy(zone)` | `['zBai','zWin','zPat','zReid','zRein']` (every town); `{ zone, safe, pvp:false, duel:false }`. The combat authority will reject PvP actions with `ZONE_SAFE` here. |
+| `SAFE_ZONES`, `zonePolicy(zone)` | `['zBai','zWin','zPat','zReid','zRein']` (every town); `{ zone, known, safe, pvp:false, duel:false }`. `known:false` for `'void'`/no zone: neither safe nor a place to fight (SAT-ONLINE-019, doc §59 C06). The combat authority will reject PvP actions with `ZONE_SAFE` here. |
 
 A *room* here is a presence channel (who you can see), not a house interior. House interiors
 are reported in `PlayerPublic.room` so remote players inside a house are only drawn there.
@@ -284,6 +284,7 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, additive** (SAT-ONLINE-019): `PlayerPublic.mv` = map version (FNV-1a of the generated world, 8 hex digits); the game shows, invites and challenges only remotes with the same `mv` and room, and tells you once when someone nearby is on another version. `Satisfy.local.zoneAt` returns `'void'` in the interior strip outside rooms (the game's own `zoneAt` still falls back to `zWin`); `zonePolicy` adds `known`. Presence + rules field (redeploy).
 - **api 1** (SAT-ONLINE-018): `transport.party(id)` replaces `transport.watch(uids)` (both unreleased); `interest()` adds `party`. Rules index `presence/{world}/{shard}` on `["x", "party"]` (redeploy).
 - **api 1, additive** (SAT-ONLINE-017): touch controls on coarse pointers (or `?touch=1`; `?touch=0` turns them off): a stick for movement, held Attack/Guard, Dodge/Use taps, the HUD key hints as buttons, and an online row (P, K, Y, N, Enter). Taps are dispatched as the same `keydown`/`keyup` events as the keyboard. No API change.
 - **api 1, additive** (SAT-ONLINE-016): `Satisfy.chat` (party chat + device block list), `blocked` option on `party.create`/`duel.create`, `net().chat/blocked`. Inbox rules accept `chat.say` `{to, party, text ≤ 120}`; `text` is rejected in every other message type (rules redeploy).

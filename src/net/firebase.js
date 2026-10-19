@@ -101,6 +101,7 @@
       if (pp.room === undefined) pp.room = null;
       if (pp.party === undefined) pp.party = null;
       if (pp.duel === undefined) pp.duel = null;
+      if (pp.mv === undefined) pp.mv = null;
       if (typeof pp.t !== 'number') pp.t = 0;
       return { v: 1, type: 'presence.state', requestId: null, sessionId: pp.sid, seq: +v.seq || 0, tick: 0, payload: pp };
     }

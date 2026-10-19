@@ -1,6 +1,6 @@
 # NET/PVP backlog U001–U038 (plan doc §33–§34) — status
 
-Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-018 · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
+Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-019 · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
 
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
@@ -29,8 +29,8 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-018 �
 | U023 | Protocol versioning | ✅ | Envelope `v: 1`, `PROTOCOL_VERSION` (§25) |
 | U024 | Load testing swarm | ✅ | `unit/chaos` 100-client soak (in memory) |
 | U025 | World shard migration | ❌ | U009 is in, but there is still one shard (`main`); migration needs more than one |
-| U026 | Safe Bairan | ✅ | `SAFE_ZONES` (SAT-ONLINE-003) |
-| U027 | Safe Winston | ✅ | Same; every town is safe (Patrian, Reidan, Reinhardt too) |
+| U026 | Safe Bairan | 🟡 | `SAFE_ZONES` (SAT-ONLINE-003) is a client-side policy: it stops duels and labels the town, but there is no server PvP authority yet (doc §59 C16; R5 needs D3). The undefined interior strip is `void`, never safe (SAT-ONLINE-019, C06) |
+| U027 | Safe Winston | 🟡 | Same as U026; every town is in the list (Patrian, Reidan, Reinhardt too) |
 | U028 | Spawn shield | ⏳ | Only matters with open PvP (R5) |
 | U029 | Projectile boundary test | ⏳ | R5 |
 | U030 | Duel request UI | ✅ | SAT-ONLINE-006 (K, Y/N prompt) |
@@ -43,4 +43,4 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-018 �
 | U037 | Outlaw flag | ⏳ | R5 |
 | U038 | Bounty board | ⏳ | R5 + ledger |
 
-**Totals:** ✅ 24 · 🟡 5 · ⏳ 7 · ❌ 2.
+**Totals:** ✅ 22 · 🟡 7 · ⏳ 7 · ❌ 2.

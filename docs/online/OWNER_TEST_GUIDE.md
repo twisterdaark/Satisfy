@@ -1,12 +1,12 @@
 # Online test guide for the owner (Twister)
 
-Owner: Claude-A · covers SAT-ONLINE-001 … 018 · دليل اختبار الأونلاين — خطوة بخطوة
+Owner: Claude-A · covers SAT-ONLINE-001 … 019 · دليل اختبار الأونلاين — خطوة بخطوة
 
 ## 0. Deploy the database rules once (after pulling the top branch)
 
 ```powershell
 git fetch origin
-git checkout claude-a/sat-online-018-party-query
+git checkout claude-a/sat-online-019-world-id
 npx.cmd -y firebase-tools@latest deploy --only database --project satisfy-online-8yjeix
 ```
 This one deploy covers presence (with its indexes on `x` and `party`), party/duel/raid/chat messages, profiles, cloud saves and session leases.

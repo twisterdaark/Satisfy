@@ -198,3 +198,13 @@ test('duel ids fit the public duel field for any uid (local transport uids conta
   const pp = SN.net.toPlayerPublic({ look: { n: 'P0' }, cls: 'novice', lv: 2, title: '' }, { x: 1, y: 1, dir: 0 }, { duel: id + ':100' });
   assert.equal(pp.duel, id + ':100');
 });
+
+test('SAT-ONLINE-019: no challenge where the world defines nothing (zone "void"), from either side', () => {
+  const w = world(2), [a, b] = w.players;
+  a.zone = 'void'; w.advance(200);
+  assert.equal(a.duel.challenge(w.remote(a, b)), 'safe');
+  a.zone = 'zPlains'; b.zone = 'void'; w.advance(200);
+  assert.equal(a.duel.challenge(w.remote(a, b)), 'safe', 'the other player stands in an undefined place');
+  b.zone = 'zPlains'; w.advance(200);
+  assert.equal(a.duel.challenge(w.remote(a, b)), 'sent');
+});

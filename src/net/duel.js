@@ -45,7 +45,9 @@
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function byUid(uid) { var hit = null; P.remotes().forEach(function (r) { if (r.uid === uid) hit = r; }); return hit; }
-    function safeHere() { return !!policy(zone()).safe; }
+    // a town, or a place the world doesn't define (zonePolicy known:false, SAT-ONLINE-019): no fighting there
+    function noFight(z) { var p = policy(z) || {}; return !!p.safe || p.known === false; }
+    function safeHere() { return noFight(zone()); }
     function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
     function send(type, extra) {
       var pl = { to: d.foe, duel: d.id };
@@ -134,7 +136,7 @@
       challenge: function (remote) {
         if (!remote || !remote.uid || remote.uid === self) return 'bad';
         if (d && d.phase !== 'over') return 'busy';
-        if (safeHere() || policy(remote.zone).safe) return 'safe';
+        if (safeHere() || noFight(remote.zone)) return 'safe';
         if (dist(pos(), remote) > C.CHALLENGE_R) return 'far';
         start(newId(), remote.uid, remote.handle, true);
         send('duel.challenge');

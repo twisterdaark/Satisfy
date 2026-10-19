@@ -64,13 +64,28 @@ test('envelope: versioned and size-limited', () => {
 
 test('zone policy: every town (Bairan, Winston, Patrian, Reidan, Reinhardt) is safe, nothing allows PvP yet', () => {
   for (const z of ['zReid', 'zRein']) assert.equal(N.zonePolicy(z).safe, true, z);
-  assert.deepEqual(N.zonePolicy('zWin'), { zone: 'zWin', safe: true, pvp: false, duel: false });
-  assert.deepEqual(N.zonePolicy('zBai'), { zone: 'zBai', safe: true, pvp: false, duel: false });
-  assert.deepEqual(N.zonePolicy('zPat'), { zone: 'zPat', safe: true, pvp: false, duel: false });
+  assert.deepEqual(N.zonePolicy('zWin'), { zone: 'zWin', known: true, safe: true, pvp: false, duel: false });
+  assert.deepEqual(N.zonePolicy('zBai'), { zone: 'zBai', known: true, safe: true, pvp: false, duel: false });
+  assert.deepEqual(N.zonePolicy('zPat'), { zone: 'zPat', known: true, safe: true, pvp: false, duel: false });
   for (const z of ['zPlains', 'zGrave', 'zOrc', '']) {
     assert.equal(N.zonePolicy(z).safe, false, z);
     assert.equal(N.zonePolicy(z).pvp, false, z);
   }
+});
+
+test('SAT-ONLINE-019 (doc §59 C06): an undefined place is neither a safe town nor a field; mv is the map version', () => {
+  for (const z of ['void', '', undefined, null, 7]) {
+    const p = N.zonePolicy(z);
+    assert.equal(p.known, false, String(z));
+    assert.equal(p.safe, false, String(z));
+  }
+  assert.equal(N.zonePolicy('zPlains').known, true);
+  const S = { look: { n: 'Grid' }, cls: 'novice', lv: 3, title: '' };
+  assert.equal(N.toPlayerPublic(S, { x: 1, y: 1, dir: 0 }, { mv: '0a1b2c3d' }).mv, '0a1b2c3d');
+  for (const bad of ['0A1B2C3D', '123', 'zzzzzzzz', 12345678, null]) assert.equal(N.toPlayerPublic(S, { x: 1, y: 1, dir: 0 }, { mv: bad }).mv, null, String(bad));
+  const ok = N.toPlayerPublic(S, { x: 1, y: 1, dir: 0 }, { mv: 'deadbeef' });
+  assert.equal(N.validatePlayerPublic(ok).ok, true);
+  assert.deepEqual(N.validatePlayerPublic({ ...ok, mv: 'DEADBEEF' }).errors, ['mv']);
 });
 
 test('PlayerPublic.duel (U034): "<duel id>:<HP>" or null, validated', () => {
