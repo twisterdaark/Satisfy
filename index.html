@@ -87,6 +87,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 .toast{background:rgba(8,14,30,.85);border:1px solid rgba(127,180,255,.5);padding:calc(var(--u)*.3) calc(var(--u)*1.1);border-radius:calc(var(--u)*.4);font-weight:700;animation:tin .25s ease-out}
 .toast.warn{border-color:#ff7a6a;color:#ffd0c8}.toast.good{border-color:var(--gold);color:#ffe7a8}
 @keyframes tin{from{opacity:0;transform:translateY(-6px)}}
+#ui:has(#dialog:not([hidden])) #evbar,#ui:has(#dialog:not([hidden])) #sgbar{visibility:hidden}
 #evbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*1.2);padding:calc(var(--u)*.35) calc(var(--u)*1.4);text-align:center;pointer-events:none;border-color:var(--gold);white-space:nowrap}#evbar b{color:var(--gold)}#sgbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*3.8);padding:calc(var(--u)*.35) calc(var(--u)*1.4);text-align:center;pointer-events:none;border-color:#c83a3a;white-space:nowrap}#sgbar b{color:#ff8a7a}
 #announce{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*6);width:calc(var(--u)*62);text-align:center;border-color:var(--gold);box-shadow:0 0 calc(var(--u)*2.5) rgba(255,194,26,.55);background:rgba(36,24,6,.92)}
 #announce .head{color:var(--gold);font-size:calc(var(--u)*2.1)}
@@ -1560,7 +1561,7 @@ function endSiege(){const G=SG;SG=null;const mine=!!(S.guild&&WS.castle.own===S.
  mons=mons.filter(m=>!(m.sg&&!m.dead));$('sgbar').hidden=true;save(true);}
 function updateSiege(dt){if(!S||!P||!WS)return;const n=siegeNow();
  if(SG&&(!n||n.slot!==SG.slot))endSiege();if(!SG&&n)startSiege(n);
- if((sgT-=dt)<=0&&SG){sgT=1;const left=Math.max(0,SG.end-Date.now()),b=$('sgbar');b.hidden=false;b.innerHTML=`<b>${esc(t('sgN'))}</b> · ${esc(gName(WS.castle.own))} · ${Math.floor(left/60000)}:${String(Math.floor(left/1000)%60).padStart(2,'0')}`;}
+ if((sgT-=dt)<=0&&SG){sgT=1;const left=Math.max(0,SG.end-Date.now()),b=$('sgbar');b.hidden=false;b.innerHTML=`<b>${esc(t('sgN'))}</b> · ${esc(gName(WS.castle.own))} · ${Math.floor(left/60000)}:${String(Math.floor(left/1000)%60).padStart(2,'0')}`+evArrow((CAST.x0+CAST.x1)/2,(CAST.y0+CAST.y1)/2);}
  if(!SG)return;const T=throneP(),near=Math.hypot(P.x-T.x,P.y-T.y)<560,own=WS.castle.own,mine=!!(S.guild&&own===S.guild);
  if(!mine&&S.guild&&!SG.def&&near){SG.def=[sgSpawn('scmd',T.x,T.y+34,own)];for(let i=0;i<6;i++){const [x,y]=sgSpot(CAST.x0+3,CAST.x1-3,CAST.y0+12,CAST.y1-3);SG.def.push(sgSpawn('sknight',x,y,own));}for(let i=0;i<2;i++)SG.def.push(sgSpawn('sknight',T.x+(i?40:-40),T.y+12,own));SFX.slam();shake=.3;}
  if(mine&&near){SG.wt-=dt;if(SG.wt<=0&&SG.atk.filter(m=>!m.dead).length<8){SG.wt=60;SG.wave++;if(!SG.by){const ops=NPCG.map(g=>g.id).filter(id=>id!==own);SG.by=ops[rand()*ops.length|0];}
@@ -1615,6 +1616,13 @@ function npcFight(dt){if(!EV||!EV.e.tw)return;const T=TOWNS.find(T=>T.k===EV.e.t
   n.acd=ft?1.1:1.7;n.dir=Math.abs(tg.x-n.x)>Math.abs(tg.y-n.y)?(tg.x>n.x?2:3):(tg.y>n.y?0:1);const d=Math.round(tg.max*(ft?.09:.04)*(.85+rand()*.3));tg.hp-=d;if(MT[tg.type])netHit(tg,d);tg.hurt=.12;tg.nt=n;tg.ntT=3;
   vfx(ft&&bd>30?'hit':'slash',tg.x,monY(tg),{angle:Math.atan2(tg.y-n.y,tg.x-n.x),rarity:1});num(tg.x+(rand()-.5)*8,monY(tg)-12,String(d),'#9fd8ff',false);
   if(tg.hp<=0){tg.dead=true;tg.rt=1e9;dissolve(tg.x,tg.y-8,['#fff','#ff7a5a'],12);}}}
+// where to go (Nitro's feedback: 'how do I get there?'): an arrow toward the event and how far, or a line for events that
+// happen everywhere. Distance in tiles, the unit of the big map
+function evArrow(tx,ty){if(!P)return '';const dx=tx*TS+8-P.x,dy=ty*TS+8-P.y,d=Math.round(Math.hypot(dx,dy)/TS);if(d<4)return ' · '+esc(t('evHere'));
+ return ' · '+'→↘↓↙←↖↑↗'[(Math.round(Math.atan2(dy,dx)/(Math.PI/4))+8)%8]+' '+esc(t('evFar',{n:d}));}
+function evWhere(e){if(e.tw){const T=TOWNS.find(T=>T.k===e.tw);return ' · '+esc(t(e.tw))+(T?evArrow(T.rx,T.ry):'');}if(e.x!=null)return evArrow(e.x,e.y);return t('evAt_'+e.k)!=='evAt_'+e.k?' · '+esc(t('evAt_'+e.k)):'';}
+Object.assign(STR.ar,{evHere:'إنت هنا',evFar:'{n} خطوة',evAt_fishf:'اصطاد في أي بحيرة أو نهر',evAt_gold:'في كل حتة',evAt_guildw:'أراضي النقابات'});
+Object.assign(STR.en,{evHere:"you're here",evFar:'{n} steps',evAt_fishf:'fish at any lake or river',evAt_gold:'everywhere',evAt_guildw:'guild territories'});
 function startEvent(n){EV={e:n.e,slot:n.slot,end:n.end,kills:0,xp:0,wave:0,mons:[],fallen:0};announce(t('ev_'+n.e.k));SFX.notice();
  if(n.e.k==='guildw'&&WS)for(const k in WS.terr)WS.terr[k].sh=0;}
 function endEvent(){const E=EV;EV=null;evDone=E.slot;mons=mons.filter(m=>!(m.evt&&!m.dead&&E.mons.includes(m)));
@@ -1623,7 +1631,7 @@ function endEvent(){const E=EV;EV=null;evDone=E.slot;mons=mons.filter(m=>!(m.evt
  toast(t('evOver',{e:t('evN_'+E.e.k)}));hudDirty=true;save(true);}
 function updateEvents(dt){if(!S||!P)return;const n=evNow();
  if(EV&&(!n||n.slot!==EV.slot))endEvent();if(!EV&&n&&n.slot!==evDone)startEvent(n);
- if((evT-=dt)<=0){evT=1;const b=$('evbar');if(!EV){b.hidden=true;}else{const left=Math.max(0,EV.end-Date.now()),mm=Math.floor(left/60000),ss=String(Math.floor(left/1000)%60).padStart(2,'0');b.hidden=false;b.innerHTML=`<b>${esc(t('evN_'+EV.e.k))}</b> · ${mm}:${ss}`+(EV.e.tw?` · ${esc(t('evWaveN',{n:EV.wave,m:EVW}))}`:'')+(EV.e.mob||EV.e.k==='fboss'?` · ${esc(t('evKills',{n:EV.kills}))}`:'');}}
+ if((evT-=dt)<=0){evT=1;const b=$('evbar');if(!EV){b.hidden=true;}else{const left=Math.max(0,EV.end-Date.now()),mm=Math.floor(left/60000),ss=String(Math.floor(left/1000)%60).padStart(2,'0');b.hidden=false;b.innerHTML=`<b>${esc(t('evN_'+EV.e.k))}</b> · ${mm}:${ss}`+evWhere(EV.e)+(EV.e.tw?` · ${esc(t('evWaveN',{n:EV.wave,m:EVW}))}`:'')+(EV.e.mob||EV.e.k==='fboss'?` · ${esc(t('evKills',{n:EV.kills}))}`:'');}}
  if(!EV)return;const e=EV.e;npcFight(dt);
  if(e.mob){const T=TOWNS.find(T=>T.k===e.tw);if(T&&Math.hypot(P.x-(T.rx*TS+8),P.y-(T.ry*TS+8))<760){EV.wt=(EV.wt||0)-dt;const alive=EV.mons.filter(m=>!m.dead).length;
   if(EV.wave>=EVW&&!alive&&EV.mons.length){EV.won=1;announce(t('evWon',{z:t(T.k)}));SFX.legendary();endEvent();return;}
