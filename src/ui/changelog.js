@@ -5,6 +5,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19o', ver: '0.38', d: '2026-10-19',
+      ar: ['أونلاين: الجيلد بقى واحد عند الكل: لما تأسس جيلد وإنت أونلاين، كل الأعضاء واللاعبين بيشوفوه',
+        'القائد والضباط بيدعوا من كارت اللاعب (⋯ أو T) بزرار "دعوة للجيلد"، واللي اتدعى بيوافق من رسالة صغيرة دلوقتي أو بعدين',
+        'القائد بيخلي أي عضو ضابط أو يرجعه عضو، والقائد والضباط بيشيلوا الأعضاء، واللي اتشال أو الجيلد اتفك بيوصله إشعار',
+        'اسم الجيلد بيظهر تحت اسم اللاعب عند الكل، وفي كارت اللاعب',
+        'لوحة الجيلد فيها قايمة الأعضاء: الرتبة، مين أونلاين، ومساهمة كل واحد، وخبرة الجيلد هي مجموع مساهمات الأعضاء'],
+      en: ['Online: a guild is the same for everyone: found one while online and every member and every player sees it',
+        'The master and officers invite from the player card (⋯ or T) with "Guild invite"; the invited player joins from a small prompt, now or later',
+        'The master makes a member an officer or a member again; the master and officers remove members; anyone removed, or in a disbanded guild, is told',
+        "The guild's name shows under a player's name for everyone, and on the player card",
+        "The guild panel lists the members: rank, who is online and what each gave; the guild's experience is what its members gave"] },
     { v: '2026-10-19l', ver: '0.35', d: '2026-10-19',
       ar: ['أونلاين: تبادل بين اللاعبين: افتح كارت اللاعب اللي جنبك (⋯ أو T) واضغط تبادل',
         'كل واحد بيحط دهب وحاجات من الشنطة، وبعدين الاتنين يضغطوا موافق وبعدها تأكيد',

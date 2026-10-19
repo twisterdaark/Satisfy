@@ -129,6 +129,7 @@
       if (pp.role === undefined) pp.role = null;
       if (pp.rs === undefined) pp.rs = null;
       if (pp.ol === undefined) pp.ol = null;
+      if (pp.gd === undefined) pp.gd = null;
       if (typeof pp.t !== 'number') pp.t = 0;
       return { v: 1, type: 'presence.state', requestId: null, sessionId: pp.sid, seq: +v.seq || 0, tick: 0, payload: pp };
     }
@@ -373,9 +374,49 @@
     };
   }
 
+  // SAT-ONLINE-046: guilds (src/net/guild.js has the flow and the paths). Every write is one update at the root, so a new
+  // guild and its name, or a join and the used-up invitation, go in together or not at all.
+  function guildStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, SV = function () { return D.serverTimestamp(); };
+    var at = function (p) { return D.ref(db, p); };
+    var up = function (u) { return D.update(D.ref(db), u); };
+    var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
+    var member = function (m) { return { rk: m.rk, n: String(m.n || '').slice(0, 24), c: Math.max(0, Math.floor(+m.c || 0)), on: SV() }; };
+    return {
+      watchInv: function (uid, cb) { return watch('guildInv/' + uid, cb); },
+      watchGuild: function (gid, cb) { return watch('guilds/' + gid, cb); },
+      watchMembers: function (gid, cb) { return watch('guildMembers/' + gid, cb); },
+      create: function (gid, uid, g, m) {
+        var u = {};
+        u['guilds/' + gid] = { name: g.name, nk: g.nk, master: uid, col: g.col, t: SV() };
+        u['guildNames/' + g.nk] = gid;
+        u['guildMembers/' + gid + '/' + uid] = member(m);
+        return up(u);
+      },
+      invite: function (uid, gid, v) { var u = {}; u['guildInv/' + uid + '/' + gid] = { n: v.n, by: v.by, byN: String(v.byN || '').slice(0, 24), t: SV() }; return up(u); },
+      uninvite: function (uid, gid) { return D.remove(at('guildInv/' + uid + '/' + gid)); },
+      join: function (gid, uid, m) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(m); u['guildInv/' + uid + '/' + gid] = null; return up(u); },
+      leave: function (gid, uid) { return D.remove(at('guildMembers/' + gid + '/' + uid)); },
+      kick: function (gid, uid) { return D.remove(at('guildMembers/' + gid + '/' + uid)); },
+      // the whole entry as it is, with the new rank (the rules let the master change only the rank)
+      setRank: function (gid, uid, rk) {
+        return D.get(at('guildMembers/' + gid + '/' + uid)).then(function (s) {
+          var v = s.val(); if (!v) throw new Error('gone');
+          var u = {}; u['guildMembers/' + gid + '/' + uid] = { rk: rk, n: v.n, c: v.c, on: v.on }; return up(u);
+        });
+      },
+      // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
+      beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; return up(u); },
+      readGuild: function (gid) { return D.get(at('guilds/' + gid)).then(function (s) { return s.val(); }); },
+      readMember: function (gid, uid) { return D.get(at('guildMembers/' + gid + '/' + uid)).then(function (s) { return !!s.val(); }); },
+    };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
     tradeStore: tradeStore,
+    guildStore: guildStore,
     SDK_VERSION: SDK_VERSION,
     load: load,
     lease: lease,

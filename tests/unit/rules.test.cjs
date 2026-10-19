@@ -10,7 +10,7 @@ const { net: N } = loadModules('src/net/contracts.js');
 const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')).rules;
 const node = rules.presence.$world.$shard.$uid;
 const firebaseJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'firebase.json'), 'utf8'));
-const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'ol']; // omitted when null/empty is allowed by the client
+const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'ol', 'gd']; // omitted when null/empty is allowed by the client
 
 test('deny by default; presence readable only when signed in, writable only by its owner', () => {
   assert.equal(rules['.read'], false);
@@ -170,6 +170,29 @@ test('trades: participants only; each writes its own offer until the swap; the s
   assert.match(led['.write'], /\(!data\.exists\(\) \|\| data\.child\('o'\)\.val\(\) === /, "only away from the item's recorded owner");
   assert.match(led['.write'], /\.child\('it'\)\.child\(\$iid\)\.exists\(\)/, 'only an item its giver offered');
   for (const n of [tr, sides.$uid, done, led]) assert.equal(n.$other['.validate'], false);
+});
+
+test('guilds: a founder makes one guild with a unique name; joining needs an invitation; ranks decide kicks and promotions', () => {
+  const g = rules.guilds.$gid, nm = rules.guildNames.$nk, mem = rules.guildMembers.$gid, m = mem.$uid, inv = rules.guildInv.$uid;
+  const { guild: GU } = loadModules('src/net/guild.js');
+  assert.equal(rules.guilds['.read'], 'auth != null');
+  assert.match(g['.write'], /!data\.exists\(\) && \$gid === 'g_' \+ auth\.uid/, 'a new guild is the founder\'s own id');
+  assert.match(g['.write'], /data\.child\('master'\)\.val\(\) === auth\.uid/, 'only its master changes or removes it');
+  assert.match(g['.validate'], /newData\.child\('nk'\)\.val\(\) === newData\.child\('name'\)\.val\(\)\.toLowerCase\(\)/);
+  assert.match(g['.validate'], /child\('guildNames'\)\.child\(newData\.child\('nk'\)\.val\(\)\)\.val\(\) === \$gid/, 'written with its name entry');
+  assert.equal(g.name['.validate'], 'newData.isString() && newData.val().length >= ' + GU.C.NAME_MIN + ' && newData.val().length <= ' + GU.C.NAME_MAX);
+  assert.match(nm['.write'], /!data\.exists\(\) && newData\.val\(\) === 'g_' \+ auth\.uid/, 'a name is taken once');
+  assert.equal(mem['.write'], "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid", 'the master removes all members (disband)');
+  assert.match(m['.write'], /newData\.child\('rk'\)\.val\(\) === 'r' && root\.child\('guildInv'\)\.child\(\$uid\)\.child\(\$gid\)\.exists\(\)/, 'join as a member, only while invited');
+  assert.match(m['.write'], /newData\.child\('rk'\)\.val\(\) === data\.child\('rk'\)\.val\(\)/, 'nobody changes their own rank');
+  assert.match(m['.write'], /data\.child\('rk'\)\.val\(\) !== 'm'\)/, 'the master does not just leave');
+  assert.match(m['.write'], /data\.child\('rk'\)\.val\(\) === 'r' && root\.child\('guildMembers'\)\.child\(\$gid\)\.child\(auth\.uid\)\.child\('rk'\)\.val\(\) === 'o'/, 'an officer kicks members only');
+  assert.match(m.rk['.validate'], /newData\.val\(\) === 'm' && \$uid === auth\.uid && \$gid === 'g_' \+ auth\.uid/, 'the only master is the founder');
+  assert.equal(inv['.read'], 'auth != null && auth.uid === $uid', 'your invitations are yours to read');
+  assert.match(inv.$gid['.write'], /=== 'm' \|\| .*=== 'o'\)/, 'masters and officers invite');
+  assert.equal(inv.$gid.by['.validate'], 'newData.val() === auth.uid');
+  for (const n of [g, m, inv.$gid]) assert.equal(n.$other['.validate'], false);
+  assert.equal(node.gd['.validate'], "newData.isString() && newData.val().matches(/" + GU.GID_RE.source + "/)", 'presence gd: a guild id');
 });
 
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing

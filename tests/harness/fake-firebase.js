@@ -35,6 +35,14 @@
       if (type === l.type) setTimeout(() => l.cb(snap(p, type === 'removed' ? old : v)), 0);
     }
     for (const cb of valueCbs.get(p) || []) setTimeout(() => cb(snap(p, v === undefined ? null : v)), 0);
+    const pp = parentOf(p);
+    if (pp && !data.has(pp)) for (const cb of valueCbs.get(pp) || []) setTimeout(() => cb(snap(pp, nodeVal(pp))), 0);
+  }
+  function nodeVal(p) {
+    if (data.has(p)) return data.get(p);
+    const kids = {}; let n = 0;
+    for (const [k, v] of data) if (parentOf(k) === p) { kids[keyOf(k)] = v; n++; }
+    return n ? kids : null;
   }
   function apply(op, p, v) {
     if (op === 'set') { const old = data.get(p); data.set(p, v); fire(p, old, v); }
@@ -44,7 +52,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -53,7 +61,7 @@
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
 
-  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'ol', 'seq', 't'];
+  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'ol', 'gd', 'seq', 't'];
   const POS_X = 16384, POS_Y = 8192, POS_Y0 = -4096; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
   // SAT-ONLINE-039 trades, as backend/database.rules.json: every condition reads the data as it was before the write
@@ -98,8 +106,65 @@
     if (cur && cur.o !== giver) return 'PERMISSION_DENIED: tradedItems not the giver\'s';
     return null;
   }
+  // SAT-ONLINE-046 guilds, as backend/database.rules.json: conditions read the data before the write; curDiff holds the
+  // other paths of the same multi-location update (the rules' newData.parent()... of a new guild and its name)
+  let curDiff = null;
+  const GID_RE = /^g_[A-Za-z0-9]{1,128}$/;
+  const after = (p) => (curDiff && p in curDiff ? curDiff[p] : data.has(p) ? data.get(p) : null);
+  const rkOf = (gid, uid) => { const m = data.get('guildMembers/' + gid + '/' + uid); return m && m.rk || ''; };
+  const isSV = (x) => JSON.stringify(x) === JSON.stringify(SV);
+  function guildRules(seg, v) {
+    if (!user) return 'PERMISSION_DENIED: guild';
+    const me = user.uid, path = seg.join('/'), old = data.has(path) ? data.get(path) : null;
+    if (seg[0] === 'guilds') {
+      const gid = seg[1];
+      if (seg.length !== 2 || !GID_RE.test(gid)) return 'PERMISSION_DENIED: guilds ' + path;
+      if (!(old ? old.master === me : gid === 'g_' + me)) return 'PERMISSION_DENIED: guilds write ' + path;
+      if (v === null) return null;
+      if (Object.keys(v).sort().join(',') !== 'col,master,name,nk,t') return 'guilds fields';
+      if (!(typeof v.name === 'string' && v.name.length >= 2 && v.name.length <= 18 && v.nk === v.name.toLowerCase() && v.master === me && /^#[0-9a-fA-F]{6}$/.test(v.col))) return 'guilds values';
+      if (!(isSV(v.t) || (old && v.t === old.t))) return 'guilds t';
+      return after('guildNames/' + v.nk) === gid ? null : 'PERMISSION_DENIED: guilds name entry';
+    }
+    if (seg[0] === 'guildNames') {
+      if (seg.length !== 2) return 'PERMISSION_DENIED: guildNames ' + path;
+      if (v === null) return old === 'g_' + me ? null : 'PERMISSION_DENIED: guildNames remove';
+      if (old !== null || v !== 'g_' + me) return 'PERMISSION_DENIED: guildNames taken ' + path;
+      const g = after('guilds/' + v);
+      return g && g.nk === seg[1] ? null : 'guildNames guild';
+    }
+    if (seg[0] === 'guildMembers') {
+      const gid = seg[1], master = (data.get('guilds/' + gid) || {}).master === me;
+      if (seg.length === 2) return v === null && master ? null : 'PERMISSION_DENIED: guildMembers ' + path;
+      if (seg.length !== 3) return 'PERMISSION_DENIED: guildMembers ' + path;
+      const uid = seg[2];
+      let ok = false;
+      if (uid === me) {
+        if (!old && v) ok = (v.rk === 'r' && data.has('guildInv/' + me + '/' + gid) && data.has('guilds/' + gid)) || (v.rk === 'm' && gid === 'g_' + me && !data.has('guilds/' + gid));
+        else if (old && v) ok = v.rk === old.rk;
+        else if (old && !v) ok = old.rk !== 'm';
+      } else if (old) {
+        ok = (master && (!v || (v.n === old.n && v.c === old.c))) || (!v && old.rk === 'r' && rkOf(gid, me) === 'o');
+      }
+      if (!ok) return 'PERMISSION_DENIED: guildMembers write ' + path;
+      if (v === null) return null;
+      if (Object.keys(v).sort().join(',') !== 'c,n,on,rk') return 'guildMembers fields';
+      if (!(v.rk === 'r' || v.rk === 'o' || (v.rk === 'm' && uid === me && gid === 'g_' + me))) return 'guildMembers rk';
+      if (!(typeof v.n === 'string' && v.n.length <= 24 && isInt(v.c, 0) && v.c <= 1e12)) return 'guildMembers n/c';
+      return isSV(v.on) || (old && v.on === old.on) ? null : 'guildMembers on';
+    }
+    // guildInv/{uid}/{gid}
+    if (seg.length !== 3) return 'PERMISSION_DENIED: guildInv ' + path;
+    const uid = seg[1], gid = seg[2], r = rkOf(gid, me);
+    if (!((uid === me && v === null) || ((r === 'm' || r === 'o') && (v === null || !data.has('guildMembers/' + gid + '/' + uid))))) return 'PERMISSION_DENIED: guildInv write ' + path;
+    if (v === null) return null;
+    for (const k in v) if (!['n', 'by', 'byN', 't'].includes(k)) return 'guildInv field ' + k;
+    if (!(typeof v.n === 'string' && v.n.length <= 18 && v.by === me && (!('byN' in v) || (typeof v.byN === 'string' && v.byN.length <= 24)))) return 'guildInv values';
+    return isSV(v.t) ? null : 'guildInv t';
+  }
   function rules(p, v, existing) {
     const seg = p.split('/');
+    if (['guilds', 'guildNames', 'guildMembers', 'guildInv'].includes(seg[0])) return guildRules(seg, v);
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
     if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
     if (seg[0] === 'handles' || seg[0] === 'accountIds' || seg[0] === 'chat' || seg[0] === 'news') return idRules(seg, v);
@@ -141,6 +206,7 @@
     if ('role' in v && !/^(tank|healer|damage|support)$/.test(v.role)) return 'role';
     if ('rs' in v && !(typeof v.rs === 'string' && v.rs.length <= 515 && /^[A-Za-z0-9:_.-]+( [A-Za-z0-9:_.-]+){0,3}$/.test(v.rs))) return 'rs';
     if ('ol' in v && v.ol !== 1) return 'ol';
+    if ('gd' in v && !(typeof v.gd === 'string' && /^g_[A-Za-z0-9]{1,128}$/.test(v.gd))) return 'gd';
     if ('wp' in v && !/^[a-z0-9_]{1,16}:[0-9](:[0-9]{1,2})?$/.test(v.wp)) return 'wp';
     if ('fx' in v && !(typeof v.fx === 'string' && v.fx.length <= 2400)) return 'fx';
     if ('gu' in v && !(Number.isInteger(v.gu) && v.gu >= 1 && v.gu <= 256)) return 'gu';
@@ -291,11 +357,14 @@
     // RTDB update(): merge into the stored node (null removes a field), then check the rules on the result
     update: (r, diff) => {
       if (!r.path) { // a multi-location update at the root (SAT-ONLINE-039): all or nothing, each path checked against the data before it
-        const ps = Object.keys(diff), errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);
+        const ps = Object.keys(diff);curDiff = diff;let errs;try{errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);}finally{curDiff = null;}
         F.log.push({ op: 'update', path: '', err: errs[0] || null, keys: ps.slice().sort() });
         if (errs.length) { F.rejected.push(errs[0]); return Promise.reject(Object.assign(new Error(errs[0]), { code: 'PERMISSION_DENIED' })); }
         const fix = (x) => (x && typeof x === 'object' ? (JSON.stringify(x) === JSON.stringify(SV) ? Date.now() : Object.fromEntries(Object.entries(x).map(([k, y]) => [k, fix(y)]))) : x);
-        for (const p of ps) { mine.add(p); write('set', p, fix(clone(diff[p]))); }
+        for (const p of ps) {
+          if (diff[p] === null) { for (const k of [...data.keys()]) if (k === p || k.startsWith(p + '/')) { mine.delete(k); write('remove', k); } continue; }
+          mine.add(p); write('set', p, fix(clone(diff[p])));
+        }
         return Promise.resolve();
       }
       const cur = data.has(r.path) ? clone(data.get(r.path)) : (pending.has(r.path) ? clone(pending.get(r.path)) : {});
@@ -332,7 +401,7 @@
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
-      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems'].includes(seg[0]) ? !!user : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'guilds', 'guildNames', 'guildMembers'].includes(seg[0]) ? !!user : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));
@@ -348,12 +417,13 @@
       if (r.path !== '.info/connected') {
         const seg = r.path.split('/');
         const tm = (seg[0] === 'tradeSides' && seg.length === 3) || (seg[0] === 'tradeDone' && seg.length === 2) ? tradeMeta(seg[1]) : null;
-        const ok = seg[0] === 'sessions' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own') && !!user;
+        const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
+        const ok = gl !== null ? gl : seg[0] === 'sessions' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);
         valueCbs.get(r.path).push(cb);
-        setTimeout(() => cb(snap(r.path, data.has(r.path) ? data.get(r.path) : null)), 0);
+        setTimeout(() => cb(snap(r.path, nodeVal(r.path))), 0);
         return () => { const a = valueCbs.get(r.path) || [], i = a.indexOf(cb); if (i >= 0) a.splice(i, 1); };
       }
       connCbs.push(cb);
