@@ -40,6 +40,7 @@ const FIG={
  mshade:{hair:'short',hc:'#bfe0ff',hl:'#ffffff',skin:'#9ab0c8',sk2:'#7a90a8',top:'#e0ecf8',top2:'#a8bccf',sleeves:true,belt:'#5a7aa0',cape:'#bfe0ff',pants:'#c8d8e8',boots:'#7a90a8'},
  ranker:{hair:'short',hc:'#3a2a1a',hl:'#5a4a3a',skin:'#f1c193',sk2:'#d3a070',top:'#2a4a8a',top2:'#1a3060',sleeves:true,belt:'#c8a050',cape:'#c8a050',pants:'#2a2a34',boots:'#3a2a1e'},
  towerK:{hair:'short',hc:'#c8c8d0',hl:'#e8e8f0',skin:'#e8b88a',sk2:'#c89868',top:'#4a2a7a',top2:'#2e1a50',sleeves:true,belt:'#9a7cff',cape:'#6a4aa8',pants:'#2a2a34',boots:'#3a2a1e'},
+ stylist:{hair:'long',hc:'#d87aa0',hl:'#f8b0c8',skin:'#f8dcc4',sk2:'#e0b898',top:'#2a7a7a',top2:'#1a5656',sleeves:true,apron:'#ece8dc',apron2:'#c8c0b0',belt:'#c8a050',pants:'#2a2a34',boots:'#5a3a20'},
  gwar:{hair:'helm',hc:'#d8b860',hl:'#f2dc8a',skin:'#3e7a2a',sk2:'#2a5a1a',top:'#5a1a1a',top2:'#3e1010',sleeves:false,pad:'#9aa0aa',pad2:'#6a707a',belt:'#2a1a10',cape:'#2a1010',shorts:'#3e1010',pants:'#3e1010',boots:'#2a5a1a'},
  tw:{hair:'short',hc:'#6a4a2a',hl:'#8a6a40',skin:'#e0aa7a',sk2:'#bf8758',top:'#8a909c',top2:'#646a76',sleeves:true,armC:'#c8ccd6',armC2:'#8a909c',pad:'#dfe2ea',pad2:'#a9aebb',chest:'#c8ccd6',belt:'#4a3020',beard:'#6a4a2a',beard2:'#4a321a',pants:'#3a3a46',boots:'#3a3e48'},
  ta:{hair:'long',hc:'#c8a050',hl:'#e8c878',skin:'#f1c7a0',sk2:'#d39f78',top:'#3f6a3a',top2:'#2c4e28',sleeves:true,pad:'#7a5a3a',pad2:'#5a3e24',belt:'#4a3020',pants:'#3a3a30',boots:'#4a3020'},
