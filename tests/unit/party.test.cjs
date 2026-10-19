@@ -395,3 +395,84 @@ test('owner #14: a break without a reload is answered with Y; a leader reload is
   assert.equal(b.party.id(), 'p_u0');
   assert.ok(b.events.some((e) => e.type === 'rejoined'));
 });
+
+// SAT-ONLINE-037 (owner 2026-10-19): the leader kicks a member; the member gets a notice naming the leader and is never
+// rejoined to that party by itself (no rejoin memo, no invite back from the leader's rejoin logic). A leader who leaves
+// is not a kick.
+function kickWorld(n = 3) {
+  let clock = 1e12; const wall = () => clock;
+  const hub = SN.transports.hub();
+  let t = 1000; const now = () => t;
+  const ps = ['u0', 'u1', 'u2'].map((uid, i) => {
+    const st = store(), pres = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net, uid, sid: 'sess' + uid + 'xxxxxxxx' });
+    const party = SN.party.create({ presence: pres, uid, now, store: st, wall });
+    const events = []; party.on((e) => events.push(e));
+    return { uid, pres, party, events, st, name: ['Lead', 'Eslam', 'Mona'][i], quiet: false };
+  });
+  const pub = (p) => p.pres.publish(SN.net.toPlayerPublic({ look: { n: p.name }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 }, { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id(), rs: p.party.roster() }), true);
+  const sync = () => {
+    for (const p of ps) if (!p.quiet) pub(p);
+    for (const p of ps) { p.pres.tick(); if (!p.quiet) p.party.tick(); }
+  };
+  const advance = (ms) => { for (let k = 0; k < ms; k += 100) { t += 100; clock += 100; sync(); } };
+  sync();
+  const [a, b, c] = ps;
+  for (const m of [b, c].slice(0, n - 1)) { a.party.invite(a.pres.remotes().find((r) => r.uid === m.uid)); m.party.accept('p_u0'); }
+  advance(300);
+  for (const p of ps) p.events.length = 0;
+  return { ps, a, b, c, sync, advance, pub };
+}
+
+test('kick: the member is told who removed them, the leader stops counting them, and a new invite needs Y', () => {
+  const { a, b, c, advance } = kickWorld();
+  assert.equal(a.party.members().length, 3);
+  assert.ok(b.st.m.has(SN.party.KEY), 'the member keeps a rejoin memo while in the party');
+  assert.equal(b.party.kick('u2'), false, 'only the leader kicks');
+  assert.equal(a.party.kick('u1'), true);
+  advance(300);
+  assert.equal(b.party.id(), null);
+  const k = b.events.find((e) => e.type === 'kicked');
+  assert.equal(k && k.handle, 'Lead');
+  assert.ok(!b.st.m.has(SN.party.KEY), 'the rejoin memo is gone');
+  assert.deepEqual(a.party.members().map((m) => m.uid), ['u0', 'u2']);
+  assert.equal(a.party.roster(), 'u2', 'not in the electorate any more');
+  assert.equal(c.party.id(), 'p_u0', 'the others stay');
+  advance(SN.party.GRACE_MS + 2000);
+  assert.ok(!b.events.some((e) => e.type === 'invite'), 'the leader does not invite them back by itself');
+  // a fresh invite from the leader is a normal one
+  a.party.invite(a.pres.remotes().find((r) => r.uid === 'u1'));
+  advance(200);
+  assert.ok(b.events.some((e) => e.type === 'invite'));
+  assert.ok(!b.events.some((e) => e.type === 'rejoined'));
+  assert.equal(b.party.id(), null, 'needs Y');
+});
+
+test('kick while the member had lost sight of the leader: the memo goes, so the next invite still needs Y', () => {
+  const { a, b, advance, pub } = kickWorld(2);
+  a.quiet = true; // the leader's window is covered: the member gives up and keeps a memo to take the leader's invite back
+  advance(SN.presence.DEFAULTS.expireMs + SN.party.GRACE_MS + 500);
+  assert.equal(b.party.id(), null);
+  assert.ok(b.events.some((e) => e.type === 'dissolved'));
+  // the leader is back and kicks before its own tick has noticed anything (the member is still in its list)
+  a.quiet = false; pub(a); b.pres.tick();
+  assert.equal(a.party.kick('u1'), true, 'the leader still has them');
+  advance(300);
+  assert.ok(b.events.some((e) => e.type === 'kicked'));
+  assert.ok(!b.st.m.has(SN.party.KEY));
+  a.party.invite(a.pres.remotes().find((r) => r.uid === 'u1'));
+  advance(300);
+  assert.ok(!b.events.some((e) => e.type === 'rejoined'), 'not back by itself');
+  assert.equal(b.party.id(), null);
+});
+
+test('a leader who leaves is not a kick: the members are told the party broke up', () => {
+  const { a, b, c, advance } = kickWorld();
+  a.party.leave();
+  advance(300);
+  for (const m of [b, c]) {
+    assert.equal(m.party.id(), null);
+    assert.ok(!m.events.some((e) => e.type === 'kicked'));
+    const e = m.events.find((x) => x.type === 'leaderLeft');
+    assert.equal(e && e.handle, 'Lead');
+  }
+});
