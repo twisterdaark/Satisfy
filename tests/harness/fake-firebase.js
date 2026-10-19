@@ -42,7 +42,7 @@
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
   function rules(p, v) {
     const seg = p.split('/');
-    if (seg.length !== 4 || seg[0] !== 'presence' || seg[1] !== 'satisfy') return 'PERMISSION_DENIED: path ' + p;
+    if (seg.length !== 4 || seg[0] !== 'presence' || seg[1] !== 'satisfy' || seg[2] !== 'main') return 'PERMISSION_DENIED: path ' + p;
     if (!user || seg[3] !== user.uid) return 'PERMISSION_DENIED: not your node';
     if (v === null) return null;
     for (const k in v) if (!FIELDS.includes(k)) return 'invalid field ' + k;
@@ -52,7 +52,7 @@
     if (JSON.stringify(v.t) !== JSON.stringify(SV)) return 't must be the server timestamp';
     if (typeof v.sid !== 'string' || v.sid.length < 8 || v.sid.length > 64) return 'sid';
     if (typeof v.handle !== 'string' || v.handle.length > 24) return 'handle';
-    if (!(v.x >= 0 && v.x < POS_X && v.y >= 0 && v.y < POS_Y)) return 'position';
+    if (!(v.x >= 0 && v.x < POS_X && v.y >= -POS_Y && v.y < POS_Y)) return 'position';
     if (!/^(idle|walk|attack|dodge|dead)$/.test(v.anim)) return 'anim';
     if (v.arm !== 0 && v.arm !== 1) return 'arm';
     if ('room' in v && (typeof v.room !== 'string' || v.room.length > 16)) return 'room';

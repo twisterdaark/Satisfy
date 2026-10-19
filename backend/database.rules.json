@@ -6,6 +6,7 @@
       "$world": {
         ".validate": "$world === 'satisfy'",
         "$shard": {
+          ".validate": "$shard === 'main'",
           ".read": "auth != null",
           "$uid": {
             ".write": "auth != null && auth.uid === $uid",
@@ -24,7 +25,7 @@
             "zone": { ".validate": "newData.isString() && newData.val().length <= 24" },
             "room": { ".validate": "newData.isString() && newData.val().length <= 16" },
             "x": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 16384" },
-            "y": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 4096" },
+            "y": { ".validate": "newData.isNumber() && newData.val() >= -4096 && newData.val() < 4096" },
             "dir": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3" },
             "anim": { ".validate": "newData.isString() && newData.val().matches(/^(idle|walk|attack|dodge|dead)$/)" },
             "arm": { ".validate": "newData.val() === 0 || newData.val() === 1" },

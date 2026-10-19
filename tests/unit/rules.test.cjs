@@ -58,3 +58,15 @@ test('position bounds cover the whole map, and the fake uses the same bounds', (
   const fb = /const POS_X = (\d+), POS_Y = (\d+);/.exec(fake);
   assert.deepEqual([+fb[1], +fb[2]], [N.LIMITS.posX, N.LIMITS.posY]);
 });
+
+// review fix (#12, #51): the open world spans rows -NR..WMH-1, so the north is written at negative y
+test('the north (negative y) is writable; one shard name only', () => {
+  assert.match(node.y['.validate'], new RegExp('>= -' + N.LIMITS.posY + ' '));
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  const nr = +/,NR=(\d+)/.exec(html)[1], ts = +/TS=(\d+)/.exec(html)[1];
+  assert.ok(nr * ts <= N.LIMITS.posY, 'the north fits');
+  assert.equal(rules.presence.$world.$shard['.validate'], "$shard === 'main'", 'nobody creates nodes under other shard names');
+  const fake = fs.readFileSync(path.join(ROOT, 'tests/harness/fake-firebase.js'), 'utf8');
+  assert.match(fake, /v\.y >= -POS_Y && v\.y < POS_Y/);
+  assert.match(fake, /seg\[2\] !== 'main'/);
+});
