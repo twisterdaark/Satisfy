@@ -294,6 +294,7 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, additive** (SAT-ONLINE-025): `PlayerPublic.role` ∈ `Satisfy.net.ROLES` (`tank, healer, damage, support`) or null, published only while in a party; `party.members()[].role`; the badge in the party panel cycles through them (kept in localStorage `satisfy_role`). Presence + rules field (redeploy).
 - **api 1, additive** (SAT-ONLINE-024): party leader election (`LEAD_MS`, events `newLeader`, `replaced`). No rules change.
 - **api 1, additive** (SAT-ONLINE-023): party rejoin after a reload (`store`, `wall`, `REJOIN_MS`, `KEY`, event `rejoined`, `accept(pid, quiet)`); a member's `leave()` tells the leader. No rules change.
 - **api 1, additive** (SAT-ONLINE-022): `PlayerPublic.em` ∈ `Satisfy.net.EMOTES` (`wave, dance, point, cheer`) or null; V / the touch Emote button opens the list; 3 s per emote, one per 2 s. Presence + rules field (redeploy).

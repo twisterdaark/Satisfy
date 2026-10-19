@@ -121,3 +121,11 @@ test('SAT-ONLINE-022: em is one of EMOTES or null, never free text', () => {
   for (const bad of ['hello', '<b>', 'Dance', '', 5]) assert.equal(N.toPlayerPublic(S, P, { em: bad }).em, null);
   assert.deepEqual(N.validatePlayerPublic({ ...N.toPlayerPublic(S, P, {}), em: 'hi there' }).errors, ['em']);
 });
+
+test('SAT-ONLINE-025: role is one of ROLES or null', () => {
+  const S = { look: { n: 'Grid' }, cls: 'novice', lv: 3, title: '' }, P = { x: 1, y: 1, dir: 0 };
+  assert.deepEqual([...N.ROLES], ['tank', 'healer', 'damage', 'support']);
+  assert.equal(N.toPlayerPublic(S, P, { role: 'healer' }).role, 'healer');
+  for (const bad of ['king', '', 'Tank', 3]) assert.equal(N.toPlayerPublic(S, P, { role: bad }).role, null);
+  assert.deepEqual(N.validatePlayerPublic({ ...N.toPlayerPublic(S, P, {}), role: 'boss' }).errors, ['role']);
+});

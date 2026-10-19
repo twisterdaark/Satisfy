@@ -1,12 +1,12 @@
 # Online test guide for the owner (Twister)
 
-Owner: Claude-A · covers SAT-ONLINE-001 … 024 · دليل اختبار الأونلاين — خطوة بخطوة
+Owner: Claude-A · covers SAT-ONLINE-001 … 025 · دليل اختبار الأونلاين — خطوة بخطوة
 
 ## 0. Deploy the database rules once (after pulling the top branch)
 
 ```powershell
 git fetch origin
-git checkout claude-a/sat-online-024-party-lead
+git checkout claude-a/sat-online-025-party-roles
 npx.cmd -y firebase-tools@latest deploy --only database --project satisfy-online-8yjeix
 ```
 This one deploy covers presence (with its indexes on `x` and `party`), party/duel/raid/chat messages, profiles, cloud saves and session leases.
@@ -27,6 +27,7 @@ devices (PC + phone), or two browsers.
 | Link | Hover the badge | `Link: NN ms · sent … · received … · dropped …` |
 | Party | Stand close, press **P**; the other presses **Y** | Party panel under the minimap; green names |
 | Player card | Click (or tap) the other player | A card with their name, level and class, and **Invite to party · Duel · Block**; Esc closes it |
+| Party role | In the party panel click the **＋** next to your name | It becomes 🛡 (tank), then ✚, ⚔, ✦ and back; the other member sees your badge |
 | New leader | Three in a party; the leader closes the tab | After about 15 s: `… leads the party now`; the other two stay in one party |
 | Rejoin | In a party, one of you presses **F5** and continues | Within a few seconds: `Back in …'s party`, no invite prompt |
 | Emote | Press **V** (phone: **Emote**) and pick **Dance** | You both see the dance for 3 s |

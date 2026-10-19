@@ -74,6 +74,9 @@
             "em": {
               ".validate": "newData.isString() && newData.val().matches(/^(wave|dance|point|cheer)$/)"
             },
+            "role": {
+              ".validate": "newData.isString() && newData.val().matches(/^(tank|healer|damage|support)$/)"
+            },
             "seq": {
               ".validate": "newData.isNumber() && newData.val() >= 0"
             },

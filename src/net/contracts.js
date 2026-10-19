@@ -14,14 +14,14 @@
  *   v:number, uid:(string|null), sid:(string|null), handle:string, look:Look,
  *   cls:string, lv:number, title:string, zone:string, room:(string|null),
  *   x:number, y:number, dir:number, anim:string, arm:number, party:(string|null), duel:(string|null), mv:(string|null),
- *   hp:(number|null), em:(string|null), t:number
+ *   hp:(number|null), em:(string|null), role:(string|null), t:number
  * }} PlayerPublic
  *   What other players may see. `room` is the house interior id (e.g. "r7") or null outdoors;
  *   `arm` is 1 when armor is worn (picks the armored sprite). `mv` is the map version (8 hex digits, a hash of
  *   the generated world): positions only mean the same place to players with the same map (doc §59 C07/C14),
  *   so the game hides remotes whose mv differs from its own. `hp` is health in percent, rounded to 5 (0..100), for
  *   party frames (doc §35 U051); it is no more than the health bar anyone nearby could already see. `em` is the
- *   emote being played (EMOTES) or null.
+ *   emote being played (EMOTES) or null; `role` the party role badge you picked (ROLES) or null.
  * @typedef {{v:number, type:string, requestId:(string|null), sessionId:(string|null),
  *   seq:number, tick:number, payload:object}} Envelope
  */
@@ -36,10 +36,12 @@
   var ANIMS = ['idle', 'walk', 'attack', 'dodge', 'dead'];
   // PlayerPublic.em (SAT-ONLINE-022, doc §35 U061): an emote from a fixed list, never free text
   var EMOTES = ['wave', 'dance', 'point', 'cheer'];
+  // PlayerPublic.role (SAT-ONLINE-025, doc §35 U050): the party role you show, a badge only, independent of class
+  var ROLES = ['tank', 'healer', 'damage', 'support'];
   // PlayerPublic.duel: a duel id from Satisfy.duel and the player's duel HP (0..100)
   var DUEL_RE = /^d_[A-Za-z0-9_-]{1,40}:(100|[1-9]?[0-9])$/;
   var MV_RE = /^[0-9a-f]{8}$/; // PlayerPublic.mv (SAT-ONLINE-019)
-  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 't'];
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
   // S.uid (the local item-instance counter) is private too, but its name collides with the public
   // account `uid`, so it is checked by value in the tests instead of listed here.
@@ -107,7 +109,7 @@
    * Build the public view of the local player.
    * @param {object} S durable state
    * @param {object} P volatile player state
-   * @param {{zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, duel?:string, mv?:string, hp?:number, em?:string, anim?:string, arm?:number, t?:number}} [ctx]
+   * @param {{zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, duel?:string, mv?:string, hp?:number, em?:string, role?:string, anim?:string, arm?:number, t?:number}} [ctx]
    *   duel: "<duel id>:<duel HP>" while in a duel's countdown or fight, so others can watch (U034)
    * @returns {PlayerPublic}
    */
@@ -135,6 +137,7 @@
       mv: typeof ctx.mv === 'string' && MV_RE.test(ctx.mv) ? ctx.mv : null,
       hp: typeof ctx.hp === 'number' && isFinite(ctx.hp) ? Math.max(0, Math.min(100, Math.round(ctx.hp / 5) * 5)) : null,
       em: EMOTES.indexOf(ctx.em) >= 0 ? ctx.em : null,
+      role: ROLES.indexOf(ctx.role) >= 0 ? ctx.role : null,
       t: ctx.t || 0,
     };
   }
@@ -167,6 +170,7 @@
     if (o.mv !== undefined && o.mv !== null && !(typeof o.mv === 'string' && MV_RE.test(o.mv))) e.push('mv');
     if (o.hp !== undefined && o.hp !== null && !(Number.isInteger(o.hp) && o.hp >= 0 && o.hp <= 100)) e.push('hp');
     if (o.em !== undefined && o.em !== null && EMOTES.indexOf(o.em) < 0) e.push('em');
+    if (o.role !== undefined && o.role !== null && ROLES.indexOf(o.role) < 0) e.push('role');
     return { ok: e.length === 0, errors: e };
   }
 
@@ -192,6 +196,7 @@
     LIMITS: LIMITS,
     ANIMS: Object.freeze(ANIMS.slice()),
     EMOTES: Object.freeze(EMOTES.slice()),
+    ROLES: Object.freeze(ROLES.slice()),
     PUBLIC_FIELDS: Object.freeze(PUBLIC_FIELDS.slice()),
     PRIVATE_FIELDS: Object.freeze(PRIVATE_FIELDS.slice()),
     ERRORS: ERRORS,
