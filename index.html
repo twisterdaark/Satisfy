@@ -2327,18 +2327,18 @@ const NPCT={
  merchantP:{idle:()=>'mHiP',opts:()=>merchOpts('merchantP')},
  armorer:{idle:()=>'arHi',opts:()=>smithMenu('armorer',[['isword',150],['bow',140],['staff',140],['hammer',150],['spear',150],['dagger',130]],[['larmor',80],['lhelm',60],['lgloves',45],['lboots',50]],false)},
  armorerP:{idle:()=>'arHiP',opts:()=>smithMenu('armorerP',[['ssword',800],['sbow',760],['sstaff',760],['shammer',820],['spear',150],['dagger',130]],[['parmor',700],['ihelm',420],['igloves',360],['iboots',380],['cring',300]],false)},
- innP:{idle:()=>'innPHi',opts:()=>[bindOpt('innP'),{l:t('oRest',{g:price('innP',30)}),f:()=>rest('innP',price('innP',30))},{l:t('oBuyBread'),f:()=>buyBread('innP')},...potOpts('innP')]},
+ innP:{idle:()=>'innPHi',opts:()=>[bindOpt('innP'),{l:t('oRest',{g:price('innP',30)}),f:()=>rest('innP',price('innP',30))},{l:t('oBuyBread'),f:()=>buyBread('innP')},...potOpts('innP'),...mapOpt('innP')]},
  ashur:{hi:'as_hi',low:()=>nextLvLine('ashur','as_low'),idle:()=>'as_idle'},
  pcap:{hi:'pc_hi',low:()=>nextLvLine('pcap','pc_low'),idle:()=>'pc_idle'},
  coachP:{idle:()=>'coachHi',opts:()=>[...rideOpt('horse'),{l:t('oTravelW',{g:fare()}),f:()=>travel(1,'coachP')},{l:t('oTravelB',{g:fare()+80}),f:()=>travel(0,'coachP')}]},
- inn:{idle:()=>'innHi',opts:()=>[bindOpt('inn'),{l:t('oRest',{g:price('inn',20)}),f:()=>rest('inn',price('inn',20))},{l:t('oBuyBread'),f:()=>buyBread('inn')},...potOpts('inn')]},
- innB:{idle:()=>'innBHi',opts:()=>[bindOpt('innB'),{l:t('oRest',{g:price('innB',20)}),f:()=>rest('innB',price('innB',20))},{l:t('oBuyBread'),f:()=>buyBread('innB')},...potOpts('innB')]},
+ inn:{idle:()=>'innHi',opts:()=>[bindOpt('inn'),{l:t('oRest',{g:price('inn',20)}),f:()=>rest('inn',price('inn',20))},{l:t('oBuyBread'),f:()=>buyBread('inn')},...potOpts('inn'),...mapOpt('inn')]},
+ innB:{idle:()=>'innBHi',opts:()=>[bindOpt('innB'),{l:t('oRest',{g:price('innB',20)}),f:()=>rest('innB',price('innB',20))},{l:t('oBuyBread'),f:()=>buyBread('innB')},...potOpts('innB'),...mapOpt('innB')]},
  oldw:{hi:'ow_hi',idle:()=>'ow_idle'},
  piaro:{hi:'pi_hi',idle:()=>'pi_idle',opts:()=>[{l:t('oPiaro'),f:()=>dialog('piaro',['pi_t1','pi_t2','pi_t3',balanced()?'pi_good':'pi_off'])}]},
  foreman:{hi:'fo_hi',idle:()=>'fo_idle'},
  smithR:{hi:'sr_hi',idle:()=>'sr_idle',opts:()=>smithMenu('smithR',[['ssword',780],['spear',150],['dagger',130],['shammer',800]],[['parmor',680],['ihelm',400],['igloves',340],['iboots',360],['mring',900]])},
  merchantR:{idle:()=>'mR_hi',opts:()=>merchOpts('merchantR')},
- innR:{idle:()=>'innR_hi',opts:()=>[bindOpt('innR'),{l:t('oRest',{g:price('innR',40)}),f:()=>rest('innR',price('innR',40))},{l:t('oBuyBread'),f:()=>buyBread('innR')},...potOpts('innR')]},
+ innR:{idle:()=>'innR_hi',opts:()=>[bindOpt('innR'),{l:t('oRest',{g:price('innR',40)}),f:()=>rest('innR',price('innR',40))},{l:t('oBuyBread'),f:()=>buyBread('innR')},...potOpts('innR'),...mapOpt('innR')]},
  fisher:{hi:'fi_hi',idle:()=>'fi_idle',opts:()=>petOpt('cat')},
  herbW:{hi:'hw_hi',idle:()=>'hw_idle'},
  guildM:{hi:'gm_hi',idle:()=>'gm_idle',opts:()=>guildMOpts()},
@@ -2353,7 +2353,7 @@ const NPCT={
  vantner:{hi:'vt_hi',idle:()=>'vt_idle',opts:()=>compOpt('vantner')},faker:{hi:'fk_hi',idle:()=>S.comp==='faker'?'cpIdle_faker':'fk_idle',opts:()=>compOpt('faker')},
  smithRh:{hi:'srh_hi',idle:()=>'srh_idle',opts:()=>smithMenu('smithRh',[['ssword',800],['spear',160],['dagger',140],['shammer',820]],[['parmor',700],['ihelm',420],['igloves',350],['iboots',370],['mring',920]])},
  merchantRh:{idle:()=>'mRh_hi',opts:()=>merchOpts('merchantRh')},
- innRh:{idle:()=>'innRh_hi',opts:()=>[bindOpt('innRh'),{l:t('oRest',{g:price('innRh',50)}),f:()=>rest('innRh',price('innRh',50))},{l:t('oBuyBread'),f:()=>buyBread('innRh')},...potOpts('innRh')]},
+ innRh:{idle:()=>'innRh_hi',opts:()=>[bindOpt('innRh'),{l:t('oRest',{g:price('innRh',50)}),f:()=>rest('innRh',price('innRh',50))},{l:t('oBuyBread'),f:()=>buyBread('innRh')},...potOpts('innRh'),...mapOpt('innRh')]},
  guardRh:{idle:()=>'grh_idle',opts:()=>rideOpt('whorse')},
  guardW:{idle:()=>'gw_idle'},hunter:{idle:()=>'hn_idle'},farmerP:{idle:()=>'fp_idle'},hunterP:{idle:()=>'hp_idle'},
  pedW:{idle:()=>'ped_hi',opts:()=>[...potOpts('pedW'),{l:t('oBuyBread'),f:()=>buyBread('pedW')}]},pedE:{idle:()=>'ped_hi',opts:()=>[...potOpts('pedE'),{l:t('oBuyBread'),f:()=>buyBread('pedE')}]},
@@ -3033,6 +3033,20 @@ function newGame(L){fadeTo(()=>{freshState();S.look={...L};buildMe(S.look);spawn
 const ZR=[['zPat',172,64,208,100],['zRuin',209,68,223,98],['zHigh',158,39,223,63],['zMarsh',158,101,223,119],['zQuarry',17,2,26,10],['zBai',2,2,27,41],['zGuard',50,2,63,20],['zGrey',28,2,63,43],['zWin',106,64,146,100],['zGrave',119,48,137,61],['zOrc',96,4,128,26],['zSnow',64,0,223,38],['zCanyon',106,102,155,119],['zHide',54,94,84,119],['zLake',76,86,108,113],['zOut',0,44,63,86],['zFields',100,39,159,119]];
 const ZL=[['zBai',14,30],['zQuarry',21,4],['zGrey',38,30],['zGuard',56,16],['zOut',32,66],['zPlains',82,50],['zSnow',145,8],['zOrc',112,24],['zWin',126,70],['zGrave',128,47],['zLake',92,90],['zHide',69,97],['zCanyon',131,106],['zFields',152,58],['zPat',190,70],['zHigh',192,49],['zMarsh',192,110],['zRuin',216,69]];
 function zoneAt(x,y){if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;return (roomAt(x,y)||{}).z||'zWin';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
+/* fog of war (Nitro's feedback): the map shows only what you have seen, in cells of FOGC tiles, saved in S.fog. A paper map
+   (sold at inns) draws the whole land in sepia, but no monsters, people or quests where you haven't been yourself. */
+const FOGC=8,FOGW=Math.ceil(MW/FOGC),FOGH=Math.ceil((WMH+NR)/FOGC);let FOG=null,fogT=0;
+function fogLoad(){FOG=new Uint8Array(FOGW*FOGH);let ok=false;try{if(S.fog){const b=atob(S.fog);if(b.length===FOG.length){for(let i=0;i<b.length;i++)FOG[i]=b.charCodeAt(i);ok=true;}}}catch(e){}
+ if(!ok){for(const T of TOWNS)if(S.vis&&S.vis[T.k])fogSee(T.rx,T.ry,4);fogSave();}} // an older save: the towns you have been to
+function fogSave(){let b='';for(let i=0;i<FOG.length;i++)b+=String.fromCharCode(FOG[i]);S.fog=btoa(b);}
+function fogSee(tx,ty,r){let ch=false;const cx=Math.floor(tx/FOGC),cy=Math.floor((ty+NR)/FOGC);for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++){if(i*i+j*j>r*r+1)continue;const x=cx+i,y=cy+j;if(x<0||y<0||x>=FOGW||y>=FOGH)continue;if(!FOG[y*FOGW+x]){FOG[y*FOGW+x]=1;ch=true;}}return ch;}
+function fogSeen(tx,ty){if(!FOG)return true;const x=Math.floor(tx/FOGC),y=Math.floor((ty+NR)/FOGC);return x<0||y<0||x>=FOGW||y>=FOGH||!!FOG[y*FOGW+x];}
+function fogTick(dt){if(!S||!P||S.__demo)return;if(!FOG||FOG.sid!==S){fogLoad();FOG.sid=S;}if((fogT-=dt)>0)return;fogT=.5;const pp=outPos();if(fogSee(pp.x/TS,pp.y/TS,2))fogSave();}
+function fogDraw(g,X,Y,sc){const paper=!!(S.ev&&S.ev.pmap);g.save();g.fillStyle=paper?'rgba(74,52,24,.62)':'#0a1220';for(let y=0;y<FOGH;y++)for(let x=0;x<FOGW;x++){if(FOG[y*FOGW+x])continue;
+  g.fillRect(Math.floor(X(x*FOGC)),Math.floor(Y(y*FOGC-NR)),Math.ceil(FOGC*sc)+1,Math.ceil(FOGC*sc)+1);}g.restore();}
+const mapOpt=who=>S.ev&&S.ev.pmap?[]:[{l:t('oPMap'),pr:price(who,300),ic:'book',st:t('oPMapD'),poor:S.gold<price(who,300),f:()=>{const g=price(who,300);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;S.ev.pmap=1;SFX.coin();toast(t('pMapGot'),'good');hudDirty=true;save(true);dialog(who,['pMapT']);}}];
+Object.assign(STR.ar,{oPMap:'اشتري خريطة ورق',oPMapD:'فيها كل الأراضي، بس مش هتوريك الوحوش ولا الناس في الأماكن اللي ماروحتهاش',pMapGot:'الخريطة الورق معاك: M تفتحها',pMapT:'دي خريطة رسمها رحالة قديم. الأراضي مظبوطة، بس اللي ساكن فيها لازم تشوفه بعينك.'});
+Object.assign(STR.en,{oPMap:'Buy a paper map',oPMapD:"Shows all the lands, but no monsters or people where you haven't been",pMapGot:'You have the paper map: M opens it',pMapT:"An old traveller drew this one. The land is right; who lives there you'll have to see for yourself."});
 function openMap(){SFX.open();mode='map';$('mapW').hidden=false;$('hint').hidden=true;const pp=outPos();MV.z=4;MV.cx=pp.x/TS;MV.cy=pp.y/TS;mapClamp($('mapC'));drawMap();}
 function closeMap(){SFX.close();$('mapW').hidden=true;mode='play';}
 // where a quest is done or turned in (world tiles), for the map
@@ -3059,17 +3073,18 @@ function drawMap(){const c=$('mapC'),dpr=Math.min(2,window.devicePixelRatio||1),
  if(MV.z>=2.5){g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=1;for(let x=0;x<=MW;x+=10){g.beginPath();g.moveTo(X(x),Y(-NR));g.lineTo(X(x),Y(WMH));g.stroke();}for(let y=-NR;y<=WMH;y+=10){g.beginPath();g.moveTo(X(0),Y(y));g.lineTo(X(MW),Y(y));g.stroke();}}
  [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zSFen',630,128]].forEach(([k,x,y])=>MM.label(g,t(k),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`}));
  ANVILS.forEach(a=>MM.marker(g,'anvil',X(a.tx+.5),Y(a.ty+.5),u*1.2));
- mons.forEach(m=>{if(m.dead)return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
+ mons.forEach(m=>{if(m.dead||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
  allies.forEach(a=>{if(!a.dead)MM.marker(g,'ally',X(a.x/TS),Y(a.y/TS),u);});if(COMPO)MM.marker(g,'ally',X(COMPO.x/TS),Y(COMPO.y/TS),u);
  if(MEET&&COMPO)MM.label(g,t('meetMap',{n:t(MEET.id)}),X(COMPO.x/TS),Y(COMPO.y/TS)-12*u,{size:Math.round(11*dpr),color:'#9fe39a',font:F,band:'rgba(6,24,10,.82)'});
  invMark(g,x=>X(x/TS),y=>Y(y/TS),u,sc,Math.round(13*dpr),F);
- npcs.forEach(n=>{if(n.hidden)return;const w=wTile(n.x,n.y),x=X(w.x),y=Y(w.y);MM.marker(g,'npc',x,y,u*1.1);const mk=npcMark(n.id);if(mk)MM.label(g,mk[0],x,y-10*u,{size:Math.round(13*dpr),color:mk[1],weight:700,font:'Oswald, sans-serif'});
+ npcs.forEach(n=>{if(n.hidden)return;const w=wTile(n.x,n.y);if(!fogSeen(w.x,w.y))return;const x=X(w.x),y=Y(w.y);MM.marker(g,'npc',x,y,u*1.1);const mk=npcMark(n.id);if(mk)MM.label(g,mk[0],x,y-10*u,{size:Math.round(13*dpr),color:mk[1],weight:700,font:'Oswald, sans-serif'});
   if(MV.z>=3)MM.label(g,t(n.id),x,y+10*u,{size:Math.round(10*dpr),color:'#e8f2ff',font:F,weight:500});});
- Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1).forEach(id=>{const p=qSpot(id);if(!p)return;const x=X(p.x),y=Y(p.y),col=p.ret?'#ffd23a':'#7ee0ff';
+ Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1).forEach(id=>{const p=qSpot(id);if(!p||!fogSeen(p.x,p.y)&&!(S.ev&&S.ev.pmap))return;const x=X(p.x),y=Y(p.y),col=p.ret?'#ffd23a':'#7ee0ff';
   if(p.area){g.save();g.globalAlpha=.18;g.fillStyle=col;g.beginPath();g.arc(x,y,5*sc,0,7);g.fill();g.globalAlpha=.6;g.setLineDash([4*dpr,3*dpr]);g.strokeStyle=col;g.lineWidth=dpr;g.stroke();g.restore();}
   MM.marker(g,p.ret?'ret':'quest',x,y,u*1.1);MM.label(g,(p.ret?'? ':'')+qName(id),x,y-13*u,{size:Math.round(11*dpr),color:col,font:F,band:'rgba(8,16,40,.82)'});});
  // party members on the big map (SAT-ONLINE-026, owner feedback 17), however far: the party query keeps them in view
  if(NET&&PARTY&&PARTY.id())for(const r of NET.remotes())if(r.party===PARTY.id()&&!r.room&&r.mv===mapV()){const x=X(r.x/TS),y=Y(r.y/TS);MM.marker(g,'ally',x,y,u*1.4);MM.label(g,r.handle||'?',x,y-12*u,{size:Math.round(11*dpr),color:'#8dff9a',font:F,band:'rgba(8,40,16,.82)'});}
+ if(FOG)fogDraw(g,X,Y,sc);
  const pp=outPos();MM.player(g,X(pp.x/TS),Y(pp.y/TS),dirAng(P.dir),u*1.2,gTime);MM.label(g,t('mapYou'),X(pp.x/TS),Y(pp.y/TS)+14*u,{size:Math.round(11*dpr),color:'#ffffff',font:F,band:'rgba(120,20,16,.85)',edge:'rgba(255,160,150,.6)'});
  // frame and zoom readout
  const gr=g.createRadialGradient(c.width/2,c.height/2,c.height*.45,c.width/2,c.height/2,c.width*.75);gr.addColorStop(0,'rgba(6,14,32,0)');gr.addColorStop(1,'rgba(6,14,32,.5)');g.fillStyle=gr;g.fillRect(0,0,c.width,c.height);
@@ -3222,7 +3237,7 @@ function update(dt){
    move(m,m.wx*b.spd*.25*dt,m.wy*b.spd*.25*dt,mr);if(m.wx)m.face=m.wx>0?1:-1;}
  }catch(err){gameErr(err,m);}finally{if(MOBP){P=MOBP;MOBP=null;}}}
  if(P.rmv>0)P.rmv-=dt;else if(P.rsp)P.rsp=Math.max(0,P.rsp-dt*2);horseRegen(dt);
- updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);updateEvents(dt);updateSiege(dt);achTick(dt);updateWeather(dt);updateComp(dt);updatePet(dt);updateArena(dt);updateTower(dt);updateDragon(dt);updateAuction(dt);
+ updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);updateEvents(dt);updateSiege(dt);achTick(dt);updateWeather(dt);fogTick(dt);updateComp(dt);updatePet(dt);updateArena(dt);updateTower(dt);updateDragon(dt);updateAuction(dt);
 }
 
 /* ---------------- monster AI ---------------- */

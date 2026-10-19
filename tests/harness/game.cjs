@@ -172,7 +172,7 @@ async function continueGame(g) {
 }
 
 // Durable state minus clocks that depend on how many frames ran.
-const VOLATILE_S = ['playT', 'bqT', 'immT'];
+const VOLATILE_S = ['playT', 'bqT', 'immT', 'fog']; // fog: map cells seen, grows with every step (and baselines before it have none)
 // Random per character (SAT-ONLINE-005): S.pid and the item ids derived from it. Baseline builds only
 // make a pid on a guild join, so golden/rollback comparisons drop them; tests/regression/ids.test.cjs checks them.
 const IDENTITY_S = ['pid'];

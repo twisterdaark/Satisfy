@@ -51,6 +51,8 @@
     'duels', 'raidDone',
     // recipes learned and recipe use counts (main rcLearn)
     'rcK', 'rcN',
+    // map cells seen (fog of war, Nitro's feedback): base64 bitset
+    'fog',
   ];
   var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT'];
   var META = ['v', 'wv', 'uid', 'pid'];
