@@ -1,6 +1,6 @@
 # NET/PVP backlog U001–U038 (plan doc §33–§34) — status
 
-Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-014 · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
+Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-018 · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
 
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
@@ -12,7 +12,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-014 �
 | U006 | Session leases | ✅ | SAT-ONLINE-010: `sessions/{uid}`, the newest session wins, "Play here" takes over |
 | U007 | Connection indicator | ✅ | HUD badge from the net state machine (§25) |
 | U008 | Player presence | ✅ | SAT-ONLINE-002/004 |
-| U009 | Spatial interest management | ✅ | SAT-ONLINE-014: range query on `x` (±800 px, re-centred every 400 px) + party members watched wherever they are; `regression/interest`, `COST_MODEL.md` |
+| U009 | Spatial interest management | ✅ | SAT-ONLINE-014: range query on `x` (±800 px, re-centred every 400 px); SAT-ONLINE-018: a second query on the party id, so all members see each other wherever they are; `regression/interest`, `COST_MODEL.md` |
 | U010 | Smooth remote movement | ✅ | Interpolation 100 ms in the past, snap on jumps (`unit/presence`) |
 | U011 | Remote animations | ✅ | `anim` idle/walk/attack/dodge/dead |
 | U012 | Network room browser | ❌ | One world shard today (`main`) |

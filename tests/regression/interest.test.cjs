@@ -112,13 +112,30 @@ test('players far along the map are not downloaded; party members are, wherever 
     await until([a], (x) => Satisfy.local.net().remotes.some((r) => r.handle === 'Faker' && r.x >= x + 20), 8000, bx);
     assert.equal(((await net(a)).party.members || []).length, 2, 'the party survives the distance');
 
-    // B leaves the party: A stops watching B, and B is out of range, so A drops it
+    // SAT-ONLINE-018: C joins now. It never saw B (far away the whole time), but the party query shows B,
+    // and B sees C, so members who never met can chat and raid together
+    await a.page.keyboard.press('KeyP');
+    await settle(a, b, c);
+    await until([c], () => !document.getElementById('partyInv').hidden);
+    await c.page.keyboard.press('KeyY');
+    await settle(a, b, c);
+    const uidC = (await net(c)).uid;
+    await until([c], () => Satisfy.local.net().remotes.some((r) => r.handle === 'Faker'));
+    await until([b], () => Satisfy.local.net().remotes.some((r) => r.handle === 'Ruby'));
+    await until([c], () => ((Satisfy.local.net().party || {}).members || []).length === 3);
+    assert.deepEqual(await sees(c), ['Faker', 'Grid']);
+    assert.equal((await net(c)).interest.party, (await net(a)).party.id);
+
+    // B leaves the party: the party queries drop B, and B is out of everyone's range
     await b.eval(() => document.querySelector('#partyW [data-act="pLeave"]').click());
     await settle(a, b, c);
-    await until([a], () => Satisfy.local.net().interest.watched.length === 0);
+    await until([a], (u) => Satisfy.local.net().interest.watched.join() === u, 8000, uidC);
     await until([a], () => Satisfy.local.net().remotes.length === 1);
     assert.deepEqual(await sees(a), ['Ruby']);
+    await until([c], () => Satisfy.local.net().remotes.length === 1);
+    assert.deepEqual(await sees(c), ['Grid']);
     await until([b], () => Satisfy.local.net().remotes.length === 0);
+    assert.equal((await net(b)).interest.party, null);
 
     for (const g of gs) {
       assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
