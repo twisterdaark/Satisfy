@@ -527,6 +527,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
 <script src="src/net/transport-local.js"></script>
 <script src="src/net/party.js"></script>
 <script src="src/net/duel.js"></script>
+<script src="src/net/raid.js"></script>
 <script src="src/net/cloud.js"></script>
 <script src="src/net/firebase-config.js"></script>
 <script src="src/net/firebase.js"></script>
@@ -1956,7 +1957,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(burn)vfx('fire',m.x,my);if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
  if(burn&&!S.burnSeen){S.burnSeen=1;toast(t('burn'),'good');}else if(burn)num(m.x,my-18,lang==='ar'?'لهب!':'FLAME','#ff9a2a',false);
- if(m.hp<=0)killMon(m);return crit||burn?2:1;}
+ if(!(PRAID&&praidHit(m,dmg))&&m.hp<=0)killMon(m);return crit||burn?2:1;}
 function tryAttack(ax,ay,mul){
  if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
@@ -2024,7 +2025,7 @@ function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);toast(t('boss
 const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','lgloves','lboots','cring','ihelm','igloves','iboots','parmor','mring'];
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.4:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.25:.1)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.dead=true;gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='bknight'&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord')setTimeout(()=>announce(t('evBossDown',{n:t('pname')})),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;rareDrop(m,b);petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y))dunBossDown(m);{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.dead=true;if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='bknight'&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord')setTimeout(()=>announce(t('evBossDown',{n:t('pname')})),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;rareDrop(m,b);petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y))dunBossDown(m);{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  (b.drop||[]).forEach(([k,p])=>{if(rand()<p)addMat(k,1);});
  if(m.lv>=20&&!m.tmp){if(b.boss)addMat('estone',1+(m.lv/50|0));else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
@@ -3442,19 +3443,21 @@ Satisfy.local=Object.freeze({api:1,
  onEvent:fn=>DEVT.on(fn),
  net:()=>NET?{mode:NETQ,state:netState,uid:NET.uid,sid:NET.sid,count:NET.count(),drawn:netDrawn,remotes:NET.remotes(),stats:NET.stats(),
   party:PARTY?{id:PARTY.id(),leader:PARTY.leader(),members:PARTY.members(),invite:PARTY.pendingInvite()}:null,
-  duel:DUEL?{...DUEL.state(),challenge:DUEL.pendingChallenge()}:null}:null});
+  duel:DUEL?{...DUEL.state(),challenge:DUEL.pendingChallenge()}:null,
+  raid:PRAID?{host:PRAID.isHost(),member:PRAID.isMember(),encounters:PRAID.encounters()}:null}:null});
 window.__G.defs=Satisfy.local.defs;
 
 /* ---------------- online (opt-in: ?net=local) ---------------- */
 // Other players come from Satisfy.presence over a transport; nothing here changes offline play.
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
-let NET=null,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='';const PARTY_R=40;
+let NET=null,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null;const PARTY_R=40;
 const NETQ=QS.get('net');
 const NET_LIVE=['play','inv','status','equip','dialog','forge','log','map','dead','cut','pause','qd','gname','controls','enhfx','lang']; // every screen of a running game (a quest open, the guild-name box, controls, an enhancement) still is in the world
 function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
 function netTick(){NET.tick();const live=Satisfy.local.inGame()&&NET_LIVE.includes(mode);
  if(PARTY)PARTY.tick();
  if(DUEL)duelTick(live);
+ if(PRAID)PRAID.tick();
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
  if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null}),netForce);netForce=false;}
  partyUI(live);
@@ -3478,7 +3481,7 @@ if(NETQ==='local'&&typeof BroadcastChannel!=='undefined'){
 // ?net=online: Google sign-in + Firebase Realtime Database (SAT-ONLINE-004). The SDK downloads only in this mode.
 let FB=null;
 /* party (SAT-ONLINE-003): P invites the nearest player, Y/N answers an invite */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now()});duelStart();
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now()});duelStart();praidStart();
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if((r.room||null)!==myRoom)continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -3536,6 +3539,23 @@ function duelTick(live){DUEL.tick();const st=DUEL.state();
  $('duelT').textContent=t('dTitle',{n:st.handle||'?'});$('duelMeN').textContent=t('dYou')+' '+st.hp;$('duelFoeN').textContent=(st.handle||'?')+' '+st.foeHp;
  $('duelMeB').style.width=st.hp+'%';$('duelFoeB').style.width=st.foeHp+'%';$('duelCd').textContent=st.phase==='countdown'?String(cd||''):'';
  $('duelYield').textContent=t('dYield');$('duelYield').hidden=st.phase==='over';}
+/* party raid (SAT-ONLINE-009, doc §10 R6): in a party, the leader's copy of a boss is the one that counts. Members'
+   hits go to the leader, everyone sees the leader's boss HP, and its death kills every hitter's copy with that
+   player's normal rewards, once per encounter (S.raidDone keeps the claimed encounter ids). */
+Object.assign(STR.ar,{raidKill:'الفريق قتل الزعيم! نصيبك وصلك'});
+Object.assign(STR.en,{raidKill:'Your party killed the boss! Your share is yours'});
+const praidKey=m=>m.type+'@'+(m.sx|0)+','+(m.sy|0);
+function praidBoss(key){return mons.find(m=>!m.dead&&MT[m.type].boss&&praidKey(m)===key)||null;}
+function praidStart(){PRAID=Satisfy.raid.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),local:{
+ boss:k=>{const m=praidBoss(k);return m?{hp:m.hp,max:m.max}:null;},
+ setHp:(k,r)=>{const m=praidBoss(k);if(m)m.hp=Math.max(1,Math.round(m.max*r));},
+ kill:k=>{const m=praidBoss(k);if(m){m.hp=0;m.praidKill=1;killMon(m);m.praidKill=0;}},
+ damage:(k,n)=>{const m=praidBoss(k);if(!m)return;m.hp-=n;m.hurt=.15;num(m.x,monY(m)-8,String(n),'#9fe0ff',false);if(m.hp<=0)killMon(m);},
+ claimed:e=>!!(S&&S.raidDone&&S.raidDone.includes(e)),
+ claim:e=>{if(!S||S.__demo)return;S.raidDone=(S.raidDone||[]).concat(e).slice(-30);save(true);}}});
+ PRAID.on(e=>{if(e.type==='killed'){toast(t('raidKill'),'good');SFX.quest();}});}
+// hitMon(): true when a party member's hit was handed to the leader (the local copy keeps its HP)
+function praidHit(m,dmg){if(!MT[m.type].boss)return false;if(PRAID.hit(praidKey(m),dmg)){m.hp+=dmg;return true;}return false;}
 function netSetState(s){netState=s;netSig='';}
 function netBtn(){const b=$('onlineBtn');if(!b)return;b.hidden=NETQ!=='online';b.disabled=netState==='AUTHENTICATING'||netState==='JOINING';
  if(netUser){delete b.dataset.i18n;b.textContent=t('netSignedIn',{n:netUser.displayName||netUser.uid.slice(0,6)});}

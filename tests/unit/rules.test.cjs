@@ -76,6 +76,10 @@ test('inbox: only the owner reads and deletes; senders create write-once message
   assert.deepEqual(types.filter((x) => x.startsWith('party.')), ['party.invite', 'party.accept', 'party.decline', 'party.kick']);
   const { duel: DU } = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/duel.js');
   assert.deepEqual(types.filter((x) => x.startsWith('duel.')), [...DU.TYPES], 'every duel message can travel');
+  const { raid: RA } = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/party.js', 'src/net/raid.js');
+  assert.deepEqual(types.filter((x) => x.startsWith('raid.')), [...RA.TYPES], 'every raid message can travel');
+  assert.match(msg.payload.raid['.validate'], /length <= 64/);
+  assert.match(msg.payload['.validate'], /beginsWith\('raid\.'\)/);
   const fake = fs.readFileSync(path.join(ROOT, 'tests/harness/fake-firebase.js'), 'utf8');
   assert.deepEqual(expand(/if \(!\/(.*)\/\.test\(v\.type\)\)/.exec(fake)[1]), types, 'the fake accepts the same types');
   for (const f of ['party', 'duel']) assert.match(msg.payload[f]['.validate'], /length <= 40/);

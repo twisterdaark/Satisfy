@@ -91,10 +91,10 @@
             ".validate": "newData.isNumber() && newData.val() >= 0"
           },
           "type": {
-            ".validate": "newData.isString() && newData.val().matches(/^(party\\.(invite|accept|decline|kick)|duel\\.(challenge|accept|decline|ready|hit|hp|yield|end))$/)"
+            ".validate": "newData.isString() && newData.val().matches(/^(party\\.(invite|accept|decline|kick)|duel\\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\\.(hit|state|kill))$/)"
           },
           "payload": {
-            ".validate": "newData.hasChild('to') && ((newData.parent().child('type').val().beginsWith('party.') && newData.hasChild('party') && !newData.hasChild('duel')) || (newData.parent().child('type').val().beginsWith('duel.') && newData.hasChild('duel') && !newData.hasChild('party')))",
+            ".validate": "newData.hasChild('to') && ((newData.parent().child('type').val().beginsWith('party.') && newData.hasChild('party') && !newData.hasChild('duel')) || (newData.parent().child('type').val().beginsWith('duel.') && newData.hasChild('duel') && !newData.hasChild('party')) || (newData.parent().child('type').val().beginsWith('raid.') && newData.hasChild('raid') && !newData.hasChild('party') && !newData.hasChild('duel')))",
             "to": {
               ".validate": "newData.val() === $uid"
             },
@@ -105,10 +105,13 @@
               ".validate": "newData.isString() && newData.val().length <= 40"
             },
             "k": {
-              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
             },
             "n": {
-              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
+            },
+            "raid": {
+              ".validate": "newData.isString() && newData.val().length <= 64"
             },
             "$other": {
               ".validate": false
