@@ -145,7 +145,8 @@ In the game: `?net=local` turns it on; remote players are drawn only inside the 
 | `leave()`, `kick(uid)` | A leader who leaves removes everyone. Members leave when the leader has been missing for 5 s. |
 | `members()` | Self first, then remotes whose `PlayerPublic.party` matches (the leader counts only players who accepted). Remotes carry `hp` (their public health %, or `null`). |
 | `ping(x, y)` | SAT-ONLINE-021: marks a spot for the other members (`'sent'`, `'noParty'`, `'tooFast'`; one per `PING_MS` = 1.5 s). Everyone, the sender too, gets a `ping` event `{uid, handle, x, y, self}`; pings from non-members, floods and impossible coordinates are dropped. |
-| `tick()`, `on(fn)` | Events: `invite, joined, youJoined, declined, left, memberLeft, kicked, dissolved, full, ping`. |
+| `tick()`, `on(fn)` | Events: `invite, joined, youJoined, declined, left, memberLeft, kicked, dissolved, full, ping, rejoined, newLeader {uid, self}, replaced`. |
+| Leader election | SAT-ONLINE-024: when the leader has been gone `LEAD_MS` (15 s) and two or more members remain, each picks the same new leader (lowest uid among the members seen while the leader was there) and the party moves to that leader's id. A member left alone dissolves after `GRACE_MS`, as before. A returning leader whose members moved on drops its party and auto-accepts the new leader's invite (`replaced`). |
 
 Messages `party.invite|accept|decline|kick` carry `{ to: uid, party }`; `party.ping` adds `k` = x and `n` = y. They go over BroadcastChannel locally, and through `inbox/{to}` in RTDB: only the recipient reads and deletes, a sender can't fake `from`, and messages older than 60 s are dropped. Until Server Authority a party is cosmetic: it gives no shared XP or loot.
 
@@ -301,6 +302,7 @@ await g.close(); await H.closeBrowser();
 - **api 1, fix** (SAT-ONLINE-004 review, #12): the Firebase transport knows a remote session as `uid + '.' + sid` (the uid is the node key the rules verify) and drops nodes whose `uid` isn't their key, so copying someone's `sid` (or a huge `seq`) can't hide or replace them. Rules: presence `y >= -4096` (the north), shard pinned to `main`.
 - **api 1, fix** (SAT-ONLINE-002 review, #10/#23): NET_LIVE: every in-game screen (`qd`, `gname`, `controls`, `enhfx`, `lang` too), so reading a quest neither hides the player nor forfeits a duel; `tests/unit/modes.test.cjs` checks it against every `mode=` in the game.
 - **api 1, fix** (SAT-ONLINE-001 review, #10): `world().y0` = `-NR*TS`, the top edge; `validatePlayerPublic` accepts `y >= world.y0`, so players in the north (negative y) are no longer dropped.
+- **api 1, additive** (SAT-ONLINE-024): party leader election (`LEAD_MS`, events `newLeader`, `replaced`). No rules change.
 - **api 1, additive** (SAT-ONLINE-023): party rejoin after a reload (`store`, `wall`, `REJOIN_MS`, `KEY`, event `rejoined`, `accept(pid, quiet)`); a member's `leave()` tells the leader. No rules change.
 - **api 1, additive** (SAT-ONLINE-022): `PlayerPublic.em` ∈ `Satisfy.net.EMOTES` (`wave, dance, point, cheer`) or null; V / the touch Emote button opens the list; 3 s per emote, one per 2 s. Presence + rules field (redeploy).
 - **api 1, additive** (SAT-ONLINE-021): `PlayerPublic.hp` (health %, 5% steps), `party.ping(x, y)` / `'ping'` events (`party.ping {to, party, k: x, n: y}` in the inbox), `party.members()[].hp`, `net().pings`; party HP bars, Alt+click pings, party members and pings on the minimap, a Ping button on the touch row. Presence + inbox rules (redeploy).

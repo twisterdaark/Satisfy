@@ -52,7 +52,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-019 �
 | U046 | Nearby player context | ✅ | SAT-ONLINE-020: click/tap a player → card with Invite / Duel / Block, aimed at their uid (`regression/playermenu`: twin names) |
 | U047 | Party invite | ✅ | SAT-ONLINE-003: invites expire after 30 s, decline, busy/full replies; blocked senders dropped (016) |
 | U048 | Party accept | 🟡 | The leader caps the party at 5 when accepts arrive; no server transaction yet |
-| U049 | Party leader election | ❌ | The party dissolves when the leader leaves |
+| U049 | Party leader election | ✅ | SAT-ONLINE-024: a leader gone 15 s (longer than a reload) is replaced by the remaining member with the lowest uid; members whose clocks differ still agree; a returning old leader joins the new party (`regression/partylead`) |
 | U050 | Party roles | ❌ | |
 | U051 | Party HP UI | ✅ | SAT-ONLINE-021: `PlayerPublic.hp` (5% steps, nothing else of the profile); a bar per member in the party panel |
 | U052 | Party pings | ✅ | SAT-ONLINE-021: Alt+click (touch: Ping marks where you stand) → `party.ping`; a ring on the ground and the minimap for 3 s; one per member per 1.5 s |
@@ -70,4 +70,4 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-019 �
 | U064 | Player inspect | ✅ | SAT-ONLINE-020: the card shows only PlayerPublic (name, level, class, title, party, armour) |
 | U065 | Party reconnect | ✅ | SAT-ONLINE-023: the party lives in the tab's sessionStorage; within 60 s a reloaded member auto-accepts its leader's invite back and a reloaded leader keeps its party. Leaving on purpose is final (`regression/rejoin`) |
 
-**Totals (social):** ✅ 7 · 🟡 4 · ⏳ 6 · ❌ 3.
+**Totals (social):** ✅ 8 · 🟡 4 · ⏳ 6 · ❌ 2.
