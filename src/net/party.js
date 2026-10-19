@@ -9,7 +9,10 @@
  * members follow the leader and leave when the leader disappears. A party grants nothing yet
  * (no shared XP or loot), so a modified client gains nothing by faking membership.
  *
- * Exposes `Satisfy.party.create({ presence, uid, now?, max? })`.
+ * Pings (SAT-ONLINE-021, doc §35 U052): party.ping {to, party, k: x, n: y} marks a map spot for every other
+ * member for 3 s, at most one per member every PING_MS.
+ *
+ * Exposes `Satisfy.party.create({ presence, uid, now?, max?, blocked? })`.
  */
 (function (root) {
   'use strict';
@@ -17,6 +20,7 @@
   var MAX = 5;
   var INVITE_MS = 30000;  // an unanswered invite expires
   var GRACE_MS = 5000;    // presence may lag; a member/leader missing this long has left
+  var PING_MS = 1500;     // pings: at most one per member this often (sent and received)
 
   function idFor(uid) { return 'p_' + String(uid).slice(0, 38); }
 
@@ -27,7 +31,7 @@
     var accepted = new Map();   // leader: uid -> last time presence showed them in the party
     var outgoing = new Map();   // leader: uid -> invite time
     var invites = new Map();    // invitee: partyId -> {party, from, sid, handle, t}
-    var leaderOk = 0, listeners = [];
+    var leaderOk = 0, listeners = [], pingOut = -1e9, pingIn = new Map();
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function byUid(uid) { var hit = null; P.remotes().forEach(function (r) { if (r.uid === uid) hit = r; }); return hit; }
@@ -58,6 +62,15 @@
         case 'party.decline':
           if (outgoing.delete(from.uid)) emit({ type: 'declined', handle: from.handle });
           break;
+        case 'party.ping': {
+          if (!id || pl.party !== id || !api.members().some(function (m) { return !m.self && m.uid === from.uid; })) return;
+          var px = Math.round(+pl.k), py = Math.round(+pl.n), last = pingIn.get(from.uid);
+          if (!(px >= 0 && py >= 0 && px < 16384 && py < 4096)) return;
+          if (last != null && now() - last < PING_MS) return;
+          pingIn.set(from.uid, now());
+          emit({ type: 'ping', uid: from.uid, handle: from.handle, x: px, y: py, self: false });
+          break;
+        }
         case 'party.kick':
           if (id && pl.party === id && leader === from.uid) { clear(); emit({ type: 'kicked', handle: from.handle }); }
           break;
@@ -109,6 +122,17 @@
         emit({ type: 'left' });
         return true;
       },
+      /** Mark a map spot (pixels) for the other members. Returns 'sent', 'noParty' or 'tooFast'. */
+      ping: function (x, y) {
+        var to = api.members().filter(function (m) { return !m.self; });
+        if (!id || !to.length) return 'noParty';
+        if (now() - pingOut < PING_MS) return 'tooFast';
+        pingOut = now();
+        x = Math.max(0, Math.round(x)); y = Math.max(0, Math.round(y));
+        to.forEach(function (m) { P.send('party.ping', { to: m.uid, party: id, k: x, n: y }); });
+        emit({ type: 'ping', uid: self, handle: null, x: x, y: y, self: true });
+        return 'sent';
+      },
       kick: function (uid) {
         if (!id || leader !== self || !accepted.has(uid)) return false;
         send('party.kick', uid);
@@ -122,7 +146,7 @@
         P.remotes().forEach(function (r) {
           if (r.party !== id) return;
           if (leader === self ? !accepted.has(r.uid) : false) return;
-          out.push({ uid: r.uid, handle: r.handle, lv: r.lv, leader: r.uid === leader });
+          out.push({ uid: r.uid, handle: r.handle, lv: r.lv, leader: r.uid === leader, hp: typeof r.hp === 'number' ? r.hp : null });
         });
         return out;
       },
@@ -151,5 +175,5 @@
   }
 
   var ns = root.Satisfy = root.Satisfy || {};
-  ns.party = Object.freeze({ create: create, idFor: idFor, MAX: MAX, INVITE_MS: INVITE_MS, GRACE_MS: GRACE_MS });
+  ns.party = Object.freeze({ create: create, idFor: idFor, MAX: MAX, INVITE_MS: INVITE_MS, GRACE_MS: GRACE_MS, PING_MS: PING_MS });
 })(typeof window !== 'undefined' ? window : globalThis);

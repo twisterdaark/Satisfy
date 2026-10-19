@@ -8,7 +8,7 @@
  *   presence/{world}/{shard}/{uid} = PlayerPublic (nulls omitted) + seq, t = server time; written in full
  *                                    once per connection, then update() with only the changed fields
  *   inbox/{uid}/{pushId}           = {from, sid, seq, type: party.* | duel.* | raid.* | chat.say, payload, t}
- *                                    payload {to, party}, {to, duel, k?, n?}, {to, raid, k?, n?} or
+ *                                    payload {to, party} (party.ping: + k = x, n = y), {to, duel, k?, n?}, {to, raid, k?, n?} or
  *                                    {to, party, text}; read and deleted by the
  *                                    recipient only; older than 60 s is dropped
  *   profiles/{uid}, cloudIndex/{uid}/{pid}, cloudSaves/{uid}/{pid}: see src/net/cloud.js
@@ -79,12 +79,16 @@
     // Round trip (doc U015): how long the server takes to acknowledge a presence write, smoothed.
     var rtt = null, writes = 0, fails = 0;
     function acked(t0) { return function () { var ms = Date.now() - t0; rtt = rtt == null ? ms : Math.round(rtt * 0.8 + ms * 0.2); }; }
-    var DIRECTED = /^(party\.(invite|accept|decline|kick)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say))$/;
+    var DIRECTED = /^(party\.(invite|accept|decline|kick|ping)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say))$/;
     // exactly the fields the inbox rules accept: party {to, party}, duel {to, duel, k?, n?}, raid {to, raid, k?, n?},
     // chat {to, party, text}
     function directedPayload(type, p) {
       var o = { to: p.to };
-      if (type.indexOf('party.') === 0) { o.party = String(p.party || ''); return o; }
+      if (type.indexOf('party.') === 0) {
+        o.party = String(p.party || '');
+        if (type === 'party.ping') { o.k = Math.max(0, Math.min(10000000, Math.round(+p.k || 0))); o.n = Math.max(0, Math.min(10000000, Math.round(+p.n || 0))); }
+        return o;
+      }
       if (type.indexOf('chat.') === 0) { o.party = String(p.party || ''); o.text = String(p.text || ''); return o; }
       if (type.indexOf('raid.') === 0) o.raid = String(p.raid || ''); else o.duel = String(p.duel || '');
       if (typeof p.k === 'number' && p.k >= 0 && p.k <= 1000000000) o.k = Math.round(p.k);
@@ -107,6 +111,7 @@
       if (pp.party === undefined) pp.party = null;
       if (pp.duel === undefined) pp.duel = null;
       if (pp.mv === undefined) pp.mv = null;
+      if (pp.hp === undefined) pp.hp = null;
       if (typeof pp.t !== 'number') pp.t = 0;
       return { v: 1, type: 'presence.state', requestId: null, sessionId: pp.sid, seq: +v.seq || 0, tick: 0, payload: pp };
     }

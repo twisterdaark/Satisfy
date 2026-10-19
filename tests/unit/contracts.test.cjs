@@ -100,6 +100,20 @@ test('PlayerPublic.duel (U034): "<duel id>:<HP>" or null, validated', () => {
   assert.deepEqual(N.validatePlayerPublic({ ...pp, duel: 'nope' }).errors, ['duel']);
 });
 
+test('SAT-ONLINE-021: hp is a percentage in 5% steps, optional', () => {
+  const S = { look: { n: 'Grid' }, cls: 'novice', lv: 3, title: '' }, P = { x: 1, y: 1, dir: 0 };
+  assert.equal(N.toPlayerPublic(S, P, {}).hp, null);
+  assert.equal(N.toPlayerPublic(S, P, { hp: 61.9 }).hp, 60);
+  assert.equal(N.toPlayerPublic(S, P, { hp: 63 }).hp, 65);
+  assert.equal(N.toPlayerPublic(S, P, { hp: 250 }).hp, 100);
+  assert.equal(N.toPlayerPublic(S, P, { hp: -3 }).hp, 0);
+  assert.equal(N.toPlayerPublic(S, P, { hp: NaN }).hp, null);
+  const ok = N.toPlayerPublic(S, P, { hp: 40 });
+  assert.equal(N.validatePlayerPublic(ok).ok, true);
+  assert.deepEqual(N.validatePlayerPublic({ ...ok, hp: 101 }).errors, ['hp']);
+  assert.deepEqual(N.validatePlayerPublic({ ...ok, hp: 2.5 }).errors, ['hp']);
+});
+
 // review fix (#10): on the current map the north (rows -NR..-1) is at negative y
 test('positions above row 0 are inside the world when world.y0 says so', () => {
   const W = { id: 'satisfy', tile: 16, w: 724, h: 184, y0: -960 };

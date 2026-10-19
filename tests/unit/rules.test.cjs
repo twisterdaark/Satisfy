@@ -10,7 +10,7 @@ const { net: N } = loadModules('src/net/contracts.js');
 const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')).rules;
 const node = rules.presence.$world.$shard.$uid;
 const firebaseJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'firebase.json'), 'utf8'));
-const NULLABLE = ['title', 'room', 'party', 'duel', 'mv']; // omitted when null/empty is allowed by the client
+const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp']; // omitted when null/empty is allowed by the client
 
 test('deny by default; presence readable only when signed in, writable only by its owner', () => {
   assert.equal(rules['.read'], false);
@@ -84,7 +84,7 @@ test('inbox: only the owner reads and deletes; senders create write-once message
   const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
   const sent = expand(/DIRECTED = \/(.*)\/;/.exec(fb)[1]);
   assert.deepEqual(types, sent, 'rules accept exactly the messages the transport sends');
-  assert.deepEqual(types.filter((x) => x.startsWith('party.')), ['party.invite', 'party.accept', 'party.decline', 'party.kick']);
+  assert.deepEqual(types.filter((x) => x.startsWith('party.')), ['party.invite', 'party.accept', 'party.decline', 'party.kick', 'party.ping']);
   const { duel: DU } = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/duel.js');
   assert.deepEqual(types.filter((x) => x.startsWith('duel.')), [...DU.TYPES], 'every duel message can travel');
   const { raid: RA } = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/party.js', 'src/net/raid.js');
