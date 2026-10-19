@@ -128,6 +128,16 @@ async function openGame(opts = {}) {
  * A fresh isolated browser context with the deterministic init script and no network.
  * @param {{scripts?:string[]}} [opts] extra init scripts (paths), e.g. tests/harness/fake-firebase.js
  */
+/**
+ * An init script that runs the page's Date.now on a fixed moment (moving on in real time). The weather, world events and
+ * sieges follow the wall clock, so a test that compares drawings or monster positions passes at any hour on this one:
+ * 2026-01-05 09:40:30 UTC, clear weather, no event, no siege (SAT-ONLINE-057/062). The offset is fixed when this is
+ * called, so every page of one context shares one clock.
+ */
+function fixedClock(at = 1767606030000) {
+  return { content: `(() => { const real = Date.now.bind(Date), off = ${at} - ${Date.now()}; Date.now = () => real() + off; })();` };
+}
+
 async function newContext(opts = {}) {
   const ctx = await (await browser()).newContext();
   await ctx.addInitScript(INIT_SCRIPT);
@@ -191,6 +201,6 @@ async function snapshot(g) {
 }
 
 module.exports = {
-  ROOT, CURRENT_HTML, BASELINE_SHA, R0_SHA, LEGACY_KEY, FAKE_FIREBASE, DEFAULT_LOOK, VOLATILE_S, IDENTITY_S,
+  ROOT, CURRENT_HTML, BASELINE_SHA, R0_SHA, LEGACY_KEY, fixedClock, FAKE_FIREBASE, DEFAULT_LOOK, VOLATILE_S, IDENTITY_S,
   openGame, newContext, closeBrowser, baselineHtml, newGame, continueGame, snapshot,
 };
