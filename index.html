@@ -1375,7 +1375,26 @@ let auT=0;function updateAuction(dt){if((auT-=dt)<=0){auT=5;auTick();}}
 // A world boss on the peak north of Reinhardt. It breathes fire in a cone it telegraphs first, slams the ground, and once
 // killed stays dead for half an hour; that time lives in the shared world state (WS.wb) so every player sees the same
 // dragon. Online the server owns its health so everyone who joins the fight hits the same dragon.
-function dragonDown(m){WS.wb=WS.wb||{};WS.wb.trauka=Date.now()+MT.trauka.wb*1000;giveTitle('dslayer');setTimeout(()=>annW('drDown'),500);save(true);}
+function dragonDown(m){WS.wb=WS.wb||{};WS.wb.trauka=Date.now()+MT.trauka.wb*1000;wbPut('trauka');giveTitle('dslayer');setTimeout(()=>annW('drDown'),500);save(true);}
+/* SAT-ONLINE-056: online the dragon's half hour is world/satisfy/wb/{type} {at, by, t} (server time), written once per kill
+   by whoever killed it: everyone's WS.wb follows it, and a player who wasn't there finds the dragon dead too (it was only
+   on the screens of those in the fight). */
+let WBS=null,wbOff=null;
+function wbOnline(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET);}
+function wbOffs(){return NETTR&&NETTR.serverOffset?NETTR.serverOffset():0;}
+function wbPut(type){if(!wbOnline()||!MT[type]||!MT[type].wb)return;const D=FB.m.database,u={};u['world/satisfy/wb/'+type]={at:Math.round(Date.now()+wbOffs()+MT[type].wb*1000),by:NET.uid,t:D.serverTimestamp()};D.update(D.ref(FB.db),u).catch(()=>{});}
+function wbSub(){if(wbOff||!wbOnline())return;const D=FB.m.database;if(!D.onValue){wbOff=1;return;}
+ try{wbOff=D.onValue(D.ref(FB.db,'world/satisfy/wb'),s=>{WBS=s.val()||{};wbApply();},()=>{WBS=null;});}catch(e){wbOff=1;}}
+/* a live one is put down quietly only off screen: near you, the fight's own sync ends it (with its rewards); a dead one
+   keeps its corpse until the shared time instead of the 25 s a follower's copy waits */
+function wbApply(){if(!WBS||!WS||!S||S.__demo)return false;WS.wb=WS.wb||{};const now=Date.now();let run=false;
+ for(const type in WBS){const v=WBS[type];if(!v||typeof v.at!=='number'||!MT[type])continue;const at=v.at-wbOffs();if(at<=now)continue;run=true;
+  if(!(WS.wb[type]>=at-2000))WS.wb[type]=at;const r=(at-now)/1000;
+  for(const m of mons){if(m.type!==type)continue;if(!m.dead){if(Math.hypot(m.x-P.x,m.y-P.y)>360){m.dead=true;m.dying=0;m.rt=r;}}else if(m.rt<r-2)m.rt=r;}}
+ return run;}
+let wbW=null,wbT=0;
+function wbTick(){if(!wbOff&&wbOnline())wbSub();if(!WBS)return;const n=performance.now();if(wbW!==WS||n-wbT>2000){wbW=WS;wbT=n;if(!wbApply())wbT=n+1e4;}}
+window.__GB2={get data(){return WBS},apply:wbApply,put:wbPut,kill:m=>killMon(m),fb:()=>FB}; // tests
 function updateDragon(dt){const m=mons.find(m=>m.type==='trauka');if(!m||m.dead||mode==='dead')return;
  // SAT-ONLINE-045: online the host times and aims the breath (at the player the dragon is after) and sends it as an
  // action; a follower only plays the breath it was sent, and each screen burns its own player if it stands in the cone
@@ -1672,8 +1691,21 @@ function dailyLines(){const D=dlyS();return t('dHead',{s:D.streak||0})+'\n'+dail
 // character); offline the canon top rankers fill the board and the player is placed among them by the same rule.
 const RKN=[['kraugel',312,9.2e6],['zibal',298,7.1e6],['peaks',295,5.4e6],['huroi',290,4.8e6],['regas',286,1.2e6],['jishuka',281,3.9e6],['damian',276,6.3e6],['euphemina',270,8.8e6],['faker',266,2.7e6],['vantner',261,2.1e6],['pon',255,4.2e6],['toon',248,3.3e6]];
 function rankList(kind){const fmt=v=>kind==='lv'?'Lv '+v:v.toLocaleString()+' G',me={n:S.look.n||t('pname'),me:1,v:kind==='lv'?S.lv:S.gold};
- const L=(WS.ranks&&WS.ranks[kind])||RKN.map(([k,lv,g])=>({n:t('rk_'+k),v:kind==='lv'?lv:g})),all=[...L.filter(x=>x.pid!==pidOf()),me].sort((a,b)=>b.v-a.v),i=all.indexOf(me);
+ const L=(RNKD&&RNKD[kind])||(WS.ranks&&WS.ranks[kind])||RKN.map(([k,lv,g])=>({n:t('rk_'+k),v:kind==='lv'?lv:g})),all=[...L.filter(x=>x.pid!==pidOf()),me].sort((a,b)=>b.v-a.v),i=all.indexOf(me);
  const out=all.slice(0,10).map((x,j)=>`${j+1}. ${x.me?'★ ':''}${x.n} · ${fmt(x.v)}`);if(i>=10)out.push(`... ${i+1}. ★ ${me.n} · ${fmt(me.v)}`);return out.join('\n');}
+/* online rankings (SAT-ONLINE-055): online the clerk's lists are real. Every player's level and gold go to
+   ranks/{lv|gold}/{uid} {v, n, t} (each writes its own, at most every 2 minutes, when they changed); the board shows the
+   real players' top 10 among the canon rankers, refreshed every 90 s. Offline it is as it was. */
+var RNKD=null,rkT=-1e9,rkPutT=-1e9,rkLast='';
+function rkOnline(){return !!(FB&&netUser&&NET&&NETTR&&NETTR.kind==='firebase');}
+function rankTick(live){if(!live||!rkOnline()||!S||S.__demo)return;const now=performance.now();
+ if(now-rkPutT>120000){rkPutT=now;const sig=(S.lv|0)+'|'+Math.floor(S.gold);if(sig!==rkLast){rkLast=sig;const D=FB.m.database,u={},n=String(netId||S.look.n||'?').slice(0,24);
+  u['ranks/lv/'+NET.uid]={v:S.lv|0,n,t:D.serverTimestamp()};u['ranks/gold/'+NET.uid]={v:Math.max(0,Math.floor(S.gold)),n,t:D.serverTimestamp()};D.update(D.ref(FB.db),u).catch(()=>{rkLast='';});}}
+ if(now-rkT>90000){rkT=now;Promise.all([rankTop('lv'),rankTop('gold')]).then(([lv,gold])=>{RNKD={lv:rankMix('lv',lv),gold:rankMix('gold',gold)};}).catch(()=>{});}}
+function rankTop(k){const D=FB.m.database,ref=D.ref(FB.db,'ranks/'+k),q=D.limitToLast&&D.orderByChild?D.query(ref,D.orderByChild('v'),D.limitToLast(10)):ref;
+ return D.get(q).then(s=>{const v=s.val()||{},a=[];for(const u in v)if(v[u]&&typeof v[u].v==='number')a.push({pid:u===NET.uid?pidOf():'u:'+u,n:Satisfy.chat.clean(v[u].n,24)||'?',v:v[u].v});return a.sort((x,y)=>y.v-x.v).slice(0,10);});}
+function rankMix(kind,real){return [...real,...RKN.map(([k,lv,g])=>({n:t('rk_'+k),v:kind==='lv'?lv:g}))];}
+window.__GK2={list:k=>rankList(k),now:()=>{rkT=-1e9;rkPutT=-1e9;rkLast='';},data:()=>RNKD}; // test hook
 function legendLines(){const L=WS.legends||{};return ['pagma','braham','muller'].map(k=>`${t('lg_'+k)}: ${L[k]?L[k].n:t('lgNone')}`).join('\n');}
 // each ranking opens straight on its list, titled "Rankings Clerk: Wealth" and so on
 function rankerOpts(){const back=()=>shopD('ranker','rk_hi'),hd=k=>t(k).replace(/^\[|\]$/g,'').split(/:\s*/).pop(),D=(k,...ls)=>dialog('ranker',ls.map(l=>[t('ranker')+': '+hd(k),l]),back);return [
@@ -2966,6 +2998,29 @@ function spawnSquad(T,n,by){const out=[],b=MT.gsold;for(let i=0;i<n;i++){const a
    castle and each territory lives at world/satisfy/own/{castle|territory}: {g guild id, n its name, c colour, h the ID of the
    player who took it, t}. Everyone reads it and draws the same flag and name; the capture also goes out as world news.
    Without the rules for it (or offline) each player keeps their own record as before. */
+/* one legendary class per world, online (SAT-ONLINE-054; plan doc D2): Pagma's, Braham's and Muller's Successor (the
+   Sword Saint) were one per world only on your own device (WS.legends). Online the record is world/satisfy/legends/{k}
+   {uid, n, t}: taking the class writes it first, and the rules take it once, so two players can't both become the same
+   legend; everyone's WS.legends follows the database (the shrines, the rankings clerk's list, "already taken by ...").
+   A legend taken offline is put online the first time its owner plays online, if it is still free. Offline nothing
+   changes. */
+Object.assign(STR.ar,{legTaken:'الأسطورة دي خدها {n} قبلك'});Object.assign(STR.en,{legTaken:'{n} took this legend before you'});
+let LEGS=null,legOff=null,legW=null;const LEGK={pagma:'pagma',braham:'braham',muller:'saint'}; // record key -> class
+function legOnline(){return !!(FB&&netUser&&NET&&NETTR&&NETTR.kind==='firebase');}
+function legSub(){if(legOff||!legOnline()||!WS)return;const D=FB.m.database;if(!D.onValue){legOff=1;return;}
+ try{legOff=D.onValue(D.ref(FB.db,'world/satisfy/legends'),s=>{LEGS=s.val()||{};legApply();},()=>{LEGS=null;});}catch(e){legOff=1;}}
+function legClaim(k){const D=FB.m.database,u={};u['world/satisfy/legends/'+k]={uid:NET.uid,n:String(netId||S.look.n||'?').slice(0,24),t:D.serverTimestamp()};return D.update(D.ref(FB.db),u);}
+function legApply(){if(!LEGS||!WS||!S||S.__demo||!NET)return;legW=WS;const L=WS.legends||(WS.legends={});
+ for(const k in LEGK){const v=LEGS[k];
+  if(v&&typeof v.uid==='string')L[k]={pid:v.uid===NET.uid?pidOf():'u:'+v.uid,n:Satisfy.chat.clean(v.n,24)||'?'};
+  else if(L[k]&&L[k].pid===pidOf()){if(S.cls===LEGK[k])legClaim(k).catch(()=>{});} // ours from offline: online now, if still free
+  else if(L[k])delete L[k];}} // freed online
+function legTick(){if(!legOff&&legOnline())legSub();if(LEGS&&legW!==WS)legApply();}
+// taking a legendary class online: the database record first (once per world), then the class itself
+function legWrap(k,f){return function(...a){if(!legOnline()||!S||S.__demo)return f.apply(this,a);const L=WS.legends||{};if(L[k]&&L[k].pid!==pidOf())return f.apply(this,a); // f says it is taken
+ legClaim(k).then(()=>{(WS.legends||(WS.legends={}))[k]={pid:pidOf(),n:netId||S.look.n};f.apply(this,a);},()=>{const v=LEGS&&LEGS[k];SFX.deny();toast(t('legTaken',{n:v?Satisfy.chat.clean(v.n,24)||'?':'?'}),'warn');});};}
+becomePagma=legWrap('pagma',becomePagma);becomeBraham=legWrap('braham',becomeBraham);becomeSaint=legWrap('muller',becomeSaint);
+window.__GL={become:k=>({pagma:becomePagma,braham:becomeBraham,muller:becomeSaint})[k](),legends:()=>WS&&WS.legends,db:()=>LEGS,apply:()=>legApply()}; // test hook
 const OWNG={};let OWN=null,ownOff=null;
 function ownSub(){if(ownOff||!FB||!netUser||!NET||!WS)return;const D=FB.m.database;if(!D.onValue){ownOff=1;return;}
  try{ownOff=D.onValue(D.ref(FB.db,'world/satisfy/own'),s=>{OWN=s.val()||{};ownApply();},()=>{OWN=null;});}catch(e){ownOff=1;}}
@@ -3410,7 +3465,7 @@ let annT=0;function announce(msg,own){logMsg(msg);const W=$('announce');W.queryS
 // through the news feed, named by your account ID. A story notice is shown once per character, whoever's clock fires it first.
 const NEWS=['bntDone','evWin','evCap','castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
 function annArgs(p,n){const o={...p,n};if('rk' in o){o.r=t('r'+o.rk);delete o.rk;}return o;}
-function annW(k,p){p=p||{};announce(t(k,annArgs(p,t('pname'))));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo)return;
+function annW(k,p){p=p||{};announce(t(k,annArgs(p,t('pname'))));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!netId)return; // no account ID yet: the rules take news only under one
  const q={};for(const f of ['lv','f','rk'])if(typeof p[f]==='number')q[f]=p[f];NETTR.feedSay('news',Object.assign({from:NET.uid,h:netId||S.look.n,k},Object.keys(q).length?{p:q}:{}));}
 function newsIn(m){if(!m||!NEWS.includes(m.k)||!NET||m.from===NET.uid||isBlocked(m.from)||!S||S.__demo)return;
  if(m.k==='annGrid'){if(S.ev.grid)return;S.ev.grid=1;announce(t('annGrid'));SFX.notice();return;}
@@ -4427,6 +4482,9 @@ function netTick(){NET.tick();const live=netLive();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
  if(TRADE)TRADE.tick();
+ legTick();
+ rankTick(live);
+ wbTick();
  if(GUILD)guildTick();
  if(PRAID)PRAID.tick();
  mobTick(live);

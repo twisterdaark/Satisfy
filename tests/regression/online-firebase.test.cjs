@@ -83,7 +83,10 @@ test('two signed-in players see each other through the database; writes pass the
     assert.equal(await a.eval(() => document.getElementById('netB').textContent), 'Online · players: 2 · Safe zone');
     // presence, the public profile (SAT-ONLINE-007), the session lease (SAT-ONLINE-010) and the account ID read (SAT-ONLINE-026)
     const paths = await a.eval(() => [...new Set(window.__fakeRTDB.log.map((l) => l.path))]);
-    assert.deepEqual(paths.filter((p) => !p.startsWith('mobs/')).sort(), ['accountIds/' + na.uid, 'presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]); // plus the shared-monster host node
+    // plus the shared-monster host node and the rankings (SAT-ONLINE-055: the top-10 reads and one root update of your own entries)
+    assert.deepEqual(paths.filter((p) => !p.startsWith('mobs/') && !p.startsWith('ranks/') && p !== '').sort(), ['accountIds/' + na.uid, 'presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]);
+    const roots = await a.eval(() => [...new Set(window.__fakeRTDB.log.filter((l) => l.op === 'update' && l.path === '').flatMap((l) => l.keys))]);
+    assert.ok(roots.every((k) => k === 'ranks/lv/' + na.uid || k === 'ranks/gold/' + na.uid), 'root updates: ' + roots);
     assert.deepEqual((await fake(a)).rejected, []);
     assert.deepEqual((await fake(b)).rejected, []);
     // link quality (doc U015/U020): acknowledged writes give a round trip, shown in the badge tooltip
