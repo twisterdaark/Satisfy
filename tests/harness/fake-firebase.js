@@ -280,7 +280,7 @@
       if (r.path === '.info/serverTimeOffset') { setTimeout(() => cb(snap(r.path, 0)), 0); return () => {}; }
       if (r.path !== '.info/connected') {
         const seg = r.path.split('/');
-        const ok = seg[0] === 'sessions' ? user && seg[1] === user.uid : seg[0] === 'presence' && seg.length === 4 && !!user;
+        const ok = seg[0] === 'sessions' ? user && seg[1] === user.uid : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);

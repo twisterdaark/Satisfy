@@ -84,7 +84,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #plW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*4.4);padding:calc(var(--u)*.8) calc(var(--u)*1.4);width:calc(var(--u)*34);max-height:calc(var(--u)*30);overflow-y:auto;font-size:calc(var(--u)*1.5);pointer-events:auto;z-index:45}
 #plL div{padding:calc(var(--u)*.25) 0;border-bottom:1px solid rgba(255,255,255,.12)}#plL div.me{color:#ffe7a8}
 #plW .row{display:flex;justify-content:center;margin-top:calc(var(--u)*.6)}#plW .row button{width:auto;padding:0 calc(var(--u)*1)}
-#updW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*9.5);z-index:60;pointer-events:auto;display:flex;align-items:center;gap:calc(var(--u)*1);padding:calc(var(--u)*.8) calc(var(--u)*1.4);font-size:calc(var(--u)*1.5)}#updW button{font:inherit;cursor:pointer}
+#updV{position:absolute;inset:0;z-index:59;pointer-events:auto;background:rgba(4,8,20,.72)}#updW small{opacity:.8}#updW{position:absolute;left:50%;transform:translate(-50%,-50%);top:50%;flex-wrap:wrap;justify-content:center;z-index:60;pointer-events:auto;display:flex;align-items:center;gap:calc(var(--u)*1);padding:calc(var(--u)*.8) calc(var(--u)*1.4);font-size:calc(var(--u)*1.5)}#updW button{font:inherit;cursor:pointer}
 #toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*3.8);z-index:55;pointer-events:none;display:grid;gap:calc(var(--u)*.4);justify-items:center;width:80%}
 .toast{background:rgba(8,14,30,.85);border:1px solid rgba(127,180,255,.5);padding:calc(var(--u)*.3) calc(var(--u)*1.1);border-radius:calc(var(--u)*.4);font-weight:700;animation:tin .25s ease-out}
 .toast.warn{border-color:#ff7a6a;color:#ffd0c8}.toast.good{border-color:var(--gold);color:#ffe7a8}
@@ -1403,6 +1403,8 @@ function drawHorse(x,y,dir,f,M,g=ctx,part){x=Math.round(x);y=Math.round(y);const
 // the rider sits: only the upper body shows above the saddle, with a leg hanging down the horse's side
 function drawRider(x,y,dir,f,ent){const b=[0,0,-1,0,1][f],ry=Math.round(y)-9+b;ctx.save();ctx.beginPath();ctx.rect(Math.round(x)-9,ry-25,18,17);ctx.clip();drawChar(pSpr(),x,ry,dir,0,false,0,ent);ctx.restore();
  if(dir>=2){const lx=Math.round(x)+(dir===2?-1:-1);R(ctx,lx,ry-8,2,4,'#3a3028');R(ctx,lx,ry-4,2,2,'#2a1a10');}}
+// the dust under someone else's galloping horse, as horseFx draws yours (Twister 2026-10-19)
+function horseFxR(r,fs,dt){fs.hfT=(fs.hfT||0)-dt;if(fs.hfT>0)return;fs.hfT=.06;fx.push({x:r.x+(rand()-.5)*10,y:r.y-1,vx:(rand()-.5)*20,vy:-10-rand()*12,t:.35,c:'#b8a888'});}
 function horseFx(dt){P.hfT=(P.hfT||0)-dt;if(P.hfT>0)return;P.hfT=.06;const d=P.dir,bx=d===2?-12:d===3?12:0,by=d===0?-14:d===1?2:0;
  if((P.rsp||0)>.5){for(let i=0;i<2;i++)fx.push({x:P.x+bx+(rand()-.5)*6,y:P.y-8+by+(rand()-.5)*10,vx:(d===2?-1:d===3?1:0)*(90+rand()*40),vy:(d===0?-1:d===1?1:0)*(90+rand()*40),t:.18,c:'rgba(230,240,255,.8)'});}
  fx.push({x:P.x+(rand()-.5)*10,y:P.y-1,vx:(rand()-.5)*20,vy:-10-rand()*12,t:.35,c:'#b8a888'});}
@@ -1656,12 +1658,16 @@ function endEvent(){const E=EV;EV=null;evDone=E.slot;mons=mons.filter(m=>!(m.evt
  if(E.e.tw){if(WS&&WS.nko)WS.nko={};if(E.won)E.kills=Math.max(1,E.kills);npcs.forEach(n=>n.nhp=NPCHP);if(E.kills>0)toast(E.fallen?t('evFallen',{n:E.fallen}):t('evSaved'),E.fallen?'warn':'good');}
  if(E.kills>0){const g=Math.round(E.kills*(10+S.lv)*(E.e.tw&&!E.fallen?1.5:1)*(E.won?1.5:1)),x=Math.round(E.xp*.5);S.gold+=g;gainXP(x);toast(t('evReward',{n:E.kills,g,x:Math.round(x)}),'good');SFX.quest();}
  toast(t('evOver',{e:t('evN_'+E.e.k)}));hudDirty=true;save(true);}
+// the town is saved: tell everyone online, so the event ends with the same notice for all (owner report: only the players
+// at Reidan saw that the invasion was over)
+function evWinSay(E){if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||typeof E.slot!=='number')return;NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:'evWin',p:{f:EVT.indexOf(E.e),lv:E.slot%100000}});}
+function evWinIn(m){const E=EV,f=m.p&&m.p.f;if(!E||typeof E.slot!=='number'||EVT.indexOf(E.e)!==f||m.p.lv!==E.slot%100000)return;const T=TOWNS.find(T=>T.k===E.e.tw);E.won=1;announce(t('evWon',{z:T?t(T.k):''}));SFX.legendary();for(const x of E.mons)if(!x.dead){x.dead=true;x.dying=.5;x.rt=1e9;}endEvent();}
 function updateEvents(dt){if(!S||!P)return;const n=evNow();
  if(EV&&(!n||n.slot!==EV.slot))endEvent();if(!EV&&n&&n.slot!==evDone)startEvent(n);
  if((evT-=dt)<=0){evT=1;const b=$('evbar');if(!EV){b.hidden=true;}else{const left=Math.max(0,EV.end-(typeof EV.slot==='number'?wNow():Date.now())),mm=Math.floor(left/60000),ss=String(Math.floor(left/1000)%60).padStart(2,'0');b.hidden=false;b.innerHTML=`<b>${esc(t('evN_'+EV.e.k))}</b> · ${mm}:${ss}`+evWhere(EV.e)+(EV.e.tw?` · ${esc(t('evWaveN',{n:EV.wave,m:EVW}))}`:'')+(EV.e.mob||EV.e.k==='fboss'?` · ${esc(t('evKills',{n:EV.kills}))}`:'');}}
  if(!EV)return;const e=EV.e;npcFight(dt);
  if(e.mob){const T=TOWNS.find(T=>T.k===e.tw);if(T&&Math.hypot(P.x-(T.rx*TS+8),P.y-(T.ry*TS+8))<760){EV.wt=(EV.wt||0)-dt;const alive=EV.mons.filter(m=>!m.dead).length;
-  if(EV.wave>=EVW&&!alive&&EV.mons.length){EV.won=1;announce(t('evWon',{z:t(T.k)}));SFX.legendary();endEvent();return;}
+  if(EV.wave>=EVW&&!alive&&EV.mons.length){EV.won=1;announce(t('evWon',{z:t(T.k)}));SFX.legendary();evWinSay(EV);endEvent();return;}
   // waves run on world time (one every EVWG from the event's start) and spawn from a seed of the event and the wave, so
   // every client near the town spawns the same monsters at the same moment; a late arrival joins at the current wave
   const st=typeof EV.slot==='number'?EV.end-EVLEN:EV.end-(EVF&&EVF.ms||60000),due=Math.min(EVW,Math.max(0,Math.floor(((typeof EV.slot==='number'?wNow():Date.now())-st-2000)/EVWG)+1));
@@ -2693,7 +2699,7 @@ function spawnSquad(T,n,by){const out=[],b=MT.gsold;for(let i=0;i<n;i++){const a
    Without the rules for it (or offline) each player keeps their own record as before. */
 const OWNG={};let OWN=null,ownOff=null;
 function ownSub(){if(ownOff||!FB||!netUser||!NET||!WS)return;const D=FB.m.database;if(!D.onValue){ownOff=1;return;}
- ownOff=D.onValue(D.ref(FB.db,'world/satisfy/own'),s=>{OWN=s.val()||{};ownApply();},()=>{OWN=null;});}
+ try{ownOff=D.onValue(D.ref(FB.db,'world/satisfy/own'),s=>{OWN=s.val()||{};ownApply();},()=>{OWN=null;});}catch(e){ownOff=1;}}
 function ownApply(){if(!OWN||!WS||!S)return;for(const k in OWN){const v=OWN[k];if(!v||typeof v.g!=='string'||v.g.length>48)continue;
   if(!WS.guilds[v.g])OWNG[v.g]={n:Satisfy.chat.clean(String(v.n||'?'),24)||'?',col:/^#[0-9a-fA-F]{6}$/.test(v.c||'')?v.c:'#9a9aa6'};
   const T=TERR.find(T=>T.k===k);
@@ -3067,12 +3073,13 @@ function toggleQuest(){$('quest').classList.toggle('min');SFX.click();}
 let annT=0;function announce(msg){logMsg(msg);$('anntext').textContent=msg;$('announce').hidden=false;annT=5;}
 // SAT-ONLINE-026 (owner feedback 12): announcements about you, and the story notices (annGrid), also reach everyone online
 // through the news feed, named by your account ID. A story notice is shown once per character, whoever's clock fires it first.
-const NEWS=['castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
+const NEWS=['evWin','castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
 function annArgs(p,n){const o={...p,n};if('rk' in o){o.r=t('r'+o.rk);delete o.rk;}return o;}
 function annW(k,p){p=p||{};announce(t(k,annArgs(p,t('pname'))));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo)return;
  const q={};for(const f of ['lv','f','rk'])if(typeof p[f]==='number')q[f]=p[f];NETTR.feedSay('news',Object.assign({from:NET.uid,h:netId||S.look.n,k},Object.keys(q).length?{p:q}:{}));}
 function newsIn(m){if(!m||!NEWS.includes(m.k)||!NET||m.from===NET.uid||isBlocked(m.from)||!S||S.__demo)return;
  if(m.k==='annGrid'){if(S.ev.grid)return;S.ev.grid=1;announce(t('annGrid'));SFX.notice();return;}
+ if(m.k==='evWin'){evWinIn(m);return;}
  if(m.k==='terrNews'||m.k==='castNews'){const T=TERR[m.p&&m.p.f|0];announce(t(m.k,{n:Satisfy.chat.clean(m.h,24)||'?',t:T?t(T.k):''}));SFX.notice();return;}
  const p={};for(const f of ['lv','f','rk'])if(m.p&&typeof m.p[f]==='number')p[f]=m.p[f];announce(t(m.k,annArgs(p,Satisfy.chat.clean(m.h,24)||'?')));SFX.notice();}
 function num(x,y,s,c,big){nums.push({x,y,s,c,big,t:.9});}
@@ -3875,13 +3882,17 @@ var MAPV;function mapHash(){let h=0x811c9dc5;for(let i=0;i<map.length;i++){h^=ma
 function mapV(){return MAPV||(MAPV=mapHash());}
 /* a new build (Twister 2026-10-19): on the public site the page checks its own ETag every minute; when a newer version is
    deployed, a box asks you to refresh (your game is saved first). The refresh adds a stamp so no cached copy comes back. */
+addEventListener('keydown',e=>{if(UPD&&e.code!=='F5'){e.preventDefault();e.stopImmediatePropagation();}},true); // nothing plays on under the refresh screen
 var UPD;function updReload(){try{if(S&&!S.__demo)save(true);}catch(e){}const q=new URLSearchParams(location.search);q.set('v',Date.now().toString(36));location.replace(location.pathname+'?'+q);}
-function updBanner(){if(UPD)return;UPD=1;const d=document.createElement('div');d.id='updW';d.className='sys';d.innerHTML=`<span>${esc(t('updT'))}</span><button>${esc(t('updB'))}</button>`;d.querySelector('button').onclick=updReload;$('ui').appendChild(d);SFX.notice();}
+// the refresh is required (Twister 2026-10-19): a dark screen covers the game, keys do nothing, and it refreshes by itself
+function updBanner(){if(UPD)return;UPD=1;const v=document.createElement('div');v.id='updV';$('ui').appendChild(v);const d=document.createElement('div');d.id='updW';d.className='sys';let n=15;
+ d.innerHTML=`<span>${esc(t('updT'))}</span><button>${esc(t('updB'))}</button><small></small>`;d.querySelector('button').onclick=updReload;$('ui').appendChild(d);SFX.notice();
+ const tick=()=>{d.querySelector('small').textContent=t('updAuto',{n});if(n--<=0)updReload();else setTimeout(tick,1000);};tick();}
 (function(){if(!/\.github\.io$/.test(location.hostname)||!window.fetch)return;let tag=null;
  const chk=()=>fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>{const e=r.headers.get('etag')||r.headers.get('last-modified');if(!e||UPD)return;if(tag===null)tag=e;else if(e!==tag)updBanner();}).catch(()=>{});
  chk();setInterval(chk,60000);})();
-Object.assign(STR.ar,{updT:'نزل تحديث جديد للعبة: اعمل ريفريش عشان تكمل مع الباقيين',updB:'ريفريش'});
-Object.assign(STR.en,{updT:'A new version of the game is out: refresh to keep playing with everyone',updB:'Refresh'});
+Object.assign(STR.ar,{updT:'نزل تحديث جديد للعبة: لازم تعمل ريفريش عشان تكمل مع الباقيين',updB:'ريفريش',updAuto:'هيعمل ريفريش لوحده كمان {n} ثانية'});
+Object.assign(STR.en,{updT:'A new version of the game is out: refresh to keep playing with everyone',updB:'Refresh',updAuto:'Refreshing by itself in {n} s'});
 function netZone(x,y){return y>=WMH*TS&&!dunAt(x,y)&&!roomAt(x,y)?'void':zoneAt(x,y);}
 function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(r.mv===mapV())return true;
  if(!netOtherV.has(r.sid)){netOtherV.add(r.sid);toast(t('netOtherV',{n:r.handle||'?'}),'warn');updBanner();}return false;}
@@ -3953,7 +3964,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   const wp=/^([a-z0-9_]+):(\d)(?::(\d{1,2}))?$/.exec(r.wp||''),wi=wp&&WSH[wp[1]]?{id:wp[1],r:+wp[2]}:null,wen=wp?+(wp[3]||0):0;
   const ft=Math.min(.1,(now-(fs.lt||now))/1000);fs.lt=now;fs.tr.forEach(a=>a.t-=ft);fs.tr=fs.tr.filter(a=>a.t>0);if(now<fs.du)fs.tr.push({x:r.x,y:r.y,dir:r.dir,t:.22});
   const swk=fs.sw?(now-fs.sw.t)/140:-1,sw=swk>=0&&swk<1?swk:-1,gu=Number.isInteger(r.gu)&&r.gu>=1&&r.gu<=256?r.gu-1:-1;
-  const pt=ptRemote(r,fs,ft),rd=pt.ride,hf=rd&&fr?1+((now/100)|0)%4:0;if(pt.pet){const a=pt.pet;ents.push({y:a.y,f:()=>drawPet(a)});}
+  const pt=ptRemote(r,fs,ft),rd=pt.ride,hf=rd&&fr?1+((now/100)|0)%4:0;if(rd&&fr)horseFxR(r,fs,ft);if(pt.pet){const a=pt.pet;ents.push({y:a.y,f:()=>drawPet(a)});}
   const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{fs.tr.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;drawChar(k,a.x,a.y,a.dir,1,false);});ctx.globalAlpha=1;
    if(r.anim==='dead')ctx.globalAlpha=.45;if(wen>=7)drawEnh(r.x,r.y-bob,wen,0,r.dir);
    if(rd){const b=[0,0,-1,0,1][hf],ry=Math.round(r.y)-9+b;drawHorse(r.x,r.y,r.dir,hf,rd);ctx.save();ctx.beginPath();ctx.rect(Math.round(r.x)-9,ry-25,18,17);ctx.clip();drawChar(k,r.x,ry,r.dir,0,false);ctx.restore();drawHorse(r.x,r.y,r.dir,hf,rd,ctx,'head');}
@@ -3979,7 +3990,7 @@ function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch
 Object.assign(STR.ar,{pRejoined:'رجعت لبارتي {n}',pYouLead:'القائد مشي: إنت قائد البارتي دلوقتي',pNewLead:'القائد مشي: {n} قائد البارتي دلوقتي',pReplaced:'البارتي اختارت قائد جديد وإنت مش موجود، هترجع لهم'});
 Object.assign(STR.en,{pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore()});duelStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn)NETTR.feedOn('news',newsIn);
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn)NETTR.feedOn('news',newsIn);
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -4216,7 +4227,9 @@ function mobKey(m){return m.nk||(m.nk=m.type+'@'+(m.sx|0)+','+(m.sy|0));}
 // bosses too (Twister 2026-10-19: a boss stood in one place for one player and elsewhere for the friends who arrived): the
 // group's host moves and fights every outdoor boss, world and event ones included, and the others follow its copy. Adds, arena,
 // siege and trial monsters stay on one client.
-function mobOk(m){const b=MT[m.type];return !!b&&(m.ek||!m.tmp&&!m.evt&&!m.goal&&!m.arena&&!m.sg)&&m.sy<WMH*TS;}
+// every outdoor monster, summoned and event ones included (owner report: one player saw monsters the other didn't): the
+// host's list is the truth, a follower makes the ones it lacks from their keys and hides its own that the host doesn't list
+function mobOk(m){const b=MT[m.type];return !!b&&!m.arena&&m.sy<WMH*TS&&m.sy>-NR*TS;}
 function mobByKey(k){for(const m of mons)if(mobOk(m)&&mobKey(m)===k)return m;return null;}
 function mobStart(){if(!NETTR||!NETTR.mobsPut)return;MOBN={zone:null,all:{},host:null,rs:[],sent:0,put:false,seq:0,hits:new Map()};
  NET.on(ev=>{if(ev.type!=='message'||!MOBN)return;const env=ev.env,pl=env.payload||{};if((env.type!=='raid.hit'&&env.type!=='raid.state')||pl.to!==NET.uid||typeof pl.raid!=='string'||pl.raid.slice(0,2)!=='m|')return;
@@ -4240,10 +4253,18 @@ function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!roomAt(P.x,P.y)&&P
  const rs=out?mobGroup(NET.remotes().filter(r=>r.uid&&!r.room&&r.mv===mapV()&&!isBlocked(r.uid)&&typeof r.x==='number'&&r.y<WMH*TS)):[];MOBN.rs=rs;
  let h=NET.uid;for(const r of rs)if(r.uid<h)h=r.uid;MOBN.host=rs.length?h:null;
  const z=MOBN.host?'h'+MOBN.host.replace(/[^A-Za-z0-9_-]/g,'').slice(0,23):null;
- if(z!==MOBN.zone){if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}MOBN.zone=z;MOBN.all={};MOBN.hits.clear();NETTR.mobsOn(z,a=>{MOBN.all=a;});}
+ if(z!==MOBN.zone){if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}MOBN.zone=z;MOBN.all={};MOBN.hits.clear();NETTR.mobsOn(z,a=>{MOBN.all=a;});
+  // a new host or none: monsters hidden for the old host come back on their own, and copies made from its list go
+  mons=mons.filter(m=>!m.mk);for(const m of mons)if(m.hidN){m.hidN=0;m.rt=1;}}
  if(!z)return;
  if(MOBN.host===NET.uid){const t=performance.now();if(t-MOBN.sent>=MOB_MS){MOBN.sent=t;NETTR.mobsPut(z,mobList(rs),NET.uid);MOBN.put=true;}}
- else if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}}
+ else{if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}mobMake();}}
+// follower: a monster on the host's list that this client never spawned (an event wave, a boss's adds, a squad) is made
+// here from its key, "<type>@<spawn x>,<spawn y>", and then follows the host like the others
+let mobMkT=0;function mobMake(){const t=performance.now();if(t-mobMkT<500)return;mobMkT=t;const L=MOBN.all[MOBN.host];if(!L||!L.m)return;
+ const have=new Set();for(const m of mons)if(mobOk(m))have.add(mobKey(m));let n=0;
+ for(const k in L.m){if(have.has(k)||n>=12)continue;const r=/^([a-z0-9_]{1,16})@(-?\d{1,6}),(-?\d{1,6})$/.exec(k),v=String(L.m[k]).split(',');if(!r||!MT[r[1]]||v[2]==='0')continue;
+  const m=newMon(r[1],+r[2],+r[3]);m.ek=1;m.tmp=1;m.mk=1;m.nk=k;m.x=+v[0]||m.x;m.y=+v[1]||m.y;m.eng=4;m.agg=1;mons.push(m);n++;}}
 function mobList(rs){const o={},pts=[P].concat(rs);let n=0;
  const near=m=>mobOk(m)&&pts.some(p=>Math.abs(p.x-m.x)<MOB_BX&&Math.abs(p.y-m.y)<MOB_BY); // bosses first, so a crowded den never pushes one off the list
  for(const m of mons.filter(m=>MT[m.type].boss&&near(m)).concat(mons.filter(m=>!MT[m.type].boss&&near(m)))){if(n>=MOB_MAX)break;
@@ -4257,10 +4278,10 @@ function mobTarget(m){if(!mobOk(m)||m.dead)return null;const dP=P.ghost||mode===
 function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))return false;const L=MOBN.all[MOBN.host],s=L&&L.m&&L.m[mobKey(m)];
  // near you but not on the host's list yet (it lists by where it last saw you): hold still instead of running a second
  // copy that drifts away from the host's (owner report: monsters differed after one of you walked off and came back)
- if(typeof s!=='string'){if(L&&L.m&&Math.abs(P.x-m.x)<MOB_BX*.8&&Math.abs(P.y-m.y)<MOB_BY*.8){m.led=true;m.st=null;m.tele=0;m.eng=0;m.t+=dt;if(m.hurt>0)m.hurt-=dt;return true;}return false;}
+ if(typeof s!=='string'){if(L&&L.m&&(m.mk||Math.abs(P.x-m.x)<MOB_BX*.8&&Math.abs(P.y-m.y)<MOB_BY*.8)){m.led=true;if(!m.dead){m.dead=true;m.dying=0;m.rt=1e9;m.hidN=1;}return true;}return false;}
  const v=s.split(',').map(Number);if(v.length!==5||v.some(x=>!isFinite(x)))return false;const [x,y,hp,fl,lv]=v;m.led=true;
  if(fl&1){if(!m.dead){m.dead=true;m.dying=.5;m.rt=25;vfx('death',m.x,m.y);}return true;} // quiet: the kill and its rewards come from the host's message
- if(m.dead){if(m.ek)return true;const ty=m.type,ox=m.sx,oy=m.sy;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));m.led=true;m.x=x;m.y=y;vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
+ if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mk:m.mk,sg:m.sg,nk:m.nk,boss:m.boss},hid=m.hidN;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
  if(m.lv!==lv){m.lv=lv;m.max=Math.round(b.hp*(1+(lv-b.lv[0])*.03));}
  const nh=Math.max(1,Math.round(m.max*hp/1000)),mine=m.pendT&&performance.now()-m.pendT<900;
  if(nh<m.hp){if(!mine&&m.hp-nh>=1){m.hurt=.12;num(m.x,monY(m)-8,String(m.hp-nh),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});}m.hp=nh;}else if(!mine)m.hp=nh; // another player's hit: its number shows here too

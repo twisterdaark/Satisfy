@@ -25,7 +25,8 @@
  * A leader that comes back to find its members in another party drops its own and takes that
  * party's invite back. A member left alone still dissolves after GRACE_MS, as before.
  *
- * Exposes `Satisfy.party.create({ presence, uid, now?, max?, blocked?, store?, wall? })`.
+ * Exposes `Satisfy.party.create({ presence, uid, now?, max?, blocked?, store?, wall?, gap? })`; gap: a tick this many ms after
+ * the last one is this client's own pause (a hidden window), and the time it slept doesn't count against the others.
  */
 (function (root) {
   'use strict';
@@ -47,7 +48,7 @@
     var accepted = new Map();   // leader: uid -> last time presence showed them in the party
     var outgoing = new Map();   // leader: uid -> invite time
     var invites = new Map();    // invitee: partyId -> {party, from, sid, handle, t}
-    var leaderOk = 0, listeners = [], pingOut = -1e9, pingIn = new Map();
+    var leaderOk = 0, lastTick = 0, listeners = [], pingOut = -1e9, pingIn = new Map();
     var store = o.store || null, wall = o.wall || function () { return Date.now(); };
     var recent = new Map(); // leader: uid -> wall time they dropped out; invited back until REJOIN_MS
     var memo = null;        // member: {id, leader, t}: auto-accept that leader's invite to that party
@@ -214,6 +215,15 @@
       /** Expire invites and notice members or a leader who are gone. Call about once per frame. */
       tick: function () {
         var t = now();
+        // our own pause (a hidden or minimised window stops the game's frames) is not the others leaving: move every
+        // "last seen" forward by the gap, so the party doesn't fall apart the moment the window comes back (Twister 2026-10-19)
+        if (o.gap && lastTick && t - lastTick > o.gap) {
+          var gap = t - lastTick;
+          leaderOk += gap;
+          accepted.forEach(function (v, k) { accepted.set(k, v + gap); });
+          mateSeen.forEach(function (v, k) { mateSeen.set(k, v + gap); });
+        }
+        lastTick = t;
         invites.forEach(function (v, k) { if (t - v.t > INVITE_MS) invites.delete(k); });
         outgoing.forEach(function (v, k) { if (t - v > INVITE_MS) outgoing.delete(k); });
         if (!id) return;

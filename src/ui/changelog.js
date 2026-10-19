@@ -4,6 +4,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19g', d: '2026-10-19',
+      ar: ['أونلاين: واحد بس فيكم بيحدد كل الوحوش اللي حواليكم، حتى وحوش الأحداث والحراس، والباقيين بيشوفوا نفس الوحوش بالظبط',
+        'لما حد يكسب حدث زي غزوة ريدان، الإشعار بيوصل للكل والحدث بيخلص عند الكل',
+        'صاحب عرش قلعة ريدان وأعلام المناطق بقوا واحد للكل، ولما حد ياخدهم بيوصل إشعار لكل اللاعبين',
+        'تراب حصان اللاعبين التانيين بيبان وهم ماشيين جنبك',
+        'البارتي مبيتفكش لما تصغّر الشباك أو تسيبه ورا',
+        'رسالة التحديث بقت إجبارية: اللعبة بتقف وبتعمل ريفريش لوحدها'],
+      en: ['Online: one of you decides every monster around you, event monsters and the castle garrison included, and the others see exactly the same ones',
+        'When someone wins an event like the Reidan invasion, everyone gets the notice and the event ends for all',
+        "Reidan Castle's throne holder and territory flags are the same for everyone, and a capture is announced to all players",
+        "Other players' horses kick up dust as they ride beside you",
+        "The party doesn't break when you minimise the window or leave it behind",
+        'The update notice is required now: the game stops and refreshes by itself'] },
     { v: '2026-10-19f', d: '2026-10-19',
       ar: ['أونلاين: صحابك بيشوفوا حيوانك الأليف ماشي وراك وبيشوفوك راكب الحصان',
         'كل الزعماء برا المدن، زي أمير حرب الأوركات، بقوا في نفس المكان وبنفس الدم عند كل اللي جنب بعض، وموتك مبيرجّعش الزعيم لأوله عند الباقيين',

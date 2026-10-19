@@ -83,7 +83,7 @@ test('two signed-in players see each other through the database; writes pass the
     assert.equal(await a.eval(() => document.getElementById('netB').textContent), 'Online · players: 2 · Safe zone');
     // presence, the public profile (SAT-ONLINE-007), the session lease (SAT-ONLINE-010) and the account ID read (SAT-ONLINE-026)
     const paths = await a.eval(() => [...new Set(window.__fakeRTDB.log.map((l) => l.path))]);
-    assert.deepEqual(paths.sort(), ['accountIds/' + na.uid, 'presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]);
+    assert.deepEqual(paths.filter((p) => !p.startsWith('mobs/')).sort(), ['accountIds/' + na.uid, 'presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]); // plus the shared-monster host node
     assert.deepEqual((await fake(a)).rejected, []);
     assert.deepEqual((await fake(b)).rejected, []);
     // link quality (doc U015/U020): acknowledged writes give a round trip, shown in the badge tooltip
