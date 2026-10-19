@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20i', ver: '0.53', d: '2026-10-20',
+      ar: ['أونلاين: أدوار الغارة قدام البوسات: الدرع البوس بيجري وراه وضربه عليه أخف 30%، والمعالج بيعالج نفسه واللي جنبه كل 3 ثواني',
+        'الهجوم ضربه للبوس أقوى 15%، والدعم هو واللي جنبه بياخدوا من البوس أقل 15%. الدور بتختاره من الشارة في لوحة الفريق'],
+      en: ['Online: raid roles against bosses: a tank draws the boss and takes 30% less from it; a healer heals itself and those near it every 3 s',
+        'Damage does 15% more to bosses; support and those near it take 15% less from them. Pick the role from the badge in the party panel'] },
     { v: '2026-10-20h', ver: '0.52', d: '2026-10-20',
       ar: ['أونلاين: الغارات: قائد الفريق يقدر يخلي فريقه غارة لحد 10 لاعبين من زرار "غارة" في لوحة الفريق، ويرجعها فريق لما يبقوا 5 أو أقل'],
       en: ['Online: raids: a party leader can make the party a raid of up to 10 players with "Raid" in the party panel, and a party again at 5 or fewer'] },
