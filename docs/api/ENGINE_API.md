@@ -166,7 +166,7 @@ Consent-based duels on top of presence, no server. `create({ presence, uid, now?
 
 Messages (`payload: { to, duel, k?, n? }`): `duel.challenge`, `duel.accept`, `duel.decline`, `duel.ready`,
 `duel.hit` (k = damage, n = hit number), `duel.hp` (k = defender's duel HP, ≤ 5/s), `duel.yield`, `duel.end`.
-Each side owns its own duel HP (100) and checks every hit for rate (`C.MIN_HIT_MS`) and range
+Each side owns its own duel HP (100) and checks every hit for rate (at most `C.HITS_PER_S` in any second, so jitter that bunches hits doesn't drop one) and range
 (`C.HIT_RANGE` from its real position). A duel moves no gold, items, materials, durability, real HP or
 quest credit; the result goes to `S.duels = { w, l }`.
 

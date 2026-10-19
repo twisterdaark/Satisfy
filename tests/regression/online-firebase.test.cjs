@@ -106,7 +106,7 @@ test('a dropped connection removes the player for others and comes back on recon
     assert.equal((await net(b)).state, 'RECONNECTING');
     assert.equal(await b.eval(() => document.getElementById('netB').textContent), 'Reconnecting… · Safe zone');
     await b.eval(() => window.__fakeRTDB.setConnected(true));
-    await b.step(70); // past the 1 s idle heartbeat
+    await b.step(10); // reconnecting republishes at once (no waiting for the 5 s idle heartbeat)
     await settle(a, b);
     assert.equal((await net(a)).count, 1);
     assert.equal((await net(b)).count, 1);

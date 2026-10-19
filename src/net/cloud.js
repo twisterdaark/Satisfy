@@ -20,17 +20,25 @@
 
   var MAX_BLOB = 400000;          // characters; the rules enforce the same limit
   var PID_RE = /^[a-z0-9_]{4,40}$/;
+  // at most `max` UTF-16 units, never half of a surrogate pair (same as Satisfy.net)
+  function cut(v, max) {
+    var s = String(v == null ? '' : v);
+    if (s.length <= max) return s;
+    var out = '';
+    for (var ch of s) { if (out.length + ch.length > max) break; out += ch; }
+    return out;
+  }
 
   /** Public profile fields from a game state (S) and language. */
   function profileFrom(S, lang, revision) {
     var L = (S && S.look) || {};
     var num = function (v) { return v >= 0 && v <= 31 ? v | 0 : 0; };
     return {
-      handle: String(L.n || 'Player').slice(0, 24),
+      handle: cut(L.n || 'Player', 24),
       look: { hair: num(L.hair), hc: num(L.hc), skin: num(L.skin), top: num(L.top) },
       language: lang === 'ar' ? 'ar' : 'en',
-      titleId: String((S && S.title) || '').slice(0, 32),
-      classId: String((S && S.cls) || 'novice').slice(0, 16),
+      titleId: cut((S && S.title) || '', 32),
+      classId: cut((S && S.cls) || 'novice', 16),
       lv: Math.max(1, Math.min(999, (S && S.lv) | 0 || 1)),
       revision: revision,
     };
@@ -41,8 +49,8 @@
     var d = JSON.parse(raw), S = d && d.S;
     if (!S || !PID_RE.test(S.pid || '')) throw new Error('cloud: save has no character id');
     return {
-      pid: S.pid, handle: String((S.look && S.look.n) || 'Player').slice(0, 24),
-      lv: Math.max(1, Math.min(999, S.lv | 0 || 1)), cls: String(S.cls || 'novice').slice(0, 16),
+      pid: S.pid, handle: cut((S.look && S.look.n) || 'Player', 24),
+      lv: Math.max(1, Math.min(999, S.lv | 0 || 1)), cls: cut(S.cls || 'novice', 16),
       schema: S.v | 0 || 4, savedAt: +d.savedAt || 0, rev: rev, size: raw.length,
     };
   }

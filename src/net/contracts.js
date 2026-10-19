@@ -77,7 +77,15 @@
     return m ? { key: key, world: m[1], zone: m[2], shard: +m[3] } : null;
   }
 
-  function str(v, max) { return String(v == null ? '' : v).slice(0, max); }
+  // Truncate to at most `max` UTF-16 units without splitting a surrogate pair (an emoji or other
+  // astral character cut in half is an invalid string that a database or font may reject).
+  function str(v, max) {
+    var s = String(v == null ? '' : v);
+    if (s.length <= max) return s;
+    var out = '';
+    for (var ch of s) { if (out.length + ch.length > max) break; out += ch; }
+    return out;
+  }
   function int(v) { return Math.round(+v || 0); }
 
   /**

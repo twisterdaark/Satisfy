@@ -17,7 +17,8 @@
  * Damage is normalized: every hit is MIN..MAX_HIT duel HP out of HP, whatever the levels.
  *
  * Trust model (no server yet): each side owns its own duel HP and applies the hits it receives
- * after checking rate (MIN_HIT_MS) and range (attacker within HIT_RANGE of the defender's real
+ * after checking rate (at most HITS_PER_S in any second, so network jitter that bunches two hits
+ * together doesn't drop one) and range (attacker within HIT_RANGE of the defender's real
  * position). A modified client could ignore hits, but a duel has no stakes, so it gains nothing.
  * Open PvP with stakes (R5) needs Trusted Combat on a server.
  *
@@ -27,7 +28,7 @@
   'use strict';
 
   var C = Object.freeze({
-    HP: 100, MIN_HIT: 4, MAX_HIT: 18, MIN_HIT_MS: 220,
+    HP: 100, MIN_HIT: 4, MAX_HIT: 18, HITS_PER_S: 4,
     CHALLENGE_R: 64, HIT_RANGE: 200, ARENA_R: 220, OUT_MS: 3000, TELEPORT_PX: 120,
     INVITE_MS: 30000, READY_MS: 20000, COUNTDOWN_MS: 3000, GRACE_MS: 6000, HP_MS: 200, OVER_MS: 4000,
   });
@@ -55,7 +56,7 @@
     function start(id, foe, handle, mine) {
       d = { id: id, foe: foe, handle: handle || '', mine: !!mine, phase: mine ? 'asking' : 'ready',
         since: now(), meReady: false, foeReady: false, hp: C.HP, foeHp: C.HP, seen: now(),
-        arena: null, outT: 0, last: null, lastHitIn: -1e9, hitN: 0, hpDirty: false, hpSent: 0 };
+        arena: null, outT: 0, last: null, hitsIn: [], hitN: 0, hpDirty: false, hpSent: 0 };
     }
     function finish(result, why, tell) {
       if (!d || d.phase === 'over') return;
@@ -96,10 +97,11 @@
           if (!mineDuel || d.phase !== 'fight') return;
           var t = now(), k = +pl.k;
           if (!(k >= 1)) return;
-          if (t - d.lastHitIn < C.MIN_HIT_MS) { emit({ type: 'rejected', why: 'rate' }); return; }
+          d.hitsIn = d.hitsIn.filter(function (x) { return t - x < 1000; });
+          if (d.hitsIn.length >= C.HITS_PER_S) { emit({ type: 'rejected', why: 'rate' }); return; }
           var me = pos(), r = byUid(from.uid);
           if (!r || dist(me, r) > C.HIT_RANGE) { emit({ type: 'rejected', why: 'range' }); return; }
-          d.lastHitIn = t;
+          d.hitsIn.push(t);
           k = Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(k)));
           d.hp = Math.max(0, d.hp - k);
           emit({ type: 'hurt', dmg: k, hp: d.hp });
