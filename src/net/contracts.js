@@ -1,0 +1,159 @@
+/* Satisfy — online contracts (SAT-ONLINE-001). Pure data shapes and validators; no network yet.
+ *
+ * Classic script, exposes `Satisfy.net`. The future presence/room layer (R2) sends and
+ * receives only these shapes. Durable/private data (inventory, gold, quests, materials)
+ * never enters a PlayerPublic; see PRIVATE_FIELDS.
+ *
+ * @typedef {{id:string, tile:number, w:number, h:number}} WorldRef
+ *   The shared map. w/h in tiles; positions in PlayerPublic are pixels (tile * TS).
+ * @typedef {{key:string, world:string, zone:string, shard:number}} RoomRef
+ *   A presence channel: everyone in the same zone shard sees each other. Not a house interior.
+ * @typedef {{hair:number, hc:number, skin:number, top:number}} Look
+ * @typedef {{
+ *   v:number, uid:(string|null), sid:(string|null), handle:string, look:Look,
+ *   cls:string, lv:number, title:string, zone:string, room:(string|null),
+ *   x:number, y:number, dir:number, anim:string, party:(string|null), t:number
+ * }} PlayerPublic
+ *   What other players may see. `room` is the house interior id (e.g. "r7") or null outdoors.
+ * @typedef {{v:number, type:string, requestId:(string|null), sessionId:(string|null),
+ *   seq:number, tick:number, payload:object}} Envelope
+ */
+(function (root) {
+  'use strict';
+
+  var PROTOCOL_VERSION = 1;
+  var WORLD_ID = 'satisfy';
+  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 2048, shard: 999 });
+  var ANIMS = ['idle', 'walk', 'attack', 'dodge', 'dead'];
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'party', 't'];
+  // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
+  // S.uid (the local item-instance counter) is private too, but its name collides with the public
+  // account `uid`, so it is checked by value in the tests instead of listed here.
+  var PRIVATE_FIELDS = ['gold', 'items', 'mats', 'qs', 'kills', 'met', 'ev', 'arrows', 'arrowsMade', 'bread', 'eqW', 'eqA',
+    'made', 'smith', 'sxp', 'st', 'pts', 'bonus', 'got', 'hid', 'bq', 'bqa', 'bqT', 'sk', 'tl', 'xp', 'sold', 'playT'];
+  // Reply codes from doc §25.
+  var ERRORS = Object.freeze({ ZONE_SAFE: 'ZONE_SAFE', CD_ACTIVE: 'CD_ACTIVE', OUT_OF_RANGE: 'OUT_OF_RANGE',
+    SESSION_STALE: 'SESSION_STALE', RATE_LIMITED: 'RATE_LIMITED', BAD_MESSAGE: 'BAD_MESSAGE' });
+
+  // Connection state machine from doc §25. The UI derives online status from this only.
+  var NET_STATES = ['DISCONNECTED', 'AUTHENTICATING', 'PROFILE_LOADING', 'JOINING', 'SYNCING', 'ONLINE', 'DEGRADED', 'RECONNECTING', 'OFFLINE', 'ERROR'];
+  var NET_EDGES = {
+    DISCONNECTED: ['AUTHENTICATING', 'OFFLINE'],
+    AUTHENTICATING: ['PROFILE_LOADING', 'ERROR', 'OFFLINE'],
+    PROFILE_LOADING: ['JOINING', 'ERROR', 'OFFLINE'],
+    JOINING: ['SYNCING', 'ERROR', 'RECONNECTING'],
+    SYNCING: ['ONLINE', 'ERROR', 'RECONNECTING'],
+    ONLINE: ['DEGRADED', 'RECONNECTING', 'DISCONNECTED'],
+    DEGRADED: ['ONLINE', 'RECONNECTING', 'DISCONNECTED'],
+    RECONNECTING: ['SYNCING', 'OFFLINE', 'ERROR'],
+    OFFLINE: ['AUTHENTICATING', 'DISCONNECTED'],
+    ERROR: ['DISCONNECTED', 'OFFLINE'],
+  };
+
+  function canTransition(from, to) {
+    return !!(NET_EDGES[from] && NET_EDGES[from].indexOf(to) >= 0);
+  }
+
+  function roomKey(world, zone, shard) {
+    return (world || WORLD_ID) + '/' + zone + '/' + ((shard | 0) || 0);
+  }
+  function parseRoomKey(key) {
+    var m = /^([a-z0-9_-]+)\/([A-Za-z0-9_-]+)\/(\d{1,3})$/.exec(String(key));
+    return m ? { key: key, world: m[1], zone: m[2], shard: +m[3] } : null;
+  }
+
+  function str(v, max) { return String(v == null ? '' : v).slice(0, max); }
+  function int(v) { return Math.round(+v || 0); }
+
+  /**
+   * Build the public view of the local player.
+   * @param {object} S durable state
+   * @param {object} P volatile player state
+   * @param {{zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, anim?:string, t?:number}} [ctx]
+   * @returns {PlayerPublic}
+   */
+  function toPlayerPublic(S, P, ctx) {
+    ctx = ctx || {};
+    var L = S.look || {};
+    return {
+      v: PROTOCOL_VERSION,
+      uid: ctx.uid || null,
+      sid: ctx.sid || null,
+      handle: str(L.n, LIMITS.handle),
+      look: { hair: L.hair | 0, hc: L.hc | 0, skin: L.skin | 0, top: L.top | 0 },
+      cls: str(S.cls || 'novice', 16),
+      lv: S.lv | 0,
+      title: str(S.title, LIMITS.title),
+      zone: str(ctx.zone, 24),
+      room: ctx.room || null,
+      x: int(P.x),
+      y: int(P.y),
+      dir: (P.dir | 0) & 3,
+      anim: ANIMS.indexOf(ctx.anim) >= 0 ? ctx.anim : 'idle',
+      party: ctx.party || null,
+      t: ctx.t || 0,
+    };
+  }
+
+  /**
+   * Check a PlayerPublic received from the network (or about to be sent).
+   * @param {object} o
+   * @param {{world?:WorldRef}} [opts] when world is given, positions are bounds-checked
+   * @returns {{ok:boolean, errors:string[]}}
+   */
+  function validatePlayerPublic(o, opts) {
+    var e = [];
+    if (!o || typeof o !== 'object') return { ok: false, errors: ['not an object'] };
+    for (var k in o) if (PUBLIC_FIELDS.indexOf(k) < 0) e.push('unknown field ' + k);
+    if (o.v !== PROTOCOL_VERSION) e.push('protocol version');
+    if (typeof o.handle !== 'string' || o.handle.length > LIMITS.handle) e.push('handle');
+    if (!o.look || typeof o.look !== 'object') e.push('look');
+    else ['hair', 'hc', 'skin', 'top'].forEach(function (f) { if (!Number.isInteger(o.look[f]) || o.look[f] < 0 || o.look[f] > 31) e.push('look.' + f); });
+    if (typeof o.cls !== 'string') e.push('cls');
+    if (!Number.isInteger(o.lv) || o.lv < 1 || o.lv > 999) e.push('lv');
+    if (!Number.isInteger(o.x) || !Number.isInteger(o.y)) e.push('position');
+    var w = opts && opts.world;
+    if (w && (o.x < 0 || o.y < 0 || o.x >= w.w * w.tile || o.y >= w.h * w.tile)) e.push('out of world');
+    if (!Number.isInteger(o.dir) || o.dir < 0 || o.dir > 3) e.push('dir');
+    if (ANIMS.indexOf(o.anim) < 0) e.push('anim');
+    if (o.room !== null && typeof o.room !== 'string') e.push('room');
+    if (o.party !== null && typeof o.party !== 'string') e.push('party');
+    return { ok: e.length === 0, errors: e };
+  }
+
+  /** Wrap a message for the wire (doc §25). Throws if it would exceed the size limit. */
+  function envelope(type, payload, meta) {
+    meta = meta || {};
+    var env = {
+      v: PROTOCOL_VERSION,
+      type: String(type),
+      requestId: meta.requestId || null,
+      sessionId: meta.sessionId || null,
+      seq: meta.seq | 0,
+      tick: meta.tick | 0,
+      payload: payload || {},
+    };
+    if (JSON.stringify(env).length > LIMITS.envelopeBytes) throw new Error(ERRORS.BAD_MESSAGE + ': envelope too large');
+    return env;
+  }
+
+  var api = {
+    PROTOCOL_VERSION: PROTOCOL_VERSION,
+    WORLD_ID: WORLD_ID,
+    LIMITS: LIMITS,
+    ANIMS: Object.freeze(ANIMS.slice()),
+    PUBLIC_FIELDS: Object.freeze(PUBLIC_FIELDS.slice()),
+    PRIVATE_FIELDS: Object.freeze(PRIVATE_FIELDS.slice()),
+    ERRORS: ERRORS,
+    NET_STATES: Object.freeze(NET_STATES.slice()),
+    canTransition: canTransition,
+    roomKey: roomKey,
+    parseRoomKey: parseRoomKey,
+    toPlayerPublic: toPlayerPublic,
+    validatePlayerPublic: validatePlayerPublic,
+    envelope: envelope,
+  };
+
+  var ns = root.Satisfy = root.Satisfy || {};
+  ns.net = Object.freeze(api);
+})(typeof window !== 'undefined' ? window : globalThis);
