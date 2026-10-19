@@ -468,12 +468,27 @@
     };
   }
 
+  // SAT-ONLINE-053: ranked arena seasons, arena/{season}/{uid} = {r, w, l, n, t}
+  function arenaStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    return {
+      get: function (season, uid) { return D.get(at('arena/' + season + '/' + uid)).then(function (s) { return s.val(); }); },
+      put: function (season, uid, v) { var u = {}; u['arena/' + season + '/' + uid] = { r: v.r, w: v.w, l: v.l, n: String(v.n || '').slice(0, 24), t: D.serverTimestamp() }; return D.update(D.ref(db), u); },
+      // the top `n` by rating (the fake has no limitToLast: then everything, sorted here)
+      top: function (season, n) {
+        var ref = at('arena/' + season), q = D.limitToLast && D.orderByChild ? D.query(ref, D.orderByChild('r'), D.limitToLast(n)) : ref;
+        return D.get(q).then(function (s) { var v = s.val() || {}, a = []; for (var k in v) if (v[k] && typeof v[k].r === 'number') a.push({ uid: k, r: v[k].r, w: v[k].w | 0, l: v[k].l | 0, n: String(v[k].n || '?') }); a.sort(function (x, y) { return y.r - x.r; }); return a.slice(0, n); });
+      },
+    };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
     tradeStore: tradeStore,
     guildStore: guildStore,
     dropStore: dropStore,
     bountyStore: bountyStore,
+    arenaStore: arenaStore,
     SDK_VERSION: SDK_VERSION,
     load: load,
     lease: lease,
