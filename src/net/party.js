@@ -17,6 +17,11 @@
  * for the same party within REJOIN_MS, and a leader who comes back (or sees a member drop out) invites the
  * dropped members back for REJOIN_MS. Leaving on purpose tells the leader (party.decline) and forgets it.
  *
+ * Leader election (SAT-ONLINE-024, doc §35 U049): when the leader has been gone LEAD_MS and at least two members
+ * remain, every member picks the same new leader, the remaining member with the lowest uid, and the party moves to
+ * that leader's id. A leader that comes back to find its members in another party drops its own and takes that
+ * party's invite back. A member left alone still dissolves after GRACE_MS, as before.
+ *
  * Exposes `Satisfy.party.create({ presence, uid, now?, max?, blocked?, store?, wall? })`.
  */
 (function (root) {
@@ -27,6 +32,7 @@
   var GRACE_MS = 5000;    // presence may lag; a member/leader missing this long has left
   var PING_MS = 1500;     // pings: at most one per member this often (sent and received)
   var REJOIN_MS = 60000;  // a dropped member or a reloaded tab can come back this long (wall clock)
+  var LEAD_MS = 15000;    // a leader gone this long (longer than a reload) is replaced by the remaining members
   var KEY = 'satisfy_party';
 
   function idFor(uid) { return 'p_' + String(uid).slice(0, 38); }
@@ -43,6 +49,7 @@
     var recent = new Map(); // leader: uid -> wall time they dropped out; invited back until REJOIN_MS
     var memo = null;        // member: {id, leader, t}: auto-accept that leader's invite to that party
     var savedSig = '', savedAt = -1e15;
+    var mates = [];         // member: the other members seen while the leader was there (the electorate)
     function save() {
       if (!store || !id) return;
       var s = JSON.stringify({ id: id, leader: leader, members: leader === self ? Array.from(accepted.keys()).concat(Array.from(recent.keys())) : [] });
@@ -65,7 +72,7 @@
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function byUid(uid) { var hit = null; P.remotes().forEach(function (r) { if (r.uid === uid) hit = r; }); return hit; }
-    function clear() { id = null; leader = null; accepted.clear(); outgoing.clear(); recent.clear(); leaderOk = 0; savedSig = ''; }
+    function clear() { id = null; leader = null; accepted.clear(); outgoing.clear(); recent.clear(); leaderOk = 0; savedSig = ''; mates = []; }
     function send(type, to) { P.send(type, { to: to, party: id }); }
 
     P.on(function (ev) {
@@ -200,18 +207,46 @@
             if (t - seen > GRACE_MS) { accepted.delete(uid); if (store) recent.set(uid, wall()); emit({ type: 'memberLeft', uid: uid, handle: r ? r.handle : '' }); }
           });
           // invite dropped members back while they may still be reloading
+          var stop = false;
           recent.forEach(function (t0, uid) {
+            if (stop) return;
             if (accepted.has(uid) || wall() - t0 > REJOIN_MS) { recent.delete(uid); return; }
             var r = byUid(uid);
             if (r && r.party === id) { recent.delete(uid); accepted.set(uid, t); return; } // still with us (we were the one reloading)
+            if (r && r.party && r.party !== id && uid !== self && recent.size && !accepted.size) {
+              // our members moved on to a new leader while we were away: join them instead of holding an empty party
+              var pid = r.party; clear(); forget();
+              if (store) memo = { id: pid, leader: pid.slice(2), t: wall() };
+              emit({ type: 'replaced' });
+              stop = true;
+            }
             if (r && !r.party && !outgoing.has(uid) && accepted.size + 1 + outgoing.size < max) { outgoing.set(uid, t); send('party.invite', uid); }
           });
+          if (stop) return;
           if (!accepted.size && !outgoing.size && !recent.size) { clear(); forget(); emit({ type: 'dissolved' }); return; }
           save();
         } else {
           var L = byUid(leader);
-          if (L && L.party === id) { leaderOk = t; save(); }
-          else if (t - leaderOk > GRACE_MS) {
+          if (L && L.party === id) {
+            leaderOk = t;
+            mates = api.members().filter(function (m) { return !m.self && !m.leader; }).map(function (m) { return m.uid; });
+            save();
+          }
+          // who is still around from the party: a mate may already have moved on to the elected leader's id
+          var ids = mates.concat([self]).map(idFor);
+          var rest = mates.filter(function (u) { var r = byUid(u); return r && (r.party === id || ids.indexOf(r.party) >= 0); }).concat([self]);
+          if (L && L.party === id) { /* the leader is here */ }
+          else if (rest.length >= 2 && t - leaderOk > LEAD_MS) {
+            // elect: everyone left computes the same leader (lowest uid), so the party moves as one
+            var old = leader, next = rest.sort()[0];
+            id = idFor(next); leader = next; leaderOk = t; accepted.clear(); outgoing.clear(); mates = rest.filter(function (u) { return u !== self && u !== next; });
+            if (next === self) {
+              rest.forEach(function (u) { if (u !== self) accepted.set(u, t); });
+              if (store) recent.set(old, wall()); // invite the old leader back if it returns
+            }
+            emit({ type: 'newLeader', uid: next, self: next === self, handle: next === self ? null : (byUid(next) || {}).handle });
+            save();
+          } else if (rest.length < 2 && t - leaderOk > GRACE_MS) {
             var was = { id: id, leader: leader };
             clear();
             if (store) memo = { id: was.id, leader: was.leader, t: wall() }; // the leader may be reloading: take its invite back
@@ -225,5 +260,5 @@
   }
 
   var ns = root.Satisfy = root.Satisfy || {};
-  ns.party = Object.freeze({ create: create, idFor: idFor, MAX: MAX, INVITE_MS: INVITE_MS, GRACE_MS: GRACE_MS, PING_MS: PING_MS, REJOIN_MS: REJOIN_MS, KEY: KEY });
+  ns.party = Object.freeze({ create: create, idFor: idFor, MAX: MAX, INVITE_MS: INVITE_MS, GRACE_MS: GRACE_MS, PING_MS: PING_MS, REJOIN_MS: REJOIN_MS, LEAD_MS: LEAD_MS, KEY: KEY });
 })(typeof window !== 'undefined' ? window : globalThis);

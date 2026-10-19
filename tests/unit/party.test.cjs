@@ -214,3 +214,92 @@ test('SAT-ONLINE-023 rejoin expires: after REJOIN_MS a reload starts clean', () 
   st.setItem(SN.party.KEY, JSON.stringify({ id: 'p_u9', leader: 'u0', members: [], t: clock }));
   assert.equal(SN.party.create({ presence: pres, uid: 'u0', now: () => 1, store: st, wall }).id(), null);
 });
+
+test('SAT-ONLINE-024 leader election: the remaining members agree on the lowest uid; the old leader rejoins', () => {
+  let clock = 1e12; const wall = () => clock;
+  const hub = SN.transports.hub();
+  let t = 1000; const now = () => t;
+  const stores = { u0: store(), u1: store(), u2: store() };
+  const live = {};
+  const mk = (uid, i) => {
+    const pres = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net, uid, sid: 'sess' + uid + i + 'xxxxxxxx' });
+    const party = SN.party.create({ presence: pres, uid, now, store: stores[uid], wall });
+    const events = []; party.on((e) => events.push(e.type + (e.self ? ':me' : '')));
+    live[uid] = { uid, pres, party, events };
+    return live[uid];
+  };
+  const sync = () => {
+    for (const p of Object.values(live)) p.pres.publish(SN.net.toPlayerPublic({ look: { n: p.uid }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 }, { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id() }), true);
+    for (const p of Object.values(live)) { p.pres.tick(); p.party.tick(); }
+  };
+  const advance = (ms) => { for (let k = 0; k < ms; k += 100) { t += 100; clock += 100; sync(); } };
+  const a = mk('u0', 0), b = mk('u1', 0), c = mk('u2', 0);
+  sync();
+  for (const m of [b, c]) { a.party.invite(a.pres.remotes().find((r) => r.uid === m.uid)); m.party.accept('p_u0'); }
+  advance(300);
+  assert.equal(a.party.members().length, 3);
+
+  // the leader vanishes (closed tab, crash): members wait out a reload, then elect u1
+  a.pres.close(); delete live.u0;
+  advance(SN.party.GRACE_MS + 500);
+  assert.equal(b.party.id(), 'p_u0', 'still waiting for the leader (it may be reloading)');
+  advance(SN.party.LEAD_MS);
+  assert.equal(b.party.id(), 'p_u1');
+  assert.equal(c.party.id(), 'p_u1', 'both picked the same leader');
+  assert.equal(b.party.isLeader(), true);
+  assert.equal(c.party.leader(), 'u1');
+  assert.ok(b.events.includes('newLeader:me'));
+  assert.ok(c.events.includes('newLeader'));
+  advance(300);
+  assert.deepEqual(b.party.members().map((m) => m.uid), ['u1', 'u2']);
+  assert.deepEqual(c.party.members().map((m) => [m.uid, m.leader]), [['u2', false], ['u1', true]]);
+
+  // the old leader comes back: it sees its members in u1's party, drops its own and is invited back in
+  const a2 = mk('u0', 1);
+  advance(300);
+  advance(2000);
+  assert.ok(a2.events.includes('replaced'));
+  assert.equal(a2.party.id(), 'p_u1');
+  assert.equal(a2.party.leader(), 'u1');
+  advance(300);
+  assert.deepEqual(b.party.members().map((m) => m.uid).sort(), ['u0', 'u1', 'u2']);
+});
+
+test('SAT-ONLINE-024: a member left alone still dissolves after GRACE_MS', () => {
+  const w = world(2), [a, b] = w.players;
+  a.party.invite(w.remote(a, b)); b.party.accept('p_u0'); w.sync();
+  a.pres.close(); w.players.splice(0, 1);
+  w.advance(SN.party.GRACE_MS + 10);
+  assert.equal(b.party.id(), null);
+});
+
+test('SAT-ONLINE-024: members whose clocks differ still agree (one elects first and moves; the other follows)', () => {
+  const hub = SN.transports.hub();
+  const clocks = { u1: 1000, u2: 1000, u0: 1000 };
+  const mk = (uid) => {
+    const now = () => clocks[uid];
+    const pres = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net, uid, sid: 'sess' + uid + 'xxxxxxxx' });
+    return { uid, pres, now, party: SN.party.create({ presence: pres, uid, now }) };
+  };
+  const all = { u0: mk('u0'), u1: mk('u1'), u2: mk('u2') };
+  const pub = (p) => p.pres.publish(SN.net.toPlayerPublic({ look: { n: p.uid }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 }, { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id() }), true);
+  const step = (uids, ms) => { for (let k = 0; k < ms; k += 100) { for (const u of uids) { clocks[u] += 100; pub(all[u]); } for (const u of uids) { all[u].pres.tick(); all[u].party.tick(); } } };
+  step(['u0', 'u1', 'u2'], 300);
+  const [a, b, c] = [all.u0, all.u1, all.u2];
+  for (const m of [b, c]) { a.party.invite(a.pres.remotes().find((r) => r.uid === m.uid)); m.party.accept('p_u0'); }
+  step(['u0', 'u1', 'u2'], 500);
+  a.pres.close(); delete all.u0;
+  clocks.u2 += 3000;                           // u2's clock runs 3 s ahead, so it elects first
+  let first = null;
+  for (let k = 0; k < SN.party.LEAD_MS + 2000; k += 100) {
+    step(['u1', 'u2'], 100);
+    if (!first && c.party.id() === 'p_u1') { first = b.party.id(); }
+  }
+  assert.equal(first, 'p_u0', 'u2 moved while u1 was still waiting for the old leader');
+  assert.equal(c.party.id(), 'p_u1');
+  assert.equal(b.party.id(), 'p_u1', 'u1 followed instead of dissolving');
+  assert.equal(b.party.isLeader(), true);
+  step(['u1', 'u2'], 1000);
+  assert.deepEqual(b.party.members().map((m) => m.uid), ['u1', 'u2']);
+  assert.equal(c.party.leader(), 'u1');
+});
