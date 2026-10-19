@@ -82,7 +82,8 @@
 
   /** The device's block list: {uid: handle} in localStorage (or a given Storage-like object). */
   function blocklist(store) {
-    var st = store || (typeof localStorage !== 'undefined' ? localStorage : null), mem = {};
+    var st = store || null, mem = {};
+    if (!st) try { st = typeof localStorage !== 'undefined' ? localStorage : null; } catch (e) { st = null; } // blocked site storage throws
     function read() {
       if (!st) return mem;
       try { var v = JSON.parse(st.getItem(KEY) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch (e) { return {}; }
