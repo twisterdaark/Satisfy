@@ -88,6 +88,6 @@ test('item icons v2 cover every key iconC handles and every craftable item',()=>
  const m=JSON.parse(fs.readFileSync(path.join(dir,'sheets','manifest.json'),'utf8')).icons;assert.deepStrictEqual(m.keys,[...I.KEYS]);assert.deepStrictEqual(pngSize(path.join(dir,m.file)),{w:16*I.KEYS.length,h:16});});
 
 test('index.html draws every layer with the v2 art',()=>{const html=fs.readFileSync(path.join(__dirname,'..','..','index.html'),'utf8');
- for(const f of ['chars','monsters','tiles','buildings','icons'])assert.ok(html.includes(`<script src="sprites-original/${f}.js"></script>`),f+'.js not loaded');
+ for(const f of ['chars','monsters','tiles','buildings','icons'])assert.ok(html.includes(`'sprites-original/${f}.js'`),f+'.js not loaded');
  for(const hook of ['SA.chars.buildSheet(FIG[n])','SA.monsters.buildSheet(k)','SA.tiles.drawMap(','SA.buildings.drawBuilding(','SA.buildings.drawWorld(','SA.icons.iconCanvas(k)'])assert.ok(html.includes(hook),'missing hook '+hook);
  for(const gone of ['function figure(','function drawTile(','function drawBuilding(','function drawWolf('])assert.ok(!html.includes(gone),'legacy painter still present: '+gone);});

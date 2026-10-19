@@ -225,7 +225,7 @@ body.touch #keys .key{cursor:pointer}
 #dopts button.hp{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*1)}#dopts button.gopt.hp{display:grid;grid-template-columns:auto 1fr auto}#dopts .gopt .pr{grid-row:1/span 2;grid-column:3}
 .pr{display:inline-flex;align-items:center;gap:.3em;color:var(--gold);font-weight:bold;white-space:nowrap;direction:ltr}.pr img{width:1.4em;height:1.4em;image-rendering:pixelated}
 #updLog{left:50%;top:50%;transform:translate(-50%,-50%);background:var(--sys2);width:calc(var(--u)*56);max-width:92%;max-height:80%;display:flex;flex-direction:column;padding:calc(var(--u)*1.4);z-index:60}#updLog .x{position:absolute;top:calc(var(--u)*.6);inset-inline-end:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}#updLogL{overflow-y:auto;min-height:0;flex:1 1 auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);padding-inline-end:calc(var(--u)*.6);font-size:calc(var(--u)*1.4)}#updLogL .ul{margin-top:calc(var(--u)*.8)}#updLogL .ul b{color:#bfe8ff}#updLogL .ul.new b{color:#ffe7a8}#updLogL ul{margin:calc(var(--u)*.3) 0 0;padding-inline-start:calc(var(--u)*2)}#updLogL li{margin:calc(var(--u)*.25) 0}
-.ggrip{position:absolute;z-index:40;pointer-events:auto;display:flex;gap:2px;opacity:.28;transition:opacity .15s;font-size:calc(var(--u)*1.05);line-height:1}.ggrip:hover,.ggrip.col{opacity:1}.ggrip[hidden]{display:none}.ggrip .gm{cursor:grab;padding:0 3px;background:rgba(8,20,44,.85);border:1px solid rgba(143,216,255,.5);color:#bfe8ff;user-select:none;touch-action:none}.ggrip .gf{width:auto;padding:0 4px;font-size:inherit;line-height:1.1;background:rgba(8,20,44,.85)}.gcol{display:none!important}
+.ggrip{position:absolute;z-index:40;pointer-events:auto;display:flex;gap:2px;opacity:.45;transition:opacity .15s;font-size:calc(var(--u)*1.25);line-height:1}body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.ggrip:hover,.ggrip.col{opacity:1}.ggrip[hidden]{display:none}.ggrip .gm{cursor:grab;padding:0 3px;background:rgba(8,20,44,.85);border:1px solid rgba(143,216,255,.5);color:#bfe8ff;user-select:none;touch-action:none}.ggrip .gf{width:auto;padding:0 4px;font-size:inherit;line-height:1.1;background:rgba(8,20,44,.85)}.gcol{display:none!important}
 #dopts{display:grid;gap:calc(var(--u)*.4);margin-top:calc(var(--u)*.7)}#dopts.many{max-height:calc(var(--u)*24);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);gap:calc(var(--u)*.2);padding-inline-end:calc(var(--u)*.4)}#dopts.many button{font-size:calc(var(--u)*1.2);padding:calc(var(--u)*.15) calc(var(--u)*.8)}#dopts.many .gopt img{width:calc(var(--u)*2.2);height:calc(var(--u)*2.2);grid-row:auto}#dopts.many .gopt small{display:none}#dopts.many .gopt .pr{grid-row:auto}#dopts.many button.gopt{min-height:0}#dopts.many>button:last-child{position:sticky;bottom:0;background:var(--sys2,#16244a)}#dopts.many .pr img{width:calc(var(--u)*1.6);height:calc(var(--u)*1.6)}#dopts.grid{grid-template-columns:repeat(auto-fill,calc(var(--u)*4.6));justify-content:center;max-height:calc(var(--u)*17);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);padding-inline-end:calc(var(--u)*.4)}#dopts.grid>button:not(.dcell){grid-column:1/-1;position:sticky;bottom:0}#dopts button.dcell{aspect-ratio:1;padding:calc(var(--u)*.4);display:flex;align-items:center;justify-content:center;position:relative}#dopts .dcell img{width:80%;height:80%;image-rendering:pixelated}#dopts .dcell b{position:absolute;bottom:2px;inset-inline-end:4px;font-size:calc(var(--u)*1.2);color:#ffe7a8;text-shadow:0 1px 2px #000}#dopts .dcell.poor img{opacity:.45}#dopts .dcell.eq{box-shadow:inset 0 0 0 2px #6ee07a}
 #dopts button{text-align:start;font-size:calc(var(--u)*1.35);padding:calc(var(--u)*.35) calc(var(--u)*1)}
 #dopts button.gopt{display:grid;grid-template-columns:auto 1fr;column-gap:calc(var(--u)*.9);align-items:center}#dopts .gopt img{grid-row:span 2;width:calc(var(--u)*3.4);height:calc(var(--u)*3.4);image-rendering:pixelated;background:rgba(0,0,0,.35);border:1px solid rgba(143,216,255,.4)}#dopts .gopt small{font-size:calc(var(--u)*1.05);opacity:.9;line-height:1.35}#dopts .gopt.poor span{opacity:.55}.cup{color:#6ee07a;font-weight:700}.cdn{color:#ff6a5a;font-weight:700}.ceq{color:#aab}
@@ -375,7 +375,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
         <div class="bar xp"><i id="xpb" style="background:var(--xp)"></i></div>
         <div class="gold" id="goldt"></div>
       </div>
-      <div id="rcol"><div id="quest" class="sys"><div class="qhead"><span class="head" data-i18n="questH"></span><button class="x qtog" data-act="qtoggle" data-tip="Tab">▾</button></div><div id="qtext"></div></div>
+      <div id="rcol"><div id="quest" class="sys"><div class="qhead"><span class="head" data-i18n="questH"></span><button class="x qtog" data-act="qtoggle" title="Tab">▾</button></div><div id="qtext"></div></div>
       <canvas id="mini" class="sys" width="128" height="88" data-tip=""></canvas>
       <div id="partyW" class="sys" hidden><div class="qhead"><span class="head" data-i18n="pTitle"></span><button class="x" data-act="pLeave" data-i18n="pLeave"></button></div><div id="partyL"></div></div></div>
       <div id="boss" class="sys" hidden><div class="head" data-i18n="guardian"></div><div class="bar"><i id="bossb" style="background:linear-gradient(90deg,#8f1d17,#e2493a)"></i><span id="bosst"></span></div></div>
@@ -563,30 +563,35 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
   </div>
 </div>
 
-<script src="sprites-original/chars.js"></script>
-<script src="sprites-original/monsters.js"></script>
-<script src="sprites-original/tiles.js"></script>
-<script src="sprites-original/buildings.js"></script>
-<script src="sprites-original/icons.js"></script>
-<script src="sprites-original/vfx.js"></script>
-<script src="sprites-original/weapons.js"></script>
-<script src="sprites-original/minimap.js"></script>
-<!-- Engine modules (classic scripts so the game still runs from file://). See docs/api/ENGINE_API.md -->
-<script src="src/core/storage.js"></script>
-<script src="src/core/ids.js"></script>
-<script src="src/ui/changelog.js"></script>
-<script src="src/core/state.js"></script>
-<script src="src/core/events.js"></script>
-<script src="src/net/contracts.js"></script>
-<script src="src/net/presence.js"></script>
-<script src="src/net/transport-local.js"></script>
-<script src="src/net/party.js"></script>
-<script src="src/net/duel.js"></script>
-<script src="src/net/chat.js"></script>
-<script src="src/net/raid.js"></script>
-<script src="src/net/cloud.js"></script>
-<script src="src/net/firebase-config.js"></script>
-<script src="src/net/firebase.js"></script>
+<!-- Engine modules (classic scripts so the game still runs from file://). See docs/api/ENGINE_API.md
+     Every file loads with the page's own version (?b=, the time the page was published), so after an update the browser
+     cannot mix a new page with an old cached script (Twister 2026-10-19: a stale monsters.js hid the player). Add new
+     scripts to this list, in load order. -->
+<script>(function(){var b=Date.parse(document.lastModified)||0;[
+ 'sprites-original/chars.js',
+ 'sprites-original/monsters.js',
+ 'sprites-original/tiles.js',
+ 'sprites-original/buildings.js',
+ 'sprites-original/icons.js',
+ 'sprites-original/vfx.js',
+ 'sprites-original/weapons.js',
+ 'sprites-original/minimap.js',
+ 'src/core/storage.js',
+ 'src/core/ids.js',
+ 'src/ui/changelog.js',
+ 'src/core/state.js',
+ 'src/core/events.js',
+ 'src/net/contracts.js',
+ 'src/net/presence.js',
+ 'src/net/transport-local.js',
+ 'src/net/party.js',
+ 'src/net/duel.js',
+ 'src/net/chat.js',
+ 'src/net/raid.js',
+ 'src/net/cloud.js',
+ 'src/net/firebase-config.js',
+ 'src/net/firebase.js'
+].forEach(function(f){document.write('<script src="'+f+'?b='+b+'"><\/script>');});})();</script>
 <script>
 (()=>{
 'use strict';
@@ -1237,7 +1242,7 @@ function updateDragon(dt){const m=mons.find(m=>m.type==='trauka');if(!m||m.dead|
   if(d<190&&da<.42){hurtPlayer(MT.trauka.dmg*2,m.lv,m);vfx('fire',P.x,P.y-8);}return;}
  if(m.brc<=0&&Math.hypot(P.x-m.x,P.y-m.y)<210){m.brc=7+rand()*3;m.br=1.1;m.ba=Math.atan2(P.y-8-(m.y-40),P.x-m.x);m.face=Math.cos(m.ba)>0?1:-1;num(m.x,m.y-100,t('drBreath'),'#ff7a1e',true);tone(120,.9,'sawtooth',.06,180);}}
 // a red dragon drawn with paths: tail, body, four legs, a long neck and horned head, and two wings that beat slowly
-function drawDragon(m){const x=Math.round(m.x),y=Math.round(m.y),f=m.face||1;if(m.dead)return;
+function drawDragon(m){const x=Math.round(m.x),y=Math.round(m.y),f=m.face||1;if(m.dead||!MSH.trauka)return;
  ctx.save();ctx.fillStyle='rgba(0,0,0,.32)';ctx.beginPath();ctx.ellipse(x,y,46,9,0,0,7);ctx.fill();
  if(m.br>0){const a=m.ba,hx=m.x+Math.cos(a)*30,hy=m.y-40+Math.sin(a)*14;ctx.globalAlpha=.18+(1.1-m.br)*.35;ctx.fillStyle='#ff4a1a';ctx.beginPath();ctx.moveTo(hx,hy);ctx.arc(hx,hy,190,a-.42,a+.42);ctx.closePath();ctx.fill();ctx.globalAlpha=1;}
  // pixel sheet from sprites-original/monsters.js (owner: drawn in the game's style, not flat shapes); the level label is drawMon's
@@ -3665,7 +3670,8 @@ function render(dt){
   ents.push({y:P.y,f:()=>{P.trail.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;const am=a.r&&MOUNTS[a.r];if(am){drawHorse(a.x,a.y,a.dir,2,am);drawRider(a.x,a.y,a.dir,2,P);drawHorse(a.x,a.y,a.dir,2,am,ctx,'head');}else drawChar(pSpr(),a.x,a.y,a.dir,a.frame,false);});ctx.globalAlpha=1;const rd=P.ride&&MOUNTS[S.mount];const hf=rd&&P.rmv>0?1+((P.rgT||0)*10|0)%4:0,blk=P.inv>0&&((gTime*20|0)%2===0)&&P.dash<=0;if(rd)drawHorse(P.x,P.y,P.dir,hf,rd);const wen=(weapon()||{}).en||0;if(wen>=7)drawEnh(P.x,P.y-(rd?9:0),wen,0);if(rd){if(!blk)drawRider(P.x,P.y,P.dir,hf,P);drawHorse(P.x,P.y,P.dir,hf,rd,ctx,'head');const hm=rhpMax(S.mount),hh=rhp(S.mount);if(hh<hm){R(ctx,P.x-9,P.y-37,18,3,'#000');R(ctx,P.x-8,P.y-36,16*hh/hm,1,'#e8a060');}}else drawChar(pSpr(),P.x,P.y,P.dir,P.frame,blk,0,P);if(wen>=4)drawEnh(P.x,P.y-(rd?9:0),wen,1);
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,w.id,w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
   if(NET&&!titleCam)netEnts(ents);}
- ents.sort((a,b)=>a.y-b.y).forEach(e=>e.f());
+ // one broken drawing (a stale sprite file after an update) must not hide the player and everything after it
+ ents.sort((a,b)=>a.y-b.y).forEach(e=>{try{e.f();}catch(err){ctx.globalAlpha=1;gameErr(err);}});
  drawEProj();proj.forEach(p=>{if(p.kind==='arrow'){const l=Math.hypot(p.vx,p.vy)||1,ux=p.vx/l,uy=p.vy/l;ctx.strokeStyle='#e8e0d0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x-ux*7,p.y-uy*7);ctx.lineTo(p.x,p.y);ctx.stroke();R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}else if(p.kind==='wave'){const a=Math.atan2(p.vy,p.vx);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.globalAlpha=.85;ctx.strokeStyle='#ffe08a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(-6,0,12,-1.1,1.1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(-5,0,12,-.9,.9);ctx.stroke();ctx.restore();}else{const f=p.kind==='fire';R(ctx,p.x-2,p.y-2,f?5:4,f?5:4,f?'#ff8a1e':'#9fd8ff');R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}});
  VX.draw(ctx);
  ctx.drawImage(overC,camX,camY+NR*TS,VW,VH,camX,camY,VW,VH);
@@ -4324,11 +4330,17 @@ function guiPlace(id){const el=$(id),g=GUI[id],hud=$('hud');if(!el||!g||g.x==nul
  Object.assign(el.style,{position:'absolute',left:x+'px',top:y+'px',right:'auto',bottom:'auto',insetInlineStart:'auto',insetInlineEnd:'auto',transform:'none',margin:'0'});el.style.setProperty('left',x+'px');}
 function guiGrip(id){let b=$('g_'+id);if(b)return b;b=document.createElement('div');b.id='g_'+id;b.className='ggrip';b.innerHTML='<span class="gm" title="">⠿</span><button class="gf">–</button>';$('hud').appendChild(b);
  b.querySelector('.gf').addEventListener('click',e=>{e.stopPropagation();const g=GUI[id]=GUI[id]||{};g.c=!g.c;guiSave();guiTick(true);SFX.click();});
- b.querySelector('.gm').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const el=$(id),hud=$('hud'),hr=hud.getBoundingClientRect(),r=el.getBoundingClientRect();guiDrag={id,dx:e.clientX-r.left,dy:e.clientY-r.top,hr};
-  GUI[id]=GUI[id]||{};GUI[id].x=(r.left-hr.left)/hr.width;GUI[id].y=(r.top-hr.top)/hr.height;guiPlace(id);});
+ const gm=b.querySelector('.gm');gm.draggable=false;gm.addEventListener('dragstart',e=>e.preventDefault());
+ // the grip keeps the pointer while you drag (pointer capture), so the box follows the mouse over buttons, the map and
+ // the game; a cancelled drag (the browser took the pointer) still saves where the box was left (Twister 2026-10-19)
+ gm.addEventListener('pointerdown',e=>{if(e.button)return;e.preventDefault();e.stopPropagation();try{gm.setPointerCapture(e.pointerId);}catch(_){}const el=$(id),hud=$('hud'),hr=hud.getBoundingClientRect(),r=el.getBoundingClientRect();guiDrag={id,dx:e.clientX-r.left,dy:e.clientY-r.top,hr,b,gx:e.clientX,gy:e.clientY};
+  GUI[id]=GUI[id]||{};GUI[id].x=(r.left-hr.left)/hr.width;GUI[id].y=(r.top-hr.top)/hr.height;guiPlace(id);document.body.classList.add('gdrag');});
+ gm.addEventListener('pointercancel',guiEnd);gm.addEventListener('lostpointercapture',guiEnd);
  return b;}
-addEventListener('pointermove',e=>{const d=guiDrag;if(!d)return;const g=GUI[d.id];g.x=(e.clientX-d.dx-d.hr.left)/d.hr.width;g.y=(e.clientY-d.dy-d.hr.top)/d.hr.height;guiPlace(d.id);guiTick(true);});
-addEventListener('pointerup',()=>{if(guiDrag){guiDrag=null;guiSave();}});
+function guiMove(e){const d=guiDrag;if(!d)return;e.preventDefault();const g=GUI[d.id];g.x=(e.clientX-d.dx-d.hr.left)/d.hr.width;g.y=(e.clientY-d.dy-d.hr.top)/d.hr.height;guiPlace(d.id);
+ const el=$(d.id),r=el.getBoundingClientRect();d.b.style.left=Math.max(0,r.left-d.hr.left)+'px';d.b.style.top=Math.max(0,r.top-d.hr.top-14)+'px';}
+function guiEnd(){if(!guiDrag)return;guiDrag=null;document.body.classList.remove('gdrag');guiSave();guiTick(true);}
+addEventListener('pointermove',guiMove);addEventListener('pointerup',guiEnd);addEventListener('beforeunload',guiSave);
 let guiT=0;
 function guiTick(now){if(TOUCH)return;if(!now&&(guiT-=1)>0)return;guiT=15;const hud=$('hud');if(!hud||hud.hidden)return;const hr=hud.getBoundingClientRect();
  for(const id of GUI_IDS){const el=$(id);if(!el)continue;const g=GUI[id]||{},b=guiGrip(id);el.classList.toggle('gcol',!!g.c);if(g.x!=null)guiPlace(id);
