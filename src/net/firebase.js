@@ -130,7 +130,8 @@
     // is left behind at once; one who walks out of range (or out of the party) is removed by its query.
     // Someone in both queries arrives twice; onState drops the second copy.
     var R = (o.interest && o.interest.radius) || 0, STEP = (o.interest && o.interest.step) || Math.round(R / 2);
-    var cx = null, qOffs = [], pq = { id: null, offs: [], keys: {} };
+    // gone: nodes the range query has removed while the party query still listed them (it decides, see below)
+    var cx = null, qOffs = [], pq = { id: null, offs: [], keys: {} }, gone = {};
     function off(f) { try { f(); } catch (e) { /* ignore */ } }
     function outside(key) { return R && cx !== null && !pq.keys[key] && !(Math.abs(lastX[key] - cx) <= R); }
     function listen(x) {
@@ -139,9 +140,10 @@
       cx = x;
       Object.keys(lastSeq).forEach(function (k) { if (outside(k)) leave(k, null); });
       var q = R ? D.query(list, D.orderByChild('x'), D.startAt(Math.max(0, x - R)), D.endAt(x + R)) : list;
-      qOffs.push(D.onChildAdded(q, onState));
-      qOffs.push(D.onChildChanged(q, onState));
-      qOffs.push(D.onChildRemoved(q, function (s) { if (s.key !== o.uid && !pq.keys[s.key]) leave(s.key, s.val()); }));
+      function inR(s) { delete gone[s.key]; onState(s); }
+      qOffs.push(D.onChildAdded(q, inR));
+      qOffs.push(D.onChildChanged(q, inR));
+      qOffs.push(D.onChildRemoved(q, function (s) { if (s.key === o.uid) return; if (pq.keys[s.key]) gone[s.key] = 1; else leave(s.key, s.val()); }));
     }
     function partyQuery(pid) {
       pid = typeof pid === 'string' && pid ? pid : null;
@@ -155,7 +157,8 @@
       function inP(s) { if (s.key === o.uid) return; pq.keys[s.key] = 1; onState(s); }
       pq.offs.push(D.onChildAdded(q, inP));
       pq.offs.push(D.onChildChanged(q, inP));
-      pq.offs.push(D.onChildRemoved(q, function (s) { delete pq.keys[s.key]; if (outside(s.key)) leave(s.key, s.val()); }));
+      // the range query may have seen the node go first (a closed tab): then nobody lists it any more
+      pq.offs.push(D.onChildRemoved(q, function (s) { delete pq.keys[s.key]; if (gone[s.key] || outside(s.key)) { delete gone[s.key]; leave(s.key, s.val()); } }));
     }
     if (!R) listen(0); // whole shard, as before
     offs.push(D.onValue(D.ref(db, '.info/serverTimeOffset'), function (s) { offset = +s.val() || 0; }));
