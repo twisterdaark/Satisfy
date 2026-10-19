@@ -4,7 +4,7 @@
 const test=require('node:test'),assert=require('node:assert'),fs=require('fs'),path=require('path'),vm=require('vm');
 const repo=path.join(__dirname,'..','..'),dataDir=path.join(repo,'data');
 const FILES=['monsters','quests','recipes','skills','npcs','zones','classes'];
-const MATS=['ore','wood','leather','blue','mstone','mith','fish','sfish','gfish','herb','bherb','cfish','stew','feast','dscale'];
+const MATS=['ore','wood','leather','blue','mstone','mith','fish','sfish','gfish','herb','bherb','cfish','stew','feast','dscale','ruby','topaz','emer','sapph','diam'];
 const VISIT_TARGETS=['grave','mural','yaltar']; // landmarks with their own trigger in the engine (visitGrave)
 
 const loadAll=()=>{const ctx={};ctx.globalThis=ctx;vm.createContext(ctx);
