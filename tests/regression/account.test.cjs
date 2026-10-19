@@ -81,3 +81,45 @@ test('Sign out, then Delete my online data: nothing of the account is left onlin
     assert.deepEqual(b.errors, []);
   } finally { await ctx.close(); }
 });
+
+// 37f15f6 (owner request): on a shared device each Google account keeps its own local save, and the title has
+// "Play with another Google account". The device's old save goes to the first account that signs in without one.
+test('Play with another Google account: each account keeps its own character on this device', async () => {
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  try {
+    const g = await H.openGame({ ctx, query: '?net=online' });
+    const ONE = 'gAcctOne1', TWO = 'gAcctTwo2';
+    await g.eval(([a, b]) => { window.__fakeRTDB.data.set('accountIds/' + a, 'Ahmed_1'); window.__fakeRTDB.data.set('accountIds/' + b, 'Bassem_2'); }, [ONE, TWO]);
+    const storeKey = () => g.eval(() => window.__GU.getStore());
+    const name = () => g.eval(() => window.__G.S.look.n);
+
+    await signIn(g, 'Ahmed', ONE);
+    assert.equal(await storeKey(), 'satisfy_proto_v4@g' + ONE);
+    await H.newGame(g, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await g.step(30);
+    await g.eval(() => window.__G.act('quit'));
+    await g.waitMode('title');
+    assert.equal(await g.eval(() => document.getElementById('switchBtn').hidden), false);
+    assert.equal(await g.eval(() => document.getElementById('switchBtn').textContent), 'Play with another Google account');
+
+    // the second account: the chooser opens from the click, and with no character of its own it goes to creation
+    await g.eval((u) => { window.__fakeRTDB.nextName = 'Bassem'; window.__fakeRTDB.nextUid = u; document.getElementById('switchBtn').click(); }, TWO);
+    await until(g, (u) => !!Satisfy.local.net() && window.__GU.getStore() === 'satisfy_proto_v4@g' + u, 8000, TWO);
+    assert.deepEqual(await g.eval(() => window.__fakeRTDB.authParams), { prompt: 'select_account' });
+    await until(g, () => window.__G.mode === 'create', 8000);
+    await H.newGame(g, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    await g.step(30);
+    await g.eval(() => window.__G.act('quit'));
+    await g.waitMode('title');
+    const saves = await g.eval(([a, b]) => [a, b].map((u) => /Grid/.test(localStorage.getItem('satisfy_proto_v4@g' + u) || '') ? 'Grid' : /Faker/.test(localStorage.getItem('satisfy_proto_v4@g' + u) || '') ? 'Faker' : null), [ONE, TWO]);
+    assert.deepEqual(saves, ['Grid', 'Faker'], 'two saves on one device, one per account');
+
+    // back to the first account: its own character continues
+    await g.eval((u) => { window.__fakeRTDB.nextName = 'Ahmed'; window.__fakeRTDB.nextUid = u; document.getElementById('switchBtn').click(); }, ONE);
+    await until(g, () => window.__G.mode === 'play', 10000);
+    assert.equal(await storeKey(), 'satisfy_proto_v4@g' + ONE);
+    assert.equal(await name(), 'Grid');
+    assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
+    assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});

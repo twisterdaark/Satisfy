@@ -314,19 +314,21 @@
 
   const auth = {
     getAuth: () => ({}),
-    GoogleAuthProvider: function GoogleAuthProvider() {},
+    // the real provider's setCustomParameters (37f15f6: prompt=select_account shows the account chooser every time)
+    GoogleAuthProvider: function GoogleAuthProvider() { this.params = {}; this.setCustomParameters = (o) => { this.params = Object.assign({}, o); return this; }; },
     onAuthStateChanged: (a, cb) => {
       if (!user) { try { user = JSON.parse(sessionStorage.getItem('fakeFirebaseUser')); } catch (e) { user = null; } }
       setTimeout(() => cb(user), 0);
       return () => {};
     },
-    signInWithPopup: () => {
+    signInWithPopup: (a, provider) => {
+      F.authParams = provider && provider.params ? provider.params : null;
       if (F.popupBlocked) return Promise.reject(Object.assign(new Error('blocked'), { code: 'auth/popup-blocked' }));
       user = { uid: F.nextUid || 'g' + rid(), displayName: F.nextName }; // nextUid: the same Google account on a second device
       sessionStorage.setItem('fakeFirebaseUser', JSON.stringify(user));
       return Promise.resolve({ user });
     },
-    signInWithRedirect: () => { F.redirected = true; return Promise.resolve(); },
+    signInWithRedirect: (a, provider) => { F.redirected = true; F.authParams = provider && provider.params ? provider.params : null; return Promise.resolve(); },
     signOut: () => { user = null; sessionStorage.removeItem('fakeFirebaseUser'); return Promise.resolve(); },
   };
   const app = { initializeApp: (cfg, name) => { F.config = cfg; return { name }; } };
