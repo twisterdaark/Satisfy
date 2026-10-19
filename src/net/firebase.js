@@ -75,6 +75,9 @@
     // after a reconnect: onDisconnect may have removed it). Later sends update only what changed,
     // so a step sends {x, y, dir, anim, seq, t} instead of the whole public profile (COST_MODEL.md).
     var sent = null;
+    // Round trip (doc U015): how long the server takes to acknowledge a presence write, smoothed.
+    var rtt = null, writes = 0, fails = 0;
+    function acked(t0) { return function () { var ms = Date.now() - t0; rtt = rtt == null ? ms : Math.round(rtt * 0.8 + ms * 0.2); }; }
     var DIRECTED = /^(party\.(invite|accept|decline|kick)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill))$/;
     // exactly the fields the inbox rules accept: party {to, party}, duel {to, duel, k?, n?}, raid {to, raid, k?, n?}
     function directedPayload(type, p) {
@@ -129,19 +132,22 @@
     function fail(e) { if (o.onError) o.onError(e); }
     return {
       kind: 'firebase',
+      /** {rtt: smoothed ms for the server to acknowledge a presence write (null until the first), writes, fails} */
+      netStats: function () { return { rtt: rtt, writes: writes, fails: fails }; },
       send: function (env) {
         if (closed || !env) return;
         if (env.type === 'presence.state') {
           var p = env.payload, v = {};
           for (var k in p) if (p[k] !== null && p[k] !== undefined && k !== 't') v[k] = p[k];
           v.seq = env.seq;
-          var out = {}, f;
-          if (!sent) { for (f in v) out[f] = v[f]; out.t = D.serverTimestamp(); D.set(mine, out).catch(function (e) { sent = null; fail(e); }); }
+          var out = {}, f, t0 = Date.now(), onFail = function (e) { sent = null; fails++; fail(e); };
+          writes++;
+          if (!sent) { for (f in v) out[f] = v[f]; out.t = D.serverTimestamp(); D.set(mine, out).then(acked(t0), onFail); }
           else {
             for (f in v) if (JSON.stringify(v[f]) !== JSON.stringify(sent[f])) out[f] = v[f];
             for (f in sent) if (!(f in v)) out[f] = null; // e.g. left the party: remove the field
             out.t = D.serverTimestamp();
-            D.update(mine, out).catch(function (e) { sent = null; fail(e); });
+            D.update(mine, out).then(acked(t0), onFail);
           }
           sent = v;
         } else if (env.type === 'presence.leave') {

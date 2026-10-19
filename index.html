@@ -3447,13 +3447,14 @@ Satisfy.local=Object.freeze({api:1,
  net:()=>NET?{mode:NETQ,state:netState,uid:NET.uid,sid:NET.sid,count:NET.count(),drawn:netDrawn,remotes:NET.remotes(),stats:NET.stats(),
   party:PARTY?{id:PARTY.id(),leader:PARTY.leader(),members:PARTY.members(),invite:PARTY.pendingInvite()}:null,
   duel:DUEL?{...DUEL.state(),challenge:DUEL.pendingChallenge()}:null,
+  link:NETTR&&NETTR.netStats?NETTR.netStats():null,
   raid:PRAID?{host:PRAID.isHost(),member:PRAID.isMember(),encounters:PRAID.encounters()}:null}:null});
 window.__G.defs=Satisfy.local.defs;
 
 /* ---------------- online (opt-in: ?net=local) ---------------- */
 // Other players come from Satisfy.presence over a transport; nothing here changes offline play.
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
-let NET=null,NETTR=null,netReplaced=false,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null;const PARTY_R=40;
+let NET=null,NETTR=null,netLinkT=0,netReplaced=false,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null;const PARTY_R=40;
 const NETQ=QS.get('net');
 const NET_LIVE=['play','inv','status','equip','dialog','forge','log','map','dead','cut','pause','qd','gname','controls','enhfx','lang']; // every screen of a running game (a quest open, the guild-name box, controls, an enhancement) still is in the world
 function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
@@ -3465,7 +3466,7 @@ function netTick(){NET.tick();const live=Satisfy.local.inGame()&&NET_LIVE.includ
  if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null}),netForce);netForce=false;}
  partyUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
- const netSafe=live&&Satisfy.net.zonePolicy(zoneAt(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;if(sig!==netSig){netSig=sig;b.hidden=!live;
+ const netSafe=live&&Satisfy.net.zonePolicy(zoneAt(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
   b.textContent=(NETQ==='local'?t('netOn',{n:NET.count()+1}):netState==='ONLINE'?t('netOnline',{n:NET.count()+1}):t(netState==='RECONNECTING'?'netRe':'netJoin'))+(netSafe?' · '+t('safeZone'):'');}}
 // remote looks are validated (0..31) but may index past LOOK; fall back to the first option
 function remoteSpr(L,arm){const ix=(a,i)=>i>=0&&i<a.length?i:0,K={hair:ix(LOOK.hair,L.hair),hc:ix(LOOK.hc,L.hc),skin:ix(LOOK.skin,L.skin),top:ix(LOOK.top,L.top)};
@@ -3560,6 +3561,11 @@ function praidStart(){PRAID=Satisfy.raid.create({presence:NET,party:PARTY,uid:NE
  PRAID.on(e=>{if(e.type==='killed'){toast(t('raidKill'),'good');SFX.quest();}});}
 // hitMon(): true when a party member's hit was handed to the leader (the local copy keeps its HP)
 function praidHit(m,dmg){if(!praidShared(m))return false;if(PRAID.hit(praidKey(m),dmg)){m.hp+=dmg;return true;}return false;}
+// link quality for the badge tooltip (doc U015 latency diagnostics, U020 observability)
+Object.assign(STR.ar,{netLink:'الاتصال: {rtt} · اتبعت {s} · وصل {r} · اترفض {d}',netRtt:'{n} م.ث',netRttNone:'—'});
+Object.assign(STR.en,{netLink:'Link: {rtt} · sent {s} · received {r} · dropped {d}',netRtt:'{n} ms',netRttNone:'—'});
+function netLinkText(){if(!NET)return '';const st=NET.stats(),l=NETTR&&NETTR.netStats?NETTR.netStats():null;
+ return t('netLink',{rtt:l&&l.rtt!=null?t('netRtt',{n:l.rtt}):t('netRttNone'),s:st.sent,r:st.recv,d:st.dropped});}
 function netSetState(s){netState=s;netSig='';}
 function netBtn(){const b=$('onlineBtn');if(!b)return;b.hidden=NETQ!=='online';b.disabled=netState==='AUTHENTICATING'||netState==='JOINING';
  if(netUser){delete b.dataset.i18n;b.textContent=t('netSignedIn',{n:netUser.displayName||netUser.uid.slice(0,6)});}

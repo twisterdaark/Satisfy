@@ -1,6 +1,6 @@
 # NET/PVP backlog U001–U038 (plan doc §33–§34) — status
 
-Owner: Claude-A · written with SAT-ONLINE-009 · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
+Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-012 · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
 
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
@@ -9,7 +9,7 @@ Owner: Claude-A · written with SAT-ONLINE-009 · ✅ done · 🟡 partly · ⏳
 | U003 | Offline guest mode | ✅ | Offline is the default; nothing online loads without `?net=` (`regression/boot`) |
 | U004 | Account profile creation | ✅ | SAT-ONLINE-007 `profiles/{uid}` |
 | U005 | Appearance sync | ✅ | `PlayerPublic.look/arm` (SAT-ONLINE-002) |
-| U006 | Session leases | ❌ | One active session per account (doc T07). Next: a `sessions/{uid}` lease with onDisconnect; a second tab asks to take over. |
+| U006 | Session leases | ✅ | SAT-ONLINE-010: `sessions/{uid}`, the newest session wins, "Play here" takes over |
 | U007 | Connection indicator | ✅ | HUD badge from the net state machine (§25) |
 | U008 | Player presence | ✅ | SAT-ONLINE-002/004 |
 | U009 | Spatial interest management | ❌ | Next: a shard per zone (room key already carries `zone`); see `COST_MODEL.md` proposal 2 |
@@ -18,12 +18,12 @@ Owner: Claude-A · written with SAT-ONLINE-009 · ✅ done · 🟡 partly · ⏳
 | U012 | Network room browser | ❌ | One world shard today (`main`) |
 | U013 | Rejoin same room | 🟡 | Reconnect after a drop and after reload (`regression/online-firebase`); one room only |
 | U014 | Stale state watchdog | ✅ | Remotes expire (15 s online, 5 s local); onDisconnect on the server |
-| U015 | Latency diagnostics | ❌ | Next: RTT from `.info/serverTimeOffset` + message timestamps in the badge tooltip |
+| U015 | Latency diagnostics | ✅ | SAT-ONLINE-012: smoothed write round trip in `net().link` and the badge tooltip |
 | U016 | Public profile projection | ✅ | SAT-ONLINE-007 (public fields only, §23) |
 | U017 | Cloud Function command bus | ⏳ | Blaze (D3) |
 | U018 | Offline-to-online migration | 🟡 | SAT-ONLINE-007 moves a save between devices with consent; a wallet migration is server-side (D4) |
 | U019 | Rate limiting | ✅ | Presence per-sender budget, duel hits per second, rules on every write |
-| U020 | Network observability | 🟡 | `Satisfy.local.net().stats` (sent/recv/dropped); no dashboard |
+| U020 | Network observability | 🟡 | `net().stats`/`net().link` and the badge tooltip (SAT-ONLINE-012); no dashboard |
 | U021 | Auth emulator CI | 🟡 | A fake Firebase that applies a copy of the rules; the real emulator isn't reachable from this sandbox |
 | U022 | Config/env isolation | 🟡 | Public web config in `src/net/firebase-config.js`; no staging project |
 | U023 | Protocol versioning | ✅ | Envelope `v: 1`, `PROTOCOL_VERSION` (§25) |
@@ -43,4 +43,4 @@ Owner: Claude-A · written with SAT-ONLINE-009 · ✅ done · 🟡 partly · ⏳
 | U037 | Outlaw flag | ⏳ | R5 |
 | U038 | Bounty board | ⏳ | R5 + ledger |
 
-**Totals:** ✅ 20 · 🟡 5 · ⏳ 7 · ❌ 6.
+**Totals:** ✅ 22 · 🟡 5 · ⏳ 7 · ❌ 4.
