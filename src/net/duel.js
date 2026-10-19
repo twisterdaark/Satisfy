@@ -36,7 +36,7 @@
 
   function create(o) {
     var P = o.presence, self = o.uid, now = o.now || function () { return Date.now(); };
-    var pos = o.pos, zone = o.zone;
+    var pos = o.pos, zone = o.zone, blocked = o.blocked || function () { return false; }; // SAT-ONLINE-016
     var policy = o.policy || (root.Satisfy && root.Satisfy.net && root.Satisfy.net.zonePolicy) || function () { return { safe: false }; };
     var seq = 0, listeners = [];
     var incoming = new Map();   // duel id -> {duel, from, sid, handle, t}
@@ -77,6 +77,7 @@
       var mineDuel = d && d.id === pl.duel && d.foe === from.uid;
       switch (env.type) {
         case 'duel.challenge':
+          if (blocked(from.uid)) return; // no answer: the challenge just expires
           if (d && d.phase !== 'over') { P.send('duel.decline', { to: from.uid, duel: pl.duel }); return; }
           incoming.set(pl.duel, { duel: pl.duel, from: from.uid, sid: ev.sid, handle: from.handle, t: now() });
           emit({ type: 'challenge', duel: pl.duel, handle: from.handle });

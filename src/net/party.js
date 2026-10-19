@@ -22,6 +22,7 @@
 
   function create(o) {
     var P = o.presence, self = o.uid, now = o.now || function () { return Date.now(); }, max = o.max || MAX;
+    var blocked = o.blocked || function () { return false; }; // SAT-ONLINE-016: invites from them are dropped silently
     var id = null, leader = null;
     var accepted = new Map();   // leader: uid -> last time presence showed them in the party
     var outgoing = new Map();   // leader: uid -> invite time
@@ -42,6 +43,7 @@
       switch (env.type) {
         case 'party.invite':
           if (pl.party !== idFor(from.uid)) return;           // only a leader invites, and only to its own party
+          if (blocked(from.uid)) return;                       // no answer: their invite just expires
           if (id) { P.send('party.decline', { to: from.uid, party: pl.party }); return; }
           invites.set(pl.party, { party: pl.party, from: from.uid, sid: ev.sid, handle: from.handle, t: now() });
           emit({ type: 'invite', party: pl.party, handle: from.handle });
