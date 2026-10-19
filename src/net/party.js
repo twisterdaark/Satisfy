@@ -51,7 +51,11 @@
     var leaderOk = 0, lastTick = 0, listeners = [], pingOut = -1e9, pingIn = new Map();
     var store = o.store || null, wall = o.wall || function () { return Date.now(); };
     var recent = new Map(); // leader: uid -> wall time they dropped out; invited back until REJOIN_MS
-    var memo = null;        // member: {id, leader, t}: auto-accept that leader's invite to that party
+    // member: {id, leader, t, sid?}: auto-accept that leader's invite to that party. Only after a real reload: our own
+    // (restored from the tab's store, any sid) or the leader's (sid: the session we last saw; a new one means it reloaded).
+    // A leader that was only out of sight (same session) must be answered with Y again (owner feedback #14).
+    var memo = null;
+    var leaderSid = null;   // member: the leader's session as we last saw it
     var savedSig = '', savedAt = -1e15;
     var mates = [];         // member: the other members, from the leader's published roster (the electorate)
     var mateSeen = new Map(); // member: uid -> when we last saw that mate with us (out of sight a moment still counts)
@@ -94,7 +98,7 @@
           if (blocked(from.uid)) return;                       // no answer: their invite just expires
           if (id) { P.send('party.decline', { to: from.uid, party: pl.party }); return; }
           invites.set(pl.party, { party: pl.party, from: from.uid, sid: ev.sid, handle: from.handle, t: now() });
-          if (memo && memo.id === pl.party && memo.leader === from.uid && wall() - memo.t < REJOIN_MS) {
+          if (memo && memo.id === pl.party && memo.leader === from.uid && wall() - memo.t < REJOIN_MS && !(memo.sid && memo.sid === ev.sid)) {
             memo = null; api.accept(pl.party, true); emit({ type: 'rejoined', handle: from.handle }); return; // our party, back after a reload
           }
           emit({ type: 'invite', party: pl.party, handle: from.handle });
@@ -162,7 +166,7 @@
         var inv = invites.get(pid);
         if (!inv || id) return false;
         invites.clear();
-        id = pid; leader = inv.from; leaderOk = now(); memo = null;
+        id = pid; leader = inv.from; leaderOk = now(); memo = null; leaderSid = inv.sid || null;
         send('party.accept', inv.from);
         save();
         if (!quiet) emit({ type: 'youJoined', handle: inv.handle });
@@ -255,7 +259,7 @@
         } else {
           var L = byUid(leader);
           if (L && L.party === id) {
-            leaderOk = t;
+            leaderOk = t; leaderSid = L.sid || leaderSid;
             // the electorate is the leader's own roster, not whoever writes our party id into their presence (#55)
             mates = (typeof L.rs === 'string' && L.rs ? L.rs.split(' ') : []).filter(function (u) { return u !== self; });
             save();
@@ -282,7 +286,8 @@
           } else if (rest.length < 2 && t - leaderOk > GRACE_MS) {
             var was = { id: id, leader: leader };
             clear();
-            if (store) memo = { id: was.id, leader: was.leader, t: wall() }; // the leader may be reloading: take its invite back
+            // the leader may be reloading: take its invite back, but only from a new session (a reload), not the same one
+            if (store) memo = { id: was.id, leader: was.leader, t: wall(), sid: leaderSid };
             emit({ type: 'dissolved' });
           }
         }
