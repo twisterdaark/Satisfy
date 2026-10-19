@@ -279,7 +279,7 @@
     onChildChanged: listen('changed'),
     onChildRemoved: listen('removed'),
     onValue: (r, cb) => {
-      if (r.path === '.info/serverTimeOffset') { setTimeout(() => cb(snap(r.path, 0)), 0); return () => {}; }
+      if (r.path === '.info/serverTimeOffset') { setTimeout(() => cb(snap(r.path, F.serverOffset || 0)), 0); return () => {}; } // a test sets F.serverOffset for a device whose clock is off
       if (r.path !== '.info/connected') {
         const seg = r.path.split('/');
         const ok = seg[0] === 'sessions' ? user && seg[1] === user.uid : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own') && !!user;
