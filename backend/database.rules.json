@@ -322,7 +322,7 @@
               ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 256 && newData.val() % 1 === 0"
             },
             "ol": {
-              ".validate": "newData.val() === 1"
+              ".validate": "newData.val() === 1 || newData.val() === 2"
             },
             "gd": {
               ".validate": "newData.isString() && newData.val().matches(/^g_[A-Za-z0-9]{1,128}$/)"
