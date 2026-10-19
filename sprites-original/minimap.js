@@ -14,7 +14,8 @@ const C={grass:['#3f7a35','#4b8a3c','#5a9a46'].map(hex),forestFloor:hex('#2f5e2c
  rock:['#4e3a2a','#6e5238','#8a6a4a','#a8885e'].map(hex),wall:['#6a655e','#9a958e','#c4beb5'].map(hex),cave:['#221c2c','#3a3248','#4e4560'].map(hex),
  ink:hex('#141020'),flower:['#f28bb0','#f2e36b','#ffffff','#9fd0ff'].map(hex),fence:hex('#6e4828')};
 const ROOF={house:['#a8322a','#7a2420','#c8483a'],forge:['#4a4f5c','#3a3e4a','#5c6272'],hall:['#3a4a6a','#2a3850','#52648a'],lodge:['#3f6a3a','#2c4e28','#5a8a52'],
- tower:['#5a3a7a','#3e2658','#7a58a0'],shop:['#b06a2a','#844c1a','#d08a44'],inn:['#8a3a5a','#64263f','#ac5276'],armory:['#5a5f6a','#40444e','#7a808c']};
+ tower:['#5a3a7a','#3e2658','#7a58a0'],shop:['#b06a2a','#844c1a','#d08a44'],inn:['#8a3a5a','#64263f','#ac5276'],armory:['#5a5f6a','#40444e','#7a808c'],
+ palace:['#c8a040','#9a7a28','#e8c868'],temple:['#e4e0d6','#b4b0a6','#fbf8f0']};   // the palaces and Rebecca's temples (Titan, Reinhardt)
 const groundKind=v=>v===FL?GR:v===BL||v===TR||v===PL?-1:v;
 
 function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,cw=W*s,ch=H*s,doc=root.document,NY=o.noiseRow||0;   // noiseRow: the tile row the texture noise is anchored to, so rows added above keep the old land's look
