@@ -766,7 +766,7 @@ const OUT='#120f18',EYE='#22181e';
 
 // character sheets from sprites-original/chars.js: idle with blink, walk 4, attack 3, hurt; left mirrors the side row
 // cosmetic effects (sprites-original/vfx.js); seeded per spawn so they never consume the game's Math.random
-const VX=window.SatArt.vfx.create();let VXn=0;const vfx=(k,x,y,o={})=>{o.seed=(++VXn*2654435761)>>>0;VX.spawn(k,x,y,o);};
+const VX=window.SatArt.vfx.create();let VXn=0,VXCAP=null;const vfx=(k,x,y,o={})=>{o.seed=(++VXn*2654435761)>>>0;if(VXCAP&&VXCAP.length<12)VXCAP.push([k,x,y,o]);VX.spawn(k,x,y,o);}; // VXCAP: SAT-ONLINE-030 records a skill's effects for other players
 const SA=window.SatArt,SH={};for(const n in FIG)SH[n]=SA.chars.buildSheet(FIG[n]);
 // monster looks vary: three extra sheets per humanoid kind. People get their own hair, skin and clothes; goblins, kobolds,
 // lizards and the like only change clothes. Each monster picks one when it spawns (m.vr)
@@ -816,6 +816,7 @@ function stepPose(e){let a=ANIM.get(e);if(!a){a={at:e.at||0,t:-9};ANIM.set(e,a);
 function poseOf(ent,frame){if(!ent)return frame?['walk',(gTime/.11|0)%4]:['idle',0];
  if(ent.hurt>0)return ['hurt',0];
  if(ent===P&&P.slash){const k=1-P.slash.t/.14;return ['atk',k<.33?0:k<.75?1:2];}
+ if(ent.rsl!=null){const k=ent.rsl;return ['atk',k<.33?0:k<.75?1:2];} // another player's swing (SAT-ONLINE-030)
  if(ent.tele>0)return ['atk',0];
  if(ent.type&&MT[ent.type]&&ent.atkT>0)return ['atk',ent.atkT>.12?1:2];
  if(ent.type&&MT[ent.type]&&!AIK[ent.type]&&ent.cd>.82&&ent.cd<=1.1)return ['atk',ent.cd>.94?1:2];
@@ -1999,7 +2000,7 @@ function tryAttack(ax,ay,mul){
  if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
  if(k==='bow'||k==='staff'){shoot(k==='bow'?'arrow':'magic',ax,ay,mul||1);return;}
- P.slash={t:.14,a:Math.atan2(ay,ax)};SFX.swing();vfx('slash',P.x+ax*4,P.y-7+ay*4,{angle:P.slash.a,rarity:weapon().r||0});
+ P.slash={t:.14,a:Math.atan2(ay,ax)};SFX.swing();vfx('slash',P.x+ax*4,P.y-7+ay*4,{angle:P.slash.a,rarity:weapon().r||0});if(NET)netFxOut('s',[Math.round(P.slash.a*100),weapon().r||0]);
  const rch=k==='spear'?19:k==='dagger'?10:12,hx=P.x+ax*rch,hy=P.y-6+ay*rch;let res=0;
  for(const m of mons){if(m.dead)continue;if(Math.hypot(m.x-hx,monY(m)-hy)<(k==='spear'?16:14)+MT[m.type].r)res=Math.max(res,hitMon(m,(mul||1)*(P.mul||1),{kx:ax,ky:ay}));}
  if(res)res===2?SFX.crit():SFX.hit();
@@ -2016,7 +2017,7 @@ function updateProj(dt){proj=proj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;i
  for(const m of mons){if(m.dead||p.hit.has(m))continue;if(Math.hypot(m.x-p.x,monY(m)-p.y)<MT[m.type].r+(p.kind==='wave'?13:5)){p.hit.add(m);if(p.boom){boom(p);return false;}if(hitMon(m,p.mul,{kx:Math.sign(p.vx)*.5,ky:Math.sign(p.vy)*.5,stun:p.stun}))SFX.hit();if(!p.pierce)return false;}}
  return true;});}
 function dodge(){if(P.ride)dismount();if(P.dash>0||P.dcd>0)return;P.guard=0;if(P.st<dodgeCost()){toast(t('tired'),'warn');SFX.deny();return;}let ix=(K.right?1:0)-(K.left?1:0),iy=(K.down?1:0)-(K.up?1:0);if(!ix&&!iy){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];ix=v[0];iy=v[1];}const l=Math.hypot(ix,iy);P.dx=ix/l;P.dy=iy/l;P.dash=.18;P.dcd=.7;P.inv=Math.max(P.inv,.3);P.st-=dodgeCost();pressKey('kD');SFX.dodge();vfx('dust',P.x,P.y,{n:8,angle:Math.atan2(-P.dy,-P.dx)});
- for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*8,y:P.y,vx:-P.dx*40+(rand()-.5)*40,vy:-rand()*25,t:.35,c:rand()<.5?'#c8b48a':'#a89870'});fx.push({ring:true,x:P.x,y:P.y-6,t:.25});}
+ for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*8,y:P.y,vx:-P.dx*40+(rand()-.5)*40,vy:-rand()*25,t:.35,c:rand()<.5?'#c8b48a':'#a89870'});fx.push({ring:true,x:P.x,y:P.y-6,t:.25});if(NET)netFxOut('d',[Math.round(Math.atan2(P.dy,P.dx)*100)]);}
 // guard (SAT-COMBAT-002): hold right click to raise a guard toward the cursor. Hits from the front lose most of their damage
 // and wear the guard gauge down; an empty gauge breaks the guard and stuns you. Raising it just before a hit parries:
 // no damage and the attacker is staggered. A tank class (Vantner) will build its skills on top of this.
@@ -2883,7 +2884,7 @@ function useSlot(i){const k=barSkills()[i];if(!k){SFX.deny();return;}const d=SKD
  if((P.cd[k]||0)>0||P.dash>0){SFX.deny();return;}
  const wk=weapKind();if((d.need==='bow'&&wk!=='bow')||(d.need==='staff'&&wk!=='staff')||(d.need==='melee'&&(wk==='bow'||wk==='staff'))){toast(t(d.need==='bow'?'needBow':d.need==='staff'?'needStaff':'needMelee'),'warn');SFX.deny();return;}
  if(P.mp<mpC(k)){toast(t('noMP'),'warn');SFX.deny();return;}
- P.mp-=mpC(k);P.cd[k]=d.cd;const el=$('skillbar').children[i];if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}SKF[k]();skVfx(k);num(P.x,P.y-34,t('sk_'+k),d.col,false);hudDirty=true;}
+ P.mp-=mpC(k);P.cd[k]=d.cd;const el=$('skillbar').children[i];if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}const f0=fx.length;VXCAP=[];try{SKF[k]();skVfx(k);}finally{const vq=VXCAP;VXCAP=null;if(NET)netFxSkill(k,f0,vq);}num(P.x,P.y-34,t('sk_'+k),d.col,false);hudDirty=true;}
 function skVfx(k){const v=fdir(),a=Math.atan2(v[1],v[0]);({whirl:()=>{for(let i=0;i<4;i++)vfx('slash',P.x,P.y-7,{angle:a+i*Math.PI/2,rarity:2});},charge:()=>vfx('dust',P.x,P.y,{n:10,angle:a+Math.PI}),nova:()=>vfx('frost',P.x,P.y-6),bolt:()=>vfx('bolt',P.x,P.y-10,{x1:P.x+v[0]*90,y1:P.y-10+v[1]*90}),smash:()=>{vfx('hit',P.x+v[0]*12,P.y-4+v[1]*12);vfx('dust',P.x+v[0]*12,P.y+v[1]*12,{n:10});},focus:()=>vfx('mana',P.x,P.y-8),rage:()=>vfx('rage',P.x,P.y),roar:()=>vfx('heal',P.x,P.y),cry:()=>vfx('rage',P.x,P.y),strike:()=>vfx('crit',P.x+v[0]*14,P.y-7+v[1]*14)}[k]||(()=>{}))();}
 function checkSkills(){clsSkills().forEach(k=>{if(skOK(k)&&!S.sk[k]){S.sk[k]=1;let i=barSkills().indexOf(k);if(i<0){const b=barSkills().slice(0,5),e=b.indexOf(null);if(e>=0){b[e]=k;S.bar=b;i=e;}}setTimeout(()=>{toast(i<0?t('skNewC',{s:t('sk_'+k)}):t('skNew',{s:t('sk_'+k),k:keyName(KB[i])}),'good');SFX.notice();},500);}});sbSig='';}
 // small procedural skill icons
@@ -3482,7 +3483,7 @@ Satisfy.local=Object.freeze({api:1,
  profile:()=>!S||S.__demo?null:Satisfy.state.profileOf(S),
  events:()=>DEVT.log(),
  onEvent:fn=>DEVT.on(fn),
- net:()=>NET?{mode:NETQ,state:netState,uid:NET.uid,sid:NET.sid,count:NET.count(),drawn:netDrawn,remotes:NET.remotes(),stats:NET.stats(),mapParty:netMapMarks(),
+ net:()=>NET?{mode:NETQ,state:netState,uid:NET.uid,sid:NET.sid,count:NET.count(),drawn:netDrawn,remotes:NET.remotes(),stats:NET.stats(),mapParty:netMapMarks(),fx:NETFX,fxPlayed:{...netFxPlayed},
   party:PARTY?{id:PARTY.id(),leader:PARTY.leader(),members:PARTY.members(),invite:PARTY.pendingInvite()}:null,
   duel:DUEL?{...DUEL.state(),challenge:DUEL.pendingChallenge()}:null,
   link:NETTR&&NETTR.netStats?NETTR.netStats():null,
@@ -3536,7 +3537,7 @@ function netTick(){NET.tick();if(mode!=='title'&&!$('hndW').hidden)hndClose();co
  if(PRAID)PRAID.tick();
  if(mode==='map'&&PARTY&&PARTY.id()&&performance.now()-netMapT>500){netMapT=performance.now();drawMap();}
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
- if(live){const pp=Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,handle:NETH||undefined,hideLv:HIDELV,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic()});if(NET.publish(pp,netForce))netBeatT=Date.now();netBeatPP=pp;netForce=false;}else netBeatPP=null;
+ if(live){const pp=Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,handle:NETH||undefined,hideLv:HIDELV,fx:NETFX||undefined,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic()});if(NET.publish(pp,netForce))netBeatT=Date.now();netBeatPP=pp;netForce=false;}else netBeatPP=null;
  partyUI(live);chatUI(live);pctxUI(live);plUI(live);plPublish(live);
  netPrev=P?{x:P.x,y:P.y}:null;
  const netSafe=live&&Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
@@ -3547,7 +3548,8 @@ function remoteSpr(L,arm){const ix=(a,i)=>i>=0&&i<a.length?i:0,K={hair:ix(LOOK.h
 function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;
  for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;
   const k=remoteSpr(r.look,r.arm),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
-  const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{if(r.anim==='dead')ctx.globalAlpha=.45;drawChar(k,r.x,r.y-bob,r.dir,fr,false);ctx.globalAlpha=1;}});
+  netFxIn(r);const pe=netEnt(r.uid);if(r.anim==='walk')pe.at++;pe.rsl=gTime-pe.rslT<.14?(gTime-pe.rslT)/.14:null;
+  const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{if(r.anim==='dead')ctx.globalAlpha=.45;drawChar(k,r.x,r.y-bob,r.dir,fr,false,0,pe);ctx.globalAlpha=1;}});
   if(r.em)emoBubble(ents,r.em,r.x,r.y,r.dir);
   if(PCTX&&PCTX.uid===r.uid)ents.push({y:r.y-1,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,231,168,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(r.x,r.y+1,9,4,0,0,7);ctx.stroke();ctx.restore();}});
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
@@ -3689,6 +3691,34 @@ function pingEnts(ents,myRoom,F){if(myRoom)return;const now=performance.now();PI
 function netMapMarks(){const id=PARTY&&PARTY.id();if(!id||!NET)return [];return NET.remotes().filter(r=>r.party===id&&r.mv===mapV()).map(r=>{const w=wTile(r.x,r.y);return {uid:r.uid,handle:r.handle||'?',x:w.x,y:w.y};});}
 function netMapParty(g,X,Y,u,F,dpr){for(const m of netMapMarks()){const x=X(m.x),y=Y(m.y);MM.marker(g,'ally',x,y,u*1.3);MM.label(g,m.handle,x,y-11*u,{size:Math.round(11*dpr),color:'#8dff9a',font:F,band:'rgba(6,24,10,.82)'});}}
 let netMapT=0;
+/* other players' actions (SAT-ONLINE-030, owner feedback #7): swings, dashes and skills show on everyone's screen. Our
+   latest action is published as PlayerPublic.fx = "<n>|<kind>|<data>" (n counts our actions, so each new one plays
+   once): s = a swing (angle×100, weapon rarity), d = a dash (angle×100), k = a skill (its id and the effects it drew,
+   recorded relative to us: vfx calls, rings, arcs, bolts and sparks, at most 16). A receiver replays the pictures
+   only, at that player's position: nothing is hit and nothing changes in its game. */
+let NETFX=null,netFxN=0;const netFxSeen=new Map(),netEntOf=new Map(),netFxPlayed={s:0,d:0,k:0};
+const NFX_V=['slash','dust','rage','heal','mana','fire','frost','bolt','stun','block','hit','crit','spawn'],NFX_C=/^(#[0-9a-fA-F]{3,8}|rgba?\([0-9., ]{5,40}\))$/;
+function netFxOut(k,data){netFxN=(netFxN+1)%100000;const s=netFxN+'|'+k+'|'+data.join('|');NETFX=s.length<=400?s:null;}
+function netFxSkill(id,f0,vq){if(!/^[a-z][A-Za-z0-9]{0,15}$/.test(id))return;const R=v=>Math.round(+v||0),list=[];
+ for(const [k,x,y,o] of vq||[])if(NFX_V.includes(k))list.push(['v',k,R(x-P.x),R(y-P.y),o.angle!=null?R(o.angle*100):null,typeof o.color==='string'?o.color:null,o.rarity|0,o.n|0,o.x1!=null?R(o.x1-P.x):null,o.y1!=null?R(o.y1-P.y):null]);
+ for(let i=f0;i<fx.length&&list.length<16;i++){const f=fx[i];if(!f)continue;
+  if(f.ring)list.push(['r',R(f.x-P.x),R(f.y-P.y),R(f.t*100),f.big?1:0]);else if(f.arc)list.push(['a',R(f.x-P.x),R(f.y-P.y),R((f.a||0)*100),R(f.t*100)]);
+  else if(f.bolt)list.push(['b',R(f.t*100)].concat(...f.bolt.slice(0,4).map(q=>[R(q[0]-P.x),R(q[1]-P.y)])));
+  else if(typeof f.x==='number'&&!f.coin&&!f.home)list.push(['p',R(f.x-P.x),R(f.y-P.y),R(f.vx),R(f.vy),R(f.t*100),typeof f.c==='string'?f.c:'#fff',f.fl?1:0]);}
+ let js=JSON.stringify(list);while(js.length>360&&list.length){list.pop();js=JSON.stringify(list);}netFxOut('k',[id,js]);}
+function netEnt(uid){let e=netEntOf.get(uid);if(!e){e={at:0,rsl:null,rslT:-9};netEntOf.set(uid,e);}return e;}
+function netFxIn(r){const m=typeof r.fx==='string'&&/^(\d{1,5})\|([a-z])\|(.*)$/.exec(r.fx),last=netFxSeen.get(r.uid),cur=m?m[1]:'';netFxSeen.set(r.uid,cur);if(!m||last===undefined||last===cur)return; // first sight (or no action yet): nothing to replay
+ const N=v=>{v=+v;return Number.isFinite(v)?v:0;},cl=(v,a)=>Math.max(-a,Math.min(a,N(v))),X=v=>r.x+cl(v,240),Y=v=>r.y+cl(v,240),T=(v,a)=>Math.max(.05,Math.min(a,N(v)/100));
+ if(m[2]==='s'){const [a,ra]=m[3].split('|'),an=cl(a,700)/100;netEnt(r.uid).rslT=gTime;vfx('slash',r.x+Math.cos(an)*4,r.y-7+Math.sin(an)*4,{angle:an,rarity:Math.max(0,Math.min(5,N(ra)|0))});netFxPlayed.s++;if(Math.hypot(r.x-P.x,r.y-P.y)<160)try{SFX.swing();}catch(e){}}
+ else if(m[2]==='d'){const an=cl(m[3],700)/100,dx=Math.cos(an),dy=Math.sin(an);vfx('dust',r.x,r.y,{n:8,angle:Math.atan2(-dy,-dx)});for(let i=0;i<8;i++)fx.push({x:r.x+(Math.random()-.5)*8,y:r.y,vx:-dx*40+(Math.random()-.5)*40,vy:-Math.random()*25,t:.35,c:Math.random()<.5?'#c8b48a':'#a89870'});fx.push({ring:true,x:r.x,y:r.y-6,t:.25});netFxPlayed.d++;}
+ else if(m[2]==='k'){const i=m[3].indexOf('|'),id=m[3].slice(0,i);let list=null;try{list=JSON.parse(m[3].slice(i+1));}catch(e){}if(!SKD[id]||!Array.isArray(list))return;
+  for(const e of list.slice(0,16)){if(!Array.isArray(e))continue;
+   if(e[0]==='v'&&NFX_V.includes(e[1])){const o={};if(e[4]!=null)o.angle=cl(e[4],700)/100;if(typeof e[5]==='string'&&NFX_C.test(e[5]))o.color=e[5];if(e[6])o.rarity=Math.max(0,Math.min(5,e[6]|0));if(e[7])o.n=Math.max(1,Math.min(24,e[7]|0));if(e[8]!=null&&e[9]!=null){o.x1=X(e[8]);o.y1=Y(e[9]);}vfx(e[1],X(e[2]),Y(e[3]),o);}
+   else if(e[0]==='r')fx.push({ring:true,big:e[4]?1:0,x:X(e[1]),y:Y(e[2]),t:T(e[3],1.5)});
+   else if(e[0]==='a')fx.push({arc:1,x:X(e[1]),y:Y(e[2]),a:cl(e[3],1e6)/100,t:T(e[4],1.5)});
+   else if(e[0]==='b'){const pts=[];for(let j=2;j+1<e.length&&pts.length<4;j+=2)pts.push([X(e[j]),Y(e[j+1])]);if(pts.length>=2)fx.push({bolt:pts,t:T(e[1],1)});}
+   else if(e[0]==='p')fx.push({x:X(e[1]),y:Y(e[2]),vx:cl(e[3],400),vy:cl(e[4],400),t:T(e[5],2),c:typeof e[6]==='string'&&NFX_C.test(e[6])?e[6]:'#fff',fl:e[7]?1:0});}
+  num(r.x,r.y-34,t('sk_'+id),SKD[id].col,false);netFxPlayed.k++;}}
 function netMini(g,sx,sy,u){const now=performance.now(),id=PARTY&&PARTY.id();
  if(id)for(const r of NET.remotes())if(r.party===id&&!r.room&&r.mv===mapV())MM.marker(g,'ally',sx(r.x),sy(r.y),u);
  for(const p of PINGS){const k=(now-p.t)/3000;if(k>=1)continue;g.strokeStyle=`rgba(255,220,90,${(1-k).toFixed(2)})`;g.lineWidth=2;g.beginPath();g.arc(sx(p.x),sy(p.y),4+10*k,0,7);g.stroke();}}

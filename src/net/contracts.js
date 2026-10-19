@@ -44,7 +44,9 @@
   var MV_RE = /^[0-9a-f]{8}$/; // PlayerPublic.mv (SAT-ONLINE-019)
   // PlayerPublic.rs (review #55): a party leader's roster, the uids it accepted, space-separated (at most MAX - 1)
   var RS_RE = /^[A-Za-z0-9:_.-]{1,128}( [A-Za-z0-9:_.-]{1,128}){0,3}$/;
-  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'rs', 't'];
+  // PlayerPublic.fx (SAT-ONLINE-030): the player's latest action, "<n>|<kind>|<data>", printable ASCII, for others to replay
+  var FX_RE = /^[0-9]{1,5}\|[a-z]\|[\x20-\x7e]{0,390}$/;
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'rs', 'fx', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
   // S.uid (the local item-instance counter) is private too, but its name collides with the public
   // account `uid`, so it is checked by value in the tests instead of listed here.
@@ -142,6 +144,7 @@
       em: EMOTES.indexOf(ctx.em) >= 0 ? ctx.em : null,
       role: ROLES.indexOf(ctx.role) >= 0 ? ctx.role : null,
       rs: typeof ctx.rs === 'string' && RS_RE.test(ctx.rs) ? ctx.rs : null,
+      fx: typeof ctx.fx === 'string' && FX_RE.test(ctx.fx) ? ctx.fx : null,
       t: ctx.t || 0,
     };
   }
@@ -176,6 +179,7 @@
     if (o.em !== undefined && o.em !== null && EMOTES.indexOf(o.em) < 0) e.push('em');
     if (o.role !== undefined && o.role !== null && ROLES.indexOf(o.role) < 0) e.push('role');
     if (o.rs !== undefined && o.rs !== null && !(typeof o.rs === 'string' && RS_RE.test(o.rs))) e.push('rs');
+    if (o.fx !== undefined && o.fx !== null && !(typeof o.fx === 'string' && FX_RE.test(o.fx))) e.push('fx');
     return { ok: e.length === 0, errors: e };
   }
 

@@ -147,3 +147,14 @@ test('hideLv publishes level 0, which validates', () => {
   assert.deepEqual(N.validatePlayerPublic(pp, { world: WORLD }).errors, []);
   assert.equal(N.toPlayerPublic(S, P, { zone: 'zWin', uid: 'u1', sid: 's1' }).lv, S.lv);
 });
+
+// SAT-ONLINE-030 (owner feedback #7): the latest action, for other players to replay
+test('fx: "<n>|<kind>|<data>", printable, at most 400 characters', () => {
+  const ok = (fx) => N.toPlayerPublic(S, P, { zone: 'zWin', uid: 'u1', sid: 's1', fx }).fx;
+  assert.equal(ok('12|s|-157|2'), '12|s|-157|2');
+  assert.equal(ok('3|k|whirl|[["r",0,-6,25,0]]'), '3|k|whirl|[["r",0,-6,25,0]]');
+  for (const bad of ['s|1', '1|S|x', '1|s|' + 'x'.repeat(400), '1|s|\u0000', 123456]) assert.equal(ok(bad), null, String(bad));
+  const pp = N.toPlayerPublic(S, P, { zone: 'zWin', uid: 'u1', sid: 's1', fx: '1|d|314' });
+  assert.deepEqual(N.validatePlayerPublic(pp, { world: WORLD }).errors, []);
+  assert.ok(N.validatePlayerPublic({ ...pp, fx: '<script>' }, { world: WORLD }).errors.includes('fx'));
+});

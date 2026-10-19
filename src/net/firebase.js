@@ -120,6 +120,7 @@
       if (pp.em === undefined) pp.em = null;
       if (pp.role === undefined) pp.role = null;
       if (pp.rs === undefined) pp.rs = null;
+      if (pp.fx === undefined) pp.fx = null;
       if (typeof pp.t !== 'number') pp.t = 0;
       return { v: 1, type: 'presence.state', requestId: null, sessionId: pp.sid, seq: +v.seq || 0, tick: 0, payload: pp };
     }
