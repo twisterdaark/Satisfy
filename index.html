@@ -53,6 +53,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #partyL i.php{display:block;height:calc(var(--u)*.5);margin:calc(var(--u)*.1) 0 calc(var(--u)*.4);background:rgba(90,26,26,.8)}#partyL i.php b{display:block;height:100%;background:#e2493a}
 #partyL button.blk{width:auto;padding:0 calc(var(--u)*.4);font-size:calc(var(--u)*1.2);opacity:.7}
 #chatW{position:absolute;inset-inline-start:calc(var(--u)*8);bottom:calc(var(--u)*5.5);z-index:30;pointer-events:auto;width:calc(var(--u)*30);font-size:calc(var(--u)*1.4);overflow-wrap:anywhere}
+#chatX{position:absolute;top:calc(var(--u)*.2);inset-inline-end:calc(var(--u)*.3);width:auto;padding:0 calc(var(--u)*.5);font-size:calc(var(--u)*1.1);line-height:1.4;background:rgba(0,0,0,.35);z-index:1}#chatW{position:absolute}#chatBar{position:absolute;inset-inline-start:calc(var(--u)*8);bottom:calc(var(--u)*5.5);z-index:30;pointer-events:auto;width:auto;font-size:calc(var(--u)*1.2);padding:calc(var(--u)*.2) calc(var(--u)*.8)}#chatBar.new{border-color:#ffd24a;color:#ffe7a8}#ui:has(#dialog:not([hidden])) #chatW,#ui:has(.panel:not([hidden]):not(#partyW):not(#chatW)) #chatW,#ui:has(#dialog:not([hidden])) #chatBar{opacity:0;pointer-events:none}
 #chatTabs{display:flex;gap:calc(var(--u)*.4);margin-bottom:calc(var(--u)*.3)}
 #chatTabs button{width:auto;font:inherit;font-size:calc(var(--u)*1.2);padding:0 calc(var(--u)*.8);background:rgba(0,0,0,.35);color:#c8d0e0;border:1px solid rgba(255,255,255,.25);border-radius:calc(var(--u)*.3);cursor:pointer}
 #chatTabs button.on{color:#fff;border-color:#9fe0ff;background:rgba(40,70,110,.6)}
@@ -224,7 +225,7 @@ body.touch #keys .key{cursor:pointer}
 #dopts button.hp{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*1)}#dopts button.gopt.hp{display:grid;grid-template-columns:auto 1fr auto}#dopts .gopt .pr{grid-row:1/span 2;grid-column:3}
 .pr{display:inline-flex;align-items:center;gap:.3em;color:var(--gold);font-weight:bold;white-space:nowrap;direction:ltr}.pr img{width:1.4em;height:1.4em;image-rendering:pixelated}
 #updLog{left:50%;top:50%;transform:translate(-50%,-50%);background:var(--sys2);width:calc(var(--u)*56);max-width:92%;max-height:80%;display:flex;flex-direction:column;padding:calc(var(--u)*1.4);z-index:60}#updLog .x{position:absolute;top:calc(var(--u)*.6);inset-inline-end:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}#updLogL{overflow-y:auto;min-height:0;flex:1 1 auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);padding-inline-end:calc(var(--u)*.6);font-size:calc(var(--u)*1.4)}#updLogL .ul{margin-top:calc(var(--u)*.8)}#updLogL .ul b{color:#bfe8ff}#updLogL .ul.new b{color:#ffe7a8}#updLogL ul{margin:calc(var(--u)*.3) 0 0;padding-inline-start:calc(var(--u)*2)}#updLogL li{margin:calc(var(--u)*.25) 0}
-#dopts{display:grid;gap:calc(var(--u)*.4);margin-top:calc(var(--u)*.7)}#dopts.grid{grid-template-columns:repeat(auto-fill,calc(var(--u)*4.6));justify-content:center;max-height:calc(var(--u)*17);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);padding-inline-end:calc(var(--u)*.4)}#dopts.grid>button:not(.dcell){grid-column:1/-1;position:sticky;bottom:0}#dopts button.dcell{aspect-ratio:1;padding:calc(var(--u)*.4);display:flex;align-items:center;justify-content:center;position:relative}#dopts .dcell img{width:80%;height:80%;image-rendering:pixelated}#dopts .dcell b{position:absolute;bottom:2px;inset-inline-end:4px;font-size:calc(var(--u)*1.2);color:#ffe7a8;text-shadow:0 1px 2px #000}#dopts .dcell.poor img{opacity:.45}#dopts .dcell.eq{box-shadow:inset 0 0 0 2px #6ee07a}
+#dopts{display:grid;gap:calc(var(--u)*.4);margin-top:calc(var(--u)*.7)}#dopts.many{max-height:calc(var(--u)*24);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);gap:calc(var(--u)*.2);padding-inline-end:calc(var(--u)*.4)}#dopts.many button{font-size:calc(var(--u)*1.2);padding:calc(var(--u)*.15) calc(var(--u)*.8)}#dopts.many .gopt img{width:calc(var(--u)*2.2);height:calc(var(--u)*2.2);grid-row:auto}#dopts.many .gopt small{display:none}#dopts.many .gopt .pr{grid-row:auto}#dopts.many button.gopt{min-height:0}#dopts.many>button:last-child{position:sticky;bottom:0;background:var(--sys2,#16244a)}#dopts.many .pr img{width:calc(var(--u)*1.6);height:calc(var(--u)*1.6)}#dopts.grid{grid-template-columns:repeat(auto-fill,calc(var(--u)*4.6));justify-content:center;max-height:calc(var(--u)*17);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);padding-inline-end:calc(var(--u)*.4)}#dopts.grid>button:not(.dcell){grid-column:1/-1;position:sticky;bottom:0}#dopts button.dcell{aspect-ratio:1;padding:calc(var(--u)*.4);display:flex;align-items:center;justify-content:center;position:relative}#dopts .dcell img{width:80%;height:80%;image-rendering:pixelated}#dopts .dcell b{position:absolute;bottom:2px;inset-inline-end:4px;font-size:calc(var(--u)*1.2);color:#ffe7a8;text-shadow:0 1px 2px #000}#dopts .dcell.poor img{opacity:.45}#dopts .dcell.eq{box-shadow:inset 0 0 0 2px #6ee07a}
 #dopts button{text-align:start;font-size:calc(var(--u)*1.35);padding:calc(var(--u)*.35) calc(var(--u)*1)}
 #dopts button.gopt{display:grid;grid-template-columns:auto 1fr;column-gap:calc(var(--u)*.9);align-items:center}#dopts .gopt img{grid-row:span 2;width:calc(var(--u)*3.4);height:calc(var(--u)*3.4);image-rendering:pixelated;background:rgba(0,0,0,.35);border:1px solid rgba(143,216,255,.4)}#dopts .gopt small{font-size:calc(var(--u)*1.05);opacity:.9;line-height:1.35}#dopts .gopt.poor span{opacity:.55}.cup{color:#6ee07a;font-weight:700}.cdn{color:#ff6a5a;font-weight:700}.ceq{color:#aab}
 #dopts button.sel{background:linear-gradient(180deg,rgba(90,160,240,.7),rgba(40,90,170,.7));box-shadow:0 0 calc(var(--u)*1) rgba(143,216,255,.75)}
@@ -363,7 +364,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
   <canvas id="txt"></canvas>
   <div id="ui" lang="ar" dir="rtl">
     <div id="hud" hidden>
-      <div id="chatW" class="sys" hidden><div id="chatTabs"><button data-ch="all"></button><button data-ch="party"></button></div><div id="chatL"></div><input id="chatIn" maxlength="120" autocomplete="off" spellcheck="false" hidden></div>
+      <button id="chatBar" hidden></button><div id="chatW" class="sys" hidden><button id="chatX" title="✕">✕</button><div id="chatTabs"><button data-ch="all"></button><button data-ch="party"></button></div><div id="chatL"></div><input id="chatIn" maxlength="120" autocomplete="off" spellcheck="false" hidden></div>
       <div id="stats" class="sys">
         <div class="nm"><span data-i18n="pname"></span><span class="lv" id="lv"></span></div>
         <div class="bar"><i id="hpb" style="background:var(--hp)"></i><span id="hpt"></span></div>
@@ -2522,18 +2523,18 @@ const NPCT={
  merchantP:{idle:()=>'mHiP',opts:()=>merchOpts('merchantP')},
  armorer:{idle:()=>'arHi',opts:()=>smithMenu('armorer',[['isword',150],['bow',140],['staff',140],['hammer',150],['spear',150],['dagger',130]],[['larmor',80],['lhelm',60],['lgloves',45],['lboots',50]],false)},
  armorerP:{idle:()=>'arHiP',opts:()=>smithMenu('armorerP',[['ssword',800],['sbow',760],['sstaff',760],['shammer',820],['spear',150],['dagger',130]],[['parmor',700],['ihelm',420],['igloves',360],['iboots',380],['cring',300]],false)},
- innP:{idle:()=>'innPHi',opts:()=>[bindOpt('innP'),{l:t('oRest',{g:price('innP',30)}),f:()=>rest('innP',price('innP',30))},{l:t('oBuyBread'),f:()=>buyBread('innP')},...potOpts('innP'),...mapOpt('innP')]},
+ innP:{idle:()=>'innPHi',opts:()=>[bindOpt('innP'),...bankOpt('innP'),{l:t('oRest',{g:price('innP',30)}),f:()=>rest('innP',price('innP',30))},{l:t('oBuyBread'),f:()=>buyBread('innP')},...potOpts('innP'),...mapOpt('innP')]},
  ashur:{hi:'as_hi',low:()=>nextLvLine('ashur','as_low'),idle:()=>'as_idle'},
  pcap:{hi:'pc_hi',low:()=>nextLvLine('pcap','pc_low'),idle:()=>'pc_idle'},
  coachP:{idle:()=>'coachHi',opts:()=>[...rideOpt('horse'),{l:t('oTravelW',{g:fare()}),f:()=>travel(1,'coachP')},{l:t('oTravelB',{g:fare()+80}),f:()=>travel(0,'coachP')}]},
- inn:{idle:()=>'innHi',opts:()=>[bindOpt('inn'),{l:t('oRest',{g:price('inn',20)}),f:()=>rest('inn',price('inn',20))},{l:t('oBuyBread'),f:()=>buyBread('inn')},...potOpts('inn'),...mapOpt('inn')]},
- innB:{idle:()=>'innBHi',opts:()=>[bindOpt('innB'),{l:t('oRest',{g:price('innB',20)}),f:()=>rest('innB',price('innB',20))},{l:t('oBuyBread'),f:()=>buyBread('innB')},...potOpts('innB'),...mapOpt('innB')]},
+ inn:{idle:()=>'innHi',opts:()=>[bindOpt('inn'),...bankOpt('inn'),{l:t('oRest',{g:price('inn',20)}),f:()=>rest('inn',price('inn',20))},{l:t('oBuyBread'),f:()=>buyBread('inn')},...potOpts('inn'),...mapOpt('inn')]},
+ innB:{idle:()=>'innBHi',opts:()=>[bindOpt('innB'),...bankOpt('innB'),{l:t('oRest',{g:price('innB',20)}),f:()=>rest('innB',price('innB',20))},{l:t('oBuyBread'),f:()=>buyBread('innB')},...potOpts('innB'),...mapOpt('innB')]},
  oldw:{hi:'ow_hi',idle:()=>'ow_idle'},
  piaro:{hi:'pi_hi',idle:()=>'pi_idle',opts:()=>[{l:t('oPiaro'),f:()=>dialog('piaro',['pi_t1','pi_t2','pi_t3',balanced()?'pi_good':'pi_off'])},...secOpt('piaro'),...(S.sec==='farmer'?[{l:t('oFarm'),st:t('farmD'),f:farmStart}]:[])]},
  foreman:{hi:'fo_hi',idle:()=>'fo_idle'},
  smithR:{hi:'sr_hi',idle:()=>'sr_idle',opts:()=>smithMenu('smithR',[['ssword',780],['spear',150],['dagger',130],['shammer',800]],[['parmor',680],['ihelm',400],['igloves',340],['iboots',360],['mring',900]])},
  merchantR:{idle:()=>'mR_hi',opts:()=>merchOpts('merchantR')},
- innR:{idle:()=>'innR_hi',opts:()=>[bindOpt('innR'),{l:t('oRest',{g:price('innR',40)}),f:()=>rest('innR',price('innR',40))},{l:t('oBuyBread'),f:()=>buyBread('innR')},...potOpts('innR'),...mapOpt('innR')]},
+ innR:{idle:()=>'innR_hi',opts:()=>[bindOpt('innR'),...bankOpt('innR'),{l:t('oRest',{g:price('innR',40)}),f:()=>rest('innR',price('innR',40))},{l:t('oBuyBread'),f:()=>buyBread('innR')},...potOpts('innR'),...mapOpt('innR')]},
  fisher:{hi:'fi_hi',idle:()=>'fi_idle',opts:()=>petOpt('cat')},
  herbW:{hi:'hw_hi',idle:()=>'hw_idle',opts:()=>[...secOpt('herbW')]},
  guildM:{hi:'gm_hi',idle:()=>'gm_idle',opts:()=>guildMOpts()},
@@ -2548,7 +2549,7 @@ const NPCT={
  vantner:{hi:'vt_hi',idle:()=>'vt_idle',opts:()=>compOpt('vantner')},faker:{hi:'fk_hi',idle:()=>S.comp==='faker'?'cpIdle_faker':'fk_idle',opts:()=>compOpt('faker')},
  smithRh:{hi:'srh_hi',idle:()=>'srh_idle',opts:()=>smithMenu('smithRh',[['ssword',800],['spear',160],['dagger',140],['shammer',820]],[['parmor',700],['ihelm',420],['igloves',350],['iboots',370],['mring',920]])},
  merchantRh:{idle:()=>'mRh_hi',opts:()=>merchOpts('merchantRh')},
- innRh:{idle:()=>'innRh_hi',opts:()=>[bindOpt('innRh'),{l:t('oRest',{g:price('innRh',50)}),f:()=>rest('innRh',price('innRh',50))},{l:t('oBuyBread'),f:()=>buyBread('innRh')},...potOpts('innRh'),...mapOpt('innRh')]},
+ innRh:{idle:()=>'innRh_hi',opts:()=>[bindOpt('innRh'),...bankOpt('innRh'),{l:t('oRest',{g:price('innRh',50)}),f:()=>rest('innRh',price('innRh',50))},{l:t('oBuyBread'),f:()=>buyBread('innRh')},...potOpts('innRh'),...mapOpt('innRh')]},
  guardRh:{idle:()=>'grh_idle',opts:()=>rideOpt('whorse')},
  guardW:{idle:()=>'gw_idle'},hunter:{idle:()=>'hn_idle'},farmerP:{idle:()=>'fp_idle'},hunterP:{idle:()=>'hp_idle'},
  pedW:{idle:()=>'ped_hi',opts:()=>[...potOpts('pedW'),{l:t('oBuyBread'),f:()=>buyBread('pedW')}]},pedE:{idle:()=>'ped_hi',opts:()=>[...potOpts('pedE'),{l:t('oBuyBread'),f:()=>buyBread('pedE')}]},
@@ -2564,6 +2565,14 @@ function useRespec(){if(!(S.respec>0))return;const n=['str','sta','agi','int','d
  S.respec--;S.st={str:10,sta:10,agi:10,int:10,dex:10};S.pts+=n;if(P){P.hp=Math.min(P.hp,maxHP());P.mp=Math.min(P.mp,maxMP());}SFX.rare();toast(t('respecDone',{n}),'good');hudDirty=true;save(true);renderStatus();}
 Object.assign(STR.ar,{oRespec:'لفافة إعادة التوزيع ({g} دهب)',respecD:'بترجعلك كل نقط الستات اللي وزعتها عشان توزعها من الأول',respecGot:'اشتريت لفافة إعادة التوزيع، استخدمها من نافذة الحالة (C)',respecUse:'اقرا لفافة إعادة التوزيع (معاك {n})',respecNone:'مفيش نقط موزعة ترجع',respecDone:'رجعتلك {n} نقطة، وزعهم من الأول'});
 Object.assign(STR.en,{oRespec:'Stat Reset Scroll ({g} gold)',respecD:'Returns every stat point you distributed so you can spend them again',respecGot:'You bought a Stat Reset Scroll. Read it from the status window (C)',respecUse:'Read a Stat Reset Scroll ({n} left)',respecNone:'No distributed points to return',respecDone:'{n} points returned. Spend them again'});
+// bank (owner request): gold kept at any inn is safe from the 10% lost on death; the inns share one account
+function bankMenu(who){const b=S.bank||0,g=S.gold,mv=(n,dep)=>{n=Math.floor(n);if(n<=0)return;if(dep){S.gold-=n;S.bank=b+n;}else{S.bank=b-n;S.gold+=n;}SFX.coin();hudDirty=true;save(true);toast(t(dep?'bankIn':'bankOut',{n:n.toLocaleString('en')}),'good');bankMenu(who);};
+ const o=[];if(g>0){o.push({l:t('bankDepAll',{n:g.toLocaleString('en')}),f:()=>mv(g,1)});if(g>=2)o.push({l:t('bankDepHalf',{n:Math.floor(g/2).toLocaleString('en')}),f:()=>mv(g/2,1)});}
+ if(b>0){o.push({l:t('bankWdAll',{n:b.toLocaleString('en')}),f:()=>mv(b,0)});for(const n of [1000,10000])if(b>n)o.push({l:t('bankWd',{n:n.toLocaleString('en')}),f:()=>mv(n,0)});}
+ o.push({l:t('oBack'),f:()=>svcBack(who)});dialog(who,[t('bankHi',{b:b.toLocaleString('en'),g:g.toLocaleString('en')})],null,o);}
+const bankOpt=who=>[{l:t('oBank'),st:t('bankD'),f:()=>bankMenu(who)}];
+Object.assign(STR.ar,{oBank:'البنك',bankD:'الفلوس اللي في البنك مبتضيعش لما تموت',bankHi:'رصيدك في البنك: {b} دهب · معاك: {g} دهب',bankDepAll:'حط كل فلوسك ({n})',bankDepHalf:'حط النص ({n})',bankWdAll:'اسحب الكل ({n})',bankWd:'اسحب {n}',bankIn:'حطيت {n} دهب في البنك',bankOut:'سحبت {n} دهب من البنك',bankL:'البنك'});
+Object.assign(STR.en,{oBank:'Bank',bankD:"Gold in the bank isn't lost when you die",bankHi:'In the bank: {b} gold · on you: {g} gold',bankDepAll:'Deposit all ({n})',bankDepHalf:'Deposit half ({n})',bankWdAll:'Withdraw all ({n})',bankWd:'Withdraw {n}',bankIn:'Deposited {n} gold',bankOut:'Withdrew {n} gold',bankL:'Bank'});
 function merchOpts(who){return [...potOpts(who),...respecOpt(who),{l:t('oBuyBread'),f:()=>buyBread(who)},...sellOpt(who),...Object.keys(MATP).filter(k=>S.mats[k]>0).map(k=>{const n=Math.min(5,S.mats[k]),g=n*MATP[k];return{l:t('oSellM',{n,it:t(k),g}),f:()=>sellMats(who,k,n,g)};})];}
 
 function haggle(who){S.hag=rand()<.35+S.hid.dign*.01+S.hid.insi*.01?1:0;SFX.click();shopD(who,S.hag?'hagOk':'hagNo');}
@@ -2810,13 +2819,13 @@ function twDone(){if(!DL||!DL.typing)return false;clearInterval(DL.twI);DL.typin
 function dialog(who,lines,done,opts){DL={who,lines,i:0,done,opts,prev:mode==='dialog'?'play':mode};mode='dialog';$('dialog').hidden=false;$('hint').hidden=true;showLine();}
 function showLine(){let ln=DL.lines[DL.i],who=DL.who;if(Array.isArray(ln)){who=ln[0];ln=ln[1];}$('dname').textContent=t(who);$('dprev').hidden=true;$('dialog').classList.remove('pv');twStart($('dtext'),t(ln));
  const o=$('dopts');o.innerHTML='';DL.optOn=!!(DL.opts&&DL.i===DL.lines.length-1);o.hidden=!DL.optOn;$('dialog').querySelector('.more').hidden=DL.optOn;
- o.classList.toggle('grid',!!(DL.optOn&&DL.opts.some(x=>x.cell)));
- if(DL.optOn){DL.opts.forEach((op,i)=>{const b=document.createElement('button'),[l,pr]=optPrice(op),ph=pr?`<span class="pr"><img src="${icon('coin')}">${pr}</span>`:'';if(op.cell){b.className='slotb dcell r'+(op.r||0)+(op.poor?' poor':'')+(op.eq?' eq':'');b.dataset.tip=op.tip||esc(l);b.innerHTML=`<img src="${icon(op.ic)}"><b dir="ltr">${op.badge||''}</b>`;}else if(op.ic){b.className='gopt'+(op.poor?' poor':'')+(pr?' hp':'');b.innerHTML=`<img src="${icon(op.ic)}"><span>${i+1}. ${esc(l)}</span>${op.st?`<small>${op.st}</small>`:''}${ph}`;}else if(pr){b.className='hp';b.innerHTML=`<span>${i+1}. ${esc(l)}</span>${ph}`;}else b.textContent=(i+1)+'. '+l;b.dataset.opt=i;b.onpointerenter=()=>selOpt(i);o.appendChild(b);});const L=LSEL;selOpt(L&&L.who===DL.who&&L.n===DL.opts.length?L.i:0);}}
+ o.classList.toggle('grid',!!(DL.optOn&&DL.opts.some(x=>x.cell)));o.classList.toggle('many',!!(DL.optOn&&DL.opts.length>7)); // long lists (shops): compact rows, a scrollbar, the detail line in the tooltip
+ if(DL.optOn){DL.opts.forEach((op,i)=>{const b=document.createElement('button'),[l,pr]=optPrice(op),ph=pr?`<span class="pr"><img src="${icon('coin')}">${pr}</span>`:'';if(op.cell){b.className='slotb dcell r'+(op.r||0)+(op.poor?' poor':'')+(op.eq?' eq':'');b.dataset.tip=op.tip||esc(l);b.innerHTML=`<img src="${icon(op.ic)}"><b dir="ltr">${op.badge||''}</b>`;}else if(op.ic){b.className='gopt'+(op.poor?' poor':'')+(pr?' hp':'');b.innerHTML=`<img src="${icon(op.ic)}"><span>${i+1}. ${esc(l)}</span>${op.st?`<small>${op.st}</small>`:''}${ph}`;if(op.st&&DL.opts.length>7)b.dataset.tip=op.st;}else if(pr){b.className='hp';b.innerHTML=`<span>${i+1}. ${esc(l)}</span>${ph}`;}else b.textContent=(i+1)+'. '+l;b.dataset.opt=i;b.onpointerenter=()=>selOpt(i);o.appendChild(b);});const L=LSEL;selOpt(L&&L.who===DL.who&&L.n===DL.opts.length?L.i:0);}}
 // a price written into an option label ((500 gold), · 200G) is pulled out and shown as a coin badge on the far side
 const PRX=/\s*\(\s*([\d,]+)\s*(?:G|دهب|ذهب|gold)\s*\)|\s*·\s*([\d,]+)\s*(?:G|دهب|ذهب|gold)\s*$/;
 function optPrice(op){if(op.pr!=null)return [op.l,Number(op.pr).toLocaleString('en')];const m=String(op.l).match(PRX);if(!m)return [op.l,null];return [op.l.replace(m[0],'').trim(),Number((m[1]||m[2]).replace(/,/g,'')).toLocaleString('en')];}
 function selOpt(i){if(!DL)return;DL.sel=i;[...$('dopts').children].forEach((b,j)=>b.classList.toggle('sel',j===i));
- {const o=$('dopts'),b=o.children[i];if(b&&o.classList.contains('grid')&&b.classList.contains('dcell')){if(b.offsetTop<o.scrollTop)o.scrollTop=b.offsetTop;else if(b.offsetTop+b.offsetHeight>o.scrollTop+o.clientHeight)o.scrollTop=b.offsetTop+b.offsetHeight-o.clientHeight;}}
+ {const o=$('dopts'),b=o.children[i];if(b&&o.scrollHeight>o.clientHeight){if(b.offsetTop<o.scrollTop)o.scrollTop=b.offsetTop;else if(b.offsetTop+b.offsetHeight>o.scrollTop+o.clientHeight)o.scrollTop=b.offsetTop+b.offsetHeight-o.clientHeight;}}
  const op=DL.opts&&DL.opts[i],pv=op&&op.pv||null;DL.pv=pv;DL.pvS=pv&&pv.look?SA.chars.buildSheet(lookFig(pv.look,S&&armorIt()?1:0)):null;$('dprev').hidden=!pv;$('dialog').classList.toggle('pv',!!pv);}
 function drawDPrev(){const g=$('dprev').getContext('2d'),v=DL.pv;g.clearRect(0,0,32,32);
  if(DL.pvS){const dir=[0,2,1,3][(gTime*.7|0)%4],r=SA.chars.rect(DIR4[dir],'walk',(gTime*9|0)%4),c=DL.pvS.canvas;if(r.flip){g.save();g.translate(32,0);g.scale(-1,1);g.drawImage(c,r.sx,r.sy,16,24,8,5,16,24);g.restore();}else g.drawImage(c,r.sx,r.sy,16,24,8,5,16,24);}
@@ -3196,7 +3205,7 @@ function openStatus(){SFX.open();mode='status';$('statusW').hidden=false;$('hint
 function closeStatus(){SFX.close();$('statusW').hidden=true;mode='play';hudDirty=true;}
 let STAB='main';
 function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,tip,btn,extra,id)=>`<div class="srow"${tip?` data-tip="${esc(tip)}"`:''}><span>${k}</span><span><b${id?` id="sv_${id}"`:''}>${v}</b>${extra||''}${btn||''}</span></div>`;
- const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+row(t('cls'),t('cl_'+S.cls))+row(t('secL'),S.sec?t('sec_'+S.sec):t('none'))+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
+ const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+row(t('cls'),t('cl_'+S.cls))+row(t('secL'),S.sec?t('sec_'+S.sec):t('none'))+(S.bank?row(t('bankL'),S.bank.toLocaleString('en')):'')+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
  h+=`<div class="ssec">${t('basic')}<span class="sptc${S.pts>0?' on':''}">${t('pts',{n:S.pts})}</span></div><div class="sgrid">`+['str','sta','agi','int','dex'].map(k=>row(t(k),stat(k),t('t'+k),S.pts>0?`<button data-stat="${k}">+</button>${S.pts>=5?`<button class="p5" data-stat="${k}" data-n="5">+5</button>`:''}`:'',S.bonus?` <em>(+${S.bonus})</em>`:'',k)).join('')+'</div>';
  if(S.respec>0)h+=`<div class="note"><button data-respec="1" data-tip="${esc(t('respecD'))}">${t('respecUse',{n:S.respec})}</button></div>`;
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
@@ -3969,7 +3978,11 @@ let CHCH='all',chatWasP=false; // joining a party switches Enter to the party ch
 function chatStart(){CHAT=Satisfy.chat.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,world:NETTR&&NETTR.sayWorld?NETTR:null,handle:()=>netId||(S&&S.look.n)||''});CHAT.on(()=>{chatSig='';});}
 function chatInParty(){return !!(PARTY&&PARTY.members().length>=2);}
 function chatCh(c){CHCH=c==='party'&&chatInParty()?'party':'all';$('chatIn').placeholder=t(CHCH==='party'?'chatPh':'chatPhAll');chatSig='';}
-function chatOpen(){if(!CHAT)return;chatCh(CHCH);const i=$('chatIn');i.hidden=false;$('chatW').hidden=false;i.focus();chatSig='';}
+// the chat box can be closed to a small bar that counts new lines; the choice is remembered (owner request)
+let CHATMIN=(()=>{try{return localStorage.getItem('satisfy_chatmin')==='1';}catch(e){return false;}})(),chatMinT=0;
+function chatMin(v){CHATMIN=v;chatMinT=performance.now();try{localStorage.setItem('satisfy_chatmin',v?'1':'0');}catch(e){}if(v){chatClose();$('chatW').hidden=true;}chatSig='';}
+$('chatX').addEventListener('click',e=>{e.stopPropagation();chatMin(true);});$('chatBar').addEventListener('click',()=>{chatMin(false);chatOpen();});
+function chatOpen(){if(!CHAT)return;if(CHATMIN)chatMin(false);chatCh(CHCH);const i=$('chatIn');i.hidden=false;$('chatW').hidden=false;i.focus();chatSig='';}
 function chatClose(){const i=$('chatIn');i.hidden=true;i.value='';i.blur();chatSig='';}
 function chatSend(){if(!CHAT)return chatClose();let v=$('chatIn').value,ch=CHCH;const m=/^\/(p|a)\s+/i.exec(v);if(m){ch=m[1].toLowerCase()==='p'?'party':'all';v=v.slice(m[0].length);} // /p party, /a everyone
  const r=CHAT.say(v,ch);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}chatClose();}
@@ -3978,7 +3991,8 @@ $('chatIn').addEventListener('blur',()=>{if(!$('chatIn').hidden&&!$('chatIn').va
 // pressing a tab used to blur the empty line first, which closed it and hid the tabs before the click landed (owner feedback 9)
 $('chatTabs').addEventListener('pointerdown',e=>e.preventDefault());$('chatTabs').addEventListener('mousedown',e=>e.preventDefault());
 $('chatTabs').addEventListener('click',e=>{const b=e.target.closest('button[data-ch]');if(!b)return;chatCh(b.dataset.ch);if($('chatIn').hidden)chatOpen();else $('chatIn').focus();});
-function chatUI(live){const W=$('chatW'),on=!!(live&&CHAT);if(!on){if(!W.hidden){W.hidden=true;chatClose();}return;}
+function chatUI(live){const W=$('chatW'),on=!!(live&&CHAT),bar=$('chatBar');if(!on){bar.hidden=true;if(!W.hidden){W.hidden=true;chatClose();}return;}
+ if(CHATMIN&&$('chatIn').hidden){W.hidden=true;const n=CHAT.log().filter(l=>!l.self&&l.t>chatMinT).length;bar.hidden=false;const s2='💬 '+t('chatAll')+(n?' ('+n+')':'');if(bar.textContent!==s2){bar.textContent=s2;bar.classList.toggle('new',n>0);}return;}bar.hidden=true;
  const inP=chatInParty();if(inP&&!chatWasP)chatCh('party');else if(!inP&&CHCH==='party')chatCh('all');chatWasP=inP;
  // one list for both (owner): everyone's lines and the party's, party ones in green; Tab picks where Enter sends
  const all=CHAT.log(),now=performance.now(),lines=all.slice(-7),nw=false;
