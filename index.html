@@ -223,6 +223,7 @@ body.touch #keys .key{cursor:pointer}
 .pbar{height:calc(var(--u)*.45);background:rgba(255,255,255,.12);margin-top:calc(var(--u)*.3)}.pbar i{display:block;height:100%;background:var(--gold)}.tl .achst{color:var(--gold);white-space:nowrap}.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 calc(var(--u)*1)}
 #dopts button.hp{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*1)}#dopts button.gopt.hp{display:grid;grid-template-columns:auto 1fr auto}#dopts .gopt .pr{grid-row:1/span 2;grid-column:3}
 .pr{display:inline-flex;align-items:center;gap:.3em;color:var(--gold);font-weight:bold;white-space:nowrap;direction:ltr}.pr img{width:1.4em;height:1.4em;image-rendering:pixelated}
+#updLog{left:50%;top:50%;transform:translate(-50%,-50%);background:var(--sys2);width:calc(var(--u)*56);max-width:92%;max-height:80%;display:flex;flex-direction:column;padding:calc(var(--u)*1.4);z-index:60}#updLog .x{position:absolute;top:calc(var(--u)*.6);inset-inline-end:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}#updLogL{overflow-y:auto;min-height:0;flex:1 1 auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);padding-inline-end:calc(var(--u)*.6);font-size:calc(var(--u)*1.4)}#updLogL .ul{margin-top:calc(var(--u)*.8)}#updLogL .ul b{color:#bfe8ff}#updLogL .ul.new b{color:#ffe7a8}#updLogL ul{margin:calc(var(--u)*.3) 0 0;padding-inline-start:calc(var(--u)*2)}#updLogL li{margin:calc(var(--u)*.25) 0}
 #dopts{display:grid;gap:calc(var(--u)*.4);margin-top:calc(var(--u)*.7)}#dopts.grid{grid-template-columns:repeat(auto-fill,calc(var(--u)*4.6));justify-content:center;max-height:calc(var(--u)*17);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);padding-inline-end:calc(var(--u)*.4)}#dopts.grid>button:not(.dcell){grid-column:1/-1;position:sticky;bottom:0}#dopts button.dcell{aspect-ratio:1;padding:calc(var(--u)*.4);display:flex;align-items:center;justify-content:center;position:relative}#dopts .dcell img{width:80%;height:80%;image-rendering:pixelated}#dopts .dcell b{position:absolute;bottom:2px;inset-inline-end:4px;font-size:calc(var(--u)*1.2);color:#ffe7a8;text-shadow:0 1px 2px #000}#dopts .dcell.poor img{opacity:.45}#dopts .dcell.eq{box-shadow:inset 0 0 0 2px #6ee07a}
 #dopts button{text-align:start;font-size:calc(var(--u)*1.35);padding:calc(var(--u)*.35) calc(var(--u)*1)}
 #dopts button.gopt{display:grid;grid-template-columns:auto 1fr;column-gap:calc(var(--u)*.9);align-items:center}#dopts .gopt img{grid-row:span 2;width:calc(var(--u)*3.4);height:calc(var(--u)*3.4);image-rendering:pixelated;background:rgba(0,0,0,.35);border:1px solid rgba(143,216,255,.4)}#dopts .gopt small{font-size:calc(var(--u)*1.05);opacity:.9;line-height:1.35}#dopts .gopt.poor span{opacity:.55}.cup{color:#6ee07a;font-weight:700}.cdn{color:#ff6a5a;font-weight:700}.ceq{color:#aab}
@@ -407,6 +408,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
       <div id="announce" class="sys" hidden><div class="head" data-i18n="worldNotice"></div><div id="anntext"></div></div>
     </div>
 
+    <div id="updLog" class="sys panel center" hidden><div class="head" id="updLogH"></div><div id="updLogL"></div><button class="x" data-act="updLogClose">✕</button></div>
     <div id="dialog" class="sys panel" hidden><canvas id="dprev" width="32" height="32" hidden></canvas><div class="head" id="dname"></div><div id="dtext"></div><div id="dopts" hidden></div><div class="more" data-i18n="next"></div></div>
 
     <div id="forge" class="sys panel center" hidden>
@@ -487,6 +489,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
         <button data-act="cloud" id="cloudBtn" hidden></button>
         <button data-act="switchAcc" id="switchBtn" hidden></button>
         <button data-act="controls" data-i18n="controls"></button>
+        <button data-act="updLog" data-i18n="updLogB"></button>
         <button data-act="lang" data-i18n="langBtn"></button>
       </div>
       <div class="foot" data-i18n="fanNote"></div>
@@ -500,6 +503,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
         <button data-act="resume" data-i18n="resume"></button>
         <button data-act="unstuck" data-i18n="unstuck"></button>
         <button data-act="controls" data-i18n="controls"></button>
+        <button data-act="updLog" data-i18n="updLogB"></button>
         <button data-act="swapLang" data-i18n="langSwap"></button>
         <label class="vol"><span data-i18n="volSfx"></span><input type="range" id="vol_sfx" min="0" max="100" step="5"><b id="volv_sfx"></b></label>
         <label class="vol"><span data-i18n="volMus"></span><input type="range" id="vol_mus" min="0" max="100" step="5"><b id="volv_mus"></b></label>
@@ -567,6 +571,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
 <!-- Engine modules (classic scripts so the game still runs from file://). See docs/api/ENGINE_API.md -->
 <script src="src/core/storage.js"></script>
 <script src="src/core/ids.js"></script>
+<script src="src/ui/changelog.js"></script>
 <script src="src/core/state.js"></script>
 <script src="src/core/events.js"></script>
 <script src="src/net/contracts.js"></script>
@@ -2098,7 +2103,7 @@ stage.addEventListener('mousedown',e=>{if(e.button===2){if(mode==='play'&&!e.tar
  if(mode==='cook'){cookHit();return;}if(mode==='sew'){sewHit();return;}if(mode==='mix'){if(MIXG)MIXG.h=1;return;}if(mode==='farm'){farmDig();return;}
  if(mode==='cut'){if(SM)SM.done();return;}
  if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar')){stage.focus();const b=stage.getBoundingClientRect();const mx=(e.clientX-b.left)/SC+camXf,my=(e.clientY-b.top)/SC+camYf;if(NET&&e.altKey){netPing(mx,my);return;}if(NET&&pctxClick(mx,my,e.ctrlKey||e.shiftKey))return;const dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);}});
-function onKey(c){
+function onKey(c){if(c==="Escape"&&!$("updLog").hidden){updLogClose();return;}
  if(c==='Tab'&&(mode==='play'||mode==='cut')){toggleQuest();return;}
  if(mode==='play'){
   const si=slotOfKey(c);if(si>=0){useSlot(si);return;}
@@ -3218,7 +3223,13 @@ function respawn(k){const bn=!k&&S.bind&&npcOf(S.bind),bz=bn&&townOfNpc(S.bind);
  mons.forEach(m=>{if(MT[m.type].boss&&!m.dead){m.hp=m.max;m.x=m.sx;m.y=m.sy;}});if(S.raid){S.raid=0;allies=[];}hudDirty=true;}
 
 /* ---------------- menus ---------------- */
-function showOnly(id){['langScreen','titleScreen','pauseScreen','controlsScreen','end','create'].forEach(s=>$(s).hidden=s!==id);}
+function showOnly(id){['langScreen','titleScreen','pauseScreen','controlsScreen','end','create'].forEach(s=>$(s).hidden=s!==id);if(id!=='titleScreen'&&id!=='pauseScreen')$('updLog').hidden=true;else if(id==='titleScreen')updLogAuto();}
+// update log (owner request): src/ui/changelog.js; opens by itself once after an update, newest entry first
+const UPDL=Satisfy.CHANGELOG||[];
+function updLogOpen(){const L=$('updLogL');$('updLogH').textContent=t('updLogB');L.innerHTML=UPDL.map((e,i)=>`<div class="ul${i?'':' new'}"><b>${esc(e.d)}${i?'':' · '+t('updLogNew')}</b><ul>${(e[lang]||e.en).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('');L.scrollTop=0;$('updLog').hidden=false;SFX.open();}
+function updLogClose(){$('updLog').hidden=true;try{if(UPDL[0])localStorage.setItem('satisfy_log',UPDL[0].v);}catch(e){}}
+function updLogAuto(){if(!UPDL[0])return;let seen=null;try{seen=localStorage.getItem('satisfy_log');}catch(e){return;}if(seen!==UPDL[0].v)setTimeout(updLogOpen,300);}
+Object.assign(STR.ar,{updLogB:'سجل التحديثات',updLogNew:'الجديد'});Object.assign(STR.en,{updLogB:'Update log',updLogNew:'New'});
 let ctrlBack='titleScreen';
 function toTitle(){mode='title';showOnly('titleScreen');$('hud').hidden=true;$('contBtn').disabled=!hasSave();setTimeout(()=>$('titleScreen').querySelector('button:not(:disabled)').focus(),0);}
 function startGame(cont){if(!cont||!hasSave())return openCreate();fadeTo(()=>{if(!load())freshState();S.raid=0;allies=[];proj=[];spawnWorld();showOnly(null);$('hud').hidden=false;mode='play';camSnap=true;hudDirty=true;sbSig='';applyLang();stage.focus();});}
@@ -3321,7 +3332,7 @@ function act(a){
  else if(a==='plClose')plOpen(false);else if(a==='plHide')plHideT();
  else if(a==='idOk')idOk();else if(a==='idCheck')idCheck();else if(a==='idClose')$('idW').hidden=true;
  else if(a==='netTakeBack')netTakeBack();
- else if(a==='cloud')cloudOpen();else if(a==='switchAcc')netSwitch();else if(a==='cloudClose')$('cloudW').hidden=true;
+ else if(a==='cloud')cloudOpen();else if(a==='updLog')updLogOpen();else if(a==='updLogClose')updLogClose();else if(a==='switchAcc')netSwitch();else if(a==='cloudClose')$('cloudW').hidden=true;
  else if(a==='pAccept'||a==='pDecline'||a==='pLeave')partyAct(a);
  else if(a==='pBlock'||a==='dBlock')blockAct(a);
  else if(a==='pcClose'||a==='pcInvite'||a==='pcDuel'||a==='pcBlock')pctxAct(a);
