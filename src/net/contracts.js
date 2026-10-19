@@ -4,7 +4,8 @@
  * receives only these shapes. Durable/private data (inventory, gold, quests, materials)
  * never enters a PlayerPublic; see PRIVATE_FIELDS.
  *
- * @typedef {{id:string, tile:number, w:number, h:number}} WorldRef
+ * @typedef {{id:string, tile:number, w:number, h:number, y0?:number}} WorldRef
+ *   y0: the top edge in px (default 0). The north (rows -NR..-1 on the current map) has negative y.
  *   The shared map. w/h in tiles; positions in PlayerPublic are pixels (tile * TS).
  * @typedef {{key:string, world:string, zone:string, shard:number}} RoomRef
  *   A presence channel: everyone in the same zone shard sees each other. Not a house interior.
@@ -113,7 +114,7 @@
     if (!Number.isInteger(o.lv) || o.lv < 1 || o.lv > 999) e.push('lv');
     if (!Number.isInteger(o.x) || !Number.isInteger(o.y)) e.push('position');
     var w = opts && opts.world;
-    if (w && (o.x < 0 || o.y < 0 || o.x >= w.w * w.tile || o.y >= w.h * w.tile)) e.push('out of world');
+    if (w && (o.x < 0 || o.y < (w.y0 || 0) || o.x >= w.w * w.tile || o.y >= w.h * w.tile)) e.push('out of world');
     if (!Number.isInteger(o.dir) || o.dir < 0 || o.dir > 3) e.push('dir');
     if (ANIMS.indexOf(o.anim) < 0) e.push('anim');
     if (o.room !== null && typeof o.room !== 'string') e.push('room');

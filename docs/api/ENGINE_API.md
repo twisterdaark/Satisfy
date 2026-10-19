@@ -20,7 +20,7 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 |---|---|
 | `api` | `1` |
 | `defs()` | Deep copy of content tables as plain JSON: `MT`, `BOSSES`, `SPAWN`, `QD` (static quests only, no generated board quests), `RC`, `SKD`, `NPCS`, `TOWNS`, `ZR`, `MATS`. Functions (e.g. `RC[i].unlock`) become `{ "$fn": "<source>" }`. Also at `window.__G.defs()`. |
-| `world()` | `{ id: 'satisfy', tile: 16, w: 160, h: 144, outdoorH: 120, zones: [...ZR ids], towns: ['zBai','zWin'] }`. Rows `>= outdoorH` hold house interiors. |
+| `world()` | `{ id: 'satisfy', tile: 16, w: 160, h: 144, y0: -960, outdoorH: 120, zones: [...ZR ids], towns: ['zBai','zWin'] }`. Rows `>= outdoorH` hold house interiors. The north is above row 0: `y` runs from `y0` (`-NR*TS`) to `h*tile`. |
 | `rooms()` | House interiors: `[{ id: 'r<n>', kind: 'house'|'shop'|'armory'|'inn', zone }]`. Ids are stable for a given map. |
 | `zoneAt(x, y)` | Zone id at a pixel position (`'zWin'`, `'zPlains'`, …). |
 | `roomAt(x, y)` | `{ id, kind, zone }` if the position is inside a house interior, else `null`. |
@@ -95,3 +95,4 @@ await g.close(); await H.closeBrowser();
 ## Change log
 
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
+- **api 1, fix** (SAT-ONLINE-001 review, #10): `world().y0` = `-NR*TS`, the top edge; `validatePlayerPublic` accepts `y >= world.y0`, so players in the north (negative y) are no longer dropped.

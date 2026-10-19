@@ -61,3 +61,12 @@ test('envelope: versioned and size-limited', () => {
   assert.deepEqual(e, { v: 1, type: 'party.invite', requestId: 'r1', sessionId: null, seq: 4, tick: 0, payload: { to: 'u2' } });
   assert.throws(() => N.envelope('chat', { text: 'x'.repeat(5000) }), /BAD_MESSAGE/);
 });
+
+// review fix (#10): on the current map the north (rows -NR..-1) is at negative y
+test('positions above row 0 are inside the world when world.y0 says so', () => {
+  const W = { id: 'satisfy', tile: 16, w: 724, h: 184, y0: -960 };
+  const pp = N.toPlayerPublic(S, { ...P, x: 5000, y: -400 }, { zone: 'zSnow', uid: 'u1', sid: 's1' });
+  assert.deepEqual(N.validatePlayerPublic(pp, { world: W }).errors, []);
+  assert.ok(N.validatePlayerPublic({ ...pp, y: -961 }, { world: W }).errors.includes('out of world'));
+  assert.ok(N.validatePlayerPublic(pp, { world: { ...W, y0: undefined } }).errors.includes('out of world'), 'no y0: the top edge is 0');
+});

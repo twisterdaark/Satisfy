@@ -3386,7 +3386,7 @@ window.__G={get CARD(){return CARD},get SM(){return SM},get allies(){return alli
 const plain=o=>JSON.parse(JSON.stringify(o,(k,v)=>typeof v==='function'?{$fn:String(v)}:v));
 Satisfy.local=Object.freeze({api:1,
  defs:()=>plain({MT,BOSSES,SPAWN,QD:Object.fromEntries(Object.entries(QD).filter(([,q])=>!q.gen)),RC,SKD,NPCS,TOWNS,ZR,MATS:Object.keys(S.mats)}),
- world:()=>({id:Satisfy.net.WORLD_ID,tile:TS,w:MW,h:MH,outdoorH:WMH,zones:ZR.map(z=>z[0]),towns:TOWNS.map(z=>z.k)}),
+ world:()=>({id:Satisfy.net.WORLD_ID,tile:TS,w:MW,h:MH,y0:-NR*TS,outdoorH:WMH,zones:ZR.map(z=>z[0]),towns:TOWNS.map(z=>z.k)}),
  rooms:()=>ROOMS.map(R=>({id:R.id,kind:R.kind,zone:R.z})),
  zoneAt:(x,y)=>zoneAt(x,y),
  roomAt:(x,y)=>{const R=roomAt(x,y);return R?{id:R.id,kind:R.kind,zone:R.z}:null;},
