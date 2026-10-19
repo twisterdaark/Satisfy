@@ -83,6 +83,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #plW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*4.4);padding:calc(var(--u)*.8) calc(var(--u)*1.4);width:calc(var(--u)*34);max-height:calc(var(--u)*30);overflow-y:auto;font-size:calc(var(--u)*1.5);pointer-events:auto;z-index:45}
 #plL div{padding:calc(var(--u)*.25) 0;border-bottom:1px solid rgba(255,255,255,.12)}#plL div.me{color:#ffe7a8}
 #plW .row{display:flex;justify-content:center;margin-top:calc(var(--u)*.6)}#plW .row button{width:auto;padding:0 calc(var(--u)*1)}
+#updW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*9.5);z-index:60;pointer-events:auto;display:flex;align-items:center;gap:calc(var(--u)*1);padding:calc(var(--u)*.8) calc(var(--u)*1.4);font-size:calc(var(--u)*1.5)}#updW button{font:inherit;cursor:pointer}
 #toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*3.8);z-index:55;pointer-events:none;display:grid;gap:calc(var(--u)*.4);justify-items:center;width:80%}
 .toast{background:rgba(8,14,30,.85);border:1px solid rgba(127,180,255,.5);padding:calc(var(--u)*.3) calc(var(--u)*1.1);border-radius:calc(var(--u)*.4);font-weight:700;animation:tin .25s ease-out}
 .toast.warn{border-color:#ff7a6a;color:#ffd0c8}.toast.good{border-color:var(--gold);color:#ffe7a8}
@@ -3668,13 +3669,23 @@ const NET_INTEREST={radius:800,step:400};
    'void' online, never Winston's safe town (the game's zoneAt falls back to zWin there). */
 const netOtherV=new Set();
 // hashed once, right after the world is generated (below the loop setup): uprooted stumps change each player's own map
-// later, and must not make two players on the same build look like different versions (review of #49)
-var MAPV=null;function mapHash(){let h=0x811c9dc5;for(let i=0;i<map.length;i++){h^=map[i];h=Math.imul(h,0x01000193);}return (h>>>0).toString(16).padStart(8,'0');}
+// later, and must not make two players on the same build look like different versions (review of #49). No initial value:
+// this line runs after that first hash, and `=null` reset it, so each player hashed its own changed map (Twister 2026-10-19)
+var MAPV;function mapHash(){let h=0x811c9dc5;for(let i=0;i<map.length;i++){h^=map[i];h=Math.imul(h,0x01000193);}return (h>>>0).toString(16).padStart(8,'0');}
 function mapV(){return MAPV||(MAPV=mapHash());}
+/* a new build (Twister 2026-10-19): on the public site the page checks its own ETag every minute; when a newer version is
+   deployed, a box asks you to refresh (your game is saved first). The refresh adds a stamp so no cached copy comes back. */
+var UPD;function updReload(){try{if(S&&!S.__demo)save(true);}catch(e){}const q=new URLSearchParams(location.search);q.set('v',Date.now().toString(36));location.replace(location.pathname+'?'+q);}
+function updBanner(){if(UPD)return;UPD=1;const d=document.createElement('div');d.id='updW';d.className='sys';d.innerHTML=`<span>${esc(t('updT'))}</span><button>${esc(t('updB'))}</button>`;d.querySelector('button').onclick=updReload;$('ui').appendChild(d);SFX.notice();}
+(function(){if(!/\.github\.io$/.test(location.hostname)||!window.fetch)return;let tag=null;
+ const chk=()=>fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>{const e=r.headers.get('etag')||r.headers.get('last-modified');if(!e||UPD)return;if(tag===null)tag=e;else if(e!==tag)updBanner();}).catch(()=>{});
+ chk();setInterval(chk,60000);})();
+Object.assign(STR.ar,{updT:'نزل تحديث جديد للعبة: اعمل ريفريش عشان تكمل مع الباقيين',updB:'ريفريش'});
+Object.assign(STR.en,{updT:'A new version of the game is out: refresh to keep playing with everyone',updB:'Refresh'});
 function netZone(x,y){return y>=WMH*TS&&!dunAt(x,y)&&!roomAt(x,y)?'void':zoneAt(x,y);}
 function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(r.mv===mapV())return true;
- if(!netOtherV.has(r.sid)){netOtherV.add(r.sid);toast(t('netOtherV',{n:r.handle||'?'}),'warn');}return false;}
-Object.assign(STR.ar,{netOtherV:'{n} قريب منك بس على نسخة تانية من اللعبة: حدّثوا الصفحة عشان تشوفوا بعض'});
+ if(!netOtherV.has(r.sid)){netOtherV.add(r.sid);toast(t('netOtherV',{n:r.handle||'?'}),'warn');updBanner();}return false;}
+Object.assign(STR.ar,{netOtherV:'{n} قريب منك بس على نسخة تانية من اللعبة: اعملوا الاتنين ريفريش عشان تشوفوا بعض'});
 Object.assign(STR.en,{netOtherV:'{n} is nearby on a different version of the game: reload both pages to see each other'});
 function netWatch(){const id=(PARTY&&PARTY.id())||null;if(NETTR.wsig!==id){NETTR.wsig=id;NETTR.party(id);}}
 function netTick(){NET.tick();const live=netLive();
