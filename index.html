@@ -76,6 +76,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #chatTabs button.new::after{content:' •';color:#ffd24a}
 #chatTabs button[hidden]{display:none}
 #chatL div.all b{color:#9fe0ff}#chatL div.sys{color:#ffe07a}#announce.own .head{color:#bfe8ff}#chatL div.sys b{color:#ffb84a}#chatL div.party,#chatL div.party b{color:#8dff9a}
+#chatL div.guild,#chatL div.guild b{color:#f0b8ff}
 #chatW.idle{opacity:.55}
 #chatL div{margin:calc(var(--u)*.2) 0}#chatL div.old{opacity:.45}#chatL b{color:#9fe0a0;font-weight:600}
 #chatIn{width:100%;box-sizing:border-box;font:inherit;padding:calc(var(--u)*.3) calc(var(--u)*.5);margin-top:calc(var(--u)*.4);background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.35)}
@@ -96,6 +97,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #emoW{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*22);display:flex;gap:calc(var(--u)*.8);padding:calc(var(--u)*.6);pointer-events:auto}#emoW button{width:auto;padding:0 calc(var(--u)*1);font-size:calc(var(--u)*1.5)}
 #pctx .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.6)}#pctxI{color:var(--muted,#c8d0e0)}
 #partyInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
+#guildInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*24);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto}#guildInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
 #tradeInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*16);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto}#tradeInv .row,#tradeW .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
 #tradeW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*6);padding:calc(var(--u)*.8) calc(var(--u)*1.4);width:calc(var(--u)*52);max-width:96vw;font-size:calc(var(--u)*1.5);pointer-events:auto}#tradeW .cols{display:flex;gap:calc(var(--u)*1.4)}#tradeW .col{flex:1;min-width:0}#tradeW .sub{color:#ffe7a8;margin-bottom:calc(var(--u)*.4)}#tradeW .st{min-height:1.3em;margin-top:calc(var(--u)*.4);color:#8dff9a}#tradeW #trGold{width:calc(var(--u)*10)}#trBag,#trTh{max-height:calc(var(--u)*20);overflow-y:auto;display:flex;flex-wrap:wrap;gap:calc(var(--u)*.4);margin-top:calc(var(--u)*.5)}#trBag button,#trTh span{width:auto;padding:0 calc(var(--u)*.6);font-size:calc(var(--u)*1.3);opacity:.6}#trBag button.on,#trTh span{opacity:1;outline:1px solid #ffe7a8}
 #netB{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*.6);padding:calc(var(--u)*.3) calc(var(--u)*1.2);font-size:calc(var(--u)*1.5);color:#9fe0ff;white-space:nowrap;pointer-events:auto;cursor:pointer}
@@ -399,7 +401,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
   <canvas id="txt"></canvas>
   <div id="ui" lang="ar" dir="rtl">
     <div id="hud" hidden>
-      <button id="chatBar" hidden></button><div id="chatW" class="sys" hidden><button id="chatX" title="✕">✕</button><div id="chatTabs"><button data-ch="all"></button><button data-ch="party"></button></div><div id="chatL"></div><input id="chatIn" maxlength="120" autocomplete="off" spellcheck="false" hidden></div>
+      <button id="chatBar" hidden></button><div id="chatW" class="sys" hidden><button id="chatX" title="✕">✕</button><div id="chatTabs"><button data-ch="all"></button><button data-ch="party"></button><button data-ch="guild"></button></div><div id="chatL"></div><input id="chatIn" maxlength="120" autocomplete="off" spellcheck="false" hidden></div>
       <div id="stats" class="sys">
         <div class="nm"><span data-i18n="pname"></span><span class="lv" id="lv"></span></div>
         <div class="sb hp" id="hpW"><em>HP</em><div class="bt"><b id="hpl"></b><i id="hpb"></i><span id="hpt"></span></div></div>
@@ -436,11 +438,11 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
       <div id="loot"></div>
       <div id="evbar" class="sys" hidden></div>
       <div id="sgbar" class="sys" hidden></div>
-      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button></div></div>
+      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plBnt" data-act="plBnt" data-i18n="bntBoard"></button><button id="plRnk" data-act="plRnk" data-i18n="rnkBoard"></button></div></div>
       <div id="netRepW" class="sys" hidden><div id="netRepT"></div><div class="row"><button id="netRepBtn" data-act="netTakeBack"></button></div></div>
       <div id="duelInv" class="sys" hidden><div id="duelInvT"></div><div class="row"><button id="duelBtnA" data-act="dAccept"></button><button id="duelBtnB" data-act="dDecline"></button><button id="duelBtnC" class="blk" data-act="dBlock" data-i18n="pBlock"></button></div></div>
       <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
-      <div id="emoW" class="sys" hidden><button data-emo="wave" data-i18n="emWave"></button><button data-emo="dance" data-i18n="emDance"></button><button data-emo="point" data-i18n="emPoint"></button><button data-emo="cheer" data-i18n="emCheer"></button></div><div id="pctx" class="sys" hidden><div class="qhead"><span class="head" id="pctxT"></span><button class="x" data-act="pcClose">✕</button></div><div id="pctxI"></div><div class="row"><button data-act="pcInvite" data-i18n="pcInvite"></button><button data-act="pcDuel" data-i18n="pcDuel"></button><button data-act="pcTrade" id="pctxTr" data-i18n="pcTrade" hidden></button><button class="blk" id="pctxB" data-act="pcBlock"></button></div></div><div id="tradeInv" class="sys" hidden><div id="tradeInvT"></div><div class="row"><button data-act="trYes" data-i18n="trYes"></button><button data-act="trNo" data-i18n="pDecline"></button></div></div><div id="tradeW" class="sys" hidden><div class="qhead"><span class="head" id="trH"></span><button class="x" data-act="trCancel">✕</button></div><div class="cols"><div class="col"><div class="sub" id="trMeH"></div><label class="gl"><span id="trGoldL"></span> <input id="trGold" type="number" min="0" step="1" value="0" inputmode="numeric"></label><div id="trBag"></div><div class="st" id="trMeS"></div></div><div class="col"><div class="sub" id="trThH"></div><div id="trTh"></div><div class="st" id="trThS"></div></div></div><div class="row"><button data-act="trOk" id="trOk"></button><button data-act="trConf" id="trConf"></button><button data-act="trCancel" id="trX"></button></div></div><div id="partyInv" class="sys" hidden><div id="partyInvT"></div><div class="row"><button data-act="pAccept" data-i18n="pAccept"></button><button data-act="pDecline" data-i18n="pDecline"></button><button class="blk" data-act="pBlock" data-i18n="pBlock"></button></div></div>
+      <div id="emoW" class="sys" hidden><button data-emo="wave" data-i18n="emWave"></button><button data-emo="dance" data-i18n="emDance"></button><button data-emo="point" data-i18n="emPoint"></button><button data-emo="cheer" data-i18n="emCheer"></button></div><div id="pctx" class="sys" hidden><div class="qhead"><span class="head" id="pctxT"></span><button class="x" data-act="pcClose">✕</button></div><div id="pctxI"></div><div class="row"><button data-act="pcInvite" data-i18n="pcInvite"></button><button data-act="pcDuel" data-i18n="pcDuel"></button><button data-act="pcTrade" id="pctxTr" data-i18n="pcTrade" hidden></button><button data-act="pcBounty" id="pctxBn" data-i18n="pcBounty" hidden></button><button data-act="pcGuild" id="pctxG" data-i18n="pcGuild" hidden></button><button class="blk" id="pctxB" data-act="pcBlock"></button></div></div><div id="guildInv" class="sys" hidden><div id="guildInvT"></div><div class="row"><button data-act="gdYes" data-i18n="gdYes"></button><button data-act="gdNo" data-i18n="pDecline"></button></div></div><div id="tradeInv" class="sys" hidden><div id="tradeInvT"></div><div class="row"><button data-act="trYes" data-i18n="trYes"></button><button data-act="trNo" data-i18n="pDecline"></button></div></div><div id="tradeW" class="sys" hidden><div class="qhead"><span class="head" id="trH"></span><button class="x" data-act="trCancel">✕</button></div><div class="cols"><div class="col"><div class="sub" id="trMeH"></div><label class="gl"><span id="trGoldL"></span> <input id="trGold" type="number" min="0" step="1" value="0" inputmode="numeric"></label><div id="trBag"></div><div class="st" id="trMeS"></div></div><div class="col"><div class="sub" id="trThH"></div><div id="trTh"></div><div class="st" id="trThS"></div></div></div><div class="row"><button data-act="trOk" id="trOk"></button><button data-act="trConf" id="trConf"></button><button data-act="trCancel" id="trX"></button></div></div><div id="partyInv" class="sys" hidden><div id="partyInvT"></div><div class="row"><button data-act="pAccept" data-i18n="pAccept"></button><button data-act="pDecline" data-i18n="pDecline"></button><button class="blk" data-act="pBlock" data-i18n="pBlock"></button></div></div>
       <div id="announce" class="sys" hidden><div class="head" data-i18n="worldNotice"></div><div id="anntext"></div></div>
     </div>
 
@@ -629,6 +631,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
  'src/net/duel.js',
  'src/net/pvp.js',
  'src/net/trade.js',
+ 'src/net/guild.js',
  'src/net/chat.js',
  'src/net/raid.js',
  'src/net/cloud.js',
@@ -658,9 +661,10 @@ muted=sfxV<=0;musicOn=musV>0;
 function setVol(k,v){v=Math.max(0,Math.min(100,Math.round(+v)||0));if(k==='sfx'){sfxV=v;muted=v<=0;if(sfxG)sfxG.gain.value=v/100;}else{musV=v;musicOn=v>0;if(musicG)musicG.gain.value=v/100;}try{localStorage.setItem('satisfy_'+k+'v',String(v));}catch(e){}volUI();}
 function volUI(){for(const k of ['sfx','mus']){const r=document.getElementById('vol_'+k),o=document.getElementById('volv_'+k),v=k==='sfx'?sfxV:musV;if(r){r.value=v;r.style.setProperty('--p',v+'%');}if(o)o.textContent=v?v+'%':t('volOff');}}
 function audio(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=.5;master.connect(ac.destination);sfxG=ac.createGain();sfxG.gain.value=sfxV/100;sfxG.connect(master);}catch(e){return null;}}if(ac.state==='suspended')ac.resume();return ac;}
-function tone(f,d,type='square',v=.15,slide=0,delay=0){const a=audio();if(!a||muted)return;const t0=a.currentTime+delay,o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t0+d);g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.0008,t0+d);o.connect(g);g.connect(sfxG);o.start(t0);o.stop(t0+d+.03);}
+let SFXV=1; // SAT-ONLINE-047: the volume of a sound another player makes, by distance (1 for your own)
+function tone(f,d,type='square',v=.15,slide=0,delay=0){const a=audio();if(!a||muted)return;v*=SFXV;const t0=a.currentTime+delay,o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t0+d);g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.0008,t0+d);o.connect(g);g.connect(sfxG);o.start(t0);o.stop(t0+d+.03);}
 let nbuf=null;
-function noise(d,v=.2,freq=1000,delay=0,q=1){const a=audio();if(!a||muted)return;if(!nbuf){nbuf=a.createBuffer(1,a.sampleRate,a.sampleRate);const c=nbuf.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=Math.random()*2-1;}const t0=a.currentTime+delay,s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=nbuf;f.type='bandpass';f.frequency.value=freq;f.Q.value=q;g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.0008,t0+d);s.connect(f);f.connect(g);g.connect(sfxG);s.start(t0,Math.random()*.5);s.stop(t0+d+.03);}
+function noise(d,v=.2,freq=1000,delay=0,q=1){const a=audio();if(!a||muted)return;v*=SFXV;if(!nbuf){nbuf=a.createBuffer(1,a.sampleRate,a.sampleRate);const c=nbuf.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=Math.random()*2-1;}const t0=a.currentTime+delay,s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=nbuf;f.type='bandpass';f.frequency.value=freq;f.Q.value=q;g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.0008,t0+d);s.connect(f);f.connect(g);g.connect(sfxG);s.start(t0,Math.random()*.5);s.stop(t0+d+.03);}
 const SFX={
  hover:()=>tone(1200,.03,'square',.025),click:()=>{tone(620,.05,'square',.06);tone(930,.07,'square',.05,0,.04);},
  open:()=>tone(420,.09,'sine',.09,380),close:()=>tone(760,.08,'sine',.07,-380),deny:()=>tone(130,.12,'square',.07),
@@ -1373,12 +1377,17 @@ let auT=0;function updateAuction(dt){if((auT-=dt)<=0){auT=5;auTick();}}
 // dragon. Online the server owns its health so everyone who joins the fight hits the same dragon.
 function dragonDown(m){WS.wb=WS.wb||{};WS.wb.trauka=Date.now()+MT.trauka.wb*1000;giveTitle('dslayer');setTimeout(()=>annW('drDown'),500);save(true);}
 function updateDragon(dt){const m=mons.find(m=>m.type==='trauka');if(!m||m.dead||mode==='dead')return;
- if(!(m.eng>0)){m.br=0;return;}m.brc=(m.brc===undefined?4:m.brc)-dt;
+ // SAT-ONLINE-045: online the host times and aims the breath (at the player the dragon is after) and sends it as an
+ // action; a follower only plays the breath it was sent, and each screen burns its own player if it stands in the cone
+ const fol=!!(m.led&&MOBN&&MOBN.host&&MOBN.host!==NET.uid);
+ if(!fol&&!(m.eng>0)){m.br=0;return;}m.brc=(m.brc===undefined?4:m.brc)-dt;
  if(m.br>0){m.br-=dt;m.stun=Math.max(m.stun||0,.05);if(m.br>0)return;const a=m.ba,hx=m.x+Math.cos(a)*30,hy=m.y-40+Math.sin(a)*14;
   for(let i=0;i<46;i++){const aa=a+(rand()-.5)*.8,sp=160+rand()*220;fx.push({x:hx,y:hy,vx:Math.cos(aa)*sp,vy:Math.sin(aa)*sp,t:.55,c:rand()<.5?'#ff7a1e':rand()<.5?'#ffd24a':'#c82a1a',fl:1});}
   SFX.slam();noise(.5,.25,500);shake=.4;const dx=P.x-hx,dy=P.y-8-hy,d=Math.hypot(dx,dy),da=Math.abs(((Math.atan2(dy,dx)-a)+Math.PI*3)%(Math.PI*2)-Math.PI);
   if(d<190&&da<.42){hurtPlayer(MT.trauka.dmg*2,m.lv,m);vfx('fire',P.x,P.y-8);}return;}
- if(m.brc<=0&&Math.hypot(P.x-m.x,P.y-m.y)<210){m.brc=7+rand()*3;m.br=1.1;m.ba=Math.atan2(P.y-8-(m.y-40),P.x-m.x);m.face=Math.cos(m.ba)>0?1:-1;num(m.x,m.y-100,t('drBreath'),'#ff7a1e',true);tone(120,.9,'sawtooth',.06,180);}}
+ if(fol)return;const tg=MOBN&&MOBN.host===NET.uid&&mobTarget(m)||P;
+ if(m.brc<=0&&Math.hypot(tg.x-m.x,tg.y-m.y)<210){m.brc=7+rand()*3;m.br=1.1;m.ba=Math.atan2(tg.y-8-(m.y-40),tg.x-m.x);dragonBreathFx(m);mobActN(m);}}
+function dragonBreathFx(m){m.face=Math.cos(m.ba)>0?1:-1;num(m.x,m.y-100,t('drBreath'),'#ff7a1e',true);tone(120,.9,'sawtooth',.06,180);}
 // a red dragon drawn with paths: tail, body, four legs, a long neck and horned head, and two wings that beat slowly
 function drawDragon(m){const x=Math.round(m.x),y=Math.round(m.y),f=m.face||1;if(m.dead||!MSH.trauka)return;
  ctx.save();ctx.fillStyle='rgba(0,0,0,.32)';ctx.beginPath();ctx.ellipse(x,y,46,9,0,0,7);ctx.fill();
@@ -1783,7 +1792,7 @@ function invMarch(m,b,mr,dt){const T=TOWNS.find(T=>T.k===m.tw);
 function npcKOSay(n){if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!EV||typeof EV.slot!=='number')return;const i=npcs.indexOf(n);if(i<0)return;NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:'npcKO',p:{f:i,lv:EV.slot%100000}});}
 function npcKOIn(m){if(!m||m.k!=='npcKO'||!NET||m.from===NET.uid||!S||S.__demo||!m.p)return;const E=EV,n=npcs[m.p.f|0];if(!E||typeof E.slot!=='number'||m.p.lv!==E.slot%100000||!n||npcKO(n.id))return;
  WS.nko=WS.nko||{};WS.nko[n.id]=E.end;E.fallen=(E.fallen||0)+1;n.nhp=NPCHP;if(Math.hypot(n.x-P.x,n.y-P.y)<900){dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');}}
-window.__GW={ev:()=>EV&&{slot:EV.slot,k:EV.e.k},wnow:()=>wNow(),nodes:()=>nodes.map(n=>[n.kind,n.tx,n.ty]),wx:()=>wxNow(),npcs:()=>npcs.map(n=>n.id),ko:id=>npcKO(id),knock:i=>{const n=npcs[i];if(n){n.nhp=1;npcHit(n,{cap:1,face:1});}}}; // tests (SAT-ONLINE-044)
+window.__GW={setMapV:v=>{MAPV=String(v);},ev:()=>EV&&{slot:EV.slot,k:EV.e.k},wnow:()=>wNow(),nodes:()=>nodes.map(n=>[n.kind,n.tx,n.ty]),wx:()=>wxNow(),npcs:()=>npcs.map(n=>n.id),ko:id=>npcKO(id),knock:i=>{const n=npcs[i];if(n){n.nhp=1;npcHit(n,{cap:1,face:1});}}}; // tests (SAT-ONLINE-044)
 function npcHit(n,m){const d=m.cap?18:9+(rand()*4|0);n.nhp=(n.nhp??NPCHP)-d;n.hitT=.2;m.at=0;vfx('hit',n.x,n.y-10,{angle:m.face>0?0:Math.PI});num(n.x,n.y-26,'-'+d,'#ff8a7a',false);SFX.hit();
  if(n.nhp<=0){n.nhp=NPCHP;WS.nko=WS.nko||{};WS.nko[n.id]=EV?EV.end:Date.now()+60e3;if(EV)EV.fallen=(EV.fallen||0)+1;npcKOSay(n);dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');SFX.deny();if(m.nt===n)m.nt=null;}}
 // townsfolk fight back: guards and trainers strike invaders from a few steps away, everyone else hits whatever is beating
@@ -2911,14 +2920,18 @@ const castleB=g=>WS&&WS.castle&&WS.castle.own===g.id?.05:0;
 const gXPB=()=>{const g=myG();if(!g)return 0;const l=gLv(g);return (l>=8?.1:l>=5?.06:l>=2?.03:0)+castleB(g);};
 const gGoldB=()=>{const g=myG();if(!g)return 0;const l=gLv(g);return (l>=7?.1:l>=3?.05:0)+castleB(g);};
 const shieldMin=o=>Math.max(1,Math.ceil((o.sh-Date.now())/60000));
-function gContrib(n){const g=myG();n=Math.round(n);if(!g||!n)return;const me=g.members[pidOf()]||(g.members[pidOf()]={n:S.look.n,rk:'r',c:0});me.c+=n;if(g.npc)return;const l0=gLv(g);g.xp+=n;const l1=gLv(g);if(l1>l0){toast(t('gLvUp',{g:g.name,n:l1}),'good');SFX.level();}}
+function gContrib(n){const g=myG();n=Math.round(n);if(!g||!n)return;if(g.online&&GUILD)GUILD.contribute(n);/* SAT-ONLINE-046: written with the next heartbeat */const me=g.members[pidOf()]||(g.members[pidOf()]={n:S.look.n,rk:'r',c:0});me.c+=n;if(g.npc)return;const l0=gLv(g);g.xp+=n;const l1=gLv(g);if(l1>l0){toast(t('gLvUp',{g:g.name,n:l1}),'good');SFX.level();}}
 function createGuild(nm){nm=String(nm||'').trim().slice(0,18);if(nm.length<2){SFX.deny();return toast(t('gNameBad'),'warn');}
  if(Object.values(WS.guilds).some(g=>gName(g.id).toLowerCase()===nm.toLowerCase())){SFX.deny();return toast(t('gNameUsed'),'warn');}
- if(S.gold<GCOST||S.lv<GLV){SFX.deny();return;}S.gold-=GCOST;const id='g_'+pidOf();
+ if(S.gold<GCOST||S.lv<GLV){SFX.deny();return;}
+ if(GUILD&&gdFor===S){if(gdBusy)return;gdBusy=1;GUILD.found(nm).then(gid=>{gdBusy=0;S.gold-=GCOST;S.guild=gid;S.gon=gid;guildMirror();SFX.legendary();flash();toast(t('gMade',{g:nm}),'good');hudDirty=true;save(true);},
+  e=>{gdBusy=0;SFX.deny();toast(t(String(e&&e.message)==='taken'?'gNameUsed':String(e&&e.message)==='busy'?'gdBusy':'gdFail'),'warn');});return;} // SAT-ONLINE-046: online the guild is made in the database
+ S.gold-=GCOST;const id='g_'+pidOf();
  WS.guilds[id]={id,name:nm,master:pidOf(),lv:1,xp:0,col:'#5aa0ff',members:{[pidOf()]:{n:S.look.n,rk:'m',c:0}}};S.guild=id;
  SFX.legendary();flash();toast(t('gMade',{g:nm}),'good');hudDirty=true;save(true);}
 function joinGuild(id){const g=WS.guilds[id];if(!g||S.guild)return;S.guild=id;g.members[pidOf()]={n:S.look.n,rk:'r',c:0};toast(t('gJoined',{g:gName(id)}),'good');SFX.quest();save(true);}
 function leaveGuild(){const g=myG();if(!g)return;const me=pidOf();
+ if(g.online&&GUILD){(g.master===me?GUILD.disband():GUILD.leave()).catch(()=>toast(t('gdFail'),'warn'));if(g.master===me){for(const k in WS.terr)if(WS.terr[k].own===g.id)WS.terr[k]={own:null,sh:0};if(WS.castle&&WS.castle.own===g.id)WS.castle.own=null;}return;} // SAT-ONLINE-046: the database tells everyone (guildEv)
  if(!g.npc&&g.master===me){for(const k in WS.terr)if(WS.terr[k].own===g.id)WS.terr[k]={own:null,sh:0};if(WS.castle&&WS.castle.own===g.id)WS.castle.own=null;delete WS.guilds[g.id];toast(t('gDisband',{g:g.name}),'warn');}
  else{delete g.members[me];toast(t('gLeft',{g:gName(g.id)}));}S.guild='';hudDirty=true;save(true);}
 function openGName(){mode='gname';const box=document.createElement('div');box.id='gnBox';box.className='sys panel';box.innerHTML=`<div class="head">${esc(t('gNameT'))}</div><div class="gnd">${esc(t('gNameD',{g:GCOST}))}</div>`;
@@ -2938,6 +2951,7 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
  const info=t('gInfo',{g:gName(g.id),n:l,x:g.npc?'-':nx?`${g.xp}/${nx}`:t('gMax'),m:Object.keys(g.members).length,cap:l*25,c:me.c});
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
  dialog('guild',[info,perks],null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
+  ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
 function guildMOpts(){const o=[],back=()=>shopD('guildM','gm_hi');
  if(!S.guild)o.push({l:t('oMakeG',{g:GCOST,l:GLV}),ic:'book',poor:S.gold<GCOST||S.lv<GLV,f:()=>S.lv<GLV?dialog('guildM',[t('gNeedLv',{n:GLV})],back):S.gold<GCOST?dialog('guildM',[t('noGold')],back):openGName()});
@@ -3308,7 +3322,7 @@ function cfm(title,body,yes,f){const w=$('cfmW');$('cfmT').textContent=title;$('
 function invTrash(s){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
  cfm(t('delT'),t('delQ',{it:`<b class="rt rt${s.r||0}">${esc(sName(s))}</b>${s.n>1?' ×'+s.n:''}`}),t('delY'),()=>{if(!slotOut(s,true))return;SFX.deny();toast(t('delDone',{it:sName(s)}),'warn');INVX=null;renderInv();save(true);});}
 function invDrop(s){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
- cfm(t('dropT'),t('dropQ',{it:`<b class="rt rt${s.r||0}">${esc(sName(s))}</b>${s.n>1?' ×'+s.n:''}`}),t('dropY'),()=>{const o=slotOut(s,true);if(!o)return;GDROP.push({x:P.x+(rand()-.5)*12,y:P.y+10,o,t:gTime+60,lock:gTime+2});SFX.swing();toast(t('dropDone',{it:sName(s)}));renderInv();save(true);});}
+ cfm(t('dropT'),t('dropQ',{it:`<b class="rt rt${s.r||0}">${esc(sName(s))}</b>${s.n>1?' ×'+s.n:''}`}),t('dropY'),()=>{const o=slotOut(s,true);if(!o)return;const d={x:P.x+(rand()-.5)*12,y:P.y+10,o,t:gTime+60,lock:gTime+2};dropPut(d);GDROP.push(d);SFX.swing();toast(t('dropDone',{it:sName(s)}));renderInv();save(true);});}
 function invSell(s,all){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}const n=all?s.n:1,g=unitVal(s)*n;
  const go=()=>{if(!slotOut(s,all))return;S.gold+=g;SFX.coin();numP(-26,'+'+g+'G','#f2c14e',false);toast(t('soldIt',{it:sName(s)+(n>1?' ×'+n:''),g}),'good');renderInv();save(true);};
  if(s.it&&(s.r||0)>=2)cfm(t('sellT'),t('sellQ',{it:`<b class="rt rt${s.r}">${esc(sName(s))}</b>`,g}),t('sellY'),go);else go();}
@@ -3320,8 +3334,37 @@ addEventListener('pointermove',e=>{const d=INVDR;if(!d)return;if(!d.moved&&Math.
  d.img.style.left=e.clientX+'px';d.img.style.top=e.clientY+'px';const el=document.elementFromPoint(e.clientX,e.clientY);$('invTrash').classList.toggle('hot',!!(el&&el.closest('#invTrash')));});
 addEventListener('pointerup',e=>{const d=INVDR;if(!d)return;if(d.img)d.img.remove();$('invTrash').classList.remove('hot');if(!d.moved){INVDR=null;return;}setTimeout(()=>{INVDR=null;},0);
  const s=INVS[d.i],el=document.elementFromPoint(e.clientX,e.clientY);if(!s)return;if(el&&el.closest('#invTrash'))invTrash(s);else if(!(el&&el.closest('#inv')))invDrop(s);});
-function updateGDrop(){for(let i=GDROP.length-1;i>=0;i--){const d=GDROP[i];if(gTime>d.t){vfx('dust',d.x,d.y,{n:5});GDROP.splice(i,1);continue;}
- if(mode==='play'&&gTime>d.lock&&Math.hypot(P.x-d.x,P.y-d.y)<16){slotIn(d.o);GDROP.splice(i,1);SFX.coin();toast(t('got',{n:d.o.n,item:d.o.it?inm(d.o.it):t(d.o.k)}));hudDirty=true;}}}
+function updateGDrop(){for(let i=GDROP.length-1;i>=0;i--){const d=GDROP[i];if(gTime>d.t){vfx('dust',d.x,d.y,{n:5});GDROP.splice(i,1);if(d.did&&d.own&&DROPS&&!d.claiming)DROPS.remove(d.did).catch(()=>{});continue;}
+ if(mode==='play'&&gTime>d.lock&&Math.hypot(P.x-d.x,P.y-d.y)<16){if(d.did&&DROPS){if(!d.claiming){d.claiming=1;dropTake(d);}continue;} // SAT-ONLINE-048: shared, the first claim wins
+ slotIn(d.o);GDROP.splice(i,1);SFX.coin();toast(t('got',{n:d.o.n,item:d.o.it?inm(d.o.it):t(d.o.k)}));hudDirty=true;}}}
+/* things dropped on the ground, shared online (SAT-ONLINE-048; owner via Claude-B, #13): a drop is written to drops/{did}
+   for its 60 s and every player near sees it; the first to step on it claims it (dropClaims/{did}: the rules take one
+   claim per drop, and others only after 2 s) and gets it, and it is gone for everyone. An item travels as plain values
+   and is rebuilt as a new item of the one who picks it up (tradeItemIn); a stack must be of a kind every client knows.
+   The dropper takes its own back the same way. Offline, drops stay as they were. */
+var DROPS=null,dropOff=null,dropSeq=0;
+function dropStart(){if(typeof dropOff==='function')dropOff();dropOff=null;DROPS=null;for(let i=GDROP.length-1;i>=0;i--)if(GDROP[i].rem)GDROP.splice(i,1);
+ if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.dropStore))return; // NETTR first: FB is declared below
+ DROPS=Satisfy.firebase.dropStore(FB);
+ dropOff=DROPS.watch(dropIn,did=>{const i=GDROP.findIndex(d=>d.did===did);if(i>=0){const d=GDROP[i];GDROP.splice(i,1);if(!d.got)vfx('dust',d.x,d.y,{n:4});}});}
+function dropStop(){if(typeof dropOff==='function')dropOff();dropOff=null;DROPS=null;for(let i=GDROP.length-1;i>=0;i--)if(GDROP[i].rem)GDROP.splice(i,1);}
+function dropKindOk(k,r){return !!(POT[k]||k==='bread'||(k==='arrows'&&ARROWG[r]!=null)||MATP[k]!==undefined||(typeof DISH!=='undefined'&&DISH[k]));}
+function dropItemOk(js){try{const o=JSON.parse(js);return o&&typeof o.id==='string'&&rcById(o.id)?o:null;}catch(e){return null;}}
+function dropPut(d){if(!DROPS||!NET||!S||S.__demo)return;const o=d.o,v={o:NET.uid,x:Math.max(0,d.x),y:d.y,k:String(o.k||''),n:o.n|0||1,r:o.r|0};if(!/^[a-z0-9_]{1,24}$/.test(v.k))return;
+ if(o.it){const j={};for(const q in o.it)if(q!=='uid'&&q!=='iid')j[q]=o.it[q];const js=JSON.stringify(j);if(js.length>600)return;v.it=js;}
+ const did='d_'+NET.uid+'_'+Date.now().toString(36)+(++dropSeq).toString(36);d.did=did;d.own=1;DROPS.put(did,v).catch(()=>{d.did=null;d.own=0;});}
+function dropIn(did,v){if(!v||!S||S.__demo||!NET||GDROP.some(d=>d.did===did))return;
+ const left=(+v.t||0)+60000-wNow();if(left<=0){if(left<-120000)DROPS.remove(did).catch(()=>{});return;} // a stale drop anyone may clear
+ let o;if(typeof v.it==='string'){const it=dropItemOk(v.it);if(!it)return;o={json:v.it,k:v.k,n:1,r:it.r|0};}
+ else if(dropKindOk(v.k,v.r|0))o={k:v.k,n:Math.max(1,Math.min(99999,v.n|0)),r:v.r|0};else return;
+ const own=v.o===NET.uid;GDROP.push({x:+v.x,y:+v.y,o,t:gTime+left/1000,lock:gTime+(own?0:Math.max(0,(2000-(60000-left))/1000)),did,rem:1,own});}
+function dropTake(d){const did=d.did;DROPS.claim(did,NET.uid).then(()=>{const i=GDROP.indexOf(d);if(i>=0)GDROP.splice(i,1);d.got=1;
+  let o=d.o;if(o.json){const it=tradeItemIn(o.json);if(!it)return;o={it,k:o.k,n:1,r:it.r};} // someone's item: a new item of yours
+  slotIn(o);if(o.it)Satisfy.ids.ensure(S);SFX.coin();toast(t('got',{n:o.n,item:o.it?inm(o.it):t(o.k)}));hudDirty=true;save(true);
+  DROPS.remove(did).catch(()=>{}).then(()=>DROPS.unclaim(did).catch(()=>{}));
+ },()=>{const i=GDROP.indexOf(d);if(i>=0)GDROP.splice(i,1);}); // someone else was first
+}
+window.__GD={drops:()=>GDROP.map(d=>({did:d.did||null,k:d.o.k,n:d.o.n,rem:!!d.rem,own:!!d.own,x:d.x,y:d.y})),drop:k=>{renderInv();const s=INVS.find(x=>x.k===k&&!x.eq);if(s)invDrop(s);return !!s;}}; // test hook
 function drawGDrop(){for(const d of GDROP){const left=d.t-gTime;if(left<10&&(gTime*6|0)%2)continue;const y=d.y-10+Math.sin(gTime*3+d.x)*1.5;
  ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(d.x,d.y,5,2,0,0,7);ctx.fill();ctx.drawImage(iconC(d.o.k),Math.round(d.x-6),Math.round(y-6),12,12);}}
 function openEquip(){SFX.open();mode='equip';$('equipW').hidden=false;$('hint').hidden=true;renderEquip();}
@@ -3365,7 +3408,7 @@ let annT=0;function announce(msg,own){logMsg(msg);const W=$('announce');W.queryS
  $('anntext').textContent=msg;W.hidden=false;annT=5;if(!own&&CHAT&&CHAT.note&&S&&!S.__demo)CHAT.note(msg);}
 // SAT-ONLINE-026 (owner feedback 12): announcements about you, and the story notices (annGrid), also reach everyone online
 // through the news feed, named by your account ID. A story notice is shown once per character, whoever's clock fires it first.
-const NEWS=['evWin','evCap','castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
+const NEWS=['bntDone','evWin','evCap','castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
 function annArgs(p,n){const o={...p,n};if('rk' in o){o.r=t('r'+o.rk);delete o.rk;}return o;}
 function annW(k,p){p=p||{};announce(t(k,annArgs(p,t('pname'))));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo)return;
  const q={};for(const f of ['lv','f','rk'])if(typeof p[f]==='number')q[f]=p[f];NETTR.feedSay('news',Object.assign({from:NET.uid,h:netId||S.look.n,k},Object.keys(q).length?{p:q}:{}));}
@@ -3547,10 +3590,10 @@ function ipHit(m,dmg,crit,o){if(o.dot)return dmg;const b=MT[m.type],skill=!!o.sk
  if(m.cboT>0&&gTime-m.icL<1)dmg*=3;
  if(ipOn('bleed')&&crit||ipOn('cut')&&rand()<.25){if(!m.bl)num(m.x,monY(m)-16,t('ipBleed'),'#ff4a3a',false);m.bl={t:3,n:0};}
  if(ipOn('fear')&&!b.boss&&m.lv<=S.lv-20&&rand()<.15){m.stun=Math.max(m.stun||0,.8);if(AIK[m.type])m.flee=1.5;num(m.x,monY(m)-24,t('ipFear'),'#c89aff',false);}
- if(!skill&&ipOn('jnt5')&&rand()<.08&&!o.jnt){num(P.x,P.y-30,t('ipJnt5'),'#ffd24a',true);for(let i=1;i<5;i++)setTimeout(()=>{if(mode!=='play'||m.dead)return;vfx('slash',m.x,monY(m),{angle:rand()*6.28,rarity:3});SFX.swing();hitMon(m,.5,{jnt:1});},i*90);}
+ if(!skill&&ipOn('jnt5')&&rand()<.08&&!o.jnt){numP(-30,t('ipJnt5'),'#ffd24a',true);for(let i=1;i<5;i++)setTimeout(()=>{if(mode!=='play'||m.dead)return;vfx('slash',m.x,monY(m),{angle:rand()*6.28,rarity:3});SFX.swing();hitMon(m,.5,{jnt:1});},i*90);}
  if(!skill&&ipOn('gale')){P.gale=Math.min(30,(P.gale||0)+1);P.galeT=3;}
- if(!skill&&ipOn('wisdom')&&rand()<.05){const ks=Object.keys(P.cd).filter(k=>P.cd[k]>0);if(ks.length){const k=ks.sort((a,c)=>P.cd[c]-P.cd[a])[0];P.cd[k]=0;num(P.x,P.y-30,t('ipWisdom'),'#9fd8ff',false);vfx('mana',P.x,P.y-8);}}
- const heal=(p,cd,key)=>{if((P[key]||0)>gTime)return;P[key]=gTime+cd;const h=Math.max(1,Math.round(dmg*p));P.hp=Math.min(maxHP(),P.hp+h);num(P.x,P.y-26,'+'+h,'#ff7a9a',false);};
+ if(!skill&&ipOn('wisdom')&&rand()<.05){const ks=Object.keys(P.cd).filter(k=>P.cd[k]>0);if(ks.length){const k=ks.sort((a,c)=>P.cd[c]-P.cd[a])[0];P.cd[k]=0;numP(-30,t('ipWisdom'),'#9fd8ff',false);vfx('mana',P.x,P.y-8);}}
+ const heal=(p,cd,key)=>{if((P[key]||0)>gTime)return;P[key]=gTime+cd;const h=Math.max(1,Math.round(dmg*p));P.hp=Math.min(maxHP(),P.hp+h);numP(-26,'+'+h,'#ff7a9a',false);};
  if(ipOn('elfin'))heal(skill?.05:.12,21,'elfT');if(!skill&&ipOn('vamp'))heal(.1,12,'vampT');
  return dmg;}
 // Blacksmith's Breath: "There is a rare chance of giving special features to your production items" (5%, Pagma's
@@ -3558,7 +3601,7 @@ function ipHit(m,dmg,crit,o){if(o.dot)return dmg;const b=MT[m.type],skill=!!o.sk
 const FEATS=[['as',.04],['ms',.04],['dm',.05],['hpp',.05]];
 function breathFeat(it){if(!pasOn('focus')||it.r<2||rand()>=.05+(skLv('focus')-1)*.005*(skLv('focus')>=10?2:1))return;const [k,v]=FEATS[rand()*FEATS.length|0];it[k]=+((it[k]||0)+v).toFixed(3);it.ft=k;setTimeout(()=>{toast(t('featGot',{f:t('ft_'+k)}),'good');SFX.rare();},600);}
 // Doran's Ring: "50% of the damage received will instantly be recovered" (once every 3 minutes here)
-function ipHurt(d){if(d>0&&P.hp>0&&ipOn('doran')&&(P.doT||0)<=S.playT){P.doT=S.playT+180;const h=Math.round(d*.5);P.hp=Math.min(maxHP(),P.hp+h);num(P.x,P.y-30,t('ipDoran',{n:h}),'#7ae07a',false);vfx('heal',P.x,P.y);}}
+function ipHurt(d){if(d>0&&P.hp>0&&ipOn('doran')&&(P.doT||0)<=S.playT){P.doT=S.playT+180;const h=Math.round(d*.5);P.hp=Math.min(maxHP(),P.hp+h);numP(-30,t('ipDoran',{n:h}),'#7ae07a',false);vfx('heal',P.x,P.y);}}
 // per frame: bleeding (6 ticks over 3 s), buff timers, Gale Spear's speed stacks, landing from Fly
 function updateItemFx(dt){if(!P)return;if(P.qm>0)P.qm-=dt;
  if(P.icb>0){P.icb-=dt;if(P.icb<=0){if(skLv('icomb')<10)[weapon(),armorIt()].forEach(i=>{if(i)i.dur=Math.max(0,durOf(i)-10);});toast(t('icombEnd'),'warn');}}if(P.galeT>0){P.galeT-=dt;if(P.galeT<=0)P.gale=0;}
@@ -3828,13 +3871,15 @@ function act(a){
  else if(a==='back'){showOnly(ctrlBack);mode=ctrlBack==='pauseScreen'?'pause':'title';}
  else if(a==='lang'){mode='lang';showOnly('langScreen');}
  else if(a==='online')netPlay();
- else if(a==='plClose')plOpen(false);else if(a==='plHide')plHideT();
+ else if(a==='plClose')plOpen(false);else if(a==='plRnk')rnkBoard();else if(a==='plHide')plHideT();
  else if(a==='idOk')idOk();else if(a==='idCheck')idCheck();else if(a==='idClose')$('idW').hidden=true;
  else if(a==='netTakeBack')netTakeBack();
  else if(a==='cloud')cloudOpen();else if(a==='updLog')updLogOpen();else if(a==='updLogClose')updLogClose();else if(a==='switchAcc')netSwitch();else if(a==='cloudClose')$('cloudW').hidden=true;
  else if(a==='pAccept'||a==='pDecline'||a==='pLeave')partyAct(a);
  else if(a==='pBlock'||a==='dBlock')blockAct(a);
- else if(a==='pcClose'||a==='pcInvite'||a==='pcDuel'||a==='pcBlock'||a==='pcTrade')pctxAct(a);
+ else if(a==='pcClose'||a==='pcInvite'||a==='pcDuel'||a==='pcBlock'||a==='pcTrade'||a==='pcGuild'||a==='pcBounty')pctxAct(a);
+ else if(a==='gdYes'||a==='gdNo')guildAct(a);
+ else if(a==='plBnt')bntBoard();
  else if(/^tr[A-Z]/.test(a))tradeAct(a);
  else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
@@ -3948,7 +3993,7 @@ function update(dt){
   // the far north and south sleep while nobody is near (the map doubled: they would roll dice and spend time for nothing)
   if(m.far&&!(m.eng>0)&&Math.hypot(m.x-P.x,m.y-P.y)>900&&!(MOBN&&MOBN.rs&&MOBN.rs.some(r=>Math.hypot(r.x-m.x,r.y-m.y)<900)))continue;
   if(m.mvd)m.at=(m.at||0)+dt;m.mvd=0;m.t+=dt;if(m.grdT>0)m.grdT-=dt;m.cd-=dt;if(m.hurt>0)m.hurt-=dt;if(m.weak>0)m.weak-=dt;if(m.stun>0){m.stun-=dt;continue;}
-  if(MOBN&&MOBN.host===NET.uid&&MOBN.rs&&MOBN.rs.length&&!b.boss){const tg=mobTarget(m);if(tg){MOBP=P;P=tg;}} // host: it may be after another player
+  if(MOBN&&MOBN.host===NET.uid&&MOBN.rs&&MOBN.rs.length){const tg=mobTarget(m);if(tg){MOBP=P;P=tg;}} // host: it may be after another player, a boss too (SAT-ONLINE-045: a boss chased and leashed by the host alone walked home and healed while someone else fought it)
   if(MOBN&&MOBN.host===NET.uid)m.tgU=P.remote||NET.uid; // SAT-ONLINE-042: the player it is after goes out with each action
   const dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=m.type==='guardian'?10:Math.max(3,b.r-3);
   if(b.boss){
@@ -3958,7 +4003,7 @@ function update(dt){
    if(m.hp>=m.max)m.ph=0;{const ph=m.hp<m.max*.33?2:m.hp<m.max*.66?1:0;if(ph>(m.ph||0)){m.ph=ph;bossPhase(m,b,ph);}}
    const enr=m.hp<m.max/2,sp=b.spd*(enr?1.3:.9)*(1+(m.ph||0)*.08);
    if(m.tele>0){m.tele-=dt;if(m.tele<=0){shake=.4;SFX.slam();if(d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}if(m.type==='guardian')slamAllies(m);for(let i=0;i<24;i++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:'#8a8f99'});}m.scd=(enr?1.7:2.6)-(m.ph||0)*.25;
-    if(m.ph>=2)for(let i=0;i<10;i++){const a=i/10*6.283+rand()*.2;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*120,vy:Math.sin(a)*120,t:1.4,m,mv:{mul:.35},sp:'rock',a});}}}
+    if(m.ph>=2)for(let i=0;i<10;i++){const a=i/10*6.283;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*120,vy:Math.sin(a)*120,t:1.4,m,mv:{mul:.35},sp:'rock',a});}}}
    else{if(d>14)chase(m,dx,dy,d,sp,mr,dt);m.scd-=dt;if(m.scd<=0&&d<b.slamR*1.5&&seeP(m)){m.tele=.9;mobActN(m);}}
    if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1.1;mobBite(m);}
    m.face=dx>0?1:-1;continue;}
@@ -3975,7 +4020,7 @@ function update(dt){
    move(m,m.wx*b.spd*.25*dt,m.wy*b.spd*.25*dt,mr);if(m.wx)m.face=m.wx>0?1:-1;}
  }catch(err){gameErr(err,m);}finally{if(MOBP){P=MOBP;MOBP=null;}}}
  if(P.rmv>0)P.rmv-=dt;else if(P.rsp)P.rsp=Math.max(0,P.rsp-dt*2);horseRegen(dt);
- updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);updateEvents(dt);updateSiege(dt);achTick(dt);updateWeather(dt);fogTick(dt);updateComp(dt);updateItemFx(dt);updateGDrop();updatePet(dt);updateArena(dt);updateTower(dt);updateDragon(dt);updateAuction(dt);
+ updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);karmaTick(dt);updateEvents(dt);updateSiege(dt);achTick(dt);updateWeather(dt);fogTick(dt);updateComp(dt);updateItemFx(dt);updateGDrop();updatePet(dt);updateArena(dt);updateTower(dt);updateDragon(dt);updateAuction(dt);
 }
 
 /* ---------------- monster AI ---------------- */
@@ -4326,6 +4371,7 @@ window.__G.defs=Satisfy.local.defs;
 // Other players come from Satisfy.presence over a transport; nothing here changes offline play.
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
 let PVP=null; // SAT-ONLINE-038 open PvP (declared first: ?net=local starts during load)
+var GUILD=null; // SAT-ONLINE-046 online guilds (declared first: ?net=local starts during load)
 var TRADE=null; // SAT-ONLINE-039 trades (online only; declared first: ?net=local starts during load)
 let NET=null,NETTR=null,netLinkT=0,netReplaced=false,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null,CHAT=null,chatSig='',PCTX=null,pctxSig='',EMO=null,emoLast=-1e9;const PARTY_R=40,BLK=Satisfy.chat.blocklist(); // CHAT/BLK: SAT-ONLINE-016 (declared here: ?net=local starts during load)
 // Twister 2026-10-19: the public site opens online with no ?net=online; ?net=off plays offline there, ?net=local stays for two-tab tests.
@@ -4361,14 +4407,18 @@ var UPD;function updReload(){try{if(S&&!S.__demo)save(true);}catch(e){}const q=n
 function updBanner(){if(UPD)return;UPD=1;const v=document.createElement('div');v.id='updV';$('ui').appendChild(v);const d=document.createElement('div');d.id='updW';d.className='sys';let n=15;
  d.innerHTML=`<span>${esc(t('updT'))}</span><button>${esc(t('updB'))}</button><small></small>`;d.querySelector('button').onclick=updReload;$('ui').appendChild(d);SFX.notice();
  const tick=()=>{d.querySelector('small').textContent=t('updAuto',{n});if(n--<=0)updReload();else setTimeout(tick,1000);};tick();}
-(function(){if(!/\.github\.io$/.test(location.hostname)||!window.fetch)return;let tag=null;
- const chk=()=>fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>{const e=r.headers.get('etag')||r.headers.get('last-modified');if(!e||UPD)return;if(tag===null)tag=e;else if(e!==tag)updBanner();}).catch(()=>{});
+// a player nearby on another version (netSees) asks the server now: only the one whose page is older refreshes; the newer
+// one would reload into the same build and see the old player again, every 15 s (SAT-ONLINE-045)
+let updChk=()=>{};
+(function(){if(!/\.github\.io$/.test(location.hostname)||!window.fetch)return;let tag=null,last=0;
+ const chk=()=>{last=Date.now();return fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>{const e=r.headers.get('etag')||r.headers.get('last-modified');if(!e||UPD)return;if(tag===null)tag=e;else if(e!==tag)updBanner();}).catch(()=>{});};
+ updChk=()=>{if(Date.now()-last>10000)chk();};
  chk();setInterval(chk,60000);})();
 Object.assign(STR.ar,{updT:'نزل تحديث جديد للعبة: لازم تعمل ريفريش عشان تكمل مع الباقيين',updB:'ريفريش',updAuto:'هيعمل ريفريش لوحده كمان {n} ثانية'});
 Object.assign(STR.en,{updT:'A new version of the game is out: refresh to keep playing with everyone',updB:'Refresh',updAuto:'Refreshing by itself in {n} s'});
 function netZone(x,y){return y>=WMH*TS&&!dunAt(x,y)&&!roomAt(x,y)?'void':zoneAt(x,y);}
 function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(r.mv===mapV())return true;
- if(!netOtherV.has(r.sid)){netOtherV.add(r.sid);toast(t('netOtherV',{n:r.handle||'?'}),'warn');updBanner();}return false;}
+ if(!netOtherV.has(r.sid)){netOtherV.add(r.sid);toast(t('netOtherV',{n:r.handle||'?'}),'warn');updChk();}return false;}
 Object.assign(STR.ar,{netOtherV:'{n} قريب منك بس على نسخة تانية من اللعبة: اعملوا الاتنين ريفريش عشان تشوفوا بعض'});
 Object.assign(STR.en,{netOtherV:'{n} is nearby on a different version of the game: reload both pages to see each other'});
 function netWatch(){const ids=PARTY?PARTY.follow():[],w=ids.join(' ');if(NETTR.wsig!==w){NETTR.wsig=w;NETTR.party(ids);}} // party.follow(): review #55
@@ -4377,11 +4427,12 @@ function netTick(){NET.tick();const live=netLive();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
  if(TRADE)TRADE.tick();
+ if(GUILD)guildTick();
  if(PRAID)PRAID.tick();
  mobTick(live);
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
- if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic(),ol:outlaw()}),netForce);netForce=false;}
- partyUI(live);chatUI(live);pctxUI(live);tradeUI(live);
+ if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic(),ol:olPub(),gd:guildPub()}),netForce);netForce=false;}
+ partyUI(live);chatUI(live);pctxUI(live);tradeUI(live);guildUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
  const netSafe=live&&Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
   b.textContent=(NETQ==='local'?t('netOn',{n:NET.count()+1}):netState==='ONLINE'?t('netOnline',{n:NET.count()+1}):t(netState==='RECONNECTING'?'netRe':'netJoin'))+(netSafe?' · '+t('safeZone'):'');}}
@@ -4406,15 +4457,23 @@ function fxGrab(f0,p0,d0){for(const o of fx.slice(f0)){if(!o||o.home||o.img)cont
 function meRun(fn,self,args){if(FXME||!NET||!P||mode!=='play')return fn.apply(self,args);const st=window.setTimeout,f0=fx.length,p0=proj.length,d0=P.dash;let ok=false;
  FXME=1;window.setTimeout=function(f,ms,...a){return st(typeof f==='function'?()=>meRun(f,null,a):f,ms);};
  try{const r=fn.apply(self,args);ok=true;return r;}finally{window.setTimeout=st;FXME=0;if(ok&&P)try{fxGrab(f0,p0,d0);}catch(e){}}}
+// SAT-ONLINE-047 (owner via Claude-B, #13): the sounds of your own actions (swings, hits, dodges, being hurt, slams,
+// level-ups) ride along with their effects (meRun/asMe record them) and play for the players near you, softer with distance
+const SFXNET=['swing','hit','crit','hurt','dodge','chop','mine','clang','miss','slam','level','legendary'],SFXR=360;
+for(const k of SFXNET){const f=SFX[k];SFX[k]=function(...a){if(FXME&&NET&&P&&mode!=='title')try{fxR(['s',k,typeof a[0]==='number'?Math.round(a[0]*100)/100:0]);}catch(e){}return f.apply(this,a);};}
+window.__GS={heard:[]}; // test hook: the other players' sounds played here
 const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(tryAttack);dodge=meWrap(dodge);useSlot=meWrap(useSlot);useISlot=meWrap(useISlot);
 // presence field: the events of the last 0.7 s, oldest first, within FXMAX characters (each one goes out in about 3 updates)
-function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),tag=JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0));if(!FXOUT.length)return tag?'['+tag+']':null;
- let out=tag?[tag]:[],len=2+(tag?tag.length+1:0);for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tag?1:0,0,j);}return out.length?'['+out.join(',')+']':null;}
+// SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
+// clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
+function stPub(){return P&&P.fly>0?'f':'';}
+function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));if(!FXOUT.length)return '['+tags.join(',')+']';
+ let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
 function guPub(){if(!P||!P.guard)return null;const a=Math.atan2(P.gy,P.gx);return 1+((Math.round(a/(2*Math.PI)*64)%64+64)%64)+(P.fort>0?64:0)+(P.gT<.22?128:0);}
 function fxSt(sid){let s=FXS.get(sid);if(!s)FXS.set(sid,s={last:-1,off:null,raw:'',sw:null,du:0,tr:[],lt:0});return s;}
-function fxIn(r,s){if(!r.fx){s.pt=null;return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
- s.pt=null;s.inT=0;for(const ev of a)if(typeof ev==='string'){const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}} // pet, mount and when they got to this place ride along in fx (fxPub)
+function fxIn(r,s){if(!r.fx){s.pt=null;s.st='';return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
+ s.pt=null;s.inT=0;s.st='';for(const ev of a)if(typeof ev==='string'){const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}const q=/^st:([a-z]{1,8})$/.exec(ev);if(q)s.st=q[1];} // pet, mount and when they got to this place ride along in fx (fxPub)
  for(const ev of a){if(!Array.isArray(ev)||!(ev[0]>s.last)||typeof ev[1]!=='number')continue;s.last=ev[0];const lat=now-ev[1];
   // the sender's clock: keep the lowest delay seen (creeping up slowly) so steps of one skill keep their spacing
   if(s.off==null||lat<s.off)s.off=lat;else s.off+=(lat-s.off)*.02;FXQ.push({at:ev[1]+s.off,sid:r.sid,ev});}
@@ -4426,11 +4485,12 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
  else if(ty==='j'&&['arrow','magic','fire','wave'].includes(ev[3]))proj.push({kind:ev[3],x:x+n(ev[4]),y:y+n(ev[5]),vx:n(ev[6]),vy:n(ev[7]),t:Math.min(2,n(ev[8])/100),ghost:1,hit:new Set()});
  else if(ty==='w')s.sw={a:n(ev[3]),t:performance.now()};
  else if(ty==='d')s.du=performance.now()+Math.min(600,n(ev[3])*10);
- else if(ty==='n'&&typeof ev[3]==='string'){const c=/^#[0-9a-fA-F]{6}$/.test(ev[4])?ev[4]:'#ffffff';num(x,y+Math.max(-60,Math.min(0,n(ev[6]))),ev[3].slice(0,16),c,!!ev[5]);}}
+ else if(ty==='n'&&typeof ev[3]==='string'){const c=/^#[0-9a-fA-F]{6}$/.test(ev[4])?ev[4]:'#ffffff';num(x,y+Math.max(-60,Math.min(0,n(ev[6]))),ev[3].slice(0,16),c,!!ev[5]);}
+ else if(ty==='s'&&SFXNET.includes(ev[3])&&P){const d=Math.hypot(x-P.x,y-P.y);if(d<SFXR){SFXV=.1+.5*(1-d/SFXR);try{SFX[ev[3]](n(ev[4])||undefined);if(__GS.heard.length<40)__GS.heard.push(ev[3]);}finally{SFXV=1;}}}}
 // due replays, at where each player is drawn now; players off screen or out of sight just drop theirs
 function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
 function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)
- for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const fs=fxSt(r.sid);fxIn(r,fs);if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
+ for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const fs=fxSt(r.sid);fxIn(r,fs);if(fs.st&&fs.st.indexOf('f')>=0&&rand()<.23)fx.push({x:r.x+(rand()-.5)*14,y:r.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});/* their flight, as yours (updateItemFx) */if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
   const k=remoteSpr(r.look,r.arm),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
   // their weapon in hand and each swing once, the way your own is drawn (SAT-ONLINE-026, owner feedback 7): a swing starts when
   // their anim turns to 'attack' and plays 0.14 s on this clock, however long the state stays up
@@ -4449,10 +4509,12 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   if(r.em)emoBubble(ents,r.em,r.x,r.y,r.dir);
   if(PCTX&&PCTX.uid===r.uid)ents.push({y:r.y-1,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,231,168,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(r.x,r.y+1,9,4,0,0,7);ctx.stroke();ctx.restore();}});
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
-  TX.push({s:r.handle||'?',x:r.x,y:r.y-28,f:F,z:8,c:foe?'#ff8a7a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038)
+  const gi=guildOf(r),gy=gi?6:0; // SAT-ONLINE-046: «guild» under the name, the name and the bar a line higher
+  TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol===2?'#b0102a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038), 2 a murderer (052)
+  if(gi)TX.push({s:'«'+gi.n+'»',x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
-  if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
-  if(near&&r.uid===near.uid&&!foe)TX.push({s:[t('pcHint'),mate?'':t('pInvite'),!mate&&DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?t('dHint'):''].filter(Boolean).join(' · '),x:r.x,y:r.y-(typeof r.hp==='number'?46:37),f:F,z:6,c:'#ffe7a8'});}
+  if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37-gy,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
+  if(near&&r.uid===near.uid&&!foe)TX.push({s:[t('pcHint'),mate?'':t('pInvite'),!mate&&DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?t('dHint'):''].filter(Boolean).join(' · '),x:r.x,y:r.y-(typeof r.hp==='number'?46:37)-gy,f:F,z:6,c:'#ffe7a8'});}
  fxRun(seen);for(const sid of FXS.keys())if(!NET.get||!NET.get(sid))FXS.delete(sid);
  duelWatch(ents,myRoom);pingEnts(ents,myRoom,F);pvpEnts();const me=emoNow();if(me)emoBubble(ents,me,P.x,P.y,P.dir);
  const ds=DUEL&&DUEL.state();if(ds&&ds.arena&&!myRoom)ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle=ds.phase==='fight'?'rgba(255,120,90,.7)':'rgba(255,210,74,.7)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(ds.arena.x,ds.arena.y,ds.arena.r,0,7);ctx.stroke();ctx.restore();}});}
@@ -4467,7 +4529,7 @@ function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch
 Object.assign(STR.ar,{pKick:'اطرد',pKickQ:'تطرد {n}؟',pKickYes:'اطرد',pKickNo:'لأ',pKickDone:'{n} اتشال من الفريق',pLeaderLeft:'{n} ساب، فالفريق اتفكك',pRejoined:'رجعت لبارتي {n}',pYouLead:'القائد مشي: إنت قائد البارتي دلوقتي',pNewLead:'القائد مشي: {n} قائد البارتي دلوقتي',pReplaced:'البارتي اختارت قائد جديد وإنت مش موجود، هترجع لهم'});
 Object.assign(STR.en,{pKick:'Kick',pKickQ:'Kick {n}?',pKickYes:'Kick',pKickNo:'Cancel',pKickDone:'{n} was removed from the party',pLeaderLeft:'{n} left, so the party broke up',pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();tradeStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();bntStart();tradeStart();guildStart();dropStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],leaderLeft:['pLeaderLeft','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -4500,33 +4562,36 @@ function isBlocked(uid){return BLK.has(uid);}
    corner (it used to sit under the right column, where the HUD covered it). Tabs pick what you read and where Enter sends;
    Tab in the chat line switches. A tab you aren't looking at gets a dot when a line arrives. */
 let CHCH='all',chatWasP=false; // joining a party switches Enter to the party chat, as before
-function chatStart(){CHAT=Satisfy.chat.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,world:NETTR&&NETTR.sayWorld?NETTR:null,handle:()=>netId||(S&&S.look.n)||''});CHAT.on(()=>{chatSig='';});}
+function chatStart(){CHAT=Satisfy.chat.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,world:NETTR&&NETTR.sayWorld?NETTR:null,guild:NETTR&&NETTR.kind==='firebase'?GCH:null,handle:()=>netId||(S&&S.look.n)||''});CHAT.on(()=>{chatSig='';});}
 function chatInParty(){return !!(PARTY&&PARTY.members().length>=2);}
-function chatCh(c){CHCH=c==='party'&&chatInParty()?'party':'all';$('chatIn').placeholder=t(CHCH==='party'?'chatPh':'chatPhAll');chatSig='';}
+function chatInGuild(){return !!(GCH&&GCH.inGuild());}
+function chatCh(c){CHCH=c==='party'&&chatInParty()?'party':c==='guild'&&chatInGuild()?'guild':'all';$('chatIn').placeholder=t(CHCH==='party'?'chatPh':CHCH==='guild'?'chatPhGuild':'chatPhAll');chatSig='';}
+// Tab: everyone, then the party, then the guild (the ones you are in)
+function chatNext(){const o=['all'];if(chatInParty())o.push('party');if(chatInGuild())o.push('guild');chatCh(o[(o.indexOf(CHCH)+1)%o.length]);}
 // the chat box can be closed to a small bar that counts new lines; the choice is remembered (owner request)
 let CHATMIN=(()=>{try{return localStorage.getItem('satisfy_chatmin')==='1';}catch(e){return false;}})(),chatMinT=0;
 function chatMin(v){CHATMIN=v;chatMinT=performance.now();try{localStorage.setItem('satisfy_chatmin',v?'1':'0');}catch(e){}if(v){chatClose();$('chatW').hidden=true;}chatSig='';}
 $('chatX').addEventListener('click',e=>{e.stopPropagation();chatMin(true);});$('chatBar').addEventListener('click',()=>{chatMin(false);chatOpen();});
 function chatOpen(){if(!CHAT)return;if(CHATMIN)chatMin(false);chatCh(CHCH);const i=$('chatIn');i.hidden=false;$('chatW').hidden=false;i.focus();chatSig='';}
 function chatClose(){const i=$('chatIn');i.hidden=true;i.value='';i.blur();chatSig='';}
-function chatSend(){if(!CHAT)return chatClose();let v=$('chatIn').value,ch=CHCH;const m=/^\/(p|a)\s+/i.exec(v);if(m){ch=m[1].toLowerCase()==='p'?'party':'all';v=v.slice(m[0].length);} // /p party, /a everyone
+function chatSend(){if(!CHAT)return chatClose();let v=$('chatIn').value,ch=CHCH;const m=/^\/(p|a|g)\s+/i.exec(v);if(m){const k=m[1].toLowerCase();ch=k==='p'?'party':k==='g'?'guild':'all';v=v.slice(m[0].length);} // /p party, /a everyone, /g guild
  const r=CHAT.say(v,ch);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}chatClose();}
-$('chatIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Tab'){e.preventDefault();chatCh(CHCH==='all'?'party':'all');return;}if(e.code==='Enter'||e.code==='NumpadEnter'){e.preventDefault();chatSend();}else if(e.code==='Escape'){e.preventDefault();chatClose();}});
+$('chatIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Tab'){e.preventDefault();chatNext();return;}if(e.code==='Enter'||e.code==='NumpadEnter'){e.preventDefault();chatSend();}else if(e.code==='Escape'){e.preventDefault();chatClose();}});
 $('chatIn').addEventListener('blur',()=>{if(!$('chatIn').hidden&&!$('chatIn').value)chatClose();});
 // pressing a tab used to blur the empty line first, which closed it and hid the tabs before the click landed (owner feedback 9)
 $('chatTabs').addEventListener('pointerdown',e=>e.preventDefault());$('chatTabs').addEventListener('mousedown',e=>e.preventDefault());
 $('chatTabs').addEventListener('click',e=>{const b=e.target.closest('button[data-ch]');if(!b)return;chatCh(b.dataset.ch);if($('chatIn').hidden)chatOpen();else $('chatIn').focus();});
 function chatUI(live){const W=$('chatW'),on=!!(live&&CHAT),bar=$('chatBar');if(!on){bar.hidden=true;if(!W.hidden){W.hidden=true;chatClose();}return;}
  if(CHATMIN&&$('chatIn').hidden){W.hidden=true;const n=CHAT.log().filter(l=>!l.self&&l.t>chatMinT).length;bar.hidden=false;const s2='💬 '+t('chatAll')+(n?' ('+n+')':'');if(bar.textContent!==s2){bar.textContent=s2;bar.classList.toggle('new',n>0);}return;}bar.hidden=true;
- const inP=chatInParty();if(inP&&!chatWasP)chatCh('party');else if(!inP&&CHCH==='party')chatCh('all');chatWasP=inP;
+ const inP=chatInParty(),inG=chatInGuild();if(inP&&!chatWasP)chatCh('party');else if(!inP&&CHCH==='party')chatCh('all');else if(!inG&&CHCH==='guild')chatCh('all');chatWasP=inP;
  // one list for both (owner): everyone's lines and the party's, party ones in green; Tab picks where Enter sends
  const all=CHAT.log(),now=performance.now(),lines=all.slice(-7),nw=false;
- const sig=lang+'|'+CHCH+'|'+inP+'|'+lines.map(l=>l.n+':'+(now-l.t>20000?1:0)).join(',')+'|'+$('chatIn').hidden;
+ const sig=lang+'|'+CHCH+'|'+inP+'|'+inG+'|'+lines.map(l=>l.n+':'+(now-l.t>20000?1:0)).join(',')+'|'+$('chatIn').hidden;
  // nothing to read and the line closed: no box at all (owner: don't crowd the screen); it comes back with a new line or Enter
  const fresh=all.some(l=>now-l.t<30000);W.hidden=!fresh&&$('chatIn').hidden;
  if(sig===chatSig)return;chatSig=sig;
- for(const b of $('chatTabs').children){const c=b.dataset.ch;b.textContent=t(c==='all'?'chatAll':'chatParty');b.classList.toggle('on',c===CHCH);b.hidden=c==='party'&&!inP;}
- $('chatTabs').hidden=$('chatIn').hidden&&!inP; // in a party both tabs stay up to pick where the next line goes
+ for(const b of $('chatTabs').children){const c=b.dataset.ch;b.textContent=t(c==='all'?'chatAll':c==='guild'?'chatGuild':'chatParty');b.classList.toggle('on',c===CHCH);b.hidden=c==='party'&&!inP||c==='guild'&&!inG;}
+ $('chatTabs').hidden=$('chatIn').hidden&&!inP&&!inG; // in a party both tabs stay up to pick where the next line goes
  W.classList.toggle('idle',!lines.length&&$('chatIn').hidden);const L=$('chatL');L.textContent='';
  for(const l of lines){const d=document.createElement('div');d.className=(now-l.t>20000?'old ':'')+(l.ch||'party');const b=document.createElement('b');b.textContent=l.ch==='sys'?'📢 ':(l.self?netId||S.look.n:l.handle)+': ';d.appendChild(b);d.appendChild(document.createTextNode(l.text));L.appendChild(d);}}
 function blockUid(uid,handle){if(!uid)return;BLK.add(uid,handle);toast(t('pBlocked',{n:handle||'?'}),'warn');partySig='';duelSig='';chatSig='';}
@@ -4613,15 +4678,17 @@ function pctxNear(){if(!NET||PCTX)return;const r=partyNear();if(r)pctxOpen(r);}
 function pctxName(k){const v=t(k);return v===k?'':v;}
 function pctxUI(live){const W=$('pctx'),r=live?pctxRemote():null;if(PCTX&&!r){if(live&&PCTX.handle)toast(t('pcGone',{n:PCTX.handle}));PCTX=null;}
  if(!PCTX){if(!W.hidden)W.hidden=true;return;}
- const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far,r.ol].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
+ const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,gi=guildOf(r),sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far,r.ol,gi&&gi.n,guildCanInvite(r),bntOn(r.uid),S&&S.gold>=BNT_MIN].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
  $('pctxT').textContent=r.handle||'?';
- $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):'',r.ol?t('pcOl'):''].filter(Boolean).join(' · ');
- $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;$('pctxTr').hidden=!TRADE;
+ $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):'',r.ol===2?t('kaMurderT'):r.ol?t('pcOl'):'',gi?'«'+gi.n+'»':'',bntOn(r.uid)?t('bntOn',{g:bntOn(r.uid)}):''].filter(Boolean).join(' · ');
+ $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;$('pctxTr').hidden=!TRADE;$('pctxG').hidden=!guildCanInvite(r);$('pctxBn').hidden=!(BNT&&r.ol&&S&&S.gold>=BNT_MIN);
  // a player out of range (from the list): invites and duels only reach players you can see, so those wait until you are close
  for(const a of ['pcInvite','pcDuel'])W.querySelector(`[data-act="${a}"]`).disabled=far;}
 function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig='';return;}if(r===PCTX.snap&&(a==='pcInvite'||a==='pcDuel')){toast(t('pcFar'),'warn');return;}
  if(a==='pcInvite'&&PARTY){const res=PARTY.invite(r);toast(t({sent:'pInvSent',busy:'pBusy',full:'pFull',notLeader:'pNotLeader',already:'pcMate'}[res]||'pBusy',{n:r.handle}),res==='sent'?'good':'warn');partySig='';}
  else if(a==='pcDuel'&&DUEL){const st=DUEL.state();if(st.phase!=='idle'&&st.phase!=='over')return;const res=DUEL.challenge(r);toast(t({sent:'dSent',busy:'dBusy',safe:'dSafe',far:'dFar'}[res]||'dBusy',{n:r.handle}),res==='sent'?'good':'warn');duelSig='';}
+ else if(a==='pcGuild'&&GUILD){GUILD.invite(r.uid).then(()=>toast(t('gdInvSent',{n:r.handle||'?'}),'good'),e=>toast(t(String(e&&e.message)==='member'?'gdInvMem':'gdFail'),'warn'));PCTX=null;}
+ else if(a==='pcBounty'&&BNT){PCTX=null;bntPost(r);}
  else if(a==='pcTrade'&&TRADE){const res=TRADE.ask(r);toast(t({sent:'trSent',busy:'trBusy',far:'dFar'}[res]||'trBusy',{n:r.handle||'?'}),res==='sent'?'good':'warn');PCTX=null;}
  else if(a==='pcBlock'){if(isBlocked(r.uid)){BLK.remove(r.uid);toast(t('pcUnblocked',{n:r.handle||'?'}));}else blockUid(r.uid,r.handle);}
  pctxSig='';}
@@ -4633,14 +4700,59 @@ addEventListener('keydown',e=>{if(e.code!=='Escape'||mode!=='play'||(e.target&&e
 /* open PvP outside towns (SAT-ONLINE-038, owner 2026-10-19): the same as a duel without the challenge. A hit is a share of
    the victim's max HP (src/net/pvp.js caps it), applied by the victim's own client; no friendly fire in a party; dying to
    a player costs the normal death penalty only. A kill makes the killer an outlaw (a red name) for OUTLAW_MS. */
-Object.assign(STR.ar,{pvpHit:'{n} بيهاجمك!',pvpDied:'{n} قتلك',pvpKill:'قتلت {n}: بقيت خارج عن القانون {m} دقيقة',pvpOl:'خارج عن القانون',pvpOlEnd:'مبقتش خارج عن القانون',pcOl:'خارج عن القانون'});
-Object.assign(STR.en,{pvpHit:'{n} is attacking you!',pvpDied:'{n} killed you',pvpKill:'You killed {n}: you are an outlaw for {m} minutes',pvpOl:'Outlaw',pvpOlEnd:'You are no longer an outlaw',pcOl:'Outlaw'});
+Object.assign(STR.ar,{kaJust:'قتلت الخارج عن القانون {n}: عدالة (الكارما {k})',kaMurder:'قتلت {n}: بقيت قاتل {m} دقيقة (الكارما {k})',kaMurderT:'قاتل',kaBack:'الكارما رجعت {k}',kaS:'الكارما: {k}',pvpHit:'{n} بيهاجمك!',pvpDied:'{n} قتلك',pvpKill:'قتلت {n}: بقيت خارج عن القانون {m} دقيقة',pvpOl:'خارج عن القانون',pvpOlEnd:'مبقتش خارج عن القانون',pcOl:'خارج عن القانون'});
+Object.assign(STR.en,{kaJust:'You killed the outlaw {n}: justice (karma {k})',kaMurder:'You killed {n}: you are a murderer for {m} minutes (karma {k})',kaMurderT:'Murderer',kaBack:'Karma back to {k}',kaS:'Karma: {k}',pvpHit:'{n} is attacking you!',pvpDied:'{n} killed you',pvpKill:'You killed {n}: you are an outlaw for {m} minutes',pvpOl:'Outlaw',pvpOlEnd:'You are no longer an outlaw',pcOl:'Outlaw'});
 var pvpFrom=new Map(),pvpOlWas=false; // uid -> when they last hit us (the "is attacking you" toast once a while)
 function outlaw(){return !!(S&&!S.__demo&&S.olT&&Date.now()<S.olT);}
+/* karma (SAT-ONLINE-052; Claude-B #13 item 23): -10..10. Killing a player who is not an outlaw costs a point and makes
+   you an outlaw for longer the lower your karma goes (OUTLAW_MS, and half of it more for each point below -1); at -5 or lower you
+   are a murderer while it lasts (a darker red for everyone). Killing an outlaw is justice: a point back and no red name.
+   Below zero, every 30 minutes of play gives a point back. */
+const KARMA_MIN=-10,KARMA_MAX=10,KARMA_BACK=1800,MURDER=-5;
+function karma(){return S&&!S.__demo?Math.max(KARMA_MIN,Math.min(KARMA_MAX,S.karma|0)):0;}
+function olPub(){return outlaw()?(karma()<=MURDER?2:1):0;}
+window.__GK={karma:()=>karma(),set:k=>{S.karma=k;},ol:()=>olPub(),respawn:()=>respawn()}; // test hook
+function karmaTick(dt){if(!S||S.__demo||mode!=='play'||karma()>=0)return;S.karT=(S.karT||0)+dt;if(S.karT>=KARMA_BACK){S.karT=0;S.karma=karma()+1;toast(t('kaBack',{k:S.karma}),'good');netForce=true;}}
 function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
   room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
-  else if(e.type==='kill'&&S&&!S.__demo){S.olT=Date.now()+Satisfy.pvp.C.OUTLAW_MS;netForce=true;save(true);toast(t('pvpKill',{n:Satisfy.chat.clean(e.handle,24)||'?',m:Math.round(Satisfy.pvp.C.OUTLAW_MS/60000)}),'warn');SFX.slam&&SFX.slam();}});}
+  else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
+   if(v&&v.ol){S.karma=Math.min(KARMA_MAX,karma()+1);netForce=true;save(true);toast(t('kaJust',{n,k:S.karma}),'good');SFX.quest&&SFX.quest();return;} // an outlaw: justice
+   S.karma=Math.max(KARMA_MIN,karma()-1);S.karT=0;const ms=Math.round(Satisfy.pvp.C.OUTLAW_MS*(1+Math.max(0,-S.karma-1)*.5));
+   S.olT=Math.max(S.olT||0,Date.now()+ms);netForce=true;save(true);toast(t(S.karma<=MURDER?'kaMurder':'pvpKill',{n,m:Math.round(ms/60000),k:S.karma}),'warn');SFX.slam&&SFX.slam();}});}
+/* bounties (SAT-ONLINE-051; Claude-B #13 item 23, U038): a price on an outlaw's head. From the card of a player with a
+   red name, Bounty puts gold on it (bounties/{bid}; the gold leaves your bag, and comes back when you take the bounty
+   back from the board). When a player kills that outlaw in open PvP, the outlaw's own client writes who killed it
+   (kills/{victim}/{kid}), and the killer claims every bounty on it set before the kill: bountyPaid/{bid}, once, in the
+   same update that removes the bounty, and the whole world hears it. Not cheat-proof yet: gold has no ledger (D3). */
+Object.assign(STR.ar,{pcBounty:'مكافأة',bntBoard:'المكافآت',bntOn:'عليه مكافأة {g} دهب',bntQ:'تحط كام دهب مكافأة على {n}؟',bntSet:'حطيت {g} دهب مكافأة على {n}',bntGot:'خدت مكافأة {g} دهب على {n}',
+ bntDone:'{n} خد مكافأة {lv} دهب على راس خارج عن القانون',bntH:'المكافآت ({n})',bntNone:'مفيش مكافآت دلوقتي',bntMine:'رجّع مكافأتك على {n} ({g} دهب)',bntBack:'رجعتلك {g} دهب',bntRow:'{n}: {g} دهب'});
+Object.assign(STR.en,{pcBounty:'Bounty',bntBoard:'Bounties',bntOn:'bounty {g} gold',bntQ:'How much gold on the head of {n}?',bntSet:'You put a {g} gold bounty on {n}',bntGot:'You claimed a {g} gold bounty on {n}',
+ bntDone:'{n} claimed a {lv} gold bounty on an outlaw',bntH:'Bounties ({n})',bntNone:'No bounties right now',bntMine:'Take back your bounty on {n} ({g} gold)',bntBack:'{g} gold back to you',bntRow:'{n}: {g} gold'});
+var BNT=null,bntOff=null,BNTS={},bntSeq=0,BNT_MIN=100,BNT_AMTS=[100,500,1000,5000,10000];
+function bntStart(){BNT=null;BNTS={};if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.bountyStore))return; // NETTR first: FB is declared below
+ BNT=Satisfy.firebase.bountyStore(FB);bntOff=BNT.watch(v=>{const o={};for(const k in v){const b=v[k];if(b&&typeof b==='object'&&typeof b.tu==='string'&&typeof b.by==='string'&&+b.g>=BNT_MIN)o[k]={by:b.by,byN:Satisfy.chat.clean(b.byN,24)||'?',tu:b.tu,tN:Satisfy.chat.clean(b.tN,24)||'?',g:Math.floor(+b.g),t:+b.t||0};}BNTS=o;pctxSig='';});}
+function bntOn(uid){let g=0;for(const k in BNTS)if(BNTS[k].tu===uid)g+=BNTS[k].g;return g;}
+function bntNew(r,g){if(!BNT||!S||S.gold<g)return false;const n=Satisfy.chat.clean(r.handle,24)||'?';S.gold-=g;hudDirty=true;save(true);
+ const bid='b_'+NET.uid.slice(0,40)+'_'+Date.now().toString(36)+(++bntSeq).toString(36);
+ BNT.post(bid,{by:NET.uid,byN:netId||S.look.n,tu:r.uid,tN:r.handle||'?',g}).then(()=>{toast(t('bntSet',{g,n}),'good');SFX.coin();},()=>{S.gold+=g;hudDirty=true;save(true);toast(t('gdFail'),'warn');});return true;}
+function bntPost(r){if(!BNT||!S||!r||!r.uid)return;const n=Satisfy.chat.clean(r.handle,24)||'?';
+ dialog('guild',[t('bntQ',{n})],null,[...BNT_AMTS.filter(g=>g<=S.gold).map(g=>({l:g+' '+t('trGold'),f:()=>bntNew(r,g)})),{l:t('oClose')}]);}
+// the outlaw's own client: who killed it (the claim needs this record, made after the bounty)
+function bntKilled(killer){if(!BNT||!NET||!killer)return;BNT.killed(NET.uid,'k_'+Date.now().toString(36)+Math.floor(Math.random()*1e9).toString(36),killer).catch(()=>{});}
+// the killer: claim what is on the victim's head, once the victim's record is there (it may come a moment after the kill)
+function bntClaim(victim,n){if(!BNT||!NET||!S||S.__demo)return;const mine=Object.keys(BNTS).filter(k=>BNTS[k].tu===victim&&BNTS[k].by!==NET.uid);if(!mine.length)return;
+ BNT.kills(victim).then(ks=>{const ok=Object.keys(ks).filter(k=>ks[k]&&ks[k].k===NET.uid).sort((a,b)=>ks[b].t-ks[a].t);
+  if(!ok.length){if(n<4)setTimeout(()=>bntClaim(victim,n+1),[700,1500,3000,6000][n]);return;}
+  for(const bid of mine){const b=BNTS[bid],kid=ok.find(k=>ks[k].t>b.t);if(!kid)continue;
+   BNT.claim(bid,kid,b.g,NET.uid).then(()=>{S.gold+=b.g;hudDirty=true;save(true);toast(t('bntGot',{g:b.g,n:b.tN}),'good');SFX.coin();annW('bntDone',{lv:b.g});},()=>{});}
+ },()=>{if(n<4)setTimeout(()=>bntClaim(victim,n+1),1500);});}
+// the board, from the player list: who has a price on their head, and your own bounties to take back
+function bntBoard(){if(!BNT)return;const by={};for(const k in BNTS){const b=BNTS[k];(by[b.tu]=by[b.tu]||{n:b.tN,g:0}).g+=b.g;}
+ const rows=Object.values(by).sort((a,b)=>b.g-a.g).slice(0,12).map(x=>t('bntRow',{n:x.n,g:x.g}));
+ const mine=Object.keys(BNTS).filter(k=>BNTS[k].by===NET.uid).map(k=>({l:t('bntMine',{n:BNTS[k].tN,g:BNTS[k].g}),f:()=>{const g=BNTS[k]&&BNTS[k].g;if(!g)return;BNT.cancel(k).then(()=>{S.gold+=g;hudDirty=true;save(true);toast(t('bntBack',{g}),'good');SFX.coin();},()=>toast(t('gdFail'),'warn'));}}));
+ plOpen(false);dialog('guild',[t('bntH',{n:Object.keys(BNTS).length}),rows.length?rows.join(' · '):t('bntNone')],null,[...mine,{l:t('oClose')}]);}
+window.__GB={all:()=>BNTS,on:uid=>bntOn(uid),post:(uid,g)=>{const r=NET.remotes().find(x=>x.uid===uid);return !!r&&bntNew(r,g);}}; // test hook
 // the local attack reaches a player outside town: melee within reach, bow/staff along the aim; the nearest one it can hit
 function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoom=(roomAt(P.x,P.y)||{}).id||null,l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';let best=null,bd=1e9;
  for(const r of NET.remotes()){if(!netSees(r,myRoom)||PVP.why(r))continue;const dx=r.x-P.x,dy=(r.y-8)-(P.y-6),d=Math.hypot(dx,dy);
@@ -4651,13 +4763,13 @@ function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoo
 // takes a quarter. The lethal one goes back to the attacker as a kill.
 function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Satisfy.chat.clean(e.handle,24)||'?',now=performance.now();
  if(!pvpFrom.has(e.uid)||now-pvpFrom.get(e.uid)>15000)toast(t('pvpHit',{n}),'warn');pvpFrom.set(e.uid,now);
- let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));vfx('block',P.x,P.y-10,{});}
- P.hp-=d;num(P.x,P.y-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();vfx('blood',P.x,P.y-10,{});shake=.12;}hudDirty=true;
+ let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}
+ P.hp-=d;numP(-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();asMe(()=>vfx('blood',P.x,P.y-10,{}));shake=.12;}hudDirty=true;
  if(P.hp<=0){if(S.tl&&S.tl.legend&&S.immT<=0){P.hp=1;S.immT=120;P.inv=1.5;toast(t('immune'),'good');flash();SFX.notice();return;}
-  die();PVP.died(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
+  die();PVP.died(e.uid);bntKilled(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
 // your own red tag while you are an outlaw, and the notice when it ends
 function pvpEnts(){const ol=outlaw();if(pvpOlWas&&!ol&&S&&!S.__demo){toast(t('pvpOlEnd'),'good');netForce=true;}pvpOlWas=ol;
- if(ol&&mode==='play')TX.push({s:t('pvpOl'),x:P.x,y:P.y-30,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff3b30'});}
+ if(ol&&mode==='play')TX.push({s:t(olPub()===2?'kaMurderT':'pvpOl'),x:P.x,y:P.y-30,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff3b30'});}
 /* trades (SAT-ONLINE-039, owner 2026-10-19): online only, from the player card. Each side puts in gold and bag items, both
    Accept, then Confirm; any change clears the accepts. The swap is one database update keyed by the item ids
    (src/net/trade.js, Satisfy.firebase.tradeStore), so an item can't be traded twice. Not cheat-proof yet (no server). */
@@ -4708,22 +4820,128 @@ function tradeUI(live){const I=$('tradeInv'),W=$('tradeW');if(!TRADE||!live){if(
 $('trBag').addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button[data-iid]');if(b&&TRADE){TRADE.toggle(b.dataset.iid);trSig='';}});
 $('trGold').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')e.target.blur();});
 $('trGold').addEventListener('change',e=>{if(TRADE){TRADE.setGold(e.target.value);trSig='';}});
+/* online guilds (SAT-ONLINE-046, owner 2026-10-19; Claude-B #13 item 21, U060). Online a guild lives in the database
+   (src/net/guild.js, Satisfy.firebase.guildStore), so its members and everyone else see the same one: founding one makes
+   it there, the master and officers invite from the player card, the invited player answers a prompt (now or later),
+   the master makes officers, the master and officers remove members, and a member's guild shows under its name for
+   everyone. The guild is mirrored into WS.guilds, so its level (the members' contributions), perks, banners and the
+   G panel work as they do offline. S.gon keeps the online guild's id across sessions; offline guilds are unchanged. */
+Object.assign(STR.ar,{gdVault:'الخزنة ({n})',gdVaultH:'خزنة الجيلد: {n}/{m}. أي عضو يحط فيها، والقائد والضباط ياخدوا منها، وكل عضو ياخد اللي حطه',gdPut:'حط حاجة في الخزنة',gdPutNone:'مفيش حاجة تنفع تتحط',gdPutDone:'حطيت {it} في الخزنة',gdTook:'خدت {it} من الخزنة',gdTakeQ:'تاخد {it}؟',gdVaultFull:'الخزنة مليانة',gdVaultEmpty:'الخزنة فاضية',chatGuild:'الجيلد',chatPhGuild:'شات الجيلد · Tab يغير · Enter يبعت · Esc يقفل',pcGuild:'دعوة للجيلد',gdYes:'انضم',gdInvFrom:'{n} بيدعوك لجيلد {g}',gdInvSent:'اتبعتت دعوة الجيلد لـ{n}',gdInvMem:'هو عضو في الجيلد بالفعل',gdFail:'محصلش، جرب تاني',gdBusy:'إنت في جيلد بالفعل',
+ gdKicked:'اتشلت من جيلد {g}',gdDisb:'جيلد {g} اتفكت',gdGone:'إنت مبقتش في جيلد {g}',gdMembers:'الأعضاء ({n})',gdMemH:'الأعضاء: {n} · أونلاين: {o}',gdInvHint:'تدعو حد من كارت اللاعب (⋯ أو T)',
+ gdRk_m:'القائد',gdRk_o:'ضابط',gdRk_r:'عضو',gdMkO:'خلي {n} ضابط',gdMkR:'رجّع {n} عضو',gdRkDone:'رتبة {n} اتغيرت',gdKick:'شيل {n} من النقابة',gdKickQ:'تشيل {n} من النقابة؟',gdKickDone:'{n} اتشال من النقابة',gdOn:'أونلاين',gdOff:'مش أونلاين'});
+Object.assign(STR.en,{gdVault:'Vault ({n})',gdVaultH:'The guild vault: {n}/{m}. Any member puts things in; the master and officers take them out, and everyone can take back their own',gdPut:'Put something in',gdPutNone:'Nothing you can put in',gdPutDone:'You put {it} in the vault',gdTook:'You took {it} from the vault',gdTakeQ:'Take {it}?',gdVaultFull:'The vault is full',gdVaultEmpty:'The vault is empty',chatGuild:'Guild',chatPhGuild:'Guild chat · Tab switches · Enter sends · Esc closes',pcGuild:'Guild invite',gdYes:'Join',gdInvFrom:'{n} invites you to the guild {g}',gdInvSent:'Guild invitation sent to {n}',gdInvMem:'They are in your guild already',gdFail:'That did not work, try again',gdBusy:'You are in a guild already',
+ gdKicked:'You were removed from {g}',gdDisb:'{g} was disbanded',gdGone:'You are no longer in {g}',gdMembers:'Members ({n})',gdMemH:'Members: {n} · online: {o}',gdInvHint:'Invite players from their card (⋯ or T)',
+ gdRk_m:'Master',gdRk_o:'Officer',gdRk_r:'Member',gdMkO:'Make {n} an officer',gdMkR:'Make {n} a member again',gdRkDone:"{n}'s rank changed",gdKick:'Remove {n} from the guild',gdKickQ:'Remove {n} from the guild?',gdKickDone:'{n} was removed from the guild',gdOn:'online',gdOff:'offline'});
+// guild chat (SAT-ONLINE-049): the chat's guild channel (src/net/chat.js `guild`) and the feed of the guild you are in
+var GCH={inGuild:()=>{const st=GUILD&&gdFor===S&&GUILD.state();return !!(st&&st.gid&&st.members[NET.uid]);},
+ sayGuild:m=>{const st=GUILD&&GUILD.state();if(st&&st.gid&&GDS)GDS.chatSay(st.gid,m,gdOff).catch(()=>toast(t('gdFail'),'warn'));},
+ guildLines:fn=>{gdChatFn=fn;}},gdChatFn=null,gdChatOff=null,gdChatG=null;
+function gdOff(){return NETTR&&NETTR.serverOffset?NETTR.serverOffset():0;}
+function guildChatSync(){const gid=GCH.inGuild()?GUILD.state().gid:null;if(gid===gdChatG)return;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=gid;if(gid&&GDS)gdChatOff=GDS.chatOn(gid,m=>{if(gdChatFn)gdChatFn(m);},gdOff);chatSig='';}
+var gdSig='',gdFor=null,GDS=null,gdBusy=0,gdFetchT=0;const GDN=new Map(); // GDN: gid -> {n, col, at, mem: uid -> true/false} for other players' labels
+function guildStart(){GUILD=null;gdFor=null;GDS=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.guildStore))return; // NETTR first: FB and GDN are declared below (?net=local starts during load)
+ GDN.clear();GDS=Satisfy.firebase.guildStore(FB);GUILD=Satisfy.guild.create({store:GDS,uid:NET.uid,handle:()=>netId||(S&&S.look.n)||'',now:()=>performance.now(),serverNow:()=>wNow()});GUILD.on(guildEv);}
+// (re)start for the character being played: the title's demo has no guild; loading another save starts over
+function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}guildChatSync();return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();guildChatSync();}
+function guildEv(e){if(!S||S.__demo||gdFor!==S)return;gdSig='';
+ if(e.type==='changed')guildMirror();
+ else if(e.type==='joined'){guildMirror();if(e.why==='join'){toast(t('gJoined',{g:e.name||gName(S.guild)}),'good');SFX.quest();save(true);}}
+ else if(e.type==='left'){const g=Satisfy.chat.clean(e.name,18)||gName(e.gid);guildDrop(e.gid);if(e.why!=='left')toast(t({kicked:'gdKicked',disbanded:'gdDisb',gone:'gdGone'}[e.why]||'gdGone',{g}),'warn');else toast(t('gLeft',{g}));}
+ else if(e.type==='invited'&&!S.guild)SFX.notice&&SFX.notice();}
+function guildMirror(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!st.guild||!WS||!S)return;const me=NET.uid,g=WS.guilds[st.gid]||{},mem={};
+ for(const u in st.members){const m=st.members[u];mem[u===me?pidOf():'u:'+u]={n:m.n,rk:m.rk,c:m.c,uid:u};}
+ WS.guilds[st.gid]=Object.assign(g,{id:st.gid,name:st.guild.name,master:st.guild.master===me?pidOf():'u:'+st.guild.master,lv:1,xp:st.xp,col:st.guild.col,online:1,members:mem});
+ if(S.guild!==st.gid||S.gon!==st.gid){S.guild=st.gid;S.gon=st.gid;save(true);}hudDirty=true;}
+function guildDrop(gid){if(gid&&WS&&WS.guilds[gid]&&WS.guilds[gid].online)delete WS.guilds[gid];if(S.guild===gid)S.guild='';if(S.gon===gid)S.gon='';hudDirty=true;save(true);}
+function guildPub(){const st=GUILD&&gdFor===S&&GUILD.state();return st&&st.gid&&st.members[NET.uid]?st.gid:null;}
+function guildCanInvite(r){const st=GUILD&&gdFor===S&&GUILD.state();return !!(st&&st.gid&&Satisfy.guild.can(st.rank,'invite')&&r&&r.uid&&!st.members[r.uid]&&!r.gd);}
+// the invitation prompt: shown while you are in no guild (leave yours first to take another)
+function guildInvNow(){const st=GUILD&&gdFor===S&&S&&!S.guild?GUILD.state():null;return st&&!st.gid&&st.invites.length?st.invites[st.invites.length-1]:null;}
+function guildUI(live){const I=$('guildInv'),v=live&&GUILD?guildInvNow():null,sig=[lang,v&&v.gid].join('|');if(sig===gdSig)return;gdSig=sig;
+ I.hidden=!v;if(v)$('guildInvT').textContent=t('gdInvFrom',{n:Satisfy.chat.clean(v.byN,24)||'?',g:Satisfy.chat.clean(v.n,18)||'?'});}
+function guildAct(a){const v=guildInvNow();gdSig='';if(!v)return;
+ if(a==='gdYes')GUILD.accept(v.gid).catch(e=>toast(t(String(e&&e.message)==='busy'?'gdBusy':'gdFail'),'warn'));
+ else GUILD.decline(v.gid).catch(()=>{});}
+// another player's guild, for the label under its name: the name from guilds/{gd}, once its member entry is there
+// (a copied guild id shows nothing); your own guild comes from your copy
+function guildOf(r){if(!r.gd||!GUILD||!GDS)return null;const st=gdFor===S?GUILD.state():null;
+ if(st&&st.gid===r.gd&&st.guild)return st.members[r.uid]?{n:st.guild.name,col:st.guild.col}:null;
+ const now=performance.now();let e=GDN.get(r.gd);if(!e){if(GDN.size>200)GDN.clear();GDN.set(r.gd,e={n:null,col:'#9a9aa6',at:-1e9,q:0,mem:new Map()});}
+ if(now-e.at>60000&&!e.q&&now-gdFetchT>200){gdFetchT=now;e.q=1;GDS.readGuild(r.gd).then(v=>{const c=Satisfy.guild.cleanGuild(v,r.gd);e.n=c?c.name:null;if(c)e.col=c.col;e.at=performance.now();e.q=0;e.mem.clear();},()=>{e.at=performance.now();e.q=0;});}
+ if(!e.n)return null;const m=e.mem.get(r.uid);
+ if(m===undefined&&now-gdFetchT>200){gdFetchT=now;e.mem.set(r.uid,null);GDS.readMember(r.gd,r.uid).then(ok=>e.mem.set(r.uid,ok),()=>e.mem.delete(r.uid));}
+ return m?e:null;}
+// the G panel's member list (online guilds): rank, online, contribution; the master and officers act from a member's line
+const GRK={m:0,o:1,r:2};
+// the guild vault (SAT-ONLINE-050): any member puts bag things in; the master and officers take anything out, everyone
+// their own; a thing taken out is one player's only (guildVaultTaken). An item travels as plain values, as in trades.
+function vaultKindOk(k,r){return !!(POT[k]||k==='bread'||(k==='arrows'&&ARROWG[r]!=null)||MATP[k]!==undefined);}
+const vaultName=e=>(e.it?tradeName(e.it):t(e.k))+(e.n>1?' ×'+e.n:'');
+function guildVaultD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const V=GUILD.vault(),ks=Object.keys(V).sort((a,b)=>V[b].t-V[a].t);
+ const o=ks.slice(0,24).map(k=>{const e=V[k],can=GUILD.canTake(k);return {l:vaultName(e)+' · '+e.byN,ic:e.k,poor:!can,f:()=>can?dialog('guild',[t('gdTakeQ',{it:vaultName(e)})],null,[{l:t('gYes'),f:()=>guildTake(k)},{l:t('gNo'),f:guildVaultD}]):guildVaultD()};});
+ dialog('guild',[t('gdVaultH',{n:ks.length,m:Satisfy.guild.C.VAULT_MAX}),ks.length?'':t('gdVaultEmpty')].filter(Boolean),null,[{l:t('gdPut'),f:guildPutD},...o,{l:t('oBack'),f:guildPanel}]);}
+function guildTake(k,quiet){const re=()=>{if(!quiet)guildVaultD();};gdBusy=1;GUILD.withdraw(k).then(e=>{gdBusy=0;let got=null;
+  if(e.it){const it=tradeItemIn(e.it);if(it){S.items.push(it);Satisfy.ids.ensure(S);got=inm(it);}}
+  else if(vaultKindOk(e.k,e.r)){slotIn({k:e.k,n:e.n,r:e.r});got=vaultName(e);}
+  if(got){SFX.coin();toast(t('gdTook',{it:got}),'good');}hudDirty=true;save(true);re();},()=>{gdBusy=0;toast(t('gdFail'),'warn');re();});}
+// what you can put in: bag items you don't wear (of a kind every client knows), and your stacks of materials, potions, bread
+function guildPutList(){const o=[];for(const b of tradeBag())o.push({iid:b.iid,k:b.it.id,n:1,r:b.it.r|0,it:b.json,name:inm(b.it)});
+ for(const k of ['hpot','mpot'])if(S[k]>0)o.push({k,n:S[k],r:0,name:t(k)+' ×'+S[k]});if(S.bread>0)o.push({k:'bread',n:S.bread,r:0,name:t('bread')+' ×'+S.bread});
+ for(const k in S.mats)if(S.mats[k]>0&&MATP[k]!==undefined)o.push({k,n:S.mats[k],r:0,name:t(k)+' ×'+S.mats[k]});return o;}
+function guildPutD(){const L=guildPutList();if(!L.length)return dialog('guild',['gdPutNone'],guildVaultD);
+ dialog('guild',['gdPut'],null,[...L.slice(0,24).map(x=>({l:x.name,ic:x.k,f:()=>guildPut(x)})),{l:t('oBack'),f:guildVaultD}]);}
+function guildPut(x,quiet){if(gdBusy)return;let back;const re=()=>{if(!quiet)guildVaultD();};
+ if(x.iid){const i=S.items.findIndex(q=>q.iid===x.iid);if(i<0)return guildPutD();const it=S.items.splice(i,1)[0];back=()=>S.items.push(it);}
+ else if(x.k==='bread'){S.bread-=x.n;back=()=>S.bread+=x.n;}else if(POT[x.k]){S[x.k]-=x.n;back=()=>S[x.k]+=x.n;}else{S.mats[x.k]-=x.n;back=()=>S.mats[x.k]+=x.n;}
+ hudDirty=true;gdBusy=1;GUILD.deposit({k:x.k,n:x.n,r:x.r,it:x.it}).then(()=>{gdBusy=0;toast(t('gdPutDone',{it:x.name}),'good');SFX.coin();save(true);re();},
+  e=>{gdBusy=0;back();hudDirty=true;toast(t(String(e&&e.message)==='full'?'gdVaultFull':'gdFail'),'warn');re();});}
+window.__GG={state:()=>GUILD&&GUILD.state(),create:n=>createGuild(n),leave:()=>leaveGuild(),of:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);return r?guildOf(r):null;},rank:(u,rk)=>GUILD.setRank(u,rk),kick:u=>GUILD.kick(u),members:()=>guildMembersD(),contribute:n=>gContrib(n),vault:()=>GUILD.vault(),put:k=>{const x=guildPutList().find(q=>q.k===k);if(x)guildPut(x,1);return !!x;},take:vid=>guildTake(vid,1),canTake:vid=>GUILD.canTake(vid)}; // test hook
+function guildMembersD(){const st=GUILD&&GUILD.state();if(!st||!st.gid)return guildPanel();
+ const list=Object.keys(st.members).map(u=>Object.assign({u},st.members[u])).sort((a,b)=>GRK[a.rk]-GRK[b.rk]||(GUILD.online(b)?1:0)-(GUILD.online(a)?1:0)||b.c-a.c);
+ const on=list.filter(m=>GUILD.online(m)).length,o=list.slice(0,30).map(m=>({l:(GUILD.online(m)?'● ':'○ ')+m.n+' · '+t('gdRk_'+m.rk)+' · '+m.c,f:()=>guildMemberD(m.u)}));
+ dialog('guild',[t('gdMemH',{n:list.length,o:on}),Satisfy.guild.can(st.rank,'invite')?t('gdInvHint'):''].filter(Boolean),null,[...o,{l:t('oBack'),f:guildPanel}]);}
+function guildMemberD(u){const st=GUILD&&GUILD.state(),m=st&&st.members[u];if(!m)return guildMembersD();const can=Satisfy.guild.can,o=[];
+ const after=(p,ok)=>p.then(()=>{if(ok)toast(ok,'good');guildMembersD();},()=>{toast(t('gdFail'),'warn');guildMembersD();});
+ if(u!==NET.uid){
+  if(can(st.rank,'rank',m.rk))o.push(m.rk==='r'?{l:t('gdMkO',{n:m.n}),f:()=>after(GUILD.setRank(u,'o'),t('gdRkDone',{n:m.n}))}:{l:t('gdMkR',{n:m.n}),f:()=>after(GUILD.setRank(u,'r'),t('gdRkDone',{n:m.n}))});
+  if(can(st.rank,'kick',m.rk))o.push({l:t('gdKick',{n:m.n}),f:()=>dialog('guild',[t('gdKickQ',{n:m.n})],null,[{l:t('gYes'),f:()=>after(GUILD.kick(u),t('gdKickDone',{n:m.n}))},{l:t('gNo'),f:guildMembersD}])});}
+ dialog('guild',[m.n+' · '+t('gdRk_'+m.rk)+' · '+t(GUILD.online(m)?'gdOn':'gdOff')],null,[...o,{l:t('oBack'),f:guildMembersD}]);}
 /* duels (SAT-ONLINE-006, doc §09 R4): K challenges the nearest player outside towns; Y/N answers, Y is the ready check.
    Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
 Object.assign(STR.ar,{dHint:'[K] مبارزة',dSent:'اتبعت تحدي مبارزة لـ{n}',dFrom:'{n} بيتحداك في مبارزة',dReadyQ:'مبارزة مع {n}: جاهز؟',dReady:'جاهز (Y)',dWait:'مستني {n}…',dNone:'مفيش حد قريب كفاية للمبارزة',dSafe:'ممنوع المبارزة جوه المدن',dBusy:'{n} مشغول دلوقتي',dFar:'قرّب من {n} الأول',dDeclined:'{n} رفض المبارزة',dCancel:'المبارزة اتلغت',dFight:'ابدأ!',dOut:'ارجع للحلبة وإلا هتخسر!',dWin:'كسبت المبارزة ضد {n} {w}',dLose:'خسرت المبارزة ضد {n} {w}',dYield:'استسلام',dYou:'إنت',dTitle:'مبارزة ضد {n}',dRec:'المبارزات: {w} فوز · {l} خسارة',dw_yield:'(استسلام)',dw_arena:'(خرج من الحلبة)',dw_teleport:'(ساب القتال)',dw_safe:'(دخل مدينة)',dw_gone:'(الخصم مشي)',dw_death:'(مات)',dw_hp:''});
 Object.assign(STR.en,{dHint:'[K] Duel',dSent:'Duel challenge sent to {n}',dFrom:'{n} challenges you to a duel',dReadyQ:'Duel with {n}: ready?',dReady:'Ready (Y)',dWait:'Waiting for {n}…',dNone:'Nobody close enough to duel',dSafe:'No duels inside towns',dBusy:'{n} is busy right now',dFar:'Get closer to {n} first',dDeclined:'{n} declined the duel',dCancel:'Duel cancelled',dFight:'Fight!',dOut:'Back to the arena or you forfeit!',dWin:'You won the duel against {n} {w}',dLose:'You lost the duel against {n} {w}',dYield:'Yield',dYou:'You',dTitle:'Duel with {n}',dRec:'Duels: {w} won · {l} lost',dw_yield:'(surrender)',dw_arena:'(left the arena)',dw_teleport:'(left the fight)',dw_safe:'(entered a town)',dw_gone:'(opponent left)',dw_death:'(died)',dw_hp:''});
-function duelStart(){DUEL=Satisfy.duel.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):''});
+function duelStart(){rnkStart();DUEL=Satisfy.duel.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):''});
  DUEL.on(e=>{const n=e.handle||((DUEL.state().handle)||'?');duelSig='';
   if(e.type==='challenge'){SFX.notice();}
   else if(e.type==='declined')toast(t('dDeclined',{n}),'warn');
   else if(e.type==='cancelled')toast(t('dCancel'),'warn');
   else if(e.type==='safeHere')toast(t('dSafe'),'warn');
-  else if(e.type==='fight'){toast(t('dFight'),'good');SFX.notice();}
+  else if(e.type==='fight'){toast(t('dFight'),'good');SFX.notice();rnkSnap(DUEL.state().foe);}
   else if(e.type==='outside')toast(t('dOut'),'warn');
   else if(e.type==='hurt'){numP(-20,'-'+e.dmg,'#ff6a5a',false);SFX.hit();}
   else if(e.type==='result'){const win=e.result==='win';if(S&&!S.__demo){S.duels=S.duels||{w:0,l:0};S.duels[win?'w':'l']++;}
-   toast(t(win?'dWin':'dLose',{n,w:t('dw_'+e.why)}),win?'good':'warn');if(win)SFX.quest();
+   toast(t(win?'dWin':'dLose',{n,w:t('dw_'+e.why)}),win?'good':'warn');if(win)SFX.quest();rnkResult(win,e.foe);
    if(S&&S.duels)setTimeout(()=>toast(t('dRec',S.duels)),500);}});}
+/* ranked arena seasons (SAT-ONLINE-053; Claude-B #13 item 23): every duel online moves both players' rating in this
+   month's season (Elo, K 32, from 1000: arena/{season}/{uid} {r, w, l, n, t}); Arena in the player list shows the top
+   10 and your own line. A new month (UTC, by the server clock) is a new season. Not cheat-proof yet: each player writes
+   its own rating; the rules allow one win or loss and at most 64 points per write. */
+Object.assign(STR.ar,{rnkBoard:'الساحة',rnkR:'تقييمك في الساحة: {r} ({d})',rnkH:'موسم الساحة {s}',rnkRow:'{i}. {n}: {r} ({w}-{l})',rnkMe:'إنت: {r} ({w}-{l})',rnkNone:'محدش لعب مبارزة في الموسم ده لسه',rnkNew:'لسه ملكش تقييم: كل مبارزة أونلاين بتحسب',rnkFail:'مقدرناش نجيب الترتيب دلوقتي'});
+Object.assign(STR.en,{rnkBoard:'Arena',rnkR:'Your arena rating: {r} ({d})',rnkH:'Arena season {s}',rnkRow:'{i}. {n}: {r} ({w}-{l})',rnkMe:'You: {r} ({w}-{l})',rnkNone:'Nobody has dueled this season yet',rnkNew:'No rating yet: every duel online counts',rnkFail:'Could not load the board right now'});
+var RNK=null;
+function rnkSeason(){const d=new Date(wNow());return 's'+d.getUTCFullYear()+String(d.getUTCMonth()+1).padStart(2,'0');}
+function rnkStart(){RNK=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.arenaStore))return;RNK=Satisfy.firebase.arenaStore(FB);} // NETTR first: FB is declared below
+// both ratings as the fight starts, so each side counts the duel against the same numbers (the other may write first)
+var RNKS=null;function rnkSnap(foe){RNKS=null;if(!RNK||!NET||!foe)return;const se=rnkSeason(),p=Promise.all([RNK.get(se,NET.uid),RNK.get(se,foe)]).catch(()=>[null,null]);RNKS={foe,se,p};}
+function rnkResult(win,foe){if(!RNK||!NET||!S||S.__demo||!foe)return;const sn=RNKS&&RNKS.foe===foe?RNKS:null,se=sn?sn.se:rnkSeason();RNKS=null;
+ (sn?sn.p:Promise.all([RNK.get(se,NET.uid),RNK.get(se,foe)])).then(([me,them])=>{const ra=me&&typeof me.r==='number'?me.r:1000,rb=them&&typeof them.r==='number'?them.r:1000;
+  const r=Math.max(0,Math.min(4000,Math.round(ra+32*((win?1:0)-1/(1+Math.pow(10,(rb-ra)/400))))));
+  return RNK.put(se,NET.uid,{r,w:(me?me.w|0:0)+(win?1:0),l:(me?me.l|0:0)+(win?0:1),n:netId||S.look.n}).then(()=>setTimeout(()=>toast(t('rnkR',{r,d:(r>=ra?'+':'')+(r-ra)}),win?'good':''),900));}).catch(()=>{});}
+function rnkBoard(){if(!RNK||!NET)return;const se=rnkSeason(),d=new Date(wNow()),sn=d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');
+ Promise.all([RNK.top(se,10),RNK.get(se,NET.uid)]).then(([top,me])=>{plOpen(false);
+  const rows=top.map((x,i)=>t('rnkRow',{i:i+1,n:Satisfy.chat.clean(x.n,24)||'?',r:x.r,w:x.w,l:x.l}));
+  dialog('guild',[t('rnkH',{s:sn}),rows.length?rows.join(' · '):t('rnkNone'),me?t('rnkMe',{r:me.r,w:me.w|0,l:me.l|0}):t('rnkNew')],null,[{l:t('oClose')}]);},()=>toast(t('rnkFail'),'warn'));}
+window.__GR={season:()=>rnkSeason(),mine:()=>RNK?RNK.get(rnkSeason(),NET.uid):null,top:()=>RNK?RNK.top(rnkSeason(),10):[]}; // test hook
 // The local attack reaches the opponent: melee within reach, bow/staff along the aim. Power is a normalized roll.
 function duelSwing(ax,ay,mul,k){if(DUEL.state().phase!=='fight')return;const f=DUEL.foe();if(!f)return;
  const dx=f.x-P.x,dy=(f.y-8)-(P.y-6),d=Math.hypot(dx,dy),l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';
@@ -4858,9 +5076,9 @@ window.__GM={get host(){return MOBN&&MOBN.host},get group(){return MOBN?MOBN.rs.
 const uh=u=>{let h=0x811c9dc5;u=String(u||'');for(let i=0;i<u.length;i++){h^=u.charCodeAt(i);h=Math.imul(h,0x01000193);}return ((h>>>0)&0xfff).toString(16);};
 function mobActN(m){if(!MOBN||MOBN.host!==NET.uid)return;m.actN=((m.actN||0)+1)%1000;MOBN.fast=1;}
 function mobBite(m){if(!MOBN||MOBN.host!==NET.uid)return;mobActN(m);m.biteT=.35;}
-function mobActS(m){if(!m.actN||m.dead)return '';const st=m.biteT>0?'b':m.st==='tele'?'t':m.st==='dash'?'d':m.st==='rec'?'r':MT[m.type].boss&&m.tele>0?'s':'0';
- const mv=m.mv,L=mv&&!mv.blk?movesOf(m).indexOf(mv):-1,i=mv&&mv.blk?99:Math.max(0,L),tl=st==='s'?m.tele:st==='b'?m.biteT:m.stT||0;
- return ','+m.actN+','+st+','+i+','+Math.max(0,Math.round(tl*100))+','+Math.round(Math.atan2(m.ay||0,m.ax||1)*100)+','+(m.lL|0)+','+uh(m.tgU);}
+function mobActS(m){if(!m.actN||m.dead)return '';const st=m.br>0?'f':m.biteT>0?'b':m.st==='tele'?'t':m.st==='dash'?'d':m.st==='rec'?'r':MT[m.type].boss&&m.tele>0?'s':'0';
+ const mv=m.mv,L=mv&&!mv.blk?movesOf(m).indexOf(mv):-1,i=mv&&mv.blk?99:Math.max(0,L),tl=st==='f'?m.br:st==='s'?m.tele:st==='b'?m.biteT:m.stT||0,an=st==='f'?m.ba:Math.atan2(m.ay||0,m.ax||1);
+ return ','+m.actN+','+st+','+i+','+Math.max(0,Math.round(tl*100))+','+Math.round(an*100)+','+(m.lL|0)+','+uh(m.tgU);}
 // host: the nearest player this monster could be after, as a stand-in that takes no damage here (inv), or null for you
 function mobTarget(m){if(!mobOk(m)||m.dead)return null;const dP=P.ghost||mode==='dead'?1e9:Math.hypot(P.x-m.x,P.y-m.y);let best=null,bd=dP;
  for(const r of MOBN.rs){if(r.anim==='dead')continue;const d=Math.hypot(r.x-m.x,r.y-m.y);if(d<bd&&d<300){bd=d;best=r;}}
@@ -4874,6 +5092,7 @@ function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))ret
  if(fl&1){if(!m.dead){m.dead=true;m.dying=.5;m.rt=25;vfx('death',m.x,m.y);}return true;} // quiet: the kill and its rewards come from the host's message
  if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mk:m.mk,sg:m.sg,nk:m.nk,boss:m.boss,far:m.far},hid=m.hidN;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
  if(m.lv!==lv){m.lv=lv;m.max=Math.round(b.hp*(1+(lv-b.lv[0])*.03));}
+ if(b.boss){const ph=hp<330?2:hp<660?1:0;if(hp>=1000)m.ph=0;else if(ph>(m.ph||0)){m.ph=ph;shake=.5;SFX.slam();vfx('rage',m.x,m.y);toast(t('bossPh'+ph,{b:itN(m.type)}),'warn');}} // SAT-ONLINE-045
  const nh=Math.max(1,Math.round(m.max*hp/1000)),mine=m.pendT&&performance.now()-m.pendT<900;
  if(nh<m.hp){if(!mine&&m.hp-nh>=1){m.hurt=.12;num(m.x,monY(m)-8,String(m.hp-nh),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});}m.hp=nh;}else if(!mine)m.hp=nh; // another player's hit: its number shows here too
  const dx=x-m.x,dy=y-m.y,dd=Math.hypot(dx,dy);if(dd>80){m.x=x;m.y=y;}else if(dd>.5&&m.st!=='dash'){ // a replayed dash moves this copy itself, then it settles on the host's spot
@@ -4888,12 +5107,14 @@ function mobAct(m,b,w,safe){const n=+w[5],sc=w[6],i=+w[7],tl=Math.max(0,+w[8]||0
  m.rN=n;m.ax=Math.cos(ang);m.ay=Math.sin(ang);m.lL=+w[10]||m.lL;
  if(sc==='b'){m.st=null;m.tele=0;if(me&&(!safe||m.evt)&&mode!=='dead'&&Math.hypot(P.x-m.x,P.y-m.y)<b.r+14&&seeP(m))hurtPlayer(b.dmg,m.lv,m);return;}
  if(sc==='s'){m.st=null;m.tele=tl;m.rSlam=1;return;}
+ if(sc==='f'){m.st=null;m.tele=0;if(m.type==='trauka'){m.br=tl;m.ba=ang;dragonBreathFx(m);}return;}
  const mv=i===99?{k:'arc',tele:.16,reach:26,arc:1.3,mul:.8,rec:.4,cd:1.3,blk:1}:AIK[m.type]?movesOf(m)[i]:null;
  if(!mv||!(sc==='t'||sc==='d'||sc==='r')){m.st=null;m.tele=0;return;}
  m.mv=mv;m.st=sc==='t'?'tele':sc==='d'?'dash':'rec';m.stT=tl;m.tele=sc==='t'?tl:0;m.hitDone=0;if(sc==='d')m.dsp=mv.k==='leap'?(m.lL||40)/(mv.dashT||.3):mv.dash||120;}
 // follower: run the telegraph, dash and strike the host started, against your own player only
 function mobReplay(m,b,dt,safe){const hurt=(!safe||m.evt)&&mode!=='dead',dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=Math.max(3,b.r-3);
- if(m.rSlam&&m.tele>0){m.tele-=dt;if(m.tele<=0){m.tele=0;m.rSlam=0;shake=Math.max(shake,.3);SFX.slam();if(hurt&&d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}for(let k=0;k<16;k++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:'#8a8f99'});}}return;}
+ if(m.rSlam&&m.tele>0){m.tele-=dt;if(m.tele<=0){m.tele=0;m.rSlam=0;shake=Math.max(shake,.3);SFX.slam();if(hurt&&d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}for(let k=0;k<16;k++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:'#8a8f99'});}
+  if(m.ph>=2)for(let k=0;k<10;k++){const a=k/10*6.283;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*120,vy:Math.sin(a)*120,t:1.4,m,mv:{mul:.35},sp:'rock',a,rep:1});}}return;}
  const mv=m.mv;if(!mv||!m.st)return;
  if(m.st==='tele'){m.stT-=dt;m.tele=Math.max(0,m.stT);if(m.stT>0)return;m.tele=0;
   if(mv.k==='leap'||mv.k==='line'){m.st='dash';m.stT=mv.dashT;m.hitDone=0;m.dsp=mv.k==='leap'?(m.lL||40)/mv.dashT:mv.dash;if(mv.k==='leap')SFX.dodge();return;}
@@ -4946,7 +5167,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
 function netStop(){try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
- if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv'].forEach(i=>$(i).hidden=true);}
+ if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid;netStop();
  (erase?C.eraseAll(['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid]):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
@@ -4981,7 +5202,7 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
 function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF=true; // from now on this tab never saves: the newer tab owns the save (review of #30)
- try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv'].forEach(i=>$(i).hidden=true);
+ try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
 // another Google account on this device (owner request): the chooser opens straight from the click, the new

@@ -67,7 +67,7 @@
       if (tell) send(tell.type, tell.extra);
       d.phase = 'over'; d.since = now();
       lastResult = { duel: d.id, foe: d.foe, handle: d.handle, result: result, why: why, hp: d.hp, foeHp: d.foeHp };
-      emit({ type: 'result', result: result, why: why, handle: d.handle });
+      emit({ type: 'result', result: result, why: why, handle: d.handle, foe: d.foe });
     }
 
     P.on(function (ev) {

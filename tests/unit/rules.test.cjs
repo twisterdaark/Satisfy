@@ -10,7 +10,7 @@ const { net: N } = loadModules('src/net/contracts.js');
 const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')).rules;
 const node = rules.presence.$world.$shard.$uid;
 const firebaseJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'firebase.json'), 'utf8'));
-const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'ol']; // omitted when null/empty is allowed by the client
+const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'ol', 'gd']; // omitted when null/empty is allowed by the client
 
 test('deny by default; presence readable only when signed in, writable only by its owner', () => {
   assert.equal(rules['.read'], false);
@@ -68,7 +68,8 @@ test('position bounds cover the whole map, and the fake uses the same bounds', (
 test('presence is indexed on exactly the children the interest queries order by (U009: x; party)', () => {
   assert.deepEqual(rules.presence.$world.$shard['.indexOn'], ['x', 'party']);
   const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
-  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['party', 't', 'x']);
+  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['party', 'r', 't', 'x']);
+  assert.deepEqual(rules.arena.$season['.indexOn'], ['r'], 'the arena board orders by rating (SAT-ONLINE-053)');
   assert.deepEqual(rules.chat.$world['.indexOn'], ['t'], 'world chat prunes old lines by t (SAT-ONLINE-026)');
   // the radius must cover the screen after a full re-centre step: |offset| <= step, half screen = W / 2
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
@@ -112,7 +113,7 @@ test('inbox: only the owner reads and deletes; senders create write-once message
   const { pvp: PV } = loadModules('src/net/contracts.js', 'src/net/pvp.js');
   assert.deepEqual(types.filter((x) => x.startsWith('pvp.')), [...PV.TYPES], 'every pvp message can travel');
   assert.match(msg.payload['.validate'], /beginsWith\('pvp\.'\) && newData\.hasChild\('k'\) && !newData\.hasChild\('party'\) && !newData\.hasChild\('duel'\) && !newData\.hasChild\('raid'\) && !newData\.hasChild\('text'\)/);
-  assert.equal(node.ol['.validate'], 'newData.val() === 1', 'the outlaw mark is 1 or absent');
+  assert.equal(node.ol['.validate'], 'newData.val() === 1 || newData.val() === 2', 'the outlaw mark is 1, 2 (a murderer: SAT-ONLINE-052) or absent');
   // SAT-ONLINE-039: trade asks carry only the trade id
   const { trade: TR } = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/trade.js');
   assert.deepEqual(types.filter((x) => x.startsWith('trade.')), [...TR.TYPES], 'every trade message can travel');
@@ -170,6 +171,79 @@ test('trades: participants only; each writes its own offer until the swap; the s
   assert.match(led['.write'], /\(!data\.exists\(\) \|\| data\.child\('o'\)\.val\(\) === /, "only away from the item's recorded owner");
   assert.match(led['.write'], /\.child\('it'\)\.child\(\$iid\)\.exists\(\)/, 'only an item its giver offered');
   for (const n of [tr, sides.$uid, done, led]) assert.equal(n.$other['.validate'], false);
+});
+
+test('guilds: a founder makes one guild with a unique name; joining needs an invitation; ranks decide kicks and promotions', () => {
+  const g = rules.guilds.$gid, nm = rules.guildNames.$nk, mem = rules.guildMembers.$gid, m = mem.$uid, inv = rules.guildInv.$uid;
+  const { guild: GU } = loadModules('src/net/guild.js');
+  assert.equal(rules.guilds['.read'], 'auth != null');
+  assert.match(g['.write'], /!data\.exists\(\) && \$gid === 'g_' \+ auth\.uid/, 'a new guild is the founder\'s own id');
+  assert.match(g['.write'], /data\.child\('master'\)\.val\(\) === auth\.uid/, 'only its master changes or removes it');
+  assert.match(g['.validate'], /newData\.child\('nk'\)\.val\(\) === newData\.child\('name'\)\.val\(\)\.toLowerCase\(\)/);
+  assert.match(g['.validate'], /child\('guildNames'\)\.child\(newData\.child\('nk'\)\.val\(\)\)\.val\(\) === \$gid/, 'written with its name entry');
+  assert.equal(g.name['.validate'], 'newData.isString() && newData.val().length >= ' + GU.C.NAME_MIN + ' && newData.val().length <= ' + GU.C.NAME_MAX);
+  assert.match(nm['.write'], /!data\.exists\(\) && newData\.val\(\) === 'g_' \+ auth\.uid/, 'a name is taken once');
+  assert.equal(mem['.write'], "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid", 'the master removes all members (disband)');
+  assert.match(m['.write'], /newData\.child\('rk'\)\.val\(\) === 'r' && root\.child\('guildInv'\)\.child\(\$uid\)\.child\(\$gid\)\.exists\(\)/, 'join as a member, only while invited');
+  assert.match(m['.write'], /newData\.child\('rk'\)\.val\(\) === data\.child\('rk'\)\.val\(\)/, 'nobody changes their own rank');
+  assert.match(m['.write'], /data\.child\('rk'\)\.val\(\) !== 'm'\)/, 'the master does not just leave');
+  assert.match(m['.write'], /data\.child\('rk'\)\.val\(\) === 'r' && root\.child\('guildMembers'\)\.child\(\$gid\)\.child\(auth\.uid\)\.child\('rk'\)\.val\(\) === 'o'/, 'an officer kicks members only');
+  assert.match(m.rk['.validate'], /newData\.val\(\) === 'm' && \$uid === auth\.uid && \$gid === 'g_' \+ auth\.uid/, 'the only master is the founder');
+  assert.equal(inv['.read'], 'auth != null && auth.uid === $uid', 'your invitations are yours to read');
+  assert.match(inv.$gid['.write'], /=== 'm' \|\| .*=== 'o'\)/, 'masters and officers invite');
+  assert.equal(inv.$gid.by['.validate'], 'newData.val() === auth.uid');
+  for (const n of [g, m, inv.$gid]) assert.equal(n.$other['.validate'], false);
+  assert.equal(node.gd['.validate'], "newData.isString() && newData.val().matches(/" + GU.GID_RE.source + "/)", 'presence gd: a guild id');
+  // SAT-ONLINE-050: the vault; taking writes guildVaultTaken once, so one player gets a thing
+  const gv = rules.guildVault.$gid, gt = rules.guildVaultTaken.$gid;
+  assert.equal(gv['.read'], "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()");
+  assert.match(gv.$vid['.write'], /!data\.exists\(\) && newData\.child\('by'\)\.val\(\) === auth\.uid/, 'a member puts things in as itself');
+  assert.match(gv.$vid['.write'], /=== 'o'\) \|\| data\.child\('by'\)\.val\(\) === auth\.uid\)/, 'the master and officers take out, a member its own');
+  assert.match(gt.$vid['.write'], /!data\.exists\(\) && newData\.child\('by'\)\.val\(\) === auth\.uid && root\.child\('guildVault'\)\.child\(\$gid\)\.child\(\$vid\)\.exists\(\)/, 'once per thing');
+  assert.equal(gv.$vid.it['.validate'], rules.tradeSides.$tid.$uid.it.$iid['.validate'].replace(/^\$iid\.matches\([^)]*\) && /, ''), 'an item as plain values, as in trades');
+  // SAT-ONLINE-049: guild chat, members only
+  const gc = rules.guildChat.$gid;
+  assert.equal(gc['.read'], "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()");
+  assert.match(gc.$id['.write'], /root\.child\('guildMembers'\)\.child\(\$gid\)\.child\(auth\.uid\)\.exists\(\) && \(\(!data\.exists\(\) && newData\.child\('from'\)\.val\(\) === auth\.uid\)/);
+  assert.equal(gc.$id.h['.validate'], rules.chat.$world.$id.h['.validate'], 'the sender is its account ID, as in world chat');
+  assert.equal(gc.$id.text['.validate'], rules.chat.$world.$id.text['.validate']);
+});
+
+test('drops: the dropper writes it; one claim per drop, others after 2 s and within 60 s; the claimant or the dropper clears it', () => {
+  const d = rules.drops.$did, c = rules.dropClaims.$did;
+  assert.equal(rules.drops['.read'], 'auth != null');
+  assert.match(d['.write'], /!data\.exists\(\) && newData\.child\('o'\)\.val\(\) === auth\.uid/, 'written once by the dropper');
+  assert.match(d['.write'], /root\.child\('dropClaims'\)\.child\(\$did\)\.child\('by'\)\.val\(\) === auth\.uid/, 'the claimant clears it');
+  assert.match(d['.write'], /now > data\.child\('t'\)\.val\(\) \+ 120000/, 'anyone clears a stale one');
+  assert.equal(d.x['.validate'], node.x['.validate'], 'x bounds as presence');
+  assert.equal(d.y['.validate'], node.y['.validate'], 'y bounds as presence');
+  assert.equal(d.it['.validate'], 'newData.isString() && newData.val().length <= 600', 'an item as plain values, as in trades');
+  assert.match(c['.write'], /!data\.exists\(\) && newData\.child\('by'\)\.val\(\) === auth\.uid && root\.child\('drops'\)\.child\(\$did\)\.exists\(\)/, 'one claim, on a drop that is there');
+  assert.match(c['.write'], /now < root\.child\('drops'\)\.child\(\$did\)\.child\('t'\)\.val\(\) \+ 60000/, 'within its 60 s');
+  assert.match(c['.write'], /now > root\.child\('drops'\)\.child\(\$did\)\.child\('t'\)\.val\(\) \+ 2000/, 'others after 2 s');
+  for (const n of [d, c]) assert.equal(n.$other['.validate'], false);
+});
+
+test('bounties: set by anyone but the target; claimed once, by whoever the target\'s own kill record names, for a kill after the bounty', () => {
+  const b = rules.bounties.$bid, pd = rules.bountyPaid.$bid, k = rules.kills.$v.$kid;
+  assert.match(b['.write'], /!data\.exists\(\) && newData\.child\('by'\)\.val\(\) === auth\.uid && newData\.child\('tu'\)\.val\(\) !== auth\.uid/);
+  assert.match(b['.write'], /child\('bountyPaid'\)\.child\(\$bid\)\.child\('by'\)\.val\(\) === auth\.uid/, 'removed by its claim in the same update');
+  assert.equal(k['.write'], 'auth != null && $v === auth.uid && (!data.exists() || !newData.exists())', 'only the victim writes its kill record');
+  assert.match(pd['.write'], /!data\.exists\(\) && newData\.child\('by'\)\.val\(\) === auth\.uid/, 'once');
+  assert.match(pd['.write'], /\.child\('k'\)\.val\(\) === auth\.uid/, 'the target named the claimer');
+  assert.match(pd['.write'], /\.child\('t'\)\.val\(\) > root\.child\('bounties'\)\.child\(\$bid\)\.child\('t'\)\.val\(\)/, 'a kill after the bounty');
+  assert.match(pd['.validate'], /newData\.child\('g'\)\.val\(\) === root\.child\('bounties'\)\.child\(\$bid\)\.child\('g'\)\.val\(\)/, 'the gold the bounty says');
+  for (const n of [b, pd, k]) assert.equal(n.$other['.validate'], false);
+});
+
+test('arena seasons: your own rating only; a first entry near 1000; then one win or loss and at most 64 points a write', () => {
+  const a = rules.arena.$season, u = a.$uid;
+  assert.equal(a['.validate'], "$season.matches(/^s20[0-9]{4}$/)");
+  assert.equal(u['.write'], 'auth != null && auth.uid === $uid');
+  assert.match(u['.validate'], /newData\.child\('r'\)\.val\(\) >= 936 && newData\.child\('r'\)\.val\(\) <= 1064/, 'a first entry is 1000 +- 64');
+  assert.match(u['.validate'], /newData\.child\('w'\)\.val\(\) === data\.child\('w'\)\.val\(\) \+ 1 && newData\.child\('l'\)\.val\(\) === data\.child\('l'\)\.val\(\)/);
+  assert.match(u['.validate'], /newData\.child\('r'\)\.val\(\) >= data\.child\('r'\)\.val\(\) - 64 && newData\.child\('r'\)\.val\(\) <= data\.child\('r'\)\.val\(\) \+ 64/);
+  assert.equal(u.$other['.validate'], false);
 });
 
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing

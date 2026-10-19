@@ -88,6 +88,14 @@ for (const mode of ['local', 'online']) {
         assert.deepEqual(await b.eval(() => window.__fakeRTDB.rejected), []);
         const types = await a.eval(() => [...new Set(window.__fakeRTDB.log.filter((l) => l.op === 'push').map((l) => l.path.split('/')[0]))]);
         assert.deepEqual(types, ['inbox']);
+        // SAT-ONLINE-053: the duel counts in this month's arena season: 1000 each before, +-16 after (Elo, K 32)
+        await until(a, () => window.__GR.mine().then((v) => !!v), 8000).catch(() => {});
+        for (let i = 0; i < 40; i++) { const ok = (await a.eval(() => window.__GR.mine())) && (await b.eval(() => window.__GR.mine())); if (ok) break; await settle(a, b); }
+        assert.deepEqual(await a.eval(() => window.__GR.mine().then((v) => [v.r, v.w, v.l])), [1016, 1, 0]);
+        assert.deepEqual(await b.eval(() => window.__GR.mine().then((v) => [v.r, v.w, v.l])), [984, 0, 1]);
+        assert.deepEqual(await b.eval(() => window.__GR.top().then((v) => v.map((x) => [x.n, x.r]))), [['Grid', 1016], ['Faker', 984]], 'the board, best first (names: the account ID, else the character)');
+        assert.match(await b.eval(() => window.__GR.season()), /^s20\d{4}$/);
+        assert.deepEqual(await a.eval(() => window.__fakeRTDB.rejected), [], 'the ratings pass the rules');
       }
       assert.deepEqual(a.errors, []);
       assert.deepEqual(b.errors, []);

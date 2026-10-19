@@ -129,6 +129,7 @@
       if (pp.role === undefined) pp.role = null;
       if (pp.rs === undefined) pp.rs = null;
       if (pp.ol === undefined) pp.ol = null;
+      if (pp.gd === undefined) pp.gd = null;
       if (typeof pp.t !== 'number') pp.t = 0;
       return { v: 1, type: 'presence.state', requestId: null, sessionId: pp.sid, seq: +v.seq || 0, tick: 0, payload: pp };
     }
@@ -373,9 +374,121 @@
     };
   }
 
+  // SAT-ONLINE-046: guilds (src/net/guild.js has the flow and the paths). Every write is one update at the root, so a new
+  // guild and its name, or a join and the used-up invitation, go in together or not at all.
+  function guildStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, SV = function () { return D.serverTimestamp(); };
+    var at = function (p) { return D.ref(db, p); };
+    var up = function (u) { return D.update(D.ref(db), u); };
+    var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
+    var member = function (m) { return { rk: m.rk, n: String(m.n || '').slice(0, 24), c: Math.max(0, Math.floor(+m.c || 0)), on: SV() }; };
+    return {
+      watchInv: function (uid, cb) { return watch('guildInv/' + uid, cb); },
+      watchGuild: function (gid, cb) { return watch('guilds/' + gid, cb); },
+      watchMembers: function (gid, cb) { return watch('guildMembers/' + gid, cb); },
+      create: function (gid, uid, g, m) {
+        var u = {};
+        u['guilds/' + gid] = { name: g.name, nk: g.nk, master: uid, col: g.col, t: SV() };
+        u['guildNames/' + g.nk] = gid;
+        u['guildMembers/' + gid + '/' + uid] = member(m);
+        return up(u);
+      },
+      invite: function (uid, gid, v) { var u = {}; u['guildInv/' + uid + '/' + gid] = { n: v.n, by: v.by, byN: String(v.byN || '').slice(0, 24), t: SV() }; return up(u); },
+      uninvite: function (uid, gid) { return D.remove(at('guildInv/' + uid + '/' + gid)); },
+      join: function (gid, uid, m) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(m); u['guildInv/' + uid + '/' + gid] = null; return up(u); },
+      leave: function (gid, uid) { return D.remove(at('guildMembers/' + gid + '/' + uid)); },
+      kick: function (gid, uid) { return D.remove(at('guildMembers/' + gid + '/' + uid)); },
+      // the whole entry as it is, with the new rank (the rules let the master change only the rank)
+      setRank: function (gid, uid, rk) {
+        return D.get(at('guildMembers/' + gid + '/' + uid)).then(function (s) {
+          var v = s.val(); if (!v) throw new Error('gone');
+          var u = {}; u['guildMembers/' + gid + '/' + uid] = { rk: rk, n: v.n, c: v.c, on: v.on }; return up(u);
+        });
+      },
+      // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
+      beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; return up(u); },
+      readGuild: function (gid) { return D.get(at('guilds/' + gid)).then(function (s) { return s.val(); }); },
+      readMember: function (gid, uid) { return D.get(at('guildMembers/' + gid + '/' + uid)).then(function (s) { return !!s.val(); }); },
+      // SAT-ONLINE-050: the vault; taking writes guildVaultTaken once in the same update, so one player gets a thing
+      watchVault: function (gid, cb) { return watch('guildVault/' + gid, cb); },
+      deposit: function (gid, vid, e) {
+        var u = {}, v = { k: e.k, n: e.n, r: e.r, by: e.by, byN: e.byN, t: SV() }; if (e.it) v.it = e.it;
+        u['guildVault/' + gid + '/' + vid] = v; return up(u);
+      },
+      withdraw: function (gid, vid, uid) { var u = {}; u['guildVault/' + gid + '/' + vid] = null; u['guildVaultTaken/' + gid + '/' + vid] = { by: uid, t: SV() }; return up(u); },
+      // SAT-ONLINE-049: guildChat/{gid}/{id} = {from, h, text, t}; members only. chatOn gets new lines (and those of the
+      // last 5 min); chatSay also clears up to 10 lines older than a day
+      chatOn: function (gid, fn, offset) {
+        var ref = at('guildChat/' + gid), q = D.limitToLast ? D.query(ref, D.limitToLast(20)) : ref;
+        var off = D.onChildAdded(q, function (s) { var m = s.val(); if (!m || typeof m !== 'object' || typeof m.from !== 'string') return; if (typeof m.t === 'number' && Date.now() + (offset ? offset() : 0) - m.t > 300000) return; fn(m); }, function () { /* not a member (any more) */ });
+        return function () { try { off(); } catch (e) { /* ignore */ } };
+      },
+      chatSay: function (gid, m, offset) {
+        var ref = at('guildChat/' + gid);
+        var p = D.push(ref, { from: m.from, h: String(m.h || '').slice(0, 24), text: String(m.text || '').slice(0, 120), t: D.serverTimestamp() });
+        if (D.limitToFirst) D.get(D.query(ref, D.orderByChild('t'), D.endAt(Date.now() + (offset ? offset() : 0) - 86400000), D.limitToFirst(10))).then(function (s) {
+          s.forEach(function (c) { D.remove(at('guildChat/' + gid + '/' + c.key)).catch(function () { /* ignore */ }); });
+        }).catch(function () { /* ignore */ });
+        return p;
+      },
+    };
+  }
+
+  // SAT-ONLINE-048: things dropped on the ground, for 60 s: drops/{did} (the dropper writes it) and dropClaims/{did} (the
+  // first to step on it writes it once; the rules take one claim per drop, so a drop goes to one player only)
+  function dropStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    var up = function (u) { return D.update(D.ref(db), u); };
+    return {
+      put: function (did, v) { var u = {}, o = { o: v.o, x: Math.round(v.x), y: Math.round(v.y), k: v.k, n: v.n, r: v.r, t: D.serverTimestamp() }; if (v.it) o.it = v.it; u['drops/' + did] = o; return up(u); },
+      claim: function (did, uid) { var u = {}; u['dropClaims/' + did] = { by: uid, t: D.serverTimestamp() }; return up(u); },
+      remove: function (did) { return D.remove(at('drops/' + did)); },
+      unclaim: function (did) { return D.remove(at('dropClaims/' + did)); },
+      watch: function (add, gone) {
+        var a = D.onChildAdded(at('drops'), function (s) { add(s.key, s.val()); }), b = D.onChildRemoved(at('drops'), function (s) { gone(s.key); });
+        return function () { try { a(); b(); } catch (e) { /* ignore */ } };
+      },
+    };
+  }
+
+  // SAT-ONLINE-051: bounties on outlaws. bounties/{bid} {by, byN, tu, tN, g, t}; a player killed in open PvP writes
+  // kills/{victim}/{kid} {k: killer, t}; the killer claims with bountyPaid/{bid} {by, kid, g, t}, written once and only
+  // for a kill its target reported after the bounty was set, in the same update that removes the bounty
+  function bountyStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, SV = function () { return D.serverTimestamp(); };
+    var up = function (u) { return D.update(D.ref(db), u); };
+    return {
+      watch: function (cb) { var off = D.onValue(at('bounties'), function (s) { cb(s.val() || {}); }, function () { cb({}); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      post: function (bid, v) { var u = {}; u['bounties/' + bid] = { by: v.by, byN: String(v.byN || '').slice(0, 24), tu: v.tu, tN: String(v.tN || '').slice(0, 24), g: v.g, t: SV() }; return up(u); },
+      cancel: function (bid) { return D.remove(at('bounties/' + bid)); },
+      killed: function (victim, kid, killer) { var u = {}; u['kills/' + victim + '/' + kid] = { k: killer, t: SV() }; return up(u); },
+      kills: function (victim) { return D.get(at('kills/' + victim)).then(function (s) { return s.val() || {}; }); },
+      claim: function (bid, kid, g, uid) { var u = {}; u['bountyPaid/' + bid] = { by: uid, kid: kid, g: g, t: SV() }; u['bounties/' + bid] = null; return up(u); },
+    };
+  }
+
+  // SAT-ONLINE-053: ranked arena seasons, arena/{season}/{uid} = {r, w, l, n, t}
+  function arenaStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    return {
+      get: function (season, uid) { return D.get(at('arena/' + season + '/' + uid)).then(function (s) { return s.val(); }); },
+      put: function (season, uid, v) { var u = {}; u['arena/' + season + '/' + uid] = { r: v.r, w: v.w, l: v.l, n: String(v.n || '').slice(0, 24), t: D.serverTimestamp() }; return D.update(D.ref(db), u); },
+      // the top `n` by rating (the fake has no limitToLast: then everything, sorted here)
+      top: function (season, n) {
+        var ref = at('arena/' + season), q = D.limitToLast && D.orderByChild ? D.query(ref, D.orderByChild('r'), D.limitToLast(n)) : ref;
+        return D.get(q).then(function (s) { var v = s.val() || {}, a = []; for (var k in v) if (v[k] && typeof v[k].r === 'number') a.push({ uid: k, r: v[k].r, w: v[k].w | 0, l: v[k].l | 0, n: String(v[k].n || '?') }); a.sort(function (x, y) { return y.r - x.r; }); return a.slice(0, n); });
+      },
+    };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
     tradeStore: tradeStore,
+    guildStore: guildStore,
+    dropStore: dropStore,
+    bountyStore: bountyStore,
+    arenaStore: arenaStore,
     SDK_VERSION: SDK_VERSION,
     load: load,
     lease: lease,
