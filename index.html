@@ -2856,6 +2856,29 @@ function spawnSquad(T,n,by){const out=[],b=MT.gsold;for(let i=0;i<n;i++){const a
    castle and each territory lives at world/satisfy/own/{castle|territory}: {g guild id, n its name, c colour, h the ID of the
    player who took it, t}. Everyone reads it and draws the same flag and name; the capture also goes out as world news.
    Without the rules for it (or offline) each player keeps their own record as before. */
+/* one legendary class per world, online (SAT-ONLINE-054; plan doc D2): Pagma's, Braham's and Muller's Successor (the
+   Sword Saint) were one per world only on your own device (WS.legends). Online the record is world/satisfy/legends/{k}
+   {uid, n, t}: taking the class writes it first, and the rules take it once, so two players can't both become the same
+   legend; everyone's WS.legends follows the database (the shrines, the rankings clerk's list, "already taken by ...").
+   A legend taken offline is put online the first time its owner plays online, if it is still free. Offline nothing
+   changes. */
+Object.assign(STR.ar,{legTaken:'الأسطورة دي خدها {n} قبلك'});Object.assign(STR.en,{legTaken:'{n} took this legend before you'});
+let LEGS=null,legOff=null,legW=null;const LEGK={pagma:'pagma',braham:'braham',muller:'saint'}; // record key -> class
+function legOnline(){return !!(FB&&netUser&&NET&&NETTR&&NETTR.kind==='firebase');}
+function legSub(){if(legOff||!legOnline()||!WS)return;const D=FB.m.database;if(!D.onValue){legOff=1;return;}
+ try{legOff=D.onValue(D.ref(FB.db,'world/satisfy/legends'),s=>{LEGS=s.val()||{};legApply();},()=>{LEGS=null;});}catch(e){legOff=1;}}
+function legClaim(k){const D=FB.m.database,u={};u['world/satisfy/legends/'+k]={uid:NET.uid,n:String(netId||S.look.n||'?').slice(0,24),t:D.serverTimestamp()};return D.update(D.ref(FB.db),u);}
+function legApply(){if(!LEGS||!WS||!S||S.__demo||!NET)return;legW=WS;const L=WS.legends||(WS.legends={});
+ for(const k in LEGK){const v=LEGS[k];
+  if(v&&typeof v.uid==='string')L[k]={pid:v.uid===NET.uid?pidOf():'u:'+v.uid,n:Satisfy.chat.clean(v.n,24)||'?'};
+  else if(L[k]&&L[k].pid===pidOf()){if(S.cls===LEGK[k])legClaim(k).catch(()=>{});} // ours from offline: online now, if still free
+  else if(L[k])delete L[k];}} // freed online
+function legTick(){if(!legOff&&legOnline())legSub();if(LEGS&&legW!==WS)legApply();}
+// taking a legendary class online: the database record first (once per world), then the class itself
+function legWrap(k,f){return function(...a){if(!legOnline()||!S||S.__demo)return f.apply(this,a);const L=WS.legends||{};if(L[k]&&L[k].pid!==pidOf())return f.apply(this,a); // f says it is taken
+ legClaim(k).then(()=>{(WS.legends||(WS.legends={}))[k]={pid:pidOf(),n:netId||S.look.n};f.apply(this,a);},()=>{const v=LEGS&&LEGS[k];SFX.deny();toast(t('legTaken',{n:v?Satisfy.chat.clean(v.n,24)||'?':'?'}),'warn');});};}
+becomePagma=legWrap('pagma',becomePagma);becomeBraham=legWrap('braham',becomeBraham);becomeSaint=legWrap('muller',becomeSaint);
+window.__GL={become:k=>({pagma:becomePagma,braham:becomeBraham,muller:becomeSaint})[k](),legends:()=>WS&&WS.legends,db:()=>LEGS,apply:()=>legApply()}; // test hook
 const OWNG={};let OWN=null,ownOff=null;
 function ownSub(){if(ownOff||!FB||!netUser||!NET||!WS)return;const D=FB.m.database;if(!D.onValue){ownOff=1;return;}
  try{ownOff=D.onValue(D.ref(FB.db,'world/satisfy/own'),s=>{OWN=s.val()||{};ownApply();},()=>{OWN=null;});}catch(e){ownOff=1;}}
@@ -4312,6 +4335,7 @@ function netTick(){NET.tick();const live=netLive();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
  if(TRADE)TRADE.tick();
+ legTick();
  if(GUILD)guildTick();
  if(PRAID)PRAID.tick();
  mobTick(live);

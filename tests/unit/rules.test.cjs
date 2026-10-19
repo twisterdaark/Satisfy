@@ -246,6 +246,15 @@ test('arena seasons: your own rating only; a first entry near 1000; then one win
   assert.equal(u.$other['.validate'], false);
 });
 
+test('legends (SAT-ONLINE-054): a legend is taken once, then only its holder changes or frees it', () => {
+  const L = rules.world.$world.legends, k = L.$k;
+  assert.equal(L['.read'], 'auth != null');
+  assert.match(k['.write'], /!data\.exists\(\) && newData\.child\('uid'\)\.val\(\) === auth\.uid/);
+  assert.match(k['.write'], /data\.exists\(\) && data\.child\('uid'\)\.val\(\) === auth\.uid/);
+  assert.equal(k.uid['.validate'], 'newData.val() === auth.uid');
+  assert.equal(k.$other['.validate'], false);
+});
+
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing
 // else here parses the expressions. Merging two rules files by hand once lost one; check every expression before a deploy.
 function exprProblem(e) {
