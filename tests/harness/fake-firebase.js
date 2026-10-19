@@ -22,6 +22,7 @@
   const snap = (p, v) => ({ key: keyOf(p), val: () => clone(v) });
   const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => (b + 256).toString(16).slice(1)).join('');
 
+  let helloAt = 0;
   const valueCbs = new Map(); // exact path -> callbacks (onValue on a data path)
   // old/v: the child before and after (undefined = absent). A child listener sees the child through
   // its query (l.match): entering the query is 'added', leaving it 'removed', changing inside it
@@ -257,7 +258,11 @@
       return Promise.resolve();
     },
     // one-shot read: the exact node, or its direct children as an object (enough for the cloud index)
+    // the server answers reads with everything stored; here the other pages' copies arrive as hello replies, so a read
+    // right after loading waits for them (otherwise a reload could read accountIds before they came back)
     get: (r) => {
+      const wait = helloAt + 150 - Date.now();
+      if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs'].includes(seg[0]) ? !!user : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
       F.log.push({ op: 'get', path: r.path });
@@ -326,5 +331,5 @@
   };
   const app = { initializeApp: (cfg, name) => { F.config = cfg; return { name }; } };
 
-  window.__SATISFY_FIREBASE_LOADER__ = (ver) => { F.sdkVersion = ver; ch.postMessage({ op: 'hello' }); return Promise.resolve({ app, auth, database }); };
+  window.__SATISFY_FIREBASE_LOADER__ = (ver) => { F.sdkVersion = ver; ch.postMessage({ op: 'hello' }); helloAt = Date.now(); return Promise.resolve({ app, auth, database }); };
 })();
