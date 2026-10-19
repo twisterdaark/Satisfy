@@ -3408,7 +3408,7 @@ window.__G.defs=Satisfy.local.defs;
 // Other players come from Satisfy.presence over a transport; nothing here changes offline play.
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
 let NET=null,netPrev=null,netSig='',netDrawn=0;
-const NET_LIVE=['play','inv','status','equip','dialog','forge','log','map','dead','cut','pause'];
+const NET_LIVE=['play','inv','status','equip','dialog','forge','log','map','dead','cut','pause','qd','gname','controls','enhfx','lang']; // every screen of a running game (a quest open, the guild-name box, controls, an enhancement) still is in the world
 function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
 function netTick(){NET.tick();const live=Satisfy.local.inGame()&&NET_LIVE.includes(mode);
  if(live)NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0}));
