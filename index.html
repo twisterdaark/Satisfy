@@ -512,6 +512,9 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
 <script src="sprites-original/minimap.js"></script>
 <!-- Engine modules (classic scripts so the game still runs from file://). See docs/api/ENGINE_API.md -->
 <script src="src/core/storage.js"></script>
+<script src="src/core/ids.js"></script>
+<script src="src/core/state.js"></script>
+<script src="src/core/events.js"></script>
 <script src="src/net/contracts.js"></script>
 <script src="src/net/presence.js"></script>
 <script src="src/net/transport-local.js"></script>
@@ -1827,8 +1830,20 @@ const SLOT=/^[A-Za-z0-9_-]{1,16}$/.test(QS.get('slot')||'')?QS.get('slot'):null;
 const STORE=(()=>{let ls=null;try{ls=localStorage;}catch(e){}return Satisfy.storage.create(ls,{slot:SLOT});})();
 // WS (guilds, territories, legends; SAT-GUILD-001) is saved next to S and P, as on main.
 // P is saved trimmed, at the tower/arena return point while inside one (as on main)
-function save(quiet){if(!S||S.__demo)return;const sp=TWR?TWR.ret:ARN?ARN.ret:P;if(STORE.write(S,{x:sp.x,y:sp.y,hp:P.hp,st:P.st,mp:P.mp,food:P.food},{WS})&&!quiet)toast(t('saved'));}
+function save(quiet){if(!S||S.__demo)return;const sp=TWR?TWR.ret:ARN?ARN.ret:P;Satisfy.ids.ensure(S);if(STORE.write(S,{x:sp.x,y:sp.y,hp:P.hp,st:P.st,mp:P.mp,food:P.food},{WS})&&!quiet)toast(t('saved'));}
 function hasSave(){return STORE.exists();}
+// Stable ids and domain events (SAT-ONLINE-005, doc §05 R0.4/R0.5; src/core/ids.js, state.js, events.js).
+// S.pid (the character id Claude-B's guilds already use) and item.iid are assigned at the first save or load; kills, crafts and quest claims are reported
+// as events with a request id and an idempotency key (DEVT; EV is the world-event clock). Nothing reads them for gameplay yet.
+const DEVT=Satisfy.events.create({uuid:Satisfy.ids.uuid,pid:()=>S&&!S.__demo?S.pid:null,now:()=>S?S.playT:0});
+function gameEv(type,payload,key){if(!S||S.__demo)return null;try{if(!S.pid)Satisfy.ids.ensure(S);return DEVT.emit(type,payload,key==null?null:S.pid+':'+key);}catch(e){return null;}}
+// called from qEvent(): kills and crafts become monster.kill / craft.item.created
+function domainEv(type,key,r,slot){try{if(type==='kill'){const n=S.kills[key]||0;gameEv('monster.kill',{monster:key,n},'kill:'+key+':'+n);}
+ else if(type==='craft'){if(slot==='x'){gameEv('craft.item.created',{recipe:key,r,slot,itemId:null},'craft:arrows:'+S.arrowsMade);return;}
+  const it=S.items.reduce((a,i)=>i.id===key&&(!a||i.uid>a.uid)?i:a,null);if(!it)return;Satisfy.ids.ensure(S);gameEv('craft.item.created',{recipe:key,r,slot,itemId:it.iid},'craft:item:'+it.uid);}}catch(e){}}
+// A quest reward is paid once: the quest must still be active and ready when the turn-in callback runs
+// (a second click, or materials sold while the dialog was open, used to pay again or go negative).
+function claimQ(id){const q=QD[id];if(!q||!qReady(id))return false;gameEv('quest.reward.claimed',{quest:id,gold:q.gold||0,xp:q.xp||0,item:q.item||null,cls:q.cls||null},q.rep?null:'claim:'+id);return true;}
 // A save that cannot be loaded, or one from another schema or map layout, is copied to a backup key
 // before anything can write over it (the autosave runs every 20 s).
 function load(){const r=STORE.read(),SCH=Satisfy.storage.SCHEMA;
@@ -1841,7 +1856,7 @@ function load(){const r=STORE.read(),SCH=Satisfy.storage.SCHEMA;
  // map widened with gaps (SAT-CONTENT-002): outdoor x shifts east of each gap
  if((S.wv||1)<2){S.wv=2;if(P.y<OWH*TS)P.x=wX(P.x/TS)*TS;}
  if(S.wv<3){S.wv=3;if(P.y>=OWH*TS)P.y+=SR*TS;}   // SAT-WORLD-003: the south took rows OWH..WMH-1, interiors and caves moved down SR rows
- S.bqa=S.bqa||{};for(const id in S.bqa)regBQ(S.bqa[id]);(S.bq||[]).forEach(regBQ);if(S.cls!=='smith'){S.bonus=0;S.got={};S.patience=0;if(S.tl.smith){delete S.tl.smith;if(S.title==='smith')S.title='';}}S.vis=S.vis||{zWin:1};buildMe(S.look);return true;}catch(e){STORE.backup('corrupt',r.raw);return false;}}
+ S.bqa=S.bqa||{};for(const id in S.bqa)regBQ(S.bqa[id]);(S.bq||[]).forEach(regBQ);if(S.cls!=='smith'){S.bonus=0;S.got={};S.patience=0;if(S.tl.smith){delete S.tl.smith;if(S.title==='smith')S.title='';}}S.vis=S.vis||{zWin:1};buildMe(S.look);Satisfy.ids.ensure(S);DEVT.reset();return true;}catch(e){STORE.backup('corrupt',r.raw);return false;}}
 
 /* ---------------- input ---------------- */
 const K={};
@@ -2163,13 +2178,13 @@ function qCount(id){const o=QD[id].obj,s=S.qs[id];if(!s)return 0;if(o.t==='have'
 const qReady=id=>{const s=S.qs[id];return !!s&&s.st===1&&qCount(id)>=QD[id].obj.n;};
 function qAvail(id){const q=QD[id];return !S.qs[id]&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2)&&(!q.cls||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)));}
 function qObjText(id){const o=QD[id].obj;return t(o.t==='craftR'?'o_craftR':'o_'+o.t,{it:o.t==='deliver'?t(o.it):o.t==='escort'?t('escN_'+o.it):itN(o.it),c:Math.min(qCount(id),o.n),n:o.n});}
-function qEvent(type,key,r,slot){for(const id in S.qs){const s=S.qs[id],q=QD[id];if(!q||s.st!==1)continue;const o=q.obj,was=qReady(id);
+function qEvent(type,key,r,slot){domainEv(type,key,r,slot);for(const id in S.qs){const s=S.qs[id],q=QD[id];if(!q||s.st!==1)continue;const o=q.obj,was=qReady(id);
   if((o.t===type&&o.it===key)||(type==='craft'&&o.t==='craftR'&&r>=1&&slot!=='x')){s.c=(s.c||0)+1;if(!was&&qReady(id)){toast(t('retTo',{w:t(q.by)}),'good');SFX.quest();}}}hudDirty=true;}
 function acceptQ(id){S.qs[id]={st:1,c:0};if(QD[id].obj.t==='escort')setTimeout(()=>startEscort(id),300);toast(t('qNew',{q:qName(id)}),'good');SFX.quest();hudDirty=true;checkSkills();save(true);}
 function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]);S.arrows[r]-=k;n-=k;}}
 function mkItem(id,r){const rc=RC.find(x=>x.id===id);const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.slot==='w'){it.atk=Math.round(rc.atk*MULT[r]);it.spd=rc.spd;}else if(rc.def)it.def=Math.round(rc.def*MULT[r]);
  for(const k of ['as','ms','dm'])if(rc[k])it[k]=+(rc[k]*(1+(MULT[r]-1)*.5)).toFixed(3);if(rc.mpb)it.mpb=Math.round(rc.mpb*MULT[r]);return it;}
-function completeQ(id){if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else S.mats[o.it]-=o.n;}if(o.give)giveItem(o.it);
+function completeQ(id){if(!claimQ(id))return;if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else S.mats[o.it]-=o.n;}if(o.give)giveItem(o.it);
  S.qs[id].st=2;if(q.rep)delete S.qs[id];
  toast(t('qDone',{q:qName(id)}),'good');SFX.quest();
  if(q.gold){S.gold+=q.gold;coinFx(npcOf(q.by),q.gold);}
@@ -3399,7 +3414,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,Math.max(0,
  if(mode==='play'||mode==='forge'||mode==='inv'||mode==='dialog'||mode==='status'||mode==='dead'||mode==='cut'||mode==='equip'||mode==='log'||mode==='map'){hudT-=dt;if(hudT<=0||hudDirty){updateHUD();hudT=.1;hudDirty=false;}saveT+=dt;if(saveT>20&&mode==='play'){saveT=0;save(true);}}
 }
 requestAnimationFrame(loop);
-window.__G={get CARD(){return CARD},get SM(){return SM},get allies(){return allies},get S(){return S},get P(){return P},get mode(){return mode},die:()=>die(),mons:()=>mons,get npcs(){return npcs},nodes,act,finishMG:()=>finishMG,get MG(){return MG},talkNPC:id=>talkNPC(id),completeQ:id=>completeQ(id),acceptQ:id=>acceptQ(id),useSlot:i=>useSlot(i),newGame:L=>newGame(L),QD,openMap:()=>openMap(),get proj(){return proj},gainXP:n=>gainXP(n),openPick:s=>openPick(s),pickOpt:i=>pickOpt(i),advance:()=>advance(),get DL(){return DL},zoneAt,VT,chopped,tryAttack:(a,b)=>tryAttack(a,b),get KB(){return KB},ROOMS,PROPS,enterRoom:r=>enterRoom(r),openBoard:()=>openBoard(),openQD:id=>openQD(id),TOWNS,useProp:p=>useProp(p),at:(x,y)=>at(x,y),setT:(x,y,v)=>setT(x,y,v),eqx:{buyGear:(i,g,w)=>buyGear(i,g,w),equip:i=>equip(i),eqIt:s=>eqIt(s),defV:()=>defV(),atkV:()=>atkV(),atkCD:()=>atkCD(),maxMP:()=>maxMP(),repairAll:w=>repairAll(w),enhance:(i,w)=>enhance(i,w),mkItem:(i,r)=>mkItem(i,r),openEquip:()=>openEquip(),wear:(i,p)=>wear(i,p),openForge:()=>openForge(),price:(w,g)=>price(w,g),addAff:(i,n)=>addAff(i,n),giveGift:(w,k)=>giveGift(w,k),townOfNpc:i=>townOfNpc(i),get ESC(){return ESC},solid:(x,y)=>solidT(x,y),DGATES,DUN,useGate:g=>useGate(g)}};
+window.__G={get CARD(){return CARD},get SM(){return SM},get allies(){return allies},get S(){return S},get P(){return P},get mode(){return mode},die:()=>die(),mons:()=>mons,get npcs(){return npcs},nodes,act,finishMG:()=>finishMG,startMG:id=>startMG(RC.find(r=>r.id===id)),get MG(){return MG},talkNPC:id=>talkNPC(id),completeQ:id=>completeQ(id),acceptQ:id=>acceptQ(id),useSlot:i=>useSlot(i),newGame:L=>newGame(L),QD,openMap:()=>openMap(),get proj(){return proj},gainXP:n=>gainXP(n),openPick:s=>openPick(s),pickOpt:i=>pickOpt(i),advance:()=>advance(),get DL(){return DL},zoneAt,VT,chopped,tryAttack:(a,b)=>tryAttack(a,b),get KB(){return KB},ROOMS,PROPS,enterRoom:r=>enterRoom(r),openBoard:()=>openBoard(),openQD:id=>openQD(id),TOWNS,useProp:p=>useProp(p),at:(x,y)=>at(x,y),setT:(x,y,v)=>setT(x,y,v),eqx:{buyGear:(i,g,w)=>buyGear(i,g,w),equip:i=>equip(i),eqIt:s=>eqIt(s),defV:()=>defV(),atkV:()=>atkV(),atkCD:()=>atkCD(),maxMP:()=>maxMP(),repairAll:w=>repairAll(w),enhance:(i,w)=>enhance(i,w),mkItem:(i,r)=>mkItem(i,r),openEquip:()=>openEquip(),wear:(i,p)=>wear(i,p),openForge:()=>openForge(),price:(w,g)=>price(w,g),addAff:(i,n)=>addAff(i,n),giveGift:(w,k)=>giveGift(w,k),townOfNpc:i=>townOfNpc(i),get ESC(){return ESC},solid:(x,y)=>solidT(x,y),DGATES,DUN,useGate:g=>useGate(g)}};
 // Read-only engine surface for the online layer and for content tests. Contract: docs/api/ENGINE_API.md
 const plain=o=>JSON.parse(JSON.stringify(o,(k,v)=>typeof v==='function'?{$fn:String(v)}:v));
 Satisfy.local=Object.freeze({api:1,
@@ -3411,6 +3426,9 @@ Satisfy.local=Object.freeze({api:1,
  inGame:()=>!!S&&!S.__demo,
  playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,zone:zoneAt(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null}),
  backups:()=>STORE.backups(),
+ profile:()=>!S||S.__demo?null:Satisfy.state.profileOf(S),
+ events:()=>DEVT.log(),
+ onEvent:fn=>DEVT.on(fn),
  net:()=>NET?{mode:NETQ,state:netState,uid:NET.uid,sid:NET.sid,count:NET.count(),drawn:netDrawn,remotes:NET.remotes(),stats:NET.stats(),
   party:PARTY?{id:PARTY.id(),leader:PARTY.leader(),members:PARTY.members(),invite:PARTY.pendingInvite()}:null}:null});
 window.__G.defs=Satisfy.local.defs;
