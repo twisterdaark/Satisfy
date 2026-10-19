@@ -113,6 +113,7 @@
       if (pp.mv === undefined) pp.mv = null;
       if (pp.hp === undefined) pp.hp = null;
       if (pp.em === undefined) pp.em = null;
+      if (pp.role === undefined) pp.role = null;
       if (pp.rs === undefined) pp.rs = null;
       if (typeof pp.t !== 'number') pp.t = 0;
       return { v: 1, type: 'presence.state', requestId: null, sessionId: pp.sid, seq: +v.seq || 0, tick: 0, payload: pp };

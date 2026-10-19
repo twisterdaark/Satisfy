@@ -51,7 +51,7 @@
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
 
-  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'rs', 'seq', 't'];
+  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'rs', 'seq', 't'];
   const POS_X = 16384, POS_Y = 4096; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
   function rules(p, v, existing) {
@@ -83,6 +83,7 @@
     if ('mv' in v && !(typeof v.mv === 'string' && /^[0-9a-f]{8}$/.test(v.mv))) return 'mv';
     if ('hp' in v && !(typeof v.hp === 'number' && v.hp >= 0 && v.hp <= 100)) return 'hp';
     if ('em' in v && !/^(wave|dance|point|cheer)$/.test(v.em)) return 'em';
+    if ('role' in v && !/^(tank|healer|damage|support)$/.test(v.role)) return 'role';
     if ('rs' in v && !(typeof v.rs === 'string' && v.rs.length <= 515 && /^[A-Za-z0-9:_.-]+( [A-Za-z0-9:_.-]+){0,3}$/.test(v.rs))) return 'rs';
     return null;
   }

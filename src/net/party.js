@@ -206,7 +206,7 @@
         P.remotes().forEach(function (r) {
           if (r.party !== id) return;
           if (leader === self ? !accepted.has(r.uid) : false) return;
-          out.push({ uid: r.uid, handle: r.handle, lv: r.lv, leader: r.uid === leader, hp: typeof r.hp === 'number' ? r.hp : null });
+          out.push({ uid: r.uid, handle: r.handle, lv: r.lv, leader: r.uid === leader, hp: typeof r.hp === 'number' ? r.hp : null, role: r.role || null });
         });
         return out;
       },
