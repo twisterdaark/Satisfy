@@ -41,7 +41,7 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 | `profile()` | `{ pid, schema, durable }`: the durable part of the character (see `Satisfy.state`), deep-copied. `null` outside a game. What a cloud profile will hold (doc §23). |
 | `events()` | The last 200 domain events (oldest first), see `Satisfy.events`. In memory only. |
 | `onEvent(fn)` | Calls `fn(event)` for each new domain event; returns an unsubscribe function. |
-| `net()` | `null` offline; with `?net=local` or a signed-in `?net=online`: `{ mode, state, uid, sid, count, drawn, remotes, stats }`. `state` is one of `NET_STATES`. |
+| `net()` | `null` offline; with `?net=local` or a signed-in `?net=online`: `{ mode, state, uid, sid, count, drawn, remotes, stats, party, duel, raid, link, interest }`. `state` is one of `NET_STATES`; `interest` is the Firebase transport's `interest()` (null for `?net=local`). |
 
 Content tables are **source data for SAT-CONTENT-001 parity tests**. They are not an editing
 interface: changing values happens in `data/**` once the engine reads from it (after the split).
@@ -225,7 +225,9 @@ click (§06: no silent writes; U003). In the game: signed in with `?net=online`,
 | `load(config)` | Downloads and initializes once; resolves `{ m, app, auth, db }`. Only called for `?net=online`. |
 | `currentUser(sdk)` | Saved Google session or `null`. |
 | `signIn(sdk)` | Google popup; falls back to redirect when popups are blocked. |
-| `transport(sdk, { uid, world, shard, onConnection?, onError? })` | Same shape as `transports.local`. Writes `presence/{world}/{shard}/{uid}` (nulls omitted, `seq`, `t` = server time), arms `onDisconnect().remove()` on every reconnect, and turns child added/changed/removed into presence envelopes. |
+| `transport(sdk, { uid, world, shard, interest?, onConnection?, onError? })` | Same shape as `transports.local`. Writes `presence/{world}/{shard}/{uid}` (nulls omitted, `seq`, `t` = server time), arms `onDisconnect().remove()` on every reconnect, and turns child added/changed/removed into presence envelopes. With `interest: { radius, step }` (SAT-ONLINE-014, doc U009) it listens only to players whose `x` is within `radius` px of the last published `x` (an `orderByChild('x')` range query, re-centred after moving `step` px); players left outside get a `presence.leave` at once. |
+| `transport.watch(uids)` | Also follow these players wherever they are (the game passes its party members). Replaces the previous list. |
+| `transport.interest()` | `{ radius, centre, watched }`; radius 0 = the whole shard. |
 
 Rules: `backend/database.rules.json` (deploy with `firebase deploy --only database`). Deny by default; presence is readable by signed-in players, each player writes only their own node, every field is validated, and unknown fields are rejected. `tests/unit/rules.test.cjs` keeps the rules, the contract and the test fake in agreement.
 
@@ -270,6 +272,7 @@ await g.close(); await H.closeBrowser();
 - **api 1, fix** (SAT-ONLINE-004 review, #12): the Firebase transport knows a remote session as `uid + '.' + sid` (the uid is the node key the rules verify) and drops nodes whose `uid` isn't their key, so copying someone's `sid` (or a huge `seq`) can't hide or replace them. Rules: presence `y >= -4096` (the north), shard pinned to `main`.
 - **api 1, fix** (SAT-ONLINE-002 review, #10/#23): NET_LIVE: every in-game screen (`qd`, `gname`, `controls`, `enhfx`, `lang` too), so reading a quest neither hides the player nor forfeits a duel; `tests/unit/modes.test.cjs` checks it against every `mode=` in the game.
 - **api 1, fix** (SAT-ONLINE-001 review, #10): `world().y0` = `-NR*TS`, the top edge; `validatePlayerPublic` accepts `y >= world.y0`, so players in the north (negative y) are no longer dropped.
+- **api 1, additive** (SAT-ONLINE-014): interest management (doc U009). Online, presence comes from a range query on `x` (±800 px, re-centred every 400 px) plus each party member's node; `net().interest`, `transport.watch/interest`. Rules add `.indexOn: ["x"]` on `presence/{world}/{shard}` (redeploy; without it the query still works but downloads the whole shard).
 - **api 1, additive** (SAT-ONLINE-013): `PlayerPublic.duel` = `"<duel id>:<duel HP>"` while in a duel's countdown/fight (null otherwise); other players see an HP bar over each duelist and a ring between them (doc U034). Presence + rules field (rules redeploy).
 - **api 1, additive** (SAT-ONLINE-012): `net().link = { rtt, writes, fails }` (Firebase: smoothed ms until the server acknowledges a presence write); the HUD badge tooltip shows link, sent, received and dropped (doc U015, U020).
 - **api 1, additive** (SAT-ONLINE-011): the Firebase transport writes presence in full once per connection, then `update()`s only changed fields (≈3.6× less download, `COST_MODEL.md`). Same database shape and rules.

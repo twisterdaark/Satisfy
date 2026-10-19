@@ -106,15 +106,40 @@
       if (typeof pp.t !== 'number') pp.t = 0;
       return { v: 1, type: 'presence.state', requestId: null, sessionId: pp.sid, seq: +v.seq || 0, tick: 0, payload: pp };
     }
-    function onState(s) { var e = fromSnap(s); if (e) { lastSeq[s.key] = e.seq; deliver(e); } }
-    offs.push(D.onChildAdded(list, onState));
-    offs.push(D.onChildChanged(list, onState));
-    offs.push(D.onChildRemoved(list, function (s) {
-      if (s.key === o.uid) return;
-      var v = s.val() || {};
-      deliver({ v: 1, type: 'presence.leave', requestId: null, sessionId: v.sid ? sidOf(s.key, v.sid) : null, seq: (lastSeq[s.key] || 0) + 1, tick: 0, payload: {} });
-      delete lastSeq[s.key];
-    }));
+    var lastX = {}, lastSid = {};
+    function onState(s) {
+      var e = fromSnap(s);
+      if (!e) return;
+      // a re-centred query lists everyone in range again: don't hand presence a replay it would count as dropped
+      if (lastSid[s.key] === e.sessionId && e.seq <= lastSeq[s.key]) return;
+      lastSeq[s.key] = e.seq; lastX[s.key] = e.payload.x; lastSid[s.key] = e.sessionId;
+      deliver(e);
+    }
+    function leave(key, v) {
+      if (lastSeq[key] == null) return;
+      deliver({ v: 1, type: 'presence.leave', requestId: null, sessionId: lastSid[key] || ((v || {}).sid ? sidOf(key, v.sid) : null), seq: lastSeq[key] + 1, tick: 0, payload: {} });
+      delete lastSeq[key]; delete lastX[key]; delete lastSid[key];
+    }
+    // Interest management (doc U009): with o.interest.radius, listen only to players whose x is within
+    // radius of ours (an RTDB range query, indexed on x), re-centred after moving `step` px. Party members
+    // are watched one by one (watch), so a party survives distance. A player we walk away from is
+    // left behind at once; one who walks out of our range is removed by the query at once.
+    var R = (o.interest && o.interest.radius) || 0, STEP = (o.interest && o.interest.step) || Math.round(R / 2);
+    var cx = null, qOffs = [], watched = {};
+    function outside(key) { return R && cx !== null && !watched[key] && !(Math.abs(lastX[key] - cx) <= R); }
+    function listen(x) {
+      qOffs.forEach(function (off) { try { off(); } catch (e) { /* ignore */ } });
+      qOffs = [];
+      cx = x;
+      Object.keys(lastSeq).forEach(function (k) { if (outside(k)) leave(k, null); });
+      var q = R ? D.query(list, D.orderByChild('x'), D.startAt(Math.max(0, x - R)), D.endAt(x + R)) : list;
+      // a watched player comes through its own listener; the query copy would only be a replay
+      function inQ(s) { if (!watched[s.key]) onState(s); }
+      qOffs.push(D.onChildAdded(q, inQ));
+      qOffs.push(D.onChildChanged(q, inQ));
+      qOffs.push(D.onChildRemoved(q, function (s) { if (s.key !== o.uid && !watched[s.key]) leave(s.key, s.val()); }));
+    }
+    if (!R) listen(0); // whole shard, as before
     offs.push(D.onValue(D.ref(db, '.info/serverTimeOffset'), function (s) { offset = +s.val() || 0; }));
     offs.push(D.onChildAdded(inbox, function (s) {
       var m = s.val();
@@ -151,6 +176,7 @@
             D.update(mine, out).then(acked(t0), onFail);
           }
           sent = v;
+          if (R && (cx === null || Math.abs(v.x - cx) > STEP)) listen(v.x);
         } else if (env.type === 'presence.leave') {
           sent = null;
           D.remove(mine).catch(fail);
@@ -162,9 +188,28 @@
         }
       },
       onmessage: function (fn) { handler = fn; },
+      /** {radius, centre, watched}: what the interest query covers now (radius 0 = the whole shard) */
+      interest: function () { return { radius: R, centre: cx, watched: Object.keys(watched) }; },
+      /** Follow these players wherever they are (party members), on top of the range query. */
+      watch: function (uids) {
+        var want = {};
+        (uids || []).forEach(function (u) { if (u && u !== o.uid) want[u] = 1; });
+        Object.keys(watched).forEach(function (u) {
+          if (want[u]) return;
+          try { watched[u](); } catch (e) { /* ignore */ }
+          delete watched[u];
+          if (outside(u)) leave(u, null); // an ex-member far away: the range query never sees them
+        });
+        Object.keys(want).forEach(function (u) {
+          if (watched[u] || closed) return;
+          var r = D.ref(db, base + '/' + u);
+          watched[u] = D.onValue(r, function (s) { if (s.val()) onState(s); else leave(u, null); });
+        });
+      },
       close: function () {
         if (closed) return;
         closed = true;
+        qOffs.concat(Object.keys(watched).map(function (u) { return watched[u]; })).forEach(function (off) { try { off(); } catch (e) { /* ignore */ } });
         offs.forEach(function (off) { try { off(); } catch (e) { /* ignore */ } });
         D.remove(mine).catch(function () { /* ignore */ });
         handler = null;
@@ -177,6 +222,7 @@
       release: function () {
         if (closed) return;
         closed = true;
+        qOffs.concat(Object.keys(watched).map(function (u) { return watched[u]; })).forEach(function (off) { try { off(); } catch (e) { /* ignore */ } });
         offs.forEach(function (off) { try { off(); } catch (e) { /* ignore */ } });
         try { D.onDisconnect(mine).cancel().catch(function () { /* ignore */ }); } catch (e) { /* ignore */ }
         handler = null;

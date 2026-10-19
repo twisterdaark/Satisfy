@@ -14,7 +14,7 @@
   const pending = new Map();
   let user = null;
   let connected = true;
-  const F = (window.__fakeRTDB = { log: [], rejected: [], data, sdkVersion: undefined, nextName: 'Tester', nextUid: null, popupBlocked: false, redirected: false });
+  const F = (window.__fakeRTDB = { log: [], listens: [], rejected: [], data, sdkVersion: undefined, nextName: 'Tester', nextUid: null, popupBlocked: false, redirected: false });
 
   const parentOf = (p) => p.slice(0, p.lastIndexOf('/'));
   const keyOf = (p) => p.slice(p.lastIndexOf('/') + 1);
@@ -23,13 +23,21 @@
   const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => (b + 256).toString(16).slice(1)).join('');
 
   const valueCbs = new Map(); // exact path -> callbacks (onValue on a data path)
-  function fire(type, p, v) {
-    for (const l of listeners) if (l.type === type && l.parent === parentOf(p)) setTimeout(() => l.cb(snap(p, v)), 0);
-    for (const cb of valueCbs.get(p) || []) setTimeout(() => cb(snap(p, type === 'removed' ? null : v)), 0);
+  // old/v: the child before and after (undefined = absent). A child listener sees the child through
+  // its query (l.match): entering the query is 'added', leaving it 'removed', changing inside it
+  // 'changed', the way RTDB fires child events for a range query.
+  function fire(p, old, v) {
+    for (const l of listeners) {
+      if (l.parent !== parentOf(p)) continue;
+      const was = old !== undefined && l.match(old), is = v !== undefined && l.match(v);
+      const type = was && is ? 'changed' : is ? 'added' : was ? 'removed' : null;
+      if (type === l.type) setTimeout(() => l.cb(snap(p, type === 'removed' ? old : v)), 0);
+    }
+    for (const cb of valueCbs.get(p) || []) setTimeout(() => cb(snap(p, v === undefined ? null : v)), 0);
   }
   function apply(op, p, v) {
-    if (op === 'set') { const had = data.has(p); data.set(p, v); fire(had ? 'changed' : 'added', p, v); }
-    else if (op === 'remove' && data.has(p)) { const old = data.get(p); data.delete(p); fire('removed', p, old); }
+    if (op === 'set') { const old = data.get(p); data.set(p, v); fire(p, old, v); }
+    else if (op === 'remove' && data.has(p)) { const old = data.get(p); data.delete(p); fire(p, old, undefined); }
   }
   ch.onmessage = (e) => {
     if (!connected) return;
@@ -131,11 +139,19 @@
     return null;
   }
 
+  // query(ref, orderByChild(k), startAt(lo), endAt(hi)): numeric range on one child, as RTDB orders it
+  // (a child without a number there sorts before every number, so a range never includes it)
+  function matcher(q) {
+    if (!q || !q.child) return () => true;
+    return (v) => { const x = v && v[q.child]; return typeof x === 'number' && (q.lo == null || x >= q.lo) && (q.hi == null || x <= q.hi); };
+  }
   function listen(type) {
     return (r, cb) => {
-      const l = { type, parent: r.path, cb };
+      const match = matcher(r.q);
+      const l = { type, parent: r.path, cb, match };
       listeners.push(l);
-      if (type === 'added') for (const [p, v] of data) if (parentOf(p) === r.path) setTimeout(() => cb(snap(p, v)), 0);
+      F.listens.push({ path: r.path, type, q: r.q || null });
+      if (type === 'added') for (const [p, v] of data) if (parentOf(p) === r.path && match(v)) setTimeout(() => cb(snap(p, v)), 0);
       return () => { const i = listeners.indexOf(l); if (i >= 0) listeners.splice(i, 1); };
     };
   }
@@ -143,6 +159,10 @@
   const database = {
     getDatabase: (app, url) => { F.databaseURL = url; return {}; },
     ref: (db, path) => ({ path, key: keyOf(path) }),
+    query: (r, ...cs) => ({ path: r.path, key: r.key, q: Object.assign({}, r.q, ...cs) }),
+    orderByChild: (child) => ({ child }),
+    startAt: (lo) => ({ lo }),
+    endAt: (hi) => ({ hi }),
     serverTimestamp: () => SV,
     push: (r, v) => {
       const p = r.path + '/-' + Date.now().toString(36) + rid();
@@ -203,7 +223,9 @@
       if (r.path === '.info/serverTimeOffset') { setTimeout(() => cb(snap(r.path, 0)), 0); return () => {}; }
       if (r.path !== '.info/connected') {
         const seg = r.path.split('/');
-        if (seg[0] !== 'sessions' || !user || seg[1] !== user.uid) throw new Error('fake onValue: unsupported path ' + r.path);
+        const ok = seg[0] === 'sessions' ? user && seg[1] === user.uid : seg[0] === 'presence' && seg.length === 4 && !!user;
+        if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
+        F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);
         valueCbs.get(r.path).push(cb);
         setTimeout(() => cb(snap(r.path, data.has(r.path) ? data.get(r.path) : null)), 0);
