@@ -1,0 +1,117 @@
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { loadModules } = require('../harness/load-module.cjs');
+
+const SN = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/transport-local.js', 'src/net/party.js');
+const WORLD = { id: 'satisfy', tile: 16, w: 160, h: 144 };
+
+function world(n) {
+  const hub = SN.transports.hub();
+  let t = 1000; const now = () => t;
+  const players = [];
+  for (let i = 0; i < n; i++) {
+    const uid = 'u' + i;
+    const pres = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net, uid, sid: 'sess' + i + 'xxxxxxxx' });
+    const party = SN.party.create({ presence: pres, uid, now });
+    const events = [];
+    party.on((e) => events.push(e.type));
+    players.push({ uid, pres, party, events, name: 'P' + i });
+  }
+  const sync = () => {
+    for (const p of players) {
+      const pp = SN.net.toPlayerPublic({ look: { n: p.name }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 },
+        { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id() });
+      p.pres.publish(pp, true);
+    }
+    for (const p of players) { p.pres.tick(); p.party.tick(); }
+  };
+  const advance = (ms) => { t += ms; sync(); };
+  sync();
+  return { players, sync, advance, remote: (from, to) => from.pres.remotes().find((r) => r.uid === to.uid) };
+}
+
+test('invite → accept: both end up in the leader\'s party and see each other as members', () => {
+  const w = world(2), [a, b] = w.players;
+  assert.equal(a.party.invite(w.remote(a, b)), 'sent');
+  assert.equal(a.party.id(), 'p_u0');
+  const inv = b.party.pendingInvite();
+  assert.equal(inv.handle, 'P0');
+  assert.equal(b.party.accept(inv.party), true);
+  w.sync();
+  assert.deepEqual(a.party.members().map((m) => m.uid), ['u0', 'u1']);
+  assert.deepEqual(b.party.members().map((m) => [m.uid, m.leader]), [['u1', false], ['u0', true]]);
+  assert.ok(a.events.includes('joined'));
+  assert.ok(b.events.includes('youJoined'));
+  assert.equal(w.remote(a, b).party, 'p_u0', 'membership travels in presence');
+});
+
+test('decline and invite expiry', () => {
+  const w = world(3), [a, b, c] = w.players;
+  a.party.invite(w.remote(a, b));
+  b.party.decline(b.party.pendingInvite().party);
+  assert.ok(a.events.includes('declined'));
+  w.sync();
+  assert.equal(a.party.id(), null, 'a party with nobody invited or accepted dissolves');
+  a.party.invite(w.remote(a, c));
+  w.advance(SN.party.INVITE_MS + 10);
+  assert.equal(c.party.pendingInvite(), null);
+  assert.equal(c.party.accept('p_u0'), false);
+});
+
+test('only the leader invites; a member cannot pull others into the party', () => {
+  const w = world(3), [a, b, c] = w.players;
+  a.party.invite(w.remote(a, b)); b.party.accept('p_u0'); w.sync();
+  assert.equal(b.party.invite(w.remote(b, c)), 'notLeader');
+  // a forged invite naming someone else's party is ignored
+  b.pres.send('party.invite', { to: 'u2', party: 'p_u0' });
+  assert.equal(c.party.pendingInvite(), null);
+});
+
+test('an accept without an invite is ignored; party size is capped at 5', () => {
+  const w = world(7), [a, ...rest] = w.players;
+  rest[0].pres.send('party.accept', { to: 'u0', party: 'p_u0' });
+  assert.equal(a.party.id(), null);
+  for (const p of rest.slice(0, 4)) { a.party.invite(w.remote(a, p)); p.party.accept('p_u0'); }
+  w.sync();
+  assert.equal(a.party.members().length, 5);
+  assert.equal(a.party.invite(w.remote(a, rest[4])), 'full');
+});
+
+test('a player already in a party auto-declines other invites', () => {
+  const w = world(3), [a, b, c] = w.players;
+  a.party.invite(w.remote(a, b)); b.party.accept('p_u0'); w.sync();
+  assert.equal(c.party.invite(w.remote(c, b)), 'busy', 'b shows a party in presence');
+});
+
+test('kick and leave', () => {
+  const w = world(3), [a, b, c] = w.players;
+  a.party.invite(w.remote(a, b)); b.party.accept('p_u0');
+  a.party.invite(w.remote(a, c)); c.party.accept('p_u0');
+  w.sync();
+  assert.equal(a.party.kick('u1'), true);
+  assert.equal(b.party.id(), null);
+  assert.ok(b.events.includes('kicked'));
+  c.pres.send('party.kick', { to: 'u1', party: 'p_u0' }); // a non-leader kick is ignored
+  c.party.leave(); w.sync();
+  w.advance(SN.party.GRACE_MS + 10);
+  assert.ok(a.events.includes('memberLeft'));
+  assert.equal(a.party.id(), null, 'leader alone again: party dissolved');
+});
+
+test('members follow the leader: party dissolves when the leader disappears', () => {
+  const w = world(2), [a, b] = w.players;
+  a.party.invite(w.remote(a, b)); b.party.accept('p_u0'); w.sync();
+  a.pres.close();
+  w.players.splice(0, 1);
+  w.advance(SN.party.GRACE_MS + 10);
+  assert.equal(b.party.id(), null);
+  assert.ok(b.events.includes('dissolved'));
+});
+
+test('messages addressed to someone else are ignored', () => {
+  const w = world(3), [a, b, c] = w.players;
+  a.party.invite(w.remote(a, b));
+  assert.equal(c.party.pendingInvite(), null);
+  assert.ok(b.party.pendingInvite());
+});

@@ -72,10 +72,13 @@
       if (env.sessionId === sid) return;
       var t = now();
       var r = remotes.get(env.sessionId);
+      // presence and directed messages may travel different paths (Firebase: presence node vs inbox),
+      // so order is only guaranteed within a channel; replay checks are per channel
+      var chan = (env.type === 'presence.state' || env.type === 'presence.leave') ? 'seq' : 'mseq';
       if (r) {
         r.win = r.win.filter(function (x) { return t - x < 1000; });
         if (r.win.length >= cfg.maxPerSec) return drop();
-        if (!(env.seq > r.seq)) return drop(); // replay or out of order
+        if (!(env.seq > r[chan])) return drop(); // replay or out of order
       }
       if (env.type === 'presence.leave') {
         if (r) { remotes.delete(env.sessionId); emit({ type: 'leave', sid: env.sessionId, reason: 'left' }); }
@@ -83,7 +86,7 @@
       }
       if (env.type !== 'presence.state') {
         if (!r) return drop(); // other messages only from players we can see
-        r.win.push(t); r.seq = env.seq;
+        r.win.push(t); r.mseq = env.seq;
         emit({ type: 'message', sid: env.sessionId, env: env });
         return;
       }
@@ -92,7 +95,7 @@
       var fresh = !r;
       if (fresh) {
         if (remotes.size >= cfg.maxRemotes) return drop();
-        r = { sid: env.sessionId, buf: [], win: [], seq: -1 };
+        r = { sid: env.sessionId, buf: [], win: [], seq: -1, mseq: -1 };
         remotes.set(env.sessionId, r);
       }
       r.win.push(t);

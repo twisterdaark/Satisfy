@@ -13,6 +13,7 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 <script src="src/net/contracts.js"></script>  <!-- Satisfy.net -->
 <script src="src/net/presence.js"></script>   <!-- Satisfy.presence (SAT-ONLINE-002) -->
 <script src="src/net/transport-local.js"></script> <!-- Satisfy.transports -->
+<script src="src/net/party.js"></script>      <!-- Satisfy.party (SAT-ONLINE-003) -->
 <script src="src/net/firebase-config.js"></script> <!-- Satisfy.firebaseConfig (public web config) -->
 <script src="src/net/firebase.js"></script>   <!-- Satisfy.firebase (SAT-ONLINE-004), SDK loaded on demand -->
 <script> (()=>{ ...game...; Satisfy.local = Object.freeze({...}) })() </script>
@@ -66,6 +67,7 @@ new ladder step and `SCHEMA + 1`.
 | `NET_STATES`, `canTransition(a, b)` | Connection state machine (doc §25). |
 | `envelope(type, payload, meta)` | `{ v, type, requestId, sessionId, seq, tick, payload }`, max 2048 bytes. |
 | `ERRORS` | `ZONE_SAFE, CD_ACTIVE, OUT_OF_RANGE, SESSION_STALE, RATE_LIMITED, BAD_MESSAGE` |
+| `SAFE_ZONES`, `zonePolicy(zone)` | `['zBai','zWin']`; `{ zone, safe, pvp:false, duel:false }`. The combat authority will reject PvP actions with `ZONE_SAFE` here. |
 
 A *room* here is a presence channel (who you can see), not a house interior. House interiors
 are reported in `PlayerPublic.room` so remote players inside a house are only drawn there.
@@ -88,6 +90,22 @@ Untrusted input is dropped: wrong protocol, invalid or spoofed `PlayerPublic` (`
 Transports (`{ kind, send, onmessage, close }`): `Satisfy.transports.local(name)` (BroadcastChannel, tabs of one browser) and `Satisfy.transports.hub().connect()` (in-memory, tests). The Firebase transport (SAT-ONLINE-004) has the same shape.
 
 In the game: `?net=local` turns it on; remote players are drawn only inside the same house interior (or both outdoors), with their name and look; a badge shows the player count. Use `?slot=a` / `?slot=b` so two tabs don't share one save.
+
+## `Satisfy.party` (SAT-ONLINE-003)
+
+`Satisfy.party.create({ presence, uid, now?, max? })` runs on a presence client. Party id = `'p_' + leaderUid`; max 5.
+
+| Member | Notes |
+|---|---|
+| `invite(remotePlayerPublic)` | `'sent'`, or `'busy'` / `'full'` / `'notLeader'` / `'already'` / `'bad'`. The first invite creates the caller's party. |
+| `pendingInvite()`, `accept(pid)`, `decline(pid)` | Invites expire after 30 s. A player who is already in a party auto-declines. |
+| `leave()`, `kick(uid)` | A leader who leaves removes everyone. Members leave when the leader has been missing for 5 s. |
+| `members()` | Self first, then remotes whose `PlayerPublic.party` matches (the leader counts only players who accepted). |
+| `tick()`, `on(fn)` | Events: `invite, joined, youJoined, declined, left, memberLeft, kicked, dissolved, full`. |
+
+Messages `party.invite|accept|decline|kick` carry `{ to: uid, party }`. They go over BroadcastChannel locally, and through `inbox/{to}` in RTDB: only the recipient reads and deletes, a sender can't fake `from`, and messages older than 60 s are dropped. Until Server Authority a party is cosmetic: it gives no shared XP or loot.
+
+In the game, near another player: `P` invites, `Y`/`N` answers, and the party panel sits under the minimap with a Leave button. Party members' names are green. The badge adds `· Safe zone` in Bairan and Winston.
 
 ## `Satisfy.firebase` (SAT-ONLINE-004)
 
@@ -139,3 +157,4 @@ await g.close(); await H.closeBrowser();
 - **api 1, fix** (SAT-ONLINE-004 review, #12): the Firebase transport knows a remote session as `uid + '.' + sid` (the uid is the node key the rules verify) and drops nodes whose `uid` isn't their key, so copying someone's `sid` (or a huge `seq`) can't hide or replace them. Rules: presence `y >= -4096` (the north), shard pinned to `main`.
 - **api 1, fix** (SAT-ONLINE-002 review, #10/#23): NET_LIVE: every in-game screen (`qd`, `gname`, `controls`, `enhfx`, `lang` too), so reading a quest neither hides the player nor forfeits a duel; `tests/unit/modes.test.cjs` checks it against every `mode=` in the game.
 - **api 1, fix** (SAT-ONLINE-001 review, #10): `world().y0` = `-NR*TS`, the top edge; `validatePlayerPublic` accepts `y >= world.y0`, so players in the north (negative y) are no longer dropped.
+- **api 1, additive** (SAT-ONLINE-003): `Satisfy.party`, `Satisfy.net.zonePolicy/SAFE_ZONES`, `net().party`, the RTDB `inbox/`. Presence now checks replays separately for state and messages.

@@ -62,6 +62,15 @@ test('envelope: versioned and size-limited', () => {
   assert.throws(() => N.envelope('chat', { text: 'x'.repeat(5000) }), /BAD_MESSAGE/);
 });
 
+test('zone policy: Bairan and Winston are safe, nothing allows PvP yet', () => {
+  assert.deepEqual(N.zonePolicy('zWin'), { zone: 'zWin', safe: true, pvp: false, duel: false });
+  assert.deepEqual(N.zonePolicy('zBai'), { zone: 'zBai', safe: true, pvp: false, duel: false });
+  for (const z of ['zPlains', 'zGrave', 'zOrc', '']) {
+    assert.equal(N.zonePolicy(z).safe, false, z);
+    assert.equal(N.zonePolicy(z).pvp, false, z);
+  }
+});
+
 // review fix (#10): on the current map the north (rows -NR..-1) is at negative y
 test('positions above row 0 are inside the world when world.y0 says so', () => {
   const W = { id: 'satisfy', tile: 16, w: 724, h: 184, y0: -960 };

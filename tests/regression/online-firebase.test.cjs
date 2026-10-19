@@ -71,7 +71,7 @@ test('two signed-in players see each other through the database; writes pass the
     assert.equal(na.remotes[0].uid, nb.uid);
     assert.equal(nb.remotes[0].handle, 'Grid');
     assert.equal(na.drawn, 1);
-    assert.equal(await a.eval(() => document.getElementById('netB').textContent), 'Online · players: 2');
+    assert.equal(await a.eval(() => document.getElementById('netB').textContent), 'Online · players: 2 · Safe zone');
     const paths = await a.eval(() => [...new Set(window.__fakeRTDB.log.map((l) => l.path))]);
     assert.deepEqual(paths, ['presence/satisfy/main/' + na.uid]);
     assert.deepEqual((await fake(a)).rejected, []);
@@ -103,7 +103,7 @@ test('a dropped connection removes the player for others and comes back on recon
     await settle(a, b);
     assert.equal((await net(a)).count, 0, 'server ran onDisconnect');
     assert.equal((await net(b)).state, 'RECONNECTING');
-    assert.equal(await b.eval(() => document.getElementById('netB').textContent), 'Reconnecting…');
+    assert.equal(await b.eval(() => document.getElementById('netB').textContent), 'Reconnecting… · Safe zone');
     await b.eval(() => window.__fakeRTDB.setConnected(true));
     await b.step(70); // past the 1 s idle heartbeat
     await settle(a, b);
