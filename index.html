@@ -49,6 +49,8 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #boss .bar{height:calc(var(--u)*1.5)}
 #boss .head{color:#ffb0a6;font-size:calc(var(--u)*1.6)}
 #partyW{pointer-events:auto;width:calc(var(--u)*26);font-size:calc(var(--u)*1.5)}#partyW .x{font-size:calc(var(--u)*1.3);width:auto;padding:0 calc(var(--u)*.6)}#partyL div{display:flex;justify-content:space-between;gap:calc(var(--u)*1)}#partyL .ld{color:#ffe07a}
+#duelInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*15);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto;border-color:#ff8a6a}#duelInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
+#duelW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*3.4);width:calc(var(--u)*40);padding:calc(var(--u)*.6) calc(var(--u)*1.2);text-align:center;font-size:calc(var(--u)*1.5);pointer-events:auto;border-color:#ff8a6a}#duelW .bars{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*1);margin:calc(var(--u)*.5) 0}#duelW .bar{height:calc(var(--u)*1.2)}#duelW .bar i{background:linear-gradient(90deg,#ff5a4a,#ffb04a)}#duelW .x{font-size:calc(var(--u)*1.3);width:auto;padding:0 calc(var(--u)*.8)}#duelCd{font-size:calc(var(--u)*4);color:var(--gold)}
 #partyInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*9);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto}#partyInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
 #netB{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*.6);padding:calc(var(--u)*.3) calc(var(--u)*1.2);font-size:calc(var(--u)*1.5);color:#9fe0ff;white-space:nowrap}
 #toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*13);display:grid;gap:calc(var(--u)*.4);justify-items:center;width:80%}
@@ -333,6 +335,8 @@ button{background:linear-gradient(180deg,rgba(36,52,108,.85),rgba(22,32,74,.85))
       <div id="evbar" class="sys" hidden></div>
       <div id="sgbar" class="sys" hidden></div>
       <div id="netB" class="sys" hidden></div>
+      <div id="duelInv" class="sys" hidden><div id="duelInvT"></div><div class="row"><button id="duelBtnA" data-act="dAccept"></button><button id="duelBtnB" data-act="dDecline"></button></div></div>
+      <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
       <div id="partyInv" class="sys" hidden><div id="partyInvT"></div><div class="row"><button data-act="pAccept" data-i18n="pAccept"></button><button data-act="pDecline" data-i18n="pDecline"></button></div></div>
       <div id="announce" class="sys" hidden><div class="head" data-i18n="worldNotice"></div><div id="anntext"></div></div>
     </div>
@@ -499,6 +503,7 @@ button{background:linear-gradient(180deg,rgba(36,52,108,.85),rgba(22,32,74,.85))
 <script src="src/net/presence.js"></script>
 <script src="src/net/transport-local.js"></script>
 <script src="src/net/party.js"></script>
+<script src="src/net/duel.js"></script>
 <script src="src/net/firebase-config.js"></script>
 <script src="src/net/firebase.js"></script>
 <script>
@@ -1881,7 +1886,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);
  if(burn&&!S.burnSeen){S.burnSeen=1;toast(t('burn'),'good');}else if(burn)num(m.x,my-18,lang==='ar'?'لهب!':'FLAME','#ff9a2a',false);
  if(m.hp<=0)killMon(m);return crit||burn?2:1;}
 function tryAttack(ax,ay,mul){
- if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');
+ if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
  if(k==='bow'||k==='staff'){shoot(k==='bow'?'arrow':'magic',ax,ay,mul||1);return;}
  P.slash={t:.14,a:Math.atan2(ay,ax)};SFX.swing();vfx('slash',P.x+ax*4,P.y-7+ay*4,{angle:P.slash.a,rarity:weapon().r||0});
@@ -2881,6 +2886,7 @@ function act(a){
  else if(a==='lang'){mode='lang';showOnly('langScreen');}
  else if(a==='online')netSignIn();
  else if(a==='pAccept'||a==='pDecline'||a==='pLeave')partyAct(a);
+ else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
  else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='quit'){save(true);fadeTo(toTitle);}
  else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeStatus')closeStatus();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qtoggle')toggleQuest();
@@ -3297,18 +3303,20 @@ Satisfy.local=Object.freeze({api:1,
  events:()=>DEVT.log(),
  onEvent:fn=>DEVT.on(fn),
  net:()=>NET?{mode:NETQ,state:netState,uid:NET.uid,sid:NET.sid,count:NET.count(),drawn:netDrawn,remotes:NET.remotes(),stats:NET.stats(),
-  party:PARTY?{id:PARTY.id(),leader:PARTY.leader(),members:PARTY.members(),invite:PARTY.pendingInvite()}:null}:null});
+  party:PARTY?{id:PARTY.id(),leader:PARTY.leader(),members:PARTY.members(),invite:PARTY.pendingInvite()}:null,
+  duel:DUEL?{...DUEL.state(),challenge:DUEL.pendingChallenge()}:null}:null});
 window.__G.defs=Satisfy.local.defs;
 
 /* ---------------- online (opt-in: ?net=local) ---------------- */
 // Other players come from Satisfy.presence over a transport; nothing here changes offline play.
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
-let NET=null,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='';const PARTY_R=40;
+let NET=null,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='';const PARTY_R=40;
 const NETQ=QS.get('net');
 const NET_LIVE=['play','inv','status','equip','dialog','forge','log','map','dead','cut','pause'];
 function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
 function netTick(){NET.tick();const live=Satisfy.local.inGame()&&NET_LIVE.includes(mode);
  if(PARTY)PARTY.tick();
+ if(DUEL)duelTick(live);
  if(live)NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null}));
  partyUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
@@ -3321,16 +3329,17 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
  for(const r of NET.remotes()){if((r.room||null)!==myRoom)continue;if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;
   const k=remoteSpr(r.look,r.arm),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
   ents.push({y:r.y,f:()=>{if(r.anim==='dead')ctx.globalAlpha=.45;drawChar(k,r.x,r.y,r.dir,fr,false);ctx.globalAlpha=1;}});
-  const mate=PARTY&&PARTY.id()&&r.party===PARTY.id();
-  TX.push({s:r.handle||'?',x:r.x,y:r.y-28,f:F,z:8,c:mate?'#8dff9a':'#9fe0ff'});
-  if(!mate&&mode==='play'&&Math.hypot(r.x-P.x,r.y-P.y)<PARTY_R)TX.push({s:t('pInvite'),x:r.x,y:r.y-37,f:F,z:6,c:'#ffe7a8'});}}
+  const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
+  TX.push({s:r.handle||'?',x:r.x,y:r.y-28,f:F,z:8,c:foe?'#ff8a7a':mate?'#8dff9a':'#9fe0ff'});
+  if(!mate&&!foe&&mode==='play'&&Math.hypot(r.x-P.x,r.y-P.y)<PARTY_R)TX.push({s:t('pInvite')+(DUEL&&!Satisfy.net.zonePolicy(zoneAt(P.x,P.y)).safe?' · '+t('dHint'):''),x:r.x,y:r.y-37,f:F,z:6,c:'#ffe7a8'});}
+ const ds=DUEL&&DUEL.state();if(ds&&ds.arena&&!myRoom)ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle=ds.phase==='fight'?'rgba(255,120,90,.7)':'rgba(255,210,74,.7)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(ds.arena.x,ds.arena.y,ds.arena.r,0,7);ctx.stroke();ctx.restore();}});}
 if(NETQ==='local'&&typeof BroadcastChannel!=='undefined'){
  netStart(Satisfy.presence.create({transport:Satisfy.transports.local('satisfy-net-v1'),world:Satisfy.local.world(),now:()=>performance.now()}));netState='ONLINE';
  addEventListener('pagehide',()=>NET.close());}
 // ?net=online: Google sign-in + Firebase Realtime Database (SAT-ONLINE-004). The SDK downloads only in this mode.
 let FB=null;
 /* party (SAT-ONLINE-003): P invites the nearest player, Y/N answers an invite */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now()});
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now()});duelStart();
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if((r.room||null)!==myRoom)continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -3342,7 +3351,52 @@ function partyUI(live){if(!PARTY)return;const inv=live?PARTY.pendingInvite():nul
  $('partyInv').hidden=!inv;if(inv)$('partyInvT').textContent=t('pInvFrom',{n:inv.handle});
  $('partyW').hidden=mem.length<2;$('partyL').innerHTML=mem.map(m=>`<div class="${m.leader?'ld':''}"><span>${m.leader?'★ ':''}${esc(m.self?S.look.n:m.handle||'?')}</span><span>${t('lv',{n:m.self?S.lv:m.lv})}</span></div>`).join('');}
 addEventListener('keydown',e=>{if(!PARTY||mode!=='play'||e.repeat||KB.includes(e.code))return;
+ if(duelKey(e.code))return;
  if(e.code==='KeyP')partyInviteNear();else if(e.code==='KeyY'&&PARTY.pendingInvite())partyAct('pAccept');else if(e.code==='KeyN'&&PARTY.pendingInvite())partyAct('pDecline');});
+/* duels (SAT-ONLINE-006, doc §09 R4): K challenges the nearest player outside towns; Y/N answers, Y is the ready check.
+   Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
+Object.assign(STR.ar,{dHint:'[K] مبارزة',dSent:'اتبعت تحدي مبارزة لـ{n}',dFrom:'{n} بيتحداك في مبارزة',dReadyQ:'مبارزة مع {n}: جاهز؟',dReady:'جاهز (Y)',dWait:'مستني {n}…',dNone:'مفيش حد قريب كفاية للمبارزة',dSafe:'ممنوع المبارزة جوه المدن',dBusy:'{n} مشغول دلوقتي',dFar:'قرّب من {n} الأول',dDeclined:'{n} رفض المبارزة',dCancel:'المبارزة اتلغت',dFight:'ابدأ!',dOut:'ارجع للحلبة وإلا هتخسر!',dWin:'كسبت المبارزة ضد {n} {w}',dLose:'خسرت المبارزة ضد {n} {w}',dYield:'استسلام',dYou:'إنت',dTitle:'مبارزة ضد {n}',dRec:'المبارزات: {w} فوز · {l} خسارة',dw_yield:'(استسلام)',dw_arena:'(خرج من الحلبة)',dw_teleport:'(ساب القتال)',dw_safe:'(دخل مدينة)',dw_gone:'(الخصم مشي)',dw_death:'(مات)',dw_hp:''});
+Object.assign(STR.en,{dHint:'[K] Duel',dSent:'Duel challenge sent to {n}',dFrom:'{n} challenges you to a duel',dReadyQ:'Duel with {n}: ready?',dReady:'Ready (Y)',dWait:'Waiting for {n}…',dNone:'Nobody close enough to duel',dSafe:'No duels inside towns',dBusy:'{n} is busy right now',dFar:'Get closer to {n} first',dDeclined:'{n} declined the duel',dCancel:'Duel cancelled',dFight:'Fight!',dOut:'Back to the arena or you forfeit!',dWin:'You won the duel against {n} {w}',dLose:'You lost the duel against {n} {w}',dYield:'Yield',dYou:'You',dTitle:'Duel with {n}',dRec:'Duels: {w} won · {l} lost',dw_yield:'(surrender)',dw_arena:'(left the arena)',dw_teleport:'(left the fight)',dw_safe:'(entered a town)',dw_gone:'(opponent left)',dw_death:'(died)',dw_hp:''});
+function duelStart(){DUEL=Satisfy.duel.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?zoneAt(P.x,P.y):''});
+ DUEL.on(e=>{const n=e.handle||((DUEL.state().handle)||'?');duelSig='';
+  if(e.type==='challenge'){SFX.notice();}
+  else if(e.type==='declined')toast(t('dDeclined',{n}),'warn');
+  else if(e.type==='cancelled')toast(t('dCancel'),'warn');
+  else if(e.type==='safeHere')toast(t('dSafe'),'warn');
+  else if(e.type==='fight'){toast(t('dFight'),'good');SFX.notice();}
+  else if(e.type==='outside')toast(t('dOut'),'warn');
+  else if(e.type==='hurt'){num(P.x,P.y-20,'-'+e.dmg,'#ff6a5a',false);SFX.hit();}
+  else if(e.type==='result'){const win=e.result==='win';if(S&&!S.__demo){S.duels=S.duels||{w:0,l:0};S.duels[win?'w':'l']++;}
+   toast(t(win?'dWin':'dLose',{n,w:t('dw_'+e.why)}),win?'good':'warn');if(win)SFX.quest();
+   if(S&&S.duels)setTimeout(()=>toast(t('dRec',S.duels)),500);}});}
+// The local attack reaches the opponent: melee within reach, bow/staff along the aim. Power is a normalized roll.
+function duelSwing(ax,ay,mul,k){if(DUEL.state().phase!=='fight')return;const f=DUEL.foe();if(!f)return;
+ const dx=f.x-P.x,dy=(f.y-8)-(P.y-6),d=Math.hypot(dx,dy),l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';
+ if(ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):d>30)return;
+ const crit=rand()<.12,pow=(8+rand()*5)*(crit?1.5:1)*Math.min(1.5,mul||1),dmg=DUEL.hit(pow);
+ if(dmg){num(f.x,f.y-24,'-'+dmg,crit?'#ffd24a':'#ffffff',crit);if(crit)vfx('crit',f.x,f.y-10);}}
+function duelNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=Satisfy.duel.C.CHALLENGE_R;for(const r of NET.remotes()){if((r.room||null)!==myRoom)continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
+function duelAct(a){if(!DUEL)return;const inv=DUEL.pendingChallenge(),st=DUEL.state();
+ if(a==='dAccept'){if(inv)DUEL.accept(inv.duel);else if(st.phase==='ready')DUEL.ready();}
+ else if(a==='dDecline'){if(inv)DUEL.decline(inv.duel);else if(st.phase==='ready'||st.phase==='asking')DUEL.yield();}
+ else if(a==='dYield')DUEL.yield();duelSig='';}
+// returns true when the key was a duel key
+function duelKey(c){if(!DUEL)return false;const inv=DUEL.pendingChallenge(),st=DUEL.state();
+ if(c==='KeyK'){if(st.phase!=='idle'&&st.phase!=='over')return true;const r=duelNear();if(!r){toast(t('dNone'));return true;}
+  const res=DUEL.challenge(r);toast(t({sent:'dSent',busy:'dBusy',safe:'dSafe',far:'dFar'}[res]||'dBusy',{n:r.handle}),res==='sent'?'good':'warn');duelSig='';return true;}
+ if((c==='KeyY'||c==='KeyN')&&(inv||st.phase==='ready'||st.phase==='asking')){duelAct(c==='KeyY'?'dAccept':'dDecline');return true;}
+ return false;}
+function duelTick(live){DUEL.tick();const st=DUEL.state();
+ if(DUEL.locked()&&(mode==='dead'||!live))DUEL.yield(mode==='dead'?'death':'teleport');
+ const inv=live?DUEL.pendingChallenge():null,cd=Math.ceil(st.countdown/1000);
+ const sig=lang+'|'+(inv?inv.duel:'')+'|'+st.phase+'|'+st.hp+'|'+st.foeHp+'|'+st.meReady+'|'+st.foeReady+'|'+cd+'|'+live;if(sig===duelSig)return;duelSig=sig;
+ const ask=inv||(live&&st.phase==='ready');$('duelInv').hidden=!ask;
+ if(inv){$('duelInvT').textContent=t('dFrom',{n:inv.handle});$('duelBtnA').textContent=t('pAccept');$('duelBtnB').textContent=t('pDecline');$('duelBtnA').hidden=false;}
+ else if(ask){$('duelInvT').textContent=st.meReady?t('dWait',{n:st.handle}):t('dReadyQ',{n:st.handle});$('duelBtnA').textContent=t('dReady');$('duelBtnA').hidden=st.meReady;$('duelBtnB').textContent=t('pDecline');}
+ const on=live&&(st.phase==='countdown'||st.phase==='fight'||st.phase==='over');$('duelW').hidden=!on;if(!on)return;
+ $('duelT').textContent=t('dTitle',{n:st.handle||'?'});$('duelMeN').textContent=t('dYou')+' '+st.hp;$('duelFoeN').textContent=(st.handle||'?')+' '+st.foeHp;
+ $('duelMeB').style.width=st.hp+'%';$('duelFoeB').style.width=st.foeHp+'%';$('duelCd').textContent=st.phase==='countdown'?String(cd||''):'';
+ $('duelYield').textContent=t('dYield');$('duelYield').hidden=st.phase==='over';}
 function netSetState(s){netState=s;netSig='';}
 function netBtn(){const b=$('onlineBtn');if(!b)return;b.hidden=NETQ!=='online';b.disabled=netState==='AUTHENTICATING'||netState==='JOINING';
  if(netUser){delete b.dataset.i18n;b.textContent=t('netSignedIn',{n:netUser.displayName||netUser.uid.slice(0,6)});}}

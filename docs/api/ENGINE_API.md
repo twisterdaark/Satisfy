@@ -17,6 +17,7 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 <script src="src/net/presence.js"></script>   <!-- Satisfy.presence (SAT-ONLINE-002) -->
 <script src="src/net/transport-local.js"></script> <!-- Satisfy.transports -->
 <script src="src/net/party.js"></script>      <!-- Satisfy.party (SAT-ONLINE-003) -->
+<script src="src/net/duel.js"></script>       <!-- Satisfy.duel (SAT-ONLINE-006) -->
 <script src="src/net/firebase-config.js"></script> <!-- Satisfy.firebaseConfig (public web config) -->
 <script src="src/net/firebase.js"></script>   <!-- Satisfy.firebase (SAT-ONLINE-004), SDK loaded on demand -->
 <script> (()=>{ ...game...; Satisfy.local = Object.freeze({...}) })() </script>
@@ -147,6 +148,32 @@ Messages `party.invite|accept|decline|kick` carry `{ to: uid, party }`. They go 
 
 In the game, near another player: `P` invites, `Y`/`N` answers, and the party panel sits under the minimap with a Leave button. Party members' names are green. The badge adds `· Safe zone` in every town (Bairan, Winston, Patrian, Reidan, Reinhardt).
 
+## `Satisfy.duel` (SAT-ONLINE-006, doc §09 R4)
+
+Consent-based duels on top of presence, no server. `create({ presence, uid, now?, pos, zone, policy? })`:
+
+| Member | Notes |
+|---|---|
+| `challenge(remote)` | `'sent'` or `'bad'`/`'busy'`/`'safe'` (either side in a safe zone)/`'far'` (> `C.CHALLENGE_R` px). |
+| `pendingChallenge()`, `accept(id)`, `decline(id)` | Answering a challenge. Accepting inside a town declines it. |
+| `ready()` | Ready check; the `C.COUNTDOWN_MS` countdown starts when both sides are ready. |
+| `hit(power)` | The game's attack reached the opponent; sends `duel.hit` with `k` = clamp(power, `MIN_HIT`, `MAX_HIT`). Returns the damage or 0. |
+| `yield(why?)` | Surrender (or cancel before the fight). |
+| `state()` | `{ phase: idle|asking|ready|countdown|fight|over, duel, foe, handle, hp, foeHp, meReady, foeReady, arena:{x,y,r}, countdown, last }`; `last` = the latest `{ result: win|lose, why }`. |
+| `locked()` | True during countdown and fight. |
+| `tick()` | Timers, arena (`C.ARENA_R`, out for `C.OUT_MS` = yield), teleport (> `C.TELEPORT_PX` in a tick = yield), entering a safe zone, opponent gone for `C.GRACE_MS` = win. |
+
+Messages (`payload: { to, duel, k?, n? }`): `duel.challenge`, `duel.accept`, `duel.decline`, `duel.ready`,
+`duel.hit` (k = damage, n = hit number), `duel.hp` (k = defender's duel HP, ≤ 5/s), `duel.yield`, `duel.end`.
+Each side owns its own duel HP (100) and checks every hit for rate (`C.MIN_HIT_MS`) and range
+(`C.HIT_RANGE` from its real position). A duel moves no gold, items, materials, durability, real HP or
+quest credit; the result goes to `S.duels = { w, l }`.
+
+In the game: `K` challenges the nearest player outside towns, `Y`/`N` answer and `Y` is the ready
+check; a bar at the top shows both duel HPs and the countdown, with a **Yield** button; the arena is a
+dashed ring. Real death, travel or entering a town forfeits. `Satisfy.local.net().duel` = `state()` plus
+`challenge`.
+
 ## `Satisfy.firebase` (SAT-ONLINE-004)
 
 | Member | Notes |
@@ -194,5 +221,6 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, additive** (SAT-ONLINE-006): `Satisfy.duel`, `net().duel`, `S.duels`, RTDB inbox accepts `duel.*` messages with `{to, duel, k?, n?}` (rules redeploy).
 - **api 1, additive** (SAT-ONLINE-005): `Satisfy.state`, `Satisfy.ids`, `Satisfy.events`, `Satisfy.local.profile/events/onEvent`, `S.pid` for every character, `item.iid`, storage writes `WS`, `__G.startMG(id)` (test hook).
 - **api 1, additive** (SAT-ONLINE-003): `Satisfy.party`, `Satisfy.net.zonePolicy/SAFE_ZONES`, `net().party`, the RTDB `inbox/`. Presence now checks replays separately for state and messages.

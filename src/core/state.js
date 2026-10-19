@@ -47,6 +47,8 @@
     'mhp', 'mdead', 'meetN',
     // Muller's trial done (SAT-MULLER-001)
     'mtr',
+    // duel record (SAT-ONLINE-006): {w, l}
+    'duels',
   ];
   var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT'];
   var META = ['v', 'wv', 'uid', 'pid'];

@@ -90,15 +90,24 @@
             ".validate": "newData.isNumber() && newData.val() >= 0"
           },
           "type": {
-            ".validate": "newData.isString() && newData.val().matches(/^party\\.(invite|accept|decline|kick)$/)"
+            ".validate": "newData.isString() && newData.val().matches(/^(party\\.(invite|accept|decline|kick)|duel\\.(challenge|accept|decline|ready|hit|hp|yield|end))$/)"
           },
           "payload": {
-            ".validate": "newData.hasChildren(['to', 'party'])",
+            ".validate": "newData.hasChild('to') && ((newData.parent().child('type').val().beginsWith('party.') && newData.hasChild('party') && !newData.hasChild('duel')) || (newData.parent().child('type').val().beginsWith('duel.') && newData.hasChild('duel') && !newData.hasChild('party')))",
             "to": {
               ".validate": "newData.val() === $uid"
             },
             "party": {
               ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "duel": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "k": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
+            },
+            "n": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
             },
             "$other": {
               ".validate": false
