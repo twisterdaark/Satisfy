@@ -611,6 +611,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
  'src/net/transport-local.js',
  'src/net/party.js',
  'src/net/duel.js',
+ 'src/net/pvp.js',
  'src/net/chat.js',
  'src/net/raid.js',
  'src/net/cloud.js',
@@ -2291,7 +2292,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);
  if(burn&&!S.burnSeen){S.burnSeen=1;toast(t('burn'),'good');}else if(burn)num(m.x,my-18,lang==='ar'?'لهب!':'FLAME','#ff9a2a',false);
  if(!netHit(m,dmg)&&m.hp<=0)killMon(m);return crit||burn?2:1;}
 function tryAttack(ax,ay,mul){
- if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);
+ if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);if(PVP)pvpSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
  if(k==='bow'||k==='staff'){if(k==='bow'&&ipOn('larrow')){shoot('magic',ax,ay,(mul||1)*1.1,{pierce:1});return;}shoot(k==='bow'?'arrow':'magic',ax,ay,mul||1);return;}
  P.slash={t:.14,a:Math.atan2(ay,ax)};if(FXME)fxR(['w',Math.round(P.slash.a*100)/100]);SFX.swing();vfx('slash',P.x+ax*4,P.y-7+ay*4,{angle:P.slash.a,rarity:weapon().r||0});
@@ -4101,6 +4102,7 @@ window.__G.defs=Satisfy.local.defs;
 /* ---------------- online (opt-in: ?net=local) ---------------- */
 // Other players come from Satisfy.presence over a transport; nothing here changes offline play.
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
+let PVP=null; // SAT-ONLINE-038 open PvP (declared first: ?net=local starts during load)
 let NET=null,NETTR=null,netLinkT=0,netReplaced=false,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null,CHAT=null,chatSig='',PCTX=null,pctxSig='',EMO=null,emoLast=-1e9;const PARTY_R=40,BLK=Satisfy.chat.blocklist(); // CHAT/BLK: SAT-ONLINE-016 (declared here: ?net=local starts during load)
 // Twister 2026-10-19: the public site opens online with no ?net=online; ?net=off plays offline there, ?net=local stays for two-tab tests.
 // The switch is Satisfy.netOnlineOnly (src/net/firebase-config.js): true on the GitHub Pages host, so local files and the test
@@ -4153,7 +4155,7 @@ function netTick(){NET.tick();const live=netLive();
  if(PRAID)PRAID.tick();
  mobTick(live);
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
- if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic()}),netForce);netForce=false;}
+ if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic(),ol:outlaw()}),netForce);netForce=false;}
  partyUI(live);chatUI(live);pctxUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
  const netSafe=live&&Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
@@ -4221,12 +4223,12 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   if(r.em)emoBubble(ents,r.em,r.x,r.y,r.dir);
   if(PCTX&&PCTX.uid===r.uid)ents.push({y:r.y-1,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,231,168,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(r.x,r.y+1,9,4,0,0,7);ctx.stroke();ctx.restore();}});
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
-  TX.push({s:r.handle||'?',x:r.x,y:r.y-28,f:F,z:8,c:foe?'#ff8a7a':mate?'#8dff9a':'#9fe0ff'});
+  TX.push({s:r.handle||'?',x:r.x,y:r.y-28,f:F,z:8,c:foe?'#ff8a7a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038)
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
   if(near&&r.uid===near.uid&&!foe)TX.push({s:[t('pcHint'),mate?'':t('pInvite'),!mate&&DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?t('dHint'):''].filter(Boolean).join(' · '),x:r.x,y:r.y-(typeof r.hp==='number'?46:37),f:F,z:6,c:'#ffe7a8'});}
  fxRun(seen);for(const sid of FXS.keys())if(!NET.get||!NET.get(sid))FXS.delete(sid);
- duelWatch(ents,myRoom);pingEnts(ents,myRoom,F);const me=emoNow();if(me)emoBubble(ents,me,P.x,P.y,P.dir);
+ duelWatch(ents,myRoom);pingEnts(ents,myRoom,F);pvpEnts();const me=emoNow();if(me)emoBubble(ents,me,P.x,P.y,P.dir);
  const ds=DUEL&&DUEL.state();if(ds&&ds.arena&&!myRoom)ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle=ds.phase==='fight'?'rgba(255,120,90,.7)':'rgba(255,210,74,.7)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(ds.arena.x,ds.arena.y,ds.arena.r,0,7);ctx.stroke();ctx.restore();}});}
 if(NETQ==='local'&&typeof BroadcastChannel!=='undefined'){
  netStart(Satisfy.presence.create({transport:NETTR=Satisfy.transports.local('satisfy-net-v1'),world:Satisfy.local.world(),now:()=>performance.now()}));netState='ONLINE';
@@ -4239,7 +4241,7 @@ function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch
 Object.assign(STR.ar,{pKick:'اطرد',pKickQ:'تطرد {n}؟',pKickYes:'اطرد',pKickNo:'لأ',pKickDone:'{n} اتشال من الفريق',pLeaderLeft:'{n} ساب، فالفريق اتفكك',pRejoined:'رجعت لبارتي {n}',pYouLead:'القائد مشي: إنت قائد البارتي دلوقتي',pNewLead:'القائد مشي: {n} قائد البارتي دلوقتي',pReplaced:'البارتي اختارت قائد جديد وإنت مش موجود، هترجع لهم'});
 Object.assign(STR.en,{pKick:'Kick',pKickQ:'Kick {n}?',pKickYes:'Kick',pKickNo:'Cancel',pKickDone:'{n} was removed from the party',pLeaderLeft:'{n} left, so the party broke up',pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn)NETTR.feedOn('news',newsIn);
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn)NETTR.feedOn('news',newsIn);
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],leaderLeft:['pLeaderLeft','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -4385,9 +4387,9 @@ function pctxNear(){if(!NET||PCTX)return;const r=partyNear();if(r)pctxOpen(r);}
 function pctxName(k){const v=t(k);return v===k?'':v;}
 function pctxUI(live){const W=$('pctx'),r=live?pctxRemote():null;if(PCTX&&!r){if(live&&PCTX.handle)toast(t('pcGone',{n:PCTX.handle}));PCTX=null;}
  if(!PCTX){if(!W.hidden)W.hidden=true;return;}
- const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
+ const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far,r.ol].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
  $('pctxT').textContent=r.handle||'?';
- $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):''].filter(Boolean).join(' · ');
+ $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):'',r.ol?t('pcOl'):''].filter(Boolean).join(' · ');
  $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;
  // a player out of range (from the list): invites and duels only reach players you can see, so those wait until you are close
  for(const a of ['pcInvite','pcDuel'])W.querySelector(`[data-act="${a}"]`).disabled=far;}
@@ -4401,6 +4403,34 @@ window.__G.maxHP=()=>maxHP();
 window.__G.isk={mkItem,equip,itemSkills,useISlot,ipOn,itemTip,mpC,MT,rs:()=>{sbSig='';},checkSkills:()=>checkSkills(),pasOn:k=>pasOn(k)};
 addEventListener('keydown',e=>{if(e.code!=='Escape'||mode!=='play'||(e.target&&e.target.tagName==='INPUT'))return;
  if(!$('emoW').hidden){$('emoW').hidden=true;e.stopImmediatePropagation();}else if(PCTX){PCTX=null;pctxSig='';e.stopImmediatePropagation();}},true);
+/* open PvP outside towns (SAT-ONLINE-038, owner 2026-10-19): the same as a duel without the challenge. A hit is a share of
+   the victim's max HP (src/net/pvp.js caps it), applied by the victim's own client; no friendly fire in a party; dying to
+   a player costs the normal death penalty only. A kill makes the killer an outlaw (a red name) for OUTLAW_MS. */
+Object.assign(STR.ar,{pvpHit:'{n} بيهاجمك!',pvpDied:'{n} قتلك',pvpKill:'قتلت {n}: بقيت خارج عن القانون {m} دقيقة',pvpOl:'خارج عن القانون',pvpOlEnd:'مبقتش خارج عن القانون',pcOl:'خارج عن القانون'});
+Object.assign(STR.en,{pvpHit:'{n} is attacking you!',pvpDied:'{n} killed you',pvpKill:'You killed {n}: you are an outlaw for {m} minutes',pvpOl:'Outlaw',pvpOlEnd:'You are no longer an outlaw',pcOl:'Outlaw'});
+var pvpFrom=new Map(),pvpOlWas=false; // uid -> when they last hit us (the "is attacking you" toast once a while)
+function outlaw(){return !!(S&&!S.__demo&&S.olT&&Date.now()<S.olT);}
+function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
+  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
+ PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
+  else if(e.type==='kill'&&S&&!S.__demo){S.olT=Date.now()+Satisfy.pvp.C.OUTLAW_MS;netForce=true;save(true);toast(t('pvpKill',{n:Satisfy.chat.clean(e.handle,24)||'?',m:Math.round(Satisfy.pvp.C.OUTLAW_MS/60000)}),'warn');SFX.slam&&SFX.slam();}});}
+// the local attack reaches a player outside town: melee within reach, bow/staff along the aim; the nearest one it can hit
+function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoom=(roomAt(P.x,P.y)||{}).id||null,l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';let best=null,bd=1e9;
+ for(const r of NET.remotes()){if(!netSees(r,myRoom)||PVP.why(r))continue;const dx=r.x-P.x,dy=(r.y-8)-(P.y-6),d=Math.hypot(dx,dy);
+  if(ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):(d>30||(dx*ax+dy*ay)/(d*l||1)<-.2))continue;if(d<bd){bd=d;best=r;}}
+ if(!best)return;const crit=rand()<.12,pow=(8+rand()*5)*(crit?1.5:1)*Math.min(1.5,mul||1),pm=PVP.hit(best,pow);
+ if(pm){num(best.x,best.y-24,'-'+Math.max(1,Math.round(pm/10))+'%',crit?'#ffd24a':'#ffffff',crit);vfx(crit?'crit':'hit',best.x,best.y-10,{angle:Math.atan2(best.y-P.y,best.x-P.x)});}}
+// a hit from another player, already checked by pvp.js: a share of our max HP; a dodge's frames avoid it, a raised guard
+// takes a quarter. The lethal one goes back to the attacker as a kill.
+function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Satisfy.chat.clean(e.handle,24)||'?',now=performance.now();
+ if(!pvpFrom.has(e.uid)||now-pvpFrom.get(e.uid)>15000)toast(t('pvpHit',{n}),'warn');pvpFrom.set(e.uid,now);
+ let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));vfx('block',P.x,P.y-10,{});}
+ P.hp-=d;num(P.x,P.y-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();vfx('blood',P.x,P.y-10,{});shake=.12;}hudDirty=true;
+ if(P.hp<=0){if(S.tl&&S.tl.legend&&S.immT<=0){P.hp=1;S.immT=120;P.inv=1.5;toast(t('immune'),'good');flash();SFX.notice();return;}
+  die();PVP.died(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
+// your own red tag while you are an outlaw, and the notice when it ends
+function pvpEnts(){const ol=outlaw();if(pvpOlWas&&!ol&&S&&!S.__demo){toast(t('pvpOlEnd'),'good');netForce=true;}pvpOlWas=ol;
+ if(ol&&mode==='play')TX.push({s:t('pvpOl'),x:P.x,y:P.y-30,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff3b30'});}
 /* duels (SAT-ONLINE-006, doc §09 R4): K challenges the nearest player outside towns; Y/N answers, Y is the ready check.
    Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
 Object.assign(STR.ar,{dHint:'[K] مبارزة',dSent:'اتبعت تحدي مبارزة لـ{n}',dFrom:'{n} بيتحداك في مبارزة',dReadyQ:'مبارزة مع {n}: جاهز؟',dReady:'جاهز (Y)',dWait:'مستني {n}…',dNone:'مفيش حد قريب كفاية للمبارزة',dSafe:'ممنوع المبارزة جوه المدن',dBusy:'{n} مشغول دلوقتي',dFar:'قرّب من {n} الأول',dDeclined:'{n} رفض المبارزة',dCancel:'المبارزة اتلغت',dFight:'ابدأ!',dOut:'ارجع للحلبة وإلا هتخسر!',dWin:'كسبت المبارزة ضد {n} {w}',dLose:'خسرت المبارزة ضد {n} {w}',dYield:'استسلام',dYou:'إنت',dTitle:'مبارزة ضد {n}',dRec:'المبارزات: {w} فوز · {l} خسارة',dw_yield:'(استسلام)',dw_arena:'(خرج من الحلبة)',dw_teleport:'(ساب القتال)',dw_safe:'(دخل مدينة)',dw_gone:'(الخصم مشي)',dw_death:'(مات)',dw_hp:''});
@@ -4596,7 +4626,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
 function netStop(){try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
- if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW'].forEach(i=>$(i).hidden=true);}
+ if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW'].forEach(i=>$(i).hidden=true);}
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid;netStop();
  (erase?C.eraseAll(['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid]):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
@@ -4631,7 +4661,7 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
 function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF=true; // from now on this tab never saves: the newer tab owns the save (review of #30)
- try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW'].forEach(i=>$(i).hidden=true);
+ try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
 // another Google account on this device (owner request): the chooser opens straight from the click, the new

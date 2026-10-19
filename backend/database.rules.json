@@ -111,6 +111,9 @@
             "gu": {
               ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 256 && newData.val() % 1 === 0"
             },
+            "ol": {
+              ".validate": "newData.val() === 1"
+            },
             "seq": {
               ".validate": "newData.isNumber() && newData.val() >= 0"
             },
@@ -143,10 +146,10 @@
             ".validate": "newData.isNumber() && newData.val() >= 0"
           },
           "type": {
-            ".validate": "newData.isString() && newData.val().matches(/^(party\\.(invite|accept|decline|kick|ping)|duel\\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\\.(hit|state|kill)|chat\\.(say))$/)"
+            ".validate": "newData.isString() && newData.val().matches(/^(party\\.(invite|accept|decline|kick|ping)|duel\\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\\.(hit|state|kill)|chat\\.(say)|pvp\\.(hit|kill))$/)"
           },
           "payload": {
-            ".validate": "newData.hasChild('to') && ((newData.parent().child('type').val().beginsWith('party.') && newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('duel.') && newData.hasChild('duel') && !newData.hasChild('party') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('raid.') && newData.hasChild('raid') && !newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('chat.') && newData.hasChildren(['party', 'text']) && !newData.hasChild('duel') && !newData.hasChild('raid') && !newData.hasChild('k') && !newData.hasChild('n')))",
+            ".validate": "newData.hasChild('to') && ((newData.parent().child('type').val().beginsWith('party.') && newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('duel.') && newData.hasChild('duel') && !newData.hasChild('party') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('raid.') && newData.hasChild('raid') && !newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('chat.') && newData.hasChildren(['party', 'text']) && !newData.hasChild('duel') && !newData.hasChild('raid') && !newData.hasChild('k') && !newData.hasChild('n')) || (newData.parent().child('type').val().beginsWith('pvp.') && newData.hasChild('k') && !newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('raid') && !newData.hasChild('text')))",
             "to": {
               ".validate": "newData.val() === $uid"
             },
