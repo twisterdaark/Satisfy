@@ -3214,6 +3214,9 @@ if(langSaved)toTitle();else setTimeout(()=>{const b=document.querySelector(`.lan
 
 /* ---------------- update ---------------- */
 const ZT={};
+// windows you can walk with (Twister 2026-10-19): the bag, status, equipment, log, quests and the big map stay open while
+// WASD/arrows move you; attacks, E and skills still need the window closed so clicks in it never become swings
+const WALKM=['inv','status','equip','log','qd','map'];
 function update(dt){
  gTime+=dt;
  for(let i=DGATES.length-1;i>=0;i--)if(DGATES[i].tmp&&gTime>DGATES[i].til)DGATES.splice(i,1);
@@ -3237,7 +3240,7 @@ function update(dt){
  const mh=maxHP(),pain=P.hp/mh<.25;
  if(P.sImm>0)P.sImm-=dt;if(P.stun>0){P.stun-=dt*(S&&S.cls==='pagma'?3:1);P.frame=0;}
  if(P.gd==null)P.gd=100;if(P.fort>0)P.fort-=dt;if(P.prov>0)P.prov-=dt;if(P.guard){if(!inp||P.stun>0||P.dash>0)P.guard=0;else{P.gT+=dt;const v=guardDir();if(v){P.gx=v[0];P.gy=v[1];}}}if(!P.guard){P.gdT=(P.gdT||0)-dt;if(P.gdT<=0)P.gd=Math.min(100,P.gd+35*dt);}
- let ix=P.stun>0||!inp?0:(K.right?1:0)-(K.left?1:0),iy=P.stun>0||!inp?0:(K.down?1:0)-(K.up?1:0);
+ const walk=inp||WALKM.includes(mode);let ix=P.stun>0||!walk?0:(K.right?1:0)-(K.left?1:0),iy=P.stun>0||!walk?0:(K.down?1:0)-(K.up?1:0);
  if(P.dash>0){P.dash-=dt;move(P,P.dx*230*dt,P.dy*230*dt,4);P.trail.push({x:P.x,y:P.y,dir:P.dir,frame:P.frame,t:.22});}
  else if(ix||iy){const l=Math.hypot(ix,iy);const sp=66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(S.tl.legend?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.guard?.45:1)*(1+Math.min(.3,gearSum('ms')))*(swampAt(P.x,P.y)?.6:1)*(P.ride&&MOUNTS[S.mount]?1+(MOUNTS[S.mount].sp-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1);move(P,ix/l*sp*dt,iy/l*sp*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
  else P.frame=0;
