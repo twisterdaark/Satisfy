@@ -11,6 +11,8 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 ```html
 <script src="src/core/storage.js"></script>   <!-- Satisfy.storage -->
 <script src="src/net/contracts.js"></script>  <!-- Satisfy.net -->
+<script src="src/net/presence.js"></script>   <!-- Satisfy.presence (SAT-ONLINE-002) -->
+<script src="src/net/transport-local.js"></script> <!-- Satisfy.transports -->
 <script> (()=>{ ...game...; Satisfy.local = Object.freeze({...}) })() </script>
 ```
 
@@ -26,7 +28,8 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 | `roomAt(x, y)` | `{ id, kind, zone }` if the position is inside a house interior, else `null`. |
 | `inGame()` | `false` on title/demo screens. |
 | `playerPublic(ctx?)` | The local player as a `PlayerPublic` (see below), or `null` outside a game. `ctx` may set `uid`, `sid`, `party`, `anim`, `t`. |
-| `backups()` | `{ reason: rawJSON }` for every save backup in this browser. |
+| `backups()` | `{ reason: rawJSON }` for every save backup of the current slot. |
+| `net()` | `null` offline; with `?net=local`: `{ mode, sid, count, drawn, remotes, stats }`. |
 
 Content tables are **source data for SAT-CONTENT-001 parity tests**. They are not an editing
 interface: changing values happens in `data/**` once the engine reads from it (after the split).
@@ -41,7 +44,8 @@ interface: changing values happens in `data/**` once the engine reads from it (a
 | `decode(raw)` | `{ status: 'empty'|'corrupt'|'ok', raw, data?, schema?, error? }`. Never throws. |
 | `encode(S, P, now?)` | `JSON {S, P:{x,y,hp,st,mp,food}, fmt:1, schema, savedAt}`. |
 | `migrate(S, P, ctx)` | Runs the ladder in place; returns applied versions. `ctx = { PTS_LV, spawn:{x,y}, maxHP() }`. |
-| `create(storage)` | Adapter with `exists()`, `read()`, `write(S, P)`, `backup(reason, raw)`, `backups()`. Swallows storage errors. |
+| `create(storage, {slot?})` | Adapter with `key`, `exists()`, `read()`, `write(S, P)`, `backup(reason, raw)`, `backups()`. Swallows storage errors. A slot stores under `satisfy_proto_v4@<slot>` (`?slot=` in the URL). |
+| `slotKey(slot)` | Key for a slot; throws on names outside `[A-Za-z0-9_-]{1,16}`. |
 
 Save shape compatibility rule: a save written by any build must load in the previous build.
 Adding a field to `S` needs a default in `freshState()`; changing the meaning of a field needs a
@@ -52,7 +56,7 @@ new ladder step and `SCHEMA + 1`.
 | Member | Notes |
 |---|---|
 | `PROTOCOL_VERSION` | `1` |
-| `PUBLIC_FIELDS` | `v, uid, sid, handle, look, cls, lv, title, zone, room, x, y, dir, anim, party, t` |
+| `PUBLIC_FIELDS` | `v, uid, sid, handle, look, cls, lv, title, zone, room, x, y, dir, anim, arm, party, t` (`arm` 0/1 = armored sprite) |
 | `PRIVATE_FIELDS` | Keys of `S` that must never appear in presence (gold, items, mats, quests, stats…). |
 | `toPlayerPublic(S, P, ctx)` | Builds a `PlayerPublic`; clamps strings, rounds positions. |
 | `validatePlayerPublic(o, {world}?)` | `{ ok, errors[] }`; rejects unknown fields and out-of-world positions. |
@@ -63,6 +67,25 @@ new ladder step and `SCHEMA + 1`.
 
 A *room* here is a presence channel (who you can see), not a house interior. House interiors
 are reported in `PlayerPublic.room` so remote players inside a house are only drawn there.
+
+## `Satisfy.presence` and `Satisfy.transports` (SAT-ONLINE-002)
+
+`Satisfy.presence.create({ transport, now?, world?, sid?, uid?, config? })` returns a client:
+
+| Member | Notes |
+|---|---|
+| `publish(pp, force?)` | Sends the local `PlayerPublic`: 10 Hz while moving, 1 Hz idle, immediately on room/zone/look/level/party change. Returns whether it sent. |
+| `send(type, payload)` | Any other envelope (`party.*` in SAT-ONLINE-003). Received by listeners as `{type:'message', sid, env}`, only from visible players. |
+| `remotes()` | Copies of remote `PlayerPublic`s with x/y interpolated 100 ms in the past; jumps over 64 px snap. |
+| `tick()` | Expires players silent for 5 s. |
+| `on(fn)` | Events `join`, `leave` (`reason: left|timeout`), `message`. |
+| `count()`, `get(sid)`, `stats()`, `close()` | `close()` sends `presence.leave`. |
+
+Untrusted input is dropped: wrong protocol, invalid or spoofed `PlayerPublic` (`sid` must match the envelope), replayed or old `seq`, more than 30 messages/s per sender, more than 64 remotes.
+
+Transports (`{ kind, send, onmessage, close }`): `Satisfy.transports.local(name)` (BroadcastChannel, tabs of one browser) and `Satisfy.transports.hub().connect()` (in-memory, tests). The Firebase transport (SAT-ONLINE-004) has the same shape.
+
+In the game: `?net=local` turns it on; remote players are drawn only inside the same house interior (or both outdoors), with their name and look; a badge shows the player count. Use `?slot=a` / `?slot=b` so two tabs don't share one save.
 
 ## Tests
 
@@ -95,4 +118,5 @@ await g.close(); await H.closeBrowser();
 ## Change log
 
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
+- **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, fix** (SAT-ONLINE-001 review, #10): `world().y0` = `-NR*TS`, the top edge; `validatePlayerPublic` accepts `y >= world.y0`, so players in the north (negative y) are no longer dropped.
