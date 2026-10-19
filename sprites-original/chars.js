@@ -55,7 +55,7 @@ function frame(c,dir,pose,f){
  // cape behind
  if(c.cape&&!U){const sw=pose==='walk'?(f%2):0;if(S_){q(4-sw,11,2,8,c.cape);q(3-sw,13,1,6,shade(c.cape,-.2));}else{q(3,11,10,1,c.cape);q(3,12,1,6+sw,c.cape);q(12,12,1,6+sw,c.cape);}}
  // back arm on the side view (behind torso)
- const arm=c.armC||(c.sleeves?c.top:c.skin),arm2=c.armC2||(c.sleeves?c.top2:c.sk2);
+ const arm=c.armC||(c.sleeves?c.top:c.skin),arm2=c.armC2||(c.sleeves?c.top2:c.sk2);const hnd=c.glove||c.skin;   // gloves recolour the hands
  if(S_&&o.atk<0){const ob=-o.armS;q(6+ob,11,2,4,shade(arm2,-.12));q(6+ob,15,2,1,c.sk2);}
  // torso with soft vertical shading
  if(S_){q(5,11,6,6,c.top);q(10,11,1,6,c.top2);q(5,11,1,5,shade(c.top,.1));}
@@ -68,16 +68,16 @@ function frame(c,dir,pose,f){
   else{q(5,12,6,7,c.apron);q(10,12,1,7,c.apron2);q(5,11,1,1,c.apron2);q(10,11,1,1,c.apron2);q(6,15,4,1,c.apron2);}}
  // arms
  if(S_){
-  if(o.atk===0){late.push(()=>{q(4,8,2,3,arm);q(5,10,2,2,arm2);q(3,7,2,2,c.skin);});hand={x:3+lx,y:7+by+OY};}
-  else if(o.atk===1){q(8,12,4,2,arm);q(8,13,4,1,arm2);q(12,12,2,2,c.skin);hand={x:13+lx,y:12+by+OY};}
-  else if(o.atk===2){q(8,12,2,3,arm);q(9,12,1,3,arm2);q(9,15,2,2,c.skin);hand={x:10+lx,y:16+by+OY};}
-  else{const a=o.armS+(o.hurt?-1:0);q(7+a,11,2,4,arm);q(8+a,11,1,4,arm2);q(7+a,15,2,2,c.skin);hand={x:8+a+lx,y:16+by+OY};}}
+  if(o.atk===0){late.push(()=>{q(4,8,2,3,arm);q(5,10,2,2,arm2);q(3,7,2,2,hnd);});hand={x:3+lx,y:7+by+OY};}
+  else if(o.atk===1){q(8,12,4,2,arm);q(8,13,4,1,arm2);q(12,12,2,2,hnd);hand={x:13+lx,y:12+by+OY};}
+  else if(o.atk===2){q(8,12,2,3,arm);q(9,12,1,3,arm2);q(9,15,2,2,hnd);hand={x:10+lx,y:16+by+OY};}
+  else{const a=o.armS+(o.hurt?-1:0);q(7+a,11,2,4,arm);q(8+a,11,1,4,arm2);q(7+a,15,2,2,hnd);hand={x:8+a+lx,y:16+by+OY};}}
  else{
-  const hl=o.hurt?-1:0;q(3,11+Math.max(0,o.armL)+hl,1,4,arm);q(3,15+Math.max(0,o.armL)+hl,1,2,c.skin);if(!c.sleeves)q(3,12+Math.max(0,o.armL),1,1,c.sk2);
-  if(o.atk===0){late.push(()=>{q(12,7,1,4,arm2);q(13,7,1,3,arm);q(12,5,2,2,c.skin);});hand={x:12,y:5+by+OY};}
-  else if(o.atk===1){q(12,11,1,2,arm2);q(11,13,1,2,arm2);q(10,15,2,2,c.skin);hand={x:10,y:16+by+OY};}
-  else if(o.atk===2){q(12,12,1,4,arm2);q(12,16,1,2,c.skin);hand={x:12,y:17+by+OY};}
-  else{const r=Math.max(0,o.armR)+hl;q(12,11+r,1,4,arm2);q(12,15+r,1,2,c.skin);hand={x:12,y:16+r+by+OY};}}
+  const hl=o.hurt?-1:0;q(3,11+Math.max(0,o.armL)+hl,1,4,arm);q(3,15+Math.max(0,o.armL)+hl,1,2,hnd);if(!c.sleeves)q(3,12+Math.max(0,o.armL),1,1,c.sk2);
+  if(o.atk===0){late.push(()=>{q(12,7,1,4,arm2);q(13,7,1,3,arm);q(12,5,2,2,hnd);});hand={x:12,y:5+by+OY};}
+  else if(o.atk===1){q(12,11,1,2,arm2);q(11,13,1,2,arm2);q(10,15,2,2,hnd);hand={x:10,y:16+by+OY};}
+  else if(o.atk===2){q(12,12,1,4,arm2);q(12,16,1,2,hnd);hand={x:12,y:17+by+OY};}
+  else{const r=Math.max(0,o.armR)+hl;q(12,11+r,1,4,arm2);q(12,15+r,1,2,hnd);hand={x:12,y:16+r+by+OY};}}
  if(c.pad){if(S_){q(6,10,4,2,c.pad);q(6,11,4,1,c.pad2);q(6,10,2,1,shade(c.pad,.2));}else{q(2,10,3,2,c.pad);q(11,10,3,2,c.pad);q(2,11,3,1,c.pad2);q(11,11,3,1,c.pad2);q(2,10,1,1,shade(c.pad,.25));q(11,10,1,1,shade(c.pad,.25));}}
  // head + neck
  q(6,10,4,1,c.sk2);
