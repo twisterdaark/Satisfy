@@ -128,7 +128,7 @@ async function openGame(opts = {}) {
 async function newContext(opts = {}) {
   const ctx = await (await browser()).newContext();
   await ctx.addInitScript(INIT_SCRIPT);
-  for (const s of opts.scripts || []) await ctx.addInitScript({ path: s });
+  for (const s of opts.scripts || []) await ctx.addInitScript(typeof s === 'string' ? { path: s } : s); // a file, or { content }
   // Hermetic: the game must run with no network (it only asks for Google Fonts, which may fail).
   ctx.__external = [];
   await ctx.route('**/*', (route) => {

@@ -253,6 +253,21 @@
         }
       }
     },
+    "ranks": {
+      ".read": "auth != null",
+      "$kind": {
+        ".indexOn": ["v"],
+        ".validate": "$kind === 'lv' || $kind === 'gold'",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['v', 'n', 't'])",
+          "v": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000000 && newData.val() % 1 === 0" },
+          "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",
@@ -576,6 +591,28 @@
             "c": { ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)" },
             "h": { ".validate": "newData.isString() && newData.val().length <= 24" },
             "uid": { ".validate": "newData.val() === auth.uid" },
+            "t": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        },
+        "legends": {
+          ".read": "auth != null",
+          "$k": {
+            ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid) || (data.exists() && data.child('uid').val() === auth.uid))",
+            ".validate": "$k.matches(/^[a-z0-9_]{1,24}$/) && newData.hasChildren(['uid', 'n', 't'])",
+            "uid": { ".validate": "newData.val() === auth.uid" },
+            "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+            "t": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        },
+        "wb": {
+          ".read": "auth != null",
+          "$type": {
+            ".write": "auth != null && (!data.exists() || data.child('at').val() < now)",
+            ".validate": "$type.matches(/^[a-z0-9_]{1,16}$/) && newData.hasChildren(['at', 'by', 't'])",
+            "at": { ".validate": "newData.isNumber() && newData.val() > now && newData.val() <= now + 7200000" },
+            "by": { ".validate": "newData.val() === auth.uid" },
             "t": { ".validate": "newData.val() === now" },
             "$other": { ".validate": false }
           }

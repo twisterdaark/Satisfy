@@ -52,7 +52,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|drops|dropClaims|kills|bounties|bountyPaid|arena)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|drops|dropClaims|kills|bounties|bountyPaid|arena|ranks|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -60,6 +60,19 @@
     apply(m.op, m.p, m.v);
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
+  // the paths a root update claims for its first writer only (each one's rules need !data.exists() or the like)
+  const CLAIM_RE = /^(guildNames|guildVaultTaken|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb))\//, CLAIM_WAIT = 120;
+  function rootUpdate(diff) {
+    const ps = Object.keys(diff);curDiff = diff;bDiff = diff;let errs;try{errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);}finally{curDiff = null;bDiff = null;}
+    F.log.push({ op: 'update', path: '', err: errs[0] || null, keys: ps.slice().sort() });
+    if (errs.length) { F.rejected.push(errs[0]); return Promise.reject(Object.assign(new Error(errs[0]), { code: 'PERMISSION_DENIED' })); }
+    const fix = (x) => (x && typeof x === 'object' ? (JSON.stringify(x) === JSON.stringify(SV) ? Date.now() : Object.fromEntries(Object.entries(x).map(([k, y]) => [k, fix(y)]))) : x);
+    for (const p of ps) {
+      if (diff[p] === null) { for (const k of [...data.keys()]) if (k === p || k.startsWith(p + '/')) { mine.delete(k); write('remove', k); } continue; }
+      mine.add(p); write('set', p, fix(clone(diff[p])));
+    }
+    return Promise.resolve();
+  }
 
   const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'ol', 'gd', 'seq', 't'];
   const POS_X = 16384, POS_Y = 8192, POS_Y0 = -4096; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
@@ -243,9 +256,34 @@
     const one = (v.w === old.w + 1 && v.l === old.l) || (v.l === old.l + 1 && v.w === old.w);
     return one && Math.abs(v.r - old.r) <= 64 ? null : 'arena step';
   }
+  // SAT-ONLINE-054: world/satisfy/legends/{k} {uid, n, t}: taken once, then only its owner changes or frees it
+  function worldRules(seg, v) {
+    if (!user || seg.length !== 4 || seg[1] !== 'satisfy' || seg[2] !== 'legends' || !/^[a-z0-9_]{1,24}$/.test(seg[3])) return 'PERMISSION_DENIED: ' + seg.join('/');
+    const old = data.get(seg.join('/'));
+    if (old && old.uid !== user.uid) return 'PERMISSION_DENIED: legend taken';
+    if (v === null) return old ? null : 'PERMISSION_DENIED: legend remove';
+    return Object.keys(v).sort().join(',') === 'n,t,uid' && v.uid === user.uid && typeof v.n === 'string' && v.n.length >= 1 && v.n.length <= 24 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'legend fields';
+  }
+  // SAT-ONLINE-055 rankings: ranks/{lv|gold}/{uid} {v, n, t}, each player its own
+  function rankRules(seg, v) {
+    if (!user || seg.length !== 3 || !['lv', 'gold'].includes(seg[1]) || seg[2] !== user.uid) return 'PERMISSION_DENIED: ' + seg.join('/');
+    if (v === null) return null;
+    return Object.keys(v).sort().join(',') === 'n,t,v' && isInt(v.v, 0) && v.v <= 1e12 && typeof v.n === 'string' && v.n.length >= 1 && v.n.length <= 24 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'ranks fields';
+  }
+  // SAT-ONLINE-056: world/satisfy/wb/{type} {at, by, t}: a world boss's respawn time, set by its killer, once per kill
+  function wbRules(seg, v) {
+    if (!user || seg.length !== 4 || seg[1] !== 'satisfy' || seg[2] !== 'wb' || !/^[a-z0-9_]{1,16}$/.test(seg[3])) return 'PERMISSION_DENIED: ' + seg.join('/');
+    const old = data.get(seg.join('/')), now = Date.now();
+    if (old && !(old.at < now)) return 'PERMISSION_DENIED: wb running';
+    if (v === null) return 'PERMISSION_DENIED: wb remove';
+    return Object.keys(v).sort().join(',') === 'at,by,t' && typeof v.at === 'number' && v.at > now && v.at <= now + 7200000 && v.by === user.uid && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'wb fields';
+  }
   function rules(p, v, existing) {
     const seg = p.split('/');
     if (seg[0] === 'arena') return arenaRules(seg, v);
+    if (seg[0] === 'world' && seg[2] === 'wb') return wbRules(seg, v);
+    if (seg[0] === 'world') return worldRules(seg, v);
+    if (seg[0] === 'ranks') return rankRules(seg, v);
     if (['guilds', 'guildNames', 'guildMembers', 'guildInv', 'guildChat', 'guildVault', 'guildVaultTaken'].includes(seg[0])) return guildRules(seg, v);
     if (seg[0] === 'drops' || seg[0] === 'dropClaims') return dropRules(seg, v);
     if (seg[0] === 'kills' || seg[0] === 'bounties' || seg[0] === 'bountyPaid') return bountyRules(seg, v);
@@ -441,15 +479,11 @@
     // RTDB update(): merge into the stored node (null removes a field), then check the rules on the result
     update: (r, diff) => {
       if (!r.path) { // a multi-location update at the root (SAT-ONLINE-039): all or nothing, each path checked against the data before it
-        const ps = Object.keys(diff);curDiff = diff;bDiff = diff;let errs;try{errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);}finally{curDiff = null;bDiff = null;}
-        F.log.push({ op: 'update', path: '', err: errs[0] || null, keys: ps.slice().sort() });
-        if (errs.length) { F.rejected.push(errs[0]); return Promise.reject(Object.assign(new Error(errs[0]), { code: 'PERMISSION_DENIED' })); }
-        const fix = (x) => (x && typeof x === 'object' ? (JSON.stringify(x) === JSON.stringify(SV) ? Date.now() : Object.fromEntries(Object.entries(x).map(([k, y]) => [k, fix(y)]))) : x);
-        for (const p of ps) {
-          if (diff[p] === null) { for (const k of [...data.keys()]) if (k === p || k.startsWith(p + '/')) { mine.delete(k); write('remove', k); } continue; }
-          mine.add(p); write('set', p, fix(clone(diff[p])));
-        }
-        return Promise.resolve();
+        // A claim (a path the rules let only its first writer take) waits its turn across the pages, as the real database
+        // orders writes: the pages hold one lock in turn, and each waits for the last one's copy to arrive before it checks.
+        // Without it two pages taking the same vault piece at once both passed on their own copies (Claude-B, #13).
+        if (Object.keys(diff).some((p) => CLAIM_RE.test(p)) && navigator.locks) return navigator.locks.request('fake-rtdb-claim', () => new Promise((res) => setTimeout(res, CLAIM_WAIT)).then(() => rootUpdate(diff)));
+        return rootUpdate(diff);
       }
       const cur = data.has(r.path) ? clone(data.get(r.path)) : (pending.has(r.path) ? clone(pending.get(r.path)) : {});
       // a key with slashes ("m/<key>") is a path inside the node, as RTDB update() takes it (SAT-ONLINE-042)
@@ -485,7 +519,7 @@
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
-      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena'].includes(seg[0]) ? !!user : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks'].includes(seg[0]) ? !!user : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));
@@ -502,7 +536,7 @@
         const seg = r.path.split('/');
         const tm = (seg[0] === 'tradeSides' && seg.length === 3) || (seg[0] === 'tradeDone' && seg.length === 2) ? tradeMeta(seg[1]) : null;
         const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : seg[0] === 'guildVault' && seg.length === 2 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
-        const ok = gl !== null ? gl : r.path === 'bounties' ? !!user : seg[0] === 'sessions' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own') && !!user;
+        const ok = gl !== null ? gl : r.path === 'bounties' ? !!user : seg[0] === 'sessions' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);

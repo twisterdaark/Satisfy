@@ -5,7 +5,7 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
-    { v: '2026-10-19w', ver: '0.46', d: '2026-10-19',
+    { v: '2026-10-20e', ver: '0.49', d: '2026-10-20',
       ar: ['الإمبراطورية الصحراوية: أرض جديدة كاملة شرق المملكة الخالدة، ورا جبال سواز',
         'جبال سواز على الحدود فيها إيتي وأوجر وترول وجارجويل، وجارجويل نظرته بتحجّرك لحظة',
         'رولينغ، القرية الصغيرة اللي ورا الجبال، فيها كاهن وتاجر ونزل، ووادي دران جنوبها فيه سمندل عملاق ورجال سحالي',
@@ -20,7 +20,7 @@
         'The Abyss north of Titan: three floors underground with prison guards and prisoners, and the Hydra at the bottom (level 480)',
         'The Butin Barony in the south-east on the far road, with the Baron and an inn',
         '6 new quests, 10 new lore spots and 9 new monsters'] },
-    { v: '2026-10-19v', ver: '0.45', d: '2026-10-19',
+    { v: '2026-10-20d', ver: '0.48', d: '2026-10-20',
       ar: ['الماب بقى أكبر مرتين: أراضي جديدة في أقصى الشمال وأقصى الجنوب',
         'الشمال: سور الشمال وبواباته فوق الطرق الشمالية، ووراه جبال الفوضى بأربع سلاسل، كل سلسلة أصعب من اللي قبلها (لفل 200 لـ 460)',
         'جبال الفوضى فيها عاصفة تلج على طول، ومن السلسلة التانية التلج بيجرحك شوية شوية إلا جنب النار، ومستنقعات سامة بتبطّأك',
@@ -33,6 +33,15 @@
         'A sanju, the beast of the old myths that rules the mountain, keeps a lair on every ridge, and the northern army has an outpost past the wall',
         'South: the Pedro countryside and its fields, the Gauss Kingdom border wall south of Patrian, and the South Sea coast with Cork Island off shore',
         '14 new monsters, and new places on the map with lines from the novel'] },
+    { v: '2026-10-20c', ver: '0.47', d: '2026-10-20',
+      ar: ['أونلاين: تراوكا التنين الأحمر واحد في العالم كله: لما حد يقتله بيفضل ميت نص ساعة عند كل اللاعبين، حتى اللي ماكانوش موجودين'],
+      en: ['Online: Trauka the Red Dragon is one for the whole world: once someone kills it, it stays dead for half an hour for every player, even those who were not there'] },
+    { v: '2026-10-20b', ver: '0.46', d: '2026-10-20',
+      ar: ['أونلاين: ترتيب اللفل والفلوس عند موظف الترتيب في رينهارت بقى فيه اللاعبين الحقيقيين جنب أبطال الرواية'],
+      en: ['Online: the level and wealth rankings at the clerk in Reinhardt now list the real players among the heroes of the novel'] },
+    { v: '2026-10-20a', ver: '0.45', d: '2026-10-20',
+      ar: ['أونلاين: كل كلاس أسطوري (وريث باغما، وريث براهام، وريث مولر) واحد بس في العالم كله: أول واحد ياخده بياخده لكل اللاعبين، والباقيين بيشوفوا اسمه'],
+      en: ["Online: each legendary class (Pagma's, Braham's and Muller's Successor) is one per world: the first to take it takes it for every player, and the others see who"] },
     { v: '2026-10-19u', ver: '0.44', d: '2026-10-19',
       ar: ['أونلاين: مواسم الساحة: كل مبارزة أونلاين بتغير تقييمك في موسم الشهر ده (بتبدأ من 1000)، وزرار "الساحة" في قايمة اللاعبين بيوريك أحسن 10 وتقييمك',
         'كل شهر جديد موسم جديد'],
