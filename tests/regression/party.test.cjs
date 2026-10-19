@@ -83,7 +83,7 @@ for (const mode of ['local', 'online']) {
       await settle(a, b);
       assert.equal((await party(b)).id, null);
       assert.equal(await shown(b, 'partyInv'), false);
-      await a.step(10);
+      await until(a, () => !(Satisfy.local.net().party || {}).id);
       assert.equal((await party(a)).id, null, 'declined, nobody left: party dissolves');
       await a.page.keyboard.press('KeyP');
       await settle(a, b);
@@ -96,6 +96,7 @@ for (const mode of ['local', 'online']) {
       await settle(a, b);
       await a.step(6 * 60); // past the grace period
       await settle(a, b);
+      for (const g of [a, b]) await until(g, () => !(Satisfy.local.net().party || {}).id);
       assert.equal((await party(b)).id, null);
       assert.equal((await party(a)).id, null);
       assert.equal(await shown(a, 'partyW'), false);
