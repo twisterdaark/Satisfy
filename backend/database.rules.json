@@ -253,6 +253,21 @@
         }
       }
     },
+    "ranks": {
+      ".read": "auth != null",
+      "$kind": {
+        ".indexOn": ["v"],
+        ".validate": "$kind === 'lv' || $kind === 'gold'",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['v', 'n', 't'])",
+          "v": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000000 && newData.val() % 1 === 0" },
+          "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",

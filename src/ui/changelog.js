@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20b', ver: '0.46', d: '2026-10-20',
+      ar: ['أونلاين: ترتيب اللفل والفلوس عند موظف الترتيب في رينهارت بقى فيه اللاعبين الحقيقيين جنب أبطال الرواية'],
+      en: ['Online: the level and wealth rankings at the clerk in Reinhardt now list the real players among the heroes of the novel'] },
     { v: '2026-10-20a', ver: '0.45', d: '2026-10-20',
       ar: ['أونلاين: كل كلاس أسطوري (وريث باغما، وريث براهام، وريث مولر) واحد بس في العالم كله: أول واحد ياخده بياخده لكل اللاعبين، والباقيين بيشوفوا اسمه'],
       en: ["Online: each legendary class (Pagma's, Braham's and Muller's Successor) is one per world: the first to take it takes it for every player, and the others see who"] },
