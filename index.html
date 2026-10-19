@@ -3453,11 +3453,12 @@ function drawNode(x,y,n){if(n.kind==='herb'||n.kind==='bherb')return drawHerb(x,
 function render(dt){
  const sx=shake>0?(rand()-.5)*4:0,sy=shake>0?(rand()-.5)*4:0;
  const titleCam=mode==='lang'||mode==='title'||(mode==='controls'&&ctrlBack==='titleScreen');
- let tx,ty;if(titleCam){tx=8*TS+Math.sin(gTime*.08)*120+120;ty=14*TS;}else{tx=P.x-W/2;ty=P.y-H/2-8;}
+ let tx,ty;const RM=!titleCam&&P&&roomAt(P.x,P.y);if(titleCam){tx=8*TS+Math.sin(gTime*.08)*120+120;ty=14*TS;}else if(RM){tx=(RM.rx+6)*TS-W/2;ty=(RM.ry+4)*TS-H/2;}else{tx=P.x-W/2;ty=P.y-H/2-8;}
+ // a house room (12x8 tiles) is smaller than the screen: the view centres on it (Twister: the Reidan merchant sat under the HUD)
  // above ground the view stops at the world's edge, so the cave rows stored under it never show
- const yMax=!titleCam&&P&&P.y<WMH*TS?WMH*TS-VH:MH*TS-VH+8*TS;const yMin=!titleCam&&P&&P.y>=WMH*TS?WMH*TS:-NR*TS;tx=clamp(tx,0,MW*TS-VW);ty=clamp(ty,yMin,yMax);
+ const yMax=!titleCam&&P&&P.y<WMH*TS?WMH*TS-VH:MH*TS-VH+8*TS;const yMin=!titleCam&&P&&P.y>=WMH*TS?WMH*TS:-NR*TS;if(!RM){tx=clamp(tx,0,MW*TS-VW);ty=clamp(ty,yMin,yMax);}
  if(titleCam||camSnap){camXf=tx;camYf=ty;camSnap=false;}else{const k=Math.min(1,dt*9);camXf+=(tx-camXf)*k;camYf+=(ty-camYf)*k;}
- const fxp=clamp(camXf+sx,0,MW*TS-VW),fyp=clamp(camYf+sy,yMin,yMax);camX=Math.floor(fxp);camY=Math.floor(fyp);
+ const fxp=RM?camXf+sx:clamp(camXf+sx,0,MW*TS-VW),fyp=RM?camYf+sy:clamp(camYf+sy,yMin,yMax);camX=Math.floor(fxp);camY=Math.floor(fyp);
  cvs.style.transform=`translate(${(-(fxp-camX)*SC).toFixed(2)}px,${(-(fyp-camY)*SC).toFixed(2)}px)`;
  ctx.drawImage(groundC,camX,camY+NR*TS,VW,VH,0,0,VW,VH);
  ctx.save();ctx.translate(-camX,-camY);
