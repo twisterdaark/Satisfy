@@ -60,6 +60,19 @@
     apply(m.op, m.p, m.v);
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
+  // the paths a root update claims for its first writer only (each one's rules need !data.exists() or the like)
+  const CLAIM_RE = /^(guildNames|guildVaultTaken|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb))\//, CLAIM_WAIT = 120;
+  function rootUpdate(diff) {
+    const ps = Object.keys(diff);curDiff = diff;bDiff = diff;let errs;try{errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);}finally{curDiff = null;bDiff = null;}
+    F.log.push({ op: 'update', path: '', err: errs[0] || null, keys: ps.slice().sort() });
+    if (errs.length) { F.rejected.push(errs[0]); return Promise.reject(Object.assign(new Error(errs[0]), { code: 'PERMISSION_DENIED' })); }
+    const fix = (x) => (x && typeof x === 'object' ? (JSON.stringify(x) === JSON.stringify(SV) ? Date.now() : Object.fromEntries(Object.entries(x).map(([k, y]) => [k, fix(y)]))) : x);
+    for (const p of ps) {
+      if (diff[p] === null) { for (const k of [...data.keys()]) if (k === p || k.startsWith(p + '/')) { mine.delete(k); write('remove', k); } continue; }
+      mine.add(p); write('set', p, fix(clone(diff[p])));
+    }
+    return Promise.resolve();
+  }
 
   const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'ol', 'gd', 'seq', 't'];
   const POS_X = 16384, POS_Y = 8192, POS_Y0 = -4096; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
@@ -441,15 +454,11 @@
     // RTDB update(): merge into the stored node (null removes a field), then check the rules on the result
     update: (r, diff) => {
       if (!r.path) { // a multi-location update at the root (SAT-ONLINE-039): all or nothing, each path checked against the data before it
-        const ps = Object.keys(diff);curDiff = diff;bDiff = diff;let errs;try{errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);}finally{curDiff = null;bDiff = null;}
-        F.log.push({ op: 'update', path: '', err: errs[0] || null, keys: ps.slice().sort() });
-        if (errs.length) { F.rejected.push(errs[0]); return Promise.reject(Object.assign(new Error(errs[0]), { code: 'PERMISSION_DENIED' })); }
-        const fix = (x) => (x && typeof x === 'object' ? (JSON.stringify(x) === JSON.stringify(SV) ? Date.now() : Object.fromEntries(Object.entries(x).map(([k, y]) => [k, fix(y)]))) : x);
-        for (const p of ps) {
-          if (diff[p] === null) { for (const k of [...data.keys()]) if (k === p || k.startsWith(p + '/')) { mine.delete(k); write('remove', k); } continue; }
-          mine.add(p); write('set', p, fix(clone(diff[p])));
-        }
-        return Promise.resolve();
+        // A claim (a path the rules let only its first writer take) waits its turn across the pages, as the real database
+        // orders writes: the pages hold one lock in turn, and each waits for the last one's copy to arrive before it checks.
+        // Without it two pages taking the same vault piece at once both passed on their own copies (Claude-B, #13).
+        if (Object.keys(diff).some((p) => CLAIM_RE.test(p)) && navigator.locks) return navigator.locks.request('fake-rtdb-claim', () => new Promise((res) => setTimeout(res, CLAIM_WAIT)).then(() => rootUpdate(diff)));
+        return rootUpdate(diff);
       }
       const cur = data.has(r.path) ? clone(data.get(r.path)) : (pending.has(r.path) ? clone(pending.get(r.path)) : {});
       // a key with slashes ("m/<key>") is a path inside the node, as RTDB update() takes it (SAT-ONLINE-042)
