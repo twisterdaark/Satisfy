@@ -32,7 +32,7 @@
   var WORLD_ID = 'satisfy';
   // posX/posY: pixel bounds the database accepts for x/y (backend/database.rules.json). They are
   // headroom over the map (724 x 144 tiles = 11584 x 2304 px today) so a wider map needs no redeploy.
-  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 2048, shard: 999, posX: 16384, posY: 4096 });
+  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 2048, shard: 999, posX: 16384, posY: 4096, posYMin: -2048 });
   var ANIMS = ['idle', 'walk', 'attack', 'dodge', 'dead'];
   // PlayerPublic.em (SAT-ONLINE-022, doc §35 U061): an emote from a fixed list, never free text
   var EMOTES = ['wave', 'dance', 'point', 'cheer'];
@@ -160,7 +160,7 @@
     if (!Number.isInteger(o.lv) || o.lv < 1 || o.lv > 999) e.push('lv');
     if (!Number.isInteger(o.x) || !Number.isInteger(o.y)) e.push('position');
     var w = opts && opts.world;
-    if (w && (o.x < 0 || o.y < 0 || o.x >= w.w * w.tile || o.y >= w.h * w.tile)) e.push('out of world');
+    if (w && (o.x < 0 || o.y < -(w.north || 0) * w.tile || o.x >= w.w * w.tile || o.y >= w.h * w.tile)) e.push('out of world'); // rows -north..-1 are the north (SAT-WORLD-003)
     if (!Number.isInteger(o.dir) || o.dir < 0 || o.dir > 3) e.push('dir');
     if (ANIMS.indexOf(o.anim) < 0) e.push('anim');
     if (o.arm !== 0 && o.arm !== 1) e.push('arm');

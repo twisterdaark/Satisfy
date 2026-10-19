@@ -52,7 +52,7 @@
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
 
   const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'seq', 't'];
-  const POS_X = 16384, POS_Y = 4096; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
+  const POS_X = 16384, POS_Y = 4096, POS_Y0 = -2048; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
   function rules(p, v, existing) {
     const seg = p.split('/');
@@ -74,7 +74,7 @@
     if (JSON.stringify(v.t) !== JSON.stringify(SV)) return 't must be the server timestamp';
     if (typeof v.sid !== 'string' || v.sid.length < 8 || v.sid.length > 64) return 'sid';
     if (typeof v.handle !== 'string' || v.handle.length > 24) return 'handle';
-    if (!(v.x >= 0 && v.x < POS_X && v.y >= 0 && v.y < POS_Y)) return 'position';
+    if (!(v.x >= 0 && v.x < POS_X && v.y >= POS_Y0 && v.y < POS_Y)) return 'position';
     if (!/^(idle|walk|attack|dodge|dead)$/.test(v.anim)) return 'anim';
     if (v.arm !== 0 && v.arm !== 1) return 'arm';
     if ('room' in v && (typeof v.room !== 'string' || v.room.length > 16)) return 'room';

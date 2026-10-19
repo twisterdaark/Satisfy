@@ -3447,7 +3447,8 @@ let last=performance.now(),hudT=0,saveT=0;
 // One bad monster is reset to idle instead of stopping every other monster behind it.
 const ERRS=new Set();
 function gameErr(e,m){if(m){m.st=null;m.tele=0;m.combo=0;m.flee=0;}const k=String(e&&e.message||e);if(ERRS.has(k))return;ERRS.add(k);console.error(e);try{logMsg('ERR '+k+' '+String(e&&e.stack||'').split('\n')[1]);toast(t('gameErr',{e:k.slice(0,90)}),'warn');}catch(_){}}
-function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{update(dt);}catch(e){gameErr(e);}if(NET)try{netTick();}catch(e){gameErr(e);}if(TOUCH)touchTick();try{render(dt);}catch(e){gameErr(e);}
+let loopAt=0;
+function loop(now){requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{update(dt);}catch(e){gameErr(e);}if(NET)try{netTick();}catch(e){gameErr(e);}if(TOUCH)touchTick();try{render(dt);}catch(e){gameErr(e);}
  if(mode==='play')updateKeys();
  if(mode==='create')drawPrev();if(DL&&DL.pv)drawDPrev();
  if(mode==='map'&&(gTime*2|0)!==(Math.max(0,gTime-dt)*2|0))drawMap();
@@ -3455,12 +3456,17 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,Math.max(0,
  if(mode==='play'||mode==='forge'||mode==='inv'||mode==='dialog'||mode==='status'||mode==='dead'||mode==='cut'||mode==='equip'||mode==='log'||mode==='map'){hudT-=dt;if(hudT<=0||hudDirty){updateHUD();hudT=.1;hudDirty=false;}saveT+=dt;if(saveT>20&&mode==='play'){saveT=0;save(true);}}
 }
 requestAnimationFrame(loop);
+/* SAT-ONLINE-026: browsers pause requestAnimationFrame in a hidden, minimised or covered window, and with it presence and the
+   party timers (the other player saw "? left the party", then the party broke). A worker clock, which pages don't throttle like
+   their own timers, keeps netTick running about once a second while the frame loop sleeps. */
+(()=>{if(typeof Worker==='undefined'||typeof Blob==='undefined')return;try{const w=new Worker(URL.createObjectURL(new Blob(['setInterval(function(){postMessage(0)},1000)'],{type:'text/javascript'})));
+ w.onmessage=()=>{if(NET&&performance.now()-loopAt>1500)try{netTick();}catch(e){gameErr(e);}};}catch(e){}})();
 window.__G={get CARD(){return CARD},get SM(){return SM},get allies(){return allies},get S(){return S},get P(){return P},get mode(){return mode},die:()=>die(),mons:()=>mons,get npcs(){return npcs},nodes,act,finishMG:()=>finishMG,startMG:id=>startMG(RC.find(r=>r.id===id)),get MG(){return MG},talkNPC:id=>talkNPC(id),completeQ:id=>completeQ(id),acceptQ:id=>acceptQ(id),useSlot:i=>useSlot(i),newGame:L=>newGame(L),QD,openMap:()=>openMap(),get proj(){return proj},gainXP:n=>gainXP(n),openPick:s=>openPick(s),pickOpt:i=>pickOpt(i),advance:()=>advance(),get DL(){return DL},zoneAt,VT,chopped,tryAttack:(a,b)=>tryAttack(a,b),get KB(){return KB},ROOMS,PROPS,enterRoom:r=>enterRoom(r),openBoard:()=>openBoard(),openQD:id=>openQD(id),TOWNS,useProp:p=>useProp(p),at:(x,y)=>at(x,y),setT:(x,y,v)=>setT(x,y,v),eqx:{buyGear:(i,g,w)=>buyGear(i,g,w),equip:i=>equip(i),eqIt:s=>eqIt(s),defV:()=>defV(),atkV:()=>atkV(),atkCD:()=>atkCD(),maxMP:()=>maxMP(),repairAll:w=>repairAll(w),enhance:(i,w)=>enhance(i,w),mkItem:(i,r)=>mkItem(i,r),openEquip:()=>openEquip(),wear:(i,p)=>wear(i,p),openForge:()=>openForge(),price:(w,g)=>price(w,g),addAff:(i,n)=>addAff(i,n),giveGift:(w,k)=>giveGift(w,k),townOfNpc:i=>townOfNpc(i),get ESC(){return ESC},solid:(x,y)=>solidT(x,y),DGATES,DUN,useGate:g=>useGate(g)}};
 // Read-only engine surface for the online layer and for content tests. Contract: docs/api/ENGINE_API.md
 const plain=o=>JSON.parse(JSON.stringify(o,(k,v)=>typeof v==='function'?{$fn:String(v)}:v));
 Satisfy.local=Object.freeze({api:1,
  defs:()=>plain({MT,BOSSES,SPAWN,QD:Object.fromEntries(Object.entries(QD).filter(([,q])=>!q.gen)),RC,SKD,NPCS,TOWNS,ZR,MATS:Object.keys(S.mats)}),
- world:()=>({id:Satisfy.net.WORLD_ID,tile:TS,w:MW,h:MH,outdoorH:WMH,zones:ZR.map(z=>z[0]),towns:TOWNS.map(z=>z.k)}),
+ world:()=>({id:Satisfy.net.WORLD_ID,tile:TS,w:MW,h:MH,north:NR,outdoorH:WMH,zones:ZR.map(z=>z[0]),towns:TOWNS.map(z=>z.k)}),
  rooms:()=>ROOMS.map(R=>({id:R.id,kind:R.kind,zone:R.z})),
  zoneAt:(x,y)=>netZone(x,y), // 'void' where the world defines nothing (SAT-ONLINE-019)
  roomAt:(x,y)=>{const R=roomAt(x,y);return R?{id:R.id,kind:R.kind,zone:R.z}:null;},
@@ -3762,7 +3768,7 @@ function cloudProfile(){const C=cloudApi();if(!C||!S||S.__demo)return;cloudProfT
 function netFail(e){netSetState('ERROR');netBtn();toast(t('netFail',{e:(e&&e.code)||(e&&e.message)||'?'}),'warn');}
 function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;netSetState('JOINING');netBtn();
  const tr=NETTR=Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',interest:NET_INTEREST,onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');if(up)netForce=true;netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)});
- netStart(Satisfy.presence.create({transport:tr,uid:user.uid,world:Satisfy.local.world(),now:()=>performance.now(),config:{moveHz:5,idleHz:.2,expireMs:15000}})); // cost model: docs/online/COST_MODEL.md
+ netStart(Satisfy.presence.create({transport:tr,uid:user.uid,world:Satisfy.local.world(),now:()=>performance.now(),config:{moveHz:5,idleHz:.2,expireMs:30000}})); // cost model: docs/online/COST_MODEL.md
  netLease=Satisfy.firebase.lease(sdk,user.uid,NET.sid,netReplace);
  addEventListener('pagehide',()=>{if(NET)NET.close();});}
 /* one session per account (SAT-ONLINE-010, doc U006/T07): the newest tab or device signed in with the account

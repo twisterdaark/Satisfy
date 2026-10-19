@@ -56,9 +56,13 @@ test('position bounds cover the whole map, and the fake uses the same bounds', (
   const mw = lw + gaps.reduce((a, g) => a + g[1], 0);
   assert.ok(mw * ts <= N.LIMITS.posX, `map width ${mw * ts}px fits under ${N.LIMITS.posX}`);
   assert.ok(mh * ts <= N.LIMITS.posY, `map height ${mh * ts}px fits under ${N.LIMITS.posY}`);
+  // the north (SAT-WORLD-003) is rows -NR..-1: y goes down to -NR*TS
+  const nr = +(/,NR=(\d+)/.exec(html) || [0, 0])[1];
+  assert.ok(-nr * ts >= N.LIMITS.posYMin, `north edge ${-nr * ts}px fits above ${N.LIMITS.posYMin}`);
+  assert.match(node.y['.validate'], new RegExp('>= ' + N.LIMITS.posYMin + ' '));
   const fake = fs.readFileSync(path.join(ROOT, 'tests/harness/fake-firebase.js'), 'utf8');
-  const fb = /const POS_X = (\d+), POS_Y = (\d+);/.exec(fake);
-  assert.deepEqual([+fb[1], +fb[2]], [N.LIMITS.posX, N.LIMITS.posY]);
+  const fb = /const POS_X = (\d+), POS_Y = (\d+), POS_Y0 = (-\d+);/.exec(fake);
+  assert.deepEqual([+fb[1], +fb[2], +fb[3]], [N.LIMITS.posX, N.LIMITS.posY, N.LIMITS.posYMin]);
 });
 
 test('presence is indexed on exactly the children the interest queries order by (U009: x; party)', () => {
