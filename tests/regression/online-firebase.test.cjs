@@ -20,7 +20,7 @@ async function until(g, fn, arg, ms = 5000) {
   throw new Error('timed out waiting for ' + fn);
 }
 const net = (g) => g.eval(() => Satisfy.local.net());
-const fake = (g) => g.eval(() => ({ rejected: window.__fakeRTDB.rejected, sdk: window.__fakeRTDB.sdkVersion, cfg: window.__fakeRTDB.config, url: window.__fakeRTDB.databaseURL, redirected: window.__fakeRTDB.redirected }));
+const fake = (g) => g.eval(() => ({ rejected: window.__fakeRTDB.rejected, sdk: window.__fakeRTDB.sdkVersion, cfg: window.__fakeRTDB.config, url: window.__fakeRTDB.databaseURL, redirected: window.__fakeRTDB.redirected, params: window.__fakeRTDB.authParams }));
 
 async function signIn(g, name) {
   await g.eval((n) => { window.__fakeRTDB.nextName = n; document.getElementById('onlineBtn').click(); }, name);
@@ -62,6 +62,7 @@ test('title shows "Play online" only with ?net=online; sign-in uses the pinned S
     const f = await fake(g);
     assert.equal(f.sdk, '12.19.0');
     assert.equal(f.cfg.projectId, 'satisfy-online-8yjeix');
+    assert.deepEqual(f.params, { prompt: 'select_account' }, 'Google always shows the account chooser (37f15f6)');
     assert.equal(f.url, 'https://satisfy-online-8yjeix-default-rtdb.europe-west1.firebasedatabase.app');
     assert.deepEqual(ctx.__external.filter((u) => !/fonts\.(googleapis|gstatic)\.com/.test(u)), [], 'no real SDK download in tests');
     assert.deepEqual(g.errors, []);
@@ -156,7 +157,9 @@ test('blocked popup falls back to redirect sign-in', async () => {
     const g = await H.openGame({ ctx, query: '?net=online' });
     await g.eval(() => { window.__fakeRTDB.popupBlocked = true; document.getElementById('onlineBtn').click(); });
     await g.page.waitForTimeout(200);
-    assert.equal((await fake(g)).redirected, true);
+    const f = await fake(g);
+    assert.equal(f.redirected, true);
+    assert.deepEqual(f.params, { prompt: 'select_account' }, 'the redirect shows the account chooser too');
     assert.equal(await g.eval(() => Satisfy.local.net()), null);
     assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
