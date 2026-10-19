@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19p', ver: '0.39', d: '2026-10-19',
+      ar: ['أونلاين: الحاجة اللي بترميها من الشنطة بتفضل على الأرض 60 ثانية والكل بيشوفها، وأول واحد يعدي عليها بياخدها',
+        'اللي رماها ياخدها على طول، والباقيين بعد ثانيتين، ولما حد ياخدها بتختفي عند الكل ومبتتاخدش مرتين'],
+      en: ['Online: what you drop from the bag lies on the ground for 60 seconds where everyone sees it, and the first to walk over it takes it',
+        'The one who dropped it can take it back at once, others after two seconds; once someone takes it, it is gone for everyone and never taken twice'] },
     { v: '2026-10-19l', ver: '0.35', d: '2026-10-19',
       ar: ['أونلاين: تبادل بين اللاعبين: افتح كارت اللاعب اللي جنبك (⋯ أو T) واضغط تبادل',
         'كل واحد بيحط دهب وحاجات من الشنطة، وبعدين الاتنين يضغطوا موافق وبعدها تأكيد',

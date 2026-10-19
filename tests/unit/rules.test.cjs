@@ -172,6 +172,21 @@ test('trades: participants only; each writes its own offer until the swap; the s
   for (const n of [tr, sides.$uid, done, led]) assert.equal(n.$other['.validate'], false);
 });
 
+test('drops: the dropper writes it; one claim per drop, others after 2 s and within 60 s; the claimant or the dropper clears it', () => {
+  const d = rules.drops.$did, c = rules.dropClaims.$did;
+  assert.equal(rules.drops['.read'], 'auth != null');
+  assert.match(d['.write'], /!data\.exists\(\) && newData\.child\('o'\)\.val\(\) === auth\.uid/, 'written once by the dropper');
+  assert.match(d['.write'], /root\.child\('dropClaims'\)\.child\(\$did\)\.child\('by'\)\.val\(\) === auth\.uid/, 'the claimant clears it');
+  assert.match(d['.write'], /now > data\.child\('t'\)\.val\(\) \+ 120000/, 'anyone clears a stale one');
+  assert.equal(d.x['.validate'], node.x['.validate'], 'x bounds as presence');
+  assert.equal(d.y['.validate'], node.y['.validate'], 'y bounds as presence');
+  assert.equal(d.it['.validate'], 'newData.isString() && newData.val().length <= 600', 'an item as plain values, as in trades');
+  assert.match(c['.write'], /!data\.exists\(\) && newData\.child\('by'\)\.val\(\) === auth\.uid && root\.child\('drops'\)\.child\(\$did\)\.exists\(\)/, 'one claim, on a drop that is there');
+  assert.match(c['.write'], /now < root\.child\('drops'\)\.child\(\$did\)\.child\('t'\)\.val\(\) \+ 60000/, 'within its 60 s');
+  assert.match(c['.write'], /now > root\.child\('drops'\)\.child\(\$did\)\.child\('t'\)\.val\(\) \+ 2000/, 'others after 2 s');
+  for (const n of [d, c]) assert.equal(n.$other['.validate'], false);
+});
+
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing
 // else here parses the expressions. Merging two rules files by hand once lost one; check every expression before a deploy.
 function exprProblem(e) {

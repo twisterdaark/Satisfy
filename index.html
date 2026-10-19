@@ -3198,7 +3198,7 @@ function cfm(title,body,yes,f){const w=$('cfmW');$('cfmT').textContent=title;$('
 function invTrash(s){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
  cfm(t('delT'),t('delQ',{it:`<b class="rt rt${s.r||0}">${esc(sName(s))}</b>${s.n>1?' ×'+s.n:''}`}),t('delY'),()=>{if(!slotOut(s,true))return;SFX.deny();toast(t('delDone',{it:sName(s)}),'warn');INVX=null;renderInv();save(true);});}
 function invDrop(s){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
- cfm(t('dropT'),t('dropQ',{it:`<b class="rt rt${s.r||0}">${esc(sName(s))}</b>${s.n>1?' ×'+s.n:''}`}),t('dropY'),()=>{const o=slotOut(s,true);if(!o)return;GDROP.push({x:P.x+(rand()-.5)*12,y:P.y+10,o,t:gTime+60,lock:gTime+2});SFX.swing();toast(t('dropDone',{it:sName(s)}));renderInv();save(true);});}
+ cfm(t('dropT'),t('dropQ',{it:`<b class="rt rt${s.r||0}">${esc(sName(s))}</b>${s.n>1?' ×'+s.n:''}`}),t('dropY'),()=>{const o=slotOut(s,true);if(!o)return;const d={x:P.x+(rand()-.5)*12,y:P.y+10,o,t:gTime+60,lock:gTime+2};dropPut(d);GDROP.push(d);SFX.swing();toast(t('dropDone',{it:sName(s)}));renderInv();save(true);});}
 function invSell(s,all){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}const n=all?s.n:1,g=unitVal(s)*n;
  const go=()=>{if(!slotOut(s,all))return;S.gold+=g;SFX.coin();numP(-26,'+'+g+'G','#f2c14e',false);toast(t('soldIt',{it:sName(s)+(n>1?' ×'+n:''),g}),'good');renderInv();save(true);};
  if(s.it&&(s.r||0)>=2)cfm(t('sellT'),t('sellQ',{it:`<b class="rt rt${s.r}">${esc(sName(s))}</b>`,g}),t('sellY'),go);else go();}
@@ -3210,8 +3210,37 @@ addEventListener('pointermove',e=>{const d=INVDR;if(!d)return;if(!d.moved&&Math.
  d.img.style.left=e.clientX+'px';d.img.style.top=e.clientY+'px';const el=document.elementFromPoint(e.clientX,e.clientY);$('invTrash').classList.toggle('hot',!!(el&&el.closest('#invTrash')));});
 addEventListener('pointerup',e=>{const d=INVDR;if(!d)return;if(d.img)d.img.remove();$('invTrash').classList.remove('hot');if(!d.moved){INVDR=null;return;}setTimeout(()=>{INVDR=null;},0);
  const s=INVS[d.i],el=document.elementFromPoint(e.clientX,e.clientY);if(!s)return;if(el&&el.closest('#invTrash'))invTrash(s);else if(!(el&&el.closest('#inv')))invDrop(s);});
-function updateGDrop(){for(let i=GDROP.length-1;i>=0;i--){const d=GDROP[i];if(gTime>d.t){vfx('dust',d.x,d.y,{n:5});GDROP.splice(i,1);continue;}
- if(mode==='play'&&gTime>d.lock&&Math.hypot(P.x-d.x,P.y-d.y)<16){slotIn(d.o);GDROP.splice(i,1);SFX.coin();toast(t('got',{n:d.o.n,item:d.o.it?inm(d.o.it):t(d.o.k)}));hudDirty=true;}}}
+function updateGDrop(){for(let i=GDROP.length-1;i>=0;i--){const d=GDROP[i];if(gTime>d.t){vfx('dust',d.x,d.y,{n:5});GDROP.splice(i,1);if(d.did&&d.own&&DROPS&&!d.claiming)DROPS.remove(d.did).catch(()=>{});continue;}
+ if(mode==='play'&&gTime>d.lock&&Math.hypot(P.x-d.x,P.y-d.y)<16){if(d.did&&DROPS){if(!d.claiming){d.claiming=1;dropTake(d);}continue;} // SAT-ONLINE-048: shared, the first claim wins
+ slotIn(d.o);GDROP.splice(i,1);SFX.coin();toast(t('got',{n:d.o.n,item:d.o.it?inm(d.o.it):t(d.o.k)}));hudDirty=true;}}}
+/* things dropped on the ground, shared online (SAT-ONLINE-048; owner via Claude-B, #13): a drop is written to drops/{did}
+   for its 60 s and every player near sees it; the first to step on it claims it (dropClaims/{did}: the rules take one
+   claim per drop, and others only after 2 s) and gets it, and it is gone for everyone. An item travels as plain values
+   and is rebuilt as a new item of the one who picks it up (tradeItemIn); a stack must be of a kind every client knows.
+   The dropper takes its own back the same way. Offline, drops stay as they were. */
+var DROPS=null,dropOff=null,dropSeq=0;
+function dropStart(){if(typeof dropOff==='function')dropOff();dropOff=null;DROPS=null;for(let i=GDROP.length-1;i>=0;i--)if(GDROP[i].rem)GDROP.splice(i,1);
+ if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.dropStore))return; // NETTR first: FB is declared below
+ DROPS=Satisfy.firebase.dropStore(FB);
+ dropOff=DROPS.watch(dropIn,did=>{const i=GDROP.findIndex(d=>d.did===did);if(i>=0){const d=GDROP[i];GDROP.splice(i,1);if(!d.got)vfx('dust',d.x,d.y,{n:4});}});}
+function dropStop(){if(typeof dropOff==='function')dropOff();dropOff=null;DROPS=null;for(let i=GDROP.length-1;i>=0;i--)if(GDROP[i].rem)GDROP.splice(i,1);}
+function dropKindOk(k,r){return !!(POT[k]||k==='bread'||(k==='arrows'&&ARROWG[r]!=null)||MATP[k]!==undefined||(typeof DISH!=='undefined'&&DISH[k]));}
+function dropItemOk(js){try{const o=JSON.parse(js);return o&&typeof o.id==='string'&&rcById(o.id)?o:null;}catch(e){return null;}}
+function dropPut(d){if(!DROPS||!NET||!S||S.__demo)return;const o=d.o,v={o:NET.uid,x:Math.max(0,d.x),y:d.y,k:String(o.k||''),n:o.n|0||1,r:o.r|0};if(!/^[a-z0-9_]{1,24}$/.test(v.k))return;
+ if(o.it){const j={};for(const q in o.it)if(q!=='uid'&&q!=='iid')j[q]=o.it[q];const js=JSON.stringify(j);if(js.length>600)return;v.it=js;}
+ const did='d_'+NET.uid+'_'+Date.now().toString(36)+(++dropSeq).toString(36);d.did=did;d.own=1;DROPS.put(did,v).catch(()=>{d.did=null;d.own=0;});}
+function dropIn(did,v){if(!v||!S||S.__demo||!NET||GDROP.some(d=>d.did===did))return;
+ const left=(+v.t||0)+60000-wNow();if(left<=0){if(left<-120000)DROPS.remove(did).catch(()=>{});return;} // a stale drop anyone may clear
+ let o;if(typeof v.it==='string'){const it=dropItemOk(v.it);if(!it)return;o={json:v.it,k:v.k,n:1,r:it.r|0};}
+ else if(dropKindOk(v.k,v.r|0))o={k:v.k,n:Math.max(1,Math.min(99999,v.n|0)),r:v.r|0};else return;
+ const own=v.o===NET.uid;GDROP.push({x:+v.x,y:+v.y,o,t:gTime+left/1000,lock:gTime+(own?0:Math.max(0,(2000-(60000-left))/1000)),did,rem:1,own});}
+function dropTake(d){const did=d.did;DROPS.claim(did,NET.uid).then(()=>{const i=GDROP.indexOf(d);if(i>=0)GDROP.splice(i,1);d.got=1;
+  let o=d.o;if(o.json){const it=tradeItemIn(o.json);if(!it)return;o={it,k:o.k,n:1,r:it.r};} // someone's item: a new item of yours
+  slotIn(o);if(o.it)Satisfy.ids.ensure(S);SFX.coin();toast(t('got',{n:o.n,item:o.it?inm(o.it):t(o.k)}));hudDirty=true;save(true);
+  DROPS.remove(did).catch(()=>{}).then(()=>DROPS.unclaim(did).catch(()=>{}));
+ },()=>{const i=GDROP.indexOf(d);if(i>=0)GDROP.splice(i,1);}); // someone else was first
+}
+window.__GD={drops:()=>GDROP.map(d=>({did:d.did||null,k:d.o.k,n:d.o.n,rem:!!d.rem,own:!!d.own,x:d.x,y:d.y})),drop:k=>{renderInv();const s=INVS.find(x=>x.k===k&&!x.eq);if(s)invDrop(s);return !!s;}}; // test hook
 function drawGDrop(){for(const d of GDROP){const left=d.t-gTime;if(left<10&&(gTime*6|0)%2)continue;const y=d.y-10+Math.sin(gTime*3+d.x)*1.5;
  ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(d.x,d.y,5,2,0,0,7);ctx.fill();ctx.drawImage(iconC(d.o.k),Math.round(d.x-6),Math.round(y-6),12,12);}}
 function openEquip(){SFX.open();mode='equip';$('equipW').hidden=false;$('hint').hidden=true;renderEquip();}
@@ -4352,7 +4381,7 @@ function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch
 Object.assign(STR.ar,{pKick:'اطرد',pKickQ:'تطرد {n}؟',pKickYes:'اطرد',pKickNo:'لأ',pKickDone:'{n} اتشال من الفريق',pLeaderLeft:'{n} ساب، فالفريق اتفكك',pRejoined:'رجعت لبارتي {n}',pYouLead:'القائد مشي: إنت قائد البارتي دلوقتي',pNewLead:'القائد مشي: {n} قائد البارتي دلوقتي',pReplaced:'البارتي اختارت قائد جديد وإنت مش موجود، هترجع لهم'});
 Object.assign(STR.en,{pKick:'Kick',pKickQ:'Kick {n}?',pKickYes:'Kick',pKickNo:'Cancel',pKickDone:'{n} was removed from the party',pLeaderLeft:'{n} left, so the party broke up',pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();tradeStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();tradeStart();dropStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],leaderLeft:['pLeaderLeft','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -4831,7 +4860,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
 function netStop(){try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
- if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv'].forEach(i=>$(i).hidden=true);}
+ if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;dropStop();PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv'].forEach(i=>$(i).hidden=true);}
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid;netStop();
  (erase?C.eraseAll(['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid]):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
@@ -4866,7 +4895,7 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
 function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF=true; // from now on this tab never saves: the newer tab owns the save (review of #30)
- try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv'].forEach(i=>$(i).hidden=true);
+ try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;dropStop();PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
 // another Google account on this device (owner request): the chooser opens straight from the click, the new

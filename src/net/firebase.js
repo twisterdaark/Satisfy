@@ -373,9 +373,27 @@
     };
   }
 
+  // SAT-ONLINE-048: things dropped on the ground, for 60 s: drops/{did} (the dropper writes it) and dropClaims/{did} (the
+  // first to step on it writes it once; the rules take one claim per drop, so a drop goes to one player only)
+  function dropStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    var up = function (u) { return D.update(D.ref(db), u); };
+    return {
+      put: function (did, v) { var u = {}, o = { o: v.o, x: Math.round(v.x), y: Math.round(v.y), k: v.k, n: v.n, r: v.r, t: D.serverTimestamp() }; if (v.it) o.it = v.it; u['drops/' + did] = o; return up(u); },
+      claim: function (did, uid) { var u = {}; u['dropClaims/' + did] = { by: uid, t: D.serverTimestamp() }; return up(u); },
+      remove: function (did) { return D.remove(at('drops/' + did)); },
+      unclaim: function (did) { return D.remove(at('dropClaims/' + did)); },
+      watch: function (add, gone) {
+        var a = D.onChildAdded(at('drops'), function (s) { add(s.key, s.val()); }), b = D.onChildRemoved(at('drops'), function (s) { gone(s.key); });
+        return function () { try { a(); b(); } catch (e) { /* ignore */ } };
+      },
+    };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
     tradeStore: tradeStore,
+    dropStore: dropStore,
     SDK_VERSION: SDK_VERSION,
     load: load,
     lease: lease,
