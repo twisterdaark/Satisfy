@@ -76,6 +76,44 @@
         "$other": { ".validate": false }
       }
     },
+    "kills": {
+      ".read": "auth != null",
+      "$v": {
+        "$kid": {
+          ".write": "auth != null && $v === auth.uid && (!data.exists() || !newData.exists())",
+          ".validate": "$kid.matches(/^k_[A-Za-z0-9_-]{1,80}$/) && newData.hasChildren(['k', 't'])",
+          "k": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128 && newData.val() !== auth.uid" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "bounties": {
+      ".read": "auth != null",
+      "$bid": {
+        ".write": "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid && newData.child('tu').val() !== auth.uid) || (data.exists() && !newData.exists() && (data.child('by').val() === auth.uid || newData.parent().parent().child('bountyPaid').child($bid).child('by').val() === auth.uid)))",
+        ".validate": "$bid.matches(/^b_[A-Za-z0-9_-]{1,80}$/) && newData.hasChildren(['by', 'byN', 'tu', 'tN', 'g', 't'])",
+        "by": { ".validate": "newData.val() === auth.uid" },
+        "byN": { ".validate": "newData.isString() && newData.val().length <= 24" },
+        "tu": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128" },
+        "tN": { ".validate": "newData.isString() && newData.val().length <= 24" },
+        "g": { ".validate": "newData.isNumber() && newData.val() >= 100 && newData.val() <= 10000000 && newData.val() % 1 === 0" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "bountyPaid": {
+      ".read": "auth != null",
+      "$bid": {
+        ".write": "auth != null && !data.exists() && newData.child('by').val() === auth.uid && root.child('bounties').child($bid).exists() && root.child('bounties').child($bid).child('by').val() !== auth.uid && root.child('bounties').child($bid).child('tu').val() !== auth.uid && root.child('kills').child(root.child('bounties').child($bid).child('tu').val()).child(newData.child('kid').val()).child('k').val() === auth.uid && root.child('kills').child(root.child('bounties').child($bid).child('tu').val()).child(newData.child('kid').val()).child('t').val() > root.child('bounties').child($bid).child('t').val()",
+        ".validate": "newData.hasChildren(['by', 'kid', 'g', 't']) && newData.child('g').val() === root.child('bounties').child($bid).child('g').val()",
+        "by": { ".validate": "newData.val() === auth.uid" },
+        "kid": { ".validate": "newData.isString() && newData.val().matches(/^k_[A-Za-z0-9_-]{1,80}$/)" },
+        "g": { ".validate": "newData.isNumber()" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",

@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19s', ver: '0.42', d: '2026-10-19',
+      ar: ['أونلاين: لوحة مكافآت: من كارت أي حد اسمه أحمر (خارج عن القانون) تقدر تحط دهب مكافأة على راسه',
+        'اللي يقتله في PvP ياخد المكافأة مرة واحدة والعالم كله يعرف، وتقدر ترجع مكافأتك من زرار "المكافآت" في قايمة اللاعبين'],
+      en: ['Online: a bounty board: from the card of anyone with a red name (an outlaw) you can put gold on their head',
+        "Whoever kills them in PvP gets it once and the whole world hears; take yours back from \"Bounties\" in the player list"] },
     { v: '2026-10-19l', ver: '0.35', d: '2026-10-19',
       ar: ['أونلاين: تبادل بين اللاعبين: افتح كارت اللاعب اللي جنبك (⋯ أو T) واضغط تبادل',
         'كل واحد بيحط دهب وحاجات من الشنطة، وبعدين الاتنين يضغطوا موافق وبعدها تأكيد',
