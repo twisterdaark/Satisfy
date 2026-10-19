@@ -123,3 +123,19 @@ test('outside a party nothing changes', () => {
   assert.equal(raid.hit(KEY, 50), false);
   assert.equal(raid.isHost() || raid.isMember(), false);
 });
+
+// SAT-ONLINE-032 (review #29)
+test('a boss the host does not have (or has not confirmed lately) takes the member\'s own hits', () => {
+  const w = world(2), [h, a] = w.ps;
+  h.g.boss.dead = true;                   // the host killed it solo (respawning), or it's a tower/trial boss only we have
+  memberHit(a, 100); w.run(300);
+  memberHit(a, 100); w.run(300);
+  assert.equal(a.g.boss.hp, a.g.boss.max - 200, 'both hits stayed on the member\'s copy');
+  h.g.boss = { hp: 1000, max: 1000, dead: false };
+  memberHit(a, 50); w.run(300);            // the first hit lands on both copies; the host confirms with raid.state
+  assert.equal(h.g.boss.hp, 950);
+  assert.ok(Math.abs(a.g.boss.hp / a.g.boss.max - 0.95) < 0.002, 'the member shows the host\'s HP');
+  assert.equal(a.raid.hit(KEY, 10), true, 'confirmed: the next hit goes to the host only');
+  w.run(SN.raid.C.CONFIRM_MS + 300);
+  assert.equal(a.raid.hit(KEY, 10), false, 'no raid.state for CONFIRM_MS: back to local damage');
+});

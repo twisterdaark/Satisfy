@@ -294,6 +294,7 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, fix** (SAT-ONLINE-032, review #29): a member hands a boss hit to the host only while the host has sent `raid.state` for that boss in the last `raid.C.CONFIRM_MS` (1.5 s); otherwise the hit stays local, so tower/trial bosses and bosses the host doesn't have alive can be fought in a party. Only world bosses are shared (`praidShared`).
 - **api 1, fix** (SAT-ONLINE-032, review #12/#15): the Firebase transport knows a remote session as `uid + '.' + sid` (the uid is the node key the rules verify) and drops nodes whose `uid` isn't their key, so copying someone's `sid` (or a huge `seq`) can't hide or replace them. Inbox messages are delivered as `sidOf(from, sid)` and only when that is the session presence shows for `from`.
 - **api 1, additive** (SAT-ONLINE-025): `PlayerPublic.role` ∈ `Satisfy.net.ROLES` (`tank, healer, damage, support`) or null, published only while in a party; `party.members()[].role`; the badge in the party panel cycles through them (kept in localStorage `satisfy_role`). Presence + rules field (redeploy).
 - **api 1, additive** (SAT-ONLINE-024): party leader election (`LEAD_MS`, events `newLeader`, `replaced`). No rules change.

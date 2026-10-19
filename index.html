@@ -4124,7 +4124,8 @@ function duelTick(live){DUEL.tick();const st=DUEL.state();
 Object.assign(STR.ar,{raidKill:'الفريق قتل الزعيم! نصيبك وصلك'});
 Object.assign(STR.en,{raidKill:'Your party killed the boss! Your share is yours'});
 const praidKey=m=>m.type+'@'+(m.sx|0)+','+(m.sy|0);
-function praidBoss(key){return mons.find(m=>!m.dead&&MT[m.type].boss&&praidKey(m)===key)||null;}
+const praidShared=m=>!!MT[m.type].boss&&!m.tmp&&!m.arena&&!m.evt&&!m.sg; // world bosses only: tower/trial/arena/event/siege ones live on one client (#29)
+function praidBoss(key){return mons.find(m=>!m.dead&&praidShared(m)&&praidKey(m)===key)||null;}
 function praidStart(){PRAID=Satisfy.raid.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),local:{
  boss:k=>{const m=praidBoss(k);return m?{hp:m.hp,max:m.max}:null;},
  setHp:(k,r)=>{const m=praidBoss(k);if(m)m.hp=Math.max(1,Math.round(m.max*r));},
@@ -4135,7 +4136,7 @@ function praidStart(){PRAID=Satisfy.raid.create({presence:NET,party:PARTY,uid:NE
  PRAID.on(e=>{if(e.type==='killed'){toast(t('raidKill'),'good');SFX.quest();}});}
 // hitMon(): true when a party member's hit was handed to the leader (the local copy keeps its HP)
 // every damage source on a boss goes through here: the player's hits, companions and NPC allies (review of #29)
-function praidHit(m,dmg){if(!MT[m.type].boss)return false;if(PRAID.hit(praidKey(m),dmg)){m.hp+=dmg;return true;}return false;}
+function praidHit(m,dmg){if(!praidShared(m))return false;if(PRAID.hit(praidKey(m),dmg)){m.hp+=dmg;return true;}return false;}
 /* shared monsters (SAT-ONLINE-026, owner feedback 8). Every client spawns the same monsters at the same spots (spawnWorld is
    seeded). In each zone the host is the lowest uid among the players there who see each other: its copies move and fight,
    and 4 times a second it writes the ones near any of those players to mobs/{world}/{zone}/{its uid} as
