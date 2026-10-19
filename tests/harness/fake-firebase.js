@@ -125,7 +125,7 @@
     if (v.payload.to !== seg[1]) return 'inbox payload';
     if (v.type.startsWith('party.')) {
       if (pk !== (v.type === 'party.ping' ? 'k,n,party,to' : 'party,to')) return 'inbox payload ' + pk;
-      if (v.type === 'party.ping' && !(v.payload.k >= 0 && v.payload.k <= 1000000000 && v.payload.n >= 0 && v.payload.n <= 1000000000)) return 'inbox ping';
+      if (v.type === 'party.ping' && !(v.payload.k >= 0 && v.payload.k <= 1000000000 && v.payload.n >= -4096 && v.payload.n <= 1000000000)) return 'inbox ping';
       if (typeof v.payload.party !== 'string' || v.payload.party.length > 40) return 'inbox party';
     } else if (v.type.startsWith('chat.')) {
       if (pk !== 'party,text,to') return 'inbox chat payload ' + pk;

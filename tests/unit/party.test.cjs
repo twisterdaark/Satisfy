@@ -144,3 +144,13 @@ test('SAT-ONLINE-021 members() carries the public HP %', () => {
   assert.ok('hp' in m);
   assert.equal(m.hp, null, 'this test world publishes no hp');
 });
+
+// review fix (#51)
+test('a ping in the north (negative y) arrives where it was made', () => {
+  const w = world(2), [a, b] = w.players;
+  a.party.invite(w.remote(a, b)); b.party.accept('p_u0'); w.sync();
+  const got = []; b.party.on((e) => { if (e.type === 'ping') got.push([e.x, e.y]); });
+  assert.equal(a.party.ping(3000, -700), 'sent');
+  w.sync();
+  assert.deepEqual(got, [[3000, -700]]);
+});

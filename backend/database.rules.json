@@ -118,7 +118,7 @@
               ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
             },
             "n": {
-              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+              ".validate": "newData.isNumber() && newData.val() >= -4096 && newData.val() <= 1000000000"
             },
             "raid": {
               ".validate": "newData.isString() && newData.val().length <= 64"

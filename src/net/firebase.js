@@ -86,7 +86,7 @@
       var o = { to: p.to };
       if (type.indexOf('party.') === 0) {
         o.party = String(p.party || '');
-        if (type === 'party.ping') { o.k = Math.max(0, Math.min(10000000, Math.round(+p.k || 0))); o.n = Math.max(0, Math.min(10000000, Math.round(+p.n || 0))); }
+        if (type === 'party.ping') { o.k = Math.max(0, Math.min(16383, Math.round(+p.k || 0))); o.n = Math.max(-4096, Math.min(4095, Math.round(+p.n || 0))); } // n = y: the north is negative
         return o;
       }
       if (type.indexOf('chat.') === 0) { o.party = String(p.party || ''); o.text = String(p.text || ''); return o; }
