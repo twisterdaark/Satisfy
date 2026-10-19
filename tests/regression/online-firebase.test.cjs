@@ -72,9 +72,9 @@ test('two signed-in players see each other through the database; writes pass the
     assert.equal(nb.remotes[0].handle, 'Grid');
     assert.equal(na.drawn, 1);
     assert.equal(await a.eval(() => document.getElementById('netB').textContent), 'Online · players: 2 · Safe zone');
-    // presence, plus the public profile (SAT-ONLINE-007) read once and written while playing
+    // presence, the public profile (SAT-ONLINE-007) and the session lease (SAT-ONLINE-010)
     const paths = await a.eval(() => [...new Set(window.__fakeRTDB.log.map((l) => l.path))]);
-    assert.deepEqual(paths.sort(), ['presence/satisfy/main/' + na.uid, 'profiles/' + na.uid]);
+    assert.deepEqual(paths.sort(), ['presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]);
     assert.deepEqual((await fake(a)).rejected, []);
     assert.deepEqual((await fake(b)).rejected, []);
     assert.deepEqual(a.errors, []);

@@ -105,6 +105,16 @@ test('profiles and cloud saves: owner writes only; cloud saves are private; limi
   assert.deepEqual(Object.keys(p).concat('t').sort(), fields, 'the client writes exactly these fields');
 });
 
+test('sessions: one lease node per account, owner only, server time', () => {
+  const s = rules.sessions.$uid, owner = 'auth != null && auth.uid === $uid';
+  assert.equal(s['.read'], owner);
+  assert.equal(s['.write'], owner);
+  assert.equal(s.t['.validate'], 'newData.val() === now');
+  assert.equal(s.$other['.validate'], false);
+  const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
+  assert.match(fb, /'sessions\/' \+ uid/);
+});
+
 // review fix (#12, #51): the open world spans rows -NR..WMH-1, so the north is written at negative y
 test('the north (negative y) is writable; one shard name only', () => {
   assert.match(node.y['.validate'], new RegExp('>= -' + N.LIMITS.posY + ' '));
