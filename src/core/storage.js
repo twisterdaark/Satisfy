@@ -121,6 +121,17 @@
         if (get(k) != null) return false;
         return set(k, raw);
       },
+      /**
+       * Replace the save with another save string (a cloud download). The current save is kept
+       * first under `reason` (which should be unique, e.g. 'before-cloud-<time>'). Refuses a string
+       * that doesn't decode. Returns true when written.
+       */
+      replace: function (raw, reason) {
+        if (decode(raw).status !== 'ok') return false;
+        var cur = get(key);
+        if (cur != null && cur !== raw && !this.backup(reason || ('replaced-' + Date.now()), cur)) return false;
+        return set(key, raw);
+      },
       backups: function () {
         var out = {};
         try {

@@ -83,6 +83,24 @@ test('inbox: only the owner reads and deletes; senders create write-once message
   assert.match(msg.payload['.validate'], /beginsWith\('duel\.'\)/);
 });
 
+test('profiles and cloud saves: owner writes only; cloud saves are private; limits match Satisfy.cloud', () => {
+  const { cloud: CL } = loadModules('src/net/cloud.js');
+  const prof = rules.profiles.$uid, idx = rules.cloudIndex.$uid, sav = rules.cloudSaves.$uid;
+  const owner = 'auth != null && auth.uid === $uid';
+  assert.equal(prof['.read'], 'auth != null', 'the public profile is readable by signed-in players');
+  assert.equal(prof['.write'], owner);
+  assert.match(prof['.validate'], /revision'\)\.val\(\) > data\.child\('revision'\)\.val\(\)/, 'no stale overwrite');
+  for (const n of [idx, sav]) { assert.equal(n['.read'], owner, 'cloud saves are private'); assert.equal(n.$pid['.write'], owner); assert.equal(n.$pid.$other['.validate'], false); }
+  assert.equal(prof.$other['.validate'], false);
+  assert.match(sav.$pid.blob['.validate'], new RegExp('length <= ' + CL.MAX_BLOB + '$'));
+  assert.match(idx.$pid.size['.validate'], new RegExp('<= ' + CL.MAX_BLOB + '$'));
+  // doc §23 public fields, nothing private (gold, items) can be stored under the public parent
+  const fields = Object.keys(prof).filter((k) => !k.startsWith('.') && !k.startsWith('$')).sort();
+  assert.deepEqual(fields, ['classId', 'handle', 'language', 'look', 'lv', 'revision', 't', 'titleId']);
+  const p = CL.profileFrom({ look: { n: 'G' } }, 'en', 1);
+  assert.deepEqual(Object.keys(p).concat('t').sort(), fields, 'the client writes exactly these fields');
+});
+
 // review fix (#12, #51): the open world spans rows -NR..WMH-1, so the north is written at negative y
 test('the north (negative y) is writable; one shard name only', () => {
   assert.match(node.y['.validate'], new RegExp('>= -' + N.LIMITS.posY + ' '));

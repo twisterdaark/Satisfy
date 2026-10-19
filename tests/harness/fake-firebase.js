@@ -14,7 +14,7 @@
   const pending = new Map();
   let user = null;
   let connected = true;
-  const F = (window.__fakeRTDB = { log: [], rejected: [], data, sdkVersion: undefined, nextName: 'Tester', popupBlocked: false, redirected: false });
+  const F = (window.__fakeRTDB = { log: [], rejected: [], data, sdkVersion: undefined, nextName: 'Tester', nextUid: null, popupBlocked: false, redirected: false });
 
   const parentOf = (p) => p.slice(0, p.lastIndexOf('/'));
   const keyOf = (p) => p.slice(p.lastIndexOf('/') + 1);
@@ -43,6 +43,7 @@
   function rules(p, v, existing) {
     const seg = p.split('/');
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
+    if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
     if (seg.length !== 4 || seg[0] !== 'presence' || seg[1] !== 'satisfy' || seg[2] !== 'main') return 'PERMISSION_DENIED: path ' + p;
     if (!user || seg[3] !== user.uid) return 'PERMISSION_DENIED: not your node';
     if (v === null) return null;
@@ -60,6 +61,34 @@
     if ('party' in v && (typeof v.party !== 'string' || v.party.length > 40)) return 'party';
     return null;
   }
+  // profiles/{uid}, cloudIndex/{uid}/{pid}, cloudSaves/{uid}/{pid} (SAT-ONLINE-007): owner writes only
+  const PID = /^[a-z0-9_]{4,40}$/;
+  const keysAre = (o, want) => Object.keys(o).sort().join(',') === [...want].sort().join(',');
+  const lookOk = (l) => l && keysAre(l, ['hair', 'hc', 'skin', 'top']) && Object.values(l).every((n) => typeof n === 'number' && n >= 0 && n <= 31);
+  function cloudRules(seg, v) {
+    if (!user || seg[1] !== user.uid) return 'PERMISSION_DENIED: not your ' + seg[0];
+    if (v === null) return seg.length === (seg[0] === 'profiles' ? 2 : 3) ? null : 'PERMISSION_DENIED: path';
+    if (JSON.stringify(v.t) !== JSON.stringify(SV)) return seg[0] + ' t';
+    if (seg[0] === 'profiles') {
+      if (seg.length !== 2) return 'PERMISSION_DENIED: path';
+      if (!keysAre(v, ['handle', 'look', 'language', 'titleId', 'classId', 'lv', 'revision', 't'])) return 'profile fields';
+      if (typeof v.handle !== 'string' || v.handle.length > 24 || !lookOk(v.look) || !['ar', 'en'].includes(v.language)) return 'profile values';
+      if (typeof v.titleId !== 'string' || v.titleId.length > 32 || typeof v.classId !== 'string' || v.classId.length > 16) return 'profile values';
+      if (!(v.lv >= 1 && v.lv <= 999) || !(v.revision >= 0)) return 'profile values';
+      const old = data.get(seg.join('/'));
+      if (old && !(v.revision > old.revision)) return 'profile revision must go up';
+      return null;
+    }
+    if (seg.length !== 3 || !PID.test(seg[2])) return 'PERMISSION_DENIED: path';
+    if (seg[0] === 'cloudSaves') {
+      if (!keysAre(v, ['blob', 'rev', 't'])) return 'cloud save fields';
+      return typeof v.blob === 'string' && v.blob.length > 0 && v.blob.length <= 400000 && v.rev >= 0 ? null : 'cloud save values';
+    }
+    if (!keysAre(v, ['pid', 'handle', 'lv', 'cls', 'schema', 'savedAt', 'rev', 'size', 't'])) return 'cloud index fields';
+    if (v.pid !== seg[2] || typeof v.handle !== 'string' || v.handle.length > 24 || typeof v.cls !== 'string' || v.cls.length > 16) return 'cloud index values';
+    return v.lv >= 1 && v.lv <= 999 && v.schema >= 1 && v.schema <= 99 && v.savedAt >= 0 && v.rev >= 0 && v.size >= 1 && v.size <= 400000 ? null : 'cloud index values';
+  }
+
   // inbox/{uid}/{msg}: the owner may delete; anyone signed in may create a new message as themselves
   function inboxRules(seg, v, existing) {
     if (seg.length !== 3 || !user) return 'PERMISSION_DENIED: inbox path';
@@ -124,6 +153,17 @@
       if (connected) write('remove', r.path);
       return Promise.resolve();
     },
+    // one-shot read: the exact node, or its direct children as an object (enough for the cloud index)
+    get: (r) => {
+      const seg = r.path.split('/');
+      const readable = seg[0] === 'profiles' ? !!user : ['cloudIndex', 'cloudSaves'].includes(seg[0]) && user && seg[1] === user.uid;
+      F.log.push({ op: 'get', path: r.path });
+      if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
+      if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));
+      const kids = {};
+      for (const [p, v] of data) if (parentOf(p) === r.path) kids[keyOf(p)] = v;
+      return Promise.resolve(snap(r.path, Object.keys(kids).length ? kids : null));
+    },
     onChildAdded: listen('added'),
     onChildChanged: listen('changed'),
     onChildRemoved: listen('removed'),
@@ -165,7 +205,7 @@
     },
     signInWithPopup: () => {
       if (F.popupBlocked) return Promise.reject(Object.assign(new Error('blocked'), { code: 'auth/popup-blocked' }));
-      user = { uid: 'g' + rid(), displayName: F.nextName };
+      user = { uid: F.nextUid || 'g' + rid(), displayName: F.nextName }; // nextUid: the same Google account on a second device
       sessionStorage.setItem('fakeFirebaseUser', JSON.stringify(user));
       return Promise.resolve({ user });
     },

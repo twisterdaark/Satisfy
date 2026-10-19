@@ -6,8 +6,10 @@
  *
  * Database layout (rules: backend/database.rules.json):
  *   presence/{world}/{shard}/{uid} = PlayerPublic (nulls omitted) + seq, t = server time
- *   inbox/{uid}/{pushId}           = {from, sid, seq, type: party.*, payload: {to, party}, t}
- *                                    read and deleted by the recipient only; older than 60 s is dropped
+ *   inbox/{uid}/{pushId}           = {from, sid, seq, type: party.* | duel.*, payload, t}
+ *                                    payload {to, party} or {to, duel, k?, n?}; read and deleted by the
+ *                                    recipient only; older than 60 s is dropped
+ *   profiles/{uid}, cloudIndex/{uid}/{pid}, cloudSaves/{uid}/{pid}: see src/net/cloud.js
  * The transport turns child added/changed/removed under presence/{world}/{shard} into the same
  * envelopes Satisfy.presence gets from the local transport.
  */

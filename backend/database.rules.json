@@ -122,6 +122,103 @@
           }
         }
       }
+    },
+    "profiles": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['handle', 'look', 'language', 'titleId', 'classId', 'lv', 'revision', 't']) && (!data.exists() || newData.child('revision').val() > data.child('revision').val())",
+        "handle": {
+          ".validate": "newData.isString() && newData.val().length <= 24"
+        },
+        "look": {
+          ".validate": "newData.hasChildren(['hair', 'hc', 'skin', 'top'])",
+          "$f": {
+            ".validate": "($f === 'hair' || $f === 'hc' || $f === 'skin' || $f === 'top') && newData.isNumber() && newData.val() >= 0 && newData.val() <= 31"
+          }
+        },
+        "language": {
+          ".validate": "newData.val() === 'ar' || newData.val() === 'en'"
+        },
+        "titleId": {
+          ".validate": "newData.isString() && newData.val().length <= 32"
+        },
+        "classId": {
+          ".validate": "newData.isString() && newData.val().length <= 16"
+        },
+        "lv": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 999"
+        },
+        "revision": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "t": {
+          ".validate": "newData.val() === now"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "cloudIndex": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$pid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "$pid.matches(/^[a-z0-9_]{4,40}$/) && newData.hasChildren(['pid', 'handle', 'lv', 'cls', 'schema', 'savedAt', 'rev', 'size', 't'])",
+          "pid": {
+            ".validate": "newData.val() === $pid"
+          },
+          "handle": {
+            ".validate": "newData.isString() && newData.val().length <= 24"
+          },
+          "lv": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 999"
+          },
+          "cls": {
+            ".validate": "newData.isString() && newData.val().length <= 16"
+          },
+          "schema": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 99"
+          },
+          "savedAt": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "rev": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "size": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 400000"
+          },
+          "t": {
+            ".validate": "newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "cloudSaves": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$pid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "$pid.matches(/^[a-z0-9_]{4,40}$/) && newData.hasChildren(['blob', 'rev', 't'])",
+          "blob": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 400000"
+          },
+          "rev": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "t": {
+            ".validate": "newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
     }
   }
 }
