@@ -94,6 +94,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 .panel{position:absolute;pointer-events:auto}
 #dialog{left:6%;right:6%;bottom:calc(var(--u)*2);min-height:calc(var(--u)*9)}
 #dialog .head{font-size:calc(var(--u)*1.9);color:var(--gold)}
+#dtext.short{font-size:1.4em;line-height:1.35}
 #dtext{font-size:calc(var(--u)*1.6);margin-top:calc(var(--u)*.3)}
 .more{position:absolute;inset-inline-end:calc(var(--u)*1.2);bottom:calc(var(--u)*.5);color:var(--muted);font-size:calc(var(--u)*1)}
 .center{left:50%;top:50%;transform:translate(-50%,-50%)}
@@ -1164,7 +1165,11 @@ let herbSpot=null;
 
 // buildings and props from sprites-original/buildings.js (same footprints, doors and over/under layers)
 buildings.forEach(b=>SA.buildings.drawBuilding({gg,og},b));
-SA.buildings.drawWorld({gg,og},{ANVILS,WELLS,BOARD,TENTS,GRAVE,PROPS});
+SA.buildings.drawWorld({gg,og},{ANVILS,WELLS,BOARD,TENTS,GRAVE,PROPS:[]});
+// room furniture (owner): the standing part of a counter, table, barrel or rack used to be painted over everyone, so a
+// player in front of the counter looked like they were inside it. Now it is one picture per piece, drawn in y order with
+// the characters (shadows, legs and beds stay on the floor)
+for(const p of PROPS){const f=SA.buildings.PROP[p.k];if(!f)continue;let up=0;const c=mk(p.w*TS+8,40,g=>{for(const [x,y,w,h,col,l] of f(p.w*TS,p)){if(l){g.fillStyle=col;g.fillRect(x+4,y+20,w,h);up=1;}else{gg.fillStyle=col;gg.fillRect(p.tx*TS+x,p.ty*TS+y,w,h);}}});p.cv=up?c:null;}
 ROOMS.forEach(Rm=>{const mx=(Rm.rx+6)*TS,my=(Rm.ry+7)*TS;R(gg,mx+2,my+4,12,8,'#8a3a3a');R(gg,mx+3,my+5,10,6,'#a84a4a');});
 const FURNS=buildings.filter(b=>b.k==='forge').map(b=>({x:b.x*TS+10,y:(b.y+2)*TS+12,cx:(b.x+b.w)*TS-16,cy:b.y*TS-16}));
 
@@ -2574,8 +2579,15 @@ function buyBlue(){if(S.gold<150){SFX.deny();return dialog('regas',['rBlueNo']);
 function travel(dest,who){const g=fare()+(dest===2||who==='coachP'?80:0);if(S.gold<g){SFX.deny();return dialog(who,[dest||who==='coachP'?t('noGold'):t('goW',{g})]);}S.gold-=g;SFX.coin();fadeTo(()=>{const c=npcOf(['coach','coachW','coachP'][dest]);P.x=c.x+(dest===1?-18:18);P.y=c.y-2;camSnap=true;vfx('spawn',P.x,P.y);allies=[];S.raid=0;hudDirty=true;toast(t('arrived',{z:t(['zBai','zWin','zPat'][dest])}),'good');save(true);});}
 /* ---------------- dialog ---------------- */
 let DL=null;
+// typewriter (Nitro's feedback): a line appears letter by letter; E, Space or a click shows the rest at once, the next one
+// moves on. Short lines are set larger. satisfy_tw=0 turns it off (the test harness does, so scripted dialogs stay instant).
+var TWON=(()=>{try{return localStorage.getItem('satisfy_tw')!=='0';}catch(e){return true;}})();
+function twStart(el,txt){const d=DL;clearInterval(d.twI);d.full=txt;const ch=[...String(txt)];el.classList.toggle('short',ch.length<=28);
+ if(!TWON||ch.length<2){el.textContent=txt;d.typing=false;return;}let n=0;d.typing=true;el.textContent='';
+ d.twI=setInterval(()=>{if(DL!==d){clearInterval(d.twI);return;}n+=ch.length>140?2:1;el.textContent=ch.slice(0,n).join('');if(n>=ch.length){clearInterval(d.twI);d.typing=false;}},26);}
+function twDone(){if(!DL||!DL.typing)return false;clearInterval(DL.twI);DL.typing=false;$('dtext').textContent=DL.full;return true;}
 function dialog(who,lines,done,opts){DL={who,lines,i:0,done,opts,prev:mode==='dialog'?'play':mode};mode='dialog';$('dialog').hidden=false;$('hint').hidden=true;showLine();}
-function showLine(){let ln=DL.lines[DL.i],who=DL.who;if(Array.isArray(ln)){who=ln[0];ln=ln[1];}$('dname').textContent=t(who);$('dprev').hidden=true;$('dialog').classList.remove('pv');$('dtext').textContent=t(ln);
+function showLine(){let ln=DL.lines[DL.i],who=DL.who;if(Array.isArray(ln)){who=ln[0];ln=ln[1];}$('dname').textContent=t(who);$('dprev').hidden=true;$('dialog').classList.remove('pv');twStart($('dtext'),t(ln));
  const o=$('dopts');o.innerHTML='';DL.optOn=!!(DL.opts&&DL.i===DL.lines.length-1);o.hidden=!DL.optOn;$('dialog').querySelector('.more').hidden=DL.optOn;
  if(DL.optOn){DL.opts.forEach((op,i)=>{const b=document.createElement('button'),[l,pr]=optPrice(op),ph=pr?`<span class="pr"><img src="${icon('coin')}">${pr}</span>`:'';if(op.ic){b.className='gopt'+(op.poor?' poor':'')+(pr?' hp':'');b.innerHTML=`<img src="${icon(op.ic)}"><span>${i+1}. ${esc(l)}</span>${op.st?`<small>${op.st}</small>`:''}${ph}`;}else if(pr){b.className='hp';b.innerHTML=`<span>${i+1}. ${esc(l)}</span>${ph}`;}else b.textContent=(i+1)+'. '+l;b.dataset.opt=i;b.onpointerenter=()=>selOpt(i);o.appendChild(b);});const L=LSEL;selOpt(L&&L.who===DL.who&&L.n===DL.opts.length?L.i:0);}}
 // a price written into an option label ((500 gold), · 200G) is pulled out and shown as a coin badge on the far side
@@ -2588,7 +2600,7 @@ function drawDPrev(){const g=$('dprev').getContext('2d'),v=DL.pv;g.clearRect(0,0
  else if(v.pet){g.save();g.translate(16,25);g.scale(1.7,1.7);g.translate(-16,-25);drawPet0({k:v.pet,x:16,y:25,dir:2,t:gTime,mv:1,lv:1},g);g.restore();}else if(v.ride)drawHorse(16,29,2,1+(gTime*10|0)%4,MOUNTS[v.ride],g);}
 let LSEL=null;
 function pickOpt(i){if(!DL||!DL.optOn)return;LSEL={who:DL.who,l0:DL.lines[0],n:DL.opts.length,i};const op=DL.opts[i];if(!op)return;SFX.click();const prev=DL.prev;DL=null;$('dialog').hidden=true;mode=prev;if(op.f)op.f();}
-function advance(){if(!DL||DL.optOn)return;DL.i++;if(DL.i>=DL.lines.length){const d=DL.done,prev=DL.prev;DL=null;$('dialog').hidden=true;mode=prev;if(d)d();}else showLine();}
+function advance(){if(twDone())return;if(!DL||DL.optOn)return;DL.i++;if(DL.i>=DL.lines.length){const d=DL.done,prev=DL.prev;DL=null;$('dialog').hidden=true;mode=prev;if(d)d();}else showLine();}
 
 /* ---------------- forge ---------------- */
 let MG=null;
@@ -3365,6 +3377,7 @@ function render(dt){
  FURNS.forEach(FURN=>{R(ctx,FURN.x+2,FURN.y+4,18,14,fl>.5?'#ff8a1e':'#ffa83a');R(ctx,FURN.x+6,FURN.y+9,10,9,'#ffe07a');for(let i=0;i<5;i++)R(ctx,FURN.x+3+i*3,FURN.y+10-((Math.sin(gTime*10+i*2)*3+3)|0),3,8,'#ff7a1a');});
  const ents=[];
  if(S){nodes.forEach(n=>ents.push({y:n.y,f:()=>drawNode(n.x,n.y,n)}));
+  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});}
   if(COMPO){const a=COMPO;ents.push({y:a.y,f:()=>{if(a.hide>0)return;drawChar(a.spr,a.x,a.y,a.dir,a.frame||0,false,0,a);}});}
   allies.forEach(a=>{if(a.dead)return;ents.push({y:a.y,f:()=>{drawChar(a.id,a.x,a.y,a.dir,a.frame||0,false,0,a);R(ctx,a.x-7,a.y-30,14,2,'#000');R(ctx,a.x-7,a.y-30,14*a.hp/a.max,2,'#5ad06a');}});});
   for(const g of DGATES){if(g.x<camX-30||g.x>camX+VW+30||g.y<camY-30||g.y>camY+VH+30)continue;ents.push({y:g.y-14,f:()=>drawGate(g)});}
