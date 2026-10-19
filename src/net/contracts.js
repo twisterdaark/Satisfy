@@ -26,7 +26,7 @@
   var PROTOCOL_VERSION = 1;
   var WORLD_ID = 'satisfy';
   // posX/posY: pixel bounds the database accepts for x/y (backend/database.rules.json). They are
-  // headroom over the map (414 x 144 tiles = 6624 x 2304 px today) so a wider map needs no redeploy.
+  // headroom over the map (724 x 144 tiles = 11584 x 2304 px today) so a wider map needs no redeploy.
   var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 2048, shard: 999, posX: 16384, posY: 4096 });
   var ANIMS = ['idle', 'walk', 'attack', 'dodge', 'dead'];
   var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 't'];
@@ -56,9 +56,10 @@
 
   // Safe zones (doc §08): towns where no player can hurt another. Enforced by the combat authority
   // once duels/PvP exist; until then the game only shows it. Zone ids come from Satisfy.local.zoneAt.
-  // Every town is safe; Patrian (zPat) joined with SAT-CONTENT-002. tests/regression/party.test.cjs
-  // checks this list against Satisfy.local.world().towns so a new town can't be left out.
-  var SAFE_ZONES = ['zBai', 'zWin', 'zPat'];
+  // Every town is safe: Patrian (zPat) joined with SAT-CONTENT-002, Reidan (zReid) with SAT-REIDAN-001,
+  // Reinhardt (zRein) with SAT-GUILD-001. tests/regression/party.test.cjs checks this list against
+  // Satisfy.local.world().towns so a new town can't be left out.
+  var SAFE_ZONES = ['zBai', 'zWin', 'zPat', 'zReid', 'zRein'];
   function zonePolicy(zone) {
     var safe = SAFE_ZONES.indexOf(zone) >= 0;
     return { zone: zone, safe: safe, pvp: false, duel: false };
