@@ -65,6 +65,7 @@ function build(T,sourceVersion){
   // legendary classes come from an item, not a trainer, and exist once per world (SAT-PAGMA-001)
   if(Object.values(T.SKD).some(d=>d.cls==='pagma'))classes.classes.pagma={id:'pagma',legendary:true,source:'pbook',unique:'world',skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls==='pagma'),src:SRC};
   if(Object.values(T.SKD).some(d=>d.cls==='braham'))classes.classes.braham={id:'braham',legendary:true,source:'bsoul',base:'mage',unique:'world',skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls==='braham'),src:SRC};   // Braham's Successor (SAT-BRAHAM-001)
+  if(Object.values(T.SKD).some(d=>d.cls==='saint'))classes.classes.saint={id:'saint',legendary:true,source:'msword',base:'warrior',unique:'world',skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls==='saint'),src:SRC};   // Muller's Successor (SAT-MULLER-001)
 
   return {monsters,quests,recipes,skills,npcs,zones,classes};}
 
