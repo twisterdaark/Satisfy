@@ -57,7 +57,9 @@
 
   // Safe zones (doc §08): towns where no player can hurt another. Enforced by the combat authority
   // once duels/PvP exist; until then the game only shows it. Zone ids come from Satisfy.local.zoneAt.
-  var SAFE_ZONES = ['zBai', 'zWin'];
+  // Every town is safe; Patrian (zPat) joined with SAT-CONTENT-002. tests/regression/party.test.cjs
+  // checks this list against Satisfy.local.world().towns so a new town can't be left out.
+  var SAFE_ZONES = ['zBai', 'zWin', 'zPat'];
   function zonePolicy(zone) {
     var safe = SAFE_ZONES.indexOf(zone) >= 0;
     return { zone: zone, safe: safe, pvp: false, duel: false };
