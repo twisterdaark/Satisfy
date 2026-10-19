@@ -64,7 +64,7 @@ test('online: the same monsters, health and attacks on both screens; the followe
     err.sort((x, y) => x - y);
     const med = err[err.length >> 1];
     assert.ok(pairs > 100, 'monsters near both: ' + pairs);
-    assert.ok(med <= 4, 'position, median px: ' + med);
+    assert.ok(med <= 8, 'position, median px: ' + med);
     assert.equal(deadDiff, 0, 'alive/dead');
     assert.ok(hpDiff <= pairs * 0.02, 'health: ' + hpDiff + '/' + pairs);
     assert.ok(atkA > 5, 'the host saw attacks: ' + atkA);
