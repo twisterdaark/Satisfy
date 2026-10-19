@@ -14,7 +14,7 @@ function world(n, o = {}) {
   let t = 1000; const now = () => t;
   const players = [];
   for (let i = 0; i < n; i++) {
-    const uid = 'u' + i;
+    const uid = (o.uidPrefix || 'u') + i;
     const p = { uid, name: 'P' + i, x: 4000 + i * 30, y: 1500, zone: o.zone || 'zPlains', events: [] };
     p.pres = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net, uid, sid: 'sess' + i + 'xxxxxxxx' });
     p.duel = SN.duel.create({ presence: p.pres, uid, now, pos: () => ({ x: p.x, y: p.y }), zone: () => p.zone, policy: SN.net.zonePolicy });
@@ -187,4 +187,14 @@ test('messages for someone else or another duel are ignored', () => {
   assert.equal(a.duel.state().phase, 'fight');
   assert.equal(c.duel.state().phase, 'idle');
   assert.equal(c.duel.state().last, null);
+});
+
+test('duel ids fit the public duel field for any uid (local transport uids contain ":")', () => {
+  const w = world(2, { uidPrefix: 'local:4cef53c75882' }), [a, b] = w.players;
+  w.fight(a, b);
+  const id = a.duel.state().duel;
+  assert.match(id, /^d_[A-Za-z0-9_-]{1,40}$/);
+  assert.equal(b.duel.state().duel, id);
+  const pp = SN.net.toPlayerPublic({ look: { n: 'P0' }, cls: 'novice', lv: 2, title: '' }, { x: 1, y: 1, dir: 0 }, { duel: id + ':100' });
+  assert.equal(pp.duel, id + ':100');
 });

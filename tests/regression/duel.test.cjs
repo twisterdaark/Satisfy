@@ -126,3 +126,30 @@ test('N declines; Yield ends the fight; no challenges inside a town', async () =
     assert.deepEqual(b.errors, []);
   } finally { await ctx.close(); }
 });
+
+test('U034: a third player sees both duelists\' HP and the ring', async () => {
+  const { ctx, a, b } = await pair('local');
+  try {
+    const c = await H.openGame({ ctx, query: '?net=local&slot=c' });
+    await H.newGame(c, { n: 'Watcher', hair: 2, hc: 1, skin: 0, top: 2 });
+    await c.eval(() => { const P = window.__G.P; P.x = 90 * 16 + 10; P.y = 60 * 16 + 40; for (const m of window.__G.mons()) { m.dead = true; m.rt = 1e9; } });
+    await settle(a, b, c);
+    await startFight(a, b);
+    // swing until a hit lands (B's own duel HP drops), stepping C along so it keeps up
+    for (let i = 0; i < 10 && (await duel(b)).hp === 100; i++) {
+      await a.eval(() => { window.__G.P.acd = 0; window.__G.tryAttack(1, 0); });
+      await a.step(16);
+      await settle(a, b, c);
+    }
+    assert.ok((await duel(b)).hp < 100, 'A hit B');
+    await until(c, () => {
+      const rs = Satisfy.local.net().remotes.filter((r) => r.duel);
+      return rs.length === 2 && rs[0].duel.split(':')[0] === rs[1].duel.split(':')[0] && rs.some((r) => +r.duel.split(':')[1] < 100);
+    }, 8000);
+    const seen = await c.eval(() => Satisfy.local.net().remotes.filter((r) => r.duel).map((r) => [r.handle, +r.duel.split(':')[1]]).sort());
+    assert.equal(seen.length, 2);
+    assert.equal(seen.find((x) => x[0] === 'Grid')[1], 100, 'A was not hit');
+    assert.ok(seen.find((x) => x[0] === 'Faker')[1] < 100, 'B took a hit');
+    assert.deepEqual(c.errors, []);
+  } finally { await ctx.close(); }
+});

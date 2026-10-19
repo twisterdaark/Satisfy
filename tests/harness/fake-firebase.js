@@ -43,7 +43,7 @@
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
 
-  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'seq', 't'];
+  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'seq', 't'];
   const POS_X = 16384, POS_Y = 4096; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
   function rules(p, v, existing) {
@@ -71,6 +71,7 @@
     if (v.arm !== 0 && v.arm !== 1) return 'arm';
     if ('room' in v && (typeof v.room !== 'string' || v.room.length > 16)) return 'room';
     if ('party' in v && (typeof v.party !== 'string' || v.party.length > 40)) return 'party';
+    if ('duel' in v && !(typeof v.duel === 'string' && /^d_[A-Za-z0-9_-]{1,40}:(100|[1-9]?[0-9])$/.test(v.duel))) return 'duel';
     return null;
   }
   // profiles/{uid}, cloudIndex/{uid}/{pid}, cloudSaves/{uid}/{pid} (SAT-ONLINE-007): owner writes only

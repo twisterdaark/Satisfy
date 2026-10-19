@@ -1,6 +1,6 @@
 # NET/PVP backlog U001–U038 (plan doc §33–§34) — status
 
-Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-012 · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
+Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-013 · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
 
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
@@ -37,10 +37,10 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-012 �
 | U031 | Duel countdown | ✅ | SAT-ONLINE-006 |
 | U032 | Duel arena ring | ✅ | SAT-ONLINE-006 |
 | U033 | Duel normalized mode | ✅ | SAT-ONLINE-006 (4–18 of 100 duel HP per hit) |
-| U034 | Duel spectator | ❌ | Next candidate: publish the duel id + HPs in presence so nearby players see the ring and bars |
+| U034 | Duel spectator | ✅ | SAT-ONLINE-013: `PlayerPublic.duel` ("id:HP"), bars over both duelists and a ring for everyone nearby |
 | U035 | Open PvP toggle | ⏳ | R5 needs Trusted Combat (Blaze, D3) |
 | U036 | Party friendly fire | ⏳ | R5 |
 | U037 | Outlaw flag | ⏳ | R5 |
 | U038 | Bounty board | ⏳ | R5 + ledger |
 
-**Totals:** ✅ 22 · 🟡 5 · ⏳ 7 · ❌ 4.
+**Totals:** ✅ 23 · 🟡 5 · ⏳ 7 · ❌ 3.
