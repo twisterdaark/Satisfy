@@ -260,6 +260,12 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 .stg span.on{color:#fff;border-color:var(--gold);box-shadow:0 0 calc(var(--u)*.8) rgba(242,193,78,.6);transform:scale(1.08)}.stg span.ok{color:#9fe39a;border-color:#9fe39a}
 #mgv{display:block;margin:0 auto;width:calc(var(--u)*32);height:calc(var(--u)*11.2);image-rendering:pixelated}
 #inv{width:calc(var(--u)*52);background:var(--sys2)}
+.itrash{display:flex;align-items:center;justify-content:center;width:calc(var(--u)*2.2);height:calc(var(--u)*2.2);padding:calc(var(--u)*.35);margin-inline-start:calc(var(--u)*.6);color:#ffb0a0;fill:currentColor}.itrash svg{width:100%;height:100%;fill:currentColor}
+#inv.trash .itrash,#inv .itrash.hot{background:rgba(255,90,70,.35);color:#fff;box-shadow:0 0 calc(var(--u)*.8) rgba(255,90,70,.7)}#inv.trash .slotb:not(.e){cursor:not-allowed}#inv.trash .slotb:not(.e):hover{background:rgba(255,90,70,.3)}
+#inv.sell{background:linear-gradient(180deg,rgba(40,34,12,.92),rgba(14,22,40,.95))}#inv.sell .itrash{display:none}
+.inote{margin-top:calc(var(--u)*.6);color:var(--muted);font-size:calc(var(--u)*.9);text-align:center;min-height:1em}
+#cfmW{z-index:80;width:calc(var(--u)*30);text-align:center}#cfmB{margin:calc(var(--u)*.8) 0;line-height:1.6}.cfmbtns{display:flex;gap:calc(var(--u)*1);justify-content:center}#cfmY{color:#ffd0c0;border-color:rgba(255,120,100,.7)}
+.gdrag-img{position:fixed;z-index:90;width:calc(var(--u)*3);height:calc(var(--u)*3);pointer-events:none;image-rendering:pixelated;filter:drop-shadow(0 0 4px #000);transform:translate(-50%,-50%)}
 .igold{color:var(--gold);font-weight:700;margin-inline-start:auto}
 .igrid{display:grid;grid-template-columns:repeat(9,1fr);gap:calc(var(--u)*.35);direction:ltr}
 .slotb{position:relative;aspect-ratio:1;padding:0;background:rgba(0,0,0,.5);border:1px solid rgba(143,216,255,.3);box-shadow:inset 0 0 calc(var(--u)*.6) rgba(0,0,0,.6);display:grid;place-items:center}
@@ -460,8 +466,15 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
     </div>
 
     <div id="inv" class="sys panel center" hidden>
-      <div class="ptitle"><span class="head" data-i18n="bagT"></span><span class="igold" id="invGold"></span><button class="x" data-act="closeInv">✕</button></div>
+      <div class="ptitle"><span class="head" id="invH" data-i18n="bagT"></span><span class="igold" id="invGold"></span><button class="itrash" id="invTrash"><svg viewBox="0 0 10 10"><rect x="2" y="3" width="6" height="6" rx=".6"/><rect x="1" y="1.6" width="8" height="1" rx=".4"/><rect x="3.8" y=".6" width="2.4" height="1.2" rx=".4"/></svg></button><button class="x" data-act="closeInv">✕</button></div>
       <div class="igrid" id="igrid"></div>
+      <div class="inote" id="invNote"></div>
+    </div>
+
+    <div id="cfmW" class="sys panel center" hidden>
+      <div class="ptitle"><span class="head" id="cfmT"></span></div>
+      <div id="cfmB"></div>
+      <div class="cfmbtns"><button id="cfmY"></button><button id="cfmN"></button></div>
     </div>
 
     <div id="equipW" class="sys panel center" hidden>
@@ -2157,6 +2170,9 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
  mons.push(newMon('fgiant',GHOLD.bx*TS+8,GHOLD.by*TS+8));
  mons.push(newMon('ypriest',(((YATAN.x0+YATAN.x1)>>1))*TS+8,(YATAN.y0+6)*TS+8));
  {const d=newMon('trauka',PEAK.x*TS+8,(PEAK.y-3)*TS+8),u=WS&&WS.wb&&WS.wb.trauka;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
+ // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
+ // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
+ {const now=Date.now(),D=(S&&S.mrt)||{};for(const m of mons){const u=D[mobKey(m)];if(u>now){m.dead=true;m.dying=0;m.rt=(u-now)/1000;}}}
  npcs=NPCS.map(n=>({...n,x:n.tx*TS+8,y:n.ty*TS+12,dir:n.dir||0}));
 }
 function newMon(type,x,y){const b=MT[type];const vr=VARY[type]!==undefined?(MID+1)%4:0;const lv=b.lv[0]+(rand()*(b.lv[1]-b.lv[0]+1)|0),hp=Math.round(b.hp*(1+(lv-b.lv[0])*.03));return{id:'m'+(++MID),type,lv,x,y,sx:x,sy:y,hp,max:hp,vr,dead:false,rt:0,cd:0,face:1,t:rand()*6,hurt:0,wt:0,wx:0,wy:0,tele:0,scd:2};}
@@ -2177,7 +2193,8 @@ function acctStore(uid){if(SLOT||!uid)return;let ls=null;try{ls=localStorage;}ca
 // WS (guilds, territories, legends; SAT-GUILD-001) is saved next to S and P, as on main.
 // P is saved trimmed, at the tower/arena return point while inside one (as on main)
 var SAVE_OFF=false; // set when another tab took the account over (SAT-ONLINE-010): this tab must not write the save any more
-function save(quiet){if(!S||S.__demo||SAVE_OFF)return;const sp=TWR?TWR.ret:ARN?ARN.ret:P;Satisfy.ids.ensure(S);if(STORE.write(S,{x:sp.x,y:sp.y,hp:P.hp,st:P.st,mp:P.mp,food:P.food},{WS})&&!quiet)toast(t('saved'));}
+function mrtKeep(){const now=Date.now(),o={};let n=0;for(const m of mons){if(!m.dead||m.tmp||m.evt||m.mk||m.arena||!(m.rt>0)||m.rt>1e8||n>=400)continue;o[mobKey(m)]=Math.round(now+m.rt*1000);n++;}S.mrt=o;}
+function save(quiet){if(!S||S.__demo||SAVE_OFF)return;mrtKeep();const sp=TWR?TWR.ret:ARN?ARN.ret:P;Satisfy.ids.ensure(S);if(STORE.write(S,{x:sp.x,y:sp.y,hp:P.hp,st:P.st,mp:P.mp,food:P.food},{WS})&&!quiet)toast(t('saved'));}
 function hasSave(){return STORE.exists();}
 // Stable ids and domain events (SAT-ONLINE-005, doc §05 R0.4/R0.5; src/core/ids.js, state.js, events.js).
 // S.pid (the character id Claude-B's guilds already use) and item.iid are assigned at the first save or load; kills, crafts and quest claims are reported
@@ -2719,7 +2736,7 @@ function bankMenu(who){const b=S.bank||0,g=S.gold,mv=(n,dep)=>{n=Math.floor(n);i
 const bankOpt=who=>[{l:t('oBank'),st:t('bankD'),f:()=>bankMenu(who)}];
 Object.assign(STR.ar,{oBank:'البنك',bankD:'الفلوس اللي في البنك مبتضيعش لما تموت',bankHi:'رصيدك في البنك: {b} دهب · معاك: {g} دهب',bankDepAll:'حط كل فلوسك ({n})',bankDepHalf:'حط النص ({n})',bankWdAll:'اسحب الكل ({n})',bankWd:'اسحب {n}',bankIn:'حطيت {n} دهب في البنك',bankOut:'سحبت {n} دهب من البنك',bankL:'البنك'});
 Object.assign(STR.en,{oBank:'Bank',bankD:"Gold in the bank isn't lost when you die",bankHi:'In the bank: {b} gold · on you: {g} gold',bankDepAll:'Deposit all ({n})',bankDepHalf:'Deposit half ({n})',bankWdAll:'Withdraw all ({n})',bankWd:'Withdraw {n}',bankIn:'Deposited {n} gold',bankOut:'Withdrew {n} gold',bankL:'Bank'});
-function merchOpts(who){return [...potOpts(who),...respecOpt(who),{l:t('oBuyBread'),f:()=>buyBread(who)},...sellOpt(who),...Object.keys(MATP).filter(k=>S.mats[k]>0).map(k=>{const n=Math.min(5,S.mats[k]),g=n*MATP[k];return{l:t('oSellM',{n,it:t(k),g}),f:()=>sellMats(who,k,n,g)};})];}
+function merchOpts(who){return [...potOpts(who),...respecOpt(who),{l:t('oBuyBread'),f:()=>buyBread(who)},{l:t('oSellW'),f:()=>openSell(who)},...sellOpt(who),...Object.keys(MATP).filter(k=>S.mats[k]>0).map(k=>{const n=Math.min(5,S.mats[k]),g=n*MATP[k];return{l:t('oSellM',{n,it:t(k),g}),f:()=>sellMats(who,k,n,g)};})];}
 
 function haggle(who){S.hag=rand()<.35+S.hid.dign*.01+S.hid.insi*.01?1:0;SFX.click();shopD(who,S.hag?'hagOk':'hagNo');}
 // generated board tasks live in S.bq (offers) and S.bqa (accepted), and are registered into QD so the normal quest code tracks them
@@ -3143,8 +3160,8 @@ function afterCraft(rc){checkSkills();}
 /* ---------------- inventory ---------------- */
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 let INVS=[];
-function openInv(){SFX.open();mode='inv';$('inv').hidden=false;$('hint').hidden=true;renderInv();}
-function closeInv(){SFX.close();$('inv').hidden=true;mode='play';}
+function openInv(){SFX.open();mode='inv';INVX=null;$('inv').hidden=false;$('hint').hidden=true;renderInv();}
+function closeInv(){SFX.close();$('inv').hidden=true;$('cfmW').hidden=true;INVX=null;mode='play';}
 // one line of an item's numbers (rc = a recipe, i.e. the base values, when cur is not given)
 function statShort(i){const a=[];if(i.atk)a.push(`${t('atk')} ${i.uid?iAtk(i):i.atk}`);if(i.def)a.push(`${t('def')} ${i.uid?iDef(i):i.def}`);
  if(i.as)a.push(`${t('gAs')} +${Math.round(i.as*enF(i)*100)}%`);if(i.ms)a.push(`${t('gMs')} +${Math.round(i.ms*enF(i)*100)}%`);if(i.dm)a.push(`${t('gDm')} +${Math.round(i.dm*enF(i)*100)}%`);if(i.mpb)a.push(`${t('gMp')} +${Math.round(i.mpb*enF(i))}`);if(i.hpp)a.push(`${t('gHp')} +${Math.round(i.hpp*enF(i)*100)}%`);if(i.gem)a.push(t('gemIn',{g:t(i.gem)}));return a.join(' · ');}
@@ -3158,9 +3175,42 @@ function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>$
  GEMK.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(k+'D')}</small>`});});
  S.arrows.forEach((n,r)=>{if(n)a.push({k:'arrows',n,r,tip:`<b class="rt rt${r}">${t('arrows')}</b><br>${t('r'+r)} · ${ARROWG[r]}G`});});
  S.items.forEach(i=>{if(WSH[i.id]||(i.slot!=='w'&&i.slot!=='x')){const on=isEq(i);a.push({k:i.id,n:1,r:i.r,it:i,eq:on,tip:itemTip(i)+`<br><small>${on?t('eqMark'):t('clickEquip')}</small>`});}});
+ const sell=INVX&&INVX.who;if(sell)a.forEach(s=>{s.tip+=s.eq?`<br><small style="color:#ff9a8a">${t('unEqFirst')}</small>`:`<br><small style="color:#f2c14e">${t('sellAt',{g:unitVal(s)})}${s.n>1?' · '+t('sellAll',{g:unitVal(s)*s.n}):''}</small>`;});
+ $('inv').classList.toggle('sell',!!sell);$('inv').classList.toggle('trash',INVX==='trash');$('invH').textContent=t(sell?'sellT':'bagT');$('invNote').textContent=sell?t('sellNote'):INVX==='trash'?t('trashNote'):t('bagNote');$('invTrash').dataset.tip=t('trashTip');
  INVS=a;let h='';for(let i=0;i<36;i++){const s=a[i];h+=s?`<button class="slotb r${s.r||0}${s.eq?' eq':''}" data-inv="${i}" data-tip="${esc(s.tip)}"><img src="${icon(s.k)}"><b>${s.n>1?s.n:''}</b></button>`:'<div class="slotb e"></div>';}
  $('igrid').innerHTML=h;$('invGold').textContent=t('gold',{n:S.gold});}
-function invClick(i){const s=INVS[i];if(!s)return;if(s.k==='bread')eat();else if(DISH[s.k])eatDish(s.k);else if(POT[s.k])drink(s.k);else if(s.it){if(equip(s.it)!==false){SFX.click();toast(t('equipped')+': '+inm(s.it));}hudDirty=true;sbSig='';}renderInv();$('tip').classList.remove('on');}
+function invClick(i,all){const s=INVS[i];if(!s)return;if(INVX==='trash'){invTrash(s);return;}if(INVX&&INVX.who){invSell(s,all);return;}if(s.k==='bread')eat();else if(DISH[s.k])eatDish(s.k);else if(POT[s.k])drink(s.k);else if(s.it){if(equip(s.it)!==false){SFX.click();toast(t('equipped')+': '+inm(s.it));}hudDirty=true;sbSig='';}renderInv();$('tip').classList.remove('on');}
+/* bag actions (owner 2026-10-19): destroy a thing (arm the bin in the bag's title, or drag the thing onto it), drop it on
+   the ground by dragging it out of the bag (it lies there for a minute for anyone to pick up, then it is gone), and sell
+   anything in the bag to a merchant from a window like the bag instead of one dialog line per material. Each asks first. */
+let INVX=null,INVDR=null;const GDROP=[];
+const sName=s=>s.it?inm(s.it):t(s.k);
+function slotOut(s,all){const n=all?s.n:1;if(s.it){const i=S.items.indexOf(s.it);if(i<0||isEq(s.it))return null;S.items.splice(i,1);return {it:s.it,k:s.k,n:1,r:s.r};}
+ if(s.k==='bread')S.bread-=n;else if(POT[s.k])S[s.k]-=n;else if(s.k==='arrows')S.arrows[s.r]-=n;else S.mats[s.k]=(S.mats[s.k]||0)-n;hudDirty=true;return {k:s.k,n,r:s.r};}
+function slotIn(o){if(o.it)S.items.push(o.it);else if(o.k==='bread')S.bread+=o.n;else if(POT[o.k])S[o.k]=(S[o.k]||0)+o.n;else if(o.k==='arrows')S.arrows[o.r]+=o.n;else S.mats[o.k]=(S.mats[o.k]||0)+o.n;hudDirty=true;}
+function itemVal(i){const rc=rcById(i.id);let b=0;if(rc&&rc.need)for(const m in rc.need)b+=(MATP[m]||5)*rc.need[m];if(!b)b=100+((rc&&rc.lvr)||40)*20;return Math.max(1,Math.round(b*[.6,1,1.6,3,8][Math.min(4,i.r||0)]*(1+.1*(i.en||0))*(durOf(i)<=0?.5:1)));}
+const unitVal=s=>s.it?itemVal(s.it):s.k==='arrows'?ARROWG[s.r]:s.k==='bread'?2:POT[s.k]?Math.round(POT[s.k].price*.4):DISH[s.k]?12:(MATP[s.k]||2);
+function cfm(title,body,yes,f){const w=$('cfmW');$('cfmT').textContent=title;$('cfmB').innerHTML=body;$('cfmY').textContent=yes;$('cfmN').textContent=t('cfmNo');w.hidden=false;SFX.notice();
+ $('cfmY').onclick=e=>{e.stopPropagation();w.hidden=true;f();};$('cfmN').onclick=e=>{e.stopPropagation();w.hidden=true;SFX.close();};}
+function invTrash(s){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
+ cfm(t('delT'),t('delQ',{it:`<b class="rt rt${s.r||0}">${esc(sName(s))}</b>${s.n>1?' ×'+s.n:''}`}),t('delY'),()=>{if(!slotOut(s,true))return;SFX.deny();toast(t('delDone',{it:sName(s)}),'warn');INVX=null;renderInv();save(true);});}
+function invDrop(s){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
+ cfm(t('dropT'),t('dropQ',{it:`<b class="rt rt${s.r||0}">${esc(sName(s))}</b>${s.n>1?' ×'+s.n:''}`}),t('dropY'),()=>{const o=slotOut(s,true);if(!o)return;GDROP.push({x:P.x+(rand()-.5)*12,y:P.y+10,o,t:gTime+60,lock:gTime+2});SFX.swing();toast(t('dropDone',{it:sName(s)}));renderInv();save(true);});}
+function invSell(s,all){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}const n=all?s.n:1,g=unitVal(s)*n;
+ const go=()=>{if(!slotOut(s,all))return;S.gold+=g;SFX.coin();numP(-26,'+'+g+'G','#f2c14e',false);toast(t('soldIt',{it:sName(s)+(n>1?' ×'+n:''),g}),'good');renderInv();save(true);};
+ if(s.it&&(s.r||0)>=2)cfm(t('sellT'),t('sellQ',{it:`<b class="rt rt${s.r}">${esc(sName(s))}</b>`,g}),t('sellY'),go);else go();}
+function openSell(who){INVX={who};SFX.open();mode='inv';$('inv').hidden=false;$('hint').hidden=true;renderInv();}
+// drag a bag slot: onto the bin = destroy, out of the bag = drop on the ground
+$('igrid').addEventListener('pointerdown',e=>{const b=e.target.closest('[data-inv]');if(!b||e.button||INVX)return;INVDR={i:+b.dataset.inv,x:e.clientX,y:e.clientY,moved:false,img:null};});
+addEventListener('pointermove',e=>{const d=INVDR;if(!d)return;if(!d.moved&&Math.hypot(e.clientX-d.x,e.clientY-d.y)<8)return;const s=INVS[d.i];if(!s){INVDR=null;return;}
+ if(!d.moved){d.moved=true;d.img=document.createElement('img');d.img.className='gdrag-img';d.img.src=icon(s.k);document.body.appendChild(d.img);$('tip').classList.remove('on');}
+ d.img.style.left=e.clientX+'px';d.img.style.top=e.clientY+'px';const el=document.elementFromPoint(e.clientX,e.clientY);$('invTrash').classList.toggle('hot',!!(el&&el.closest('#invTrash')));});
+addEventListener('pointerup',e=>{const d=INVDR;if(!d)return;if(d.img)d.img.remove();$('invTrash').classList.remove('hot');if(!d.moved){INVDR=null;return;}setTimeout(()=>{INVDR=null;},0);
+ const s=INVS[d.i],el=document.elementFromPoint(e.clientX,e.clientY);if(!s)return;if(el&&el.closest('#invTrash'))invTrash(s);else if(!(el&&el.closest('#inv')))invDrop(s);});
+function updateGDrop(){for(let i=GDROP.length-1;i>=0;i--){const d=GDROP[i];if(gTime>d.t){vfx('dust',d.x,d.y,{n:5});GDROP.splice(i,1);continue;}
+ if(mode==='play'&&gTime>d.lock&&Math.hypot(P.x-d.x,P.y-d.y)<16){slotIn(d.o);GDROP.splice(i,1);SFX.coin();toast(t('got',{n:d.o.n,item:d.o.it?inm(d.o.it):t(d.o.k)}));hudDirty=true;}}}
+function drawGDrop(){for(const d of GDROP){const left=d.t-gTime;if(left<10&&(gTime*6|0)%2)continue;const y=d.y-10+Math.sin(gTime*3+d.x)*1.5;
+ ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(d.x,d.y,5,2,0,0,7);ctx.fill();ctx.drawImage(iconC(d.o.k),Math.round(d.x-6),Math.round(y-6),12,12);}}
 function openEquip(){SFX.open();mode='equip';$('equipW').hidden=false;$('hint').hidden=true;renderEquip();}
 function closeEquip(){SFX.close();$('equipW').hidden=true;mode='play';}
 function eqSlot(it,ph,lbl,sl){const tip=it?itemTip(it)+`<br><small>${t('pickT',{s:t(lbl)})}</small>`:`${t(lbl)}: ${t('empty')}`;return `<div><button class="slotb ${it?'r'+it.r:''}" data-eq="${sl}" data-tip="${esc(tip)}"><img src="${icon(it?it.id:ph)}"></button><small>${t(lbl)}</small></div>`;}
@@ -3446,12 +3496,12 @@ Object.assign(STR.en,{failure:'Failure',ideal:'Ideal Dagger',gale:'Gale Spear',i
  needLv:'You need level {n} to wear this',needLvT:'Level required: {n}',iskNone:'No skill here: wear a weapon or piece that carries one',flyNo:"You can't fly here",qmoveOn:'Quick Movements!',flyOn:'Flying!',
  ipBleed:'BLEED',ipFear:'FEAR!',ipJnt5:'5 Joint Attacks!',ipWisdom:'Cooldown reset!',ipDoran:"Doran's Ring +{n}",ipEvade:'EVADE',iskL:'Skill: {s}',iskSlotE:'Item skill slot: wear a weapon or piece that carries a skill',iskItem:'from the item',gHp:'HP'});
 Object.assign(STR.ar,{sk_lrep:'تصليح الحداد الأسطوري',skd_lrep:'بيرجّع متانة القطع اللي لابسها 25% (وبيزيد مع لفل السكيل)',sk_icomb:'دمج القطع',skd_icomb:'"قطعتين فاهمهم 100% ممكن يتدمجوا عشان أداءهم يتحسن." سلاحك ودرعك بيتدمجوا 30 ثانية: هجوم ودفاع +20%، وبعدها كل واحد بيخسر 10 متانة',
- lrepOn:'اتصلحت {n} قطعة',skLvT:'لفل {n}',skUses:'{c}/{n} استعمال للفل الجاي',skMax:'أعلى لفل',skNext:'في لفل {n}: {o}',skLvUp:'{s} وصل لفل {n}!',skOpen:'اتفتح: {o}',
+ lrepOn:'اتصلحت {n} قطعة',sellT:'بيع',sellNote:'دوس على حاجة عشان تبيع واحدة، وShift عشان تبيع الكل',bagNote:'اسحب حاجة برا الشنطة عشان ترميها، أو على السلة عشان تدمرها',trashNote:'دوس على الحاجة اللي عايز تدمرها',trashTip:'تدمير حاجة',unEqFirst:'شيلها من عليك الأول',sellAt:'تتباع بـ {g} دهب',sellAll:'الكل بـ {g}',cfmNo:'لأ',delT:'تدمير',delQ:'هتدمر {it} ومش هترجع تاني. متأكد؟',delY:'دمرها',delDone:'{it} اتدمرت',dropT:'رمي',dropQ:'كده هترمي {it} على الأرض، وأي حد يقدر ياخدها. لو محدش أخدها في دقيقة هتختفي. متأكد؟',dropY:'ارميها',dropDone:'رميت {it} على الأرض',sellQ:'هتبيع {it} بـ {g} دهب. متأكد؟',sellY:'بيع',soldIt:'بعت {it} بـ {g} دهب',oSellW:'عايز أبيع حاجات',skLvT:'لفل {n}',skUses:'{c}/{n} استعمال للفل الجاي',skMax:'أعلى لفل',skNext:'في لفل {n}: {o}',skLvUp:'{s} وصل لفل {n}!',skOpen:'اتفتح: {o}',
  skO5_any:'فرصة 10% زيادة للضربة الحرجة',skO10_any:'الضربات بتخلي العدو ينزف 3 ثواني',skO5_icb:'الدمج بيبقى +30% بدل +20%',skO10_icb:'القطع مبتخسرش متانة بعد الدمج',
  skO5_lrep:'بيصلّح كل القطع اللي في الشنطة كمان',skO10_lrep:'تصليح كامل 100%',skO5_focus:'جودة أعلى في كل قطعة',skO10_focus:'فرصة الميزة الخاصة بتتضاعف',lrepNone:'كل حاجة متانتها كاملة',icombOn:'السلاح والدرع اتدمجوا!',icombEnd:'الدمج خلص والقطع رجعت زي ما كانت',pasNew:'سكيل Passive جديد: {s} (شغال على طول)',pasH:'سكيلات Passive',pasOnT:'شغال على طول',
  featL:'ميزة خاصة',featGot:'نفَس الحداد: القطعة طلعت بميزة خاصة ({f})',ft_as:'سرعة هجوم +4%',ft_ms:'سرعة حركة +4%',ft_dm:'ضرر +5%',ft_hpp:'صحة +5%'});
 Object.assign(STR.en,{sk_lrep:"Legendary Blacksmith's Repair",skd_lrep:'Restores 25% durability to the gear you wear (more as the skill levels up)',sk_icomb:'Item Combination',skd_icomb:'"Two items with a 100% understanding can be combined to enhance the performance." Your weapon and armor merge for 30 s: attack and defense +20%, then each loses 10 durability',
- lrepOn:'{n} items repaired',skLvT:'Lv {n}',skUses:'{c}/{n} uses to the next level',skMax:'Max level',skNext:'At Lv {n}: {o}',skLvUp:'{s} reached Lv {n}!',skOpen:'Unlocked: {o}',
+ lrepOn:'{n} items repaired',sellT:'Sell',sellNote:'Click a thing to sell one, Shift-click to sell them all',bagNote:'Drag a thing out of the bag to drop it, or onto the bin to destroy it',trashNote:'Click the thing you want to destroy',trashTip:'Destroy an item',unEqFirst:'Take it off first',sellAt:'Sells for {g} gold',sellAll:'all for {g}',cfmNo:'No',delT:'Destroy',delQ:'{it} will be destroyed for good. Are you sure?',delY:'Destroy it',delDone:'{it} destroyed',dropT:'Drop',dropQ:'You will drop {it} on the ground, where anyone can take it. If nobody picks it up within a minute it disappears. Are you sure?',dropY:'Drop it',dropDone:'You dropped {it}',sellQ:'Sell {it} for {g} gold?',sellY:'Sell',soldIt:'Sold {it} for {g} gold',oSellW:'I want to sell things',skLvT:'Lv {n}',skUses:'{c}/{n} uses to the next level',skMax:'Max level',skNext:'At Lv {n}: {o}',skLvUp:'{s} reached Lv {n}!',skOpen:'Unlocked: {o}',
  skO5_any:'+10% critical hit chance',skO10_any:'Hits make the enemy bleed for 3 s',skO5_icb:'The combination gives +30% instead of +20%',skO10_icb:'No durability loss after the combination',
  skO5_lrep:'Also repairs every item in your bag',skO10_lrep:'Full 100% repair',skO5_focus:'Better quality on every item',skO10_focus:'Double chance of a special feature',lrepNone:'Everything is at full durability',icombOn:'Weapon and armor combined!',icombEnd:'The combination ended and the items returned to their original appearance',pasNew:'New passive skill: {s} (always on)',pasH:'Passive skills',pasOnT:'Always on',
  featL:'Special feature',featGot:"Blacksmith's Breath: the item came out with a special feature ({f})",ft_as:'Attack speed +4%',ft_ms:'Move speed +4%',ft_dm:'Damage +5%',ft_hpp:'Health +5%'});
@@ -3688,7 +3738,7 @@ UI.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  if(b.dataset.stat){if(S.pts>0){const n=e.shiftKey?S.pts:Math.min(S.pts,+(b.dataset.n||1));S.st[b.dataset.stat]+=n;S.pts-=n;SFX.tick(1.6);if(n>1)tone(1500,.08,'square',.05,0,.06);renderStatus(b.dataset.stat);hudDirty=true;}return;}
  if(b.dataset.opt!==undefined){pickOpt(+b.dataset.opt);return;}
  if(b.dataset.town){if(mode==='dead')respawn(b.dataset.town);return;}
- if(b.dataset.inv!==undefined){invClick(+b.dataset.inv);return;}if(b.dataset.pot){drink(b.dataset.pot);return;}
+ if(b.dataset.inv!==undefined){if(INVDR&&INVDR.moved)return;invClick(+b.dataset.inv,e.shiftKey);return;}if(b.id==='invTrash'){INVX=INVX==='trash'?null:'trash';SFX.click();renderInv();return;}if(b.dataset.pot){drink(b.dataset.pot);return;}
  if(b.dataset.eq){openPick(b.dataset.eq);$('tip').classList.remove('on');return;}
  if(b.dataset.pick!==undefined){const sl=$('eqPick').dataset.sl,u=+b.dataset.pick;if(sl==='w'&&u)S.eqW=u;else if(sl==='a')S.eqA=u;else if(sl!=='w'){S.eq=S.eq||{};S.eq[sl]=u;}SFX.click();$('eqPick').hidden=true;renderEquip();hudDirty=true;$('tip').classList.remove('on');return;}
  if(b.dataset.sk!==undefined){if(mode==='play')useSlot(+b.dataset.sk);return;}
@@ -3806,7 +3856,7 @@ function update(dt){
    move(m,m.wx*b.spd*.25*dt,m.wy*b.spd*.25*dt,mr);if(m.wx)m.face=m.wx>0?1:-1;}
  }catch(err){gameErr(err,m);}finally{if(MOBP){P=MOBP;MOBP=null;}}}
  if(P.rmv>0)P.rmv-=dt;else if(P.rsp)P.rsp=Math.max(0,P.rsp-dt*2);horseRegen(dt);
- updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);updateEvents(dt);updateSiege(dt);achTick(dt);updateWeather(dt);fogTick(dt);updateComp(dt);updateItemFx(dt);updatePet(dt);updateArena(dt);updateTower(dt);updateDragon(dt);updateAuction(dt);
+ updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);updateEvents(dt);updateSiege(dt);achTick(dt);updateWeather(dt);fogTick(dt);updateComp(dt);updateItemFx(dt);updateGDrop();updatePet(dt);updateArena(dt);updateTower(dt);updateDragon(dt);updateAuction(dt);
 }
 
 /* ---------------- monster AI ---------------- */
@@ -4000,7 +4050,7 @@ function render(dt){
   if(NET&&!titleCam)netEnts(ents);}
  // one broken drawing (a stale sprite file after an update) must not hide the player and everything after it
  ents.sort((a,b)=>a.y-b.y).forEach(e=>{try{e.f();}catch(err){ctx.globalAlpha=1;gameErr(err);}});
- drawEProj();proj.forEach(p=>{if(p.kind==='arrow'){const l=Math.hypot(p.vx,p.vy)||1,ux=p.vx/l,uy=p.vy/l;ctx.strokeStyle='#e8e0d0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x-ux*7,p.y-uy*7);ctx.lineTo(p.x,p.y);ctx.stroke();R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}else if(p.kind==='wave'){const a=Math.atan2(p.vy,p.vx);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.globalAlpha=.85;ctx.strokeStyle='#ffe08a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(-6,0,12,-1.1,1.1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(-5,0,12,-.9,.9);ctx.stroke();ctx.restore();}else{const f=p.kind==='fire';R(ctx,p.x-2,p.y-2,f?5:4,f?5:4,f?'#ff8a1e':'#9fd8ff');R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}});
+ drawGDrop();drawEProj();proj.forEach(p=>{if(p.kind==='arrow'){const l=Math.hypot(p.vx,p.vy)||1,ux=p.vx/l,uy=p.vy/l;ctx.strokeStyle='#e8e0d0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x-ux*7,p.y-uy*7);ctx.lineTo(p.x,p.y);ctx.stroke();R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}else if(p.kind==='wave'){const a=Math.atan2(p.vy,p.vx);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.globalAlpha=.85;ctx.strokeStyle='#ffe08a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(-6,0,12,-1.1,1.1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(-5,0,12,-.9,.9);ctx.stroke();ctx.restore();}else{const f=p.kind==='fire';R(ctx,p.x-2,p.y-2,f?5:4,f?5:4,f?'#ff8a1e':'#9fd8ff');R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}});
  VX.draw(ctx);
  og.blit(ctx,camX,camY,VW,VH,camX,camY);
  vtView(tr=>{if((chopped.get(tr.k)||0)>gTime)return;const px=tr.tx*TS-6,py=tr.ty*TS-11;ctx.drawImage(tr.cn,px,py);});
@@ -4127,7 +4177,7 @@ requestAnimationFrame(loop);
    their own timers, keeps netTick running about once a second while the frame loop sleeps. */
 (()=>{if(typeof Worker==='undefined'||typeof Blob==='undefined')return;try{const w=new Worker(URL.createObjectURL(new Blob(['setInterval(function(){postMessage(0)},1000)'],{type:'text/javascript'})));
  w.onmessage=()=>{if(NET&&performance.now()-loopAt>1500)try{netTick();}catch(e){gameErr(e);}};}catch(e){}})();
-window.__G={chunks:()=>({g:gg.stats(),o:og.stats()}),get CARD(){return CARD},get SM(){return SM},get allies(){return allies},get S(){return S},get P(){return P},get mode(){return mode},die:()=>die(),mons:()=>mons,get npcs(){return npcs},nodes,act,finishMG:()=>finishMG,startMG:id=>startMG(RC.find(r=>r.id===id)),get MG(){return MG},talkNPC:id=>talkNPC(id),completeQ:id=>completeQ(id),acceptQ:id=>acceptQ(id),useSlot:i=>useSlot(i),newGame:L=>newGame(L),QD,openMap:()=>openMap(),get proj(){return proj},gainXP:n=>gainXP(n),openPick:s=>openPick(s),pickOpt:i=>pickOpt(i),advance:()=>advance(),get DL(){return DL},zoneAt,VT,chopped,tryAttack:(a,b)=>tryAttack(a,b),get KB(){return KB},ROOMS,PROPS,enterRoom:r=>enterRoom(r),openBoard:()=>openBoard(),openQD:id=>openQD(id),TOWNS,useProp:p=>useProp(p),at:(x,y)=>at(x,y),setT:(x,y,v)=>setT(x,y,v),eqx:{buyGear:(i,g,w)=>buyGear(i,g,w),equip:i=>equip(i),eqIt:s=>eqIt(s),defV:()=>defV(),atkV:()=>atkV(),atkCD:()=>atkCD(),maxMP:()=>maxMP(),repairAll:w=>repairAll(w),enhance:(i,w)=>enhance(i,w),mkItem:(i,r)=>mkItem(i,r),openEquip:()=>openEquip(),wear:(i,p)=>wear(i,p),openForge:()=>openForge(),price:(w,g)=>price(w,g),addAff:(i,n)=>addAff(i,n),giveGift:(w,k)=>giveGift(w,k),townOfNpc:i=>townOfNpc(i),get ESC(){return ESC},solid:(x,y)=>solidT(x,y),DGATES,DUN,useGate:g=>useGate(g)}};
+window.__G={bag:()=>({GDROP,openSell,INVS,invClick}),chunks:()=>({g:gg.stats(),o:og.stats()}),get CARD(){return CARD},get SM(){return SM},get allies(){return allies},get S(){return S},get P(){return P},get mode(){return mode},die:()=>die(),mons:()=>mons,get npcs(){return npcs},nodes,act,finishMG:()=>finishMG,startMG:id=>startMG(RC.find(r=>r.id===id)),get MG(){return MG},talkNPC:id=>talkNPC(id),completeQ:id=>completeQ(id),acceptQ:id=>acceptQ(id),useSlot:i=>useSlot(i),newGame:L=>newGame(L),QD,openMap:()=>openMap(),get proj(){return proj},gainXP:n=>gainXP(n),openPick:s=>openPick(s),pickOpt:i=>pickOpt(i),advance:()=>advance(),get DL(){return DL},zoneAt,VT,chopped,tryAttack:(a,b)=>tryAttack(a,b),get KB(){return KB},ROOMS,PROPS,enterRoom:r=>enterRoom(r),openBoard:()=>openBoard(),openQD:id=>openQD(id),TOWNS,useProp:p=>useProp(p),at:(x,y)=>at(x,y),setT:(x,y,v)=>setT(x,y,v),eqx:{buyGear:(i,g,w)=>buyGear(i,g,w),equip:i=>equip(i),eqIt:s=>eqIt(s),defV:()=>defV(),atkV:()=>atkV(),atkCD:()=>atkCD(),maxMP:()=>maxMP(),repairAll:w=>repairAll(w),enhance:(i,w)=>enhance(i,w),mkItem:(i,r)=>mkItem(i,r),openEquip:()=>openEquip(),wear:(i,p)=>wear(i,p),openForge:()=>openForge(),price:(w,g)=>price(w,g),addAff:(i,n)=>addAff(i,n),giveGift:(w,k)=>giveGift(w,k),townOfNpc:i=>townOfNpc(i),get ESC(){return ESC},solid:(x,y)=>solidT(x,y),DGATES,DUN,useGate:g=>useGate(g)}};
 // Read-only engine surface for the online layer and for content tests. Contract: docs/api/ENGINE_API.md
 const plain=o=>JSON.parse(JSON.stringify(o,(k,v)=>typeof v==='function'?{$fn:String(v)}:v));
 Satisfy.local=Object.freeze({api:1,

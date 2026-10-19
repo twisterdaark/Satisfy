@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19k', ver: '0.34', d: '2026-10-19',
+      ar: ['الشنطة فيها سلة: دوس عليها وبعدين على الحاجة، أو اسحب الحاجة عليها، وهتسألك قبل ما تدمرها',
+        'لو سحبت حاجة برا الشنطة هتسألك إذا كنت عايز ترميها. بتفضل على الأرض دقيقة تقدر ترجع تاخدها، وبعدها بتختفي',
+        'عند التاجر "عايز أبيع حاجات" بتفتح شباك زي الشنطة: دوس على أي حاجة تبيع واحدة، وShift تبيع الكل، والسعر باين في الوصف',
+        'الوحوش اللي قتلتها بتفضل ميتة لو عملت حفظ وخروج ورجعت، لحد ما ميعادها ييجي'],
+      en: ['The bag has a bin: click it and then a thing, or drag the thing onto it, and it asks before destroying it',
+        'Dragging a thing out of the bag asks whether to drop it. It lies on the ground for a minute so you can pick it up again, then it disappears',
+        'Merchants have "I want to sell things": a window like the bag where a click sells one, Shift-click sells all, and the price shows in the tooltip',
+        'Monsters you killed stay dead through a save and quit until their respawn time'] },
     { v: '2026-10-19j', ver: '0.33', d: '2026-10-19',
       ar: ['السكيلات بتتلفل كل ما تستعملها لحد لفل 10: ضرر أكتر ومانا وكول داون أقل، وفي لفل 5 و10 بتفتح ميزة جديدة. اللفل باين على أيقونة السكيل وفي الوصف',
         'غضب الحداد مبقاش متكرر: هو سكيل التايتل بس، ومكانه في سكيلات الحداد بقى تصليح الحداد الأسطوري اللي بيرجّع متانة اللبس',

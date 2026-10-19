@@ -56,6 +56,8 @@
     'fog', 'sec', 'respec', 'bank',
     // skill use counts that set each skill's level (owner 2026-10-19)
     'skx',
+    // when each monster you killed comes back, so a save and quit does not respawn them (owner 2026-10-19)
+    'mrt',
   ];
   var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT'];
   var META = ['v', 'wv', 'uid', 'pid'];
