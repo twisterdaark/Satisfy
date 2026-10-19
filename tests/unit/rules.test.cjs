@@ -272,6 +272,14 @@ test('world boss timers (SAT-ONLINE-056): set once per kill by its killer, at mo
   assert.equal(k.$other['.validate'], false);
 });
 
+test('weekly lockouts (SAT-ONLINE-059): your own, read by you alone, taken once per boss and week', () => {
+  const u = rules.lockouts.$uid, b = u.$week.$boss;
+  assert.equal(u['.read'], 'auth != null && auth.uid === $uid');
+  assert.equal(u.$week['.validate'], '$week.matches(/^w[0-9]{4,6}$/)');
+  assert.equal(b['.write'], 'auth != null && auth.uid === $uid && !data.exists()', 'never replaced or removed');
+  assert.equal(b.$other['.validate'], false);
+});
+
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing
 // else here parses the expressions. Merging two rules files by hand once lost one; check every expression before a deploy.
 function exprProblem(e) {

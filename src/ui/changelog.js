@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20g', ver: '0.51', d: '2026-10-20',
+      ar: ['أونلاين: صندوق بوس الدانجن بياخد غنيمته مرة واحدة في الأسبوع لكل حساب، وبعدها بيبقى فاضي ليك لحد التجديد يوم الاتنين',
+        'الدهب والخبرة والحاجات اللي بتقع من البوس نفسه زي ما هي، والأوفلاين مفيهوش قفل'],
+      en: ["Online: a dungeon boss's chest gives its loot once a week per account, then it is empty for you until the Monday reset",
+        "The boss's own drops, gold and experience are unchanged, and offline nothing is locked"] },
     { v: '2026-10-20f', ver: '0.50', d: '2026-10-20',
       ar: ['أونلاين: لما لاعب جنبك يموت أو يرجع للحياة بتسمع صوته، أوطى كل ما يبعد'],
       en: ['Online: you hear a player near you die or come back to life, softer the farther away they are'] },
