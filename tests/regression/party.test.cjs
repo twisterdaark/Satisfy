@@ -141,7 +141,7 @@ test('every town is a safe zone, and Patrian shows the tag', async () => {
     const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
     await H.newGame(a, LOOK_A);
     const towns = await a.eval(() => Satisfy.local.world().towns.map((z) => [z, Satisfy.net.zonePolicy(z).safe]));
-    assert.ok(towns.length >= 3, 'Bairan, Winston, Patrian');
+    assert.ok(towns.length >= 5, 'Bairan, Winston, Patrian, Reidan, Reinhardt');
     for (const [z, safe] of towns) assert.equal(safe, true, `${z} is safe`);
     const zone = await a.eval(() => { const T = window.__G.TOWNS.find((t) => t.k === 'zPat'), P = window.__G.P; P.x = T.rx * 16 + 8; P.y = T.ry * 16 + 10; return Satisfy.local.zoneAt(P.x, P.y); });
     assert.equal(zone, 'zPat');
