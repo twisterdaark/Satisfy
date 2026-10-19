@@ -12,12 +12,13 @@ const pick=(ramp,t,x,y)=>ramp[Math.max(0,Math.min(ramp.length-1,Math.round(t+BAY
 
 // PER_CODE: roof colors per kind from drawBuilding ([body, dark, light]); house is the fallback
 const ROOF={forge:['#4a4f5c','#3a3e4a','#5c6272'],hall:['#3a4a6a','#2a3850','#52648a'],lodge:['#3f6a3a','#2c4e28','#5a8a52'],tower:['#5a3a7a','#3e2658','#7a58a0'],
- shop:['#b8862a','#8a6418','#d8a848'],armory:['#5a6474','#3e4654','#7a8698'],inn:['#a85a2a','#7e3e18','#c8784a'],house:['#a8443a','#8c3530','#c05a48']};
+ shop:['#b8862a','#8a6418','#d8a848'],armory:['#5a6474','#3e4654','#7a8698'],inn:['#a85a2a','#7e3e18','#c8784a'],house:['#a8443a','#8c3530','#c05a48'],
+ palace:['#c8a040','#9a7a28','#e8c868'],temple:['#e4e0d6','#b4b0a6','#fbf8f0']};   // Titan (major #2): the Celestial Palace and Rebecca's great temple
 const rampOf=k=>{const [b,d,l]=(ROOF[k]||ROOF.house).map(hex);return [shade(d,-.35),d,b,l,shade(l,.25)];};
 const STONE=['#46423e','#5d5853','#75706a','#8c8781','#a39e97','#bcb7b0'].map(hex),WOOD=['#4a2e18','#5e3e26','#7a5230','#946640','#ad7c50','#c4925e'].map(hex);
 const PLANK=['#8a6a3f','#a07e50','#b8925e','#c9a46b','#d8b680','#e6c896'].map(hex),PLASTER=['#b8a888','#cdbd9a','#ddd0b0','#e9dfc4','#f4ecd8'].map(hex);
-const SHUTTER={house:'#4a7a48',shop:'#8a6418',inn:'#8a3a2a',hall:'#3a4a6a',lodge:'#4a6a3a',tower:'#5a3a7a',armory:'#4a5464'};
-const WALLK={house:'plank',shop:'timber',inn:'timber',hall:'timber',lodge:'log',tower:'stone',armory:'stone',forge:'stone'};
+const SHUTTER={house:'#4a7a48',shop:'#8a6418',inn:'#8a3a2a',hall:'#3a4a6a',lodge:'#4a6a3a',tower:'#5a3a7a',armory:'#4a5464',palace:'#7a1a1e',temple:'#c8a040'};
+const WALLK={house:'plank',shop:'timber',inn:'timber',hall:'timber',lodge:'log',tower:'stone',armory:'stone',forge:'stone',palace:'stone',temple:'stone'};
 
 function Img(w,h){const d=new Uint8ClampedArray(w*h*4);return {w,h,d,set(x,y,c,a){x|=0;y|=0;if(x<0||y<0||x>=w||y>=h)return;const i=(y*w+x)*4;d[i]=c[0];d[i+1]=c[1];d[i+2]=c[2];d[i+3]=a===undefined?255:a;},
  rect(x,y,rw,rh,c){for(let j=y;j<y+rh;j++)for(let i=x;i<x+rw;i++)this.set(i,j,c);}};}
@@ -60,6 +61,8 @@ function signIcon(I,k,sx,sy){const e=hex('#f2e6c8'),R_=(x,y,w,h,c)=>I.rect(sx+x,
  else if(k==='lodge'){for(let i=0;i<8;i++)R_(3+Math.round(Math.sin(i/7*Math.PI)*3),1+i,1,1);R_(3,1,1,8);}
  else if(k==='tower'){R_(5,1,2,8);R_(2,4,8,2);R_(4,3,4,4,hex('#bfe8ff'));}
  else if(k==='armory'){R_(3,1,1,7);R_(2,6,3,1);R_(6,2,4,5,hex('#c8ccd6'));R_(7,7,2,1,hex('#c8ccd6'));}
+ else if(k==='palace'){R_(2,4,8,4,hex('#f2c14e'));R_(2,2,2,2,hex('#f2c14e'));R_(5,1,2,3,hex('#f2c14e'));R_(8,2,2,2,hex('#f2c14e'));R_(5,5,2,2,hex('#d83a3a'));}
+ else if(k==='temple'){R_(5,1,2,8,hex('#fff3b0'));R_(2,3,8,2,hex('#fff3b0'));R_(4,6,4,1);}
  else if(k==='inn'){R_(3,3,5,6,hex('#e8c070'));R_(3,2,5,2,hex('#ffffff'));R_(8,4,2,3,hex('#e8c070'));}
  else {R_(4,3,4,4,hex('#f2c14e'));R_(3,4,6,2,hex('#f2c14e'));R_(5,4,2,2,hex('#fff3b0'));}}
 

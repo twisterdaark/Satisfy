@@ -5,6 +5,21 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19w', ver: '0.46', d: '2026-10-19',
+      ar: ['الإمبراطورية الصحراوية: أرض جديدة كاملة شرق المملكة الخالدة، ورا جبال سواز',
+        'جبال سواز على الحدود فيها إيتي وأوجر وترول وجارجويل، وجارجويل نظرته بتحجّرك لحظة',
+        'رولينغ، القرية الصغيرة اللي ورا الجبال، فيها كاهن وتاجر ونزل، ووادي دران جنوبها فيه سمندل عملاق ورجال سحالي',
+        'تيتان، عاصمة الإمبراطورية: أسوار وبوابات، قصر الإمبراطور، المعبد، البرج، منجم الميثريل الأسود، حداد وتاجر ونزل وسندان',
+        'الهاوية شمال تيتان: تلات أدوار تحت الأرض، فيها حراس السجن والمساجين، وفي آخرها الهيدرا (لفل 480)',
+        'بارونية بوتين في الجنوب الشرقي على الطريق البعيد، فيها البارون ونزل',
+        '6 كويستات جديدة، و10 أماكن تاريخ جديدة، و9 وحوش جديدة'],
+      en: ['The Saharan Empire: a whole new land east of the Eternal Kingdom, past the Suaz Mountains',
+        'The Suaz border range has etis, ogres, trolls and gargoyles; a gargoyle\'s gaze turns you to stone for a moment',
+        'Rolling, the small village past the mountains, has a priest, a merchant and an inn; Dran Valley to its south has giant salamanders and lizardmen',
+        'Titan, the imperial capital: walls and gates, the Emperor\'s palace, the temple, the tower, the black mithril mine, a smith, a merchant, an inn and an anvil',
+        'The Abyss north of Titan: three floors underground with prison guards and prisoners, and the Hydra at the bottom (level 480)',
+        'The Butin Barony in the south-east on the far road, with the Baron and an inn',
+        '6 new quests, 10 new lore spots and 9 new monsters'] },
     { v: '2026-10-19v', ver: '0.45', d: '2026-10-19',
       ar: ['الماب بقى أكبر مرتين: أراضي جديدة في أقصى الشمال وأقصى الجنوب',
         'الشمال: سور الشمال وبواباته فوق الطرق الشمالية، ووراه جبال الفوضى بأربع سلاسل، كل سلسلة أصعب من اللي قبلها (لفل 200 لـ 460)',
