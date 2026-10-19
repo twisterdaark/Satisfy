@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20f', ver: '0.50', d: '2026-10-20',
+      ar: ['أونلاين: لما لاعب جنبك يموت أو يرجع للحياة بتسمع صوته، أوطى كل ما يبعد'],
+      en: ['Online: you hear a player near you die or come back to life, softer the farther away they are'] },
     { v: '2026-10-20c', ver: '0.47', d: '2026-10-20',
       ar: ['أونلاين: تراوكا التنين الأحمر واحد في العالم كله: لما حد يقتله بيفضل ميت نص ساعة عند كل اللاعبين، حتى اللي ماكانوش موجودين'],
       en: ['Online: Trauka the Red Dragon is one for the whole world: once someone kills it, it stays dead for half an hour for every player, even those who were not there'] },

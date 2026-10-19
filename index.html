@@ -4405,6 +4405,11 @@ function meRun(fn,self,args){if(FXME||!NET||!P||mode!=='play')return fn.apply(se
 const SFXNET=['swing','hit','crit','hurt','dodge','chop','mine','clang','miss','slam','level','legendary'],SFXR=360;
 for(const k of SFXNET){const f=SFX[k];SFX[k]=function(...a){if(FXME&&NET&&P&&mode!=='title')try{fxR(['s',k,typeof a[0]==='number'?Math.round(a[0]*100)/100:0]);}catch(e){}return f.apply(this,a);};}
 window.__GS={heard:[]}; // test hook: the other players' sounds played here
+/* SAT-ONLINE-058 (owner, via Claude-B on #13): a player near you dying or coming back is heard too, the sounds yours make,
+   softer with distance; from their presence turning to 'dead' and back (none for one already dead when first seen) */
+function remLife(r,fs){const a=r.anim==='dead'?1:0;if(fs.lf===undefined){fs.lf=a;return;}if(fs.lf===a)return;fs.lf=a;if(!P||mode==='title')return;
+ const d=Math.hypot(r.x-P.x,r.y-P.y);if(d>=SFXR)return;SFXV=.1+.5*(1-d/SFXR);
+ try{if(a){SFX.slam();tone(196,1.4,'sine',.1,-90,.1);}else SFX.quest();if(__GS.heard.length<40)__GS.heard.push(a?'die':'back');}finally{SFXV=1;}}
 const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(tryAttack);dodge=meWrap(dodge);useSlot=meWrap(useSlot);useISlot=meWrap(useISlot);
 // presence field: the events of the last 0.7 s, oldest first, within FXMAX characters (each one goes out in about 3 updates)
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
@@ -4433,7 +4438,7 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
 // due replays, at where each player is drawn now; players off screen or out of sight just drop theirs
 function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
 function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)
- for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const fs=fxSt(r.sid);fxIn(r,fs);if(fs.st&&fs.st.indexOf('f')>=0&&rand()<.23)fx.push({x:r.x+(rand()-.5)*14,y:r.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});/* their flight, as yours (updateItemFx) */if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
+ for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const fs=fxSt(r.sid);fxIn(r,fs);remLife(r,fs);if(fs.st&&fs.st.indexOf('f')>=0&&rand()<.23)fx.push({x:r.x+(rand()-.5)*14,y:r.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});/* their flight, as yours (updateItemFx) */if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
   const k=remoteSpr(r.look,r.arm),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
   // their weapon in hand and each swing once, the way your own is drawn (SAT-ONLINE-026, owner feedback 7): a swing starts when
   // their anim turns to 'attack' and plays 0.14 s on this clock, however long the state stays up
