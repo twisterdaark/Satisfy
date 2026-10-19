@@ -10,7 +10,7 @@ const vm = require('node:vm');
 const { ROOT } = require('../harness/load-module.cjs');
 
 const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-const inline = [...html.matchAll(/<script>\n([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+const inline = [...html.matchAll(/<script>\r?\n([\s\S]*?)<\/script>/g)].map((m) => m[1]); // CRLF on a Windows checkout
 
 test('the inline game script parses', () => {
   assert.ok(inline.length >= 1, 'inline script found');
