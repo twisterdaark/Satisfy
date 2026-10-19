@@ -72,3 +72,15 @@ test('zone policy: every town (Bairan, Winston, Patrian, Reidan, Reinhardt) is s
     assert.equal(N.zonePolicy(z).pvp, false, z);
   }
 });
+
+test('PlayerPublic.duel (U034): "<duel id>:<HP>" or null, validated', () => {
+  const S = { look: { n: 'G' }, cls: 'novice', lv: 3 }, P = { x: 10, y: 10, dir: 0 };
+  assert.equal(N.toPlayerPublic(S, P, {}).duel, null);
+  assert.equal(N.toPlayerPublic(S, P, { duel: 'd_u0_abc1:73' }).duel, 'd_u0_abc1:73');
+  for (const bad of ['x:1', 'd_u0:101', 'd_u0:-1', 'd_' + 'x'.repeat(50) + ':5', 42]) {
+    assert.equal(N.toPlayerPublic(S, P, { duel: bad }).duel, null, String(bad));
+  }
+  const pp = N.toPlayerPublic(S, P, { duel: 'd_u0_abc1:0', zone: 'zPlains' });
+  assert.ok(N.validatePlayerPublic(pp).ok);
+  assert.deepEqual(N.validatePlayerPublic({ ...pp, duel: 'nope' }).errors, ['duel']);
+});

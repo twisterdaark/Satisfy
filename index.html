@@ -3330,7 +3330,7 @@ function netTick(){NET.tick();const live=Satisfy.local.inGame()&&NET_LIVE.includ
  if(DUEL)duelTick(live);
  if(PRAID)PRAID.tick();
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
- if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null}),netForce);netForce=false;}
+ if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,duel:duelPublic()}),netForce);netForce=false;}
  partyUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
  const netSafe=live&&Satisfy.net.zonePolicy(zoneAt(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
@@ -3345,6 +3345,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   TX.push({s:r.handle||'?',x:r.x,y:r.y-28,f:F,z:8,c:foe?'#ff8a7a':mate?'#8dff9a':'#9fe0ff'});
   if(!mate&&!foe&&mode==='play'&&Math.hypot(r.x-P.x,r.y-P.y)<PARTY_R)TX.push({s:t('pInvite')+(DUEL&&!Satisfy.net.zonePolicy(zoneAt(P.x,P.y)).safe?' · '+t('dHint'):''),x:r.x,y:r.y-37,f:F,z:6,c:'#ffe7a8'});}
+ duelWatch(ents,myRoom);
  const ds=DUEL&&DUEL.state();if(ds&&ds.arena&&!myRoom)ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle=ds.phase==='fight'?'rgba(255,120,90,.7)':'rgba(255,210,74,.7)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(ds.arena.x,ds.arena.y,ds.arena.r,0,7);ctx.stroke();ctx.restore();}});}
 if(NETQ==='local'&&typeof BroadcastChannel!=='undefined'){
  netStart(Satisfy.presence.create({transport:Satisfy.transports.local('satisfy-net-v1'),world:Satisfy.local.world(),now:()=>performance.now()}));netState='ONLINE';
@@ -3388,6 +3389,15 @@ function duelSwing(ax,ay,mul,k){if(DUEL.state().phase!=='fight')return;const f=D
  if(ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):d>30)return;
  const crit=rand()<.12,pow=(8+rand()*5)*(crit?1.5:1)*Math.min(1.5,mul||1),dmg=DUEL.hit(pow);
  if(dmg){num(f.x,f.y-24,'-'+dmg,crit?'#ffd24a':'#ffffff',crit);if(crit)vfx('crit',f.x,f.y-10);}}
+// U034 spectators: while fighting, each duelist publishes "<duel id>:<duel HP>"; everyone else sees a bar over
+// each duelist and a dashed ring between the two
+function duelPublic(){if(!DUEL||!DUEL.locked())return null;const s=DUEL.state();return s.duel+':'+Math.max(0,Math.min(100,s.hp|0));}
+function duelWatch(ents,myRoom){const mine=DUEL&&DUEL.state().duel,by={};
+ for(const r of NET.remotes()){if(!r.duel||(r.room||null)!==myRoom)continue;const i=r.duel.lastIndexOf(':'),id=r.duel.slice(0,i),hp=+r.duel.slice(i+1);
+  ents.push({y:r.y+1,f:()=>{const w=20,x=Math.round(r.x-w/2),y=Math.round(r.y-34);R(ctx,x-1,y-1,w+2,4,'#000');R(ctx,x,y,w,2,'#5a1a1a');R(ctx,x,y,Math.round(w*hp/100),2,'#ff8a4a');}});
+  if(id!==mine)(by[id]=by[id]||[]).push(r);}
+ for(const id in by){const g=by[id];if(g.length<2)continue;const cx=(g[0].x+g[1].x)/2,cy=(g[0].y+g[1].y)/2;
+  ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,180,120,.45)';ctx.lineWidth=1;ctx.setLineDash([3,5]);ctx.beginPath();ctx.arc(cx,cy,Math.max(40,Math.hypot(g[0].x-g[1].x,g[0].y-g[1].y)/2+30),0,7);ctx.stroke();ctx.restore();}});}}
 function duelNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=Satisfy.duel.C.CHALLENGE_R;for(const r of NET.remotes()){if((r.room||null)!==myRoom)continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
 function duelAct(a){if(!DUEL)return;const inv=DUEL.pendingChallenge(),st=DUEL.state();
  if(a==='dAccept'){if(inv)DUEL.accept(inv.duel);else if(st.phase==='ready')DUEL.ready();}

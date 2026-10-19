@@ -264,6 +264,7 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, additive** (SAT-ONLINE-013): `PlayerPublic.duel` = `"<duel id>:<duel HP>"` while in a duel's countdown/fight (null otherwise); other players see an HP bar over each duelist and a ring between them (doc U034). Presence + rules field (rules redeploy).
 - **api 1, additive** (SAT-ONLINE-012): `net().link = { rtt, writes, fails }` (Firebase: smoothed ms until the server acknowledges a presence write); the HUD badge tooltip shows link, sent, received and dropped (doc U015, U020).
 - **api 1, additive** (SAT-ONLINE-011): the Firebase transport writes presence in full once per connection, then `update()`s only changed fields (≈3.6× less download, `COST_MODEL.md`). Same database shape and rules.
 - **api 1, additive** (SAT-ONLINE-010): `Satisfy.firebase.lease()`, `transport.release()`, RTDB `sessions/` (rules redeploy), "Play here" panel.

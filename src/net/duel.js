@@ -52,7 +52,9 @@
       if (extra) for (var k in extra) pl[k] = extra[k];
       P.send(type, pl);
     }
-    function newId() { return 'd_' + String(self).slice(0, 20) + '_' + (now() | 0).toString(36) + (++seq).toString(36); }
+    // only [A-Za-z0-9_-]: the id goes into PlayerPublic.duel as "<id>:<hp>" (contracts DUEL_RE), and a
+    // local-transport uid is "local:<hex>"
+    function newId() { return 'd_' + String(self).replace(/[^A-Za-z0-9_-]/g, '-').slice(0, 20) + '_' + (now() | 0).toString(36) + (++seq).toString(36); }
     function start(id, foe, handle, mine) {
       d = { id: id, foe: foe, handle: handle || '', mine: !!mine, phase: mine ? 'asking' : 'ready',
         since: now(), meReady: false, foeReady: false, hp: C.HP, foeHp: C.HP, seen: now(),

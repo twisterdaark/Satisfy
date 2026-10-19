@@ -13,7 +13,7 @@
  * @typedef {{
  *   v:number, uid:(string|null), sid:(string|null), handle:string, look:Look,
  *   cls:string, lv:number, title:string, zone:string, room:(string|null),
- *   x:number, y:number, dir:number, anim:string, arm:number, party:(string|null), t:number
+ *   x:number, y:number, dir:number, anim:string, arm:number, party:(string|null), duel:(string|null), t:number
  * }} PlayerPublic
  *   What other players may see. `room` is the house interior id (e.g. "r7") or null outdoors;
  *   `arm` is 1 when armor is worn (picks the armored sprite).
@@ -29,7 +29,9 @@
   // headroom over the map (724 x 144 tiles = 11584 x 2304 px today) so a wider map needs no redeploy.
   var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 2048, shard: 999, posX: 16384, posY: 4096 });
   var ANIMS = ['idle', 'walk', 'attack', 'dodge', 'dead'];
-  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 't'];
+  // PlayerPublic.duel: a duel id from Satisfy.duel and the player's duel HP (0..100)
+  var DUEL_RE = /^d_[A-Za-z0-9_-]{1,40}:(100|[1-9]?[0-9])$/;
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
   // S.uid (the local item-instance counter) is private too, but its name collides with the public
   // account `uid`, so it is checked by value in the tests instead of listed here.
@@ -92,7 +94,8 @@
    * Build the public view of the local player.
    * @param {object} S durable state
    * @param {object} P volatile player state
-   * @param {{zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, anim?:string, arm?:number, t?:number}} [ctx]
+   * @param {{zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, duel?:string, anim?:string, arm?:number, t?:number}} [ctx]
+   *   duel: "<duel id>:<duel HP>" while in a duel's countdown or fight, so others can watch (U034)
    * @returns {PlayerPublic}
    */
   function toPlayerPublic(S, P, ctx) {
@@ -115,6 +118,7 @@
       anim: ANIMS.indexOf(ctx.anim) >= 0 ? ctx.anim : 'idle',
       arm: ctx.arm ? 1 : 0,
       party: ctx.party || null,
+      duel: typeof ctx.duel === 'string' && DUEL_RE.test(ctx.duel) ? ctx.duel : null,
       t: ctx.t || 0,
     };
   }
@@ -143,6 +147,7 @@
     if (o.arm !== 0 && o.arm !== 1) e.push('arm');
     if (o.room !== null && typeof o.room !== 'string') e.push('room');
     if (o.party !== null && typeof o.party !== 'string') e.push('party');
+    if (o.duel !== undefined && o.duel !== null && !(typeof o.duel === 'string' && DUEL_RE.test(o.duel))) e.push('duel');
     return { ok: e.length === 0, errors: e };
   }
 

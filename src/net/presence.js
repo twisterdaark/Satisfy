@@ -126,7 +126,7 @@
         var t = now();
         var changed = !lastPP || pp.x !== lastPP.x || pp.y !== lastPP.y || pp.dir !== lastPP.dir || pp.anim !== lastPP.anim;
         var meta = !lastPP || pp.room !== lastPP.room || pp.zone !== lastPP.zone || pp.lv !== lastPP.lv ||
-          pp.handle !== lastPP.handle || pp.arm !== lastPP.arm || pp.party !== lastPP.party || JSON.stringify(pp.look) !== JSON.stringify(lastPP.look);
+          pp.handle !== lastPP.handle || pp.arm !== lastPP.arm || pp.party !== lastPP.party || pp.duel !== lastPP.duel || JSON.stringify(pp.look) !== JSON.stringify(lastPP.look);
         var gap = 1000 / (changed ? cfg.moveHz : cfg.idleHz);
         if (!force && !meta && t - lastSent < gap) return false;
         sendEnv('presence.state', pp);
