@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20h', ver: '0.52', d: '2026-10-20',
+      ar: ['أونلاين: الغارات: قائد الفريق يقدر يخلي فريقه غارة لحد 10 لاعبين من زرار "غارة" في لوحة الفريق، ويرجعها فريق لما يبقوا 5 أو أقل'],
+      en: ['Online: raids: a party leader can make the party a raid of up to 10 players with "Raid" in the party panel, and a party again at 5 or fewer'] },
     { v: '2026-10-20c', ver: '0.47', d: '2026-10-20',
       ar: ['أونلاين: تراوكا التنين الأحمر واحد في العالم كله: لما حد يقتله بيفضل ميت نص ساعة عند كل اللاعبين، حتى اللي ماكانوش موجودين'],
       en: ['Online: Trauka the Red Dragon is one for the whole world: once someone kills it, it stays dead for half an hour for every player, even those who were not there'] },
