@@ -12089,6 +12089,10 @@
    "msword",
    "marmor",
    "mhelm",
+   "tHood",
+   "tGloves",
+   "tBoots",
+   "tRobe",
    "dscale",
    "ruby",
    "topaz",
@@ -12110,7 +12114,8 @@
    "slotB",
    "slotX",
    "coin",
-   "estone"
+   "estone",
+   "respec"
   ]
  }
 }

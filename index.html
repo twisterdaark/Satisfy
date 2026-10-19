@@ -485,6 +485,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
         <button data-act="new" id="newBtn" data-i18n="newGame"></button>
         <button data-act="online" id="onlineBtn" data-i18n="netSignIn" hidden></button>
         <button data-act="cloud" id="cloudBtn" hidden></button>
+        <button data-act="switchAcc" id="switchBtn" hidden></button>
         <button data-act="controls" data-i18n="controls"></button>
         <button data-act="lang" data-i18n="langBtn"></button>
       </div>
@@ -1645,7 +1646,7 @@ function updateEvents(dt){if(!S||!P)return;const n=evNow();
 /* ---------------- life skills (SAT-LIFE-001) ---------------- */
 // Fishing, herb gathering, cooking and brewing. Levels are per player (S.life); online, herbs and fishing spots stay
 // per-player so nobody steals a node from under someone else.
-const LIFE=['fish','herb','cook','alch'],LIFEM=['fish','sfish','gfish','herb','bherb'],LXP=[0,20,60,140,280,500,800,1200,1800,2600];
+const LIFE=['fish','herb','cook','alch','sew'],LIFEM=['fish','sfish','gfish','herb','bherb'],LXP=[0,20,60,140,280,500,800,1200,1800,2600];
 const lifeLv=k=>Math.max(1,LXP.filter(x=>((S&&S.life||{})[k]||0)>=x).length);
 function lifeXP(k,n){if(S.pet==='cat')n=Math.round(n*(1+petB('cat')));S.life=S.life||{};const l0=lifeLv(k);S.life[k]=(S.life[k]||0)+n;if(lifeLv(k)>l0){toast(t('lifeUp',{s:t('life_'+k),n:lifeLv(k)}),'good');SFX.level();}}
 // fishing: stand by the water and press E to cast, wait for the bite, press E again before it gets away
@@ -1666,14 +1667,94 @@ function makeLife(k,brew){const r=(brew?BREW:COOK)[k];if(!canMake(r)){SFX.deny()
    click while the bar is in the golden part. A better cook gets a wider golden part; harder dishes heat faster. Right in the
    middle is perfect: one more dish and double life EXP. Too early or too late: the ingredients are lost, a little EXP. */
 let COOKG=null;
-function cookStart(k,brew){const sk=brew?'alch':'cook',r=(brew?BREW:COOK)[k],w=Math.min(.34,.16+lifeLv(sk)*.012);
+function cookStart(k,brew){if(brew)return mixStart(k);const sk=brew?'alch':'cook',r=(brew?BREW:COOK)[k],w=Math.min(S.sec==='chef'?.45:.34,(.16+lifeLv(sk)*.012)*(S.sec==='chef'?1.4:1));
  COOKG={k,brew,sk,r,p:0,dur:{cfish:1.7,stew:1.4,feast:1.05,hpot:1.6,mpot:1.3}[k]||1.5,c:.62,w,t:performance.now(),end:0};mode='cook';SFX.click();}
 function cookHit(){const G=COOKG;if(!G||G.end)return;const d=Math.abs(G.p-G.c),ok=d<=G.w/2,perfect=d<=G.w*.12;G.end=performance.now();G.res=perfect?2:ok?1:0;
  const {k,brew,sk,r}=G;
- if(ok){const n=perfect?2:1;if(brew)S[k]=(S[k]||0)+n;else S.mats[k]=(S.mats[k]||0)+n;lifeXP(sk,r.xp*(perfect?2:1));toast(perfect?t('cookPerfect',{it:t(k)}):t(brew?'brewOk':'cookOk',{it:t(k)}),'good');perfect?SFX.legendary():SFX.quest();}
+ if(ok){const n=perfect?(S.sec==='chef'?3:2):1;if(brew)S[k]=(S[k]||0)+n;else S.mats[k]=(S.mats[k]||0)+n;lifeXP(sk,r.xp*(perfect?2:1));toast(perfect?t('cookPerfect',{it:t(k)}):t(brew?'brewOk':'cookOk',{it:t(k)}),'good');perfect?SFX.legendary():SFX.quest();}
  else{lifeXP(sk,Math.ceil(r.xp/3));toast(t(G.p<G.c?(brew?'brewRaw':'cookRaw'):(brew?'brewFail':'cookFail')),'warn');SFX.deny();}
  hudDirty=true;setTimeout(()=>{if(COOKG!==G)return;COOKG=null;if(mode==='cook'){mode='play';campMenu();}},650);}
 function cookQuit(){if(!COOKG)return;if(!COOKG.end){COOKG.p=1;cookHit();}}
+/* production specializations (Twister 2026-10-19: "a blacksmith specialization and production specializations like the novel,
+   each with a mini-game"). The novel's production fields: "production rankers in various fields such as blacksmiths, tailors
+   and alchemists" (ch 178), and Grid recruiting "secondary classes like cleaners, chefs, tailors, construction workers,
+   blacksmiths, alchemists" (ch 278). S.sec is one specialization next to your class, learned from a trainer (switching later
+   costs 2000 G): smith = the forge (as the blacksmith class), tailor = sewing (new), alch = mixing potions (new, brewing for
+   everyone uses it), chef = the cooking bar (wider gold part, three dishes on a perfect). "The benefit of raising all stats
+   every time a higher grade item was made was common to all production-related classes, not just blacksmiths" (ch 36): a
+   tailor's first item of each grade gives the same stat bonus as a blacksmith's. Per-player state only (online-safe). */
+const SEC={smith:['khan','smith'],tailor:['stylist'],alch:['herbW'],chef:['baker']},SEC_SWAP=2000;
+function secOpt(who){const k=Object.keys(SEC).find(k=>SEC[k].includes(who));if(!k||S.sec===k)return [];const cost=S.sec?SEC_SWAP:0;
+ return [{l:t('oSec',{n:t('sec_'+k)}),pr:cost||undefined,st:t('sec_'+k+'D'),poor:S.gold<cost,f:()=>{if(S.gold<cost){SFX.deny();return dialog(who,[t('noGold')]);}
+  S.gold-=cost;S.sec=k;hudDirty=true;SFX.quest();toast(t('secGot',{n:t('sec_'+k)}),'good');save(true);dialog(who,['secT_'+k]);}}];}
+// tailoring recipes: soft leather and cloth pieces for the armour slots, sewn only by tailors
+const TRC=[
+ {id:'tHood',slot:'h',def:4,ms:.04,need:{leather:2,herb:2},xp:10,n:6},
+ {id:'tGloves',slot:'g',def:2,as:.07,need:{leather:2,herb:1},xp:10,n:6},
+ {id:'tBoots',slot:'b',def:2,ms:.1,need:{leather:3},xp:12,n:7},
+ {id:'tRobe',slot:'a',def:9,mpb:30,need:{leather:3,herb:2,bherb:1},xp:18,n:8}];
+const rcById=id=>RC.find(x=>x.id===id)||TRC.find(x=>x.id===id);
+function sewMenu(){dialog('stylist',['sewHi'],null,[...TRC.map(r=>({l:t('oSewIt',{it:t(r.id),n:needTxt(r)}),poor:!canMake(r),f:()=>{if(!canMake(r)){SFX.deny();return sewMenu();}
+  for(const [m,n] of Object.entries(r.need))S.mats[m]-=n;sewStart(r);}})),{l:t('oLeave'),f:()=>{}}]);}
+/* sewing minigame: the needle runs along a seam of stitch marks; press E, Space or click as it crosses each one. A better
+   tailor gets a wider mark. Accuracy sets the grade (common to epic; unique from sewing level 5); a seam under half right tears. */
+let SEWG=null;
+function sewStart(rc){const n=rc.n,w=Math.min(.05,.022+lifeLv('sew')*.003);SEWG={rc,n,w,marks:Array.from({length:n},(_,i)=>.08+i*.84/(n-1)),hit:new Array(n).fill(0),miss:0,p:0,dur:1+n*.34,t:performance.now(),end:0};mode='sew';SFX.click();}
+function sewHit(){const G=SEWG;if(!G||G.end)return;let bi=-1,bd=9;G.marks.forEach((m,i)=>{if(G.hit[i])return;const d=Math.abs(G.p-m);if(d<bd){bd=d;bi=i;}});
+ if(bi>=0&&bd<=G.w){G.hit[bi]=bd<=G.w*.35?2:1;SFX.click();}else{G.miss++;SFX.deny();}}
+function sewEnd(quit){const G=SEWG;if(!G||G.end)return;G.end=performance.now();const h=G.hit.filter(Boolean).length,acc=quit?0:Math.max(0,(h-G.miss*.5)/G.n),rc=G.rc;
+ if(acc<.5){lifeXP('sew',Math.ceil(rc.xp/3));G.res=0;toast(t('sewFail'),'warn');SFX.deny();}
+ else{const r=Math.min(lifeLv('sew')>=5?3:2,acc>=.98?3:acc>=.85?2:acc>=.7?1:0),it=mkItem(rc.id,r);S.items.push(it);if(!eqIt(rc.slot))equip(it);
+  lifeXP('sew',rc.xp*(r+1));G.res=r+1;const gk='t'+rc.id+r;let bonus='';if(STATB[r]&&!S.got[gk]){S.got[gk]=1;S.bonus+=STATB[r];bonus=' · '+t('craftBonus',{n:STATB[r]});}
+  vfx('loot',P.x,P.y,{rarity:r});toast(t('sewOk',{it:t(rc.id)})+bonus,'good');r>=2?SFX.legendary():SFX.quest();qEvent('craft',rc.id,r,rc.slot);}
+ hudDirty=true;save(true);setTimeout(()=>{if(SEWG!==G)return;SEWG=null;if(mode==='sew')mode='play';},800);}
+function drawSew(){const G=SEWG;if(!G)return;const now=performance.now();if(!G.end){G.p=Math.min(1,(now-G.t)/1000/G.dur);if(G.p>=1)sewEnd();}
+ const W=110,x=Math.round(P.x-W/2),y=Math.round(P.y-54);ctx.save();ctx.fillStyle='rgba(8,14,34,.86)';ctx.fillRect(x-6,y-16,W+12,34);ctx.strokeStyle='rgba(166,214,246,.9)';ctx.lineWidth=1;ctx.strokeRect(x-6.5,y-16.5,W+13,35);
+ ctx.fillStyle='#d8c8a8';ctx.fillRect(x,y,W,6);ctx.fillStyle='#b8a888';for(let i=0;i<W;i+=4)ctx.fillRect(x+i,y+2,2,1);
+ G.marks.forEach((m,i)=>{const mx=x+Math.round(m*W),hw=Math.max(1,Math.round(G.w*W));ctx.fillStyle=G.hit[i]===2?'#fff2a8':G.hit[i]?'#7aff8a':G.p>m+G.w?'#ff6a5a':'#ffc21a';ctx.fillRect(mx-hw,y-2,hw*2,10);if(G.hit[i]){ctx.fillStyle='#3a2a6a';ctx.fillRect(mx-1,y-1,2,8);}});
+ const nx=x+Math.round(G.p*W);ctx.fillStyle='#e8eef8';ctx.fillRect(nx-1,y-6,2,14);ctx.fillRect(nx-2,y-7,4,2);ctx.restore();
+ TX.push({s:t(G.end?(G.res?'sewDone':'cookBad'):'sewHow'),x:P.x,y:y-6,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:8,c:'#ffe7a8'});
+ TX.push({s:t(G.rc.id),x:P.x,y:y+16,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#bfe8ff'});}
+/* alchemy (mixing) minigame: hold E, Space or the mouse to heat the flask, let go to cool it. Keep the heat inside the
+   blue band until the mix is done; boiling over or running out of time spoils it. A better alchemist gets a wider band;
+   an alchemist specialist also gets three potions on a fast, clean mix. */
+let MIXG=null;
+addEventListener('keydown',e=>{if(MIXG&&(e.code==='KeyE'||e.code==='Space'))MIXG.h=1;});
+addEventListener('keyup',e=>{if(MIXG&&(e.code==='KeyE'||e.code==='Space'))MIXG.h=0;});
+addEventListener('mouseup',()=>{if(MIXG)MIXG.h=0;});
+function mixStart(k){const r=BREW[k],bw=Math.min(.3,(.14+lifeLv('alch')*.01)*(S.sec==='alch'?1.4:1)),c=.45+rand()*.2;
+ MIXG={k,r,lo:c-bw/2,hi:c+bw/2,heat:.15,prog:0,out:0,h:0,dur:8,el:0,end:0};mode='mix';SFX.click();}
+function mixEnd(res){const G=MIXG;if(!G||G.end)return;G.end=performance.now();G.res=res;const {k,r}=G;
+ if(res){const n=res===2?(S.sec==='alch'?3:2):1;S[k]=(S[k]||0)+n;lifeXP('alch',r.xp*res);toast(res===2?t('mixPerfect',{it:t(k),n}):t('brewOk',{it:t(k)}),'good');res===2?SFX.legendary():SFX.quest();}
+ else{lifeXP('alch',Math.ceil(r.xp/3));toast(t(G.heat>=1?'mixBoil':'brewFail'),'warn');SFX.deny();}
+ hudDirty=true;setTimeout(()=>{if(MIXG!==G)return;MIXG=null;if(mode==='mix'){mode='play';campMenu();}},700);}
+function mixTick(dt){const G=MIXG;if(!G||G.end)return;G.el+=dt;G.heat=Math.max(0,G.heat+(G.h?.5:-.38)*dt+Math.sin(G.el*5.3)*.06*dt);
+ const inB=G.heat>=G.lo&&G.heat<=G.hi;if(inB)G.prog+=dt/2.6;else if(G.prog>0)G.out+=dt;
+ if(G.heat>=1)return mixEnd(0);if(G.prog>=1)return mixEnd(G.out<.6&&G.el<5.5?2:1);if(G.el>=G.dur)mixEnd(0);}
+function drawMix(){const G=MIXG;if(!G)return;const now=performance.now();if(!G.end){mixTick(Math.min(.05,(now-(G.lt||now))/1000));}G.lt=now;
+ const H=56,x=Math.round(P.x+16),y=Math.round(P.y-66);ctx.save();ctx.fillStyle='rgba(8,14,34,.86)';ctx.fillRect(x-5,y-5,30,H+10);ctx.strokeStyle='rgba(166,214,246,.9)';ctx.lineWidth=1;ctx.strokeRect(x-5.5,y-5.5,31,H+11);
+ ctx.fillStyle='#2a1a3a';ctx.fillRect(x,y,8,H);const Y=v=>y+H-Math.round(v*H);ctx.fillStyle='#3a8ae8';ctx.fillRect(x,Y(G.hi),8,Y(G.lo)-Y(G.hi));
+ ctx.fillStyle=G.heat>.85?'#ff6a5a':'#ffffff';ctx.fillRect(x-2,Y(Math.min(1,G.heat))-1,12,2);
+ ctx.fillStyle='#1a2a1a';ctx.fillRect(x+13,y,7,H);ctx.fillStyle='#7aff8a';const ph=Math.round(Math.min(1,G.prog)*H);ctx.fillRect(x+13,y+H-ph,7,ph);ctx.restore();
+ if(!G.end&&rand()<(G.h?.6:.25))fx.push({x:P.x+(rand()-.5)*8,y:P.y-14,vx:(rand()-.5)*8,vy:-16-rand()*12,t:.5,c:G.heat>.85?'#ff8a6a':'#a8d8ff',fl:1});
+ TX.push({s:t(G.end?(G.res===2?'cookPerf':G.res?'cookGood':'cookBad'):'mixHow'),x:P.x,y:P.y-76,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:8,c:'#ffe7a8'});
+ TX.push({s:t(G.k),x:P.x,y:P.y-64+H+16,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#bfe8ff'});}
+Object.assign(STR.ar,{craftBonus:'إنجاز صنعة: +{n} لكل الستات',secL:'التخصص',oSec:'اتعلم تخصص {n}',secGot:'بقيت {n}!',
+ sec_smith:'حداد',sec_tailor:'خياط',sec_alch:'كيميائي',sec_chef:'طباخ',
+ sec_smithD:'الحدادة على السندان: جودة أعلى ونقط ستات مع كل درجة جديدة',sec_tailorD:'الخياطة: قطع جلد وقماش للخوذة والجوانتي والجزمة والدرع، بميني جيم الإبرة',sec_alchD:'الجرعات: مدى أوسع في ميني جيم الخلط، وتلات جرعات لو الخلطة مظبوطة',sec_chefD:'الطبخ: الجزء الدهبي أوسع، وتلات أطباق لو الطبخة مظبوطة',
+ secT_smith:'من النهارده إنت حداد. السندان مستنيك.',secT_tailor:'من النهارده إنت خياط. تعالالي لما تحب تخيّط حاجة.',secT_alch:'من النهارده إنت كيميائي. الجرعات بتتعمل عند النار.',secT_chef:'من النهارده إنت طباخ. الطبخ بيتعمل عند النار.',
+ oSew:'خيّط حاجة',oSewIt:'خيّط {it} ({n})',sewHi:'تحب تخيّط إيه؟',sewHow:'اضغط على كل غرزة',sewDone:'خلصت',sewOk:'خيّطت {it}!',sewFail:'الخياطة اتقطعت... الخامات راحت',
+ mixHow:'اضغط باستمرار تسخّن، وسيب تبرّد: خليه في الأزرق',mixPerfect:'خلطة مظبوطة: {n} {it}!',mixBoil:'الجرعة فارت... باظت',
+ life_sew:'الخياطة',lifeD_sew:'كل لفل بيوسّع الغرزة ويفتح جودة أعلى.',
+ tHood:'قلنسوة قماش',tGloves:'جوانتي جلد ناعم',tBoots:'جزمة جلد ناعم',tRobe:'رداء قماش'});
+Object.assign(STR.en,{craftBonus:'Crafting feat: +{n} to all stats',secL:'Specialization',oSec:'Learn the {n} specialization',secGot:'You are now a {n}!',
+ sec_smith:'Blacksmith',sec_tailor:'Tailor',sec_alch:'Alchemist',sec_chef:'Chef',
+ sec_smithD:'Smithing at the anvil: better grades and stat points for each new grade',sec_tailorD:'Tailoring: leather and cloth pieces for helmet, gloves, boots and armour, with the needle mini-game',sec_alchD:'Potions: a wider band in the mixing mini-game, and three potions on a clean mix',sec_chefD:'Cooking: a wider golden part, and three dishes on a perfect one',
+ secT_smith:'From today you are a blacksmith. The anvil is waiting.',secT_tailor:'From today you are a tailor. Come to me when you want to sew something.',secT_alch:'From today you are an alchemist. Potions are made at the campfire.',secT_chef:'From today you are a chef. Cooking is done at the campfire.',
+ oSew:'Sew something',oSewIt:'Sew {it} ({n})',sewHi:'What would you like to sew?',sewHow:'Hit each stitch',sewDone:'Done',sewOk:'You sewed {it}!',sewFail:'The seam tore... the materials are lost',
+ mixHow:'Hold to heat, let go to cool: keep it in the blue',mixPerfect:'A clean mix: {n} {it}!',mixBoil:'The potion boiled over... spoiled',
+ life_sew:'Tailoring',lifeD_sew:'Each level widens the stitch and opens higher grades.',
+ tHood:'Cloth Hood',tGloves:'Soft Leather Gloves',tBoots:'Soft Leather Boots',tRobe:'Cloth Robe'});
 function drawCook(){const G=COOKG;if(!G)return;const now=performance.now();if(!G.end){G.p=Math.min(1,(now-G.t)/1000/G.dur);if(G.p>=1)cookHit();}
  const W=96,H=8,x=Math.round(P.x-W/2),y=Math.round(P.y-52),g0=G.c-G.w/2,g1=G.c+G.w/2;ctx.save();
  ctx.fillStyle='rgba(8,14,34,.86)';ctx.fillRect(x-6,y-16,W+12,H+28);ctx.strokeStyle='rgba(166,214,246,.9)';ctx.lineWidth=1;ctx.strokeRect(x-6.5,y-16.5,W+13,H+29);
@@ -1715,7 +1796,7 @@ function freshWS(){return {v:1,guilds:Object.fromEntries(NPCG.map(g=>[g.id,{...g
 
 /* ---------------- state ---------------- */
 // Pagma's Successor counts as a blacksmith everywhere a smith does (SAT-PAGMA-001)
-const isSm=()=>S.cls==='smith'||S.cls==='pagma';
+const isSm=()=>S.cls==='smith'||S.cls==='pagma'||S.sec==='smith'; // S.sec: the blacksmith specialization (production module)
 // Monster table (data-driven so a server could own it later). Winston's fields are the starter area; Bairan's Grey Forest is canon-deadly (lv 96+).
 const MT={
  rabbit:{lv:[1,3],hp:70,dmg:6,spd:52,xp:10,gold:1,aggro:0,r:5,oy:14,drop:[['leather',.5]]},
@@ -1916,7 +1997,13 @@ function newMon(type,x,y){const b=MT[type];const vr=VARY[type]!==undefined?(MID+
 // ?slot=<name> keeps a separate save (two tabs testing online play); ?net=local turns on local online play.
 const QS=(()=>{try{return new URLSearchParams(location.search);}catch(e){return new URLSearchParams('');}})();
 const SLOT=/^[A-Za-z0-9_-]{1,16}$/.test(QS.get('slot')||'')?QS.get('slot'):null;
-const STORE=(()=>{let ls=null;try{ls=localStorage;}catch(e){}return Satisfy.storage.create(ls,{slot:SLOT});})();
+const STORE0=(()=>{let ls=null;try{ls=localStorage;}catch(e){}return Satisfy.storage.create(ls,{slot:SLOT});})();
+let STORE=STORE0;
+// one character per Google account on a shared device (owner request): signed in online, the save lives under
+// satisfy_proto_v4@g<uid>. The device's old save goes to the first account that signs in without a save of its own.
+function acctStore(uid){if(SLOT||!uid)return;let ls=null;try{ls=localStorage;}catch(e){}if(!ls)return;const s=Satisfy.storage.create(ls,{slot:'g'+uid.replace(/[^A-Za-z0-9]/g,'').slice(0,15)});
+ try{const own=ls.getItem('satisfy_owner');if(!s.exists()&&STORE0.exists()&&(!own||own===uid)){ls.setItem(s.key,ls.getItem(STORE0.key));ls.setItem('satisfy_owner',uid);}}catch(e){}
+ STORE=s;}
 // WS (guilds, territories, legends; SAT-GUILD-001) is saved next to S and P, as on main.
 // P is saved trimmed, at the tower/arena return point while inside one (as on main)
 var SAVE_OFF=false; // set when another tab took the account over (SAT-ONLINE-010): this tab must not write the save any more
@@ -1967,7 +2054,7 @@ addEventListener('blur',()=>{for(const k in K)K[k]=false;guardOff();});
 stage.addEventListener('mousedown',e=>{if(e.button===2){if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar,button')){e.preventDefault();guardOn();}return;}if(e.button!==0)return;audio();if(e.target.closest('button'))return;
  if(mode==='forge'&&MG&&!MG.done){e.preventDefault();strike();return;}
  if(mode==='dialog'){advance();return;}
- if(mode==='cook'){cookHit();return;}
+ if(mode==='cook'){cookHit();return;}if(mode==='sew'){sewHit();return;}if(mode==='mix'){if(MIXG)MIXG.h=1;return;}
  if(mode==='cut'){if(SM)SM.done();return;}
  if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar')){stage.focus();const b=stage.getBoundingClientRect();const mx=(e.clientX-b.left)/SC+camXf,my=(e.clientY-b.top)/SC+camYf;if(NET&&e.altKey){netPing(mx,my);return;}if(NET&&pctxClick(mx,my,e.ctrlKey||e.shiftKey))return;const dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);}});
 function onKey(c){
@@ -1979,6 +2066,8 @@ function onKey(c){
  else if(mode==='dialog'&&DL&&DL.optOn){const n=+c.replace(/\D/g,'');if(/^(Digit|Numpad)[1-9]$/.test(c))pickOpt(n-1);else if(c==='ArrowUp'||c==='KeyW')selOpt((DL.sel+DL.opts.length-1)%DL.opts.length);else if(c==='ArrowDown'||c==='KeyS')selOpt((DL.sel+1)%DL.opts.length);else if(c==='KeyE'||c==='Space'||c==='Enter')pickOpt(DL.sel);else if(c==='Escape')pickOpt(DL.opts.length-1);}
  else if(mode==='dialog'){if(c==='KeyE'||c==='Space'||c==='Enter')advance();}
  else if(mode==='cook'){if(c==='KeyE'||c==='Space'||c==='Enter')cookHit();else if(c==='Escape')cookQuit();}
+ else if(mode==='sew'){if(c==='KeyE'||c==='Space'||c==='Enter')sewHit();else if(c==='Escape')sewEnd(true);}
+ else if(mode==='mix'){if(c==='Escape')mixEnd(0);}
  else if(mode==='forge'){if(MG&&!MG.done){if(c==='Space')strike();else if(c==='KeyR')reheat();}else if(c==='Escape')closeForge();else if(c==='Enter'&&$('nameIn'))$('nameOk')&&$('nameOk').click();}
  else if(mode==='inv'){if(c==='Escape'||c==='KeyI')closeInv();}
  else if(mode==='equip'){if(c==='Escape'&&!$('eqPick').hidden){$('eqPick').hidden=true;SFX.close();}else if(c==='Escape'||c==='KeyU')closeEquip();}
@@ -2316,7 +2405,7 @@ function qEvent(type,key,r,slot){domainEv(type,key,r,slot);for(const id in S.qs)
   if((o.t===type&&o.it===key)||(type==='craft'&&o.t==='craftR'&&r>=1&&slot!=='x')){s.c=(s.c||0)+1;if(!was&&qReady(id)){toast(t('retTo',{w:t(q.by)}),'good');SFX.quest();}}}hudDirty=true;}
 function acceptQ(id){S.qs[id]={st:1,c:0};if(QD[id].obj.t==='escort')setTimeout(()=>startEscort(id),300);toast(t('qNew',{q:qName(id)}),'good');SFX.quest();hudDirty=true;checkSkills();save(true);}
 function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]);S.arrows[r]-=k;n-=k;}}
-function mkItem(id,r){const rc=RC.find(x=>x.id===id);const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.slot==='w'){it.atk=Math.round(rc.atk*MULT[r]);it.spd=rc.spd;}else if(rc.def)it.def=Math.round(rc.def*MULT[r]);
+function mkItem(id,r){const rc=rcById(id);const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.slot==='w'){it.atk=Math.round(rc.atk*MULT[r]);it.spd=rc.spd;}else if(rc.def)it.def=Math.round(rc.def*MULT[r]);
  for(const k of ['as','ms','dm'])if(rc[k])it[k]=+(rc[k]*(1+(MULT[r]-1)*.5)).toFixed(3);if(rc.mpb)it.mpb=Math.round(rc.mpb*MULT[r]);return it;}
 function completeQ(id){if(!claimQ(id))return;if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else S.mats[o.it]-=o.n;}if(o.give)giveItem(o.it);
  S.qs[id].st=2;if(q.rep)delete S.qs[id];
@@ -2370,15 +2459,15 @@ function updateEscort(dt){escHide();if(!ESC)return;const s=S.qs[ESC.q],q=QD[ESC.
  const D=escDest(q.obj);if(Math.hypot(E.x-D.x,E.y-D.y)<40){s.c=1;num(E.x,E.y-26,t('escThanks'),'#9fe39a',false);vfx('spawn',E.x,E.y);ESC=null;addAff(q.by,6);completeQ(E.q);}}
 // who says what: hi = first meeting, low = a quest exists but your level is too low, idle = nothing to do; opts = shop choices
 const NPCT={
- khan:{hi:'kh_hi',idle:()=>isSm()?(rand()<.5?'kh_s1':'kh_s2'):S.ev.grid&&rand()<.5?'kh_grid':'kh_idle',opts:()=>[...(isSm()?[{l:t('oBuyOre'),f:()=>buyMat('khan','ore',8)}]:[]),...svcOpts('khan')]},
- smith:{hi:'sm_hi',idle:()=>isSm()?'sm_s1':'sm_idle',opts:()=>[...(isSm()?[{l:t('oBuyOre'),f:()=>buyMat('smith','ore',8)}]:[]),...svcOpts('smith')]},
+ khan:{hi:'kh_hi',idle:()=>isSm()?(rand()<.5?'kh_s1':'kh_s2'):S.ev.grid&&rand()<.5?'kh_grid':'kh_idle',opts:()=>[...secOpt('khan'),...(isSm()?[{l:t('oBuyOre'),f:()=>buyMat('khan','ore',8)}]:[]),...svcOpts('khan')]},
+ smith:{hi:'sm_hi',idle:()=>isSm()?'sm_s1':'sm_idle',opts:()=>[...secOpt('smith'),...(isSm()?[{l:t('oBuyOre'),f:()=>buyMat('smith','ore',8)}]:[]),...svcOpts('smith')]},
  tw:{low:()=>trLine('tw'),idle:()=>trLine('tw')},
  tk:{low:()=>trLine('tk'),idle:()=>trLine('tk')},
  ta:{low:()=>trLine('ta'),idle:()=>trLine('ta')},
  tm:{low:()=>trLine('tm'),idle:()=>trLine('tm'),opts:()=>petOpt('owl')},
  board:{idle:()=>'board_idle'},
  grid:{idle:()=>S.ev.grid?'grid3':rand()<.5?'grid1':'grid2'},
- baker:{idle:()=>'bHi',opts:()=>[{l:t('oBuyBread'),f:()=>buyBread('baker')},...petOpt('dog')]},
+ baker:{idle:()=>'bHi',opts:()=>[...secOpt('baker'),{l:t('oBuyBread'),f:()=>buyBread('baker')},...petOpt('dog')]},
  merchant:{idle:()=>'mHi',opts:()=>merchOpts('merchant')},
  merchantP:{idle:()=>'mHiP',opts:()=>merchOpts('merchantP')},
  armorer:{idle:()=>'arHi',opts:()=>smithMenu('armorer',[['isword',150],['bow',140],['staff',140],['hammer',150],['spear',150],['dagger',130]],[['larmor',80],['lhelm',60],['lgloves',45],['lboots',50]],false)},
@@ -2396,14 +2485,14 @@ const NPCT={
  merchantR:{idle:()=>'mR_hi',opts:()=>merchOpts('merchantR')},
  innR:{idle:()=>'innR_hi',opts:()=>[bindOpt('innR'),{l:t('oRest',{g:price('innR',40)}),f:()=>rest('innR',price('innR',40))},{l:t('oBuyBread'),f:()=>buyBread('innR')},...potOpts('innR'),...mapOpt('innR')]},
  fisher:{hi:'fi_hi',idle:()=>'fi_idle',opts:()=>petOpt('cat')},
- herbW:{hi:'hw_hi',idle:()=>'hw_idle'},
+ herbW:{hi:'hw_hi',idle:()=>'hw_idle',opts:()=>[...secOpt('herbW')]},
  guildM:{hi:'gm_hi',idle:()=>'gm_idle',opts:()=>guildMOpts()},
  jishuka:{hi:'js_hi',idle:()=>'js_idle',opts:()=>[...compOpt('jishuka'),...(!S.guild&&S.lv>=GLV?[{l:t('oJoinTz'),f:()=>joinGuild('g_tzed')}]:[])]},
  priestRh:{hi:'pr_hi',idle:()=>'pr_idle'},
  kscout:{hi:'ksc_hi',idle:()=>'ksc_idle'},
  towerK:{hi:'tow_hi',idle:()=>'tow_idle',opts:()=>towerOpts()},
  ranker:{hi:'rk_hi',idle:()=>'rk_idle',opts:()=>rankerOpts()},
- stylist:{hi:'sty_hi',idle:()=>S.look.cos?'sty_cos':'sty_idle',opts:()=>styOpts()},
+ stylist:{hi:'sty_hi',idle:()=>S.look.cos?'sty_cos':'sty_idle',opts:()=>[...secOpt('stylist'),...(S.sec==='tailor'?[{l:t('oSew'),ic:'leather',f:sewMenu}]:[]),...styOpts()]},
  auction:{hi:'au_hi',idle:()=>'au_idle',opts:()=>auOpts()},
  herald:{hi:'hr_hi',idle:()=>WS.arena&&WS.arena.day===today()?t('hrChamp',{n:WS.arena.n}):S.arenaDay===today()?'hrTomorrow':'hr_idle',opts:()=>S.lv>=50&&S.arenaDay!==today()?[{l:t('oArena'),f:startArena}]:[]},
  vantner:{hi:'vt_hi',idle:()=>'vt_idle',opts:()=>compOpt('vantner')},faker:{hi:'fk_hi',idle:()=>S.comp==='faker'?'cpIdle_faker':'fk_idle',opts:()=>compOpt('faker')},
@@ -2418,7 +2507,14 @@ const NPCT={
  coachW:{idle:()=>'coachHi',opts:()=>[...rideOpt('horse'),{l:t('oTravelB',{g:fare()}),f:()=>travel(0,'coachW')},{l:t('oTravelP',{g:fare()+80}),f:()=>travel(2,'coachW')},...(S.hag===undefined?[{l:t('oHaggle'),f:()=>haggle('coachW')}]:[])]}};
 const fare=()=>S.hag?178:200;
 // shop options shared by the Winston and Patrian merchants
-function merchOpts(who){return [...potOpts(who),{l:t('oBuyBread'),f:()=>buyBread(who)},...sellOpt(who),...Object.keys(MATP).filter(k=>S.mats[k]>0).map(k=>{const n=Math.min(5,S.mats[k]),g=n*MATP[k];return{l:t('oSellM',{n,it:t(k),g}),f:()=>sellMats(who,k,n,g)};})];}
+// stat reset scroll (owner request): very expensive; reading it returns every distributed point to spend again
+const RESPEC_G=100000;
+function respecOpt(who){const g=price(who,RESPEC_G);return [{l:t('oRespec',{g}),ic:'respec',st:`${t('respecD')} (${S.respec||0})`,poor:S.gold<g,f:()=>{if(S.gold<g){toast(t('noGold'),'warn');return;}S.gold-=g;S.respec=(S.respec||0)+1;SFX.coin();toast(t('respecGot'),'good');hudDirty=true;save(true);}}];}
+function useRespec(){if(!(S.respec>0))return;const n=['str','sta','agi','int','dex'].reduce((a,k)=>a+S.st[k],0)-50;if(n<=0){toast(t('respecNone'),'warn');return;}
+ S.respec--;S.st={str:10,sta:10,agi:10,int:10,dex:10};S.pts+=n;if(P){P.hp=Math.min(P.hp,maxHP());P.mp=Math.min(P.mp,maxMP());}SFX.rare();toast(t('respecDone',{n}),'good');hudDirty=true;save(true);renderStatus();}
+Object.assign(STR.ar,{oRespec:'لفافة إعادة التوزيع ({g} دهب)',respecD:'بترجعلك كل نقط الستات اللي وزعتها عشان توزعها من الأول',respecGot:'اشتريت لفافة إعادة التوزيع، استخدمها من نافذة الحالة (C)',respecUse:'اقرا لفافة إعادة التوزيع (معاك {n})',respecNone:'مفيش نقط موزعة ترجع',respecDone:'رجعتلك {n} نقطة، وزعهم من الأول'});
+Object.assign(STR.en,{oRespec:'Stat Reset Scroll ({g} gold)',respecD:'Returns every stat point you distributed so you can spend them again',respecGot:'You bought a Stat Reset Scroll. Read it from the status window (C)',respecUse:'Read a Stat Reset Scroll ({n} left)',respecNone:'No distributed points to return',respecDone:'{n} points returned. Spend them again'});
+function merchOpts(who){return [...potOpts(who),...respecOpt(who),{l:t('oBuyBread'),f:()=>buyBread(who)},...sellOpt(who),...Object.keys(MATP).filter(k=>S.mats[k]>0).map(k=>{const n=Math.min(5,S.mats[k]),g=n*MATP[k];return{l:t('oSellM',{n,it:t(k),g}),f:()=>sellMats(who,k,n,g)};})];}
 
 function haggle(who){S.hag=rand()<.35+S.hid.dign*.01+S.hid.insi*.01?1:0;SFX.click();shopD(who,S.hag?'hagOk':'hagNo');}
 // generated board tasks live in S.bq (offers) and S.bqa (accepted), and are registered into QD so the normal quest code tracks them
@@ -2462,7 +2558,7 @@ function offerQ(id,av){const n=NPCT[id]||{},lines=[];if(n.hi&&!S.met[id])lines.p
 function buyMat(who,k,g){if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;S.mats[k]=(S.mats[k]||0)+1;SFX.coin();num(P.x,P.y-26,'-'+g+'G','#f2c14e',false);toast(t('got',{n:1,item:t(k)}));hudDirty=true;shopD(who,isSm()&&who!=='merchant'?'kh_s3':'mHi');}
 function sellMats(who,k,n,g){S.mats[k]-=n;S.gold+=g;coinFx(npcOf(who),g);toast(t('soldM',{n,it:t(k),g}),'good');hudDirty=true;shopD(who,'mHi');}
 const MATP={ruby:200,topaz:200,emer:200,sapph:200,diam:800,wood:2,ore:3,leather:4,mstone:12,estone:150,mith:30,dscale:600,fish:4,sfish:6,gfish:45,herb:3,bherb:7};
-function gearCmp(id){const rc=RC.find(x=>x.id===id),cv=(d,f)=>{d=+d.toFixed(f||0);return d?`<span class="${d>0?'cup':'cdn'}">${d>0?'▲':'▼'}${Math.abs(d)}</span>`:'<span class="ceq">=</span>';};
+function gearCmp(id){const rc=rcById(id),cv=(d,f)=>{d=+d.toFixed(f||0);return d?`<span class="${d>0?'cup':'cdn'}">${d>0?'▲':'▼'}${Math.abs(d)}</span>`:'<span class="ceq">=</span>';};
  if(rc.slot==='w'){const w=weapon(),k=WSH[id].k,as=1/rc.spd;return `${t('atk')} ${rc.atk} ${cv(rc.atk-w.atk)} · ${t('spd')} <bdi>${as.toFixed(1)}${t('perS')}</bdi> ${cv(as-1/w.spd,1)} · ${t('wk_'+k)}<br>${t('vsEq')}: <b class="rt rt${w.r}">${esc(inm(w))}</b> (${t('atk')} ${w.atk})`;}
  const a=eqIt(rc.slot);if(!rc.def)return `${statShort(rc)}<br>${t('vsEq')}: ${a?`<b class="rt rt${a.r}">${esc(inm(a))}</b> (${statShort(a)})`:t('noneEq')}`;const d=a?iDef(a):0;return `${statShort(rc)} ${cv(rc.def-d)}<br>${t('vsEq')}: ${a?`<b class="rt rt${a.r}">${esc(inm(a))}</b> (${t('def')} ${d})`:t('noneEq')}`;}
 // armorers sell in two lists and run the repair bench and the enhancement anvil (SAT-EQUIP-001). Enhancement can fail
@@ -2600,7 +2696,7 @@ function drawShrine(o){const x=Math.round(o.x),y=Math.round(o.y),pul=.5+Math.sin
  R(ctx,x-26,y-34,52,26,'#2a2218');R(ctx,x-24,y-32,48,22,'#5a4a36');ctx.globalAlpha=.55+pul*.3;
  R(ctx,x-2,y-26,3,3,'#f2c14e');R(ctx,x-1,y-23,2,7,'#f2c14e');R(ctx,x-4,y-21,8,1,'#f2c14e');R(ctx,x-3,y-16,2,4,'#f2c14e');R(ctx,x+1,y-16,2,4,'#f2c14e');
  for(let i=0;i<12;i++)R(ctx,x+3+i,y-22-i,1,1,'#fff3c8');for(let i=0;i<8;i++)R(ctx,x-18+i*2,y-14-Math.round(Math.sin(i*.8)*3),1,1,'#bfe8ff');ctx.globalAlpha=1;}
-window.__GU={GRAVE,CAMPS,lmList,zoneAt,pSpr,SH,setT,at,seeP,enhMenu,ROOMS,buildings,DGATES,loot,TOWNS,npcKO,getMeet:()=>MEET,meetBosses,openStatus,heartsH,gk,FEM,renderTab,setStab:k=>{STAB=k;},buildings,KESAN,petLv,petXP,petB,petFeed,petRest,getPet:()=>PET,buildMe,COS,DYE,styOpts,styList,stySet,cosMenu,cosPick,lookFig,startTower,twL,twNear,towerOpts,getTower:()=>TWR,SETS,setCount,setTier,setBon,wxNow,wxHere,forceWeather:w=>{WXF=w||null;},GEMS,gemMenu,gemPick,dailyList,dlyS,dailyOpts,rankList,rankerOpts,ACH,achTick:()=>{achT=0;achTick(0);},legendReset,mswordAct,becomeSaint,MULL,get SG(){return SG},forceSiege:ms=>{SGF=ms?Date.now()+ms:0;},throneAct,castleTaken,CAST,siegeNext,altarAct,YATAN,auList,auBuy,auCollect,auTick,auMarket,PEAK,dragonDown,get ARN(){return ARN},startArena,arenaLose,toggleRide,dismount,gainMount,buyRide,buyPet,setPet,get PET(){return PET},MOUNTS,PETS,soulAct,becomeBraham,get COMPO(){return COMPO},setComp,COMPS,killMon,get EV(){return EV},forceEvent:(k,ms)=>{evDone=null;EVF=k?{e:EVT.find(e=>e.k===k),until:Date.now()+(ms||60000)}:null;},evNow,EVT,CAMPS,get FISH(){return FISH},startFish,fishAct,nearWater,campMenu,makeLife,eatDish,lifeLv,pickHerb,SHRINES,shrineAct,becomePagma,get WS(){return WS},get RAID(){return RAID},set RAID(v){RAID=v},TERR,TW,createGuild,joinGuild,leaveGuild,bannerAct,captureT,guildPanel,updateTerr,swampAt,REIN,gXPB,gGoldB,ownsT};
+window.__GU={acctStore,getStore:()=>STORE.key,respecOpt,useRespec,save,mapV:()=>[MAPV,mapHash()],GRAVE,CAMPS,lmList,zoneAt,TRC,secOpt,sewStart:id=>sewStart(TRC.find(r=>r.id===id)),mixStart,getSEW:()=>SEWG,getMIX:()=>MIXG,pSpr,SH,setT,at,seeP,enhMenu,ROOMS,buildings,DGATES,loot,TOWNS,npcKO,getMeet:()=>MEET,meetBosses,openStatus,heartsH,gk,FEM,renderTab,setStab:k=>{STAB=k;},buildings,KESAN,petLv,petXP,petB,petFeed,petRest,getPet:()=>PET,buildMe,COS,DYE,styOpts,styList,stySet,cosMenu,cosPick,lookFig,startTower,twL,twNear,towerOpts,getTower:()=>TWR,SETS,setCount,setTier,setBon,wxNow,wxHere,forceWeather:w=>{WXF=w||null;},GEMS,gemMenu,gemPick,dailyList,dlyS,dailyOpts,rankList,rankerOpts,ACH,achTick:()=>{achT=0;achTick(0);},legendReset,mswordAct,becomeSaint,MULL,get SG(){return SG},forceSiege:ms=>{SGF=ms?Date.now()+ms:0;},throneAct,castleTaken,CAST,siegeNext,altarAct,YATAN,auList,auBuy,auCollect,auTick,auMarket,PEAK,dragonDown,get ARN(){return ARN},startArena,arenaLose,toggleRide,dismount,gainMount,buyRide,buyPet,setPet,get PET(){return PET},MOUNTS,PETS,soulAct,becomeBraham,get COMPO(){return COMPO},setComp,COMPS,killMon,get EV(){return EV},forceEvent:(k,ms)=>{evDone=null;EVF=k?{e:EVT.find(e=>e.k===k),until:Date.now()+(ms||60000)}:null;},evNow,EVT,CAMPS,get FISH(){return FISH},startFish,fishAct,nearWater,campMenu,makeLife,eatDish,lifeLv,pickHerb,SHRINES,shrineAct,becomePagma,get WS(){return WS},get RAID(){return RAID},set RAID(v){RAID=v},TERR,TW,createGuild,joinGuild,leaveGuild,bannerAct,captureT,guildPanel,updateTerr,swampAt,REIN,gXPB,gGoldB,ownsT};
 function smithMenu(who,W,A,svc=true){const back={l:t('oBack'),f:()=>shopD(who,'arBuy')},row=([id,g0])=>{const g=price(who,g0);return{l:t('oBuyGear',{it:t(id),g}),ic:id,st:gearCmp(id),poor:S.gold<g,f:()=>buyGear(id,g,who)};};
  return [{l:t('oBuyW'),ic:'slotW',f:()=>dialog(who,['arW'],null,[...W.map(row),back])},{l:t('oBuyA'),ic:'slotA',f:()=>dialog(who,['arA'],null,[...A.map(row),back])},
   ...(svc?svcOpts(who):[])];}
@@ -3045,8 +3141,9 @@ function openStatus(){SFX.open();mode='status';$('statusW').hidden=false;$('hint
 function closeStatus(){SFX.close();$('statusW').hidden=true;mode='play';hudDirty=true;}
 let STAB='main';
 function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,tip,btn,extra,id)=>`<div class="srow"${tip?` data-tip="${esc(tip)}"`:''}><span>${k}</span><span><b${id?` id="sv_${id}"`:''}>${v}</b>${extra||''}${btn||''}</span></div>`;
- const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+row(t('cls'),t('cl_'+S.cls))+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
+ const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+row(t('cls'),t('cl_'+S.cls))+row(t('secL'),S.sec?t('sec_'+S.sec):t('none'))+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
  h+=`<div class="ssec">${t('basic')}<span class="sptc${S.pts>0?' on':''}">${t('pts',{n:S.pts})}</span></div><div class="sgrid">`+['str','sta','agi','int','dex'].map(k=>row(t(k),stat(k),t('t'+k),S.pts>0?`<button data-stat="${k}">+</button>${S.pts>=5?`<button class="p5" data-stat="${k}" data-n="5">+5</button>`:''}`:'',S.bonus?` <em>(+${S.bonus})</em>`:'',k)).join('')+'</div>';
+ if(S.respec>0)h+=`<div class="note"><button data-respec="1" data-tip="${esc(t('respecD'))}">${t('respecUse',{n:S.respec})}</button></div>`;
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
  h+=`<div class="ssec">${t('special')}</div><div class="sgrid">`+['comp','indom','dign','insi',...(S.hid.pers?['pers']:[])].map(k=>row(t(k),S.hid[k],t('t'+k)+'<br><small>'+t('noDist')+'</small>')).join('')+'</div>';
  h+=`<div class="pts" id="ptsT">${t('pts',{n:S.pts})}</div>`+(S.pts>0?`<div class="note">${t('ptsHint')}</div>`:'');
@@ -3177,7 +3274,7 @@ function act(a){
  else if(a==='plClose')plOpen(false);else if(a==='plHide')plHideT();
  else if(a==='idOk')idOk();else if(a==='idCheck')idCheck();else if(a==='idClose')$('idW').hidden=true;
  else if(a==='netTakeBack')netTakeBack();
- else if(a==='cloud')cloudOpen();else if(a==='cloudClose')$('cloudW').hidden=true;
+ else if(a==='cloud')cloudOpen();else if(a==='switchAcc')netSwitch();else if(a==='cloudClose')$('cloudW').hidden=true;
  else if(a==='pAccept'||a==='pDecline'||a==='pLeave')partyAct(a);
  else if(a==='pBlock'||a==='dBlock')blockAct(a);
  else if(a==='pcClose'||a==='pcInvite'||a==='pcDuel'||a==='pcBlock')pctxAct(a);
@@ -3193,6 +3290,7 @@ function act(a){
  else if(a==='keepPlaying'){$('end').hidden=true;$('hud').hidden=false;mode='play';stage.focus();}
 }
 UI.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('tip').classList.remove('on');
+ if(b.dataset.respec){if(!b.dataset.arm){b.dataset.arm=1;b.textContent=t('cloudSure');return;}useRespec();return;}
  if(b.dataset.stat){if(S.pts>0){const n=e.shiftKey?S.pts:Math.min(S.pts,+(b.dataset.n||1));S.st[b.dataset.stat]+=n;S.pts-=n;SFX.tick(1.6);if(n>1)tone(1500,.08,'square',.05,0,.06);renderStatus(b.dataset.stat);hudDirty=true;}return;}
  if(b.dataset.opt!==undefined){pickOpt(+b.dataset.opt);return;}
  if(b.dataset.town){if(mode==='dead')respawn(b.dataset.town);return;}
@@ -3522,7 +3620,7 @@ function render(dt){
   if(f.img){ctx.globalAlpha=Math.max(0,f.t/.7);ctx.drawImage(f.img,Math.round(f.x),Math.round(f.y));ctx.globalAlpha=1;return;}
   if(f.coin){R(ctx,f.x-1,f.y-1,3,3,'#8a6418');R(ctx,f.x-1,f.y-1,2,2,f.c);return;}if(f.fl)ctx.globalAlpha=Math.min(1,f.t*1.5)*(.6+.4*Math.sin(f.t*40));R(ctx,f.x,f.y,f.t>.2?2:1,f.t>.2?2:1,f.c);ctx.globalAlpha=1;});
  nums.forEach(n=>TX.push({s:n.s,x:n.x,y:n.y,f:'{s}px "Press Start 2P", monospace',z:n.big?9:7,c:n.c,a:Math.min(1,n.t*2)}));
- if(COOKG&&P)drawCook();
+ if(COOKG&&P)drawCook();if(SEWG&&P)drawSew();if(MIXG&&P)drawMix();
  ctx.restore();drawWeather();
  if(P&&S&&mode!=='title'&&mode!=='lang'){const k=P.y<WH*TS&&P.x<BW*TS?clamp((P.x-49*TS)/40,0,1):0;if(k>0){dg.globalCompositeOperation='source-over';dg.clearRect(0,0,VW,VH);dg.fillStyle=`rgba(3,12,6,${.62*k})`;dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='destination-out';const px=P.x-camX,py=P.y-8-camY,g=dg.createRadialGradient(px,py,10,px,py,95);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(0,0,VW,VH);ctx.drawImage(darkC,0,0);}
   const hole=(x,y,r)=>{const g=dg.createRadialGradient(x-camX,y-camY,r*.15,x-camX,y-camY,r);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(x-camX-r,y-camY-r,r*2,r*2);};
@@ -4069,11 +4167,12 @@ function netPlay(){if(NETQ!=='online')return;if(!netUser){netPending=true;return
 function netBtn(){const b=$('onlineBtn');if(!b)return;b.hidden=NETQ!=='online';b.disabled=netState==='AUTHENTICATING'||netState==='JOINING';
  if(NETQ==='online'){$('newBtn').hidden=true;$('contBtn').hidden=true;}
  delete b.dataset.i18n;b.textContent=netId?t('playOnlineAs',{n:netId}):t('playOnline');
- const c=$('cloudBtn');if(c){c.hidden=!netUser||!FB;c.textContent=t('cloudBtn');}}
+ const c=$('cloudBtn');if(c){c.hidden=!netUser||!FB;c.textContent=t('cloudBtn');}const sw=$('switchBtn');if(sw){sw.hidden=!netUser||!FB;sw.textContent=t('switchAcc');}}
 /* cloud saves (SAT-ONLINE-007, doc §06 R1 / §23 / D4): signed in with ?net=online, the title screen can copy this
    device's character to the Google account and bring a cloud character to this device. Every upload, download and
    delete needs a second click to confirm; a download keeps the replaced local save as a backup. The public profile
    (profiles/{uid}) is refreshed on connect and once a minute while playing. */
+Object.assign(STR.ar,{switchAcc:'العب بحساب جوجل تاني'});Object.assign(STR.en,{switchAcc:'Play with another Google account'});
 Object.assign(STR.ar,{cloudBtn:'حفظ سحابي',cloudH:'الحفظ السحابي (حساب جوجل)',cloudLocal:'على الجهاز ده: {n} · مستوى {lv}',cloudNoLocal:'مفيش شخصية محفوظة على الجهاز ده',cloudNone:'مفيش شخصيات على السحابة لسه',cloudUp:'ارفع',cloudDown:'نزّل',cloudDel:'امسح',cloudSure:'متأكد؟ دوس تاني',cloudLoading:'جاري التحميل…',cloudUpOk:'{n} اترفع على حسابك',cloudDownOk:'{n} نزل على الجهاز ده (القديم محفوظ نسخة احتياطي)',cloudDelOk:'{n} اتمسح من السحابة',cloudErr:'الحفظ السحابي فشل: {e}',cloudSame:'(نفس الشخصية)',cloudOut:'خروج من الحساب',cloudOutOk:'خرجت من الحساب',cloudErase:'امسح بياناتي أونلاين',cloudEraseOk:'بياناتك أونلاين اتمسحت ({n} سجل). الحفظ اللي على الجهاز ده زي ما هو.'});
 Object.assign(STR.en,{cloudBtn:'Cloud saves',cloudH:'Cloud saves (Google account)',cloudLocal:'On this device: {n} · Lv {lv}',cloudNoLocal:'No saved character on this device',cloudNone:'No characters in the cloud yet',cloudUp:'Upload',cloudDown:'Download',cloudDel:'Delete',cloudSure:'Sure? Click again',cloudLoading:'Loading…',cloudUpOk:'{n} uploaded to your account',cloudDownOk:'{n} is on this device now (the old save is kept as a backup)',cloudDelOk:'{n} deleted from the cloud',cloudErr:'Cloud save failed: {e}',cloudSame:'(same character)',cloudOut:'Sign out',cloudOutOk:'Signed out',cloudErase:'Delete my online data',cloudEraseOk:'Your online data is deleted ({n} records). The save on this device is untouched.'});
 let CLOUD=null,cloudProfT=-1e9,netLease=null;
@@ -4105,7 +4204,7 @@ function cloudOpen(){const C=cloudApi();if(!C)return;$('cloudW').hidden=false;$(
    row.appendChild(armBtn(t('cloudDel'),()=>C.remove(c.pid).then(()=>{toast(t('cloudDelOk',{n:c.handle}));cloudOpen();},e=>{cloudErr(e);cloudOpen();})));box.appendChild(row);}},e=>{box.textContent='';cloudErr(e);});}
 function cloudProfile(){const C=cloudApi();if(!C||!S||S.__demo)return;cloudProfT=performance.now();C.writeProfile(S,lang).catch(e=>console.warn('profile write failed',e&&e.code));}
 function netFail(e){netSetState('ERROR');netBtn();toast(t('netFail',{e:(e&&e.code)||(e&&e.message)||'?'}),'warn');}
-function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;netSetState('JOINING');netBtn();
+function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(user.uid);netSetState('JOINING');netBtn();
  const tr=NETTR=Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',interest:NET_INTEREST,onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');if(up)netForce=true;netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)});
  netStart(Satisfy.presence.create({transport:tr,uid:user.uid,world:Satisfy.local.world(),now:()=>performance.now(),config:{moveHz:5,idleHz:.2,expireMs:30000}})); // cost model: docs/online/COST_MODEL.md
  netLease=Satisfy.firebase.lease(sdk,user.uid,NET.sid,netReplace);netIdLoad().catch(()=>{});
@@ -4119,6 +4218,9 @@ function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF
  try{NETTR.release();}catch(e){}NET=null;PARTY=null;DUEL=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
+// another Google account on this device (owner request): the chooser opens straight from the click, the new
+// account gets its own save slot (acctStore), and with no character yet it goes to character creation.
+function netSwitch(){if(NETQ!=='online')return;netStop();netUser=null;netId=null;CLOUD=null;STORE=STORE0;$('cloudW').hidden=true;netPending=true;netSignIn();}
 function netSignIn(){if(NETQ!=='online'||netUser)return;netSetState('AUTHENTICATING');netBtn();
  Satisfy.firebase.load(Satisfy.firebaseConfig).then(sdk=>{FB=sdk;return Satisfy.firebase.signIn(sdk);}).then(u=>{if(u){netConnect(FB,u);if(netPending){netPending=false;netPlay();}}else{netSetState('DISCONNECTED');netBtn();}},netFail);}
 if(NETQ==='online'){netBtn();

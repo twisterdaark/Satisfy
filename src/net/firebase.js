@@ -50,6 +50,7 @@
   /** Google sign-in from a click. Popup first; redirect where popups are blocked (resolves null, page reloads). */
   function signIn(sdk) {
     var A = sdk.m.auth, provider = new A.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' }); // always show the account chooser, so a second Google account can play
     return A.signInWithPopup(sdk.auth, provider).then(function (r) { return r.user; }, function (e) {
       var code = e && e.code;
       if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
