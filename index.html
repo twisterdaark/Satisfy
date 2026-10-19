@@ -52,13 +52,13 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #partyL .role{display:inline-block;min-width:1.2em;text-align:center}#partyL button.role{width:auto;padding:0 calc(var(--u)*.3);font-size:calc(var(--u)*1.3)}
 #partyL i.php{display:block;height:calc(var(--u)*.5);margin:calc(var(--u)*.1) 0 calc(var(--u)*.4);background:rgba(90,26,26,.8)}#partyL i.php b{display:block;height:100%;background:#e2493a}
 #partyL button.blk{width:auto;padding:0 calc(var(--u)*.4);font-size:calc(var(--u)*1.2);opacity:.7}
-#chatW{position:absolute;inset-inline-start:calc(var(--u)*7);bottom:calc(var(--u)*1.5);z-index:30;pointer-events:auto;width:calc(var(--u)*30);font-size:calc(var(--u)*1.4);overflow-wrap:anywhere}
+#chatW{position:absolute;inset-inline-start:calc(var(--u)*8);bottom:calc(var(--u)*5.5);z-index:30;pointer-events:auto;width:calc(var(--u)*30);font-size:calc(var(--u)*1.4);overflow-wrap:anywhere}
 #chatTabs{display:flex;gap:calc(var(--u)*.4);margin-bottom:calc(var(--u)*.3)}
 #chatTabs button{width:auto;font:inherit;font-size:calc(var(--u)*1.2);padding:0 calc(var(--u)*.8);background:rgba(0,0,0,.35);color:#c8d0e0;border:1px solid rgba(255,255,255,.25);border-radius:calc(var(--u)*.3);cursor:pointer}
 #chatTabs button.on{color:#fff;border-color:#9fe0ff;background:rgba(40,70,110,.6)}
 #chatTabs button.new::after{content:' •';color:#ffd24a}
 #chatTabs button[hidden]{display:none}
-#chatL div.all b{color:#9fe0ff}
+#chatL div.all b{color:#9fe0ff}#chatL div.party,#chatL div.party b{color:#8dff9a}
 #chatW.idle{opacity:.55}
 #chatL div{margin:calc(var(--u)*.2) 0}#chatL div.old{opacity:.45}#chatL b{color:#9fe0a0;font-weight:600}
 #chatIn{width:100%;box-sizing:border-box;font:inherit;padding:calc(var(--u)*.3) calc(var(--u)*.5);margin-top:calc(var(--u)*.4);background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.35)}
@@ -66,13 +66,13 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #netRepW{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);padding:calc(var(--u)*1.4) calc(var(--u)*2);text-align:center;font-size:calc(var(--u)*1.8);pointer-events:auto;border-color:var(--gold);z-index:5}#netRepW .row{display:flex;justify-content:center;margin-top:calc(var(--u)*1)}
 #duelInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*15);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto;border-color:#ff8a6a}#duelInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
 #duelW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*3.4);width:calc(var(--u)*40);padding:calc(var(--u)*.6) calc(var(--u)*1.2);text-align:center;font-size:calc(var(--u)*1.5);pointer-events:auto;border-color:#ff8a6a}#duelW .bars{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*1);margin:calc(var(--u)*.5) 0}#duelW .bar{height:calc(var(--u)*1.2)}#duelW .bar i{background:linear-gradient(90deg,#ff5a4a,#ffb04a)}#duelW .x{font-size:calc(var(--u)*1.3);width:auto;padding:0 calc(var(--u)*.8)}#duelCd{font-size:calc(var(--u)*4);color:var(--gold)}
-#cloudW{left:50%;top:50%;transform:translate(-50%,-50%);width:calc(var(--u)*50);max-height:calc(var(--u)*34);overflow:auto;padding:calc(var(--u)*1.4);font-size:calc(var(--u)*1.6)}#cloudW .x{position:absolute;top:calc(var(--u)*.6);right:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}#cloudN{color:var(--muted,#c8d0e0);margin:calc(var(--u)*.6) 0}
+#cloudW{left:50%;top:50%;transform:translate(-50%,-50%);width:calc(var(--u)*50);max-height:calc(var(--u)*34);overflow:auto;padding:calc(var(--u)*1.4);font-size:calc(var(--u)*1.6)}#cloudW .x{position:absolute;top:calc(var(--u)*.6);inset-inline-end:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}#cloudN{color:var(--muted,#c8d0e0);margin:calc(var(--u)*.6) 0}
 #idW{left:50%;top:50%;transform:translate(-50%,-50%);width:calc(var(--u)*44);padding:calc(var(--u)*1.4);font-size:calc(var(--u)*1.6)}
-#idW .x{position:absolute;top:calc(var(--u)*.6);right:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}
+#idW .x{position:absolute;top:calc(var(--u)*.6);inset-inline-end:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}
 #idT{color:var(--muted,#c8d0e0);margin:calc(var(--u)*.6) 0;font-size:calc(var(--u)*1.4)}
 #idIn{width:100%;box-sizing:border-box;font:inherit;direction:ltr;padding:calc(var(--u)*.4) calc(var(--u)*.6);background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.35)}
-#idErr{color:#ff9a8a;min-height:calc(var(--u)*2);font-size:calc(var(--u)*1.3)}
-#idA{display:flex;justify-content:flex-end}#idA button{width:auto;padding:0 calc(var(--u)*1.6)}#cloudL .cr{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*1);padding:calc(var(--u)*.5) 0;border-top:1px solid rgba(255,255,255,.15)}#cloudL .cr button{width:auto;padding:0 calc(var(--u)*1);font-size:calc(var(--u)*1.4)}
+#idErr{color:#ff9a8a;min-height:calc(var(--u)*2);font-size:calc(var(--u)*1.3)}#idErr.ok{color:#8dff9a}
+#idA{display:flex;justify-content:flex-end;gap:calc(var(--u)*1)}#idA button{width:auto;padding:0 calc(var(--u)*1.6)}#cloudL .cr{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*1);padding:calc(var(--u)*.5) 0;border-top:1px solid rgba(255,255,255,.15)}#cloudL .cr button{width:auto;padding:0 calc(var(--u)*1);font-size:calc(var(--u)*1.4)}
 #cloudA{display:flex;justify-content:space-between;gap:calc(var(--u)*1);margin-top:calc(var(--u)*1);padding-top:calc(var(--u)*.8);border-top:1px solid rgba(255,255,255,.3)}
 #cloudA button{width:auto;padding:0 calc(var(--u)*1);font-size:calc(var(--u)*1.4)}
 #partyInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*9);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto}#pctx{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*6);padding:calc(var(--u)*.8) calc(var(--u)*1.4);min-width:calc(var(--u)*26);font-size:calc(var(--u)*1.5);pointer-events:auto;text-align:center}
@@ -486,7 +486,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
         <button data-act="lang" data-i18n="langBtn"></button>
       </div>
       <div class="foot" data-i18n="fanNote"></div>
-      <div id="idW" class="panel" hidden><div class="head" id="idH"></div><div id="idT"></div><input id="idIn" maxlength="16" autocomplete="off" spellcheck="false"><div id="idErr"></div><div id="idA"><button data-act="idOk" id="idOk"></button></div><button class="x" data-act="idClose">✕</button></div>
+      <div id="idW" class="panel" hidden><div class="head" id="idH"></div><div id="idT"></div><input id="idIn" maxlength="16" autocomplete="off" spellcheck="false"><div id="idErr"></div><div id="idA"><button data-act="idCheck" id="idCheck"></button><button data-act="idOk" id="idOk"></button></div><button class="x" data-act="idClose">✕</button></div>
       <div id="cloudW" class="panel" hidden><div class="head" id="cloudH"></div><div id="cloudN"></div><div id="cloudL"></div><div id="cloudA"></div><button class="x" data-act="cloudClose" id="cloudX">✕</button></div>
     </div>
 
@@ -3061,7 +3061,7 @@ function act(a){
  else if(a==='lang'){mode='lang';showOnly('langScreen');}
  else if(a==='online')netPlay();
  else if(a==='plClose')plOpen(false);else if(a==='plHide')plHideT();
- else if(a==='idOk')idOk();else if(a==='idClose')$('idW').hidden=true;
+ else if(a==='idOk')idOk();else if(a==='idCheck')idCheck();else if(a==='idClose')$('idW').hidden=true;
  else if(a==='netTakeBack')netTakeBack();
  else if(a==='cloud')cloudOpen();else if(a==='cloudClose')$('cloudW').hidden=true;
  else if(a==='pAccept'||a==='pDecline'||a==='pLeave')partyAct(a);
@@ -3503,7 +3503,7 @@ Satisfy.local=Object.freeze({api:1,
  zoneAt:(x,y)=>netZone(x,y), // 'void' where the world defines nothing (SAT-ONLINE-019)
  roomAt:(x,y)=>{const R=roomAt(x,y);return R?{id:R.id,kind:R.kind,zone:R.z}:null;},
  inGame:()=>!!S&&!S.__demo,
- playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null}),
+ playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,wp:(()=>{const w=weapon();return w&&WSH[w.id]?w.id+':'+Math.max(0,Math.min(9,w.r|0)):null;})(),zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null}),
  backups:()=>STORE.backups(),
  profile:()=>!S||S.__demo?null:Satisfy.state.profileOf(S),
  events:()=>DEVT.log(),
@@ -3528,7 +3528,7 @@ const NETQ=QS.get('net');
 const NET_OFF=['title','lang','create'];
 function netLive(){return Satisfy.local.inGame()&&!NET_OFF.includes(mode)&&!(mode==='controls'&&ctrlBack==='titleScreen');}
 // a swing is shorter than the 200 ms between presence updates: keep 'attack' up for 350 ms so the others see it
-var netAtkT=-1e9;function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)netAtkT=performance.now();if(performance.now()-netAtkT<350)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
+var netAtkT=-1e9;function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)netAtkT=performance.now();if(performance.now()-netAtkT<230)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
 // Interest management (doc U009): online, a client listens only to players within NET_INTEREST.radius px
 // of it along the map (the screen is W=480 px wide, so the re-centre step keeps it covered), plus its
 // everyone in its party wherever they are (raid hits, chat and the party list need them; SAT-ONLINE-018 follows the
@@ -3563,13 +3563,18 @@ function netTick(){NET.tick();const live=netLive();
 // remote looks are validated (0..31) but may index past LOOK; fall back to the first option
 function remoteSpr(L,arm){const ix=(a,i)=>i>=0&&i<a.length?i:0,K={hair:ix(LOOK.hair,L.hair),hc:ix(LOOK.hc,L.hc),skin:ix(LOOK.skin,L.skin),top:ix(LOOK.top,L.top)};
  const k='rp_'+K.hair+'_'+K.hc+'_'+K.skin+'_'+K.top+'_'+(arm?1:0);if(!SH[k])SH[k]=SA.chars.buildSheet(lookFig(K,arm?1:0));return k;}
+// swing progress 0..1 for a remote player, or -1: a swing starts on the change to 'attack' (one per change)
+const NSW=new Map();function netSwing(r){const now=performance.now(),s=NSW.get(r.sid)||{a:'',t:-1e9};if(r.anim==='attack'&&s.a!=='attack')s.t=now;s.a=r.anim;NSW.set(r.sid,s);const k=(now-s.t)/140;return k>=0&&k<1?k:-1;}
 function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;
  for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;
   const k=remoteSpr(r.look,r.arm),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
-  const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{if(r.anim==='dead')ctx.globalAlpha=.45;else if(r.anim==='dodge')ctx.globalAlpha=.6;drawChar(k,r.x,r.y-bob,r.dir,fr,false);ctx.globalAlpha=1;}});
-  // their swings and dodges show here too (SAT-ONLINE-026, owner feedback 7): a slash arc on the side they face
-  if(r.anim==='attack'){const a=[Math.PI/2,-Math.PI/2,0,Math.PI][r.dir&3],ph=(gTime*9)%1;ents.push({y:r.y+1,f:()=>{ctx.save();ctx.strokeStyle=`rgba(255,255,255,${(.85-ph*.5).toFixed(2)})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(r.x,r.y-9,13,a-1.1+ph*.6,a+.4+ph*.6);ctx.stroke();ctx.strokeStyle='rgba(159,224,255,.5)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(r.x,r.y-9,16,a-.9+ph*.6,a+.3+ph*.6);ctx.stroke();ctx.restore();}});}
-  else if(r.anim==='dodge')ents.push({y:r.y-1,f:()=>{ctx.save();ctx.globalAlpha=.25;drawChar(k,r.x-[0,0,6,-6][r.dir&3],r.y-[6,-6,0,0][r.dir&3],r.dir,1,false);ctx.restore();}});
+  // their weapon in hand and each swing once, the way your own is drawn (SAT-ONLINE-026, owner feedback 7): a swing starts when
+  // their anim turns to 'attack' and plays 0.14 s on this clock, however long the state stays up
+  const sw=netSwing(r),wp=/^([a-z0-9_]+):(\d)$/.exec(r.wp||''),wi=wp&&WSH[wp[1]]?{id:wp[1],r:+wp[2]}:null,a0=[Math.PI/2,-Math.PI/2,0,Math.PI][r.dir&3];
+  const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{if(r.anim==='dead')ctx.globalAlpha=.45;else if(r.anim==='dodge')ctx.globalAlpha=.6;drawChar(k,r.x,r.y-bob,r.dir,fr,false);
+   if(wi&&r.anim!=='dead'){const hx=Math.round(r.x)+(r.dir===3?-6:5),hy=Math.round(r.y-bob)-7;if(sw<0)weapPix(ctx,hx,hy,wi,r.dir);else SA.weapons.draw(ctx,wi.id,wi.r,hx,hy,a0-1.1+2.2*sw+Math.PI/2,Math.cos(a0)<0);}ctx.globalAlpha=1;}});
+  if(sw>=0)ents.push({y:r.y+1,f:()=>{ctx.save();ctx.globalAlpha=.8*(1-sw);ctx.strokeStyle='#ffffff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(r.x,r.y-9,13,a0-1.1,a0-1.1+2.2*sw);ctx.stroke();ctx.restore();}});
+  if(r.anim==='dodge')ents.push({y:r.y-1,f:()=>{ctx.save();ctx.globalAlpha=.25;drawChar(k,r.x-[0,0,6,-6][r.dir&3],r.y-[6,-6,0,0][r.dir&3],r.dir,1,false);ctx.restore();}});
   if(r.em)emoBubble(ents,r.em,r.x,r.y,r.dir);
   if(PCTX&&PCTX.uid===r.uid)ents.push({y:r.y-1,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,231,168,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(r.x,r.y+1,9,4,0,0,7);ctx.stroke();ctx.restore();}});
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
@@ -3618,23 +3623,27 @@ function isBlocked(uid){return BLK.has(uid);}
 /* SAT-ONLINE-026 (owner feedback 10/11): a world chat for everyone next to the party chat, in its own box at the bottom-left
    corner (it used to sit under the right column, where the HUD covered it). Tabs pick what you read and where Enter sends;
    Tab in the chat line switches. A tab you aren't looking at gets a dot when a line arrives. */
-let CHCH='all',chatSeen={all:0,party:0},chatWasP=false; // joining a party switches Enter to the party chat, as before
+let CHCH='all',chatWasP=false; // joining a party switches Enter to the party chat, as before
 function chatStart(){CHAT=Satisfy.chat.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,world:NETTR&&NETTR.sayWorld?NETTR:null,handle:()=>netId||(S&&S.look.n)||''});CHAT.on(()=>{chatSig='';});}
 function chatInParty(){return !!(PARTY&&PARTY.members().length>=2);}
 function chatCh(c){CHCH=c==='party'&&chatInParty()?'party':'all';$('chatIn').placeholder=t(CHCH==='party'?'chatPh':'chatPhAll');chatSig='';}
 function chatOpen(){if(!CHAT)return;chatCh(CHCH);const i=$('chatIn');i.hidden=false;$('chatW').hidden=false;i.focus();chatSig='';}
 function chatClose(){const i=$('chatIn');i.hidden=true;i.value='';i.blur();chatSig='';}
-function chatSend(){if(!CHAT)return chatClose();const r=CHAT.say($('chatIn').value,CHCH);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}chatClose();}
+function chatSend(){if(!CHAT)return chatClose();let v=$('chatIn').value,ch=CHCH;const m=/^\/(p|a)\s+/i.exec(v);if(m){ch=m[1].toLowerCase()==='p'?'party':'all';v=v.slice(m[0].length);} // /p party, /a everyone
+ const r=CHAT.say(v,ch);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}chatClose();}
 $('chatIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Tab'){e.preventDefault();chatCh(CHCH==='all'?'party':'all');return;}if(e.code==='Enter'||e.code==='NumpadEnter'){e.preventDefault();chatSend();}else if(e.code==='Escape'){e.preventDefault();chatClose();}});
 $('chatIn').addEventListener('blur',()=>{if(!$('chatIn').hidden&&!$('chatIn').value)chatClose();});
 $('chatTabs').addEventListener('click',e=>{const b=e.target.closest('button[data-ch]');if(!b)return;chatCh(b.dataset.ch);if(!$('chatIn').hidden)$('chatIn').focus();});
 function chatUI(live){const W=$('chatW'),on=!!(live&&CHAT);if(!on){if(!W.hidden){W.hidden=true;chatClose();}return;}
  const inP=chatInParty();if(inP&&!chatWasP)chatCh('party');else if(!inP&&CHCH==='party')chatCh('all');chatWasP=inP;
- const all=CHAT.log(),last=c=>{for(let i=all.length-1;i>=0;i--)if((all[i].ch||'party')===c)return all[i].n;return 0;};chatSeen[CHCH]=last(CHCH);
- const now=performance.now(),lines=all.filter(l=>(l.ch||'party')===CHCH).slice(-6),oth=CHCH==='all'?'party':'all',nw=last(oth)>chatSeen[oth];
- const sig=lang+'|'+CHCH+'|'+inP+'|'+nw+'|'+lines.map(l=>l.n+':'+(now-l.t>20000?1:0)).join(',')+'|'+$('chatIn').hidden;
- W.hidden=false;if(sig===chatSig)return;chatSig=sig;
- for(const b of $('chatTabs').children){const c=b.dataset.ch;b.textContent=t(c==='all'?'chatAll':'chatParty');b.classList.toggle('on',c===CHCH);b.classList.toggle('new',c===oth&&nw);b.hidden=c==='party'&&!inP;}
+ // one list for both (owner): everyone's lines and the party's, party ones in green; Tab picks where Enter sends
+ const all=CHAT.log(),now=performance.now(),lines=all.slice(-7),nw=false;
+ const sig=lang+'|'+CHCH+'|'+inP+'|'+lines.map(l=>l.n+':'+(now-l.t>20000?1:0)).join(',')+'|'+$('chatIn').hidden;
+ // nothing to read and the line closed: no box at all (owner: don't crowd the screen); it comes back with a new line or Enter
+ const fresh=all.some(l=>now-l.t<30000);W.hidden=!fresh&&$('chatIn').hidden;
+ if(sig===chatSig)return;chatSig=sig;
+ for(const b of $('chatTabs').children){const c=b.dataset.ch;b.textContent=t(c==='all'?'chatAll':'chatParty');b.classList.toggle('on',c===CHCH);b.hidden=c==='party'&&!inP;}
+ $('chatTabs').hidden=$('chatIn').hidden;
  W.classList.toggle('idle',!lines.length&&$('chatIn').hidden);const L=$('chatL');L.textContent='';
  for(const l of lines){const d=document.createElement('div');d.className=(now-l.t>20000?'old ':'')+(l.ch||'party');const b=document.createElement('b');b.textContent=(l.self?netId||S.look.n:l.handle)+': ';d.appendChild(b);d.appendChild(document.createTextNode(l.text));L.appendChild(d);}}
 function blockUid(uid,handle){if(!uid)return;BLK.add(uid,handle);toast(t('pBlocked',{n:handle||'?'}),'warn');partySig='';duelSig='';chatSig='';}
@@ -3809,12 +3818,15 @@ function netSetState(s){netState=s;netSig='';}
    name on the button and the character name over your head. Online is the only way to play with ?net=online (feedback 2/3):
    one button signs in, asks for the ID the first time, then continues this device's character or makes a new one. */
 let netId=null,netPending=false;const ID_RE=/^[A-Za-z0-9_]{3,16}$/;
-Object.assign(STR.ar,{idH:'اختار ID ليك',idT:'ده الاسم اللي الناس هتشوفك بيه أونلاين، ومحدش تاني يقدر ياخده. من 3 لـ16 حرف إنجليزي أو رقم أو _',idOk:'تمام',idBad:'من 3 لـ16 حرف إنجليزي أو رقم أو _ بس',idTaken:'الـID ده محجوز، جرّب غيره',idSaved:'الـID بتاعك: {n}',playOnline:'العب أونلاين',playOnlineAs:'العب أونلاين · {n}'});
-Object.assign(STR.en,{idH:'Pick your ID',idT:'Other players see you by this name online, and nobody else can take it. 3 to 16 English letters, digits or _',idOk:'OK',idBad:'Only 3 to 16 English letters, digits or _',idTaken:'That ID is taken, try another',idSaved:'Your ID: {n}',playOnline:'Play online',playOnlineAs:'Play online · {n}'});
+Object.assign(STR.ar,{idH:'اختار ID ليك',idT:'ده الاسم اللي الناس هتشوفك بيه أونلاين، ومحدش تاني يقدر ياخده. من 3 لـ16 حرف إنجليزي أو رقم أو _',idOk:'تمام',idCheckB:'اتأكد إنه فاضي',idFree:'الـID ده فاضي، تقدر تاخده',idBad:'من 3 لـ16 حرف إنجليزي أو رقم أو _ بس',idTaken:'الـID ده محجوز، جرّب غيره',idSaved:'الـID بتاعك: {n}',playOnline:'العب أونلاين',playOnlineAs:'العب أونلاين · {n}'});
+Object.assign(STR.en,{idH:'Pick your ID',idT:'Other players see you by this name online, and nobody else can take it. 3 to 16 English letters, digits or _',idOk:'OK',idCheckB:'Check if free',idFree:'That ID is free, you can take it',idBad:'Only 3 to 16 English letters, digits or _',idTaken:'That ID is taken, try another',idSaved:'Your ID: {n}',playOnline:'Play online',playOnlineAs:'Play online · {n}'});
 function netIdLoad(){if(!FB||!netUser)return Promise.resolve(null);const D=FB.m.database;return D.get(D.ref(FB.db,'accountIds/'+netUser.uid)).then(s=>{const v=s.val();netId=typeof v==='string'&&ID_RE.test(v)?v:null;netForce=true;partySig='';netBtn();return netId;});}
 function netIdClaim(v){const D=FB.m.database,uid=netUser.uid;return D.set(D.ref(FB.db,'handles/'+v.toLowerCase()),uid).then(()=>D.set(D.ref(FB.db,'accountIds/'+uid),v)).then(()=>{netId=v;netForce=true;partySig='';netBtn();});}
-function idOpen(){$('idW').hidden=false;$('idH').textContent=t('idH');$('idT').textContent=t('idT');$('idOk').textContent=t('idOk');$('idErr').textContent='';const i=$('idIn');i.value='';setTimeout(()=>i.focus(),0);}
-function idOk(){const v=$('idIn').value.trim(),e=$('idErr'),b=$('idOk');if(!ID_RE.test(v)){e.textContent=t('idBad');return;}b.disabled=true;
+function idOpen(){$('idW').hidden=false;$('idH').textContent=t('idH');$('idT').textContent=t('idT');$('idOk').textContent=t('idOk');$('idCheck').textContent=t('idCheckB');$('idErr').textContent='';$('idErr').className='';const i=$('idIn');i.value='';setTimeout(()=>i.focus(),0);}
+// look the name up before taking it (owner request): handles/{lowercase} exists = taken
+function idCheck(){const v=$('idIn').value.trim(),e=$('idErr');e.className='';if(!ID_RE.test(v)){e.textContent=t('idBad');return;}const D=FB.m.database;
+ D.get(D.ref(FB.db,'handles/'+v.toLowerCase())).then(s=>{const u=s.val();if(u&&u!==netUser.uid){e.textContent=t('idTaken');}else{e.className='ok';e.textContent=t('idFree');}},err=>{e.textContent=t('netFail',{e:(err&&err.code)||'?'});});}
+function idOk(){const v=$('idIn').value.trim(),e=$('idErr'),b=$('idOk');e.className='';if(!ID_RE.test(v)){e.textContent=t('idBad');return;}b.disabled=true;
  netIdClaim(v).then(()=>{b.disabled=false;$('idW').hidden=true;toast(t('idSaved',{n:v}),'good');netPlay();},err=>{b.disabled=false;e.textContent=/PERMISSION|permission/.test(String(err&&(err.code||err.message)))?t('idTaken'):t('netFail',{e:(err&&err.code)||'?'});});}
 $('idIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')idOk();else if(e.key==='Escape')$('idW').hidden=true;});
 function netPlay(){if(NETQ!=='online')return;if(!netUser){netPending=true;return netSignIn();}if(!netId)return netIdLoad().then(v=>v?netPlay():idOpen(),netFail);startGame(hasSave());}

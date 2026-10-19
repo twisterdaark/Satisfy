@@ -38,7 +38,7 @@ test('the leader leaves without a word: the two members elect one leader and sta
     // A invites both from their cards (U046), they accept with Y
     for (const g of [b, c]) {
       const uid = await g.eval(() => Satisfy.local.net().uid);
-      const p = await a.eval((u) => { const r = Satisfy.local.net().remotes.find((x) => x.uid === u); return window.__G.toScreen(r.x, r.y - 10); }, uid);
+      const p = await a.eval((u) => { const r = Satisfy.local.net().remotes.find((x) => x.uid === u); return window.__G.toScreen(r.x, r.y - 30); }, uid);
       await a.page.mouse.click(p.x, p.y);
       await a.step(2);
       await a.eval(() => document.querySelector('#pctx [data-act="pcInvite"]').click());

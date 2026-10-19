@@ -141,6 +141,7 @@ test('a saved Google session reconnects after reload without a popup', async () 
     await until(g, () => !document.getElementById('idW').hidden);
     await g.eval(() => { document.getElementById('idIn').value = 'Ahmed'; document.getElementById('idOk').click(); });
     await until(g, () => document.getElementById('idW').hidden);
+    const keep = await H.openGame({ ctx, query: '?net=online&slot=k' }); // holds the database while g reloads (the fake lives in pages)
     await g.reload();
     await until(g, () => !!Satisfy.local.net());
     assert.equal((await net(g)).uid, uid);

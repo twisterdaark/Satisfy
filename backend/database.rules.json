@@ -77,6 +77,9 @@
             "role": {
               ".validate": "newData.isString() && newData.val().matches(/^(tank|healer|damage|support)$/)"
             },
+            "wp": {
+              ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9_]{1,16}:[0-9]$/)"
+            },
             "seq": {
               ".validate": "newData.isNumber() && newData.val() >= 0"
             },

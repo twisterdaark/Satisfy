@@ -42,7 +42,8 @@
   ch.onmessage = (e) => {
     if (!connected) return;
     const m = e.data;
-    if (m.op === 'hello') { for (const p of mine) if (data.has(p)) ch.postMessage({ op: 'set', p, v: data.get(p) }); return; }
+    // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -51,7 +52,7 @@
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
 
-  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'seq', 't'];
+  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'seq', 't'];
   const POS_X = 16384, POS_Y = 4096, POS_Y0 = -2048; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
   function rules(p, v, existing) {
@@ -87,6 +88,7 @@
     if ('hp' in v && !(typeof v.hp === 'number' && v.hp >= 0 && v.hp <= 100)) return 'hp';
     if ('em' in v && !/^(wave|dance|point|cheer)$/.test(v.em)) return 'em';
     if ('role' in v && !/^(tank|healer|damage|support)$/.test(v.role)) return 'role';
+    if ('wp' in v && !/^[a-z0-9_]{1,16}:[0-9]$/.test(v.wp)) return 'wp';
     return null;
   }
   // SAT-ONLINE-026: handles/{lowercase ID} = uid (first come), accountIds/{uid} = ID (needs that handle), world feeds
