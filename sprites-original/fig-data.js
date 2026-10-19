@@ -1,7 +1,11 @@
-// SNAPSHOT (PER_CODE) of index.html @ ce297728037e368fbfc5a9dce3e5d3eaefd3e17a. Do not edit here; Claude-A owns the runtime copy.
+// SNAPSHOT (PER_CODE) of index.html @ 6ef0595bcc38e995e491d7667634e8665040bdd4 + SAT-CONTENT-002. Do not edit here; Claude-A owns the runtime copy.
 (function(root){const A=root.SatArt=root.SatArt||{};
 const GH={hair:'spiky',ahoge:1,hc:'#1b1f2e',hl:'#3d4a6b',skin:'#f1c7a0',sk2:'#d39f78'};
 const FIG={
+ ashur:{hair:'short',hc:'#2a1a14',hl:'#4a3024',skin:'#e8b890',sk2:'#c8946a',top:'#5a1a2a',top2:'#3e1020',collar:'#d8b04a',sleeves:true,cape:'#2a2a4a',pants:'#2a2430',boots:'#1a1418'},
+ pcap:{hair:'helm',hc:'#9aa4b4',hl:'#d0d8e4',skin:'#e0aa7a',sk2:'#bf8758',top:'#8a909c',top2:'#646a76',sleeves:true,armC:'#c8ccd6',armC2:'#8a909c',pad:'#dfe2ea',pad2:'#a9aebb',chest:'#c8ccd6',belt:'#4a3020',cape:'#7a1a2a',pants:'#3a3a46',boots:'#2a2c34'},
+ deserter:{hair:'helm',hc:'#6a6e78',hl:'#9aa0aa',skin:'#d9a070',sk2:'#b47c50',top:'#5a4a3a',top2:'#3e3226',sleeves:true,pad:'#7a7e88',pad2:'#5a5e68',chest:'#7a3a2c',belt:'#2a1a10',pants:'#3a3028',boots:'#22180f'},
+ dcapt:{hair:'helm',hc:'#3a3e48',hl:'#6a707a',skin:'#c8906a',sk2:'#a8704a',top:'#3e3226',top2:'#2a2018',sleeves:true,pad:'#9aa0aa',pad2:'#6a707a',chest:'#8a1f2a',belt:'#1a1008',cape:'#4a1018',pants:'#2a2420',boots:'#1a1008'},
  grid:{...GH,top:'#8d919b',top2:'#6a6e78',sleeves:true,belt:'#4a3424',pants:'#33323c',boots:'#4a3424'},
  smith:{hair:'short',hc:'#3a2a1e',hl:'#5a4030',skin:'#d9a070',sk2:'#b47c50',top:'#d9a070',top2:'#b47c50',sleeves:false,beard:'#3a2a1e',beard2:'#22180f',apron:'#5a3a24',apron2:'#3e2616',pants:'#3a3028',boots:'#22180f'},
  goblin:{hair:'bald',hc:'#2e4a1e',hl:'#8ac46a',skin:'#6aa84a',sk2:'#4a8030',top:'#6a5236',top2:'#4e3a24',sleeves:false,shorts:'#5a4028',pants:'#5a4028',boots:'#4a8030'},

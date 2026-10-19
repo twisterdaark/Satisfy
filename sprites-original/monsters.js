@@ -18,7 +18,7 @@ function polish(g,W,H,out){const id=g.getImageData(0,0,W,H),d=id.data,OUT=out||'
  rim.forEach(([x,y,c])=>R(g,x,y,1,1,shade(c,.14)));o.forEach(([x,y,c])=>R(g,x,y,1,1,c));}
 
 // PER_CODE snapshot of index.html PAL @ ce29772 (body, dark, light, scale). A test checks drift.
-const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15]};
+const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15],hwolf:['#6e6258','#4e443c','#968878',1.05],rboar:['#7a3a2a','#55261a','#a05a40',1.3]};
 const POSES=[['idle',2],['walk',4],['atk',2],['hurt',1]];
 const TIMING={idle:[.5,.5],walk:[.1,.1,.1,.1],atk:[.12,.16],hurt:[.2]};
 
@@ -78,7 +78,7 @@ function rabbit(g,p,pose,f){const B='#c8b49a',D='#9a8468',L='#e8dcc8',W=16,H=14;
  return {W,H};}
 
 // Stone / crystal golem. 32x36, anchor (16,36). k: 'golem' | 'cgolem'
-function golem(k){return function(g,p,pose,f){const cr=k==='cgolem',B=cr?'#7ab8d8':'#7a7068',D=cr?'#4a88b0':'#544c46',L=cr?'#c8f0ff':'#9a908a',E=cr?'#ffffff':'#ffb040',W=32,H=36;
+function golem(k){return function(g,p,pose,f){const cr=k==='cgolem',mo=k==='mgolem',B=cr?'#7ab8d8':mo?'#5a6a4a':'#7a7068',D=cr?'#4a88b0':mo?'#3e4a32':'#544c46',L=cr?'#c8f0ff':mo?'#8a9a6a':'#9a908a',E=cr?'#ffffff':mo?'#b8ff6a':'#ffb040',W=32,H=36;
  const st=pose==='walk'?[1,0,-1,0][f]:0,bob=pose==='idle'?f:pose==='walk'&&(f%2)?-1:0,arm=pose==='atk'?(f===0?-8:4):0;const x=16,y=H;
  R(g,x-7,y-9+Math.max(0,st),5,9-Math.max(0,st),D);R(g,x+2,y-9+Math.max(0,-st),5,9-Math.max(0,-st),D);R(g,x-8,y-2,7,2,shade(D,-.2));R(g,x+1,y-2,7,2,shade(D,-.2));
  const ty=y-25+bob;R(g,x-9,ty,18,17,B);R(g,x-9,ty,18,2,L);R(g,x+7,ty,2,17,D);R(g,x-9,ty+15,18,2,D);
@@ -99,7 +99,7 @@ function guardian(g,p,pose,f){const W=64,H=72,B='#5a3b22',Bd='#3e2814',L='#2f6b3
  const ec=pose==='hurt'?'#ffffff':'#b8ff6a';R(g,x-7,ty+7,4,3,ec);R(g,x+3,ty+7,4,3,ec);R(g,x-6,ty+7,1,1,'#ffffff');R(g,x+4,ty+7,1,1,'#ffffff');R(g,x-4,ty+15,8,2,Bd);
  return {W,H};}
 
-const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],boar:[boar,'boar'],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null]};
+const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null]};
 
 // Build a sheet: columns = frames of the longest pose, rows = poses. Returns {canvas, W, H, anchor}.
 // Frames are drawn with a margin and cropped to the union of their pixels (+1 for the outline),
