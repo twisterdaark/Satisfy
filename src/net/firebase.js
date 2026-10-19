@@ -65,12 +65,17 @@
     var mine = D.ref(db, base + '/' + o.uid), list = D.ref(db, base);
     var handler = null, offs = [], lastSeq = {}, closed = false;
     function deliver(env) { if (handler && env && !closed) handler(env); }
+    // Session ids are chosen by the writer and readable by everyone, so a remote session is known by
+    // uid + sid: the uid is the node key (or the inbox `from`), which the rules verify. Another account
+    // that copies someone's sid is then just another session, never theirs (review #12, #15).
+    function sidOf(uid, sid) { return uid + '.' + sid; }
     function fromSnap(s) {
       if (s.key === o.uid) return null;
       var v = s.val();
-      if (!v || typeof v !== 'object') return null;
+      if (!v || typeof v !== 'object' || v.uid !== s.key || typeof v.sid !== 'string') return null;
       var pp = {};
       for (var k in v) if (k !== 'seq') pp[k] = v[k];
+      pp.sid = sidOf(s.key, v.sid);
       if (pp.room === undefined) pp.room = null;
       if (pp.party === undefined) pp.party = null;
       if (typeof pp.t !== 'number') pp.t = 0;
@@ -82,7 +87,7 @@
     offs.push(D.onChildRemoved(list, function (s) {
       if (s.key === o.uid) return;
       var v = s.val() || {};
-      deliver({ v: 1, type: 'presence.leave', requestId: null, sessionId: v.sid, seq: (lastSeq[s.key] || 0) + 1, tick: 0, payload: {} });
+      deliver({ v: 1, type: 'presence.leave', requestId: null, sessionId: v.sid ? sidOf(s.key, v.sid) : null, seq: (lastSeq[s.key] || 0) + 1, tick: 0, payload: {} });
       delete lastSeq[s.key];
     }));
     offs.push(D.onValue(D.ref(db, '.info/connected'), function (s) {
