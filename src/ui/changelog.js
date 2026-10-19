@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20a', ver: '0.46', d: '2026-10-20',
+      ar: ['أونلاين: كل كلاس أسطوري (وريث باغما، وريث براهام، وريث مولر) واحد بس في العالم كله: أول واحد ياخده بياخده لكل اللاعبين، والباقيين بيشوفوا اسمه'],
+      en: ["Online: each legendary class (Pagma's, Braham's and Muller's Successor) is one per world: the first to take it takes it for every player, and the others see who"] },
     { v: '2026-10-19u', ver: '0.44', d: '2026-10-19',
       ar: ['أونلاين: مواسم الساحة: كل مبارزة أونلاين بتغير تقييمك في موسم الشهر ده (بتبدأ من 1000)، وزرار "الساحة" في قايمة اللاعبين بيوريك أحسن 10 وتقييمك',
         'كل شهر جديد موسم جديد'],

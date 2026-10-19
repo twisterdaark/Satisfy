@@ -580,6 +580,17 @@
             "$other": { ".validate": false }
           }
         },
+        "legends": {
+          ".read": "auth != null",
+          "$k": {
+            ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid) || (data.exists() && data.child('uid').val() === auth.uid))",
+            ".validate": "$k.matches(/^[a-z0-9_]{1,24}$/) && newData.hasChildren(['uid', 'n', 't'])",
+            "uid": { ".validate": "newData.val() === auth.uid" },
+            "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+            "t": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        },
         "$other": { ".validate": false }
       }
     },
