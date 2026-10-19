@@ -52,7 +52,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|drops|dropClaims)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -188,9 +188,29 @@
     if (!(typeof v.n === 'string' && v.n.length <= 18 && v.by === me && (!('byN' in v) || (typeof v.byN === 'string' && v.byN.length <= 24)))) return 'guildInv values';
     return isSV(v.t) ? null : 'guildInv t';
   }
+  // SAT-ONLINE-048 dropped items, as backend/database.rules.json (server time = this page's clock)
+  function dropRules(seg, v) {
+    if (!user || seg.length !== 2) return 'PERMISSION_DENIED: ' + seg.join('/');
+    const me = user.uid, path = seg.join('/'), old = data.has(path) ? data.get(path) : null, now = Date.now(), SVs = JSON.stringify(SV);
+    if (seg[0] === 'drops') {
+      if (!/^d_[A-Za-z0-9_-]{1,80}$/.test(seg[1])) return 'drops id';
+      if (v === null) { const c = data.get('dropClaims/' + seg[1]); return old && (old.o === me || (c && c.by === me) || now > old.t + 120000) ? null : 'PERMISSION_DENIED: drops remove'; }
+      if (old || v.o !== me) return 'PERMISSION_DENIED: drops write';
+      for (const k in v) if (!['o', 'x', 'y', 'k', 'n', 'r', 'it', 't'].includes(k)) return 'drops field ' + k;
+      if (!(typeof v.x === 'number' && v.x >= 0 && v.x < 16384 && typeof v.y === 'number' && v.y >= -4096 && v.y < 8192)) return 'drops x/y';
+      if (!(typeof v.k === 'string' && /^[a-z0-9_]{1,24}$/.test(v.k) && isInt(v.n, 1) && v.n <= 99999 && isInt(v.r, 0) && v.r <= 9)) return 'drops k/n/r';
+      if ('it' in v && !(typeof v.it === 'string' && v.it.length <= 600)) return 'drops it';
+      return JSON.stringify(v.t) === SVs ? null : 'drops t';
+    }
+    const d = data.get('drops/' + seg[1]);
+    if (v === null) return old && (old.by === me || now > old.t + 120000) ? null : 'PERMISSION_DENIED: dropClaims remove';
+    if (old || !d || now >= d.t + 60000 || !(d.o === me || now > d.t + 2000)) return 'PERMISSION_DENIED: dropClaims ' + path;
+    return Object.keys(v).sort().join(',') === 'by,t' && v.by === me && JSON.stringify(v.t) === SVs ? null : 'dropClaims fields';
+  }
   function rules(p, v, existing) {
     const seg = p.split('/');
     if (['guilds', 'guildNames', 'guildMembers', 'guildInv', 'guildChat', 'guildVault', 'guildVaultTaken'].includes(seg[0])) return guildRules(seg, v);
+    if (seg[0] === 'drops' || seg[0] === 'dropClaims') return dropRules(seg, v);
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
     if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
     if (seg[0] === 'handles' || seg[0] === 'accountIds' || seg[0] === 'chat' || seg[0] === 'news') return idRules(seg, v);
@@ -427,7 +447,7 @@
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
-      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'guilds', 'guildNames', 'guildMembers'].includes(seg[0]) ? !!user : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers'].includes(seg[0]) ? !!user : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));
