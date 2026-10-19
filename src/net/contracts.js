@@ -46,8 +46,10 @@
   var WP_RE = /^[a-z0-9_]{1,16}:[0-9](:[0-9]{1,2})?$/; // PlayerPublic.wp: the weapon in hand, "<item id>:<rating>[:<enhancement>]" (SAT-ONLINE-026)
   // PlayerPublic.fx: the player's own effects of the last moment, replayed by the others (JSON text, game-defined; SAT-ONLINE-026)
   // PlayerPublic.gu: the raised guard, 1..256 (direction and flags, see the game's guPub)
+  // PlayerPublic.pt: what travels with the player, "<pet>.<pet level>" and/or "~<mount>" while riding (Twister 2026-10-19)
+  var PT_RE = /^(?=.)([a-z]{2,8}\.[0-9]{1,3})?(~[a-z]{2,8})?$/;
   var FX_MAX = 2400;
-  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 't'];
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'pt', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
   // S.uid (the local item-instance counter) is private too, but its name collides with the public
   // account `uid`, so it is checked by value in the tests instead of listed here.
@@ -148,6 +150,7 @@
       fx: typeof ctx.fx === 'string' && ctx.fx.length <= FX_MAX ? ctx.fx : null,
       gu: Number.isInteger(ctx.gu) && ctx.gu >= 1 && ctx.gu <= 256 ? ctx.gu : null,
       rs: typeof ctx.rs === 'string' && RS_RE.test(ctx.rs) ? ctx.rs : null,
+      pt: typeof ctx.pt === 'string' && PT_RE.test(ctx.pt) ? ctx.pt : null,
       t: ctx.t || 0,
     };
   }
@@ -185,6 +188,7 @@
     if (o.fx !== undefined && o.fx !== null && !(typeof o.fx === 'string' && o.fx.length <= FX_MAX)) e.push('fx');
     if (o.gu !== undefined && o.gu !== null && !(Number.isInteger(o.gu) && o.gu >= 1 && o.gu <= 256)) e.push('gu');
     if (o.rs !== undefined && o.rs !== null && !(typeof o.rs === 'string' && RS_RE.test(o.rs))) e.push('rs');
+    if (o.pt !== undefined && o.pt !== null && !(typeof o.pt === 'string' && PT_RE.test(o.pt))) e.push('pt');
     return { ok: e.length === 0, errors: e };
   }
 

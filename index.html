@@ -1406,6 +1406,15 @@ function drawRider(x,y,dir,f,ent){const b=[0,0,-1,0,1][f],ry=Math.round(y)-9+b;c
 function horseFx(dt){P.hfT=(P.hfT||0)-dt;if(P.hfT>0)return;P.hfT=.06;const d=P.dir,bx=d===2?-12:d===3?12:0,by=d===0?-14:d===1?2:0;
  if((P.rsp||0)>.5){for(let i=0;i<2;i++)fx.push({x:P.x+bx+(rand()-.5)*6,y:P.y-8+by+(rand()-.5)*10,vx:(d===2?-1:d===3?1:0)*(90+rand()*40),vy:(d===0?-1:d===1?1:0)*(90+rand()*40),t:.18,c:'rgba(230,240,255,.8)'});}
  fx.push({x:P.x+(rand()-.5)*10,y:P.y-1,vx:(rand()-.5)*20,vy:-10-rand()*12,t:.35,c:'#b8a888'});}
+// online (Twister 2026-10-19): the others see your pet and your horse. Presence carries pt = "<pet>.<level>" and "~<mount>"
+// while riding; each client walks its own copy of a remote's pet behind them with the same follow rule as yours.
+function ptPub(){let s='';if(PET&&S.pet&&PETS[S.pet])s+=S.pet+'.'+Math.min(999,petLv(S.pet));if(P.ride&&MOUNTS[S.mount])s+='~'+S.mount;return s||null;}
+function ptRemote(r,fs,dt){const m=/^(?:([a-z]{2,8})\.(\d{1,3}))?(?:~([a-z]{2,8}))?$/.exec(r.pt||'')||[],ride=MOUNTS[m[3]]||null;
+ if(!m[1]||!PETS[m[1]]||r.anim==='dead'){fs.pet=null;return {ride,pet:null};}
+ let a=fs.pet;if(!a||a.k!==m[1])a=fs.pet={k:m[1],x:r.x+12,y:r.y+4,dir:2,t:0,mv:0};a.lv=+m[2]||1;
+ const tx=r.x+(r.dir===3?14:-14),ty=r.y+(r.dir===1?10:r.dir===0?-6:4),dx=tx-a.x,dy=ty-a.y,d=Math.hypot(dx,dy);a.t+=dt;
+ if(Math.hypot(r.x-a.x,r.y-a.y)>220){a.x=tx;a.y=ty;}else if(d>3){const sp=Math.min(d*4,ride?200:120);a.x+=dx/d*sp*dt;a.y+=dy/d*sp*dt;a.mv=1;if(Math.abs(dx)>1)a.dir=dx>0?2:3;}else a.mv=0;
+ return {ride,pet:a};}
 // a pet is a few pixels that bob as it follows
 function drawPet(a){const sc=(a.lv||1)<5?.75:(a.lv||1)<15?1:1.3;if(sc!==1){ctx.save();ctx.translate(Math.round(a.x),Math.round(a.y));ctx.scale(sc,sc);ctx.translate(-Math.round(a.x),-Math.round(a.y));drawPet0(a);ctx.restore();}else drawPet0(a);
  if((a.lv||1)>=15&&(a.t*3|0)%4===0)R(ctx,Math.round(a.x+Math.sin(a.t*7)*6),Math.round(a.y-12-Math.cos(a.t*5)*4),1,1,'#f2c14e');}
@@ -1654,7 +1663,7 @@ function updateEvents(dt){if(!S||!P)return;const n=evNow();
    if(gs.length){for(let i=0;i<n;i++)invSpawn(ml[(rnd()*ml.length)|0],gs[(i+EV.wave)%gs.length],T,false,rnd);if(EV.wave%3===0)invSpawn(ml[ml.length-1],gs[(rnd()*gs.length)|0],T,true,rnd);}
    toast(t(EV.wave===1?'evSiege':'evWave',{n:EV.wave,z:t(T.k),c:n}),'warn');if(EV.wave%3===0)setTimeout(()=>announce(t('evCap')),500);}}}
 
- if(e.k==='fboss'&&!EV.boss){const cx=e.x*TS+8,cy=e.y*TS+8;if(Math.hypot(P.x-cx,P.y-cy)<600){let x=cx,y=cy;for(let r=0;r<10&&solidT(x/TS|0,y/TS|0);r++){x+=16;}EV.boss=evSpawn('warlord',x,y);EV.mons.push(EV.boss);SFX.slam();shake=.4;}}}
+ if(e.k==='fboss'&&!EV.boss){const cx=e.x*TS+8,cy=e.y*TS+8;if(Math.hypot(P.x-cx,P.y-cy)<600){let x=cx,y=cy;for(let r=0;r<10&&sol0(x/TS|0,y/TS|0);r++){x+=16;}EV.boss=evSpawn('warlord',x,y,1);EV.boss.ek=1;EV.mons.push(EV.boss);SFX.slam();shake=.4;}}}
 
 /* ---------------- life skills (SAT-LIFE-001) ---------------- */
 // Fishing, herb gathering, cooking and brewing. Levels are per player (S.life); online, herbs and fishing spots stay
@@ -3232,7 +3241,7 @@ const nearTown=()=>TOWNS.reduce((a,T)=>Math.hypot(T.rx*TS-P.x,T.ry*TS-P.y)<Math.
 function bindOpt(id){return {l:t(S.bind===id?'oBound':'oBind'),f:()=>{S.bind=id;const z=townOfNpc(id);toast(t('bindSet',{z:t(z||'zWin')}),'good');SFX.quest();save(true);shopD(id,NPCT[id].idle());}};}
 function deadChoice(){return respawn();}
 function respawn(k){const bn=!k&&S.bind&&npcOf(S.bind),bz=bn&&townOfNpc(S.bind);const T=TOWNS.find(T=>T.k===(k||bz))||nearTown();const lost=Math.floor(S.gold*.1);S.gold-=lost;P.hp=Math.round(maxHP()*.5);P.food=Math.max(P.food,50);if(bn){P.x=bn.x;P.y=bn.y+18;}else{P.x=T.rx*TS+8;P.y=T.ry*TS+10;}P.inv=2;camSnap=true;vfx('spawn',P.x,P.y);cvs.classList.remove('dead');$('deathW').hidden=true;mode='play';toast(t('died',{g:lost,z:t(T.k)}),'warn');SFX.quest();
- mons.forEach(m=>{if(MT[m.type].boss&&!m.dead){m.hp=m.max;m.x=m.sx;m.y=m.sy;}});if(S.raid){S.raid=0;allies=[];}hudDirty=true;}
+ mons.forEach(m=>{if(MT[m.type].boss&&!m.dead&&!(MOBN&&MOBN.host&&mobOk(m))){m.hp=m.max;m.x=m.sx;m.y=m.sy;}});if(S.raid){S.raid=0;allies=[];}hudDirty=true;}
 
 /* ---------------- menus ---------------- */
 function showOnly(id){['langScreen','titleScreen','pauseScreen','controlsScreen','end','create'].forEach(s=>$(s).hidden=s!==id);if(id!=='titleScreen'&&id!=='pauseScreen')$('updLog').hidden=true;else if(id==='titleScreen')updLogAuto();}
@@ -3798,7 +3807,7 @@ Satisfy.local=Object.freeze({api:1,
  zoneAt:(x,y)=>netZone(x,y), // 'void' where the world defines nothing (SAT-ONLINE-019)
  roomAt:(x,y)=>{const R=roomAt(x,y);return R?{id:R.id,kind:R.kind,zone:R.z}:null;},
  inGame:()=>!!S&&!S.__demo,
- playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,wp:(()=>{const w=weapon();return w&&WSH[w.id]?w.id+':'+Math.max(0,Math.min(9,w.r|0))+(w.en>0?':'+Math.min(99,w.en|0):''):null;})(),fx:fxPub(),gu:guPub(),zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null}),
+ playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,wp:(()=>{const w=weapon();return w&&WSH[w.id]?w.id+':'+Math.max(0,Math.min(9,w.r|0))+(w.en>0?':'+Math.min(99,w.en|0):''):null;})(),fx:fxPub(),gu:guPub(),pt:ptPub(),zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null}),
  backups:()=>STORE.backups(),
  profile:()=>!S||S.__demo?null:Satisfy.state.profileOf(S),
  events:()=>DEVT.log(),
@@ -3922,8 +3931,11 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   const wp=/^([a-z0-9_]+):(\d)(?::(\d{1,2}))?$/.exec(r.wp||''),wi=wp&&WSH[wp[1]]?{id:wp[1],r:+wp[2]}:null,wen=wp?+(wp[3]||0):0;
   const ft=Math.min(.1,(now-(fs.lt||now))/1000);fs.lt=now;fs.tr.forEach(a=>a.t-=ft);fs.tr=fs.tr.filter(a=>a.t>0);if(now<fs.du)fs.tr.push({x:r.x,y:r.y,dir:r.dir,t:.22});
   const swk=fs.sw?(now-fs.sw.t)/140:-1,sw=swk>=0&&swk<1?swk:-1,gu=Number.isInteger(r.gu)&&r.gu>=1&&r.gu<=256?r.gu-1:-1;
+  const pt=ptRemote(r,fs,ft),rd=pt.ride,hf=rd&&fr?1+((now/100)|0)%4:0;if(pt.pet){const a=pt.pet;ents.push({y:a.y,f:()=>drawPet(a)});}
   const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{fs.tr.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;drawChar(k,a.x,a.y,a.dir,1,false);});ctx.globalAlpha=1;
-   if(r.anim==='dead')ctx.globalAlpha=.45;if(wen>=7)drawEnh(r.x,r.y-bob,wen,0,r.dir);drawChar(k,r.x,r.y-bob,r.dir,fr,false);if(wen>=4)drawEnh(r.x,r.y-bob,wen,1,r.dir);
+   if(r.anim==='dead')ctx.globalAlpha=.45;if(wen>=7)drawEnh(r.x,r.y-bob,wen,0,r.dir);
+   if(rd){const b=[0,0,-1,0,1][hf],ry=Math.round(r.y)-9+b;drawHorse(r.x,r.y,r.dir,hf,rd);ctx.save();ctx.beginPath();ctx.rect(Math.round(r.x)-9,ry-25,18,17);ctx.clip();drawChar(k,r.x,ry,r.dir,0,false);ctx.restore();drawHorse(r.x,r.y,r.dir,hf,rd,ctx,'head');}
+   else drawChar(k,r.x,r.y-bob,r.dir,fr,false);if(wen>=4&&!rd)drawEnh(r.x,r.y-bob,wen,1,r.dir);
    if(wi&&r.anim!=='dead'){const hx=Math.round(r.x)+(r.dir===3?-6:5),hy=Math.round(r.y-bob)-7;if(sw<0)weapPix(ctx,hx,hy,wi,r.dir);else SA.weapons.draw(ctx,wi.id,wi.r,hx,hy,fs.sw.a-1.1+2.2*sw+Math.PI/2,Math.cos(fs.sw.a)<0);}
    if(gu>=0&&r.anim!=='dead')guardArc(r.x,r.y-bob,(gu&63)/64*2*Math.PI,gu&128?1:.55,!!(gu&64));ctx.globalAlpha=1;}});
   if(r.em)emoBubble(ents,r.em,r.x,r.y,r.dir);
@@ -4154,7 +4166,7 @@ function duelTick(live){DUEL.tick();const st=DUEL.state();
 Object.assign(STR.ar,{raidKill:'الفريق قتل الزعيم! نصيبك وصلك'});
 Object.assign(STR.en,{raidKill:'Your party killed the boss! Your share is yours'});
 const praidKey=m=>m.type+'@'+(m.sx|0)+','+(m.sy|0);
-const praidShared=m=>!!MT[m.type].boss&&!m.tmp&&!m.arena&&!m.evt&&!m.sg; // world bosses only: tower/trial/arena/event/siege ones live on one client (#29)
+const praidShared=m=>!!MT[m.type].boss&&!m.tmp&&!m.arena&&!m.evt&&!m.sg&&!(MOBN&&MOBN.host&&mobOk(m)); // world bosses only: tower/trial/arena/event/siege ones live on one client (#29)
 function praidBoss(key){return mons.find(m=>!m.dead&&praidShared(m)&&praidKey(m)===key)||null;}
 function praidStart(){PRAID=Satisfy.raid.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),local:{
  boss:k=>{const m=praidBoss(k);return m?{hp:m.hp,max:m.max}:null;},
@@ -4175,10 +4187,14 @@ function praidHit(m,dmg){if(!praidShared(m))return false;if(PRAID.hit(praidKey(m
    whichever player is nearest (it reads that player as a stand-in that takes no damage on the host's side). A hit on a
    followed monster goes to the host (raid.hit "m|<key>"), which applies it; when the monster dies the host tells everyone
    who hit it (raid.state "m|<key>", k 0) and each of them gets the normal rewards from their own game. Nothing of value
-   moves between players. Bosses stay with the party raid; event and temporary monsters, and those indoors, stay local. */
+   moves between players. Bosses are shared the same way (the party raid only keeps a boss's health when party members are too far apart to be one
+   group); event monsters are shared when every client spawns them alike (m.ek); temporary ones and those indoors stay local. */
 var MOBN,MOBP,MOB_MS=250,MOB_MAX=60; // no initial values: ?net=local starts the network above this line
 function mobKey(m){return m.nk||(m.nk=m.type+'@'+(m.sx|0)+','+(m.sy|0));}
-function mobOk(m){const b=MT[m.type];return !!b&&!b.boss&&(m.ek||!m.tmp&&!m.evt&&!m.goal)&&m.sy<WMH*TS;}
+// bosses too (Twister 2026-10-19: a boss stood in one place for one player and elsewhere for the friends who arrived): the
+// group's host moves and fights every outdoor boss, world and event ones included, and the others follow its copy. Adds, arena,
+// siege and trial monsters stay on one client.
+function mobOk(m){const b=MT[m.type];return !!b&&(m.ek||!m.tmp&&!m.evt&&!m.goal&&!m.arena&&!m.sg)&&m.sy<WMH*TS;}
 function mobByKey(k){for(const m of mons)if(mobOk(m)&&mobKey(m)===k)return m;return null;}
 function mobStart(){if(!NETTR||!NETTR.mobsPut)return;MOBN={zone:null,all:{},host:null,rs:[],sent:0,put:false,seq:0,hits:new Map()};
  NET.on(ev=>{if(ev.type!=='message'||!MOBN)return;const env=ev.env,pl=env.payload||{};if((env.type!=='raid.hit'&&env.type!=='raid.state')||pl.to!==NET.uid||typeof pl.raid!=='string'||pl.raid.slice(0,2)!=='m|')return;
@@ -4207,7 +4223,8 @@ function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!roomAt(P.x,P.y)&&P
  if(MOBN.host===NET.uid){const t=performance.now();if(t-MOBN.sent>=MOB_MS){MOBN.sent=t;NETTR.mobsPut(z,mobList(rs),NET.uid);MOBN.put=true;}}
  else if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}}
 function mobList(rs){const o={},pts=[P].concat(rs);let n=0;
- for(const m of mons){if(n>=MOB_MAX)break;if(!mobOk(m)||!pts.some(p=>Math.abs(p.x-m.x)<460&&Math.abs(p.y-m.y)<300))continue;
+ const near=m=>mobOk(m)&&pts.some(p=>Math.abs(p.x-m.x)<460&&Math.abs(p.y-m.y)<300); // bosses first, so a crowded den never pushes one off the list
+ for(const m of mons.filter(m=>MT[m.type].boss&&near(m)).concat(mons.filter(m=>!MT[m.type].boss&&near(m)))){if(n>=MOB_MAX)break;
   o[mobKey(m)]=Math.round(m.x)+','+Math.round(m.y)+','+(m.dead?0:Math.max(1,Math.round(1000*m.hp/m.max)))+','+((m.dead?1:0)|(m.eng>0?2:0)|(m.face<0?4:0))+','+(m.lv|0);n++;}
  return o;}
 // host: the nearest player this monster could be after, as a stand-in that takes no damage here (inv), or null for you
