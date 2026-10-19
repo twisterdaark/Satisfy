@@ -12,7 +12,12 @@
  * Pings (SAT-ONLINE-021, doc §35 U052): party.ping {to, party, k: x, n: y} marks a map spot for every other
  * member for 3 s, at most one per member every PING_MS.
  *
- * Exposes `Satisfy.party.create({ presence, uid, now?, max?, blocked? })`.
+ * Rejoin (SAT-ONLINE-023, doc §35 U065): with `store` (the tab's sessionStorage) a party survives a reload or a
+ * short disconnect. The party is kept in the store; a member who comes back auto-accepts its old leader's invite
+ * for the same party within REJOIN_MS, and a leader who comes back (or sees a member drop out) invites the
+ * dropped members back for REJOIN_MS. Leaving on purpose tells the leader (party.decline) and forgets it.
+ *
+ * Exposes `Satisfy.party.create({ presence, uid, now?, max?, blocked?, store?, wall? })`.
  */
 (function (root) {
   'use strict';
@@ -21,6 +26,8 @@
   var INVITE_MS = 30000;  // an unanswered invite expires
   var GRACE_MS = 5000;    // presence may lag; a member/leader missing this long has left
   var PING_MS = 1500;     // pings: at most one per member this often (sent and received)
+  var REJOIN_MS = 60000;  // a dropped member or a reloaded tab can come back this long (wall clock)
+  var KEY = 'satisfy_party';
 
   function idFor(uid) { return 'p_' + String(uid).slice(0, 38); }
 
@@ -32,10 +39,33 @@
     var outgoing = new Map();   // leader: uid -> invite time
     var invites = new Map();    // invitee: partyId -> {party, from, sid, handle, t}
     var leaderOk = 0, listeners = [], pingOut = -1e9, pingIn = new Map();
+    var store = o.store || null, wall = o.wall || function () { return Date.now(); };
+    var recent = new Map(); // leader: uid -> wall time they dropped out; invited back until REJOIN_MS
+    var memo = null;        // member: {id, leader, t}: auto-accept that leader's invite to that party
+    var savedSig = '', savedAt = -1e15;
+    function save() {
+      if (!store || !id) return;
+      var s = JSON.stringify({ id: id, leader: leader, members: leader === self ? Array.from(accepted.keys()).concat(Array.from(recent.keys())) : [] });
+      // rewritten when it changes and every few seconds anyway: its time says how recently we were in the party
+      if (s === savedSig && wall() - savedAt < 5000) return;
+      savedSig = s; savedAt = wall();
+      try { var v = JSON.parse(s); v.t = wall(); store.setItem(KEY, JSON.stringify(v)); } catch (e) { /* storage full or blocked: no rejoin */ }
+    }
+    function forget() { memo = null; savedSig = ''; if (store) try { store.removeItem(KEY); } catch (e) { /* ignore */ } }
+    (function restore() {
+      if (!store) return;
+      var s = null;
+      try { s = JSON.parse(store.getItem(KEY) || 'null'); } catch (e) { s = null; }
+      if (!s || typeof s.id !== 'string' || typeof s.leader !== 'string' || !(wall() - s.t < REJOIN_MS)) { forget(); return; }
+      if (s.leader === self && s.id === idFor(self)) {
+        id = s.id; leader = self;
+        (Array.isArray(s.members) ? s.members : []).forEach(function (u) { if (typeof u === 'string' && u !== self) recent.set(u, s.t); });
+      } else memo = { id: s.id, leader: s.leader, t: s.t };
+    })();
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function byUid(uid) { var hit = null; P.remotes().forEach(function (r) { if (r.uid === uid) hit = r; }); return hit; }
-    function clear() { id = null; leader = null; accepted.clear(); outgoing.clear(); leaderOk = 0; }
+    function clear() { id = null; leader = null; accepted.clear(); outgoing.clear(); recent.clear(); leaderOk = 0; savedSig = ''; }
     function send(type, to) { P.send(type, { to: to, party: id }); }
 
     P.on(function (ev) {
@@ -50,6 +80,9 @@
           if (blocked(from.uid)) return;                       // no answer: their invite just expires
           if (id) { P.send('party.decline', { to: from.uid, party: pl.party }); return; }
           invites.set(pl.party, { party: pl.party, from: from.uid, sid: ev.sid, handle: from.handle, t: now() });
+          if (memo && memo.id === pl.party && memo.leader === from.uid && wall() - memo.t < REJOIN_MS) {
+            memo = null; api.accept(pl.party, true); emit({ type: 'rejoined', handle: from.handle }); return; // our party, back after a reload
+          }
           emit({ type: 'invite', party: pl.party, handle: from.handle });
           break;
         case 'party.accept':
@@ -61,6 +94,7 @@
           break;
         case 'party.decline':
           if (outgoing.delete(from.uid)) emit({ type: 'declined', handle: from.handle });
+          else if (id && leader === self && pl.party === id && accepted.delete(from.uid)) { recent.delete(from.uid); emit({ type: 'memberLeft', uid: from.uid, handle: from.handle }); }
           break;
         case 'party.ping': {
           if (!id || pl.party !== id || !api.members().some(function (m) { return !m.self && m.uid === from.uid; })) return;
@@ -72,7 +106,7 @@
           break;
         }
         case 'party.kick':
-          if (id && pl.party === id && leader === from.uid) { clear(); emit({ type: 'kicked', handle: from.handle }); }
+          if (id && pl.party === id && leader === from.uid) { clear(); forget(); emit({ type: 'kicked', handle: from.handle }); }
           break;
       }
     });
@@ -99,13 +133,14 @@
         invites.forEach(function (v) { if (!best || v.t > best.t) best = v; });
         return best;
       },
-      accept: function (pid) {
+      accept: function (pid, quiet) {
         var inv = invites.get(pid);
         if (!inv || id) return false;
         invites.clear();
-        id = pid; leader = inv.from; leaderOk = now();
+        id = pid; leader = inv.from; leaderOk = now(); memo = null;
         send('party.accept', inv.from);
-        emit({ type: 'youJoined', handle: inv.handle });
+        save();
+        if (!quiet) emit({ type: 'youJoined', handle: inv.handle });
         return true;
       },
       decline: function (pid) {
@@ -118,7 +153,9 @@
       leave: function () {
         if (!id) return false;
         if (leader === self) accepted.forEach(function (t, uid) { send('party.kick', uid); });
+        else send('party.decline', leader); // a member leaving on purpose: the leader drops us now, no invite back
         clear();
+        forget();
         emit({ type: 'left' });
         return true;
       },
@@ -160,13 +197,26 @@
           accepted.forEach(function (seen, uid) {
             var r = byUid(uid);
             if (r && r.party === id) { accepted.set(uid, t); return; }
-            if (t - seen > GRACE_MS) { accepted.delete(uid); emit({ type: 'memberLeft', uid: uid, handle: r ? r.handle : '' }); }
+            if (t - seen > GRACE_MS) { accepted.delete(uid); if (store) recent.set(uid, wall()); emit({ type: 'memberLeft', uid: uid, handle: r ? r.handle : '' }); }
           });
-          if (!accepted.size && !outgoing.size) { clear(); emit({ type: 'dissolved' }); }
+          // invite dropped members back while they may still be reloading
+          recent.forEach(function (t0, uid) {
+            if (accepted.has(uid) || wall() - t0 > REJOIN_MS) { recent.delete(uid); return; }
+            var r = byUid(uid);
+            if (r && r.party === id) { recent.delete(uid); accepted.set(uid, t); return; } // still with us (we were the one reloading)
+            if (r && !r.party && !outgoing.has(uid) && accepted.size + 1 + outgoing.size < max) { outgoing.set(uid, t); send('party.invite', uid); }
+          });
+          if (!accepted.size && !outgoing.size && !recent.size) { clear(); forget(); emit({ type: 'dissolved' }); return; }
+          save();
         } else {
           var L = byUid(leader);
-          if (L && L.party === id) leaderOk = t;
-          else if (t - leaderOk > GRACE_MS) { clear(); emit({ type: 'dissolved' }); }
+          if (L && L.party === id) { leaderOk = t; save(); }
+          else if (t - leaderOk > GRACE_MS) {
+            var was = { id: id, leader: leader };
+            clear();
+            if (store) memo = { id: was.id, leader: was.leader, t: wall() }; // the leader may be reloading: take its invite back
+            emit({ type: 'dissolved' });
+          }
         }
       },
       on: function (fn) { listeners.push(fn); },
@@ -175,5 +225,5 @@
   }
 
   var ns = root.Satisfy = root.Satisfy || {};
-  ns.party = Object.freeze({ create: create, idFor: idFor, MAX: MAX, INVITE_MS: INVITE_MS, GRACE_MS: GRACE_MS, PING_MS: PING_MS });
+  ns.party = Object.freeze({ create: create, idFor: idFor, MAX: MAX, INVITE_MS: INVITE_MS, GRACE_MS: GRACE_MS, PING_MS: PING_MS, REJOIN_MS: REJOIN_MS, KEY: KEY });
 })(typeof window !== 'undefined' ? window : globalThis);

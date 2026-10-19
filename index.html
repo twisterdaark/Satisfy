@@ -3534,9 +3534,12 @@ if(NETQ==='local'&&typeof BroadcastChannel!=='undefined'){
  addEventListener('pagehide',()=>NET.close());}
 // ?net=online: Google sign-in + Firebase Realtime Database (SAT-ONLINE-004). The SDK downloads only in this mode.
 let FB=null;
-/* party (SAT-ONLINE-003): P invites the nearest player, Y/N answers an invite */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked});duelStart();praidStart();chatStart();
- PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
+/* party (SAT-ONLINE-003): P invites the nearest player, Y/N answers an invite. SAT-ONLINE-023 (doc §35 U065): the party
+   is kept in this tab's sessionStorage, so a reload (F5, Play here, an update) rejoins it within a minute. */
+function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch(e){return null;}}
+Object.assign(STR.ar,{pRejoined:'رجعت لبارتي {n}'});Object.assign(STR.en,{pRejoined:'Back in {n}\'s party'});
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore()});duelStart();praidStart();chatStart();
+ PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
 function partyInviteNear(){const r=partyNear();if(!r)return toast(t('pNone'));const res=PARTY.invite(r);

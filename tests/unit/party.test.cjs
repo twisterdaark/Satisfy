@@ -145,6 +145,76 @@ test('SAT-ONLINE-021 members() carries the public HP %', () => {
   assert.equal(m.hp, null, 'this test world publishes no hp');
 });
 
+// SAT-ONLINE-023: a party survives a reload. Each player gets a Storage-like store (the tab's sessionStorage);
+// "reloading" = closing the presence and creating a new client with the same uid and store.
+function store() { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), m }; }
+
+test('SAT-ONLINE-023 rejoin: a member who reloads is invited back and accepts by itself', () => {
+  let clock = 1e12; const wall = () => clock;
+  const hub = SN.transports.hub();
+  let t = 1000; const now = () => t;
+  const mk = (uid, st, i) => {
+    const pres = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net, uid, sid: 'sess' + uid + i + 'xxxxxxxx' });
+    const party = SN.party.create({ presence: pres, uid, now, store: st, wall });
+    const events = []; party.on((e) => events.push(e.type));
+    return { uid, pres, party, events, name: uid === 'u0' ? 'Lead' : 'Mem' };
+  };
+  const sa = store(), sb = store();
+  let a = mk('u0', sa, 0), b = mk('u1', sb, 0);
+  const players = () => [a, b];
+  const sync = () => {
+    for (const p of players()) p.pres.publish(SN.net.toPlayerPublic({ look: { n: p.name }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 }, { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id() }), true);
+    for (const p of players()) { p.pres.tick(); p.party.tick(); }
+  };
+  const advance = (ms) => { for (let k = 0; k < ms; k += 100) { t += 100; clock += 100; sync(); } };
+  sync();
+  assert.equal(a.party.invite(a.pres.remotes().find((r) => r.uid === 'u1')), 'sent');
+  b.party.accept('p_u0'); advance(300);
+  assert.equal(a.party.members().length, 2);
+  assert.equal(JSON.parse(sb.getItem(SN.party.KEY)).id, 'p_u0', 'the member keeps its party in the tab store');
+  advance(SN.party.REJOIN_MS + 5000); // a long session first: the stored time keeps up, so the reload still counts
+  assert.ok(clock - JSON.parse(sb.getItem(SN.party.KEY)).t < 6000);
+
+  // B reloads: new presence session, same uid and store
+  b.pres.close(); b = mk('u1', sb, 1); advance(300);
+  assert.equal(b.party.id(), null, 'a fresh page starts outside the party');
+  advance(SN.party.GRACE_MS + 500); // the leader notices B's old session gone, then invites B back
+  assert.equal(b.party.id(), 'p_u0', 'B accepted by itself');
+  assert.ok(b.events.includes('rejoined'));
+  assert.equal(b.party.pendingInvite(), null, 'no prompt');
+  advance(300);
+  assert.deepEqual(a.party.members().map((m) => m.uid), ['u0', 'u1']);
+
+  // the leader reloads: it restores its party and B is still in it
+  a.pres.close(); a = mk('u0', sa, 2); advance(300);
+  assert.equal(a.party.id(), 'p_u0');
+  advance(SN.party.GRACE_MS + 500);
+  assert.equal(b.party.id(), 'p_u0');
+  assert.deepEqual(a.party.members().map((m) => m.uid), ['u0', 'u1']);
+
+  // B leaves on purpose: the leader drops B at once and does not invite it back
+  b.party.leave(); advance(300);
+  assert.equal(sb.getItem(SN.party.KEY), null, 'forgotten');
+  assert.ok(a.events.includes('memberLeft'));
+  advance(SN.party.GRACE_MS + 2000);
+  assert.equal(b.party.pendingInvite(), null);
+  assert.equal(b.party.id(), null);
+});
+
+test('SAT-ONLINE-023 rejoin expires: after REJOIN_MS a reload starts clean', () => {
+  let clock = 1e12; const wall = () => clock;
+  const st = store();
+  st.setItem(SN.party.KEY, JSON.stringify({ id: 'p_u0', leader: 'u0', members: ['u1'], t: clock - SN.party.REJOIN_MS - 1 }));
+  const hub = SN.transports.hub();
+  const pres = SN.presence.create({ transport: hub.connect(), now: () => 1, world: WORLD, net: SN.net, uid: 'u0', sid: 'sessu0xxxxxxxx' });
+  const party = SN.party.create({ presence: pres, uid: 'u0', now: () => 1, store: st, wall });
+  assert.equal(party.id(), null);
+  assert.equal(st.getItem(SN.party.KEY), null);
+  // a store entry claiming someone else's leadership is not taken as ours
+  st.setItem(SN.party.KEY, JSON.stringify({ id: 'p_u9', leader: 'u0', members: [], t: clock }));
+  assert.equal(SN.party.create({ presence: pres, uid: 'u0', now: () => 1, store: st, wall }).id(), null);
+});
+
 // review fix (#51)
 test('a ping in the north (negative y) arrives where it was made', () => {
   const w = world(2), [a, b] = w.players;

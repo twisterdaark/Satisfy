@@ -136,7 +136,7 @@ In the game: `?net=local` turns it on; remote players are drawn only inside the 
 
 ## `Satisfy.party` (SAT-ONLINE-003)
 
-`Satisfy.party.create({ presence, uid, now?, max?, blocked? })` runs on a presence client. Party id = `'p_' + leaderUid`; max 5.
+`Satisfy.party.create({ presence, uid, now?, max?, blocked?, store?, wall? })` runs on a presence client. With `store` (a Storage, the game passes the tab's sessionStorage) the party survives a reload for `REJOIN_MS` = 60 s of `wall` time (SAT-ONLINE-023): a member auto-accepts its old leader's invite to the same party (event `rejoined`, no prompt); a leader restores its party and invites dropped members back. `leave()` by a member sends `party.decline` to the leader, which drops them at once and forgets them. Party id = `'p_' + leaderUid`; max 5.
 
 | Member | Notes |
 |---|---|
@@ -301,6 +301,7 @@ await g.close(); await H.closeBrowser();
 - **api 1, fix** (SAT-ONLINE-004 review, #12): the Firebase transport knows a remote session as `uid + '.' + sid` (the uid is the node key the rules verify) and drops nodes whose `uid` isn't their key, so copying someone's `sid` (or a huge `seq`) can't hide or replace them. Rules: presence `y >= -4096` (the north), shard pinned to `main`.
 - **api 1, fix** (SAT-ONLINE-002 review, #10/#23): NET_LIVE: every in-game screen (`qd`, `gname`, `controls`, `enhfx`, `lang` too), so reading a quest neither hides the player nor forfeits a duel; `tests/unit/modes.test.cjs` checks it against every `mode=` in the game.
 - **api 1, fix** (SAT-ONLINE-001 review, #10): `world().y0` = `-NR*TS`, the top edge; `validatePlayerPublic` accepts `y >= world.y0`, so players in the north (negative y) are no longer dropped.
+- **api 1, additive** (SAT-ONLINE-023): party rejoin after a reload (`store`, `wall`, `REJOIN_MS`, `KEY`, event `rejoined`, `accept(pid, quiet)`); a member's `leave()` tells the leader. No rules change.
 - **api 1, additive** (SAT-ONLINE-022): `PlayerPublic.em` ∈ `Satisfy.net.EMOTES` (`wave, dance, point, cheer`) or null; V / the touch Emote button opens the list; 3 s per emote, one per 2 s. Presence + rules field (redeploy).
 - **api 1, additive** (SAT-ONLINE-021): `PlayerPublic.hp` (health %, 5% steps), `party.ping(x, y)` / `'ping'` events (`party.ping {to, party, k: x, n: y}` in the inbox), `party.members()[].hp`, `net().pings`; party HP bars, Alt+click pings, party members and pings on the minimap, a Ping button on the touch row. Presence + inbox rules (redeploy).
 - **api 1, additive** (SAT-ONLINE-020): the player menu (click a player: card + invite/duel/block by uid); `__G.toScreen`. No network change.
