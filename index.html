@@ -3634,7 +3634,9 @@ window.__G.defs=Satisfy.local.defs;
 // Other players come from Satisfy.presence over a transport; nothing here changes offline play.
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
 let NET=null,NETTR=null,netLinkT=0,netReplaced=false,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null,CHAT=null,chatSig='',PCTX=null,pctxSig='',EMO=null,emoLast=-1e9;const PARTY_R=40,BLK=Satisfy.chat.blocklist(); // CHAT/BLK: SAT-ONLINE-016 (declared here: ?net=local starts during load)
-const NETQ=QS.get('net');
+// Twister 2026-10-19: the public site opens online with no ?net=online; ?net=off plays offline there, ?net=local stays for two-tab tests.
+// Only on the GitHub Pages host, so local files and the test harness keep the offline default.
+const NETQ=(q=>q==='off'?null:q)(QS.get('net')||(/\.github\.io$/.test(location.hostname)?'online':null));
 // every screen of a running game counts as in the world (review of #23: quest dialog, guild name, enhance effect and the
 // controls opened from pause used to stop presence and forfeit a duel); only the title, language and creation screens don't
 const NET_OFF=['title','lang','create'];
