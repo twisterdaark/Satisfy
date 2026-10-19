@@ -84,7 +84,7 @@ test('?touch=1: the stick moves the player, Attack works while held, a key hint 
   } finally { await g.close(); }
 });
 
-test('?touch=1 online: the party row invites, accepts and opens the chat line', async () => {
+test('?touch=1 online: the party row opens a card, invites, accepts and opens the chat line', async () => {
   const ctx = await H.newContext();
   try {
     const a = await H.openGame({ ctx, query: '?net=local&slot=a&touch=1' });
@@ -94,6 +94,12 @@ test('?touch=1 online: the party row invites, accepts and opens the chat line', 
     await b.eval(() => { window.__G.P.x += 20; });
     for (let i = 0; i < 8; i++) { await a.step(7); await b.step(7); await a.page.waitForTimeout(30); }
     assert.equal(await a.eval(() => document.getElementById('tNet').hidden), false);
+    // SAT-ONLINE-036: the Options tap opens the card of the player next to you
+    await tap(a, '#tNet [data-tk="KeyT"]');
+    assert.equal(await a.eval(() => document.getElementById('pctx').hidden), false, 'Options opened the card');
+    assert.equal(await a.eval(() => document.getElementById('pctxT').textContent), 'Faker');
+    await a.eval(() => document.querySelector('#pctx [data-act="pcClose"]').click());
+    await a.step(2);
     await tap(a, '#tNet [data-tk="KeyP"]');
     for (let i = 0; i < 8; i++) { await a.step(7); await b.step(7); await a.page.waitForTimeout(30); }
     assert.equal(await b.eval(() => document.getElementById('partyInv').hidden), false, 'B got the invite');
