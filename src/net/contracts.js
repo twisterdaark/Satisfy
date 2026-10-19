@@ -54,6 +54,14 @@
     ERROR: ['DISCONNECTED', 'OFFLINE'],
   };
 
+  // Safe zones (doc §08): towns where no player can hurt another. Enforced by the combat authority
+  // once duels/PvP exist; until then the game only shows it. Zone ids come from Satisfy.local.zoneAt.
+  var SAFE_ZONES = ['zBai', 'zWin'];
+  function zonePolicy(zone) {
+    var safe = SAFE_ZONES.indexOf(zone) >= 0;
+    return { zone: zone, safe: safe, pvp: false, duel: false };
+  }
+
   function canTransition(from, to) {
     return !!(NET_EDGES[from] && NET_EDGES[from].indexOf(to) >= 0);
   }
@@ -152,6 +160,8 @@
     PRIVATE_FIELDS: Object.freeze(PRIVATE_FIELDS.slice()),
     ERRORS: ERRORS,
     NET_STATES: Object.freeze(NET_STATES.slice()),
+    SAFE_ZONES: Object.freeze(SAFE_ZONES.slice()),
+    zonePolicy: zonePolicy,
     canTransition: canTransition,
     roomKey: roomKey,
     parseRoomKey: parseRoomKey,

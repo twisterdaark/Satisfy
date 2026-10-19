@@ -10,28 +10,105 @@
           "$uid": {
             ".write": "auth != null && auth.uid === $uid",
             ".validate": "newData.hasChildren(['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'])",
-            "v": { ".validate": "newData.val() === 1" },
-            "uid": { ".validate": "newData.val() === $uid" },
-            "sid": { ".validate": "newData.isString() && newData.val().length >= 8 && newData.val().length <= 64" },
-            "handle": { ".validate": "newData.isString() && newData.val().length <= 24" },
+            "v": {
+              ".validate": "newData.val() === 1"
+            },
+            "uid": {
+              ".validate": "newData.val() === $uid"
+            },
+            "sid": {
+              ".validate": "newData.isString() && newData.val().length >= 8 && newData.val().length <= 64"
+            },
+            "handle": {
+              ".validate": "newData.isString() && newData.val().length <= 24"
+            },
             "look": {
               ".validate": "newData.hasChildren(['hair', 'hc', 'skin', 'top'])",
-              "$f": { ".validate": "($f === 'hair' || $f === 'hc' || $f === 'skin' || $f === 'top') && newData.isNumber() && newData.val() >= 0 && newData.val() <= 31" }
+              "$f": {
+                ".validate": "($f === 'hair' || $f === 'hc' || $f === 'skin' || $f === 'top') && newData.isNumber() && newData.val() >= 0 && newData.val() <= 31"
+              }
             },
-            "cls": { ".validate": "newData.isString() && newData.val().length <= 16" },
-            "lv": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 999" },
-            "title": { ".validate": "newData.isString() && newData.val().length <= 32" },
-            "zone": { ".validate": "newData.isString() && newData.val().length <= 24" },
-            "room": { ".validate": "newData.isString() && newData.val().length <= 16" },
-            "x": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 16384" },
-            "y": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 4096" },
-            "dir": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3" },
-            "anim": { ".validate": "newData.isString() && newData.val().matches(/^(idle|walk|attack|dodge|dead)$/)" },
-            "arm": { ".validate": "newData.val() === 0 || newData.val() === 1" },
-            "party": { ".validate": "newData.isString() && newData.val().length <= 40" },
-            "seq": { ".validate": "newData.isNumber() && newData.val() >= 0" },
-            "t": { ".validate": "newData.val() === now" },
-            "$other": { ".validate": false }
+            "cls": {
+              ".validate": "newData.isString() && newData.val().length <= 16"
+            },
+            "lv": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 999"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length <= 32"
+            },
+            "zone": {
+              ".validate": "newData.isString() && newData.val().length <= 24"
+            },
+            "room": {
+              ".validate": "newData.isString() && newData.val().length <= 16"
+            },
+            "x": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 16384"
+            },
+            "y": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 4096"
+            },
+            "dir": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3"
+            },
+            "anim": {
+              ".validate": "newData.isString() && newData.val().matches(/^(idle|walk|attack|dodge|dead)$/)"
+            },
+            "arm": {
+              ".validate": "newData.val() === 0 || newData.val() === 1"
+            },
+            "party": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "seq": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "t": {
+              ".validate": "newData.val() === now"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
+    },
+    "inbox": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$msg": {
+          ".write": "auth != null && ((auth.uid === $uid && !newData.exists()) || (!data.exists() && newData.child('from').val() === auth.uid))",
+          ".validate": "newData.hasChildren(['from', 'sid', 'seq', 'type', 'payload', 't'])",
+          "from": {
+            ".validate": "newData.isString() && newData.val().length <= 128"
+          },
+          "sid": {
+            ".validate": "newData.isString() && newData.val().length >= 8 && newData.val().length <= 64"
+          },
+          "seq": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "type": {
+            ".validate": "newData.isString() && newData.val().matches(/^party\\.(invite|accept|decline|kick)$/)"
+          },
+          "payload": {
+            ".validate": "newData.hasChildren(['to', 'party'])",
+            "to": {
+              ".validate": "newData.val() === $uid"
+            },
+            "party": {
+              ".validate": "newData.isString() && newData.val().length <= 40"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "t": {
+            ".validate": "newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
           }
         }
       }

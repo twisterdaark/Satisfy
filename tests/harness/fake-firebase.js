@@ -40,8 +40,9 @@
   const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'seq', 't'];
   const POS_X = 16384, POS_Y = 4096; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
-  function rules(p, v) {
+  function rules(p, v, existing) {
     const seg = p.split('/');
+    if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
     if (seg.length !== 4 || seg[0] !== 'presence' || seg[1] !== 'satisfy') return 'PERMISSION_DENIED: path ' + p;
     if (!user || seg[3] !== user.uid) return 'PERMISSION_DENIED: not your node';
     if (v === null) return null;
@@ -56,6 +57,21 @@
     if (!/^(idle|walk|attack|dodge|dead)$/.test(v.anim)) return 'anim';
     if (v.arm !== 0 && v.arm !== 1) return 'arm';
     if ('room' in v && (typeof v.room !== 'string' || v.room.length > 16)) return 'room';
+    if ('party' in v && (typeof v.party !== 'string' || v.party.length > 40)) return 'party';
+    return null;
+  }
+  // inbox/{uid}/{msg}: the owner may delete; anyone signed in may create a new message as themselves
+  function inboxRules(seg, v, existing) {
+    if (seg.length !== 3 || !user) return 'PERMISSION_DENIED: inbox path';
+    if (v === null) return seg[1] === user.uid ? null : 'PERMISSION_DENIED: not your inbox';
+    if (existing) return 'PERMISSION_DENIED: inbox messages are write-once';
+    if (v.from !== user.uid) return 'PERMISSION_DENIED: forged from';
+    const keys = Object.keys(v).sort().join(',');
+    if (keys !== 'from,payload,seq,sid,t,type') return 'inbox fields ' + keys;
+    if (!/^party\.(invite|accept|decline|kick)$/.test(v.type)) return 'inbox type';
+    if (Object.keys(v.payload).sort().join(',') !== 'party,to' || v.payload.to !== seg[1]) return 'inbox payload';
+    if (typeof v.payload.party !== 'string' || v.payload.party.length > 40) return 'inbox party';
+    if (JSON.stringify(v.t) !== JSON.stringify(SV)) return 'inbox t';
     return null;
   }
 
@@ -72,8 +88,17 @@
     getDatabase: (app, url) => { F.databaseURL = url; return {}; },
     ref: (db, path) => ({ path, key: keyOf(path) }),
     serverTimestamp: () => SV,
+    push: (r, v) => {
+      const p = r.path + '/-' + Date.now().toString(36) + rid();
+      const err = rules(p, v, false);
+      F.log.push({ op: 'push', path: p, err });
+      if (err) { F.rejected.push(err); return Promise.reject(Object.assign(new Error(err), { code: 'PERMISSION_DENIED' })); }
+      const stored = clone(v); stored.t = Date.now();
+      if (connected) write('set', p, stored); else pending.set(p, stored);
+      return Promise.resolve({ key: keyOf(p) });
+    },
     set: (r, v) => {
-      const err = rules(r.path, v);
+      const err = rules(r.path, v, false);
       F.log.push({ op: 'set', path: r.path, err });
       if (err) { F.rejected.push(err); return Promise.reject(Object.assign(new Error(err), { code: 'PERMISSION_DENIED' })); }
       const stored = clone(v); stored.t = Date.now();
@@ -83,7 +108,7 @@
       return Promise.resolve();
     },
     remove: (r) => {
-      const err = rules(r.path, null);
+      const err = rules(r.path, null, true);
       F.log.push({ op: 'remove', path: r.path, err });
       if (err) { F.rejected.push(err); return Promise.reject(new Error(err)); }
       mine.delete(r.path); pending.delete(r.path);
@@ -94,7 +119,8 @@
     onChildChanged: listen('changed'),
     onChildRemoved: listen('removed'),
     onValue: (r, cb) => {
-      if (r.path !== '.info/connected') throw new Error('fake onValue supports only .info/connected');
+      if (r.path === '.info/serverTimeOffset') { setTimeout(() => cb(snap(r.path, 0)), 0); return () => {}; }
+      if (r.path !== '.info/connected') throw new Error('fake onValue supports only .info/connected and serverTimeOffset');
       connCbs.push(cb);
       setTimeout(() => cb(snap(r.path, connected)), 0);
       return () => { const i = connCbs.indexOf(cb); if (i >= 0) connCbs.splice(i, 1); };

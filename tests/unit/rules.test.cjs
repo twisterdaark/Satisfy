@@ -58,3 +58,18 @@ test('position bounds cover the whole map, and the fake uses the same bounds', (
   const fb = /const POS_X = (\d+), POS_Y = (\d+);/.exec(fake);
   assert.deepEqual([+fb[1], +fb[2]], [N.LIMITS.posX, N.LIMITS.posY]);
 });
+
+test('inbox: only the owner reads and deletes; senders create write-once messages as themselves', () => {
+  const box = rules.inbox.$uid, msg = box.$msg;
+  assert.equal(box['.read'], 'auth != null && auth.uid === $uid');
+  assert.equal(msg['.write'], "auth != null && ((auth.uid === $uid && !newData.exists()) || (!data.exists() && newData.child('from').val() === auth.uid))");
+  assert.equal(msg.payload.to['.validate'], 'newData.val() === $uid');
+  assert.equal(msg.t['.validate'], 'newData.val() === now');
+  assert.equal(msg.$other['.validate'], false);
+  assert.equal(msg.payload.$other['.validate'], false);
+  const types = /\^party\\\.\((.*)\)\$/.exec(msg.type['.validate'])[1].split('|');
+  const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
+  const sent = /DIRECTED = \/\^party\\\.\((.*)\)\$\//.exec(fb)[1].split('|');
+  assert.deepEqual(types, sent, 'rules accept exactly the party messages the transport sends');
+  assert.deepEqual(types, ['invite', 'accept', 'decline', 'kick']);
+});

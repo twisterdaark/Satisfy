@@ -41,7 +41,7 @@ test('two tabs in Winston see each other, with name and look', async () => {
     assert.equal(seenByA.sid, nb.sid);
     assert.equal(nb.remotes[0].handle, 'Grid');
     assert.equal(na.drawn, 1, 'B is drawn on A\'s screen');
-    assert.equal(await a.eval(() => document.getElementById('netB').textContent), 'Local online · players: 2');
+    assert.equal(await a.eval(() => document.getElementById('netB').textContent), 'Local online · players: 2 · Safe zone');
     assert.deepEqual(a.errors, []);
     assert.deepEqual(b.errors, []);
   } finally { await ctx.close(); }
@@ -88,7 +88,7 @@ test('closing a tab removes the player; silent tabs expire', async () => {
     let n = (await net(a)).count;
     if (n) { await a.step(6 * 60); n = (await net(a)).count; } // pagehide may not fire in headless: expiry covers it
     assert.equal(n, 0);
-    assert.equal(await a.eval(() => document.getElementById('netB').textContent), 'Local online · players: 1');
+    assert.equal(await a.eval(() => document.getElementById('netB').textContent), 'Local online · players: 1 · Safe zone');
   } finally { await ctx.close(); }
 });
 

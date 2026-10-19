@@ -61,3 +61,12 @@ test('envelope: versioned and size-limited', () => {
   assert.deepEqual(e, { v: 1, type: 'party.invite', requestId: 'r1', sessionId: null, seq: 4, tick: 0, payload: { to: 'u2' } });
   assert.throws(() => N.envelope('chat', { text: 'x'.repeat(5000) }), /BAD_MESSAGE/);
 });
+
+test('zone policy: Bairan and Winston are safe, nothing allows PvP yet', () => {
+  assert.deepEqual(N.zonePolicy('zWin'), { zone: 'zWin', safe: true, pvp: false, duel: false });
+  assert.deepEqual(N.zonePolicy('zBai'), { zone: 'zBai', safe: true, pvp: false, duel: false });
+  for (const z of ['zPlains', 'zGrave', 'zOrc', '']) {
+    assert.equal(N.zonePolicy(z).safe, false, z);
+    assert.equal(N.zonePolicy(z).pvp, false, z);
+  }
+});

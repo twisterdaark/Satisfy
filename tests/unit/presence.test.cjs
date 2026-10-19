@@ -116,3 +116,15 @@ test('remotes() returns copies', () => {
   b.remotes()[0].handle = 'hacked';
   assert.notEqual(b.remotes()[0].handle, 'hacked');
 });
+
+test('directed messages and presence have separate replay windows (they may arrive out of order)', () => {
+  const hub = SN.transports.hub(), now = clock();
+  const b = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net });
+  const t = hub.connect();
+  const got = [];
+  b.on((e) => { if (e.type === 'message') got.push(e.env.seq); });
+  t.send({ v: 1, type: 'presence.state', sessionId: 'aaaa1111', seq: 11, tick: 0, payload: pp('aaaa1111') });
+  t.send({ v: 1, type: 'party.invite', sessionId: 'aaaa1111', seq: 10, tick: 0, payload: { to: 'x' } });
+  t.send({ v: 1, type: 'party.invite', sessionId: 'aaaa1111', seq: 10, tick: 0, payload: { to: 'x' } });
+  assert.deepEqual(got, [10], 'older message seq accepted once, replay dropped');
+});

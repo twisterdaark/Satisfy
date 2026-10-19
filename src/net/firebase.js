@@ -6,6 +6,8 @@
  *
  * Database layout (rules: backend/database.rules.json):
  *   presence/{world}/{shard}/{uid} = PlayerPublic (nulls omitted) + seq, t = server time
+ *   inbox/{uid}/{pushId}           = {from, sid, seq, type: party.*, payload: {to, party}, t}
+ *                                    read and deleted by the recipient only; older than 60 s is dropped
  * The transport turns child added/changed/removed under presence/{world}/{shard} into the same
  * envelopes Satisfy.presence gets from the local transport.
  */
@@ -63,7 +65,9 @@
     var D = sdk.m.database, db = sdk.db;
     var base = 'presence/' + o.world + '/' + o.shard;
     var mine = D.ref(db, base + '/' + o.uid), list = D.ref(db, base);
-    var handler = null, offs = [], lastSeq = {}, closed = false;
+    var inbox = D.ref(db, 'inbox/' + o.uid);
+    var handler = null, offs = [], lastSeq = {}, closed = false, offset = 0;
+    var DIRECTED = /^party\.(invite|accept|decline|kick)$/;
     function deliver(env) { if (handler && env && !closed) handler(env); }
     function fromSnap(s) {
       if (s.key === o.uid) return null;
@@ -85,6 +89,14 @@
       deliver({ v: 1, type: 'presence.leave', requestId: null, sessionId: v.sid, seq: (lastSeq[s.key] || 0) + 1, tick: 0, payload: {} });
       delete lastSeq[s.key];
     }));
+    offs.push(D.onValue(D.ref(db, '.info/serverTimeOffset'), function (s) { offset = +s.val() || 0; }));
+    offs.push(D.onChildAdded(inbox, function (s) {
+      var m = s.val();
+      D.remove(D.ref(db, 'inbox/' + o.uid + '/' + s.key)).catch(function () { /* ignore */ });
+      if (!m || typeof m !== 'object' || !DIRECTED.test(m.type)) return;
+      if (typeof m.t === 'number' && Date.now() + offset - m.t > 60000) return; // stale while offline
+      deliver({ v: 1, type: m.type, requestId: null, sessionId: m.sid, seq: +m.seq || 0, tick: 0, payload: m.payload || {} });
+    }));
     offs.push(D.onValue(D.ref(db, '.info/connected'), function (s) {
       var up = !!s.val();
       // re-armed on every reconnect: the server deletes our node if this client vanishes
@@ -104,8 +116,12 @@
           D.set(mine, v).catch(fail);
         } else if (env.type === 'presence.leave') {
           D.remove(mine).catch(fail);
+        } else if (DIRECTED.test(env.type) && env.payload && typeof env.payload.to === 'string') {
+          D.push(D.ref(db, 'inbox/' + env.payload.to), {
+            from: o.uid, sid: env.sessionId, seq: env.seq, type: env.type,
+            payload: { to: env.payload.to, party: String(env.payload.party || '') }, t: D.serverTimestamp(),
+          }).catch(fail);
         }
-        // other envelope types travel on their own paths (party: SAT-ONLINE-003)
       },
       onmessage: function (fn) { handler = fn; },
       close: function () {
