@@ -3463,7 +3463,10 @@ function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(
 // of it along the map (the screen is W=480 px wide, so the re-centre step keeps it covered), plus its
 // party members wherever they are (raid hits and the party list need them). See docs/online/COST_MODEL.md.
 const NET_INTEREST={radius:800,step:400};
-function netWatch(){const w=PARTY&&PARTY.id()?PARTY.members().filter(m=>!m.self&&m.uid).map(m=>m.uid).sort().join(','):'';
+// review fix (#37): members() lists only members we can see right now, so a member whose node blinks out (a mobile
+// blip, a background tab) would drop off the watch for good. Watched uids stay until the party itself changes.
+function netWatch(){const id=PARTY&&PARTY.id()||null,keep=id&&NETTR.wid===id?(NETTR.wsig||'').split(',').filter(Boolean):[];NETTR.wid=id;
+ const w=id?[...new Set(PARTY.members().filter(m=>!m.self&&m.uid).map(m=>m.uid).concat(keep))].sort().join(','):'';
  if(NETTR.wsig!==w){NETTR.wsig=w;NETTR.watch(w?w.split(','):[]);}}
 function netTick(){NET.tick();const live=Satisfy.local.inGame()&&NET_LIVE.includes(mode);
  if(PARTY)PARTY.tick();
