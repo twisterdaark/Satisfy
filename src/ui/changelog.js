@@ -1,9 +1,23 @@
 /* Update log (owner request): what each update added, in the player's words, newest first. The game opens it once after
    an update (it remembers the newest `v` seen) and from "Update log" on the title and pause screens. Whoever pushes
-   to main adds a line here: one entry per day or release, short points, Arabic and English. */
+   to main adds a line here: one entry per day or release, short points, Arabic and English. Every new entry raises
+   `ver` by 0.01 (owner 2026-10-19); the title screen shows the newest entry's ver as "ALPHA v0.31" and so on. */
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19h', ver: '0.31', d: '2026-10-19',
+      ar: ['بارات الصحة والمانا والطاقة والشبع اتعملت من جديد بستايل نوافذ ساتيسفاي: علامة ملونة، ولمعة، وتقسيمات كل 10%، والجزء اللي راح بيفضل باهت لحظة قبل ما يختفي',
+        'صحة اللاعبين التانيين بتبان فوق راسهم، وأعضاء فريقك ليهم بار أخضر بإطار دهبي',
+        'بارات صحة الوحوش والشخصيات بقت أوضح بنفس الستايل',
+        'زراير تحريك وتصغير الصناديق بقت تاب صغير شيك فوق كل صندوق، بأيقونات مرسومة',
+        'الوحوش اللي ورا سور بتلف وتدخل من البوابة بدل ما تتكوم على الحيطة',
+        'رقم النسخة في الشاشة الرئيسية بيزيد مع كل تحديث'],
+      en: ['Health, mana, stamina and food bars are redrawn in the style of Satisfy\'s windows: a coloured tag, a gloss, a tick every 10%, and a pale trail where you just lost some',
+        "Other players' health shows over their heads; your party members get a green bar with a gold frame",
+        'Monster and NPC health bars are clearer, in the same style',
+        'The move and fold buttons on each HUD box are a small tab with drawn icons',
+        'Monsters behind a wall walk round and come in through the gate instead of piling up against it',
+        'The version on the title screen goes up with every update'] },
     { v: '2026-10-19g', d: '2026-10-19',
       ar: ['أونلاين: واحد بس فيكم بيحدد كل الوحوش اللي حواليكم، حتى وحوش الأحداث والحراس، والباقيين بيشوفوا نفس الوحوش بالظبط',
         'لما حد يكسب حدث زي غزوة ريدان، الإشعار بيوصل للكل والحدث بيخلص عند الكل',
