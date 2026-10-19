@@ -1600,8 +1600,21 @@ function dailyLines(){const D=dlyS();return t('dHead',{s:D.streak||0})+'\n'+dail
 // character); offline the canon top rankers fill the board and the player is placed among them by the same rule.
 const RKN=[['kraugel',312,9.2e6],['zibal',298,7.1e6],['peaks',295,5.4e6],['huroi',290,4.8e6],['regas',286,1.2e6],['jishuka',281,3.9e6],['damian',276,6.3e6],['euphemina',270,8.8e6],['faker',266,2.7e6],['vantner',261,2.1e6],['pon',255,4.2e6],['toon',248,3.3e6]];
 function rankList(kind){const fmt=v=>kind==='lv'?'Lv '+v:v.toLocaleString()+' G',me={n:S.look.n||t('pname'),me:1,v:kind==='lv'?S.lv:S.gold};
- const L=(WS.ranks&&WS.ranks[kind])||RKN.map(([k,lv,g])=>({n:t('rk_'+k),v:kind==='lv'?lv:g})),all=[...L.filter(x=>x.pid!==pidOf()),me].sort((a,b)=>b.v-a.v),i=all.indexOf(me);
+ const L=(RNKD&&RNKD[kind])||(WS.ranks&&WS.ranks[kind])||RKN.map(([k,lv,g])=>({n:t('rk_'+k),v:kind==='lv'?lv:g})),all=[...L.filter(x=>x.pid!==pidOf()),me].sort((a,b)=>b.v-a.v),i=all.indexOf(me);
  const out=all.slice(0,10).map((x,j)=>`${j+1}. ${x.me?'★ ':''}${x.n} · ${fmt(x.v)}`);if(i>=10)out.push(`... ${i+1}. ★ ${me.n} · ${fmt(me.v)}`);return out.join('\n');}
+/* online rankings (SAT-ONLINE-055): online the clerk's lists are real. Every player's level and gold go to
+   ranks/{lv|gold}/{uid} {v, n, t} (each writes its own, at most every 2 minutes, when they changed); the board shows the
+   real players' top 10 among the canon rankers, refreshed every 90 s. Offline it is as it was. */
+var RNKD=null,rkT=-1e9,rkPutT=-1e9,rkLast='';
+function rkOnline(){return !!(FB&&netUser&&NET&&NETTR&&NETTR.kind==='firebase');}
+function rankTick(live){if(!live||!rkOnline()||!S||S.__demo)return;const now=performance.now();
+ if(now-rkPutT>120000){rkPutT=now;const sig=(S.lv|0)+'|'+Math.floor(S.gold);if(sig!==rkLast){rkLast=sig;const D=FB.m.database,u={},n=String(netId||S.look.n||'?').slice(0,24);
+  u['ranks/lv/'+NET.uid]={v:S.lv|0,n,t:D.serverTimestamp()};u['ranks/gold/'+NET.uid]={v:Math.max(0,Math.floor(S.gold)),n,t:D.serverTimestamp()};D.update(D.ref(FB.db),u).catch(()=>{rkLast='';});}}
+ if(now-rkT>90000){rkT=now;Promise.all([rankTop('lv'),rankTop('gold')]).then(([lv,gold])=>{RNKD={lv:rankMix('lv',lv),gold:rankMix('gold',gold)};}).catch(()=>{});}}
+function rankTop(k){const D=FB.m.database,ref=D.ref(FB.db,'ranks/'+k),q=D.limitToLast&&D.orderByChild?D.query(ref,D.orderByChild('v'),D.limitToLast(10)):ref;
+ return D.get(q).then(s=>{const v=s.val()||{},a=[];for(const u in v)if(v[u]&&typeof v[u].v==='number')a.push({pid:u===NET.uid?pidOf():'u:'+u,n:Satisfy.chat.clean(v[u].n,24)||'?',v:v[u].v});return a.sort((x,y)=>y.v-x.v).slice(0,10);});}
+function rankMix(kind,real){return [...real,...RKN.map(([k,lv,g])=>({n:t('rk_'+k),v:kind==='lv'?lv:g}))];}
+window.__GK2={list:k=>rankList(k),now:()=>{rkT=-1e9;rkPutT=-1e9;rkLast='';},data:()=>RNKD}; // test hook
 function legendLines(){const L=WS.legends||{};return ['pagma','braham','muller'].map(k=>`${t('lg_'+k)}: ${L[k]?L[k].n:t('lgNone')}`).join('\n');}
 // each ranking opens straight on its list, titled "Rankings Clerk: Wealth" and so on
 function rankerOpts(){const back=()=>shopD('ranker','rk_hi'),hd=k=>t(k).replace(/^\[|\]$/g,'').split(/:\s*/).pop(),D=(k,...ls)=>dialog('ranker',ls.map(l=>[t('ranker')+': '+hd(k),l]),back);return [
@@ -4312,6 +4325,7 @@ function netTick(){NET.tick();const live=netLive();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
  if(TRADE)TRADE.tick();
+ rankTick(live);
  if(GUILD)guildTick();
  if(PRAID)PRAID.tick();
  mobTick(live);

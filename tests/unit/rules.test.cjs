@@ -246,6 +246,14 @@ test('arena seasons: your own rating only; a first entry near 1000; then one win
   assert.equal(u.$other['.validate'], false);
 });
 
+test('rankings (SAT-ONLINE-055): each player writes only its own level and gold; the lists are indexed on v', () => {
+  const r = rules.ranks.$kind;
+  assert.equal(r['.validate'], "$kind === 'lv' || $kind === 'gold'");
+  assert.deepEqual(r['.indexOn'], ['v']);
+  assert.equal(r.$uid['.write'], 'auth != null && auth.uid === $uid');
+  assert.equal(r.$uid.$other['.validate'], false);
+});
+
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing
 // else here parses the expressions. Merging two rules files by hand once lost one; check every expression before a deploy.
 function exprProblem(e) {

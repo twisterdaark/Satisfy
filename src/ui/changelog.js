@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20b', ver: '0.47', d: '2026-10-20',
+      ar: ['أونلاين: ترتيب اللفل والفلوس عند موظف الترتيب في رينهارت بقى فيه اللاعبين الحقيقيين جنب أبطال الرواية'],
+      en: ['Online: the level and wealth rankings at the clerk in Reinhardt now list the real players among the heroes of the novel'] },
     { v: '2026-10-19u', ver: '0.44', d: '2026-10-19',
       ar: ['أونلاين: مواسم الساحة: كل مبارزة أونلاين بتغير تقييمك في موسم الشهر ده (بتبدأ من 1000)، وزرار "الساحة" في قايمة اللاعبين بيوريك أحسن 10 وتقييمك',
         'كل شهر جديد موسم جديد'],
