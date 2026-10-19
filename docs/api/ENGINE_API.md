@@ -294,6 +294,7 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, fix** (SAT-ONLINE-024 review, #55): `PlayerPublic.rs`, the leader's roster (accepted uids); members elect only from it, so a stranger who writes the party id can't vote. `party.roster()`, `party.follow()` (the ids to follow), `transport.party(ids)` takes several ids: far-apart members don't lose each other mid-election. Presence + rules field (redeploy).
 - **api 1, fix** (SAT-ONLINE-021 review, #51): pings carry a signed y (`n` >= -4096 in the rules), so a ping in the north lands where it was made.
 - **api 1, fix** (SAT-ONLINE-019 review, #49): `mapV()` is hashed at load, from the generated world, before a save replays uprooted stumps (`WS.roots`), so players who uprooted different stumps still match.
 - **api 1, fix** (SAT-ONLINE-010 review, #30): a tab another session replaced saves once, at that moment, then never again (`netNoSave`: no autosave, no save on quit); *Play here* only reloads.

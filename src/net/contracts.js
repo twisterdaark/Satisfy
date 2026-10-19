@@ -40,7 +40,9 @@
   // PlayerPublic.duel: a duel id from Satisfy.duel and the player's duel HP (0..100)
   var DUEL_RE = /^d_[A-Za-z0-9_-]{1,40}:(100|[1-9]?[0-9])$/;
   var MV_RE = /^[0-9a-f]{8}$/; // PlayerPublic.mv (SAT-ONLINE-019)
-  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 't'];
+  // PlayerPublic.rs (review #55): a party leader's roster, the uids it accepted, space-separated (at most MAX - 1)
+  var RS_RE = /^[A-Za-z0-9:_.-]{1,128}( [A-Za-z0-9:_.-]{1,128}){0,3}$/;
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'rs', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
   // S.uid (the local item-instance counter) is private too, but its name collides with the public
   // account `uid`, so it is checked by value in the tests instead of listed here.
@@ -136,6 +138,7 @@
       mv: typeof ctx.mv === 'string' && MV_RE.test(ctx.mv) ? ctx.mv : null,
       hp: typeof ctx.hp === 'number' && isFinite(ctx.hp) ? Math.max(0, Math.min(100, Math.round(ctx.hp / 5) * 5)) : null,
       em: EMOTES.indexOf(ctx.em) >= 0 ? ctx.em : null,
+      rs: typeof ctx.rs === 'string' && RS_RE.test(ctx.rs) ? ctx.rs : null,
       t: ctx.t || 0,
     };
   }
@@ -168,6 +171,7 @@
     if (o.mv !== undefined && o.mv !== null && !(typeof o.mv === 'string' && MV_RE.test(o.mv))) e.push('mv');
     if (o.hp !== undefined && o.hp !== null && !(Number.isInteger(o.hp) && o.hp >= 0 && o.hp <= 100)) e.push('hp');
     if (o.em !== undefined && o.em !== null && EMOTES.indexOf(o.em) < 0) e.push('em');
+    if (o.rs !== undefined && o.rs !== null && !(typeof o.rs === 'string' && RS_RE.test(o.rs))) e.push('rs');
     return { ok: e.length === 0, errors: e };
   }
 

@@ -19,7 +19,10 @@
  *
  * Leader election (SAT-ONLINE-024, doc §35 U049): when the leader has been gone LEAD_MS and at least two members
  * remain, every member picks the same new leader, the remaining member with the lowest uid, and the party moves to
- * that leader's id. A leader that comes back to find its members in another party drops its own and takes that
+ * that leader's id. The electorate is the roster the leader publishes (PlayerPublic.rs), so a stranger who writes
+ * the party id into its own presence can't vote; members also follow every id the party could move to
+ * (follow()), so members far apart don't lose each other mid-election (review #55).
+ * A leader that comes back to find its members in another party drops its own and takes that
  * party's invite back. A member left alone still dissolves after GRACE_MS, as before.
  *
  * Exposes `Satisfy.party.create({ presence, uid, now?, max?, blocked?, store?, wall? })`.
@@ -49,7 +52,8 @@
     var recent = new Map(); // leader: uid -> wall time they dropped out; invited back until REJOIN_MS
     var memo = null;        // member: {id, leader, t}: auto-accept that leader's invite to that party
     var savedSig = '', savedAt = -1e15;
-    var mates = [];         // member: the other members seen while the leader was there (the electorate)
+    var mates = [];         // member: the other members, from the leader's published roster (the electorate)
+    var mateSeen = new Map(); // member: uid -> when we last saw that mate with us (out of sight a moment still counts)
     function save() {
       if (!store || !id) return;
       var s = JSON.stringify({ id: id, leader: leader, members: leader === self ? Array.from(accepted.keys()).concat(Array.from(recent.keys())) : [] });
@@ -73,7 +77,7 @@
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function byUid(uid) { var hit = null; P.remotes().forEach(function (r) { if (r.uid === uid) hit = r; }); return hit; }
-    function clear() { id = null; leader = null; accepted.clear(); outgoing.clear(); recent.clear(); leaderOk = 0; savedSig = ''; mates = []; }
+    function clear() { id = null; leader = null; accepted.clear(); outgoing.clear(); recent.clear(); leaderOk = 0; savedSig = ''; mates = []; mateSeen.clear(); }
     function send(type, to) { P.send(type, { to: to, party: id }); }
 
     P.on(function (ev) {
@@ -123,6 +127,17 @@
       id: function () { return id; },
       leader: function () { return leader; },
       isLeader: function () { return !!id && leader === self; },
+      /** Leader: the members it accepted, as PlayerPublic.rs (members vote only from this list), or null. */
+      roster: function () { return id && leader === self && accepted.size ? Array.from(accepted.keys()).sort().join(' ') : null; },
+      /**
+       * The party ids whose members to follow (transport.party): ours, and for a member also every id an election
+       * could move the party to, so members who only see each other through the party keep doing so (review #55).
+       */
+      follow: function () {
+        if (!id) return [];
+        if (leader === self) return [id];
+        return [id].concat(mates.concat([self]).sort().map(idFor)).filter(function (x, i, a) { return a.indexOf(x) === i; });
+      },
       /** Leader (or a player not in a party) invites a remote player. Returns 'sent' or a reason. */
       invite: function (remote) {
         if (!remote || !remote.uid || remote.uid === self) return 'bad';
@@ -230,12 +245,18 @@
           var L = byUid(leader);
           if (L && L.party === id) {
             leaderOk = t;
-            mates = api.members().filter(function (m) { return !m.self && !m.leader; }).map(function (m) { return m.uid; });
+            // the electorate is the leader's own roster, not whoever writes our party id into their presence (#55)
+            mates = (typeof L.rs === 'string' && L.rs ? L.rs.split(' ') : []).filter(function (u) { return u !== self; });
             save();
           }
-          // who is still around from the party: a mate may already have moved on to the elected leader's id
+          // who is still around from the party: a mate may already have moved on to the elected leader's id (we follow
+          // those ids too), and one we lost sight of a moment ago (a blip, a re-centred query) still counts for LEAD_MS
           var ids = mates.concat([self]).map(idFor);
-          var rest = mates.filter(function (u) { var r = byUid(u); return r && (r.party === id || ids.indexOf(r.party) >= 0); }).concat([self]);
+          var rest = mates.filter(function (u) {
+            var r = byUid(u);
+            if (r) { if (r.party === id || ids.indexOf(r.party) >= 0) { mateSeen.set(u, t); return true; } return false; }
+            return mateSeen.has(u) && t - mateSeen.get(u) < LEAD_MS;
+          }).concat([self]);
           if (L && L.party === id) { /* the leader is here */ }
           else if (rest.length >= 2 && t - leaderOk > LEAD_MS) {
             // elect: everyone left computes the same leader (lowest uid), so the party moves as one
