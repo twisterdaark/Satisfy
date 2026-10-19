@@ -109,7 +109,7 @@
    * Build the public view of the local player.
    * @param {object} S durable state
    * @param {object} P volatile player state
-   * @param {{handle?:string, zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, duel?:string, mv?:string, hp?:number, em?:string, role?:string, anim?:string, arm?:number, t?:number}} [ctx]
+   * @param {{handle?:string, hideLv?:boolean, zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, duel?:string, mv?:string, hp?:number, em?:string, role?:string, anim?:string, arm?:number, t?:number}} [ctx]
    *   duel: "<duel id>:<duel HP>" while in a duel's countdown or fight, so others can watch (U034)
    * @returns {PlayerPublic}
    */
@@ -123,7 +123,7 @@
       handle: str(ctx.handle || L.n, LIMITS.handle), // online: the account ID (SAT-ONLINE-026); otherwise the character name
       look: { hair: L.hair | 0, hc: L.hc | 0, skin: L.skin | 0, top: L.top | 0 },
       cls: str(S.cls || 'novice', 16),
-      lv: S.lv | 0,
+      lv: ctx.hideLv ? 0 : S.lv | 0, // 0 = the player hides their level (SAT-ONLINE-026)
       title: str(S.title, LIMITS.title),
       zone: str(ctx.zone, 24),
       room: ctx.room || null,
@@ -157,7 +157,7 @@
     if (!o.look || typeof o.look !== 'object') e.push('look');
     else ['hair', 'hc', 'skin', 'top'].forEach(function (f) { if (!Number.isInteger(o.look[f]) || o.look[f] < 0 || o.look[f] > 31) e.push('look.' + f); });
     if (typeof o.cls !== 'string') e.push('cls');
-    if (!Number.isInteger(o.lv) || o.lv < 1 || o.lv > 999) e.push('lv');
+    if (!Number.isInteger(o.lv) || o.lv < 0 || o.lv > 999) e.push('lv');
     if (!Number.isInteger(o.x) || !Number.isInteger(o.y)) e.push('position');
     var w = opts && opts.world;
     if (w && (o.x < 0 || o.y < -(w.north || 0) * w.tile || o.x >= w.w * w.tile || o.y >= w.h * w.tile)) e.push('out of world'); // rows -north..-1 are the north (SAT-WORLD-003)

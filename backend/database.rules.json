@@ -33,7 +33,7 @@
               ".validate": "newData.isString() && newData.val().length <= 16"
             },
             "lv": {
-              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 999"
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
             },
             "title": {
               ".validate": "newData.isString() && newData.val().length <= 32"
@@ -155,6 +155,25 @@
           "from": { ".validate": "newData.val() === auth.uid" },
           "h": { ".validate": "newData.isString() && newData.val() === root.child('accountIds').child(auth.uid).val()" },
           "text": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "news": {
+      "$world": {
+        ".read": "auth != null",
+        ".indexOn": ["t"],
+        ".validate": "$world === 'satisfy'",
+        "$id": {
+          ".write": "auth != null && ((!data.exists() && newData.child('from').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('t').val() < now - 600000))",
+          ".validate": "newData.hasChildren(['from', 'h', 'k', 't'])",
+          "from": { ".validate": "newData.val() === auth.uid" },
+          "h": { ".validate": "newData.isString() && newData.val() === root.child('accountIds').child(auth.uid).val()" },
+          "k": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z]{2,16}$/)" },
+          "p": {
+            "$f": { ".validate": "($f === 'lv' || $f === 'f' || $f === 'rk') && newData.isNumber()" }
+          },
           "t": { ".validate": "newData.val() === now" },
           "$other": { ".validate": false }
         }

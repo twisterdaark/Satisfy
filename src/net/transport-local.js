@@ -11,16 +11,18 @@
 
   function local(name) {
     var ch = new root.BroadcastChannel(name || 'satisfy-net-v1');
-    var handler = null, wch = null; // wch: world chat (SAT-ONLINE-026), its own channel
-    function wc() { if (!wch) wch = new root.BroadcastChannel((name || 'satisfy-net-v1') + '-world'); return wch; }
+    var handler = null, feeds = {}; // world feeds (SAT-ONLINE-026): chat, news; each on its own channel
+    function fc(kind) { if (!feeds[kind]) feeds[kind] = new root.BroadcastChannel((name || 'satisfy-net-v1') + '-' + kind); return feeds[kind]; }
     ch.onmessage = function (e) { if (handler) handler(e.data); };
     return {
       kind: 'local',
       send: function (env) { try { ch.postMessage(env); } catch (e) { /* closed or not cloneable */ } },
       onmessage: function (fn) { handler = fn; },
-      world: function (fn) { wc().onmessage = function (e) { fn(e.data); }; },
-      sayWorld: function (m) { try { wc().postMessage({ from: m.from, h: m.h, text: m.text }); } catch (e) { /* closed */ } },
-      close: function () { handler = null; try { ch.close(); if (wch) wch.close(); } catch (e) { /* ignore */ } },
+      feedOn: function (kind, fn) { fc(kind).onmessage = function (e) { fn(e.data); }; },
+      feedSay: function (kind, m) { try { fc(kind).postMessage(JSON.parse(JSON.stringify(m))); } catch (e) { /* closed */ } },
+      world: function (fn) { this.feedOn('chat', fn); },
+      sayWorld: function (m) { this.feedSay('chat', { from: m.from, h: m.h, text: m.text }); },
+      close: function () { handler = null; try { ch.close(); for (var k in feeds) feeds[k].close(); } catch (e) { /* ignore */ } },
     };
   }
 

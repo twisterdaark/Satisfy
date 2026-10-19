@@ -217,27 +217,31 @@
       /** Follow everyone whose presence says they are in party `id` (null: stop), on top of the range query. */
       party: partyQuery,
       /**
-       * World chat (SAT-ONLINE-026): chat/{world}/{pushId} = {from, h, text, t}; the rules check from = auth uid and
-       * h = the account ID. world(fn) gets the last lines and every new one (older than 5 min skipped); sayWorld also
-       * deletes up to 10 lines older than 10 min so the list stays short.
+       * World feeds (SAT-ONLINE-026): chat/{world} (world chat: {from, h, text, t}) and news/{world} (world
+       * announcements: {from, h, k, p?, t}). The rules check from = auth uid and h = the account ID. feedOn(kind, fn)
+       * gets the last lines and every new one (older than 5 min skipped); feedSay also deletes up to 10 lines older
+       * than 10 min so each list stays short.
        */
-      world: function (fn) {
-        var ref = D.ref(db, 'chat/' + o.world), q = D.limitToLast ? D.query(ref, D.limitToLast(20)) : ref;
+      feedOn: function (kind, fn) {
+        var ref = D.ref(db, kind + '/' + o.world), q = D.limitToLast ? D.query(ref, D.limitToLast(20)) : ref;
         offs.push(D.onChildAdded(q, function (s) {
           var m = s.val();
-          if (!m || typeof m !== 'object' || typeof m.from !== 'string' || typeof m.text !== 'string') return;
+          if (!m || typeof m !== 'object' || typeof m.from !== 'string') return;
           if (typeof m.t === 'number' && Date.now() + offset - m.t > 300000) return;
-          fn({ from: m.from, h: m.h, text: m.text });
+          fn(m);
         }));
       },
-      sayWorld: function (m) {
+      feedSay: function (kind, m) {
         if (closed) return;
-        var ref = D.ref(db, 'chat/' + o.world);
-        D.push(ref, { from: o.uid, h: String(m.h || ''), text: String(m.text || '').slice(0, 120), t: D.serverTimestamp() }).catch(fail);
+        var ref = D.ref(db, kind + '/' + o.world), v = { from: o.uid, t: D.serverTimestamp() };
+        for (var k in m) if (k !== 'from' && k !== 't') v[k] = m[k];
+        D.push(ref, v).catch(fail);
         if (D.limitToFirst) D.get(D.query(ref, D.orderByChild('t'), D.endAt(Date.now() + offset - 600000), D.limitToFirst(10))).then(function (s) {
-          s.forEach(function (c) { D.remove(D.ref(db, 'chat/' + o.world + '/' + c.key)).catch(function () { /* ignore */ }); });
+          s.forEach(function (c) { D.remove(D.ref(db, kind + '/' + o.world + '/' + c.key)).catch(function () { /* ignore */ }); });
         }).catch(function () { /* ignore */ });
       },
+      world: function (fn) { this.feedOn('chat', fn); },
+      sayWorld: function (m) { this.feedSay('chat', { h: String(m.h || ''), text: String(m.text || '').slice(0, 120) }); },
       close: function () {
         if (closed) return;
         closed = true;

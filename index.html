@@ -79,7 +79,10 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #emoW{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*22);display:flex;gap:calc(var(--u)*.8);padding:calc(var(--u)*.6);pointer-events:auto}#emoW button{width:auto;padding:0 calc(var(--u)*1);font-size:calc(var(--u)*1.5)}
 #pctx .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.6)}#pctxI{color:var(--muted,#c8d0e0)}
 #partyInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
-#netB{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*.6);padding:calc(var(--u)*.3) calc(var(--u)*1.2);font-size:calc(var(--u)*1.5);color:#9fe0ff;white-space:nowrap}
+#netB{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*.6);padding:calc(var(--u)*.3) calc(var(--u)*1.2);font-size:calc(var(--u)*1.5);color:#9fe0ff;white-space:nowrap;pointer-events:auto;cursor:pointer}
+#plW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*4.4);padding:calc(var(--u)*.8) calc(var(--u)*1.4);width:calc(var(--u)*34);max-height:calc(var(--u)*30);overflow-y:auto;font-size:calc(var(--u)*1.5);pointer-events:auto;z-index:45}
+#plL div{padding:calc(var(--u)*.25) 0;border-bottom:1px solid rgba(255,255,255,.12)}#plL div.me{color:#ffe7a8}
+#plW .row{display:flex;justify-content:center;margin-top:calc(var(--u)*.6)}#plW .row button{width:auto;padding:0 calc(var(--u)*1)}
 #toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*13);display:grid;gap:calc(var(--u)*.4);justify-items:center;width:80%}
 .toast{background:rgba(8,14,30,.85);border:1px solid rgba(127,180,255,.5);padding:calc(var(--u)*.3) calc(var(--u)*1.1);border-radius:calc(var(--u)*.4);font-weight:700;animation:tin .25s ease-out}
 .toast.warn{border-color:#ff7a6a;color:#ffd0c8}.toast.good{border-color:var(--gold);color:#ffe7a8}
@@ -393,7 +396,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
       <div id="loot"></div>
       <div id="evbar" class="sys" hidden></div>
       <div id="sgbar" class="sys" hidden></div>
-      <div id="netB" class="sys" hidden></div>
+      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button></div></div>
       <div id="netRepW" class="sys" hidden><div id="netRepT"></div><div class="row"><button id="netRepBtn" data-act="netTakeBack"></button></div></div>
       <div id="duelInv" class="sys" hidden><div id="duelInvT"></div><div class="row"><button id="duelBtnA" data-act="dAccept"></button><button id="duelBtnB" data-act="dDecline"></button><button id="duelBtnC" class="blk" data-act="dBlock" data-i18n="pBlock"></button></div></div>
       <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
@@ -1203,7 +1206,7 @@ let auT=0;function updateAuction(dt){if((auT-=dt)<=0){auT=5;auTick();}}
 // A world boss on the peak north of Reinhardt. It breathes fire in a cone it telegraphs first, slams the ground, and once
 // killed stays dead for half an hour; that time lives in the shared world state (WS.wb) so every player sees the same
 // dragon. Online the server owns its health so everyone who joins the fight hits the same dragon.
-function dragonDown(m){WS.wb=WS.wb||{};WS.wb.trauka=Date.now()+MT.trauka.wb*1000;giveTitle('dslayer');setTimeout(()=>announce(t('drDown',{n:t('pname')})),500);save(true);}
+function dragonDown(m){WS.wb=WS.wb||{};WS.wb.trauka=Date.now()+MT.trauka.wb*1000;giveTitle('dslayer');setTimeout(()=>annW('drDown'),500);save(true);}
 function updateDragon(dt){const m=mons.find(m=>m.type==='trauka');if(!m||m.dead||mode==='dead')return;
  if(!(m.eng>0)){m.br=0;return;}m.brc=(m.brc===undefined?4:m.brc)-dt;
  if(m.br>0){m.br-=dt;m.stun=Math.max(m.stun||0,.05);if(m.br>0)return;const a=m.ba,hx=m.x+Math.cos(a)*30,hy=m.y-40+Math.sin(a)*14;
@@ -1249,7 +1252,7 @@ function updateArena(dt){if(!ARN||mode==='dead')return;
  if(!m.dead){m.eng=99;m.agg=1;return;}
  ARN.r++;ARN.m=null;const g=Math.round(400*ARN.r*(1+S.lv/40));S.gold+=g;toast(t('arnWon',{n:ARN.r,g}),'good');SFX.quest();
  if(ARN.r>=ARNK.length)return arenaWin();P.hp=maxHP();P.mp=maxMP();ARN.wait=3;}
-function arenaWin(){giveTitle('champ');S.arW=(S.arW||0)+1;gainXP(Math.round(S.lv*S.lv*4));WS.arena={day:today(),pid:pidOf(),n:S.look.n};announce(t('arnChamp',{n:t('pname')}));SFX.legendary();flash();leaveArena(3.5);}
+function arenaWin(){giveTitle('champ');S.arW=(S.arW||0)+1;gainXP(Math.round(S.lv*S.lv*4));WS.arena={day:today(),pid:pidOf(),n:S.look.n};annW('arnChamp');SFX.legendary();flash();leaveArena(3.5);}
 function arenaLose(){const r=ARN.r;P.hp=Math.max(1,Math.round(maxHP()*.3));if(ARN.m)ARN.m.dead=true;toast(t('arnLose',{n:r}),'warn');SFX.deny();leaveArena(1.2);}
 function leaveArena(delay){const A=ARN;A.wait=99;setTimeout(()=>{mons=mons.filter(m=>!m.arena);ARN=null;fadeTo(()=>{P.x=A.ret.x;P.y=A.ret.y;camSnap=true;hudDirty=true;});save(true);},delay*1000);}
 
@@ -1294,7 +1297,7 @@ function updateTower(dt){if(!TWR||mode==='dead')return;
  let alive=0;for(const m of TWR.ms)if(!m.dead){m.eng=99;m.agg=1;alive++;}if(!alive)twClear();}
 function twClear(){const f=TWR.f,boss=f%10===0,g=Math.round(twL(f)*10*(boss?8:1));TWR.ms=null;S.gold+=g;toast(t('twrClear',{n:f,g}),'good');SFX.quest();
  if(f>(S.twB||0)){S.twB=f;if(f%5===0){addMat('mstone',boss?3:1);if(boss)addMat('estone',2);toast(t('twrStone',{n:boss?3:1}),'good');}if(boss){const k=GEMK[rand()*GEMK.length|0];addMat(k,1);SFX.rare();}}
- if(!WS.tower||f>WS.tower.f){WS.tower={f,n:S.look.n||t('pname'),pid:pidOf()};if(boss)announce(t('twrRec',{n:t('pname'),f}));}
+ if(!WS.tower||f>WS.tower.f){WS.tower={f,n:S.look.n||t('pname'),pid:pidOf()};if(boss)annW('twrRec',{f});}
  hudDirty=true;save(true);
  dialog('towerK',[t('twrNext',{n:f+1,lv:twL(f+1)})],null,[{l:t('twrUp'),f:()=>{TWR.f++;P.hp=maxHP();P.mp=maxMP();TWR.wait=2.5;}},{l:t('twrOut'),f:()=>leaveTower(.3)}]);}
 function towerLose(){P.hp=Math.max(1,Math.round(maxHP()*.3));(TWR.ms||[]).forEach(m=>m.dead=true);toast(t('twrLose',{n:TWR.f}),'warn');SFX.deny();leaveTower(1.2);}
@@ -1320,7 +1323,7 @@ const petB=k=>S.pet===k&&(S.pets||{})[k]?PETS[k].b*(1+(petLv(k)-1)*.1)*(S.tl.tam
 function petXP(k,n){if(!k||!(S.pets||{})[k]||n<=0)return;const l0=petLv(k);S.petx=S.petx||{};S.petx[k]=(S.petx[k]||0)+n;const l1=petLv(k);
  if(l1>l0){toast(t(l1===5||l1===15?'petGrow':'petUp',{n:t('pt_'+k),l:l1}),'good');SFX.level();if(PET)vfx('spawn',PET.x,PET.y,{color:'#f2c14e'});if(l1===10)setTimeout(()=>toast(t('petFight',{n:t('pt_'+k)}),'good'),600);hudDirty=true;sbSig='';}}
 function petKill(m,b){if(!S.pet)return;petXP(S.pet,Math.max(1,Math.round(m.lv/10))*(b.boss?10:1));
- if(m.type==='ypriest'&&!m.tower&&!(S.pets||{}).noe&&rand()<.05){S.pets=S.pets||{};S.pets.noe=1;announce(t('noeDrop',{n:t('pname')}));SFX.legendary();setTimeout(()=>setPet('noe'),800);}}
+ if(m.type==='ypriest'&&!m.tower&&!(S.pets||{}).noe&&rand()<.05){S.pets=S.pets||{};S.pets.noe=1;annW('noeDrop');SFX.legendary();setTimeout(()=>setPet('noe'),800);}}
 function petFeed(k){const f=(S.mats.gfish||0)>0?'gfish':(S.mats.fish||0)>0?'fish':null;if(!f){SFX.deny();return toast(t('petNoFish'),'warn');}S.mats[f]--;petXP(k,f==='gfish'?150:25);toast(t('petAte',{n:t('pt_'+k)}),'good');save(true);}
 function rideOpt(k){return (S.mounts||{})[k]?healOpt():[{l:t('oBuyRide',{n:t('mt_'+k),g:MOUNTS[k].g}),pv:{ride:k},f:()=>buyRide(k)}];}
 function petOpt(k){return (S.pets||{})[k]?[]:[{l:t('oBuyPet',{n:t('pt_'+k),g:PETS[k].g}),pv:{pet:k},f:()=>buyPet(k)}];}
@@ -1929,7 +1932,7 @@ stage.addEventListener('mousedown',e=>{if(e.button===2){if(mode==='play'&&!e.tar
  if(mode==='forge'&&MG&&!MG.done){e.preventDefault();strike();return;}
  if(mode==='dialog'){advance();return;}
  if(mode==='cut'){if(SM)SM.done();return;}
- if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar')){stage.focus();const b=stage.getBoundingClientRect();const mx=(e.clientX-b.left)/SC+camXf,my=(e.clientY-b.top)/SC+camYf;if(NET&&e.altKey){netPing(mx,my);return;}if(NET&&pctxClick(mx,my))return;const dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);}});
+ if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar')){stage.focus();const b=stage.getBoundingClientRect();const mx=(e.clientX-b.left)/SC+camXf,my=(e.clientY-b.top)/SC+camYf;if(NET&&e.altKey){netPing(mx,my);return;}if(NET&&pctxClick(mx,my,e.ctrlKey||e.shiftKey))return;const dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);}});
 function onKey(c){
  if(c==='Tab'&&(mode==='play'||mode==='cut')){toggleQuest();return;}
  if(mode==='play'){
@@ -2066,12 +2069,12 @@ function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);toast(t('boss
 const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','lgloves','lboots','cring','ihelm','igloves','iboots','parmor','mring'];
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.4:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.25:.1)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.dead=true;if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='bknight'&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord')setTimeout(()=>announce(t('evBossDown',{n:t('pname')})),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;rareDrop(m,b);petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y))dunBossDown(m);{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.dead=true;if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='bknight'&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord')setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;rareDrop(m,b);petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y))dunBossDown(m);{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  (b.drop||[]).forEach(([k,p])=>{if(rand()<p)addMat(k,1);});
  if(m.lv>=20&&!m.tmp){if(b.boss)addMat('estone',1+(m.lv/50|0));else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
  S.kills[m.type]=(S.kills[m.type]||0)+1;qEvent('kill',m.type);
- if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;announce(t('annGuard',{n:t('pname'),lv:S.lv}));}giveTitle('forest');S.raid=0;}
+ if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;annW('annGuard',{lv:S.lv});}giveTitle('forest');S.raid=0;}
  if(m.type==='gchief'){shake=.3;giveTitle('chief');}
  if((S.kills.rabbit||0)+(S.kills.goblin||0)>=40)giveTitle('hunter');
  hudDirty=true;save(true);}
@@ -2484,7 +2487,7 @@ const ptsLv=()=>isLeg()?15:PTS_LV;
 function legendReset(){S.lv=1;S.xp=0;S.st={str:10,sta:10,agi:10,int:10,dex:10};S.pts=0;S.adv=0;if(P){P.hp=maxHP();P.mp=maxMP();}hudDirty=true;}
 function becomeSaint(){const L=WS.legends||(WS.legends={});if(L.muller&&L.muller.pid!==pidOf())return;L.muller={pid:pidOf(),n:S.look.n};
  S.cls='saint';S.bar=null;legendReset();sbSig='';SFX.legendary();flash();hudDirty=true;save(true);
- dialog('mswordN',['saS1','saS2','legReset','saPerk'],()=>{announce(t('annSaint',{n:t('pname')}));checkSkills();});}
+ dialog('mswordN',['saS1','saS2','legReset','saPerk'],()=>{annW('annSaint');checkSkills();});}
 function soulAct(){const L=WS.legends||(WS.legends={}),own=L.braham;
  if(S.cls==='braham')return dialog('bsoulN',['bsDone']);
  if(own&&own.pid!==pidOf())return dialog('bsoulN',[t('bsTaken',{n:own.n})]);
@@ -2495,10 +2498,10 @@ function soulAct(){const L=WS.legends||(WS.legends={}),own=L.braham;
 // the legend is one per world like Pagma's: WS.legends.braham is the shared record (online the server grants it atomically)
 function becomeBraham(){const L=WS.legends||(WS.legends={});if(L.braham&&L.braham.pid!==pidOf())return;L.braham={pid:pidOf(),n:S.look.n};
  S.cls='braham';S.bar=null;legendReset();sbSig='';SFX.legendary();flash();hudDirty=true;save(true);
- dialog('bsoulN',['brS1','brS2','legReset','brPerk'],()=>{announce(t('annBraham',{n:t('pname')}));checkSkills();});}
+ dialog('bsoulN',['brS1','brS2','legReset','brPerk'],()=>{annW('annBraham');checkSkills();});}
 function becomePagma(){const L=WS.legends||(WS.legends={});if(L.pagma&&L.pagma.pid!==pidOf())return;L.pagma={pid:pidOf(),n:S.look.n};
  S.cls='pagma';S.bar=null;legendReset();sbSig='';SFX.legendary();flash();hudDirty=true;save(true);
- dialog('pbookN',['pgS1','pgS2','legReset','pgPerk'],()=>{announce(t('annPagma',{n:t('pname')}));checkSkills();});}
+ dialog('pbookN',['pgS1','pgS2','legReset','pgPerk'],()=>{annW('annPagma');checkSkills();});}
 function drawShrine(o){const x=Math.round(o.x),y=Math.round(o.y),pul=.5+Math.sin(gTime*3)*.5;
  if(o.k==='msword'){const has=!(WS&&WS.legends&&WS.legends.muller);ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(x-11,y-1,22,2);R(ctx,x-10,y-7,20,7,'#6a6e78');R(ctx,x-10,y-7,20,1,'#8a909a');R(ctx,x-7,y-10,14,3,'#7a808a');
   if(has){ctx.globalAlpha=.2+pul*.25;ctx.fillStyle='#bfe0ff';ctx.beginPath();ctx.ellipse(x,y-22,8,16,0,0,7);ctx.fill();ctx.globalAlpha=1;R(ctx,x-1,y-34,3,24,'#dfe8f2');R(ctx,x,y-34,1,24,'#ffffff');R(ctx,x-5,y-36,11,2,'#c8a050');R(ctx,x-1,y-42,3,6,'#6a4a2a');R(ctx,x-1,y-43,3,1,'#c8a050');if(rand()<.2)fx.push({x:x+(rand()-.5)*10,y:y-30,vx:0,vy:-12,t:.6,c:'#bfe0ff',fl:1});}
@@ -2701,7 +2704,7 @@ function drawForgeView(){const c=$('mgv'),g=c.getContext('2d');g.imageSmoothingE
   g.lineWidth=2;g.strokeStyle='#ffffff';g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Math.cos(A(p))*(rr+5),cy+Math.sin(A(p))*(rr+5));g.stroke();g.lineWidth=1;R(g,cx-2,cy-2,4,4,'#ffffff');}
  MG.steam.forEach(s=>{g.globalAlpha=Math.max(0,s.t*.6);R(g,s.x,s.y,3,3,'#e8eef4');});g.globalAlpha=1;}
 function finishMG(){const rc=MG.rc;
- const q=mgScore()+.025*(S.smith-1)+S.patience+(S.focus?.05:0)+(rand()-.5)*.08;let r=Math.min(craftRate(q),maxRating());S.focus=0;if(r>=3)setTimeout(()=>announce(t('craftLeg',{n:t('pname'),r:t('r'+r)})),300);
+ const q=mgScore()+.025*(S.smith-1)+S.patience+(S.focus?.05:0)+(rand()-.5)*.08;let r=Math.min(craftRate(q),maxRating());S.focus=0;if(r>=3)setTimeout(()=>annW('craftLeg',{rk:r}),300);
  let it=null;
  if(rc.slot==='x'){S.arrows[r]++;S.arrowsMade++;}
  else{it=mkItem(rc.id,r);if(P){vfx('forge',P.x,P.y-8);vfx('loot',P.x,P.y,{rarity:r});}
@@ -2721,7 +2724,7 @@ function finishMG(){const rc=MG.rc;
   nm.classList.add('burst');$('rextra').hidden=false;b.hidden=false;b.focus();
   if(it&&r>=3)askName(it);
   if(S.cls==='pagma'){const g=[0,0,2,4,25][r]||0;if(g){S.bonus+=g;setTimeout(()=>toast(t('pgStat',{n:g}),'good'),500);}}
-  if(r===4){SFX.legendary();flash();$('rays').classList.add('on');if(!S.firstLeg){S.firstLeg=1;announce(t('annLeg',{n:t('pname')}));}if(isSm())giveTitle('smith');for(let k=0;k<70;k++)fx.push({x:ANVIL.tx*TS+8,y:ANVIL.ty*TS,vx:(rand()-.5)*170,vy:-rand()*170,t:1,c:'#ffd24a'});}
+  if(r===4){SFX.legendary();flash();$('rays').classList.add('on');if(!S.firstLeg){S.firstLeg=1;annW('annLeg');}if(isSm())giveTitle('smith');for(let k=0;k<70;k++)fx.push({x:ANVIL.tx*TS+8,y:ANVIL.ty*TS,vx:(rand()-.5)*170,vy:-rand()*170,t:1,c:'#ffd24a'});}
   else if(r>=2)SFX.rare();else SFX.click();};
  setTimeout(step,250);
  hudDirty=true;save(true);}
@@ -2786,6 +2789,15 @@ function closeQD(){SFX.close();$('qdW').hidden=true;mode='play';}
 function closeLog(){SFX.close();$('logW').hidden=true;mode='play';}
 function toggleQuest(){$('quest').classList.toggle('min');SFX.click();}
 let annT=0;function announce(msg){logMsg(msg);$('anntext').textContent=msg;$('announce').hidden=false;annT=5;}
+// SAT-ONLINE-026 (owner feedback 12): announcements about you, and the story notices (annGrid), also reach everyone online
+// through the news feed, named by your account ID. A story notice is shown once per character, whoever's clock fires it first.
+const NEWS=['drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
+function annArgs(p,n){const o={...p,n};if('rk' in o){o.r=t('r'+o.rk);delete o.rk;}return o;}
+function annW(k,p){p=p||{};announce(t(k,annArgs(p,t('pname'))));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo)return;
+ const q={};for(const f of ['lv','f','rk'])if(typeof p[f]==='number')q[f]=p[f];NETTR.feedSay('news',Object.assign({from:NET.uid,h:netId||S.look.n,k},Object.keys(q).length?{p:q}:{}));}
+function newsIn(m){if(!m||!NEWS.includes(m.k)||!NET||m.from===NET.uid||isBlocked(m.from)||!S||S.__demo)return;
+ if(m.k==='annGrid'){if(S.ev.grid)return;S.ev.grid=1;announce(t('annGrid'));SFX.notice();return;}
+ const p={};for(const f of ['lv','f','rk'])if(m.p&&typeof m.p[f]==='number')p[f]=m.p[f];announce(t(m.k,annArgs(p,Satisfy.chat.clean(m.h,24)||'?')));SFX.notice();}
 function num(x,y,s,c,big){nums.push({x,y,s,c,big,t:.9});}
 let qLast='';
 function updateHUD(){const mh=maxHP();P.hp=Math.min(P.hp,mh);
@@ -3025,6 +3037,8 @@ function drawMap(){const c=$('mapC'),dpr=Math.min(2,window.devicePixelRatio||1),
  Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1).forEach(id=>{const p=qSpot(id);if(!p)return;const x=X(p.x),y=Y(p.y),col=p.ret?'#ffd23a':'#7ee0ff';
   if(p.area){g.save();g.globalAlpha=.18;g.fillStyle=col;g.beginPath();g.arc(x,y,5*sc,0,7);g.fill();g.globalAlpha=.6;g.setLineDash([4*dpr,3*dpr]);g.strokeStyle=col;g.lineWidth=dpr;g.stroke();g.restore();}
   MM.marker(g,p.ret?'ret':'quest',x,y,u*1.1);MM.label(g,(p.ret?'? ':'')+qName(id),x,y-13*u,{size:Math.round(11*dpr),color:col,font:F,band:'rgba(8,16,40,.82)'});});
+ // party members on the big map (SAT-ONLINE-026, owner feedback 17), however far: the party query keeps them in view
+ if(NET&&PARTY&&PARTY.id())for(const r of NET.remotes())if(r.party===PARTY.id()&&!r.room&&r.mv===mapV()){const x=X(r.x/TS),y=Y(r.y/TS);MM.marker(g,'ally',x,y,u*1.4);MM.label(g,r.handle||'?',x,y-12*u,{size:Math.round(11*dpr),color:'#8dff9a',font:F,band:'rgba(8,40,16,.82)'});}
  const pp=outPos();MM.player(g,X(pp.x/TS),Y(pp.y/TS),dirAng(P.dir),u*1.2,gTime);MM.label(g,t('mapYou'),X(pp.x/TS),Y(pp.y/TS)+14*u,{size:Math.round(11*dpr),color:'#ffffff',font:F,band:'rgba(120,20,16,.85)',edge:'rgba(255,160,150,.6)'});
  // frame and zoom readout
  const gr=g.createRadialGradient(c.width/2,c.height/2,c.height*.45,c.width/2,c.height/2,c.width*.75);gr.addColorStop(0,'rgba(6,14,32,0)');gr.addColorStop(1,'rgba(6,14,32,.5)');g.fillStyle=gr;g.fillRect(0,0,c.width,c.height);
@@ -3045,6 +3059,7 @@ function act(a){
  else if(a==='back'){showOnly(ctrlBack);mode=ctrlBack==='pauseScreen'?'pause':'title';}
  else if(a==='lang'){mode='lang';showOnly('langScreen');}
  else if(a==='online')netPlay();
+ else if(a==='plClose')plOpen(false);else if(a==='plHide')plHideT();
  else if(a==='idOk')idOk();else if(a==='idClose')$('idW').hidden=true;
  else if(a==='netTakeBack')netTakeBack();
  else if(a==='cloud')cloudOpen();else if(a==='cloudClose')$('cloudW').hidden=true;
@@ -3133,7 +3148,7 @@ function update(dt){
  P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));
  updateProj(dt);
  // world events and zone banners
- if(!S.ev.grid&&S.playT>480){S.ev.grid=1;announce(t('annGrid'));SFX.notice();}
+ if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
   if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)}));ZT[z]=gTime;}S.zone=z;if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold')&&S.lv<160)&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
  {const rg=npcs.find(n=>n.id==='regas');if(rg)rg.hidden=!!allies.length||!!COMPO&&COMPO.id==='regas';}
@@ -3487,7 +3502,7 @@ Satisfy.local=Object.freeze({api:1,
  zoneAt:(x,y)=>netZone(x,y), // 'void' where the world defines nothing (SAT-ONLINE-019)
  roomAt:(x,y)=>{const R=roomAt(x,y);return R?{id:R.id,kind:R.kind,zone:R.z}:null;},
  inGame:()=>!!S&&!S.__demo,
- playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null}),
+ playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null}),
  backups:()=>STORE.backups(),
  profile:()=>!S||S.__demo?null:Satisfy.state.profileOf(S),
  events:()=>DEVT.log(),
@@ -3562,7 +3577,7 @@ function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch
 Object.assign(STR.ar,{pRejoined:'رجعت لبارتي {n}',pYouLead:'القائد مشي: إنت قائد البارتي دلوقتي',pNewLead:'القائد مشي: {n} قائد البارتي دلوقتي',pReplaced:'البارتي اختارت قائد جديد وإنت مش موجود، هترجع لهم'});
 Object.assign(STR.en,{pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore()});duelStart();praidStart();chatStart();
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore()});duelStart();praidStart();chatStart();if(NETTR&&NETTR.feedOn)NETTR.feedOn('news',newsIn);
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -3574,11 +3589,12 @@ function partyUI(live){if(!PARTY)return;const inv=live?PARTY.pendingInvite():nul
  const roleOf=m=>m.self?ROLE:m.role;
  const sig=lang+'|'+(inv?inv.party:'')+'|'+mem.map(m=>m.uid+':'+m.lv+':'+m.leader+':'+hpOf(m)+':'+roleOf(m)).join(',');if(sig===partySig)return;partySig=sig;
  $('partyInv').hidden=!inv;if(inv)$('partyInvT').textContent=t('pInvFrom',{n:inv.handle});
- $('partyW').hidden=mem.length<2;$('partyL').innerHTML=mem.map(m=>`<div class="${m.leader?'ld':''}"><span>${m.self?`<button class="role" data-tip="${esc(t('roleTip'))}">${ROLE_B[ROLE]||'＋'}</button> `:roleOf(m)?`<span class="role" title="${esc(t('role_'+roleOf(m)))}">${ROLE_B[roleOf(m)]}</span> `:''}${m.leader?'★ ':''}${esc(m.self?netId||S.look.n:m.handle||'?')}</span><span>${t('lv',{n:m.self?S.lv:m.lv})}${m.self?'':` <button class="blk" data-uid="${esc(m.uid)}" data-tip="${esc(t('pBlock'))}">⊘</button>`}</span></div>${hpOf(m)==null?'':`<i class="php" data-hp="${hpOf(m)}"><b style="width:${hpOf(m)}%"></b></i>`}`).join('');}
+ $('partyW').hidden=mem.length<2;$('partyL').innerHTML=mem.map(m=>`<div class="${m.leader?'ld':''}"><span>${m.self?`<button class="role" data-tip="${esc(t('roleTip'))}">${ROLE_B[ROLE]||'＋'}</button> `:roleOf(m)?`<span class="role" title="${esc(t('role_'+roleOf(m)))}">${ROLE_B[roleOf(m)]}</span> `:''}${m.leader?'★ ':''}${esc(m.self?netId||S.look.n:m.handle||'?')}</span><span>${t('lv',{n:m.self?S.lv:lvTxt(m.lv)})}${m.self?'':` <button class="blk" data-uid="${esc(m.uid)}" data-tip="${esc(t('pBlock'))}">⊘</button>`}</span></div>${hpOf(m)==null?'':`<i class="php" data-hp="${hpOf(m)}"><b style="width:${hpOf(m)}%"></b></i>`}`).join('');}
 addEventListener('keydown',e=>{if(!PARTY||mode!=='play'||e.repeat||KB.includes(e.code))return;
  if(e.target&&e.target.tagName==='INPUT')return; // typing in the chat line
  if(e.code==='Enter'){chatOpen();return;}
  if(e.code==='KeyV'){emoToggle();return;}
+ if(e.code==='KeyO'){plOpen();return;}
  if(duelKey(e.code))return;
  if(e.code==='KeyP')partyInviteNear();else if(e.code==='KeyY'&&PARTY.pendingInvite())partyAct('pAccept');else if(e.code==='KeyN'&&PARTY.pendingInvite())partyAct('pDecline');});
 /* party chat + block list (SAT-ONLINE-016, doc §29 T31). In a party, Enter opens the chat line, Enter sends it to the
@@ -3652,24 +3668,44 @@ function pingEnts(ents,myRoom,F){if(myRoom)return;const now=performance.now();PI
 function netMini(g,sx,sy,u){const now=performance.now(),id=PARTY&&PARTY.id();
  if(id)for(const r of NET.remotes())if(r.party===id&&!r.room&&r.mv===mapV())MM.marker(g,'ally',sx(r.x),sy(r.y),u);
  for(const p of PINGS){const k=(now-p.t)/3000;if(k>=1)continue;g.strokeStyle=`rgba(255,220,90,${(1-k).toFixed(2)})`;g.lineWidth=2;g.beginPath();g.arc(sx(p.x),sy(p.y),4+10*k,0,7);g.stroke();}}
-/* player menu (SAT-ONLINE-020, doc §35 U046 nearby player context + U064 inspect): click or tap another player to see
+/* player menu (SAT-ONLINE-020, doc §35 U046 nearby player context + U064 inspect): click or tap another player's name to see
    their public card (name, level, class, title, party, armour) and invite, challenge or block exactly that player:
    the target is their uid, so two players with the same name can't be mixed up. Nothing private is shown: it is only
    the PlayerPublic everyone nearby already receives. Clicking your duel opponent mid-fight still attacks. */
 Object.assign(STR.ar,{pcInvite:'دعوة للبارتي',pcDuel:'مبارزة',pcUnblock:'شيل البلوك',pcUnblocked:'{n} مبقاش عليه بلوك',pcLv:'لفل {n}',pcInParty:'في بارتي',pcMate:'معاك في البارتي',pcArm:'لابس درع',pcGone:'{n} مبقاش قريب'});
 Object.assign(STR.en,{pcInvite:'Invite to party',pcDuel:'Duel',pcUnblock:'Unblock',pcUnblocked:'{n} is not blocked any more',pcLv:'Lv {n}',pcInParty:'In a party',pcMate:'In your party',pcArm:'Wearing armour',pcGone:'{n} is not nearby any more'});
+/* player list (SAT-ONLINE-026, owner feedback 5 and 16): click the online badge, or press O, for everyone signed in to this
+   world with their ID, level and place. "Hide my level" publishes level 0, which everyone, the party too, sees as "?". */
+let HIDELV=(()=>{try{return localStorage.getItem('satisfy_hidelv')==='1';}catch(e){return false;}})();
+Object.assign(STR.ar,{plH:'اللاعيبة أونلاين ({n})',plHideLv:'اخفي اللفل بتاعي',plShowLv:'اظهر اللفل بتاعي',plHidden:'اللفل بتاعك مخفي عن الكل',plShown:'اللفل بتاعك ظاهر للناس'});
+Object.assign(STR.en,{plH:'Players online ({n})',plHideLv:'Hide my level',plShowLv:'Show my level',plHidden:'Your level is hidden from everyone',plShown:'Your level is visible again'});
+function lvTxt(n){return n>0?String(n):'?';}
+function plOpen(on){const w=$('plW');if(on===undefined)on=w.hidden;if(!NET||!Satisfy.local.inGame())on=false;w.hidden=!on;if(on)plFill();}
+function plHideT(){HIDELV=!HIDELV;try{localStorage.setItem('satisfy_hidelv',HIDELV?'1':'0');}catch(e){}netForce=true;partySig='';toast(t(HIDELV?'plHidden':'plShown'));plFill();}
+function plFill(){const box=$('plL');$('plHide').textContent=t(HIDELV?'plShowLv':'plHideLv');
+ const me={self:true,handle:netId||S.look.n,lv:HIDELV?0:S.lv,zone:netZone(P.x,P.y)};
+ const show=arr=>{$('plH').textContent=t('plH',{n:arr.length});box.textContent='';for(const r of arr){const d=document.createElement('div');if(r.self)d.className='me';
+  d.textContent=[r.handle||'?',t('lv',{n:lvTxt(r.lv)}),pctxName(r.zone||'')].filter(Boolean).join(' · ');box.appendChild(d);}};
+ const near=()=>NET.remotes().map(r=>({handle:r.handle,lv:r.lv,zone:r.zone}));
+ if(!(FB&&NETTR&&NETTR.kind==='firebase'))return show([me].concat(near()));
+ // the range query only covers nearby players, so the list reads the whole shard once when it opens
+ show([me].concat(near()));const D=FB.m.database;D.get(D.ref(FB.db,'presence/'+Satisfy.net.WORLD_ID+'/main')).then(s=>{const v=s.val()||{};
+  show([me].concat(Object.keys(v).filter(k=>k!==NET.uid&&v[k]&&typeof v[k]==='object').map(k=>({handle:v[k].handle,lv:v[k].lv,zone:v[k].zone}))));},()=>{});}
+$('netB').addEventListener('click',()=>plOpen());
 function pctxRemote(){return PCTX&&NET?NET.remotes().find(r=>r.uid===PCTX.uid)||null:null;}
 // the visible player whose sprite (16×26 px around the feet) is under the point, nearest first
-function pctxPick(mx,my){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=1e9;
- for(const r of NET.remotes()){if((r.room||null)!==myRoom||r.mv!==mapV())continue;const dx=mx-r.x,dy=my-(r.y-11);if(Math.abs(dx)>9||Math.abs(dy)>14)continue;const d=dx*dx+dy*dy;if(d<bd){bd=d;best=r;}}return best;}
-function pctxClick(mx,my){const r=pctxPick(mx,my);if(!r)return false;const st=DUEL&&DUEL.state();if(st&&st.phase==='fight'&&st.foe===r.uid)return false;
+// SAT-ONLINE-026 (owner feedback 9): a plain click only opens the card on the name over their head, so clicking to attack
+// while walking past someone no longer opens it; Ctrl or Shift + click opens it on the sprite too.
+function pctxPick(mx,my,body){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=1e9;
+ for(const r of NET.remotes()){if((r.room||null)!==myRoom||r.mv!==mapV())continue;const dx=mx-r.x,dy=my-(body?r.y-11:r.y-30),w=body?9:Math.max(12,(r.handle||'?').length*3.2);if(Math.abs(dx)>w||Math.abs(dy)>(body?14:5))continue;const d=dx*dx+dy*dy;if(d<bd){bd=d;best=r;}}return best;}
+function pctxClick(mx,my,body){const r=pctxPick(mx,my,body);if(!r)return false;const st=DUEL&&DUEL.state();if(st&&st.phase==='fight'&&st.foe===r.uid)return false;
  PCTX={uid:r.uid,sid:r.sid,handle:r.handle};pctxSig='';SFX.notice&&SFX.notice();return true;}
 function pctxName(k){const v=t(k);return v===k?'':v;}
 function pctxUI(live){const W=$('pctx'),r=live?pctxRemote():null;if(PCTX&&!r){if(live&&PCTX.handle)toast(t('pcGone',{n:PCTX.handle}));PCTX=null;}
  if(!PCTX){if(!W.hidden)W.hidden=true;return;}
  const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
  $('pctxT').textContent=r.handle||'?';
- $('pctxI').textContent=[t('pcLv',{n:r.lv}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):''].filter(Boolean).join(' · ');
+ $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):''].filter(Boolean).join(' · ');
  $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;}
 function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig='';return;}
  if(a==='pcInvite'&&PARTY){const res=PARTY.invite(r);toast(t({sent:'pInvSent',busy:'pBusy',full:'pFull',notLeader:'pNotLeader',already:'pcMate'}[res]||'pBusy',{n:r.handle}),res==='sent'?'good':'warn');partySig='';}
@@ -3785,7 +3821,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
 function netStop(){try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
- NET=null;NETTR=null;PARTY=null;DUEL=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW'].forEach(i=>$(i).hidden=true);}
+ NET=null;NETTR=null;PARTY=null;DUEL=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW'].forEach(i=>$(i).hidden=true);}
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid;netStop();
  (erase?C.eraseAll(['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid]):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
@@ -3819,7 +3855,7 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;netSetStat
    and offers "Play here", which saves and reloads, so this page claims the account back. */
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
-function netReplace(){if(netReplaced)return;netReplaced=true;save(true);try{NETTR.release();}catch(e){}NET=null;PARTY=null;DUEL=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx'].forEach(i=>$(i).hidden=true);
+function netReplace(){if(netReplaced)return;netReplaced=true;save(true);try{NETTR.release();}catch(e){}NET=null;PARTY=null;DUEL=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){save(true);location.reload();}
 function netSignIn(){if(NETQ!=='online'||netUser)return;netSetState('AUTHENTICATING');netBtn();
