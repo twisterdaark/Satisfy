@@ -25,7 +25,9 @@
 
   var PROTOCOL_VERSION = 1;
   var WORLD_ID = 'satisfy';
-  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 2048, shard: 999 });
+  // posX/posY: pixel bounds the database accepts for x/y (backend/database.rules.json). They are
+  // headroom over the map (414 x 144 tiles = 6624 x 2304 px today) so a wider map needs no redeploy.
+  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 2048, shard: 999, posX: 16384, posY: 4096 });
   var ANIMS = ['idle', 'walk', 'attack', 'dodge', 'dead'];
   var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.

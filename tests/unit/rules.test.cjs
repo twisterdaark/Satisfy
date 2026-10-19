@@ -33,8 +33,8 @@ test('every PlayerPublic field has a rule, required fields match the contract', 
 test('limits match the contract and the world', () => {
   assert.match(node.handle['.validate'], new RegExp('length <= ' + N.LIMITS.handle));
   assert.match(node.title['.validate'], new RegExp('length <= ' + N.LIMITS.title));
-  assert.match(node.x['.validate'], /< 2560/); // 160 tiles * 16 px
-  assert.match(node.y['.validate'], /< 2304/); // 144 tiles * 16 px
+  assert.match(node.x['.validate'], new RegExp('< ' + N.LIMITS.posX + '"?$'));
+  assert.match(node.y['.validate'], new RegExp('< ' + N.LIMITS.posY + '"?$'));
   const anims = /\^\((.*)\)\$/.exec(node.anim['.validate'])[1].split('|');
   assert.deepEqual(anims, N.ANIMS);
 });
@@ -43,4 +43,18 @@ test('the test fake enforces the same required fields', () => {
   const fake = fs.readFileSync(path.join(ROOT, 'tests/harness/fake-firebase.js'), 'utf8');
   const req = JSON.parse(/const REQUIRED = (\[.*\]);/.exec(fake)[1].replace(/'/g, '"'));
   assert.deepEqual(req.sort(), [...N.PUBLIC_FIELDS.filter((f) => !NULLABLE.includes(f)), 'seq'].sort());
+});
+
+test('position bounds cover the whole map, and the fake uses the same bounds', () => {
+  // Read the map size from index.html so a wider map fails here, not in a live Winston write.
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  const m = /TS=(\d+),LW=(\d+),GAPS=(\[\[[\d,\[\]]*\]\]),MW=.*?,MH=(\d+)/.exec(html);
+  assert.ok(m, 'map constants found in index.html');
+  const [ts, lw, gaps, mh] = [+m[1], +m[2], JSON.parse(m[3]), +m[4]];
+  const mw = lw + gaps.reduce((a, g) => a + g[1], 0);
+  assert.ok(mw * ts <= N.LIMITS.posX, `map width ${mw * ts}px fits under ${N.LIMITS.posX}`);
+  assert.ok(mh * ts <= N.LIMITS.posY, `map height ${mh * ts}px fits under ${N.LIMITS.posY}`);
+  const fake = fs.readFileSync(path.join(ROOT, 'tests/harness/fake-firebase.js'), 'utf8');
+  const fb = /const POS_X = (\d+), POS_Y = (\d+);/.exec(fake);
+  assert.deepEqual([+fb[1], +fb[2]], [N.LIMITS.posX, N.LIMITS.posY]);
 });
