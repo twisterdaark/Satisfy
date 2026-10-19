@@ -102,11 +102,14 @@ function guardian(g,p,pose,f){const W=64,H=72,B='#5a3b22',Bd='#3e2814',L='#2f6b3
 const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],boar:[boar,'boar'],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null]};
 
 // Build a sheet: columns = frames of the longest pose, rows = poses. Returns {canvas, W, H, anchor}.
-function buildSheet(type){const [fn,pk]=KINDS[type],p=pk?PAL[pk]:null;const probe=canvas(1,1);let dims=null;
- const frames=[];POSES.forEach(([pose,n],ri)=>{for(let f=0;f<n;f++){const c=canvas(72,80),g=c.getContext('2d');const d=fn(g,p,pose,f);dims=d;frames.push({c,ri,f});}});
- const {W,H}=dims,cols=Math.max(...POSES.map(([,n])=>n));const sh=canvas(W*cols,H*POSES.length),sg=sh.getContext('2d');
- frames.forEach(({c,ri,f})=>{const t=canvas(W,H),tg=t.getContext('2d');tg.drawImage(c,0,0,W,H,0,0,W,H);polish(tg,W,H);sg.drawImage(t,f*W,ri*H);});
- return {canvas:sh,W,H,anchor:{x:dims.AX??W/2,y:H},scale:pk?PAL[pk][3]:1};}
+// Frames are drawn with a margin and cropped to the union of their pixels (+1 for the outline),
+// so legs, tails, ears and attack lunges that reach past the nominal W x H are never cut off.
+function buildSheet(type){const [fn,pk]=KINDS[type],p=pk?PAL[pk]:null,PAD=16;let dims=null;
+ const frames=[];POSES.forEach(([pose,n],ri)=>{for(let f=0;f<n;f++){const c=canvas(104,112),g=c.getContext('2d');g.translate(PAD,PAD);const d=fn(g,p,pose,f);dims=d;frames.push({c,ri,f});}});
+ let x0=1e9,y0=1e9,x1=-1,y1=-1;frames.forEach(({c})=>{const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++)if(d[(y*c.width+x)*4+3]){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}});
+ x0-=1;y0-=1;x1+=1;y1+=1;const W=x1-x0+1,H=y1-y0+1,cols=Math.max(...POSES.map(([,n])=>n));const sh=canvas(W*cols,H*POSES.length),sg=sh.getContext('2d');
+ frames.forEach(({c,ri,f})=>{const t=canvas(W,H),tg=t.getContext('2d');tg.drawImage(c,x0,y0,W,H,0,0,W,H);polish(tg,W,H);sg.drawImage(t,f*W,ri*H);});
+ return {canvas:sh,W,H,anchor:{x:(dims.AX??dims.W/2)+PAD-x0,y:dims.H+PAD-y0},scale:pk?PAL[pk][3]:1};}
 function rect(type,W,H,pose,f){const ri=POSES.findIndex(([p])=>p===pose);return {sx:f*W,sy:ri*H,sw:W,sh:H};}
 
 A.monsters={PAL,POSES,TIMING,KINDS:Object.keys(KINDS),buildSheet,rect};

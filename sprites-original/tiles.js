@@ -53,8 +53,15 @@ function pebbles(b,X,Y,n,s,pal){const [p0,p1,p2]=pal||PEB;const tx=X>>4,ty=Y>>4;
 
 // ---- the tile ----
 function isGrassy(v){return v===GR||v===FL||v===TR||v===SN;}
+// Tiles that only hold an object (tree, board/prop blocker, fence) take the ground around them,
+// so a tree or the quest board on a dirt square no longer sits on a hard-edged grass block.
+const HOLDER=new Set([TR,BL,PL]),OPEN=new Set([GR,FL,DR,PA,SN,CF]);
+function baseAt(env,x,y){const v=env.at(x,y);if(!HOLDER.has(v)||(v===BL&&y>=env.WMH))return v;const n={};let best=-1,bc=0;
+ for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const q=env.at(x+dx,y+dy);if(!OPEN.has(q))continue;const k=q===FL?GR:q;n[k]=(n[k]||0)+(dx&&dy?1:2);}
+ for(const k in n)if(n[k]>bc||(n[k]===bc&&+k===GR)){bc=n[k];best=+k;}
+ return best<0?v:best;}
 function ground(env,x,y,frame){
- const {at,snowAt,WMH}=env,X=x*16,Y=y*16,b=Buf();let v=at(x,y);const snowy=snowAt(x,y);
+ const {snowAt,WMH}=env,at=(a,c)=>baseAt(env,a,c),X=x*16,Y=y*16,b=Buf();let v=at(x,y);const snowy=snowAt(x,y);
  if(v===BL&&y>=WMH)v=FW;
  if(v===GR||v===FL||((v===TR||v===BL)&&!snowy))grassFill(b,X,Y,v===FL);
  else if(v===SN||((v===TR||v===BL)&&snowy))snowFill(b,X,Y);

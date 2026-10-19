@@ -1,6 +1,6 @@
 # Art contract: characters, monsters, terrain, buildings, icons and VFX (SAT-ART-001)
 
-Owner: Claude-B. Status: **live**. Since the owner approved it on 2026-10-19, `index.html` loads `chars.js`, `monsters.js`, `tiles.js`, `buildings.js` and `icons.js` and draws every layer with them. The legacy painters were removed from `index.html`, with no toggle, at the owner's request. The `legacy-*.js` snapshots stay only for the preview comparison. The adapter sections below describe what is wired in now. `vfx.js` is not hooked up yet.
+Owner: Claude-B. Status: **live**. Since the owner approved it on 2026-10-19, `index.html` loads `chars.js`, `monsters.js`, `tiles.js`, `buildings.js` and `icons.js` and draws every layer with them. The legacy painters were removed from `index.html`, with no toggle, at the owner's request. The `legacy-*.js` snapshots stay only for the preview comparison. The adapter sections below describe what is wired in now. Second pass (owner requests, 2026-10-19): `vfx.js` is hooked (hits, crits, slashes, blood, level-up, death, dodge dust, skills, forge and loot beams; every spawn is seeded so effects never consume the game's `Math.random`), `weapons.js` draws the held weapon and swings it around the grip, and `minimap.js` paints the HUD minimap and the zoomable world map.
 
 ## What exists
 
@@ -15,6 +15,8 @@ Owner: Claude-B. Status: **live**. Since the owner approved it on 2026-10-19, `i
 | `sprites-original/icons.js` | Item icons v2: the same 16×16 keys as `iconC` (weapons, armor, materials, food, arrows, book, slot ghosts) with an outline and a light edge. Exported as `sheets/icons.png`. |
 | `sprites-original/legacy-icons.js` | Snapshot of today's `iconC`, for the preview. A test fails if it drifts. |
 | `sprites-original/vfx.js` | Data-driven cosmetic VFX presets with a tiny particle engine |
+| `sprites-original/weapons.js` | Held weapons: `sprite(id,r)` pointing up with a grip point, `draw(g,id,r,x,y,rot,flip)` |
+| `sprites-original/minimap.js` | Map art: `buildBase(env,{W,H,buildings,px})`, `marker`, `player`, `label` |
 | `sprites-original/fig-data.js` | Snapshot of `FIG`/`LOOK`/`lookFig` from `index.html` @ `ce29772` (PER_CODE). A test fails if `FIG` drifts. |
 | `sprites-original/legacy-figure.js` | Snapshot of today's `figure()`, used only for the side-by-side preview |
 | `sprites-original/sheets/*.png` + `manifest.json` | Exported sheets: every `FIG` entry plus each player hair style, with and without armor. `sheets/monsters/*.png` are listed under `manifest.monsters`. |
