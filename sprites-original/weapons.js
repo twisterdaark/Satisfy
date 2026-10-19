@@ -25,6 +25,7 @@ const DEF={
  isword:()=>sword(10,2,['#c4c8d0','#7a808c','#eef0f4'],'#9a9aa6'),
  ssword:()=>sword(11,2,['#dfe6ee','#8a94a4','#ffffff'],'#d8b04a',(I,cx,top,len)=>{for(let y=top+3;y<top+len-1;y+=3)I.set(cx,y,'#b8c4d4');}),
  gsword:()=>sword(14,3,['#6ab0ff','#2a5ab0','#d0e8ff'],'#c8a050',(I,cx,top,len)=>{for(let y=top+2;y<top+len;y+=2)I.set(cx,y,'#9fd0ff');I.rect(cx-3,top+len,7,1,'#c8a050');I.set(cx-3,top+len,'#6a4a1a');I.set(cx+3,top+len,'#6a4a1a');}),
+ msword:()=>sword(11,2,['#c8e8f4','#7aa0b8','#ffffff'],'#4a90c0',(I,cx,top,len)=>{for(let y=top+2;y<top+len-1;y+=3)I.set(cx,y,'#e8f8ff');}),
  bow:()=>bow(['#8a5a32','#5e3e20','#b07a46'],null),
  sbow:()=>bow(['#5a3a22','#3e2616','#7a5230'],'#d0d4dc'),
  staff:()=>staff(['#2a5ab0','#4a90ff','#bfe8ff'],'#7a5634'),
