@@ -22,6 +22,7 @@ const CURRENT_HTML = process.env.SATISFY_HTML ? path.resolve(process.env.SATISFY
 // R0 history: ce29772 (pre-online), 1899cdb (+ #6 CSS hotfix), 6ef0595 (+ v2 art, #5), 6295a5f (+ Patrian, AI, wider map), 3c343ec (+ town quests, Piaro balance, Guardian Knight), fe34ae0 (+ equipment, guilds, WS world state, events), daaef26 (+ companions, dragon, auction, Yatan), 7d57d5f (+ siege, Muller).
 const BASELINE_SHA = process.env.SATISFY_BASELINE || '34b2ea5094d6d1597b4acb67d338d99d8765b745';
 const LEGACY_KEY = 'satisfy_proto_v4';
+const FAKE_FIREBASE = path.join(__dirname, 'fake-firebase.js');
 
 // Runs before the game script. Must not change gameplay, only make it reproducible.
 const INIT_SCRIPT = `(() => {
@@ -120,10 +121,14 @@ async function openGame(opts = {}) {
   return g;
 }
 
-/** A fresh isolated browser context with the deterministic init script and no network. */
-async function newContext() {
+/**
+ * A fresh isolated browser context with the deterministic init script and no network.
+ * @param {{scripts?:string[]}} [opts] extra init scripts (paths), e.g. tests/harness/fake-firebase.js
+ */
+async function newContext(opts = {}) {
   const ctx = await (await browser()).newContext();
   await ctx.addInitScript(INIT_SCRIPT);
+  for (const s of opts.scripts || []) await ctx.addInitScript({ path: s });
   // Hermetic: the game must run with no network (it only asks for Google Fonts, which may fail).
   ctx.__external = [];
   await ctx.route('**/*', (route) => {
@@ -178,6 +183,6 @@ async function snapshot(g) {
 }
 
 module.exports = {
-  ROOT, CURRENT_HTML, BASELINE_SHA, LEGACY_KEY, DEFAULT_LOOK, VOLATILE_S,
+  ROOT, CURRENT_HTML, BASELINE_SHA, LEGACY_KEY, FAKE_FIREBASE, DEFAULT_LOOK, VOLATILE_S,
   openGame, newContext, closeBrowser, baselineHtml, newGame, continueGame, snapshot,
 };
