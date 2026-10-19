@@ -3349,13 +3349,13 @@ const NET_LIVE=['play','inv','status','equip','dialog','forge','log','map','dead
 function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
 // Interest management (doc U009): online, a client listens only to players within NET_INTEREST.radius px
 // of it along the map (the screen is W=480 px wide, so the re-centre step keeps it covered), plus its
-// party members wherever they are (raid hits and the party list need them). See docs/online/COST_MODEL.md.
+// everyone in its party wherever they are (raid hits, chat and the party list need them; SAT-ONLINE-018 follows the
+// party by its id, so members who never met still see each other). See docs/online/COST_MODEL.md.
 const NET_INTEREST={radius:800,step:400};
-function netWatch(){const w=PARTY&&PARTY.id()?PARTY.members().filter(m=>!m.self&&m.uid).map(m=>m.uid).sort().join(','):'';
- if(NETTR.wsig!==w){NETTR.wsig=w;NETTR.watch(w?w.split(','):[]);}}
+function netWatch(){const id=(PARTY&&PARTY.id())||null;if(NETTR.wsig!==id){NETTR.wsig=id;NETTR.party(id);}}
 function netTick(){NET.tick();const live=Satisfy.local.inGame()&&NET_LIVE.includes(mode);
  if(PARTY)PARTY.tick();
- if(NETTR&&NETTR.watch)netWatch();
+ if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
  if(PRAID)PRAID.tick();
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();

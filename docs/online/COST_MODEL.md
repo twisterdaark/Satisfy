@@ -41,10 +41,11 @@ Spark gives **10 GB/month** of downloads and **100 simultaneous connections** (d
 
 - **SAT-ONLINE-014 (doc U009): interest management.** The presence listener is a Realtime Database
   range query, `orderByChild('x')` from x − 800 to x + 800 px, re-centred after moving 400 px (the
-  screen is 480 px wide, so everything on it stays covered). Party members are followed one node at a
-  time wherever they are. A 20-player shard with about 5 players around each one drops to ~0.14 GB/hour
+  screen is 480 px wide, so everything on it stays covered). A second query follows the party
+  (`orderByChild('party').equalTo(id)`, SAT-ONLINE-018), so members see each other wherever they are, even
+  ones who never met; it costs at most four extra listeners' worth of updates. A 20-player shard with about 5 players around each one drops to ~0.14 GB/hour
   (~73 hours a month on Spark), and a 100-player shard (Spark's connection cap) becomes ~1.4 GB/hour
-  instead of ~11. The rules add `.indexOn: ["x"]` on `presence/{world}/{shard}` so the server filters;
+  instead of ~11. The rules add `.indexOn: ["x", "party"]` on `presence/{world}/{shard}` so the server filters;
   until that is deployed the query still works, but the SDK downloads the whole shard and warns in the
   console.
   - Why a range query and not a shard per zone (the earlier proposal): players on either side of a zone

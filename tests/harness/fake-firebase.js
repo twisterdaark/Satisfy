@@ -144,9 +144,11 @@
   }
 
   // query(ref, orderByChild(k), startAt(lo), endAt(hi)): numeric range on one child, as RTDB orders it
-  // (a child without a number there sorts before every number, so a range never includes it)
+  // (a child without a number there sorts before every number, so a range never includes it);
+  // equalTo(v): exactly that value (a child without it never matches)
   function matcher(q) {
     if (!q || !q.child) return () => true;
+    if ('eq' in q) return (v) => !!v && v[q.child] === q.eq;
     return (v) => { const x = v && v[q.child]; return typeof x === 'number' && (q.lo == null || x >= q.lo) && (q.hi == null || x <= q.hi); };
   }
   function listen(type) {
@@ -167,6 +169,7 @@
     orderByChild: (child) => ({ child }),
     startAt: (lo) => ({ lo }),
     endAt: (hi) => ({ hi }),
+    equalTo: (eq) => ({ eq }),
     serverTimestamp: () => SV,
     push: (r, v) => {
       const p = r.path + '/-' + Date.now().toString(36) + rid();

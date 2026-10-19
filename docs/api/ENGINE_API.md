@@ -244,8 +244,8 @@ never show it.
 | `currentUser(sdk)` | Saved Google session or `null`. |
 | `signIn(sdk)` | Google popup; falls back to redirect when popups are blocked. |
 | `transport(sdk, { uid, world, shard, interest?, onConnection?, onError? })` | Same shape as `transports.local`. Writes `presence/{world}/{shard}/{uid}` (nulls omitted, `seq`, `t` = server time), arms `onDisconnect().remove()` on every reconnect, and turns child added/changed/removed into presence envelopes. With `interest: { radius, step }` (SAT-ONLINE-014, doc U009) it listens only to players whose `x` is within `radius` px of the last published `x` (an `orderByChild('x')` range query, re-centred after moving `step` px); players left outside get a `presence.leave` at once. |
-| `transport.watch(uids)` | Also follow these players wherever they are (the game passes its party members). Replaces the previous list. |
-| `transport.interest()` | `{ radius, centre, watched }`; radius 0 = the whole shard. |
+| `transport.party(id)` | SAT-ONLINE-018: also follow everyone whose presence is in party `id` (`orderByChild('party').equalTo(id)`), wherever they are; `null` stops. The game passes its party id, so members who never met see each other. (014 had `watch(uids)` per member; it only covered members already seen.) |
+| `transport.interest()` | `{ radius, centre, party, watched }`; radius 0 = the whole shard; `watched` = the players the party query shows. |
 
 Rules: `backend/database.rules.json` (deploy with `firebase deploy --only database`). Deny by default; presence is readable by signed-in players, each player writes only their own node, every field is validated, and unknown fields are rejected. `tests/unit/rules.test.cjs` keeps the rules, the contract and the test fake in agreement.
 
@@ -284,6 +284,7 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1** (SAT-ONLINE-018): `transport.party(id)` replaces `transport.watch(uids)` (both unreleased); `interest()` adds `party`. Rules index `presence/{world}/{shard}` on `["x", "party"]` (redeploy).
 - **api 1, additive** (SAT-ONLINE-017): touch controls on coarse pointers (or `?touch=1`; `?touch=0` turns them off): a stick for movement, held Attack/Guard, Dodge/Use taps, the HUD key hints as buttons, and an online row (P, K, Y, N, Enter). Taps are dispatched as the same `keydown`/`keyup` events as the keyboard. No API change.
 - **api 1, additive** (SAT-ONLINE-016): `Satisfy.chat` (party chat + device block list), `blocked` option on `party.create`/`duel.create`, `net().chat/blocked`. Inbox rules accept `chat.say` `{to, party, text ≤ 120}`; `text` is rejected in every other message type (rules redeploy).
 - **api 1, additive** (SAT-ONLINE-015): `cloud.eraseAll()`; Sign out and Delete my online data in the Cloud saves panel (doc §29 T35). No rules change (owners could already delete their own paths).

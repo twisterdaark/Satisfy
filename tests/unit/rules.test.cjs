@@ -59,10 +59,10 @@ test('position bounds cover the whole map, and the fake uses the same bounds', (
   assert.deepEqual([+fb[1], +fb[2]], [N.LIMITS.posX, N.LIMITS.posY]);
 });
 
-test('presence is indexed on x, the child the interest query orders by (U009)', () => {
-  assert.deepEqual(rules.presence.$world.$shard['.indexOn'], ['x']);
+test('presence is indexed on exactly the children the interest queries order by (U009: x; party)', () => {
+  assert.deepEqual(rules.presence.$world.$shard['.indexOn'], ['x', 'party']);
   const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
-  assert.deepEqual([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]), ['x']);
+  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['party', 'x']);
   // the radius must cover the screen after a full re-centre step: |offset| <= step, half screen = W / 2
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   const I = /const NET_INTEREST=\{radius:(\d+),step:(\d+)\}/.exec(html), W = +/const W=(\d+),H=/.exec(html)[1];

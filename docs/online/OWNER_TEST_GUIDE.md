@@ -1,15 +1,15 @@
 # Online test guide for the owner (Twister)
 
-Owner: Claude-A · covers SAT-ONLINE-001 … 017 · دليل اختبار الأونلاين — خطوة بخطوة
+Owner: Claude-A · covers SAT-ONLINE-001 … 018 · دليل اختبار الأونلاين — خطوة بخطوة
 
 ## 0. Deploy the database rules once (after pulling the top branch)
 
 ```powershell
 git fetch origin
-git checkout claude-a/sat-online-017-touch
+git checkout claude-a/sat-online-018-party-query
 npx.cmd -y firebase-tools@latest deploy --only database --project satisfy-online-8yjeix
 ```
-This one deploy covers presence (with its index on `x`), party/duel/raid/chat messages, profiles, cloud saves and session leases.
+This one deploy covers presence (with its indexes on `x` and `party`), party/duel/raid/chat messages, profiles, cloud saves and session leases.
 It's safe before the PRs are merged, because `main` has no online code yet.
 Expected output: `rules syntax for database satisfy-online-8yjeix-default-rtdb is valid` and `Deploy complete!`.
 
