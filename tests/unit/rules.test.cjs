@@ -10,7 +10,7 @@ const { net: N } = loadModules('src/net/contracts.js');
 const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')).rules;
 const node = rules.presence.$world.$shard.$uid;
 const firebaseJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'firebase.json'), 'utf8'));
-const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'pt']; // omitted when null/empty is allowed by the client
+const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs']; // omitted when null/empty is allowed by the client
 
 test('deny by default; presence readable only when signed in, writable only by its owner', () => {
   assert.equal(rules['.read'], false);

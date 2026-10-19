@@ -4,6 +4,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19f', d: '2026-10-19',
+      ar: ['أونلاين: صحابك بيشوفوا حيوانك الأليف ماشي وراك وبيشوفوك راكب الحصان',
+        'كل الزعماء برا المدن، زي أمير حرب الأوركات، بقوا في نفس المكان وبنفس الدم عند كل اللي جنب بعض، وموتك مبيرجّعش الزعيم لأوله عند الباقيين',
+        'الوحوش بتفضل متطابقة لما واحد فيكم يبعد ويرجع',
+        'حصار قلعة ريدان: الحراس بيظهروا لكل اللي هناك حتى لو مش في جيلد، وفي نفس الأماكن عند الكل، وفيه تنبيه قبل الحصار بـ5 دقايق وبدقيقة'],
+      en: ['Online: friends see your pet following you and see you riding your horse',
+        "Every boss outside towns, like the Orc Warlord, stands in the same place with the same health for everyone nearby, and your death doesn't reset it for the others",
+        'Monsters stay the same for both of you when one walks away and comes back',
+        'Reidan Castle siege: the garrison appears for everyone there, guild or not, at the same spots for all, with a warning 5 minutes and 1 minute before'] },
     { v: '2026-10-19e', d: '2026-10-19',
       ar: ['تصليح: شخصيتك كانت بتختفي بعد التحديث لو المتصفح فاكر ملفات قديمة، دلوقتي كل الملفات بتتحدث مع بعض',
         'السحب في الواجهة ماسك الماوس لحد ما تسيبه، ومكان الصناديق بيتحفظ دايمًا',
