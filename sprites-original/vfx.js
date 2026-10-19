@@ -46,6 +46,9 @@ function create(){
    glow(x1,y1,6,22,'#8fb8ff',.22,.7);add({x:x1,y:y1,life:.16,shape:'star',size:8,color:'#ffffff'});burst(r,10,x1,y1,{sp0:50,sp1:140,l0:.15,l1:.3,ramp:RAMP.mana,shape:'streak'});},
   heal(r,x,y,o){glow(x,y-8,8,18,'#7ae07a',.7,.45);for(let i=0;i<10;i++)add({x:x+(r()-.5)*20,y:y-r()*10,vy:-lerp(16,34,r()),life:lerp(.6,1,r()),t:-r()*.35,shape:'plus',size:1,ramp:RAMP.heal});},
   mana(r,x,y,o){for(let i=0;i<16;i++){const a=r()*TAU,d=lerp(16,24,r());add({x:x+Math.cos(a)*d,y:y+Math.sin(a)*d*.6,vx:-Math.cos(a)*d*2.2,vy:-Math.sin(a)*d*1.3,life:.45,shape:'px',size:2,size1:1,ramp:RAMP.mana});}add({x,y,life:.45,shape:'ring',size:16,size1:2,color:'#7ab0ff',width:2});glow(x,y,2,14,'#7ab0ff',.5,.5);},
+  // something appears in the world: a ring opens on the ground, a short light column, motes drifting up
+  spawn(r,x,y,o){const col=o.color||'#8fd8ff';glow(x,y-8,6,20,col,.6,.5);add({x,y,life:.45,shape:'ring',size:2,size1:15,color:col,width:2});add({x,y,life:.6,shape:'beam',size:9,height:38,color:col});
+   for(let i=0;i<14;i++)add({x:x+(r()-.5)*16,y:y-r()*6,vy:-lerp(18,55,r()),life:lerp(.4,.8,r()),t:-r()*.2,shape:'px',size:2,size1:1,color:col});},
   levelup(r,x,y,o){add({x,y,life:1.2,shape:'beam',size:16,height:90,color:'#ffe07a'});glow(x,y,10,30,'#ffe07a',1,.5);add({x,y,life:.6,shape:'ring',size:4,size1:30,color:'#fff2a0',width:2});add({x,y,life:.8,shape:'ring',size:2,size1:40,color:'#ffd23a'});
    for(let i=0;i<26;i++)add({x:x+(r()-.5)*20,y:y-r()*10,vy:-lerp(30,90,r()),life:lerp(.6,1.2,r()),t:-r()*.5,shape:r()<.3?'glint':'px',size:2,ramp:RAMP.holy});},
   loot(r,x,y,o){const k=o.rarity||0;if(k<1)return;const col=RARITY[k];add({x,y,life:o.life||2.5,shape:'beam',size:k>=4?14:k>=3?11:8,height:k>=3?80:55,color:col,pulse:1});glow(x,y,5,k>=4?20:12,col,o.life||2.5,.45);

@@ -22,8 +22,10 @@ function readTables(html){
   for(const [k,m] of Object.entries(TABLES))out[k]=vm.runInContext('('+sliceLiteral(html,m)+')',ctx,{filename:'index.html#'+k});
   // interior NPCs are appended right after the outdoor list
   const push=sliceLiteral(html,'NPCS.push');out.NPCS_INTERIOR=vm.runInContext('['+push.slice(1,-1)+']',ctx,{filename:'index.html#NPCS.push'});
-  const w=/const W=\d+,H=\d+,TS=(\d+),MW=(\d+),MH=(\d+),WH=(\d+),BW=(\d+),WMH=(\d+)/.exec(html);if(!w)throw new Error('world constants not found');
-  out.WORLD={TS:+w[1],MW:+w[2],MH:+w[3],WH:+w[4],BW:+w[5],WMH:+w[6]};
+  // tables keep logical columns (LW wide); the physical map inserts the GAPS wilderness belts (SAT-WORLD-002)
+  const w=/const W=\d+,H=\d+,TS=(\d+),LW=(\d+),GAPS=(\[\[[\d,\[\]]*\]\]),MW=.*?,MH=(\d+),WH=(\d+),BW=(\d+),WMH=(\d+)/.exec(html);if(!w)throw new Error('world constants not found');
+  const GAPS=JSON.parse(w[3]);
+  out.WORLD={TS:+w[1],LW:+w[2],GAPS,MW:+w[2]+GAPS.reduce((a,g)=>a+g[1],0),MH:+w[4],WH:+w[5],BW:+w[6],WMH:+w[7]};
   // gen:1 quests are registered at runtime by regBQ; only static ones are content
   for(const id of Object.keys(out.QD))if(out.QD[id].gen)delete out.QD[id];
   // skill gate and class-quest gate, kept as text for _srcFn
