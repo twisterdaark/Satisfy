@@ -96,6 +96,12 @@ test('inbox: only the owner reads and deletes; senders create write-once message
   for (const f of ['party', 'duel']) assert.match(msg.payload[f]['.validate'], /length <= 40/);
   assert.match(msg.payload['.validate'], /beginsWith\('party\.'\)/);
   assert.match(msg.payload['.validate'], /beginsWith\('duel\.'\)/);
+  // SAT-ONLINE-016: party chat, text only in chat messages, as long as Satisfy.chat allows
+  const { chat: CH } = loadModules('src/net/chat.js');
+  assert.deepEqual(types.filter((x) => x.startsWith('chat.')), [...CH.TYPES]);
+  assert.match(msg.payload.text['.validate'], new RegExp('length <= ' + CH.C.MAX_LEN + '$'));
+  assert.match(msg.payload['.validate'], /beginsWith\('chat\.'\) && newData\.hasChildren\(\['party', 'text'\]\)/);
+  for (const kind of ['party', 'duel', 'raid']) assert.match(msg.payload['.validate'], new RegExp("beginsWith\\('" + kind + "\\.'\\)[^|]*!newData\\.hasChild\\('text'\\)"), kind + ' messages carry no text');
 });
 
 test('profiles and cloud saves: owner writes only; cloud saves are private; limits match Satisfy.cloud', () => {

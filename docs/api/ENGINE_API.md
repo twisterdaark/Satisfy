@@ -176,6 +176,21 @@ check; a bar at the top shows both duel HPs and the countdown, with a **Yield** 
 dashed ring. Real death, travel or entering a town forfeits. `Satisfy.local.net().duel` = `state()` plus
 `challenge`.
 
+## `Satisfy.chat` (SAT-ONLINE-016, doc §29 T31)
+
+Party chat and a block list, on presence + party.
+
+| Member | Notes |
+|---|---|
+| `create({ presence, party, uid, now?, blocked? })` | `say(text)` sends to every other member as a directed `chat.say` `{to, party, text}`, returning `'sent'`, `'empty'`, `'noParty'` or `'tooFast'` (one per 0.7 s, five per 10 s). Incoming lines count only from current members of the same party and not blocked. `log()` = the last 50 `{from, handle, text, t, self, n}`; `on(fn)`. |
+| `clean(text, max?)` | Removes control, zero-width and bidi-override characters, collapses whitespace, cuts to 120 (or `max`) without splitting an emoji. Used on both ends. |
+| `blocklist(storage?)` | `{has, add(uid, handle), remove, clear, list}` in localStorage `satisfy_blocked` (this device only). |
+| `TYPES`, `C`, `KEY` | `['chat.say']`, the limits, the storage key. |
+
+`party.create` and `duel.create` take the same `blocked(uid)` option: invites and challenges from a blocked player are dropped without an answer.
+
+In the game: in a party, **Enter** opens the chat line (Enter sends, Esc closes). Lines are shown as text only. **Block** on the party invite or duel challenge prompt, or **⊘** next to a party member, blocks that player. **Cloud saves → Unblock all** clears the list. `net().chat` = `log()`, `net().blocked` = `list()`.
+
 ## `Satisfy.raid` (SAT-ONLINE-009, doc §10 R6)
 
 A party fights one boss. `create({ presence, party, uid, now?, local })`; `local` is the game's side:
@@ -275,6 +290,7 @@ await g.close(); await H.closeBrowser();
 - **api 1, fix** (SAT-ONLINE-004 review, #12): the Firebase transport knows a remote session as `uid + '.' + sid` (the uid is the node key the rules verify) and drops nodes whose `uid` isn't their key, so copying someone's `sid` (or a huge `seq`) can't hide or replace them. Rules: presence `y >= -4096` (the north), shard pinned to `main`.
 - **api 1, fix** (SAT-ONLINE-002 review, #10/#23): NET_LIVE: every in-game screen (`qd`, `gname`, `controls`, `enhfx`, `lang` too), so reading a quest neither hides the player nor forfeits a duel; `tests/unit/modes.test.cjs` checks it against every `mode=` in the game.
 - **api 1, fix** (SAT-ONLINE-001 review, #10): `world().y0` = `-NR*TS`, the top edge; `validatePlayerPublic` accepts `y >= world.y0`, so players in the north (negative y) are no longer dropped.
+- **api 1, additive** (SAT-ONLINE-016): `Satisfy.chat` (party chat + device block list), `blocked` option on `party.create`/`duel.create`, `net().chat/blocked`. Inbox rules accept `chat.say` `{to, party, text ≤ 120}`; `text` is rejected in every other message type (rules redeploy).
 - **api 1, additive** (SAT-ONLINE-015): `cloud.eraseAll()`; Sign out and Delete my online data in the Cloud saves panel (doc §29 T35). No rules change (owners could already delete their own paths).
 - **api 1, additive** (SAT-ONLINE-014): interest management (doc U009). Online, presence comes from a range query on `x` (±800 px, re-centred every 400 px) plus each party member's node; `net().interest`, `transport.watch/interest`. Rules add `.indexOn: ["x"]` on `presence/{world}/{shard}` (redeploy; without it the query still works but downloads the whole shard).
 - **api 1, additive** (SAT-ONLINE-013): `PlayerPublic.duel` = `"<duel id>:<duel HP>"` while in a duel's countdown/fight (null otherwise); other players see an HP bar over each duelist and a ring between them (doc U034). Presence + rules field (rules redeploy).

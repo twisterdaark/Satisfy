@@ -95,10 +95,10 @@
             ".validate": "newData.isNumber() && newData.val() >= 0"
           },
           "type": {
-            ".validate": "newData.isString() && newData.val().matches(/^(party\\.(invite|accept|decline|kick)|duel\\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\\.(hit|state|kill))$/)"
+            ".validate": "newData.isString() && newData.val().matches(/^(party\\.(invite|accept|decline|kick)|duel\\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\\.(hit|state|kill)|chat\\.(say))$/)"
           },
           "payload": {
-            ".validate": "newData.hasChild('to') && ((newData.parent().child('type').val().beginsWith('party.') && newData.hasChild('party') && !newData.hasChild('duel')) || (newData.parent().child('type').val().beginsWith('duel.') && newData.hasChild('duel') && !newData.hasChild('party')) || (newData.parent().child('type').val().beginsWith('raid.') && newData.hasChild('raid') && !newData.hasChild('party') && !newData.hasChild('duel')))",
+            ".validate": "newData.hasChild('to') && ((newData.parent().child('type').val().beginsWith('party.') && newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('duel.') && newData.hasChild('duel') && !newData.hasChild('party') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('raid.') && newData.hasChild('raid') && !newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('chat.') && newData.hasChildren(['party', 'text']) && !newData.hasChild('duel') && !newData.hasChild('raid') && !newData.hasChild('k') && !newData.hasChild('n')))",
             "to": {
               ".validate": "newData.val() === $uid"
             },
@@ -116,6 +116,9 @@
             },
             "raid": {
               ".validate": "newData.isString() && newData.val().length <= 64"
+            },
+            "text": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
             },
             "$other": {
               ".validate": false

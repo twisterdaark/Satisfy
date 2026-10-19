@@ -118,12 +118,16 @@
     if (v.from !== user.uid) return 'PERMISSION_DENIED: forged from';
     const keys = Object.keys(v).sort().join(',');
     if (keys !== 'from,payload,seq,sid,t,type') return 'inbox fields ' + keys;
-    if (!/^(party\.(invite|accept|decline|kick)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill))$/.test(v.type)) return 'inbox type';
+    if (!/^(party\.(invite|accept|decline|kick)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say))$/.test(v.type)) return 'inbox type';
     const pk = Object.keys(v.payload).sort().join(',');
     if (v.payload.to !== seg[1]) return 'inbox payload';
     if (v.type.startsWith('party.')) {
       if (pk !== 'party,to') return 'inbox payload';
       if (typeof v.payload.party !== 'string' || v.payload.party.length > 40) return 'inbox party';
+    } else if (v.type.startsWith('chat.')) {
+      if (pk !== 'party,text,to') return 'inbox chat payload ' + pk;
+      if (typeof v.payload.party !== 'string' || v.payload.party.length > 40) return 'inbox party';
+      if (typeof v.payload.text !== 'string' || v.payload.text.length < 1 || v.payload.text.length > 120) return 'inbox text';
     } else if (v.type.startsWith('raid.')) {
       if (!['raid,to', 'k,raid,to', 'k,n,raid,to'].includes(pk)) return 'inbox raid payload ' + pk;
       if (typeof v.payload.raid !== 'string' || v.payload.raid.length > 64) return 'inbox raid';

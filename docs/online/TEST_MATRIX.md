@@ -1,8 +1,8 @@
 # Test matrix T01–T40 (plan doc §29) — coverage
 
-Owner: Claude-A · SAT-ONLINE-008 (T20/T21 updated by SAT-ONLINE-009, T37 by SAT-ONLINE-014, T35 by SAT-ONLINE-015)
+Owner: Claude-A · SAT-ONLINE-008 (T20/T21 updated by SAT-ONLINE-009, T37 by SAT-ONLINE-014, T35 by SAT-ONLINE-015, T31 by SAT-ONLINE-016)
 
-Status: **✅ covered** · **🟡 partial** (what's missing is noted) · **⏳ needs a feature that doesn't exist yet** (R5 open PvP, a server, trading, chat) · **❌ gap**.
+Status: **✅ covered** · **🟡 partial** (what's missing is noted) · **⏳ needs a feature that doesn't exist yet** (R5 open PvP, a server, trading) · **❌ gap**.
 Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it applies a copy of the database rules).
 
 | ID | What (doc §29) | Status | Where |
@@ -37,7 +37,7 @@ Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it app
 | T28 | Simultaneous party invites | ✅ | `unit/chaos` (both bounce, the next invite works) |
 | T29 | Party leader disconnects | ✅ | `unit/party` (members leave when the leader disappears) |
 | T30 | Full party | ✅ | `unit/party` (capped at 5) |
-| T31 | Blocked sender hidden | ⏳ | No chat or block list yet. |
+| T31 | Blocked sender hidden | ✅ | `unit/chat` (a blocked player's chat lines, party invites and duel challenges never surface; forged lines from outside the party are ignored), `regression/chat` (⊘ in the party list hides their lines and their next invite; Block on the invite prompt) |
 | T32 | Unicode names | ✅ | `unit/chaos` (Arabic and emoji, never cut in half, valid for the rules) |
 | T33 | Malicious numbers in localStorage | 🟡 | `unit/contracts` (hostile values clamped before anything is published), `unit/storage` (corrupt/odd saves backed up). The game itself doesn't sanitize a hand-edited save (single-player, Claude-B's area). |
 | T34 | Client-side inventory edits | ⏳ | Needs server inventory (§24: `inventory/$uid .write=false`). Today the inventory exists only in the local save. |
@@ -48,6 +48,6 @@ Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it app
 | T39 | 8-hour session | ❌ | A long soak needs a real browser and time. |
 | T40 | 100-client soak | ✅ | `unit/chaos` (100 presence clients, a simulated minute: tables bounded, under 30 s CPU) |
 
-**Totals:** ✅ 26 · 🟡 6 · ⏳ 6 · ❌ 2 (T38, T39 need devices and time, not code).
+**Totals:** ✅ 27 · 🟡 6 · ⏳ 5 · ❌ 2 (T38, T39 need devices and time, not code).
 
 Run everything with `npm test`; the network rows (T19, T25–T28, T32, T40) are `node --test tests/unit/chaos.test.cjs` and take about 10 s.

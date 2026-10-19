@@ -1,15 +1,15 @@
 # Online test guide for the owner (Twister)
 
-Owner: Claude-A · covers SAT-ONLINE-001 … 015 · دليل اختبار الأونلاين — خطوة بخطوة
+Owner: Claude-A · covers SAT-ONLINE-001 … 016 · دليل اختبار الأونلاين — خطوة بخطوة
 
 ## 0. Deploy the database rules once (after pulling the top branch)
 
 ```powershell
 git fetch origin
-git checkout claude-a/sat-online-015-account
+git checkout claude-a/sat-online-016-chat
 npx.cmd -y firebase-tools@latest deploy --only database --project satisfy-online-8yjeix
 ```
-This one deploy covers presence (with its index on `x`), party/duel/raid messages, profiles, cloud saves and session leases.
+This one deploy covers presence (with its index on `x`), party/duel/raid/chat messages, profiles, cloud saves and session leases.
 It's safe before the PRs are merged, because `main` has no online code yet.
 Expected output: `rules syntax for database satisfy-online-8yjeix-default-rtdb is valid` and `Deploy complete!`.
 
@@ -25,6 +25,8 @@ devices (PC + phone), or two browsers.
 | Presence | New game or Continue on both | Badge top-centre: `Online · players: 2 · Safe zone`; you see each other walk |
 | Link | Hover the badge | `Link: NN ms · sent … · received … · dropped …` |
 | Party | Stand close, press **P**; the other presses **Y** | Party panel under the minimap; green names |
+| Chat | In the party, press **Enter**, type, **Enter** | The line shows under the party panel on both devices; **Esc** closes without sending; letters typed there don't move you or open menus |
+| Block | Click **⊘** next to the other member | `… is blocked`; their chat lines stop showing; after leaving the party their invites no longer pop up. **Cloud saves → Unblock all** undoes it |
 | Duel | Walk out of town together (no "Safe zone" in the badge), press **K**; the other presses **Y** (accept), then both **Y** (ready) | 3-2-1 countdown, a dashed ring, HP bars at the top; hits take duel HP only; **Yield** button |
 | Spectate | A third player nearby | Sees a small HP bar over each duelist and a ring |
 | Distance | Not in a party: one player walks or rides far east (two to three screens, 800–1200 px) | The count in the badge goes to `players: 1`; walking back brings them back within a second |
