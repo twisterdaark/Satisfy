@@ -1235,25 +1235,12 @@ function updateDragon(dt){const m=mons.find(m=>m.type==='trauka');if(!m||m.dead|
   if(d<190&&da<.42){hurtPlayer(MT.trauka.dmg*2,m.lv,m);vfx('fire',P.x,P.y-8);}return;}
  if(m.brc<=0&&Math.hypot(P.x-m.x,P.y-m.y)<210){m.brc=7+rand()*3;m.br=1.1;m.ba=Math.atan2(P.y-8-(m.y-40),P.x-m.x);m.face=Math.cos(m.ba)>0?1:-1;num(m.x,m.y-100,t('drBreath'),'#ff7a1e',true);tone(120,.9,'sawtooth',.06,180);}}
 // a red dragon drawn with paths: tail, body, four legs, a long neck and horned head, and two wings that beat slowly
-function drawDragon(m){const x=Math.round(m.x),y=Math.round(m.y),f=m.face||1,fl=Math.sin(gTime*2.6+m.t)*8,dead=m.dead;if(dead)return;
- ctx.save();ctx.fillStyle='rgba(0,0,0,.32)';ctx.beginPath();ctx.ellipse(x,y,42,9,0,0,7);ctx.fill();
+function drawDragon(m){const x=Math.round(m.x),y=Math.round(m.y),f=m.face||1;if(m.dead)return;
+ ctx.save();ctx.fillStyle='rgba(0,0,0,.32)';ctx.beginPath();ctx.ellipse(x,y,46,9,0,0,7);ctx.fill();
  if(m.br>0){const a=m.ba,hx=m.x+Math.cos(a)*30,hy=m.y-40+Math.sin(a)*14;ctx.globalAlpha=.18+(1.1-m.br)*.35;ctx.fillStyle='#ff4a1a';ctx.beginPath();ctx.moveTo(hx,hy);ctx.arc(hx,hy,190,a-.42,a+.42);ctx.closePath();ctx.fill();ctx.globalAlpha=1;}
- ctx.translate(x,y);ctx.scale(f,1);const C=m.hurt>0?'#ff8a8a':'#b8282a',D=m.hurt>0?'#d86a6a':'#7a161a',B='#e8a050',W='#8a1a1e';
- const poly=(pts,c)=>{ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(const q of pts.slice(1))ctx.lineTo(q[0],q[1]);ctx.closePath();ctx.fill();};
- // far wing, tail, legs, body
- poly([[-2,-40],[-34,-78-fl],[-20,-52-fl*.4],[-8,-36]],D);
- poly([[-22,-22],[-46,-16],[-62,-8],[-58,-4],[-40,-10],[-20,-14]],C);poly([[-62,-8],[-70,-14],[-66,-2]],D);
- for(const [lx,c] of [[-16,D],[10,D],[-10,C],[16,C]]){ctx.fillStyle=c;ctx.fillRect(lx-3,-14,7,14);ctx.fillStyle='#2a1010';ctx.fillRect(lx-4,-2,9,2);}
- ctx.fillStyle=C;ctx.beginPath();ctx.ellipse(0,-24,28,14,0,0,7);ctx.fill();ctx.fillStyle=B;ctx.beginPath();ctx.ellipse(2,-16,20,6,0,0,Math.PI);ctx.fill();
- for(let i=-2;i<=2;i++)poly([[i*9-3,-37],[i*9,-44],[i*9+3,-37]],D);
- // neck and head
- poly([[16,-30],[30,-52],[38,-50],[26,-24]],C);ctx.fillStyle=C;ctx.beginPath();ctx.ellipse(40,-54,12,7,-.2,0,7);ctx.fill();
- poly([[44,-50],[56,-48],[54,-44],[42,-46]],C);poly([[34,-60],[28,-72],[38,-62]],'#e8dcc0');poly([[40,-60],[38,-74],[44,-61]],'#e8dcc0');
- ctx.fillStyle=m.br>0?'#ffffff':'#ffd24a';ctx.fillRect(42,-57,3,2);if(m.br>0){ctx.fillStyle='#ff7a1e';ctx.globalAlpha=.6+Math.sin(gTime*30)*.3;ctx.beginPath();ctx.arc(56,-46,4,0,7);ctx.fill();ctx.globalAlpha=1;}
- // near wing over the body
- poly([[4,-40],[-24,-86-fl],[-6,-60-fl*.5],[20,-90-fl],[14,-54-fl*.3],[16,-36]],W);ctx.strokeStyle=D;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(6,-40);ctx.lineTo(-24,-86-fl);ctx.moveTo(10,-42);ctx.lineTo(20,-90-fl);ctx.stroke();
- ctx.restore();
- ctx.font='bold 9px Oswald, sans-serif';ctx.textAlign='center';ctx.fillStyle='#ff9a6a';ctx.fillText('Lv'+m.lv,x,y-104);}
+ // pixel sheet from sprites-original/monsters.js (owner: drawn in the game's style, not flat shapes); the level label is drawMon's
+ const s=MSH.trauka,pose=m.hurt>0?'hurt':m.br>0?'atk':(m.mvd||m.eng>0)?'walk':'idle',fr=pose==='atk'?(m.br>.8?0:1):monFrame(pose,gTime+m.t),r=SA.monsters.rect('trauka',s.W,s.H,pose,Math.min(fr,SA.monsters.POSES.find(q=>q[0]===pose)[1]-1));
+ ctx.translate(x,y);ctx.scale(f,1);ctx.drawImage(s.canvas,r.sx,r.sy,r.sw,r.sh,-s.anchor.x,-s.anchor.y,s.W,s.H);ctx.restore();}
 
 /* ---------------- the tournament (SAT-ARENA-001) ---------------- */
 // Once a day the herald in Reinhardt lets you into the tournament: four duels on the arena floor against famous rankers,

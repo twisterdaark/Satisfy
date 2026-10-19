@@ -12032,6 +12032,18 @@
     },
     "scale": 1.3
    },
+   "trauka": {
+    "file": "sheets/monsters/trauka.png",
+    "frame": {
+     "w": 178,
+     "h": 122
+    },
+    "anchor": {
+     "x": 91,
+     "y": 121
+    },
+    "scale": 1
+   },
    "wolf": {
     "file": "sheets/monsters/wolf.png",
     "frame": {

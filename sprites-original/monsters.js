@@ -99,13 +99,55 @@ function guardian(g,p,pose,f){const W=64,H=72,B='#5a3b22',Bd='#3e2814',L='#2f6b3
  const ec=pose==='hurt'?'#ffffff':'#b8ff6a';R(g,x-7,ty+7,4,3,ec);R(g,x+3,ty+7,4,3,ec);R(g,x-6,ty+7,1,1,'#ffffff');R(g,x+4,ty+7,1,1,'#ffffff');R(g,x-4,ty+15,8,2,Bd);
  return {W,H};}
 
-const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null]};
+
+// Fire Dragon Trauka (world boss, canon "Red Dragon Trauka", ch 96/156). 156x112, anchor (78,112): a red dragon with
+// membrane wings, back-swept horns, a spiked tail and a pale belly; atk = head forward, jaw open, fire in the mouth.
+function dpoly(g,pts,c){let y0=1e9,y1=-1e9;pts.forEach(q=>{y0=Math.min(y0,q[1]);y1=Math.max(y1,q[1]);});g.fillStyle=c;
+ for(let y=Math.floor(y0);y<=Math.ceil(y1);y++){const xs=[];for(let i=0;i<pts.length;i++){const [ax,ay]=pts[i],[bx,by]=pts[(i+1)%pts.length];if((ay<=y+.5&&by>y+.5)||(by<=y+.5&&ay>y+.5))xs.push(ax+(y+.5-ay)*(bx-ax)/(by-ay));}
+  xs.sort((a,b)=>a-b);for(let i=0;i+1<xs.length;i+=2){const a=Math.round(xs[i]),b=Math.round(xs[i+1]);if(b>a)g.fillRect(a,y,b-a,1);}}}
+function dline(g,x0,y0,x1,y1,w,c){const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0))|0;for(let i=0;i<=n;i++){const t=n?i/n:0;R(g,x0+(x1-x0)*t-w/2,y0+(y1-y0)*t-w/2,w,w,c);}}
+function trauka(g,p,pose,f){const W=156,H=112,AX=78,B='#b8282a',D='#7a161a',DD='#4e0c12',L='#e04a3a',BL='#e8a050',BD='#c07a34',M1='#8a1a1e',M2='#a8303a',HN='#e8dcc0',CL='#2a1010';
+ const flap=pose==='idle'?[0,4][f]:pose==='walk'?[0,3,6,3][f]:pose==='atk'?(f?-4:2):5,bob=pose==='walk'?[0,-1,0,-1][f]:0,lunge=pose==='atk'?(f?6:-3):pose==='hurt'?-4:0,st=pose==='walk'?[2,0,-2,0][f]:0;
+ const by=78+bob,bx=72;
+ // far wing (behind)
+
+ const sx=bx+10,sy=by-14,wx=bx+2,wy=6+flap;
+ dpoly(g,[[sx,sy],[wx,wy],[wx-50,wy+10],[wx-44,wy+22],[wx-40,wy+28],[wx-30,wy+32],[wx-24,wy+40],[wx-14,wy+44],[wx-6,sy-2]],shade(M1,-.25));for(const [tx,ty] of [[-50,10],[-40,28],[-24,40]])dline(g,wx,wy,wx+tx,wy+ty,2,DD);dline(g,sx,sy,wx,wy,3,DD);
+ // tail with spikes
+ const tail=[[bx-26,by+2,9],[bx-38,by+6,7],[bx-50,by+10,6],[bx-60,by+14,5],[bx-68,by+18,4]];tail.forEach(([x,y,r],i)=>{ell(g,x,y,r+2,r,D);ell(g,x,y-1,r+1,r-1,B);dpoly(g,[[x-3,y-r],[x,y-r-5+i*.5],[x+3,y-r]],D);});
+ dpoly(g,[[bx-72,by+18],[bx-84,by+12],[bx-80,by+22]],D);dpoly(g,[[bx-72,by+16],[bx-78,by+14],[bx-76,by+19]],L);
+ // far legs
+ const leg=(x,s,c,c2)=>{ell(g,x,by+6,11,12,c);R(g,x-5+s,by+14,10,H-by-18,c);R(g,x-5+s,by+14,2,H-by-18,shade(c,-.2));R(g,x-7+s,H-5,15,5,c2);for(let k=0;k<4;k++)R(g,x-7+s+k*4,H-1,2,1,'#e8dcc0');};
+ leg(bx-14,-st,shade(D,-.15),DD);leg(bx+20,st,shade(D,-.15),DD);
+ // body + belly + scales
+ ell(g,bx,by,34,18,D);ell(g,bx,by-1,33,16,B);ell(g,bx+2,by+9,27,7,BD);ell(g,bx+2,by+8,25,6,BL);for(let i=-3;i<=3;i++)R(g,bx+2+i*6,by+3,1,8,BD);
+ for(let yy=-10;yy<=2;yy+=4)for(let xx=-22;xx<=22;xx+=6)R(g,bx+xx+(yy%8?3:0),by+yy,2,1,D);R(g,bx-18,by-13,26,2,L);
+ for(let i=0;i<6;i++){const x=bx-20+i*8;dpoly(g,[[x-3,by-15],[x,by-22-(i%2)*2],[x+3,by-15]],D);}
+ // near legs
+ leg(bx-8,st,B,D);leg(bx+26,-st,B,D);R(g,bx-12,by+4,4,6,L);R(g,bx+22,by+4,4,6,L);
+ // neck and head
+ const nx=bx+26,hx=bx+48+lunge,hy=26+bob+(pose==='atk'?(f?6:2):0);
+ for(let i=0;i<=5;i++){const t=i/5,x=nx+(hx-12-nx)*t,y=by-8+(hy+6-(by-8))*t;ell(g,x,y,8-i*.5,8-i*.6,D);ell(g,x,y-1,7-i*.5,7-i*.6,B);ell(g,x+2,y+3,4-i*.4,3,BL);}
+ for(let i=1;i<5;i++){const t=i/5,x=nx+(hx-12-nx)*t,y=by-8+(hy+6-(by-8))*t;dpoly(g,[[x-6,y-6],[x-9,y-11],[x-3,y-7]],D);}
+ ell(g,hx,hy,13,8,D);ell(g,hx,hy-1,12,7,B);R(g,hx+6,hy-4,16,7,B);R(g,hx+6,hy+2,16,2,D);R(g,hx+6,hy-5,14,1,L);R(g,hx+20,hy-4,2,2,DD);
+ const open=pose==='atk'&&f===1;if(open){R(g,hx+4,hy+3,18,3,'#3a0a0a');R(g,hx+4,hy+6,16,4,B);R(g,hx+4,hy+9,16,1,D);for(let k=0;k<4;k++)R(g,hx+8+k*4,hy+3,1,2,'#ffffff');
+  R(g,hx+22,hy+2,6,4,'#ffd24a');R(g,hx+26,hy+1,8,6,'#ff7a1e');R(g,hx+32,hy+2,6,4,'#ffb43a');}else{R(g,hx+4,hy+3,18,3,B);R(g,hx+4,hy+5,16,1,D);}
+ dpoly(g,[[hx-6,hy-6],[hx-22,hy-16],[hx-10,hy-4]],HN);dpoly(g,[[hx-2,hy-7],[hx-14,hy-20],[hx-4,hy-5]],HN);R(g,hx-21,hy-16,2,1,shade(HN,-.3));
+ R(g,hx+2,hy-4,4,3,pose==='hurt'?'#ffffff':'#ffd24a');R(g,hx+4,hy-4,1,3,'#3a0a0a');dpoly(g,[[hx-2,hy-6],[hx+8,hy-8],[hx+6,hy-5]],D);
+ // near wing over the body, membrane lighter
+ const nsx=bx+4,nsy=by-12,nwx=bx-4,nwy=0+flap,T=[[-64,14],[-54,34],[-38,46],[-20,52]];
+ dpoly(g,[[nsx,nsy],[nwx,nwy],[nwx-64,nwy+14],[nwx-56,nwy+26],[nwx-54,nwy+34],[nwx-44,nwy+38],[nwx-38,nwy+46],[nwx-28,nwy+47],[nwx-20,nwy+52],[nwx-10,nwy+50],[nsx-8,nsy+4]],M1);
+ dpoly(g,[[nwx-3,nwy+8],[nwx-52,nwy+22],[nwx-48,nwy+32],[nwx-36,nwy+40],[nwx-22,nwy+46],[nsx-10,nsy+1]],M2);
+ for(const [tx,ty] of T)dline(g,nwx,nwy,nwx+tx,nwy+ty,2,D);dline(g,nsx,nsy,nwx,nwy,4,D);dline(g,nsx,nsy-1,nwx,nwy-1,1,L);R(g,nwx-2,nwy-4,3,5,HN);
+ return {W,H,AX};}
+
+const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null],trauka:[trauka,null,[230,170]]};
 
 // Build a sheet: columns = frames of the longest pose, rows = poses. Returns {canvas, W, H, anchor}.
 // Frames are drawn with a margin and cropped to the union of their pixels (+1 for the outline),
 // so legs, tails, ears and attack lunges that reach past the nominal W x H are never cut off.
-function buildSheet(type){const [fn,pk]=KINDS[type],p=pk?PAL[pk]:null,PAD=16;let dims=null;
- const frames=[];POSES.forEach(([pose,n],ri)=>{for(let f=0;f<n;f++){const c=canvas(104,112),g=c.getContext('2d');g.translate(PAD,PAD);const d=fn(g,p,pose,f);dims=d;frames.push({c,ri,f});}});
+function buildSheet(type){const [fn,pk,cs]=KINDS[type],p=pk?PAL[pk]:null,PAD=16;let dims=null;
+ const frames=[];POSES.forEach(([pose,n],ri)=>{for(let f=0;f<n;f++){const c=canvas(cs?cs[0]:104,cs?cs[1]:112),g=c.getContext('2d');g.translate(PAD,PAD);const d=fn(g,p,pose,f);dims=d;frames.push({c,ri,f});}});
  let x0=1e9,y0=1e9,x1=-1,y1=-1;frames.forEach(({c})=>{const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++)if(d[(y*c.width+x)*4+3]){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}});
  x0-=1;y0-=1;x1+=1;y1+=1;const W=x1-x0+1,H=y1-y0+1,cols=Math.max(...POSES.map(([,n])=>n));const sh=canvas(W*cols,H*POSES.length),sg=sh.getContext('2d');
  frames.forEach(({c,ri,f})=>{const t=canvas(W,H),tg=t.getContext('2d');tg.drawImage(c,x0,y0,W,H,0,0,W,H);polish(tg,W,H);sg.drawImage(t,f*W,ri*H);});
