@@ -112,7 +112,7 @@ test('inbox: only the owner reads and deletes; senders create write-once message
   const { pvp: PV } = loadModules('src/net/contracts.js', 'src/net/pvp.js');
   assert.deepEqual(types.filter((x) => x.startsWith('pvp.')), [...PV.TYPES], 'every pvp message can travel');
   assert.match(msg.payload['.validate'], /beginsWith\('pvp\.'\) && newData\.hasChild\('k'\) && !newData\.hasChild\('party'\) && !newData\.hasChild\('duel'\) && !newData\.hasChild\('raid'\) && !newData\.hasChild\('text'\)/);
-  assert.equal(node.ol['.validate'], 'newData.val() === 1', 'the outlaw mark is 1 or absent');
+  assert.equal(node.ol['.validate'], 'newData.val() === 1 || newData.val() === 2', 'the outlaw mark is 1, 2 (a murderer: SAT-ONLINE-052) or absent');
   // SAT-ONLINE-039: trade asks carry only the trade id
   const { trade: TR } = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/trade.js');
   assert.deepEqual(types.filter((x) => x.startsWith('trade.')), [...TR.TYPES], 'every trade message can travel');

@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19t', ver: '0.43', d: '2026-10-19',
+      ar: ['أونلاين: الكارما: لما تقتل لاعب مش خارج عن القانون بتخسر نقطة واسمك بيفضل أحمر مدة أطول، ولو وصلت -5 بتبقى "قاتل" باسم أحمر غامق عند الكل',
+        'قتل الخارج عن القانون عدالة: بتكسب نقطة ومبتبقاش أحمر، وكل نص ساعة لعب بترجعلك نقطة لو إنت تحت الصفر'],
+      en: ['Online: karma: killing a player who is not an outlaw costs a point and keeps your name red for longer; at -5 you are a "Murderer" in dark red for everyone',
+        'Killing an outlaw is justice: a point back and no red name; below zero, every half hour of play gives a point back'] },
     { v: '2026-10-19l', ver: '0.35', d: '2026-10-19',
       ar: ['أونلاين: تبادل بين اللاعبين: افتح كارت اللاعب اللي جنبك (⋯ أو T) واضغط تبادل',
         'كل واحد بيحط دهب وحاجات من الشنطة، وبعدين الاتنين يضغطوا موافق وبعدها تأكيد',

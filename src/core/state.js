@@ -50,6 +50,8 @@
     // duel record (SAT-ONLINE-006): {w, l}; party-raid encounters already paid (SAT-ONLINE-009);
     // outlaw until (wall-clock ms) after killing a player in open PvP (SAT-ONLINE-038), kept across a reload
     'duels', 'raidDone', 'olT',
+    // karma (SAT-ONLINE-052): -10..10, down for killing a player who isn't an outlaw, up for killing an outlaw; karT: play time toward the next point back
+    'karma', 'karT',
     // recipes learned and recipe use counts (main rcLearn)
     'rcK', 'rcN',
     // map cells seen (fog of war, Nitro's feedback): base64 bitset

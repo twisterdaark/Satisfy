@@ -148,7 +148,7 @@
       fx: typeof ctx.fx === 'string' && ctx.fx.length <= FX_MAX ? ctx.fx : null,
       gu: Number.isInteger(ctx.gu) && ctx.gu >= 1 && ctx.gu <= 256 ? ctx.gu : null,
       rs: typeof ctx.rs === 'string' && RS_RE.test(ctx.rs) ? ctx.rs : null,
-      ol: ctx.ol ? 1 : null, // SAT-ONLINE-038: an outlaw (killed a player lately): a red name for everyone
+      ol: ctx.ol === 2 ? 2 : ctx.ol ? 1 : null, // SAT-ONLINE-038: an outlaw (killed a player lately): a red name for everyone; 2: a murderer (SAT-ONLINE-052, low karma)
       t: ctx.t || 0,
     };
   }
@@ -186,7 +186,7 @@
     if (o.fx !== undefined && o.fx !== null && !(typeof o.fx === 'string' && o.fx.length <= FX_MAX)) e.push('fx');
     if (o.gu !== undefined && o.gu !== null && !(Number.isInteger(o.gu) && o.gu >= 1 && o.gu <= 256)) e.push('gu');
     if (o.rs !== undefined && o.rs !== null && !(typeof o.rs === 'string' && RS_RE.test(o.rs))) e.push('rs');
-    if (o.ol !== undefined && o.ol !== null && o.ol !== 1) e.push('ol');
+    if (o.ol !== undefined && o.ol !== null && o.ol !== 1 && o.ol !== 2) e.push('ol');
     return { ok: e.length === 0, errors: e };
   }
 

@@ -140,7 +140,7 @@
     if ('em' in v && !/^(wave|dance|point|cheer)$/.test(v.em)) return 'em';
     if ('role' in v && !/^(tank|healer|damage|support)$/.test(v.role)) return 'role';
     if ('rs' in v && !(typeof v.rs === 'string' && v.rs.length <= 515 && /^[A-Za-z0-9:_.-]+( [A-Za-z0-9:_.-]+){0,3}$/.test(v.rs))) return 'rs';
-    if ('ol' in v && v.ol !== 1) return 'ol';
+    if ('ol' in v && v.ol !== 1 && v.ol !== 2) return 'ol';
     if ('wp' in v && !/^[a-z0-9_]{1,16}:[0-9](:[0-9]{1,2})?$/.test(v.wp)) return 'wp';
     if ('fx' in v && !(typeof v.fx === 'string' && v.fx.length <= 2400)) return 'fx';
     if ('gu' in v && !(Number.isInteger(v.gu) && v.gu >= 1 && v.gu <= 256)) return 'gu';

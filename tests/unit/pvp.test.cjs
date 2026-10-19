@@ -108,10 +108,13 @@ test('a kill report makes the killer an outlaw, only for a player it really hit 
   assert.equal(a.events.filter((e) => e.type === 'kill').length, 1);
 });
 
-test('PlayerPublic.ol is 1 or null', () => {
+test('PlayerPublic.ol is 1 (an outlaw), 2 (a murderer, SAT-ONLINE-052) or null', () => {
   const pp = (ol) => SN.net.toPlayerPublic({ look: { n: 'X' }, cls: 'novice', lv: 2 }, { x: 1, y: 1, dir: 0 }, { ol });
   assert.equal(pp(true).ol, 1);
+  assert.equal(pp(1).ol, 1);
+  assert.equal(pp(2).ol, 2);
   assert.equal(pp(false).ol, null);
   assert.ok(SN.net.validatePlayerPublic(pp(true)).ok);
-  assert.deepEqual(SN.net.validatePlayerPublic({ ...pp(true), ol: 2 }).errors, ['ol']);
+  assert.ok(SN.net.validatePlayerPublic(pp(2)).ok);
+  assert.deepEqual(SN.net.validatePlayerPublic({ ...pp(true), ol: 3 }).errors, ['ol']);
 });

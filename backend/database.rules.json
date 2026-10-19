@@ -162,7 +162,7 @@
               ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 256 && newData.val() % 1 === 0"
             },
             "ol": {
-              ".validate": "newData.val() === 1"
+              ".validate": "newData.val() === 1 || newData.val() === 2"
             },
             "seq": {
               ".validate": "newData.isNumber() && newData.val() >= 0"
