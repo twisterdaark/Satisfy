@@ -18,7 +18,7 @@ async function until(g, fn, ms = 8000, arg) {
   while (Date.now() < end) { if (await g.eval(fn, arg)) return; await g.step(3); await g.page.waitForTimeout(30); }
   throw new Error('timed out waiting for ' + fn);
 }
-const lines = (g) => g.eval(() => [...document.querySelectorAll('#chatL div')].map((d) => d.textContent));
+const lines = (g) => g.eval(() => [...document.querySelectorAll('#chatL div:not(.sys)')].map((d) => d.textContent)); // players' lines (not world notices, SAT-ONLINE-041)
 
 async function partyOf2(mode) {
   const ctx = await H.newContext(mode === 'online' ? { scripts: [H.FAKE_FIREBASE] } : {});
@@ -49,7 +49,8 @@ for (const mode of ['local', 'online']) {
     try {
       await settle(a, b);
       // no lines yet: no box (owner, SAT-ONLINE-026: don't crowd the screen); Enter brings it up
-      assert.equal(await a.eval(() => document.getElementById('chatW').hidden), true, 'no empty chat box');
+      // (a world notice from the real clock, an event that began in the last seconds, may be the one line: SAT-ONLINE-041)
+      assert.equal(await a.eval(() => document.getElementById('chatW').hidden || [...document.querySelectorAll('#chatL div')].every((d) => d.classList.contains('sys'))), true, 'no empty chat box');
       await a.page.keyboard.press('Enter');
       await a.step(2);
       assert.equal(await a.eval(() => document.getElementById('chatW').hidden), false, 'Enter shows the chat box');
