@@ -18,8 +18,15 @@ test('a player on another map version is tracked but not drawn, invited or chall
   try {
     const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
     const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
-    // B runs a build whose map differs by one tile (as after an update that only one of them loaded)
+    // B runs a build whose map hashes differently (as after an update that only one of them loaded). The version is
+    // the hash of the map as generated at load (c178cdd), so a tile changed while playing (a tree cut) keeps it:
+    // the test sets the other build's version through the hook instead of changing a tile.
+    const [v0] = await b.eval(() => window.__GU.mapV());
     await b.eval(() => { window.__G.setT(3, 3, window.__G.at(3, 3) === 1 ? 2 : 1); });
+    const [v1, h1] = await b.eval(() => window.__GU.mapV());
+    assert.equal(v1, v0, 'a tile changed in play keeps the version');
+    assert.notEqual(h1, v0, '(the map itself did change)');
+    await b.eval(() => window.__GW.setMapV('0badc0de'));
     await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
     await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
     await b.eval(() => { window.__G.P.x += 20; });

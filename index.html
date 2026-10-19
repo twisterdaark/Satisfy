@@ -1302,12 +1302,17 @@ let auT=0;function updateAuction(dt){if((auT-=dt)<=0){auT=5;auTick();}}
 // dragon. Online the server owns its health so everyone who joins the fight hits the same dragon.
 function dragonDown(m){WS.wb=WS.wb||{};WS.wb.trauka=Date.now()+MT.trauka.wb*1000;giveTitle('dslayer');setTimeout(()=>annW('drDown'),500);save(true);}
 function updateDragon(dt){const m=mons.find(m=>m.type==='trauka');if(!m||m.dead||mode==='dead')return;
- if(!(m.eng>0)){m.br=0;return;}m.brc=(m.brc===undefined?4:m.brc)-dt;
+ // SAT-ONLINE-045: online the host times and aims the breath (at the player the dragon is after) and sends it as an
+ // action; a follower only plays the breath it was sent, and each screen burns its own player if it stands in the cone
+ const fol=!!(m.led&&MOBN&&MOBN.host&&MOBN.host!==NET.uid);
+ if(!fol&&!(m.eng>0)){m.br=0;return;}m.brc=(m.brc===undefined?4:m.brc)-dt;
  if(m.br>0){m.br-=dt;m.stun=Math.max(m.stun||0,.05);if(m.br>0)return;const a=m.ba,hx=m.x+Math.cos(a)*30,hy=m.y-40+Math.sin(a)*14;
   for(let i=0;i<46;i++){const aa=a+(rand()-.5)*.8,sp=160+rand()*220;fx.push({x:hx,y:hy,vx:Math.cos(aa)*sp,vy:Math.sin(aa)*sp,t:.55,c:rand()<.5?'#ff7a1e':rand()<.5?'#ffd24a':'#c82a1a',fl:1});}
   SFX.slam();noise(.5,.25,500);shake=.4;const dx=P.x-hx,dy=P.y-8-hy,d=Math.hypot(dx,dy),da=Math.abs(((Math.atan2(dy,dx)-a)+Math.PI*3)%(Math.PI*2)-Math.PI);
   if(d<190&&da<.42){hurtPlayer(MT.trauka.dmg*2,m.lv,m);vfx('fire',P.x,P.y-8);}return;}
- if(m.brc<=0&&Math.hypot(P.x-m.x,P.y-m.y)<210){m.brc=7+rand()*3;m.br=1.1;m.ba=Math.atan2(P.y-8-(m.y-40),P.x-m.x);m.face=Math.cos(m.ba)>0?1:-1;num(m.x,m.y-100,t('drBreath'),'#ff7a1e',true);tone(120,.9,'sawtooth',.06,180);}}
+ if(fol)return;const tg=MOBN&&MOBN.host===NET.uid&&mobTarget(m)||P;
+ if(m.brc<=0&&Math.hypot(tg.x-m.x,tg.y-m.y)<210){m.brc=7+rand()*3;m.br=1.1;m.ba=Math.atan2(tg.y-8-(m.y-40),tg.x-m.x);dragonBreathFx(m);mobActN(m);}}
+function dragonBreathFx(m){m.face=Math.cos(m.ba)>0?1:-1;num(m.x,m.y-100,t('drBreath'),'#ff7a1e',true);tone(120,.9,'sawtooth',.06,180);}
 // a red dragon drawn with paths: tail, body, four legs, a long neck and horned head, and two wings that beat slowly
 function drawDragon(m){const x=Math.round(m.x),y=Math.round(m.y),f=m.face||1;if(m.dead||!MSH.trauka)return;
  ctx.save();ctx.fillStyle='rgba(0,0,0,.32)';ctx.beginPath();ctx.ellipse(x,y,46,9,0,0,7);ctx.fill();
@@ -1711,7 +1716,7 @@ function invMarch(m,b,mr,dt){const T=TOWNS.find(T=>T.k===m.tw);
 function npcKOSay(n){if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!EV||typeof EV.slot!=='number')return;const i=npcs.indexOf(n);if(i<0)return;NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:'npcKO',p:{f:i,lv:EV.slot%100000}});}
 function npcKOIn(m){if(!m||m.k!=='npcKO'||!NET||m.from===NET.uid||!S||S.__demo||!m.p)return;const E=EV,n=npcs[m.p.f|0];if(!E||typeof E.slot!=='number'||m.p.lv!==E.slot%100000||!n||npcKO(n.id))return;
  WS.nko=WS.nko||{};WS.nko[n.id]=E.end;E.fallen=(E.fallen||0)+1;n.nhp=NPCHP;if(Math.hypot(n.x-P.x,n.y-P.y)<900){dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');}}
-window.__GW={ev:()=>EV&&{slot:EV.slot,k:EV.e.k},wnow:()=>wNow(),nodes:()=>nodes.map(n=>[n.kind,n.tx,n.ty]),wx:()=>wxNow(),npcs:()=>npcs.map(n=>n.id),ko:id=>npcKO(id),knock:i=>{const n=npcs[i];if(n){n.nhp=1;npcHit(n,{cap:1,face:1});}}}; // tests (SAT-ONLINE-044)
+window.__GW={setMapV:v=>{MAPV=String(v);},ev:()=>EV&&{slot:EV.slot,k:EV.e.k},wnow:()=>wNow(),nodes:()=>nodes.map(n=>[n.kind,n.tx,n.ty]),wx:()=>wxNow(),npcs:()=>npcs.map(n=>n.id),ko:id=>npcKO(id),knock:i=>{const n=npcs[i];if(n){n.nhp=1;npcHit(n,{cap:1,face:1});}}}; // tests (SAT-ONLINE-044)
 function npcHit(n,m){const d=m.cap?18:9+(rand()*4|0);n.nhp=(n.nhp??NPCHP)-d;n.hitT=.2;m.at=0;vfx('hit',n.x,n.y-10,{angle:m.face>0?0:Math.PI});num(n.x,n.y-26,'-'+d,'#ff8a7a',false);SFX.hit();
  if(n.nhp<=0){n.nhp=NPCHP;WS.nko=WS.nko||{};WS.nko[n.id]=EV?EV.end:Date.now()+60e3;if(EV)EV.fallen=(EV.fallen||0)+1;npcKOSay(n);dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');SFX.deny();if(m.nt===n)m.nt=null;}}
 // townsfolk fight back: guards and trainers strike invaders from a few steps away, everyone else hits whatever is beating
@@ -3437,10 +3442,10 @@ function ipHit(m,dmg,crit,o){if(o.dot)return dmg;const b=MT[m.type],skill=!!o.sk
  if(m.cboT>0&&gTime-m.icL<1)dmg*=3;
  if(ipOn('bleed')&&crit||ipOn('cut')&&rand()<.25){if(!m.bl)num(m.x,monY(m)-16,t('ipBleed'),'#ff4a3a',false);m.bl={t:3,n:0};}
  if(ipOn('fear')&&!b.boss&&m.lv<=S.lv-20&&rand()<.15){m.stun=Math.max(m.stun||0,.8);if(AIK[m.type])m.flee=1.5;num(m.x,monY(m)-24,t('ipFear'),'#c89aff',false);}
- if(!skill&&ipOn('jnt5')&&rand()<.08&&!o.jnt){num(P.x,P.y-30,t('ipJnt5'),'#ffd24a',true);for(let i=1;i<5;i++)setTimeout(()=>{if(mode!=='play'||m.dead)return;vfx('slash',m.x,monY(m),{angle:rand()*6.28,rarity:3});SFX.swing();hitMon(m,.5,{jnt:1});},i*90);}
+ if(!skill&&ipOn('jnt5')&&rand()<.08&&!o.jnt){numP(-30,t('ipJnt5'),'#ffd24a',true);for(let i=1;i<5;i++)setTimeout(()=>{if(mode!=='play'||m.dead)return;vfx('slash',m.x,monY(m),{angle:rand()*6.28,rarity:3});SFX.swing();hitMon(m,.5,{jnt:1});},i*90);}
  if(!skill&&ipOn('gale')){P.gale=Math.min(30,(P.gale||0)+1);P.galeT=3;}
- if(!skill&&ipOn('wisdom')&&rand()<.05){const ks=Object.keys(P.cd).filter(k=>P.cd[k]>0);if(ks.length){const k=ks.sort((a,c)=>P.cd[c]-P.cd[a])[0];P.cd[k]=0;num(P.x,P.y-30,t('ipWisdom'),'#9fd8ff',false);vfx('mana',P.x,P.y-8);}}
- const heal=(p,cd,key)=>{if((P[key]||0)>gTime)return;P[key]=gTime+cd;const h=Math.max(1,Math.round(dmg*p));P.hp=Math.min(maxHP(),P.hp+h);num(P.x,P.y-26,'+'+h,'#ff7a9a',false);};
+ if(!skill&&ipOn('wisdom')&&rand()<.05){const ks=Object.keys(P.cd).filter(k=>P.cd[k]>0);if(ks.length){const k=ks.sort((a,c)=>P.cd[c]-P.cd[a])[0];P.cd[k]=0;numP(-30,t('ipWisdom'),'#9fd8ff',false);vfx('mana',P.x,P.y-8);}}
+ const heal=(p,cd,key)=>{if((P[key]||0)>gTime)return;P[key]=gTime+cd;const h=Math.max(1,Math.round(dmg*p));P.hp=Math.min(maxHP(),P.hp+h);numP(-26,'+'+h,'#ff7a9a',false);};
  if(ipOn('elfin'))heal(skill?.05:.12,21,'elfT');if(!skill&&ipOn('vamp'))heal(.1,12,'vampT');
  return dmg;}
 // Blacksmith's Breath: "There is a rare chance of giving special features to your production items" (5%, Pagma's
@@ -3448,7 +3453,7 @@ function ipHit(m,dmg,crit,o){if(o.dot)return dmg;const b=MT[m.type],skill=!!o.sk
 const FEATS=[['as',.04],['ms',.04],['dm',.05],['hpp',.05]];
 function breathFeat(it){if(!pasOn('focus')||it.r<2||rand()>=.05+(skLv('focus')-1)*.005*(skLv('focus')>=10?2:1))return;const [k,v]=FEATS[rand()*FEATS.length|0];it[k]=+((it[k]||0)+v).toFixed(3);it.ft=k;setTimeout(()=>{toast(t('featGot',{f:t('ft_'+k)}),'good');SFX.rare();},600);}
 // Doran's Ring: "50% of the damage received will instantly be recovered" (once every 3 minutes here)
-function ipHurt(d){if(d>0&&P.hp>0&&ipOn('doran')&&(P.doT||0)<=S.playT){P.doT=S.playT+180;const h=Math.round(d*.5);P.hp=Math.min(maxHP(),P.hp+h);num(P.x,P.y-30,t('ipDoran',{n:h}),'#7ae07a',false);vfx('heal',P.x,P.y);}}
+function ipHurt(d){if(d>0&&P.hp>0&&ipOn('doran')&&(P.doT||0)<=S.playT){P.doT=S.playT+180;const h=Math.round(d*.5);P.hp=Math.min(maxHP(),P.hp+h);numP(-30,t('ipDoran',{n:h}),'#7ae07a',false);vfx('heal',P.x,P.y);}}
 // per frame: bleeding (6 ticks over 3 s), buff timers, Gale Spear's speed stacks, landing from Fly
 function updateItemFx(dt){if(!P)return;if(P.qm>0)P.qm-=dt;
  if(P.icb>0){P.icb-=dt;if(P.icb<=0){if(skLv('icomb')<10)[weapon(),armorIt()].forEach(i=>{if(i)i.dur=Math.max(0,durOf(i)-10);});toast(t('icombEnd'),'warn');}}if(P.galeT>0){P.galeT-=dt;if(P.galeT<=0)P.gale=0;}
@@ -3833,7 +3838,7 @@ function update(dt){
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
   if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}continue;}
   if(m.mvd)m.at=(m.at||0)+dt;m.mvd=0;m.t+=dt;if(m.grdT>0)m.grdT-=dt;m.cd-=dt;if(m.hurt>0)m.hurt-=dt;if(m.weak>0)m.weak-=dt;if(m.stun>0){m.stun-=dt;continue;}
-  if(MOBN&&MOBN.host===NET.uid&&MOBN.rs&&MOBN.rs.length&&!b.boss){const tg=mobTarget(m);if(tg){MOBP=P;P=tg;}} // host: it may be after another player
+  if(MOBN&&MOBN.host===NET.uid&&MOBN.rs&&MOBN.rs.length){const tg=mobTarget(m);if(tg){MOBP=P;P=tg;}} // host: it may be after another player, a boss too (SAT-ONLINE-045: a boss chased and leashed by the host alone walked home and healed while someone else fought it)
   if(MOBN&&MOBN.host===NET.uid)m.tgU=P.remote||NET.uid; // SAT-ONLINE-042: the player it is after goes out with each action
   const dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=m.type==='guardian'?10:Math.max(3,b.r-3);
   if(b.boss){
@@ -3843,7 +3848,7 @@ function update(dt){
    if(m.hp>=m.max)m.ph=0;{const ph=m.hp<m.max*.33?2:m.hp<m.max*.66?1:0;if(ph>(m.ph||0)){m.ph=ph;bossPhase(m,b,ph);}}
    const enr=m.hp<m.max/2,sp=b.spd*(enr?1.3:.9)*(1+(m.ph||0)*.08);
    if(m.tele>0){m.tele-=dt;if(m.tele<=0){shake=.4;SFX.slam();if(d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}if(m.type==='guardian')slamAllies(m);for(let i=0;i<24;i++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:'#8a8f99'});}m.scd=(enr?1.7:2.6)-(m.ph||0)*.25;
-    if(m.ph>=2)for(let i=0;i<10;i++){const a=i/10*6.283+rand()*.2;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*120,vy:Math.sin(a)*120,t:1.4,m,mv:{mul:.35},sp:'rock',a});}}}
+    if(m.ph>=2)for(let i=0;i<10;i++){const a=i/10*6.283;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*120,vy:Math.sin(a)*120,t:1.4,m,mv:{mul:.35},sp:'rock',a});}}}
    else{if(d>14)chase(m,dx,dy,d,sp,mr,dt);m.scd-=dt;if(m.scd<=0&&d<b.slamR*1.5&&seeP(m)){m.tele=.9;mobActN(m);}}
    if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1.1;mobBite(m);}
    m.face=dx>0?1:-1;continue;}
@@ -4246,14 +4251,18 @@ var UPD;function updReload(){try{if(S&&!S.__demo)save(true);}catch(e){}const q=n
 function updBanner(){if(UPD)return;UPD=1;const v=document.createElement('div');v.id='updV';$('ui').appendChild(v);const d=document.createElement('div');d.id='updW';d.className='sys';let n=15;
  d.innerHTML=`<span>${esc(t('updT'))}</span><button>${esc(t('updB'))}</button><small></small>`;d.querySelector('button').onclick=updReload;$('ui').appendChild(d);SFX.notice();
  const tick=()=>{d.querySelector('small').textContent=t('updAuto',{n});if(n--<=0)updReload();else setTimeout(tick,1000);};tick();}
-(function(){if(!/\.github\.io$/.test(location.hostname)||!window.fetch)return;let tag=null;
- const chk=()=>fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>{const e=r.headers.get('etag')||r.headers.get('last-modified');if(!e||UPD)return;if(tag===null)tag=e;else if(e!==tag)updBanner();}).catch(()=>{});
+// a player nearby on another version (netSees) asks the server now: only the one whose page is older refreshes; the newer
+// one would reload into the same build and see the old player again, every 15 s (SAT-ONLINE-045)
+let updChk=()=>{};
+(function(){if(!/\.github\.io$/.test(location.hostname)||!window.fetch)return;let tag=null,last=0;
+ const chk=()=>{last=Date.now();return fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>{const e=r.headers.get('etag')||r.headers.get('last-modified');if(!e||UPD)return;if(tag===null)tag=e;else if(e!==tag)updBanner();}).catch(()=>{});};
+ updChk=()=>{if(Date.now()-last>10000)chk();};
  chk();setInterval(chk,60000);})();
 Object.assign(STR.ar,{updT:'نزل تحديث جديد للعبة: لازم تعمل ريفريش عشان تكمل مع الباقيين',updB:'ريفريش',updAuto:'هيعمل ريفريش لوحده كمان {n} ثانية'});
 Object.assign(STR.en,{updT:'A new version of the game is out: refresh to keep playing with everyone',updB:'Refresh',updAuto:'Refreshing by itself in {n} s'});
 function netZone(x,y){return y>=WMH*TS&&!dunAt(x,y)&&!roomAt(x,y)?'void':zoneAt(x,y);}
 function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(r.mv===mapV())return true;
- if(!netOtherV.has(r.sid)){netOtherV.add(r.sid);toast(t('netOtherV',{n:r.handle||'?'}),'warn');updBanner();}return false;}
+ if(!netOtherV.has(r.sid)){netOtherV.add(r.sid);toast(t('netOtherV',{n:r.handle||'?'}),'warn');updChk();}return false;}
 Object.assign(STR.ar,{netOtherV:'{n} قريب منك بس على نسخة تانية من اللعبة: اعملوا الاتنين ريفريش عشان تشوفوا بعض'});
 Object.assign(STR.en,{netOtherV:'{n} is nearby on a different version of the game: reload both pages to see each other'});
 function netWatch(){const ids=PARTY?PARTY.follow():[],w=ids.join(' ');if(NETTR.wsig!==w){NETTR.wsig=w;NETTR.party(ids);}} // party.follow(): review #55
@@ -4293,13 +4302,16 @@ function meRun(fn,self,args){if(FXME||!NET||!P||mode!=='play')return fn.apply(se
  try{const r=fn.apply(self,args);ok=true;return r;}finally{window.setTimeout=st;FXME=0;if(ok&&P)try{fxGrab(f0,p0,d0);}catch(e){}}}
 const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(tryAttack);dodge=meWrap(dodge);useSlot=meWrap(useSlot);useISlot=meWrap(useISlot);
 // presence field: the events of the last 0.7 s, oldest first, within FXMAX characters (each one goes out in about 3 updates)
-function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),tag=JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0));if(!FXOUT.length)return tag?'['+tag+']':null;
- let out=tag?[tag]:[],len=2+(tag?tag.length+1:0);for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tag?1:0,0,j);}return out.length?'['+out.join(',')+']':null;}
+// SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
+// clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
+function stPub(){return P&&P.fly>0?'f':'';}
+function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));if(!FXOUT.length)return '['+tags.join(',')+']';
+ let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
 function guPub(){if(!P||!P.guard)return null;const a=Math.atan2(P.gy,P.gx);return 1+((Math.round(a/(2*Math.PI)*64)%64+64)%64)+(P.fort>0?64:0)+(P.gT<.22?128:0);}
 function fxSt(sid){let s=FXS.get(sid);if(!s)FXS.set(sid,s={last:-1,off:null,raw:'',sw:null,du:0,tr:[],lt:0});return s;}
-function fxIn(r,s){if(!r.fx){s.pt=null;return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
- s.pt=null;s.inT=0;for(const ev of a)if(typeof ev==='string'){const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}} // pet, mount and when they got to this place ride along in fx (fxPub)
+function fxIn(r,s){if(!r.fx){s.pt=null;s.st='';return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
+ s.pt=null;s.inT=0;s.st='';for(const ev of a)if(typeof ev==='string'){const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}const q=/^st:([a-z]{1,8})$/.exec(ev);if(q)s.st=q[1];} // pet, mount and when they got to this place ride along in fx (fxPub)
  for(const ev of a){if(!Array.isArray(ev)||!(ev[0]>s.last)||typeof ev[1]!=='number')continue;s.last=ev[0];const lat=now-ev[1];
   // the sender's clock: keep the lowest delay seen (creeping up slowly) so steps of one skill keep their spacing
   if(s.off==null||lat<s.off)s.off=lat;else s.off+=(lat-s.off)*.02;FXQ.push({at:ev[1]+s.off,sid:r.sid,ev});}
@@ -4315,7 +4327,7 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
 // due replays, at where each player is drawn now; players off screen or out of sight just drop theirs
 function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
 function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)
- for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const fs=fxSt(r.sid);fxIn(r,fs);if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
+ for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const fs=fxSt(r.sid);fxIn(r,fs);if(fs.st&&fs.st.indexOf('f')>=0&&rand()<.23)fx.push({x:r.x+(rand()-.5)*14,y:r.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});/* their flight, as yours (updateItemFx) */if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
   const k=remoteSpr(r.look,r.arm),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
   // their weapon in hand and each swing once, the way your own is drawn (SAT-ONLINE-026, owner feedback 7): a swing starts when
   // their anim turns to 'attack' and plays 0.14 s on this clock, however long the state stays up
@@ -4536,8 +4548,8 @@ function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoo
 // takes a quarter. The lethal one goes back to the attacker as a kill.
 function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Satisfy.chat.clean(e.handle,24)||'?',now=performance.now();
  if(!pvpFrom.has(e.uid)||now-pvpFrom.get(e.uid)>15000)toast(t('pvpHit',{n}),'warn');pvpFrom.set(e.uid,now);
- let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));vfx('block',P.x,P.y-10,{});}
- P.hp-=d;num(P.x,P.y-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();vfx('blood',P.x,P.y-10,{});shake=.12;}hudDirty=true;
+ let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}
+ P.hp-=d;numP(-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();asMe(()=>vfx('blood',P.x,P.y-10,{}));shake=.12;}hudDirty=true;
  if(P.hp<=0){if(S.tl&&S.tl.legend&&S.immT<=0){P.hp=1;S.immT=120;P.inv=1.5;toast(t('immune'),'good');flash();SFX.notice();return;}
   die();PVP.died(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
 // your own red tag while you are an outlaw, and the notice when it ends
@@ -4743,9 +4755,9 @@ window.__GM={get host(){return MOBN&&MOBN.host},get group(){return MOBN?MOBN.rs.
 const uh=u=>{let h=0x811c9dc5;u=String(u||'');for(let i=0;i<u.length;i++){h^=u.charCodeAt(i);h=Math.imul(h,0x01000193);}return ((h>>>0)&0xfff).toString(16);};
 function mobActN(m){if(!MOBN||MOBN.host!==NET.uid)return;m.actN=((m.actN||0)+1)%1000;MOBN.fast=1;}
 function mobBite(m){if(!MOBN||MOBN.host!==NET.uid)return;mobActN(m);m.biteT=.35;}
-function mobActS(m){if(!m.actN||m.dead)return '';const st=m.biteT>0?'b':m.st==='tele'?'t':m.st==='dash'?'d':m.st==='rec'?'r':MT[m.type].boss&&m.tele>0?'s':'0';
- const mv=m.mv,L=mv&&!mv.blk?movesOf(m).indexOf(mv):-1,i=mv&&mv.blk?99:Math.max(0,L),tl=st==='s'?m.tele:st==='b'?m.biteT:m.stT||0;
- return ','+m.actN+','+st+','+i+','+Math.max(0,Math.round(tl*100))+','+Math.round(Math.atan2(m.ay||0,m.ax||1)*100)+','+(m.lL|0)+','+uh(m.tgU);}
+function mobActS(m){if(!m.actN||m.dead)return '';const st=m.br>0?'f':m.biteT>0?'b':m.st==='tele'?'t':m.st==='dash'?'d':m.st==='rec'?'r':MT[m.type].boss&&m.tele>0?'s':'0';
+ const mv=m.mv,L=mv&&!mv.blk?movesOf(m).indexOf(mv):-1,i=mv&&mv.blk?99:Math.max(0,L),tl=st==='f'?m.br:st==='s'?m.tele:st==='b'?m.biteT:m.stT||0,an=st==='f'?m.ba:Math.atan2(m.ay||0,m.ax||1);
+ return ','+m.actN+','+st+','+i+','+Math.max(0,Math.round(tl*100))+','+Math.round(an*100)+','+(m.lL|0)+','+uh(m.tgU);}
 // host: the nearest player this monster could be after, as a stand-in that takes no damage here (inv), or null for you
 function mobTarget(m){if(!mobOk(m)||m.dead)return null;const dP=P.ghost||mode==='dead'?1e9:Math.hypot(P.x-m.x,P.y-m.y);let best=null,bd=dP;
  for(const r of MOBN.rs){if(r.anim==='dead')continue;const d=Math.hypot(r.x-m.x,r.y-m.y);if(d<bd&&d<300){bd=d;best=r;}}
@@ -4759,6 +4771,7 @@ function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))ret
  if(fl&1){if(!m.dead){m.dead=true;m.dying=.5;m.rt=25;vfx('death',m.x,m.y);}return true;} // quiet: the kill and its rewards come from the host's message
  if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mk:m.mk,sg:m.sg,nk:m.nk,boss:m.boss},hid=m.hidN;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
  if(m.lv!==lv){m.lv=lv;m.max=Math.round(b.hp*(1+(lv-b.lv[0])*.03));}
+ if(b.boss){const ph=hp<330?2:hp<660?1:0;if(hp>=1000)m.ph=0;else if(ph>(m.ph||0)){m.ph=ph;shake=.5;SFX.slam();vfx('rage',m.x,m.y);toast(t('bossPh'+ph,{b:itN(m.type)}),'warn');}} // SAT-ONLINE-045
  const nh=Math.max(1,Math.round(m.max*hp/1000)),mine=m.pendT&&performance.now()-m.pendT<900;
  if(nh<m.hp){if(!mine&&m.hp-nh>=1){m.hurt=.12;num(m.x,monY(m)-8,String(m.hp-nh),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});}m.hp=nh;}else if(!mine)m.hp=nh; // another player's hit: its number shows here too
  const dx=x-m.x,dy=y-m.y,dd=Math.hypot(dx,dy);if(dd>80){m.x=x;m.y=y;}else if(dd>.5&&m.st!=='dash'){ // a replayed dash moves this copy itself, then it settles on the host's spot
@@ -4773,12 +4786,14 @@ function mobAct(m,b,w,safe){const n=+w[5],sc=w[6],i=+w[7],tl=Math.max(0,+w[8]||0
  m.rN=n;m.ax=Math.cos(ang);m.ay=Math.sin(ang);m.lL=+w[10]||m.lL;
  if(sc==='b'){m.st=null;m.tele=0;if(me&&(!safe||m.evt)&&mode!=='dead'&&Math.hypot(P.x-m.x,P.y-m.y)<b.r+14&&seeP(m))hurtPlayer(b.dmg,m.lv,m);return;}
  if(sc==='s'){m.st=null;m.tele=tl;m.rSlam=1;return;}
+ if(sc==='f'){m.st=null;m.tele=0;if(m.type==='trauka'){m.br=tl;m.ba=ang;dragonBreathFx(m);}return;}
  const mv=i===99?{k:'arc',tele:.16,reach:26,arc:1.3,mul:.8,rec:.4,cd:1.3,blk:1}:AIK[m.type]?movesOf(m)[i]:null;
  if(!mv||!(sc==='t'||sc==='d'||sc==='r')){m.st=null;m.tele=0;return;}
  m.mv=mv;m.st=sc==='t'?'tele':sc==='d'?'dash':'rec';m.stT=tl;m.tele=sc==='t'?tl:0;m.hitDone=0;if(sc==='d')m.dsp=mv.k==='leap'?(m.lL||40)/(mv.dashT||.3):mv.dash||120;}
 // follower: run the telegraph, dash and strike the host started, against your own player only
 function mobReplay(m,b,dt,safe){const hurt=(!safe||m.evt)&&mode!=='dead',dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=Math.max(3,b.r-3);
- if(m.rSlam&&m.tele>0){m.tele-=dt;if(m.tele<=0){m.tele=0;m.rSlam=0;shake=Math.max(shake,.3);SFX.slam();if(hurt&&d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}for(let k=0;k<16;k++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:'#8a8f99'});}}return;}
+ if(m.rSlam&&m.tele>0){m.tele-=dt;if(m.tele<=0){m.tele=0;m.rSlam=0;shake=Math.max(shake,.3);SFX.slam();if(hurt&&d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}for(let k=0;k<16;k++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:'#8a8f99'});}
+  if(m.ph>=2)for(let k=0;k<10;k++){const a=k/10*6.283;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*120,vy:Math.sin(a)*120,t:1.4,m,mv:{mul:.35},sp:'rock',a,rep:1});}}return;}
  const mv=m.mv;if(!mv||!m.st)return;
  if(m.st==='tele'){m.stT-=dt;m.tele=Math.max(0,m.stT);if(m.stT>0)return;m.tele=0;
   if(mv.k==='leap'||mv.k==='line'){m.st='dash';m.stT=mv.dashT;m.hitDone=0;m.dsp=mv.k==='leap'?(m.lL||40)/mv.dashT:mv.dash;if(mv.k==='leap')SFX.dodge();return;}
