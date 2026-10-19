@@ -1004,16 +1004,16 @@ function openBChest(g){if(g.open){toast(t('chestE'));SFX.deny();return;}g.open=1
  vfx('loot',g.x,g.y,{rarity:3});coinFx(g,gd);SFX.legendary();hudDirty=true;save(true);}
 function useGate(g){if(g.chest)return openBChest(g);if(roomFade)return;if(P.ride)dismount();if(g.lv&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
 const ROOMS=[],PROPS=[];
-(function genInteriors(){let i=0;
- buildings.forEach((b,bi)=>{if(!['house','shop','armory','inn'].includes(b.k))return;
-  const rx=1+i*13,ry=168,kind=bi===3?'inn':b.k,R={id:'r'+bi,bi,b,kind,rx,ry,z:b.y<WH?'zBai':(b.lx??b.x)>=160?'zPat':'zWin',dx:b.x*TS+b.w*8,dy:(b.y+b.h)*TS+8};i++;ROOMS.push(R);
+function genRoom(b,bi,kind,rx,ry,z){const R={id:'r'+bi,bi,b,kind,rx,ry,z,dx:b.x*TS+b.w*8,dy:(b.y+b.h)*TS+8};ROOMS.push(R);
   for(let y=ry;y<ry+8;y++)for(let x=rx;x<rx+12;x++)setT(x,y,(y<ry+2||y===ry+7||x===rx||x===rx+11)?IW:FW);
   setT(rx+6,ry+7,FW);
   const P0=(k,x,y,w,o)=>{PROPS.push({k,tx:rx+x,ty:ry+y,w:w||1,room:R.id,id:R.id+k+x,...o});for(let j=0;j<(w||1);j++)setT(rx+x+j,ry+y,BL);};
   if(kind==='house'){P0('bed',1,2,2);P0('table',5,4,2);P0('chest',10,2);P0('shelf',4,1,2,{back:1});P0('barrel',10,6);}
   else if(kind==='inn'){P0('counter',3,3,4);P0('bed',9,2,2);P0('bed',9,5,2);P0('table',1,5,2);P0('shelf',3,1,3,{back:1});P0('barrel',1,2);}
   else if(kind==='shop'){P0('counter',3,3,6);P0('shelf',2,1,3,{back:1});P0('shelf',6,1,3,{back:1});P0('barrel',1,5);P0('barrel',10,5);P0('chest',10,2);}
-  else{P0('counter',3,3,6);P0('rack',1,2);P0('rack',10,2);P0('shelf',4,1,4,{back:1});P0('barrel',10,6);}});})();
+  else{P0('counter',3,3,6);P0('rack',1,2);P0('rack',10,2);P0('shelf',4,1,4,{back:1});P0('barrel',10,6);}}
+(function genInteriors(){let i=0;
+ buildings.forEach((b,bi)=>{if(!['house','shop','armory','inn'].includes(b.k))return;genRoom(b,bi,bi===3?'inn':b.k,1+i*13,168,b.y<WH?'zBai':(b.lx??b.x)>=160?'zPat':'zWin');i++;});})();
 const roomAt=(x,y)=>y<WMH*TS?null:ROOMS.find(R=>x>=R.rx*TS&&x<(R.rx+12)*TS&&y>=R.ry*TS&&y<(R.ry+8)*TS);
 const doorOf=b=>({x:b.x*TS+b.w*8,y:(b.y+b.h)*TS+2});
 
@@ -1032,11 +1032,11 @@ function vtView(f){const x0=Math.floor(camX/TS)-1,y0=Math.floor(camY/TS)-1,x1=x0
 function vtNear(px,py,rad){const o=[],cx=Math.floor(px/TS),cy=Math.floor(py/TS),n=Math.ceil(rad/TS)+1;for(let y=cy-n;y<=cy+n;y++)for(let x=cx-n;x<=cx+n;x++){const tr=VTM.get(x+','+y);if(tr)o.push(tr);}return o;}
 
 // Reidan (SAT-REIDAN-001): a walled mining town at the far east end of the third belt, past Patrian. Houses are closed;
-// the smith, merchant, inn and mine foreman work in the open. The mine shaft (north-east) leads to the mine floors.
+// the smith and mine foreman work in the open; the merchant and the inn keeper work indoors. The mine shaft (north-east) leads to the mine floors.
 (function buildReidan(){const {x0,x1,y0,y1}=REID;
  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const e=Math.min(x-x0,x1-x,y-y0,y1-y);setT(x,y,e<1?WL:(x===537||x===538||y===82||y===83)?PA:GR);}
  for(let y=80;y<=85;y++)setT(x0,y,y===82||y===83?PA:GR);
- const B=[{x:518,y:65,w:6,h:5,k:'house'},{x:528,y:65,w:7,h:5,k:'forge'},{x:542,y:65,w:6,h:5,k:'house'},{x:518,y:88,w:7,h:5,k:'house'},{x:542,y:88,w:6,h:5,k:'house'},{x:550,y:76,w:6,h:5,k:'house'}];
+ const B=[{x:518,y:65,w:6,h:5,k:'house'},{x:528,y:65,w:7,h:5,k:'forge'},{x:542,y:65,w:6,h:5,k:'shop'},{x:518,y:88,w:7,h:5,k:'inn'},{x:542,y:88,w:6,h:5,k:'house'},{x:550,y:76,w:6,h:5,k:'house'}];
  B.forEach(b=>{b.lx=b.x;buildings.push(b);for(let y=b.y+2;y<b.y+b.h;y++)for(let x=b.x;x<b.x+b.w;x++)setT(x,y,BL);});
  ANVILS.push({id:'anvR',tx:536,ty:71,own:'smithR',perm:'fo1'});WELLS.push({tx:533,ty:79,ph:1});setT(533,79,BL);
  for(let y=REID.my-1;y<=REID.my+2;y++)for(let x=REID.mx-1;x<=REID.mx+1;x++)setT(x,y,PA);
@@ -1064,6 +1064,7 @@ function swampAt(x,y){const tx=x/TS,ty=y/TS;if(beltAt(tx|0)!==3)return false;ret
  B.forEach(b=>{b.lx=b.x;buildings.push(b);for(let y=b.y+2;y<b.y+b.h;y++)for(let x=b.x;x<b.x+b.w;x++)setT(x,y,BL);});
  ANVILS.push({id:'anvRh',tx:708,ty:72,own:'smithRh',perm:'rh2'});for(const tx of [687,696]){WELLS.push({tx,ty:79,ph:1});setT(tx,79,BL);}
  TOWNS.push({k:'zRein',x0,x1,y0,y1,rx:691,ry:84});
+ {let j=0;buildings.forEach((b,bi)=>{const z=b.x>=REIN.x0&&b.x<=REIN.x1?'zRein':b.x>=REID.x0&&b.x<=REID.x1?'zReid':null;if(z&&(b.k==='shop'||b.k==='inn'))genRoom(b,bi,b.k,1+(j++)*13,176,z);});}
  const r=mulberry32(9393);for(const [cx,cy,rx,ry] of SWAMP){const inS=(x,y)=>((x-cx)/rx)**2+((y-cy)/ry)**2<=1;
   for(let y=Math.floor(cy-ry);y<=cy+ry;y++)for(let x=Math.floor(cx-rx);x<=cx+rx;x++)if(inS(x,y)&&at(x,y)!==PA)setT(x,y,GR);
   // pools of standing water, a few tiles each, never on the edge so the swamp can be walked around
@@ -1694,6 +1695,8 @@ const NPCS=[{id:'smith',spr:'smith',tx:22,ty:18},{id:'grid',spr:'grid',tx:17,ty:
 NPCS.forEach(n=>{if(!n.ph)n.tx=wX(n.tx);for(let y=Math.floor(n.ty)-1;y<=Math.floor(n.ty)+1;y++)for(let x=Math.floor(n.tx)-1;x<=Math.floor(n.tx)+1;x++){const v=at(x,y);if((n.clr||n.id[0]==='t'&&n.id.length===2)&&(v===TR||v===RK||v===WA))setT(x,y,GR);}});
 // shopkeepers and townsfolk inside houses (bi = index in buildings)
 const rmP=(bi,dx,dy)=>{const R=ROOMS.find(r=>r.bi===bi);return{tx:R.rx+dx,ty:R.ry+dy};};
+const rmAt=(x,y,dx,dy)=>rmP(buildings.findIndex(b=>b.x===x&&b.y===y),dx,dy);
+for(const [id,x,y,dx] of [['merchantR',542,65,5.5],['innR',518,88,4.5],['merchantRh',668,90,5.5],['innRh',677,90,4.5]]){const n=NPCS.find(n=>n.id===id);Object.assign(n,rmAt(x,y,dx,2.5),{reach:16,dir:0});}
 NPCS.push({id:'merchant',spr:'merchant',...rmP(7,5.5,2.5),reach:16},{id:'armorer',spr:'armorer',...rmP(15,5.5,2.5),reach:16},{id:'inn',spr:'inn',...rmP(13,4.5,2.5),reach:16},{id:'innB',spr:'inn',...rmP(3,4.5,2.5),reach:16},{id:'oldw',spr:'oldw',...rmP(5,7,4.4)},
  {id:'merchantP',spr:'merchant',...rmP(18,5.5,2.5),reach:16},
  {id:'armorerP',spr:'armorer',...rmP(20,5.5,2.5),reach:16},{id:'innP',spr:'inn',...rmP(19,4.5,2.5),reach:16});
@@ -2414,7 +2417,7 @@ function drawShrine(o){const x=Math.round(o.x),y=Math.round(o.y),pul=.5+Math.sin
  R(ctx,x-26,y-34,52,26,'#2a2218');R(ctx,x-24,y-32,48,22,'#5a4a36');ctx.globalAlpha=.55+pul*.3;
  R(ctx,x-2,y-26,3,3,'#f2c14e');R(ctx,x-1,y-23,2,7,'#f2c14e');R(ctx,x-4,y-21,8,1,'#f2c14e');R(ctx,x-3,y-16,2,4,'#f2c14e');R(ctx,x+1,y-16,2,4,'#f2c14e');
  for(let i=0;i<12;i++)R(ctx,x+3+i,y-22-i,1,1,'#fff3c8');for(let i=0;i<8;i++)R(ctx,x-18+i*2,y-14-Math.round(Math.sin(i*.8)*3),1,1,'#bfe8ff');ctx.globalAlpha=1;}
-window.__GU={pSpr,SH,setT,at,seeP,enhMenu,DGATES,loot,TOWNS,npcKO,getMeet:()=>MEET,meetBosses,openStatus,heartsH,gk,FEM,renderTab,setStab:k=>{STAB=k;},buildings,KESAN,petLv,petXP,petB,petFeed,petRest,getPet:()=>PET,buildMe,COS,DYE,styOpts,styList,stySet,cosMenu,cosPick,lookFig,startTower,twL,twNear,towerOpts,getTower:()=>TWR,SETS,setCount,setTier,setBon,wxNow,wxHere,forceWeather:w=>{WXF=w||null;},GEMS,gemMenu,gemPick,dailyList,dlyS,dailyOpts,rankList,rankerOpts,ACH,achTick:()=>{achT=0;achTick(0);},legendReset,mswordAct,becomeSaint,MULL,get SG(){return SG},forceSiege:ms=>{SGF=ms?Date.now()+ms:0;},throneAct,castleTaken,CAST,siegeNext,altarAct,YATAN,auList,auBuy,auCollect,auTick,auMarket,PEAK,dragonDown,get ARN(){return ARN},startArena,arenaLose,toggleRide,dismount,gainMount,buyRide,buyPet,setPet,get PET(){return PET},MOUNTS,PETS,soulAct,becomeBraham,get COMPO(){return COMPO},setComp,COMPS,killMon,get EV(){return EV},forceEvent:(k,ms)=>{evDone=null;EVF=k?{e:EVT.find(e=>e.k===k),until:Date.now()+(ms||60000)}:null;},evNow,EVT,CAMPS,get FISH(){return FISH},startFish,fishAct,nearWater,campMenu,makeLife,eatDish,lifeLv,pickHerb,SHRINES,shrineAct,becomePagma,get WS(){return WS},get RAID(){return RAID},set RAID(v){RAID=v},TERR,TW,createGuild,joinGuild,leaveGuild,bannerAct,captureT,guildPanel,updateTerr,swampAt,REIN,gXPB,gGoldB,ownsT};
+window.__GU={pSpr,SH,setT,at,seeP,enhMenu,ROOMS,buildings,DGATES,loot,TOWNS,npcKO,getMeet:()=>MEET,meetBosses,openStatus,heartsH,gk,FEM,renderTab,setStab:k=>{STAB=k;},buildings,KESAN,petLv,petXP,petB,petFeed,petRest,getPet:()=>PET,buildMe,COS,DYE,styOpts,styList,stySet,cosMenu,cosPick,lookFig,startTower,twL,twNear,towerOpts,getTower:()=>TWR,SETS,setCount,setTier,setBon,wxNow,wxHere,forceWeather:w=>{WXF=w||null;},GEMS,gemMenu,gemPick,dailyList,dlyS,dailyOpts,rankList,rankerOpts,ACH,achTick:()=>{achT=0;achTick(0);},legendReset,mswordAct,becomeSaint,MULL,get SG(){return SG},forceSiege:ms=>{SGF=ms?Date.now()+ms:0;},throneAct,castleTaken,CAST,siegeNext,altarAct,YATAN,auList,auBuy,auCollect,auTick,auMarket,PEAK,dragonDown,get ARN(){return ARN},startArena,arenaLose,toggleRide,dismount,gainMount,buyRide,buyPet,setPet,get PET(){return PET},MOUNTS,PETS,soulAct,becomeBraham,get COMPO(){return COMPO},setComp,COMPS,killMon,get EV(){return EV},forceEvent:(k,ms)=>{evDone=null;EVF=k?{e:EVT.find(e=>e.k===k),until:Date.now()+(ms||60000)}:null;},evNow,EVT,CAMPS,get FISH(){return FISH},startFish,fishAct,nearWater,campMenu,makeLife,eatDish,lifeLv,pickHerb,SHRINES,shrineAct,becomePagma,get WS(){return WS},get RAID(){return RAID},set RAID(v){RAID=v},TERR,TW,createGuild,joinGuild,leaveGuild,bannerAct,captureT,guildPanel,updateTerr,swampAt,REIN,gXPB,gGoldB,ownsT};
 function smithMenu(who,W,A,svc=true){const back={l:t('oBack'),f:()=>shopD(who,'arBuy')},row=([id,g0])=>{const g=price(who,g0);return{l:t('oBuyGear',{it:t(id),g}),ic:id,st:gearCmp(id),poor:S.gold<g,f:()=>buyGear(id,g,who)};};
  return [{l:t('oBuyW'),ic:'slotW',f:()=>dialog(who,['arW'],null,[...W.map(row),back])},{l:t('oBuyA'),ic:'slotA',f:()=>dialog(who,['arA'],null,[...A.map(row),back])},
   ...(svc?svcOpts(who):[])];}
@@ -3202,7 +3205,7 @@ function render(dt){
  const titleCam=mode==='lang'||mode==='title'||(mode==='controls'&&ctrlBack==='titleScreen');
  let tx,ty;if(titleCam){tx=8*TS+Math.sin(gTime*.08)*120+120;ty=14*TS;}else{tx=P.x-W/2;ty=P.y-H/2-8;}
  // above ground the view stops at the world's edge, so the cave rows stored under it never show
- const yMax=!titleCam&&P&&P.y<WMH*TS?WMH*TS-VH:MH*TS-VH;const yMin=!titleCam&&P&&P.y>=WMH*TS?WMH*TS:-NR*TS;tx=clamp(tx,0,MW*TS-VW);ty=clamp(ty,yMin,yMax);
+ const yMax=!titleCam&&P&&P.y<WMH*TS?WMH*TS-VH:MH*TS-VH+8*TS;const yMin=!titleCam&&P&&P.y>=WMH*TS?WMH*TS:-NR*TS;tx=clamp(tx,0,MW*TS-VW);ty=clamp(ty,yMin,yMax);
  if(titleCam||camSnap){camXf=tx;camYf=ty;camSnap=false;}else{const k=Math.min(1,dt*9);camXf+=(tx-camXf)*k;camYf+=(ty-camYf)*k;}
  const fxp=clamp(camXf+sx,0,MW*TS-VW),fyp=clamp(camYf+sy,yMin,yMax);camX=Math.floor(fxp);camY=Math.floor(fyp);
  cvs.style.transform=`translate(${(-(fxp-camX)*SC).toFixed(2)}px,${(-(fyp-camY)*SC).toFixed(2)}px)`;
