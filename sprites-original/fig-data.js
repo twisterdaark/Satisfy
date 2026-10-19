@@ -29,7 +29,7 @@ const FIG={
  huroi:{hair:'short',hc:'#2a2a30',hl:'#44444c',skin:'#e8b88a',sk2:'#c8946a',top:'#3a3a44',top2:'#24242c',sleeves:true,belt:'#8a1f2a',pants:'#24242c',boots:'#1a1a20'},
  peaks:{hair:'spiky',hc:'#3a5a9a',hl:'#5a7ac8',skin:'#f1c193',sk2:'#d3a070',top:'#d8dce4',top2:'#a8aebc',sleeves:true,pad:'#3a5a9a',pad2:'#28406e',belt:'#28406e',pants:'#3a4250',boots:'#2a2e38'},
  zibal:{hair:'short',hc:'#6a2a1a',hl:'#8a4a2a',skin:'#d9a070',sk2:'#b47c50',top:'#8a2a22',top2:'#5e1a14',sleeves:true,pad:'#c8a050',pad2:'#8a6a30',belt:'#3a2a1a',cape:'#5e1a14',pants:'#3a2a22',boots:'#2a1a12'},
- kraugel:{hair:'long',hc:'#e8e4dc',hl:'#ffffff',skin:'#f1c7a0',sk2:'#d39f78',top:'#e8ecf4',top2:'#b8c0d0',sleeves:true,pad:'#c8d8f0',pad2:'#8aa0c8',belt:'#c8a050',cape:'#f4f6fa',pants:'#c8d0dc',boots:'#8a96a8'},
+ kraugel:{hair:'long',hc:'#16161e',hl:'#3a3a4c',skin:'#f1c7a0',sk2:'#d39f78',top:'#e8ecf4',top2:'#b8c0d0',sleeves:true,pad:'#c8d8f0',pad2:'#8aa0c8',belt:'#c8a050',cape:'#f4f6fa',pants:'#c8d0dc',boots:'#8a96a8'},
  auction:{hair:'hat',hc:'#5a4a3a',hl:'#7a6a50',hat:'#1a3a2a',skin:'#e8b88a',sk2:'#c8946a',top:'#1f4a36',top2:'#143224',sleeves:true,belt:'#d8b860',cape:'#d8b860',pants:'#2a2a24',boots:'#3a2a1e'},
  cultist:{hair:'hat',hc:'#2a0a12',hl:'#4a1a22',hat:'#5a0a1a',skin:'#c8a088',sk2:'#a07c66',top:'#5a0a1a',top2:'#3a0610',sleeves:true,cape:'#2a0a12',pants:'#2a0a12',boots:'#1a0608'},
  demon:{hair:'helm',hc:'#1a0a0a',hl:'#3a1a1a',skin:'#a83a3a',sk2:'#7a2424',top:'#2a1010',top2:'#1a0808',sleeves:false,shorts:'#1a0808',pants:'#1a0808',boots:'#a83a3a',cape:'#140606'},
