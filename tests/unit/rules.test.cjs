@@ -10,7 +10,7 @@ const { net: N } = loadModules('src/net/contracts.js');
 const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')).rules;
 const node = rules.presence.$world.$shard.$uid;
 const firebaseJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'firebase.json'), 'utf8'));
-const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'ol', 'gd']; // omitted when null/empty is allowed by the client
+const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'rd', 'ol', 'gd']; // omitted when null/empty is allowed by the client
 
 test('deny by default; presence readable only when signed in, writable only by its owner', () => {
   assert.equal(rules['.read'], false);
@@ -270,6 +270,14 @@ test('world boss timers (SAT-ONLINE-056): set once per kill by its killer, at mo
   assert.match(k.at['.validate'], /newData\.val\(\) > now && newData\.val\(\) <= now \+ 7200000/);
   assert.equal(k.by['.validate'], 'newData.val() === auth.uid');
   assert.equal(k.$other['.validate'], false);
+});
+
+test('weekly lockouts (SAT-ONLINE-059): your own, read by you alone, taken once per boss and week', () => {
+  const u = rules.lockouts.$uid, b = u.$week.$boss;
+  assert.equal(u['.read'], 'auth != null && auth.uid === $uid');
+  assert.equal(u.$week['.validate'], '$week.matches(/^w[0-9]{4,6}$/)');
+  assert.equal(b['.write'], 'auth != null && auth.uid === $uid && !data.exists()', 'never replaced or removed');
+  assert.equal(b.$other['.validate'], false);
 });
 
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing

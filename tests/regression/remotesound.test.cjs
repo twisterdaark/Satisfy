@@ -11,7 +11,7 @@ async function settle(...games) {
   for (let i = 0; i < 6; i++) { for (const g of games) await g.step(4); await games[0].page.waitForTimeout(30); }
 }
 
-test("another player's swing and dodge sound on your screen while close, softer, and never from far away", async () => {
+test("another player's swing, dodge, death and return sound on your screen while close, softer, and never from far away", async () => {
   const ctx = await H.newContext();
   try {
     const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
@@ -36,6 +36,28 @@ test("another player's swing and dodge sound on your screen while close, softer,
     assert.deepEqual(await a.eval(() => window.__GS.heard.slice()), [], 'nothing from 600 px away');
     // B's own sounds are not played back to B
     assert.deepEqual(await b.eval(() => window.__GS.heard.slice()), []);
+
+    // SAT-ONLINE-058: B dies near A: A hears it
+    await b.eval(() => { window.__G.P.x -= 600; });
+    await settle(a, b);
+    const life = () => a.eval(() => window.__GS.heard.filter((k) => k === 'die' || k === 'back'));
+    await a.eval(() => { window.__GS.heard.length = 0; });
+    await b.eval(() => { window.__G.die(); });
+    await settle(a, b); await settle(a, b);
+    assert.deepEqual(await life(), ['die'], 'A heard B die');
+    // B comes back in town; A waits there; B dies again far away (not heard) and comes back next to A (heard)
+    await b.eval(() => { window.__GK.respawn(); });
+    await settle(a, b);
+    const at = await b.eval(() => [window.__G.P.x, window.__G.P.y]);
+    await a.eval((p) => { window.__G.P.x = p[0] + 30; window.__G.P.y = p[1]; window.__GS.heard.length = 0; }, at);
+    await b.eval(() => { window.__G.P.x += 600; });
+    await settle(a, b);
+    await b.eval(() => { window.__G.P.inv = 0; window.__G.die(); });
+    await settle(a, b); await settle(a, b);
+    assert.deepEqual(await life(), [], 'nothing from 600 px away');
+    await b.eval(() => { window.__GK.respawn(); });
+    await settle(a, b); await settle(a, b);
+    assert.deepEqual(await life(), ['back'], 'A heard B come back');
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
