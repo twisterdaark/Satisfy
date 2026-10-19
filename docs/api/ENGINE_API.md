@@ -105,7 +105,7 @@ Events: `{ id: uuid, key, type, pid, at: S.playT, payload }`.
 | `PUBLIC_FIELDS` | `v, uid, sid, handle, look, cls, lv, title, zone, room, x, y, dir, anim, arm, party, t` (`arm` 0/1 = armored sprite) |
 | `PRIVATE_FIELDS` | Keys of `S` that must never appear in presence (gold, items, mats, quests, stats…). |
 | `toPlayerPublic(S, P, ctx)` | Builds a `PlayerPublic`; clamps strings, rounds positions. |
-| `validatePlayerPublic(o, {world}?)` | `{ ok, errors[] }`; rejects unknown fields and out-of-world positions. |
+| `validatePlayerPublic(o, {world}?)` | `{ ok, errors[] }`; rejects unknown fields and out-of-world positions. `lv` 0 = hidden (SAT-ONLINE-027). |
 | `roomKey(world, zone, shard)` / `parseRoomKey(key)` | Presence channel id, e.g. `satisfy/zWin/0` (all players in Winston shard 0). |
 | `NET_STATES`, `canTransition(a, b)` | Connection state machine (doc §25). |
 | `envelope(type, payload, meta)` | `{ v, type, requestId, sessionId, seq, tick, payload }`, max 2048 bytes. |
@@ -294,6 +294,7 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, additive** (SAT-ONLINE-027): owner feedback #2, #6, #9, #11, #16, #17. The player card opens on a right-click (a long press on a phone), never on the attack click. No Block in the party invite or the party panel (the card keeps it). The chat has its own corner (bottom, start side). The title's *Online as …* opens the account panel. *Hide my level* (account panel, `localStorage satisfy_hidelv`): `toPlayerPublic(…, {hideLv})` and the public profile write `lv: 0`, shown as `Lv ?`; rules accept presence/profile `lv >= 0` (redeploy). The big map (M) shows party members with names (`net().mapParty`).
 - **api 1, additive** (SAT-ONLINE-026): party stability (owner feedback #13–#15). A heartbeat outside the render loop (a Worker timer, `setInterval` as the fallback) re-sends presence when nothing went out for 6 s online (2 s local), so a covered or minimised window stays in the party. `party.GRACE_MS` 5 s → 10 s. A broken party is rejoined without a prompt only after a real reload (ours, or the leader's new session); toasts keep the last-seen name (`memberLeft.handle`). No rules change.
 - **api 1, fix** (SAT-ONLINE-024 review, #55): `PlayerPublic.rs`, the leader's roster (accepted uids); members elect only from it, so a stranger who writes the party id can't vote. `party.roster()`, `party.follow()` (the ids to follow), `transport.party(ids)` takes several ids: far-apart members don't lose each other mid-election. Presence + rules field (redeploy).
 - **api 1, fix** (SAT-ONLINE-021 review, #51): pings carry a signed y (`n` >= -4096 in the rules), so a ping in the north lands where it was made.

@@ -103,3 +103,9 @@ test('eraseAll (T35): every online record of the account, index before save, not
   await C.writeProfile({ look: { n: 'Grid' }, lv: 3 }, 'en');
   assert.ok(data.has('profiles/u1'));
 });
+
+// SAT-ONLINE-027 (owner feedback #16)
+test('profileFrom: a hidden level is written as 0', () => {
+  assert.equal(CL.profileFrom({ look: { n: 'Grid' }, lv: 40 }, 'en', 1, true).lv, 0);
+  assert.equal(CL.profileFrom({ look: { n: 'Grid' }, lv: 40 }, 'en', 1).lv, 40);
+});

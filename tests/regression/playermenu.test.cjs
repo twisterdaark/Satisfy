@@ -1,6 +1,7 @@
 'use strict';
-// SAT-ONLINE-020 (doc §35 U046 nearby player context, U064 inspect): click another player to see their public card
-// and invite, challenge or block exactly that player (by uid), even when two players share a name.
+// SAT-ONLINE-020 (doc §35 U046 nearby player context, U064 inspect): right-click another player to see their public card
+// and invite, challenge or block exactly that player (by uid), even when two players share a name. SAT-ONLINE-027 (owner
+// feedback #9): the attack click never opens it.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -12,14 +13,14 @@ async function settle(...games) {
 }
 const shown = (g, id) => g.eval((i) => !document.getElementById(i).hidden, id);
 const text = (g, id) => g.eval((i) => document.getElementById(i).textContent, id);
-// click the middle of a remote player's sprite on g's screen
-async function clickRemote(g, uid) {
+// click the middle of a remote player's sprite on g's screen (right button: the card; left: attack)
+async function clickRemote(g, uid, button = 'right') {
   const p = await g.eval((u) => { const r = Satisfy.local.net().remotes.find((x) => x.uid === u); return window.__G.toScreen(r.x, r.y - 10); }, uid);
-  await g.page.mouse.click(p.x, p.y);
+  await g.page.mouse.click(p.x, p.y, { button });
   await g.step(2);
 }
 
-test('click a player: their card, and invite/duel/block go to that uid even with a twin name', async () => {
+test('right-click a player: their card, and invite/duel/block go to that uid even with a twin name', async () => {
   const ctx = await H.newContext();
   try {
     const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
@@ -36,13 +37,20 @@ test('click a player: their card, and invite/duel/block go to that uid even with
     const uidB = (await b.eval(() => Satisfy.local.net().uid)), uidC = (await c.eval(() => Satisfy.local.net().uid));
     await a.eval(() => { window.__G.P.acd = 0; });
 
-    // click C (the left Twin): its card shows, no attack swing
+    // a left click on C attacks and never opens the card (owner #9)
+    await clickRemote(a, uidC, 'left');
+    assert.equal(await shown(a, 'pctx'), false, 'the attack click does not open the card');
+    assert.ok(await a.eval(() => window.__G.P.acd > 0), 'it swung');
+    await a.step(60);
+    await a.eval(() => { window.__G.P.acd = 0; });
+    // right-click C (the left Twin): its card shows, no attack swing, no guard
     await clickRemote(a, uidC);
     assert.equal(await shown(a, 'pctx'), true);
     assert.equal(await text(a, 'pctxT'), 'Twin');
     assert.match(await text(a, 'pctxI'), /^Lv \d+/);
     assert.doesNotMatch(await text(a, 'pctxI'), /gold|Gold/, 'nothing private');
-    assert.equal(await a.eval(() => window.__G.P.acd > 0), false, 'the click opened the card instead of attacking');
+    assert.equal(await a.eval(() => window.__G.P.acd > 0), false, 'the right-click opened the card, no attack');
+    assert.equal(await a.eval(() => !!window.__G.P.guard), false, 'and no guard');
 
     // invite from the card: only C (not the other Twin) gets it
     await a.eval(() => document.querySelector('#pctx [data-act="pcInvite"]').click());

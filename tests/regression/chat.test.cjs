@@ -88,12 +88,16 @@ for (const mode of ['local', 'online']) {
   });
 }
 
-test('⊘ blocks a party member: their lines and their next invite never show; Unblock all clears it', async () => {
+test('Block (on the player card) hides a party member\'s lines and next invite; Unblock all clears it', async () => {
   const { ctx, a, b } = await partyOf2('local');
   try {
     await settle(a, b);
-    // B blocks A from the party list
-    await b.eval(() => document.querySelector('#partyL button.blk').click());
+    // no Block in the party panel or on the invite any more (owner feedback #6): B blocks A from A's player card
+    assert.equal(await b.eval(() => document.querySelectorAll('#partyL button.blk, #partyInv [data-act="pBlock"]').length), 0);
+    const pa = await b.eval(() => { const r = Satisfy.local.net().remotes[0]; return window.__G.toScreen(r.x, r.y - 10); });
+    await b.page.mouse.click(pa.x, pa.y, { button: 'right' });
+    await b.step(2);
+    await b.eval(() => document.querySelector('#pctx [data-act="pcBlock"]').click());
     await b.step(2);
     assert.match(await b.eval(() => document.getElementById('toasts').textContent), /Grid is blocked/);
     const blocked = await b.eval(() => Satisfy.local.net().blocked);
@@ -120,11 +124,7 @@ test('⊘ blocks a party member: their lines and their next invite never show; U
     await a.page.keyboard.press('KeyP');
     await settle(a, b);
     await until(b, () => !document.getElementById('partyInv').hidden);
-    // Block on the invite prompt: blocks and declines
-    await b.eval(() => document.querySelector('#partyInv [data-act="pBlock"]').click());
-    await settle(a, b);
-    assert.equal(await b.eval(() => document.getElementById('partyInv').hidden), true);
-    assert.deepEqual((await b.eval(() => Satisfy.local.net().blocked)).map((x) => x.handle), ['Grid']);
+    assert.equal(await b.eval(() => !!document.querySelector('#partyInv [data-act="pBlock"]')), false, 'the invite has Accept and Decline only');
     assert.deepEqual(a.errors, []);
     assert.deepEqual(b.errors, []);
   } finally { await ctx.close(); }

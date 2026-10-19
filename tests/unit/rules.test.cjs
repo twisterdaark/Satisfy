@@ -157,3 +157,10 @@ test('inbox k/n bounds cover the biggest boss (trauka has 30M HP)', () => {
   assert.doesNotMatch(fake, /<= 10000000\b/);
   assert.doesNotMatch(fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8'), /<= 10000000\b/);
 });
+
+// SAT-ONLINE-027 (owner feedback #16): lv 0 = hidden, in presence and in the public profile; the private index keeps >= 1
+test('a hidden level (0) is accepted in presence and profiles', () => {
+  assert.match(node.lv['.validate'], /newData\.val\(\) >= 0 && newData\.val\(\) <= 999/);
+  assert.match(rules.profiles.$uid.lv['.validate'], /newData\.val\(\) >= 0 && newData\.val\(\) <= 999/);
+  assert.match(rules.cloudIndex.$uid.$pid.lv['.validate'], /newData\.val\(\) >= 1 && newData\.val\(\) <= 999/);
+});

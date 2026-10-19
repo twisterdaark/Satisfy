@@ -35,7 +35,8 @@ test('validatePlayerPublic: rejects unknown fields, bad types and out-of-world p
   assert.ok(bad({ y: 144 * 16 }).includes('out of world'));
   assert.ok(bad({ x: 1.5 }).includes('position'));
   assert.ok(bad({ v: 2 }).includes('protocol version'));
-  assert.ok(bad({ lv: 0 }).includes('lv'));
+  assert.ok(bad({ lv: -1 }).includes('lv'));
+  assert.ok(!bad({ lv: 0 }).includes('lv'), 'lv 0 = hidden level (SAT-ONLINE-027)');
   assert.ok(bad({ look: { hair: 'a', hc: 0, skin: 0, top: 0 } }).includes('look.hair'));
   assert.equal(N.validatePlayerPublic(null).ok, false);
 });
@@ -137,4 +138,12 @@ test('positions above row 0 are inside the world when world.y0 says so', () => {
   assert.deepEqual(N.validatePlayerPublic(pp, { world: W }).errors, []);
   assert.ok(N.validatePlayerPublic({ ...pp, y: -961 }, { world: W }).errors.includes('out of world'));
   assert.ok(N.validatePlayerPublic(pp, { world: { ...W, y0: undefined } }).errors.includes('out of world'), 'no y0: the top edge is 0');
+});
+
+// SAT-ONLINE-027 (owner feedback #16): a player can hide its level; others get lv 0 ("Lv ?")
+test('hideLv publishes level 0, which validates', () => {
+  const pp = N.toPlayerPublic(S, P, { zone: 'zWin', uid: 'u1', sid: 's1', hideLv: true });
+  assert.equal(pp.lv, 0);
+  assert.deepEqual(N.validatePlayerPublic(pp, { world: WORLD }).errors, []);
+  assert.equal(N.toPlayerPublic(S, P, { zone: 'zWin', uid: 'u1', sid: 's1' }).lv, S.lv);
 });

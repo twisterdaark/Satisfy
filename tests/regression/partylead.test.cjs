@@ -39,7 +39,7 @@ test('the leader leaves without a word: the two members elect one leader and sta
     for (const g of [b, c]) {
       const uid = await g.eval(() => Satisfy.local.net().uid);
       const p = await a.eval((u) => { const r = Satisfy.local.net().remotes.find((x) => x.uid === u); return window.__G.toScreen(r.x, r.y - 10); }, uid);
-      await a.page.mouse.click(p.x, p.y);
+      await a.page.mouse.click(p.x, p.y, { button: 'right' });
       await a.step(2);
       await a.eval(() => document.querySelector('#pctx [data-act="pcInvite"]').click());
       await settle(a, b, c);
@@ -84,7 +84,7 @@ test('online, members far apart: the leader vanishes, both elect the same leader
     for (const g of [b, c]) {
       const uid = await g.eval(() => Satisfy.local.net().uid);
       const p = await a.eval((u) => { const r = Satisfy.local.net().remotes.find((x) => x.uid === u); return window.__G.toScreen(r.x, r.y - 10); }, uid);
-      await a.page.mouse.click(p.x, p.y);
+      await a.page.mouse.click(p.x, p.y, { button: 'right' });
       await a.step(2);
       await a.eval(() => document.querySelector('#pctx [data-act="pcInvite"]').click());
       await settle(a, b, c);

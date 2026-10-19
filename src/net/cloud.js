@@ -32,7 +32,7 @@
   }
 
   /** Public profile fields from a game state (S) and language. */
-  function profileFrom(S, lang, revision) {
+  function profileFrom(S, lang, revision, hideLv) {
     var L = (S && S.look) || {};
     var num = function (v) { return v >= 0 && v <= 31 ? v | 0 : 0; };
     return {
@@ -41,7 +41,7 @@
       language: lang === 'ar' ? 'ar' : 'en',
       titleId: cut((S && S.title) || '', 32),
       classId: cut((S && S.cls) || 'novice', 16),
-      lv: Math.max(1, Math.min(999, (S && S.lv) | 0 || 1)),
+      lv: hideLv ? 0 : Math.max(1, Math.min(999, (S && S.lv) | 0 || 1)), // 0: the player hides its level
       revision: revision,
     };
   }
@@ -79,9 +79,9 @@
     return {
       uid: uid,
       /** Write the public profile. Resolves when stored; rejects on a rules error. */
-      writeProfile: function (S, lang) {
+      writeProfile: function (S, lang, opts) {
         return ensureRev().then(function () {
-          var p = profileFrom(S, lang, rev());
+          var p = profileFrom(S, lang, rev(), !!(opts && opts.hideLv));
           p.t = D.serverTimestamp();
           return D.set(ref('profiles/' + uid), p);
         });

@@ -100,7 +100,7 @@
       if (!keysAre(v, ['handle', 'look', 'language', 'titleId', 'classId', 'lv', 'revision', 't'])) return 'profile fields';
       if (typeof v.handle !== 'string' || v.handle.length > 24 || !lookOk(v.look) || !['ar', 'en'].includes(v.language)) return 'profile values';
       if (typeof v.titleId !== 'string' || v.titleId.length > 32 || typeof v.classId !== 'string' || v.classId.length > 16) return 'profile values';
-      if (!(v.lv >= 1 && v.lv <= 999) || !(v.revision >= 0)) return 'profile values';
+      if (!(v.lv >= 0 && v.lv <= 999) || !(v.revision >= 0)) return 'profile values'; // 0: level hidden
       const old = data.get(seg.join('/'));
       if (old && !(v.revision > old.revision)) return 'profile revision must go up';
       return null;

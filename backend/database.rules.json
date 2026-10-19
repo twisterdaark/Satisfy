@@ -34,7 +34,7 @@
               ".validate": "newData.isString() && newData.val().length <= 16"
             },
             "lv": {
-              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 999"
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
             },
             "title": {
               ".validate": "newData.isString() && newData.val().length <= 32"
@@ -172,7 +172,7 @@
           ".validate": "newData.isString() && newData.val().length <= 16"
         },
         "lv": {
-          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 999"
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
         },
         "revision": {
           ".validate": "newData.isNumber() && newData.val() >= 0"

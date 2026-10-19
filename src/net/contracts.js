@@ -126,7 +126,7 @@
       handle: str(L.n, LIMITS.handle),
       look: { hair: L.hair | 0, hc: L.hc | 0, skin: L.skin | 0, top: L.top | 0 },
       cls: str(S.cls || 'novice', 16),
-      lv: S.lv | 0,
+      lv: ctx.hideLv ? 0 : S.lv | 0, // hideLv: shown to others as "Lv ?" (owner feedback #16)
       title: str(S.title, LIMITS.title),
       zone: str(ctx.zone, 24),
       room: ctx.room || null,
@@ -161,7 +161,7 @@
     if (!o.look || typeof o.look !== 'object') e.push('look');
     else ['hair', 'hc', 'skin', 'top'].forEach(function (f) { if (!Number.isInteger(o.look[f]) || o.look[f] < 0 || o.look[f] > 31) e.push('look.' + f); });
     if (typeof o.cls !== 'string') e.push('cls');
-    if (!Number.isInteger(o.lv) || o.lv < 1 || o.lv > 999) e.push('lv');
+    if (!Number.isInteger(o.lv) || o.lv < 0 || o.lv > 999) e.push('lv'); // 0: the player hides its level (SAT-ONLINE-027)
     if (!Number.isInteger(o.x) || !Number.isInteger(o.y)) e.push('position');
     var w = opts && opts.world;
     if (w && (o.x < 0 || o.y < (w.y0 || 0) || o.x >= w.w * w.tile || o.y >= w.h * w.tile)) e.push('out of world');
