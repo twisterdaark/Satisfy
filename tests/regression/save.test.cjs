@@ -66,7 +66,7 @@ test('legacy v4 save migrates to v5 and keeps progress', async () => {
     assert.deepEqual(S.kills, { rabbit: 12, boar: 3 });
     assert.equal(P.x, spawn.x);
     assert.equal(P.y, spawn.y);
-    assert.equal(S.wv, 2, 'spawned on the current map, not shifted again');
+    assert.equal(S.wv, 3, 'spawned on the current map (wv 3 since the south expansion), not shifted again');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
