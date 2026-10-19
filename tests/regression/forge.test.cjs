@@ -64,3 +64,28 @@ test('presence: a node that copies another player\'s session id is a separate pl
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+// SAT-ONLINE-003 review fix (#15): inbox messages are tied to the sender's verified uid as well
+test('inbox: a party kick "from the leader\'s session" sent by another account is ignored', async () => {
+  const { ctx, a, b, c } = await three();
+  try {
+    await a.page.keyboard.press('KeyP');
+    await settle(a, b);
+    await until([b], () => !document.getElementById('partyInv').hidden);
+    await b.page.keyboard.press('KeyY');
+    await until([a, b], () => ((Satisfy.local.net().party || {}).members || []).length === 2);
+    const A = await who(a), B = await who(b), C = await who(c);
+    const pid = await a.eval(() => Satisfy.local.net().party.id);
+    await c.eval(async ([me, to, sid, party]) => {
+      const sdk = await Satisfy.firebase.load(Satisfy.firebaseConfig), D = sdk.m.database;
+      await D.push(D.ref(sdk.db, 'inbox/' + to), { from: me, sid, seq: 1e15, type: 'party.kick', payload: { to, party }, t: D.serverTimestamp() });
+    }, [C.uid, B.uid, A.sid, pid]);
+    await settle(a, b, c); await settle(a, b, c);
+    assert.equal(await b.eval(() => (Satisfy.local.net().party || {}).id), pid, 'B is still in the party');
+    assert.equal(await c.eval(() => window.__fakeRTDB.rejected.length), 0, 'the forged message passed the database rules (only the client can tell)');
+    // and the real leader's messages still land afterwards (the huge seq did not poison A's message counter)
+    await a.eval(() => document.querySelector('#partyW [data-act=pLeave]').click());
+    await until([b], () => !(Satisfy.local.net().party || {}).id);
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});

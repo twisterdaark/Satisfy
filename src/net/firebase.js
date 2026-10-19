@@ -98,9 +98,9 @@
     offs.push(D.onChildAdded(inbox, function (s) {
       var m = s.val();
       D.remove(D.ref(db, 'inbox/' + o.uid + '/' + s.key)).catch(function () { /* ignore */ });
-      if (!m || typeof m !== 'object' || !DIRECTED.test(m.type)) return;
+      if (!m || typeof m !== 'object' || !DIRECTED.test(m.type) || typeof m.from !== 'string' || typeof m.sid !== 'string') return;
       if (typeof m.t === 'number' && Date.now() + offset - m.t > 60000) return; // stale while offline
-      deliver({ v: 1, type: m.type, requestId: null, sessionId: m.sid, seq: +m.seq || 0, tick: 0, payload: m.payload || {} });
+      deliver({ v: 1, type: m.type, requestId: null, sessionId: sidOf(m.from, m.sid), seq: +m.seq || 0, tick: 0, payload: m.payload || {} });
     }));
     offs.push(D.onValue(D.ref(db, '.info/connected'), function (s) {
       var up = !!s.val();
