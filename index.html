@@ -3938,13 +3938,13 @@ function meRun(fn,self,args){if(FXME||!NET||!P||mode!=='play')return fn.apply(se
  try{const r=fn.apply(self,args);ok=true;return r;}finally{window.setTimeout=st;FXME=0;if(ok&&P)try{fxGrab(f0,p0,d0);}catch(e){}}}
 const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(tryAttack);dodge=meWrap(dodge);useSlot=meWrap(useSlot);
 // presence field: the events of the last 0.7 s, oldest first, within FXMAX characters (each one goes out in about 3 updates)
-function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),tag=pt?JSON.stringify('pt:'+pt):null;if(!FXOUT.length)return tag?'['+tag+']':null;
+function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),tag=JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0));if(!FXOUT.length)return tag?'['+tag+']':null;
  let out=tag?[tag]:[],len=2+(tag?tag.length+1:0);for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tag?1:0,0,j);}return out.length?'['+out.join(',')+']':null;}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
 function guPub(){if(!P||!P.guard)return null;const a=Math.atan2(P.gy,P.gx);return 1+((Math.round(a/(2*Math.PI)*64)%64+64)%64)+(P.fort>0?64:0)+(P.gT<.22?128:0);}
 function fxSt(sid){let s=FXS.get(sid);if(!s)FXS.set(sid,s={last:-1,off:null,raw:'',sw:null,du:0,tr:[],lt:0});return s;}
 function fxIn(r,s){if(!r.fx){s.pt=null;return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
- s.pt=null;for(const ev of a)if(typeof ev==='string'&&ev.slice(0,3)==='pt:')s.pt=ev.slice(3,24); // pet and mount ride along in fx (ptPub)
+ s.pt=null;s.inT=0;for(const ev of a)if(typeof ev==='string'){const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}} // pet, mount and when they got to this place ride along in fx (fxPub)
  for(const ev of a){if(!Array.isArray(ev)||!(ev[0]>s.last)||typeof ev[1]!=='number')continue;s.last=ev[0];const lat=now-ev[1];
   // the sender's clock: keep the lowest delay seen (creeping up slowly) so steps of one skill keep their spacing
   if(s.off==null||lat<s.off)s.off=lat;else s.off+=(lat-s.off)*.02;FXQ.push({at:ev[1]+s.off,sid:r.sid,ev});}
@@ -4233,7 +4233,7 @@ function mobKey(m){return m.nk||(m.nk=m.type+'@'+(m.sx|0)+','+(m.sy|0));}
 // siege and trial monsters stay on one client.
 // every outdoor monster, summoned and event ones included (owner report: one player saw monsters the other didn't): the
 // host's list is the truth, a follower makes the ones it lacks from their keys and hides its own that the host doesn't list
-function mobOk(m){const b=MT[m.type];return !!b&&!m.arena&&m.sy<WMH*TS&&m.sy>-NR*TS;}
+function mobOk(m){const b=MT[m.type];return !!b&&!m.arena&&!m.tower;}
 function mobByKey(k){for(const m of mons)if(mobOk(m)&&mobKey(m)===k)return m;return null;}
 function mobStart(){if(!NETTR||!NETTR.mobsPut)return;MOBN={zone:null,all:{},host:null,rs:[],sent:0,put:false,seq:0,hits:new Map()};
  NET.on(ev=>{if(ev.type!=='message'||!MOBN)return;const env=ev.env,pl=env.payload||{};if((env.type!=='raid.hit'&&env.type!=='raid.state')||pl.to!==NET.uid||typeof pl.raid!=='string'||pl.raid.slice(0,2)!=='m|')return;
@@ -4253,9 +4253,16 @@ function netHit(m,dmg){if(PRAID&&praidHit(m,dmg))return true;if(!MOBN||!MOBN.hos
    writes under mobs/{world}/h<host uid>, a path that changes only when the host does. */
 const MOB_LINK=520;
 function mobGroup(cand){const g=[],q=[{x:P.x,y:P.y}],rest=cand.slice();while(q.length){const a=q.pop();for(let i=rest.length-1;i>=0;i--){const r=rest[i];if(Math.abs(r.x-a.x)<MOB_LINK&&Math.abs(r.y-a.y)<MOB_LINK){q.push(r);g.push(r);rest.splice(i,1);}}}return g;}
-function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!roomAt(P.x,P.y)&&P.y<WMH*TS);
- const rs=out?mobGroup(NET.remotes().filter(r=>r.uid&&!r.room&&r.mv===mapV()&&!isBlocked(r.uid)&&typeof r.x==='number'&&r.y<WMH*TS)):[];MOBN.rs=rs;
- let h=NET.uid;for(const r of rs)if(r.uid<h)h=r.uid;MOBN.host=rs.length?h:null;
+/* everywhere, not only outdoors (owner report: mines, pits and caves differed, worst when one went in ahead): players in the
+   same place (outdoors, the same cave or mine, the same house) and near each other are one group. Its host is whoever has
+   been in that place longest (each publishes when it got there, as an "in:" tag in fx), so a friend who walks in later
+   takes over the monsters as the first one left them; ties go to the lowest uid. The arena and the tower stay solo. */
+const solo=(x,y)=>{const D=DUN[8];return !!D&&x>=D.x0*TS&&x<(D.x1+1)*TS&&y>=D.y0*TS&&y<(D.y1+1)*TS;};
+let SPIN={k:null,t:0};function spaceKey(){const R=roomAt(P.x,P.y);if(R)return 'r'+R.id;const D=dunAt(P.x,P.y);if(D)return 'd'+DUN.indexOf(D);return P.y>=WMH*TS?'v':'o';}
+function spaceIn(){const k=spaceKey();if(k!==SPIN.k)SPIN={k,t:Math.floor(wNow()/1000)};return SPIN.t;}
+function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!ARN&&!TWR&&!solo(P.x,P.y));const me=out?spaceIn():0,room=out?(roomAt(P.x,P.y)||{}).id||null:null;
+ const rs=out?mobGroup(NET.remotes().filter(r=>r.uid&&(r.room||null)===room&&r.mv===mapV()&&!isBlocked(r.uid)&&typeof r.x==='number'&&!solo(r.x,r.y))):[];MOBN.rs=rs;
+ const inOf=r=>{const f=FXS.get(r.sid);return f&&f.inT>0?f.inT:9e9;};let h=NET.uid,ht=me;for(const r of rs){const t=inOf(r);if(t<ht||t===ht&&r.uid<h){h=r.uid;ht=t;}}MOBN.host=rs.length?h:null;
  const z=MOBN.host?'h'+MOBN.host.replace(/[^A-Za-z0-9_-]/g,'').slice(0,23):null;
  if(z!==MOBN.zone){if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}MOBN.zone=z;MOBN.all={};MOBN.hits.clear();NETTR.mobsOn(z,a=>{MOBN.all=a;});
   // a new host or none: monsters hidden for the old host come back on their own, and copies made from its list go
