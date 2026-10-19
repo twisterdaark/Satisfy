@@ -111,6 +111,22 @@
         }
       }
     },
+    "guildChat": {
+      "$gid": {
+        ".read": "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid",
+        ".indexOn": ["t"],
+        "$id": {
+          ".write": "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists() && ((!data.exists() && newData.child('from').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('t').val() < now - 86400000))",
+          ".validate": "newData.hasChildren(['from', 'h', 'text', 't'])",
+          "from": { ".validate": "newData.val() === auth.uid" },
+          "h": { ".validate": "newData.isString() && newData.val() === root.child('accountIds').child(auth.uid).val()" },
+          "text": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "guildInv": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",

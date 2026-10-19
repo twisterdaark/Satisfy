@@ -193,6 +193,12 @@ test('guilds: a founder makes one guild with a unique name; joining needs an inv
   assert.equal(inv.$gid.by['.validate'], 'newData.val() === auth.uid');
   for (const n of [g, m, inv.$gid]) assert.equal(n.$other['.validate'], false);
   assert.equal(node.gd['.validate'], "newData.isString() && newData.val().matches(/" + GU.GID_RE.source + "/)", 'presence gd: a guild id');
+  // SAT-ONLINE-049: guild chat, members only
+  const gc = rules.guildChat.$gid;
+  assert.equal(gc['.read'], "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()");
+  assert.match(gc.$id['.write'], /root\.child\('guildMembers'\)\.child\(\$gid\)\.child\(auth\.uid\)\.exists\(\) && \(\(!data\.exists\(\) && newData\.child\('from'\)\.val\(\) === auth\.uid\)/);
+  assert.equal(gc.$id.h['.validate'], rules.chat.$world.$id.h['.validate'], 'the sender is its account ID, as in world chat');
+  assert.equal(gc.$id.text['.validate'], rules.chat.$world.$id.text['.validate']);
 });
 
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing

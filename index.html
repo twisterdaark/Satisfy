@@ -76,6 +76,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #chatTabs button.new::after{content:' •';color:#ffd24a}
 #chatTabs button[hidden]{display:none}
 #chatL div.all b{color:#9fe0ff}#chatL div.sys{color:#ffe07a}#announce.own .head{color:#bfe8ff}#chatL div.sys b{color:#ffb84a}#chatL div.party,#chatL div.party b{color:#8dff9a}
+#chatL div.guild,#chatL div.guild b{color:#f0b8ff}
 #chatW.idle{opacity:.55}
 #chatL div{margin:calc(var(--u)*.2) 0}#chatL div.old{opacity:.45}#chatL b{color:#9fe0a0;font-weight:600}
 #chatIn{width:100%;box-sizing:border-box;font:inherit;padding:calc(var(--u)*.3) calc(var(--u)*.5);margin-top:calc(var(--u)*.4);background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.35)}
@@ -400,7 +401,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
   <canvas id="txt"></canvas>
   <div id="ui" lang="ar" dir="rtl">
     <div id="hud" hidden>
-      <button id="chatBar" hidden></button><div id="chatW" class="sys" hidden><button id="chatX" title="✕">✕</button><div id="chatTabs"><button data-ch="all"></button><button data-ch="party"></button></div><div id="chatL"></div><input id="chatIn" maxlength="120" autocomplete="off" spellcheck="false" hidden></div>
+      <button id="chatBar" hidden></button><div id="chatW" class="sys" hidden><button id="chatX" title="✕">✕</button><div id="chatTabs"><button data-ch="all"></button><button data-ch="party"></button><button data-ch="guild"></button></div><div id="chatL"></div><input id="chatIn" maxlength="120" autocomplete="off" spellcheck="false" hidden></div>
       <div id="stats" class="sys">
         <div class="nm"><span data-i18n="pname"></span><span class="lv" id="lv"></span></div>
         <div class="sb hp" id="hpW"><em>HP</em><div class="bt"><b id="hpl"></b><i id="hpb"></i><span id="hpt"></span></div></div>
@@ -4397,33 +4398,36 @@ function isBlocked(uid){return BLK.has(uid);}
    corner (it used to sit under the right column, where the HUD covered it). Tabs pick what you read and where Enter sends;
    Tab in the chat line switches. A tab you aren't looking at gets a dot when a line arrives. */
 let CHCH='all',chatWasP=false; // joining a party switches Enter to the party chat, as before
-function chatStart(){CHAT=Satisfy.chat.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,world:NETTR&&NETTR.sayWorld?NETTR:null,handle:()=>netId||(S&&S.look.n)||''});CHAT.on(()=>{chatSig='';});}
+function chatStart(){CHAT=Satisfy.chat.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,world:NETTR&&NETTR.sayWorld?NETTR:null,guild:NETTR&&NETTR.kind==='firebase'?GCH:null,handle:()=>netId||(S&&S.look.n)||''});CHAT.on(()=>{chatSig='';});}
 function chatInParty(){return !!(PARTY&&PARTY.members().length>=2);}
-function chatCh(c){CHCH=c==='party'&&chatInParty()?'party':'all';$('chatIn').placeholder=t(CHCH==='party'?'chatPh':'chatPhAll');chatSig='';}
+function chatInGuild(){return !!(GCH&&GCH.inGuild());}
+function chatCh(c){CHCH=c==='party'&&chatInParty()?'party':c==='guild'&&chatInGuild()?'guild':'all';$('chatIn').placeholder=t(CHCH==='party'?'chatPh':CHCH==='guild'?'chatPhGuild':'chatPhAll');chatSig='';}
+// Tab: everyone, then the party, then the guild (the ones you are in)
+function chatNext(){const o=['all'];if(chatInParty())o.push('party');if(chatInGuild())o.push('guild');chatCh(o[(o.indexOf(CHCH)+1)%o.length]);}
 // the chat box can be closed to a small bar that counts new lines; the choice is remembered (owner request)
 let CHATMIN=(()=>{try{return localStorage.getItem('satisfy_chatmin')==='1';}catch(e){return false;}})(),chatMinT=0;
 function chatMin(v){CHATMIN=v;chatMinT=performance.now();try{localStorage.setItem('satisfy_chatmin',v?'1':'0');}catch(e){}if(v){chatClose();$('chatW').hidden=true;}chatSig='';}
 $('chatX').addEventListener('click',e=>{e.stopPropagation();chatMin(true);});$('chatBar').addEventListener('click',()=>{chatMin(false);chatOpen();});
 function chatOpen(){if(!CHAT)return;if(CHATMIN)chatMin(false);chatCh(CHCH);const i=$('chatIn');i.hidden=false;$('chatW').hidden=false;i.focus();chatSig='';}
 function chatClose(){const i=$('chatIn');i.hidden=true;i.value='';i.blur();chatSig='';}
-function chatSend(){if(!CHAT)return chatClose();let v=$('chatIn').value,ch=CHCH;const m=/^\/(p|a)\s+/i.exec(v);if(m){ch=m[1].toLowerCase()==='p'?'party':'all';v=v.slice(m[0].length);} // /p party, /a everyone
+function chatSend(){if(!CHAT)return chatClose();let v=$('chatIn').value,ch=CHCH;const m=/^\/(p|a|g)\s+/i.exec(v);if(m){const k=m[1].toLowerCase();ch=k==='p'?'party':k==='g'?'guild':'all';v=v.slice(m[0].length);} // /p party, /a everyone, /g guild
  const r=CHAT.say(v,ch);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}chatClose();}
-$('chatIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Tab'){e.preventDefault();chatCh(CHCH==='all'?'party':'all');return;}if(e.code==='Enter'||e.code==='NumpadEnter'){e.preventDefault();chatSend();}else if(e.code==='Escape'){e.preventDefault();chatClose();}});
+$('chatIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Tab'){e.preventDefault();chatNext();return;}if(e.code==='Enter'||e.code==='NumpadEnter'){e.preventDefault();chatSend();}else if(e.code==='Escape'){e.preventDefault();chatClose();}});
 $('chatIn').addEventListener('blur',()=>{if(!$('chatIn').hidden&&!$('chatIn').value)chatClose();});
 // pressing a tab used to blur the empty line first, which closed it and hid the tabs before the click landed (owner feedback 9)
 $('chatTabs').addEventListener('pointerdown',e=>e.preventDefault());$('chatTabs').addEventListener('mousedown',e=>e.preventDefault());
 $('chatTabs').addEventListener('click',e=>{const b=e.target.closest('button[data-ch]');if(!b)return;chatCh(b.dataset.ch);if($('chatIn').hidden)chatOpen();else $('chatIn').focus();});
 function chatUI(live){const W=$('chatW'),on=!!(live&&CHAT),bar=$('chatBar');if(!on){bar.hidden=true;if(!W.hidden){W.hidden=true;chatClose();}return;}
  if(CHATMIN&&$('chatIn').hidden){W.hidden=true;const n=CHAT.log().filter(l=>!l.self&&l.t>chatMinT).length;bar.hidden=false;const s2='💬 '+t('chatAll')+(n?' ('+n+')':'');if(bar.textContent!==s2){bar.textContent=s2;bar.classList.toggle('new',n>0);}return;}bar.hidden=true;
- const inP=chatInParty();if(inP&&!chatWasP)chatCh('party');else if(!inP&&CHCH==='party')chatCh('all');chatWasP=inP;
+ const inP=chatInParty(),inG=chatInGuild();if(inP&&!chatWasP)chatCh('party');else if(!inP&&CHCH==='party')chatCh('all');else if(!inG&&CHCH==='guild')chatCh('all');chatWasP=inP;
  // one list for both (owner): everyone's lines and the party's, party ones in green; Tab picks where Enter sends
  const all=CHAT.log(),now=performance.now(),lines=all.slice(-7),nw=false;
- const sig=lang+'|'+CHCH+'|'+inP+'|'+lines.map(l=>l.n+':'+(now-l.t>20000?1:0)).join(',')+'|'+$('chatIn').hidden;
+ const sig=lang+'|'+CHCH+'|'+inP+'|'+inG+'|'+lines.map(l=>l.n+':'+(now-l.t>20000?1:0)).join(',')+'|'+$('chatIn').hidden;
  // nothing to read and the line closed: no box at all (owner: don't crowd the screen); it comes back with a new line or Enter
  const fresh=all.some(l=>now-l.t<30000);W.hidden=!fresh&&$('chatIn').hidden;
  if(sig===chatSig)return;chatSig=sig;
- for(const b of $('chatTabs').children){const c=b.dataset.ch;b.textContent=t(c==='all'?'chatAll':'chatParty');b.classList.toggle('on',c===CHCH);b.hidden=c==='party'&&!inP;}
- $('chatTabs').hidden=$('chatIn').hidden&&!inP; // in a party both tabs stay up to pick where the next line goes
+ for(const b of $('chatTabs').children){const c=b.dataset.ch;b.textContent=t(c==='all'?'chatAll':c==='guild'?'chatGuild':'chatParty');b.classList.toggle('on',c===CHCH);b.hidden=c==='party'&&!inP||c==='guild'&&!inG;}
+ $('chatTabs').hidden=$('chatIn').hidden&&!inP&&!inG; // in a party both tabs stay up to pick where the next line goes
  W.classList.toggle('idle',!lines.length&&$('chatIn').hidden);const L=$('chatL');L.textContent='';
  for(const l of lines){const d=document.createElement('div');d.className=(now-l.t>20000?'old ':'')+(l.ch||'party');const b=document.createElement('b');b.textContent=l.ch==='sys'?'📢 ':(l.self?netId||S.look.n:l.handle)+': ';d.appendChild(b);d.appendChild(document.createTextNode(l.text));L.appendChild(d);}}
 function blockUid(uid,handle){if(!uid)return;BLK.add(uid,handle);toast(t('pBlocked',{n:handle||'?'}),'warn');partySig='';duelSig='';chatSig='';}
@@ -4612,17 +4616,23 @@ $('trGold').addEventListener('change',e=>{if(TRADE){TRADE.setGold(e.target.value
    the master makes officers, the master and officers remove members, and a member's guild shows under its name for
    everyone. The guild is mirrored into WS.guilds, so its level (the members' contributions), perks, banners and the
    G panel work as they do offline. S.gon keeps the online guild's id across sessions; offline guilds are unchanged. */
-Object.assign(STR.ar,{pcGuild:'دعوة للجيلد',gdYes:'انضم',gdInvFrom:'{n} بيدعوك لجيلد {g}',gdInvSent:'اتبعتت دعوة الجيلد لـ{n}',gdInvMem:'هو عضو في الجيلد بالفعل',gdFail:'محصلش، جرب تاني',gdBusy:'إنت في جيلد بالفعل',
+Object.assign(STR.ar,{chatGuild:'الجيلد',chatPhGuild:'شات الجيلد · Tab يغير · Enter يبعت · Esc يقفل',pcGuild:'دعوة للجيلد',gdYes:'انضم',gdInvFrom:'{n} بيدعوك لجيلد {g}',gdInvSent:'اتبعتت دعوة الجيلد لـ{n}',gdInvMem:'هو عضو في الجيلد بالفعل',gdFail:'محصلش، جرب تاني',gdBusy:'إنت في جيلد بالفعل',
  gdKicked:'اتشلت من جيلد {g}',gdDisb:'جيلد {g} اتفكت',gdGone:'إنت مبقتش في جيلد {g}',gdMembers:'الأعضاء ({n})',gdMemH:'الأعضاء: {n} · أونلاين: {o}',gdInvHint:'تدعو حد من كارت اللاعب (⋯ أو T)',
  gdRk_m:'القائد',gdRk_o:'ضابط',gdRk_r:'عضو',gdMkO:'خلي {n} ضابط',gdMkR:'رجّع {n} عضو',gdRkDone:'رتبة {n} اتغيرت',gdKick:'شيل {n} من النقابة',gdKickQ:'تشيل {n} من النقابة؟',gdKickDone:'{n} اتشال من النقابة',gdOn:'أونلاين',gdOff:'مش أونلاين'});
-Object.assign(STR.en,{pcGuild:'Guild invite',gdYes:'Join',gdInvFrom:'{n} invites you to the guild {g}',gdInvSent:'Guild invitation sent to {n}',gdInvMem:'They are in your guild already',gdFail:'That did not work, try again',gdBusy:'You are in a guild already',
+Object.assign(STR.en,{chatGuild:'Guild',chatPhGuild:'Guild chat · Tab switches · Enter sends · Esc closes',pcGuild:'Guild invite',gdYes:'Join',gdInvFrom:'{n} invites you to the guild {g}',gdInvSent:'Guild invitation sent to {n}',gdInvMem:'They are in your guild already',gdFail:'That did not work, try again',gdBusy:'You are in a guild already',
  gdKicked:'You were removed from {g}',gdDisb:'{g} was disbanded',gdGone:'You are no longer in {g}',gdMembers:'Members ({n})',gdMemH:'Members: {n} · online: {o}',gdInvHint:'Invite players from their card (⋯ or T)',
  gdRk_m:'Master',gdRk_o:'Officer',gdRk_r:'Member',gdMkO:'Make {n} an officer',gdMkR:'Make {n} a member again',gdRkDone:"{n}'s rank changed",gdKick:'Remove {n} from the guild',gdKickQ:'Remove {n} from the guild?',gdKickDone:'{n} was removed from the guild',gdOn:'online',gdOff:'offline'});
+// guild chat (SAT-ONLINE-049): the chat's guild channel (src/net/chat.js `guild`) and the feed of the guild you are in
+var GCH={inGuild:()=>{const st=GUILD&&gdFor===S&&GUILD.state();return !!(st&&st.gid&&st.members[NET.uid]);},
+ sayGuild:m=>{const st=GUILD&&GUILD.state();if(st&&st.gid&&GDS)GDS.chatSay(st.gid,m,gdOff).catch(()=>toast(t('gdFail'),'warn'));},
+ guildLines:fn=>{gdChatFn=fn;}},gdChatFn=null,gdChatOff=null,gdChatG=null;
+function gdOff(){return NETTR&&NETTR.serverOffset?NETTR.serverOffset():0;}
+function guildChatSync(){const gid=GCH.inGuild()?GUILD.state().gid:null;if(gid===gdChatG)return;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=gid;if(gid&&GDS)gdChatOff=GDS.chatOn(gid,m=>{if(gdChatFn)gdChatFn(m);},gdOff);chatSig='';}
 var gdSig='',gdFor=null,GDS=null,gdBusy=0,gdFetchT=0;const GDN=new Map(); // GDN: gid -> {n, col, at, mem: uid -> true/false} for other players' labels
 function guildStart(){GUILD=null;gdFor=null;GDS=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.guildStore))return; // NETTR first: FB and GDN are declared below (?net=local starts during load)
  GDN.clear();GDS=Satisfy.firebase.guildStore(FB);GUILD=Satisfy.guild.create({store:GDS,uid:NET.uid,handle:()=>netId||(S&&S.look.n)||'',now:()=>performance.now(),serverNow:()=>wNow()});GUILD.on(guildEv);}
 // (re)start for the character being played: the title's demo has no guild; loading another save starts over
-function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();}
+function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}guildChatSync();return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();guildChatSync();}
 function guildEv(e){if(!S||S.__demo||gdFor!==S)return;gdSig='';
  if(e.type==='changed')guildMirror();
  else if(e.type==='joined'){guildMirror();if(e.why==='join'){toast(t('gJoined',{g:e.name||gName(S.guild)}),'good');SFX.quest();save(true);}}
@@ -4902,7 +4912,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
 function netStop(){try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
- if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;if(GUILD)GUILD.stop();GUILD=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
+ if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid;netStop();
  (erase?C.eraseAll(['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid]):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
@@ -4937,7 +4947,7 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
 function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF=true; // from now on this tab never saves: the newer tab owns the save (review of #30)
- try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;if(GUILD)GUILD.stop();GUILD=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
+ try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
 // another Google account on this device (owner request): the chooser opens straight from the click, the new

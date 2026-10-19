@@ -407,9 +407,24 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; return up(u); },
       readGuild: function (gid) { return D.get(at('guilds/' + gid)).then(function (s) { return s.val(); }); },
       readMember: function (gid, uid) { return D.get(at('guildMembers/' + gid + '/' + uid)).then(function (s) { return !!s.val(); }); },
+      // SAT-ONLINE-049: guildChat/{gid}/{id} = {from, h, text, t}; members only. chatOn gets new lines (and those of the
+      // last 5 min); chatSay also clears up to 10 lines older than a day
+      chatOn: function (gid, fn, offset) {
+        var ref = at('guildChat/' + gid), q = D.limitToLast ? D.query(ref, D.limitToLast(20)) : ref;
+        var off = D.onChildAdded(q, function (s) { var m = s.val(); if (!m || typeof m !== 'object' || typeof m.from !== 'string') return; if (typeof m.t === 'number' && Date.now() + (offset ? offset() : 0) - m.t > 300000) return; fn(m); }, function () { /* not a member (any more) */ });
+        return function () { try { off(); } catch (e) { /* ignore */ } };
+      },
+      chatSay: function (gid, m, offset) {
+        var ref = at('guildChat/' + gid);
+        var p = D.push(ref, { from: m.from, h: String(m.h || '').slice(0, 24), text: String(m.text || '').slice(0, 120), t: D.serverTimestamp() });
+        if (D.limitToFirst) D.get(D.query(ref, D.orderByChild('t'), D.endAt(Date.now() + (offset ? offset() : 0) - 86400000), D.limitToFirst(10))).then(function (s) {
+          s.forEach(function (c) { D.remove(at('guildChat/' + gid + '/' + c.key)).catch(function () { /* ignore */ }); });
+        }).catch(function () { /* ignore */ });
+        return p;
+      },
     };
   }
 

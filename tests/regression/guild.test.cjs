@@ -83,6 +83,22 @@ test('online guilds: found, invite from the card, join, ranks, remove, disband; 
     for (let i = 0; i < 4; i++) { await b.step(90); await b.page.waitForTimeout(20); } // the heartbeat sends a new contribution within 5 s of game time
     await until([a], () => window.__GG.state().xp >= 700, 15000);
 
+    // guild chat (SAT-ONLINE-049): B writes in the guild tab; A gets it as a guild line, C (in no guild) gets nothing
+    await b.page.keyboard.press('Enter'); await b.step(2);
+    await b.eval(() => document.querySelector('#chatTabs [data-ch="guild"]').click()); await b.step(2);
+    assert.match(await b.eval(() => document.getElementById('chatIn').placeholder), /Guild chat/);
+    await b.page.keyboard.type('for the guild only');
+    await b.page.keyboard.press('Enter'); await b.step(2);
+    await until([a], () => [...document.querySelectorAll('#chatL div.guild')].some((d) => /Bassem: for the guild only/.test(d.textContent)));
+    await settle(a, b, c);
+    assert.equal(await c.eval(() => [...document.querySelectorAll('#chatL div')].some((d) => /for the guild only/.test(d.textContent))), false, 'not for others');
+    assert.equal(await c.eval(() => !document.querySelector('#chatTabs [data-ch="guild"]') || document.querySelector('#chatTabs [data-ch="guild"]').hidden), true, 'no guild tab outside a guild');
+    // /g from any tab
+    await a.page.keyboard.press('Enter'); await a.step(2);
+    await a.page.keyboard.type('/g welcome');
+    await a.page.keyboard.press('Enter'); await a.step(2);
+    await until([b], () => [...document.querySelectorAll('#chatL div.guild')].some((d) => /Ahmed: welcome/.test(d.textContent)));
+
     // A makes B an officer; B invites C; C joins; B removes C, who is told
     await a.eval(() => window.__GG.rank('gGdB2', 'o'));
     await until([b], () => window.__GG.state().rank === 'o');

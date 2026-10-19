@@ -153,6 +153,15 @@
       if (!(typeof v.n === 'string' && v.n.length <= 24 && isInt(v.c, 0) && v.c <= 1e12)) return 'guildMembers n/c';
       return isSV(v.on) || (old && v.on === old.on) ? null : 'guildMembers on';
     }
+    if (seg[0] === 'guildChat') { // SAT-ONLINE-049: members write new lines as themselves; the master clears it all on disband
+      const gid = seg[1], member = data.has('guildMembers/' + gid + '/' + me);
+      if (seg.length === 2) return v === null && (data.get('guilds/' + gid) || {}).master === me ? null : 'PERMISSION_DENIED: guildChat ' + path;
+      if (seg.length !== 3 || !member) return 'PERMISSION_DENIED: guildChat ' + path;
+      if (v === null) return old && old.t < Date.now() - 86400000 ? null : 'PERMISSION_DENIED: guildChat remove';
+      if (old || v.from !== me) return 'PERMISSION_DENIED: guildChat write';
+      if (Object.keys(v).sort().join(',') !== 'from,h,t,text' || v.h !== data.get('accountIds/' + me) || typeof v.text !== 'string' || v.text.length < 1 || v.text.length > 120) return 'guildChat fields';
+      return isSV(v.t) ? null : 'guildChat t';
+    }
     // guildInv/{uid}/{gid}
     if (seg.length !== 3) return 'PERMISSION_DENIED: guildInv ' + path;
     const uid = seg[1], gid = seg[2], r = rkOf(gid, me);
@@ -164,7 +173,7 @@
   }
   function rules(p, v, existing) {
     const seg = p.split('/');
-    if (['guilds', 'guildNames', 'guildMembers', 'guildInv'].includes(seg[0])) return guildRules(seg, v);
+    if (['guilds', 'guildNames', 'guildMembers', 'guildInv', 'guildChat'].includes(seg[0])) return guildRules(seg, v);
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
     if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
     if (seg[0] === 'handles' || seg[0] === 'accountIds' || seg[0] === 'chat' || seg[0] === 'news') return idRules(seg, v);
