@@ -64,7 +64,9 @@ test('position bounds cover the whole map, and the fake uses the same bounds', (
 test('presence is indexed on exactly the children the interest queries order by (U009: x; party)', () => {
   assert.deepEqual(rules.presence.$world.$shard['.indexOn'], ['x', 'party']);
   const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
-  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['party', 'x']);
+  // presence: x and party (SAT-ONLINE-014/018); world chat: t and from (SAT-ONLINE-028)
+  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['from', 'party', 't', 'x']);
+  assert.deepEqual(rules.world.$shard['.indexOn'], ['t', 'from']);
   // the radius must cover the screen after a full re-centre step: |offset| <= step, half screen = W / 2
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   const I = /const NET_INTEREST=\{radius:(\d+),step:(\d+)\}/.exec(html), W = +/const W=(\d+),H=/.exec(html)[1];
@@ -163,4 +165,20 @@ test('a hidden level (0) is accepted in presence and profiles', () => {
   assert.match(node.lv['.validate'], /newData\.val\(\) >= 0 && newData\.val\(\) <= 999/);
   assert.match(rules.profiles.$uid.lv['.validate'], /newData\.val\(\) >= 0 && newData\.val\(\) <= 999/);
   assert.match(rules.cloudIndex.$uid.$pid.lv['.validate'], /newData\.val\(\) >= 1 && newData\.val\(\) <= 999/);
+});
+
+// SAT-ONLINE-028: world chat / notices and the online list
+test('world lines: readable when signed in, written once as yourself, deleted only by their author', () => {
+  const w = rules.world.$shard, m = w.$msg;
+  assert.equal(w['.read'], 'auth != null');
+  assert.equal(w['.validate'], "$shard === 'main'");
+  assert.match(m['.write'], /!data\.exists\(\) && newData\.child\('from'\)\.val\(\) === auth\.uid/);
+  assert.match(m['.write'], /data\.exists\(\) && !newData\.exists\(\) && data\.child\('from'\)\.val\(\) === auth\.uid/);
+  assert.equal(m.t['.validate'], 'newData.val() === now');
+  assert.equal(m.$other['.validate'], false);
+  assert.match(m.x['.validate'], /<= 240/);
+  const o = rules.online.$shard.$uid;
+  assert.equal(rules.online.$shard['.read'], 'auth != null');
+  assert.equal(o['.write'], 'auth != null && auth.uid === $uid');
+  assert.equal(o.$other['.validate'], false);
 });

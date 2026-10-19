@@ -48,7 +48,7 @@ test('Sign out, then Delete my online data: nothing of the account is left onlin
     assert.deepEqual(await accountButtons(a), ['Sign out', 'Delete my online data', 'Hide my level from others']);
     await click(a, '#cloudN button'); await click(a, '#cloudN button');
     await until(a, () => document.querySelectorAll('#cloudL .cr').length === 1);
-    assert.deepEqual(await keysOf(a, UID), ['cloudIndex/gEraseMe1/<pid>', 'cloudSaves/gEraseMe1/<pid>', 'presence/satisfy/main/gEraseMe1', 'profiles/gEraseMe1', 'sessions/gEraseMe1']);
+    assert.deepEqual(await keysOf(a, UID), ['cloudIndex/gEraseMe1/<pid>', 'cloudSaves/gEraseMe1/<pid>', 'online/main/gEraseMe1', 'presence/satisfy/main/gEraseMe1', 'profiles/gEraseMe1', 'sessions/gEraseMe1']);
 
     // Sign out: presence goes, the cloud data stays, the title offers sign-in again
     await click(a, '#cloudA button');
@@ -75,7 +75,7 @@ test('Sign out, then Delete my online data: nothing of the account is left onlin
     assert.deepEqual(await a.eval(() => window.__fakeRTDB.rejected), []);
 
     // the other account is untouched and still online
-    assert.deepEqual(await keysOf(b, OTHER), ['presence/satisfy/main/gSomeoneElse2', 'profiles/gSomeoneElse2', 'sessions/gSomeoneElse2']);
+    assert.deepEqual(await keysOf(b, OTHER), ['online/main/gSomeoneElse2', 'presence/satisfy/main/gSomeoneElse2', 'profiles/gSomeoneElse2', 'sessions/gSomeoneElse2']);
     assert.equal((await b.eval(() => Satisfy.local.net())).state, 'ONLINE');
     assert.deepEqual(a.errors, []);
     assert.deepEqual(b.errors, []);

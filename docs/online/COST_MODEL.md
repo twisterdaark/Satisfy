@@ -53,6 +53,18 @@ Spark gives **10 GB/month** of downloads and **100 simultaneous connections** (d
     The range has no borders and keeps one node path. y is not filtered (RTDB queries one child); the
     map is 724 × 144 tiles, so x carries almost all of the distance.
 
+## World chat, notices and the player list (SAT-ONLINE-028)
+
+- **World chat / notices** (`world/main`): every line is downloaded by every online player, so the cost is
+  lines × N × ~150 B. At 20 players and one line every 10 s that is ~0.3 KB/s per player, about a tenth of a
+  moving player's presence. A client joining reads only the last 2 minutes, and each author deletes its own
+  lines after 10 minutes, so the path stays small. Sending is rate-limited in the client (one line per 1.5 s,
+  4 per 15 s); the rules can't count, so a modified client could still flood the channel. If that happens the
+  fix is a Cloud Function (Blaze) that drops lines over a rate, or moving chat to the WebSocket server of
+  alternative B.
+- **Player list** (`online/main/{uid}`, ~60 B): each client writes its entry about once a minute and on a zone or
+  level change; the list is downloaded only while someone has it open (O), plus its changes while open.
+
 ## Next steps
 
 1. **Measure k.** The table assumes 5 players near each one in a 20-player shard. Town crowds are the

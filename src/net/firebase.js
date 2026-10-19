@@ -13,6 +13,9 @@
  *                                    recipient only; older than 60 s is dropped
  *   profiles/{uid}, cloudIndex/{uid}/{pid}, cloudSaves/{uid}/{pid}: see src/net/cloud.js
  *   sessions/{uid}                 = {sid, t}: the account's active session (lease)
+ *   world/{shard}/{pushId}         = {from, h, ty: say|note, x, t}: world chat and notices (SAT-ONLINE-028); the
+ *                                    last 2 minutes are fetched, each author deletes its own after 10 minutes
+ *   online/{shard}/{uid}           = {h, lv, z, t}: who is online (the player list), about once a minute
  * The transport turns child added/changed/removed under presence/{world}/{shard} into the same
  * envelopes Satisfy.presence gets from the local transport.
  */
@@ -185,10 +188,35 @@
       if (typeof m.t === 'number' && Date.now() + offset - m.t > 60000) return; // stale while offline
       deliver({ v: 1, type: m.type, requestId: null, sessionId: sidOf(m.from, m.sid), seq: +m.seq || 0, tick: 0, payload: m.payload || {} });
     }));
+    // World chat and notices (SAT-ONLINE-028): one channel per shard; listened to once someone subscribes.
+    var worldRef = D.ref(db, 'world/' + o.shard), worldCbs = [], worldOn = false, worldOwn = {};
+    var WORLD_BACK_MS = 120000, WORLD_KEEP_MS = 600000;
+    function worldListen() {
+      if (worldOn || closed) return;
+      worldOn = true;
+      var q = D.query(worldRef, D.orderByChild('t'), D.startAt(Date.now() + offset - WORLD_BACK_MS));
+      offs.push(D.onChildAdded(q, function (s) {
+        var m = s.val();
+        if (!m || typeof m !== 'object' || m.from === o.uid) return;
+        worldCbs.forEach(function (f) { try { f(m); } catch (e) { /* ignore */ } });
+      }));
+      // our own lines: remembered (Delete my online data removes them) and tidied after WORLD_KEEP_MS; only the
+      // author may delete a line (rules), so every client cleans up after itself
+      offs.push(D.onChildAdded(D.query(worldRef, D.orderByChild('from'), D.equalTo(o.uid)), function (s) {
+        var m = s.val();
+        worldOwn[s.key] = 1;
+        if (m && typeof m.t === 'number' && Date.now() + offset - m.t > WORLD_KEEP_MS) {
+          delete worldOwn[s.key];
+          D.remove(D.ref(db, 'world/' + o.shard + '/' + s.key)).catch(function () { /* ignore */ });
+        }
+      }));
+    }
+    var onlineRef = D.ref(db, 'online/' + o.shard + '/' + o.uid);
     offs.push(D.onValue(D.ref(db, '.info/connected'), function (s) {
       var up = !!s.val();
       // re-armed on every reconnect: the server deletes our node if this client vanishes
       if (up) D.onDisconnect(mine).remove().catch(function () { /* ignore */ });
+      if (up) D.onDisconnect(onlineRef).remove().catch(function () { /* ignore */ });
       sent = null;
       if (o.onConnection) o.onConnection(up);
     }));
@@ -232,11 +260,33 @@
       interest: function () { return { radius: R, centre: cx, party: pq.ids[0] || null, parties: pq.ids.slice(), watched: Object.keys(pq.keys) }; },
       /** Follow everyone whose presence is in party `id` (or any of an array of ids; null or []: stop), on top of the range query. */
       party: partyQuery,
+      /** World chat / notices (Satisfy.world): send one line as us. ty 'say' (x = text) or 'note' (x = JSON {k, p}). */
+      worldSend: function (ty, x, h) {
+        if (closed) return;
+        D.push(worldRef, { from: o.uid, h: String(h || '').slice(0, 24), ty: ty, x: String(x).slice(0, 240), t: D.serverTimestamp() }).catch(fail);
+      },
+      /** Lines from everyone else, the last two minutes first. */
+      onWorld: function (fn) { worldCbs.push(fn); worldListen(); },
+      /** Paths of our own world lines (Delete my online data). */
+      worldMine: function () { return Object.keys(worldOwn).map(function (k) { return 'world/' + o.shard + '/' + k; }); },
+      /** The player list (SAT-ONLINE-028): write our entry {h, lv, z}; removed when this client goes away. */
+      onlineSet: function (v) {
+        if (closed || !v) return;
+        D.set(onlineRef, { h: String(v.h || '').slice(0, 24), lv: Math.max(0, Math.min(999, v.lv | 0)), z: String(v.z || '').slice(0, 24), t: D.serverTimestamp() }).catch(fail);
+      },
+      /** Watch the whole list: fn({uid: {h, lv, z, t}}) on every change. Returns a function that stops it. */
+      onlineWatch: function (fn) {
+        var all = {}, ref = D.ref(db, 'online/' + o.shard), fs = [];
+        function up(s) { var v = s.val(); if (v && typeof v === 'object') all[s.key] = v; fn(all); }
+        fs.push(D.onChildAdded(ref, up), D.onChildChanged(ref, up), D.onChildRemoved(ref, function (s) { delete all[s.key]; fn(all); }));
+        return function () { fs.forEach(off); };
+      },
       close: function () {
         if (closed) return;
         closed = true;
         qOffs.concat(pq.offs, offs).forEach(off);
         D.remove(mine).catch(function () { /* ignore */ });
+        D.remove(onlineRef).catch(function () { /* ignore */ });
         handler = null;
       },
       /**
@@ -249,6 +299,7 @@
         closed = true;
         qOffs.concat(pq.offs, offs).forEach(off);
         try { D.onDisconnect(mine).cancel().catch(function () { /* ignore */ }); } catch (e) { /* ignore */ }
+        try { D.onDisconnect(onlineRef).cancel().catch(function () { /* ignore */ }); } catch (e) { /* ignore */ }
         handler = null;
       },
     };

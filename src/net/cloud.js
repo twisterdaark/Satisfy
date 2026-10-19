@@ -126,8 +126,11 @@
        * @param {string[]} [extra]
        */
       eraseAll: function (extra) {
-        var mine = new RegExp('^(presence/[a-z0-9_-]+/[A-Za-z0-9_-]+|inbox)/' + uid.replace(/[^A-Za-z0-9_-]/g, '') + '(/|$)');
-        var own = (extra || []).filter(function (p) { return typeof p === 'string' && mine.test(p); });
+        var mine = new RegExp('^(presence/[a-z0-9_-]+/[A-Za-z0-9_-]+|inbox|online/[a-z0-9_-]+)/' + uid.replace(/[^A-Za-z0-9_-]/g, '') + '(/|$)');
+        // world lines are keyed by push id, not uid: the caller passes its own (transport.worldMine()); the rules
+        // refuse deleting anyone else's anyway
+        var line = /^world\/[a-z0-9_-]+\/[A-Za-z0-9_-]+$/;
+        var own = (extra || []).filter(function (p) { return typeof p === 'string' && (mine.test(p) || line.test(p)); });
         return Promise.all(['cloudIndex', 'cloudSaves', 'inbox'].map(function (k) { return D.get(ref(k + '/' + uid)); })).then(function (r) {
           var paths = [];
           ['cloudIndex', 'cloudSaves', 'inbox'].forEach(function (k, i) {

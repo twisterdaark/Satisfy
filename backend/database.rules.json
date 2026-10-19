@@ -148,6 +148,60 @@
         }
       }
     },
+    "world": {
+      "$shard": {
+        ".validate": "$shard === 'main'",
+        ".read": "auth != null",
+        ".indexOn": ["t", "from"],
+        "$msg": {
+          ".write": "auth != null && ((!data.exists() && newData.child('from').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('from').val() === auth.uid))",
+          ".validate": "newData.hasChildren(['from', 'h', 'ty', 'x', 't'])",
+          "from": {
+            ".validate": "newData.isString() && newData.val().length <= 128"
+          },
+          "h": {
+            ".validate": "newData.isString() && newData.val().length <= 24"
+          },
+          "ty": {
+            ".validate": "newData.val() === 'say' || newData.val() === 'note'"
+          },
+          "x": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 240"
+          },
+          "t": {
+            ".validate": "newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "online": {
+      "$shard": {
+        ".validate": "$shard === 'main'",
+        ".read": "auth != null",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['h', 'lv', 'z', 't'])",
+          "h": {
+            ".validate": "newData.isString() && newData.val().length <= 24"
+          },
+          "lv": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
+          },
+          "z": {
+            ".validate": "newData.isString() && newData.val().length <= 24"
+          },
+          "t": {
+            ".validate": "newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
     "profiles": {
       "$uid": {
         ".read": "auth != null",

@@ -57,6 +57,8 @@
   function rules(p, v, existing) {
     const seg = p.split('/');
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
+    if (seg[0] === 'world') return worldRules(seg, v, existing);
+    if (seg[0] === 'online') return onlineRules(seg, v);
     if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
     if (seg[0] === 'sessions') {
       if (seg.length !== 2 || !user || seg[1] !== user.uid) return 'PERMISSION_DENIED: not your session';
@@ -86,6 +88,24 @@
     if ('role' in v && !/^(tank|healer|damage|support)$/.test(v.role)) return 'role';
     if ('rs' in v && !(typeof v.rs === 'string' && v.rs.length <= 515 && /^[A-Za-z0-9:_.-]+( [A-Za-z0-9:_.-]+){0,3}$/.test(v.rs))) return 'rs';
     return null;
+  }
+  // world/{shard}/{msg} (SAT-ONLINE-028): write-once lines as yourself; only the author deletes one
+  function worldRules(seg, v, existing) {
+    if (seg.length !== 3 || seg[1] !== 'main' || !user) return 'PERMISSION_DENIED: world path';
+    if (v === null) { const cur = data.get(seg.join('/')); return cur && cur.from === user.uid ? null : 'PERMISSION_DENIED: not your world line'; }
+    if (existing) return 'PERMISSION_DENIED: world lines are write-once';
+    if (v.from !== user.uid) return 'PERMISSION_DENIED: forged from';
+    if (Object.keys(v).sort().join(',') !== 'from,h,t,ty,x') return 'world fields';
+    if (typeof v.h !== 'string' || v.h.length > 24 || (v.ty !== 'say' && v.ty !== 'note') || typeof v.x !== 'string' || v.x.length < 1 || v.x.length > 240) return 'world values';
+    return JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'world t';
+  }
+  // online/{shard}/{uid} (SAT-ONLINE-028): the player list, owner writes only
+  function onlineRules(seg, v) {
+    if (seg.length !== 3 || seg[1] !== 'main' || !user || seg[2] !== user.uid) return 'PERMISSION_DENIED: online path';
+    if (v === null) return null;
+    if (Object.keys(v).sort().join(',') !== 'h,lv,t,z') return 'online fields';
+    if (typeof v.h !== 'string' || v.h.length > 24 || !(v.lv >= 0 && v.lv <= 999) || typeof v.z !== 'string' || v.z.length > 24) return 'online values';
+    return JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'online t';
   }
   // profiles/{uid}, cloudIndex/{uid}/{pid}, cloudSaves/{uid}/{pid} (SAT-ONLINE-007): owner writes only
   const PID = /^[a-z0-9_]{4,40}$/;
