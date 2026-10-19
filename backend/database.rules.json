@@ -236,6 +236,23 @@
         "$other": { ".validate": false }
       }
     },
+    "arena": {
+      ".read": "auth != null",
+      "$season": {
+        ".indexOn": ["r"],
+        ".validate": "$season.matches(/^s20[0-9]{4}$/)",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['r', 'w', 'l', 'n', 't']) && ((!data.exists() && newData.child('w').val() + newData.child('l').val() <= 1 && newData.child('r').val() >= 936 && newData.child('r').val() <= 1064) || (data.exists() && ((newData.child('w').val() === data.child('w').val() + 1 && newData.child('l').val() === data.child('l').val()) || (newData.child('l').val() === data.child('l').val() + 1 && newData.child('w').val() === data.child('w').val())) && newData.child('r').val() >= data.child('r').val() - 64 && newData.child('r').val() <= data.child('r').val() + 64))",
+          "r": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 4000 && newData.val() % 1 === 0" },
+          "w": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0" },
+          "l": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0" },
+          "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",

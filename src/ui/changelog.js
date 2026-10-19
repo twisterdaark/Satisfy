@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19u', ver: '0.44', d: '2026-10-19',
+      ar: ['أونلاين: مواسم الساحة: كل مبارزة أونلاين بتغير تقييمك في موسم الشهر ده (بتبدأ من 1000)، وزرار "الساحة" في قايمة اللاعبين بيوريك أحسن 10 وتقييمك',
+        'كل شهر جديد موسم جديد'],
+      en: ['Online: arena seasons: every duel online moves your rating in this month\'s season (from 1000); "Arena" in the player list shows the top 10 and your own',
+        'Every new month is a new season'] },
     { v: '2026-10-19s', ver: '0.42', d: '2026-10-19',
       ar: ['أونلاين: لوحة مكافآت: من كارت أي حد اسمه أحمر (خارج عن القانون) تقدر تحط دهب مكافأة على راسه',
         'اللي يقتله في PvP ياخد المكافأة مرة واحدة والعالم كله يعرف، وتقدر ترجع مكافأتك من زرار "المكافآت" في قايمة اللاعبين'],
