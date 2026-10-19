@@ -1,12 +1,12 @@
 # Online test guide for the owner (Twister)
 
-Owner: Claude-A · covers SAT-ONLINE-001 … 020 · دليل اختبار الأونلاين — خطوة بخطوة
+Owner: Claude-A · covers SAT-ONLINE-001 … 021 · دليل اختبار الأونلاين — خطوة بخطوة
 
 ## 0. Deploy the database rules once (after pulling the top branch)
 
 ```powershell
 git fetch origin
-git checkout claude-a/sat-online-020-player-menu
+git checkout claude-a/sat-online-021-party-hp-ping
 npx.cmd -y firebase-tools@latest deploy --only database --project satisfy-online-8yjeix
 ```
 This one deploy covers presence (with its indexes on `x` and `party`), party/duel/raid/chat messages, profiles, cloud saves and session leases.
@@ -27,6 +27,7 @@ devices (PC + phone), or two browsers.
 | Link | Hover the badge | `Link: NN ms · sent … · received … · dropped …` |
 | Party | Stand close, press **P**; the other presses **Y** | Party panel under the minimap; green names |
 | Player card | Click (or tap) the other player | A card with their name, level and class, and **Invite to party · Duel · Block**; Esc closes it |
+| Party HP + ping | In a party, get hit; then **Alt+click** a spot (phone: **Ping**) | Each member's health bar in the party panel moves; a yellow ring appears at the spot on both screens and on the minimap |
 | Chat | In the party, press **Enter**, type, **Enter** | The line shows under the party panel on both devices; **Esc** closes without sending; letters typed there don't move you or open menus |
 | Block | Click **⊘** next to the other member | `… is blocked`; their chat lines stop showing; after leaving the party their invites no longer pop up. **Cloud saves → Unblock all** undoes it |
 | Duel | Walk out of town together (no "Safe zone" in the badge), press **K**; the other presses **Y** (accept), then both **Y** (ready) | 3-2-1 countdown, a dashed ring, HP bars at the top; hits take duel HP only; **Yield** button |

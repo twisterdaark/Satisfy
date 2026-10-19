@@ -99,3 +99,17 @@ test('PlayerPublic.duel (U034): "<duel id>:<HP>" or null, validated', () => {
   assert.ok(N.validatePlayerPublic(pp).ok);
   assert.deepEqual(N.validatePlayerPublic({ ...pp, duel: 'nope' }).errors, ['duel']);
 });
+
+test('SAT-ONLINE-021: hp is a percentage in 5% steps, optional', () => {
+  const S = { look: { n: 'Grid' }, cls: 'novice', lv: 3, title: '' }, P = { x: 1, y: 1, dir: 0 };
+  assert.equal(N.toPlayerPublic(S, P, {}).hp, null);
+  assert.equal(N.toPlayerPublic(S, P, { hp: 61.9 }).hp, 60);
+  assert.equal(N.toPlayerPublic(S, P, { hp: 63 }).hp, 65);
+  assert.equal(N.toPlayerPublic(S, P, { hp: 250 }).hp, 100);
+  assert.equal(N.toPlayerPublic(S, P, { hp: -3 }).hp, 0);
+  assert.equal(N.toPlayerPublic(S, P, { hp: NaN }).hp, null);
+  const ok = N.toPlayerPublic(S, P, { hp: 40 });
+  assert.equal(N.validatePlayerPublic(ok).ok, true);
+  assert.deepEqual(N.validatePlayerPublic({ ...ok, hp: 101 }).errors, ['hp']);
+  assert.deepEqual(N.validatePlayerPublic({ ...ok, hp: 2.5 }).errors, ['hp']);
+});

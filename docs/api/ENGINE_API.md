@@ -136,17 +136,18 @@ In the game: `?net=local` turns it on; remote players are drawn only inside the 
 
 ## `Satisfy.party` (SAT-ONLINE-003)
 
-`Satisfy.party.create({ presence, uid, now?, max? })` runs on a presence client. Party id = `'p_' + leaderUid`; max 5.
+`Satisfy.party.create({ presence, uid, now?, max?, blocked? })` runs on a presence client. Party id = `'p_' + leaderUid`; max 5.
 
 | Member | Notes |
 |---|---|
 | `invite(remotePlayerPublic)` | `'sent'`, or `'busy'` / `'full'` / `'notLeader'` / `'already'` / `'bad'`. The first invite creates the caller's party. |
 | `pendingInvite()`, `accept(pid)`, `decline(pid)` | Invites expire after 30 s. A player who is already in a party auto-declines. |
 | `leave()`, `kick(uid)` | A leader who leaves removes everyone. Members leave when the leader has been missing for 5 s. |
-| `members()` | Self first, then remotes whose `PlayerPublic.party` matches (the leader counts only players who accepted). |
-| `tick()`, `on(fn)` | Events: `invite, joined, youJoined, declined, left, memberLeft, kicked, dissolved, full`. |
+| `members()` | Self first, then remotes whose `PlayerPublic.party` matches (the leader counts only players who accepted). Remotes carry `hp` (their public health %, or `null`). |
+| `ping(x, y)` | SAT-ONLINE-021: marks a spot for the other members (`'sent'`, `'noParty'`, `'tooFast'`; one per `PING_MS` = 1.5 s). Everyone, the sender too, gets a `ping` event `{uid, handle, x, y, self}`; pings from non-members, floods and impossible coordinates are dropped. |
+| `tick()`, `on(fn)` | Events: `invite, joined, youJoined, declined, left, memberLeft, kicked, dissolved, full, ping`. |
 
-Messages `party.invite|accept|decline|kick` carry `{ to: uid, party }`. They go over BroadcastChannel locally, and through `inbox/{to}` in RTDB: only the recipient reads and deletes, a sender can't fake `from`, and messages older than 60 s are dropped. Until Server Authority a party is cosmetic: it gives no shared XP or loot.
+Messages `party.invite|accept|decline|kick` carry `{ to: uid, party }`; `party.ping` adds `k` = x and `n` = y. They go over BroadcastChannel locally, and through `inbox/{to}` in RTDB: only the recipient reads and deletes, a sender can't fake `from`, and messages older than 60 s are dropped. Until Server Authority a party is cosmetic: it gives no shared XP or loot.
 
 In the game, near another player: `P` invites, `Y`/`N` answers, and the party panel sits under the minimap with a Leave button. Party members' names are green. The badge adds `· Safe zone` in every town (Bairan, Winston, Patrian, Reidan, Reinhardt).
 
@@ -292,6 +293,7 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, additive** (SAT-ONLINE-021): `PlayerPublic.hp` (health %, 5% steps), `party.ping(x, y)` / `'ping'` events (`party.ping {to, party, k: x, n: y}` in the inbox), `party.members()[].hp`, `net().pings`; party HP bars, Alt+click pings, party members and pings on the minimap, a Ping button on the touch row. Presence + inbox rules (redeploy).
 - **api 1, additive** (SAT-ONLINE-020): the player menu (click a player: card + invite/duel/block by uid); `__G.toScreen`. No network change.
 - **api 1, additive** (SAT-ONLINE-019): `PlayerPublic.mv` = map version (FNV-1a of the generated world, 8 hex digits); the game shows, invites and challenges only remotes with the same `mv` and room, and tells you once when someone nearby is on another version. `Satisfy.local.zoneAt` returns `'void'` in the interior strip outside rooms (the game's own `zoneAt` still falls back to `zWin`); `zonePolicy` adds `known`. Presence + rules field (redeploy).
 - **api 1** (SAT-ONLINE-018): `transport.party(id)` replaces `transport.watch(uids)` (both unreleased); `interest()` adds `party`. Rules index `presence/{world}/{shard}` on `["x", "party"]` (redeploy).

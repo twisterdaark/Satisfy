@@ -51,7 +51,7 @@
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
 
-  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'seq', 't'];
+  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'seq', 't'];
   const POS_X = 16384, POS_Y = 4096; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
   function rules(p, v, existing) {
@@ -81,6 +81,7 @@
     if ('party' in v && (typeof v.party !== 'string' || v.party.length > 40)) return 'party';
     if ('duel' in v && !(typeof v.duel === 'string' && /^d_[A-Za-z0-9_-]{1,40}:(100|[1-9]?[0-9])$/.test(v.duel))) return 'duel';
     if ('mv' in v && !(typeof v.mv === 'string' && /^[0-9a-f]{8}$/.test(v.mv))) return 'mv';
+    if ('hp' in v && !(typeof v.hp === 'number' && v.hp >= 0 && v.hp <= 100)) return 'hp';
     return null;
   }
   // profiles/{uid}, cloudIndex/{uid}/{pid}, cloudSaves/{uid}/{pid} (SAT-ONLINE-007): owner writes only
@@ -119,11 +120,12 @@
     if (v.from !== user.uid) return 'PERMISSION_DENIED: forged from';
     const keys = Object.keys(v).sort().join(',');
     if (keys !== 'from,payload,seq,sid,t,type') return 'inbox fields ' + keys;
-    if (!/^(party\.(invite|accept|decline|kick)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say))$/.test(v.type)) return 'inbox type';
+    if (!/^(party\.(invite|accept|decline|kick|ping)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say))$/.test(v.type)) return 'inbox type';
     const pk = Object.keys(v.payload).sort().join(',');
     if (v.payload.to !== seg[1]) return 'inbox payload';
     if (v.type.startsWith('party.')) {
-      if (pk !== 'party,to') return 'inbox payload';
+      if (pk !== (v.type === 'party.ping' ? 'k,n,party,to' : 'party,to')) return 'inbox payload ' + pk;
+      if (v.type === 'party.ping' && !(v.payload.k >= 0 && v.payload.k <= 10000000 && v.payload.n >= 0 && v.payload.n <= 10000000)) return 'inbox ping';
       if (typeof v.payload.party !== 'string' || v.payload.party.length > 40) return 'inbox party';
     } else if (v.type.startsWith('chat.')) {
       if (pk !== 'party,text,to') return 'inbox chat payload ' + pk;

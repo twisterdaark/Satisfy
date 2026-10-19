@@ -49,6 +49,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #boss .bar{height:calc(var(--u)*1.5)}
 #boss .head{color:#ffb0a6;font-size:calc(var(--u)*1.6)}
 #partyW{pointer-events:auto;width:calc(var(--u)*26);font-size:calc(var(--u)*1.5)}#partyW .x{font-size:calc(var(--u)*1.3);width:auto;padding:0 calc(var(--u)*.6)}#partyL div{display:flex;justify-content:space-between;gap:calc(var(--u)*1)}#partyL .ld{color:#ffe07a}
+#partyL i.php{display:block;height:calc(var(--u)*.5);margin:calc(var(--u)*.1) 0 calc(var(--u)*.4);background:rgba(90,26,26,.8)}#partyL i.php b{display:block;height:100%;background:#e2493a}
 #partyL button.blk{width:auto;padding:0 calc(var(--u)*.4);font-size:calc(var(--u)*1.2);opacity:.7}
 #chatW{pointer-events:auto;width:calc(var(--u)*26);font-size:calc(var(--u)*1.4);margin-top:calc(var(--u)*.6);overflow-wrap:anywhere}
 #chatL div{margin:calc(var(--u)*.2) 0}#chatL div.old{opacity:.45}#chatL b{color:#9fe0a0;font-weight:600}
@@ -349,7 +350,7 @@ button{background:linear-gradient(180deg,rgba(36,52,108,.85),rgba(22,32,74,.85))
       </div>
       <div id="touch" hidden><div id="tStick"><i id="tKnob"></i></div>
         <div id="tAct"><button data-tk="atk" class="big" data-i18n="kA"></button><button data-tk="Space" data-i18n="kD"></button><button data-tk="guard" data-i18n="kG"></button><button data-tk="KeyE" data-i18n="kE"></button></div>
-        <div id="tNet" hidden><button data-tk="KeyP" data-i18n="tParty"></button><button data-tk="KeyK" data-i18n="tDuel"></button><button data-tk="KeyY" data-i18n="tYes"></button><button data-tk="KeyN" data-i18n="tNo"></button><button data-tk="Enter" data-i18n="tChat"></button></div></div>
+        <div id="tNet" hidden><button data-tk="KeyP" data-i18n="tParty"></button><button data-tk="KeyK" data-i18n="tDuel"></button><button data-tk="KeyY" data-i18n="tYes"></button><button data-tk="KeyN" data-i18n="tNo"></button><button data-tk="Enter" data-i18n="tChat"></button><button data-tk="ping" data-i18n="tPing"></button></div></div>
       <div id="skillbar" class="sys"></div>
       <div id="hint" hidden></div>
       <div id="toasts"></div>
@@ -1850,7 +1851,7 @@ stage.addEventListener('mousedown',e=>{if(e.button===2){if(mode==='play'&&!e.tar
  if(mode==='forge'&&MG&&!MG.done){e.preventDefault();strike();return;}
  if(mode==='dialog'){advance();return;}
  if(mode==='cut'){if(SM)SM.done();return;}
- if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar')){stage.focus();const b=stage.getBoundingClientRect();const mx=(e.clientX-b.left)/SC+camXf,my=(e.clientY-b.top)/SC+camYf;if(NET&&pctxClick(mx,my))return;const dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);}});
+ if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar')){stage.focus();const b=stage.getBoundingClientRect();const mx=(e.clientX-b.left)/SC+camXf,my=(e.clientY-b.top)/SC+camYf;if(NET&&e.altKey){netPing(mx,my);return;}if(NET&&pctxClick(mx,my))return;const dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);}});
 function onKey(c){
  if(c==='Tab'&&(mode==='play'||mode==='cut')){toggleQuest();return;}
  if(mode==='play'){
@@ -3283,7 +3284,7 @@ function drawMini(){const c=$('mini');const show=!miniOff&&S&&!$('hud').hidden;c
  npcs.forEach(n=>{if(n.hidden)return;const w=wTile(n.x,n.y),x=(w.x-ox)*4,y=(w.y-oy)*4;MM.marker(g,'npc',x,y,u);const mk=npcMark(n.id);if(mk)MM.label(g,mk[0],x,y-9*u,{size:13,color:mk[1],weight:700,font:'Oswald, sans-serif'});});
  Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1).forEach(id=>{const p=qSpot(id);if(p)MM.marker(g,p.ret?'ret':'quest',(p.x-ox)*4,(p.y-oy)*4,u*.85);});
  invMark(g,sx,sy,u,4,13,lang==='ar'?'Tajawal, sans-serif':'Oswald, sans-serif');
- MM.player(g,sx(pp.x),sy(pp.y),dirAng(P.dir),u,gTime);
+ if(NET)netMini(g,sx,sy,u);MM.player(g,sx(pp.x),sy(pp.y),dirAng(P.dir),u,gTime);
  // frame: inner glow edge, compass, zone band
  const gr=g.createRadialGradient(128,88,60,128,88,160);gr.addColorStop(0,'rgba(6,14,32,0)');gr.addColorStop(1,'rgba(6,14,32,.55)');g.fillStyle=gr;g.fillRect(0,0,256,176);
  g.strokeStyle='rgba(143,216,255,.55)';g.lineWidth=2;g.strokeRect(1,1,254,174);
@@ -3329,7 +3330,7 @@ Satisfy.local=Object.freeze({api:1,
  zoneAt:(x,y)=>netZone(x,y), // 'void' where the world defines nothing (SAT-ONLINE-019)
  roomAt:(x,y)=>{const R=roomAt(x,y);return R?{id:R.id,kind:R.kind,zone:R.z}:null;},
  inGame:()=>!!S&&!S.__demo,
- playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV()}),
+ playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP()}),
  backups:()=>STORE.backups(),
  profile:()=>!S||S.__demo?null:Satisfy.state.profileOf(S),
  events:()=>DEVT.log(),
@@ -3340,7 +3341,8 @@ Satisfy.local=Object.freeze({api:1,
   link:NETTR&&NETTR.netStats?NETTR.netStats():null,
   interest:NETTR&&NETTR.interest?NETTR.interest():null,
   raid:PRAID?{host:PRAID.isHost(),member:PRAID.isMember(),encounters:PRAID.encounters()}:null,
-  chat:CHAT?CHAT.log():null,blocked:BLK.list()}:null});
+  chat:CHAT?CHAT.log():null,blocked:BLK.list(),
+  pings:PINGS.filter(p=>performance.now()-p.t<3000).map(p=>({x:p.x,y:p.y,handle:p.handle,self:p.self}))}:null});
 window.__G.defs=Satisfy.local.defs;
 
 /* ---------------- online (opt-in: ?net=local) ---------------- */
@@ -3389,7 +3391,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   TX.push({s:r.handle||'?',x:r.x,y:r.y-28,f:F,z:8,c:foe?'#ff8a7a':mate?'#8dff9a':'#9fe0ff'});
   if(!mate&&!foe&&mode==='play'&&Math.hypot(r.x-P.x,r.y-P.y)<PARTY_R)TX.push({s:t('pInvite')+(DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?' · '+t('dHint'):''),x:r.x,y:r.y-37,f:F,z:6,c:'#ffe7a8'});}
- duelWatch(ents,myRoom);
+ duelWatch(ents,myRoom);pingEnts(ents,myRoom,F);
  const ds=DUEL&&DUEL.state();if(ds&&ds.arena&&!myRoom)ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle=ds.phase==='fight'?'rgba(255,120,90,.7)':'rgba(255,210,74,.7)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(ds.arena.x,ds.arena.y,ds.arena.r,0,7);ctx.stroke();ctx.restore();}});}
 if(NETQ==='local'&&typeof BroadcastChannel!=='undefined'){
  netStart(Satisfy.presence.create({transport:Satisfy.transports.local('satisfy-net-v1'),world:Satisfy.local.world(),now:()=>performance.now()}));netState='ONLINE';
@@ -3399,15 +3401,16 @@ let FB=null;
 /* party (SAT-ONLINE-003): P invites the nearest player, Y/N answers an invite */
 function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked});duelStart();praidStart();chatStart();
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
-  if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();partySig='';});}
+  if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
 function partyInviteNear(){const r=partyNear();if(!r)return toast(t('pNone'));const res=PARTY.invite(r);
  toast(t({sent:'pInvSent',busy:'pBusy',full:'pFull',notLeader:'pNotLeader'}[res]||'pBusy',{n:r.handle}),res==='sent'?'good':'warn');partySig='';}
 function partyAct(a){if(!PARTY)return;const inv=PARTY.pendingInvite();if(a==='pAccept'&&inv)PARTY.accept(inv.party);else if(a==='pDecline'&&inv)PARTY.decline(inv.party);else if(a==='pLeave')PARTY.leave();partySig='';}
 function partyUI(live){if(!PARTY)return;const inv=live?PARTY.pendingInvite():null,mem=live?PARTY.members():[];
- const sig=lang+'|'+(inv?inv.party:'')+'|'+mem.map(m=>m.uid+':'+m.lv+':'+m.leader).join(',');if(sig===partySig)return;partySig=sig;
+ const hpOf=m=>m.self?Math.round(20*Math.max(0,P.hp)/maxHP())*5:m.hp;
+ const sig=lang+'|'+(inv?inv.party:'')+'|'+mem.map(m=>m.uid+':'+m.lv+':'+m.leader+':'+hpOf(m)).join(',');if(sig===partySig)return;partySig=sig;
  $('partyInv').hidden=!inv;if(inv)$('partyInvT').textContent=t('pInvFrom',{n:inv.handle});
- $('partyW').hidden=mem.length<2;$('partyL').innerHTML=mem.map(m=>`<div class="${m.leader?'ld':''}"><span>${m.leader?'★ ':''}${esc(m.self?S.look.n:m.handle||'?')}</span><span>${t('lv',{n:m.self?S.lv:m.lv})}${m.self?'':` <button class="blk" data-uid="${esc(m.uid)}" data-tip="${esc(t('pBlock'))}">⊘</button>`}</span></div>`).join('');}
+ $('partyW').hidden=mem.length<2;$('partyL').innerHTML=mem.map(m=>`<div class="${m.leader?'ld':''}"><span>${m.leader?'★ ':''}${esc(m.self?S.look.n:m.handle||'?')}</span><span>${t('lv',{n:m.self?S.lv:m.lv})}${m.self?'':` <button class="blk" data-uid="${esc(m.uid)}" data-tip="${esc(t('pBlock'))}">⊘</button>`}</span></div>${hpOf(m)==null?'':`<i class="php" data-hp="${hpOf(m)}"><b style="width:${hpOf(m)}%"></b></i>`}`).join('');}
 addEventListener('keydown',e=>{if(!PARTY||mode!=='play'||e.repeat||KB.includes(e.code))return;
  if(e.target&&e.target.tagName==='INPUT')return; // typing in the chat line
  if(e.code==='Enter'){chatOpen();return;}
@@ -3434,6 +3437,22 @@ function blockUid(uid,handle){if(!uid)return;BLK.add(uid,handle);toast(t('pBlock
 function blockAct(a){if(a==='pBlock'&&PARTY){const inv=PARTY.pendingInvite();if(inv){blockUid(inv.from,inv.handle);PARTY.decline(inv.party);}}
  else if(a==='dBlock'&&DUEL){const inv=DUEL.pendingChallenge();if(inv){blockUid(inv.from,inv.handle);DUEL.decline(inv.duel);}}}
 $('partyL').addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button.blk');if(!b||!PARTY)return;const m=PARTY.members().find(x=>x.uid===b.dataset.uid);if(m)blockUid(m.uid,m.handle);});
+/* party HP and pings (SAT-ONLINE-021, doc §35 U051/U052). Every player publishes health in 5% steps
+   (PlayerPublic.hp); the party panel shows a bar per member. Alt+click (or Ping on the touch row, which marks where
+   you stand) shows a ring at that spot for the whole party for 3 s, on the ground and on the minimap; at most one
+   ping per member every 1.5 s. */
+Object.assign(STR.ar,{pingNone:'العلامة للبارتي بس',pingFast:'براحة على العلامات',pingFrom:'{n} حط علامة على الخريطة'});
+Object.assign(STR.en,{pingNone:'Pings are for your party',pingFast:'Not so many pings',pingFrom:'{n} pinged the map'});
+let PINGS=[];
+function netPing(x,y){if(!PARTY)return;const r=PARTY.ping(x,y);if(r==='noParty')toast(t('pingNone'));else if(r==='tooFast')toast(t('pingFast'),'warn');}
+function pingAdd(e){PINGS.push({x:e.x,y:e.y,t:performance.now(),handle:e.handle,self:e.self});if(PINGS.length>8)PINGS.shift();
+ if(!e.self){SFX.notice&&SFX.notice();if(e.x<camX||e.x>camX+VW||e.y<camY||e.y>camY+VH)toast(t('pingFrom',{n:e.handle||'?'}));}}
+function pingEnts(ents,myRoom,F){if(myRoom)return;const now=performance.now();PINGS=PINGS.filter(p=>now-p.t<3000);
+ for(const p of PINGS){const k=(now-p.t)/3000;ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle=`rgba(255,220,90,${(1-k).toFixed(2)})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,6+14*k,0,7);ctx.stroke();ctx.restore();}});
+  if(!p.self)TX.push({s:p.handle||'?',x:p.x,y:p.y-18,f:F,z:6,c:'#ffe07a'});}}
+function netMini(g,sx,sy,u){const now=performance.now(),id=PARTY&&PARTY.id();
+ if(id)for(const r of NET.remotes())if(r.party===id&&!r.room&&r.mv===mapV())MM.marker(g,'ally',sx(r.x),sy(r.y),u);
+ for(const p of PINGS){const k=(now-p.t)/3000;if(k>=1)continue;g.strokeStyle=`rgba(255,220,90,${(1-k).toFixed(2)})`;g.lineWidth=2;g.beginPath();g.arc(sx(p.x),sy(p.y),4+10*k,0,7);g.stroke();}}
 /* player menu (SAT-ONLINE-020, doc §35 U046 nearby player context + U064 inspect): click or tap another player to see
    their public card (name, level, class, title, party, armour) and invite, challenge or block exactly that player:
    the target is their uid, so two players with the same name can't be mixed up. Nothing private is shown: it is only
@@ -3459,6 +3478,7 @@ function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig
  else if(a==='pcBlock'){if(isBlocked(r.uid)){BLK.remove(r.uid);toast(t('pcUnblocked',{n:r.handle||'?'}));}else blockUid(r.uid,r.handle);}
  pctxSig='';}
 window.__G.toScreen=(x,y)=>{const b=stage.getBoundingClientRect();return {x:b.left+(x-camXf)*SC,y:b.top+(y-camYf)*SC};}; // tests: click a world position
+window.__G.maxHP=()=>maxHP();
 addEventListener('keydown',e=>{if(e.code==='Escape'&&PCTX&&mode==='play'&&!(e.target&&e.target.tagName==='INPUT')){PCTX=null;pctxSig='';e.stopImmediatePropagation();}},true);
 /* duels (SAT-ONLINE-006, doc §09 R4): K challenges the nearest player outside towns; Y/N answers, Y is the ready check.
    Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
@@ -3596,8 +3616,8 @@ if(NETQ==='online'){netBtn();
    a stick on the left moves, Attack/Guard work while held, Dodge and Use tap, and the key hints at the bottom right
    (inventory, status, map, …) become buttons. Online, a row for party (P), duel (K), yes/no (Y/N) and chat. Taps are
    sent as the same key events the keyboard sends, so every screen keeps one input path. */
-Object.assign(STR.ar,{tParty:'بارتي',tDuel:'مبارزة',tYes:'أيوه',tNo:'لأ',tChat:'شات'});
-Object.assign(STR.en,{tParty:'Party',tDuel:'Duel',tYes:'Yes',tNo:'No',tChat:'Chat'});
+Object.assign(STR.ar,{tPing:'علامة',tParty:'بارتي',tDuel:'مبارزة',tYes:'أيوه',tNo:'لأ',tChat:'شات'});
+Object.assign(STR.en,{tPing:'Ping',tParty:'Party',tDuel:'Duel',tYes:'Yes',tNo:'No',tChat:'Chat'});
 const TOUCH=(()=>{const q=new URLSearchParams(location.search).get('touch');if(q==='0')return false;if(q==='1')return true;try{return matchMedia('(pointer: coarse)').matches;}catch(e){return false;}})();
 // key hints that work as taps (attack and guard are held, so they live on the big buttons instead)
 const TKEY={kD:'Space',kE:'KeyE',kC:'KeyC',kI:'KeyI',kU:'KeyU',kM:'KeyM',kGu:'KeyG',kMo:'KeyH',kEsc:'Escape'};
@@ -3614,8 +3634,8 @@ if(TOUCH){document.body.classList.add('touch');const st=$('tStick');
  st.addEventListener('pointermove',e=>{if(e.pointerId===sid)tStickAt(e);});
  for(const ev of ['pointerup','pointercancel','lostpointercapture'])st.addEventListener(ev,e=>{if(e.pointerId===sid){sid=null;tStickOff();}});
  for(const b of document.querySelectorAll('#touch button')){const k=b.dataset.tk;
-  b.addEventListener('pointerdown',e=>{e.preventDefault();audio();b.classList.add('on');if(k==='atk')K.atk=true;else if(k==='guard'){if(mode==='play')guardOn();}else tKey(k,true);});
-  const up=()=>{if(!b.classList.contains('on'))return;b.classList.remove('on');if(k==='atk')K.atk=false;else if(k==='guard')guardOff();else tKey(k,false);};
+  b.addEventListener('pointerdown',e=>{e.preventDefault();audio();b.classList.add('on');if(k==='atk')K.atk=true;else if(k==='guard'){if(mode==='play')guardOn();}else if(k==='ping'){if(NET&&PARTY&&mode==='play')netPing(P.x,P.y);}else tKey(k,true);});
+  const up=()=>{if(!b.classList.contains('on'))return;b.classList.remove('on');if(k==='atk')K.atk=false;else if(k==='guard')guardOff();else if(k!=='ping')tKey(k,false);};
   for(const ev of ['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,up);}
  $('keys').addEventListener('pointerdown',e=>{const el=e.target.closest('.key'),c=el&&TKEY[el.id];if(!c)return;e.preventDefault();tKey(c,true);tKey(c,false);});}
 })();

@@ -54,8 +54,8 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-019 �
 | U048 | Party accept | 🟡 | The leader caps the party at 5 when accepts arrive; no server transaction yet |
 | U049 | Party leader election | ❌ | The party dissolves when the leader leaves |
 | U050 | Party roles | ❌ | |
-| U051 | Party HP UI | ❌ | Next (needs a public HP % in presence) |
-| U052 | Party pings | ❌ | Next |
+| U051 | Party HP UI | ✅ | SAT-ONLINE-021: `PlayerPublic.hp` (5% steps, nothing else of the profile); a bar per member in the party panel |
+| U052 | Party pings | ✅ | SAT-ONLINE-021: Alt+click (touch: Ping marks where you stand) → `party.ping`; a ring on the ground and the minimap for 3 s; one per member per 1.5 s |
 | U053 | Party chat | 🟡 | SAT-ONLINE-016: party-only, rate-limited, block list; no profanity filter |
 | U054 | Party summon | ⏳ | A teleport needs a movement authority |
 | U055 | Party follow | ❌ | |
@@ -70,4 +70,4 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-019 �
 | U064 | Player inspect | ✅ | SAT-ONLINE-020: the card shows only PlayerPublic (name, level, class, title, party, armour) |
 | U065 | Party reconnect | ❌ | A reload leaves the party |
 
-**Totals (social):** ✅ 3 · 🟡 4 · ⏳ 6 · ❌ 7.
+**Totals (social):** ✅ 5 · 🟡 4 · ⏳ 6 · ❌ 5.

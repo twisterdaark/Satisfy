@@ -115,3 +115,32 @@ test('messages addressed to someone else are ignored', () => {
   assert.equal(c.party.pendingInvite(), null);
   assert.ok(b.party.pendingInvite());
 });
+
+test('SAT-ONLINE-021 pings: members only, at most one per member every PING_MS, sane coordinates', () => {
+  const w = world(3), [a, b, c] = w.players;
+  const pings = (p) => { const out = []; p.party.on((e) => { if (e.type === 'ping') out.push(e); }); return out; };
+  const pa = pings(a), pb = pings(b), pc = pings(c);
+  assert.equal(a.party.ping(10, 10), 'noParty');
+  a.party.invite(w.remote(a, b)); b.party.accept('p_u0'); w.sync();
+  assert.equal(a.party.ping(2100, 1300), 'sent');
+  assert.deepEqual(pb.map((e) => [e.uid, e.handle, e.x, e.y, e.self]), [['u0', 'P0', 2100, 1300, false]]);
+  assert.deepEqual(pa.map((e) => e.self), [true], 'the pinger sees its own ping');
+  assert.deepEqual(pc, [], 'not in the party');
+  assert.equal(a.party.ping(2100, 1300), 'tooFast');
+  w.advance(SN.party.PING_MS);
+  // a forged ping from outside the party, a flood from a member, and nonsense coordinates are dropped
+  c.pres.send('party.ping', { to: 'u1', party: 'p_u0', k: 5, n: 5 });
+  b.pres.send('party.ping', { to: 'u0', party: 'p_u0', k: 7, n: 7 });
+  b.pres.send('party.ping', { to: 'u0', party: 'p_u0', k: 8, n: 8 });
+  b.pres.send('party.ping', { to: 'u0', party: 'p_u0', k: -1, n: 99999 });
+  assert.deepEqual(pb.length, 1);
+  assert.deepEqual(pa.filter((e) => !e.self).map((e) => [e.x, e.y]), [[7, 7]]);
+});
+
+test('SAT-ONLINE-021 members() carries the public HP %', () => {
+  const w = world(2), [a, b] = w.players;
+  a.party.invite(w.remote(a, b)); b.party.accept('p_u0'); w.sync();
+  const m = a.party.members().find((x) => x.uid === 'u1');
+  assert.ok('hp' in m);
+  assert.equal(m.hp, null, 'this test world publishes no hp');
+});
