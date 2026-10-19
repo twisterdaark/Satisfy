@@ -1,6 +1,6 @@
 # Art contract: characters, monsters, terrain, buildings, icons and VFX (SAT-ART-001)
 
-Owner: Claude-B. Integrator: Claude-A. Status: proposal. Nothing here is wired into `index.html` yet.
+Owner: Claude-B. Status: **live**. Since the owner approved it on 2026-10-19, `index.html` loads `chars.js`, `monsters.js`, `tiles.js`, `buildings.js` and `icons.js` and draws every layer with them. The legacy painters were removed from `index.html`, with no toggle, at the owner's request. The `legacy-*.js` snapshots stay only for the preview comparison. The adapter sections below describe what is wired in now. `vfx.js` is not hooked up yet.
 
 ## What exists
 

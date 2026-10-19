@@ -50,7 +50,8 @@ test('terrain v2 keeps the game tile ids and the legacy snapshot matches index.h
  const ids=Object.fromEntries(line.slice(6,-1).split(',').map(p=>{const [k,v]=p.split('=');return [k,+v];}));
  assert.deepStrictEqual(plainObj(T.tiles.IDS),ids);assert.deepStrictEqual(plainObj(T.legacyTiles.IDS),ids);
  const snap=fs.readFileSync(path.join(dir,'legacy-tiles.js'),'utf8'),grab=(s,a,b)=>{const i=s.indexOf(a);return s.slice(i,s.indexOf(b,i));};
- assert.strictEqual(grab(snap,'function drawTile(x,y){','\nreturn {drawTile').replace('if(v===TR&&env.tree)env.tree(x,y,r);','if(v===TR)VT.push(vtree(x,y,r));'),grab(html,'function drawTile(x,y){','\nfunction drawBuilding'),'drawTile drifted: re-run the snapshot');});
+ // once index.html runs tiles.js the legacy painter is gone and the snapshot is only history
+ if(html.includes('function drawTile(x,y){'))assert.strictEqual(grab(snap,'function drawTile(x,y){','\nreturn {drawTile').replace('if(v===TR&&env.tree)env.tree(x,y,r);','if(v===TR)VT.push(vtree(x,y,r));'),grab(html,'function drawTile(x,y){','\nfunction drawBuilding'),'drawTile drifted: re-run the snapshot');});
 
 test('every tile id renders a full opaque 16x16 ground, deterministic, with overlays near the tile',()=>{const T=load('tiles.js').tiles,I=T.IDS;
  // a 5x5 neighborhood per id: the id in a plus shape on grass, so edge and corner code paths run
@@ -65,7 +66,7 @@ test('every tile id renders a full opaque 16x16 ground, deterministic, with over
 test('buildings v2 cover every kind and prop in index.html and keep footprints, doors and the roof line',()=>{const html=fs.readFileSync(path.join(__dirname,'..','..','index.html'),'utf8');
  const B=load('buildings.js','legacy-buildings.js');const N=B.buildings;
  const snap=fs.readFileSync(path.join(dir,'legacy-buildings.js'),'utf8'),grab=(s,a,b)=>{const i=s.indexOf(a);return s.slice(i,s.indexOf(b,i));};
- assert.strictEqual(grab(snap,'function drawBuilding(b){','\nfunction drawWorld'),grab(html,'function drawBuilding(b){','\nfor(let y=0;y<MH;y++)'),'drawBuilding drifted: re-run the snapshot');
+ if(html.includes('function drawBuilding(b){'))assert.strictEqual(grab(snap,'function drawBuilding(b){','\nfunction drawWorld'),grab(html,'function drawBuilding(b){','\nfor(let y=0;y<MH;y++)'),'drawBuilding drifted: re-run the snapshot');
  const kinds=[...new Set([...html.matchAll(/k:'(\w+)'\}/g)].map(m=>m[1]).filter(k=>/^(house|forge|hall|shop|tower|lodge|inn|armory)$/.test(k)))];
  assert.ok(kinds.length>=8,'kinds found: '+kinds);for(const k of kinds){assert.ok(N.ROOF[k],'roof color for '+k);assert.ok(N.WALLK[k],'wall style for '+k);}
  const props=[...new Set([...html.matchAll(/P0\('(\w+)'/g)].map(m=>m[1]))];for(const k of props)assert.ok(N.PROP[k],'prop '+k);
@@ -78,9 +79,15 @@ test('buildings v2 cover every kind and prop in index.html and keep footprints, 
 
 test('item icons v2 cover every key iconC handles and every craftable item',()=>{const html=fs.readFileSync(path.join(__dirname,'..','..','index.html'),'utf8');
  const I=load('icons.js').icons,snap=fs.readFileSync(path.join(dir,'legacy-icons.js'),'utf8'),grab=(s,a,b)=>{const i=s.indexOf(a);return s.slice(i,s.indexOf(b,i));};
- const src=grab(html,'function iconC(k){','\nfunction icon(k)');assert.strictEqual(grab(snap,'function iconC(k){','\nA.legacyIcon'),src,'iconC drifted: re-run the snapshot');
+ const live=grab(html,'function iconC(k){','\nfunction icon(k)'),src=live.includes('SatArt')||live.includes('SA.icons')?grab(snap,'function iconC(k){','\nA.legacyIcon'):live;
+ if(src===live)assert.strictEqual(grab(snap,'function iconC(k){','\nA.legacyIcon'),src,'iconC drifted: re-run the snapshot');
  const keys=new Set([...src.matchAll(/k==='(\w+)'/g)].map(m=>m[1]));for(const m of html.match(/const WSH=\{[^\n]+/)[0].matchAll(/(\w+):\{l:/g))keys.add(m[1]);
  for(const m of html.matchAll(/\{id:'(\w+)',slot:'[wax]'/g))keys.add(m[1]);
  for(const k of keys)assert.ok(I.KEYS.includes(k),'no v2 icon for '+k);
  for(const k of I.KEYS){const d=I.iconRGBA(k);assert.strictEqual(d.length,1024);let n=0;for(let i=3;i<1024;i+=4)if(d[i])n++;assert.ok(n>=12,k+' is nearly empty');}
  const m=JSON.parse(fs.readFileSync(path.join(dir,'sheets','manifest.json'),'utf8')).icons;assert.deepStrictEqual(m.keys,[...I.KEYS]);assert.deepStrictEqual(pngSize(path.join(dir,m.file)),{w:16*I.KEYS.length,h:16});});
+
+test('index.html draws every layer with the v2 art',()=>{const html=fs.readFileSync(path.join(__dirname,'..','..','index.html'),'utf8');
+ for(const f of ['chars','monsters','tiles','buildings','icons'])assert.ok(html.includes(`<script src="sprites-original/${f}.js"></script>`),f+'.js not loaded');
+ for(const hook of ['SA.chars.buildSheet(FIG[n])','SA.monsters.buildSheet(k)','SA.tiles.drawMap(','SA.buildings.drawBuilding(','SA.buildings.drawWorld(','SA.icons.iconCanvas(k)'])assert.ok(html.includes(hook),'missing hook '+hook);
+ for(const gone of ['function figure(','function drawTile(','function drawBuilding(','function drawWolf('])assert.ok(!html.includes(gone),'legacy painter still present: '+gone);});
