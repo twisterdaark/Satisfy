@@ -1,12 +1,12 @@
 # Online test guide for the owner (Twister)
 
-Owner: Claude-A · covers SAT-ONLINE-001 … 014 · دليل اختبار الأونلاين — خطوة بخطوة
+Owner: Claude-A · covers SAT-ONLINE-001 … 015 · دليل اختبار الأونلاين — خطوة بخطوة
 
 ## 0. Deploy the database rules once (after pulling the top branch)
 
 ```powershell
 git fetch origin
-git checkout claude-a/sat-online-014-interest
+git checkout claude-a/sat-online-015-account
 npx.cmd -y firebase-tools@latest deploy --only database --project satisfy-online-8yjeix
 ```
 This one deploy covers presence (with its index on `x`), party/duel/raid messages, profiles, cloud saves and session leases.
@@ -33,6 +33,8 @@ devices (PC + phone), or two browsers.
 | Cloud save | Back on the title screen → **Cloud saves** → **Upload** (click twice) | `… uploaded to your account` |
 | Second device | Same Google account on the other device → **Cloud saves** → **Download** (click twice) → **Continue** | Your character, same level and gold; the replaced save is kept as a backup |
 | Same account twice | The same Google account in two tabs | The older tab says *Your account is now playing on another device or tab* with **Play here** |
+| Sign out | Title screen → **Cloud saves** → **Sign out** | `Signed out`; the button says **Play online (Google)** again; the other device stops seeing you |
+| Delete my data | **Cloud saves** → **Delete my online data** (click twice) | `Your online data is deleted (N records)`; in the Firebase console nothing under your uid is left in `profiles`, `cloudIndex`, `cloudSaves`, `sessions`, `presence`; **Continue** still loads this device's save |
 
 ## 2. If something looks wrong
 

@@ -8,6 +8,8 @@
  *                              written by its owner only; revision only goes up (no stale overwrite)
  *   cloudIndex/{uid}/{pid}   = {pid, handle, lv, cls, schema, savedAt, rev, size, t}   (owner only)
  *   cloudSaves/{uid}/{pid}   = {blob, rev, t}                                          (owner only)
+ * eraseAll() deletes every one of these for the account, plus its session lease and inbox (doc §29
+ * T35: per-user data deletion). The local save on the device is not touched.
  *
  * A cloud save is a copy of the local save (the same JSON string), keyed by the character id S.pid.
  * It moves a character between devices; it is not an online wallet (D4: the online wallet stays
@@ -113,6 +115,28 @@
         return D.get(ref('cloudSaves/' + uid + '/' + pid)).then(function (s) {
           var v = s.val();
           return v && typeof v.blob === 'string' ? v.blob : null;
+        });
+      },
+      /**
+       * Delete everything this account stored online: cloud characters (index entries first, then the
+       * saves, including any saved without an index entry), inbox, `extra` paths (the game passes its
+       * presence node), the session lease and the public profile. One path at a time, in that order, so
+       * a failure part-way leaves no index entry pointing at a deleted save. Resolves with the number
+       * of paths deleted.
+       * @param {string[]} [extra]
+       */
+      eraseAll: function (extra) {
+        var mine = new RegExp('^(presence/[a-z0-9_-]+/[A-Za-z0-9_-]+|inbox)/' + uid.replace(/[^A-Za-z0-9_-]/g, '') + '(/|$)');
+        var own = (extra || []).filter(function (p) { return typeof p === 'string' && mine.test(p); });
+        return Promise.all(['cloudIndex', 'cloudSaves', 'inbox'].map(function (k) { return D.get(ref(k + '/' + uid)); })).then(function (r) {
+          var paths = [];
+          ['cloudIndex', 'cloudSaves', 'inbox'].forEach(function (k, i) {
+            var v = r[i].val();
+            if (v && typeof v === 'object') Object.keys(v).forEach(function (id) { paths.push(k + '/' + uid + '/' + id); });
+          });
+          paths = paths.concat(own, ['sessions/' + uid, 'profiles/' + uid]);
+          return paths.reduce(function (p, path) { return p.then(function () { return D.remove(ref(path)); }); }, Promise.resolve())
+            .then(function () { lastRev = 0; revLoaded = null; return paths.length; });
         });
       },
       /** Delete a cloud character (index first, so a half-done delete never lists a missing save). */
