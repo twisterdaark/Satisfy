@@ -85,7 +85,7 @@
     // Round trip (doc U015): how long the server takes to acknowledge a presence write, smoothed.
     var rtt = null, writes = 0, fails = 0;
     function acked(t0) { return function () { var ms = Date.now() - t0; rtt = rtt == null ? ms : Math.round(rtt * 0.8 + ms * 0.2); }; }
-    var DIRECTED = /^(party\.(invite|accept|decline|kick|ping)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say)|pvp\.(hit|kill))$/;
+    var DIRECTED = /^(party\.(invite|accept|decline|kick|ping)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say)|pvp\.(hit|kill)|trade\.(ask|accept|decline|cancel))$/;
     // exactly the fields the inbox rules accept: party {to, party}, duel {to, duel, k?, n?}, raid {to, raid, k?, n?},
     // chat {to, party, text}
     function directedPayload(type, p) {
@@ -102,6 +102,7 @@
         if (typeof p.n === 'number' && p.n >= 0 && p.n <= 1000000000) o.n = Math.round(p.n);
         return o;
       }
+      if (type.indexOf('trade.') === 0) { o.trade = String(p.trade || ''); return o; } // SAT-ONLINE-039
       if (type.indexOf('raid.') === 0) o.raid = String(p.raid || ''); else o.duel = String(p.duel || '');
       if (typeof p.k === 'number' && p.k >= 0 && p.k <= 1000000000) o.k = Math.round(p.k);
       if (typeof p.n === 'number' && p.n >= 0 && p.n <= 1000000000) o.n = Math.round(p.n);
@@ -344,8 +345,37 @@
     return { off: function () { try { off(); } catch (e) { /* ignore */ } } };
   }
 
+  /**
+   * SAT-ONLINE-039: the trade store for Satisfy.trade over this database. trades/{id} = {a, b, t} (the asker writes it once),
+   * tradeSides/{id}/{uid} = each side's offer (its owner only, until the swap), tradeDone/{id} plus tradedItems/{iid} =
+   * the swap, written together in one multi-path update the rules check (backend/database.rules.json).
+   */
+  function tradeStore(sdk) {
+    var D = sdk.m.database, db = sdk.db;
+    var at = function (p) { return D.ref(db, p); };
+    return {
+      create: function (id, a, b) { return D.set(at('trades/' + id), { a: a, b: b, t: D.serverTimestamp() }); },
+      side: function (id, uid, o) {
+        var v = { g: o.g, rev: o.rev, acc: o.acc, conf: o.conf, t: D.serverTimestamp() };
+        if (o.it && Object.keys(o.it).length) v.it = o.it;
+        return D.set(at('tradeSides/' + id + '/' + uid), v);
+      },
+      watch: function (id, uid, cb) { var off = D.onValue(at('tradeSides/' + id + '/' + uid), function (s) { cb(s.val()); }, function () {}); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      read: function (id, uid) { return D.get(at('tradeSides/' + id + '/' + uid)).then(function (s) { return s.val(); }); },
+      watchDone: function (id, cb) { var off = D.onValue(at('tradeDone/' + id), function (s) { cb(s.val()); }, function () {}); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      commit: function (id, by, a, b, A, B) {
+        var u = {};
+        u['tradeDone/' + id] = { by: by, t: D.serverTimestamp() };
+        Object.keys((A && A.it) || {}).forEach(function (iid) { u['tradedItems/' + iid] = { o: b, t: id, at: D.serverTimestamp() }; });
+        Object.keys((B && B.it) || {}).forEach(function (iid) { u['tradedItems/' + iid] = { o: a, t: id, at: D.serverTimestamp() }; });
+        return D.update(D.ref(db), u);
+      },
+    };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
+    tradeStore: tradeStore,
     SDK_VERSION: SDK_VERSION,
     load: load,
     lease: lease,

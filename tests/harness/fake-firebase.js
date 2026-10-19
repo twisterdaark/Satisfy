@@ -56,6 +56,48 @@
   const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'ol', 'seq', 't'];
   const POS_X = 16384, POS_Y = 4096, POS_Y0 = -2048; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
+  // SAT-ONLINE-039 trades, as backend/database.rules.json: every condition reads the data as it was before the write
+  const TID_RE = /^t_[A-Za-z0-9_-]{1,60}$/, IID_RE = /^it_[a-z0-9_]{4,40}_[0-9]+$/;
+  const isInt = (x, lo) => typeof x === 'number' && x >= lo && x % 1 === 0;
+  function tradeMeta(tid) { const m = data.get('trades/' + tid); return m && typeof m === 'object' ? m : null; }
+  function tradeConfirmed(tid) {
+    const m = tradeMeta(tid); if (!m) return false;
+    const A = data.get('tradeSides/' + tid + '/' + m.a), B = data.get('tradeSides/' + tid + '/' + m.b);
+    return !!A && !!B && A.rev != null && B.rev != null && A.acc === B.rev && B.acc === A.rev && A.conf === B.rev && B.conf === A.rev;
+  }
+  function tradeRules(seg, v) {
+    if (!user) return 'PERMISSION_DENIED: trade';
+    const path = seg.join('/'), me = user.uid;
+    if (seg[0] === 'trades') {
+      if (seg.length !== 2 || !TID_RE.test(seg[1]) || data.has(path) || !v) return 'PERMISSION_DENIED: trades ' + path;
+      if (Object.keys(v).sort().join(',') !== 'a,b,t' || v.a !== me || typeof v.b !== 'string' || !v.b || v.b.length > 128 || v.b === me || JSON.stringify(v.t) !== JSON.stringify(SV)) return 'trades fields';
+      return null;
+    }
+    const m = tradeMeta(seg[1]), part = !!m && (m.a === me || m.b === me);
+    if (seg[0] === 'tradeSides') {
+      if (seg.length !== 3 || seg[2] !== me || !part || data.has('tradeDone/' + seg[1])) return 'PERMISSION_DENIED: tradeSides ' + path;
+      if (!v) return 'tradeSides null';
+      for (const k in v) if (!['g', 'rev', 'acc', 'conf', 'it', 't'].includes(k)) return 'tradeSides field ' + k;
+      if (!(isInt(v.g, 0) && v.g <= 1000000000 && isInt(v.rev, 1) && isInt(v.acc, -1) && isInt(v.conf, -1))) return 'tradeSides numbers';
+      if ('it' in v && !(v.it && typeof v.it === 'object' && Object.keys(v.it).every((k) => IID_RE.test(k) && typeof v.it[k] === 'string' && v.it[k].length <= 600))) return 'tradeSides it';
+      return JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'tradeSides t';
+    }
+    if (seg[0] === 'tradeDone') {
+      if (seg.length !== 2 || !part || data.has(path) || !v || !tradeConfirmed(seg[1])) return 'PERMISSION_DENIED: tradeDone ' + path;
+      return Object.keys(v).sort().join(',') === 'by,t' && v.by === me && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'tradeDone fields';
+    }
+    // tradedItems/{iid} = {o, t, at}: an item moves only inside a confirmed, not yet done trade it was offered in, and only
+    // away from the player the ledger last recorded
+    if (seg.length !== 2 || !IID_RE.test(seg[1]) || !v || typeof v.t !== 'string') return 'PERMISSION_DENIED: tradedItems ' + path;
+    if (Object.keys(v).sort().join(',') !== 'at,o,t' || JSON.stringify(v.at) !== JSON.stringify(SV) || !TID_RE.test(v.t)) return 'tradedItems fields';
+    const T = tradeMeta(v.t);
+    if (!T || (T.a !== me && T.b !== me) || data.has('tradeDone/' + v.t) || !tradeConfirmed(v.t)) return 'PERMISSION_DENIED: tradedItems trade';
+    const giver = v.o === T.a ? T.b : v.o === T.b ? T.a : null, offer = giver && data.get('tradeSides/' + v.t + '/' + giver);
+    if (!giver || !offer || !offer.it || !(seg[1] in offer.it)) return 'PERMISSION_DENIED: tradedItems not offered';
+    const cur = data.get(path);
+    if (cur && cur.o !== giver) return 'PERMISSION_DENIED: tradedItems not the giver\'s';
+    return null;
+  }
   function rules(p, v, existing) {
     const seg = p.split('/');
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
@@ -68,6 +110,7 @@
       if (Object.keys(v).sort().join(',') !== 'm,t' || JSON.stringify(v.t) !== JSON.stringify(SV) || !v.m || typeof v.m !== 'object') return 'mobs fields';
       return Object.keys(v.m).every((k) => /^[a-z0-9_]{1,16}@-?[0-9]{1,6},-?[0-9]{1,6}$/.test(k) && typeof v.m[k] === 'string' && v.m[k].length <= 64) ? null : 'mobs m';
     }
+    if (['trades', 'tradeSides', 'tradeDone', 'tradedItems'].includes(seg[0])) return tradeRules(seg, v);
     if (seg[0] === 'sessions') {
       if (seg.length !== 2 || !user || seg[1] !== user.uid) return 'PERMISSION_DENIED: not your session';
       if (v === null) return null;
@@ -164,7 +207,7 @@
     if (v.from !== user.uid) return 'PERMISSION_DENIED: forged from';
     const keys = Object.keys(v).sort().join(',');
     if (keys !== 'from,payload,seq,sid,t,type') return 'inbox fields ' + keys;
-    if (!/^(party\.(invite|accept|decline|kick|ping)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say)|pvp\.(hit|kill))$/.test(v.type)) return 'inbox type';
+    if (!/^(party\.(invite|accept|decline|kick|ping)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say)|pvp\.(hit|kill)|trade\.(ask|accept|decline|cancel))$/.test(v.type)) return 'inbox type';
     const pk = Object.keys(v.payload).sort().join(',');
     if (v.payload.to !== seg[1]) return 'inbox payload';
     if (v.type.startsWith('party.')) {
@@ -181,6 +224,8 @@
       if (!['k,to', 'k,n,to'].includes(pk)) return 'inbox pvp payload ' + pk;
       if (!(typeof v.payload.k === 'number' && v.payload.k >= 0 && v.payload.k <= 1000000000)) return 'inbox k';
       if ('n' in v.payload && !(typeof v.payload.n === 'number' && v.payload.n >= 0 && v.payload.n <= 1000000000)) return 'inbox n';
+    } else if (v.type.startsWith('trade.')) {
+      if (pk !== 'to,trade' || !TID_RE.test(v.payload.trade)) return 'inbox trade payload ' + pk;
     } else if (v.type.startsWith('raid.')) {
       if (!['raid,to', 'k,raid,to', 'k,n,raid,to'].includes(pk)) return 'inbox raid payload ' + pk;
       if (typeof v.payload.raid !== 'string' || v.payload.raid.length > 64) return 'inbox raid';
@@ -217,7 +262,7 @@
 
   const database = {
     getDatabase: (app, url) => { F.databaseURL = url; return {}; },
-    ref: (db, path) => ({ path, key: keyOf(path) }),
+    ref: (db, path) => ({ path: path || '', key: path ? keyOf(path) : null }),
     query: (r, ...cs) => ({ path: r.path, key: r.key, q: Object.assign({}, r.q, ...cs) }),
     orderByChild: (child) => ({ child }),
     startAt: (lo) => ({ lo }),
@@ -245,6 +290,14 @@
     },
     // RTDB update(): merge into the stored node (null removes a field), then check the rules on the result
     update: (r, diff) => {
+      if (!r.path) { // a multi-location update at the root (SAT-ONLINE-039): all or nothing, each path checked against the data before it
+        const ps = Object.keys(diff), errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);
+        F.log.push({ op: 'update', path: '', err: errs[0] || null, keys: ps.slice().sort() });
+        if (errs.length) { F.rejected.push(errs[0]); return Promise.reject(Object.assign(new Error(errs[0]), { code: 'PERMISSION_DENIED' })); }
+        const fix = (x) => (x && typeof x === 'object' ? (JSON.stringify(x) === JSON.stringify(SV) ? Date.now() : Object.fromEntries(Object.entries(x).map(([k, y]) => [k, fix(y)]))) : x);
+        for (const p of ps) { mine.add(p); write('set', p, fix(clone(diff[p]))); }
+        return Promise.resolve();
+      }
       const cur = data.has(r.path) ? clone(data.get(r.path)) : (pending.has(r.path) ? clone(pending.get(r.path)) : {});
       // a key with slashes ("m/<key>") is a path inside the node, as RTDB update() takes it (SAT-ONLINE-042)
       for (const k in diff) {
@@ -278,7 +331,8 @@
       const wait = helloAt + 150 - Date.now();
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
-      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs'].includes(seg[0]) ? !!user : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
+      const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems'].includes(seg[0]) ? !!user : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));
@@ -293,7 +347,8 @@
       if (r.path === '.info/serverTimeOffset') { setTimeout(() => cb(snap(r.path, F.serverOffset || 0)), 0); return () => {}; } // a test sets F.serverOffset for a device whose clock is off
       if (r.path !== '.info/connected') {
         const seg = r.path.split('/');
-        const ok = seg[0] === 'sessions' ? user && seg[1] === user.uid : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own') && !!user;
+        const tm = (seg[0] === 'tradeSides' && seg.length === 3) || (seg[0] === 'tradeDone' && seg.length === 2) ? tradeMeta(seg[1]) : null;
+        const ok = seg[0] === 'sessions' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);

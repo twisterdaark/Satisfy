@@ -26,6 +26,56 @@
         }
       }
     },
+    "trades": {
+      "$tid": {
+        ".read": "auth != null && (data.child('a').val() === auth.uid || data.child('b').val() === auth.uid)",
+        ".write": "auth != null && !data.exists() && newData.child('a').val() === auth.uid",
+        ".validate": "$tid.matches(/^t_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['a', 'b', 't'])",
+        "a": { ".validate": "newData.val() === auth.uid" },
+        "b": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128 && newData.val() !== auth.uid" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "tradeSides": {
+      "$tid": {
+        ".read": "auth != null && (root.child('trades').child($tid).child('a').val() === auth.uid || root.child('trades').child($tid).child('b').val() === auth.uid)",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid && (root.child('trades').child($tid).child('a').val() === $uid || root.child('trades').child($tid).child('b').val() === $uid) && !root.child('tradeDone').child($tid).exists()",
+          ".validate": "newData.hasChildren(['g', 'rev', 'acc', 'conf', 't'])",
+          "g": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000 && newData.val() % 1 === 0" },
+          "rev": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() % 1 === 0" },
+          "acc": { ".validate": "newData.isNumber() && newData.val() >= -1 && newData.val() % 1 === 0" },
+          "conf": { ".validate": "newData.isNumber() && newData.val() >= -1 && newData.val() % 1 === 0" },
+          "it": {
+            "$iid": { ".validate": "$iid.matches(/^it_[a-z0-9_]{4,40}_[0-9]+$/) && newData.isString() && newData.val().length <= 600" }
+          },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "tradeDone": {
+      "$tid": {
+        ".read": "auth != null && (root.child('trades').child($tid).child('a').val() === auth.uid || root.child('trades').child($tid).child('b').val() === auth.uid)",
+        ".write": "auth != null && (root.child('trades').child($tid).child('a').val() === auth.uid || root.child('trades').child($tid).child('b').val() === auth.uid) && !data.exists() && newData.exists() && root.child('tradeSides').child($tid).child(root.child('trades').child($tid).child('a').val()).child('rev').exists() && root.child('tradeSides').child($tid).child(root.child('trades').child($tid).child('b').val()).child('rev').exists() && root.child('tradeSides').child($tid).child(root.child('trades').child($tid).child('a').val()).child('acc').val() === root.child('tradeSides').child($tid).child(root.child('trades').child($tid).child('b').val()).child('rev').val() && root.child('tradeSides').child($tid).child(root.child('trades').child($tid).child('b').val()).child('acc').val() === root.child('tradeSides').child($tid).child(root.child('trades').child($tid).child('a').val()).child('rev').val() && root.child('tradeSides').child($tid).child(root.child('trades').child($tid).child('a').val()).child('conf').val() === root.child('tradeSides').child($tid).child(root.child('trades').child($tid).child('b').val()).child('rev').val() && root.child('tradeSides').child($tid).child(root.child('trades').child($tid).child('b').val()).child('conf').val() === root.child('tradeSides').child($tid).child(root.child('trades').child($tid).child('a').val()).child('rev').val()",
+        ".validate": "newData.hasChildren(['by', 't'])",
+        "by": { ".validate": "newData.val() === auth.uid" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "tradedItems": {
+      "$iid": {
+        ".read": "auth != null",
+        ".write": "auth != null && newData.exists() && newData.child('t').isString() && (root.child('trades').child(newData.child('t').val()).child('a').val() === auth.uid || root.child('trades').child(newData.child('t').val()).child('b').val() === auth.uid) && !root.child('tradeDone').child(newData.child('t').val()).exists() && root.child('tradeSides').child(newData.child('t').val()).child(root.child('trades').child(newData.child('t').val()).child('a').val()).child('rev').exists() && root.child('tradeSides').child(newData.child('t').val()).child(root.child('trades').child(newData.child('t').val()).child('b').val()).child('rev').exists() && root.child('tradeSides').child(newData.child('t').val()).child(root.child('trades').child(newData.child('t').val()).child('a').val()).child('acc').val() === root.child('tradeSides').child(newData.child('t').val()).child(root.child('trades').child(newData.child('t').val()).child('b').val()).child('rev').val() && root.child('tradeSides').child(newData.child('t').val()).child(root.child('trades').child(newData.child('t').val()).child('b').val()).child('acc').val() === root.child('tradeSides').child(newData.child('t').val()).child(root.child('trades').child(newData.child('t').val()).child('a').val()).child('rev').val() && root.child('tradeSides').child(newData.child('t').val()).child(root.child('trades').child(newData.child('t').val()).child('a').val()).child('conf').val() === root.child('tradeSides').child(newData.child('t').val()).child(root.child('trades').child(newData.child('t').val()).child('b').val()).child('rev').val() && root.child('tradeSides').child(newData.child('t').val()).child(root.child('trades').child(newData.child('t').val()).child('b').val()).child('conf').val() === root.child('tradeSides').child(newData.child('t').val()).child(root.child('trades').child(newData.child('t').val()).child('a').val()).child('rev').val() && ((newData.child('o').val() === root.child('trades').child(newData.child('t').val()).child('a').val() && root.child('tradeSides').child(newData.child('t').val()).child(root.child('trades').child(newData.child('t').val()).child('b').val()).child('it').child($iid).exists() && (!data.exists() || data.child('o').val() === root.child('trades').child(newData.child('t').val()).child('b').val())) || (newData.child('o').val() === root.child('trades').child(newData.child('t').val()).child('b').val() && root.child('tradeSides').child(newData.child('t').val()).child(root.child('trades').child(newData.child('t').val()).child('a').val()).child('it').child($iid).exists() && (!data.exists() || data.child('o').val() === root.child('trades').child(newData.child('t').val()).child('a').val())))",
+        ".validate": "$iid.matches(/^it_[a-z0-9_]{4,40}_[0-9]+$/) && newData.hasChildren(['o', 't', 'at'])",
+        "o": { ".validate": "newData.isString() && newData.val().length <= 128" },
+        "t": { ".validate": "newData.isString() && newData.val().matches(/^t_[A-Za-z0-9_-]{1,60}$/)" },
+        "at": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",
@@ -146,10 +196,10 @@
             ".validate": "newData.isNumber() && newData.val() >= 0"
           },
           "type": {
-            ".validate": "newData.isString() && newData.val().matches(/^(party\\.(invite|accept|decline|kick|ping)|duel\\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\\.(hit|state|kill)|chat\\.(say)|pvp\\.(hit|kill))$/)"
+            ".validate": "newData.isString() && newData.val().matches(/^(party\\.(invite|accept|decline|kick|ping)|duel\\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\\.(hit|state|kill)|chat\\.(say)|pvp\\.(hit|kill)|trade\\.(ask|accept|decline|cancel))$/)"
           },
           "payload": {
-            ".validate": "newData.hasChild('to') && ((newData.parent().child('type').val().beginsWith('party.') && newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('duel.') && newData.hasChild('duel') && !newData.hasChild('party') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('raid.') && newData.hasChild('raid') && !newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('chat.') && newData.hasChildren(['party', 'text']) && !newData.hasChild('duel') && !newData.hasChild('raid') && !newData.hasChild('k') && !newData.hasChild('n')) || (newData.parent().child('type').val().beginsWith('pvp.') && newData.hasChild('k') && !newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('raid') && !newData.hasChild('text')))",
+            ".validate": "newData.hasChild('to') && ((newData.parent().child('type').val().beginsWith('party.') && newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('duel.') && newData.hasChild('duel') && !newData.hasChild('party') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('raid.') && newData.hasChild('raid') && !newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('chat.') && newData.hasChildren(['party', 'text']) && !newData.hasChild('duel') && !newData.hasChild('raid') && !newData.hasChild('k') && !newData.hasChild('n')) || (newData.parent().child('type').val().beginsWith('pvp.') && newData.hasChild('k') && !newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('raid') && !newData.hasChild('text')) || (newData.parent().child('type').val().beginsWith('trade.') && newData.hasChild('trade') && !newData.hasChild('party') && !newData.hasChild('duel') && !newData.hasChild('raid') && !newData.hasChild('text') && !newData.hasChild('k') && !newData.hasChild('n')))",
             "to": {
               ".validate": "newData.val() === $uid"
             },
@@ -170,6 +220,9 @@
             },
             "text": {
               ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+            },
+            "trade": {
+              ".validate": "newData.isString() && newData.val().matches(/^t_[A-Za-z0-9_-]{1,60}$/)"
             },
             "$other": {
               ".validate": false

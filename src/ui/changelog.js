@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19l', ver: '0.35', d: '2026-10-19',
+      ar: ['أونلاين: تبادل بين اللاعبين: افتح كارت اللاعب اللي جنبك (⋯ أو T) واضغط تبادل',
+        'كل واحد بيحط دهب وحاجات من الشنطة، وبعدين الاتنين يضغطوا موافق وبعدها تأكيد',
+        'أي تغيير في العرض بيرجّع الموافقة من الأول، ولو بعت أو صرفت حاجة من اللي عارضها العرض بيتغير لوحده',
+        'القطعة اللي اتبدلت مرة متتبدلش تاني من حفظ قديم'],
+      en: ['Online: trading between players: open the card of a player next to you (⋯ or T) and press Trade',
+        'Each of you puts in gold and things from the bag, then both press Accept, then Confirm',
+        'Any change to an offer resets the accepts; selling or spending something you offered changes the offer by itself',
+        'An item that was traded once can not be traded again from an old save'] },
     { v: '2026-10-19k', ver: '0.34', d: '2026-10-19',
       ar: ['الشنطة فيها سلة: دوس عليها وبعدين على الحاجة، أو اسحب الحاجة عليها، وهتسألك قبل ما تدمرها',
         'لو سحبت حاجة برا الشنطة هتسألك إذا كنت عايز ترميها. بتفضل على الأرض دقيقة تقدر ترجع تاخدها، وبعدها بتختفي',
