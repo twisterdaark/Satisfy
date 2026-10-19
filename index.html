@@ -3300,7 +3300,7 @@ let annT=0;function announce(msg,own){logMsg(msg);const W=$('announce');W.queryS
 // through the news feed, named by your account ID. A story notice is shown once per character, whoever's clock fires it first.
 const NEWS=['bntDone','evWin','evCap','castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
 function annArgs(p,n){const o={...p,n};if('rk' in o){o.r=t('r'+o.rk);delete o.rk;}return o;}
-function annW(k,p){p=p||{};announce(t(k,annArgs(p,t('pname'))));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo)return;
+function annW(k,p){p=p||{};announce(t(k,annArgs(p,t('pname'))));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!netId)return; // no account ID yet: the rules take news only under one
  const q={};for(const f of ['lv','f','rk'])if(typeof p[f]==='number')q[f]=p[f];NETTR.feedSay('news',Object.assign({from:NET.uid,h:netId||S.look.n,k},Object.keys(q).length?{p:q}:{}));}
 function newsIn(m){if(!m||!NEWS.includes(m.k)||!NET||m.from===NET.uid||isBlocked(m.from)||!S||S.__demo)return;
  if(m.k==='annGrid'){if(S.ev.grid)return;S.ev.grid=1;announce(t('annGrid'));SFX.notice();return;}
