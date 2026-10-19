@@ -3905,7 +3905,7 @@ function update(dt){
    move(m,m.wx*b.spd*.25*dt,m.wy*b.spd*.25*dt,mr);if(m.wx)m.face=m.wx>0?1:-1;}
  }catch(err){gameErr(err,m);}finally{if(MOBP){P=MOBP;MOBP=null;}}}
  if(P.rmv>0)P.rmv-=dt;else if(P.rsp)P.rsp=Math.max(0,P.rsp-dt*2);horseRegen(dt);
- updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);updateEvents(dt);updateSiege(dt);achTick(dt);updateWeather(dt);fogTick(dt);updateComp(dt);updateItemFx(dt);updateGDrop();updatePet(dt);updateArena(dt);updateTower(dt);updateDragon(dt);updateAuction(dt);
+ updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);karmaTick(dt);updateEvents(dt);updateSiege(dt);achTick(dt);updateWeather(dt);fogTick(dt);updateComp(dt);updateItemFx(dt);updateGDrop();updatePet(dt);updateArena(dt);updateTower(dt);updateDragon(dt);updateAuction(dt);
 }
 
 /* ---------------- monster AI ---------------- */
@@ -4316,7 +4316,7 @@ function netTick(){NET.tick();const live=netLive();
  if(PRAID)PRAID.tick();
  mobTick(live);
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
- if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic(),ol:outlaw(),gd:guildPub()}),netForce);netForce=false;}
+ if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic(),ol:olPub(),gd:guildPub()}),netForce);netForce=false;}
  partyUI(live);chatUI(live);pctxUI(live);tradeUI(live);guildUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
  const netSafe=live&&Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
@@ -4395,7 +4395,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   if(PCTX&&PCTX.uid===r.uid)ents.push({y:r.y-1,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,231,168,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(r.x,r.y+1,9,4,0,0,7);ctx.stroke();ctx.restore();}});
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   const gi=guildOf(r),gy=gi?6:0; // SAT-ONLINE-046: «guild» under the name, the name and the bar a line higher
-  TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038)
+  TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol===2?'#b0102a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038), 2 a murderer (052)
   if(gi)TX.push({s:'«'+gi.n+'»',x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37-gy,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
@@ -4565,7 +4565,7 @@ function pctxUI(live){const W=$('pctx'),r=live?pctxRemote():null;if(PCTX&&!r){if
  if(!PCTX){if(!W.hidden)W.hidden=true;return;}
  const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,gi=guildOf(r),sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far,r.ol,gi&&gi.n,guildCanInvite(r),bntOn(r.uid),S&&S.gold>=BNT_MIN].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
  $('pctxT').textContent=r.handle||'?';
- $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):'',r.ol?t('pcOl'):'',gi?'«'+gi.n+'»':'',bntOn(r.uid)?t('bntOn',{g:bntOn(r.uid)}):''].filter(Boolean).join(' · ');
+ $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):'',r.ol===2?t('kaMurderT'):r.ol?t('pcOl'):'',gi?'«'+gi.n+'»':'',bntOn(r.uid)?t('bntOn',{g:bntOn(r.uid)}):''].filter(Boolean).join(' · ');
  $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;$('pctxTr').hidden=!TRADE;$('pctxG').hidden=!guildCanInvite(r);$('pctxBn').hidden=!(BNT&&r.ol&&S&&S.gold>=BNT_MIN);
  // a player out of range (from the list): invites and duels only reach players you can see, so those wait until you are close
  for(const a of ['pcInvite','pcDuel'])W.querySelector(`[data-act="${a}"]`).disabled=far;}
@@ -4585,14 +4585,26 @@ addEventListener('keydown',e=>{if(e.code!=='Escape'||mode!=='play'||(e.target&&e
 /* open PvP outside towns (SAT-ONLINE-038, owner 2026-10-19): the same as a duel without the challenge. A hit is a share of
    the victim's max HP (src/net/pvp.js caps it), applied by the victim's own client; no friendly fire in a party; dying to
    a player costs the normal death penalty only. A kill makes the killer an outlaw (a red name) for OUTLAW_MS. */
-Object.assign(STR.ar,{pvpHit:'{n} بيهاجمك!',pvpDied:'{n} قتلك',pvpKill:'قتلت {n}: بقيت خارج عن القانون {m} دقيقة',pvpOl:'خارج عن القانون',pvpOlEnd:'مبقتش خارج عن القانون',pcOl:'خارج عن القانون'});
-Object.assign(STR.en,{pvpHit:'{n} is attacking you!',pvpDied:'{n} killed you',pvpKill:'You killed {n}: you are an outlaw for {m} minutes',pvpOl:'Outlaw',pvpOlEnd:'You are no longer an outlaw',pcOl:'Outlaw'});
+Object.assign(STR.ar,{kaJust:'قتلت الخارج عن القانون {n}: عدالة (الكارما {k})',kaMurder:'قتلت {n}: بقيت قاتل {m} دقيقة (الكارما {k})',kaMurderT:'قاتل',kaBack:'الكارما رجعت {k}',kaS:'الكارما: {k}',pvpHit:'{n} بيهاجمك!',pvpDied:'{n} قتلك',pvpKill:'قتلت {n}: بقيت خارج عن القانون {m} دقيقة',pvpOl:'خارج عن القانون',pvpOlEnd:'مبقتش خارج عن القانون',pcOl:'خارج عن القانون'});
+Object.assign(STR.en,{kaJust:'You killed the outlaw {n}: justice (karma {k})',kaMurder:'You killed {n}: you are a murderer for {m} minutes (karma {k})',kaMurderT:'Murderer',kaBack:'Karma back to {k}',kaS:'Karma: {k}',pvpHit:'{n} is attacking you!',pvpDied:'{n} killed you',pvpKill:'You killed {n}: you are an outlaw for {m} minutes',pvpOl:'Outlaw',pvpOlEnd:'You are no longer an outlaw',pcOl:'Outlaw'});
 var pvpFrom=new Map(),pvpOlWas=false; // uid -> when they last hit us (the "is attacking you" toast once a while)
 function outlaw(){return !!(S&&!S.__demo&&S.olT&&Date.now()<S.olT);}
+/* karma (SAT-ONLINE-052; Claude-B #13 item 23): -10..10. Killing a player who is not an outlaw costs a point and makes
+   you an outlaw for longer the lower your karma goes (OUTLAW_MS, and half of it more for each point below -1); at -5 or lower you
+   are a murderer while it lasts (a darker red for everyone). Killing an outlaw is justice: a point back and no red name.
+   Below zero, every 30 minutes of play gives a point back. */
+const KARMA_MIN=-10,KARMA_MAX=10,KARMA_BACK=1800,MURDER=-5;
+function karma(){return S&&!S.__demo?Math.max(KARMA_MIN,Math.min(KARMA_MAX,S.karma|0)):0;}
+function olPub(){return outlaw()?(karma()<=MURDER?2:1):0;}
+window.__GK={karma:()=>karma(),set:k=>{S.karma=k;},ol:()=>olPub(),respawn:()=>respawn()}; // test hook
+function karmaTick(dt){if(!S||S.__demo||mode!=='play'||karma()>=0)return;S.karT=(S.karT||0)+dt;if(S.karT>=KARMA_BACK){S.karT=0;S.karma=karma()+1;toast(t('kaBack',{k:S.karma}),'good');netForce=true;}}
 function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
   room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
-  else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);S.olT=Date.now()+Satisfy.pvp.C.OUTLAW_MS;netForce=true;save(true);toast(t('pvpKill',{n:Satisfy.chat.clean(e.handle,24)||'?',m:Math.round(Satisfy.pvp.C.OUTLAW_MS/60000)}),'warn');SFX.slam&&SFX.slam();}});}
+  else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
+   if(v&&v.ol){S.karma=Math.min(KARMA_MAX,karma()+1);netForce=true;save(true);toast(t('kaJust',{n,k:S.karma}),'good');SFX.quest&&SFX.quest();return;} // an outlaw: justice
+   S.karma=Math.max(KARMA_MIN,karma()-1);S.karT=0;const ms=Math.round(Satisfy.pvp.C.OUTLAW_MS*(1+Math.max(0,-S.karma-1)*.5));
+   S.olT=Math.max(S.olT||0,Date.now()+ms);netForce=true;save(true);toast(t(S.karma<=MURDER?'kaMurder':'pvpKill',{n,m:Math.round(ms/60000),k:S.karma}),'warn');SFX.slam&&SFX.slam();}});}
 /* bounties (SAT-ONLINE-051; Claude-B #13 item 23, U038): a price on an outlaw's head. From the card of a player with a
    red name, Bounty puts gold on it (bounties/{bid}; the gold leaves your bag, and comes back when you take the bounty
    back from the board). When a player kills that outlaw in open PvP, the outlaw's own client writes who killed it
@@ -4642,7 +4654,7 @@ function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Sati
   die();PVP.died(e.uid);bntKilled(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
 // your own red tag while you are an outlaw, and the notice when it ends
 function pvpEnts(){const ol=outlaw();if(pvpOlWas&&!ol&&S&&!S.__demo){toast(t('pvpOlEnd'),'good');netForce=true;}pvpOlWas=ol;
- if(ol&&mode==='play')TX.push({s:t('pvpOl'),x:P.x,y:P.y-30,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff3b30'});}
+ if(ol&&mode==='play')TX.push({s:t(olPub()===2?'kaMurderT':'pvpOl'),x:P.x,y:P.y-30,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff3b30'});}
 /* trades (SAT-ONLINE-039, owner 2026-10-19): online only, from the player card. Each side puts in gold and bag items, both
    Accept, then Confirm; any change clears the accepts. The swap is one database update keyed by the item ids
    (src/net/trade.js, Satisfy.firebase.tradeStore), so an item can't be traded twice. Not cheat-proof yet (no server). */
