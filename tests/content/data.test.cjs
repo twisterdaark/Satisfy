@@ -28,7 +28,7 @@ test('counts match the audited baseline',()=>{
   const n=o=>Array.isArray(o)?o.length:Object.keys(o).length;
   assert.deepStrictEqual({MT:n(D.monsters.types),BOSSES:n(D.monsters.bosses),SPAWN:n(D.monsters.spawns),QD:n(D.quests.quests),RC:n(D.recipes.recipes),
     SKD:n(D.skills.skills),NPC:n(D.npcs.npcs),interior:Object.values(D.npcs.npcs).filter(x=>x.interior).length,ZR:n(D.zones.regions),TOWNS:n(D.zones.towns),classes:n(D.classes.classes)},
-    {MT:21,BOSSES:5,SPAWN:19,QD:28,RC:12,SKD:14,NPC:22,interior:8,ZR:17,TOWNS:3,classes:5});});
+    {MT:21,BOSSES:5,SPAWN:19,QD:42,RC:12,SKD:14,NPC:28,interior:8,ZR:17,TOWNS:3,classes:5});});
 
 // condition vocabulary (docs/content/CONTENT_SCHEMA.md)
 function checkCond(c,where){assert.ok(c&&typeof c==='object'&&!Array.isArray(c),where+': condition must be an object');

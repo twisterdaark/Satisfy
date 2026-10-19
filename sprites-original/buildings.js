@@ -64,15 +64,19 @@ function signIcon(I,k,sx,sy){const e=hex('#f2e6c8'),R_=(x,y,w,h,c)=>I.rect(sx+x,
  else {R_(4,3,4,4,hex('#f2c14e'));R_(3,4,6,2,hex('#f2c14e'));R_(5,4,2,2,hex('#fff3b0'));}}
 
 // ---- roof (over layer): x px-4..px+w+4, y py-16..py+34 ----
+// chimney stack: staggered brick courses with mortar lines, lit from the left, darker on the right edge
+const BRICK=['#4e2a22','#6a3a2e','#8a4a3a','#a85a46','#c06a52','#d88a6e'].map(hex);
+function chimney(I,x0,y0,w,h,P,sx,sy){const bw=w>8?6:4;for(let y=0;y<h;y++)for(let x=0;x<w;x++){const row=y>>2,off=row%2?bw>>1:0,mortar=(y&3)===3||(x+off)%bw===bw-1;
+  let c=mortar?P[1]:P[(hash(sx+((x+off)/bw|0),sy+row,23)>.5?3:2)];if(x===0&&!mortar)c=P[4];if(x>=w-2)c=mortar?P[0]:P[1];I.set(x0+x,y0+y,c);}}
 function roofRGBA(b){const w=b.w*16,W=w+8,top=12,H=top+38,k=b.k,R=rampOf(k),I=Img(W,H),X=b.x*16,Y=b.y*16,forge=k==='forge';
  for(let i=0;i<9;i++){const inset=Math.max(0,8-i*2),y0=top+i*4,off=i%2?3:0;
   for(let j=0;j<4;j++)for(let x=inset;x<W-inset;x++){const y=y0+j,col=Math.floor((x+off)/6),light=(1-x/W)*.9-.2;let c;
    if(j===3)c=R[0];else if((x+off)%6===0)c=R[1];else c=pick(R,1.8+hash(X+col,Y+i,17)*1.1+light+(j===0?.8:0),X+x,Y+y);
    if(x===inset||x===W-inset-1)c=R[0];if(i===0&&j===0)c=R[4];I.set(x,y,c);}}
  I.rect(0,top+36,W,2,hex('#2a1d18'));I.rect(0,top+35,W,1,R[0]);
- if(forge){const cx=W-26;for(let y=top-14;y<top+8;y++)for(let x=cx;x<cx+12;x++)I.set(x,y,((y>>2)+((x-cx)>>2))%2?STONE[2]:STONE[3]);
+ if(forge){const cx=W-26;chimney(I,cx,top-14,12,22,STONE,X+cx,Y);
   I.rect(cx-2,top-16,16,4,STONE[4]);I.rect(cx-2,top-16,16,1,STONE[5]);I.rect(cx,top-12,12,1,STONE[0]);I.rect(cx+2,top-15,8,2,hex('#1a1414'));}
- else if(k==='house'||k==='inn'){const cx=Math.round(W*.68);for(let y=top-6;y<top+10;y++)for(let x=cx;x<cx+6;x++)I.set(x,y,((y>>1)+((x-cx)>>1))%2?hex('#8a4a3a'):hex('#a85a46'));
+ else if(k==='house'||k==='inn'){const cx=Math.round(W*.68);chimney(I,cx,top-6,6,16,BRICK,X+cx,Y);
   I.rect(cx-1,top-8,8,2,STONE[3]);I.rect(cx-1,top-8,8,1,STONE[5]);I.rect(cx+1,top-7,4,1,hex('#1a1414'));}
  return {x:X-4,y:Y-4-top,w:W,h:H,d:I.d};}
 
