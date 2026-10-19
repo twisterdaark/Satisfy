@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20g', ver: '0.51', d: '2026-10-20',
+      ar: ['أونلاين: صندوق بوس الدانجن بياخد غنيمته مرة واحدة في الأسبوع لكل حساب، وبعدها بيبقى فاضي ليك لحد التجديد يوم الاتنين',
+        'الدهب والخبرة والحاجات اللي بتقع من البوس نفسه زي ما هي، والأوفلاين مفيهوش قفل'],
+      en: ["Online: a dungeon boss's chest gives its loot once a week per account, then it is empty for you until the Monday reset",
+        "The boss's own drops, gold and experience are unchanged, and offline nothing is locked"] },
     { v: '2026-10-20c', ver: '0.47', d: '2026-10-20',
       ar: ['أونلاين: تراوكا التنين الأحمر واحد في العالم كله: لما حد يقتله بيفضل ميت نص ساعة عند كل اللاعبين، حتى اللي ماكانوش موجودين'],
       en: ['Online: Trauka the Red Dragon is one for the whole world: once someone kills it, it stays dead for half an hour for every player, even those who were not there'] },
