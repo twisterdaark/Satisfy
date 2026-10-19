@@ -327,6 +327,26 @@
         }
       }
     },
+    "world": {
+      "$world": {
+        ".validate": "$world === 'satisfy'",
+        "own": {
+          ".read": "auth != null",
+          "$k": {
+            ".write": "auth != null",
+            ".validate": "$k.matches(/^[a-z0-9_]{1,24}$/) && newData.hasChildren(['g', 'n', 'c', 'h', 'uid', 't'])",
+            "g": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_:.-]{1,48}$/)" },
+            "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+            "c": { ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)" },
+            "h": { ".validate": "newData.isString() && newData.val().length <= 24" },
+            "uid": { ".validate": "newData.val() === auth.uid" },
+            "t": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        },
+        "$other": { ".validate": false }
+      }
+    },
     "sessions": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
