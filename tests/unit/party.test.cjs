@@ -21,7 +21,7 @@ function world(n) {
   const sync = () => {
     for (const p of players) {
       const pp = SN.net.toPlayerPublic({ look: { n: p.name }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 },
-        { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id(), rs: p.party.roster() });
+        { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id(), rs: p.party.roster(), rd: p.party.isLeader() && p.party.isRaid() });
       p.pres.publish(pp, true);
     }
     for (const p of players) { p.pres.tick(); p.party.tick(); }
@@ -475,4 +475,48 @@ test('a leader who leaves is not a kick: the members are told the party broke up
     const e = m.events.find((x) => x.type === 'leaderLeft');
     assert.equal(e && e.handle, 'Lead');
   }
+});
+
+// SAT-ONLINE-060 (Claude-B #13 item 24): raids of up to 10
+test('a raid holds up to RAID_MAX; a party is MAX; members read the raid from the leader; the roster still validates', () => {
+  const w = world(11), [a, ...rest] = w.players;
+  const join = (p) => { const r = a.party.invite(w.remote(a, p)); if (r !== 'sent') return r; p.party.accept('p_u0'); w.sync(); return 'joined'; };
+  for (let i = 0; i < SN.party.MAX - 1; i++) assert.equal(join(rest[i]), 'joined');
+  assert.equal(join(rest[4]), 'full', 'a party is full at MAX');
+  assert.equal(rest[0].party.setRaid(true), 'notLeader', 'only the leader makes a raid');
+  assert.equal(a.party.setRaid(true), 'ok');
+  assert.equal(a.party.max(), SN.party.RAID_MAX);
+  w.sync();
+  assert.equal(rest[0].party.isRaid(), true, 'the members see the raid');
+  assert.ok(rest[0].events.includes('raid'));
+  for (let i = 4; i < SN.party.RAID_MAX - 1; i++) assert.equal(join(rest[i]), 'joined', 'member ' + (i + 2));
+  assert.equal(join(rest[9]), 'full', 'a raid is full at RAID_MAX');
+  assert.equal(a.party.members().length, SN.party.RAID_MAX);
+  const L = w.remote(rest[0], a);
+  assert.equal(L.rd, 1);
+  assert.equal(L.rs.split(' ').length, SN.party.RAID_MAX - 1);
+  assert.deepEqual(SN.net.validatePlayerPublic(L).errors, [], 'a roster of 9 and rd are valid');
+  assert.deepEqual(rest[8].party.members().map((m) => m.uid).length, SN.party.RAID_MAX, 'the last member sees all ten');
+  // too many to be a party again; five or fewer is fine
+  assert.equal(a.party.setRaid(false), 'big');
+  for (const p of rest.slice(4, 9)) a.party.kick(p.uid);
+  w.sync();
+  assert.equal(a.party.setRaid(false), 'ok');
+  w.sync();
+  assert.equal(rest[0].party.isRaid(), false);
+  assert.equal(SN.net.validatePlayerPublic({ ...L, rd: 2 }).errors.includes('rd'), true);
+});
+
+test('a raid stays a raid when its leader is replaced', () => {
+  const w = world(4), [a, b, c, d] = w.players;
+  for (const p of [b, c, d]) { a.party.invite(w.remote(a, p)); p.party.accept('p_u0'); w.sync(); }
+  a.party.setRaid(true); w.advance(200);
+  assert.equal(b.party.isRaid(), true);
+  // the leader is gone: the remaining members elect u1, which keeps the raid
+  w.players.splice(0, 1); a.pres.close();
+  for (let k = 0; k < (SN.party.LEAD_MS + SN.party.GRACE_MS) / 100 + 20; k++) w.advance(100);
+  assert.equal(b.party.isLeader(), true);
+  assert.equal(b.party.isRaid(), true, 'the new leader keeps the raid');
+  w.advance(200);
+  assert.equal(c.party.isRaid(), true, 'and the members see it from the new leader');
 });
