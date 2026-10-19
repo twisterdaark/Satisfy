@@ -3527,7 +3527,8 @@ const NETQ=QS.get('net');
 // controls opened from pause used to stop presence and forfeit a duel); only the title, language and creation screens don't
 const NET_OFF=['title','lang','create'];
 function netLive(){return Satisfy.local.inGame()&&!NET_OFF.includes(mode)&&!(mode==='controls'&&ctrlBack==='titleScreen');}
-function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
+// a swing is shorter than the 200 ms between presence updates: keep 'attack' up for 350 ms so the others see it
+var netAtkT=-1e9;function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)netAtkT=performance.now();if(performance.now()-netAtkT<350)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
 // Interest management (doc U009): online, a client listens only to players within NET_INTEREST.radius px
 // of it along the map (the screen is W=480 px wide, so the re-centre step keeps it covered), plus its
 // everyone in its party wherever they are (raid hits, chat and the party list need them; SAT-ONLINE-018 follows the
@@ -3565,7 +3566,10 @@ function remoteSpr(L,arm){const ix=(a,i)=>i>=0&&i<a.length?i:0,K={hair:ix(LOOK.h
 function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;
  for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;
   const k=remoteSpr(r.look,r.arm),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
-  const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{if(r.anim==='dead')ctx.globalAlpha=.45;drawChar(k,r.x,r.y-bob,r.dir,fr,false);ctx.globalAlpha=1;}});
+  const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{if(r.anim==='dead')ctx.globalAlpha=.45;else if(r.anim==='dodge')ctx.globalAlpha=.6;drawChar(k,r.x,r.y-bob,r.dir,fr,false);ctx.globalAlpha=1;}});
+  // their swings and dodges show here too (SAT-ONLINE-026, owner feedback 7): a slash arc on the side they face
+  if(r.anim==='attack'){const a=[Math.PI/2,-Math.PI/2,0,Math.PI][r.dir&3],ph=(gTime*9)%1;ents.push({y:r.y+1,f:()=>{ctx.save();ctx.strokeStyle=`rgba(255,255,255,${(.85-ph*.5).toFixed(2)})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(r.x,r.y-9,13,a-1.1+ph*.6,a+.4+ph*.6);ctx.stroke();ctx.strokeStyle='rgba(159,224,255,.5)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(r.x,r.y-9,16,a-.9+ph*.6,a+.3+ph*.6);ctx.stroke();ctx.restore();}});}
+  else if(r.anim==='dodge')ents.push({y:r.y-1,f:()=>{ctx.save();ctx.globalAlpha=.25;drawChar(k,r.x-[0,0,6,-6][r.dir&3],r.y-[6,-6,0,0][r.dir&3],r.dir,1,false);ctx.restore();}});
   if(r.em)emoBubble(ents,r.em,r.x,r.y,r.dir);
   if(PCTX&&PCTX.uid===r.uid)ents.push({y:r.y-1,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,231,168,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(r.x,r.y+1,9,4,0,0,7);ctx.stroke();ctx.restore();}});
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
