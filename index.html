@@ -1716,7 +1716,7 @@ function invMarch(m,b,mr,dt){const T=TOWNS.find(T=>T.k===m.tw);
 function npcKOSay(n){if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!EV||typeof EV.slot!=='number')return;const i=npcs.indexOf(n);if(i<0)return;NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:'npcKO',p:{f:i,lv:EV.slot%100000}});}
 function npcKOIn(m){if(!m||m.k!=='npcKO'||!NET||m.from===NET.uid||!S||S.__demo||!m.p)return;const E=EV,n=npcs[m.p.f|0];if(!E||typeof E.slot!=='number'||m.p.lv!==E.slot%100000||!n||npcKO(n.id))return;
  WS.nko=WS.nko||{};WS.nko[n.id]=E.end;E.fallen=(E.fallen||0)+1;n.nhp=NPCHP;if(Math.hypot(n.x-P.x,n.y-P.y)<900){dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');}}
-window.__GW={ev:()=>EV&&{slot:EV.slot,k:EV.e.k},wnow:()=>wNow(),nodes:()=>nodes.map(n=>[n.kind,n.tx,n.ty]),wx:()=>wxNow(),npcs:()=>npcs.map(n=>n.id),ko:id=>npcKO(id),knock:i=>{const n=npcs[i];if(n){n.nhp=1;npcHit(n,{cap:1,face:1});}}}; // tests (SAT-ONLINE-044)
+window.__GW={setMapV:v=>{MAPV=String(v);},ev:()=>EV&&{slot:EV.slot,k:EV.e.k},wnow:()=>wNow(),nodes:()=>nodes.map(n=>[n.kind,n.tx,n.ty]),wx:()=>wxNow(),npcs:()=>npcs.map(n=>n.id),ko:id=>npcKO(id),knock:i=>{const n=npcs[i];if(n){n.nhp=1;npcHit(n,{cap:1,face:1});}}}; // tests (SAT-ONLINE-044)
 function npcHit(n,m){const d=m.cap?18:9+(rand()*4|0);n.nhp=(n.nhp??NPCHP)-d;n.hitT=.2;m.at=0;vfx('hit',n.x,n.y-10,{angle:m.face>0?0:Math.PI});num(n.x,n.y-26,'-'+d,'#ff8a7a',false);SFX.hit();
  if(n.nhp<=0){n.nhp=NPCHP;WS.nko=WS.nko||{};WS.nko[n.id]=EV?EV.end:Date.now()+60e3;if(EV)EV.fallen=(EV.fallen||0)+1;npcKOSay(n);dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');SFX.deny();if(m.nt===n)m.nt=null;}}
 // townsfolk fight back: guards and trainers strike invaders from a few steps away, everyone else hits whatever is beating
@@ -3442,10 +3442,10 @@ function ipHit(m,dmg,crit,o){if(o.dot)return dmg;const b=MT[m.type],skill=!!o.sk
  if(m.cboT>0&&gTime-m.icL<1)dmg*=3;
  if(ipOn('bleed')&&crit||ipOn('cut')&&rand()<.25){if(!m.bl)num(m.x,monY(m)-16,t('ipBleed'),'#ff4a3a',false);m.bl={t:3,n:0};}
  if(ipOn('fear')&&!b.boss&&m.lv<=S.lv-20&&rand()<.15){m.stun=Math.max(m.stun||0,.8);if(AIK[m.type])m.flee=1.5;num(m.x,monY(m)-24,t('ipFear'),'#c89aff',false);}
- if(!skill&&ipOn('jnt5')&&rand()<.08&&!o.jnt){num(P.x,P.y-30,t('ipJnt5'),'#ffd24a',true);for(let i=1;i<5;i++)setTimeout(()=>{if(mode!=='play'||m.dead)return;vfx('slash',m.x,monY(m),{angle:rand()*6.28,rarity:3});SFX.swing();hitMon(m,.5,{jnt:1});},i*90);}
+ if(!skill&&ipOn('jnt5')&&rand()<.08&&!o.jnt){numP(-30,t('ipJnt5'),'#ffd24a',true);for(let i=1;i<5;i++)setTimeout(()=>{if(mode!=='play'||m.dead)return;vfx('slash',m.x,monY(m),{angle:rand()*6.28,rarity:3});SFX.swing();hitMon(m,.5,{jnt:1});},i*90);}
  if(!skill&&ipOn('gale')){P.gale=Math.min(30,(P.gale||0)+1);P.galeT=3;}
- if(!skill&&ipOn('wisdom')&&rand()<.05){const ks=Object.keys(P.cd).filter(k=>P.cd[k]>0);if(ks.length){const k=ks.sort((a,c)=>P.cd[c]-P.cd[a])[0];P.cd[k]=0;num(P.x,P.y-30,t('ipWisdom'),'#9fd8ff',false);vfx('mana',P.x,P.y-8);}}
- const heal=(p,cd,key)=>{if((P[key]||0)>gTime)return;P[key]=gTime+cd;const h=Math.max(1,Math.round(dmg*p));P.hp=Math.min(maxHP(),P.hp+h);num(P.x,P.y-26,'+'+h,'#ff7a9a',false);};
+ if(!skill&&ipOn('wisdom')&&rand()<.05){const ks=Object.keys(P.cd).filter(k=>P.cd[k]>0);if(ks.length){const k=ks.sort((a,c)=>P.cd[c]-P.cd[a])[0];P.cd[k]=0;numP(-30,t('ipWisdom'),'#9fd8ff',false);vfx('mana',P.x,P.y-8);}}
+ const heal=(p,cd,key)=>{if((P[key]||0)>gTime)return;P[key]=gTime+cd;const h=Math.max(1,Math.round(dmg*p));P.hp=Math.min(maxHP(),P.hp+h);numP(-26,'+'+h,'#ff7a9a',false);};
  if(ipOn('elfin'))heal(skill?.05:.12,21,'elfT');if(!skill&&ipOn('vamp'))heal(.1,12,'vampT');
  return dmg;}
 // Blacksmith's Breath: "There is a rare chance of giving special features to your production items" (5%, Pagma's
@@ -3453,7 +3453,7 @@ function ipHit(m,dmg,crit,o){if(o.dot)return dmg;const b=MT[m.type],skill=!!o.sk
 const FEATS=[['as',.04],['ms',.04],['dm',.05],['hpp',.05]];
 function breathFeat(it){if(!pasOn('focus')||it.r<2||rand()>=.05+(skLv('focus')-1)*.005*(skLv('focus')>=10?2:1))return;const [k,v]=FEATS[rand()*FEATS.length|0];it[k]=+((it[k]||0)+v).toFixed(3);it.ft=k;setTimeout(()=>{toast(t('featGot',{f:t('ft_'+k)}),'good');SFX.rare();},600);}
 // Doran's Ring: "50% of the damage received will instantly be recovered" (once every 3 minutes here)
-function ipHurt(d){if(d>0&&P.hp>0&&ipOn('doran')&&(P.doT||0)<=S.playT){P.doT=S.playT+180;const h=Math.round(d*.5);P.hp=Math.min(maxHP(),P.hp+h);num(P.x,P.y-30,t('ipDoran',{n:h}),'#7ae07a',false);vfx('heal',P.x,P.y);}}
+function ipHurt(d){if(d>0&&P.hp>0&&ipOn('doran')&&(P.doT||0)<=S.playT){P.doT=S.playT+180;const h=Math.round(d*.5);P.hp=Math.min(maxHP(),P.hp+h);numP(-30,t('ipDoran',{n:h}),'#7ae07a',false);vfx('heal',P.x,P.y);}}
 // per frame: bleeding (6 ticks over 3 s), buff timers, Gale Spear's speed stacks, landing from Fly
 function updateItemFx(dt){if(!P)return;if(P.qm>0)P.qm-=dt;
  if(P.icb>0){P.icb-=dt;if(P.icb<=0){if(skLv('icomb')<10)[weapon(),armorIt()].forEach(i=>{if(i)i.dur=Math.max(0,durOf(i)-10);});toast(t('icombEnd'),'warn');}}if(P.galeT>0){P.galeT-=dt;if(P.galeT<=0)P.gale=0;}
@@ -4544,8 +4544,8 @@ function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoo
 // takes a quarter. The lethal one goes back to the attacker as a kill.
 function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Satisfy.chat.clean(e.handle,24)||'?',now=performance.now();
  if(!pvpFrom.has(e.uid)||now-pvpFrom.get(e.uid)>15000)toast(t('pvpHit',{n}),'warn');pvpFrom.set(e.uid,now);
- let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));vfx('block',P.x,P.y-10,{});}
- P.hp-=d;num(P.x,P.y-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();vfx('blood',P.x,P.y-10,{});shake=.12;}hudDirty=true;
+ let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}
+ P.hp-=d;numP(-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();asMe(()=>vfx('blood',P.x,P.y-10,{}));shake=.12;}hudDirty=true;
  if(P.hp<=0){if(S.tl&&S.tl.legend&&S.immT<=0){P.hp=1;S.immT=120;P.inv=1.5;toast(t('immune'),'good');flash();SFX.notice();return;}
   die();PVP.died(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
 // your own red tag while you are an outlaw, and the notice when it ends

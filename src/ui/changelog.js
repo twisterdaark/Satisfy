@@ -5,6 +5,21 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19m', ver: '0.36', d: '2026-10-19',
+      ar: ['أونلاين: إشعار العالم بيوصل لكل اللاعبين وبيفضل مكتوب في الشات، وإشعاراتك إنت بس مكتوب عليها "إشعار"',
+        'PvP مفتوح برا المدن: ضربة اللاعب بتاخد جزء صغير من صحتك، ومفيش ضرب بين أعضاء البارتي ولا جوه المدن، واللي يقتل لاعب اسمه بيبقى أحمر 10 دقايق',
+        'الوحوش بتهجم بنفس الشكل عند الكل: الخط الأحمر اللي بيحذرك، والاندفاع، والضربة، وعلى مين',
+        'البوس بيحارب أقرب لاعب ليه، فمبيرجعش لبيته ويعالج نفسه وإنت بتضربه، ونفَس النار بتاع تراوكا بيطلع في نفس الوقت والاتجاه عند الكل',
+        'لما البوس يدخل مرحلة جديدة الكل بيشوف الزئير، وفي آخر مرحلة شظايا الضربة بتطلع عند الكل',
+        'الأرقام اللي فوق لاعبك (الضرر، العلاج، ضربات اللاعبين، أسماء السكيلات) بتبان عند كل اللي حواليك، والطيران بسكيل السلاح بيبان للكل',
+        'الجو والأعشاب واحد عند الكل، وأهل المدينة اللي وقعوا في حدث بيبانوا واقعين عند الكل'],
+      en: ['Online: a World Notice reaches everyone and stays in the chat; notices only about you say "Notice"',
+        'Open PvP outside towns: a hit from a player takes a small share of your health; no hits inside a party or a town; a killer\'s name turns red for 10 minutes',
+        'Monsters attack the same on every screen: the red warning, the dash, the strike, and who it is aimed at',
+        "A boss fights the player nearest to it, so it no longer walks home to heal while you hit it; Trauka's fire breath comes at the same moment and in the same direction on every screen",
+        'When a boss enters a new phase everyone sees the roar, and in the last phase the shards of its slam fly on every screen',
+        'Numbers over your player (damage, heals, hits from players, skill names) show on everyone\'s screen, and so does flying on an item skill',
+        'The weather and the herbs are the same for everyone, and townsfolk knocked down in an event lie down on every screen'] },
     { v: '2026-10-19l', ver: '0.35', d: '2026-10-19',
       ar: ['أونلاين: تبادل بين اللاعبين: افتح كارت اللاعب اللي جنبك (⋯ أو T) واضغط تبادل',
         'كل واحد بيحط دهب وحاجات من الشنطة، وبعدين الاتنين يضغطوا موافق وبعدها تأكيد',
