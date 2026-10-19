@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19l', ver: '0.35', d: '2026-10-19',
+      ar: ['أونلاين: تبادل بين اللاعبين: افتح كارت اللاعب اللي جنبك (⋯ أو T) واضغط تبادل',
+        'كل واحد بيحط دهب وحاجات من الشنطة، وبعدين الاتنين يضغطوا موافق وبعدها تأكيد',
+        'أي تغيير في العرض بيرجّع الموافقة من الأول، ولو بعت أو صرفت حاجة من اللي عارضها العرض بيتغير لوحده',
+        'القطعة اللي اتبدلت مرة متتبدلش تاني من حفظ قديم'],
+      en: ['Online: trading between players: open the card of a player next to you (⋯ or T) and press Trade',
+        'Each of you puts in gold and things from the bag, then both press Accept, then Confirm',
+        'Any change to an offer resets the accepts; selling or spending something you offered changes the offer by itself',
+        'An item that was traded once can not be traded again from an old save'] },
     { v: '2026-10-19i', ver: '0.32', d: '2026-10-19',
       ar: ['أسلحة وخواتم بأسماء من الرواية ليها سكيلات أكتيف وباسيف وانت لابسها: Failure، الخنجر المثالي، رمح العاصفة، إيارغت، دينسليف، قوس الرعد، سيف الحكمة، خاتم حجر الإلف، خاتم مصاص الدماء، خاتم دوران، خاتم العبث، حذاء براهام، خوذة زعيم الأورك',
         'سكيلات السلاح والخواتم ليها خانتين جنب البار على زرار Z وX، وبتظهر بس لما تلبس قطعة فيها سكيل',
