@@ -145,10 +145,12 @@ function drawTile(env,x,y,frame){const px=x*16,py=y*16,d=ground(env,x,y,frame||0
  for(const [a,b,w,h,c] of overlay(env,x,y)){env.og.fillStyle=c;env.og.fillRect(px+a,py+b,w,h);}
  if(env.at(x,y)===TR&&env.tree)env.tree(x,y);}
 // whole map in one putImageData (much faster than one call per tile); overlays and trees as in drawTile
-function drawMap(env,W,H,frame){const img=env.gg.createImageData(W*16,H*16),D=img.data,row=W*16*4;
- for(let y=0;y<H;y++)for(let x=0;x<W;x++){const d=ground(env,x,y,frame||0);for(let j=0;j<16;j++)D.set(d.subarray(j*64,j*64+64),(y*16+j)*row+x*64);}
+// env.y0 (default 0) = the first world row; the image lands at canvas row 0 and overlays use world rows, so a caller
+// with rows above 0 translates og by -y0*16
+function drawMap(env,W,H,frame){const y0=env.y0||0,img=env.gg.createImageData(W*16,H*16),D=img.data,row=W*16*4;
+ for(let y=y0;y<y0+H;y++)for(let x=0;x<W;x++){const d=ground(env,x,y,frame||0);for(let j=0;j<16;j++)D.set(d.subarray(j*64,j*64+64),((y-y0)*16+j)*row+x*64);}
  env.gg.putImageData(img,0,0);
- for(let y=0;y<H;y++)for(let x=0;x<W;x++){const o=overlay(env,x,y);for(const [a,b,w,h,c] of o){env.og.fillStyle=c;env.og.fillRect(x*16+a,y*16+b,w,h);}if(env.at(x,y)===TR&&env.tree)env.tree(x,y);}}
+ for(let y=y0;y<y0+H;y++)for(let x=0;x<W;x++){const o=overlay(env,x,y);for(const [a,b,w,h,c] of o){env.og.fillStyle=c;env.og.fillRect(x*16+a,y*16+b,w,h);}if(env.at(x,y)===TR&&env.tree)env.tree(x,y);}}
 function trunkCanvas(){const c=document.createElement('canvas');c.width=c.height=16;const g=c.getContext('2d');for(const [x,y,w,h,col] of trunkRects()){g.fillStyle=col;g.fillRect(x,y,w,h);}return c;}
 function canopyCanvas(seed,snowy){const r=canopyRGBA(seed,snowy),c=document.createElement('canvas');c.width=r.W;c.height=r.H;c.getContext('2d').putImageData(new ImageData(r.d,r.W,r.H),0,0);return c;}
 
