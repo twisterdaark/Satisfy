@@ -1202,7 +1202,7 @@ SA.tiles.drawMap({gg,og,at,snowAt,WMH,TS,y0:-NR,tree:(x,y)=>VT.push(vtree(x,y,mu
 // snow); campfires burn in every town square and at every waystation for cooking and brewing.
 const CAMPS=[];
 let herbSpot=null;
-(function placeLife(){const r=mulberry32(6161),rh=mulberry32((Date.now()^0x5f3a91)>>>0),inTownT=(x,y)=>TOWNS.some(T=>x>=T.x0&&x<=T.x1&&y>=T.y0&&y<=T.y1),wetNear=(x,y)=>{for(let j=-2;j<=2;j++)for(let i=-2;i<=2;i++)if(at(x+i,y+j)===WA)return true;return false;};
+(function placeLife(){const r=mulberry32(6161),rh=mulberry32((Math.floor(Date.now()/864e5)^0x5f3a91)>>>0)/* SAT-ONLINE-044: today's layout, the same on every device (was this page load's) */,inTownT=(x,y)=>TOWNS.some(T=>x>=T.x0&&x<=T.x1&&y>=T.y0&&y<=T.y1),wetNear=(x,y)=>{for(let j=-2;j<=2;j++)for(let i=-2;i<=2;i++)if(at(x+i,y+j)===WA)return true;return false;};
  const ok=(x,y)=>{if(!(at(x,y)===GR||at(x,y)===FL||at(x,y)===SN))return false;for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++)if(SOLID[at(x+i,y+j)])return false;return true;};   // open ground, clear of trees and walls
  for(let k=0,tr=0;k<46&&tr<20000;tr++){const x=2+(rh()*(MW-4)|0),y=30+(rh()*86|0);if(!ok(x,y)||inTownT(x,y)||snowAt(x,y)||swampAt(x*TS,y*TS)||nodes.some(n=>Math.abs(n.tx-x)+Math.abs(n.ty-y)<6))continue;nodes.push({tx:x,ty:y,x:x*TS+8,y:y*TS+12,dep:0,kind:'herb',reach:14});k++;}
  for(let k=0,tr=0;k<18&&tr<20000;tr++){const x=2+(rh()*(MW-4)|0),y=4+(rh()*110|0);if(!ok(x,y)||inTownT(x,y)||!(wetNear(x,y)||snowAt(x,y))||nodes.some(n=>Math.abs(n.tx-x)+Math.abs(n.ty-y)<6))continue;nodes.push({tx:x,ty:y,x:x*TS+8,y:y*TS+12,dep:0,kind:'bherb',reach:14});k++;}
@@ -1513,7 +1513,8 @@ function updateComp(dt){if(!S||!P)return;meetTick(dt);const c=MEET?COMPS[MEET.id
 // marks the spot, then the bolt hits whatever stands there (monsters 300%, the player 8% of max health).
 const WXS=20*60*1000,WXT=['clear','clear','rain','clear','fog','rain','storm','clear','clear','rain'];
 let WXF=null,wxP=[],wxBolt=4,wxFlash=0,wxAg=1,wxLast=null;
-function wxNow(){if(WXF)return WXF;const sl=Math.floor(Date.now()/WXS);return WXT[((sl*40503)>>>0)%WXT.length];}
+function wxNow(){if(WXF)return WXF;const sl=Math.floor(wNow()/WXS); // SAT-ONLINE-044: the server's clock online, so the weather is the same for everyone
+return WXT[((sl*40503)>>>0)%WXT.length];}
 const outdoors=()=>!!(P&&P.y<WMH*TS);
 function wxHere(){const w=wxNow();if(!outdoors())return 'clear';if((w==='rain'||w==='storm')&&snowAt(P.x/TS|0,P.y/TS|0))return 'snow';return w;}
 function updateWeather(dt){if(!S||!P)return;const w=wxHere();wxAg=w==='fog'?.6:1;
@@ -1648,7 +1649,7 @@ function evSpawn(type,x,y,gen){const so=gen?sol0:solidT;if(so(x/TS|0,y/TS|0)){le
 // wild monsters living there), march in through the gates and beat up the townsfolk they find. Every wave is bigger than
 // the last and every third one brings a captain. A knocked-out NPC lies there until the invasion ends; online this is
 // shared state (WS.nko), so everyone sees the same town fall or hold.
-const NPCHP=100,npcKO=id=>!!(WS&&WS.nko&&WS.nko[id]>Date.now());
+const NPCHP=100,npcKO=id=>!!(WS&&WS.nko&&WS.nko[id]>wNow()); // the server clock, as EV.end is (SAT-ONLINE-044: a device whose clock was off saw them stand up)
 function evRef(T){const cx=T.rx*TS+8,cy=T.ry*TS+8,ms=mons.filter(m=>!m.tmp&&!m.evt&&!MT[m.type].boss&&Math.hypot(m.x-cx,m.y-cy)<760).sort((a,b)=>a.lv-b.lv);
  if(!ms.length)return {lv:10,hp:600,dmg:60,xp:50};const med=ms[ms.length>>1].lv,near=ms.filter(m=>Math.abs(m.lv-med)<=Math.max(6,med*.3)),av=f=>near.reduce((a,m)=>a+f(m),0)/near.length;
  return {lv:Math.round(med),hp:av(m=>m.max),dmg:av(m=>MT[m.type].dmg),xp:av(m=>MT[m.type].xp)};}
@@ -1666,8 +1667,15 @@ function invMarch(m,b,mr,dt){const T=TOWNS.find(T=>T.k===m.tw);
  const gx=m.goal.x-m.x,gy=m.goal.y-m.y,gd=Math.hypot(gx,gy);
  if(gd<18&&T){for(let k=0;k<8;k++){const tx=T.x0+2+(rand()*(T.x1-T.x0-4)|0),ty=T.y0+2+(rand()*(T.y1-T.y0-4)|0);if(!solidT(tx,ty)){m.goal={x:tx*TS+8,y:ty*TS+8};break;}}return;}
  chase(m,gx,gy,gd,b.spd*.95,mr,dt);m.face=gx>0?1:-1;}
+// SAT-ONLINE-044: the invaders are the host's monsters, so only the host's screen saw townsfolk fall (followers' copies don't
+// think). The client whose monster knocks one out tells everyone (news npcKO: the townsperson's index, the event slot), and
+// each client lays them down for the rest of the invasion, with the same notice.
+function npcKOSay(n){if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!EV||typeof EV.slot!=='number')return;const i=npcs.indexOf(n);if(i<0)return;NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:'npcKO',p:{f:i,lv:EV.slot%100000}});}
+function npcKOIn(m){if(!m||m.k!=='npcKO'||!NET||m.from===NET.uid||!S||S.__demo||!m.p)return;const E=EV,n=npcs[m.p.f|0];if(!E||typeof E.slot!=='number'||m.p.lv!==E.slot%100000||!n||npcKO(n.id))return;
+ WS.nko=WS.nko||{};WS.nko[n.id]=E.end;E.fallen=(E.fallen||0)+1;n.nhp=NPCHP;if(Math.hypot(n.x-P.x,n.y-P.y)<900){dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');}}
+window.__GW={ev:()=>EV&&{slot:EV.slot,k:EV.e.k},wnow:()=>wNow(),nodes:()=>nodes.map(n=>[n.kind,n.tx,n.ty]),wx:()=>wxNow(),npcs:()=>npcs.map(n=>n.id),ko:id=>npcKO(id),knock:i=>{const n=npcs[i];if(n){n.nhp=1;npcHit(n,{cap:1,face:1});}}}; // tests (SAT-ONLINE-044)
 function npcHit(n,m){const d=m.cap?18:9+(rand()*4|0);n.nhp=(n.nhp??NPCHP)-d;n.hitT=.2;m.at=0;vfx('hit',n.x,n.y-10,{angle:m.face>0?0:Math.PI});num(n.x,n.y-26,'-'+d,'#ff8a7a',false);SFX.hit();
- if(n.nhp<=0){n.nhp=NPCHP;WS.nko=WS.nko||{};WS.nko[n.id]=EV?EV.end:Date.now()+60e3;if(EV)EV.fallen=(EV.fallen||0)+1;dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');SFX.deny();if(m.nt===n)m.nt=null;}}
+ if(n.nhp<=0){n.nhp=NPCHP;WS.nko=WS.nko||{};WS.nko[n.id]=EV?EV.end:Date.now()+60e3;if(EV)EV.fallen=(EV.fallen||0)+1;npcKOSay(n);dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');SFX.deny();if(m.nt===n)m.nt=null;}}
 // townsfolk fight back: guards and trainers strike invaders from a few steps away, everyone else hits whatever is beating
 // on them. A monster struck by an NPC turns on them, and NPCs can finish monsters off (no reward for you then)
 const NPCF=/^(guard|pcap|coach|tk|ta|tw|tm|regas|khan|smith|armorer)/;
@@ -4242,7 +4250,7 @@ function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch
 Object.assign(STR.ar,{pKick:'اطرد',pKickQ:'تطرد {n}؟',pKickYes:'اطرد',pKickNo:'لأ',pKickDone:'{n} اتشال من الفريق',pLeaderLeft:'{n} ساب، فالفريق اتفكك',pRejoined:'رجعت لبارتي {n}',pYouLead:'القائد مشي: إنت قائد البارتي دلوقتي',pNewLead:'القائد مشي: {n} قائد البارتي دلوقتي',pReplaced:'البارتي اختارت قائد جديد وإنت مش موجود، هترجع لهم'});
 Object.assign(STR.en,{pKick:'Kick',pKickQ:'Kick {n}?',pKickYes:'Kick',pKickNo:'Cancel',pKickDone:'{n} was removed from the party',pLeaderLeft:'{n} left, so the party broke up',pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn)NETTR.feedOn('news',newsIn);
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],leaderLeft:['pLeaderLeft','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
