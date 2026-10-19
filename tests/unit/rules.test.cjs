@@ -223,6 +223,18 @@ test('drops: the dropper writes it; one claim per drop, others after 2 s and wit
   for (const n of [d, c]) assert.equal(n.$other['.validate'], false);
 });
 
+test('bounties: set by anyone but the target; claimed once, by whoever the target\'s own kill record names, for a kill after the bounty', () => {
+  const b = rules.bounties.$bid, pd = rules.bountyPaid.$bid, k = rules.kills.$v.$kid;
+  assert.match(b['.write'], /!data\.exists\(\) && newData\.child\('by'\)\.val\(\) === auth\.uid && newData\.child\('tu'\)\.val\(\) !== auth\.uid/);
+  assert.match(b['.write'], /child\('bountyPaid'\)\.child\(\$bid\)\.child\('by'\)\.val\(\) === auth\.uid/, 'removed by its claim in the same update');
+  assert.equal(k['.write'], 'auth != null && $v === auth.uid && (!data.exists() || !newData.exists())', 'only the victim writes its kill record');
+  assert.match(pd['.write'], /!data\.exists\(\) && newData\.child\('by'\)\.val\(\) === auth\.uid/, 'once');
+  assert.match(pd['.write'], /\.child\('k'\)\.val\(\) === auth\.uid/, 'the target named the claimer');
+  assert.match(pd['.write'], /\.child\('t'\)\.val\(\) > root\.child\('bounties'\)\.child\(\$bid\)\.child\('t'\)\.val\(\)/, 'a kill after the bounty');
+  assert.match(pd['.validate'], /newData\.child\('g'\)\.val\(\) === root\.child\('bounties'\)\.child\(\$bid\)\.child\('g'\)\.val\(\)/, 'the gold the bounty says');
+  for (const n of [b, pd, k]) assert.equal(n.$other['.validate'], false);
+});
+
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing
 // else here parses the expressions. Merging two rules files by hand once lost one; check every expression before a deploy.
 function exprProblem(e) {

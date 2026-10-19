@@ -52,7 +52,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|drops|dropClaims)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|drops|dropClaims|kills|bounties|bountyPaid)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -207,10 +207,37 @@
     if (old || !d || now >= d.t + 60000 || !(d.o === me || now > d.t + 2000)) return 'PERMISSION_DENIED: dropClaims ' + path;
     return Object.keys(v).sort().join(',') === 'by,t' && v.by === me && JSON.stringify(v.t) === SVs ? null : 'dropClaims fields';
   }
+  // SAT-ONLINE-051 bounties, as backend/database.rules.json (curDiff: the other paths of the same update)
+  let bDiff = null;
+  function bountyRules(seg, v) {
+    if (!user) return 'PERMISSION_DENIED: bounty';
+    const me = user.uid, path = seg.join('/'), old = data.has(path) ? data.get(path) : null, SVs = JSON.stringify(SV);
+    if (seg[0] === 'kills') {
+      if (seg.length !== 3 || seg[1] !== me || !/^k_[A-Za-z0-9_-]{1,80}$/.test(seg[2])) return 'PERMISSION_DENIED: kills ' + path;
+      if (v === null) return null;
+      if (old) return 'PERMISSION_DENIED: kills rewrite';
+      return Object.keys(v).sort().join(',') === 'k,t' && typeof v.k === 'string' && v.k && v.k.length <= 128 && v.k !== me && JSON.stringify(v.t) === SVs ? null : 'kills fields';
+    }
+    if (seg.length !== 2) return 'PERMISSION_DENIED: ' + path;
+    const bid = seg[1], b = data.get('bounties/' + bid);
+    if (seg[0] === 'bounties') {
+      if (v === null) { const paid = bDiff && bDiff['bountyPaid/' + bid]; return old && (old.by === me || (paid && paid.by === me)) ? null : 'PERMISSION_DENIED: bounties remove'; }
+      if (old || v.by !== me || v.tu === me || !/^b_[A-Za-z0-9_-]{1,80}$/.test(bid)) return 'PERMISSION_DENIED: bounties write';
+      if (Object.keys(v).sort().join(',') !== 'by,byN,g,t,tN,tu') return 'bounties fields';
+      if (!(typeof v.byN === 'string' && v.byN.length <= 24 && typeof v.tN === 'string' && v.tN.length <= 24 && typeof v.tu === 'string' && v.tu && v.tu.length <= 128 && isInt(v.g, 100) && v.g <= 10000000)) return 'bounties values';
+      return JSON.stringify(v.t) === SVs ? null : 'bounties t';
+    }
+    // bountyPaid/{bid} {by, kid, g, t}: once, by whoever the target's own client says killed it after the bounty was set
+    if (old || !v || v.by !== me || !b || b.by === me || b.tu === me) return 'PERMISSION_DENIED: bountyPaid ' + path;
+    const k = typeof v.kid === 'string' && data.get('kills/' + b.tu + '/' + v.kid);
+    if (!k || k.k !== me || !(k.t > b.t)) return 'PERMISSION_DENIED: bountyPaid kill';
+    return Object.keys(v).sort().join(',') === 'by,g,kid,t' && v.g === b.g && JSON.stringify(v.t) === SVs ? null : 'bountyPaid fields';
+  }
   function rules(p, v, existing) {
     const seg = p.split('/');
     if (['guilds', 'guildNames', 'guildMembers', 'guildInv', 'guildChat', 'guildVault', 'guildVaultTaken'].includes(seg[0])) return guildRules(seg, v);
     if (seg[0] === 'drops' || seg[0] === 'dropClaims') return dropRules(seg, v);
+    if (seg[0] === 'kills' || seg[0] === 'bounties' || seg[0] === 'bountyPaid') return bountyRules(seg, v);
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
     if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
     if (seg[0] === 'handles' || seg[0] === 'accountIds' || seg[0] === 'chat' || seg[0] === 'news') return idRules(seg, v);
@@ -403,7 +430,7 @@
     // RTDB update(): merge into the stored node (null removes a field), then check the rules on the result
     update: (r, diff) => {
       if (!r.path) { // a multi-location update at the root (SAT-ONLINE-039): all or nothing, each path checked against the data before it
-        const ps = Object.keys(diff);curDiff = diff;let errs;try{errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);}finally{curDiff = null;}
+        const ps = Object.keys(diff);curDiff = diff;bDiff = diff;let errs;try{errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);}finally{curDiff = null;bDiff = null;}
         F.log.push({ op: 'update', path: '', err: errs[0] || null, keys: ps.slice().sort() });
         if (errs.length) { F.rejected.push(errs[0]); return Promise.reject(Object.assign(new Error(errs[0]), { code: 'PERMISSION_DENIED' })); }
         const fix = (x) => (x && typeof x === 'object' ? (JSON.stringify(x) === JSON.stringify(SV) ? Date.now() : Object.fromEntries(Object.entries(x).map(([k, y]) => [k, fix(y)]))) : x);
@@ -447,7 +474,7 @@
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
-      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers'].includes(seg[0]) ? !!user : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers'].includes(seg[0]) ? !!user : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));
@@ -464,7 +491,7 @@
         const seg = r.path.split('/');
         const tm = (seg[0] === 'tradeSides' && seg.length === 3) || (seg[0] === 'tradeDone' && seg.length === 2) ? tradeMeta(seg[1]) : null;
         const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : seg[0] === 'guildVault' && seg.length === 2 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
-        const ok = gl !== null ? gl : seg[0] === 'sessions' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own') && !!user;
+        const ok = gl !== null ? gl : r.path === 'bounties' ? !!user : seg[0] === 'sessions' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);

@@ -452,11 +452,28 @@
     };
   }
 
+  // SAT-ONLINE-051: bounties on outlaws. bounties/{bid} {by, byN, tu, tN, g, t}; a player killed in open PvP writes
+  // kills/{victim}/{kid} {k: killer, t}; the killer claims with bountyPaid/{bid} {by, kid, g, t}, written once and only
+  // for a kill its target reported after the bounty was set, in the same update that removes the bounty
+  function bountyStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, SV = function () { return D.serverTimestamp(); };
+    var up = function (u) { return D.update(D.ref(db), u); };
+    return {
+      watch: function (cb) { var off = D.onValue(at('bounties'), function (s) { cb(s.val() || {}); }, function () { cb({}); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      post: function (bid, v) { var u = {}; u['bounties/' + bid] = { by: v.by, byN: String(v.byN || '').slice(0, 24), tu: v.tu, tN: String(v.tN || '').slice(0, 24), g: v.g, t: SV() }; return up(u); },
+      cancel: function (bid) { return D.remove(at('bounties/' + bid)); },
+      killed: function (victim, kid, killer) { var u = {}; u['kills/' + victim + '/' + kid] = { k: killer, t: SV() }; return up(u); },
+      kills: function (victim) { return D.get(at('kills/' + victim)).then(function (s) { return s.val() || {}; }); },
+      claim: function (bid, kid, g, uid) { var u = {}; u['bountyPaid/' + bid] = { by: uid, kid: kid, g: g, t: SV() }; u['bounties/' + bid] = null; return up(u); },
+    };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
     tradeStore: tradeStore,
     guildStore: guildStore,
     dropStore: dropStore,
+    bountyStore: bountyStore,
     SDK_VERSION: SDK_VERSION,
     load: load,
     lease: lease,

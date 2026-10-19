@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19s', ver: '0.42', d: '2026-10-19',
+      ar: ['أونلاين: لوحة مكافآت: من كارت أي حد اسمه أحمر (خارج عن القانون) تقدر تحط دهب مكافأة على راسه',
+        'اللي يقتله في PvP ياخد المكافأة مرة واحدة والعالم كله يعرف، وتقدر ترجع مكافأتك من زرار "المكافآت" في قايمة اللاعبين'],
+      en: ['Online: a bounty board: from the card of anyone with a red name (an outlaw) you can put gold on their head',
+        "Whoever kills them in PvP gets it once and the whole world hears; take yours back from \"Bounties\" in the player list"] },
     { v: '2026-10-19r', ver: '0.41', d: '2026-10-19',
       ar: ['أونلاين: خزنة للجيلد من لوحة الجيلد: أي عضو يحط فيها حاجات من شنطته، والقائد والضباط ياخدوا منها، وكل عضو ياخد اللي حطه، والحاجة متتاخدش مرتين'],
       en: ['Online: a guild vault in the guild panel: any member puts things from the bag in, the master and officers take them out, everyone can take back their own, and nothing is taken twice'] },

@@ -438,11 +438,11 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
       <div id="loot"></div>
       <div id="evbar" class="sys" hidden></div>
       <div id="sgbar" class="sys" hidden></div>
-      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button></div></div>
+      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plBnt" data-act="plBnt" data-i18n="bntBoard"></button></div></div>
       <div id="netRepW" class="sys" hidden><div id="netRepT"></div><div class="row"><button id="netRepBtn" data-act="netTakeBack"></button></div></div>
       <div id="duelInv" class="sys" hidden><div id="duelInvT"></div><div class="row"><button id="duelBtnA" data-act="dAccept"></button><button id="duelBtnB" data-act="dDecline"></button><button id="duelBtnC" class="blk" data-act="dBlock" data-i18n="pBlock"></button></div></div>
       <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
-      <div id="emoW" class="sys" hidden><button data-emo="wave" data-i18n="emWave"></button><button data-emo="dance" data-i18n="emDance"></button><button data-emo="point" data-i18n="emPoint"></button><button data-emo="cheer" data-i18n="emCheer"></button></div><div id="pctx" class="sys" hidden><div class="qhead"><span class="head" id="pctxT"></span><button class="x" data-act="pcClose">✕</button></div><div id="pctxI"></div><div class="row"><button data-act="pcInvite" data-i18n="pcInvite"></button><button data-act="pcDuel" data-i18n="pcDuel"></button><button data-act="pcTrade" id="pctxTr" data-i18n="pcTrade" hidden></button><button data-act="pcGuild" id="pctxG" data-i18n="pcGuild" hidden></button><button class="blk" id="pctxB" data-act="pcBlock"></button></div></div><div id="guildInv" class="sys" hidden><div id="guildInvT"></div><div class="row"><button data-act="gdYes" data-i18n="gdYes"></button><button data-act="gdNo" data-i18n="pDecline"></button></div></div><div id="tradeInv" class="sys" hidden><div id="tradeInvT"></div><div class="row"><button data-act="trYes" data-i18n="trYes"></button><button data-act="trNo" data-i18n="pDecline"></button></div></div><div id="tradeW" class="sys" hidden><div class="qhead"><span class="head" id="trH"></span><button class="x" data-act="trCancel">✕</button></div><div class="cols"><div class="col"><div class="sub" id="trMeH"></div><label class="gl"><span id="trGoldL"></span> <input id="trGold" type="number" min="0" step="1" value="0" inputmode="numeric"></label><div id="trBag"></div><div class="st" id="trMeS"></div></div><div class="col"><div class="sub" id="trThH"></div><div id="trTh"></div><div class="st" id="trThS"></div></div></div><div class="row"><button data-act="trOk" id="trOk"></button><button data-act="trConf" id="trConf"></button><button data-act="trCancel" id="trX"></button></div></div><div id="partyInv" class="sys" hidden><div id="partyInvT"></div><div class="row"><button data-act="pAccept" data-i18n="pAccept"></button><button data-act="pDecline" data-i18n="pDecline"></button><button class="blk" data-act="pBlock" data-i18n="pBlock"></button></div></div>
+      <div id="emoW" class="sys" hidden><button data-emo="wave" data-i18n="emWave"></button><button data-emo="dance" data-i18n="emDance"></button><button data-emo="point" data-i18n="emPoint"></button><button data-emo="cheer" data-i18n="emCheer"></button></div><div id="pctx" class="sys" hidden><div class="qhead"><span class="head" id="pctxT"></span><button class="x" data-act="pcClose">✕</button></div><div id="pctxI"></div><div class="row"><button data-act="pcInvite" data-i18n="pcInvite"></button><button data-act="pcDuel" data-i18n="pcDuel"></button><button data-act="pcTrade" id="pctxTr" data-i18n="pcTrade" hidden></button><button data-act="pcBounty" id="pctxBn" data-i18n="pcBounty" hidden></button><button data-act="pcGuild" id="pctxG" data-i18n="pcGuild" hidden></button><button class="blk" id="pctxB" data-act="pcBlock"></button></div></div><div id="guildInv" class="sys" hidden><div id="guildInvT"></div><div class="row"><button data-act="gdYes" data-i18n="gdYes"></button><button data-act="gdNo" data-i18n="pDecline"></button></div></div><div id="tradeInv" class="sys" hidden><div id="tradeInvT"></div><div class="row"><button data-act="trYes" data-i18n="trYes"></button><button data-act="trNo" data-i18n="pDecline"></button></div></div><div id="tradeW" class="sys" hidden><div class="qhead"><span class="head" id="trH"></span><button class="x" data-act="trCancel">✕</button></div><div class="cols"><div class="col"><div class="sub" id="trMeH"></div><label class="gl"><span id="trGoldL"></span> <input id="trGold" type="number" min="0" step="1" value="0" inputmode="numeric"></label><div id="trBag"></div><div class="st" id="trMeS"></div></div><div class="col"><div class="sub" id="trThH"></div><div id="trTh"></div><div class="st" id="trThS"></div></div></div><div class="row"><button data-act="trOk" id="trOk"></button><button data-act="trConf" id="trConf"></button><button data-act="trCancel" id="trX"></button></div></div><div id="partyInv" class="sys" hidden><div id="partyInvT"></div><div class="row"><button data-act="pAccept" data-i18n="pAccept"></button><button data-act="pDecline" data-i18n="pDecline"></button><button class="blk" data-act="pBlock" data-i18n="pBlock"></button></div></div>
       <div id="announce" class="sys" hidden><div class="head" data-i18n="worldNotice"></div><div id="anntext"></div></div>
     </div>
 
@@ -3298,7 +3298,7 @@ let annT=0;function announce(msg,own){logMsg(msg);const W=$('announce');W.queryS
  $('anntext').textContent=msg;W.hidden=false;annT=5;if(!own&&CHAT&&CHAT.note&&S&&!S.__demo)CHAT.note(msg);}
 // SAT-ONLINE-026 (owner feedback 12): announcements about you, and the story notices (annGrid), also reach everyone online
 // through the news feed, named by your account ID. A story notice is shown once per character, whoever's clock fires it first.
-const NEWS=['evWin','evCap','castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
+const NEWS=['bntDone','evWin','evCap','castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
 function annArgs(p,n){const o={...p,n};if('rk' in o){o.r=t('r'+o.rk);delete o.rk;}return o;}
 function annW(k,p){p=p||{};announce(t(k,annArgs(p,t('pname'))));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo)return;
  const q={};for(const f of ['lv','f','rk'])if(typeof p[f]==='number')q[f]=p[f];NETTR.feedSay('news',Object.assign({from:NET.uid,h:netId||S.look.n,k},Object.keys(q).length?{p:q}:{}));}
@@ -3767,8 +3767,9 @@ function act(a){
  else if(a==='cloud')cloudOpen();else if(a==='updLog')updLogOpen();else if(a==='updLogClose')updLogClose();else if(a==='switchAcc')netSwitch();else if(a==='cloudClose')$('cloudW').hidden=true;
  else if(a==='pAccept'||a==='pDecline'||a==='pLeave')partyAct(a);
  else if(a==='pBlock'||a==='dBlock')blockAct(a);
- else if(a==='pcClose'||a==='pcInvite'||a==='pcDuel'||a==='pcBlock'||a==='pcTrade'||a==='pcGuild')pctxAct(a);
+ else if(a==='pcClose'||a==='pcInvite'||a==='pcDuel'||a==='pcBlock'||a==='pcTrade'||a==='pcGuild'||a==='pcBounty')pctxAct(a);
  else if(a==='gdYes'||a==='gdNo')guildAct(a);
+ else if(a==='plBnt')bntBoard();
  else if(/^tr[A-Z]/.test(a))tradeAct(a);
  else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
@@ -4394,7 +4395,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   if(PCTX&&PCTX.uid===r.uid)ents.push({y:r.y-1,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,231,168,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(r.x,r.y+1,9,4,0,0,7);ctx.stroke();ctx.restore();}});
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   const gi=guildOf(r),gy=gi?6:0; // SAT-ONLINE-046: «guild» under the name, the name and the bar a line higher
-  TX.push({s:r.handle||'?',x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038)
+  TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038)
   if(gi)TX.push({s:'«'+gi.n+'»',x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37-gy,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
@@ -4413,7 +4414,7 @@ function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch
 Object.assign(STR.ar,{pKick:'اطرد',pKickQ:'تطرد {n}؟',pKickYes:'اطرد',pKickNo:'لأ',pKickDone:'{n} اتشال من الفريق',pLeaderLeft:'{n} ساب، فالفريق اتفكك',pRejoined:'رجعت لبارتي {n}',pYouLead:'القائد مشي: إنت قائد البارتي دلوقتي',pNewLead:'القائد مشي: {n} قائد البارتي دلوقتي',pReplaced:'البارتي اختارت قائد جديد وإنت مش موجود، هترجع لهم'});
 Object.assign(STR.en,{pKick:'Kick',pKickQ:'Kick {n}?',pKickYes:'Kick',pKickNo:'Cancel',pKickDone:'{n} was removed from the party',pLeaderLeft:'{n} left, so the party broke up',pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();tradeStart();guildStart();dropStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();bntStart();tradeStart();guildStart();dropStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],leaderLeft:['pLeaderLeft','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -4562,16 +4563,17 @@ function pctxNear(){if(!NET||PCTX)return;const r=partyNear();if(r)pctxOpen(r);}
 function pctxName(k){const v=t(k);return v===k?'':v;}
 function pctxUI(live){const W=$('pctx'),r=live?pctxRemote():null;if(PCTX&&!r){if(live&&PCTX.handle)toast(t('pcGone',{n:PCTX.handle}));PCTX=null;}
  if(!PCTX){if(!W.hidden)W.hidden=true;return;}
- const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,gi=guildOf(r),sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far,r.ol,gi&&gi.n,guildCanInvite(r)].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
+ const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,gi=guildOf(r),sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far,r.ol,gi&&gi.n,guildCanInvite(r),bntOn(r.uid),S&&S.gold>=BNT_MIN].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
  $('pctxT').textContent=r.handle||'?';
- $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):'',r.ol?t('pcOl'):'',gi?'«'+gi.n+'»':''].filter(Boolean).join(' · ');
- $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;$('pctxTr').hidden=!TRADE;$('pctxG').hidden=!guildCanInvite(r);
+ $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):'',r.ol?t('pcOl'):'',gi?'«'+gi.n+'»':'',bntOn(r.uid)?t('bntOn',{g:bntOn(r.uid)}):''].filter(Boolean).join(' · ');
+ $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;$('pctxTr').hidden=!TRADE;$('pctxG').hidden=!guildCanInvite(r);$('pctxBn').hidden=!(BNT&&r.ol&&S&&S.gold>=BNT_MIN);
  // a player out of range (from the list): invites and duels only reach players you can see, so those wait until you are close
  for(const a of ['pcInvite','pcDuel'])W.querySelector(`[data-act="${a}"]`).disabled=far;}
 function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig='';return;}if(r===PCTX.snap&&(a==='pcInvite'||a==='pcDuel')){toast(t('pcFar'),'warn');return;}
  if(a==='pcInvite'&&PARTY){const res=PARTY.invite(r);toast(t({sent:'pInvSent',busy:'pBusy',full:'pFull',notLeader:'pNotLeader',already:'pcMate'}[res]||'pBusy',{n:r.handle}),res==='sent'?'good':'warn');partySig='';}
  else if(a==='pcDuel'&&DUEL){const st=DUEL.state();if(st.phase!=='idle'&&st.phase!=='over')return;const res=DUEL.challenge(r);toast(t({sent:'dSent',busy:'dBusy',safe:'dSafe',far:'dFar'}[res]||'dBusy',{n:r.handle}),res==='sent'?'good':'warn');duelSig='';}
  else if(a==='pcGuild'&&GUILD){GUILD.invite(r.uid).then(()=>toast(t('gdInvSent',{n:r.handle||'?'}),'good'),e=>toast(t(String(e&&e.message)==='member'?'gdInvMem':'gdFail'),'warn'));PCTX=null;}
+ else if(a==='pcBounty'&&BNT){PCTX=null;bntPost(r);}
  else if(a==='pcTrade'&&TRADE){const res=TRADE.ask(r);toast(t({sent:'trSent',busy:'trBusy',far:'dFar'}[res]||'trBusy',{n:r.handle||'?'}),res==='sent'?'good':'warn');PCTX=null;}
  else if(a==='pcBlock'){if(isBlocked(r.uid)){BLK.remove(r.uid);toast(t('pcUnblocked',{n:r.handle||'?'}));}else blockUid(r.uid,r.handle);}
  pctxSig='';}
@@ -4590,7 +4592,40 @@ function outlaw(){return !!(S&&!S.__demo&&S.olT&&Date.now()<S.olT);}
 function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
   room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
-  else if(e.type==='kill'&&S&&!S.__demo){S.olT=Date.now()+Satisfy.pvp.C.OUTLAW_MS;netForce=true;save(true);toast(t('pvpKill',{n:Satisfy.chat.clean(e.handle,24)||'?',m:Math.round(Satisfy.pvp.C.OUTLAW_MS/60000)}),'warn');SFX.slam&&SFX.slam();}});}
+  else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);S.olT=Date.now()+Satisfy.pvp.C.OUTLAW_MS;netForce=true;save(true);toast(t('pvpKill',{n:Satisfy.chat.clean(e.handle,24)||'?',m:Math.round(Satisfy.pvp.C.OUTLAW_MS/60000)}),'warn');SFX.slam&&SFX.slam();}});}
+/* bounties (SAT-ONLINE-051; Claude-B #13 item 23, U038): a price on an outlaw's head. From the card of a player with a
+   red name, Bounty puts gold on it (bounties/{bid}; the gold leaves your bag, and comes back when you take the bounty
+   back from the board). When a player kills that outlaw in open PvP, the outlaw's own client writes who killed it
+   (kills/{victim}/{kid}), and the killer claims every bounty on it set before the kill: bountyPaid/{bid}, once, in the
+   same update that removes the bounty, and the whole world hears it. Not cheat-proof yet: gold has no ledger (D3). */
+Object.assign(STR.ar,{pcBounty:'مكافأة',bntBoard:'المكافآت',bntOn:'عليه مكافأة {g} دهب',bntQ:'تحط كام دهب مكافأة على {n}؟',bntSet:'حطيت {g} دهب مكافأة على {n}',bntGot:'خدت مكافأة {g} دهب على {n}',
+ bntDone:'{n} خد مكافأة {lv} دهب على راس خارج عن القانون',bntH:'المكافآت ({n})',bntNone:'مفيش مكافآت دلوقتي',bntMine:'رجّع مكافأتك على {n} ({g} دهب)',bntBack:'رجعتلك {g} دهب',bntRow:'{n}: {g} دهب'});
+Object.assign(STR.en,{pcBounty:'Bounty',bntBoard:'Bounties',bntOn:'bounty {g} gold',bntQ:'How much gold on the head of {n}?',bntSet:'You put a {g} gold bounty on {n}',bntGot:'You claimed a {g} gold bounty on {n}',
+ bntDone:'{n} claimed a {lv} gold bounty on an outlaw',bntH:'Bounties ({n})',bntNone:'No bounties right now',bntMine:'Take back your bounty on {n} ({g} gold)',bntBack:'{g} gold back to you',bntRow:'{n}: {g} gold'});
+var BNT=null,bntOff=null,BNTS={},bntSeq=0,BNT_MIN=100,BNT_AMTS=[100,500,1000,5000,10000];
+function bntStart(){BNT=null;BNTS={};if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.bountyStore))return; // NETTR first: FB is declared below
+ BNT=Satisfy.firebase.bountyStore(FB);bntOff=BNT.watch(v=>{const o={};for(const k in v){const b=v[k];if(b&&typeof b==='object'&&typeof b.tu==='string'&&typeof b.by==='string'&&+b.g>=BNT_MIN)o[k]={by:b.by,byN:Satisfy.chat.clean(b.byN,24)||'?',tu:b.tu,tN:Satisfy.chat.clean(b.tN,24)||'?',g:Math.floor(+b.g),t:+b.t||0};}BNTS=o;pctxSig='';});}
+function bntOn(uid){let g=0;for(const k in BNTS)if(BNTS[k].tu===uid)g+=BNTS[k].g;return g;}
+function bntNew(r,g){if(!BNT||!S||S.gold<g)return false;const n=Satisfy.chat.clean(r.handle,24)||'?';S.gold-=g;hudDirty=true;save(true);
+ const bid='b_'+NET.uid.slice(0,40)+'_'+Date.now().toString(36)+(++bntSeq).toString(36);
+ BNT.post(bid,{by:NET.uid,byN:netId||S.look.n,tu:r.uid,tN:r.handle||'?',g}).then(()=>{toast(t('bntSet',{g,n}),'good');SFX.coin();},()=>{S.gold+=g;hudDirty=true;save(true);toast(t('gdFail'),'warn');});return true;}
+function bntPost(r){if(!BNT||!S||!r||!r.uid)return;const n=Satisfy.chat.clean(r.handle,24)||'?';
+ dialog('guild',[t('bntQ',{n})],null,[...BNT_AMTS.filter(g=>g<=S.gold).map(g=>({l:g+' '+t('trGold'),f:()=>bntNew(r,g)})),{l:t('oClose')}]);}
+// the outlaw's own client: who killed it (the claim needs this record, made after the bounty)
+function bntKilled(killer){if(!BNT||!NET||!killer)return;BNT.killed(NET.uid,'k_'+Date.now().toString(36)+Math.floor(Math.random()*1e9).toString(36),killer).catch(()=>{});}
+// the killer: claim what is on the victim's head, once the victim's record is there (it may come a moment after the kill)
+function bntClaim(victim,n){if(!BNT||!NET||!S||S.__demo)return;const mine=Object.keys(BNTS).filter(k=>BNTS[k].tu===victim&&BNTS[k].by!==NET.uid);if(!mine.length)return;
+ BNT.kills(victim).then(ks=>{const ok=Object.keys(ks).filter(k=>ks[k]&&ks[k].k===NET.uid).sort((a,b)=>ks[b].t-ks[a].t);
+  if(!ok.length){if(n<4)setTimeout(()=>bntClaim(victim,n+1),[700,1500,3000,6000][n]);return;}
+  for(const bid of mine){const b=BNTS[bid],kid=ok.find(k=>ks[k].t>b.t);if(!kid)continue;
+   BNT.claim(bid,kid,b.g,NET.uid).then(()=>{S.gold+=b.g;hudDirty=true;save(true);toast(t('bntGot',{g:b.g,n:b.tN}),'good');SFX.coin();annW('bntDone',{lv:b.g});},()=>{});}
+ },()=>{if(n<4)setTimeout(()=>bntClaim(victim,n+1),1500);});}
+// the board, from the player list: who has a price on their head, and your own bounties to take back
+function bntBoard(){if(!BNT)return;const by={};for(const k in BNTS){const b=BNTS[k];(by[b.tu]=by[b.tu]||{n:b.tN,g:0}).g+=b.g;}
+ const rows=Object.values(by).sort((a,b)=>b.g-a.g).slice(0,12).map(x=>t('bntRow',{n:x.n,g:x.g}));
+ const mine=Object.keys(BNTS).filter(k=>BNTS[k].by===NET.uid).map(k=>({l:t('bntMine',{n:BNTS[k].tN,g:BNTS[k].g}),f:()=>{const g=BNTS[k]&&BNTS[k].g;if(!g)return;BNT.cancel(k).then(()=>{S.gold+=g;hudDirty=true;save(true);toast(t('bntBack',{g}),'good');SFX.coin();},()=>toast(t('gdFail'),'warn'));}}));
+ plOpen(false);dialog('guild',[t('bntH',{n:Object.keys(BNTS).length}),rows.length?rows.join(' · '):t('bntNone')],null,[...mine,{l:t('oClose')}]);}
+window.__GB={all:()=>BNTS,on:uid=>bntOn(uid),post:(uid,g)=>{const r=NET.remotes().find(x=>x.uid===uid);return !!r&&bntNew(r,g);}}; // test hook
 // the local attack reaches a player outside town: melee within reach, bow/staff along the aim; the nearest one it can hit
 function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoom=(roomAt(P.x,P.y)||{}).id||null,l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';let best=null,bd=1e9;
  for(const r of NET.remotes()){if(!netSees(r,myRoom)||PVP.why(r))continue;const dx=r.x-P.x,dy=(r.y-8)-(P.y-6),d=Math.hypot(dx,dy);
@@ -4604,7 +4639,7 @@ function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Sati
  let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}
  P.hp-=d;numP(-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();asMe(()=>vfx('blood',P.x,P.y-10,{}));shake=.12;}hudDirty=true;
  if(P.hp<=0){if(S.tl&&S.tl.legend&&S.immT<=0){P.hp=1;S.immT=120;P.inv=1.5;toast(t('immune'),'good');flash();SFX.notice();return;}
-  die();PVP.died(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
+  die();PVP.died(e.uid);bntKilled(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
 // your own red tag while you are an outlaw, and the notice when it ends
 function pvpEnts(){const ol=outlaw();if(pvpOlWas&&!ol&&S&&!S.__demo){toast(t('pvpOlEnd'),'good');netForce=true;}pvpOlWas=ol;
  if(ol&&mode==='play')TX.push({s:t('pvpOl'),x:P.x,y:P.y-30,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff3b30'});}
@@ -4985,7 +5020,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
 function netStop(){try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
- if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
+ if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid;netStop();
  (erase?C.eraseAll(['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid]):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
@@ -5020,7 +5055,7 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
 function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF=true; // from now on this tab never saves: the newer tab owns the save (review of #30)
- try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
+ try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
 // another Google account on this device (owner request): the chooser opens straight from the click, the new
