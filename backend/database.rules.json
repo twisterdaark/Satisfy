@@ -380,7 +380,10 @@
               ".validate": "newData.val() === now"
             },
             "rs": {
-              ".validate": "newData.isString() && newData.val().length <= 515 && newData.val().matches(/^[A-Za-z0-9:_.-]+( [A-Za-z0-9:_.-]+){0,3}$/)"
+              ".validate": "newData.isString() && newData.val().length <= 1160 && newData.val().matches(/^[A-Za-z0-9:_.-]+( [A-Za-z0-9:_.-]+){0,8}$/)"
+            },
+            "rd": {
+              ".validate": "newData.val() === 1"
             },
             "$other": {
               ".validate": false

@@ -25,6 +25,10 @@
  * A leader that comes back to find its members in another party drops its own and takes that
  * party's invite back. A member left alone still dissolves after GRACE_MS, as before.
  *
+ * Raids (SAT-ONLINE-060, Claude-B #13 item 24, doc ch 40): the leader turns the party into a raid of up to RAID_MAX
+ * (setRaid) and back when it is small enough again. The leader publishes it (PlayerPublic.rd = 1), members read it from
+ * the leader's presence, an elected leader keeps it, and a reloaded leader gets it back from the store.
+ *
  * Exposes `Satisfy.party.create({ presence, uid, now?, max?, blocked?, store?, wall?, gap? })`; gap: a tick this many ms after
  * the last one is this client's own pause (a hidden window), and the time it slept doesn't count against the others.
  */
@@ -32,6 +36,7 @@
   'use strict';
 
   var MAX = 5;
+  var RAID_MAX = 10;      // a raid (SAT-ONLINE-060)
   var INVITE_MS = 30000;  // an unanswered invite expires
   var GRACE_MS = 10000;   // presence may lag; a member/leader missing this long has left (a closed tab leaves presence at once)
   var PING_MS = 1500;     // pings: at most one per member this often (sent and received)
@@ -60,9 +65,12 @@
     var mates = [];         // member: the other members, from the leader's published roster (the electorate)
     var mateSeen = new Map(); // member: uid -> when we last saw that mate with us (out of sight a moment still counts)
     var names = new Map();  // uid -> last handle seen, so a member who drops out is still named (not "?")
+    var raid = false;       // leader: the party is a raid (up to RAID_MAX)
+    var raidSeen = false;   // member: the leader's presence says it is a raid
+    function cap() { return raid ? RAID_MAX : max; }
     function save() {
       if (!store || !id) return;
-      var s = JSON.stringify({ id: id, leader: leader, members: leader === self ? Array.from(accepted.keys()).concat(Array.from(recent.keys())) : [] });
+      var s = JSON.stringify({ id: id, leader: leader, members: leader === self ? Array.from(accepted.keys()).concat(Array.from(recent.keys())) : [], raid: leader === self && raid ? 1 : 0 });
       // rewritten when it changes and every few seconds anyway: its time says how recently we were in the party
       if (s === savedSig && wall() - savedAt < 5000) return;
       savedSig = s; savedAt = wall();
@@ -76,14 +84,14 @@
       if (!s || typeof s.id !== 'string' || typeof s.leader !== 'string' || !(wall() - s.t < REJOIN_MS)) { forget(); return; }
       if (s.leader === self && s.id === idFor(self)) {
         if (!(Array.isArray(s.members) && s.members.length)) { forget(); return; } // only invites out: nothing to come back to
-        id = s.id; leader = self;
+        id = s.id; leader = self; raid = s.raid === 1;
         (Array.isArray(s.members) ? s.members : []).forEach(function (u) { if (typeof u === 'string' && u !== self) recent.set(u, s.t); });
       } else memo = { id: s.id, leader: s.leader, t: s.t };
     })();
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function byUid(uid) { var hit = null; P.remotes().forEach(function (r) { if (r.uid === uid) hit = r; if (r.uid && r.handle) names.set(r.uid, r.handle); }); return hit; }
-    function clear() { id = null; leader = null; accepted.clear(); outgoing.clear(); recent.clear(); leaderOk = 0; savedSig = ''; mates = []; mateSeen.clear(); }
+    function clear() { id = null; leader = null; accepted.clear(); outgoing.clear(); recent.clear(); leaderOk = 0; savedSig = ''; mates = []; mateSeen.clear(); raid = false; raidSeen = false; }
     function send(type, to) { P.send(type, { to: to, party: id }); }
 
     P.on(function (ev) {
@@ -106,7 +114,7 @@
         case 'party.accept':
           if (!id || leader !== self || pl.party !== id || !outgoing.has(from.uid)) return;
           outgoing.delete(from.uid);
-          if (accepted.size + 1 >= max) { P.send('party.kick', { to: from.uid, party: id }); emit({ type: 'full', handle: from.handle }); return; }
+          if (accepted.size + 1 >= cap()) { P.send('party.kick', { to: from.uid, party: id }); emit({ type: 'full', handle: from.handle }); return; }
           accepted.set(from.uid, now());
           emit({ type: 'joined', uid: from.uid, handle: from.handle });
           break;
@@ -147,13 +155,29 @@
         if (leader === self) return [id];
         return [id].concat(mates.concat([self]).sort().map(idFor)).filter(function (x, i, a) { return a.indexOf(x) === i; });
       },
+      /** A raid (SAT-ONLINE-060): the leader's own flag, or for a member what the leader's presence says. */
+      isRaid: function () { return !!id && (leader === self ? raid : raidSeen); },
+      /** How many the party can hold now (the leader's view). */
+      max: function () { return cap(); },
+      /**
+       * Leader only: make the party a raid of up to RAID_MAX, or a party again. Returns 'ok', 'notLeader' (also with
+       * no party yet) or 'big' (too many members, accepted or invited, to be a party again).
+       */
+      setRaid: function (on) {
+        if (!id || leader !== self) return 'notLeader';
+        if (!on && accepted.size + 1 + outgoing.size > max) return 'big';
+        if (raid === !!on) return 'ok';
+        raid = !!on; savedSig = ''; save();
+        emit({ type: 'raid', on: raid, self: true });
+        return 'ok';
+      },
       /** Leader (or a player not in a party) invites a remote player. Returns 'sent' or a reason. */
       invite: function (remote) {
         if (!remote || !remote.uid || remote.uid === self) return 'bad';
         if (id && leader !== self) return 'notLeader';
         if (remote.party && remote.party === id) return 'already';
         if (remote.party) return 'busy';
-        if (id && accepted.size + 1 + outgoing.size >= max) return 'full';
+        if (id && accepted.size + 1 + outgoing.size >= cap()) return 'full';
         if (!id) { id = idFor(self); leader = self; }
         outgoing.set(remote.uid, now());
         send('party.invite', remote.uid);
@@ -256,7 +280,7 @@
               emit({ type: 'replaced' });
               stop = true;
             }
-            if (r && !r.party && !outgoing.has(uid) && accepted.size + 1 + outgoing.size < max) { outgoing.set(uid, t); send('party.invite', uid); }
+            if (r && !r.party && !outgoing.has(uid) && accepted.size + 1 + outgoing.size < cap()) { outgoing.set(uid, t); send('party.invite', uid); }
           });
           if (stop) return;
           if (!accepted.size && !outgoing.size && !recent.size) { clear(); forget(); emit({ type: 'dissolved' }); return; }
@@ -267,6 +291,7 @@
             leaderOk = t; leaderSid = L.sid || leaderSid;
             // the electorate is the leader's own roster, not whoever writes our party id into their presence (#55)
             mates = (typeof L.rs === 'string' && L.rs ? L.rs.split(' ') : []).filter(function (u) { return u !== self; });
+            if (raidSeen !== (L.rd === 1)) { raidSeen = L.rd === 1; emit({ type: 'raid', on: raidSeen, self: false }); }
             save();
           }
           // who is still around from the party: a mate may already have moved on to the elected leader's id (we follow
@@ -283,6 +308,7 @@
             var old = leader, next = rest.sort()[0];
             id = idFor(next); leader = next; leaderOk = t; accepted.clear(); outgoing.clear(); mates = rest.filter(function (u) { return u !== self && u !== next; });
             if (next === self) {
+              raid = raidSeen || rest.length > max; // the raid stays a raid under its new leader
               rest.forEach(function (u) { if (u !== self) accepted.set(u, t); });
               if (store) recent.set(old, wall()); // invite the old leader back if it returns
             }
@@ -303,5 +329,5 @@
   }
 
   var ns = root.Satisfy = root.Satisfy || {};
-  ns.party = Object.freeze({ create: create, idFor: idFor, MAX: MAX, INVITE_MS: INVITE_MS, GRACE_MS: GRACE_MS, PING_MS: PING_MS, REJOIN_MS: REJOIN_MS, LEAD_MS: LEAD_MS, KEY: KEY });
+  ns.party = Object.freeze({ create: create, idFor: idFor, MAX: MAX, RAID_MAX: RAID_MAX, INVITE_MS: INVITE_MS, GRACE_MS: GRACE_MS, PING_MS: PING_MS, REJOIN_MS: REJOIN_MS, LEAD_MS: LEAD_MS, KEY: KEY });
 })(typeof window !== 'undefined' ? window : globalThis);

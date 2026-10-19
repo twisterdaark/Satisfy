@@ -5,12 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
-    { v: '2026-10-20g', ver: '0.51', d: '2026-10-20',
+    { v: '2026-10-20h', ver: '0.50', d: '2026-10-20',
+      ar: ['أونلاين: الغارات: قائد الفريق يقدر يخلي فريقه غارة لحد 10 لاعبين من زرار "غارة" في لوحة الفريق، ويرجعها فريق لما يبقوا 5 أو أقل'],
+      en: ['Online: raids: a party leader can make the party a raid of up to 10 players with "Raid" in the party panel, and a party again at 5 or fewer'] },
+    { v: '2026-10-20g', ver: '0.49', d: '2026-10-20',
       ar: ['أونلاين: صندوق بوس الدانجن بياخد غنيمته مرة واحدة في الأسبوع لكل حساب، وبعدها بيبقى فاضي ليك لحد التجديد يوم الاتنين',
         'الدهب والخبرة والحاجات اللي بتقع من البوس نفسه زي ما هي، والأوفلاين مفيهوش قفل'],
       en: ["Online: a dungeon boss's chest gives its loot once a week per account, then it is empty for you until the Monday reset",
         "The boss's own drops, gold and experience are unchanged, and offline nothing is locked"] },
-    { v: '2026-10-20f', ver: '0.50', d: '2026-10-20',
+    { v: '2026-10-20f', ver: '0.48', d: '2026-10-20',
       ar: ['أونلاين: لما لاعب جنبك يموت أو يرجع للحياة بتسمع صوته، أوطى كل ما يبعد'],
       en: ['Online: you hear a player near you die or come back to life, softer the farther away they are'] },
     { v: '2026-10-20c', ver: '0.47', d: '2026-10-20',
