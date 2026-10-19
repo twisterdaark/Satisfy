@@ -96,6 +96,8 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #emoW{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*22);display:flex;gap:calc(var(--u)*.8);padding:calc(var(--u)*.6);pointer-events:auto}#emoW button{width:auto;padding:0 calc(var(--u)*1);font-size:calc(var(--u)*1.5)}
 #pctx .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.6)}#pctxI{color:var(--muted,#c8d0e0)}
 #partyInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
+#tradeInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*16);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto}#tradeInv .row,#tradeW .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
+#tradeW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*6);padding:calc(var(--u)*.8) calc(var(--u)*1.4);width:calc(var(--u)*52);max-width:96vw;font-size:calc(var(--u)*1.5);pointer-events:auto}#tradeW .cols{display:flex;gap:calc(var(--u)*1.4)}#tradeW .col{flex:1;min-width:0}#tradeW .sub{color:#ffe7a8;margin-bottom:calc(var(--u)*.4)}#tradeW .st{min-height:1.3em;margin-top:calc(var(--u)*.4);color:#8dff9a}#tradeW #trGold{width:calc(var(--u)*10)}#trBag,#trTh{max-height:calc(var(--u)*20);overflow-y:auto;display:flex;flex-wrap:wrap;gap:calc(var(--u)*.4);margin-top:calc(var(--u)*.5)}#trBag button,#trTh span{width:auto;padding:0 calc(var(--u)*.6);font-size:calc(var(--u)*1.3);opacity:.6}#trBag button.on,#trTh span{opacity:1;outline:1px solid #ffe7a8}
 #netB{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*.6);padding:calc(var(--u)*.3) calc(var(--u)*1.2);font-size:calc(var(--u)*1.5);color:#9fe0ff;white-space:nowrap;pointer-events:auto;cursor:pointer}
 #plW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*4.4);padding:calc(var(--u)*.8) calc(var(--u)*1.4);width:calc(var(--u)*34);max-height:calc(var(--u)*30);overflow-y:auto;font-size:calc(var(--u)*1.5);pointer-events:auto;z-index:45}
 #plL div{padding:calc(var(--u)*.25) 0;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:calc(var(--u)*.8)}#plL div.me{color:#ffe7a8}#plL .pm{width:auto;min-width:calc(var(--u)*3);padding:0 calc(var(--u)*.8);line-height:1.2;flex:none}
@@ -431,7 +433,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
       <div id="netRepW" class="sys" hidden><div id="netRepT"></div><div class="row"><button id="netRepBtn" data-act="netTakeBack"></button></div></div>
       <div id="duelInv" class="sys" hidden><div id="duelInvT"></div><div class="row"><button id="duelBtnA" data-act="dAccept"></button><button id="duelBtnB" data-act="dDecline"></button><button id="duelBtnC" class="blk" data-act="dBlock" data-i18n="pBlock"></button></div></div>
       <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
-      <div id="emoW" class="sys" hidden><button data-emo="wave" data-i18n="emWave"></button><button data-emo="dance" data-i18n="emDance"></button><button data-emo="point" data-i18n="emPoint"></button><button data-emo="cheer" data-i18n="emCheer"></button></div><div id="pctx" class="sys" hidden><div class="qhead"><span class="head" id="pctxT"></span><button class="x" data-act="pcClose">✕</button></div><div id="pctxI"></div><div class="row"><button data-act="pcInvite" data-i18n="pcInvite"></button><button data-act="pcDuel" data-i18n="pcDuel"></button><button class="blk" id="pctxB" data-act="pcBlock"></button></div></div><div id="partyInv" class="sys" hidden><div id="partyInvT"></div><div class="row"><button data-act="pAccept" data-i18n="pAccept"></button><button data-act="pDecline" data-i18n="pDecline"></button><button class="blk" data-act="pBlock" data-i18n="pBlock"></button></div></div>
+      <div id="emoW" class="sys" hidden><button data-emo="wave" data-i18n="emWave"></button><button data-emo="dance" data-i18n="emDance"></button><button data-emo="point" data-i18n="emPoint"></button><button data-emo="cheer" data-i18n="emCheer"></button></div><div id="pctx" class="sys" hidden><div class="qhead"><span class="head" id="pctxT"></span><button class="x" data-act="pcClose">✕</button></div><div id="pctxI"></div><div class="row"><button data-act="pcInvite" data-i18n="pcInvite"></button><button data-act="pcDuel" data-i18n="pcDuel"></button><button data-act="pcTrade" id="pctxTr" data-i18n="pcTrade" hidden></button><button class="blk" id="pctxB" data-act="pcBlock"></button></div></div><div id="tradeInv" class="sys" hidden><div id="tradeInvT"></div><div class="row"><button data-act="trYes" data-i18n="trYes"></button><button data-act="trNo" data-i18n="pDecline"></button></div></div><div id="tradeW" class="sys" hidden><div class="qhead"><span class="head" id="trH"></span><button class="x" data-act="trCancel">✕</button></div><div class="cols"><div class="col"><div class="sub" id="trMeH"></div><label class="gl"><span id="trGoldL"></span> <input id="trGold" type="number" min="0" step="1" value="0" inputmode="numeric"></label><div id="trBag"></div><div class="st" id="trMeS"></div></div><div class="col"><div class="sub" id="trThH"></div><div id="trTh"></div><div class="st" id="trThS"></div></div></div><div class="row"><button data-act="trOk" id="trOk"></button><button data-act="trConf" id="trConf"></button><button data-act="trCancel" id="trX"></button></div></div><div id="partyInv" class="sys" hidden><div id="partyInvT"></div><div class="row"><button data-act="pAccept" data-i18n="pAccept"></button><button data-act="pDecline" data-i18n="pDecline"></button><button class="blk" data-act="pBlock" data-i18n="pBlock"></button></div></div>
       <div id="announce" class="sys" hidden><div class="head" data-i18n="worldNotice"></div><div id="anntext"></div></div>
     </div>
 
@@ -612,6 +614,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
  'src/net/party.js',
  'src/net/duel.js',
  'src/net/pvp.js',
+ 'src/net/trade.js',
  'src/net/chat.js',
  'src/net/raid.js',
  'src/net/cloud.js',
@@ -3618,7 +3621,8 @@ function act(a){
  else if(a==='cloud')cloudOpen();else if(a==='updLog')updLogOpen();else if(a==='updLogClose')updLogClose();else if(a==='switchAcc')netSwitch();else if(a==='cloudClose')$('cloudW').hidden=true;
  else if(a==='pAccept'||a==='pDecline'||a==='pLeave')partyAct(a);
  else if(a==='pBlock'||a==='dBlock')blockAct(a);
- else if(a==='pcClose'||a==='pcInvite'||a==='pcDuel'||a==='pcBlock')pctxAct(a);
+ else if(a==='pcClose'||a==='pcInvite'||a==='pcDuel'||a==='pcBlock'||a==='pcTrade')pctxAct(a);
+ else if(/^tr[A-Z]/.test(a))tradeAct(a);
  else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
  else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='guiReset')guiReset();else if(a==='quit'){save(true);fadeTo(toTitle);}
@@ -4104,6 +4108,7 @@ window.__G.defs=Satisfy.local.defs;
 // Other players come from Satisfy.presence over a transport; nothing here changes offline play.
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
 let PVP=null; // SAT-ONLINE-038 open PvP (declared first: ?net=local starts during load)
+var TRADE=null; // SAT-ONLINE-039 trades (online only; declared first: ?net=local starts during load)
 let NET=null,NETTR=null,netLinkT=0,netReplaced=false,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null,CHAT=null,chatSig='',PCTX=null,pctxSig='',EMO=null,emoLast=-1e9;const PARTY_R=40,BLK=Satisfy.chat.blocklist(); // CHAT/BLK: SAT-ONLINE-016 (declared here: ?net=local starts during load)
 // Twister 2026-10-19: the public site opens online with no ?net=online; ?net=off plays offline there, ?net=local stays for two-tab tests.
 // The switch is Satisfy.netOnlineOnly (src/net/firebase-config.js): true on the GitHub Pages host, so local files and the test
@@ -4153,11 +4158,12 @@ function netTick(){NET.tick();const live=netLive();
  if(PARTY)PARTY.tick();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
+ if(TRADE)TRADE.tick();
  if(PRAID)PRAID.tick();
  mobTick(live);
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
  if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic(),ol:outlaw()}),netForce);netForce=false;}
- partyUI(live);chatUI(live);pctxUI(live);
+ partyUI(live);chatUI(live);pctxUI(live);tradeUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
  const netSafe=live&&Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
   b.textContent=(NETQ==='local'?t('netOn',{n:NET.count()+1}):netState==='ONLINE'?t('netOnline',{n:NET.count()+1}):t(netState==='RECONNECTING'?'netRe':'netJoin'))+(netSafe?' · '+t('safeZone'):'');}}
@@ -4242,7 +4248,7 @@ function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch
 Object.assign(STR.ar,{pKick:'اطرد',pKickQ:'تطرد {n}؟',pKickYes:'اطرد',pKickNo:'لأ',pKickDone:'{n} اتشال من الفريق',pLeaderLeft:'{n} ساب، فالفريق اتفكك',pRejoined:'رجعت لبارتي {n}',pYouLead:'القائد مشي: إنت قائد البارتي دلوقتي',pNewLead:'القائد مشي: {n} قائد البارتي دلوقتي',pReplaced:'البارتي اختارت قائد جديد وإنت مش موجود، هترجع لهم'});
 Object.assign(STR.en,{pKick:'Kick',pKickQ:'Kick {n}?',pKickYes:'Kick',pKickNo:'Cancel',pKickDone:'{n} was removed from the party',pLeaderLeft:'{n} left, so the party broke up',pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn)NETTR.feedOn('news',newsIn);
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();tradeStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn)NETTR.feedOn('news',newsIn);
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],leaderLeft:['pLeaderLeft','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -4391,12 +4397,13 @@ function pctxUI(live){const W=$('pctx'),r=live?pctxRemote():null;if(PCTX&&!r){if
  const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far,r.ol].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
  $('pctxT').textContent=r.handle||'?';
  $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):'',r.ol?t('pcOl'):''].filter(Boolean).join(' · ');
- $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;
+ $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;$('pctxTr').hidden=!TRADE;
  // a player out of range (from the list): invites and duels only reach players you can see, so those wait until you are close
  for(const a of ['pcInvite','pcDuel'])W.querySelector(`[data-act="${a}"]`).disabled=far;}
 function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig='';return;}if(r===PCTX.snap&&(a==='pcInvite'||a==='pcDuel')){toast(t('pcFar'),'warn');return;}
  if(a==='pcInvite'&&PARTY){const res=PARTY.invite(r);toast(t({sent:'pInvSent',busy:'pBusy',full:'pFull',notLeader:'pNotLeader',already:'pcMate'}[res]||'pBusy',{n:r.handle}),res==='sent'?'good':'warn');partySig='';}
  else if(a==='pcDuel'&&DUEL){const st=DUEL.state();if(st.phase!=='idle'&&st.phase!=='over')return;const res=DUEL.challenge(r);toast(t({sent:'dSent',busy:'dBusy',safe:'dSafe',far:'dFar'}[res]||'dBusy',{n:r.handle}),res==='sent'?'good':'warn');duelSig='';}
+ else if(a==='pcTrade'&&TRADE){const res=TRADE.ask(r);toast(t({sent:'trSent',busy:'trBusy',far:'dFar'}[res]||'trBusy',{n:r.handle||'?'}),res==='sent'?'good':'warn');PCTX=null;}
  else if(a==='pcBlock'){if(isBlocked(r.uid)){BLK.remove(r.uid);toast(t('pcUnblocked',{n:r.handle||'?'}));}else blockUid(r.uid,r.handle);}
  pctxSig='';}
 window.__G.toScreen=(x,y)=>{const b=stage.getBoundingClientRect();return {x:b.left+(x-camXf)*SC,y:b.top+(y-camYf)*SC};}; // tests: click a world position
@@ -4432,6 +4439,56 @@ function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Sati
 // your own red tag while you are an outlaw, and the notice when it ends
 function pvpEnts(){const ol=outlaw();if(pvpOlWas&&!ol&&S&&!S.__demo){toast(t('pvpOlEnd'),'good');netForce=true;}pvpOlWas=ol;
  if(ol&&mode==='play')TX.push({s:t('pvpOl'),x:P.x,y:P.y-30,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff3b30'});}
+/* trades (SAT-ONLINE-039, owner 2026-10-19): online only, from the player card. Each side puts in gold and bag items, both
+   Accept, then Confirm; any change clears the accepts. The swap is one database update keyed by the item ids
+   (src/net/trade.js, Satisfy.firebase.tradeStore), so an item can't be traded twice. Not cheat-proof yet (no server). */
+Object.assign(STR.ar,{pcTrade:'تبادل',trYes:'وافق',trFrom:'{n} عايز يتبادل معاك',trSent:'اتبعت طلب تبادل لـ{n}',trBusy:'{n} مشغول دلوقتي',trH:'تبادل مع {n}',trMe:'إنت بتدي',trThem:'{n} بيدي',trGold:'دهب',trOk:'موافق',trOkOn:'موافق ✓',trConf:'تأكيد',trConfOn:'متأكد ✓',trCancelB:'إلغاء',
+ trSAcc:'موافق',trSConf:'أكّد',trSWait:'مستني…',trNone:'ولا حاجة',trSwapped:'التبادل مع {n} خلص',trDeclined:'{n} رفض التبادل',trCancelled:'التبادل اتلغى',trFailed:'التبادل مكملش: حاجة اتغيرت أو قطعة مبقتش بتاعته',trFar:'التبادل اتلغى: بعدتوا عن بعض'});
+Object.assign(STR.en,{pcTrade:'Trade',trYes:'Trade',trFrom:'{n} wants to trade',trSent:'Trade request sent to {n}',trBusy:'{n} is busy right now',trH:'Trade with {n}',trMe:'You give',trThem:'{n} gives',trGold:'Gold',trOk:'Accept',trOkOn:'Accepted ✓',trConf:'Confirm',trConfOn:'Confirmed ✓',trCancelB:'Cancel',
+ trSAcc:'Accepted',trSConf:'Confirmed',trSWait:'Waiting…',trNone:'Nothing',trSwapped:'Trade with {n} done',trDeclined:'{n} declined the trade',trCancelled:'The trade was cancelled',trFailed:'The trade did not go through: something changed, or an item is no longer theirs',trFar:'The trade was cancelled: you walked apart'});
+var trSig='';
+// what you may give: bag items that aren't worn, of a kind every client knows (so the other side can take them)
+function tradeBag(){if(!S||S.__demo)return [];const w=weapon();return S.items.filter(i=>i&&i.iid&&!isEq(i)&&i!==w&&rcById(i.id)).map(i=>{const o={};for(const k in i)if(k!=='uid'&&k!=='iid')o[k]=i[k];return {iid:i.iid,json:JSON.stringify(o),it:i};}).filter(x=>x.json.length<=Satisfy.trade.C.ITEM_MAX);}
+// an item from the other side, rebuilt from plain values only, as a new item of yours (a new uid; ids.ensure gives the iid)
+function tradeItemIn(json){let o;try{o=JSON.parse(json);}catch(e){return null;}if(!o||typeof o!=='object'||typeof o.id!=='string')return null;const rc=rcById(o.id);if(!rc)return null;
+ const it={};for(const k in o){const v=o[k];if(k==='uid'||k==='iid'||k==='__proto__')continue;if((typeof v==='number'&&isFinite(v))||(typeof v==='string'&&v.length<=40)||typeof v==='boolean')it[k]=v;}
+ it.id=o.id;it.slot=rc.slot;it.r=Math.max(0,Math.min(4,it.r|0));it.dur=Math.max(0,Math.min(100,typeof it.dur==='number'?it.dur:100));if(it.gem&&!(typeof GEMS!=='undefined'&&GEMS[it.gem]))delete it.gem;it.uid=++S.uid;return it;}
+function tradeName(json){try{const o=JSON.parse(json);return o&&o.id?inm(o):'?';}catch(e){return '?';}}
+function tradeStart(){TRADE=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.tradeStore))return; // NETTR first: FB is declared below, a local start must not touch it
+ TRADE=Satisfy.trade.create({presence:NET,uid:NET.uid,now:()=>performance.now(),store:Satisfy.firebase.tradeStore(FB),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},bag:tradeBag,gold:()=>S&&!S.__demo?S.gold:0,blocked:isBlocked});
+ TRADE.on(e=>{const n=Satisfy.chat.clean(e.handle,24)||'?';trSig='';
+  if(e.type==='ask')SFX.notice&&SFX.notice();
+  else if(e.type==='open'){$('trGold').value='0';}
+  else if(e.type==='declined')toast(t('trDeclined',{n}),'warn');
+  else if(e.type==='cancelled')toast(t(e.why==='far'?'trFar':'trCancelled'),'warn');
+  else if(e.type==='failed')toast(t('trFailed'),'warn');
+  else if(e.type==='done')tradeApply(e,n);});}
+function tradeApply(e,n){if(!S||S.__demo)return;const give=e.give||{g:0,it:{}},get=e.get||{g:0,it:{}};
+ const out=new Set(Object.keys(give.it||{}));S.items=S.items.filter(i=>!(i&&out.has(i.iid)));S.gold=Math.max(0,S.gold-(give.g|0))+(get.g|0);
+ for(const k in get.it||{}){const it=tradeItemIn(get.it[k]);if(it)S.items.push(it);}
+ Satisfy.ids.ensure(S);save(true);hudDirty=true;if(!$('inv').hidden&&typeof renderInv==='function')renderInv();toast(t('trSwapped',{n}),'good');SFX.quest&&SFX.quest();}
+function tradeAct(a){if(!TRADE)return;const st=TRADE.state();
+ if(a==='trYes'){const ask=TRADE.pendingAsk();if(ask)TRADE.accept(ask.trade);}
+ else if(a==='trNo'){const ask=TRADE.pendingAsk();if(ask)TRADE.decline(ask.trade);}
+ else if(a==='trOk')TRADE.acceptOffer();
+ else if(a==='trConf')TRADE.confirm();
+ else if(a==='trCancel'&&st.phase!=='idle')TRADE.cancel();
+ trSig='';}
+function tradeUI(live){const I=$('tradeInv'),W=$('tradeW');if(!TRADE||!live){if(!I.hidden)I.hidden=true;if(!W.hidden)W.hidden=true;return;}
+ const ask=TRADE.pendingAsk(),st=TRADE.state(),bag=st.phase==='open'?tradeBag():[];
+ const sig=[lang,ask&&ask.trade,st.phase,JSON.stringify(st.mine),JSON.stringify(st.theirs),st.accepted,st.theyAccepted,st.confirmed,st.theyConfirmed,bag.map(b=>b.iid).join(','),S&&S.gold].join('|');if(sig===trSig)return;trSig=sig;
+ I.hidden=!(ask&&st.phase==='idle');if(!I.hidden)$('tradeInvT').textContent=t('trFrom',{n:Satisfy.chat.clean(ask.handle,24)||'?'});
+ W.hidden=st.phase!=='open';if(W.hidden)return;const n=Satisfy.chat.clean(st.handle,24)||'?',m=st.mine||{g:0,it:{}},th=st.theirs;
+ $('trH').textContent=t('trH',{n});$('trMeH').textContent=t('trMe');$('trThH').textContent=t('trThem',{n});$('trGoldL').textContent=t('trGold');
+ const gi=$('trGold');if(document.activeElement!==gi)gi.value=String(m.g||0);gi.max=String(S?S.gold:0);
+ const bx=$('trBag');bx.textContent='';for(const b of bag){const e=document.createElement('button');e.className='rt rt'+(b.it.r|0)+(m.it[b.iid]?' on':'');e.dataset.iid=b.iid;e.textContent=inm(b.it);bx.appendChild(e);}
+ const tx=$('trTh');tx.textContent='';if(th){if(th.g){const e=document.createElement('span');e.textContent=th.g+' '+t('trGold');tx.appendChild(e);}
+  for(const k in th.it){const e=document.createElement('span');e.dataset.iid=k;e.textContent=tradeName(th.it[k]);tx.appendChild(e);}if(!th.g&&!Object.keys(th.it).length)tx.textContent=t('trNone');}
+ $('trMeS').textContent=st.confirmed?t('trSConf'):st.accepted?t('trSAcc'):'';$('trThS').textContent=!th?t('trSWait'):st.theyConfirmed?t('trSConf'):st.theyAccepted?t('trSAcc'):'';
+ const ok=$('trOk'),cf=$('trConf');ok.textContent=t(st.accepted?'trOkOn':'trOk');ok.disabled=!th||st.confirmed;cf.textContent=t(st.confirmed?'trConfOn':'trConf');cf.disabled=!st.canConfirm||st.confirmed;$('trX').textContent=t('trCancelB');}
+$('trBag').addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button[data-iid]');if(b&&TRADE){TRADE.toggle(b.dataset.iid);trSig='';}});
+$('trGold').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')e.target.blur();});
+$('trGold').addEventListener('change',e=>{if(TRADE){TRADE.setGold(e.target.value);trSig='';}});
 /* duels (SAT-ONLINE-006, doc §09 R4): K challenges the nearest player outside towns; Y/N answers, Y is the ready check.
    Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
 Object.assign(STR.ar,{dHint:'[K] مبارزة',dSent:'اتبعت تحدي مبارزة لـ{n}',dFrom:'{n} بيتحداك في مبارزة',dReadyQ:'مبارزة مع {n}: جاهز؟',dReady:'جاهز (Y)',dWait:'مستني {n}…',dNone:'مفيش حد قريب كفاية للمبارزة',dSafe:'ممنوع المبارزة جوه المدن',dBusy:'{n} مشغول دلوقتي',dFar:'قرّب من {n} الأول',dDeclined:'{n} رفض المبارزة',dCancel:'المبارزة اتلغت',dFight:'ابدأ!',dOut:'ارجع للحلبة وإلا هتخسر!',dWin:'كسبت المبارزة ضد {n} {w}',dLose:'خسرت المبارزة ضد {n} {w}',dYield:'استسلام',dYou:'إنت',dTitle:'مبارزة ضد {n}',dRec:'المبارزات: {w} فوز · {l} خسارة',dw_yield:'(استسلام)',dw_arena:'(خرج من الحلبة)',dw_teleport:'(ساب القتال)',dw_safe:'(دخل مدينة)',dw_gone:'(الخصم مشي)',dw_death:'(مات)',dw_hp:''});
@@ -4670,7 +4727,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
 function netStop(){try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
- if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW'].forEach(i=>$(i).hidden=true);}
+ if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv'].forEach(i=>$(i).hidden=true);}
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid;netStop();
  (erase?C.eraseAll(['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid]):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
@@ -4705,7 +4762,7 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
 function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF=true; // from now on this tab never saves: the newer tab owns the save (review of #30)
- try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW'].forEach(i=>$(i).hidden=true);
+ try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;TRADE=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
 // another Google account on this device (owner request): the chooser opens straight from the click, the new

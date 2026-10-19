@@ -113,7 +113,12 @@ test('inbox: only the owner reads and deletes; senders create write-once message
   assert.deepEqual(types.filter((x) => x.startsWith('pvp.')), [...PV.TYPES], 'every pvp message can travel');
   assert.match(msg.payload['.validate'], /beginsWith\('pvp\.'\) && newData\.hasChild\('k'\) && !newData\.hasChild\('party'\) && !newData\.hasChild\('duel'\) && !newData\.hasChild\('raid'\) && !newData\.hasChild\('text'\)/);
   assert.equal(node.ol['.validate'], 'newData.val() === 1', 'the outlaw mark is 1 or absent');
-  for (const kind of ['party', 'duel', 'raid', 'pvp']) assert.match(msg.payload['.validate'], new RegExp("beginsWith\\('" + kind + "\\.'\\)[^|]*!newData\\.hasChild\\('text'\\)"), kind + ' messages carry no text');
+  // SAT-ONLINE-039: trade asks carry only the trade id
+  const { trade: TR } = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/trade.js');
+  assert.deepEqual(types.filter((x) => x.startsWith('trade.')), [...TR.TYPES], 'every trade message can travel');
+  assert.match(msg.payload['.validate'], /beginsWith\('trade\.'\) && newData\.hasChild\('trade'\) && !newData\.hasChild\('party'\) && !newData\.hasChild\('duel'\) && !newData\.hasChild\('raid'\) && !newData\.hasChild\('text'\) && !newData\.hasChild\('k'\) && !newData\.hasChild\('n'\)/);
+  assert.equal(msg.payload.trade['.validate'], "newData.isString() && newData.val().matches(/" + TR.ID_RE.source + "/)");
+  for (const kind of ['party', 'duel', 'raid', 'pvp', 'trade']) assert.match(msg.payload['.validate'], new RegExp("beginsWith\\('" + kind + "\\.'\\)[^|]*!newData\\.hasChild\\('text'\\)"), kind + ' messages carry no text');
 });
 
 test('profiles and cloud saves: owner writes only; cloud saves are private; limits match Satisfy.cloud', () => {
@@ -149,4 +154,20 @@ test('presence: one shard name only', () => {
   assert.equal(rules.presence.$world.$shard['.validate'], "$shard === 'main'");
   const fake = fs.readFileSync(path.join(ROOT, 'tests/harness/fake-firebase.js'), 'utf8');
   assert.match(fake, /seg\[2\] !== 'main'/);
+});
+
+// SAT-ONLINE-039: the trade swap is guarded by the rules, not only by the clients
+test('trades: participants only; each writes its own offer until the swap; the swap needs both confirms; the ledger moves an item once', () => {
+  const tr = rules.trades.$tid, sides = rules.tradeSides.$tid, done = rules.tradeDone.$tid, led = rules.tradedItems.$iid;
+  assert.equal(tr['.write'], "auth != null && !data.exists() && newData.child('a').val() === auth.uid", 'the asker creates it, once');
+  assert.match(tr['.read'], /data\.child\('a'\)\.val\(\) === auth\.uid \|\| data\.child\('b'\)\.val\(\) === auth\.uid/);
+  assert.match(sides.$uid['.write'], /^auth != null && auth\.uid === \$uid && /, 'only your own offer');
+  assert.match(sides.$uid['.write'], /!root\.child\('tradeDone'\)\.child\(\$tid\)\.exists\(\)$/, 'frozen once the swap is written');
+  assert.match(sides.$uid.it.$iid['.validate'], /length <= 600$/);
+  assert.match(done['.write'], /!data\.exists\(\)/, 'the swap is written once');
+  for (const k of ['acc', 'conf']) assert.ok(done['.write'].includes(`.child('${k}').val() === root.child('tradeSides').child($tid).child(root.child('trades').child($tid).child('b').val()).child('rev').val()`), 'both sides agree to the exact other offer: ' + k);
+  assert.match(led['.write'], /!root\.child\('tradeDone'\)\.child\(newData\.child\('t'\)\.val\(\)\)\.exists\(\)/, 'only while the swap is being written');
+  assert.match(led['.write'], /\(!data\.exists\(\) \|\| data\.child\('o'\)\.val\(\) === /, "only away from the item's recorded owner");
+  assert.match(led['.write'], /\.child\('it'\)\.child\(\$iid\)\.exists\(\)/, 'only an item its giver offered');
+  for (const n of [tr, sides.$uid, done, led]) assert.equal(n.$other['.validate'], false);
 });
