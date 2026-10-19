@@ -85,6 +85,13 @@
         push({ type: 'line', ch: all ? 'all' : 'party', from: self, handle: null, text: s, t: t, self: true, n: ++seq });
         return 'sent';
       },
+      /** A world or server notice as a line of its own (ch 'sys', SAT-ONLINE-041): local only, nothing is sent. */
+      note: function (text) {
+        var s = clean(text, 200);
+        if (!s) return false;
+        push({ type: 'line', ch: 'sys', from: null, handle: '', text: s, t: now(), self: false, n: ++seq });
+        return true;
+      },
       /** The last LOG lines, oldest first. */
       log: function () { return lines.slice(); },
       on: function (fn) { listeners.push(fn); },
