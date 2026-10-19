@@ -72,6 +72,12 @@ test('upload from one device, download on another; both need a second click; the
     const got = await b.eval(() => ({ pid: window.__G.S.pid, gold: window.__G.S.gold, n: window.__G.S.look.n }));
     assert.deepEqual(got, { pid: mine.pid, gold: 4321, n: 'Grid' });
 
+    // T36: another account's cloud saves can't be read (the fake applies the owner-only rule)
+    const other = await b.eval(async () => {
+      const sdk = await window.__SATISFY_FIREBASE_LOADER__();
+      try { await sdk.database.get({ path: 'cloudSaves/gSomeoneElse' }); return 'read'; } catch (e) { return e.code; }
+    });
+    assert.equal(other, 'PERMISSION_DENIED');
     assert.deepEqual(await a.eval(() => window.__fakeRTDB.rejected), []);
     assert.deepEqual(await b.eval(() => window.__fakeRTDB.rejected), []);
     assert.deepEqual(a.errors, []);

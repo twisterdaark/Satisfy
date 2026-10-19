@@ -3448,7 +3448,7 @@ window.__G.defs=Satisfy.local.defs;
 /* ---------------- online (opt-in: ?net=local) ---------------- */
 // Other players come from Satisfy.presence over a transport; nothing here changes offline play.
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
-let NET=null,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='';const PARTY_R=40;
+let NET=null,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='';const PARTY_R=40;
 const NETQ=QS.get('net');
 const NET_LIVE=['play','inv','status','equip','dialog','forge','log','map','dead','cut','pause','qd','gname','controls','enhfx','lang']; // every screen of a running game (a quest open, the guild-name box, controls, an enhancement) still is in the world
 function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
@@ -3456,7 +3456,7 @@ function netTick(){NET.tick();const live=Satisfy.local.inGame()&&NET_LIVE.includ
  if(PARTY)PARTY.tick();
  if(DUEL)duelTick(live);
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
- if(live)NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null}));
+ if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null}),netForce);netForce=false;}
  partyUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
  const netSafe=live&&Satisfy.net.zonePolicy(zoneAt(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;if(sig!==netSig){netSig=sig;b.hidden=!live;
@@ -3565,8 +3565,8 @@ function cloudOpen(){const C=cloudApi();if(!C)return;$('cloudW').hidden=false;$(
 function cloudProfile(){const C=cloudApi();if(!C||!S||S.__demo)return;cloudProfT=performance.now();C.writeProfile(S,lang).catch(e=>console.warn('profile write failed',e&&e.code));}
 function netFail(e){netSetState('ERROR');netBtn();toast(t('netFail',{e:(e&&e.code)||(e&&e.message)||'?'}),'warn');}
 function netConnect(sdk,user){if(NET)return;netUser=user;netSetState('JOINING');netBtn();
- const tr=Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)});
- netStart(Satisfy.presence.create({transport:tr,uid:user.uid,world:Satisfy.local.world(),now:()=>performance.now(),config:{moveHz:5}}));
+ const tr=Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');if(up)netForce=true;netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)});
+ netStart(Satisfy.presence.create({transport:tr,uid:user.uid,world:Satisfy.local.world(),now:()=>performance.now(),config:{moveHz:5,idleHz:.2,expireMs:15000}})); // cost model: docs/online/COST_MODEL.md
  addEventListener('pagehide',()=>NET.close());}
 function netSignIn(){if(NETQ!=='online'||netUser)return;netSetState('AUTHENTICATING');netBtn();
  Satisfy.firebase.load(Satisfy.firebaseConfig).then(sdk=>{FB=sdk;return Satisfy.firebase.signIn(sdk);}).then(u=>{if(u)netConnect(FB,u);else{netSetState('DISCONNECTED');netBtn();}},netFail);}

@@ -111,17 +111,20 @@ test('hits are normalized, the defender owns its HP, the attacker sees it, HP 0 
 test('the defender rejects hits that come too fast or from out of range', () => {
   const w = world(2), [a, b] = w.players;
   w.fight(a, b);
-  a.duel.hit(10); a.duel.hit(10); // second one within MIN_HIT_MS
+  for (let i = 0; i < C.HITS_PER_S + 2; i++) a.duel.hit(5); // a burst faster than any weapon can swing
   w.advance(100);
-  assert.equal(b.duel.state().hp, C.HP - 10);
+  assert.equal(b.duel.state().hp, C.HP - 5 * C.HITS_PER_S, 'only HITS_PER_S of them count');
   assert.ok(b.events.includes('rejected:rate'));
+  w.advance(1100); // a new second
+  a.duel.hit(5); w.advance(100);
+  assert.equal(b.duel.state().hp, C.HP - 5 * (C.HITS_PER_S + 1));
   // A's client lies about reach: the hit message arrives, but B sees A far away
   w.advance(400);
   for (let i = 0; i < 5; i++) { a.x += 48; w.advance(100); } // walk (a jump would be a teleport) to 210 px from B
   w.advance(500); // B's interpolated view of A catches up
   a.pres.send('duel.hit', { to: 'u1', duel: a.duel.state().duel, k: 10, n: 99 });
   w.advance(100);
-  assert.equal(b.duel.state().hp, C.HP - 10);
+  assert.equal(b.duel.state().hp, C.HP - 5 * (C.HITS_PER_S + 1));
   assert.ok(b.events.includes('rejected:range'));
 });
 
