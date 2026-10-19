@@ -1,12 +1,12 @@
 # NET/PVP backlog U001–U038 (plan doc §33–§34) — status
 
-Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-019 · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
+Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-050 (2026-10-19) · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
 
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
 | U001 | Google login, desktop | ✅ | SAT-ONLINE-004 (popup) |
 | U002 | Google login, mobile | ✅ | SAT-ONLINE-004 (redirect when the popup is blocked) |
-| U003 | Offline guest mode | ✅ | Offline is the default; nothing online loads without `?net=` (`regression/boot`) |
+| U003 | Offline guest mode | ✅ | On `*.github.io` the game opens online (a7439b3), `?net=off` plays offline; elsewhere offline is the default and nothing online loads without `?net=` (`regression/boot`, `regression/onlinedefault`) |
 | U004 | Account profile creation | ✅ | SAT-ONLINE-007 `profiles/{uid}` |
 | U005 | Appearance sync | ✅ | `PlayerPublic.look/arm` (SAT-ONLINE-002) |
 | U006 | Session leases | ✅ | SAT-ONLINE-010: `sessions/{uid}`, the newest session wins, "Play here" takes over |
@@ -29,7 +29,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-019 �
 | U023 | Protocol versioning | ✅ | Envelope `v: 1`, `PROTOCOL_VERSION` (§25) |
 | U024 | Load testing swarm | ✅ | `unit/chaos` 100-client soak (in memory) |
 | U025 | World shard migration | ❌ | U009 is in, but there is still one shard (`main`); migration needs more than one |
-| U026 | Safe Bairan | 🟡 | `SAFE_ZONES` (SAT-ONLINE-003) is a client-side policy: it stops duels and labels the town, but there is no server PvP authority yet (doc §59 C16; R5 needs D3). The undefined interior strip is `void`, never safe (SAT-ONLINE-019, C06) |
+| U026 | Safe Bairan | 🟡 | `SAFE_ZONES` (SAT-ONLINE-003): no duels and no open PvP inside (SAT-ONLINE-038 checks it on both sides), but it is still a client-side policy, not a server PvP authority (doc §59 C16; D3). The undefined interior strip is `void`, never safe (SAT-ONLINE-019, C06) |
 | U027 | Safe Winston | 🟡 | Same as U026; every town is in the list (Patrian, Reidan, Reinhardt too) |
 | U028 | Spawn shield | ⏳ | Only matters with open PvP (R5) |
 | U029 | Projectile boundary test | ⏳ | R5 |
@@ -38,12 +38,12 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-019 �
 | U032 | Duel arena ring | ✅ | SAT-ONLINE-006 |
 | U033 | Duel normalized mode | ✅ | SAT-ONLINE-006 (4–18 of 100 duel HP per hit) |
 | U034 | Duel spectator | ✅ | SAT-ONLINE-013: `PlayerPublic.duel` ("id:HP"), bars over both duelists and a ring for everyone nearby |
-| U035 | Open PvP toggle | ⏳ | R5 needs Trusted Combat (Blaze, D3) |
-| U036 | Party friendly fire | ⏳ | R5 |
-| U037 | Outlaw flag | ⏳ | R5 |
-| U038 | Bounty board | ⏳ | R5 + ledger |
+| U035 | Open PvP toggle | 🟡 | SAT-ONLINE-038 (#72, owner 2026-10-19): open PvP outside towns, capped hits (3–9% of max HP) applied by the victim's own client, the victim checks rate and range; not cheat-proof until Trusted Combat (D3) |
+| U036 | Party friendly fire | ✅ | SAT-ONLINE-038: no hits inside a party, checked by the attacker and again by the victim (`unit/pvp`, `regression/pvp`) |
+| U037 | Outlaw flag | ✅ | SAT-ONLINE-038: a kill makes the killer an outlaw for 10 min (`PlayerPublic.ol`, red name for everyone, `S.olT` kept across a reload); the kill counts only from a real, recent hit |
+| U038 | Bounty board | ❌ | Next (Claude-B #13 item 23): bounties on outlaws, serverless like trades; a ledger needs D3 |
 
-**Totals:** ✅ 22 · 🟡 7 · ⏳ 7 · ❌ 2.
+**Totals:** ✅ 24 · 🟡 8 · ⏳ 3 · ❌ 3.
 
 ## Social U046–U065 (plan doc §35 [SOC])
 
@@ -56,18 +56,31 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-019 �
 | U050 | Party roles | ✅ | SAT-ONLINE-025: a badge (tank/healer/damage/support) picked in the party panel, `PlayerPublic.role`; no combat effect, separate from class |
 | U051 | Party HP UI | ✅ | SAT-ONLINE-021: `PlayerPublic.hp` (5% steps, nothing else of the profile); a bar per member in the party panel |
 | U052 | Party pings | ✅ | SAT-ONLINE-021: Alt+click (touch: Ping marks where you stand) → `party.ping`; a ring on the ground and the minimap for 3 s; one per member per 1.5 s |
-| U053 | Party chat | 🟡 | SAT-ONLINE-016: party-only, rate-limited, block list; no profanity filter |
+| U053 | Party chat | 🟡 | SAT-ONLINE-016: party lines, rate-limited, block list; world chat for everyone (SAT-ONLINE-026), guild chat (SAT-ONLINE-049, #81), world notices as lines (SAT-ONLINE-041); no profanity filter |
 | U054 | Party summon | ⏳ | A teleport needs a movement authority |
 | U055 | Party follow | ❌ | |
 | U056 | Shared PvE XP | ⏳ | Needs a combat authority; a party raid pays each member their own rewards (009) |
 | U057 | Personal loot | 🟡 | SAT-ONLINE-009: each member's own game pays the boss kill once per encounter; no server ledger |
 | U058 | Need/Greed loot | ⏳ | Server random + ledger |
 | U059 | Friends and follow | ❌ | |
-| U060 | Guild invitations | ⏳ | Guilds are local game content today |
+| U060 | Guild invitations | 🟡 | SAT-ONLINE-046 (#79): guilds in the database (unique names, ranks master/officer/member), invites from the card answered from a prompt (now or later), remove, disband, the guild under the name; guild chat (#81) and the vault (#82). Open PRs; buildings next |
 | U061 | Emotes | ✅ | SAT-ONLINE-022: V (touch: Emote) → wave/dance/point/cheer for 3 s as `PlayerPublic.em` (a fixed list, no text); one per 2 s |
 | U062 | Chat moderation | 🟡 | Block list + rate limit (016); no report or keyword filter |
-| U063 | Player trade request | ⏳ | Needs inventory escrow on a server (D3) |
+| U063 | Player trade request | 🟡 | SAT-ONLINE-039 (#76): serverless trade, Accept then Confirm, any change resets the accepts, one update with the `tradedItems` ledger so an item can't be traded twice; gold has no ledger (D3) |
 | U064 | Player inspect | ✅ | SAT-ONLINE-020: the card shows only PlayerPublic (name, level, class, title, party, armour) |
 | U065 | Party reconnect | ✅ | SAT-ONLINE-023: the party lives in the tab's sessionStorage; within 60 s a reloaded member auto-accepts its leader's invite back and a reloaded leader keeps its party. Leaving on purpose is final (`regression/rejoin`) |
 
-**Totals (social):** ✅ 9 · 🟡 4 · ⏳ 6 · ❌ 1.
+**Totals (social):** ✅ 9 · 🟡 6 · ⏳ 3 · ❌ 2.
+
+## Online since the backlog (owner requests, 2026-10-19), not in U001–U065
+
+| Feature | Where | Status |
+|---|---|---|
+| Shared monsters: the same position, health, death, attacks (telegraph, dash, strike, target) on every screen | B's host rule (5f0a7e2, d0cecd4); SAT-ONLINE-042 (#73); bosses after the nearest player, Trauka's breath, phase roars: SAT-ONLINE-045 (#77) | ✅ #73 merged; #77 open |
+| World and server notices reach everyone, also in the chat; your own say "Notice" | SAT-ONLINE-041 (#71) | ✅ |
+| Numbers and effects over your player on every screen; others' action sounds | SAT-ONLINE-043 (#74), SAT-ONLINE-047 (#78) | ✅ #74; #78 open |
+| Weather, herbs, knocked-out townsfolk the same for everyone (server clock) | SAT-ONLINE-044 (#75) | ✅ |
+| Things dropped on the ground: everyone sees them, one player takes each | SAT-ONLINE-048 (#80) | open |
+| A player on another build: only the older page refreshes | SAT-ONLINE-045 (#77) | open |
+
+Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits and guild contributions trust each client; a game server (D3) closes that.
