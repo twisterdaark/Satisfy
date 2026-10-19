@@ -67,11 +67,20 @@ test('inbox: only the owner reads and deletes; senders create write-once message
   assert.equal(msg.t['.validate'], 'newData.val() === now');
   assert.equal(msg.$other['.validate'], false);
   assert.equal(msg.payload.$other['.validate'], false);
-  const types = /\^party\\\.\((.*)\)\$/.exec(msg.type['.validate'])[1].split('|');
+  // "party\.(a|b)|duel\.(c|d)" -> ['party.a', 'party.b', 'duel.c', 'duel.d']
+  const expand = (src) => [...src.matchAll(/(\w+)\\\.\(([^)]*)\)/g)].flatMap((m) => m[2].split('|').map((x) => m[1] + '.' + x));
+  const types = expand(/matches\(\/(.*)\/\)/.exec(msg.type['.validate'])[1]);
   const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
-  const sent = /DIRECTED = \/\^party\\\.\((.*)\)\$\//.exec(fb)[1].split('|');
-  assert.deepEqual(types, sent, 'rules accept exactly the party messages the transport sends');
-  assert.deepEqual(types, ['invite', 'accept', 'decline', 'kick']);
+  const sent = expand(/DIRECTED = \/(.*)\/;/.exec(fb)[1]);
+  assert.deepEqual(types, sent, 'rules accept exactly the messages the transport sends');
+  assert.deepEqual(types.filter((x) => x.startsWith('party.')), ['party.invite', 'party.accept', 'party.decline', 'party.kick']);
+  const { duel: DU } = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/duel.js');
+  assert.deepEqual(types.filter((x) => x.startsWith('duel.')), [...DU.TYPES], 'every duel message can travel');
+  const fake = fs.readFileSync(path.join(ROOT, 'tests/harness/fake-firebase.js'), 'utf8');
+  assert.deepEqual(expand(/if \(!\/(.*)\/\.test\(v\.type\)\)/.exec(fake)[1]), types, 'the fake accepts the same types');
+  for (const f of ['party', 'duel']) assert.match(msg.payload[f]['.validate'], /length <= 40/);
+  assert.match(msg.payload['.validate'], /beginsWith\('party\.'\)/);
+  assert.match(msg.payload['.validate'], /beginsWith\('duel\.'\)/);
 });
 
 // review fix (#12, #51): the open world spans rows -NR..WMH-1, so the north is written at negative y

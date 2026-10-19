@@ -67,7 +67,16 @@
     var mine = D.ref(db, base + '/' + o.uid), list = D.ref(db, base);
     var inbox = D.ref(db, 'inbox/' + o.uid);
     var handler = null, offs = [], lastSeq = {}, closed = false, offset = 0;
-    var DIRECTED = /^party\.(invite|accept|decline|kick)$/;
+    var DIRECTED = /^(party\.(invite|accept|decline|kick)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end))$/;
+    // exactly the fields the inbox rules accept: party messages {to, party}, duel messages {to, duel, k?, n?}
+    function directedPayload(type, p) {
+      var o = { to: p.to };
+      if (type.indexOf('party.') === 0) { o.party = String(p.party || ''); return o; }
+      o.duel = String(p.duel || '');
+      if (typeof p.k === 'number' && p.k >= 0 && p.k <= 999) o.k = Math.round(p.k);
+      if (typeof p.n === 'number' && p.n >= 0 && p.n <= 100000) o.n = Math.round(p.n);
+      return o;
+    }
     function deliver(env) { if (handler && env && !closed) handler(env); }
     // Session ids are chosen by the writer and readable by everyone, so a remote session is known by
     // uid + sid: the uid is the node key (or the inbox `from`), which the rules verify. Another account
@@ -124,7 +133,7 @@
         } else if (DIRECTED.test(env.type) && env.payload && typeof env.payload.to === 'string') {
           D.push(D.ref(db, 'inbox/' + env.payload.to), {
             from: o.uid, sid: env.sessionId, seq: env.seq, type: env.type,
-            payload: { to: env.payload.to, party: String(env.payload.party || '') }, t: D.serverTimestamp(),
+            payload: directedPayload(env.type, env.payload), t: D.serverTimestamp(),
           }).catch(fail);
         }
       },
