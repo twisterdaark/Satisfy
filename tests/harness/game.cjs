@@ -77,6 +77,12 @@ function baselineHtml() {
  * @param {string} [opts.html] path to index.html (defaults to the working tree)
  * @param {Record<string,string>} [opts.storage] localStorage to seed before the game boots
  */
+let blank = null;
+function blankUrl() {
+  if (!blank) { blank = path.join(os.tmpdir(), 'satisfy-blank.html'); fs.writeFileSync(blank, '<!doctype html><title>seed</title>'); }
+  return pathToFileURL(blank).href;
+}
+
 async function openGame(opts = {}) {
   const html = opts.html || CURRENT_HTML;
   const ctx = await (await browser()).newContext();
@@ -98,10 +104,12 @@ async function openGame(opts = {}) {
     errors.push('console: ' + m.text());
   });
   const url = pathToFileURL(html).href;
-  await page.goto(url);
   const storage = { satisfy_lang: 'en', ...(opts.storage || {}) };
+  // Seed localStorage from an empty file:// page first (all file: URLs share one storage origin),
+  // then load the game once. This used to be goto(game) + seed + reload: two full boots.
+  await page.goto(blankUrl());
   await page.evaluate((st) => { localStorage.clear(); for (const k in st) if (st[k] != null) localStorage.setItem(k, st[k]); }, storage);
-  await page.reload();
+  await page.goto(url);
   await step(page, 2);
   const g = {
     page, ctx, errors, external, html,
