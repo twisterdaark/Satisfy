@@ -92,7 +92,7 @@
       var o = { to: p.to };
       if (type.indexOf('party.') === 0) {
         o.party = String(p.party || '');
-        if (type === 'party.ping') { o.k = Math.max(0, Math.min(1000000000, Math.round(+p.k || 0))); o.n = Math.max(-2048, Math.min(1000000000, Math.round(+p.n || 0))); }
+        if (type === 'party.ping') { o.k = Math.max(0, Math.min(1000000000, Math.round(+p.k || 0))); o.n = Math.max(-4096, Math.min(1000000000, Math.round(+p.n || 0))); }
         if (type === 'party.kick' && p.k === 1) o.k = 1; // a kick by the leader, not the leader leaving (SAT-ONLINE-037)
         return o;
       }

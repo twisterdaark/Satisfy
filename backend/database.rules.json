@@ -123,7 +123,7 @@
               ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 16384"
             },
             "y": {
-              ".validate": "newData.isNumber() && newData.val() >= -2048 && newData.val() < 4096"
+              ".validate": "newData.isNumber() && newData.val() >= -4096 && newData.val() < 8192"
             },
             "dir": {
               ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3"
@@ -213,7 +213,7 @@
               ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
             },
             "n": {
-              ".validate": "newData.isNumber() && newData.val() >= -2048 && newData.val() <= 1000000000"
+              ".validate": "newData.isNumber() && newData.val() >= -4096 && newData.val() <= 1000000000"
             },
             "raid": {
               ".validate": "newData.isString() && newData.val().length <= 64"

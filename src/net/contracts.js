@@ -31,8 +31,8 @@
   var PROTOCOL_VERSION = 1;
   var WORLD_ID = 'satisfy';
   // posX/posY: pixel bounds the database accepts for x/y (backend/database.rules.json). They are
-  // headroom over the map (724 x 144 tiles = 11584 x 2304 px today) so a wider map needs no redeploy.
-  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 4096, shard: 999, posX: 16384, posY: 4096, posYMin: -2048 });
+  // headroom over the map (724 tiles wide, rows -172..295 after the map doubled north and south, owner 2026-10-19).
+  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 4096, shard: 999, posX: 16384, posY: 8192, posYMin: -4096 });
   var ANIMS = ['idle', 'walk', 'attack', 'dodge', 'dead'];
   // PlayerPublic.em (SAT-ONLINE-022, doc §35 U061): an emote from a fixed list, never free text
   var EMOTES = ['wave', 'dance', 'point', 'cheer'];

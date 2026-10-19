@@ -117,7 +117,7 @@
         case 'party.ping': {
           if (!id || pl.party !== id || !api.members().some(function (m) { return !m.self && m.uid === from.uid; })) return;
           var px = Math.round(+pl.k), py = Math.round(+pl.n), last = pingIn.get(from.uid);
-          if (!(px >= 0 && py >= -2048 && px < 16384 && py < 4096)) return; // north rows are y < 0
+          if (!(px >= 0 && py >= -4096 && px < 16384 && py < 8192)) return; // north rows are y < 0
           if (last != null && now() - last < PING_MS) return;
           pingIn.set(from.uid, now());
           emit({ type: 'ping', uid: from.uid, handle: from.handle, x: px, y: py, self: false });
@@ -197,7 +197,7 @@
         if (!id || !to.length) return 'noParty';
         if (now() - pingOut < PING_MS) return 'tooFast';
         pingOut = now();
-        x = Math.max(0, Math.round(x)); y = Math.max(-2048, Math.round(y));
+        x = Math.max(0, Math.round(x)); y = Math.max(-4096, Math.round(y));
         to.forEach(function (m) { P.send('party.ping', { to: m.uid, party: id, k: x, n: y }); });
         emit({ type: 'ping', uid: self, handle: null, x: x, y: y, self: true });
         return 'sent';
