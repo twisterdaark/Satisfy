@@ -243,8 +243,8 @@ body.touch #keys .key{cursor:pointer}
 #updLog{left:50%;top:50%;transform:translate(-50%,-50%);background:var(--sys2);width:calc(var(--u)*56);max-width:92%;max-height:80%;display:flex;flex-direction:column;padding:calc(var(--u)*1.4);z-index:60}#updLog .x{position:absolute;top:calc(var(--u)*.6);inset-inline-end:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}#updLogL{overflow-y:auto;min-height:0;flex:1 1 auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);padding-inline-end:calc(var(--u)*.6);font-size:calc(var(--u)*1.4)}#updLogL .ul{margin-top:calc(var(--u)*.8)}#updLogL .ul b{color:#bfe8ff}#updLogL .ul.new b{color:#ffe7a8}#updLogL ul{margin:calc(var(--u)*.3) 0 0;padding-inline-start:calc(var(--u)*2)}#updLogL li{margin:calc(var(--u)*.25) 0}
 /* HUD grips (owner 2026-10-19: the old ⠿ and – squares looked odd): one small tab on top of each box, in the window's navy
    and cyan, with a drawn dot grip to drag and a drawn bar to fold; folded boxes become a tab with a + and the box's name */
-.ggrip{position:absolute;z-index:40;pointer-events:auto;display:flex;align-items:stretch;height:calc(var(--u)*1.35);opacity:.5;transition:opacity .15s,box-shadow .15s;background:linear-gradient(180deg,rgba(30,72,130,.95),rgba(8,22,48,.95));border:1px solid rgba(143,216,255,.6);border-bottom:0;border-start-start-radius:calc(var(--u)*.45);border-start-end-radius:calc(var(--u)*.45);box-shadow:0 -1px calc(var(--u)*.5) rgba(90,190,255,.25)}
-body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.ggrip:hover,.ggrip.col,body.gdrag .ggrip{opacity:1;box-shadow:0 0 calc(var(--u)*.7) rgba(143,216,255,.6)}.ggrip[hidden]{display:none}
+.ggrip{position:absolute;z-index:40;pointer-events:auto;display:flex;align-items:stretch;height:calc(var(--u)*1.35);opacity:0;transition:opacity .2s .3s,box-shadow .15s;background:linear-gradient(180deg,rgba(30,72,130,.95),rgba(8,22,48,.95));border:1px solid rgba(143,216,255,.6);border-bottom:0;border-start-start-radius:calc(var(--u)*.45);border-start-end-radius:calc(var(--u)*.45);box-shadow:0 -1px calc(var(--u)*.5) rgba(90,190,255,.25)}
+body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.ggrip.hov,.ggrip.col,body.gdrag .ggrip{opacity:1;transition-delay:0s}.ggrip:hover,.ggrip.col:hover,body.gdrag .ggrip{box-shadow:0 0 calc(var(--u)*.7) rgba(143,216,255,.6)}.ggrip[hidden]{display:none}
 .ggrip .gm,.ggrip .gf{display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*.35);min-width:calc(var(--u)*1.7);padding:0 calc(var(--u)*.3);margin:0;color:#bfe8ff;background:none;border:0;border-radius:0;box-shadow:none;transform:none;font-size:calc(var(--u)*.85);line-height:1;white-space:nowrap}
 .ggrip .gm{cursor:grab;user-select:none;touch-action:none}.ggrip .gf{border-inline-start:1px solid rgba(143,216,255,.3)}
 .ggrip .gm:hover,.ggrip .gf:hover,.ggrip .gf:focus-visible{color:#fff;background:rgba(143,216,255,.2);box-shadow:none;transform:none}
@@ -3356,7 +3356,7 @@ function itemSkills(){const a=[];for(const i of eqAll()){const rc=rcById(i.id);i
 function useISlot(j){const k=itemSkills()[j];if(!k){SFX.deny();toast(t('iskNone'),'warn');return;}const d=SKD[k];
  if((P.cd[k]||0)>0||P.dash>0){SFX.deny();return;}if(P.mp<mpC(k)){toast(t('noMP'),'warn');SFX.deny();return;}
  if(k==='fly'&&(roomAt(P.x,P.y)||dunAt(P.x,P.y)||ARN||TWR)){toast(t('flyNo'),'warn');SFX.deny();return;}
- P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k);SKC={k,t:gTime};skUse(k);const el=$('isk'+j);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}SKF[k]();num(P.x,P.y-34,t('sk_'+k),d.col,false);hudDirty=true;}
+ P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k);SKC={k,t:gTime};skUse(k);const el=$('isk'+j);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}SKF[k]();numP(-34,t('sk_'+k),d.col,false);hudDirty=true;}
 Object.assign(SKF,{
  // Ideal Dagger: "Shoots a blade-like wind in front of you"; "Increases evasion rate by 30% and doubles agility for 1 minute"
  wblast:()=>{const v=fdir();P.acd=0;shoot('wave',v[0],v[1],1.8,{pierce:1,range:.7});SFX.swing();vfx('slash',P.x+v[0]*10,P.y-7+v[1]*10,{angle:Math.atan2(v[1],v[0]),rarity:3});},
@@ -4794,12 +4794,17 @@ function guiGrip(id){let b=$('g_'+id);if(b)return b;b=document.createElement('di
  const gm=b.querySelector('.gm');gm.draggable=false;gm.addEventListener('dragstart',e=>e.preventDefault());
  // the grip keeps the pointer while you drag (pointer capture), so the box follows the mouse over buttons, the map and
  // the game; a cancelled drag (the browser took the pointer) still saves where the box was left (Twister 2026-10-19)
- gm.addEventListener('pointerdown',e=>{if(e.button)return;e.preventDefault();e.stopPropagation();try{gm.setPointerCapture(e.pointerId);}catch(_){}const el=$(id),hud=$('hud'),hr=hud.getBoundingClientRect(),r=el.getBoundingClientRect();guiDrag={id,dx:e.clientX-r.left,dy:e.clientY-r.top,hr,b,gx:e.clientX,gy:e.clientY};
-  GUI[id]=GUI[id]||{};GUI[id].x=(r.left-hr.left)/hr.width;GUI[id].y=(r.top-hr.top)/hr.height;guiPlace(id);document.body.classList.add('gdrag');});
+ gm.addEventListener('pointerdown',e=>{if(e.button)return;e.preventDefault();e.stopPropagation();try{gm.setPointerCapture(e.pointerId);}catch(_){}const el=$(id),hud=$('hud'),hr=hud.getBoundingClientRect(),g=GUI[id]=GUI[id]||{},col=!!g.c,r=col?b.getBoundingClientRect():el.getBoundingClientRect();guiDrag={id,dx:e.clientX-r.left,dy:e.clientY-r.top,hr,b,col,gx:e.clientX,gy:e.clientY};
+  // a folded box is hidden (its rect is 0,0): its tab is what moves, and g.y keeps the box's top, just under the tab
+  if(col){g.x=(r.left-hr.left)/hr.width;g.y=(r.bottom-hr.top)/hr.height;}else{g.x=(r.left-hr.left)/hr.width;g.y=(r.top-hr.top)/hr.height;guiPlace(id);}document.body.classList.add('gdrag');});
  gm.addEventListener('pointercancel',guiEnd);gm.addEventListener('lostpointercapture',guiEnd);
  return b;}
-function guiMove(e){const d=guiDrag;if(!d)return;e.preventDefault();const g=GUI[d.id];g.x=(e.clientX-d.dx-d.hr.left)/d.hr.width;g.y=(e.clientY-d.dy-d.hr.top)/d.hr.height;guiPlace(d.id);
- const el=$(d.id),r=el.getBoundingClientRect();d.b.style.left=Math.max(0,r.left-d.hr.left)+'px';d.b.style.top=Math.max(0,r.top-d.hr.top-d.b.offsetHeight)+'px';}
+function guiMove(e){const d=guiDrag;if(!d){guiHover(e);return;}e.preventDefault();const g=GUI[d.id],W=d.hr.width,H=d.hr.height,bh=d.b.offsetHeight;
+ if(d.col){const x=Math.max(0,Math.min(W-d.b.offsetWidth,e.clientX-d.dx-d.hr.left)),y=Math.max(0,Math.min(H-bh,e.clientY-d.dy-d.hr.top));g.x=x/W;g.y=(y+bh)/H;d.b.style.left=x+'px';d.b.style.top=y+'px';return;}
+ g.x=(e.clientX-d.dx-d.hr.left)/W;g.y=(e.clientY-d.dy-d.hr.top)/H;guiPlace(d.id);
+ const el=$(d.id),r=el.getBoundingClientRect();d.b.style.left=Math.max(0,r.left-d.hr.left)+'px';d.b.style.top=Math.max(0,r.top-d.hr.top-bh)+'px';}
+// the grip and fold buttons show only while the mouse is over their box or the tab (owner 2026-10-19); a folded tab stays
+let guiHv=0;function guiHover(e){const t=performance.now();if(t-guiHv<60)return;guiHv=t;for(const id of GUI_IDS){const b=$('g_'+id),el=$(id);if(!b||b.hidden||!el)continue;const r=el.getBoundingClientRect(),q=b.getBoundingClientRect(),inR=(o,p)=>e.clientX>=o.left-p&&e.clientX<=o.right+p&&e.clientY>=o.top-p&&e.clientY<=o.bottom+p;b.classList.toggle('hov',inR(q,4)||r.width>0&&inR(r,0));}}
 function guiEnd(){if(!guiDrag)return;guiDrag=null;document.body.classList.remove('gdrag');guiSave();guiTick(true);}
 addEventListener('pointermove',guiMove);addEventListener('pointerup',guiEnd);addEventListener('beforeunload',guiSave);
 let guiT=0;
@@ -4807,7 +4812,7 @@ function guiTick(now){if(TOUCH)return;if(!now&&(guiT-=1)>0)return;guiT=15;const 
  for(const id of GUI_IDS){const el=$(id);if(!el)continue;const g=GUI[id]||{},b=guiGrip(id);el.classList.toggle('gcol',!!g.c);if(g.x!=null)guiPlace(id);
   const show=!el.hidden&&(g.c||el.offsetParent!==null)&&getComputedStyle(el).opacity!=='0';b.hidden=!show;if(!show)continue;
   b.classList.toggle('col',!!g.c);{const f=b.querySelector('.gf'),h=g.c?GICO.max+'<span>'+esc(t('gui_'+id))+'</span>':GICO.min;if(f.dataset.h!==h){f.dataset.h=h;f.innerHTML=h;}f.title=t(g.c?'guiOpen':'guiFold');b.querySelector('.gm').title=t('guiMove');}
-  if(g.c){const x=g.x!=null?g.x*hr.width:el.getBoundingClientRect().left-hr.left,y=g.y!=null?g.y*hr.height:el.getBoundingClientRect().top-hr.top;b.style.left=Math.max(0,Math.min(hr.width-90,x))+'px';b.style.top=Math.max(0,Math.min(hr.height-20,y))+'px';}
+  if(g.c){if(guiDrag&&guiDrag.id===id)continue;const x=g.x!=null?g.x*hr.width:el.getBoundingClientRect().left-hr.left,y=(g.y!=null?g.y*hr.height:el.getBoundingClientRect().top-hr.top)-b.offsetHeight;b.style.left=Math.max(0,Math.min(hr.width-b.offsetWidth,x))+'px';b.style.top=Math.max(0,Math.min(hr.height-b.offsetHeight,y))+'px';}
   else{const r=el.getBoundingClientRect();b.style.left=Math.max(0,r.left-hr.left)+'px';b.style.top=Math.max(0,r.top-hr.top-b.offsetHeight)+'px';}}}
 function guiReset(){GUI={};guiSave();save(true);location.reload();}
 Object.assign(STR.ar,{guiMove:'اسحب عشان تحرّك',guiFold:'صغّر',guiOpen:'افتح',guiReset:'رجّع الواجهة لوضعها الأصلي',gui_stats:'الحالة',gui_quest:'الكويستات',gui_mini:'الخريطة',gui_partyW:'الفريق',gui_chatW:'الشات',gui_skillbar:'السكيلات',gui_keys:'الأزرار',gui_evbar:'الحدث',gui_boss:'الزعيم'});
