@@ -48,8 +48,9 @@
     // Muller's trial done (SAT-MULLER-001)
     'mtr',
     // duel record (SAT-ONLINE-006): {w, l}; party-raid encounters already paid (SAT-ONLINE-009);
-    // outlaw until (wall-clock ms) after killing a player in open PvP (SAT-ONLINE-038), kept across a reload
-    'duels', 'raidDone', 'olT',
+    // outlaw until (wall-clock ms) after killing a player in open PvP (SAT-ONLINE-038), kept across a reload;
+    // the online guild's id (SAT-ONLINE-046): the guild itself lives in the database
+    'duels', 'raidDone', 'olT', 'gon',
     // recipes learned and recipe use counts (main rcLearn)
     'rcK', 'rcN',
     // map cells seen (fog of war, Nitro's feedback): base64 bitset

@@ -5,6 +5,23 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19r', ver: '0.41', d: '2026-10-19',
+      ar: ['أونلاين: خزنة للجيلد من لوحة الجيلد: أي عضو يحط فيها حاجات من شنطته، والقائد والضباط ياخدوا منها، وكل عضو ياخد اللي حطه، والحاجة متتاخدش مرتين'],
+      en: ['Online: a guild vault in the guild panel: any member puts things from the bag in, the master and officers take them out, everyone can take back their own, and nothing is taken twice'] },
+    { v: '2026-10-19q', ver: '0.40', d: '2026-10-19',
+      ar: ['أونلاين: شات للجيلد: تاب "الجيلد" في الشات، أو اكتب /g قبل الرسالة، وأعضاء الجيلد بس اللي بيشوفوها حتى لو بعاد عن بعض'],
+      en: ['Online: guild chat: the "Guild" tab in the chat, or /g before a line; only your guild members read it, wherever they are'] },
+    { v: '2026-10-19o', ver: '0.38', d: '2026-10-19',
+      ar: ['أونلاين: الجيلد بقى واحد عند الكل: لما تأسس جيلد وإنت أونلاين، كل الأعضاء واللاعبين بيشوفوه',
+        'القائد والضباط بيدعوا من كارت اللاعب (⋯ أو T) بزرار "دعوة للجيلد"، واللي اتدعى بيوافق من رسالة صغيرة دلوقتي أو بعدين',
+        'القائد بيخلي أي عضو ضابط أو يرجعه عضو، والقائد والضباط بيشيلوا الأعضاء، واللي اتشال أو الجيلد اتفك بيوصله إشعار',
+        'اسم الجيلد بيظهر تحت اسم اللاعب عند الكل، وفي كارت اللاعب',
+        'لوحة الجيلد فيها قايمة الأعضاء: الرتبة، مين أونلاين، ومساهمة كل واحد، وخبرة الجيلد هي مجموع مساهمات الأعضاء'],
+      en: ['Online: a guild is the same for everyone: found one while online and every member and every player sees it',
+        'The master and officers invite from the player card (⋯ or T) with "Guild invite"; the invited player joins from a small prompt, now or later',
+        'The master makes a member an officer or a member again; the master and officers remove members; anyone removed, or in a disbanded guild, is told',
+        "The guild's name shows under a player's name for everyone, and on the player card",
+        "The guild panel lists the members: rank, who is online and what each gave; the guild's experience is what its members gave"] },
     { v: '2026-10-19n', ver: '0.37', d: '2026-10-19',
       ar: ['أونلاين: بتسمع أصوات اللاعبين اللي جنبك وهم بيضربوا ويتفادوا ويتعوروا ويلفلوا، وكل ما يبعدوا الصوت بيوطى، ومن بعيد مبتسمعش حاجة'],
       en: ['Online: you hear the players near you swing, dodge, get hurt and level up, softer the farther they are, and nothing from far away'] },

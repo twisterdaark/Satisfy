@@ -62,7 +62,7 @@ for (const mode of ['local', 'online']) {
       assert.equal(await a.eval(() => Satisfy.local.net().duel.phase), 'idle', 'K did not challenge');
       await a.page.keyboard.press('Enter');
       await settle(a, b);
-      await until(b, () => document.querySelectorAll('#chatL div').length === 1);
+      await until(b, () => document.querySelectorAll('#chatL div:not(.sys)').length === 1);
       assert.deepEqual(await lines(b), ['Grid: pkei hi <b>bold</b> 👋']);
       assert.equal(await b.eval(() => document.querySelectorAll('#chatL b').length), 1, 'the markup arrived as text, not as elements');
       assert.deepEqual(await lines(a), ['Grid: pkei hi <b>bold</b> 👋']);
@@ -78,7 +78,7 @@ for (const mode of ['local', 'online']) {
       await b.page.keyboard.type('مرحبا');
       await b.page.keyboard.press('Enter');
       await settle(a, b);
-      await until(a, () => document.querySelectorAll('#chatL div').length === 2);
+      await until(a, () => document.querySelectorAll('#chatL div:not(.sys)').length === 2);
       assert.deepEqual(await lines(a), ['Grid: pkei hi <b>bold</b> 👋', 'Faker: مرحبا']);
       if (mode === 'online') {
         const types = await a.eval(() => window.__fakeRTDB.log.filter((l) => l.op === 'push').map((l) => l.path.split('/')[0]));
