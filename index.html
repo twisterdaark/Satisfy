@@ -658,9 +658,10 @@ muted=sfxV<=0;musicOn=musV>0;
 function setVol(k,v){v=Math.max(0,Math.min(100,Math.round(+v)||0));if(k==='sfx'){sfxV=v;muted=v<=0;if(sfxG)sfxG.gain.value=v/100;}else{musV=v;musicOn=v>0;if(musicG)musicG.gain.value=v/100;}try{localStorage.setItem('satisfy_'+k+'v',String(v));}catch(e){}volUI();}
 function volUI(){for(const k of ['sfx','mus']){const r=document.getElementById('vol_'+k),o=document.getElementById('volv_'+k),v=k==='sfx'?sfxV:musV;if(r){r.value=v;r.style.setProperty('--p',v+'%');}if(o)o.textContent=v?v+'%':t('volOff');}}
 function audio(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=.5;master.connect(ac.destination);sfxG=ac.createGain();sfxG.gain.value=sfxV/100;sfxG.connect(master);}catch(e){return null;}}if(ac.state==='suspended')ac.resume();return ac;}
-function tone(f,d,type='square',v=.15,slide=0,delay=0){const a=audio();if(!a||muted)return;const t0=a.currentTime+delay,o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t0+d);g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.0008,t0+d);o.connect(g);g.connect(sfxG);o.start(t0);o.stop(t0+d+.03);}
+let SFXV=1; // SAT-ONLINE-047: the volume of a sound another player makes, by distance (1 for your own)
+function tone(f,d,type='square',v=.15,slide=0,delay=0){const a=audio();if(!a||muted)return;v*=SFXV;const t0=a.currentTime+delay,o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t0+d);g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.0008,t0+d);o.connect(g);g.connect(sfxG);o.start(t0);o.stop(t0+d+.03);}
 let nbuf=null;
-function noise(d,v=.2,freq=1000,delay=0,q=1){const a=audio();if(!a||muted)return;if(!nbuf){nbuf=a.createBuffer(1,a.sampleRate,a.sampleRate);const c=nbuf.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=Math.random()*2-1;}const t0=a.currentTime+delay,s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=nbuf;f.type='bandpass';f.frequency.value=freq;f.Q.value=q;g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.0008,t0+d);s.connect(f);f.connect(g);g.connect(sfxG);s.start(t0,Math.random()*.5);s.stop(t0+d+.03);}
+function noise(d,v=.2,freq=1000,delay=0,q=1){const a=audio();if(!a||muted)return;v*=SFXV;if(!nbuf){nbuf=a.createBuffer(1,a.sampleRate,a.sampleRate);const c=nbuf.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=Math.random()*2-1;}const t0=a.currentTime+delay,s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=nbuf;f.type='bandpass';f.frequency.value=freq;f.Q.value=q;g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.0008,t0+d);s.connect(f);f.connect(g);g.connect(sfxG);s.start(t0,Math.random()*.5);s.stop(t0+d+.03);}
 const SFX={
  hover:()=>tone(1200,.03,'square',.025),click:()=>{tone(620,.05,'square',.06);tone(930,.07,'square',.05,0,.04);},
  open:()=>tone(420,.09,'sine',.09,380),close:()=>tone(760,.08,'sine',.07,-380),deny:()=>tone(130,.12,'square',.07),
@@ -4291,6 +4292,11 @@ function fxGrab(f0,p0,d0){for(const o of fx.slice(f0)){if(!o||o.home||o.img)cont
 function meRun(fn,self,args){if(FXME||!NET||!P||mode!=='play')return fn.apply(self,args);const st=window.setTimeout,f0=fx.length,p0=proj.length,d0=P.dash;let ok=false;
  FXME=1;window.setTimeout=function(f,ms,...a){return st(typeof f==='function'?()=>meRun(f,null,a):f,ms);};
  try{const r=fn.apply(self,args);ok=true;return r;}finally{window.setTimeout=st;FXME=0;if(ok&&P)try{fxGrab(f0,p0,d0);}catch(e){}}}
+// SAT-ONLINE-047 (owner via Claude-B, #13): the sounds of your own actions (swings, hits, dodges, being hurt, slams,
+// level-ups) ride along with their effects (meRun/asMe record them) and play for the players near you, softer with distance
+const SFXNET=['swing','hit','crit','hurt','dodge','chop','mine','clang','miss','slam','level','legendary'],SFXR=360;
+for(const k of SFXNET){const f=SFX[k];SFX[k]=function(...a){if(FXME&&NET&&P&&mode!=='title')try{fxR(['s',k,typeof a[0]==='number'?Math.round(a[0]*100)/100:0]);}catch(e){}return f.apply(this,a);};}
+window.__GS={heard:[]}; // test hook: the other players' sounds played here
 const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(tryAttack);dodge=meWrap(dodge);useSlot=meWrap(useSlot);useISlot=meWrap(useISlot);
 // presence field: the events of the last 0.7 s, oldest first, within FXMAX characters (each one goes out in about 3 updates)
 function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),tag=JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0));if(!FXOUT.length)return tag?'['+tag+']':null;
@@ -4311,7 +4317,8 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
  else if(ty==='j'&&['arrow','magic','fire','wave'].includes(ev[3]))proj.push({kind:ev[3],x:x+n(ev[4]),y:y+n(ev[5]),vx:n(ev[6]),vy:n(ev[7]),t:Math.min(2,n(ev[8])/100),ghost:1,hit:new Set()});
  else if(ty==='w')s.sw={a:n(ev[3]),t:performance.now()};
  else if(ty==='d')s.du=performance.now()+Math.min(600,n(ev[3])*10);
- else if(ty==='n'&&typeof ev[3]==='string'){const c=/^#[0-9a-fA-F]{6}$/.test(ev[4])?ev[4]:'#ffffff';num(x,y+Math.max(-60,Math.min(0,n(ev[6]))),ev[3].slice(0,16),c,!!ev[5]);}}
+ else if(ty==='n'&&typeof ev[3]==='string'){const c=/^#[0-9a-fA-F]{6}$/.test(ev[4])?ev[4]:'#ffffff';num(x,y+Math.max(-60,Math.min(0,n(ev[6]))),ev[3].slice(0,16),c,!!ev[5]);}
+ else if(ty==='s'&&SFXNET.includes(ev[3])&&P){const d=Math.hypot(x-P.x,y-P.y);if(d<SFXR){SFXV=.1+.5*(1-d/SFXR);try{SFX[ev[3]](n(ev[4])||undefined);if(__GS.heard.length<40)__GS.heard.push(ev[3]);}finally{SFXV=1;}}}}
 // due replays, at where each player is drawn now; players off screen or out of sight just drop theirs
 function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
 function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)

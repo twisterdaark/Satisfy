@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19n', ver: '0.37', d: '2026-10-19',
+      ar: ['أونلاين: بتسمع أصوات اللاعبين اللي جنبك وهم بيضربوا ويتفادوا ويتعوروا ويلفلوا، وكل ما يبعدوا الصوت بيوطى، ومن بعيد مبتسمعش حاجة'],
+      en: ['Online: you hear the players near you swing, dodge, get hurt and level up, softer the farther they are, and nothing from far away'] },
     { v: '2026-10-19l', ver: '0.35', d: '2026-10-19',
       ar: ['أونلاين: تبادل بين اللاعبين: افتح كارت اللاعب اللي جنبك (⋯ أو T) واضغط تبادل',
         'كل واحد بيحط دهب وحاجات من الشنطة، وبعدين الاتنين يضغطوا موافق وبعدها تأكيد',
