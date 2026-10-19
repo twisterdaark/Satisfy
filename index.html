@@ -3097,11 +3097,23 @@ function fogSave(){let b='';for(let i=0;i<FOG.length;i++)b+=String.fromCharCode(
 function fogSee(tx,ty,r){let ch=false;const cx=Math.floor(tx/FOGC),cy=Math.floor((ty+NR)/FOGC);for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++){if(i*i+j*j>r*r+1)continue;const x=cx+i,y=cy+j;if(x<0||y<0||x>=FOGW||y>=FOGH)continue;if(!FOG[y*FOGW+x]){FOG[y*FOGW+x]=1;ch=true;}}return ch;}
 function fogSeen(tx,ty){if(!FOG)return true;const x=Math.floor(tx/FOGC),y=Math.floor((ty+NR)/FOGC);return x<0||y<0||x>=FOGW||y>=FOGH||!!FOG[y*FOGW+x];}
 function fogTick(dt){if(!S||!P||S.__demo)return;if(!FOG||FOG.sid!==S){fogLoad();FOG.sid=S;}if((fogT-=dt)>0)return;fogT=.5;const pp=outPos();if(fogSee(pp.x/TS,pp.y/TS,2))fogSave();}
-function fogDraw(g,X,Y,sc){const paper=!!(S.ev&&S.ev.pmap);g.save();g.fillStyle=paper?'rgba(74,52,24,.62)':'#0a1220';for(let y=0;y<FOGH;y++)for(let x=0;x<FOGW;x++){if(FOG[y*FOGW+x])continue;
+/* paper maps (Twister 2026-10-19): each inn sells the map of its own area only, and it is a traveller's sketch: the land
+   shows through an uneven haze, and places are drawn near where they are, not exactly, with some left out. What you
+   walked yourself stays exact. S.ev.pmap = {innId:1}; an old save's 1 becomes Winston's. */
+const PM_RX=60,PM_RY=40,pmH=(x,y)=>(((x*73856093)^(y*19349663))>>>0);
+function pmOwned(){const m=S.ev&&S.ev.pmap;if(m===1)S.ev.pmap={inn:1};return S.ev&&S.ev.pmap||{};}
+let PMR=null,PMRk='';
+function pmRegions(){const o=pmOwned(),k=Object.keys(o).join(',');if(PMR&&PMRk===k)return PMR;PMRk=k;PMR=[];
+ for(const id of Object.keys(o)){const n=npcs.find(n=>n.id===id);if(!n)continue;const w=wTile(n.x,n.y);PMR.push({x:w.x,y:w.y});}return PMR;}
+function pmIn(tx,ty){for(const r of pmRegions())if(Math.abs(tx-r.x)<=PM_RX&&Math.abs(ty-r.y)<=PM_RY)return true;return false;}
+// a place on the paper: moved up to 5 tiles, and about one in three left off the sketch
+function pmSpot(tx,ty,salt){const h=pmH(Math.round(tx)+salt*7,Math.round(ty));if(h%3===0)return null;return {x:tx+((h>>>4)%11)-5,y:ty+((h>>>9)%11)-5};}
+function fogDraw(g,X,Y,sc){const paper=pmRegions().length>0;g.save();for(let y=0;y<FOGH;y++)for(let x=0;x<FOGW;x++){if(FOG[y*FOGW+x])continue;
+  g.fillStyle=paper&&pmIn(x*FOGC+FOGC/2,y*FOGC-NR+FOGC/2)?`rgba(74,52,24,${(.5+(pmH(x,y)%40)/100).toFixed(2)})`:'#0a1220';
   g.fillRect(Math.floor(X(x*FOGC)),Math.floor(Y(y*FOGC-NR)),Math.ceil(FOGC*sc)+1,Math.ceil(FOGC*sc)+1);}g.restore();}
-const mapOpt=who=>S.ev&&S.ev.pmap?[]:[{l:t('oPMap'),pr:price(who,300),ic:'book',st:t('oPMapD'),poor:S.gold<price(who,300),f:()=>{const g=price(who,300);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;S.ev.pmap=1;SFX.coin();toast(t('pMapGot'),'good');hudDirty=true;save(true);dialog(who,['pMapT']);}}];
-Object.assign(STR.ar,{oPMap:'اشتري خريطة ورق',oPMapD:'فيها كل الأراضي، بس مش هتوريك الوحوش ولا الناس في الأماكن اللي ماروحتهاش',pMapGot:'الخريطة الورق معاك: M تفتحها',pMapT:'دي خريطة رسمها رحالة قديم. الأراضي مظبوطة، بس اللي ساكن فيها لازم تشوفه بعينك.'});
-Object.assign(STR.en,{oPMap:'Buy a paper map',oPMapD:"Shows all the lands, but no monsters or people where you haven't been",pMapGot:'You have the paper map: M opens it',pMapT:"An old traveller drew this one. The land is right; who lives there you'll have to see for yourself."});
+const mapOpt=who=>pmOwned()[who]?[]:[{l:t('oPMap'),pr:price(who,300),ic:'book',st:t('oPMapD'),poor:S.gold<price(who,300),f:()=>{const g=price(who,300);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;S.ev.pmap=Object.assign({},pmOwned(),{[who]:1});SFX.coin();toast(t('pMapGot'),'good');hudDirty=true;save(true);dialog(who,['pMapT']);}}];
+Object.assign(STR.ar,{oPMap:'اشتري خريطة ورق',oPMapD:'خريطة المنطقة دي بس، مرسومة بالإيد: الأماكن تقريبية ومش كلها موجودة',pMapGot:'الخريطة الورق معاك: M تفتحها',pMapT:'رحالة رسمها من دماغه للمنطقة اللي حوالين هنا. هتقرّبك من الأماكن، بس متعتمدش عليها: اللي تمشيه بنفسك هو اللي هيبان مظبوط.'});
+Object.assign(STR.en,{oPMap:'Buy a paper map',oPMapD:"This area only, drawn by hand: places are roughly placed and some are missing",pMapGot:'You have the paper map: M opens it',pMapT:"A traveller sketched the land around here from memory. It gets you close, but don't trust it fully: only what you walk yourself shows exactly."});
 function openMap(){SFX.open();mode='map';$('mapW').hidden=false;$('hint').hidden=true;const pp=outPos();MV.z=4;MV.cx=pp.x/TS;MV.cy=pp.y/TS;mapClamp($('mapC'));drawMap();}
 function closeMap(){SFX.close();$('mapW').hidden=true;mode='play';}
 // where a quest is done or turned in (world tiles), for the map
@@ -3132,14 +3144,15 @@ function drawMap(){const c=$('mapC'),dpr=Math.min(2,window.devicePixelRatio||1),
  allies.forEach(a=>{if(!a.dead)MM.marker(g,'ally',X(a.x/TS),Y(a.y/TS),u);});if(COMPO)MM.marker(g,'ally',X(COMPO.x/TS),Y(COMPO.y/TS),u);
  if(MEET&&COMPO)MM.label(g,t('meetMap',{n:t(MEET.id)}),X(COMPO.x/TS),Y(COMPO.y/TS)-12*u,{size:Math.round(11*dpr),color:'#9fe39a',font:F,band:'rgba(6,24,10,.82)'});
  invMark(g,x=>X(x/TS),y=>Y(y/TS),u,sc,Math.round(13*dpr),F);
- npcs.forEach(n=>{if(n.hidden)return;const w=wTile(n.x,n.y);if(!fogSeen(w.x,w.y))return;const x=X(w.x),y=Y(w.y);MM.marker(g,'npc',x,y,u*1.1);const mk=npcMark(n.id);if(mk)MM.label(g,mk[0],x,y-10*u,{size:Math.round(13*dpr),color:mk[1],weight:700,font:'Oswald, sans-serif'});
+ const PMK=[];npcs.forEach((n,i)=>{if(n.hidden)return;const w=wTile(n.x,n.y);if(!fogSeen(w.x,w.y)){if(pmIn(w.x,w.y)){const q=pmSpot(w.x,w.y,i);if(q)PMK.push(['npc',q.x,q.y]);}return;}const x=X(w.x),y=Y(w.y);MM.marker(g,'npc',x,y,u*1.1);const mk=npcMark(n.id);if(mk)MM.label(g,mk[0],x,y-10*u,{size:Math.round(13*dpr),color:mk[1],weight:700,font:'Oswald, sans-serif'});
   if(MV.z>=3)MM.label(g,t(n.id),x,y+10*u,{size:Math.round(10*dpr),color:'#e8f2ff',font:F,weight:500});});
- Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1).forEach(id=>{const p=qSpot(id);if(!p||!fogSeen(p.x,p.y)&&!(S.ev&&S.ev.pmap))return;const x=X(p.x),y=Y(p.y),col=p.ret?'#ffd23a':'#7ee0ff';
+ Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1).forEach(id=>{const p=qSpot(id);if(!p)return;if(!fogSeen(p.x,p.y)){if(pmIn(p.x,p.y)){const q=pmSpot(p.x,p.y,id.length);if(q)PMK.push([p.ret?'ret':'quest',q.x,q.y]);}return;}const x=X(p.x),y=Y(p.y),col=p.ret?'#ffd23a':'#7ee0ff';
   if(p.area){g.save();g.globalAlpha=.18;g.fillStyle=col;g.beginPath();g.arc(x,y,5*sc,0,7);g.fill();g.globalAlpha=.6;g.setLineDash([4*dpr,3*dpr]);g.strokeStyle=col;g.lineWidth=dpr;g.stroke();g.restore();}
   MM.marker(g,p.ret?'ret':'quest',x,y,u*1.1);MM.label(g,(p.ret?'? ':'')+qName(id),x,y-13*u,{size:Math.round(11*dpr),color:col,font:F,band:'rgba(8,16,40,.82)'});});
  // party members on the big map (SAT-ONLINE-026, owner feedback 17), however far: the party query keeps them in view
  if(NET&&PARTY&&PARTY.id())for(const r of NET.remotes())if(r.party===PARTY.id()&&!r.room&&r.mv===mapV()){const x=X(r.x/TS),y=Y(r.y/TS);MM.marker(g,'ally',x,y,u*1.4);MM.label(g,r.handle||'?',x,y-12*u,{size:Math.round(11*dpr),color:'#8dff9a',font:F,band:'rgba(8,40,16,.82)'});}
  if(FOG)fogDraw(g,X,Y,sc);
+ if(PMK.length){g.save();g.globalAlpha=.6;for(const [k,x,y] of PMK)MM.marker(g,k,X(x),Y(y),u);g.restore();}
  const pp=outPos();MM.player(g,X(pp.x/TS),Y(pp.y/TS),dirAng(P.dir),u*1.2,gTime);MM.label(g,t('mapYou'),X(pp.x/TS),Y(pp.y/TS)+14*u,{size:Math.round(11*dpr),color:'#ffffff',font:F,band:'rgba(120,20,16,.85)',edge:'rgba(255,160,150,.6)'});
  // frame and zoom readout
  const gr=g.createRadialGradient(c.width/2,c.height/2,c.height*.45,c.width/2,c.height/2,c.width*.75);gr.addColorStop(0,'rgba(6,14,32,0)');gr.addColorStop(1,'rgba(6,14,32,.5)');g.fillStyle=gr;g.fillRect(0,0,c.width,c.height);
@@ -3251,7 +3264,8 @@ function update(dt){
  // Second Wind (balanced body): below 35% health, recover 3% of max HP per second for 5 s; once a minute
  if(balanced()&&P.hp>0&&P.hp<mh*.35&&(S.swT||0)<=S.playT){S.swT=S.playT+60;P.sw=5;vfx('heal',P.x,P.y);toast(t('secondWind'),'good');SFX.notice();}
  if(P.sw>0){P.sw-=dt;P.hp=Math.min(mh,P.hp+mh*.03*dt);if(rand()<dt*6)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*14,vx:0,vy:-24,t:.5,c:'#7ae07a',fl:1});}
- P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));
+ // hunger only drops while you do something (Twister 2026-10-19): walking, riding, attacking, dodging or guarding
+ {const busy=Math.abs(P.x-(P.fqx??P.x))+Math.abs(P.y-(P.fqy??P.y))>.01||P.acd>0||P.dash>0||P.guard;P.fqx=P.x;P.fqy=P.y;if(busy)P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));}
  updateProj(dt);
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
