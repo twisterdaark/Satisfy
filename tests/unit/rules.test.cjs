@@ -10,7 +10,7 @@ const { net: N } = loadModules('src/net/contracts.js');
 const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')).rules;
 const node = rules.presence.$world.$shard.$uid;
 const firebaseJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'firebase.json'), 'utf8'));
-const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs']; // omitted when null/empty is allowed by the client
+const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'ol']; // omitted when null/empty is allowed by the client
 
 test('deny by default; presence readable only when signed in, writable only by its owner', () => {
   assert.equal(rules['.read'], false);
@@ -108,7 +108,12 @@ test('inbox: only the owner reads and deletes; senders create write-once message
   assert.deepEqual(types.filter((x) => x.startsWith('chat.')), [...CH.TYPES]);
   assert.match(msg.payload.text['.validate'], new RegExp('length <= ' + CH.C.MAX_LEN + '$'));
   assert.match(msg.payload['.validate'], /beginsWith\('chat\.'\) && newData\.hasChildren\(\['party', 'text'\]\)/);
-  for (const kind of ['party', 'duel', 'raid']) assert.match(msg.payload['.validate'], new RegExp("beginsWith\\('" + kind + "\\.'\\)[^|]*!newData\\.hasChild\\('text'\\)"), kind + ' messages carry no text');
+  // SAT-ONLINE-038: open PvP hits and kill reports, k (and n) only
+  const { pvp: PV } = loadModules('src/net/contracts.js', 'src/net/pvp.js');
+  assert.deepEqual(types.filter((x) => x.startsWith('pvp.')), [...PV.TYPES], 'every pvp message can travel');
+  assert.match(msg.payload['.validate'], /beginsWith\('pvp\.'\) && newData\.hasChild\('k'\) && !newData\.hasChild\('party'\) && !newData\.hasChild\('duel'\) && !newData\.hasChild\('raid'\) && !newData\.hasChild\('text'\)/);
+  assert.equal(node.ol['.validate'], 'newData.val() === 1', 'the outlaw mark is 1 or absent');
+  for (const kind of ['party', 'duel', 'raid', 'pvp']) assert.match(msg.payload['.validate'], new RegExp("beginsWith\\('" + kind + "\\.'\\)[^|]*!newData\\.hasChild\\('text'\\)"), kind + ' messages carry no text');
 });
 
 test('profiles and cloud saves: owner writes only; cloud saves are private; limits match Satisfy.cloud', () => {

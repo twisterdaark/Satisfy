@@ -84,7 +84,7 @@
     // Round trip (doc U015): how long the server takes to acknowledge a presence write, smoothed.
     var rtt = null, writes = 0, fails = 0;
     function acked(t0) { return function () { var ms = Date.now() - t0; rtt = rtt == null ? ms : Math.round(rtt * 0.8 + ms * 0.2); }; }
-    var DIRECTED = /^(party\.(invite|accept|decline|kick|ping)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say))$/;
+    var DIRECTED = /^(party\.(invite|accept|decline|kick|ping)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say)|pvp\.(hit|kill))$/;
     // exactly the fields the inbox rules accept: party {to, party}, duel {to, duel, k?, n?}, raid {to, raid, k?, n?},
     // chat {to, party, text}
     function directedPayload(type, p) {
@@ -96,6 +96,11 @@
         return o;
       }
       if (type.indexOf('chat.') === 0) { o.party = String(p.party || ''); o.text = String(p.text || ''); return o; }
+      if (type.indexOf('pvp.') === 0) { // SAT-ONLINE-038: only to, k and n
+        o.k = Math.max(0, Math.min(1000000000, Math.round(+p.k || 0)));
+        if (typeof p.n === 'number' && p.n >= 0 && p.n <= 1000000000) o.n = Math.round(p.n);
+        return o;
+      }
       if (type.indexOf('raid.') === 0) o.raid = String(p.raid || ''); else o.duel = String(p.duel || '');
       if (typeof p.k === 'number' && p.k >= 0 && p.k <= 1000000000) o.k = Math.round(p.k);
       if (typeof p.n === 'number' && p.n >= 0 && p.n <= 1000000000) o.n = Math.round(p.n);
@@ -121,6 +126,7 @@
       if (pp.em === undefined) pp.em = null;
       if (pp.role === undefined) pp.role = null;
       if (pp.rs === undefined) pp.rs = null;
+      if (pp.ol === undefined) pp.ol = null;
       if (typeof pp.t !== 'number') pp.t = 0;
       return { v: 1, type: 'presence.state', requestId: null, sessionId: pp.sid, seq: +v.seq || 0, tick: 0, payload: pp };
     }
