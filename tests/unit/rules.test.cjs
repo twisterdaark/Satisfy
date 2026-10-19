@@ -193,6 +193,13 @@ test('guilds: a founder makes one guild with a unique name; joining needs an inv
   assert.equal(inv.$gid.by['.validate'], 'newData.val() === auth.uid');
   for (const n of [g, m, inv.$gid]) assert.equal(n.$other['.validate'], false);
   assert.equal(node.gd['.validate'], "newData.isString() && newData.val().matches(/" + GU.GID_RE.source + "/)", 'presence gd: a guild id');
+  // SAT-ONLINE-050: the vault; taking writes guildVaultTaken once, so one player gets a thing
+  const gv = rules.guildVault.$gid, gt = rules.guildVaultTaken.$gid;
+  assert.equal(gv['.read'], "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()");
+  assert.match(gv.$vid['.write'], /!data\.exists\(\) && newData\.child\('by'\)\.val\(\) === auth\.uid/, 'a member puts things in as itself');
+  assert.match(gv.$vid['.write'], /=== 'o'\) \|\| data\.child\('by'\)\.val\(\) === auth\.uid\)/, 'the master and officers take out, a member its own');
+  assert.match(gt.$vid['.write'], /!data\.exists\(\) && newData\.child\('by'\)\.val\(\) === auth\.uid && root\.child\('guildVault'\)\.child\(\$gid\)\.child\(\$vid\)\.exists\(\)/, 'once per thing');
+  assert.equal(gv.$vid.it['.validate'], rules.tradeSides.$tid.$uid.it.$iid['.validate'].replace(/^\$iid\.matches\([^)]*\) && /, ''), 'an item as plain values, as in trades');
   // SAT-ONLINE-049: guild chat, members only
   const gc = rules.guildChat.$gid;
   assert.equal(gc['.read'], "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()");

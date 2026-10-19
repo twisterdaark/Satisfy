@@ -2835,7 +2835,7 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
  const info=t('gInfo',{g:gName(g.id),n:l,x:g.npc?'-':nx?`${g.xp}/${nx}`:t('gMax'),m:Object.keys(g.members).length,cap:l*25,c:me.c});
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
  dialog('guild',[info,perks],null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
-  ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD}]:[]),
+  ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
 function guildMOpts(){const o=[],back=()=>shopD('guildM','gm_hi');
  if(!S.guild)o.push({l:t('oMakeG',{g:GCOST,l:GLV}),ic:'book',poor:S.gold<GCOST||S.lv<GLV,f:()=>S.lv<GLV?dialog('guildM',[t('gNeedLv',{n:GLV})],back):S.gold<GCOST?dialog('guildM',[t('noGold')],back):openGName()});
@@ -4616,10 +4616,10 @@ $('trGold').addEventListener('change',e=>{if(TRADE){TRADE.setGold(e.target.value
    the master makes officers, the master and officers remove members, and a member's guild shows under its name for
    everyone. The guild is mirrored into WS.guilds, so its level (the members' contributions), perks, banners and the
    G panel work as they do offline. S.gon keeps the online guild's id across sessions; offline guilds are unchanged. */
-Object.assign(STR.ar,{chatGuild:'الجيلد',chatPhGuild:'شات الجيلد · Tab يغير · Enter يبعت · Esc يقفل',pcGuild:'دعوة للجيلد',gdYes:'انضم',gdInvFrom:'{n} بيدعوك لجيلد {g}',gdInvSent:'اتبعتت دعوة الجيلد لـ{n}',gdInvMem:'هو عضو في الجيلد بالفعل',gdFail:'محصلش، جرب تاني',gdBusy:'إنت في جيلد بالفعل',
+Object.assign(STR.ar,{gdVault:'الخزنة ({n})',gdVaultH:'خزنة الجيلد: {n}/{m}. أي عضو يحط فيها، والقائد والضباط ياخدوا منها، وكل عضو ياخد اللي حطه',gdPut:'حط حاجة في الخزنة',gdPutNone:'مفيش حاجة تنفع تتحط',gdPutDone:'حطيت {it} في الخزنة',gdTook:'خدت {it} من الخزنة',gdTakeQ:'تاخد {it}؟',gdVaultFull:'الخزنة مليانة',gdVaultEmpty:'الخزنة فاضية',chatGuild:'الجيلد',chatPhGuild:'شات الجيلد · Tab يغير · Enter يبعت · Esc يقفل',pcGuild:'دعوة للجيلد',gdYes:'انضم',gdInvFrom:'{n} بيدعوك لجيلد {g}',gdInvSent:'اتبعتت دعوة الجيلد لـ{n}',gdInvMem:'هو عضو في الجيلد بالفعل',gdFail:'محصلش، جرب تاني',gdBusy:'إنت في جيلد بالفعل',
  gdKicked:'اتشلت من جيلد {g}',gdDisb:'جيلد {g} اتفكت',gdGone:'إنت مبقتش في جيلد {g}',gdMembers:'الأعضاء ({n})',gdMemH:'الأعضاء: {n} · أونلاين: {o}',gdInvHint:'تدعو حد من كارت اللاعب (⋯ أو T)',
  gdRk_m:'القائد',gdRk_o:'ضابط',gdRk_r:'عضو',gdMkO:'خلي {n} ضابط',gdMkR:'رجّع {n} عضو',gdRkDone:'رتبة {n} اتغيرت',gdKick:'شيل {n} من النقابة',gdKickQ:'تشيل {n} من النقابة؟',gdKickDone:'{n} اتشال من النقابة',gdOn:'أونلاين',gdOff:'مش أونلاين'});
-Object.assign(STR.en,{chatGuild:'Guild',chatPhGuild:'Guild chat · Tab switches · Enter sends · Esc closes',pcGuild:'Guild invite',gdYes:'Join',gdInvFrom:'{n} invites you to the guild {g}',gdInvSent:'Guild invitation sent to {n}',gdInvMem:'They are in your guild already',gdFail:'That did not work, try again',gdBusy:'You are in a guild already',
+Object.assign(STR.en,{gdVault:'Vault ({n})',gdVaultH:'The guild vault: {n}/{m}. Any member puts things in; the master and officers take them out, and everyone can take back their own',gdPut:'Put something in',gdPutNone:'Nothing you can put in',gdPutDone:'You put {it} in the vault',gdTook:'You took {it} from the vault',gdTakeQ:'Take {it}?',gdVaultFull:'The vault is full',gdVaultEmpty:'The vault is empty',chatGuild:'Guild',chatPhGuild:'Guild chat · Tab switches · Enter sends · Esc closes',pcGuild:'Guild invite',gdYes:'Join',gdInvFrom:'{n} invites you to the guild {g}',gdInvSent:'Guild invitation sent to {n}',gdInvMem:'They are in your guild already',gdFail:'That did not work, try again',gdBusy:'You are in a guild already',
  gdKicked:'You were removed from {g}',gdDisb:'{g} was disbanded',gdGone:'You are no longer in {g}',gdMembers:'Members ({n})',gdMemH:'Members: {n} · online: {o}',gdInvHint:'Invite players from their card (⋯ or T)',
  gdRk_m:'Master',gdRk_o:'Officer',gdRk_r:'Member',gdMkO:'Make {n} an officer',gdMkR:'Make {n} a member again',gdRkDone:"{n}'s rank changed",gdKick:'Remove {n} from the guild',gdKickQ:'Remove {n} from the guild?',gdKickDone:'{n} was removed from the guild',gdOn:'online',gdOff:'offline'});
 // guild chat (SAT-ONLINE-049): the chat's guild channel (src/net/chat.js `guild`) and the feed of the guild you are in
@@ -4663,7 +4663,29 @@ function guildOf(r){if(!r.gd||!GUILD||!GDS)return null;const st=gdFor===S?GUILD.
  return m?e:null;}
 // the G panel's member list (online guilds): rank, online, contribution; the master and officers act from a member's line
 const GRK={m:0,o:1,r:2};
-window.__GG={state:()=>GUILD&&GUILD.state(),create:n=>createGuild(n),leave:()=>leaveGuild(),of:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);return r?guildOf(r):null;},rank:(u,rk)=>GUILD.setRank(u,rk),kick:u=>GUILD.kick(u),members:()=>guildMembersD(),contribute:n=>gContrib(n)}; // test hook
+// the guild vault (SAT-ONLINE-050): any member puts bag things in; the master and officers take anything out, everyone
+// their own; a thing taken out is one player's only (guildVaultTaken). An item travels as plain values, as in trades.
+function vaultKindOk(k,r){return !!(POT[k]||k==='bread'||(k==='arrows'&&ARROWG[r]!=null)||MATP[k]!==undefined);}
+const vaultName=e=>(e.it?tradeName(e.it):t(e.k))+(e.n>1?' ×'+e.n:'');
+function guildVaultD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const V=GUILD.vault(),ks=Object.keys(V).sort((a,b)=>V[b].t-V[a].t);
+ const o=ks.slice(0,24).map(k=>{const e=V[k],can=GUILD.canTake(k);return {l:vaultName(e)+' · '+e.byN,ic:e.k,poor:!can,f:()=>can?dialog('guild',[t('gdTakeQ',{it:vaultName(e)})],null,[{l:t('gYes'),f:()=>guildTake(k)},{l:t('gNo'),f:guildVaultD}]):guildVaultD()};});
+ dialog('guild',[t('gdVaultH',{n:ks.length,m:Satisfy.guild.C.VAULT_MAX}),ks.length?'':t('gdVaultEmpty')].filter(Boolean),null,[{l:t('gdPut'),f:guildPutD},...o,{l:t('oBack'),f:guildPanel}]);}
+function guildTake(k,quiet){const re=()=>{if(!quiet)guildVaultD();};gdBusy=1;GUILD.withdraw(k).then(e=>{gdBusy=0;let got=null;
+  if(e.it){const it=tradeItemIn(e.it);if(it){S.items.push(it);Satisfy.ids.ensure(S);got=inm(it);}}
+  else if(vaultKindOk(e.k,e.r)){slotIn({k:e.k,n:e.n,r:e.r});got=vaultName(e);}
+  if(got){SFX.coin();toast(t('gdTook',{it:got}),'good');}hudDirty=true;save(true);re();},()=>{gdBusy=0;toast(t('gdFail'),'warn');re();});}
+// what you can put in: bag items you don't wear (of a kind every client knows), and your stacks of materials, potions, bread
+function guildPutList(){const o=[];for(const b of tradeBag())o.push({iid:b.iid,k:b.it.id,n:1,r:b.it.r|0,it:b.json,name:inm(b.it)});
+ for(const k of ['hpot','mpot'])if(S[k]>0)o.push({k,n:S[k],r:0,name:t(k)+' ×'+S[k]});if(S.bread>0)o.push({k:'bread',n:S.bread,r:0,name:t('bread')+' ×'+S.bread});
+ for(const k in S.mats)if(S.mats[k]>0&&MATP[k]!==undefined)o.push({k,n:S.mats[k],r:0,name:t(k)+' ×'+S.mats[k]});return o;}
+function guildPutD(){const L=guildPutList();if(!L.length)return dialog('guild',['gdPutNone'],guildVaultD);
+ dialog('guild',['gdPut'],null,[...L.slice(0,24).map(x=>({l:x.name,ic:x.k,f:()=>guildPut(x)})),{l:t('oBack'),f:guildVaultD}]);}
+function guildPut(x,quiet){if(gdBusy)return;let back;const re=()=>{if(!quiet)guildVaultD();};
+ if(x.iid){const i=S.items.findIndex(q=>q.iid===x.iid);if(i<0)return guildPutD();const it=S.items.splice(i,1)[0];back=()=>S.items.push(it);}
+ else if(x.k==='bread'){S.bread-=x.n;back=()=>S.bread+=x.n;}else if(POT[x.k]){S[x.k]-=x.n;back=()=>S[x.k]+=x.n;}else{S.mats[x.k]-=x.n;back=()=>S.mats[x.k]+=x.n;}
+ hudDirty=true;gdBusy=1;GUILD.deposit({k:x.k,n:x.n,r:x.r,it:x.it}).then(()=>{gdBusy=0;toast(t('gdPutDone',{it:x.name}),'good');SFX.coin();save(true);re();},
+  e=>{gdBusy=0;back();hudDirty=true;toast(t(String(e&&e.message)==='full'?'gdVaultFull':'gdFail'),'warn');re();});}
+window.__GG={state:()=>GUILD&&GUILD.state(),create:n=>createGuild(n),leave:()=>leaveGuild(),of:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);return r?guildOf(r):null;},rank:(u,rk)=>GUILD.setRank(u,rk),kick:u=>GUILD.kick(u),members:()=>guildMembersD(),contribute:n=>gContrib(n),vault:()=>GUILD.vault(),put:k=>{const x=guildPutList().find(q=>q.k===k);if(x)guildPut(x,1);return !!x;},take:vid=>guildTake(vid,1),canTake:vid=>GUILD.canTake(vid)}; // test hook
 function guildMembersD(){const st=GUILD&&GUILD.state();if(!st||!st.gid)return guildPanel();
  const list=Object.keys(st.members).map(u=>Object.assign({u},st.members[u])).sort((a,b)=>GRK[a.rk]-GRK[b.rk]||(GUILD.online(b)?1:0)-(GUILD.online(a)?1:0)||b.c-a.c);
  const on=list.filter(m=>GUILD.online(m)).length,o=list.slice(0,30).map(m=>({l:(GUILD.online(m)?'● ':'○ ')+m.n+' · '+t('gdRk_'+m.rk)+' · '+m.c,f:()=>guildMemberD(m.u)}));

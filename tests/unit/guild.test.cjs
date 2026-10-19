@@ -132,3 +132,29 @@ test('old invitations expire; a guild full of members takes no more', async () =
   b2.start(null); await tick();
   assert.equal(b2.state().invites.length, 0);
 });
+
+test('vault (SAT-ONLINE-050): members put things in; the master and officers take anything out, a member its own; one player per thing', async () => {
+  const w = world([['uA', 'Grid'], ['uB', 'Faker'], ['uC', 'Ruby']]), { uA: a, uB: b, uC: c } = w.ps;
+  await a.g.found('Vaulters');
+  for (const p of [b, c]) { await a.g.invite(p.uid); await tick(); await p.g.accept('g_uA'); await tick(); }
+  await assert.rejects(G.create({ store: w.db.as('uX'), uid: 'uX', handle: () => 'X' }).deposit({ k: 'wood', n: 1, r: 0 }), /rank/, 'not a member');
+  const v1 = await b.g.deposit({ k: 'wood', n: 12, r: 0 }); await tick();
+  const v2 = await b.g.deposit({ k: 'isword', n: 1, r: 2, it: JSON.stringify({ id: 'isword', r: 2 }) }); await tick();
+  assert.deepEqual(Object.keys(a.g.vault()).sort(), [v1, v2].sort(), 'everyone in the guild sees the vault');
+  assert.equal(a.g.vault()[v1].byN, 'Faker');
+  assert.equal(c.g.canTake(v1), false, 'a member takes only its own');
+  assert.equal(b.g.canTake(v1), true);
+  await assert.rejects(c.g.withdraw(v1), /rank/);
+  // the master and B try for the same sword: one of them gets it
+  const r = await Promise.allSettled([a.g.withdraw(v2), b.g.withdraw(v2)]);
+  assert.equal(r.filter((x) => x.status === 'fulfilled').length, 1, 'one player gets it');
+  assert.equal(r.find((x) => x.status === 'fulfilled').value.it, JSON.stringify({ id: 'isword', r: 2 }));
+  await tick();
+  assert.deepEqual(Object.keys(c.g.vault()), [v1]);
+  // an officer takes anything
+  await a.g.setRank('uC', 'o'); await tick();
+  assert.equal(c.g.canTake(v1), true);
+  const e = await c.g.withdraw(v1); await tick();
+  assert.deepEqual([e.k, e.n], ['wood', 12]);
+  assert.deepEqual(a.g.vault(), {});
+});

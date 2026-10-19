@@ -11,6 +11,10 @@
  * may leave (the master disbands instead). The guild's experience is the sum of its members' contributions.
  * A member's `on` is renewed every BEAT_MS while it plays, so the member list shows who is online.
  *
+ * The vault (SAT-ONLINE-050): guildVault/{gid}/{vid} {k, n, r, it?, by, byN, t}: any member puts a thing in (an item as
+ * plain values, or a stack); the master and officers take anything out, a member takes back its own. Taking writes
+ * guildVaultTaken/{gid}/{vid} once in the same update, so two players can't both take one thing.
+ *
  * Not cheat-proof yet: contributions are each member's own number. A game server (D3) owns them later.
  *
  * Exposes `Satisfy.guild.create({ store, uid, handle, now?, serverNow? })` and the helpers `validName`, `nameKey`,
@@ -23,7 +27,7 @@
 (function (root) {
   'use strict';
 
-  var C = Object.freeze({ NAME_MIN: 2, NAME_MAX: 18, MAX_MEMBERS: 250, INV_MS: 7 * 24 * 3600 * 1000, BEAT_MS: 60000, ON_MS: 150000, C_MAX: 1e12, COLORS: ['#5aa0ff', '#4ab06a', '#d8a840', '#9a6ad8', '#e05a5a', '#3ac8c8', '#e88a3a', '#c8c8d0'] });
+  var C = Object.freeze({ NAME_MIN: 2, NAME_MAX: 18, MAX_MEMBERS: 250, VAULT_MAX: 60, VID_RE: /^v_[A-Za-z0-9_-]{1,80}$/, INV_MS: 7 * 24 * 3600 * 1000, BEAT_MS: 60000, ON_MS: 150000, C_MAX: 1e12, COLORS: ['#5aa0ff', '#4ab06a', '#d8a840', '#9a6ad8', '#e05a5a', '#3ac8c8', '#e88a3a', '#c8c8d0'] });
   var GID_RE = /^g_[A-Za-z0-9]{1,128}$/, RK = { m: 3, o: 2, r: 1 };
 
   // a guild name: trimmed, single spaces, NAME_MIN..NAME_MAX characters, none that a database key can't hold
@@ -42,7 +46,14 @@
     if (act === 'rank') return r === 3 && t > 0 && t < 3;
     if (act === 'disband') return r === 3;
     if (act === 'leave') return r > 0 && r < 3;
+    if (act === 'take') return r >= 2;
     return false;
+  }
+  function cleanEntry(v) {
+    if (!v || typeof v !== 'object' || typeof v.k !== 'string' || !/^[a-z0-9_]{1,24}$/.test(v.k) || typeof v.by !== 'string') return null;
+    var e = { k: v.k, n: Math.max(1, Math.min(99999, Math.floor(+v.n || 1))), r: Math.max(0, Math.min(9, Math.floor(+v.r || 0))), by: v.by, byN: typeof v.byN === 'string' ? v.byN.slice(0, 24) : '?', t: +v.t || 0 };
+    if (typeof v.it === 'string' && v.it.length <= 600) e.it = v.it;
+    return e;
   }
   function cleanMember(v) {
     if (!v || typeof v !== 'object' || !RK[v.rk]) return null;
@@ -57,7 +68,7 @@
   function create(o) {
     var store = o.store, self = o.uid, handle = o.handle || function () { return ''; };
     var now = o.now || function () { return Date.now(); }, serverNow = o.serverNow || function () { return Date.now(); };
-    var listeners = [], G = null, invites = {}, offInv = null, beatT = 0, cSent = -1, cMine = 0, joining = null;
+    var listeners = [], G = null, invites = {}, offInv = null, beatT = 0, cSent = -1, cMine = 0, joining = null, vseq = 0;
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function off(f) { try { if (f) f(); } catch (e) { /* ignore */ } }
     function me() { return G && G.members[self] || null; }
@@ -67,7 +78,7 @@
     // watch one guild: its node and its members; we are in it while our entry is there
     function follow(gid, why) {
       unfollow();
-      G = { gid: gid, guild: null, members: {}, seen: false, offs: [], why: why || '' };
+      G = { gid: gid, guild: null, members: {}, vault: {}, seen: false, offs: [], why: why || '' };
       var g = G;
       g.offs.push(store.watchGuild(gid, function (v) {
         if (G !== g) return;
@@ -81,7 +92,12 @@
         for (k in (v || {})) { var c = cleanMember(v[k]); if (c) m[k] = c; }
         g.members = m;
         if (!m[self]) { lost(g.ending || (!g.seen ? 'gone' : g.guild ? 'kicked' : 'disbanded')); return; }
-        if (!g.seen) { g.seen = true; cMine = Math.max(cMine, m[self].c); emit({ type: 'joined', gid: gid, why: g.why, name: g.guild ? g.guild.name : '' }); }
+        if (!g.seen) {
+          g.seen = true; cMine = Math.max(cMine, m[self].c);
+          // the vault is for members only: watch it once we know we are one
+          if (store.watchVault) g.offs.push(store.watchVault(gid, function (v) { if (G !== g) return; var o = {}, k; for (k in (v || {})) { var e = C.VID_RE.test(k) && cleanEntry(v[k]); if (e) o[k] = e; } g.vault = o; emit({ type: 'vault' }); }));
+          emit({ type: 'joined', gid: gid, why: g.why, name: g.guild ? g.guild.name : '' });
+        }
         emit({ type: 'changed' });
       }));
     }
@@ -157,6 +173,25 @@
         if (!t || uid === self || (rk !== 'o' && rk !== 'r') || !can(myRank(), 'rank', t.rk)) return Promise.reject(new Error('rank'));
         return store.setRank(G.gid, uid, rk);
       },
+      /** The vault: {vid: {k, n, r, it?, by, byN, t}}. */
+      vault: function () { return G ? G.vault : {}; },
+      /** May you take this vault entry out (the master and officers anything, a member its own)? */
+      canTake: function (vid) { var e = G && G.vault[vid]; return !!e && (can(myRank(), 'take') || e.by === self); },
+      /** Put a thing in: {k, n, r, it?} (it: the item as plain values). Rejects 'full', 'rank' (not a member). */
+      deposit: function (x) {
+        if (!G || !me()) return Promise.reject(new Error('rank'));
+        if (Object.keys(G.vault).length >= C.VAULT_MAX) return Promise.reject(new Error('full'));
+        var e = cleanEntry({ k: x.k, n: x.n, r: x.r, it: x.it, by: self, byN: String(handle() || '').slice(0, 24) });
+        if (!e) return Promise.reject(new Error('bad'));
+        var vid = 'v_' + String(self).slice(0, 40) + '_' + Math.floor(now()).toString(36) + (++vseq).toString(36);
+        return store.deposit(G.gid, vid, e).then(function () { return vid; });
+      },
+      /** Take a thing out: resolves with the entry once it is yours (one player only). */
+      withdraw: function (vid) {
+        var e = G && G.vault[vid];
+        if (!e || !api.canTake(vid)) return Promise.reject(new Error('rank'));
+        return store.withdraw(G.gid, vid, self).then(function () { return e; });
+      },
       /** Add to your contribution (the guild's experience); written with the next heartbeat. */
       contribute: function (n) { n = Math.floor(+n || 0); if (n > 0 && me()) cMine = Math.min(C.C_MAX, cMine + n); },
       /** Heartbeat (who is online) and pending contributions. Call about once per frame. */
@@ -176,7 +211,7 @@
   // An in-memory database with the rules' checks, for tests: memoryStore().as(uid) is the store one player uses (the
   // acting uid stands in for auth.uid). guildStore in firebase.js has the same shape.
   function memoryStore() {
-    var d = { guilds: {}, names: {}, members: {}, inv: {} }, watchers = [], clock = 1;
+    var d = { guilds: {}, names: {}, members: {}, inv: {}, vault: {}, taken: {} }, watchers = [], clock = 1;
     function fire() { watchers.slice().forEach(function (w) { try { w(); } catch (e) { /* ignore */ } }); }
     function watch(get, cb) { var last; var w = function () { var v = JSON.stringify(get() || null); if (v !== last) { last = v; cb(JSON.parse(v)); } }; watchers.push(w); w(); return function () { var i = watchers.indexOf(w); if (i >= 0) watchers.splice(i, 1); }; }
     function no(why) { return Promise.reject(new Error('PERMISSION_DENIED: ' + why)); }
@@ -205,7 +240,14 @@
         kick: function (gid, uid) { if (!can(rk(gid, me), 'kick', rk(gid, uid))) return no('kick'); delete d.members[gid][uid]; return ok(); },
         setRank: function (gid, uid, r) { if (!can(rk(gid, me), 'rank', rk(gid, uid)) || (r !== 'o' && r !== 'r')) return no('rank'); d.members[gid][uid].rk = r; return ok(); },
         beat: function (gid, uid, p) { var m = (d.members[gid] || {})[uid]; if (uid !== me || !m || p.rk !== m.rk) return no('beat'); m.n = p.n; m.c = p.c; m.on = clock; return ok(); },
-        disband: function (gid, nk) { if (rk(gid, me) !== 'm' || d.names[nk] !== gid) return no('disband'); delete d.guilds[gid]; delete d.names[nk]; delete d.members[gid]; return ok(); },
+        disband: function (gid, nk) { if (rk(gid, me) !== 'm' || d.names[nk] !== gid) return no('disband'); delete d.guilds[gid]; delete d.names[nk]; delete d.members[gid]; delete d.vault[gid]; delete d.taken[gid]; return ok(); },
+        watchVault: function (gid, cb) { return watch(function () { return rk(gid, me) ? d.vault[gid] : null; }, cb); },
+        deposit: function (gid, vid, v) { if (!rk(gid, me) || v.by !== me || (d.vault[gid] || {})[vid]) return no('deposit'); (d.vault[gid] = d.vault[gid] || {})[vid] = JSON.parse(JSON.stringify(v)); return ok(); },
+        withdraw: function (gid, vid, uid) {
+          var e = (d.vault[gid] || {})[vid], tk = (d.taken[gid] = d.taken[gid] || {});
+          if (uid !== me || !e || tk[vid] || !(can(rk(gid, me), 'take') || e.by === me)) return no('withdraw');
+          tk[vid] = { by: me }; delete d.vault[gid][vid]; return ok();
+        },
         readGuild: function (gid) { return Promise.resolve(d.guilds[gid] || null); },
         readMember: function (gid, uid) { return Promise.resolve(!!(d.members[gid] || {})[uid]); },
       };
@@ -214,5 +256,5 @@
   }
 
   var ns = root.Satisfy = root.Satisfy || {};
-  ns.guild = Object.freeze({ create: create, memoryStore: memoryStore, validName: validName, nameKey: nameKey, gidOf: gidOf, can: can, cleanGuild: cleanGuild, C: C, GID_RE: GID_RE });
+  ns.guild = Object.freeze({ create: create, memoryStore: memoryStore, validName: validName, nameKey: nameKey, gidOf: gidOf, can: can, cleanGuild: cleanGuild, cleanEntry: cleanEntry, C: C, GID_RE: GID_RE });
 })(typeof window !== 'undefined' ? window : globalThis);

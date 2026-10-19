@@ -407,9 +407,16 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; return up(u); },
       readGuild: function (gid) { return D.get(at('guilds/' + gid)).then(function (s) { return s.val(); }); },
       readMember: function (gid, uid) { return D.get(at('guildMembers/' + gid + '/' + uid)).then(function (s) { return !!s.val(); }); },
+      // SAT-ONLINE-050: the vault; taking writes guildVaultTaken once in the same update, so one player gets a thing
+      watchVault: function (gid, cb) { return watch('guildVault/' + gid, cb); },
+      deposit: function (gid, vid, e) {
+        var u = {}, v = { k: e.k, n: e.n, r: e.r, by: e.by, byN: e.byN, t: SV() }; if (e.it) v.it = e.it;
+        u['guildVault/' + gid + '/' + vid] = v; return up(u);
+      },
+      withdraw: function (gid, vid, uid) { var u = {}; u['guildVault/' + gid + '/' + vid] = null; u['guildVaultTaken/' + gid + '/' + vid] = { by: uid, t: SV() }; return up(u); },
       // SAT-ONLINE-049: guildChat/{gid}/{id} = {from, h, text, t}; members only. chatOn gets new lines (and those of the
       // last 5 min); chatSay also clears up to 10 lines older than a day
       chatOn: function (gid, fn, offset) {

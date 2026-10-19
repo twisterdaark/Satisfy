@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19r', ver: '0.41', d: '2026-10-19',
+      ar: ['أونلاين: خزنة للجيلد من لوحة الجيلد: أي عضو يحط فيها حاجات من شنطته، والقائد والضباط ياخدوا منها، وكل عضو ياخد اللي حطه، والحاجة متتاخدش مرتين'],
+      en: ['Online: a guild vault in the guild panel: any member puts things from the bag in, the master and officers take them out, everyone can take back their own, and nothing is taken twice'] },
     { v: '2026-10-19q', ver: '0.40', d: '2026-10-19',
       ar: ['أونلاين: شات للجيلد: تاب "الجيلد" في الشات، أو اكتب /g قبل الرسالة، وأعضاء الجيلد بس اللي بيشوفوها حتى لو بعاد عن بعض'],
       en: ['Online: guild chat: the "Guild" tab in the chat, or /g before a line; only your guild members read it, wherever they are'] },

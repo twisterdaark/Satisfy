@@ -52,7 +52,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -162,6 +162,23 @@
       if (Object.keys(v).sort().join(',') !== 'from,h,t,text' || v.h !== data.get('accountIds/' + me) || typeof v.text !== 'string' || v.text.length < 1 || v.text.length > 120) return 'guildChat fields';
       return isSV(v.t) ? null : 'guildChat t';
     }
+    if (seg[0] === 'guildVault' || seg[0] === 'guildVaultTaken') { // SAT-ONLINE-050
+      const gid = seg[1], r = rkOf(gid, me), master = (data.get('guilds/' + gid) || {}).master === me;
+      if (seg.length === 2) return v === null && master ? null : 'PERMISSION_DENIED: ' + path;
+      if (seg.length !== 3) return 'PERMISSION_DENIED: ' + path;
+      const e = data.get('guildVault/' + gid + '/' + seg[2]);
+      if (seg[0] === 'guildVault') {
+        if (!r) return 'PERMISSION_DENIED: guildVault member';
+        if (v === null) return old && (r === 'm' || r === 'o' || old.by === me) ? null : 'PERMISSION_DENIED: guildVault take';
+        if (old || v.by !== me || !/^v_[A-Za-z0-9_-]{1,80}$/.test(seg[2])) return 'PERMISSION_DENIED: guildVault put';
+        for (const k in v) if (!['k', 'n', 'r', 'it', 'by', 'byN', 't'].includes(k)) return 'guildVault field ' + k;
+        if (!(typeof v.k === 'string' && /^[a-z0-9_]{1,24}$/.test(v.k) && isInt(v.n, 1) && v.n <= 99999 && isInt(v.r, 0) && v.r <= 9 && (!('it' in v) || (typeof v.it === 'string' && v.it.length <= 600)))) return 'guildVault values';
+        return isSV(v.t) ? null : 'guildVault t';
+      }
+      if (v === null) return old && old.t < Date.now() - 86400000 ? null : 'PERMISSION_DENIED: guildVaultTaken remove';
+      if (old || v.by !== me || !e || !(r === 'm' || r === 'o' || e.by === me)) return 'PERMISSION_DENIED: guildVaultTaken ' + path;
+      return Object.keys(v).sort().join(',') === 'by,t' && isSV(v.t) ? null : 'guildVaultTaken fields';
+    }
     // guildInv/{uid}/{gid}
     if (seg.length !== 3) return 'PERMISSION_DENIED: guildInv ' + path;
     const uid = seg[1], gid = seg[2], r = rkOf(gid, me);
@@ -173,7 +190,7 @@
   }
   function rules(p, v, existing) {
     const seg = p.split('/');
-    if (['guilds', 'guildNames', 'guildMembers', 'guildInv', 'guildChat'].includes(seg[0])) return guildRules(seg, v);
+    if (['guilds', 'guildNames', 'guildMembers', 'guildInv', 'guildChat', 'guildVault', 'guildVaultTaken'].includes(seg[0])) return guildRules(seg, v);
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
     if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
     if (seg[0] === 'handles' || seg[0] === 'accountIds' || seg[0] === 'chat' || seg[0] === 'news') return idRules(seg, v);
@@ -426,7 +443,7 @@
       if (r.path !== '.info/connected') {
         const seg = r.path.split('/');
         const tm = (seg[0] === 'tradeSides' && seg.length === 3) || (seg[0] === 'tradeDone' && seg.length === 2) ? tradeMeta(seg[1]) : null;
-        const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
+        const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : seg[0] === 'guildVault' && seg.length === 2 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
         const ok = gl !== null ? gl : seg[0] === 'sessions' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });

@@ -99,6 +99,29 @@ test('online guilds: found, invite from the card, join, ranks, remove, disband; 
     await a.page.keyboard.press('Enter'); await a.step(2);
     await until([b], () => [...document.querySelectorAll('#chatL div.guild')].some((d) => /Ahmed: welcome/.test(d.textContent)));
 
+    // the vault (SAT-ONLINE-050): B puts 9 wood in; A sees it and takes it out; B puts a piece in, and A and B both try
+    // to take it at once: one of them gets it
+    await b.eval(() => { window.__G.S.mats.wood = 9; });
+    assert.equal(await b.eval(() => window.__GG.put('wood')), true);
+    await until([a], () => Object.keys(window.__GG.vault()).length === 1);
+    assert.equal(await b.eval(() => window.__G.S.mats.wood || 0), 0, 'out of B\u2019s bag');
+    const vw = await a.eval(() => Object.keys(window.__GG.vault())[0]);
+    assert.equal(await a.eval(() => window.__G.S.mats.wood || 0), 0);
+    await a.eval((v) => window.__GG.take(v), vw);
+    await until([a], () => (window.__G.S.mats.wood || 0) === 9);
+    await until([b], () => Object.keys(window.__GG.vault()).length === 0);
+    const pc = await b.eval(() => { const G = window.__G, S = G.S, rc = Satisfy.local.defs().RC.find((r) => r.slot && r.slot !== 'w' && r.def); const it = { uid: ++S.uid, id: rc.id, slot: rc.slot, r: 2, dur: 100, def: 7 }; S.items.push(it); Satisfy.ids.ensure(S); return it.id; });
+    assert.equal(await b.eval((k) => window.__GG.put(k), pc), true);
+    await until([a, b], () => Object.keys(window.__GG.vault()).length === 1);
+    const vp = await a.eval(() => Object.keys(window.__GG.vault())[0]);
+    assert.equal(await b.eval((v) => window.__GG.canTake(v), vp), true, 'a member takes back its own');
+    const has = (g) => g.eval((k) => window.__G.S.items.filter((i) => i.id === k && i.r === 2 && i.def === 7).length, pc);
+    const n0 = (await has(a)) + (await has(b));
+    await Promise.all([a.eval((v) => window.__GG.take(v), vp), b.eval((v) => window.__GG.take(v), vp)]);
+    await until([a, b], () => Object.keys(window.__GG.vault()).length === 0);
+    await settle(a, b);
+    assert.equal((await has(a)) + (await has(b)) - n0, 1, 'one of them got the piece');
+
     // A makes B an officer; B invites C; C joins; B removes C, who is told
     await a.eval(() => window.__GG.rank('gGdB2', 'o'));
     await until([b], () => window.__GG.state().rank === 'o');
@@ -120,7 +143,7 @@ test('online guilds: found, invite from the card, join, ranks, remove, disband; 
     assert.equal(await b.eval(() => window.__G.S.guild), '');
     assert.equal(await a.eval(() => window.__G.S.guild), '');
     assert.equal(await a.eval(() => window.__fakeRTDB.data.has('guildNames/black dragons')), false);
-    for (const g of [a, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/guildNames taken/.test(x))), []);
+    for (const g of [a, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/guildNames taken|guildVault(Taken)? take|PERMISSION_DENIED: guildVaultTaken/.test(x))), []);
     for (const g of [a, b, c]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
