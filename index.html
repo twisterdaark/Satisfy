@@ -1124,7 +1124,7 @@ function updateSiege(dt){if(!S||!P||!WS)return;const n=siegeNow();
  if(SG&&(!n||n.slot!==SG.slot))endSiege();if(!SG&&n)startSiege(n);
  if((sgT-=dt)<=0&&SG){sgT=1;const left=Math.max(0,SG.end-Date.now()),b=$('sgbar');b.hidden=false;b.innerHTML=`<b>${esc(t('sgN'))}</b> · ${esc(gName(WS.castle.own))} · ${Math.floor(left/60000)}:${String(Math.floor(left/1000)%60).padStart(2,'0')}`;}
  if(!SG)return;const T=throneP(),near=Math.hypot(P.x-T.x,P.y-T.y)<560,own=WS.castle.own,mine=!!(S.guild&&own===S.guild);
- if(!mine&&!SG.def&&near){SG.def=[sgSpawn('scmd',T.x,T.y+34,own)];for(let i=0;i<6;i++){const [x,y]=sgSpot(CAST.x0+3,CAST.x1-3,CAST.y0+12,CAST.y1-3);SG.def.push(sgSpawn('sknight',x,y,own));}for(let i=0;i<2;i++)SG.def.push(sgSpawn('sknight',T.x+(i?40:-40),T.y+12,own));SFX.slam();shake=.3;}
+ if(!mine&&S.guild&&!SG.def&&near){SG.def=[sgSpawn('scmd',T.x,T.y+34,own)];for(let i=0;i<6;i++){const [x,y]=sgSpot(CAST.x0+3,CAST.x1-3,CAST.y0+12,CAST.y1-3);SG.def.push(sgSpawn('sknight',x,y,own));}for(let i=0;i<2;i++)SG.def.push(sgSpawn('sknight',T.x+(i?40:-40),T.y+12,own));SFX.slam();shake=.3;}
  if(mine&&near){SG.wt-=dt;if(SG.wt<=0&&SG.atk.filter(m=>!m.dead).length<8){SG.wt=60;SG.wave++;if(!SG.by){const ops=NPCG.map(g=>g.id).filter(id=>id!==own);SG.by=ops[rand()*ops.length|0];}
   for(let i=0;i<4;i++){const [x,y]=sgSpot(535,541,CAST.y1-3,CAST.y1);SG.atk.push(sgSpawn('sknight',x,y,SG.by));}toast(t('sgWave',{n:SG.wave,g:gName(SG.by)}),'warn');SFX.slam();}}
  if(SG.cap){const c=SG.cap;if(Math.hypot(P.x-T.x,P.y-T.y)>30||P.hp<c.hp-1||P.ghost||!S.guild){SG.cap=null;toast(t('capBroke'),'warn');SFX.deny();}else if((c.t+=dt)>=SCAPT){SG.cap=null;castleTaken(S.guild);}}}
@@ -1133,7 +1133,7 @@ function throneAct(){const o=WS.castle,gn=o.own?gName(o.own):t('gNone');
  if(!S.guild)return dialog('throneN',[t('thInfo2',{g:gn}),'bnNoG']);
  if(o.own===S.guild)return dialog('throneN',['thOurs']);
  if(SG.cap)return;const T=throneP();
- if(SG.def&&(SG.def[0]&&!SG.def[0].dead||SG.def.some(m=>!m.dead&&Math.hypot(m.x-T.x,m.y-T.y)<120))){SFX.deny();return toast(t('thGuard'),'warn');}
+ if(!SG.def||(SG.def[0]&&!SG.def[0].dead||SG.def.some(m=>!m.dead&&Math.hypot(m.x-T.x,m.y-T.y)<120))){SFX.deny();return toast(t('thGuard'),'warn');}
  SG.cap={t:0,hp:P.hp};toast(t('thCap',{n:SCAPT}));SFX.notice();}
 
 /* ---------------- world events (SAT-EVENT-001) ---------------- */
