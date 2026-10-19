@@ -1,0 +1,19 @@
+{
+  "name": "satisfy",
+  "private": true,
+  "version": "0.5.0",
+  "description": "Satisfy: Pagma's Descendant — browser prototype. No build step; the game runs from index.html.",
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.cjs\"",
+    "test:unit": "node --test \"tests/unit/**/*.test.cjs\"",
+    "test:regression": "node --test --test-concurrency=1 \"tests/regression/**/*.test.cjs\"",
+    "test:content": "node --test \"tests/content/**/*.test.cjs\"",
+    "setup:browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "playwright": "~1.56.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
