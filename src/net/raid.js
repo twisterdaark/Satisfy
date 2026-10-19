@@ -25,7 +25,7 @@
 (function (root) {
   'use strict';
 
-  var C = Object.freeze({ STATE_MS: 250, HIT_MAX: 5000, ENC_TTL_MS: 300000 });
+  var C = Object.freeze({ STATE_MS: 250, HIT_MAX: 1000000, ENC_TTL_MS: 300000 }); // late-game hits pass 5000 (review of #29)
   var TYPES = ['raid.hit', 'raid.state', 'raid.kill'];
 
   function create(o) {

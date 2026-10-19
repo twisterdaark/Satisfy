@@ -120,10 +120,10 @@
               ".validate": "newData.isString() && newData.val().length <= 40"
             },
             "k": {
-              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
             },
             "n": {
-              ".validate": "newData.isNumber() && newData.val() >= -2048 && newData.val() <= 10000000"
+              ".validate": "newData.isNumber() && newData.val() >= -2048 && newData.val() <= 1000000000"
             },
             "raid": {
               ".validate": "newData.isString() && newData.val().length <= 64"

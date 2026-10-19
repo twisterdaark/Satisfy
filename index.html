@@ -1422,7 +1422,7 @@ function meetTick(dt){if(!S||!P||ARN||TWR)return;if(S.comp)S.comp=null;const slo
  const M=MEET;if(!M)return;const d=Math.hypot(P.x-M.m.x,P.y-M.m.y);
  if(M.m.hp<M.m.max&&d<300)M.joined=true;}
 function setComp(id){const old=S.comp;S.comp=id||null;COMPO=null;if(id){toast(t('compOn',{n:t(id)}),'good');SFX.quest();dialog(id,['cpGo_'+id]);}else if(old)toast(t('compOff',{n:t(old)}));hudDirty=true;save(true);}
-function compHit(m,mul,crit){if(!m||m.dead)return;const my=monY(m),d=Math.max(1,Math.round(atkV()*mul*lvF(m.lv)*(.9+rand()*.2)*(crit?2:1)));m.hp-=d;m.hurt=.12;m.agg=1;m.eng=4;
+function compHit(m,mul,crit){if(!m||m.dead)return;const my=monY(m),d=Math.max(1,Math.round(atkV()*mul*lvF(m.lv)*(.9+rand()*.2)*(crit?2:1)));m.hp-=d;if(PRAID)praidHit(m,d);m.hurt=.12;m.agg=1;m.eng=4;
  num(m.x+(rand()-.5)*8,my-8,String(d),crit?'#ffd24a':'#9fe39a',crit);vfx(crit?'crit':'hit',m.x,my,{});if(m.hp<=0)killMon(m);}
 function updateComp(dt){if(!S||!P)return;meetTick(dt);const c=MEET?COMPS[MEET.id]:null;
  if(!c){COMPO=null;}else if(!COMPO||COMPO.id!==MEET.id)COMPO={id:MEET.id,spr:c.spr,x:MEET.m.x+26,y:MEET.m.y+4,dir:3,frame:0,at:0,cd:1,sk:5};
@@ -1607,7 +1607,7 @@ const NPCF=/^(guard|pcap|coach|tk|ta|tw|tm|regas|khan|smith|armorer)/;
 function npcFight(dt){if(!EV||!EV.e.tw)return;const T=TOWNS.find(T=>T.k===EV.e.tw);if(!T)return;const live=EV.mons.filter(m=>!m.dead);if(!live.length)return;
  for(const n of npcs){if(n.hidden||n.obj||n.y>=WMH*TS||npcKO(n.id)||Math.hypot(n.x-T.rx*TS,n.y-T.ry*TS)>(T.x1-T.x0)*TS)continue;n.acd=(n.acd||0)-dt;if(n.acd>0)continue;
   const ft=NPCF.test(n.id),reach=ft?80:28;let tg=null,bd=reach;for(const m of live){const d=Math.hypot(m.x-n.x,m.y-n.y);if(d<bd){bd=d;tg=m;}}if(!tg)continue;
-  n.acd=ft?1.1:1.7;n.dir=Math.abs(tg.x-n.x)>Math.abs(tg.y-n.y)?(tg.x>n.x?2:3):(tg.y>n.y?0:1);const d=Math.round(tg.max*(ft?.09:.04)*(.85+rand()*.3));tg.hp-=d;tg.hurt=.12;tg.nt=n;tg.ntT=3;
+  n.acd=ft?1.1:1.7;n.dir=Math.abs(tg.x-n.x)>Math.abs(tg.y-n.y)?(tg.x>n.x?2:3):(tg.y>n.y?0:1);const d=Math.round(tg.max*(ft?.09:.04)*(.85+rand()*.3));tg.hp-=d;if(PRAID&&MT[tg.type])praidHit(tg,d);tg.hurt=.12;tg.nt=n;tg.ntT=3;
   vfx(ft&&bd>30?'hit':'slash',tg.x,monY(tg),{angle:Math.atan2(tg.y-n.y,tg.x-n.x),rarity:1});num(tg.x+(rand()-.5)*8,monY(tg)-12,String(d),'#9fd8ff',false);
   if(tg.hp<=0){tg.dead=true;tg.rt=1e9;dissolve(tg.x,tg.y-8,['#fff','#ff7a5a'],12);}}}
 function startEvent(n){EV={e:n.e,slot:n.slot,end:n.end,kills:0,xp:0,wave:0,mons:[],fallen:0};announce(t('ev_'+n.e.k));SFX.notice();
@@ -1884,7 +1884,8 @@ const SLOT=/^[A-Za-z0-9_-]{1,16}$/.test(QS.get('slot')||'')?QS.get('slot'):null;
 const STORE=(()=>{let ls=null;try{ls=localStorage;}catch(e){}return Satisfy.storage.create(ls,{slot:SLOT});})();
 // WS (guilds, territories, legends; SAT-GUILD-001) is saved next to S and P, as on main.
 // P is saved trimmed, at the tower/arena return point while inside one (as on main)
-function save(quiet){if(!S||S.__demo)return;const sp=TWR?TWR.ret:ARN?ARN.ret:P;Satisfy.ids.ensure(S);if(STORE.write(S,{x:sp.x,y:sp.y,hp:P.hp,st:P.st,mp:P.mp,food:P.food},{WS})&&!quiet)toast(t('saved'));}
+var SAVE_OFF=false; // set when another tab took the account over (SAT-ONLINE-010): this tab must not write the save any more
+function save(quiet){if(!S||S.__demo||SAVE_OFF)return;const sp=TWR?TWR.ret:ARN?ARN.ret:P;Satisfy.ids.ensure(S);if(STORE.write(S,{x:sp.x,y:sp.y,hp:P.hp,st:P.st,mp:P.mp,food:P.food},{WS})&&!quiet)toast(t('saved'));}
 function hasSave(){return STORE.exists();}
 // Stable ids and domain events (SAT-ONLINE-005, doc §05 R0.4/R0.5; src/core/ids.js, state.js, events.js).
 // S.pid (the character id Claude-B's guilds already use) and item.iid are assigned at the first save or load; kills, crafts and quest claims are reported
@@ -3472,7 +3473,7 @@ function musicTick(){if(!ac||!musicOn)return;if(!musicG){musicG=ac.createGain();
  while(mNext<ac.currentTime+.2){const m=tr.mel[mStep%tr.mel.length],b=tr.bass[mStep%tr.bass.length];if(m!=null)mtone(tr.root*Math.pow(2,m/12),sd*1.8,tr.w,tr.v,mNext);if(b!=null)mtone(tr.root/2*Math.pow(2,b/12),sd*(mTrack==='boss'?1:6),mTrack==='boss'?'sawtooth':'triangle',tr.v*.8,mNext);mStep++;mNext+=sd;}}
 
 /* ---------------- loop ---------------- */
-freshState();spawnWorld();S.__demo=true;
+freshState();spawnWorld();S.__demo=true;MAPV=mapHash();
 let last=performance.now(),hudT=0,saveT=0;
 // a bug in one frame must never freeze the world: report it once (console, log, toast) and keep the loop running.
 // One bad monster is reset to idle instead of stopping every other monster behind it.
@@ -3522,7 +3523,10 @@ window.__G.defs=Satisfy.local.defs;
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
 let NET=null,NETTR=null,netLinkT=0,netReplaced=false,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null,CHAT=null,chatSig='',PCTX=null,pctxSig='',EMO=null,emoLast=-1e9;const PARTY_R=40,BLK=Satisfy.chat.blocklist(); // CHAT/BLK: SAT-ONLINE-016 (declared here: ?net=local starts during load)
 const NETQ=QS.get('net');
-const NET_LIVE=['play','inv','status','equip','dialog','forge','log','map','dead','cut','pause'];
+// every screen of a running game counts as in the world (review of #23: quest dialog, guild name, enhance effect and the
+// controls opened from pause used to stop presence and forfeit a duel); only the title, language and creation screens don't
+const NET_OFF=['title','lang','create'];
+function netLive(){return Satisfy.local.inGame()&&!NET_OFF.includes(mode)&&!(mode==='controls'&&ctrlBack==='titleScreen');}
 function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
 // Interest management (doc U009): online, a client listens only to players within NET_INTEREST.radius px
 // of it along the map (the screen is W=480 px wide, so the re-centre step keeps it covered), plus its
@@ -3533,15 +3537,18 @@ const NET_INTEREST={radius:800,step:400};
    map changes with the game's updates: every client publishes mapV(), a hash of the generated world, and only shows
    (and invites or challenges) remotes on the same map and in the same room. The interior strip between rooms is
    'void' online, never Winston's safe town (the game's zoneAt falls back to zWin there). */
-let MAPV=null;const netOtherV=new Set();
-function mapV(){if(MAPV)return MAPV;let h=0x811c9dc5;for(let i=0;i<map.length;i++){h^=map[i];h=Math.imul(h,0x01000193);}return MAPV=(h>>>0).toString(16).padStart(8,'0');}
+const netOtherV=new Set();
+// hashed once, right after the world is generated (below the loop setup): uprooted stumps change each player's own map
+// later, and must not make two players on the same build look like different versions (review of #49)
+var MAPV=null;function mapHash(){let h=0x811c9dc5;for(let i=0;i<map.length;i++){h^=map[i];h=Math.imul(h,0x01000193);}return (h>>>0).toString(16).padStart(8,'0');}
+function mapV(){return MAPV||(MAPV=mapHash());}
 function netZone(x,y){return y>=WMH*TS&&!dunAt(x,y)&&!roomAt(x,y)?'void':zoneAt(x,y);}
 function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(r.mv===mapV())return true;
  if(!netOtherV.has(r.sid)){netOtherV.add(r.sid);toast(t('netOtherV',{n:r.handle||'?'}),'warn');}return false;}
 Object.assign(STR.ar,{netOtherV:'{n} قريب منك بس على نسخة تانية من اللعبة: حدّثوا الصفحة عشان تشوفوا بعض'});
 Object.assign(STR.en,{netOtherV:'{n} is nearby on a different version of the game: reload both pages to see each other'});
 function netWatch(){const id=(PARTY&&PARTY.id())||null;if(NETTR.wsig!==id){NETTR.wsig=id;NETTR.party(id);}}
-function netTick(){NET.tick();const live=Satisfy.local.inGame()&&NET_LIVE.includes(mode);
+function netTick(){NET.tick();const live=netLive();
  if(PARTY)PARTY.tick();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
@@ -3785,6 +3792,7 @@ function praidStart(){PRAID=Satisfy.raid.create({presence:NET,party:PARTY,uid:NE
  claim:e=>{if(!S||S.__demo)return;S.raidDone=(S.raidDone||[]).concat(e).slice(-30);save(true);}}});
  PRAID.on(e=>{if(e.type==='killed'){toast(t('raidKill'),'good');SFX.quest();}});}
 // hitMon(): true when a party member's hit was handed to the leader (the local copy keeps its HP)
+// every damage source on a boss goes through here: the player's hits, companions and NPC allies (review of #29)
 function praidHit(m,dmg){if(!MT[m.type].boss)return false;if(PRAID.hit(praidKey(m),dmg)){m.hp+=dmg;return true;}return false;}
 // link quality for the badge tooltip (doc U015 latency diagnostics, U020 observability)
 Object.assign(STR.ar,{netLink:'الاتصال: {rtt} · اتبعت {s} · وصل {r} · اترفض {d}',netRtt:'{n} م.ث',netRttNone:'—'});
@@ -3855,9 +3863,10 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;netSetStat
    and offers "Play here", which saves and reloads, so this page claims the account back. */
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
-function netReplace(){if(netReplaced)return;netReplaced=true;save(true);try{NETTR.release();}catch(e){}NET=null;PARTY=null;DUEL=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW'].forEach(i=>$(i).hidden=true);
+function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF=true; // from now on this tab never saves: the newer tab owns the save (review of #30)
+ try{NETTR.release();}catch(e){}NET=null;PARTY=null;DUEL=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
-function netTakeBack(){save(true);location.reload();}
+function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
 function netSignIn(){if(NETQ!=='online'||netUser)return;netSetState('AUTHENTICATING');netBtn();
  Satisfy.firebase.load(Satisfy.firebaseConfig).then(sdk=>{FB=sdk;return Satisfy.firebase.signIn(sdk);}).then(u=>{if(u){netConnect(FB,u);if(netPending){netPending=false;netPlay();}}else{netSetState('DISCONNECTED');netBtn();}},netFail);}
 if(NETQ==='online'){netBtn();

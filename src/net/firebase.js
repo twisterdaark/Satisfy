@@ -86,13 +86,13 @@
       var o = { to: p.to };
       if (type.indexOf('party.') === 0) {
         o.party = String(p.party || '');
-        if (type === 'party.ping') { o.k = Math.max(0, Math.min(10000000, Math.round(+p.k || 0))); o.n = Math.max(-2048, Math.min(10000000, Math.round(+p.n || 0))); }
+        if (type === 'party.ping') { o.k = Math.max(0, Math.min(1000000000, Math.round(+p.k || 0))); o.n = Math.max(-2048, Math.min(1000000000, Math.round(+p.n || 0))); }
         return o;
       }
       if (type.indexOf('chat.') === 0) { o.party = String(p.party || ''); o.text = String(p.text || ''); return o; }
       if (type.indexOf('raid.') === 0) o.raid = String(p.raid || ''); else o.duel = String(p.duel || '');
-      if (typeof p.k === 'number' && p.k >= 0 && p.k <= 10000000) o.k = Math.round(p.k);
-      if (typeof p.n === 'number' && p.n >= 0 && p.n <= 10000000) o.n = Math.round(p.n);
+      if (typeof p.k === 'number' && p.k >= 0 && p.k <= 1000000000) o.k = Math.round(p.k);
+      if (typeof p.n === 'number' && p.n >= 0 && p.n <= 1000000000) o.n = Math.round(p.n);
       return o;
     }
     function deliver(env) { if (handler && env && !closed) handler(env); }
@@ -166,6 +166,9 @@
       var m = s.val();
       D.remove(D.ref(db, 'inbox/' + o.uid + '/' + s.key)).catch(function () { /* ignore */ });
       if (!m || typeof m !== 'object' || !DIRECTED.test(m.type)) return;
+      // the rules only prove `from`; the session id is the writer's own claim. Accept it only when it is the session that
+      // uid's presence shows, so nobody can send as another player's session (review of #12/#15/#23).
+      if (typeof m.from !== 'string' || !lastSid[m.from] || lastSid[m.from] !== m.sid) return;
       if (typeof m.t === 'number' && Date.now() + offset - m.t > 60000) return; // stale while offline
       deliver({ v: 1, type: m.type, requestId: null, sessionId: m.sid, seq: +m.seq || 0, tick: 0, payload: m.payload || {} });
     }));
