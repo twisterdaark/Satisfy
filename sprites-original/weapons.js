@@ -30,7 +30,10 @@ const DEF={
  staff:()=>staff(['#2a5ab0','#4a90ff','#bfe8ff'],'#7a5634'),
  sstaff:()=>staff(['#5a2a90','#b07aff','#e8d0ff'],'#3e2a5a',true),
  hammer:()=>hammer(['#9aa0aa','#6a707a','#d0d4dc']),
- shammer:()=>hammer(['#c8ccd6','#8a909a','#ffffff'],true)};
+ shammer:()=>hammer(['#c8ccd6','#8a909a','#ffffff'],true),
+ // spear: long shaft with a leaf head; dagger: short blade on a stub grip (SAT-EQUIP-001)
+ spear:()=>{const I=Img(7,22);I.vline(3,5,21,'#7a5634');I.vline(3,12,13,'#c8a050');I.set(3,0,'#eef0f4');I.rect(2,1,3,3,'#c4c8d0');I.vline(3,1,3,'#eef0f4');I.set(4,3,'#7a808c');I.set(3,4,'#9a9aa6');return {I,gx:3,gy:15};},
+ dagger:()=>sword(5,2,['#c4c8d0','#7a808c','#eef0f4'],'#9a9aa6')};
 function bow(w,tip){const I=Img(8,18);for(let i=0;i<=14;i++){const a=i/14*Math.PI,x=Math.round(2+Math.sin(a)*3.4);I.set(x,1+i,w[0]);I.set(x+1,1+i,i<3||i>11?w[0]:w[1]);if(i===7){I.set(x,1+i,w[2]);I.set(x+1,1+i,w[2]);}}
  I.vline(2,1,15,'#e8e0d0');I.set(2,1,tip||w[2]);I.set(2,15,tip||w[2]);I.rect(5,7,2,3,'#3a2414');return {I,gx:5,gy:8};}
 function staff(orb,wood,prong){const I=Img(9,20);I.vline(4,5,18,wood);I.vline(5,6,17,'#5a3a20');I.set(4,10,'#c8a050');I.set(4,15,'#c8a050');

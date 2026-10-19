@@ -82,7 +82,7 @@ test('item icons v2 cover every key iconC handles and every craftable item',()=>
  const live=grab(html,'function iconC(k){','\nfunction icon(k)'),src=live.includes('SatArt')||live.includes('SA.icons')?grab(snap,'function iconC(k){','\nA.legacyIcon'):live;
  if(src===live)assert.strictEqual(grab(snap,'function iconC(k){','\nA.legacyIcon'),src,'iconC drifted: re-run the snapshot');
  const keys=new Set([...src.matchAll(/k==='(\w+)'/g)].map(m=>m[1]));for(const m of html.match(/const WSH=\{[^\n]+/)[0].matchAll(/(\w+):\{l:/g))keys.add(m[1]);
- for(const m of html.matchAll(/\{id:'(\w+)',slot:'[wax]'/g))keys.add(m[1]);
+ for(const m of html.matchAll(/\{id:'(\w+)',slot:'[waxhgbk]'/g))keys.add(m[1]);
  for(const k of keys)assert.ok(I.KEYS.includes(k),'no v2 icon for '+k);
  for(const k of I.KEYS){const d=I.iconRGBA(k);assert.strictEqual(d.length,1024);let n=0;for(let i=3;i<1024;i+=4)if(d[i])n++;assert.ok(n>=12,k+' is nearly empty');}
  const m=JSON.parse(fs.readFileSync(path.join(dir,'sheets','manifest.json'),'utf8')).icons;assert.deepStrictEqual(m.keys,[...I.KEYS]);assert.deepStrictEqual(pngSize(path.join(dir,m.file)),{w:16*I.KEYS.length,h:16});});
