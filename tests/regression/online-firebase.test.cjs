@@ -94,6 +94,11 @@ test('movement reaches the other device', async () => {
     assert.ok(bx > x0 + 10);
     assert.equal(seen.x, bx);
     assert.equal(seen.dir, 2);
+    // after the first full write, a step only sends what changed (SAT-ONLINE-011, COST_MODEL.md)
+    const ups = await b.eval(() => window.__fakeRTDB.log.filter((l) => l.op === 'update' && l.path.startsWith('presence/')));
+    assert.ok(ups.length > 0, 'moves go out as updates');
+    for (const u of ups) for (const k of ['handle', 'look', 'cls', 'uid', 'sid', 'v']) assert.equal(u.keys.includes(k), false, k + ' is not resent');
+    assert.deepEqual(await b.eval(() => window.__fakeRTDB.rejected), []);
   } finally { await ctx.close(); }
 });
 

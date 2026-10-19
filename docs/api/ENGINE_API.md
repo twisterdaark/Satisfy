@@ -264,6 +264,8 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, additive** (SAT-ONLINE-011): the Firebase transport writes presence in full once per connection, then `update()`s only changed fields (≈3.6× less download, `COST_MODEL.md`). Same database shape and rules.
+- **api 1, additive** (SAT-ONLINE-010): `Satisfy.firebase.lease()`, `transport.release()`, RTDB `sessions/` (rules redeploy), "Play here" panel.
 - **api 1, additive** (SAT-ONLINE-009): `Satisfy.raid`, `net().raid`, `S.raidDone`, RTDB inbox accepts `raid.*` (rules redeploy). Hooks in `hitMon()`/`killMon()`.
 - **api 1, additive** (SAT-ONLINE-008): online presence `idleHz 0.2`, `expireMs 15000`, republish on reconnect; `tools/cost-model.cjs`.
 - **api 1, additive** (SAT-ONLINE-007): `Satisfy.cloud`, `storage.replace()`, RTDB `profiles/`, `cloudIndex/`, `cloudSaves/` (rules redeploy), title-screen **Cloud saves**.

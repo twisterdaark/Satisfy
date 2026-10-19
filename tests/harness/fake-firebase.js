@@ -162,6 +162,20 @@
       write('set', r.path, stored);
       return Promise.resolve();
     },
+    // RTDB update(): merge into the stored node (null removes a field), then check the rules on the result
+    update: (r, diff) => {
+      const cur = data.has(r.path) ? clone(data.get(r.path)) : (pending.has(r.path) ? clone(pending.get(r.path)) : {});
+      for (const k in diff) { if (diff[k] === null) delete cur[k]; else cur[k] = clone(diff[k]); }
+      if ('t' in diff) cur.t = diff.t; // the rules see the server-time sentinel, as with set()
+      const err = rules(r.path, cur, false);
+      F.log.push({ op: 'update', path: r.path, err, keys: Object.keys(diff).sort() });
+      if (err) { F.rejected.push(err); return Promise.reject(Object.assign(new Error(err), { code: 'PERMISSION_DENIED' })); }
+      const stored = clone(cur); stored.t = Date.now();
+      mine.add(r.path);
+      if (!connected) { pending.set(r.path, stored); return Promise.resolve(); }
+      write('set', r.path, stored);
+      return Promise.resolve();
+    },
     remove: (r) => {
       const err = rules(r.path, null, true);
       F.log.push({ op: 'remove', path: r.path, err });

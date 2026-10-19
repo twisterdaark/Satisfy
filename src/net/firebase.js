@@ -5,7 +5,8 @@
  * via dynamic import(). Tests replace it with window.__SATISFY_FIREBASE_LOADER__.
  *
  * Database layout (rules: backend/database.rules.json):
- *   presence/{world}/{shard}/{uid} = PlayerPublic (nulls omitted) + seq, t = server time
+ *   presence/{world}/{shard}/{uid} = PlayerPublic (nulls omitted) + seq, t = server time; written in full
+ *                                    once per connection, then update() with only the changed fields
  *   inbox/{uid}/{pushId}           = {from, sid, seq, type: party.* | duel.*, payload, t}
  *                                    payload {to, party} or {to, duel, k?, n?}; read and deleted by the
  *                                    recipient only; older than 60 s is dropped
@@ -70,6 +71,10 @@
     var mine = D.ref(db, base + '/' + o.uid), list = D.ref(db, base);
     var inbox = D.ref(db, 'inbox/' + o.uid);
     var handler = null, offs = [], lastSeq = {}, closed = false, offset = 0;
+    // The node as the server last stored it, or null when it must be written in full (first send,
+    // after a reconnect: onDisconnect may have removed it). Later sends update only what changed,
+    // so a step sends {x, y, dir, anim, seq, t} instead of the whole public profile (COST_MODEL.md).
+    var sent = null;
     var DIRECTED = /^(party\.(invite|accept|decline|kick)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill))$/;
     // exactly the fields the inbox rules accept: party {to, party}, duel {to, duel, k?, n?}, raid {to, raid, k?, n?}
     function directedPayload(type, p) {
@@ -113,6 +118,7 @@
       var up = !!s.val();
       // re-armed on every reconnect: the server deletes our node if this client vanishes
       if (up) D.onDisconnect(mine).remove().catch(function () { /* ignore */ });
+      sent = null;
       if (o.onConnection) o.onConnection(up);
     }));
     function fail(e) { if (o.onError) o.onError(e); }
@@ -124,9 +130,17 @@
           var p = env.payload, v = {};
           for (var k in p) if (p[k] !== null && p[k] !== undefined && k !== 't') v[k] = p[k];
           v.seq = env.seq;
-          v.t = D.serverTimestamp();
-          D.set(mine, v).catch(fail);
+          var out = {}, f;
+          if (!sent) { for (f in v) out[f] = v[f]; out.t = D.serverTimestamp(); D.set(mine, out).catch(function (e) { sent = null; fail(e); }); }
+          else {
+            for (f in v) if (JSON.stringify(v[f]) !== JSON.stringify(sent[f])) out[f] = v[f];
+            for (f in sent) if (!(f in v)) out[f] = null; // e.g. left the party: remove the field
+            out.t = D.serverTimestamp();
+            D.update(mine, out).catch(function (e) { sent = null; fail(e); });
+          }
+          sent = v;
         } else if (env.type === 'presence.leave') {
+          sent = null;
           D.remove(mine).catch(fail);
         } else if (DIRECTED.test(env.type) && env.payload && typeof env.payload.to === 'string') {
           D.push(D.ref(db, 'inbox/' + env.payload.to), {

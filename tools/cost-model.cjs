@@ -39,15 +39,15 @@ function scenario(o) {
 
 function run() {
   const size = updateBytes(), D = SN.presence.DEFAULTS;
-  const full = size.total, slim = 70 + FRAMING; // position-only node {x,y,dir,anim,seq,t} + path (proposal)
+  const full = size.total, slim = 70 + FRAMING; // an update of {x,y,dir,anim,seq,t} + path (SAT-ONLINE-011)
   const base = { moving: 0.5, inboxPerMin: 2 };
   const rows = [
     scenario({ name: 'doc §28 example (k = N−1, b = 120)', N: 20, moveHz: 5, idleHz: 5, bytes: 120, ...base, moving: 1 }),
     scenario({ name: 'SAT-ONLINE-004 config: 20 players, half moving, 1 s idle heartbeat', N: 20, moveHz: 5, idleHz: D.idleHz, bytes: full, ...base }),
     scenario({ name: 'now (SAT-ONLINE-008): 5 s idle heartbeat', N: 20, moveHz: 5, idleHz: 0.2, bytes: full, ...base }),
-    scenario({ name: 'proposal: + position-only updates', N: 20, moveHz: 5, idleHz: 0.2, bytes: slim, ...base }),
+    scenario({ name: 'now (SAT-ONLINE-011): only changed fields', N: 20, moveHz: 5, idleHz: 0.2, bytes: slim, ...base }),
     scenario({ name: 'proposal: + 10 players per zone shard', N: 10, moveHz: 5, idleHz: 0.2, bytes: slim, ...base }),
-    scenario({ name: 'now: 5 friends', N: 5, moveHz: 5, idleHz: 0.2, bytes: full, ...base }),
+    scenario({ name: 'now: 5 friends', N: 5, moveHz: 5, idleHz: 0.2, bytes: slim, ...base }),
   ];
   return { updateBytes: size, slimBytes: slim, spark: { gbPerMonth: SPARK_GB_MONTH, connections: SPARK_CONN }, rows };
 }
