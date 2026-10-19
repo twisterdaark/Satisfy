@@ -19,8 +19,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const CURRENT_HTML = process.env.SATISFY_HTML ? path.resolve(process.env.SATISFY_HTML) : path.join(ROOT, 'index.html');
 // Golden/render baseline: the main commit this branch is based on. Bump it when rebasing onto a
 // newer main (or set SATISFY_BASELINE=<sha> to compare with any other commit).
-// R0 history: ce29772 (pre-online), 1899cdb (+ #6 CSS hotfix), 6ef0595 (+ v2 art, #5), 6295a5f (+ Patrian, AI, wider map), 3c343ec (+ town quests, Piaro balance, Guardian Knight).
-const BASELINE_SHA = process.env.SATISFY_BASELINE || '3c343eccb14a6dafc13772b1e3dec543e15add59';
+// R0 history: ce29772 (pre-online), 1899cdb (+ #6 CSS hotfix), 6ef0595 (+ v2 art, #5), 6295a5f (+ Patrian, AI, wider map), 3c343ec (+ town quests, Piaro balance, Guardian Knight), fe34ae0 (+ equipment, guilds, WS world state, events), daaef26 (+ companions, dragon, auction, Yatan), 7d57d5f (+ siege, Muller).
+const BASELINE_SHA = process.env.SATISFY_BASELINE || 'a67e5b8c8d2c830380a45a1e12ca80980996aa37';
 const LEGACY_KEY = 'satisfy_proto_v4';
 
 // Runs before the game script. Must not change gameplay, only make it reproducible.
