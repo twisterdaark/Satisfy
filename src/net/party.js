@@ -16,6 +16,8 @@
  * short disconnect. The party is kept in the store; a member who comes back auto-accepts its old leader's invite
  * for the same party within REJOIN_MS, and a leader who comes back (or sees a member drop out) invites the
  * dropped members back for REJOIN_MS. Leaving on purpose tells the leader (party.decline) and forgets it.
+ * SAT-ONLINE-026: the auto-accept needs a real reload, ours (the restored store) or the leader's (a new session id);
+ * a member whose party broke while the leader was only out of sight answers its next invite with Y, as usual.
  *
  * Leader election (SAT-ONLINE-024, doc §35 U049): when the leader has been gone LEAD_MS and at least two members
  * remain, every member picks the same new leader, the remaining member with the lowest uid, and the party moves to
@@ -32,7 +34,7 @@
 
   var MAX = 5;
   var INVITE_MS = 30000;  // an unanswered invite expires
-  var GRACE_MS = 5000;    // presence may lag; a member/leader missing this long has left
+  var GRACE_MS = 10000;   // presence may lag (a background tab, a phone switching networks); missing this long has left
   var PING_MS = 1500;     // pings: at most one per member this often (sent and received)
   var REJOIN_MS = 60000;  // a dropped member or a reloaded tab can come back this long (wall clock)
   var LEAD_MS = 15000;    // a leader gone this long (longer than a reload) is replaced by the remaining members
@@ -50,7 +52,12 @@
     var leaderOk = 0, listeners = [], pingOut = -1e9, pingIn = new Map();
     var store = o.store || null, wall = o.wall || function () { return Date.now(); };
     var recent = new Map(); // leader: uid -> wall time they dropped out; invited back until REJOIN_MS
-    var memo = null;        // member: {id, leader, t}: auto-accept that leader's invite to that party
+    // member: {id, leader, t, sid?}: auto-accept that leader's invite to that party. Only after a real reload: our own
+    // (restored from the tab's store, any sid) or the leader's (sid: the session we last saw; a new one means it reloaded).
+    // A leader that was only out of sight (same session) must be answered with Y again (SAT-ONLINE-026, owner #14).
+    var memo = null;
+    var leaderSid = null;   // member: the leader's session as we last saw it
+    var names = new Map();  // uid -> the last handle we saw, so a toast about someone who is gone still has a name (#13)
     var savedSig = '', savedAt = -1e15;
     var mates = [];         // member: the other members, from the leader's published roster (the electorate)
     var mateSeen = new Map(); // member: uid -> when we last saw that mate with us (out of sight a moment still counts)
@@ -76,7 +83,7 @@
     })();
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
-    function byUid(uid) { var hit = null; P.remotes().forEach(function (r) { if (r.uid === uid) hit = r; }); return hit; }
+    function byUid(uid) { var hit = null; P.remotes().forEach(function (r) { if (r.uid === uid) hit = r; }); if (hit && hit.handle) names.set(uid, hit.handle); return hit; }
     function clear() { id = null; leader = null; accepted.clear(); outgoing.clear(); recent.clear(); leaderOk = 0; savedSig = ''; mates = []; mateSeen.clear(); }
     function send(type, to) { P.send(type, { to: to, party: id }); }
 
@@ -86,13 +93,14 @@
       if (pl.to !== self || typeof pl.party !== 'string') return;
       var from = P.get(ev.sid);
       if (!from || !from.uid) return;
+      if (from.handle) names.set(from.uid, from.handle);
       switch (env.type) {
         case 'party.invite':
           if (pl.party !== idFor(from.uid)) return;           // only a leader invites, and only to its own party
           if (blocked(from.uid)) return;                       // no answer: their invite just expires
           if (id) { P.send('party.decline', { to: from.uid, party: pl.party }); return; }
           invites.set(pl.party, { party: pl.party, from: from.uid, sid: ev.sid, handle: from.handle, t: now() });
-          if (memo && memo.id === pl.party && memo.leader === from.uid && wall() - memo.t < REJOIN_MS) {
+          if (memo && memo.id === pl.party && memo.leader === from.uid && wall() - memo.t < REJOIN_MS && !(memo.sid && memo.sid === ev.sid)) {
             memo = null; api.accept(pl.party, true); emit({ type: 'rejoined', handle: from.handle }); return; // our party, back after a reload
           }
           emit({ type: 'invite', party: pl.party, handle: from.handle });
@@ -160,7 +168,7 @@
         var inv = invites.get(pid);
         if (!inv || id) return false;
         invites.clear();
-        id = pid; leader = inv.from; leaderOk = now(); memo = null;
+        id = pid; leader = inv.from; leaderOk = now(); memo = null; leaderSid = inv.sid || null;
         send('party.accept', inv.from);
         save();
         if (!quiet) emit({ type: 'youJoined', handle: inv.handle });
@@ -220,7 +228,7 @@
           accepted.forEach(function (seen, uid) {
             var r = byUid(uid);
             if (r && r.party === id) { accepted.set(uid, t); return; }
-            if (t - seen > GRACE_MS) { accepted.delete(uid); if (store) recent.set(uid, wall()); emit({ type: 'memberLeft', uid: uid, handle: r ? r.handle : '' }); }
+            if (t - seen > GRACE_MS) { accepted.delete(uid); if (store) recent.set(uid, wall()); emit({ type: 'memberLeft', uid: uid, handle: (r && r.handle) || names.get(uid) || '' }); }
           });
           // invite dropped members back while they may still be reloading
           var stop = false;
@@ -244,7 +252,7 @@
         } else {
           var L = byUid(leader);
           if (L && L.party === id) {
-            leaderOk = t;
+            leaderOk = t; leaderSid = L.sid || leaderSid;
             // the electorate is the leader's own roster, not whoever writes our party id into their presence (#55)
             mates = (typeof L.rs === 'string' && L.rs ? L.rs.split(' ') : []).filter(function (u) { return u !== self; });
             save();
@@ -266,12 +274,13 @@
               rest.forEach(function (u) { if (u !== self) accepted.set(u, t); });
               if (store) recent.set(old, wall()); // invite the old leader back if it returns
             }
-            emit({ type: 'newLeader', uid: next, self: next === self, handle: next === self ? null : (byUid(next) || {}).handle });
+            emit({ type: 'newLeader', uid: next, self: next === self, handle: next === self ? null : (byUid(next) || {}).handle || names.get(next) || null });
             save();
           } else if (rest.length < 2 && t - leaderOk > GRACE_MS) {
             var was = { id: id, leader: leader };
             clear();
-            if (store) memo = { id: was.id, leader: was.leader, t: wall() }; // the leader may be reloading: take its invite back
+            // the leader may be reloading: take its invite back, but only from a new session (a reload), not the same one
+            if (store) memo = { id: was.id, leader: was.leader, t: wall(), sid: leaderSid };
             emit({ type: 'dissolved' });
           }
         }

@@ -358,3 +358,50 @@ test('election: a mate out of sight for a moment still counts', () => {
   assert.equal(b.party.id(), 'p_u1');
   assert.equal(c.party.id(), 'p_u1');
 });
+
+// SAT-ONLINE-026 (owner feedback #13-#15): a party that broke while its leader was only out of sight (a covered or
+// minimised window) needs a fresh Y; only a real reload is rejoined by itself. Toasts keep the name of who left.
+test('SAT-ONLINE-026: a break without a reload is answered with Y; a leader reload is rejoined by itself', () => {
+  let clock = 1e12; const wall = () => clock;
+  const hub = SN.transports.hub();
+  let t = 1000; const now = () => t;
+  const sa = store(), sb = store();
+  const mk = (uid, st, i, name) => {
+    const pres = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net, uid, sid: 'sess' + uid + i + 'xxxxxxxx' });
+    const party = SN.party.create({ presence: pres, uid, now, store: st, wall });
+    const events = []; party.on((e) => events.push(e));
+    return { uid, pres, party, events, name, quiet: false };
+  };
+  let a = mk('u0', sa, 0, 'Lead'), b = mk('u1', sb, 0, 'Mem');
+  const sync = () => {
+    for (const p of [a, b]) if (!p.quiet) p.pres.publish(SN.net.toPlayerPublic({ look: { n: p.name }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 }, { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id(), rs: p.party.roster() }), true);
+    for (const p of [a, b]) { p.pres.tick(); if (!p.quiet) p.party.tick(); }
+  };
+  const advance = (ms) => { for (let k = 0; k < ms; k += 100) { t += 100; clock += 100; sync(); } };
+  sync();
+  a.party.invite(a.pres.remotes().find((r) => r.uid === 'u1')); b.party.accept('p_u0'); advance(300);
+  // the leader's window is covered: it stops publishing (and ticking) for a while, same session
+  a.quiet = true;
+  advance(SN.presence.DEFAULTS.expireMs + SN.party.GRACE_MS + 500);
+  assert.equal(b.party.id(), null, 'the member gave up on the leader');
+  a.quiet = false;
+  advance(SN.party.GRACE_MS + 1000); // the leader notices, and invites the member back
+  const types = b.events.map((e) => e.type);
+  assert.ok(types.includes('invite'), 'a normal invite: ' + types);
+  assert.ok(!types.includes('rejoined'), 'not accepted by itself');
+  assert.equal(b.party.id(), null);
+  const left = a.events.find((e) => e.type === 'memberLeft');
+  assert.equal(left && left.handle, 'Mem', 'the toast still has the name');
+  // answer with Y
+  assert.equal(b.party.accept('p_u0'), true); advance(300);
+  assert.equal(a.party.members().length, 2);
+
+  // the leader reloads for real, slowly (the member gives up first); the new session's invite is taken by itself
+  const old = a; a.pres.close(); a.quiet = true;
+  advance(SN.party.GRACE_MS + 500);
+  assert.equal(b.party.id(), null);
+  a = mk('u0', sa, 1, 'Lead'); assert.notEqual(a.pres.sid, old.pres.sid);
+  advance(2000);
+  assert.equal(b.party.id(), 'p_u0');
+  assert.ok(b.events.some((e) => e.type === 'rejoined'));
+});
