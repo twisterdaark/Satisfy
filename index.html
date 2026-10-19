@@ -75,7 +75,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #chatTabs button.on{color:#fff;border-color:#9fe0ff;background:rgba(40,70,110,.6)}
 #chatTabs button.new::after{content:' •';color:#ffd24a}
 #chatTabs button[hidden]{display:none}
-#chatL div.all b{color:#9fe0ff}#chatL div.party,#chatL div.party b{color:#8dff9a}
+#chatL div.all b{color:#9fe0ff}#chatL div.sys{color:#ffe07a}#announce.own .head{color:#bfe8ff}#chatL div.sys b{color:#ffb84a}#chatL div.party,#chatL div.party b{color:#8dff9a}
 #chatW.idle{opacity:.55}
 #chatL div{margin:calc(var(--u)*.2) 0}#chatL div.old{opacity:.45}#chatL b{color:#9fe0a0;font-weight:600}
 #chatIn{width:100%;box-sizing:border-box;font:inherit;padding:calc(var(--u)*.3) calc(var(--u)*.5);margin-top:calc(var(--u)*.4);background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.35)}
@@ -612,6 +612,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
  'src/net/transport-local.js',
  'src/net/party.js',
  'src/net/duel.js',
+ 'src/net/pvp.js',
  'src/net/chat.js',
  'src/net/raid.js',
  'src/net/cloud.js',
@@ -665,7 +666,7 @@ const STR={
 ar:{pname:"لاعب",subtitle:"عالم ساتيسفاي",newGame:'لعبة جديدة',cont:'كمّل',controls:'التحكم',langBtn:'اللغة',langSwap:'English',paused:'اللعبة واقفة',resume:'كمّل اللعب',unstuck:'اطلع من الزنقة',unstuckWait:'استنى {n} ثانية وجرّب تاني',unstuckDone:'رجعت لساحة {z}',saveQuit:'احفظ واخرج',back:'رجوع',
  kMove:'الحركة',kAtk:'هجوم',kDodge:'تفادي (بيستهلك طاقة)',hpFull:'صحتك كاملة',mpFull:'المانا كاملة',kGuard:'جارد (كليك يمين): بيصد الضرب اللي قدامك، ولو رفعته قبل الضربة على طول بتعمل صد مثالي. لو فضلت تدوس عليه ورا بعض التوقيت بيبوظ، والضربات الدايرية وضربة البوس الكبيرة بتتصد عادي بس',kG:'جارد',parry:'صد مثالي!',mBlock:'صد!',guardBreak:'الجارد اتكسر!',kUse:'كلام / تعدين / السندان',kInv:'الشنطة',kEat:'كُل عيش',kMenu:'القايمة',
  fanNote:'لعبة من صنع معجبين، مستوحاة من Overgeared',questH:"الكويستات",weapon:'السلاح',armor:'الدرع',bag:'الشنطة',menu:'القايمة',next:'E / Space ←',
- hp:'صحة',st:'طاقة',food:'شبع',lv:'لفل {n}',gold:'{n} دهب',worldNotice:'إشعار للعالم كله',
+ hp:'صحة',st:'طاقة',food:'شبع',lv:'لفل {n}',gold:'{n} دهب',worldNotice:'إشعار للعالم كله',selfNotice:'إشعار',
  khan:'خان الحداد',baker:'الخباز',recruiter:'قائد فريق الصيد',coach:'العربجي',guardian:'حارس الغابة',wolfN:'ذئب رمادي',bearN:"دب الغابة",
  kh1:"إنت مين؟ دي حدادة مش لوكاندة. عايز إيه؟",
  k2:"حداد؟ بإيدين زي دي؟ هه. ماشي، نشوف. الفرن دايما ناقصه خشب.",
@@ -702,7 +703,7 @@ zOut:'ضواحي بايران (لفل 100+)',zPlains:'السهول الوسطى'
 en:{pname:"Player",subtitle:"World of Satisfy",newGame:'New Game',cont:'Continue',controls:'Controls',langBtn:'Language',langSwap:'العربية',paused:'Paused',resume:'Resume',unstuck:'Get unstuck',unstuckWait:'Wait {n}s and try again',unstuckDone:'Back in {z} square',saveQuit:'Save & Quit',back:'Back',
  kMove:'Move',kAtk:'Attack',kDodge:'Dodge (uses stamina)',hpFull:'HP is already full',mpFull:'MP is already full',kGuard:'Guard (right click): blocks hits from the front; raise it right before a hit to parry. Spamming it ruins the timing, and ring blows or a boss slam can only be blocked',kG:'Guard',parry:'PARRY!',mBlock:'BLOCK',guardBreak:'Guard broken!',kUse:'Talk / Mine / Anvil',kInv:'Inventory',kEat:'Eat bread',kMenu:'Menu',
  fanNote:'Fan-made game inspired by Overgeared',questH:"Quests",weapon:'Weapon',armor:'Armor',bag:'Bag',menu:'Menu',next:'E / Space →',
- hp:'HP',st:'Stamina',food:'Food',lv:'Lv {n}',gold:'{n} gold',worldNotice:'World Notice',
+ hp:'HP',st:'Stamina',food:'Food',lv:'Lv {n}',gold:'{n} gold',worldNotice:'World Notice',selfNotice:'Notice',
  khan:'Khan the Smith',baker:'Baker',recruiter:'Hunting Party Leader',coach:'Coachman',guardian:'Guardian of the Forest',wolfN:'Grey Wolf',bearN:"Forest Bear",
  kh1:"Who are you? This is a smithy, not an inn. What do you want?",
  k2:"A blacksmith? With hands like those? Hah. Fine, we'll see. The furnace is always short on wood.",
@@ -1223,7 +1224,7 @@ for(let y=-NR;y<MH;y++)for(let x=0;x<MW;x++)if(at(x,y)===TR)VT.push(vtree(x,y,mu
 // snow); campfires burn in every town square and at every waystation for cooking and brewing.
 const CAMPS=[];
 let herbSpot=null;
-(function placeLife(){const r=mulberry32(6161),rh=mulberry32((Date.now()^0x5f3a91)>>>0),inTownT=(x,y)=>TOWNS.some(T=>x>=T.x0&&x<=T.x1&&y>=T.y0&&y<=T.y1),wetNear=(x,y)=>{for(let j=-2;j<=2;j++)for(let i=-2;i<=2;i++)if(at(x+i,y+j)===WA)return true;return false;};
+(function placeLife(){const r=mulberry32(6161),rh=mulberry32((Math.floor(Date.now()/864e5)^0x5f3a91)>>>0)/* SAT-ONLINE-044: today's layout, the same on every device (was this page load's) */,inTownT=(x,y)=>TOWNS.some(T=>x>=T.x0&&x<=T.x1&&y>=T.y0&&y<=T.y1),wetNear=(x,y)=>{for(let j=-2;j<=2;j++)for(let i=-2;i<=2;i++)if(at(x+i,y+j)===WA)return true;return false;};
  const ok=(x,y)=>{if(!(at(x,y)===GR||at(x,y)===FL||at(x,y)===SN))return false;for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++)if(SOLID[at(x+i,y+j)])return false;return true;};   // open ground, clear of trees and walls
  for(let k=0,tr=0;k<46&&tr<20000;tr++){const x=2+(rh()*(MW-4)|0),y=30+(rh()*86|0);if(!ok(x,y)||inTownT(x,y)||snowAt(x,y)||swampAt(x*TS,y*TS)||nodes.some(n=>Math.abs(n.tx-x)+Math.abs(n.ty-y)<6))continue;nodes.push({tx:x,ty:y,x:x*TS+8,y:y*TS+12,dep:0,kind:'herb',reach:14});k++;}
  for(let k=0,tr=0;k<18&&tr<20000;tr++){const x=2+(rh()*(MW-4)|0),y=4+(rh()*110|0);if(!ok(x,y)||inTownT(x,y)||!(wetNear(x,y)||snowAt(x,y))||nodes.some(n=>Math.abs(n.tx-x)+Math.abs(n.ty-y)<6))continue;nodes.push({tx:x,ty:y,x:x*TS+8,y:y*TS+12,dep:0,kind:'bherb',reach:14});k++;}
@@ -1310,7 +1311,7 @@ function startArena(){if(ARN||TWR)return;S.arenaDay=today();if(P.ride)dismount()
  fadeTo(()=>{P.x=(A.x0+4)*TS+8;P.y=171*TS+10;P.dir=2;P.hp=maxHP();P.mp=maxMP();P.cd={};camSnap=true;hudDirty=true;toast(t('arnStart'),'good');SFX.notice();});}
 function arenaSpawn(){const k=ARNK[ARN.r],A=DUN[8];
  const m=newMon(k,(A.x1-4)*TS+8,171*TS+10);m.tmp=1;m.agg=1;m.eng=99;m.arena=1;mons.push(m);ARN.m=m;
- vfx('spawn',m.x,m.y,{color:'#f2c14e'});announce(t('arnRound',{n:ARN.r+1,who:t(k+'N')}));SFX.notice();}
+ vfx('spawn',m.x,m.y,{color:'#f2c14e'});announce(t('arnRound',{n:ARN.r+1,who:t(k+'N')}),1);SFX.notice();}
 function updateArena(dt){if(!ARN||mode==='dead')return;
  if(ARN.wait>0){ARN.wait-=dt;if(ARN.wait<=0)arenaSpawn();return;}const m=ARN.m;if(!m)return;
  if(!m.dead){m.eng=99;m.agg=1;return;}
@@ -1355,7 +1356,7 @@ function twSpawn(){const f=TWR.f,L=twL(f),A=DUN[8],boss=f%10===0,near=twNear(L,T
  TWR.ms=list.map((k,i)=>{const b=MT[k],m=newMon(k,(A.x0+8+(i*5%12))*TS+8,(A.y0+5+(i*7%10))*TS+8),over=Math.max(0,L-b.lv[1]);
   m.lv=L;m.hp=m.max=Math.round(b.hp*(1+Math.max(0,L-b.lv[0])*.03)*(1+over*.04));m.dmul=1+over*.03;m.xmul=1+over*.04;m.tmp=1;m.agg=1;m.eng=99;m.tower=1;mons.push(m);
   vfx('spawn',m.x,m.y,{color:'#9a7cff'});return m;});
- announce(t(boss?'twrBoss':'twrFloor',{n:f,lv:L}));SFX.notice();}
+ announce(t(boss?'twrBoss':'twrFloor',{n:f,lv:L}),1);SFX.notice();}
 function updateTower(dt){if(!TWR||mode==='dead')return;
  if(TWR.wait>0){TWR.wait-=dt;if(TWR.wait<=0)twSpawn();return;}if(!TWR.ms)return;
  let alive=0;for(const m of TWR.ms)if(!m.dead){m.eng=99;m.agg=1;alive++;}if(!alive)twClear();}
@@ -1391,7 +1392,7 @@ function petKill(m,b){if(!S.pet)return;petXP(S.pet,Math.max(1,Math.round(m.lv/10
 function petFeed(k){const f=(S.mats.gfish||0)>0?'gfish':(S.mats.fish||0)>0?'fish':null;if(!f){SFX.deny();return toast(t('petNoFish'),'warn');}S.mats[f]--;petXP(k,f==='gfish'?150:25);toast(t('petAte',{n:t('pt_'+k)}),'good');save(true);}
 function rideOpt(k){return (S.mounts||{})[k]?healOpt():[{l:t('oBuyRide',{n:t('mt_'+k),g:MOUNTS[k].g}),pv:{ride:k},f:()=>buyRide(k)}];}
 function petOpt(k){return (S.pets||{})[k]?[]:[{l:t('oBuyPet',{n:t('pt_'+k),g:PETS[k].g}),pv:{pet:k},f:()=>buyPet(k)}];}
-function gainMount(k,drop){S.mounts=S.mounts||{};S.mounts[k]=1;S.mount=k;toast(t(drop?'rideDrop':'rideGot',{n:t('mt_'+k)}),'good');if(drop)announce(t('rideDrop',{n:t('mt_'+k)}));SFX.rare();hudDirty=true;save(true);}
+function gainMount(k,drop){S.mounts=S.mounts||{};S.mounts[k]=1;S.mount=k;toast(t(drop?'rideDrop':'rideGot',{n:t('mt_'+k)}),'good');if(drop)announce(t('rideDrop',{n:t('mt_'+k)}),1);SFX.rare();hudDirty=true;save(true);}
 function buyRide(k){const M=MOUNTS[k];if(S.lv<M.lv){SFX.deny();return toast(t('rideLv',{n:M.lv}),'warn');}if(S.gold<M.g){SFX.deny();return toast(t('noGold'),'warn');}S.gold-=M.g;SFX.coin();gainMount(k);toast(t('rideHow'),'good');}
 function buyPet(k){const Q=PETS[k];if(S.lv<Q.lv){SFX.deny();return toast(t('rideLv',{n:Q.lv}),'warn');}if(S.gold<Q.g){SFX.deny();return toast(t('noGold'),'warn');}S.gold-=Q.g;SFX.coin();S.pets=S.pets||{};S.pets[k]=1;setPet(k);}
 function setPet(k){S.pet=k||null;PET=null;if(k){toast(t('petGot',{n:t('pt_'+k)}),'good');SFX.notice();}hudDirty=true;save(true);}
@@ -1534,7 +1535,8 @@ function updateComp(dt){if(!S||!P)return;meetTick(dt);const c=MEET?COMPS[MEET.id
 // marks the spot, then the bolt hits whatever stands there (monsters 300%, the player 8% of max health).
 const WXS=20*60*1000,WXT=['clear','clear','rain','clear','fog','rain','storm','clear','clear','rain'];
 let WXF=null,wxP=[],wxBolt=4,wxFlash=0,wxAg=1,wxLast=null;
-function wxNow(){if(WXF)return WXF;const sl=Math.floor(Date.now()/WXS);return WXT[((sl*40503)>>>0)%WXT.length];}
+function wxNow(){if(WXF)return WXF;const sl=Math.floor(wNow()/WXS); // SAT-ONLINE-044: the server's clock online, so the weather is the same for everyone
+return WXT[((sl*40503)>>>0)%WXT.length];}
 const outdoors=()=>!!(P&&P.y<WMH*TS);
 function wxHere(){const w=wxNow();if(!outdoors())return 'clear';if((w==='rain'||w==='storm')&&snowAt(P.x/TS|0,P.y/TS|0))return 'snow';return w;}
 function updateWeather(dt){if(!S||!P)return;const w=wxHere();wxAg=w==='fog'?.6:1;
@@ -1623,15 +1625,16 @@ const inCastle=m=>m.x>=CAST.x0*TS&&m.x<(CAST.x1+1)*TS&&m.y>=CAST.y0*TS&&m.y<(CAS
 function castleLine(){const o=WS.castle||{},g=o.own?gName(o.own):t('gNone');return SG?t('castleOn',{g}):t('castleL',{g,m:siegeNext()});}
 function sgSpawn(type,x,y,gd){const m=newMon(type,x,y);m.tmp=1;m.eng=4;m.agg=1;m.sg=1;m.gd=gd;mons.push(m);vfx('spawn',x,y,{color:gd?gCol(gd):'#c8d4e0'});return m;}
 function sgSpot(x0,x1,y0,y1,rnd=rand){for(let i=0;i<40;i++){const tx=x0+(rnd()*(x1-x0)|0),ty=y0+(rnd()*(y1-y0)|0);if(!sol0(tx,ty)&&!sol0(tx+1,ty))return [tx*TS+8,ty*TS+8];}return [538*TS,(CAST.y1-4)*TS];}
-function startSiege(n){SG={slot:n.slot,end:n.end,def:null,atk:[],wave:0,wt:30,by:null,cap:null};announce(t('sgStart',{g:gName(WS.castle.own)}));SFX.notice();}
+function startSiege(n){SG={slot:n.slot,end:n.end,def:null,atk:[],wave:0,wt:30,by:null,cap:null,demo:!!S.__demo};if(SG.demo)return;
+ if(typeof n.slot==='number'&&wNow()-(n.end-SIEGL)>EV_LATE)toast(t('sgOngoing',{g:gName(WS.castle.own)}),'good');else{announce(t('sgStart',{g:gName(WS.castle.own)}));SFX.notice();}} // SAT-ONLINE-041: late and demo as for events
 function castleTaken(gid,remote){const o=WS.castle;o.own=gid;o.at=Date.now();if(!remote)ownPut('castle',gid);
  if(gid&&gid===S.guild){gContrib(3000);announce(t('sgWon',{g:gName(gid)}));SFX.legendary();flash();if(SG){SG.wt=30;SG.by=null;}}else toast(t('sgLost',{g:gName(gid)}),'warn');hudDirty=true;save(true);}
 function endSiege(){const G=SG;SG=null;const mine=!!(S.guild&&WS.castle.own===S.guild);
  if(mine&&G.by&&G.atk.some(m=>!m.dead&&inCastle(m)))castleTaken(G.by);else if(mine&&G.wave){gContrib(1500);toast(t('sgHeld'),'good');SFX.quest();}else toast(t('sgOver',{g:gName(WS.castle.own)}));
  mons=mons.filter(m=>!(m.sg&&!m.dead));$('sgbar').hidden=true;save(true);}
-function updateSiege(dt){if(!S||!P||!WS)return;if(!ownOff&&NET&&FB&&netUser)ownSub();const n=siegeNow();
+function updateSiege(dt){if(!S||!P||!WS)return;if(SG&&SG.demo&&!S.__demo){mons=mons.filter(m=>!(m.sg&&!m.dead));SG=null;}if(!ownOff&&NET&&FB&&netUser)ownSub();const n=siegeNow();
  // a heads-up 5 minutes and 1 minute before (owner report: they waited at the castle and it started after they left)
- if(!n&&!SGF){const m=siegeNext();if((m===5||m===1)&&sgWarn!==m){sgWarn=m;announce(t('sgSoon',{m}));SFX.notice();}else if(m>5)sgWarn=0;}
+ if(!n&&!SGF){const m=siegeNext();if((m===5||m===1)&&sgWarn!==m){sgWarn=m;if(!S.__demo){announce(t('sgSoon',{m}));SFX.notice();}}else if(m>5)sgWarn=0;}
  if(SG&&(!n||n.slot!==SG.slot))endSiege();if(!SG&&n)startSiege(n);
  if((sgT-=dt)<=0&&SG){sgT=1;const left=Math.max(0,SG.end-wNow()),b=$('sgbar');b.hidden=false;b.innerHTML=`<b>${esc(t('sgN'))}</b> · ${esc(gName(WS.castle.own))} · ${Math.floor(left/60000)}:${String(Math.floor(left/1000)%60).padStart(2,'0')}`+evArrow((CAST.x0+CAST.x1)/2,(CAST.y0+CAST.y1)/2);}
  if(!SG)return;const T=throneP(),near=Math.hypot(P.x-T.x,P.y-T.y)<560,own=WS.castle.own,mine=!!(S.guild&&own===S.guild);
@@ -1668,7 +1671,7 @@ function evSpawn(type,x,y,gen){const so=gen?sol0:solidT;if(so(x/TS|0,y/TS|0)){le
 // wild monsters living there), march in through the gates and beat up the townsfolk they find. Every wave is bigger than
 // the last and every third one brings a captain. A knocked-out NPC lies there until the invasion ends; online this is
 // shared state (WS.nko), so everyone sees the same town fall or hold.
-const NPCHP=100,npcKO=id=>!!(WS&&WS.nko&&WS.nko[id]>Date.now());
+const NPCHP=100,npcKO=id=>!!(WS&&WS.nko&&WS.nko[id]>wNow()); // the server clock, as EV.end is (SAT-ONLINE-044: a device whose clock was off saw them stand up)
 function evRef(T){const cx=T.rx*TS+8,cy=T.ry*TS+8,ms=mons.filter(m=>!m.tmp&&!m.evt&&!MT[m.type].boss&&Math.hypot(m.x-cx,m.y-cy)<760).sort((a,b)=>a.lv-b.lv);
  if(!ms.length)return {lv:10,hp:600,dmg:60,xp:50};const med=ms[ms.length>>1].lv,near=ms.filter(m=>Math.abs(m.lv-med)<=Math.max(6,med*.3)),av=f=>near.reduce((a,m)=>a+f(m),0)/near.length;
  return {lv:Math.round(med),hp:av(m=>m.max),dmg:av(m=>MT[m.type].dmg),xp:av(m=>MT[m.type].xp)};}
@@ -1686,8 +1689,15 @@ function invMarch(m,b,mr,dt){const T=TOWNS.find(T=>T.k===m.tw);
  const gx=m.goal.x-m.x,gy=m.goal.y-m.y,gd=Math.hypot(gx,gy);
  if(gd<18&&T){for(let k=0;k<8;k++){const tx=T.x0+2+(rand()*(T.x1-T.x0-4)|0),ty=T.y0+2+(rand()*(T.y1-T.y0-4)|0);if(!solidT(tx,ty)){m.goal={x:tx*TS+8,y:ty*TS+8};break;}}return;}
  chase(m,gx,gy,gd,b.spd*.95,mr,dt);m.face=gx>0?1:-1;}
+// SAT-ONLINE-044: the invaders are the host's monsters, so only the host's screen saw townsfolk fall (followers' copies don't
+// think). The client whose monster knocks one out tells everyone (news npcKO: the townsperson's index, the event slot), and
+// each client lays them down for the rest of the invasion, with the same notice.
+function npcKOSay(n){if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!EV||typeof EV.slot!=='number')return;const i=npcs.indexOf(n);if(i<0)return;NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:'npcKO',p:{f:i,lv:EV.slot%100000}});}
+function npcKOIn(m){if(!m||m.k!=='npcKO'||!NET||m.from===NET.uid||!S||S.__demo||!m.p)return;const E=EV,n=npcs[m.p.f|0];if(!E||typeof E.slot!=='number'||m.p.lv!==E.slot%100000||!n||npcKO(n.id))return;
+ WS.nko=WS.nko||{};WS.nko[n.id]=E.end;E.fallen=(E.fallen||0)+1;n.nhp=NPCHP;if(Math.hypot(n.x-P.x,n.y-P.y)<900){dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');}}
+window.__GW={ev:()=>EV&&{slot:EV.slot,k:EV.e.k},wnow:()=>wNow(),nodes:()=>nodes.map(n=>[n.kind,n.tx,n.ty]),wx:()=>wxNow(),npcs:()=>npcs.map(n=>n.id),ko:id=>npcKO(id),knock:i=>{const n=npcs[i];if(n){n.nhp=1;npcHit(n,{cap:1,face:1});}}}; // tests (SAT-ONLINE-044)
 function npcHit(n,m){const d=m.cap?18:9+(rand()*4|0);n.nhp=(n.nhp??NPCHP)-d;n.hitT=.2;m.at=0;vfx('hit',n.x,n.y-10,{angle:m.face>0?0:Math.PI});num(n.x,n.y-26,'-'+d,'#ff8a7a',false);SFX.hit();
- if(n.nhp<=0){n.nhp=NPCHP;WS.nko=WS.nko||{};WS.nko[n.id]=EV?EV.end:Date.now()+60e3;if(EV)EV.fallen=(EV.fallen||0)+1;dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');SFX.deny();if(m.nt===n)m.nt=null;}}
+ if(n.nhp<=0){n.nhp=NPCHP;WS.nko=WS.nko||{};WS.nko[n.id]=EV?EV.end:Date.now()+60e3;if(EV)EV.fallen=(EV.fallen||0)+1;npcKOSay(n);dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');SFX.deny();if(m.nt===n)m.nt=null;}}
 // townsfolk fight back: guards and trainers strike invaders from a few steps away, everyone else hits whatever is beating
 // on them. A monster struck by an NPC turns on them, and NPCs can finish monsters off (no reward for you then)
 const NPCF=/^(guard|pcap|coach|tk|ta|tw|tm|regas|khan|smith|armorer)/;
@@ -1704,7 +1714,14 @@ function evArrow(tx,ty){if(!P)return '';const dx=tx*TS+8-P.x,dy=ty*TS+8-P.y,d=Ma
 function evWhere(e){if(e.tw){const T=TOWNS.find(T=>T.k===e.tw);return ' · '+esc(t(e.tw))+(T?evArrow(T.rx,T.ry):'');}if(e.x!=null)return evArrow(e.x,e.y);return t('evAt_'+e.k)!=='evAt_'+e.k?' · '+esc(t('evAt_'+e.k)):'';}
 Object.assign(STR.ar,{evHere:'إنت هنا',evFar:'{n} خطوة',evAt_fishf:'اصطاد في أي بحيرة أو نهر',evAt_gold:'في كل حتة',evAt_guildw:'أراضي النقابات'});
 Object.assign(STR.en,{evHere:"you're here",evFar:'{n} steps',evAt_fishf:'fish at any lake or river',evAt_gold:'everywhere',evAt_guildw:'guild territories'});
-function startEvent(n){EV={e:n.e,slot:n.slot,end:n.end,kills:0,xp:0,wave:0,mons:[],fallen:0};announce(t('ev_'+n.e.k));SFX.notice();
+// the world notice goes up when the event starts, for everyone online at once (server time); a player who comes in later
+// (a reload, a new login) gets a short line that it is on, not a fresh notice as if it had just begun. The title screen's
+// demo world never runs one (owner report: the notice was missed by whoever sat on the title when it began).
+var EV_LATE=20000; // var: startSiege above reads it
+Object.assign(STR.ar,{evOngoing:'{e} شغال دلوقتي',sgOngoing:'حصار قلعة ريدان شغال دلوقتي. النقابة اللي ماسكاها: {g}'});
+Object.assign(STR.en,{evOngoing:'{e} is on now',sgOngoing:'The siege of Reidan Castle is on now. Held by: {g}'});
+function startEvent(n){EV={e:n.e,slot:n.slot,end:n.end,kills:0,xp:0,wave:0,mons:[],fallen:0,demo:!!S.__demo};if(EV.demo)return;
+ const late=typeof n.slot==='number'&&wNow()-(n.end-EVLEN)>EV_LATE;if(late)toast(t('evOngoing',{e:t('evN_'+n.e.k)}),'good');else{announce(t('ev_'+n.e.k));SFX.notice();}
  if(n.e.k==='guildw'&&WS)for(const k in WS.terr)WS.terr[k].sh=0;}
 function endEvent(){const E=EV;EV=null;evDone=E.slot;mons=mons.filter(m=>!(m.evt&&!m.dead&&E.mons.includes(m)));
  if(E.e.tw){if(WS&&WS.nko)WS.nko={};if(E.won)E.kills=Math.max(1,E.kills);npcs.forEach(n=>n.nhp=NPCHP);if(E.kills>0)toast(E.fallen?t('evFallen',{n:E.fallen}):t('evSaved'),E.fallen?'warn':'good');}
@@ -1713,8 +1730,15 @@ function endEvent(){const E=EV;EV=null;evDone=E.slot;mons=mons.filter(m=>!(m.evt
 // the town is saved: tell everyone online, so the event ends with the same notice for all (owner report: only the players
 // at Reidan saw that the invasion was over)
 function evWinSay(E){if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||typeof E.slot!=='number')return;NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:'evWin',p:{f:EVT.indexOf(E.e),lv:E.slot%100000}});}
+// a captain marches in (every third wave): the clients at the town spawn it, so they tell everyone else, once per wave
+// (SAT-ONLINE-041, owner: a world notice reaches every player)
+var evCapK=''; // '<event slot>:<wave>' already told here
+function evCapSay(E){const k=E.slot+':'+E.wave;if(evCapK===k)return;evCapK=k;setTimeout(()=>announce(t('evCap')),500);
+ if(NET&&NETTR&&NETTR.feedSay&&S&&!S.__demo&&typeof E.slot==='number')NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:'evCap',p:{f:E.wave,lv:E.slot%100000}});}
+function evCapIn(m){const n=evNow(),w=m.p&&m.p.f;if(!n||typeof n.slot!=='number'||!m.p||m.p.lv!==n.slot%100000||!(w>0))return;const k=n.slot+':'+w;if(evCapK===k)return;evCapK=k;announce(t('evCap'));SFX.notice();} // by the server clock, not EV: the news can come a frame before this client turns to the event
+window.__GN={announce:(m,own)=>announce(m,own),get EV(){return EV},get SG(){return SG},chat:()=>CHAT?CHAT.log():[]}; // tests (SAT-ONLINE-041)
 function evWinIn(m){const E=EV,f=m.p&&m.p.f;if(!E||typeof E.slot!=='number'||EVT.indexOf(E.e)!==f||m.p.lv!==E.slot%100000)return;const T=TOWNS.find(T=>T.k===E.e.tw);E.won=1;announce(t('evWon',{z:T?t(T.k):''}));SFX.legendary();for(const x of E.mons)if(!x.dead){x.dead=true;x.dying=.5;x.rt=1e9;}endEvent();}
-function updateEvents(dt){if(!S||!P)return;const n=evNow();
+function updateEvents(dt){if(!S||!P)return;if(EV&&EV.demo&&!S.__demo){mons=mons.filter(m=>!(m.evt&&EV.mons.includes(m)));EV=null;}const n=evNow();
  if(EV&&(!n||n.slot!==EV.slot))endEvent();if(!EV&&n&&n.slot!==evDone)startEvent(n);
  if((evT-=dt)<=0){evT=1;const b=$('evbar');if(!EV){b.hidden=true;}else{const left=Math.max(0,EV.end-(typeof EV.slot==='number'?wNow():Date.now())),mm=Math.floor(left/60000),ss=String(Math.floor(left/1000)%60).padStart(2,'0');b.hidden=false;b.innerHTML=`<b>${esc(t('evN_'+EV.e.k))}</b> · ${mm}:${ss}`+evWhere(EV.e)+(EV.e.tw?` · ${esc(t('evWaveN',{n:EV.wave,m:EVW}))}`:'')+(EV.e.mob||EV.e.k==='fboss'?` · ${esc(t('evKills',{n:EV.kills}))}`:'');}}
  if(!EV)return;const e=EV.e;npcFight(dt);
@@ -1725,7 +1749,7 @@ function updateEvents(dt){if(!S||!P)return;const n=evNow();
   const st=typeof EV.slot==='number'?EV.end-EVLEN:EV.end-(EVF&&EVF.ms||60000),due=Math.min(EVW,Math.max(0,Math.floor(((typeof EV.slot==='number'?wNow():Date.now())-st-2000)/EVWG)+1));
   if(due>EV.wave&&alive<50){EV.wave=due;if(!EV.ref)EV.ref=evRef(T);const rnd=mulberry32((((typeof EV.slot==='number'?EV.slot:0)*977+EV.wave*131+e.k.length*7)>>>0)||1),gs=evGates(T,rnd),n=Math.min(30,5+3*(EV.wave-1)),ml=e.mob;
    if(gs.length){for(let i=0;i<n;i++)invSpawn(ml[(rnd()*ml.length)|0],gs[(i+EV.wave)%gs.length],T,false,rnd);if(EV.wave%3===0)invSpawn(ml[ml.length-1],gs[(rnd()*gs.length)|0],T,true,rnd);}
-   toast(t(EV.wave===1?'evSiege':'evWave',{n:EV.wave,z:t(T.k),c:n}),'warn');if(EV.wave%3===0)setTimeout(()=>announce(t('evCap')),500);}}}
+   toast(t(EV.wave===1?'evSiege':'evWave',{n:EV.wave,z:t(T.k),c:n}),'warn');if(EV.wave%3===0)evCapSay(EV);}}}
 
  if(e.k==='fboss'&&!EV.boss){const cx=e.x*TS+8,cy=e.y*TS+8;if(Math.hypot(P.x-cx,P.y-cy)<600){let x=cx,y=cy;for(let r=0;r<10&&sol0(x/TS|0,y/TS|0);r++){x+=16;}EV.boss=evSpawn('warlord',x,y,1);EV.boss.ek=1;EV.mons.push(EV.boss);SFX.slam();shake=.4;}}}
 
@@ -2114,9 +2138,9 @@ function setBon(k){let v=0;for(const sk in SETS){const c=setTier(sk);if(c&&SETS[
 // fighting with worn gear a reminder comes back every 40 seconds
 let durRemT=0;
 function wear(i,p){if(!i||rand()>=p)return;const d=durOf(i);if(d<=0)return;i.dur=d-1;
- if(i.dur===0){announce(t('brokeT',{it:inm(i)}));SFX.deny();shake=.15;hudDirty=true;}
+ if(i.dur===0){announce(t('brokeT',{it:inm(i)}),1);SFX.deny();shake=.15;hudDirty=true;}
  else if(i.dur===40)toast(t('durNote',{it:inm(i),n:40}));else if(i.dur===20){toast(t('lowDur',{it:inm(i),n:20}),'warn');SFX.notice();}
- else if(i.dur===10||i.dur===5){announce(t('durCrit',{it:inm(i),n:i.dur}));SFX.deny();}
+ else if(i.dur===10||i.dur===5){announce(t('durCrit',{it:inm(i),n:i.dur}),1);SFX.deny();}
  else if(i.dur<=20&&gTime>durRemT){durRemT=gTime+40;toast(t('lowDur',{it:inm(i),n:i.dur}),'warn');}}
 function atkV(){return Math.round(iAtk(weapon())*dmgMult()*(P&&P.icb>0?icbM():1));}
 function defV(){let d=0;for(const sl of GEAR){const i=eqIt(sl);if(i)d+=iDef(i);}return Math.round((d+Math.floor(stat('sta')*.15))*(P&&P.icb>0?icbM():1));}
@@ -2301,7 +2325,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);
  if(burn&&!S.burnSeen){S.burnSeen=1;toast(t('burn'),'good');}else if(burn)num(m.x,my-18,lang==='ar'?'لهب!':'FLAME','#ff9a2a',false);
  if(!netHit(m,dmg)&&m.hp<=0)killMon(m);return crit||burn?2:1;}
 function tryAttack(ax,ay,mul){
- if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);
+ if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);if(PVP)pvpSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
  if(k==='bow'||k==='staff'){if(k==='bow'&&ipOn('larrow')){shoot('magic',ax,ay,(mul||1)*1.1,{pierce:1});return;}shoot(k==='bow'?'arrow':'magic',ax,ay,mul||1);return;}
  P.slash={t:.14,a:Math.atan2(ay,ax)};if(FXME)fxR(['w',Math.round(P.slash.a*100)/100]);SFX.swing();vfx('slash',P.x+ax*4,P.y-7+ay*4,{angle:P.slash.a,rarity:weapon().r||0});
@@ -2332,13 +2356,14 @@ function guardOff(){if(P)P.guard=0;}
 function guardArc(x,y,a,k,fort){const cx=Math.round(x),cy=Math.round(y)-8;ctx.save();ctx.fillStyle=`rgba(120,190,255,${.1+.14*k})`;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,14,a-.95,a+.95);ctx.closePath();ctx.fill();ctx.strokeStyle=`rgba(190,230,255,${.45+.5*k})`;ctx.lineWidth=2;ctx.beginPath();if(fort)ctx.arc(cx,cy,14,0,7);else ctx.arc(cx,cy,14,a-.95,a+.95);ctx.stroke();ctx.restore();}
 function drawGuard(){if(P.guard)guardArc(P.x,P.y,Math.atan2(P.gy,P.gx),P.gT<.22?1:.55,P.fort>0);
  const g=P.gd??100;if(g<100||P.guard){const x=Math.round(P.x)-9,y=Math.round(P.y)+3;ctx.fillStyle='rgba(10,16,30,.6)';ctx.fillRect(x,y,18,3);ctx.fillStyle=g<30?'#ff8a5a':'#8fd0ff';ctx.fillRect(x+1,y+1,Math.round(16*g/100),1);}}
-function hurtPlayer(d,ml,src){if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(src&&src.dmul)d*=src.dmul;
- if(P.qm>0&&rand()<.3){num(P.x,P.y-20,t('ipEvade'),'#9fe39a',false);P.inv=.3;return 0;}
- const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){num(P.x,P.y-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
+function hurtPlayer(d,ml,src){return asMe(()=>hurtPlayer0(d,ml,src));}
+function hurtPlayer0(d,ml,src){if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(src&&src.dmul)d*=src.dmul;
+ if(P.qm>0&&rand()<.3){numP(-20,t('ipEvade'),'#9fe39a',false);P.inv=.3;return 0;}
+ const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
  d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,2.2)*150/(150+defV())));if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
  if(P.guard&&src){const sx=src.x-P.x,sy=src.y-P.y,sl=Math.hypot(sx,sy)||1;
   const GK=S.cls==='gknight';if(P.fort>0||(sx*P.gx+sy*P.gy)/sl>-.15){const ang=Math.atan2(sy,sx),bx=P.x+sx/sl*10,by=P.y-8+sy/sl*10;vfx('block',bx,by,{angle:ang});
-   if(!src.hv&&P.gT<(GK?.18:.12)*clamp(1-((ml||S.lv)-S.lv)*.015,.6,1)){vfx('crit',bx,by);qEvent('block','guard');num(P.x,P.y-24,t('parry'),'#9fe3ff',false);SFX.crit();P.inv=.35;P.gd=Math.min(100,P.gd+15);
+   if(!src.hv&&P.gT<(GK?.18:.12)*clamp(1-((ml||S.lv)-S.lv)*.015,.6,1)){vfx('crit',bx,by);qEvent('block','guard');numP(-24,t('parry'),'#9fe3ff',false);SFX.crit();P.inv=.35;P.gd=Math.min(100,P.gd+15);
     const mb=src.type&&MT[src.type];if(mb&&!src.dead){src.st=null;src.tele=0;src.combo=0;src.stun=mb.boss?.5:1.3;src.cd=Math.max(src.cd||0,1);vfx('stun',src.x,src.y-(mb.oy||16),{life:src.stun});}return 0;}
    P.gd-=P.fort>0?0:(18+70*d/maxHP())*(GK?.6:1);qEvent('block','guard');if(P.fort>0&&src.type&&!src.dead)hitMon(src,.3,{skill:1});
    if(P.gd<=0){P.gd=0;P.guard=0;P.gdT=1.6;d=Math.round(d*.6);P.stun=1;vfx('stun',P.x,P.y-24,{life:1});toast(t('guardBreak'),'warn');}
@@ -2346,7 +2371,7 @@ function hurtPlayer(d,ml,src){if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wa
  if(P.prov>0)d=Math.max(1,Math.round(d*.8));
  if(P.ride&&S.mount)d=horseHit(d);P.hp-=d;ipHurt(d);P.inv=blk?.35:.7;{const gs=GEAR.map(eqIt).filter(Boolean);if(gs.length)wear(gs[rand()*gs.length|0],.2);}
  if(!blk){shake=.18;vfx('blood',P.x,P.y-10,{});if(d>=maxHP()*.4&&P.hp>0&&!(P.sImm>0)){P.stun=1;P.sImm=3;vfx('stun',P.x,P.y-24,{life:1});toast(t('stunned'),'warn');}SFX.hurt();}else SFX.hit();
- num(P.x,P.y-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);
+ numP(-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);
  if(P.hp<=0){if(S.tl.legend&&S.immT<=0){P.hp=1;S.immT=120;P.inv=1.5;toast(t('immune'),'good');flash();SFX.notice();}else die();}return blk?1:2;}
 // Satisfy-style death: the body breaks into light, the world goes grey, then respawn
 function deathPenalty(){const loss=Math.round(xpNeed()*.5);let lv='';
@@ -2355,7 +2380,7 @@ function deathPenalty(){const loss=Math.round(xpNeed()*.5);let lv='';
 function die(){if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(mode==='dead')return;['inv','statusW','eqW','logW','mapW','qdW','forge','pauseScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
 const xpNeed=()=>40+S.lv*30+S.lv*S.lv*3;
 const PTS_LV=10; // stat points per level-up (canon)
-function gainXP(n){S.xp+=Math.round(n);while(S.xp>=xpNeed()){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}));flash();SFX.rare();if(P)vfx('levelup',P.x,P.y);},600);}P.hp=maxHP();if(P)vfx('levelup',P.x,P.y);toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();checkSkills();}hudDirty=true;}
+function gainXP(n){S.xp+=Math.round(n);while(S.xp>=xpNeed()){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}),1);flash();SFX.rare();if(P)asMe(()=>vfx('levelup',P.x,P.y));},600);}P.hp=maxHP();if(P)asMe(()=>vfx('levelup',P.x,P.y));toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();checkSkills();}hudDirty=true;}
 // loot feed: what you just gained slides in at the side as a system box (+n name icon); the same thing again within a few
 // seconds adds to its box instead of stacking a new one
 const LOOT={};
@@ -2381,7 +2406,7 @@ function killMon(m){const b=MT[m.type];m.dead=true;if(PRAID&&b.boss&&!m.praidKil
  hudDirty=true;save(true);}
 function giveTitle(id){if(S.tl[id])return;S.tl[id]=1;if(!S.title&&TLS[id])S.title=id;sbSig='';setTimeout(()=>{toast(t('newTitleX',{t:t('tl_'+id)}),'good');SFX.notice();},900);}
 // potions: Q heals 40% HP, F restores 50% MP; a shared 5 s cooldown keeps them from replacing dodging
-const POT={hpot:{key:'KeyQ',price:30,f:()=>{const h=Math.round(maxHP()*.4);P.hp=Math.min(maxHP(),P.hp+h);num(P.x,P.y-26,'+'+h,'#7ae07a',false);vfx('heal',P.x,P.y);}},mpot:{key:'KeyF',price:25,f:()=>{const v=Math.round(maxMP()*.5);P.mp=Math.min(maxMP(),P.mp+v);num(P.x,P.y-26,'+'+v,'#7ab0ff',false);vfx('mana',P.x,P.y-8);}}};
+const POT={hpot:{key:'KeyQ',price:30,f:()=>{const h=Math.round(maxHP()*.4);P.hp=Math.min(maxHP(),P.hp+h);numP(-26,'+'+h,'#7ae07a',false);asMe(()=>vfx('heal',P.x,P.y));}},mpot:{key:'KeyF',price:25,f:()=>{const v=Math.round(maxMP()*.5);P.mp=Math.min(maxMP(),P.mp+v);numP(-26,'+'+v,'#7ab0ff',false);asMe(()=>vfx('mana',P.x,P.y-8));}}};
 function drink(k){if(!S||mode==='dead')return;const n=S[k]||0;if(n<=0){toast(t('noPot',{p:t(k)}),'warn');SFX.deny();return;}if((P.pcd||0)>0){SFX.deny();return;}if(k==='hpot'?P.hp>=maxHP():P.mp>=maxMP()){toast(t(k==='hpot'?'hpFull':'mpFull'),'warn');SFX.deny();return;}S[k]=n-1;P.pcd=5;POT[k].f();SFX.eat();hudDirty=true;sbSig='';}
 function buyPot(who,k){if((S[k]||0)>=10)return shopD(who,'potFull');const g=price(who,POT[k].price);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;S[k]=(S[k]||0)+1;SFX.coin();num(P.x,P.y-26,'-'+g+'G','#f2c14e',false);toast(t('got',{n:1,item:t(k)}));hudDirty=true;shopD(who,'potBuy');}
 const potOpts=who=>['hpot','mpot'].map(k=>{const g=price(who,POT[k].price);return{l:t('oBuyPot',{p:t(k),g}),ic:k,st:`${t(k+'D')} (${S[k]||0}/10)`,poor:S.gold<g,f:()=>buyPot(who,k)};});
@@ -2456,7 +2481,7 @@ function uprootTile(x,y){if(at(x,y)!==TR)return;const n={};for(const [a,b] of [[
  gg.putImageData(new ImageData(SA.tiles.ground(TENV,x,y,0),16,16),x*TS,y*TS);}
 function uproot(tr){if(treeBound(tr.tx,tr.ty)){toast(t('rootBound'),'warn');SFX.deny();return;}tr.rh=(tr.rh||0)+1;SFX.chop();shake=.1;vfx('dust',tr.x,tr.y,{n:6});
  if(tr.rh<3){num(tr.x,tr.y-20,t('rootHit',{n:tr.rh}),'#c8a070',false);return;}WS.roots=WS.roots||{};WS.roots[tr.k]=1;uprootTile(tr.tx,tr.ty);addMat('wood',2);toast(t('rootDone'),'good');save(true);}
-function labor(c){if((P.lcd||0)>0)return false;P.lcd=.35;P.lbT=1.6;if(P.st>=c){P.st-=c;return true;}P.st=0;const h=Math.max(1,Math.ceil(maxHP()*.05));P.hp=Math.max(1,P.hp-h);num(P.x,P.y-22,'-'+h,'#ff6a5a',false);SFX.hurt();if(!(P.lwT>gTime)){P.lwT=gTime+4;toast(t('workTired'),'warn');}hudDirty=true;return true;}
+function labor(c){if((P.lcd||0)>0)return false;P.lcd=.35;P.lbT=1.6;if(P.st>=c){P.st-=c;return true;}P.st=0;const h=Math.max(1,Math.ceil(maxHP()*.05));P.hp=Math.max(1,P.hp-h);numP(-22,'-'+h,'#ff6a5a',false);SFX.hurt();if(!(P.lwT>gTime)){P.lwT=gTime+4;toast(t('workTired'),'warn');}hudDirty=true;return true;}
 function chop(tr){{const st=(chopped.get(tr.k)||0)>gTime;if(!(st&&treeBound(tr.tx,tr.ty))&&!labor(st?14:10))return;}if((chopped.get(tr.k)||0)>gTime)return uproot(tr);chopped.set(tr.k,gTime+45);addMat('wood',1);S.chops=(S.chops||0)+1;if(S.chops>=40&&!S.hid.pers){S.hid.pers=10;setTimeout(()=>{toast(t('persOpen'),'good');SFX.notice();},600);}else if(S.hid.pers&&S.chops%40===0)S.hid.pers++;SFX.chop();setTimeout(()=>noise(.35,.18,260),120);shake=.08;
  fx.push({img:tr.cn,x:tr.tx*TS-6,y:tr.ty*TS-11,vx:0,vy:22,t:.7,fl:1});
  for(let i=0;i<16;i++)fx.push({x:tr.x+(rand()-.5)*14,y:tr.y-14-rand()*10,vx:(rand()-.5)*80,vy:-rand()*60,t:.6,c:rand()<.5?'#3f8a44':'#58a65a'});
@@ -3170,19 +3195,29 @@ function cancelQ(){const id=qdId,s=id&&S.qs[id];if(!s||s.st!==1)return;const b=$
 function closeQD(){SFX.close();$('qdW').hidden=true;mode='play';}
 function closeLog(){SFX.close();$('logW').hidden=true;mode='play';}
 function toggleQuest(){$('quest').classList.toggle('min');SFX.click();}
-let annT=0;function announce(msg){logMsg(msg);$('anntext').textContent=msg;$('announce').hidden=false;annT=5;}
+// SAT-ONLINE-041 (owner 2026-10-19): "World Notice" only for what every player online gets (events, sieges, the news feed);
+// your own moments (a broken item, a tower floor, an arena round, an advancement) say "Notice". A world notice also stays
+// in the chat as a line of its own, so whoever was away from the screen or in a menu can still read it.
+let annT=0;function announce(msg,own){logMsg(msg);const W=$('announce');W.querySelector('.head').textContent=t(own?'selfNotice':'worldNotice');W.classList.toggle('own',!!own);
+ $('anntext').textContent=msg;W.hidden=false;annT=5;if(!own&&CHAT&&CHAT.note&&S&&!S.__demo)CHAT.note(msg);}
 // SAT-ONLINE-026 (owner feedback 12): announcements about you, and the story notices (annGrid), also reach everyone online
 // through the news feed, named by your account ID. A story notice is shown once per character, whoever's clock fires it first.
-const NEWS=['evWin','castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
+const NEWS=['evWin','evCap','castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
 function annArgs(p,n){const o={...p,n};if('rk' in o){o.r=t('r'+o.rk);delete o.rk;}return o;}
 function annW(k,p){p=p||{};announce(t(k,annArgs(p,t('pname'))));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo)return;
  const q={};for(const f of ['lv','f','rk'])if(typeof p[f]==='number')q[f]=p[f];NETTR.feedSay('news',Object.assign({from:NET.uid,h:netId||S.look.n,k},Object.keys(q).length?{p:q}:{}));}
 function newsIn(m){if(!m||!NEWS.includes(m.k)||!NET||m.from===NET.uid||isBlocked(m.from)||!S||S.__demo)return;
  if(m.k==='annGrid'){if(S.ev.grid)return;S.ev.grid=1;announce(t('annGrid'));SFX.notice();return;}
  if(m.k==='evWin'){evWinIn(m);return;}
+ if(m.k==='evCap'){evCapIn(m);return;}
  if(m.k==='terrNews'||m.k==='castNews'){const T=TERR[m.p&&m.p.f|0];announce(t(m.k,{n:Satisfy.chat.clean(m.h,24)||'?',t:T?t(T.k):''}));SFX.notice();return;}
  const p={};for(const f of ['lv','f','rk'])if(m.p&&typeof m.p[f]==='number')p[f]=m.p[f];announce(t(m.k,annArgs(p,Satisfy.chat.clean(m.h,24)||'?')));SFX.notice();}
 function num(x,y,s,c,big){nums.push({x,y,s,c,big,t:.9});}
+// SAT-ONLINE-043 (owner 2026-10-19: when someone takes damage, the others don't see the number): a number over your own player
+// (damage taken, a heal, a parry, a skill's name; not gold) also goes out with your effects and shows over you on every screen
+function numP(dy,s,c,big){num(P.x,P.y+dy,s,c,big);if(NET&&typeof fxR==='function'&&mode!=='title')try{fxR(['n',String(s).slice(0,16),String(c||'#ffffff').slice(0,7),big?1:0,dy]);}catch(e){}}
+// the effects of being hit or healed are your own too: record them like the ones your actions make (meRun)
+function asMe(fn){if(!NET||FXME||!FXREC)return fn();FXME=1;try{return fn();}finally{FXME=0;}}
 let qLast='';const SBL={}; // the pale trail on each bar: holds 0.45 s where the bar was, then slides down at 50% a second
 function updateHUD(){const mh=maxHP();P.hp=Math.min(P.hp,mh);
  $('lv').textContent=t('lv',{n:S.lv});const now=performance.now(),sbW=(k,f)=>{f=Math.max(0,Math.min(100,f));const L=SBL[k]=SBL[k]||{v:f,t:now,u:now};if(f>=L.v){L.v=f;L.t=now;}else{if(f<(L.f??f)-.05)L.t=now;if(now-L.t>450)L.v=Math.max(f,L.v-(now-L.u)*.05);}L.u=now;L.f=f;$(k+'b').style.width=f+'%';$(k+'l').style.width=L.v+'%';};
@@ -3301,7 +3336,7 @@ function useSlot(i){const k=barSkills()[i];if(!k){SFX.deny();return;}const d=SKD
  if((P.cd[k]||0)>0||P.dash>0){SFX.deny();return;}
  const wk=weapKind();if((d.need==='bow'&&wk!=='bow')||(d.need==='staff'&&wk!=='staff')||(d.need==='melee'&&(wk==='bow'||wk==='staff'))){toast(t(d.need==='bow'?'needBow':d.need==='staff'?'needStaff':'needMelee'),'warn');SFX.deny();return;}
  if(P.mp<mpC(k)){toast(t('noMP'),'warn');SFX.deny();return;}
- P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k);SKC={k,t:gTime};skUse(k);const el=$('skillbar').children[i];if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}SKF[k]();skVfx(k);num(P.x,P.y-34,t('sk_'+k),d.col,false);hudDirty=true;}
+ P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k);SKC={k,t:gTime};skUse(k);const el=$('skillbar').children[i];if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}SKF[k]();skVfx(k);numP(-34,t('sk_'+k),d.col,false);hudDirty=true;}
 function skVfx(k){const v=fdir(),a=Math.atan2(v[1],v[0]);({whirl:()=>{for(let i=0;i<4;i++)vfx('slash',P.x,P.y-7,{angle:a+i*Math.PI/2,rarity:2});},charge:()=>vfx('dust',P.x,P.y,{n:10,angle:a+Math.PI}),nova:()=>vfx('frost',P.x,P.y-6),bolt:()=>vfx('bolt',P.x,P.y-10,{x1:P.x+v[0]*90,y1:P.y-10+v[1]*90}),smash:()=>{vfx('hit',P.x+v[0]*12,P.y-4+v[1]*12);vfx('dust',P.x+v[0]*12,P.y+v[1]*12,{n:10});},focus:()=>vfx('mana',P.x,P.y-8),rage:()=>vfx('rage',P.x,P.y),roar:()=>vfx('heal',P.x,P.y),cry:()=>vfx('rage',P.x,P.y),strike:()=>vfx('crit',P.x+v[0]*14,P.y-7+v[1]*14)}[k]||(()=>{}))();}
 function checkSkills(){pasSkills().forEach(k=>{if(!S.sk[k]){S.sk[k]=1;setTimeout(()=>{toast(t('pasNew',{s:t('sk_'+k)}),'good');SFX.notice();},500);}});clsSkills().forEach(k=>{if(skOK(k)&&!S.sk[k]){S.sk[k]=1;let i=barSkills().indexOf(k);if(i<0){const b=barSkills().slice(0,5),e=b.indexOf(null);if(e>=0){b[e]=k;S.bar=b;i=e;}}setTimeout(()=>{toast(i<0?t('skNewC',{s:t('sk_'+k)}):t('skNew',{s:t('sk_'+k),k:keyName(KB[i])}),'good');SFX.notice();},500);}});sbSig='';}
 /* item skills (owner 2026-10-19, "weapons and rings that come with an active skill while you use them, as in the novel"):
@@ -3745,6 +3780,7 @@ function update(dt){
   if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}continue;}
   if(m.mvd)m.at=(m.at||0)+dt;m.mvd=0;m.t+=dt;if(m.grdT>0)m.grdT-=dt;m.cd-=dt;if(m.hurt>0)m.hurt-=dt;if(m.weak>0)m.weak-=dt;if(m.stun>0){m.stun-=dt;continue;}
   if(MOBN&&MOBN.host===NET.uid&&MOBN.rs&&MOBN.rs.length&&!b.boss){const tg=mobTarget(m);if(tg){MOBP=P;P=tg;}} // host: it may be after another player
+  if(MOBN&&MOBN.host===NET.uid)m.tgU=P.remote||NET.uid; // SAT-ONLINE-042: the player it is after goes out with each action
   const dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=m.type==='guardian'?10:Math.max(3,b.r-3);
   if(b.boss){
    if(Math.hypot(P.x-m.sx,P.y-m.sy)>b.leash){const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);if(hd>2)move(m,hx/hd*30*dt,hy/hd*30*dt,mr);m.hp=Math.min(m.max,m.hp+m.max*.006*dt);m.tele=0;continue;}
@@ -3754,8 +3790,8 @@ function update(dt){
    const enr=m.hp<m.max/2,sp=b.spd*(enr?1.3:.9)*(1+(m.ph||0)*.08);
    if(m.tele>0){m.tele-=dt;if(m.tele<=0){shake=.4;SFX.slam();if(d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}if(m.type==='guardian')slamAllies(m);for(let i=0;i<24;i++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:'#8a8f99'});}m.scd=(enr?1.7:2.6)-(m.ph||0)*.25;
     if(m.ph>=2)for(let i=0;i<10;i++){const a=i/10*6.283+rand()*.2;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*120,vy:Math.sin(a)*120,t:1.4,m,mv:{mul:.35},sp:'rock',a});}}}
-   else{if(d>14)chase(m,dx,dy,d,sp,mr,dt);m.scd-=dt;if(m.scd<=0&&d<b.slamR*1.5&&seeP(m))m.tele=.9;}
-   if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1.1;}
+   else{if(d>14)chase(m,dx,dy,d,sp,mr,dt);m.scd-=dt;if(m.scd<=0&&d<b.slamR*1.5&&seeP(m)){m.tele=.9;mobActN(m);}}
+   if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1.1;mobBite(m);}
    m.face=dx>0?1:-1;continue;}
   const ag=(b.aggro||(m.agg?80:0))*wxAg,AI=AIK[m.type];
   if(m.evt&&m.goal){if(m.ret){m.ret=0;m.retT=0;m.path=null;}if(!(d<ag&&!P.ghost)&&!(m.eng>0&&d<ag*2.4)){m.eng=Math.max(0,m.eng-dt);m.st=null;m.tele=0;invMarch(m,b,mr,dt);continue;}}
@@ -3765,7 +3801,7 @@ function update(dt){
   // takes it further from you and from its spawn for a while
   const eng=ag&&(!safe||m.evt)&&(d<ag||(m.eng>0&&(d<ag*2.4||m.fl&&m.fd>0&&m.fd<=MFAR)));
   if(eng){m.eng=4;if(!m.goal&&Math.hypot(m.x-m.sx,m.y-m.sy)>(m.fl?MFAR*TS:AI?260:200)){m.ret=1;m.eng=0;m.fl=0;continue;}
-   if(AI){packTick(m,AI,dt);monAct(m,b,AI,dx,dy,d,mr,dt);}else{if(d>6)chase(m,dx,dy,d,b.spd,mr,dt);m.face=dx>0?1:-1;if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;}}}
+   if(AI){packTick(m,AI,dt);monAct(m,b,AI,dx,dy,d,mr,dt);}else{if(d>6)chase(m,dx,dy,d,b.spd,mr,dt);m.face=dx>0?1:-1;if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;mobBite(m);}}}
   else{m.eng-=dt;m.st=null;m.tele=0;m.wt-=dt;if(m.wt<=0){m.wt=1+rand()*2.5;const back=Math.hypot(m.sx-m.x,m.sy-m.y)>50;if(back){const l=Math.hypot(m.sx-m.x,m.sy-m.y);m.wx=(m.sx-m.x)/l;m.wy=(m.sy-m.y)/l;}else if(rand()<.5){m.wx=0;m.wy=0;}else{const a=rand()*6.28;m.wx=Math.cos(a);m.wy=Math.sin(a);}}
    move(m,m.wx*b.spd*.25*dt,m.wy*b.spd*.25*dt,mr);if(m.wx)m.face=m.wx>0?1:-1;}
  }catch(err){gameErr(err,m);}finally{if(MOBP){P=MOBP;MOBP=null;}}}
@@ -3835,11 +3871,11 @@ function monAct(m,b,AI,dx,dy,d,mr,dt){m.atkT=Math.max(0,(m.atkT||0)-dt);
   if(mv.k==='leap'||mv.k==='line'){m.st='dash';m.stT=mv.dashT;m.hitDone=0;m.atkT=mv.dashT+.1;m.dsp=mv.k==='leap'?(m.lL||40)/mv.dashT:mv.dash;
    if(mv.k==='leap')SFX.dodge();else vfx('dust',m.x,m.y,{n:8,angle:Math.atan2(-m.ay,-m.ax)});return;}
   if(mv.k==='blink'){const bx=P.x+fx_*16,by=P.y+fy_*12;vfx('dust',m.x,m.y,{n:6});if(!hitBox(bx,by,mr)){m.x=bx;m.y=by;}vfx('dust',m.x,m.y,{n:6});SFX.dodge();const ax=P.x-m.x,ay=P.y-m.y,al=Math.hypot(ax,ay)||1;m.ax=ax/al;m.ay=ay/al;m.face=ax>0?1:-1;
-   m.mv={k:'arc',tele:.16,reach:26,arc:1.3,mul:mv.mul,rec:mv.rec,cd:mv.cd};m.st='tele';m.stT=m.tele=.16;return;}
+   m.mv={k:'arc',tele:.16,reach:26,arc:1.3,mul:mv.mul,rec:mv.rec,cd:mv.cd,blk:1};m.st='tele';m.stT=m.tele=.16;mobActN(m);return;}
   m.atkT=.25;
   if(mv.k==='ring'){shake=Math.max(shake,.2);SFX.slam();vfx('dust',m.x,m.y,{n:14});for(let k=0;k<16;k++){const a=k/16*6.28;fx.push({x:m.x+Math.cos(a)*mv.reach*.8,y:m.y+Math.sin(a)*mv.reach*.45,vx:Math.cos(a)*30,vy:-rand()*50,t:.45,c:'#8a8f99'});}if(d<mv.reach+4)hitBy(m,b,mv);if(mv.pull&&d<mv.reach*1.6&&seeP(m)&&P.dash<=0)move(P,-fx_*Math.min(mv.pull,d-8),-fy_*Math.min(mv.pull,d-8),4);}
   else if(mv.k==='arc'){const ang=Math.atan2(dy,dx)-Math.atan2(m.ay,m.ax),da=Math.abs(Math.atan2(Math.sin(ang),Math.cos(ang)));vfx('slash',m.x+m.ax*8,m.y-8+m.ay*8,{angle:Math.atan2(m.ay,m.ax),rarity:0});if(d<mv.reach+6&&da<mv.arc)hitBy(m,b,mv);
-   if((m.combo||0)>1){m.combo--;m.stT=m.tele=mv.tele*.6;return;}}
+   if((m.combo||0)>1){m.combo--;m.stT=m.tele=mv.tele*.6;mobActN(m);return;}}
   else if(mv.k==='shot'){eproj.push({x:m.x+m.ax*8,y:m.y-10+m.ay*8,vx:m.ax*mv.spd,vy:m.ay*mv.spd,t:mv.max/mv.spd+.3,m,mv,sp:mv.sp,a:Math.atan2(m.ay,m.ax)});SFX.dodge();}
   else if(mv.k==='buff'){vfx('rage',m.x,m.y);SFX.notice();for(const o of mons)if(!o.dead&&AIK[o.type]===AI&&Math.hypot(o.x-m.x,o.y-m.y)<130){o.sprT=3;o.tired=0;o.cd=Math.min(o.cd,.3);o.eng=4;o.agg=1;}}
   m.st='rec';m.stT=mv.rec;return;}
@@ -3857,7 +3893,7 @@ function monAct(m,b,AI,dx,dy,d,mr,dt){m.atkT=Math.max(0,(m.atkT||0)-dt);
  const ph=phaseOf(m);
  if(ph==='back'&&d<130){const R=AI==='hop'?46:96,tx=P.x-fx_*R,ty=P.y-fy_*R*.8,tdx=tx-m.x,tdy=ty-m.y,td=Math.hypot(tdx,tdy);if(td>6)chase(m,tdx,tdy,td,sp*.9,mr,dt);return;}
  // free: maybe start a move, otherwise position by style
- if(m.cd<=0&&busyIn(m)<2&&seeP(m)){const i=pickMove(m,d);if(i>=0){const v=movesOf(m)[i];m.mv=v;m.last=i;if(v.once)m.once[i]=gTime+v.once;m.st='tele';m.stT=m.tele=v.tele;m.ax=fx_;m.ay=fy_;m.combo=v.combo||0;if(v.k==='leap')m.lL=Math.min(v.max,d)+14;return;}}
+ if(m.cd<=0&&busyIn(m)<2&&seeP(m)){const i=pickMove(m,d);if(i>=0){const v=movesOf(m)[i];m.mv=v;m.last=i;if(v.once)m.once[i]=gTime+v.once;m.st='tele';m.stT=m.tele=v.tele;mobActN(m);m.ax=fx_;m.ay=fy_;m.combo=v.combo||0;if(v.k==='leap')m.lL=Math.min(v.max,d)+14;return;}}
  if(AI==='lunge'||AI==='hop'){const R=AI==='hop'?26:72,a=monHash(m)*6.28+gTime*.35,tx=P.x+Math.cos(a)*R,ty=P.y+Math.sin(a)*R*.72,tdx=tx-m.x,tdy=ty-m.y,td=Math.hypot(tdx,tdy);
   if(td>4)chase(m,tdx,tdy,td,sp,mr,dt);return;}
  if(AI==='charge'){if(d>28)chase(m,dx,dy,d,sp,mr,dt);else move(m,-fx_*sp*.4*dt,-fy_*sp*.4*dt,mr);return;}
@@ -4120,6 +4156,7 @@ window.__G.defs=Satisfy.local.defs;
 /* ---------------- online (opt-in: ?net=local) ---------------- */
 // Other players come from Satisfy.presence over a transport; nothing here changes offline play.
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
+let PVP=null; // SAT-ONLINE-038 open PvP (declared first: ?net=local starts during load)
 let NET=null,NETTR=null,netLinkT=0,netReplaced=false,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null,CHAT=null,chatSig='',PCTX=null,pctxSig='',EMO=null,emoLast=-1e9;const PARTY_R=40,BLK=Satisfy.chat.blocklist(); // CHAT/BLK: SAT-ONLINE-016 (declared here: ?net=local starts during load)
 // Twister 2026-10-19: the public site opens online with no ?net=online; ?net=off plays offline there, ?net=local stays for two-tab tests.
 // The switch is Satisfy.netOnlineOnly (src/net/firebase-config.js): true on the GitHub Pages host, so local files and the test
@@ -4172,7 +4209,7 @@ function netTick(){NET.tick();const live=netLive();
  if(PRAID)PRAID.tick();
  mobTick(live);
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
- if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic()}),netForce);netForce=false;}
+ if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic(),ol:outlaw()}),netForce);netForce=false;}
  partyUI(live);chatUI(live);pctxUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
  const netSafe=live&&Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
@@ -4217,7 +4254,8 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
  else if(ty==='f'&&ev[3]&&typeof ev[3]==='object'){const o={};for(const q in ev[3]){const v=ev[3][q];if(q==='x')o.x=x+n(v);else if(q==='y')o.y=y+n(v);else if(q==='bolt'&&Array.isArray(v))o.bolt=v.map(p=>[x+n(p&&p[0]),y+n(p&&p[1])]);else if(typeof v!=='object')o[q]=v;}if(!(o.t>0))return;o.t=Math.min(o.t,3);fx.push(o);}
  else if(ty==='j'&&['arrow','magic','fire','wave'].includes(ev[3]))proj.push({kind:ev[3],x:x+n(ev[4]),y:y+n(ev[5]),vx:n(ev[6]),vy:n(ev[7]),t:Math.min(2,n(ev[8])/100),ghost:1,hit:new Set()});
  else if(ty==='w')s.sw={a:n(ev[3]),t:performance.now()};
- else if(ty==='d')s.du=performance.now()+Math.min(600,n(ev[3])*10);}
+ else if(ty==='d')s.du=performance.now()+Math.min(600,n(ev[3])*10);
+ else if(ty==='n'&&typeof ev[3]==='string'){const c=/^#[0-9a-fA-F]{6}$/.test(ev[4])?ev[4]:'#ffffff';num(x,y+Math.max(-60,Math.min(0,n(ev[6]))),ev[3].slice(0,16),c,!!ev[5]);}}
 // due replays, at where each player is drawn now; players off screen or out of sight just drop theirs
 function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
 function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)
@@ -4240,12 +4278,12 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   if(r.em)emoBubble(ents,r.em,r.x,r.y,r.dir);
   if(PCTX&&PCTX.uid===r.uid)ents.push({y:r.y-1,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,231,168,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(r.x,r.y+1,9,4,0,0,7);ctx.stroke();ctx.restore();}});
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
-  TX.push({s:r.handle||'?',x:r.x,y:r.y-28,f:F,z:8,c:foe?'#ff8a7a':mate?'#8dff9a':'#9fe0ff'});
+  TX.push({s:r.handle||'?',x:r.x,y:r.y-28,f:F,z:8,c:foe?'#ff8a7a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038)
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
   if(near&&r.uid===near.uid&&!foe)TX.push({s:[t('pcHint'),mate?'':t('pInvite'),!mate&&DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?t('dHint'):''].filter(Boolean).join(' · '),x:r.x,y:r.y-(typeof r.hp==='number'?46:37),f:F,z:6,c:'#ffe7a8'});}
  fxRun(seen);for(const sid of FXS.keys())if(!NET.get||!NET.get(sid))FXS.delete(sid);
- duelWatch(ents,myRoom);pingEnts(ents,myRoom,F);const me=emoNow();if(me)emoBubble(ents,me,P.x,P.y,P.dir);
+ duelWatch(ents,myRoom);pingEnts(ents,myRoom,F);pvpEnts();const me=emoNow();if(me)emoBubble(ents,me,P.x,P.y,P.dir);
  const ds=DUEL&&DUEL.state();if(ds&&ds.arena&&!myRoom)ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle=ds.phase==='fight'?'rgba(255,120,90,.7)':'rgba(255,210,74,.7)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(ds.arena.x,ds.arena.y,ds.arena.r,0,7);ctx.stroke();ctx.restore();}});}
 if(NETQ==='local'&&typeof BroadcastChannel!=='undefined'){
  netStart(Satisfy.presence.create({transport:NETTR=Satisfy.transports.local('satisfy-net-v1'),world:Satisfy.local.world(),now:()=>performance.now()}));netState='ONLINE';
@@ -4258,7 +4296,7 @@ function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch
 Object.assign(STR.ar,{pKick:'اطرد',pKickQ:'تطرد {n}؟',pKickYes:'اطرد',pKickNo:'لأ',pKickDone:'{n} اتشال من الفريق',pLeaderLeft:'{n} ساب، فالفريق اتفكك',pRejoined:'رجعت لبارتي {n}',pYouLead:'القائد مشي: إنت قائد البارتي دلوقتي',pNewLead:'القائد مشي: {n} قائد البارتي دلوقتي',pReplaced:'البارتي اختارت قائد جديد وإنت مش موجود، هترجع لهم'});
 Object.assign(STR.en,{pKick:'Kick',pKickQ:'Kick {n}?',pKickYes:'Kick',pKickNo:'Cancel',pKickDone:'{n} was removed from the party',pLeaderLeft:'{n} left, so the party broke up',pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn)NETTR.feedOn('news',newsIn);
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],leaderLeft:['pLeaderLeft','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -4319,7 +4357,7 @@ function chatUI(live){const W=$('chatW'),on=!!(live&&CHAT),bar=$('chatBar');if(!
  for(const b of $('chatTabs').children){const c=b.dataset.ch;b.textContent=t(c==='all'?'chatAll':'chatParty');b.classList.toggle('on',c===CHCH);b.hidden=c==='party'&&!inP;}
  $('chatTabs').hidden=$('chatIn').hidden&&!inP; // in a party both tabs stay up to pick where the next line goes
  W.classList.toggle('idle',!lines.length&&$('chatIn').hidden);const L=$('chatL');L.textContent='';
- for(const l of lines){const d=document.createElement('div');d.className=(now-l.t>20000?'old ':'')+(l.ch||'party');const b=document.createElement('b');b.textContent=(l.self?netId||S.look.n:l.handle)+': ';d.appendChild(b);d.appendChild(document.createTextNode(l.text));L.appendChild(d);}}
+ for(const l of lines){const d=document.createElement('div');d.className=(now-l.t>20000?'old ':'')+(l.ch||'party');const b=document.createElement('b');b.textContent=l.ch==='sys'?'📢 ':(l.self?netId||S.look.n:l.handle)+': ';d.appendChild(b);d.appendChild(document.createTextNode(l.text));L.appendChild(d);}}
 function blockUid(uid,handle){if(!uid)return;BLK.add(uid,handle);toast(t('pBlocked',{n:handle||'?'}),'warn');partySig='';duelSig='';chatSig='';}
 function blockAct(a){if(a==='pBlock'&&PARTY){const inv=PARTY.pendingInvite();if(inv){blockUid(inv.from,inv.handle);PARTY.decline(inv.party);}}
  else if(a==='dBlock'&&DUEL){const inv=DUEL.pendingChallenge();if(inv){blockUid(inv.from,inv.handle);DUEL.decline(inv.duel);}}}
@@ -4404,9 +4442,9 @@ function pctxNear(){if(!NET||PCTX)return;const r=partyNear();if(r)pctxOpen(r);}
 function pctxName(k){const v=t(k);return v===k?'':v;}
 function pctxUI(live){const W=$('pctx'),r=live?pctxRemote():null;if(PCTX&&!r){if(live&&PCTX.handle)toast(t('pcGone',{n:PCTX.handle}));PCTX=null;}
  if(!PCTX){if(!W.hidden)W.hidden=true;return;}
- const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
+ const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far,r.ol].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
  $('pctxT').textContent=r.handle||'?';
- $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):''].filter(Boolean).join(' · ');
+ $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):'',r.ol?t('pcOl'):''].filter(Boolean).join(' · ');
  $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;
  // a player out of range (from the list): invites and duels only reach players you can see, so those wait until you are close
  for(const a of ['pcInvite','pcDuel'])W.querySelector(`[data-act="${a}"]`).disabled=far;}
@@ -4420,6 +4458,34 @@ window.__G.maxHP=()=>maxHP();
 window.__G.isk={mkItem,equip,itemSkills,useISlot,ipOn,itemTip,mpC,MT,rs:()=>{sbSig='';},checkSkills:()=>checkSkills(),pasOn:k=>pasOn(k)};
 addEventListener('keydown',e=>{if(e.code!=='Escape'||mode!=='play'||(e.target&&e.target.tagName==='INPUT'))return;
  if(!$('emoW').hidden){$('emoW').hidden=true;e.stopImmediatePropagation();}else if(PCTX){PCTX=null;pctxSig='';e.stopImmediatePropagation();}},true);
+/* open PvP outside towns (SAT-ONLINE-038, owner 2026-10-19): the same as a duel without the challenge. A hit is a share of
+   the victim's max HP (src/net/pvp.js caps it), applied by the victim's own client; no friendly fire in a party; dying to
+   a player costs the normal death penalty only. A kill makes the killer an outlaw (a red name) for OUTLAW_MS. */
+Object.assign(STR.ar,{pvpHit:'{n} بيهاجمك!',pvpDied:'{n} قتلك',pvpKill:'قتلت {n}: بقيت خارج عن القانون {m} دقيقة',pvpOl:'خارج عن القانون',pvpOlEnd:'مبقتش خارج عن القانون',pcOl:'خارج عن القانون'});
+Object.assign(STR.en,{pvpHit:'{n} is attacking you!',pvpDied:'{n} killed you',pvpKill:'You killed {n}: you are an outlaw for {m} minutes',pvpOl:'Outlaw',pvpOlEnd:'You are no longer an outlaw',pcOl:'Outlaw'});
+var pvpFrom=new Map(),pvpOlWas=false; // uid -> when they last hit us (the "is attacking you" toast once a while)
+function outlaw(){return !!(S&&!S.__demo&&S.olT&&Date.now()<S.olT);}
+function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
+  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
+ PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
+  else if(e.type==='kill'&&S&&!S.__demo){S.olT=Date.now()+Satisfy.pvp.C.OUTLAW_MS;netForce=true;save(true);toast(t('pvpKill',{n:Satisfy.chat.clean(e.handle,24)||'?',m:Math.round(Satisfy.pvp.C.OUTLAW_MS/60000)}),'warn');SFX.slam&&SFX.slam();}});}
+// the local attack reaches a player outside town: melee within reach, bow/staff along the aim; the nearest one it can hit
+function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoom=(roomAt(P.x,P.y)||{}).id||null,l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';let best=null,bd=1e9;
+ for(const r of NET.remotes()){if(!netSees(r,myRoom)||PVP.why(r))continue;const dx=r.x-P.x,dy=(r.y-8)-(P.y-6),d=Math.hypot(dx,dy);
+  if(ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):(d>30||(dx*ax+dy*ay)/(d*l||1)<-.2))continue;if(d<bd){bd=d;best=r;}}
+ if(!best)return;const crit=rand()<.12,pow=(8+rand()*5)*(crit?1.5:1)*Math.min(1.5,mul||1),pm=PVP.hit(best,pow);
+ if(pm){num(best.x,best.y-24,'-'+Math.max(1,Math.round(pm/10))+'%',crit?'#ffd24a':'#ffffff',crit);vfx(crit?'crit':'hit',best.x,best.y-10,{angle:Math.atan2(best.y-P.y,best.x-P.x)});}}
+// a hit from another player, already checked by pvp.js: a share of our max HP; a dodge's frames avoid it, a raised guard
+// takes a quarter. The lethal one goes back to the attacker as a kill.
+function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Satisfy.chat.clean(e.handle,24)||'?',now=performance.now();
+ if(!pvpFrom.has(e.uid)||now-pvpFrom.get(e.uid)>15000)toast(t('pvpHit',{n}),'warn');pvpFrom.set(e.uid,now);
+ let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));vfx('block',P.x,P.y-10,{});}
+ P.hp-=d;num(P.x,P.y-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();vfx('blood',P.x,P.y-10,{});shake=.12;}hudDirty=true;
+ if(P.hp<=0){if(S.tl&&S.tl.legend&&S.immT<=0){P.hp=1;S.immT=120;P.inv=1.5;toast(t('immune'),'good');flash();SFX.notice();return;}
+  die();PVP.died(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
+// your own red tag while you are an outlaw, and the notice when it ends
+function pvpEnts(){const ol=outlaw();if(pvpOlWas&&!ol&&S&&!S.__demo){toast(t('pvpOlEnd'),'good');netForce=true;}pvpOlWas=ol;
+ if(ol&&mode==='play')TX.push({s:t('pvpOl'),x:P.x,y:P.y-30,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff3b30'});}
 /* duels (SAT-ONLINE-006, doc §09 R4): K challenges the nearest player outside towns; Y/N answers, Y is the ready check.
    Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
 Object.assign(STR.ar,{dHint:'[K] مبارزة',dSent:'اتبعت تحدي مبارزة لـ{n}',dFrom:'{n} بيتحداك في مبارزة',dReadyQ:'مبارزة مع {n}: جاهز؟',dReady:'جاهز (Y)',dWait:'مستني {n}…',dNone:'مفيش حد قريب كفاية للمبارزة',dSafe:'ممنوع المبارزة جوه المدن',dBusy:'{n} مشغول دلوقتي',dFar:'قرّب من {n} الأول',dDeclined:'{n} رفض المبارزة',dCancel:'المبارزة اتلغت',dFight:'ابدأ!',dOut:'ارجع للحلبة وإلا هتخسر!',dWin:'كسبت المبارزة ضد {n} {w}',dLose:'خسرت المبارزة ضد {n} {w}',dYield:'استسلام',dYou:'إنت',dTitle:'مبارزة ضد {n}',dRec:'المبارزات: {w} فوز · {l} خسارة',dw_yield:'(استسلام)',dw_arena:'(خرج من الحلبة)',dw_teleport:'(ساب القتال)',dw_safe:'(دخل مدينة)',dw_gone:'(الخصم مشي)',dw_death:'(مات)',dw_hp:''});
@@ -4432,7 +4498,7 @@ function duelStart(){DUEL=Satisfy.duel.create({presence:NET,uid:NET.uid,now:()=>
   else if(e.type==='safeHere')toast(t('dSafe'),'warn');
   else if(e.type==='fight'){toast(t('dFight'),'good');SFX.notice();}
   else if(e.type==='outside')toast(t('dOut'),'warn');
-  else if(e.type==='hurt'){num(P.x,P.y-20,'-'+e.dmg,'#ff6a5a',false);SFX.hit();}
+  else if(e.type==='hurt'){numP(-20,'-'+e.dmg,'#ff6a5a',false);SFX.hit();}
   else if(e.type==='result'){const win=e.result==='win';if(S&&!S.__demo){S.duels=S.duels||{w:0,l:0};S.duels[win?'w':'l']++;}
    toast(t(win?'dWin':'dLose',{n,w:t('dw_'+e.why)}),win?'good':'warn');if(win)SFX.quest();
    if(S&&S.duels)setTimeout(()=>toast(t('dRec',S.duels)),500);}});}
@@ -4544,7 +4610,7 @@ function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!ARN&&!TWR&&!solo(P
   // a new host or none: monsters hidden for the old host come back on their own, and copies made from its list go
   mons=mons.filter(m=>!m.mk);for(const m of mons)if(m.hidN){m.hidN=0;m.rt=1;}}
  if(!z)return;
- if(MOBN.host===NET.uid){const t=performance.now();if(t-MOBN.sent>=MOB_MS){MOBN.sent=t;NETTR.mobsPut(z,mobList(rs),NET.uid);MOBN.put=true;}}
+ if(MOBN.host===NET.uid){const t=performance.now();for(const m of mons)if(m.biteT>0)m.biteT-=1/60;if(t-MOBN.sent>=(MOBN.fast?MOB_FAST:MOB_MS)){MOBN.sent=t;MOBN.fast=0;NETTR.mobsPut(z,mobList(rs),NET.uid);MOBN.put=true;}}
  else{if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}mobMake();}}
 // follower: a monster on the host's list that this client never spawned (an event wave, a boss's adds, a squad) is made
 // here from its key, "<type>@<spawn x>,<spawn y>", and then follows the host like the others
@@ -4555,8 +4621,24 @@ let mobMkT=0;function mobMake(){const t=performance.now();if(t-mobMkT<500)return
 function mobList(rs){const o={},pts=[P].concat(rs);let n=0;
  const near=m=>mobOk(m)&&pts.some(p=>Math.abs(p.x-m.x)<MOB_BX&&Math.abs(p.y-m.y)<MOB_BY); // bosses first, so a crowded den never pushes one off the list
  for(const m of mons.filter(m=>MT[m.type].boss&&near(m)).concat(mons.filter(m=>!MT[m.type].boss&&near(m)))){if(n>=MOB_MAX)break;
-  o[mobKey(m)]=Math.round(m.x)+','+Math.round(m.y)+','+(m.dead?0:Math.max(1,Math.round(1000*m.hp/m.max)))+','+((m.dead?1:0)|(m.eng>0?2:0)|(m.face<0?4:0))+','+(m.lv|0);n++;}
+  o[mobKey(m)]=Math.round(m.x)+','+Math.round(m.y)+','+(m.dead?0:Math.max(1,Math.round(1000*m.hp/m.max)))+','+((m.dead?1:0)|(m.eng>0?2:0)|(m.face<0?4:0))+','+(m.lv|0)+mobActS(m);n++;}
  return o;}
+/* SAT-ONLINE-042 (owner 2026-10-19: the red attack zone showed for some players and not others; a monster could chase one
+   player on one screen and bite another on the other). The host's copy is the only one that thinks; each listed monster now
+   also carries what it is doing: ",n,s,i,t,a,l,g" = action number (a new one at every move, slam or bite), state (t
+   telegraph, d dash, r recovery, s a boss's slam, b a bite, 0 nothing), the move's index in its move set (99: the arc after
+   a blink), the state's time left (1/100 s), the aim (radians x 100), the leap length, and a 3-hex hash of the player it is
+   after. A follower replays the same telegraph, dash and strike on its own copy, and the strike only ever hurts its own
+   player, the way the host's strikes only hurt the host's: so everyone sees the same red zone, and dodging it on your
+   screen is dodging it. A new action is sent at once (MOB_FAST), not at the next quarter second. */
+const MOB_FAST=60;
+window.__GM={get host(){return MOBN&&MOBN.host},get group(){return MOBN?MOBN.rs.map(r=>r.uid):[]},get list(){const L=MOBN&&MOBN.all[MOBN.host];return L&&L.m||null}}; // tests
+const uh=u=>{let h=0x811c9dc5;u=String(u||'');for(let i=0;i<u.length;i++){h^=u.charCodeAt(i);h=Math.imul(h,0x01000193);}return ((h>>>0)&0xfff).toString(16);};
+function mobActN(m){if(!MOBN||MOBN.host!==NET.uid)return;m.actN=((m.actN||0)+1)%1000;MOBN.fast=1;}
+function mobBite(m){if(!MOBN||MOBN.host!==NET.uid)return;mobActN(m);m.biteT=.35;}
+function mobActS(m){if(!m.actN||m.dead)return '';const st=m.biteT>0?'b':m.st==='tele'?'t':m.st==='dash'?'d':m.st==='rec'?'r':MT[m.type].boss&&m.tele>0?'s':'0';
+ const mv=m.mv,L=mv&&!mv.blk?movesOf(m).indexOf(mv):-1,i=mv&&mv.blk?99:Math.max(0,L),tl=st==='s'?m.tele:st==='b'?m.biteT:m.stT||0;
+ return ','+m.actN+','+st+','+i+','+Math.max(0,Math.round(tl*100))+','+Math.round(Math.atan2(m.ay||0,m.ax||1)*100)+','+(m.lL|0)+','+uh(m.tgU);}
 // host: the nearest player this monster could be after, as a stand-in that takes no damage here (inv), or null for you
 function mobTarget(m){if(!mobOk(m)||m.dead)return null;const dP=P.ghost||mode==='dead'?1e9:Math.hypot(P.x-m.x,P.y-m.y);let best=null,bd=dP;
  for(const r of MOBN.rs){if(r.anim==='dead')continue;const d=Math.hypot(r.x-m.x,r.y-m.y);if(d<bd&&d<300){bd=d;best=r;}}
@@ -4566,16 +4648,43 @@ function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))ret
  // near you but not on the host's list yet (it lists by where it last saw you): hold still instead of running a second
  // copy that drifts away from the host's (owner report: monsters differed after one of you walked off and came back)
  if(typeof s!=='string'){if(L&&L.m&&(m.mk||Math.abs(P.x-m.x)<MOB_BX*.8&&Math.abs(P.y-m.y)<MOB_BY*.8)){m.led=true;if(!m.dead){m.dead=true;m.dying=0;m.rt=1e9;m.hidN=1;}return true;}return false;}
- const v=s.split(',').map(Number);if(v.length!==5||v.some(x=>!isFinite(x)))return false;const [x,y,hp,fl,lv]=v;m.led=true;
+ const w=s.split(','),v=w.slice(0,5).map(Number);if((w.length!==5&&w.length!==12)||v.some(x=>!isFinite(x)))return false;const [x,y,hp,fl,lv]=v;m.led=true;
  if(fl&1){if(!m.dead){m.dead=true;m.dying=.5;m.rt=25;vfx('death',m.x,m.y);}return true;} // quiet: the kill and its rewards come from the host's message
  if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mk:m.mk,sg:m.sg,nk:m.nk,boss:m.boss},hid=m.hidN;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
  if(m.lv!==lv){m.lv=lv;m.max=Math.round(b.hp*(1+(lv-b.lv[0])*.03));}
  const nh=Math.max(1,Math.round(m.max*hp/1000)),mine=m.pendT&&performance.now()-m.pendT<900;
  if(nh<m.hp){if(!mine&&m.hp-nh>=1){m.hurt=.12;num(m.x,monY(m)-8,String(m.hp-nh),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});}m.hp=nh;}else if(!mine)m.hp=nh; // another player's hit: its number shows here too
- const dx=x-m.x,dy=y-m.y,dd=Math.hypot(dx,dy);if(dd>80){m.x=x;m.y=y;}else if(dd>.5){const st=Math.min(dd,Math.max(40,dd*8)*dt);m.x+=dx/dd*st;m.y+=dy/dd*st;m.at=(m.at||0)+dt;}
- m.face=fl&4?-1:1;m.eng=fl&2?4:0;m.t+=dt;if(m.hurt>0)m.hurt-=dt;m.cd-=dt;m.st=null;m.tele=0;m.ret=0;
- if(fl&2&&(!safe||m.evt)){const d=Math.hypot(P.x-m.x,P.y-m.y);if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;}}
+ const dx=x-m.x,dy=y-m.y,dd=Math.hypot(dx,dy);if(dd>80){m.x=x;m.y=y;}else if(dd>.5&&m.st!=='dash'){ // a replayed dash moves this copy itself, then it settles on the host's spot
+ const st=Math.min(dd,Math.max(40,dd*8)*dt);m.x+=dx/dd*st;m.y+=dy/dd*st;m.at=(m.at||0)+dt;}
+ m.face=fl&4?-1:1;m.eng=fl&2?4:0;m.t+=dt;if(m.hurt>0)m.hurt-=dt;m.cd-=dt;m.ret=0;
+ if(w.length===12)mobAct(m,b,w,safe);else{m.st=null;m.tele=0;}
+ mobReplay(m,b,dt,safe);
  return true;}
+// follower: a new action from the host's list starts here as it did there; the same one keeps the host's aim
+function mobAct(m,b,w,safe){const n=+w[5],sc=w[6],i=+w[7],tl=Math.max(0,+w[8]||0)/100,ang=(+w[9]||0)/100,me=w[11]===uh(NET.uid);
+ if(n===m.rN){if(m.st==='tele'&&sc==='t'){m.ax=Math.cos(ang);m.ay=Math.sin(ang);}return;}
+ m.rN=n;m.ax=Math.cos(ang);m.ay=Math.sin(ang);m.lL=+w[10]||m.lL;
+ if(sc==='b'){m.st=null;m.tele=0;if(me&&(!safe||m.evt)&&mode!=='dead'&&Math.hypot(P.x-m.x,P.y-m.y)<b.r+14&&seeP(m))hurtPlayer(b.dmg,m.lv,m);return;}
+ if(sc==='s'){m.st=null;m.tele=tl;m.rSlam=1;return;}
+ const mv=i===99?{k:'arc',tele:.16,reach:26,arc:1.3,mul:.8,rec:.4,cd:1.3,blk:1}:AIK[m.type]?movesOf(m)[i]:null;
+ if(!mv||!(sc==='t'||sc==='d'||sc==='r')){m.st=null;m.tele=0;return;}
+ m.mv=mv;m.st=sc==='t'?'tele':sc==='d'?'dash':'rec';m.stT=tl;m.tele=sc==='t'?tl:0;m.hitDone=0;if(sc==='d')m.dsp=mv.k==='leap'?(m.lL||40)/(mv.dashT||.3):mv.dash||120;}
+// follower: run the telegraph, dash and strike the host started, against your own player only
+function mobReplay(m,b,dt,safe){const hurt=(!safe||m.evt)&&mode!=='dead',dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=Math.max(3,b.r-3);
+ if(m.rSlam&&m.tele>0){m.tele-=dt;if(m.tele<=0){m.tele=0;m.rSlam=0;shake=Math.max(shake,.3);SFX.slam();if(hurt&&d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}for(let k=0;k<16;k++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:'#8a8f99'});}}return;}
+ const mv=m.mv;if(!mv||!m.st)return;
+ if(m.st==='tele'){m.stT-=dt;m.tele=Math.max(0,m.stT);if(m.stT>0)return;m.tele=0;
+  if(mv.k==='leap'||mv.k==='line'){m.st='dash';m.stT=mv.dashT;m.hitDone=0;m.dsp=mv.k==='leap'?(m.lL||40)/mv.dashT:mv.dash;if(mv.k==='leap')SFX.dodge();return;}
+  if(mv.k==='blink'){m.st=null;return;} // the host sends the arc that comes out of it
+  if(mv.k==='ring'){shake=Math.max(shake,.2);SFX.slam();vfx('dust',m.x,m.y,{n:14});if(hurt&&d<mv.reach+4)hitBy(m,b,mv);}
+  else if(mv.k==='arc'){const ang=Math.atan2(dy,dx)-Math.atan2(m.ay,m.ax),da=Math.abs(Math.atan2(Math.sin(ang),Math.cos(ang)));vfx('slash',m.x+m.ax*8,m.y-8+m.ay*8,{angle:Math.atan2(m.ay,m.ax),rarity:0});if(hurt&&d<mv.reach+6&&da<mv.arc)hitBy(m,b,mv);}
+  else if(mv.k==='shot'){eproj.push({x:m.x+m.ax*8,y:m.y-10+m.ay*8,vx:m.ax*mv.spd,vy:m.ay*mv.spd,t:mv.max/mv.spd+.3,m,mv,sp:mv.sp,a:Math.atan2(m.ay,m.ax),rep:1});SFX.dodge();}
+  else if(mv.k==='buff')vfx('rage',m.x,m.y);
+  m.st='rec';m.stT=mv.rec;return;}
+ if(m.st==='dash'){m.stT-=dt;const step=(m.dsp||0)*dt;if(mv.k==='leap')m.hop=Math.sin(Math.min(1,1-m.stT/mv.dashT)*Math.PI)*Math.min(14,(m.lL||40)*.14);move(m,m.ax*step,m.ay*step,mr);
+  if(!m.hitDone&&hurt&&Math.hypot(P.x-m.x,P.y-m.y)<b.r+9&&seeP(m)){m.hitDone=1;hurtPlayer(b.dmg*mv.mul,m.lv,m);}
+  if(m.stT<=0){m.st='rec';m.stT=mv.rec;m.hop=0;}return;}
+ if(m.st==='rec'){m.stT-=dt;if(m.stT<=0)m.st=null;}}
 // link quality for the badge tooltip (doc U015 latency diagnostics, U020 observability)
 Object.assign(STR.ar,{netLink:'الاتصال: {rtt} · اتبعت {s} · وصل {r} · اترفض {d}',netRtt:'{n} م.ث',netRttNone:'—'});
 Object.assign(STR.en,{netLink:'Link: {rtt} · sent {s} · received {r} · dropped {d}',netRtt:'{n} ms',netRttNone:'—'});
@@ -4615,7 +4724,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
 function netStop(){try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
- if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW'].forEach(i=>$(i).hidden=true);}
+ if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW'].forEach(i=>$(i).hidden=true);}
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid;netStop();
  (erase?C.eraseAll(['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid]):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
@@ -4650,7 +4759,7 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
 function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF=true; // from now on this tab never saves: the newer tab owns the save (review of #30)
- try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW'].forEach(i=>$(i).hidden=true);
+ try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
 // another Google account on this device (owner request): the chooser opens straight from the click, the new

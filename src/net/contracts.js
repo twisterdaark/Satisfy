@@ -47,7 +47,7 @@
   // PlayerPublic.fx: the player's own effects of the last moment, replayed by the others (JSON text, game-defined; SAT-ONLINE-026)
   // PlayerPublic.gu: the raised guard, 1..256 (direction and flags, see the game's guPub)
   var FX_MAX = 2400;
-  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 't'];
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'ol', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
   // S.uid (the local item-instance counter) is private too, but its name collides with the public
   // account `uid`, so it is checked by value in the tests instead of listed here.
@@ -148,6 +148,7 @@
       fx: typeof ctx.fx === 'string' && ctx.fx.length <= FX_MAX ? ctx.fx : null,
       gu: Number.isInteger(ctx.gu) && ctx.gu >= 1 && ctx.gu <= 256 ? ctx.gu : null,
       rs: typeof ctx.rs === 'string' && RS_RE.test(ctx.rs) ? ctx.rs : null,
+      ol: ctx.ol ? 1 : null, // SAT-ONLINE-038: an outlaw (killed a player lately): a red name for everyone
       t: ctx.t || 0,
     };
   }
@@ -185,6 +186,7 @@
     if (o.fx !== undefined && o.fx !== null && !(typeof o.fx === 'string' && o.fx.length <= FX_MAX)) e.push('fx');
     if (o.gu !== undefined && o.gu !== null && !(Number.isInteger(o.gu) && o.gu >= 1 && o.gu <= 256)) e.push('gu');
     if (o.rs !== undefined && o.rs !== null && !(typeof o.rs === 'string' && RS_RE.test(o.rs))) e.push('rs');
+    if (o.ol !== undefined && o.ol !== null && o.ol !== 1) e.push('ol');
     return { ok: e.length === 0, errors: e };
   }
 

@@ -76,7 +76,8 @@
     var mine = D.ref(db, base + '/' + o.uid), list = D.ref(db, base);
     var inbox = D.ref(db, 'inbox/' + o.uid);
     var handler = null, offs = [], lastSeq = {}, closed = false, offset = 0;
-    var mobs = { offs: null, all: {}, zone: null }; // shared monsters (SAT-ONLINE-026)
+    var MOB_FULL_MS = 5000;
+    var mobs = { offs: null, all: {}, zone: null, last: null, fullT: 0 }; // shared monsters (SAT-ONLINE-026)
     // The node as the server last stored it, or null when it must be written in full (first send,
     // after a reconnect: onDisconnect may have removed it). Later sends update only what changed,
     // so a step sends {x, y, dir, anim, seq, t} instead of the whole public profile (COST_MODEL.md).
@@ -84,7 +85,7 @@
     // Round trip (doc U015): how long the server takes to acknowledge a presence write, smoothed.
     var rtt = null, writes = 0, fails = 0;
     function acked(t0) { return function () { var ms = Date.now() - t0; rtt = rtt == null ? ms : Math.round(rtt * 0.8 + ms * 0.2); }; }
-    var DIRECTED = /^(party\.(invite|accept|decline|kick|ping)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say))$/;
+    var DIRECTED = /^(party\.(invite|accept|decline|kick|ping)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say)|pvp\.(hit|kill))$/;
     // exactly the fields the inbox rules accept: party {to, party}, duel {to, duel, k?, n?}, raid {to, raid, k?, n?},
     // chat {to, party, text}
     function directedPayload(type, p) {
@@ -96,6 +97,11 @@
         return o;
       }
       if (type.indexOf('chat.') === 0) { o.party = String(p.party || ''); o.text = String(p.text || ''); return o; }
+      if (type.indexOf('pvp.') === 0) { // SAT-ONLINE-038: only to, k and n
+        o.k = Math.max(0, Math.min(1000000000, Math.round(+p.k || 0)));
+        if (typeof p.n === 'number' && p.n >= 0 && p.n <= 1000000000) o.n = Math.round(p.n);
+        return o;
+      }
       if (type.indexOf('raid.') === 0) o.raid = String(p.raid || ''); else o.duel = String(p.duel || '');
       if (typeof p.k === 'number' && p.k >= 0 && p.k <= 1000000000) o.k = Math.round(p.k);
       if (typeof p.n === 'number' && p.n >= 0 && p.n <= 1000000000) o.n = Math.round(p.n);
@@ -121,6 +127,7 @@
       if (pp.em === undefined) pp.em = null;
       if (pp.role === undefined) pp.role = null;
       if (pp.rs === undefined) pp.rs = null;
+      if (pp.ol === undefined) pp.ol = null;
       if (typeof pp.t !== 'number') pp.t = 0;
       return { v: 1, type: 'presence.state', requestId: null, sessionId: pp.sid, seq: +v.seq || 0, tick: 0, payload: pp };
     }
@@ -285,10 +292,18 @@
       mobsPut: function (zone, m) {
         if (closed) return;
         if (mobs.zone && (mobs.zone !== zone || !m)) { D.remove(D.ref(db, 'mobs/' + o.world + '/' + mobs.zone + '/' + o.uid)).catch(function () { /* ignore */ }); mobs.zone = null; }
-        if (!zone || !m) return;
-        var ref = D.ref(db, 'mobs/' + o.world + '/' + zone + '/' + o.uid);
-        if (mobs.zone !== zone) { mobs.zone = zone; D.onDisconnect(ref).remove().catch(function () { /* ignore */ }); }
-        D.set(ref, { t: D.serverTimestamp(), m: m }).catch(fail);
+        if (!zone || !m) { mobs.last = null; return; }
+        var ref = D.ref(db, 'mobs/' + o.world + '/' + zone + '/' + o.uid), t = Date.now(), keys = Object.keys(m);
+        if (mobs.zone !== zone) { mobs.zone = zone; mobs.last = null; D.onDisconnect(ref).remove().catch(function () { /* ignore */ }); }
+        // SAT-ONLINE-042: only the monsters that changed since the last write (and nulls for those that left the list), so
+        // sending at once on every new attack doesn't multiply the download; the whole list again every MOB_FULL_MS
+        if (!keys.length) { if (mobs.last && Object.keys(mobs.last).length) D.remove(ref).catch(fail); mobs.last = {}; return; }
+        if (!mobs.last || !Object.keys(mobs.last).length || t - mobs.fullT > MOB_FULL_MS) { mobs.fullT = t; mobs.last = Object.assign({}, m); D.set(ref, { t: D.serverTimestamp(), m: m }).catch(fail); return; }
+        var u = { t: D.serverTimestamp() }, n = 0, k;
+        for (k in m) if (mobs.last[k] !== m[k]) { u['m/' + k] = m[k]; n++; }
+        for (k in mobs.last) if (!(k in m)) { u['m/' + k] = null; n++; }
+        mobs.last = Object.assign({}, m);
+        if (n) D.update(ref, u).catch(fail);
       },
       close: function () {
         if (closed) return;

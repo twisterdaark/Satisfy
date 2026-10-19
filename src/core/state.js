@@ -47,8 +47,9 @@
     'mhp', 'mdead', 'meetN',
     // Muller's trial done (SAT-MULLER-001)
     'mtr',
-    // duel record (SAT-ONLINE-006): {w, l}; party-raid encounters already paid (SAT-ONLINE-009)
-    'duels', 'raidDone',
+    // duel record (SAT-ONLINE-006): {w, l}; party-raid encounters already paid (SAT-ONLINE-009);
+    // outlaw until (wall-clock ms) after killing a player in open PvP (SAT-ONLINE-038), kept across a reload
+    'duels', 'raidDone', 'olT',
     // recipes learned and recipe use counts (main rcLearn)
     'rcK', 'rcN',
     // map cells seen (fog of war, Nitro's feedback): base64 bitset
