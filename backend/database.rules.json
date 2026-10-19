@@ -78,7 +78,13 @@
               ".validate": "newData.isString() && newData.val().matches(/^(tank|healer|damage|support)$/)"
             },
             "wp": {
-              ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9_]{1,16}:[0-9]$/)"
+              ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9_]{1,16}:[0-9](:[0-9]{1,2})?$/)"
+            },
+            "fx": {
+              ".validate": "newData.isString() && newData.val().length <= 2400"
+            },
+            "gu": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 256 && newData.val() % 1 === 0"
             },
             "seq": {
               ".validate": "newData.isNumber() && newData.val() >= 0"

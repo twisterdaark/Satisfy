@@ -32,7 +32,7 @@
   var WORLD_ID = 'satisfy';
   // posX/posY: pixel bounds the database accepts for x/y (backend/database.rules.json). They are
   // headroom over the map (724 x 144 tiles = 11584 x 2304 px today) so a wider map needs no redeploy.
-  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 2048, shard: 999, posX: 16384, posY: 4096, posYMin: -2048 });
+  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 4096, shard: 999, posX: 16384, posY: 4096, posYMin: -2048 });
   var ANIMS = ['idle', 'walk', 'attack', 'dodge', 'dead'];
   // PlayerPublic.em (SAT-ONLINE-022, doc §35 U061): an emote from a fixed list, never free text
   var EMOTES = ['wave', 'dance', 'point', 'cheer'];
@@ -41,8 +41,11 @@
   // PlayerPublic.duel: a duel id from Satisfy.duel and the player's duel HP (0..100)
   var DUEL_RE = /^d_[A-Za-z0-9_-]{1,40}:(100|[1-9]?[0-9])$/;
   var MV_RE = /^[0-9a-f]{8}$/; // PlayerPublic.mv (SAT-ONLINE-019)
-  var WP_RE = /^[a-z0-9_]{1,16}:[0-9]$/; // PlayerPublic.wp: the weapon in hand, "<item id>:<rating>" (SAT-ONLINE-026)
-  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 't'];
+  var WP_RE = /^[a-z0-9_]{1,16}:[0-9](:[0-9]{1,2})?$/; // PlayerPublic.wp: the weapon in hand, "<item id>:<rating>[:<enhancement>]" (SAT-ONLINE-026)
+  // PlayerPublic.fx: the player's own effects of the last moment, replayed by the others (JSON text, game-defined; SAT-ONLINE-026)
+  // PlayerPublic.gu: the raised guard, 1..256 (direction and flags, see the game's guPub)
+  var FX_MAX = 2400;
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
   // S.uid (the local item-instance counter) is private too, but its name collides with the public
   // account `uid`, so it is checked by value in the tests instead of listed here.
@@ -140,6 +143,8 @@
       em: EMOTES.indexOf(ctx.em) >= 0 ? ctx.em : null,
       role: ROLES.indexOf(ctx.role) >= 0 ? ctx.role : null,
       wp: typeof ctx.wp === 'string' && WP_RE.test(ctx.wp) ? ctx.wp : null,
+      fx: typeof ctx.fx === 'string' && ctx.fx.length <= FX_MAX ? ctx.fx : null,
+      gu: Number.isInteger(ctx.gu) && ctx.gu >= 1 && ctx.gu <= 256 ? ctx.gu : null,
       t: ctx.t || 0,
     };
   }
@@ -174,6 +179,8 @@
     if (o.em !== undefined && o.em !== null && EMOTES.indexOf(o.em) < 0) e.push('em');
     if (o.role !== undefined && o.role !== null && ROLES.indexOf(o.role) < 0) e.push('role');
     if (o.wp !== undefined && o.wp !== null && !(typeof o.wp === 'string' && WP_RE.test(o.wp))) e.push('wp');
+    if (o.fx !== undefined && o.fx !== null && !(typeof o.fx === 'string' && o.fx.length <= FX_MAX)) e.push('fx');
+    if (o.gu !== undefined && o.gu !== null && !(Number.isInteger(o.gu) && o.gu >= 1 && o.gu <= 256)) e.push('gu');
     return { ok: e.length === 0, errors: e };
   }
 

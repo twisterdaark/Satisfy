@@ -83,7 +83,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #plW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*4.4);padding:calc(var(--u)*.8) calc(var(--u)*1.4);width:calc(var(--u)*34);max-height:calc(var(--u)*30);overflow-y:auto;font-size:calc(var(--u)*1.5);pointer-events:auto;z-index:45}
 #plL div{padding:calc(var(--u)*.25) 0;border-bottom:1px solid rgba(255,255,255,.12)}#plL div.me{color:#ffe7a8}
 #plW .row{display:flex;justify-content:center;margin-top:calc(var(--u)*.6)}#plW .row button{width:auto;padding:0 calc(var(--u)*1)}
-#toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*13);display:grid;gap:calc(var(--u)*.4);justify-items:center;width:80%}
+#toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*3.8);z-index:55;pointer-events:none;display:grid;gap:calc(var(--u)*.4);justify-items:center;width:80%}
 .toast{background:rgba(8,14,30,.85);border:1px solid rgba(127,180,255,.5);padding:calc(var(--u)*.3) calc(var(--u)*1.1);border-radius:calc(var(--u)*.4);font-weight:700;animation:tin .25s ease-out}
 .toast.warn{border-color:#ff7a6a;color:#ffd0c8}.toast.good{border-color:var(--gold);color:#ffe7a8}
 @keyframes tin{from{opacity:0;transform:translateY(-6px)}}
@@ -773,7 +773,7 @@ const OUT='#120f18',EYE='#22181e';
 
 // character sheets from sprites-original/chars.js: idle with blink, walk 4, attack 3, hurt; left mirrors the side row
 // cosmetic effects (sprites-original/vfx.js); seeded per spawn so they never consume the game's Math.random
-const VX=window.SatArt.vfx.create();let VXn=0;const vfx=(k,x,y,o={})=>{o.seed=(++VXn*2654435761)>>>0;VX.spawn(k,x,y,o);};
+const VX=window.SatArt.vfx.create();let VXn=0;var FXME=0,FXREC=null;const vfx=(k,x,y,o={})=>{o.seed=o.rs!=null?o.rs:(++VXn*2654435761)>>>0;if(FXME&&FXREC)FXREC(k,x,y,o);VX.spawn(k,x,y,o);}; // rs: a replayed effect keeps its sender's seed (net 1:1 effects)
 const SA=window.SatArt,SH={};for(const n in FIG)SH[n]=SA.chars.buildSheet(FIG[n]);
 // monster looks vary: three extra sheets per humanoid kind. People get their own hair, skin and clothes; goblins, kobolds,
 // lizards and the like only change clothes. Each monster picks one when it spawns (m.vr)
@@ -2007,7 +2007,7 @@ function tryAttack(ax,ay,mul){
  if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
  if(k==='bow'||k==='staff'){shoot(k==='bow'?'arrow':'magic',ax,ay,mul||1);return;}
- P.slash={t:.14,a:Math.atan2(ay,ax)};SFX.swing();vfx('slash',P.x+ax*4,P.y-7+ay*4,{angle:P.slash.a,rarity:weapon().r||0});
+ P.slash={t:.14,a:Math.atan2(ay,ax)};if(FXME)fxR(['w',Math.round(P.slash.a*100)/100]);SFX.swing();vfx('slash',P.x+ax*4,P.y-7+ay*4,{angle:P.slash.a,rarity:weapon().r||0});
  const rch=k==='spear'?19:k==='dagger'?10:12,hx=P.x+ax*rch,hy=P.y-6+ay*rch;let res=0;
  for(const m of mons){if(m.dead)continue;if(Math.hypot(m.x-hx,monY(m)-hy)<(k==='spear'?16:14)+MT[m.type].r)res=Math.max(res,hitMon(m,(mul||1)*(P.mul||1),{kx:ax,ky:ay}));}
  if(res)res===2?SFX.crit():SFX.hit();
@@ -2019,6 +2019,7 @@ function shoot(kind,ax,ay,mul,o={}){const sp=kind==='arrow'?260:200;proj.push({k
 function hitTrees(x,y,r,max){let n=0;for(const tr of vtNear(x,y,r+8)){if(n>=(max||1))break;if((chopped.get(tr.k)||0)>gTime)continue;if(Math.hypot(tr.x-x,tr.y-8-y)<r){chop(tr);n++;}}return n;}
 function boom(p){hitTrees(p.x,p.y,30,3);SFX.crit();shake=.15;vfx('fire',p.x,p.y);fx.push({ring:true,big:1,x:p.x,y:p.y,t:.5});for(let i=0;i<18;i++)fx.push({x:p.x,y:p.y,vx:(rand()-.5)*120,vy:(rand()-.5)*120,t:.4,c:rand()<.5?'#ff8a1e':'#ffd24a'});mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-p.x,monY(m)-p.y)<30)hitMon(m,p.mul,{});});}
 function updateProj(dt){proj=proj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.kind!=='arrow'&&rand()<.7)fx.push({x:p.x,y:p.y,vx:0,vy:0,t:.25,c:p.kind==='fire'?'#ff8a1e':p.kind==='wave'?'#ffe08a':'#9fd8ff',fl:1});
+ if(p.ghost)return p.t>0&&!solidT(Math.floor(p.x/TS),Math.floor((p.y+8)/TS)); // another player's shot, replayed: looks only
  if(p.kind!=='wave'&&hitTrees(p.x,p.y,10)){if(p.boom)boom(p);return false;}
  if(p.t<=0||solidT(Math.floor(p.x/TS),Math.floor((p.y+8)/TS))){if(p.boom)boom(p);return false;}
  for(const m of mons){if(m.dead||p.hit.has(m))continue;if(Math.hypot(m.x-p.x,monY(m)-p.y)<MT[m.type].r+(p.kind==='wave'?13:5)){p.hit.add(m);if(p.boom){boom(p);return false;}if(hitMon(m,p.mul,{kx:Math.sign(p.vx)*.5,ky:Math.sign(p.vy)*.5,stun:p.stun}))SFX.hit();if(!p.pierce)return false;}}
@@ -2031,7 +2032,8 @@ function dodge(){if(P.ride)dismount();if(P.dash>0||P.dcd>0)return;P.guard=0;if(P
 function guardDir(){if(MSX==null)return null;const b=stage.getBoundingClientRect(),mx=(MSX-b.left)/SC+camXf,my=(MSY-b.top)/SC+camYf,dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;return [dx/l,dy/l];}
 function guardOn(){if(!P||P.stun>0||P.dash>0||(P.gd??100)<10){SFX.deny();return;}P.guard=1;P.gT=gTime-(P.gUp??-9)<.5?.5:0;P.gUp=gTime;P.gd=Math.max(0,P.gd-6);const v=guardDir()||[[0,1],[0,-1],[1,0],[-1,0]][P.dir];P.gx=v[0];P.gy=v[1];pressKey('kG');}
 function guardOff(){if(P)P.guard=0;}
-function drawGuard(){if(P.guard){const a=Math.atan2(P.gy,P.gx),k=P.gT<.22?1:.55,cx=Math.round(P.x),cy=Math.round(P.y)-8;ctx.save();ctx.fillStyle=`rgba(120,190,255,${.1+.14*k})`;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,14,a-.95,a+.95);ctx.closePath();ctx.fill();ctx.strokeStyle=`rgba(190,230,255,${.45+.5*k})`;ctx.lineWidth=2;ctx.beginPath();if(P.fort>0)ctx.arc(cx,cy,14,0,7);else ctx.arc(cx,cy,14,a-.95,a+.95);ctx.stroke();ctx.restore();}
+function guardArc(x,y,a,k,fort){const cx=Math.round(x),cy=Math.round(y)-8;ctx.save();ctx.fillStyle=`rgba(120,190,255,${.1+.14*k})`;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,14,a-.95,a+.95);ctx.closePath();ctx.fill();ctx.strokeStyle=`rgba(190,230,255,${.45+.5*k})`;ctx.lineWidth=2;ctx.beginPath();if(fort)ctx.arc(cx,cy,14,0,7);else ctx.arc(cx,cy,14,a-.95,a+.95);ctx.stroke();ctx.restore();}
+function drawGuard(){if(P.guard)guardArc(P.x,P.y,Math.atan2(P.gy,P.gx),P.gT<.22?1:.55,P.fort>0);
  const g=P.gd??100;if(g<100||P.guard){const x=Math.round(P.x)-9,y=Math.round(P.y)+3;ctx.fillStyle='rgba(10,16,30,.6)';ctx.fillRect(x,y,18,3);ctx.fillStyle=g<30?'#ff8a5a':'#8fd0ff';ctx.fillRect(x+1,y+1,Math.round(16*g/100),1);}}
 function hurtPlayer(d,ml,src){if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(src&&src.dmul)d*=src.dmul;
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){num(P.x,P.y-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
@@ -3098,6 +3100,8 @@ const tip=$('tip');let lastBtn=null;
 UI.addEventListener('pointermove',e=>{const el=e.target.closest('[data-tip]');
  if(el){tip.innerHTML=el.dataset.tip;tip.classList.add('on');const r=stage.getBoundingClientRect();let x=e.clientX-r.left+16,y=e.clientY-r.top+16;if(x+tip.offsetWidth>r.width)x=e.clientX-r.left-tip.offsetWidth-10;if(y+tip.offsetHeight>r.height)y=e.clientY-r.top-tip.offsetHeight-10;tip.style.left=x+'px';tip.style.top=y+'px';}else tip.classList.remove('on');
  const b=e.target.closest('button');if(b!==lastBtn){lastBtn=b;if(b&&!b.disabled)SFX.hover();}});
+// the tip only moved off on another pointermove: leaving the window over a slot left it up (owner feedback 9)
+const tipOff=()=>tip.classList.remove('on');stage.addEventListener('pointerleave',tipOff);addEventListener('blur',tipOff);document.addEventListener('mouseleave',tipOff);addEventListener('keydown',tipOff);
 let langSaved=false;try{const l=localStorage.getItem('satisfy_lang');if(l){lang=l;langSaved=true;}}catch(e){}
 for(const k of ['sfx','mus'])$('vol_'+k).addEventListener('input',e=>{setVol(k,e.target.value);if(k==='sfx')SFX.tick();});
 // drag a skill from the status list (or another bar slot) onto any of the first five bar slots; an occupied slot swaps
@@ -3293,7 +3297,7 @@ function updateEProj(dt){eproj=eproj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y+=p.vy*d
 // enhanced weapons shine like the manhwa's: a glint from +4, a coloured aura from +7 (blue, violet, gold, crimson as it climbs),
 // rising sparks from +9 and two orbiting lights at +10. Kept subtle and short-lived (Twister: too much was irritating)
 const ENHC=['#6ab4ff','#6ab4ff','#c07aff','#ffc24a','#ff4a3a'];
-function drawEnh(x,y,en,front){const c=ENHC[Math.min(4,Math.max(0,en-6))],d=P.dir,hx=x+(d===1?-5:d===3?-6:d===2?6:5),hy=y-(d===1?12:10),pul=.5+Math.sin(gTime*4)*.5;
+function drawEnh(x,y,en,front,dir){const c=ENHC[Math.min(4,Math.max(0,en-6))],d=dir??P.dir,hx=x+(d===1?-5:d===3?-6:d===2?6:5),hy=y-(d===1?12:10),pul=.5+Math.sin(gTime*4)*.5;
  if(!front){ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(x,y-11,2,x,y-11,10+en*.5);g.addColorStop(0,c+'66');g.addColorStop(.6,c+'1a');g.addColorStop(1,c+'00');ctx.globalAlpha=Math.min(.6,.3+pul*.15+(en-7)*.05);ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(x,y-11,9+en*.5,12+en*.5,0,0,7);ctx.fill();ctx.restore();return;}
  if(rand()<(en>=9?.12:en>=7?.05:.02))fx.push({x:hx+(rand()-.5)*6,y:hy+(rand()-.5)*8,vx:(rand()-.5)*6,vy:-10-rand()*12,t:.22,c:en>=7?c:'#ffffff'});
  if(en>=10){ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<2;i++){const a=gTime*1.8+i*3.142,ox=x+Math.cos(a)*11,oy=y-11+Math.sin(a)*5;ctx.fillStyle=c;ctx.globalAlpha=.55;ctx.fillRect(ox-1,oy-1,2,2);}
@@ -3503,7 +3507,7 @@ Satisfy.local=Object.freeze({api:1,
  zoneAt:(x,y)=>netZone(x,y), // 'void' where the world defines nothing (SAT-ONLINE-019)
  roomAt:(x,y)=>{const R=roomAt(x,y);return R?{id:R.id,kind:R.kind,zone:R.z}:null;},
  inGame:()=>!!S&&!S.__demo,
- playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,wp:(()=>{const w=weapon();return w&&WSH[w.id]?w.id+':'+Math.max(0,Math.min(9,w.r|0)):null;})(),zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null}),
+ playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,wp:(()=>{const w=weapon();return w&&WSH[w.id]?w.id+':'+Math.max(0,Math.min(9,w.r|0))+(w.en>0?':'+Math.min(99,w.en|0):''):null;})(),fx:fxPub(),gu:guPub(),zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null}),
  backups:()=>STORE.backups(),
  profile:()=>!S||S.__demo?null:Satisfy.state.profileOf(S),
  events:()=>DEVT.log(),
@@ -3563,23 +3567,65 @@ function netTick(){NET.tick();const live=netLive();
 // remote looks are validated (0..31) but may index past LOOK; fall back to the first option
 function remoteSpr(L,arm){const ix=(a,i)=>i>=0&&i<a.length?i:0,K={hair:ix(LOOK.hair,L.hair),hc:ix(LOOK.hc,L.hc),skin:ix(LOOK.skin,L.skin),top:ix(LOOK.top,L.top)};
  const k='rp_'+K.hair+'_'+K.hc+'_'+K.skin+'_'+K.top+'_'+(arm?1:0);if(!SH[k])SH[k]=SA.chars.buildSheet(lookFig(K,arm?1:0));return k;}
-// swing progress 0..1 for a remote player, or -1: a swing starts on the change to 'attack' (one per change)
-const NSW=new Map();function netSwing(r){const now=performance.now(),s=NSW.get(r.sid)||{a:'',t:-1e9};if(r.anim==='attack'&&s.a!=='attack')s.t=now;s.a=r.anim;NSW.set(r.sid,s);const k=(now-s.t)/140;return k>=0&&k<1?k:-1;}
-function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;
- for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;
+/* 1:1 effects (SAT-ONLINE-026, owner feedback 9/10): whatever your own attack, dash or skill draws is recorded while it runs
+   (each vfx call with its seed, the fx particles, rings and bolts it adds, its projectiles, the weapon swing and the dash
+   trail) and published with presence as offsets from you. The others replay the same calls at your position, so they see
+   exactly your effects, not a stand-in. Replayed shots are ghosts: they fly and fade but hit nothing. */
+var FXN=0,FXOUT=[];const FXQ=[],FXS=new Map(),FXWIN=700,FXMAX=2400;
+const r1=v=>Math.round(v*10)/10;
+function fxR(ev){if(!NET||!P)return;ev.unshift(++FXN,Math.round(performance.now()));FXOUT.push(ev);if(FXOUT.length>60)FXOUT.shift();}
+FXREC=(k,x,y,o)=>{const c={};for(const q in o){if(q==='seed'||q==='rs')continue;let v=o[q];if(typeof v==='number'){if(/^x\d$/.test(q))v=r1(v-P.x);else if(/^y\d$/.test(q))v=r1(v-P.y);else v=Math.round(v*1000)/1000;}else if(typeof v!=='string'&&typeof v!=='boolean')continue;c[q]=v;}fxR(['v',k,r1(x-P.x),r1(y-P.y),c,o.seed]);};
+const FXPK=['x','y','vx','vy','t','c','fl','dl'];
+function fxGrab(f0,p0,d0){for(const o of fx.slice(f0)){if(!o||o.home||o.img)continue;
+  if(Object.keys(o).every(q=>FXPK.includes(q)))fxR(['p',r1(o.x-P.x),r1(o.y-P.y),r1(o.vx||0),r1(o.vy||0),Math.round((o.t||0)*100),o.c||'',o.fl?1:0,Math.round((o.dl||0)*100)]);
+  else{const c={};for(const q in o){const v=o[q];if(q==='x')c.x=r1(v-P.x);else if(q==='y')c.y=r1(v-P.y);else if(q==='bolt'&&Array.isArray(v))c.bolt=v.map(p=>[r1(p[0]-P.x),r1(p[1]-P.y)]);else if(typeof v==='number')c[q]=Math.round(v*1000)/1000;else if(typeof v==='string'||typeof v==='boolean')c[q]=v;}fxR(['f',c]);}}
+ for(const q of proj.slice(p0))if(q&&!q.ghost)fxR(['j',q.kind,r1(q.x-P.x),r1(q.y-P.y),Math.round(q.vx),Math.round(q.vy),Math.round(q.t*100)]);
+ if(P.dash>d0)fxR(['d',Math.round(P.dash*100)]);}
+// run fn as the local player's own action: record what it draws, also from the timers it starts (skills hit in steps)
+function meRun(fn,self,args){if(FXME||!NET||!P||mode!=='play')return fn.apply(self,args);const st=window.setTimeout,f0=fx.length,p0=proj.length,d0=P.dash;let ok=false;
+ FXME=1;window.setTimeout=function(f,ms,...a){return st(typeof f==='function'?()=>meRun(f,null,a):f,ms);};
+ try{const r=fn.apply(self,args);ok=true;return r;}finally{window.setTimeout=st;FXME=0;if(ok&&P)try{fxGrab(f0,p0,d0);}catch(e){}}}
+const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(tryAttack);dodge=meWrap(dodge);useSlot=meWrap(useSlot);
+// presence field: the events of the last 0.7 s, oldest first, within FXMAX characters (each one goes out in about 3 updates)
+function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();if(!FXOUT.length)return null;
+ let out=[],len=2;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.unshift(j);}return out.length?'['+out.join(',')+']':null;}
+// presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
+function guPub(){if(!P||!P.guard)return null;const a=Math.atan2(P.gy,P.gx);return 1+((Math.round(a/(2*Math.PI)*64)%64+64)%64)+(P.fort>0?64:0)+(P.gT<.22?128:0);}
+function fxSt(sid){let s=FXS.get(sid);if(!s)FXS.set(sid,s={last:-1,off:null,raw:'',sw:null,du:0,tr:[],lt:0});return s;}
+function fxIn(r,s){if(!r.fx||r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
+ for(const ev of a){if(!Array.isArray(ev)||!(ev[0]>s.last)||typeof ev[1]!=='number')continue;s.last=ev[0];const lat=now-ev[1];
+  // the sender's clock: keep the lowest delay seen (creeping up slowly) so steps of one skill keep their spacing
+  if(s.off==null||lat<s.off)s.off=lat;else s.off+=(lat-s.off)*.02;FXQ.push({at:ev[1]+s.off,sid:r.sid,ev});}
+ if(FXQ.length>300)FXQ.splice(0,FXQ.length-300);}
+function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
+ if(ty==='v'&&typeof ev[3]==='string'){const o={};const c=ev[6]||{};for(const q in c){let v=c[q];if(typeof v==='number'){if(/^x\d$/.test(q))v+=x;else if(/^y\d$/.test(q))v+=y;}o[q]=v;}o.rs=n(ev[7])>>>0;vfx(ev[3],x+n(ev[4]),y+n(ev[5]),o);}
+ else if(ty==='p')fx.push({x:x+n(ev[3]),y:y+n(ev[4]),vx:n(ev[5]),vy:n(ev[6]),t:n(ev[7])/100,c:String(ev[8]||'#ffffff').slice(0,9),fl:ev[9]?1:0,dl:n(ev[10])/100});
+ else if(ty==='f'&&ev[3]&&typeof ev[3]==='object'){const o={};for(const q in ev[3]){const v=ev[3][q];if(q==='x')o.x=x+n(v);else if(q==='y')o.y=y+n(v);else if(q==='bolt'&&Array.isArray(v))o.bolt=v.map(p=>[x+n(p&&p[0]),y+n(p&&p[1])]);else if(typeof v!=='object')o[q]=v;}if(!(o.t>0))return;o.t=Math.min(o.t,3);fx.push(o);}
+ else if(ty==='j'&&['arrow','magic','fire','wave'].includes(ev[3]))proj.push({kind:ev[3],x:x+n(ev[4]),y:y+n(ev[5]),vx:n(ev[6]),vy:n(ev[7]),t:Math.min(2,n(ev[8])/100),ghost:1,hit:new Set()});
+ else if(ty==='w')s.sw={a:n(ev[3]),t:performance.now()};
+ else if(ty==='d')s.du=performance.now()+Math.min(600,n(ev[3])*10);}
+// due replays, at where each player is drawn now; players off screen or out of sight just drop theirs
+function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
+function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now();
+ for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const fs=fxSt(r.sid);fxIn(r,fs);if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
   const k=remoteSpr(r.look,r.arm),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
   // their weapon in hand and each swing once, the way your own is drawn (SAT-ONLINE-026, owner feedback 7): a swing starts when
   // their anim turns to 'attack' and plays 0.14 s on this clock, however long the state stays up
-  const sw=netSwing(r),wp=/^([a-z0-9_]+):(\d)$/.exec(r.wp||''),wi=wp&&WSH[wp[1]]?{id:wp[1],r:+wp[2]}:null,a0=[Math.PI/2,-Math.PI/2,0,Math.PI][r.dir&3];
-  const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{if(r.anim==='dead')ctx.globalAlpha=.45;else if(r.anim==='dodge')ctx.globalAlpha=.6;drawChar(k,r.x,r.y-bob,r.dir,fr,false);
-   if(wi&&r.anim!=='dead'){const hx=Math.round(r.x)+(r.dir===3?-6:5),hy=Math.round(r.y-bob)-7;if(sw<0)weapPix(ctx,hx,hy,wi,r.dir);else SA.weapons.draw(ctx,wi.id,wi.r,hx,hy,a0-1.1+2.2*sw+Math.PI/2,Math.cos(a0)<0);}ctx.globalAlpha=1;}});
-  if(sw>=0)ents.push({y:r.y+1,f:()=>{ctx.save();ctx.globalAlpha=.8*(1-sw);ctx.strokeStyle='#ffffff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(r.x,r.y-9,13,a0-1.1,a0-1.1+2.2*sw);ctx.stroke();ctx.restore();}});
-  if(r.anim==='dodge')ents.push({y:r.y-1,f:()=>{ctx.save();ctx.globalAlpha=.25;drawChar(k,r.x-[0,0,6,-6][r.dir&3],r.y-[6,-6,0,0][r.dir&3],r.dir,1,false);ctx.restore();}});
+  // drawn the way your own character is (the player draw in render): dash trail, enhancement glow, weapon in hand or the
+  // swing at the aimed angle (from their 'w' effect), and the raised guard (gu)
+  const wp=/^([a-z0-9_]+):(\d)(?::(\d{1,2}))?$/.exec(r.wp||''),wi=wp&&WSH[wp[1]]?{id:wp[1],r:+wp[2]}:null,wen=wp?+(wp[3]||0):0;
+  const ft=Math.min(.1,(now-(fs.lt||now))/1000);fs.lt=now;fs.tr.forEach(a=>a.t-=ft);fs.tr=fs.tr.filter(a=>a.t>0);if(now<fs.du)fs.tr.push({x:r.x,y:r.y,dir:r.dir,t:.22});
+  const swk=fs.sw?(now-fs.sw.t)/140:-1,sw=swk>=0&&swk<1?swk:-1,gu=Number.isInteger(r.gu)&&r.gu>=1&&r.gu<=256?r.gu-1:-1;
+  const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{fs.tr.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;drawChar(k,a.x,a.y,a.dir,1,false);});ctx.globalAlpha=1;
+   if(r.anim==='dead')ctx.globalAlpha=.45;if(wen>=7)drawEnh(r.x,r.y-bob,wen,0,r.dir);drawChar(k,r.x,r.y-bob,r.dir,fr,false);if(wen>=4)drawEnh(r.x,r.y-bob,wen,1,r.dir);
+   if(wi&&r.anim!=='dead'){const hx=Math.round(r.x)+(r.dir===3?-6:5),hy=Math.round(r.y-bob)-7;if(sw<0)weapPix(ctx,hx,hy,wi,r.dir);else SA.weapons.draw(ctx,wi.id,wi.r,hx,hy,fs.sw.a-1.1+2.2*sw+Math.PI/2,Math.cos(fs.sw.a)<0);}
+   if(gu>=0&&r.anim!=='dead')guardArc(r.x,r.y-bob,(gu&63)/64*2*Math.PI,gu&128?1:.55,!!(gu&64));ctx.globalAlpha=1;}});
   if(r.em)emoBubble(ents,r.em,r.x,r.y,r.dir);
   if(PCTX&&PCTX.uid===r.uid)ents.push({y:r.y-1,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,231,168,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(r.x,r.y+1,9,4,0,0,7);ctx.stroke();ctx.restore();}});
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   TX.push({s:r.handle||'?',x:r.x,y:r.y-28,f:F,z:8,c:foe?'#ff8a7a':mate?'#8dff9a':'#9fe0ff'});
   if(!mate&&!foe&&mode==='play'&&Math.hypot(r.x-P.x,r.y-P.y)<PARTY_R)TX.push({s:t('pInvite')+(DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?' · '+t('dHint'):''),x:r.x,y:r.y-37,f:F,z:6,c:'#ffe7a8'});}
+ fxRun(seen);for(const sid of FXS.keys())if(!NET.get||!NET.get(sid))FXS.delete(sid);
  duelWatch(ents,myRoom);pingEnts(ents,myRoom,F);const me=emoNow();if(me)emoBubble(ents,me,P.x,P.y,P.dir);
  const ds=DUEL&&DUEL.state();if(ds&&ds.arena&&!myRoom)ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle=ds.phase==='fight'?'rgba(255,120,90,.7)':'rgba(255,210,74,.7)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(ds.arena.x,ds.arena.y,ds.arena.r,0,7);ctx.stroke();ctx.restore();}});}
 if(NETQ==='local'&&typeof BroadcastChannel!=='undefined'){
@@ -3633,7 +3679,9 @@ function chatSend(){if(!CHAT)return chatClose();let v=$('chatIn').value,ch=CHCH;
  const r=CHAT.say(v,ch);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}chatClose();}
 $('chatIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Tab'){e.preventDefault();chatCh(CHCH==='all'?'party':'all');return;}if(e.code==='Enter'||e.code==='NumpadEnter'){e.preventDefault();chatSend();}else if(e.code==='Escape'){e.preventDefault();chatClose();}});
 $('chatIn').addEventListener('blur',()=>{if(!$('chatIn').hidden&&!$('chatIn').value)chatClose();});
-$('chatTabs').addEventListener('click',e=>{const b=e.target.closest('button[data-ch]');if(!b)return;chatCh(b.dataset.ch);if(!$('chatIn').hidden)$('chatIn').focus();});
+// pressing a tab used to blur the empty line first, which closed it and hid the tabs before the click landed (owner feedback 9)
+$('chatTabs').addEventListener('pointerdown',e=>e.preventDefault());$('chatTabs').addEventListener('mousedown',e=>e.preventDefault());
+$('chatTabs').addEventListener('click',e=>{const b=e.target.closest('button[data-ch]');if(!b)return;chatCh(b.dataset.ch);if($('chatIn').hidden)chatOpen();else $('chatIn').focus();});
 function chatUI(live){const W=$('chatW'),on=!!(live&&CHAT);if(!on){if(!W.hidden){W.hidden=true;chatClose();}return;}
  const inP=chatInParty();if(inP&&!chatWasP)chatCh('party');else if(!inP&&CHCH==='party')chatCh('all');chatWasP=inP;
  // one list for both (owner): everyone's lines and the party's, party ones in green; Tab picks where Enter sends
@@ -3643,7 +3691,7 @@ function chatUI(live){const W=$('chatW'),on=!!(live&&CHAT);if(!on){if(!W.hidden)
  const fresh=all.some(l=>now-l.t<30000);W.hidden=!fresh&&$('chatIn').hidden;
  if(sig===chatSig)return;chatSig=sig;
  for(const b of $('chatTabs').children){const c=b.dataset.ch;b.textContent=t(c==='all'?'chatAll':'chatParty');b.classList.toggle('on',c===CHCH);b.hidden=c==='party'&&!inP;}
- $('chatTabs').hidden=$('chatIn').hidden;
+ $('chatTabs').hidden=$('chatIn').hidden&&!inP; // in a party both tabs stay up to pick where the next line goes
  W.classList.toggle('idle',!lines.length&&$('chatIn').hidden);const L=$('chatL');L.textContent='';
  for(const l of lines){const d=document.createElement('div');d.className=(now-l.t>20000?'old ':'')+(l.ch||'party');const b=document.createElement('b');b.textContent=(l.self?netId||S.look.n:l.handle)+': ';d.appendChild(b);d.appendChild(document.createTextNode(l.text));L.appendChild(d);}}
 function blockUid(uid,handle){if(!uid)return;BLK.add(uid,handle);toast(t('pBlocked',{n:handle||'?'}),'warn');partySig='';duelSig='';chatSig='';}
