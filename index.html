@@ -3832,7 +3832,7 @@ function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(r.mv===map
  if(!netOtherV.has(r.sid)){netOtherV.add(r.sid);toast(t('netOtherV',{n:r.handle||'?'}),'warn');updBanner();}return false;}
 Object.assign(STR.ar,{netOtherV:'{n} قريب منك بس على نسخة تانية من اللعبة: اعملوا الاتنين ريفريش عشان تشوفوا بعض'});
 Object.assign(STR.en,{netOtherV:'{n} is nearby on a different version of the game: reload both pages to see each other'});
-function netWatch(){const id=(PARTY&&PARTY.id())||null;if(NETTR.wsig!==id){NETTR.wsig=id;NETTR.party(id);}}
+function netWatch(){const ids=PARTY?PARTY.follow():[],w=ids.join(' ');if(NETTR.wsig!==w){NETTR.wsig=w;NETTR.party(ids);}} // party.follow(): review #55
 function netTick(){NET.tick();const live=netLive();
  if(PARTY)PARTY.tick();
  if(NETTR&&NETTR.party)netWatch();
@@ -3840,7 +3840,7 @@ function netTick(){NET.tick();const live=netLive();
  if(PRAID)PRAID.tick();
  mobTick(live);
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
- if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,duel:duelPublic()}),netForce);netForce=false;}
+ if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic()}),netForce);netForce=false;}
  partyUI(live);chatUI(live);pctxUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
  const netSafe=live&&Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;

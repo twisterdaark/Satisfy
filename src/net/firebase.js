@@ -116,6 +116,7 @@
       if (pp.hp === undefined) pp.hp = null;
       if (pp.em === undefined) pp.em = null;
       if (pp.role === undefined) pp.role = null;
+      if (pp.rs === undefined) pp.rs = null;
       if (typeof pp.t !== 'number') pp.t = 0;
       return { v: 1, type: 'presence.state', requestId: null, sessionId: pp.sid, seq: +v.seq || 0, tick: 0, payload: pp };
     }
@@ -140,7 +141,8 @@
     // is left behind at once; one who walks out of range (or out of the party) is removed by its query.
     // Someone in both queries arrives twice; onState drops the second copy.
     var R = (o.interest && o.interest.radius) || 0, STEP = (o.interest && o.interest.step) || Math.round(R / 2);
-    var cx = null, qOffs = [], pq = { id: null, offs: [], keys: {} };
+    // gone: nodes the range query has removed while the party query still listed them (it decides, see below)
+    var cx = null, qOffs = [], pq = { ids: [], offs: [], keys: {} }, gone = {};
     function off(f) { try { f(); } catch (e) { /* ignore */ } }
     function outside(key) { return R && cx !== null && !pq.keys[key] && !(Math.abs(lastX[key] - cx) <= R); }
     function listen(x) {
@@ -149,23 +151,32 @@
       cx = x;
       Object.keys(lastSeq).forEach(function (k) { if (outside(k)) leave(k, null); });
       var q = R ? D.query(list, D.orderByChild('x'), D.startAt(Math.max(0, x - R)), D.endAt(x + R)) : list;
-      qOffs.push(D.onChildAdded(q, onState));
-      qOffs.push(D.onChildChanged(q, onState));
-      qOffs.push(D.onChildRemoved(q, function (s) { if (s.key !== o.uid && !pq.keys[s.key]) leave(s.key, s.val()); }));
+      function inR(s) { delete gone[s.key]; onState(s); }
+      qOffs.push(D.onChildAdded(q, inR));
+      qOffs.push(D.onChildChanged(q, inR));
+      qOffs.push(D.onChildRemoved(q, function (s) { if (s.key === o.uid) return; if (pq.keys[s.key]) gone[s.key] = 1; else leave(s.key, s.val()); }));
     }
-    function partyQuery(pid) {
-      pid = typeof pid === 'string' && pid ? pid : null;
-      if (!R || pid === pq.id || closed) return;
+    function partyQuery(ids) {
+      // one equalTo query per id: the party's own, and for a member also the ids a new leader could take (see
+      // party.follow()), so members far apart keep seeing each other while an election moves them (review #55)
+      ids = (Array.isArray(ids) ? ids : [ids]).filter(function (x, i, a) { return typeof x === 'string' && x && a.indexOf(x) === i; }).slice(0, 6);
+      if (!R || closed || ids.join(' ') === pq.ids.join(' ')) return;
       pq.offs.forEach(off);
       var had = pq.keys;
-      pq = { id: pid, offs: [], keys: {} };
+      pq = { ids: ids, offs: [], keys: {} };
       Object.keys(had).forEach(function (k) { if (outside(k)) leave(k, null); }); // ex-members far away
-      if (!pid) return;
-      var q = D.query(list, D.orderByChild('party'), D.equalTo(pid));
-      function inP(s) { if (s.key === o.uid) return; pq.keys[s.key] = 1; onState(s); }
-      pq.offs.push(D.onChildAdded(q, inP));
-      pq.offs.push(D.onChildChanged(q, inP));
-      pq.offs.push(D.onChildRemoved(q, function (s) { delete pq.keys[s.key]; if (outside(s.key)) leave(s.key, s.val()); }));
+      ids.forEach(function (pid) {
+        var q = D.query(list, D.orderByChild('party'), D.equalTo(pid));
+        function inP(s) { if (s.key === o.uid) return; (pq.keys[s.key] = pq.keys[s.key] || {})[pid] = 1; onState(s); }
+        pq.offs.push(D.onChildAdded(q, inP));
+        pq.offs.push(D.onChildChanged(q, inP));
+        pq.offs.push(D.onChildRemoved(q, function (s) {
+          var m = pq.keys[s.key];
+          if (m) { delete m[pid]; if (Object.keys(m).length) return; delete pq.keys[s.key]; } // moved to another id we follow
+          // the range query may have seen the node go first (a closed tab): then nobody lists it any more
+          if (gone[s.key] || outside(s.key)) { delete gone[s.key]; leave(s.key, s.val()); }
+        }));
+      });
     }
     if (!R) listen(0); // whole shard, as before
     offs.push(D.onValue(D.ref(db, '.info/serverTimeOffset'), function (s) { offset = +s.val() || 0; }));
@@ -223,8 +234,8 @@
        * {radius, centre, party, watched}: what the interest queries cover now (radius 0 = the whole
        * shard); watched = the other players the party query shows.
        */
-      interest: function () { return { radius: R, centre: cx, party: pq.id, watched: Object.keys(pq.keys) }; },
-      /** Follow everyone whose presence says they are in party `id` (null: stop), on top of the range query. */
+      interest: function () { return { radius: R, centre: cx, party: pq.ids[0] || null, parties: pq.ids.slice(), watched: Object.keys(pq.keys) }; },
+      /** Follow everyone whose presence is in party `id` (or any of an array of ids; null or []: stop), on top of the range query. */
       party: partyQuery,
       /**
        * World feeds (SAT-ONLINE-026): chat/{world} (world chat: {from, h, text, t}) and news/{world} (world
