@@ -27,6 +27,7 @@ const FIG={
  praga:{hair:'spiky',hc:'#7a1a1a',hl:'#a83a2a',skin:'#d9a070',sk2:'#b47c50',top:'#3a2a2a',top2:'#261a1a',sleeves:true,pad:'#6a5a4a',pad2:'#4a3a2a',belt:'#2a1a10',pants:'#2a2626',boots:'#22180f'},
  forc:{hair:'bald',hc:'#cfd8e0',hl:'#ffffff',skin:'#5a86c8',sk2:'#3e66a0',top:'#e8eef4',top2:'#b8c4d0',sleeves:false,shorts:'#6a5a4a',pants:'#6a5a4a',boots:'#5e7884'},
  fochief:{hair:'helm',hc:'#c8d4e0',hl:'#f0f6ff',skin:'#4a76b8',sk2:'#2e5690',top:'#e8eef4',top2:'#b8c4d0',sleeves:false,pad:'#9aa8b8',pad2:'#7a8898',belt:'#3a2a1a',shorts:'#4a3a2a',pants:'#4a3a2a',boots:'#506a76'},
+ piaro:{hair:'cap',hc:'#b8b0a0',hl:'#ddd6c8',cap:'#d8b860',skin:'#d9a070',sk2:'#b47c50',top:'#6a7a4a',top2:'#4e5c36',sleeves:true,beard:'#c8c0b0',beard2:'#9a9284',belt:'#5a3a24',pants:'#5a4a36',boots:'#2a1c12'},
  regas:{hair:'spiky',hc:'#e2702a',hl:'#ffa45a',skin:'#f1c193',sk2:'#d3a070',top:'#f1c193',top2:'#d3a070',sleeves:false,belt:'#5a3a24',pants:'#2e2e36',boots:'#22180f'},
  knight:{hair:'helm',hc:'#b8bec9',hl:'#e6e9ee',skin:'#f1c193',sk2:'#d3a070',top:'#b8bec9',top2:'#8a909c',sleeves:true,cape:'#8a1f2a',pants:'#6a707c',boots:'#3a3e48'}};
 const OUT='#120f18',EYE='#22181e';
