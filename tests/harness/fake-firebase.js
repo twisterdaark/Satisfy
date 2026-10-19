@@ -58,6 +58,7 @@
     const seg = p.split('/');
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
     if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
+    if (seg[0] === 'handles' || seg[0] === 'accountIds' || seg[0] === 'chat' || seg[0] === 'news') return idRules(seg, v);
     if (seg[0] === 'sessions') {
       if (seg.length !== 2 || !user || seg[1] !== user.uid) return 'PERMISSION_DENIED: not your session';
       if (v === null) return null;
@@ -74,6 +75,8 @@
     if (JSON.stringify(v.t) !== JSON.stringify(SV)) return 't must be the server timestamp';
     if (typeof v.sid !== 'string' || v.sid.length < 8 || v.sid.length > 64) return 'sid';
     if (typeof v.handle !== 'string' || v.handle.length > 24) return 'handle';
+    // the rules require handle = accountIds/{uid}; here only once the account has an ID, so tests that never pick one still run
+    if (data.has('accountIds/' + user.uid) && v.handle !== data.get('accountIds/' + user.uid)) return 'handle is not the account ID';
     if (!(v.x >= 0 && v.x < POS_X && v.y >= POS_Y0 && v.y < POS_Y)) return 'position';
     if (!/^(idle|walk|attack|dodge|dead)$/.test(v.anim)) return 'anim';
     if (v.arm !== 0 && v.arm !== 1) return 'arm';
@@ -85,6 +88,31 @@
     if ('em' in v && !/^(wave|dance|point|cheer)$/.test(v.em)) return 'em';
     if ('role' in v && !/^(tank|healer|damage|support)$/.test(v.role)) return 'role';
     return null;
+  }
+  // SAT-ONLINE-026: handles/{lowercase ID} = uid (first come), accountIds/{uid} = ID (needs that handle), world feeds
+  // chat|news/satisfy/{id} = {from, h, ...} written as yourself under your ID, removable by anyone after 10 min
+  function idRules(seg, v) {
+    if (!user) return 'PERMISSION_DENIED: signed out';
+    const p = seg.join('/'), old = data.has(p) ? data.get(p) : undefined;
+    if (seg[0] === 'handles') {
+      if (seg.length !== 2) return 'PERMISSION_DENIED: path';
+      if (v === null) return old === user.uid ? null : 'PERMISSION_DENIED: not your handle';
+      if (old !== undefined || v !== user.uid) return 'PERMISSION_DENIED: handle taken';
+      return /^[a-z0-9_]{3,16}$/.test(seg[1]) ? null : 'handle name';
+    }
+    if (seg[0] === 'accountIds') {
+      if (seg.length !== 2 || seg[1] !== user.uid) return 'PERMISSION_DENIED: not your id';
+      if (v === null) return null;
+      if (old !== undefined) return 'PERMISSION_DENIED: id is set';
+      return typeof v === 'string' && /^[A-Za-z0-9_]{3,16}$/.test(v) && data.get('handles/' + v.toLowerCase()) === user.uid ? null : 'account id';
+    }
+    if (seg.length !== 3 || seg[1] !== 'satisfy') return 'PERMISSION_DENIED: path';
+    if (v === null) return old && old.t < Date.now() - 600000 ? null : 'PERMISSION_DENIED: too new';
+    if (old !== undefined) return 'PERMISSION_DENIED: write once';
+    if (v.from !== user.uid || v.h !== data.get('accountIds/' + user.uid) || JSON.stringify(v.t) !== JSON.stringify(SV)) return seg[0] + ' from/h/t';
+    if (seg[0] === 'chat') return keysAre(v, ['from', 'h', 'text', 't']) && typeof v.text === 'string' && v.text.length >= 1 && v.text.length <= 120 ? null : 'chat fields';
+    if (!/^[A-Za-z]{2,16}$/.test(v.k) || Object.keys(v).some((k) => !['from', 'h', 'k', 'p', 't'].includes(k))) return 'news fields';
+    return !v.p || Object.keys(v.p).every((k) => ['lv', 'f', 'rk'].includes(k) && typeof v.p[k] === 'number') ? null : 'news p';
   }
   // profiles/{uid}, cloudIndex/{uid}/{pid}, cloudSaves/{uid}/{pid} (SAT-ONLINE-007): owner writes only
   const PID = /^[a-z0-9_]{4,40}$/;
@@ -189,7 +217,7 @@
       const err = rules(r.path, v, false);
       F.log.push({ op: 'set', path: r.path, err });
       if (err) { F.rejected.push(err); return Promise.reject(Object.assign(new Error(err), { code: 'PERMISSION_DENIED' })); }
-      const stored = clone(v); stored.t = Date.now();
+      const stored = clone(v); if (stored && typeof stored === 'object') stored.t = Date.now(); // handles/accountIds hold strings
       mine.add(r.path);
       if (!connected) { pending.set(r.path, stored); return Promise.resolve(); }
       write('set', r.path, stored);
@@ -220,7 +248,7 @@
     // one-shot read: the exact node, or its direct children as an object (enough for the cloud index)
     get: (r) => {
       const seg = r.path.split('/');
-      const readable = seg[0] === 'profiles' ? !!user : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence'].includes(seg[0]) ? !!user : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));

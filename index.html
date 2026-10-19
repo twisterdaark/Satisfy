@@ -3618,7 +3618,7 @@ function isBlocked(uid){return BLK.has(uid);}
 /* SAT-ONLINE-026 (owner feedback 10/11): a world chat for everyone next to the party chat, in its own box at the bottom-left
    corner (it used to sit under the right column, where the HUD covered it). Tabs pick what you read and where Enter sends;
    Tab in the chat line switches. A tab you aren't looking at gets a dot when a line arrives. */
-let CHCH='all',chatSeen={all:0,party:0};
+let CHCH='all',chatSeen={all:0,party:0},chatWasP=false; // joining a party switches Enter to the party chat, as before
 function chatStart(){CHAT=Satisfy.chat.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,world:NETTR&&NETTR.sayWorld?NETTR:null,handle:()=>netId||(S&&S.look.n)||''});CHAT.on(()=>{chatSig='';});}
 function chatInParty(){return !!(PARTY&&PARTY.members().length>=2);}
 function chatCh(c){CHCH=c==='party'&&chatInParty()?'party':'all';$('chatIn').placeholder=t(CHCH==='party'?'chatPh':'chatPhAll');chatSig='';}
@@ -3629,7 +3629,7 @@ $('chatIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Tab'
 $('chatIn').addEventListener('blur',()=>{if(!$('chatIn').hidden&&!$('chatIn').value)chatClose();});
 $('chatTabs').addEventListener('click',e=>{const b=e.target.closest('button[data-ch]');if(!b)return;chatCh(b.dataset.ch);if(!$('chatIn').hidden)$('chatIn').focus();});
 function chatUI(live){const W=$('chatW'),on=!!(live&&CHAT);if(!on){if(!W.hidden){W.hidden=true;chatClose();}return;}
- const inP=chatInParty();if(!inP&&CHCH==='party')chatCh('all');
+ const inP=chatInParty();if(inP&&!chatWasP)chatCh('party');else if(!inP&&CHCH==='party')chatCh('all');chatWasP=inP;
  const all=CHAT.log(),last=c=>{for(let i=all.length-1;i>=0;i--)if((all[i].ch||'party')===c)return all[i].n;return 0;};chatSeen[CHCH]=last(CHCH);
  const now=performance.now(),lines=all.filter(l=>(l.ch||'party')===CHCH).slice(-6),oth=CHCH==='all'?'party':'all',nw=last(oth)>chatSeen[oth];
  const sig=lang+'|'+CHCH+'|'+inP+'|'+nw+'|'+lines.map(l=>l.n+':'+(now-l.t>20000?1:0)).join(',')+'|'+$('chatIn').hidden;

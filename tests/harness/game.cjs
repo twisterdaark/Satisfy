@@ -67,7 +67,7 @@ function baselineHtml() {
   const tmp = dir + '.part-' + process.pid;
   fs.rmSync(tmp, { recursive: true, force: true });
   fs.mkdirSync(tmp, { recursive: true });
-  execFileSync('tar', ['-x', '-C', tmp], { input: tar });
+  execFileSync('tar', ['-x', '-f', '-', '-C', tmp], { input: tar }); // -f -: Windows tar reads a tape device otherwise
   try { fs.renameSync(tmp, dir); } catch (e) { fs.rmSync(tmp, { recursive: true, force: true }); } // another test process won
   return fs.existsSync(file) ? file : null;
 }

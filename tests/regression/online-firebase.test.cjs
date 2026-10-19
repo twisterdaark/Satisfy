@@ -39,7 +39,7 @@ async function twoOnline() {
   return { ctx, a, b };
 }
 
-test('title shows "Play online (Google)" only with ?net=online; sign-in uses the pinned SDK and project config', async () => {
+test('title shows "Play online" only with ?net=online; sign-in uses the pinned SDK and project config; the first time asks for a unique ID', async () => {
   const off = await H.openGame();
   try {
     assert.equal(await off.eval(() => document.getElementById('onlineBtn').hidden), true);
@@ -48,9 +48,17 @@ test('title shows "Play online (Google)" only with ?net=online; sign-in uses the
   try {
     const g = await H.openGame({ ctx, query: '?net=online' });
     assert.equal(await g.eval(() => document.getElementById('onlineBtn').hidden), false);
-    assert.equal(await g.eval(() => document.getElementById('onlineBtn').textContent), 'Play online (Google)');
+    assert.equal(await g.eval(() => document.getElementById('onlineBtn').textContent), 'Play online');
+    assert.equal(await g.eval(() => document.getElementById('newBtn').hidden && document.getElementById('contBtn').hidden), true, 'online only: no New game / Continue');
     await signIn(g, 'Ahmed');
-    assert.equal(await g.eval(() => document.getElementById('onlineBtn').textContent), 'Online as Ahmed');
+    // SAT-ONLINE-026: no account ID yet, so the ID box opens; a taken ID is refused, a free one is kept and shown
+    await until(g, () => !document.getElementById('idW').hidden);
+    await g.eval(() => { window.__fakeRTDB.data.set('handles/taken', 'someone-else'); document.getElementById('idIn').value = 'Taken'; document.getElementById('idOk').click(); });
+    await until(g, () => document.getElementById('idErr').textContent !== '');
+    assert.equal(await g.eval(() => document.getElementById('idW').hidden), false);
+    await g.eval(() => { document.getElementById('idIn').value = 'Ahmed_1'; document.getElementById('idOk').click(); });
+    await until(g, () => document.getElementById('idW').hidden);
+    assert.equal(await g.eval(() => document.getElementById('onlineBtn').textContent), 'Play online · Ahmed_1');
     const f = await fake(g);
     assert.equal(f.sdk, '12.19.0');
     assert.equal(f.cfg.projectId, 'satisfy-online-8yjeix');
@@ -72,9 +80,9 @@ test('two signed-in players see each other through the database; writes pass the
     assert.equal(nb.remotes[0].handle, 'Grid');
     assert.equal(na.drawn, 1);
     assert.equal(await a.eval(() => document.getElementById('netB').textContent), 'Online · players: 2 · Safe zone');
-    // presence, the public profile (SAT-ONLINE-007) and the session lease (SAT-ONLINE-010)
+    // presence, the public profile (SAT-ONLINE-007), the session lease (SAT-ONLINE-010) and the account ID read (SAT-ONLINE-026)
     const paths = await a.eval(() => [...new Set(window.__fakeRTDB.log.map((l) => l.path))]);
-    assert.deepEqual(paths.sort(), ['presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]);
+    assert.deepEqual(paths.sort(), ['accountIds/' + na.uid, 'presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]);
     assert.deepEqual((await fake(a)).rejected, []);
     assert.deepEqual((await fake(b)).rejected, []);
     // link quality (doc U015/U020): acknowledged writes give a round trip, shown in the badge tooltip
@@ -130,10 +138,14 @@ test('a saved Google session reconnects after reload without a popup', async () 
     const g = await H.openGame({ ctx, query: '?net=online&slot=a' });
     await signIn(g, 'Ahmed');
     const uid = (await net(g)).uid;
+    await until(g, () => !document.getElementById('idW').hidden);
+    await g.eval(() => { document.getElementById('idIn').value = 'Ahmed'; document.getElementById('idOk').click(); });
+    await until(g, () => document.getElementById('idW').hidden);
     await g.reload();
     await until(g, () => !!Satisfy.local.net());
     assert.equal((await net(g)).uid, uid);
-    assert.equal(await g.eval(() => document.getElementById('onlineBtn').textContent), 'Online as Ahmed');
+    // SAT-ONLINE-026 (owner feedback 15): the account ID comes back after a reload, not the Google name
+    await until(g, () => document.getElementById('onlineBtn').textContent === 'Play online · Ahmed');
   } finally { await ctx.close(); }
 });
 
