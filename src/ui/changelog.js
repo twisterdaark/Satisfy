@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19k', ver: '0.34', d: '2026-10-19',
+      ar: ['أونلاين: الجو (مطر وتلج وضباب) واحد عند كل اللاعبين في نفس اللحظة',
+        'الأعشاب في نفس الأماكن عند الكل، وأماكنها بتتغير كل يوم',
+        'لما وحش يوقّع حد من أهل المدينة في حدث، بيبان واقع عند الكل لحد ما يقوم'],
+      en: ['Online: the weather (rain, snow, fog) is the same for every player at the same moment',
+        'Herbs grow in the same places for everyone, and the places change every day',
+        'When a monster knocks out a townsperson during an event, everyone sees them down until they get up'] },
     { v: '2026-10-19i', ver: '0.32', d: '2026-10-19',
       ar: ['أسلحة وخواتم بأسماء من الرواية ليها سكيلات أكتيف وباسيف وانت لابسها: Failure، الخنجر المثالي، رمح العاصفة، إيارغت، دينسليف، قوس الرعد، سيف الحكمة، خاتم حجر الإلف، خاتم مصاص الدماء، خاتم دوران، خاتم العبث، حذاء براهام، خوذة زعيم الأورك',
         'سكيلات السلاح والخواتم ليها خانتين جنب البار على زرار Z وX، وبتظهر بس لما تلبس قطعة فيها سكيل',
