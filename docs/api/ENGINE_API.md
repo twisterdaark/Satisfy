@@ -13,6 +13,8 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 <script src="src/net/contracts.js"></script>  <!-- Satisfy.net -->
 <script src="src/net/presence.js"></script>   <!-- Satisfy.presence (SAT-ONLINE-002) -->
 <script src="src/net/transport-local.js"></script> <!-- Satisfy.transports -->
+<script src="src/net/firebase-config.js"></script> <!-- Satisfy.firebaseConfig (public web config) -->
+<script src="src/net/firebase.js"></script>   <!-- Satisfy.firebase (SAT-ONLINE-004), SDK loaded on demand -->
 <script> (()=>{ ...game...; Satisfy.local = Object.freeze({...}) })() </script>
 ```
 
@@ -29,7 +31,7 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 | `inGame()` | `false` on title/demo screens. |
 | `playerPublic(ctx?)` | The local player as a `PlayerPublic` (see below), or `null` outside a game. `ctx` may set `uid`, `sid`, `party`, `anim`, `t`. |
 | `backups()` | `{ reason: rawJSON }` for every save backup of the current slot. |
-| `net()` | `null` offline; with `?net=local`: `{ mode, sid, count, drawn, remotes, stats }`. |
+| `net()` | `null` offline; with `?net=local` or a signed-in `?net=online`: `{ mode, state, uid, sid, count, drawn, remotes, stats }`. `state` is one of `NET_STATES`. |
 
 Content tables are **source data for SAT-CONTENT-001 parity tests**. They are not an editing
 interface: changing values happens in `data/**` once the engine reads from it (after the split).
@@ -87,6 +89,20 @@ Transports (`{ kind, send, onmessage, close }`): `Satisfy.transports.local(name)
 
 In the game: `?net=local` turns it on; remote players are drawn only inside the same house interior (or both outdoors), with their name and look; a badge shows the player count. Use `?slot=a` / `?slot=b` so two tabs don't share one save.
 
+## `Satisfy.firebase` (SAT-ONLINE-004)
+
+| Member | Notes |
+|---|---|
+| `SDK_VERSION` | `'12.19.0'` (modular SDK from gstatic, via dynamic `import()`). |
+| `load(config)` | Downloads and initializes once; resolves `{ m, app, auth, db }`. Only called for `?net=online`. |
+| `currentUser(sdk)` | Saved Google session or `null`. |
+| `signIn(sdk)` | Google popup; falls back to redirect when popups are blocked. |
+| `transport(sdk, { uid, world, shard, onConnection?, onError? })` | Same shape as `transports.local`. Writes `presence/{world}/{shard}/{uid}` (nulls omitted, `seq`, `t` = server time), arms `onDisconnect().remove()` on every reconnect, and turns child added/changed/removed into presence envelopes. |
+
+Rules: `backend/database.rules.json` (deploy with `firebase deploy --only database`). Deny by default; presence is readable by signed-in players, each player writes only their own node, every field is validated, and unknown fields are rejected. `tests/unit/rules.test.cjs` keeps the rules, the contract and the test fake in agreement.
+
+In the game: `?net=online` shows **Play online (Google)** on the title screen. A saved session reconnects by itself, and the HUD badge shows `Connecting…` / `Online · players: N` / `Reconnecting…`. Presence sends at 5 Hz while moving. Offline and `?net=local` never download the SDK.
+
 ## Tests
 
 ```bash
@@ -119,3 +135,4 @@ await g.close(); await H.closeBrowser();
 
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
+- **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
