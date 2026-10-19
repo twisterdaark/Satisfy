@@ -45,7 +45,7 @@ test('Sign out, then Delete my online data: nothing of the account is left onlin
 
     // upload a cloud character (two clicks), so every kind of record exists
     await openCloud(a);
-    assert.deepEqual(await accountButtons(a), ['Sign out', 'Delete my online data', 'Hide my level from others']);
+    assert.deepEqual(await accountButtons(a), ['Sign out', 'Delete my online data', 'Change my name', 'Hide my level from others']);
     await click(a, '#cloudN button'); await click(a, '#cloudN button');
     await until(a, () => document.querySelectorAll('#cloudL .cr').length === 1);
     assert.deepEqual(await keysOf(a, UID), ['cloudIndex/gEraseMe1/<pid>', 'cloudSaves/gEraseMe1/<pid>', 'online/main/gEraseMe1', 'presence/satisfy/main/gEraseMe1', 'profiles/gEraseMe1', 'sessions/gEraseMe1']);

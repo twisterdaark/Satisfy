@@ -16,4 +16,8 @@
     messagingSenderId: '564433517305',
     appId: '1:564433517305:web:52eb415373d8252d8b4028',
   });
+  // SAT-ONLINE-029 (owner feedback #3): true = the game is online-only. The title has no New game / Continue: you sign
+  // in, pick your player name once, and Play takes your character (this device's, or your newest cloud save). The URL
+  // needs no ?net=online then. Testing it before flipping: add &only=1 to a ?net=online URL.
+  ns.netOnlineOnly = false;
 })(typeof window !== 'undefined' ? window : globalThis);

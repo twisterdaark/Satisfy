@@ -32,11 +32,11 @@
   }
 
   /** Public profile fields from a game state (S) and language. */
-  function profileFrom(S, lang, revision, hideLv) {
+  function profileFrom(S, lang, revision, hideLv, handle) {
     var L = (S && S.look) || {};
     var num = function (v) { return v >= 0 && v <= 31 ? v | 0 : 0; };
     return {
-      handle: cut(L.n || 'Player', 24),
+      handle: cut(handle || L.n || 'Player', 24), // the account's name when it has one (SAT-ONLINE-029)
       look: { hair: num(L.hair), hc: num(L.hc), skin: num(L.skin), top: num(L.top) },
       language: lang === 'ar' ? 'ar' : 'en',
       titleId: cut((S && S.title) || '', 32),
@@ -81,7 +81,7 @@
       /** Write the public profile. Resolves when stored; rejects on a rules error. */
       writeProfile: function (S, lang, opts) {
         return ensureRev().then(function () {
-          var p = profileFrom(S, lang, rev(), !!(opts && opts.hideLv));
+          var p = profileFrom(S, lang, rev(), !!(opts && opts.hideLv), opts && opts.handle);
           p.t = D.serverTimestamp();
           return D.set(ref('profiles/' + uid), p);
         });
@@ -129,15 +129,15 @@
         var mine = new RegExp('^(presence/[a-z0-9_-]+/[A-Za-z0-9_-]+|inbox|online/[a-z0-9_-]+)/' + uid.replace(/[^A-Za-z0-9_-]/g, '') + '(/|$)');
         // world lines are keyed by push id, not uid: the caller passes its own (transport.worldMine()); the rules
         // refuse deleting anyone else's anyway
-        var line = /^world\/[a-z0-9_-]+\/[A-Za-z0-9_-]+$/;
-        var own = (extra || []).filter(function (p) { return typeof p === 'string' && (mine.test(p) || line.test(p)); });
+        var line = /^world\/[a-z0-9_-]+\/[A-Za-z0-9_-]+$/, name = /^handles\/[a-z0-9_]{3,16}$/; // our name (SAT-ONLINE-029)
+        var own = (extra || []).filter(function (p) { return typeof p === 'string' && (mine.test(p) || line.test(p) || name.test(p)); });
         return Promise.all(['cloudIndex', 'cloudSaves', 'inbox'].map(function (k) { return D.get(ref(k + '/' + uid)); })).then(function (r) {
           var paths = [];
           ['cloudIndex', 'cloudSaves', 'inbox'].forEach(function (k, i) {
             var v = r[i].val();
             if (v && typeof v === 'object') Object.keys(v).forEach(function (id) { paths.push(k + '/' + uid + '/' + id); });
           });
-          paths = paths.concat(own, ['sessions/' + uid, 'profiles/' + uid]);
+          paths = paths.concat(own, ['sessions/' + uid, 'profiles/' + uid, 'accounts/' + uid]);
           return paths.reduce(function (p, path) { return p.then(function () { return D.remove(ref(path)); }); }, Promise.resolve())
             .then(function () { lastRev = 0; revLoaded = null; return paths.length; });
         });

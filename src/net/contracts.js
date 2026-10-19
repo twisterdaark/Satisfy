@@ -123,7 +123,7 @@
       v: PROTOCOL_VERSION,
       uid: ctx.uid || null,
       sid: ctx.sid || null,
-      handle: str(L.n, LIMITS.handle),
+      handle: str(ctx.handle || L.n, LIMITS.handle), // online: the account's unique name (SAT-ONLINE-029)
       look: { hair: L.hair | 0, hc: L.hc | 0, skin: L.skin | 0, top: L.top | 0 },
       cls: str(S.cls || 'novice', 16),
       lv: ctx.hideLv ? 0 : S.lv | 0, // hideLv: shown to others as "Lv ?" (owner feedback #16)

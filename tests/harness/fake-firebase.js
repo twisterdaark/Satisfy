@@ -14,6 +14,8 @@
   const pending = new Map();
   let user = null;
   let connected = true;
+  const DURABLE = ['handles', 'accounts', 'profiles', 'cloudIndex', 'cloudSaves'];
+  let helloAt = 0;
   const F = (window.__fakeRTDB = { log: [], listens: [], rejected: [], data, sdkVersion: undefined, nextName: 'Tester', nextUid: null, popupBlocked: false, redirected: false });
 
   const parentOf = (p) => p.slice(0, p.lastIndexOf('/'));
@@ -42,7 +44,9 @@
   ch.onmessage = (e) => {
     if (!connected) return;
     const m = e.data;
-    if (m.op === 'hello') { for (const p of mine) if (data.has(p)) ch.postMessage({ op: 'set', p, v: data.get(p) }); return; }
+    // a page that (re)loads asks the others for the data: their own nodes, and every copy of the durable paths a real
+    // server would keep (the page that wrote them may be the one reloading)
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || DURABLE.includes(p.split('/')[0])) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -59,6 +63,7 @@
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
     if (seg[0] === 'world') return worldRules(seg, v, existing);
     if (seg[0] === 'online') return onlineRules(seg, v);
+    if (seg[0] === 'handles' || seg[0] === 'accounts') return accountRules(seg, v);
     if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
     if (seg[0] === 'sessions') {
       if (seg.length !== 2 || !user || seg[1] !== user.uid) return 'PERMISSION_DENIED: not your session';
@@ -106,6 +111,24 @@
     if (Object.keys(v).sort().join(',') !== 'h,lv,t,z') return 'online fields';
     if (typeof v.h !== 'string' || v.h.length > 24 || !(v.lv >= 0 && v.lv <= 999) || typeof v.z !== 'string' || v.z.length > 24) return 'online values';
     return JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'online t';
+  }
+  // handles/{key}, accounts/{uid} (SAT-ONLINE-029): a name belongs to whoever took it first; the account points at its own
+  function accountRules(seg, v) {
+    if (seg.length !== 2 || !user) return 'PERMISSION_DENIED: ' + seg[0] + ' path';
+    if (seg[0] === 'handles') {
+      const cur = data.get(seg.join('/'));
+      if (cur && cur.uid !== user.uid) return 'PERMISSION_DENIED: name taken';
+      if (v === null) return null;
+      if (!/^[a-z0-9_]{3,16}$/.test(seg[1]) || Object.keys(v).sort().join(',') !== 'name,t,uid' || v.uid !== user.uid) return 'handle fields';
+      if (typeof v.name !== 'string' || !/^[A-Za-z0-9_]{3,16}$/.test(v.name) || v.name.toLowerCase() !== seg[1]) return 'handle name';
+      return JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'handle t';
+    }
+    if (seg[1] !== user.uid) return 'PERMISSION_DENIED: not your account';
+    if (v === null) return null;
+    if (Object.keys(v).sort().join(',') !== 'handle,t' || typeof v.handle !== 'string' || !/^[A-Za-z0-9_]{3,16}$/.test(v.handle)) return 'account fields';
+    const h = data.get('handles/' + v.handle.toLowerCase());
+    if (!h || h.uid !== user.uid) return 'account: the name is not yours';
+    return JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'account t';
   }
   // profiles/{uid}, cloudIndex/{uid}/{pid}, cloudSaves/{uid}/{pid} (SAT-ONLINE-007): owner writes only
   const PID = /^[a-z0-9_]{4,40}$/;
@@ -239,9 +262,13 @@
       return Promise.resolve();
     },
     // one-shot read: the exact node, or its direct children as an object (enough for the cloud index)
+    // the server answers reads with everything stored; here the other pages' copies arrive as hello replies, so a read
+    // right after loading waits for them (Claude-B, #58)
     get: (r) => {
+      const wait = helloAt + 150 - Date.now();
+      if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
-      const readable = seg[0] === 'profiles' ? !!user : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
+      const readable = seg[0] === 'profiles' || seg[0] === 'handles' ? !!user : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'accounts'].includes(seg[0]) && user && seg[1] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));
@@ -308,5 +335,5 @@
   };
   const app = { initializeApp: (cfg, name) => { F.config = cfg; return { name }; } };
 
-  window.__SATISFY_FIREBASE_LOADER__ = (ver) => { F.sdkVersion = ver; ch.postMessage({ op: 'hello' }); return Promise.resolve({ app, auth, database }); };
+  window.__SATISFY_FIREBASE_LOADER__ = (ver) => { F.sdkVersion = ver; ch.postMessage({ op: 'hello' }); helloAt = Date.now(); return Promise.resolve({ app, auth, database }); };
 })();

@@ -79,7 +79,7 @@ test('online: "Online as …" opens the account panel; "Hide my level" shows oth
       await until([g], () => !!Satisfy.local.net() && Satisfy.local.net().state === 'ONLINE');
     }
     // the signed-in title button now does something: it opens the account panel
-    assert.match(await b.eval(() => document.getElementById('onlineBtn').textContent), /Bassem/);
+    assert.match(await b.eval(() => document.getElementById('onlineBtn').textContent), /^Online as /);
     await b.eval(() => document.getElementById('onlineBtn').click());
     await b.step(3);
     assert.equal(await b.eval(() => document.getElementById('cloudW').hidden), false);

@@ -50,7 +50,8 @@ test('title shows "Play online (Google)" only with ?net=online; sign-in uses the
     assert.equal(await g.eval(() => document.getElementById('onlineBtn').hidden), false);
     assert.equal(await g.eval(() => document.getElementById('onlineBtn').textContent), 'Play online (Google)');
     await signIn(g, 'Ahmed');
-    assert.equal(await g.eval(() => document.getElementById('onlineBtn').textContent), 'Online as Ahmed');
+    // never the Google display name: until a player name is chosen (SAT-ONLINE-029) the button asks for one
+    assert.equal(await g.eval(() => document.getElementById('onlineBtn').textContent), 'Online as choose a name');
     const f = await fake(g);
     assert.equal(f.sdk, '12.19.0');
     assert.equal(f.cfg.projectId, 'satisfy-online-8yjeix');
@@ -75,7 +76,8 @@ test('two signed-in players see each other through the database; writes pass the
     // presence, the public profile (SAT-ONLINE-007) and the session lease (SAT-ONLINE-010)
     const paths = await a.eval(() => [...new Set(window.__fakeRTDB.log.map((l) => l.path))]);
     // + the player-list entry (SAT-ONLINE-028)
-    assert.deepEqual(paths.sort(), ['online/main/' + na.uid, 'presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]);
+    // the account's player name is read once (SAT-ONLINE-029)
+    assert.deepEqual(paths.sort(), ['accounts/' + na.uid, 'online/main/' + na.uid, 'presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]);
     assert.deepEqual((await fake(a)).rejected, []);
     assert.deepEqual((await fake(b)).rejected, []);
     // link quality (doc U015/U020): acknowledged writes give a round trip, shown in the badge tooltip
@@ -134,7 +136,7 @@ test('a saved Google session reconnects after reload without a popup', async () 
     await g.reload();
     await until(g, () => !!Satisfy.local.net());
     assert.equal((await net(g)).uid, uid);
-    assert.equal(await g.eval(() => document.getElementById('onlineBtn').textContent), 'Online as Ahmed');
+    assert.equal(await g.eval(() => document.getElementById('onlineBtn').textContent), 'Online as choose a name');
   } finally { await ctx.close(); }
 });
 

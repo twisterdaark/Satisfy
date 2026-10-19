@@ -93,12 +93,12 @@ test('eraseAll (T35): every online record of the account, index before save, not
   for (const p of ['profiles/u2', 'cloudSaves/u2/p_cccccccccccccccccccc', 'presence/satisfy/main/u2', 'inbox/u2/-m9']) data.set(p, { other: 1 });
   log.length = 0;
   const n = await C.eraseAll(['presence/satisfy/main/u1', 'presence/satisfy/main/u2', 'profiles/u2']);
-  assert.equal(n, 9);
+  assert.equal(n, 10, '... and the account record (SAT-ONLINE-029)');
   assert.deepEqual([...data.keys()].filter((k) => k.includes('u1')), [], 'nothing of u1 left');
   assert.equal([...data.keys()].filter((k) => k.includes('u2')).length, 4, "another account's data and paths passed in by mistake are untouched");
   const removed = log.filter((l) => l[0] === 'remove').map((l) => l[1]);
   assert.ok(removed.indexOf('cloudIndex/u1/p_aaaaaaaaaaaaaaaaaaaa') < removed.indexOf('cloudSaves/u1/p_aaaaaaaaaaaaaaaaaaaa'));
-  assert.deepEqual(removed.slice(-2), ['sessions/u1', 'profiles/u1']);
+  assert.deepEqual(removed.slice(-3), ['sessions/u1', 'profiles/u1', 'accounts/u1']);
   // a new profile can be written afterwards (the revision is read again)
   await C.writeProfile({ look: { n: 'Grid' }, lv: 3 }, 'en');
   assert.ok(data.has('profiles/u1'));
@@ -108,4 +108,13 @@ test('eraseAll (T35): every online record of the account, index before save, not
 test('profileFrom: a hidden level is written as 0', () => {
   assert.equal(CL.profileFrom({ look: { n: 'Grid' }, lv: 40 }, 'en', 1, true).lv, 0);
   assert.equal(CL.profileFrom({ look: { n: 'Grid' }, lv: 40 }, 'en', 1).lv, 40);
+});
+
+// SAT-ONLINE-028/029: the player-list entry, our world lines and our name go too
+test('eraseAll also takes the online entry, our world lines and our name', async () => {
+  const { sdk, data } = memSdk();
+  const C = CL.create(sdk, { uid: 'u1', now: () => 5000 });
+  for (const p of ['online/main/u1', 'world/main/-w1', 'handles/grid', 'accounts/u1', 'online/main/u2']) data.set(p, { x: 1 });
+  await C.eraseAll(['online/main/u1', 'world/main/-w1', 'handles/grid', 'online/main/u2', 'handles/../x']);
+  assert.deepEqual([...data.keys()].sort(), ['online/main/u2'], 'only what is ours (the rules refuse the rest anyway)');
 });

@@ -54,6 +54,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #partyL button.blk{width:auto;padding:0 calc(var(--u)*.4);font-size:calc(var(--u)*1.2);opacity:.7}
 #chatW{position:absolute;inset-inline-start:calc(var(--u)*1);bottom:calc(var(--u)*1);z-index:6;pointer-events:auto;width:calc(var(--u)*30);max-height:calc(var(--u)*14);overflow-y:auto;font-size:calc(var(--u)*1.4);overflow-wrap:anywhere}
 #chatW.tch{bottom:calc(var(--u)*27)}
+#hndW{z-index:30;width:calc(var(--u)*44)}#hndW #hndT{opacity:.8;margin:calc(var(--u)*.5) 0}#hndIn{font:inherit;width:100%;box-sizing:border-box;color:#fff;background:rgba(0,0,0,.45);border:1px solid var(--line);padding:calc(var(--u)*.4) calc(var(--u)*.8);user-select:text;-webkit-user-select:text}#hndE{min-height:1.4em;color:#ffb48a;margin:calc(var(--u)*.4) 0}
 #chatL div{margin:calc(var(--u)*.2) 0}#chatL div.old{opacity:.45}#chatL b{color:#9fe0a0;font-weight:600}#chatL div.w b{color:#9fd0ff}
 #chatTabs{display:flex;gap:calc(var(--u)*.4);margin-bottom:calc(var(--u)*.3)}#chatTabs button{font-size:calc(var(--u)*1.2);padding:calc(var(--u)*.1) calc(var(--u)*.7);opacity:.6}#chatTabs button.on{opacity:1;border-color:var(--gold)}#chatTabs button.new::after{content:' •';color:#ffd36a}#chatTabs button:disabled{opacity:.25}
 #plW{position:absolute;left:50%;top:calc(var(--u)*8);transform:translateX(-50%);width:calc(var(--u)*40);max-height:calc(var(--u)*34);overflow-y:auto;pointer-events:auto;font-size:calc(var(--u)*1.5);z-index:7}#plW .r{display:flex;justify-content:space-between;gap:calc(var(--u)*1);padding:calc(var(--u)*.2) 0;border-bottom:1px solid rgba(255,255,255,.08)}#plW .r.me{color:#ffe7a8}#plW .r.mate{color:#8dff9a}#plW .z{opacity:.7}
@@ -466,14 +467,16 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
     <div id="titleScreen" class="screen" hidden>
       <div class="logo"><div class="l1">SATISFY</div><div class="l2" data-i18n="subtitle"></div><div class="l3">ALPHA v0.30</div></div>
       <div class="menu">
+        <button data-act="play" id="playBtn" data-i18n="playBtn" hidden></button>
         <button data-act="cont" id="contBtn" data-i18n="cont"></button>
-        <button data-act="new" data-i18n="newGame"></button>
+        <button data-act="new" id="newBtn" data-i18n="newGame"></button>
         <button data-act="online" id="onlineBtn" data-i18n="netSignIn" hidden></button>
         <button data-act="cloud" id="cloudBtn" hidden></button>
         <button data-act="controls" data-i18n="controls"></button>
         <button data-act="lang" data-i18n="langBtn"></button>
       </div>
       <div class="foot" data-i18n="fanNote"></div>
+      <div id="hndW" class="panel" hidden><!-- SAT-ONLINE-029: the account's player name --><div class="head" id="hndH"></div><div id="hndT"></div><input id="hndIn" maxlength="16" autocomplete="off" spellcheck="false"><div id="hndE"></div><div class="row"><button id="hndOk" data-act="hndOk"></button><button id="hndLater" data-act="hndLater"></button></div></div>
       <div id="cloudW" class="panel" hidden><div class="head" id="cloudH"></div><div id="cloudN"></div><div id="cloudL"></div><div id="cloudA"></div><button class="x" data-act="cloudClose" id="cloudX">✕</button></div>
     </div>
 
@@ -563,6 +566,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
 <script src="src/net/cloud.js"></script>
 <script src="src/net/firebase-config.js"></script>
 <script src="src/net/firebase.js"></script>
+<script src="src/net/account.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -3039,7 +3043,7 @@ function act(a){
  else if(a==='lang'){mode='lang';showOnly('langScreen');}
  else if(a==='online'){if(netUser&&FB)cloudOpen();else netSignIn();} // signed in: the account panel (owner #2)
  else if(a==='netTakeBack')netTakeBack();
- else if(a==='cloud')cloudOpen();else if(a==='cloudClose')$('cloudW').hidden=true;
+ else if(a==='cloud')cloudOpen();else if(a==='cloudClose')$('cloudW').hidden=true;else if(a==='hndOk')hndOk();else if(a==='hndLater')hndClose();else if(a==='play')netPlay();
  else if(a==='pAccept'||a==='pDecline'||a==='pLeave')partyAct(a);
  else if(a==='pBlock'||a==='dBlock')blockAct(a);
  else if(a==='pcClose'||a==='pcInvite'||a==='pcDuel'||a==='pcBlock')pctxAct(a);
@@ -3491,8 +3495,9 @@ window.__G.defs=Satisfy.local.defs;
 /* ---------------- online (opt-in: ?net=local) ---------------- */
 // Other players come from Satisfy.presence over a transport; nothing here changes offline play.
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
-let NET=null,NETTR=null,netLinkT=0,netReplaced=false,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null,CHAT=null,chatSig='',PCTX=null,pctxSig='',EMO=null,emoLast=-1e9,WORLD=null,CHATTAB='party',chatWasP=false,chatSeen={party:0,world:0},PLIST=null,plSig='',plOn=false,annIn=false;const PARTY_R=40,BLK=Satisfy.chat.blocklist();let HIDELV=(()=>{try{return localStorage.getItem('satisfy_hidelv')==='1';}catch(e){return false;}})(); // SAT-ONLINE-027: others see "Lv ?" // CHAT/BLK: SAT-ONLINE-016 (declared here: ?net=local starts during load)
-const NETQ=QS.get('net');
+let NET=null,NETTR=null,netLinkT=0,netReplaced=false,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null,CHAT=null,chatSig='',PCTX=null,pctxSig='',EMO=null,emoLast=-1e9,WORLD=null,NETH=null,NACC=null,hndAsked=false,netRestoring=false,CHATTAB='party',chatWasP=false,chatSeen={party:0,world:0},PLIST=null,plSig='',plOn=false,annIn=false;const PARTY_R=40,BLK=Satisfy.chat.blocklist();let HIDELV=(()=>{try{return localStorage.getItem('satisfy_hidelv')==='1';}catch(e){return false;}})(); // SAT-ONLINE-027: others see "Lv ?" // CHAT/BLK: SAT-ONLINE-016 (declared here: ?net=local starts during load)
+// SAT-ONLINE-029: Satisfy.netOnlineOnly (src/net/firebase-config.js) makes the game online-only; &only=1 tries it
+const NET_ONLY=!!Satisfy.netOnlineOnly||(QS.get('net')==='online'&&QS.get('only')==='1'),NETQ=QS.get('net')||(Satisfy.netOnlineOnly?'online':null);
 const NET_LIVE=['play','inv','status','equip','dialog','forge','log','map','dead','cut','pause','qd','gname','controls','enhfx','lang']; // every screen of a running game (a quest open, the guild-name box, controls, an enhancement) still is in the world
 function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
 // Interest management (doc U009): online, a client listens only to players within NET_INTEREST.radius px
@@ -3524,14 +3529,14 @@ function netBeat(){if(!NET||!netBeatPP||netReplaced||Date.now()-netBeatT<netBeat
 function netBeatStart(){if(netBeatOn)return;netBeatOn=true;
  try{const w=new Worker(URL.createObjectURL(new Blob(['setInterval(function(){postMessage(0)},1000)'],{type:'text/javascript'})));w.onmessage=netBeat;w.onerror=()=>{w.onerror=null;setInterval(netBeat,1000);};}
  catch(e){setInterval(netBeat,1000);}}
-function netTick(){NET.tick();const live=Satisfy.local.inGame()&&NET_LIVE.includes(mode);
+function netTick(){NET.tick();if(mode!=='title'&&!$('hndW').hidden)hndClose();const live=Satisfy.local.inGame()&&NET_LIVE.includes(mode);
  if(PARTY)PARTY.tick();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
  if(PRAID)PRAID.tick();
  if(mode==='map'&&PARTY&&PARTY.id()&&performance.now()-netMapT>500){netMapT=performance.now();drawMap();}
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
- if(live){const pp=Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,hideLv:HIDELV,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic()});if(NET.publish(pp,netForce))netBeatT=Date.now();netBeatPP=pp;netForce=false;}else netBeatPP=null;
+ if(live){const pp=Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,handle:NETH||undefined,hideLv:HIDELV,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic()});if(NET.publish(pp,netForce))netBeatT=Date.now();netBeatPP=pp;netForce=false;}else netBeatPP=null;
  partyUI(live);chatUI(live);pctxUI(live);plUI(live);plPublish(live);
  netPrev=P?{x:P.x,y:P.y}:null;
  const netSafe=live&&Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
@@ -3573,7 +3578,7 @@ function partyUI(live){if(!PARTY)return;const inv=live?PARTY.pendingInvite():nul
  const roleOf=m=>m.self?ROLE:m.role;
  const sig=lang+'|'+(inv?inv.party:'')+'|'+mem.map(m=>m.uid+':'+m.lv+':'+m.leader+':'+hpOf(m)+':'+roleOf(m)).join(',');if(sig===partySig)return;partySig=sig;
  $('partyInv').hidden=!inv;if(inv)$('partyInvT').textContent=t('pInvFrom',{n:inv.handle});
- $('partyW').hidden=mem.length<2;$('partyL').innerHTML=mem.map(m=>`<div class="${m.leader?'ld':''}"><span>${m.self?`<button class="role" data-tip="${esc(t('roleTip'))}">${ROLE_B[ROLE]||'＋'}</button> `:roleOf(m)?`<span class="role" title="${esc(t('role_'+roleOf(m)))}">${ROLE_B[roleOf(m)]}</span> `:''}${m.leader?'★ ':''}${esc(m.self?S.look.n:m.handle||'?')}</span><span>${t('lv',{n:m.self?S.lv:(m.lv||'?')})}</span></div>${hpOf(m)==null?'':`<i class="php" data-hp="${hpOf(m)}"><b style="width:${hpOf(m)}%"></b></i>`}`).join('');}
+ $('partyW').hidden=mem.length<2;$('partyL').innerHTML=mem.map(m=>`<div class="${m.leader?'ld':''}"><span>${m.self?`<button class="role" data-tip="${esc(t('roleTip'))}">${ROLE_B[ROLE]||'＋'}</button> `:roleOf(m)?`<span class="role" title="${esc(t('role_'+roleOf(m)))}">${ROLE_B[roleOf(m)]}</span> `:''}${m.leader?'★ ':''}${esc(m.self?myName():m.handle||'?')}</span><span>${t('lv',{n:m.self?S.lv:(m.lv||'?')})}</span></div>${hpOf(m)==null?'':`<i class="php" data-hp="${hpOf(m)}"><b style="width:${hpOf(m)}%"></b></i>`}`).join('');}
 addEventListener('keydown',e=>{if(!PARTY||mode!=='play'||e.repeat||KB.includes(e.code))return;
  if(e.target&&e.target.tagName==='INPUT')return; // typing in the chat line
  if(e.code==='Enter'){chatOpen();return;}
@@ -3607,7 +3612,7 @@ function chatUI(live){const W=$('chatW'),inP=live&&chatInParty(),wl=live&&WORLD?
  W.hidden=false;if(sig===chatSig)return;chatSig=sig;
  for(const b of W.querySelectorAll('#chatTabs button')){const k=b.dataset.ct;b.classList.toggle('on',k===CHATTAB);b.classList.toggle('new',k!==CHATTAB&&last[k]>chatSeen[k]);b.disabled=k==='party'?!inP:!WORLD;}
  const L=$('chatL');L.textContent='';
- for(const l of lines){const d=document.createElement('div');d.className=(now-l.t>20000?'old ':'')+(CHATTAB==='world'?'w':'');const b=document.createElement('b');b.textContent=(l.self?S.look.n:l.handle)+': ';d.appendChild(b);d.appendChild(document.createTextNode(l.text));L.appendChild(d);}}
+ for(const l of lines){const d=document.createElement('div');d.className=(now-l.t>20000?'old ':'')+(CHATTAB==='world'?'w':'');const b=document.createElement('b');b.textContent=(l.self?myName():l.handle)+': ';d.appendChild(b);d.appendChild(document.createTextNode(l.text));L.appendChild(d);}}
 $('chatTabs').addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button[data-ct]');if(!b||b.disabled)return;CHATTAB=b.dataset.ct;chatSig='';const i=$('chatIn');if(!i.hidden){i.placeholder=t(CHATTAB==='world'?'chatPhW':'chatPh');i.focus();}});
 /* world notices (SAT-ONLINE-028, owner #12): when the game announces something everyone should hear (a legendary class
    taken, the champion of the day, a world boss down, a castle taken: Satisfy.world.NOTE_KEYS), the key and its values go
@@ -3615,13 +3620,13 @@ $('chatTabs').addEventListener('click',e=>{const b=e.target.closest&&e.target.cl
    the key it was built from (tLast). A notice from someone else is shown, not sent on again (annIn). */
 function netNoteOut(msg){if(!WORLD||annIn||!tLast.k||!Satisfy.world.NOTE_KEYS.includes(tLast.k))return;const k=tLast.k,v=Object.assign({},tLast.v||{});if(t(k,v)!==msg)return;WORLD.note(k,v);}
 function netNoteIn(e){annIn=true;try{announce('🌐 '+t(e.k,e.p));}finally{annIn=false;}}
-function worldStart(){WORLD=Satisfy.world.create({presence:NET,transport:NETTR&&NETTR.worldSend?NETTR:null,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,handle:()=>S&&S.look?S.look.n||'':''});
+function worldStart(){WORLD=Satisfy.world.create({presence:NET,transport:NETTR&&NETTR.worldSend?NETTR:null,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,handle:()=>myName()});
  WORLD.on(e=>{if(e.type==='note')netNoteIn(e);else chatSig='';});}
 /* who is online (SAT-ONLINE-028, owner #5): O (touch: Players) lists everyone online with level and zone, so friends can
    find each other. Online it reads online/{shard}: each client writes its own small entry about once a minute (and on a
    zone or level change); the list is only downloaded while it is open. Local tabs list the players presence knows. */
 let plSent='',plSentT=-1e9;
-function plMine(){return S&&!S.__demo?{h:S.look.n||'',lv:HIDELV?0:S.lv,z:netZone(P.x,P.y)}:null;}
+function plMine(){return S&&!S.__demo?{h:myName(),lv:HIDELV?0:S.lv,z:netZone(P.x,P.y)}:null;}
 function plPublish(live){if(!live||!NETTR||!NETTR.onlineSet)return;const v=plMine();if(!v)return;const k=JSON.stringify(v),now=performance.now();
  if(k===plSent&&now-plSentT<60000)return;if(k!==plSent&&now-plSentT<5000)return;plSent=k;plSentT=now;NETTR.onlineSet(v);}
 function plClose(){if(PLIST&&PLIST.off)try{PLIST.off();}catch(e){}PLIST=null;plOn=false;plSig='';$('plW').hidden=true;}
@@ -3803,7 +3808,9 @@ function netLinkText(){if(!NET)return '';const st=NET.stats(),l=NETTR&&NETTR.net
  return t('netLink',{rtt:l&&l.rtt!=null?t('netRtt',{n:l.rtt}):t('netRttNone'),s:st.sent,r:st.recv,d:st.dropped});}
 function netSetState(s){netState=s;netSig='';}
 function netBtn(){const b=$('onlineBtn');if(!b)return;b.hidden=NETQ!=='online';b.disabled=netState==='AUTHENTICATING'||netState==='JOINING';
- if(netUser){delete b.dataset.i18n;b.textContent=t('netSignedIn',{n:netUser.displayName||netUser.uid.slice(0,6)});}else if(!b.dataset.i18n){b.dataset.i18n='netSignIn';b.textContent=t('netSignIn');}
+ // never the Google display name: the account's chosen name (SAT-ONLINE-029, owner #1)
+ const hint=netHint();if(netUser){delete b.dataset.i18n;b.textContent=t('netSignedIn',{n:NETH||t('netNoName')});}else if(netRestoring&&hint){delete b.dataset.i18n;b.textContent=t('netRestoring',{n:hint.h||'…'});}else{b.dataset.i18n='netSignIn';b.textContent=t('netSignIn');}
+ if(NET_ONLY){$('contBtn').hidden=true;$('newBtn').hidden=true;const pb=$('playBtn');pb.hidden=false;pb.disabled=!(netUser&&NETH);}
  const c=$('cloudBtn');if(c){c.hidden=!netUser||!FB;c.textContent=t('cloudBtn');}}
 /* cloud saves (SAT-ONLINE-007, doc §06 R1 / §23 / D4): signed in with ?net=online, the title screen can copy this
    device's character to the Google account and bring a cloud character to this device. Every upload, download and
@@ -3817,9 +3824,9 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // nothing is written again after the erase.
 function netStop(){try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
  NET=null;NETTR=null;PARTY=null;DUEL=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;WORLD=null;plClose();['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW'].forEach(i=>$(i).hidden=true);}
-function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid,lines=NETTR&&NETTR.worldMine?NETTR.worldMine():[];netStop();
- (erase?C.eraseAll(['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'online/main/'+uid].concat(lines)):Promise.resolve(0))
-  .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
+function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid,lines=NETTR&&NETTR.worldMine?NETTR.worldMine():[],name=NETH?['handles/'+Satisfy.account.keyOf(NETH)]:[];netStop();
+ (erase?C.eraseAll(['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'online/main/'+uid].concat(lines,name)):Promise.resolve(0))
+  .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;CLOUD=null;NETH=null;NACC=null;hndAsked=false;netHintSet(null);netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
   .catch(e=>{cloudErr(e);if(netUser&&!NET)netConnect(FB,netUser);cloudOpen();});}
 function cloudApi(){if(!FB||!netUser)return null;if(!CLOUD||CLOUD.uid!==netUser.uid)CLOUD=Satisfy.cloud.create(FB,{uid:netUser.uid});return CLOUD;}
 function cloudErr(e){toast(t('cloudErr',{e:(e&&e.code)||(e&&e.message)||'?'}),'warn');}
@@ -3831,6 +3838,7 @@ function cloudLocal(){const r=STORE.read();if(r.status!=='ok')return null;const 
  return {raw:STORE.read().raw,pid:d.S.pid,n:(d.S.look&&d.S.look.n)||'?',lv:d.S.lv||1};}
 function cloudOpen(){const C=cloudApi();if(!C)return;$('cloudW').hidden=false;$('cloudH').textContent=t('cloudH');const L=cloudLocal(),N=$('cloudN'),box=$('cloudL'),A=$('cloudA');
  A.textContent='';const out=document.createElement('button');out.textContent=t('cloudOut');out.onclick=()=>{out.disabled=true;netSignOut(false);};A.appendChild(out);A.appendChild(armBtn(t('cloudErase'),()=>netSignOut(true)));
+ {const n=document.createElement('button');n.id='hndBtn';n.textContent=t('hndChange');n.onclick=()=>hndAsk(true);A.appendChild(n);}
  {const h=document.createElement('button');h.id='hideLvBtn';h.textContent=t(HIDELV?'hideLvOn':'hideLvOff');h.onclick=()=>hideLvSet(!HIDELV);A.appendChild(h);}
  const nb=BLK.list().length;if(nb){const u=document.createElement('button');u.textContent=t('blkClear',{n:nb});u.onclick=()=>{BLK.clear();toast(t('blkCleared'));cloudOpen();};A.appendChild(u);}
  N.textContent=L?t('cloudLocal',{n:L.n,lv:L.lv}):t('cloudNoLocal');if(L)N.appendChild(armBtn(t('cloudUp'),()=>C.upload(L.raw).then(i=>{toast(t('cloudUpOk',{n:i.handle}),'good');cloudOpen();},e=>{cloudErr(e);cloudOpen();})));
@@ -3844,9 +3852,31 @@ function cloudOpen(){const C=cloudApi();if(!C)return;$('cloudW').hidden=false;$(
 Object.assign(STR.ar,{hideLvOff:'خبّي اللفل بتاعي عن الناس',hideLvOn:'ورّي اللفل بتاعي للناس',hideLvDone:'الناس هتشوف "لفل ؟" مكان اللفل بتاعك',hideLvUndone:'الناس هتشوف اللفل بتاعك تاني'});
 Object.assign(STR.en,{hideLvOff:'Hide my level from others',hideLvOn:'Show my level to others',hideLvDone:'Others now see "Lv ?" instead of your level',hideLvUndone:'Others see your level again'});
 function hideLvSet(on){HIDELV=!!on;try{localStorage.setItem('satisfy_hidelv',HIDELV?'1':'0');}catch(e){}netForce=true;toast(t(HIDELV?'hideLvDone':'hideLvUndone'));if(S&&!S.__demo)cloudProfile();if(!$('cloudW').hidden)cloudOpen();}
-function cloudProfile(){const C=cloudApi();if(!C||!S||S.__demo)return;cloudProfT=performance.now();C.writeProfile(S,lang,{hideLv:HIDELV}).catch(e=>console.warn('profile write failed',e&&e.code));}
+/* the player name (SAT-ONLINE-029, owner #1/#15): after signing in the player picks a name that is unique in the game
+   (src/net/account.js). Online, everyone sees that name: presence, chat, the player list and the public profile carry it
+   instead of the character's name, and never the Google display name. Online-only (NET_ONLY), Play waits for it. */
+Object.assign(STR.ar,{hndH:'اختار اسمك في اللعبة',hndT:'ده الاسم اللي الناس هتشوفه، ومحدش غيرك هياخده: من ٣ لـ ١٦ حرف إنجليزي أو رقم أو _',hndOk:'خد الاسم ده',hndLater:'بعدين',hndBad:'استخدم من ٣ لـ ١٦ حرف إنجليزي (A–Z) أو رقم أو _',hndTaken:'الاسم ده واخده حد تاني',hndWait:'بنشوف…',hndErr:'معرفناش نحفظ الاسم، جرّب تاني',hndDone:'اسمك أونلاين بقى {n}',hndChange:'غيّر اسمي',netNoName:'اختار اسم',netRestoring:'بندخّلك باسم {n}…',playBtn:'العب',cancel:'إلغاء'});
+Object.assign(STR.en,{hndH:'Choose your player name',hndT:'Other players see this name, and nobody else can take it: 3 to 16 letters (A–Z), digits or _',hndOk:'Take this name',hndLater:'Later',hndBad:'Use 3 to 16 letters (A–Z), digits or _',hndTaken:'Someone already has this name',hndWait:'Checking…',hndErr:'Could not save the name, try again',hndDone:'Online you are {n} now',hndChange:'Change my name',netNoName:'choose a name',netRestoring:'Signing in as {n}…',playBtn:'Play',cancel:'Cancel'});
+function myName(){return NETH||(S&&S.look&&S.look.n)||'';}
+function nhKey(){return 'satisfy_netuser'+(QS.get('slot')?'@'+QS.get('slot'):'');} // per save slot, like the save (two test tabs share localStorage)
+function netHint(){try{const v=JSON.parse(localStorage.getItem(nhKey())||'null');return v&&typeof v.uid==='string'?v:null;}catch(e){return null;}}
+function netHintSet(uid,h){try{if(uid)localStorage.setItem(nhKey(),JSON.stringify({uid,h:h||null}));else localStorage.removeItem(nhKey());}catch(e){}}
+function hndAsk(force){if(!NACC||(!force&&(hndAsked||mode!=='title')))return;hndAsked=true;$('hndW').hidden=false;$('hndH').textContent=t('hndH');$('hndT').textContent=t('hndT');$('hndE').textContent='';
+ const i=$('hndIn'),L=cloudLocal();i.value=(NETH||(L&&L.n)||'').replace(/[^A-Za-z0-9_]/g,'').slice(0,16);$('hndOk').textContent=t('hndOk');const b=$('hndLater');b.textContent=t(NETH?'cancel':'hndLater');b.hidden=NET_ONLY&&!NETH;setTimeout(()=>{if(!$('hndW').hidden)i.focus();},30);}
+function hndClose(){$('hndW').hidden=true;$('hndIn').blur();}
+function hndOk(){if(!NACC||!netUser)return;const v=$('hndIn').value.trim(),E=$('hndE');if(!Satisfy.account.valid(v)){E.textContent=t('hndBad');return;}E.textContent=t('hndWait');$('hndOk').disabled=true;const uid=netUser.uid;
+ NACC.claim(v,NETH).then(h=>{NETH=h;netHintSet(uid,h);netForce=true;hndClose();toast(t('hndDone',{n:h}),'good');netBtn();if(S&&!S.__demo)cloudProfile();if(!$('cloudW').hidden)cloudOpen();},
+  e=>{E.textContent=t(e&&e.code==='taken'?'hndTaken':e&&e.code==='bad'?'hndBad':'hndErr');}).then(()=>{$('hndOk').disabled=false;});}
+$('hndIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Enter'||e.code==='NumpadEnter'){e.preventDefault();hndOk();}else if(e.code==='Escape'&&!$('hndLater').hidden){e.preventDefault();hndClose();}});
+// Play (online-only title, owner #3): this device's character, else the newest one in the account's cloud saves, else a new one
+function netPlay(){if(!netUser||!NETH)return;if(hasSave())return startGame(true);const C=cloudApi(),fresh=()=>{startGame(false);const n=$('cname');if(n){n.value=NETH;n.dispatchEvent(new Event('input'));}};if(!C)return fresh();
+ C.list().then(list=>{const c=list[0];if(!c)return fresh();return C.download(c.pid).then(raw=>{if(!raw||!STORE.replace(raw,'before-cloud-'+Date.now().toString(36)))throw new Error('restore');toast(t('cloudDownOk',{n:c.handle}),'good');startGame(true);});}).catch(e=>cloudErr(e));}
+function cloudProfile(){const C=cloudApi();if(!C||!S||S.__demo)return;cloudProfT=performance.now();C.writeProfile(S,lang,{hideLv:HIDELV,handle:NETH}).catch(e=>console.warn('profile write failed',e&&e.code));}
 function netFail(e){netSetState('ERROR');netBtn();toast(t('netFail',{e:(e&&e.code)||(e&&e.message)||'?'}),'warn');}
-function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;netSetState('JOINING');netBtn();
+function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;netSetState('JOINING');
+ // the player name: shown at once from this device's memory (no "?" after F5, owner #15), then checked with the database
+ NACC=Satisfy.account.create(sdk,user.uid);const hh=netHint();NETH=hh&&hh.uid===user.uid&&Satisfy.account.valid(hh.h)?hh.h:null;netHintSet(user.uid,NETH);netBtn();
+ NACC.load().then(h=>{if(!netUser||netUser.uid!==user.uid)return;NETH=h;netHintSet(user.uid,h);netForce=true;netBtn();if(!h)hndAsk();},e=>{console.warn('account load failed',e&&e.code);if(!NETH)hndAsk();});
  const tr=NETTR=Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',interest:NET_INTEREST,onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');if(up)netForce=true;netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)});
  netStart(Satisfy.presence.create({transport:tr,uid:user.uid,world:Satisfy.local.world(),now:()=>performance.now(),config:{moveHz:5,idleHz:.2,expireMs:15000}})); // cost model: docs/online/COST_MODEL.md
  netLease=Satisfy.firebase.lease(sdk,user.uid,NET.sid,netReplace);
@@ -3864,9 +3894,11 @@ function netReplace(){if(netReplaced)return;netReplaced=true;save(true);netNoSav
 function netTakeBack(){location.reload();}
 function netSignIn(){if(NETQ!=='online'||netUser)return;netSetState('AUTHENTICATING');netBtn();
  Satisfy.firebase.load(Satisfy.firebaseConfig).then(sdk=>{FB=sdk;return Satisfy.firebase.signIn(sdk);}).then(u=>{if(u)netConnect(FB,u);else{netSetState('DISCONNECTED');netBtn();}},netFail);}
+netRestoring=!!(NETQ==='online'&&netHint()); // the button still works meanwhile: a click just signs in again
 if(NETQ==='online'){netBtn();
- // a session saved by Firebase Auth reconnects without another popup
- Satisfy.firebase.load(Satisfy.firebaseConfig).then(sdk=>{FB=sdk;return Satisfy.firebase.currentUser(sdk);}).then(u=>{if(u)netConnect(FB,u);},netFail);}
+ // a session saved by Firebase Auth reconnects without another popup (owner #4: while it is restored the button says
+ // "Signing in as …" instead of offering a sign-in that isn't needed)
+ Satisfy.firebase.load(Satisfy.firebaseConfig).then(sdk=>{FB=sdk;return Satisfy.firebase.currentUser(sdk);}).then(u=>{netRestoring=false;if(u)netConnect(FB,u);else{netHintSet(null);netBtn();}},e=>{netRestoring=false;netFail(e);});}
 /* touch controls (SAT-ONLINE-017, doc §29 T38 / U002): on a touch screen (or with ?touch=1; ?touch=0 turns them off)
    a stick on the left moves, Attack/Guard work while held, Dodge and Use tap, and the key hints at the bottom right
    (inventory, status, map, …) become buttons. Online, a row for party (P), duel (K), yes/no (Y/N) and chat. Taps are

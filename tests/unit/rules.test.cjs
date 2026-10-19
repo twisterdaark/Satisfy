@@ -182,3 +182,18 @@ test('world lines: readable when signed in, written once as yourself, deleted on
   assert.equal(o['.write'], 'auth != null && auth.uid === $uid');
   assert.equal(o.$other['.validate'], false);
 });
+
+// SAT-ONLINE-029: unique player names
+test('handles: first come, first served, kept or freed only by the owner; accounts point only at their own name', () => {
+  const h = rules.handles.$h, a = rules.accounts.$uid;
+  assert.equal(h['.read'], 'auth != null');
+  assert.equal(h['.write'], "auth != null && (!data.exists() || data.child('uid').val() === auth.uid)");
+  assert.match(h['.validate'], /\$h\.matches\(\/\^\[a-z0-9_\]\{3,16\}\$\/\)/);
+  assert.match(h['.validate'], /newData\.child\('name'\)\.val\(\)\.toLowerCase\(\) === \$h/);
+  assert.match(h['.validate'], /newData\.child\('uid'\)\.val\(\) === auth\.uid/);
+  assert.equal(a['.read'], 'auth != null && auth.uid === $uid');
+  assert.match(a['.validate'], /root\.child\('handles'\)\.child\(newData\.child\('handle'\)\.val\(\)\.toLowerCase\(\)\)\.child\('uid'\)\.val\(\) === \$uid/);
+  const { account } = loadModules('src/net/account.js');
+  assert.equal(String(account.RE), '/^[A-Za-z0-9_]{3,16}$/');
+  assert.match(a.handle['.validate'], /\^\[A-Za-z0-9_\]\{3,16\}\$/);
+});

@@ -36,8 +36,10 @@
     if (cache) return cache;
     var loader = root.__SATISFY_FIREBASE_LOADER__ || defaultLoader;
     cache = Promise.resolve().then(function () { return loader(SDK_VERSION); }).then(function (m) {
-      var app = m.app.initializeApp(cfg, 'satisfy');
-      return { m: m, app: app, auth: m.auth.getAuth(app), db: m.database.getDatabase(app, cfg.databaseURL) };
+      var app = m.app.initializeApp(cfg, 'satisfy'), auth = m.auth.getAuth(app);
+      // keep the sign-in across reloads (SAT-ONLINE-029, owner #4); getAuth's default, but said out loud
+      var keep = m.auth.setPersistence && m.auth.browserLocalPersistence ? m.auth.setPersistence(auth, m.auth.browserLocalPersistence).catch(function () { /* default */ }) : null;
+      return Promise.resolve(keep).then(function () { return { m: m, app: app, auth: auth, db: m.database.getDatabase(app, cfg.databaseURL) }; });
     });
     cache.catch(function () { cache = null; });
     return cache;
