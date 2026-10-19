@@ -113,3 +113,11 @@ test('SAT-ONLINE-021: hp is a percentage in 5% steps, optional', () => {
   assert.deepEqual(N.validatePlayerPublic({ ...ok, hp: 101 }).errors, ['hp']);
   assert.deepEqual(N.validatePlayerPublic({ ...ok, hp: 2.5 }).errors, ['hp']);
 });
+
+test('SAT-ONLINE-022: em is one of EMOTES or null, never free text', () => {
+  const S = { look: { n: 'Grid' }, cls: 'novice', lv: 3, title: '' }, P = { x: 1, y: 1, dir: 0 };
+  assert.deepEqual([...N.EMOTES], ['wave', 'dance', 'point', 'cheer']);
+  for (const e of N.EMOTES) assert.equal(N.toPlayerPublic(S, P, { em: e }).em, e);
+  for (const bad of ['hello', '<b>', 'Dance', '', 5]) assert.equal(N.toPlayerPublic(S, P, { em: bad }).em, null);
+  assert.deepEqual(N.validatePlayerPublic({ ...N.toPlayerPublic(S, P, {}), em: 'hi there' }).errors, ['em']);
+});

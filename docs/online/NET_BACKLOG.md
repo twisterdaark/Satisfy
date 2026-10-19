@@ -64,10 +64,10 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-019 �
 | U058 | Need/Greed loot | ⏳ | Server random + ledger |
 | U059 | Friends and follow | ❌ | |
 | U060 | Guild invitations | ⏳ | Guilds are local game content today |
-| U061 | Emotes | ❌ | Next |
+| U061 | Emotes | ✅ | SAT-ONLINE-022: V (touch: Emote) → wave/dance/point/cheer for 3 s as `PlayerPublic.em` (a fixed list, no text); one per 2 s |
 | U062 | Chat moderation | 🟡 | Block list + rate limit (016); no report or keyword filter |
 | U063 | Player trade request | ⏳ | Needs inventory escrow on a server (D3) |
 | U064 | Player inspect | ✅ | SAT-ONLINE-020: the card shows only PlayerPublic (name, level, class, title, party, armour) |
 | U065 | Party reconnect | ❌ | A reload leaves the party |
 
-**Totals (social):** ✅ 5 · 🟡 4 · ⏳ 6 · ❌ 5.
+**Totals (social):** ✅ 6 · 🟡 4 · ⏳ 6 · ❌ 4.

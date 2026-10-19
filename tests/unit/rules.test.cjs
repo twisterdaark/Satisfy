@@ -10,7 +10,7 @@ const { net: N } = loadModules('src/net/contracts.js');
 const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')).rules;
 const node = rules.presence.$world.$shard.$uid;
 const firebaseJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'firebase.json'), 'utf8'));
-const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp']; // omitted when null/empty is allowed by the client
+const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em']; // omitted when null/empty is allowed by the client
 
 test('deny by default; presence readable only when signed in, writable only by its owner', () => {
   assert.equal(rules['.read'], false);
@@ -37,6 +37,7 @@ test('limits match the contract and the world', () => {
   assert.match(node.y['.validate'], new RegExp('< ' + N.LIMITS.posY + '"?$'));
   const anims = /\^\((.*)\)\$/.exec(node.anim['.validate'])[1].split('|');
   assert.deepEqual(anims, N.ANIMS);
+  assert.deepEqual(/\^\((.*)\)\$/.exec(node.em['.validate'])[1].split('|'), N.EMOTES, 'emotes: the same fixed list');
 });
 
 test('the test fake enforces the same required fields', () => {

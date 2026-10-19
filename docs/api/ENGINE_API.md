@@ -293,6 +293,7 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, additive** (SAT-ONLINE-022): `PlayerPublic.em` ∈ `Satisfy.net.EMOTES` (`wave, dance, point, cheer`) or null; V / the touch Emote button opens the list; 3 s per emote, one per 2 s. Presence + rules field (redeploy).
 - **api 1, additive** (SAT-ONLINE-021): `PlayerPublic.hp` (health %, 5% steps), `party.ping(x, y)` / `'ping'` events (`party.ping {to, party, k: x, n: y}` in the inbox), `party.members()[].hp`, `net().pings`; party HP bars, Alt+click pings, party members and pings on the minimap, a Ping button on the touch row. Presence + inbox rules (redeploy).
 - **api 1, additive** (SAT-ONLINE-020): the player menu (click a player: card + invite/duel/block by uid); `__G.toScreen`. No network change.
 - **api 1, additive** (SAT-ONLINE-019): `PlayerPublic.mv` = map version (FNV-1a of the generated world, 8 hex digits); the game shows, invites and challenges only remotes with the same `mv` and room, and tells you once when someone nearby is on another version. `Satisfy.local.zoneAt` returns `'void'` in the interior strip outside rooms (the game's own `zoneAt` still falls back to `zWin`); `zonePolicy` adds `known`. Presence + rules field (redeploy).

@@ -71,6 +71,9 @@
             "hp": {
               ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
             },
+            "em": {
+              ".validate": "newData.isString() && newData.val().matches(/^(wave|dance|point|cheer)$/)"
+            },
             "seq": {
               ".validate": "newData.isNumber() && newData.val() >= 0"
             },
