@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20j', ver: '0.54', d: '2026-10-20',
+      ar: ['أونلاين: قرعة غنايم الغارة: كل بوس بتقتله الغارة بيطلع قطعة زيادة (إيبك وساعات يونيك) للي حاربوه: محتاجها، عايزها، أو سيبها',
+        'المحتاج قبل العايز، وبعدين أعلى رقم من 1 لـ 100، والكل بيشوف مين كسب وبكام، والكسبان بس هو اللي بياخدها'],
+      en: ['Online: raid loot rolls: every boss the raid kills puts one extra piece (Epic, sometimes Unique) up for those who fought it: Need, Greed or Pass',
+        'Need before Greed, then the highest roll from 1 to 100; everyone sees who won and with what, and only the winner gets it'] },
     { v: '2026-10-20i', ver: '0.53', d: '2026-10-20',
       ar: ['أونلاين: أدوار الغارة قدام البوسات: الدرع البوس بيجري وراه وضربه عليه أخف 30%، والمعالج بيعالج نفسه واللي جنبه كل 3 ثواني',
         'الهجوم ضربه للبوس أقوى 15%، والدعم هو واللي جنبه بياخدوا من البوس أقل 15%. الدور بتختاره من الشارة في لوحة الفريق'],
