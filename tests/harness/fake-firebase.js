@@ -208,7 +208,7 @@
     // one-shot read: the exact node, or its direct children as an object (enough for the cloud index)
     get: (r) => {
       const seg = r.path.split('/');
-      const readable = seg[0] === 'profiles' ? !!user : ['cloudIndex', 'cloudSaves'].includes(seg[0]) && user && seg[1] === user.uid;
+      const readable = seg[0] === 'profiles' ? !!user : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));

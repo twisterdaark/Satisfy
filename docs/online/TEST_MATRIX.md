@@ -1,6 +1,6 @@
 # Test matrix T01–T40 (plan doc §29) — coverage
 
-Owner: Claude-A · SAT-ONLINE-008 (T20/T21 updated by SAT-ONLINE-009, T37 by SAT-ONLINE-014)
+Owner: Claude-A · SAT-ONLINE-008 (T20/T21 updated by SAT-ONLINE-009, T37 by SAT-ONLINE-014, T35 by SAT-ONLINE-015)
 
 Status: **✅ covered** · **🟡 partial** (what's missing is noted) · **⏳ needs a feature that doesn't exist yet** (R5 open PvP, a server, trading, chat) · **❌ gap**.
 Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it applies a copy of the database rules).
@@ -41,13 +41,13 @@ Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it app
 | T32 | Unicode names | ✅ | `unit/chaos` (Arabic and emoji, never cut in half, valid for the rules) |
 | T33 | Malicious numbers in localStorage | 🟡 | `unit/contracts` (hostile values clamped before anything is published), `unit/storage` (corrupt/odd saves backed up). The game itself doesn't sanitize a hand-edited save (single-player, Claude-B's area). |
 | T34 | Client-side inventory edits | ⏳ | Needs server inventory (§24: `inventory/$uid .write=false`). Today the inventory exists only in the local save. |
-| T35 | Per-user data deletion | 🟡 | `unit/cloud`, `regression/cloud` (delete a cloud character). No "delete my account" flow yet. |
+| T35 | Per-user data deletion | ✅ | `unit/cloud` (`eraseAll`: every record of the account, index before save, nobody else's), `regression/account` (Sign out; **Delete my online data** leaves nothing of the account online, the local save stays, another account is untouched), `regression/cloud` (delete one cloud character) |
 | T36 | Unauthorized reads of other users' data | ✅ | `unit/rules` (cloud saves owner-only), `regression/cloud` (reading another account's cloud saves is denied) |
 | T37 | Spectators | 🟡 | `regression/duel` (U034, SAT-ONLINE-013: a third player sees both duelists' HP and the ring). No free spectator camera. |
 | T38 | Frame rate on mobile | ❌ | Needs a device lab. |
 | T39 | 8-hour session | ❌ | A long soak needs a real browser and time. |
 | T40 | 100-client soak | ✅ | `unit/chaos` (100 presence clients, a simulated minute: tables bounded, under 30 s CPU) |
 
-**Totals:** ✅ 25 · 🟡 7 · ⏳ 6 · ❌ 2 (T38, T39 need devices and time, not code).
+**Totals:** ✅ 26 · 🟡 6 · ⏳ 6 · ❌ 2 (T38, T39 need devices and time, not code).
 
 Run everything with `npm test`; the network rows (T19, T25–T28, T32, T40) are `node --test tests/unit/chaos.test.cjs` and take about 10 s.

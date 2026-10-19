@@ -79,3 +79,27 @@ test('profile revisions only go up, even when another device wrote a higher one'
   assert.ok(data.get('profiles/u1').revision > r1);
   assert.deepEqual(data.get('profiles/u1').t, SV);
 });
+
+test('eraseAll (T35): every online record of the account, index before save, nothing of anyone else', async () => {
+  const { sdk, data, log } = memSdk();
+  const C = CL.create(sdk, { uid: 'u1', now: () => 5000 });
+  await C.writeProfile({ look: { n: 'Grid' }, lv: 3 }, 'en');
+  await C.upload(save('p_aaaaaaaaaaaaaaaaaaaa'));
+  await C.upload(save('p_bbbbbbbbbbbbbbbbbbbb', { n: 'Faker' }));
+  data.set('cloudSaves/u1/p_orphanorphanorphan1', { blob: '{}', rev: 1, t: 1 }); // a save whose index write never happened
+  data.set('inbox/u1/-m1', { type: 'party.invite' });
+  data.set('sessions/u1', { sid: 'sess-1234', t: 1 });
+  data.set('presence/satisfy/main/u1', { x: 1 });
+  for (const p of ['profiles/u2', 'cloudSaves/u2/p_cccccccccccccccccccc', 'presence/satisfy/main/u2', 'inbox/u2/-m9']) data.set(p, { other: 1 });
+  log.length = 0;
+  const n = await C.eraseAll(['presence/satisfy/main/u1', 'presence/satisfy/main/u2', 'profiles/u2']);
+  assert.equal(n, 9);
+  assert.deepEqual([...data.keys()].filter((k) => k.includes('u1')), [], 'nothing of u1 left');
+  assert.equal([...data.keys()].filter((k) => k.includes('u2')).length, 4, "another account's data and paths passed in by mistake are untouched");
+  const removed = log.filter((l) => l[0] === 'remove').map((l) => l[1]);
+  assert.ok(removed.indexOf('cloudIndex/u1/p_aaaaaaaaaaaaaaaaaaaa') < removed.indexOf('cloudSaves/u1/p_aaaaaaaaaaaaaaaaaaaa'));
+  assert.deepEqual(removed.slice(-2), ['sessions/u1', 'profiles/u1']);
+  // a new profile can be written afterwards (the revision is read again)
+  await C.writeProfile({ look: { n: 'Grid' }, lv: 3 }, 'en');
+  assert.ok(data.has('profiles/u1'));
+});

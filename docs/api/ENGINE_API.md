@@ -207,6 +207,7 @@ each client fights its own copy again. Messages travel in the inbox as `raid.*` 
 | `upload(raw)` | Copies a save string to `cloudSaves/{uid}/{pid}` then indexes it. Needs `S.pid`; at most `MAX_BLOB` (400 000) characters. |
 | `download(pid)` | The save string, or `null`. |
 | `remove(pid)` | Index first, then the blob. |
+| `eraseAll(extra?)` | SAT-ONLINE-015 (doc §29 T35): deletes every cloud index entry, every cloud save (also one saved without an index entry), the inbox, `extra` paths that belong to this account (the game passes its presence node; anyone else's are ignored), `sessions/{uid}` and `profiles/{uid}`, one at a time in that order. Resolves with the number of paths deleted. |
 | `profileFrom(S, lang, rev)`, `indexFrom(raw, rev)` | Pure helpers (tests). |
 
 `Satisfy.storage.create(...).replace(raw, reason)` puts a downloaded save in place after keeping the
@@ -215,7 +216,9 @@ current one under `reason` (the game uses `before-cloud-<time>`); it refuses a s
 A cloud save is a copy of the local save, not an online wallet (D4). Nothing moves without a second
 click (§06: no silent writes; U003). In the game: signed in with `?net=online`, the title screen shows
 **Cloud saves** with this device's character (**Upload**) and the account's characters (**Download**,
-**Delete**). Offline and `?net=local` never show it.
+**Delete**), and an account row: **Sign out** (stops presence, signs out of Google) and **Delete my online
+data** (second click: `eraseAll`, then sign out; the local save is not touched). Offline and `?net=local`
+never show it.
 
 ## `Satisfy.firebase` (SAT-ONLINE-004)
 
@@ -272,6 +275,7 @@ await g.close(); await H.closeBrowser();
 - **api 1, fix** (SAT-ONLINE-004 review, #12): the Firebase transport knows a remote session as `uid + '.' + sid` (the uid is the node key the rules verify) and drops nodes whose `uid` isn't their key, so copying someone's `sid` (or a huge `seq`) can't hide or replace them. Rules: presence `y >= -4096` (the north), shard pinned to `main`.
 - **api 1, fix** (SAT-ONLINE-002 review, #10/#23): NET_LIVE: every in-game screen (`qd`, `gname`, `controls`, `enhfx`, `lang` too), so reading a quest neither hides the player nor forfeits a duel; `tests/unit/modes.test.cjs` checks it against every `mode=` in the game.
 - **api 1, fix** (SAT-ONLINE-001 review, #10): `world().y0` = `-NR*TS`, the top edge; `validatePlayerPublic` accepts `y >= world.y0`, so players in the north (negative y) are no longer dropped.
+- **api 1, additive** (SAT-ONLINE-015): `cloud.eraseAll()`; Sign out and Delete my online data in the Cloud saves panel (doc §29 T35). No rules change (owners could already delete their own paths).
 - **api 1, additive** (SAT-ONLINE-014): interest management (doc U009). Online, presence comes from a range query on `x` (±800 px, re-centred every 400 px) plus each party member's node; `net().interest`, `transport.watch/interest`. Rules add `.indexOn: ["x"]` on `presence/{world}/{shard}` (redeploy; without it the query still works but downloads the whole shard).
 - **api 1, additive** (SAT-ONLINE-013): `PlayerPublic.duel` = `"<duel id>:<duel HP>"` while in a duel's countdown/fight (null otherwise); other players see an HP bar over each duelist and a ring between them (doc U034). Presence + rules field (rules redeploy).
 - **api 1, additive** (SAT-ONLINE-012): `net().link = { rtt, writes, fails }` (Firebase: smoothed ms until the server acknowledges a presence write); the HUD badge tooltip shows link, sent, received and dropped (doc U015, U020).
