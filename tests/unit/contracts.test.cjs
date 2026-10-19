@@ -35,7 +35,8 @@ test('validatePlayerPublic: rejects unknown fields, bad types and out-of-world p
   assert.ok(bad({ y: 144 * 16 }).includes('out of world'));
   assert.ok(bad({ x: 1.5 }).includes('position'));
   assert.ok(bad({ v: 2 }).includes('protocol version'));
-  assert.ok(bad({ lv: 0 }).includes('lv'));
+  assert.ok(bad({ lv: -1 }).includes('lv'));
+  assert.ok(!bad({ lv: 0 }).includes('lv'), 'lv 0 = level hidden (SAT-ONLINE-026)');
   assert.ok(bad({ look: { hair: 'a', hc: 0, skin: 0, top: 0 } }).includes('look.hair'));
   assert.equal(N.validatePlayerPublic(null).ok, false);
 });

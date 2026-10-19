@@ -72,6 +72,7 @@
     var mine = D.ref(db, base + '/' + o.uid), list = D.ref(db, base);
     var inbox = D.ref(db, 'inbox/' + o.uid);
     var handler = null, offs = [], lastSeq = {}, closed = false, offset = 0;
+    var mobs = { offs: null, all: {}, zone: null }; // shared monsters (SAT-ONLINE-026)
     // The node as the server last stored it, or null when it must be written in full (first send,
     // after a reconnect: onDisconnect may have removed it). Later sends update only what changed,
     // so a step sends {x, y, dir, anim, seq, t} instead of the whole public profile (COST_MODEL.md).
@@ -86,13 +87,13 @@
       var o = { to: p.to };
       if (type.indexOf('party.') === 0) {
         o.party = String(p.party || '');
-        if (type === 'party.ping') { o.k = Math.max(0, Math.min(10000000, Math.round(+p.k || 0))); o.n = Math.max(0, Math.min(10000000, Math.round(+p.n || 0))); }
+        if (type === 'party.ping') { o.k = Math.max(0, Math.min(1000000000, Math.round(+p.k || 0))); o.n = Math.max(-2048, Math.min(1000000000, Math.round(+p.n || 0))); }
         return o;
       }
       if (type.indexOf('chat.') === 0) { o.party = String(p.party || ''); o.text = String(p.text || ''); return o; }
       if (type.indexOf('raid.') === 0) o.raid = String(p.raid || ''); else o.duel = String(p.duel || '');
-      if (typeof p.k === 'number' && p.k >= 0 && p.k <= 10000000) o.k = Math.round(p.k);
-      if (typeof p.n === 'number' && p.n >= 0 && p.n <= 10000000) o.n = Math.round(p.n);
+      if (typeof p.k === 'number' && p.k >= 0 && p.k <= 1000000000) o.k = Math.round(p.k);
+      if (typeof p.n === 'number' && p.n >= 0 && p.n <= 1000000000) o.n = Math.round(p.n);
       return o;
     }
     function deliver(env) { if (handler && env && !closed) handler(env); }
@@ -166,6 +167,9 @@
       var m = s.val();
       D.remove(D.ref(db, 'inbox/' + o.uid + '/' + s.key)).catch(function () { /* ignore */ });
       if (!m || typeof m !== 'object' || !DIRECTED.test(m.type)) return;
+      // the rules only prove `from`; the session id is the writer's own claim. Accept it only when it is the session that
+      // uid's presence shows, so nobody can send as another player's session (review of #12/#15/#23).
+      if (typeof m.from !== 'string' || !lastSid[m.from] || lastSid[m.from] !== m.sid) return;
       if (typeof m.t === 'number' && Date.now() + offset - m.t > 60000) return; // stale while offline
       deliver({ v: 1, type: m.type, requestId: null, sessionId: m.sid, seq: +m.seq || 0, tick: 0, payload: m.payload || {} });
     }));
@@ -216,11 +220,59 @@
       interest: function () { return { radius: R, centre: cx, party: pq.id, watched: Object.keys(pq.keys) }; },
       /** Follow everyone whose presence says they are in party `id` (null: stop), on top of the range query. */
       party: partyQuery,
+      /**
+       * World feeds (SAT-ONLINE-026): chat/{world} (world chat: {from, h, text, t}) and news/{world} (world
+       * announcements: {from, h, k, p?, t}). The rules check from = auth uid and h = the account ID. feedOn(kind, fn)
+       * gets the last lines and every new one (older than 5 min skipped); feedSay also deletes up to 10 lines older
+       * than 10 min so each list stays short.
+       */
+      feedOn: function (kind, fn) {
+        var ref = D.ref(db, kind + '/' + o.world), q = D.limitToLast ? D.query(ref, D.limitToLast(20)) : ref;
+        offs.push(D.onChildAdded(q, function (s) {
+          var m = s.val();
+          if (!m || typeof m !== 'object' || typeof m.from !== 'string') return;
+          if (typeof m.t === 'number' && Date.now() + offset - m.t > 300000) return;
+          fn(m);
+        }));
+      },
+      feedSay: function (kind, m) {
+        if (closed) return;
+        var ref = D.ref(db, kind + '/' + o.world), v = { from: o.uid, t: D.serverTimestamp() };
+        for (var k in m) if (k !== 'from' && k !== 't') v[k] = m[k];
+        D.push(ref, v).catch(fail);
+        if (D.limitToFirst) D.get(D.query(ref, D.orderByChild('t'), D.endAt(Date.now() + offset - 600000), D.limitToFirst(10))).then(function (s) {
+          s.forEach(function (c) { D.remove(D.ref(db, kind + '/' + o.world + '/' + c.key)).catch(function () { /* ignore */ }); });
+        }).catch(function () { /* ignore */ });
+      },
+      world: function (fn) { this.feedOn('chat', fn); },
+      sayWorld: function (m) { this.feedSay('chat', { h: String(m.h || ''), text: String(m.text || '').slice(0, 120) }); },
+      /**
+       * Shared monsters (SAT-ONLINE-026): mobs/{world}/{zone}/{host uid} = {t, m: {"<type>@<sx>,<sy>": "x,y,hp,flags,lv"}}.
+       * The zone's host writes its monsters near players; the others follow them. mobsOn(zone, fn) calls fn with
+       * {hostUid: {t, m}} on every change (null zone: stop); mobsPut(zone, m) writes this client's node (null m: remove it).
+       */
+      mobsOn: function (zone, fn) {
+        if (mobs.offs) mobs.offs.forEach(off);
+        mobs.offs = null; mobs.all = {};
+        if (!zone || closed) return;
+        var ref = D.ref(db, 'mobs/' + o.world + '/' + zone), all = mobs.all;
+        function put(s) { if (s.key === o.uid) return; var v = s.val(); if (v && typeof v === 'object' && v.m && typeof v.m === 'object') all[s.key] = v; else delete all[s.key]; fn(all); }
+        mobs.offs = [D.onChildAdded(ref, put), D.onChildChanged(ref, put), D.onChildRemoved(ref, function (s) { delete all[s.key]; fn(all); })];
+      },
+      mobsPut: function (zone, m) {
+        if (closed) return;
+        if (mobs.zone && (mobs.zone !== zone || !m)) { D.remove(D.ref(db, 'mobs/' + o.world + '/' + mobs.zone + '/' + o.uid)).catch(function () { /* ignore */ }); mobs.zone = null; }
+        if (!zone || !m) return;
+        var ref = D.ref(db, 'mobs/' + o.world + '/' + zone + '/' + o.uid);
+        if (mobs.zone !== zone) { mobs.zone = zone; D.onDisconnect(ref).remove().catch(function () { /* ignore */ }); }
+        D.set(ref, { t: D.serverTimestamp(), m: m }).catch(fail);
+      },
       close: function () {
         if (closed) return;
         closed = true;
-        qOffs.concat(pq.offs, offs).forEach(off);
+        qOffs.concat(pq.offs, offs, mobs.offs || []).forEach(off);
         D.remove(mine).catch(function () { /* ignore */ });
+        if (mobs.zone) D.remove(D.ref(db, 'mobs/' + o.world + '/' + mobs.zone + '/' + o.uid)).catch(function () { /* ignore */ });
         handler = null;
       },
       /**
@@ -231,7 +283,7 @@
       release: function () {
         if (closed) return;
         closed = true;
-        qOffs.concat(pq.offs, offs).forEach(off);
+        qOffs.concat(pq.offs, offs, mobs.offs || []).forEach(off);
         try { D.onDisconnect(mine).cancel().catch(function () { /* ignore */ }); } catch (e) { /* ignore */ }
         handler = null;
       },

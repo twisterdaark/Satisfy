@@ -10,7 +10,7 @@ const { net: N } = loadModules('src/net/contracts.js');
 const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')).rules;
 const node = rules.presence.$world.$shard.$uid;
 const firebaseJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'firebase.json'), 'utf8'));
-const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role']; // omitted when null/empty is allowed by the client
+const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu']; // omitted when null/empty is allowed by the client
 
 test('deny by default; presence readable only when signed in, writable only by its owner', () => {
   assert.equal(rules['.read'], false);
@@ -56,15 +56,20 @@ test('position bounds cover the whole map, and the fake uses the same bounds', (
   const mw = lw + gaps.reduce((a, g) => a + g[1], 0);
   assert.ok(mw * ts <= N.LIMITS.posX, `map width ${mw * ts}px fits under ${N.LIMITS.posX}`);
   assert.ok(mh * ts <= N.LIMITS.posY, `map height ${mh * ts}px fits under ${N.LIMITS.posY}`);
+  // the north (SAT-WORLD-003) is rows -NR..-1: y goes down to -NR*TS
+  const nr = +(/,NR=(\d+)/.exec(html) || [0, 0])[1];
+  assert.ok(-nr * ts >= N.LIMITS.posYMin, `north edge ${-nr * ts}px fits above ${N.LIMITS.posYMin}`);
+  assert.match(node.y['.validate'], new RegExp('>= ' + N.LIMITS.posYMin + ' '));
   const fake = fs.readFileSync(path.join(ROOT, 'tests/harness/fake-firebase.js'), 'utf8');
-  const fb = /const POS_X = (\d+), POS_Y = (\d+);/.exec(fake);
-  assert.deepEqual([+fb[1], +fb[2]], [N.LIMITS.posX, N.LIMITS.posY]);
+  const fb = /const POS_X = (\d+), POS_Y = (\d+), POS_Y0 = (-\d+);/.exec(fake);
+  assert.deepEqual([+fb[1], +fb[2], +fb[3]], [N.LIMITS.posX, N.LIMITS.posY, N.LIMITS.posYMin]);
 });
 
 test('presence is indexed on exactly the children the interest queries order by (U009: x; party)', () => {
   assert.deepEqual(rules.presence.$world.$shard['.indexOn'], ['x', 'party']);
   const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
-  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['party', 'x']);
+  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['party', 't', 'x']);
+  assert.deepEqual(rules.chat.$world['.indexOn'], ['t'], 'world chat prunes old lines by t (SAT-ONLINE-026)');
   // the radius must cover the screen after a full re-centre step: |offset| <= step, half screen = W / 2
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   const I = /const NET_INTEREST=\{radius:(\d+),step:(\d+)\}/.exec(html), W = +/const W=(\d+),H=/.exec(html)[1];

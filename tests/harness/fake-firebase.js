@@ -22,6 +22,7 @@
   const snap = (p, v) => ({ key: keyOf(p), val: () => clone(v) });
   const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => (b + 256).toString(16).slice(1)).join('');
 
+  let helloAt = 0;
   const valueCbs = new Map(); // exact path -> callbacks (onValue on a data path)
   // old/v: the child before and after (undefined = absent). A child listener sees the child through
   // its query (l.match): entering the query is 'added', leaving it 'removed', changing inside it
@@ -42,7 +43,8 @@
   ch.onmessage = (e) => {
     if (!connected) return;
     const m = e.data;
-    if (m.op === 'hello') { for (const p of mine) if (data.has(p)) ch.postMessage({ op: 'set', p, v: data.get(p) }); return; }
+    // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -51,13 +53,21 @@
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
 
-  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'seq', 't'];
-  const POS_X = 16384, POS_Y = 4096; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
+  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'seq', 't'];
+  const POS_X = 16384, POS_Y = 4096, POS_Y0 = -2048; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
   function rules(p, v, existing) {
     const seg = p.split('/');
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
     if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
+    if (seg[0] === 'handles' || seg[0] === 'accountIds' || seg[0] === 'chat' || seg[0] === 'news') return idRules(seg, v);
+    // mobs/satisfy/{zone}/{uid} = {t, m: {key: "x,y,hp,flags,lv"}} (shared monsters, SAT-ONLINE-026)
+    if (seg[0] === 'mobs') {
+      if (seg.length !== 4 || seg[1] !== 'satisfy' || !/^[A-Za-z0-9_-]{1,24}$/.test(seg[2]) || !user || seg[3] !== user.uid) return 'PERMISSION_DENIED: mobs ' + p;
+      if (v === null) return null;
+      if (Object.keys(v).sort().join(',') !== 'm,t' || JSON.stringify(v.t) !== JSON.stringify(SV) || !v.m || typeof v.m !== 'object') return 'mobs fields';
+      return Object.keys(v.m).every((k) => /^[a-z0-9_]{1,16}@-?[0-9]{1,6},-?[0-9]{1,6}$/.test(k) && typeof v.m[k] === 'string' && v.m[k].length <= 48) ? null : 'mobs m';
+    }
     if (seg[0] === 'sessions') {
       if (seg.length !== 2 || !user || seg[1] !== user.uid) return 'PERMISSION_DENIED: not your session';
       if (v === null) return null;
@@ -74,7 +84,9 @@
     if (JSON.stringify(v.t) !== JSON.stringify(SV)) return 't must be the server timestamp';
     if (typeof v.sid !== 'string' || v.sid.length < 8 || v.sid.length > 64) return 'sid';
     if (typeof v.handle !== 'string' || v.handle.length > 24) return 'handle';
-    if (!(v.x >= 0 && v.x < POS_X && v.y >= 0 && v.y < POS_Y)) return 'position';
+    // the rules require handle = accountIds/{uid}; here only once the account has an ID, so tests that never pick one still run
+    if (data.has('accountIds/' + user.uid) && v.handle !== data.get('accountIds/' + user.uid)) return 'handle is not the account ID';
+    if (!(v.x >= 0 && v.x < POS_X && v.y >= POS_Y0 && v.y < POS_Y)) return 'position';
     if (!/^(idle|walk|attack|dodge|dead)$/.test(v.anim)) return 'anim';
     if (v.arm !== 0 && v.arm !== 1) return 'arm';
     if ('room' in v && (typeof v.room !== 'string' || v.room.length > 16)) return 'room';
@@ -84,7 +96,35 @@
     if ('hp' in v && !(typeof v.hp === 'number' && v.hp >= 0 && v.hp <= 100)) return 'hp';
     if ('em' in v && !/^(wave|dance|point|cheer)$/.test(v.em)) return 'em';
     if ('role' in v && !/^(tank|healer|damage|support)$/.test(v.role)) return 'role';
+    if ('wp' in v && !/^[a-z0-9_]{1,16}:[0-9](:[0-9]{1,2})?$/.test(v.wp)) return 'wp';
+    if ('fx' in v && !(typeof v.fx === 'string' && v.fx.length <= 2400)) return 'fx';
+    if ('gu' in v && !(Number.isInteger(v.gu) && v.gu >= 1 && v.gu <= 256)) return 'gu';
     return null;
+  }
+  // SAT-ONLINE-026: handles/{lowercase ID} = uid (first come), accountIds/{uid} = ID (needs that handle), world feeds
+  // chat|news/satisfy/{id} = {from, h, ...} written as yourself under your ID, removable by anyone after 10 min
+  function idRules(seg, v) {
+    if (!user) return 'PERMISSION_DENIED: signed out';
+    const p = seg.join('/'), old = data.has(p) ? data.get(p) : undefined;
+    if (seg[0] === 'handles') {
+      if (seg.length !== 2) return 'PERMISSION_DENIED: path';
+      if (v === null) return old === user.uid ? null : 'PERMISSION_DENIED: not your handle';
+      if (old !== undefined || v !== user.uid) return 'PERMISSION_DENIED: handle taken';
+      return /^[a-z0-9_]{3,16}$/.test(seg[1]) ? null : 'handle name';
+    }
+    if (seg[0] === 'accountIds') {
+      if (seg.length !== 2 || seg[1] !== user.uid) return 'PERMISSION_DENIED: not your id';
+      if (v === null) return null;
+      if (old !== undefined) return 'PERMISSION_DENIED: id is set';
+      return typeof v === 'string' && /^[A-Za-z0-9_]{3,16}$/.test(v) && data.get('handles/' + v.toLowerCase()) === user.uid ? null : 'account id';
+    }
+    if (seg.length !== 3 || seg[1] !== 'satisfy') return 'PERMISSION_DENIED: path';
+    if (v === null) return old && old.t < Date.now() - 600000 ? null : 'PERMISSION_DENIED: too new';
+    if (old !== undefined) return 'PERMISSION_DENIED: write once';
+    if (v.from !== user.uid || v.h !== data.get('accountIds/' + user.uid) || JSON.stringify(v.t) !== JSON.stringify(SV)) return seg[0] + ' from/h/t';
+    if (seg[0] === 'chat') return keysAre(v, ['from', 'h', 'text', 't']) && typeof v.text === 'string' && v.text.length >= 1 && v.text.length <= 120 ? null : 'chat fields';
+    if (!/^[A-Za-z]{2,16}$/.test(v.k) || Object.keys(v).some((k) => !['from', 'h', 'k', 'p', 't'].includes(k))) return 'news fields';
+    return !v.p || Object.keys(v.p).every((k) => ['lv', 'f', 'rk'].includes(k) && typeof v.p[k] === 'number') ? null : 'news p';
   }
   // profiles/{uid}, cloudIndex/{uid}/{pid}, cloudSaves/{uid}/{pid} (SAT-ONLINE-007): owner writes only
   const PID = /^[a-z0-9_]{4,40}$/;
@@ -127,7 +167,7 @@
     if (v.payload.to !== seg[1]) return 'inbox payload';
     if (v.type.startsWith('party.')) {
       if (pk !== (v.type === 'party.ping' ? 'k,n,party,to' : 'party,to')) return 'inbox payload ' + pk;
-      if (v.type === 'party.ping' && !(v.payload.k >= 0 && v.payload.k <= 10000000 && v.payload.n >= 0 && v.payload.n <= 10000000)) return 'inbox ping';
+      if (v.type === 'party.ping' && !(v.payload.k >= 0 && v.payload.k <= 1000000000 && v.payload.n >= -2048 && v.payload.n <= 1000000000)) return 'inbox ping';
       if (typeof v.payload.party !== 'string' || v.payload.party.length > 40) return 'inbox party';
     } else if (v.type.startsWith('chat.')) {
       if (pk !== 'party,text,to') return 'inbox chat payload ' + pk;
@@ -136,13 +176,13 @@
     } else if (v.type.startsWith('raid.')) {
       if (!['raid,to', 'k,raid,to', 'k,n,raid,to'].includes(pk)) return 'inbox raid payload ' + pk;
       if (typeof v.payload.raid !== 'string' || v.payload.raid.length > 64) return 'inbox raid';
-      if ('k' in v.payload && !(typeof v.payload.k === 'number' && v.payload.k >= 0 && v.payload.k <= 10000000)) return 'inbox k';
-      if ('n' in v.payload && !(typeof v.payload.n === 'number' && v.payload.n >= 0 && v.payload.n <= 10000000)) return 'inbox n';
+      if ('k' in v.payload && !(typeof v.payload.k === 'number' && v.payload.k >= 0 && v.payload.k <= 1000000000)) return 'inbox k';
+      if ('n' in v.payload && !(typeof v.payload.n === 'number' && v.payload.n >= 0 && v.payload.n <= 1000000000)) return 'inbox n';
     } else {
       if (!['duel,to', 'duel,k,to', 'duel,k,n,to'].includes(pk)) return 'inbox duel payload ' + pk;
       if (typeof v.payload.duel !== 'string' || v.payload.duel.length > 40) return 'inbox duel';
-      if ('k' in v.payload && !(typeof v.payload.k === 'number' && v.payload.k >= 0 && v.payload.k <= 10000000)) return 'inbox k';
-      if ('n' in v.payload && !(typeof v.payload.n === 'number' && v.payload.n >= 0 && v.payload.n <= 10000000)) return 'inbox n';
+      if ('k' in v.payload && !(typeof v.payload.k === 'number' && v.payload.k >= 0 && v.payload.k <= 1000000000)) return 'inbox k';
+      if ('n' in v.payload && !(typeof v.payload.n === 'number' && v.payload.n >= 0 && v.payload.n <= 1000000000)) return 'inbox n';
     }
     if (JSON.stringify(v.t) !== JSON.stringify(SV)) return 'inbox t';
     return null;
@@ -189,7 +229,7 @@
       const err = rules(r.path, v, false);
       F.log.push({ op: 'set', path: r.path, err });
       if (err) { F.rejected.push(err); return Promise.reject(Object.assign(new Error(err), { code: 'PERMISSION_DENIED' })); }
-      const stored = clone(v); stored.t = Date.now();
+      const stored = clone(v); if (stored && typeof stored === 'object') stored.t = Date.now(); // handles/accountIds hold strings
       mine.add(r.path);
       if (!connected) { pending.set(r.path, stored); return Promise.resolve(); }
       write('set', r.path, stored);
@@ -218,9 +258,13 @@
       return Promise.resolve();
     },
     // one-shot read: the exact node, or its direct children as an object (enough for the cloud index)
+    // the server answers reads with everything stored; here the other pages' copies arrive as hello replies, so a read
+    // right after loading waits for them (otherwise a reload could read accountIds before they came back)
     get: (r) => {
+      const wait = helloAt + 150 - Date.now();
+      if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
-      const readable = seg[0] === 'profiles' ? !!user : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs'].includes(seg[0]) ? !!user : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));
@@ -287,5 +331,5 @@
   };
   const app = { initializeApp: (cfg, name) => { F.config = cfg; return { name }; } };
 
-  window.__SATISFY_FIREBASE_LOADER__ = (ver) => { F.sdkVersion = ver; ch.postMessage({ op: 'hello' }); return Promise.resolve({ app, auth, database }); };
+  window.__SATISFY_FIREBASE_LOADER__ = (ver) => { F.sdkVersion = ver; ch.postMessage({ op: 'hello' }); helloAt = Date.now(); return Promise.resolve({ app, auth, database }); };
 })();

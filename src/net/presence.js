@@ -106,7 +106,12 @@
       r.buf.push({ t: t, x: pp.x, y: pp.y });
       if (r.buf.length > cfg.bufLen) r.buf.shift();
       stats.recv++;
-      if (fresh) emit({ type: 'join', sid: env.sessionId, player: pp });
+      if (fresh) {
+        // one session per account: a new session of the same uid (a reload, Play here) replaces the old one at once,
+        // instead of both being shown until the old one expires (SAT-ONLINE-026)
+        if (pp.uid) remotes.forEach(function (o2, id) { if (id !== env.sessionId && o2.pp && o2.pp.uid === pp.uid) { remotes.delete(id); emit({ type: 'leave', sid: id, reason: 'replaced' }); } });
+        emit({ type: 'join', sid: env.sessionId, player: pp });
+      }
     }
 
     transport.onmessage(onMessage);
@@ -124,7 +129,7 @@
       publish: function (pp, force) {
         if (closed || !pp) return false;
         var t = now();
-        var changed = !lastPP || pp.x !== lastPP.x || pp.y !== lastPP.y || pp.dir !== lastPP.dir || pp.anim !== lastPP.anim || pp.hp !== lastPP.hp;
+        var changed = !lastPP || pp.x !== lastPP.x || pp.y !== lastPP.y || pp.dir !== lastPP.dir || pp.anim !== lastPP.anim || pp.hp !== lastPP.hp || pp.fx !== lastPP.fx || pp.gu !== lastPP.gu;
         var meta = !lastPP || pp.room !== lastPP.room || pp.zone !== lastPP.zone || pp.lv !== lastPP.lv ||
           pp.handle !== lastPP.handle || pp.arm !== lastPP.arm || pp.party !== lastPP.party || pp.duel !== lastPP.duel || pp.mv !== lastPP.mv || pp.em !== lastPP.em || pp.role !== lastPP.role || JSON.stringify(pp.look) !== JSON.stringify(lastPP.look);
         var gap = 1000 / (changed ? cfg.moveHz : cfg.idleHz);

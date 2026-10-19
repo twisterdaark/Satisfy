@@ -32,7 +32,7 @@
   var WORLD_ID = 'satisfy';
   // posX/posY: pixel bounds the database accepts for x/y (backend/database.rules.json). They are
   // headroom over the map (724 x 144 tiles = 11584 x 2304 px today) so a wider map needs no redeploy.
-  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 2048, shard: 999, posX: 16384, posY: 4096 });
+  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 4096, shard: 999, posX: 16384, posY: 4096, posYMin: -2048 });
   var ANIMS = ['idle', 'walk', 'attack', 'dodge', 'dead'];
   // PlayerPublic.em (SAT-ONLINE-022, doc §35 U061): an emote from a fixed list, never free text
   var EMOTES = ['wave', 'dance', 'point', 'cheer'];
@@ -41,7 +41,11 @@
   // PlayerPublic.duel: a duel id from Satisfy.duel and the player's duel HP (0..100)
   var DUEL_RE = /^d_[A-Za-z0-9_-]{1,40}:(100|[1-9]?[0-9])$/;
   var MV_RE = /^[0-9a-f]{8}$/; // PlayerPublic.mv (SAT-ONLINE-019)
-  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 't'];
+  var WP_RE = /^[a-z0-9_]{1,16}:[0-9](:[0-9]{1,2})?$/; // PlayerPublic.wp: the weapon in hand, "<item id>:<rating>[:<enhancement>]" (SAT-ONLINE-026)
+  // PlayerPublic.fx: the player's own effects of the last moment, replayed by the others (JSON text, game-defined; SAT-ONLINE-026)
+  // PlayerPublic.gu: the raised guard, 1..256 (direction and flags, see the game's guPub)
+  var FX_MAX = 2400;
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
   // S.uid (the local item-instance counter) is private too, but its name collides with the public
   // account `uid`, so it is checked by value in the tests instead of listed here.
@@ -109,7 +113,7 @@
    * Build the public view of the local player.
    * @param {object} S durable state
    * @param {object} P volatile player state
-   * @param {{zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, duel?:string, mv?:string, hp?:number, em?:string, role?:string, anim?:string, arm?:number, t?:number}} [ctx]
+   * @param {{handle?:string, hideLv?:boolean, zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, duel?:string, mv?:string, hp?:number, em?:string, role?:string, anim?:string, arm?:number, t?:number}} [ctx]
    *   duel: "<duel id>:<duel HP>" while in a duel's countdown or fight, so others can watch (U034)
    * @returns {PlayerPublic}
    */
@@ -120,10 +124,10 @@
       v: PROTOCOL_VERSION,
       uid: ctx.uid || null,
       sid: ctx.sid || null,
-      handle: str(L.n, LIMITS.handle),
+      handle: str(ctx.handle || L.n, LIMITS.handle), // online: the account ID (SAT-ONLINE-026); otherwise the character name
       look: { hair: L.hair | 0, hc: L.hc | 0, skin: L.skin | 0, top: L.top | 0 },
       cls: str(S.cls || 'novice', 16),
-      lv: S.lv | 0,
+      lv: ctx.hideLv ? 0 : S.lv | 0, // 0 = the player hides their level (SAT-ONLINE-026)
       title: str(S.title, LIMITS.title),
       zone: str(ctx.zone, 24),
       room: ctx.room || null,
@@ -138,6 +142,9 @@
       hp: typeof ctx.hp === 'number' && isFinite(ctx.hp) ? Math.max(0, Math.min(100, Math.round(ctx.hp / 5) * 5)) : null,
       em: EMOTES.indexOf(ctx.em) >= 0 ? ctx.em : null,
       role: ROLES.indexOf(ctx.role) >= 0 ? ctx.role : null,
+      wp: typeof ctx.wp === 'string' && WP_RE.test(ctx.wp) ? ctx.wp : null,
+      fx: typeof ctx.fx === 'string' && ctx.fx.length <= FX_MAX ? ctx.fx : null,
+      gu: Number.isInteger(ctx.gu) && ctx.gu >= 1 && ctx.gu <= 256 ? ctx.gu : null,
       t: ctx.t || 0,
     };
   }
@@ -157,10 +164,10 @@
     if (!o.look || typeof o.look !== 'object') e.push('look');
     else ['hair', 'hc', 'skin', 'top'].forEach(function (f) { if (!Number.isInteger(o.look[f]) || o.look[f] < 0 || o.look[f] > 31) e.push('look.' + f); });
     if (typeof o.cls !== 'string') e.push('cls');
-    if (!Number.isInteger(o.lv) || o.lv < 1 || o.lv > 999) e.push('lv');
+    if (!Number.isInteger(o.lv) || o.lv < 0 || o.lv > 999) e.push('lv');
     if (!Number.isInteger(o.x) || !Number.isInteger(o.y)) e.push('position');
     var w = opts && opts.world;
-    if (w && (o.x < 0 || o.y < 0 || o.x >= w.w * w.tile || o.y >= w.h * w.tile)) e.push('out of world');
+    if (w && (o.x < 0 || o.y < -(w.north || 0) * w.tile || o.x >= w.w * w.tile || o.y >= w.h * w.tile)) e.push('out of world'); // rows -north..-1 are the north (SAT-WORLD-003)
     if (!Number.isInteger(o.dir) || o.dir < 0 || o.dir > 3) e.push('dir');
     if (ANIMS.indexOf(o.anim) < 0) e.push('anim');
     if (o.arm !== 0 && o.arm !== 1) e.push('arm');
@@ -171,6 +178,9 @@
     if (o.hp !== undefined && o.hp !== null && !(Number.isInteger(o.hp) && o.hp >= 0 && o.hp <= 100)) e.push('hp');
     if (o.em !== undefined && o.em !== null && EMOTES.indexOf(o.em) < 0) e.push('em');
     if (o.role !== undefined && o.role !== null && ROLES.indexOf(o.role) < 0) e.push('role');
+    if (o.wp !== undefined && o.wp !== null && !(typeof o.wp === 'string' && WP_RE.test(o.wp))) e.push('wp');
+    if (o.fx !== undefined && o.fx !== null && !(typeof o.fx === 'string' && o.fx.length <= FX_MAX)) e.push('fx');
+    if (o.gu !== undefined && o.gu !== null && !(Number.isInteger(o.gu) && o.gu >= 1 && o.gu <= 256)) e.push('gu');
     return { ok: e.length === 0, errors: e };
   }
 

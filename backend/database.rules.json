@@ -2,6 +2,30 @@
   "rules": {
     ".read": false,
     ".write": false,
+    "mobs": {
+      "$world": {
+        ".validate": "$world === 'satisfy'",
+        "$zone": {
+          ".read": "auth != null",
+          ".validate": "$zone.matches(/^[A-Za-z0-9_-]{1,24}$/)",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.hasChildren(['t', 'm'])",
+            "t": {
+              ".validate": "newData.val() === now"
+            },
+            "m": {
+              "$k": {
+                ".validate": "$k.matches(/^[a-z0-9_]{1,16}@-?[0-9]{1,6},-?[0-9]{1,6}$/) && newData.isString() && newData.val().length <= 48"
+              }
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",
@@ -21,7 +45,7 @@
               ".validate": "newData.isString() && newData.val().length >= 8 && newData.val().length <= 64"
             },
             "handle": {
-              ".validate": "newData.isString() && newData.val().length <= 24"
+              ".validate": "newData.isString() && newData.val().length <= 24 && newData.val() === root.child('accountIds').child($uid).val()"
             },
             "look": {
               ".validate": "newData.hasChildren(['hair', 'hc', 'skin', 'top'])",
@@ -33,7 +57,7 @@
               ".validate": "newData.isString() && newData.val().length <= 16"
             },
             "lv": {
-              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 999"
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
             },
             "title": {
               ".validate": "newData.isString() && newData.val().length <= 32"
@@ -48,7 +72,7 @@
               ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 16384"
             },
             "y": {
-              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 4096"
+              ".validate": "newData.isNumber() && newData.val() >= -2048 && newData.val() < 4096"
             },
             "dir": {
               ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3"
@@ -76,6 +100,15 @@
             },
             "role": {
               ".validate": "newData.isString() && newData.val().matches(/^(tank|healer|damage|support)$/)"
+            },
+            "wp": {
+              ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9_]{1,16}:[0-9](:[0-9]{1,2})?$/)"
+            },
+            "fx": {
+              ".validate": "newData.isString() && newData.val().length <= 2400"
+            },
+            "gu": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 256 && newData.val() % 1 === 0"
             },
             "seq": {
               ".validate": "newData.isNumber() && newData.val() >= 0"
@@ -120,10 +153,10 @@
               ".validate": "newData.isString() && newData.val().length <= 40"
             },
             "k": {
-              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
             },
             "n": {
-              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
+              ".validate": "newData.isNumber() && newData.val() >= -2048 && newData.val() <= 1000000000"
             },
             "raid": {
               ".validate": "newData.isString() && newData.val().length <= 64"
@@ -142,6 +175,55 @@
             ".validate": false
           }
         }
+      }
+    },
+    "chat": {
+      "$world": {
+        ".read": "auth != null",
+        ".indexOn": ["t"],
+        ".validate": "$world === 'satisfy'",
+        "$id": {
+          ".write": "auth != null && ((!data.exists() && newData.child('from').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('t').val() < now - 600000))",
+          ".validate": "newData.hasChildren(['from', 'h', 'text', 't'])",
+          "from": { ".validate": "newData.val() === auth.uid" },
+          "h": { ".validate": "newData.isString() && newData.val() === root.child('accountIds').child(auth.uid).val()" },
+          "text": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "news": {
+      "$world": {
+        ".read": "auth != null",
+        ".indexOn": ["t"],
+        ".validate": "$world === 'satisfy'",
+        "$id": {
+          ".write": "auth != null && ((!data.exists() && newData.child('from').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('t').val() < now - 600000))",
+          ".validate": "newData.hasChildren(['from', 'h', 'k', 't'])",
+          "from": { ".validate": "newData.val() === auth.uid" },
+          "h": { ".validate": "newData.isString() && newData.val() === root.child('accountIds').child(auth.uid).val()" },
+          "k": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z]{2,16}$/)" },
+          "p": {
+            "$f": { ".validate": "($f === 'lv' || $f === 'f' || $f === 'rk') && newData.isNumber()" }
+          },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "handles": {
+      "$h": {
+        ".read": "auth != null",
+        ".write": "auth != null && ((!data.exists() && newData.val() === auth.uid) || (data.val() === auth.uid && !newData.exists()))",
+        ".validate": "$h.matches(/^[a-z0-9_]{3,16}$/)"
+      }
+    },
+    "accountIds": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid && (!data.exists() || !newData.exists())",
+        ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_]{3,16}$/) && root.child('handles').child(newData.val().toLowerCase()).val() === $uid"
       }
     },
     "profiles": {

@@ -29,7 +29,7 @@
 
   var MAX = 5;
   var INVITE_MS = 30000;  // an unanswered invite expires
-  var GRACE_MS = 5000;    // presence may lag; a member/leader missing this long has left
+  var GRACE_MS = 10000;   // presence may lag; a member/leader missing this long has left (a closed tab leaves presence at once)
   var PING_MS = 1500;     // pings: at most one per member this often (sent and received)
   var REJOIN_MS = 60000;  // a dropped member or a reloaded tab can come back this long (wall clock)
   var LEAD_MS = 15000;    // a leader gone this long (longer than a reload) is replaced by the remaining members
@@ -50,6 +50,7 @@
     var memo = null;        // member: {id, leader, t}: auto-accept that leader's invite to that party
     var savedSig = '', savedAt = -1e15;
     var mates = [];         // member: the other members seen while the leader was there (the electorate)
+    var names = new Map();  // uid -> last handle seen, so a member who drops out is still named (not "?")
     function save() {
       if (!store || !id) return;
       var s = JSON.stringify({ id: id, leader: leader, members: leader === self ? Array.from(accepted.keys()).concat(Array.from(recent.keys())) : [] });
@@ -71,7 +72,7 @@
     })();
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
-    function byUid(uid) { var hit = null; P.remotes().forEach(function (r) { if (r.uid === uid) hit = r; }); return hit; }
+    function byUid(uid) { var hit = null; P.remotes().forEach(function (r) { if (r.uid === uid) hit = r; if (r.uid && r.handle) names.set(r.uid, r.handle); }); return hit; }
     function clear() { id = null; leader = null; accepted.clear(); outgoing.clear(); recent.clear(); leaderOk = 0; savedSig = ''; mates = []; }
     function send(type, to) { P.send(type, { to: to, party: id }); }
 
@@ -106,7 +107,7 @@
         case 'party.ping': {
           if (!id || pl.party !== id || !api.members().some(function (m) { return !m.self && m.uid === from.uid; })) return;
           var px = Math.round(+pl.k), py = Math.round(+pl.n), last = pingIn.get(from.uid);
-          if (!(px >= 0 && py >= 0 && px < 16384 && py < 4096)) return;
+          if (!(px >= 0 && py >= -2048 && px < 16384 && py < 4096)) return; // north rows are y < 0
           if (last != null && now() - last < PING_MS) return;
           pingIn.set(from.uid, now());
           emit({ type: 'ping', uid: from.uid, handle: from.handle, x: px, y: py, self: false });
@@ -172,7 +173,7 @@
         if (!id || !to.length) return 'noParty';
         if (now() - pingOut < PING_MS) return 'tooFast';
         pingOut = now();
-        x = Math.max(0, Math.round(x)); y = Math.max(0, Math.round(y));
+        x = Math.max(0, Math.round(x)); y = Math.max(-2048, Math.round(y));
         to.forEach(function (m) { P.send('party.ping', { to: m.uid, party: id, k: x, n: y }); });
         emit({ type: 'ping', uid: self, handle: null, x: x, y: y, self: true });
         return 'sent';
@@ -204,7 +205,7 @@
           accepted.forEach(function (seen, uid) {
             var r = byUid(uid);
             if (r && r.party === id) { accepted.set(uid, t); return; }
-            if (t - seen > GRACE_MS) { accepted.delete(uid); if (store) recent.set(uid, wall()); emit({ type: 'memberLeft', uid: uid, handle: r ? r.handle : '' }); }
+            if (t - seen > GRACE_MS) { accepted.delete(uid); if (store) recent.set(uid, wall()); emit({ type: 'memberLeft', uid: uid, handle: r ? r.handle : names.get(uid) || '' }); }
           });
           // invite dropped members back while they may still be reloading
           var stop = false;

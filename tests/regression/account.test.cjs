@@ -53,7 +53,7 @@ test('Sign out, then Delete my online data: nothing of the account is left onlin
     // Sign out: presence goes, the cloud data stays, the title offers sign-in again
     await click(a, '#cloudA button');
     await until(a, () => document.getElementById('cloudBtn').hidden && Satisfy.local.net() === null);
-    assert.equal(await a.eval(() => document.getElementById('onlineBtn').textContent), 'Play online (Google)');
+    assert.equal(await a.eval(() => document.getElementById('onlineBtn').textContent), 'Play online');
     assert.equal(await a.eval(() => document.getElementById('cloudW').hidden), true);
     assert.match(await a.eval(() => document.getElementById('toasts').textContent), /Signed out/);
     await until(a, (u) => !window.__fakeRTDB.data.has('presence/satisfy/main/' + u), 5000, UID);

@@ -12,9 +12,9 @@ async function settle(...games) {
 }
 const shown = (g, id) => g.eval((i) => !document.getElementById(i).hidden, id);
 const text = (g, id) => g.eval((i) => document.getElementById(i).textContent, id);
-// click the middle of a remote player's sprite on g's screen
+// click the name over a remote player's head on g's screen (SAT-ONLINE-026: a click on the sprite attacks)
 async function clickRemote(g, uid) {
-  const p = await g.eval((u) => { const r = Satisfy.local.net().remotes.find((x) => x.uid === u); return window.__G.toScreen(r.x, r.y - 10); }, uid);
+  const p = await g.eval((u) => { const r = Satisfy.local.net().remotes.find((x) => x.uid === u); return window.__G.toScreen(r.x, r.y - 30); }, uid);
   await g.page.mouse.click(p.x, p.y);
   await g.step(2);
 }
