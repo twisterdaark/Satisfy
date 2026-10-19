@@ -1,6 +1,6 @@
 # NET/PVP backlog U001–U038 (plan doc §33–§34) — status
 
-Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-013 · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
+Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-014 · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
 
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
@@ -12,7 +12,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-013 �
 | U006 | Session leases | ✅ | SAT-ONLINE-010: `sessions/{uid}`, the newest session wins, "Play here" takes over |
 | U007 | Connection indicator | ✅ | HUD badge from the net state machine (§25) |
 | U008 | Player presence | ✅ | SAT-ONLINE-002/004 |
-| U009 | Spatial interest management | ❌ | Next: a shard per zone (room key already carries `zone`); see `COST_MODEL.md` proposal 2 |
+| U009 | Spatial interest management | ✅ | SAT-ONLINE-014: range query on `x` (±800 px, re-centred every 400 px) + party members watched wherever they are; `regression/interest`, `COST_MODEL.md` |
 | U010 | Smooth remote movement | ✅ | Interpolation 100 ms in the past, snap on jumps (`unit/presence`) |
 | U011 | Remote animations | ✅ | `anim` idle/walk/attack/dodge/dead |
 | U012 | Network room browser | ❌ | One world shard today (`main`) |
@@ -28,7 +28,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-013 �
 | U022 | Config/env isolation | 🟡 | Public web config in `src/net/firebase-config.js`; no staging project |
 | U023 | Protocol versioning | ✅ | Envelope `v: 1`, `PROTOCOL_VERSION` (§25) |
 | U024 | Load testing swarm | ✅ | `unit/chaos` 100-client soak (in memory) |
-| U025 | World shard migration | ❌ | Needs U009 first |
+| U025 | World shard migration | ❌ | U009 is in, but there is still one shard (`main`); migration needs more than one |
 | U026 | Safe Bairan | ✅ | `SAFE_ZONES` (SAT-ONLINE-003) |
 | U027 | Safe Winston | ✅ | Same; every town is safe (Patrian, Reidan, Reinhardt too) |
 | U028 | Spawn shield | ⏳ | Only matters with open PvP (R5) |
@@ -43,4 +43,4 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-013 �
 | U037 | Outlaw flag | ⏳ | R5 |
 | U038 | Bounty board | ⏳ | R5 + ledger |
 
-**Totals:** ✅ 23 · 🟡 5 · ⏳ 7 · ❌ 3.
+**Totals:** ✅ 24 · 🟡 5 · ⏳ 7 · ❌ 2.
