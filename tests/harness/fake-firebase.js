@@ -44,7 +44,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|arena)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -98,8 +98,19 @@
     if (cur && cur.o !== giver) return 'PERMISSION_DENIED: tradedItems not the giver\'s';
     return null;
   }
+  // SAT-ONLINE-053 arena seasons, as backend/database.rules.json: your own rating; one win or loss and at most 64 points a write
+  function arenaRules(seg, v) {
+    if (!user || seg.length !== 3 || !/^s20[0-9]{4}$/.test(seg[1]) || seg[2] !== user.uid) return 'PERMISSION_DENIED: arena ' + seg.join('/');
+    if (v === null) return null;
+    const old = data.get(seg.join('/'));
+    if (Object.keys(v).sort().join(',') !== 'l,n,r,t,w' || !isInt(v.r, 0) || v.r > 4000 || !isInt(v.w, 0) || !isInt(v.l, 0) || typeof v.n !== 'string' || v.n.length > 24 || JSON.stringify(v.t) !== JSON.stringify(SV)) return 'arena fields';
+    if (!old) return v.w + v.l <= 1 && v.r >= 936 && v.r <= 1064 ? null : 'arena first';
+    const one = (v.w === old.w + 1 && v.l === old.l) || (v.l === old.l + 1 && v.w === old.w);
+    return one && Math.abs(v.r - old.r) <= 64 ? null : 'arena step';
+  }
   function rules(p, v, existing) {
     const seg = p.split('/');
+    if (seg[0] === 'arena') return arenaRules(seg, v);
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
     if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
     if (seg[0] === 'handles' || seg[0] === 'accountIds' || seg[0] === 'chat' || seg[0] === 'news') return idRules(seg, v);
@@ -332,7 +343,7 @@
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
-      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems'].includes(seg[0]) ? !!user : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'arena'].includes(seg[0]) ? !!user : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions'].includes(seg[0]) && user && seg[1] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));

@@ -68,7 +68,8 @@ test('position bounds cover the whole map, and the fake uses the same bounds', (
 test('presence is indexed on exactly the children the interest queries order by (U009: x; party)', () => {
   assert.deepEqual(rules.presence.$world.$shard['.indexOn'], ['x', 'party']);
   const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
-  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['party', 't', 'x']);
+  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['party', 'r', 't', 'x']);
+  assert.deepEqual(rules.arena.$season['.indexOn'], ['r'], 'the arena board orders by rating (SAT-ONLINE-053)');
   assert.deepEqual(rules.chat.$world['.indexOn'], ['t'], 'world chat prunes old lines by t (SAT-ONLINE-026)');
   // the radius must cover the screen after a full re-centre step: |offset| <= step, half screen = W / 2
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
@@ -170,6 +171,16 @@ test('trades: participants only; each writes its own offer until the swap; the s
   assert.match(led['.write'], /\(!data\.exists\(\) \|\| data\.child\('o'\)\.val\(\) === /, "only away from the item's recorded owner");
   assert.match(led['.write'], /\.child\('it'\)\.child\(\$iid\)\.exists\(\)/, 'only an item its giver offered');
   for (const n of [tr, sides.$uid, done, led]) assert.equal(n.$other['.validate'], false);
+});
+
+test('arena seasons: your own rating only; a first entry near 1000; then one win or loss and at most 64 points a write', () => {
+  const a = rules.arena.$season, u = a.$uid;
+  assert.equal(a['.validate'], "$season.matches(/^s20[0-9]{4}$/)");
+  assert.equal(u['.write'], 'auth != null && auth.uid === $uid');
+  assert.match(u['.validate'], /newData\.child\('r'\)\.val\(\) >= 936 && newData\.child\('r'\)\.val\(\) <= 1064/, 'a first entry is 1000 +- 64');
+  assert.match(u['.validate'], /newData\.child\('w'\)\.val\(\) === data\.child\('w'\)\.val\(\) \+ 1 && newData\.child\('l'\)\.val\(\) === data\.child\('l'\)\.val\(\)/);
+  assert.match(u['.validate'], /newData\.child\('r'\)\.val\(\) >= data\.child\('r'\)\.val\(\) - 64 && newData\.child\('r'\)\.val\(\) <= data\.child\('r'\)\.val\(\) \+ 64/);
+  assert.equal(u.$other['.validate'], false);
 });
 
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing

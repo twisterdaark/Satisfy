@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19u', ver: '0.44', d: '2026-10-19',
+      ar: ['أونلاين: مواسم الساحة: كل مبارزة أونلاين بتغير تقييمك في موسم الشهر ده (بتبدأ من 1000)، وزرار "الساحة" في قايمة اللاعبين بيوريك أحسن 10 وتقييمك',
+        'كل شهر جديد موسم جديد'],
+      en: ['Online: arena seasons: every duel online moves your rating in this month\'s season (from 1000); "Arena" in the player list shows the top 10 and your own',
+        'Every new month is a new season'] },
     { v: '2026-10-19l', ver: '0.35', d: '2026-10-19',
       ar: ['أونلاين: تبادل بين اللاعبين: افتح كارت اللاعب اللي جنبك (⋯ أو T) واضغط تبادل',
         'كل واحد بيحط دهب وحاجات من الشنطة، وبعدين الاتنين يضغطوا موافق وبعدها تأكيد',

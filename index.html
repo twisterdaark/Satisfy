@@ -436,7 +436,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
       <div id="loot"></div>
       <div id="evbar" class="sys" hidden></div>
       <div id="sgbar" class="sys" hidden></div>
-      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button></div></div>
+      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plRnk" data-act="plRnk" data-i18n="rnkBoard"></button></div></div>
       <div id="netRepW" class="sys" hidden><div id="netRepT"></div><div class="row"><button id="netRepBtn" data-act="netTakeBack"></button></div></div>
       <div id="duelInv" class="sys" hidden><div id="duelInvT"></div><div class="row"><button id="duelBtnA" data-act="dAccept"></button><button id="duelBtnB" data-act="dDecline"></button><button id="duelBtnC" class="blk" data-act="dBlock" data-i18n="pBlock"></button></div></div>
       <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
@@ -3718,7 +3718,7 @@ function act(a){
  else if(a==='back'){showOnly(ctrlBack);mode=ctrlBack==='pauseScreen'?'pause':'title';}
  else if(a==='lang'){mode='lang';showOnly('langScreen');}
  else if(a==='online')netPlay();
- else if(a==='plClose')plOpen(false);else if(a==='plHide')plHideT();
+ else if(a==='plClose')plOpen(false);else if(a==='plRnk')rnkBoard();else if(a==='plHide')plHideT();
  else if(a==='idOk')idOk();else if(a==='idCheck')idCheck();else if(a==='idClose')$('idW').hidden=true;
  else if(a==='netTakeBack')netTakeBack();
  else if(a==='cloud')cloudOpen();else if(a==='updLog')updLogOpen();else if(a==='updLogClose')updLogClose();else if(a==='switchAcc')netSwitch();else if(a==='cloudClose')$('cloudW').hidden=true;
@@ -4597,18 +4597,38 @@ $('trGold').addEventListener('change',e=>{if(TRADE){TRADE.setGold(e.target.value
    Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
 Object.assign(STR.ar,{dHint:'[K] مبارزة',dSent:'اتبعت تحدي مبارزة لـ{n}',dFrom:'{n} بيتحداك في مبارزة',dReadyQ:'مبارزة مع {n}: جاهز؟',dReady:'جاهز (Y)',dWait:'مستني {n}…',dNone:'مفيش حد قريب كفاية للمبارزة',dSafe:'ممنوع المبارزة جوه المدن',dBusy:'{n} مشغول دلوقتي',dFar:'قرّب من {n} الأول',dDeclined:'{n} رفض المبارزة',dCancel:'المبارزة اتلغت',dFight:'ابدأ!',dOut:'ارجع للحلبة وإلا هتخسر!',dWin:'كسبت المبارزة ضد {n} {w}',dLose:'خسرت المبارزة ضد {n} {w}',dYield:'استسلام',dYou:'إنت',dTitle:'مبارزة ضد {n}',dRec:'المبارزات: {w} فوز · {l} خسارة',dw_yield:'(استسلام)',dw_arena:'(خرج من الحلبة)',dw_teleport:'(ساب القتال)',dw_safe:'(دخل مدينة)',dw_gone:'(الخصم مشي)',dw_death:'(مات)',dw_hp:''});
 Object.assign(STR.en,{dHint:'[K] Duel',dSent:'Duel challenge sent to {n}',dFrom:'{n} challenges you to a duel',dReadyQ:'Duel with {n}: ready?',dReady:'Ready (Y)',dWait:'Waiting for {n}…',dNone:'Nobody close enough to duel',dSafe:'No duels inside towns',dBusy:'{n} is busy right now',dFar:'Get closer to {n} first',dDeclined:'{n} declined the duel',dCancel:'Duel cancelled',dFight:'Fight!',dOut:'Back to the arena or you forfeit!',dWin:'You won the duel against {n} {w}',dLose:'You lost the duel against {n} {w}',dYield:'Yield',dYou:'You',dTitle:'Duel with {n}',dRec:'Duels: {w} won · {l} lost',dw_yield:'(surrender)',dw_arena:'(left the arena)',dw_teleport:'(left the fight)',dw_safe:'(entered a town)',dw_gone:'(opponent left)',dw_death:'(died)',dw_hp:''});
-function duelStart(){DUEL=Satisfy.duel.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):''});
+function duelStart(){rnkStart();DUEL=Satisfy.duel.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):''});
  DUEL.on(e=>{const n=e.handle||((DUEL.state().handle)||'?');duelSig='';
   if(e.type==='challenge'){SFX.notice();}
   else if(e.type==='declined')toast(t('dDeclined',{n}),'warn');
   else if(e.type==='cancelled')toast(t('dCancel'),'warn');
   else if(e.type==='safeHere')toast(t('dSafe'),'warn');
-  else if(e.type==='fight'){toast(t('dFight'),'good');SFX.notice();}
+  else if(e.type==='fight'){toast(t('dFight'),'good');SFX.notice();rnkSnap(DUEL.state().foe);}
   else if(e.type==='outside')toast(t('dOut'),'warn');
   else if(e.type==='hurt'){numP(-20,'-'+e.dmg,'#ff6a5a',false);SFX.hit();}
   else if(e.type==='result'){const win=e.result==='win';if(S&&!S.__demo){S.duels=S.duels||{w:0,l:0};S.duels[win?'w':'l']++;}
-   toast(t(win?'dWin':'dLose',{n,w:t('dw_'+e.why)}),win?'good':'warn');if(win)SFX.quest();
+   toast(t(win?'dWin':'dLose',{n,w:t('dw_'+e.why)}),win?'good':'warn');if(win)SFX.quest();rnkResult(win,e.foe);
    if(S&&S.duels)setTimeout(()=>toast(t('dRec',S.duels)),500);}});}
+/* ranked arena seasons (SAT-ONLINE-053; Claude-B #13 item 23): every duel online moves both players' rating in this
+   month's season (Elo, K 32, from 1000: arena/{season}/{uid} {r, w, l, n, t}); Arena in the player list shows the top
+   10 and your own line. A new month (UTC, by the server clock) is a new season. Not cheat-proof yet: each player writes
+   its own rating; the rules allow one win or loss and at most 64 points per write. */
+Object.assign(STR.ar,{rnkBoard:'الساحة',rnkR:'تقييمك في الساحة: {r} ({d})',rnkH:'موسم الساحة {s}',rnkRow:'{i}. {n}: {r} ({w}-{l})',rnkMe:'إنت: {r} ({w}-{l})',rnkNone:'محدش لعب مبارزة في الموسم ده لسه',rnkNew:'لسه ملكش تقييم: كل مبارزة أونلاين بتحسب',rnkFail:'مقدرناش نجيب الترتيب دلوقتي'});
+Object.assign(STR.en,{rnkBoard:'Arena',rnkR:'Your arena rating: {r} ({d})',rnkH:'Arena season {s}',rnkRow:'{i}. {n}: {r} ({w}-{l})',rnkMe:'You: {r} ({w}-{l})',rnkNone:'Nobody has dueled this season yet',rnkNew:'No rating yet: every duel online counts',rnkFail:'Could not load the board right now'});
+var RNK=null;
+function rnkSeason(){const d=new Date(wNow());return 's'+d.getUTCFullYear()+String(d.getUTCMonth()+1).padStart(2,'0');}
+function rnkStart(){RNK=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.arenaStore))return;RNK=Satisfy.firebase.arenaStore(FB);} // NETTR first: FB is declared below
+// both ratings as the fight starts, so each side counts the duel against the same numbers (the other may write first)
+var RNKS=null;function rnkSnap(foe){RNKS=null;if(!RNK||!NET||!foe)return;const se=rnkSeason(),p=Promise.all([RNK.get(se,NET.uid),RNK.get(se,foe)]).catch(()=>[null,null]);RNKS={foe,se,p};}
+function rnkResult(win,foe){if(!RNK||!NET||!S||S.__demo||!foe)return;const sn=RNKS&&RNKS.foe===foe?RNKS:null,se=sn?sn.se:rnkSeason();RNKS=null;
+ (sn?sn.p:Promise.all([RNK.get(se,NET.uid),RNK.get(se,foe)])).then(([me,them])=>{const ra=me&&typeof me.r==='number'?me.r:1000,rb=them&&typeof them.r==='number'?them.r:1000;
+  const r=Math.max(0,Math.min(4000,Math.round(ra+32*((win?1:0)-1/(1+Math.pow(10,(rb-ra)/400))))));
+  return RNK.put(se,NET.uid,{r,w:(me?me.w|0:0)+(win?1:0),l:(me?me.l|0:0)+(win?0:1),n:netId||S.look.n}).then(()=>setTimeout(()=>toast(t('rnkR',{r,d:(r>=ra?'+':'')+(r-ra)}),win?'good':''),900));}).catch(()=>{});}
+function rnkBoard(){if(!RNK||!NET)return;const se=rnkSeason(),d=new Date(wNow()),sn=d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');
+ Promise.all([RNK.top(se,10),RNK.get(se,NET.uid)]).then(([top,me])=>{plOpen(false);
+  const rows=top.map((x,i)=>t('rnkRow',{i:i+1,n:Satisfy.chat.clean(x.n,24)||'?',r:x.r,w:x.w,l:x.l}));
+  dialog('guild',[t('rnkH',{s:sn}),rows.length?rows.join(' · '):t('rnkNone'),me?t('rnkMe',{r:me.r,w:me.w|0,l:me.l|0}):t('rnkNew')],null,[{l:t('oClose')}]);},()=>toast(t('rnkFail'),'warn'));}
+window.__GR={season:()=>rnkSeason(),mine:()=>RNK?RNK.get(rnkSeason(),NET.uid):null,top:()=>RNK?RNK.top(rnkSeason(),10):[]}; // test hook
 // The local attack reaches the opponent: melee within reach, bow/staff along the aim. Power is a normalized roll.
 function duelSwing(ax,ay,mul,k){if(DUEL.state().phase!=='fight')return;const f=DUEL.foe();if(!f)return;
  const dx=f.x-P.x,dy=(f.y-8)-(P.y-6),d=Math.hypot(dx,dy),l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';
