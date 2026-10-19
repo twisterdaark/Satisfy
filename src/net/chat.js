@@ -13,8 +13,12 @@
  * drop those silently, so the sender just sees no answer). It is kept on this device
  * (localStorage `satisfy_blocked`), not in the save or the database.
  *
+ * World chat (SAT-ONLINE-026, owner feedback 10): with `world` (the transport's world channel: {sayWorld(msg), world(fn)})
+ * say(text, 'all') reaches everyone signed in, separate from the party lines. Lines carry ch: 'party' | 'all'.
+ * The sender's name is its account ID (`handle()`), which the database rules check against accountIds.
+ *
  * Exposes `Satisfy.chat`:
- *   create({ presence, party, uid, now?, blocked? }) -> { say(text), log(), on(fn), C }
+ *   create({ presence, party, uid, now?, blocked?, world?, handle? }) -> { say(text, ch?), log(), on(fn), C }
  *   blocklist(storage?) -> { has(uid), add(uid, handle), remove(uid), clear(), list() }
  *   clean(text) -> string
  */
@@ -39,7 +43,7 @@
   function create(o) {
     var P = o.presence, party = o.party, self = o.uid, now = o.now || function () { return Date.now(); };
     var blocked = o.blocked || function () { return false; };
-    var lines = [], listeners = [], sent = [], seq = 0;
+    var lines = [], listeners = [], sent = [], seq = 0, world = o.world || null, handle = o.handle || function () { return ''; };
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function push(line) { lines.push(line); if (lines.length > C.LOG) lines.shift(); emit(line); }
@@ -55,23 +59,30 @@
       if (!others().some(function (m) { return m.uid === from.uid; })) return;
       var text = clean(pl.text);
       if (!text) return;
-      push({ type: 'line', from: from.uid, handle: from.handle || '?', text: text, t: now(), self: false, n: ++seq });
+      push({ type: 'line', ch: 'party', from: from.uid, handle: from.handle || '?', text: text, t: now(), self: false, n: ++seq });
+    });
+    if (world && world.world) world.world(function (m) {
+      if (!m || typeof m.from !== 'string' || m.from === self || blocked(m.from)) return;
+      var text = clean(m.text);
+      if (!text) return;
+      push({ type: 'line', ch: 'all', from: m.from, handle: clean(m.h, 24) || '?', text: text, t: now(), self: false, n: ++seq });
     });
 
     return {
       C: C,
-      /** Send a line to the party. Returns 'sent', 'empty', 'noParty' or 'tooFast'. */
-      say: function (text) {
+      /** Send a line to the party (or with ch 'all', to everyone). Returns 'sent', 'empty', 'noParty', 'noWorld' or 'tooFast'. */
+      say: function (text, ch) {
         var s = clean(text);
         if (!s) return 'empty';
-        var to = others();
-        if (!party.id() || !to.length) return 'noParty';
+        var all = ch === 'all', to = all ? [] : others();
+        if (all ? !(world && world.sayWorld) : !party.id() || !to.length) return all ? 'noWorld' : 'noParty';
         var t = now();
         sent = sent.filter(function (x) { return t - x < C.BURST_MS; });
         if ((sent.length && t - sent[sent.length - 1] < C.MIN_GAP_MS) || sent.length >= C.BURST) return 'tooFast';
         sent.push(t);
-        to.forEach(function (m) { P.send('chat.say', { to: m.uid, party: party.id(), text: s }); });
-        push({ type: 'line', from: self, handle: null, text: s, t: t, self: true, n: ++seq });
+        if (all) world.sayWorld({ from: self, h: handle(), text: s });
+        else to.forEach(function (m) { P.send('chat.say', { to: m.uid, party: party.id(), text: s }); });
+        push({ type: 'line', ch: all ? 'all' : 'party', from: self, handle: null, text: s, t: t, self: true, n: ++seq });
         return 'sent';
       },
       /** The last LOG lines, oldest first. */

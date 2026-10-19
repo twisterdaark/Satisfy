@@ -11,13 +11,16 @@
 
   function local(name) {
     var ch = new root.BroadcastChannel(name || 'satisfy-net-v1');
-    var handler = null;
+    var handler = null, wch = null; // wch: world chat (SAT-ONLINE-026), its own channel
+    function wc() { if (!wch) wch = new root.BroadcastChannel((name || 'satisfy-net-v1') + '-world'); return wch; }
     ch.onmessage = function (e) { if (handler) handler(e.data); };
     return {
       kind: 'local',
       send: function (env) { try { ch.postMessage(env); } catch (e) { /* closed or not cloneable */ } },
       onmessage: function (fn) { handler = fn; },
-      close: function () { handler = null; try { ch.close(); } catch (e) { /* ignore */ } },
+      world: function (fn) { wc().onmessage = function (e) { fn(e.data); }; },
+      sayWorld: function (m) { try { wc().postMessage({ from: m.from, h: m.h, text: m.text }); } catch (e) { /* closed */ } },
+      close: function () { handler = null; try { ch.close(); if (wch) wch.close(); } catch (e) { /* ignore */ } },
     };
   }
 

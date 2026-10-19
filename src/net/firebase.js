@@ -86,7 +86,7 @@
       var o = { to: p.to };
       if (type.indexOf('party.') === 0) {
         o.party = String(p.party || '');
-        if (type === 'party.ping') { o.k = Math.max(0, Math.min(10000000, Math.round(+p.k || 0))); o.n = Math.max(0, Math.min(10000000, Math.round(+p.n || 0))); }
+        if (type === 'party.ping') { o.k = Math.max(0, Math.min(10000000, Math.round(+p.k || 0))); o.n = Math.max(-2048, Math.min(10000000, Math.round(+p.n || 0))); }
         return o;
       }
       if (type.indexOf('chat.') === 0) { o.party = String(p.party || ''); o.text = String(p.text || ''); return o; }
@@ -216,6 +216,28 @@
       interest: function () { return { radius: R, centre: cx, party: pq.id, watched: Object.keys(pq.keys) }; },
       /** Follow everyone whose presence says they are in party `id` (null: stop), on top of the range query. */
       party: partyQuery,
+      /**
+       * World chat (SAT-ONLINE-026): chat/{world}/{pushId} = {from, h, text, t}; the rules check from = auth uid and
+       * h = the account ID. world(fn) gets the last lines and every new one (older than 5 min skipped); sayWorld also
+       * deletes up to 10 lines older than 10 min so the list stays short.
+       */
+      world: function (fn) {
+        var ref = D.ref(db, 'chat/' + o.world), q = D.limitToLast ? D.query(ref, D.limitToLast(20)) : ref;
+        offs.push(D.onChildAdded(q, function (s) {
+          var m = s.val();
+          if (!m || typeof m !== 'object' || typeof m.from !== 'string' || typeof m.text !== 'string') return;
+          if (typeof m.t === 'number' && Date.now() + offset - m.t > 300000) return;
+          fn({ from: m.from, h: m.h, text: m.text });
+        }));
+      },
+      sayWorld: function (m) {
+        if (closed) return;
+        var ref = D.ref(db, 'chat/' + o.world);
+        D.push(ref, { from: o.uid, h: String(m.h || ''), text: String(m.text || '').slice(0, 120), t: D.serverTimestamp() }).catch(fail);
+        if (D.limitToFirst) D.get(D.query(ref, D.orderByChild('t'), D.endAt(Date.now() + offset - 600000), D.limitToFirst(10))).then(function (s) {
+          s.forEach(function (c) { D.remove(D.ref(db, 'chat/' + o.world + '/' + c.key)).catch(function () { /* ignore */ }); });
+        }).catch(function () { /* ignore */ });
+      },
       close: function () {
         if (closed) return;
         closed = true;

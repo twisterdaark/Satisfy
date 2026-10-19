@@ -109,7 +109,7 @@
    * Build the public view of the local player.
    * @param {object} S durable state
    * @param {object} P volatile player state
-   * @param {{zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, duel?:string, mv?:string, hp?:number, em?:string, role?:string, anim?:string, arm?:number, t?:number}} [ctx]
+   * @param {{handle?:string, zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, duel?:string, mv?:string, hp?:number, em?:string, role?:string, anim?:string, arm?:number, t?:number}} [ctx]
    *   duel: "<duel id>:<duel HP>" while in a duel's countdown or fight, so others can watch (U034)
    * @returns {PlayerPublic}
    */
@@ -120,7 +120,7 @@
       v: PROTOCOL_VERSION,
       uid: ctx.uid || null,
       sid: ctx.sid || null,
-      handle: str(L.n, LIMITS.handle),
+      handle: str(ctx.handle || L.n, LIMITS.handle), // online: the account ID (SAT-ONLINE-026); otherwise the character name
       look: { hair: L.hair | 0, hc: L.hc | 0, skin: L.skin | 0, top: L.top | 0 },
       cls: str(S.cls || 'novice', 16),
       lv: S.lv | 0,
