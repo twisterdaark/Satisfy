@@ -44,7 +44,7 @@ Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it app
 | T35 | Per-user data deletion | ✅ | `unit/cloud` (`eraseAll`: every record of the account, index before save, nobody else's), `regression/account` (Sign out; **Delete my online data** leaves nothing of the account online, the local save stays, another account is untouched), `regression/cloud` (delete one cloud character) |
 | T36 | Unauthorized reads of other users' data | ✅ | `unit/rules` (cloud saves owner-only), `regression/cloud` (reading another account's cloud saves is denied) |
 | T37 | Spectators | 🟡 | `regression/duel` (U034, SAT-ONLINE-013: a third player sees both duelists' HP and the ring). No free spectator camera. |
-| T38 | Frame rate on mobile | ❌ | Needs a device lab. |
+| T38 | Frame rate on mobile | ❌ | Needs a device lab. Mobile is playable since SAT-ONLINE-017 (touch controls, `regression/touch`), so the owner's phone check is the first real measurement. |
 | T39 | 8-hour session | ❌ | A long soak needs a real browser and time. |
 | T40 | 100-client soak | ✅ | `unit/chaos` (100 presence clients, a simulated minute: tables bounded, under 30 s CPU) |
 

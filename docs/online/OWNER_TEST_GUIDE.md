@@ -1,12 +1,12 @@
 # Online test guide for the owner (Twister)
 
-Owner: Claude-A · covers SAT-ONLINE-001 … 016 · دليل اختبار الأونلاين — خطوة بخطوة
+Owner: Claude-A · covers SAT-ONLINE-001 … 017 · دليل اختبار الأونلاين — خطوة بخطوة
 
 ## 0. Deploy the database rules once (after pulling the top branch)
 
 ```powershell
 git fetch origin
-git checkout claude-a/sat-online-016-chat
+git checkout claude-a/sat-online-017-touch
 npx.cmd -y firebase-tools@latest deploy --only database --project satisfy-online-8yjeix
 ```
 This one deploy covers presence (with its index on `x`), party/duel/raid/chat messages, profiles, cloud saves and session leases.
@@ -22,6 +22,7 @@ devices (PC + phone), or two browsers.
 | Step | Do | Expect |
 |---|---|---|
 | Sign in | Title screen → **Play online (Google)** | The button shows your name; **Cloud saves** appears under it |
+| Phone controls | On the phone, start or continue a game | A stick bottom-left moves you; **Attack** and **Guard** work while held, **Dodge** and **Use** tap; the key hints bottom-right (Inventory, Status, Map, …) are buttons; online, a row with **Party · Duel · Yes · No · Chat**. On a PC add `&touch=1` to the address to see them |
 | Presence | New game or Continue on both | Badge top-centre: `Online · players: 2 · Safe zone`; you see each other walk |
 | Link | Hover the badge | `Link: NN ms · sent … · received … · dropped …` |
 | Party | Stand close, press **P**; the other presses **Y** | Party panel under the minimap; green names |
