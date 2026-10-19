@@ -69,14 +69,14 @@
     var mine = D.ref(db, base + '/' + o.uid), list = D.ref(db, base);
     var inbox = D.ref(db, 'inbox/' + o.uid);
     var handler = null, offs = [], lastSeq = {}, closed = false, offset = 0;
-    var DIRECTED = /^(party\.(invite|accept|decline|kick)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end))$/;
-    // exactly the fields the inbox rules accept: party messages {to, party}, duel messages {to, duel, k?, n?}
+    var DIRECTED = /^(party\.(invite|accept|decline|kick)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill))$/;
+    // exactly the fields the inbox rules accept: party {to, party}, duel {to, duel, k?, n?}, raid {to, raid, k?, n?}
     function directedPayload(type, p) {
       var o = { to: p.to };
       if (type.indexOf('party.') === 0) { o.party = String(p.party || ''); return o; }
-      o.duel = String(p.duel || '');
-      if (typeof p.k === 'number' && p.k >= 0 && p.k <= 999) o.k = Math.round(p.k);
-      if (typeof p.n === 'number' && p.n >= 0 && p.n <= 100000) o.n = Math.round(p.n);
+      if (type.indexOf('raid.') === 0) o.raid = String(p.raid || ''); else o.duel = String(p.duel || '');
+      if (typeof p.k === 'number' && p.k >= 0 && p.k <= 10000000) o.k = Math.round(p.k);
+      if (typeof p.n === 'number' && p.n >= 0 && p.n <= 10000000) o.n = Math.round(p.n);
       return o;
     }
     function deliver(env) { if (handler && env && !closed) handler(env); }

@@ -18,6 +18,7 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 <script src="src/net/transport-local.js"></script> <!-- Satisfy.transports -->
 <script src="src/net/party.js"></script>      <!-- Satisfy.party (SAT-ONLINE-003) -->
 <script src="src/net/duel.js"></script>       <!-- Satisfy.duel (SAT-ONLINE-006) -->
+<script src="src/net/raid.js"></script>       <!-- Satisfy.raid (SAT-ONLINE-009) -->
 <script src="src/net/cloud.js"></script>      <!-- Satisfy.cloud (SAT-ONLINE-007) -->
 <script src="src/net/firebase-config.js"></script> <!-- Satisfy.firebaseConfig (public web config) -->
 <script src="src/net/firebase.js"></script>   <!-- Satisfy.firebase (SAT-ONLINE-004), SDK loaded on demand -->
@@ -175,6 +176,26 @@ check; a bar at the top shows both duel HPs and the countdown, with a **Yield** 
 dashed ring. Real death, travel or entering a town forfeits. `Satisfy.local.net().duel` = `state()` plus
 `challenge`.
 
+## `Satisfy.raid` (SAT-ONLINE-009, doc §10 R6)
+
+A party fights one boss. `create({ presence, party, uid, now?, local })`; `local` is the game's side:
+`boss(key) → {hp,max}|null`, `setHp(key, ratio)`, `kill(key)`, `damage(key, k)` (host), `claimed(enc)`, `claim(enc)`.
+
+| Member | Notes |
+|---|---|
+| `isHost()`, `isMember()` | Host = the party leader (party of 2+). |
+| `hit(key, k)` | A member's hit: sent to the host as `raid.hit`, returns `true` (the game undoes its local damage). The host or a solo player gets `false` (normal flow). |
+| `killed(key)` | Host: its copy died; sends `raid.kill` to every member who hit it. |
+| `touch(key)`, `tick()` | Host: send changed HP as `raid.state` (≤ 4/s) to the party. |
+| `encounters()` | Host: `{ key: { enc, hitters } }`. |
+
+Boss key = `"<type>@<spawn x>,<spawn y>"` (the same on every client). Members show the host's HP as a share
+of their own copy's max (levels roll per client) and kill their copy only on `raid.kill`, with their own
+normal rewards, once per encounter: `S.raidDone` keeps the last 30 claimed `"<host uid>:<encounter>"`
+ids, so a resent message or a reload can't pay twice. When the host leaves, the party dissolves and
+each client fights its own copy again. Messages travel in the inbox as `raid.*` with
+`{ to, raid, k?, n? }` (rules redeploy). `Satisfy.local.net().raid = { host, member, encounters }`.
+
 ## `Satisfy.cloud` (SAT-ONLINE-007, doc §06 R1, §23, §24, D4)
 
 `create(sdk, { uid, now? })` on the handle from `Satisfy.firebase.load()`:
@@ -243,6 +264,8 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, additive** (SAT-ONLINE-009): `Satisfy.raid`, `net().raid`, `S.raidDone`, RTDB inbox accepts `raid.*` (rules redeploy). Hooks in `hitMon()`/`killMon()`.
+- **api 1, additive** (SAT-ONLINE-008): online presence `idleHz 0.2`, `expireMs 15000`, republish on reconnect; `tools/cost-model.cjs`.
 - **api 1, additive** (SAT-ONLINE-007): `Satisfy.cloud`, `storage.replace()`, RTDB `profiles/`, `cloudIndex/`, `cloudSaves/` (rules redeploy), title-screen **Cloud saves**.
 - **api 1, additive** (SAT-ONLINE-006): `Satisfy.duel`, `net().duel`, `S.duels`, RTDB inbox accepts `duel.*` messages with `{to, duel, k?, n?}` (rules redeploy).
 - **api 1, additive** (SAT-ONLINE-005): `Satisfy.state`, `Satisfy.ids`, `Satisfy.events`, `Satisfy.local.profile/events/onEvent`, `S.pid` for every character, `item.iid`, storage writes `WS`, `__G.startMG(id)` (test hook).

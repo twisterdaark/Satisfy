@@ -1,6 +1,6 @@
 # Test matrix T01–T40 (plan doc §29) — coverage
 
-Owner: Claude-A · SAT-ONLINE-008 · Stack top: SAT-ONLINE-007
+Owner: Claude-A · SAT-ONLINE-008 (T20/T21 updated by SAT-ONLINE-009)
 
 Status: **✅ covered** · **🟡 partial** (what's missing is noted) · **⏳ needs a feature that doesn't exist yet** (R5 open PvP, a server, trading, chat) · **❌ gap**.
 Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it applies a copy of the database rules).
@@ -26,8 +26,8 @@ Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it app
 | T17 | Friendly fire in a party | ⏳ | R5 (a party has no damage path at all today). |
 | T18 | Duel refusal and expiry | ✅ | `unit/duel` (decline, expiry, busy, ready-check timeout), `regression/duel` (N declines) |
 | T19 | Duplicate duel result | ✅ | `unit/chaos` (every message duplicated → one result each) |
-| T20 | Same kill sent by two clients | 🟡 | `unit/events` (same key applied once). Today each client simulates its own monsters; a shared kill needs R6 server/host authority. |
-| T21 | Loot ledger idempotency | 🟡 | `unit/events`, `regression/ids` (a quest pays once; the baseline paid twice). The ledger itself is server-only (§23). |
+| T20 | Same kill sent by two clients | ✅ | `unit/raid`, `regression/raid` (party boss: the leader's copy is the one that dies; members' copies die only on its `raid.kill`; one reward each). Outside a party each client keeps its own monsters. |
+| T21 | Loot ledger idempotency | 🟡 | `unit/events`, `regression/ids` (a quest pays once; the baseline paid twice), `unit/raid` (a raid kill re-sent or replayed after a reload pays nothing: `S.raidDone`). The ledger itself is server-only (§23). |
 | T22 | Reload during a trade | ⏳ | No player trading yet. |
 | T23 | Privileged database write denied | ✅ | `unit/rules` (deny by default, owner-only paths, unknown fields rejected); every fake-backed regression test asserts `rejected = []` for the client's own writes |
 | T24 | Offline quests and forge still work | ✅ | `regression/golden`, `regression/ids` (forge through the real minigame, quest turn-in) |
@@ -48,6 +48,6 @@ Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it app
 | T39 | 8-hour session | ❌ | A long soak needs a real browser and time. |
 | T40 | 100-client soak | ✅ | `unit/chaos` (100 presence clients, a simulated minute: tables bounded, under 30 s CPU) |
 
-**Totals:** ✅ 24 · 🟡 7 · ⏳ 7 · ❌ 2 (T38, T39 need devices and time, not code).
+**Totals:** ✅ 25 · 🟡 6 · ⏳ 7 · ❌ 2 (T38, T39 need devices and time, not code).
 
 Run everything with `npm test`; the network rows (T19, T25–T28, T32, T40) are `node --test tests/unit/chaos.test.cjs` and take about 10 s.
