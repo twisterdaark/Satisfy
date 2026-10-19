@@ -66,6 +66,9 @@
             "duel": {
               ".validate": "newData.isString() && newData.val().matches(/^d_[A-Za-z0-9_-]{1,40}:(100|[1-9]?[0-9])$/)"
             },
+            "mv": {
+              ".validate": "newData.isString() && newData.val().matches(/^[0-9a-f]{8}$/)"
+            },
             "seq": {
               ".validate": "newData.isNumber() && newData.val() >= 0"
             },

@@ -14,10 +14,12 @@
  * @typedef {{
  *   v:number, uid:(string|null), sid:(string|null), handle:string, look:Look,
  *   cls:string, lv:number, title:string, zone:string, room:(string|null),
- *   x:number, y:number, dir:number, anim:string, arm:number, party:(string|null), duel:(string|null), t:number
+ *   x:number, y:number, dir:number, anim:string, arm:number, party:(string|null), duel:(string|null), mv:(string|null), t:number
  * }} PlayerPublic
  *   What other players may see. `room` is the house interior id (e.g. "r7") or null outdoors;
- *   `arm` is 1 when armor is worn (picks the armored sprite).
+ *   `arm` is 1 when armor is worn (picks the armored sprite). `mv` is the map version (8 hex digits, a hash of
+ *   the generated world): positions only mean the same place to players with the same map (doc §59 C07/C14),
+ *   so the game hides remotes whose mv differs from its own.
  * @typedef {{v:number, type:string, requestId:(string|null), sessionId:(string|null),
  *   seq:number, tick:number, payload:object}} Envelope
  */
@@ -32,7 +34,8 @@
   var ANIMS = ['idle', 'walk', 'attack', 'dodge', 'dead'];
   // PlayerPublic.duel: a duel id from Satisfy.duel and the player's duel HP (0..100)
   var DUEL_RE = /^d_[A-Za-z0-9_-]{1,40}:(100|[1-9]?[0-9])$/;
-  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 't'];
+  var MV_RE = /^[0-9a-f]{8}$/; // PlayerPublic.mv (SAT-ONLINE-019)
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
   // S.uid (the local item-instance counter) is private too, but its name collides with the public
   // account `uid`, so it is checked by value in the tests instead of listed here.
@@ -63,9 +66,14 @@
   // Reinhardt (zRein) with SAT-GUILD-001. tests/regression/party.test.cjs checks this list against
   // Satisfy.local.world().towns so a new town can't be left out.
   var SAFE_ZONES = ['zBai', 'zWin', 'zPat', 'zReid', 'zRein'];
+  // 'void' (or no zone): a position the world doesn't define, e.g. the interior strip between rooms. The game's
+  // own zoneAt falls back to Winston there (doc §59 C06); online that must never count as a safe town, nor as a
+  // field where players may fight, so it is `known: false` and callers refuse both.
+  var UNKNOWN_ZONES = ['void', ''];
   function zonePolicy(zone) {
-    var safe = SAFE_ZONES.indexOf(zone) >= 0;
-    return { zone: zone, safe: safe, pvp: false, duel: false };
+    var known = typeof zone === 'string' && UNKNOWN_ZONES.indexOf(zone) < 0;
+    var safe = known && SAFE_ZONES.indexOf(zone) >= 0;
+    return { zone: zone, known: known, safe: safe, pvp: false, duel: false };
   }
 
   function canTransition(from, to) {
@@ -95,7 +103,7 @@
    * Build the public view of the local player.
    * @param {object} S durable state
    * @param {object} P volatile player state
-   * @param {{zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, duel?:string, anim?:string, arm?:number, t?:number}} [ctx]
+   * @param {{zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, duel?:string, mv?:string, anim?:string, arm?:number, t?:number}} [ctx]
    *   duel: "<duel id>:<duel HP>" while in a duel's countdown or fight, so others can watch (U034)
    * @returns {PlayerPublic}
    */
@@ -120,6 +128,7 @@
       arm: ctx.arm ? 1 : 0,
       party: ctx.party || null,
       duel: typeof ctx.duel === 'string' && DUEL_RE.test(ctx.duel) ? ctx.duel : null,
+      mv: typeof ctx.mv === 'string' && MV_RE.test(ctx.mv) ? ctx.mv : null,
       t: ctx.t || 0,
     };
   }
@@ -149,6 +158,7 @@
     if (o.room !== null && typeof o.room !== 'string') e.push('room');
     if (o.party !== null && typeof o.party !== 'string') e.push('party');
     if (o.duel !== undefined && o.duel !== null && !(typeof o.duel === 'string' && DUEL_RE.test(o.duel))) e.push('duel');
+    if (o.mv !== undefined && o.mv !== null && !(typeof o.mv === 'string' && MV_RE.test(o.mv))) e.push('mv');
     return { ok: e.length === 0, errors: e };
   }
 
