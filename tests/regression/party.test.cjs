@@ -46,10 +46,12 @@ for (const mode of ['local', 'online']) {
     try {
       await a.page.keyboard.press('KeyP');
       await settle(a, b);
+      await until(b, () => !document.getElementById('partyInv').hidden);
       assert.equal(await shown(b, 'partyInv'), true, 'invite prompt on B');
       assert.equal(await text(b, 'partyInvT'), 'Grid invites you to a party');
       await b.page.keyboard.press('KeyY');
       await settle(a, b);
+      for (const g of [a, b]) await until(g, () => ((Satisfy.local.net().party || {}).members || []).length === 2);
       const pa = await party(a), pb = await party(b);
       assert.equal(pa.id, 'p_' + (await a.eval(() => Satisfy.local.net().uid)));
       assert.equal(pb.id, pa.id);
@@ -76,6 +78,7 @@ for (const mode of ['local', 'online']) {
     try {
       await a.page.keyboard.press('KeyP');
       await settle(a, b);
+      await until(b, () => !document.getElementById('partyInv').hidden);
       await b.page.keyboard.press('KeyN');
       await settle(a, b);
       assert.equal((await party(b)).id, null);
@@ -84,8 +87,10 @@ for (const mode of ['local', 'online']) {
       assert.equal((await party(a)).id, null, 'declined, nobody left: party dissolves');
       await a.page.keyboard.press('KeyP');
       await settle(a, b);
+      await until(b, () => !document.getElementById('partyInv').hidden);
       await b.page.keyboard.press('KeyY');
       await settle(a, b);
+      await until(b, () => !!(Satisfy.local.net().party || {}).id);
       assert.ok((await party(b)).id);
       await b.eval(() => document.querySelector('#partyW [data-act=pLeave]').click());
       await settle(a, b);
@@ -126,5 +131,21 @@ test('safe zone tag in Winston, not outside town', async () => {
     await a.step(5);
     assert.equal(await a.eval(() => Satisfy.local.zoneAt(window.__G.P.x, window.__G.P.y) === 'zWin'), false);
     assert.doesNotMatch(await text(a, 'netB'), /Safe zone/);
+  } finally { await ctx.close(); }
+});
+
+test('every town is a safe zone, and Patrian shows the tag', async () => {
+  const ctx = await H.newContext();
+  try {
+    const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
+    await H.newGame(a, LOOK_A);
+    const towns = await a.eval(() => Satisfy.local.world().towns.map((z) => [z, Satisfy.net.zonePolicy(z).safe]));
+    assert.ok(towns.length >= 3, 'Bairan, Winston, Patrian');
+    for (const [z, safe] of towns) assert.equal(safe, true, `${z} is safe`);
+    const zone = await a.eval(() => { const T = window.__G.TOWNS.find((t) => t.k === 'zPat'), P = window.__G.P; P.x = T.rx * 16 + 8; P.y = T.ry * 16 + 10; return Satisfy.local.zoneAt(P.x, P.y); });
+    assert.equal(zone, 'zPat');
+    await a.step(5);
+    assert.match(await text(a, 'netB'), /Safe zone$/);
+    assert.deepEqual(a.errors, []);
   } finally { await ctx.close(); }
 });

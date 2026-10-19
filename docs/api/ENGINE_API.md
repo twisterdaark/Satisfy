@@ -25,7 +25,7 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 |---|---|
 | `api` | `1` |
 | `defs()` | Deep copy of content tables as plain JSON: `MT`, `BOSSES`, `SPAWN`, `QD` (static quests only, no generated board quests), `RC`, `SKD`, `NPCS`, `TOWNS`, `ZR`, `MATS`. Functions (e.g. `RC[i].unlock`) become `{ "$fn": "<source>" }`. Also at `window.__G.defs()`. |
-| `world()` | `{ id: 'satisfy', tile: 16, w: 160, h: 144, outdoorH: 120, zones: [...ZR ids], towns: ['zBai','zWin'] }`. Rows `>= outdoorH` hold house interiors. |
+| `world()` | `{ id: 'satisfy', tile: 16, w: 414, h: 144, outdoorH: 120, zones: [...ZR ids], towns: ['zBai','zWin','zPat'] }` (w is the physical width with the wilderness gaps, from `MW`). Rows `>= outdoorH` hold house interiors. |
 | `rooms()` | House interiors: `[{ id: 'r<n>', kind: 'house'|'shop'|'armory'|'inn', zone }]`. Ids are stable for a given map. |
 | `zoneAt(x, y)` | Zone id at a pixel position (`'zWin'`, `'zPlains'`, …). |
 | `roomAt(x, y)` | `{ id, kind, zone }` if the position is inside a house interior, else `null`. |
@@ -67,7 +67,7 @@ new ladder step and `SCHEMA + 1`.
 | `NET_STATES`, `canTransition(a, b)` | Connection state machine (doc §25). |
 | `envelope(type, payload, meta)` | `{ v, type, requestId, sessionId, seq, tick, payload }`, max 2048 bytes. |
 | `ERRORS` | `ZONE_SAFE, CD_ACTIVE, OUT_OF_RANGE, SESSION_STALE, RATE_LIMITED, BAD_MESSAGE` |
-| `SAFE_ZONES`, `zonePolicy(zone)` | `['zBai','zWin']`; `{ zone, safe, pvp:false, duel:false }`. The combat authority will reject PvP actions with `ZONE_SAFE` here. |
+| `SAFE_ZONES`, `zonePolicy(zone)` | `['zBai','zWin','zPat']` (every town); `{ zone, safe, pvp:false, duel:false }`. The combat authority will reject PvP actions with `ZONE_SAFE` here. |
 
 A *room* here is a presence channel (who you can see), not a house interior. House interiors
 are reported in `PlayerPublic.room` so remote players inside a house are only drawn there.
@@ -105,7 +105,7 @@ In the game: `?net=local` turns it on; remote players are drawn only inside the 
 
 Messages `party.invite|accept|decline|kick` carry `{ to: uid, party }`. They go over BroadcastChannel locally, and through `inbox/{to}` in RTDB: only the recipient reads and deletes, a sender can't fake `from`, and messages older than 60 s are dropped. Until Server Authority a party is cosmetic: it gives no shared XP or loot.
 
-In the game, near another player: `P` invites, `Y`/`N` answers, and the party panel sits under the minimap with a Leave button. Party members' names are green. The badge adds `· Safe zone` in Bairan and Winston.
+In the game, near another player: `P` invites, `Y`/`N` answers, and the party panel sits under the minimap with a Leave button. Party members' names are green. The badge adds `· Safe zone` in every town (Bairan, Winston, Patrian).
 
 ## `Satisfy.firebase` (SAT-ONLINE-004)
 
