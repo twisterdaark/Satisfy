@@ -41,11 +41,13 @@
   // PlayerPublic.duel: a duel id from Satisfy.duel and the player's duel HP (0..100)
   var DUEL_RE = /^d_[A-Za-z0-9_-]{1,40}:(100|[1-9]?[0-9])$/;
   var MV_RE = /^[0-9a-f]{8}$/; // PlayerPublic.mv (SAT-ONLINE-019)
+  // PlayerPublic.rs (review #55): a party leader's roster, the uids it accepted, space-separated (at most MAX - 1)
+  var RS_RE = /^[A-Za-z0-9:_.-]{1,128}( [A-Za-z0-9:_.-]{1,128}){0,3}$/;
   var WP_RE = /^[a-z0-9_]{1,16}:[0-9](:[0-9]{1,2})?$/; // PlayerPublic.wp: the weapon in hand, "<item id>:<rating>[:<enhancement>]" (SAT-ONLINE-026)
   // PlayerPublic.fx: the player's own effects of the last moment, replayed by the others (JSON text, game-defined; SAT-ONLINE-026)
   // PlayerPublic.gu: the raised guard, 1..256 (direction and flags, see the game's guPub)
   var FX_MAX = 2400;
-  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 't'];
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
   // S.uid (the local item-instance counter) is private too, but its name collides with the public
   // account `uid`, so it is checked by value in the tests instead of listed here.
@@ -145,6 +147,7 @@
       wp: typeof ctx.wp === 'string' && WP_RE.test(ctx.wp) ? ctx.wp : null,
       fx: typeof ctx.fx === 'string' && ctx.fx.length <= FX_MAX ? ctx.fx : null,
       gu: Number.isInteger(ctx.gu) && ctx.gu >= 1 && ctx.gu <= 256 ? ctx.gu : null,
+      rs: typeof ctx.rs === 'string' && RS_RE.test(ctx.rs) ? ctx.rs : null,
       t: ctx.t || 0,
     };
   }
@@ -181,6 +184,7 @@
     if (o.wp !== undefined && o.wp !== null && !(typeof o.wp === 'string' && WP_RE.test(o.wp))) e.push('wp');
     if (o.fx !== undefined && o.fx !== null && !(typeof o.fx === 'string' && o.fx.length <= FX_MAX)) e.push('fx');
     if (o.gu !== undefined && o.gu !== null && !(Number.isInteger(o.gu) && o.gu >= 1 && o.gu <= 256)) e.push('gu');
+    if (o.rs !== undefined && o.rs !== null && !(typeof o.rs === 'string' && RS_RE.test(o.rs))) e.push('rs');
     return { ok: e.length === 0, errors: e };
   }
 

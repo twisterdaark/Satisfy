@@ -30,6 +30,7 @@
       "$world": {
         ".validate": "$world === 'satisfy'",
         "$shard": {
+          ".validate": "$shard === 'main'",
           ".read": "auth != null",
           ".indexOn": ["x", "party"],
           "$uid": {
@@ -115,6 +116,9 @@
             },
             "t": {
               ".validate": "newData.val() === now"
+            },
+            "rs": {
+              ".validate": "newData.isString() && newData.val().length <= 515 && newData.val().matches(/^[A-Za-z0-9:_.-]+( [A-Za-z0-9:_.-]+){0,3}$/)"
             },
             "$other": {
               ".validate": false

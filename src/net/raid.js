@@ -25,13 +25,16 @@
 (function (root) {
   'use strict';
 
-  var C = Object.freeze({ STATE_MS: 250, HIT_MAX: 1000000, ENC_TTL_MS: 300000 }); // late-game hits pass 5000 (review of #29)
+  // HIT_MAX: late-game hits pass 5000 (review of #29). CONFIRM_MS: a member hands its hits to the host only while the host
+  // has sent raid.state for that boss this recently, i.e. it has that boss alive (SAT-ONLINE-032)
+  var C = Object.freeze({ STATE_MS: 250, HIT_MAX: 1000000, ENC_TTL_MS: 300000, CONFIRM_MS: 1500 });
   var TYPES = ['raid.hit', 'raid.state', 'raid.kill'];
 
   function create(o) {
     var P = o.presence, party = o.party, self = o.uid, L = o.local, now = o.now || function () { return Date.now(); };
     var encs = new Map();   // host: boss key -> {enc, hitters:Set, dirty, sent, t}
     var seq = 0, listeners = [];
+    var conf = new Map();   // member: boss key -> when the host last sent its HP
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function inParty() { return !!(party.id() && party.members().length >= 2); }
@@ -70,6 +73,7 @@
           if (!isMember() || from.uid !== party.leader()) return;
           var hp = +pl.k, max = +pl.n;
           if (!(max > 0) || !(hp >= 0)) return;
+          conf.set(pl.raid, now());
           if (L.boss(pl.raid)) L.setHp(pl.raid, Math.max(0, Math.min(1, hp / max)));
           break;
         }
@@ -98,7 +102,10 @@
       hit: function (key, k) {
         if (isMember()) {
           P.send('raid.hit', { to: party.leader(), raid: key, k: Math.max(1, Math.min(C.HIT_MAX, Math.round(k))), n: ++seq });
-          return true;
+          // Until the host confirms it has this boss (raid.state), the hit lands on our own copy too: a tower or trial
+          // boss only we have, or one the host killed solo and is waiting to respawn, is fought locally (review #29).
+          // The host's next raid.state replaces our copy's HP with the shared one.
+          return conf.has(key) && now() - conf.get(key) < C.CONFIRM_MS;
         }
         if (isHost()) { var e = enc(key); e.hitters.add(self); e.dirty = true; }
         return false;

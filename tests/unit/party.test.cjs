@@ -21,7 +21,7 @@ function world(n) {
   const sync = () => {
     for (const p of players) {
       const pp = SN.net.toPlayerPublic({ look: { n: p.name }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 },
-        { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id() });
+        { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id(), rs: p.party.roster() });
       p.pres.publish(pp, true);
     }
     for (const p of players) { p.pres.tick(); p.party.tick(); }
@@ -163,7 +163,7 @@ test('SAT-ONLINE-023 rejoin: a member who reloads is invited back and accepts by
   let a = mk('u0', sa, 0), b = mk('u1', sb, 0);
   const players = () => [a, b];
   const sync = () => {
-    for (const p of players()) p.pres.publish(SN.net.toPlayerPublic({ look: { n: p.name }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 }, { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id() }), true);
+    for (const p of players()) p.pres.publish(SN.net.toPlayerPublic({ look: { n: p.name }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 }, { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id(), rs: p.party.roster() }), true);
     for (const p of players()) { p.pres.tick(); p.party.tick(); }
   };
   const advance = (ms) => { for (let k = 0; k < ms; k += 100) { t += 100; clock += 100; sync(); } };
@@ -229,7 +229,7 @@ test('SAT-ONLINE-024 leader election: the remaining members agree on the lowest 
     return live[uid];
   };
   const sync = () => {
-    for (const p of Object.values(live)) p.pres.publish(SN.net.toPlayerPublic({ look: { n: p.uid }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 }, { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id() }), true);
+    for (const p of Object.values(live)) p.pres.publish(SN.net.toPlayerPublic({ look: { n: p.uid }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 }, { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id(), rs: p.party.roster() }), true);
     for (const p of Object.values(live)) { p.pres.tick(); p.party.tick(); }
   };
   const advance = (ms) => { for (let k = 0; k < ms; k += 100) { t += 100; clock += 100; sync(); } };
@@ -282,7 +282,7 @@ test('SAT-ONLINE-024: members whose clocks differ still agree (one elects first 
     return { uid, pres, now, party: SN.party.create({ presence: pres, uid, now }) };
   };
   const all = { u0: mk('u0'), u1: mk('u1'), u2: mk('u2') };
-  const pub = (p) => p.pres.publish(SN.net.toPlayerPublic({ look: { n: p.uid }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 }, { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id() }), true);
+  const pub = (p) => p.pres.publish(SN.net.toPlayerPublic({ look: { n: p.uid }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 }, { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.party.id(), rs: p.party.roster() }), true);
   const step = (uids, ms) => { for (let k = 0; k < ms; k += 100) { for (const u of uids) { clocks[u] += 100; pub(all[u]); } for (const u of uids) { all[u].pres.tick(); all[u].party.tick(); } } };
   step(['u0', 'u1', 'u2'], 300);
   const [a, b, c] = [all.u0, all.u1, all.u2];
@@ -302,4 +302,49 @@ test('SAT-ONLINE-024: members whose clocks differ still agree (one elects first 
   step(['u1', 'u2'], 1000);
   assert.deepEqual(b.party.members().map((m) => m.uid), ['u1', 'u2']);
   assert.equal(c.party.leader(), 'u1');
+});
+
+// review fix (#55)
+test('election: only the leader\'s roster votes; a stranger who claims the party id neither votes nor wins', () => {
+  const hub = SN.transports.hub();
+  let t = 1000; const now = () => t;
+  const live = {};
+  const mk = (uid) => {
+    const pres = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net, uid, sid: 'sess' + uid + 'xxxxxxxx' });
+    return (live[uid] = { uid, pres, party: SN.party.create({ presence: pres, uid, now }), fake: null });
+  };
+  const sync = () => {
+    for (const p of Object.values(live)) p.pres.publish(SN.net.toPlayerPublic({ look: { n: p.uid }, cls: 'novice', lv: 2, title: '' }, { x: 2024, y: 1354, dir: 0 }, { zone: 'zWin', uid: p.uid, sid: p.pres.sid, party: p.fake || p.party.id(), rs: p.party.roster() }), true);
+    for (const p of Object.values(live)) { p.pres.tick(); p.party.tick(); }
+  };
+  const advance = (ms) => { for (let k = 0; k < ms; k += 100) { t += 100; sync(); } };
+  const lead = mk('u5'), b = mk('u7'), c = mk('u8'), x = mk('u1');
+  sync();
+  for (const m of [b, c]) { lead.party.invite(lead.pres.remotes().find((r) => r.uid === m.uid)); m.party.accept('p_u5'); }
+  advance(300);
+  assert.equal(lead.party.roster(), 'u7 u8');
+  assert.deepEqual(b.party.follow(), ['p_u5', 'p_u7', 'p_u8'], 'a member follows every id the party could move to');
+  x.fake = 'p_u5'; // the stranger writes the party id into its own presence
+  advance(300);
+  lead.pres.close(); delete live.u5;
+  advance(SN.party.LEAD_MS + 3000);
+  assert.equal(b.party.id(), 'p_u7', 'u7 leads, not the stranger u1 (its uid sorts lower)');
+  assert.equal(c.party.id(), 'p_u7');
+  assert.equal(c.party.leader(), 'u7');
+  assert.equal(b.party.roster(), 'u8');
+});
+
+test('election: a mate out of sight for a moment still counts', () => {
+  const w = world(3), [a, b, c] = w.players;
+  for (const m of [b, c]) { a.party.invite(w.remote(a, m)); m.party.accept('p_u0'); }
+  w.sync(); w.sync();
+  a.pres.close(); w.players.splice(0, 1);
+  const hide = w.players.indexOf(c);
+  w.players.splice(hide, 1);                      // c's presence stops for a while (a blip)
+  for (let k = 0; k < 60; k++) w.advance(100);    // 6 s: past GRACE_MS, alone as far as b can see
+  assert.equal(b.party.id(), 'p_u0', 'b does not dissolve while c may come back');
+  w.players.push(c);
+  for (let k = 0; k < (SN.party.LEAD_MS / 100) + 20; k++) w.advance(100);
+  assert.equal(b.party.id(), 'p_u1');
+  assert.equal(c.party.id(), 'p_u1');
 });

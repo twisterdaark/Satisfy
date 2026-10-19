@@ -3765,7 +3765,7 @@ let last=performance.now(),hudT=0,saveT=0;
 const ERRS=new Set();
 function gameErr(e,m){if(m){m.st=null;m.tele=0;m.combo=0;m.flee=0;}const k=String(e&&e.message||e);if(ERRS.has(k))return;ERRS.add(k);console.error(e);try{logMsg('ERR '+k+' '+String(e&&e.stack||'').split('\n')[1]);toast(t('gameErr',{e:k.slice(0,90)}),'warn');}catch(_){}}
 let loopAt=0;
-function loop(now){requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{update(dt);}catch(e){gameErr(e);}if(NET)try{netTick();}catch(e){gameErr(e);}if(TOUCH)touchTick();try{render(dt);}catch(e){gameErr(e);}
+function loop(now){requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{update(dt);}catch(e){gameErr(e);}if(NET)try{netTick();}catch(e){gameErr(e);}if(TOUCH)try{touchTick();}catch(e){gameErr(e);}try{render(dt);}catch(e){gameErr(e);}
  if(mode==='play')updateKeys();
  if(mode==='create')drawPrev();if(DL&&DL.pv)drawDPrev();
  if(mode==='map'&&(gTime*2|0)!==(Math.max(0,gTime-dt)*2|0))drawMap();
@@ -3782,7 +3782,7 @@ window.__G={get CARD(){return CARD},get SM(){return SM},get allies(){return alli
 // Read-only engine surface for the online layer and for content tests. Contract: docs/api/ENGINE_API.md
 const plain=o=>JSON.parse(JSON.stringify(o,(k,v)=>typeof v==='function'?{$fn:String(v)}:v));
 Satisfy.local=Object.freeze({api:1,
- defs:()=>plain({MT,BOSSES,SPAWN,QD:Object.fromEntries(Object.entries(QD).filter(([,q])=>!q.gen)),RC,SKD,NPCS,TOWNS,ZR,MATS:Object.keys(S.mats)}),
+ defs:()=>plain({MT,BOSSES,SPAWN,QD:Object.fromEntries(Object.entries(QD).filter(([,q])=>!q.gen)),RC,SKD,NPCS,TOWNS,ZR,MATS:S?Object.keys(S.mats||{}):[]}),
  world:()=>({id:Satisfy.net.WORLD_ID,tile:TS,w:MW,h:MH,north:NR,outdoorH:WMH,zones:ZR.map(z=>z[0]),towns:TOWNS.map(z=>z.k)}),
  rooms:()=>ROOMS.map(R=>({id:R.id,kind:R.kind,zone:R.z})),
  zoneAt:(x,y)=>netZone(x,y), // 'void' where the world defines nothing (SAT-ONLINE-019)
@@ -3846,7 +3846,7 @@ function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(r.mv===map
  if(!netOtherV.has(r.sid)){netOtherV.add(r.sid);toast(t('netOtherV',{n:r.handle||'?'}),'warn');updBanner();}return false;}
 Object.assign(STR.ar,{netOtherV:'{n} قريب منك بس على نسخة تانية من اللعبة: اعملوا الاتنين ريفريش عشان تشوفوا بعض'});
 Object.assign(STR.en,{netOtherV:'{n} is nearby on a different version of the game: reload both pages to see each other'});
-function netWatch(){const id=(PARTY&&PARTY.id())||null;if(NETTR.wsig!==id){NETTR.wsig=id;NETTR.party(id);}}
+function netWatch(){const ids=PARTY?PARTY.follow():[],w=ids.join(' ');if(NETTR.wsig!==w){NETTR.wsig=w;NETTR.party(ids);}} // party.follow(): review #55
 function netTick(){NET.tick();const live=netLive();
  if(PARTY)PARTY.tick();
  if(NETTR&&NETTR.party)netWatch();
@@ -3854,7 +3854,7 @@ function netTick(){NET.tick();const live=netLive();
  if(PRAID)PRAID.tick();
  mobTick(live);
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
- if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,duel:duelPublic()}),netForce);netForce=false;}
+ if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,duel:duelPublic()}),netForce);netForce=false;}
  partyUI(live);chatUI(live);pctxUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
  const netSafe=live&&Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
@@ -4138,7 +4138,8 @@ function duelTick(live){DUEL.tick();const st=DUEL.state();
 Object.assign(STR.ar,{raidKill:'الفريق قتل الزعيم! نصيبك وصلك'});
 Object.assign(STR.en,{raidKill:'Your party killed the boss! Your share is yours'});
 const praidKey=m=>m.type+'@'+(m.sx|0)+','+(m.sy|0);
-function praidBoss(key){return mons.find(m=>!m.dead&&MT[m.type].boss&&praidKey(m)===key)||null;}
+const praidShared=m=>!!MT[m.type].boss&&!m.tmp&&!m.arena&&!m.evt&&!m.sg; // world bosses only: tower/trial/arena/event/siege ones live on one client (#29)
+function praidBoss(key){return mons.find(m=>!m.dead&&praidShared(m)&&praidKey(m)===key)||null;}
 function praidStart(){PRAID=Satisfy.raid.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),local:{
  boss:k=>{const m=praidBoss(k);return m?{hp:m.hp,max:m.max}:null;},
  setHp:(k,r)=>{const m=praidBoss(k);if(m)m.hp=Math.max(1,Math.round(m.max*r));},
@@ -4149,7 +4150,7 @@ function praidStart(){PRAID=Satisfy.raid.create({presence:NET,party:PARTY,uid:NE
  PRAID.on(e=>{if(e.type==='killed'){toast(t('raidKill'),'good');SFX.quest();}});}
 // hitMon(): true when a party member's hit was handed to the leader (the local copy keeps its HP)
 // every damage source on a boss goes through here: the player's hits, companions and NPC allies (review of #29)
-function praidHit(m,dmg){if(!MT[m.type].boss)return false;if(PRAID.hit(praidKey(m),dmg)){m.hp+=dmg;return true;}return false;}
+function praidHit(m,dmg){if(!praidShared(m))return false;if(PRAID.hit(praidKey(m),dmg)){m.hp+=dmg;return true;}return false;}
 /* shared monsters (SAT-ONLINE-026, owner feedback 8). Every client spawns the same monsters at the same spots (spawnWorld is
    seeded). In each zone the host is the lowest uid among the players there who see each other: its copies move and fight,
    and 4 times a second it writes the ones near any of those players to mobs/{world}/{zone}/{its uid} as

@@ -53,7 +53,7 @@
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
 
-  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'seq', 't'];
+  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'seq', 't'];
   const POS_X = 16384, POS_Y = 4096, POS_Y0 = -2048; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
   function rules(p, v, existing) {
@@ -74,7 +74,7 @@
       if (Object.keys(v).sort().join(',') !== 'sid,t' || typeof v.sid !== 'string' || v.sid.length < 8 || v.sid.length > 64) return 'session fields';
       return JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'session t';
     }
-    if (seg.length !== 4 || seg[0] !== 'presence' || seg[1] !== 'satisfy') return 'PERMISSION_DENIED: path ' + p;
+    if (seg.length !== 4 || seg[0] !== 'presence' || seg[1] !== 'satisfy' || seg[2] !== 'main') return 'PERMISSION_DENIED: path ' + p;
     if (!user || seg[3] !== user.uid) return 'PERMISSION_DENIED: not your node';
     if (v === null) return null;
     for (const k in v) if (!FIELDS.includes(k)) return 'invalid field ' + k;
@@ -96,6 +96,7 @@
     if ('hp' in v && !(typeof v.hp === 'number' && v.hp >= 0 && v.hp <= 100)) return 'hp';
     if ('em' in v && !/^(wave|dance|point|cheer)$/.test(v.em)) return 'em';
     if ('role' in v && !/^(tank|healer|damage|support)$/.test(v.role)) return 'role';
+    if ('rs' in v && !(typeof v.rs === 'string' && v.rs.length <= 515 && /^[A-Za-z0-9:_.-]+( [A-Za-z0-9:_.-]+){0,3}$/.test(v.rs))) return 'rs';
     if ('wp' in v && !/^[a-z0-9_]{1,16}:[0-9](:[0-9]{1,2})?$/.test(v.wp)) return 'wp';
     if ('fx' in v && !(typeof v.fx === 'string' && v.fx.length <= 2400)) return 'fx';
     if ('gu' in v && !(Number.isInteger(v.gu) && v.gu >= 1 && v.gu <= 256)) return 'gu';
