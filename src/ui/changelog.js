@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20c', ver: '0.47', d: '2026-10-20',
+      ar: ['أونلاين: تراوكا التنين الأحمر واحد في العالم كله: لما حد يقتله بيفضل ميت نص ساعة عند كل اللاعبين، حتى اللي ماكانوش موجودين'],
+      en: ['Online: Trauka the Red Dragon is one for the whole world: once someone kills it, it stays dead for half an hour for every player, even those who were not there'] },
     { v: '2026-10-20b', ver: '0.46', d: '2026-10-20',
       ar: ['أونلاين: ترتيب اللفل والفلوس عند موظف الترتيب في رينهارت بقى فيه اللاعبين الحقيقيين جنب أبطال الرواية'],
       en: ['Online: the level and wealth rankings at the clerk in Reinhardt now list the real players among the heroes of the novel'] },

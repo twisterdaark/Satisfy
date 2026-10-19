@@ -606,6 +606,17 @@
             "$other": { ".validate": false }
           }
         },
+        "wb": {
+          ".read": "auth != null",
+          "$type": {
+            ".write": "auth != null && (!data.exists() || data.child('at').val() < now)",
+            ".validate": "$type.matches(/^[a-z0-9_]{1,16}$/) && newData.hasChildren(['at', 'by', 't'])",
+            "at": { ".validate": "newData.isNumber() && newData.val() > now && newData.val() <= now + 7200000" },
+            "by": { ".validate": "newData.val() === auth.uid" },
+            "t": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        },
         "$other": { ".validate": false }
       }
     },

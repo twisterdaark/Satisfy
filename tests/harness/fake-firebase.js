@@ -52,7 +52,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|drops|dropClaims|kills|bounties|bountyPaid|arena|ranks|world\/satisfy\/legends)\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|drops|dropClaims|kills|bounties|bountyPaid|arena|ranks|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -270,9 +270,18 @@
     if (v === null) return null;
     return Object.keys(v).sort().join(',') === 'n,t,v' && isInt(v.v, 0) && v.v <= 1e12 && typeof v.n === 'string' && v.n.length >= 1 && v.n.length <= 24 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'ranks fields';
   }
+  // SAT-ONLINE-056: world/satisfy/wb/{type} {at, by, t}: a world boss's respawn time, set by its killer, once per kill
+  function wbRules(seg, v) {
+    if (!user || seg.length !== 4 || seg[1] !== 'satisfy' || seg[2] !== 'wb' || !/^[a-z0-9_]{1,16}$/.test(seg[3])) return 'PERMISSION_DENIED: ' + seg.join('/');
+    const old = data.get(seg.join('/')), now = Date.now();
+    if (old && !(old.at < now)) return 'PERMISSION_DENIED: wb running';
+    if (v === null) return 'PERMISSION_DENIED: wb remove';
+    return Object.keys(v).sort().join(',') === 'at,by,t' && typeof v.at === 'number' && v.at > now && v.at <= now + 7200000 && v.by === user.uid && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'wb fields';
+  }
   function rules(p, v, existing) {
     const seg = p.split('/');
     if (seg[0] === 'arena') return arenaRules(seg, v);
+    if (seg[0] === 'world' && seg[2] === 'wb') return wbRules(seg, v);
     if (seg[0] === 'world') return worldRules(seg, v);
     if (seg[0] === 'ranks') return rankRules(seg, v);
     if (['guilds', 'guildNames', 'guildMembers', 'guildInv', 'guildChat', 'guildVault', 'guildVaultTaken'].includes(seg[0])) return guildRules(seg, v);
@@ -527,7 +536,7 @@
         const seg = r.path.split('/');
         const tm = (seg[0] === 'tradeSides' && seg.length === 3) || (seg[0] === 'tradeDone' && seg.length === 2) ? tradeMeta(seg[1]) : null;
         const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : seg[0] === 'guildVault' && seg.length === 2 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
-        const ok = gl !== null ? gl : r.path === 'bounties' ? !!user : seg[0] === 'sessions' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends') && !!user;
+        const ok = gl !== null ? gl : r.path === 'bounties' ? !!user : seg[0] === 'sessions' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);

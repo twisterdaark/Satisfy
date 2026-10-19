@@ -1304,7 +1304,26 @@ let auT=0;function updateAuction(dt){if((auT-=dt)<=0){auT=5;auTick();}}
 // A world boss on the peak north of Reinhardt. It breathes fire in a cone it telegraphs first, slams the ground, and once
 // killed stays dead for half an hour; that time lives in the shared world state (WS.wb) so every player sees the same
 // dragon. Online the server owns its health so everyone who joins the fight hits the same dragon.
-function dragonDown(m){WS.wb=WS.wb||{};WS.wb.trauka=Date.now()+MT.trauka.wb*1000;giveTitle('dslayer');setTimeout(()=>annW('drDown'),500);save(true);}
+function dragonDown(m){WS.wb=WS.wb||{};WS.wb.trauka=Date.now()+MT.trauka.wb*1000;wbPut('trauka');giveTitle('dslayer');setTimeout(()=>annW('drDown'),500);save(true);}
+/* SAT-ONLINE-056: online the dragon's half hour is world/satisfy/wb/{type} {at, by, t} (server time), written once per kill
+   by whoever killed it: everyone's WS.wb follows it, and a player who wasn't there finds the dragon dead too (it was only
+   on the screens of those in the fight). */
+let WBS=null,wbOff=null;
+function wbOnline(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET);}
+function wbOffs(){return NETTR&&NETTR.serverOffset?NETTR.serverOffset():0;}
+function wbPut(type){if(!wbOnline()||!MT[type]||!MT[type].wb)return;const D=FB.m.database,u={};u['world/satisfy/wb/'+type]={at:Math.round(Date.now()+wbOffs()+MT[type].wb*1000),by:NET.uid,t:D.serverTimestamp()};D.update(D.ref(FB.db),u).catch(()=>{});}
+function wbSub(){if(wbOff||!wbOnline())return;const D=FB.m.database;if(!D.onValue){wbOff=1;return;}
+ try{wbOff=D.onValue(D.ref(FB.db,'world/satisfy/wb'),s=>{WBS=s.val()||{};wbApply();},()=>{WBS=null;});}catch(e){wbOff=1;}}
+/* a live one is put down quietly only off screen: near you, the fight's own sync ends it (with its rewards); a dead one
+   keeps its corpse until the shared time instead of the 25 s a follower's copy waits */
+function wbApply(){if(!WBS||!WS||!S||S.__demo)return false;WS.wb=WS.wb||{};const now=Date.now();let run=false;
+ for(const type in WBS){const v=WBS[type];if(!v||typeof v.at!=='number'||!MT[type])continue;const at=v.at-wbOffs();if(at<=now)continue;run=true;
+  if(!(WS.wb[type]>=at-2000))WS.wb[type]=at;const r=(at-now)/1000;
+  for(const m of mons){if(m.type!==type)continue;if(!m.dead){if(Math.hypot(m.x-P.x,m.y-P.y)>360){m.dead=true;m.dying=0;m.rt=r;}}else if(m.rt<r-2)m.rt=r;}}
+ return run;}
+let wbW=null,wbT=0;
+function wbTick(){if(!wbOff&&wbOnline())wbSub();if(!WBS)return;const n=performance.now();if(wbW!==WS||n-wbT>2000){wbW=WS;wbT=n;if(!wbApply())wbT=n+1e4;}}
+window.__GB2={get data(){return WBS},apply:wbApply,put:wbPut,kill:m=>killMon(m),fb:()=>FB}; // tests
 function updateDragon(dt){const m=mons.find(m=>m.type==='trauka');if(!m||m.dead||mode==='dead')return;
  // SAT-ONLINE-045: online the host times and aims the breath (at the player the dragon is after) and sends it as an
  // action; a follower only plays the breath it was sent, and each screen burns its own player if it stands in the cone
@@ -4350,6 +4369,7 @@ function netTick(){NET.tick();const live=netLive();
  if(TRADE)TRADE.tick();
  legTick();
  rankTick(live);
+ wbTick();
  if(GUILD)guildTick();
  if(PRAID)PRAID.tick();
  mobTick(live);

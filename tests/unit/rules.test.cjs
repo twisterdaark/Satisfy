@@ -263,6 +263,15 @@ test('rankings (SAT-ONLINE-055): each player writes only its own level and gold;
   assert.equal(r.$uid.$other['.validate'], false);
 });
 
+test('world boss timers (SAT-ONLINE-056): set once per kill by its killer, at most two hours ahead', () => {
+  const w = rules.world.$world.wb, k = w.$type;
+  assert.equal(w['.read'], 'auth != null');
+  assert.equal(k['.write'], "auth != null && (!data.exists() || data.child('at').val() < now)", 'a running timer is not replaced');
+  assert.match(k.at['.validate'], /newData\.val\(\) > now && newData\.val\(\) <= now \+ 7200000/);
+  assert.equal(k.by['.validate'], 'newData.val() === auth.uid');
+  assert.equal(k.$other['.validate'], false);
+});
+
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing
 // else here parses the expressions. Merging two rules files by hand once lost one; check every expression before a deploy.
 function exprProblem(e) {
