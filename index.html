@@ -1560,7 +1560,7 @@ function achTick(dt){if(!S||!P||(achT-=dt)>0)return;achT=2;S.peak=pk();const A=S
 // canon guilds attack a player-held castle and win it if their knights still stand inside when the siege ends.
 const SIEGP=2*3600*1000,SIEGO=3600*1000,SIEGL=20*60*1000,SCAPT=20;
 let SG=null,SGF=0,sgT=0;
-function siegeNow(){const n=Date.now();if(SGF)return SGF>n?{slot:'f',end:SGF}:null;const o=n-SIEGO,sl=Math.floor(o/SIEGP);return o-sl*SIEGP<SIEGL?{slot:sl,end:sl*SIEGP+SIEGO+SIEGL}:null;}
+function siegeNow(){const n=wNow();if(SGF)return SGF>n?{slot:'f',end:SGF}:null;const o=n-SIEGO,sl=Math.floor(o/SIEGP);return o-sl*SIEGP<SIEGL?{slot:sl,end:sl*SIEGP+SIEGO+SIEGL}:null;}
 function siegeNext(){const o=Date.now()-SIEGO;return Math.max(1,Math.ceil(((Math.floor(o/SIEGP)+1)*SIEGP-o)/60000));}
 const throneP=()=>SHRINES.find(o=>o.k==='sthrone');
 const inCastle=m=>m.x>=CAST.x0*TS&&m.x<(CAST.x1+1)*TS&&m.y>=CAST.y0*TS&&m.y<(CAST.y1+1)*TS;
@@ -1594,11 +1594,14 @@ function throneAct(){const o=WS.castle,gn=o.own?gName(o.own):t('gNone');
 // 10 minutes. Every player (and later the server, from its own clock) agrees on what is happening without any message.
 // Invasions and the field boss spawn near whoever is there; online the server spawns them once for everyone.
 const EVS=15*60*1000,EVLEN=10*60*1000;
+// world time (owner report: the invasion showed a different event, clock and wave to each player): online it is the
+// server's clock, so the event, its countdown and its waves are the same for everyone; offline it is this device's
+const wNow=()=>Date.now()+(NETTR&&NETTR.serverOffset?NETTR.serverOffset()||0:0);
 const EVT=[{k:'invW',x:179,y:83,tw:'zWin',mob:['goblin','cgob','gshaman','boar','outlaw','wolf']},{k:'gold'},{k:'invP',x:356,y:83,tw:'zPat',mob:['deserter','hwolf','outlaw','forc','bear','kobold']},{k:'fboss',x:150,y:14},{k:'fishf'},{k:'invR',x:507,y:83,tw:'zReid',mob:['kobold','rboar','kraider','kshaman','gbear','skel']},{k:'guildw'},{k:'invK',x:654,y:83,tw:'zRein',mob:['lizard','gsold','wraith','cultist','golem','demon']}];
-let EV=null,EVF=null,evT=0,evDone=null;const EVW=6;
-function evNow(){if(EVF)return EVF.until>Date.now()?{e:EVF.e,slot:'f'+EVF.e.k,end:EVF.until}:null;const n=Date.now(),slot=Math.floor(n/EVS);if(n-slot*EVS>=EVLEN)return null;return {e:EVT[((slot*2654435761)>>>0)%EVT.length],slot,end:slot*EVS+EVLEN};}
+let EV=null,EVF=null,evT=0,evDone=null;const EVW=6,EVWG=30000;
+function evNow(){if(EVF)return EVF.until>Date.now()?{e:EVF.e,slot:'f'+EVF.e.k,end:EVF.until}:null;const n=wNow(),slot=Math.floor(n/EVS);if(n-slot*EVS>=EVLEN)return null;return {e:EVT[((slot*2654435761)>>>0)%EVT.length],slot,end:slot*EVS+EVLEN};}
 const evOn=k=>!!(EV&&EV.e.k===k);
-function evSpawn(type,x,y){if(solidT(x/TS|0,y/TS|0)){let best=null;for(let r=1;r<=6&&!best;r++)for(let dy=-r;dy<=r&&!best;dy++)for(let dx=-r;dx<=r;dx++){const tx=(x/TS|0)+dx,ty=(y/TS|0)+dy;if(!solidT(tx,ty)){best=[tx*TS+8,ty*TS+8];break;}}if(best)[x,y]=best;} // never inside a wall (owner report)
+function evSpawn(type,x,y,gen){const so=gen?sol0:solidT;if(so(x/TS|0,y/TS|0)){let best=null;for(let r=1;r<=6&&!best;r++)for(let dy=-r;dy<=r&&!best;dy++)for(let dx=-r;dx<=r;dx++){const tx=(x/TS|0)+dx,ty=(y/TS|0)+dy;if(!so(tx,ty)){best=[tx*TS+8,ty*TS+8];break;}}if(best)[x,y]=best;} // never inside a wall (owner report)
  const m=newMon(type,x,y);m.tmp=1;m.eng=4;m.agg=1;m.evt=1;mons.push(m);vfx('spawn',x,y,{color:'#ff7a5a'});return m;}
 // Invasions: the monsters come from all four sides of the town at once, at the level of the land around it (read from the
 // wild monsters living there), march in through the gates and beat up the townsfolk they find. Every wave is bigger than
@@ -1608,11 +1611,11 @@ const NPCHP=100,npcKO=id=>!!(WS&&WS.nko&&WS.nko[id]>Date.now());
 function evRef(T){const cx=T.rx*TS+8,cy=T.ry*TS+8,ms=mons.filter(m=>!m.tmp&&!m.evt&&!MT[m.type].boss&&Math.hypot(m.x-cx,m.y-cy)<760).sort((a,b)=>a.lv-b.lv);
  if(!ms.length)return {lv:10,hp:600,dmg:60,xp:50};const med=ms[ms.length>>1].lv,near=ms.filter(m=>Math.abs(m.lv-med)<=Math.max(6,med*.3)),av=f=>near.reduce((a,m)=>a+f(m),0)/near.length;
  return {lv:Math.round(med),hp:av(m=>m.max),dmg:av(m=>MT[m.type].dmg),xp:av(m=>MT[m.type].xp)};}
-function evGates(T){return [[T.x0-4,T.ry-1.5],[T.x1+4,T.ry-1.5],[T.rx,T.y0-4],[T.rx,T.y1+4]].map(([x,y])=>{for(let r=0;r<8;r++)for(let k=0;k<10;k++){const tx=Math.round(x+(rand()-.5)*r*2),ty=Math.round(y+(rand()-.5)*r*2);if(!solidT(tx,ty)&&!inTown(tx*TS+8,ty*TS+8))return {x:tx*TS+8,y:ty*TS+8};}return null;}).filter(Boolean);}
+function evGates(T,rnd=rand){return [[T.x0-4,T.ry-1.5],[T.x1+4,T.ry-1.5],[T.rx,T.y0-4],[T.rx,T.y1+4]].map(([x,y])=>{for(let r=0;r<8;r++)for(let k=0;k<10;k++){const tx=Math.round(x+(rnd()-.5)*r*2),ty=Math.round(y+(rnd()-.5)*r*2);if(!sol0(tx,ty)&&!inTown(tx*TS+8,ty*TS+8))return {x:tx*TS+8,y:ty*TS+8};}return null;}).filter(Boolean);}
 // every kind is rebuilt from the area's reference stats, so any monster can join any town's invasion at the right strength;
 // some are elites (double health, harder hits) and they grow with each wave
-function invSpawn(type,g,T,cap){const E=EV,R=E.ref,b=MT[type],m=evSpawn(type,g.x+(rand()-.5)*20,g.y+(rand()-.5)*20),w=E.wave,el=!cap&&rand()<.15+w*.01;
- m.lv=R.lv+4+(rand()*4|0)+Math.floor(w/2)+(cap?6:el?2:0);m.hp=m.max=Math.round(R.hp*(2.6+w*.12)*(cap?4:el?2:1));m.dmul=R.dmg*(2+w*.08)*(cap?1.5:el?1.3:1)/b.dmg;m.xmul=R.xp*1.6*(cap?5:el?2.5:1)/b.xp;if(el){m.elite=1;vfx('rage',m.x,m.y);}
+function invSpawn(type,g,T,cap,rnd=rand){const E=EV,R=E.ref,b=MT[type],m=evSpawn(type,g.x+(rnd()-.5)*20,g.y+(rnd()-.5)*20,1),w=E.wave,el=!cap&&rnd()<.15+w*.01;m.ek=1; // ek: the same monster on every client, shared like the wild ones
+ m.lv=R.lv+4+(rnd()*4|0)+Math.floor(w/2)+(cap?6:el?2:0);m.hp=m.max=Math.round(R.hp*(2.6+w*.12)*(cap?4:el?2:1));m.dmul=R.dmg*(2+w*.08)*(cap?1.5:el?1.3:1)/b.dmg;m.xmul=R.xp*1.6*(cap?5:el?2.5:1)/b.xp;if(el){m.elite=1;vfx('rage',m.x,m.y);}
  m.goal={x:T.rx*TS+8,y:T.ry*TS+8};m.tw=T.k;if(cap){m.cap=1;vfx('rage',m.x,m.y);}E.mons.push(m);return m;}
 function invMarch(m,b,mr,dt){const T=TOWNS.find(T=>T.k===m.tw);
  if(inTown(m.x,m.y)){m.ntT=(m.ntT||0)-dt;if(!m.nt||m.nt.hidden||npcKO(m.nt.id)||m.ntT<=0){m.ntT=2;m.nt=null;let bd=170;for(const n of npcs){if(n.hidden||n.obj||n.y>=WMH*TS||npcKO(n.id))continue;const dd=Math.hypot(n.x-m.x,n.y-m.y);if(dd<bd){bd=dd;m.nt=n;}}}
@@ -1646,12 +1649,15 @@ function endEvent(){const E=EV;EV=null;evDone=E.slot;mons=mons.filter(m=>!(m.evt
  toast(t('evOver',{e:t('evN_'+E.e.k)}));hudDirty=true;save(true);}
 function updateEvents(dt){if(!S||!P)return;const n=evNow();
  if(EV&&(!n||n.slot!==EV.slot))endEvent();if(!EV&&n&&n.slot!==evDone)startEvent(n);
- if((evT-=dt)<=0){evT=1;const b=$('evbar');if(!EV){b.hidden=true;}else{const left=Math.max(0,EV.end-Date.now()),mm=Math.floor(left/60000),ss=String(Math.floor(left/1000)%60).padStart(2,'0');b.hidden=false;b.innerHTML=`<b>${esc(t('evN_'+EV.e.k))}</b> · ${mm}:${ss}`+evWhere(EV.e)+(EV.e.tw?` · ${esc(t('evWaveN',{n:EV.wave,m:EVW}))}`:'')+(EV.e.mob||EV.e.k==='fboss'?` · ${esc(t('evKills',{n:EV.kills}))}`:'');}}
+ if((evT-=dt)<=0){evT=1;const b=$('evbar');if(!EV){b.hidden=true;}else{const left=Math.max(0,EV.end-(typeof EV.slot==='number'?wNow():Date.now())),mm=Math.floor(left/60000),ss=String(Math.floor(left/1000)%60).padStart(2,'0');b.hidden=false;b.innerHTML=`<b>${esc(t('evN_'+EV.e.k))}</b> · ${mm}:${ss}`+evWhere(EV.e)+(EV.e.tw?` · ${esc(t('evWaveN',{n:EV.wave,m:EVW}))}`:'')+(EV.e.mob||EV.e.k==='fboss'?` · ${esc(t('evKills',{n:EV.kills}))}`:'');}}
  if(!EV)return;const e=EV.e;npcFight(dt);
  if(e.mob){const T=TOWNS.find(T=>T.k===e.tw);if(T&&Math.hypot(P.x-(T.rx*TS+8),P.y-(T.ry*TS+8))<760){EV.wt=(EV.wt||0)-dt;const alive=EV.mons.filter(m=>!m.dead).length;
   if(EV.wave>=EVW&&!alive&&EV.mons.length){EV.won=1;announce(t('evWon',{z:t(T.k)}));SFX.legendary();endEvent();return;}
-  if(EV.wt<=0&&alive<50&&EV.wave<EVW){EV.wt=EV.wave?16:2;EV.wave++;if(!EV.ref)EV.ref=evRef(T);const gs=evGates(T),n=Math.min(30,5+3*(EV.wave-1)),ml=e.mob;
-   if(gs.length){for(let i=0;i<n;i++)invSpawn(ml[(rand()*ml.length)|0],gs[(i+EV.wave)%gs.length],T,false);if(EV.wave%3===0)invSpawn(ml[ml.length-1],gs[(rand()*gs.length)|0],T,true);}
+  // waves run on world time (one every EVWG from the event's start) and spawn from a seed of the event and the wave, so
+  // every client near the town spawns the same monsters at the same moment; a late arrival joins at the current wave
+  const st=typeof EV.slot==='number'?EV.end-EVLEN:EV.end-(EVF&&EVF.ms||60000),due=Math.min(EVW,Math.max(0,Math.floor(((typeof EV.slot==='number'?wNow():Date.now())-st-2000)/EVWG)+1));
+  if(due>EV.wave&&alive<50){EV.wave=due;if(!EV.ref)EV.ref=evRef(T);const rnd=mulberry32((((typeof EV.slot==='number'?EV.slot:0)*977+EV.wave*131+e.k.length*7)>>>0)||1),gs=evGates(T,rnd),n=Math.min(30,5+3*(EV.wave-1)),ml=e.mob;
+   if(gs.length){for(let i=0;i<n;i++)invSpawn(ml[(rnd()*ml.length)|0],gs[(i+EV.wave)%gs.length],T,false,rnd);if(EV.wave%3===0)invSpawn(ml[ml.length-1],gs[(rnd()*gs.length)|0],T,true,rnd);}
    toast(t(EV.wave===1?'evSiege':'evWave',{n:EV.wave,z:t(T.k),c:n}),'warn');if(EV.wave%3===0)setTimeout(()=>announce(t('evCap')),500);}}}
 
  if(e.k==='fboss'&&!EV.boss){const cx=e.x*TS+8,cy=e.y*TS+8;if(Math.hypot(P.x-cx,P.y-cy)<600){let x=cx,y=cy;for(let r=0;r<10&&solidT(x/TS|0,y/TS|0);r++){x+=16;}EV.boss=evSpawn('warlord',x,y);EV.mons.push(EV.boss);SFX.slam();shake=.4;}}}
@@ -2755,7 +2761,7 @@ function drawShrine(o){const x=Math.round(o.x),y=Math.round(o.y),pul=.5+Math.sin
  R(ctx,x-26,y-34,52,26,'#2a2218');R(ctx,x-24,y-32,48,22,'#5a4a36');ctx.globalAlpha=.55+pul*.3;
  R(ctx,x-2,y-26,3,3,'#f2c14e');R(ctx,x-1,y-23,2,7,'#f2c14e');R(ctx,x-4,y-21,8,1,'#f2c14e');R(ctx,x-3,y-16,2,4,'#f2c14e');R(ctx,x+1,y-16,2,4,'#f2c14e');
  for(let i=0;i<12;i++)R(ctx,x+3+i,y-22-i,1,1,'#fff3c8');for(let i=0;i<8;i++)R(ctx,x-18+i*2,y-14-Math.round(Math.sin(i*.8)*3),1,1,'#bfe8ff');ctx.globalAlpha=1;}
-window.__GU={netHit,farmStart,farmDig,farmMove,getFARM:()=>FARMG,acctStore,getStore:()=>STORE.key,respecOpt,useRespec,save,mapV:()=>[MAPV,mapHash()],GRAVE,CAMPS,lmList,zoneAt,TRC,secOpt,sewStart:id=>sewStart(TRC.find(r=>r.id===id)),mixStart,getSEW:()=>SEWG,getMIX:()=>MIXG,pSpr,SH,setT,at,seeP,enhMenu,ROOMS,buildings,DGATES,loot,TOWNS,npcKO,getMeet:()=>MEET,meetBosses,openStatus,heartsH,gk,FEM,renderTab,setStab:k=>{STAB=k;},buildings,KESAN,petLv,petXP,petB,petFeed,petRest,getPet:()=>PET,buildMe,COS,DYE,styOpts,styList,stySet,cosMenu,cosPick,lookFig,startTower,twL,twNear,towerOpts,getTower:()=>TWR,SETS,setCount,setTier,setBon,wxNow,wxHere,forceWeather:w=>{WXF=w||null;},GEMS,gemMenu,gemPick,dailyList,dlyS,dailyOpts,rankList,rankerOpts,ACH,achTick:()=>{achT=0;achTick(0);},legendReset,mswordAct,becomeSaint,MULL,get SG(){return SG},forceSiege:ms=>{SGF=ms?Date.now()+ms:0;},throneAct,castleTaken,CAST,siegeNext,altarAct,YATAN,auList,auBuy,auCollect,auTick,auMarket,PEAK,dragonDown,get ARN(){return ARN},startArena,arenaLose,toggleRide,dismount,gainMount,buyRide,buyPet,setPet,get PET(){return PET},MOUNTS,PETS,soulAct,becomeBraham,get COMPO(){return COMPO},setComp,COMPS,killMon,get EV(){return EV},forceEvent:(k,ms)=>{evDone=null;EVF=k?{e:EVT.find(e=>e.k===k),until:Date.now()+(ms||60000)}:null;},evNow,EVT,CAMPS,get FISH(){return FISH},startFish,fishAct,nearWater,campMenu,makeLife,eatDish,lifeLv,pickHerb,SHRINES,shrineAct,becomePagma,get WS(){return WS},get RAID(){return RAID},set RAID(v){RAID=v},TERR,TW,createGuild,joinGuild,leaveGuild,bannerAct,captureT,guildPanel,updateTerr,swampAt,REIN,gXPB,gGoldB,ownsT};
+window.__GU={netHit,farmStart,farmDig,farmMove,getFARM:()=>FARMG,acctStore,getStore:()=>STORE.key,respecOpt,useRespec,save,mapV:()=>[MAPV,mapHash()],GRAVE,CAMPS,lmList,zoneAt,TRC,secOpt,sewStart:id=>sewStart(TRC.find(r=>r.id===id)),mixStart,getSEW:()=>SEWG,getMIX:()=>MIXG,pSpr,SH,setT,at,seeP,enhMenu,ROOMS,buildings,DGATES,loot,TOWNS,npcKO,getMeet:()=>MEET,meetBosses,openStatus,heartsH,gk,FEM,renderTab,setStab:k=>{STAB=k;},buildings,KESAN,petLv,petXP,petB,petFeed,petRest,getPet:()=>PET,buildMe,COS,DYE,styOpts,styList,stySet,cosMenu,cosPick,lookFig,startTower,twL,twNear,towerOpts,getTower:()=>TWR,SETS,setCount,setTier,setBon,wxNow,wxHere,forceWeather:w=>{WXF=w||null;},GEMS,gemMenu,gemPick,dailyList,dlyS,dailyOpts,rankList,rankerOpts,ACH,achTick:()=>{achT=0;achTick(0);},legendReset,mswordAct,becomeSaint,MULL,get SG(){return SG},forceSiege:ms=>{SGF=ms?Date.now()+ms:0;},throneAct,castleTaken,CAST,siegeNext,altarAct,YATAN,auList,auBuy,auCollect,auTick,auMarket,PEAK,dragonDown,get ARN(){return ARN},startArena,arenaLose,toggleRide,dismount,gainMount,buyRide,buyPet,setPet,get PET(){return PET},MOUNTS,PETS,soulAct,becomeBraham,get COMPO(){return COMPO},setComp,COMPS,killMon,get EV(){return EV},forceEvent:(k,ms)=>{evDone=null;EVF=k?{e:EVT.find(e=>e.k===k),until:Date.now()+(ms||60000),ms:ms||60000}:null;},evNow,EVT,CAMPS,get FISH(){return FISH},startFish,fishAct,nearWater,campMenu,makeLife,eatDish,lifeLv,pickHerb,SHRINES,shrineAct,becomePagma,get WS(){return WS},get RAID(){return RAID},set RAID(v){RAID=v},TERR,TW,createGuild,joinGuild,leaveGuild,bannerAct,captureT,guildPanel,updateTerr,swampAt,REIN,gXPB,gGoldB,ownsT};
 function smithMenu(who,W,A,svc=true){const back={l:t('oBack'),f:()=>shopD(who,'arBuy')},row=([id,g0])=>{const g=price(who,g0);return{l:t('oBuyGear',{it:t(id),g}),ic:id,st:gearCmp(id),poor:S.gold<g,f:()=>buyGear(id,g,who)};};
  return [{l:t('oBuyW'),ic:'slotW',f:()=>dialog(who,['arW'],null,[...W.map(row),back])},{l:t('oBuyA'),ic:'slotA',f:()=>dialog(who,['arA'],null,[...A.map(row),back])},
   ...(svc?svcOpts(who):[])];}
@@ -4177,7 +4183,7 @@ function praidHit(m,dmg){if(!praidShared(m))return false;if(PRAID.hit(praidKey(m
    moves between players. Bosses stay with the party raid; event and temporary monsters, and those indoors, stay local. */
 var MOBN,MOBP,MOB_MS=250,MOB_MAX=60; // no initial values: ?net=local starts the network above this line
 function mobKey(m){return m.nk||(m.nk=m.type+'@'+(m.sx|0)+','+(m.sy|0));}
-function mobOk(m){const b=MT[m.type];return !!b&&!b.boss&&!m.tmp&&!m.evt&&!m.goal&&m.sy<WMH*TS;}
+function mobOk(m){const b=MT[m.type];return !!b&&!b.boss&&(m.ek||!m.tmp&&!m.evt&&!m.goal)&&m.sy<WMH*TS;}
 function mobByKey(k){for(const m of mons)if(mobOk(m)&&mobKey(m)===k)return m;return null;}
 function mobStart(){if(!NETTR||!NETTR.mobsPut)return;MOBN={zone:null,all:{},host:null,rs:[],sent:0,put:false,seq:0,hits:new Map()};
  NET.on(ev=>{if(ev.type!=='message'||!MOBN)return;const env=ev.env,pl=env.payload||{};if((env.type!=='raid.hit'&&env.type!=='raid.state')||pl.to!==NET.uid||typeof pl.raid!=='string'||pl.raid.slice(0,2)!=='m|')return;
@@ -4217,7 +4223,7 @@ function mobTarget(m){if(!mobOk(m)||m.dead)return null;const dP=P.ghost||mode===
 function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))return false;const L=MOBN.all[MOBN.host],s=L&&L.m&&L.m[mobKey(m)];if(typeof s!=='string')return false;
  const v=s.split(',').map(Number);if(v.length!==5||v.some(x=>!isFinite(x)))return false;const [x,y,hp,fl,lv]=v;m.led=true;
  if(fl&1){if(!m.dead){m.dead=true;m.dying=.5;m.rt=25;vfx('death',m.x,m.y);}return true;} // quiet: the kill and its rewards come from the host's message
- if(m.dead){const ty=m.type,ox=m.sx,oy=m.sy;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));m.led=true;m.x=x;m.y=y;vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
+ if(m.dead){if(m.ek)return true;const ty=m.type,ox=m.sx,oy=m.sy;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));m.led=true;m.x=x;m.y=y;vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
  if(m.lv!==lv){m.lv=lv;m.max=Math.round(b.hp*(1+(lv-b.lv[0])*.03));}
  const nh=Math.max(1,Math.round(m.max*hp/1000)),mine=m.pendT&&performance.now()-m.pendT<900;
  if(nh<m.hp){if(!mine&&m.hp-nh>=1){m.hurt=.12;num(m.x,monY(m)-8,String(m.hp-nh),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});}m.hp=nh;}else if(!mine)m.hp=nh; // another player's hit: its number shows here too

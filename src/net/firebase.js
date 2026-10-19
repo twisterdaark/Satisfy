@@ -237,6 +237,8 @@
        * {radius, centre, party, watched}: what the interest queries cover now (radius 0 = the whole
        * shard); watched = the other players the party query shows.
        */
+      /** Server time minus this device's clock (ms), from .info/serverTimeOffset: world events use it so every client agrees. */
+      serverOffset: function () { return offset; },
       interest: function () { return { radius: R, centre: cx, party: pq.ids[0] || null, parties: pq.ids.slice(), watched: Object.keys(pq.keys) }; },
       /** Follow everyone whose presence is in party `id` (or any of an array of ids; null or []: stop), on top of the range query. */
       party: partyQuery,

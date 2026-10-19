@@ -4,6 +4,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19d', d: '2026-10-19',
+      ar: ['الوحوش المشتركة: اللاعبين اللي جنب بعض بيشوفوا نفس الوحوش حتى لو على حدود منطقتين، والضرب بيتحسب للكل وأرقامه بتبان',
+        'الأحداث زي غزو ونستون بقت واحدة للكل: نفس الحدث ونفس العداد ونفس الموجة ونفس الوحوش',
+        'البنك في النُزل: الفلوس اللي فيه مبتضيعش لما تموت',
+        'الشات ليه زرار يقفله لشريط صغير، وبيستخبى لما تفتح نافذة أو حوار',
+        'قايمة التاجر الطويلة بقت صفوف صغيرة وفيها سكرول',
+        'ضرب أعضاء الفريق على الزعيم بيتحسب حتى لو القائد بعيد'],
+      en: ['Shared monsters: players near each other see the same monsters even across a zone border; every hit counts for everyone and shows its number',
+        "World events like Winston's invasion are the same for everyone: same event, countdown, wave and monsters",
+        "Bank at the inns: gold in it isn't lost when you die",
+        'The chat has a button that closes it to a small bar, and it hides while a window or dialog is open',
+        'Long shop lists use small rows with a scrollbar',
+        "Party members' hits on a boss count even when the leader is far away"] },
     { v: '2026-10-19c', d: '2026-10-19',
       ar: ['سجل التحديثات: بيظهر بعد كل تحديث، وتلاقيه في شاشة البداية والقايمة',
         'تخصصات إنتاجية زي الرواية: حداد (خان أو سميث)، خياط (الستايلست)، كيميائي (العشابة)، طباخ (الخباز)، مزارع (بيارو)، كل واحد بميني جيم',
