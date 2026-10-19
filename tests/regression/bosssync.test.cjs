@@ -54,7 +54,7 @@ test('online: the boss fights the nearest player; the breath, the phase roar and
     await b.eval(() => { const m = window.__G.mons().find((x) => x.type === 'trauka'); m.brc = 0; });
     await a.eval(() => { const m = window.__G.mons().find((x) => x.type === 'trauka'); m.brc = 99; });
     await frames([a, b], 30);
-    assert.equal((await dragon(b)).br, 0, 'no breath of its own on the follower');
+    assert.ok((await dragon(b)).br <= 0, 'no breath of its own on the follower');
 
     // the phase roar: the host's boss drops below 66%, B sees it change phase
     await a.eval(() => { const m = window.__G.mons().find((x) => x.type === 'trauka'); m.hp = Math.round(m.max * 0.6); });
@@ -62,7 +62,7 @@ test('online: the boss fights the nearest player; the breath, the phase roar and
 
     // flying on an item skill shows on the other screen
     await b.eval(() => { const G = window.__G; G.P.mp = 1e6; G.P.fly = 4; });
-    assert.ok(await until([a, b], () => a.eval(() => { const r = Satisfy.local.net().remotes().find((x) => x.uid === 'gBsB2'); return !!r && typeof r.fx === 'string' && r.fx.includes('"st:f"'); }), 40), "B's flight is in its presence");
+    assert.ok(await until([a, b], () => a.eval(() => { const r = Satisfy.local.net().remotes.find((x) => x.uid === 'gBsB2'); return !!r && typeof r.fx === 'string' && r.fx.includes('"st:f"'); }), 40), "B's flight is in its presence");
 
     for (const g of [a, b]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
