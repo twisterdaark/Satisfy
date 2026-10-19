@@ -5,6 +5,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19j', ver: '0.33', d: '2026-10-19',
+      ar: ['أونلاين: إشعار العالم بيوصل لكل اللي لاعبين وبيفضل مكتوب في الشات، وإشعاراتك إنت بس مكتوب عليها "إشعار"',
+        'لو دخلت وحدث شغال من بدري بيجيلك سطر صغير بدل الصندوق الكبير',
+        'PvP مفتوح برا المدن: ضربة اللاعب بتاخد جزء صغير من صحتك، ومفيش ضرب بين أعضاء البارتي ولا جوه المدن',
+        'اللي يقتل لاعب اسمه بيبقى أحمر (خارج عن القانون) لمدة 10 دقايق، والميت عليه عقوبة الموت العادية بس',
+        'الوحوش بتهجم بنفس الشكل عند الكل: الخط الأحمر اللي بيحذرك، والاندفاع، والضربة، وعلى مين',
+        'الأرقام اللي فوق لاعبك (الضرر اللي خدته، العلاج، أسماء السكيلات) بتبان عند كل اللي حواليك'],
+      en: ['Online: a World Notice reaches everyone and stays in the chat; notices only about you say "Notice"',
+        'Joining while an event has been on for a while gives a short line instead of the big box',
+        'Open PvP outside towns: a hit from a player takes a small share of your health; no hits inside a party or a town',
+        'Killing a player turns your name red (outlaw) for 10 minutes; the one who died only gets the normal death penalty',
+        'Monsters attack the same on every screen: the red warning, the dash, the strike, and who it is aimed at',
+        'Numbers over your player (damage taken, heals, skill names) show on everyone\'s screen'] },
     { v: '2026-10-19i', ver: '0.32', d: '2026-10-19',
       ar: ['أسلحة وخواتم بأسماء من الرواية ليها سكيلات أكتيف وباسيف وانت لابسها: Failure، الخنجر المثالي، رمح العاصفة، إيارغت، دينسليف، قوس الرعد، سيف الحكمة، خاتم حجر الإلف، خاتم مصاص الدماء، خاتم دوران، خاتم العبث، حذاء براهام، خوذة زعيم الأورك',
         'سكيلات السلاح والخواتم ليها خانتين جنب البار على زرار Z وX، وبتظهر بس لما تلبس قطعة فيها سكيل',
