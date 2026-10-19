@@ -176,6 +176,14 @@ check; a bar at the top shows both duel HPs and the countdown, with a **Yield** 
 dashed ring. Real death, travel or entering a town forfeits. `Satisfy.local.net().duel` = `state()` plus
 `challenge`.
 
+## Player menu (SAT-ONLINE-020, doc §35 U046/U064)
+
+In the game: click or tap another visible player (same map version and room) to open their card: name, level,
+class, title, party and armour, all from their `PlayerPublic`. The card has **Invite to party**, **Duel** and
+**Block/Unblock**, each aimed at that player's uid. Clicking your duel opponent during a fight still attacks;
+Esc or ✕ closes the card, and it closes by itself when the player leaves. Test hook: `__G.toScreen(x, y)`
+gives the screen position of a world point.
+
 ## `Satisfy.chat` (SAT-ONLINE-016, doc §29 T31)
 
 Party chat and a block list, on presence + party.
@@ -284,6 +292,7 @@ await g.close(); await H.closeBrowser();
 - **api 1** (SAT-ONLINE-001): `Satisfy.storage`, `Satisfy.net`, `Satisfy.local`, `__G.defs()`.
 - **api 1, additive** (SAT-ONLINE-002): `Satisfy.presence`, `Satisfy.transports`, `Satisfy.local.net()`, storage slots, `PlayerPublic.arm`.
 - **api 1, additive** (SAT-ONLINE-004): `Satisfy.firebase`, `Satisfy.firebaseConfig`, `net().state/uid`, `?net=online`.
+- **api 1, additive** (SAT-ONLINE-020): the player menu (click a player: card + invite/duel/block by uid); `__G.toScreen`. No network change.
 - **api 1, additive** (SAT-ONLINE-019): `PlayerPublic.mv` = map version (FNV-1a of the generated world, 8 hex digits); the game shows, invites and challenges only remotes with the same `mv` and room, and tells you once when someone nearby is on another version. `Satisfy.local.zoneAt` returns `'void'` in the interior strip outside rooms (the game's own `zoneAt` still falls back to `zWin`); `zonePolicy` adds `known`. Presence + rules field (redeploy).
 - **api 1** (SAT-ONLINE-018): `transport.party(id)` replaces `transport.watch(uids)` (both unreleased); `interest()` adds `party`. Rules index `presence/{world}/{shard}` on `["x", "party"]` (redeploy).
 - **api 1, additive** (SAT-ONLINE-017): touch controls on coarse pointers (or `?touch=1`; `?touch=0` turns them off): a stick for movement, held Attack/Guard, Dodge/Use taps, the HUD key hints as buttons, and an online row (P, K, Y, N, Enter). Taps are dispatched as the same `keydown`/`keyup` events as the keyboard. No API change.

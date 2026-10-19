@@ -44,3 +44,30 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-019 �
 | U038 | Bounty board | ⏳ | R5 + ledger |
 
 **Totals:** ✅ 22 · 🟡 7 · ⏳ 7 · ❌ 2.
+
+## Social U046–U065 (plan doc §35 [SOC])
+
+| ID | Item | Status | Where / what's left |
+|---|---|---|---|
+| U046 | Nearby player context | ✅ | SAT-ONLINE-020: click/tap a player → card with Invite / Duel / Block, aimed at their uid (`regression/playermenu`: twin names) |
+| U047 | Party invite | ✅ | SAT-ONLINE-003: invites expire after 30 s, decline, busy/full replies; blocked senders dropped (016) |
+| U048 | Party accept | 🟡 | The leader caps the party at 5 when accepts arrive; no server transaction yet |
+| U049 | Party leader election | ❌ | The party dissolves when the leader leaves |
+| U050 | Party roles | ❌ | |
+| U051 | Party HP UI | ❌ | Next (needs a public HP % in presence) |
+| U052 | Party pings | ❌ | Next |
+| U053 | Party chat | 🟡 | SAT-ONLINE-016: party-only, rate-limited, block list; no profanity filter |
+| U054 | Party summon | ⏳ | A teleport needs a movement authority |
+| U055 | Party follow | ❌ | |
+| U056 | Shared PvE XP | ⏳ | Needs a combat authority; a party raid pays each member their own rewards (009) |
+| U057 | Personal loot | 🟡 | SAT-ONLINE-009: each member's own game pays the boss kill once per encounter; no server ledger |
+| U058 | Need/Greed loot | ⏳ | Server random + ledger |
+| U059 | Friends and follow | ❌ | |
+| U060 | Guild invitations | ⏳ | Guilds are local game content today |
+| U061 | Emotes | ❌ | Next |
+| U062 | Chat moderation | 🟡 | Block list + rate limit (016); no report or keyword filter |
+| U063 | Player trade request | ⏳ | Needs inventory escrow on a server (D3) |
+| U064 | Player inspect | ✅ | SAT-ONLINE-020: the card shows only PlayerPublic (name, level, class, title, party, armour) |
+| U065 | Party reconnect | ❌ | A reload leaves the party |
+
+**Totals (social):** ✅ 3 · 🟡 4 · ⏳ 6 · ❌ 7.
