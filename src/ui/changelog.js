@@ -5,6 +5,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19i', ver: '0.32', d: '2026-10-19',
+      ar: ['أسلحة وخواتم بأسماء من الرواية ليها سكيلات أكتيف وباسيف وانت لابسها: Failure، الخنجر المثالي، رمح العاصفة، إيارغت، دينسليف، قوس الرعد، سيف الحكمة، خاتم حجر الإلف، خاتم مصاص الدماء، خاتم دوران، خاتم العبث، حذاء براهام، خوذة زعيم الأورك',
+        'سكيلات السلاح والخواتم ليها خانتين جنب البار على زرار Z وX، وبتظهر بس لما تلبس قطعة فيها سكيل',
+        'Failure والخنجر المثالي ورمح العاصفة وصفات مخفية بتتفتح للحداد بعد ما يعمل كفاية من نوعها، والباقي بينزل من البوسات والوحوش القوية',
+        'نفَس الحداد الأسطوري بقى Passive شغال على طول ومش واخد خانة في البار',
+        'سكيلات حداد جديدة: غضب الحداد (من مهمة خان) ودمج القطع اللي بيقوي السلاح والدرع شوية وبعدها بيتعبوا',
+        'الحاجات النادرة اللي بتعملها ممكن تطلع بميزة خاصة زيادة، وفرصتها أعلى مع باجما'],
+      en: ['Named weapons and rings from the novel carry active and passive skills while worn: Failure, Ideal Dagger, Gale Spear, Iyarugt, Dainsleif, Thunder Bow, Sword of Wisdom, Elfin Stone Ring, Vampire Ring, Doran\'s Ring, Ring of Absurdity, Braham\'s Boots, Frostlight Orc Chief\'s Helmet',
+        'Item skills get two slots next to the bar on Z and X, shown only when you wear an item with a skill',
+        'Failure, Ideal Dagger and Gale Spear are hidden recipes a smith unlocks by making enough of their kind; the rest drop from bosses and strong monsters',
+        'Legendary Blacksmith\'s Breath is a passive now, always on and off the bar',
+        'New smith skills: Blacksmith\'s Rage (from Khan\'s quest) and Item Combination, which boosts weapon and armor for a while and wears them after',
+        'Rare things you make can come out with an extra special feature, more often for Pagma'] },
     { v: '2026-10-19h', ver: '0.31', d: '2026-10-19',
       ar: ['بارات الصحة والمانا والطاقة والشبع اتعملت من جديد بستايل نوافذ ساتيسفاي: علامة ملونة، ولمعة، وتقسيمات كل 10%، والجزء اللي راح بيفضل باهت لحظة قبل ما يختفي',
         'صحة اللاعبين التانيين بتبان فوق راسهم، وأعضاء فريقك ليهم بار أخضر بإطار دهبي',

@@ -18,8 +18,8 @@ function finish(I,ghost){const d=I.d,src=d.slice();
  return d;}
 
 // PER_CODE: weapon colors and the great sword's blue edge from WSH
-const BLADE={rusty:['#9b8b78','#6e6052','#c4b4a0'],isword:['#c4c8d0','#7a808c','#eef0f4'],ssword:['#dfe6ee','#8a94a4','#ffffff'],gsword:['#6ab0ff','#2a5ab0','#d0e8ff'],msword:['#c8e8f4','#7aa0b8','#ffffff']};
-function sword(I,k){const [b,dk,lt]=BLADE[k]||BLADE.rusty,long=k==='gsword';const tx=long?14:13,ty=long?1:2;
+const BLADE={failure:['#5a6a7a','#2e3a48','#a8b8c8'],iyarugt:['#c8282a','#6a0a0e','#ff7a6a'],dains:['#e8c050','#9a7418','#fff4c0'],wisdom:['#e8f4ff','#7a9ab8','#ffffff'],rusty:['#9b8b78','#6e6052','#c4b4a0'],isword:['#c4c8d0','#7a808c','#eef0f4'],ssword:['#dfe6ee','#8a94a4','#ffffff'],gsword:['#6ab0ff','#2a5ab0','#d0e8ff'],msword:['#c8e8f4','#7aa0b8','#ffffff']};
+function sword(I,k){const [b,dk,lt]=BLADE[k]||BLADE.rusty,long=k==='gsword'||k==='failure'||k==='dains';const tx=long?14:13,ty=long?1:2;
  for(let i=0;i<=tx-5;i++){I.set(5+i,10-i,b);I.set(6+i,10-i,dk);I.set(5+i,9-i,lt);}I.set(tx,ty,lt);
  if(long)for(let i=1;i<tx-5;i+=2)I.set(6+i,10-i,'#9fd0ff');
  if(k==='rusty'){I.set(8,7,'#7a5a3a');I.set(10,5,'#7a5a3a');I.set(11,4,dk);}
@@ -80,6 +80,13 @@ const DRAW={
  cring:I=>ring(I,'#c87a3a','#e8a060','#4ad070'),mring:I=>ring(I,'#c8a050','#f2d27a','#4a90ff'),
  spear:I=>{I.line(2,14,11,5,'#7a5634');I.line(3,14,12,5,'#5a3a20');I.set(6,10,'#c8a050');I.set(7,10,'#c8a050');I.rect(11,3,2,2,'#c4c8d0');I.set(13,2,'#eef0f4');I.set(14,1,'#eef0f4');I.set(12,2,'#c4c8d0');I.set(13,3,'#7a808c');I.set(10,4,'#9a9aa6');I.set(11,5,'#9a9aa6');},
  dagger:I=>{for(let i=0;i<5;i++){I.set(7+i,8-i,'#c4c8d0');I.set(8+i,8-i,'#7a808c');I.set(7+i,7-i,'#eef0f4');}I.line(5,7,8,10,'#9a9aa6');I.line(4,11,6,9,'#6b4428');I.set(3,12,'#c8a050');},
+ // named items from the novel (item skills)
+ ideal:I=>{for(let i=0;i<6;i++){I.set(6+i,9-i,'#bfe8ff');I.set(7+i,9-i,'#5a8ab0');I.set(6+i,8-i,'#ffffff');}I.line(4,8,7,11,'#4a90c0');I.line(3,12,5,10,'#6b4428');I.set(2,13,'#4a90c0');},
+ gale:I=>{I.line(2,14,11,5,'#3a6a5a');I.line(3,14,12,5,'#2a4a40');I.set(6,10,'#9fe3c8');I.rect(11,2,3,3,'#9fe3c8');I.set(14,1,'#ffffff');I.set(13,1,'#e8fff4');I.set(12,3,'#ffffff');I.set(10,4,'#5aa890');I.set(14,4,'#5aa890');},
+ tbow:I=>{for(let i=0;i<=12;i++){const a=i/12*Math.PI,x=Math.round(10-Math.sin(a)*6);I.set(x,2+i,'#4a6ab0');I.set(x+1,2+i,'#2a3a70');}I.set(10,2,'#fff07a');I.set(10,14,'#fff07a');I.line(11,2,11,14,'#fff07a');I.line(3,8,12,8,'#bfe0ff');I.set(2,8,'#ffffff');I.set(5,7,'#fff07a');I.set(7,9,'#fff07a');},
+ elfin:I=>ring(I,'#8a8a96','#c8c8d8','#4ad070'),vring:I=>ring(I,'#3a1a22','#7a3a4a','#d8283a'),doran:I=>ring(I,'#c8a050','#f2d27a','#8a3ad8'),absurd:I=>ring(I,'#e8e8f0','#ffffff','#ff8a1e'),
+ bboots:I=>{boot(I,['#2a2a34','#5a5a6a','#1a1a20']);I.set(6,4,'#d8dce8');I.set(8,6,'#d8dce8');I.set(7,8,'#d8dce8');I.rect(5,9,5,1,'#4a4a58');},
+ ochelm:I=>{helm(I,['#d8dce4','#ffffff','#7a8494'],1);I.set(3,5,'#d8dce4');I.set(12,5,'#d8dce4');I.set(2,4,'#ffffff');I.set(13,4,'#ffffff');I.set(6,8,'#c8282a');I.set(9,8,'#c8282a');},
  book:I=>{I.rect(3,2,10,12,'#7a2a26');I.rect(4,2,9,1,'#a03a34');I.rect(3,2,1,12,'#4a1a18');I.rect(12,3,1,10,'#e8dcc0');I.rect(6,6,4,1,'#f2c14e');I.rect(6,8,4,1,'#f2c14e');I.rect(11,7,2,2,'#c8a050');}};
 // potions: round flask, cork, liquid with a highlight
 const flask=(liq,lt)=>I=>{I.rect(7,2,2,2,'#8a5a32');I.rect(6,4,4,1,'#c8d0dc');I.rect(7,5,2,2,'#c8d0dc');I.ell(8,10.5,4.5,4,'#c8d0dc');I.ell(8,11,3.5,3,liq);I.rect(5,9,6,1,lt);I.set(6,10,'#ffffff');I.set(6,11,lt);I.set(10,13,'#00000000'==='x'?lt:liq);};
@@ -95,6 +102,6 @@ function iconRGBA(k){const I=Img();
  else if(k==='larmor'||k==='parmor'||k==='marmor'||k==='warmor')armor(I,k);else sword(I,k);
  return finish(I,false);}
 function iconCanvas(k){const c=document.createElement('canvas');c.width=c.height=16;c.getContext('2d').putImageData(new ImageData(iconRGBA(k),16,16),0,0);return c;}
-const KEYS=['rusty','isword','ssword','gsword','bow','sbow','staff','sstaff','hammer','shammer','larmor','parmor','warmor','jaffa','arrows','bread','wood','ore','leather','blue','mstone','book','hpot','mpot','lhelm','ihelm','lgloves','igloves','lboots','iboots','cring','mring','spear','dagger','mith','msword','marmor','mhelm','tHood','tGloves','tBoots','tRobe','dscale','ruby','topaz','emer','sapph','diam','fish','sfish','gfish','herb','bherb','cfish','stew','feast','slotW','slotA','slotH','slotG','slotB','slotX','coin','estone','respec'];
+const KEYS=['rusty','isword','ssword','gsword','bow','sbow','staff','sstaff','hammer','shammer','larmor','parmor','warmor','jaffa','arrows','bread','wood','ore','leather','blue','mstone','book','hpot','mpot','lhelm','ihelm','lgloves','igloves','lboots','iboots','cring','mring','spear','dagger','mith','msword','marmor','mhelm','tHood','tGloves','tBoots','tRobe','dscale','ruby','topaz','emer','sapph','diam','fish','sfish','gfish','herb','bherb','cfish','stew','feast','slotW','slotA','slotH','slotG','slotB','slotX','coin','estone','respec','failure','ideal','gale','iyarugt','dains','tbow','wisdom','elfin','vring','doran','absurd','bboots','ochelm'];
 A.icons={KEYS,iconRGBA,iconCanvas};
 })(typeof window!=='undefined'?window:globalThis);

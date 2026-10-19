@@ -34,7 +34,16 @@ const DEF={
  shammer:()=>hammer(['#c8ccd6','#8a909a','#ffffff'],true),
  // spear: long shaft with a leaf head; dagger: short blade on a stub grip (SAT-EQUIP-001)
  spear:()=>{const I=Img(7,22);I.vline(3,5,21,'#7a5634');I.vline(3,12,13,'#c8a050');I.set(3,0,'#eef0f4');I.rect(2,1,3,3,'#c4c8d0');I.vline(3,1,3,'#eef0f4');I.set(4,3,'#7a808c');I.set(3,4,'#9a9aa6');return {I,gx:3,gy:15};},
- dagger:()=>sword(5,2,['#c4c8d0','#7a808c','#eef0f4'],'#9a9aa6')};
+ dagger:()=>sword(5,2,['#c4c8d0','#7a808c','#eef0f4'],'#9a9aa6'),
+ // named items from the novel (item skills): Failure's shark-like greatsword, the Ideal Dagger, the Gale Spear, Iyarugt's
+ // blood-red blade, Dainsleif (Reproduction) in gold, the Thunder Bow and the Sword of Wisdom
+ failure:()=>sword(13,3,['#5a6a7a','#2e3a48','#a8b8c8'],'#3a4450',(I,cx,top,len)=>{for(let y=top+3;y<top+len-1;y+=3)I.set(cx+2,y,'#2e3a48');I.set(cx-1,top+2,'#ffffff');I.set(cx+2,top+len-3,'#a8b8c8');}),
+ ideal:()=>sword(6,2,['#bfe8ff','#5a8ab0','#ffffff'],'#4a90c0',(I,cx,top)=>{I.set(cx,top+3,'#ffffff');}),
+ gale:()=>{const I=Img(7,24);I.vline(3,6,23,'#3a6a5a');I.vline(3,13,14,'#9fe3c8');I.set(3,0,'#ffffff');I.rect(2,1,3,4,'#9fe3c8');I.vline(3,1,4,'#e8fff4');I.set(1,4,'#5aa890');I.set(5,4,'#5aa890');I.set(3,5,'#5aa890');return {I,gx:3,gy:16};},
+ iyarugt:()=>sword(11,2,['#c8282a','#6a0a0e','#ff7a6a'],'#2a0a0e',(I,cx,top,len)=>{for(let y=top+2;y<top+len-1;y+=2)I.set(cx,y,'#ff3a2a');I.set(cx-2,top+len,'#c8282a');I.set(cx+2,top+len,'#c8282a');}),
+ dains:()=>sword(12,3,['#e8c050','#9a7418','#fff4c0'],'#6a4a18',(I,cx,top,len)=>{for(let y=top+3;y<top+len-1;y+=3)I.set(cx,y,'#fff4c0');}),
+ tbow:()=>bow(['#4a6ab0','#2a3a70','#9fc8ff'],'#fff07a'),
+ wisdom:()=>sword(11,2,['#e8f4ff','#7a9ab8','#ffffff'],'#d8b04a',(I,cx,top,len)=>{I.set(cx,top+len-4,'#4a90ff');I.set(cx,top+len-6,'#4a90ff');})};
 function bow(w,tip){const I=Img(8,18);for(let i=0;i<=14;i++){const a=i/14*Math.PI,x=Math.round(2+Math.sin(a)*3.4);I.set(x,1+i,w[0]);I.set(x+1,1+i,i<3||i>11?w[0]:w[1]);if(i===7){I.set(x,1+i,w[2]);I.set(x+1,1+i,w[2]);}}
  I.vline(2,1,15,'#e8e0d0');I.set(2,1,tip||w[2]);I.set(2,15,tip||w[2]);I.rect(5,7,2,3,'#3a2414');return {I,gx:5,gy:8};}
 function staff(orb,wood,prong){const I=Img(9,20);I.vline(4,5,18,wood);I.vline(5,6,17,'#5a3a20');I.set(4,10,'#c8a050');I.set(4,15,'#c8a050');
