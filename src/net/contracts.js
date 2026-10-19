@@ -7,14 +7,16 @@
  * @typedef {{id:string, tile:number, w:number, h:number}} WorldRef
  *   The shared map. w/h in tiles; positions in PlayerPublic are pixels (tile * TS).
  * @typedef {{key:string, world:string, zone:string, shard:number}} RoomRef
- *   A presence channel: everyone in the same zone shard sees each other. Not a house interior.
+ *   A presence channel: everyone on the same channel can see each other. `zone` is a zone id or an
+ *   instance name ('main' while the whole map is one channel). Not a house interior.
  * @typedef {{hair:number, hc:number, skin:number, top:number}} Look
  * @typedef {{
  *   v:number, uid:(string|null), sid:(string|null), handle:string, look:Look,
  *   cls:string, lv:number, title:string, zone:string, room:(string|null),
- *   x:number, y:number, dir:number, anim:string, party:(string|null), t:number
+ *   x:number, y:number, dir:number, anim:string, arm:number, party:(string|null), t:number
  * }} PlayerPublic
- *   What other players may see. `room` is the house interior id (e.g. "r7") or null outdoors.
+ *   What other players may see. `room` is the house interior id (e.g. "r7") or null outdoors;
+ *   `arm` is 1 when armor is worn (picks the armored sprite).
  * @typedef {{v:number, type:string, requestId:(string|null), sessionId:(string|null),
  *   seq:number, tick:number, payload:object}} Envelope
  */
@@ -25,7 +27,7 @@
   var WORLD_ID = 'satisfy';
   var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 2048, shard: 999 });
   var ANIMS = ['idle', 'walk', 'attack', 'dodge', 'dead'];
-  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'party', 't'];
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
   // S.uid (the local item-instance counter) is private too, but its name collides with the public
   // account `uid`, so it is checked by value in the tests instead of listed here.
@@ -69,7 +71,7 @@
    * Build the public view of the local player.
    * @param {object} S durable state
    * @param {object} P volatile player state
-   * @param {{zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, anim?:string, t?:number}} [ctx]
+   * @param {{zone?:string, room?:(string|null), uid?:string, sid?:string, party?:string, anim?:string, arm?:number, t?:number}} [ctx]
    * @returns {PlayerPublic}
    */
   function toPlayerPublic(S, P, ctx) {
@@ -90,6 +92,7 @@
       y: int(P.y),
       dir: (P.dir | 0) & 3,
       anim: ANIMS.indexOf(ctx.anim) >= 0 ? ctx.anim : 'idle',
+      arm: ctx.arm ? 1 : 0,
       party: ctx.party || null,
       t: ctx.t || 0,
     };
@@ -116,6 +119,7 @@
     if (w && (o.x < 0 || o.y < 0 || o.x >= w.w * w.tile || o.y >= w.h * w.tile)) e.push('out of world');
     if (!Number.isInteger(o.dir) || o.dir < 0 || o.dir > 3) e.push('dir');
     if (ANIMS.indexOf(o.anim) < 0) e.push('anim');
+    if (o.arm !== 0 && o.arm !== 1) e.push('arm');
     if (o.room !== null && typeof o.room !== 'string') e.push('room');
     if (o.party !== null && typeof o.party !== 'string') e.push('party');
     return { ok: e.length === 0, errors: e };

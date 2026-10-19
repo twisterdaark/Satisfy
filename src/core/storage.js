@@ -82,23 +82,34 @@
     return applied;
   }
 
+  /** Save slots let two local characters coexist (e.g. two tabs testing online play). */
+  function slotKey(slot) {
+    if (slot == null || slot === '') return KEY;
+    if (!/^[A-Za-z0-9_-]{1,16}$/.test(String(slot))) throw new Error('bad save slot: ' + slot);
+    return KEY + '@' + slot;
+  }
+
   /**
    * Bind to a Storage-like object (localStorage, or a fake in tests).
    * Every method swallows storage errors (private mode, quota) like the original code did.
+   * @param {Storage|null} store
+   * @param {{slot?:string}} [opts] slot: separate save, stored under `satisfy_proto_v4@<slot>`
    */
-  function create(store) {
+  function create(store, opts) {
+    var key = slotKey(opts && opts.slot);
+    var prefix = key + '.backup.';
     function get(k) { try { return store.getItem(k); } catch (e) { return null; } }
     function set(k, v) { try { store.setItem(k, v); return true; } catch (e) { return false; } }
 
     return {
-      key: KEY,
+      key: key,
       // Same truthiness as the original hasSave(): an empty string is "no save".
-      exists: function () { return !!get(KEY); },
-      read: function () { return decode(get(KEY)); },
+      exists: function () { return !!get(key); },
+      read: function () { return decode(get(key)); },
       write: function (S, P, extra) {
         var raw;
         try { raw = encode(S, P, null, extra); } catch (e) { return false; }
-        return set(KEY, raw);
+        return set(key, raw);
       },
       /**
        * Keep a verbatim copy of a save before it can be lost. First copy per reason wins,
@@ -106,7 +117,7 @@
        */
       backup: function (reason, raw) {
         if (raw == null) return false;
-        var k = BACKUP_PREFIX + reason;
+        var k = prefix + reason;
         if (get(k) != null) return false;
         return set(k, raw);
       },
@@ -115,7 +126,7 @@
         try {
           for (var i = 0; i < store.length; i++) {
             var k = store.key(i);
-            if (k && k.indexOf(BACKUP_PREFIX) === 0) out[k.slice(BACKUP_PREFIX.length)] = store.getItem(k);
+            if (k && k.indexOf(prefix) === 0) out[k.slice(prefix.length)] = store.getItem(k);
           }
         } catch (e) { /* ignore */ }
         return out;
@@ -132,6 +143,7 @@
     encode: encode,
     migrate: migrate,
     create: create,
+    slotKey: slotKey,
   };
 
   var ns = root.Satisfy = root.Satisfy || {};

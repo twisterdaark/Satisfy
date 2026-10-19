@@ -106,3 +106,18 @@ test('adapter: storage failures are swallowed (private mode, quota, no localStor
   const circular = { v: 5 }; circular.self = circular;
   assert.equal(ST.create(new MemoryStorage()).write(circular, {}), false, 'unserializable state does not throw');
 });
+
+test('slots: separate key and backups per slot, default untouched, bad names rejected', () => {
+  const store = new MemoryStorage({ [ST.KEY]: 'main-save' });
+  const a = ST.create(store, { slot: 'a' });
+  assert.equal(a.key, 'satisfy_proto_v4@a');
+  assert.equal(a.exists(), false);
+  a.write({ v: 5, lv: 9 }, { x: 0, y: 0 });
+  a.backup('corrupt', 'x');
+  assert.equal(store.getItem(ST.KEY), 'main-save');
+  assert.equal(store.getItem('satisfy_proto_v4@a.backup.corrupt'), 'x');
+  assert.deepEqual(ST.create(store).backups(), {}, 'default slot does not list slot backups');
+  assert.deepEqual(Object.keys(a.backups()), ['corrupt']);
+  assert.equal(ST.create(store, { slot: '' }).key, ST.KEY);
+  for (const bad of ['../x', 'a b', 'x'.repeat(17), 'é']) assert.throws(() => ST.slotKey(bad), /bad save slot/);
+});

@@ -76,6 +76,8 @@ function baselineHtml() {
  * @param {object} [opts]
  * @param {string} [opts.html] path to index.html (defaults to the working tree)
  * @param {Record<string,string>} [opts.storage] localStorage to seed before the game boots
+ * @param {string} [opts.query] URL query, e.g. '?net=local&slot=a'
+ * @param {object} [opts.ctx] reuse a context from newContext() so several pages share storage and BroadcastChannel
  */
 let blank = null;
 function blankUrl() {
@@ -85,16 +87,9 @@ function blankUrl() {
 
 async function openGame(opts = {}) {
   const html = opts.html || CURRENT_HTML;
-  const ctx = await (await browser()).newContext();
-  await ctx.addInitScript(INIT_SCRIPT);
-  // Hermetic: the game must run with no network (it only asks for Google Fonts, which may fail).
-  const external = [];
-  await ctx.route('**/*', (route) => {
-    const u = route.request().url();
-    if (u.startsWith('file:') || u.startsWith('data:') || u.startsWith('blob:')) return route.continue();
-    external.push(u);
-    return route.abort();
-  });
+  const shared = !!opts.ctx;
+  const ctx = opts.ctx || await newContext();
+  const external = ctx.__external;
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -103,12 +98,13 @@ async function openGame(opts = {}) {
     if (/^Failed to load resource/.test(m.text())) return; // aborted external request, tracked in `external`
     errors.push('console: ' + m.text());
   });
-  const url = pathToFileURL(html).href;
+  const url = pathToFileURL(html).href + (opts.query || '');
   const storage = { satisfy_lang: 'en', ...(opts.storage || {}) };
   // Seed localStorage from an empty file:// page first (all file: URLs share one storage origin),
   // then load the game once. This used to be goto(game) + seed + reload: two full boots.
+  // A page in a shared context (two tabs) keeps what the other tab stored.
   await page.goto(blankUrl());
-  await page.evaluate((st) => { localStorage.clear(); for (const k in st) if (st[k] != null) localStorage.setItem(k, st[k]); }, storage);
+  await page.evaluate(([st, keep]) => { if (!keep) localStorage.clear(); for (const k in st) if (st[k] != null) localStorage.setItem(k, st[k]); }, [storage, shared]);
   await page.goto(url);
   await step(page, 2);
   const g = {
@@ -119,9 +115,24 @@ async function openGame(opts = {}) {
     eval: (fn, arg) => page.evaluate(fn, arg),
     waitMode: (want, ms) => waitMode(page, want, ms),
     reload: async () => { await page.reload(); await step(page, 2); },
-    close: () => ctx.close(),
+    close: () => (shared ? page.close() : ctx.close()),
   };
   return g;
+}
+
+/** A fresh isolated browser context with the deterministic init script and no network. */
+async function newContext() {
+  const ctx = await (await browser()).newContext();
+  await ctx.addInitScript(INIT_SCRIPT);
+  // Hermetic: the game must run with no network (it only asks for Google Fonts, which may fail).
+  ctx.__external = [];
+  await ctx.route('**/*', (route) => {
+    const u = route.request().url();
+    if (u.startsWith('file:') || u.startsWith('data:') || u.startsWith('blob:')) return route.continue();
+    ctx.__external.push(u);
+    return route.abort();
+  });
+  return ctx;
 }
 
 async function step(page, n = 1, dt) { await page.evaluate(([n, dt]) => window.__step(n, dt), [n, dt]); }
@@ -168,5 +179,5 @@ async function snapshot(g) {
 
 module.exports = {
   ROOT, CURRENT_HTML, BASELINE_SHA, LEGACY_KEY, DEFAULT_LOOK, VOLATILE_S,
-  openGame, closeBrowser, baselineHtml, newGame, continueGame, snapshot,
+  openGame, newContext, closeBrowser, baselineHtml, newGame, continueGame, snapshot,
 };
