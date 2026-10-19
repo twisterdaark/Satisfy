@@ -74,9 +74,12 @@ test('party raid: one boss HP, one death, one reward each, nothing paid twice', 
     await until(b, () => !window.__G.mons().some((x) => x.type === 'gchief' && !x.dead), 5000);
     const after = await b.eval(() => ({ gold: window.__G.S.gold, xp: window.__G.S.xp, lv: window.__G.S.lv, done: window.__G.S.raidDone }));
     assert.ok(after.gold > before.gold || after.lv > before.lv || after.xp > before.xp, 'B got the kill rewards');
-    assert.equal(after.done.length, 1, 'the encounter is recorded once');
-    await settle(a, b);
-    assert.equal((await b.eval(() => window.__G.S.raidDone)).length, 1);
+    // paid once. Since the shared monsters (5f0a7e2) the group's host runs the boss and its kill message pays each hitter
+    // (raid.state, once per death); the party raid's claim (S.raidDone) is only for members too far apart to be one group
+    await settle(a, b); await settle(a, b);
+    const later = await b.eval(() => ({ gold: window.__G.S.gold, xp: window.__G.S.xp, lv: window.__G.S.lv, done: window.__G.S.raidDone }));
+    assert.deepEqual([later.gold, later.xp, later.lv], [after.gold, after.xp, after.lv], 'nothing paid twice');
+    assert.ok(!later.done || later.done.length <= 1, 'the encounter is recorded at most once');
     assert.deepEqual(a.errors, []);
     assert.deepEqual(b.errors, []);
   } finally { await ctx.close(); }

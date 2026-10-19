@@ -5,7 +5,7 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
-    { v: '2026-10-20i', ver: '0.51', d: '2026-10-20',
+    { v: '2026-10-20k', ver: '0.53', d: '2026-10-20',
       ar: ['الماب بقى أكبر مرتين: أراضي جديدة في أقصى الشمال وأقصى الجنوب',
         'الشمال: سور الشمال وبواباته فوق الطرق الشمالية، ووراه جبال الفوضى بأربع سلاسل، كل سلسلة أصعب من اللي قبلها (لفل 200 لـ 460)',
         'جبال الفوضى فيها عاصفة تلج على طول، ومن السلسلة التانية التلج بيجرحك شوية شوية إلا جنب النار، ومستنقعات سامة بتبطّأك',
@@ -18,6 +18,16 @@
         'A sanju, the beast of the old myths that rules the mountain, keeps a lair on every ridge, and the northern army has an outpost past the wall',
         'South: the Pedro countryside and its fields, the Gauss Kingdom border wall south of Patrian, and the South Sea coast with Cork Island off shore',
         '14 new monsters, and new places on the map with lines from the novel'] },
+    { v: '2026-10-20j', ver: '0.52', d: '2026-10-20',
+      ar: ['أونلاين: قرعة غنايم الغارة: كل بوس بتقتله الغارة بيطلع قطعة زيادة (إيبك وساعات يونيك) للي حاربوه: محتاجها، عايزها، أو سيبها',
+        'المحتاج قبل العايز، وبعدين أعلى رقم من 1 لـ 100، والكل بيشوف مين كسب وبكام، والكسبان بس هو اللي بياخدها'],
+      en: ['Online: raid loot rolls: every boss the raid kills puts one extra piece (Epic, sometimes Unique) up for those who fought it: Need, Greed or Pass',
+        'Need before Greed, then the highest roll from 1 to 100; everyone sees who won and with what, and only the winner gets it'] },
+    { v: '2026-10-20i', ver: '0.51', d: '2026-10-20',
+      ar: ['أونلاين: أدوار الغارة قدام البوسات: الدرع البوس بيجري وراه وضربه عليه أخف 30%، والمعالج بيعالج نفسه واللي جنبه كل 3 ثواني',
+        'الهجوم ضربه للبوس أقوى 15%، والدعم هو واللي جنبه بياخدوا من البوس أقل 15%. الدور بتختاره من الشارة في لوحة الفريق'],
+      en: ['Online: raid roles against bosses: a tank draws the boss and takes 30% less from it; a healer heals itself and those near it every 3 s',
+        'Damage does 15% more to bosses; support and those near it take 15% less from them. Pick the role from the badge in the party panel'] },
     { v: '2026-10-20h', ver: '0.50', d: '2026-10-20',
       ar: ['أونلاين: الغارات: قائد الفريق يقدر يخلي فريقه غارة لحد 10 لاعبين من زرار "غارة" في لوحة الفريق، ويرجعها فريق لما يبقوا 5 أو أقل'],
       en: ['Online: raids: a party leader can make the party a raid of up to 10 players with "Raid" in the party panel, and a party again at 5 or fewer'] },
