@@ -67,6 +67,12 @@ const FIG={
  fochief:{hair:'helm',hc:'#c8d4e0',hl:'#f0f6ff',skin:'#4a76b8',sk2:'#2e5690',top:'#e8eef4',top2:'#b8c4d0',sleeves:false,pad:'#9aa8b8',pad2:'#7a8898',belt:'#3a2a1a',shorts:'#4a3a2a',pants:'#4a3a2a',boots:'#506a76'},
  piaro:{hair:'cap',hc:'#b8b0a0',hl:'#ddd6c8',cap:'#d8b860',skin:'#d9a070',sk2:'#b47c50',top:'#6a7a4a',top2:'#4e5c36',sleeves:true,beard:'#c8c0b0',beard2:'#9a9284',belt:'#5a3a24',pants:'#5a4a36',boots:'#2a1c12'},
  regas:{hair:'pony',hc:'#1a1418',hl:'#3a2e34',skin:'#a8703f',sk2:'#86562c',top:'#a8703f',top2:'#86562c',sleeves:false,belt:'#c8a050',pants:'#2e2e36',boots:'#22180f'},
+ hdrac:{hair:'spiky',hc:'#2a1a1a',hl:'#5a2a22',skin:'#8a9a6a',sk2:'#6a7a4a',top:'#4a2a1e',top2:'#2e1a12',sleeves:false,pad:'#7a8a5a',pad2:'#5a6a3a',belt:'#a83a2a',shorts:'#3a2418',pants:'#3a2418',boots:'#6a7a4a'},
+ hdrac2:{hair:'spiky',hc:'#4a0e0e',hl:'#8a2a1a',skin:'#b0704a',sk2:'#8a4e30',top:'#5a1a14',top2:'#3a0e0a',sleeves:false,pad:'#c8a050',pad2:'#8a6a30',belt:'#c8a050',cape:'#8a1f2a',shorts:'#2a1410',pants:'#2a1410',boots:'#8a4e30'},
+ hdrac3:{hair:'long',hc:'#e8e0d0',hl:'#ffffff',skin:'#7a6a8a',sk2:'#5a4a6a',top:'#1a1420',top2:'#0e0a12',sleeves:true,pad:'#d8b040',pad2:'#a08030',belt:'#d8b040',cape:'#3a1a4a',pants:'#1a1420',boots:'#5a4a6a'},
+ gscout:{hair:'cap',hc:'#4a3a2a',hl:'#6a5a40',cap:'#2a4a3a',skin:'#d9a070',sk2:'#b47c50',top:'#3a5a4a',top2:'#26402f',sleeves:true,belt:'#2a1a10',pants:'#2e3a30',boots:'#2a2018'},
+ gknight:{hair:'helm',hc:'#9aa0aa',hl:'#d0d4dc',skin:'#d9a070',sk2:'#b47c50',top:'#2a5a46',top2:'#1a3e30',sleeves:true,pad:'#9aa0aa',pad2:'#6a707a',chest:'#c8c0a0',belt:'#2a1a10',cape:'#1a3e30',pants:'#2e3a30',boots:'#3a4048'},
+ smerman:{hair:'bald',hc:'#1a4a7a',hl:'#3a6a9a',skin:'#3a7aa8',sk2:'#2a5a82',top:'#3a7aa8',top2:'#2a5a82',sleeves:false,shorts:'#c8a050',pants:'#c8a050',boots:'#2a5a82'},
  knight:{hair:'helm',hc:'#b8bec9',hl:'#e6e9ee',skin:'#f1c193',sk2:'#d3a070',top:'#b8bec9',top2:'#8a909c',sleeves:true,cape:'#8a1f2a',pants:'#6a707c',boots:'#3a3e48'}};
 const OUT='#120f18',EYE='#22181e';
 const LOOK={hair:['spiky','short','long','pony','bald'],

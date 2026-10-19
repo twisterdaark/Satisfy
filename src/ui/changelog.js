@@ -5,6 +5,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19m', ver: '0.36', d: '2026-10-19',
+      ar: ['الماب بقى أكبر مرتين: أراضي جديدة في أقصى الشمال وأقصى الجنوب',
+        'الشمال: سور الشمال وبواباته فوق الطرق الشمالية، ووراه جبال الفوضى بأربع سلاسل، كل سلسلة أصعب من اللي قبلها (لفل 200 لـ 460)',
+        'جبال الفوضى فيها عاصفة تلج على طول، ومن السلسلة التانية التلج بيجرحك شوية شوية إلا جنب النار، ومستنقعات سامة بتبطّأك',
+        'في كل سلسلة سانجو، وحش الأساطير اللي ساكن الجبل، وفي معسكر لجيش الشمال ورا السور',
+        'الجنوب: ريف بيدرو بحقوله، وسور حدود مملكة جاوس جنوب باتريان، وساحل البحر الجنوبي وجزيرة كورك قدامه',
+        '14 وحش جديد، وأماكن جديدة على الخريطة بكلام من الرواية'],
+      en: ['The map is twice as big: new lands in the far north and the far south',
+        'North: the Northern Wall with a gate above each northern road, and beyond it the Chaos Mountains in four ridges, each harder than the last (Lv 200 to 460)',
+        'The Chaos Mountains have a blizzard all year; from the second ridge the cold cuts you little by little except by a fire, and poison swamps slow you down',
+        'A sanju, the beast of the old myths that rules the mountain, keeps a lair on every ridge, and the northern army has an outpost past the wall',
+        'South: the Pedro countryside and its fields, the Gauss Kingdom border wall south of Patrian, and the South Sea coast with Cork Island off shore',
+        '14 new monsters, and new places on the map with lines from the novel'] },
     { v: '2026-10-19l', ver: '0.35', d: '2026-10-19',
       ar: ['أونلاين: تبادل بين اللاعبين: افتح كارت اللاعب اللي جنبك (⋯ أو T) واضغط تبادل',
         'كل واحد بيحط دهب وحاجات من الشنطة، وبعدين الاتنين يضغطوا موافق وبعدها تأكيد',
