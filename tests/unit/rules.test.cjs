@@ -138,3 +138,10 @@ test('sessions: one lease node per account, owner only, server time', () => {
   const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
   assert.match(fb, /'sessions\/' \+ uid/);
 });
+
+// SAT-ONLINE-032 (review #12, optional there): one account can't create presence nodes under any number of shard names
+test('presence: one shard name only', () => {
+  assert.equal(rules.presence.$world.$shard['.validate'], "$shard === 'main'");
+  const fake = fs.readFileSync(path.join(ROOT, 'tests/harness/fake-firebase.js'), 'utf8');
+  assert.match(fake, /seg\[2\] !== 'main'/);
+});

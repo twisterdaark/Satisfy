@@ -30,6 +30,7 @@
       "$world": {
         ".validate": "$world === 'satisfy'",
         "$shard": {
+          ".validate": "$shard === 'main'",
           ".read": "auth != null",
           ".indexOn": ["x", "party"],
           "$uid": {

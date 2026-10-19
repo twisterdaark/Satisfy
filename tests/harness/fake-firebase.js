@@ -74,7 +74,7 @@
       if (Object.keys(v).sort().join(',') !== 'sid,t' || typeof v.sid !== 'string' || v.sid.length < 8 || v.sid.length > 64) return 'session fields';
       return JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'session t';
     }
-    if (seg.length !== 4 || seg[0] !== 'presence' || seg[1] !== 'satisfy') return 'PERMISSION_DENIED: path ' + p;
+    if (seg.length !== 4 || seg[0] !== 'presence' || seg[1] !== 'satisfy' || seg[2] !== 'main') return 'PERMISSION_DENIED: path ' + p;
     if (!user || seg[3] !== user.uid) return 'PERMISSION_DENIED: not your node';
     if (v === null) return null;
     for (const k in v) if (!FIELDS.includes(k)) return 'invalid field ' + k;

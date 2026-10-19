@@ -70,6 +70,7 @@
       try { s = JSON.parse(store.getItem(KEY) || 'null'); } catch (e) { s = null; }
       if (!s || typeof s.id !== 'string' || typeof s.leader !== 'string' || !(wall() - s.t < REJOIN_MS)) { forget(); return; }
       if (s.leader === self && s.id === idFor(self)) {
+        if (!(Array.isArray(s.members) && s.members.length)) { forget(); return; } // only invites out: nothing to come back to
         id = s.id; leader = self;
         (Array.isArray(s.members) ? s.members : []).forEach(function (u) { if (typeof u === 'string' && u !== self) recent.set(u, s.t); });
       } else memo = { id: s.id, leader: s.leader, t: s.t };

@@ -3751,7 +3751,7 @@ let last=performance.now(),hudT=0,saveT=0;
 const ERRS=new Set();
 function gameErr(e,m){if(m){m.st=null;m.tele=0;m.combo=0;m.flee=0;}const k=String(e&&e.message||e);if(ERRS.has(k))return;ERRS.add(k);console.error(e);try{logMsg('ERR '+k+' '+String(e&&e.stack||'').split('\n')[1]);toast(t('gameErr',{e:k.slice(0,90)}),'warn');}catch(_){}}
 let loopAt=0;
-function loop(now){requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{update(dt);}catch(e){gameErr(e);}if(NET)try{netTick();}catch(e){gameErr(e);}if(TOUCH)touchTick();try{render(dt);}catch(e){gameErr(e);}
+function loop(now){requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{update(dt);}catch(e){gameErr(e);}if(NET)try{netTick();}catch(e){gameErr(e);}if(TOUCH)try{touchTick();}catch(e){gameErr(e);}try{render(dt);}catch(e){gameErr(e);}
  if(mode==='play')updateKeys();
  if(mode==='create')drawPrev();if(DL&&DL.pv)drawDPrev();
  if(mode==='map'&&(gTime*2|0)!==(Math.max(0,gTime-dt)*2|0))drawMap();
@@ -3768,7 +3768,7 @@ window.__G={get CARD(){return CARD},get SM(){return SM},get allies(){return alli
 // Read-only engine surface for the online layer and for content tests. Contract: docs/api/ENGINE_API.md
 const plain=o=>JSON.parse(JSON.stringify(o,(k,v)=>typeof v==='function'?{$fn:String(v)}:v));
 Satisfy.local=Object.freeze({api:1,
- defs:()=>plain({MT,BOSSES,SPAWN,QD:Object.fromEntries(Object.entries(QD).filter(([,q])=>!q.gen)),RC,SKD,NPCS,TOWNS,ZR,MATS:Object.keys(S.mats)}),
+ defs:()=>plain({MT,BOSSES,SPAWN,QD:Object.fromEntries(Object.entries(QD).filter(([,q])=>!q.gen)),RC,SKD,NPCS,TOWNS,ZR,MATS:S?Object.keys(S.mats||{}):[]}),
  world:()=>({id:Satisfy.net.WORLD_ID,tile:TS,w:MW,h:MH,north:NR,outdoorH:WMH,zones:ZR.map(z=>z[0]),towns:TOWNS.map(z=>z.k)}),
  rooms:()=>ROOMS.map(R=>({id:R.id,kind:R.kind,zone:R.z})),
  zoneAt:(x,y)=>netZone(x,y), // 'void' where the world defines nothing (SAT-ONLINE-019)
