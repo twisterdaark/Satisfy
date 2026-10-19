@@ -77,6 +77,11 @@ test('two signed-in players see each other through the database; writes pass the
     assert.deepEqual(paths.sort(), ['presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]);
     assert.deepEqual((await fake(a)).rejected, []);
     assert.deepEqual((await fake(b)).rejected, []);
+    // link quality (doc U015/U020): acknowledged writes give a round trip, shown in the badge tooltip
+    const link = (await net(a)).link;
+    assert.ok(link.writes > 0 && link.fails === 0 && link.rtt >= 0, JSON.stringify(link));
+    await a.step(70);
+    assert.match(await a.eval(() => document.getElementById('netB').title), /^Link: \d+ ms · sent \d+ · received \d+ · dropped \d+$/);
     assert.deepEqual(a.errors, []);
   } finally { await ctx.close(); }
 });
