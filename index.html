@@ -1126,6 +1126,8 @@ function vtNear(px,py,rad){const o=[],cx=Math.floor(px/TS),cy=Math.floor(py/TS),
 (function buildReidan(){const {x0,x1,y0,y1}=REID;
  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const e=Math.min(x-x0,x1-x,y-y0,y1-y);setT(x,y,e<1?WL:(x===537||x===538||y===82||y===83)?PA:GR);}
  for(let y=80;y<=85;y++)setT(x0,y,y===82||y===83?PA:GR);
+ // south gate where the main road meets the wall (owner report: invaders spawned south of a closed wall)
+ for(let x=535;x<=540;x++)setT(x,y1,x===537||x===538?PA:GR);for(let y=y1+1;y<=y1+4;y++){setT(537,y,PA);setT(538,y,PA);}
  const B=[{x:518,y:65,w:6,h:5,k:'house'},{x:528,y:65,w:7,h:5,k:'forge'},{x:542,y:65,w:6,h:5,k:'shop'},{x:518,y:88,w:7,h:5,k:'inn'},{x:542,y:88,w:6,h:5,k:'house'},{x:550,y:76,w:6,h:5,k:'house'}];
  B.forEach(b=>{b.lx=b.x;buildings.push(b);for(let y=b.y+2;y<b.y+b.h;y++)for(let x=b.x;x<b.x+b.w;x++)setT(x,y,BL);});
  ANVILS.push({id:'anvR',tx:536,ty:71,own:'smithR',perm:'fo1'});WELLS.push({tx:533,ty:79,ph:1});setT(533,79,BL);
@@ -1622,7 +1624,9 @@ const NPCHP=100,npcKO=id=>!!(WS&&WS.nko&&WS.nko[id]>Date.now());
 function evRef(T){const cx=T.rx*TS+8,cy=T.ry*TS+8,ms=mons.filter(m=>!m.tmp&&!m.evt&&!MT[m.type].boss&&Math.hypot(m.x-cx,m.y-cy)<760).sort((a,b)=>a.lv-b.lv);
  if(!ms.length)return {lv:10,hp:600,dmg:60,xp:50};const med=ms[ms.length>>1].lv,near=ms.filter(m=>Math.abs(m.lv-med)<=Math.max(6,med*.3)),av=f=>near.reduce((a,m)=>a+f(m),0)/near.length;
  return {lv:Math.round(med),hp:av(m=>m.max),dmg:av(m=>MT[m.type].dmg),xp:av(m=>MT[m.type].xp)};}
-function evGates(T,rnd=rand){return [[T.x0-4,T.ry-1.5],[T.x1+4,T.ry-1.5],[T.rx,T.y0-4],[T.rx,T.y1+4]].map(([x,y])=>{for(let r=0;r<8;r++)for(let k=0;k<10;k++){const tx=Math.round(x+(rnd()-.5)*r*2),ty=Math.round(y+(rnd()-.5)*r*2);if(!sol0(tx,ty)&&!inTown(tx*TS+8,ty*TS+8))return {x:tx*TS+8,y:ty*TS+8};}return null;}).filter(Boolean);}
+// only sides whose wall has an opening where the march goes in (owner report: invaders stuck under Reidan's closed south wall)
+function evGates(T,rnd=rand){const ry=Math.round(T.ry-1.5),open=(x,y)=>[-1,0,1].some(d=>x===T.x0||x===T.x1?!sol0(x,y+d):!sol0(x+d,y)),G=[[T.x0-4,T.ry-1.5,T.x0,ry],[T.x1+4,T.ry-1.5,T.x1,ry],[T.rx,T.y0-4,T.rx,T.y0],[T.rx,T.y1+4,T.rx,T.y1]],ok=G.filter(g=>open(g[2],g[3]));
+ return (ok.length?ok:G).map(([x,y])=>{for(let r=0;r<8;r++)for(let k=0;k<10;k++){const tx=Math.round(x+(rnd()-.5)*r*2),ty=Math.round(y+(rnd()-.5)*r*2);if(!sol0(tx,ty)&&!inTown(tx*TS+8,ty*TS+8))return {x:tx*TS+8,y:ty*TS+8};}return null;}).filter(Boolean);}
 // every kind is rebuilt from the area's reference stats, so any monster can join any town's invasion at the right strength;
 // some are elites (double health, harder hits) and they grow with each wave
 function invSpawn(type,g,T,cap,rnd=rand){const E=EV,R=E.ref,b=MT[type],m=evSpawn(type,g.x+(rnd()-.5)*20,g.y+(rnd()-.5)*20,1),w=E.wave,el=!cap&&rnd()<.15+w*.01;m.ek=1; // ek: the same monster on every client, shared like the wild ones
