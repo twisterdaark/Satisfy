@@ -62,6 +62,8 @@ const DRAW={
  mith:I=>{I.ell(8,9,6,5,'#3e4650');I.ell(8,8,5,4,'#5a6470');I.rect(5,7,3,2,'#a8d8f0');I.rect(9,9,2,2,'#c8ecff');I.set(6,7,'#ffffff');I.set(10,6,'#bfe8ff');I.set(4,11,'#2e343c');},
  // life skills (SAT-LIFE-001): fish, herbs and cooked dishes
  fish:I=>fishI(I,['#6a8aa8','#8aaac8','#4a6a88']),sfish:I=>fishI(I,['#c8909a','#e8c0c8','#9a6a78']),gfish:I=>{fishI(I,['#d8a830','#f2d060','#a87a18']);I.set(9,5,'#ffffff');I.set(3,11,'#fff3b0');},
+ // a red dragon scale (SAT-DRAGON-001)
+ dscale:I=>{I.ell(8,8,6,6,'#7a161a');I.ell(8,7,5,5,'#b8282a');I.ell(7,6,3,3,'#d84a3a');I.line(8,3,8,13,'#7a161a');I.set(6,4,'#ff9a7a');I.set(5,5,'#ff9a7a');I.rect(7,13,2,2,'#5a1012');},
  herb:I=>herbI(I,'#d83a3a','#ff8a7a'),bherb:I=>herbI(I,'#3a7ad8','#bfe8ff'),
  cfish:I=>{I.line(1,14,14,1,'#8a6a3a');fishI(I,['#a8642a','#c8843a','#6a3a18']);I.set(6,7,'#4a2a10');I.set(8,7,'#4a2a10');I.set(10,7,'#4a2a10');},
  stew:I=>{I.ell(8,10,6,3.5,'#7a4a2a');I.rect(2,9,13,1,'#9a6a40');I.ell(8,9,5,1.5,'#c8843a');I.set(6,9,'#5aa83a');I.set(9,8,'#d83a3a');I.set(11,9,'#5aa83a');for(const x of [5,8,11]){I.set(x,6,'#e8e8f0');I.set(x+1,4,'#e8e8f0');I.set(x,2,'#e8e8f0');}},
@@ -83,6 +85,6 @@ function iconRGBA(k){const I=Img();
  else if(k==='larmor'||k==='parmor'||k==='marmor'||k==='warmor')armor(I,k);else sword(I,k);
  return finish(I,false);}
 function iconCanvas(k){const c=document.createElement('canvas');c.width=c.height=16;c.getContext('2d').putImageData(new ImageData(iconRGBA(k),16,16),0,0);return c;}
-const KEYS=['rusty','isword','ssword','gsword','bow','sbow','staff','sstaff','hammer','shammer','larmor','parmor','warmor','jaffa','arrows','bread','wood','ore','leather','blue','mstone','book','hpot','mpot','lhelm','ihelm','lgloves','igloves','lboots','iboots','cring','mring','spear','dagger','mith','msword','marmor','mhelm','fish','sfish','gfish','herb','bherb','cfish','stew','feast','slotW','slotA','slotH','slotG','slotB','slotX'];
+const KEYS=['rusty','isword','ssword','gsword','bow','sbow','staff','sstaff','hammer','shammer','larmor','parmor','warmor','jaffa','arrows','bread','wood','ore','leather','blue','mstone','book','hpot','mpot','lhelm','ihelm','lgloves','igloves','lboots','iboots','cring','mring','spear','dagger','mith','msword','marmor','mhelm','dscale','fish','sfish','gfish','herb','bherb','cfish','stew','feast','slotW','slotA','slotH','slotG','slotB','slotX'];
 A.icons={KEYS,iconRGBA,iconCanvas};
 })(typeof window!=='undefined'?window:globalThis);
