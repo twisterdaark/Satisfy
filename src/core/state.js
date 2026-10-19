@@ -53,6 +53,8 @@
     'rcK', 'rcN',
     // map cells seen (fog of war, Nitro's feedback): base64 bitset
     'fog', 'sec', 'respec', 'bank',
+    // skill use counts that set each skill's level (owner 2026-10-19)
+    'skx',
   ];
   var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT'];
   var META = ['v', 'wv', 'uid', 'pid'];
