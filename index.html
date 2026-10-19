@@ -2477,7 +2477,7 @@ function update(dt){
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;announce(t('annGrid'));SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
-  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)}));ZT[z]=gTime;}S.zone=z;if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if((z==='zGrey'||z==='zOut')&&S.lv<90&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
+  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)}));ZT[z]=gTime;}S.zone=z;if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut')&&S.lv<90||(z==='zYatan'||z==='zPeak')&&S.lv<160)&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
  {const rg=npcs.find(n=>n.id==='regas');if(rg)rg.hidden=!!allies.length||!!COMPO&&COMPO.id==='regas';}
  {const Rm=roomAt(P.x,P.y);if(Rm&&P.y>=(Rm.ry+7)*TS+5)leaveRoom(Rm);}
  npcs.forEach(n=>{if(n.hidden||n.obj)return;if(n.d0===undefined)n.d0=n.dir;const dx=P.x-n.x,dy=P.y-n.y;n.dir=!P.ghost&&Math.hypot(dx,dy)<40?(Math.abs(dx)>Math.abs(dy)?(dx>0?2:3):(dy>0?0:1)):n.d0;});
