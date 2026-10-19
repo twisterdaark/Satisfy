@@ -4,6 +4,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-19e', d: '2026-10-19',
+      ar: ['تقدر تحرك أي صندوق في الواجهة: اسحبه من علامة ⠿ وحطه مكان ما تحب، ومكانه بيتحفظ',
+        'زرار – جنب أغلب الصناديق بيقفلها لزرار صغير، ودوس + عشان ترجعها',
+        'رجّع الواجهة زي الأول من زرار "رجّع الواجهة لوضعها الأصلي" في قايمة Esc',
+        'التنين تراوكا اترسم من جديد بستايل اللعبة: جناحات وقرون وديل ونار في بقه'],
+      en: ['Move any HUD box: drag it by its ⠿ grip and drop it where you like; its place is saved',
+        'The – button beside most boxes folds them to a small tab; press + to bring them back',
+        'Put the HUD back as it was with "Reset the HUD" in the Esc menu',
+        'Trauka the dragon is redrawn in the game style: wings, horns, a spiked tail and fire in its jaws'] },
     { v: '2026-10-19d', d: '2026-10-19',
       ar: ['الوحوش المشتركة: اللاعبين اللي جنب بعض بيشوفوا نفس الوحوش حتى لو على حدود منطقتين، والضرب بيتحسب للكل وأرقامه بتبان',
         'الأحداث زي غزو ونستون بقت واحدة للكل: نفس الحدث ونفس العداد ونفس الموجة ونفس الوحوش',

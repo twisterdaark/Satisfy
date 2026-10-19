@@ -225,6 +225,7 @@ body.touch #keys .key{cursor:pointer}
 #dopts button.hp{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*1)}#dopts button.gopt.hp{display:grid;grid-template-columns:auto 1fr auto}#dopts .gopt .pr{grid-row:1/span 2;grid-column:3}
 .pr{display:inline-flex;align-items:center;gap:.3em;color:var(--gold);font-weight:bold;white-space:nowrap;direction:ltr}.pr img{width:1.4em;height:1.4em;image-rendering:pixelated}
 #updLog{left:50%;top:50%;transform:translate(-50%,-50%);background:var(--sys2);width:calc(var(--u)*56);max-width:92%;max-height:80%;display:flex;flex-direction:column;padding:calc(var(--u)*1.4);z-index:60}#updLog .x{position:absolute;top:calc(var(--u)*.6);inset-inline-end:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}#updLogL{overflow-y:auto;min-height:0;flex:1 1 auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);padding-inline-end:calc(var(--u)*.6);font-size:calc(var(--u)*1.4)}#updLogL .ul{margin-top:calc(var(--u)*.8)}#updLogL .ul b{color:#bfe8ff}#updLogL .ul.new b{color:#ffe7a8}#updLogL ul{margin:calc(var(--u)*.3) 0 0;padding-inline-start:calc(var(--u)*2)}#updLogL li{margin:calc(var(--u)*.25) 0}
+.ggrip{position:absolute;z-index:40;pointer-events:auto;display:flex;gap:2px;opacity:.28;transition:opacity .15s;font-size:calc(var(--u)*1.05);line-height:1}.ggrip:hover,.ggrip.col{opacity:1}.ggrip[hidden]{display:none}.ggrip .gm{cursor:grab;padding:0 3px;background:rgba(8,20,44,.85);border:1px solid rgba(143,216,255,.5);color:#bfe8ff;user-select:none;touch-action:none}.ggrip .gf{width:auto;padding:0 4px;font-size:inherit;line-height:1.1;background:rgba(8,20,44,.85)}.gcol{display:none!important}
 #dopts{display:grid;gap:calc(var(--u)*.4);margin-top:calc(var(--u)*.7)}#dopts.many{max-height:calc(var(--u)*24);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);gap:calc(var(--u)*.2);padding-inline-end:calc(var(--u)*.4)}#dopts.many button{font-size:calc(var(--u)*1.2);padding:calc(var(--u)*.15) calc(var(--u)*.8)}#dopts.many .gopt img{width:calc(var(--u)*2.2);height:calc(var(--u)*2.2);grid-row:auto}#dopts.many .gopt small{display:none}#dopts.many .gopt .pr{grid-row:auto}#dopts.many button.gopt{min-height:0}#dopts.many>button:last-child{position:sticky;bottom:0;background:var(--sys2,#16244a)}#dopts.many .pr img{width:calc(var(--u)*1.6);height:calc(var(--u)*1.6)}#dopts.grid{grid-template-columns:repeat(auto-fill,calc(var(--u)*4.6));justify-content:center;max-height:calc(var(--u)*17);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6);padding-inline-end:calc(var(--u)*.4)}#dopts.grid>button:not(.dcell){grid-column:1/-1;position:sticky;bottom:0}#dopts button.dcell{aspect-ratio:1;padding:calc(var(--u)*.4);display:flex;align-items:center;justify-content:center;position:relative}#dopts .dcell img{width:80%;height:80%;image-rendering:pixelated}#dopts .dcell b{position:absolute;bottom:2px;inset-inline-end:4px;font-size:calc(var(--u)*1.2);color:#ffe7a8;text-shadow:0 1px 2px #000}#dopts .dcell.poor img{opacity:.45}#dopts .dcell.eq{box-shadow:inset 0 0 0 2px #6ee07a}
 #dopts button{text-align:start;font-size:calc(var(--u)*1.35);padding:calc(var(--u)*.35) calc(var(--u)*1)}
 #dopts button.gopt{display:grid;grid-template-columns:auto 1fr;column-gap:calc(var(--u)*.9);align-items:center}#dopts .gopt img{grid-row:span 2;width:calc(var(--u)*3.4);height:calc(var(--u)*3.4);image-rendering:pixelated;background:rgba(0,0,0,.35);border:1px solid rgba(143,216,255,.4)}#dopts .gopt small{font-size:calc(var(--u)*1.05);opacity:.9;line-height:1.35}#dopts .gopt.poor span{opacity:.55}.cup{color:#6ee07a;font-weight:700}.cdn{color:#ff6a5a;font-weight:700}.ceq{color:#aab}
@@ -503,6 +504,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
       <div class="menu">
         <button data-act="resume" data-i18n="resume"></button>
         <button data-act="unstuck" data-i18n="unstuck"></button>
+        <button data-act="guiReset" data-i18n="guiReset"></button>
         <button data-act="controls" data-i18n="controls"></button>
         <button data-act="updLog" data-i18n="updLogB"></button>
         <button data-act="swapLang" data-i18n="langSwap"></button>
@@ -3343,7 +3345,7 @@ function act(a){
  else if(a==='pcClose'||a==='pcInvite'||a==='pcDuel'||a==='pcBlock')pctxAct(a);
  else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
- else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='quit'){save(true);fadeTo(toTitle);}
+ else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='guiReset')guiReset();else if(a==='quit'){save(true);fadeTo(toTitle);}
  else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeStatus')closeStatus();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qtoggle')toggleQuest();
  else if(a==='cardNext'){if(CARD)CARD('next');}else if(a==='cardSkip'){if(CARD)CARD('skip');}
  else if(a==='cRand'){CL.hair=rand()*LOOK.hair.length|0;CL.hc=rand()*LOOK.hc.length|0;CL.skin=rand()*LOOK.skin.length|0;CL.top=rand()*LOOK.top.length|0;renderCreate();}
@@ -3767,7 +3769,7 @@ let last=performance.now(),hudT=0,saveT=0;
 const ERRS=new Set();
 function gameErr(e,m){if(m){m.st=null;m.tele=0;m.combo=0;m.flee=0;}const k=String(e&&e.message||e);if(ERRS.has(k))return;ERRS.add(k);console.error(e);try{logMsg('ERR '+k+' '+String(e&&e.stack||'').split('\n')[1]);toast(t('gameErr',{e:k.slice(0,90)}),'warn');}catch(_){}}
 let loopAt=0;
-function loop(now){requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{update(dt);}catch(e){gameErr(e);}if(NET)try{netTick();}catch(e){gameErr(e);}if(TOUCH)try{touchTick();}catch(e){gameErr(e);}try{render(dt);}catch(e){gameErr(e);}
+function loop(now){requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;try{update(dt);}catch(e){gameErr(e);}if(NET)try{netTick();}catch(e){gameErr(e);}if(TOUCH)try{touchTick();}catch(e){gameErr(e);}try{render(dt);}catch(e){gameErr(e);}try{guiTick();}catch(e){gameErr(e);}
  if(mode==='play')updateKeys();
  if(mode==='create')drawPrev();if(DL&&DL.pv)drawDPrev();
  if(mode==='map'&&(gTime*2|0)!==(Math.max(0,gTime-dt)*2|0))drawMap();
@@ -4310,6 +4312,33 @@ if(NETQ==='online'){netBtn();
 Object.assign(STR.ar,{tEmote:'حركة',tPing:'علامة',tParty:'بارتي',tDuel:'مبارزة',tYes:'أيوه',tNo:'لأ',tChat:'شات'});
 Object.assign(STR.en,{tEmote:'Emote',tPing:'Ping',tParty:'Party',tDuel:'Duel',tYes:'Yes',tNo:'No',tChat:'Chat'});
 const TOUCH=(()=>{const q=new URLSearchParams(location.search).get('touch');if(q==='0')return false;if(q==='1')return true;try{return matchMedia('(pointer: coarse)').matches;}catch(e){return false;}})();
+/* movable HUD (owner request): every box has a grip (⠿) at its corner to drag it anywhere and a – that folds it to a
+   small tab (+ opens it again). Places and folds are kept per browser (localStorage satisfy_gui) as fractions of the
+   screen, so they survive reloads and window sizes; "Reset the HUD" in the pause menu puts everything back. Touch keeps
+   the fixed layout. */
+const GUI_IDS=['stats','quest','mini','partyW','chatW','skillbar','keys','evbar','boss'],GUIK='satisfy_gui';
+let GUI=(()=>{try{return JSON.parse(localStorage.getItem(GUIK)||'{}')||{};}catch(e){return {};}})(),guiDrag=null;
+function guiSave(){try{localStorage.setItem(GUIK,JSON.stringify(GUI));}catch(e){}}
+function guiPlace(id){const el=$(id),g=GUI[id],hud=$('hud');if(!el||!g||g.x==null)return;if(el.parentNode!==hud)hud.appendChild(el);const W=hud.clientWidth,H=hud.clientHeight,r=el.getBoundingClientRect();
+ const x=Math.max(0,Math.min(W-Math.min(r.width||40,W),g.x*W)),y=Math.max(0,Math.min(H-Math.min(r.height||20,H),g.y*H));
+ Object.assign(el.style,{position:'absolute',left:x+'px',top:y+'px',right:'auto',bottom:'auto',insetInlineStart:'auto',insetInlineEnd:'auto',transform:'none',margin:'0'});el.style.setProperty('left',x+'px');}
+function guiGrip(id){let b=$('g_'+id);if(b)return b;b=document.createElement('div');b.id='g_'+id;b.className='ggrip';b.innerHTML='<span class="gm" title="">⠿</span><button class="gf">–</button>';$('hud').appendChild(b);
+ b.querySelector('.gf').addEventListener('click',e=>{e.stopPropagation();const g=GUI[id]=GUI[id]||{};g.c=!g.c;guiSave();guiTick(true);SFX.click();});
+ b.querySelector('.gm').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const el=$(id),hud=$('hud'),hr=hud.getBoundingClientRect(),r=el.getBoundingClientRect();guiDrag={id,dx:e.clientX-r.left,dy:e.clientY-r.top,hr};
+  GUI[id]=GUI[id]||{};GUI[id].x=(r.left-hr.left)/hr.width;GUI[id].y=(r.top-hr.top)/hr.height;guiPlace(id);});
+ return b;}
+addEventListener('pointermove',e=>{const d=guiDrag;if(!d)return;const g=GUI[d.id];g.x=(e.clientX-d.dx-d.hr.left)/d.hr.width;g.y=(e.clientY-d.dy-d.hr.top)/d.hr.height;guiPlace(d.id);guiTick(true);});
+addEventListener('pointerup',()=>{if(guiDrag){guiDrag=null;guiSave();}});
+let guiT=0;
+function guiTick(now){if(TOUCH)return;if(!now&&(guiT-=1)>0)return;guiT=15;const hud=$('hud');if(!hud||hud.hidden)return;const hr=hud.getBoundingClientRect();
+ for(const id of GUI_IDS){const el=$(id);if(!el)continue;const g=GUI[id]||{},b=guiGrip(id);el.classList.toggle('gcol',!!g.c);if(g.x!=null)guiPlace(id);
+  const show=!el.hidden&&(g.c||el.offsetParent!==null)&&getComputedStyle(el).opacity!=='0';b.hidden=!show;if(!show)continue;
+  b.classList.toggle('col',!!g.c);b.querySelector('.gf').textContent=g.c?'+ '+t('gui_'+id):'–';
+  if(g.c){const x=g.x!=null?g.x*hr.width:el.getBoundingClientRect().left-hr.left,y=g.y!=null?g.y*hr.height:el.getBoundingClientRect().top-hr.top;b.style.left=Math.max(0,Math.min(hr.width-90,x))+'px';b.style.top=Math.max(0,Math.min(hr.height-20,y))+'px';}
+  else{const r=el.getBoundingClientRect();b.style.left=Math.max(0,r.left-hr.left)+'px';b.style.top=Math.max(0,r.top-hr.top-14)+'px';}}}
+function guiReset(){GUI={};guiSave();save(true);location.reload();}
+Object.assign(STR.ar,{guiReset:'رجّع الواجهة لوضعها الأصلي',gui_stats:'الحالة',gui_quest:'الكويستات',gui_mini:'الخريطة',gui_partyW:'الفريق',gui_chatW:'الشات',gui_skillbar:'السكيلات',gui_keys:'الأزرار',gui_evbar:'الحدث',gui_boss:'الزعيم'});
+Object.assign(STR.en,{guiReset:'Reset the HUD',gui_stats:'Status',gui_quest:'Quests',gui_mini:'Map',gui_partyW:'Party',gui_chatW:'Chat',gui_skillbar:'Skills',gui_keys:'Keys',gui_evbar:'Event',gui_boss:'Boss'});
 // key hints that work as taps (attack and guard are held, so they live on the big buttons instead)
 const TKEY={kD:'Space',kE:'KeyE',kC:'KeyC',kI:'KeyI',kU:'KeyU',kM:'KeyM',kGu:'KeyG',kMo:'KeyH',kEsc:'Escape'};
 function tKey(code,down){dispatchEvent(new KeyboardEvent(down?'keydown':'keyup',{code,key:code,bubbles:true}));}
