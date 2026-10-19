@@ -65,6 +65,13 @@ Spark gives **10 GB/month** of downloads and **100 simultaneous connections** (d
 - **Player list** (`online/main/{uid}`, ~60 B): each client writes its entry about once a minute and on a zone or
   level change; the list is downloaded only while someone has it open (O), plus its changes while open.
 
+## Shared monsters (SAT-ONLINE-031)
+
+The zone's host writes its list of monsters near players 4 times a second: up to 60 entries of about 30 B, so up to
+~2 KB per write and ~8 KB/s from the host, downloaded by every other player in that zone. With a handful of players
+together that is the largest stream in the game, still within Spark at a few hours of play a day. If it grows:
+send only the monsters that changed, or drop the rate to 2/s for monsters that are not fighting.
+
 ## Next steps
 
 1. **Measure k.** The table assumes 5 players near each one in a 20-player shard. Town crowds are the

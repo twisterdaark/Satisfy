@@ -13,11 +13,35 @@
     var ch = new root.BroadcastChannel(name || 'satisfy-net-v1');
     var handler = null;
     ch.onmessage = function (e) { if (handler) handler(e.data); };
+    // shared monsters (SAT-ONLINE-031), the shape of the Firebase transport's: {zone, h, m} on a second channel
+    var mch = null, mz = null, mw = null;
+    function mc() {
+      if (!mch) {
+        mch = new root.BroadcastChannel((name || 'satisfy-net-v1') + '-mobs');
+        mch.onmessage = function (e) {
+          var v = e.data;
+          if (!mw || !v || v.zone !== mw.zone || typeof v.h !== 'string') return;
+          if (v.m && typeof v.m === 'object') mw.all[v.h] = { t: v.t, m: v.m }; else delete mw.all[v.h];
+          mw.fn(mw.all);
+        };
+      }
+      return mch;
+    }
     return {
       kind: 'local',
       send: function (env) { try { ch.postMessage(env); } catch (e) { /* closed or not cloneable */ } },
       onmessage: function (fn) { handler = fn; },
-      close: function () { handler = null; try { ch.close(); } catch (e) { /* ignore */ } },
+      /** Follow the host lists of zone `zone` (null: stop): fn({hostUid: {t, m}}) on every change. */
+      mobsOn: function (zone, fn) { mw = zone ? { zone: zone, fn: fn, all: {} } : null; if (zone) mc(); },
+      /** Post our list for zone `zone` as host h (null zone or m: withdraw it). */
+      mobsPut: function (zone, m, h) {
+        var c = mc();
+        if (mz && (mz !== zone || !m)) { try { c.postMessage({ zone: mz, h: h, m: null }); } catch (e) { /* closed */ } mz = null; }
+        if (!zone || !m) return;
+        mz = zone;
+        try { c.postMessage({ zone: zone, h: h, m: m, t: Date.now() }); } catch (e) { /* closed */ }
+      },
+      close: function () { handler = null; mw = null; try { ch.close(); } catch (e) { /* ignore */ } try { if (mch) mch.close(); } catch (e) { /* ignore */ } },
     };
   }
 

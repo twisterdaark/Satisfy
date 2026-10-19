@@ -64,6 +64,13 @@
     if (seg[0] === 'world') return worldRules(seg, v, existing);
     if (seg[0] === 'online') return onlineRules(seg, v);
     if (seg[0] === 'handles' || seg[0] === 'accounts') return accountRules(seg, v);
+    // mobs/satisfy/{zone}/{uid} = {t, m: {key: "x,y,hp,flags,lv"}} (shared monsters, SAT-ONLINE-031)
+    if (seg[0] === 'mobs') {
+      if (seg.length !== 4 || seg[1] !== 'satisfy' || !/^[A-Za-z0-9_-]{1,24}$/.test(seg[2]) || !user || seg[3] !== user.uid) return 'PERMISSION_DENIED: mobs ' + p;
+      if (v === null) return null;
+      if (Object.keys(v).sort().join(',') !== 'm,t' || JSON.stringify(v.t) !== JSON.stringify(SV) || !v.m || typeof v.m !== 'object') return 'mobs fields';
+      return Object.keys(v.m).every((k) => /^[a-z0-9_]{1,16}@-?[0-9]{1,6},-?[0-9]{1,6}$/.test(k) && typeof v.m[k] === 'string' && v.m[k].length <= 48) ? null : 'mobs m';
+    }
     if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
     if (seg[0] === 'sessions') {
       if (seg.length !== 2 || !user || seg[1] !== user.uid) return 'PERMISSION_DENIED: not your session';

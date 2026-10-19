@@ -240,6 +240,30 @@
         }
       }
     },
+    "mobs": {
+      "$world": {
+        ".validate": "$world === 'satisfy'",
+        "$zone": {
+          ".read": "auth != null",
+          ".validate": "$zone.matches(/^[A-Za-z0-9_-]{1,24}$/)",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.hasChildren(['t', 'm'])",
+            "t": {
+              ".validate": "newData.val() === now"
+            },
+            "m": {
+              "$k": {
+                ".validate": "$k.matches(/^[a-z0-9_]{1,16}@-?[0-9]{1,6},-?[0-9]{1,6}$/) && newData.isString() && newData.val().length <= 48"
+              }
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
+    },
     "profiles": {
       "$uid": {
         ".read": "auth != null",

@@ -215,6 +215,7 @@
       }));
     }
     var onlineRef = D.ref(db, 'online/' + o.shard + '/' + o.uid);
+    var mobs = { offs: null, all: {}, zone: null }; // shared monsters (SAT-ONLINE-031)
     offs.push(D.onValue(D.ref(db, '.info/connected'), function (s) {
       var up = !!s.val();
       // re-armed on every reconnect: the server deletes our node if this client vanishes
@@ -277,6 +278,27 @@
         if (closed || !v) return;
         D.set(onlineRef, { h: String(v.h || '').slice(0, 24), lv: Math.max(0, Math.min(999, v.lv | 0)), z: String(v.z || '').slice(0, 24), t: D.serverTimestamp() }).catch(fail);
       },
+      /**
+       * Shared monsters (SAT-ONLINE-031): mobs/{world}/{zone}/{host uid} = {t, m: {"<type>@<sx>,<sy>": "x,y,hp,flags,lv"}}.
+       * The zone's host writes its monsters near players; the others follow them. mobsOn(zone, fn) calls fn with
+       * {hostUid: {t, m}} on every change (null zone: stop); mobsPut(zone, m) writes this client's node (null m: remove it).
+       */
+      mobsOn: function (zone, fn) {
+        if (mobs.offs) mobs.offs.forEach(off);
+        mobs.offs = null; mobs.all = {};
+        if (!zone || closed) return;
+        var ref = D.ref(db, 'mobs/' + o.world + '/' + zone), all = mobs.all;
+        function put(s) { if (s.key === o.uid) return; var v = s.val(); if (v && typeof v === 'object' && v.m && typeof v.m === 'object') all[s.key] = v; else delete all[s.key]; fn(all); }
+        mobs.offs = [D.onChildAdded(ref, put), D.onChildChanged(ref, put), D.onChildRemoved(ref, function (s) { delete all[s.key]; fn(all); })];
+      },
+      mobsPut: function (zone, m) {
+        if (closed) return;
+        if (mobs.zone && (mobs.zone !== zone || !m)) { D.remove(D.ref(db, 'mobs/' + o.world + '/' + mobs.zone + '/' + o.uid)).catch(function () { /* ignore */ }); mobs.zone = null; }
+        if (!zone || !m) return;
+        var ref = D.ref(db, 'mobs/' + o.world + '/' + zone + '/' + o.uid);
+        if (mobs.zone !== zone) { mobs.zone = zone; D.onDisconnect(ref).remove().catch(function () { /* ignore */ }); }
+        D.set(ref, { t: D.serverTimestamp(), m: m }).catch(fail);
+      },
       /** Watch the whole list: fn({uid: {h, lv, z, t}}) on every change. Returns a function that stops it. */
       onlineWatch: function (fn) {
         var all = {}, ref = D.ref(db, 'online/' + o.shard), fs = [];
@@ -287,9 +309,10 @@
       close: function () {
         if (closed) return;
         closed = true;
-        qOffs.concat(pq.offs, offs).forEach(off);
+        qOffs.concat(pq.offs, offs, mobs.offs || []).forEach(off);
         D.remove(mine).catch(function () { /* ignore */ });
         D.remove(onlineRef).catch(function () { /* ignore */ });
+        if (mobs.zone) D.remove(D.ref(db, 'mobs/' + o.world + '/' + mobs.zone + '/' + o.uid)).catch(function () { /* ignore */ });
         handler = null;
       },
       /**
@@ -300,7 +323,7 @@
       release: function () {
         if (closed) return;
         closed = true;
-        qOffs.concat(pq.offs, offs).forEach(off);
+        qOffs.concat(pq.offs, offs, mobs.offs || []).forEach(off);
         try { D.onDisconnect(mine).cancel().catch(function () { /* ignore */ }); } catch (e) { /* ignore */ }
         try { D.onDisconnect(onlineRef).cancel().catch(function () { /* ignore */ }); } catch (e) { /* ignore */ }
         handler = null;

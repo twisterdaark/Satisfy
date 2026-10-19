@@ -197,3 +197,15 @@ test('handles: first come, first served, kept or freed only by the owner; accoun
   assert.equal(String(account.RE), '/^[A-Za-z0-9_]{3,16}$/');
   assert.match(a.handle['.validate'], /\^\[A-Za-z0-9_\]\{3,16\}\$/);
 });
+
+// SAT-ONLINE-031: shared monsters
+test('mobs: each player writes only its own list per zone, readable by everyone signed in', () => {
+  const z = rules.mobs.$world.$zone, u = z.$uid;
+  assert.equal(rules.mobs.$world['.validate'], "$world === 'satisfy'");
+  assert.equal(z['.read'], 'auth != null');
+  assert.equal(u['.write'], 'auth != null && auth.uid === $uid');
+  assert.equal(u.t['.validate'], 'newData.val() === now');
+  assert.match(u.m.$k['.validate'], /length <= 48/);
+  const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
+  assert.match(fb, /'mobs\/' \+ o\.world \+ '\/' \+ zone/);
+});
