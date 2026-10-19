@@ -10,6 +10,7 @@
  *                                    payload {to, party} or {to, duel, k?, n?}; read and deleted by the
  *                                    recipient only; older than 60 s is dropped
  *   profiles/{uid}, cloudIndex/{uid}/{pid}, cloudSaves/{uid}/{pid}: see src/net/cloud.js
+ *   sessions/{uid}                 = {sid, t}: the account's active session (lease)
  * The transport turns child added/changed/removed under presence/{world}/{shard} into the same
  * envelopes Satisfy.presence gets from the local transport.
  */
@@ -142,13 +143,42 @@
         D.remove(mine).catch(function () { /* ignore */ });
         handler = null;
       },
+      /**
+       * Stop without touching the shared presence node or inbox: another tab or device signed in
+       * with the same account owns them now (see lease). Cancels this client's onDisconnect too,
+       * so closing this tab later can't delete the other session's node.
+       */
+      release: function () {
+        if (closed) return;
+        closed = true;
+        offs.forEach(function (off) { try { off(); } catch (e) { /* ignore */ } });
+        try { D.onDisconnect(mine).cancel().catch(function () { /* ignore */ }); } catch (e) { /* ignore */ }
+        handler = null;
+      },
     };
+  }
+
+  /**
+   * Session lease (doc U006 / T07): one active session per account. This client claims
+   * sessions/{uid} = {sid, t}; the newest claim wins, and every other session of the account is told
+   * through onLost(otherSid) so it can step aside (stop sending presence and reading the inbox).
+   * @returns {{off:function()}}
+   */
+  function lease(sdk, uid, sid, onLost) {
+    var D = sdk.m.database, ref = D.ref(sdk.db, 'sessions/' + uid), lost = false;
+    D.set(ref, { sid: sid, t: D.serverTimestamp() }).catch(function () { /* the rules or the network: presence still works */ });
+    var off = D.onValue(ref, function (s) {
+      var v = s.val();
+      if (!lost && v && typeof v.sid === 'string' && v.sid !== sid) { lost = true; onLost(v.sid); }
+    });
+    return { off: function () { try { off(); } catch (e) { /* ignore */ } } };
   }
 
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
     SDK_VERSION: SDK_VERSION,
     load: load,
+    lease: lease,
     currentUser: currentUser,
     signIn: signIn,
     signOut: signOut,

@@ -22,8 +22,10 @@
   const snap = (p, v) => ({ key: keyOf(p), val: () => clone(v) });
   const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => (b + 256).toString(16).slice(1)).join('');
 
+  const valueCbs = new Map(); // exact path -> callbacks (onValue on a data path)
   function fire(type, p, v) {
     for (const l of listeners) if (l.type === type && l.parent === parentOf(p)) setTimeout(() => l.cb(snap(p, v)), 0);
+    for (const cb of valueCbs.get(p) || []) setTimeout(() => cb(snap(p, type === 'removed' ? null : v)), 0);
   }
   function apply(op, p, v) {
     if (op === 'set') { const had = data.has(p); data.set(p, v); fire(had ? 'changed' : 'added', p, v); }
@@ -33,6 +35,10 @@
     if (!connected) return;
     const m = e.data;
     if (m.op === 'hello') { for (const p of mine) if (data.has(p)) ch.postMessage({ op: 'set', p, v: data.get(p) }); return; }
+    // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
+    // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
+    const cur = data.get(m.p);
+    if (m.op === 'set' && cur && m.v && typeof cur.t === 'number' && typeof m.v.t === 'number' && m.v.t < cur.t) return;
     apply(m.op, m.p, m.v);
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
@@ -44,6 +50,12 @@
     const seg = p.split('/');
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
     if (seg[0] === 'profiles' || seg[0] === 'cloudIndex' || seg[0] === 'cloudSaves') return cloudRules(seg, v);
+    if (seg[0] === 'sessions') {
+      if (seg.length !== 2 || !user || seg[1] !== user.uid) return 'PERMISSION_DENIED: not your session';
+      if (v === null) return null;
+      if (Object.keys(v).sort().join(',') !== 'sid,t' || typeof v.sid !== 'string' || v.sid.length < 8 || v.sid.length > 64) return 'session fields';
+      return JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'session t';
+    }
     if (seg.length !== 4 || seg[0] !== 'presence' || seg[1] !== 'satisfy') return 'PERMISSION_DENIED: path ' + p;
     if (!user || seg[3] !== user.uid) return 'PERMISSION_DENIED: not your node';
     if (v === null) return null;
@@ -174,12 +186,19 @@
     onChildRemoved: listen('removed'),
     onValue: (r, cb) => {
       if (r.path === '.info/serverTimeOffset') { setTimeout(() => cb(snap(r.path, 0)), 0); return () => {}; }
-      if (r.path !== '.info/connected') throw new Error('fake onValue supports only .info/connected and serverTimeOffset');
+      if (r.path !== '.info/connected') {
+        const seg = r.path.split('/');
+        if (seg[0] !== 'sessions' || !user || seg[1] !== user.uid) throw new Error('fake onValue: unsupported path ' + r.path);
+        if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);
+        valueCbs.get(r.path).push(cb);
+        setTimeout(() => cb(snap(r.path, data.has(r.path) ? data.get(r.path) : null)), 0);
+        return () => { const a = valueCbs.get(r.path) || [], i = a.indexOf(cb); if (i >= 0) a.splice(i, 1); };
+      }
       connCbs.push(cb);
       setTimeout(() => cb(snap(r.path, connected)), 0);
       return () => { const i = connCbs.indexOf(cb); if (i >= 0) connCbs.splice(i, 1); };
     },
-    onDisconnect: (r) => ({ remove: () => { discon.add(r.path); return Promise.resolve(); } }),
+    onDisconnect: (r) => ({ remove: () => { discon.add(r.path); return Promise.resolve(); }, cancel: () => { discon.delete(r.path); F.log.push({ op: 'cancelOnDisconnect', path: r.path }); return Promise.resolve(); } }),
   };
 
   // Simulates the network dropping: the "server" runs onDisconnect for this client, the client sees

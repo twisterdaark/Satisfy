@@ -49,6 +49,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #boss .bar{height:calc(var(--u)*1.5)}
 #boss .head{color:#ffb0a6;font-size:calc(var(--u)*1.6)}
 #partyW{pointer-events:auto;width:calc(var(--u)*26);font-size:calc(var(--u)*1.5)}#partyW .x{font-size:calc(var(--u)*1.3);width:auto;padding:0 calc(var(--u)*.6)}#partyL div{display:flex;justify-content:space-between;gap:calc(var(--u)*1)}#partyL .ld{color:#ffe07a}
+#netRepW{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);padding:calc(var(--u)*1.4) calc(var(--u)*2);text-align:center;font-size:calc(var(--u)*1.8);pointer-events:auto;border-color:var(--gold);z-index:5}#netRepW .row{display:flex;justify-content:center;margin-top:calc(var(--u)*1)}
 #duelInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*15);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto;border-color:#ff8a6a}#duelInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
 #duelW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*3.4);width:calc(var(--u)*40);padding:calc(var(--u)*.6) calc(var(--u)*1.2);text-align:center;font-size:calc(var(--u)*1.5);pointer-events:auto;border-color:#ff8a6a}#duelW .bars{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*1);margin:calc(var(--u)*.5) 0}#duelW .bar{height:calc(var(--u)*1.2)}#duelW .bar i{background:linear-gradient(90deg,#ff5a4a,#ffb04a)}#duelW .x{font-size:calc(var(--u)*1.3);width:auto;padding:0 calc(var(--u)*.8)}#duelCd{font-size:calc(var(--u)*4);color:var(--gold)}
 #cloudW{left:50%;top:50%;transform:translate(-50%,-50%);width:calc(var(--u)*50);max-height:calc(var(--u)*34);overflow:auto;padding:calc(var(--u)*1.4);font-size:calc(var(--u)*1.6)}#cloudW .x{position:absolute;top:calc(var(--u)*.6);right:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}#cloudN{color:var(--muted,#c8d0e0);margin:calc(var(--u)*.6) 0}#cloudL .cr{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*1);padding:calc(var(--u)*.5) 0;border-top:1px solid rgba(255,255,255,.15)}#cloudL .cr button{width:auto;padding:0 calc(var(--u)*1);font-size:calc(var(--u)*1.4)}
@@ -336,6 +337,7 @@ button{background:linear-gradient(180deg,rgba(36,52,108,.85),rgba(22,32,74,.85))
       <div id="evbar" class="sys" hidden></div>
       <div id="sgbar" class="sys" hidden></div>
       <div id="netB" class="sys" hidden></div>
+      <div id="netRepW" class="sys" hidden><div id="netRepT"></div><div class="row"><button id="netRepBtn" data-act="netTakeBack"></button></div></div>
       <div id="duelInv" class="sys" hidden><div id="duelInvT"></div><div class="row"><button id="duelBtnA" data-act="dAccept"></button><button id="duelBtnB" data-act="dDecline"></button></div></div>
       <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
       <div id="partyInv" class="sys" hidden><div id="partyInvT"></div><div class="row"><button data-act="pAccept" data-i18n="pAccept"></button><button data-act="pDecline" data-i18n="pDecline"></button></div></div>
@@ -2890,6 +2892,7 @@ function act(a){
  else if(a==='back'){showOnly(ctrlBack);mode=ctrlBack==='pauseScreen'?'pause':'title';}
  else if(a==='lang'){mode='lang';showOnly('langScreen');}
  else if(a==='online')netSignIn();
+ else if(a==='netTakeBack')netTakeBack();
  else if(a==='cloud')cloudOpen();else if(a==='cloudClose')$('cloudW').hidden=true;
  else if(a==='pAccept'||a==='pDecline'||a==='pLeave')partyAct(a);
  else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
@@ -3317,7 +3320,7 @@ window.__G.defs=Satisfy.local.defs;
 /* ---------------- online (opt-in: ?net=local) ---------------- */
 // Other players come from Satisfy.presence over a transport; nothing here changes offline play.
 // 'local' = BroadcastChannel between tabs of this browser. Two devices need SAT-ONLINE-004 (Firebase).
-let NET=null,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null;const PARTY_R=40;
+let NET=null,NETTR=null,netReplaced=false,netForce=false,netPrev=null,netSig='',netDrawn=0,netState='DISCONNECTED',netUser=null,PARTY=null,partySig='',DUEL=null,duelSig='',PRAID=null;const PARTY_R=40;
 const NETQ=QS.get('net');
 const NET_LIVE=['play','inv','status','equip','dialog','forge','log','map','dead','cut','pause'];
 function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
@@ -3451,10 +3454,19 @@ function cloudOpen(){const C=cloudApi();if(!C)return;$('cloudW').hidden=false;$(
    row.appendChild(armBtn(t('cloudDel'),()=>C.remove(c.pid).then(()=>{toast(t('cloudDelOk',{n:c.handle}));cloudOpen();},e=>{cloudErr(e);cloudOpen();})));box.appendChild(row);}},e=>{box.textContent='';cloudErr(e);});}
 function cloudProfile(){const C=cloudApi();if(!C||!S||S.__demo)return;cloudProfT=performance.now();C.writeProfile(S,lang).catch(e=>console.warn('profile write failed',e&&e.code));}
 function netFail(e){netSetState('ERROR');netBtn();toast(t('netFail',{e:(e&&e.code)||(e&&e.message)||'?'}),'warn');}
-function netConnect(sdk,user){if(NET)return;netUser=user;netSetState('JOINING');netBtn();
- const tr=Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');if(up)netForce=true;netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)});
+function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;netSetState('JOINING');netBtn();
+ const tr=NETTR=Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');if(up)netForce=true;netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)});
  netStart(Satisfy.presence.create({transport:tr,uid:user.uid,world:Satisfy.local.world(),now:()=>performance.now(),config:{moveHz:5,idleHz:.2,expireMs:15000}})); // cost model: docs/online/COST_MODEL.md
- addEventListener('pagehide',()=>NET.close());}
+ Satisfy.firebase.lease(sdk,user.uid,NET.sid,netReplace);
+ addEventListener('pagehide',()=>{if(NET)NET.close();});}
+/* one session per account (SAT-ONLINE-010, doc U006/T07): the newest tab or device signed in with the account
+   takes over. This one stops sending presence and reading the inbox, leaves the shared presence node alone,
+   and offers "Play here", which saves and reloads, so this page claims the account back. */
+Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
+Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
+function netReplace(){if(netReplaced)return;netReplaced=true;save(true);try{NETTR.release();}catch(e){}NET=null;PARTY=null;DUEL=null;PRAID=null;['partyW','partyInv','duelW','duelInv'].forEach(i=>$(i).hidden=true);
+ netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
+function netTakeBack(){save(true);location.reload();}
 function netSignIn(){if(NETQ!=='online'||netUser)return;netSetState('AUTHENTICATING');netBtn();
  Satisfy.firebase.load(Satisfy.firebaseConfig).then(sdk=>{FB=sdk;return Satisfy.firebase.signIn(sdk);}).then(u=>{if(u)netConnect(FB,u);else{netSetState('DISCONNECTED');netBtn();}},netFail);}
 if(NETQ==='online'){netBtn();
