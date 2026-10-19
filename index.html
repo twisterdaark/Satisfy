@@ -1842,7 +1842,7 @@ const SLOT=/^[A-Za-z0-9_-]{1,16}$/.test(QS.get('slot')||'')?QS.get('slot'):null;
 const STORE=(()=>{let ls=null;try{ls=localStorage;}catch(e){}return Satisfy.storage.create(ls,{slot:SLOT});})();
 // WS (guilds, territories, legends; SAT-GUILD-001) is saved next to S and P, as on main.
 // P is saved trimmed, at the tower/arena return point while inside one (as on main)
-function save(quiet){if(!S||S.__demo)return;const sp=TWR?TWR.ret:ARN?ARN.ret:P;Satisfy.ids.ensure(S);if(STORE.write(S,{x:sp.x,y:sp.y,hp:P.hp,st:P.st,mp:P.mp,food:P.food},{WS})&&!quiet)toast(t('saved'));}
+function save(quiet){if(!S||S.__demo||netNoSave)return;const sp=TWR?TWR.ret:ARN?ARN.ret:P;Satisfy.ids.ensure(S);if(STORE.write(S,{x:sp.x,y:sp.y,hp:P.hp,st:P.st,mp:P.mp,food:P.food},{WS})&&!quiet)toast(t('saved'));}
 function hasSave(){return STORE.exists();}
 // Stable ids and domain events (SAT-ONLINE-005, doc §05 R0.4/R0.5; src/core/ids.js, state.js, events.js).
 // S.pid (the character id Claude-B's guilds already use) and item.iid are assigned at the first save or load; kills, crafts and quest claims are reported
@@ -3595,12 +3595,15 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;netSetStat
  addEventListener('pagehide',()=>{if(NET)NET.close();});}
 /* one session per account (SAT-ONLINE-010, doc U006/T07): the newest tab or device signed in with the account
    takes over. This one stops sending presence and reading the inbox, leaves the shared presence node alone,
-   and offers "Play here", which saves and reloads, so this page claims the account back. */
+   and offers "Play here", which reloads (without saving: the other tab's save is newer), so this page claims the account back.
+   From the moment it is replaced, this page saves once (its state at that moment) and then never again (#30). */
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
-function netReplace(){if(netReplaced)return;netReplaced=true;save(true);try{NETTR.release();}catch(e){}NET=null;PARTY=null;DUEL=null;PRAID=null;['partyW','partyInv','duelW','duelInv'].forEach(i=>$(i).hidden=true);
+var netNoSave=false; // var: save() can run before this line; true once another tab or device owns the account
+function netReplace(){if(netReplaced)return;netReplaced=true;save(true);netNoSave=true;try{NETTR.release();}catch(e){}NET=null;PARTY=null;DUEL=null;PRAID=null;['partyW','partyInv','duelW','duelInv'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
-function netTakeBack(){save(true);location.reload();}
+// no save here: the other tab has played on since, and this page's state is older than what it saved
+function netTakeBack(){location.reload();}
 function netSignIn(){if(NETQ!=='online'||netUser)return;netSetState('AUTHENTICATING');netBtn();
  Satisfy.firebase.load(Satisfy.firebaseConfig).then(sdk=>{FB=sdk;return Satisfy.firebase.signIn(sdk);}).then(u=>{if(u)netConnect(FB,u);else{netSetState('DISCONNECTED');netBtn();}},netFail);}
 if(NETQ==='online'){netBtn();

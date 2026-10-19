@@ -41,8 +41,17 @@ test('a second tab with the same account takes over; Play here takes it back', a
     assert.ok(log.includes('cancelOnDisconnect'));
     assert.equal(log.lastIndexOf('remove'), -1, 'A never removed the shared node');
     assert.notEqual(await b.eval(() => Satisfy.local.net().sid), sidA);
+    // review fix (#30): from now on A never writes its (older) game over the save, not by autosave and not on quit
+    const mySave = () => JSON.stringify(Object.entries(localStorage).filter(([k]) => k.startsWith('satisfy_proto_v4@a')).sort());
+    const saved = await a.eval(mySave);
+    assert.ok(saved.length > 10, 'A has a save');
+    await a.eval(() => { window.__G.S.gold += 777; });
+    await a.step(60 * 25);
+    await a.eval(() => window.__G.act('quit'));
+    await a.waitMode('title');
+    assert.equal(await a.eval(mySave), saved, 'the replaced tab saved nothing');
 
-    // Play here: A saves, reloads, signs back in from the saved session and claims the account
+    // Play here: A reloads (no save), signs back in from the saved session and claims the account
     await Promise.all([a.page.waitForNavigation(), a.eval(() => setTimeout(() => document.getElementById('netRepBtn').click(), 0))]);
     await a.step(2);
     await until(a, () => !!Satisfy.local.net() && Satisfy.local.net().state === 'ONLINE', 20000); // reload + sign-in; slow when the machine is busy
