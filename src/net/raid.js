@@ -2,7 +2,9 @@
  *
  * Every client still simulates its own monsters. For a boss, the party leader is the *host*: its copy
  * of the boss is the one that counts.
- *   raid.hit    member → host: k = damage, n = hit number          (the member undoes it locally)
+ *   raid.hit    member → host: k = damage, n = hit number          (the member undoes it locally once the
+ *               host has confirmed that boss with a raid.state in the last CONFIRM_MS; until then it
+ *               keeps it, so a boss the host doesn't have is fought alone)
  *   raid.state  host → members: k = boss HP, n = boss max HP       (≤ 4/s while it changes)
  *   raid.kill   host → each member who hit it: raid = "<boss>~<encounter>"
  * payload.raid is the boss key ("<type>@<spawn x>,<spawn y>", the same on every client) or, for a
@@ -25,13 +27,15 @@
 (function (root) {
   'use strict';
 
-  var C = Object.freeze({ STATE_MS: 250, HIT_MAX: 5000, ENC_TTL_MS: 300000 });
+  // CONFIRM_MS: a member hands its hits to the host only while the host has recently sent raid.state for that boss
+  var C = Object.freeze({ STATE_MS: 250, HIT_MAX: 5000, ENC_TTL_MS: 300000, CONFIRM_MS: 1500 });
   var TYPES = ['raid.hit', 'raid.state', 'raid.kill'];
 
   function create(o) {
     var P = o.presence, party = o.party, self = o.uid, L = o.local, now = o.now || function () { return Date.now(); };
     var encs = new Map();   // host: boss key -> {enc, hitters:Set, dirty, sent, t}
     var seq = 0, listeners = [];
+    var conf = new Map();   // member: boss key -> when the host last sent its HP (it has that boss alive)
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function inParty() { return !!(party.id() && party.members().length >= 2); }
@@ -70,6 +74,7 @@
           if (!isMember() || from.uid !== party.leader()) return;
           var hp = +pl.k, max = +pl.n;
           if (!(max > 0) || !(hp >= 0)) return;
+          conf.set(pl.raid, now());
           if (L.boss(pl.raid)) L.setHp(pl.raid, Math.max(0, Math.min(1, hp / max)));
           break;
         }
@@ -98,7 +103,10 @@
       hit: function (key, k) {
         if (isMember()) {
           P.send('raid.hit', { to: party.leader(), raid: key, k: Math.max(1, Math.min(C.HIT_MAX, Math.round(k))), n: ++seq });
-          return true;
+          // Until the host confirms it has this boss (raid.state), the hit lands on our own copy too: a tower or
+          // trial boss only we have, or one the host killed solo and is waiting to respawn, is fought locally (#29).
+          // The host's next raid.state replaces our copy's HP with the shared one.
+          return conf.has(key) && now() - conf.get(key) < C.CONFIRM_MS;
         }
         if (isHost()) { var e = enc(key); e.hitters.add(self); e.dirty = true; }
         return false;

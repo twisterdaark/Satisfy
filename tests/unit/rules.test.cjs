@@ -116,3 +116,15 @@ test('the north (negative y) is writable; one shard name only', () => {
   assert.match(fake, /v\.y >= -POS_Y && v\.y < POS_Y/);
   assert.match(fake, /seg\[2\] !== 'main'/);
 });
+
+// review fix (#29): raid.state carries boss HP in k/n; trauka has 30M HP
+test('inbox k/n bounds cover the biggest boss (trauka has 30M HP)', () => {
+  const pl = rules.inbox.$uid.$msg.payload, cap = (r) => +/<= (\d+)/.exec(r['.validate'])[1];
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  const top = Math.max(...[...html.matchAll(/hp:(\d+),dmg:/g)].map((m) => +m[1]));
+  assert.ok(top >= 30000000, 'the dragon is in the monster table');
+  assert.ok(cap(pl.k) >= 10 * top && cap(pl.n) >= 10 * top, 'headroom for level scaling');
+  const fake = fs.readFileSync(path.join(ROOT, 'tests/harness/fake-firebase.js'), 'utf8');
+  assert.doesNotMatch(fake, /<= 10000000\b/);
+  assert.doesNotMatch(fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8'), /<= 10000000\b/);
+});

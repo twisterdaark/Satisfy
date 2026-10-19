@@ -75,8 +75,8 @@
       var o = { to: p.to };
       if (type.indexOf('party.') === 0) { o.party = String(p.party || ''); return o; }
       if (type.indexOf('raid.') === 0) o.raid = String(p.raid || ''); else o.duel = String(p.duel || '');
-      if (typeof p.k === 'number' && p.k >= 0 && p.k <= 10000000) o.k = Math.round(p.k);
-      if (typeof p.n === 'number' && p.n >= 0 && p.n <= 10000000) o.n = Math.round(p.n);
+      if (typeof p.k === 'number' && p.k >= 0 && p.k <= 1000000000) o.k = Math.round(p.k);
+      if (typeof p.n === 'number' && p.n >= 0 && p.n <= 1000000000) o.n = Math.round(p.n);
       return o;
     }
     function deliver(env) { if (handler && env && !closed) handler(env); }
