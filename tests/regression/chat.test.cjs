@@ -21,7 +21,7 @@ async function until(g, fn, ms = 8000, arg) {
 const lines = (g) => g.eval(() => [...document.querySelectorAll('#chatL div:not(.sys)')].map((d) => d.textContent)); // players' lines (not world notices, SAT-ONLINE-041)
 
 async function partyOf2(mode) {
-  const ctx = await H.newContext(mode === 'online' ? { scripts: [H.FAKE_FIREBASE] } : {});
+  const ctx = await H.newContext({ scripts: mode === 'online' ? [H.FAKE_FIREBASE, H.fixedClock()] : [H.fixedClock()] }); // world events by the clock put lines in the chat (SAT-ONLINE-066)
   const a = await H.openGame({ ctx, query: `?net=${mode}&slot=a` });
   const b = await H.openGame({ ctx, query: `?net=${mode}&slot=b` });
   if (mode === 'online') {

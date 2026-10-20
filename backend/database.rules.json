@@ -271,6 +271,7 @@
     "lockouts": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && !newData.exists()",
         "$week": {
           ".validate": "$week.matches(/^w[0-9]{4,6}$/)",
           "$boss": {

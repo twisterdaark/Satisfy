@@ -280,6 +280,7 @@
   }
   // SAT-ONLINE-059: lockouts/{uid}/{week}/{boss} {t}: your own, taken once a week per boss
   function lockRules(seg, v) {
+    if (seg.length === 2 && user && seg[1] === user.uid && v === null) return null; // SAT-ONLINE-066: the owner deletes them all
     if (!user || seg.length !== 4 || seg[1] !== user.uid || !/^w[0-9]{4,6}$/.test(seg[2]) || !/^[a-z0-9_]{1,16}$/.test(seg[3])) return 'PERMISSION_DENIED: ' + seg.join('/');
     if (data.has(seg.join('/'))) return 'PERMISSION_DENIED: lockout taken';
     return v && Object.keys(v).join(',') === 't' && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'lockout fields';
