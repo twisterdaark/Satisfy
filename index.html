@@ -4426,12 +4426,12 @@ function sahZone(tx,ty){const T=TITAN,B=BUTIN,R=ROLL,A=ABYSS;
 function zoneAt(x,y){if(y>=BHY0*TS)return 'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;return (roomAt(x,y)||{}).z||'zWin';}if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
 /* fog of war (Nitro's feedback): the map shows only what you have seen, in cells of FOGC tiles, saved in S.fog. A paper map
    (sold at inns) draws the whole land in sepia, but no monsters, people or quests where you haven't been yourself. */
-const FOGC=8,FOGW=Math.ceil(MW/FOGC),FOGH=Math.ceil((WMH+NR)/FOGC);let FOG=null,fogT=0;
-function fogLoad(){FOG=new Uint8Array(FOGW*FOGH);let ok=false;try{if(S.fog){const b=atob(S.fog),ow=Math.ceil(EX/FOGC);   // older maps: narrower before the Saharan Empire, shorter before the map doubled
+const FOGC=8,FOGW=Math.ceil(MW/FOGC),FOGH=Math.ceil((WMH+NR)/FOGC);let FOG=null,fogT=0,fogV=0;
+function fogLoad(){FOG=new Uint8Array(FOGW*FOGH);fogV++;let ok=false;try{if(S.fog){const b=atob(S.fog),ow=Math.ceil(EX/FOGC);   // older maps: narrower before the Saharan Empire, shorter before the map doubled
   for(const [w,h,dy] of [[FOGW,FOGH,0],[ow,FOGH,0],[ow,Math.ceil((OS+ON)/FOGC),(NR-ON)/FOGC]])if(b.length===w*h){for(let y=0;y<h;y++)for(let x=0;x<w;x++)FOG[(y+dy)*FOGW+x]=b.charCodeAt(y*w+x);ok=true;if(w!==FOGW||dy)fogSave();break;}}}catch(e){}
  if(!ok){for(const T of TOWNS)if(S.vis&&S.vis[T.k])fogSee(T.rx,T.ry,4);fogSave();}} // an older save: the towns you have been to
 function fogSave(){let b='';for(let i=0;i<FOG.length;i++)b+=String.fromCharCode(FOG[i]);S.fog=btoa(b);}
-function fogSee(tx,ty,r){let ch=false;const cx=Math.floor(tx/FOGC),cy=Math.floor((ty+NR)/FOGC);for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++){if(i*i+j*j>r*r+1)continue;const x=cx+i,y=cy+j;if(x<0||y<0||x>=FOGW||y>=FOGH)continue;if(!FOG[y*FOGW+x]){FOG[y*FOGW+x]=1;ch=true;}}return ch;}
+function fogSee(tx,ty,r){let ch=false;fogV++;const cx=Math.floor(tx/FOGC),cy=Math.floor((ty+NR)/FOGC);for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++){if(i*i+j*j>r*r+1)continue;const x=cx+i,y=cy+j;if(x<0||y<0||x>=FOGW||y>=FOGH)continue;if(!FOG[y*FOGW+x]){FOG[y*FOGW+x]=1;ch=true;}}return ch;}
 function fogSeen(tx,ty){if(!FOG)return true;const x=Math.floor(tx/FOGC),y=Math.floor((ty+NR)/FOGC);return x<0||y<0||x>=FOGW||y>=FOGH||!!FOG[y*FOGW+x];}
 function fogTick(dt){if(!S||!P||S.__demo)return;if(!FOG||FOG.sid!==S){fogLoad();FOG.sid=S;}if((fogT-=dt)>0)return;fogT=.5;const pp=outPos();if(fogSee(pp.x/TS,pp.y/TS,2))fogSave();}
 /* paper maps (Twister 2026-10-19): each inn sells the map of its own area only, and it is a traveller's sketch: the land
@@ -4445,13 +4445,18 @@ function pmRegions(){const o=pmOwned(),k=Object.keys(o).join(',');if(PMR&&PMRk==
 function pmIn(tx,ty){for(const r of pmRegions())if(Math.abs(tx-r.x)<=PM_RX&&Math.abs(ty-r.y)<=PM_RY)return true;return false;}
 // a place on the paper: moved up to 5 tiles, and about one in three left off the sketch
 function pmSpot(tx,ty,salt){const h=pmH(Math.round(tx)+salt*7,Math.round(ty));if(h%3===0)return null;return {x:tx+((h>>>4)%11)-5,y:ty+((h>>>9)%11)-5};}
-function fogDraw(g,X,Y,sc){const paper=pmRegions().length>0;g.save();for(let y=0;y<FOGH;y++)for(let x=0;x<FOGW;x++){if(FOG[y*FOGW+x])continue;
-  g.fillStyle=paper&&pmIn(x*FOGC+FOGC/2,y*FOGC-NR+FOGC/2)?`rgba(74,52,24,${(.5+(pmH(x,y)%40)/100).toFixed(2)})`:'#0a1220';
-  g.fillRect(Math.floor(X(x*FOGC)),Math.floor(Y(y*FOGC-NR)),Math.ceil(FOGC*sc)+1,Math.ceil(FOGC*sc)+1);}g.restore();}
+// the fog is painted once into a canvas one pixel per fog cell, and only repainted when you uncover land or buy a paper
+// map; the big map then stretches it in one drawImage (it was 6,700 rects on every redraw, the main drag lag)
+let FOGCV=null,FOGK='';
+function fogDraw(g,X,Y,sc){const paper=pmRegions().length>0,k=fogV+'|'+PMRk;
+ if(!FOGCV){FOGCV=document.createElement('canvas');FOGCV.width=FOGW;FOGCV.height=FOGH;}
+ if(FOGK!==k||FOGCV.fv!==FOG){FOGK=k;FOGCV.fv=FOG;const f=FOGCV.getContext('2d');f.clearRect(0,0,FOGW,FOGH);for(let y=0;y<FOGH;y++)for(let x=0;x<FOGW;x++){if(FOG[y*FOGW+x])continue;
+  f.fillStyle=paper&&pmIn(x*FOGC+FOGC/2,y*FOGC-NR+FOGC/2)?`rgba(74,52,24,${(.5+(pmH(x,y)%40)/100).toFixed(2)})`:'#0a1220';f.fillRect(x,y,1,1);}}
+ g.save();g.imageSmoothingEnabled=false;g.drawImage(FOGCV,Math.floor(X(0)),Math.floor(Y(-NR)),Math.ceil(FOGW*FOGC*sc)+1,Math.ceil(FOGH*FOGC*sc)+1);g.restore();}
 const mapOpt=who=>pmOwned()[who]?[]:[{l:t('oPMap'),pr:price(who,300),ic:'book',st:t('oPMapD'),poor:S.gold<price(who,300),f:()=>{const g=price(who,300);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;S.ev.pmap=Object.assign({},pmOwned(),{[who]:1});SFX.coin();toast(t('pMapGot'),'good');hudDirty=true;save(true);dialog(who,['pMapT']);}}];
 Object.assign(STR.ar,{oPMap:'اشتري خريطة ورق',oPMapD:'خريطة المنطقة دي بس، مرسومة بالإيد: الأماكن تقريبية ومش كلها موجودة',pMapGot:'الخريطة الورق معاك: M تفتحها',pMapT:'رحالة رسمها من دماغه للمنطقة اللي حوالين هنا. هتقرّبك من الأماكن، بس متعتمدش عليها: اللي تمشيه بنفسك هو اللي هيبان مظبوط.'});
 Object.assign(STR.en,{oPMap:'Buy a paper map',oPMapD:"This area only, drawn by hand: places are roughly placed and some are missing",pMapGot:'You have the paper map: M opens it',pMapT:"A traveller sketched the land around here from memory. It gets you close, but don't trust it fully: only what you walk yourself shows exactly."});
-function openMap(){SFX.open();mode='map';$('mapW').hidden=false;$('hint').hidden=true;const pp=outPos();MV.z=4;MV.cx=pp.x/TS;MV.cy=pp.y/TS;mapClamp($('mapC'));drawMap();}
+function openMap(){SFX.open();mode='map';$('mapW').hidden=false;$('hint').hidden=true;const pp=outPos();MV.z=4;MV.cx=pp.x/TS;MV.cy=pp.y/TS;mapClamp($('mapC'));drawMapNow();}
 function closeMap(){SFX.close();$('mapW').hidden=true;mode='play';}
 // where a quest is done or turned in (world tiles), for the map
 const wTile=(x,y)=>{const R=roomAt(x,y);return R?{x:R.dx/TS,y:R.dy/TS}:{x:x/TS,y:y/TS};};
@@ -4468,20 +4473,27 @@ function mapClamp(c){const sc=mapFit(c)*MV.z,hw=c.width/sc/2,hh=c.height/sc/2;MV
 function mapZoom(f,px,py){const c=$('mapC'),sc0=mapFit(c)*MV.z;px=px??c.width/2;py=py??c.height/2;const wx=MV.cx+(px-c.width/2)/sc0,wy=MV.cy+(py-c.height/2)/sc0;
  MV.z=clamp(MV.z*f,1,6);const sc=mapFit(c)*MV.z;MV.cx=wx-(px-c.width/2)/sc;MV.cy=wy-(py-c.height/2)/sc;mapClamp(c);drawMap();}
 function mapCenter(){const pp=outPos();MV.cx=pp.x/TS;MV.cy=pp.y/TS;if(MV.z<2)MV.z=2.5;mapClamp($('mapC'));drawMap();}
-function drawMap(){const c=$('mapC'),dpr=Math.min(2,window.devicePixelRatio||1),cw=Math.round(c.clientWidth*dpr),chh=Math.round(c.clientHeight*dpr);if(cw&&(c.width!==cw||c.height!==chh)){c.width=cw;c.height=chh;}
+// redraws from dragging and the wheel are folded into one per frame (a mouse sends 100+ moves a second)
+let mapRAF=0;function drawMap(){if(mapRAF)return;mapRAF=requestAnimationFrame(()=>{mapRAF=0;if(mode==='map')drawMapNow();});}
+function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=$('mapC'),dpr=Math.min(2,window.devicePixelRatio||1),cw=Math.round(c.clientWidth*dpr),chh=Math.round(c.clientHeight*dpr);if(cw&&(c.width!==cw||c.height!==chh)){c.width=cw;c.height=chh;}
  mapClamp(c);const g=c.getContext('2d'),sc=mapFit(c)*MV.z,X=x=>(x-MV.cx)*sc+c.width/2,Y=y=>(y-MV.cy)*sc+c.height/2,u=dpr*Math.min(1.8,.9+MV.z*.25),F=lang==='ar'?'Tajawal, sans-serif':'Oswald, sans-serif';
  g.fillStyle='#0a1220';g.fillRect(0,0,c.width,c.height);g.imageSmoothingEnabled=sc<8;g.imageSmoothingQuality='high';
- g.drawImage(mapBase,0,0,MW*8,(WMH+NR)*8,X(0),Y(-NR),MW*sc,(WMH+NR)*sc);
+ // only the part of the land on screen, from the copy nearest the zoom (the full 8 px copy is 27 million pixels)
+ {const B=sc>=7?mapBase:sc>=3.5?miniBase:lowBase(),bp=B===mapBase?8:B===miniBase?4:2,x0=Math.max(0,Math.floor(MV.cx-c.width/2/sc)-1),x1=Math.min(MW,Math.ceil(MV.cx+c.width/2/sc)+1),y0=Math.max(-NR,Math.floor(MV.cy-c.height/2/sc)-1),y1=Math.min(WMH,Math.ceil(MV.cy+c.height/2/sc)+1);
+  g.imageSmoothingQuality=bp>sc?'high':'low';   // scaling a copy up needs no mipmaps (downscaling the 8 px copy rebuilt them every frame)
+  if(B===mapBase){for(let j=Math.floor((y0+NR)/128);j*128<y1+NR;j++)for(let i=Math.floor(x0/128);i*128<x1;i++)g.drawImage(baseTile(i,j),Math.floor(X(i*128)),Math.floor(Y(j*128-NR)),Math.ceil(128*sc)+1,Math.ceil(128*sc)+1);}
+  else if(x1>x0&&y1>y0)g.drawImage(B,x0*bp,(y0+NR)*bp,(x1-x0)*bp,(y1-y0)*bp,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc);g.imageSmoothingQuality='high';}
+ const onS=(x,y,m=60*dpr)=>x>-m&&y>-m&&x<c.width+m&&y<c.height+m;
  // danger regions: red wash with a dashed edge
  g.save();g.setLineDash([6*dpr,4*dpr]);g.lineWidth=1.2*dpr;g.strokeStyle='rgba(226,73,58,.7)';g.fillStyle='rgba(140,10,10,.16)';[[28,2,34,40],[2,44,62,42]].forEach(([x,y,w,h])=>{g.fillRect(X(x),Y(y),w*sc,h*sc);g.strokeRect(X(x),Y(y),w*sc,h*sc);});g.restore();
  if(MV.z>=2.5){g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=1;for(let x=0;x<=MW;x+=10){g.beginPath();g.moveTo(X(x),Y(-NR));g.lineTo(X(x),Y(WMH));g.stroke();}for(let y=-NR;y<=WMH;y+=10){g.beginPath();g.moveTo(X(0),Y(y));g.lineTo(X(MW),Y(y));g.stroke();}}
- [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3]].forEach(([k,x,y])=>MM.label(g,t(k),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`}));
- ANVILS.forEach(a=>MM.marker(g,'anvil',X(a.tx+.5),Y(a.ty+.5),u*1.2));
- mons.forEach(m=>{if(m.dead||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
- allies.forEach(a=>{if(!a.dead)MM.marker(g,'ally',X(a.x/TS),Y(a.y/TS),u);});if(COMPO)MM.marker(g,'ally',X(COMPO.x/TS),Y(COMPO.y/TS),u);
+ [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3]].forEach(([k,x,y])=>onS(X(x),Y(y),240*dpr)&&MM.label(g,t(k),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`}));
+ ANVILS.forEach(a=>{if(onS(X(a.tx+.5),Y(a.ty+.5)))MM.marker(g,'anvil',X(a.tx+.5),Y(a.ty+.5),u*1.2);});
+ mons.forEach(m=>{if(m.dead||!onS(X(m.x/TS),Y(m.y/TS))||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
+ allies.forEach(a=>{if(!a.dead&&onS(X(a.x/TS),Y(a.y/TS)))MM.marker(g,'ally',X(a.x/TS),Y(a.y/TS),u);});if(COMPO)MM.marker(g,'ally',X(COMPO.x/TS),Y(COMPO.y/TS),u);
  if(MEET&&COMPO)MM.label(g,t('meetMap',{n:t(MEET.id)}),X(COMPO.x/TS),Y(COMPO.y/TS)-12*u,{size:Math.round(11*dpr),color:'#9fe39a',font:F,band:'rgba(6,24,10,.82)'});
  invMark(g,x=>X(x/TS),y=>Y(y/TS),u,sc,Math.round(13*dpr),F);
- const PMK=[];npcs.forEach((n,i)=>{if(n.hidden)return;const w=wTile(n.x,n.y);if(!fogSeen(w.x,w.y)){if(pmIn(w.x,w.y)){const q=pmSpot(w.x,w.y,i);if(q)PMK.push(['npc',q.x,q.y]);}return;}const x=X(w.x),y=Y(w.y);MM.marker(g,'npc',x,y,u*1.1);const mk=npcMark(n.id);if(mk)MM.label(g,mk[0],x,y-10*u,{size:Math.round(13*dpr),color:mk[1],weight:700,font:'Oswald, sans-serif'});
+ const PMK=[];npcs.forEach((n,i)=>{if(n.hidden)return;const w=wTile(n.x,n.y);if(!fogSeen(w.x,w.y)){if(pmIn(w.x,w.y)){const q=pmSpot(w.x,w.y,i);if(q)PMK.push(['npc',q.x,q.y]);}return;}const x=X(w.x),y=Y(w.y);if(!onS(x,y))return;MM.marker(g,'npc',x,y,u*1.1);const mk=npcMark(n.id);if(mk)MM.label(g,mk[0],x,y-10*u,{size:Math.round(13*dpr),color:mk[1],weight:700,font:'Oswald, sans-serif'});
   if(MV.z>=3)MM.label(g,t(n.id),x,y+10*u,{size:Math.round(10*dpr),color:'#e8f2ff',font:F,weight:500});});
  Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1).forEach(id=>{const p=qSpot(id);if(!p)return;if(!fogSeen(p.x,p.y)){if(pmIn(p.x,p.y)){const q=pmSpot(p.x,p.y,id.length);if(q)PMK.push([p.ret?'ret':'quest',q.x,q.y]);}return;}const x=X(p.x),y=Y(p.y),col=p.ret?'#ffd23a':'#7ee0ff';
   if(p.area){g.save();g.globalAlpha=.18;g.fillStyle=col;g.beginPath();g.arc(x,y,5*sc,0,7);g.fill();g.globalAlpha=.6;g.setLineDash([4*dpr,3*dpr]);g.strokeStyle=col;g.lineWidth=dpr;g.stroke();g.restore();}
@@ -4936,7 +4948,8 @@ function slamAllies(m){allies.forEach(a=>{if(!a.dead&&Math.hypot(a.x-m.x,a.y-m.y
 /* ---------------- minimap ---------------- */
 let miniT=0,miniOff=false;try{miniOff=localStorage.getItem('satisfy_mini')==='1';}catch(e){}
 // map art (sprites-original/minimap.js): painted base at 8 px per tile for the world map, a smoothed 4 px copy for the HUD
-const MM=SA.minimap,mapBase=MM.buildBase({at:(x,y)=>at(x,y-NR),snowAt:(x,y)=>snowAt(x,y-NR),WMH:WMH+NR},{W:MW,H:WMH+NR,buildings:buildings.map(b=>({...b,y:b.y+NR})),px:8,noiseRow:NR-ON}),miniBase=mk(MW*4,(WMH+NR)*4,g=>{g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(mapBase,0,0,MW*4,(WMH+NR)*4);});   // both start at world row -NR
+const MM=SA.minimap,mapBase=MM.buildBase({at:(x,y)=>at(x,y-NR),snowAt:(x,y)=>snowAt(x,y-NR),WMH:WMH+NR},{W:MW,H:WMH+NR,buildings:buildings.map(b=>({...b,y:b.y+NR})),px:8,noiseRow:NR-ON}),miniBase=mk(MW*4,(WMH+NR)*4,g=>{g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(mapBase,0,0,MW*4,(WMH+NR)*4);});let LOWB=null;const BTL={},baseTile=(i,j)=>BTL[i+','+j]||(BTL[i+','+j]=mk(1024,1024,g=>g.drawImage(mapBase,i*1024,j*1024,1024,1024,0,0,1024,1024)));   // the 8 px copy in 1024 px pieces: drawing from the whole 27-million-pixel canvas each frame was the zoomed-in lag
+const lowBase=()=>LOWB||(LOWB=mk(MW*2,(WMH+NR)*2,g=>{g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(miniBase,0,0,MW*2,(WMH+NR)*2);}));   // both start at world row -NR
 // where the player is on the world map (outside position while indoors)
 const outPos=()=>{if(ARN)return ARN.ret;if(TWR)return TWR.ret;if(inBh(P.x,P.y))return {x:BHPIER.gx,y:BHPIER.gy};const R=roomAt(P.x,P.y);if(R)return {x:R.dx,y:R.dy};let D=dunAt(P.x,P.y);for(let i=0;D&&i<8;i++){const g=DGATES.find(g=>g.hint==='hUp'&&dunAt(g.x,g.y)===D);if(!g)break;if(g.to.y<WMH*TS)return g.to;D=dunAt(g.to.x,g.to.y);}return P;};// below ground the map shows the cave mouth you came down
 function toggleMini(){miniOff=!miniOff;try{localStorage.setItem('satisfy_mini',miniOff?'1':'0');}catch(e){}SFX.click();drawMini();}
@@ -5444,7 +5457,7 @@ function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig
  else if(a==='pcBlock'){if(isBlocked(r.uid)){BLK.remove(r.uid);toast(t('pcUnblocked',{n:r.handle||'?'}));}else blockUid(r.uid,r.handle);}
  pctxSig='';}
 window.__G.toScreen=(x,y)=>{const b=stage.getBoundingClientRect();return {x:b.left+(x-camXf)*SC,y:b.top+(y-camYf)*SC};}; // tests: click a world position
-window.__G.maxHP=()=>maxHP();window.__G.mapBase=()=>mapBase;
+window.__G.maxHP=()=>maxHP();window.__G.mapBase=()=>mapBase;window.__G.MV=MV;window.__G.mapDraw=()=>drawMapNow();
 window.__G.isk={mkItem,equip,itemSkills,useISlot,ipOn,itemTip,mpC,MT,rs:()=>{sbSig='';},checkSkills:()=>checkSkills(),pasOn:k=>pasOn(k)};
 addEventListener('keydown',e=>{if(e.code!=='Escape'||mode!=='play'||(e.target&&e.target.tagName==='INPUT'))return;
  if(!$('emoW').hidden){$('emoW').hidden=true;e.stopImmediatePropagation();}else if(PCTX){PCTX=null;pctxSig='';e.stopImmediatePropagation();}},true);
