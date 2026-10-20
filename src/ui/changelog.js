@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zd', ver: '0.70', d: '2026-10-20',
+      ar: ['المزاد بقى شاشة زي شاشة البيع بدل الكلام: شنطتك على جنب، تختار حاجة وتكتب الكمية والسعر وتدوس "اعرض". وعلى الجنب التاني "المعروض" فيه بحث بالاسم وزرار اشتري، و"عروضي" فيه زرار اسحب، وفلوس البيع بتستلمها من نفس الشاشة',
+        'الشنطة كانت بتعرض أول 36 خانة بس، فلو اتملت الباقي كان مستخبي. دلوقتي بتعرض كل حاجة وبتسكرول'],
+      en: ['The auction house is now a window like the sell window instead of talk: your bag on one side, pick something, set the amount and price and press "List". On the other side, "Listed" has a name search and Buy buttons, "My listings" has Withdraw, and you collect your sales from the same window',
+        'The bag showed only its first 36 slots, so anything past a full bag was hidden. It now shows everything and scrolls'] },
     { v: '2026-10-20zc', ver: '0.69', d: '2026-10-20',
       ar: ['الإيرل آدن أمين الخزانة بقى بيديك مهام ملكية متنوعة بدل الحديد كل مرة: ضريبة خامات، صيد وحوش على طرق المملكة، جواب لمدينة تانية، أو قطع نادرة للخزانة. ومبيدكش نفس النوع مرتين ورا بعض',
         'لحد 4 مهام في اليوم وبين كل واحدة والتانية 5 دقايق لعب، والمكافأة على قد لفلك ومش أحسن من الصيد العادي. وكويستات العلماء المتكررة بقت 5 مرات في اليوم بالكتير'],
