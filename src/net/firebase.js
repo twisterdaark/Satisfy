@@ -407,7 +407,32 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; return up(u); },
+      // SAT-ONLINE-065: the treasury guildBank/{gid} = {in, s, lb, lg, t} (in: all gold given, s: all spent on buildings; lb,
+      // lg: the last gift's giver and amount, which the rules add to in), the buildings guildBuild/{gid}/{b} = level and
+      // guildLog/{gid}/{id} = {by, n, k, g, b?, l?, t}. A gift or a build reads the treasury and writes it back with the
+      // change: one written meanwhile makes the rules refuse it (the caller tries again).
+      watchBank: function (gid, cb) { return watch('guildBank/' + gid, cb); },
+      watchBuild: function (gid, cb) { return watch('guildBuild/' + gid, cb); },
+      watchLog: function (gid, cb) { var ref = at('guildLog/' + gid), q = D.limitToLast ? D.query(ref, D.limitToLast(8)) : ref; var off = D.onValue(q, function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      give: function (gid, uid, n, g, lid) {
+        return D.get(at('guildBank/' + gid)).then(function (s) {
+          var v = s.val() || {}, u = {};
+          u['guildBank/' + gid] = { in: (+v.in || 0) + g, s: +v.s || 0, lb: uid, lg: g, t: SV() };
+          u['guildLog/' + gid + '/' + lid] = { by: uid, n: String(n || '?').slice(0, 24), k: 'give', g: g, t: SV() };
+          return up(u);
+        });
+      },
+      build: function (gid, uid, n, b, l, cost, lid) {
+        return D.get(at('guildBank/' + gid)).then(function (s) {
+          var v = s.val(); if (!v) throw new Error('empty');
+          var u = {};
+          u['guildBank/' + gid] = { in: +v.in || 0, s: (+v.s || 0) + cost, lb: v.lb, lg: v.lg, t: SV() };
+          u['guildBuild/' + gid + '/' + b] = l;
+          u['guildLog/' + gid + '/' + lid] = { by: uid, n: String(n || '?').slice(0, 24), k: 'build', g: cost, b: b, l: l, t: SV() };
+          return up(u);
+        });
+      },
       readGuild: function (gid) { return D.get(at('guilds/' + gid)).then(function (s) { return s.val(); }); },
       readMember: function (gid, uid) { return D.get(at('guildMembers/' + gid + '/' + uid)).then(function (s) { return !!s.val(); }); },
       // SAT-ONLINE-050: the vault; taking writes guildVaultTaken once in the same update, so one player gets a thing

@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20o', ver: '0.54', d: '2026-10-20',
+      ar: ['أونلاين: مباني الجيلد: خزينة كل عضو يدي فيها دهب، والقائد والضباط يبنوا منها 3 مباني بـ 3 لفلات',
+        'ورشة الجيلد (+2% جودة صناعة كل لفل)، وساحة التدريب (+3% خبرة)، وقاعة الكنوز (+3% دهب من الوحوش)، لكل الأعضاء. من G ← المباني'],
+      en: ['Online: guild buildings: a treasury every member gives gold to, from which the master and officers raise 3 buildings of 3 levels',
+        'The Guild Forge (+2% crafting quality a level), the Training Hall (+3% experience) and the Treasure Hall (+3% gold from monsters), for every member. G -> Buildings'] },
     { v: '2026-10-20n', ver: '0.53', d: '2026-10-20',
       ar: ['أونلاين: المسابقة الوطنية: كل ساعتين (على الساعات الزوجية بتوقيت جرينتش) نص ساعة في 3 مراحل: الصيد، والصناعة، والساحة',
         'كل مرحلة ليها نقطها، والشريط فوق بيوريك المرحلة والوقت ونقطك ومركزك، وزرار "المسابقة" في قايمة اللاعبين فيه الترتيب',

@@ -292,6 +292,18 @@ test('the National Competition (SAT-ONLINE-064): your own scores, only upward, s
   assert.equal(u.$other['.validate'], false);
 });
 
+test('guild buildings (SAT-ONLINE-065): members give to the treasury, the master and officers build from it at fixed costs', () => {
+  const k = rules.guildBank.$gid, b = rules.guildBuild.$gid, l = rules.guildLog.$gid;
+  assert.match(k['.validate'], /newData\.child\('in'\)\.val\(\) === data\.child\('in'\)\.val\(\) \+ newData\.child\('lg'\)\.val\(\)/, 'a gift adds exactly its amount');
+  assert.match(k['.validate'], /newData\.child\('s'\)\.val\(\) <= newData\.child\('in'\)\.val\(\)/, 'no spending what was not given');
+  assert.match(k['.validate'], /=== 'm' \|\| .*=== 'o'\)\)\)$/, 'only the master and officers spend');
+  assert.match(b['.write'], /=== 'm' \|\| .*=== 'o'\)/);
+  for (const [lv, cost] of [[1, 50000], [2, 150000], [3, 400000]]) assert.ok(b.$b['.validate'].includes('newData.val() === ' + lv + ' && ') && b.$b['.validate'].includes(" + " + cost + ")"), 'level ' + lv + ' costs ' + cost);
+  assert.match(b.$b['.validate'], /newData\.val\(\) <= 3/);
+  assert.equal(l.$id['.write'], "auth != null && !data.exists() && root.child('guildMembers').child($gid).child(auth.uid).exists()", 'the log is written once, by members');
+  assert.equal(l.$id.$other['.validate'], false);
+});
+
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing
 // else here parses the expressions. Merging two rules files by hand once lost one; check every expression before a deploy.
 function exprProblem(e) {

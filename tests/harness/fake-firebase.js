@@ -52,7 +52,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|drops|dropClaims|kills|bounties|bountyPaid|arena|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|drops|dropClaims|kills|bounties|bountyPaid|arena|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -61,7 +61,7 @@
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
   // the paths a root update claims for its first writer only (each one's rules need !data.exists() or the like)
-  const CLAIM_RE = /^(guildNames|guildVaultTaken|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb))\//, CLAIM_WAIT = 120;
+  const CLAIM_RE = /^(guildNames|guildVaultTaken|guildBank|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb))\//, CLAIM_WAIT = 120;
   function rootUpdate(diff) {
     const ps = Object.keys(diff);curDiff = diff;bDiff = diff;let errs;try{errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);}finally{curDiff = null;bDiff = null;}
     F.log.push({ op: 'update', path: '', err: errs[0] || null, keys: ps.slice().sort() });
@@ -165,6 +165,27 @@
       if (!(v.rk === 'r' || v.rk === 'o' || (v.rk === 'm' && uid === me && gid === 'g_' + me))) return 'guildMembers rk';
       if (!(typeof v.n === 'string' && v.n.length <= 24 && isInt(v.c, 0) && v.c <= 1e12)) return 'guildMembers n/c';
       return isSV(v.on) || (old && v.on === old.on) ? null : 'guildMembers on';
+    }
+    if (seg[0] === 'guildBank' || seg[0] === 'guildBuild' || seg[0] === 'guildLog') { // SAT-ONLINE-065: the treasury, the buildings, the log
+      const gid = seg[1], member = data.has('guildMembers/' + gid + '/' + me), master = (data.get('guilds/' + gid) || {}).master === me, rk = rkOf(gid, me), boss = rk === 'm' || rk === 'o';
+      if (seg.length === 2 && v === null) return master ? null : 'PERMISSION_DENIED: ' + seg[0] + ' remove';
+      if (seg[0] === 'guildBank') {
+        if (seg.length !== 2 || !member) return 'PERMISSION_DENIED: guildBank ' + path;
+        if (Object.keys(v).sort().join(',') !== 'in,lb,lg,s,t' || !isInt(v.in, 0) || !isInt(v.s, 0) || !isInt(v.lg, 1) || v.lg > 1e6 || typeof v.lb !== 'string' || !isSV(v.t) || v.s > v.in) return 'guildBank fields';
+        const give = old ? v.s === old.s && v.in === old.in + v.lg && v.lb === me : v.s === 0 && v.in === v.lg && v.lb === me;
+        const spend = !!old && v.in === old.in && v.s > old.s && boss;
+        return give || spend ? null : 'PERMISSION_DENIED: guildBank stale or not yours';
+      }
+      if (seg[0] === 'guildBuild') {
+        if (seg.length !== 3 || !boss || !['forge', 'train', 'gold'].includes(seg[2])) return 'PERMISSION_DENIED: guildBuild ' + path;
+        if (!(isInt(v, 1) && v <= 3 && v === (old || 0) + 1)) return 'guildBuild level';
+        const s0 = (data.get('guildBank/' + gid) || {}).s, s1 = (after('guildBank/' + gid) || {}).s;
+        return s1 === s0 + [0, 50000, 150000, 400000][v] ? null : 'PERMISSION_DENIED: guildBuild cost';
+      }
+      if (seg.length !== 3 || !member || old || !/^l_[A-Za-z0-9_-]{1,40}$/.test(seg[2])) return 'PERMISSION_DENIED: guildLog ' + path;
+      const ks = Object.keys(v).sort().join(',');
+      if (!['by,g,k,n,t', 'b,by,g,k,l,n,t'].includes(ks) || v.by !== me || !['give', 'build'].includes(v.k) || !isSV(v.t)) return 'guildLog fields';
+      return null;
     }
     if (seg[0] === 'guildChat') { // SAT-ONLINE-049: members write new lines as themselves; the master clears it all on disband
       const gid = seg[1], member = data.has('guildMembers/' + gid + '/' + me);
@@ -302,7 +323,7 @@
     if (seg[0] === 'world' && seg[2] === 'wb') return wbRules(seg, v);
     if (seg[0] === 'world') return worldRules(seg, v);
     if (seg[0] === 'ranks') return rankRules(seg, v);
-    if (['guilds', 'guildNames', 'guildMembers', 'guildInv', 'guildChat', 'guildVault', 'guildVaultTaken'].includes(seg[0])) return guildRules(seg, v);
+    if (['guilds', 'guildNames', 'guildMembers', 'guildInv', 'guildChat', 'guildVault', 'guildVaultTaken', 'guildBank', 'guildBuild', 'guildLog'].includes(seg[0])) return guildRules(seg, v);
     if (seg[0] === 'drops' || seg[0] === 'dropClaims') return dropRules(seg, v);
     if (seg[0] === 'kills' || seg[0] === 'bounties' || seg[0] === 'bountyPaid') return bountyRules(seg, v);
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
@@ -538,7 +559,7 @@
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
-      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat'].includes(seg[0]) ? !!user : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts'].includes(seg[0]) && user && seg[1] === user.uid || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat'].includes(seg[0]) ? !!user : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : ['guildBank', 'guildBuild', 'guildLog'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts'].includes(seg[0]) && user && seg[1] === user.uid || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));
@@ -554,7 +575,7 @@
       if (r.path !== '.info/connected') {
         const seg = r.path.split('/');
         const tm = (seg[0] === 'tradeSides' && seg.length === 3) || (seg[0] === 'tradeDone' && seg.length === 2) ? tradeMeta(seg[1]) : null;
-        const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : seg[0] === 'guildVault' && seg.length === 2 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
+        const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : ['guildVault', 'guildBank', 'guildBuild', 'guildLog'].includes(seg[0]) && seg.length === 2 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
         const ok = gl !== null ? gl : r.path === 'bounties' ? !!user : seg[0] === 'sessions' || seg[0] === 'lockouts' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
