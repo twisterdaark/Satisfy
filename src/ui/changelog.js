@@ -5,6 +5,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zo', ver: '0.81', d: '2026-10-20',
+      ar: ['الحرامية والقتلة (التحديث الكبير التامن): فيه راجل مقنّع واقف في زقاق جوه وينستون، بين السور الغربي والبيت البنفسجي',
+        'كلاس الحرامي من لفل 15: اختباره إنك تسرق من 5 وحوش. سكيلاته: التخفّي (الوحوش بتفقدك، وأول ضربة منه الضعف، وأي ضربة بتنهيه)، والسرقة (دهب وساعات حاجة من اللي الوحش بيوقعه، مرة لكل وحش)، وسكينة الرمي، والمراوغة (12% من ضربات الوحوش مبتجيش فيك)',
+        'القاتل (مستوى تاني) من لفل 30 للحرامي بإتقان الخنجر 3: زي الرواية، اختبار تغيير الكلاس هو الاغتيال. بتقتل 8 هاربين من الجيش، وكل واحد لازم ياخد أول ضربة وإنت متخفّي',
+        'سكيلات القاتل: الاغتيال (الضعف من التخفّي أو من ورا، وأقوى على الوحش اللي صحته واطية)، وخطوة الظل (بتنط ورا الوحش)، ونصل السم',
+        'وإنت متخفّي باقي اللاعبين بيشوفوك باهت. كل ده ضد الوحوش بس، ومبيغيرش القتال بين اللاعبين'],
+      en: ['Thieves and assassins (major #8): a hooded man stands in an alley inside Winston, between the west wall and the purple house',
+        'The Thief class from level 15: the trial is to steal from 5 monsters. Skills: Stealth (monsters lose you, your first blow from it lands double, any blow ends it), Steal (gold and sometimes one of the monster\'s drops, once per monster), Throwing Knife, and Evasion (12% of monster blows miss you)',
+        'The Assassin (Tier-2) from level 30 for a Thief with dagger mastery 3: as in the novel, the class change quest is assassination. Kill 8 deserters, each after a first blow from stealth',
+        'Assassin skills: Assassinate (double from stealth or from behind, and harder on a badly wounded monster), Shadow Step (behind the monster) and Poison Blade',
+        'Other players see you faint while you are hidden. All of it works against monsters only and does not change fights between players'] },
     { v: '2026-10-20zn', ver: '0.80', d: '2026-10-20',
       ar: ['الكنايس (التحديث الكبير السابع): كاسوس، كاهن ريبيكا، بقى واقف برا سور وينستون الشمالي جنب مدربين الكلاسات',
         'كلاس الكاهن من لفل 10: زي الرواية، الكهنوت صعب. بتصلي جنب كاسوس 5 مرات وإنت ثابت مكانك، ولحد ما تخلص ممنوع تكتب في الشات وممنوع تاكل. لو كسرت النذر الصلوات بترجع من الأول',

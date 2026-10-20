@@ -28,7 +28,7 @@ test('counts match the audited baseline',()=>{
   const n=o=>Array.isArray(o)?o.length:Object.keys(o).length;
   assert.deepStrictEqual({MT:n(D.monsters.types),BOSSES:n(D.monsters.bosses),SPAWN:n(D.monsters.spawns),QD:n(D.quests.quests),RC:n(D.recipes.recipes),
     SKD:n(D.skills.skills),NPC:n(D.npcs.npcs),interior:Object.values(D.npcs.npcs).filter(x=>x.interior).length,ZR:n(D.zones.regions),TOWNS:n(D.zones.towns),classes:n(D.classes.classes)},
-    {MT:88,BOSSES:5,SPAWN:19,QD:102,RC:25,SKD:53,NPC:78,interior:8,ZR:17,TOWNS:3,classes:15});});
+    {MT:88,BOSSES:5,SPAWN:19,QD:104,RC:25,SKD:60,NPC:79,interior:8,ZR:17,TOWNS:3,classes:17});});
 
 // condition vocabulary (docs/content/CONTENT_SCHEMA.md)
 function checkCond(c,where){assert.ok(c&&typeof c==='object'&&!Array.isArray(c),where+': condition must be an object');
@@ -53,6 +53,7 @@ test('cross-references point at things that exist',()=>{
   for(const q of Object.values(Q)){assert.ok(N[q.by],`quest ${q.id} giver ${q.by}`);if(q.pre)assert.ok(Q[q.pre],`quest ${q.id} pre`);
     const o=q.obj;if(o.t==='kill')assert.ok(types[o.it],`quest ${q.id} kills ${o.it}`);else if(o.t==='have')assert.ok(MATS.includes(o.it),`quest ${q.id} has ${o.it}`);
     else if(o.t==='craft')assert.ok(R[o.it],`quest ${q.id} crafts ${o.it}`);else if(o.t==='visit')assert.ok(VISIT_TARGETS.includes(o.it),`quest ${q.id} visits ${o.it}`);
+    else if(o.t==='steal')assert.strictEqual(o.it,'steal',`quest ${q.id} steals`);
     else if(o.t==='pray')assert.strictEqual(o.it,'altar',`quest ${q.id} prays`);
     else if(o.t==='cache')assert.strictEqual(o.it,'cache',`quest ${q.id} digs caches`);
     else if(o.t==='block')assert.strictEqual(o.it,'guard',`quest ${q.id} blocks with the guard`);
