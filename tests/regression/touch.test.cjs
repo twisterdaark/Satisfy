@@ -88,6 +88,60 @@ test('?touch=1: the stick moves the player, Attack works while held, a key hint 
   } finally { await g.close(); }
 });
 
+// owner 2026-10-20: a finger near the stick (not only on it) steers, and one press on a potion or a skill uses it,
+// with a finger or the mouse, even when the pointer moves a little before it lets go
+test('a finger near the stick steers; one press on a potion or a skill uses it once (finger and mouse)', async () => {
+  const ctx = await H.newContext({ device: { viewport: { width: 844, height: 390 }, screen: { width: 844, height: 390 }, isMobile: true, hasTouch: true } });
+  try {
+    const g = await H.openGame({ ctx });
+    await H.newGame(g, LOOK);
+    await g.step(3);
+    await g.eval(() => { const G = window.__G; G.P.x = 90 * 16; G.P.y = 60 * 16; for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } });
+    await g.step(2);
+    const x0 = await g.eval(() => window.__G.P.x);
+    // just outside the ring, to its right
+    const near = await g.eval(() => { const b = document.getElementById('tStick').getBoundingClientRect(), x = b.right + b.width * 0.12, y = b.top + b.height / 2, el = document.elementFromPoint(x, y);
+      el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerId: 9, pointerType: 'touch', isPrimary: true, clientX: x, clientY: y })); return { id: el.id, x, y }; });
+    assert.equal(near.id, 'tStick', 'the space around the stick belongs to it');
+    await g.step(30);
+    assert.ok(await g.eval(() => window.__G.P.x) > x0 + 10, 'moved right');
+    await g.eval(([x, y]) => document.getElementById('tStick').dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 9, pointerType: 'touch', clientX: x, clientY: y })), [near.x, near.y]);
+    await g.step(5);
+    assert.equal(await g.eval(() => document.getElementById('tKnob').style.transform), '');
+    // a finger on the potion and on a skill: used on the press, once
+    await g.eval(() => { const G = window.__G; G.S.cls = 'warrior'; G.S.lv = 20; G.gainXP(1); G.S.hpot = 5; G.P.hp = 10; G.P.mp = 100; });
+    await g.step(3);
+    const at = (s) => g.eval((s) => { const b = document.querySelector(s).getBoundingClientRect(); return [b.x + b.width / 2, b.y + b.height / 2]; }, s);
+    const q = await at('#pot_hpot');
+    await g.page.touchscreen.tap(q[0], q[1]);
+    await g.step(3);
+    assert.deepEqual(await g.eval(() => window.__G.S.hpot), 4, 'one potion for one tap');
+    assert.ok(await g.eval(() => window.__G.P.hp > 10));
+    const r = await at('#skillbar [data-sk="0"]');
+    await g.page.touchscreen.tap(r[0], r[1]);
+    await g.step(2);
+    assert.ok(await g.eval(() => Object.values(window.__G.P.cd).some((c) => c > 0)), 'the skill went off');
+    assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+  // the mouse: the press uses it, a small slip before letting go does not lose it, and the click after it adds nothing
+  const m = await H.openGame();
+  try {
+    await H.newGame(m, LOOK);
+    await m.step(3);
+    await m.eval(() => { const G = window.__G; G.S.hpot = 5; G.P.hp = 10; });
+    await m.step(3);
+    const q = await m.eval(() => { const b = document.querySelector('#pot_hpot').getBoundingClientRect(); return [b.x + b.width / 2, b.y + b.height / 2]; });
+    await m.page.mouse.move(q[0], q[1]);
+    await m.page.mouse.down();
+    assert.equal(await m.eval(() => window.__G.S.hpot), 4, 'on the press');
+    await m.page.mouse.move(q[0] + 6, q[1] + 3);
+    await m.page.mouse.up();
+    await m.step(3);
+    assert.equal(await m.eval(() => window.__G.S.hpot), 4, 'once');
+    assert.deepEqual(m.errors, []);
+  } finally { await m.close(); }
+});
+
 test('?touch=1 online: the party row opens a card, invites, accepts and opens the chat line', async () => {
   const ctx = await H.newContext();
   try {

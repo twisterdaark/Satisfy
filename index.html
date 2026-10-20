@@ -411,7 +411,7 @@ body.touch #skillbar{inset-inline-start:auto;left:auto;right:calc(var(--u)*22);t
 body.touch #skillbar .sk{width:calc(var(--u)*5.6);height:calc(var(--u)*5.6)}
 body.touch #tAct{right:calc(var(--u)*2);bottom:calc(var(--u)*2)}
 body.touch #tAct button{height:calc(var(--u)*8);font-size:calc(var(--u)*1.6)}body.touch #tAct{grid-template-columns:repeat(2,calc(var(--u)*9))}
-body.touch #tStick{left:calc(var(--u)*2.5);bottom:calc(var(--u)*3);width:calc(var(--u)*18);height:calc(var(--u)*18)}
+body.touch #tStick{left:calc(var(--u)*2.5);bottom:calc(var(--u)*3);width:calc(var(--u)*18);height:calc(var(--u)*18)}body.touch #tStick::before{content:'';position:absolute;inset:calc(var(--u)*-5);border-radius:50%}
 body.touch #tNet{bottom:calc(var(--u)*22.5);left:calc(var(--u)*9.5)}
 #tNetT.open{background:rgba(255,220,120,.45)}#tAsk{position:absolute;left:calc(var(--u)*9.5);bottom:calc(var(--u)*22.5);display:flex;gap:calc(var(--u)*.8)}#tAsk button{width:calc(var(--u)*7);height:calc(var(--u)*5);border-radius:calc(var(--u)*2.5);font-size:calc(var(--u)*1.5);color:#fff;padding:0;background:rgba(40,110,60,.8);border:2px solid #9be7a8}#tAsk button+button{background:rgba(120,40,40,.8);border-color:#ff9a8a}body.touch #tNet:not([hidden])~#tAsk{bottom:calc(var(--u)*28.5)}
 body.touch .toast{font-size:calc(var(--u)*1.25);padding:calc(var(--u)*.2) calc(var(--u)*.8)}body.touch #toasts{top:calc(var(--u)*2.6);width:60%}body.touch #announce{width:calc(var(--u)*42);top:calc(var(--u)*7);font-size:calc(var(--u)*1.3);padding:calc(var(--u)*.5) calc(var(--u)*1)}body.touch #announce .head{font-size:calc(var(--u)*1.6)}#tNetT{position:absolute;left:calc(var(--u)*2.5);bottom:calc(var(--u)*22.5);width:calc(var(--u)*5.6);height:calc(var(--u)*5);border-radius:calc(var(--u)*2.5);font-size:calc(var(--u)*2);background:rgba(20,24,34,.55);border:2px solid rgba(255,255,255,.3);color:#fff;padding:0}
@@ -5601,7 +5601,14 @@ function act(a){
  else if(a==='resetKeys'){KB=[...DEFKB];REB=-1;try{localStorage.removeItem('satisfy_keys');}catch(e){}sbSig='';renderRebind();}
  else if(a==='keepPlaying'){$('end').hidden=true;$('hud').hidden=false;mode='play';stage.focus();}
 }
+/* owner 2026-10-20: one press on a potion or a skill on the bar uses it, with the mouse or a finger, like its key. It
+   fires on the press, so a click that moves a little (the browser starts dragging the slot), a finger that shifts (the
+   browser takes it for a scroll) or the bar redrawn under the pointer no longer loses it; the click after it is skipped. */
+let SBPD=0;
+UI.addEventListener('pointerdown',e=>{if(e.button>0)return;const b=e.target.closest&&e.target.closest('#skillbar [data-pot],#skillbar [data-sk],#skillbar [data-isk]');if(!b)return;SBPD=performance.now();
+ if(b.dataset.pot)drink(b.dataset.pot);else if(mode==='play'){if(b.dataset.sk!==undefined)useSlot(+b.dataset.sk);else useISlot(+b.dataset.isk);}});
 UI.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('tip').classList.remove('on');
+ if(b.closest('#skillbar')&&(b.dataset.pot||b.dataset.sk!==undefined||b.dataset.isk!==undefined)&&performance.now()-SBPD<1500)return;
  if(b.dataset.respec){if(!b.dataset.arm){b.dataset.arm=1;b.textContent=t('cloudSure');return;}useRespec();return;}
  if(b.dataset.stat){if(S.pts>0){const n=e.shiftKey?S.pts:Math.min(S.pts,+(b.dataset.n||1));S.st[b.dataset.stat]+=n;S.pts-=n;SFX.tick(1.6);if(n>1)tone(1500,.08,'square',.05,0,.06);renderStatus(b.dataset.stat);hudDirty=true;}return;}
  if(b.dataset.opt!==undefined){pickOpt(+b.dataset.opt);return;}

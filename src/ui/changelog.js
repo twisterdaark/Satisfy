@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20v85', ver: '0.85', d: '2026-10-20',
+      ar: ['عصا الحركة على الموبايل بقت بتشتغل لو لمست جنبها، مش لازم على الدايرة بالظبط',
+        'ضغطة واحدة على البوشن أو السكيل في الشريط بتستعمله على طول، بالماوس أو بالصباع، حتى لو إيدك اتحركت شوية قبل ما تشيلها'],
+      en: ['The touch stick now answers a finger near it, not only one right on the circle',
+        'One press on a potion or a skill on the bar uses it at once, with the mouse or a finger, even if the pointer slips a little before you let go'] },
     { v: '2026-10-20v84', ver: '0.84', d: '2026-10-20',
       ar: ['متجر Fog Island (عربية القرع في جزر بيهين) بقى بيبيع كتب تغيير كلاس نادرة زي الرواية: سيّاف البرق وساحر الانفجارات، بـ1,000 نقطة تحدي. نفس قواعد الكلاسات المخفية: كلاس مخفي واحد لكل شخصية، للنوفيس أو الكلاس الأول',
         'سيّاف البرق: ضربة البرق اللي بتنط بين الوحوش، خطوة الرعد، قصف الرعد، ونصل مشحون بينزّل صاعقة كل رابع ضربة',
