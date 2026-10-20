@@ -537,6 +537,21 @@
       accept: function (me, f, nMe, nF) { var u = {}; u['friends/' + me + '/' + f] = ent(nF); u['friends/' + f + '/' + me] = ent(nMe); u['friendReq/' + me + '/' + f] = null; return up(u); },
       decline: function (me, f) { var u = {}; u['friendReq/' + me + '/' + f] = null; return up(u); },
       remove: function (me, f) { var u = {}; u['friends/' + me + '/' + f] = null; u['friends/' + f + '/' + me] = null; return up(u); },
+      // SAT-ONLINE-070: whispers, whisper/{to}/{id} = {from, h, text, t}; the rules take them only from a friend, and only
+      // `to` reads them. whisperOn gets new lines (and those of the last 5 min); whisperClean drops ours older than a day
+      whisperOn: function (me, fn, offset) {
+        var ref = at('whisper/' + me), q = D.limitToLast ? D.query(ref, D.limitToLast(20)) : ref;
+        var off = D.onChildAdded(q, function (s) { var m = s.val(); if (!m || typeof m !== 'object' || typeof m.from !== 'string') return; if (typeof m.t === 'number' && Date.now() + (offset ? offset() : 0) - m.t > 300000) return; fn(m); }, function () { /* ignore */ });
+        return function () { try { off(); } catch (e) { /* ignore */ } };
+      },
+      whisper: function (to, m) { return D.push(at('whisper/' + to), { from: m.from, h: String(m.h || '?').slice(0, 24), text: String(m.text || '').slice(0, 120), t: D.serverTimestamp() }); },
+      whisperClean: function (me, offset) {
+        if (!D.limitToFirst) return Promise.resolve();
+        var ref = at('whisper/' + me);
+        return D.get(D.query(ref, D.orderByChild('t'), D.endAt(Date.now() + (offset ? offset() : 0) - 86400000), D.limitToFirst(10))).then(function (s) {
+          s.forEach(function (c) { D.remove(at('whisper/' + me + '/' + c.key)).catch(function () { /* ignore */ }); });
+        }).catch(function () { /* ignore */ });
+      },
     };
   }
 

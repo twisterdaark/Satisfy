@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zw', ver: '0.65', d: '2026-10-20',
+      ar: ['أونلاين: الهمس للأصحاب: اكتب في الشات /w والاسم والرسالة، أو "همس" من الأصحاب، والرسالة بتوصل لصاحبك بس مهما كان بعيد (بالبنفسجي)'],
+      en: ['Online: whispers to friends: type /w, the name and the message in the chat, or "Whisper" in Friends; only that friend reads it, however far away (in purple)'] },
     { v: '2026-10-20p', ver: '0.64', d: '2026-10-20',
       ar: ['أونلاين: الأصحاب: من كارت أي لاعب "صاحبني"، ولما يوافق بتلاقوا بعض في "الأصحاب" في قايمة اللاعبين (O)',
         'بتشوف مين أونلاين ولفله وفين في العالم، وبيوصلك إشعار لما صاحبك يدخل'],

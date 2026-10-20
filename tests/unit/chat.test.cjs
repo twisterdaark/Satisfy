@@ -135,3 +135,24 @@ test('a broken block list in storage is treated as empty', () => {
   s.setItem(CH.KEY, '[1,2]');
   assert.deepEqual(CH.blocklist(s).list(), []);
 });
+
+// SAT-ONLINE-070: whispers through an adapter (the game's goes through the database, friends only)
+test('whispers: sayTo sends through the adapter and shows "to"; incoming lines are ch w; blocked senders and the shared rate limit apply', () => {
+  const sent = [], fns = [];
+  const hub = SN.transports.hub();
+  let t = 1000;
+  const pres = SN.presence.create({ transport: hub.connect(), now: () => t, world: WORLD, net: SN.net, uid: 'u0', sid: 'sessWxxxxxxxx' });
+  const party = SN.party.create({ presence: pres, uid: 'u0', now: () => t });
+  const chat = CH.create({ presence: pres, party, uid: 'u0', now: () => t, blocked: (u) => u === 'uBad', handle: () => 'Me', whisper: { say: (uid, m) => sent.push([uid, m.from, m.h, m.text]), lines: (fn) => fns.push(fn) } });
+  assert.equal(chat.sayTo('u1', 'Bassem', '  hi ‮ there '), 'sent');
+  assert.deepEqual(sent, [['u1', 'u0', 'Me', 'hi there']]);
+  assert.deepEqual(chat.log().map((l) => [l.ch, l.to, l.text, l.self]), [['w', 'Bassem', 'hi there', true]]);
+  fns[0]({ from: 'u1', h: 'Bassem', text: 'yo' });
+  fns[0]({ from: 'uBad', h: 'Spam', text: 'buy gold' });
+  fns[0]({ from: 'u0', h: 'Me', text: 'echo' });
+  assert.deepEqual(chat.log().filter((l) => !l.self).map((l) => [l.ch, l.handle, l.text]), [['w', 'Bassem', 'yo']]);
+  assert.equal(chat.sayTo('u1', 'Bassem', 'again'), 'tooFast', 'the same rate limit as the other channels');
+  t += CH.C.MIN_GAP_MS + 1;
+  assert.equal(chat.sayTo('u1', 'Bassem', ''), 'empty');
+  assert.equal(CH.create({ presence: pres, party, uid: 'u0' }).sayTo('u1', 'B', 'x'), 'noWhisper');
+});

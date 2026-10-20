@@ -380,6 +380,21 @@
         }
       }
     },
+    "whisper": {
+      "$to": {
+        ".read": "auth != null && auth.uid === $to",
+        "$id": {
+          ".write": "auth != null && ((!data.exists() && newData.child('from').val() === auth.uid && root.child('friends').child($to).child(auth.uid).exists()) || (!newData.exists() && auth.uid === $to))",
+          ".validate": "newData.hasChildren(['from', 'h', 'text', 't'])",
+          "from": { ".validate": "newData.isString()" },
+          "h": { ".validate": "newData.isString() && newData.val().length <= 24" },
+          "text": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        },
+        ".indexOn": ["t"]
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",
