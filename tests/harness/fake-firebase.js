@@ -173,7 +173,7 @@
         if (seg.length !== 2 || !member) return 'PERMISSION_DENIED: guildBank ' + path;
         if (Object.keys(v).sort().join(',') !== 'in,lb,lg,s,t' || !isInt(v.in, 0) || !isInt(v.s, 0) || !isInt(v.lg, 1) || v.lg > 1e6 || typeof v.lb !== 'string' || !isSV(v.t) || v.s > v.in) return 'guildBank fields';
         const give = old ? v.s === old.s && v.in === old.in + v.lg && v.lb === me : v.s === 0 && v.in === v.lg && v.lb === me;
-        const spend = !!old && v.in === old.in && v.s > old.s && boss;
+        const spend = !!old && v.in === old.in && v.s > old.s && boss && ['forge', 'train', 'gold'].some((b) => { const n = after('guildBuild/' + gid + '/' + b), o = data.get('guildBuild/' + gid + '/' + b); return n != null && (o == null || n > o); }); // only with a building raised (Claude-B's review of #99)
         return give || spend ? null : 'PERMISSION_DENIED: guildBank stale or not yours';
       }
       if (seg[0] === 'guildBuild') {

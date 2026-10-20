@@ -83,6 +83,12 @@ test('online guild buildings: gifts to the treasury, buildings raised from it, a
     await a.eval(() => window.__GBD.build('forge')); await settle(a, b);
     assert.equal(await a.eval(() => window.__GBD.lv('forge')), 1);
     assert.match(await toasts(a), /Not enough in the treasury/);
+    // the master can't burn the treasury without raising a building (Claude-B's review of #99)
+    const burn = await a.eval(async () => {
+      const F = window.__GBD.fb(), D = F.m.database, v = window.__fakeRTDB.data.get('guildBank/g_gGbA1');
+      try { await D.update(D.ref(F.db), { 'guildBank/g_gGbA1': { in: v.in, s: v.s + 50000, lb: v.lb, lg: v.lg, t: D.serverTimestamp() } }); return 'ok'; } catch (e) { return 'no'; }
+    });
+    assert.equal(burn, 'no');
     // the dialog and the log
     await b.eval(() => window.__GBD.open()); await b.step(2);
     assert.match(await b.eval(() => document.getElementById('dialog').textContent), /Guild treasury: 103,000 gold/);

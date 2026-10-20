@@ -4964,7 +4964,7 @@ function guildBldD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const st=
  const o=GB_GIVE.filter(g=>S.gold>=g).map(g=>({l:t('gbGive',{g:g.toLocaleString()}),f:()=>{gbGive(g);setTimeout(guildBldD,700);}}));
  if(boss)for(const b in GB){const l=gbLv(b);if(l<3)o.push({l:t('gbBuild',{b:t('gb_'+b),l:l+1,g:GB_COST[l].toLocaleString()}),poor:have<GB_COST[l],f:()=>{gbBuild(b);setTimeout(guildBldD,700);}});}
  dialog('guild',L,null,[...o,{l:t('oBack'),f:guildPanel}]);}
-window.__GBD={store:()=>GDS,give:g=>gbGive(g),build:b=>gbBuild(b),bank:()=>GBK,lv:b=>gbLv(b),xpB:()=>gXPB(),goldB:()=>gGoldB(),q:()=>gbB('q'),open:()=>guildBldD(),log:()=>GBLOG}; // tests
+window.__GBD={fb:()=>FB,store:()=>GDS,give:g=>gbGive(g),build:b=>gbBuild(b),bank:()=>GBK,lv:b=>gbLv(b),xpB:()=>gXPB(),goldB:()=>gGoldB(),q:()=>gbB('q'),open:()=>guildBldD(),log:()=>GBLOG}; // tests
 function guildVaultD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const V=GUILD.vault(),ks=Object.keys(V).sort((a,b)=>V[b].t-V[a].t);
  const o=ks.slice(0,24).map(k=>{const e=V[k],can=GUILD.canTake(k);return {l:vaultName(e)+' · '+e.byN,ic:e.k,poor:!can,f:()=>can?dialog('guild',[t('gdTakeQ',{it:vaultName(e)})],null,[{l:t('gYes'),f:()=>guildTake(k)},{l:t('gNo'),f:guildVaultD}]):guildVaultD()};});
  dialog('guild',[t('gdVaultH',{n:ks.length,m:Satisfy.guild.C.VAULT_MAX}),ks.length?'':t('gdVaultEmpty')].filter(Boolean),null,[{l:t('gdPut'),f:guildPutD},...o,{l:t('oBack'),f:guildPanel}]);}
@@ -5296,7 +5296,8 @@ function netStop(){try{if(netLease)netLease.off();}catch(e){}netLease=null;try{i
 // what the game itself keeps online under the account, for "Delete my online data" (SAT-ONLINE-066): presence, the
 // rankings (055), this and last month's arena rating (053), the weekly lockouts (059). A held legend is freed too.
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
- return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid];}
+ const nc=Satisfy.natcomp?Satisfy.natcomp.now(wNow()):null,ni=nc?+nc.id.slice(1):-1; /* the National Competition's last two (SAT-ONLINE-069) */
+ return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid,lf=erase?legFree(uid):null;netStop();
  (erase?lf.then(()=>C.eraseAll(netErasePaths(uid))):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))

@@ -296,7 +296,8 @@ test('guild buildings (SAT-ONLINE-065): members give to the treasury, the master
   const k = rules.guildBank.$gid, b = rules.guildBuild.$gid, l = rules.guildLog.$gid;
   assert.match(k['.validate'], /newData\.child\('in'\)\.val\(\) === data\.child\('in'\)\.val\(\) \+ newData\.child\('lg'\)\.val\(\)/, 'a gift adds exactly its amount');
   assert.match(k['.validate'], /newData\.child\('s'\)\.val\(\) <= newData\.child\('in'\)\.val\(\)/, 'no spending what was not given');
-  assert.match(k['.validate'], /=== 'm' \|\| .*=== 'o'\)\)\)$/, 'only the master and officers spend');
+  assert.match(k['.validate'], /=== 'm' \|\| .*=== 'o'\) && \(/, 'only the master and officers spend');
+  for (const b of ['forge', 'train', 'gold']) assert.ok(k['.validate'].includes("newData.parent().parent().child('guildBuild').child($gid).child('" + b + "').val() > root.child('guildBuild').child($gid).child('" + b + "').val()"), 'a spend comes with a building raised: ' + b);
   assert.match(b['.write'], /=== 'm' \|\| .*=== 'o'\)/);
   for (const [lv, cost] of [[1, 50000], [2, 150000], [3, 400000]]) assert.ok(b.$b['.validate'].includes('newData.val() === ' + lv + ' && ') && b.$b['.validate'].includes(" + " + cost + ")"), 'level ' + lv + ' costs ' + cost);
   assert.match(b.$b['.validate'], /newData\.val\(\) <= 3/);
