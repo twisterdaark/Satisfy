@@ -20,6 +20,10 @@
  * Guild chat (SAT-ONLINE-049): with `guild` ({inGuild(), sayGuild(msg), guildLines(fn)}) say(text, 'guild') goes to the
  * guild's feed in the database; only members read it (the rules). Lines carry ch: 'guild'.
  *
+ * The word filter (SAT-ONLINE-071, plan U062): with `filter()` true, the words of other players' lines that are on a
+ * short list of insults (English and Arabic, matched after folding case, Arabic letter forms and repeated letters) are
+ * shown as stars. Your own lines are never changed. mask(text) does it.
+ *
  * Exposes `Satisfy.chat`:
  *   create({ presence, party, uid, now?, blocked?, world?, guild?, handle? }) -> { say(text, ch?), log(), on(fn), C }
  *   blocklist(storage?) -> { has(uid), add(uid, handle), remove(uid), clear(), list() }
@@ -43,10 +47,35 @@
     return out.trim();
   }
 
+  // insults, folded as fold() folds a word; English roots also match with an ending (fucking, shitty)
+  var BAD = ['fuck', 'fuk', 'fck', 'shit', 'bitch', 'cunt', 'dick', 'pussy', 'asshole', 'bastard', 'whore', 'slut', 'faggot', 'fag', 'nigger', 'nigga', 'retard', 'motherfucker',
+    'كس', 'كسمك', 'كسامك', 'كسختك', 'شرموط', 'شرموطه', 'شرموطة', 'متناك', 'متناكه', 'منيك', 'منيوك', 'خول', 'عرص', 'معرص', 'زبي', 'زب', 'طيز', 'لبوه', 'لبوة', 'وسخ', 'ابنالكلب', 'يلعندينك', 'قحبه', 'قحبة', 'نيك', 'انيكك'];
+  var ROOTS = ['fuck', 'shit', 'bitch', 'cunt', 'asshole', 'whore', 'slut', 'faggot', 'nigger', 'motherfucker'];
+  function fold(w) {
+    return String(w).toLowerCase().replace(/[\u064b-\u0652\u0640]/g, '').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه')
+      .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's').replace(/\$/g, 's').replace(/@/g, 'a')
+      .replace(/(.)\1{2,}/g, '$1$1').replace(/[^a-z\u0621-\u064a]/g, '');
+  }
+  var BADF = BAD.map(fold);
+  function bad(w) {
+    var f = fold(w), g = f.replace(/(.)\1+/g, '$1');
+    if (!f) return false;
+    if (BADF.indexOf(f) >= 0 || BADF.indexOf(g) >= 0) return true;
+    if (/^(ال|و|يا|ف)/.test(f) && f.length > 3) { var s = f.replace(/^(ال|و|يا|ف)/, ''); if (BADF.indexOf(s) >= 0) return true; } // Arabic: and-, the-, O-
+    for (var i = 0; i < ROOTS.length; i++) if (f.indexOf(ROOTS[i]) === 0 || g.indexOf(ROOTS[i]) === 0) return true;
+    return false;
+  }
+  /** The text with the listed insults as stars (the rest untouched). */
+  function mask(text) {
+    return String(text).replace(/[^\s.,!?؟،:;"'()\[\]{}<>\/\\|*~-]+/g, function (w) { return bad(w) ? new Array(Array.from(w).length + 1).join('★') : w; });
+  }
+
   function create(o) {
     var P = o.presence, party = o.party, self = o.uid, now = o.now || function () { return Date.now(); };
     var blocked = o.blocked || function () { return false; };
     var lines = [], listeners = [], sent = [], seq = 0, world = o.world || null, guild = o.guild || null, handle = o.handle || function () { return ''; };
+    var filt = o.filter || function () { return false; };
+    function seen(text) { return filt() ? mask(text) : text; } // other players' lines only
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function push(line) { lines.push(line); if (lines.length > C.LOG) lines.shift(); emit(line); }
@@ -62,20 +91,20 @@
       if (!others().some(function (m) { return m.uid === from.uid; })) return;
       var text = clean(pl.text);
       if (!text) return;
-      push({ type: 'line', ch: 'party', from: from.uid, handle: from.handle || '?', text: text, t: now(), self: false, n: ++seq });
+      push({ type: 'line', ch: 'party', from: from.uid, handle: from.handle || '?', text: seen(text), t: now(), self: false, n: ++seq });
     });
     if (world && world.world) world.world(function (m) {
       if (!m || typeof m.from !== 'string' || m.from === self || blocked(m.from)) return;
       var text = clean(m.text);
       if (!text) return;
-      push({ type: 'line', ch: 'all', from: m.from, handle: clean(m.h, 24) || '?', text: text, t: now(), self: false, n: ++seq });
+      push({ type: 'line', ch: 'all', from: m.from, handle: clean(m.h, 24) || '?', text: seen(text), t: now(), self: false, n: ++seq });
     });
 
     if (guild && guild.guildLines) guild.guildLines(function (m) {
       if (!m || typeof m.from !== 'string' || m.from === self || blocked(m.from)) return;
       var text = clean(m.text);
       if (!text) return;
-      push({ type: 'line', ch: 'guild', from: m.from, handle: clean(m.h, 24) || '?', text: text, t: now(), self: false, n: ++seq });
+      push({ type: 'line', ch: 'guild', from: m.from, handle: clean(m.h, 24) || '?', text: seen(text), t: now(), self: false, n: ++seq });
     });
 
     return {
@@ -128,5 +157,5 @@
   }
 
   var ns = root.Satisfy = root.Satisfy || {};
-  ns.chat = Object.freeze({ create: create, blocklist: blocklist, clean: clean, C: C, TYPES: Object.freeze(TYPES.slice()), KEY: KEY });
+  ns.chat = Object.freeze({ create: create, blocklist: blocklist, clean: clean, mask: mask, C: C, TYPES: Object.freeze(TYPES.slice()), KEY: KEY });
 })(typeof window !== 'undefined' ? window : globalThis);

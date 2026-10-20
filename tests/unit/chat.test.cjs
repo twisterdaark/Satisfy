@@ -135,3 +135,29 @@ test('a broken block list in storage is treated as empty', () => {
   s.setItem(CH.KEY, '[1,2]');
   assert.deepEqual(CH.blocklist(s).list(), []);
 });
+
+// SAT-ONLINE-071: the word filter
+test('mask(): listed insults as stars, after folding case, letter forms, repeats and look-alikes; other words untouched', () => {
+  const m = CH.mask;
+  assert.equal(m('you fucking idiot'), 'you ★★★★★★★ idiot');
+  assert.equal(m('FUUUCK this'), '★★★★★★ this');
+  assert.equal(m('sh1t happens'), '★★★★ happens');
+  assert.equal(m('classic Scunthorpe, cocktail, assassin'), 'classic Scunthorpe, cocktail, assassin');
+  assert.equal(m('يا شرموط'), 'يا ★★★★★');
+  assert.equal(m('كسر الباب والكسكسي'), 'كسر الباب والكسكسي', 'Arabic words that only start alike stay');
+  assert.equal(m('hello world'), 'hello world');
+});
+
+test('the filter option masks other players\' lines only', () => {
+  const fns = [];
+  const hub = SN.transports.hub();
+  const pres = SN.presence.create({ transport: hub.connect(), now: () => 1, world: WORLD, net: SN.net, uid: 'u0', sid: 'sessFxxxxxxxx' });
+  const party = SN.party.create({ presence: pres, uid: 'u0', now: () => 1 });
+  let on = true;
+  const chat = CH.create({ presence: pres, party, uid: 'u0', now: () => 1, filter: () => on, world: { sayWorld: () => {}, world: (fn) => fns.push(fn) } });
+  fns[0]({ from: 'u1', h: 'X', text: 'shit game' });
+  on = false;
+  fns[0]({ from: 'u1', h: 'X', text: 'shit game' });
+  assert.equal(chat.say('my own shit stays', 'all'), 'sent');
+  assert.deepEqual(chat.log().map((l) => l.text), ['★★★★ game', 'shit game', 'my own shit stays']);
+});

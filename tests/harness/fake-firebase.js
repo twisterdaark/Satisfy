@@ -317,6 +317,10 @@
   }
   function rules(p, v, existing) {
     const seg = p.split('/');
+    if (seg[0] === 'reports') { // SAT-ONLINE-071: once, as yourself, about someone else
+      if (!user || seg.length !== 2 || data.has(p) || !v || v.by !== user.uid) return 'PERMISSION_DENIED: reports';
+      return Object.keys(v).sort().join(',') === 'about,aboutN,by,byN,said,t,why' && typeof v.about === 'string' && v.about !== user.uid && ['spam', 'abuse', 'cheat', 'other'].includes(v.why) && typeof v.said === 'string' && v.said.length <= 360 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'reports fields';
+    }
     if (seg[0] === 'lockouts') return lockRules(seg, v);
     if (seg[0] === 'nat' || seg[0] === 'natPaid') return natRules(seg, v);
     if (seg[0] === 'arena') return arenaRules(seg, v);

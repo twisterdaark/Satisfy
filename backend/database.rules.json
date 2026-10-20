@@ -354,6 +354,20 @@
         }
       }
     },
+    "reports": {
+      "$id": {
+        ".write": "auth != null && !data.exists() && newData.child('by').val() === auth.uid",
+        ".validate": "newData.hasChildren(['by', 'byN', 'about', 'aboutN', 'why', 'said', 't'])",
+        "by": { ".validate": "newData.isString()" },
+        "byN": { ".validate": "newData.isString() && newData.val().length <= 24" },
+        "about": { ".validate": "newData.isString() && newData.val().length <= 128 && newData.val() !== auth.uid" },
+        "aboutN": { ".validate": "newData.isString() && newData.val().length <= 24" },
+        "why": { ".validate": "newData.val() === 'spam' || newData.val() === 'abuse' || newData.val() === 'cheat' || newData.val() === 'other'" },
+        "said": { ".validate": "newData.isString() && newData.val().length <= 360" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",
