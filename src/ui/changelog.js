@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20o', ver: '0.54', d: '2026-10-20',
+      ar: ['أونلاين: مباني الجيلد: خزينة كل عضو يدي فيها دهب، والقائد والضباط يبنوا منها 3 مباني بـ 3 لفلات',
+        'ورشة الجيلد (+2% جودة صناعة كل لفل)، وساحة التدريب (+3% خبرة)، وقاعة الكنوز (+3% دهب من الوحوش)، لكل الأعضاء. من G ← المباني'],
+      en: ['Online: guild buildings: a treasury every member gives gold to, from which the master and officers raise 3 buildings of 3 levels',
+        'The Guild Forge (+2% crafting quality a level), the Training Hall (+3% experience) and the Treasure Hall (+3% gold from monsters), for every member. G -> Buildings'] },
     { v: '2026-10-20j', ver: '0.52', d: '2026-10-20',
       ar: ['أونلاين: قرعة غنايم الغارة: كل بوس بتقتله الغارة بيطلع قطعة زيادة (إيبك وساعات يونيك) للي حاربوه: محتاجها، عايزها، أو سيبها',
         'المحتاج قبل العايز، وبعدين أعلى رقم من 1 لـ 100، والكل بيشوف مين كسب وبكام، والكسبان بس هو اللي بياخدها'],

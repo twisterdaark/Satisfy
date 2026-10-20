@@ -2854,8 +2854,8 @@ const gLv=g=>g.npc?g.lv:Math.max(1,GXP.filter(x=>g.xp>=x).length);
 const myG=()=>S&&S.guild&&WS&&WS.guilds[S.guild]||null;
 const ownsT=k=>!!(S&&S.guild&&WS&&WS.terr[k]&&WS.terr[k].own===S.guild);
 const castleB=g=>WS&&WS.castle&&WS.castle.own===g.id?.05:0;
-const gXPB=()=>{const g=myG();if(!g)return 0;const l=gLv(g);return (l>=8?.1:l>=5?.06:l>=2?.03:0)+castleB(g);};
-const gGoldB=()=>{const g=myG();if(!g)return 0;const l=gLv(g);return (l>=7?.1:l>=3?.05:0)+castleB(g);};
+const gXPB=()=>{const g=myG();if(!g)return 0;const l=gLv(g);return (l>=8?.1:l>=5?.06:l>=2?.03:0)+castleB(g)+gbB('xp');};
+const gGoldB=()=>{const g=myG();if(!g)return 0;const l=gLv(g);return (l>=7?.1:l>=3?.05:0)+castleB(g)+gbB('gd');};
 const shieldMin=o=>Math.max(1,Math.ceil((o.sh-Date.now())/60000));
 function gContrib(n){const g=myG();n=Math.round(n);if(!g||!n)return;if(g.online&&GUILD)GUILD.contribute(n);/* SAT-ONLINE-046: written with the next heartbeat */const me=g.members[pidOf()]||(g.members[pidOf()]={n:S.look.n,rk:'r',c:0});me.c+=n;if(g.npc)return;const l0=gLv(g);g.xp+=n;const l1=gLv(g);if(l1>l0){toast(t('gLvUp',{g:g.name,n:l1}),'good');SFX.level();}}
 function createGuild(nm){nm=String(nm||'').trim().slice(0,18);if(nm.length<2){SFX.deny();return toast(t('gNameBad'),'warn');}
@@ -2888,7 +2888,7 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
  const info=t('gInfo',{g:gName(g.id),n:l,x:g.npc?'-':nx?`${g.xp}/${nx}`:t('gMax'),m:Object.keys(g.members).length,cap:l*25,c:me.c});
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
  dialog('guild',[info,perks],null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
-  ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD}]:[]),
+  ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
 function guildMOpts(){const o=[],back=()=>shopD('guildM','gm_hi');
  if(!S.guild)o.push({l:t('oMakeG',{g:GCOST,l:GLV}),ic:'book',poor:S.gold<GCOST||S.lv<GLV,f:()=>S.lv<GLV?dialog('guildM',[t('gNeedLv',{n:GLV})],back):S.gold<GCOST?dialog('guildM',[t('noGold')],back):openGName()});
@@ -3215,7 +3215,7 @@ function drawForgeView(){const c=$('mgv'),g=c.getContext('2d');g.imageSmoothingE
   g.lineWidth=2;g.strokeStyle='#ffffff';g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Math.cos(A(p))*(rr+5),cy+Math.sin(A(p))*(rr+5));g.stroke();g.lineWidth=1;R(g,cx-2,cy-2,4,4,'#ffffff');}
  MG.steam.forEach(s=>{g.globalAlpha=Math.max(0,s.t*.6);R(g,s.x,s.y,3,3,'#e8eef4');});g.globalAlpha=1;}
 function finishMG(){const rc=MG.rc;
- const q=mgScore()+.025*(S.smith-1)+S.patience+(pasOn('focus')?(skLv('focus')>=5?.06:.04):0)+(rand()-.5)*.08;let r=Math.min(craftRate(q),maxRating());if(r>=3)setTimeout(()=>annW('craftLeg',{rk:r}),300);
+ const q=mgScore()+.025*(S.smith-1)+S.patience+(pasOn('focus')?(skLv('focus')>=5?.06:.04):0)+gbB('q')+(rand()-.5)*.08;let r=Math.min(craftRate(q),maxRating());if(r>=3)setTimeout(()=>annW('craftLeg',{rk:r}),300);
  let it=null;
  if(rc.slot==='x'){S.arrows[r]++;S.arrowsMade++;}
  else{it=mkItem(rc.id,r);breathFeat(it);if(pasOn('focus'))skUse('focus');if(P){vfx('forge',P.x,P.y-8);vfx('loot',P.x,P.y,{rarity:r});}
@@ -4898,8 +4898,9 @@ function guildEv(e){if(!S||S.__demo||gdFor!==S)return;gdSig='';
 function guildMirror(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!st.guild||!WS||!S)return;const me=NET.uid,g=WS.guilds[st.gid]||{},mem={};
  for(const u in st.members){const m=st.members[u];mem[u===me?pidOf():'u:'+u]={n:m.n,rk:m.rk,c:m.c,uid:u};}
  WS.guilds[st.gid]=Object.assign(g,{id:st.gid,name:st.guild.name,master:st.guild.master===me?pidOf():'u:'+st.guild.master,lv:1,xp:st.xp,col:st.guild.col,online:1,members:mem});
+ if(gbFor!==st.gid)gbStart(st.gid);else guildMirrorB();
  if(S.guild!==st.gid||S.gon!==st.gid){S.guild=st.gid;S.gon=st.gid;save(true);}hudDirty=true;}
-function guildDrop(gid){if(gid&&WS&&WS.guilds[gid]&&WS.guilds[gid].online)delete WS.guilds[gid];if(S.guild===gid)S.guild='';if(S.gon===gid)S.gon='';hudDirty=true;save(true);}
+function guildDrop(gid){if(gbFor===gid)gbStop();if(gid&&WS&&WS.guilds[gid]&&WS.guilds[gid].online)delete WS.guilds[gid];if(S.guild===gid)S.guild='';if(S.gon===gid)S.gon='';hudDirty=true;save(true);}
 function guildPub(){const st=GUILD&&gdFor===S&&GUILD.state();return st&&st.gid&&st.members[NET.uid]?st.gid:null;}
 function guildCanInvite(r){const st=GUILD&&gdFor===S&&GUILD.state();return !!(st&&st.gid&&Satisfy.guild.can(st.rank,'invite')&&r&&r.uid&&!st.members[r.uid]&&!r.gd);}
 // the invitation prompt: shown while you are in no guild (leave yours first to take another)
@@ -4924,6 +4925,41 @@ const GRK={m:0,o:1,r:2};
 // their own; a thing taken out is one player's only (guildVaultTaken). An item travels as plain values, as in trades.
 function vaultKindOk(k,r){return !!(POT[k]||k==='bread'||(k==='arrows'&&ARROWG[r]!=null)||MATP[k]!==undefined);}
 const vaultName=e=>(e.it?tradeName(e.it):t(e.k))+(e.n>1?' ×'+e.n:'');
+/* guild buildings (SAT-ONLINE-065, Claude-B #13 item 21; plan U234 guild forge, U236 treasury, U237 research tree).
+   Online, a guild has a treasury every member gives gold to (guildBank/{gid}: in, all given; s, all spent; the rules add
+   each gift to in) and three buildings the master and officers raise from it, three levels each (guildBuild/{gid}/{b}; the
+   rules take that level's cost from the treasury in the same write): the Guild Forge (+2% crafting quality a level), the
+   Training Hall (+3% experience) and the Treasure Hall (+3% gold from monsters), on top of the guild level's perks.
+   Every member's game applies its guild's buildings; guildLog/{gid} keeps who gave and raised what. G -> Buildings. */
+Object.assign(STR.ar,{gdBld:'المباني',gbH:'خزينة الجيلد: {g} دهب. أي عضو يدي، والقائد والضباط يبنوا',gb_forge:'ورشة الجيلد',gb_train:'ساحة التدريب',gb_gold:'قاعة الكنوز',gbE_forge:'جودة الصناعة',gbE_train:'خبرة',gbE_gold:'دهب من الوحوش',gbRow:'{ic} {b} لفل {l}/3: +{e}% {w} · {nx}',gbNext:'الجاي: {g} دهب',gbMax:'آخر لفل',gbGive:'إدي {g} دهب',gbBuild:'ارفع {b} للفل {l} ({g} دهب)',gbGave:'اديت {g} دهب لخزينة الجيلد',gbBuilt:'{b} بقت لفل {l}!',gbLogG:'{n} ادى {g}',gbLogB:'{n} رفع {b} لـ {l}',gbPoor:'الخزينة مفيهاش كفاية'});
+Object.assign(STR.en,{gdBld:'Buildings',gbH:'Guild treasury: {g} gold. Any member gives; the master and officers build',gb_forge:'Guild Forge',gb_train:'Training Hall',gb_gold:'Treasure Hall',gbE_forge:'crafting quality',gbE_train:'experience',gbE_gold:'gold from monsters',gbRow:'{ic} {b} Lv {l}/3: +{e}% {w} · {nx}',gbNext:'next: {g} gold',gbMax:'top level',gbGive:'Give {g} gold',gbBuild:'Raise {b} to Lv {l} ({g} gold)',gbGave:'You gave {g} gold to the guild treasury',gbBuilt:'{b} is now level {l}!',gbLogG:'{n} gave {g}',gbLogB:'{n} raised {b} to {l}',gbPoor:'Not enough in the treasury'});
+const GB={forge:{ic:'⚒',k:'q',v:.02},train:{ic:'⚔',k:'xp',v:.03},gold:{ic:'💰',k:'gd',v:.03}},GB_COST=[50000,150000,400000],GB_GIVE=[1000,10000,100000];
+var GBK=null,GBL=null,GBLOG=null,gbOff=null,gbFor=null,gbSeq=0; // var: guildMirror may run before this line when ?net=local starts during load
+function gbStart(gid){gbStop();if(!GDS||!gid||!GDS.watchBank)return;gbFor=gid;
+ const o=[GDS.watchBank(gid,v=>{GBK=v&&typeof v==='object'?{in:+v.in||0,s:+v.s||0}:{in:0,s:0};}),GDS.watchBuild(gid,v=>{GBL=v&&typeof v==='object'?v:{};guildMirrorB();}),GDS.watchLog(gid,v=>{GBLOG=v&&typeof v==='object'?v:{};})];
+ gbOff=()=>o.forEach(f=>{try{f();}catch(e){}});}
+function gbStop(){if(gbOff)gbOff();gbOff=null;GBK=GBL=GBLOG=null;gbFor=null;}
+function gbLv(b){const g=myG();return g&&g.online&&g.bld?Math.max(0,Math.min(3,g.bld[b]|0)):0;}
+function gbB(k){let n=0;for(const b in GB)if(GB[b].k===k)n+=gbLv(b)*GB[b].v;return n;}
+// the buildings into the mirrored guild (what gXPB, gGoldB and crafting read); a level that went up is told
+function guildMirrorB(){const g=myG();if(!g||!g.online||!GBL)return;const was=g.bld||null;g.bld={};
+ for(const b in GB){const l=Math.max(0,Math.min(3,GBL[b]|0));g.bld[b]=l;if(was&&l>(was[b]|0))toast(t('gbBuilt',{b:t('gb_'+b),l}),'good');}hudDirty=true;}
+function gbLid(){return 'l_'+Date.now().toString(36)+(++gbSeq).toString(36)+NET.uid.slice(0,8);}
+function gbFail(e){return /PERMISSION/i.test(String(e&&(e.code||e.message)));}
+function gbGive(g,tries){tries=tries|0;if(!GDS||!GUILD||!S||S.gold<g)return;const st=GUILD.state();if(!st.gid)return;S.gold-=g;hudDirty=true;save(true);
+ GDS.give(st.gid,NET.uid,netId||S.look.n,g,gbLid()).then(()=>{toast(t('gbGave',{g:g.toLocaleString()}),'good');SFX.coin();},e=>{S.gold+=g;hudDirty=true;save(true);
+  if(tries<3&&gbFail(e))setTimeout(()=>gbGive(g,tries+1),250+rand()*250);else toast(t('gdFail'),'warn');});} // another gift came first: read it again
+function gbBuild(b,tries){tries=tries|0;if(!GDS||!GUILD)return;const st=GUILD.state(),l=gbLv(b);if(!st.gid||l>=3||!Satisfy.guild.can(st.rank,'invite'))return;const cost=GB_COST[l],k=GBK||{in:0,s:0};
+ if(k.in-k.s<cost){toast(t('gbPoor'),'warn');return;}
+ GDS.build(st.gid,NET.uid,netId||S.look.n,b,l+1,cost,gbLid()).then(()=>{SFX.level();},e=>{if(tries<2&&gbFail(e))setTimeout(()=>gbBuild(b,tries+1),300);else toast(t('gdFail'),'warn');});}
+function guildBldD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const st=GUILD.state(),k=GBK||{in:0,s:0},have=k.in-k.s,boss=Satisfy.guild.can(st.rank,'invite');
+ const L=[t('gbH',{g:have.toLocaleString()})];for(const b in GB){const l=gbLv(b);L.push(t('gbRow',{ic:GB[b].ic,b:t('gb_'+b),l,e:Math.round(l*GB[b].v*100),w:t('gbE_'+b),nx:l<3?t('gbNext',{g:GB_COST[l].toLocaleString()}):t('gbMax')}));}
+ const log=Object.values(GBLOG||{}).filter(x=>x&&typeof x.t==='number').sort((a,b)=>b.t-a.t).slice(0,5).map(x=>{const n=Satisfy.chat.clean(x.n,24)||'?';return x.k==='build'&&GB[x.b]?t('gbLogB',{n,b:t('gb_'+x.b),l:x.l|0}):t('gbLogG',{n,g:(x.g|0).toLocaleString()});});
+ if(log.length)L.push(log.join(' · '));
+ const o=GB_GIVE.filter(g=>S.gold>=g).map(g=>({l:t('gbGive',{g:g.toLocaleString()}),f:()=>{gbGive(g);setTimeout(guildBldD,700);}}));
+ if(boss)for(const b in GB){const l=gbLv(b);if(l<3)o.push({l:t('gbBuild',{b:t('gb_'+b),l:l+1,g:GB_COST[l].toLocaleString()}),poor:have<GB_COST[l],f:()=>{gbBuild(b);setTimeout(guildBldD,700);}});}
+ dialog('guild',L,null,[...o,{l:t('oBack'),f:guildPanel}]);}
+window.__GBD={store:()=>GDS,give:g=>gbGive(g),build:b=>gbBuild(b),bank:()=>GBK,lv:b=>gbLv(b),xpB:()=>gXPB(),goldB:()=>gGoldB(),q:()=>gbB('q'),open:()=>guildBldD(),log:()=>GBLOG}; // tests
 function guildVaultD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const V=GUILD.vault(),ks=Object.keys(V).sort((a,b)=>V[b].t-V[a].t);
  const o=ks.slice(0,24).map(k=>{const e=V[k],can=GUILD.canTake(k);return {l:vaultName(e)+' · '+e.byN,ic:e.k,poor:!can,f:()=>can?dialog('guild',[t('gdTakeQ',{it:vaultName(e)})],null,[{l:t('gYes'),f:()=>guildTake(k)},{l:t('gNo'),f:guildVaultD}]):guildVaultD()};});
  dialog('guild',[t('gdVaultH',{n:ks.length,m:Satisfy.guild.C.VAULT_MAX}),ks.length?'':t('gdVaultEmpty')].filter(Boolean),null,[{l:t('gdPut'),f:guildPutD},...o,{l:t('oBack'),f:guildPanel}]);}
