@@ -22,7 +22,7 @@ test('island boxes fit inside the map, with the bridge rows inside MH', () => {
 });
 
 test('the archipelago is an instance for one and its save state persists', () => {
-  assert.match(html, /const solo=\(x,y\)=>\{if\(inBh\(x,y\)\)return true;/);
+  assert.match(html, /const solo=\(x,y\)=>\{if\(inBh\(x,y\)(\|\|inTw\(x,y\))?\)return true;/);
   const st = fs.readFileSync(path.join(ROOT, 'src', 'core', 'state.js'), 'utf8');
   assert.match(st, /'bh',/);
 });

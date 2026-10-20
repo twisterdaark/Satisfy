@@ -65,6 +65,8 @@
     'kc',
     // the Behen Archipelago (major #4): island, save point, best island, Challenger Points, masteries, statue worship
     'bh',
+    // the Tower of Wisdom (major #5): map, Tower's Mission, basic tests, members' tests, Dragon Pills, Matchless Heart, 10th Seat
+    'wis',
   ];
   var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT'];
   var META = ['v', 'wv', 'uid', 'pid'];
