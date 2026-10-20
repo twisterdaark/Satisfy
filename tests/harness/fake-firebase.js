@@ -332,6 +332,13 @@
   function rules(p, v, existing) {
     const seg = p.split('/');
     if (seg[0] === 'friends' || seg[0] === 'friendReq') return friendRules(seg, v);
+    if (seg[0] === 'whisper') { // SAT-ONLINE-070: only from a friend; the one it is for deletes it
+      if (!user || seg.length !== 3) return 'PERMISSION_DENIED: whisper ' + p;
+      const old = data.get(p);
+      if (v === null) return seg[1] === user.uid ? null : 'PERMISSION_DENIED: whisper remove';
+      if (old || v.from !== user.uid || !data.has('friends/' + seg[1] + '/' + user.uid)) return 'PERMISSION_DENIED: whisper not a friend';
+      return Object.keys(v).sort().join(',') === 'from,h,t,text' && typeof v.h === 'string' && v.h.length <= 24 && typeof v.text === 'string' && v.text.length >= 1 && v.text.length <= 120 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'whisper fields';
+    }
     if (seg[0] === 'lockouts') return lockRules(seg, v);
     if (seg[0] === 'nat' || seg[0] === 'natPaid') return natRules(seg, v);
     if (seg[0] === 'arena') return arenaRules(seg, v);

@@ -20,6 +20,9 @@
  * Guild chat (SAT-ONLINE-049): with `guild` ({inGuild(), sayGuild(msg), guildLines(fn)}) say(text, 'guild') goes to the
  * guild's feed in the database; only members read it (the rules). Lines carry ch: 'guild'.
  *
+ * Whispers (SAT-ONLINE-070): with `whisper` ({say(uid, msg), lines(fn)}) sayTo(uid, name, text) sends one friend a line
+ * through the database (the rules take it only from a friend); lines carry ch: 'w' and `to` (the name) on your own.
+ *
  * Exposes `Satisfy.chat`:
  *   create({ presence, party, uid, now?, blocked?, world?, guild?, handle? }) -> { say(text, ch?), log(), on(fn), C }
  *   blocklist(storage?) -> { has(uid), add(uid, handle), remove(uid), clear(), list() }
@@ -46,7 +49,8 @@
   function create(o) {
     var P = o.presence, party = o.party, self = o.uid, now = o.now || function () { return Date.now(); };
     var blocked = o.blocked || function () { return false; };
-    var lines = [], listeners = [], sent = [], seq = 0, world = o.world || null, guild = o.guild || null, handle = o.handle || function () { return ''; };
+    var lines = [], listeners = [], sent = [], seq = 0, world = o.world || null, guild = o.guild || null, whisper = o.whisper || null, handle = o.handle || function () { return ''; };
+    function slow(t) { sent = sent.filter(function (x) { return t - x < C.BURST_MS; }); return (sent.length && t - sent[sent.length - 1] < C.MIN_GAP_MS) || sent.length >= C.BURST; }
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function push(line) { lines.push(line); if (lines.length > C.LOG) lines.shift(); emit(line); }
@@ -71,6 +75,13 @@
       push({ type: 'line', ch: 'all', from: m.from, handle: clean(m.h, 24) || '?', text: text, t: now(), self: false, n: ++seq });
     });
 
+    if (whisper && whisper.lines) whisper.lines(function (m) {
+      if (!m || typeof m.from !== 'string' || m.from === self || blocked(m.from)) return;
+      var text = clean(m.text);
+      if (!text) return;
+      push({ type: 'line', ch: 'w', from: m.from, handle: clean(m.h, 24) || '?', text: text, t: now(), self: false, n: ++seq });
+    });
+
     if (guild && guild.guildLines) guild.guildLines(function (m) {
       if (!m || typeof m.from !== 'string' || m.from === self || blocked(m.from)) return;
       var text = clean(m.text);
@@ -87,13 +98,24 @@
         var all = ch === 'all', gd = ch === 'guild', to = all || gd ? [] : others();
         if (gd ? !(guild && guild.sayGuild && guild.inGuild && guild.inGuild()) : all ? !(world && world.sayWorld) : !party.id() || !to.length) return gd ? 'noGuild' : all ? 'noWorld' : 'noParty';
         var t = now();
-        sent = sent.filter(function (x) { return t - x < C.BURST_MS; });
-        if ((sent.length && t - sent[sent.length - 1] < C.MIN_GAP_MS) || sent.length >= C.BURST) return 'tooFast';
+        if (slow(t)) return 'tooFast';
         sent.push(t);
         if (gd) guild.sayGuild({ from: self, h: handle(), text: s });
         else if (all) world.sayWorld({ from: self, h: handle(), text: s });
         else to.forEach(function (m) { P.send('chat.say', { to: m.uid, party: party.id(), text: s }); });
         push({ type: 'line', ch: gd ? 'guild' : all ? 'all' : 'party', from: self, handle: null, text: s, t: t, self: true, n: ++seq });
+        return 'sent';
+      },
+      /** A whisper to one friend (SAT-ONLINE-070). Returns 'sent', 'empty', 'noWhisper' or 'tooFast'. */
+      sayTo: function (uid, name, text) {
+        var s = clean(text);
+        if (!s) return 'empty';
+        if (!whisper || !whisper.say || !uid) return 'noWhisper';
+        var t = now();
+        if (slow(t)) return 'tooFast';
+        sent.push(t);
+        whisper.say(uid, { from: self, h: handle(), text: s });
+        push({ type: 'line', ch: 'w', from: self, handle: null, to: clean(name, 24) || '?', text: s, t: t, self: true, n: ++seq });
         return 'sent';
       },
       /** A world or server notice as a line of its own (ch 'sys', SAT-ONLINE-041): local only, nothing is sent. */
