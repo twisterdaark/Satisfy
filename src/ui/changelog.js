@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20v87', ver: '0.87', d: '2026-10-20',
+      ar: ['الشياطين العظام: الشيطان العظيم رقم 22 بيريث نزل على حصن تالرين في مملكة هاكن، الحصن اللي في الوادي على الطريق في الأراضي الحمرا. راكب حصانه العيّان ومعاه جيش شياطين لفل 360+. غارة أونلاين: بيريث واحد للكل، ولما يموت بيرتاح ساعتين للعالم كله',
+        'زي الرواية: حافر حصانه بيخبط الأرض والحجارة بتتحول دهب، وكدبة إنه "مايتقهرش" (8 ثواني مفيش ضرر بيعدّي فيه وضربه بيتضاعف) عند 75% و50% و25%، والواقع المشوّه بياخد مهاراتك 12 ثانية لو قريب منه عند 60% و35%، وعند 30% إحصائياته بتزيد 20% وبتتشال الإضعافات اللي عليه',
+        'بيئة الجحيم حواليه بتمنع التعافي الطبيعي (لا مانا ولا علاج أكل). المكافأة على قد مساهمتك: 5% من صحته تديك لقب "منقذ العالم" (+3% ضرر) وحاجات زيادة، و20% أكتر'],
+      en: ['Great demons: the 22nd Great Demon Berith marches on Fort Taleren in the Haken Kingdom, a canyon fort on the low road through the red badlands. He rides his sickly horse with an army of Lv 360+ demons. An online raid: one Berith for everyone, and once he falls he rests two hours for the whole world',
+        'As in the novel: his horse\'s hoof slams the ground and the stones turn to gold; the lie of being \'invincible\' (8 s with no damage reaching him and his blows doubled) at 75%, 50% and 25%; his distorted reality takes your skills for 12 s near him at 60% and 35%; at 30% his stats rise 20% and his debuffs are released',
+        'The hell around him prohibits natural restoration (no mana back, no food healing). Rewards follow your part: 5% of his health earns the title \'Savior of the World\' (+3% damage) and extra materials, 20% more'] },
     { v: '2026-10-20v86', ver: '0.86', d: '2026-10-20',
       ar: ['الآلهة والكنايس: تمثال لكل إله جنب ناسه زي الرواية: ريبيكا جنب كاسوس، هيكستيا جنب ورشة خان، جاريون جنب فلاح باتريان، ديبيريون جنب الصياد، فينيس جنب بيت المزادات، دومينيون جنب فرسان تايتان، وجودار جنب برج الحكمة',
         'صلّي عند التمثال (E) وخد بركة الإله 20 دقيقة: ريبيكا بتعالجك، دومينيون ضرب أعلى، جودار خبرة أكتر، جاريون ضرر أقل، هيكستيا خبرة حدادة، فينيس دهب أكتر، ديبيريون ضرب أعلى على الوحوش البرية',

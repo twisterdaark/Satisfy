@@ -32,6 +32,8 @@ const FIG={
  kraugel:{hair:'long',hc:'#16161e',hl:'#3a3a4c',skin:'#f1c7a0',sk2:'#d39f78',top:'#e8ecf4',top2:'#b8c0d0',sleeves:true,pad:'#c8d8f0',pad2:'#8aa0c8',belt:'#c8a050',cape:'#f4f6fa',pants:'#c8d0dc',boots:'#8a96a8'},
  auction:{hair:'hat',hc:'#5a4a3a',hl:'#7a6a50',hat:'#1a3a2a',skin:'#e8b88a',sk2:'#c8946a',top:'#1f4a36',top2:'#143224',sleeves:true,belt:'#d8b860',cape:'#d8b860',pants:'#2a2a24',boots:'#3a2a1e'},
  cultist:{hair:'hat',hc:'#2a0a12',hl:'#4a1a22',hat:'#5a0a1a',skin:'#c8a088',sk2:'#a07c66',top:'#5a0a1a',top2:'#3a0610',sleeves:true,cape:'#2a0a12',pants:'#2a0a12',boots:'#1a0608'},
+ berith:{hair:'helm',hc:'#2a1a0a',hl:'#c8a050',skin:'#8a7a3a',sk2:'#6a5a2a',top:'#2a1a0a',top2:'#c8a050',sleeves:true,cape:'#140c04',pants:'#1a1006',boots:'#0e0a04'},
+ hdemon:{hair:'spiky',hc:'#0e0606',hl:'#3a1010',skin:'#7a2a1a',sk2:'#5a1a10',top:'#1a0806',top2:'#0e0404',sleeves:false,pants:'#1a0806',boots:'#7a2a1a',cape:'#0a0303'},
  demon:{hair:'helm',hc:'#1a0a0a',hl:'#3a1a1a',skin:'#a83a3a',sk2:'#7a2424',top:'#2a1010',top2:'#1a0808',sleeves:false,shorts:'#1a0808',pants:'#1a0808',boots:'#a83a3a',cape:'#140606'},
  ypriest:{hair:'hat',hc:'#0a0a0a',hl:'#2a2a2a',hat:'#1a0a0a',skin:'#b89a88',sk2:'#94786a',top:'#4a0a1a',top2:'#2a0610',sleeves:true,belt:'#c8a050',cape:'#8a1f2a',pants:'#1a0608',boots:'#0a0404'},
  priest:{hair:'short',hc:'#d8c8a8',hl:'#f0e4cc',skin:'#f1c193',sk2:'#d3a070',top:'#f0ece0',top2:'#c8c0b0',sleeves:true,belt:'#d8b860',cape:'#d8b860',pants:'#e0dccc',boots:'#a89878'},
