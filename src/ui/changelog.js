@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20x', ver: '0.62', d: '2026-10-20',
+      ar: ['الشنطة وشاشة البيع ليهم سكرول لما الحاجات تكتر',
+        'التاجر مبقاش بيعرض "بيع كذا" في الكلام: البيع كله من "عايز أبيع حاجات" اللي بتفتح شاشة البيع',
+        'أسعار البيع: حاجات المحل بتتباع بحوالي 30% من سعرها، والعدة اللي من المحل مبتتباعش بأكتر من 30% من تمنها. العدة النادرة والمطورة بتجيب أكتر، والمكسورة بنص التمن، والجواهر النادرة لسه أغلى حاجة',
+        'الشرا بالكمية: Shift مع الدوسة (أو رقم الاختيار) بيشتري 10، وCtrl بيشتري أكتر عدد يساعه مكانك وفلوسك. مكتوبة تحت اختيارات الشرا'],
+      en: ['The bag and the sell window scroll when they fill up',
+        'Merchants no longer list "sell ..." lines in their talk: all selling goes through "I want to sell things", which opens the sell window',
+        'Sell prices: shop goods sell for about 30% of their price, and shop gear never for more than 30% of what it cost. Rarer and enhanced gear fetches more, broken gear half, and rare gems are still worth the most',
+        'Buying in bulk: Shift with the click (or the option number) buys 10, Ctrl buys as many as fit and you can pay for. A line under the buy options says so'] },
     { v: '2026-10-20w', ver: '0.61', d: '2026-10-20',
       ar: ['رينهارت: الخيمتين والبير اللي كانوا طالعين في نص المدينة اتشالوا (كانوا استراحة طريق قديمة قبل ما المدينة تكبر)',
         'السور الغربي والشمالي بتوع رينهارت اتنقلوا خانتين لبرا، فمفيش بيت ولا القصر لازق في السور. وقاعة المشاهير والحدادتين بعدوا عن سور القصر والسور الشرقي والطرق',
