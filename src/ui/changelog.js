@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zr', ver: '0.84', d: '2026-10-20',
+      ar: ['متجر Fog Island (عربية القرع في جزر بيهين) بقى بيبيع كتب تغيير كلاس نادرة زي الرواية: سيّاف البرق وساحر الانفجارات، بـ1,000 نقطة تحدي. نفس قواعد الكلاسات المخفية: كلاس مخفي واحد لكل شخصية، للنوفيس أو الكلاس الأول',
+        'سيّاف البرق: ضربة البرق اللي بتنط بين الوحوش، خطوة الرعد، قصف الرعد، ونصل مشحون بينزّل صاعقة كل رابع ضربة',
+        'ساحر الانفجارات: انفجار مكان ما بتشاور، نقش بيتفجر بعد ثانيتين، سلسلة انفجارات، والوحش اللي يموت بمهارتك بيتفجر هو كمان',
+        'وكتابين مهارة لأي كلاس: اندفاعة قلب الموازين (400 نقطة) ومطر النار القصير (900 نقطة)'],
+      en: ['Fog Island\'s store (the pumpkin carriage in the Behen Archipelago) now sells rare class change books as in the novel: Lightning Swordsman and Explosion Sorcerer, 1,000 Challenger Points each. Hidden class rules: one per character, for a novice or a first class',
+        'Lightning Swordsman: Lightning Slash that leaps between monsters, Thunder Step, Thunderclap, and Charged Blade bringing a bolt every fourth blow',
+        'Explosion Sorcerer: Explosion where you point, Delayed Blast rune, Blast Chain, and a monster your skill kills explodes too',
+        'Two skill books for any class: Dash to Turn the Tables (400 points) and Blazing Short Rain (900 points)'] },
     { v: '2026-10-20zq', ver: '0.83', d: '2026-10-20',
       ar: ['الكلاسات المخفية (التحديث الكبير العاشر): مفيش مدرب بيديهالك. زي الرواية، كل كلاس مستخبي ورا شرط محدش بيقولك عليه، ولما تحققه وإنت نوفيس أو في كلاس أول، النظام بيعرض عليك كويست تغيير الكلاس',
         'الكلاس الجديد بياخد مكان القديم ومهاراته، بس اللفل والستاتس بيفضلوا. كلاس مخفي واحد لكل شخصية، ولو رفضت الشرط ممكن يتحقق تاني',

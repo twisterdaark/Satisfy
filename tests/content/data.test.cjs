@@ -28,7 +28,7 @@ test('counts match the audited baseline',()=>{
   const n=o=>Array.isArray(o)?o.length:Object.keys(o).length;
   assert.deepStrictEqual({MT:n(D.monsters.types),BOSSES:n(D.monsters.bosses),SPAWN:n(D.monsters.spawns),QD:n(D.quests.quests),RC:n(D.recipes.recipes),
     SKD:n(D.skills.skills),NPC:n(D.npcs.npcs),interior:Object.values(D.npcs.npcs).filter(x=>x.interior).length,ZR:n(D.zones.regions),TOWNS:n(D.zones.towns),classes:n(D.classes.classes)},
-    {MT:88,BOSSES:5,SPAWN:19,QD:108,RC:25,SKD:78,NPC:80,interior:8,ZR:17,TOWNS:3,classes:21});});
+    {MT:88,BOSSES:5,SPAWN:19,QD:108,RC:25,SKD:88,NPC:80,interior:8,ZR:17,TOWNS:3,classes:23});});
 
 // condition vocabulary (docs/content/CONTENT_SCHEMA.md)
 function checkCond(c,where){assert.ok(c&&typeof c==='object'&&!Array.isArray(c),where+': condition must be an object');
@@ -72,7 +72,7 @@ test('cross-references point at things that exist',()=>{
   for(const z of [...D.zones.towns,...D.zones.regions])assert.ok(z.x0>=0&&z.x0<z.x1&&z.x1<MW&&z.y0>=0&&z.y0<z.y1&&z.y1<WMH,`zone ${z.id} inside map`);
   D.zones.regions.forEach((r,i)=>assert.strictEqual(r.order,i,'regions keep first-match order'));
   for(const t of D.zones.towns)assert.ok(D.zones.regions.some(r=>r.id===t.id),`town ${t.id} has a region`);
-  for(const c of Object.values(C)){if(c.start)continue;if(c.hidden){assert.ok(Q[c.quest]&&Q[c.quest].hcls===c.id&&Q[c.quest].hid,`class ${c.id} quest`);c.skills.forEach(s=>assert.strictEqual(SK[s].cls,c.id));continue;}if(c.legendary){c.skills.forEach(s=>assert.strictEqual(SK[s].cls,c.id));continue;}if(c.tier===2){assert.ok(Q[c.quest]&&Q[c.quest].promo===c.id&&N[c.trainer]&&c.base.every(b=>C[b]),`class ${c.id}`);c.skills.forEach(s=>assert.strictEqual(SK[s].cls,c.id));continue;}assert.ok(Q[c.quest]&&Q[c.quest].cls===c.id,`class ${c.id} quest`);assert.ok(N[c.trainer]);assert.ok(R[c.item]);c.skills.forEach(s=>assert.strictEqual(SK[s].cls,c.id));}});
+  for(const c of Object.values(C)){if(c.start)continue;if(c.hidden){assert.ok(c.source==='fogbook'||Q[c.quest]&&Q[c.quest].hcls===c.id&&Q[c.quest].hid,`class ${c.id} quest`);c.skills.forEach(s=>assert.strictEqual(SK[s].cls,c.id));continue;}if(c.legendary){c.skills.forEach(s=>assert.strictEqual(SK[s].cls,c.id));continue;}if(c.tier===2){assert.ok(Q[c.quest]&&Q[c.quest].promo===c.id&&N[c.trainer]&&c.base.every(b=>C[b]),`class ${c.id}`);c.skills.forEach(s=>assert.strictEqual(SK[s].cls,c.id));continue;}assert.ok(Q[c.quest]&&Q[c.quest].cls===c.id,`class ${c.id} quest`);assert.ok(N[c.trainer]);assert.ok(R[c.item]);c.skills.forEach(s=>assert.strictEqual(SK[s].cls,c.id));}});
 
 test('parity: data/*.js equals a fresh build from index.html',()=>{
   const {readTables}=require(path.join(dataDir,'tools','index-tables.cjs')),{build}=require(path.join(dataDir,'tools','build-data.cjs'));

@@ -71,6 +71,8 @@ function build(T,sourceVersion){
   for(const [qid,q] of Object.entries(T.QD))if(q.promo)classes.classes[q.promo]={id:q.promo,tier:2,base:q.from,quest:qid,trainer:q.by,lv:q.lv,mastery:{k:q.mst[0],gte:q.mst[1]},skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls===q.promo),src:SRC};
   // hidden classes (major 10): no trainer; the system offers the quest once a hidden condition is met; one per character
   for(const [qid,q] of Object.entries(T.QD))if(q.hcls)classes.classes[q.hcls]={id:q.hcls,hidden:true,rating:'rare',quest:qid,cond:q.cond,lv:q.lv,skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls===q.hcls),src:SRC};
+  // Fog Island class change books (ch 362): rare hidden classes bought with Challenger Points
+  for(const c of ['lsword','esorc'])if(Object.values(T.SKD).some(d=>d.cls===c))classes.classes[c]={id:c,hidden:true,rating:'rare',source:'fogbook',skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls===c),src:SRC};
   return {monsters,quests,recipes,skills,npcs,zones,classes};}
 
 // one record per line keeps diffs readable
