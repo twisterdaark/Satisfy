@@ -410,7 +410,8 @@ body.touch #skillbar .sk{width:calc(var(--u)*5.6);height:calc(var(--u)*5.6)}
 body.touch #tAct{right:calc(var(--u)*2);bottom:calc(var(--u)*2)}
 body.touch #tAct button{height:calc(var(--u)*8);font-size:calc(var(--u)*1.6)}body.touch #tAct{grid-template-columns:repeat(2,calc(var(--u)*9))}
 body.touch #tStick{left:calc(var(--u)*2.5);bottom:calc(var(--u)*3);width:calc(var(--u)*18);height:calc(var(--u)*18)}
-body.touch #tNet{bottom:calc(var(--u)*22.5)}
+body.touch #tNet{bottom:calc(var(--u)*22.5);left:calc(var(--u)*9.5)}
+#tNetT.open{background:rgba(255,220,120,.45)}#tNetT{position:absolute;left:calc(var(--u)*2.5);bottom:calc(var(--u)*22.5);width:calc(var(--u)*5.6);height:calc(var(--u)*5);border-radius:calc(var(--u)*2.5);font-size:calc(var(--u)*2);background:rgba(20,24,34,.55);border:2px solid rgba(255,255,255,.3);color:#fff;padding:0}
 body.touch #hint{bottom:calc(var(--u)*20)}body.touch #natbar{bottom:calc(var(--u)*17.6)}body.touch #sgbar{bottom:calc(var(--u)*15)}body.touch #evbar{bottom:calc(var(--u)*12.4)}body.touch #belt{bottom:calc(var(--u)*12)}body.touch #chatW,body.touch #chatBar{bottom:calc(var(--u)*25)}
 body.touch #ui *{touch-action:pan-x pan-y}body.touch #ui #touch,body.touch #ui #touch *{touch-action:none}
 #rotW{position:fixed;inset:0;z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0a0e1a;color:#e8f0ff;font:600 18px/1.5 Tajawal,system-ui,sans-serif;text-align:center;padding:24px}
@@ -454,7 +455,7 @@ body.touch #ui *{touch-action:pan-x pan-y}body.touch #ui #touch,body.touch #ui #
       </div>
       <div id="touch" hidden><div id="tStick"><i id="tKnob"></i></div>
         <div id="tAct"><button data-tk="atk" class="big" data-i18n="kA"></button><button data-tk="Space" data-i18n="kD"></button><button data-tk="guard" data-i18n="kG"></button><button data-tk="KeyE" data-i18n="kE"></button></div>
-        <div id="tNet" hidden><button data-tk="KeyT" data-i18n="tOpt"></button><button data-tk="KeyP" data-i18n="tParty"></button><button data-tk="KeyK" data-i18n="tDuel"></button><button data-tk="KeyY" data-i18n="tYes"></button><button data-tk="KeyN" data-i18n="tNo"></button><button data-tk="Enter" data-i18n="tChat"></button><button data-tk="ping" data-i18n="tPing"></button><button data-tk="emote" data-i18n="tEmote"></button></div></div>
+        <button id="tNetT" data-tk="netrow" hidden>☰</button><div id="tNet" hidden><button data-tk="KeyT" data-i18n="tOpt"></button><button data-tk="KeyP" data-i18n="tParty"></button><button data-tk="KeyK" data-i18n="tDuel"></button><button data-tk="KeyY" data-i18n="tYes"></button><button data-tk="KeyN" data-i18n="tNo"></button><button data-tk="Enter" data-i18n="tChat"></button><button data-tk="ping" data-i18n="tPing"></button><button data-tk="emote" data-i18n="tEmote"></button></div></div>
       <div id="skillbar" class="sys"></div>
       <div id="hint" hidden></div>
       <div id="toasts"></div>
@@ -6761,16 +6762,18 @@ function tStickAt(e){const el=$('tStick'),b=el.getBoundingClientRect(),r=b.width
  K.left=dx<-.35;K.right=dx>.35;K.up=dy<-.35;K.down=dy>.35;$('tKnob').style.transform=`translate(${dx*k*r*.6}px,${dy*k*r*.6}px)`;}
 function tStickOff(){K.left=K.right=K.up=K.down=false;$('tKnob').style.transform='';}
 let tSig='';
+// owner 2026-10-20: the online row (options, party, duel, yes/no, chat, ping, emote) stays folded behind ☰; it opens on a tap and folds again after a pick
+let tNetOpen=false;
 function touchTick(){const show=['play','dialog','cut'].includes(mode),net=show&&!!NET&&Satisfy.local.inGame(),sig=show+':'+net;if(sig===tSig)return;tSig=sig;
- $('touch').hidden=!show;$('tNet').hidden=!net;if(!show){tStickOff();K.atk=false;guardOff();}}
+ $('touch').hidden=!show;$('tNetT').hidden=!net;$('tNet').hidden=!net||!tNetOpen;$('tNetT').classList.toggle('open',net&&tNetOpen);if(!show){tStickOff();K.atk=false;guardOff();}}
 if(TOUCH){document.body.classList.add('touch');const st=$('tStick');
  let sid=null; // the finger on the stick; captured so a drag past its edge keeps steering
  st.addEventListener('pointerdown',e=>{e.preventDefault();audio();sid=e.pointerId;try{st.setPointerCapture(sid);}catch(_){}tStickAt(e);});
  st.addEventListener('pointermove',e=>{if(e.pointerId===sid)tStickAt(e);});
  for(const ev of ['pointerup','pointercancel','lostpointercapture'])st.addEventListener(ev,e=>{if(e.pointerId===sid){sid=null;tStickOff();}});
  for(const b of document.querySelectorAll('#touch button')){const k=b.dataset.tk;
-  b.addEventListener('pointerdown',e=>{e.preventDefault();audio();b.classList.add('on');if(k==='atk')K.atk=true;else if(k==='guard'){if(mode==='play')guardOn();}else if(k==='ping'){if(NET&&PARTY&&mode==='play')netPing(P.x,P.y);}else if(k==='emote'){if(NET&&mode==='play')emoToggle();}else tKey(k,true);});
-  const up=()=>{if(!b.classList.contains('on'))return;b.classList.remove('on');if(k==='atk')K.atk=false;else if(k==='guard')guardOff();else if(k!=='ping'&&k!=='emote')tKey(k,false);};
+  b.addEventListener('pointerdown',e=>{e.preventDefault();audio();b.classList.add('on');if(k==='atk')K.atk=true;else if(k==='guard'){if(mode==='play')guardOn();}else if(k==='ping'){if(NET&&PARTY&&mode==='play')netPing(P.x,P.y);}else if(k==='emote'){if(NET&&mode==='play')emoToggle();}else if(k==='netrow'){tNetOpen=!tNetOpen;tSig='';}else tKey(k,true);if(k!=='netrow'&&b.closest('#tNet')){tNetOpen=false;tSig='';}});
+  const up=()=>{if(!b.classList.contains('on'))return;b.classList.remove('on');if(k==='atk')K.atk=false;else if(k==='guard')guardOff();else if(k!=='ping'&&k!=='emote'&&k!=='netrow')tKey(k,false);};
   for(const ev of ['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,up);}
  $('keys').addEventListener('pointerdown',e=>{const el=e.target.closest('.key'),c=el&&TKEY[el.id];if(!c)return;e.preventDefault();tKey(c,true);tKey(c,false);});
  // the first tap goes full screen and holds the screen sideways where the browser allows it (Android; an iPhone keeps its
