@@ -5,6 +5,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zh', ver: '0.74', d: '2026-10-20',
+      ar: ['المدن بقت عايشة: أهل البلد ماشيين في شوارع كل مدينة وقرية، بيقفوا شوية ويقولوا كلمتين، وتقدر تكلمهم بـ E',
+        'العيال بيجروا حواليك ويلعبوا معاك لما تقرب منهم',
+        'فيه محاربين بيتمرنوا في المدن: كلّمهم واطلب تمرين بسيوف التمرين لحد ربع الصحة، ولو كسبت تاخد دهب وخبرة',
+        'برا كل مدينة فيه قطاع طرق مستنيين، لفلهم على قد الوحوش اللي حوالين المدينة، وبيزعقوا فيك وهما جايين يقتلوك',
+        'كل اللاعبين بيشوفوا أهل البلد في نفس المكان وبيقولوا نفس الكلام في نفس الوقت، وقطاع الطرق وحوش مشتركة زي الباقي'],
+      en: ['Towns are alive: townsfolk walk the streets of every town and village, stop for a moment and say a few words, and you can talk to them with E',
+        'Children run round you and play when you come near',
+        'Sparring partners train in the towns: talk to one and ask for a bout with practice blades to a quarter of health; win for gold and experience',
+        'Highwaymen lie in wait outside every town, as strong as the monsters around it, and shout at you as they come to kill you',
+        'Every player sees the townsfolk at the same spot saying the same thing at the same moment, and the highwaymen are shared monsters like the rest'] },
     { v: '2026-10-20zg', ver: '0.73', d: '2026-10-20',
       ar: ['الاستكشاف بقى ليه فايدة: أول مرة تدخل منطقة جديدة بتاخد خبرة وبيظهرلك إعلان باسمها',
         'لما تشوف 75% من أرض منطقة بترسم خريطتها: دهب، وعلامة ✓ جنب اسمها على الماب',

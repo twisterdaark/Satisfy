@@ -2954,6 +2954,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
  mons.push(newMon('ypriest',(((YATAN.x0+YATAN.x1)>>1))*TS+8,(YATAN.y0+6)*TS+8));
  {const d=newMon('trauka',PEAK.x*TS+8,(PEAK.y-3)*TS+8),u=WS&&WS.wb&&WS.wb.trauka;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
  {const rf=mulberry32(77);for(const [type,x0,x1,y0,y1,n] of FSPAWN){let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=x0+(rf()*(x1-x0)|0),y=y0+(rf()*(y1-y0)|0);if(!sol0(x,y)&&!sol0(x+1,y)&&at0(x,y)!==PA){const m=newMon(type,x*TS+8,y*TS+8,rf);m.far=1;mons.push(m);c++;}}}
+  banditSpawn();
   SLAIR.forEach(([x,y],i)=>{const m=newMon('sanju'+(i+1),x*TS+8,(y-1)*TS+8,rf);m.far=1;mons.push(m);});
   for(const [type,x0,x1,y0,y1,n] of SDSPAWN){let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=x0+(rf()*(x1-x0)|0),y=y0+(rf()*(y1-y0)|0);if(!sol0(x,y)&&!sol0(x+1,y)){const m=newMon(type,x*TS+8,y*TS+8,rf);m.far=1;mons.push(m);c++;}}}
   for(const [type,x,y] of SDBOSS){const m=newMon(type,x*TS+8,y*TS+8,rf);m.far=1;mons.push(m);}}
@@ -3202,7 +3203,7 @@ function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);toast(t('boss
 const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','lgloves','lboots','cring','ihelm','igloves','iboots','parmor','mring'];
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.4:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.25:.1)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.dead=true;if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh)gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(NET&&b.boss&&!m.bh)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y))dunBossDown(m);{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(S.tl.viscount?.05:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)+(S.tl.baron?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh)gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(NET&&b.boss&&!m.bh)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y))dunBossDown(m);{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(S.tl.viscount?.05:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)+(S.tl.baron?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh)(b.drop||[]).forEach(([k,p])=>{if(rand()<p)addMat(k,1);});
  if(m.lv>=20&&!m.tmp){if(b.boss)addMat('estone',1+(m.lv/50|0));else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
@@ -3223,9 +3224,9 @@ function buyPot(who,k){if((S[k]||0)>=10)return shopD(who,'potFull');const g=pric
 const potOpts=who=>['hpot','mpot'].map(k=>{const g=price(who,POT[k].price);return{l:t('oBuyPot',{p:t(k),g}),qty:1,ic:k,st:`${t(k+'D')} (${S[k]||0}/10)`,poor:S.gold<g,f:()=>buyPot(who,k)};});
 function eat(){if(S.bread<=0){toast(t('noBread'),'warn');SFX.deny();return;}if(P.food>=95){toast(t('full'));SFX.deny();return;}S.bread--;P.food=Math.min(100,P.food+40);P.hp=Math.min(maxHP(),P.hp+15);vfx('heal',P.x,P.y);toast(t('ate'));SFX.eat();hudDirty=true;}
 function nearTree(){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];let best=null,bs=1e9,bc=null,bcs=1e9;for(const tr of vtNear(P.x,P.y,30)){const dx=tr.x-P.x,dy=tr.y-P.y,d=Math.hypot(dx,dy);if(d>30)continue;const s=d-((dx*v[0]+dy*v[1])/(d||1))*12;if((chopped.get(tr.k)||0)>gTime){if(s<bcs){bcs=s;bc=tr;}}else if(s<bs){bs=s;best=tr;}}return best||bc;}
-function nearest(){let best=null,bd=26;const cand=[...npcs.filter(n=>!n.hidden).map(n=>({k:'npc',o:n,x:n.x,y:n.y})),...ANVILS.map(a=>({k:'anvil',o:a,x:a.tx*TS+8,y:a.ty*TS+8})),...nodes.filter(n=>!(n.dep>0&&(n.kind==='herb'||n.kind==='bherb'))).map(n=>({k:'node',o:n,x:n.x,y:n.y,hint:n.kind==='herb'||n.kind==='bherb'?(n.dep>0?'hPicked':'hHerb'):undefined})),...CAMPS.map(c=>({k:'camp',o:c,x:c.x,y:c.y,hint:'hCamp'})),...ROOMS.map(R=>{const d=doorOf(R.b);return{k:'door',o:R,x:d.x,y:d.y,hint:'hEnter'};}),...PROPS.filter(p=>p.k==='chest'||p.k==='shelf'||p.k==='bed').map(p=>({k:'prop',o:p,x:p.tx*TS+p.w*8,y:p.ty*TS+(p.back?22:10),hint:{chest:'hChest',shelf:'hShelf',bed:'hBed'}[p.k]})),{k:'grave',o:GRAVE,x:GRAVE.tx*TS+8,y:GRAVE.ty*TS+16,hint:'hGrave'},...lmList().map(l=>({k:'lm',o:l,x:l.x,y:l.y,hint:'hRead'})),...exNear().map(c=>({k:'cache',o:c,x:c.x,y:c.y,hint:'hCache'})),...DGATES.filter(g=>!(g.hide&&g.bh!=='key')&&!g.got&&!g.out&&!g.gone).map(g=>({k:'gate',o:g,x:g.x,y:g.y,hint:g.hint})),...TERR.map(T=>({k:'banner',o:T,x:T.x,y:T.y-4,hint:'hBanner'})),...SHRINES.map(o=>({k:'shrine',o,x:o.x,y:o.y,hint:o.hint})),...(COMPO?[{k:'npc',o:COMPO,x:COMPO.x,y:COMPO.y}]:[])];for(const c of cand){const d=Math.hypot(c.x-P.x,c.y-P.y)-(c.o&&c.o.reach||0);if(d<bd){bd=d;best=c;}}const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
+function nearest(){let best=null,bd=26;const cand=[...npcs.filter(n=>!n.hidden).map(n=>({k:'npc',o:n,x:n.x,y:n.y})),...ANVILS.map(a=>({k:'anvil',o:a,x:a.tx*TS+8,y:a.ty*TS+8})),...nodes.filter(n=>!(n.dep>0&&(n.kind==='herb'||n.kind==='bherb'))).map(n=>({k:'node',o:n,x:n.x,y:n.y,hint:n.kind==='herb'||n.kind==='bherb'?(n.dep>0?'hPicked':'hHerb'):undefined})),...CAMPS.map(c=>({k:'camp',o:c,x:c.x,y:c.y,hint:'hCamp'})),...ROOMS.map(R=>{const d=doorOf(R.b);return{k:'door',o:R,x:d.x,y:d.y,hint:'hEnter'};}),...PROPS.filter(p=>p.k==='chest'||p.k==='shelf'||p.k==='bed').map(p=>({k:'prop',o:p,x:p.tx*TS+p.w*8,y:p.ty*TS+(p.back?22:10),hint:{chest:'hChest',shelf:'hShelf',bed:'hBed'}[p.k]})),{k:'grave',o:GRAVE,x:GRAVE.tx*TS+8,y:GRAVE.ty*TS+16,hint:'hGrave'},...lmList().map(l=>({k:'lm',o:l,x:l.x,y:l.y,hint:'hRead'})),...exNear().map(c=>({k:'cache',o:c,x:c.x,y:c.y,hint:'hCache'})),...tfNear().map(f=>({k:'folk',o:f,x:f.x,y:f.y,hint:'hTalk'})),...DGATES.filter(g=>!(g.hide&&g.bh!=='key')&&!g.got&&!g.out&&!g.gone).map(g=>({k:'gate',o:g,x:g.x,y:g.y,hint:g.hint})),...TERR.map(T=>({k:'banner',o:T,x:T.x,y:T.y-4,hint:'hBanner'})),...SHRINES.map(o=>({k:'shrine',o,x:o.x,y:o.y,hint:o.hint})),...(COMPO?[{k:'npc',o:COMPO,x:COMPO.x,y:COMPO.y}]:[])];for(const c of cand){const d=Math.hypot(c.x-P.x,c.y-P.y)-(c.o&&c.o.reach||0);if(d<bd){bd=d;best=c;}}const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
  if(!best||best.k==='tree'){const w=nearWater();if(w)best={k:'water',o:w,x:w.x,y:w.y,hint:FISH?'hReel':'hFish'};}return best;}
-function interact(){if(FISH){fishAct();return;}const n=nearest();if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
+function interact(){if(FISH){fishAct();return;}const n=nearest();if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='folk')tfTalk(n.o);else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
 let roomFade=false;
 function enterRoom(Rm){if(roomFade)return;if(P.ride)dismount();roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=(Rm.rx+6)*TS+8;P.y=(Rm.ry+6)*TS+10;P.dir=1;camSnap=true;hudDirty=true;});}
 // "get unstuck" in the Esc menu: walks you out of a house, or takes you back to the nearest town square (once a minute)
@@ -4650,6 +4651,73 @@ Object.assign(STR.en,{life_carto:'Cartography',lifeD_carto:'Grows with every new
  ach_ex10:'First Steps',ach_ex30:'Pathfinder',ach_ex60:'Seen the World',ach_zones30:'Region Hunter',ach_chart15:'Cartographer',ach_cache25:'Treasure Hunter',
  tl_pathfinder:'Pathfinder',tl_pathfinderD:'+20% exploring rewards.',tl_cartog:'Cartographer',tl_cartogD:'+50% gold from caches.'});
 window.__GX={grid:()=>{const E=exGrid();return {k:E.k,n:E.n};},caches:()=>exCaches(),stats:()=>{const s=exStats();return {all:s.all,seen:s.seen};},dig:c=>exDig(c),near:()=>exNear(),zone:z=>exZone(z),seen:n=>exSeen(n),pct:z=>exPct(z),fill:z=>{const E=exGrid(),i=E.ix[z];for(let j=0;j<E.z.length;j++)if(E.z[j]===i)FOG[j]=1;fogV++;}}; // tests
+/* living towns (owner 2026-10-20: "add NPCs in every village and place who walk, talk and play with you so it feels alive;
+   some fight you and some try to kill you; and keep them all synced so every player sees the same"). Townsfolk walk set
+   rounds through their town, stop now and then, and say a line. Where each one stands is a pure function of the world
+   clock (wNow), so every player online sees the same person at the same spot saying the same thing, with nothing sent.
+   Children run round the nearest player (of everyone there) and play; sparring partners offer a friendly bout (E), fought
+   with practice blows until one side is down to a quarter of health. Outside every town a few highwaymen lie in wait:
+   real monsters of the level of the land around, shared like every other monster (spawnWorld, banditSpawn). */
+let TF=null,SPAR=null;const tfNow=()=>window.__tfNow?window.__tfNow():wNow()/1000; // __tfNow: tests freeze the townsfolk clock (render parity)
+const TFB=[],TFS=new WeakMap();
+const tfOpen=(x,y)=>{const a=at0(x,y);return a!==undefined&&SOLID[a]!==1&&a!==WA;};
+function tfRoom(x,y){for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++)if(!tfOpen(x+i,y+j))return false;return true;}
+function tfLos(a,b){const dx=b.x-a.x,dy=b.y-a.y,n=Math.ceil(Math.hypot(dx,dy)*2);for(let k=1;k<n;k++)if(!tfOpen(Math.round(a.x+dx*k/n),Math.round(a.y+dy*k/n)))return false;return true;}
+function tfBuild(){TF=[];if(!GM0)return;for(const T of TOWNS){const pts=[];for(let y=T.y0+1;y<T.y1;y+=3)for(let x=T.x0+1;x<T.x1;x+=3)if(tfRoom(x,y))pts.push({x,y});if(pts.length<6)continue;
+ const nb=pts.map(a=>pts.map((b,i)=>i).filter(i=>pts[i]!==a&&Math.abs(pts[i].x-a.x)<=9&&Math.abs(pts[i].y-a.y)<=9&&tfLos(a,pts[i]))),rf=mulberry32(strH(T.k)),n=Math.max(4,Math.min(10,Math.round(pts.length/14)));
+ for(let i=0;i<n;i++){let c=rf()*pts.length|0;const path=[c];for(let h=0;h<9;h++){const L=nb[c];if(!L.length)break;let nx=L[rf()*L.length|0];if(path.length>1&&nx===path[path.length-2]&&L.length>1)nx=L[rf()*L.length|0];path.push(nx);c=nx;}
+  if(path.length<3)continue;const route=[...path,...path.slice(1,-1).reverse()].map(k=>pts[k]),role=i%5===1?'kid':i%5===3?'spar':'walk',sp=role==='kid'?34:20;
+  let tt=0;const legs=[];for(let j=0;j<route.length;j++){const a=route[j],b=route[(j+1)%route.length],tw=Math.hypot(b.x-a.x,b.y-a.y)*TS/sp,tp=1.5+rf()*4;legs.push({a,b,t0:tt,tw,tp});tt+=tw+tp;}
+  const look={hair:rf()*LOOK.hair.length|0,hc:rf()*LOOK.hc.length|0,skin:rf()*LOOK.skin.length|0,top:rf()*LOOK.top.length|0};
+  TF.push({id:T.k+'#'+i,T:T.k,role,look,legs,len:tt,off:rf()*tt,ln:rf()*1000|0,x:route[0].x*TS+8,y:route[0].y*TS+8,dir:0,mv:0,sc:role==='kid'?.8:1,busy:0});}}}
+// where a townsperson is at world time s (seconds): walking a leg, or standing at its end
+function tfAt(f,s){const tau=((s+f.off)%f.len+f.len)%f.len;for(const L of f.legs){if(tau>=L.t0+L.tw+L.tp)continue;const u=Math.min(1,(tau-L.t0)/L.tw),dx=L.b.x-L.a.x,dy=L.b.y-L.a.y;
+  return {x:(L.a.x+dx*u)*TS+8,y:(L.a.y+dy*u)*TS+8,mv:u<1?1:0,dir:Math.abs(dx)>Math.abs(dy)?(dx>0?2:3):(dy>0?0:1)};}const L=f.legs[0];return {x:L.a.x*TS+8,y:L.a.y*TS+8,mv:0,dir:0};}
+const tfSays=(f,s)=>((Math.floor((s+f.ln)/16)+f.ln)%3===0)&&((s+f.ln)%16<4.5)?(Math.floor((s+f.ln)/16)+f.ln)%(f.role==='kid'?5:f.role==='spar'?4:8):-1;
+function tfPlayers(){const L=P&&!P.ghost&&!roomAt(P.x,P.y)?[{x:P.x,y:P.y}]:[];if(NET)for(const r of NET.remotes())if(!r.room&&r.anim!=='dead')L.push({x:r.x,y:r.y});return L;}
+function tfTick(dt){if(!TF)tfBuild();if(!P)return;const s=tfNow(),pl=tfPlayers();
+ for(const f of TF){if(Math.abs(f.x-P.x)>1200||Math.abs(f.y-P.y)>900){const q=tfAt(f,s);f.x=q.x;f.y=q.y;continue;}
+  const q=tfAt(f,s);let tx=q.x,ty=q.y;f.dir=q.dir;f.mv=q.mv;
+  if(f.role==='kid'){let best=null,bd=70;for(const p of pl){const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<bd){bd=d;best=p;}}
+   if(best){const a=s*2.2+f.ln;tx=best.x+Math.cos(a)*22;ty=best.y+Math.sin(a)*12;const dx=tx-f.x;f.mv=1;f.dir=Math.abs(dx)>Math.abs(ty-f.y)?(dx>0?2:3):(ty>f.y?0:1);}}
+  const k=Math.min(1,dt*5);f.x+=(tx-f.x)*k;f.y+=(ty-f.y)*k;}
+ // highwaymen shout as they come for you
+ for(const m of TFB){const st=TFS.get(m)||{};TFS.set(m,st);const e=m.eng>0&&!m.dead;if(e&&!st.e&&(st.at||0)<gTime-12){st.at=gTime;st.n=(st.n||0)+1;st.s=t('bdSay'+((monHash(m)*4+st.n)%4|0));st.t=gTime+2.6;}st.e=e;}
+ if(SPAR){const m=SPAR.m;SPAR.t+=dt;if(m.dead||mode==='dead'||P.hp<maxHP()*.25||SPAR.t>90||Math.hypot(P.x-m.x,P.y-m.y)>300)sparEnd(!m.dead&&m.hp<=m.max*.25||m.dead&&SPAR.won);else if(m.hp<=m.max*.25)sparEnd(true);}}
+function tfVis(){return TF?TF.filter(f=>!f.busy&&f.x>camX-20&&f.x<camX+VW+20&&f.y>camY-10&&f.y<camY+VH+40):[];}
+function tfDraw(f){drawChar(remoteSpr(f.look,0),f.x,f.y,f.dir,f.mv,false,f.sc);}
+function tfText(f){const s=tfNow(),i=tfSays(f,s),F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';if(i>=0)TX.push({s:t('tfL_'+f.role+i),x:f.x,y:f.y-30*f.sc,f:F,z:7,c:'#fff3d6'});
+ if(Math.hypot(f.x-P.x,f.y-P.y)<60)TX.push({s:t('tfN_'+f.role),x:f.x,y:f.y-(i>=0?40:30)*f.sc,f:F,z:6,c:f.role==='spar'?'#ffc070':'#bfe8ff'});}
+function tfNear(){return TF&&P?TF.filter(f=>!f.busy&&f.role!=='kid'&&Math.abs(f.x-P.x)<40&&Math.abs(f.y-P.y)<40):[];}
+function tfTalk(f){const L=['tfL_'+f.role+((tfNow()/7+f.ln)%(f.role==='spar'?4:8)|0)];
+ if(f.role==='spar'&&!SPAR)dialog('tfN_spar',[...L,'tfSparQ'],null,[{l:t('tfSparY'),f:()=>sparStart(f)},{l:t('oClose')}]);else dialog('tfN_'+f.role,L);}
+function sparStart(f){if(SPAR||!P)return;const m=newMon('outlaw',f.x,f.y);Object.assign(m,{spar:1,tmp:1,look:f.look,nm:t('tfN_spar'),lv:S.lv,eng:4,agg:1,face:P.x>f.x?1:-1});
+ m.max=m.hp=Math.max(40,Math.round(atkV()*14));m.dmul=clamp(maxHP()*.06/(MT.outlaw.dmg*1.5),.0001,5);mons.push(m);f.busy=1;SPAR={m,f,t:0};toast(t('tfSparGo'),'good');SFX.notice();}
+function sparEnd(won){const{m,f}=SPAR;SPAR=null;f.busy=0;m.dead=true;m.rt=1e9;m.hidN=1;const i=mons.indexOf(m);if(i>=0)mons.splice(i,1);
+ if(won){const g=Math.round(20+S.lv*5),xg=Math.round(xpNeed()*.03);S.gold+=g;gainXP(xg);toast(t('tfSparWon',{g,n:xg.toLocaleString('en')}),'good');SFX.quest();}else toast(t('tfSparLost'),'warn');hudDirty=true;save(true);}
+// highwaymen: three a town, out past its walls and off the roads, of the human kind nearest in level to the 30 monsters
+// nearest the town (own RNG, so the shared spawn sequence stays as it was)
+function banditSpawn(){TFB.length=0;const rf=mulberry32(55),kinds=['outlaw','gsold','deserter','sknight','kraider','gscout','cultist','gknight','huroi','pguard'];
+ for(const T of TOWNS){const cx=(T.x0+T.x1)/2,cy=(T.y0+T.y1)/2,hw=(T.x1-T.x0)/2,hh=(T.y1-T.y0)/2;
+  const L=mons.filter(m=>!MT[m.type].boss&&!TFB.includes(m)).map(m=>[Math.hypot(m.sx/TS-cx,m.sy/TS-cy),MT[m.type].lv[0]]).filter(a=>a[0]<hw+60).sort((a,b)=>a[0]-b[0]).slice(0,30).map(a=>a[1]).sort((a,b)=>a-b),lv=L.length>=5?L[L.length>>1]:170; // the Saharan towns stand in late land with few spawns near
+  const ty=kinds.reduce((a,k)=>Math.abs(MT[k].lv[0]-lv)<Math.abs(MT[a].lv[0]-lv)?k:a);
+  for(let n=0,tr=0;n<3&&tr<200;tr++){const a=rf()*6.283,r=1+(10+rf()*8)/Math.max(hw,hh),x=Math.round(cx+Math.cos(a)*hw*r),y=Math.round(cy+Math.sin(a)*hh*r);
+   if(x<1||x>=GW-1||y<-NR+1||y>=WMH-1||sol0(x,y)||sol0(x+1,y)||at0(x,y)===WA||at0(x,y)===PA||TOWNS.some(o=>x>=o.x0-2&&x<=o.x1+2&&y>=o.y0-2&&y<=o.y1+2))continue;
+   const m=newMon(ty,x*TS+8,y*TS+8,rf);mons.push(m);TFB.push(m);n++;}}}
+Object.assign(STR.ar,{tfN_walk:'من أهل البلد',tfN_kid:'عيّل',tfN_spar:'محارب بيتمرن',
+ tfL_walk0:'الجو حلو النهارده',tfL_walk1:'الأسعار غليت في السوق',tfL_walk2:'بيقولوا الوحوش برا السور زادت',tfL_walk3:'متنساش تاكل قبل ما تطلع',tfL_walk4:'الحداد شغال من الفجر',tfL_walk5:'ابني نفسه يبقى مغامر زيك',tfL_walk6:'فيه قطاع طرق برا البوابة، خلي بالك',tfL_walk7:'يوم طويل، ربنا يعدّيه',
+ tfL_kid0:'إلحقني لو تقدر!',tfL_kid1:'إنت مغامر بجد؟',tfL_kid2:'هيييه!',tfL_kid3:'لما أكبر هبقى فارس',tfL_kid4:'مسكتك!',
+ tfL_spar0:'عايز تتمرن شوية؟',tfL_spar1:'سيفي محتاج حركة',tfL_spar2:'تعالى نشوف مين أسرع',tfL_spar3:'التمرين كل يوم بيفرق',
+ tfSparQ:'تعالى نتمرن بسيوف التمرين. اللي يوصل لربع صحته الأول يخسر.',tfSparY:'يلا نتمرن',tfSparGo:'التمرين بدأ! لحد ربع الصحة',tfSparWon:'كسبت التمرين! +{g} دهب و+{n} خبرة',tfSparLost:'خسرت التمرين، المرة الجاية',
+ bdSay0:'سيب فلوسك وامشي!',bdSay1:'الطريق ده بتاعنا!',bdSay2:'هتدفع ولا هتموت؟',bdSay3:'محدش هيسمع صريخك هنا'});
+Object.assign(STR.en,{tfN_walk:'Townsfolk',tfN_kid:'Child',tfN_spar:'Sparring partner',
+ tfL_walk0:'Lovely weather today',tfL_walk1:'Prices went up at the market',tfL_walk2:'They say there are more monsters past the wall',tfL_walk3:"Don't forget to eat before you head out",tfL_walk4:"The smith's been at it since dawn",tfL_walk5:'My son wants to be an adventurer like you',tfL_walk6:'Highwaymen out past the gate, be careful',tfL_walk7:'Long day ahead',
+ tfL_kid0:'Catch me if you can!',tfL_kid1:'Are you a real adventurer?',tfL_kid2:'Wheee!',tfL_kid3:"I'll be a knight when I grow up",tfL_kid4:'Got you!',
+ tfL_spar0:'Up for some practice?',tfL_spar1:'My sword needs the exercise',tfL_spar2:"Let's see who's quicker",tfL_spar3:'Training every day makes the difference',
+ tfSparQ:"Let's spar with practice blades. Whoever drops to a quarter of their health first loses.",tfSparY:"Let's spar",tfSparGo:'Sparring! To a quarter of health',tfSparWon:'You won the bout! +{g} gold and +{n} XP',tfSparLost:'You lost the bout. Next time',
+ bdSay0:'Hand over your gold!',bdSay1:'This road is ours!',bdSay2:'Pay up or die!',bdSay3:'Nobody will hear you scream out here'});
+window.__GT={tf:()=>TF,at:(f,s)=>tfAt(f,s),bandits:()=>TFB,spar:f=>sparStart(f),get SPAR(){return SPAR},tick:dt=>tfTick(dt)}; // tests
+
 /* paper maps (Twister 2026-10-19): each inn sells the map of its own area only, and it is a traveller's sketch: the land
    shows through an uneven haze, and places are drawn near where they are, not exactly, with some left out. What you
    walked yourself stays exact. S.ev.pmap = {innId:1}; an old save's 1 becomes Winston's. */
@@ -4861,7 +4929,7 @@ function update(dt){
  if(P.food<20&&!P.hungryT){P.hungryT=true;toast(t('hungry'),'warn');}if(P.food>=25)P.hungryT=false;
  if(pain&&!P.painT){P.painT=true;toast(t('pain'),'warn');}if(!pain)P.painT=false;
  // monsters
- const safe=!!inTown(P.x,P.y);
+ tfTick(dt);const safe=!!inTown(P.x,P.y);
  for(const m of mons){try{
   const b=MT[m.type];monVox(m,b,dt);
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
@@ -4890,7 +4958,7 @@ function update(dt){
   if(m.ret){const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);m.st=null;m.tele=0;m.retT=(m.retT||0)+dt;if(hd>4){const ox=m.x,oy=m.y;chase(m,hx,hy,hd,b.spd*1.2,mr,dt);m.stuckN=0;m.ret=1;if(Math.hypot(m.x-ox,m.y-oy)>.01)m.rsT=0;else m.rsT=(m.rsT||0)+dt;if(m.rsT>2||m.retT>12){m.x=m.sx;m.y=m.sy;m.path=null;m.rsT=0;}}m.hp=Math.min(m.max,m.hp+m.max*.08*dt);if(hd<=4||hd<20&&m.hp>=m.max){m.ret=0;m.retT=0;m.path=null;}continue;}
   // a monster walking round a wall toward you (m.fl) stays on you while its way round is short enough, even though that
   // takes it further from you and from its spawn for a while
-  const eng=ag&&(!safe||m.evt)&&(d<ag||(m.eng>0&&(d<ag*2.4||m.fl&&m.fd>0&&m.fd<=MFAR)));
+  const eng=ag&&(!safe||m.evt||m.spar)&&(d<ag||(m.eng>0&&(d<ag*2.4||m.fl&&m.fd>0&&m.fd<=MFAR)));
   if(eng){m.eng=4;if(!m.goal&&Math.hypot(m.x-m.sx,m.y-m.sy)>(m.fl?MFAR*TS:AI?260:200)){m.ret=1;m.eng=0;m.fl=0;continue;}
    if(AI){packTick(m,AI,dt);monAct(m,b,AI,dx,dy,d,mr,dt);}else{if(d>6)chase(m,dx,dy,d,b.spd,mr,dt);m.face=dx>0?1:-1;if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;mobBite(m);}}}
   else{m.eng-=dt;m.st=null;m.tele=0;m.wt-=dt;if(m.wt<=0){m.wt=1+rand()*2.5;const back=Math.hypot(m.sx-m.x,m.sy-m.y)>50;if(back){const l=Math.hypot(m.sx-m.x,m.sy-m.y);m.wx=(m.sx-m.x)/l;m.wy=(m.sy-m.y)/l;}else if(rand()<.5){m.wx=0;m.wy=0;}else{const a=rand()*6.28;m.wx=Math.cos(a);m.wy=Math.sin(a);}}
@@ -5051,7 +5119,7 @@ function drawMonSheet(x,y,m){const s=MSH[m.type],[pose,f]=monPose(m),r=SA.monste
  ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(x,y,Math.max(4,s.W*sc*.3),2.5*sc,0,0,7);ctx.fill();
  ctx.save();ctx.translate(x,y);if(m.face<0)ctx.scale(-1,1);ctx.drawImage(s.canvas,r.sx,r.sy,r.sw,r.sh,dx,dy,w,h);
  if(m.hurt>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha*=.55;ctx.drawImage(s.canvas,r.sx,r.sy,r.sw,r.sh,dx,dy,w,h);}ctx.restore();}
-function drawMon(m){if(m.fake&&!m.fk){m.fk=1;ctx.save();ctx.globalAlpha*=.55;try{drawMon(m);}finally{ctx.restore();m.fk=0;}return;}if(m.type==='trauka')return drawDragon(m);if(m.type==='bhclone')return drawClone(m);const x=Math.round(m.x),hop=m.st==='dash'?m.hop||0:m.type==='rabbit'&&m.mvd?Math.abs(Math.sin((m.at||0)*9))*3:0,y=Math.round(m.y-hop),b=MT[m.type];if(m.grdT>0){ctx.save();ctx.strokeStyle='rgba(190,230,255,.85)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y-10,11,(m.face>0?0:Math.PI)-.9,(m.face>0?0:Math.PI)+.9);ctx.stroke();ctx.restore();}if(hop>1){ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x,Math.round(m.y),b.r+1,2.5,0,0,7);ctx.fill();}if(MSH[m.type])drawMonSheet(x,y,m);
+function drawMon(m){if(m.fake&&!m.fk){m.fk=1;ctx.save();ctx.globalAlpha*=.55;try{drawMon(m);}finally{ctx.restore();m.fk=0;}return;}if(m.type==='trauka')return drawDragon(m);if(m.type==='bhclone')return drawClone(m);if(m.look)return drawChar(remoteSpr(m.look,0),m.x,m.y,m.face>0?2:3,m.mvd?((m.at||0)*6|0)%2:0,false,1,m);const x=Math.round(m.x),hop=m.st==='dash'?m.hop||0:m.type==='rabbit'&&m.mvd?Math.abs(Math.sin((m.at||0)*9))*3:0,y=Math.round(m.y-hop),b=MT[m.type];if(m.grdT>0){ctx.save();ctx.strokeStyle='rgba(190,230,255,.85)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y-10,11,(m.face>0?0:Math.PI)-.9,(m.face>0?0:Math.PI)+.9);ctx.stroke();ctx.restore();}if(hop>1){ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x,Math.round(m.y),b.r+1,2.5,0,0,7);ctx.fill();}if(MSH[m.type])drawMonSheet(x,y,m);
  else{const sc=b.sc||0,h=Math.round(22*(sc||1));drawChar(m.vr?m.type+'~'+m.vr:m.type,x,y,m.face>0?2:3,m.mvd?((m.at||0)*6|0)%2:0,false,sc,m);if(m.type==='merman'||m.type==='smerman'){const hx=x+(m.face>0?6:-7);R(ctx,hx,y-20,1,18,'#c8b070');R(ctx,hx-2,y-22,5,1,'#e8d890');R(ctx,hx-2,y-24,1,2,'#e8d890');R(ctx,hx+2,y-24,1,2,'#e8d890');R(ctx,hx,y-25,1,3,'#e8d890');}
   const wp=MWPN[m.type];if(wp){ctx.save();ctx.translate(x,y);ctx.scale((m.face>0?1:-1)*(sc||1),sc||1);wp();ctx.restore();}}}
 // weapons in the hands of the Saharan Empire's humanoid monsters (drawn facing right, scaled with the body)
@@ -5081,6 +5149,8 @@ function render(dt){
  FURNS.forEach(FURN=>{R(ctx,FURN.x+2,FURN.y+4,18,14,fl>.5?'#ff8a1e':'#ffa83a');R(ctx,FURN.x+6,FURN.y+9,10,9,'#ffe07a');for(let i=0;i<5;i++)R(ctx,FURN.x+3+i*3,FURN.y+10-((Math.sin(gTime*10+i*2)*3+3)|0),3,8,'#ff7a1a');});
  const ents=[];
  if(S){nodes.forEach(n=>ents.push({y:n.y,f:()=>drawNode(n.x,n.y,n)}));
+  for(const f of tfVis()){ents.push({y:f.y,f:()=>tfDraw(f)});tfText(f);}
+  for(const m of TFB){const st=TFS.get(m);if(st&&st.t>gTime&&!m.dead)TX.push({s:st.s,x:m.x,y:m.y-(MT[m.type].oy||16)-24,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff9a8a'});}
   for(const c of exNear()){ents.push({y:c.y-6,f:()=>drawCache(c)});ents.push({y:c.y+400,f:()=>drawCacheG(c)});}
   for(const l of lmList())if(l.x>camX-20&&l.x<camX+VW+20&&l.y>camY-10&&l.y<camY+VH+40)ents.push({y:l.y,f:()=>drawLm(l)});
   {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});}
@@ -5102,7 +5172,7 @@ function render(dt){
     // coloured by how dangerous it is for you (grey far weaker, white even, orange stronger, red deadly)
     const md=Math.hypot(m.x-P.x,m.y-P.y),hov=MWP&&Math.abs(MWP[0]-m.x)<14&&MWP[1]>m.y-oy-6&&MWP[1]<m.y+6;
     if((md<140||hov)&&monLit(m)){const dl=m.lv-S.lv,c=dl>8?'#ff6a5a':dl>3?'#ffb04a':dl<-8?'#a8b0b8':'#ffe07a';TX.push({s:'Lv'+m.lv,x:m.x,y:m.y-oy-3,f:'{s}px "Press Start 2P", monospace',z:6,c});
-     TX.push({s:t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),x:m.x,y:m.y-oy-12,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:dl>8?'#ff8a7a':dl>3?'#ffc070':dl<-8?'#b8c0c8':'#f2f2f2'});}}});});
+     TX.push({s:m.nm||t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),x:m.x,y:m.y-oy-12,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:dl>8?'#ff8a7a':dl>3?'#ffc070':dl<-8?'#b8c0c8':'#f2f2f2'});}}});});
   if(!titleCam&&mode!=='dead'&&!P.ghost)if(PET)ents.push({y:PET.y,f:()=>drawPet(PET)});
   ents.push({y:P.y,f:()=>{P.trail.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;const am=a.r&&MOUNTS[a.r];if(am){drawHorse(a.x,a.y,a.dir,2,am);drawRider(a.x,a.y,a.dir,2,P);drawHorse(a.x,a.y,a.dir,2,am,ctx,'head');}else drawChar(pSpr(),a.x,a.y,a.dir,a.frame,false);});ctx.globalAlpha=1;const rd=P.ride&&MOUNTS[S.mount];const hf=rd&&P.rmv>0?1+((P.rgT||0)*10|0)%4:0,blk=P.inv>0&&((gTime*20|0)%2===0)&&P.dash<=0;if(rd)drawHorse(P.x,P.y,P.dir,hf,rd);const wen=(weapon()||{}).en||0;if(wen>=7)drawEnh(P.x,P.y-(rd?9:0),wen,0);if(rd){if(!blk)drawRider(P.x,P.y,P.dir,hf,P);drawHorse(P.x,P.y,P.dir,hf,rd,ctx,'head');const hm=rhpMax(S.mount),hh=rhp(S.mount);if(hh<hm){R(ctx,P.x-9,P.y-37,18,3,'#000');R(ctx,P.x-8,P.y-36,16*hh/hm,1,'#e8a060');}}else drawChar(pSpr(),P.x,P.y,P.dir,P.frame,blk,0,P);if(wen>=4)drawEnh(P.x,P.y-(rd?9:0),wen,1);
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,w.id,w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
@@ -6170,7 +6240,7 @@ function mobKey(m){return m.nk||(m.nk=m.type+'@'+(m.sx|0)+','+(m.sy|0));}
 // siege and trial monsters stay on one client.
 // every outdoor monster, summoned and event ones included (owner report: one player saw monsters the other didn't): the
 // host's list is the truth, a follower makes the ones it lacks from their keys and hides its own that the host doesn't list
-function mobOk(m){const b=MT[m.type];return !!b&&!m.arena&&!m.tower;}
+function mobOk(m){const b=MT[m.type];return !!b&&!m.arena&&!m.tower&&!m.spar;}
 function mobByKey(k){for(const m of mons)if(mobOk(m)&&mobKey(m)===k)return m;return null;}
 function mobStart(){if(!NETTR||!NETTR.mobsPut)return;MOBN={zone:null,all:{},host:null,rs:[],sent:0,put:false,seq:0,hits:new Map()};
  NET.on(ev=>{if(ev.type!=='message'||!MOBN)return;const env=ev.env,pl=env.payload||{};if((env.type!=='raid.hit'&&env.type!=='raid.state')||pl.to!==NET.uid||typeof pl.raid!=='string'||pl.raid.slice(0,2)!=='m|')return;
