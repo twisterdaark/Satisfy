@@ -322,7 +322,7 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 .sk.lock::after{content:"🔒";position:absolute;font-size:calc(var(--u)*1.1)}
 .sk.press{transform:scale(.88)}
 #ui:has(.panel:not([hidden])) #keys,#ui:has(.panel:not([hidden])) #skillbar,#ui:has(#sysm:not([hidden])) #skillbar{opacity:0;pointer-events:none}
-#mapW{display:flex;gap:calc(var(--u)*1.4);align-items:stretch;background:var(--sys2)}
+#mapEx{white-space:pre-line;font-size:calc(var(--u)*1.15);color:#bfe8ff;opacity:.85;margin-bottom:calc(var(--u)*.6)}#mapW{display:flex;gap:calc(var(--u)*1.4);align-items:stretch;background:var(--sys2)}
 #mapC{height:calc(var(--u)*40);aspect-ratio:160/120;border:1px solid rgba(143,216,255,.45);border-radius:calc(var(--u)*.4);background:#0a1220;cursor:grab;touch-action:none;box-shadow:inset 0 0 0 1px rgba(6,14,32,.8),0 0 calc(var(--u)*1.2) rgba(80,170,255,.18)}.mzoom{display:flex;gap:calc(var(--u)*.5)}.mzoom button{min-width:calc(var(--u)*3);padding:calc(var(--u)*.3) calc(var(--u)*.8)}
 .mleg{min-width:calc(var(--u)*17);display:grid;align-content:start;gap:calc(var(--u)*.55);font-size:calc(var(--u)*1.2)}
 .mleg i{display:inline-block;width:calc(var(--u)*1);height:calc(var(--u)*1);border-radius:50%;margin-inline-end:calc(var(--u)*.7);vertical-align:middle;box-shadow:0 0 0 1px #000}
@@ -500,7 +500,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
       <canvas id="mapC" width="800" height="600"></canvas>
       <div class="mleg">
         <div class="ptitle"><span class="head" data-i18n="mapT"></span><button class="x" data-act="closeMap">✕</button></div>
-        <div id="mapZ"></div>
+        <div id="mapZ"></div><div id="mapEx"></div>
         <div><i style="background:#fff"></i><span data-i18n="mapYou"></span></div>
         <div><i style="background:#ffd23a"></i><span data-i18n="mapNpc"></span></div>
         <div><i style="background:#e2493a"></i><span data-i18n="mapMon"></span></div>
@@ -3223,9 +3223,9 @@ function buyPot(who,k){if((S[k]||0)>=10)return shopD(who,'potFull');const g=pric
 const potOpts=who=>['hpot','mpot'].map(k=>{const g=price(who,POT[k].price);return{l:t('oBuyPot',{p:t(k),g}),qty:1,ic:k,st:`${t(k+'D')} (${S[k]||0}/10)`,poor:S.gold<g,f:()=>buyPot(who,k)};});
 function eat(){if(S.bread<=0){toast(t('noBread'),'warn');SFX.deny();return;}if(P.food>=95){toast(t('full'));SFX.deny();return;}S.bread--;P.food=Math.min(100,P.food+40);P.hp=Math.min(maxHP(),P.hp+15);vfx('heal',P.x,P.y);toast(t('ate'));SFX.eat();hudDirty=true;}
 function nearTree(){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];let best=null,bs=1e9,bc=null,bcs=1e9;for(const tr of vtNear(P.x,P.y,30)){const dx=tr.x-P.x,dy=tr.y-P.y,d=Math.hypot(dx,dy);if(d>30)continue;const s=d-((dx*v[0]+dy*v[1])/(d||1))*12;if((chopped.get(tr.k)||0)>gTime){if(s<bcs){bcs=s;bc=tr;}}else if(s<bs){bs=s;best=tr;}}return best||bc;}
-function nearest(){let best=null,bd=26;const cand=[...npcs.filter(n=>!n.hidden).map(n=>({k:'npc',o:n,x:n.x,y:n.y})),...ANVILS.map(a=>({k:'anvil',o:a,x:a.tx*TS+8,y:a.ty*TS+8})),...nodes.filter(n=>!(n.dep>0&&(n.kind==='herb'||n.kind==='bherb'))).map(n=>({k:'node',o:n,x:n.x,y:n.y,hint:n.kind==='herb'||n.kind==='bherb'?(n.dep>0?'hPicked':'hHerb'):undefined})),...CAMPS.map(c=>({k:'camp',o:c,x:c.x,y:c.y,hint:'hCamp'})),...ROOMS.map(R=>{const d=doorOf(R.b);return{k:'door',o:R,x:d.x,y:d.y,hint:'hEnter'};}),...PROPS.filter(p=>p.k==='chest'||p.k==='shelf'||p.k==='bed').map(p=>({k:'prop',o:p,x:p.tx*TS+p.w*8,y:p.ty*TS+(p.back?22:10),hint:{chest:'hChest',shelf:'hShelf',bed:'hBed'}[p.k]})),{k:'grave',o:GRAVE,x:GRAVE.tx*TS+8,y:GRAVE.ty*TS+16,hint:'hGrave'},...lmList().map(l=>({k:'lm',o:l,x:l.x,y:l.y,hint:'hRead'})),...DGATES.filter(g=>!(g.hide&&g.bh!=='key')&&!g.got&&!g.out&&!g.gone).map(g=>({k:'gate',o:g,x:g.x,y:g.y,hint:g.hint})),...TERR.map(T=>({k:'banner',o:T,x:T.x,y:T.y-4,hint:'hBanner'})),...SHRINES.map(o=>({k:'shrine',o,x:o.x,y:o.y,hint:o.hint})),...(COMPO?[{k:'npc',o:COMPO,x:COMPO.x,y:COMPO.y}]:[])];for(const c of cand){const d=Math.hypot(c.x-P.x,c.y-P.y)-(c.o&&c.o.reach||0);if(d<bd){bd=d;best=c;}}const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
+function nearest(){let best=null,bd=26;const cand=[...npcs.filter(n=>!n.hidden).map(n=>({k:'npc',o:n,x:n.x,y:n.y})),...ANVILS.map(a=>({k:'anvil',o:a,x:a.tx*TS+8,y:a.ty*TS+8})),...nodes.filter(n=>!(n.dep>0&&(n.kind==='herb'||n.kind==='bherb'))).map(n=>({k:'node',o:n,x:n.x,y:n.y,hint:n.kind==='herb'||n.kind==='bherb'?(n.dep>0?'hPicked':'hHerb'):undefined})),...CAMPS.map(c=>({k:'camp',o:c,x:c.x,y:c.y,hint:'hCamp'})),...ROOMS.map(R=>{const d=doorOf(R.b);return{k:'door',o:R,x:d.x,y:d.y,hint:'hEnter'};}),...PROPS.filter(p=>p.k==='chest'||p.k==='shelf'||p.k==='bed').map(p=>({k:'prop',o:p,x:p.tx*TS+p.w*8,y:p.ty*TS+(p.back?22:10),hint:{chest:'hChest',shelf:'hShelf',bed:'hBed'}[p.k]})),{k:'grave',o:GRAVE,x:GRAVE.tx*TS+8,y:GRAVE.ty*TS+16,hint:'hGrave'},...lmList().map(l=>({k:'lm',o:l,x:l.x,y:l.y,hint:'hRead'})),...exNear().map(c=>({k:'cache',o:c,x:c.x,y:c.y,hint:'hCache'})),...DGATES.filter(g=>!(g.hide&&g.bh!=='key')&&!g.got&&!g.out&&!g.gone).map(g=>({k:'gate',o:g,x:g.x,y:g.y,hint:g.hint})),...TERR.map(T=>({k:'banner',o:T,x:T.x,y:T.y-4,hint:'hBanner'})),...SHRINES.map(o=>({k:'shrine',o,x:o.x,y:o.y,hint:o.hint})),...(COMPO?[{k:'npc',o:COMPO,x:COMPO.x,y:COMPO.y}]:[])];for(const c of cand){const d=Math.hypot(c.x-P.x,c.y-P.y)-(c.o&&c.o.reach||0);if(d<bd){bd=d;best=c;}}const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
  if(!best||best.k==='tree'){const w=nearWater();if(w)best={k:'water',o:w,x:w.x,y:w.y,hint:FISH?'hReel':'hFish'};}return best;}
-function interact(){if(FISH){fishAct();return;}const n=nearest();if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
+function interact(){if(FISH){fishAct();return;}const n=nearest();if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
 let roomFade=false;
 function enterRoom(Rm){if(roomFade)return;if(P.ride)dismount();roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=(Rm.rx+6)*TS+8;P.y=(Rm.ry+6)*TS+10;P.dir=1;camSnap=true;hudDirty=true;});}
 // "get unstuck" in the Esc menu: walks you out of a house, or takes you back to the nearest town square (once a minute)
@@ -4523,7 +4523,7 @@ function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,ti
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
  h+=`<div class="ssec">${t('special')}</div><div class="sgrid">`+['comp','indom','dign','insi',...(S.hid.pers?['pers']:[])].map(k=>row(t(k),S.hid[k],t('t'+k)+'<br><small>'+t('noDist')+'</small>')).join('')+'</div>';
  h+=`<div class="pts" id="ptsT">${t('pts',{n:S.pts})}</div>`+(S.pts>0?`<div class="note">${t('ptsHint')}</div>`:'');
- h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','natChamp'].filter(id=>S.tl[id]);
+ h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','natChamp','pathfinder','cartog'].filter(id=>S.tl[id]);
  h+=`<div class="ssec">${t('titlesH')}</div>`+(own.length?own.map(id=>`<div class="tl${S.title===id?' worn':''}"><div><b>${t('tl_'+id)}</b><small>${t('tl_'+id+'D')}</small>${STR.en['tl_'+id+'S']?`<em>${t('tl_'+id+'S')}</em>`:''}</div><button data-title="${id}" ${S.title===id?'disabled':''}>${t(S.title===id?'tlWorn':'tlWear')}</button></div>`).join('')+`<div class="note">${t('tlNote')}</div>`:`<div class="note">${t('noTitles')}</div>`);
  {const cs=clsSkills().filter(skOK),bar=barSkills();h+=`<div class="ssec">${t('skillsH')} · ${t('cl_'+S.cls)}</div>`+cs.map(k=>{const d=SKD[k],bi=bar.indexOf(k);return `<div class="tl skd${bi>=0?' worn':''}" draggable="true" data-dsk="${k}"><img class="ski" src="${skIcon(k)}"><div><b>${t('sk_'+k)}</b><small>${t('skd_'+k)}${skLvTxt(k)}</small><em>${t('skCost',{mp:mpC(k),cd:Math.round(d.cd*skCostM(k))})}</em></div><button data-bar="${k}">${bi>=0?t('barOff',{k:keyName(KB[bi])}):t('barOn')}</button></div>`;}).join('')+`<div class="note">${t('barDrag')}</div>`;
   const ps=pasSkills();if(ps.length)h+=`<div class="ssec">${t('pasH')}</div>`+ps.map(k=>`<div class="tl skd worn"><img class="ski" src="${skIcon(k)}"><div><b>${t('sk_'+k)}</b><small>${t('skd_'+k)}${skLvTxt(k)}</small><em>${t('pasOnT')}</em></div></div>`).join('');}
@@ -4589,9 +4589,67 @@ function fogLoad(){FOG=new Uint8Array(FOGW*FOGH);fogV++;let ok=false;try{if(S.fo
   for(const [w,h,dy] of [[FOGW,FOGH,0],[ow,FOGH,0],[ow,Math.ceil((OS+ON)/FOGC),(NR-ON)/FOGC]])if(b.length===w*h){for(let y=0;y<h;y++)for(let x=0;x<w;x++)FOG[(y+dy)*FOGW+x]=b.charCodeAt(y*w+x);ok=true;if(w!==FOGW||dy)fogSave();break;}}}catch(e){}
  if(!ok){for(const T of TOWNS)if(S.vis&&S.vis[T.k])fogSee(T.rx,T.ry,4);fogSave();}} // an older save: the towns you have been to
 function fogSave(){let b='';for(let i=0;i<FOG.length;i++)b+=String.fromCharCode(FOG[i]);S.fog=btoa(b);}
-function fogSee(tx,ty,r){let ch=false;fogV++;const cx=Math.floor(tx/FOGC),cy=Math.floor((ty+NR)/FOGC);for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++){if(i*i+j*j>r*r+1)continue;const x=cx+i,y=cy+j;if(x<0||y<0||x>=FOGW||y>=FOGH)continue;if(!FOG[y*FOGW+x]){FOG[y*FOGW+x]=1;ch=true;}}return ch;}
+function fogSee(tx,ty,r){let ch=0;fogV++;const cx=Math.floor(tx/FOGC),cy=Math.floor((ty+NR)/FOGC);for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++){if(i*i+j*j>r*r+1)continue;const x=cx+i,y=cy+j;if(x<0||y<0||x>=FOGW||y>=FOGH)continue;if(!FOG[y*FOGW+x]){FOG[y*FOGW+x]=1;ch++;}}return ch;}
 function fogSeen(tx,ty){if(!FOG)return true;const x=Math.floor(tx/FOGC),y=Math.floor((ty+NR)/FOGC);return x<0||y<0||x>=FOGW||y>=FOGH||!!FOG[y*FOGW+x];}
-function fogTick(dt){if(!S||!P||S.__demo)return;if(!FOG||FOG.sid!==S){fogLoad();FOG.sid=S;}if((fogT-=dt)>0)return;fogT=.5;const pp=outPos();if(fogSee(pp.x/TS,pp.y/TS,2))fogSave();}
+function fogTick(dt){if(!S||!P||S.__demo)return;if(!FOG||FOG.sid!==S){fogLoad();FOG.sid=S;}if((fogT-=dt)>0)return;fogT=.5;const pp=outPos();const n=fogSee(pp.x/TS,pp.y/TS,exR());if(n){fogSave();exSeen(n);}}
+/* exploring and drawing the map (owner 2026-10-20: "add achievements and things for exploring the map and drawing it, so
+   wandering and exploring really pay off"). The open world's fog cells are counted per region, land only:
+   - the first time you set foot in a region pays experience and Cartography, with a banner;
+   - seeing 75 % of a region's land charts it: its name gets a check on the map, with gold and Cartography;
+   - Cartography (a life skill) trains on every new patch of land you see. Its level widens what you uncover around you
+     (2, 3 then 4 cells), lets you spot explorer caches from further away, and marks them on the map: from level 3 in the
+     regions you have charted, from 6 in all land you have seen;
+   - explorer caches lie hidden across the land (a glint once you are near): E digs one up, once, for gold and materials;
+   - achievements for the share of the world seen, the regions found and charted and the caches dug up, with two titles.
+   All of it is per character (S.exd found, S.exc charted, S.exf caches), so online every player explores on their own. */
+LIFE.push('carto');
+let EXZ=null,EXC=null;
+function exGrid(){if(EXZ)return EXZ;const z=new Int16Array(FOGW*FOGH).fill(-1),k=[],ix={},n=[];
+ for(let cy=0;cy<FOGH;cy++)for(let cx=0;cx<FOGW;cx++){let land=0;for(const [a,b] of [[4,4],[2,2],[5,2],[2,5],[5,5]]){const tt=at(cx*FOGC+a,cy*FOGC+b-NR);if(tt!==undefined&&tt!==WA){land=1;break;}}
+  if(!land)continue;const zk=zoneAt((cx*FOGC+4)*TS,(cy*FOGC+4-NR)*TS);if(/Sea$/.test(zk))continue;let i=ix[zk];if(i===undefined){i=ix[zk]=k.length;k.push(zk);n.push(0);}z[cy*FOGW+cx]=i;n[i]++;}
+ return EXZ={z,k,n,ix};}
+function exStats(){const E=exGrid(),seen=new Array(E.k.length).fill(0);let a=0,all=0;if(FOG)for(let i=0;i<E.z.length;i++){const z=E.z[i];if(z<0)continue;all++;if(FOG[i]){a++;seen[z]++;}}return {all:all?a/all:0,seen,E};}
+const exPctAll=()=>Math.floor(exStats().all*100);
+function exPct(z){const st=exStats(),i=st.E.ix[z];return i===undefined?0:st.seen[i]/st.E.n[i];}
+const exR=()=>{const l=lifeLv('carto');return l>=8?4:l>=4?3:2;};
+const exXP=n=>Math.round(n*(S.tl.pathfinder?1.2:1));
+function exMig(){if(S.exd)return;S.exd={};const st=exStats();st.E.k.forEach((k,i)=>{if(st.seen[i]>=Math.max(2,st.E.n[i]*.3))S.exd[k]=1;});S.exc=S.exc||{};S.exf=S.exf||{};}
+// a region found for the first time (called as the zone banner changes)
+function exZone(z){if(!S||!P||P.y>=WMH*TS||S.__demo)return;exMig();if(S.exd[z]||exGrid().ix[z]===undefined)return;S.exd[z]=1;
+ const xg=exXP(xpNeed()*.06);gainXP(xg);lifeXP('carto',30);announce(t('exFound',{z:t(z)}));SFX.rare();toast(t('exFoundR',{n:xg.toLocaleString('en')}),'good');hudDirty=true;save(true);}
+// new land seen: Cartography, and the region you are in may now be charted
+function exSeen(n){if(S.__demo)return;exMig();lifeXP('carto',n);const z=zoneAt(P.x,P.y),E=exGrid(),i=E.ix[z];if(i===undefined||S.exc[z]||E.n[i]<4||exPct(z)<.75)return;
+ S.exc[z]=1;const g=exXP(100+S.lv*15);S.gold+=g;lifeXP('carto',60);toast(t('exChart',{z:t(z),g}),'good');SFX.quest();hudDirty=true;save(true);}
+// explorer caches: one for every 60 land cells of a region (at least one), never in a town, the cells picked by a fixed
+// hash, each on the nearest open tile to its cell's middle
+function exCaches(){if(EXC)return EXC;const E=exGrid(),by=E.k.map(()=>[]);EXC=[];for(let i=0;i<E.z.length;i++)if(E.z[i]>=0)by[E.z[i]].push(i);
+ for(const [zi,L] of by.entries()){const zk=E.k[zi];if(TOWNS.some(T=>T.k===zk)||L.length<4)continue;L.sort((a,b)=>pmH(a%FOGW*7+3,(a/FOGW|0)*11+5)-pmH(b%FOGW*7+3,(b/FOGW|0)*11+5));
+ for(const i of L.slice(0,Math.max(1,Math.round(L.length/60)))){const cx=i%FOGW,cy=i/FOGW|0;const x0=cx*FOGC+4,y0=cy*FOGC+4-NR;let best=null;
+  for(let r=0;r<4&&!best;r++)for(let j=-r;j<=r&&!best;j++)for(let q=-r;q<=r;q++){const x=x0+q,y=y0+j,a=at(x,y);if(a===undefined||SOLID[a]||a===WA||at(x,y+1)===WA)continue;best={x,y};break;}
+  if(best&&!inTown(best.x*TS+8,best.y*TS+8))EXC.push({id:cx+'_'+cy,x:best.x*TS+8,y:best.y*TS+10,z:zk});}}return EXC;}
+const exSpot=()=>40+lifeLv('carto')*6; // how near you see a cache's glint
+const exHid=c=>!(S.exf&&S.exf[c.id]);
+function exNear(){if(!P||P.y>=WMH*TS)return [];const r=exSpot();return exCaches().filter(c=>exHid(c)&&Math.abs(c.x-P.x)<r&&Math.abs(c.y-P.y)<r&&Math.hypot(c.x-P.x,c.y-P.y)<r);}
+function exDig(c){exMig();if(!exHid(c))return;S.exf[c.id]=1;const g=Math.round((40+S.lv*12)*(S.tl.cartog?1.5:1));S.gold+=g;const mk=rand()<.05?'blue':rand()<.18?'mstone':['ore','wood','leather'][rand()*3|0],q=mk==='blue'||mk==='mstone'?1:2+(rand()*3|0);addMat(mk,q);
+ lifeXP('carto',20);vfx('loot',c.x,c.y,{rarity:2});coinFx(c,g);SFX.rare();SFX.coin();toast(t('exCacheGot',{g,q,it:t(mk)}),'good');hudDirty=true;save(true);}
+function drawCache(c){const x=Math.round(c.x),y=Math.round(c.y);ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(x-6,y,12,2);
+ R(ctx,x-5,y-3,10,3,'#6b4a2a');R(ctx,x-3,y-5,6,2,'#7d5a34');R(ctx,x-1,y-4,2,1,'#3a2614');}
+// the glint draws over the trees in front, like a system marker, so a cache under a canopy is still found
+function drawCacheG(c){const x=Math.round(c.x),y=Math.round(c.y)-14,b=(Math.sin(gTime*4+c.x)+1)/2,h=4+Math.round(b*3);ctx.globalAlpha=.55+b*.45;
+ R(ctx,x-1,y-h-1,2,h*2+2,'#5a3a10');R(ctx,x-h-1,y-1,h*2+2,2,'#5a3a10');R(ctx,x,y-h,1,h*2,'#ffe7a8');R(ctx,x-h,y,h*2,1,'#ffe7a8');R(ctx,x-1,y-1,3,3,'#ffffff');ctx.globalAlpha=1;}
+ACH.push({k:'ex10',c:()=>[exPctAll(),10],pb:{xp:.01}},{k:'ex30',c:()=>[exPctAll(),30],tl:'pathfinder',pb:{xp:.02}},{k:'ex60',c:()=>[exPctAll(),60],pb:{gold:.03,hp:.01}},
+ {k:'zones30',c:()=>[Object.keys(S.exd||{}).length,30],pb:{dmg:.01}},{k:'chart15',c:()=>[Object.keys(S.exc||{}).length,15],tl:'cartog',pb:{gold:.02}},{k:'cache25',c:()=>[Object.keys(S.exf||{}).length,25],pb:{gold:.02}});
+Object.assign(STR.ar,{life_carto:'رسم الخرايط',lifeD_carto:'بيكبر مع كل حتة أرض جديدة تشوفها. لفله بيوسّع اللي بتكشفه حواليك، وبيخليك تلمح المخابئ من أبعد، ومن لفل 3 بيعلّم المخابئ على الماب في المناطق اللي رسمتها (ومن لفل 6 في كل الأرض اللي شفتها).',
+ exFound:'اكتشفت منطقة جديدة: {z}',exFoundR:'+{n} خبرة من الاستكشاف',exChart:'رسمت خريطة {z}! (+{g} دهب)',exCacheGot:'لقيت مخبأ مستكشف: +{g} دهب و{q} {it}',hCache:'E: احفر المخبأ',
+ mapEx:'شفت {a}% من العالم · المنطقة دي {b}%',mapEx2:'مناطق اكتشفتها {d} · رسمتها {c} · مخابئ لقيتها {f}',
+ ach_ex10:'أول خطوات',ach_ex30:'دليل الطرق',ach_ex60:'شاف الدنيا',ach_zones30:'مكتشف المناطق',ach_chart15:'رسام الخرايط',ach_cache25:'صياد الكنوز',
+ tl_pathfinder:'دليل الطرق',tl_pathfinderD:'+20% مكافآت الاستكشاف.',tl_cartog:'رسام الخرايط',tl_cartogD:'+50% دهب من المخابئ.'});
+Object.assign(STR.en,{life_carto:'Cartography',lifeD_carto:'Grows with every new patch of land you see. Its level widens what you uncover around you, lets you spot caches from further away, and from level 3 marks caches on the map in regions you have charted (from 6, in all land you have seen).',
+ exFound:'New region discovered: {z}',exFoundR:'+{n} XP for exploring',exChart:'You charted {z}! (+{g} gold)',exCacheGot:"Explorer's cache: +{g} gold and {q} {it}",hCache:'E: Dig up the cache',
+ mapEx:'Seen {a}% of the world · this region {b}%',mapEx2:'Regions found {d} · charted {c} · caches dug up {f}',
+ ach_ex10:'First Steps',ach_ex30:'Pathfinder',ach_ex60:'Seen the World',ach_zones30:'Region Hunter',ach_chart15:'Cartographer',ach_cache25:'Treasure Hunter',
+ tl_pathfinder:'Pathfinder',tl_pathfinderD:'+20% exploring rewards.',tl_cartog:'Cartographer',tl_cartogD:'+50% gold from caches.'});
+window.__GX={grid:()=>{const E=exGrid();return {k:E.k,n:E.n};},caches:()=>exCaches(),stats:()=>{const s=exStats();return {all:s.all,seen:s.seen};},dig:c=>exDig(c),near:()=>exNear(),zone:z=>exZone(z),seen:n=>exSeen(n),pct:z=>exPct(z),fill:z=>{const E=exGrid(),i=E.ix[z];for(let j=0;j<E.z.length;j++)if(E.z[j]===i)FOG[j]=1;fogV++;}}; // tests
 /* paper maps (Twister 2026-10-19): each inn sells the map of its own area only, and it is a traveller's sketch: the land
    shows through an uneven haze, and places are drawn near where they are, not exactly, with some left out. What you
    walked yourself stays exact. S.ev.pmap = {innId:1}; an old save's 1 becomes Winston's. */
@@ -4645,7 +4703,7 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  // danger regions: red wash with a dashed edge
  g.save();g.setLineDash([6*dpr,4*dpr]);g.lineWidth=1.2*dpr;g.strokeStyle='rgba(226,73,58,.7)';g.fillStyle='rgba(140,10,10,.16)';[[28,2,34,40],[2,44,62,42]].forEach(([x,y,w,h])=>{g.fillRect(X(x),Y(y),w*sc,h*sc);g.strokeRect(X(x),Y(y),w*sc,h*sc);});g.restore();
  if(MV.z>=2.5){g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=1;for(let x=0;x<=MW;x+=10){g.beginPath();g.moveTo(X(x),Y(-NR));g.lineTo(X(x),Y(WMH));g.stroke();}for(let y=-NR;y<=WMH;y+=10){g.beginPath();g.moveTo(X(0),Y(y));g.lineTo(X(MW),Y(y));g.stroke();}}
- [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3]].forEach(([k,x,y])=>onS(X(x),Y(y),240*dpr)&&MM.label(g,t(k),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`}));
+ [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3]].forEach(([k,x,y])=>onS(X(x),Y(y),240*dpr)&&MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`}));
  ANVILS.forEach(a=>{if(onS(X(a.tx+.5),Y(a.ty+.5)))MM.marker(g,'anvil',X(a.tx+.5),Y(a.ty+.5),u*1.2);});
  mons.forEach(m=>{if(m.dead||!onS(X(m.x/TS),Y(m.y/TS))||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
  allies.forEach(a=>{if(!a.dead&&onS(X(a.x/TS),Y(a.y/TS)))MM.marker(g,'ally',X(a.x/TS),Y(a.y/TS),u);});if(COMPO)MM.marker(g,'ally',X(COMPO.x/TS),Y(COMPO.y/TS),u);
@@ -4658,6 +4716,8 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
   MM.marker(g,p.ret?'ret':'quest',x,y,u*1.1);MM.label(g,(p.ret?'? ':'')+qName(id),x,y-13*u,{size:Math.round(11*dpr),color:col,font:F,band:'rgba(8,16,40,.82)'});});
  // party members on the big map (SAT-ONLINE-026, owner feedback 17), however far: the party query keeps them in view
  if(NET&&PARTY&&PARTY.id())for(const r of NET.remotes())if(r.party===PARTY.id()&&!r.room&&r.mv===mapV()){const x=X(r.x/TS),y=Y(r.y/TS);MM.marker(g,'ally',x,y,u*1.4);MM.label(g,r.handle||'?',x,y-12*u,{size:Math.round(11*dpr),color:'#8dff9a',font:F,band:'rgba(8,40,16,.82)'});}
+ {const cl=lifeLv('carto');if(cl>=3&&MV.z>=1.5)for(const q of exCaches()){if(cl<6&&!(S.exc&&S.exc[q.z]))continue;const wx=q.x/TS,wy=q.y/TS;if(!fogSeen(wx,wy))continue;const x=X(wx),y=Y(wy);if(!onS(x,y))continue; // explorer caches, from Cartography 3
+  const r=3*u;g.strokeStyle=exHid(q)?'#ffd23a':'rgba(160,170,190,.55)';g.lineWidth=2*dpr;g.beginPath();g.moveTo(x-r,y-r);g.lineTo(x+r,y+r);g.moveTo(x+r,y-r);g.lineTo(x-r,y+r);g.stroke();}}
  if(FOG)fogDraw(g,X,Y,sc);
  if(PMK.length){g.save();g.globalAlpha=.6;for(const [k,x,y] of PMK)MM.marker(g,k,X(x),Y(y),u);g.restore();}
  const pp=outPos();MM.player(g,X(pp.x/TS),Y(pp.y/TS),dirAng(P.dir),u*1.2,gTime);MM.label(g,t('mapYou'),X(pp.x/TS),Y(pp.y/TS)+14*u,{size:Math.round(11*dpr),color:'#ffffff',font:F,band:'rgba(120,20,16,.85)',edge:'rgba(255,160,150,.6)'});
@@ -4665,7 +4725,8 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  const gr=g.createRadialGradient(c.width/2,c.height/2,c.height*.45,c.width/2,c.height/2,c.width*.75);gr.addColorStop(0,'rgba(6,14,32,0)');gr.addColorStop(1,'rgba(6,14,32,.5)');g.fillStyle=gr;g.fillRect(0,0,c.width,c.height);
  MM.label(g,'N',22*dpr,22*dpr,{size:Math.round(15*dpr),color:'#bfe8ff',font:'Oswald, sans-serif',weight:700});
  MM.label(g,`×${MV.z.toFixed(1)}`,c.width-12*dpr,c.height-14*dpr,{size:Math.round(11*dpr),color:'#bfe8ff',font:'Oswald, sans-serif',align:'right'});
- $('mapZ').textContent=t('mapZone',{z:t(zoneAt(P.x,P.y))});}
+ $('mapZ').textContent=t('mapZone',{z:t(zoneAt(P.x,P.y))});
+ {const st=exStats(),i=st.E.ix[zoneAt(P.x,P.y)];$('mapEx').textContent=t('mapEx',{a:Math.floor(st.all*100),b:i===undefined?'-':Math.floor(st.seen[i]/st.E.n[i]*100)})+'\n'+t('mapEx2',{d:Object.keys(S.exd||{}).length,c:Object.keys(S.exc||{}).length,f:Object.keys(S.exf||{}).length});}}
 (()=>{const c=$('mapC'),pos=e=>{const r=c.getBoundingClientRect();return [(e.clientX-r.left)*c.width/r.width,(e.clientY-r.top)*c.height/r.height];};
  c.addEventListener('wheel',e=>{if(mode!=='map')return;e.preventDefault();const [x,y]=pos(e);mapZoom(e.deltaY<0?1.25:.8,x,y);},{passive:false});
  c.addEventListener('pointerdown',e=>{if(mode!=='map')return;MV.drag={p:pos(e),cx:MV.cx,cy:MV.cy};c.setPointerCapture(e.pointerId);c.style.cursor='grabbing';});
@@ -4788,7 +4849,7 @@ function update(dt){
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
-  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)}));ZT[z]=gTime;}S.zone=z;if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold'||z==='zPedro'||z==='zGauss'||z==='zSSea')&&S.lv<160||/^zChaos/.test(z)&&S.lv<220||z==='zSuaz'&&S.lv<150||z==='zDran'&&S.lv<180||/^zAbyss/.test(z)&&S.lv<360)&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
+  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)}));ZT[z]=gTime;}S.zone=z;exZone(z);if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold'||z==='zPedro'||z==='zGauss'||z==='zSSea')&&S.lv<160||/^zChaos/.test(z)&&S.lv<220||z==='zSuaz'&&S.lv<150||z==='zDran'&&S.lv<180||/^zAbyss/.test(z)&&S.lv<360)&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
  // the Chaos Mountains past the first ridge: the blizzard cuts the flesh, 1/2/3 % of max health every 4 s (never the last
  // point); a campfire keeps it off
  if(P.y<NWALL*TS&&!P.ghost){const k=ridgeAt(P.x/TS,P.y/TS);if(k>0&&(P.chT=(P.chT??4)-dt)<=0){P.chT=4;if(!CAMPS.some(c=>Math.hypot(c.x-P.x,c.y-P.y)<64)){const d=Math.max(1,Math.round(maxHP()*.01*k));P.hp=Math.max(1,P.hp-d);numP(-26,'-'+d,'#bfe6ff');hudDirty=true;}}}
@@ -5020,6 +5081,7 @@ function render(dt){
  FURNS.forEach(FURN=>{R(ctx,FURN.x+2,FURN.y+4,18,14,fl>.5?'#ff8a1e':'#ffa83a');R(ctx,FURN.x+6,FURN.y+9,10,9,'#ffe07a');for(let i=0;i<5;i++)R(ctx,FURN.x+3+i*3,FURN.y+10-((Math.sin(gTime*10+i*2)*3+3)|0),3,8,'#ff7a1a');});
  const ents=[];
  if(S){nodes.forEach(n=>ents.push({y:n.y,f:()=>drawNode(n.x,n.y,n)}));
+  for(const c of exNear()){ents.push({y:c.y-6,f:()=>drawCache(c)});ents.push({y:c.y+400,f:()=>drawCacheG(c)});}
   for(const l of lmList())if(l.x>camX-20&&l.x<camX+VW+20&&l.y>camY-10&&l.y<camY+VH+40)ents.push({y:l.y,f:()=>drawLm(l)});
   {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});}
   if(COMPO){const a=COMPO;ents.push({y:a.y,f:()=>{if(a.hide>0)return;drawChar(a.spr,a.x,a.y,a.dir,a.frame||0,false,0,a);}});}

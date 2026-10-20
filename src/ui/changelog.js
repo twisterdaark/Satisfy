@@ -5,6 +5,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zg', ver: '0.73', d: '2026-10-20',
+      ar: ['الاستكشاف بقى ليه فايدة: أول مرة تدخل منطقة جديدة بتاخد خبرة وبيظهرلك إعلان باسمها',
+        'لما تشوف 75% من أرض منطقة بترسم خريطتها: دهب، وعلامة ✓ جنب اسمها على الماب',
+        'مهارة حياة جديدة: رسم الخرايط. بتكبر مع كل أرض جديدة تشوفها، وكل ما تعلى بتكشف حواليك أوسع، وبتلمح المخابئ من أبعد، ومن لفل 3 بتتعلّم المخابئ على الماب',
+        'مخابئ مستكشفين مستخبية في كل منطقة برا المدن: لمعة لما تقرب، E تحفر وتاخد دهب وخامات (مرة واحدة لكل مخبأ)',
+        'الماب بيقولك شفت كام في المية من العالم ومن المنطقة اللي إنت فيها، وكام منطقة اكتشفت ورسمت وكام مخبأ لقيت',
+        'إنجازات جديدة للاستكشاف ولقبين: دليل الطرق (+20% مكافآت الاستكشاف) ورسام الخرايط (+50% دهب المخابئ)'],
+      en: ['Exploring now pays: setting foot in a new region for the first time gives experience and a banner with its name',
+        'Seeing 75% of a region\'s land charts it: gold, and a ✓ by its name on the map',
+        'A new life skill, Cartography: it grows with every new patch of land you see; higher levels uncover more around you, spot caches from further away, and from level 3 mark caches on the map',
+        "Explorer's caches lie hidden in every region outside towns: a glint as you get near, E digs one up for gold and materials (once each)",
+        'The map shows how much of the world and of your region you have seen, and how many regions you found and charted and caches you dug up',
+        'New exploring achievements and two titles: Pathfinder (+20% exploring rewards) and Cartographer (+50% gold from caches)'] },
     { v: '2026-10-20zf', ver: '0.72', d: '2026-10-20',
       ar: ['الوحوش بقى ليها صوت: كل نوع بصوته (ديابة، خنازير، دببة، جولم، عفاريت، بشر، سحالي، تنانين، موتى، شياطين...). بتصرخ لما تشوفك، وبتزوم وهي بتجهز الضربة، وبتصوت لما تضرب أو تتضرب أو تموت، وساعات وهي ماشية. الكبيرة صوتها أتقل',
         'صوت الوحش بيوطى كل ما تبعد عنه، ومش بيتسمع من بعيد خالص',

@@ -31,7 +31,7 @@
     // crafting (the Blacksmith's ladder)
     'made', 'smith', 'sxp', 'patience', 'bonus', 'got', 'firstLeg',
     // quests, NPC memory, world flags, discovery
-    'qs', 'bqa', 'adqa', 'adqO', 'adqT', 'adqK', 'qOff', 'kills', 'met', 'ev', 'guardDown', 'vis', 'books', 'chest', 'chops', 'hag', 'burnSeen',
+    'qs', 'bqa', 'adqa', 'adqO', 'adqT', 'adqK', 'exd', 'exc', 'exf', 'qOff', 'kills', 'met', 'ev', 'guardDown', 'vis', 'books', 'chest', 'chops', 'hag', 'burnSeen',
     // equipment slots, skill bar, NPC affinity and town reputation, guild membership, companion, life skills
     'eq', 'bar', 'aff', 'rep', 'guild', 'comp', 'life',
     // mounts and pets owned/active (SAT-MOUNT), the daily arena lockout (a date, so it must sync)
