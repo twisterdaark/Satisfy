@@ -726,7 +726,7 @@ const SFX={
 const SKSND={fireball:'fire',bmeteor:'fire',bolt:'zap',bchain:'zap',gflash:'zap',pflash:'zap',tillu:'zap',nova:'frost',bzero:'frost',
  rapid:'bow',pierce:'bow',rain:'bow',larrow:'bow',mcross:'holy',mflash:'holy',mwind:'holy',mheaven:'holy',roar:'holy',
  strike:'power',smash:'power',kill:'power',wave:'power',revolve:'power',whirl:'power',charge:'power',rcut:'power',
- fort:'guardup',bash:'guardup',taunt:'guardup',tstealth:'cast',tsteal:'cast',tknife:'bow',aassn:'power',ashadow:'cast',apoison:'buff',pheal:'holy',pbless:'holy',plight:'holy',pdprot:'guardup',psmite:'power',pjudar:'holy',pdomin:'buff',prebec:'holy',kstance:'guardup',glink:'holy',bfury:'buff',cleave:'power',lstand:'buff',thrust:'power',skewer:'power',swall:'power',track:'cast',trap:'cast',volley:'bow',rage:'buff',cry:'buff',bcry:'buff',focus:'buff',icomb:'buff',lrep:'buff',qmove:'buff',fly:'buff'};
+ fort:'guardup',bash:'guardup',taunt:'guardup',nskel:'magic',ndrain:'magic',nexpl:'fire',tstealth:'cast',tsteal:'cast',tknife:'bow',aassn:'power',ashadow:'cast',apoison:'buff',pheal:'holy',pbless:'holy',plight:'holy',pdprot:'guardup',psmite:'power',pjudar:'holy',pdomin:'buff',prebec:'holy',kstance:'guardup',glink:'holy',bfury:'buff',cleave:'power',lstand:'buff',thrust:'power',skewer:'power',swall:'power',track:'cast',trap:'cast',volley:'bow',rage:'buff',cry:'buff',bcry:'buff',focus:'buff',icomb:'buff',lrep:'buff',qmove:'buff',fly:'buff'};
 function skSnd(k){const f=SFX[SKSND[k]||'cast'];if(f)f();}
 /* monster voices (owner 2026-10-20: "add sounds for hits and skills, above all the enemies, the game has no sound and no
    life"). Every monster speaks by its kind (critter, wolf, boar, beast, stone, goblin, man, reptile, dragon, fish-man,
@@ -2527,6 +2527,67 @@ const RGICO={
 window.__GRG={RG,tick:dt=>rgTick(dt),sk:k=>SKF[k](),evade:src=>rgEvade(src),atk:m=>rgAtk(m),behind:m=>rgBehind(m)};
 Object.assign(STR.ar,{"hood": "الراجل المقنّع", "hood_hi": "شش. محدش شافك وإنت جاي هنا؟ كويس. اللي بيشتغل في الضلمة بيعيش أطول.", "hood_idle": "متبصليش كده. الناس بتلاحظ.", "prHi_hood": "القتلة متخصصين في الاغتيال. واختبار تغيير الكلاس بتاعهم هو الاغتيال. لسه عايز؟", "cl_thief": "حرامي", "cl_assassin": "قاتل", "q_ct": "إيد خفيفة", "ct_o": "عايز تبقى حرامي؟ وريني إيدك. اسرق من 5 وحوش (سكيل السرقة، والوحش لازم يكون قدامك). خد الخنجر ده.", "ct_w": "لسه. إيدك تقيلة.", "ct_d": "مش وحش. من النهارده إنت حرامي. التخفّي هيبقى صاحبك.", "q_c2a": "الاغتيال", "c2a_o": "الهاربين من الجيش مستخبيين برا البلد. اقتل 8 منهم، وكل واحد لازم يتضرب أول ضربة وإنت متخفّي.", "c2a_w": "لسه. اللي بيشوفك قبل ما تضربه مش اغتيال.", "c2a_d": "نضيف. محدش هيعرف إنه إنت. إنت قاتل دلوقتي.", "o_steal": "اسرق من وحوش: {c}/{n}", "oStl": "(بضربة وإنت متخفّي)", "evade": "مراوغة", "stlOn": "تخفّي: الوحوش مش شايفاك. أول ضربة هتبقى الضعف", "stealNone": "مفيش وحش قدامك تسرقه", "stealDone": "الوحش ده اتسرق خلاص", "shdNone": "مفيش وحش قدامك تنط وراه", "pblOn": "نصل السم: ضرباتك بتسمم 15 ثانية", "sk_tstealth": "تخفّي", "skd_tstealth": "10 ثواني: الوحوش بتفقدك ومبتلاحظكش غير لو جنبها. بتمشي أبطأ. أي ضربة بتضربها أو بتاخدها بتنهيه، وأول ضربة منه الضعف.", "sk_tsteal": "سرقة", "skd_tsteal": "بتسرق دهب من الوحش اللي قدامك، وساعات حاجة من اللي بيوقعها. مرة واحدة لكل وحش.", "sk_tknife": "سكينة رمي", "skd_tknife": "سلاح سري: سكينة بترميها 130%.", "sk_tevade": "مراوغة", "skd_tevade": "12% من ضربات الوحوش مبتجيش فيك.", "sk_aassn": "اغتيال", "skd_aassn": "طعنة 350% لأول وحش قدامك: الضعف وإنت متخفّي أو من وراه، وأقوى 50% لو صحته تحت 30%.", "sk_ashadow": "خطوة الظل", "skd_ashadow": "بتنط ورا أقرب وحش قدامك وبتتخفّى ثانية ونص.", "sk_apoison": "نصل السم", "skd_apoison": "15 ثانية: ضرباتك بتسمم الوحوش 5 ثواني."});
 Object.assign(STR.en,{"hood": "Hooded Man", "hood_hi": "Shh. Nobody saw you come here? Good. Those who work in the dark live longer.", "hood_idle": "Do not stare at me. People notice.", "prHi_hood": "Assassins are specialized in assassination. Their class change quest is assassination. Still want it?", "cl_thief": "Thief", "cl_assassin": "Assassin", "q_ct": "A Light Hand", "ct_o": "You want to be a thief? Show me your hand. Steal from 5 monsters (the Steal skill, with the monster right in front of you). Take this dagger.", "ct_w": "Not yet. Your hand is heavy.", "ct_d": "Not bad. From today you are a thief. Stealth will be your friend.", "q_c2a": "Assassination", "c2a_o": "The deserters hide outside the city. Kill 8 of them, and each must take a first blow from you while you are hidden.", "c2a_w": "Not yet. If he sees you before you strike, it is not an assassination.", "c2a_d": "Clean. Nobody will know it was you. You are an Assassin now.", "o_steal": "Steal from monsters: {c}/{n}", "oStl": "(after a blow from stealth)", "evade": "Evade", "stlOn": "Stealth: the monsters cannot see you. Your first blow lands double", "stealNone": "There is no monster in front of you to steal from", "stealDone": "This monster has already been robbed", "shdNone": "There is no monster in front of you to step behind", "pblOn": "Poison Blade: your hits poison for 15 s", "sk_tstealth": "Stealth", "skd_tstealth": "10 s: monsters lose you and only notice you right beside them. You move slower. Any blow you strike or take ends it, and the first blow from it lands double.", "sk_tsteal": "Steal", "skd_tsteal": "Steal gold from the monster in front of you, and sometimes one of its drops. Once per monster.", "sk_tknife": "Throwing Knife", "skd_tknife": "A secret weapon: a thrown knife for 130%.", "sk_tevade": "Evasion", "skd_tevade": "12% of monster blows miss you.", "sk_aassn": "Assassinate", "skd_aassn": "A stab for 350% on the first monster in front: double from stealth or from behind, and 50% more below 30% health.", "sk_ashadow": "Shadow Step", "skd_ashadow": "Step behind the nearest monster in front of you and vanish for a second and a half.", "sk_apoison": "Poison Blade", "skd_apoison": "15 s: your hits poison monsters for 5 s."});
+/* Necromancers (major 9; plan doc ch 81 "Necromancer → restricted summoner with summon caps", spec "summon cap + corpse
+   resource"; novel ch 239/499/543/591/666/797). A pale robed man outside Winston's north wall takes a novice from level
+   20. Canon ch 591: "Hyena. It was a derogatory term for necromancers. A necromancer could manipulate the corpses of
+   others. They were called hyenas because they had a habit of looking for dead bodies on the battlefield." So the trial
+   is to find eight fresh corpses: once it is taken (and always for a necromancer) a monster you kill leaves its body for
+   15 s; walking onto one gathers it.
+   Necromancer: Summon Skeleton raises a skeleton from a body near you (ch 499: "The necromancer's basic skills included
+   'Summon Skeleton' and 'Skeleton Enhancement'... The skeletons summoned by a typical necromancer had old longswords by
+   default"); how many at once grows with level (ch 666: "The higher the domination stat, the more undead that could be
+   summoned"; the game has no Domination stat yet, so Intelligence stands in for it); each lasts 60 s, follows you and
+   fights the monsters near you, and its hits count as yours. Skeleton Enhancement (passive) makes them stronger. Corpse
+   Explosion blows up your nearest skeleton on everything around it (ch 797: "A big disadvantage of this magic was that it
+   took a considerably long amount of time to re-summon the destroyed undead": no summoning for 6 s after). Life Drain
+   heals you by part of what it deals. Ch 543: necromancers are "as weak as a child" (10% less health). Online the
+   skeletons are yours alone; others see a few of them walk behind you (fx "st:" tag 'k'). Monsters only. */
+const NEC={min:[],corpses:[],lock:0};
+const necOn=()=>!!S&&(clsIs('necro')||!!(S.qs.cn&&S.qs.cn.st===1));
+const necCap=()=>Math.min(6,2+Math.floor(S.lv/15)+Math.floor(stat('int')/60));
+const necPow=()=>(pasOn('nenh')&&clsIs('necro')?1.3:1);
+function necCorpse(m){if(!necOn()||m.spar||MT[m.type].boss)return;NEC.corpses.push({x:m.x,y:m.y,t:15});if(NEC.corpses.length>12)NEC.corpses.shift();}
+function necSum(){if(NEC.lock>0){toast(t('necLock',{n:Math.ceil(NEC.lock)}),'warn');return;}
+ let bi=-1,bd=120;NEC.corpses.forEach((c,i)=>{const d=Math.hypot(c.x-P.x,c.y-P.y);if(d<bd){bd=d;bi=i;}});if(bi<0){toast(t('necNoBody'),'warn');return;}
+ const c=NEC.corpses.splice(bi,1)[0];if(NEC.min.length>=necCap())NEC.min.shift();const mx=Math.round(maxHP()*.6*necPow());
+ NEC.min.push({x:c.x,y:c.y,hp:mx,max:mx,t:60,cd:.6,dir:0,fr:0,hk:1});dissolve(c.x,c.y-6,['#d8d4c4','#6a5a8a'],14);SFX.magic(.6);}
+function necBoom(){if(!NEC.min.length){toast(t('necNoMin'),'warn');return;}let bi=0,bd=1e9;NEC.min.forEach((s,i)=>{const d=Math.hypot(s.x-P.x,s.y-P.y);if(d<bd){bd=d;bi=i;}});
+ const s=NEC.min.splice(bi,1)[0];let n=0;for(const m of mons){if(m.dead)continue;if(Math.hypot(m.x-s.x,monY(m)-(s.y-6))<40+MT[m.type].r&&hitMon(m,3.5*necPow(),{skill:1}))n++;}
+ vfx('fire',s.x,s.y-6);fx.push({ring:true,big:1,x:s.x,y:s.y-4,t:.5});dissolve(s.x,s.y-6,['#d8d4c4','#8a6aff'],24);SFX.crit();shake=.2;NEC.lock=6;}
+const NESK={
+ nskel:()=>necSum(),
+ nexpl:()=>necBoom(),
+ ndrain:()=>{const v=fdir();let best=null,bd=1e9;for(const m of mons){if(m.dead)continue;const dx=m.x-P.x,dy=m.y-P.y,d=Math.hypot(dx,dy);if(d<110&&(dx*v[0]+dy*v[1])/(d||1)>.4&&d<bd){best=m;bd=d;}}
+  if(!best){toast(t('necNoTgt'),'warn');return;}const h0=best.hp;hitMon(best,1.4,{skill:1});const got=Math.max(0,h0-best.hp);
+  for(let i=0;i<8;i++)fx.push({x:best.x+(P.x-best.x)*i/8,y:monY(best)-6+(P.y-best.y)*i/8,vx:0,vy:-6,t:.4,c:'#b07aff',fl:1});
+  const n=Math.min(maxHP()-P.hp,Math.max(1,Math.round(Math.min(maxHP()*.12,got*.3))));if(n>0&&mode==='play'){P.hp+=n;numP(-14,'+'+n,'#b07aff',false);hudDirty=true;}}};
+function necTick(dt){if(!S||!P)return;if(NEC.lock>0)NEC.lock-=dt;
+ for(let i=NEC.corpses.length-1;i>=0;i--){const c=NEC.corpses[i];if((c.t-=dt)<=0){NEC.corpses.splice(i,1);continue;}
+  if(S.qs.cn&&S.qs.cn.st===1&&Math.hypot(c.x-P.x,c.y-P.y)<10){NEC.corpses.splice(i,1);qEvent('corpse','corpse');dissolve(c.x,c.y-4,['#6a5a8a','#d8d4c4'],10);SFX.quest();}}
+ if(!clsIs('necro')&&NEC.min.length)NEC.min=[];
+ for(let i=NEC.min.length-1;i>=0;i--){const s=NEC.min[i];s.t-=dt;if(s.t<=0||s.hp<=0||P.hp<=0||Math.hypot(s.x-P.x,s.y-P.y)>600){dissolve(s.x,s.y-8,['#d8d4c4','#6a5a8a'],12);NEC.min.splice(i,1);continue;}
+  let tgt=null,td=150;for(const m of mons){if(m.dead||m.spar)continue;const d=Math.hypot(m.x-P.x,m.y-P.y);if(d<td){td=d;tgt=m;}}
+  const k=i-(NEC.min.length-1)/2,gx=tgt?tgt.x+k*6:P.x-[0,0,14,-14][P.dir]+k*10,gy=tgt?tgt.y+4:P.y-[12,-12,0,0][P.dir]+Math.abs(k)*4;
+  const dx=gx-s.x,dy=gy-s.y,d=Math.hypot(dx,dy),reach=tgt?8+MT[tgt.type].r:4;
+  if(d>reach){const sp=Math.min(d,(d>60?90:55)*dt);const nx=s.x+dx/d*sp,ny=s.y+dy/d*sp;if(!solidT(Math.floor(nx/TS),Math.floor(ny/TS))||d>200){s.x=nx;s.y=ny;}s.dir=Math.abs(dx)>Math.abs(dy)?(dx>0?2:3):(dy>0?0:1);s.fr+=dt*6;}else s.fr=0;
+  if(tgt&&d<=reach+2){if((s.cd-=dt)<=0){s.cd=1.2;s.sw=.15;hitMon(tgt,.35*necPow(),{dot:1});}
+   if((s.hk-=dt)<=0){s.hk=1;const b=MT[tgt.type];if(!tgt.stun&&Math.hypot(tgt.x-s.x,tgt.y-s.y)<b.r+10){s.hp-=Math.round(b.dmg*.4*(b.boss?2:1));num(s.x,s.y-24,'-'+Math.round(b.dmg*.4),'#ff6a5a',false);}}}
+  if(s.sw>0)s.sw-=dt;}}
+function necEnts(ents){for(const c of NEC.corpses)ents.push({y:c.y-6,f:()=>{const x=Math.round(c.x),y=Math.round(c.y);ctx.globalAlpha=Math.min(1,c.t/3);R(ctx,x-6,y-2,12,3,'#4a3a3a');R(ctx,x-4,y-3,3,2,'#d8d4c4');R(ctx,x+2,y-1,3,1,'#d8d4c4');ctx.globalAlpha=1;}});
+ for(const s of NEC.min)ents.push({y:s.y,f:()=>{if(s.t<3&&(gTime*8|0)%2)ctx.globalAlpha=.5;drawChar('skel',s.x,s.y,s.dir,Math.floor(s.fr)%4,false,0,null);ctx.globalAlpha=1;
+  const hx=Math.round(s.x)+(s.dir===3?-6:5),hy=Math.round(s.y)-7;R(ctx,hx,hy-(s.sw>0?8:5),1,6,'#8a8a90');R(ctx,hx-1,hy,3,1,'#5a4a3a');
+  R(ctx,s.x-6,s.y-28,12,2,'#000');R(ctx,s.x-6,s.y-28,12*Math.max(0,s.hp)/s.max,2,'#b07aff');}});}
+// others' skeletons: a few walk behind a necromancer whose fx carries 'k' (looks only)
+function necRemote(ents,r,fs){if(!fs.st||fs.st.indexOf('k')<0)return;const n=3;for(let i=0;i<n;i++){const a=(i-(n-1)/2)*.9+Math.PI/2+[0,Math.PI,-Math.PI/2,Math.PI/2][r.dir&3],x=r.x+Math.cos(a)*16,y=r.y+Math.sin(a)*8+6;
+ ents.push({y,f:()=>{ctx.globalAlpha=.85;drawChar('skel',x,y,r.dir,r.anim==='walk'?((performance.now()/150|0)+i)%4:0,false,0,null);ctx.globalAlpha=1;}});}}
+const NEICO={
+ nskel:p=>{p(5,2,6,5,'#d8d4c4');p(6,4,1,1,'#101a33');p(9,4,1,1,'#101a33');p(6,8,4,5,'#d8d4c4');p(4,9,2,1);p(10,9,2,1);p(12,4,1,8,'#8a8a90');},
+ nenh:p=>{p(5,3,6,5,'#d8d4c4');p(6,5,1,1,'#101a33');p(9,5,1,1,'#101a33');p(7,10,2,4);p(5,12,6,2);},
+ nexpl:p=>{for(let i=0;i<8;i++){const a=i*.785;p(8+Math.cos(a)*5|0,8+Math.sin(a)*5|0,2,2,i%2?'#d8d4c4':undefined);}p(6,6,4,4,'#fff');},
+ ndrain:p=>{p(2,7,4,3,'#ff6a5a');p(6,8,4,1);p(10,6,4,4,'#b07aff');p(11,7,2,2,'#fff');}};
+window.__GNE={NEC,tick:dt=>necTick(dt),sk:k=>SKF[k](),cap:()=>necCap(),corpse:m=>necCorpse(m)};
+Object.assign(STR.ar,{"nec": "الراجل الشاحب", "nec_hi": "الناس بتسمينا ضباع. عشان بندور على الجثث في ساحة القتال. ميهمنيش.", "nec_idle": "الموتى مبيتكلموش كتير. بحبهم كده.", "cl_necro": "نيكرومانسر", "q_cn": "الضبع", "cn_o": "النيكرومانسر بيحرك جثث غيره. وريني إنك تعرف تلاقيها: لما تقتل وحش جسمه هيفضل 15 ثانية، امشي عليه وخده. هات 8 جثث طازة.", "cn_w": "لسه. الجثث مبتستناش كتير.", "cn_d": "عندك عين ضبع. من النهارده إنت نيكرومانسر. جسمك ضعيف زي العيل، فخلي الهياكل تاخد الضرب عنك.", "o_corpse": "لم جثث طازة: {c}/{n}", "necLock": "الانفجار لسه مخلّص على الهيكل: استنى {n} ثانية قبل ما تستدعي تاني", "necNoBody": "مفيش جثة قريبة. اقتل وحش الأول", "necNoMin": "مفيش هيكل عندك تفجره", "necNoTgt": "مفيش وحش قدامك", "sk_nskel": "استدعاء هيكل", "skd_nskel": "بتقوّم هيكل عظمي بسيف قديم من جثة قريبة. بيعيش 60 ثانية وبيحارب الوحوش اللي جنبك. عددهم بيزيد مع اللفل والذكاء.", "sk_nenh": "تقوية الهياكل", "skd_nenh": "الهياكل بتاعتك أقوى 30% في الضرب والصحة.", "sk_nexpl": "انفجار الجثة", "skd_nexpl": "بتفجر أقرب هيكل ليك 350% في كل اللي حواليه. بعدها مينفعش تستدعي 6 ثواني.", "sk_ndrain": "امتصاص الحياة", "skd_ndrain": "140% على الوحش اللي قدامك، وبترجع جزء من الضرر صحة ليك."});
+Object.assign(STR.en,{"nec": "Pale Robed Man", "nec_hi": "People call us hyenas, because we look for dead bodies on the battlefield. I do not mind.", "nec_idle": "The dead do not talk much. I like them that way.", "cl_necro": "Necromancer", "q_cn": "The Hyena", "cn_o": "A necromancer moves the corpses of others. Show me you can find them: when you kill a monster its body stays for 15 seconds; walk onto it to take it. Bring me 8 fresh corpses.", "cn_w": "Not yet. Corpses do not wait long.", "cn_d": "You have a hyena's eye. From today you are a Necromancer. Your body is as weak as a child, so let the skeletons take the blows for you.", "o_corpse": "Gather fresh corpses: {c}/{n}", "necLock": "The explosion just spent a skeleton: wait {n} s before summoning again", "necNoBody": "There is no body nearby. Kill a monster first", "necNoMin": "You have no skeleton to explode", "necNoTgt": "There is no monster in front of you", "sk_nskel": "Summon Skeleton", "skd_nskel": "Raise a skeleton with an old longsword from a body nearby. It lasts 60 s and fights the monsters near you. How many you can keep grows with level and Intelligence.", "sk_nenh": "Skeleton Enhancement", "skd_nenh": "Your skeletons have 30% more damage and health.", "sk_nexpl": "Corpse Explosion", "skd_nexpl": "Blow up your nearest skeleton for 350% on everything around it. No summoning for 6 s after.", "sk_ndrain": "Life Drain", "skd_ndrain": "140% on the monster in front of you, and part of it comes back to you as health."});
 /* ---------------- mounts and pets (SAT-PET-001) ---------------- */
 // Horses carry you faster across the wide belts (H to ride); any fight, hit, dodge, door or cave puts you back on foot.
 // Pets follow you and give a small passive. Both are per-player (S.mounts / S.mount, S.pets / S.pet); online the server
@@ -3243,7 +3304,7 @@ const FSPAWN=[
  ['eti',728,772,-55,70,16],['ogre',728,772,20,150,12],['troll',728,772,70,210,12],['gargoyle',728,772,-55,230,16],['salamander',780,850,100,236,16],['ilizard',780,850,110,236,16]];
 // NPCs: stable ids (dialog keys, quest givers), sprite, tile position
 const NPCS=[{id:'smith',spr:'smith',tx:22,ty:18},{id:'grid',spr:'grid',tx:17,ty:18.4,dir:2},{id:'baker',spr:'baker',tx:6,ty:18},{id:'regas',spr:'regas',tx:24.5,ty:19,dir:3},{id:'coach',spr:'coach',tx:4,ty:21.6},
- {id:'khan',spr:'khan',tx:142,ty:73},{id:'tw',spr:'tw',tx:152,ty:77.4},{id:'tk',spr:'knight',tx:134,ty:61.4},{id:'tm',spr:'tm',tx:124,ty:57.4},{id:'cassus',spr:'priest',tx:117,ty:60.4,clr:1},{id:'hood',spr:'outlaw',tx:107.7,ty:86.4,clr:1,dir:2},{id:'ta',spr:'ta',tx:112,ty:52.4},{id:'coachW',spr:'coach',tx:143,ty:83.4},{id:'stylist',spr:'stylist',tx:138,ty:83.4,dir:2},{id:'board',tx:123,ty:79.6,obj:1},
+ {id:'khan',spr:'khan',tx:142,ty:73},{id:'tw',spr:'tw',tx:152,ty:77.4},{id:'tk',spr:'knight',tx:134,ty:61.4},{id:'tm',spr:'tm',tx:124,ty:57.4},{id:'cassus',spr:'priest',tx:117,ty:60.4,clr:1},{id:'hood',spr:'outlaw',tx:107.7,ty:86.4,clr:1,dir:2},{id:'nec',spr:'wraith',tx:141.5,ty:56.4,clr:1},{id:'ta',spr:'ta',tx:112,ty:52.4},{id:'coachW',spr:'coach',tx:143,ty:83.4},{id:'stylist',spr:'stylist',tx:138,ty:83.4,dir:2},{id:'board',tx:123,ty:79.6,obj:1},
  {id:'ashur',spr:'ashur',tx:190,ty:72.4},{id:'pcap',spr:'pcap',tx:185,ty:80,dir:2},{id:'coachP',spr:'coach',tx:176,ty:83.4},
  {id:'guardW',spr:'knight',tx:108,ty:80.4,dir:2,clr:1},{id:'hunter',spr:'hunter',tx:151,ty:90.4,clr:1},{id:'farmerP',spr:'baker',tx:183,ty:95.4,clr:1},{id:'hunterP',spr:'recruiter',tx:202,ty:80.4,dir:3,clr:1},
  // a peddler at each waystation, halfway through the belts (ph: already a physical column)
@@ -3352,7 +3413,7 @@ const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Mat
 // the golden ratio (novel ch 315, 1423): Strength and Agility kept 1:1. A hidden stat: always on, never shown in the status window
 const balanced=()=>!!(S&&S.st.str>=20&&S.st.agi>=20&&Math.abs(S.st.str-S.st.agi)<=Math.max(S.st.str,S.st.agi)*.1);
 const dodgeCost=()=>balanced()?20:25;
-function maxHP(){return Math.round((1+achB('hp'))*(100+stat('sta')*10+(S.tl.chief?60:0))*(balanced()?1.08:1)*(S.cls==='gknight'?1.15:S.cls==='knight'?1.2:S.cls==='paladin'?1.15:1)*(S.tl.purifier?1.1:1)*(S.tl.climber?1.05:1)*(1+gearSum('hpp')));}
+function maxHP(){return Math.round((1+achB('hp'))*(100+stat('sta')*10+(S.tl.chief?60:0))*(balanced()?1.08:1)*(S.cls==='gknight'?1.15:S.cls==='knight'?1.2:S.cls==='paladin'?1.15:S.cls==='necro'?.9:1)*(S.tl.purifier?1.1:1)*(S.tl.climber?1.05:1)*(1+gearSum('hpp')));}
 function maxST(){return 80+stat('sta')*2;}
 function maxMP(){return Math.round((stat('int')*3+Math.round(gearSum('mpb')))*(1+.1*Math.min(2,(S.wis&&S.wis.pill)||0))*(S.tl.echo?1.08:1));}
 const weapKind=()=>(WSH[weapon().id]||{}).k||'sword';
@@ -3662,7 +3723,7 @@ function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh)(b.drop||[]).forEach(([k,p])=>{if(rand()<p)addMat(k,1);});
  if(m.lv>=20&&!m.tmp){if(b.boss)addMat('estone',1+(m.lv/50|0));else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
- S.kills[m.type]=(S.kills[m.type]||0)+1;RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
+ S.kills[m.type]=(S.kills[m.type]||0)+1;necCorpse(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
  if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;annW('annGuard',{lv:S.lv});}giveTitle('forest');S.raid=0;}
  if(m.type==='gchief'){shake=.3;giveTitle('chief');}
  if((S.kills.rabbit||0)+(S.kills.goblin||0)>=40)giveTitle('hunter');
@@ -3841,6 +3902,8 @@ const QD={
  // thieves (major 8): a hooded man in a Winston alley; stl: the kill must follow a blow from stealth
  ct:{by:'hood',lv:15,obj:{t:'steal',it:'steal',n:5},xp:1500,cls:'thief',item:'dagger'},
  c2a:{by:'hood',lv:30,from:['thief'],mst:['dagger',3],obj:{t:'kill',it:'deserter',n:8,stl:1},xp:15000,gold:600,promo:'assassin'},
+ // necromancers (major 9): gather fresh corpses (a kill leaves its body for 15 s)
+ cn:{by:'nec',lv:20,obj:{t:'corpse',it:'corpse',n:8},xp:2500,cls:'necro',item:'staff'},
  bnt:{by:'board',lv:8,obj:{t:'kill',it:'gchief',n:1},xp:400,gold:120},
  pt1:{by:'pcap',lv:45,obj:{t:'kill',it:'hwolf',n:10},xp:2600,gold:120},
  pt2:{by:'pcap',lv:48,pre:'pt1',obj:{t:'kill',it:'rboar',n:8},xp:3400,gold:150,pts:5},
@@ -4024,6 +4087,7 @@ const NPCT={
  tw:{low:()=>trLine('tw'),idle:()=>trLine('tw')},
  cassus:{hi:'cas_hi',idle:()=>'cas_idle',opts:()=>casOpts()},
  hood:{hi:'hood_hi',idle:()=>'hood_idle'},
+ nec:{hi:'nec_hi',idle:()=>'nec_idle'},
  tk:{low:()=>trLine('tk'),idle:()=>trLine('tk')},
  ta:{low:()=>trLine('ta'),idle:()=>trLine('ta')},
  tm:{low:()=>trLine('tm'),idle:()=>trLine('tm'),opts:()=>petOpt('owl')},
@@ -4732,6 +4796,8 @@ const SKD={
  // thieves (major 8)
  tstealth:{cls:'thief',lv:15,mp:16,cd:18,col:'#8a8aa8'},tsteal:{cls:'thief',lv:15,mp:6,cd:4,col:'#ffd24a'},tknife:{cls:'thief',lv:18,mp:8,cd:3,col:'#c8ccd6'},tevade:{cls:'thief',lv:20,pas:1,col:'#c8e0ff'},
  aassn:{cls:'assassin',lv:30,mp:24,cd:12,need:'melee',col:'#ff4a4a'},ashadow:{cls:'assassin',lv:32,mp:18,cd:10,col:'#6a6a8a'},apoison:{cls:'assassin',lv:35,mp:20,cd:25,col:'#8ae05a'},
+ // necromancers (major 9)
+ nskel:{cls:'necro',lv:20,mp:20,cd:2,col:'#d8d4c4'},ndrain:{cls:'necro',lv:20,mp:14,cd:4,col:'#b07aff'},nenh:{cls:'necro',lv:22,pas:1,col:'#c8c0e0'},nexpl:{cls:'necro',lv:25,mp:25,cd:8,col:'#8a6aff'},
  rage:{title:'krage',mp:20,cd:40,col:'#ff5a3a'},roar:{title:'forest',mp:15,cd:30,col:'#7cc672'},cry:{title:'chief',mp:15,cd:25,col:'#e05040'}};
 const TLS={krage:'rage',forest:'roar',chief:'cry'};
 const pasSkills=()=>Object.keys(SKD).filter(k=>SKD[k].pas&&(SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.sec===SKD[k].cls)&&skOK(k));
@@ -4764,6 +4830,7 @@ const SKF={
  ...C2SK,
  ...PHSK,
  ...RGSK,
+ ...NESK,
  strike:()=>{const v=fdir();P.acd=0;tryAttack(v[0],v[1],1.8);shake=.12;},
  // Guardian Knight: shield bash stuns a cone in front; Fortress makes the guard unbreakable and all-round, and turns blocks back on the attacker; Taunt pulls every monster nearby onto you and hardens you for it
  bash:()=>{const v=fdir(),a=Math.atan2(v[1],v[0]);SFX.slam();shake=.12;vfx('block',P.x+v[0]*12,P.y-8+v[1]*12,{angle:a});let n=0;mons.forEach(m=>{if(m.dead)return;const dx=m.x-P.x,dy=monY(m)-(P.y-6),d=Math.hypot(dx,dy);if(d<30+MT[m.type].r&&(dx*v[0]+dy*v[1])/(d||1)>.35&&hitMon(m,1.2,{stun:1.2,skill:1,kx:v[0],ky:v[1]}))n++;});if(n)SFX.hit();},
@@ -4944,7 +5011,7 @@ Object.assign(STR.en,{sk_lrep:"Legendary Blacksmith's Repair",skd_lrep:'Restores
 function namedDrop(m){const L=NDROP[m.type];if(!L||m.tmp)return;for(const [id,p] of L){if(rand()>=p)continue;const it=mkItem(id,0);S.items.push(it);vfx('loot',m.x,m.y,{rarity:it.r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+it.r)}));break;}}
 // small procedural skill icons
 function skIcon(k){const id='sk_'+k;if(ICN[id])return ICN[id];const c=SKD[k].col;ICN[id]=mk(16,16,g=>{const p=(x,y,w,h,cc)=>R(g,x,y,w,h,cc||c);R(g,0,0,16,16,'#101a33');
- if(C2ICO[k])C2ICO[k](p);else if(PHICO[k])PHICO[k](p);else if(RGICO[k])RGICO[k](p);else if(k==='strike'){for(let i=0;i<10;i++)p(3+i,12-i,2,2);p(11,2,3,1,'#fff');}
+ if(C2ICO[k])C2ICO[k](p);else if(PHICO[k])PHICO[k](p);else if(RGICO[k])RGICO[k](p);else if(NEICO[k])NEICO[k](p);else if(k==='strike'){for(let i=0;i<10;i++)p(3+i,12-i,2,2);p(11,2,3,1,'#fff');}
  else if(k==='bash'){p(4,3,8,9,'#5a6a8a');p(5,4,6,7);p(7,5,2,5,'#fff');p(5,12,6,1,'#5a6a8a');p(6,13,4,1,'#5a6a8a');p(12,7,3,1,'#fff');p(13,5,1,1,'#fff');p(13,9,1,1,'#fff');}
  else if(k==='fort'){p(3,6,10,8);p(3,4,2,2);p(7,4,2,2);p(11,4,2,2);p(7,10,2,4,'#101a33');p(4,7,8,1,'#fff');}
  else if(k==='taunt'){for(let i=0;i<8;i++){const an=i*.785;p(8+Math.cos(an)*6|0,8+Math.sin(an)*6|0,1,1);}p(7,3,2,7);p(7,11,2,2);}
@@ -5423,7 +5490,7 @@ function update(dt){
  if(P.food<20&&!P.hungryT){P.hungryT=true;toast(t('hungry'),'warn');}if(P.food>=25)P.hungryT=false;
  if(pain&&!P.painT){P.painT=true;toast(t('pain'),'warn');}if(!pain)P.painT=false;
  // monsters
- tfTick(dt);c2Tick(dt);phTick(dt);rgTick(dt);const safe=!!inTown(P.x,P.y);
+ tfTick(dt);c2Tick(dt);phTick(dt);rgTick(dt);necTick(dt);const safe=!!inTown(P.x,P.y);
  for(const m of mons){try{
   const b=MT[m.type];monVox(m,b,dt);
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
@@ -5670,7 +5737,7 @@ function render(dt){
   if(!titleCam&&mode!=='dead'&&!P.ghost)if(PET)ents.push({y:PET.y,f:()=>drawPet(PET)});
   ents.push({y:P.y,f:()=>{P.trail.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;const am=a.r&&MOUNTS[a.r];if(am){drawHorse(a.x,a.y,a.dir,2,am);drawRider(a.x,a.y,a.dir,2,P);drawHorse(a.x,a.y,a.dir,2,am,ctx,'head');}else drawChar(pSpr(),a.x,a.y,a.dir,a.frame,false);});ctx.globalAlpha=1;const rd=P.ride&&MOUNTS[S.mount];const hf=rd&&P.rmv>0?1+((P.rgT||0)*10|0)%4:0,blk=P.inv>0&&((gTime*20|0)%2===0)&&P.dash<=0;if(rd)drawHorse(P.x,P.y,P.dir,hf,rd);const wen=(weapon()||{}).en||0;if(wen>=7)drawEnh(P.x,P.y-(rd?9:0),wen,0);if(rd){if(!blk)drawRider(P.x,P.y,P.dir,hf,P);drawHorse(P.x,P.y,P.dir,hf,rd,ctx,'head');const hm=rhpMax(S.mount),hh=rhp(S.mount);if(hh<hm){R(ctx,P.x-9,P.y-37,18,3,'#000');R(ctx,P.x-8,P.y-36,16*hh/hm,1,'#e8a060');}}else{if(P.stl>0)ctx.globalAlpha=.35;drawChar(pSpr(),P.x,P.y,P.dir,P.frame,blk,0,P);ctx.globalAlpha=1;}if(wen>=4)drawEnh(P.x,P.y-(rd?9:0),wen,1);
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,w.id,w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
-  if(BHR)bhEnts(ents);if(S&&S.wis)twEnts(ents);if(S){c2Ents(ents);phEnts(ents);}if(NET&&!titleCam)netEnts(ents);}
+  if(BHR)bhEnts(ents);if(S&&S.wis)twEnts(ents);if(S){c2Ents(ents);phEnts(ents);necEnts(ents);}if(NET&&!titleCam)netEnts(ents);}
  // one broken drawing (a stale sprite file after an update) must not hide the player and everything after it
  ents.sort((a,b)=>a.y-b.y).forEach(e=>{try{e.f();}catch(err){ctx.globalAlpha=1;gameErr(err);}});
  drawGDrop();drawEProj();proj.forEach(p=>{if(p.kind==='arrow'){const l=Math.hypot(p.vx,p.vy)||1,ux=p.vx/l,uy=p.vy/l;ctx.strokeStyle='#e8e0d0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x-ux*7,p.y-uy*7);ctx.lineTo(p.x,p.y);ctx.stroke();R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}else if(p.kind==='wave'){const a=Math.atan2(p.vy,p.vx);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.globalAlpha=.85;ctx.strokeStyle='#ffe08a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(-6,0,12,-1.1,1.1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(-5,0,12,-.9,.9);ctx.stroke();ctx.restore();}else{const f=p.kind==='fire';R(ctx,p.x-2,p.y-2,f?5:4,f?5:4,f?'#ff8a1e':'#9fd8ff');R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}});
@@ -5940,7 +6007,7 @@ const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(try
 // presence field: the events of the last 0.7 s, oldest first, within FXMAX characters (each one goes out in about 3 updates)
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
 // clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
-function stPub(){return P?(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':'')+(P.stl>0?'s':''):'';}
+function stPub(){return P?(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':''):'';}
 function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));if(!FXOUT.length)return '['+tags.join(',')+']';
  let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
@@ -5973,7 +6040,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   const wp=/^([a-z0-9_]+):(\d)(?::(\d{1,2}))?$/.exec(r.wp||''),wi=wp&&WSH[wp[1]]?{id:wp[1],r:+wp[2]}:null,wen=wp?+(wp[3]||0):0;
   const ft=Math.min(.1,(now-(fs.lt||now))/1000);fs.lt=now;fs.tr.forEach(a=>a.t-=ft);fs.tr=fs.tr.filter(a=>a.t>0);if(now<fs.du)fs.tr.push({x:r.x,y:r.y,dir:r.dir,t:.22});
   const swk=fs.sw?(now-fs.sw.t)/140:-1,sw=swk>=0&&swk<1?swk:-1,gu=Number.isInteger(r.gu)&&r.gu>=1&&r.gu<=256?r.gu-1:-1;
-  const pt=ptRemote(r,fs,ft),rd=pt.ride,hf=rd&&fr?1+((now/100)|0)%4:0;if(rd&&fr)horseFxR(r,fs,ft);if(pt.pet){const a=pt.pet;ents.push({y:a.y,f:()=>drawPet(a)});}
+  const pt=ptRemote(r,fs,ft),rd=pt.ride,hf=rd&&fr?1+((now/100)|0)%4:0;if(rd&&fr)horseFxR(r,fs,ft);if(pt.pet){const a=pt.pet;ents.push({y:a.y,f:()=>drawPet(a)});}necRemote(ents,r,fs);
   const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{fs.tr.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;drawChar(k,a.x,a.y,a.dir,1,false);});ctx.globalAlpha=1;
    if(r.anim==='dead')ctx.globalAlpha=.45;else if(fs.st&&fs.st.indexOf('s')>=0)ctx.globalAlpha=.3;if(wen>=7)drawEnh(r.x,r.y-bob,wen,0,r.dir);
    if(rd){const b=[0,0,-1,0,1][hf],ry=Math.round(r.y)-9+b;drawHorse(r.x,r.y,r.dir,hf,rd);ctx.save();ctx.beginPath();ctx.rect(Math.round(r.x)-9,ry-25,18,17);ctx.clip();drawChar(k,r.x,ry,r.dir,0,false);ctx.restore();drawHorse(r.x,r.y,r.dir,hf,rd,ctx,'head');}

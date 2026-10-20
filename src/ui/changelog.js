@@ -5,6 +5,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zp', ver: '0.82', d: '2026-10-20',
+      ar: ['النيكرومانسر (التحديث الكبير التاسع): راجل شاحب واقف برا سور وينستون الشمالي، شرق مدربين الكلاسات',
+        'كلاس النيكرومانسر من لفل 20: زي الرواية بيسموهم ضباع عشان بيدوروا على الجثث. الاختبار إنك تلم 8 جثث طازة: الوحش اللي تقتله جسمه بيفضل 15 ثانية، امشي عليه وخده',
+        'استدعاء هيكل: بتقوّم هيكل عظمي بسيف قديم من جثة قريبة، بيعيش 60 ثانية وبيحارب الوحوش اللي جنبك. عددهم بيزيد مع اللفل والذكاء (لحد 6)',
+        'تقوية الهياكل، وانفجار الجثة (بتفجر هيكل في الوحوش اللي حواليه، وبعدها مينفعش تستدعي 6 ثواني زي الرواية)، وامتصاص الحياة',
+        'جسم النيكرومانسر ضعيف (صحة أقل 10%). أونلاين اللاعبين التانيين بيشوفوا كام هيكل ماشيين وراك. كل ده ضد الوحوش بس'],
+      en: ['Necromancers (major #9): a pale robed man stands outside Winston\'s north wall, east of the class trainers',
+        'The Necromancer class from level 20: as in the novel they are called hyenas because they look for dead bodies. The trial is to gather 8 fresh corpses: a monster you kill leaves its body for 15 seconds; walk onto it to take it',
+        'Summon Skeleton raises a skeleton with an old longsword from a body nearby; it lasts 60 s and fights the monsters near you. How many you keep grows with level and Intelligence (up to 6)',
+        'Skeleton Enhancement, Corpse Explosion (blows up a skeleton among the monsters around it, then no summoning for 6 s, as in the novel) and Life Drain',
+        'A necromancer\'s body is weak (10% less health). Online, other players see a few skeletons walking with you. All of it works against monsters only'] },
     { v: '2026-10-20zo', ver: '0.81', d: '2026-10-20',
       ar: ['الحرامية والقتلة (التحديث الكبير التامن): فيه راجل مقنّع واقف في زقاق جوه وينستون، بين السور الغربي والبيت البنفسجي',
         'كلاس الحرامي من لفل 15: اختباره إنك تسرق من 5 وحوش. سكيلاته: التخفّي (الوحوش بتفقدك، وأول ضربة منه الضعف، وأي ضربة بتنهيه)، والسرقة (دهب وساعات حاجة من اللي الوحش بيوقعه، مرة لكل وحش)، وسكينة الرمي، والمراوغة (12% من ضربات الوحوش مبتجيش فيك)',
