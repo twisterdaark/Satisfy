@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zr', ver: '0.66', d: '2026-10-20',
+      ar: ['أونلاين: "بلّغ" في كارت أي لاعب: بتختار السبب (سبام، شتيمة، غش) والبلاغ بيوصل لصاحب اللعبة ومعاه آخر كلامه',
+        'الشتايم في كلام اللاعبين التانيين بتظهر نجوم، و/filter في الشات بيقفل الفلتر أو يشغله'],
+      en: ['Online: "Report" on any player\'s card: pick why (spam, insults, cheating) and the report reaches the game\'s owner with their last lines',
+        'Insults in other players\' chat show as stars; /filter in the chat turns that off and on'] },
     { v: '2026-10-20zw', ver: '0.65', d: '2026-10-20',
       ar: ['أونلاين: الهمس للأصحاب: اكتب في الشات /w والاسم والرسالة، أو "همس" من الأصحاب، والرسالة بتوصل لصاحبك بس مهما كان بعيد (بالبنفسجي)'],
       en: ['Online: whispers to friends: type /w, the name and the message in the chat, or "Whisper" in Friends; only that friend reads it, however far away (in purple)'] },

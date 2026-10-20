@@ -555,6 +555,17 @@
     };
   }
 
+  // SAT-ONLINE-071: reports/{id} = {by, byN, about, aboutN, why, said, t}: written once by the reporter, read by nobody
+  // in the game (the owner reads them in the Firebase console)
+  function reportStore(sdk) {
+    var D = sdk.m.database, db = sdk.db;
+    return {
+      report: function (v) {
+        return D.push(D.ref(db, 'reports'), { by: v.by, byN: String(v.byN || '?').slice(0, 24), about: v.about, aboutN: String(v.aboutN || '?').slice(0, 24), why: v.why, said: String(v.said || '').slice(0, 360), t: D.serverTimestamp() });
+      },
+    };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
     tradeStore: tradeStore,
@@ -563,6 +574,7 @@
     bountyStore: bountyStore,
     arenaStore: arenaStore,
     friendStore: friendStore,
+    reportStore: reportStore,
     natStore: natStore,
     SDK_VERSION: SDK_VERSION,
     load: load,

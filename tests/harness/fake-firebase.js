@@ -339,6 +339,10 @@
       if (old || v.from !== user.uid || !data.has('friends/' + seg[1] + '/' + user.uid)) return 'PERMISSION_DENIED: whisper not a friend';
       return Object.keys(v).sort().join(',') === 'from,h,t,text' && typeof v.h === 'string' && v.h.length <= 24 && typeof v.text === 'string' && v.text.length >= 1 && v.text.length <= 120 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'whisper fields';
     }
+    if (seg[0] === 'reports') { // SAT-ONLINE-071: once, as yourself, about someone else
+      if (!user || seg.length !== 2 || data.has(p) || !v || v.by !== user.uid) return 'PERMISSION_DENIED: reports';
+      return Object.keys(v).sort().join(',') === 'about,aboutN,by,byN,said,t,why' && typeof v.about === 'string' && v.about !== user.uid && ['spam', 'abuse', 'cheat', 'other'].includes(v.why) && typeof v.said === 'string' && v.said.length <= 360 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'reports fields';
+    }
     if (seg[0] === 'lockouts') return lockRules(seg, v);
     if (seg[0] === 'nat' || seg[0] === 'natPaid') return natRules(seg, v);
     if (seg[0] === 'arena') return arenaRules(seg, v);
