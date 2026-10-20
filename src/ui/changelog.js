@@ -5,6 +5,23 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20u', ver: '0.59', d: '2026-10-20',
+      ar: ['أرخبيل بيهين: جسر من الساحل الجنوبي بيوصل لبوابة الجزيرة الأولى. دانجن لشخص واحد، 66 جزيرة ورا بعض، وأونلاين كل واحد بيلعب نسخته',
+        'كل جزيرة ليها مهمة: اصمد قدام السيلوبوس، دوّر على مفاتيح الصناديق الدهبية، امسك الفيران الثعلبية، اطفي النار، العاصفة، الجزيرة السامة، أوضة البرق، المرأة السحلية، القمر الجهنمي، كابوس الجزيرة 30، الشيطان العظيم فورفو، نفسك في الجزيرة 41، التيجان الدهبية، المتاهة، والجحيم',
+        'المهمة لما تخلص بيظهر جسر للبوابة اللي بعدها. أول مرة بس بتديك نقاط المتحدّين، والوحوش مبتوقعش حاجة غير خبرة',
+        'الجزر 29 و40 و50 و60 نقط حفظ: لو مت بترجع لآخر نقطة، ولو مفيش بتطلع برا على الجسر',
+        'جزيرة الضباب بتظهر صدفة وفيها عربية القرع: إكسير +10 لأي ستات بـ 250 نقطة، إتقان الأسلحة بـ 6000، وإتقان السحر بـ 5000',
+        'الجزيرة 25: الحكيم ستيكس عيان. اعمله الدوا من جوز الهند الأزرق وورق شجرة العالم',
+        'الجزر 61 لـ 66: فرسان الموت بتوع باجما، لانتيير وأليكس وكروجر وجيس وبوفيا ومادرا، كل واحد بمهاراته، وبيسيبوا أدواتهم',
+        'لما تهزم مادرا الأرخبيل بيتطهر، وقاعة المشاهير بتفتح بتماثيلها (بركة يومين كل 3 أيام)، وستيكس بيديك لقب الملك البطل'],
+      en: ['The Behen Archipelago: a bridge off the south coast leads to the gate of the first island. A dungeon for one, 66 islands one after another, and online everyone plays their own copy',
+        'Every island has a mission: survive the sellobus, find the keys to the golden boxes, catch the fox mice, put out the fire, the blizzard, the poison island, the lightning room, the lizardwoman, the hell moon, the 30th island\'s nightmare, the great demon Furfu, yourself on the 41st, the golden crowns, the maze and the hell',
+        'Clear the mission and a bridge appears to the next gate. Only a first clear pays Challenger Points, and the monsters drop nothing but experience',
+        'Islands 29, 40, 50 and 60 are save points: a death sends you back to the last one, or out to the bridge without one',
+        'Fog Island turns up by chance with the pumpkin carriage: a +10 elixir for any stat for 250 points, Weapons Mastery for 6,000 and Magic Mastery for 5,000',
+        'The 25th island: Sage Sticks is ill. Make him the cure from a blue coconut and leaves of the World Tree',
+        'Islands 61 to 66: Pagma\'s death knights, Lantier, Alex, Kruger, Gis, Povia and Madra, each with their own skills, and they leave their gear',
+        'Beat Madra and the archipelago is purified: the Hall of Fame opens with its statues (a two-day blessing every three days), and Sticks gives you the Hero King title'] },
     { v: '2026-10-20t', ver: '0.58', d: '2026-10-20',
       ar: ['رينهارت بقت عاصمة ملكية بجد: الأسوار اتوسعت غرب وشمال',
         'قصر رينهارت ورا سوره، وجنينته أكبر من جنينة قلعة وينستون سبع مرات، وثكنات الفرسان الملكيين وساحات التدريب الست',

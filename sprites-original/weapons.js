@@ -43,7 +43,11 @@ const DEF={
  iyarugt:()=>sword(11,2,['#c8282a','#6a0a0e','#ff7a6a'],'#2a0a0e',(I,cx,top,len)=>{for(let y=top+2;y<top+len-1;y+=2)I.set(cx,y,'#ff3a2a');I.set(cx-2,top+len,'#c8282a');I.set(cx+2,top+len,'#c8282a');}),
  dains:()=>sword(12,3,['#e8c050','#9a7418','#fff4c0'],'#6a4a18',(I,cx,top,len)=>{for(let y=top+3;y<top+len-1;y+=3)I.set(cx,y,'#fff4c0');}),
  tbow:()=>bow(['#4a6ab0','#2a3a70','#9fc8ff'],'#fff07a'),
- wisdom:()=>sword(11,2,['#e8f4ff','#7a9ab8','#ffffff'],'#d8b04a',(I,cx,top,len)=>{I.set(cx,top+len-4,'#4a90ff');I.set(cx,top+len-6,'#4a90ff');})};
+ wisdom:()=>sword(11,2,['#e8f4ff','#7a9ab8','#ffffff'],'#d8b04a',(I,cx,top,len)=>{I.set(cx,top+len-4,'#4a90ff');I.set(cx,top+len-6,'#4a90ff');}),
+ // the death knights' weapons from the Behen Archipelago: Lantier's adamantium dagger, Alex's bayonet, Gis' pickaxe
+ lantd:()=>sword(6,2,['#e8eef8','#8a94a4','#ffffff'],'#a81a1a',(I,cx,top)=>{I.set(cx,top+3,'#ffffff');}),
+ alexb:()=>{const I=Img(7,20);I.rect(2,6,3,12,'#4a5a7a');I.vline(2,6,17,'#9ab0d0');I.vline(3,0,5,'#e8eef8');I.set(3,0,'#ffffff');I.rect(1,13,2,4,'#3a2a1e');I.set(4,9,'#c8a050');return {I,gx:3,gy:14};},
+ gisp:()=>{const I=Img(11,16);I.vline(5,3,15,'#6a4a2a');I.vline(5,8,8,'#4a3020');I.rect(1,1,9,2,'#8a9aa8');I.set(0,3,'#8a9aa8');I.set(10,3,'#8a9aa8');I.rect(1,1,9,1,'#c8d0dc');return {I,gx:5,gy:11};}};
 function bow(w,tip){const I=Img(8,18);for(let i=0;i<=14;i++){const a=i/14*Math.PI,x=Math.round(2+Math.sin(a)*3.4);I.set(x,1+i,w[0]);I.set(x+1,1+i,i<3||i>11?w[0]:w[1]);if(i===7){I.set(x,1+i,w[2]);I.set(x+1,1+i,w[2]);}}
  I.vline(2,1,15,'#e8e0d0');I.set(2,1,tip||w[2]);I.set(2,15,tip||w[2]);I.rect(5,7,2,3,'#3a2414');return {I,gx:5,gy:8};}
 function staff(orb,wood,prong){const I=Img(9,20);I.vline(4,5,18,wood);I.vline(5,6,17,'#5a3a20');I.set(4,10,'#c8a050');I.set(4,15,'#c8a050');

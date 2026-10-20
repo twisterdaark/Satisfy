@@ -65,6 +65,8 @@
     'mrt',
     // kingdom contribution from royal quests and the Defense War's golems (major #3)
     'kc',
+    // the Behen Archipelago (major #4): island, save point, best island, Challenger Points, masteries, statue worship
+    'bh',
   ];
   var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT'];
   var META = ['v', 'wv', 'uid', 'pid'];
