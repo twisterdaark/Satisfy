@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20y', ver: '0.63', d: '2026-10-20',
+      ar: ['خبرة السكيلات بقت نسبة مئوية للفل الجاي بدل عدد الاستعمالات. كل استعمال بيديك خبرة، وكل وحش السكيل يصيبه بيديك زيادة (لحد 3 في الضربة)',
+        'الفلات الأولى بقت أسرع والأخيرة أبطأ (مش خطي)، وبيطلعلك إشعار لما السكيل يعلى لفل. الحفظ القديم بيحتفظ بلفله ونسبته',
+        'الكلام عن الشخصيات بقى بيفرق بين الولد والبنت: "جيشوكا بتحارب"، "بقت معاك"، "رجعت مكانها"'],
+      en: ['Skill experience now shows as a % to the next level instead of a use count. Every use gives experience, and every monster the skill hits gives more (up to 3 a cast)',
+        'Early levels come faster and later ones slower (not linear), with a notice when a skill levels up. Older saves keep their level and share',
+        'Arabic lines about characters now use the feminine form for women: Jishuka "بتحارب", "بقت معاك", "رجعت مكانها"'] },
     { v: '2026-10-20x', ver: '0.62', d: '2026-10-20',
       ar: ['الشنطة وشاشة البيع ليهم سكرول لما الحاجات تكتر',
         'التاجر مبقاش بيعرض "بيع كذا" في الكلام: البيع كله من "عايز أبيع حاجات" اللي بتفتح شاشة البيع',

@@ -59,8 +59,8 @@
     'rcK', 'rcN',
     // map cells seen (fog of war, Nitro's feedback): base64 bitset
     'fog', 'sec', 'respec', 'bank',
-    // skill use counts that set each skill's level (owner 2026-10-19)
-    'skx',
+    // skill experience that sets each skill's level (owner 2026-10-19), and its format (2 = experience, 2026-10-20)
+    'skx', 'skv',
     // when each monster you killed comes back, so a save and quit does not respawn them (owner 2026-10-19)
     'mrt',
     // kingdom contribution from royal quests and the Defense War's golems (major #3)
