@@ -523,6 +523,23 @@
     };
   }
 
+  // SAT-ONLINE-067: friends. friendReq/{to}/{from} = {n, t} asks; friends/{uid}/{f} = {n, t} on both sides once the
+  // asked one accepts (in one update that also clears the ask); either side removes both
+  function friendStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, up = function (u) { return D.update(D.ref(db), u); };
+    var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
+    var ent = function (n) { return { n: String(n || '?').slice(0, 24), t: D.serverTimestamp() }; };
+    return {
+      watchList: function (uid, cb) { return watch('friends/' + uid, cb); },
+      watchAsks: function (uid, cb) { return watch('friendReq/' + uid, cb); },
+      watchPresence: function (world, uid, cb) { return watch('presence/' + world + '/main/' + uid, cb); },
+      ask: function (to, from, n) { var u = {}; u['friendReq/' + to + '/' + from] = ent(n); return up(u); },
+      accept: function (me, f, nMe, nF) { var u = {}; u['friends/' + me + '/' + f] = ent(nF); u['friends/' + f + '/' + me] = ent(nMe); u['friendReq/' + me + '/' + f] = null; return up(u); },
+      decline: function (me, f) { var u = {}; u['friendReq/' + me + '/' + f] = null; return up(u); },
+      remove: function (me, f) { var u = {}; u['friends/' + me + '/' + f] = null; u['friends/' + f + '/' + me] = null; return up(u); },
+    };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
     tradeStore: tradeStore,
@@ -530,6 +547,7 @@
     dropStore: dropStore,
     bountyStore: bountyStore,
     arenaStore: arenaStore,
+    friendStore: friendStore,
     natStore: natStore,
     SDK_VERSION: SDK_VERSION,
     load: load,

@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20p', ver: '0.64', d: '2026-10-20',
+      ar: ['أونلاين: الأصحاب: من كارت أي لاعب "صاحبني"، ولما يوافق بتلاقوا بعض في "الأصحاب" في قايمة اللاعبين (O)',
+        'بتشوف مين أونلاين ولفله وفين في العالم، وبيوصلك إشعار لما صاحبك يدخل'],
+      en: ['Online: friends: "Add friend" on any player\'s card; once they accept, you find each other under "Friends" in the player list (O)',
+        'See who is online, their level and where in the world, and get a note when a friend comes online'] },
     { v: '2026-10-20y', ver: '0.63', d: '2026-10-20',
       ar: ['خبرة السكيلات بقت نسبة مئوية للفل الجاي بدل عدد الاستعمالات. كل استعمال بيديك خبرة، وكل وحش السكيل يصيبه بيديك زيادة (لحد 3 في الضربة)',
         'الفلات الأولى بقت أسرع والأخيرة أبطأ (مش خطي)، وبيطلعلك إشعار لما السكيل يعلى لفل. الحفظ القديم بيحتفظ بلفله ونسبته',
