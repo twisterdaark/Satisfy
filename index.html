@@ -2899,7 +2899,7 @@ function load(){const r=STORE.read(),SCH=Satisfy.storage.SCHEMA;
  if((S.wv||1)<2){S.wv=2;if(P.y<OWH*TS)P.x=wX(P.x/TS)*TS;}
  if(S.wv<3){S.wv=3;if(P.y>=OWH*TS)P.y+=SR*TS;}   // SAT-WORLD-003: the south took rows OWH..WMH-1, interiors and caves moved down SR rows
  if(S.wv<4){S.wv=4;if(P.y>=OS*TS)P.y+=(WMH-OS)*TS;}   // the map doubled: the far south took rows OS..WMH-1, interiors and caves moved down again
- S.bqa=S.bqa||{};for(const id in S.bqa)regBQ(S.bqa[id]);(S.bq||[]).forEach(regBQ);if(S.cls!=='smith'){S.bonus=0;S.got={};S.patience=0;if(S.tl.smith){delete S.tl.smith;if(S.title==='smith')S.title='';}}S.vis=S.vis||{zWin:1};buildMe(S.look);Satisfy.ids.ensure(S);DEVT.reset();return true;}catch(e){STORE.backup('corrupt',r.raw);return false;}}
+ S.bqa=S.bqa||{};for(const id in S.bqa)regBQ(S.bqa[id]);for(const id in S.adqa||{})regAD(S.adqa[id]);(S.bq||[]).forEach(regBQ);if(S.cls!=='smith'){S.bonus=0;S.got={};S.patience=0;if(S.tl.smith){delete S.tl.smith;if(S.title==='smith')S.title='';}}S.vis=S.vis||{zWin:1};buildMe(S.look);Satisfy.ids.ensure(S);DEVT.reset();return true;}catch(e){STORE.backup('corrupt',r.raw);return false;}}
 
 /* ---------------- input ---------------- */
 const K={};
@@ -3152,7 +3152,38 @@ Object.assign(STR.en,{"priestRo": "Rolling Priest of Rebecca", "merchantRo": "Ro
 // 10,000, as the novel's rule has it. Each player's own, online or not.
 const KCON={ogolem:100,sdoll:500,aweapon:1500};
 function kcGain(n,m){S.kc=(S.kc||0)+n;if(m)num(m.x,m.y-48,'+'+n+' '+t('kcShort'),'#e8c040',false);else toast(t('kcGot',{n}),'good');hudDirty=true;}
-function peerOpts(){const kc=S.kc||0,o=[{l:t('kcShow',{n:kc.toLocaleString('en')}),f:()=>shopD('aden','adn_rule')}];
+/* royal requests (owner 2026-10-20: Aden kept asking for the same 20 ore, easy to repeat without end). Earl Aden gives one
+   task at a time, picked for your level from a varied pool: a levy in goods, a hunt on the kingdom's roads, a royal letter
+   to another city, or fine pieces for the treasury, never the same kind twice running. At most ADQ_MAX a day and ADQ_GAP
+   seconds of play between two; the task offered is fixed for that day and count, so leaving and coming back does not
+   change it. Rewards stay under what the same time hunting gives (a level-100 levy pays 8% of a level, the old one 60%),
+   plus contribution. Other repeatable quests (the scholars') are capped at QREP_MAX a day. */
+const ADQ_MAX=4,ADQ_GAP=300,QREP_MAX=5,ADQ_TO=['merchantP','innR','priestRo','merchantT','priestT','baronB','innBu','innT'],
+ ADQ_MATS=[['ore',40,1],['leather',25,1],['wood',50,1],['herb',30,1],['mith',8,120],['mstone',12,110],['bherb',15,130],['estone',3,180],['gfish',4,150]];
+const strH=x=>{let h=2166136261;for(let i=0;i<x.length;i++)h=Math.imul(h^x.charCodeAt(i),16777619);return h>>>0;};
+function regAD(d){QD[d.id]={by:'aden',nm:'adq_'+d.obj.t,nv:{n:d.obj.n},obj:d.obj,xp:d.xp,gold:d.gold,kc:d.kc,rep:1,gen:1,adq:1};}
+function adqMake(day,n){const r=mulberry32(strH(day+'|'+n+'|'+(S.look.n||''))),pick=a=>a[(r()*a.length)|0],L=S.lv,need=xpNeed();
+ const wild=new Set([...SPAWN,...BSPAWN].map(x=>x[0])),pool=Object.keys(MT).filter(k=>{const b=MT[k];return wild.has(k)&&!b.boss&&b.aggro!==undefined&&b.lv[0]<=L+8&&b.lv[1]>=L-25&&b.board!==0;});
+ const kinds=['have','kill','deliver','craftR'].filter(k=>k!==S.adqK&&(k!=='kill'||pool.length)),k=pick(kinds),kc=40+((r()*41)|0),id='ad'+day.replace(/-/g,'')+n;
+ if(k==='kill'){const m=pick(pool),b=MT[m],c=10+((r()*11)|0);return {id,obj:{t:'kill',it:m,n:c},xp:Math.round(b.xp*c*.5),gold:Math.round((b.gold||1)*c*.8+L*3),kc};}
+ if(k==='have'){const [m,c]=pick(ADQ_MATS.filter(x=>x[2]<=L));return {id,obj:{t:'have',it:m,n:c,take:1},xp:Math.round(need*.08),gold:Math.round(c*(MATP[m]||3)*1.3+L*2),kc};}
+ if(k==='deliver')return {id,obj:{t:'deliver',it:pick(ADQ_TO),n:1},xp:Math.round(need*.1),gold:L*8,kc};
+ return {id,obj:{t:'craftR',n:2},xp:Math.round(need*.1),gold:L*10,kc};}
+function adqName(d){return t('adq_'+d.obj.t,{n:d.obj.n,it:d.obj.t==='deliver'?t(d.obj.it):itN(d.obj.it||'')});}
+function adqOpts(){if(S.lv<100||Object.keys(S.adqa||{}).some(id=>S.qs[id]))return [];const D=dlyS(),n=D.adq||0;
+ if(n>=ADQ_MAX)return [{l:t('adqAll'),f:()=>shopD('aden','adqTom')}];
+ if((S.adqT||0)>S.playT)return [{l:t('adqWait',{m:Math.ceil((S.adqT-S.playT)/60)}),f:()=>shopD('aden','adqSoon')}];
+ const d=S.adqO&&S.adqO.day===D.day&&S.adqO.n===n?S.adqO.d:(S.adqO={day:D.day,n,d:adqMake(D.day,n)}).d;
+ const rw=[t('rwXP',{n:d.xp}),t('rwGold',{n:d.gold}),t('kcRw',{n:d.kc})].join(' · ');
+ return [{l:t('adqAsk',{q:adqName(d),n:n+1,m:ADQ_MAX}),st:rw,ic:'book',f:()=>dialog('aden',[t('adq_o')+'\n'+t('rwLine',{r:rw})],null,[{l:t('qAccept'),f:()=>{S.adqa=S.adqa||{};S.adqa[d.id]=d;S.adqK=d.obj.t;S.adqO=null;regAD(d);acceptQ(d.id);}},{l:t('qDecline')}])}];}
+function adqFin(id){const D=dlyS();D.adq=(D.adq||0)+1;S.adqT=S.playT+ADQ_GAP;if(S.adqa)delete S.adqa[id];delete QD[id];}
+Object.assign(STR.ar,{adq_have:'ضريبة المملكة: هات {n} {it}',adq_kill:'طرق المملكة: اقضي على {n} {it}',adq_deliver:'جواب ملكي لـ{it}',adq_craftR:'للخزانة: اعمل {n} قطع نادرة أو أحسن',
+ adqAsk:'مهمة ملكية ({n}/{m}): {q}',adq_o:'الخزانة محتاجة إيد. خلّص دي وارجعلي، والمملكة مبتنساش اللي بيخدمها.',adqAll:'خلصت مهام النهارده',adqTom:'كفاية كده النهارده. الخزانة بتفتح دفاترها تاني بكرة.',
+ adqWait:'المهمة الجاية بعد {m} دقيقة',adqSoon:'لسه بنسجل اللي جبته. ارجعلي كمان شوية.',adq_dl:'جواب من الإيرل آدن؟ تمام، وصل. قوله إن الرد هيوصله.',genQ_d:'تمام، ده اللي كنت محتاجه. خد حقك.',kcRw:'+{n} مساهمة'});
+Object.assign(STR.en,{adq_have:'Kingdom levy: bring {n} {it}',adq_kill:"The kingdom's roads: put down {n} {it}",adq_deliver:'A royal letter to {it}',adq_craftR:'For the treasury: make {n} rare or better pieces',
+ adqAsk:'Royal task ({n}/{m}): {q}',adq_o:'The treasury needs a hand. Finish this and come back; the kingdom does not forget those who serve it.',adqAll:"Today's tasks are done",adqTom:'Enough for today. The treasury opens its books again tomorrow.',
+ adqWait:'Next task in {m} min',adqSoon:'We are still recording what you brought. Come back a little later.',adq_dl:'A letter from Earl Aden? Received. Tell him the answer will reach him.',genQ_d:'Good, that is what I needed. Here is your due.',kcRw:'+{n} contribution'});
+function peerOpts(){const kc=S.kc||0,o=[...adqOpts(),{l:t('kcShow',{n:kc.toLocaleString('en')}),f:()=>shopD('aden','adn_rule')}];
  const ask=(id,need)=>({l:t('oPeer',{t:t('tl_'+id),n:need.toLocaleString('en')}),f:()=>{if((S.kc||0)<need){SFX.deny();return shopD('aden','adn_no');}giveTitle(id);SFX.legendary();shopD('aden','adn_'+id);save(true);}});
  if(!S.tl.baron)o.push(ask('baron',3000));else if(!S.tl.viscount)o.push(ask('viscount',10000));return o;}
 Object.assign(STR.ar,{"wiesbaden": "الملك فيسبادن", "ren": "الأمير رين", "aslan": "الأمير أصلان", "aden": "الإيرل آدن، أمين الخزانة", "chucksley": "تشاكسلي، قائد الفرسان الملكيين", "ferrell": "فيريل، رامي القصر", "rguard1": "حارس القصر", "rguard2": "حارس القصر", "scholarRh": "عالم الوحوش الملكي", "grocerRh": "بقال العاصمة", "wsb_hi": "أنا فيسبادن، الملك التلاتاشر للمملكة الخالدة. المملكة دي عمرها 400 سنة، ومش هتقع في عهدي.", "wsb_idle": "المملكة الخالدة محايدة، بس جيشها مش ضعيف. ماحدش يقدر يدوس على أرضها.", "wsb_war": "مفيش محاربين أقويا يواجهوا الجولم دول؟ النقص في المواهب كبير أوي!", "ren_hi": "أنا رين، ولي عهد المملكة الخالدة. ماتنساش انت واقف قدام مين.", "ren_idle": "العرش ده هيبقى بتاعي في الآخر.", "asl_idle": "(بيبصلك وبعدين يرجع يبص للجنينة من غير ولا كلمة)", "adn_hi": "مساهمتك في المملكة بتتسجل عندي. 3000 مساهمة تديك لقب بارون، و10000 تديك لقب فايكونت.", "adn_idle": "قوانين المملكة الخالدة واضحة: كل لقب ليه تمن.", "adn_rule": "كل جولم بتقتله في حرب الدفاع وكل مهمة ملكية بتخلصها بتزود مساهمتك.", "adn_no": "مساهمتك لسه مش كفاية. ارجعلي لما تخدم المملكة أكتر.", "adn_baron": "باسم الملك، من النهارده انت بارون في المملكة الخالدة.", "adn_viscount": "باسم الملك، من النهارده انت فايكونت. ليك الحق تعين تلات فرسان.", "chk_hi": "الفرسان الملكيين بيحموا الملك والقصر. عايز تثبت إنك تستاهل؟ روح نضّف مستنقع هالرون من السحالي.", "chk_idle": "ماحدش بيعدي من بوابات القصر من غير ما أعرف.", "frl_idle": "أنا أحسن رامي في القصر. فيه ست ساحات تدريب ورا الثكنات، والفرسان بيتدربوا فيهم كل يوم.", "rgd_idle": "ده قصر رينهارت. اتفضل، بس خلي سلاحك في جرابه.", "sch_hi": "إحنا علماء الوحوش الملكيين، بنعلّم أماكن الوحوش على خرايط المملكة. ساعدنا وهتاخد مساهمة في المملكة.", "sch_idle": "كل وحش بتقتله بيخلي الخريطة أوضح.", "grc_hi": "بقالة العاصمة. كل اللي تحتاجه موجود.", "marketRh": "تاجر سوق الشارع الغربي", "beggarRh": "عجوز من الحي الفقير", "mkt_hi": "أهلًا في سوق الشارع الغربي! أحسن أسعار في العاصمة.", "bgr_idle": "الملك عايش في قصر جنينته أكبر من جنينة قلعة وينستون سبع مرات، وإحنا هنا مش لاقيين ناكل.", "q_rq1": "تطهير مستنقع هالرون", "rq1": "تطهير مستنقع هالرون", "rq1_o": "اقتل 12 سحلية في مستنقع هالرون غرب رينهارت. (+300 مساهمة في المملكة)", "rq1_w": "المستنقع على الطريق بين ريدان ورينهارت.", "rq1_d": "شغل نضيف. الفرسان الملكيين مش هينسوا ده.", "q_rq2": "مسح الوحوش: هالرون", "rq2": "مسح الوحوش: هالرون", "rq2_o": "اقتل 15 سحلية في مستنقع هالرون عشان نعلّم أماكنها. (+100 مساهمة، تتعاد)", "rq2_w": "المستنقع غرب العاصمة.", "rq2_d": "الخريطة بقت أوضح. شكرًا.", "q_rq3": "مسح الوحوش: جبال سواز", "rq3": "مسح الوحوش: جبال سواز", "rq3_o": "اقتل 12 جارجويل في جبال سواز على حدود الإمبراطورية. (+200 مساهمة، تتعاد)", "rq3_w": "جبال سواز شرق رينهارت.", "rq3_d": "معلومات قيمة عن الحدود. المملكة ممتنة.", "q_rq4": "إعادة إعمار العاصمة", "rq4": "إعادة إعمار العاصمة", "rq4_o": "هات 20 خام حديد لإصلاح الأسوار والبيوت. (+50 مساهمة، تتعاد)", "rq4_w": "الخام بيطلع من المناجم ومن الجولم.", "rq4_d": "الحجارة دي هتتبني في الأسوار. شكرًا.", "q_rq5": "حرب الدفاع", "rq5": "حرب الدفاع", "rq5_o": "اقتل 30 جولم قديم لما جيش الجولم يهجم على رينهارت. (+3000 مساهمة)", "rq5_w": "جيش الجولم بيهجم على العاصمة في حرب الدفاع.", "rq5_d": "بفضل البطل العظيم، تاريخ المملكة اللي عمره 400 سنة اتحفظ!", "kcShort": "مساهمة", "kcGot": "+{n} مساهمة في المملكة", "kcShow": "مساهمتك في المملكة: {n}", "oPeer": "قدّم على لقب {t} ({n} مساهمة)", "tl_baron": "بارون المملكة الخالدة", "tl_baronD": "+5% دهب من الوحوش.", "tl_viscount": "فايكونت المملكة الخالدة", "tl_viscountD": "+5% خبرة من الوحوش.", "evN_golemW": "حرب الدفاع: جيش الجولم", "ogolemN": "جولم قديم", "sdollN": "دمية الروح", "aweaponN": "سلاح قديم", "lmRCity": "رينهارت", "lmRCity1": "\"منظر رينهارت كان جميل جدًا، وشكلها أكبر وأفخم بكتير من أفلام العصور الوسطى اللي بتتكلف مئات الملايين.\"", "lmRCity2": "\"بفضل البطل العظيم، تاريخ المملكة اللي عمره 400 سنة اتحفظ...!\"", "lmRPalace": "قصر رينهارت", "lmRPalace1": "\"قصر رينهارت اللي ساكن فيه الملك كان فخم ومبهر. مكانش ناقصه أي حاجة.\"", "lmRPalace2": "\"الجنينة دي أكبر من جنينة قلعة وينستون سبع مرات.\"", "lmRTrain": "ساحات التدريب", "lmRTrain1": "\"فيه ست ساحات تدريب ورا الثكنات.\"", "lmRTrain2": "\"قائد الفرسان الملكيين، تشاكسلي. أحسن رامي في القصر، فيريل.\"", "lmRFame": "قاعة المشاهير", "lmRFame1": "\"...وتمثالك هيتحط في قاعة المشاهير، وهيفضل عايش للجيل الجاي.\"", "lmRFame2": "\"[لو اتعمل تمثال في قاعة المشاهير، هتحصل تأثيرات خاصة.]\"", "lmRWest": "الشارع الغربي", "lmRWest1": "\"الشارع الغربي في رينهارت.\"", "lmRWest2": "\"جيش الشمال كان بيواجه أزمة كبيرة.\"", "lmRTemple": "معبد ريبيكا", "lmRTemple1": "\"ريبيكا، إلهة النور! اديني القوة أحمي مملكتي وشعبي...!\"", "lmRTemple2": "\"ريبيكا، إلهة النور، ليها رمزين. الأول الشمس والتاني الدهب.\"", "lmRWall": "أسوار رينهارت", "lmRWall1": "\"أسوار رينهارت الضخمة، اللي ارتفاعها 10 متر، ماقدرتش تستحمل الطاقة السحرية اللي ضربتها الأسلحة القديمة ووقعت.\"", "lmRWall2": "\"القوة العسكرية للمملكة الخالدة قوية جدًا. وعشان كده قدرت تفضل مملكة محايدة.\""});
@@ -3314,7 +3345,7 @@ const QD={
  rq1:{by:'chucksley',lv:130,obj:{t:'kill',it:'lizard',n:12},xp:90000,gold:1500,kc:300},
  rq2:{by:'scholarRh',lv:120,rep:1,obj:{t:'kill',it:'lizard',n:15},xp:40000,gold:600,kc:100},
  rq3:{by:'scholarRh',lv:165,rep:1,obj:{t:'kill',it:'gargoyle',n:12},xp:150000,gold:1500,kc:200},
- rq4:{by:'aden',lv:100,rep:1,obj:{t:'have',it:'ore',n:20,take:1},xp:20000,gold:400,kc:50},
+ rq4:{by:'aden',lv:1e9,rep:1,obj:{t:'have',it:'ore',n:20,take:1},xp:20000,gold:400,kc:50},   // replaced by the royal requests of Aden (adqOpts), never offered now
  rq5:{by:'wiesbaden',lv:230,obj:{t:'kill',it:'ogolem',n:30},xp:3000000,gold:30000,kc:3000},
  rh3:{by:'guildM',lv:60,obj:{t:'kill',it:'gsold',n:4},xp:18000,gold:800},
  dl1:{by:'baker',lv:18,obj:{t:'deliver',it:'innP',n:1},xp:1400,gold:90},
@@ -3338,7 +3369,7 @@ const qDone=id=>!!S.qs[id]&&S.qs[id].st===2;
 const arrowN=()=>S.arrows.reduce((a,b)=>a+b,0);
 function qCount(id){const o=QD[id].obj,s=S.qs[id];if(!s)return 0;if(o.t==='have')return S.mats[o.it]||0;return s.c||0;}
 const qReady=id=>{const s=S.qs[id];return !!s&&s.st===1&&qCount(id)>=QD[id].obj.n;};
-function qAvail(id){const q=QD[id];return !S.qs[id]&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2)&&(!q.cls||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)));}
+function qAvail(id){const q=QD[id];return !S.qs[id]&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2)&&(!q.cls||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)));}
 function qObjText(id){const o=QD[id].obj;return t(o.t==='craftR'?'o_craftR':'o_'+o.t,{it:o.t==='deliver'?t(o.it):o.t==='escort'?t('escN_'+o.it):itN(o.it),c:Math.min(qCount(id),o.n),n:o.n});}
 function qEvent(type,key,r,slot){domainEv(type,key,r,slot);natEv(type,key,r);for(const id in S.qs){const s=S.qs[id],q=QD[id];if(!q||s.st!==1)continue;const o=q.obj,was=qReady(id);
   if((o.t===type&&o.it===key)||(type==='craft'&&o.t==='craftR'&&r>=1&&slot!=='x')){s.c=(s.c||0)+1;if(!was&&qReady(id)){toast(t('retTo',{w:t(q.by)}),'good');SFX.quest();}}}hudDirty=true;}
@@ -3354,7 +3385,7 @@ function completeQ(id){if(!claimQ(id))return;if(id==='ya3')setTimeout(()=>giveTi
  if(q.cls){S.cls=q.cls;sbSig='';SFX.legendary();flash();setTimeout(()=>toast(t('clsGot',{c:t('cl_'+q.cls)}),'good'),400);checkSkills();}
  if(q.title)giveTitle(q.title);
  addAff(q.by,12);addRep(townOfNpc(q.by),10+Math.min(15,Math.floor((q.xp||0)/200)));
- if(q.xp){gainXP(q.xp);gContrib(q.xp*.1);}checkSkills();hudDirty=true;save(true);}
+ if(q.xp){gainXP(q.xp);gContrib(q.xp*.1);}if(q.adq)adqFin(id);else if(q.rep&&!q.gen){const D=dlyS();D.rq=D.rq||{};D.rq[id]=(D.rq[id]||0)+1;}checkSkills();hudDirty=true;save(true);}
 // craft-for quests hand over one crafted piece: the least valuable unequipped one (an equipped one is taken off first)
 function giveItem(id){const c=S.items.filter(i=>i.id===id).sort((a,b)=>isEq(a)-isEq(b)||a.r-b.r);const it=c[0];if(!it)return;
  if(it.uid===S.eqW)S.eqW=(S.items.find(i=>i!==it&&WSH[i.id])||{}).uid||0;if(it.uid===S.eqA)S.eqA=0;for(const k in S.eq||{})if(S.eq[k]===it.uid)delete S.eq[k];S.items.splice(S.items.indexOf(it),1);toast(t('gaveIt',{it:inm(it)}));}
@@ -3500,10 +3531,10 @@ function trLine(id){const av=Object.keys(QD).filter(q=>QD[q].by===id&&qAvail(q))
 function npcMark(id){const mine=Object.keys(QD).filter(q=>QD[q].by===id);if(mine.some(qReady))return['?','#ffd23a'];if(mine.some(q=>qAvail(q)&&S.lv>=(QD[q].lv||1)))return['!','#ffd23a'];if(mine.some(q=>S.qs[q]&&S.qs[q].st===1))return['?','#8aa0c0'];return null;}
 function shopD(who,line){const n=NPCT[who];if(!n)return;const o=[...(n.opts?n.opts():[]),...(n.noGift||!(GOK.has(who)||GREF.has(who))?[]:[{l:t(gk(who,'oGift')),ic:'bread',st:affTxt(who),f:()=>giftMenu(who)}])];dialog(who,[line],null,o.length?[...o,{l:t('oLeave')}]:null);}
 function talkNPC(id){if(id==='board')return openBoard();if(npcKO(id)){toast(t(gk(id,'npcKOt'),{n:t(id)}),'warn');SFX.deny();return;}
- for(const q in S.qs){const s=S.qs[q],o=QD[q]&&QD[q].obj;if(o&&o.t==='deliver'&&o.it===id&&s.st===1&&!s.c){s.c=1;addAff(id,6);SFX.quest();toast(t('retTo',{w:t(QD[q].by)}),'good');hudDirty=true;save(true);return dialog(id,[q+'_dl']);}}
+ for(const q in S.qs){const s=S.qs[q],o=QD[q]&&QD[q].obj;if(o&&o.t==='deliver'&&o.it===id&&s.st===1&&!s.c){s.c=1;addAff(id,6);SFX.quest();toast(t('retTo',{w:t(QD[q].by)}),'good');hudDirty=true;save(true);return dialog(id,[QD[q].adq?'adq_dl':q+'_dl']);}}
  {const eq=Object.keys(S.qs).find(q=>QD[q]&&QD[q].by===id&&QD[q].obj.t==='escort'&&S.qs[q].st===1);if(eq&&(!ESC||ESC.q!==eq))return dialog(id,[eq+'_w'],()=>startEscort(eq));}
  if(isSm()&&(id==='khan'||id==='smith')){const ch=id==='khan'?['kh1','kh2']:['sm1','sm2'];const sk=ch.filter(q=>!qDone(q));if(sk.length){sk.forEach(q=>S.qs[q]={st:2,c:0});S.met[id]=1;save(true);return dialog(id,[id==='khan'?'kh_sk':'sm_sk']);}}const n=NPCT[id]||{},mine=Object.keys(QD).filter(q=>QD[q].by===id);
- const rd=mine.find(qReady);if(rd)return dialog(id,[rd+'_d'],()=>completeQ(rd));
+ const rd=mine.find(qReady);if(rd)return dialog(id,[QD[rd].gen?'genQ_d':rd+'_d'],()=>completeQ(rd));
  const av=mine.find(q=>qAvail(q)&&S.lv>=(QD[q].lv||1));
  if(av&&n.opts&&(S.qOff=S.qOff||{})[av]){const line=n.idle?n.idle():'oLeave',o=n.opts();return dialog(id,[line],null,[{l:t('oQuestAsk',{q:qName(av)}),f:()=>offerQ(id,av)},...o,{l:t('oLeave')}]);}
  if(av){if(n.opts)S.qOff[av]=1;return offerQ(id,av);}
@@ -4037,7 +4068,7 @@ function openQD(id){const q=QD[id];if(!q)return;qdId=id;qdArm=false;SFX.open();m
 // The first click arms the button, the second one cancels (the game has no confirm dialogs).
 function cancelQ(){const id=qdId,s=id&&S.qs[id];if(!s||s.st!==1)return;const b=$('qdCancel');
  if(!qdArm){qdArm=true;SFX.click();if(b){b.textContent=t('qCancelSure');b.classList.add('arm');}return;}
- const nm=qName(id);delete S.qs[id];if(QD[id]&&QD[id].gen){if(S.bqa)delete S.bqa[id];delete QD[id];}
+ const nm=qName(id);delete S.qs[id];if(QD[id]&&QD[id].gen){if(S.bqa)delete S.bqa[id];if(S.adqa)delete S.adqa[id];delete QD[id];}
  toast(t('qCanceled',{q:nm}));hudDirty=true;save(true);closeQD();}
 function closeQD(){SFX.close();$('qdW').hidden=true;mode='play';}
 function closeLog(){SFX.close();$('logW').hidden=true;mode='play';}

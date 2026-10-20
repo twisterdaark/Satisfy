@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zc', ver: '0.69', d: '2026-10-20',
+      ar: ['الإيرل آدن أمين الخزانة بقى بيديك مهام ملكية متنوعة بدل الحديد كل مرة: ضريبة خامات، صيد وحوش على طرق المملكة، جواب لمدينة تانية، أو قطع نادرة للخزانة. ومبيدكش نفس النوع مرتين ورا بعض',
+        'لحد 4 مهام في اليوم وبين كل واحدة والتانية 5 دقايق لعب، والمكافأة على قد لفلك ومش أحسن من الصيد العادي. وكويستات العلماء المتكررة بقت 5 مرات في اليوم بالكتير'],
+      en: ['Earl Aden, the Royal Treasurer, now gives varied royal tasks instead of iron ore every time: a levy of materials, a hunt on the kingdom\'s roads, a letter to another city, or rare pieces for the treasury, never the same kind twice running',
+        'Up to 4 a day with 5 minutes of play between two, paid for your level and never better than plain hunting. The scholars\' repeatable quests are capped at 5 a day'] },
     { v: '2026-10-20zb', ver: '0.68', d: '2026-10-20',
       ar: ['اسم الوحش ولفله بقوا بيظهروا ويختفوا مع بعض: لما تبعد مبيفضلش اللفل لوحده'],
       en: ["A monster's name and level now show and hide together: stepping away no longer leaves the level alone"] },
