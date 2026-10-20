@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20za', ver: '0.67', d: '2026-10-20',
+      ar: ['اسم الوحش بقى بيظهر فوق لفله لما تقرّب منه أو تحط الماوس عليه، عشان تعرف مين ده',
+        'لون الاسم واللفل على قد خطورته عليك: رمادي لو أضعف منك بكتير، أبيض لو قدك، برتقاني لو أقوى شوية، وأحمر لو خطير'],
+      en: ['A monster now shows its name over its level when you are close or point at it, so you know what it is',
+        'The name and level are coloured by how dangerous it is for you: grey far weaker, white even, orange stronger, red deadly'] },
     { v: '2026-10-20zr', ver: '0.66', d: '2026-10-20',
       ar: ['أونلاين: "بلّغ" في كارت أي لاعب: بتختار السبب (سبام، شتيمة، غش) والبلاغ بيوصل لصاحب اللعبة ومعاه آخر كلامه',
         'الشتايم في كلام اللاعبين التانيين بتظهر نجوم، و/filter في الشات بيقفل الفلتر أو يشغله'],
