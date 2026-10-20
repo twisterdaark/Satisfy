@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20v90', ver: '0.90', d: '2026-10-20',
+      ar: ['تحكم الموبايل بقى زي ألعاب الأكشن على الموبايل: زرار ضرب كبير في الركن، والسكيلات في قوس حواليه، والمراوغة والدفاع والاستخدام والجرعات تحت صباعك',
+        'العصا بقت عايمة: حط صباعك في أي حتة في الشمال تحت والعصا تيجي تحته. وبقت أنعم: كل ما تزقها أكتر تمشي أسرع، وبتمشي في أي اتجاه مش 8 اتجاهات بس',
+        'الضرب بيلف لوحده ناحية أقرب وحش. ودوسة على السكيل بتضربه على أقرب وحش، ولو سحبته من الزرار بيروح مطرح ما صباعك شاور، وبيظهر سهم يوريك الاتجاه. لو رجّعت صباعك على الزرار السكيل بيتلغي، والضغطة الطويلة بتوريك تفاصيله بس',
+        'الدوسة على سطر التلميح (اتكلم، التقط...) بتعمل نفس اللي بيعمله زرار الاستخدام'],
+      en: ['Phone controls now play like mobile action games: a big Attack button in the corner, your skills in an arc around it, and Dodge, Guard, Use and the potions under your thumb',
+        'The stick floats: put your thumb anywhere on the lower left and the stick comes under it. It is smoother too: the farther you push it, the faster you walk, in any direction rather than eight',
+        'Attack turns to the nearest monster by itself. A tap on a skill aims it at the nearest monster; drag it away from its button and it goes where your finger points, with an arrow showing the way. Drag back onto the button to call it off, and a long press only shows what the skill does',
+        'A tap on the hint line (talk, pick up...) does what Use does'] },
     { v: '2026-10-20v89', ver: '0.89', d: '2026-10-20',
       ar: ['مهام S وSS زي الرواية: المهمة بتبيّن درجة صعوبتها جنب اسمها، والصعبة ليها وقت محدد وعقوبة. لو الوقت خلص أو سبتها بتفشل، واللفل بينزل، والمهمة بتختفي خالص',
         'مهمة S: "إنقاذ بنت الإيرل المحترمة". دوران مستنيك قدام أطلال معبد ياتان، وإيرين متكتفة جنب المذبح. فك حبالها خلال ساعة وخد 3,000 دهب، وفيه احتمال قليل تبقى جوز بنت الإيرل (كل الإحصائيات +20). لو فشلت اللفل بينزل 2',

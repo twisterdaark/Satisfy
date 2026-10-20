@@ -201,14 +201,102 @@ test('a phone sideways: the view fills the screen and the controls stay apart; u
     assert.ok(L.W > 560, 'wider view: ' + L.W);
     assert.ok(L.stage.r - L.stage.l > 830, 'no black bars');
     const apart = (a, b) => a.r <= b.l || b.r <= a.l || a.b <= b.t || b.b <= a.t;
-    for (const [x, y] of [['stick', 'keys'], ['keys', 'sk'], ['sk', 'act'], ['stick', 'act'], ['kt', 'keys'], ['kt', 'stick'], ['kt', 'sk']]) assert.ok(apart(L[x], L[y]), `${x} and ${y} overlap`);
-    for (const k of ['stick', 'act', 'keys', 'sk']) assert.ok(L[k].l >= L.stage.l && L[k].r <= L.stage.r && L[k].b <= L.stage.b + 1, k + ' on screen');
+    // owner 2026-10-20: every round button (Attack, the skills in an arc around it, Dodge, Guard, Use, the potions) apart
+    // from the others, from the stick, the menu keys and ▦, and on screen
+    const B = await g.eval(() => [...document.querySelectorAll('#tAct button, #skillbar button')].filter((e) => e.offsetParent && getComputedStyle(e).display !== 'none')
+      .map((e) => { const b = e.getBoundingClientRect(); return { id: e.id || e.dataset.tk || 'sk' + e.dataset.sk, l: b.left, r: b.right, t: b.top, b: b.bottom }; }));
+    assert.ok(B.length >= 6, JSON.stringify(B.map((b) => b.id)));
+    for (let i = 0; i < B.length; i++) {
+      for (let j = i + 1; j < B.length; j++) assert.ok(apart(B[i], B[j]), `${B[i].id} and ${B[j].id} overlap`);
+      for (const k of ['stick', 'keys', 'kt']) assert.ok(apart(B[i], L[k]), `${B[i].id} and ${k} overlap`);
+      assert.ok(B[i].l >= L.stage.l && B[i].r <= L.stage.r && B[i].t >= L.stage.t && B[i].b <= L.stage.b + 1, B[i].id + ' on screen');
+    }
+    for (const [x, y] of [['stick', 'keys'], ['kt', 'keys'], ['kt', 'stick']]) assert.ok(apart(L[x], L[y]), `${x} and ${y} overlap`);
+    for (const k of ['stick', 'keys']) assert.ok(L[k].l >= L.stage.l && L[k].r <= L.stage.r && L[k].b <= L.stage.b + 1, k + ' on screen');
     assert.equal(L.kbd, 'none'); assert.equal(L.label, 'block');
     assert.deepEqual(L.hidden, ['none', 'none', 'none', 'none'], 'attack, dodge, guard and use are the big buttons');
     assert.equal(L.rot, 'none');
     await g.page.setViewportSize({ width: 390, height: 844 });
     await g.page.waitForTimeout(100);
     assert.equal(await g.eval(() => getComputedStyle(document.getElementById('rotW')).display), 'flex');
+    assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+// owner 2026-10-20: play on a phone like the mobile action games: the stick floats under the left thumb and is analog,
+// Attack turns to the nearest monster, a tapped skill aims at it too, a dragged skill goes where the finger points (with an
+// arrow), dragging back calls it off, and a long press only shows what it does
+test('a phone: floating analog stick, Attack and skills aim themselves, a dragged skill aims where you point', async () => {
+  const ctx = await H.newContext({ device: { viewport: { width: 844, height: 390 }, screen: { width: 844, height: 390 }, isMobile: true, hasTouch: true } });
+  try {
+    const g = await H.openGame({ ctx });
+    await H.newGame(g, LOOK);
+    await g.step(3);
+    await g.eval(() => { const G = window.__G; G.P.x = 90 * 16; G.P.y = 60 * 16; for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } G.S.cls = 'warrior'; G.S.lv = 40; G.gainXP(1); G.P.mp = 999; });
+    await g.step(3);
+    const pe = (sel, type, x, y, id = 11) => g.eval(([s, t, x, y, id]) => { const el = typeof s === 'string' ? document.querySelector(s) : document.elementFromPoint(s[0], s[1]);
+      el.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: id, pointerType: 'touch', isPrimary: true, clientX: x, clientY: y })); return el.id; }, [sel, type, x, y, id]);
+    // the floating stick: a finger on the world, lower left, brings the stick under it
+    const tgt = await pe([300, 250], 'pointerdown', 300, 250);
+    assert.equal(tgt, 'game');
+    const c = await g.eval(() => { const b = document.getElementById('tStick').getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2, b.width / 2]; });
+    assert.ok(Math.abs(c[0] - 300) < 2 && Math.abs(c[1] - 250) < 2, 'under the finger: ' + c);
+    // a small push walks slowly, a full one at full speed
+    const walk = async (f) => { const x0 = await g.eval(() => window.__G.P.x); await pe('#tStick', 'pointermove', c[0] + c[2] * f, c[1]); await g.step(30); return (await g.eval(() => window.__G.P.x)) - x0; };
+    const slow = await walk(0.3), fast = await walk(1);
+    assert.ok(slow > 2 && fast > slow * 1.8, `analog: ${slow} then ${fast}`);
+    await pe('#tStick', 'pointerup', c[0] + c[2], c[1]);
+    await g.step(2);
+    assert.deepEqual(await g.eval(() => { const s = document.getElementById('tStick'); return [s.style.left, s.style.top, s.classList.contains('on')]; }), ['', '', false], 'back home');
+    // a monster to the east, the player facing west
+    const m = () => g.eval(() => { const G = window.__G, m = G.mons().find((m) => m.type === 'wolf' || m.type === 'rabbit') || G.mons()[0]; m.dead = false; m.hp = m.mhp = 1e9; m.x = G.P.x + 30; m.y = G.P.y; m.spd = 0; G.P.dir = 3; G.P.acd = 0; for (const k in G.P.cd) G.P.cd[k] = 0; return m.type; });
+    await m();
+    await ptr(g, '#tAct [data-tk="atk"]', 'pointerdown');
+    await g.step(1);
+    await ptr(g, '#tAct [data-tk="atk"]', 'pointerup');
+    const at = await g.eval(() => [window.__G.P.dir, window.__G.P.slash.a]);
+    assert.ok(at[0] === 2 && Math.abs(at[1]) < 0.3, 'Attack turned to the monster: ' + at);
+    // a tapped skill: goes off on the release, at the monster
+    const sk = await g.eval(() => { const b = document.querySelector('#skillbar [data-sk="0"]').getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; });
+    await g.step(30);
+    await m();
+    await pe('#skillbar [data-sk="0"]', 'pointerdown', sk[0], sk[1]);
+    await g.step(1);
+    assert.equal(await g.eval(() => Object.values(window.__G.P.cd).some((c) => c > 0)), false, 'not on the press');
+    await pe('#skillbar [data-sk="0"]', 'pointerup', sk[0], sk[1]);
+    assert.ok(await g.eval(() => (window.__G.P.cd.strike || 0) > 0), 'on the release');
+    assert.ok(Math.abs(await g.eval(() => window.__G.P.slash.a)) < 0.3, 'at the monster');
+    // a dragged skill: up and to the left, away from the monster, with the arrow while the finger is down
+    await g.step(30);
+    await m();
+    await pe('#skillbar [data-sk="0"]', 'pointerdown', sk[0], sk[1]);
+    await pe('#skillbar [data-sk="0"]', 'pointermove', sk[0] - 60, sk[1] - 60);
+    await g.step(3);
+    await pe('#skillbar [data-sk="0"]', 'pointerup', sk[0] - 60, sk[1] - 60);
+    assert.equal(await g.eval(() => Math.round(window.__G.P.slash.a * 100) / 100), Math.round(Math.atan2(-1, -1) * 100) / 100, 'where the finger pointed');
+    // dragged out and back onto the button: called off
+    await g.step(30);
+    await m();
+    await pe('#skillbar [data-sk="0"]', 'pointerdown', sk[0], sk[1]);
+    await pe('#skillbar [data-sk="0"]', 'pointermove', sk[0] - 70, sk[1]);
+    await pe('#skillbar [data-sk="0"]', 'pointermove', sk[0] - 4, sk[1]);
+    assert.equal(await g.eval(() => document.querySelector('#skillbar [data-sk="0"]').classList.contains('cx')), true);
+    await pe('#skillbar [data-sk="0"]', 'pointerup', sk[0] - 4, sk[1]);
+    assert.equal(await g.eval(() => window.__G.P.cd.strike || 0), 0, 'called off');
+    // a long press: shows what it does, does not cast
+    await pe('#skillbar [data-sk="0"]', 'pointerdown', sk[0], sk[1]);
+    await g.page.waitForTimeout(600);
+    assert.equal(await g.eval(() => document.getElementById('tip').classList.contains('on')), true);
+    await pe('#skillbar [data-sk="0"]', 'pointerup', sk[0], sk[1]);
+    assert.equal(await g.eval(() => window.__G.P.cd.strike || 0), 0, 'only the details');
+    // the hint is Use: a tap on it does what E does
+    const h = await g.eval(() => { const G = window.__G, n = G.npcs[0]; G.P.x = n.x; G.P.y = n.y + 14; return n.id; });
+    await g.step(5);
+    if (await g.eval(() => !document.getElementById('hint').hidden)) {
+      await ptr(g, '#hint', 'pointerdown');
+      await g.step(3);
+      assert.equal(await g.mode(), 'dialog', 'talked to ' + h);
+    }
     assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
