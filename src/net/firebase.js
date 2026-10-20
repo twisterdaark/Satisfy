@@ -566,6 +566,21 @@
     };
   }
 
+  // SAT-ONLINE-073: the group finder, lfg/{uid} = {n, lv, cls, k, z, t}: yours only, gone when you leave (onDisconnect)
+  function lfgStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    return {
+      list: function () { return D.get(at('lfg')).then(function (s) { return s.val() || {}; }); },
+      put: function (uid, v) {
+        var r = at('lfg/' + uid);
+        if (D.onDisconnect) D.onDisconnect(r).remove().catch(function () { /* ignore */ });
+        var u = {}; u['lfg/' + uid] = { n: String(v.n || '?').slice(0, 24), lv: v.lv | 0, cls: String(v.cls || '').slice(0, 16), r: v.r || '', k: v.k, z: String(v.z || '').slice(0, 24), t: D.serverTimestamp() };
+        return D.update(D.ref(db), u);
+      },
+      off: function (uid) { return D.remove(at('lfg/' + uid)); },
+    };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
     tradeStore: tradeStore,
@@ -575,6 +590,7 @@
     arenaStore: arenaStore,
     friendStore: friendStore,
     reportStore: reportStore,
+    lfgStore: lfgStore,
     natStore: natStore,
     SDK_VERSION: SDK_VERSION,
     load: load,

@@ -83,12 +83,17 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-064 (
 | Things dropped on the ground: everyone sees them, one player takes each | SAT-ONLINE-048 (#80) | ✅ |
 | A player on another build: only the older page refreshes | SAT-ONLINE-045 (#77) | ✅ |
 | Trade with a two-step confirm | SAT-ONLINE-039 (#76) | ✅ |
-| Guilds, guild chat, guild vault; guild buildings (a treasury, the Forge, the Training Hall, the Treasure Hall) | SAT-ONLINE-046/049/050 (#79, #81, #82); 065 (#99) | ✅; #99 open |
+| Guilds, guild chat, guild vault; guild buildings (a treasury, the Forge, the Training Hall, the Treasure Hall) | SAT-ONLINE-046/049/050 (#79, #81, #82); 065 (#99) | ✅ |
 | Karma, bounties, ranked arena seasons | SAT-ONLINE-051/052/053 (#84–#86) | ✅ |
 | Legendary classes one per world; rankings with the real players; Trauka's half hour shared | SAT-ONLINE-054/055/056 (#88–#90) | ✅ |
 | Weekly lockouts: a dungeon boss chest pays once a week per account (dungeons are shared already: one world, shared monsters) | SAT-ONLINE-059 (#92) | ✅ |
 | Raids of up to 10, raid roles against bosses, raid loot rolls | SAT-ONLINE-060/061/063 (#93, #95, #96) | ✅ |
-| The National Competition: every two hours, hunting, production, arena; paid by rank | SAT-ONLINE-064 (#98) | open |
-| "Delete my online data" also erases rankings, arena ratings, lockouts and held legends | SAT-ONLINE-066 (#97) | open |
+| The National Competition: every two hours, hunting, production, arena; paid by rank | SAT-ONLINE-064 (#98) | ✅ |
+| "Delete my online data" also erases rankings, arena ratings, lockouts and held legends | SAT-ONLINE-066 (#97) | ✅ |
+| "Follow" a party mate | SAT-ONLINE-068 (#102) | ✅ |
+| Friends: ask from the card, accept, who is online and where | SAT-ONLINE-067 (#101) | open |
+| Whispers to friends anywhere (`/w name text`) | SAT-ONLINE-070 (#104) | open |
+| Report a player; insults in others' chat as stars (`/filter`) | SAT-ONLINE-071 (#105) | open |
+| Group finder (plan U185): who is looking for a raid, party, dungeon group or duel, with level, class, party role and place; your own entry goes when you stop, sign out or drop | SAT-ONLINE-073 | open |
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

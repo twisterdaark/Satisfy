@@ -126,8 +126,8 @@
        * @param {string[]} [extra]
        */
       eraseAll: function (extra) {
-        // the game's own per-account records may come in `extra` too: rankings, arena ratings, lockouts (SAT-ONLINE-066)
-        var mine = new RegExp('^(presence/[a-z0-9_-]+/[A-Za-z0-9_-]+|inbox|ranks/(lv|gold)|arena/s20[0-9]{4}|lockouts|nat/n[0-9]{1,8}|friends|friendReq)/' + uid.replace(/[^A-Za-z0-9_-]/g, '') + '(/|$)');
+        // the game's own per-account records may come in `extra` too: rankings, arena ratings, lockouts (SAT-ONLINE-066), the group finder (073)
+        var mine = new RegExp('^(presence/[a-z0-9_-]+/[A-Za-z0-9_-]+|inbox|ranks/(lv|gold)|arena/s20[0-9]{4}|lockouts|lfg|nat/n[0-9]{1,8}|friends|friendReq)/' + uid.replace(/[^A-Za-z0-9_-]/g, '') + '(/|$)');
         var own = (extra || []).filter(function (p) { return typeof p === 'string' && mine.test(p); });
         return Promise.all(['cloudIndex', 'cloudSaves', 'inbox', 'accountIds'].map(function (k) { return D.get(ref(k + '/' + uid)); })).then(function (r) {
           var paths = [], aid = r[3].val();

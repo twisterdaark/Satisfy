@@ -439,7 +439,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
       <div id="loot"></div>
       <div id="evbar" class="sys" hidden></div>
       <div id="sgbar" class="sys" hidden></div><div id="natbar" class="sys" hidden></div>
-      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plBnt" data-act="plBnt" data-i18n="bntBoard"></button><button id="plRnk" data-act="plRnk" data-i18n="rnkBoard"></button><button id="plFr" data-act="plFr" data-i18n="frBoard"></button><button id="plNat" data-act="plNat" data-i18n="natBoard"></button></div></div>
+      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plBnt" data-act="plBnt" data-i18n="bntBoard"></button><button id="plRnk" data-act="plRnk" data-i18n="rnkBoard"></button><button id="plLfg" data-act="plLfg" data-i18n="lfgBoard"></button><button id="plFr" data-act="plFr" data-i18n="frBoard"></button><button id="plNat" data-act="plNat" data-i18n="natBoard"></button></div></div>
       <div id="netRepW" class="sys" hidden><div id="netRepT"></div><div class="row"><button id="netRepBtn" data-act="netTakeBack"></button></div></div>
       <div id="duelInv" class="sys" hidden><div id="duelInvT"></div><div class="row"><button id="duelBtnA" data-act="dAccept"></button><button id="duelBtnB" data-act="dDecline"></button><button id="duelBtnC" class="blk" data-act="dBlock" data-i18n="pBlock"></button></div></div>
       <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
@@ -4580,6 +4580,7 @@ function act(a){
  else if(a==='gdYes'||a==='gdNo')guildAct(a);
  else if(a==='plBnt')bntBoard();
  else if(a==='plFr')frBoard();
+ else if(a==='plLfg')lfgBoard();
  else if(a==='plNat')natBoard();
  else if(/^tr[A-Z]/.test(a))tradeAct(a);
  else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
@@ -5907,6 +5908,21 @@ function rptAsk(r){if(!rptOn()||!r||!r.uid)return;const n=Satisfy.chat.clean(r.h
 function rptSend(r,n,why){RPTT[r.uid]=performance.now();const said=CHAT?CHAT.log().filter(l=>l.from===r.uid&&!l.self).slice(-3).map(l=>l.text).join(' | '):'';
  Satisfy.firebase.reportStore(FB).report({by:NET.uid,byN:netId||S.look.n,about:r.uid,aboutN:n,why,said}).then(()=>toast(t('rptDone',{n}),'good'),()=>{delete RPTT[r.uid];toast(t('rptFail'),'warn');});}
 window.__GRP={ask:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);rptAsk(r);},get filter(){return CHATF}}; // tests
+/* the group finder (SAT-ONLINE-073, plan U185). "Group finder" in the player list (O) shows who is looking for a raid, a party,
+   a dungeon group or a duel, with level, class and where they are, and lets you say what you are looking for yourself
+   (lfg/{uid}, yours only: gone when you stop, leave, or after half an hour). Go to them, or whisper a friend. */
+Object.assign(STR.ar,{lfgBoard:'دوّر على فريق',lfgH:'بيدوروا على فريق ({n})',lfgRow:'{n} · لفل {lv} {c}{r} · {k} · {z}',lfgNone:'محدش بيدور دلوقتي',lfgPost:'دوّر على {k}',lfgOff:'بطّل تدوير',lfgOn:'إنت بتدور على {k} (لمدة نص ساعة)',lfgOffT:'بطلت تدور',lfgK_raid:'غارة',lfgK_party:'فريق',lfgK_dungeon:'فريق دانجن',lfgK_duel:'مبارزة',lfgFail:'مقدرناش دلوقتي'});
+Object.assign(STR.en,{lfgBoard:'Group finder',lfgH:'Looking for a group ({n})',lfgRow:'{n} · Lv {lv} {c}{r} · {k} · {z}',lfgNone:'Nobody is looking right now',lfgPost:'Look for {k}',lfgOff:'Stop looking',lfgOn:'You are looking for {k} (for half an hour)',lfgOffT:'You stopped looking',lfgK_raid:'a raid',lfgK_party:'a party',lfgK_dungeon:'a dungeon group',lfgK_duel:'a duel',lfgFail:'Could not do that right now'});
+var LFGK=null,LFG_MS=1800000,LFG_KS=['raid','party','dungeon','duel'];
+function lfgSt(){return NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&Satisfy.firebase.lfgStore?Satisfy.firebase.lfgStore(FB):null;}
+function lfgBoard(){const L=lfgSt();if(!L){toast(t('lfgFail'),'warn');return;}const now=wNow();
+ L.list().then(v=>{plOpen(false);const rows=[];for(const k in v){const e=v[k];if(!e||typeof e!=='object'||!LFG_KS.includes(e.k)||!(now-(+e.t||0)<LFG_MS))continue;rows.push({uid:k,t:+e.t||0,s:t('lfgRow',{n:Satisfy.chat.clean(e.n,24)||'?',lv:lvTxt(e.lv|0),c:pctxName('cl_'+e.cls),r:ROLE_B[e.r]?' · '+ROLE_B[e.r]+' '+t('role_'+e.r):'',k:t('lfgK_'+e.k),z:pctxName(String(e.z||''))})});}
+  rows.sort((a,b)=>b.t-a.t);const mine=v[NET.uid]&&now-(+v[NET.uid].t||0)<LFG_MS;
+  const o=LFG_KS.map(k=>({l:t('lfgPost',{k:t('lfgK_'+k)}),f:()=>lfgPut(k)}));if(mine)o.push({l:t('lfgOff'),f:lfgStop});
+  dialog('guild',[t('lfgH',{n:rows.length}),rows.length?rows.slice(0,12).map(r=>(r.uid===NET.uid?'★ ':'')+r.s).join(' · '):t('lfgNone')],null,[...o,{l:t('oClose')}]);},()=>toast(t('lfgFail'),'warn'));}
+function lfgPut(k){const L=lfgSt();if(!L||!S)return;L.put(NET.uid,{n:netId||S.look.n,lv:HIDELV?0:S.lv,cls:S.cls||'',r:ROLE||'',k,z:zoneAt(P.x,P.y)}).then(()=>{LFGK=k;toast(t('lfgOn',{k:t('lfgK_'+k)}),'good');},()=>toast(t('lfgFail'),'warn'));}
+function lfgStop(){const L=lfgSt();if(!L)return;L.off(NET.uid).then(()=>{LFGK=null;toast(t('lfgOffT'));},()=>toast(t('lfgFail'),'warn'));}
+window.__GLF={board:()=>lfgBoard(),put:k=>lfgPut(k),stop:()=>lfgStop(),out:()=>netSignOut(false),fb:()=>FB,get k(){return LFGK}}; // tests
 window.__GR={season:()=>rnkSeason(),mine:()=>RNK?RNK.get(rnkSeason(),NET.uid):null,top:()=>RNK?RNK.top(rnkSeason(),10):[]}; // test hook
 // The local attack reaches the opponent: melee within reach, bow/staff along the aim. Power is a normalized roll.
 function duelSwing(ax,ay,mul,k){if(DUEL.state().phase!=='fight')return;const f=DUEL.foe();if(!f)return;
@@ -6132,13 +6148,13 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // Sign out, or (erase) first delete everything the account stored online (doc §29 T35): cloud characters,
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
-function netStop(){try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
+function netStop(){if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(()=>{});}LFGK=null;try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
  if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
 // what the game itself keeps online under the account, for "Delete my online data" (SAT-ONLINE-066): presence, the
-// rankings (055), this and last month's arena rating (053), the weekly lockouts (059). A held legend is freed too.
+// rankings (055), this and last month's arena rating (053), the weekly lockouts (059), the group finder entry (073). A held legend is freed too.
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
  const nc=Satisfy.natcomp?Satisfy.natcomp.now(wNow()):null,ni=nc?+nc.id.slice(1):-1; /* the National Competition's last two (SAT-ONLINE-069) */
- return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
+ return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'friends/'+uid,'friendReq/'+uid,'lfg/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid,lf=erase?Promise.all([legFree(uid),frFree()]):null;netStop();
  (erase?lf.then(()=>C.eraseAll(netErasePaths(uid))):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))

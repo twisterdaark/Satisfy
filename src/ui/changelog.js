@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20lfg', ver: '0.70', d: '2026-10-20',
+      ar: ['أونلاين: "دوّر على فريق" في قايمة اللاعبين (O): بتشوف مين بيدور على غارة أو فريق أو فريق دانجن أو مبارزة، لفله وكلاسه وهو فين',
+        'وتقدر تقول إنت بتدور على إيه، والكلام ده بيفضل نص ساعة أو لحد ما تبطل أو تخرج'],
+      en: ['Online: "Group finder" in the player list (O): see who is looking for a raid, a party, a dungeon group or a duel, with their level, class and where they are',
+        'Say what you are looking for yourself; it stays up for half an hour, or until you stop or leave'] },
     { v: '2026-10-20zc', ver: '0.69', d: '2026-10-20',
       ar: ['الإيرل آدن أمين الخزانة بقى بيديك مهام ملكية متنوعة بدل الحديد كل مرة: ضريبة خامات، صيد وحوش على طرق المملكة، جواب لمدينة تانية، أو قطع نادرة للخزانة. ومبيدكش نفس النوع مرتين ورا بعض',
         'لحد 4 مهام في اليوم وبين كل واحدة والتانية 5 دقايق لعب، والمكافأة على قد لفلك ومش أحسن من الصيد العادي. وكويستات العلماء المتكررة بقت 5 مرات في اليوم بالكتير'],
