@@ -94,6 +94,6 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-064 (
 | Friends: ask from the card, accept, who is online and where | SAT-ONLINE-067 (#101) | open |
 | Whispers to friends anywhere (`/w name text`) | SAT-ONLINE-070 (#104) | open |
 | Report a player; insults in others' chat as stars (`/filter`) | SAT-ONLINE-071 (#105) | open |
-| Group finder (plan U185): who is looking for a raid, party, dungeon group or duel, with level, class, party role and place; your own entry goes when you stop, sign out or drop | SAT-ONLINE-073 | open |
+| Group finder (plan U185): who is looking for a raid, party, dungeon group or duel, with level, class, party role and place; your own entry goes when you stop, sign out or drop | SAT-ONLINE-073 (#106) | open |
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
