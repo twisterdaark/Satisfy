@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zg', ver: '0.67', d: '2026-10-20',
+      ar: ['أونلاين: "دوّر على فريق" في قايمة اللاعبين (O): بتشوف مين بيدور على غارة أو فريق أو فريق دانجن أو مبارزة، لفله وكلاسه وهو فين',
+        'وتقدر تقول إنت بتدور على إيه، والكلام ده بيفضل نص ساعة أو لحد ما تبطل أو تخرج'],
+      en: ['Online: "Group finder" in the player list (O): see who is looking for a raid, a party, a dungeon group or a duel, with their level, class and where they are',
+        'Say what you are looking for yourself; it stays up for half an hour, or until you stop or leave'] },
     { v: '2026-10-20y', ver: '0.63', d: '2026-10-20',
       ar: ['خبرة السكيلات بقت نسبة مئوية للفل الجاي بدل عدد الاستعمالات. كل استعمال بيديك خبرة، وكل وحش السكيل يصيبه بيديك زيادة (لحد 3 في الضربة)',
         'الفلات الأولى بقت أسرع والأخيرة أبطأ (مش خطي)، وبيطلعلك إشعار لما السكيل يعلى لفل. الحفظ القديم بيحتفظ بلفله ونسبته',

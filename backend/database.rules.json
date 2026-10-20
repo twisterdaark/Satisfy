@@ -354,6 +354,21 @@
         }
       }
     },
+    "lfg": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['n', 'lv', 'cls', 'r', 'k', 'z', 't'])",
+        "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+        "lv": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999" },
+        "cls": { ".validate": "newData.isString() && newData.val().length <= 16" },
+        "r": { ".validate": "newData.val() === '' || newData.val() === 'tank' || newData.val() === 'healer' || newData.val() === 'damage' || newData.val() === 'support'" },
+        "k": { ".validate": "newData.val() === 'raid' || newData.val() === 'party' || newData.val() === 'dungeon' || newData.val() === 'duel'" },
+        "z": { ".validate": "newData.isString() && newData.val().length <= 24" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",
