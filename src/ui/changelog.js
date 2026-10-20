@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20v86', ver: '0.86', d: '2026-10-20',
+      ar: ['الآلهة والكنايس: تمثال لكل إله جنب ناسه زي الرواية: ريبيكا جنب كاسوس، هيكستيا جنب ورشة خان، جاريون جنب فلاح باتريان، ديبيريون جنب الصياد، فينيس جنب بيت المزادات، دومينيون جنب فرسان تايتان، وجودار جنب برج الحكمة',
+        'صلّي عند التمثال (E) وخد بركة الإله 20 دقيقة: ريبيكا بتعالجك، دومينيون ضرب أعلى، جودار خبرة أكتر، جاريون ضرر أقل، هيكستيا خبرة حدادة، فينيس دهب أكتر، ديبيريون ضرب أعلى على الوحوش البرية',
+        'بركة واحدة في المرة، وكل إله مرة في اليوم. بالادين كنيسة الإله (أو الكاهن مع ريبيكا) بياخد البركة مرة ونص. البركة الحالية بتظهر في نافذة الحالة'],
+      en: ['Gods and churches: a statue of each god stands by its people as in the novel: Rebecca by Cassus, Hexetia by Khan\'s smithy, Garion by the Patrian farmer, Debirion by the hunter, Venice by the auction house, Dominion by the Titan knights and Judar by the Tower of Wisdom',
+        'Pray at a statue (E) for that god\'s blessing for 20 minutes: Rebecca heals you, Dominion more damage, Judar more experience, Garion less damage taken, Hexetia blacksmith experience, Venice more gold, Debirion more damage to beasts',
+        'One blessing at a time, each god once a day. A Paladin of the god\'s church (or a Priest with Rebecca) gets it at half again the strength. The current blessing shows in the Status window'] },
     { v: '2026-10-20v85', ver: '0.85', d: '2026-10-20',
       ar: ['عصا الحركة على الموبايل بقت بتشتغل لو لمست جنبها، مش لازم على الدايرة بالظبط',
         'ضغطة واحدة على البوشن أو السكيل في الشريط بتستعمله على طول، بالماوس أو بالصباع، حتى لو إيدك اتحركت شوية قبل ما تشيلها'],
