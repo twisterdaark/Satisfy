@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20v91', ver: '0.91', d: '2026-10-20',
+      ar: ['الموبايل: السكيلات والجرعات رجعت جوا الشريط القديم، وبتشتغل زي ما هي: دوسة بتضرب أقرب وحش، والسحب بيختار الاتجاه، والرجوع على الزرار بيلغي. المراوغة والدفاع والاستخدام بقوا فوق زرار الضرب'],
+      en: ['Phone: the skills and potions are back in their old bar and work the same way: a tap aims at the nearest monster, a drag picks the direction, dragging back calls it off. Dodge, Guard and Use now sit above the Attack button'] },
     { v: '2026-10-20v90', ver: '0.90', d: '2026-10-20',
       ar: ['تحكم الموبايل بقى زي ألعاب الأكشن على الموبايل: زرار ضرب كبير في الركن، والسكيلات في قوس حواليه، والمراوغة والدفاع والاستخدام والجرعات تحت صباعك',
         'العصا بقت عايمة: حط صباعك في أي حتة في الشمال تحت والعصا تيجي تحته. وبقت أنعم: كل ما تزقها أكتر تمشي أسرع، وبتمشي في أي اتجاه مش 8 اتجاهات بس',
