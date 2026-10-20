@@ -37,7 +37,7 @@ function build(T,sourceVersion){
 
   const quests={...meta(['QD']),quests:{}};
   for(const [id,q] of Object.entries(T.QD)){
-    const all=[{not:{questTaken:id}}];if(q.pre)all.push({questDone:q.pre});if(q.cl2)all.push({cls:q.cl2});
+    const all=[{not:{questTaken:id}}];if(q.pre)all.push({questDone:q.pre});if(q.cl2)all.push({cls:q.cl2});if(q.from)all.push({cls:q.from},{not:{promoQuestActive:true}},{mastery:{k:q.mst[0],gte:q.mst[1]}});
     if(q.cls)all.push({cls:'novice'},{not:{classQuestActive:true}});all.push({lv:{gte:q.lv||1}});
     quests.quests[id]={id,...q,offer:{all},_srcFn:'qAvail(id)&&S.lv>=(QD[id].lv||1)',src:SRC};}
 
@@ -67,6 +67,8 @@ function build(T,sourceVersion){
   if(Object.values(T.SKD).some(d=>d.cls==='braham'))classes.classes.braham={id:'braham',legendary:true,source:'bsoul',base:'mage',unique:'world',skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls==='braham'),src:SRC};   // Braham's Successor (SAT-BRAHAM-001)
   if(Object.values(T.SKD).some(d=>d.cls==='saint'))classes.classes.saint={id:'saint',legendary:true,source:'msword',base:'warrior',unique:'world',skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls==='saint'),src:SRC};   // Muller's Successor (SAT-MULLER-001)
 
+  // Tier-2 classes (major 6): from a trainer's trial, for one who has a base class and the weapon mastery; the base class's skills stay
+  for(const [qid,q] of Object.entries(T.QD))if(q.promo)classes.classes[q.promo]={id:q.promo,tier:2,base:q.from,quest:qid,trainer:q.by,lv:q.lv,mastery:{k:q.mst[0],gte:q.mst[1]},skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls===q.promo),src:SRC};
   return {monsters,quests,recipes,skills,npcs,zones,classes};}
 
 // one record per line keeps diffs readable

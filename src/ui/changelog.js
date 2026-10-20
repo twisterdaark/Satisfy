@@ -5,6 +5,23 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zm', ver: '0.79', d: '2026-10-20',
+      ar: ['كلاسات المستوى التاني (التحديث الكبير السادس): من لفل 20 المحارب يقدر يبقى فارس أو بيرسيركر أو رمّاح، والرامي يبقى رينجر (والفارس الحارس يقدر يبقى فارس)',
+        'مش باللفل بس: لازم الكلاس، وإتقان سلاح الطريق لمستوى 3، واختبار من المدرب. طريق واحد بس، وبتفضل معاك سكيلات كلاسك القديم',
+        'الفارس: وقفة الدرع (ضرر أقل من قدام والجنب)، والاستفزاز، ورابط الحماية اللي بيحمي البارتي اللي جنبك',
+        'البيرسيركر: الغضب بيزيد من القتال الحقيقي ويزود ضربك، والشق ضربة واسعة بتصرف الغضب، والوقفة الأخيرة متخليش الوحوش تنزلك تحت 1 صحة',
+        'الرمّاح: الطعنة على خط لحد أول حيطة، والخوزقة اندفاع بالرمح، وسور الرماح اللي بيزق الوحوش لورا',
+        'الرينجر: التعقّب بيوريك اتجاه الوحوش ويعلّم أقواهم، والفخ بيمسك أول وحش يدوس عليه، والرشقة السريعة خمس أسهم. وكمان بيشوف أبعد وهو بيستكشف',
+        'كل ده ضد الوحوش بس، ومبيغيرش القتال بين اللاعبين',
+        'اسم حسابك بقى بيرجع دايمًا بعد ما تعمل ريفرش للصفحة'],
+      en: ['Tier-2 classes (major #6): from level 20 a Warrior can become a Knight, a Berserker or a Lancer, and an Archer a Ranger (a Guardian Knight can become a Knight too)',
+        'Not by level alone: you need the class, Lv 3 mastery with the path\'s weapon, and the trainer\'s trial. One path only, and you keep your old class\'s skills',
+        'Knight: Shield Stance (less damage from the front and sides), Taunt, and Guard Link, which shields the party members near you',
+        'Berserker: Fury builds from real fights and raises your damage, Cleave is a wide swing that spends it, and Last Stand keeps monsters from taking you below 1 HP',
+        'Lancer: Thrust along a line up to the first wall, Skewer dashes with the spear, and Spear Wall pushes monsters back',
+        'Ranger: Track shows the way to the monsters and marks the strongest, Trap holds the first monster that steps on it, and Swift Volley looses five arrows. Rangers also see further while exploring',
+        'All of it works against monsters only and does not change fights between players',
+        'Your account ID now always comes back after a page reload'] },
     { v: '2026-10-20zl', ver: '0.78', d: '2026-10-20', ar: ['الموبايل: زراير القوايم اللي تحت (الحالة والشنطة والخريطة وغيرهم) بقت مقفولة ورا زرار ▦ جنب العصاية، بتفتح بلمسة وتتقفل بعد ما تختار', 'أيوه ولأ مبقوش في الصف، بيظهروا لوحدهم فوق العصاية بس لما يكون فيه دعوة بارتي أو تحدي مبارزة مستنيك', 'الإشعارات على الموبايل بقت أصغر وبتختفي أسرع'], en: ['Phones: the menu keys at the bottom (status, bag, map and the rest) fold behind a ▦ button next to the stick; a tap opens them and a pick folds them again', 'Yes and No left the row: they pop up above the stick by themselves only while a party invite or a duel challenge waits for you', 'Notices on phones are smaller and leave sooner'] },
     { v: '2026-10-20zk', ver: '0.77', d: '2026-10-20',
       ar: ['الموبايل: صف زراير الأونلاين اللي على الشمال (خيارات، بارتي، مبارزة، أيوه، لأ، شات، علامة، حركة) بقى مقفول ورا زرار ☰، بيتفتح لما تدوس عليه ويتقفل تاني بعد ما تختار'],
