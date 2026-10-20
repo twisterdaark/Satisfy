@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20w', ver: '0.61', d: '2026-10-20',
+      ar: ['رينهارت: الخيمتين والبير اللي كانوا طالعين في نص المدينة اتشالوا (كانوا استراحة طريق قديمة قبل ما المدينة تكبر)',
+        'السور الغربي والشمالي بتوع رينهارت اتنقلوا خانتين لبرا، فمفيش بيت ولا القصر لازق في السور. وقاعة المشاهير والحدادتين بعدوا عن سور القصر والسور الشرقي والطرق',
+        'تيتان: طريق البوابة الشمالية كان بيخبط في سور القصر السماوي، دلوقتي فيه بوابة',
+        'فحص آلي لكل المدن: مفيش خيمة جوه مدينة، ولا مبنيين لازقين، ولا مبنى في سور، وكل باب توصله مشي'],
+      en: ['Reinhardt: the two tents and the well standing in the middle of town are gone (an old road waystation from before the city grew)',
+        "Reinhardt's west and north walls moved out two tiles, so no house and not the palace touches a wall; the Hall of Fame and the two forges moved off the palace wall, the east wall and the lanes",
+        "Titan: the north gate's road ran into the Celestial Palace wall; it has a gate now",
+        'An automatic check for every town: no tent inside, no two buildings touching, nothing against a wall, every door reachable on foot'] },
     { v: '2026-10-20v', ver: '0.60', d: '2026-10-20',
       ar: ['الخريطة الكبيرة بقت أخف بكتير وانت بتسحبها أو بتكبّرها: بترسم مرة واحدة كل فريم، وبترسم الحتة اللي قدامك بس من نسخة على قد الزوم، والضباب بيترسم مرة واحدة ويتنسخ'],
       en: ['The big map is much lighter to drag and zoom: it draws once per frame, only the part on screen from a copy sized for the zoom, and the fog is painted once and reused'] },

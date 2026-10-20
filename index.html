@@ -1406,11 +1406,14 @@ function vtNear(px,py,rad){const o=[],cx=Math.floor(px/TS),cy=Math.floor(py/TS),
 // grocery, the market square and the poor houses by the west wall. The Haalrune Swamp lies
 // on the road from Reidan (canon lv 130-150; it slows everyone who wades in).
 // major #3 (owner 2026-10-19): the walls moved out west and north for the palace district and the West Street quarter
-const REIN={x0:636,x1:721,y0:42,y1:110},RE0=new Uint8Array((721-636+1)*(110-42+1)),SWAMP=[[598,52,16,7],[612,104,18,6],[578,100,7,5]];
+// owner 2026-10-20: the west and north walls moved out two more tiles so no building touches a wall
+const REIN={x0:634,x1:721,y0:40,y1:110},RE0=new Uint8Array((721-634+1)*(110-40+1)),SWAMP=[[598,52,16,7],[612,104,18,6],[578,100,7,5]];
 function swampAt(x,y){const tx=x/TS,ty=y/TS;if(ty<NWALL)return CSW.some(([cx,cy,rx,ry])=>((tx-cx)/rx)**2+((ty-cy)/ry)**2<=1);if(beltAt(tx|0)!==3)return false;return SWAMP.some(([cx,cy,rx,ry])=>((tx-cx)/rx)**2+((ty-cy)/ry)**2<=1);}
 (function buildReinhardt(){const {x0,x1,y0,y1}=REIN;
+ // the fourth belt's road waystation (two tents and a well) was generated where the town now stands: it goes
+ for(const L of [TENTS,WELLS])for(let i=L.length-1;i>=0;i--){const e=L[i],x=e.tx??e[0],y=e.ty??e[1];if(x>=x0&&x<=x1&&y>=y0&&y<=y1)L.splice(i,1);}
  for(let y=80;y<=85;y++)setT(REID.x1,y,y===82||y===83?PA:GR);   // Reidan's east gate opens onto the fourth belt
- const B=[{x:684,y:58,w:16,h:6,k:'hall'},{x:668,y:65,w:10,h:6,k:'hall'},{x:704,y:65,w:7,h:5,k:'forge'},{x:713,y:65,w:7,h:5,k:'forge'},
+ const B=[{x:685,y:59,w:14,h:6,k:'hall'},{x:668,y:65,w:10,h:6,k:'hall'},{x:703,y:65,w:6,h:5,k:'forge'},{x:711,y:65,w:6,h:5,k:'forge'},
   {x:668,y:90,w:6,h:5,k:'shop'},{x:677,y:90,w:7,h:5,k:'inn'},{x:701,y:90,w:6,h:5,k:'armory'},{x:710,y:90,w:6,h:5,k:'tower'},
   {x:668,y:100,w:6,h:5,k:'house'},{x:677,y:100,w:6,h:5,k:'house'},{x:701,y:100,w:6,h:5,k:'house'},{x:710,y:100,w:6,h:5,k:'house'},
   // major #3: Reinhardt Palace, the Royal Knights' barracks, Rebecca's temple, the royal monster scholars, the grocery and West Street
@@ -1499,7 +1502,8 @@ BUTIN.gy=fRoad(BUTIN.x0);
   for(const y of [T.y0,T.y0+1,T.y1-1,T.y1])for(let x=g-2;x<=g+3;x++)setT(x,y,x===g||x===g+1?PA:GR);
   for(let y=76;y<=89;y++)for(let x=g-8;x<=g+9;x++)if(ell(x,y,g+.5,82.5,8.5,6.5))setT(x,y,PA);
   // the Celestial Palace: inner walls, a garden and the palace itself
-  const P={x0:878,x1:919,y0:41,y1:63};for(let y=P.y0;y<=P.y1;y++)for(let x=P.x0;x<=P.x1;x++){const e=Math.min(x-P.x0,P.x1-x,y-P.y0,P.y1-y);setT(x,y,e<1&&!(y===P.y1&&x>=g-1&&x<=g+2)?WL:(x===g||x===g+1)?PA:r()<.1?FL:GR);}
+  // the north gate's road goes on through a gate in the palace wall (owner 2026-10-20: it ran into the wall)
+  const P={x0:878,x1:919,y0:41,y1:63};for(let y=P.y0;y<=P.y1;y++)for(let x=P.x0;x<=P.x1;x++){const e=Math.min(x-P.x0,P.x1-x,y-P.y0,P.y1-y);setT(x,y,e<1&&!((y===P.y1||y===P.y0)&&x>=g-1&&x<=g+2)?WL:(x===g||x===g+1)?PA:r()<.1?FL:GR);}
   for(let y=P.y1+1;y<76;y++)for(let x=g;x<=g+1;x++)setT(x,y,PA);
   const B=[{x:887,y:44,w:24,h:8,k:'palace'},{x:862,y:62,w:14,h:8,k:'temple'},{x:928,y:64,w:7,h:9,k:'tower'},
    {x:864,y:94,w:6,h:5,k:'shop'},{x:873,y:94,w:7,h:5,k:'inn'},{x:864,y:104,w:7,h:5,k:'forge'},{x:874,y:104,w:6,h:5,k:'armory'},
@@ -5457,7 +5461,7 @@ function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig
  else if(a==='pcBlock'){if(isBlocked(r.uid)){BLK.remove(r.uid);toast(t('pcUnblocked',{n:r.handle||'?'}));}else blockUid(r.uid,r.handle);}
  pctxSig='';}
 window.__G.toScreen=(x,y)=>{const b=stage.getBoundingClientRect();return {x:b.left+(x-camXf)*SC,y:b.top+(y-camYf)*SC};}; // tests: click a world position
-window.__G.maxHP=()=>maxHP();window.__G.mapBase=()=>mapBase;window.__G.MV=MV;window.__G.mapDraw=()=>drawMapNow();
+window.__G.maxHP=()=>maxHP();window.__G.mapBase=()=>mapBase;window.__G.MV=MV;window.__G.mapDraw=()=>drawMapNow();window.__G.world=()=>({TENTS,buildings,TOWNS,WELLS,ANVILS,BOARD});
 window.__G.isk={mkItem,equip,itemSkills,useISlot,ipOn,itemTip,mpC,MT,rs:()=>{sbSig='';},checkSkills:()=>checkSkills(),pasOn:k=>pasOn(k)};
 addEventListener('keydown',e=>{if(e.code!=='Escape'||mode!=='play'||(e.target&&e.target.tagName==='INPUT'))return;
  if(!$('emoW').hidden){$('emoW').hidden=true;e.stopImmediatePropagation();}else if(PCTX){PCTX=null;pctxSig='';e.stopImmediatePropagation();}},true);
