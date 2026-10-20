@@ -305,6 +305,16 @@ test('guild buildings (SAT-ONLINE-065): members give to the treasury, the master
   assert.equal(l.$id.$other['.validate'], false);
 });
 
+test('friends (SAT-ONLINE-067): an ask to someone not yet a friend; both lists only from that ask; either side removes', () => {
+  const q = rules.friendReq.$to, f = rules.friends.$uid;
+  assert.equal(q['.read'], 'auth != null && auth.uid === $to', 'your asks are yours to read');
+  assert.match(q.$from['.write'], /auth\.uid === \$from && \$from !== \$to && !data\.exists\(\) && newData\.exists\(\) && !root\.child\('friends'\)\.child\(\$to\)\.child\(\$from\)\.exists\(\)/);
+  assert.match(f.$f['.write'], /auth\.uid === \$uid && \(!newData\.exists\(\) \|\| root\.child\('friendReq'\)\.child\(\$uid\)\.child\(\$f\)\.exists\(\)\)/);
+  assert.match(f.$f['.write'], /auth\.uid === \$f && \(!newData\.exists\(\) \|\| root\.child\('friendReq'\)\.child\(\$f\)\.child\(\$uid\)\.exists\(\)\)/);
+  assert.equal(f['.read'], 'auth != null && auth.uid === $uid');
+  assert.equal(f.$f.$other['.validate'], false);
+});
+
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing
 // else here parses the expressions. Merging two rules files by hand once lost one; check every expression before a deploy.
 function exprProblem(e) {

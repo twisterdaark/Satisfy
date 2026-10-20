@@ -52,7 +52,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|drops|dropClaims|kills|bounties|bountyPaid|arena|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -315,8 +315,23 @@
     if (Object.keys(v).sort().join(',') !== 'c,d,h,n,s,t' || !['h', 'c', 'd'].every((k) => isInt(v[k], 0) && v[k] <= 1e6) || v.s !== v.h + v.c + v.d || typeof v.n !== 'string' || v.n.length < 1 || v.n.length > 24 || JSON.stringify(v.t) !== JSON.stringify(SV)) return 'nat fields';
     return !old || (v.h >= old.h && v.c >= old.c && v.d >= old.d) ? null : 'nat down';
   }
+  // SAT-ONLINE-067 friends: an ask to someone not yet a friend; friends on both sides only from an ask; either side removes
+  function friendRules(seg, v) {
+    if (user && seg.length === 2 && seg[1] === user.uid && v === null) return null; // your own list, all at once ("Delete my online data")
+    if (!user || seg.length !== 3) return 'PERMISSION_DENIED: ' + seg.join('/');
+    const me = user.uid, [k, a, b] = seg, old = data.get(seg.join('/'));
+    const okV = (x) => x && Object.keys(x).sort().join(',') === 'n,t' && typeof x.n === 'string' && x.n.length >= 1 && x.n.length <= 24 && JSON.stringify(x.t) === JSON.stringify(SV);
+    if (k === 'friendReq') { // friendReq/{to}/{from}
+      if (v === null) return me === a || me === b ? null : 'PERMISSION_DENIED: friendReq remove';
+      return me === b && a !== b && !old && !data.has('friends/' + a + '/' + b) && okV(v) ? null : 'PERMISSION_DENIED: friendReq';
+    }
+    if (v === null) return me === a || me === b ? null : 'PERMISSION_DENIED: friends remove'; // friends/{uid}/{f}
+    const asked = me === a ? data.has('friendReq/' + a + '/' + b) : me === b ? data.has('friendReq/' + b + '/' + a) : false;
+    return asked && okV(v) ? null : 'PERMISSION_DENIED: friends';
+  }
   function rules(p, v, existing) {
     const seg = p.split('/');
+    if (seg[0] === 'friends' || seg[0] === 'friendReq') return friendRules(seg, v);
     if (seg[0] === 'lockouts') return lockRules(seg, v);
     if (seg[0] === 'nat' || seg[0] === 'natPaid') return natRules(seg, v);
     if (seg[0] === 'arena') return arenaRules(seg, v);
@@ -559,7 +574,7 @@
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
-      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat'].includes(seg[0]) ? !!user : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : ['guildBank', 'guildBuild', 'guildLog'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts'].includes(seg[0]) && user && seg[1] === user.uid || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat'].includes(seg[0]) ? !!user : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : ['guildBank', 'guildBuild', 'guildLog'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts', 'friends', 'friendReq'].includes(seg[0]) && user && seg[1] === user.uid || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));
@@ -576,7 +591,7 @@
         const seg = r.path.split('/');
         const tm = (seg[0] === 'tradeSides' && seg.length === 3) || (seg[0] === 'tradeDone' && seg.length === 2) ? tradeMeta(seg[1]) : null;
         const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : ['guildVault', 'guildBank', 'guildBuild', 'guildLog'].includes(seg[0]) && seg.length === 2 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
-        const ok = gl !== null ? gl : r.path === 'bounties' ? !!user : seg[0] === 'sessions' || seg[0] === 'lockouts' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb') && !!user;
+        const ok = gl !== null ? gl : r.path === 'bounties' ? !!user : seg[0] === 'sessions' || seg[0] === 'lockouts' || seg[0] === 'friends' || seg[0] === 'friendReq' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);

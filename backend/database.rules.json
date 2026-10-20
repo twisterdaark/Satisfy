@@ -354,6 +354,32 @@
         }
       }
     },
+    "friendReq": {
+      "$to": {
+        ".read": "auth != null && auth.uid === $to",
+        ".write": "auth != null && auth.uid === $to && !newData.exists()",
+        "$from": {
+          ".write": "auth != null && ((auth.uid === $from && $from !== $to && !data.exists() && newData.exists() && !root.child('friends').child($to).child($from).exists()) || (!newData.exists() && (auth.uid === $to || auth.uid === $from)))",
+          ".validate": "newData.hasChildren(['n', 't'])",
+          "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "friends": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && !newData.exists()",
+        "$f": {
+          ".write": "auth != null && ((auth.uid === $uid && (!newData.exists() || root.child('friendReq').child($uid).child($f).exists())) || (auth.uid === $f && (!newData.exists() || root.child('friendReq').child($f).child($uid).exists())))",
+          ".validate": "newData.hasChildren(['n', 't'])",
+          "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",
