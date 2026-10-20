@@ -17,7 +17,7 @@ const ROOF={house:['#a8322a','#7a2420','#c8483a'],forge:['#4a4f5c','#3a3e4a','#5
  tower:['#5a3a7a','#3e2658','#7a58a0'],shop:['#b06a2a','#844c1a','#d08a44'],inn:['#8a3a5a','#64263f','#ac5276'],armory:['#5a5f6a','#40444e','#7a808c']};
 const groundKind=v=>v===FL?GR:v===BL||v===TR||v===PL?-1:v;
 
-function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,cw=W*s,ch=H*s,doc=root.document;
+function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,cw=W*s,ch=H*s,doc=root.document,NY=o.noiseRow||0;   // noiseRow: the tile row the texture noise is anchored to, so rows added above keep the old land's look
  const cv=doc?doc.createElement('canvas'):A.makeCanvas(cw,ch);cv.width=cw;cv.height=ch;const g=cv.getContext('2d');
  const img=g.createImageData(cw,ch),D=img.data,kind=new Int8Array(cw*ch);
  const at=(x,y)=>x<0||y<0||x>=W||y>=H?-9:env.at(x,y);
@@ -28,25 +28,25 @@ function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,cw=W*s,ch=H*s,doc=root.doc
  const put=(px,py,c,k)=>{const i=(py*cw+px)*4;D[i]=c[0];D[i+1]=c[1];D[i+2]=c[2];D[i+3]=255;if(k!==undefined)kind[py*cw+px]=k;};
  const tri=(r,v)=>v<.36?r[0]:v<.64?r[1]:r[2];
  for(let ty=0;ty<H;ty++)for(let tx=0;tx<W;tx++){const k=base(tx,ty),raw=at(tx,ty);
-  for(let j=0;j<s;j++)for(let i=0;i<s;i++){const wx=tx*s+i,wy=ty*s+j,fx=wx/s,fy=wy/s,n=vn(fx*1.6,fy*1.6,1,301)*.7+hash(wx,wy,302)*.3;let c;
+  for(let j=0;j<s;j++)for(let i=0;i<s;i++){const wx=tx*s+i,wy=ty*s+j,ny=wy-NY*s,fx=wx/s,fy=wy/s,n=vn(fx*1.6,(ty-NY+j/s)*1.6,1,301)*.7+hash(wx,ny,302)*.3;let c;
    if(k===WA){// depth: distance to the nearest non-water tile, sampled per pixel
     let d=9;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){if(at(tx+dx,ty+dy)===WA||at(tx+dx,ty+dy)===-9)continue;const ex=Math.max(0,Math.abs(fx-(tx+dx+.5))-.5),ey=Math.max(0,Math.abs(fy-(ty+dy+.5))-.5);d=Math.min(d,Math.hypot(ex,ey));}
-    c=d<.12?C.sand:d<.3?C.water[3]:mix(C.water[2],C.water[0],Math.min(1,(d-.3)/1.6));if(d>.4&&hash(wx>>1,wy,303+(wy>>2))<.025)c=C.water[3];}
+    c=d<.12?C.sand:d<.3?C.water[3]:mix(C.water[2],C.water[0],Math.min(1,(d-.3)/1.6));if(d>.4&&hash(wx>>1,ny,303+(ny>>2))<.025)c=C.water[3];}
    else if(k===SN)c=tri(C.snow,n);
    else if(k===PA)c=tri(C.path,n);
    else if(k===DR)c=tri(C.dirt,n);
-   else if(k===RK){c=C.rock[1+((n*2.4)|0)%3];if(((wx+wy)%5)===0)c=C.rock[0];}
+   else if(k===RK){c=C.rock[1+((n*2.4)|0)%3];if(((wx+ny)%5)===0)c=C.rock[0];}
    else if(k===WL){c=C.wall[1];if(i===0||j===0)c=C.wall[2];if(i===s-1||j===s-1)c=C.wall[0];}
    else if(k===CW)c=C.cave[0];else if(k===CF)c=tri(C.cave,n);
    else c=tri(C.grass,n);
-   if(raw===FL&&hash(wx,wy,304)<.035)c=C.flower[(hash(wx,wy,305)*4)|0];
+   if(raw===FL&&hash(wx,ny,304)<.035)c=C.flower[(hash(wx,ny,305)*4)|0];
    put(wx,wy,c,k);}}
  // ink: a darker 1px line where one terrain meets another (lower/right side), so regions read as a drawn map
  for(let y=1;y<ch;y++)for(let x=1;x<cw;x++){const k=kind[y*cw+x],u=kind[(y-1)*cw+x],l=kind[y*cw+x-1];if(k===u&&k===l)continue;
   const i=(y*cw+x)*4;if(k===WA||u===WA||l===WA)continue;const c=mix([D[i],D[i+1],D[i+2]],C.ink,.32);D[i]=c[0];D[i+1]=c[1];D[i+2]=c[2];}
  g.putImageData(img,0,0);
  // forests: a canopy blob per tree tile, back to front, with a soft shadow; snowy trees get white tops
- for(let ty=0;ty<H;ty++)for(let tx=0;tx<W;tx++){if(at(tx,ty)!==TR)continue;const sn=env.snowAt(tx,ty),L=sn?C.snowLeaf:C.leaf,r=s*.62,cx=tx*s+s/2+(hash(tx,ty,310)-.5)*s*.3,cy=ty*s+s/2+(hash(tx,ty,311)-.5)*s*.3;
+ for(let ty=0;ty<H;ty++)for(let tx=0;tx<W;tx++){if(at(tx,ty)!==TR)continue;const sn=env.snowAt(tx,ty),L=sn?C.snowLeaf:C.leaf,r=s*.62,cx=tx*s+s/2+(hash(tx,ty-NY,310)-.5)*s*.3,cy=ty*s+s/2+(hash(tx,ty-NY,311)-.5)*s*.3;
   g.fillStyle='rgba(10,20,10,.35)';g.beginPath();g.ellipse(cx+s*.12,cy+s*.22,r,r*.8,0,0,7);g.fill();
   const rgb=c=>`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;g.fillStyle=rgb(L[0]);g.beginPath();g.arc(cx,cy,r,0,7);g.fill();
   g.fillStyle=rgb(L[1]);g.beginPath();g.arc(cx-r*.1,cy-r*.12,r*.8,0,7);g.fill();g.fillStyle=rgb(L[2]);g.beginPath();g.arc(cx-r*.28,cy-r*.3,r*.42,0,7);g.fill();
