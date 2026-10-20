@@ -73,8 +73,12 @@ test('?touch=1: the stick moves the player, Attack works while held, a key hint 
     await g.step(60);
     assert.equal(await g.eval(() => window.__G.P.acd > 0), false, 'stops swinging when released');
 
-    // a key hint opens the inventory like I
+    // owner 2026-10-20: the menu keys stay folded behind ▦; a key hint opens the inventory like I and folds them again
+    assert.equal(await g.eval(() => getComputedStyle(document.getElementById('keys')).display), 'none', 'keys start folded');
+    await tap(g, '#tKeysT');
+    assert.notEqual(await g.eval(() => getComputedStyle(document.getElementById('keys')).display), 'none', '▦ opens them');
     await tap(g, '#keys #kI');
+    assert.equal(await g.eval(() => document.body.classList.contains('keysOpen')), false, 'a pick folds them');
     assert.equal(await g.eval(() => window.__G.mode), 'inv');
     assert.equal(await g.eval(() => document.getElementById('touch').hidden), true, 'hidden over menus');
     await g.page.keyboard.press('KeyI');
@@ -108,8 +112,12 @@ test('?touch=1 online: the party row opens a card, invites, accepts and opens th
     await tap(a, '#tNet [data-tk="KeyP"]');
     for (let i = 0; i < 8; i++) { await a.step(7); await b.step(7); await a.page.waitForTimeout(30); }
     assert.equal(await b.eval(() => document.getElementById('partyInv').hidden), false, 'B got the invite');
-    await tap(b, '#tNet [data-tk="KeyY"]');
+    // owner 2026-10-20: yes and no show by themselves only while something waits for an answer
+    assert.equal(await a.eval(() => document.getElementById('tAsk').hidden), true, 'nothing waits on A');
+    assert.equal(await b.eval(() => document.getElementById('tAsk').hidden), false, 'yes/no wait on B');
+    await tap(b, '#tAsk [data-tk="KeyY"]');
     for (let i = 0; i < 12; i++) { await a.step(7); await b.step(7); await a.page.waitForTimeout(30); }
+    assert.equal(await b.eval(() => document.getElementById('tAsk').hidden), true, 'answered, yes/no hide again');
     assert.equal((await a.eval(() => Satisfy.local.net().party.members)).length, 2);
     await tap(a, '#tNetT');
     await tap(a, '#tNet [data-tk="Enter"]');
@@ -128,16 +136,18 @@ test('a phone sideways: the view fills the screen and the controls stay apart; u
     const g = await H.openGame({ ctx });
     await H.newGame(g, LOOK);
     await g.step(3);
+    assert.equal(await g.eval(() => getComputedStyle(document.getElementById('keys')).display), 'none', 'menu keys folded behind ▦');
+    await tap(g, '#tKeysT');
     const L = await g.eval(() => {
       const r = (s) => { const b = document.querySelector(s).getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, b: b.bottom }; };
-      return { W: document.getElementById('game').width, stage: r('#stage'), stick: r('#tStick'), act: r('#tAct'), keys: r('#keys'), sk: r('#skillbar'),
+      return { W: document.getElementById('game').width, stage: r('#stage'), stick: r('#tStick'), act: r('#tAct'), keys: r('#keys'), sk: r('#skillbar'), kt: r('#tKeysT'),
         kbd: getComputedStyle(document.querySelector('#kM kbd')).display, label: getComputedStyle(document.querySelector('#kM span')).display,
         hidden: ['kA', 'kD', 'kG', 'kE'].map((k) => getComputedStyle(document.getElementById(k)).display), rot: getComputedStyle(document.getElementById('rotW')).display };
     });
     assert.ok(L.W > 560, 'wider view: ' + L.W);
     assert.ok(L.stage.r - L.stage.l > 830, 'no black bars');
     const apart = (a, b) => a.r <= b.l || b.r <= a.l || a.b <= b.t || b.b <= a.t;
-    for (const [x, y] of [['stick', 'keys'], ['keys', 'sk'], ['sk', 'act'], ['stick', 'act']]) assert.ok(apart(L[x], L[y]), `${x} and ${y} overlap`);
+    for (const [x, y] of [['stick', 'keys'], ['keys', 'sk'], ['sk', 'act'], ['stick', 'act'], ['kt', 'keys'], ['kt', 'stick'], ['kt', 'sk']]) assert.ok(apart(L[x], L[y]), `${x} and ${y} overlap`);
     for (const k of ['stick', 'act', 'keys', 'sk']) assert.ok(L[k].l >= L.stage.l && L[k].r <= L.stage.r && L[k].b <= L.stage.b + 1, k + ' on screen');
     assert.equal(L.kbd, 'none'); assert.equal(L.label, 'block');
     assert.deepEqual(L.hidden, ['none', 'none', 'none', 'none'], 'attack, dodge, guard and use are the big buttons');

@@ -5,6 +5,7 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zl', ver: '0.78', d: '2026-10-20', ar: ['الموبايل: زراير القوايم اللي تحت (الحالة والشنطة والخريطة وغيرهم) بقت مقفولة ورا زرار ▦ جنب العصاية، بتفتح بلمسة وتتقفل بعد ما تختار', 'أيوه ولأ مبقوش في الصف، بيظهروا لوحدهم فوق العصاية بس لما يكون فيه دعوة بارتي أو تحدي مبارزة مستنيك', 'الإشعارات على الموبايل بقت أصغر وبتختفي أسرع'], en: ['Phones: the menu keys at the bottom (status, bag, map and the rest) fold behind a ▦ button next to the stick; a tap opens them and a pick folds them again', 'Yes and No left the row: they pop up above the stick by themselves only while a party invite or a duel challenge waits for you', 'Notices on phones are smaller and leave sooner'] },
     { v: '2026-10-20zk', ver: '0.77', d: '2026-10-20',
       ar: ['الموبايل: صف زراير الأونلاين اللي على الشمال (خيارات، بارتي، مبارزة، أيوه، لأ، شات، علامة، حركة) بقى مقفول ورا زرار ☰، بيتفتح لما تدوس عليه ويتقفل تاني بعد ما تختار'],
       en: ['Phones: the online row on the left (options, party, duel, yes, no, chat, ping, emote) is folded behind a ☰ button; it opens on a tap and folds again after you pick'] },

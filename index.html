@@ -402,7 +402,9 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
    browser gestures (zoom, pull to refresh, text selection) getting in the way */
 html,body{overscroll-behavior:none}
 body.touch,body.touch #stage{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-body.touch #keys{inset-inline-end:auto;left:calc(var(--u)*22);bottom:calc(var(--u)*.6);grid-template-columns:repeat(4,auto);gap:calc(var(--u)*.4);padding:calc(var(--u)*.4);direction:ltr}
+body.touch:not(.keysOpen) #keys{display:none}
+#tKeysT{position:absolute;left:calc(var(--u)*22);bottom:calc(var(--u)*1.2);width:calc(var(--u)*5.6);height:calc(var(--u)*5);border-radius:calc(var(--u)*1);font-size:calc(var(--u)*2.2);background:rgba(14,24,52,.78);border:1px solid rgba(166,214,246,.55);color:#e8f0ff;padding:0}#tKeysT.open{background:rgba(255,220,120,.45)}
+body.touch #keys{inset-inline-end:auto;left:calc(var(--u)*28.5);bottom:calc(var(--u)*.6);grid-template-columns:repeat(4,auto);gap:calc(var(--u)*.4);padding:calc(var(--u)*.4);direction:ltr}
 body.touch #kA,body.touch #kD,body.touch #kG,body.touch #kE{display:none}
 body.touch #keys kbd{display:none}body.touch #keys .key{min-width:0}body.touch #keys .key span{display:block;min-width:calc(var(--u)*6.6);padding:calc(var(--u)*.75) calc(var(--u)*.6);text-align:center;font-size:calc(var(--u)*1.3);font-weight:700;color:#e8f0ff;background:rgba(14,24,52,.78);border:1px solid rgba(166,214,246,.55);border-radius:calc(var(--u)*.5)}body.touch #keys .key.press span,body.touch #keys .key:active span{background:rgba(255,220,120,.4)}
 body.touch #skillbar{inset-inline-start:auto;left:auto;right:calc(var(--u)*22);top:auto;bottom:calc(var(--u)*.6);grid-template-columns:repeat(4,auto);grid-auto-flow:row;padding:calc(var(--u)*.3);direction:ltr}
@@ -411,7 +413,8 @@ body.touch #tAct{right:calc(var(--u)*2);bottom:calc(var(--u)*2)}
 body.touch #tAct button{height:calc(var(--u)*8);font-size:calc(var(--u)*1.6)}body.touch #tAct{grid-template-columns:repeat(2,calc(var(--u)*9))}
 body.touch #tStick{left:calc(var(--u)*2.5);bottom:calc(var(--u)*3);width:calc(var(--u)*18);height:calc(var(--u)*18)}
 body.touch #tNet{bottom:calc(var(--u)*22.5);left:calc(var(--u)*9.5)}
-#tNetT.open{background:rgba(255,220,120,.45)}#tNetT{position:absolute;left:calc(var(--u)*2.5);bottom:calc(var(--u)*22.5);width:calc(var(--u)*5.6);height:calc(var(--u)*5);border-radius:calc(var(--u)*2.5);font-size:calc(var(--u)*2);background:rgba(20,24,34,.55);border:2px solid rgba(255,255,255,.3);color:#fff;padding:0}
+#tNetT.open{background:rgba(255,220,120,.45)}#tAsk{position:absolute;left:calc(var(--u)*9.5);bottom:calc(var(--u)*22.5);display:flex;gap:calc(var(--u)*.8)}#tAsk button{width:calc(var(--u)*7);height:calc(var(--u)*5);border-radius:calc(var(--u)*2.5);font-size:calc(var(--u)*1.5);color:#fff;padding:0;background:rgba(40,110,60,.8);border:2px solid #9be7a8}#tAsk button+button{background:rgba(120,40,40,.8);border-color:#ff9a8a}body.touch #tNet:not([hidden])~#tAsk{bottom:calc(var(--u)*28.5)}
+body.touch .toast{font-size:calc(var(--u)*1.25);padding:calc(var(--u)*.2) calc(var(--u)*.8)}body.touch #toasts{top:calc(var(--u)*2.6);width:60%}body.touch #announce{width:calc(var(--u)*42);top:calc(var(--u)*7);font-size:calc(var(--u)*1.3);padding:calc(var(--u)*.5) calc(var(--u)*1)}body.touch #announce .head{font-size:calc(var(--u)*1.6)}#tNetT{position:absolute;left:calc(var(--u)*2.5);bottom:calc(var(--u)*22.5);width:calc(var(--u)*5.6);height:calc(var(--u)*5);border-radius:calc(var(--u)*2.5);font-size:calc(var(--u)*2);background:rgba(20,24,34,.55);border:2px solid rgba(255,255,255,.3);color:#fff;padding:0}
 body.touch #hint{bottom:calc(var(--u)*20)}body.touch #natbar{bottom:calc(var(--u)*17.6)}body.touch #sgbar{bottom:calc(var(--u)*15)}body.touch #evbar{bottom:calc(var(--u)*12.4)}body.touch #belt{bottom:calc(var(--u)*12)}body.touch #chatW,body.touch #chatBar{bottom:calc(var(--u)*25)}
 body.touch #ui *{touch-action:pan-x pan-y}body.touch #ui #touch,body.touch #ui #touch *{touch-action:none}
 #rotW{position:fixed;inset:0;z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0a0e1a;color:#e8f0ff;font:600 18px/1.5 Tajawal,system-ui,sans-serif;text-align:center;padding:24px}
@@ -455,7 +458,7 @@ body.touch #ui *{touch-action:pan-x pan-y}body.touch #ui #touch,body.touch #ui #
       </div>
       <div id="touch" hidden><div id="tStick"><i id="tKnob"></i></div>
         <div id="tAct"><button data-tk="atk" class="big" data-i18n="kA"></button><button data-tk="Space" data-i18n="kD"></button><button data-tk="guard" data-i18n="kG"></button><button data-tk="KeyE" data-i18n="kE"></button></div>
-        <button id="tNetT" data-tk="netrow" hidden>☰</button><div id="tNet" hidden><button data-tk="KeyT" data-i18n="tOpt"></button><button data-tk="KeyP" data-i18n="tParty"></button><button data-tk="KeyK" data-i18n="tDuel"></button><button data-tk="KeyY" data-i18n="tYes"></button><button data-tk="KeyN" data-i18n="tNo"></button><button data-tk="Enter" data-i18n="tChat"></button><button data-tk="ping" data-i18n="tPing"></button><button data-tk="emote" data-i18n="tEmote"></button></div></div>
+        <button id="tNetT" data-tk="netrow" hidden>☰</button><button id="tKeysT" data-tk="keysrow">▦</button><div id="tNet" hidden><button data-tk="KeyT" data-i18n="tOpt"></button><button data-tk="KeyP" data-i18n="tParty"></button><button data-tk="KeyK" data-i18n="tDuel"></button><button data-tk="Enter" data-i18n="tChat"></button><button data-tk="ping" data-i18n="tPing"></button><button data-tk="emote" data-i18n="tEmote"></button></div><div id="tAsk" hidden><button data-tk="KeyY" data-i18n="tYes"></button><button data-tk="KeyN" data-i18n="tNo"></button></div></div>
       <div id="skillbar" class="sys"></div>
       <div id="hint" hidden></div>
       <div id="toasts"></div>
@@ -4414,7 +4417,7 @@ function pSpr(){if(!S||!S.items)return 'me';const k='me~'+gearSig();if(!SH[k])SH
 /* ---------------- ui helpers ---------------- */
 const LOG=[];function logMsg(m){const d=new Date();LOG.push({tm:d.toTimeString().slice(0,5),m});if(LOG.length>60)LOG.shift();}
 function toast(msg,cls){const box0=$('toasts'),dup=[...box0.children].find(e=>!e.classList.contains('out')&&e.textContent===msg);if(dup){clearTimeout(dup._t);dup._t=setTimeout(()=>{dup.classList.add('out');setTimeout(()=>dup.remove(),360);},2600);return;}
- logMsg(msg);const el=document.createElement('div');el.className='toast'+(cls?' '+cls:'');el.textContent=msg;const box=$('toasts');box.appendChild(el);const live=[...box.children].filter(e=>!e.classList.contains('out'));if(live.length>4)live[0].classList.add('out');el._t=setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),360);},2600);}
+ logMsg(msg);const el=document.createElement('div');el.className='toast'+(cls?' '+cls:'');el.textContent=msg;const box=$('toasts');box.appendChild(el);const live=[...box.children].filter(e=>!e.classList.contains('out'));if(live.length>(document.body.classList.contains('touch')?2:4))live[0].classList.add('out');el._t=setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),360);},document.body.classList.contains('touch')?1700:2600);}
 function openLog(){SFX.open();mode='log';$('logW').hidden=false;$('hint').hidden=true;$('logL').innerHTML=LOG.length?[...LOG].reverse().map(l=>`<div><small>${l.tm}</small>${esc(l.m)}</div>`).join(''):`<div>${t('logEmpty')}</div>`;}
 let qdId=null,qdArm=false;
 function openQD(id){const q=QD[id];if(!q)return;qdId=id;qdArm=false;SFX.open();mode='qd';$('qdW').hidden=false;$('hint').hidden=true;$('qdT').textContent=qName(id);const r=qReady(id),off=STR.en[id+'_o']?t(id+'_o'):'';
@@ -4432,7 +4435,7 @@ function toggleQuest(){$('quest').classList.toggle('min');SFX.click();}
 // your own moments (a broken item, a tower floor, an arena round, an advancement) say "Notice". A world notice also stays
 // in the chat as a line of its own, so whoever was away from the screen or in a menu can still read it.
 let annT=0;function announce(msg,own){logMsg(msg);const W=$('announce');W.querySelector('.head').textContent=t(own?'selfNotice':'worldNotice');W.classList.toggle('own',!!own);
- $('anntext').textContent=msg;W.hidden=false;annT=5;if(!own&&CHAT&&CHAT.note&&S&&!S.__demo)CHAT.note(msg);}
+ $('anntext').textContent=msg;W.hidden=false;annT=document.body.classList.contains('touch')?3:5;if(!own&&CHAT&&CHAT.note&&S&&!S.__demo)CHAT.note(msg);}
 // SAT-ONLINE-026 (owner feedback 12): announcements about you, and the story notices (annGrid), also reach everyone online
 // through the news feed, named by your account ID. A story notice is shown once per character, whoever's clock fires it first.
 const NEWS=['twPioN','bhRec','bhFinal','bhPureN','natWin','bntDone','evWin','evCap','castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
@@ -6762,20 +6765,23 @@ function tStickAt(e){const el=$('tStick'),b=el.getBoundingClientRect(),r=b.width
  K.left=dx<-.35;K.right=dx>.35;K.up=dy<-.35;K.down=dy>.35;$('tKnob').style.transform=`translate(${dx*k*r*.6}px,${dy*k*r*.6}px)`;}
 function tStickOff(){K.left=K.right=K.up=K.down=false;$('tKnob').style.transform='';}
 let tSig='';
-// owner 2026-10-20: the online row (options, party, duel, yes/no, chat, ping, emote) stays folded behind ☰; it opens on a tap and folds again after a pick
+// owner 2026-10-20: the online row (options, party, duel, yes/no, chat, ping, emote) stays folded behind ☰, and the menu keys
+// (status, bag, gear, map, guild, ride, menu) behind ▦; each opens on a tap and folds again after a pick
 let tNetOpen=false;
-function touchTick(){const show=['play','dialog','cut'].includes(mode),net=show&&!!NET&&Satisfy.local.inGame(),sig=show+':'+net;if(sig===tSig)return;tSig=sig;
- $('touch').hidden=!show;$('tNetT').hidden=!net;$('tNet').hidden=!net||!tNetOpen;$('tNetT').classList.toggle('open',net&&tNetOpen);if(!show){tStickOff();K.atk=false;guardOff();}}
+// yes and no show by themselves only while a party invite or a duel waits for an answer
+function tAsking(){if(PARTY&&PARTY.pendingInvite())return true;if(!DUEL)return false;const ph=DUEL.state().phase;return !!DUEL.pendingChallenge()||ph==='ready'||ph==='asking';}
+function touchTick(){const show=['play','dialog','cut'].includes(mode),net=show&&!!NET&&Satisfy.local.inGame(),ask=net&&tAsking(),sig=show+':'+net+':'+ask;if(sig===tSig)return;tSig=sig;
+ $('touch').hidden=!show;$('tNetT').hidden=!net;$('tAsk').hidden=!ask;$('tNet').hidden=!net||!tNetOpen;$('tNetT').classList.toggle('open',net&&tNetOpen);if(!show){tStickOff();K.atk=false;guardOff();}}
 if(TOUCH){document.body.classList.add('touch');const st=$('tStick');
  let sid=null; // the finger on the stick; captured so a drag past its edge keeps steering
  st.addEventListener('pointerdown',e=>{e.preventDefault();audio();sid=e.pointerId;try{st.setPointerCapture(sid);}catch(_){}tStickAt(e);});
  st.addEventListener('pointermove',e=>{if(e.pointerId===sid)tStickAt(e);});
  for(const ev of ['pointerup','pointercancel','lostpointercapture'])st.addEventListener(ev,e=>{if(e.pointerId===sid){sid=null;tStickOff();}});
  for(const b of document.querySelectorAll('#touch button')){const k=b.dataset.tk;
-  b.addEventListener('pointerdown',e=>{e.preventDefault();audio();b.classList.add('on');if(k==='atk')K.atk=true;else if(k==='guard'){if(mode==='play')guardOn();}else if(k==='ping'){if(NET&&PARTY&&mode==='play')netPing(P.x,P.y);}else if(k==='emote'){if(NET&&mode==='play')emoToggle();}else if(k==='netrow'){tNetOpen=!tNetOpen;tSig='';}else tKey(k,true);if(k!=='netrow'&&b.closest('#tNet')){tNetOpen=false;tSig='';}});
-  const up=()=>{if(!b.classList.contains('on'))return;b.classList.remove('on');if(k==='atk')K.atk=false;else if(k==='guard')guardOff();else if(k!=='ping'&&k!=='emote'&&k!=='netrow')tKey(k,false);};
+  b.addEventListener('pointerdown',e=>{e.preventDefault();audio();b.classList.add('on');if(k==='atk')K.atk=true;else if(k==='guard'){if(mode==='play')guardOn();}else if(k==='ping'){if(NET&&PARTY&&mode==='play')netPing(P.x,P.y);}else if(k==='emote'){if(NET&&mode==='play')emoToggle();}else if(k==='netrow'){tNetOpen=!tNetOpen;tSig='';}else if(k==='keysrow'){document.body.classList.toggle('keysOpen');b.classList.toggle('open',document.body.classList.contains('keysOpen'));}else tKey(k,true);if(k!=='netrow'&&b.closest('#tNet')){tNetOpen=false;tSig='';}if(k==='keysrow')return;});
+  const up=()=>{if(!b.classList.contains('on'))return;b.classList.remove('on');if(k==='atk')K.atk=false;else if(k==='guard')guardOff();else if(k!=='ping'&&k!=='emote'&&k!=='netrow'&&k!=='keysrow')tKey(k,false);};
   for(const ev of ['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,up);}
- $('keys').addEventListener('pointerdown',e=>{const el=e.target.closest('.key'),c=el&&TKEY[el.id];if(!c)return;e.preventDefault();tKey(c,true);tKey(c,false);});
+ $('keys').addEventListener('pointerdown',e=>{const el=e.target.closest('.key'),c=el&&TKEY[el.id];if(!c)return;e.preventDefault();tKey(c,true);tKey(c,false);document.body.classList.remove('keysOpen');$('tKeysT').classList.remove('open');});
  // the first tap goes full screen and holds the screen sideways where the browser allows it (Android; an iPhone keeps its
  // bars unless the game is added to the home screen, which opens it full screen from the manifest)
  const full=()=>{const d=document.documentElement;if(document.fullscreenElement||!d.requestFullscreen)return;d.requestFullscreen({navigationUI:'hide'}).then(()=>{try{screen.orientation.lock('landscape').catch(()=>{});}catch(_){}},()=>{});};
