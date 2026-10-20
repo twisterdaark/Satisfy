@@ -5,6 +5,21 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20t', ver: '0.58', d: '2026-10-20',
+      ar: ['رينهارت بقت عاصمة ملكية بجد: الأسوار اتوسعت غرب وشمال',
+        'قصر رينهارت ورا سوره، وجنينته أكبر من جنينة قلعة وينستون سبع مرات، وثكنات الفرسان الملكيين وساحات التدريب الست',
+        'الملك فيسبادن، الأمير رين، الأمير أصلان، الإيرل آدن، تشاكسلي قائد الفرسان الملكيين، وفيريل رامي القصر',
+        'الشارع الغربي: معبد ريبيكا، علماء الوحوش الملكيين، البقالة، سوق الشارع، والحي الفقير جنب السور',
+        'مساهمة المملكة: كويستات ملكية بتديك مساهمة، والإيرل آدن بيديك لقب بارون عند 3000 وفايكونت عند 10000',
+        'حرب الدفاع: جيش الجولم بتاع براهام بيهجم على رينهارت. الجولم القديم (لفل 240) بـ 300 دهب و100 مساهمة، دمية الروح (280) بـ 1000 و500، والسلاح القديم بـ 3000 و1500',
+        'المبنى القديم اللي في نص المدينة بقى قاعة المشاهير، و7 أماكن تاريخ جديدة'],
+      en: ['Reinhardt is a real royal capital now: the walls moved out west and north',
+        'Reinhardt Palace behind its own wall, a garden seven times as big as Winston Castle\'s, the Royal Knights\' barracks and their six training grounds',
+        'King Wiesbaden, Prince Ren, Prince Aslan, Earl Aden, Chucksley the Royal Knights Commander, and Ferrell the palace archer',
+        'West Street: the Temple of Rebecca, the royal monster scholars, the grocery, the street market and the poor quarter by the wall',
+        'Kingdom contribution: royal quests earn it, and Earl Aden grants a baron\'s title at 3,000 and a viscount\'s at 10,000',
+        'The Defense War: Braham\'s golem army attacks Reinhardt. An old golem (level 240) pays 300 gold and 100 contribution, a soul doll (280) 1,000 and 500, an ancient weapon 3,000 and 1,500',
+        'The old hall in the middle of town is now the Hall of Fame, and 7 new lore spots'] },
     { v: '2026-10-20s', ver: '0.57', d: '2026-10-20',
       ar: ['الإمبراطورية الصحراوية: أرض جديدة كاملة شرق المملكة الخالدة، ورا جبال سواز',
         'جبال سواز على الحدود فيها إيتي وأوجر وترول وجارجويل، وجارجويل نظرته بتحجّرك لحظة',

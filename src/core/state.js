@@ -63,6 +63,8 @@
     'skx',
     // when each monster you killed comes back, so a save and quit does not respawn them (owner 2026-10-19)
     'mrt',
+    // kingdom contribution from royal quests and the Defense War's golems (major #3)
+    'kc',
   ];
   var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT'];
   var META = ['v', 'wv', 'uid', 'pid'];

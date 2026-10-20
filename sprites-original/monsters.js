@@ -18,7 +18,7 @@ function polish(g,W,H,out){const id=g.getImageData(0,0,W,H),d=id.data,OUT=out||'
  rim.forEach(([x,y,c])=>R(g,x,y,1,1,shade(c,.14)));o.forEach(([x,y,c])=>R(g,x,y,1,1,c));}
 
 // PER_CODE snapshot of index.html PAL @ ce29772 (body, dark, light, scale). A test checks drift.
-const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15],hwolf:['#6e6258','#4e443c','#968878',1.05],rboar:['#7a3a2a','#55261a','#a05a40',1.3],cwolf:['#c8d4e0','#8a9cb0','#eef4fa',1.1],cbear:['#d8dce4','#9aa2b0','#f4f6fa',1.6],cboar:['#4a5a3a','#323e26','#6e7e52',1.35],fboar:['#8a6a5a','#5e4a3e','#b08a78',1.2],sanju1:['#8a8a90','#5e5e66','#b4b4bc',2.4],sanju2:['#7a7a82','#52525a','#a4a4ae',2.5],sanju3:['#6a6a74','#46464e','#94949e',2.6],sanju4:['#5a5660','#3a363e','#86828e',2.8],gargoyle:['#7a7a82','#55555e','#a2a2ac',1.25],salamander:['#c8603a','#8a3a22','#e89a6a',1.3],hydra:['#3e6a4a','#264a32','#6a9a6a',1.5]};
+const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15],hwolf:['#6e6258','#4e443c','#968878',1.05],rboar:['#7a3a2a','#55261a','#a05a40',1.3],cwolf:['#c8d4e0','#8a9cb0','#eef4fa',1.1],cbear:['#d8dce4','#9aa2b0','#f4f6fa',1.6],cboar:['#4a5a3a','#323e26','#6e7e52',1.35],fboar:['#8a6a5a','#5e4a3e','#b08a78',1.2],sanju1:['#8a8a90','#5e5e66','#b4b4bc',2.4],sanju2:['#7a7a82','#52525a','#a4a4ae',2.5],sanju3:['#6a6a74','#46464e','#94949e',2.6],sanju4:['#5a5660','#3a363e','#86828e',2.8],gargoyle:['#7a7a82','#55555e','#a2a2ac',1.25],salamander:['#c8603a','#8a3a22','#e89a6a',1.3],hydra:['#3e6a4a','#264a32','#6a9a6a',1.5],ogolem:['#3e3638','#221c1e','#5e5254',1.35],aweapon:['#8a7a4e','#5a4e2e','#c8b47a',2.7]};
 const POSES=[['idle',2],['walk',4],['atk',2],['hurt',1]];
 const TIMING={idle:[.5,.5],walk:[.1,.1,.1,.1],atk:[.12,.16],hurt:[.2]};
 
@@ -78,12 +78,14 @@ function rabbit(g,p,pose,f){const B='#c8b49a',D='#9a8468',L='#e8dcc8',W=16,H=14;
  return {W,H};}
 
 // Stone / crystal golem. 32x36, anchor (16,36). k: 'golem' | 'cgolem'
-function golem(k){return function(g,p,pose,f){const cr=k==='cgolem',mo=k==='mgolem',B=cr?'#7ab8d8':mo?'#5a6a4a':'#7a7068',D=cr?'#4a88b0':mo?'#3e4a32':'#544c46',L=cr?'#c8f0ff':mo?'#8a9a6a':'#9a908a',E=cr?'#ffffff':mo?'#b8ff6a':'#ffb040',W=32,H=36;
+function golem(k){return function(g,p,pose,f){const cr=k==='cgolem',mo=k==='mgolem',ob=k==='ogolem',aw=k==='aweapon',B=cr?'#7ab8d8':mo?'#5a6a4a':ob?'#3e3638':aw?'#8a7a4e':'#7a7068',D=cr?'#4a88b0':mo?'#3e4a32':ob?'#221c1e':aw?'#5a4e2e':'#544c46',L=cr?'#c8f0ff':mo?'#8a9a6a':ob?'#5e5254':aw?'#c8b47a':'#9a908a',E=cr?'#ffffff':mo?'#b8ff6a':ob?'#ff6a2a':aw?'#7af0ff':'#ffb040',W=32,H=36;
  const st=pose==='walk'?[1,0,-1,0][f]:0,bob=pose==='idle'?f:pose==='walk'&&(f%2)?-1:0,arm=pose==='atk'?(f===0?-8:4):0;const x=16,y=H;
  R(g,x-7,y-9+Math.max(0,st),5,9-Math.max(0,st),D);R(g,x+2,y-9+Math.max(0,-st),5,9-Math.max(0,-st),D);R(g,x-8,y-2,7,2,shade(D,-.2));R(g,x+1,y-2,7,2,shade(D,-.2));
  const ty=y-25+bob;R(g,x-9,ty,18,17,B);R(g,x-9,ty,18,2,L);R(g,x+7,ty,2,17,D);R(g,x-9,ty+15,18,2,D);
  // cracks / crystal shards
- if(cr){R(g,x-4,ty+4,2,5,L);R(g,x+2,ty+8,2,4,L);R(g,x-2,ty-4,2,4,L);R(g,x+3,ty-3,2,3,L);}else{R(g,x-3,ty+5,1,4,D);R(g,x-2,ty+8,2,1,D);R(g,x+3,ty+3,3,2,'#5a8a4a');R(g,x+2,ty+10,1,3,D);}
+ if(cr){R(g,x-4,ty+4,2,5,L);R(g,x+2,ty+8,2,4,L);R(g,x-2,ty-4,2,4,L);R(g,x+3,ty-3,2,3,L);}
+ // old golem: volcanic rock and black iron with glowing seams; ancient weapon: Braham's runes
+ else if(ob||aw){R(g,x-3,ty+5,1,4,E);R(g,x-2,ty+8,2,1,E);R(g,x+3,ty+3,1,3,E);R(g,x+2,ty+10,1,3,E);if(aw){R(g,x-6,ty+2,12,1,E);R(g,x-1,ty+6,2,2,'#ffffff');R(g,x-5,ty-5,10,1,E);}}else{R(g,x-3,ty+5,1,4,D);R(g,x-2,ty+8,2,1,D);R(g,x+3,ty+3,3,2,'#5a8a4a');R(g,x+2,ty+10,1,3,D);}
  // arms
  R(g,x-13,ty+2+arm,4,12,B);R(g,x-13,ty+2+arm,1,12,shade(B,.12));R(g,x-14,ty+12+arm,6,4,D);R(g,x+9,ty+2+arm,4,12,B);R(g,x+8,ty+12+arm,6,4,D);
  // head
@@ -185,7 +187,7 @@ function hydra(g,p,pose,f){const W=112,H=92,AX=56,B='#3e6a4a',D='#264a32',DD='#1
   if(pose==='atk'&&f===1){R(g,x1+3,y1+2,6,2,'#5a1a2a');R(g,x1+9,y1+2,3,1,V);R(g,x1+11,y1+3,2,1,V);}});
  return {W,H,AX};}
 
-const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null],trauka:[trauka,null,[230,170]],cwolf:[wolf,'cwolf'],cbear:[bear,'cbear'],cboar:[boar,'cboar'],fboar:[boar,'fboar'],sanju1:[bear,'sanju1'],sanju2:[bear,'sanju2'],sanju3:[bear,'sanju3'],sanju4:[bear,'sanju4'],gargoyle:[gargoyle,'gargoyle'],salamander:[salamander,'salamander'],hydra:[hydra,'hydra',[150,130]]};
+const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null],trauka:[trauka,null,[230,170]],cwolf:[wolf,'cwolf'],cbear:[bear,'cbear'],cboar:[boar,'cboar'],fboar:[boar,'fboar'],sanju1:[bear,'sanju1'],sanju2:[bear,'sanju2'],sanju3:[bear,'sanju3'],sanju4:[bear,'sanju4'],gargoyle:[gargoyle,'gargoyle'],salamander:[salamander,'salamander'],hydra:[hydra,'hydra',[150,130]],ogolem:[golem('ogolem'),'ogolem'],aweapon:[golem('aweapon'),'aweapon']};
 
 // Build a sheet: columns = frames of the longest pose, rows = poses. Returns {canvas, W, H, anchor}.
 // Frames are drawn with a margin and cropped to the union of their pixels (+1 for the outline),
