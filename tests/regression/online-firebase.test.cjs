@@ -28,7 +28,7 @@ async function signIn(g, name) {
 }
 
 async function twoOnline() {
-  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE, H.fixedClock()] });
   const a = await H.openGame({ ctx, query: '?net=online&slot=a' });
   const b = await H.openGame({ ctx, query: '?net=online&slot=b' });
   await signIn(a, 'Ahmed');
@@ -44,7 +44,7 @@ test('title shows "Play online" only with ?net=online; sign-in uses the pinned S
   try {
     assert.equal(await off.eval(() => document.getElementById('onlineBtn').hidden), true);
   } finally { await off.close(); }
-  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE, H.fixedClock()] });
   try {
     const g = await H.openGame({ ctx, query: '?net=online' });
     assert.equal(await g.eval(() => document.getElementById('onlineBtn').hidden), false);
@@ -137,7 +137,7 @@ test('a dropped connection removes the player for others and comes back on recon
 });
 
 test('a saved Google session reconnects after reload without a popup', async () => {
-  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE, H.fixedClock()] });
   try {
     const g = await H.openGame({ ctx, query: '?net=online&slot=a' });
     await signIn(g, 'Ahmed');
@@ -155,7 +155,7 @@ test('a saved Google session reconnects after reload without a popup', async () 
 });
 
 test('blocked popup falls back to redirect sign-in', async () => {
-  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE, H.fixedClock()] });
   try {
     const g = await H.openGame({ ctx, query: '?net=online' });
     await g.eval(() => { window.__fakeRTDB.popupBlocked = true; document.getElementById('onlineBtn').click(); });
@@ -169,7 +169,7 @@ test('blocked popup falls back to redirect sign-in', async () => {
 });
 
 test('offline and ?net=local never load the Firebase SDK', async () => {
-  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE, H.fixedClock()] });
   try {
     for (const q of ['', '?net=local']) {
       const g = await H.openGame({ ctx, query: q });

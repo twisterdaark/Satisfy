@@ -407,7 +407,32 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; return up(u); },
+      // SAT-ONLINE-065: the treasury guildBank/{gid} = {in, s, lb, lg, t} (in: all gold given, s: all spent on buildings; lb,
+      // lg: the last gift's giver and amount, which the rules add to in), the buildings guildBuild/{gid}/{b} = level and
+      // guildLog/{gid}/{id} = {by, n, k, g, b?, l?, t}. A gift or a build reads the treasury and writes it back with the
+      // change: one written meanwhile makes the rules refuse it (the caller tries again).
+      watchBank: function (gid, cb) { return watch('guildBank/' + gid, cb); },
+      watchBuild: function (gid, cb) { return watch('guildBuild/' + gid, cb); },
+      watchLog: function (gid, cb) { var ref = at('guildLog/' + gid), q = D.limitToLast ? D.query(ref, D.limitToLast(8)) : ref; var off = D.onValue(q, function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      give: function (gid, uid, n, g, lid) {
+        return D.get(at('guildBank/' + gid)).then(function (s) {
+          var v = s.val() || {}, u = {};
+          u['guildBank/' + gid] = { in: (+v.in || 0) + g, s: +v.s || 0, lb: uid, lg: g, t: SV() };
+          u['guildLog/' + gid + '/' + lid] = { by: uid, n: String(n || '?').slice(0, 24), k: 'give', g: g, t: SV() };
+          return up(u);
+        });
+      },
+      build: function (gid, uid, n, b, l, cost, lid) {
+        return D.get(at('guildBank/' + gid)).then(function (s) {
+          var v = s.val(); if (!v) throw new Error('empty');
+          var u = {};
+          u['guildBank/' + gid] = { in: +v.in || 0, s: (+v.s || 0) + cost, lb: v.lb, lg: v.lg, t: SV() };
+          u['guildBuild/' + gid + '/' + b] = l;
+          u['guildLog/' + gid + '/' + lid] = { by: uid, n: String(n || '?').slice(0, 24), k: 'build', g: cost, b: b, l: l, t: SV() };
+          return up(u);
+        });
+      },
       readGuild: function (gid) { return D.get(at('guilds/' + gid)).then(function (s) { return s.val(); }); },
       readMember: function (gid, uid) { return D.get(at('guildMembers/' + gid + '/' + uid)).then(function (s) { return !!s.val(); }); },
       // SAT-ONLINE-050: the vault; taking writes guildVaultTaken once in the same update, so one player gets a thing
@@ -482,6 +507,80 @@
     };
   }
 
+  // SAT-ONLINE-064: the National Competition, nat/{id}/{uid} = {h, c, d, s, n, t} and natPaid/{id}/{uid} = {g, t}
+  function natStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, up = function (u) { return D.update(D.ref(db), u); };
+    return {
+      get: function (id, uid) { return D.get(at('nat/' + id + '/' + uid)).then(function (s) { return s.val(); }); },
+      put: function (id, uid, v) { var u = {}; u['nat/' + id + '/' + uid] = { h: v.h, c: v.c, d: v.d, s: v.h + v.c + v.d, n: String(v.n || '?').slice(0, 24), t: D.serverTimestamp() }; return up(u); },
+      // the top `n` by total (the fake has no limitToLast: then everything, sorted here)
+      top: function (id, n) {
+        var ref = at('nat/' + id), q = D.limitToLast && D.orderByChild ? D.query(ref, D.orderByChild('s'), D.limitToLast(n)) : ref;
+        return D.get(q).then(function (s) { var v = s.val() || {}, a = []; for (var k in v) if (v[k] && typeof v[k].s === 'number') a.push({ uid: k, s: v[k].s, h: v[k].h | 0, c: v[k].c | 0, d: v[k].d | 0, n: String(v[k].n || '?') }); a.sort(function (x, y) { return y.s - x.s || (x.uid < y.uid ? -1 : 1); }); return a.slice(0, n); });
+      },
+      paid: function (id, uid) { return D.get(at('natPaid/' + id + '/' + uid)).then(function (s) { return s.val(); }); },
+      pay: function (id, uid, g) { var u = {}; u['natPaid/' + id + '/' + uid] = { g: g, t: D.serverTimestamp() }; return up(u); },
+    };
+  }
+
+  // SAT-ONLINE-067: friends. friendReq/{to}/{from} = {n, t} asks; friends/{uid}/{f} = {n, t} on both sides once the
+  // asked one accepts (in one update that also clears the ask); either side removes both
+  function friendStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, up = function (u) { return D.update(D.ref(db), u); };
+    var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
+    var ent = function (n) { return { n: String(n || '?').slice(0, 24), t: D.serverTimestamp() }; };
+    return {
+      watchList: function (uid, cb) { return watch('friends/' + uid, cb); },
+      watchAsks: function (uid, cb) { return watch('friendReq/' + uid, cb); },
+      watchPresence: function (world, uid, cb) { return watch('presence/' + world + '/main/' + uid, cb); },
+      ask: function (to, from, n) { var u = {}; u['friendReq/' + to + '/' + from] = ent(n); return up(u); },
+      accept: function (me, f, nMe, nF) { var u = {}; u['friends/' + me + '/' + f] = ent(nF); u['friends/' + f + '/' + me] = ent(nMe); u['friendReq/' + me + '/' + f] = null; return up(u); },
+      decline: function (me, f) { var u = {}; u['friendReq/' + me + '/' + f] = null; return up(u); },
+      remove: function (me, f) { var u = {}; u['friends/' + me + '/' + f] = null; u['friends/' + f + '/' + me] = null; return up(u); },
+      // SAT-ONLINE-070: whispers, whisper/{to}/{id} = {from, h, text, t}; the rules take them only from a friend, and only
+      // `to` reads them. whisperOn gets new lines (and those of the last 5 min); whisperClean drops ours older than a day
+      whisperOn: function (me, fn, offset) {
+        var ref = at('whisper/' + me), q = D.limitToLast ? D.query(ref, D.limitToLast(20)) : ref;
+        var off = D.onChildAdded(q, function (s) { var m = s.val(); if (!m || typeof m !== 'object' || typeof m.from !== 'string') return; if (typeof m.t === 'number' && Date.now() + (offset ? offset() : 0) - m.t > 300000) return; fn(m); }, function () { /* ignore */ });
+        return function () { try { off(); } catch (e) { /* ignore */ } };
+      },
+      whisper: function (to, m) { return D.push(at('whisper/' + to), { from: m.from, h: String(m.h || '?').slice(0, 24), text: String(m.text || '').slice(0, 120), t: D.serverTimestamp() }); },
+      whisperClean: function (me, offset) {
+        if (!D.limitToFirst) return Promise.resolve();
+        var ref = at('whisper/' + me);
+        return D.get(D.query(ref, D.orderByChild('t'), D.endAt(Date.now() + (offset ? offset() : 0) - 86400000), D.limitToFirst(10))).then(function (s) {
+          s.forEach(function (c) { D.remove(at('whisper/' + me + '/' + c.key)).catch(function () { /* ignore */ }); });
+        }).catch(function () { /* ignore */ });
+      },
+    };
+  }
+
+  // SAT-ONLINE-071: reports/{id} = {by, byN, about, aboutN, why, said, t}: written once by the reporter, read by nobody
+  // in the game (the owner reads them in the Firebase console)
+  function reportStore(sdk) {
+    var D = sdk.m.database, db = sdk.db;
+    return {
+      report: function (v) {
+        return D.push(D.ref(db, 'reports'), { by: v.by, byN: String(v.byN || '?').slice(0, 24), about: v.about, aboutN: String(v.aboutN || '?').slice(0, 24), why: v.why, said: String(v.said || '').slice(0, 360), t: D.serverTimestamp() });
+      },
+    };
+  }
+
+  // SAT-ONLINE-073: the group finder, lfg/{uid} = {n, lv, cls, k, z, t}: yours only, gone when you leave (onDisconnect)
+  function lfgStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    return {
+      list: function () { return D.get(at('lfg')).then(function (s) { return s.val() || {}; }); },
+      put: function (uid, v) {
+        var r = at('lfg/' + uid);
+        if (D.onDisconnect) D.onDisconnect(r).remove().catch(function () { /* ignore */ });
+        var u = {}; u['lfg/' + uid] = { n: String(v.n || '?').slice(0, 24), lv: v.lv | 0, cls: String(v.cls || '').slice(0, 16), r: v.r || '', k: v.k, z: String(v.z || '').slice(0, 24), t: D.serverTimestamp() };
+        return D.update(D.ref(db), u);
+      },
+      off: function (uid) { return D.remove(at('lfg/' + uid)); },
+    };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
     tradeStore: tradeStore,
@@ -489,6 +588,10 @@
     dropStore: dropStore,
     bountyStore: bountyStore,
     arenaStore: arenaStore,
+    friendStore: friendStore,
+    reportStore: reportStore,
+    lfgStore: lfgStore,
+    natStore: natStore,
     SDK_VERSION: SDK_VERSION,
     load: load,
     lease: lease,

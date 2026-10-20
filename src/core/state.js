@@ -31,7 +31,7 @@
     // crafting (the Blacksmith's ladder)
     'made', 'smith', 'sxp', 'patience', 'bonus', 'got', 'firstLeg',
     // quests, NPC memory, world flags, discovery
-    'qs', 'bqa', 'qOff', 'kills', 'met', 'ev', 'guardDown', 'vis', 'books', 'chest', 'chops', 'hag', 'burnSeen',
+    'qs', 'bqa', 'adqa', 'adqO', 'adqT', 'adqK', 'exd', 'exc', 'exf', 'qOff', 'kills', 'met', 'ev', 'guardDown', 'vis', 'books', 'chest', 'chops', 'hag', 'burnSeen',
     // equipment slots, skill bar, NPC affinity and town reputation, guild membership, companion, life skills
     'eq', 'bar', 'aff', 'rep', 'guild', 'comp', 'life',
     // mounts and pets owned/active (SAT-MOUNT), the daily arena lockout (a date, so it must sync)
@@ -53,12 +53,14 @@
     'duels', 'raidDone', 'olT', 'gon',
     // karma (SAT-ONLINE-052): -10..10, down for killing a player who isn't an outlaw, up for killing an outlaw; karT: play time toward the next point back
     'karma', 'karT',
+    // the National Competition (SAT-ONLINE-064) this character scored in and is still to be paid for (its id)
+    'natIn',
     // recipes learned and recipe use counts (main rcLearn)
     'rcK', 'rcN',
     // map cells seen (fog of war, Nitro's feedback): base64 bitset
     'fog', 'sec', 'respec', 'bank',
-    // skill use counts that set each skill's level (owner 2026-10-19)
-    'skx',
+    // skill experience that sets each skill's level (owner 2026-10-19), and its format (2 = experience, 2026-10-20)
+    'skx', 'skv',
     // when each monster you killed comes back, so a save and quit does not respawn them (owner 2026-10-19)
     'mrt',
     // kingdom contribution from royal quests and the Defense War's golems (major #3)

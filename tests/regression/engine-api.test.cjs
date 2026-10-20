@@ -32,8 +32,10 @@ test('defs(): content tables as plain JSON, functions replaced by {$fn}', async 
     assert.equal(d.BOSSES.length, DATA.monsters.bosses.length);
     assert.equal(d.SPAWN.length, DATA.monsters.spawns.length);
     assert.equal(Object.keys(d.QD).length, Object.keys(DATA.quests.quests).length);
-    assert.equal(d.RC.length, Object.keys(DATA.recipes.recipes).length);
-    assert.equal(Object.keys(d.SKD).length, Object.keys(DATA.skills.skills).length);
+    // data/recipes.js holds the base RC table; the named items added later with RC.push live only in the engine
+    for (const id of Object.keys(DATA.recipes.recipes)) assert.ok(d.RC.some((r) => r.id === id), 'engine has recipe ' + id);
+    // the same for skills: Object.assign(SKD, ...) adds item and class skills after the base table
+    for (const k of Object.keys(DATA.skills.skills)) assert.ok(k in d.SKD, 'engine has skill ' + k);
     assert.equal(d.NPCS.length, Object.keys(DATA.npcs.npcs).length);
     // data/zones.js is regenerated from index.html by Claude-B and can lag a new town by a few commits,
     // so towns are checked as "every data town is in the engine" rather than by count.

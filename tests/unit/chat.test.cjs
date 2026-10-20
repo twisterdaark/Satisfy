@@ -135,3 +135,50 @@ test('a broken block list in storage is treated as empty', () => {
   s.setItem(CH.KEY, '[1,2]');
   assert.deepEqual(CH.blocklist(s).list(), []);
 });
+
+// SAT-ONLINE-070: whispers through an adapter (the game's goes through the database, friends only)
+test('whispers: sayTo sends through the adapter and shows "to"; incoming lines are ch w; blocked senders and the shared rate limit apply', () => {
+  const sent = [], fns = [];
+  const hub = SN.transports.hub();
+  let t = 1000;
+  const pres = SN.presence.create({ transport: hub.connect(), now: () => t, world: WORLD, net: SN.net, uid: 'u0', sid: 'sessWxxxxxxxx' });
+  const party = SN.party.create({ presence: pres, uid: 'u0', now: () => t });
+  const chat = CH.create({ presence: pres, party, uid: 'u0', now: () => t, blocked: (u) => u === 'uBad', handle: () => 'Me', whisper: { say: (uid, m) => sent.push([uid, m.from, m.h, m.text]), lines: (fn) => fns.push(fn) } });
+  assert.equal(chat.sayTo('u1', 'Bassem', '  hi ‮ there '), 'sent');
+  assert.deepEqual(sent, [['u1', 'u0', 'Me', 'hi there']]);
+  assert.deepEqual(chat.log().map((l) => [l.ch, l.to, l.text, l.self]), [['w', 'Bassem', 'hi there', true]]);
+  fns[0]({ from: 'u1', h: 'Bassem', text: 'yo' });
+  fns[0]({ from: 'uBad', h: 'Spam', text: 'buy gold' });
+  fns[0]({ from: 'u0', h: 'Me', text: 'echo' });
+  assert.deepEqual(chat.log().filter((l) => !l.self).map((l) => [l.ch, l.handle, l.text]), [['w', 'Bassem', 'yo']]);
+  assert.equal(chat.sayTo('u1', 'Bassem', 'again'), 'tooFast', 'the same rate limit as the other channels');
+  t += CH.C.MIN_GAP_MS + 1;
+  assert.equal(chat.sayTo('u1', 'Bassem', ''), 'empty');
+  assert.equal(CH.create({ presence: pres, party, uid: 'u0' }).sayTo('u1', 'B', 'x'), 'noWhisper');
+});
+
+// SAT-ONLINE-071: the word filter
+test('mask(): listed insults as stars, after folding case, letter forms, repeats and look-alikes; other words untouched', () => {
+  const m = CH.mask;
+  assert.equal(m('you fucking idiot'), 'you ★★★★★★★ idiot');
+  assert.equal(m('FUUUCK this'), '★★★★★★ this');
+  assert.equal(m('sh1t happens'), '★★★★ happens');
+  assert.equal(m('classic Scunthorpe, cocktail, assassin'), 'classic Scunthorpe, cocktail, assassin');
+  assert.equal(m('يا شرموط'), 'يا ★★★★★');
+  assert.equal(m('كسر الباب والكسكسي'), 'كسر الباب والكسكسي', 'Arabic words that only start alike stay');
+  assert.equal(m('hello world'), 'hello world');
+});
+
+test('the filter option masks other players\' lines only', () => {
+  const fns = [];
+  const hub = SN.transports.hub();
+  const pres = SN.presence.create({ transport: hub.connect(), now: () => 1, world: WORLD, net: SN.net, uid: 'u0', sid: 'sessFxxxxxxxx' });
+  const party = SN.party.create({ presence: pres, uid: 'u0', now: () => 1 });
+  let on = true;
+  const chat = CH.create({ presence: pres, party, uid: 'u0', now: () => 1, filter: () => on, world: { sayWorld: () => {}, world: (fn) => fns.push(fn) } });
+  fns[0]({ from: 'u1', h: 'X', text: 'shit game' });
+  on = false;
+  fns[0]({ from: 'u1', h: 'X', text: 'shit game' });
+  assert.equal(chat.say('my own shit stays', 'all'), 'sent');
+  assert.deepEqual(chat.log().map((l) => l.text), ['★★★★ game', 'shit game', 'my own shit stays']);
+});

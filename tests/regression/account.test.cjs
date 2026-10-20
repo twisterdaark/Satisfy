@@ -48,7 +48,7 @@ test('Sign out, then Delete my online data: nothing of the account is left onlin
     assert.deepEqual(await accountButtons(a), ['Sign out', 'Delete my online data']);
     await click(a, '#cloudN button'); await click(a, '#cloudN button');
     await until(a, () => document.querySelectorAll('#cloudL .cr').length === 1);
-    assert.deepEqual(await keysOf(a, UID), ['cloudIndex/gEraseMe1/<pid>', 'cloudSaves/gEraseMe1/<pid>', 'presence/satisfy/main/gEraseMe1', 'profiles/gEraseMe1', 'sessions/gEraseMe1']);
+    assert.deepEqual(await keysOf(a, UID), ['cloudIndex/gEraseMe1/<pid>', 'cloudSaves/gEraseMe1/<pid>', 'presence/satisfy/main/gEraseMe1', 'profiles/gEraseMe1', 'ranks/gold/gEraseMe1', 'ranks/lv/gEraseMe1', 'sessions/gEraseMe1']); // ranks: SAT-ONLINE-055
 
     // Sign out: presence goes, the cloud data stays, the title offers sign-in again
     await click(a, '#cloudA button');
@@ -58,7 +58,7 @@ test('Sign out, then Delete my online data: nothing of the account is left onlin
     assert.match(await a.eval(() => document.getElementById('toasts').textContent), /Signed out/);
     await until(a, (u) => !window.__fakeRTDB.data.has('presence/satisfy/main/' + u), 5000, UID);
     await until(b, () => Satisfy.local.net().remotes.length === 0);
-    assert.deepEqual(await keysOf(a, UID), ['cloudIndex/gEraseMe1/<pid>', 'cloudSaves/gEraseMe1/<pid>', 'profiles/gEraseMe1', 'sessions/gEraseMe1']);
+    assert.deepEqual(await keysOf(a, UID), ['cloudIndex/gEraseMe1/<pid>', 'cloudSaves/gEraseMe1/<pid>', 'profiles/gEraseMe1', 'ranks/gold/gEraseMe1', 'ranks/lv/gEraseMe1', 'sessions/gEraseMe1']);
 
     // sign back in, then delete everything: one click does nothing, the second erases
     await signIn(a, 'Ahmed', UID);
@@ -75,7 +75,7 @@ test('Sign out, then Delete my online data: nothing of the account is left onlin
     assert.deepEqual(await a.eval(() => window.__fakeRTDB.rejected), []);
 
     // the other account is untouched and still online
-    assert.deepEqual(await keysOf(b, OTHER), ['presence/satisfy/main/gSomeoneElse2', 'profiles/gSomeoneElse2', 'sessions/gSomeoneElse2']);
+    assert.deepEqual(await keysOf(b, OTHER), ['presence/satisfy/main/gSomeoneElse2', 'profiles/gSomeoneElse2', 'ranks/gold/gSomeoneElse2', 'ranks/lv/gSomeoneElse2', 'sessions/gSomeoneElse2']);
     assert.equal((await b.eval(() => Satisfy.local.net())).state, 'ONLINE');
     assert.deepEqual(a.errors, []);
     assert.deepEqual(b.errors, []);

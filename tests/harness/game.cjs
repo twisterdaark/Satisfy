@@ -20,7 +20,7 @@ const CURRENT_HTML = process.env.SATISFY_HTML ? path.resolve(process.env.SATISFY
 // Golden/render baseline: the main commit this branch is based on. Bump it when rebasing onto a
 // newer main (or set SATISFY_BASELINE=<sha> to compare with any other commit).
 // R0 history: ce29772 (pre-online), 1899cdb (+ #6 CSS hotfix), 6ef0595 (+ v2 art, #5), 6295a5f (+ Patrian, AI, wider map), 3c343ec (+ town quests, Piaro balance, Guardian Knight), fe34ae0 (+ equipment, guilds, WS world state, events), daaef26 (+ companions, dragon, auction, Yatan), 7d57d5f (+ siege, Muller).
-const BASELINE_SHA = process.env.SATISFY_BASELINE || '277ac62945bf5be6f14106cb84ad5f0ab6943aec';
+const BASELINE_SHA = process.env.SATISFY_BASELINE || '7cb76c134cf7903a3d68923c2d2a1b0bf1de98fb';
 // the R0 baseline (before the safe saves and ids): the characterization tests document its bugs, so they keep it when
 // BASELINE_SHA moves on for the parity tests (it moved in aaa59ee, and the corrupt-save one failed since)
 const R0_SHA = '34b2ea5094d6d1597b4acb67d338d99d8765b745';
@@ -135,12 +135,17 @@ async function openGame(opts = {}) {
  * called, so every page of one context shares one clock.
  */
 function fixedClock(at = 1767606030000) {
-  return { content: `(() => { const real = Date.now.bind(Date), off = ${at} - ${Date.now()}; Date.now = () => real() + off; })();` };
+  return { content: `(() => { if (window.__fixedClock) return; window.__fixedClock = ${at}; const real = Date.now.bind(Date), off = ${at} - ${Date.now()}; Date.now = () => real() + off; })();` };
 }
 
 async function newContext(opts = {}) {
   const ctx = await (await browser()).newContext();
   await ctx.addInitScript(INIT_SCRIPT);
+  // every test runs on the fixed clock unless it asks for the real one (opts.clock === false): the weather, world events,
+  // sieges and the National Competition follow Date.now, and failed tests by the hour (SAT-ONLINE-072). A test's own
+  // H.fixedClock(at) in opts.scripts sets the time instead.
+  const ownClock = (opts.scripts || []).some((s) => s && typeof s === 'object' && /window\.__fixedClock/.test(s.content || ''));
+  if (opts.clock !== false && !ownClock) await ctx.addInitScript(fixedClock());
   for (const s of opts.scripts || []) await ctx.addInitScript(typeof s === 'string' ? { path: s } : s); // a file, or { content }
   // Hermetic: the game must run with no network (it only asks for Google Fonts, which may fail).
   ctx.__external = [];

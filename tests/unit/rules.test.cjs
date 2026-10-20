@@ -68,7 +68,7 @@ test('position bounds cover the whole map, and the fake uses the same bounds', (
 test('presence is indexed on exactly the children the interest queries order by (U009: x; party)', () => {
   assert.deepEqual(rules.presence.$world.$shard['.indexOn'], ['x', 'party']);
   const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
-  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['party', 'r', 't', 'x']);
+  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['party', 'r', 's', 't', 'x']);
   assert.deepEqual(rules.arena.$season['.indexOn'], ['r'], 'the arena board orders by rating (SAT-ONLINE-053)');
   assert.deepEqual(rules.chat.$world['.indexOn'], ['t'], 'world chat prunes old lines by t (SAT-ONLINE-026)');
   // the radius must cover the screen after a full re-centre step: |offset| <= step, half screen = W / 2
@@ -280,6 +280,58 @@ test('weekly lockouts (SAT-ONLINE-059): your own, read by you alone, taken once 
   assert.equal(b.$other['.validate'], false);
 });
 
+test('the National Competition (SAT-ONLINE-064): your own scores, only upward, s the total; paid once, read by you', () => {
+  const n = rules.nat.$id, u = n.$uid, p = rules.natPaid.$id.$uid;
+  assert.equal(rules.nat['.read'], 'auth != null');
+  assert.deepEqual(n['.indexOn'], ['s']);
+  assert.equal(u['.write'], 'auth != null && auth.uid === $uid');
+  assert.match(u['.validate'], /newData\.child\('s'\)\.val\(\) === newData\.child\('h'\)\.val\(\) \+ newData\.child\('c'\)\.val\(\) \+ newData\.child\('d'\)\.val\(\)/);
+  assert.match(u['.validate'], /newData\.child\('h'\)\.val\(\) >= data\.child\('h'\)\.val\(\)/, 'scores only go up');
+  assert.equal(p['.write'], 'auth != null && auth.uid === $uid && !data.exists()', 'paid once');
+  assert.equal(p['.read'], 'auth != null && auth.uid === $uid');
+  assert.equal(u.$other['.validate'], false);
+});
+
+test('guild buildings (SAT-ONLINE-065): members give to the treasury, the master and officers build from it at fixed costs', () => {
+  const k = rules.guildBank.$gid, b = rules.guildBuild.$gid, l = rules.guildLog.$gid;
+  assert.match(k['.validate'], /newData\.child\('in'\)\.val\(\) === data\.child\('in'\)\.val\(\) \+ newData\.child\('lg'\)\.val\(\)/, 'a gift adds exactly its amount');
+  assert.match(k['.validate'], /newData\.child\('s'\)\.val\(\) <= newData\.child\('in'\)\.val\(\)/, 'no spending what was not given');
+  assert.match(k['.validate'], /=== 'm' \|\| .*=== 'o'\) && \(/, 'only the master and officers spend');
+  for (const b of ['forge', 'train', 'gold']) assert.ok(k['.validate'].includes("newData.parent().parent().child('guildBuild').child($gid).child('" + b + "').val() > root.child('guildBuild').child($gid).child('" + b + "').val()"), 'a spend comes with a building raised: ' + b);
+  assert.match(b['.write'], /=== 'm' \|\| .*=== 'o'\)/);
+  for (const [lv, cost] of [[1, 50000], [2, 150000], [3, 400000]]) assert.ok(b.$b['.validate'].includes('newData.val() === ' + lv + ' && ') && b.$b['.validate'].includes(" + " + cost + ")"), 'level ' + lv + ' costs ' + cost);
+  assert.match(b.$b['.validate'], /newData\.val\(\) <= 3/);
+  assert.equal(l.$id['.write'], "auth != null && !data.exists() && root.child('guildMembers').child($gid).child(auth.uid).exists()", 'the log is written once, by members');
+  assert.equal(l.$id.$other['.validate'], false);
+});
+
+test('friends (SAT-ONLINE-067): an ask to someone not yet a friend; both lists only from that ask; either side removes', () => {
+  const q = rules.friendReq.$to, f = rules.friends.$uid;
+  assert.equal(q['.read'], 'auth != null && auth.uid === $to', 'your asks are yours to read');
+  assert.match(q.$from['.write'], /auth\.uid === \$from && \$from !== \$to && !data\.exists\(\) && newData\.exists\(\) && !root\.child\('friends'\)\.child\(\$to\)\.child\(\$from\)\.exists\(\)/);
+  assert.match(f.$f['.write'], /auth\.uid === \$uid && \(!newData\.exists\(\) \|\| root\.child\('friendReq'\)\.child\(\$uid\)\.child\(\$f\)\.exists\(\)\)/);
+  assert.match(f.$f['.write'], /auth\.uid === \$f && \(!newData\.exists\(\) \|\| root\.child\('friendReq'\)\.child\(\$f\)\.child\(\$uid\)\.exists\(\)\)/);
+  assert.equal(f['.read'], 'auth != null && auth.uid === $uid');
+  assert.equal(f.$f.$other['.validate'], false);
+});
+
+test('whispers (SAT-ONLINE-070): only from a friend, read and cleared by the one it is for', () => {
+  const w = rules.whisper.$to;
+  assert.equal(w['.read'], 'auth != null && auth.uid === $to');
+  assert.match(w.$id['.write'], /newData\.child\('from'\)\.val\(\) === auth\.uid && root\.child\('friends'\)\.child\(\$to\)\.child\(auth\.uid\)\.exists\(\)/);
+  assert.match(w.$id['.write'], /!newData\.exists\(\) && auth\.uid === \$to/);
+  assert.deepEqual(w['.indexOn'], ['t']);
+  assert.equal(w.$id.$other['.validate'], false);
+});
+
+test('reports (SAT-ONLINE-071): written once, as yourself, about someone else; nobody reads them in the game', () => {
+  const r = rules.reports, e = r.$id;
+  assert.equal(r['.read'], undefined, 'the owner reads them in the console');
+  assert.equal(e['.write'], "auth != null && !data.exists() && newData.child('by').val() === auth.uid");
+  assert.match(e.about['.validate'], /newData\.val\(\) !== auth\.uid/);
+  assert.equal(e.$other['.validate'], false);
+});
+
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing
 // else here parses the expressions. Merging two rules files by hand once lost one; check every expression before a deploy.
 function exprProblem(e) {
@@ -300,6 +352,43 @@ function exprProblem(e) {
   }
   return quote ? 'an unclosed string' : regex ? 'an unclosed regex' : depth ? depth + ' unclosed (' : null;
 }
+// JSON.parse keeps the last of two equal keys without a word, and Firebase refuses the file ("'friendReq' occurs multiple
+// times", rules-next e6406e2/18a7697), so scan the raw text one object level at a time.
+function dupKeys(src) {
+  const out = []; let i = 0;
+  const ws = () => { while (/\s/.test(src[i])) i++; };
+  const str = () => { const s = i; i++; while (src[i] !== '"') { if (src[i] === '\\') i++; i++; } i++; return JSON.parse(src.slice(s, i)); };
+  function val(at) {
+    ws();
+    if (src[i] === '{') {
+      i++; const seen = new Set(); ws();
+      if (src[i] === '}') { i++; return; }
+      for (;;) { ws(); const k = str(); if (seen.has(k)) out.push(at + '/' + k); seen.add(k); ws(); i++; val(at + '/' + k); ws(); if (src[i] === ',') { i++; continue; } i++; return; }
+    }
+    if (src[i] === '[') { i++; ws(); if (src[i] === ']') { i++; return; } for (let n = 0; ; n++) { val(at + '[' + n + ']'); ws(); if (src[i] === ',') { i++; continue; } i++; return; } }
+    if (src[i] === '"') { str(); return; }
+    while (i < src.length && !/[,}\]\s]/.test(src[i])) i++;
+  }
+  val('');
+  return out;
+}
+
+test('no key appears twice in one object of the rules file', () => {
+  assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
+  assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);
+});
+
+test('the group finder (SAT-ONLINE-073): read by any signed-in player, your own entry only, four kinds, a party role, stamped by the server', () => {
+  const l = rules.lfg, u = l.$uid;
+  assert.equal(l['.read'], 'auth != null');
+  assert.equal(u['.write'], 'auth != null && auth.uid === $uid');
+  assert.equal(u['.validate'], "newData.hasChildren(['n', 'lv', 'cls', 'r', 'k', 'z', 't'])");
+  for (const r of ['tank', 'healer', 'damage', 'support']) assert.ok(u.r['.validate'].includes("newData.val() === '" + r + "'"), r);
+  for (const k of ['raid', 'party', 'dungeon', 'duel']) assert.ok(u.k['.validate'].includes("newData.val() === '" + k + "'"), k);
+  assert.equal(u.t['.validate'], 'newData.val() === now');
+  assert.equal(u.$other['.validate'], false);
+});
+
 test('every rule expression is well formed: balanced parentheses, closed strings and regexes', () => {
   assert.equal(exprProblem("a && (b || c('x)'))"), null);
   assert.equal(exprProblem("v.matches(/^(a|b)$/) && (x"), '1 unclosed (', 'the checker finds a lost )');
