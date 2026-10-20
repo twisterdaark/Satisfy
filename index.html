@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0a0e1a"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/icon-192.png"></head><body>
 <title>Satisfy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Oswald:wght@500;600;700&family=Tajawal:wght@400;500;700&family=Pixelify+Sans:wght@400;600;700&family=Press+Start+2P&display=swap">
@@ -396,8 +396,29 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
 ::-webkit-scrollbar{width:6px;height:6px;background:transparent}::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent;border:0}::-webkit-scrollbar-button{display:none;width:0;height:0}::-webkit-scrollbar-thumb{background:rgba(166,214,246,.55);border:0;border-radius:3px}::-webkit-scrollbar-thumb:hover{background:rgba(190,230,255,.8)}
 @supports (-moz-appearance:none){*{scrollbar-width:thin;scrollbar-color:rgba(166,214,246,.55) transparent}}
 #qtext .qpg{display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*.8);padding-top:calc(var(--u)*.3)}#qtext .qpg button{min-width:calc(var(--u)*2);height:calc(var(--u)*1.8);padding:0;font-size:calc(var(--u)*1.2);line-height:1}
+
+/* phones (owner 2026-10-20, mobile port): the screen sideways and as big as it goes, the stick at the left thumb, attack,
+   dodge, guard and use at the right one with the skills in an arc above them, the menus in one row at the bottom, and no
+   browser gestures (zoom, pull to refresh, text selection) getting in the way */
+html,body{overscroll-behavior:none}
+body.touch,body.touch #stage{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body.touch #keys{inset-inline-end:auto;left:calc(var(--u)*22);bottom:calc(var(--u)*.6);grid-template-columns:repeat(4,auto);gap:calc(var(--u)*.4);padding:calc(var(--u)*.4);direction:ltr}
+body.touch #kA,body.touch #kD,body.touch #kG,body.touch #kE{display:none}
+body.touch #keys kbd{display:none}body.touch #keys .key{min-width:0}body.touch #keys .key span{display:block;min-width:calc(var(--u)*6.6);padding:calc(var(--u)*.75) calc(var(--u)*.6);text-align:center;font-size:calc(var(--u)*1.3);font-weight:700;color:#e8f0ff;background:rgba(14,24,52,.78);border:1px solid rgba(166,214,246,.55);border-radius:calc(var(--u)*.5)}body.touch #keys .key.press span,body.touch #keys .key:active span{background:rgba(255,220,120,.4)}
+body.touch #skillbar{inset-inline-start:auto;left:auto;right:calc(var(--u)*22);top:auto;bottom:calc(var(--u)*.6);grid-template-columns:repeat(4,auto);grid-auto-flow:row;padding:calc(var(--u)*.3);direction:ltr}
+body.touch #skillbar .sk{width:calc(var(--u)*5.6);height:calc(var(--u)*5.6)}
+body.touch #tAct{right:calc(var(--u)*2);bottom:calc(var(--u)*2)}
+body.touch #tAct button{height:calc(var(--u)*8);font-size:calc(var(--u)*1.6)}body.touch #tAct{grid-template-columns:repeat(2,calc(var(--u)*9))}
+body.touch #tStick{left:calc(var(--u)*2.5);bottom:calc(var(--u)*3);width:calc(var(--u)*18);height:calc(var(--u)*18)}
+body.touch #tNet{bottom:calc(var(--u)*22.5)}
+body.touch #hint{bottom:calc(var(--u)*20)}body.touch #natbar{bottom:calc(var(--u)*17.6)}body.touch #sgbar{bottom:calc(var(--u)*15)}body.touch #evbar{bottom:calc(var(--u)*12.4)}body.touch #belt{bottom:calc(var(--u)*12)}body.touch #chatW,body.touch #chatBar{bottom:calc(var(--u)*25)}
+body.touch #ui *{touch-action:pan-x pan-y}body.touch #ui #touch,body.touch #ui #touch *{touch-action:none}
+#rotW{position:fixed;inset:0;z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0a0e1a;color:#e8f0ff;font:600 18px/1.5 Tajawal,system-ui,sans-serif;text-align:center;padding:24px}
+#rotW b{font-size:56px;line-height:1;display:block;animation:rotP 1.6s ease-in-out infinite}@keyframes rotP{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
+@media (orientation:portrait){body.touch #rotW{display:flex}}
 </style>
 
+<div id="rotW"><b>📱</b><span id="rotT">لف الموبايل بالعرض عشان تلعب<br>Turn your phone sideways to play</span></div>
 <div id="stage" tabindex="0">
   <canvas id="game" width="481" height="271"></canvas>
   <canvas id="txt"></canvas>
@@ -650,12 +671,12 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
 <script>
 (()=>{
 'use strict';
-const W=480,H=270,TS=16,LW=224,GAPS=[[104,80],[158,110],[224,150],[224,160]],EX=LW+GAPS.reduce((a,g)=>a+g[1],0),EW=240,MW=EX+EW,MH=326,WH=44,BW=64,WMH=272,OWH=120,SR=40,NR=172,ON=60,OS=OWH+SR; // Bairan block = x<BW,y<WH; the open world is rows -NR..WMH-1 (the first map was rows 0..OWH-1; the north -ON..-1 and the south OWH..OS-1 came next; the map doubled north and south, owner 2026-10-19: the far north -NR..-ON-1, the far south OS..WMH-1); columns EX..MW-1 are the Saharan Empire past Reinhardt (owner 2026-10-19); rows WMH..MH-1 hold house interiors and caves
-const cvs=document.getElementById('game'),ctx=cvs.getContext('2d');ctx.imageSmoothingEnabled=false;
+const W=(()=>{try{if(/touch=0/.test(location.search)||!matchMedia('(pointer: coarse)').matches)return 480;const a=Math.max(screen.width,screen.height)/Math.min(screen.width,screen.height);return Math.max(480,Math.min(624,Math.round(270*a/2)*2));}catch(e){return 480;}})(),H=270,TS=16,LW=224,GAPS=[[104,80],[158,110],[224,150],[224,160]],EX=LW+GAPS.reduce((a,g)=>a+g[1],0),EW=240,MW=EX+EW,MH=326,WH=44,BW=64,WMH=272,OWH=120,SR=40,NR=172,ON=60,OS=OWH+SR; // Bairan block = x<BW,y<WH; the open world is rows -NR..WMH-1 (the first map was rows 0..OWH-1; the north -ON..-1 and the south OWH..OS-1 came next; the map doubled north and south, owner 2026-10-19: the far north -NR..-ON-1, the far south OS..WMH-1); columns EX..MW-1 are the Saharan Empire past Reinhardt (owner 2026-10-19); rows WMH..MH-1 hold house interiors and caves
+const cvs=document.getElementById('game');if(cvs.width!==W+1)cvs.width=W+1;const ctx=cvs.getContext('2d');ctx.imageSmoothingEnabled=false;
 const stage=document.getElementById('stage'),UI=document.getElementById('ui');
 const $=id=>document.getElementById(id);
 let SC=1,TXS=1;const TX=[];
-function fit(){const s0=Math.min(innerWidth/W,innerHeight/H);const s=s0>=2?Math.floor(s0*4)/4:s0;SC=s;const w=Math.round(W*s),h=Math.round(H*s);stage.style.width=w+'px';stage.style.height=h+'px';stage.style.setProperty('--u',(w/100)+'px');cvs.style.width=((W+1)*s)+'px';cvs.style.height=((H+1)*s)+'px';const dp=devicePixelRatio||1,tc=document.getElementById('txt');TXS=s*dp;tc.width=Math.round(w*dp);tc.height=Math.round(h*dp);tc.style.width=w+'px';tc.style.height=h+'px';}
+function fit(){const s0=Math.min(innerWidth/W,innerHeight/H);const s=s0>=2?Math.floor(s0*4)/4:s0;SC=s;const w=Math.round(W*s),h=Math.round(H*s);stage.style.width=w+'px';stage.style.height=h+'px';stage.style.setProperty('--u',(Math.min(w,h*16/9)/100)+'px');cvs.style.width=((W+1)*s)+'px';cvs.style.height=((H+1)*s)+'px';const dp=devicePixelRatio||1,tc=document.getElementById('txt');TXS=s*dp;tc.width=Math.round(w*dp);tc.height=Math.round(h*dp);tc.style.width=w+'px';tc.style.height=h+'px';}
 addEventListener('resize',fit);fit();
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -5530,7 +5551,7 @@ requestAnimationFrame(loop);
    their own timers, keeps netTick running about once a second while the frame loop sleeps. */
 (()=>{if(typeof Worker==='undefined'||typeof Blob==='undefined')return;try{const w=new Worker(URL.createObjectURL(new Blob(['setInterval(function(){postMessage(0)},1000)'],{type:'text/javascript'})));
  w.onmessage=()=>{if(NET&&performance.now()-loopAt>1500)try{netTick();}catch(e){gameErr(e);}};}catch(e){}})();
-window.__G={bag:()=>({GDROP,openSell,INVS,invClick,unitVal,itemVal,SHOPG,SHOPM,POT}),chunks:()=>({g:gg.stats(),o:og.stats()}),get CARD(){return CARD},get SM(){return SM},get allies(){return allies},get S(){return S},get P(){return P},get mode(){return mode},die:()=>die(),mons:()=>mons,get npcs(){return npcs},nodes,act,finishMG:()=>finishMG,startMG:id=>startMG(RC.find(r=>r.id===id)),get MG(){return MG},talkNPC:id=>talkNPC(id),completeQ:id=>completeQ(id),acceptQ:id=>acceptQ(id),useSlot:i=>useSlot(i),newGame:L=>newGame(L),QD,openMap:()=>openMap(),get proj(){return proj},gainXP:n=>gainXP(n),openPick:s=>openPick(s),pickOpt:i=>pickOpt(i),advance:()=>advance(),get DL(){return DL},zoneAt,VT,chopped,tryAttack:(a,b)=>tryAttack(a,b),get KB(){return KB},ROOMS,PROPS,enterRoom:r=>enterRoom(r),openBoard:()=>openBoard(),openQD:id=>openQD(id),TOWNS,useProp:p=>useProp(p),at:(x,y)=>at(x,y),setT:(x,y,v)=>setT(x,y,v),eqx:{buyGear:(i,g,w)=>buyGear(i,g,w),equip:i=>equip(i),eqIt:s=>eqIt(s),defV:()=>defV(),atkV:()=>atkV(),atkCD:()=>atkCD(),maxMP:()=>maxMP(),repairAll:w=>repairAll(w),enhance:(i,w)=>enhance(i,w),mkItem:(i,r)=>mkItem(i,r),openEquip:()=>openEquip(),wear:(i,p)=>wear(i,p),openForge:()=>openForge(),price:(w,g)=>price(w,g),addAff:(i,n)=>addAff(i,n),giveGift:(w,k)=>giveGift(w,k),townOfNpc:i=>townOfNpc(i),get ESC(){return ESC},solid:(x,y)=>solidT(x,y),DGATES,DUN,useGate:g=>useGate(g)}};
+window.__G={bag:()=>({GDROP,openSell,INVS,invClick,unitVal,itemVal,SHOPG,SHOPM,POT}),chunks:()=>({g:gg.stats(),o:og.stats()}),get CARD(){return CARD},get SM(){return SM},get allies(){return allies},get S(){return S},get P(){return P},get mode(){return mode},die:()=>die(),mons:()=>mons,get npcs(){return npcs},nodes,act,finishMG:()=>finishMG,startMG:id=>startMG(RC.find(r=>r.id===id)),get MG(){return MG},talkNPC:id=>talkNPC(id),completeQ:id=>completeQ(id),acceptQ:id=>acceptQ(id),useSlot:i=>useSlot(i),newGame:L=>newGame(L),QD,openMap:()=>openMap(),get proj(){return proj},gainXP:n=>gainXP(n),save:q=>save(q),openPick:s=>openPick(s),pickOpt:i=>pickOpt(i),advance:()=>advance(),get DL(){return DL},zoneAt,VT,chopped,tryAttack:(a,b)=>tryAttack(a,b),get KB(){return KB},ROOMS,PROPS,enterRoom:r=>enterRoom(r),openBoard:()=>openBoard(),openQD:id=>openQD(id),TOWNS,useProp:p=>useProp(p),at:(x,y)=>at(x,y),setT:(x,y,v)=>setT(x,y,v),eqx:{buyGear:(i,g,w)=>buyGear(i,g,w),equip:i=>equip(i),eqIt:s=>eqIt(s),defV:()=>defV(),atkV:()=>atkV(),atkCD:()=>atkCD(),maxMP:()=>maxMP(),repairAll:w=>repairAll(w),enhance:(i,w)=>enhance(i,w),mkItem:(i,r)=>mkItem(i,r),openEquip:()=>openEquip(),wear:(i,p)=>wear(i,p),openForge:()=>openForge(),price:(w,g)=>price(w,g),addAff:(i,n)=>addAff(i,n),giveGift:(w,k)=>giveGift(w,k),townOfNpc:i=>townOfNpc(i),get ESC(){return ESC},solid:(x,y)=>solidT(x,y),DGATES,DUN,useGate:g=>useGate(g)}};
 // Read-only engine surface for the online layer and for content tests. Contract: docs/api/ENGINE_API.md
 const plain=o=>JSON.parse(JSON.stringify(o,(k,v)=>typeof v==='function'?{$fn:String(v)}:v));
 Satisfy.local=Object.freeze({api:1,
@@ -5626,7 +5647,7 @@ function netTick(){NET.tick();const live=netLive();
  if(GUILD)guildTick();
  if(PRAID)PRAID.tick();
  mobTick(live);
- if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();
+ if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();if(live&&FB&&netUser)cloudAuto();
  if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,rd:PARTY&&PARTY.isLeader()&&PARTY.isRaid()?1:0,duel:duelPublic(),ol:olPub(),gd:guildPub()}),netForce);netForce=false;}
  partyUI(live);chatUI(live);pctxUI(live);tradeUI(live);guildUI(live);
  netPrev=P?{x:P.x,y:P.y}:null;
@@ -6597,7 +6618,8 @@ function idCheck(){const v=$('idIn').value.trim(),e=$('idErr');e.className='';if
 function idOk(){const v=$('idIn').value.trim(),e=$('idErr'),b=$('idOk');e.className='';if(!ID_RE.test(v)){e.textContent=t('idBad');return;}b.disabled=true;
  netIdClaim(v).then(()=>{b.disabled=false;$('idW').hidden=true;toast(t('idSaved',{n:v}),'good');netPlay();},err=>{b.disabled=false;e.textContent=/PERMISSION|permission/.test(String(err&&(err.code||err.message)))?t('idTaken'):t('netFail',{e:(err&&err.code)||'?'});});}
 $('idIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')idOk();else if(e.key==='Escape')$('idW').hidden=true;});
-function netPlay(){if(NETQ!=='online')return;if(!netUser){netPending=true;return netSignIn();}if(!netId)return netIdLoad().then(v=>v?netPlay():idOpen(),netFail);startGame(hasSave());}
+function netPlay(){if(NETQ!=='online')return;if(!netUser){netPending=true;return netSignIn();}if(!netId)return netIdLoad().then(v=>v?netPlay():idOpen(),netFail);if(netPulling)return;netPulling=true;cloudPull().then(()=>{netPulling=false;startGame(hasSave());});}
+let netPulling=false;
 function netBtn(){const b=$('onlineBtn');if(!b)return;b.hidden=NETQ!=='online';b.disabled=netState==='AUTHENTICATING'||netState==='JOINING';
  if(NETQ==='online'){$('newBtn').hidden=true;$('contBtn').hidden=true;}
  delete b.dataset.i18n;b.textContent=netId?t('playOnlineAs',{n:netId}):t('playOnline');
@@ -6631,16 +6653,36 @@ function armBtn(label,run){const b=document.createElement('button');b.textConten
  b.onclick=()=>{if(Date.now()-armed<4000){armed=0;b.disabled=true;run();return;}armed=Date.now();b.textContent=t('cloudSure');setTimeout(()=>{if(armed&&Date.now()-armed>=4000){armed=0;b.textContent=label;}},4100);};return b;}
 // the local save, with S.pid filled in (an old save that this build never loaded has none yet)
 function cloudLocal(){const r=STORE.read();if(r.status!=='ok')return null;const d=r.data;if(!Satisfy.ids.isCharId(d.S.pid)){Satisfy.ids.ensure(d.S);if(!STORE.replace(JSON.stringify(d),'before-ids-'+Date.now().toString(36)))return null;}
- return {raw:STORE.read().raw,pid:d.S.pid,n:(d.S.look&&d.S.look.n)||'?',lv:d.S.lv||1};}
+ return {raw:STORE.read().raw,pid:d.S.pid,n:(d.S.look&&d.S.look.n)||'?',lv:d.S.lv||1,at:+d.savedAt||0};}
 function cloudOpen(){const C=cloudApi();if(!C)return;$('cloudW').hidden=false;$('cloudH').textContent=t('cloudH');const L=cloudLocal(),N=$('cloudN'),box=$('cloudL'),A=$('cloudA');
  A.textContent='';const out=document.createElement('button');out.textContent=t('cloudOut');out.onclick=()=>{out.disabled=true;netSignOut(false);};A.appendChild(out);A.appendChild(armBtn(t('cloudErase'),()=>netSignOut(true)));
  const nb=BLK.list().length;if(nb){const u=document.createElement('button');u.textContent=t('blkClear',{n:nb});u.onclick=()=>{BLK.clear();toast(t('blkCleared'));cloudOpen();};A.appendChild(u);}
- N.textContent=L?t('cloudLocal',{n:L.n,lv:L.lv}):t('cloudNoLocal');if(L)N.appendChild(armBtn(t('cloudUp'),()=>C.upload(L.raw).then(i=>{toast(t('cloudUpOk',{n:i.handle}),'good');cloudOpen();},e=>{cloudErr(e);cloudOpen();})));
+ N.textContent=L?t('cloudLocal',{n:L.n,lv:L.lv}):t('cloudNoLocal');{const nt=document.createElement('div');nt.className='note';nt.textContent=t('cloudAutoNote');N.appendChild(nt);}if(L)N.appendChild(armBtn(t('cloudUp'),()=>C.upload(L.raw).then(i=>{toast(t('cloudUpOk',{n:i.handle}),'good');cloudOpen();},e=>{cloudErr(e);cloudOpen();})));
  box.textContent=t('cloudLoading');
  C.list().then(list=>{box.textContent=list.length?'':t('cloudNone');for(const c of list){const row=document.createElement('div');row.className='cr';row.dataset.pid=c.pid;
    const lab=document.createElement('span');lab.textContent=`${c.handle} · ${t('lv',{n:c.lv})} · ${t('cl_'+c.cls)} · ${new Date(c.savedAt||c.rev).toLocaleString(lang==='ar'?'ar-EG':'en-GB')}`+(L&&L.pid===c.pid?' '+t('cloudSame'):'');row.appendChild(lab);
    row.appendChild(armBtn(t('cloudDown'),()=>C.download(c.pid).then(raw=>{if(!raw||!STORE.replace(raw,'before-cloud-'+Date.now().toString(36)))throw new Error('restore');toast(t('cloudDownOk',{n:c.handle}),'good');$('contBtn').disabled=!hasSave();cloudOpen();}).catch(e=>{cloudErr(e);cloudOpen();})));
    row.appendChild(armBtn(t('cloudDel'),()=>C.remove(c.pid).then(()=>{toast(t('cloudDelOk',{n:c.handle}));cloudOpen();},e=>{cloudErr(e);cloudOpen();})));box.appendChild(row);}},e=>{box.textContent='';cloudErr(e);});}
+/* owner 2026-10-20 ("on the phone there was no cloud save and no account"): signed in, the character follows the Google
+   account by itself. While you play, the save goes up when it changed (every 30 s, and when the page is hidden or closed);
+   on sign-in, a newer copy of this character in the cloud, or a further one on a device that has a newer or no character, comes
+   down before the game starts. The replaced local save is kept as a backup, as with the manual download. */
+let cloudUpRaw='',cloudUpT=-1e9,cloudBusy=false,cloudPulled=false;const cloudLive=()=>S&&!S.__demo&&!['title','create','lang','cut'].includes(mode);
+function cloudAuto(now){const C=cloudApi();if(!C||!S||S.__demo||SAVE_OFF||netReplaced||cloudBusy||!cloudLive())return;if(!now&&performance.now()-cloudUpT<30000)return;cloudUpT=performance.now();
+ let L=null;try{L=cloudLocal();}catch(e){}if(!L||L.raw===cloudUpRaw||L.raw.length>Satisfy.cloud.MAX_BLOB)return;cloudBusy=true;
+ C.upload(L.raw).then(()=>{cloudUpRaw=L.raw;},e=>console.warn('cloud auto-save failed',e&&(e.code||e.message))).then(()=>{cloudBusy=false;});}
+// the copy to start from: this character's cloud copy when it is newer; otherwise, a cloud character further on (higher level)
+// than the one on this device, or the newest one when this device has none
+function cloudPick(list,L){if(!list.length)return null;const same=L&&list.find(c=>c.pid===L.pid);if(same)return (same.savedAt||0)>L.at+2000?same:null;
+ const best=list.slice().sort((a,b)=>(b.lv-a.lv)||((b.savedAt||0)-(a.savedAt||0)))[0];return !L||best.lv>L.lv?best:null;}
+function cloudPull(){const C=cloudApi();if(!C||cloudPulled)return Promise.resolve(false);cloudPulled=true;
+ return C.list().then(list=>{let L=null;try{L=cloudLocal();}catch(e){}const c=cloudPick(list,L);if(!c)return false;
+  return C.download(c.pid).then(raw=>{if(!raw||!STORE.replace(raw,'before-cloud-'+Date.now().toString(36)))return false;cloudUpRaw=raw;toast(t('cloudAutoDown',{n:c.handle,lv:c.lv}),'good');return true;});})
+  .catch(e=>{console.warn('cloud restore failed',e&&(e.code||e.message));return false;});}
+addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&cloudLive()&&FB&&netUser){save(true);cloudAuto(true);}});
+addEventListener('pagehide',()=>{if(cloudLive()&&FB&&netUser){save(true);cloudAuto(true);}});
+Object.assign(STR.ar,{cloudAutoDown:'شخصيتك {n} (لفل {lv}) اتحمّلت من حسابك',cloudAutoNote:'الحفظ بيترفع لحسابك لوحده طول ما إنت داخل بجوجل'});
+Object.assign(STR.en,{cloudAutoDown:'Your character {n} (Lv {lv}) was loaded from your account',cloudAutoNote:'Your save goes up to your account by itself while you are signed in with Google'});
 function cloudProfile(){const C=cloudApi();if(!C||!S||S.__demo)return;cloudProfT=performance.now();C.writeProfile(S,lang).catch(e=>console.warn('profile write failed',e&&e.code));}
 function netFail(e){netSetState('ERROR');netBtn();toast(t('netFail',{e:(e&&e.code)||(e&&e.message)||'?'}),'warn');}
 function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(user.uid);netSetState('JOINING');netBtn();
@@ -6730,7 +6772,19 @@ if(TOUCH){document.body.classList.add('touch');const st=$('tStick');
   b.addEventListener('pointerdown',e=>{e.preventDefault();audio();b.classList.add('on');if(k==='atk')K.atk=true;else if(k==='guard'){if(mode==='play')guardOn();}else if(k==='ping'){if(NET&&PARTY&&mode==='play')netPing(P.x,P.y);}else if(k==='emote'){if(NET&&mode==='play')emoToggle();}else tKey(k,true);});
   const up=()=>{if(!b.classList.contains('on'))return;b.classList.remove('on');if(k==='atk')K.atk=false;else if(k==='guard')guardOff();else if(k!=='ping'&&k!=='emote')tKey(k,false);};
   for(const ev of ['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,up);}
- $('keys').addEventListener('pointerdown',e=>{const el=e.target.closest('.key'),c=el&&TKEY[el.id];if(!c)return;e.preventDefault();tKey(c,true);tKey(c,false);});}
+ $('keys').addEventListener('pointerdown',e=>{const el=e.target.closest('.key'),c=el&&TKEY[el.id];if(!c)return;e.preventDefault();tKey(c,true);tKey(c,false);});
+ // the first tap goes full screen and holds the screen sideways where the browser allows it (Android; an iPhone keeps its
+ // bars unless the game is added to the home screen, which opens it full screen from the manifest)
+ const full=()=>{const d=document.documentElement;if(document.fullscreenElement||!d.requestFullscreen)return;d.requestFullscreen({navigationUI:'hide'}).then(()=>{try{screen.orientation.lock('landscape').catch(()=>{});}catch(_){}},()=>{});};
+ addEventListener('pointerup',full,true);
+ // a long press shows what a mouse would show on hover (item, skill and button details); the tap after it does nothing
+ let lpT=0,lpEl=null,lpShown=false;const lpOff=()=>{clearTimeout(lpT);lpEl=null;};
+ UI.addEventListener('pointerdown',e=>{const el=e.target.closest('[data-tip]');lpOff();if(!el)return;lpEl=el;const x=e.clientX,y=e.clientY;
+  lpT=setTimeout(()=>{if(lpEl!==el)return;const tip=$('tip'),r=stage.getBoundingClientRect();tip.innerHTML=el.dataset.tip;tip.classList.add('on');let tx=x-r.left-tip.offsetWidth/2,ty=y-r.top-tip.offsetHeight-18;tx=clamp(tx,4,r.width-tip.offsetWidth-4);if(ty<4)ty=y-r.top+22;tip.style.left=tx+'px';tip.style.top=ty+'px';lpShown=true;},420);},true);
+ for(const ev of ['pointerup','pointercancel'])UI.addEventListener(ev,()=>{lpOff();if(lpShown){setTimeout(()=>{lpShown=false;},350);setTimeout(()=>{$('tip').classList.remove('on');},1600);}},true);
+ UI.addEventListener('pointermove',e=>{if(lpEl&&e.pointerType==='touch'&&!lpShown&&!lpEl.contains(document.elementFromPoint(e.clientX,e.clientY)))lpOff();},true);
+ UI.addEventListener('click',e=>{if(lpShown){lpShown=false;e.stopPropagation();e.preventDefault();}},true);
+ UI.addEventListener('contextmenu',e=>e.preventDefault());}
 })();
 </script>
 </body></html>

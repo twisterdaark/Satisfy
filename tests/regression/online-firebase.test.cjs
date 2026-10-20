@@ -84,7 +84,10 @@ test('two signed-in players see each other through the database; writes pass the
     // presence, the public profile (SAT-ONLINE-007), the session lease (SAT-ONLINE-010) and the account ID read (SAT-ONLINE-026)
     const paths = await a.eval(() => [...new Set(window.__fakeRTDB.log.map((l) => l.path))]);
     // plus the shared-monster host node and the rankings (SAT-ONLINE-055: the top-10 reads and one root update of your own entries)
-    assert.deepEqual(paths.filter((p) => !p.startsWith('mobs/') && !p.startsWith('ranks/') && p !== '').sort(), ['accountIds/' + na.uid, 'presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]);
+    // and the save going up by itself (owner 2026-10-20; regression/cloud tests it), only under this account
+    const cloud = paths.filter((p) => /^cloud(Index|Saves)\//.test(p));
+    assert.ok(cloud.every((p) => p.startsWith('cloudIndex/' + na.uid + '/') || p.startsWith('cloudSaves/' + na.uid + '/')), cloud.join());
+    assert.deepEqual(paths.filter((p) => !p.startsWith('mobs/') && !p.startsWith('ranks/') && !cloud.includes(p) && p !== '').sort(), ['accountIds/' + na.uid, 'presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]);
     const roots = await a.eval(() => [...new Set(window.__fakeRTDB.log.filter((l) => l.op === 'update' && l.path === '').flatMap((l) => l.keys))]);
     assert.ok(roots.every((k) => k === 'ranks/lv/' + na.uid || k === 'ranks/gold/' + na.uid), 'root updates: ' + roots);
     assert.deepEqual((await fake(a)).rejected, []);

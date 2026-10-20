@@ -5,6 +5,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zj', ver: '0.76', d: '2026-10-20',
+      ar: ['الحفظ السحابي بقى أوتوماتيك: طول ما إنت داخل بحساب جوجل، الحفظ بيترفع لحسابك لوحده (كل 30 ثانية، ولما تقفل الصفحة أو تسيبها)',
+        'لما تدخل من جهاز جديد (زي الموبايل) بنفس الحساب، شخصيتك بتنزل لوحدها قبل ما تبدأ، ولو الجهاز عليه نسخة أقدم بتتبدل بالأحدث (والقديمة بتتحفظ كنسخة احتياطية)',
+        'اللعبة على الموبايل: الشاشة بالعرض بتتملي كلها من غير شرايط سودا، وأول لمسة بتفتح ملء الشاشة',
+        'زراير الموبايل اتظبطت: العصاية على الشمال، والهجوم والتفادي والجارد والاستخدام على اليمين، والسكيلات والبوشنات جنبهم، والقوايم (الحالة، الشنطة، المعدات، الخريطة، الجيلد، الركوبة، القايمة) بأساميها تحت',
+        'الضغط المطوّل على أي حاجة بيوريك تفاصيلها (زي الماوس على الكمبيوتر)، ولو الموبايل طولي اللعبة بتطلب منك تلفّه',
+        'تقدر تضيف اللعبة للشاشة الرئيسية في الموبايل، وتفتح ملء الشاشة بالعرض زي أي لعبة'],
+      en: ['Cloud saves are automatic: while you are signed in with Google, your save goes up to your account by itself (every 30 s, and when you close or leave the page)',
+        'Sign in on a new device (like your phone) with the same account and your character comes down by itself before you start; an older copy on that device is replaced with the newest (and kept as a backup)',
+        'The game on phones: held sideways the whole screen is used, no black bars, and the first tap goes full screen',
+        'Phone controls rearranged: the stick on the left, attack, dodge, guard and use on the right with the skills and potions beside them, and the menus (status, bag, gear, map, guild, ride, menu) by name at the bottom',
+        'A long press on anything shows its details (like the mouse on a computer), and held upright the game asks you to turn the phone',
+        'You can add the game to your phone\'s home screen and it opens full screen, sideways, like any game'] },
     { v: '2026-10-20zi', ver: '0.75', d: '2026-10-20',
       ar: ['برج الحكمة (التحديث الكبير الخامس): بيبان، المقعد التاسع، قاعد على السور الغربي لرينهارت. من لفل 400 بيديك اختبار التاسع، ولو صمدت بيديك الخريطة',
         'البرج وهم بيتنقل كل أسبوع بين أماكن مستخبية (نفس المكان لكل اللاعبين)، ومش بيبان غير بالخريطة',

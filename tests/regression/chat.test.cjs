@@ -64,7 +64,7 @@ for (const mode of ['local', 'online']) {
       await settle(a, b);
       await until(b, () => document.querySelectorAll('#chatL div:not(.sys)').length === 1);
       assert.deepEqual(await lines(b), ['Grid: pkei hi <b>bold</b> 👋']);
-      assert.equal(await b.eval(() => document.querySelectorAll('#chatL b').length), 1, 'the markup arrived as text, not as elements');
+      assert.equal(await b.eval(() => document.querySelectorAll('#chatL div:not(.sys) b').length), 1, 'the markup arrived as text, not as elements') // a world notice (sys) may be listed too;
       assert.deepEqual(await lines(a), ['Grid: pkei hi <b>bold</b> 👋']);
       assert.equal(await a.eval(() => document.getElementById('chatIn').hidden), true, 'Enter sends and closes');
 

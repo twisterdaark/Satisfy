@@ -74,8 +74,8 @@ test('Sign out, then Delete my online data: nothing of the account is left onlin
     assert.equal(await a.eval(() => localStorage.getItem('satisfy_proto_v4@a')), local, 'the save on this device is untouched');
     assert.deepEqual(await a.eval(() => window.__fakeRTDB.rejected), []);
 
-    // the other account is untouched and still online
-    assert.deepEqual(await keysOf(b, OTHER), ['presence/satisfy/main/gSomeoneElse2', 'profiles/gSomeoneElse2', 'ranks/gold/gSomeoneElse2', 'ranks/lv/gSomeoneElse2', 'sessions/gSomeoneElse2']);
+    // the other account is untouched and still online (its save went up by itself while playing, owner 2026-10-20)
+    assert.deepEqual(await keysOf(b, OTHER), ['cloudIndex/gSomeoneElse2/<pid>', 'cloudSaves/gSomeoneElse2/<pid>', 'presence/satisfy/main/gSomeoneElse2', 'profiles/gSomeoneElse2', 'ranks/gold/gSomeoneElse2', 'ranks/lv/gSomeoneElse2', 'sessions/gSomeoneElse2']);
     assert.equal((await b.eval(() => Satisfy.local.net())).state, 'ONLINE');
     assert.deepEqual(a.errors, []);
     assert.deepEqual(b.errors, []);

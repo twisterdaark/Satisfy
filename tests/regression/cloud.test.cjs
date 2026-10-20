@@ -1,6 +1,7 @@
 'use strict';
 // SAT-ONLINE-007 (doc §06 R1, §23, D4): a character moves between two "devices" (tabs with separate
-// saves) of the same Google account through the fake Firebase, only after a confirming second click.
+// saves) of the same Google account through the fake Firebase. The buttons need a confirming second click;
+// since 2026-10-20 (owner) the save also goes up by itself while signed in, and a new device starts from it.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -42,10 +43,14 @@ test('upload from one device, download on another; both need a second click; the
     await click(a, '#cloudBtn');
     await until(a, () => !document.getElementById('cloudW').hidden && !/Loading/.test(document.getElementById('cloudL').textContent));
     assert.match(await a.eval(() => document.getElementById('cloudN').textContent), /On this device: Grid · Lv \d+/);
+    // the save went up by itself while playing (owner 2026-10-20); the button still uploads it again on a second click
+    assert.equal(await a.eval(([u, p]) => window.__fakeRTDB.data.has('cloudSaves/' + u + '/' + p), [UID, mine.pid]), true, 'auto-uploaded');
+    const rev0 = await a.eval(([u, p]) => window.__fakeRTDB.data.get('cloudIndex/' + u + '/' + p).rev, [UID, mine.pid]);
     await click(a, '#cloudN button');
     await a.step(2);
-    assert.equal(await a.eval((u) => [...window.__fakeRTDB.data.keys()].some((k) => k.startsWith('cloudSaves/' + u)), UID), false, 'one click uploads nothing');
+    assert.equal(await a.eval(([u, p]) => window.__fakeRTDB.data.get('cloudIndex/' + u + '/' + p).rev, [UID, mine.pid]), rev0, 'one click uploads nothing');
     await click(a, '#cloudN button');
+    await until(a, ([u, p, r]) => window.__fakeRTDB.data.get('cloudIndex/' + u + '/' + p).rev > r, 5000, [UID, mine.pid, rev0]);
     await until(a, () => document.getElementById('cloudL').querySelectorAll('.cr').length === 1);
     assert.deepEqual((await rows(a)).map((r) => r.pid), [mine.pid]);
     assert.match((await rows(a))[0].text, /Grid · Lv \d+ .*\(same character\)/);
@@ -58,11 +63,12 @@ test('upload from one device, download on another; both need a second click; the
     await b.waitMode('title');
     const before = await b.eval(() => localStorage.getItem('satisfy_proto_v4@b'));
     await click(b, '#cloudBtn');
-    await until(b, () => document.querySelectorAll('#cloudL .cr').length === 1);
-    await click(b, '#cloudL .cr button');
+    const row = `#cloudL .cr[data-pid="${mine.pid}"] button`; // Faker may be listed too: it goes up by itself
+    await until(b, (r) => !!document.querySelector(r), 5000, row);
+    await click(b, row);
     await b.step(2);
     assert.equal(await b.eval(() => localStorage.getItem('satisfy_proto_v4@b')), before, 'one click changes nothing');
-    await click(b, '#cloudL .cr button');
+    await click(b, row);
     await until(b, () => JSON.parse(localStorage.getItem('satisfy_proto_v4@b')).S.look.n === 'Grid');
     const st = await b.storage();
     const backups = Object.keys(st).filter((k) => k.startsWith('satisfy_proto_v4@b.backup.before-cloud-'));
@@ -81,6 +87,34 @@ test('upload from one device, download on another; both need a second click; the
     assert.deepEqual(await a.eval(() => window.__fakeRTDB.rejected), []);
     assert.deepEqual(await b.eval(() => window.__fakeRTDB.rejected), []);
     assert.deepEqual(a.errors, []);
+    assert.deepEqual(b.errors, []);
+  } finally { await ctx.close(); }
+});
+
+// owner 2026-10-20: "on the phone there was no cloud save and no account". The character now follows the Google
+// account: it goes up while playing, and a device without it starts from it when you press Play online.
+test('the save goes up by itself and a new device starts from it', async () => {
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  try {
+    const a = await H.openGame({ ctx, query: '?net=online&slot=a' });
+    await signIn(a, 'Ahmed');
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await a.eval(() => { window.__G.gainXP(5000); window.__G.S.gold = 777; window.__G.save(true); });
+    const pid = await a.eval(() => window.__G.S.pid), lv = await a.eval(() => window.__G.S.lv);
+    await until(a, ([u, p]) => window.__fakeRTDB.data.has('cloudSaves/' + u + '/' + p), 5000, [UID, pid]);
+    // the phone: same account, nothing saved on it yet, the account ID already taken on the computer
+    const b = await H.openGame({ ctx, query: '?net=online&slot=b' });
+    await b.eval((u) => window.__fakeRTDB.data.set('accountIds/' + u, 'Ahmed'), UID);
+    assert.equal(await b.eval(() => localStorage.getItem('satisfy_proto_v4@b')), null);
+    await signIn(b, 'Ahmed');
+    await b.waitMode('play');
+    const got = await b.eval(() => ({ pid: window.__G.S.pid, n: window.__G.S.look.n, lv: window.__G.S.lv }));
+    assert.deepEqual(got, { pid, n: 'Grid', lv });
+    // the copy on the phone is not replaced again by an older one: the phone plays on and its save goes up
+    await b.eval(() => { window.__G.S.gold = 999; window.__G.save(true); });
+    await until(b, ([u, p]) => JSON.parse(window.__fakeRTDB.data.get('cloudSaves/' + u + '/' + p).blob).S.gold === 999, 40000, [UID, pid]);
+    assert.deepEqual(await a.eval(() => window.__fakeRTDB.rejected), []);
+    assert.deepEqual(await b.eval(() => window.__fakeRTDB.rejected), []);
     assert.deepEqual(b.errors, []);
   } finally { await ctx.close(); }
 });

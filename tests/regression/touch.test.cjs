@@ -112,3 +112,33 @@ test('?touch=1 online: the party row opens a card, invites, accepts and opens th
     assert.deepEqual(b.errors, []);
   } finally { await ctx.close(); }
 });
+
+// owner 2026-10-20 (mobile port): on a phone held sideways the view widens to the screen instead of black bars, the
+// controls do not cover each other, the menu keys show their names, and held upright the game asks to be turned
+test('a phone sideways: the view fills the screen and the controls stay apart; upright it asks to turn', async () => {
+  const phone = { viewport: { width: 844, height: 390 }, screen: { width: 844, height: 390 }, isMobile: true, hasTouch: true };
+  const ctx = await H.newContext({ device: phone });
+  try {
+    const g = await H.openGame({ ctx });
+    await H.newGame(g, LOOK);
+    await g.step(3);
+    const L = await g.eval(() => {
+      const r = (s) => { const b = document.querySelector(s).getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, b: b.bottom }; };
+      return { W: document.getElementById('game').width, stage: r('#stage'), stick: r('#tStick'), act: r('#tAct'), keys: r('#keys'), sk: r('#skillbar'),
+        kbd: getComputedStyle(document.querySelector('#kM kbd')).display, label: getComputedStyle(document.querySelector('#kM span')).display,
+        hidden: ['kA', 'kD', 'kG', 'kE'].map((k) => getComputedStyle(document.getElementById(k)).display), rot: getComputedStyle(document.getElementById('rotW')).display };
+    });
+    assert.ok(L.W > 560, 'wider view: ' + L.W);
+    assert.ok(L.stage.r - L.stage.l > 830, 'no black bars');
+    const apart = (a, b) => a.r <= b.l || b.r <= a.l || a.b <= b.t || b.b <= a.t;
+    for (const [x, y] of [['stick', 'keys'], ['keys', 'sk'], ['sk', 'act'], ['stick', 'act']]) assert.ok(apart(L[x], L[y]), `${x} and ${y} overlap`);
+    for (const k of ['stick', 'act', 'keys', 'sk']) assert.ok(L[k].l >= L.stage.l && L[k].r <= L.stage.r && L[k].b <= L.stage.b + 1, k + ' on screen');
+    assert.equal(L.kbd, 'none'); assert.equal(L.label, 'block');
+    assert.deepEqual(L.hidden, ['none', 'none', 'none', 'none'], 'attack, dodge, guard and use are the big buttons');
+    assert.equal(L.rot, 'none');
+    await g.page.setViewportSize({ width: 390, height: 844 });
+    await g.page.waitForTimeout(100);
+    assert.equal(await g.eval(() => getComputedStyle(document.getElementById('rotW')).display), 'flex');
+    assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});

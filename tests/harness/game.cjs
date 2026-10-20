@@ -139,7 +139,7 @@ function fixedClock(at = 1767606030000) {
 }
 
 async function newContext(opts = {}) {
-  const ctx = await (await browser()).newContext();
+  const ctx = await (await browser()).newContext(opts.device || {}); // device: Playwright context options (a phone's viewport, touch)
   await ctx.addInitScript(INIT_SCRIPT);
   // every test runs on the fixed clock unless it asks for the real one (opts.clock === false): the weather, world events,
   // sieges and the National Competition follow Date.now, and failed tests by the hour (SAT-ONLINE-072). A test's own
