@@ -1,6 +1,7 @@
 'use strict';
 // Render parity: after the same frames, the branch draws exactly the same pixels as the baseline.
-// Compares the game canvases (world + minimap), which are driven only by the frame clock.
+// Compares the game canvases (world + minimap), which are driven only by the frame clock. The baseline moves when a
+// change means to draw something new (living towns, v0.74: townsfolk in Winston).
 // DOM overlays (HUD text, toasts, CSS animations) run on real time, so they are not hashed.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -21,6 +22,7 @@ async function frameHash(html, setup) {
   const g = await H.openGame({ html, ctx });
   try {
     await g.page.setViewportSize({ width: 960, height: 540 });
+    await g.eval(() => { window.__tfNow = () => 1.7e9; }); // the townsfolk walk on the world clock: hold it still
     await setup(g);
     const urls = await g.eval(() => ['game', 'mini'].map((id) => document.getElementById(id).toDataURL()));
     return { hash: crypto.createHash('sha1').update(urls.join('|')).digest('hex'), errors: g.errors };
