@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20v88', ver: '0.88', d: '2026-10-20',
+      ar: ['الدانجونات بقت بتقييم زي الرواية (عادي، نادر، فريد، ملحمي، أسطوري) على قد عمقها ووحوشها. أول ما تدخل الدانجون بيقولك اسمه وتقييمه، وجواه الوحوش بتدي خبرة ودهب أكتر 5% عن كل درجة، وصندوق الزعيم بيطلع فيه حاجة أكتر',
+        'أول لاعب في العالم يلاقي دانجون بيتقاله زي جريد في سجن الحمم: "انت أول لاعب يلاقي الدانجون". لمدة أسبوع خبرته هناك +20% وصندوق الزعيم دايمًا فيه حاجة، ونصها فريد أو أعلى. أونلاين ده واحد بس في العالم كله والأخبار بتعلن اسمه',
+        'لما ترجع دانجون قتلت زعيمه بيرحب بيك مرة: "دي أول مرة تزور الدانجون بعد ما فتحته"'],
+      en: ['Dungeons now carry a rating as in the novel (normal, rare, unique, epic, legendary) by their depth and monsters. Entering one names it and its rating; inside, monsters give 5% more experience and gold per step and the boss chest holds an item more often',
+        'The first player in the world to find a dungeon is told so as Grid was at the Lava Prison: "You are the first player to find the dungeon". For a week their experience there is 20% higher and the boss chest always holds an item, unique or better half the time. Online it is one player per world, announced in the news',
+        'A dungeon whose boss you killed greets you once: "This is the first time you have visited the dungeon after conquering it"'] },
     { v: '2026-10-20v87', ver: '0.87', d: '2026-10-20',
       ar: ['الشياطين العظام: الشيطان العظيم رقم 22 بيريث نزل على حصن تالرين في مملكة هاكن، الحصن اللي في الوادي على الطريق في الأراضي الحمرا. راكب حصانه العيّان ومعاه جيش شياطين لفل 360+. غارة أونلاين: بيريث واحد للكل، ولما يموت بيرتاح ساعتين للعالم كله',
         'زي الرواية: حافر حصانه بيخبط الأرض والحجارة بتتحول دهب، وكدبة إنه "مايتقهرش" (8 ثواني مفيش ضرر بيعدّي فيه وضربه بيتضاعف) عند 75% و50% و25%، والواقع المشوّه بياخد مهاراتك 12 ثانية لو قريب منه عند 60% و35%، وعند 30% إحصائياته بتزيد 20% وبتتشال الإضعافات اللي عليه',
