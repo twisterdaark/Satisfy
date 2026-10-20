@@ -136,6 +136,8 @@ function frame(c,dir,pose,f){
  else if(c.hair==='crown'){q(4,2,8,2,h);q(3,3,1,5,h);q(12,3,1,5,h);if(U)q(4,4,8,5,h);q(4,0,8,2,c.hat);q(4,-1,1,1,c.hat);q(7,-1,2,1,c.hat);q(11,-1,1,1,c.hat);q(5,0,6,1,shade(c.hat,.25));q(7,1,2,1,'#d83a3a');}   // a king's crown over long hair
  else if(c.hair==='helm'){if(U)q(4,1,8,9,h);else if(S_){q(5,1,7,6,h);q(4,3,1,4,h);q(9,5,3,1,'#22252c');}else{q(4,1,8,5,h);q(3,3,1,5,h);q(12,3,1,5,h);q(5,5,6,1,'#22252c');q(7,1,2,4,hl);}q(7,-1,2,2,'#8a1f2a');}
  if(c.ahoge){q(7,0,1,1,h);q(8,-1,1,1,h);q(9,-2,2,1,h);q(11,-1,1,1,h);}
+ // the Good-looking Sunglasses from the Reputation Store (v0.96): "the large frame is the highlight of the square sunglasses"
+ if(c.sg&&!U){const G='#141418',W='#6a7a9a';if(S_){q(9,6,3,2,G);q(6,6,3,1,G);q(10,6,1,1,W);}else{q(4,6,3,2,G);q(9,6,3,2,G);q(7,6,2,1,G);q(4,6,1,1,W);q(9,6,1,1,W);}}
  if(c.beard&&!U){if(c.longBeard){if(S_){q(8,7,4,5,c.beard);q(9,12,3,3,c.beard);q(11,8,1,6,c.beard2);q(10,15,1,1,c.beard2);q(7,7,2,1,c.beard2);}else{q(4,7,8,2,c.beard);q(5,9,6,4,c.beard);q(6,13,4,2,c.beard);q(7,15,2,1,c.beard2);q(10,9,1,4,c.beard2);q(4,8,3,1,c.beard2);q(9,8,3,1,c.beard2);q(7,8,2,1,'#fff');}}
   else if(S_){q(8,7,4,5,c.beard);q(11,8,1,4,c.beard2);q(9,12,2,1,c.beard2);}else{q(4,7,8,2,c.beard);q(5,9,6,3,c.beard);q(6,12,4,1,c.beard);q(10,9,1,3,c.beard2);q(7,13,2,1,c.beard2);q(7,8,2,1,c.beard2);}}
  late.forEach(fn=>fn());

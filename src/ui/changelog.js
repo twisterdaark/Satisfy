@@ -5,6 +5,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20v96', ver: '0.96', d: '2026-10-20',
+      ar: ['سمعة القارة: الأعمال الكبيرة بتعلّي سمعتك في القارة كلها، زي الرواية: "[سمعتك في القارة كلها هتزيد +N.]". الحدادين بياخدوها من القطع النادرة والملحمية والفريدة والأسطورية (+30 / +80 / +300 / +1,000)، وكل الناس من المهمات، ومهمات S وSS، وفصول القصة، وأول مرة تقتل كل زعيم، وكل رتبة جديدة في مدينة',
+        'متجر السمعة: من 3,000 سمعة دوس "متجر السمعة!" في نافذة الحالة (تبويب العلاقات)، وعربية دهب محدش شايفها غيرك بتنزل من السما جنبك. السمعة هي الفلوس',
+        'في المتجر: الحلوى المسكّرة (كل الإحصائيات +30% لمدة 5 دقايق، خمس مرات بس للحساب)، النضارة الحلوة (شكل بس، واللاعيبة التانيين أونلاين بيشوفوها عليك)، وماكينة "اسحب! اسحب! اسحب كل حاجة!" بـ 999 سمعة',
+        'الماكينة بتطلّع بنسة شعر حلوة (هدية الستات بيفرحوا بيها جدًا)، أطعم سيخ في العالم، أحسن شوكولاتة، مكعبات لعب، أو جرعة زيادة الخبرة (+20% خبرة لمدة 3 أيام، فرصتها أقل من 1%)، وساعات بتفشل',
+        'سمعة المدن ليها مزايا أكتر: المكرّم بيشتري 3 أحجار مانا كل يوم من تاجر المدينة، وبطل المدينة بياخد كمان حجر تقوية كل يوم وبينام في اللوكاندة ببلاش. المزايا مكتوبة في نافذة الحالة'],
+      en: ['Continent reputation: great deeds raise your reputation throughout the continent, as in the novel: "[Reputation throughout the continent will rise by +N.]". Blacksmiths earn it from rare, epic, unique and legendary items (+30 / +80 / +300 / +1,000), and everyone from quests, S and SS quests, story chapters, the first kill of each boss and every new town rank',
+        'The Reputation Store: from 3,000 reputation press "Reputation Store!" in the status window (Bonds tab), and a golden carriage only you can see falls from the sky beside you. Reputation is the money',
+        'In the store: Sweet Candy (all stats +30% for 5 minutes, five per account), the Good-looking Sunglasses (looks only, and other players online see them on you), and the "Draw! Draw! Draw everything!" machine for 999 reputation',
+        'The machine gives a Pretty Hairpin (a woman is delighted by it as a gift), the World’s Most Delicious Skewer, the best chocolate, Block Toys, or the Experience Increase Potion (+20% experience for three days, under a 1% chance), and sometimes nothing',
+        'Town ranks give more: the Honoured buy 3 mana stones a day from the town merchant, and a Town Hero also gets an enchant stone a day and free rooms at the inn. The status window lists what each rank gives'] },
     { v: '2026-10-20v95', ver: '0.95', d: '2026-10-20',
       ar: ['سباق الخيل بقى مرة كل ساعة بدل كل تلات دقايق. البوابة بتفتح الساعة :59 وتلاتاشر ثانية، والسباق بيخلص قبل الساعة الجديدة',
         'تقدر تسجّل عند منظم السباق في أي وقت في الساعة. لما البوابة تفتح بتنزل المضمار من أي حتة برا، مش لازم تكون في وينستون، وبعد السباق بترجع وينستون',

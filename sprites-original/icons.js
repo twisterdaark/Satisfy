@@ -103,6 +103,16 @@ const DRAW={
 const flask=(liq,lt)=>I=>{I.rect(7,2,2,2,'#8a5a32');I.rect(6,4,4,1,'#c8d0dc');I.rect(7,5,2,2,'#c8d0dc');I.ell(8,10.5,4.5,4,'#c8d0dc');I.ell(8,11,3.5,3,liq);I.rect(5,9,6,1,lt);I.set(6,10,'#ffffff');I.set(6,11,lt);I.set(10,13,'#00000000'==='x'?lt:liq);};
 DRAW.respec=I=>{I.rect(3,3,10,10,'#e8d8a8');I.rect(3,3,10,1,'#b89858');I.rect(3,12,10,1,'#b89858');I.rect(2,2,2,12,'#9a7a48');I.rect(12,2,2,12,'#9a7a48');I.rect(5,5,6,1,'#5a4a8a');I.rect(5,7,5,1,'#5a4a8a');I.rect(5,9,6,1,'#5a4a8a');I.rect(7,10,2,2,'#c83a3a');};
 DRAW.hpot=flask('#d8283a','#ff7a8a');DRAW.mpot=flask('#2a5ad8','#7ab0ff');
+// the Reputation Store (v0.96): Sweet Candy, the sunglasses, the drawing machine and what it gives
+DRAW.xpot=flask('#e8b030','#fff0a0');
+Object.assign(DRAW,{
+ candy:I=>{I.line(3,13,7,9,'#e8e0d0');I.ell(10,6,4,4,'#e84a7a');I.ell(10,6,3,3,'#ff8ab0');I.line(8,4,12,8,'#ffffff');I.set(9,5,'#ffffff');I.set(11,4,'#ffd0e0');},
+ sgl:I=>{I.rect(1,6,6,4,'#141418');I.rect(9,6,6,4,'#141418');I.rect(7,6,2,1,'#141418');I.rect(0,6,1,1,'#141418');I.rect(15,6,1,1,'#141418');I.set(2,7,'#6a7a9a');I.set(10,7,'#6a7a9a');I.set(3,7,'#3a4a6a');I.set(11,7,'#3a4a6a');},
+ rsdraw:I=>{I.rect(3,6,10,9,'#c82a3a');I.rect(3,6,10,1,'#ff6a7a');I.ell(8,5,4,4,'#bfe8ff');I.ell(8,5,3,3,'#e8f6ff');I.set(7,4,'#ffd24a');I.set(9,6,'#4ad070');I.set(8,3,'#e84a7a');I.rect(6,10,4,2,'#2a1a20');I.rect(13,8,1,4,'#c8ccd6');I.rect(13,7,2,1,'#f2c14e');},
+ hairpin:I=>{I.line(2,13,11,4,'#c8ccd6');I.line(3,13,12,4,'#8a909a');I.ell(11,4,3,3,'#3a7ad8');I.set(11,4,'#bfe0ff');I.set(9,3,'#ff8ab0');I.set(13,6,'#ffd24a');I.set(12,2,'#ff8ab0');},
+ dskewer:I=>{I.line(1,14,14,1,'#c8a070');for(const [x,y,c] of [[5,10,'#8a3a1a'],[8,7,'#a8481e'],[11,4,'#8a3a1a']]){I.ell(x,y,2.5,2.5,c);I.set(x-1,y-1,'#d87a3a');}I.set(4,11,'#5a2010');I.set(10,5,'#5a2010');},
+ choco:I=>{I.rect(3,4,10,9,'#5a2e16');for(let x=3;x<13;x+=3)I.rect(x,4,1,9,'#3e1e0e');for(let y=4;y<13;y+=3)I.rect(3,y,10,1,'#3e1e0e');I.rect(3,10,10,3,'#c8a050');I.rect(3,10,10,1,'#f2d27a');I.set(5,5,'#8a4e2a');I.set(8,5,'#8a4e2a');},
+ blocks:I=>{I.rect(2,9,5,5,'#d83a3a');I.rect(8,9,5,5,'#3a7ad8');I.rect(5,3,5,5,'#e8b030');I.set(3,10,'#ff8a8a');I.set(9,10,'#9ac0ff');I.set(6,4,'#fff0a0');I.rect(3,8,1,1,'#d83a3a');I.rect(9,8,1,1,'#3a7ad8');}});
 DRAW.jaffa=DRAW.arrows;
 const SLOT={slotW:I=>{for(let i=0;i<8;i++)I.set(5+i,10-i,'#bfe0ff');I.line(3,10,5,12,'#bfe0ff');I.set(3,12,'#bfe0ff');},slotA:I=>{I.rect(4,3,8,10,'#bfe0ff');I.rect(2,3,3,4,'#bfe0ff');I.rect(11,3,3,4,'#bfe0ff');},
  slotH:I=>{I.rect(4,4,8,7,'#bfe0ff');I.rect(3,8,10,2,'#bfe0ff');},slotG:I=>{I.rect(4,5,7,8,'#bfe0ff');I.rect(11,7,2,3,'#bfe0ff');},slotB:I=>{I.rect(5,3,4,9,'#bfe0ff');I.rect(5,10,8,3,'#bfe0ff');},slotX:I=>{I.rect(6,3,4,4,'#bfe0ff');I.rect(7,7,2,6,'#bfe0ff');}};
@@ -113,6 +123,6 @@ function iconRGBA(k){const I=Img();
  else if(k==='larmor'||k==='parmor'||k==='marmor'||k==='warmor')armor(I,k);else sword(I,k);
  return finish(I,false);}
 function iconCanvas(k){const c=document.createElement('canvas');c.width=c.height=16;c.getContext('2d').putImageData(new ImageData(iconRGBA(k),16,16),0,0);return c;}
-const KEYS=['rusty','isword','ssword','gsword','bow','sbow','staff','sstaff','hammer','shammer','larmor','parmor','warmor','jaffa','arrows','bread','wood','ore','leather','blue','mstone','book','hpot','mpot','lhelm','ihelm','lgloves','igloves','lboots','iboots','cring','mring','spear','dagger','mith','msword','marmor','mhelm','tHood','tGloves','tBoots','tRobe','dscale','ruby','topaz','emer','sapph','diam','fish','sfish','gfish','herb','bherb','cfish','stew','feast','slotW','slotA','slotH','slotG','slotB','slotX','coin','estone','respec','failure','ideal','gale','iyarugt','dains','tbow','wisdom','elfin','vring','doran','absurd','bboots','ochelm','lantd','alexb','alexg','kcloth','gisp','povt','wtneck','bcoco','wtleaf','mnring'];
+const KEYS=['rusty','isword','ssword','gsword','bow','sbow','staff','sstaff','hammer','shammer','larmor','parmor','warmor','jaffa','arrows','bread','wood','ore','leather','blue','mstone','book','hpot','mpot','lhelm','ihelm','lgloves','igloves','lboots','iboots','cring','mring','spear','dagger','mith','msword','marmor','mhelm','tHood','tGloves','tBoots','tRobe','dscale','ruby','topaz','emer','sapph','diam','fish','sfish','gfish','herb','bherb','cfish','stew','feast','slotW','slotA','slotH','slotG','slotB','slotX','coin','estone','respec','failure','ideal','gale','iyarugt','dains','tbow','wisdom','elfin','vring','doran','absurd','bboots','ochelm','lantd','alexb','alexg','kcloth','gisp','povt','wtneck','bcoco','wtleaf','mnring','candy','sgl','rsdraw','xpot','hairpin','dskewer','choco','blocks'];
 A.icons={KEYS,iconRGBA,iconCanvas};
 })(typeof window!=='undefined'?window:globalThis);
