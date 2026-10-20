@@ -135,12 +135,17 @@ async function openGame(opts = {}) {
  * called, so every page of one context shares one clock.
  */
 function fixedClock(at = 1767606030000) {
-  return { content: `(() => { const real = Date.now.bind(Date), off = ${at} - ${Date.now()}; Date.now = () => real() + off; })();` };
+  return { content: `(() => { if (window.__fixedClock) return; window.__fixedClock = ${at}; const real = Date.now.bind(Date), off = ${at} - ${Date.now()}; Date.now = () => real() + off; })();` };
 }
 
 async function newContext(opts = {}) {
   const ctx = await (await browser()).newContext();
   await ctx.addInitScript(INIT_SCRIPT);
+  // every test runs on the fixed clock unless it asks for the real one (opts.clock === false): the weather, world events,
+  // sieges and the National Competition follow Date.now, and failed tests by the hour (SAT-ONLINE-072). A test's own
+  // H.fixedClock(at) in opts.scripts sets the time instead.
+  const ownClock = (opts.scripts || []).some((s) => s && typeof s === 'object' && /window\.__fixedClock/.test(s.content || ''));
+  if (opts.clock !== false && !ownClock) await ctx.addInitScript(fixedClock());
   for (const s of opts.scripts || []) await ctx.addInitScript(typeof s === 'string' ? { path: s } : s); // a file, or { content }
   // Hermetic: the game must run with no network (it only asks for Google Fonts, which may fail).
   ctx.__external = [];

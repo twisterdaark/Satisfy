@@ -39,7 +39,7 @@ test('online: a dragon killed by one player is dead for everyone, for the same h
     await until([a], () => !!(window.__GB2.data && window.__GB2.data.trauka));
     const at = await a.eval(() => window.__fakeRTDB.data.get('world/satisfy/wb/trauka'));
     assert.equal(at.by, 'gWbA1');
-    const left = (at.at - Date.now()) / 1000;
+    const left = await a.eval((t) => (t - Date.now()) / 1000, at.at); // the page's clock (the fixed one)
     assert.ok(left > 1790 && left <= 1800, 'half an hour: ' + left);
 
     // B: the dragon is down too, with the same time left, and the world state keeps it
