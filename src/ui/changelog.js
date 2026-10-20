@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zf', ver: '0.72', d: '2026-10-20',
+      ar: ['الوحوش بقى ليها صوت: كل نوع بصوته (ديابة، خنازير، دببة، جولم، عفاريت، بشر، سحالي، تنانين، موتى، شياطين...). بتصرخ لما تشوفك، وبتزوم وهي بتجهز الضربة، وبتصوت لما تضرب أو تتضرب أو تموت، وساعات وهي ماشية. الكبيرة صوتها أتقل',
+        'صوت الوحش بيوطى كل ما تبعد عنه، ومش بيتسمع من بعيد خالص',
+        'كل سكيل ليها صوت على قد نوعها: نار، برق، تلج، سهام، نور مقدس، ضربة قوية، درع، تقوية',
+        'صوت الضربة بيختلف بالسلاح: الخنجر أحد وأسرع، الرمح والمطرقة أتقل. والقوس والعصا ليهم صوت، واللاعبين اللي جنبك بيسمعوا سكيلاتك وضرباتك'],
+      en: ['Monsters now have voices, each kind its own (wolves, boars, bears, golems, goblins, men, lizards, dragons, the undead, demons...). They cry out when they see you, growl as they wind up, and are heard as they strike, are hit and die, and now and then as they roam. Big ones sound deeper',
+        'A monster sounds softer the further you are, and is not heard at all from far away',
+        'Every skill has a sound for its kind: fire, lightning, frost, arrows, holy light, a power strike, a shield, a buff',
+        'Swings sound different by weapon: a dagger is sharper and quicker, a spear or hammer heavier. Bows and staves have their own sound, and players near you hear your skills and shots'] },
     { v: '2026-10-20ze', ver: '0.71', d: '2026-10-20',
       ar: ['أونلاين: "دوّر على فريق" في قايمة اللاعبين (O): بتشوف مين بيدور على غارة أو فريق أو فريق دانجن أو مبارزة، لفله وكلاسه وهو فين',
         'وتقدر تقول إنت بتدور على إيه، والكلام ده بيفضل نص ساعة أو لحد ما تبطل أو تخرج'],

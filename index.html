@@ -677,7 +677,7 @@ function noise(d,v=.2,freq=1000,delay=0,q=1){const a=audio();if(!a||muted)return
 const SFX={
  hover:()=>tone(1200,.03,'square',.025),click:()=>{tone(620,.05,'square',.06);tone(930,.07,'square',.05,0,.04);},
  open:()=>tone(420,.09,'sine',.09,380),close:()=>tone(760,.08,'sine',.07,-380),deny:()=>tone(130,.12,'square',.07),
- swing:()=>noise(.11,.12,2600,0,.7),hit:()=>{noise(.07,.28,500);tone(170,.08,'square',.1,-90);},crit:()=>{noise(.1,.3,700);tone(260,.12,'sawtooth',.1,-150);tone(1400,.08,'triangle',.06);},
+ swing:(p=1)=>{p=+p||1;noise(.11/Math.sqrt(p),.12,2600*p,0,.7);},hit:()=>{noise(.07,.28,500);tone(170,.08,'square',.1,-90);},crit:()=>{noise(.1,.3,700);tone(260,.12,'sawtooth',.1,-150);tone(1400,.08,'triangle',.06);},
  hurt:()=>{tone(240,.16,'sawtooth',.13,-140);noise(.08,.15,300);},dodge:()=>{noise(.18,.14,3200,0,.5);tone(500,.12,'sine',.04,600);},
  chop:()=>{noise(.06,.32,650);tone(150,.06,'square',.08,-40);},mine:()=>{noise(.05,.3,2200);tone(880,.09,'triangle',.07,-200);},
  coin:()=>{tone(988,.06,'square',.06);tone(1319,.14,'square',.06,0,.06);},eat:()=>{noise(.08,.12,500);noise(.08,.12,600,.12);},
@@ -687,7 +687,85 @@ const SFX={
  notice:()=>[784,1047,1319].forEach((f,i)=>tone(f,.3,'triangle',.1,0,i*.13)),
  rare:()=>[660,990].forEach((f,i)=>tone(f,.25,'triangle',.1,0,i*.1)),
  legendary:()=>{[523,659,784,1047,1319,1568].forEach((f,i)=>tone(f,.5,'triangle',.11,0,i*.11));tone(2093,1.4,'sine',.07,0,.7);noise(.6,.08,5000,.7,.3);},
- slam:()=>{tone(70,.4,'sawtooth',.2,-30);noise(.35,.35,180);}};
+ slam:()=>{tone(70,.4,'sawtooth',.2,-30);noise(.35,.35,180);},
+ // v0.72 (owner 2026-10-20, "sounds for hits and skills"): a bow and a staff shot, and a cue for each kind of skill as it is cast
+ bow:(p=1)=>{tone(260*p,.12,'triangle',.08,-120);noise(.08,.12,3000,0,.6);},magic:(p=1)=>tone(660*p,.14,'sine',.06,300),
+ fire:()=>{noise(.35,.22,700,0,.5);tone(180,.3,'sawtooth',.06,260);},
+ zap:()=>{for(let i=0;i<4;i++)tone(1800-i*300,.05,'square',.05,-900,i*.035);noise(.12,.18,5200,0,.4);},
+ frost:()=>{[2100,2600,3100].forEach((f,i)=>tone(f,.25,'triangle',.04,-400,i*.05));noise(.3,.1,6000,0,.3);},
+ holy:()=>[784,988,1175,1568].forEach((f,i)=>tone(f,.4,'sine',.06,0,i*.06)),
+ cast:()=>{tone(440,.25,'sine',.07,520);tone(220,.3,'triangle',.05,260,.03);},
+ power:()=>{noise(.18,.22,900,0,.6);tone(110,.2,'sawtooth',.09,-40);},
+ guardup:()=>{tone(620,.18,'triangle',.08,-120);noise(.06,.2,2400);},
+ buff:()=>[392,523,659].forEach((f,i)=>tone(f,.18,'triangle',.07,40,i*.06))};
+const SKSND={fireball:'fire',bmeteor:'fire',bolt:'zap',bchain:'zap',gflash:'zap',pflash:'zap',tillu:'zap',nova:'frost',bzero:'frost',
+ rapid:'bow',pierce:'bow',rain:'bow',larrow:'bow',mcross:'holy',mflash:'holy',mwind:'holy',mheaven:'holy',roar:'holy',
+ strike:'power',smash:'power',kill:'power',wave:'power',revolve:'power',whirl:'power',charge:'power',rcut:'power',
+ fort:'guardup',bash:'guardup',taunt:'guardup',rage:'buff',cry:'buff',bcry:'buff',focus:'buff',icomb:'buff',lrep:'buff',qmove:'buff',fly:'buff'};
+function skSnd(k){const f=SFX[SKSND[k]||'cast'];if(f)f();}
+/* monster voices (owner 2026-10-20: "add sounds for hits and skills, above all the enemies, the game has no sound and no
+   life"). Every monster speaks by its kind (critter, wolf, boar, beast, stone, goblin, man, reptile, dragon, fish-man,
+   undead, demon): a cry when it sees you, a growl as it winds up, a bark with its strike, a yelp when hit, a death cry, and
+   now and then a sound while it roams. They come from what each copy of a monster does on this screen, so online everyone
+   hears their own copy (followers replay the host's moves); softer with distance, none past SFXR, at most 5 in half a second.
+   Bigger monsters sound lower. VOXK: type -> [kind, pitch]; any other type goes by its fighting style (AIK). */
+const VOXK={rabbit:['crit',1],foxmouse:['crit',1.1],sellobu:['beast',.9],wolf:['beast',1],pwolf:['beast',.95],hwolf:['beast',.85],cwolf:['beast',.9],
+ boar:['boar',1],rboar:['boar',.9],fboar:['boar',.85],cboar:['boar',.9],zibal:['boar',.75],
+ bear:['heavy',1],gbear:['heavy',.9],cbear:['heavy',.95],troll:['heavy',1.1],ogre:['heavy',.95],eti:['heavy',1.05],fgiant:['heavy',.8],
+ sanju1:['heavy',.9],sanju2:['heavy',.85],sanju3:['heavy',.8],sanju4:['heavy',.75],
+ golem:['stone',1],cgolem:['stone',1],mgolem:['stone',.95],ogolem:['stone',.9],gargoyle:['stone',1.2],aweapon:['stone',.8],guardian:['stone',.7],
+ goblin:['gob',1],cgob:['gob',1],gchief:['gob',.85],gshaman:['gob',1.1],kobold:['gob',1.05],kking:['gob',.85],gcrown:['gob',.9],
+ forc:['man',.62],fochief:['man',.55],
+ lizard:['rept',1],ilizard:['rept',1],lizw:['rept',.85],salamander:['rept',.9],hdrac:['rept',.8],hdrac2:['rept',.75],hdrac3:['rept',.7],
+ hydra:['drag',1],trauka:['drag',.8],merman:['fish',1],smerman:['fish',.9],
+ skel:['dead',1],wraith:['dead',1.1],bknight:['dead',.8],dk_lant:['dead',.8],dk_alex:['dead',.8],dk_krug:['dead',.8],dk_gis:['dead',.8],dk_povia:['dead',.85],dk_madra:['dead',.75],
+ mshade:['dead',.9],sdoll:['dead',1.3],demon:['demon',1],furfu:['demon',.8],aprison:['demon',.9]};
+const VOXA={hop:'crit',lunge:'beast',charge:'boar',brute:'heavy',slam:'stone',soldier:'man'};
+const voxOf=ty=>VOXK[ty]||[VOXA[AIK[ty]]||'man',1];
+function growl(f,d,v=.08,dl=0){const n=Math.max(2,Math.round(d/.05));for(let i=0;i<n;i++)tone(f*(1+(Math.random()-.5)*.2),.065,'sawtooth',v*(1-i/n*.5),0,dl+i*d/n);noise(d,v*.8,f*2.4,dl,1.2);}
+const gurgle=(f,n,v=.06)=>{for(let i=0;i<n;i++)tone(f*(1+Math.random()*.6),.05,'sine',v,f*.4,i*.05);};
+const rattle=(n,dl=0)=>{for(let i=0;i<n;i++)noise(.03,.2,3000,dl+i*.045,2);};
+const VOX={ // a: sees you, w: winds up (or roams), s: strikes, h: is hit, d: dies; p = pitch
+ crit:{a:p=>tone(1400*p,.08,'square',.04,500*p),w:p=>tone(1100*p,.06,'square',.035,200*p),s:p=>tone(1600*p,.05,'square',.04,-300*p),h:p=>tone(1800*p,.09,'square',.05,-700*p),d:p=>tone(1500*p,.28,'square',.05,-1100*p)},
+ beast:{a:p=>{tone(330*p,.6,'sine',.07,280*p);tone(660*p,.5,'triangle',.03,500*p,.05);},w:p=>growl(90*p,.45,.07),s:p=>{noise(.06,.2,900*p);tone(420*p,.08,'sawtooth',.07,-200*p);},
+  h:p=>tone(900*p,.14,'triangle',.07,-500*p),d:p=>tone(700*p,.55,'sine',.06,-450*p)},
+ boar:{a:p=>{noise(.15,.22,500*p,0,2);noise(.12,.2,450*p,.18,2);},w:p=>growl(120*p,.35,.07),s:p=>tone(1100*p,.18,'sawtooth',.05,-300*p),h:p=>tone(800*p,.15,'sawtooth',.06,-300*p),d:p=>tone(900*p,.55,'sawtooth',.06,-650*p)},
+ heavy:{a:p=>{growl(70*p,.8,.11);tone(140*p,.8,'sawtooth',.06,-40*p);},w:p=>growl(60*p,.5,.09),s:p=>{noise(.1,.25,300*p);tone(90*p,.12,'sawtooth',.09,-30*p);},h:p=>growl(110*p,.18,.08),
+  d:p=>{growl(80*p,.9,.1);tone(100*p,1,'sawtooth',.06,-60*p);}},
+ stone:{a:p=>{noise(.6,.25,140*p,0,.8);tone(55*p,.6,'triangle',.1,-15*p);},w:p=>noise(.5,.2,200*p,0,1.5),s:p=>{noise(.12,.3,180*p);tone(60*p,.15,'square',.08,-20*p);},
+  h:p=>{tone(1300*p,.12,'triangle',.06);noise(.05,.2,2400);},d:p=>{noise(1,.3,120*p,0,.6);for(let i=0;i<5;i++)noise(.12,.2,500+Math.random()*700,i*.12);}},
+ gob:{a:p=>[700,900,650].forEach((f,i)=>tone(f*p,.06,'square',.05,80,i*.07)),w:p=>tone(500*p,.2,'square',.05,200*p),s:p=>tone(800*p,.08,'square',.06,-300*p),h:p=>tone(900*p,.12,'square',.06,-400*p),d:p=>tone(800*p,.4,'square',.05,-600*p)},
+ man:{a:p=>{tone(220*p,.25,'sawtooth',.06,60*p);tone(440*p,.2,'square',.02,60*p);},w:p=>tone(170*p,.25,'sawtooth',.05,40*p),s:p=>{noise(.08,.15,1200*p);tone(240*p,.1,'sawtooth',.06,-80*p);},
+  h:p=>tone(200*p,.14,'sawtooth',.07,-90*p),d:p=>{tone(240*p,.6,'sawtooth',.06,-150*p);noise(.3,.08,800);}},
+ rept:{a:p=>noise(.5,.2,5000*p,0,.6),w:p=>noise(.35,.15,4000*p,0,.8),s:p=>{noise(.08,.2,2500*p);tone(300*p,.08,'sawtooth',.05,-100*p);},h:p=>{tone(500*p,.12,'sawtooth',.05,-250*p);noise(.1,.12,4000);},
+  d:p=>{noise(.6,.18,3500*p,0,.5);tone(300*p,.5,'sawtooth',.04,-200*p);}},
+ drag:{a:p=>{growl(55*p,1.2,.12);noise(1,.2,3000,0,.4);tone(110*p,1.2,'sawtooth',.07,-30*p);},w:p=>{growl(50*p,.7,.1);noise(.6,.15,2000,0,.5);},s:p=>{noise(.1,.3,300*p);tone(80*p,.15,'sawtooth',.1,-30*p);},
+  h:p=>growl(90*p,.25,.09),d:p=>{growl(60*p,1.5,.12);tone(90*p,1.6,'sawtooth',.07,-60*p);}},
+ fish:{a:p=>gurgle(300*p,6),w:p=>gurgle(260*p,3),s:p=>{noise(.08,.15,1200*p);tone(260*p,.1,'sawtooth',.05,-80*p);},h:p=>{tone(400*p,.12,'sine',.07,-200*p);noise(.08,.1,700);},d:p=>{gurgle(240*p,9);tone(300*p,.6,'sine',.05,-220*p,.2);}},
+ dead:{a:p=>{tone(440*p,.9,'sine',.05,-60*p);tone(466*p,.9,'sine',.05,-60*p);noise(.8,.06,1800,0,.4);},w:p=>{tone(330*p,.5,'triangle',.05,120*p);tone(349*p,.5,'triangle',.04,120*p);},
+  s:p=>{noise(.07,.18,2000);tone(520*p,.08,'triangle',.05,-200*p);},h:()=>rattle(4),d:p=>{tone(400*p,1,'sine',.06,-300*p);tone(415*p,1,'sine',.05,-300*p);rattle(6,.1);}},
+ demon:{a:p=>{growl(80*p,.7,.1);tone(160*p,.7,'square',.04,-60*p);tone(1200*p,.5,'sine',.03,-900*p);},w:p=>growl(70*p,.5,.09),s:p=>{noise(.1,.2,700*p);tone(150*p,.12,'sawtooth',.08,-60*p);},
+  h:p=>growl(130*p,.2,.08),d:p=>{growl(70*p,1.2,.1);tone(900*p,1,'sine',.04,-800*p);}}};
+const VOXC=[];
+function voxPlay(m,b,k,soft){if(!P)return;const d=Math.hypot(m.x-P.x,m.y-P.y);if(d>=SFXR)return;const now=performance.now()/1000;while(VOXC.length&&now-VOXC[0]>.5)VOXC.shift();
+ if(VOXC.length>=5&&k!=='d'&&!b.boss)return;VOXC.push(now);const [c,pm]=voxOf(m.type),V=VOX[c],f=V&&V[k];if(!f)return;
+ const p=pm*clamp(7/(b.r||7),.45,1.35)*(b.boss?.85:1)*(.95+monHash(m)*.1);if(window.__GS&&__GS.vox&&__GS.vox.length<80)__GS.vox.push(m.type+':'+c+':'+k);
+ SFXV=Math.max(.06,(1-d/SFXR)*(b.boss?1:.8)*(soft?.5:1));try{f(p);}finally{SFXV=1;}}
+// watches each monster for the moments it should be heard (state from the last frame in m.vx)
+function monVox(m,b,dt){if(muted||!P||mode==='title'||m.hidN)return;const v=m.vx,e=m.eng>0;
+ if(!v){m.vx={st:m.st,hp:m.hp,e,d:m.dead,tl:m.tele>0,cd:m.cd,h:-9,a:-9,w:-9,i:3+monHash(m)*12};return;}
+ const now=performance.now()/1000;
+ if(m.dead!==v.d){v.d=m.dead;if(m.dead)voxPlay(m,b,'d');}
+ if(m.dead)return;
+ if(m.hp<v.hp&&now-v.h>.3){v.h=now;voxPlay(m,b,'h');}v.hp=m.hp;
+ if(e&&!v.e&&now-v.a>8){v.a=now;voxPlay(m,b,'a');}v.e=e;
+ if(m.st==='tele'&&v.st!=='tele'&&now-v.w>1.1){v.w=now;voxPlay(m,b,'w');}
+ if(v.st==='tele'&&m.st&&m.st!=='tele'){voxPlay(m,b,'s');if(m.mv&&m.mv.k==='arc'&&Math.hypot(m.x-P.x,m.y-P.y)<SFXR){SFXV=.5;try{SFX.swing(clamp(8/(b.r||7),.6,1.2));}finally{SFXV=1;}}}
+ v.st=m.st;
+ const tl=m.tele>0;if(b.boss&&!m.st){if(tl&&!v.tl)voxPlay(m,b,'w');else if(!tl&&v.tl&&e)voxPlay(m,b,'s');}v.tl=tl;
+ if(!AIK[m.type]&&!b.boss&&m.cd>v.cd+.5&&e)voxPlay(m,b,'s');v.cd=m.cd;
+ if(!e&&(v.i-=dt)<=0){v.i=8+Math.random()*14;if(Math.hypot(m.x-P.x,m.y-P.y)<220)voxPlay(m,b,'w',1);}}
+
 
 /* ---------------- i18n ---------------- */
 let lang='ar';
@@ -3057,14 +3135,14 @@ function tryAttack(ax,ay,mul){
  if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);if(PVP)pvpSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
  if(k==='bow'||k==='staff'){if(k==='bow'&&ipOn('larrow')){shoot('magic',ax,ay,(mul||1)*1.1,{pierce:1});return;}shoot(k==='bow'?'arrow':'magic',ax,ay,mul||1);return;}
- P.slash={t:.14,a:Math.atan2(ay,ax)};if(FXME)fxR(['w',Math.round(P.slash.a*100)/100]);SFX.swing();vfx('slash',P.x+ax*4,P.y-7+ay*4,{angle:P.slash.a,rarity:weapon().r||0});
+ P.slash={t:.14,a:Math.atan2(ay,ax)};if(FXME)fxR(['w',Math.round(P.slash.a*100)/100]);SFX.swing({dagger:1.35,spear:.85,hammer:.7}[k]||1);vfx('slash',P.x+ax*4,P.y-7+ay*4,{angle:P.slash.a,rarity:weapon().r||0});
  const rch=k==='spear'?19:k==='dagger'?10:12,hx=P.x+ax*rch,hy=P.y-6+ay*rch;let res=0;
  for(const m of mons){if(m.dead)continue;if(Math.hypot(m.x-hx,monY(m)-hy)<(k==='spear'?16:14)+MT[m.type].r)res=Math.max(res,hitMon(m,(mul||1)*(P.mul||1),{kx:ax,ky:ay}));}
  if(res)res===2?SFX.crit():SFX.hit();
  else{const tr=vtNear(hx,hy,18).find(tr=>Math.hypot(tr.x-hx,tr.y-8-hy)<18);if(tr&&(chopped.get(tr.k)||0)<=gTime)chop(tr);}
 }
 // arrows (bow), magic bolts (staff) and fireballs fly as projectiles
-function shoot(kind,ax,ay,mul,o={}){const sp=kind==='arrow'?260:200;proj.push({kind,x:P.x+ax*6,y:P.y-8+ay*6,vx:ax*sp,vy:ay*sp,t:o.range||(kind==='arrow'?.62:.65),mul,pierce:o.pierce,boom:o.boom,stun:o.stun,hit:new Set()});if(kind==='arrow')noise(.08,.12,3000,0,.6);else tone(kind==='fire'?330:660,.14,'sine',.06,300);}
+function shoot(kind,ax,ay,mul,o={}){const sp=kind==='arrow'?260:200;proj.push({kind,x:P.x+ax*6,y:P.y-8+ay*6,vx:ax*sp,vy:ay*sp,t:o.range||(kind==='arrow'?.62:.65),mul,pierce:o.pierce,boom:o.boom,stun:o.stun,hit:new Set()});if(kind==='arrow')SFX.bow();else SFX.magic(kind==='fire'?.5:1);}
 // any hit that lands on a standing tree chops it, same as a melee swing (max caps how many one hit fells)
 function hitTrees(x,y,r,max){let n=0;for(const tr of vtNear(x,y,r+8)){if(n>=(max||1))break;if((chopped.get(tr.k)||0)>gTime)continue;if(Math.hypot(tr.x-x,tr.y-8-y)<r){chop(tr);n++;}}return n;}
 function boom(p){hitTrees(p.x,p.y,30,3);SFX.crit();shake=.15;vfx('fire',p.x,p.y);fx.push({ring:true,big:1,x:p.x,y:p.y,t:.5});for(let i=0;i<18;i++)fx.push({x:p.x,y:p.y,vx:(rand()-.5)*120,vy:(rand()-.5)*120,t:.4,c:rand()<.5?'#ff8a1e':'#ffd24a'});mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-p.x,monY(m)-p.y)<30)hitMon(m,p.mul,{});});}
@@ -4249,7 +4327,7 @@ function useSlot(i){const k=barSkills()[i];if(!k){SFX.deny();return;}const d=SKD
  if((P.cd[k]||0)>0||P.dash>0){SFX.deny();return;}
  const wk=weapKind();if((d.need==='bow'&&wk!=='bow')||(d.need==='staff'&&wk!=='staff')||(d.need==='melee'&&(wk==='bow'||wk==='staff'))){toast(t(d.need==='bow'?'needBow':d.need==='staff'?'needStaff':'needMelee'),'warn');SFX.deny();return;}
  if(P.mp<mpC(k)){toast(t('noMP'),'warn');SFX.deny();return;}
- P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k);SKC={k,t:gTime};skUse(k);const el=$('skillbar').children[i];if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}SKF[k]();skVfx(k);numP(-34,t('sk_'+k),d.col,false);hudDirty=true;}
+ P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k);SKC={k,t:gTime};skUse(k);const el=$('skillbar').children[i];if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}SKF[k]();skSnd(k);skVfx(k);numP(-34,t('sk_'+k),d.col,false);hudDirty=true;}
 function skVfx(k){const v=fdir(),a=Math.atan2(v[1],v[0]);({whirl:()=>{for(let i=0;i<4;i++)vfx('slash',P.x,P.y-7,{angle:a+i*Math.PI/2,rarity:2});},charge:()=>vfx('dust',P.x,P.y,{n:10,angle:a+Math.PI}),nova:()=>vfx('frost',P.x,P.y-6),bolt:()=>vfx('bolt',P.x,P.y-10,{x1:P.x+v[0]*90,y1:P.y-10+v[1]*90}),smash:()=>{vfx('hit',P.x+v[0]*12,P.y-4+v[1]*12);vfx('dust',P.x+v[0]*12,P.y+v[1]*12,{n:10});},focus:()=>vfx('mana',P.x,P.y-8),rage:()=>vfx('rage',P.x,P.y),roar:()=>vfx('heal',P.x,P.y),cry:()=>vfx('rage',P.x,P.y),strike:()=>vfx('crit',P.x+v[0]*14,P.y-7+v[1]*14)}[k]||(()=>{}))();}
 function checkSkills(){pasSkills().forEach(k=>{if(!S.sk[k]){S.sk[k]=1;setTimeout(()=>{toast(t('pasNew',{s:t('sk_'+k)}),'good');SFX.notice();},500);}});clsSkills().forEach(k=>{if(skOK(k)&&!S.sk[k]){S.sk[k]=1;let i=barSkills().indexOf(k);if(i<0){const b=barSkills().slice(0,5),e=b.indexOf(null);if(e>=0){b[e]=k;S.bar=b;i=e;}}setTimeout(()=>{toast(i<0?t('skNewC',{s:t('sk_'+k)}):t('skNew',{s:t('sk_'+k),k:keyName(KB[i])}),'good');SFX.notice();},500);}});sbSig='';}
 /* item skills (owner 2026-10-19, "weapons and rings that come with an active skill while you use them, as in the novel"):
@@ -4724,7 +4802,7 @@ function update(dt){
  // monsters
  const safe=!!inTown(P.x,P.y);
  for(const m of mons){try{
-  const b=MT[m.type];
+  const b=MT[m.type];monVox(m,b,dt);
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
   if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy,fa=m.far;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));if(fa)m.far=1;vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}continue;}
   // the far north and south sleep while nobody is near (the map doubled: they would roll dice and spend time for nothing)
@@ -5223,9 +5301,9 @@ function meRun(fn,self,args){if(FXME||!NET||!P||mode!=='play')return fn.apply(se
  try{const r=fn.apply(self,args);ok=true;return r;}finally{window.setTimeout=st;FXME=0;if(ok&&P)try{fxGrab(f0,p0,d0);}catch(e){}}}
 // SAT-ONLINE-047 (owner via Claude-B, #13): the sounds of your own actions (swings, hits, dodges, being hurt, slams,
 // level-ups) ride along with their effects (meRun/asMe record them) and play for the players near you, softer with distance
-const SFXNET=['swing','hit','crit','hurt','dodge','chop','mine','clang','miss','slam','level','legendary'],SFXR=360;
+const SFXNET=['swing','hit','crit','hurt','dodge','chop','mine','clang','miss','slam','level','legendary','bow','magic','fire','zap','frost','holy','cast','power','guardup','buff'],SFXR=360;
 for(const k of SFXNET){const f=SFX[k];SFX[k]=function(...a){if(FXME&&NET&&P&&mode!=='title')try{fxR(['s',k,typeof a[0]==='number'?Math.round(a[0]*100)/100:0]);}catch(e){}return f.apply(this,a);};}
-window.__GS={heard:[]}; // test hook: the other players' sounds played here
+window.__GS={heard:[],vox:[]}; // test hook: the other players' sounds played here
 /* SAT-ONLINE-058 (owner, via Claude-B on #13): a player near you dying or coming back is heard too, the sounds yours make,
    softer with distance; from their presence turning to 'dead' and back (none for one already dead when first seen) */
 function remLife(r,fs){const a=r.anim==='dead'?1:0;if(fs.lf===undefined){fs.lf=a;return;}if(fs.lf===a)return;fs.lf=a;if(!P||mode==='title')return;
@@ -5549,7 +5627,7 @@ function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig
  else if(a==='pcBlock'){if(isBlocked(r.uid)){BLK.remove(r.uid);toast(t('pcUnblocked',{n:r.handle||'?'}));}else blockUid(r.uid,r.handle);}
  pctxSig='';}
 window.__G.toScreen=(x,y)=>{const b=stage.getBoundingClientRect();return {x:b.left+(x-camXf)*SC,y:b.top+(y-camYf)*SC};}; // tests: click a world position
-window.__G.maxHP=()=>maxHP();window.__G.mapBase=()=>mapBase;window.__G.MV=MV;window.__G.mapDraw=()=>drawMapNow();window.__G.world=()=>({TENTS,buildings,TOWNS,WELLS,ANVILS,BOARD});window.__G.skProg=skProg;window.__G.skUse=skUse;window.__G.monNames=()=>Object.keys(MT).map(k=>[k,t(k==="guardian"?"guardian":NAMEK[k]||k)]);
+window.__G.maxHP=()=>maxHP();window.__G.mapBase=()=>mapBase;window.__G.MV=MV;window.__G.mapDraw=()=>drawMapNow();window.__G.world=()=>({TENTS,buildings,TOWNS,WELLS,ANVILS,BOARD});window.__G.skProg=skProg;window.__G.skUse=skUse;window.__G.monNames=()=>Object.keys(MT).map(k=>[k,t(k==="guardian"?"guardian":NAMEK[k]||k)]);window.__G.vox=k=>VOX[voxOf(k)[0]];window.__G.spawnMon=(ty,x,y)=>{const m=newMon(ty,x,y);m.tmp=1;mons.push(m);return m;};
 window.__G.isk={mkItem,equip,itemSkills,useISlot,ipOn,itemTip,mpC,MT,rs:()=>{sbSig='';},checkSkills:()=>checkSkills(),pasOn:k=>pasOn(k)};
 addEventListener('keydown',e=>{if(e.code!=='Escape'||mode!=='play'||(e.target&&e.target.tagName==='INPUT'))return;
  if(!$('emoW').hidden){$('emoW').hidden=true;e.stopImmediatePropagation();}else if(PCTX){PCTX=null;pctxSig='';e.stopImmediatePropagation();}},true);
