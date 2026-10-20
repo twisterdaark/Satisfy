@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20v92', ver: '0.92', d: '2026-10-20',
+      ar: ['الموبايل: زرار ✥ جديد جنب ▦ بيخليك ترتّب الزراير زي ما انت عايز. اسحب الضرب أو المراوغة أو الدفاع أو الاستخدام أو شريط السكيلات أو العصا لأي مكان، واختار زرار ودوس − أو + عشان تصغّره أو تكبّره. "تمام" بيحفظ الترتيب على جهازك، و"الأصلي" بيرجّع الترتيب الأولاني'],
+      en: ['Phone: a new ✥ button beside ▦ lets you arrange the controls as you like. Drag Attack, Dodge, Guard, Use, the skill bar or the stick anywhere, and pick one and tap − or + to resize it. Done keeps the layout on your device, and Reset brings the first layout back'] },
     { v: '2026-10-20v91', ver: '0.91', d: '2026-10-20',
       ar: ['الموبايل: السكيلات والجرعات رجعت جوا الشريط القديم، وبتشتغل زي ما هي: دوسة بتضرب أقرب وحش، والسحب بيختار الاتجاه، والرجوع على الزرار بيلغي. المراوغة والدفاع والاستخدام بقوا فوق زرار الضرب'],
       en: ['Phone: the skills and potions are back in their old bar and work the same way: a tap aims at the nearest monster, a drag picks the direction, dragging back calls it off. Dodge, Guard and Use now sit above the Attack button'] },

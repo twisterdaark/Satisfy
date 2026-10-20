@@ -424,7 +424,10 @@ body.touch #ui *{touch-action:pan-x pan-y}body.touch #ui #touch,body.touch #ui #
 body.touch #skillbar,body.touch #skillbar *{touch-action:none}body.touch #skillbar .sk.cx{border-color:#ff5a4a;box-shadow:0 0 calc(var(--u)*.8) #ff5a4a}
 body.touch #tAct{right:0;bottom:0;width:0;height:0;display:block}body.touch #tAct button{position:absolute;border-radius:50%;font-size:calc(var(--u)*1.4)}body.touch #tAct button.big{font-size:calc(var(--u)*2.2);background:rgba(160,40,30,.6);border-width:3px}
 body.touch #tAct .big{right:calc(var(--u)*4);bottom:calc(var(--u)*3.5);width:calc(var(--u)*13);height:calc(var(--u)*13)}body.touch #tAct [data-tk="Space"]{right:calc(var(--u)*13);bottom:calc(var(--u)*18);width:calc(var(--u)*7.6);height:calc(var(--u)*7.6)}body.touch #tAct [data-tk="guard"]{right:calc(var(--u)*3);bottom:calc(var(--u)*18.5);width:calc(var(--u)*6.4);height:calc(var(--u)*6.4)}body.touch #tAct [data-tk="KeyE"]{right:calc(var(--u)*6);bottom:calc(var(--u)*27);width:calc(var(--u)*6.4);height:calc(var(--u)*6.4)}
-body.touch #tStick{opacity:.5;transition:opacity .15s}body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
+body.touch #tStick{opacity:.5;transition:opacity .15s}/* owner 2026-10-20: ✥ arranges the phone buttons */
+#tLayT{position:absolute;left:calc(var(--u)*22);bottom:calc(var(--u)*7);width:calc(var(--u)*5.6);height:calc(var(--u)*5);border-radius:calc(var(--u)*1);font-size:calc(var(--u)*2.4);background:rgba(14,24,52,.78);border:1px solid rgba(166,214,246,.55);color:#e8f0ff;padding:0}body.tLay #tLayT{background:rgba(255,220,120,.45)}#tLayBar{position:absolute;left:50%;top:calc(var(--u)*9);transform:translateX(-50%);display:flex;align-items:center;gap:calc(var(--u)*.8);padding:calc(var(--u)*.6) calc(var(--u)*1);background:rgba(14,24,52,.92);border:1px solid rgba(166,214,246,.6);border-radius:calc(var(--u)*1);pointer-events:auto;color:#e8f0ff;font-size:calc(var(--u)*1.4);white-space:nowrap;z-index:2}#tLayBar button{min-width:calc(var(--u)*5);height:calc(var(--u)*4.4);border-radius:calc(var(--u)*.8);background:rgba(40,60,110,.95);border:1px solid rgba(166,214,246,.55);color:#fff;font-size:calc(var(--u)*1.6);padding:0 calc(var(--u)*1)}
+body.tLay #tStick,body.tLay #skillbar,body.tLay #tAct button,body.tLay #tKeysT,body.tLay #tLayT{outline:1px dashed rgba(255,224,138,.6);outline-offset:2px;opacity:1}body.tLay .lsel{outline:2px solid #ffe08a!important;outline-offset:3px}
+body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
 
 </style>
 
@@ -5280,6 +5283,16 @@ let MSX=null,MSY=null;stage.addEventListener('mousemove',e=>{MSX=e.clientX;MSY=e
    button goes where the finger points (TAIM, with how far for a skill thrown at a spot), else at the nearest monster in
    reach, else where you face. The stick is analog (TSV): the farther it is pushed, the faster you walk. */
 let TAIM=null,TSV=null,SKA=null;const TAIM_MIN=18;
+// owner 2026-10-20: the phone buttons can be moved and resized (✥); kept on this device as the centre of each control
+// (a fraction of the screen) and its size
+const TLAY_K='satisfy_tlay',TLAY_IDS={atk:'#tAct [data-tk="atk"]',dodge:'#tAct [data-tk="Space"]',guard:'#tAct [data-tk="guard"]',use:'#tAct [data-tk="KeyE"]',bar:'#skillbar',stick:'#tStick',keys:'#tKeysT',lay:'#tLayT'};
+let TLAY=(()=>{try{return JSON.parse(localStorage.getItem(TLAY_K)||'{}')||{};}catch(e){return {};}})(),tLayEnd=()=>{};
+function tLayOne(k){const el=document.querySelector(TLAY_IDS[k]),g=TLAY[k];if(!el)return;const z=el.style;if(!g){z.left=z.top=z.right=z.bottom=z.transform='';return;}
+ const st=stage.getBoundingClientRect(),p=el.offsetParent;if(!p||!st.width)return;const pr=p.getBoundingClientRect();z.right=z.bottom='auto';
+ z.left=(g.x*st.width+st.left-pr.left-el.offsetWidth/2)+'px';z.top=(g.y*st.height+st.top-pr.top-el.offsetHeight/2)+'px';z.transform=g.s&&g.s!==1?`scale(${g.s})`:'';}
+function tLayApply(){if(!TOUCH)return;for(const k in TLAY_IDS)tLayOne(k);}
+Object.assign(STR.ar,{tLayH:'اسحب أي زرار لمكانه، واختار زرار ودوس − أو + عشان تصغّره أو تكبّره',tLayR:'الأصلي',tLayD:'تمام'});
+Object.assign(STR.en,{tLayH:'Drag any button where you like; pick one and tap − or + to resize it',tLayR:'Reset',tLayD:'Done'});
 function tNearM(r){let b=null,bd=r;for(const m of mons){if(m.dead||m.spar)continue;const d=Math.hypot(m.x-P.x,monY(m)-(P.y-8));if(d<bd){bd=d;b=m;}}return b;}
 function tAim(r){if(TAIM)return [TAIM.x,TAIM.y];const m=tNearM(r);if(!m)return null;const dx=m.x-P.x,dy=monY(m)-(P.y-8),l=Math.hypot(dx,dy)||1;return [dx/l,dy/l];}
 function tAimEnts(ents){if(!S||!P)return;const a=SKA.on?TAIM:null,m=!SKA.on&&tNearM(200);if(!a&&!m)return;
@@ -5530,7 +5543,7 @@ function renderSkillbar(){const b=barSkills(),ik=itemSkills(),sig=b.join()+'|'+i
   // the two item-skill slots: only shown while something worn carries a skill
   +(ik[0]?ik.map((k,j)=>{const kb=`<kbd>${keyName(IKB[j])}</kbd>`;if(!k)return `<button class="sk e it" id="isk${j}" data-isk="${j}" data-tip="${esc(t('iskSlotE'))}">${kb}<i></i></button>`;const d=SKD[k];
    return `<button class="sk it" id="isk${j}" data-isk="${j}" data-tip="${esc(`<b>${t('sk_'+k)}</b> <small>(${t('iskItem')})</small><br>${t('skd_'+k)}<br><small>${t('skCost',{mp:mpC(k),cd:Math.round(d.cd*skCostM(k))})}</small>${skLvTxt(k)}`)}"><img src="${skIcon(k)}">${kb}<b class="lv">${skLv(k)}</b><i></i></button>`;}).join(''):'')
-  +['hpot','mpot'].map(k=>`<button class="sk pot" id="pot_${k}" data-pot="${k}" data-tip="${esc(`<b>${t(k)}</b><br>${t(k+'D')}`)}"><img src="${icon(k)}"><kbd>${keyName(POT[k].key)}</kbd><b class="pn"></b><i></i></button>`).join('');}
+  +['hpot','mpot'].map(k=>`<button class="sk pot" id="pot_${k}" data-pot="${k}" data-tip="${esc(`<b>${t(k)}</b><br>${t(k+'D')}`)}"><img src="${icon(k)}"><kbd>${keyName(POT[k].key)}</kbd><b class="pn"></b><i></i></button>`).join('');if(TOUCH&&TLAY.bar)tLayOne('bar');}
 function updateSkillbar(){renderSkillbar();const b=barSkills(),els=$('skillbar').children;for(let i=0;i<6;i++){const k=b[i],el=els[i];if(!k||!el)continue;const d=SKD[k],c=P.cd[k]||0;el.classList.toggle('off',c>0||P.mp<mpC(k));el.querySelector('i').style.height=(c>0?clamp(c/d.cd,0,1)*100:0)+'%';}
  itemSkills().forEach((k,j)=>{const el=$('isk'+j);if(!k||!el)return;const d=SKD[k],c=P.cd[k]||0;el.classList.toggle('off',c>0||P.mp<mpC(k));el.querySelector('i').style.height=(c>0?clamp(c/d.cd,0,1)*100:0)+'%';});
  ['hpot','mpot'].forEach(k=>{const el=$('pot_'+k);if(!el)return;const n=S[k]||0;el.querySelector('.pn').textContent=n;el.classList.toggle('off',!n||(P.pcd||0)>0);el.querySelector('i').style.height=((P.pcd||0)>0?clamp(P.pcd/5,0,1)*100:0)+'%';});}
@@ -7556,7 +7569,7 @@ const TKEY={kD:'Space',kE:'KeyE',kC:'KeyC',kI:'KeyI',kU:'KeyU',kM:'KeyM',kGu:'Ke
 function tKey(code,down){dispatchEvent(new KeyboardEvent(down?'keydown':'keyup',{code,key:code,bubbles:true}));}
 function tStickAt(e){const el=$('tStick'),b=el.getBoundingClientRect(),r=b.width/2,dx=(e.clientX-b.left-r)/r,dy=(e.clientY-b.top-r)/r,l=Math.hypot(dx,dy),k=l>1?1/l:1;
  K.left=dx<-.35;K.right=dx>.35;K.up=dy<-.35;K.down=dy>.35;TSV=l>.18?{x:dx*k,y:dy*k}:null;el.classList.add('on');$('tKnob').style.transform=`translate(${dx*k*r*.6}px,${dy*k*r*.6}px)`;}
-function tStickOff(){K.left=K.right=K.up=K.down=false;TSV=null;$('tKnob').style.transform='';const s=$('tStick');s.classList.remove('on');s.style.left=s.style.top=s.style.bottom='';}
+function tStickOff(){K.left=K.right=K.up=K.down=false;TSV=null;$('tKnob').style.transform='';const s=$('tStick');s.classList.remove('on');s.style.left=s.style.top=s.style.bottom='';tLayOne('stick');}
 let tSig='';
 // owner 2026-10-20: the online row (options, party, duel, yes/no, chat, ping, emote) stays folded behind ☰, and the menu keys
 // (status, bag, gear, map, guild, ride, menu) behind ▦; each opens on a tap and folds again after a pick
@@ -7564,7 +7577,7 @@ let tNetOpen=false;
 // yes and no show by themselves only while a party invite or a duel waits for an answer
 function tAsking(){if(PARTY&&PARTY.pendingInvite())return true;if(!DUEL)return false;const ph=DUEL.state().phase;return !!DUEL.pendingChallenge()||ph==='ready'||ph==='asking';}
 function touchTick(){const show=['play','dialog','cut'].includes(mode),net=show&&!!NET&&Satisfy.local.inGame(),ask=net&&tAsking(),sig=show+':'+net+':'+ask;if(sig===tSig)return;tSig=sig;
- $('touch').hidden=!show;$('tNetT').hidden=!net;$('tAsk').hidden=!ask;$('tNet').hidden=!net||!tNetOpen;$('tNetT').classList.toggle('open',net&&tNetOpen);if(!show){tStickOff();K.atk=false;guardOff();}}
+ $('touch').hidden=!show;if(show)tLayApply();else tLayEnd();$('tNetT').hidden=!net;$('tAsk').hidden=!ask;$('tNet').hidden=!net||!tNetOpen;$('tNetT').classList.toggle('open',net&&tNetOpen);if(!show){tStickOff();K.atk=false;guardOff();}}
 if(TOUCH){document.body.classList.add('touch');const st=$('tStick');
  let sid=null; // the finger on the stick; captured so a drag past its edge keeps steering
  st.addEventListener('pointerdown',e=>{e.preventDefault();audio();sid=e.pointerId;try{st.setPointerCapture(sid);}catch(_){}tStickAt(e);});
@@ -7600,7 +7613,32 @@ if(TOUCH){document.body.classList.add('touch');const st=$('tStick');
   if(go){SBPD=performance.now();if(a.b.dataset.sk!==undefined)useSlot(+a.b.dataset.sk);else useISlot(+a.b.dataset.isk);}TAIM=null;};
  addEventListener('pointerup',skUp);addEventListener('pointercancel',skUp);
  // what the hint offers (talk, pick up, enter...) is a tap on the hint itself, like Use
- $('hint').addEventListener('pointerdown',e=>{e.preventDefault();audio();tKey('KeyE',true);tKey('KeyE',false);});}
+ $('hint').addEventListener('pointerdown',e=>{e.preventDefault();audio();tKey('KeyE',true);tKey('KeyE',false);});
+ /* owner 2026-10-20: ✥ arranges the phone buttons: while it is on, drag Attack, Dodge, Guard, Use, the skill bar, the stick
+    or the menu buttons where you like; pick one and tap − or + to make it smaller or bigger; Reset brings the first layout
+    back and Done (or ✥ again) keeps it on this device. Nothing else answers a finger meanwhile. */
+ const lt=document.createElement('button');lt.id='tLayT';lt.textContent='✥';$('touch').appendChild(lt);
+ const lb=document.createElement('div');lb.id='tLayBar';lb.hidden=true;lb.innerHTML='<span></span><button data-l="-">−</button><button data-l="+">+</button><button data-l="r"></button><button data-l="d"></button>';$('touch').appendChild(lb);
+ let lay=null,laySel=null;const layIs=()=>document.body.classList.contains('tLay');
+ const layKey=el=>{for(const k in TLAY_IDS){const c=document.querySelector(TLAY_IDS[k]);if(c&&(c===el||c.contains(el)))return k;}return null;};
+ const layMark=()=>{for(const k in TLAY_IDS){const c=document.querySelector(TLAY_IDS[k]);if(c)c.classList.toggle('lsel',k===laySel);}};
+ const layPos=k=>{const r=document.querySelector(TLAY_IDS[k]).getBoundingClientRect(),st=stage.getBoundingClientRect();return {x:(r.left+r.width/2-st.left)/st.width,y:(r.top+r.height/2-st.top)/st.height,s:1};};
+ const laySave=()=>{try{localStorage.setItem(TLAY_K,JSON.stringify(TLAY));}catch(e){}};
+ const layOn=()=>{tStickOff();K.atk=false;guardOff();document.body.classList.remove('keysOpen');document.body.classList.add('tLay');lb.hidden=false;
+  lb.querySelector('span').textContent=t('tLayH');lb.querySelector('[data-l="r"]').textContent=t('tLayR');lb.querySelector('[data-l="d"]').textContent=t('tLayD');laySel=null;layMark();};
+ tLayEnd=()=>{if(!layIs())return;document.body.classList.remove('tLay');lb.hidden=true;lay=null;laySel=null;layMark();laySave();};
+ addEventListener('pointerdown',e=>{const on=layIs();if(!on&&e.target!==lt)return;e.preventDefault();e.stopPropagation();audio();
+  if(!on){layOn();return;}
+  const b=lb.contains(e.target)&&e.target.closest('[data-l]');if(lb.contains(e.target)){if(!b)return;const l=b.dataset.l;
+   if(l==='d')tLayEnd();else if(l==='r'){TLAY={};tLayApply();laySel=null;layMark();}
+   else if(laySel){const g=TLAY[laySel]||(TLAY[laySel]=layPos(laySel));g.s=clamp(Math.round(((g.s||1)+(l==='+'?.1:-.1))*10)/10,.6,1.6);tLayOne(laySel);}return;}
+  const k=layKey(e.target);laySel=k;layMark();if(!k)return;const g=TLAY[k]||(TLAY[k]=layPos(k));lay={id:e.pointerId,k,x:e.clientX,y:e.clientY,gx:g.x,gy:g.y,moved:false};},true);
+ addEventListener('pointermove',e=>{if(!layIs())return;e.stopPropagation();const d=lay;if(!d||e.pointerId!==d.id)return;const st=stage.getBoundingClientRect(),dx=e.clientX-d.x,dy=e.clientY-d.y;
+  if(!d.moved&&Math.hypot(dx,dy)<6)return;d.moved=true;const g=TLAY[d.k];g.x=clamp(d.gx+dx/st.width,.02,.98);g.y=clamp(d.gy+dy/st.height,.03,.97);tLayOne(d.k);},true);
+ for(const ev of ['pointerup','pointercancel'])addEventListener(ev,e=>{if(!layIs())return;e.stopPropagation();const d=lay;if(!d||e.pointerId!==d.id)return;lay=null;
+  if(d.k==='lay'&&!d.moved)tLayEnd();},true);
+ addEventListener('click',e=>{if(layIs()||e.target===lt){e.stopPropagation();e.preventDefault();}},true);
+ addEventListener('resize',()=>setTimeout(tLayApply,60));}
 })();
 </script>
 </body></html>

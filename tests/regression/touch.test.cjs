@@ -300,3 +300,58 @@ test('a phone: floating analog stick, Attack and skills aim themselves, a dragge
     assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+// owner 2026-10-20: ✥ arranges the phone buttons: drag them where you like, resize them, keep it, or bring the first layout back
+test('a phone: ✥ moves and resizes the buttons, nothing else answers meanwhile, and the layout is kept', async () => {
+  const phone = { viewport: { width: 844, height: 390 }, screen: { width: 844, height: 390 }, isMobile: true, hasTouch: true };
+  const ctx = await H.newContext({ device: phone });
+  try {
+    const g = await H.openGame({ ctx });
+    await H.newGame(g, LOOK);
+    await g.step(3);
+    const pe = (sel, type, x, y, id = 21) => g.eval(([s, t, x, y, id]) => document.querySelector(s).dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: id, pointerType: 'touch', isPrimary: true, clientX: x, clientY: y })), [sel, type, x, y, id]);
+    const box = (s) => g.eval((s) => { const b = document.querySelector(s).getBoundingClientRect(); return { x: b.left + b.width / 2, y: b.top + b.height / 2, w: b.width }; }, s);
+    const ATK = '#tAct [data-tk="atk"]';
+    const t0 = await box('#tLayT');
+    await pe('#tLayT', 'pointerdown', t0.x, t0.y); await pe('#tLayT', 'pointerup', t0.x, t0.y);
+    assert.equal(await g.eval(() => document.body.classList.contains('tLay') && !document.getElementById('tLayBar').hidden), true, '✥ opens the arranging');
+    assert.match(await g.eval(() => document.getElementById('tLayBar').textContent), /Drag any button/);
+    // drag Attack to the middle of the screen: it moves and does not swing
+    await g.eval(() => { window.__G.P.acd = 0; });
+    const a0 = await box(ATK);
+    await pe(ATK, 'pointerdown', a0.x, a0.y);
+    await pe(ATK, 'pointermove', 422, 200); await pe(ATK, 'pointerup', 422, 200);
+    await g.step(2);
+    let a1 = await box(ATK);
+    assert.ok(Math.abs(a1.x - (a0.x + 422 - a0.x)) < 3 && Math.abs(a1.y - 200) < 3, 'moved: ' + JSON.stringify([a0, a1]));
+    assert.equal(await g.eval(() => window.__G.P.acd > 0), false, 'no swing while arranging');
+    // bigger twice, smaller once
+    for (const l of ['+', '+', '-']) { const b = await box(`#tLayBar [data-l="${l}"]`); await pe(`#tLayBar [data-l="${l}"]`, 'pointerdown', b.x, b.y); }
+    await g.page.waitForTimeout(400); // buttons ease into a new size
+    a1 = await box(ATK);
+    assert.ok(Math.abs(a1.w / a0.w - 1.1) < 0.02, 'resized ' + a1.w / a0.w);
+    assert.ok(Math.abs(a1.x - 422) < 3, 'keeps its centre');
+    // Done keeps it on this device; Attack works again where it is now
+    const d = await box('#tLayBar [data-l="d"]');
+    await pe('#tLayBar [data-l="d"]', 'pointerdown', d.x, d.y);
+    const saved = await g.eval(() => JSON.parse(localStorage.getItem('satisfy_tlay')));
+    assert.ok(saved.atk && Math.abs(saved.atk.s - 1.1) < 0.01, JSON.stringify(saved));
+    await ptr(g, ATK, 'pointerdown'); await g.step(2);
+    assert.equal(await g.eval(() => window.__G.P.acd > 0), true, 'swings again');
+    await ptr(g, ATK, 'pointerup');
+    // the next time the game opens on this phone
+    const g2 = await H.openGame({ ctx, storage: { satisfy_tlay: JSON.stringify(saved) } });
+    await H.newGame(g2, LOOK);
+    await g2.step(3);
+    const b2 = await g2.eval(() => { const b = document.querySelector('#tAct [data-tk="atk"]').getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; });
+    assert.ok(Math.abs(b2[0] - 422) < 3 && Math.abs(b2[1] - 200) < 3, 'kept: ' + b2);
+    // Reset: the first layout again
+    await g.eval(() => { const lt = document.getElementById('tLayT'), b = lt.getBoundingClientRect(), f = (t, el) => el.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: 23, pointerType: 'touch', clientX: b.left + 5, clientY: b.top + 5 })); f('pointerdown', lt); f('pointerup', lt); });
+    const r = await box('#tLayBar [data-l="r"]');
+    await pe('#tLayBar [data-l="r"]', 'pointerdown', r.x, r.y);
+    await g.page.waitForTimeout(400);
+    const a2 = await box(ATK);
+    assert.ok(Math.abs(a2.x - a0.x) < 2 && Math.abs(a2.y - a0.y) < 2 && Math.abs(a2.w - a0.w) < 1, 'back to the first layout');
+    assert.deepEqual(g.errors, []); assert.deepEqual(g2.errors, []);
+  } finally { await ctx.close(); }
+});
