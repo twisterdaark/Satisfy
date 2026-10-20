@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20n', ver: '0.53', d: '2026-10-20',
+      ar: ['أونلاين: المسابقة الوطنية: كل ساعتين (على الساعات الزوجية بتوقيت جرينتش) نص ساعة في 3 مراحل: الصيد، والصناعة، والساحة',
+        'كل مرحلة ليها نقطها، والشريط فوق بيوريك المرحلة والوقت ونقطك ومركزك، وزرار "المسابقة" في قايمة اللاعبين فيه الترتيب',
+        'في الآخر كل اللي جاب نقط بياخد دهب حسب مركزه، والأول بياخد لقب "بطل المسابقة الوطنية" والعالم كله بيعرف'],
+      en: ['Online: the National Competition: every two hours (even hours UTC), half an hour in 3 stages: hunting, production and the arena',
+        'Each stage scores its own way; the bar at the top shows the stage, the time, your points and your rank, and "Nat. Comp." in the player list has the board',
+        'At the end everyone who scored gets gold by rank; the first gets the title "National Champion" and the whole world hears it'] },
     { v: '2026-10-20j', ver: '0.52', d: '2026-10-20',
       ar: ['أونلاين: قرعة غنايم الغارة: كل بوس بتقتله الغارة بيطلع قطعة زيادة (إيبك وساعات يونيك) للي حاربوه: محتاجها، عايزها، أو سيبها',
         'المحتاج قبل العايز، وبعدين أعلى رقم من 1 لـ 100، والكل بيشوف مين كسب وبكام، والكسبان بس هو اللي بياخدها'],

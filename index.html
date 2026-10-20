@@ -109,7 +109,8 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 .toast{background:rgba(8,14,30,.85);border:1px solid rgba(127,180,255,.5);padding:calc(var(--u)*.3) calc(var(--u)*1.1);border-radius:calc(var(--u)*.4);font-weight:700;animation:tin .25s ease-out}
 .toast.warn{border-color:#ff7a6a;color:#ffd0c8}.toast.good{border-color:var(--gold);color:#ffe7a8}
 @keyframes tin{from{opacity:0;transform:translateY(-6px)}}
-#ui:has(#dialog:not([hidden])) #evbar,#ui:has(#dialog:not([hidden])) #sgbar{visibility:hidden}
+#ui:has(#dialog:not([hidden])) #evbar,#ui:has(#dialog:not([hidden])) #sgbar,#ui:has(#dialog:not([hidden])) #natbar{visibility:hidden}
+#natbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*6.4);padding:calc(var(--u)*.35) calc(var(--u)*1.4);text-align:center;pointer-events:none;border-color:#5aa2ff;white-space:nowrap}#natbar b{color:#9fd0ff}
 #evbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*1.2);padding:calc(var(--u)*.35) calc(var(--u)*1.4);text-align:center;pointer-events:none;border-color:var(--gold);white-space:nowrap}#evbar b{color:var(--gold)}#sgbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*3.8);padding:calc(var(--u)*.35) calc(var(--u)*1.4);text-align:center;pointer-events:none;border-color:#c83a3a;white-space:nowrap}#sgbar b{color:#ff8a7a}
 #announce{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*6);width:calc(var(--u)*62);text-align:center;border-color:var(--gold);box-shadow:0 0 calc(var(--u)*2.5) rgba(255,194,26,.55);background:rgba(36,24,6,.92)}
 #announce .head{color:var(--gold);font-size:calc(var(--u)*2.1)}
@@ -437,8 +438,8 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
       <div id="toasts"></div>
       <div id="loot"></div>
       <div id="evbar" class="sys" hidden></div>
-      <div id="sgbar" class="sys" hidden></div>
-      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plBnt" data-act="plBnt" data-i18n="bntBoard"></button><button id="plRnk" data-act="plRnk" data-i18n="rnkBoard"></button></div></div>
+      <div id="sgbar" class="sys" hidden></div><div id="natbar" class="sys" hidden></div>
+      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plBnt" data-act="plBnt" data-i18n="bntBoard"></button><button id="plRnk" data-act="plRnk" data-i18n="rnkBoard"></button><button id="plNat" data-act="plNat" data-i18n="natBoard"></button></div></div>
       <div id="netRepW" class="sys" hidden><div id="netRepT"></div><div class="row"><button id="netRepBtn" data-act="netTakeBack"></button></div></div>
       <div id="duelInv" class="sys" hidden><div id="duelInvT"></div><div class="row"><button id="duelBtnA" data-act="dAccept"></button><button id="duelBtnB" data-act="dDecline"></button><button id="duelBtnC" class="blk" data-act="dBlock" data-i18n="pBlock"></button></div></div>
       <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
@@ -632,6 +633,7 @@ body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-in
  'src/net/pvp.js',
  'src/net/trade.js',
  'src/net/guild.js',
+ 'src/net/natcomp.js',
  'src/net/chat.js',
  'src/net/raid.js',
  'src/net/cloud.js',
@@ -2674,7 +2676,7 @@ function qCount(id){const o=QD[id].obj,s=S.qs[id];if(!s)return 0;if(o.t==='have'
 const qReady=id=>{const s=S.qs[id];return !!s&&s.st===1&&qCount(id)>=QD[id].obj.n;};
 function qAvail(id){const q=QD[id];return !S.qs[id]&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2)&&(!q.cls||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)));}
 function qObjText(id){const o=QD[id].obj;return t(o.t==='craftR'?'o_craftR':'o_'+o.t,{it:o.t==='deliver'?t(o.it):o.t==='escort'?t('escN_'+o.it):itN(o.it),c:Math.min(qCount(id),o.n),n:o.n});}
-function qEvent(type,key,r,slot){domainEv(type,key,r,slot);for(const id in S.qs){const s=S.qs[id],q=QD[id];if(!q||s.st!==1)continue;const o=q.obj,was=qReady(id);
+function qEvent(type,key,r,slot){domainEv(type,key,r,slot);natEv(type,key,r);for(const id in S.qs){const s=S.qs[id],q=QD[id];if(!q||s.st!==1)continue;const o=q.obj,was=qReady(id);
   if((o.t===type&&o.it===key)||(type==='craft'&&o.t==='craftR'&&r>=1&&slot!=='x')){s.c=(s.c||0)+1;if(!was&&qReady(id)){toast(t('retTo',{w:t(q.by)}),'good');SFX.quest();}}}hudDirty=true;}
 function acceptQ(id){S.qs[id]={st:1,c:0};if(QD[id].obj.t==='escort')setTimeout(()=>startEscort(id),300);toast(t('qNew',{q:qName(id)}),'good');SFX.quest();hudDirty=true;checkSkills();save(true);}
 function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]);S.arrows[r]-=k;n-=k;}}
@@ -3368,7 +3370,7 @@ let annT=0;function announce(msg,own){logMsg(msg);const W=$('announce');W.queryS
  $('anntext').textContent=msg;W.hidden=false;annT=5;if(!own&&CHAT&&CHAT.note&&S&&!S.__demo)CHAT.note(msg);}
 // SAT-ONLINE-026 (owner feedback 12): announcements about you, and the story notices (annGrid), also reach everyone online
 // through the news feed, named by your account ID. A story notice is shown once per character, whoever's clock fires it first.
-const NEWS=['bntDone','evWin','evCap','castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
+const NEWS=['natWin','bntDone','evWin','evCap','castNews','terrNews','drDown','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
 function annArgs(p,n){const o={...p,n};if('rk' in o){o.r=t('r'+o.rk);delete o.rk;}return o;}
 function annW(k,p){p=p||{};announce(t(k,annArgs(p,t('pname'))));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!netId)return; // no account ID yet: the rules take news only under one
  const q={};for(const f of ['lv','f','rk'])if(typeof p[f]==='number')q[f]=p[f];NETTR.feedSay('news',Object.assign({from:NET.uid,h:netId||S.look.n,k},Object.keys(q).length?{p:q}:{}));}
@@ -3841,6 +3843,7 @@ function act(a){
  else if(a==='pcClose'||a==='pcInvite'||a==='pcDuel'||a==='pcBlock'||a==='pcTrade'||a==='pcGuild'||a==='pcBounty')pctxAct(a);
  else if(a==='gdYes'||a==='gdNo')guildAct(a);
  else if(a==='plBnt')bntBoard();
+ else if(a==='plNat')natBoard();
  else if(/^tr[A-Z]/.test(a))tradeAct(a);
  else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
@@ -4389,6 +4392,7 @@ function netTick(){NET.tick();const live=netLive();
  rankTick(live);
  wbTick();
  lockTick();
+ natTick();
  if(GUILD)guildTick();
  if(PRAID)PRAID.tick();
  mobTick(live);
@@ -4967,7 +4971,7 @@ function duelStart(){rnkStart();DUEL=Satisfy.duel.create({presence:NET,uid:NET.u
   else if(e.type==='outside')toast(t('dOut'),'warn');
   else if(e.type==='hurt'){numP(-20,'-'+e.dmg,'#ff6a5a',false);SFX.hit();}
   else if(e.type==='result'){const win=e.result==='win';if(S&&!S.__demo){S.duels=S.duels||{w:0,l:0};S.duels[win?'w':'l']++;}
-   toast(t(win?'dWin':'dLose',{n,w:t('dw_'+e.why)}),win?'good':'warn');if(win)SFX.quest();rnkResult(win,e.foe);
+   toast(t(win?'dWin':'dLose',{n,w:t('dw_'+e.why)}),win?'good':'warn');if(win)SFX.quest();rnkResult(win,e.foe);natDuel(win,e.foe);
    if(S&&S.duels)setTimeout(()=>toast(t('dRec',S.duels)),500);}});}
 /* ranked arena seasons (SAT-ONLINE-053; Claude-B #13 item 23): every duel online moves both players' rating in this
    month's season (Elo, K 32, from 1000: arena/{season}/{uid} {r, w, l, n, t}); Arena in the player list shows the top
@@ -4988,6 +4992,43 @@ function rnkBoard(){if(!RNK||!NET)return;const se=rnkSeason(),d=new Date(wNow())
  Promise.all([RNK.top(se,10),RNK.get(se,NET.uid)]).then(([top,me])=>{plOpen(false);
   const rows=top.map((x,i)=>t('rnkRow',{i:i+1,n:Satisfy.chat.clean(x.n,24)||'?',r:x.r,w:x.w,l:x.l}));
   dialog('guild',[t('rnkH',{s:sn}),rows.length?rows.join(' · '):t('rnkNone'),me?t('rnkMe',{r:me.r,w:me.w|0,l:me.l|0}):t('rnkNew')],null,[{l:t('oClose')}]);},()=>toast(t('rnkFail'),'warn'));}
+/* the National Competition (SAT-ONLINE-064, Claude-B #13 item 25; Satisfy.natcomp has the schedule and the scoring). Online,
+   every two hours on the server clock, three stages of ten minutes: hunting (each monster you kill), production (each item
+   you craft, better ones more) and the arena (each duel online, a win more; three a foe). The bar over the HUD shows the
+   stage, the time left, your points and your rank; "Nat. Comp." in the player list shows the board. Your scores go to
+   nat/{id}/{uid} every 15 s while they change; half a minute after the end each player who scored is paid once by its
+   rank (natPaid/{id}/{uid}), the winner gets the title and the whole world hears it. */
+Object.assign(STR.ar,{natN:'المسابقة الوطنية',natK_hunt:'الصيد',natK_craft:'الصناعة',natK_duel:'الساحة',natBar:'<b>المسابقة الوطنية</b> · المرحلة {i}/3: {k} · {m} · {p} نقطة{r}',natGo_hunt:'المسابقة الوطنية بدأت! المرحلة 1/3: الصيد: كل وحش بتقتله بيجيب نقط',natGo_craft:'المرحلة 2/3: الصناعة: كل حاجة بتصنعها بتجيب نقط، والأحسن أكتر',natGo_duel:'المرحلة 3/3: الساحة: كل مبارزة أونلاين بتجيب نقط، والفوز أكتر',natEnd:'المسابقة الوطنية خلصت: الجوايز بعد شوية',natBoard:'المسابقة',natH:'المسابقة الوطنية ({s})',natRow:'{i}. {n}: {s} (صيد {h} · صناعة {c} · ساحة {d})',natMe:'إنت: {s} (صيد {h} · صناعة {c} · ساحة {d})',natNone:'محدش جاب نقط لسه',natNext:'المسابقة الجاية بعد {m} دقيقة',natPay:'المسابقة الوطنية: المركز {r}، {g} دهب',natPay0:'المسابقة الوطنية: {g} دهب على المشاركة',natWin:'{n} كسب المسابقة الوطنية!',tl_natChamp:'بطل المسابقة الوطنية',natFail:'مقدرناش نجيب الترتيب دلوقتي'});
+Object.assign(STR.en,{natN:'National Competition',natK_hunt:'Hunting',natK_craft:'Production',natK_duel:'Arena',natBar:'<b>National Competition</b> · Stage {i}/3: {k} · {m} · {p} pts{r}',natGo_hunt:'The National Competition begins! Stage 1/3: Hunting: every monster you kill scores',natGo_craft:'Stage 2/3: Production: every item you craft scores, better ones more',natGo_duel:'Stage 3/3: Arena: every duel online scores, a win more',natEnd:'The National Competition is over: rewards in a moment',natBoard:'Nat. Comp.',natH:'National Competition ({s})',natRow:'{i}. {n}: {s} (hunt {h} · craft {c} · arena {d})',natMe:'You: {s} (hunt {h} · craft {c} · arena {d})',natNone:'No scores yet',natNext:'Next National Competition in {m} min',natPay:'National Competition: rank {r}, {g} gold',natPay0:'National Competition: {g} gold for taking part',natWin:'{n} won the National Competition!',tl_natChamp:'National Champion',natFail:'Could not load the board right now'});
+var NATS=null,NATF=0,natSc=null,natPutT=-1e9,natTop=null,natTopT=-1e9,natSt=null,natPaidId=null,natPayT=-1e9,natBarS='';
+function natOnline(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&Satisfy.natcomp&&Satisfy.firebase.natStore&&S&&!S.__demo);}
+function natNow(){return Satisfy.natcomp.now(wNow(),NATF);}
+function natAdd(k,n){const c=natNow();if(!natSc||!c.running||natSc.id!==c.id||c.kind!==k||!(n>0))return;natSc[k[0]]+=n;natSc.dirty=true;if(S.natIn!==c.id){S.natIn=c.id;save(true);}natLoad();} // S.natIn: the competition to be paid for (kept through a reload)
+function natEv(type,key,r){try{if(!natOnline())return;}catch(e){return;}/* qEvent may run before the network's declarations */if(type==='kill'&&MT[key])natAdd('hunt',Satisfy.natcomp.huntPts(MT[key].lv[0],MT[key].boss));else if(type==='craft')natAdd('craft',Satisfy.natcomp.craftPts(r));}
+function natDuel(win,foe){if(!natOnline()||!natSc||!foe)return;const c=natNow();if(!c.running||c.kind!=='duel'||natSc.id!==c.id)return;const f=natSc.foes[foe]||0;natSc.foes[foe]=f+1;natAdd('duel',Satisfy.natcomp.duelPts(win,f));}
+// the first points of a competition: what this account already has in it (a reload, another device) adds to them; nothing
+// is read or written for a player who doesn't take part
+function natLoad(){const sc=natSc;if(!sc||sc.ld||!NATS)return;sc.ld=1;NATS.get(sc.id,NET.uid).then(v=>{const o=Satisfy.natcomp.clean(v);if(o){sc.h+=o.h;sc.c+=o.c;sc.d+=o.d;}sc.ld=2;},()=>{sc.ld=0;});}
+function natWrite(){if(!NATS||!natSc||natSc.ld!==2)return;natSc.dirty=false;natPutT=performance.now();NATS.put(natSc.id,NET.uid,{h:natSc.h,c:natSc.c,d:natSc.d,n:netId||S.look.n}).catch(()=>{if(natSc)natSc.dirty=true;});}
+function natTick(){if(!natOnline()){if(natBarS){natBarS='';$('natbar').hidden=true;}return;}if(!NATS)NATS=Satisfy.firebase.natStore(FB);const c=natNow(),pn=performance.now();
+ if(c.running){if(!natSc||natSc.id!==c.id){natSc={id:c.id,h:0,c:0,d:0,foes:{},dirty:false,ld:0};natTop=null;natTopT=-1e9;}
+  if(natSt!==c.id+c.stage){const first=natSt===null;natSt=c.id+c.stage;if(!first||wNow()-(c.stageEnd-Satisfy.natcomp.C.STAGE)<60000){announce(t('natGo_'+c.kind));SFX.notice();}}
+  if(natSc.dirty&&natSc.ld===2&&pn-natPutT>15000)natWrite();
+  if(natSc.ld===2&&pn-natTopT>30000){natTopT=pn;NATS.top(c.id,Satisfy.natcomp.C.TOP_N).then(a=>{natTop=a;}).catch(()=>{});}
+  const me=natSc.h+natSc.c+natSc.d,rk=natTop?natTop.findIndex(x=>x.uid===NET.uid)+1:0,left=Math.max(0,c.stageEnd-wNow());
+  const h=t('natBar',{i:c.stage+1,k:t('natK_'+c.kind),m:Math.floor(left/60000)+':'+String(Math.floor(left/1000)%60).padStart(2,'0'),p:me,r:rk?' · #'+rk:''});if(h!==natBarS){natBarS=h;const b=$('natbar');b.innerHTML=h;b.hidden=false;}return;}
+ if(natBarS){natBarS='';$('natbar').hidden=true;}
+ if(natSc&&natSc.id===c.id){if(natSt!==c.id+'end'){natSt=c.id+'end';announce(t('natEnd'));}if(natSc.dirty)natWrite();}
+ if(S.natIn&&natPaidId!==S.natIn&&pn>natPayT&&(S.natIn!==c.id||wNow()>c.end+Satisfy.natcomp.C.CLAIM_MS)){natPaidId=S.natIn;natClaim(S.natIn);}}
+// paid once per account (natPaid), by the rank on the final board
+function natClaim(id){if(!NATS)return;const uid=NET.uid,done=()=>{if(S&&S.natIn===id){S.natIn=null;save(true);}};NATS.paid(id,uid).then(p=>{if(p){done();return null;}return Promise.all([NATS.top(id,Satisfy.natcomp.C.TOP_N),NATS.get(id,uid)]);}).then(r=>{if(!r)return;const me=Satisfy.natcomp.clean(r[1]);
+  if(!me||!(me.s>0)){done();return;}const rank=r[0].findIndex(x=>x.uid===uid)+1,g=Satisfy.natcomp.reward(rank,me.s);
+  return NATS.pay(id,uid,g).then(()=>{if(!S||S.__demo)return;done();S.gold+=g;hudDirty=true;coinFx(P,g);SFX.legendary();toast(rank?t('natPay',{r:rank,g}):t('natPay0',{g}),'good');if(rank===1){giveTitle('natChamp');annW('natWin');}save(true);});}).catch(()=>{natPaidId=null;natPayT=performance.now()+30000;});} // a fault: try again in half a minute
+function natBoard(){if(!NATS||!NET){toast(t('natFail'),'warn');return;}const c=natNow();
+ Promise.all([NATS.top(c.id,Satisfy.natcomp.C.TOP_N),NATS.get(c.id,NET.uid)]).then(([top,v])=>{plOpen(false);const me=Satisfy.natcomp.clean(v),d=new Date(c.start);
+  const rows=top.map((x,i)=>t('natRow',{i:i+1,n:Satisfy.chat.clean(x.n,24)||'?',s:x.s,h:x.h,c:x.c,d:x.d}));
+  dialog('guild',[t('natH',{s:String(d.getUTCHours()).padStart(2,'0')+':00 UTC'}),rows.length?rows.join(' · '):t('natNone'),me?t('natMe',me):'',c.running?'':t('natNext',{m:Math.max(1,Math.ceil((c.next-wNow())/60000))})].filter(Boolean),null,[{l:t('oClose')}]);},()=>toast(t('natFail'),'warn'));}
+window.__GNC={force:ms=>{NATF=ms==null?0:wNow()-ms;},sc:()=>natSc&&{id:natSc.id,h:natSc.h,c:natSc.c,d:natSc.d},now:()=>natNow(),top:()=>natTop,write:()=>natWrite(),duel:(w,f)=>natDuel(w,f),board:()=>natBoard()}; // tests
 window.__GR={season:()=>rnkSeason(),mine:()=>RNK?RNK.get(rnkSeason(),NET.uid):null,top:()=>RNK?RNK.top(rnkSeason(),10):[]}; // test hook
 // The local attack reaches the opponent: melee within reach, bow/staff along the aim. Power is a normalized roll.
 function duelSwing(ax,ay,mul,k){if(DUEL.state().phase!=='fight')return;const f=DUEL.foe();if(!f)return;
