@@ -68,7 +68,7 @@ test('position bounds cover the whole map, and the fake uses the same bounds', (
 test('presence is indexed on exactly the children the interest queries order by (U009: x; party)', () => {
   assert.deepEqual(rules.presence.$world.$shard['.indexOn'], ['x', 'party']);
   const fb = fs.readFileSync(path.join(ROOT, 'src/net/firebase.js'), 'utf8');
-  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['party', 'r', 't', 'x']);
+  assert.deepEqual([...new Set([...fb.matchAll(/orderByChild\('(\w+)'\)/g)].map((m) => m[1]))].sort(), ['party', 'r', 's', 't', 'x']);
   assert.deepEqual(rules.arena.$season['.indexOn'], ['r'], 'the arena board orders by rating (SAT-ONLINE-053)');
   assert.deepEqual(rules.chat.$world['.indexOn'], ['t'], 'world chat prunes old lines by t (SAT-ONLINE-026)');
   // the radius must cover the screen after a full re-centre step: |offset| <= step, half screen = W / 2
@@ -278,6 +278,18 @@ test('weekly lockouts (SAT-ONLINE-059): your own, read by you alone, taken once 
   assert.equal(u.$week['.validate'], '$week.matches(/^w[0-9]{4,6}$/)');
   assert.equal(b['.write'], 'auth != null && auth.uid === $uid && !data.exists()', 'never replaced or removed');
   assert.equal(b.$other['.validate'], false);
+});
+
+test('the National Competition (SAT-ONLINE-064): your own scores, only upward, s the total; paid once, read by you', () => {
+  const n = rules.nat.$id, u = n.$uid, p = rules.natPaid.$id.$uid;
+  assert.equal(rules.nat['.read'], 'auth != null');
+  assert.deepEqual(n['.indexOn'], ['s']);
+  assert.equal(u['.write'], 'auth != null && auth.uid === $uid');
+  assert.match(u['.validate'], /newData\.child\('s'\)\.val\(\) === newData\.child\('h'\)\.val\(\) \+ newData\.child\('c'\)\.val\(\) \+ newData\.child\('d'\)\.val\(\)/);
+  assert.match(u['.validate'], /newData\.child\('h'\)\.val\(\) >= data\.child\('h'\)\.val\(\)/, 'scores only go up');
+  assert.equal(p['.write'], 'auth != null && auth.uid === $uid && !data.exists()', 'paid once');
+  assert.equal(p['.read'], 'auth != null && auth.uid === $uid');
+  assert.equal(u.$other['.validate'], false);
 });
 
 // The Firebase deploy rejects an expression with an unclosed parenthesis ("missing ) in parenthetical"), and nothing

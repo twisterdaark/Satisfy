@@ -53,6 +53,8 @@
     'duels', 'raidDone', 'olT', 'gon',
     // karma (SAT-ONLINE-052): -10..10, down for killing a player who isn't an outlaw, up for killing an outlaw; karT: play time toward the next point back
     'karma', 'karT',
+    // the National Competition (SAT-ONLINE-064) this character scored in and is still to be paid for (its id)
+    'natIn',
     // recipes learned and recipe use counts (main rcLearn)
     'rcK', 'rcN',
     // map cells seen (fog of war, Nitro's feedback): base64 bitset

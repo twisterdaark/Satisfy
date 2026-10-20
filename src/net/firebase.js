@@ -482,6 +482,22 @@
     };
   }
 
+  // SAT-ONLINE-064: the National Competition, nat/{id}/{uid} = {h, c, d, s, n, t} and natPaid/{id}/{uid} = {g, t}
+  function natStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, up = function (u) { return D.update(D.ref(db), u); };
+    return {
+      get: function (id, uid) { return D.get(at('nat/' + id + '/' + uid)).then(function (s) { return s.val(); }); },
+      put: function (id, uid, v) { var u = {}; u['nat/' + id + '/' + uid] = { h: v.h, c: v.c, d: v.d, s: v.h + v.c + v.d, n: String(v.n || '?').slice(0, 24), t: D.serverTimestamp() }; return up(u); },
+      // the top `n` by total (the fake has no limitToLast: then everything, sorted here)
+      top: function (id, n) {
+        var ref = at('nat/' + id), q = D.limitToLast && D.orderByChild ? D.query(ref, D.orderByChild('s'), D.limitToLast(n)) : ref;
+        return D.get(q).then(function (s) { var v = s.val() || {}, a = []; for (var k in v) if (v[k] && typeof v[k].s === 'number') a.push({ uid: k, s: v[k].s, h: v[k].h | 0, c: v[k].c | 0, d: v[k].d | 0, n: String(v[k].n || '?') }); a.sort(function (x, y) { return y.s - x.s || (x.uid < y.uid ? -1 : 1); }); return a.slice(0, n); });
+      },
+      paid: function (id, uid) { return D.get(at('natPaid/' + id + '/' + uid)).then(function (s) { return s.val(); }); },
+      pay: function (id, uid, g) { var u = {}; u['natPaid/' + id + '/' + uid] = { g: g, t: D.serverTimestamp() }; return up(u); },
+    };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
     tradeStore: tradeStore,
@@ -489,6 +505,7 @@
     dropStore: dropStore,
     bountyStore: bountyStore,
     arenaStore: arenaStore,
+    natStore: natStore,
     SDK_VERSION: SDK_VERSION,
     load: load,
     lease: lease,

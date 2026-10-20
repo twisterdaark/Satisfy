@@ -283,6 +283,37 @@
         }
       }
     },
+    "nat": {
+      ".read": "auth != null",
+      "$id": {
+        ".indexOn": ["s"],
+        ".validate": "$id.matches(/^n[0-9]{1,8}$/)",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['h', 'c', 'd', 's', 'n', 't']) && newData.child('s').val() === newData.child('h').val() + newData.child('c').val() + newData.child('d').val() && (!data.exists() || (newData.child('h').val() >= data.child('h').val() && newData.child('c').val() >= data.child('c').val() && newData.child('d').val() >= data.child('d').val()))",
+          "h": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000 && newData.val() % 1 === 0" },
+          "c": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000 && newData.val() % 1 === 0" },
+          "d": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000 && newData.val() % 1 === 0" },
+          "s": { ".validate": "newData.isNumber()" },
+          "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "natPaid": {
+      "$id": {
+        ".validate": "$id.matches(/^n[0-9]{1,8}$/)",
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid && !data.exists()",
+          ".validate": "newData.hasChildren(['g', 't'])",
+          "g": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000 && newData.val() % 1 === 0" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",
