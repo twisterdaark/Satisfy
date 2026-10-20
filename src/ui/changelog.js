@@ -5,6 +5,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20v94', ver: '0.94', d: '2026-10-20',
+      ar: ['حياة المدينة: سباق خيل كل تلات دقايق في وينستون. سجّل عند منظم السباق جنب البوابة الشرقية، ولما البوابة تفتح بتنزل مضمار وينستون على حصان سباق زي كل الناس',
+        'السباق لفتين. دوس Space (زرار التفادي) عشان تنخز الحصان ويجري أسرع، والنخزة بتصرف من شريط النَفَس. الحارة الجوانية أقصر، وفرسان الإسطبل بيسابقوك',
+        'أونلاين: كل اللي في السباق بيشوفوا بعض وبيشوفوا نفس فرسان الإسطبل، والترتيب بيبان للكل. الأول والتاني والتالت بياخدوا جوايز دهب',
+        'ترابيزة الزهر في كل حانة: راهن بـ 10 أو 100 أو 1000 دهب، وكل 20 ثانية الزهر بيترمي قصاد البيت. كل اللي قاعدين على الترابيزة بيشوفوا الزهر فوق راس كل واحد',
+        'مهرجان المدن: كل تلات ساعات (01:35، 04:35 … بتوقيت جرينتش) لمدة 25 دقيقة، صواريخ وفوانيس في كل مدينة، وجوايز السباق بالضعف'],
+      en: ['Town life: a horse race every three minutes at Winston. Sign up with the Race Steward by the east gate; when the gate opens you go down to the Winston Racecourse on a race horse, the same as everyone else',
+        'Two laps. Press Space (the dodge button) to spur the horse for extra speed, at the cost of breath from its bar. The inside lane is shorter, and the stable riders race you',
+        'Online: everyone in the race sees each other and the same stable riders, and the places show for all. First, second and third win gold',
+        'A dice table in every inn: bet 10, 100 or 1000 gold, and every 20 seconds the dice roll against the house. Everyone at the table sees each player’s dice over their head',
+        'The town festival: every three hours (01:35, 04:35 … UTC) for 25 minutes, fireworks and lanterns in every town, and race prizes are doubled'] },
     { v: '2026-10-20v93', ver: '0.93', d: '2026-10-20',
       ar: ['القصة الرئيسية: سلسلة مهام لكل الكلاسات بتمشي ورا رحلة جريد في الرواية، فصل ورا فصل. أول ما تكلّم أول شخص في الفصل بتظهر صفحة من الرواية، وصندوق الكويستات بيقولك القصة رايحة فين بعد كده',
         'الفصل 1، ورشة خان (لفل 30): "غضب الحداد" ضد براغا وعصابة شركة ميرو، و"مسابقة صناعة مع شركة ميرو!" تكسبها بحاجة نادرة أو أحسن. علاقتك بخان بتوصل للقمة',
