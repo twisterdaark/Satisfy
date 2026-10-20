@@ -87,7 +87,17 @@ const DRAW={
  elfin:I=>ring(I,'#8a8a96','#c8c8d8','#4ad070'),vring:I=>ring(I,'#3a1a22','#7a3a4a','#d8283a'),doran:I=>ring(I,'#c8a050','#f2d27a','#8a3ad8'),absurd:I=>ring(I,'#e8e8f0','#ffffff','#ff8a1e'),
  bboots:I=>{boot(I,['#2a2a34','#5a5a6a','#1a1a20']);I.set(6,4,'#d8dce8');I.set(8,6,'#d8dce8');I.set(7,8,'#d8dce8');I.rect(5,9,5,1,'#4a4a58');},
  ochelm:I=>{helm(I,['#d8dce4','#ffffff','#7a8494'],1);I.set(3,5,'#d8dce4');I.set(12,5,'#d8dce4');I.set(2,4,'#ffffff');I.set(13,4,'#ffffff');I.set(6,8,'#c8282a');I.set(9,8,'#c8282a');},
- book:I=>{I.rect(3,2,10,12,'#7a2a26');I.rect(4,2,9,1,'#a03a34');I.rect(3,2,1,12,'#4a1a18');I.rect(12,3,1,10,'#e8dcc0');I.rect(6,6,4,1,'#f2c14e');I.rect(6,8,4,1,'#f2c14e');I.rect(11,7,2,2,'#c8a050');}};
+ book:I=>{I.rect(3,2,10,12,'#7a2a26');I.rect(4,2,9,1,'#a03a34');I.rect(3,2,1,12,'#4a1a18');I.rect(12,3,1,10,'#e8dcc0');I.rect(6,6,4,1,'#f2c14e');I.rect(6,8,4,1,'#f2c14e');I.rect(11,7,2,2,'#c8a050');},
+ // the death knights' gear from the Behen Archipelago, and the cure for Sticks
+ lantd:I=>{for(let i=0;i<5;i++){I.set(7+i,8-i,'#e8eef8');I.set(8+i,8-i,'#8a94a4');I.set(7+i,7-i,'#ffffff');}I.line(5,7,8,10,'#a81a1a');I.line(4,11,6,9,'#3a2a1e');I.set(3,12,'#a81a1a');},
+ alexb:I=>{I.rect(2,8,10,2,'#4a5a7a');I.rect(2,8,10,1,'#9ab0d0');I.rect(11,7,4,1,'#e8eef8');I.set(14,6,'#ffffff');I.rect(3,10,2,4,'#5a3a20');I.rect(6,10,2,2,'#3a2a1e');I.set(9,7,'#c8a050');},
+ alexg:I=>{glove(I,['#2a3a5a','#6a7a9a','#141c30']);I.set(6,9,'#c8a050');I.set(8,9,'#c8a050');},
+ kcloth:I=>{I.rect(3,3,10,10,'#6a6a74');I.rect(3,3,10,1,'#9a9aa6');for(let y=5;y<13;y+=2)I.rect(4,y,8,1,'#4a4a52');I.rect(12,4,1,9,'#4a4a52');I.set(6,6,'#c8c0ff');I.set(9,9,'#c8c0ff');},
+ gisp:I=>{I.line(3,14,10,7,'#6a4a2a');I.line(4,14,11,7,'#4a3020');I.line(6,4,13,4,'#8a9aa8');I.line(6,4,5,7,'#8a9aa8');I.line(13,4,14,7,'#8a9aa8');I.set(9,4,'#c8d0dc');I.set(10,5,'#6a7480');},
+ povt:I=>{ring(I,'#3a6a3a','#7ab07a','#c8e8a8');I.set(10,8,'#c8a050');},
+ wtneck:I=>{for(let i=0;i<=10;i++){const a=i/10*Math.PI;I.set(Math.round(8-Math.cos(a)*5),Math.round(3+Math.sin(a)*6),'#c8a050');}I.ell(8,11,2,2.5,'#3a9a4a');I.set(7,10,'#a8f0a0');I.set(8,13,'#1a6a2a');},
+ bcoco:I=>{I.ell(8,9,5,5,'#2a5ab0');I.ell(7,8,4,4,'#3a7ad8');I.set(6,6,'#bfe0ff');I.set(7,6,'#bfe0ff');I.rect(7,2,2,3,'#3a6a2a');I.set(10,3,'#5aa83a');I.set(5,3,'#5aa83a');},
+ wtleaf:I=>{I.ell(8,8,3.5,6,'#3a9a4a');I.line(8,3,8,14,'#1a6a2a');I.set(6,6,'#9af0a0');I.set(7,5,'#9af0a0');I.line(8,14,9,15,'#6a4a2a');I.set(10,9,'#1a6a2a');I.set(6,10,'#1a6a2a');}};
 // potions: round flask, cork, liquid with a highlight
 const flask=(liq,lt)=>I=>{I.rect(7,2,2,2,'#8a5a32');I.rect(6,4,4,1,'#c8d0dc');I.rect(7,5,2,2,'#c8d0dc');I.ell(8,10.5,4.5,4,'#c8d0dc');I.ell(8,11,3.5,3,liq);I.rect(5,9,6,1,lt);I.set(6,10,'#ffffff');I.set(6,11,lt);I.set(10,13,'#00000000'==='x'?lt:liq);};
 DRAW.respec=I=>{I.rect(3,3,10,10,'#e8d8a8');I.rect(3,3,10,1,'#b89858');I.rect(3,12,10,1,'#b89858');I.rect(2,2,2,12,'#9a7a48');I.rect(12,2,2,12,'#9a7a48');I.rect(5,5,6,1,'#5a4a8a');I.rect(5,7,5,1,'#5a4a8a');I.rect(5,9,6,1,'#5a4a8a');I.rect(7,10,2,2,'#c83a3a');};
@@ -102,6 +112,6 @@ function iconRGBA(k){const I=Img();
  else if(k==='larmor'||k==='parmor'||k==='marmor'||k==='warmor')armor(I,k);else sword(I,k);
  return finish(I,false);}
 function iconCanvas(k){const c=document.createElement('canvas');c.width=c.height=16;c.getContext('2d').putImageData(new ImageData(iconRGBA(k),16,16),0,0);return c;}
-const KEYS=['rusty','isword','ssword','gsword','bow','sbow','staff','sstaff','hammer','shammer','larmor','parmor','warmor','jaffa','arrows','bread','wood','ore','leather','blue','mstone','book','hpot','mpot','lhelm','ihelm','lgloves','igloves','lboots','iboots','cring','mring','spear','dagger','mith','msword','marmor','mhelm','tHood','tGloves','tBoots','tRobe','dscale','ruby','topaz','emer','sapph','diam','fish','sfish','gfish','herb','bherb','cfish','stew','feast','slotW','slotA','slotH','slotG','slotB','slotX','coin','estone','respec','failure','ideal','gale','iyarugt','dains','tbow','wisdom','elfin','vring','doran','absurd','bboots','ochelm'];
+const KEYS=['rusty','isword','ssword','gsword','bow','sbow','staff','sstaff','hammer','shammer','larmor','parmor','warmor','jaffa','arrows','bread','wood','ore','leather','blue','mstone','book','hpot','mpot','lhelm','ihelm','lgloves','igloves','lboots','iboots','cring','mring','spear','dagger','mith','msword','marmor','mhelm','tHood','tGloves','tBoots','tRobe','dscale','ruby','topaz','emer','sapph','diam','fish','sfish','gfish','herb','bherb','cfish','stew','feast','slotW','slotA','slotH','slotG','slotB','slotX','coin','estone','respec','failure','ideal','gale','iyarugt','dains','tbow','wisdom','elfin','vring','doran','absurd','bboots','ochelm','lantd','alexb','alexg','kcloth','gisp','povt','wtneck','bcoco','wtleaf'];
 A.icons={KEYS,iconRGBA,iconCanvas};
 })(typeof window!=='undefined'?window:globalThis);

@@ -90,6 +90,17 @@ const FIG={
  rknight:{hair:'helm',hc:'#d8dce4',hl:'#ffffff',skin:'#f1c193',sk2:'#d3a070',top:'#c8ccd6',top2:'#8a909c',sleeves:true,pad:'#e8c040',pad2:'#b08a28',chest:'#2a3a7a',cape:'#2a3a7a',pants:'#6a707c',boots:'#3a3e48'},
  scholar:{hair:'hat',hc:'#6a5a4a',hl:'#8a7a6a',hat:'#2a4a3a',skin:'#e8b88a',sk2:'#c8946a',top:'#2a4a3a',top2:'#1c3428',sleeves:true,robe:1,collar:'#d8c8a8',belt:'#c8a050',pants:'#1c3428',boots:'#22180f'},
  sdoll:{hair:'bald',hc:'#d8d0dc',hl:'#f4eef6',skin:'#e4dce6',sk2:'#b8aec0',top:'#4a3a5a',top2:'#2e2240',sleeves:true,pad:'#9aa0b0',pad2:'#6a7080',belt:'#2e2240',pants:'#4a3a5a',boots:'#2e2240'},
+ lizw:{hair:'long',hc:'#2a5a3a',hl:'#4a8a5a',skin:'#5a9a5a',sk2:'#3e7a42',top:'#7a5a2a',top2:'#5a3e1c',sleeves:false,pad:'#c8a050',pad2:'#8a6a30',belt:'#c8a050',shorts:'#5a3e1c',pants:'#3e7a42',boots:'#3e7a42'},
+ gcrown:{hair:'crown',hc:'#6a5a3a',hl:'#8a7a5a',hat:'#f2c14e',skin:'#b08a5a',sk2:'#8a6a40',top:'#b08a5a',top2:'#8a6a40',sleeves:false,belt:'#c8a050',shorts:'#6a3a8a',pants:'#6a3a8a',boots:'#8a6a40'},
+ tlord:{hair:'mohawk',hc:'#7a1a1a',hl:'#a83a2a',skin:'#4a7a3a',sk2:'#325a28',top:'#6a4a2a',top2:'#4a321c',sleeves:false,pad:'#5a3a22',pad2:'#3e2616',belt:'#2a1a10',shorts:'#4a321c',pants:'#4a321c',boots:'#325a28'},
+ furfu:{hair:'spiky',hc:'#1a0a14',hl:'#4a1a2a',skin:'#6a2a4a',sk2:'#4a1a32',top:'#1a0a14',top2:'#0e0610',sleeves:true,pad:'#8a1a2a',pad2:'#5a0e1a',belt:'#c8a050',cape:'#3a0a1a',pants:'#1a0a14',boots:'#0e0610'},
+ dk_lant:{hair:'helm',hc:'#3a3a44',hl:'#6a6a78',skin:'#d8d4c4',sk2:'#a8a494',top:'#2a2a32',top2:'#1a1a20',sleeves:true,pad:'#4a4a56',pad2:'#32323c',belt:'#1a1a20',cape:'#a81a1a',pants:'#1a1a20',boots:'#2a2a32'},
+ dk_alex:{hair:'helm',hc:'#2a3a5a',hl:'#4a5a7a',skin:'#d8d4c4',sk2:'#a8a494',top:'#1e2a44',top2:'#141c30',sleeves:true,pad:'#6a7a9a',pad2:'#4a5a7a',belt:'#c8a050',cape:'#141c30',pants:'#141c30',boots:'#2a3a5a'},
+ dk_krug:{hair:'hat',hc:'#4a4a52',hl:'#6a6a72',hat:'#5a5a64',skin:'#d8d4c4',sk2:'#a8a494',top:'#6a6a74',top2:'#4a4a52',sleeves:true,robe:1,belt:'#2a2a30',cape:'#3a3a42',pants:'#3a3a42',boots:'#2a2a30'},
+ dk_gis:{hair:'bald',hc:'#d8d4c4',hl:'#f0ece0',skin:'#d8d4c4',sk2:'#a8a494',top:'#5a4a3a',top2:'#3e3226',sleeves:false,beard:'#8a8478',beard2:'#5a564c',apron:'#3a2a1e',apron2:'#2a1c12',pants:'#3e3226',boots:'#2a1c12'},
+ dk_povia:{hair:'long',hc:'#c8d8a8',hl:'#e8f4d0',skin:'#d8d4c4',sk2:'#a8a494',top:'#2a5a3a',top2:'#1a3e28',sleeves:true,belt:'#8a6a3a',cape:'#1a3e28',pants:'#1a3e28',boots:'#3a2a1a'},
+ dk_madra:{hair:'helm',hc:'#1a1418',hl:'#3a3038',skin:'#d8d4c4',sk2:'#a8a494',top:'#14101a',top2:'#0a080e',sleeves:true,pad:'#5a1a2a',pad2:'#3a0e1a',chest:'#2a0a14',belt:'#5a1a2a',cape:'#4a0a14',pants:'#0a080e',boots:'#14101a'},
+ sticks:{hair:'long',hc:'#e8ecd8',hl:'#ffffff',skin:'#f1d0b0',sk2:'#d0aa88',top:'#2a6a3a',top2:'#1a4a28',sleeves:true,robe:1,collar:'#e8d8a0',belt:'#c8a050',pants:'#1a4a28',boots:'#3a2a1a'},
  knight:{hair:'helm',hc:'#b8bec9',hl:'#e6e9ee',skin:'#f1c193',sk2:'#d3a070',top:'#b8bec9',top2:'#8a909c',sleeves:true,cape:'#8a1f2a',pants:'#6a707c',boots:'#3a3e48'}};
 const OUT='#120f18',EYE='#22181e';
 const LOOK={hair:['spiky','short','long','pony','bald'],
