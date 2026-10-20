@@ -77,9 +77,9 @@
   // Safe zones (doc §08): towns where no player can hurt another. Enforced by the combat authority
   // once duels/PvP exist; until then the game only shows it. Zone ids come from Satisfy.local.zoneAt.
   // Every town is safe: Patrian (zPat) joined with SAT-CONTENT-002, Reidan (zReid) with SAT-REIDAN-001,
-  // Reinhardt (zRein) with SAT-GUILD-001. tests/regression/party.test.cjs checks this list against
-  // Satisfy.local.world().towns so a new town can't be left out.
-  var SAFE_ZONES = ['zBai', 'zWin', 'zPat', 'zReid', 'zRein'];
+  // Reinhardt (zRein) with SAT-GUILD-001, Titan (zTitan) and the Butin Barony (zButin) with the Saharan Empire.
+  // tests/regression/party.test.cjs checks this list against Satisfy.local.world().towns so a new town can't be left out.
+  var SAFE_ZONES = ['zBai', 'zWin', 'zPat', 'zReid', 'zRein', 'zTitan', 'zButin'];
   // 'void' (or no zone): a position the world doesn't define, e.g. the interior strip between rooms. The game's
   // own zoneAt falls back to Winston there (doc §59 C06); online that must never count as a safe town, nor as a
   // field where players may fight, so it is `known: false` and callers refuse both.

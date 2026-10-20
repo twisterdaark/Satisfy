@@ -64,7 +64,7 @@ test('envelope: versioned and size-limited', () => {
 });
 
 test('zone policy: every town (Bairan, Winston, Patrian, Reidan, Reinhardt) is safe, nothing allows PvP yet', () => {
-  for (const z of ['zReid', 'zRein']) assert.equal(N.zonePolicy(z).safe, true, z);
+  for (const z of ['zReid', 'zRein', 'zTitan', 'zButin']) assert.equal(N.zonePolicy(z).safe, true, z);
   assert.deepEqual(N.zonePolicy('zWin'), { zone: 'zWin', known: true, safe: true, pvp: false, duel: false });
   assert.deepEqual(N.zonePolicy('zBai'), { zone: 'zBai', known: true, safe: true, pvp: false, duel: false });
   assert.deepEqual(N.zonePolicy('zPat'), { zone: 'zPat', known: true, safe: true, pvp: false, duel: false });
