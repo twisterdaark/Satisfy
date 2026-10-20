@@ -726,7 +726,7 @@ const SFX={
 const SKSND={fireball:'fire',bmeteor:'fire',bolt:'zap',bchain:'zap',gflash:'zap',pflash:'zap',tillu:'zap',nova:'frost',bzero:'frost',
  rapid:'bow',pierce:'bow',rain:'bow',larrow:'bow',mcross:'holy',mflash:'holy',mwind:'holy',mheaven:'holy',roar:'holy',
  strike:'power',smash:'power',kill:'power',wave:'power',revolve:'power',whirl:'power',charge:'power',rcut:'power',
- fort:'guardup',bash:'guardup',taunt:'guardup',kstance:'guardup',glink:'holy',bfury:'buff',cleave:'power',lstand:'buff',thrust:'power',skewer:'power',swall:'power',track:'cast',trap:'cast',volley:'bow',rage:'buff',cry:'buff',bcry:'buff',focus:'buff',icomb:'buff',lrep:'buff',qmove:'buff',fly:'buff'};
+ fort:'guardup',bash:'guardup',taunt:'guardup',pheal:'holy',pbless:'holy',plight:'holy',pdprot:'guardup',psmite:'power',pjudar:'holy',pdomin:'buff',prebec:'holy',kstance:'guardup',glink:'holy',bfury:'buff',cleave:'power',lstand:'buff',thrust:'power',skewer:'power',swall:'power',track:'cast',trap:'cast',volley:'bow',rage:'buff',cry:'buff',bcry:'buff',focus:'buff',icomb:'buff',lrep:'buff',qmove:'buff',fly:'buff'};
 function skSnd(k){const f=SFX[SKSND[k]||'cast'];if(f)f();}
 /* monster voices (owner 2026-10-20: "add sounds for hits and skills, above all the enemies, the game has no sound and no
    life"). Every monster speaks by its kind (critter, wolf, boar, beast, stone, goblin, man, reptile, dragon, fish-man,
@@ -2330,7 +2330,7 @@ const C2={traps:[],walls:[],trk:0,trkL:[]};
 const clsIs=c=>!!S&&(S.cls===c||S.cbase===c);
 const mstOk=q=>{const [k,n]=q.mst||['',0];return (k==='melee'?Math.max(...['sword','spear','dagger','hammer'].map(mastLv)):mastLv(k))>=n;};
 const wkN=k=>k==='melee'?t('wkMelee'):t('wk_'+k).split(' · ')[0];
-function promoTalk(id){if(!S||!['tk','tw','ta'].includes(id))return false;const ps=Object.keys(QD).filter(q=>QD[q].promo&&QD[q].by===id&&qAvail(q)&&S.lv>=QD[q].lv);if(!ps.length)return false;
+function promoTalk(id){if(!S||!['tk','tw','ta','cassus'].includes(id))return false;const ps=Object.keys(QD).filter(q=>QD[q].promo&&QD[q].by===id&&qAvail(q)&&S.lv>=QD[q].lv);if(!ps.length)return false;
  const opts=ps.map(q=>{const d=QD[q],ok=mstOk(d);return {l:t('prPath',{c:t('cl_'+d.promo)})+(ok?'':' 🔒'),f:()=>ok?offerQ(id,q):dialog(id,[t('prNeed',{c:t('cl_'+d.promo),w:wkN(d.mst[0]),n:d.mst[1]})])};});
  const av=Object.keys(QD).find(q=>QD[q].by===id&&!QD[q].promo&&qAvail(q)&&S.lv>=(QD[q].lv||1));if(av)opts.push({l:t('oQuestAsk',{q:qName(av)}),f:()=>offerQ(id,av)});
  S.met[id]=1;dialog(id,[t('prHi_'+id)],null,[...opts,{l:t('oLeave')}]);return true;}
@@ -2394,6 +2394,89 @@ window.__GC2={C2,mstOk,avail:id=>qAvail(id),talk:id=>promoTalk(id),accept:id=>ac
  hit:m=>hitMon(m,1,{}),hurt:(d,src)=>hurtPlayer(d,S.lv,src),sk:k=>SKF[k](),line:(v,n)=>c2Line(v,n),tick:dt=>c2Tick(dt),obj:id=>qObjText(id),st:()=>stPub(),solid:(x,y)=>solidT(x,y)};
 Object.assign(STR.ar,{"cl_knight": "فارس", "cl_berserker": "بيرسيركر", "cl_lancer": "رمّاح", "cl_ranger": "رينجر", "wkMelee": "سلاح قريب", "prPath": "طريق الـ{c}", "prNeed": "عشان تبقى {c} لازم تتقن {w} لحد مستوى {n} الأول (شوف الإتقان في نافذة الحالة).", "prHi_tw": "وصلت لفل يخليك تختار طريقك. الدرع والحماية، ولا الغضب، ولا الرمح؟ طريق واحد بس.", "prHi_tk": "الفارس مش بس بيصد، الفارس بيحمي اللي جنبه. جاهز تتعلم؟", "prHi_ta": "الصيد الحقيقي بيبدأ قبل ما ترمي السهم: الأثر، والفخ، والصبر. عايز تبقى رينجر؟", "q_c2k": "اختبار الفارس", "q_c2b": "اختبار البيرسيركر", "q_c2l": "اختبار الرمّاح", "q_c2r": "اختبار الرينجر", "c2k_o": "اصد 40 ضربة بالجارد وإنت واقف مكانك. الفارس اللي بيهرب مبيحميش حد.", "c2k_w": "لسه. استقبل الضرب بالجارد.", "c2k_d": "من النهارده إنت فارس. درعك لنفسك ولكل اللي معاك.", "c2b_o": "الغضب بيطلع لما تبقى على الحافة. اقتل 12 من رجال السمك وصحتك تحت النص.", "c2b_w": "لسه. الغضب مبيجيش وإنت مرتاح.", "c2b_d": "شفت النار اللي في عينك؟ إنت بيرسيركر دلوقتي. بس ماتسيبهاش تاكلك.", "c2l_o": "الرمح بيمسك المسافة. اقتل 15 من رجال السمك بالرمح بس.", "c2l_w": "لسه. بالرمح، مش بحاجة تانية.", "c2l_d": "الصف الأول بقى ليك. إنت رمّاح.", "c2r_o": "الرينجر بيلاقي اللي غيره ميشوفوش. احفر 3 مخابئ مستخبية في الأرض (دور على اللمعة).", "c2r_w": "لسه. عينك على الأرض.", "c2r_d": "عينك بقت عين صياد. إنت رينجر.", "o_cache": "احفر مخابئ مستخبية: {c}/{n}", "oLow": "(وصحتك تحت {p}%)", "oWk": "(بـ{w})", "needSpear": "المهارة دي محتاجة رمح", "kstOn": "وقفة الدرع: ضرر أقل من قدام", "glkOn": "رابط الحماية: أعضاء البارتي اللي جنبك محميين", "glkSolo": "رابط الحماية: بتاخد ضرر أقل (وبيحمي البارتي لما تكون في بارتي)", "lstOn": "الوقفة الأخيرة! مش هتقع", "lstEnd": "الوقفة الأخيرة خلصت: مفيش علاج 4 ثواني", "trkOn": "تعقّب: {n} وحش حواليك", "sk_kstance": "وقفة الدرع", "skd_kstance": "8 ثواني: الضرر من قدام بيقل 60% ومن الجنب 20%، ومن ورا زي ما هو. بتمشي أبطأ. ضد الوحوش بس.", "sk_glink": "رابط الحماية", "skd_glink": "12 ثانية: أعضاء البارتي اللي حواليك بياخدوا ضرر أقل 25%، وإنت 15%.", "sk_bfury": "الغضب", "skd_bfury": "سلبية: كل ضربة بتديها أو بتاخدها من وحش بتزود الغضب (لحد 20)، كل درجة +1.5% ضرر. بيقل بعد 4 ثواني من غير قتال.", "sk_cleave": "الشق", "skd_cleave": "ضربة واسعة قدامك 200% + 10% لكل درجة غضب، وبتصرف نص الغضب.", "sk_lstand": "الوقفة الأخيرة", "skd_lstand": "6 ثواني الوحوش متقدرش تنزلك تحت 1 صحة، وضربك بيزيد كل ما صحتك تقل. بعدها 4 ثواني من غير علاج.", "sk_thrust": "الطعنة", "skd_thrust": "طعنة على خط طوله 70 لحد أول حيطة، بتضرب كل اللي فيه 190%.", "sk_skewer": "الخوزقة", "skd_skewer": "بتندفع على الخط وتطعن كل اللي في طريقك 240% وتشلّهم.", "sk_swall": "سور الرماح", "skd_swall": "بتغرس سور رماح قدامك 6 ثواني: أي وحش يقرب بيتزق لورا وبيتجرح.", "sk_track": "التعقّب", "skd_track": "12 ثانية بتشوف اتجاه كل الوحوش لحد 400 حواليك، وأقواهم بيتعلّم (+20% من ضربك). مبيكشفش لاعيبة.", "sk_trap": "الفخ", "skd_trap": "فخ عند رجلك (بتاعك، 3 بالكتير، 30 ثانية): أول وحش يدوس عليه بيتمسك وبيتجرح 200%.", "sk_volley": "الرشقة السريعة", "skd_volley": "خمس أسهم ورا بعض في مروحة ضيقة."});
 Object.assign(STR.en,{"cl_knight": "Knight", "cl_berserker": "Berserker", "cl_lancer": "Lancer", "cl_ranger": "Ranger", "wkMelee": "a melee weapon", "prPath": "The {c} path", "prNeed": "To become a {c} you first need {w} mastery {n} (see Mastery in the status window).", "prHi_tw": "You have come far enough to choose your road. The shield, the fury, or the spear? Only one.", "prHi_tk": "A knight does not just block, a knight protects the one beside him. Ready to learn?", "prHi_ta": "Real hunting starts before the arrow: the trail, the trap, the patience. Want to be a Ranger?", "q_c2k": "The Knight's Trial", "q_c2b": "The Berserker's Trial", "q_c2l": "The Lancer's Trial", "q_c2r": "The Ranger's Trial", "c2k_o": "Block 40 blows with your guard and hold your ground. A knight who runs protects no one.", "c2k_w": "Not yet. Take the blows on your guard.", "c2k_d": "From today you are a Knight. Your shield is for yourself and for everyone with you.", "c2b_o": "Fury comes when you are on the edge. Kill 12 Mermen while your health is below half.", "c2b_w": "Not yet. Fury does not come while you are comfortable.", "c2b_d": "See the fire in your eyes? You are a Berserker now. Just do not let it eat you.", "c2l_o": "The spear holds the distance. Kill 15 Mermen with a spear only.", "c2l_w": "Not yet. With the spear, nothing else.", "c2l_d": "The front line is yours. You are a Lancer.", "c2r_o": "A Ranger finds what others miss. Dig up 3 hidden caches (look for the glint).", "c2r_w": "Not yet. Keep your eyes on the ground.", "c2r_d": "You have a hunter's eye now. You are a Ranger.", "o_cache": "Dig up hidden caches: {c}/{n}", "oLow": "(below {p}% health)", "oWk": "(with a {w})", "needSpear": "This skill needs a spear", "kstOn": "Shield Stance: less damage from the front", "glkOn": "Guard Link: the party members near you are shielded", "glkSolo": "Guard Link: you take less damage (and it shields your party when you have one)", "lstOn": "Last Stand! You will not fall", "lstEnd": "Last Stand is over: no healing for 4 s", "trkOn": "Track: {n} monsters around you", "sk_kstance": "Shield Stance", "skd_kstance": "8 s: 60% less damage from the front and 20% from the sides, none from behind. You move slower. Against monsters only.", "sk_glink": "Guard Link", "skd_glink": "12 s: party members around you take 25% less damage, and you 15%.", "sk_bfury": "Fury", "skd_bfury": "Passive: every hit you land on or take from a monster adds Fury (up to 20), +1.5% damage each. It fades 4 s after the fight.", "sk_cleave": "Cleave", "skd_cleave": "A wide swing in front for 200% + 10% per Fury, spending half of it.", "sk_lstand": "Last Stand", "skd_lstand": "For 6 s monsters cannot bring you below 1 HP, and you hit harder the lower you are. Then 4 s without healing.", "sk_thrust": "Thrust", "skd_thrust": "A thrust along a 70 px line up to the first wall, hitting everything on it for 190%.", "sk_skewer": "Skewer", "skd_skewer": "Dash along the line, piercing everything in your way for 240% and pinning it.", "sk_swall": "Spear Wall", "skd_swall": "Plant a fence of spears in front for 6 s: any monster that comes near is pushed back and wounded.", "sk_track": "Track", "skd_track": "For 12 s you see the way to every monster within 400, and the strongest is marked (+20% from you). Never shows players.", "sk_trap": "Trap", "skd_trap": "A snare at your feet (yours, 3 at most, 30 s): the first monster to step on it is held and wounded for 200%.", "sk_volley": "Swift Volley", "skd_volley": "Five arrows in quick succession in a narrow fan."});
+/* Priests and paladins of the churches (major 7; plan doc ch 81 PRIEST OF REBECCA / GUARDIAN KNIGHT/PALADIN, novel ch 118
+   and 122). Cassus, the priest of Rebecca at Winston (novel ch 80: "I am Cassus. This body serves Rebecca, the goddess of
+   light."), gives the Priest trial to a novice from level 10. Canon ch 118: "It was very hard to become a priest of the
+   Rebecca Church. Dating was forbidden and there was a series of hardships such as praying for days, intermittent silence,
+   and fasting." So the trial is five prayers at his side (stand still), and from the moment it is taken until it is done a
+   word in the chat breaks the silence and a bite of food breaks the fast: either one sets the prayers back to nothing.
+   Priest: Heal mends you and the party members within 150 px (online each one's own game applies it, raid.state
+   "p|<party>" with k per mille of their health, at most one every 1.5 s from each priest, so no new presence field and
+   no rules change); Blessing: for 20 s you and the party near you take 10% less from monsters and deal 10% more to them
+   (fx "st:" tag 'b'); Holy Light burns the monsters around you, double against the undead and demons.
+   Canon ch 118 also: "Parties looking for priests had to visit the Rebecca Church. Then they had to pay a large sum in
+   donations to hire NPC priests." Anyone can hire one from Cassus for a donation: for 5 minutes a priest walks with you
+   and heals you when you are hurt.
+   Paladin (Tier-2, level 25, from a Guardian Knight or a Priest with Lv 2 melee mastery; trial: ch 120 "The paladins
+   regularly scouted, so it was difficult to find thieves, monsters and beasts", ten outlaws). It picks its church, as
+   ch 122 lays them out: Judar ("a wide range of buff skills and had excellent defense... the main tanker": an aura for
+   the party near, fx tag 'j'), Dominion ("personal buff skills and had high attack power... single combat ability was
+   the best": Zeal, +25% damage for 15 s) or Rebecca ("the only paladins who could use Heal... their amount of healing
+   wasn't high": a weaker Heal). All of them: Divine Protection (40% less from monsters for 6 s) and Smite (double against
+   the undead and demons). Monsters only: none of this changes damage between players. */
+const PH={pray:null,hire:null,heals:new Map()};
+const HOLYX=new Set(['skel','wraith','demon','furfu','aprison','cultist']);
+const HEALC=['priest','paladin'];
+const phPm=()=>120+Math.min(120,stat('int')*2);
+function vowBreak(kind){const s=S&&S.qs.cp;if(!s||s.st!==1)return;const had=s.c>0;s.c=0;PH.pray=null;toast(t(kind==='fast'?'vowFast':'vowSilent')+(had?' '+t('vowReset'):''),'warn');SFX.deny();hudDirty=true;}
+function phMates(r){if(!NET||!PARTY||!PARTY.id())return [];const pid=PARTY.id();return NET.remotes().filter(m=>m.party===pid&&m.anim!=='dead'&&Math.hypot(m.x-P.x,m.y-P.y)<r);}
+function phNear(ch,r){for(const m of phMates(r)){const s=FXS.get(m.sid);if(s&&s.st&&s.st.indexOf(ch)>=0)return true;}return false;}
+// a blow from a monster and a blow on one
+function phHurt(d,src){if(!src||!src.type||src.spar)return d;if(P.bls>0||phNear('b',120))d*=.9;if(P.jud>0||phNear('j',120))d*=.85;if(P.pdv>0)d*=.6;return Math.max(1,Math.round(d));}
+function phAtk(m){if(m.spar)return 1;return (P.bls>0||phNear('b',120)?1.1:1)*(P.jud>0||phNear('j',120)?1.1:1)*(P.dom>0?1.25:1);}
+function phHeal(pm){const n=rlHeal(pm);if(P.stun>0)P.stun=0;for(const m of phMates(150))NET.send('raid.state',{to:m.uid,raid:'p|'+PARTY.id(),k:pm});return n;}
+function phRing(c){fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*20,y:P.y-4,vx:(rand()-.5)*14,vy:-26-rand()*16,t:.7,c,fl:1});}
+function phHoly(mul,r,o){let n=0;for(const m of mons){if(m.dead)continue;const d=Math.hypot(m.x-P.x,monY(m)-(P.y-6));if(d<r+MT[m.type].r&&hitMon(m,mul*(HOLYX.has(m.type)?2:1),{skill:1,...(o||{})}))n++;}return n;}
+const PHSK={
+ pheal:()=>{phHeal(phPm());phRing('#fff3b0');},
+ pbless:()=>{P.bls=20*skDur('pbless');phRing('#ffe08a');toast(t(NET&&PARTY&&PARTY.id()?'blsOn':'blsSolo'),'good');},
+ plight:()=>{const n=phHoly(1.6,60);vfx('heal',P.x,P.y);for(let i=0;i<16;i++){const a=i/16*6.283;fx.push({x:P.x+Math.cos(a)*10,y:P.y-6+Math.sin(a)*6,vx:Math.cos(a)*90,vy:Math.sin(a)*60,t:.35,c:'#fff7c8',fl:1});}if(n)shake=.12;},
+ pdprot:()=>{P.pdv=6*skDur('pdprot');vfx('block',P.x,P.y-8,{});phRing('#cfe6ff');toast(t('pdvOn'),'good');},
+ psmite:()=>{const v=fdir(),a=Math.atan2(v[1],v[0]);let n=0;vfx('slash',P.x+v[0]*6,P.y-7+v[1]*6,{angle:a,rarity:4});
+  for(const m of mons){if(m.dead)continue;const dx=m.x-P.x,dy=monY(m)-(P.y-6),d=Math.hypot(dx,dy);if(d<30+MT[m.type].r&&(dx*v[0]+dy*v[1])/(d||1)>.3){const h=HOLYX.has(m.type);if(hitMon(m,2.6*(h?2:1),{skill:1,kx:v[0],ky:v[1],...(h?{stun:.8}:{})}))n++;}}
+  for(let i=0;i<8;i++)fx.push({x:P.x+v[0]*14,y:P.y-30+i*3,vx:0,vy:60,t:.25,c:'#fff3b0',fl:1});if(n){SFX.crit();shake=.15;}},
+ pjudar:()=>{P.jud=15*skDur('pjudar');phRing('#9fd8ff');toast(t(NET&&PARTY&&PARTY.id()?'judOn':'judSolo'),'good');},
+ pdomin:()=>{P.dom=15*skDur('pdomin');vfx('rage',P.x,P.y);phRing('#ff9a6a');toast(t('domOn'),'good');},
+ prebec:()=>{phHeal(70+Math.min(60,stat('int')));phRing('#fff3b0');}};
+// a priest's or a Rebecca paladin's Heal from another player (raid.state "p|<party>")
+function phStart(){PH.heals=new Map();NET.on(ev=>{if(ev.type!=='message')return;const env=ev.env,pl=env.payload||{};
+ if(env.type!=='raid.state'||pl.to!==NET.uid||typeof pl.raid!=='string'||!PARTY||!PARTY.id()||pl.raid!=='p|'+PARTY.id())return;
+ const f=NET.get(ev.sid);if(!f||!f.uid||isBlocked(f.uid)||f.party!==PARTY.id()||!HEALC.includes(f.cls)||Math.hypot(f.x-P.x,f.y-P.y)>220)return;
+ const now=performance.now(),last=PH.heals.get(f.uid);if(last!=null&&now-last<1500)return;PH.heals.set(f.uid,now);rlHeal(Math.max(0,Math.min(240,Math.round(+pl.k)||0)));});}
+// Cassus: the trial's prayers, the church choice of a new paladin, and a priest for hire
+function phChurch(){dialog('cassus',[t('chPick')],null,['judar','dominion','rebecca'].map(c=>({l:t('ch_'+c),st:t('chD_'+c),f:()=>{S.church=c;sbSig='';checkSkills();save(true);SFX.legendary();dialog('cassus',[t('chOk_'+c)]);}})));}
+const hirePrice=()=>price('cassus',50+S.lv*20);
+function casOpts(){const o=[],s=S.qs.cp;
+ if(s&&s.st===1&&!qReady('cp'))o.push({l:t('oPray'),f:()=>{PH.pray={t:12,x:P.x,y:P.y};toast(t('prayGo'));}});
+ if(S.cls==='paladin'&&!S.church)o.push({l:t('oChurch'),f:phChurch});
+ o.push({l:t('oHire',{g:hirePrice()}),f:()=>{const g=hirePrice();if(S.gold<g){SFX.deny();return dialog('cassus',[t('noGold')]);}S.gold-=g;PH.hire={t:300,x:P.x-14,y:P.y,hk:2,dir:0,fr:0};hudDirty=true;SFX.coin&&SFX.coin();dialog('cassus',[t('hireOk')]);}});
+ return o;}
+function phDone(q){if(q.promo==='paladin')setTimeout(phChurch,600);}
+function phTick(dt){if(!S||!P)return;for(const k of ['bls','jud','dom','pdv'])if(P[k]>0)P[k]-=dt;
+ const pr=PH.pray;if(pr){if(mode!=='play'&&mode!=='dialog'){PH.pray=null;}else if(Math.hypot(P.x-pr.x,P.y-pr.y)>3){PH.pray=null;toast(t('prayMoved'),'warn');}else if((pr.t-=dt)<=0){PH.pray=null;qEvent('pray','altar');SFX.quest();phRing('#fff3b0');}
+  else if(rand()<dt*14)fx.push({x:P.x+(rand()-.5)*16,y:P.y-2,vx:0,vy:-20-rand()*10,t:.9,c:'#fff3b0',fl:1});}
+ const h=PH.hire;if(h){if((h.t-=dt)<=0||P.hp<=0||P.ghost){PH.hire=null;if(P.hp>0)toast(t('hireEnd'));return;}
+  const tx=P.x-[0,0,14,-14][P.dir]-0,ty=P.y-([12,-12,0,0][P.dir]),dx=tx-h.x,dy=ty-h.y,d=Math.hypot(dx,dy);
+  if(d>400){h.x=tx;h.y=ty;}else if(d>4){const sp=Math.min(d,(d>40?140:70)*dt);h.x+=dx/d*sp;h.y+=dy/d*sp;h.dir=Math.abs(dx)>Math.abs(dy)?(dx>0?2:3):(dy>0?0:1);h.fr+=dt*8;}else{h.fr=0;h.dir=P.dir;}
+  if((h.hk-=dt)<=0){h.hk=5;if(P.hp<maxHP()*.8&&mode==='play'){rlHeal(80);for(let i=0;i<6;i++)fx.push({x:h.x+(rand()-.5)*10,y:h.y-10,vx:(dx>0?1:-1)*20,vy:-16,t:.6,c:'#fff3b0',fl:1});}}}}
+function phEnts(ents){const h=PH.hire;if(h)ents.push({y:h.y,f:()=>drawChar('priest',h.x,h.y,h.dir,Math.floor(h.fr)%4,false,0,null)});
+ if(P.bls>0||P.jud>0||PH.pray)ents.push({y:P.y+1,f:()=>{ctx.save();ctx.setLineDash([2,4]);
+  if(P.bls>0){ctx.strokeStyle='rgba(255,236,150,.35)';ctx.beginPath();ctx.ellipse(Math.round(P.x),Math.round(P.y-4),120,80,0,0,7);ctx.stroke();}
+  if(P.jud>0){ctx.strokeStyle='rgba(159,216,255,.4)';ctx.beginPath();ctx.ellipse(Math.round(P.x),Math.round(P.y-4),120,80,0,0,7);ctx.stroke();}
+  if(PH.pray){ctx.setLineDash([]);ctx.fillStyle='rgba(255,243,176,.18)';ctx.fillRect(Math.round(P.x)-6,Math.round(P.y)-40,12,40);ctx.fillStyle='#ffe08a';ctx.fillRect(Math.round(P.x)-10,Math.round(P.y)-34,Math.round(20*(1-PH.pray.t/12)),2);}
+  ctx.restore();}});}
+const PHICO={
+ pheal:p=>{p(6,2,4,12);p(2,6,12,4);p(7,3,2,10,'#fff');p(3,7,10,2,'#fff');},
+ pbless:p=>{for(let i=0;i<8;i++){const a=i*.785;p(8+Math.cos(a)*5|0,8+Math.sin(a)*5|0,2,2);}p(7,7,2,2,'#fff');},
+ plight:p=>{p(7,1,2,14);p(1,7,14,2);p(5,5,6,6);p(7,7,2,2,'#fff');},
+ pdprot:p=>{p(4,2,8,10,'#5a6a8a');p(5,3,6,8);p(7,4,2,6,'#fff');p(5,6,6,2,'#fff');p(6,12,4,2);},
+ psmite:p=>{p(7,1,2,9,'#d8dce6');p(5,10,6,2,'#c8a070');p(7,12,2,3,'#c8a070');p(3,3,2,2,'#fff');p(11,5,2,2,'#fff');},
+ pjudar:p=>{p(3,4,10,8,'#3a5a8a');p(4,5,8,6);p(7,5,2,6,'#fff');p(1,7,2,2);p(13,7,2,2);},
+ pdomin:p=>{p(7,2,2,10);p(4,4,8,2);p(5,12,6,2,'#fff');p(3,9,2,2);p(11,9,2,2);},
+ prebec:p=>{p(4,3,8,8,'#c8a040');p(6,1,4,12);p(2,5,12,4);p(7,2,2,10,'#fff');p(3,6,10,2,'#fff');}};
+window.__GPH={PH,start:()=>phStart(),casOpts:()=>casOpts(),church:()=>phChurch(),tick:dt=>phTick(dt),hurt:(d,src)=>phHurt(d,src),atk:m=>phAtk(m),vow:k=>vowBreak(k),sk:k=>SKF[k](),pm:()=>phPm()};
+Object.assign(STR.ar,{"cassus": "كاسوس", "cas_hi": "أنا كاسوس. الجسد ده بيخدم ريبيكا، إلهة النور. خلّي بالك مني.", "cas_idle": "النور مبيسيبش اللي بيمشي فيه.", "prHi_cassus": "الكنيسة محتاجة دروع بتصلي. البالادين بيحرس الحجاج، وبيختار كنيسته. مستعد؟", "cl_priest": "كاهن", "cl_paladin": "بالادين", "q_cp": "نذور النور المقدس", "cp_o": "الكهنوت مش لبس. حرام الحب، وفيه صلاة لأيام، وصمت، وصيام. صلّي جنبي 5 مرات وإنت ثابت مكانك. ومن دلوقتي لحد ما تخلص: ولا كلمة في الشات، ولا لقمة أكل. لو كسرت النذر هتبدأ الصلاة من الأول.", "cp_w": "لسه. صلّي جنبي، واسكت، ومتاكلش.", "cp_d": "الصلاة نفسها بتقوي إيمانك. من النهارده إنت كاهن لريبيكا. البارتيات هتدور عليك.", "q_c2p": "حراسة طريق الحجاج", "c2p_o": "البالادين بيمشّطوا الطرق عشان الحرامية والوحوش متقربش من الحجاج. نضّف مخبأ المجرمين: اقتل 10 خارجين عن القانون.", "c2p_w": "لسه. الطريق مش أمان.", "c2p_d": "الطريق بقى أمان بفضلك. إنت بالادين دلوقتي. باقي حاجة واحدة: الكنيسة اللي هتخدمها.", "o_pray": "صلّي لريبيكا جنب كاسوس (اثبت مكانك): {c}/{n}", "vowFast": "كسرت نذر الصيام.", "vowSilent": "كسرت نذر الصمت.", "vowReset": "الصلوات رجعت من الأول.", "oPray": "صلّي لريبيكا", "prayGo": "بتصلي... متتحركش.", "prayMoved": "اتحركت، والصلاة اتقطعت.", "oChurch": "اختار كنيستك", "chPick": "فيه تلات أنواع من البالادين. كل كنيسة ليها طريقها. تخدم مين؟", "ch_judar": "كنيسة جودار", "ch_dominion": "كنيسة دومينيون", "ch_rebecca": "كنيسة ريبيكا", "chD_judar": "دعم للبارتي ودفاع عالي", "chD_dominion": "دعم لنفسك وضرب عالي", "chD_rebecca": "البالادين الوحيدين اللي بيعالجوا", "chOk_judar": "بالادين جودار: إنت الدرع الأول للبارتي. هالتك بتحمي اللي جنبك.", "chOk_dominion": "بالادين دومينيون: في القتال الفردي محدش زيك.", "chOk_rebecca": "بالادين ريبيكا: علاجك مش كبير، بس بنات ريبيكا كانوا بالادين برضه. يمكن في حاجة مستخبية.", "oHire": "أجّر كاهن من الكنيسة (تبرع {g} دهب)", "hireOk": "الكاهن هيمشي معاك 5 دقايق ويعالجك لما تتعور. ريبيكا معاك.", "hireEnd": "الكاهن المأجور رجع للكنيسة.", "blsOn": "البركة: إنت والبارتي اللي جنبك بتاخدوا أقل وبتضربوا أقوى", "blsSolo": "البركة: بتاخد أقل وبتضرب أقوى (وبتشمل البارتي لما تكون في بارتي)", "pdvOn": "الحماية الإلهية: ضرر الوحوش أقل 40%", "judOn": "هالة جودار: البارتي اللي جنبك محمي", "judSolo": "هالة جودار: بتاخد أقل وبتضرب أقوى", "domOn": "الحماسة: ضربك أقوى 25%", "sk_pheal": "علاج", "skd_pheal": "بتعالج نفسك وأعضاء البارتي اللي جنبك (150 بكسل) وبتفك الدوخة. بيزيد مع الذكاء.", "sk_pbless": "بركة ريبيكا", "skd_pbless": "20 ثانية: إنت والبارتي اللي جنبك بتاخدوا من الوحوش أقل 10% وبتضربوها أقوى 10%.", "sk_plight": "النور المقدس", "skd_plight": "نور بيحرق الوحوش اللي حواليك 160%، والضعف على الموتى الأحياء والشياطين.", "sk_pdprot": "الحماية الإلهية", "skd_pdprot": "6 ثواني: ضرر الوحوش عليك أقل 40%.", "sk_psmite": "الضربة المقدسة", "skd_psmite": "ضربة لقدام 260%، والضعف على الموتى الأحياء والشياطين وبتدوّخهم.", "sk_pjudar": "هالة جودار", "skd_pjudar": "15 ثانية: إنت والبارتي اللي جنبك بتاخدوا من الوحوش أقل 15% وبتضربوها أقوى 10%. (كنيسة جودار)", "sk_pdomin": "الحماسة", "skd_pdomin": "15 ثانية: ضربك على الوحوش أقوى 25%. (كنيسة دومينيون)", "sk_prebec": "علاج البالادين", "skd_prebec": "علاج أضعف من الكاهن ليك وللبارتي اللي جنبك. (كنيسة ريبيكا)"});
+Object.assign(STR.en,{"cassus": "Cassus", "cas_hi": "I am Cassus. This body serves Rebecca, the goddess of light. Please look after me.", "cas_idle": "The light does not leave those who walk in it.", "prHi_cassus": "The church needs shields that pray. A paladin guards the pilgrims and serves a church of their choosing. Are you ready?", "cl_priest": "Priest", "cl_paladin": "Paladin", "q_cp": "Vows of the Sacred Light", "cp_o": "The priesthood is not a robe. Love is forbidden, and there are days of prayer, silence and fasting. Pray at my side 5 times and stay still. From now until you are done: not a word in the chat, not a bite of food. Break a vow and your prayers start again.", "cp_w": "Not yet. Pray at my side, keep silent, and do not eat.", "cp_d": "The act of praying itself makes your faith stronger. From today you are a priest of Rebecca. Parties will look for you.", "q_c2p": "Guarding the Pilgrims' Road", "c2p_o": "Paladins scout the roads so thieves and beasts keep away from the pilgrims. Clear the Outlaws' Hideout: defeat 10 outlaws.", "c2p_w": "Not yet. The road is not safe.", "c2p_d": "The road is safe thanks to you. You are a Paladin now. One thing is left: the church you will serve.", "o_pray": "Pray to Rebecca beside Cassus (stand still): {c}/{n}", "vowFast": "You broke your vow of fasting.", "vowSilent": "You broke your vow of silence.", "vowReset": "Your prayers start over.", "oPray": "Pray to Rebecca", "prayGo": "You pray... do not move.", "prayMoved": "You moved and the prayer broke.", "oChurch": "Choose your church", "chPick": "There are three types of paladins. Each church has its way. Which will you serve?", "ch_judar": "The Judar Church", "ch_dominion": "The Dominion Church", "ch_rebecca": "The Rebecca Church", "chD_judar": "party buffs and excellent defense", "chD_dominion": "personal buffs and high attack", "chD_rebecca": "the only paladins who heal", "chOk_judar": "A Judar paladin: you are the party's first shield. Your aura guards those beside you.", "chOk_dominion": "A Dominion paladin: in single combat no one matches you.", "chOk_rebecca": "A Rebecca paladin: your healing is not great, but Rebecca's Daughters were paladins too. Maybe something is hidden.", "oHire": "Hire a priest of the church (donation of {g} gold)", "hireOk": "The priest will walk with you for 5 minutes and heal you when you are hurt. Rebecca be with you.", "hireEnd": "The hired priest went back to the church.", "blsOn": "Blessing: you and the party near you take less and hit harder", "blsSolo": "Blessing: you take less and hit harder (and it covers your party when you have one)", "pdvOn": "Divine Protection: 40% less from monsters", "judOn": "Judar Aura: the party near you is guarded", "judSolo": "Judar Aura: you take less and hit harder", "domOn": "Zeal: 25% more damage", "sk_pheal": "Heal", "skd_pheal": "Heals you and the party members near you (150 px) and clears a stun. Grows with Intelligence.", "sk_pbless": "Rebecca's Blessing", "skd_pbless": "20 s: you and the party near you take 10% less from monsters and deal 10% more to them.", "sk_plight": "Holy Light", "skd_plight": "Light burns the monsters around you for 160%, double against the undead and demons.", "sk_pdprot": "Divine Protection", "skd_pdprot": "6 s: monsters deal 40% less to you.", "sk_psmite": "Smite", "skd_psmite": "A strike ahead for 260%, double against the undead and demons, and it stuns them.", "sk_pjudar": "Judar Aura", "skd_pjudar": "15 s: you and the party near you take 15% less from monsters and deal 10% more to them. (Judar Church)", "sk_pdomin": "Zeal", "skd_pdomin": "15 s: you deal 25% more to monsters. (Dominion Church)", "sk_prebec": "Paladin's Heal", "skd_prebec": "A heal weaker than a priest's, for you and the party near you. (Rebecca Church)"});
 /* ---------------- mounts and pets (SAT-PET-001) ---------------- */
 // Horses carry you faster across the wide belts (H to ride); any fight, hit, dodge, door or cave puts you back on foot.
 // Pets follow you and give a small passive. Both are per-player (S.mounts / S.mount, S.pets / S.pet); online the server
@@ -2952,7 +3035,7 @@ Object.assign(STR.ar,{cookHow:'اضغط لما يبقى دهبي',brewHow:'اض�
 Object.assign(STR.en,{cookHow:'Press E when it turns golden',brewHow:'Press E when it turns golden',cookPerf:'Perfect!',cookGood:'Good',cookBad:'Ruined',cookPerfect:'Perfect cooking: two {it}!',cookRaw:'Still raw... it fell apart',brewRaw:"It never came to a boil... ruined"});
 function campMenu(){dialog('camp',['campHi'],null,[...Object.keys(COOK).map(k=>({l:t('oCook',{it:t(k),n:needTxt(COOK[k])}),ic:k,poor:!canMake(COOK[k]),st:t(k+'D'),f:()=>makeLife(k,false)})),
  ...Object.keys(BREW).map(k=>({l:t('oBrew',{it:t(k),n:needTxt(BREW[k])}),ic:k,poor:!canMake(BREW[k]),f:()=>makeLife(k,true)})),{l:t('oLeave')}]);}
-function eatDish(k){const d=DISH[k];if(!(S.mats[k]>0))return;S.mats[k]--;P.food=Math.min(100,P.food+d.food);if(d.hp)P.hp=Math.min(maxHP(),P.hp+maxHP()*d.hp);if(d.buf)P.buf={k:d.buf,t:d.bt};vfx('heal',P.x,P.y);toast(t('ateD',{it:t(k)}),'good');SFX.eat();hudDirty=true;}
+function eatDish(k){const d=DISH[k];if(!(S.mats[k]>0))return;S.mats[k]--;vowBreak('fast');P.food=Math.min(100,P.food+d.food);if(d.hp)P.hp=Math.min(maxHP(),P.hp+maxHP()*d.hp);if(d.buf)P.buf={k:d.buf,t:d.bt};vfx('heal',P.x,P.y);toast(t('ateD',{it:t(k)}),'good');SFX.eat();hudDirty=true;}
 function updateLife(dt){if(!P)return;if(P.buf){P.buf.t-=dt;if(P.buf.k==='regen'&&P.hp>0&&!P.ghost)P.hp=Math.min(maxHP(),P.hp+maxHP()*.015*dt);if(P.buf.t<=0){P.buf=null;toast(t('bufEnd'));}}
  if(FISH){const F=FISH;F.t+=dt;if(Math.hypot(P.x-F.px,P.y-F.py)>3||mode==='dead'){FISH=null;return;}if(F.t>=F.bite&&!F.shown){F.shown=1;SFX.notice();}if(F.t>F.bite+F.win){FISH=null;toast(t('fGone'),'warn');}}}
 function drawFish(){const F=FISH;if(!F)return;const bite=F.t>=F.bite,bx=F.x,by=F.y-2+(bite?2+Math.sin(gTime*30):Math.sin(gTime*3));ctx.strokeStyle='rgba(230,230,220,.8)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P.x+(P.dir===3?-8:8),P.y-20);ctx.quadraticCurveTo((P.x+bx)/2,Math.min(P.y,by)-14,bx,by);ctx.stroke();
@@ -3110,7 +3193,7 @@ const FSPAWN=[
  ['eti',728,772,-55,70,16],['ogre',728,772,20,150,12],['troll',728,772,70,210,12],['gargoyle',728,772,-55,230,16],['salamander',780,850,100,236,16],['ilizard',780,850,110,236,16]];
 // NPCs: stable ids (dialog keys, quest givers), sprite, tile position
 const NPCS=[{id:'smith',spr:'smith',tx:22,ty:18},{id:'grid',spr:'grid',tx:17,ty:18.4,dir:2},{id:'baker',spr:'baker',tx:6,ty:18},{id:'regas',spr:'regas',tx:24.5,ty:19,dir:3},{id:'coach',spr:'coach',tx:4,ty:21.6},
- {id:'khan',spr:'khan',tx:142,ty:73},{id:'tw',spr:'tw',tx:152,ty:77.4},{id:'tk',spr:'knight',tx:134,ty:61.4},{id:'tm',spr:'tm',tx:124,ty:57.4},{id:'ta',spr:'ta',tx:112,ty:52.4},{id:'coachW',spr:'coach',tx:143,ty:83.4},{id:'stylist',spr:'stylist',tx:138,ty:83.4,dir:2},{id:'board',tx:123,ty:79.6,obj:1},
+ {id:'khan',spr:'khan',tx:142,ty:73},{id:'tw',spr:'tw',tx:152,ty:77.4},{id:'tk',spr:'knight',tx:134,ty:61.4},{id:'tm',spr:'tm',tx:124,ty:57.4},{id:'cassus',spr:'priest',tx:117,ty:60.4,clr:1},{id:'ta',spr:'ta',tx:112,ty:52.4},{id:'coachW',spr:'coach',tx:143,ty:83.4},{id:'stylist',spr:'stylist',tx:138,ty:83.4,dir:2},{id:'board',tx:123,ty:79.6,obj:1},
  {id:'ashur',spr:'ashur',tx:190,ty:72.4},{id:'pcap',spr:'pcap',tx:185,ty:80,dir:2},{id:'coachP',spr:'coach',tx:176,ty:83.4},
  {id:'guardW',spr:'knight',tx:108,ty:80.4,dir:2,clr:1},{id:'hunter',spr:'hunter',tx:151,ty:90.4,clr:1},{id:'farmerP',spr:'baker',tx:183,ty:95.4,clr:1},{id:'hunterP',spr:'recruiter',tx:202,ty:80.4,dir:3,clr:1},
  // a peddler at each waystation, halfway through the belts (ph: already a physical column)
@@ -3219,7 +3302,7 @@ const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Mat
 // the golden ratio (novel ch 315, 1423): Strength and Agility kept 1:1. A hidden stat: always on, never shown in the status window
 const balanced=()=>!!(S&&S.st.str>=20&&S.st.agi>=20&&Math.abs(S.st.str-S.st.agi)<=Math.max(S.st.str,S.st.agi)*.1);
 const dodgeCost=()=>balanced()?20:25;
-function maxHP(){return Math.round((1+achB('hp'))*(100+stat('sta')*10+(S.tl.chief?60:0))*(balanced()?1.08:1)*(S.cls==='gknight'?1.15:S.cls==='knight'?1.2:1)*(S.tl.purifier?1.1:1)*(S.tl.climber?1.05:1)*(1+gearSum('hpp')));}
+function maxHP(){return Math.round((1+achB('hp'))*(100+stat('sta')*10+(S.tl.chief?60:0))*(balanced()?1.08:1)*(S.cls==='gknight'?1.15:S.cls==='knight'?1.2:S.cls==='paladin'?1.15:1)*(S.tl.purifier?1.1:1)*(S.tl.climber?1.05:1)*(1+gearSum('hpp')));}
 function maxST(){return 80+stat('sta')*2;}
 function maxMP(){return Math.round((stat('int')*3+Math.round(gearSum('mpb')))*(1+.1*Math.min(2,(S.wis&&S.wis.pill)||0))*(S.tl.echo?1.08:1));}
 const weapKind=()=>(WSH[weapon().id]||{}).k||'sword';
@@ -3439,7 +3522,7 @@ const monY=m=>m.y-(m.type==='guardian'?18:m.type==='gchief'?10:4);
 // one hit on one monster; returns 0 (no effect), 1 (hit) or 2 (crit)
 function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}
  if(m.type==='kraugel'&&!m.st&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
- let dmg=atkV()*mul*lvF(m.lv)*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1),crit=rand()<Math.min(.5,.05+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
+ let dmg=atkV()*mul*lvF(m.lv)*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m),crit=rand()<Math.min(.5,.05+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -3489,7 +3572,7 @@ function hurtPlayer(d,ml,src){return asMe(()=>hurtPlayer0(d,ml,src));}
 function hurtPlayer0(d,ml,src){if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(src&&src.dmul)d*=src.dmul;if(src&&src.type)P.lastSrc=src.type;if(S.tl.hking&&src&&HKV.has(src.type))d*=.85;
  if(P.qm>0&&rand()<.3){numP(-20,t('ipEvade'),'#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
- d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,2.2)*150/(150+defV())*rlDef(src)));d=c2Hurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
+ d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,2.2)*150/(150+defV())*rlDef(src)));d=c2Hurt(d,src);d=phHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
  if(P.guard&&src){const sx=src.x-P.x,sy=src.y-P.y,sl=Math.hypot(sx,sy)||1;
   const GK=S.cls==='gknight';if(P.fort>0||(sx*P.gx+sy*P.gy)/sl>-.15){const ang=Math.atan2(sy,sx),bx=P.x+sx/sl*10,by=P.y-8+sy/sl*10;vfx('block',bx,by,{angle:ang});
    if(!src.hv&&P.gT<(GK?.18:.12)*clamp(1-((ml||S.lv)-S.lv)*.015,.6,1)){vfx('crit',bx,by);qEvent('block','guard');numP(-24,t('parry'),'#9fe3ff',false);SFX.crit();P.inv=.35;P.gd=Math.min(100,P.gd+15);
@@ -3544,7 +3627,7 @@ const buyCount=(room,g)=>Math.max(0,Math.min(BUYQ,room,Math.floor(S.gold/g)));
 function boughtFx(k,n,g){SFX.coin();num(P.x,P.y-26,'-'+g+'G','#f2c14e',false);toast(n>1?t('boughtN',{n,it:t(k),g}):t('got',{n:1,item:t(k)}));hudDirty=true;}
 function buyPot(who,k){if((S[k]||0)>=10)return shopD(who,'potFull');const g=price(who,POT[k].price),n=buyCount(10-(S[k]||0),g);if(!n){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g*n;S[k]=(S[k]||0)+n;boughtFx(k,n,g*n);shopD(who,'potBuy');}
 const potOpts=who=>['hpot','mpot'].map(k=>{const g=price(who,POT[k].price);return{l:t('oBuyPot',{p:t(k),g}),qty:1,ic:k,st:`${t(k+'D')} (${S[k]||0}/10)`,poor:S.gold<g,f:()=>buyPot(who,k)};});
-function eat(){if(S.bread<=0){toast(t('noBread'),'warn');SFX.deny();return;}if(P.food>=95){toast(t('full'));SFX.deny();return;}S.bread--;P.food=Math.min(100,P.food+40);P.hp=Math.min(maxHP(),P.hp+15);vfx('heal',P.x,P.y);toast(t('ate'));SFX.eat();hudDirty=true;}
+function eat(){if(S.bread<=0){toast(t('noBread'),'warn');SFX.deny();return;}if(P.food>=95){toast(t('full'));SFX.deny();return;}S.bread--;vowBreak('fast');P.food=Math.min(100,P.food+40);P.hp=Math.min(maxHP(),P.hp+15);vfx('heal',P.x,P.y);toast(t('ate'));SFX.eat();hudDirty=true;}
 function nearTree(){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];let best=null,bs=1e9,bc=null,bcs=1e9;for(const tr of vtNear(P.x,P.y,30)){const dx=tr.x-P.x,dy=tr.y-P.y,d=Math.hypot(dx,dy);if(d>30)continue;const s=d-((dx*v[0]+dy*v[1])/(d||1))*12;if((chopped.get(tr.k)||0)>gTime){if(s<bcs){bcs=s;bc=tr;}}else if(s<bs){bs=s;best=tr;}}return best||bc;}
 function nearest(){let best=null,bd=26;const cand=[...npcs.filter(n=>!n.hidden).map(n=>({k:'npc',o:n,x:n.x,y:n.y})),...ANVILS.map(a=>({k:'anvil',o:a,x:a.tx*TS+8,y:a.ty*TS+8})),...nodes.filter(n=>!(n.dep>0&&(n.kind==='herb'||n.kind==='bherb'))).map(n=>({k:'node',o:n,x:n.x,y:n.y,hint:n.kind==='herb'||n.kind==='bherb'?(n.dep>0?'hPicked':'hHerb'):undefined})),...CAMPS.map(c=>({k:'camp',o:c,x:c.x,y:c.y,hint:'hCamp'})),...ROOMS.map(R=>{const d=doorOf(R.b);return{k:'door',o:R,x:d.x,y:d.y,hint:'hEnter'};}),...PROPS.filter(p=>p.k==='chest'||p.k==='shelf'||p.k==='bed').map(p=>({k:'prop',o:p,x:p.tx*TS+p.w*8,y:p.ty*TS+(p.back?22:10),hint:{chest:'hChest',shelf:'hShelf',bed:'hBed'}[p.k]})),{k:'grave',o:GRAVE,x:GRAVE.tx*TS+8,y:GRAVE.ty*TS+16,hint:'hGrave'},...lmList().map(l=>({k:'lm',o:l,x:l.x,y:l.y,hint:'hRead'})),...exNear().map(c=>({k:'cache',o:c,x:c.x,y:c.y,hint:'hCache'})),...tfNear().map(f=>({k:'folk',o:f,x:f.x,y:f.y,hint:'hTalk'})),...DGATES.filter(g=>!(g.hide&&g.bh!=='key'&&!(g.tw&&Math.hypot(g.x-P.x,g.y-P.y)<22))&&!g.got&&!g.out&&!g.gone&&!(g.tw==='enter'&&!(S.wis&&S.wis.map))).map(g=>({k:'gate',o:g,x:g.x,y:g.y,hint:g.hint})),...TERR.map(T=>({k:'banner',o:T,x:T.x,y:T.y-4,hint:'hBanner'})),...SHRINES.map(o=>({k:'shrine',o,x:o.x,y:o.y,hint:o.hint})),...(COMPO?[{k:'npc',o:COMPO,x:COMPO.x,y:COMPO.y}]:[])];for(const c of cand){const d=Math.hypot(c.x-P.x,c.y-P.y)-(c.o&&c.o.reach||0);if(d<bd){bd=d;best=c;}}const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
  if(!best||best.k==='tree'){const w=nearWater();if(w)best={k:'water',o:w,x:w.x,y:w.y,hint:FISH?'hReel':'hFish'};}return best;}
@@ -3702,6 +3785,9 @@ const QD={
  c2b:{by:'tw',lv:20,from:['warrior'],mst:['melee',3],obj:{t:'kill',it:'merman',n:12,low:.5},xp:4000,gold:200,promo:'berserker'},
  c2l:{by:'tw',lv:20,from:['warrior'],mst:['spear',3],obj:{t:'kill',it:'merman',n:15,wk:'spear'},xp:4000,gold:200,promo:'lancer'},
  c2r:{by:'ta',lv:20,from:['archer'],mst:['bow',3],obj:{t:'cache',it:'cache',n:3},xp:4000,gold:200,promo:'ranger'},
+ // churches (major 7): the Priest vows at Cassus (no chat and no food until done), the Paladin road patrol
+ cp:{by:'cassus',lv:10,obj:{t:'pray',it:'altar',n:5},xp:900,cls:'priest',item:'staff'},
+ c2p:{by:'cassus',lv:25,from:['gknight','priest'],mst:['melee',2],obj:{t:'kill',it:'outlaw',n:10},xp:9000,gold:400,promo:'paladin'},
  bnt:{by:'board',lv:8,obj:{t:'kill',it:'gchief',n:1},xp:400,gold:120},
  pt1:{by:'pcap',lv:45,obj:{t:'kill',it:'hwolf',n:10},xp:2600,gold:120},
  pt2:{by:'pcap',lv:48,pre:'pt1',obj:{t:'kill',it:'rboar',n:8},xp:3400,gold:150,pts:5},
@@ -3821,7 +3907,7 @@ function completeQ(id){if(!claimQ(id))return;if(id==='ya3')setTimeout(()=>giveTi
  toast(t('qDone',{q:qName(id)}),'good');SFX.quest();
  if(q.gold){S.gold+=q.gold;coinFx(npcOf(q.by),q.gold);}if(q.kc)kcGain(q.kc);
  if(q.item){const it=mkItem(q.item,1);S.items.push(it);if(q.cls)S.eqW=it.uid;loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});}
- if(q.promo)promoDone(q);
+ if(q.promo){promoDone(q);phDone(q);}
  if(q.cls){S.cls=q.cls;sbSig='';SFX.legendary();flash();setTimeout(()=>toast(t('clsGot',{c:t('cl_'+q.cls)}),'good'),400);checkSkills();}
  if(q.title)giveTitle(q.title);
  addAff(q.by,12);addRep(townOfNpc(q.by),10+Math.min(15,Math.floor((q.xp||0)/200)));
@@ -3883,6 +3969,7 @@ const NPCT={
  khan:{hi:'kh_hi',idle:()=>isSm()?(rand()<.5?'kh_s1':'kh_s2'):S.ev.grid&&rand()<.5?'kh_grid':'kh_idle',opts:()=>[...secOpt('khan'),...(isSm()?[{l:t('oBuyOre'),qty:1,f:()=>buyMat('khan','ore',8)}]:[]),...svcOpts('khan')]},
  smith:{hi:'sm_hi',idle:()=>isSm()?'sm_s1':'sm_idle',opts:()=>[...secOpt('smith'),...(isSm()?[{l:t('oBuyOre'),qty:1,f:()=>buyMat('smith','ore',8)}]:[]),...svcOpts('smith')]},
  tw:{low:()=>trLine('tw'),idle:()=>trLine('tw')},
+ cassus:{hi:'cas_hi',idle:()=>'cas_idle',opts:()=>casOpts()},
  tk:{low:()=>trLine('tk'),idle:()=>trLine('tk')},
  ta:{low:()=>trLine('ta'),idle:()=>trLine('ta')},
  tm:{low:()=>trLine('tm'),idle:()=>trLine('tm'),opts:()=>petOpt('owl')},
@@ -4139,7 +4226,7 @@ function mswordAct(){const L=WS.legends||(WS.legends={}),own=L.muller;
 // classes then earn 15 stat points per level instead of 10, so the second climb ends far stronger than the first.
 const isLeg=()=>S.cls==='pagma'||S.cls==='braham'||S.cls==='saint';
 const ptsLv=()=>isLeg()?15:PTS_LV;
-function legendReset(){S.cbase=null;S.lv=1;S.xp=0;S.st={str:10,sta:10,agi:10,int:10,dex:10};S.pts=0;S.adv=0;if(P){P.hp=maxHP();P.mp=maxMP();}hudDirty=true;}
+function legendReset(){S.cbase=null;S.church=null;S.lv=1;S.xp=0;S.st={str:10,sta:10,agi:10,int:10,dex:10};S.pts=0;S.adv=0;if(P){P.hp=maxHP();P.mp=maxMP();}hudDirty=true;}
 function becomeSaint(){const L=WS.legends||(WS.legends={});if(L.muller&&L.muller.pid!==pidOf())return;L.muller={pid:pidOf(),n:S.look.n};
  S.cls='saint';S.bar=null;legendReset();sbSig='';SFX.legendary();flash();hudDirty=true;save(true);
  dialog('mswordN',['saS1','saS2','legReset','saPerk'],()=>{annW('annSaint');checkSkills();});}
@@ -4584,6 +4671,10 @@ const SKD={
  bfury:{cls:'berserker',lv:20,pas:1,col:'#ff5a3a'},cleave:{cls:'berserker',lv:20,mp:16,cd:7,need:'melee',col:'#ff7a5a'},lstand:{cls:'berserker',lv:28,mp:24,cd:60,col:'#ff3a2a'},
  thrust:{cls:'lancer',lv:20,mp:12,cd:5,need:'spear',col:'#cfe0ff'},skewer:{cls:'lancer',lv:24,mp:18,cd:10,need:'spear',col:'#9fd8ff'},swall:{cls:'lancer',lv:28,mp:26,cd:20,need:'spear',col:'#e8f4ff'},
  track:{cls:'ranger',lv:20,mp:12,cd:20,col:'#c8e07a'},trap:{cls:'ranger',lv:22,mp:10,cd:6,col:'#d8b070'},volley:{cls:'ranger',lv:26,mp:20,cd:9,need:'bow',col:'#9fe39a'},
+ // churches (major 7): church: the paladin church a skill belongs to
+ pheal:{cls:'priest',lv:10,mp:18,cd:5,col:'#fff3b0'},pbless:{cls:'priest',lv:12,mp:24,cd:30,col:'#ffe08a'},plight:{cls:'priest',lv:15,mp:22,cd:8,col:'#fff7c8'},
+ pdprot:{cls:'paladin',lv:25,mp:20,cd:25,col:'#cfe6ff'},psmite:{cls:'paladin',lv:25,mp:14,cd:6,need:'melee',col:'#fff3b0'},
+ pjudar:{cls:'paladin',church:'judar',lv:28,mp:26,cd:30,col:'#9fd8ff'},pdomin:{cls:'paladin',church:'dominion',lv:28,mp:20,cd:30,col:'#ff9a6a'},prebec:{cls:'paladin',church:'rebecca',lv:28,mp:18,cd:6,col:'#ffe08a'},
  rage:{title:'krage',mp:20,cd:40,col:'#ff5a3a'},roar:{title:'forest',mp:15,cd:30,col:'#7cc672'},cry:{title:'chief',mp:15,cd:25,col:'#e05040'}};
 const TLS={krage:'rage',forest:'roar',chief:'cry'};
 const pasSkills=()=>Object.keys(SKD).filter(k=>SKD[k].pas&&(SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.sec===SKD[k].cls)&&skOK(k));
@@ -4600,7 +4691,7 @@ const skLv=k=>skProg(k)[0],skDm=k=>1+.06*(skLv(k)-1),skCostM=k=>1-.03*(skLv(k)-1
 function skUse(k,xp=2){S.skx=S.skx||{};const was=skLv(k);S.skx[k]=(S.skx[k]||0)+xp;const now=skLv(k);if(now>was){sbSig='';setTimeout(()=>{toast(t('skLvUp',{s:t('sk_'+k),n:now})+(now===5||now===10?' '+t('skOpen',{o:skOptTxt(k,now)}):''),'good');SFX.level();},300);}}
 const skOptTxt=(k,l)=>t('skO'+l+'_'+(SKO[k]||'any'));
 function skLvTxt(k){const [l,c,nx]=skProg(k),nxO=l<5?5:l<10?10:0;return `<br><small style="color:#ffe08a">${t('skLvT',{n:l})}${nx?` · ${t('skUses',{p:Math.floor(c/nx*100)})}`:` · ${t('skMax')}`}</small>`+(nxO?`<br><small style="color:#9fb8d8">${t('skNext',{n:nxO,o:skOptTxt(k,nxO)})}</small>`:'')+(l>=5?`<br><small style="color:#9fe39a">✓ ${skOptTxt(k,5)}</small>`:'')+(l>=10?`<br><small style="color:#9fe39a">✓ ${skOptTxt(k,10)}</small>`:'');}
-const clsSkills=()=>Object.keys(SKD).filter(k=>!SKD[k].pas).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior');
+const clsSkills=()=>Object.keys(SKD).filter(k=>!SKD[k].pas&&(!SKD[k].church||SKD[k].church===S.church)).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior');
 function barSkills(){const cs=clsSkills().filter(skOK),a=Array.isArray(S.bar)&&S.bar.length===5?S.bar.map(k=>k&&cs.includes(k)?k:null):cs.slice(0,5);while(a.length<5)a.push(null);a.push(TLS[S.title]||null);return a;}
 const skOK=k=>{const d=SKD[k];return d.title?S.title===d.title:S.lv>=d.lv&&(!d.qd||qDone(d.qd));};
 const lockTxt=d=>d.qd&&!qDone(d.qd)?t('skQuest',{q:qName(d.qd)}):t('skUnlock',{n:d.lv});
@@ -4614,6 +4705,7 @@ const fdir=()=>{if(MSX===null)return [[0,1],[0,-1],[1,0],[-1,0]][P.dir];const b=
 const aoe=(x,y,r,mul,o)=>{let n=0;hitTrees(x,y,r,3);mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-x,monY(m)-y)<r&&hitMon(m,mul,o||{}))n++;});return n;};
 const SKF={
  ...C2SK,
+ ...PHSK,
  strike:()=>{const v=fdir();P.acd=0;tryAttack(v[0],v[1],1.8);shake=.12;},
  // Guardian Knight: shield bash stuns a cone in front; Fortress makes the guard unbreakable and all-round, and turns blocks back on the attacker; Taunt pulls every monster nearby onto you and hardens you for it
  bash:()=>{const v=fdir(),a=Math.atan2(v[1],v[0]);SFX.slam();shake=.12;vfx('block',P.x+v[0]*12,P.y-8+v[1]*12,{angle:a});let n=0;mons.forEach(m=>{if(m.dead)return;const dx=m.x-P.x,dy=monY(m)-(P.y-6),d=Math.hypot(dx,dy);if(d<30+MT[m.type].r&&(dx*v[0]+dy*v[1])/(d||1)>.35&&hitMon(m,1.2,{stun:1.2,skill:1,kx:v[0],ky:v[1]}))n++;});if(n)SFX.hit();},
@@ -4794,7 +4886,7 @@ Object.assign(STR.en,{sk_lrep:"Legendary Blacksmith's Repair",skd_lrep:'Restores
 function namedDrop(m){const L=NDROP[m.type];if(!L||m.tmp)return;for(const [id,p] of L){if(rand()>=p)continue;const it=mkItem(id,0);S.items.push(it);vfx('loot',m.x,m.y,{rarity:it.r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+it.r)}));break;}}
 // small procedural skill icons
 function skIcon(k){const id='sk_'+k;if(ICN[id])return ICN[id];const c=SKD[k].col;ICN[id]=mk(16,16,g=>{const p=(x,y,w,h,cc)=>R(g,x,y,w,h,cc||c);R(g,0,0,16,16,'#101a33');
- if(C2ICO[k])C2ICO[k](p);else if(k==='strike'){for(let i=0;i<10;i++)p(3+i,12-i,2,2);p(11,2,3,1,'#fff');}
+ if(C2ICO[k])C2ICO[k](p);else if(PHICO[k])PHICO[k](p);else if(k==='strike'){for(let i=0;i<10;i++)p(3+i,12-i,2,2);p(11,2,3,1,'#fff');}
  else if(k==='bash'){p(4,3,8,9,'#5a6a8a');p(5,4,6,7);p(7,5,2,5,'#fff');p(5,12,6,1,'#5a6a8a');p(6,13,4,1,'#5a6a8a');p(12,7,3,1,'#fff');p(13,5,1,1,'#fff');p(13,9,1,1,'#fff');}
  else if(k==='fort'){p(3,6,10,8);p(3,4,2,2);p(7,4,2,2);p(11,4,2,2);p(7,10,2,4,'#101a33');p(4,7,8,1,'#fff');}
  else if(k==='taunt'){for(let i=0;i<8;i++){const an=i*.785;p(8+Math.cos(an)*6|0,8+Math.sin(an)*6|0,1,1);}p(7,3,2,7);p(7,11,2,2);}
@@ -5273,7 +5365,7 @@ function update(dt){
  if(P.food<20&&!P.hungryT){P.hungryT=true;toast(t('hungry'),'warn');}if(P.food>=25)P.hungryT=false;
  if(pain&&!P.painT){P.painT=true;toast(t('pain'),'warn');}if(!pain)P.painT=false;
  // monsters
- tfTick(dt);c2Tick(dt);const safe=!!inTown(P.x,P.y);
+ tfTick(dt);c2Tick(dt);phTick(dt);const safe=!!inTown(P.x,P.y);
  for(const m of mons){try{
   const b=MT[m.type];monVox(m,b,dt);
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
@@ -5520,7 +5612,7 @@ function render(dt){
   if(!titleCam&&mode!=='dead'&&!P.ghost)if(PET)ents.push({y:PET.y,f:()=>drawPet(PET)});
   ents.push({y:P.y,f:()=>{P.trail.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;const am=a.r&&MOUNTS[a.r];if(am){drawHorse(a.x,a.y,a.dir,2,am);drawRider(a.x,a.y,a.dir,2,P);drawHorse(a.x,a.y,a.dir,2,am,ctx,'head');}else drawChar(pSpr(),a.x,a.y,a.dir,a.frame,false);});ctx.globalAlpha=1;const rd=P.ride&&MOUNTS[S.mount];const hf=rd&&P.rmv>0?1+((P.rgT||0)*10|0)%4:0,blk=P.inv>0&&((gTime*20|0)%2===0)&&P.dash<=0;if(rd)drawHorse(P.x,P.y,P.dir,hf,rd);const wen=(weapon()||{}).en||0;if(wen>=7)drawEnh(P.x,P.y-(rd?9:0),wen,0);if(rd){if(!blk)drawRider(P.x,P.y,P.dir,hf,P);drawHorse(P.x,P.y,P.dir,hf,rd,ctx,'head');const hm=rhpMax(S.mount),hh=rhp(S.mount);if(hh<hm){R(ctx,P.x-9,P.y-37,18,3,'#000');R(ctx,P.x-8,P.y-36,16*hh/hm,1,'#e8a060');}}else drawChar(pSpr(),P.x,P.y,P.dir,P.frame,blk,0,P);if(wen>=4)drawEnh(P.x,P.y-(rd?9:0),wen,1);
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,w.id,w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
-  if(BHR)bhEnts(ents);if(S&&S.wis)twEnts(ents);if(S)c2Ents(ents);if(NET&&!titleCam)netEnts(ents);}
+  if(BHR)bhEnts(ents);if(S&&S.wis)twEnts(ents);if(S){c2Ents(ents);phEnts(ents);}if(NET&&!titleCam)netEnts(ents);}
  // one broken drawing (a stale sprite file after an update) must not hide the player and everything after it
  ents.sort((a,b)=>a.y-b.y).forEach(e=>{try{e.f();}catch(err){ctx.globalAlpha=1;gameErr(err);}});
  drawGDrop();drawEProj();proj.forEach(p=>{if(p.kind==='arrow'){const l=Math.hypot(p.vx,p.vy)||1,ux=p.vx/l,uy=p.vy/l;ctx.strokeStyle='#e8e0d0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x-ux*7,p.y-uy*7);ctx.lineTo(p.x,p.y);ctx.stroke();R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}else if(p.kind==='wave'){const a=Math.atan2(p.vy,p.vx);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.globalAlpha=.85;ctx.strokeStyle='#ffe08a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(-6,0,12,-1.1,1.1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(-5,0,12,-.9,.9);ctx.stroke();ctx.restore();}else{const f=p.kind==='fire';R(ctx,p.x-2,p.y-2,f?5:4,f?5:4,f?'#ff8a1e':'#9fd8ff');R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}});
@@ -5790,7 +5882,7 @@ const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(try
 // presence field: the events of the last 0.7 s, oldest first, within FXMAX characters (each one goes out in about 3 updates)
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
 // clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
-function stPub(){return P?(P.fly>0?'f':'')+(P.glk>0?'g':''):'';}
+function stPub(){return P?(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':''):'';}
 function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));if(!FXOUT.length)return '['+tags.join(',')+']';
  let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
@@ -5814,7 +5906,7 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
 // due replays, at where each player is drawn now; players off screen or out of sight just drop theirs
 function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
 function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)
- for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const fs=fxSt(r.sid);fxIn(r,fs);remLife(r,fs);if(fs.st&&fs.st.indexOf('f')>=0&&rand()<.23)fx.push({x:r.x+(rand()-.5)*14,y:r.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});if(fs.st&&fs.st.indexOf('g')>=0&&rand()<.12)fx.push({x:r.x+(rand()-.5)*24,y:r.y-6,vx:0,vy:-16,t:.6,c:'#ffe08a',fl:1});/* their flight, as yours (updateItemFx) */if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
+ for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const fs=fxSt(r.sid);fxIn(r,fs);remLife(r,fs);if(fs.st&&fs.st.indexOf('f')>=0&&rand()<.23)fx.push({x:r.x+(rand()-.5)*14,y:r.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});if(fs.st&&fs.st.indexOf('g')>=0&&rand()<.12)fx.push({x:r.x+(rand()-.5)*24,y:r.y-6,vx:0,vy:-16,t:.6,c:'#ffe08a',fl:1});if(fs.st&&/[bj]/.test(fs.st)&&rand()<.1)fx.push({x:r.x+(rand()-.5)*28,y:r.y-4,vx:0,vy:-18,t:.7,c:fs.st.indexOf('j')>=0?'#9fd8ff':'#fff3b0',fl:1});/* their flight, as yours (updateItemFx) */if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
   const k=remoteSpr(r.look,r.arm),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
   // their weapon in hand and each swing once, the way your own is drawn (SAT-ONLINE-026, owner feedback 7): a swing starts when
   // their anim turns to 'attack' and plays 0.14 s on this clock, however long the state stays up
@@ -5853,7 +5945,7 @@ function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch
 Object.assign(STR.ar,{pKick:'اطرد',pKickQ:'تطرد {n}؟',pKickYes:'اطرد',pKickNo:'لأ',pKickDone:'{n} اتشال من الفريق',pLeaderLeft:'{n} ساب، فالفريق اتفكك',pRejoined:'رجعت لبارتي {n}',pYouLead:'القائد مشي: إنت قائد البارتي دلوقتي',pNewLead:'القائد مشي: {n} قائد البارتي دلوقتي',pReplaced:'البارتي اختارت قائد جديد وإنت مش موجود، هترجع لهم'});
 Object.assign(STR.en,{pKick:'Kick',pKickQ:'Kick {n}?',pKickYes:'Kick',pKickNo:'Cancel',pKickDone:'{n} was removed from the party',pLeaderLeft:'{n} left, so the party broke up',pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();rlStart();bntStart();frStart();tradeStart();guildStart();dropStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();rlStart();phStart();bntStart();frStart();tradeStart();guildStart();dropStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],leaderLeft:['pLeaderLeft','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn'],raid:[e.on?(e.self?'pRaidMade':'pRaidNow'):(e.self?'pPartyMade':'pPartyNow'),'good']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -5908,7 +6000,7 @@ function chatClose(){const i=$('chatIn');i.hidden=true;i.value='';i.blur();chatS
 function chatSend(){if(!CHAT)return chatClose();let v=$('chatIn').value,ch=CHCH;
  {const w=/^\/(?:w|whisper)\s+(\S+)\s*([\s\S]*)$/i.exec(v);if(w){const f=frByName(w[1]);if(!f){toast(t('wNoFriend',{n:Satisfy.chat.clean(w[1],24)}),'warn');return;}const r=CHAT.sayTo(f.uid,f.n,w[2]);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}if(r==='sent')CHWTO=f.n;chatClose();return;}}/* SAT-ONLINE-070: /w name text */
  if(/^\/filter\s*$/i.test(v)){CHATF=!CHATF;try{localStorage.setItem('satisfy_chatf',CHATF?'1':'0');}catch(e){}toast(t(CHATF?'chatFOn':'chatFOff'));chatClose();return;}/* SAT-ONLINE-071: /filter turns the word filter off and on */const m=/^\/(p|a|g)\s+/i.exec(v);if(m){const k=m[1].toLowerCase();ch=k==='p'?'party':k==='g'?'guild':'all';v=v.slice(m[0].length);} // /p party, /a everyone, /g guild
- const r=CHAT.say(v,ch);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}chatClose();}
+ const r=CHAT.say(v,ch);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}vowBreak('silence');chatClose();}
 $('chatIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Tab'){e.preventDefault();chatNext();return;}if(e.code==='Enter'||e.code==='NumpadEnter'){e.preventDefault();chatSend();}else if(e.code==='Escape'){e.preventDefault();chatClose();}});
 $('chatIn').addEventListener('blur',()=>{if(!$('chatIn').hidden&&!$('chatIn').value)chatClose();});
 // pressing a tab used to blur the empty line first, which closed it and hid the tabs before the click landed (owner feedback 9)

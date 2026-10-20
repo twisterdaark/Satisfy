@@ -5,6 +5,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zn', ver: '0.80', d: '2026-10-20',
+      ar: ['الكنايس (التحديث الكبير السابع): كاسوس، كاهن ريبيكا، بقى واقف برا سور وينستون الشمالي جنب مدربين الكلاسات',
+        'كلاس الكاهن من لفل 10: زي الرواية، الكهنوت صعب. بتصلي جنب كاسوس 5 مرات وإنت ثابت مكانك، ولحد ما تخلص ممنوع تكتب في الشات وممنوع تاكل. لو كسرت النذر الصلوات بترجع من الأول',
+        'الكاهن: العلاج بيعالجك ويعالج البارتي اللي جنبك (وبيشتغل أونلاين)، وبركة ريبيكا بتخليكم تاخدوا أقل وتضربوا أقوى، والنور المقدس بيحرق الوحوش والضعف على الموتى الأحياء والشياطين',
+        'أي حد يقدر يأجّر كاهن من كاسوس بتبرع للكنيسة: بيمشي معاك 5 دقايق ويعالجك لما تتعور',
+        'البالادين (مستوى تاني) من لفل 25 للفارس الحارس أو الكاهن: اختبار حراسة طريق الحجاج، وبعده بتختار كنيستك. جودار (هالة بتحمي البارتي)، أو دومينيون (الحماسة للضرب الفردي)، أو ريبيكا (البالادين الوحيدين اللي بيعالجوا)',
+        'كل البالادين: الحماية الإلهية والضربة المقدسة. كل ده ضد الوحوش بس، ومبيغيرش القتال بين اللاعبين'],
+      en: ['Churches (major #7): Cassus, priest of Rebecca, now stands outside Winston\'s north wall beside the class trainers',
+        'The Priest class from level 10: as in the novel, the priesthood is hard. Pray beside Cassus 5 times without moving, and until you are done you may not write in the chat or eat. Break a vow and the prayers start over',
+        'Priest: Heal mends you and the party near you (online too), Rebecca\'s Blessing makes you take less and hit harder, and Holy Light burns monsters, double against the undead and demons',
+        'Anyone can hire a priest from Cassus for a donation to the church: they walk with you for 5 minutes and heal you when you are hurt',
+        'The Paladin (Tier-2) from level 25 for a Guardian Knight or a Priest: a trial guarding the pilgrims\' road, then you choose your church. Judar (an aura that guards the party), Dominion (Zeal for single combat) or Rebecca (the only paladins who heal)',
+        'Every paladin: Divine Protection and Smite. All of it works against monsters only and does not change fights between players'] },
     { v: '2026-10-20zm', ver: '0.79', d: '2026-10-20',
       ar: ['كلاسات المستوى التاني (التحديث الكبير السادس): من لفل 20 المحارب يقدر يبقى فارس أو بيرسيركر أو رمّاح، والرامي يبقى رينجر (والفارس الحارس يقدر يبقى فارس)',
         'مش باللفل بس: لازم الكلاس، وإتقان سلاح الطريق لمستوى 3، واختبار من المدرب. طريق واحد بس، وبتفضل معاك سكيلات كلاسك القديم',
