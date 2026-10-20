@@ -5,6 +5,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zq', ver: '0.83', d: '2026-10-20',
+      ar: ['الكلاسات المخفية (التحديث الكبير العاشر): مفيش مدرب بيديهالك. زي الرواية، كل كلاس مستخبي ورا شرط محدش بيقولك عليه، ولما تحققه وإنت نوفيس أو في كلاس أول، النظام بيعرض عليك كويست تغيير الكلاس',
+        'الكلاس الجديد بياخد مكان القديم ومهاراته، بس اللفل والستاتس بيفضلوا. كلاس مخفي واحد لكل شخصية، ولو رفضت الشرط ممكن يتحقق تاني',
+        'أورا ماستر (نادر وبيكبر): الضربات العادية سيوف أورا من إيديك الاتنين مهما كان في إيدك. إطلاق الأورا، رماح الأورا، أورا الرجلين، دفاع الأورا، والحساسية الفائقة. الأورا بتبدأ زرقا وتبقى حمرا (إبيك) من لفل 40 ويونيك من لفل 80 بالتدريب',
+        'بيست ماستر (نادر): تتحول دب أو مستذئب أو نسر، وضربة الملك 1350%، ونص إنسان نص وحش',
+        'الخطيب (نادر): صحة أقل من الساحر، والإقناع (مكافآت كويستات أكتر، أسعار أقل، وعلاقة أسرع بالناس)، واللسان الحاقد، والبلاغة اللي بترفع معنويات الفريق',
+        'أونلاين اللاعبين التانيين بيشوفوا شكل الوحش ولون الأورا. كل ده ضد الوحوش بس'],
+      en: ['Hidden classes (major #10): no trainer gives them. As in the novel, each waits behind a condition nobody tells you about; meet it as a novice or a first class and the system offers the class change quest',
+        'The new class replaces the old one and its skills, but your level and stats stay. One hidden class per character; decline and the condition can be met again',
+        'Aura Master (rare, grows): basic attacks are aura blades from both hands whatever you hold. Aura Release, Aura Spears, Aura Legs, Aura Guard and Super Sensitivity. The aura starts blue, turns red (Epic) from Lv 40 and Unique from Lv 80 with training',
+        'Beast Master (rare): become a bear, a werewolf or an eagle; Lord\'s Strike for 1350%; Half Man Half Beast',
+        'Orator (rare): lower health than a magician; Persuasion (more quest rewards, lower prices, faster affinity), Spiteful Tongue, and Eloquence to lift the party',
+        'Online, other players see your beast form and your aura\'s colour. All of it against monsters only'] },
     { v: '2026-10-20zp', ver: '0.82', d: '2026-10-20',
       ar: ['النيكرومانسر (التحديث الكبير التاسع): راجل شاحب واقف برا سور وينستون الشمالي، شرق مدربين الكلاسات',
         'كلاس النيكرومانسر من لفل 20: زي الرواية بيسموهم ضباع عشان بيدوروا على الجثث. الاختبار إنك تلم 8 جثث طازة: الوحش اللي تقتله جسمه بيفضل 15 ثانية، امشي عليه وخده',

@@ -38,7 +38,7 @@ function build(T,sourceVersion){
   const quests={...meta(['QD']),quests:{}};
   for(const [id,q] of Object.entries(T.QD)){
     const all=[{not:{questTaken:id}}];if(q.pre)all.push({questDone:q.pre});if(q.cl2)all.push({cls:q.cl2});if(q.from)all.push({cls:q.from},{not:{promoQuestActive:true}},{mastery:{k:q.mst[0],gte:q.mst[1]}});
-    if(q.cls)all.push({cls:'novice'},{not:{classQuestActive:true}});all.push({lv:{gte:q.lv||1}});
+    if(q.cls)all.push({cls:'novice'},{not:{classQuestActive:true}});if(q.hid)all.push({hiddenCondition:q.cond});all.push({lv:{gte:q.lv||1}});
     quests.quests[id]={id,...q,offer:{all},_srcFn:'qAvail(id)&&S.lv>=(QD[id].lv||1)',src:SRC};}
 
   const recipes={...meta(['RC']),recipes:{}};
@@ -69,6 +69,8 @@ function build(T,sourceVersion){
 
   // Tier-2 classes (major 6): from a trainer's trial, for one who has a base class and the weapon mastery; the base class's skills stay
   for(const [qid,q] of Object.entries(T.QD))if(q.promo)classes.classes[q.promo]={id:q.promo,tier:2,base:q.from,quest:qid,trainer:q.by,lv:q.lv,mastery:{k:q.mst[0],gte:q.mst[1]},skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls===q.promo),src:SRC};
+  // hidden classes (major 10): no trainer; the system offers the quest once a hidden condition is met; one per character
+  for(const [qid,q] of Object.entries(T.QD))if(q.hcls)classes.classes[q.hcls]={id:q.hcls,hidden:true,rating:'rare',quest:qid,cond:q.cond,lv:q.lv,skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls===q.hcls),src:SRC};
   return {monsters,quests,recipes,skills,npcs,zones,classes};}
 
 // one record per line keeps diffs readable
