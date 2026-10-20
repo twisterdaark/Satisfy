@@ -22,12 +22,15 @@ async function until(games, fn, ms = 10000, arg) {
     await games[0].page.waitForTimeout(30);
   }
 }
-const toasts = (g) => g.eval(() => document.getElementById('toasts').textContent);
+// a toast lives 2.6 s of real time, which a loaded machine can step past: every page keeps all the toasts it has shown
+const toasts = (g) => g.eval(() => window.__toastSeen || '');
+const keepToasts = (g) => g.eval(() => { window.__toastSeen = ''; const box = document.getElementById('toasts'); new MutationObserver(() => { window.__toastSeen += '|' + box.textContent; }).observe(box, { childList: true, subtree: true, characterData: true }); });
 async function signIn(ctx, k, uid, name, look) {
   const g = await H.openGame({ ctx, query: '?net=online&slot=' + k });
   await g.eval(([u, n]) => { window.__fakeRTDB.data.set('accountIds/' + u, n); window.__fakeRTDB.data.set('handles/' + n.toLowerCase(), u); window.__fakeRTDB.nextName = n; window.__fakeRTDB.nextUid = u; document.getElementById('onlineBtn').click(); }, [uid, name]);
   await until([g], () => !!Satisfy.local.net() && Satisfy.local.net().state === 'ONLINE', 15000);
   await H.newGame(g, look);
+  await keepToasts(g);
   return g;
 }
 
@@ -60,8 +63,9 @@ test('online friends: ask from the card, accept, both lists, online with place, 
     // B leaves and comes back: offline, then A is told it is online
     await b.close();
     await until([a], () => !window.__GFR.pres().gFrB2, 15000);
+    await a.eval(() => { window.__toastSeen = ''; }); // only what comes after B's return
     b = await signIn(ctx, 'b2', 'gFrB2', 'Bassem', { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
-    const online = () => a.eval(() => /Bassem is online/.test(document.getElementById('toasts').textContent));
+    const online = async () => /Bassem is online/.test(await toasts(a));
     for (let i = 0; i < 40 && !(await online()); i++) await settle(a, b); // both clocks run: B's page must publish its presence
     assert.equal(await online(), true, 'A is told B is online');
     // the rules: no friend without an ask, and no ask to a friend

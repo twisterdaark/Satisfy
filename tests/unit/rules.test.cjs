@@ -352,6 +352,32 @@ function exprProblem(e) {
   }
   return quote ? 'an unclosed string' : regex ? 'an unclosed regex' : depth ? depth + ' unclosed (' : null;
 }
+// JSON.parse keeps the last of two equal keys without a word, and Firebase refuses the file ("'friendReq' occurs multiple
+// times", rules-next e6406e2/18a7697), so scan the raw text one object level at a time.
+function dupKeys(src) {
+  const out = []; let i = 0;
+  const ws = () => { while (/\s/.test(src[i])) i++; };
+  const str = () => { const s = i; i++; while (src[i] !== '"') { if (src[i] === '\\') i++; i++; } i++; return JSON.parse(src.slice(s, i)); };
+  function val(at) {
+    ws();
+    if (src[i] === '{') {
+      i++; const seen = new Set(); ws();
+      if (src[i] === '}') { i++; return; }
+      for (;;) { ws(); const k = str(); if (seen.has(k)) out.push(at + '/' + k); seen.add(k); ws(); i++; val(at + '/' + k); ws(); if (src[i] === ',') { i++; continue; } i++; return; }
+    }
+    if (src[i] === '[') { i++; ws(); if (src[i] === ']') { i++; return; } for (let n = 0; ; n++) { val(at + '[' + n + ']'); ws(); if (src[i] === ',') { i++; continue; } i++; return; } }
+    if (src[i] === '"') { str(); return; }
+    while (i < src.length && !/[,}\]\s]/.test(src[i])) i++;
+  }
+  val('');
+  return out;
+}
+
+test('no key appears twice in one object of the rules file', () => {
+  assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
+  assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);
+});
+
 test('every rule expression is well formed: balanced parentheses, closed strings and regexes', () => {
   assert.equal(exprProblem("a && (b || c('x)'))"), null);
   assert.equal(exprProblem("v.matches(/^(a|b)$/) && (x"), '1 unclosed (', 'the checker finds a lost )');
