@@ -69,10 +69,12 @@ test('online: one first finder per world, kept in the database; the second playe
     await until([a], () => window.__GDT.fw('zMine2'));
     assert.equal(await a.eval(() => window.__fakeRTDB.data.get('world/satisfy/legends/df_zmine2').uid), 'gDtA1');
     await b.eval(() => window.__GDT.enter('zMine2'));
-    for (let i = 0; i < 6; i++) { await b.step(5); await b.page.waitForTimeout(60); }
+    await until([b], () => window.__GDT.s().seen.zMine2 === 1);
+    for (let i = 0; i < 40; i++) { await b.step(5); await b.page.waitForTimeout(60); } // longer than any wait before a claim
     assert.equal(await b.eval(() => window.__GDT.fw('zMine2')), false, 'already found by Ahmed');
     assert.equal(await b.eval(() => window.__GDT.s().seen.zMine2), 1);
     assert.equal(await a.eval(() => window.__fakeRTDB.data.get('world/satisfy/legends/df_zmine2').uid), 'gDtA1');
+    for (const g of [a, b]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });

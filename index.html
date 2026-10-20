@@ -744,7 +744,7 @@ const VOXK={rabbit:['crit',1],foxmouse:['crit',1.1],sellobu:['beast',.9],wolf:['
  lizard:['rept',1],ilizard:['rept',1],lizw:['rept',.85],salamander:['rept',.9],hdrac:['rept',.8],hdrac2:['rept',.75],hdrac3:['rept',.7],
  hydra:['drag',1],trauka:['drag',.8],merman:['fish',1],smerman:['fish',.9],
  skel:['dead',1],wraith:['dead',1.1],bknight:['dead',.8],dk_lant:['dead',.8],dk_alex:['dead',.8],dk_krug:['dead',.8],dk_gis:['dead',.8],dk_povia:['dead',.85],dk_madra:['dead',.75],
- mshade:['dead',.9],sdoll:['dead',1.3],demon:['demon',1],furfu:['demon',.8],berith:['demon',.7],hdemon:['demon',1.1],aprison:['demon',.9]};
+ mshade:['dead',.9],sdoll:['dead',1.3],demon:['demon',1],furfu:['demon',.8],berith:['demon',.7],hdemon:['demon',1.1],aprison:['demon',.9],asmo:['man',.95],dbus:['man',.8]};
 const VOXA={hop:'crit',lunge:'beast',charge:'boar',brute:'heavy',slam:'stone',soldier:'man'};
 const voxOf=ty=>VOXK[ty]||[VOXA[AIK[ty]]||'man',1];
 function growl(f,d,v=.08,dl=0){const n=Math.max(2,Math.round(d/.05));for(let i=0;i<n;i++)tone(f*(1+(Math.random()-.5)*.2),.065,'sawtooth',v*(1-i/n*.5),0,dl+i*d/n);noise(d,v*.8,f*2.4,dl,1.2);}
@@ -911,6 +911,11 @@ const FIG={
  cultist:{hair:'hat',hc:'#2a0a12',hl:'#4a1a22',hat:'#5a0a1a',skin:'#c8a088',sk2:'#a07c66',top:'#5a0a1a',top2:'#3a0610',sleeves:true,cape:'#2a0a12',pants:'#2a0a12',boots:'#1a0608'},
  berith:{hair:'helm',hc:'#2a1a0a',hl:'#c8a050',skin:'#8a7a3a',sk2:'#6a5a2a',top:'#2a1a0a',top2:'#c8a050',sleeves:true,cape:'#140c04',pants:'#1a1006',boots:'#0e0a04'},
  hdemon:{hair:'spiky',hc:'#0e0606',hl:'#3a1010',skin:'#7a2a1a',sk2:'#5a1a10',top:'#1a0806',top2:'#0e0404',sleeves:false,pants:'#1a0806',boots:'#7a2a1a',cape:'#0a0303'},
+ doranS:{hair:'short',hc:'#1a1a1e',hl:'#34343a',skin:'#e8b88a',sk2:'#c8946a',top:'#26262c',top2:'#18181c',sleeves:true,belt:'#4a3a2a',cape:'#121216',pants:'#1c1c22',boots:'#101014'},
+ irene:{hair:'long',hc:'#e8c870',hl:'#f8e4a8',skin:'#f8dcc4',sk2:'#e0b898',top:'#f4f0e8',top2:'#d8d0c0',sleeves:true,belt:'#c8a050',pants:'#e8e0d0',boots:'#c8b890'},
+ redk:{hair:'helm',hc:'#8a1a1a',hl:'#c83a3a',skin:'#f1c193',sk2:'#d3a070',top:'#a01a1a',top2:'#6a0e0e',sleeves:true,pad:'#c83a3a',pad2:'#8a1a1a',belt:'#2a2a2a',cape:'#6a0e0e',pants:'#5a0a0a',boots:'#2a1a1a'},
+ dbus:{hair:'messy',hc:'#2a2a2a',hl:'#4a4a4a',skin:'#c8a890',sk2:'#a88870',top:'#1a1a24',top2:'#101018',sleeves:true,belt:'#5a1a5a',cape:'#3a0a3a',pants:'#1a1a24',boots:'#101010'},
+ asmo:{hair:'short',hc:'#c8b080',hl:'#e8d4a8',skin:'#f1c7a0',sk2:'#d39f78',top:'#d8d0c0',top2:'#a89880',sleeves:true,belt:'#c8a050',cape:'#8a1a1a',pants:'#3a3a44',boots:'#2a2a30'},
  demon:{hair:'helm',hc:'#1a0a0a',hl:'#3a1a1a',skin:'#a83a3a',sk2:'#7a2424',top:'#2a1010',top2:'#1a0808',sleeves:false,shorts:'#1a0808',pants:'#1a0808',boots:'#a83a3a',cape:'#140606'},
  ypriest:{hair:'hat',hc:'#0a0a0a',hl:'#2a2a2a',hat:'#1a0a0a',skin:'#b89a88',sk2:'#94786a',top:'#4a0a1a',top2:'#2a0610',sleeves:true,belt:'#c8a050',cape:'#8a1f2a',pants:'#1a0608',boots:'#0a0404'},
  priest:{hair:'short',hc:'#d8c8a8',hl:'#f0e4cc',skin:'#f1c193',sk2:'#d3a070',top:'#f0ece0',top2:'#c8c0b0',sleeves:true,belt:'#d8b860',cape:'#d8b860',pants:'#e0dccc',boots:'#a89878'},
@@ -1686,6 +1691,14 @@ BUTIN.gy=fRoad(BUTIN.x0);
   const H=[{x:907,y:176,w:6,h:5,k:'house'},{x:918,y:176,w:10,h:6,k:'hall'},{x:907,y:189,w:7,h:5,k:'inn'},{x:918,y:189,w:6,h:5,k:'shop'}];
   H.forEach(b=>{b.lx=b.x;buildings.push(b);for(let y=b.y+2;y<b.y+b.h;y++)for(let x=b.x;x<b.x+b.w;x++)setT(x,y,BL);});
   TOWNS.push({k:'zButin',x0:B.x0,x1:B.x1,y0:B.y0,y1:B.y1,rx:B.x0+10,ry:B.gy+1});}})();
+// Asmophel's mansion (major 14, see the S and SS quests block): a walled manor in the hills north of Titan
+const ASMO={x0:860,x1:878,y0:17,y1:29,gx:869};
+const asmoIn=(tx,ty)=>tx>=ASMO.x0&&tx<=ASMO.x1&&ty>=ASMO.y0&&ty<=ASMO.y1;
+(function genAsmo(){const A=ASMO;
+ for(let y=A.y0-1;y<=A.y1+1;y++)for(let x=A.x0-1;x<=A.x1+1;x++){const edge=x===A.x0||x===A.x1||y===A.y0||y===A.y1,out=x<A.x0||x>A.x1||y<A.y0||y>A.y1;
+  if(out){if(solidT(x,y))setT(x,y,GR);continue;}setT(x,y,edge&&!(y===A.y1&&Math.abs(x-A.gx)<=1)?WL:Math.abs(x-A.gx)<=1&&y>A.y0+5?PA:GR);}
+ for(let y=A.y1+2;y<=A.y1+4;y++)for(let x=A.gx-1;x<=A.gx+1;x++)setT(x,y,PA);
+ const b={x:A.gx-4,y:A.y0+1,w:9,h:5,k:'hall'};b.lx=b.x;buildings.push(b);for(let y=b.y+2;y<b.y+b.h;y++)for(let x=b.x;x<b.x+b.w;x++)setT(x,y,BL);})();
 for(let x=0;x<MW;x++)for(const y of [82,83])if(at(x,y)===TR)setT(x,y,PA);
 // terrain from sprites-original/tiles.js: whole map in one pass, trees registered for live drawing as before
 for(let y=-NR;y<MH;y++)for(let x=0;x<MW;x++)if(at(x,y)===TR)VT.push(vtree(x,y,mulberry32(x*73856093^y*19349663)));   // the tiles themselves are painted per chunk (chunkLayer)
@@ -2921,17 +2934,74 @@ function dtChestR(g,r){const z=dtZone(g.x,g.y);return dtFw(z)&&rand()<.5?Math.ma
 function dtEnter(z){if(!(z in DTR)||!S||S.__demo)return;const s=dtS(),k=DTR[z],L=[t('dtIn',{d:t(z)}),t('dtRate',{r:t('r'+k)})];if(k)L.push(t('dtBonus',{x:k*5}));
  if(s.clr[z]===1){s.clr[z]=2;L.push(t('dtBack'));}
  L.forEach((l,i)=>setTimeout(()=>toast(l,i?'':'good'),400+i*700));
- if(s.seen[z])return;s.seen[z]=1;save(true);
- if(legOnline()){legClaim('df_'+z.toLowerCase()).then(()=>dtFirst(z),()=>{});return;}
- const W=WS&&(WS.dfirst||(WS.dfirst={}));if(W&&!W[z]){W[z]={n:S.look.n||t('pname'),pid:pidOf()};dtFirst(z);}}
+ dtClaim(z);}
+// online the world's record is read first and a taken one is not asked for; two players arriving together wait a little,
+// each a different time (from the account id), so the later one finds the record taken instead of being refused
+function dtClaim(z,n=0){const s=dtS();if(s.seen[z]||!S||S.__demo)return;
+ if(legOnline()){if(!LEGS){if(n<10)setTimeout(()=>dtClaim(z,n+1),1500);return;}const k='df_'+z.toLowerCase();s.seen[z]=1;save(true);if(LEGS[k])return;
+  let h=2166136261;for(const c of String(NET.uid)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}h^=h>>>13;h=Math.imul(h,2654435761)>>>0;h=((h^h>>>16)>>>0)%2500;setTimeout(()=>{if(!LEGS||LEGS[k]||!S)return;legClaim(k).then(()=>dtFirst(z),()=>{});},1200+h);return;}
+ s.seen[z]=1;save(true);const W=WS&&(WS.dfirst||(WS.dfirst={}));if(W&&!W[z]){W[z]={n:S.look.n||t('pname'),pid:pidOf()};dtFirst(z);}}
 function dtFirst(z){const s=dtS(),d=t(z);s.fw[z]=Date.now()+DTWK;save(true);
- [t('dtFirst1',{d}),t('dtFirst2',{d}),t('dtFirst3')].forEach((l,i)=>setTimeout(()=>{toast(l,'good');if(!i)SFX.legendary();},2600+i*800));
+ [t('dtFirst1',{d:d.replace(/^The /,'')}),t('dtFirst2',{d}),t('dtFirst3')].forEach((l,i)=>setTimeout(()=>{toast(l,'good');if(!i)SFX.legendary();},2600+i*800));
  setTimeout(()=>{announce(t('dtFirstN',{n:t('pname'),d}));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!netId)return;NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:'dtFirstN',p:{f:DTK.indexOf(z)}});},5200);}
 function dtNewsIn(m){const z=DTK[m.p&&m.p.f|0];announce(t('dtFirstN',{n:Satisfy.chat.clean(m.h,24)||'?',d:z?t(z):'?'}));SFX.notice();}
 function dtClear(m){const z=dtZone(m.x,m.y);if(z){const s=dtS();if(!s.clr[z])s.clr[z]=1;}}
 window.__GDT={DTR,s:()=>dtS(),enter:z=>dtEnter(z),xp:m=>dtXP(m),gold:m=>dtGold(m),p:g=>dtChestP(g),r:(g,r)=>dtChestR(g,r),clear:m=>dtClear(m),first:z=>dtFirst(z),dun:z=>DUN.find(D=>D.k===z),zone:(x,y)=>dtZone(x,y),fw:z=>dtFw(z)};
 Object.assign(STR.ar,{"dtIn": "دخلت {d}.", "dtRate": "الدانجون ده تقييمه {r}.", "dtBonus": "كمكافأة، الخبرة والدهب من الوحوش هنا زادوا {x}%، وصندوق الزعيم فيه قطعة أكتر.", "dtBack": "دي أول مرة تزور فيها الدانجون بعد ما فتحته.", "dtFirst1": "انت أول لاعب يلاقي دانجون {d}!", "dtFirst2": "الخبرة اللي هتاخدها من {d} هتزيد الأسبوع الجاي!", "dtFirst3": "لما تصطاد وحوش زعيمة، احتمال إنك تاخد حاجات تقييمها فريد أو أعلى هيزيد جامد!", "dtFirstN": "{n} أول لاعب في العالم يلاقي {d}!"});
-Object.assign(STR.en,{"dtIn": "You have entered {d}.", "dtRate": "This is a {r}-rated dungeon.", "dtBonus": "As a bonus, experience and gold from monsters here have increased by {x}%, and the boss chest holds an item more often.", "dtBack": "This is the first time you have visited the dungeon after conquering it.", "dtFirst1": "You are the first player to find the {d} dungeon!", "dtFirst2": "The amount of experience gained from {d} will increase for the next week!", "dtFirst3": "When hunting boss monsters, the probability of gaining unique or higher rated items will increase significantly!", "dtFirstN": "{n} is the first player in the world to find {d}!"});
+Object.assign(STR.en,{"dtIn": "You have entered {d}.", "dtRate": "The rating of this dungeon is {r}.", "dtBonus": "As a bonus, experience and gold from monsters here have increased by {x}%, and the boss chest holds an item more often.", "dtBack": "This is the first time you have visited the dungeon after conquering it.", "dtFirst1": "You are the first player to find the {d} dungeon!", "dtFirst2": "The amount of experience gained from {d} will increase for the next week!", "dtFirst3": "When hunting boss monsters, the probability of gaining unique or higher rated items will increase significantly!", "dtFirstN": "{n} is the first player in the world to find {d}!"});
+/* S and SS quests (major 14). In the novel a quest shows its grade ("[Rescue the Earl's Esteemed Daughter] Difficulty: S",
+   ch 5) and the hard ones carry a time limit and a price: "Quest Failure: Level -2"; when Grid failed it, "[Quest failed!]
+   [Your level has dropped by 2.]" (ch 5). A quest with gr carries that grade beside its name ("For the Residents of Winston
+   (A)", ch 33), lim minutes of real time from the moment it is taken, and fl levels lost when it fails; giving one up is a
+   failure, and a failed one is gone for good (st 3). Clearing one of them is world news.
+   - S "Rescue the Earl's Esteemed Daughter" (ch 4-5): Doran waits by the ruins of Yatan's temple; Irene is held by the
+     altar; free her within the hour. 3,000 gold and "a low probability of becoming the earl's son-in-law" (all stats +20).
+   - SS "The True Traitor of the Red Knights" (ch 330 and 256-259): Piaro sends you to Asmophel's mansion north of Titan,
+     guarded by red-armored knights and the Seventh Servant Dark Bus, who keeps Asmophel brainwashed ("Dark Bus hid behind
+     Asmophel"): while Dark Bus lives, Asmophel takes a tenth of the damage. Dark Bus pays as he did Grid: the titles
+     'Secret Hero' and "Yatan Servant's Slaughterer", blessed enhancement stones and deluxe magic stones.
+   - SS "Defense War II" (ch 202-206): King Wiesbaden asks for the six ancient weapons of the golem army; 50,000 kingdom
+     contribution, your guild two levels up and the king's 500,000 gold.
+   Every player's own quest, online or not; a monster's kill counts for everyone who hit it (the shared mob sync). */
+const EPQ=['irn','asm','dw2'];
+const epAct=id=>!!(S&&S.qs[id]&&S.qs[id].st===1);
+const epLeft=id=>{const q=QD[id],s=S.qs[id];return q&&q.lim&&s&&s.t0?Math.max(0,s.t0+q.lim*60000-Date.now()):0;};
+const epClock=ms=>{const s=Math.ceil(ms/1000);return (s/60|0)+':'+String(s%60).padStart(2,'0');};
+// the lines of a graded quest, written as its window in the novel
+function epLines(id){const q=QD[id],o=[t('epGr',{g:q.gr})];if(q.lim)o.push(t('epLim',{m:q.lim}));if(q.fl)o.push(t('epFl',{n:q.fl}));return o.join('\n');}
+function epAccept(id){const s=S.qs[id];if(s&&QD[id].lim)s.t0=Date.now();}
+function epLvDown(n){for(let i=0;i<n&&S.lv>1;i++){S.lv--;let k=PTS_LV;const u=Math.min(S.pts,k);S.pts-=u;k-=u;while(k-->0){const st=['str','sta','agi','int','dex'].reduce((a,b)=>S.st[b]>S.st[a]?b:a);if(S.st[st]>1)S.st[st]--;}}
+ S.xp=Math.min(S.xp,Math.max(0,xpNeed()-1));if(P)P.hp=Math.min(P.hp,maxHP());}
+function epFail(id){const q=QD[id];if(!q||!epAct(id))return;S.qs[id]={st:3};if(ESC&&ESC.q===id)ESC=null;
+ toast(t('epFailT'),'warn');SFX.deny();if(q.fl){epLvDown(q.fl);setTimeout(()=>toast(t('epLvT',{n:q.fl}),'warn'),700);}
+ hudDirty=true;sbSig='';checkSkills();save(true);}
+let EPI=false,EPS=0;
+function epTick(){if(!S||!S.qs)return;if(!EPI&&SHRINES.length){EPI=true;epInit();}const sec=Date.now()/1000|0;
+ for(const id of EPQ)if(epAct(id)&&QD[id].lim&&!qReady(id)){if(epLeft(id)<=0)epFail(id);else if(sec!==EPS){EPS=sec;hudDirty=true;}}}
+function epDone(id){const q=QD[id];if(!q||!q.gr)return;
+ if(id==='irn'&&rand()<.1){giveTitle('sonlaw');setTimeout(()=>toast(t('epSonT'),'good'),1600);}
+ if(id==='asm'){addAff('piaro',100);setTimeout(()=>toast(t('epPiaroT'),'good'),1600);}
+ if(id==='dw2'){const g=myG();if(g){const L=gLv(g),need=(GXP[Math.min(GXP.length-1,L+1)]||0)-g.xp;if(need>0)gContrib(need);setTimeout(()=>{toast(t('epGKcT',{g:gName(g.id)}),'good');toast(t('epGLvT',{g:gName(g.id)}),'good');},1600);}}
+ setTimeout(()=>{announce(t('epClrN',{n:t('pname'),g:q.gr,q:qName(id)}));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!netId)return;NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:'epClrN',p:{f:EPQ.indexOf(id)}});},2400);}
+function epNewsIn(m){const id=EPQ[m.p&&m.p.f|0];if(!id)return;announce(t('epClrN',{n:Satisfy.chat.clean(m.h,24)||'?',g:QD[id].gr,q:qName(id)}));SFX.notice();}
+// Irene, by the altar of Yatan's ruins: seen only by a player on the quest
+const epVis=o=>o.qv?epAct(o.qv)&&!qReady(o.qv):true;
+function epInit(){if(SHRINES.some(o=>o.k==='irene'))return;const mx=(YATAN.x0+YATAN.x1)>>1,ty=YATAN.y0+3;let spot=null;
+ for(let r=0;r<=4&&!spot;r++)for(const dx of [3+r,-3-r])if(!solidT(mx+dx,ty)&&!solidT(mx+dx,ty-1)){spot={x:(mx+dx)*TS+8,y:ty*TS+10};break;}
+ SHRINES.push({k:'irene',qv:'irn',...(spot||{x:(mx+3)*TS+8,y:ty*TS+10}),hint:'hIrene'});}
+function ireneAct(o){if(!epVis(o))return;qEvent('visit','irene');SFX.legendary();for(let i=0;i<14;i++)fx.push({x:o.x+(rand()-.5)*14,y:o.y-10,vx:(rand()-.5)*20,vy:-24-rand()*20,t:.8,c:'#fff3b0',fl:1});dialog('ireneN',['irene1']);}
+function drawIrene(o){if(!epVis(o))return;const x=Math.round(o.x),y=Math.round(o.y);ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(x,y,7,2,0,0,7);ctx.fill();
+ drawChar('irene',x,y,0,0,false);ctx.fillStyle='#8a6a3a';ctx.fillRect(x-5,y-12,10,1);ctx.fillRect(x-5,y-9,10,1); // the ropes
+ const p=.5+Math.sin(gTime*3)*.5;ctx.globalAlpha=.15+p*.15;ctx.fillStyle='#fff3b0';ctx.beginPath();ctx.ellipse(x,y-12,8,14,0,0,7);ctx.fill();ctx.globalAlpha=1;}
+// Dark Bus keeps Asmophel brainwashed: while he lives near him, Asmophel takes a tenth of the damage
+// the Slaughterer of Yatan's Servants: +10% damage to Yatan's followers
+const YATANX=new Set(['cultist','ypriest','dbus']);
+function epAtk(m){const y=S.tl.yslay&&YATANX.has(m.type)?1.1:1;if(m.type!=='asmo')return y;const d=mons.find(o=>o.type==='dbus'&&!o.dead);return d&&Math.hypot(d.x-m.x,d.y-m.y)<260?.1:1;}
+function epHit(m){if(m.type==='asmo'&&epAtk(m)<.5&&(m.epT||0)<gTime){m.epT=gTime+4;num(m.x,monY(m)-30,t('epWashT'),'#b88aff',false);}}
+function epKill(m){if(m.type!=='dbus')return;setTimeout(()=>{toast(t('epBus1'),'good');toast(t('epBus2'),'good');SFX.legendary();},500);setTimeout(()=>{giveTitle('shero');giveTitle('yslay');addMat('estone',10);addMat('mstone',3);},1200);}
+window.__GEP={EPQ,ASMO,asmoIn,left:id=>epLeft(id),fail:id=>epFail(id),tick:()=>epTick(),lines:id=>epLines(id),irene:()=>SHRINES.find(o=>o.k==='irene'),act:o=>ireneAct(o),vis:o=>epVis(o),atk:m=>epAtk(m),lvDown:n=>epLvDown(n),done:id=>epDone(id)};
+Object.assign(STR.ar,{"o_irn":"أنقذ إيرين: {c}/{n}","doranS": "دوران", "ireneN": "إيرين", "dor_hi": "اسمي دوران. أنا ضِل بيحمي الإيرل شتايم في السر. بعد يوم أو يومين من ما خدت إجازة، بنت الإيرل المحترمة اتخطفت. تتبعتها وعرفت إنها محبوسة في بدروم المعبد ده. ممكن تسلفني قوتك؟ هديلك أجر على الطلب ده.", "dor_idle": "الخاتم ده مميز. بيحمي اللي لابسه من اللعنات والسموم، بس الحماية مش كاملة.", "q_irn": "إنقاذ بنت الإيرل المحترمة", "irn_o": "إيرين، البنت الوحيدة للإيرل شتايم، بنت جميلة وبريئة. شيوخ ياتان خطفوا إيرين عشان يقدّموها قربان بدمها.\nشروط إنهاء المهمة: أنقذ إيرين خلال ساعة من قبول المهمة.", "irn_w": "اقتحم البدروم حالًا!", "irn_d": "شكرًا!!", "rx_irn": "احتمال قليل إنك تبقى جوز بنت الإيرل (كل الإحصائيات +20)", "irene1": "فكّيت حبال إيرين. ارجع لدوران.", "hIrene": "E: فك حبال إيرين", "q_asm": "الخاين الحقيقي للفرسان الحمر", "asm_o": "أسموفيل اتجرأ وقابل الإمبراطورة في السر، وبيارو قفشه. بيارو ورجالته اتلفّقت لهم تهمة واتوصموا بالخيانة.\nبسبب كده خسر رجالته واضطر يهرب. ودلوقتي بيارو مش ناوي يسامح أسموفيل.\nبس إن بيارو ياخد تاره بنفسه شبه مستحيل.\nبيارو خلاك وكيل انتقامه.\nشروط إنهاء المهمة: اقتل أسموفيل، نايب قائد الفرسان الحمر السابق.", "asm_w": "أنا واثق إنك هتخلّص المهمة.", "asm_d": "قتلت أسموفيل؟", "rx_asm": "علاقة بيارو بيك هتوصل للقمة.", "q_dw2": "حرب الدفاع 2", "dw2_o": "جيش الجولم طلع أقوى بكتير من ما أي حد توقّع.\nأقوى نقابات المملكة وجيوشها مقدروش يوقفوا زحف الجولم.\nأقوى الجولم، اللي اسمهم الأسلحة القديمة، دخّلوا المملكة الخالدة في أزمة.\nدافع عن المملكة الخالدة واهزمهم.\nانت بس الأمل الأخير للمملكة الخالدة. الملك فيسبادن القلقان مش لاقي غيرك يعتمد عليه.\nشروط إنهاء المهمة: اهزم الأسلحة القديمة (0/6)", "dw2_w": "الأسلحة القديمة بتظهر مع جيش الجولم في حرب الدفاع.", "dw2_d": "مهمة حرب الدفاع 2 خلصت.", "rx_dw2a": "50,000 مساهمة في المملكة.", "rx_dw2b": "لفل النقابة هيزيد 2.", "epGr": "الصعوبة: {g}", "epLim": "الوقت: {m} دقيقة من الوقت الحقيقي", "epFl": "فشل المهمة: اللفل -{n}.", "epFailT": "المهمة فشلت!", "epLvT": "اللفل بتاعك نزل {n}.", "epSonT": "جوز بنت الإيرل: إحصائية النبالة هتتفتح، وكل الإحصائيات +20.", "epPiaroT": "علاقة بيارو بيك وصلت للقمة.", "epGKcT": "مساهمة {g} في المملكة زادت 50,000.", "epGLvT": "لفل {g} زاد 2.", "epClrN": "{n} خلّص مهمة من درجة {g}: {q}!", "epWashT": "متغسل مخه", "epBus1": "هزمت الخادم السابع دارك باس، اللي نشر الفوضى في العالم!", "epBus2": "أنقذت إمبراطورية ساهارا من أزمة لما وقفت مؤامرة كنيسة ياتان.", "tl_sonlaw": "جوز بنت الإيرل", "tl_sonlawD": "كل الإحصائيات +20.", "tl_shero": "البطل السري", "tl_sheroD": "+5% دهب من الوحوش.", "tl_yslay": "سفّاح خدام ياتان", "tl_yslayD": "+10% ضرر على أتباع ياتان.", "redkN": "فارس أحمر", "dbusN": "الخادم السابع دارك باس", "asmoN": "أسموفيل", "zAsmo": "قصر أسموفيل (لفل 250+)"});
+Object.assign(STR.en,{"o_irn":"Rescue Irene: {c}/{n}","doranS": "Doran", "ireneN": "Irene", "dor_hi": "My name is Doran. I am a shadow who secretly protects Earl Steim. One or two days after I had gone on vacation, the Earl’s esteemed daughter was kidnapped. I tracked her and found out that she was trapped in the basement of this temple. Won’t you lend me your strength? I will give you a remuneration for the request.", "dor_idle": "This ring is special. It protects the wearer from curses and poisons; however, the protection isn’t perfect.", "q_irn": "Rescue the Earl’s Esteemed Daughter", "irn_o": "Irene, the only daughter of Earl Steim, is a beautiful and innocent virgin. The elders of Yatan had kidnapped Irene in order to sacrifice her for her virgin blood.\nQuest Clear Conditions: Rescue Irene within one hour after accepting the quest.", "irn_w": "Break through to the basement at once!", "irn_d": "Thank you!!", "rx_irn": "A low probability of becoming the earl’s son-in-law (all stats +20)", "irene1": "You untied Irene. Go back to Doran.", "hIrene": "E: Untie Irene", "q_asm": "The True Traitor of the Red Knights", "asm_o": "Asmophel dared to rendezvous with the empress and was caught by Piaro. Piaro and his men were framed and branded as traitors.\nDue to that, he lost his men and had to flee. Now Piaro has no intention of forgiving Asmophel.\nHowever, it is virtually impossible for Piaro to get revenge himself.\nPiaro has made you his agent of revenge.\nQuest Clear Conditions: Kill Asmophel, the former vice captain of the Red Knights.", "asm_w": "I believe you can get the job done.", "asm_d": "Did you kill Asmophel?", "rx_asm": "Piaro’s affinity will reach the peak.", "q_dw2": "Defense War II", "dw2_o": "The golem army was much more powerful than anyone expected.\nThe kingdom’s strongest guilds and armies couldn’t prevent the golems from advancing.\nThe most powerful golems called the ancient weapons have plunged the Eternal Kingdom into a crisis.\nDefend the Eternal Kingdom by defeating them.\nOnly you are the last hope of the Eternal Kingdom. The anxious King Wiesbaden can only rely on you.\nQuest Clear Conditions: Defeat the ancient weapons (0/6)", "dw2_w": "The ancient weapons come with the golem army in the Defense War.", "dw2_d": "The quest ‘Defense War II’ has been completed.", "rx_dw2a": "50,000 contribution to the kingdom.", "rx_dw2b": "The guild level will rise by 2.", "epGr": "Difficulty: {g}", "epLim": "Time limit: {m} minutes of real time", "epFl": "Quest Failure: Level -{n}.", "epFailT": "Quest failed!", "epLvT": "Your level has dropped by {n}.", "epSonT": "Earl’s son-in-law: Nobility stat will open, all stats +20.", "epPiaroT": "Piaro’s affinity has reached the peak.", "epGKcT": "The kingdom contribution of {g} has increased by 50,000.", "epGLvT": "The level of {g} has increased by 2.", "epClrN": "{n} has cleared a {g}-grade quest: {q}!", "epWashT": "Brainwashed", "epBus1": "You have defeated the Seventh Servant Dark Bus, who spread chaos through the world!", "epBus2": "You have saved the Saharan Empire from a crisis by interfering with the conspiracy of the Yatan Church.", "tl_sonlaw": "Earl’s Son-in-law", "tl_sonlawD": "All stats +20.", "tl_shero": "Secret Hero", "tl_sheroD": "+5% gold from monsters.", "tl_yslay": "Yatan Servant’s Slaughterer", "tl_yslayD": "+10% damage to Yatan’s followers.", "redkN": "Red Knight", "dbusN": "Seventh Servant Dark Bus", "asmoN": "Asmophel", "zAsmo": "Asmophel’s Mansion (Lv 250+)"});
 /* ---------------- mounts and pets (SAT-PET-001) ---------------- */
 // Horses carry you faster across the wide belts (H to ride); any fight, hit, dodge, door or cave puts you back on foot.
 // Pets follow you and give a small passive. Both are per-player (S.mounts / S.mount, S.pets / S.pet); online the server
@@ -3532,6 +3602,9 @@ const MT={
  tlord:{lv:[440,440],hp:9000000,dmg:20000,spd:48,xp:2000000,gold:0,aggro:170,r:10,oy:46,boss:1,leash:420,slam:30000,slamR:56,sc:1.7,regen:.01,drop:[]},
  berith:{lv:[450,450],hp:180000000,dmg:26000,spd:54,xp:20000000,gold:250000,aggro:180,r:12,oy:62,boss:1,leash:300,slam:50000,slamR:80,wb:7200,sc:1.6,drop:[['mith',26],['diam',3],['mstone',30],['blue',3]]},
  hdemon:{lv:[360,370],hp:3200000,dmg:14000,spd:50,xp:160000,gold:500,aggro:150,r:7,oy:32,sc:1.25,drop:[['mstone',1],['mith',.2]]},
+ redk:{lv:[250,260],hp:1000000,dmg:7800,spd:50,xp:60000,gold:260,aggro:120,r:6,oy:28,drop:[['mstone',.6],['ore',.5]]},
+ dbus:{lv:[270,270],hp:9000000,dmg:10000,spd:44,xp:2400000,gold:40000,aggro:160,r:6,oy:28,boss:1,leash:240,slam:14000,slamR:60,adds:'redk',drop:[['mstone',4],['mith',6]]},
+ asmo:{lv:[291,291],hp:24000000,dmg:11000,spd:60,xp:3000000,gold:30000,aggro:160,r:6,oy:28,boss:1,leash:240,slam:18000,slamR:52,drop:[['mith',8],['mstone',10],['blue',1]]},
  furfu:{lv:[320,320],hp:9000000,dmg:12000,spd:52,xp:2000000,gold:0,aggro:170,r:9,oy:44,boss:1,leash:420,slam:22000,slamR:60,sc:1.5,drop:[]},
  bhclone:{lv:[1,1],hp:1000,dmg:100,spd:56,xp:0,gold:0,aggro:220,r:6,oy:28,boss:1,leash:520,slam:150,slamR:40,drop:[]},
  dk_lant:{lv:[400,400],hp:9000000,dmg:18000,spd:60,xp:2500000,gold:0,aggro:200,r:7,oy:34,boss:1,leash:480,slam:26000,slamR:44,sc:1.2,drop:[]},
@@ -3649,7 +3722,9 @@ const FSPAWN=[
  // the Saharan Empire: the Suaz Mountains on the border, Dran Valley south of Rolling (Butin and the towns stay clear)
  ['eti',728,772,-55,70,16],['ogre',728,772,20,150,12],['troll',728,772,70,210,12],['gargoyle',728,772,-55,230,16],['salamander',780,850,100,236,16],['ilizard',780,850,110,236,16],
  // the army of the 22nd Great Demon at Fort Taleren (major 12)
- ['hdemon',472,510,138,152,6]];
+ ['hdemon',472,510,138,152,6],
+ // the red knights at the mansion of Asmophel (major 14)
+ ['redk',861,877,24,28,6]];
 // NPCs: stable ids (dialog keys, quest givers), sprite, tile position
 const NPCS=[{id:'smith',spr:'smith',tx:22,ty:18},{id:'grid',spr:'grid',tx:17,ty:18.4,dir:2},{id:'baker',spr:'baker',tx:6,ty:18},{id:'regas',spr:'regas',tx:24.5,ty:19,dir:3},{id:'coach',spr:'coach',tx:4,ty:21.6},
  {id:'khan',spr:'khan',tx:142,ty:73},{id:'tw',spr:'tw',tx:152,ty:77.4},{id:'tk',spr:'knight',tx:134,ty:61.4},{id:'tm',spr:'tm',tx:124,ty:57.4},{id:'cassus',spr:'priest',tx:117,ty:60.4,clr:1},{id:'hood',spr:'outlaw',tx:107.7,ty:86.4,clr:1,dir:2},{id:'nec',spr:'wraith',tx:141.5,ty:56.4,clr:1},{id:'ta',spr:'ta',tx:112,ty:52.4},{id:'coachW',spr:'coach',tx:143,ty:83.4},{id:'stylist',spr:'stylist',tx:138,ty:83.4,dir:2},{id:'board',tx:123,ty:79.6,obj:1},
@@ -3669,7 +3744,7 @@ const NPCS=[{id:'smith',spr:'smith',tx:22,ty:18},{id:'grid',spr:'grid',tx:17,ty:
  {id:'priestT',spr:'priest',tx:869.5,ty:71.4,ph:1},{id:'towerT',spr:'towerK',tx:931.5,ty:74.4,ph:1},
  {id:'baronB',spr:'noble',tx:923.5,ty:183.4,ph:1},
  // Reinhardt as the royal capital (major #3): the court, the Royal Knights and the West Street quarter
- {id:'wiesbaden',spr:'wiesbaden',tx:691.5,ty:53.4,ph:1},{id:'ren',spr:'ren',tx:687.5,ty:53.4,ph:1},{id:'aden',spr:'aden',tx:696.5,ty:53.4,ph:1},
+ {id:'wiesbaden',spr:'wiesbaden',tx:691.5,ty:53.4,ph:1},{id:'doranS',spr:'doranS',tx:461.5,ty:32.4,ph:1},{id:'ren',spr:'ren',tx:687.5,ty:53.4,ph:1},{id:'aden',spr:'aden',tx:696.5,ty:53.4,ph:1},
  {id:'aslan',spr:'aslan',tx:709.5,ty:53.4,ph:1,dir:3},{id:'chucksley',spr:'chucksley',tx:672.5,ty:52.4,ph:1},{id:'ferrell',spr:'ferrell',tx:678.5,ty:54.4,ph:1,dir:3},
  {id:'rguard1',spr:'rknight',tx:682.5,ty:58.4,ph:1},{id:'rguard2',spr:'rknight',tx:700.5,ty:58.4,ph:1},
  {id:'scholarRh',spr:'scholar',tx:642.5,ty:52.4,ph:1},{id:'grocerRh',spr:'merchant',tx:641.5,ty:64.4,ph:1},{id:'marketRh',spr:'merchant',tx:653.5,ty:89.4,ph:1,dir:2},{id:'beggarRh',spr:'oldw',tx:649.5,ty:104.4,ph:1},{id:'mutoB',spr:'merchant',tx:921.5,ty:195.4,ph:1},{id:'innBu',spr:'inn',tx:910.5,ty:195.4,ph:1},{id:'biban',spr:'biban',tx:637,ty:91,ph:1,dir:0}];
@@ -3755,7 +3830,7 @@ function freshState(){
 // Advancements (SAT-CLASS-002): every 100 levels the body breaks through a limit. Each one adds +10 to every stat and
 // multiplies all stats by a further 5% (first at 100, second at 200, ...).
 const advN=()=>Math.min(9,Math.floor((S&&S.lv||1)/100));
-const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Math.round((S.st[k]+S.bonus+a*10)*(1+a*.05)*bhStat(k)*(S.tl.paint?1.03:1));};
+const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Math.round((S.st[k]+S.bonus+a*10+(S.tl.sonlaw?20:0))*(1+a*.05)*bhStat(k)*(S.tl.paint?1.03:1));};
 // Piaro's lesson (manhwa): keep Strength and Stamina at 1:1. Once learned, while the two stay within 10% of each other the
 // body is balanced: +8% damage and max HP, faster stamina recovery, cheaper dodges, and Second Wind when health runs low.
 // the golden ratio (novel ch 315, 1423): Strength and Agility kept 1:1. A hidden stat: always on, never shown in the status window
@@ -3821,7 +3896,9 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   for(const [type,x0,x1,y0,y1,n] of SDSPAWN){let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=x0+(rf()*(x1-x0)|0),y=y0+(rf()*(y1-y0)|0);if(!sol0(x,y)&&!sol0(x+1,y)){const m=newMon(type,x*TS+8,y*TS+8,rf);m.far=1;mons.push(m);c++;}}}
   for(const [type,x,y] of SDBOSS){const m=newMon(type,x*TS+8,y*TS+8,rf);m.far=1;mons.push(m);}
   // the 22nd Great Demon at Fort Taleren (major 12), last so every monster before him keeps its id and dice
-  {const d=newMon('berith',TALE.bx*TS+8,sRoad(TALE.bx)*TS+8,rf),u=WS&&WS.wb&&WS.wb.berith;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}}
+  {const d=newMon('berith',TALE.bx*TS+8,sRoad(TALE.bx)*TS+8,rf),u=WS&&WS.wb&&WS.wb.berith;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
+  // Asmophel and the Seventh Servant Dark Bus at the mansion (major 14), after him for the same reason
+  for(const [k,dx,dy] of [['asmo',0,7],['dbus',-4,9]]){const m=newMon(k,(ASMO.gx+dx)*TS+8,(ASMO.y0+dy)*TS+8,rf);m.far=1;mons.push(m);}}
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
  {const now=Date.now(),D=(S&&S.mrt)||{};for(const m of mons){const u=D[mobKey(m)];if(u>now){m.dead=true;m.dying=0;m.rt=(u-now)/1000;}}}
@@ -3983,7 +4060,7 @@ const monY=m=>m.y-(m.type==='guardian'?18:m.type==='gchief'?10:4);
 // one hit on one monster; returns 0 (no effect), 1 (hit) or 2 (crit)
 function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}
  if(m.type==='kraugel'&&!m.st&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
- let dmg=(o.aura?auAtkV():atkV())*mul*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*dvAtk(m),crit=rand()<Math.min(.5,.05+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
+ let dmg=(o.aura?auAtkV():atkV())*mul*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*dvAtk(m)*epAtk(m),crit=rand()<Math.min(.5,.05+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -3996,7 +4073,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,m
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(burn)vfx('fire',m.x,my);if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
  if(burn&&!S.burnSeen){S.burnSeen=1;toast(t('burn'),'good');}else if(burn)num(m.x,my-18,lang==='ar'?'لهب!':'FLAME','#ff9a2a',false);
- c2Hit(m,o);rgHit(m,o);hcHit(m,o);fbHit(m,o);brHit(m,dmg);if(!netHit(m,dmg)&&m.hp<=0)killMon(m);return crit||burn?2:1;}
+ c2Hit(m,o);rgHit(m,o);hcHit(m,o);fbHit(m,o);brHit(m,dmg);epHit(m);if(!netHit(m,dmg)&&m.hp<=0)killMon(m);return crit||burn?2:1;}
 function tryAttack(ax,ay,mul){
  if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);if(PVP)pvpSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
@@ -4069,7 +4146,7 @@ function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);toast(t('boss
 const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','lgloves','lboots','cring','ihelm','igloves','iboots','parmor','mring'];
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.4:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.25:.1)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh)gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(NET&&b.boss&&!m.bh)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(S.tl.viscount?.05:0)+(S.tl.pioneer?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)+(S.tl.baron?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh)gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);epKill(m);if(NET&&b.boss&&!m.bh)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(S.tl.viscount?.05:0)+(S.tl.pioneer?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)+(S.tl.shero?.05:0)+(S.tl.baron?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh)(b.drop||[]).forEach(([k,p])=>{if(rand()<p)addMat(k,1);});
  if(m.lv>=20&&!m.tmp){if(b.boss)addMat('estone',1+(m.lv/50|0));else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
@@ -4090,7 +4167,7 @@ function buyPot(who,k){if((S[k]||0)>=10)return shopD(who,'potFull');const g=pric
 const potOpts=who=>['hpot','mpot'].map(k=>{const g=price(who,POT[k].price);return{l:t('oBuyPot',{p:t(k),g}),qty:1,ic:k,st:`${t(k+'D')} (${S[k]||0}/10)`,poor:S.gold<g,f:()=>buyPot(who,k)};});
 function eat(){if(S.bread<=0){toast(t('noBread'),'warn');SFX.deny();return;}if(P.food>=95){toast(t('full'));SFX.deny();return;}S.bread--;vowBreak('fast');P.food=Math.min(100,P.food+40);P.hp=Math.min(maxHP(),P.hp+15);vfx('heal',P.x,P.y);toast(t('ate'));SFX.eat();hudDirty=true;}
 function nearTree(){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];let best=null,bs=1e9,bc=null,bcs=1e9;for(const tr of vtNear(P.x,P.y,30)){const dx=tr.x-P.x,dy=tr.y-P.y,d=Math.hypot(dx,dy);if(d>30)continue;const s=d-((dx*v[0]+dy*v[1])/(d||1))*12;if((chopped.get(tr.k)||0)>gTime){if(s<bcs){bcs=s;bc=tr;}}else if(s<bs){bs=s;best=tr;}}return best||bc;}
-function nearest(){let best=null,bd=26;const cand=[...npcs.filter(n=>!n.hidden).map(n=>({k:'npc',o:n,x:n.x,y:n.y})),...ANVILS.map(a=>({k:'anvil',o:a,x:a.tx*TS+8,y:a.ty*TS+8})),...nodes.filter(n=>!(n.dep>0&&(n.kind==='herb'||n.kind==='bherb'))).map(n=>({k:'node',o:n,x:n.x,y:n.y,hint:n.kind==='herb'||n.kind==='bherb'?(n.dep>0?'hPicked':'hHerb'):undefined})),...CAMPS.map(c=>({k:'camp',o:c,x:c.x,y:c.y,hint:'hCamp'})),...ROOMS.map(R=>{const d=doorOf(R.b);return{k:'door',o:R,x:d.x,y:d.y,hint:'hEnter'};}),...PROPS.filter(p=>p.k==='chest'||p.k==='shelf'||p.k==='bed').map(p=>({k:'prop',o:p,x:p.tx*TS+p.w*8,y:p.ty*TS+(p.back?22:10),hint:{chest:'hChest',shelf:'hShelf',bed:'hBed'}[p.k]})),{k:'grave',o:GRAVE,x:GRAVE.tx*TS+8,y:GRAVE.ty*TS+16,hint:'hGrave'},...lmList().map(l=>({k:'lm',o:l,x:l.x,y:l.y,hint:'hRead'})),...exNear().map(c=>({k:'cache',o:c,x:c.x,y:c.y,hint:'hCache'})),...tfNear().map(f=>({k:'folk',o:f,x:f.x,y:f.y,hint:'hTalk'})),...DGATES.filter(g=>!(g.hide&&g.bh!=='key'&&!(g.tw&&Math.hypot(g.x-P.x,g.y-P.y)<22))&&!g.got&&!g.out&&!g.gone&&!(g.tw==='enter'&&!(S.wis&&S.wis.map))).map(g=>({k:'gate',o:g,x:g.x,y:g.y,hint:g.hint})),...TERR.map(T=>({k:'banner',o:T,x:T.x,y:T.y-4,hint:'hBanner'})),...SHRINES.map(o=>({k:'shrine',o,x:o.x,y:o.y,hint:o.hint})),...(COMPO?[{k:'npc',o:COMPO,x:COMPO.x,y:COMPO.y}]:[])];for(const c of cand){const d=Math.hypot(c.x-P.x,c.y-P.y)-(c.o&&c.o.reach||0);if(d<bd){bd=d;best=c;}}const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
+function nearest(){let best=null,bd=26;const cand=[...npcs.filter(n=>!n.hidden).map(n=>({k:'npc',o:n,x:n.x,y:n.y})),...ANVILS.map(a=>({k:'anvil',o:a,x:a.tx*TS+8,y:a.ty*TS+8})),...nodes.filter(n=>!(n.dep>0&&(n.kind==='herb'||n.kind==='bherb'))).map(n=>({k:'node',o:n,x:n.x,y:n.y,hint:n.kind==='herb'||n.kind==='bherb'?(n.dep>0?'hPicked':'hHerb'):undefined})),...CAMPS.map(c=>({k:'camp',o:c,x:c.x,y:c.y,hint:'hCamp'})),...ROOMS.map(R=>{const d=doorOf(R.b);return{k:'door',o:R,x:d.x,y:d.y,hint:'hEnter'};}),...PROPS.filter(p=>p.k==='chest'||p.k==='shelf'||p.k==='bed').map(p=>({k:'prop',o:p,x:p.tx*TS+p.w*8,y:p.ty*TS+(p.back?22:10),hint:{chest:'hChest',shelf:'hShelf',bed:'hBed'}[p.k]})),{k:'grave',o:GRAVE,x:GRAVE.tx*TS+8,y:GRAVE.ty*TS+16,hint:'hGrave'},...lmList().map(l=>({k:'lm',o:l,x:l.x,y:l.y,hint:'hRead'})),...exNear().map(c=>({k:'cache',o:c,x:c.x,y:c.y,hint:'hCache'})),...tfNear().map(f=>({k:'folk',o:f,x:f.x,y:f.y,hint:'hTalk'})),...DGATES.filter(g=>!(g.hide&&g.bh!=='key'&&!(g.tw&&Math.hypot(g.x-P.x,g.y-P.y)<22))&&!g.got&&!g.out&&!g.gone&&!(g.tw==='enter'&&!(S.wis&&S.wis.map))).map(g=>({k:'gate',o:g,x:g.x,y:g.y,hint:g.hint})),...TERR.map(T=>({k:'banner',o:T,x:T.x,y:T.y-4,hint:'hBanner'})),...SHRINES.filter(epVis).map(o=>({k:'shrine',o,x:o.x,y:o.y,hint:o.hint})),...(COMPO?[{k:'npc',o:COMPO,x:COMPO.x,y:COMPO.y}]:[])];for(const c of cand){const d=Math.hypot(c.x-P.x,c.y-P.y)-(c.o&&c.o.reach||0);if(d<bd){bd=d;best=c;}}const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
  if(!best||best.k==='tree'){const w=nearWater();if(w)best={k:'water',o:w,x:w.x,y:w.y,hint:FISH?'hReel':'hFish'};}return best;}
 function interact(){if(FISH){fishAct();return;}const n=nearest();if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
 let roomFade=false;
@@ -4316,6 +4393,10 @@ const QD={
  ya1:{by:'priestRh',lv:170,obj:{t:'kill',it:'cultist',n:20},xp:300000,gold:6000},
  ya2:{by:'priestRh',pre:'ya1',lv:180,obj:{t:'kill',it:'ypriest',n:1},xp:700000,gold:15000,pts:10},
  ya3:{by:'priestRh',pre:'ya2',lv:180,obj:{t:'visit',it:'yaltar',n:1},xp:200000,gold:5000},
+ // S and SS quests (major 14): gr the grade, lim minutes of real time, fl levels lost on failure, rx extra reward lines
+ irn:{by:'doranS',lv:150,gr:'S',lim:60,fl:2,ot:'o_irn',obj:{t:'visit',it:'irene',n:1},gold:3000,rx:['rx_irn']},
+ asm:{by:'piaro',lv:280,gr:'SS',fl:6,obj:{t:'kill',it:'asmo',n:1},rx:['rx_asm']},
+ dw2:{by:'wiesbaden',lv:230,gr:'SS',obj:{t:'kill',it:'aweapon',n:6},kc:50000,gold:500000,rx:['rx_dw2a','rx_dw2b']},
  // the Sword Saint path, from the warrior trainer
  ms1:{by:'tw',cl2:'saint',lv:150,obj:{t:'kill',it:'forc',n:20},xp:200000,gold:4000},
  ms2:{by:'tw',cl2:'saint',pre:'ms1',lv:160,obj:{t:'kill',it:'bknight',n:1},xp:400000,gold:8000,pts:10},
@@ -4356,19 +4437,19 @@ const QD={
  fp1:{by:'farmerP',lv:48,obj:{t:'kill',it:'rboar',n:6},xp:3200,gold:150},
  fp2:{by:'farmerP',pre:'fp1',lv:52,obj:{t:'have',it:'leather',n:10,take:1},xp:3000,gold:220},
  hp1:{by:'hunterP',lv:55,obj:{t:'kill',it:'gbear',n:6},xp:5200,gold:260,pts:5}};
-const NAMEK={bibanm:'bibanmN',abellm:'abellmN',sellobu:'sellobuN',foxmouse:'foxmouseN',lizw:'lizwN',gcrown:'gcrownN',tlord:'tlordN',furfu:'furfuN',bhclone:'bhcloneN',dk_lant:'dk_lantN',dk_alex:'dk_alexN',dk_krug:'dk_krugN',dk_gis:'dk_gisN',dk_povia:'dk_poviaN',dk_madra:'dk_madraN',fgiant:'fgiantN',kraider:'kraiderN',kshaman:'kshamanN',kbandit:'kbanditN',mshade:'mshadeN',sknight:'sknightN',scmd:'scmdN',cultist:'cultistN',demon:'demonN',berith:'berithN',hdemon:'hdemonN',ypriest:'ypriestN',trauka:'traukaN',huroi:'huroiN',peaks:'peaksN',zibal:'zibalN',kraugel:'kraugelN',skel:'skelN',wraith:'wraithN',bknight:'bknightN',warlord:'warlordN',lizard:'lizardN',gsold:'gsoldN',kobold:'koboldN',kking:'kkingN',cgob:'cgobN',gshaman:'gshamanN',gwar:'gwarN',grave:'graveN',goblin:'goblinN',rabbit:'rabbitN',gchief:'gchiefN',wolf:'wolfN',bear:'bearN',boar:'boarN',merman:'mermanN',pwolf:'pwolfN',gbear:'gbearN',outlaw:'outlawN',praga:'pragaN',forc:'forcN',fochief:'fochiefN',golem:'golemN',cgolem:'cgolemN',hwolf:'hwolfN',rboar:'rboarN',deserter:'deserterN',mgolem:'mgolemN',dcapt:'dcaptN',fboar:'fboarN',gscout:'gscoutN',gknight:'gknightN',smerman:'smermanN',eti:'etiN',ogolem:'ogolemN',sdoll:'sdollN',aweapon:'aweaponN',troll:'trollN',ogre:'ogreN',gargoyle:'gargoyleN',salamander:'salamanderN',ilizard:'ilizardN',pguard:'pguardN',aprison:'aprisonN',hydra:'hydraN',cwolf:'cwolfN',cbear:'cbearN',cboar:'cboarN',hdrac:'hdracN',hdrac2:'hdrac2N',hdrac3:'hdrac3N',sanju1:'sanju1N',sanju2:'sanju2N',sanju3:'sanju3N',sanju4:'sanju4N'};
+const NAMEK={bibanm:'bibanmN',abellm:'abellmN',sellobu:'sellobuN',foxmouse:'foxmouseN',lizw:'lizwN',gcrown:'gcrownN',tlord:'tlordN',furfu:'furfuN',bhclone:'bhcloneN',dk_lant:'dk_lantN',dk_alex:'dk_alexN',dk_krug:'dk_krugN',dk_gis:'dk_gisN',dk_povia:'dk_poviaN',dk_madra:'dk_madraN',fgiant:'fgiantN',kraider:'kraiderN',kshaman:'kshamanN',kbandit:'kbanditN',mshade:'mshadeN',sknight:'sknightN',scmd:'scmdN',cultist:'cultistN',demon:'demonN',redk:'redkN',dbus:'dbusN',asmo:'asmoN',berith:'berithN',hdemon:'hdemonN',ypriest:'ypriestN',trauka:'traukaN',huroi:'huroiN',peaks:'peaksN',zibal:'zibalN',kraugel:'kraugelN',skel:'skelN',wraith:'wraithN',bknight:'bknightN',warlord:'warlordN',lizard:'lizardN',gsold:'gsoldN',kobold:'koboldN',kking:'kkingN',cgob:'cgobN',gshaman:'gshamanN',gwar:'gwarN',grave:'graveN',goblin:'goblinN',rabbit:'rabbitN',gchief:'gchiefN',wolf:'wolfN',bear:'bearN',boar:'boarN',merman:'mermanN',pwolf:'pwolfN',gbear:'gbearN',outlaw:'outlawN',praga:'pragaN',forc:'forcN',fochief:'fochiefN',golem:'golemN',cgolem:'cgolemN',hwolf:'hwolfN',rboar:'rboarN',deserter:'deserterN',mgolem:'mgolemN',dcapt:'dcaptN',fboar:'fboarN',gscout:'gscoutN',gknight:'gknightN',smerman:'smermanN',eti:'etiN',ogolem:'ogolemN',sdoll:'sdollN',aweapon:'aweaponN',troll:'trollN',ogre:'ogreN',gargoyle:'gargoyleN',salamander:'salamanderN',ilizard:'ilizardN',pguard:'pguardN',aprison:'aprisonN',hydra:'hydraN',cwolf:'cwolfN',cbear:'cbearN',cboar:'cboarN',hdrac:'hdracN',hdrac2:'hdrac2N',hdrac3:'hdrac3N',sanju1:'sanju1N',sanju2:'sanju2N',sanju3:'sanju3N',sanju4:'sanju4N'};
 const itN=k=>t(NAMEK[k]||k);
-const qName=id=>{const q=QD[id];return q&&q.nm?t(q.nm,q.nv&&q.obj&&q.obj.it?{...q.nv,it:itN(q.obj.it)}:q.nv):t('q_'+id);};   // names re-read in the current language
-function qRewards(id){const q=QD[id],o=[];if(q.xp)o.push(t('rwXP',{n:q.xp}));if(q.gold)o.push(t('rwGold',{n:q.gold}));if(q.item)o.push(t(q.item));if(q.mat)o.push(t('got',{n:q.mat[1],item:t(q.mat[0])}));if(q.title)o.push(t('tl_'+q.title));if(q.cls)o.push(t('rwCls',{c:t('cl_'+q.cls)}));if(q.promo)o.push(t('rwCls',{c:t('cl_'+q.promo)}));if(q.hcls)o.push(t('rwCls',{c:t('cl_'+q.hcls)}));return o;}
+const qName=id=>{const q=QD[id];return q&&q.nm?t(q.nm,q.nv&&q.obj&&q.obj.it?{...q.nv,it:itN(q.obj.it)}:q.nv):t('q_'+id)+(q&&q.gr?' ('+q.gr+')':'');};   // names re-read in the current language
+function qRewards(id){const q=QD[id],o=[];if(q.xp)o.push(t('rwXP',{n:q.xp}));if(q.gold)o.push(t('rwGold',{n:q.gold}));if(q.item)o.push(t(q.item));if(q.mat)o.push(t('got',{n:q.mat[1],item:t(q.mat[0])}));if(q.title)o.push(t('tl_'+q.title));if(q.cls)o.push(t('rwCls',{c:t('cl_'+q.cls)}));if(q.promo)o.push(t('rwCls',{c:t('cl_'+q.promo)}));if(q.hcls)o.push(t('rwCls',{c:t('cl_'+q.hcls)}));if(q.rx)q.rx.forEach(k=>o.push(t(k)));return o;}
 const qDone=id=>!!S.qs[id]&&S.qs[id].st===2;
 const arrowN=()=>S.arrows.reduce((a,b)=>a+b,0);
 function qCount(id){const o=QD[id].obj,s=S.qs[id];if(!s)return 0;if(o.t==='have')return S.mats[o.it]||0;return s.c||0;}
 const qReady=id=>{const s=S.qs[id];return !!s&&s.st===1&&qCount(id)>=QD[id].obj.n;};
 function qAvail(id){const q=QD[id];return !S.qs[id]&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)));}
-function qObjText(id){const o=QD[id].obj;return t(o.t==='craftR'?'o_craftR':'o_'+o.t,{it:o.t==='deliver'?t(o.it):o.t==='escort'?t('escN_'+o.it):itN(o.it),c:Math.min(qCount(id),o.n),n:o.n})+(o.low?' '+t('oLow',{p:Math.round(o.low*100)}):'')+(o.wk?' '+t('oWk',{w:wkN(o.wk)}):'')+(o.stl?' '+t('oStl'):'');}
+function qObjText(id){const o=QD[id].obj;return t(QD[id].ot||(o.t==='craftR'?'o_craftR':'o_'+o.t),{it:o.t==='deliver'?t(o.it):o.t==='escort'?t('escN_'+o.it):itN(o.it),c:Math.min(qCount(id),o.n),n:o.n})+(o.low?' '+t('oLow',{p:Math.round(o.low*100)}):'')+(o.wk?' '+t('oWk',{w:wkN(o.wk)}):'')+(o.stl?' '+t('oStl'):'')+(QD[id].lim&&epAct(id)&&!qReady(id)?' · ⏳ '+epClock(epLeft(id)):'');}
 function qEvent(type,key,r,slot){domainEv(type,key,r,slot);natEv(type,key,r);for(const id in S.qs){const s=S.qs[id],q=QD[id];if(!q||s.st!==1)continue;const o=q.obj,was=qReady(id);
   if((o.t===type&&o.it===key&&(!o.wk||weapKind()===o.wk)&&(!o.low||P.hp<maxHP()*o.low)&&(!o.stl||RG.kAsn))||(type==='craft'&&o.t==='craftR'&&r>=1&&slot!=='x')){s.c=(s.c||0)+1;if(!was&&qReady(id)&&!q.hid){toast(t('retTo',{w:t(q.by)}),'good');SFX.quest();}}}hudDirty=true;}
-function acceptQ(id){S.qs[id]={st:1,c:0};if(QD[id].obj.t==='escort')setTimeout(()=>startEscort(id),300);toast(t('qNew',{q:qName(id)}),'good');SFX.quest();hudDirty=true;checkSkills();save(true);}
+function acceptQ(id){S.qs[id]={st:1,c:0};epAccept(id);if(QD[id].obj.t==='escort')setTimeout(()=>startEscort(id),300);toast(t('qNew',{q:qName(id)}),'good');SFX.quest();hudDirty=true;checkSkills();save(true);}
 function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]);S.arrows[r]-=k;n-=k;}}
 function mkItem(id,r){const rc=rcById(id);if(rc.fix!=null)r=rc.fix;const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.hpp)it.hpp=rc.hpp;if(rc.slot==='w'){it.atk=Math.round(rc.atk*MULT[r]);it.spd=rc.spd;}else if(rc.def)it.def=Math.round(rc.def*MULT[r]);
  for(const k of ['as','ms','dm'])if(rc[k])it[k]=+(rc[k]*(1+(MULT[r]-1)*.5)).toFixed(3);if(rc.mpb)it.mpb=Math.round(rc.mpb*MULT[r]);return it;}
@@ -4379,7 +4460,7 @@ function completeQ(id){if(!claimQ(id))return;if(id==='ya3')setTimeout(()=>giveTi
  if(q.item){const it=mkItem(q.item,1);S.items.push(it);if(q.cls)S.eqW=it.uid;loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});}
  if(q.promo){promoDone(q);phDone(q);}if(q.hcls)hcDone(q);
  if(q.cls){S.cls=q.cls;sbSig='';SFX.legendary();flash();setTimeout(()=>toast(t('clsGot',{c:t('cl_'+q.cls)}),'good'),400);checkSkills();}
- if(q.title)giveTitle(q.title);
+ if(q.title)giveTitle(q.title);epDone(id);
  addAff(q.by,12);addRep(townOfNpc(q.by),10+Math.min(15,Math.floor((q.xp||0)/200)));
  if(q.xp){gainXP(pasOn('opers')?q.xp*1.15:q.xp);gContrib(q.xp*.1);}if(q.adq)adqFin(id);else if(q.rep&&!q.gen){const D=dlyS();D.rq=D.rq||{};D.rq[id]=(D.rq[id]||0)+1;}checkSkills();hudDirty=true;save(true);}
 // craft-for quests hand over one crafted piece: the least valuable unequipped one (an equipped one is taken off first)
@@ -4484,7 +4565,7 @@ const NPCT={
  guardT:{idle:()=>'gT_idle'},knightT:{idle:()=>'kT_idle'},merchantT:{idle:()=>'mT_hi',opts:()=>merchOpts('merchantT')},innT:{idle:()=>'innT_hi',opts:()=>[bindOpt('innT'),...bankOpt('innT'),{l:t('oRest',{g:price('innT',90)}),f:()=>rest('innT',price('innT',90))},{l:t('oBuyBread'),qty:1,f:()=>buyBread('innT')},...potOpts('innT'),...mapOpt('innT')]},
  smithT:{hi:'sT_hi',idle:()=>'sT_idle',opts:()=>smithMenu('smithT',[['msword',3200],['ssword',820],['spear',160]],[['marmor',3000],['mhelm',1500],['parmor',720],['mring',950]])},
  priestT:{hi:'prT_hi',idle:()=>'prT_idle'},towerT:{hi:'twT_hi',idle:()=>'twT_idle'},baronB:{hi:'bB_hi',idle:()=>'bB_idle'},mutoB:{idle:()=>'muB_hi',opts:()=>merchOpts('mutoB')},innBu:{idle:()=>'innBu_hi',opts:()=>[bindOpt('innBu'),...bankOpt('innBu'),{l:t('oRest',{g:price('innBu',120)}),f:()=>rest('innBu',price('innBu',120))},{l:t('oBuyBread'),qty:1,f:()=>buyBread('innBu')},...potOpts('innBu'),...mapOpt('innBu')]},
- wiesbaden:{hi:'wsb_hi',idle:()=>evOn('golemW')?'wsb_war':'wsb_idle'},ren:{hi:'ren_hi',idle:()=>'ren_idle'},aslan:{idle:()=>'asl_idle'},
+ wiesbaden:{hi:'wsb_hi',idle:()=>evOn('golemW')?'wsb_war':'wsb_idle'},doranS:{hi:'dor_hi',idle:()=>'dor_idle'},ren:{hi:'ren_hi',idle:()=>'ren_idle'},aslan:{idle:()=>'asl_idle'},
  aden:{hi:'adn_hi',idle:()=>'adn_idle',opts:()=>peerOpts()},chucksley:{hi:'chk_hi',idle:()=>'chk_idle'},ferrell:{idle:()=>'frl_idle'},
  marketRh:{idle:()=>'mkt_hi',opts:()=>merchOpts('marketRh')},beggarRh:{idle:()=>'bgr_idle'}, rguard1:{idle:()=>'rgd_idle'},rguard2:{idle:()=>'rgd_idle'},scholarRh:{hi:'sch_hi',idle:()=>'sch_idle'},grocerRh:{idle:()=>'grc_hi',opts:()=>merchOpts('grocerRh')},
  guardW:{idle:()=>'gw_idle'},hunter:{idle:()=>'hn_idle'},farmerP:{idle:()=>'fp_idle'},hunterP:{idle:()=>'hp_idle'},
@@ -4550,7 +4631,7 @@ function talkNPC(id){if(id==='board')return openBoard();if(id==='auction'&&!npcK
  const ac=mine.find(q=>S.qs[q]&&S.qs[q].st===1);if(ac&&!n.opts)return dialog(id,[ac+'_w']);
  let line=mine.some(qAvail)&&n.low?(typeof n.low==='function'?n.low():n.low):n.idle?n.idle():'oLeave';if(n.hi&&!S.met[id]){S.met[id]=1;line=n.hi;}
  shopD(id,ac?ac+'_w':line);}
-function offerQ(id,av){const n=NPCT[id]||{},lines=[];if(n.hi&&!S.met[id])lines.push(n.hi);S.met[id]=1;lines.push(t(av+'_o')+'\n'+t('rwLine',{r:qRewards(av).join(' · ')}));return dialog(id,lines,null,[{l:t('qAccept'),f:()=>acceptQ(av)},{l:t('qDecline')}]);}
+function offerQ(id,av){const n=NPCT[id]||{},lines=[];if(n.hi&&!S.met[id])lines.push(n.hi);S.met[id]=1;lines.push((QD[av].gr?epLines(av)+'\n':'')+t(av+'_o')+'\n'+t('rwLine',{r:qRewards(av).join(' · ')}));return dialog(id,lines,null,[{l:t('qAccept'),f:()=>acceptQ(av)},{l:t('qDecline')}]);}
 function buyMat(who,k,g){const n=buyCount(99,g);if(!n){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g*n;S.mats[k]=(S.mats[k]||0)+n;boughtFx(k,n,g*n);shopD(who,isSm()&&who!=='merchant'?'kh_s3':'mHi');}
 const MATP={ruby:200,topaz:200,emer:200,sapph:200,diam:800,wood:2,ore:3,leather:4,mstone:12,estone:150,mith:30,dscale:600,fish:4,sfish:6,gfish:45,herb:3,bherb:7};
 function gearCmp(id){const rc=rcById(id),cv=(d,f)=>{d=+d.toFixed(f||0);return d?`<span class="${d>0?'cup':'cdn'}">${d>0?'▲':'▼'}${Math.abs(d)}</span>`:'<span class="ceq">=</span>';};
@@ -4678,7 +4759,7 @@ function drawBanner(T){const o=WS.terr[T.k],x=Math.round(T.x),y=Math.round(T.y),
  if(Math.hypot(T.x-P.x,T.y-P.y)<110)TX.push({s:t(T.k)+' · '+(o.own?gName(o.own):t('gNone')),x:T.x,y:T.y-(w&&w.cap?52:42),f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:8,c:o.own?c:'#d0d4dc'});}
 // Pagma's Rare Book (SAT-PAGMA-001). Legendary classes are one per world, as in the novel: the first player to read the
 // book is Pagma's Successor, and the registry lives in shared world state so an online server can enforce it.
-function shrineAct(o){if(o.k==='god')return godAct(o);if(o.k==='msword')return mswordAct();if(o.k==='sthrone')return throneAct();if(o.k==='bsoul')return soulAct();if(o.k==='yaltar')return altarAct();if(o.k==='mural'){qEvent('visit','mural');return dialog('mural',['mur1','mur2',S.cls==='pagma'?'mur3p':'mur3']);}
+function shrineAct(o){if(o.k==='god')return godAct(o);if(o.k==='irene')return ireneAct(o);if(o.k==='msword')return mswordAct();if(o.k==='sthrone')return throneAct();if(o.k==='bsoul')return soulAct();if(o.k==='yaltar')return altarAct();if(o.k==='mural'){qEvent('visit','mural');return dialog('mural',['mur1','mur2',S.cls==='pagma'?'mur3p':'mur3']);}
  const L=WS.legends||(WS.legends={}),own=L.pagma;
  if(S.cls==='pagma')return dialog('pbookN',['pbDone']);
  if(own&&own.pid!==pidOf())return dialog('pbookN',[t('pbTaken',{n:own.n})]);
@@ -4716,7 +4797,7 @@ function becomeBraham(){const L=WS.legends||(WS.legends={});if(L.braham&&L.braha
 function becomePagma(){const L=WS.legends||(WS.legends={});if(L.pagma&&L.pagma.pid!==pidOf())return;L.pagma={pid:pidOf(),n:S.look.n};
  S.cls='pagma';S.bar=null;legendReset();sbSig='';SFX.legendary();flash();hudDirty=true;save(true);
  dialog('pbookN',['pgS1','pgS2','legReset','pgPerk'],()=>{annW('annPagma');checkSkills();});}
-function drawShrine(o){if(o.k==='god')return drawGod(o);const x=Math.round(o.x),y=Math.round(o.y),pul=.5+Math.sin(gTime*3)*.5;
+function drawShrine(o){if(o.k==='god')return drawGod(o);if(o.k==='irene')return drawIrene(o);const x=Math.round(o.x),y=Math.round(o.y),pul=.5+Math.sin(gTime*3)*.5;
  if(o.k==='msword'){const has=!(WS&&WS.legends&&WS.legends.muller);ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(x-11,y-1,22,2);R(ctx,x-10,y-7,20,7,'#6a6e78');R(ctx,x-10,y-7,20,1,'#8a909a');R(ctx,x-7,y-10,14,3,'#7a808a');
   if(has){ctx.globalAlpha=.2+pul*.25;ctx.fillStyle='#bfe0ff';ctx.beginPath();ctx.ellipse(x,y-22,8,16,0,0,7);ctx.fill();ctx.globalAlpha=1;R(ctx,x-1,y-34,3,24,'#dfe8f2');R(ctx,x,y-34,1,24,'#ffffff');R(ctx,x-5,y-36,11,2,'#c8a050');R(ctx,x-1,y-42,3,6,'#6a4a2a');R(ctx,x-1,y-43,3,1,'#c8a050');if(rand()<.2)fx.push({x:x+(rand()-.5)*10,y:y-30,vx:0,vy:-12,t:.6,c:'#bfe0ff',fl:1});}
   else R(ctx,x-2,y-12,4,2,'#3a3e48');return;}
@@ -5072,12 +5153,12 @@ function toast(msg,cls){const box0=$('toasts'),dup=[...box0.children].find(e=>!e
 function openLog(){SFX.open();mode='log';$('logW').hidden=false;$('hint').hidden=true;$('logL').innerHTML=LOG.length?[...LOG].reverse().map(l=>`<div><small>${l.tm}</small>${esc(l.m)}</div>`).join(''):`<div>${t('logEmpty')}</div>`;}
 let qdId=null,qdArm=false;
 function openQD(id){const q=QD[id];if(!q)return;qdId=id;qdArm=false;SFX.open();mode='qd';$('qdW').hidden=false;$('hint').hidden=true;$('qdT').textContent=qName(id);const r=qReady(id),off=STR.en[id+'_o']?t(id+'_o'):'';
- $('qdB').innerHTML=`<div class="ssec">${t('qdFrom',{w:t(q.by)})}</div>${off?`<p>${esc(off)}</p>`:''}<div class="ssec">${t('qdObj')}</div><p>${esc(r?t('retTo',{w:t(q.by)}):qObjText(id))}</p><div class="ssec">${t('rwH')}</div><ul>${qRewards(id).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${S.qs[id]&&S.qs[id].st===1?`<div class="qdc"><button id="qdCancel" data-act="cancelQ">${esc(t('qCancel'))}</button></div>`:''}`;}
+ $('qdB').innerHTML=`<div class="ssec">${t('qdFrom',{w:t(q.by)})}</div>${q.gr?`<p>${esc(epLines(id)).replace(/\n/g,'<br>')}</p>`:''}${off?`<p>${esc(off)}</p>`:''}<div class="ssec">${t('qdObj')}</div><p>${esc(r?t('retTo',{w:t(q.by)}):qObjText(id))}</p><div class="ssec">${t('rwH')}</div><ul>${qRewards(id).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${S.qs[id]&&S.qs[id].st===1?`<div class="qdc"><button id="qdCancel" data-act="cancelQ">${esc(t('qCancel'))}</button></div>`:''}`;}
 // Abandon an active quest: progress is lost; story and class quests can be taken again from their giver, board tasks are discarded.
 // The first click arms the button, the second one cancels (the game has no confirm dialogs).
 function cancelQ(){const id=qdId,s=id&&S.qs[id];if(!s||s.st!==1)return;const b=$('qdCancel');
  if(!qdArm){qdArm=true;SFX.click();if(b){b.textContent=t('qCancelSure');b.classList.add('arm');}return;}
- const nm=qName(id);delete S.qs[id];if(QD[id]&&QD[id].gen){if(S.bqa)delete S.bqa[id];if(S.adqa)delete S.adqa[id];delete QD[id];}
+ if(QD[id]&&QD[id].gr){epFail(id);closeQD();return;}const nm=qName(id);delete S.qs[id];if(QD[id]&&QD[id].gen){if(S.bqa)delete S.bqa[id];if(S.adqa)delete S.adqa[id];delete QD[id];}
  toast(t('qCanceled',{q:nm}));hudDirty=true;save(true);closeQD();}
 function closeQD(){SFX.close();$('qdW').hidden=true;mode='play';}
 function closeLog(){SFX.close();$('logW').hidden=true;mode='play';}
@@ -5089,7 +5170,7 @@ let annT=0;function announce(msg,own){logMsg(msg);const W=$('announce');W.queryS
  $('anntext').textContent=msg;W.hidden=false;annT=document.body.classList.contains('touch')?3:5;if(!own&&CHAT&&CHAT.note&&S&&!S.__demo)CHAT.note(msg);}
 // SAT-ONLINE-026 (owner feedback 12): announcements about you, and the story notices (annGrid), also reach everyone online
 // through the news feed, named by your account ID. A story notice is shown once per character, whoever's clock fires it first.
-const NEWS=['twPioN','bhRec','bhFinal','bhPureN','natWin','bntDone','evWin','evCap','castNews','terrNews','drDown','brDown','dtFirstN','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
+const NEWS=['twPioN','bhRec','bhFinal','bhPureN','natWin','bntDone','evWin','evCap','castNews','terrNews','drDown','brDown','dtFirstN','epClrN','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','craftLeg','annLeg','annGrid'];
 function annArgs(p,n){const o={...p,n};if('rk' in o){o.r=t('r'+o.rk);delete o.rk;}return o;}
 function annW(k,p){p=p||{};announce(t(k,annArgs(p,t('pname'))));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!netId)return; // no account ID yet: the rules take news only under one
  const q={};for(const f of ['lv','f','rk'])if(typeof p[f]==='number')q[f]=p[f];NETTR.feedSay('news',Object.assign({from:NET.uid,h:netId||S.look.n,k},Object.keys(q).length?{p:q}:{}));}
@@ -5097,6 +5178,7 @@ function newsIn(m){if(!m||!NEWS.includes(m.k)||!NET||m.from===NET.uid||isBlocked
  if(m.k==='annGrid'){if(S.ev.grid)return;S.ev.grid=1;announce(t('annGrid'));SFX.notice();return;}
  if(m.k==='evWin'){evWinIn(m);return;}
  if(m.k==='dtFirstN'){dtNewsIn(m);return;}
+ if(m.k==='epClrN'){epNewsIn(m);return;}
  if(m.k==='evCap'){evCapIn(m);return;}
  if(m.k==='terrNews'||m.k==='castNews'){const T=TERR[m.p&&m.p.f|0];announce(t(m.k,{n:Satisfy.chat.clean(m.h,24)||'?',t:T?t(T.k):''}));SFX.notice();return;}
  const p={};for(const f of ['lv','f','rk'])if(m.p&&typeof m.p[f]==='number')p[f]=m.p[f];announce(t(m.k,annArgs(p,Satisfy.chat.clean(m.h,24)||'?')));SFX.notice();}
@@ -5450,7 +5532,7 @@ function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,ti
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
  h+=`<div class="ssec">${t('special')}</div><div class="sgrid">`+['comp','indom','dign','insi',...(S.hid.pers?['pers']:[])].map(k=>row(t(k),S.hid[k],t('t'+k)+'<br><small>'+t('noDist')+'</small>')).join('')+'</div>';
  h+=`<div class="pts" id="ptsT">${t('pts',{n:S.pts})}</div>`+(S.pts>0?`<div class="note">${t('ptsHint')}</div>`:'');
- h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior'].filter(id=>S.tl[id]);
+ h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay'].filter(id=>S.tl[id]);
  h+=`<div class="ssec">${t('titlesH')}</div>`+(own.length?own.map(id=>`<div class="tl${S.title===id?' worn':''}"><div><b>${t('tl_'+id)}</b><small>${t('tl_'+id+'D')}</small>${STR.en['tl_'+id+'S']?`<em>${t('tl_'+id+'S')}</em>`:''}</div><button data-title="${id}" ${S.title===id?'disabled':''}>${t(S.title===id?'tlWorn':'tlWear')}</button></div>`).join('')+`<div class="note">${t('tlNote')}</div>`:`<div class="note">${t('noTitles')}</div>`);
  {const cs=clsSkills().filter(skOK),bar=barSkills();h+=`<div class="ssec">${t('skillsH')} · ${t('cl_'+S.cls)}</div>`+cs.map(k=>{const d=SKD[k],bi=bar.indexOf(k);return `<div class="tl skd${bi>=0?' worn':''}" draggable="true" data-dsk="${k}"><img class="ski" src="${skIcon(k)}"><div><b>${t('sk_'+k)}</b><small>${t('skd_'+k)}${skLvTxt(k)}</small><em>${t('skCost',{mp:mpC(k),cd:Math.round(d.cd*skCostM(k))})}</em></div><button data-bar="${k}">${bi>=0?t('barOff',{k:keyName(KB[bi])}):t('barOn')}</button></div>`;}).join('')+`<div class="note">${t('barDrag')}</div>`;
   const ps=pasSkills();if(ps.length)h+=`<div class="ssec">${t('pasH')}</div>`+ps.map(k=>`<div class="tl skd worn"><img class="ski" src="${skIcon(k)}"><div><b>${t('sk_'+k)}</b><small>${t('skd_'+k)}${skLvTxt(k)}</small><em>${t('pasOnT')}</em></div></div>`).join('');}
@@ -5506,7 +5588,7 @@ function sahZone(tx,ty){const T=TITAN,B=BUTIN,R=ROLL,A=ABYSS;
  if(tx>=R.x0&&tx<R.x1+1&&ty>=R.y0&&ty<R.y1+1)return 'zRolling';
  if(Math.hypot((tx-A.x)/A.rx,(ty-A.y)/A.ry)<1.3)return 'zAbyss';
  if(ty>96&&tx<854)return 'zDran';
- if(ty<T.y0-2&&tx>=846)return 'zSahHills';
+ if(asmoIn(tx,ty))return 'zAsmo';if(ty<T.y0-2&&tx>=846)return 'zSahHills';
  return tx<856&&ty<=78?'zTatur':'zSahFarm';}
 function zoneAt(x,y){if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;return (roomAt(x,y)||{}).z||'zWin';}if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
 /* fog of war (Nitro's feedback): the map shows only what you have seen, in cells of FOGC tiles, saved in S.fog. A paper map
@@ -5697,7 +5779,7 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  // danger regions: red wash with a dashed edge
  g.save();g.setLineDash([6*dpr,4*dpr]);g.lineWidth=1.2*dpr;g.strokeStyle='rgba(226,73,58,.7)';g.fillStyle='rgba(140,10,10,.16)';[[28,2,34,40],[2,44,62,42]].forEach(([x,y,w,h])=>{g.fillRect(X(x),Y(y),w*sc,h*sc);g.strokeRect(X(x),Y(y),w*sc,h*sc);});g.restore();
  if(MV.z>=2.5){g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=1;for(let x=0;x<=MW;x+=10){g.beginPath();g.moveTo(X(x),Y(-NR));g.lineTo(X(x),Y(WMH));g.stroke();}for(let y=-NR;y<=WMH;y+=10){g.beginPath();g.moveTo(X(0),Y(y));g.lineTo(X(MW),Y(y));g.stroke();}}
- [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3]].forEach(([k,x,y])=>onS(X(x),Y(y),240*dpr)&&MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`}));
+ [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAsmo',ASMO.gx,ASMO.y0-2],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3]].forEach(([k,x,y])=>onS(X(x),Y(y),240*dpr)&&MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`}));
  ANVILS.forEach(a=>{if(onS(X(a.tx+.5),Y(a.ty+.5)))MM.marker(g,'anvil',X(a.tx+.5),Y(a.ty+.5),u*1.2);});
  mons.forEach(m=>{if(m.dead||!onS(X(m.x/TS),Y(m.y/TS))||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
  allies.forEach(a=>{if(!a.dead&&onS(X(a.x/TS),Y(a.y/TS)))MM.marker(g,'ally',X(a.x/TS),Y(a.y/TS),u);});if(COMPO)MM.marker(g,'ally',X(COMPO.x/TS),Y(COMPO.y/TS),u);
@@ -5850,7 +5932,7 @@ function update(dt){
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
-  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)}));ZT[z]=gTime;}S.zone=z;exZone(z);dtEnter(z);if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold'||z==='zPedro'||z==='zGauss'||z==='zSSea')&&S.lv<160||/^zChaos/.test(z)&&S.lv<220||z==='zSuaz'&&S.lv<150||z==='zDran'&&S.lv<180||(/^zAbyss/.test(z)||z==='zTaleren')&&S.lv<360)&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
+  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)}));ZT[z]=gTime;}S.zone=z;exZone(z);dtEnter(z);if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold'||z==='zPedro'||z==='zGauss'||z==='zSSea')&&S.lv<160||/^zChaos/.test(z)&&S.lv<220||z==='zSuaz'&&S.lv<150||z==='zDran'&&S.lv<180||z==='zAsmo'&&S.lv<250||(/^zAbyss/.test(z)||z==='zTaleren')&&S.lv<360)&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
  // the Chaos Mountains past the first ridge: the blizzard cuts the flesh, 1/2/3 % of max health every 4 s (never the last
  // point); a campfire keeps it off
  if(P.y<NWALL*TS&&!P.ghost){const k=ridgeAt(P.x/TS,P.y/TS);if(k>0&&(P.chT=(P.chT??4)-dt)<=0){P.chT=4;if(!CAMPS.some(c=>Math.hypot(c.x-P.x,c.y-P.y)<64)){const d=Math.max(1,Math.round(maxHP()*.01*k));P.hp=Math.max(1,P.hp-d);numP(-26,'-'+d,'#bfe6ff');hudDirty=true;}}}
@@ -5862,7 +5944,7 @@ function update(dt){
  if(P.food<20&&!P.hungryT){P.hungryT=true;toast(t('hungry'),'warn');}if(P.food>=25)P.hungryT=false;
  if(pain&&!P.painT){P.painT=true;toast(t('pain'),'warn');}if(!pain)P.painT=false;
  // monsters
- tfTick(dt);c2Tick(dt);phTick(dt);rgTick(dt);necTick(dt);hcTick(dt);fbTick(dt);dvTick(dt);brTick(dt);const safe=!!inTown(P.x,P.y);
+ tfTick(dt);c2Tick(dt);phTick(dt);rgTick(dt);necTick(dt);hcTick(dt);fbTick(dt);dvTick(dt);brTick(dt);epTick();const safe=!!inTown(P.x,P.y);
  for(const m of mons){try{
   const b=MT[m.type];monVox(m,b,dt);
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
@@ -5908,7 +5990,7 @@ function update(dt){
 //   leap  jump at where you stand (aim locks just before take-off)      line  rush in a locked straight line
 //   arc   swing in a cone in front (combo: repeats faster)               ring  smash the ground all around
 //   shot  throw something at you                                         buff  howl: the pack speeds up and attacks sooner
-const AIK={bibanm:'soldier',sellobu:'lunge',foxmouse:'hop',gcrown:'soldier',rabbit:'hop',wolf:'lunge',pwolf:'lunge',hwolf:'lunge',boar:'charge',rboar:'charge',bear:'brute',gbear:'brute',golem:'slam',cgolem:'slam',mgolem:'slam',goblin:'soldier',merman:'soldier',outlaw:'soldier',deserter:'soldier',forc:'soldier',cgob:'soldier',gshaman:'soldier',kobold:'soldier',lizard:'soldier',gsold:'soldier',skel:'soldier',wraith:'soldier',huroi:'lunge',peaks:'soldier',zibal:'charge',kraugel:'soldier',cultist:'soldier',demon:'soldier',hdemon:'soldier',kraider:'soldier',kshaman:'soldier',sknight:'soldier',cwolf:'lunge',cbear:'brute',cboar:'charge',fboar:'charge',hdrac:'soldier',hdrac2:'soldier',hdrac3:'soldier',gscout:'soldier',gknight:'soldier',smerman:'soldier',eti:'soldier',ogolem:'brute',sdoll:'lunge',aweapon:'brute',troll:'brute',ogre:'brute',gargoyle:'lunge',salamander:'charge',ilizard:'soldier',pguard:'soldier',aprison:'lunge'};
+const AIK={bibanm:'soldier',sellobu:'lunge',foxmouse:'hop',gcrown:'soldier',rabbit:'hop',wolf:'lunge',pwolf:'lunge',hwolf:'lunge',boar:'charge',rboar:'charge',bear:'brute',gbear:'brute',golem:'slam',cgolem:'slam',mgolem:'slam',goblin:'soldier',merman:'soldier',outlaw:'soldier',deserter:'soldier',forc:'soldier',cgob:'soldier',gshaman:'soldier',kobold:'soldier',lizard:'soldier',gsold:'soldier',skel:'soldier',wraith:'soldier',huroi:'lunge',peaks:'soldier',zibal:'charge',kraugel:'soldier',cultist:'soldier',demon:'soldier',redk:'soldier',asmo:'lunge',hdemon:'soldier',kraider:'soldier',kshaman:'soldier',sknight:'soldier',cwolf:'lunge',cbear:'brute',cboar:'charge',fboar:'charge',hdrac:'soldier',hdrac2:'soldier',hdrac3:'soldier',gscout:'soldier',gknight:'soldier',smerman:'soldier',eti:'soldier',ogolem:'brute',sdoll:'lunge',aweapon:'brute',troll:'brute',ogre:'brute',gargoyle:'lunge',salamander:'charge',ilizard:'soldier',pguard:'soldier',aprison:'lunge'};
 const MOVES={
  hop:[{k:'leap',w:3,min:8,max:44,tele:.3,dashT:.2,mul:1,rec:.5,cd:1.5},{k:'arc',w:1,max:20,tele:.22,reach:20,arc:1.4,mul:.7,rec:.4,cd:1.4,kb:10}],
  lunge:[{k:'leap',w:3,min:34,max:118,tele:.48,dashT:.34,mul:1.2,rec:.55,cd:2},{k:'arc',w:3,max:30,tele:.26,reach:26,arc:1,mul:.75,rec:.2,cd:1.3,combo:2},
@@ -6092,7 +6174,7 @@ function render(dt){
   for(const g of DGATES){if(g.hide||g.bhg&&!['next','exit','goal','box'].includes(g.bh)||g.tw&&!['up','down','exit'].includes(g.tw))continue;if(g.x<camX-30||g.x>camX+VW+30||g.y<camY-30||g.y>camY+VH+30)continue;ents.push({y:g.y-14,f:()=>drawGate(g)});}
   for(const c of CAMPS){if(c.x<camX-30||c.x>camX+VW+30||c.y<camY-30||c.y>camY+VH+40)continue;ents.push({y:c.y-2,f:()=>drawCamp(c)});}
   if(FISH)ents.push({y:P.y+1,f:drawFish});
-  for(const o of SHRINES){if(o.x<camX-40||o.x>camX+VW+40||o.y<camY-20||o.y>camY+VH+60)continue;ents.push({y:o.y,f:()=>drawShrine(o)});}
+  for(const o of SHRINES){if(!epVis(o))continue;if(o.x<camX-40||o.x>camX+VW+40||o.y<camY-20||o.y>camY+VH+60)continue;ents.push({y:o.y,f:()=>drawShrine(o)});}
   if(WS)for(const T of TERR){if(T.x<camX-40||T.x>camX+VW+40||T.y<camY-20||T.y>camY+VH+60)continue;ents.push({y:T.y,f:()=>drawBanner(T)});}
   if(ESC){const E=ESC;ents.push({y:E.y,f:()=>{drawChar(E.id,E.x,E.y,E.dir,E.frame||0,E.hurtT>0&&(gTime*20|0)%2,0,E);txBar(E.x,E.y-28,16,Math.max(0,E.hp)/E.max,HPY,hpLag(E,Math.max(0,E.hp)/E.max,'hl'));}});}
   npcs.forEach(n=>{if(n.hidden||n.obj)return;ents.push({y:n.y,f:()=>{const ko=npcKO(n.id);if(ko)ctx.globalAlpha=.38;if(n.hitT>0)n.hitT-=1/60;drawChar(n.spr,n.x,n.y,n.dir,n.frame||0,n.hitT>0,0,n);ctx.globalAlpha=1;
