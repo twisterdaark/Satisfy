@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20ze', ver: '0.71', d: '2026-10-20',
+      ar: ['أونلاين: "دوّر على فريق" في قايمة اللاعبين (O): بتشوف مين بيدور على غارة أو فريق أو فريق دانجن أو مبارزة، لفله وكلاسه وهو فين',
+        'وتقدر تقول إنت بتدور على إيه، والكلام ده بيفضل نص ساعة أو لحد ما تبطل أو تخرج'],
+      en: ['Online: "Group finder" in the player list (O): see who is looking for a raid, a party, a dungeon group or a duel, with their level, class and where they are',
+        'Say what you are looking for yourself; it stays up for half an hour, or until you stop or leave'] },
     { v: '2026-10-20zd', ver: '0.70', d: '2026-10-20',
       ar: ['المزاد بقى شاشة زي شاشة البيع بدل الكلام: شنطتك على جنب، تختار حاجة وتكتب الكمية والسعر وتدوس "اعرض". وعلى الجنب التاني "المعروض" فيه بحث بالاسم وزرار اشتري، و"عروضي" فيه زرار اسحب، وفلوس البيع بتستلمها من نفس الشاشة',
         'الشنطة كانت بتعرض أول 36 خانة بس، فلو اتملت الباقي كان مستخبي. دلوقتي بتعرض كل حاجة وبتسكرول'],

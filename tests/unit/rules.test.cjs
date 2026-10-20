@@ -378,6 +378,17 @@ test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);
 });
 
+test('the group finder (SAT-ONLINE-073): read by any signed-in player, your own entry only, four kinds, a party role, stamped by the server', () => {
+  const l = rules.lfg, u = l.$uid;
+  assert.equal(l['.read'], 'auth != null');
+  assert.equal(u['.write'], 'auth != null && auth.uid === $uid');
+  assert.equal(u['.validate'], "newData.hasChildren(['n', 'lv', 'cls', 'r', 'k', 'z', 't'])");
+  for (const r of ['tank', 'healer', 'damage', 'support']) assert.ok(u.r['.validate'].includes("newData.val() === '" + r + "'"), r);
+  for (const k of ['raid', 'party', 'dungeon', 'duel']) assert.ok(u.k['.validate'].includes("newData.val() === '" + k + "'"), k);
+  assert.equal(u.t['.validate'], 'newData.val() === now');
+  assert.equal(u.$other['.validate'], false);
+});
+
 test('every rule expression is well formed: balanced parentheses, closed strings and regexes', () => {
   assert.equal(exprProblem("a && (b || c('x)'))"), null);
   assert.equal(exprProblem("v.matches(/^(a|b)$/) && (x"), '1 unclosed (', 'the checker finds a lost )');
