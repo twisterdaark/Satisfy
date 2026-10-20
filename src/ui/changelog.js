@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20zb', ver: '0.68', d: '2026-10-20',
+      ar: ['اسم الوحش ولفله بقوا بيظهروا ويختفوا مع بعض: لما تبعد مبيفضلش اللفل لوحده'],
+      en: ["A monster's name and level now show and hide together: stepping away no longer leaves the level alone"] },
     { v: '2026-10-20za', ver: '0.67', d: '2026-10-20',
       ar: ['اسم الوحش بقى بيظهر فوق لفله لما تقرّب منه أو تحط الماوس عليه، عشان تعرف مين ده',
         'لون الاسم واللفل على قد خطورته عليك: رمادي لو أضعف منك بكتير، أبيض لو قدك، برتقاني لو أقوى شوية، وأحمر لو خطير'],
