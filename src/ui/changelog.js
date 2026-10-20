@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20v95', ver: '0.95', d: '2026-10-20',
+      ar: ['سباق الخيل بقى مرة كل ساعة بدل كل تلات دقايق. البوابة بتفتح الساعة :59 وتلاتاشر ثانية، والسباق بيخلص قبل الساعة الجديدة',
+        'تقدر تسجّل عند منظم السباق في أي وقت في الساعة. لما البوابة تفتح بتنزل المضمار من أي حتة برا، مش لازم تكون في وينستون، وبعد السباق بترجع وينستون',
+        'بيجيلك تنبيه قبل البوابة بدقيقتين وقبلها بنص دقيقة'],
+      en: ['The horse race now runs once an hour instead of every three minutes. The gate opens at :59:14 and the race ends before the hour turns',
+        'Sign up with the Race Steward any time in the hour. When the gate opens it takes you to the track from anywhere outdoors, not only Winston, and you come back to Winston after the race',
+        'A reminder comes two minutes and thirty seconds before the gate'] },
     { v: '2026-10-20v94', ver: '0.94', d: '2026-10-20',
       ar: ['حياة المدينة: سباق خيل كل تلات دقايق في وينستون. سجّل عند منظم السباق جنب البوابة الشرقية، ولما البوابة تفتح بتنزل مضمار وينستون على حصان سباق زي كل الناس',
         'السباق لفتين. دوس Space (زرار التفادي) عشان تنخز الحصان ويجري أسرع، والنخزة بتصرف من شريط النَفَس. الحارة الجوانية أقصر، وفرسان الإسطبل بيسابقوك',

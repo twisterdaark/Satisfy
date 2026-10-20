@@ -1,5 +1,5 @@
 'use strict';
-// Town life (owner 2026-10-20): horse races at Winston every three minutes, dice at the inn tables every twenty seconds,
+// Town life (owner 2026-10-20): a horse race at Winston every hour, dice at the inn tables every twenty seconds,
 // and the town festival. All of it runs on the world clock, so every screen online shares the same race, riders and
 // rolls; your race and your bet ride along in the presence fx field as one "tl:" string.
 const test = require('node:test');
@@ -8,12 +8,12 @@ const H = require('../harness/game.cjs');
 
 test.after(() => H.closeBrowser());
 
-const RCG = 134000, RCGO = 140000, RCEND = 176000, RCBACK = 178000;
+const RCS = 3600000, RCG = RCS - 46000, RCGO = RCS - 40000, RCEND = RCS - 4000, RCBACK = RCS - 2000; // once an hour
 // move this page's clock so that the race slot is at `ms` (the next slot when the current one is already past it)
 const raceClock = (g, ms) => g.eval((ms) => {
   if (!window.__realNow) window.__realNow = Date.now.bind(Date);
-  if (window.__raceSlot == null) window.__raceSlot = Math.floor(window.__realNow() / 180000) + 1;
-  window.__off = window.__raceSlot * 180000 + ms - window.__realNow(); Date.now = () => window.__realNow() + window.__off;
+  if (window.__raceSlot == null) window.__raceSlot = Math.floor(window.__realNow() / 3600000) + 1;
+  window.__off = window.__raceSlot * 3600000 + ms - window.__realNow(); Date.now = () => window.__realNow() + window.__off;
 }, ms);
 const toasts = (g) => g.eval(() => [...document.querySelectorAll('#toasts > *')].map((e) => e.textContent).join(' | '));
 const bar = async (g) => { await g.step(8); return g.eval(() => { const b = document.getElementById('tlbar'); return b.hidden ? '' : b.textContent; }); };
@@ -42,7 +42,7 @@ test('horse race: sign up with the steward, the gate takes you to the track on a
   try {
     await H.newGame(g);
     await g.step(3);
-    await g.eval(() => { window.__G.S.lv = 20; });
+    await g.eval(() => { window.__G.S.lv = 20; window.__GTL.setFS(1); }); // no festival (it doubles the prize)
     await raceClock(g, RCG - 20000);
     await signUp(g);
     assert.equal(await g.eval(() => window.__GTL.RCR.in), false);
