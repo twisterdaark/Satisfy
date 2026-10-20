@@ -5,6 +5,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-20v93', ver: '0.93', d: '2026-10-20',
+      ar: ['القصة الرئيسية: سلسلة مهام لكل الكلاسات بتمشي ورا رحلة جريد في الرواية، فصل ورا فصل. أول ما تكلّم أول شخص في الفصل بتظهر صفحة من الرواية، وصندوق الكويستات بيقولك القصة رايحة فين بعد كده',
+        'الفصل 1، ورشة خان (لفل 30): "غضب الحداد" ضد براغا وعصابة شركة ميرو، و"مسابقة صناعة مع شركة ميرو!" تكسبها بحاجة نادرة أو أحسن. علاقتك بخان بتوصل للقمة',
+        'الفصل 2، حارس الغابة (لفل 95): جولمات الغابة الرمادية، وبعدين غارة حارس الغابة مع ريجاس',
+        'الفصل 3، أورك ضوء الصقيع (لفل 110): خان بيبعتك لحراشيف السيلفيد، وبعدين زعيم أورك ضوء الصقيع',
+        'الفصل 4، حرب الجولم (لفل 230): "حرب الدفاع" من الملك فيسبادن ضد الجولمات القديمة، وبعدين سلاح قديم. والقصة هتكمل في التحديثات الجاية'],
+      en: ['Main story: a quest chain for every class that follows Grid’s road through the novel, chapter by chapter. The first time you talk to a chapter’s first giver, a page from the novel opens, and the quest box shows where the story goes next',
+        'Chapter 1, Khan’s Smithy (Lv 30): "Blacksmith’s Rage" against Praga and the Mero Company’s gang, and "Item Production Game with the Mero Company!", won with a rare or better item. Khan’s affinity reaches the maximum',
+        'Chapter 2, The Guardian of the Forest (Lv 95): the golems of the Grey Forest, then the Guardian of the Forest raid with Regas',
+        'Chapter 3, The Frostlight Orcs (Lv 110): Khan sends you for sylphid scales, then the Frostlight Orc Chief',
+        'Chapter 4, The Golem War (Lv 230): King Wiesbaden’s "Defense War" against the old golems, then an ancient weapon. The story continues in a coming update'] },
     { v: '2026-10-20v92', ver: '0.92', d: '2026-10-20',
       ar: ['الموبايل: زرار ✥ جديد جنب ▦ بيخليك ترتّب الزراير زي ما انت عايز. اسحب الضرب أو المراوغة أو الدفاع أو الاستخدام أو شريط السكيلات أو العصا لأي مكان، واختار زرار ودوس − أو + عشان تصغّره أو تكبّره. "تمام" بيحفظ الترتيب على جهازك، و"الأصلي" بيرجّع الترتيب الأولاني'],
       en: ['Phone: a new ✥ button beside ▦ lets you arrange the controls as you like. Drag Attack, Dodge, Guard, Use, the skill bar or the stick anywhere, and pick one and tap − or + to resize it. Done keeps the layout on your device, and Reset brings the first layout back'] },
