@@ -18,7 +18,7 @@ function polish(g,W,H,out){const id=g.getImageData(0,0,W,H),d=id.data,OUT=out||'
  rim.forEach(([x,y,c])=>R(g,x,y,1,1,shade(c,.14)));o.forEach(([x,y,c])=>R(g,x,y,1,1,c));}
 
 // PER_CODE snapshot of index.html PAL @ ce29772 (body, dark, light, scale). A test checks drift.
-const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15],hwolf:['#6e6258','#4e443c','#968878',1.05],rboar:['#7a3a2a','#55261a','#a05a40',1.3],cwolf:['#c8d4e0','#8a9cb0','#eef4fa',1.1],cbear:['#d8dce4','#9aa2b0','#f4f6fa',1.6],cboar:['#4a5a3a','#323e26','#6e7e52',1.35],fboar:['#8a6a5a','#5e4a3e','#b08a78',1.2],sanju1:['#8a8a90','#5e5e66','#b4b4bc',2.4],sanju2:['#7a7a82','#52525a','#a4a4ae',2.5],sanju3:['#6a6a74','#46464e','#94949e',2.6],sanju4:['#5a5660','#3a363e','#86828e',2.8]};
+const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15],hwolf:['#6e6258','#4e443c','#968878',1.05],rboar:['#7a3a2a','#55261a','#a05a40',1.3],cwolf:['#c8d4e0','#8a9cb0','#eef4fa',1.1],cbear:['#d8dce4','#9aa2b0','#f4f6fa',1.6],cboar:['#4a5a3a','#323e26','#6e7e52',1.35],fboar:['#8a6a5a','#5e4a3e','#b08a78',1.2],sanju1:['#8a8a90','#5e5e66','#b4b4bc',2.4],sanju2:['#7a7a82','#52525a','#a4a4ae',2.5],sanju3:['#6a6a74','#46464e','#94949e',2.6],sanju4:['#5a5660','#3a363e','#86828e',2.8],gargoyle:['#7a7a82','#55555e','#a2a2ac',1.25],salamander:['#c8603a','#8a3a22','#e89a6a',1.3],hydra:['#3e6a4a','#264a32','#6a9a6a',1.5]};
 const POSES=[['idle',2],['walk',4],['atk',2],['hurt',1]];
 const TIMING={idle:[.5,.5],walk:[.1,.1,.1,.1],atk:[.12,.16],hurt:[.2]};
 
@@ -141,7 +141,51 @@ function trauka(g,p,pose,f){const W=156,H=112,AX=78,B='#b8282a',D='#7a161a',DD='
  for(const [tx,ty] of T)dline(g,nwx,nwy,nwx+tx,nwy+ty,2,D);dline(g,nsx,nsy,nwx,nwy,4,D);dline(g,nsx,nsy-1,nwx,nwy-1,1,L);R(g,nwx-2,nwy-4,3,5,HN);
  return {W,H,AX};}
 
-const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null],trauka:[trauka,null,[230,170]],cwolf:[wolf,'cwolf'],cbear:[bear,'cbear'],cboar:[boar,'cboar'],fboar:[boar,'fboar'],sanju1:[bear,'sanju1'],sanju2:[bear,'sanju2'],sanju3:[bear,'sanju3'],sanju4:[bear,'sanju4']};
+// Saharan Empire monsters (major #2). Gargoyle (Suaz Mountains, canon ch 118): a winged stone demon that hovers and
+// turns what its beam touches to stone. 40x40, anchor (20,40); it floats a few pixels over its shadow.
+function gargoyle(g,p,pose,f){const [B,D,L]=p,W=40,H=37,AX=20,E='#ff5a3a';
+ const flap=pose==='walk'?[0,1,2,1][f]:pose==='idle'?f*2:pose==='atk'?(f===0?0:2):1,bob=pose==='walk'?[0,-1,-2,-1][f]:pose==='idle'?-f:0;
+ const cx=20+(pose==='atk'&&f===1?4:pose==='hurt'?-2:0),cy=22+bob,wy=[-14,-8,-1][flap];
+ const wing=(o,col)=>{dpoly(g,[[cx-2+o,cy-6],[cx-17+o,cy+wy-2],[cx-15+o,cy+wy+6],[cx-10+o,cy+wy+3],[cx-7+o,cy+wy+9],[cx-3+o,cy+2]],col);dline(g,cx-2+o,cy-6,cx-17+o,cy+wy-2,1,shade(col,-.35));};
+ wing(3,shade(D,-.2));wing(0,D);
+ R(g,cx-5,cy+6,4,7,D);R(g,cx+2,cy+6,4,7,D);R(g,cx-6,cy+12,5,2,shade(D,-.25));R(g,cx+2,cy+12,5,2,shade(D,-.25));
+ dline(g,cx-5,cy+5,cx-12,cy+10,2,D);dpoly(g,[[cx-12,cy+8],[cx-16,cy+11],[cx-11,cy+12]],D);
+ ell(g,cx,cy,7,8,D);ell(g,cx,cy-1,6,7,B);R(g,cx-3,cy-4,4,6,L);
+ const hx=cx+5,hy=cy-10;ell(g,hx,hy,5,4,B);R(g,hx+3,hy,4,3,B);dpoly(g,[[hx-3,hy-3],[hx-6,hy-9],[hx-1,hy-4]],L);dpoly(g,[[hx+1,hy-3],[hx+1,hy-9],[hx+3,hy-3]],L);
+ R(g,hx+2,hy-1,2,1,pose==='hurt'?'#ffffff':E);R(g,hx+5,hy+2,2,1,'#1a1420');
+ if(pose==='atk'&&f===0){ell(g,hx+8,hy,2,2,'#ffd27a');R(g,hx+7,hy-1,2,2,'#fff4c0');}
+ R(g,cx+3,cy-2,6,2,B);R(g,cx+8,cy-1,2,4,D);R(g,cx+9,cy+2,2,1,L);
+ return {W,H,AX};}
+
+// Giant salamander (Dran Valley, canon ch 120): long and low, a flat wide head, a spotted back and a swaying tail. 50x18.
+function salamander(g,p,pose,f){const [B,D,L]=p,W=50,H=18,AX=22,steps=legSteps(pose,f);
+ const sway=pose==='walk'?[1,0,-1,0][f]:0,lean=pose==='atk'?(f===0?-2:5):pose==='hurt'?-2:0,by=10,bx=22+lean;
+ const leg=(x,s,col)=>{R(g,x+s,by+2,3,H-by-3,col);R(g,x+s-1,H-1,5,1,shade(col,-.25));};
+ leg(bx-10,steps[1],shade(D,-.15));leg(bx+6,steps[3],shade(D,-.15));
+ for(let i=0;i<8;i++){const tx=bx-14-i*2.4,ty=by+Math.round(Math.sin(i*.6+sway)*1.2+i*.2),r=Math.max(1,Math.round(4-i*.45));ell(g,tx,ty,2,r,i%2?D:B);}
+ ell(g,bx,by,14,5,D);ell(g,bx,by-1,13,4,B);R(g,bx-11,by+3,22,1,L);
+ for(const [sx,sy] of [[-8,-2],[-2,-3],[4,-2],[9,-3],[-5,1],[2,1]])R(g,bx+sx,by+sy,2,1,shade(D,-.3));
+ leg(bx-8,steps[0],D);leg(bx+8,steps[2],D);
+ const hx=bx+15,hy=by-1,open=pose==='atk'&&f===1?2:0;ell(g,hx,hy,6,3,B);R(g,hx+2,hy+1+open,6,2,D);R(g,hx+3,hy-3,2,2,shade(B,.15));R(g,hx+3,hy-2,1,1,pose==='hurt'?'#fff':'#1a1420');
+ if(open)R(g,hx+2,hy+1,6,1,'#7a1a1a');
+ return {W,H,AX};}
+
+// The hydra under the Abyss (canon ch 1066, 1095): a great scaled body on four clawed legs with five necks; its venom
+// is feared even by gods. 112x92, anchor (56,92); atk = the heads coil back, then strike with venom.
+function hydra(g,p,pose,f){const W=112,H=92,AX=56,B='#3e6a4a',D='#264a32',DD='#16301e',L='#6a9a6a',BL='#c8c08a',V='#b85ad8';
+ const bob=pose==='idle'?f:pose==='walk'?[0,1,0,1][f]:0,cx=56,by=H-22+bob;
+ for(let i=0;i<10;i++){const tx=cx-26-i*3,ty=by+6-Math.round(Math.sin(i*.5)*4);ell(g,tx,ty,4,Math.max(2,Math.round(6-i*.4)),i%2?D:B);}
+ for(const lx of [cx-20,cx+12]){R(g,lx,by+8,10,H-by-10,DD);R(g,lx-2,H-3,14,3,D);for(let k=0;k<4;k++)R(g,lx-2+k*4,H-1,2,1,BL);}
+ ell(g,cx,by,30,16,DD);ell(g,cx,by-2,28,14,D);ell(g,cx,by-4,25,11,B);ell(g,cx+4,by+6,18,5,BL);
+ for(let k=0;k<7;k++)R(g,cx-18+k*6,by-13+Math.abs(k-3),3,2,L);
+ const sw=pose==='walk'?[0,1,0,-1][f]:pose==='idle'?f*.6:0,str=pose==='atk'?(f===0?-6:10):pose==='hurt'?-4:0;
+ [[-14,-36],[-4,-46],[8,-50],[18,-44],[26,-32]].forEach(([nx,ny],i)=>{const x0=cx+nx*.3,y0=by-10,x1=cx+nx+str*(.4+i*.15)+Math.round(Math.sin(i*1.3+sw)*2),y1=by+ny+(pose==='atk'&&f===1?6:0);
+  for(let k=0;k<=10;k++){const t=k/10,x=x0+(x1-x0)*t+Math.sin(t*3.1)*4*(i%2?1:-1),y=y0+(y1-y0)*t,r=Math.round(3.4-t*.6);ell(g,x,y,r,r,k%2?D:B);}
+  ell(g,x1,y1,6,4,B);R(g,x1+3,y1,6,3,B);R(g,x1+3,y1+2,6,1,D);dpoly(g,[[x1-4,y1-3],[x1-9,y1-7],[x1-2,y1-4]],L);R(g,x1+2,y1-2,2,1,pose==='hurt'?'#ffffff':'#ffe04a');
+  if(pose==='atk'&&f===1){R(g,x1+3,y1+2,6,2,'#5a1a2a');R(g,x1+9,y1+2,3,1,V);R(g,x1+11,y1+3,2,1,V);}});
+ return {W,H,AX};}
+
+const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null],trauka:[trauka,null,[230,170]],cwolf:[wolf,'cwolf'],cbear:[bear,'cbear'],cboar:[boar,'cboar'],fboar:[boar,'fboar'],sanju1:[bear,'sanju1'],sanju2:[bear,'sanju2'],sanju3:[bear,'sanju3'],sanju4:[bear,'sanju4'],gargoyle:[gargoyle,'gargoyle'],salamander:[salamander,'salamander'],hydra:[hydra,'hydra',[150,130]]};
 
 // Build a sheet: columns = frames of the longest pose, rows = poses. Returns {canvas, W, H, anchor}.
 // Frames are drawn with a margin and cropped to the union of their pixels (+1 for the outline),

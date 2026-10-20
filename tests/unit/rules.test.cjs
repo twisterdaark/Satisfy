@@ -50,10 +50,10 @@ test('the test fake enforces the same required fields', () => {
 test('position bounds cover the whole map, and the fake uses the same bounds', () => {
   // Read the map size from index.html so a wider map fails here, not in a live Winston write.
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-  const m = /TS=(\d+),LW=(\d+),GAPS=(\[\[[\d,\[\]]*\]\]),MW=.*?,MH=(\d+)/.exec(html);
+  const m = /TS=(\d+),LW=(\d+),GAPS=(\[\[[\d,\[\]]*\]\]),(?:EX=.*?,EW=(\d+),)?MW=.*?,MH=(\d+)/.exec(html);
   assert.ok(m, 'map constants found in index.html');
-  const [ts, lw, gaps, mh] = [+m[1], +m[2], JSON.parse(m[3]), +m[4]];
-  const mw = lw + gaps.reduce((a, g) => a + g[1], 0);
+  const [ts, lw, gaps, ew, mh] = [+m[1], +m[2], JSON.parse(m[3]), +(m[4] || 0), +m[5]];
+  const mw = lw + gaps.reduce((a, g) => a + g[1], 0) + ew;   // + the Saharan Empire east of the logical map
   assert.ok(mw * ts <= N.LIMITS.posX, `map width ${mw * ts}px fits under ${N.LIMITS.posX}`);
   assert.ok(mh * ts <= N.LIMITS.posY, `map height ${mh * ts}px fits under ${N.LIMITS.posY}`);
   // the north (SAT-WORLD-003) is rows -NR..-1: y goes down to -NR*TS
