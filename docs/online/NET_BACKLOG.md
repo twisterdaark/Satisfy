@@ -195,7 +195,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U337 | Maintenance notices | ✅ | SAT-ONLINE-079: `/maint minutes text`: the time, reminders 10/5/1 min before, a save when it starts; and "a new version" asks only the older page to refresh (SAT-ONLINE-045) |
 | U338 | Hotfix pipeline | 🟡 | Small PRs, a review, then main |
 | U339 | Moderation console | ✅ | SAT-ONLINE-082: `/reports`, `/mute ID hours`, `/unmute ID` for admins only; a mute has an expiry and keeps the player out of the world chat by the rules (`regression/moderation`) |
-| U340 | Player appeal flow | ❌ | |
+| U340 | Player appeal flow | ✅ | SAT-ONLINE-087: `/appeal why` while muted, once a mute (`appeals/{uid}`, `mt` = the mute's time: linked to the moderation event); read only by admins and the player (privacy); `/appeals` lifts or keeps it (`appealDone`), the player is told once; a second appeal for the same mute and anyone else's answer are refused by the rules (`regression/appeal`) |
 | U341 | Crash reporting | ✅ | SAT-ONLINE-082: errors on a signed-in page go to `crashes` (admins read): message and stack with long ids, e-mails and paths cut out, build and zone, at most three a session; `/crashes` lists them |
 | U342 | A/B testing ethics | ⏳ | No tests on players; owner decision |
 | U343 | Community feedback triage | 🟡 | GitHub issues and in-game reports |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 41 · 🟡 38 · ⏳ 6 · ❌ 19 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 42 · 🟡 38 · ⏳ 6 · ❌ 18 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

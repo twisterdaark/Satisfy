@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21appeal', ver: '1.30', d: '2026-10-21',
+      ar: ["الطعن في الكتم: لو اتكتمت في الشات العام وشايف إنه غلط، اكتب /appeal والسبب. الطعن بيروح لصاحب اللعبة بس، ومرة واحدة لكل كتمة",
+        "صاحب اللعبة بيكتب /appeals ويشوف الطعون، كل واحد معاه ميعاد الكتم وسببه، ويشيل الكتم أو يخليه، واللاعب بيتبلغ بالرد"],
+      en: ["Appeals: muted in the world chat and think it is a mistake? Type /appeal and why. Only the game's owner reads it, and each mute is appealed once",
+        "The owner's /appeals lists them, each with the mute's time and reason, to lift the mute or keep it; the player is told the answer"] },
     { v: '2026-10-21v129', ver: '1.29', d: '2026-10-21',
       ar: ['كلاسات جديدة من لفل 30 (مع إتقان السلاح 4): الآرتشر يقدر يبقى سنايبر أو بو ماستر عند مدرب الآرتشر، والميج يبقى باتل ميج أو وورلوك عند مدرب السحر في ريدان. المهارات القديمة بتفضل معاك',
         'سنايبر: طلقة مشحونة 500% بتخترق خط كامل لو وقفت مكانك ثانية وربع، عين النسر، وضرب أقوى وانت واقف',
