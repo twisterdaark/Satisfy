@@ -440,6 +440,18 @@ test('guild events (SAT-ONLINE-080): added or cancelled by the master and office
   for (const n of [ev.$eid, sg.$eid.$uid]) assert.equal(n.$other['.validate'], false);
 });
 
+test('guild weekly goal (SAT-ONLINE-081): each member its own count, only upward, at most 1,500; each tier taken once', () => {
+  const wk = rules.guildWeek.$gid.$wk, pd = rules.guildWeekPaid.$gid.$wk.$uid;
+  assert.equal(wk['.validate'], '$wk.matches(/^w[0-9]{4,6}$/)');
+  assert.equal(wk.$uid['.write'], "auth != null && auth.uid === $uid && (!newData.exists() || root.child('guildMembers').child($gid).child(auth.uid).exists())");
+  assert.ok(wk.$uid['.validate'].includes("newData.child('k').val() >= data.child('k').val()"), 'only upward');
+  assert.equal(wk.$uid.k['.validate'], 'newData.isNumber() && newData.val() >= 0 && newData.val() <= 1500 && newData.val() % 1 === 0');
+  assert.equal(pd['.read'], 'auth != null && auth.uid === $uid');
+  assert.equal(pd.$tier['.write'], "auth != null && auth.uid === $uid && !data.exists() && root.child('guildMembers').child($gid).child(auth.uid).exists()", 'once, a member');
+  assert.equal(pd.$tier['.validate'], "$tier.matches(/^[123]$/) && newData.hasChildren(['t'])");
+  for (const n of [wk.$uid, pd.$tier]) assert.equal(n.$other['.validate'], false);
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);

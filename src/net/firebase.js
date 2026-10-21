@@ -407,7 +407,13 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; return up(u); },
+      // SAT-ONLINE-081 the weekly goal: guildWeek/{gid}/{wk}/{uid} {n, k, t}: each member's own kills this week (only upward,
+      // at most 1,500); guildWeekPaid/{gid}/{wk}/{uid}/{tier} {t}: a tier's reward, taken once
+      watchWeek: function (gid, wk, cb) { return watch('guildWeek/' + gid + '/' + wk, cb); },
+      weekPut: function (gid, wk, uid, v) { var u = {}; u['guildWeek/' + gid + '/' + wk + '/' + uid] = { n: String(v.n || '?').slice(0, 24), k: v.k, t: SV() }; return up(u); },
+      weekPaid: function (gid, wk, uid) { return D.get(at('guildWeekPaid/' + gid + '/' + wk + '/' + uid)).then(function (s) { return s.val() || {}; }); },
+      weekClaim: function (gid, wk, uid, tier) { var u = {}; u['guildWeekPaid/' + gid + '/' + wk + '/' + uid + '/' + tier] = { t: SV() }; return up(u); },
       // SAT-ONLINE-080 guild events: guildEvents/{gid}/{eid} {title, at, by, n, t} (the master or an officer adds or cancels
       // one; members read them), guildEventSign/{gid}/{eid}/{uid} {n, t} (a member's own "going"; cancelling clears them)
       watchEvents: function (gid, cb) { return watch('guildEvents/' + gid, cb); },
