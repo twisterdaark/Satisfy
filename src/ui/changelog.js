@@ -5,6 +5,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v97', ver: '0.97', d: '2026-10-21',
+      ar: ['تطوّر الحيوانات الأليفة: لما الحيوان يوصل لفل 20 تقدر تطوّره مرة واحدة من نافذة الحالة. بيرجع لفل 1 بشكل جديد، وميزته بتبقى الضعف، وبيحارب جنبك من أول لفل',
+        'نوي بيتطوّر بحجر رعد زي الرواية: "[الممفيس ‘نوي’ نجح في التطوّر!]". فروه بيبقى دهبي وقرونه بتتقسم، وبياخد مهارة "تفريغ!!" اللي بتصعق لحد 10 وحوش قريبين',
+        'أحجار الرعد: أي حداد يقدر يفكّ قوس الرعد ويطلّعلك منه تلات أحجار رعد',
+        'الكلب والقطة والبومة بيتطوّروا بـ 10 أحجار مانا وسمكة دهبي: كلب صيد، قطة ظل، بومة تلج بيضا',
+        'تدريب الخيول: كل مسافة بتركبها بتدرّب حصانك لحد لفل 10. كل لفل سرعة +1.5% وصحة الحصان +5%',
+        'أونلاين: اللاعيبة التانيين بيشوفوا الحيوان بشكله المتطوّر'],
+      en: ['Pet evolution: a pet at level 20 can evolve once from the status window. It starts again at level 1 in a new form, with twice the passive, and fights beside you from the first level',
+        'Noe evolves on a thunder stone, as in the novel: "[The memphis ‘Noe’ has succeeded in the evolution!]". His fur turns golden, his horns split, and he gains "Discharge!!", which shocks up to 10 monsters near you',
+        'Thunder stones: any smith can take the Thunder Bow apart for three thunder stones',
+        'The dog, cat and owl evolve on 10 mana stones and a golden fish: a hunting hound, a shadow cat, a white snow owl',
+        'Horse training: every distance you ride trains your horse, up to level 10. Each level gives +1.5% speed and +5% horse health',
+        'Online: other players see your pet in its evolved form'] },
     { v: '2026-10-20v96', ver: '0.96', d: '2026-10-20',
       ar: ['سمعة القارة: الأعمال الكبيرة بتعلّي سمعتك في القارة كلها، زي الرواية: "[سمعتك في القارة كلها هتزيد +N.]". الحدادين بياخدوها من القطع النادرة والملحمية والفريدة والأسطورية (+30 / +80 / +300 / +1,000)، وكل الناس من المهمات، ومهمات S وSS، وفصول القصة، وأول مرة تقتل كل زعيم، وكل رتبة جديدة في مدينة',
         'متجر السمعة: من 3,000 سمعة دوس "متجر السمعة!" في نافذة الحالة (تبويب العلاقات)، وعربية دهب محدش شايفها غيرك بتنزل من السما جنبك. السمعة هي الفلوس',

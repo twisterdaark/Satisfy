@@ -3241,9 +3241,9 @@ let PET=null;
 const PLMAX=20,petNeed=l=>15*l*l;
 function petLv(k){let x=(S.petx||{})[k]||0,l=1;while(l<PLMAX&&x>=petNeed(l)){x-=petNeed(l);l++;}return l;}
 function petRest(k){let x=(S.petx||{})[k]||0,l=1;while(l<PLMAX&&x>=petNeed(l)){x-=petNeed(l);l++;}return [x,l<PLMAX?petNeed(l):0];}
-const petB=k=>S.pet===k&&(S.pets||{})[k]?PETS[k].b*(1+(petLv(k)-1)*.1)*(S.tl.tamer?1.25:1):0;
+const petB=k=>S.pet===k&&(S.pets||{})[k]?PETS[k].b*(pEvo(k)?2:1)*(1+(petLv(k)-1)*.1)*(S.tl.tamer?1.25:1):0;
 function petXP(k,n){if(!k||!(S.pets||{})[k]||n<=0)return;const l0=petLv(k);S.petx=S.petx||{};S.petx[k]=(S.petx[k]||0)+n;const l1=petLv(k);
- if(l1>l0){toast(t(l1===5||l1===15?'petGrow':'petUp',{n:t('pt_'+k),l:l1}),'good');SFX.level();if(PET)vfx('spawn',PET.x,PET.y,{color:'#f2c14e'});if(l1===10)setTimeout(()=>toast(t('petFight',{n:t('pt_'+k)}),'good'),600);hudDirty=true;sbSig='';}}
+ if(l1>l0){toast(t(l1===5||l1===15?'petGrow':'petUp',{n:t('pt_'+k),l:l1}),'good');SFX.level();if(PET)vfx('spawn',PET.x,PET.y,{color:'#f2c14e'});if(l1===10&&!pEvo(k))setTimeout(()=>toast(t('petFight',{n:t('pt_'+k)}),'good'),600);if(l1>=PLMAX&&pEvoOk(k))setTimeout(()=>toast(t('peReady',{n:t('pt_'+k),m:pEvoNeed(k)}),'good'),1200);hudDirty=true;sbSig='';}}
 function petKill(m,b){if(!S.pet)return;petXP(S.pet,Math.max(1,Math.round(m.lv/10))*(b.boss?10:1)*(S.tl.beastf?1.5:1));
  if(m.type==='ypriest'&&!m.tower&&!(S.pets||{}).noe&&rand()<.05){S.pets=S.pets||{};S.pets.noe=1;annW('noeDrop');SFX.legendary();setTimeout(()=>setPet('noe'),800);}}
 function petFeed(k){const f=(S.mats.gfish||0)>0?'gfish':(S.mats.fish||0)>0?'fish':null;if(!f){SFX.deny();return toast(t('petNoFish'),'warn');}S.mats[f]--;petXP(k,f==='gfish'?150:25);toast(t('petAte',{n:t('pt_'+k)}),'good');save(true);}
@@ -3257,7 +3257,7 @@ function toggleRide(){if(RCR&&RCR.in)return;if(P.ride){dismount();return;}if(!S.
  if(S.mdead&&S.mdead[S.mount]){SFX.deny();return toast(t('rideIsDead',{n:t('mt_'+S.mount)}),'warn');}
  if(dunAt(P.x,P.y)||roomAt(P.x,P.y)||swampAt(P.x,P.y)){SFX.deny();return toast(t('noRideHere'),'warn');}P.ride=1;P.rsp=0;P.guard=0;vfx('dust',P.x,P.y,{n:8});noise(.12,.12,600);hudDirty=true;}
 function dismount(){if(!P.ride)return;P.ride=0;P.rsp=0;vfx('dust',P.x,P.y,{n:6});hudDirty=true;}
-const rhpMax=k=>Math.round(maxHP()*((MOUNTS[k]||{}).hpk||1));
+const rhpMax=k=>Math.round(maxHP()*((MOUNTS[k]||{}).hpk||1)*(1+(mtLv(k)-1)*.05));
 const rhp=k=>{S.mhp=S.mhp||{};if(S.mhp[k]===undefined)S.mhp[k]=rhpMax(k);return S.mhp[k];};
 function horseHit(d){const k=S.mount;const hd=Math.round(d*.7);S.mhp[k]=rhp(k)-hd;num(P.x+10,P.y-8,'-'+hd,'#e8a060',false);
  if(S.mhp[k]<=0){S.mhp[k]=0;S.mdead=S.mdead||{};S.mdead[k]=1;dismount();dissolve(P.x,P.y-6,['#fff',MOUNTS[k].b],14);toast(t('rideDead',{n:t('mt_'+k)}),'warn');SFX.deny();}return d-hd;}
@@ -3267,9 +3267,9 @@ function healOpt(){const k=Object.keys(S.mdead||{}).find(k=>S.mdead[k]);if(!k)re
 function updatePet(dt){if(!S||!P)return;if(!S.pet||!(S.pets||{})[S.pet]){PET=null;return;}if(!PET||PET.k!==S.pet)PET={k:S.pet,x:P.x+12,y:P.y+4,dir:2,t:0,mv:0};
  const a=PET,tx=P.x+(P.dir===3?14:-14),ty=P.y+(P.dir===1?10:P.dir===0?-6:4),dx=tx-a.x,dy=ty-a.y,d=Math.hypot(dx,dy);a.t+=dt;
  if(Math.hypot(P.x-a.x,P.y-a.y)>220){a.x=tx;a.y=ty;}else if(d>3){const sp=Math.min(d*4,P.ride?200:120);a.x+=dx/d*sp*dt;a.y+=dy/d*sp*dt;a.mv=1;if(Math.abs(dx)>1)a.dir=dx>0?2:3;}else a.mv=0;
- const pl=petLv(a.k);a.lv=pl;if(pl<10||mode!=='play'||P.ride)return;a.cd=(a.cd||0)-dt;if(a.cd>0)return;let best=null,bd=90;
+ const pl=petLv(a.k),ev=pEvo(a.k);a.lv=pl;a.ev=ev;if((pl<10&&!ev)||mode!=='play'||P.ride)return;if(ev&&a.k==='noe'&&peDischarge(a,pl,dt))return;a.cd=(a.cd||0)-dt;if(a.cd>0)return;let best=null,bd=90;
  for(const m of mons){if(m.dead||!(m.eng>0))continue;const md=Math.hypot(m.x-P.x,m.y-P.y);if(md<bd){bd=md;best=m;}}
- if(best){a.cd=1.6;a.x=best.x-(best.x>P.x?10:-10);a.y=best.y+2;a.dir=best.x>a.x?2:3;compHit(best,.15+pl*.015,rand()<.1);}}
+ if(best){a.cd=1.6;a.x=best.x-(best.x>P.x?10:-10);a.y=best.y+2;a.dir=best.x>a.x?2:3;compHit(best,ev?.4+pl*.03:.15+pl*.015,rand()<.1);}}
 // horses: drawn once per mount into a sheet (side, front, back) x (stand + four gallop frames) and blitted from it; the
 // gallop cycle moves the legs in pairs, bobs the body, streams the mane and tail. Standing still holds the stand frame.
 const HSH={},HFW=34,HFH=30;
@@ -3319,23 +3319,59 @@ function horseFx(dt){P.hfT=(P.hfT||0)-dt;if(P.hfT>0)return;P.hfT=.06;const d=P.d
 // online (Twister 2026-10-19): the others see your pet and your horse. "<pet>.<level>" and "~<mount>" while riding ride
 // along in the fx field as one "pt:..." string (no new presence field, so no rules deploy); each client walks its own copy
 // of a remote's pet behind them with the same follow rule as yours.
-function ptPub(){let s='';if(PET&&S.pet&&PETS[S.pet])s+=S.pet+'.'+Math.min(999,petLv(S.pet));if(P.ride&&MOUNTS[myMt()])s+='~'+myMt();return s||null;}
+function ptPub(){let s='';if(PET&&S.pet&&PETS[S.pet])s+=S.pet+'.'+Math.min(999,petLv(S.pet)+(pEvo(S.pet)?500:0));if(P.ride&&MOUNTS[myMt()])s+='~'+myMt();return s||null;}
 function ptRemote(r,fs,dt){const m=/^(?:([a-z]{2,8})\.(\d{1,3}))?(?:~([a-z]{2,8}))?$/.exec(fs.pt||'')||[],ride=MOUNTS[m[3]]||null;
  if(!m[1]||!PETS[m[1]]||r.anim==='dead'){fs.pet=null;return {ride,pet:null};}
- let a=fs.pet;if(!a||a.k!==m[1])a=fs.pet={k:m[1],x:r.x+12,y:r.y+4,dir:2,t:0,mv:0};a.lv=+m[2]||1;
+ let a=fs.pet;if(!a||a.k!==m[1])a=fs.pet={k:m[1],x:r.x+12,y:r.y+4,dir:2,t:0,mv:0};a.lv=+m[2]||1;a.ev=a.lv>=500;if(a.ev)a.lv-=500;
  const tx=r.x+(r.dir===3?14:-14),ty=r.y+(r.dir===1?10:r.dir===0?-6:4),dx=tx-a.x,dy=ty-a.y,d=Math.hypot(dx,dy);a.t+=dt;
  if(Math.hypot(r.x-a.x,r.y-a.y)>220){a.x=tx;a.y=ty;}else if(d>3){const sp=Math.min(d*4,ride?200:120);a.x+=dx/d*sp*dt;a.y+=dy/d*sp*dt;a.mv=1;if(Math.abs(dx)>1)a.dir=dx>0?2:3;}else a.mv=0;
  return {ride,pet:a};}
 // a pet is a few pixels that bob as it follows
-function drawPet(a){const sc=(a.lv||1)<5?.75:(a.lv||1)<15?1:1.3;if(sc!==1){ctx.save();ctx.translate(Math.round(a.x),Math.round(a.y));ctx.scale(sc,sc);ctx.translate(-Math.round(a.x),-Math.round(a.y));drawPet0(a);ctx.restore();}else drawPet0(a);
- if((a.lv||1)>=15&&(a.t*3|0)%4===0)R(ctx,Math.round(a.x+Math.sin(a.t*7)*6),Math.round(a.y-12-Math.cos(a.t*5)*4),1,1,'#f2c14e');}
+function drawPet(a){const sc=a.ev?1.35:(a.lv||1)<5?.75:(a.lv||1)<15?1:1.3;if(sc!==1){ctx.save();ctx.translate(Math.round(a.x),Math.round(a.y));ctx.scale(sc,sc);ctx.translate(-Math.round(a.x),-Math.round(a.y));drawPet0(a);ctx.restore();}else drawPet0(a);
+ if(a.ev&&a.k==='noe'&&rand()<.25)fx.push({x:a.x+(rand()-.5)*12,y:a.y-6-rand()*8,vx:(rand()-.5)*30,vy:-20,t:.25,c:'#fff3b0',fl:1});
+ if(((a.lv||1)>=15||a.ev)&&(a.t*3|0)%4===0)R(ctx,Math.round(a.x+Math.sin(a.t*7)*6),Math.round(a.y-12-Math.cos(a.t*5)*4),1,1,'#f2c14e');}
 function drawPet0(a,g=ctx){const x=Math.round(a.x),bob=a.mv?Math.abs(Math.sin(a.t*12))*2:Math.sin(a.t*3)*.5,y=Math.round(a.y-bob),fl=a.dir===3?-1:1,r=(px,py,w,h,c)=>R(g,fl>0?x+px:x-px-w,y+py,w,h,c);
  g.fillStyle='rgba(0,0,0,.25)';g.fillRect(x-4,Math.round(a.y)-1,8,2);
- if(a.k==='dog'){r(-4,-6,8,4,'#a8743a');r(2,-9,4,4,'#a8743a');r(5,-8,2,2,'#5a3a1a');r(3,-10,2,2,'#5a3a1a');r(-6,-7,2,2,'#a8743a');r(-4,-2,2,2,'#6a4a22');r(2,-2,2,2,'#6a4a22');r(4,-8,1,1,'#101010');}
- else if(a.k==='cat'){r(-4,-5,7,3,'#8a8e98');r(2,-8,4,4,'#8a8e98');r(2,-9,1,1,'#8a8e98');r(5,-9,1,1,'#8a8e98');r(-6,-8,1,4,'#8a8e98');r(-4,-2,1,2,'#6a6e78');r(2,-2,1,2,'#6a6e78');r(4,-7,1,1,'#7ad06a');}
+ const E=a.ev;
+ if(a.k==='dog'){const c=E?'#5a3a22':'#a8743a',c2=E?'#2e1e10':'#5a3a1a';r(-4,-6,8,4,c);r(2,-9,4,4,c);r(5,-8,2,2,c2);r(3,-10,2,2,c2);r(-6,-7,2,2,c);r(-4,-2,2,2,c2);r(2,-2,2,2,c2);r(4,-8,1,1,'#101010');if(E){r(2,-6,2,2,'#e8dcc0');r(1,-7,1,2,'#d83a3a');r(3,-11,1,1,c2);}}
+ else if(a.k==='cat'){const c=E?'#22222c':'#8a8e98',c2=E?'#14141a':'#6a6e78';r(-4,-5,7,3,c);r(2,-8,4,4,c);r(2,-9,1,1,c);r(5,-9,1,1,c);r(-6,-8,1,4,c);r(-4,-2,1,2,c2);r(2,-2,1,2,c2);r(4,-7,1,1,E?'#c88aff':'#7ad06a');if(E){r(-7,-9,1,2,'#6a2a9a');r(-3,-6,4,1,'#3a2a50');}}
+ else if(a.k==='noe'&&E){const c='#e8c050',c2='#b8902a';r(-5,-6,9,4,c);r(2,-10,5,5,c);r(-4,-7,7,1,'#fff0a0');r(1,-12,1,2,'#ffffff');r(3,-12,1,1,'#ffffff');r(5,-12,1,1,'#ffffff');r(7,-12,1,2,'#ffffff');r(-7,-9,2,4,c);r(-8,-10,1,2,'#fff0a0');r(-5,-2,2,2,c2);r(2,-2,2,2,c2);r(5,-8,1,1,'#3a2a10');r(3,-8,1,1,'#3a2a10');r(4,-6,1,1,'#ff8a8a');}
  else if(a.k==='noe'){r(-5,-6,9,4,'#1a1a22');r(2,-10,5,5,'#1a1a22');r(2,-11,1,2,'#6a2a9a');r(6,-11,1,2,'#6a2a9a');r(-7,-9,2,4,'#1a1a22');r(-8,-10,1,2,'#6a2a9a');r(-5,-2,2,2,'#0e0e14');r(2,-2,2,2,'#0e0e14');r(5,-8,1,1,'#ff4a6a');r(3,-8,1,1,'#ff4a6a');
   if((a.lv||1)>=15){r(-3,-9,4,2,'#2a1a3a');r(-4,-10,2,1,'#6a2a9a');}}
- else{const fy=y-10-Math.sin(a.t*5)*2;R(g,x-3,fy-6,6,7,'#8a6a4a');R(g,x-2,fy-5,4,3,'#e8dcc0');R(g,x-2,fy-4,1,1,'#101010');R(g,x+1,fy-4,1,1,'#101010');R(g,x-4+(Math.sin(a.t*14)>0?0:-1),fy-3,1,3,'#6a4a2a');R(g,x+3+(Math.sin(a.t*14)>0?0:1),fy-3,1,3,'#6a4a2a');R(g,x,fy-2,1,1,'#f2c14e');}}
+ else{const fy=y-10-Math.sin(a.t*5)*2;R(g,x-3,fy-6,6,7,E?'#e8eef4':'#8a6a4a');R(g,x-2,fy-5,4,3,E?'#ffffff':'#e8dcc0');R(g,x-2,fy-4,1,1,'#101010');R(g,x+1,fy-4,1,1,'#101010');R(g,x-4+(Math.sin(a.t*14)>0?0:-1),fy-3,1,3,'#6a4a2a');R(g,x+3+(Math.sin(a.t*14)>0?0:1),fy-3,1,3,'#6a4a2a');R(g,x,fy-2,1,1,'#f2c14e');}}
+
+/* Pet evolution and mount training (v0.97). In the novel Noe, a memphis, evolves after eating thunder stones: "[The
+   memphis 'Noe' has succeeded in the evolution!]", his black fur turns golden, his horns split in two, he gains the
+   lightning attribute and "Discharge!!" (attacks up to 10 enemies near you, a very high chance of electric shock), and
+   he starts again at level 1 with stats three to six times higher. Thunder stones come from taking apart the Thunder
+   Bow (ch 288: "Grid had disassembled it ... he obtained three thunder stones"). Here a pet at level 20 can evolve once:
+   Noe on a thunder stone, the dog, cat and owl on mana stones and a golden fish. The evolved pet starts at level 1 with
+   twice the passive, fights beside you from the first level and keeps its new look; online it rides in the pet string
+   as level + 500, so others see the evolved form with no new presence field. Horses learn the road: every distance you
+   ride trains the horse you are on (S.mxp), up to level 10, each level +1.5% speed and +5% horse health. */
+const PEVO={noe:{need:{tstone:1}},dog:{need:{mstone:10,gfish:1}},cat:{need:{mstone:10,gfish:1}},owl:{need:{mstone:10,gfish:1}}};
+const pEvo=k=>!!(S&&S.pevo&&S.pevo[k]),pEvoOk=k=>(S.pets||{})[k]&&!pEvo(k)&&petLv(k)>=PLMAX&&PEVO[k];
+const pEvoNeed=k=>Object.entries(PEVO[k].need).map(([m,n])=>t('got',{n,item:t(m)})).join(', ');
+function petEvo(k){if(!pEvoOk(k))return;const N=PEVO[k].need;if(!Object.keys(N).every(m=>(S.mats[m]||0)>=N[m])){SFX.deny();return toast(t('peNeed',{n:t('pt_'+k),m:pEvoNeed(k)}),'warn');}
+ for(const m in N)S.mats[m]-=N[m];S.pevo=S.pevo||{};S.pevo[k]=1;S.petx=S.petx||{};S.petx[k]=0;sbSig='';
+ if(S.pet!==k)setPet(k);if(PET){PET.ev=1;vfx('levelup',PET.x,PET.y);vfx('bolt',PET.x,PET.y-8);for(let i=0;i<40;i++)fx.push({x:PET.x,y:PET.y-6,vx:(rand()-.5)*160,vy:(rand()-.5)*160,t:.6,c:i%2?'#fff3b0':'#ffd24a',fl:1});}
+ flash();SFX.legendary();toast(t(k==='noe'?'peDoneN':'peDone',{n:t('pt_'+k)}),'good');setTimeout(()=>toast(t('peAfter_'+k),'good'),1400);hudDirty=true;save(true);}
+// evolved Noe: Discharge!! when monsters come near (every 5 s, up to 10 of them, short shock)
+function peDischarge(a,pl,dt){a.dc=(a.dc||0)-dt;if(a.dc>0)return false;const near=mons.filter(m=>!m.dead&&m.eng>0&&!m.spar&&Math.hypot(m.x-a.x,m.y-a.y)<80).slice(0,10);if(!near.length)return false;
+ a.dc=5;SFX.zap&&SFX.zap();for(const m of near){fx.push({x:a.x,y:a.y-8,vx:(m.x-a.x)*4,vy:(m.y-a.y)*4,t:.25,c:'#fff3b0',fl:1});vfx('bolt',m.x,monY(m));compHit(m,.5+pl*.03,false);if(!m.dead)m.stun=Math.max(m.stun||0,MT[m.type].boss?.3:1.2);}return true;}
+// mount training
+const MTMAX=10,mtNeed=l=>2500*l*l;
+function mtLv(k){let x=(S.mxp||{})[k]||0,l=1;while(l<MTMAX&&x>=mtNeed(l)){x-=mtNeed(l);l++;}return l;}
+function mtRest(k){let x=(S.mxp||{})[k]||0,l=1;while(l<MTMAX&&x>=mtNeed(l)){x-=mtNeed(l);l++;}return [Math.floor(x),l<MTMAX?mtNeed(l):0];}
+const mtSp=k=>MOUNTS[k].sp*(k==='rhorse'?1:1+(mtLv(k)-1)*.015);
+function mtRide(d){if(!S||!P||!P.ride||(RCR&&RCR.in))return;const k=S.mount;if(!MOUNTS[k]||!(S.mounts||{})[k])return;const l0=mtLv(k);S.mxp=S.mxp||{};S.mxp[k]=(S.mxp[k]||0)+d;const l1=mtLv(k);
+ if(l1>l0){toast(t(l1>=MTMAX?'mtMax':'mtUp',{n:t('mt_'+k),l:l1,s:Math.round((l1-1)*1.5*10)/10}),'good');SFX.level();vfx('dust',P.x,P.y,{n:10});sbSig='';}}
+window.__GPE={setPet:k=>setPet(k),petLv:k=>petLv(k),petEvo:k=>petEvo(k),pEvo:k=>pEvo(k),pEvoOk:k=>!!pEvoOk(k),petB:k=>petB(k),mtLv:k=>mtLv(k),mtSp:k=>mtSp(k),mtRide:d=>mtRide(d),rhpMax:k=>rhpMax(k),get PET(){return PET},peDischarge:(a,l,dt)=>peDischarge(a,l,dt),ptPub:()=>ptPub(),tbowBreak:w=>tbowBreak(w),remPets:()=>[...FXS.values()].map(f=>f.pet).filter(Boolean).map(p=>({k:p.k,ev:!!p.ev,lv:p.lv}))};
+// the smiths take the Thunder Bow apart: three thunder stones (the fuller take-apart menu comes with salvage)
+function tbowBreak(who){const c=S.items.filter(i=>i.id==='tbow'&&!isEq(i));if(!c.length){SFX.deny();return dialog(who,[S.items.some(i=>i.id==='tbow')?'tbWorn':'tbNone'],()=>shopD(who,'svcMore'));}
+ const it=c.sort((a,b)=>a.r-b.r)[0];S.items.splice(S.items.indexOf(it),1);addMat('tstone',3);SFX.slam();vfx('bolt',P.x,P.y-10);save(true);dialog(who,['tbDone'],()=>shopD(who,'svcMore'));}
+Object.assign(STR.ar,{"tstone": "حجر الرعد", "tstoneD": "معدن بيطلع بس لما الشيطان العظيم أستاروث يكون في عالم البشر.\nممكن يدّي عنصر البرق لقطعة، وكمان كويس إنك تأكّله للوحوش الشيطانية.\nالوحش الشيطاني هيفرح جدًا لما ياكله.", "oTbow": "فكّ قوس الرعد (3 أحجار رعد)", "tbDone": "فكّيت قوس الرعد وطلع منه تلات أحجار رعد.", "tbNone": "معاكش قوس الرعد.", "tbWorn": "اقلع قوس الرعد الأول.", "peB": "تطوّر", "peReady": "{n} وصل لأعلى لفل! يقدر يتطوّر لو معاك: {m}", "peNeed": "{n} محتاج عشان يتطوّر: {m}", "peTip": "بيرجع لفل 1 بشكل جديد، وميزته بتبقى الضعف، وبيحارب جنبك من أول لفل. محتاج: {m}", "peDoneN": "[الممفيس ‘{n}’ نجح في التطوّر!]", "peDone": "[{n} نجح في التطوّر!]", "peAfter_noe": "فروه الأسود بقى دهبي، وقرونه اتقسمت اتنين. العنصر: ظلام، برق. المهارة: تفريغ!!", "peAfter_dog": "الكلب بقى كلب صيد كبير. بيحارب جنبك من أول لفل.", "peAfter_cat": "القطة بقت قطة ظل. بتحارب جنبك من أول لفل.", "peAfter_owl": "البومة بقت بومة تلج بيضا. بتحارب جنبك من أول لفل.", "peEv": "متطوّر", "ptE_noe": "الممفيس: ظلام وبرق. الضرر +10%. تفريغ!!: بيصعق لحد 10 أعداء قريبين.", "ptE_dog": "كلب صيد. دهب الوحوش +20%.", "ptE_cat": "قطة ظل. خبرة مهارات الحياة +40%.", "ptE_owl": "بومة تلج. خبرة الوحوش +10%.", "mtLvT": "لفل {n}", "mtUp": "{n} اتعوّد على الطريق: لفل {l} (سرعة +{s}%)", "mtMax": "{n} وصل لفل {l}: انتو الاتنين بقيتوا روح واحدة على الطريق!", "mtTip": "كل مسافة بتركبها بتدرّب الحصان: كل لفل سرعة +1.5% وصحة الحصان +5%، لحد لفل 10."});
+Object.assign(STR.en,{"tstone": "Thunder Stone", "tstoneD": "A mineral that is produced only when the great demon, Astaroth, is present in the human world.\nThe lightning attribute can be given to an item, and it is also good for feeding to demonic beasts.\nThe demonic beast will be very pleased when fed.", "oTbow": "Take apart the Thunder Bow (3 Thunder Stones)", "tbDone": "The Thunder Bow comes apart. You obtained three thunder stones.", "tbNone": "You have no Thunder Bow.", "tbWorn": "Take the Thunder Bow off first.", "peB": "Evolve", "peReady": "{n} has reached the top level! It can evolve if you have: {m}", "peNeed": "To evolve, {n} needs: {m}", "peTip": "Starts again at level 1 in a new form with twice the passive, and fights beside you from the first level. Needs: {m}", "peDoneN": "[The memphis ‘{n}’ has succeeded in the evolution!]", "peDone": "[{n} has succeeded in the evolution!]", "peAfter_noe": "His black fur has turned golden and his horns have split in two. Attribute: Dark, Lightning. Skill: Discharge!!", "peAfter_dog": "The dog has become a great hunting hound. It fights beside you from the first level.", "peAfter_cat": "The cat has become a shadow cat. It fights beside you from the first level.", "peAfter_owl": "The owl has become a white snow owl. It fights beside you from the first level.", "peEv": "Evolved", "ptE_noe": "The memphis: dark and lightning. Damage +10%. Discharge!!: shocks up to 10 enemies near you.", "ptE_dog": "A hunting hound. Monster gold +20%.", "ptE_cat": "A shadow cat. Life skill experience +40%.", "ptE_owl": "A snow owl. Monster experience +10%.", "mtLvT": "Lv {n}", "mtUp": "{n} has learned the road: level {l} (speed +{s}%)", "mtMax": "{n} reached level {l}: the two of you ride as one!", "mtTip": "Every distance you ride trains the horse: each level +1.5% speed and +5% horse health, up to level 10."});
 
 /* ---------------- Overgeared companions (SAT-COMP-001) ---------------- */
 // Members of the Overgeared guild met around the continent. After a companion's quest they will travel with you, one at a
@@ -4870,7 +4906,7 @@ function talkNPC(id){if(id==='board')return openBoard();if(id==='auction'&&!npcK
  shopD(id,ac?ac+'_w':line);}
 function offerQ(id,av){const n=NPCT[id]||{},lines=[];if(n.hi&&!S.met[id])lines.push(n.hi);S.met[id]=1;lines.push((QD[av].gr?epLines(av)+'\n':'')+t(av+'_o')+'\n'+t('rwLine',{r:qRewards(av).join(' · ')}));return dialog(id,lines,null,[{l:t('qAccept'),f:()=>acceptQ(av)},{l:t('qDecline')}]);}
 function buyMat(who,k,g){const n=buyCount(99,g);if(!n){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g*n;S.mats[k]=(S.mats[k]||0)+n;boughtFx(k,n,g*n);shopD(who,isSm()&&who!=='merchant'?'kh_s3':'mHi');}
-const MATP={ruby:200,topaz:200,emer:200,sapph:200,diam:800,wood:2,ore:3,leather:4,mstone:12,estone:150,mith:30,dscale:600,fish:4,sfish:6,gfish:45,herb:3,bherb:7};
+const MATP={tstone:600,ruby:200,topaz:200,emer:200,sapph:200,diam:800,wood:2,ore:3,leather:4,mstone:12,estone:150,mith:30,dscale:600,fish:4,sfish:6,gfish:45,herb:3,bherb:7};
 function gearCmp(id){const rc=rcById(id),cv=(d,f)=>{d=+d.toFixed(f||0);return d?`<span class="${d>0?'cup':'cdn'}">${d>0?'▲':'▼'}${Math.abs(d)}</span>`:'<span class="ceq">=</span>';};
  if(rc.slot==='w'){const w=weapon(),k=WSH[id].k,as=1/rc.spd;return `${t('atk')} ${rc.atk} ${cv(rc.atk-w.atk)} · ${t('spd')} <bdi>${as.toFixed(1)}${t('perS')}</bdi> ${cv(as-1/w.spd,1)} · ${t('wk_'+k)}<br>${t('vsEq')}: <b class="rt rt${w.r}">${esc(inm(w))}</b> (${t('atk')} ${w.atk})`;}
  const a=eqIt(rc.slot);if(!rc.def)return `${statShort(rc)}<br>${t('vsEq')}: ${a?`<b class="rt rt${a.r}">${esc(inm(a))}</b> (${statShort(a)})`:t('noneEq')}`;const d=a?iDef(a):0;return `${statShort(rc)} ${cv(rc.def-d)}<br>${t('vsEq')}: ${a?`<b class="rt rt${a.r}">${esc(inm(a))}</b> (${t('def')} ${d})`:t('noneEq')}`;}
@@ -5059,7 +5095,7 @@ function smithMenu(who,W,A,svc=true){const back={l:t('oBack'),f:()=>shopD(who,'a
 // repair and enhancement are smith work (Khan, Smith, the Reidan and Reinhardt smiths) or done yourself at an anvil;
 // setting gems needs a master (Khan, the Reinhardt smith) or your own anvil. Armorers are only traders.
 const GEMSM=new Set(['khan','smithRh']);
-function svcOpts(who){const rc=repairCost(who);return [...(GEMSM.has(who)?[{l:t('oGem',{g:GEMC}),ic:'ruby',f:()=>gemMenu(who)}]:[]),{l:rc?t('oRepair',{g:rc}):t('oRepair0'),ic:'hammer',poor:S.gold<rc,f:()=>repairAll(who)},{l:t('oEnh'),ic:'mstone',f:()=>enhMenu(who)}];}
+function svcOpts(who){const rc=repairCost(who);return [...(GEMSM.has(who)?[{l:t('oGem',{g:GEMC}),ic:'ruby',f:()=>gemMenu(who)}]:[]),{l:rc?t('oRepair',{g:rc}):t('oRepair0'),ic:'hammer',poor:S.gold<rc,f:()=>repairAll(who)},{l:t('oEnh'),ic:'mstone',f:()=>enhMenu(who)},...(S.items.some(i=>i.id==='tbow')?[{l:t('oTbow'),ic:'tbow',f:()=>tbowBreak(who)}]:[])];}
 const svcBack=who=>NPCT[who]&&NPCT[who].opts?shopD(who,'svcMore'):null;
 function repairCost(who){let g=0;for(const i of S.items){const d=durOf(i);if(d<100&&i.slot!=='x')g+=Math.ceil((100-d)*.4*(1+i.r));}return g?price(who,g):0;}
 function repairAll(who){const g=repairCost(who);if(!g)return dialog(who,['arNoRep'],()=>svcBack(who));if(S.gold<g){SFX.deny();return dialog(who,['arNo']);}
@@ -5294,7 +5330,7 @@ function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>$
  LIFEM.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t('lifeMD')}</small>`});});
  Object.keys(DISH).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickEat')}</small>`});});
  RSUSE.filter(k=>!DISH[k]).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickUse')}</small>`});});
- ['wood','ore','leather','mstone','estone','mith','dscale','blue'].forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t('matD')}</small>`});});
+ ['wood','ore','leather','mstone','estone','mith','dscale','blue','tstone'].forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t('matD')}</small>`});});
  GEMK.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(k+'D')}</small>`});});
  S.arrows.forEach((n,r)=>{if(n)a.push({k:'arrows',n,r,tip:`<b class="rt rt${r}">${t('arrows')}</b><br>${t('r'+r)} · ${ARROWG[r]}G`});});
  S.items.forEach(i=>{if(WSH[i.id]||(i.slot!=='w'&&i.slot!=='x')){const on=isEq(i);a.push({k:i.id,n:1,r:i.r,it:i,eq:on,tip:itemTip(i)+`<br><small>${on?t('eqMark'):t('clickEquip')}</small>`});}});
@@ -5800,7 +5836,7 @@ function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,ti
  h+=`<div class="ssec">${t('titlesH')}</div>`+(own.length?own.map(id=>`<div class="tl${S.title===id?' worn':''}"><div><b>${t('tl_'+id)}</b><small>${t('tl_'+id+'D')}</small>${STR.en['tl_'+id+'S']?`<em>${t('tl_'+id+'S')}</em>`:''}</div><button data-title="${id}" ${S.title===id?'disabled':''}>${t(S.title===id?'tlWorn':'tlWear')}</button></div>`).join('')+`<div class="note">${t('tlNote')}</div>`:`<div class="note">${t('noTitles')}</div>`);
  {const cs=clsSkills().filter(skOK),bar=barSkills();h+=`<div class="ssec">${t('skillsH')} · ${t('cl_'+S.cls)}</div>`+cs.map(k=>{const d=SKD[k],bi=bar.indexOf(k);return `<div class="tl skd${bi>=0?' worn':''}" draggable="true" data-dsk="${k}"><img class="ski" src="${skIcon(k)}"><div><b>${t('sk_'+k)}</b><small>${t('skd_'+k)}${skLvTxt(k)}</small><em>${t('skCost',{mp:mpC(k),cd:Math.round(d.cd*skCostM(k))})}</em></div><button data-bar="${k}">${bi>=0?t('barOff',{k:keyName(KB[bi])}):t('barOn')}</button></div>`;}).join('')+`<div class="note">${t('barDrag')}</div>`;
   const ps=pasSkills();if(ps.length)h+=`<div class="ssec">${t('pasH')}</div>`+ps.map(k=>`<div class="tl skd worn"><img class="ski" src="${skIcon(k)}"><div><b>${t('sk_'+k)}</b><small>${t('skd_'+k)}${skLvTxt(k)}</small><em>${t('pasOnT')}</em></div></div>`).join('');}
- {const mo=Object.keys(MOUNTS).filter(k=>(S.mounts||{})[k]),pe=Object.keys(PETS).filter(k=>(S.pets||{})[k]);if(mo.length||pe.length)h+=`<div class="ssec">${t('rideH')}</div>`+mo.map(k=>`<div class="tl${S.mount===k?' worn':''}"><div><b>${t('mt_'+k)}</b><small>${t('rideSp',{n:Math.round((MOUNTS[k].sp-1)*100)})}</small></div><button data-mount="${k}" ${S.mount===k?'disabled':''}>${t(S.mount===k?'rideSel':'rideUse')}</button></div>`).join('')+pe.map(k=>{const [x,nx]=petRest(k);return `<div class="tl${S.pet===k?' worn':''}"><div><b>${t('pt_'+k)} · ${t('petLvT',{n:petLv(k)})}</b><small>${t('ptD_'+k)} ${t('petNow',{n:Math.round(PETS[k].b*(1+(petLv(k)-1)*.1)*100)})}${nx?` <em>(${x}/${nx})</em>`:''}</small></div><button data-pet="${S.pet===k?'':k}">${t(S.pet===k?'petOff':'petOn')}</button>${S.pet===k?`<button data-feed="${k}">${t('petFeedB')}</button>`:''}</div>`;}).join('')+(mo.length?`<div class="note">${t('rideNote')}</div>`:'');}
+ {const mo=Object.keys(MOUNTS).filter(k=>(S.mounts||{})[k]),pe=Object.keys(PETS).filter(k=>(S.pets||{})[k]);if(mo.length||pe.length)h+=`<div class="ssec">${t('rideH')}</div>`+mo.map(k=>`<div class="tl${S.mount===k?' worn':''}"><div><b>${t('mt_'+k)}</b><small>${t('rideSp',{n:Math.round((mtSp(k)-1)*100)})} · ${t('mtLvT',{n:mtLv(k)})}${(([x,nx])=>nx?` <em>(${x}/${nx})</em>`:'')(mtRest(k))}</small></div><button data-mount="${k}" ${S.mount===k?'disabled':''}>${t(S.mount===k?'rideSel':'rideUse')}</button></div>`).join('')+pe.map(k=>{const [x,nx]=petRest(k);return `<div class="tl${S.pet===k?' worn':''}"><div><b>${t('pt_'+k)}${pEvo(k)?' ★ '+t('peEv'):''} · ${t('petLvT',{n:petLv(k)})}</b><small>${t(pEvo(k)?'ptE_'+k:'ptD_'+k)} ${t('petNow',{n:Math.round(PETS[k].b*(pEvo(k)?2:1)*(1+(petLv(k)-1)*.1)*100)})}${nx?` <em>(${x}/${nx})</em>`:''}</small></div><button data-pet="${S.pet===k?'':k}">${t(S.pet===k?'petOff':'petOn')}</button>${S.pet===k?`<button data-feed="${k}">${t('petFeedB')}</button>`:''}${pEvoOk(k)?`<button data-pevo="${k}" data-tip="${esc(t('peTip',{m:pEvoNeed(k)}))}">${t('peB')}</button>`:''}</div>`;}).join('')+(mo.length?`<div class="note">${t('rideNote')} ${t('mtTip')}</div>`:'');}
  h+=`<div class="ssec">${t('lifeH')}</div><div class="sgrid">`+LIFE.map(k=>{const l=lifeLv(k),nx=LXP[l];return row(t('life_'+k),t('lifeLvT',{n:l}),t('lifeD_'+k),'',nx?` <em>(${(S.life||{})[k]||0}/${nx})</em>`:'');}).join('')+'</div>';
  h+='</div></div>';$('sbody').innerHTML=stabs()+h;
  if(pop){const e=$('sv_'+pop);if(e)e.classList.add('pop');}}
@@ -6129,7 +6165,7 @@ UI.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  if(b.dataset.cc){CL.hair=(CL.hair+(+b.dataset.cc)+LOOK.hair.length)%LOOK.hair.length;SFX.click();renderCreate();return;}
  if(b.dataset.sw){CL[b.dataset.sw]=+b.dataset.i;SFX.click();renderCreate();return;}
  if(b.dataset.mount){S.mount=b.dataset.mount;if(P.ride){dismount();toggleRide();}SFX.click();renderStatus();hudDirty=true;return;}
- if(b.dataset.stab){STAB=b.dataset.stab;renderStatus();return;}if(b.dataset.rstore){rsCall();return;}if(b.dataset.pet!==undefined){setPet(b.dataset.pet||null);renderStatus();return;}if(b.dataset.feed){petFeed(b.dataset.feed);renderStatus();return;}
+ if(b.dataset.stab){STAB=b.dataset.stab;renderStatus();return;}if(b.dataset.pevo){petEvo(b.dataset.pevo);renderStatus();return;}if(b.dataset.rstore){rsCall();return;}if(b.dataset.pet!==undefined){setPet(b.dataset.pet||null);renderStatus();return;}if(b.dataset.feed){petFeed(b.dataset.feed);renderStatus();return;}
  if(b.dataset.bar){const k=b.dataset.bar,a=barSkills().slice(0,5),i=a.indexOf(k);if(i>=0)a[i]=null;else{const e=a.indexOf(null);if(e<0){toast(t('barFull'),'warn');SFX.deny();return;}a[e]=k;}S.bar=a;sbSig='';SFX.click();renderStatus();hudDirty=true;return;}
  if(b.dataset.title){S.title=b.dataset.title;sbSig='';SFX.notice();renderStatus();hudDirty=true;return;}
  if(b.dataset.l){lang=b.dataset.l;try{localStorage.setItem('satisfy_lang',lang);}catch(_){}SFX.click();applyLang();fadeTo(toTitle);}else if(b.dataset.act){if(!b.classList.contains('x'))SFX.click();act(b.dataset.act);}});
@@ -6184,7 +6220,7 @@ function update(dt){
  if(TSV&&walk&&!(P.stun>0)){ix=TSV.x;iy=TSV.y;tsf=Math.max(.45,Math.min(1,Math.hypot(ix,iy)*1.3));}
  if(FOLLOW){if(ix||iy)folStop('folOff');else if(walk&&!(P.stun>0)&&!(P.dash>0)){const v=folDir(dt);if(v){ix=v[0];iy=v[1];}}} // SAT-ONLINE-068: your own keys stop it
  if(P.dash>0){P.dash-=dt;move(P,P.dx*230*dt,P.dy*230*dt,4);P.trail.push({x:P.x,y:P.y,dir:P.dir,frame:P.frame,t:.22,r:P.ride?myMt():0});}
- else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(S.tl.legend?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*(1+Math.min(.3,gearSum('ms')))*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(MOUNTS[myMt()].sp-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1);move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
+ else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(S.tl.legend?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*(1+Math.min(.3,gearSum('ms')))*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1);move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
  else P.frame=0;
  if(P.guard)P.dir=Math.abs(P.gx)>Math.abs(P.gy)?(P.gx>0?2:3):(P.gy>0?0:1);
  if(K.atk&&inp){const wk=weapKind(),v=(TOUCH&&tAim((wk==='bow'||wk==='staff')&&!hcMelee()?170:44))||[[0,1],[0,-1],[1,0],[-1,0]][P.dir];tryAttack(v[0],v[1]);}
