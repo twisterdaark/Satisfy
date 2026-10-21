@@ -6005,7 +6005,7 @@ function updateHUD(){const mh=maxHP();P.hp=Math.min(P.hp,mh);
  $('xpb').style.width=(S.xp/xpNeed()*100)+'%';$('goldt').textContent=t('gold',{n:S.gold});
  const qs=Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1),qh=qs.length?(qPage=Math.min(qPage,Math.ceil(qs.length/3)-1),qs.slice(qPage*3,qPage*3+3)).map(id=>{const r=qReady(id);return `<div class="qi${r?' ret':''}" data-qd="${id}" data-tip="${esc(t('qdHint'))}"><b>${esc(qName(id))}</b><span>${esc(r?t('retTo',{w:t(QD[id].by)}):qObjText(id))}</span></div>`;}).join('')+(qs.length>3?`<div class="qn qpg"><button class="x" data-qp="-1">‹</button><span>${qPage+1} / ${Math.ceil(qs.length/3)}</span><button class="x" data-qp="1">›</button></div>`:''):`<div class="qn">${esc(t('noQuest'))}</div>`;{const bq=BHR?bhHud():TOW?twHud():'',qx=msHud()+(bq?`<div class="qi ret"><b>${esc(bq)}</b></div>`+qh:qh);if(qx!==qLast){qLast=qx;$('qtext').innerHTML=qx;}}
  $('stats').querySelector('.nm span').textContent=t('pname');
- const g=mons.find(m=>MT[m.type].boss&&!m.dead&&Math.hypot(P.x-m.sx,P.y-m.sy)<MT[m.type].leash&&Math.hypot(m.x-P.x,m.y-P.y)<220);$('boss').hidden=!g;if(g){$('boss').querySelector('.head').textContent=t(g.type==='guardian'?'guardian':NAMEK[g.type]||g.type);{const gf=blGauge(g);$('bossb').style.width=(gf*100)+'%';$('bosst').textContent=`${Math.ceil(gf*g.max)}/${g.max}`;}}
+ const g=mons.find(m=>MT[m.type].boss&&!m.dead&&Math.hypot(P.x-m.sx,P.y-m.sy)<MT[m.type].leash+(m.prov>gTime?280:0)&&Math.hypot(m.x-P.x,m.y-P.y)<(m.prov>gTime?360:220));$('boss').hidden=!g;if(g){$('boss').querySelector('.head').textContent=t(g.type==='guardian'?'guardian':NAMEK[g.type]||g.type);{const gf=blGauge(g);$('bossb').style.width=(gf*100)+'%';$('bosst').textContent=`${Math.ceil(gf*g.max)}/${g.max}`;}}
  if(mode==='play'){const n=nearest();const h=$('hint');if(n){h.hidden=false;h.textContent=n.hint?t(n.hint):n.k==='npc'?t(n.o.obj?'hRead':'hTalk'):n.k==='anvil'?t('hAnvil'):n.k==='tree'?((chopped.get(n.o.k)||0)>gTime?t(treeBound(n.o.tx,n.o.ty)?'hChopW':'hUproot'):t('hChop')):(n.o.dep>0?t('hEmpty'):t('hMine'));}else h.hidden=true;}}
 
 /* ---------------- fx helpers, keybinds, status window ---------------- */
@@ -6809,7 +6809,9 @@ function update(dt){
   if(MOBN&&MOBN.host===NET.uid)m.tgU=P.remote||NET.uid; // SAT-ONLINE-042: the player it is after goes out with each action
   const dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=m.type==='guardian'?10:Math.max(3,b.r-3);
   if(b.boss){
-   if(Math.hypot(P.x-m.sx,P.y-m.sy)>b.leash){const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);if(hd>2)move(m,hx/hd*30*dt,hy/hd*30*dt,mr);m.hp=Math.min(m.max,m.hp+m.max*.006*dt);m.tele=0;continue;}
+   // (owner 2026-10-21) a boss shot from beyond its leash came nowhere and healed: for 10 s after a hit (m.prov) the leash
+   // reaches 280 px further, so it comes for the shooter, and only goes home when you get well away
+   if(Math.hypot(P.x-m.sx,P.y-m.sy)>b.leash+(m.prov>gTime?280:0)){const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);if(hd>2)move(m,hx/hd*30*dt,hy/hd*30*dt,mr);m.hp=Math.min(m.max,m.hp+m.max*.006*dt);m.tele=0;continue;}
    // phases: at 66% and 33% health a boss roars, calls its adds and grows faster; in the last phase every slam also
    // throws a ring of shards. Healing back to full (after a leash) resets it.
    if(m.hp>=m.max)m.ph=0;{const ph=m.hp<m.max*.33?2:m.hp<m.max*.66?1:0;if(ph>(m.ph||0)){m.ph=ph;bossPhase(m,b,ph);}}

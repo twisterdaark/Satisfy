@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v127', ver: '1.27', d: '2026-10-21',
+      ar: ['البوس اللي بتضربه من بعيد (زي زعيم العفاريت) مابقاش يقف عند مكانه ويعالج نفسه: لمدة 10 ثواني بعد كل ضربة بيجري عليك حتى لو انت بعيد عن مكانه، وبيرجع بيته بس لو بعدت عنه خالص',
+        'شريط صحة البوس بيظهر وانت بتضربه من بعيد'],
+      en: ['A boss you hit from afar (like the Goblin Chief) no longer stands at its spot and heals: for 10 s after each hit it comes for you even beyond its home ground, and only walks home when you get well away',
+        'The boss health bar shows while you hit it from afar'] },
     { v: '2026-10-21v126', ver: '1.26', d: '2026-10-21',
       ar: ['الشاشة السودا على الموبايل: اللعبة كانت بترسم خريطة العالم كلها أول ما تفتح (صورة 27 مليون بكسل، حوالي 250 ميجا رام)، والموبايل ساعات كان بيقفل التاب. دلوقتي الخريطة بتترسم على أجزاء في الخلفية، وشكلها زي ما هو بالظبط',
         'رسومات الشخصيات والوحوش بتترسم أول ما تظهر بس، فالتحميل بقى أسرع أكتر من مرتين',

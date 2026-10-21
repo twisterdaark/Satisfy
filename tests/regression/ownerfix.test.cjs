@@ -69,3 +69,23 @@ test('exploring is a personal notice; an inn does not sell the paper map of land
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+test('a boss shot from beyond its leash comes for the shooter instead of healing at home (owner 2026-10-21)', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, LOOK);
+    await g.step(3);
+    const d0 = await g.eval(() => { const G = window.__G, P = G.P, m = G.mons().find((o) => o.type === 'gchief' && !o.dead); P.inv = 1e9; P.hp = 1e9; G.S.lv = 13;
+      for (const o of G.mons()) if (o !== m && Math.hypot(o.x - m.x, o.y - m.y) < 600) { o.dead = true; o.rt = 1e9; }
+      P.x = m.sx - 250; P.y = m.sy; m.x = m.sx; m.y = m.sy; window.__m = m; window.__GC2.hit(m); window.__hp = m.hp; return Math.hypot(m.x - P.x, m.y - P.y); });
+    await g.step(150);
+    const r = await g.eval(() => { const m = window.__m, P = window.__G.P; return { d: Math.hypot(m.x - P.x, m.y - P.y), healed: m.hp > window.__hp, bar: !document.getElementById('boss').hidden }; });
+    assert.ok(r.d < d0 - 60 && !r.healed, JSON.stringify([d0, r]));
+    assert.equal(r.bar, true, 'its health bar shows');
+    // well away (beyond the leash and the extra reach), it walks home
+    await g.eval(() => { const P = window.__G.P, m = window.__m; P.x = m.sx - 700; P.y = m.sy; });
+    await g.step(120);
+    assert.ok(await g.eval(() => { const m = window.__m; return Math.hypot(m.x - m.sx, m.y - m.sy) < 200; }));
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});
