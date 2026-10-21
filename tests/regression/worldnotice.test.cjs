@@ -58,13 +58,15 @@ test('a world event starts for everyone at once, also in the chat; a late joiner
     assert.deepEqual(nb, na, 'the same notice for both');
     for (const g of [a, b]) assert.ok((await chatSys(g)).some((x) => x.includes(na.text)), 'it stays in the chat too');
 
-    // a third player comes in a minute later: a short line, no notice as if it had just begun
+    // a third player comes in later: a short line, no notice as if it had just begun. 40 s in (the second wave): at 60 s
+    // the seconds a slow run takes to set up the page reached the third wave, whose captain is a World Notice of its own
     const c = await online(ctx, 'c', 'gWnC3', 'Celine');
-    await eventClock([c], 60000);
+    await eventClock([c], 40000);
+    await c.eval(() => { window.__toastSeen = ''; const box = document.getElementById('toasts'); new MutationObserver(() => { window.__toastSeen += '|' + box.textContent; }).observe(box, { childList: true, subtree: true, characterData: true }); }); // a toast lives 2.6 s of real time, which a slow run outlasts
     await H.newGame(c, { n: 'Ruby', hair: 2, hc: 1, skin: 0, top: 2 });
     await settle(c);
     assert.equal(await notice(c), null, 'no World Notice for a late joiner');
-    assert.match(await c.eval(() => document.getElementById('toasts').textContent), /is on now/);
+    assert.match(await c.eval(() => window.__toastSeen), /is on now/);
 
     // your own moment: "Notice", and not in anyone's chat
     await a.eval(() => window.__GN.announce('Your Sword broke!', 1));
