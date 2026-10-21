@@ -421,3 +421,43 @@ test('a phone: forge and alchemy hold under the finger, the farm digs where you 
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// Mobile 2 (v1.02): a phone has no drag and drop, so a skill goes on the bar by a tap on it and a tap on a slot (a slot
+// that has a skill can be picked up and moved the same way); a phone's menus start at 120% and the pause menu changes it.
+test('a phone: skills go on the bar by tapping, and the menus are bigger (menu size in the pause menu)', async () => {
+  const ctx = await H.newContext({ device: { viewport: { width: 844, height: 390 }, screen: { width: 844, height: 390 }, isMobile: true, hasTouch: true } });
+  const g = await H.openGame({ ctx });
+  try {
+    await H.newGame(g, LOOK);
+    await g.step(3);
+    const u = () => g.eval(() => { const s = getComputedStyle(document.getElementById('stage')); return [parseFloat(s.getPropertyValue('--u')), parseFloat(s.getPropertyValue('--pu'))]; });
+    const [u0, p0] = await u();
+    assert.ok(Math.abs(p0 / u0 - 1.2) < 1e-6, `${p0} / ${u0}`);
+    await g.eval(() => { const G = window.__G; G.S.cls = 'warrior'; G.S.lv = 60; G.gainXP(1); window.__GTC.openStatus(); });
+    await g.step(1);
+    const k = await g.eval(() => [...document.querySelectorAll('#statusW [data-dsk]')].map((r) => r.dataset.dsk));
+    assert.ok(k.length >= 3, k.join());
+    await g.eval((a) => { window.__G.S.bar = [a, null, null, null, null]; window.__GTC.openStatus(); }, k[0]);
+    await g.step(1);
+    await g.page.tap(`#statusW [data-dsk="${k[2]}"] .ski`);
+    assert.match(await g.eval(() => document.querySelector('#statusW .barrow span').textContent), /Pick a slot for/);
+    await g.page.tap('#statusW [data-bslot="3"]');
+    let bar = await g.eval(() => window.__G.S.bar);
+    assert.equal(bar[3], k[2]);
+    // pick up slot 1 (the first skill) and move it to slot 4: they swap
+    await g.page.tap('#statusW [data-bslot="0"]');
+    await g.page.tap('#statusW [data-bslot="3"]');
+    bar = await g.eval(() => window.__G.S.bar);
+    assert.deepEqual([bar[0], bar[3]], [k[2], k[0]]);
+    assert.equal(await g.eval(() => document.querySelectorAll('#statusW .pick,#statusW .bslot.on').length), 0);
+    await g.eval(() => document.querySelector('[data-act="closeStatus"]').click());
+    // the pause menu cycles the size: 120 -> 140 -> 100, kept for next time
+    await g.eval(() => document.querySelector('[data-act="menuSize"]').click());
+    assert.match(await g.eval(() => document.getElementById('mzB').textContent), /140%/);
+    await g.eval(() => document.querySelector('[data-act="menuSize"]').click());
+    const [u1, p1] = await u();
+    assert.ok(Math.abs(p1 - u1) < 1e-6);
+    assert.equal(await g.eval(() => localStorage.getItem('satisfy_mz')), '100');
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); await ctx.close(); }
+});

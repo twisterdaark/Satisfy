@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v102', ver: '1.02', d: '2026-10-21',
+      ar: ['الموبايل 2: ترتيب شريط المهارات باللمس. في نافذة الحالة فيه صف بخانات الشريط الخمسة: دوس على مهارة وبعدين على الخانة اللي عايزها، أو دوس على خانة فيها مهارة وبعدين على خانة تانية عشان تبدّلهم',
+        'القوايم بقت أكبر على الموبايل (120%)، والكلام الصغير في القوايم بقى أوضح',
+        'زرار "حجم القوايم" في قايمة الإيقاف: 100% أو 120% أو 140%، واللعبة بتفتكر اختيارك'],
+      en: ['Mobile 2: arrange the skill bar by touch. The status window has a row of the five bar slots: tap a skill and then a slot, or tap a slot that has a skill and then another slot to swap them',
+        'Menus are bigger on phones (120%), and their small print is easier to read',
+        'A "Menu size" button in the pause menu: 100%, 120% or 140%, and the game remembers it'] },
     { v: '2026-10-21v101', ver: '1.01', d: '2026-10-21',
       ar: ['الموبايل: كل حاجة بالكيبورد بقت تتعمل باللمس',
         'الألعاب الصغيرة بترد أول ما صباعك يلمس الشاشة: التسخين والتبريد في الحدادة والتسخين في الكيميا بيفضلوا شغالين طول ما صباعك على الشاشة',
