@@ -5764,7 +5764,7 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
  const l=gLv(g),me=g.members[pidOf()]||{c:0},nx=GXP[l];
  const info=t('gInfo',{g:gdEmb(g.emb)+gName(g.id),n:l,x:g.npc?'-':nx?`${g.xp}/${nx}`:t('gMax'),m:Object.keys(g.members).length,cap:l*25,c:me.c});
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
- dialog('guild',[info,perks+(g.online&&GWK?' · '+gwLine():''),g.online?guildNoteLine():''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
+ dialog('guild',[info,perks+(g.online&&GWK?' · '+gwLine():''),g.online?guildNoteLine():'',g.online?gtroLine(g.id):''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
   ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},
    ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),...(galSt()?[{l:t('gdDip')+(galMo()&&Object.keys(GALA).length?' ('+Object.keys(GALA).length+')':''),f:galD}]:[]),...(gwrSt()?[{l:t('gdWar')+(galMo()&&Object.keys(GWRA).length?' ('+Object.keys(GWRA).length+')':''),f:gwrD}]:[]),
    ...(Satisfy.guild.can(GUILD.state().rank,'emblem')?[{l:t('gdBan'),f:guildBanD}]:[]),
@@ -8039,7 +8039,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   const gi=guildOf(r),gy=gi?6:0; // SAT-ONLINE-046: «guild» under the name, the name and the bar a line higher
   TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol===2?'#b0102a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038), 2 a murderer (052)
-  if(gi)TX.push({s:'«'+gdEmb(gi.emb)+gi.n+'»'+(galOf(r.gd)?' 🤝':warNow(r.gd)?' ⚔':''),x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
+  if(gi)TX.push({s:'«'+gdEmb(gi.emb)+gi.n+'»'+gtroTag(r.gd)+(galOf(r.gd)?' 🤝':warNow(r.gd)?' ⚔':''),x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37-gy,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
   if(near&&r.uid===near.uid&&!foe)TX.push({s:[t('pcHint'),mate?'':t('pInvite'),!mate&&DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?t('dHint'):''].filter(Boolean).join(' · '),x:r.x,y:r.y-(typeof r.hp==='number'?46:37)-gy,f:F,z:6,c:'#ffe7a8'});}
@@ -9010,8 +9010,8 @@ window.__GANN={get q(){return ANNQ.slice()},get admin(){return ANNADM},get maint
    the gold of the ranked players (total, median, top 10%, richest) and their average level. A muted player can't write in the
    world chat until the time (the rules refuse it; the game says until when). Every signed-in page sends its own errors as a
    crash report (at most three a session, each message once), with the build, the zone and a stack with long ids cut out. */
-Object.assign(STR.ar,{admReports:'البلاغات المفتوحة ({n})',admRepRow:'{b}: {w}',admRep:'{a} بلّغ عن {b} ({w}) · آخر كلامه: "{s}"',admNone:'مفيش بلاغات مفتوحة',admMute:'اكتم {n} يوم',admOk:'اقفل البلاغ من غير حاجة',admMuted:'{n} مكتوم لحد {l}',admResolved:'البلاغ اتقفل',admCrashes:'تقارير الأعطال ({n})',admCrashRow:'{v} · {m} ({z})',admEco:'الاقتصاد ({n} لاعب في الترتيب): إجمالي {g} دهب · المتوسط {m} · أعلى 10% من {p} · الأغنى {x} · متوسط اللفل {lv}',mutedYou:'إنت مكتوم في الشات العام لحد {l} · لو شايف إنه غلط اكتب /appeal والسبب',admNoId:'مفيش لاعب بالـID ده: {n}',admUnmuted:'{n} يقدر يتكلم تاني',admHelp:'/reports · /appeals · /crashes · /economy · /balance · /mute ID ساعات سبب · /unmute ID',why_spam:'سبام',why_abuse:'شتيمة',why_cheat:'غش',why_other:'حاجة تانية'});
-Object.assign(STR.en,{admReports:'Open reports ({n})',admRepRow:'{b}: {w}',admRep:'{a} reported {b} ({w}) · their last lines: "{s}"',admNone:'No open reports',admMute:'Mute {n} for a day',admOk:'Resolve, no action',admMuted:'{n} is muted until {l}',admResolved:'Report resolved',admCrashes:'Crash reports ({n})',admCrashRow:'{v} · {m} ({z})',admEco:'Economy ({n} ranked players): total {g} gold · median {m} · top 10% from {p} · richest {x} · average level {lv}',mutedYou:'You are muted in the world chat until {l} · Think it is a mistake? Type /appeal and why',admNoId:'No player with the ID {n}',admUnmuted:'{n} can talk again',admHelp:'/reports · /appeals · /crashes · /economy · /balance · /mute ID hours reason · /unmute ID',why_spam:'spam',why_abuse:'insults',why_cheat:'cheating',why_other:'something else'});
+Object.assign(STR.ar,{admReports:'البلاغات المفتوحة ({n})',admRepRow:'{b}: {w}',admRep:'{a} بلّغ عن {b} ({w}) · آخر كلامه: "{s}"',admNone:'مفيش بلاغات مفتوحة',admMute:'اكتم {n} يوم',admOk:'اقفل البلاغ من غير حاجة',admMuted:'{n} مكتوم لحد {l}',admResolved:'البلاغ اتقفل',admCrashes:'تقارير الأعطال ({n})',admCrashRow:'{v} · {m} ({z})',admEco:'الاقتصاد ({n} لاعب في الترتيب): إجمالي {g} دهب · المتوسط {m} · أعلى 10% من {p} · الأغنى {x} · متوسط اللفل {lv}',mutedYou:'إنت مكتوم في الشات العام لحد {l} · لو شايف إنه غلط اكتب /appeal والسبب',admNoId:'مفيش لاعب بالـID ده: {n}',admUnmuted:'{n} يقدر يتكلم تاني',admHelp:'/reports · /appeals · /crashes · /economy · /season · /balance · /mute ID ساعات سبب · /unmute ID',why_spam:'سبام',why_abuse:'شتيمة',why_cheat:'غش',why_other:'حاجة تانية'});
+Object.assign(STR.en,{admReports:'Open reports ({n})',admRepRow:'{b}: {w}',admRep:'{a} reported {b} ({w}) · their last lines: "{s}"',admNone:'No open reports',admMute:'Mute {n} for a day',admOk:'Resolve, no action',admMuted:'{n} is muted until {l}',admResolved:'Report resolved',admCrashes:'Crash reports ({n})',admCrashRow:'{v} · {m} ({z})',admEco:'Economy ({n} ranked players): total {g} gold · median {m} · top 10% from {p} · richest {x} · average level {lv}',mutedYou:'You are muted in the world chat until {l} · Think it is a mistake? Type /appeal and why',admNoId:'No player with the ID {n}',admUnmuted:'{n} can talk again',admHelp:'/reports · /appeals · /crashes · /economy · /season · /balance · /mute ID hours reason · /unmute ID',why_spam:'spam',why_abuse:'insults',why_cheat:'cheating',why_other:'something else'});
 var MUTED=null,MUTOFF=null,CRN=0,CRSEEN=[],APOFF=null;
 function modSt(){return NETTR&&NETTR.kind==='firebase'&&FB&&NET&&Satisfy.firebase.modStore?Satisfy.firebase.modStore(FB):null;}
 function modStart(){if(!(NETTR&&NETTR.kind==='firebase'))return;modStop();const st=modSt();if(!st)return;MUTOFF=st.watchMute(NET.uid,v=>{MUTED=v&&typeof v==='object'&&+v.until>0?{until:+v.until,t:+v.t||0}:null;if(MUTED)apWatch(st);});}
@@ -9079,6 +9079,30 @@ function balStats(all,wk){const C={};for(const k in (all||{})){const e=all[k];if
  return Object.values(C).map(c=>({c:c.c,p:c.p,lv:Math.round(c.lv/c.p),n:c.n,ttk:c.n?Math.round(c.s/c.n*10)/10:0,w:c.w,l:c.l,rate:c.w+c.l?Math.round(c.w*100/(c.w+c.l)):null})).sort((a,b)=>b.p-a.p||a.c.localeCompare(b.c));}
 function admBal(st){st.balance().then(all=>{const wk=lockWeek(),L=balStats(all,wk),f=x=>Math.round(x).toLocaleString('en-US');
  dialog('guild',[L.length?t('admBal',{w:wk,n:L.reduce((a,c)=>a+c.p,0)}):t('admBalNone'),...L.slice(0,12).map(c=>t('admBalRow',{c:t('cl_'+c.c),p:c.p,lv:c.lv,k:f(c.n),s:c.ttk,w:c.w,l:c.l,r:c.rate==null?'-':c.rate+'%'}))],null,[{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
+/* guild seasons (SAT-ONLINE-090, plan U246). A season is a calendar month (UTC). Each week of it (the weeks whose Monday is in
+   that month) a guild earns the weekly-goal tier it reached that week (0 to 3, see 081). At the end, the game's owner's
+   "/season" (last month) or "/season 2026-10" adds them up and gives every guild that earned enough a trophy: gold from 10
+   points, silver from 6, bronze from 3. The tiers are fixed, so any guild can earn one (not a ranking). A trophy is only to
+   show: the latest one by the guild's name on everyone's screen, all of them in G. It gives nothing in a fight. */
+Object.assign(STR.ar,{ssnDone:'الموسم {s}: {l}',ssnNone:'الموسم {s}: محدش وصل لكأس',ssnBad:'اكتب: /season أو /season 2026-10',gdTro:'الكؤوس: {l}',ssnRow:'{e} {g} ({p})'});
+Object.assign(STR.en,{ssnDone:'Season {s}: {l}',ssnNone:'Season {s}: no guild earned a trophy',ssnBad:'Type: /season or /season 2026-10',gdTro:'Trophies: {l}',ssnRow:'{e} {g} ({p})'});
+var GTRO=new Map(),gtroT=0;const SSN_T=[['gold',10],['silver',6],['bronze',3]],SSN_E={gold:'🏆',silver:'🥈',bronze:'🥉'};
+// the weeks of a season (yyyy-mm): those whose Monday is in that month
+function ssnWeeks(ym){const [y,m]=ym.split('-').map(Number),a=Date.UTC(y,m-1,1),b=Date.UTC(y,m,1),out=[];for(let w=Math.ceil((a-LOCK_E)/LOCK_WK);LOCK_E+w*LOCK_WK<b;w++)out.push('w'+w);return out;}
+// each guild's points for a season: the weekly-goal tier it reached each week (each member counted up to the cap, as in 081)
+function ssnPoints(weeks,ym){const W=ssnWeeks(ym),P={};for(const gid in (weeks||{})){let p=0;for(const wk of W){const e=weeks[gid]&&weeks[gid][wk];if(!e||typeof e!=='object')continue;let n=0;for(const u in e)n+=Math.min(GW_CAP,Math.max(0,+(e[u]&&e[u].k)||0));p+=GW_T.filter(x=>n>=x).length;}if(p)P[gid]=p;}return P;}
+function ssnKind(p){const x=SSN_T.find(([,n])=>p>=n);return x?x[0]:null;}
+function ssnLast(){const d=new Date(wNow()),pm=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()-1,1));return pm.getUTCFullYear()+'-'+String(pm.getUTCMonth()+1).padStart(2,'0');}
+function admSeason(st,ym){st.seasonData().then(({weeks,guilds})=>{const P=ssnPoints(weeks,ym),L=Object.keys(P).map(g=>({g,p:P[g],k:ssnKind(P[g])})).filter(x=>x.k&&guilds&&guilds[x.g]).sort((a,b)=>b.p-a.p);
+ return Promise.all(L.map(x=>st.trophy(x.g,'s'+ym,x.k,Math.min(100,x.p),NET.uid))).then(()=>{GTRO.clear();
+  dialog('guild',[L.length?t('ssnDone',{s:ym,l:L.map(x=>t('ssnRow',{e:SSN_E[x.k],g:Satisfy.chat.clean(guilds[x.g].name,18)||'?',p:x.p})).join(' · ')}):t('ssnNone',{s:ym})],null,[{l:t('oClose')}]);});}).catch(()=>toast(t('gdFail'),'warn'));}
+// a guild's trophies, newest first (read at most every 5 minutes a guild)
+function gtroOf(gid){const st=modSt();if(!st||!gid)return null;const now=performance.now(),e=GTRO.get(gid);
+ if((!e||now-e.at>300000)&&!(e&&e.q)&&now-gtroT>300){gtroT=now;const x=e||{L:[],at:0};x.q=1;GTRO.set(gid,x);
+  st.trophies(gid).then(v=>{const L=Object.keys(v||{}).filter(k=>/^s\d{4}-\d{2}$/.test(k)&&v[k]&&SSN_E[v[k].k]).sort().reverse().map(k=>({s:k.slice(1),k:v[k].k}));GTRO.set(gid,{L,at:performance.now()});},()=>{x.q=0;x.at=performance.now();});}
+ return e&&e.L&&e.L.length?e.L:null;}
+function gtroTag(gid){const L=gtroOf(gid);return L?' '+SSN_E[L[0].k]:'';}
+function gtroLine(gid){const L=gtroOf(gid);return L?t('gdTro',{l:L.slice(0,6).map(x=>SSN_E[x.k]+' '+x.s).join(' · ')}):'';}
 // the owner's chat commands; true when the line was one of them
 function admCmd(v){let m;
  if(/^\/reports\s*$/i.test(v)){admOnly(admReports);return true;}
@@ -9086,12 +9110,13 @@ function admCmd(v){let m;
  if(/^\/appeals\s*$/i.test(v)){admOnly(admAppeals);return true;}
  if(/^\/appeal(\s|$)/i.test(v)){apSend(v.replace(/^\/appeal/i,''));return true;}
  if(/^\/economy\s*$/i.test(v)){admOnly(admEco);return true;}
+ if(/^\/season(\s|$)/i.test(v)){const x=/^\/season(?:\s+(\d{4}-(?:0[1-9]|1[0-2])))?\s*$/i.exec(v);if(!x){toast(t('ssnBad'),'warn');return true;}const ym=x[1]||ssnLast();admOnly(st=>admSeason(st,ym));return true;}
  if(/^\/balance\s*$/i.test(v)){admOnly(admBal);return true;}
  if(/^\/admin\s*$/i.test(v)){admOnly(()=>toast(t('admHelp')));return true;}
  if((m=/^\/mute\s+(\S+)\s+(\d{1,3})\s*([\s\S]*)$/i.exec(v))){const id=m[1],h=Math.max(1,Math.min(720,+m[2])),why=m[3].trim().slice(0,60);admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}const until=wNow()+h*3600000;return st.mute(u,until,why,NET.uid).then(()=>toast(t('admMuted',{n:id,l:calTime(until)}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  if((m=/^\/unmute\s+(\S+)\s*$/i.exec(v))){const id=m[1];admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}return st.unmute(u).then(()=>toast(t('admUnmuted',{n:id}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  return false;}
-window.__GMOD={get muted(){return MUTED},appeal:x=>apSend(x),bal:()=>balGet(),balPush:()=>{balT=0;balTick(true,true);},balStats:(a,w)=>balStats(a,w),cmd:v=>admCmd(v),eco:(g,l)=>ecoStats(g,l),redact:x=>crashRedact(x),crash:(m,s)=>crashSend(m,s),get sent(){return CRN},store:()=>modSt()}; // tests
+window.__GMOD={get muted(){return MUTED},ssnWeeks:ym=>ssnWeeks(ym),ssnPoints:(w,ym)=>ssnPoints(w,ym),tro:gid=>gtroOf(gid),troClear:()=>GTRO.clear(),appeal:x=>apSend(x),bal:()=>balGet(),balPush:()=>{balT=0;balTick(true,true);},balStats:(a,w)=>balStats(a,w),cmd:v=>admCmd(v),eco:(g,l)=>ecoStats(g,l),redact:x=>crashRedact(x),crash:(m,s)=>crashSend(m,s),get sent(){return CRN},store:()=>modSt()}; // tests
 /* the event calendar (SAT-ONLINE-077, plan U331). "Calendar" in the player list (O) shows what comes next on the world clock:
    the next three world events (each slot's event is known in advance), the National Competition, the siege of Reidan Castle,
    the town festival, the horse race, and when Trauka and Berith are back. Every time is in your own time zone and in UTC.

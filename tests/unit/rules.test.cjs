@@ -543,6 +543,15 @@ test('seller history (SAT-ONLINE-089): your own record of a trade done between t
   assert.equal(L.$tid.gi['.validate'], "newData.val() === root.child('tradeSides').child($tid).child(newData.parent().child('o').val()).child('g').val()");
 });
 
+test('guild seasons (SAT-ONLINE-090): trophies written by admins only, three kinds; admins read the weekly goals', () => {
+  const adm = "root.child('admins').child(auth.uid).val() === true", T = rules.guildTrophy;
+  assert.equal(T['.read'], 'auth != null', 'everyone sees them');
+  assert.equal(T.$gid.$season['.write'], 'auth != null && ' + adm, 'nobody else gives one');
+  assert.equal(T.$gid.$season.k['.validate'], "newData.val() === 'gold' || newData.val() === 'silver' || newData.val() === 'bronze'");
+  assert.match(T.$gid.$season['.validate'], /^\$season\.matches\(\/\^s\[0-9\]\{4\}-\[0-9\]\{2\}\$\/\)/);
+  assert.equal(rules.guildWeek['.read'], 'auth != null && ' + adm, 'the owner reads every guild\'s weekly goal to close a season');
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);

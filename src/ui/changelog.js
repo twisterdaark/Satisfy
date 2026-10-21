@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22season', ver: '1.40', d: '2026-10-22',
+      ar: ["مواسم الجيلد: كل شهر موسم، وكل أسبوع فيه الجيلد بياخد نقط على قد المرحلة اللي وصلها في هدف الأسبوع (من 0 لـ 3)",
+        "في آخر الموسم صاحب اللعبة بيكتب /season والجيلدات اللي جمعت نقط كفاية بتاخد كاس: دهب من 10 نقط، فضة من 6، برونز من 3. أي جيلد يقدر ياخد كاس، مش ترتيب",
+        "الكاس للشكل بس: آخر كاس بيظهر جنب اسم الجيلد عند الكل، وكل الكؤوس في G، ومبيديش أي ميزة في القتال"],
+      en: ["Guild seasons: each month is a season, and each week of it a guild earns the tier it reached in the weekly goal (0 to 3)",
+        "At the end the game's owner types /season and every guild with enough points gets a trophy: gold from 10, silver from 6, bronze from 3. Any guild can earn one; it is not a ranking",
+        "A trophy is only to show: the latest one by the guild's name on everyone's screen, all of them in G. It gives nothing in a fight"] },
     { v: '2026-10-21v139', ver: '1.39', d: '2026-10-21',
       ar: ['الغابة الغامضة غرب جاوس (لفل 250+): ضباب أخضر وطريق واحد بيلف لحد فسحة في النص. ناسك الغابة واقف عند أول الطريق وعنده كويستين',
            'نسخة باجما (لفل 260): زعيم عالمي لابس وش باجما وبيحارب بحركات سيفه (القتل، الربط، الموجة، التجاوز، الدوران). كل 30 ثانية بتتقسم لظلال، وطول ما الظلال واقفة بتاخد تلت ضربك بس. كل ما اللاعبين حواليها يكتروا الظلال بتكتر. بترجع بعد ساعة',
