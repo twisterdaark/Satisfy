@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v111', ver: '1.11', d: '2026-10-21',
+      ar: ['المدربين في أماكنهم من الرواية: معلم السحر في ريدان (برج السحر)، ومدرب الفرسان في تيتان مع الفرسان الحُمر، وكاسوس في رولينج (كنيسة ريبيكا)، والراجل المقنّع في حواري رينهارت. مدرب المحاربين ومدربة الرماة والنكرومانسر فضلوا حوالين وينستون',
+           'التماثيل: ريبيكا في رولينج، وهيكسيتيا وجاريون وديبيريون جنب بعض في رينهارت. فينيس عند المزاد، ودومينيون في تيتان، وجودار عند برج الحكمة',
+           'عربيات بين المدن: عربجي في ريدان ورينهارت ورولينج وتيتان، وعربجي وينستون وباتريان بقوا بيروحوا لهم. السعر على قد المسافة، واللي لسه ملوش كلاس بيركب ببلاش. واسأل عربجي وينستون "المدربين فين؟"'],
+      en: ['Trainers where the novel puts them: the magic instructor in Reidan (the magic tower), the knight trainer in Titan with the Red Knights, Cassus in Rolling (the Rebecca Church), and the hooded man in the back streets of Reinhardt. The warrior and archer trainers and the necromancer stay around Winston',
+           'Statues: Rebecca in Rolling; Hexetia, Garion and Debirion side by side in Reinhardt. Venice stays by the auction house, Dominion in Titan and Judar at the Tower of Wisdom',
+           'Coaches between the cities: a coachman in Reidan, Reinhardt, Rolling and Titan, and the Winston and Patrian coachmen now go there too. The fare follows the distance, and anyone without a class yet rides free. Ask the Winston coachman "Where are the trainers?"'] },
     { v: '2026-10-21announce', ver: '1.10', d: '2026-10-21',
       ar: ['أونلاين: إعلانات من صاحب اللعبة: بتظهر لكل اللي أونلاين كإشعار عالمي "من صاحب اللعبة" وفي الشات، مرة واحدة، واللي يدخل بعدها بعشر دقايق بيشوفها',
         'إشعار الصيانة: الميعاد والوقت الفاضل، وتنبيه قبلها بـ10 و5 ودقيقة، ولما تبدأ اللعبة بتحفظ تقدمك'],
