@@ -568,6 +568,21 @@ test('repair orders (SAT-ONLINE-096): your own order; mended by someone else, wh
   assert.ok(P['.write'].endsWith("|| (data.exists() && !newData.exists()))"), 'a fee collected once (Claude-B, #131)');
 });
 
+test('territories (SAT-ONLINE-095): a member takes a place with a free weekly slot, 45 minutes after the last change', () => {
+  const O = rules.world.$world.own.$k, C = rules.capSlot.$g.$s;
+  assert.ok(O['.write'].includes("root.child('guildMembers').child(newData.child('g').val()).child(auth.uid).exists()"), 'a member, for their guild');
+  assert.ok(O['.write'].includes("(!data.exists() || data.child('t').val() < now - 2700000)"), 'safe 45 minutes');
+  assert.ok(O['.write'].includes("newData.parent().parent().parent().parent().child('capSlot').child(newData.child('g').val()).child(newData.child('s').val()).child('k').val() === $k"), 'its slot written with it');
+  assert.ok(O['.write'].includes("root.child('capSlot').child(newData.child('g').val()).child(newData.child('s').val()).child('t').val() < now - 604800000"), 'a slot is free a week after');
+  assert.equal(O.s['.validate'], 'newData.isString() && newData.val().matches(/^[abcd-]$/)', 'four slots, or none for a canon guild winning it back');
+  assert.ok(C['.write'].includes("(!data.exists() || data.child('t').val() < now - 604800000)"));
+  assert.match(C['.validate'], /^\$s\.matches\(\/\^\[abcd\]\$\/\)/);
+  assert.equal(O.t['.validate'], 'newData.val() === now', "the server's time of the capture");
+  // the places' keys are camel case (tCanyon, tWay, tMine; castle): the key rule took only lower case, so no capture reached the server
+  const key = /\$k\.matches\(\/(.+?)\/\)/.exec(O['.validate'])[1];
+  for (const k of ['tCanyon', 'tWay', 'tMine', 'castle']) assert.ok(new RegExp(key).test(k), k);
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);
