@@ -58,7 +58,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|guildHall|guildHallGuest|hallInv|flags|announce|admins|guildTrophy|repairOrders|repairDone|repairPaid|tradeLog|tradeRep|trades|tradeSides|tradeDone|tradedItems|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|guildHall|guildHallGuest|hallInv|flags|announce|admins|guildTrophy|repairOrders|repairDone|repairPaid|capSlot|world\/satisfy\/own|tradeLog|tradeRep|trades|tradeSides|tradeDone|tradedItems|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -71,7 +71,7 @@
   // write(), so a promise settled on a later timer resolves after them.
   const acked = (v) => new Promise((res) => setTimeout(() => res(v), 0));
   // the paths a root update claims for its first writer only (each one's rules need !data.exists() or the like)
-  const CLAIM_RE = /^(repairOrders|guildNames|guildVaultTaken|guildBank|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb))\//, CLAIM_WAIT = 120;
+  const CLAIM_RE = /^(repairOrders|guildNames|guildVaultTaken|guildBank|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb|own))\//, CLAIM_WAIT = 120;
   function rootUpdate(diff) {
     const ps = Object.keys(diff);curDiff = diff;bDiff = diff;let errs;try{errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);}finally{curDiff = null;bDiff = null;}
     F.log.push({ op: 'update', path: '', err: errs[0] || null, keys: ps.slice().sort() });
@@ -452,6 +452,16 @@
   }
   // SAT-ONLINE-054: world/satisfy/legends/{k} {uid, n, t}: taken once, then only its owner changes or frees it
   function worldRules(seg, v) {
+    if (user && seg.length === 4 && seg[1] === 'satisfy' && seg[2] === 'own') { // SAT-ONLINE-095: territories and the castle
+      const k = seg[3], old = data.get(seg.join('/')), now = Date.now(), me = user.uid, mem = (g) => data.has('guildMembers/' + g + '/' + me);
+      if (!/^[A-Za-z0-9_]{1,24}$/.test(k) || v === null) return 'PERMISSION_DENIED: own ' + k; // tCanyon, castle (the rules took only lower case, so no capture ever reached the server)
+      if (Object.keys(v).sort().join(',') !== 'c,g,h,n,s,t,uid') return 'own fields';
+      let ok = false;
+      if (mem(v.g)) { const pre = data.get('capSlot/' + v.g + '/' + v.s), post = after('capSlot/' + v.g + '/' + v.s); ok = /^[abcd]$/.test(v.s) && (!pre || pre.t < now - 604800000) && !!post && post.k === k && (!old || old.t < now - 2700000); }
+      else if (['g_tzed', 'g_giant', 'g_snake'].includes(v.g) && v.s === '-' && old && mem(old.g) && old.t < now - 2700000) ok = true;
+      if (!ok) return 'PERMISSION_DENIED: own capture';
+      return /^[A-Za-z0-9_:.-]{1,48}$/.test(v.g) && typeof v.n === 'string' && v.n.length >= 1 && v.n.length <= 24 && /^#[0-9a-fA-F]{6}$/.test(v.c) && typeof v.h === 'string' && v.h.length <= 24 && v.uid === me && isSV(v.t) ? null : 'own values';
+    }
     if (!user || seg.length !== 4 || seg[1] !== 'satisfy' || seg[2] !== 'legends' || !/^[a-z0-9_]{1,24}$/.test(seg[3])) return 'PERMISSION_DENIED: ' + seg.join('/');
     const old = data.get(seg.join('/'));
     if (old && old.uid !== user.uid) return 'PERMISSION_DENIED: legend taken';
@@ -560,6 +570,17 @@
       if (v === null) return old !== undefined ? null : 'PERMISSION_DENIED: repairPaid remove'; // collected once: two pages of one account can't both
       if (old || !O || O.by === me || (after('repairDone/' + O.by + '/' + seg[2]) || {}).by !== me) return 'PERMISSION_DENIED: repairPaid write';
       return Object.keys(v).sort().join(',') === 'g,t' && v.g === O.fee && isSV(v.t) ? null : 'repairPaid values';
+    }
+    if (seg[0] === 'capSlot') { // SAT-ONLINE-095: a guild's four capture slots, each free again a week after its use
+      if (!user) return 'PERMISSION_DENIED: capSlot';
+      const me = user.uid, now = Date.now();
+      if (seg.length === 2) return v === null && (data.get('guilds/' + seg[1]) || {}).master === me ? null : 'PERMISSION_DENIED: capSlot ' + p;
+      if (seg.length !== 3 || v === null || !/^[abcd]$/.test(seg[2]) || !data.has('guildMembers/' + seg[1] + '/' + me)) return 'PERMISSION_DENIED: capSlot ' + p;
+      const old = data.get(p);
+      if (old && !(old.t < now - 604800000)) return 'PERMISSION_DENIED: capSlot used';
+      const own = v && after('world/satisfy/own/' + v.k);
+      if (!own || own.g !== seg[1]) return 'PERMISSION_DENIED: capSlot without its capture';
+      return Object.keys(v).sort().join(',') === 'k,t' && /^[A-Za-z0-9_]{1,24}$/.test(v.k) && isSV(v.t) ? null : 'capSlot values';
     }
     if (seg[0] === 'crashes' || seg[0] === 'mutes' || seg[0] === 'reportDone') { // SAT-ONLINE-082
       const adm = !!user && data.get('admins/' + user.uid) === true, now = Date.now(), old = data.get(p);
@@ -862,7 +883,7 @@
         const seg = r.path.split('/');
         const tm = (seg[0] === 'tradeSides' && seg.length === 3) || (seg[0] === 'tradeDone' && seg.length === 2) ? tradeMeta(seg[1]) : null;
         const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : ['guildVault', 'guildBank', 'guildBuild', 'guildLog', 'guildNote', 'guildEvents', 'guildEventSign', 'guildDiplo'].includes(seg[0]) && seg.length === 2 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildHall' && seg.length === 2 ? !!user && (data.has('guildMembers/' + seg[1] + '/' + user.uid) || data.has('guildHallGuest/' + seg[1] + '/' + user.uid)) : (seg[0] === 'guildAlly' || seg[0] === 'guildWar') && seg.length === 2 ? !!user : seg[0] === 'guildWarKill' && seg.length === 3 ? !!user : (seg[0] === 'guildAllyAsk' || seg[0] === 'guildWarAsk') && seg.length === 2 ? !!user && ['m', 'o'].includes(rkOf(seg[1], user.uid)) : seg[0] === 'guildWeek' && seg.length === 3 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildApply' && seg.length === 2 ? !!user && rightOf(seg[1], user.uid, 'inv') : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
-        const ok = gl !== null ? gl : r.path === 'bounties' || r.path === 'lfg' || r.path === 'announce' || r.path === 'flags' || seg[0] === 'mutes' && seg.length === 2 ? !!user : seg[0] === 'appealDone' && seg.length === 2 ? !!user && seg[1] === user.uid : seg[0] === 'sessions' || seg[0] === 'lockouts' || seg[0] === 'friends' || seg[0] === 'friendReq' || ((seg[0] === 'repairDone' || seg[0] === 'repairPaid') && seg.length === 2) ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb') && !!user;
+        const ok = gl !== null ? gl : r.path === 'bounties' || r.path === 'lfg' || r.path === 'announce' || r.path === 'flags' || seg[0] === 'mutes' && seg.length === 2 ? !!user : seg[0] === 'appealDone' && seg.length === 2 ? !!user && seg[1] === user.uid : seg[0] === 'sessions' || seg[0] === 'lockouts' || seg[0] === 'friends' || seg[0] === 'friendReq' || ((seg[0] === 'repairDone' || seg[0] === 'repairPaid') && seg.length === 2) ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || seg[0] === 'capSlot' && seg.length === 2 && data.has('guildMembers/' + seg[1] + '/' + (user && user.uid)) || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);

@@ -356,6 +356,19 @@
         }
       }
     },
+    "capSlot": {
+      "$g": {
+        ".read": "auth != null && root.child('guildMembers').child($g).child(auth.uid).exists()",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($g).child('master').val() === auth.uid",
+        "$s": {
+          ".write": "auth != null && newData.exists() && root.child('guildMembers').child($g).child(auth.uid).exists() && (!data.exists() || data.child('t').val() < now - 604800000) && newData.parent().parent().parent().child('world').child('satisfy').child('own').child(newData.child('k').val()).child('g').val() === $g",
+          ".validate": "$s.matches(/^[abcd]$/) && newData.hasChildren(['k', 't'])",
+          "k": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_]{1,24}$/)" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "guildTrophy": {
       ".read": "auth != null",
       "$gid": {
@@ -1222,8 +1235,9 @@
         "own": {
           ".read": "auth != null",
           "$k": {
-            ".write": "auth != null",
-            ".validate": "$k.matches(/^[a-z0-9_]{1,24}$/) && newData.hasChildren(['g', 'n', 'c', 'h', 'uid', 't'])",
+            ".write": "auth != null && ((root.child('guildMembers').child(newData.child('g').val()).child(auth.uid).exists() && (!root.child('capSlot').child(newData.child('g').val()).child(newData.child('s').val()).exists() || root.child('capSlot').child(newData.child('g').val()).child(newData.child('s').val()).child('t').val() < now - 604800000) && newData.parent().parent().parent().parent().child('capSlot').child(newData.child('g').val()).child(newData.child('s').val()).child('k').val() === $k && (!data.exists() || data.child('t').val() < now - 2700000)) || ((newData.child('g').val() === 'g_tzed' || newData.child('g').val() === 'g_giant' || newData.child('g').val() === 'g_snake') && newData.child('s').val() === '-' && data.exists() && root.child('guildMembers').child(data.child('g').val()).child(auth.uid).exists() && data.child('t').val() < now - 2700000))",
+            ".validate": "$k.matches(/^[A-Za-z0-9_]{1,24}$/) && newData.hasChildren(['g', 'n', 'c', 'h', 'uid', 's', 't'])",
+            "s": { ".validate": "newData.isString() && newData.val().matches(/^[abcd-]$/)" },
             "g": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_:.-]{1,48}$/)" },
             "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
             "c": { ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)" },
