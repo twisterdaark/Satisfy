@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v136', ver: '1.36', d: '2026-10-21',
+      ar: ['مهارات الحداد الأسطوري (النفَس، العيون، الصبر، الإبداع، التصليح الأسطوري، دمج القطع) بقت لوريث باجما بس، زي الرواية',
+           'الحداد العادي ليه مهاراته: "حِرفة الحداد" (لفل 7، المنطقة الحلوة أوسع شوية والجودة أعلى شوية)، "تصليح القطع" (لفل 10 بعد كويست خان "التل الشمالي"، بيرجّع 13% وبيزيد مع اللفل)، و"تسقية الحديد" (لفل 12، القطع اللي لابسها بتستهلك أبطأ)',
+           'كويست خان "براغا" مفتوح لوريث باجما كمان',
+           'الأسوار: الشخصية مبقتش تدخل في رسمة السور، بتقف قبلها بشوية (قلعة ريدان وكل الأسوار)'],
+      en: ["The Legendary Blacksmith's skills (Breath, Eyes, Patience, Creation, Legendary Repair, Item Combination) are Pagma's Descendant's alone, as in the novel",
+           "A plain blacksmith has their own: Blacksmith's Craftsmanship (Lv 7, a slightly wider sweet spot and better quality), Item Repair (Lv 10 after Khan's North Hill quest, mends 13% and more with levels) and Tempering (Lv 12, the gear you wear wears out slower)",
+           "Khan's Praga quest is open to Pagma's Descendant too",
+           'Walls: the character no longer walks into a wall\'s drawing, it stops a little before it (Reidan Castle and every wall)'] },
     { v: '2026-10-22tradehist', ver: '1.35', d: '2026-10-21',
       ar: ["سجل التبادل: بعد كل تبادل بين لاعبين، كل واحد بيتسجله التبادل مع مين وكام دهب ادى وخد وكام حاجة، والقواعد بتتأكد إن الأرقام هي نفس اللي في التبادل فعلًا",
         "كارت اللاعب بيبين عمل كام تبادل ومع كام لاعب (مينفعش حد يزود الرقم ده من غير تبادل حقيقي)، و/trades بيعرض آخر 10 تبادلات ليك"],
