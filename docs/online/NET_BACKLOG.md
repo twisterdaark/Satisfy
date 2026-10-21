@@ -219,7 +219,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U376 | Trade race tests | ✅ | `regression/trade`: any change resets the accepts; the same item twice is refused |
 | U377 | Boss raid race tests | ✅ | `regression/raid`, `raidloot`: one boss death, one reward each, nothing paid twice |
 | U378 | Save backward compatibility | ✅ | `regression/golden` and the characterization tests against the R0 baseline |
-| U379 | Localization regressions | 🟡 | Tests run in English; Arabic lines are written with each feature |
+| U379 | Localization regressions | ✅ | SAT-ONLINE-092: `unit/i18n` reads every string table in the page: each line in both languages (Arabic feminine forms aside), the same `{placeholders}`, empty in both or neither. Play tests still run in English |
 | U380 | Art provenance audit | 🟡 | `docs/art/ART_CONTRACT.md` (B) |
 | U381 | Security incident drill | ⏳ | Owner (Firebase console) |
 | U382 | Data retention review | 🟡 | Only what play needs is online; entries expire (lfg 30 min, chat lines, inbox) |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 46 · 🟡 39 · ⏳ 6 · ❌ 13 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 47 · 🟡 38 · ⏳ 6 · ❌ 13 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
