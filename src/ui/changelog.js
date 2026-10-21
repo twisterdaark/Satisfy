@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v109', ver: '1.09', d: '2026-10-21',
+      ar: ['أونلاين: الوحش اللي تضربه من بعيد (سهم أو سحر) بيجري وراك إنت حتى لو مش إنت اللي ماسك الوحوش في المنطقة، لحد ٥٦٠ بكسل',
+           'لما تكتشف منطقة جديدة بيطلع "إشعار" شخصي ليك بس، مش "إشعار للعالم"',
+           'صاحب النزل مبقاش يبيعلك الخريطة الورقية لو إنت كاشف معظم الأرض اللي حواليه، عشان متدفعش في حاجة عارفها'],
+      en: ['Online: a monster you hit from afar (arrow or spell) comes after you even when another player runs the monsters in the area, up to 560 px',
+           'Finding a new region shows a personal "Notice", not a "World Notice"',
+           'An innkeeper no longer sells you the paper map when you have already uncovered most of the land around the inn, so you do not pay for what you know'] },
     { v: '2026-10-21v108', ver: '1.08', d: '2026-10-21',
       ar: ['الحفظ السحابي: اتشال الرفع والتنزيل اليدوي و"تحميل بياناتي أونلاين"، عشان نقلل فرص تكرار الداتا. الشخصية بتترفع لحسابك لوحدها وإنت بتلعب، وبتنزل لوحدها لما تدخل بجوجل من جهاز تاني'],
       en: ['Cloud saves: the manual Upload and Download and "Download my online data" are gone, to cut the chance of duplicated data. Your character goes up to your account by itself while you play, and comes down by itself when you sign in with Google on another device'] },

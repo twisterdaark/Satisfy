@@ -75,3 +75,21 @@ test('online: the same monsters, health and attacks on both screens; the followe
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+test('online: a monster the follower shot from afar goes for the follower on the host', async () => {
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE, H.fixedClock()] });
+  try {
+    const a = await online(ctx, 'a', 'gMsA1', 'Ahmed');
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    const b = await online(ctx, 'b', 'gMsB2', 'Bassem');
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    const spot = { x: 90 * 16, y: 60 * 16 };
+    await a.eval((s) => { const G = window.__G; G.P.x = s.x; G.P.y = s.y; G.P.inv = 1e9; }, spot);
+    await b.eval((s) => { const G = window.__G; G.P.x = s.x + 450; G.P.y = s.y; G.P.inv = 1e9; }, spot);
+    await frames([a, b], 40);
+    const r = await a.eval(() => { const G = window.__G; for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } const m = G.spawnMon('wolf', G.P.x + 40, G.P.y); m.max = m.hp = 1e9;
+      const before = window.__GRL.target(m); m.agg = 1; m.prov = 1e12; m.provU = 'gMsB2'; const t = window.__GRL.target(m); return [before && before.remote, t && t.remote]; });
+    assert.deepEqual(r, [null, 'gMsB2']);
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});

@@ -4454,7 +4454,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,m
  dmg=ipHit(m,dmg,crit,o);if(o.skill&&S.tl.duke)dmg*=1.15;if(m.tw)twHit(m,crit,o);if(m.type==='gcrown'&&m.bh&&!crit&&!o.skill)dmg=1;if(o.skill&&S.bh&&S.bh.mm)dmg*=1.03;if(S.tl.hking&&HKV.has(m.type))dmg*=1.15;
  let mblk=false;if(AIK[m.type]==='soldier'&&!o.skill&&!o.aura&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
   mblk=true;dmg*=.2;crit=false;burn=false;m.grdT=.6;m.cd=Math.min(m.cd,.15);vfx('block',m.x+m.face*7,my-2,{angle:m.face>0?Math.PI:0});num(m.x,my-20,t('mBlock'),'#9fc8ff',false);SFX.hit();}
- dmg=Math.max(1,Math.round(dmg));m.hp-=dmg;m.hurt=mblk?0:.15;trainMast();wear(w,.125);m.agg=1;m.prov=gTime+10;if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
+ dmg=Math.max(1,Math.round(dmg));m.hp-=dmg;m.hurt=mblk?0:.15;trainMast();wear(w,.125);m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
  num(m.x,my-8,String(dmg),crit||burn?'#ffd24a':'#ffffff',crit||burn);
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(burn)vfx('fire',m.x,my);if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
@@ -6065,7 +6065,7 @@ const exXP=n=>Math.round(n*(S.tl.pathfinder?1.2:1));
 function exMig(){if(S.exd)return;S.exd={};const st=exStats();st.E.k.forEach((k,i)=>{if(st.seen[i]>=Math.max(2,st.E.n[i]*.3))S.exd[k]=1;});S.exc=S.exc||{};S.exf=S.exf||{};}
 // a region found for the first time (called as the zone banner changes)
 function exZone(z){if(!S||!P||P.y>=WMH*TS||S.__demo)return;exMig();if(S.exd[z]||exGrid().ix[z]===undefined)return;S.exd[z]=1;
- const xg=exXP(xpNeed()*.06);gainXP(xg);lifeXP('carto',30);announce(t('exFound',{z:t(z)}));SFX.rare();toast(t('exFoundR',{n:xg.toLocaleString('en')}),'good');hudDirty=true;save(true);}
+ const xg=exXP(xpNeed()*.06);gainXP(xg);lifeXP('carto',30);announce(t('exFound',{z:t(z)}),1);SFX.rare();toast(t('exFoundR',{n:xg.toLocaleString('en')}),'good');hudDirty=true;save(true);}
 // new land seen: Cartography, and the region you are in may now be charted
 function exSeen(n){if(S.__demo)return;exMig();lifeXP('carto',n);const z=zoneAt(P.x,P.y),E=exGrid(),i=E.ix[z];if(i===undefined||S.exc[z]||E.n[i]<4||exPct(z)<.75)return;
  S.exc[z]=1;const g=exXP(100+S.lv*15);S.gold+=g;lifeXP('carto',60);toast(t('exChart',{z:t(z),g}),'good');SFX.quest();hudDirty=true;save(true);}
@@ -6133,7 +6133,7 @@ function tfTick(dt){if(!TF)tfBuild();if(!P)return;const s=tfNow(),pl=tfPlayers()
  // highwaymen shout as they come for you
  for(const m of TFB){const st=TFS.get(m)||{};TFS.set(m,st);const e=m.eng>0&&!m.dead;if(e&&!st.e&&(st.at||0)<gTime-12){st.at=gTime;st.n=(st.n||0)+1;st.s=t('bdSay'+((monHash(m)*4+st.n)%4|0));st.t=gTime+2.6;}st.e=e;}
  if(SPAR){const m=SPAR.m;SPAR.t+=dt;if(m.dead||mode==='dead'||P.hp<maxHP()*.25||SPAR.t>90||Math.hypot(P.x-m.x,P.y-m.y)>300)sparEnd(!m.dead&&m.hp<=m.max*.25||m.dead&&SPAR.won);else if(m.hp<=m.max*.25)sparEnd(true);}}
-window.__GFX={turn:(m,b,ox,dt)=>monTurn(m,b,ox,dt),tf:()=>TF,tick:dt=>tfTick(dt)}; // tests (owner fixes v1.05)
+window.__GFX={pmKnown:w=>pmKnown(w),map:w=>mapOpt(w).length,turn:(m,b,ox,dt)=>monTurn(m,b,ox,dt),tf:()=>TF,tick:dt=>tfTick(dt)}; // tests (owner fixes v1.05)
 function tfVis(){return TF?TF.filter(f=>!f.busy&&f.x>camX-20&&f.x<camX+VW+20&&f.y>camY-10&&f.y<camY+VH+40):[];}
 function tfDraw(f){drawChar(remoteSpr(f.look,0),f.x,f.y,f.dir,f.mv,false,f.sc);}
 function tfText(f){const s=tfNow(),i=tfSays(f,s),F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';if(i>=0)TX.push({s:t('tfL_'+f.role+i),x:f.x,y:f.y-30*f.sc,f:F,z:7,c:'#fff3d6'});
@@ -6187,7 +6187,10 @@ function fogDraw(g,X,Y,sc){const paper=pmRegions().length>0,k=fogV+'|'+PMRk;
  if(FOGK!==k||FOGCV.fv!==FOG){FOGK=k;FOGCV.fv=FOG;const f=FOGCV.getContext('2d');f.clearRect(0,0,FOGW,FOGH);for(let y=0;y<FOGH;y++)for(let x=0;x<FOGW;x++){if(FOG[y*FOGW+x])continue;
   f.fillStyle=paper&&pmIn(x*FOGC+FOGC/2,y*FOGC-NR+FOGC/2)?`rgba(74,52,24,${(.5+(pmH(x,y)%40)/100).toFixed(2)})`:'#0a1220';f.fillRect(x,y,1,1);}}
  g.save();g.imageSmoothingEnabled=false;g.drawImage(FOGCV,Math.floor(X(0)),Math.floor(Y(-NR)),Math.ceil(FOGW*FOGC*sc)+1,Math.ceil(FOGH*FOGC*sc)+1);g.restore();}
-const mapOpt=who=>pmOwned()[who]?[]:[{l:t('oPMap'),pr:price(who,300),ic:'book',st:t('oPMapD'),poor:S.gold<price(who,300),f:()=>{const g=price(who,300);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;S.ev.pmap=Object.assign({},pmOwned(),{[who]:1});SFX.coin();toast(t('pMapGot'),'good');hudDirty=true;save(true);dialog(who,['pMapT']);}}];
+// owner 2026-10-21: an inn does not sell the map of land you have already walked (85% of its area seen): it would show nothing new
+function pmKnown(who){const n=npcs.find(n=>n.id===who);if(!n||!FOG)return false;const w=wTile(n.x,n.y);let a=0,b=0;
+ for(let y=Math.floor((w.y-PM_RY+NR)/FOGC);y<=Math.floor((w.y+PM_RY+NR)/FOGC);y++)for(let x=Math.floor((w.x-PM_RX)/FOGC);x<=Math.floor((w.x+PM_RX)/FOGC);x++){if(x<0||y<0||x>=FOGW||y>=FOGH)continue;a++;if(FOG[y*FOGW+x])b++;}return a>0&&b/a>=.85;}
+const mapOpt=who=>pmOwned()[who]||pmKnown(who)?[]:[{l:t('oPMap'),pr:price(who,300),ic:'book',st:t('oPMapD'),poor:S.gold<price(who,300),f:()=>{const g=price(who,300);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;S.ev.pmap=Object.assign({},pmOwned(),{[who]:1});SFX.coin();toast(t('pMapGot'),'good');hudDirty=true;save(true);dialog(who,['pMapT']);}}];
 Object.assign(STR.ar,{oPMap:'اشتري خريطة ورق',oPMapD:'خريطة المنطقة دي بس، مرسومة بالإيد: الأماكن تقريبية ومش كلها موجودة',pMapGot:'الخريطة الورق معاك: M تفتحها',pMapT:'رحالة رسمها من دماغه للمنطقة اللي حوالين هنا. هتقرّبك من الأماكن، بس متعتمدش عليها: اللي تمشيه بنفسك هو اللي هيبان مظبوط.'});
 Object.assign(STR.en,{oPMap:'Buy a paper map',oPMapD:"This area only, drawn by hand: places are roughly placed and some are missing",pMapGot:'You have the paper map: M opens it',pMapT:"A traveller sketched the land around here from memory. It gets you close, but don't trust it fully: only what you walk yourself shows exactly."});
 function openMap(){SFX.open();mode='map';$('mapW').hidden=false;$('hint').hidden=true;const pp=outPos();MV.z=4;MV.cx=pp.x/TS;MV.cy=pp.y/TS;mapClamp($('mapC'));drawMapNow();}
@@ -7795,7 +7798,7 @@ function mobStart(){if(!NETTR||!NETTR.mobsPut)return;MOBN={zone:null,all:{},host
  NET.on(ev=>{if(ev.type!=='message'||!MOBN)return;const env=ev.env,pl=env.payload||{};if((env.type!=='raid.hit'&&env.type!=='raid.state')||pl.to!==NET.uid||typeof pl.raid!=='string'||pl.raid.slice(0,2)!=='m|')return;
   const from=NET.get(ev.sid);if(!from||!from.uid||isBlocked(from.uid))return;const m=mobByKey(pl.raid.slice(2));if(!m||m.dead)return;
   if(env.type==='raid.hit'){if(MOBN.host!==NET.uid)return;const k=Math.round(+pl.k);if(!(k>=1&&k<=1e6))return;if(brImm(m))return;mobHitBy(m,from.uid);
-   m.hp-=k;m.hurt=.15;m.agg=1;m.eng=4;num(m.x,monY(m)-8,String(k),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});SFX.hit();if(m.hp<=0){if(MOBN.hits.get(m).has(NET.uid))killMon(m);else{mobKilled(m);m.dead=true;m.dying=.5;m.rt=25;vfx('death',m.x,m.y);}}}
+   m.hp-=k;m.hurt=.15;m.agg=1;m.eng=4;m.prov=gTime+10;m.provU=from.uid;num(m.x,monY(m)-8,String(k),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});SFX.hit();if(m.hp<=0){if(MOBN.hits.get(m).has(NET.uid))killMon(m);else{mobKilled(m);m.dead=true;m.dying=.5;m.rt=25;vfx('death',m.x,m.y);}}}
   else if(from.uid===MOBN.host&&+pl.k===0){m.mobKill=1;m.hp=0;killMon(m);m.mobKill=0;}});}
 function mobHitBy(m,uid){let h=MOBN.hits.get(m);if(!h)MOBN.hits.set(m,h=new Set());h.add(uid);}
 // host: a monster died; everyone else who hit it gets the kill (and their own rewards)
@@ -7854,7 +7857,9 @@ function mobActS(m){if(!m.actN||m.dead)return '';const st=m.br>0?'f':m.biteT>0?'
  const mv=m.mv,L=mv&&!mv.blk?movesOf(m).indexOf(mv):-1,i=mv&&mv.blk?99:Math.max(0,L),tl=st==='f'?m.br:st==='s'?m.tele:st==='b'?m.biteT:m.stT||0,an=st==='f'?m.ba:Math.atan2(m.ay||0,m.ax||1);
  return ','+m.actN+','+st+','+i+','+Math.max(0,Math.round(tl*100))+','+Math.round(an*100)+','+(m.lL|0)+','+uh(m.tgU);}
 // host: the nearest player this monster could be after, as a stand-in that takes no damage here (inv), or null for you
-function mobTarget(m){if(!mobOk(m)||m.dead)return null;const dP=P.ghost||mode==='dead'?1e9:Math.hypot(P.x-m.x,P.y-m.y);let best=null,bd=dP>=1e9?dP:rlNear(m,dP,ROLE,PARTY&&PARTY.id());
+function mobTarget(m){if(!mobOk(m)||m.dead)return null;const dP=P.ghost||mode==='dead'?1e9:Math.hypot(P.x-m.x,P.y-m.y);
+ if(m.prov>gTime&&m.provU&&!rlBoss(m)){if(m.provU===NET.uid&&dP<560)return null;const r=MOBN.rs.find(r=>r.uid===m.provU&&r.anim!=='dead');if(r&&Math.hypot(r.x-m.x,r.y-m.y)<560)return {x:r.x,y:r.y,dir:r.dir,inv:1,dash:0,hp:1,guard:0,gx:0,gy:1,stun:0,ghost:false,remote:r.uid};} // owner 2026-10-21: whoever shot it from afar
+let best=null,bd=dP>=1e9?dP:rlNear(m,dP,ROLE,PARTY&&PARTY.id());
  for(const r of MOBN.rs){if(r.anim==='dead')continue;const d0=Math.hypot(r.x-m.x,r.y-m.y),d=rlNear(m,d0,r.role,r.party);if(d<bd&&d0<300){bd=d;best=r;}} // a raid tank draws the boss (SAT-ONLINE-061)
  return best?{x:best.x,y:best.y,dir:best.dir,inv:1,dash:0,hp:1,guard:0,gx:0,gy:1,stun:0,ghost:false,remote:best.uid}:null;}
 // follower: drive this copy from the host's list; false when the host doesn't list it (it runs on its own)

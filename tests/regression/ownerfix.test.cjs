@@ -54,3 +54,18 @@ test('a phone: the dialog options are tapped directly, the fight buttons step as
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); await ctx.close(); }
 });
+
+test('exploring is a personal notice; an inn does not sell the paper map of land you have already seen', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, LOOK);
+    await g.step(3);
+    // a region found shows under the personal header, not the world one
+    const h = await g.eval(() => { const X = window.__GX, S = window.__G.S, z = X.grid().k.find((k) => !(S.exd || {})[k]); X.zone(z); const W = document.getElementById('announce'); return [W.hidden, W.querySelector('.head').textContent, W.classList.contains('own')]; });
+    assert.deepEqual(h, [false, 'Notice', true]);
+    assert.deepEqual(await g.eval(() => [window.__GFX.pmKnown('inn'), window.__GFX.map('inn')]), [false, 1]);
+    await g.eval(() => { const X = window.__GX; for (const z of X.grid().k) X.fill(z); });
+    assert.deepEqual(await g.eval(() => [window.__GFX.pmKnown('inn'), window.__GFX.map('inn')]), [true, 0]);
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});
