@@ -5613,7 +5613,7 @@ function createGuild(nm){nm=String(nm||'').trim().slice(0,18);if(nm.length<2){SF
  SFX.legendary();flash();toast(t('gMade',{g:nm}),'good');hudDirty=true;save(true);}
 function joinGuild(id){const g=WS.guilds[id];if(!g||S.guild)return;S.guild=id;g.members[pidOf()]={n:S.look.n,rk:'r',c:0};toast(t('gJoined',{g:gName(id)}),'good');SFX.quest();save(true);}
 function leaveGuild(){const g=myG();if(!g)return;const me=pidOf();
- if(g.online&&GUILD){(g.master===me?GUILD.disband():GUILD.leave()).catch(()=>toast(t('gdFail'),'warn'));if(g.master===me){for(const k in WS.terr)if(WS.terr[k].own===g.id)WS.terr[k]={own:null,sh:0};if(WS.castle&&WS.castle.own===g.id)WS.castle.own=null;}return;} // SAT-ONLINE-046: the database tells everyone (guildEv)
+ if(g.online&&GUILD){(g.master===me?galEndAll().then(()=>GUILD.disband()):GUILD.leave()).catch(()=>toast(t('gdFail'),'warn'));if(g.master===me){for(const k in WS.terr)if(WS.terr[k].own===g.id)WS.terr[k]={own:null,sh:0};if(WS.castle&&WS.castle.own===g.id)WS.castle.own=null;}return;} // SAT-ONLINE-046: the database tells everyone (guildEv)
  if(!g.npc&&g.master===me){for(const k in WS.terr)if(WS.terr[k].own===g.id)WS.terr[k]={own:null,sh:0};if(WS.castle&&WS.castle.own===g.id)WS.castle.own=null;delete WS.guilds[g.id];toast(t('gDisband',{g:g.name}),'warn');}
  else{delete g.members[me];toast(t('gLeft',{g:gName(g.id)}));}S.guild='';hudDirty=true;save(true);}
 function openGName(){mode='gname';const box=document.createElement('div');box.id='gnBox';box.className='sys panel';box.innerHTML=`<div class="head">${esc(t('gNameT'))}</div><div class="gnd">${esc(t('gNameD',{g:GCOST}))}</div>`;
@@ -5636,7 +5636,7 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
  dialog('guild',[info,perks+(g.online&&GWK?' · '+gwLine():''),g.online?guildNoteLine():''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
   ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},
-   ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),
+   ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),...(galSt()?[{l:t('gdDip')+(galMo()&&Object.keys(GALA).length?' ('+Object.keys(GALA).length+')':''),f:galD}]:[]),
    ...(Satisfy.guild.can(GUILD.state().rank,'emblem')?[{l:t('gdBan'),f:guildBanD}]:[]),
    ...(Satisfy.guild.can(GUILD.state().rank,'note')?[{l:t('gdNoteW'),f:guildNoteW},...(recSt()?[{l:t('gdApps',{n:Object.keys(GAPPS).length}),f:recAppsD},{l:t('gdRecOn'),f:recPost},{l:t('gdRecOff'),f:recStop}]:[])]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
@@ -7547,7 +7547,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   const gi=guildOf(r),gy=gi?6:0; // SAT-ONLINE-046: «guild» under the name, the name and the bar a line higher
   TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol===2?'#b0102a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038), 2 a murderer (052)
-  if(gi)TX.push({s:'«'+gdEmb(gi.emb)+gi.n+'»',x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
+  if(gi)TX.push({s:'«'+gdEmb(gi.emb)+gi.n+'»'+(galOf(r.gd)?' 🤝':''),x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37-gy,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
   if(near&&r.uid===near.uid&&!foe)TX.push({s:[t('pcHint'),mate?'':t('pInvite'),!mate&&DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?t('dHint'):''].filter(Boolean).join(' · '),x:r.x,y:r.y-(typeof r.hp==='number'?46:37)-gy,f:F,z:6,c:'#ffe7a8'});}
@@ -7839,7 +7839,7 @@ function olPub(){return outlaw()?(karma()<=MURDER?2:1):0;}
 window.__GK={karma:()=>karma(),set:k=>{S.karma=k;},ol:()=>olPub(),respawn:()=>respawn()}; // test hook
 function karmaTick(dt){if(!S||S.__demo||mode!=='play'||karma()>=0)return;S.karT=(S.karT||0)+dt;if(S.karT>=KARMA_BACK){S.karT=0;S.karma=karma()+1;toast(t('kaBack',{k:S.karma}),'good');netForce=true;}}
 function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
-  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
+  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
   else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
    if(v&&v.ol){S.karma=Math.min(KARMA_MAX,karma()+1);netForce=true;save(true);toast(t('kaJust',{n,k:S.karma}),'good');SFX.quest&&SFX.quest();return;} // an outlaw: justice
@@ -7969,7 +7969,7 @@ var gdSig='',gdFor=null,GDS=null,gdBusy=0,gdFetchT=0;const GDN=new Map(); // GDN
 function guildStart(){GUILD=null;gdFor=null;GDS=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.guildStore))return; // NETTR first: FB and GDN are declared below (?net=local starts during load)
  GDN.clear();GDS=Satisfy.firebase.guildStore(FB);GUILD=Satisfy.guild.create({store:GDS,uid:NET.uid,handle:()=>netId||(S&&S.look.n)||'',now:()=>performance.now(),serverNow:()=>wNow()});GUILD.on(guildEv);}
 // (re)start for the character being played: the title's demo has no guild; loading another save starts over
-function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}guildChatSync();recAppsSync();geSync();gwSync();return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();guildChatSync();recAppsSync();geSync();geTick();gwSync();gwTick();}
+function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}guildChatSync();recAppsSync();geSync();gwSync();galSync();return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();guildChatSync();recAppsSync();geSync();geTick();gwSync();gwTick();galSync();}
 function guildEv(e){if(!S||S.__demo||gdFor!==S)return;gdSig='';
  if(e.type==='changed')guildMirror();
  else if(e.type==='joined'){guildMirror();if(e.why==='join'){toast(t('gJoined',{g:e.name||gName(S.guild)}),'good');SFX.quest();save(true);}}
@@ -8083,6 +8083,59 @@ function gdEmb(i){const E=Satisfy.guild.C.EMBLEMS;return i>0&&i<E.length?E[i]+' 
 function guildBanD(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!Satisfy.guild.can(st.rank,'emblem'))return guildPanel();const E=Satisfy.guild.C.EMBLEMS;
  dialog('guild',[t('gdBanQ')],null,[...E.map((e,i)=>({l:i?e+' '+st.guild.name:t('gdBanNone'),f:()=>GUILD.setEmblem(i).then(()=>{toast(t('gdBanDone'),'good');guildPanel();},()=>{toast(t('gdFail'),'warn');guildPanel();})})),{l:t('oBack'),f:guildPanel}]);}
 window.__GBAN={set:i=>GUILD.setEmblem(i),of:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);return r?guildOf(r):null;},open:()=>guildBanD(),E:()=>Satisfy.guild.C.EMBLEMS}; // tests
+/* guild alliances and diplomacy (SAT-ONLINE-085, plan U238/U245). The master or an officer proposes an alliance to another
+   guild by its name (G -> Diplomacy); that guild's master or officers accept or decline it. Neither can make one alone: the
+   rules write each side only against the other's proposal. An alliance lasts 30 days (in its last week either side asks to
+   renew), up to 3 at once; allied players can't hurt each other in open PvP and carry 🤝 by their guild's name. Either side
+   ends it at any time: both are told, it is written in both guilds' diplomacy logs, and neither may propose again for a day. */
+Object.assign(STR.ar,{gdDip:'الدبلوماسية',galH:'حلفاء الجيلد: {n} من {m}',galRow:'🤝 {g}: فاضل {d}',galGone:'{g}: التحالف خلص',galAskIn:'📜 {g} عايزين تحالف',galNone:'لسه مفيش حلفاء. التحالف بيقعد 30 يوم، والحلفاء ميقدروش يضربوا بعض في الـPvP المفتوح',galPropose:'اطلب تحالف',galNameT:'اسم الجيلد التاني',galNoG:'مفيش جيلد اسمه {g}',galSelf:'ده الجيلد بتاعك',galAsked:'طلب التحالف راح لـ {g}',galCd:'التحالف مع {g} اتفك من أقل من يوم. جرب تاني بعد {h}',galFull:'أقصى حاجة 3 حلفاء',galAccept:'اقبل {g}',galDecline:'ارفض {g}',galEnd:'فك التحالف مع {g}',galEndQ:'تفك التحالف مع {g}؟ ومحدش فيكم يقدر يطلب تحالف تاني لمدة يوم',galRenew:'اطلب من {g} تجديد',galNow:'الجيلد بقى حليف {g}!',galOver:'التحالف مع {g} خلص',galAskTo:'{g} عايزين يتحالفوا مع الجيلد (G ← الدبلوماسية)',galLogH:'آخر الأحداث',galLask:'{n} طلب تحالف من {g}',galLallyMe:'{n} قبل تحالف {g}',galLally:'{g} قبلوا التحالف',galLdecMe:'{n} رفض طلب {g}',galLdec:'{g} رفضوا الطلب',galLbrkMe:'{n} فك التحالف مع {g}',galLbrk:'{g} فكوا التحالف',galLend:'التحالف مع {g} خلص',galDays:'{d} يوم',galHrs:'{h} ساعة'});
+Object.assign(STR.en,{gdDip:'Diplomacy',galH:'Guild allies: {n} of {m}',galRow:'🤝 {g}: {d} left',galGone:'{g}: the alliance ran out',galAskIn:'📜 {g} asks for an alliance',galNone:"No allies yet. An alliance lasts 30 days, and allies can't hurt each other in open PvP",galPropose:'Propose an alliance',galNameT:"The other guild's name",galNoG:'No guild called {g}',galSelf:'That is your guild',galAsked:'Proposal sent to {g}',galCd:'The alliance with {g} ended less than a day ago. Try again after {h}',galFull:'At most 3 allies',galAccept:'Accept {g}',galDecline:'Decline {g}',galEnd:'End the alliance with {g}',galEndQ:'End the alliance with {g}? Neither guild can propose again for a day',galRenew:'Ask {g} to renew',galNow:'Your guild and {g} are now allies!',galOver:'The alliance with {g} ended',galAskTo:'{g} asks your guild for an alliance (G → Diplomacy)',galLogH:'Recent',galLask:'{n} proposed an alliance to {g}',galLallyMe:"{n} accepted {g}'s proposal",galLally:'{g} accepted our proposal',galLdecMe:"{n} declined {g}'s proposal",galLdec:'{g} declined our proposal',galLbrkMe:'{n} broke the alliance with {g}',galLbrk:'{g} broke the alliance',galLend:'The alliance with {g} ended',galDays:'{d} days',galHrs:'{h} h'});
+var GAL={},GALA={},GALD={},galW=null,galOff=[],galSeen=0,galSeenA=0;const GAL_MS=2592000000,GAL_MAX=3,GAL_RENEW=604800000,GAL_CD=86400000;
+function galSt(){return GDS&&NETTR&&NETTR.kind==='firebase'&&GDS.watchAllies?GDS:null;}
+function galMo(){const gs=GUILD&&GUILD.state();return !!(gs&&gs.gid&&(gs.rank==='m'||gs.rank==='o'));}
+// an alliance in force with guild gid, or null
+function galOf(gid){const e=gid&&GAL[gid];return e&&e.until>wNow()?e:null;}
+function galId(){return 'd_'+String(NET.uid).slice(0,20).replace(/[^A-Za-z0-9_-]/g,'')+'_'+Date.now().toString(36);}
+const galName=(o,v)=>Satisfy.chat.clean(v&&v.n,18)||gName(o);
+// watch your guild's alliances and log as a member, its proposals as the master or an officer
+function galSync(){const st=galSt(),gs=GUILD&&GUILD.state(),gid=st&&gs&&gs.gid&&gs.rank?gs.gid:null,key=gid?gid+(galMo()?'/mo':''):null;if(key===galW)return;
+ galOff.forEach(f=>{try{f();}catch(e){}});galOff=[];galW=key;GAL={};GALA={};GALD={};galSeen=0;galSeenA=0;if(!gid)return;
+ galOff.push(st.watchAllies(gid,v=>{if(galW!==key)return;const o={},n=wNow();for(const k in (v||{})){const e=v[k];if(/^g_[A-Za-z0-9]{1,128}$/.test(k)&&e&&typeof e==='object'&&+e.until>0)o[k]={n:galName(k,e),until:+e.until};}
+  if(galSeen){for(const k in o)if(o[k].until>n&&!(GAL[k]&&GAL[k].until>n)){toast(t('galNow',{g:o[k].n}),'good');SFX.quest&&SFX.quest();}
+   for(const k in GAL)if(!o[k]&&GAL[k].until>n)toast(t('galOver',{g:GAL[k].n}),'warn');}
+  GAL=o;galSeen=1;hudDirty=true;}));
+ galOff.push(st.watchDiplo(gid,v=>{if(galW!==key)return;GALD=v&&typeof v==='object'?v:{};}));
+ if(galMo())galOff.push(st.watchAllyAsks(gid,v=>{if(galW!==key)return;const o={};for(const k in (v||{})){const e=v[k];if(/^g_[A-Za-z0-9]{1,128}$/.test(k)&&e&&typeof e==='object')o[k]={n:galName(k,e),t:+e.t||0};}
+  if(galSeenA)for(const k in o)if(!GALA[k]){toast(t('galAskTo',{g:o[k].n}),'good');SFX.notice&&SFX.notice();}
+  GALA=o;galSeenA=1;}));}
+function galLeft(ms){const h=Math.max(1,Math.ceil(ms/3600000));return h>=48?t('galDays',{d:Math.floor(h/24)}):t('galHrs',{h});}
+function galLogLine(e){const gs=GUILD&&GUILD.state(),m=gs&&gs.members&&gs.members[e.by],g=Satisfy.chat.clean(e.n,18)||'?',n=m?Satisfy.chat.clean(m.n,24)||'?':'';
+ const k={ask:'galLask',ally:m?'galLallyMe':'galLally',decline:m?'galLdecMe':'galLdec',break:m?'galLbrkMe':'galLbrk',end:'galLend'}[e.k];return k?t(k,{n,g})+' · '+calTime(+e.t||0):'';}
+function galD(){const st=galSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return guildPanel();const n=wNow(),mo=galMo(),me=gs.guild.name;
+ const live=Object.keys(GAL).filter(k=>GAL[k].until>n),gone=Object.keys(GAL).filter(k=>GAL[k].until<=n),asks=Object.keys(GALA);
+ const lines=[t('galH',{n:live.length,m:GAL_MAX})+' · '+(live.length||gone.length?[...live.map(k=>t('galRow',{g:GAL[k].n,d:galLeft(GAL[k].until-n)})),...gone.map(k=>t('galGone',{g:GAL[k].n}))].join(' · '):t('galNone'))];
+ if(mo&&asks.length)lines.push(asks.map(k=>t('galAskIn',{g:GALA[k].n})).join(' · '));
+ const log=Object.keys(GALD).sort().slice(-6).reverse().map(k=>galLogLine(GALD[k])).filter(Boolean);if(log.length)lines.push(t('galLogH')+': '+log.join(' · '));
+ const done=(p,ok)=>p.then(()=>{if(ok)toast(ok,'good');galD();},()=>{toast(t('gdFail'),'warn');galD();});
+ const opts=[];
+ if(mo){for(const k of asks)opts.push({l:t('galAccept',{g:GALA[k].n}),f:()=>{if(!galOf(k)&&live.length>=GAL_MAX){toast(t('galFull'),'warn');return galD();}done(st.allyAccept(gs.gid,me,k,GALA[k].n,NET.uid,wNow()+GAL_MS,galId()));}},{l:t('galDecline',{g:GALA[k].n}),f:()=>done(st.allyDecline(gs.gid,me,k,GALA[k].n,NET.uid,galId()))});
+  if(live.length<GAL_MAX)opts.push({l:t('galPropose'),f:galPropose});
+  for(const k of live)if(GAL[k].until-n<GAL_RENEW)opts.push({l:t('galRenew',{g:GAL[k].n}),f:()=>galAsk(k,GAL[k].n)});
+  for(const k of [...live,...gone])opts.push({l:t('galEnd',{g:GAL[k].n}),f:()=>{const g=GAL[k].n,brk=GAL[k].until>wNow();if(!brk)return done(st.allyEnd(gs.gid,me,k,g,NET.uid,'end',galId()));
+   dialog('guild',[t('galEndQ',{g})],null,[{l:t('gYes'),f:()=>done(st.allyEnd(gs.gid,me,k,g,NET.uid,'break',galId()))},{l:t('gNo'),f:galD}]);}});}
+ opts.push({l:t('oBack'),f:guildPanel});dialog('guild',lines,null,opts);}
+// propose to the guild called name (after the day's wait when one of the two broke an alliance between them)
+function galAsk(gid,name){const st=galSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid||!galMo())return Promise.reject(new Error('rank'));
+ return st.allyCd(gs.gid,gid).then(cd=>{if(cd&&wNow()-cd<GAL_CD){toast(t('galCd',{g:name,h:calTime(cd+GAL_CD)}),'warn');return galD();}
+  return st.allyAsk(gs.gid,gs.guild.name,gid,name,NET.uid,galId()).then(()=>{toast(t('galAsked',{g:name}),'good');galD();});}).catch(e=>{toast(t('gdFail'),'warn');galD();});}
+function galPropose(){const st=galSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return guildPanel();
+ askLine(t('galNameT'),'',18,v=>{const nm=Satisfy.chat.clean(String(v||'').trim(),18);if(!nm)return galD();
+  st.findGuild(nm.toLowerCase()).then(r=>{if(!r){toast(t('galNoG',{g:nm}),'warn');return galD();}if(r.gid===gs.gid){toast(t('galSelf'),'warn');return galD();}
+   return galAsk(r.gid,Satisfy.chat.clean(r.g.name,18)||nm);},()=>{toast(t('gdFail'),'warn');galD();});});}
+// before the master closes the guild: every alliance ends ('end', no day's wait)
+function galEndAll(){const st=galSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return Promise.resolve();
+ return Promise.all(Object.keys(GAL).map((k,i)=>st.allyEnd(gs.gid,gs.guild.name,k,GAL[k].n,NET.uid,'end',galId()+i).catch(()=>{})));}
+window.__GAL={open:()=>galD(),ask:name=>new Promise(r=>{const st=galSt();st.findGuild(String(name).toLowerCase()).then(x=>galAsk(x.gid,x.g.name).then(r));}),of:gid=>galOf(gid),get all(){return GAL},get asks(){return GALA},get log(){return GALD},line:e=>galLogLine(e),endAll:()=>galEndAll(),store:()=>GDS}; // tests
 /* the guild master and the notice (SAT-ONLINE-076, plan U241/U243/U244). The master hands the guild to an officer from
    that officer's card (they become master, you an officer); when the master has not been seen for 14 days an officer takes
    it over from the master's card. The notice: one line the master and officers write ("Write the notice" in G), shown at the

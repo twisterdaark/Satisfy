@@ -6,7 +6,8 @@
  * Every message carries payload.to (recipient uid).
  *
  * Rules: no fighting in towns or in a place the world doesn't define (zonePolicy safe / known:false), on either side;
- * no friendly fire inside a party; nobody in a duel is part of open PvP (the duel has its own hits); a dead player
+ * no friendly fire inside a party or between allied guilds (SAT-ONLINE-085: o.ally(r) says r is in a guild allied with
+ * ours); nobody in a duel is part of open PvP (the duel has its own hits); a dead player
  * takes no hits. Damage is capped: each hit is MIN_HIT..MAX_HIT per mille of the victim's max HP whatever the levels,
  * so nobody dies to one blow. Dying to a player costs the normal death penalty only (the game's die()); nothing
  * changes hands.
@@ -17,9 +18,9 @@
  * player it really hit in the last KILL_MS. A modified client could ignore hits or hide its mark; Trusted Combat on a
  * server (R5) closes that later.
  *
- * Exposes `Satisfy.pvp.create({ presence, uid, now?, pos, zone, room?, party, busy?, alive?, policy? })`.
+ * Exposes `Satisfy.pvp.create({ presence, uid, now?, pos, zone, room?, party, ally?, busy?, alive?, policy? })`.
  *   pos(): {x, y} of the local player; zone(): its zone id; room(): its house interior id or null; party(): its party id or null;
- *   busy(): true while in a duel; alive(): false while dead.
+ *   ally(r): true when remote r is in a guild allied with ours; busy(): true while in a duel; alive(): false while dead.
  */
 (function (root) {
   'use strict';
@@ -33,6 +34,7 @@
     var P = o.presence, self = o.uid, now = o.now || function () { return Date.now(); };
     var pos = o.pos, zone = o.zone, party = o.party || function () { return null; }, room = o.room || function () { return null; };
     var busy = o.busy || function () { return false; }, alive = o.alive || function () { return true; };
+    var ally = o.ally || function () { return false; };
     var policy = o.policy || (root.Satisfy && root.Satisfy.net && root.Satisfy.net.zonePolicy) || function () { return { safe: false }; };
     var listeners = [], hitsIn = new Map(), hitsOut = [], hitN = 0;
     var struck = new Map(); // uid -> last time we hit them (a kill report only counts for those)
@@ -47,6 +49,7 @@
       if ((r.room || null) !== (room() || null)) return 'room';
       if (noFight(zone()) || noFight(r.zone)) return 'safe';
       if (mate(r)) return 'mate';
+      if (ally(r)) return 'ally';
       if (busy() || r.duel) return 'duel';
       if (!alive() || r.anim === 'dead') return 'dead';
       return null;
@@ -79,7 +82,7 @@
     });
 
     var api = {
-      /** Can the local player hit remote r right now? Returns null, or why not: bad, room, safe, mate, duel, dead. */
+      /** Can the local player hit remote r right now? Returns null, or why not: bad, room, safe, mate, ally, duel, dead. */
       why: why,
       /** Send one hit of power pow (game units). Returns the per-mille sent (0 when it can't land or is too fast). */
       hit: function (r, pow) {
