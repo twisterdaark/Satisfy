@@ -5,6 +5,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v105', ver: '1.05', d: '2026-10-21',
+      ar: ['الموبايل: زرار ✥ اللي كان جنب العصاية واتداس عليه بالغلط بقى "رتّب الأزرار" جوه قايمة ▦',
+        'الحوار على الموبايل: أزرار القتال والعصاية بيختفوا طول ما الحوار مفتوح، والحوار مبيغطيش زرار استخدم، فتقدر تدوس على الاختيار نفسه أو تستخدم زرار استخدم',
+        'الوحوش مبقتش تمشي بضهرها (المون ووك): الوحش اللي بيبعد بيلف ضهره ويجري، واللي كان بيرجع لورا وهو بيهاجم بقى يتفادى على الجنب',
+        'أهل البلد والعيال بيمشوا لمكانهم بخطوات عادية بدل ما ينطّوا من حتة لحتة',
+        'لو رينجد ضرب وحش من برا مدى الأجرو، الوحش بيجري وراه وبيبعد عن مكانه أكتر شوية لحد ما يوصله'],
+      en: ['Phones: the ✥ button beside the stick, which got pressed by mistake while moving, is now "Arrange buttons" in the ▦ menu',
+        'Dialogs on phones: the fight buttons and the stick step aside while a dialog is open, and the dialog no longer covers Use, so you can tap an option or use the Use button',
+        'Monsters no longer moonwalk: one moving away turns its back and runs, and the ones that backed off while fighting now sidestep',
+        'Townsfolk and children walk to their spot at a normal pace instead of jumping from place to place',
+        'A monster hit from beyond its aggro range (a bow, a spell) comes after the attacker, and follows further from home until it reaches them'] },
     { v: '2026-10-21guildlead', ver: '1.04', d: '2026-10-21',
       ar: ['أونلاين: قائد الجيلد يقدر يسلّم الجيلد لضابط من كارته في G ← الأعضاء، فيبقى هو القائد وإنت ضابط. ولو القائد غاب 14 يوم، أي ضابط ياخد القيادة',
         'إعلان الجيلد: القائد والضباط بيكتبوه من G، وبيظهر فوق في G، وكل الأعضاء بيوصلهم لما يتغير',
