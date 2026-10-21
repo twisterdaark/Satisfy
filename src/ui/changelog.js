@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21calendar', ver: '1.06', d: '2026-10-21',
+      ar: ['أونلاين: "المواعيد" في قايمة اللاعبين (O): الأحداث العالمية الجاية، والمسابقة الوطنية، وحصار قلعة ريدان، ومهرجان المدن، وسباق الخيل، وإمتى تراوكا وبيريث يرجعوا',
+        'كل ميعاد بتوقيتك وبتوقيت جرينتش، والوقت الفاضل عليه. والمواعيد من ساعة السيرفر، فهي واحدة عند الكل'],
+      en: ['Online: "Calendar" in the player list (O): the coming world events, the National Competition, the siege of Reidan Castle, the town festival, the horse race, and when Trauka and Berith are back',
+        'Every time in your own time zone and in UTC, with the time left. They come from the server\'s clock, so they are the same for everyone'] },
     { v: '2026-10-21v105', ver: '1.05', d: '2026-10-21',
       ar: ['الموبايل: زرار ✥ اللي كان جنب العصاية واتداس عليه بالغلط بقى "رتّب الأزرار" جوه قايمة ▦',
         'الحوار على الموبايل: أزرار القتال والعصاية بيختفوا طول ما الحوار مفتوح، والحوار مبيغطيش زرار استخدم، فتقدر تدوس على الاختيار نفسه أو تستخدم زرار استخدم',
