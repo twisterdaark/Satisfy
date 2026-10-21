@@ -29,7 +29,9 @@ const at = (g, dx) => g.eval((dx) => {
   for (const o of G.mons()) if (o !== m) { o.dead = true; o.rt = 1e9; }
   G.P.x = m.x + dx; G.P.y = m.y; G.P.inv = 0; G.P.hp = 1e6; G.P.dir = dx < 0 ? 1 : 3;
 }, dx);
-const toasts = (g) => g.eval(() => document.getElementById('toasts').textContent);
+// a toast lives 2.6 s of real time, which a busy machine steps past: every page keeps the toasts it has shown
+const toasts = (g) => g.eval(() => window.__toastSeen || '');
+const keepToasts = (g) => g.eval(() => { window.__toastSeen = ''; const box = document.getElementById('toasts'); new MutationObserver(() => { window.__toastSeen += '|' + box.textContent; }).observe(box, { childList: true, subtree: true, characterData: true }); });
 
 test('online: a raid boss kill rolls one bonus piece among those who fought it; Need beats Greed; only the winner gets it', async () => {
   const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
@@ -43,6 +45,7 @@ test('online: a raid boss kill rolls one bonus piece among those who fought it; 
     const { a, b } = pages;
     await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
     await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    for (const g of [a, b]) await keepToasts(g);
     await at(a, -40); await at(b, -20);
     await settle(a, b);
     await a.page.keyboard.press('KeyP');
@@ -70,7 +73,7 @@ test('online: a raid boss kill rolls one bonus piece among those who fought it; 
     const roll = await a.eval((id) => window.__GRL.roll(id, 'gLtB2'), offer.id);
     await until([b], (o) => window.__G.S.items.some((it) => it.uid > o.u && it.id === o.it && it.r === o.r), 10000, { u: uid0, it: offer.it, r: offer.r });
     assert.match(await toasts(b), new RegExp('You won .+ in the raid roll \\(Need ' + roll + '\\)'));
-    await until([a], (r) => new RegExp('Mate won .+ in the raid roll \\(Need ' + r + '\\)').test(document.getElementById('toasts').textContent), 10000, roll);
+    await until([a], (r) => new RegExp('Mate won .+ in the raid roll \\(Need ' + r + '\\)').test(window.__toastSeen), 10000, roll);
     for (const g of [a, b]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
     assert.deepEqual(a.errors, []);
     assert.deepEqual(b.errors, []);
