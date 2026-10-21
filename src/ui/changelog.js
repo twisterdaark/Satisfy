@@ -5,6 +5,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v137', ver: '1.37', d: '2026-10-21',
+      ar: ['سهم المهمات: سهم بيدلّك على مكان المهمة. لو المكان على الشاشة بيبقى فوقه، ولو بعيد بيلف حواليك ويشاور عليه ومعاه المسافة بالمتر. الأزرق للمهمة نفسها، والدهبي لما تخلص وترجع للي إداك المهمة',
+           'مهمات القتل بتشاور على أقرب وحش من النوع المطلوب، ومهمات الحاجات بتشاور على أقرب وحش بيوقّعها، ومهمات الزيارة على المكان نفسه',
+           'السهم بيتبع أحدث مهمة ليها مكان. افتح أي مهمة من القايمة ودوس "خلّي السهم يدلّني على المهمة دي" عشان تختارها، ودوس تاني عشان تخفي السهم. المهمة المتتبَّعة عليها 📍 في القايمة',
+           'لو مفيش مهمات، السهم بيدلّك على اللي هيديك المهمة الجاية في القصة الرئيسية',
+           'شاشة التحميل بقت أحلى: "جاري التحميل" أو "Loading" حسب لغتك، وشرارات ودواير بتطير ورا الاسم'],
+      en: ['Quest arrow: an arrow shows where your quest wants you. When the place is on screen it bobs over it; when it is far it circles you, pointing to it with the distance in metres. Blue for the task, gold when it is done and you go back to the giver',
+           'Kill quests point to the nearest monster of the kind, item quests to the nearest monster that drops it, visits to the place itself',
+           'The arrow follows your newest quest with a place. Open any quest in the list and press "Point the arrow to this quest" to pick it, and press it again to hide the arrow. The followed quest has a 📍 in the list',
+           'With no quest, the arrow points to whoever gives the next main story quest',
+           'A nicer loading screen: "Loading" or "جاري التحميل" in your language, with sparks and rings drifting up behind the name'] },
     { v: '2026-10-21v136', ver: '1.36', d: '2026-10-21',
       ar: ['مهارات الحداد الأسطوري (النفَس، العيون، الصبر، الإبداع، التصليح الأسطوري، دمج القطع) بقت لوريث باجما بس، زي الرواية',
            'الحداد العادي ليه مهاراته: "حِرفة الحداد" (لفل 7، المنطقة الحلوة أوسع شوية والجودة أعلى شوية)، "تصليح القطع" (لفل 10 بعد كويست خان "التل الشمالي"، بيرجّع 13% وبيزيد مع اللفل)، و"تسقية الحديد" (لفل 12، القطع اللي لابسها بتستهلك أبطأ)',
