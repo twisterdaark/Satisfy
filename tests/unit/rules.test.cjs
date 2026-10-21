@@ -531,6 +531,18 @@ test('balance figures (SAT-ONLINE-088): each player its own week\'s numbers, bou
   assert.equal(u.$other['.validate'], false);
 });
 
+test('seller history (SAT-ONLINE-089): your own record of a trade done between the two, checked against its sides', () => {
+  const L = rules.tradeLog.$uid, R = rules.tradeRep.$uid;
+  assert.equal(L['.read'], 'auth != null && auth.uid === $uid', 'your record is yours');
+  assert.equal(R['.read'], 'auth != null', 'the count is public');
+  const w = "auth != null && auth.uid === $uid && !data.exists() && newData.exists() && root.child('tradeDone').child($tid).exists()";
+  assert.equal(L.$tid['.write'], w, 'once, only for a done trade');
+  assert.equal(R.$tid['.write'], w);
+  for (const x of [L.$tid.o, R.$tid.o]) assert.ok(x['.validate'].includes("root.child('trades').child($tid).child('a').val() === $uid && newData.val() === root.child('trades').child($tid).child('b').val()"), 'the other party');
+  assert.equal(L.$tid.gg['.validate'], "newData.val() === root.child('tradeSides').child($tid).child($uid).child('g').val()", 'the gold given as the trade holds it');
+  assert.equal(L.$tid.gi['.validate'], "newData.val() === root.child('tradeSides').child($tid).child(newData.parent().child('o').val()).child('g').val()");
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);

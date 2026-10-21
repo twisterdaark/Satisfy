@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22tradehist', ver: '1.30', d: '2026-10-21',
+      ar: ["سجل التبادل: بعد كل تبادل بين لاعبين، كل واحد بيتسجله التبادل مع مين وكام دهب ادى وخد وكام حاجة، والقواعد بتتأكد إن الأرقام هي نفس اللي في التبادل فعلًا",
+        "كارت اللاعب بيبين عمل كام تبادل ومع كام لاعب (مينفعش حد يزود الرقم ده من غير تبادل حقيقي)، و/trades بيعرض آخر 10 تبادلات ليك"],
+      en: ["Trade history: after every trade between players each side keeps a record of it: with whom, the gold given and got, and how many items; the rules check the numbers against the trade itself",
+        "A player's card shows how many trades they have made and with how many players (nobody can raise it without a real trade), and /trades lists your last ten"] },
     { v: '2026-10-22balance', ver: '1.30', d: '2026-10-22',
       ar: ["لوحة التوازن لصاحب اللعبة: /balance بتجمع أرقام الأسبوع لكل كلاس: عدد اللاعيبة ومتوسط اللفل، القتلات ومتوسط الوقت لقتل الوحش، ونسبة الفوز في الـPvP (المبارزات والـPvP المفتوح)",
         "كل لعبة أونلاين بتبعت أرقامها هي بس كل 5 دقايق لما تتغير، ومحدش غير صاحب اللعبة بيقراها، واللوحة مفيهاش أسامي لاعيبة"],
