@@ -85,10 +85,12 @@ test('the harbor: the ferry to Cork Island, a boat that keeps to the sea and lan
     await at(g, 299, 241);
     // the fare is taken at once (charting a new place on arrival pays its own gold)
     assert.equal(await g.eval(() => { window.__G.S.gold = 1000; window.__GP4.ferry(0); return window.__G.S.gold; }), 700);
+    await g.page.waitForTimeout(700); // the fade runs on a real timer
     await g.step(80);
     const f = await g.eval(() => { const G = window.__G; return [Math.floor(G.P.x / 16), Math.floor(G.P.y / 16), G.zoneAt(G.P.x, G.P.y)]; });
     assert.deepEqual(f, [641, 260, 'zCork']);
     await g.eval(() => window.__GP4.boat(1));
+    await g.page.waitForTimeout(700);
     await g.step(80);
     assert.equal(await g.eval(() => window.__G.P.boat), 1);
     await g.page.keyboard.down('KeyD'); await g.step(60); await g.page.keyboard.up('KeyD');

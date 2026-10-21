@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v139', ver: '1.39', d: '2026-10-21',
+      ar: ['الغابة الغامضة غرب جاوس (لفل 250+): ضباب أخضر وطريق واحد بيلف لحد فسحة في النص. ناسك الغابة واقف عند أول الطريق وعنده كويستين',
+           'نسخة باجما (لفل 260): زعيم عالمي لابس وش باجما وبيحارب بحركات سيفه (القتل، الربط، الموجة، التجاوز، الدوران). كل 30 ثانية بتتقسم لظلال، وطول ما الظلال واقفة بتاخد تلت ضربك بس. كل ما اللاعبين حواليها يكتروا الظلال بتكتر. بترجع بعد ساعة',
+           'سيف النسخة العظيم (أسطوري، لفل 320): بيتجاهل 20% من الدفاع ومهارات الهجوم +20%. فرصة يقع من النسخة',
+           'البت راندي (حيوان أليف جديد، من كويست الناسك التاني): بتقاتل من أول لفل، بتقلد آخر مهارة استخدمتها، ولما صحتك تقل عن 30% بتبدل مكانها معاك. الضرر اللي بيوصلك بيقل'],
+      en: ['The Mysterious Forest in western Gauss (Lv 250+): green mist and one winding path to a clearing at its heart. The Forest Hermit at the path head has two quests',
+           "Pagma's Doppelganger (Lv 260): a world boss with Pagma's face, fighting with his sword moves (Kill, Link, Wave, Transcend, Revolve). Every 30 s it splits into shades, and while they stand it takes a third of your damage. More players near it make more shades. It returns after an hour",
+           "The Doppelganger's Greatsword (Legendary, Lv 320): ignores 20% of defence, attack skills +20%. A chance to drop from the Doppelganger",
+           "Randy (a new pet, from the hermit's second quest): she fights from level 1, copies the last skill you used, and when your health falls under 30% she swaps places with you. You take less damage"] },
     { v: '2026-10-21v138', ver: '1.38', d: '2026-10-21',
       ar: ['حقل بيارو (جنب بيت بيارو على طريق باتريان): 8 أحواض تزرع فيها قمح وفراولة وبطيخ وقرع عسلي وكرنب الصقيع. المواسم بتتغير كل يومين، واللي في موسمه بيطلع أسرع وأكتر. 3 أعشاب في الصندوق = سماد بيسرّع ويزوّد المحصول',
            'للفلاحين (تخصص فلاح): كويستات بيارو "طريق الفلاح" و"الحقل الأسطوري"، وآخرها تايتل "الفلاح الأسطوري" (زرع أسرع، محصول أكتر، وحفر أكتر في الحقل)',
