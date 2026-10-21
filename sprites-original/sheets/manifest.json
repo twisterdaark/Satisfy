@@ -7364,6 +7364,161 @@
     }
    }
   },
+  "gobsc": {
+   "file": "sheets/gobsc.png",
+   "hands": {
+    "d": {
+     "idle": [
+      {
+       "x": 12,
+       "y": 18
+      },
+      {
+       "x": 12,
+       "y": 18
+      }
+     ],
+     "walk": [
+      {
+       "x": 12,
+       "y": 18
+      },
+      {
+       "x": 12,
+       "y": 17
+      },
+      {
+       "x": 12,
+       "y": 19
+      },
+      {
+       "x": 12,
+       "y": 17
+      }
+     ],
+     "atk": [
+      {
+       "x": 12,
+       "y": 6
+      },
+      {
+       "x": 10,
+       "y": 18
+      },
+      {
+       "x": 12,
+       "y": 19
+      }
+     ],
+     "hurt": [
+      {
+       "x": 12,
+       "y": 16
+      }
+     ]
+    },
+    "u": {
+     "idle": [
+      {
+       "x": 12,
+       "y": 18
+      },
+      {
+       "x": 12,
+       "y": 18
+      }
+     ],
+     "walk": [
+      {
+       "x": 12,
+       "y": 18
+      },
+      {
+       "x": 12,
+       "y": 17
+      },
+      {
+       "x": 12,
+       "y": 19
+      },
+      {
+       "x": 12,
+       "y": 17
+      }
+     ],
+     "atk": [
+      {
+       "x": 12,
+       "y": 6
+      },
+      {
+       "x": 10,
+       "y": 18
+      },
+      {
+       "x": 12,
+       "y": 19
+      }
+     ],
+     "hurt": [
+      {
+       "x": 12,
+       "y": 16
+      }
+     ]
+    },
+    "s": {
+     "idle": [
+      {
+       "x": 8,
+       "y": 18
+      },
+      {
+       "x": 8,
+       "y": 18
+      }
+     ],
+     "walk": [
+      {
+       "x": 9,
+       "y": 18
+      },
+      {
+       "x": 8,
+       "y": 17
+      },
+      {
+       "x": 7,
+       "y": 18
+      },
+      {
+       "x": 8,
+       "y": 17
+      }
+     ],
+     "atk": [
+      {
+       "x": 2,
+       "y": 9
+      },
+      {
+       "x": 14,
+       "y": 14
+      },
+      {
+       "x": 10,
+       "y": 18
+      }
+     ],
+     "hurt": [
+      {
+       "x": 6,
+       "y": 18
+      }
+     ]
+    }
+   }
+  },
   "grid": {
    "file": "sheets/grid.png",
    "hands": {
@@ -20616,6 +20771,18 @@
     },
     "scale": 1.15
    },
+   "cbat": {
+    "file": "sheets/monsters/cbat.png",
+    "frame": {
+     "w": 30,
+     "h": 30
+    },
+    "anchor": {
+     "x": 13,
+     "y": 29
+    },
+    "scale": 1.1
+   },
    "cbear": {
     "file": "sheets/monsters/cbear.png",
     "frame": {
@@ -20724,6 +20891,18 @@
     },
     "scale": 1
    },
+   "grabbit": {
+    "file": "sheets/monsters/grabbit.png",
+    "frame": {
+     "w": 17,
+     "h": 17
+    },
+    "anchor": {
+     "x": 8,
+     "y": 17
+    },
+    "scale": 1
+   },
    "guardian": {
     "file": "sheets/monsters/guardian.png",
     "frame": {
@@ -20735,6 +20914,18 @@
      "y": 64
     },
     "scale": 1
+   },
+   "hrabbit": {
+    "file": "sheets/monsters/hrabbit.png",
+    "frame": {
+     "w": 16,
+     "h": 18
+    },
+    "anchor": {
+     "x": 8,
+     "y": 18
+    },
+    "scale": 1.15
    },
    "hwolf": {
     "file": "sheets/monsters/hwolf.png",
@@ -20771,6 +20962,30 @@
      "y": 33
     },
     "scale": 1
+   },
+   "mimic": {
+    "file": "sheets/monsters/mimic.png",
+    "frame": {
+     "w": 18,
+     "h": 22
+    },
+    "anchor": {
+     "x": 9,
+     "y": 21
+    },
+    "scale": 1.2
+   },
+   "mslime": {
+    "file": "sheets/monsters/mslime.png",
+    "frame": {
+     "w": 25,
+     "h": 17
+    },
+    "anchor": {
+     "x": 10,
+     "y": 16
+    },
+    "scale": 0.75
    },
    "ogolem": {
     "file": "sheets/monsters/ogolem.png",
@@ -20891,6 +21106,30 @@
      "y": 17
     },
     "scale": 1.1
+   },
+   "slime": {
+    "file": "sheets/monsters/slime.png",
+    "frame": {
+     "w": 25,
+     "h": 17
+    },
+    "anchor": {
+     "x": 10,
+     "y": 16
+    },
+    "scale": 1.25
+   },
+   "sscorp": {
+    "file": "sheets/monsters/sscorp.png",
+    "frame": {
+     "w": 41,
+     "h": 23
+    },
+    "anchor": {
+     "x": 20,
+     "y": 22
+    },
+    "scale": 1.3
    },
    "trauka": {
     "file": "sheets/monsters/trauka.png",

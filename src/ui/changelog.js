@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v128', ver: '1.28', d: '2026-10-21',
+      ar: ['وحوش جديدة: أرانب بقرن والأرنب الدهبي (بيهرب منك ونادر) جنب وينستون، سلايم بيتقسم لاتنين صغيرين لما تقتله، ميميك متخبي كأنه صندوق في المستنقع، خفافيش الكهوف في المرتفعات، عقارب رمل مدفونة في الصحرا الجنوبية بتطلع لما تقرب منها، وكشافة العفاريت اللي لما يشوفك بينفخ في البوق ويجيب المعسكر كله عليك',
+        'الشنطة بقى ليها تابات: الكل، العتاد، الخامات، الاستهلاك',
+        'فلتر للمهام على الشاشة: الكل، القصة، S، يومية، جانبية',
+        'وضع التصوير: F8 أو من قايمة الإيقاف. الواجهة بتختفي، وEnter أو 📷 بتحفظ صورة'],
+      en: ['New monsters: horned rabbits and the golden rabbit (rare, and it runs from you) by Winston, slimes that split in two when killed, mimics posing as chests in the marsh, cave bats on the highlands, sand scorpions buried in the southern desert that burst out when you come close, and goblin scouts whose horn calls the whole camp on you',
+        'The bag has tabs: All, Gear, Materials, Consumables',
+        'Quest filter on the HUD: All, Story, S, Daily, Side',
+        'Photo mode: F8 or the pause menu. The HUD hides, and Enter or 📷 saves a picture'] },
     { v: '2026-10-21v127', ver: '1.27', d: '2026-10-21',
       ar: ['البوس اللي بتضربه من بعيد (زي زعيم العفاريت) مابقاش يقف عند مكانه ويعالج نفسه: لمدة 10 ثواني بعد كل ضربة بيجري عليك حتى لو انت بعيد عن مكانه، وبيرجع بيته بس لو بعدت عنه خالص',
         'شريط صحة البوس بيظهر وانت بتضربه من بعيد'],

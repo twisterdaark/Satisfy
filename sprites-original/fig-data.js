@@ -9,6 +9,7 @@ const FIG={
  grid:{...GH,top:'#8d919b',top2:'#6a6e78',sleeves:true,belt:'#4a3424',pants:'#33323c',boots:'#4a3424'},
  smith:{hair:'short',hc:'#3a2a1e',hl:'#5a4030',skin:'#d9a070',sk2:'#b47c50',top:'#d9a070',top2:'#b47c50',sleeves:false,beard:'#3a2a1e',beard2:'#22180f',apron:'#5a3a24',apron2:'#3e2616',pants:'#3a3028',boots:'#22180f'},
  goblin:{hair:'bald',hc:'#2e4a1e',hl:'#8ac46a',skin:'#6aa84a',sk2:'#4a8030',top:'#6a5236',top2:'#4e3a24',sleeves:false,shorts:'#5a4028',pants:'#5a4028',boots:'#4a8030'},
+ gobsc:{hair:'cap',hc:'#2e4a1e',hl:'#8ac46a',cap:'#5a3a1e',skin:'#6aa84a',sk2:'#4a8030',top:'#4a5a2a',top2:'#34401c',sleeves:false,belt:'#c8a050',shorts:'#4a3a24',pants:'#4a3a24',boots:'#4a8030'},
  gchief:{hair:'helm',hc:'#cbbf9a',hl:'#efe6c8',skin:'#4f8a36',sk2:'#356a22',top:'#5a3a2a',top2:'#3e261a',sleeves:false,pad:'#8a7a5a',pad2:'#6a5a3a',belt:'#2a1a10',shorts:'#3e261a',pants:'#3e261a',boots:'#356a22'},
  cgob:{hair:'bald',hc:'#1e3a16',hl:'#5a8a3a',skin:'#4a7a3a',sk2:'#33602a',top:'#3a3a44',top2:'#26262e',sleeves:false,shorts:'#2e2a26',pants:'#2e2a26',boots:'#33602a'},
  gshaman:{hair:'long',hc:'#d8d0c0',hl:'#f2ece0',skin:'#5a9a44',sk2:'#3e7a2e',top:'#5a2a7a',top2:'#3e1a58',sleeves:true,belt:'#c8a050',pants:'#3e1a58',boots:'#2a1a10'},
