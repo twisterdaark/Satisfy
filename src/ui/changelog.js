@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21war', ver: '1.31', d: '2026-10-21',
+      ar: ["حروب الجيلد: القائد أو الضابط يعلن حرب على جيلد تاني باسمه (G ← الحروب) لساعة واحدة في ميعاد ثابت على رأس الساعة، والجيلد التاني يوافق أو يرفض. ومينفعش تحارب حلفائك",
+        "في ساعة الحرب، كل قتلة لحد من الجيلد التاني برا المدن بتتحسب للجيلد ومبتخسركش كارما ولا بتخليك خارج عن القانون، وبيظهر ⚔ جنب اسم جيلدهم",
+        "الجيلدين بيتبلغوا لما الحرب تتحدد، وقبلها بـ 10 دقايق، ولما تبدأ، ولما تخلص بالنتيجة. تقدر تلغيها لحد قبلها بـ 10 دقايق، ومينفعش تهرب منها وهي شغالة"],
+      en: ["Guild wars: the master or an officer declares war on another guild by its name (G → Wars) for one hour on a set full hour, and that guild accepts or refuses. No war on an ally",
+        "In the war's hour, every kill of the other guild's members outside towns counts for your guild, costs no karma and makes no outlaw; enemies carry ⚔ by their guild's name",
+        "Both guilds are told when it is set, 10 minutes before, at the start and at the end with the score. It can be called off up to 10 minutes before, and can't be left once it is on"] },
     { v: '2026-10-21ally', ver: '1.30', d: '2026-10-21',
       ar: ["تحالفات الجيلد: القائد أو الضابط يطلب تحالف من جيلد تاني باسمه (G ← الدبلوماسية)، والجيلد التاني يقبل أو يرفض. محدش يقدر يعمل تحالف لوحده",
         "الحلفاء ميقدروش يضربوا بعض في الـPvP المفتوح، وبيظهر 🤝 جنب اسم جيلدهم. التحالف 30 يوم، وفي آخر أسبوع تقدر تطلب تجديد، وأقصى حاجة 3 حلفاء",

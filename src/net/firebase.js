@@ -407,7 +407,7 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; u['guildWar/' + gid] = null; u['guildWarAsk/' + gid] = null; u['guildWarKill/' + gid] = null; return up(u); },
       // SAT-ONLINE-081 the weekly goal: guildWeek/{gid}/{wk}/{uid} {n, k, t}: each member's own kills this week (only upward,
       // at most 1,500); guildWeekPaid/{gid}/{wk}/{uid}/{tier} {t}: a tier's reward, taken once
       watchWeek: function (gid, wk, cb) { return watch('guildWeek/' + gid + '/' + wk, cb); },
@@ -492,6 +492,37 @@
           return up(u);
         });
       },
+      // SAT-ONLINE-086 guild wars (plan U239). guildWarAsk/{to}/{from} {n, at, by, t}: `from` declares a war for the hour
+      // starting at `at` (on the hour, 30 min to 7 days ahead; not on an ally); guildWar/{g}/{o} {n, at, t}: g's side, both
+      // written by whoever accepts with the same `at`; called off up to 10 minutes before, cleared after it ends, never during;
+      // guildWarKill/{g}/{o}/{uid} {n, k, at, t}: a member's own kills of o's members in the war at `at`, only during it,
+      // only upward (a new war starts again), at most 200. The log (guildDiplo) gets warask, war and warno entries.
+      watchWars: function (gid, cb) { return watch('guildWar/' + gid, cb); },
+      watchWarAsks: function (gid, cb) { return watch('guildWarAsk/' + gid, cb); },
+      watchWarKills: function (g, o, cb) { return watch('guildWarKill/' + g + '/' + o, cb); },
+      warAsk: function (me, meN, o, oN, uid, at, id) {
+        var u = {}; u['guildWarAsk/' + o + '/' + me] = { n: meN, at: at, by: uid, t: SV() };
+        u['guildDiplo/' + me + '/' + id] = { k: 'warask', o: o, n: oN, by: uid, at: at, t: SV() }; return up(u);
+      },
+      warAccept: function (me, meN, o, oN, uid, at, id) {
+        var u = {}; u['guildWar/' + me + '/' + o] = { n: oN, at: at, t: SV() }; u['guildWar/' + o + '/' + me] = { n: meN, at: at, t: SV() };
+        u['guildWarAsk/' + me + '/' + o] = null; u['guildWarAsk/' + o + '/' + me] = null;
+        u['guildDiplo/' + me + '/' + id + 'a'] = { k: 'war', o: o, n: oN, by: uid, at: at, t: SV() }; u['guildDiplo/' + o + '/' + id + 'b'] = { k: 'war', o: me, n: meN, by: uid, at: at, t: SV() };
+        return up(u);
+      },
+      warDecline: function (me, meN, o, oN, uid, at, id) {
+        var u = {}; u['guildWarAsk/' + me + '/' + o] = null;
+        u['guildDiplo/' + me + '/' + id + 'a'] = { k: 'warno', o: o, n: oN, by: uid, at: at, t: SV() }; u['guildDiplo/' + o + '/' + id + 'b'] = { k: 'warno', o: me, n: meN, by: uid, at: at, t: SV() };
+        return up(u);
+      },
+      // call a war off (more than 10 minutes before it) or clear one that is over: both sides, each while it is there
+      warOff: function (me, o) {
+        return Promise.all([D.get(at('guildWar/' + me + '/' + o)), D.get(at('guildWar/' + o + '/' + me))]).then(function (r) {
+          var u = {}; if (r[0].val()) u['guildWar/' + me + '/' + o] = null; if (r[1].val()) u['guildWar/' + o + '/' + me] = null;
+          return Object.keys(u).length ? up(u) : null;
+        });
+      },
+      warKill: function (me, o, uid, v) { var u = {}; u['guildWarKill/' + me + '/' + o + '/' + uid] = { n: String(v.n || '?').slice(0, 24), k: v.k, at: v.at, t: SV() }; return up(u); },
       // guildNote/{gid} = {s, by, n, v, t}: the notice; members read it, the master and officers write the next version
       watchNote: function (gid, cb) { return watch('guildNote/' + gid, cb); },
       setNote: function (gid, n) { var u = {}; u['guildNote/' + gid] = { s: n.s, by: n.by, n: n.n, v: n.v, t: SV() }; return up(u); },

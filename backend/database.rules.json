@@ -256,14 +256,62 @@
         ".read": "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()",
         ".write": "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid",
         "$id": {
-          ".write": "auth != null && !data.exists() && newData.exists() && ((root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o') || ((root.child('guildMembers').child(newData.child('o').val()).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child(newData.child('o').val()).child(auth.uid).child('rk').val() === 'o') && (root.child('guildAlly').child($gid).child(newData.child('o').val()).exists() || root.child('guildAllyAsk').child(newData.child('o').val()).child($gid).exists())))",
+          ".write": "auth != null && !data.exists() && newData.exists() && ((root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o') || ((root.child('guildMembers').child(newData.child('o').val()).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child(newData.child('o').val()).child(auth.uid).child('rk').val() === 'o') && (root.child('guildAlly').child($gid).child(newData.child('o').val()).exists() || root.child('guildAllyAsk').child(newData.child('o').val()).child($gid).exists() || root.child('guildWarAsk').child(newData.child('o').val()).child($gid).exists())))",
           ".validate": "$id.matches(/^d_[A-Za-z0-9_-]{1,40}$/) && newData.hasChildren(['k', 'o', 'n', 'by', 't'])",
-          "k": { ".validate": "newData.val() === 'ask' || newData.val() === 'ally' || newData.val() === 'decline' || newData.val() === 'break' || newData.val() === 'end'" },
+          "k": { ".validate": "newData.val() === 'ask' || newData.val() === 'ally' || newData.val() === 'decline' || newData.val() === 'break' || newData.val() === 'end' || newData.val() === 'warask' || newData.val() === 'war' || newData.val() === 'warno'" },
+          "at": { ".validate": "newData.isNumber() && newData.val() % 3600000 === 0" },
           "o": { ".validate": "newData.isString() && newData.val().matches(/^g_[A-Za-z0-9]{1,128}$/) && newData.val() !== $gid" },
           "n": { ".validate": "newData.isString() && newData.val().length <= 18" },
           "by": { ".validate": "newData.val() === auth.uid" },
           "t": { ".validate": "newData.val() === now" },
           "$other": { ".validate": false }
+        }
+      }
+    },
+    "guildWarAsk": {
+      "$to": {
+        ".read": "auth != null && (root.child('guildMembers').child($to).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($to).child(auth.uid).child('rk').val() === 'o')",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($to).child('master').val() === auth.uid",
+        "$from": {
+          ".read": "auth != null && (root.child('guildMembers').child($from).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($from).child(auth.uid).child('rk').val() === 'o')",
+          ".write": "auth != null && ((newData.exists() && (root.child('guildMembers').child($from).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($from).child(auth.uid).child('rk').val() === 'o') && $from !== $to && root.child('guilds').child($to).exists() && (!root.child('guildAlly').child($from).child($to).exists() || root.child('guildAlly').child($from).child($to).child('until').val() < now)) || (!newData.exists() && ((root.child('guildMembers').child($from).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($from).child(auth.uid).child('rk').val() === 'o') || (root.child('guildMembers').child($to).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($to).child(auth.uid).child('rk').val() === 'o'))))",
+          ".validate": "newData.hasChildren(['n', 'at', 'by', 't'])",
+          "n": { ".validate": "newData.val() === root.child('guilds').child($from).child('name').val()" },
+          "at": { ".validate": "newData.isNumber() && newData.val() % 3600000 === 0 && newData.val() >= now + 1800000 && newData.val() <= now + 604800000" },
+          "by": { ".validate": "newData.val() === auth.uid" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "guildWar": {
+      "$g": {
+        ".read": "auth != null",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($g).child('master').val() === auth.uid",
+        "$o": {
+          ".write": "auth != null && ((newData.exists() && (!data.exists() || data.child('at').val() + 3600000 < now) && (((root.child('guildMembers').child($g).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($g).child(auth.uid).child('rk').val() === 'o') && root.child('guildWarAsk').child($g).child($o).child('at').val() === newData.child('at').val()) || ((root.child('guildMembers').child($o).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($o).child(auth.uid).child('rk').val() === 'o') && root.child('guildWarAsk').child($o).child($g).child('at').val() === newData.child('at').val()))) || (!newData.exists() && ((root.child('guildMembers').child($g).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($g).child(auth.uid).child('rk').val() === 'o') || (root.child('guildMembers').child($o).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($o).child(auth.uid).child('rk').val() === 'o')) && (data.child('at').val() > now + 600000 || data.child('at').val() + 3600000 < now)))",
+          ".validate": "newData.hasChildren(['n', 'at', 't'])",
+          "n": { ".validate": "newData.val() === root.child('guilds').child($o).child('name').val()" },
+          "at": { ".validate": "newData.isNumber() && newData.val() % 3600000 === 0 && newData.val() > now" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "guildWarKill": {
+      "$g": {
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($g).child('master').val() === auth.uid",
+        "$o": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && $uid === auth.uid && newData.exists() && root.child('guildMembers').child($g).child(auth.uid).exists()",
+            ".validate": "newData.hasChildren(['n', 'k', 'at', 't'])",
+            "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
+            "at": { ".validate": "newData.val() === root.child('guildWar').child($g).child($o).child('at').val() && now >= newData.val() && now <= newData.val() + 3900000" },
+            "k": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 200 && (!data.exists() || data.parent().child('at').val() !== newData.parent().child('at').val() || newData.val() >= data.val())" },
+            "t": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
         }
       }
     },

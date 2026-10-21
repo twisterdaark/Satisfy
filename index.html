@@ -5636,7 +5636,7 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
  dialog('guild',[info,perks+(g.online&&GWK?' · '+gwLine():''),g.online?guildNoteLine():''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
   ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},
-   ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),...(galSt()?[{l:t('gdDip')+(galMo()&&Object.keys(GALA).length?' ('+Object.keys(GALA).length+')':''),f:galD}]:[]),
+   ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),...(galSt()?[{l:t('gdDip')+(galMo()&&Object.keys(GALA).length?' ('+Object.keys(GALA).length+')':''),f:galD}]:[]),...(gwrSt()?[{l:t('gdWar')+(galMo()&&Object.keys(GWRA).length?' ('+Object.keys(GWRA).length+')':''),f:gwrD}]:[]),
    ...(Satisfy.guild.can(GUILD.state().rank,'emblem')?[{l:t('gdBan'),f:guildBanD}]:[]),
    ...(Satisfy.guild.can(GUILD.state().rank,'note')?[{l:t('gdNoteW'),f:guildNoteW},...(recSt()?[{l:t('gdApps',{n:Object.keys(GAPPS).length}),f:recAppsD},{l:t('gdRecOn'),f:recPost},{l:t('gdRecOff'),f:recStop}]:[])]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
@@ -7547,7 +7547,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   const gi=guildOf(r),gy=gi?6:0; // SAT-ONLINE-046: «guild» under the name, the name and the bar a line higher
   TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol===2?'#b0102a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038), 2 a murderer (052)
-  if(gi)TX.push({s:'«'+gdEmb(gi.emb)+gi.n+'»'+(galOf(r.gd)?' 🤝':''),x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
+  if(gi)TX.push({s:'«'+gdEmb(gi.emb)+gi.n+'»'+(galOf(r.gd)?' 🤝':warNow(r.gd)?' ⚔':''),x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37-gy,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
   if(near&&r.uid===near.uid&&!foe)TX.push({s:[t('pcHint'),mate?'':t('pInvite'),!mate&&DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?t('dHint'):''].filter(Boolean).join(' · '),x:r.x,y:r.y-(typeof r.hp==='number'?46:37)-gy,f:F,z:6,c:'#ffe7a8'});}
@@ -7842,6 +7842,7 @@ function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>per
   room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
   else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
+   if(v&&warOf(v)){gwrKill(v.gd);return;} // a guild war (SAT-ONLINE-086): it counts for the guild, no karma lost
    if(v&&v.ol){S.karma=Math.min(KARMA_MAX,karma()+1);netForce=true;save(true);toast(t('kaJust',{n,k:S.karma}),'good');SFX.quest&&SFX.quest();return;} // an outlaw: justice
    S.karma=Math.max(KARMA_MIN,karma()-1);S.karT=0;const ms=Math.round(Satisfy.pvp.C.OUTLAW_MS*(1+Math.max(0,-S.karma-1)*.5));
    S.olT=Math.max(S.olT||0,Date.now()+ms);netForce=true;save(true);toast(t(S.karma<=MURDER?'kaMurder':'pvpKill',{n,m:Math.round(ms/60000),k:S.karma}),'warn');SFX.slam&&SFX.slam();}});}
@@ -7969,7 +7970,7 @@ var gdSig='',gdFor=null,GDS=null,gdBusy=0,gdFetchT=0;const GDN=new Map(); // GDN
 function guildStart(){GUILD=null;gdFor=null;GDS=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.guildStore))return; // NETTR first: FB and GDN are declared below (?net=local starts during load)
  GDN.clear();GDS=Satisfy.firebase.guildStore(FB);GUILD=Satisfy.guild.create({store:GDS,uid:NET.uid,handle:()=>netId||(S&&S.look.n)||'',now:()=>performance.now(),serverNow:()=>wNow()});GUILD.on(guildEv);}
 // (re)start for the character being played: the title's demo has no guild; loading another save starts over
-function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}guildChatSync();recAppsSync();geSync();gwSync();galSync();return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();guildChatSync();recAppsSync();geSync();geTick();gwSync();gwTick();galSync();}
+function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}guildChatSync();recAppsSync();geSync();gwSync();galSync();gwrSync();return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();guildChatSync();recAppsSync();geSync();geTick();gwSync();gwTick();galSync();gwrSync();gwrTick();}
 function guildEv(e){if(!S||S.__demo||gdFor!==S)return;gdSig='';
  if(e.type==='changed')guildMirror();
  else if(e.type==='joined'){guildMirror();if(e.why==='join'){toast(t('gJoined',{g:e.name||gName(S.guild)}),'good');SFX.quest();save(true);}}
@@ -8110,7 +8111,7 @@ function galSync(){const st=galSt(),gs=GUILD&&GUILD.state(),gid=st&&gs&&gs.gid&&
   GALA=o;galSeenA=1;}));}
 function galLeft(ms){const h=Math.max(1,Math.ceil(ms/3600000));return h>=48?t('galDays',{d:Math.floor(h/24)}):t('galHrs',{h});}
 function galLogLine(e){const gs=GUILD&&GUILD.state(),m=gs&&gs.members&&gs.members[e.by],g=Satisfy.chat.clean(e.n,18)||'?',n=m?Satisfy.chat.clean(m.n,24)||'?':'';
- const k={ask:'galLask',ally:m?'galLallyMe':'galLally',decline:m?'galLdecMe':'galLdec',break:m?'galLbrkMe':'galLbrk',end:'galLend'}[e.k];return k?t(k,{n,g})+' · '+calTime(+e.t||0):'';}
+ const k={ask:'galLask',ally:m?'galLallyMe':'galLally',decline:m?'galLdecMe':'galLdec',break:m?'galLbrkMe':'galLbrk',end:'galLend',warask:'gwrLask',war:m?'gwrLwarMe':'gwrLwar',warno:m?'gwrLnoMe':'gwrLno'}[e.k];return k?t(k,{n,g,h:+e.at?gwrAt(+e.at):''})+' · '+calTime(+e.t||0):'';}
 function galD(){const st=galSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return guildPanel();const n=wNow(),mo=galMo(),me=gs.guild.name;
  const live=Object.keys(GAL).filter(k=>GAL[k].until>n),gone=Object.keys(GAL).filter(k=>GAL[k].until<=n),asks=Object.keys(GALA);
  const lines=[t('galH',{n:live.length,m:GAL_MAX})+' · '+(live.length||gone.length?[...live.map(k=>t('galRow',{g:GAL[k].n,d:galLeft(GAL[k].until-n)})),...gone.map(k=>t('galGone',{g:GAL[k].n}))].join(' · '):t('galNone'))];
@@ -8136,6 +8137,65 @@ function galPropose(){const st=galSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.
 function galEndAll(){const st=galSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return Promise.resolve();
  return Promise.all(Object.keys(GAL).map((k,i)=>st.allyEnd(gs.gid,gs.guild.name,k,GAL[k].n,NET.uid,'end',galId()+i).catch(()=>{})));}
 window.__GAL={open:()=>galD(),ask:name=>new Promise(r=>{const st=galSt();st.findGuild(String(name).toLowerCase()).then(x=>galAsk(x.gid,x.g.name).then(r));}),of:gid=>galOf(gid),get all(){return GAL},get asks(){return GALA},get log(){return GALD},line:e=>galLogLine(e),endAll:()=>galEndAll(),store:()=>GDS}; // tests
+/* guild wars (SAT-ONLINE-086, plan U239). The master or an officer declares war on another guild (G -> Wars) for one hour
+   on a set hour (a full hour at least an hour ahead: the next four, or the same four tomorrow); that guild's master or
+   officers accept or refuse it, and an ally can't be at war. During that hour the two guilds' members fight as in open PvP
+   (never in towns): a kill of an enemy member costs no karma and makes no outlaw, and counts for your guild (each member
+   writes its own count, only during the war, which the rules check). Both guilds are told when it is set, 10 minutes
+   before, at the start and at the end with the score. A war is called off up to 10 minutes before, and can't be left. */
+Object.assign(STR.ar,{gdWar:'الحروب',gwrH:'حروب الجيلد ({n})',gwrNone:'مفيش حروب. الحرب ساعة في ميعاد ثابت، وكل قتلة لحد من الجيلد التاني برا المدن بتتحسب ومبتخسركش كارما',gwrRow:'⚔ {g}: {w} · {a} : {b}',gwrOver:'خلصت',gwrWon:'كسبتوا',gwrLost:'خسرتوا',gwrDraw:'تعادل',gwrDeclare:'اعلن حرب',gwrWhenQ:'الحرب على {g} إمتى؟ (ساعة واحدة)',gwrAsked:'اتعلنت الحرب على {g} الساعة {h}. لازم يوافقوا',gwrAskIn:'⚔ {g} عايزين حرب الساعة {h}',gwrAskTo:'{g} عايزين يحاربوا الجيلد (G ← الحروب)',gwrAccept:'وافق على الحرب مع {g} ({h})',gwrRefuse:'ارفض الحرب مع {g}',gwrSet:'الحرب مع {g} الساعة {h}!',gwrSoon:'الحرب مع {g} بعد {m} دقيقة',gwrOn:'الحرب مع {g} بدأت! القتل برا المدن بيتحسب',gwrEnd:'الحرب مع {g} خلصت: {a} : {b} · {r}',gwrKill:'قتلة في الحرب! {a} : {b}',gwrAlly:'{g} حلفائكم',gwrBusy:'فيه حرب مع {g} بالفعل',gwrCancel:'الغي الحرب مع {g}',gwrClear:'شيل الحرب مع {g}',gwrLask:'{n} اعلن حرب على {g} الساعة {h}',gwrLwarMe:'{n} وافق على الحرب مع {g} الساعة {h}',gwrLwar:'{g} وافقوا على الحرب الساعة {h}',gwrLnoMe:'{n} رفض حرب {g}',gwrLno:'{g} رفضوا الحرب'});
+Object.assign(STR.en,{gdWar:'Wars',gwrH:'Guild wars ({n})',gwrNone:'No wars. A war is one hour at a set time; kills of the other guild outside towns count, and cost no karma',gwrRow:'⚔ {g}: {w} · {a} : {b}',gwrOver:'over',gwrWon:'you won',gwrLost:'you lost',gwrDraw:'a draw',gwrDeclare:'Declare war',gwrWhenQ:'War on {g}: when? (one hour)',gwrAsked:'War declared on {g} for {h}. They have to accept',gwrAskIn:'⚔ {g} declares war for {h}',gwrAskTo:'{g} declares war on your guild (G → Wars)',gwrAccept:'Accept the war with {g} ({h})',gwrRefuse:'Refuse the war with {g}',gwrSet:'War with {g} at {h}!',gwrSoon:'War with {g} in {m} min',gwrOn:'The war with {g} has started! Kills outside towns count',gwrEnd:'The war with {g} is over: {a} : {b} · {r}',gwrKill:'War kill! {a} : {b}',gwrAlly:'{g} is your ally',gwrBusy:'A war with {g} is already set',gwrCancel:'Call off the war with {g}',gwrClear:'Clear the war with {g}',gwrLask:'{n} declared war on {g} for {h}',gwrLwarMe:'{n} accepted the war with {g} for {h}',gwrLwar:'{g} accepted the war for {h}',gwrLnoMe:"{n} refused {g}'s war",gwrLno:'{g} refused the war'});
+var GWR={},GWRA={},GWRK={},gwrW=null,gwrOff=[],gwrKOff={},gwrSeen=0,gwrSeenA=0,GWRWARN={};const GWR_MS=3600000,GWR_MAX=3,GWR_KMAX=200;
+function gwrSt(){return GDS&&NETTR&&NETTR.kind==='firebase'&&GDS.watchWars?GDS:null;}
+// the war with guild o going on now, or null
+function warNow(o){const w=o&&GWR[o],n=wNow();return w&&n>=w.at&&n<w.at+GWR_MS?w:null;}
+// remote r is a member of a guild we are at war with right now (its guild checked, as for the name under it)
+function warOf(r){return r&&r.gd&&!galOf(r.gd)&&warNow(r.gd)&&guildOf(r)?GWR[r.gd]:null;}
+function gwrAt(at){return calTime(at)+' (UTC '+calTime(at,true)+')';}
+// watch your guild's wars as a member (and both sides' kills in each), the wars declared on it as the master or an officer
+function gwrSync(){const st=gwrSt(),gs=GUILD&&GUILD.state(),gid=st&&gs&&gs.gid&&gs.rank?gs.gid:null,key=gid?gid+(galMo()?'/mo':''):null;if(key===gwrW)return;
+ gwrOff.forEach(f=>{try{f();}catch(e){}});gwrOff=[];for(const k in gwrKOff)gwrKOff[k]();gwrKOff={};gwrW=key;GWR={};GWRA={};GWRK={};gwrSeen=0;gwrSeenA=0;if(!gid)return;
+ gwrOff.push(st.watchWars(gid,v=>{if(gwrW!==key)return;const o={};for(const k in (v||{})){const e=v[k];if(/^g_[A-Za-z0-9]{1,128}$/.test(k)&&e&&typeof e==='object'&&+e.at>0)o[k]={n:galName(k,e),at:+e.at};}
+  if(gwrSeen)for(const k in o)if((!GWR[k]||GWR[k].at!==o[k].at)&&o[k].at>wNow()){toast(t('gwrSet',{g:o[k].n,h:gwrAt(o[k].at)}),'warn');SFX.notice&&SFX.notice();}
+  GWR=o;gwrSeen=1;gwrKSync(gid);hudDirty=true;}));
+ if(galMo())gwrOff.push(st.watchWarAsks(gid,v=>{if(gwrW!==key)return;const o={};for(const k in (v||{})){const e=v[k];if(/^g_[A-Za-z0-9]{1,128}$/.test(k)&&e&&typeof e==='object'&&+e.at>0)o[k]={n:galName(k,e),at:+e.at};}
+  if(gwrSeenA)for(const k in o)if(!GWRA[k]){toast(t('gwrAskTo',{g:o[k].n}),'warn');SFX.notice&&SFX.notice();}
+  GWRA=o;gwrSeenA=1;}));}
+function gwrKSync(gid){const st=gwrSt();if(!st)return;for(const k in gwrKOff)if(!GWR[k]){gwrKOff[k]();delete gwrKOff[k];delete GWRK[k];}
+ for(const k in GWR)if(!gwrKOff[k]){const K=GWRK[k]={m:{},o:{}},a=st.watchWarKills(gid,k,v=>{K.m=v&&typeof v==='object'?v:{};}),b=st.watchWarKills(k,gid,v=>{K.o=v&&typeof v==='object'?v:{};});gwrKOff[k]=()=>{a();b();};}}
+// the score of the war with o: [ours, theirs], each member's count of that war only
+function gwrScore(o){const w=GWR[o],K=GWRK[o];if(!w||!K)return [0,0];const sum=x=>Object.values(x).reduce((s,e)=>s+(e&&+e.at===w.at?Math.min(GWR_KMAX,Math.max(0,+e.k|0)):0),0);return [sum(K.m),sum(K.o)];}
+const gwrRes=(a,b)=>t(a>b?'gwrWon':a<b?'gwrLost':'gwrDraw');
+function gwrTick(){if(!gwrW)return;const n=wNow();for(const k in GWR){const w=GWR[k],x=GWRWARN[k+'@'+w.at]||(GWRWARN[k+'@'+w.at]={});
+  if(!x.s&&w.at-n<=600000&&w.at>n){x.s=1;toast(t('gwrSoon',{g:w.n,m:Math.ceil((w.at-n)/60000)}),'warn');}
+  if(!x.n&&n>=w.at&&n<w.at+GWR_MS){x.n=1;toast(t('gwrOn',{g:w.n}),'warn');SFX.slam&&SFX.slam();hudDirty=true;}
+  if(!x.e&&x.n&&n>=w.at+GWR_MS){x.e=1;const [a,b]=gwrScore(k);toast(t('gwrEnd',{g:w.n,a,b,r:gwrRes(a,b)}),a>b?'good':'warn');}}}
+// a kill of an enemy member during the war: one more for us (no karma lost: the caller returns before that)
+function gwrKill(o){const st=gwrSt(),gs=GUILD&&GUILD.state(),w=warNow(o);if(!st||!gs||!gs.gid||!w)return;const K=GWRK[o]||(GWRK[o]={m:{},o:{}}),e=K.m[NET.uid],was=e&&+e.at===w.at?+e.k||0:0;if(was>=GWR_KMAX)return;
+ K.m[NET.uid]={n:netId||S.look.n,k:was+1,at:w.at};st.warKill(gs.gid,o,NET.uid,K.m[NET.uid]).catch(()=>{});const [a,b]=gwrScore(o);toast(t('gwrKill',{a,b}),'good');SFX.quest&&SFX.quest();}
+// the hours offered: the next four full hours at least an hour away, and the same hours tomorrow
+function gwrTimes(n){const h0=Math.ceil((n+3600000)/3600000)*3600000,day=x=>new Date(x).toDateString(),out=[];
+ for(const d of [0,1])for(let i=0;i<4;i++){const at=h0+i*3600000+d*86400000,dd=new Date(at);out.push({at,l:day(at)===day(n)?t('geToday',{h:gwrAt(at)}):day(at)===day(n+86400000)?t('geTom',{h:gwrAt(at)}):dd.getDate()+'/'+(dd.getMonth()+1)+' '+gwrAt(at)});}
+ return out;}
+function gwrD(){const st=gwrSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return guildPanel();const n=wNow(),mo=galMo(),me=gs.guild.name;
+ const L=Object.keys(GWR).sort((a,b)=>GWR[a].at-GWR[b].at),asks=Object.keys(GWRA);
+ const row=k=>{const w=GWR[k],[a,b]=gwrScore(k);return t('gwrRow',{g:w.n,w:n>=w.at+GWR_MS?t('gwrOver')+' · '+gwrRes(a,b):calWhen({at:w.at,end:w.at+GWR_MS},n),a,b});};
+ const lines=[t('gwrH',{n:L.length})+' · '+(L.length?L.map(row).join(' · '):t('gwrNone'))];
+ if(mo&&asks.length)lines.push(asks.map(k=>t('gwrAskIn',{g:GWRA[k].n,h:gwrAt(GWRA[k].at)})).join(' · '));
+ const done=p=>Promise.resolve(p).then(()=>gwrD(),()=>{toast(t('gdFail'),'warn');gwrD();}),opts=[];
+ if(mo){for(const k of asks){const x=GWRA[k];opts.push({l:t('gwrAccept',{g:x.n,h:gwrAt(x.at)}),f:()=>{if(galOf(k)){toast(t('gwrAlly',{g:x.n}),'warn');return gwrD();}const w=GWR[k];if(w&&wNow()<w.at+GWR_MS){toast(t('gwrBusy',{g:x.n}),'warn');return gwrD();}
+   done(st.warAccept(gs.gid,me,k,x.n,NET.uid,x.at,galId()));}},{l:t('gwrRefuse',{g:x.n}),f:()=>done(st.warDecline(gs.gid,me,k,x.n,NET.uid,x.at,galId()))});}
+  if(L.filter(k=>n<GWR[k].at+GWR_MS).length<GWR_MAX)opts.push({l:t('gwrDeclare'),f:gwrDeclare});
+  for(const k of L){const w=GWR[k];if(w.at-n>600000)opts.push({l:t('gwrCancel',{g:w.n}),f:()=>done(st.warOff(gs.gid,k))});else if(n>=w.at+GWR_MS)opts.push({l:t('gwrClear',{g:w.n}),f:()=>done(st.warOff(gs.gid,k))});}}
+ opts.push({l:t('oBack'),f:guildPanel});dialog('guild',lines,null,opts);}
+function gwrDeclare(){const st=gwrSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return guildPanel();
+ askLine(t('galNameT'),'',18,v=>{const nm=Satisfy.chat.clean(String(v||'').trim(),18);if(!nm)return gwrD();
+  st.findGuild(nm.toLowerCase()).then(r=>{if(!r){toast(t('galNoG',{g:nm}),'warn');return gwrD();}if(r.gid===gs.gid){toast(t('galSelf'),'warn');return gwrD();}const g=Satisfy.chat.clean(r.g.name,18)||nm;
+   if(galOf(r.gid)){toast(t('gwrAlly',{g}),'warn');return gwrD();}const w=GWR[r.gid];if(w&&wNow()<w.at+GWR_MS){toast(t('gwrBusy',{g}),'warn');return gwrD();}
+   dialog('guild',[t('gwrWhenQ',{g})],null,[...gwrTimes(wNow()).map(o=>({l:o.l,f:()=>gwrAsk(r.gid,g,o.at)})),{l:t('oBack'),f:gwrD}]);},()=>{toast(t('gdFail'),'warn');gwrD();});});}
+function gwrAsk(o,g,at){const st=gwrSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid||!galMo())return Promise.reject(new Error('rank'));
+ return st.warAsk(gs.gid,gs.guild.name,o,g,NET.uid,at,galId()).then(()=>{toast(t('gwrAsked',{g,h:gwrAt(at)}),'good');gwrD();},()=>{toast(t('gdFail'),'warn');gwrD();});}
+window.__GWR={open:()=>gwrD(),declare:(name,at)=>gwrSt().findGuild(String(name).toLowerCase()).then(x=>gwrAsk(x.gid,x.g.name,at)),get all(){return GWR},get asks(){return GWRA},score:o=>gwrScore(o),times:n=>gwrTimes(n),now:o=>warNow(o),store:()=>GDS}; // tests
 /* the guild master and the notice (SAT-ONLINE-076, plan U241/U243/U244). The master hands the guild to an officer from
    that officer's card (they become master, you an officer); when the master has not been seen for 14 days an officer takes
    it over from the master's card. The notice: one line the master and officers write ("Write the notice" in G), shown at the
