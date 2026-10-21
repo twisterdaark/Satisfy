@@ -595,6 +595,26 @@
     };
   }
 
+  // SAT-ONLINE-079: announcements from the game's owner. admins/{uid} = true is set by the owner in the Firebase console
+  // (the rules let nobody write it); announce/{id} = {k: 'msg' | 'maint', ar, en, at? (maintenance time), by, t}, written only
+  // by an admin, read by every signed-in player
+  function announceStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    return {
+      isAdmin: function (uid) { return D.get(at('admins/' + uid)).then(function (s) { return s.val() === true; }, function () { return false; }); },
+      watch: function (cb) {
+        var ref = at('announce'), q = D.limitToLast ? D.query(ref, D.limitToLast(5)) : ref;
+        var off = D.onValue(q, function (s) { cb(s.val() || {}); }, function () { cb({}); });
+        return function () { try { off(); } catch (e) { /* ignore */ } };
+      },
+      post: function (v) {
+        var e = { k: v.k, ar: String(v.ar).slice(0, 200), en: String(v.en).slice(0, 200), by: v.by, t: D.serverTimestamp() };
+        if (v.k === 'maint') e.at = v.at;
+        return D.push(at('announce'), e);
+      },
+    };
+  }
+
   // SAT-ONLINE-073: the group finder, lfg/{uid} = {n, lv, cls, k, z, t}: yours only, gone when you leave (onDisconnect)
   function lfgStore(sdk) {
     var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
@@ -620,6 +640,7 @@
     friendStore: friendStore,
     reportStore: reportStore,
     lfgStore: lfgStore,
+    announceStore: announceStore,
     natStore: natStore,
     SDK_VERSION: SDK_VERSION,
     load: load,

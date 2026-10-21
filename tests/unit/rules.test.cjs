@@ -415,6 +415,19 @@ test('guild recruiting (SAT-ONLINE-078): posted by the master or officers; you a
   for (const n of [ap, rj]) assert.equal(n['.write'], "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid", 'the master clears them on disband');
 });
 
+test('owner announcements (SAT-ONLINE-079): admins set in the console only; only an admin posts; a maintenance time ahead', () => {
+  const ad = rules.admins.$uid, an = rules.announce, e = an.$id;
+  assert.equal(ad['.write'], false, 'nobody marks an admin from a page');
+  assert.equal(ad['.read'], 'auth != null && auth.uid === $uid');
+  assert.equal(an['.read'], 'auth != null');
+  assert.equal(e['.write'], "auth != null && root.child('admins').child(auth.uid).val() === true");
+  assert.equal(e.k['.validate'], "newData.val() === 'msg' || newData.val() === 'maint'");
+  assert.match(e['.validate'], /newData\.child\('k'\)\.val\(\) === 'msg' \|\| newData\.hasChild\('at'\)/, 'a maintenance notice has its time');
+  assert.equal(e.at['.validate'], 'newData.isNumber() && newData.val() > now && newData.val() <= now + 86400000');
+  assert.equal(e.by['.validate'], 'newData.val() === auth.uid');
+  assert.equal(e.$other['.validate'], false);
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);

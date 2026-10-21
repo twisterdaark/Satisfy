@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21announce', ver: '1.09', d: '2026-10-21',
+      ar: ['أونلاين: إعلانات من صاحب اللعبة: بتظهر لكل اللي أونلاين كإشعار عالمي "من صاحب اللعبة" وفي الشات، مرة واحدة، واللي يدخل بعدها بعشر دقايق بيشوفها',
+        'إشعار الصيانة: الميعاد والوقت الفاضل، وتنبيه قبلها بـ10 و5 ودقيقة، ولما تبدأ اللعبة بتحفظ تقدمك'],
+      en: ["Online: announcements from the game's owner: every player online sees a world notice \"From the game's owner\" and a chat line, once; players who come online within ten minutes see it too",
+        'Maintenance notices: the time and how long until it, reminders 10, 5 and 1 minute before, and the game saves your progress when it starts'] },
     { v: '2026-10-21v108', ver: '1.08', d: '2026-10-21',
       ar: ['الحفظ السحابي: اتشال الرفع والتنزيل اليدوي و"تحميل بياناتي أونلاين"، عشان نقلل فرص تكرار الداتا. الشخصية بتترفع لحسابك لوحدها وإنت بتلعب، وبتنزل لوحدها لما تدخل بجوجل من جهاز تاني'],
       en: ['Cloud saves: the manual Upload and Download and "Download my online data" are gone, to cut the chance of duplicated data. Your character goes up to your account by itself while you play, and comes down by itself when you sign in with Google on another device'] },
