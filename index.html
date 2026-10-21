@@ -5080,17 +5080,18 @@ function terrList(back){dialog('guild',[castleLine(),...TERR.map(T=>{const o=WS.
 function rankLine(){const all={};for(const k in (GRANK||{}))all[k]=Object.assign({},GRANK[k]);for(const k in WS.guilds)all[k]=Object.assign(all[k]||{},WS.guilds[k]);
  const L=Object.values(all).sort((a,b)=>gLv(b)-gLv(a)||(b.xp||0)-(a.xp||0)),nm=g=>WS.guilds[g.id]?gName(g.id):Satisfy.chat.clean(g.name,18)||'?',k=L.findIndex(g=>g.id===(S&&S.guild));
  return t('rankH')+L.slice(0,10).map((g,i)=>`${i+1}. ${g.id===(S&&S.guild)?'★ ':''}${nm(g)} (Lv ${gLv(g)}, ${TERR.filter(T=>WS.terr[T.k].own===g.id).length} ${t('terrN')})`).join(' · ')+(k>=10?' · '+t('gdRankMe',{k:k+1}):'');}
-function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],null,[{l:t('oTerrList'),f:()=>terrList()},{l:t('oClose')}]);
+function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],null,[...(recSt()?[{l:t('gdRecList'),f:()=>recBoard(guildPanel)}]:[]),{l:t('oTerrList'),f:()=>terrList()},{l:t('oClose')}]);
  const l=gLv(g),me=g.members[pidOf()]||{c:0},nx=GXP[l];
  const info=t('gInfo',{g:gName(g.id),n:l,x:g.npc?'-':nx?`${g.xp}/${nx}`:t('gMax'),m:Object.keys(g.members).length,cap:l*25,c:me.c});
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
  dialog('guild',[info,perks,g.online?guildNoteLine():''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
   ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},
-   ...(Satisfy.guild.can(GUILD.state().rank,'note')?[{l:t('gdNoteW'),f:guildNoteW}]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
+   ...(Satisfy.guild.can(GUILD.state().rank,'note')?[{l:t('gdNoteW'),f:guildNoteW},...(recSt()?[{l:t('gdApps',{n:Object.keys(GAPPS).length}),f:recAppsD},{l:t('gdRecOn'),f:recPost},{l:t('gdRecOff'),f:recStop}]:[])]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
 function guildMOpts(){const o=[],back=()=>shopD('guildM','gm_hi');
  if(!S.guild)o.push({l:t('oMakeG',{g:GCOST,l:GLV}),ic:'book',poor:S.gold<GCOST||S.lv<GLV,f:()=>S.lv<GLV?dialog('guildM',[t('gNeedLv',{n:GLV})],back):S.gold<GCOST?dialog('guildM',[t('noGold')],back):openGName()});
  else o.push({l:t('oMyG'),f:guildPanel});
+ if(!S.guild&&recSt())o.push({l:t('gdRecList'),f:()=>recBoard(back)});
  o.push({l:t('oRank'),f:()=>gRankFresh(()=>dialog('guildM',[rankLine()],back))},{l:t('oTerrList'),f:()=>terrList(back)});return o;}
 // Territory banners. Claiming one: beat the owner guild's guards, then hold the banner for CAPT seconds without being hit.
 // A captured banner is shielded for a while; after that it can be contested again. Online the challengers are other
@@ -7367,7 +7368,7 @@ var gdSig='',gdFor=null,GDS=null,gdBusy=0,gdFetchT=0;const GDN=new Map(); // GDN
 function guildStart(){GUILD=null;gdFor=null;GDS=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.guildStore))return; // NETTR first: FB and GDN are declared below (?net=local starts during load)
  GDN.clear();GDS=Satisfy.firebase.guildStore(FB);GUILD=Satisfy.guild.create({store:GDS,uid:NET.uid,handle:()=>netId||(S&&S.look.n)||'',now:()=>performance.now(),serverNow:()=>wNow()});GUILD.on(guildEv);}
 // (re)start for the character being played: the title's demo has no guild; loading another save starts over
-function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}guildChatSync();return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();guildChatSync();}
+function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}guildChatSync();recAppsSync();return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();guildChatSync();recAppsSync();}
 function guildEv(e){if(!S||S.__demo||gdFor!==S)return;gdSig='';
  if(e.type==='changed')guildMirror();
  else if(e.type==='joined'){guildMirror();if(e.why==='join'){toast(t('gJoined',{g:e.name||gName(S.guild)}),'good');SFX.quest();save(true);}}
@@ -7496,6 +7497,36 @@ function gRankFresh(cb){const st=GDS&&NETTR&&NETTR.kind==='firebase'&&GDS.readAl
    for(const u in ms){const m=ms[u];if(m&&typeof m==='object'){n++;xp+=Math.max(0,Math.min(1e12,Math.floor(+m.c||0)));}}out[gid]={id:gid,name:g.name,xp,m:n,col:g.col};}
   GRANK=out;GRANK_T=performance.now();fin();},fin);}
 window.__GLD={hand:u=>GUILD.handover(u),claim:()=>GUILD.claim(),away:()=>GUILD.masterAway(),note:()=>GUILD.note(),setNote:v=>GUILD.setNote(v),disband:()=>GUILD.disband(),fb:()=>FB,rank:()=>new Promise(r=>gRankFresh(()=>r(rankLine()))),get grank(){return GRANK}}; // tests
+/* guild recruiting (SAT-ONLINE-078, plan U229). The master or an officer posts a recruiting message from G; anyone without
+   a guild sees the recruiting guilds at the Guild Association (and in G) and asks to join one. The master and officers see
+   the requests in G and are told of new ones: "Invite" sends the usual invitation (joining still needs it), "Turn down"
+   refuses, and a player turned down can ask that guild again after a week. */
+Object.assign(STR.ar,{gdRecList:'جيلدات بتجنّد',gdRecH:'جيلدات بتجنّد ({n})',gdRecRow:'{g} ({m} عضو): {s}',gdRecNone:'مفيش جيلد بيجنّد دلوقتي',gdApply:'اطلب تنضم لـ{g}',gdApplyQ:'تطلب تنضم لجيلد {g}؟',gdApplied:'طلبت تنضم لـ{g}',gdApplyWait:'إنت طالب تنضم لـ{g}، مستني الرد',gdApplyNo:'{g} رفضوا طلبك. تقدر تطلب تاني بعد أسبوع',gdApplyOff:'اسحب الطلب',gdApplyTaken:'سحبت الطلب',gdRecOn:'جنّد: اكتب رسالة',gdRecT:'رسالة التجنيد (لحد 120 حرف)',gdRecPosted:'جيلدك بيجنّد دلوقتي',gdRecOff:'بطّل تجنيد',gdRecStopped:'جيلدك بطّل يجنّد',gdApps:'طلبات الانضمام ({n})',gdAppRow:'{n} · لفل {lv}',gdAppInv:'ابعت دعوة لـ{n}',gdAppNo:'ارفض {n}',gdAppNew:'{n} طالب ينضم للجيلد',gdAppNoDone:'رفضت {n}',gdAppNone:'مفيش طلبات'});
+Object.assign(STR.en,{gdRecList:'Guilds that are recruiting',gdRecH:'Recruiting ({n})',gdRecRow:'{g} ({m} members): {s}',gdRecNone:'No guild is recruiting right now',gdApply:'Ask to join {g}',gdApplyQ:'Ask to join {g}?',gdApplied:'You asked to join {g}',gdApplyWait:'You asked to join {g}; waiting for an answer',gdApplyNo:'{g} turned you down. You can ask again in a week',gdApplyOff:'Take the request back',gdApplyTaken:'You took the request back',gdRecOn:'Recruit: post a message',gdRecT:'Recruiting message (up to 120 letters)',gdRecPosted:'Your guild is recruiting',gdRecOff:'Stop recruiting',gdRecStopped:'Your guild stopped recruiting',gdApps:'Requests to join ({n})',gdAppRow:'{n} · Lv {lv}',gdAppInv:'Invite {n}',gdAppNo:'Turn {n} down',gdAppNew:'{n} asks to join the guild',gdAppNoDone:'You turned {n} down',gdAppNone:'No requests'});
+var GAPPS={},GAPW=null,GAPOff=null;
+function recSt(){return GDS&&NETTR&&NETTR.kind==='firebase'&&NET&&GDS.recruitList?GDS:null;}
+// the list of recruiting guilds, for a player without one
+function recBoard(back){const st=recSt();if(!st){toast(t('gdFail'),'warn');return;}
+ st.recruitList().then(v=>{const L=[];for(const gid in v){const r=v[gid];if(!Satisfy.guild.GID_RE.test(gid)||!r||typeof r!=='object'||typeof r.n!=='string')continue;L.push({gid,n:Satisfy.chat.clean(r.n,18)||'?',m:Math.max(0,Math.min(250,r.m|0)),s:Satisfy.chat.clean(r.msg||'',120),t:+r.t||0});}
+  L.sort((a,b)=>b.t-a.t);const back0=back||(()=>{});
+  dialog('guild',[t('gdRecH',{n:L.length}),L.length?L.slice(0,10).map(r=>t('gdRecRow',{g:r.n,m:r.m,s:r.s})).join(' · '):t('gdRecNone')],null,[...(S.guild?[]:L.slice(0,10).map(r=>({l:t('gdApply',{g:r.n}),f:()=>recApply(r,back)}))),{l:t('oBack'),f:back0}]);},()=>toast(t('gdFail'),'warn'));}
+function recApply(r,back){const st=recSt();if(!st)return;const again=()=>recBoard(back);
+ st.myApply(r.gid,NET.uid).then(x=>{const rej=x.rej&&wNow()-(+x.rej.t||0)<604800000;
+  if(rej)return dialog('guild',[t('gdApplyNo',{g:r.n})],again);
+  if(x.app)return dialog('guild',[t('gdApplyWait',{g:r.n})],null,[{l:t('gdApplyOff'),f:()=>st.unapply(r.gid,NET.uid).then(()=>{toast(t('gdApplyTaken'));again();},()=>toast(t('gdFail'),'warn'))},{l:t('oBack'),f:again}]);
+  dialog('guild',[t('gdApplyQ',{g:r.n})],null,[{l:t('gYes'),f:()=>st.apply(r.gid,NET.uid,{n:String(netId||S.look.n).slice(0,24),lv:HIDELV?0:S.lv}).then(()=>{toast(t('gdApplied',{g:r.n}),'good');again();},()=>{toast(t('gdFail'),'warn');again();})},{l:t('gNo'),f:again}]);},()=>toast(t('gdFail'),'warn'));}
+// the master and officers: post or stop the message, and answer the requests (watched while you are one of them)
+function recPost(){const st=recSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return guildPanel();
+ askLine(t('gdRecT'),'',120,v=>{if(v==null)return guildPanel();st.recruitPut(gs.gid,{n:gs.guild.name,msg:String(v).replace(/\s+/g,' ').trim().slice(0,120),m:Object.keys(gs.members).length,by:NET.uid}).then(()=>{toast(t('gdRecPosted'),'good');guildPanel();},()=>{toast(t('gdFail'),'warn');guildPanel();});});}
+function recStop(){const st=recSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return;st.recruitOff(gs.gid).then(()=>{toast(t('gdRecStopped'));guildPanel();},()=>toast(t('gdFail'),'warn'));}
+function recAppsSync(){const st=recSt(),gs=GUILD&&GUILD.state(),gid=st&&gs&&gs.gid&&(gs.rank==='m'||gs.rank==='o')?gs.gid:null;if(gid===GAPW)return;
+ if(GAPOff){GAPOff();GAPOff=null;}GAPW=gid;GAPPS={};if(!gid)return;let first=true;
+ GAPOff=st.watchApps(gid,v=>{if(GAPW!==gid)return;const next={};for(const u in (v||{})){const a=v[u];if(!a||typeof a!=='object')continue;next[u]={n:Satisfy.chat.clean(a.n,24)||'?',lv:a.lv|0,t:+a.t||0};if(!first&&!GAPPS[u])toast(t('gdAppNew',{n:next[u].n}),'good');}GAPPS=next;first=false;});}
+function recAppsD(){const st=recSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return guildPanel();const L=Object.keys(GAPPS).map(u=>Object.assign({u},GAPPS[u])).sort((a,b)=>a.t-b.t);
+ dialog('guild',[L.length?t('gdApps',{n:L.length}):t('gdAppNone')],null,[...L.slice(0,20).map(a=>({l:t('gdAppRow',{n:a.n,lv:lvTxt(a.lv)}),f:()=>dialog('guild',[t('gdAppRow',{n:a.n,lv:lvTxt(a.lv)})],null,[
+   {l:t('gdAppInv',{n:a.n}),f:()=>GUILD.invite(a.u,a.n).then(()=>st.unapply(gs.gid,a.u)).then(()=>{toast(t('gdInvSent',{n:a.n}),'good');recAppsD();},()=>{toast(t('gdFail'),'warn');recAppsD();})},
+   {l:t('gdAppNo',{n:a.n}),f:()=>st.refuse(gs.gid,a.u,NET.uid).then(()=>{toast(t('gdAppNoDone',{n:a.n}));recAppsD();},()=>{toast(t('gdFail'),'warn');recAppsD();})},{l:t('oBack'),f:recAppsD}])})),{l:t('oBack'),f:guildPanel}]);}
+window.__GREC={list:()=>recBoard(),apply:gid=>recApply({gid,n:gid},null),post:msg=>{const st=recSt(),gs=GUILD.state();return st.recruitPut(gs.gid,{n:gs.guild.name,msg,m:Object.keys(gs.members).length,by:NET.uid});},stop:()=>recStop(),apps:()=>GAPPS,appsD:()=>recAppsD(),store:()=>GDS}; // tests
 /* duels (SAT-ONLINE-006, doc §09 R4): K challenges the nearest player outside towns; Y/N answers, Y is the ready check.
    Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
 Object.assign(STR.ar,{dHint:'[K] مبارزة',dSent:'اتبعت تحدي مبارزة لـ{n}',dFrom:'{n} بيتحداك في مبارزة',dReadyQ:'مبارزة مع {n}: جاهز؟',dReady:'جاهز (Y)',dWait:'مستني {n}…',dNone:'مفيش حد قريب كفاية للمبارزة',dSafe:'ممنوع المبارزة جوه المدن',dBusy:'{n} مشغول دلوقتي',dFar:'قرّب من {n} الأول',dDeclined:'{n} رفض المبارزة',dCancel:'المبارزة اتلغت',dFight:'ابدأ!',dOut:'ارجع للحلبة وإلا هتخسر!',dWin:'كسبت المبارزة ضد {n} {w}',dLose:'خسرت المبارزة ضد {n} {w}',dYield:'استسلام',dYou:'إنت',dTitle:'مبارزة ضد {n}',dRec:'المبارزات: {w} فوز · {l} خسارة',dw_yield:'(استسلام)',dw_arena:'(خرج من الحلبة)',dw_teleport:'(ساب القتال)',dw_safe:'(دخل مدينة)',dw_gone:'(الخصم مشي)',dw_death:'(مات)',dw_hp:''});
@@ -7897,8 +7928,8 @@ function netBtn(){const b=$('onlineBtn');if(!b)return;b.hidden=NETQ!=='online';b
    delete needs a second click to confirm; a download keeps the replaced local save as a backup. The public profile
    (profiles/{uid}) is refreshed on connect and once a minute while playing. */
 Object.assign(STR.ar,{switchAcc:'العب بحساب جوجل تاني'});Object.assign(STR.en,{switchAcc:'Play with another Google account'});
-Object.assign(STR.ar,{cloudBtn:'حفظ سحابي',cloudH:'الحفظ السحابي (حساب جوجل)',cloudLocal:'على الجهاز ده: {n} · مستوى {lv}',cloudNoLocal:'مفيش شخصية محفوظة على الجهاز ده',cloudNone:'مفيش شخصيات على السحابة لسه',cloudUp:'ارفع',cloudDown:'نزّل',cloudDel:'امسح',cloudSure:'متأكد؟ دوس تاني',cloudLoading:'جاري التحميل…',cloudUpOk:'{n} اترفع على حسابك',cloudDownOk:'{n} نزل على الجهاز ده (القديم محفوظ نسخة احتياطي)',cloudDelOk:'{n} اتمسح من السحابة',cloudErr:'الحفظ السحابي فشل: {e}',cloudSame:'(نفس الشخصية)',cloudOut:'خروج من الحساب',cloudOutOk:'خرجت من الحساب',cloudErase:'امسح بياناتي أونلاين',cloudEraseOk:'بياناتك أونلاين اتمسحت ({n} سجل). الحفظ اللي على الجهاز ده زي ما هو.'});
-Object.assign(STR.en,{cloudBtn:'Cloud saves',cloudH:'Cloud saves (Google account)',cloudLocal:'On this device: {n} · Lv {lv}',cloudNoLocal:'No saved character on this device',cloudNone:'No characters in the cloud yet',cloudUp:'Upload',cloudDown:'Download',cloudDel:'Delete',cloudSure:'Sure? Click again',cloudLoading:'Loading…',cloudUpOk:'{n} uploaded to your account',cloudDownOk:'{n} is on this device now (the old save is kept as a backup)',cloudDelOk:'{n} deleted from the cloud',cloudErr:'Cloud save failed: {e}',cloudSame:'(same character)',cloudOut:'Sign out',cloudOutOk:'Signed out',cloudErase:'Delete my online data',cloudEraseOk:'Your online data is deleted ({n} records). The save on this device is untouched.'});
+Object.assign(STR.ar,{cloudBtn:'حفظ سحابي',cloudH:'الحفظ السحابي (حساب جوجل)',cloudLocal:'على الجهاز ده: {n} · مستوى {lv}',cloudNoLocal:'مفيش شخصية محفوظة على الجهاز ده',cloudNone:'مفيش شخصيات على السحابة لسه',cloudUp:'ارفع',cloudDown:'نزّل',cloudDel:'امسح',cloudSure:'متأكد؟ دوس تاني',cloudLoading:'جاري التحميل…',cloudUpOk:'{n} اترفع على حسابك',cloudDownOk:'{n} نزل على الجهاز ده (القديم محفوظ نسخة احتياطي)',cloudDelOk:'{n} اتمسح من السحابة',cloudErr:'الحفظ السحابي فشل: {e}',cloudSame:'(نفس الشخصية)',cloudOut:'خروج من الحساب',cloudOutOk:'خرجت من الحساب',cloudErase:'امسح بياناتي أونلاين',cloudExport:'نزّل نسخة من بياناتي أونلاين',cloudExOk:'نزلت نسخة من بياناتك أونلاين ({n} سجل)',cloudEraseOk:'بياناتك أونلاين اتمسحت ({n} سجل). الحفظ اللي على الجهاز ده زي ما هو.'});
+Object.assign(STR.en,{cloudBtn:'Cloud saves',cloudH:'Cloud saves (Google account)',cloudLocal:'On this device: {n} · Lv {lv}',cloudNoLocal:'No saved character on this device',cloudNone:'No characters in the cloud yet',cloudUp:'Upload',cloudDown:'Download',cloudDel:'Delete',cloudSure:'Sure? Click again',cloudLoading:'Loading…',cloudUpOk:'{n} uploaded to your account',cloudDownOk:'{n} is on this device now (the old save is kept as a backup)',cloudDelOk:'{n} deleted from the cloud',cloudErr:'Cloud save failed: {e}',cloudSame:'(same character)',cloudOut:'Sign out',cloudOutOk:'Signed out',cloudErase:'Delete my online data',cloudExport:'Download my online data',cloudExOk:'Your online data is downloaded ({n} records)',cloudEraseOk:'Your online data is deleted ({n} records). The save on this device is untouched.'});
 let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // Sign out, or (erase) first delete everything the account stored online (doc §29 T35): cloud characters,
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
@@ -7910,6 +7941,13 @@ function netStop(){if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(()=>{});}L
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
  const nc=Satisfy.natcomp?Satisfy.natcomp.now(wNow()):null,ni=nc?+nc.id.slice(1):-1; /* the National Competition's last two (SAT-ONLINE-069) */
  return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
+/* "Download my online data" (SAT-ONLINE-078, plan U346): a JSON file with everything the account keeps online that it can
+   read: what "Delete my online data" removes, plus the guild invitations, its guild entry and its whispers. */
+function netExportPaths(uid){return netErasePaths(uid).concat(['guildInv/'+uid,'whisper/'+uid],S&&S.gon?['guildMembers/'+S.gon+'/'+uid]:[]);}
+function cloudExport(){const C=cloudApi();if(!C||!C.exportAll||!netUser)return;const uid=netUser.uid;
+ return C.exportAll(netExportPaths(uid)).then(d=>{const doc={game:'Satisfy',account:uid,id:netId||null,exported:new Date(wNow()).toISOString(),data:d};
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(doc,null,1)],{type:'application/json'}));a.download='satisfy-my-online-data.json';
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);toast(t('cloudExOk',{n:Object.keys(d).length}),'good');return doc;},e=>{toast(t('cloudErr',{e:e&&e.message||'?'}),'warn');});}
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid,lf=erase?Promise.all([legFree(uid),frFree()]):null;netStop();
  (erase?lf.then(()=>C.eraseAll(netErasePaths(uid))):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
@@ -7923,7 +7961,7 @@ function armBtn(label,run){const b=document.createElement('button');b.textConten
 function cloudLocal(){const r=STORE.read();if(r.status!=='ok')return null;const d=r.data;if(!Satisfy.ids.isCharId(d.S.pid)){Satisfy.ids.ensure(d.S);if(!STORE.replace(JSON.stringify(d),'before-ids-'+Date.now().toString(36)))return null;}
  return {raw:STORE.read().raw,pid:d.S.pid,n:(d.S.look&&d.S.look.n)||'?',lv:d.S.lv||1,at:+d.savedAt||0};}
 function cloudOpen(){const C=cloudApi();if(!C)return;$('cloudW').hidden=false;$('cloudH').textContent=t('cloudH');const L=cloudLocal(),N=$('cloudN'),box=$('cloudL'),A=$('cloudA');
- A.textContent='';const out=document.createElement('button');out.textContent=t('cloudOut');out.onclick=()=>{out.disabled=true;netSignOut(false);};A.appendChild(out);A.appendChild(armBtn(t('cloudErase'),()=>netSignOut(true)));
+ A.textContent='';const out=document.createElement('button');out.textContent=t('cloudOut');out.onclick=()=>{out.disabled=true;netSignOut(false);};A.appendChild(out);A.appendChild(armBtn(t('cloudErase'),()=>netSignOut(true)));{const x=document.createElement('button');x.textContent=t('cloudExport');x.onclick=()=>cloudExport();A.appendChild(x);}
  const nb=BLK.list().length;if(nb){const u=document.createElement('button');u.textContent=t('blkClear',{n:nb});u.onclick=()=>{BLK.clear();toast(t('blkCleared'));cloudOpen();};A.appendChild(u);}
  N.textContent=L?t('cloudLocal',{n:L.n,lv:L.lv}):t('cloudNoLocal');{const nt=document.createElement('div');nt.className='note';nt.textContent=t('cloudAutoNote');N.appendChild(nt);}if(L)N.appendChild(armBtn(t('cloudUp'),()=>C.upload(L.raw).then(i=>{toast(t('cloudUpOk',{n:i.handle}),'good');cloudOpen();},e=>{cloudErr(e);cloudOpen();})));
  box.textContent=t('cloudLoading');
