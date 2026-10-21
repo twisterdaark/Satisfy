@@ -46,8 +46,8 @@ async function pages(g) {
   return out.join(' / ');
 }
 const write = (g, u) => g.eval(async (x) => { const F = window.__GLD.fb(), D = F.m.database; for (const k in x) if (x[k] && x[k].t === 'SV') x[k].t = D.serverTimestamp(); try { await D.update(D.ref(F.db), x); return 'ok'; } catch (e) { return 'no'; } }, u);
-// close whatever dialog is open (Escape, back to play)
-async function shut(g) { for (let i = 0; i < 5 && (await g.eval(() => window.__G.mode)) !== 'play'; i++) { await g.page.keyboard.press('Escape'); await g.step(2); } }
+// close whatever dialog is open (its last choice, Back and then Close, back to play)
+async function shut(g) { for (let i = 0; i < 8 && (await g.eval(() => window.__G.mode)) === 'dialog'; i++) { await g.eval(() => { const o = [...document.querySelectorAll('#dopts button')]; if (document.getElementById('dopts').hidden || !o.length) window.__G.advance(); else o[o.length - 1].click(); }); await g.step(2); } }
 // one attack click on the other player's body (as in pvp.test.cjs)
 async function strike(a, b) {
   const uid = await b.eval(() => Satisfy.local.net().uid);

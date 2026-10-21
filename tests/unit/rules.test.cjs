@@ -495,6 +495,20 @@ test('guild alliances (SAT-ONLINE-085): asked by one side, written by the other,
   for (const k of ['ask', 'ally', 'decline', 'break', 'end']) assert.ok(dl.$id.k['.validate'].includes("newData.val() === '" + k + "'"), k);
 });
 
+test('guild wars (SAT-ONLINE-086): on a full hour ahead, accepted by the other side, not on an ally; kills only in the hour; no leaving', () => {
+  const ask = rules.guildWarAsk.$to.$from, w = rules.guildWar.$g, k = rules.guildWarKill.$g.$o.$uid;
+  const mo = (g) => "(root.child('guildMembers').child(" + g + ").child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child(" + g + ").child(auth.uid).child('rk').val() === 'o')";
+  assert.equal(ask.at['.validate'], 'newData.isNumber() && newData.val() % 3600000 === 0 && newData.val() >= now + 1800000 && newData.val() <= now + 604800000', 'a full hour, 30 min to 7 days ahead');
+  assert.ok(ask['.write'].includes("(!root.child('guildAlly').child($from).child($to).exists() || root.child('guildAlly').child($from).child($to).child('until').val() < now)"), 'not on an ally');
+  assert.ok(w.$o['.write'].includes(mo('$g') + " && root.child('guildWarAsk').child($g).child($o).child('at').val() === newData.child('at').val()"), 'the hour the other side declared');
+  assert.ok(w.$o['.write'].includes(mo('$o') + " && root.child('guildWarAsk').child($o).child($g).child('at').val() === newData.child('at').val()"));
+  assert.ok(w.$o['.write'].endsWith("(data.child('at').val() > now + 600000 || data.child('at').val() + 3600000 < now)))"), 'called off up to 10 minutes before, cleared after, never during');
+  assert.equal(k['.write'], "auth != null && $uid === auth.uid && newData.exists() && root.child('guildMembers').child($g).child(auth.uid).exists()", 'your own count, for your guild');
+  assert.equal(k.at['.validate'], "newData.val() === root.child('guildWar').child($g).child($o).child('at').val() && now >= newData.val() && now <= newData.val() + 3900000", "only in the war's hour (a war can't start off-schedule)");
+  assert.match(k.k['.validate'], /newData\.val\(\) >= 1 && newData\.val\(\) <= 200 && \(!data\.exists\(\) \|\| data\.parent\(\)\.child\('at'\)\.val\(\) !== newData\.parent\(\)\.child\('at'\)\.val\(\) \|\| newData\.val\(\) >= data\.val\(\)\)/, 'only upward, at most 200');
+  for (const x of ['warask', 'war', 'warno']) assert.ok(rules.guildDiplo.$gid.$id.k['.validate'].includes("newData.val() === '" + x + "'"), x);
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);
