@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v121', ver: '1.21', d: '2026-10-21',
+      ar: ['موسوعة الوحوش (زرار B): صفحة لكل وحش في اللعبة. اللي لسه ماقتلتهوش بيبان ضل أسود و"???"',
+        'أول قتلة بتفتح صفحته (الاسم واللفل والصحة والضرر والعنصر)، و10 قتلات (أو قتلة واحدة للبوس) بتوريك اللي بيوقعه',
+        'الإتقان: 100 قتلة (3 للبوس، واحدة للبوس العالمي) بتديك +3% ضرر عليه و-3% من ضربه. فلاتر: الكل، المكتشفة، البوسات، المتقنة',
+        'إنجازات جديدة: اكتشف 30 و60 وحش، وأتقن 25. لقب "عالم الوحوش" بيضاعف مكافأة الإتقان لـ6%'],
+      en: ['Monster Encyclopedia (B): a page for every monster in the game. Ones you have not defeated show as a dark silhouette and "???"',
+        'The first kill opens its page (name, level, HP, damage, element), and 10 kills (one for a boss) show what it drops',
+        'Mastery: 100 kills (3 for a boss, one for a world boss) give +3% damage to it and −3% damage from it. Filters: all, discovered, bosses, mastered',
+        'New achievements: discover 30 and 60 monsters, master 25. The "Monster Scholar" title doubles mastery to 6%'] },
     { v: '2026-10-21v120', ver: '1.20', d: '2026-10-21',
       ar: ['القصة الرئيسية: الفصل 8 "أنفاس الوحوش الإلهية" مع جيشوكا. اهزم العنقاء الحمرا في الجنوب والنمر الأبيض في الغرب علشان القوس اللي يليق بيها',
         'الفصل 9 "الشيطان العظيم رقم 32" مع بيارو: افتح طريق الحافة الرابعة من 20 بطل نصف تنين، وبعدين غارة بيليال مع الكل',

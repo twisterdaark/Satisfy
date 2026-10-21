@@ -236,7 +236,7 @@ body.touch #keys .key{cursor:pointer}
 .toast.out{animation:tout .35s ease-in forwards}.toast::before{content:"[ "}.toast::after{content:" ]"}
 .panel{animation:pin .2s cubic-bezier(.3,1.4,.5,1)}@keyframes pin{from{opacity:0;scale:.94}}
 /* patch 2 */
-#keys{transition:opacity .2s}#ui:has(#dialog:not([hidden])) #keys,#ui:has(#sysm:not([hidden])) #keys,#ui:has(#statusW:not([hidden])) #keys,#ui:has(#inv:not([hidden])) #keys,#ui:has(#equipW:not([hidden])) #keys,#ui:has(#forge:not([hidden])) #keys,#ui:has(#logW:not([hidden])) #keys{opacity:0;pointer-events:none}
+#keys{transition:opacity .2s}#ui:has(#dialog:not([hidden])) #keys,#ui:has(#sysm:not([hidden])) #keys,#ui:has(#statusW:not([hidden])) #keys,#ui:has(#inv:not([hidden])) #keys,#ui:has(#equipW:not([hidden])) #keys,#ui:has(#forge:not([hidden])) #keys,#ui:has(#logW:not([hidden])) #keys,#ui:has(#mbW:not([hidden])) #keys{opacity:0;pointer-events:none}
 .qhead{display:flex;justify-content:space-between;align-items:center}.qtog{padding:0 calc(var(--u)*.6);font-size:calc(var(--u)*1.1);transition:transform .2s}
 #quest.min #qtext{display:none}#quest.min .qtog{transform:rotate(90deg)}#ui[dir=rtl] #quest.min .qtog{transform:rotate(-90deg)}
 #qtext{overflow:hidden;animation:qin .25s ease-out}@keyframes qin{from{opacity:0;transform:translateY(-4px)}}
@@ -294,6 +294,7 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 #eqInfo{margin-top:calc(var(--u)*.8)}
 #dtext{white-space:pre-line}#qdW{width:calc(var(--u)*44)}#qdB .ssec:first-child{border-top:0;margin-top:0}#qdB p{margin:calc(var(--u)*.4) 0}#qdB ul{margin:0;padding-inline-start:calc(var(--u)*1.6)}#qdB li{color:var(--gold)}#qtext .qi{cursor:pointer}#qtext .qi:hover b{color:#fff;text-decoration:underline}
 #logW{width:calc(var(--u)*50);max-height:80%;overflow:auto;background:var(--sys2)}
+#mbW{width:calc(var(--u)*66);max-width:96%;height:86%;display:flex;flex-direction:column;overflow:hidden;background:var(--sys2)}#mbG{flex:1;min-height:0;overflow-y:auto;align-content:start;padding-right:calc(var(--u)*.3)}#mbSum{font-size:calc(var(--u)*1.35);color:#bfe8ff;text-align:center;margin:calc(var(--u)*.4) 0}#mbF{display:flex;gap:calc(var(--u)*.6);justify-content:center;flex-wrap:wrap;margin-bottom:calc(var(--u)*.8)}#mbF button{padding:calc(var(--u)*.4) calc(var(--u)*1.2);font-size:calc(var(--u)*1.4)}#mbF button.on{background:rgba(120,190,255,.35);border-color:#9fd8ff}#mbD .mbd{display:flex;gap:calc(var(--u)*1.2);align-items:flex-start;padding:calc(var(--u)*1);margin-bottom:calc(var(--u)*.8);border:1px solid rgba(160,210,255,.35);background:rgba(10,24,50,.55)}#mbD .mbd>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:calc(var(--u)*.35)}#mbD b{font-size:calc(var(--u)*1.9);color:#ffe9a8}#mbD small{font-size:calc(var(--u)*1.3);opacity:.9}.mbpb{width:calc(var(--u)*11);height:calc(var(--u)*11);image-rendering:pixelated;background:rgba(0,0,0,.35);border:1px solid rgba(160,210,255,.3);flex:none}.mbbar{position:relative;height:calc(var(--u)*2.2);background:rgba(0,0,0,.45);border:1px solid rgba(160,210,255,.35)}.mbbar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#3a7ad8,#7fc8ff)}[dir=rtl] .mbbar i{inset:0 0 0 auto}.mbbar span{position:relative;display:block;text-align:center;font-size:calc(var(--u)*1.25);line-height:calc(var(--u)*2.2)}.mbdr{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.5) calc(var(--u)*1)}.mbi{display:inline-flex;align-items:center;gap:calc(var(--u)*.4);font-size:calc(var(--u)*1.3)}.mbi img{width:calc(var(--u)*2.2);height:calc(var(--u)*2.2);image-rendering:pixelated}#mbG{display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(var(--u)*10.5),1fr));gap:calc(var(--u)*.6)}.mbc{display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*.2);padding:calc(var(--u)*.5);border:1px solid rgba(160,210,255,.25);background:rgba(10,24,50,.45);cursor:pointer;text-align:center;min-width:0}.mbc:hover,.mbc.sel{border-color:#9fd8ff;background:rgba(40,80,140,.5)}.mbc.ms{border-color:#f2c14e}.mbc b{font-size:calc(var(--u)*1.2);line-height:1.15;overflow-wrap:anywhere}.mbc small{font-size:calc(var(--u)*1.05);opacity:.8}.mbp{width:calc(var(--u)*6);height:calc(var(--u)*6);image-rendering:pixelated}.un .mbp,.mbpb.un{filter:brightness(0) opacity(.55)}.mbq{display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*2.6);color:#9fd8ff;background:rgba(0,0,0,.3);border-radius:50%}
 #logL div{padding:calc(var(--u)*.25) 0;border-bottom:1px solid rgba(143,216,255,.12);font-size:calc(var(--u)*1.15)}#logL small{color:var(--muted);margin-inline-end:calc(var(--u)*.6);direction:ltr;display:inline-block}
 #sysm{position:absolute;min-width:calc(var(--u)*30);max-width:calc(var(--u)*56);text-align:center;font-size:calc(var(--u)*1.7);white-space:pre-line;border-color:#bfe8ff;box-shadow:0 0 calc(var(--u)*2.2) rgba(143,216,255,.6);animation:pin .25s cubic-bezier(.3,1.4,.5,1);z-index:30;pointer-events:auto}
 #sysm .sorn{color:#bfe8ff;font-size:calc(var(--u)*1);letter-spacing:.4em;margin-bottom:calc(var(--u)*.3);text-shadow:0 0 6px #8fd8ff}
@@ -470,6 +471,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
         <div class="key" id="kM"><kbd>M<i></i></kbd><span data-i18n="kMap"></span></div>
         <div class="key" id="kGu"><kbd>G<i></i></kbd><span data-i18n="kGuild"></span></div>
         <div class="key" id="kMo"><kbd>H<i></i></kbd><span data-i18n="kMount"></span></div>
+        <div class="key" id="kB"><kbd>B<i></i></kbd><span data-i18n="kMb"></span></div>
         <div class="key" id="kL"><kbd>L<i></i></kbd><span data-i18n="kLog"></span></div>
         <div class="key" id="kLay"><kbd>✥<i></i></kbd><span data-i18n="kLay"></span></div>
         <div class="key" id="kEsc"><kbd>Esc<i></i></kbd><span data-i18n="kEsc"></span></div>
@@ -560,6 +562,10 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
     <div id="qdW" class="sys panel center" hidden>
       <div class="ptitle"><span class="head" id="qdT"></span><button class="x" data-act="closeQD">✕</button></div>
       <div id="qdB"></div>
+    </div>
+    <div id="mbW" class="sys panel center" hidden>
+      <div class="ptitle"><span class="head" data-i18n="mbT"></span><button class="x" data-act="closeMB">✕</button></div>
+      <div id="mbSum"></div><div id="mbF"></div><div id="mbD"></div><div id="mbG"></div>
     </div>
     <div id="logW" class="sys panel center" hidden>
       <div class="ptitle"><span class="head" data-i18n="logT"></span><button class="x" data-act="closeLog">✕</button></div>
@@ -3320,6 +3326,51 @@ Object.assign(STR.ar,{"belialN": "الشيطان العظيم رقم 32 بيلي
 Object.assign(STR.en,{"belialN": "32nd Great Demon Belial", "succN": "Succubus", "blSeenT": "The 32nd Great Demon Belial waits at the gate of hell. The monsters around her are level 440+.", "blHellT": "You have entered the hell field: no health or mana regeneration, no potions, and attack speed -20%.", "blMirOn": "[Mirror Shield] Only 30% of your hits will land and 70% will come back to you. (6 s)", "blMirT": "Mirror", "blSucc": "Belial has called her succubi (Lv 320)!", "blFake": "Belial's health gauge was fake!", "blForm": "Belial has taken her final form: small, winged, with insect skin. Her magic comes faster.", "blMet": "Meteor!", "blFire": "Flames of Hell!", "blNoPot": "Potions do not work in the hell field.", "blWin": "[The soul of the 32nd Great Demon Belial has been destroyed...]", "blPerf": "Your part in the raid: {p}% of her health.", "blTitle": "Those who dealt 5% or more of her health receive the title 'Belial's Bane' and Belial's Black Jewel.", "blDown": "{n} took part in destroying the soul of the 32nd Great Demon Belial! The gate of hell opens again in two hours.", "tl_blslay": "Belial's Bane", "tl_blslayD": "-10% damage from demons and +5% damage to them.", "bljewel": "Belial's Black Jewel", "blhorn": "Belial's Horn", "bljewelD": "A jewel from Belial's body. A rare material.", "blhornD": "The 32nd Great Demon's horn. It goes to the raid's strongest.", "blstaff": "Belial's Staff"});
 Object.assign(STR.ar,{"msc8": "أنفاس الوحوش الإلهية", "msc9": "الشيطان العظيم رقم 32", "msc8a": "『 في مسابقة القارة الشرقية، جريد عمل قوس العنقاء الحمراء، وماكانش ينفع يكمل من غير نَفَس الوحش. 』", "msc8b": "『 الوحوش الإلهية الأربعة بيحرسوا أركان القارة الأربعة، وكل واحد فيهم أقوى من أي بوس في المنطقة. 』", "msc8c": "『 جيشوكا كانت مستنية قوس يليق بيها. 』", "msc9a": "『 الملك أصلان حرق 9,999 شخص في طقس واحد. 』", "msc9b": "『 الشيطان العظيم رقم 32 بيليال استجاب، راكب عربية بتجرّها كلاب جهنم. 』", "msc9c": "『 بيارو وداميان وإيزابيل والأوفرجيرد اتجمعوا للغارة. 』", "q_gj14": "نَفَس العنقاء الحمراء", "gj14_o": "القوس اللي جيشوكا عايزاه محتاج نَفَس العنقاء الحمراء، اللي بتحرس الجنوب.\nشروط إنهاء المهمة: اهزم العنقاء الحمراء", "gj14_w": "نارها بتحرق أي حد يقرب. ماتروحش لوحدك.", "gj14_d": "ده النَفَس؟ حاسة إن القوس هيعيش.", "q_gj15": "النمر الأبيض النبيل", "gj15_o": "جيشوكا عايزة سهام تخترق أي درع. النمر الأبيض اللي بيحرس الغرب عنده النَفَس اللي محتاجاه.\nشروط إنهاء المهمة: اهزم النمر الأبيض", "gj15_w": "سريع ومخالبه تقطع الحديد. خلي عينك عليه.", "gj15_d": "قوس يليق بيا أخيرًا. شكرًا يا صاحبي.", "q_gj16": "طقس أصلان", "gj16_o": "الطقس اللي عمله الملك أصلان صحّى شياطين في الجبال. أنصاف التنانين في الحافة الرابعة بيقفلوا الطريق.\nشروط إنهاء المهمة: اهزم 20 بطل نصف تنين", "gj16_w": "لازم نفتح الطريق قبل ما الشيطان العظيم يكمل نزوله.", "gj16_d": "الطريق اتفتح. اللي جاي أصعب بكتير.", "q_gj17": "الشيطان العظيم رقم 32 بيليال", "gj17_o": "[الشيطان العظيم رقم 32 بيليال ظهر في القارة...!]\nماحدش يقدر يواجهها لوحده. اتجمعوا للغارة.\nشروط إنهاء المهمة: اهزم الشيطان العظيم رقم 32 بيليال", "gj17_w": "المرايا بترجّع الضرب. اضربوا بحساب.", "gj17_d": "[روح الشيطان العظيم رقم 32 بيليال اتدمرت...]"});
 Object.assign(STR.en,{"msc8": "The Divine Beasts’ Breaths", "msc9": "The 32nd Great Demon", "msc8a": "『 At the East Continent contest, Grid made the Red Phoenix Bow, and it could not be finished without the beast’s breath. 』", "msc8b": "『 The four divine beasts guard the four corners of the continent, each stronger than any boss of its region. 』", "msc8c": "『 Jishuka had been waiting for a bow worthy of her. 』", "msc9a": "『 King Aslan burned 9,999 people in a single ritual. 』", "msc9b": "『 The 32nd Great Demon Belial answered, riding a chariot drawn by hellhounds. 』", "msc9c": "『 Piaro, Damian, Isabel and the Overgeared gathered for the raid. 』", "q_gj14": "The Red Phoenix’s Breath", "gj14_o": "The bow Jishuka wants needs the breath of the Red Phoenix, which guards the south.\nQuest Clear Conditions: Defeat the Red Phoenix", "gj14_w": "Its fire burns anyone who comes close. Don’t go alone.", "gj14_d": "This is the breath? I can feel the bow coming alive.", "q_gj15": "The Noble White Tiger", "gj15_o": "Jishuka wants arrows that pierce any armor. The White Tiger guarding the west holds the breath she needs.\nQuest Clear Conditions: Defeat the White Tiger", "gj15_w": "It is fast and its claws cut iron. Keep your eyes on it.", "gj15_d": "A bow worthy of me at last. Thank you, friend.", "q_gj16": "Aslan’s Ritual", "gj16_o": "The ritual King Aslan held woke demons in the mountains. The Half-Draconians on the Fourth Ridge block the road.\nQuest Clear Conditions: Defeat 20 Half-Draconian Champions", "gj16_w": "We must open the road before the Great Demon finishes descending.", "gj16_d": "The road is open. What comes next is far harder.", "q_gj17": "32nd Great Demon Belial", "gj17_o": "[32nd Great Demon Belial has appeared on the continent...!]\nNo one can face her alone. Gather for the raid.\nQuest Clear Conditions: Defeat 32nd Great Demon Belial", "gj17_w": "Her mirrors throw blows back. Strike with care.", "gj17_d": "[The soul of the 32nd Great Demon Belial has been destroyed...]"});
+/* ---------------- the monster encyclopedia (owner 2026-10-21: monster encyclopedia) ----------------
+   Every monster you kill fills its page: the first kill shows its name, level and strength, more kills show what it
+   drops, and enough kills master it (+3% damage to it, -3% damage from it). Kills are your own save's S.kills, so it
+   works the same online and offline. B opens it. */
+const MBX=new Set(['bhclone']),MBP={};let MBF='all',MBS=null;
+const mbList=()=>Object.keys(MT).filter(k=>!MBX.has(k)).sort((a,b)=>MT[a].lv[0]-MT[b].lv[0]||(a<b?-1:1));
+const mbK=k=>(S&&S.kills&&S.kills[k])||0;
+const mbNeed=k=>MT[k].wb?1:MT[k].boss?3:100,mbDropN=k=>MT[k].boss?1:10;
+const mbMs=k=>!!MT[k]&&!MBX.has(k)&&mbK(k)>=mbNeed(k);
+const mbSeen=()=>mbList().filter(k=>mbK(k)>0).length,mbMast=()=>mbList().filter(mbMs).length;
+const mbB=()=>S&&S.tl&&S.tl.mbook?.06:.03;
+function mbAtk(m){return mbMs(m.type)?1+mbB():1;}
+function mbHurt(d,src){return src&&src.type&&mbMs(src.type)?Math.max(1,Math.round(d*(1-mbB()))):d;}
+const mbName=k=>t(k==='guardian'?'guardian':NAMEK[k]||k);
+// a portrait: the monster is drawn once on a cleared corner of the game canvas, cropped to what it painted, and the
+// corner put back before the frame is shown (the world drawing code all paints on the one canvas)
+function mbPic(k){if(MBP[k]!==undefined)return MBP[k];let url='';const GW=240,GH=220;
+ try{const keep=ctx.getImageData(0,0,GW,GH);ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,GW,GH);ctx.beginPath();ctx.rect(0,0,GW,GH);ctx.clip();ctx.translate(GW/2,GH-24);
+  const m={type:k,x:0,y:0,face:1,at:0,t:0,mvd:0,hp:1,max:1,lv:MT[k].lv[0],cd:1,id:-1,mbPic:1};try{drawMon(m);}catch(e){}ctx.restore();
+  const d=ctx.getImageData(0,0,GW,GH).data;let x0=GW,y0=GH,x1=-1,y1=-1;for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)if(d[(y*GW+x)*4+3]>40){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+  if(x1>=0){const S2=48,c=document.createElement('canvas');c.width=c.height=S2;const g=c.getContext('2d');g.imageSmoothingEnabled=false;const w=x1-x0+1,h=y1-y0+1,f=Math.min(S2/w,S2/h,3),dw=Math.round(w*f),dh=Math.round(h*f);
+   g.drawImage(cvs,x0,y0,w,h,Math.round((S2-dw)/2),S2-dh,dw,dh);url=c.toDataURL();}
+  ctx.putImageData(keep,0,0);}catch(e){url='';}
+ return MBP[k]=url;}
+function mbPicH(k,cls){const u=mbPic(k);return u?`<img class="${cls}" src="${u}">`:`<span class="${cls} mbq">${esc(mbName(k)[0]||'?')}</span>`;}
+function mbDrops(k){const o=[];for(const [it] of (MT[k].drop||[]))if(!o.includes(it))o.push(it);for(const [it] of ((typeof NDROP!=='undefined'&&NDROP[k])||[]))if(!o.includes(it))o.push(it);return o;}
+function mbDetail(k){const b=MT[k],n=mbK(k),need=mbNeed(k);if(!n)return `<div class="mbd">${mbPicH(k,'mbpb un')}<div><b>???</b><small>${t('mbUnk')}</small></div></div>`;
+ const lv=b.lv[0]===b.lv[1]?b.lv[0]:b.lv[0]+'–'+b.lv[1],el=typeof BEL!=='undefined'&&BEL[k],tags=[b.wb?t('mbWb'):b.boss?t('mbBoss'):'',el?t('mbEl_'+el):''].filter(Boolean).join(' · ');
+ const dr=n>=mbDropN(k)?mbDrops(k).map(it=>`<span class="mbi"><img src="${icon(it)}">${esc(t(it))}</span>`).join('')||`<small>${t('mbNoDrop')}</small>`:`<small>${t('mbDropAt',{n:mbDropN(k)})}</small>`;
+ const pc=Math.min(100,n/need*100);
+ return `<div class="mbd">${mbPicH(k,'mbpb')}<div><b>${esc(mbName(k))}</b><small>${t('mbLv',{l:lv})}${tags?' · '+tags:''}</small><small>${t('mbStats',{h:b.hp.toLocaleString('en'),d:b.dmg.toLocaleString('en')})}</small>`+
+  `<div class="mbbar"><i style="width:${pc}%"></i><span>${mbMs(k)?t('mbMsT',{p:Math.round(mbB()*100)}):t('mbKills',{n:n.toLocaleString('en'),m:need})}</span></div><div class="mbdr">${dr}</div></div></div>`;}
+function mbDraw(){const L=mbList(),f=MBF,vis=L.filter(k=>f==='all'||(f==='seen'&&mbK(k)>0)||(f==='boss'&&MT[k].boss)||(f==='ms'&&mbMs(k)));
+ if(!MBS||!vis.includes(MBS))MBS=vis.find(k=>mbK(k)>0)||vis[0]||null;
+ $('mbSum').textContent=t('mbSumT',{s:mbSeen(),n:L.length,m:mbMast(),p:Math.round(mbB()*100)});
+ $('mbF').innerHTML=['all','seen','boss','ms'].map(x=>`<button data-mbf="${x}" class="${x===f?'on':''}">${t('mbF_'+x)}</button>`).join('');
+ $('mbD').innerHTML=MBS?mbDetail(MBS):'';
+ $('mbG').innerHTML=vis.map(k=>{const n=mbK(k);return `<div class="mbc${n?'':' un'}${mbMs(k)?' ms':''}${k===MBS?' sel':''}" data-mb="${k}">${mbPicH(k,'mbp')}<b>${n?esc(mbName(k)):'???'}</b><small>${n?t('mbLvS',{l:MT[k].lv[0]})+' · '+Math.min(n,mbNeed(k))+'/'+mbNeed(k):''}</small></div>`;}).join('')||`<div>${t('mbNone')}</div>`;}
+function openMB(){if(mode!=='play')return;SFX.open();mode='mb';$('mbW').hidden=false;$('hint').hidden=true;mbDraw();}
+function closeMB(){SFX.close();$('mbW').hidden=true;mode='play';}
+window.__GMB={get MT(){return MT},list:mbList,need:mbNeed,ms:mbMs,seen:()=>mbSeen(),mast:()=>mbMast(),atk:mbAtk,hurt:mbHurt,pic:mbPic,open:openMB,close:closeMB,detail:mbDetail,
+ sel:k=>{MBS=k;mbDraw();},filt:f=>{MBF=f;mbDraw();}};
+function mbUp(k){if(MBX.has(k)||!MT[k])return;const n=mbK(k);if(n===1)toast(t('mbNew',{m:mbName(k)}));if(n===mbNeed(k)){toast(t('mbMsUp',{m:mbName(k),p:Math.round(mbB()*100)}),'good');SFX.click();}}
+Object.assign(STR.ar,{"kMb": "الوحوش", "mbT": "موسوعة الوحوش", "mbSumT": "اكتشفت {s}/{n} · أتقنت {m} · الإتقان: +{p}% ضرر على الوحش و-{p}% من ضربه", "mbF_all": "الكل", "mbF_seen": "المكتشفة", "mbF_boss": "البوسات", "mbF_ms": "المتقنة", "mbUnk": "لسه ماقتلتهوش. اقتله مرة علشان صفحته تتفتح.", "mbWb": "بوس عالمي", "mbBoss": "بوس", "mbEl_fire": "نار", "mbEl_thunder": "رعد", "mbEl_earth": "أرض", "mbEl_water": "مياه", "mbNoDrop": "مابيوقعش حاجة معروفة.", "mbDropAt": "اللي بيوقعه بيبان بعد {n} قتلة.", "mbLv": "لفل {l}", "mbLvS": "لف {l}", "mbStats": "الصحة {h} · الضرر {d}", "mbMsT": "متقن: +{p}% ضرر و-{p}% ضرر واخده", "mbKills": "القتلات {n}/{m} للإتقان", "mbNone": "مفيش حاجة هنا لسه.", "mbNew": "صفحة جديدة في موسوعة الوحوش: {m} (B)", "mbMsUp": "[أتقنت {m}!] +{p}% ضرر عليه و-{p}% من ضربه.", "ach_mb30": "باحث مبتدئ", "achD_mb30": "اكتشف 30 وحش في الموسوعة.", "ach_mb60": "عالم الوحوش", "achD_mb60": "اكتشف 60 وحش في الموسوعة.", "ach_mbm25": "صياد خبير", "achD_mbm25": "أتقن 25 وحش.", "tl_mbook": "عالم الوحوش", "tl_mbookD": "مكافأة الإتقان بتبقى الضعف (6%)."});
+Object.assign(STR.en,{"kMb": "Monsters", "mbT": "Monster Encyclopedia", "mbSumT": "Discovered {s}/{n} · Mastered {m} · Mastery: +{p}% damage to that monster, −{p}% damage from it", "mbF_all": "All", "mbF_seen": "Discovered", "mbF_boss": "Bosses", "mbF_ms": "Mastered", "mbUnk": "Not defeated yet. Defeat it once to open its page.", "mbWb": "World boss", "mbBoss": "Boss", "mbEl_fire": "Fire", "mbEl_thunder": "Thunder", "mbEl_earth": "Earth", "mbEl_water": "Water", "mbNoDrop": "No known drops.", "mbDropAt": "Its drops show after {n} kills.", "mbLv": "Level {l}", "mbLvS": "Lv {l}", "mbStats": "HP {h} · Damage {d}", "mbMsT": "Mastered: +{p}% damage, −{p}% damage taken", "mbKills": "Kills {n}/{m} to master", "mbNone": "Nothing here yet.", "mbNew": "New page in the Monster Encyclopedia: {m} (B)", "mbMsUp": "[You have mastered {m}!] +{p}% damage to it, −{p}% damage from it.", "ach_mb30": "Novice Researcher", "achD_mb30": "Discover 30 monsters in the encyclopedia.", "ach_mb60": "Monster Scholar", "achD_mb60": "Discover 60 monsters in the encyclopedia.", "ach_mbm25": "Expert Hunter", "achD_mbm25": "Master 25 monsters.", "tl_mbook": "Monster Scholar", "tl_mbookD": "Mastery bonuses double (6%)."});
 /* ---------------- town life (owner 2026-10-20: town life) ----------------
    Horse races at Winston, dice at the inn tables and the town festival, all on the world clock (wNow), so everyone online
    shares the same race, the same dice rounds and the same festival without any new message or rules change: your race
@@ -3783,6 +3834,7 @@ const ACH=[
  {k:'lv50',c:()=>[pk(),50],pb:{hp:.01}},{k:'lv100',c:()=>[pk(),100],pb:{hp:.02}},{k:'lv200',c:()=>[pk(),200],tl:'veteran',pb:{hp:.03}},
  {k:'gwar',c:()=>[kOf('gwar'),1],pb:{dmg:.01}},{k:'kking',c:()=>[kOf('kking'),1],pb:{hp:.01}},{k:'warlord',c:()=>[kOf('warlord'),1],pb:{dmg:.02}},
  {k:'bknight',c:()=>[kOf('bknight'),1],pb:{hp:.02}},{k:'ypriest',c:()=>[kOf('ypriest'),1],pb:{dmg:.02}},{k:'trauka',c:()=>[kOf('trauka'),1],pb:{dmg:.03,hp:.03}},{k:'beasts',c:()=>[Object.keys(BEAST).filter(k=>kOf(k)>0).length,4],tl:'four',pb:{dmg:.03,hp:.03}},
+ {k:'mb30',c:()=>[mbSeen(),30],pb:{hp:.01}},{k:'mb60',c:()=>[mbSeen(),60],tl:'mbook',pb:{dmg:.02}},{k:'mbm25',c:()=>[mbMast(),25],pb:{dmg:.02,hp:.02}},
  {k:'craft10',c:()=>[mAll(),10],pb:{gold:.02}},{k:'craft100',c:()=>[mAll(),100],pb:{gold:.03}},
  {k:'towns',c:()=>[TOWNS.filter(T=>S.vis[T.k]).length,TOWNS.length],tl:'explorer',pb:{xp:.03}},
  {k:'rich',c:()=>[S.gold,100000],pb:{gold:.05}},{k:'life',c:()=>[Math.max(...LIFE.map(k=>lifeLv(k))),10],pb:{xp:.02}},
@@ -4652,7 +4704,7 @@ function onKey(c){if(c==="Escape"&&!$("updLog").hidden){updLogClose();return;}
  if(c==='Tab'&&(mode==='play'||mode==='cut')){toggleQuest();return;}
  if(mode==='play'){
   const si=slotOfKey(c);if(si>=0){useSlot(si);return;}const ij=IKB.indexOf(c);if(ij>=0){useISlot(ij);return;}
-  if(c==='Space')dodge();else if(c===POT.hpot.key){pressKey('pot_hpot');drink('hpot');}else if(c===POT.mpot.key){pressKey('pot_mpot');drink('mpot');}else if(c==='KeyE')interact();else if(c==='KeyI'){pressKey('kI');openInv();}else if(c==='KeyC'){pressKey('kC');openStatus();}else if(c==='KeyU'){pressKey('kU');openEquip();}else if(c==='KeyG'){pressKey('kGu');guildPanel();}else if(c==='KeyH'){pressKey('kMo');toggleRide();}else if(c==='KeyL'){pressKey('kL');openLog();}else if(c==='KeyM'){pressKey('kM');openMap();}else if(c==='Escape'){pressKey('kEsc');openPause();}
+  if(c==='Space')dodge();else if(c===POT.hpot.key){pressKey('pot_hpot');drink('hpot');}else if(c===POT.mpot.key){pressKey('pot_mpot');drink('mpot');}else if(c==='KeyE')interact();else if(c==='KeyI'){pressKey('kI');openInv();}else if(c==='KeyC'){pressKey('kC');openStatus();}else if(c==='KeyU'){pressKey('kU');openEquip();}else if(c==='KeyG'){pressKey('kGu');guildPanel();}else if(c==='KeyH'){pressKey('kMo');toggleRide();}else if(c==='KeyL'){pressKey('kL');openLog();}else if(c==='KeyB'){pressKey('kB');openMB();}else if(c==='KeyM'){pressKey('kM');openMap();}else if(c==='Escape'){pressKey('kEsc');openPause();}
  }else if(mode==='cut'){if(SM&&(c==='KeyE'||c==='Space'||c==='Enter'))SM.done();else if(CARD&&(c==='KeyE'||c==='Space'||c==='Enter'))CARD('next');else if(CARD&&c==='Escape')CARD('skip');}
  else if(mode==='dialog'&&DL&&DL.optOn){const n=+c.replace(/\D/g,'');if(/^(Digit|Numpad)[1-9]$/.test(c))pickOpt(n-1);else if(c==='ArrowUp'||c==='KeyW')selOpt((DL.sel+DL.opts.length-1)%DL.opts.length);else if(c==='ArrowDown'||c==='KeyS')selOpt((DL.sel+1)%DL.opts.length);else if(c==='KeyE'||c==='Space'||c==='Enter')pickOpt(DL.sel);else if(c==='Escape')pickOpt(DL.opts.length-1);}
  else if(mode==='dialog'){if(c==='KeyE'||c==='Space'||c==='Enter')advance();}
@@ -4667,6 +4719,7 @@ function onKey(c){if(c==="Escape"&&!$("updLog").hidden){updLogClose();return;}
  else if(mode==='map'){if(c==='Escape'||c==='KeyM')closeMap();else if(c==='Equal'||c==='NumpadAdd')mapZoom(1.25);else if(c==='Minus'||c==='NumpadSubtract')mapZoom(.8);else if(c==='Digit0'||c==='Numpad0')mapCenter();}
  else if(mode==='create'){if(c==='Escape')act('cBack');}
  else if(mode==='log'){if(c==='Escape'||c==='KeyL')closeLog();}
+ else if(mode==='mb'){if(c==='Escape'||c==='KeyB')closeMB();}
  else if(mode==='qd'){if(c==='Escape'||c==='Tab')closeQD();}
  else if(mode==='status'){if(c==='Escape'||c==='KeyC')closeStatus();}
  else if(mode==='pause'){if(c==='Escape')resume();}
@@ -4732,7 +4785,7 @@ const monY=m=>m.y-(m.type==='guardian'?18:m.type==='gchief'?10:4);
 // one hit on one monster; returns 0 (no effect), 1 (hit) or 2 (crit)
 function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}
  if(m.type==='kraugel'&&!m.st&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
- let dmg=(o.aura?auAtkV():atkV())*mul*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*dvAtk(m)*epAtk(m)*(S.tl.blslay&&DEMK.has(m.type)?1.05:1),crit=rand()<Math.min(.5,.05+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
+ let dmg=(o.aura?auAtkV():atkV())*mul*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*dvAtk(m)*epAtk(m)*(S.tl.blslay&&DEMK.has(m.type)?1.05:1)*mbAtk(m),crit=rand()<Math.min(.5,.05+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -4782,7 +4835,7 @@ function hurtPlayer(d,ml,src){return asMe(()=>hurtPlayer0(d,ml,src));}
 function hurtPlayer0(d,ml,src){if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(rgEvade(src)||hcEvade(src))return 0;if(src&&src.dmul)d*=src.dmul;if(src&&src.type)P.lastSrc=src.type;if(S.tl.hking&&src&&HKV.has(src.type))d*=.85;
  if(P.qm>0&&rand()<.3){numP(-20,t('ipEvade'),'#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
- d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,2.2)*150/(150+defV())*rlDef(src)));d=c2Hurt(d,src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=bthHurt(d,src);d=dmHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
+ d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,2.2)*150/(150+defV())*rlDef(src)));d=c2Hurt(d,src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=bthHurt(d,src);d=dmHurt(d,src);d=mbHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
  if(P.guard&&src){const sx=src.x-P.x,sy=src.y-P.y,sl=Math.hypot(sx,sy)||1;
   const GK=S.cls==='gknight';if(P.fort>0||(sx*P.gx+sy*P.gy)/sl>-.15){const ang=Math.atan2(sy,sx),bx=P.x+sx/sl*10,by=P.y-8+sy/sl*10;vfx('block',bx,by,{angle:ang});
    if(!src.hv&&P.gT<(GK?.18:.12)*clamp(1-((ml||S.lv)-S.lv)*.015,.6,1)){vfx('crit',bx,by);hcParry();qEvent('block','guard');numP(-24,t('parry'),'#9fe3ff',false);SFX.crit();P.inv=.35;P.gd=Math.min(100,P.gd+15);
@@ -4822,7 +4875,7 @@ function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh)(b.drop||[]).forEach(([k,p])=>{if(rand()<p)addMat(k,1);});
  if(m.lv>=20&&!m.tmp){if(b.boss)addMat('estone',1+(m.lv/50|0));else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
- crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;necCorpse(m);hcKill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
+ crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;mbUp(m.type);necCorpse(m);hcKill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
  if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;annW('annGuard',{lv:S.lv});}giveTitle('forest');S.raid=0;}
  if(m.type==='gchief'){shake=.3;giveTitle('chief');}
  if((S.kills.rabbit||0)+(S.kills.goblin||0)>=40)giveTitle('hunter');
@@ -5876,6 +5929,7 @@ function cancelQ(){const id=qdId,s=id&&S.qs[id];if(!s||s.st!==1)return;const b=$
  toast(t('qCanceled',{q:nm}));hudDirty=true;save(true);closeQD();}
 function closeQD(){SFX.close();$('qdW').hidden=true;mode='play';}
 function closeLog(){SFX.close();$('logW').hidden=true;mode='play';}
+$('mbW').addEventListener('click',e=>{const f=e.target.closest('[data-mbf]');if(f){SFX.click();MBF=f.dataset.mbf;mbDraw();return;}const c=e.target.closest('[data-mb]');if(c){SFX.click();MBS=c.dataset.mb;mbDraw();}});
 function toggleQuest(){$('quest').classList.toggle('min');SFX.click();}
 // SAT-ONLINE-041 (owner 2026-10-19): "World Notice" only for what every player online gets (events, sieges, the news feed);
 // your own moments (a broken item, a tower floor, an arena round, an advancement) say "Notice". A world notice also stays
@@ -6587,7 +6641,7 @@ function act(a){
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
  else if(a==='menuSize'){const v=[100,120,140],c=mzOf();MZ=v[(v.indexOf(c)+1)%v.length]||100;try{localStorage.setItem('satisfy_mz',String(MZ));}catch(e){}fit();mzUI();}
  else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='guiReset')guiReset();else if(a==='quit'){save(true);fadeTo(toTitle);}
- else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='mgReheat'){reheat();}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='fCre'){creOpen();}else if(a==='fApr'){closeForge();openApr('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qtoggle')toggleQuest();
+ else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='mgReheat'){reheat();}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='fCre'){creOpen();}else if(a==='fApr'){closeForge();openApr('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='closeMB')closeMB();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qtoggle')toggleQuest();
  else if(a==='cardNext'){if(CARD)CARD('next');}else if(a==='cardSkip'){if(CARD)CARD('skip');}
  else if(a==='cRand'){CL.hair=rand()*LOOK.hair.length|0;CL.hc=rand()*LOOK.hc.length|0;CL.skin=rand()*LOOK.skin.length|0;CL.top=rand()*LOOK.top.length|0;renderCreate();}
  else if(a==='cStart'){const n=$('cname').value.trim();if(n.length<2||n.length>12){$('cerr').textContent=t('cNameErr');SFX.deny();$('cname').focus();return;}CL.n=n;newGame(CL);}
@@ -8521,7 +8575,7 @@ function guiReset(){GUI={};guiSave();save(true);location.reload();}
 Object.assign(STR.ar,{guiMove:'اسحب عشان تحرّك',guiFold:'صغّر',guiOpen:'افتح',guiReset:'رجّع الواجهة لوضعها الأصلي',gui_stats:'الحالة',gui_quest:'الكويستات',gui_mini:'الخريطة',gui_partyW:'الفريق',gui_chatW:'الشات',gui_skillbar:'السكيلات',gui_keys:'الأزرار',gui_evbar:'الحدث',gui_boss:'الزعيم'});
 Object.assign(STR.en,{guiMove:'Drag to move',guiFold:'Fold',guiOpen:'Open',guiReset:'Reset the HUD',gui_stats:'Status',gui_quest:'Quests',gui_mini:'Map',gui_partyW:'Party',gui_chatW:'Chat',gui_skillbar:'Skills',gui_keys:'Keys',gui_evbar:'Event',gui_boss:'Boss'});
 // key hints that work as taps (attack and guard are held, so they live on the big buttons instead)
-const TKEY={kD:'Space',kE:'KeyE',kC:'KeyC',kI:'KeyI',kU:'KeyU',kM:'KeyM',kGu:'KeyG',kMo:'KeyH',kL:'KeyL',kEsc:'Escape'};
+const TKEY={kD:'Space',kE:'KeyE',kC:'KeyC',kI:'KeyI',kU:'KeyU',kM:'KeyM',kGu:'KeyG',kMo:'KeyH',kL:'KeyL',kB:'KeyB',kEsc:'Escape'};
 function tKey(code,down){dispatchEvent(new KeyboardEvent(down?'keydown':'keyup',{code,key:code,bubbles:true}));}
 function tStickAt(e){const el=$('tStick'),b=el.getBoundingClientRect(),r=b.width/2,dx=(e.clientX-b.left-r)/r,dy=(e.clientY-b.top-r)/r,l=Math.hypot(dx,dy),k=l>1?1/l:1;
  K.left=dx<-.35;K.right=dx>.35;K.up=dy<-.35;K.down=dy>.35;TSV=l>.18?{x:dx*k,y:dy*k}:null;el.classList.add('on');$('tKnob').style.transform=`translate(${dx*k*r*.6}px,${dy*k*r*.6}px)`;}
