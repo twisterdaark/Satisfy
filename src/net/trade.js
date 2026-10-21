@@ -99,7 +99,7 @@
       (t.offs || []).forEach(function (f) { try { f(); } catch (e) { /* ignore */ } });
       Promise.all([store.read(t.id, self), store.read(t.id, t.foe)]).then(function (v) {
         if (T === t) T = null;
-        emit({ type: 'done', give: cleanOffer(v[0]) || t.mine, get: cleanOffer(v[1]) || t.theirs || { g: 0, it: {} }, handle: t.handle, id: t.id });
+        emit({ type: 'done', give: cleanOffer(v[0]) || t.mine, get: cleanOffer(v[1]) || t.theirs || { g: 0, it: {} }, handle: t.handle, id: t.id, foe: t.foe });
       }, function () { if (T === t) T = null; emit({ type: 'failed', why: 'read', handle: t.handle }); });
     }
     function maybeCommit() {

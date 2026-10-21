@@ -1,7 +1,8 @@
 'use strict';
 // SAT-ONLINE-039 (owner 2026-10-19): trading without a server, online over the fake Firebase. Each side puts in gold and
 // bag items, both Accept, then Confirm; any change resets the accepts; the swap is one database update keyed by the item
-// ids, so the same item can't be traded twice (an old save that still has it is refused).
+// ids, so the same item can't be traded twice (an old save that still has it is refused). SAT-ONLINE-089: each side keeps
+// a record of the trade the rules check (seller history), and the card shows a player's trades and partners.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -99,7 +100,21 @@ test('online: offer, any change resets the accepts, Accept + Confirm swap once; 
     assert.equal(got.length, 1, 'B has it once');
     assert.notEqual(got[0], it.iid, "it is B's own item now (B's id)");
     assert.deepEqual(await a.eval((iid) => { const v = window.__fakeRTDB.data.get('tradedItems/' + iid); return v && v.o; }, it.iid), 'gTradeB2', 'the ledger');
+    // SAT-ONLINE-089 seller history: each side's record of it, checked against the trade (gold given and got, with whom)
+    await until([a, b], () => [...window.__fakeRTDB.data.keys()].filter((k) => /^tradeRep\//.test(k)).length === 2);
+    const tid = await a.eval(() => [...window.__fakeRTDB.data.keys()].find((k) => /^tradeLog\/gTradeA1\//.test(k)).split('/')[2]);
+    assert.deepEqual(await a.eval((x) => { const v = window.__fakeRTDB.data.get('tradeLog/gTradeA1/' + x); return [v.o, v.on, v.gg, v.gi, v.ig, v.ii]; }, tid), ['gTradeB2', 'Bassem', 100, 50, 1, 0]);
+    assert.deepEqual(await a.eval((x) => { const v = window.__fakeRTDB.data.get('tradeLog/gTradeB2/' + x); return [v.o, v.gg, v.gi, v.ig, v.ii]; }, tid), ['gTradeA1', 50, 100, 0, 1]);
     for (const g of [a, b]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
+    // B's card on A's screen: one trade with one player; "/trades" lists A's
+    await openCard(a, 'gTradeB2');
+    await until([a], () => /🤝 1 trades with 1 players/.test(document.getElementById('pctxI').textContent));
+    await click(a, '#pctx [data-act="pcClose"]'); await a.step(2);
+    await a.page.keyboard.press('Enter'); await a.step(1); await a.page.keyboard.type('/trades'); await a.page.keyboard.press('Enter'); await a.step(2);
+    await until([a], () => /Your trades \(1\)/.test(document.getElementById('dialog').textContent));
+    await a.eval(() => window.__G.advance()); await a.step(2);
+    assert.match(await text(a, 'dtext'), /^\d+\/\d+ \d\d:\d\d with Bassem: gave 100 gold and 1 items, got 50 gold$/);
+    for (let i = 0; i < 3 && (await a.eval(() => window.__G.mode)) === 'dialog'; i++) { await a.eval(() => { const o = [...document.querySelectorAll('#dopts button')]; if (o.length && !document.getElementById('dopts').hidden) o[o.length - 1].click(); else window.__G.advance(); }); await a.step(2); }
 
     // A reloads an old save that still has the piece (same id) and offers it again: the swap is refused
     await a.eval((old) => { window.__G.S.items.push(old); Satisfy.ids.ensure(window.__G.S); }, it);
@@ -120,6 +135,18 @@ test('online: offer, any change resets the accepts, Accept + Confirm swap once; 
     assert.equal(await b.eval((id) => window.__G.S.items.filter((i) => i.id === id && i.r === 2 && i.def === 7).length, it.id), 1, 'B did not get a second one');
     const rej = [...await a.eval(() => window.__fakeRTDB.rejected), ...await b.eval(() => window.__fakeRTDB.rejected)];
     assert.ok(rej.length >= 1 && rej.every((r) => /tradedItems not the giver/.test(r)), 'refused by the ledger rule: ' + rej);
+    assert.equal(await a.eval(() => [...window.__fakeRTDB.data.keys()].filter((k) => /^tradeRep\/gTradeA1\//.test(k)).length), 1, 'a refused trade is no trade');
+    // the record can't be forged: not another amount, not twice, not for a trade not done, not someone else's, not read by others
+    const w = (g, u) => g.eval(async (x) => { const F = window.__GLD.fb(), D = F.m.database; for (const k in x) x[k].t = D.serverTimestamp(); try { await D.update(D.ref(F.db), x); return 'ok'; } catch (e) { return 'no'; } }, u);
+    const open2 = await a.eval(() => [...window.__fakeRTDB.data.keys()].filter((k) => /^trades\//.test(k)).map((k) => k.split('/')[1]).find((x) => !window.__fakeRTDB.data.has('tradeDone/' + x)));
+    assert.ok(open2, 'the refused trade');
+    assert.equal(await w(a, { ['tradeRep/gTradeA1/' + open2]: { o: 'gTradeB2' } }), 'no', 'not done');
+    assert.equal(await w(a, { ['tradeRep/gTradeA1/' + tid]: { o: 'gTradeB2' } }), 'no', 'once');
+    assert.equal(await w(a, { ['tradeRep/gTradeB2/t_fake' + tid.slice(2, 20)]: { o: 'gTradeA1' } }), 'no', "not someone else's");
+    await a.eval((x) => { window.__fakeRTDB.data.delete('tradeLog/gTradeA1/' + x); }, tid); // as if A had never written it
+    assert.equal(await w(a, { ['tradeLog/gTradeA1/' + tid]: { o: 'gTradeB2', on: 'Bassem', gg: 100, gi: 5000, ig: 1, ii: 0 } }), 'no', 'not another amount');
+    assert.equal(await w(a, { ['tradeLog/gTradeA1/' + tid]: { o: 'gTradeX9', on: 'Bassem', gg: 100, gi: 50, ig: 1, ii: 0 } }), 'no', 'not another partner');
+    assert.equal(await a.eval(async () => { const F = window.__GLD.fb(), D = F.m.database; try { await D.get(D.ref(F.db, 'tradeLog/gTradeB2')); return 'ok'; } catch (e) { return 'no'; } }), 'no', "B's record is B's");
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });

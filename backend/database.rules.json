@@ -65,6 +65,35 @@
         "$other": { ".validate": false }
       }
     },
+    "tradeLog": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$tid": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.exists() && root.child('tradeDone').child($tid).exists()",
+          ".validate": "$tid.matches(/^t_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['o', 'on', 'gg', 'gi', 'ig', 'ii', 't'])",
+          "o": { ".validate": "((root.child('trades').child($tid).child('a').val() === $uid && newData.val() === root.child('trades').child($tid).child('b').val()) || (root.child('trades').child($tid).child('b').val() === $uid && newData.val() === root.child('trades').child($tid).child('a').val()))" },
+          "on": { ".validate": "newData.isString() && newData.val().length <= 24" },
+          "gg": { ".validate": "newData.val() === root.child('tradeSides').child($tid).child($uid).child('g').val()" },
+          "gi": { ".validate": "newData.val() === root.child('tradeSides').child($tid).child(newData.parent().child('o').val()).child('g').val()" },
+          "ig": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 8" },
+          "ii": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 8" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "tradeRep": {
+      "$uid": {
+        ".read": "auth != null",
+        "$tid": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.exists() && root.child('tradeDone').child($tid).exists()",
+          ".validate": "$tid.matches(/^t_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['o', 't'])",
+          "o": { ".validate": "((root.child('trades').child($tid).child('a').val() === $uid && newData.val() === root.child('trades').child($tid).child('b').val()) || (root.child('trades').child($tid).child('b').val() === $uid && newData.val() === root.child('trades').child($tid).child('a').val()))" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "tradedItems": {
       "$iid": {
         ".read": "auth != null",

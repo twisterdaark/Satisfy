@@ -7618,7 +7618,7 @@ $('chatX').addEventListener('click',e=>{e.stopPropagation();chatMin(true);});$('
 function chatOpen(){if(!CHAT)return;if(CHATMIN)chatMin(false);chatCh(CHCH);const i=$('chatIn');i.hidden=false;$('chatW').hidden=false;i.focus();chatSig='';}
 function chatClose(){const i=$('chatIn');i.hidden=true;i.value='';i.blur();chatSig='';}
 function chatSend(){if(!CHAT)return chatClose();let v=$('chatIn').value,ch=CHCH;
- if(annCmd(v.trim())||admCmd(v.trim())){chatClose();return;}/* SAT-ONLINE-079/082: the game's owner's commands */
+ if(annCmd(v.trim())||admCmd(v.trim())||trCmd(v.trim())){chatClose();return;}/* SAT-ONLINE-079/082: the game's owner's commands */
  {const w=/^\/(?:w|whisper)\s+(\S+)\s*([\s\S]*)$/i.exec(v);if(w){const f=frByName(w[1]);if(!f){toast(t('wNoFriend',{n:Satisfy.chat.clean(w[1],24)}),'warn');return;}const r=CHAT.sayTo(f.uid,f.n,w[2]);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}if(r==='sent')CHWTO=f.n;chatClose();return;}}/* SAT-ONLINE-070: /w name text */
  if(/^\/filter\s*$/i.test(v)){CHATF=!CHATF;try{localStorage.setItem('satisfy_chatf',CHATF?'1':'0');}catch(e){}toast(t(CHATF?'chatFOn':'chatFOff'));chatClose();return;}/* SAT-ONLINE-071: /filter turns the word filter off and on */const m=/^\/(p|a|g)\s+/i.exec(v);if(m){const k=m[1].toLowerCase();ch=k==='p'?'party':k==='g'?'guild':'all';v=v.slice(m[0].length);} // /p party, /a everyone, /g guild
  if(ch==='all'&&mutedNow()){toast(t('mutedYou',{l:calTime(MUTED.until)}),'warn');chatClose();return;}/* SAT-ONLINE-082: muted in the world chat */
@@ -7798,9 +7798,9 @@ function pctxNear(){if(!NET||PCTX)return;const r=partyNear();if(r)pctxOpen(r);}
 function pctxName(k){const v=t(k);return v===k?'':v;}
 function pctxUI(live){const W=$('pctx'),r=live?pctxRemote():null;if(PCTX&&!r){if(live&&PCTX.handle)toast(t('pcGone',{n:PCTX.handle}));PCTX=null;}
  if(!PCTX){if(!W.hidden)W.hidden=true;return;}
- const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,gi=guildOf(r),sig=[lang,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far,r.ol,gi&&gi.n,guildCanInvite(r),bntOn(r.uid),S&&S.gold>=BNT_MIN,FOLLOW&&FOLLOW.uid,frKind(r.uid)].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
+ const blk=isBlocked(r.uid),mate=!!(PARTY&&PARTY.id()&&r.party===PARTY.id()),far=r===PCTX.snap,gi=guildOf(r),rep=trRepOf(r.uid),sig=[lang,rep&&rep.n,rep&&rep.p,r.uid,r.handle,r.lv,r.cls,r.title,r.party,r.arm,blk,mate,far,r.ol,gi&&gi.n,guildCanInvite(r),bntOn(r.uid),S&&S.gold>=BNT_MIN,FOLLOW&&FOLLOW.uid,frKind(r.uid)].join('|');if(sig===pctxSig)return;pctxSig=sig;W.hidden=false;
  $('pctxT').textContent=r.handle||'?';
- $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):'',r.ol===2?t('kaMurderT'):r.ol?t('pcOl'):'',gi?'«'+gi.n+'»':'',bntOn(r.uid)?t('bntOn',{g:bntOn(r.uid)}):'',frKind(r.uid)==='friend'?t('frIs'):''].filter(Boolean).join(' · ');
+ $('pctxI').textContent=[t('pcLv',{n:lvTxt(r.lv)}),pctxName('cl_'+r.cls),r.title?pctxName('tl_'+r.title):'',mate?t('pcMate'):r.party?t('pcInParty'):'',r.arm?t('pcArm'):'',far?t('pcFar'):'',r.ol===2?t('kaMurderT'):r.ol?t('pcOl'):'',gi?'«'+gi.n+'»':'',bntOn(r.uid)?t('bntOn',{g:bntOn(r.uid)}):'',frKind(r.uid)==='friend'?t('frIs'):'',rep?t('trRep',{n:rep.n,p:rep.p}):''].filter(Boolean).join(' · ');
  $('pctxB').textContent=blk?t('pcUnblock'):t('pBlock');W.querySelector('[data-act="pcInvite"]').hidden=mate;$('pctxTr').hidden=!TRADE;$('pctxG').hidden=!guildCanInvite(r);$('pctxBn').hidden=!(BNT&&r.ol&&S&&S.gold>=BNT_MIN);$('pctxR').hidden=!rptOn();
  {const b=$('pctxF'),k=frKind(r.uid);b.hidden=!FRS||k==='friend';b.textContent=t(k==='asked'?'frAccept':k==='sent'?'frSent':'frAdd');b.disabled=k==='sent';}
  {const b=$('pctxFo');b.hidden=!mate;b.textContent=t(FOLLOW&&FOLLOW.uid===r.uid?'folStopB':'folB');}
@@ -7921,10 +7921,29 @@ function tradeStart(){TRADE=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisf
   else if(e.type==='cancelled')toast(t(e.why==='far'?'trFar':'trCancelled'),'warn');
   else if(e.type==='failed')toast(t('trFailed'),'warn');
   else if(e.type==='done')tradeApply(e,n);});}
+/* seller history (SAT-ONLINE-089, plan U215). After a trade each side writes its own record of it: tradeLog (with whom, the
+   gold given and got, which the rules check against the trade's own sides, and how many items; only you read it) and a
+   public entry, tradeRep (with whom). A player's card shows how many trades they have made and with how many players (a
+   count nobody can raise without a real trade with someone), and "/trades" lists your last ten. */
+Object.assign(STR.ar,{trRep:'🤝 {n} تبادل مع {p} لاعب',trHist:'تبادلاتك ({n})',trHistNone:'لسه متبادلتش مع حد',trHistRow:'{w} مع {o}: اديت {g} دهب{gi} وخدت {r} دهب{ri}',trItems:' و{n} حاجة',trOnline:'ده في اللعب الأونلاين بس'});
+Object.assign(STR.en,{trRep:'🤝 {n} trades with {p} players',trHist:'Your trades ({n})',trHistNone:'No trades yet',trHistRow:'{w} with {o}: gave {g} gold{gi}, got {r} gold{ri}',trItems:' and {n} items',trOnline:'Only when playing online'});
+const TREP=new Map();let trRepT=0;
+function trSt(){return NETTR&&NETTR.kind==='firebase'&&FB&&NET&&Satisfy.firebase.tradeStore?Satisfy.firebase.tradeStore(FB):null;}
+function trRecord(e,n){const st=trSt();if(!st||!e.id||!e.foe)return;const give=e.give||{},get=e.get||{};TREP.delete(e.foe);
+ st.record(e.id,NET.uid,{o:e.foe,on:n,gg:give.g|0,gi:get.g|0,ig:Math.min(8,Object.keys(give.it||{}).length),ii:Math.min(8,Object.keys(get.it||{}).length)}).catch(()=>{});}
+// a player's trades and partners, read at most once a minute
+function trRepOf(uid){const st=trSt();if(!st||!uid)return null;const now=performance.now(),e=TREP.get(uid);
+ if((!e||now-e.at>60000)&&!(e&&e.q)&&now-trRepT>300){trRepT=now;const x=e||{n:0,p:0,at:0};x.q=1;TREP.set(uid,x);
+  st.rep(uid).then(v=>{const L=Object.values(v||{}).filter(r=>r&&typeof r.o==='string');TREP.set(uid,{n:L.length,p:new Set(L.map(r=>r.o)).size,at:performance.now()});pctxSig='';},()=>{x.q=0;x.at=performance.now();});}
+ return e&&e.n?e:null;}
+function trHist(){const st=trSt();if(!st)return;st.history(NET.uid).then(v=>{const L=Object.values(v||{}).filter(r=>r&&typeof r.o==='string').sort((a,b)=>(b.t||0)-(a.t||0)),f=x=>(x|0).toLocaleString('en-US'),d=x=>{const z=new Date(+x||0);return z.getDate()+'/'+(z.getMonth()+1)+' '+calTime(+x||0);};
+ dialog('guild',[L.length?t('trHist',{n:L.length}):t('trHistNone'),...L.slice(0,10).map(r=>t('trHistRow',{w:d(r.t),o:Satisfy.chat.clean(r.on,24)||'?',g:f(r.gg),gi:r.ig?t('trItems',{n:r.ig}):'',r:f(r.gi),ri:r.ii?t('trItems',{n:r.ii}):''}))],null,[{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
+function trCmd(v){if(!/^\/trades\s*$/i.test(v))return false;if(trSt())trHist();else toast(t('trOnline'));return true;}
+window.__GTR={hist:()=>trHist(),rep:uid=>trRepOf(uid),get cache(){return TREP},store:()=>trSt()}; // tests
 function tradeApply(e,n){if(!S||S.__demo)return;const give=e.give||{g:0,it:{}},get=e.get||{g:0,it:{}};
  const out=new Set(Object.keys(give.it||{}));S.items=S.items.filter(i=>!(i&&out.has(i.iid)));S.gold=Math.max(0,S.gold-(give.g|0))+(get.g|0);
  for(const k in get.it||{}){const it=tradeItemIn(get.it[k]);if(it)S.items.push(it);}
- Satisfy.ids.ensure(S);save(true);hudDirty=true;if(!$('inv').hidden&&typeof renderInv==='function')renderInv();toast(t('trSwapped',{n}),'good');SFX.quest&&SFX.quest();}
+ Satisfy.ids.ensure(S);save(true);hudDirty=true;if(!$('inv').hidden&&typeof renderInv==='function')renderInv();toast(t('trSwapped',{n}),'good');SFX.quest&&SFX.quest();trRecord(e,n);}
 function tradeAct(a){if(!TRADE)return;const st=TRADE.state();
  if(a==='trYes'){const ask=TRADE.pendingAsk();if(ask)TRADE.accept(ask.trade);}
  else if(a==='trNo'){const ask=TRADE.pendingAsk();if(ask)TRADE.decline(ask.trade);}

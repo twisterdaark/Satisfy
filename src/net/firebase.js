@@ -364,6 +364,15 @@
       watch: function (id, uid, cb) { var off = D.onValue(at('tradeSides/' + id + '/' + uid), function (s) { cb(s.val()); }, function () {}); return function () { try { off(); } catch (e) { /* ignore */ } }; },
       read: function (id, uid) { return D.get(at('tradeSides/' + id + '/' + uid)).then(function (s) { return s.val(); }); },
       watchDone: function (id, cb) { var off = D.onValue(at('tradeDone/' + id), function (s) { cb(s.val()); }, function () {}); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      // SAT-ONLINE-089 seller history (plan U215): after a trade each side writes its own record, tradeLog/{uid}/{tid}
+      // {o, on, gg, gi, ig, ii, t} (with whom, gold given and got as the trade's sides hold them, how many items; yours only)
+      // and tradeRep/{uid}/{tid} {o, t} (public: the count of trades and of partners). Only for a trade done between the two.
+      record: function (id, uid, v) {
+        var u = {}; u['tradeLog/' + uid + '/' + id] = { o: v.o, on: String(v.on || '?').slice(0, 24), gg: v.gg, gi: v.gi, ig: v.ig, ii: v.ii, t: D.serverTimestamp() };
+        u['tradeRep/' + uid + '/' + id] = { o: v.o, t: D.serverTimestamp() }; return D.update(D.ref(db), u);
+      },
+      history: function (uid) { return D.get(at('tradeLog/' + uid)).then(function (s) { return s.val() || {}; }); },
+      rep: function (uid) { return D.get(at('tradeRep/' + uid)).then(function (s) { return s.val() || {}; }); },
       commit: function (id, by, a, b, A, B) {
         var u = {};
         u['tradeDone/' + id] = { by: by, t: D.serverTimestamp() };
