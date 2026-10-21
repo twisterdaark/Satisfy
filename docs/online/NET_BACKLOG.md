@@ -137,7 +137,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
 | U228 | Guild creation | ✅ | SAT-ONLINE-046 (#79): unique names (case-folded, `guildNames`), the founder is master |
-| U229 | Guild recruitment | ❌ | Next: a recruiting board with applications |
+| U229 | Guild recruitment | ✅ | SAT-ONLINE-078: a recruiting message (`guildRecruit`), requests to join (`guildApply`, only for yourself and while it recruits), refusals kept a week (`guildRej`); joining still needs the invitation (`regression/guildrecruit`) |
 | U230 | Guild rank permissions | 🟡 | Master, officer, member with fixed rights, checked by the rules; no custom ranks |
 | U231 | Guild banners | 🟡 | A guild colour at founding; no emblem |
 | U232 | Guild chat | ✅ | SAT-ONLINE-049 (#81): `/g`, members only by the rules, so a removed member loses it |
@@ -201,7 +201,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U343 | Community feedback triage | 🟡 | GitHub issues and in-game reports |
 | U344 | Season rewards | 🟡 | Titles for the National Champion and the arena; cosmetic |
 | U345 | Retention without grind | 🟡 | Nothing is lost for a missed day; daily caps on repeatable quests (B) |
-| U346 | Data export/delete | 🟡 | "Delete my online data" (SAT-ONLINE-015/066); export is next |
+| U346 | Data export/delete | ✅ | "Delete my online data" (SAT-ONLINE-015/066) and "Download my online data" (078): a JSON file of every record the account can read (`regression/account`) |
 | U347 | Disaster recovery | ⏳ | Database backups need the Blaze plan (owner) |
 | U348 | Shard scale-out | ⏳ | One shard (`main`) |
 
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 29 · 🟡 40 · ⏳ 6 · ❌ 29 of 104. Next from here: guild recruitment (U229) and data export (U346).
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 31 · 🟡 39 · ⏳ 6 · ❌ 28 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

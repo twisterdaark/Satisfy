@@ -396,6 +396,25 @@ test('guild master handover and the notice (SAT-ONLINE-076): to an officer only,
   assert.equal(nt.$other['.validate'], false);
 });
 
+test('guild recruiting (SAT-ONLINE-078): posted by the master or officers; you ask only for yourself, only while it recruits, not a week after a refusal', () => {
+  const rc = rules.guildRecruit, ap = rules.guildApply.$gid, rj = rules.guildRej.$gid;
+  assert.equal(rc['.read'], 'auth != null');
+  assert.match(rc.$gid['.write'], /=== 'm' \|\| .*=== 'o'\)/);
+  assert.ok(rc.$gid['.validate'].includes("root.child('guilds').child($gid).exists()"), 'only for a guild that exists');
+  assert.equal(rc.$gid.by['.validate'], 'newData.val() === auth.uid');
+  assert.match(ap['.read'], /=== 'm' \|\| .*=== 'o'\)/, 'the master and officers read the requests');
+  assert.equal(ap.$uid['.read'], 'auth != null && auth.uid === $uid', 'and you your own');
+  const w = ap.$uid['.write'];
+  assert.ok(w.includes("auth.uid === $uid && (!newData.exists() || (root.child('guildRecruit').child($gid).exists()"), 'yourself, only while it recruits');
+  assert.ok(w.includes("!root.child('guildMembers').child($gid).child($uid).exists()"), 'not when you are a member');
+  assert.ok(w.includes("root.child('guildRej').child($gid).child($uid).child('t').val() < now - 604800000"), 'a week after a refusal');
+  assert.match(rules.guildMembers.$gid.$uid['.write'], /newData\.child\('rk'\)\.val\(\) === 'r' && root\.child\('guildInv'\)/, 'joining still needs the invitation, whatever was asked');
+  assert.match(rj.$uid['.write'], /=== 'm' \|\| .*=== 'o'\)/);
+  assert.equal(rj.$uid['.read'], 'auth != null && auth.uid === $uid');
+  for (const n of [rc.$gid, ap.$uid, rj.$uid]) assert.equal(n.$other['.validate'], false);
+  for (const n of [ap, rj]) assert.equal(n['.write'], "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid", 'the master clears them on disband');
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);

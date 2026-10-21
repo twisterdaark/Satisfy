@@ -142,6 +142,23 @@
             .then(function () { lastRev = 0; revLoaded = null; return paths.length; });
         });
       },
+      /**
+       * SAT-ONLINE-078 (plan U346): a copy of what the account keeps online, {path: value}: the profile, account ID, cloud
+       * characters, inbox and session, plus the game's own per-account paths in `extra` (each must name this account as a
+       * path segment). A path the account can't read, or that is empty, is left out.
+       * @param {string[]} [extra]
+       */
+      exportAll: function (extra) {
+        var paths = ['profiles', 'accountIds', 'cloudIndex', 'cloudSaves', 'inbox', 'sessions'].map(function (k) { return k + '/' + uid; })
+          .concat((extra || []).filter(function (p) { return typeof p === 'string' && p.split('/').indexOf(uid) > 0; }));
+        return Promise.all(paths.map(function (p) { return D.get(ref(p)).then(function (s) { return [p, s.val()]; }, function () { return [p, null]; }); })).then(function (r) {
+          var out = {};
+          r.forEach(function (x) { if (x[1] != null) out[x[0]] = x[1]; });
+          var aid = out['accountIds/' + uid];
+          if (typeof aid !== 'string' || !/^[A-Za-z0-9_]{3,16}$/.test(aid)) return out;
+          return D.get(ref('handles/' + aid.toLowerCase())).then(function (s) { if (s.val() === uid) out['handles/' + aid.toLowerCase()] = uid; return out; }, function () { return out; });
+        });
+      },
       /** Delete a cloud character (index first, so a half-done delete never lists a missing save). */
       remove: function (pid) {
         if (!PID_RE.test(pid || '')) return Promise.reject(new Error('cloud: bad character id'));

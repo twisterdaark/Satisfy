@@ -407,7 +407,18 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; return up(u); },
+      // SAT-ONLINE-078 recruiting: guildRecruit/{gid} {n, msg, m, by, t} (posted by the master or an officer, read by all);
+      // guildApply/{gid}/{uid} {n, lv, t} (the player's own, only while the guild recruits and not refused in the last week;
+      // read by the master and officers); guildRej/{gid}/{uid} {by, t}: a refusal, written with the application's removal
+      recruitList: function () { return D.get(at('guildRecruit')).then(function (s) { return s.val() || {}; }); },
+      recruitPut: function (gid, v) { var u = {}; u['guildRecruit/' + gid] = { n: v.n, msg: v.msg, m: v.m, by: v.by, t: SV() }; return up(u); },
+      recruitOff: function (gid) { return D.remove(at('guildRecruit/' + gid)); },
+      apply: function (gid, uid, v) { var u = {}; u['guildApply/' + gid + '/' + uid] = { n: v.n, lv: v.lv, t: SV() }; return up(u); },
+      unapply: function (gid, uid) { return D.remove(at('guildApply/' + gid + '/' + uid)); },
+      myApply: function (gid, uid) { return Promise.all([D.get(at('guildApply/' + gid + '/' + uid)), D.get(at('guildRej/' + gid + '/' + uid))]).then(function (r) { return { app: r[0].val(), rej: r[1].val() }; }); },
+      watchApps: function (gid, cb) { return watch('guildApply/' + gid, cb); },
+      refuse: function (gid, uid, by) { var u = {}; u['guildApply/' + gid + '/' + uid] = null; u['guildRej/' + gid + '/' + uid] = { by: by, t: SV() }; return up(u); },
       // SAT-ONLINE-076: the master moves to `to` (an officer), who becomes 'm' while `from` becomes 'o', in one update; the
       // master writes it, or the officer when the master has been away AWAY_MS (the rules check both). Ranks only change:
       // each entry keeps its name, contribution and last seen.

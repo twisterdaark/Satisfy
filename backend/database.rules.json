@@ -102,6 +102,48 @@
         "$other": { ".validate": false }
       }
     },
+    "guildRecruit": {
+      ".read": "auth != null",
+      "$gid": {
+        ".write": "auth != null && ((root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o') || (!newData.exists() && !root.child('guilds').child($gid).exists()))",
+        ".validate": "newData.hasChildren(['n', 'msg', 'm', 'by', 't']) && root.child('guilds').child($gid).exists()",
+        "n": { ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 18" },
+        "msg": { ".validate": "newData.isString() && newData.val().length <= 120" },
+        "m": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 250" },
+        "by": { ".validate": "newData.val() === auth.uid" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "guildApply": {
+      "$gid": {
+        ".read": "auth != null && (root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o')",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid",
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && ((auth.uid === $uid && (!newData.exists() || (root.child('guildRecruit').child($gid).exists() && !root.child('guildMembers').child($gid).child($uid).exists() && (!root.child('guildRej').child($gid).child($uid).exists() || root.child('guildRej').child($gid).child($uid).child('t').val() < now - 604800000)))) || (!newData.exists() && (root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o')))",
+          ".validate": "newData.hasChildren(['n', 'lv', 't'])",
+          "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+          "lv": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "guildRej": {
+      "$gid": {
+        ".read": "auth != null && (root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o')",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid",
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && (root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o')",
+          ".validate": "newData.hasChildren(['by', 't'])",
+          "by": { ".validate": "newData.val() === auth.uid" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "guildNames": {
       ".read": "auth != null",
       "$nk": {

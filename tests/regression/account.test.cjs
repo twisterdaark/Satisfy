@@ -45,10 +45,23 @@ test('Sign out, then Delete my online data: nothing of the account is left onlin
 
     // upload a cloud character (two clicks), so every kind of record exists
     await openCloud(a);
-    assert.deepEqual(await accountButtons(a), ['Sign out', 'Delete my online data']);
+    assert.deepEqual(await accountButtons(a), ['Sign out', 'Delete my online data', 'Download my online data']);
     await click(a, '#cloudN button'); await click(a, '#cloudN button');
     await until(a, () => document.querySelectorAll('#cloudL .cr').length === 1);
     assert.deepEqual(await keysOf(a, UID), ['cloudIndex/gEraseMe1/<pid>', 'cloudSaves/gEraseMe1/<pid>', 'presence/satisfy/main/gEraseMe1', 'profiles/gEraseMe1', 'ranks/gold/gEraseMe1', 'ranks/lv/gEraseMe1', 'sessions/gEraseMe1']); // ranks: SAT-ONLINE-055
+
+    // SAT-ONLINE-078 (plan U346): "Download my online data" saves a JSON file with every one of those records, and nothing
+    // of the other account
+    const [dl] = await Promise.all([a.page.waitForEvent('download'), click(a, '#cloudA button:nth-child(3)')]);
+    assert.equal(dl.suggestedFilename(), 'satisfy-my-online-data.json');
+    const doc = JSON.parse(require('node:fs').readFileSync(await dl.path(), 'utf8'));
+    assert.equal(doc.game, 'Satisfy'); assert.equal(doc.account, UID);
+    const got = Object.keys(doc.data).map((k) => k.replace(/^(cloudIndex|cloudSaves)\/gEraseMe1$/, '$1/gEraseMe1')).sort();
+    assert.deepEqual(got, ['cloudIndex/gEraseMe1', 'cloudSaves/gEraseMe1', 'presence/satisfy/main/gEraseMe1', 'profiles/gEraseMe1', 'ranks/gold/gEraseMe1', 'ranks/lv/gEraseMe1', 'sessions/gEraseMe1']);
+    assert.equal(Object.keys(doc.data['cloudSaves/gEraseMe1']).length, 1, 'the cloud character itself');
+    assert.equal(doc.data['profiles/gEraseMe1'].handle, 'Grid');
+    assert.ok(!JSON.stringify(doc).includes(OTHER), 'nothing of the other account');
+    await until(a, () => /Your online data is downloaded \(7 records\)/.test(document.getElementById('toasts').textContent));
 
     // Sign out: presence goes, the cloud data stays, the title offers sign-in again
     await click(a, '#cloudA button');

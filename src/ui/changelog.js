@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21recruit', ver: '1.07', d: '2026-10-21',
+      ar: ['أونلاين: الجيلد يقدر يجنّد: القائد أو ضابط يكتب رسالة تجنيد من G، واللي ملوش جيلد يشوف الجيلدات اللي بتجنّد عند جمعية الجيلدات أو في G ويطلب ينضم',
+        'القائد والضباط بيوصلهم إشعار بكل طلب، ومن G ← طلبات الانضمام: "ابعت دعوة" (بتوصل الدعوة العادية) أو "ارفض". اللي اترفض يقدر يطلب تاني من نفس الجيلد بعد أسبوع',
+        '"نزّل نسخة من بياناتي أونلاين" في Cloud saves: ملف فيه كل اللي حسابك محتفظ بيه أونلاين'],
+      en: ['Online: guilds can recruit: the master or an officer posts a recruiting message from G, and a player without a guild sees the recruiting guilds at the Guild Association or in G and asks to join',
+        'The master and officers hear of every request; in G -> Requests to join: "Invite" (the usual invitation) or "Turn down". A player turned down can ask that guild again after a week',
+        '"Download my online data" in Cloud saves: a file with everything your account keeps online'] },
     { v: '2026-10-21calendar', ver: '1.06', d: '2026-10-21',
       ar: ['أونلاين: "المواعيد" في قايمة اللاعبين (O): الأحداث العالمية الجاية، والمسابقة الوطنية، وحصار قلعة ريدان، ومهرجان المدن، وسباق الخيل، وإمتى تراوكا وبيريث يرجعوا',
         'كل ميعاد بتوقيتك وبتوقيت جرينتش، والوقت الفاضل عليه. والمواعيد من ساعة السيرفر، فهي واحدة عند الكل'],
