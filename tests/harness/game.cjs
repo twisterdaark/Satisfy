@@ -20,7 +20,7 @@ const CURRENT_HTML = process.env.SATISFY_HTML ? path.resolve(process.env.SATISFY
 // Golden/render baseline: the main commit this branch is based on. Bump it when rebasing onto a
 // newer main (or set SATISFY_BASELINE=<sha> to compare with any other commit).
 // R0 history: ce29772 (pre-online), 1899cdb (+ #6 CSS hotfix), 6ef0595 (+ v2 art, #5), 6295a5f (+ Patrian, AI, wider map), 3c343ec (+ town quests, Piaro balance, Guardian Knight), fe34ae0 (+ equipment, guilds, WS world state, events), daaef26 (+ companions, dragon, auction, Yatan), 7d57d5f (+ siege, Muller).
-const BASELINE_SHA = process.env.SATISFY_BASELINE || 'bdc718dddf98c36b794ead835d93560a4a560559';
+const BASELINE_SHA = process.env.SATISFY_BASELINE || '1d8ed5df70d1422a85c4e5f1e5d98fca5c462cb1';
 // the R0 baseline (before the safe saves and ids): the characterization tests document its bugs, so they keep it when
 // BASELINE_SHA moves on for the parity tests (it moved in aaa59ee, and the corrupt-save one failed since)
 const R0_SHA = '34b2ea5094d6d1597b4acb67d338d99d8765b745';
