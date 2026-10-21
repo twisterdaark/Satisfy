@@ -312,9 +312,14 @@ test('a phone: ✥ moves and resizes the buttons, nothing else answers meanwhile
     const pe = (sel, type, x, y, id = 21) => g.eval(([s, t, x, y, id]) => document.querySelector(s).dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: id, pointerType: 'touch', isPrimary: true, clientX: x, clientY: y })), [sel, type, x, y, id]);
     const box = (s) => g.eval((s) => { const b = document.querySelector(s).getBoundingClientRect(); return { x: b.left + b.width / 2, y: b.top + b.height / 2, w: b.width }; }, s);
     const ATK = '#tAct [data-tk="atk"]';
-    const t0 = await box('#tLayT');
-    await pe('#tLayT', 'pointerdown', t0.x, t0.y); await pe('#tLayT', 'pointerup', t0.x, t0.y);
-    assert.equal(await g.eval(() => document.body.classList.contains('tLay') && !document.getElementById('tLayBar').hidden), true, '✥ opens the arranging');
+    // owner 2026-10-21: ✥ is no longer beside the stick (it got pressed while moving); it is "Arrange buttons" in the ▦ menu
+    assert.equal(await g.eval(() => getComputedStyle(document.getElementById('tLayT')).display), 'none');
+    const k0 = await box('#tKeysT');
+    await pe('#tKeysT', 'pointerdown', k0.x, k0.y); await pe('#tKeysT', 'pointerup', k0.x, k0.y); await g.step(1);
+    const kl = await box('#kLay');
+    assert.match(await g.eval(() => document.getElementById('kLay').textContent), /Arrange buttons/);
+    await pe('#kLay', 'pointerdown', kl.x, kl.y); await pe('#kLay', 'pointerup', kl.x, kl.y);
+    assert.equal(await g.eval(() => document.body.classList.contains('tLay') && !document.getElementById('tLayBar').hidden && !document.body.classList.contains('keysOpen')), true, 'Arrange buttons opens the arranging');
     assert.match(await g.eval(() => document.getElementById('tLayBar').textContent), /Drag any button/);
     // drag Attack to the middle of the screen: it moves and does not swing
     await g.eval(() => { window.__G.P.acd = 0; });
@@ -346,7 +351,7 @@ test('a phone: ✥ moves and resizes the buttons, nothing else answers meanwhile
     const b2 = await g2.eval(() => { const b = document.querySelector('#tAct [data-tk="atk"]').getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; });
     assert.ok(Math.abs(b2[0] - 422) < 3 && Math.abs(b2[1] - 200) < 3, 'kept: ' + b2);
     // Reset: the first layout again
-    await g.eval(() => { const lt = document.getElementById('tLayT'), b = lt.getBoundingClientRect(), f = (t, el) => el.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: 23, pointerType: 'touch', clientX: b.left + 5, clientY: b.top + 5 })); f('pointerdown', lt); f('pointerup', lt); });
+    await g.eval(() => document.getElementById('kLay').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerId: 23, pointerType: 'touch' })));
     const r = await box('#tLayBar [data-l="r"]');
     await pe('#tLayBar [data-l="r"]', 'pointerdown', r.x, r.y);
     await g.page.waitForTimeout(400);

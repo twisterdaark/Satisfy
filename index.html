@@ -411,7 +411,7 @@ body.touch,body.touch #stage{touch-action:none;-webkit-touch-callout:none;-webki
 body.touch:not(.keysOpen) #keys{display:none}
 #tKeysT{position:absolute;left:calc(var(--u)*22);bottom:calc(var(--u)*1.2);width:calc(var(--u)*5.6);height:calc(var(--u)*5);border-radius:calc(var(--u)*1);font-size:calc(var(--u)*2.2);background:rgba(14,24,52,.78);border:1px solid rgba(166,214,246,.55);color:#e8f0ff;padding:0}#tKeysT.open{background:rgba(255,220,120,.45)}
 body.touch #keys{inset-inline-end:auto;left:calc(var(--u)*28.5);bottom:calc(var(--u)*.6);grid-template-columns:repeat(4,auto);gap:calc(var(--u)*.4);padding:calc(var(--u)*.4);direction:ltr}
-body.touch #kA,body.touch #kD,body.touch #kG,body.touch #kE{display:none}
+body.touch #kA,body.touch #kD,body.touch #kG,body.touch #kE{display:none}body.touch:has(#dialog:not([hidden])) :is(#tAct button:not([data-tk="KeyE"]),#tStick,#tKeysT,#tNetT,#tNet){visibility:hidden}body.touch #dialog{right:calc(var(--u)*14)}body:not(.touch) #kLay,body.touch #tLayT{display:none}
 body.touch #keys kbd{display:none}body.touch #keys .key{min-width:0}body.touch #keys .key span{display:block;min-width:calc(var(--u)*6.6);padding:calc(var(--u)*.75) calc(var(--u)*.6);text-align:center;font-size:calc(var(--u)*1.3);font-weight:700;color:#e8f0ff;background:rgba(14,24,52,.78);border:1px solid rgba(166,214,246,.55);border-radius:calc(var(--u)*.5)}body.touch #keys .key.press span,body.touch #keys .key:active span{background:rgba(255,220,120,.4)}
 body.touch #skillbar{inset-inline-start:auto;left:auto;right:calc(var(--u)*22);top:auto;bottom:calc(var(--u)*.6);grid-template-columns:repeat(4,auto);grid-auto-flow:row;padding:calc(var(--u)*.3);direction:ltr}
 body.touch #skillbar .sk{width:calc(var(--u)*5.6);height:calc(var(--u)*5.6)}
@@ -470,6 +470,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
         <div class="key" id="kGu"><kbd>G<i></i></kbd><span data-i18n="kGuild"></span></div>
         <div class="key" id="kMo"><kbd>H<i></i></kbd><span data-i18n="kMount"></span></div>
         <div class="key" id="kL"><kbd>L<i></i></kbd><span data-i18n="kLog"></span></div>
+        <div class="key" id="kLay"><kbd>✥<i></i></kbd><span data-i18n="kLay"></span></div>
         <div class="key" id="kEsc"><kbd>Esc<i></i></kbd><span data-i18n="kEsc"></span></div>
       </div>
       <div id="touch" hidden><div id="tStick"><i id="tKnob"></i></div>
@@ -3062,6 +3063,8 @@ Object.assign(STR.ar,{"farmHowT": "دوس على مربع عشان تحفر · �
 Object.assign(STR.en,{"farmHowT": "Tap a square to dig · digs left: {n}", "kLog": "Log", "reheatB": "Reheat", "bqT": "Amount:", "bqMax": "Max", "sellAllB": "Sell all", "sellOneB": "Sell one", "ptsAllB": "All", "tQuitT": "Leave"});
 Object.assign(STR.ar,{"barTap": "دوس على مهارة وبعدين على خانة من الخانات الخمسة فوق، أو دوس الزرار. دوس على خانة فيها مهارة عشان تنقلها لخانة تانية.", "barPickT": "اختار خانة لـ{sk}", "barRowT": "شريط المهارات", "mzB": "حجم القوايم: {n}%"});
 Object.assign(STR.en,{"barTap": "Tap a skill, then one of the five slots above, or use the button. Tap a slot that has a skill to move it to another slot.", "barPickT": "Pick a slot for {sk}", "barRowT": "Skill bar", "mzB": "Menu size: {n}%"});
+Object.assign(STR.ar,{"kLay": "رتّب الأزرار"});
+Object.assign(STR.en,{"kLay": "Arrange buttons"});
 /* ---------------- town life (owner 2026-10-20: town life) ----------------
    Horse races at Winston, dice at the inn tables and the town festival, all on the world clock (wNow), so everyone online
    shares the same race, the same dice rounds and the same festival without any new message or rules change: your race
@@ -4451,7 +4454,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,m
  dmg=ipHit(m,dmg,crit,o);if(o.skill&&S.tl.duke)dmg*=1.15;if(m.tw)twHit(m,crit,o);if(m.type==='gcrown'&&m.bh&&!crit&&!o.skill)dmg=1;if(o.skill&&S.bh&&S.bh.mm)dmg*=1.03;if(S.tl.hking&&HKV.has(m.type))dmg*=1.15;
  let mblk=false;if(AIK[m.type]==='soldier'&&!o.skill&&!o.aura&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
   mblk=true;dmg*=.2;crit=false;burn=false;m.grdT=.6;m.cd=Math.min(m.cd,.15);vfx('block',m.x+m.face*7,my-2,{angle:m.face>0?Math.PI:0});num(m.x,my-20,t('mBlock'),'#9fc8ff',false);SFX.hit();}
- dmg=Math.max(1,Math.round(dmg));m.hp-=dmg;m.hurt=mblk?0:.15;trainMast();wear(w,.125);m.agg=1;if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
+ dmg=Math.max(1,Math.round(dmg));m.hp-=dmg;m.hurt=mblk?0:.15;trainMast();wear(w,.125);m.agg=1;m.prov=gTime+10;if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
  num(m.x,my-8,String(dmg),crit||burn?'#ffd24a':'#ffffff',crit||burn);
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(burn)vfx('fire',m.x,my);if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
@@ -5684,7 +5687,7 @@ let TAIM=null,TSV=null,SKA=null;const TAIM_MIN=18;
 // owner 2026-10-20: the phone buttons can be moved and resized (✥); kept on this device as the centre of each control
 // (a fraction of the screen) and its size
 const TLAY_K='satisfy_tlay',TLAY_IDS={atk:'#tAct [data-tk="atk"]',dodge:'#tAct [data-tk="Space"]',guard:'#tAct [data-tk="guard"]',use:'#tAct [data-tk="KeyE"]',bar:'#skillbar',stick:'#tStick',keys:'#tKeysT',lay:'#tLayT'};
-let TLAY=(()=>{try{return JSON.parse(localStorage.getItem(TLAY_K)||'{}')||{};}catch(e){return {};}})(),tLayEnd=()=>{};
+let TLAY=(()=>{try{return JSON.parse(localStorage.getItem(TLAY_K)||'{}')||{};}catch(e){return {};}})(),tLayEnd=()=>{},tLayOpen=()=>{};
 function tLayOne(k){const el=document.querySelector(TLAY_IDS[k]),g=TLAY[k];if(!el)return;const z=el.style;if(!g){z.left=z.top=z.right=z.bottom=z.transform='';return;}
  const st=stage.getBoundingClientRect(),p=el.offsetParent;if(!p||!st.width)return;const pr=p.getBoundingClientRect();z.right=z.bottom='auto';
  z.left=(g.x*st.width+st.left-pr.left-el.offsetWidth/2)+'px';z.top=(g.y*st.height+st.top-pr.top-el.offsetHeight/2)+'px';z.transform=g.s&&g.s!==1?`scale(${g.s})`:'';}
@@ -6124,10 +6127,12 @@ function tfTick(dt){if(!TF)tfBuild();if(!P)return;const s=tfNow(),pl=tfPlayers()
   const q=tfAt(f,s);let tx=q.x,ty=q.y;f.dir=q.dir;f.mv=q.mv;
   if(f.role==='kid'){let best=null,bd=70;for(const p of pl){const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<bd){bd=d;best=p;}}
    if(best){const a=s*2.2+f.ln;tx=best.x+Math.cos(a)*22;ty=best.y+Math.sin(a)*12;const dx=tx-f.x;f.mv=1;f.dir=Math.abs(dx)>Math.abs(ty-f.y)?(dx>0?2:3):(ty>f.y?0:1);}}
-  const k=Math.min(1,dt*5);f.x+=(tx-f.x)*k;f.y+=(ty-f.y)*k;}
+  if(f.role==='kid'&&!tfOpen(tx/TS|0,ty/TS|0)){tx=q.x;ty=q.y;}
+  const ex=tx-f.x,ey=ty-f.y,ed=Math.hypot(ex,ey);if(!f.ok||ed>400){f.ok=1;f.x=tx;f.y=ty;}else if(ed>.5){const st=Math.min(ed,(f.role==='kid'?60:34)*(ed>40?1.8:1)*dt);f.x+=ex/ed*st;f.y+=ey/ed*st;if(ed>2){f.mv=1;f.dir=Math.abs(ex)>Math.abs(ey)?(ex>0?2:3):(ey>0?0:1);}}}
  // highwaymen shout as they come for you
  for(const m of TFB){const st=TFS.get(m)||{};TFS.set(m,st);const e=m.eng>0&&!m.dead;if(e&&!st.e&&(st.at||0)<gTime-12){st.at=gTime;st.n=(st.n||0)+1;st.s=t('bdSay'+((monHash(m)*4+st.n)%4|0));st.t=gTime+2.6;}st.e=e;}
  if(SPAR){const m=SPAR.m;SPAR.t+=dt;if(m.dead||mode==='dead'||P.hp<maxHP()*.25||SPAR.t>90||Math.hypot(P.x-m.x,P.y-m.y)>300)sparEnd(!m.dead&&m.hp<=m.max*.25||m.dead&&SPAR.won);else if(m.hp<=m.max*.25)sparEnd(true);}}
+window.__GFX={turn:(m,b,ox,dt)=>monTurn(m,b,ox,dt),tf:()=>TF,tick:dt=>tfTick(dt)}; // tests (owner fixes v1.05)
 function tfVis(){return TF?TF.filter(f=>!f.busy&&f.x>camX-20&&f.x<camX+VW+20&&f.y>camY-10&&f.y<camY+VH+40):[];}
 function tfDraw(f){drawChar(remoteSpr(f.look,0),f.x,f.y,f.dir,f.mv,false,f.sc);}
 function tfText(f){const s=tfNow(),i=tfSays(f,s),F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';if(i>=0)TX.push({s:t('tfL_'+f.role+i),x:f.x,y:f.y-30*f.sc,f:F,z:7,c:'#fff3d6'});
@@ -6414,9 +6419,9 @@ function update(dt){
   if(m.ret){const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);m.st=null;m.tele=0;m.retT=(m.retT||0)+dt;if(hd>4){const ox=m.x,oy=m.y;chase(m,hx,hy,hd,b.spd*1.2,mr,dt);m.stuckN=0;m.ret=1;if(Math.hypot(m.x-ox,m.y-oy)>.01)m.rsT=0;else m.rsT=(m.rsT||0)+dt;if(m.rsT>2||m.retT>12){m.x=m.sx;m.y=m.sy;m.path=null;m.rsT=0;}}m.hp=Math.min(m.max,m.hp+m.max*.08*dt);if(hd<=4||hd<20&&m.hp>=m.max){m.ret=0;m.retT=0;m.path=null;}continue;}
   // a monster walking round a wall toward you (m.fl) stays on you while its way round is short enough, even though that
   // takes it further from you and from its spawn for a while
-  const eng=ag&&(!safe||m.evt||m.spar)&&(d<ag||(m.eng>0&&(d<ag*2.4||m.fl&&m.fd>0&&m.fd<=MFAR)));
-  if(eng){m.eng=4;if(!m.goal&&Math.hypot(m.x-m.sx,m.y-m.sy)>(m.fl?MFAR*TS:AI?260:200)){m.ret=1;m.eng=0;m.fl=0;continue;}
-   if(AI){packTick(m,AI,dt);monAct(m,b,AI,dx,dy,d,mr,dt);}else{if(d>6)chase(m,dx,dy,d,b.spd,mr,dt);m.face=dx>0?1:-1;if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;mobBite(m);}}}
+  const eng=ag&&(!safe||m.evt||m.spar)&&(d<ag||m.prov>gTime&&d<560||(m.eng>0&&(d<ag*2.4||m.fl&&m.fd>0&&m.fd<=MFAR)));
+  if(eng){m.eng=4;if(!m.goal&&Math.hypot(m.x-m.sx,m.y-m.sy)>(m.fl?MFAR*TS:m.prov>gTime?520:AI?260:200)){m.ret=1;m.eng=0;m.fl=0;continue;}
+   if(AI){packTick(m,AI,dt);const ox=m.x;monAct(m,b,AI,dx,dy,d,mr,dt);monTurn(m,b,ox,dt);}else{if(d>6)chase(m,dx,dy,d,b.spd,mr,dt);m.face=dx>0?1:-1;if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;mobBite(m);}}}
   else{m.eng-=dt;m.st=null;m.tele=0;m.wt-=dt;if(m.wt<=0){m.wt=1+rand()*2.5;const back=Math.hypot(m.sx-m.x,m.sy-m.y)>50;if(back){const l=Math.hypot(m.sx-m.x,m.sy-m.y);m.wx=(m.sx-m.x)/l;m.wy=(m.sy-m.y)/l;}else if(rand()<.5){m.wx=0;m.wy=0;}else{const a=rand()*6.28;m.wx=Math.cos(a);m.wy=Math.sin(a);}}
    move(m,m.wx*b.spd*.25*dt,m.wy*b.spd*.25*dt,mr);if(m.wx)m.face=m.wx>0?1:-1;}
  }catch(err){gameErr(err,m);}finally{if(MOBP){P=MOBP;MOBP=null;}}}
@@ -6473,6 +6478,8 @@ function pickMove(m,d){const L=movesOf(m);m.once=m.once||{};let tot=0;
  const c=L.map((v,i)=>{const ok=d>=(v.min||0)&&d<=v.max&&!((m.once[i]||0)>gTime);const w=ok?v.w*(m.last===i?.35:1):0;tot+=w;return w;});
  if(!tot)return -1;let x=rand()*tot;for(let i=0;i<c.length;i++){x-=c[i];if(x<0)return i;}return -1;}
 function hitBy(m,b,mv){if(!seeP(m))return 0;m.hv=mv.k==='ring'||mv.mul>=1.4;const r=hurtPlayer(b.dmg*mv.mul,m.lv,m);m.hv=0;if(r===2){if(mv.kb&&P.dash<=0)move(P,m.ax*mv.kb,m.ay*mv.kb,4);if(mv.stun&&!(P.sImm>0)){P.stun=Math.max(P.stun||0,mv.stun);P.sImm=mv.stun+2;vfx('stun',P.x,P.y-24,{life:mv.stun});}}return r;}
+// owner 2026-10-21: no moonwalking. A monster stepping away faster than a shuffle turns its back and runs that way
+function monTurn(m,b,ox,dt){const vx=m.x-ox;if(!m.st&&Math.abs(vx)>b.spd*dt*.3&&(vx>0?1:-1)!==(m.face||1))m.face=vx>0?1:-1;}
 function monAct(m,b,AI,dx,dy,d,mr,dt){m.atkT=Math.max(0,(m.atkT||0)-dt);
  const fx_=dx/(d||1),fy_=dy/(d||1),mv=m.mv;
  // sprint: chasing from far for a while makes them speed up (then tire), so running backwards stops being free
@@ -6512,13 +6519,13 @@ function monAct(m,b,AI,dx,dy,d,mr,dt){m.atkT=Math.max(0,(m.atkT||0)-dt);
  if(m.cd<=0&&busyIn(m)<2&&seeP(m)){const i=pickMove(m,d);if(i>=0){const v=movesOf(m)[i];m.mv=v;m.last=i;if(v.once)m.once[i]=gTime+v.once;m.st='tele';m.stT=m.tele=v.tele;mobActN(m);m.ax=fx_;m.ay=fy_;m.combo=v.combo||0;if(v.k==='leap')m.lL=Math.min(v.max,d)+14;return;}}
  if(AI==='lunge'||AI==='hop'){const R=AI==='hop'?26:72,a=monHash(m)*6.28+gTime*.35,tx=P.x+Math.cos(a)*R,ty=P.y+Math.sin(a)*R*.72,tdx=tx-m.x,tdy=ty-m.y,td=Math.hypot(tdx,tdy);
   if(td>4)chase(m,tdx,tdy,td,sp,mr,dt);return;}
- if(AI==='charge'){if(d>28)chase(m,dx,dy,d,sp,mr,dt);else move(m,-fx_*sp*.4*dt,-fy_*sp*.4*dt,mr);return;}
+ if(AI==='charge'){if(d>28)chase(m,dx,dy,d,sp,mr,dt);else{m.sideT=(m.sideT||0)-dt;if(m.sideT<=0){m.side=rand()<.5?-1:1;m.sideT=.8+rand()*1.2;}move(m,-fy_*m.side*sp*.4*dt,fx_*m.side*sp*.4*dt,mr);}return;}
  if(AI==='brute'||AI==='slam'){if(d>20)chase(m,dx,dy,d,sp,mr,dt);return;}
  if(AI==='soldier'){
   if(d>58){chase(m,dx,dy,d,sp,mr,dt);return;}
   // circle at sword range: strafe sideways, drift in, switch sides now and then
   m.sideT=(m.sideT||0)-dt;if(m.sideT<=0){m.side=rand()<.5?-1:1;m.sideT=.8+rand()*1.2;}
-  const px=-fy_*m.side,py=fx_*m.side,inw=d>24?.6:-.3;move(m,(px*.8+fx_*inw)*sp*.7*dt,(py*.8+fy_*inw)*sp*.7*dt,mr);return;}
+  const px=-fy_*m.side,py=fx_*m.side,inw=d>24?.6:0;move(m,(px*.8+fx_*inw)*sp*.7*dt,(py*.8+fy_*inw)*sp*.7*dt,mr);return;}
 }
 // thrown rocks and knives
 function updateEProj(dt){eproj=eproj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.t<=0||solidT(p.x/TS|0,(p.y+8)/TS|0)){vfx('dust',p.x,p.y+6,{n:3});return false;}
@@ -8050,7 +8057,7 @@ if(TOUCH){document.body.classList.add('touch');fit();mzUI();const st=$('tStick')
   b.addEventListener('pointerdown',e=>{e.preventDefault();audio();b.classList.add('on');if(k==='atk')K.atk=true;else if(k==='guard'){if(mode==='play')guardOn();}else if(k==='ping'){if(NET&&PARTY&&mode==='play')netPing(P.x,P.y);}else if(k==='emote'){if(NET&&mode==='play')emoToggle();}else if(k==='netrow'){tNetOpen=!tNetOpen;tSig='';}else if(k==='keysrow'){document.body.classList.toggle('keysOpen');b.classList.toggle('open',document.body.classList.contains('keysOpen'));}else tKey(k,true);if(k!=='netrow'&&b.closest('#tNet')){tNetOpen=false;tSig='';}if(k==='keysrow')return;});
   const up=()=>{if(!b.classList.contains('on'))return;b.classList.remove('on');if(k==='atk')K.atk=false;else if(k==='guard')guardOff();else if(k!=='ping'&&k!=='emote'&&k!=='netrow'&&k!=='keysrow')tKey(k,false);};
   for(const ev of ['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,up);}
- $('keys').addEventListener('pointerdown',e=>{const el=e.target.closest('.key'),c=el&&TKEY[el.id];if(!c)return;e.preventDefault();tKey(c,true);tKey(c,false);document.body.classList.remove('keysOpen');$('tKeysT').classList.remove('open');});
+ $('keys').addEventListener('pointerdown',e=>{const el=e.target.closest('.key');if(el&&el.id==='kLay'){e.preventDefault();document.body.classList.remove('keysOpen');$('tKeysT').classList.remove('open');tLayOpen();return;}const c=el&&TKEY[el.id];if(!c)return;e.preventDefault();tKey(c,true);tKey(c,false);document.body.classList.remove('keysOpen');$('tKeysT').classList.remove('open');});
  // the first tap goes full screen and holds the screen sideways where the browser allows it (Android; an iPhone keeps its
  // bars unless the game is added to the home screen, which opens it full screen from the manifest)
  const full=()=>{const d=document.documentElement;if(document.fullscreenElement||!d.requestFullscreen)return;d.requestFullscreen({navigationUI:'hide'}).then(()=>{try{screen.orientation.lock('landscape').catch(()=>{});}catch(_){}},()=>{});};
@@ -8086,6 +8093,7 @@ if(TOUCH){document.body.classList.add('touch');fit();mzUI();const st=$('tStick')
  const laySave=()=>{try{localStorage.setItem(TLAY_K,JSON.stringify(TLAY));}catch(e){}};
  const layOn=()=>{tStickOff();K.atk=false;guardOff();document.body.classList.remove('keysOpen');document.body.classList.add('tLay');lb.hidden=false;
   lb.querySelector('span').textContent=t('tLayH');lb.querySelector('[data-l="r"]').textContent=t('tLayR');lb.querySelector('[data-l="d"]').textContent=t('tLayD');laySel=null;layMark();};
+ tLayOpen=()=>{if(!layIs())layOn();};
  tLayEnd=()=>{if(!layIs())return;document.body.classList.remove('tLay');lb.hidden=true;lay=null;laySel=null;layMark();laySave();};
  addEventListener('pointerdown',e=>{const on=layIs();if(!on&&e.target!==lt)return;e.preventDefault();e.stopPropagation();audio();
   if(!on){layOn();return;}
