@@ -324,9 +324,10 @@ test('whispers (SAT-ONLINE-070): only from a friend, read and cleared by the one
   assert.equal(w.$id.$other['.validate'], false);
 });
 
-test('reports (SAT-ONLINE-071): written once, as yourself, about someone else; nobody reads them in the game', () => {
+test('reports (SAT-ONLINE-071): written once, as yourself, about someone else; only an admin reads them', () => {
   const r = rules.reports, e = r.$id;
-  assert.equal(r['.read'], undefined, 'the owner reads them in the console');
+  assert.equal(e['.read'], undefined, 'no single report is readable on its own');
+  assert.equal(rules.reports['.read'], "auth != null && root.child('admins').child(auth.uid).val() === true", 'only the owner (an admin, SAT-ONLINE-082) reads them');
   assert.equal(e['.write'], "auth != null && !data.exists() && newData.child('by').val() === auth.uid");
   assert.match(e.about['.validate'], /newData\.val\(\) !== auth\.uid/);
   assert.equal(e.$other['.validate'], false);
@@ -450,6 +451,19 @@ test('guild weekly goal (SAT-ONLINE-081): each member its own count, only upward
   assert.equal(pd.$tier['.write'], "auth != null && auth.uid === $uid && !data.exists() && root.child('guildMembers').child($gid).child(auth.uid).exists()", 'once, a member');
   assert.equal(pd.$tier['.validate'], "$tier.matches(/^[123]$/) && newData.hasChildren(['t'])");
   for (const n of [wk.$uid, pd.$tier]) assert.equal(n.$other['.validate'], false);
+});
+
+test('moderation (SAT-ONLINE-082): admins read reports and crashes, write mutes and resolutions; a mute keeps you out of the world chat', () => {
+  const ADM = "root.child('admins').child(auth.uid).val() === true";
+  assert.equal(rules.reports['.read'], 'auth != null && ' + ADM);
+  assert.equal(rules.crashes['.read'], 'auth != null && ' + ADM);
+  assert.equal(rules.crashes.$id['.write'], 'auth != null && !data.exists()', 'anyone signed in sends one, once');
+  assert.equal(rules.crashes.$id.by['.validate'], 'newData.val() === auth.uid');
+  assert.equal(rules.mutes.$uid['.write'], 'auth != null && ' + ADM);
+  assert.equal(rules.mutes.$uid.until['.validate'], 'newData.isNumber() && newData.val() > now && newData.val() <= now + 2592000000', 'an expiry within 30 days');
+  assert.equal(rules.reportDone.$id['.write'], 'auth != null && ' + ADM);
+  assert.ok(rules.chat.$world.$id['.write'].includes("(!root.child('mutes').child(auth.uid).exists() || root.child('mutes').child(auth.uid).child('until').val() < now)"), 'muted: no new world line');
+  for (const n of [rules.crashes.$id, rules.mutes.$uid, rules.reportDone.$id]) assert.equal(n.$other['.validate'], false);
 });
 
 test('no key appears twice in one object of the rules file', () => {

@@ -629,6 +629,25 @@
     };
   }
 
+  // SAT-ONLINE-082 moderation and crash reports: crashes/{id} {m, s, v, z?, by, t} (anyone signed in writes one, admins read);
+  // reports (071) readable by admins; reportDone/{id} {a: 'ok' | 'mute', by, t}; mutes/{uid} {until, why?, by, t}: written by an
+  // admin, read by everyone; the rules keep a muted player out of the world chat until `until`
+  function modStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    var all = function (p) { return D.get(at(p)).then(function (s) { return s.val() || {}; }); };
+    return {
+      crash: function (v) { var e = { m: String(v.m).slice(0, 200) || '?', s: String(v.s || '').slice(0, 800), v: String(v.v || '').slice(0, 16), by: v.by, t: D.serverTimestamp() }; if (v.z) e.z = String(v.z).slice(0, 24); return D.push(at('crashes'), e); },
+      crashes: function () { return all('crashes'); },
+      reports: function () { return Promise.all([all('reports'), all('reportDone')]).then(function (r) { return { reports: r[0], done: r[1] }; }); },
+      resolve: function (id, a, by) { var u = {}; u['reportDone/' + id] = { a: a, by: by, t: D.serverTimestamp() }; return D.update(D.ref(db), u); },
+      mute: function (uid, until, why, by) { var u = {}; u['mutes/' + uid] = { until: until, why: String(why || '').slice(0, 60), by: by, t: D.serverTimestamp() }; return D.update(D.ref(db), u); },
+      unmute: function (uid) { return D.remove(at('mutes/' + uid)); },
+      watchMute: function (uid, cb) { var off = D.onValue(at('mutes/' + uid), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      uidOf: function (id) { return D.get(at('handles/' + String(id).toLowerCase())).then(function (s) { return typeof s.val() === 'string' ? s.val() : null; }); },
+      ranks: function () { return Promise.all([all('ranks/gold'), all('ranks/lv')]).then(function (r) { return { gold: r[0], lv: r[1] }; }); },
+    };
+  }
+
   // SAT-ONLINE-073: the group finder, lfg/{uid} = {n, lv, cls, k, z, t}: yours only, gone when you leave (onDisconnect)
   function lfgStore(sdk) {
     var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
@@ -655,6 +674,7 @@
     reportStore: reportStore,
     lfgStore: lfgStore,
     announceStore: announceStore,
+    modStore: modStore,
     natStore: natStore,
     SDK_VERSION: SDK_VERSION,
     load: load,

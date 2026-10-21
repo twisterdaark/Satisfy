@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21moderation', ver: '1.16', d: '2026-10-21',
+      ar: ['أونلاين: لصاحب اللعبة: /reports بيوريه البلاغات المفتوحة ويقدر يكتم اللي اتبلّغ عنه يوم أو يقفل البلاغ، و/mute و/unmute لأي ID، و/crashes لتقارير الأعطال، و/economy لدهب اللاعبين',
+        'اللي مكتوم ميقدرش يكتب في الشات العام لحد الميعاد، واللعبة بتقوله لحد إمتى',
+        'لو حصل عطل في اللعبة وإنت أونلاين، تقرير صغير بيتبعت لصاحب اللعبة من غير أي بيانات حساب'],
+      en: ["Online: for the game's owner: /reports lists the open reports, to mute the reported player for a day or resolve it; /mute and /unmute any ID; /crashes for crash reports; /economy for the players' gold",
+        'A muted player cannot write in the world chat until the time, and the game says until when',
+        "If the game hits an error while you are online, a short report goes to the game's owner, without any account details"] },
     { v: '2026-10-21gweek', ver: '1.15', d: '2026-10-21',
       ar: ['أونلاين: هدف الجيلد الأسبوعي: قتلات كل الأعضاء بتتجمع طول الأسبوع (من الاتنين 00:00 بتوقيت جرينتش). عند 300 و1,000 و3,000 قتيلة كل عضو بياخد جايزة المستوى مرة واحدة من G ← هدف الأسبوع',
         'الوحوش اللي أقل منك بأكتر من 15 لفل مبتتحسبش، وكل عضو بيتحسبله لحد 1,500 قتيلة. والكل بيوصلهم إشعار لما الجيلد يوصل لمستوى'],

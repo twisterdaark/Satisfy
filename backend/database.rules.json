@@ -517,6 +517,7 @@
       }
     },
     "reports": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
       "$id": {
         ".write": "auth != null && !data.exists() && newData.child('by').val() === auth.uid",
         ".validate": "newData.hasChildren(['by', 'byN', 'about', 'aboutN', 'why', 'said', 't'])",
@@ -560,6 +561,43 @@
         "ar": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
         "en": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
         "at": { ".validate": "newData.isNumber() && newData.val() > now && newData.val() <= now + 86400000" },
+        "by": { ".validate": "newData.val() === auth.uid" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "crashes": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$id": {
+        ".write": "auth != null && !data.exists()",
+        ".validate": "newData.hasChildren(['m', 's', 'v', 'by', 't'])",
+        "m": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
+        "s": { ".validate": "newData.isString() && newData.val().length <= 800" },
+        "v": { ".validate": "newData.isString() && newData.val().length <= 16" },
+        "z": { ".validate": "newData.isString() && newData.val().length <= 24" },
+        "by": { ".validate": "newData.val() === auth.uid" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "mutes": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        ".validate": "newData.hasChildren(['until', 'by', 't'])",
+        "until": { ".validate": "newData.isNumber() && newData.val() > now && newData.val() <= now + 2592000000" },
+        "why": { ".validate": "newData.isString() && newData.val().length <= 60" },
+        "by": { ".validate": "newData.val() === auth.uid" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "reportDone": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$id": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        ".validate": "newData.hasChildren(['a', 'by', 't'])",
+        "a": { ".validate": "newData.val() === 'ok' || newData.val() === 'mute'" },
         "by": { ".validate": "newData.val() === auth.uid" },
         "t": { ".validate": "newData.val() === now" },
         "$other": { ".validate": false }
@@ -738,7 +776,7 @@
         ".indexOn": ["t"],
         ".validate": "$world === 'satisfy'",
         "$id": {
-          ".write": "auth != null && ((!data.exists() && newData.child('from').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('t').val() < now - 600000))",
+          ".write": "auth != null && ((!data.exists() && newData.child('from').val() === auth.uid && (!root.child('mutes').child(auth.uid).exists() || root.child('mutes').child(auth.uid).child('until').val() < now)) || (data.exists() && !newData.exists() && data.child('t').val() < now - 600000))",
           ".validate": "newData.hasChildren(['from', 'h', 'text', 't'])",
           "from": { ".validate": "newData.val() === auth.uid" },
           "h": { ".validate": "newData.isString() && newData.val() === root.child('accountIds').child(auth.uid).val()" },
