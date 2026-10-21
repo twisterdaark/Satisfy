@@ -5,7 +5,7 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
-    { v: '2026-10-21moderation', ver: '1.15', d: '2026-10-21',
+    { v: '2026-10-21moderation', ver: '1.16', d: '2026-10-21',
       ar: ['أونلاين: لصاحب اللعبة: /reports بيوريه البلاغات المفتوحة ويقدر يكتم اللي اتبلّغ عنه يوم أو يقفل البلاغ، و/mute و/unmute لأي ID، و/crashes لتقارير الأعطال، و/economy لدهب اللاعبين',
         'اللي مكتوم ميقدرش يكتب في الشات العام لحد الميعاد، واللعبة بتقوله لحد إمتى',
         'لو حصل عطل في اللعبة وإنت أونلاين، تقرير صغير بيتبعت لصاحب اللعبة من غير أي بيانات حساب'],
@@ -13,10 +13,16 @@
         'A muted player cannot write in the world chat until the time, and the game says until when',
         "If the game hits an error while you are online, a short report goes to the game's owner, without any account details"] },
     { v: '2026-10-21gweek', ver: '1.14', d: '2026-10-21',
+    { v: '2026-10-21gweek', ver: '1.15', d: '2026-10-21',
       ar: ['أونلاين: هدف الجيلد الأسبوعي: قتلات كل الأعضاء بتتجمع طول الأسبوع (من الاتنين 00:00 بتوقيت جرينتش). عند 300 و1,000 و3,000 قتيلة كل عضو بياخد جايزة المستوى مرة واحدة من G ← هدف الأسبوع',
         'الوحوش اللي أقل منك بأكتر من 15 لفل مبتتحسبش، وكل عضو بيتحسبله لحد 1,500 قتيلة. والكل بيوصلهم إشعار لما الجيلد يوصل لمستوى'],
       en: ["Online: the guild's weekly goal: every member's kills add up through the week (from Monday 00:00 UTC). At 300, 1,000 and 3,000 kills each member takes that tier's reward once, from G -> Weekly goal",
         'Monsters more than 15 levels below you do not count, and each member counts up to 1,500 kills. Everyone is told when the guild reaches a tier'] },
+    { v: '2026-10-21v114', ver: '1.14', d: '2026-10-21',
+      ar: ['"إبداع الحداد الأسطوري" (حداد أو وريث باجما من لفل 10): عند السندان دوس "إبداع". "[عايز تبتكر قطعة إيه؟]" سيف عظيم أو رمح أو درع أو أي نوع، وبعدين "[عايز تستخدم خامات إيه؟]"، وبعدين "[من فضلك صمّم القطعة.]": ترسمها على المخطط (الطول والعرض والانحناء للسلاح، والسُمك والتغطية والمرونة للدرع) وكل شكل بيغيّر الإحصائيات. سمّيها، وطريقة الصنع بتظهر أول القايمة',
+           'كل قطعة من إبداعك مكتوب عليها "صنع" واسمك، ومعاها اسمها وإحصائياتها حتى لو اتبادلت. 3 إبداعات لكل لفل حدادة'],
+      en: ['"Legendary Blacksmith\'s Creation" (a blacksmith or Pagma\'s Descendant from Lv 10): press "Creation" at the anvil. "[What item do you want to create?]" a greatsword, spear, armour or any kind, then "[What materials would you like to use?]", then "[Please design the item.]": draw it on the blueprint (a weapon\'s length, width and curve; armour\'s thickness, coverage and flex), and every shape shifts the stats. Name it, and the production method sits at the top of the list',
+           'Every item from your creation says "Made by" with your name, and keeps its name and stats even when traded. Three creations per smithing level'] },
     { v: '2026-10-21gevents', ver: '1.13', d: '2026-10-21',
       ar: ['أونلاين: مواعيد الجيلد: القائد أو ضابط يضيف ميعاد من G (اسمه، وبعدين إمتى: بعد نص ساعة لساعتين، أو النهارده أو بكره الساعة 6 أو 8 أو 10 بالليل)',
         'الأعضاء بيشوفوه في G وفي المواعيد (O) بتوقيتهم وبتوقيت جرينتش، ويقولوا "أنا رايح"، وبيوصلهم تنبيه قبله بعشر دقايق ولما يبدأ'],
