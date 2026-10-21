@@ -5,11 +5,16 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
-    { v: '2026-10-21gevents', ver: '1.12', d: '2026-10-21',
+    { v: '2026-10-21gevents', ver: '1.13', d: '2026-10-21',
       ar: ['أونلاين: مواعيد الجيلد: القائد أو ضابط يضيف ميعاد من G (اسمه، وبعدين إمتى: بعد نص ساعة لساعتين، أو النهارده أو بكره الساعة 6 أو 8 أو 10 بالليل)',
         'الأعضاء بيشوفوه في G وفي المواعيد (O) بتوقيتهم وبتوقيت جرينتش، ويقولوا "أنا رايح"، وبيوصلهم تنبيه قبله بعشر دقايق ولما يبدأ'],
       en: ['Online: guild events: the master or an officer adds one from G (a title, then when: in half an hour to two hours, or today or tomorrow at 18:00, 20:00 or 22:00)',
         'Members see them in G and in the Calendar (O) in their own time zone and in UTC, say "I\'m going", and are told 10 minutes before and when it starts'] },
+    { v: '2026-10-21v112', ver: '1.12', d: '2026-10-21',
+      ar: ['مهارات الحداد الأسطوري: "صبر الحداد الأسطوري" (لفل 15) مينفعش تستخدمه بمزاجك. بيشتغل لوحده لو فضلت صابر في قتال وصحتك تحت 30%، أو كمّلت على السندان قطعة ورا قطعة. التحمل والمهارة والدفاع بيبقوا ×3 لمدة ساعة، مرة في اليوم',
+           '"عيون الحداد" (لفل 12): اقف ثابت جنب وحش لابس قطعة باسم، وهتشوف خصائصها سطر سطر. كل ما تقرّب تشوف أكتر، وكل سطر جديد بيزوّد فهمك للقطعة. من لفل 5 في السكيل بتبقى "عيون الحداد الأسطوري": 3 ثواني وبتشوف كل حاجة'],
+      en: ['Legendary Blacksmith skills: "Legendary Blacksmith\'s Patience" (Lv 15) can\'t be used on purpose. It wakes by itself when you hold on in a fight below 30% health, or keep at the anvil make after make: Stamina, Dexterity and defense ×3 for an hour, once a day',
+           '"Blacksmith\'s Eyes" (Lv 12): stand still near a monster that wears a named item and you see its options line by line. The closer you stand the more you see, and each new line adds to your understanding of the item. From skill Lv 5 they become the "Legendary Blacksmith\'s Eyes": three seconds and you see it all'] },
     { v: '2026-10-21v111', ver: '1.11', d: '2026-10-21',
       ar: ['المدربين في أماكنهم من الرواية: معلم السحر في ريدان (برج السحر)، ومدرب الفرسان في تيتان مع الفرسان الحُمر، وكاسوس في رولينج (كنيسة ريبيكا)، والراجل المقنّع في حواري رينهارت. مدرب المحاربين ومدربة الرماة والنكرومانسر فضلوا حوالين وينستون',
            'التماثيل: ريبيكا في رولينج، وهيكسيتيا وجاريون وديبيريون جنب بعض في رينهارت. فينيس عند المزاد، ودومينيون في تيتان، وجودار عند برج الحكمة',

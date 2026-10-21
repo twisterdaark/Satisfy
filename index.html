@@ -75,7 +75,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #chatTabs button.on{color:#fff;border-color:#9fe0ff;background:rgba(40,70,110,.6)}
 #chatTabs button.new::after{content:' •';color:#ffd24a}
 #chatTabs button[hidden]{display:none}
-#chatL div.all b{color:#9fe0ff}#chatL div.sys{color:#ffe07a}#announce.own .head{color:#bfe8ff}#chatL div.sys b{color:#ffb84a}#chatL div.party,#chatL div.party b{color:#8dff9a}
+#chatL div.all b{color:#9fe0ff}#chatL div.sys{color:#ffe07a}#announce.own .head{color:#bfe8ff}#eyesW{position:absolute;left:calc(var(--u)*10);top:calc(var(--u)*17);width:calc(var(--u)*34);text-align:center;font-size:calc(var(--u)*1.45);z-index:4;pointer-events:none}#eyesW .head{color:#bfe8ff}#eyesW .eyl{color:#cfe0f4}#chatL div.sys b{color:#ffb84a}#chatL div.party,#chatL div.party b{color:#8dff9a}
 #chatL div.guild,#chatL div.guild b{color:#f0b8ff}#chatL div.w,#chatL div.w b{color:#c9a6ff;font-style:italic}
 #chatW.idle{opacity:.55}
 #chatL div{margin:calc(var(--u)*.2) 0}#chatL div.old{opacity:.45}#chatL b{color:#9fe0a0;font-weight:600}
@@ -489,6 +489,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
       <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
       <div id="emoW" class="sys" hidden><button data-emo="wave" data-i18n="emWave"></button><button data-emo="dance" data-i18n="emDance"></button><button data-emo="point" data-i18n="emPoint"></button><button data-emo="cheer" data-i18n="emCheer"></button></div><div id="pctx" class="sys" hidden><div class="qhead"><span class="head" id="pctxT"></span><button class="x" data-act="pcClose">✕</button></div><div id="pctxI"></div><div class="row"><button data-act="pcInvite" data-i18n="pcInvite"></button><button data-act="pcDuel" data-i18n="pcDuel"></button><button data-act="pcTrade" id="pctxTr" data-i18n="pcTrade" hidden></button><button data-act="pcBounty" id="pctxBn" data-i18n="pcBounty" hidden></button><button data-act="pcGuild" id="pctxG" data-i18n="pcGuild" hidden></button><button data-act="pcFriend" id="pctxF" hidden></button><button data-act="pcFollow" id="pctxFo" hidden></button><button class="blk" id="pctxB" data-act="pcBlock"></button><button class="blk" id="pctxR" data-act="pcReport" data-i18n="pcReport" hidden></button></div></div><div id="guildInv" class="sys" hidden><div id="guildInvT"></div><div class="row"><button data-act="gdYes" data-i18n="gdYes"></button><button data-act="gdNo" data-i18n="pDecline"></button></div></div><div id="tradeInv" class="sys" hidden><div id="tradeInvT"></div><div class="row"><button data-act="trYes" data-i18n="trYes"></button><button data-act="trNo" data-i18n="pDecline"></button></div></div><div id="tradeW" class="sys" hidden><div class="qhead"><span class="head" id="trH"></span><button class="x" data-act="trCancel">✕</button></div><div class="cols"><div class="col"><div class="sub" id="trMeH"></div><label class="gl"><span id="trGoldL"></span> <input id="trGold" type="number" min="0" step="1" value="0" inputmode="numeric"></label><div id="trBag"></div><div class="st" id="trMeS"></div></div><div class="col"><div class="sub" id="trThH"></div><div id="trTh"></div><div class="st" id="trThS"></div></div></div><div class="row"><button data-act="trOk" id="trOk"></button><button data-act="trConf" id="trConf"></button><button data-act="trCancel" id="trX"></button></div></div><div id="lootW" class="sys" hidden><div id="lootT"></div><div class="row"><button data-act="lootN" data-i18n="lootNeed"></button><button data-act="lootG" data-i18n="lootGreed"></button><button data-act="lootP" data-i18n="lootPass"></button></div></div><div id="partyInv" class="sys" hidden><div id="partyInvT"></div><div class="row"><button data-act="pAccept" data-i18n="pAccept"></button><button data-act="pDecline" data-i18n="pDecline"></button><button class="blk" data-act="pBlock" data-i18n="pBlock"></button></div></div>
       <div id="announce" class="sys" hidden><div class="head" data-i18n="worldNotice"></div><div id="anntext"></div></div>
+      <div id="eyesW" class="sys" hidden></div>
     </div>
 
     <div id="updLog" class="sys panel center" hidden><div class="head" id="updLogH"></div><div id="updLogL"></div><button class="x" data-act="updLogClose">✕</button></div>
@@ -3067,6 +3068,56 @@ Object.assign(STR.ar,{"kLay": "رتّب الأزرار"});
 Object.assign(STR.en,{"kLay": "Arrange buttons"});
 Object.assign(STR.ar,{"coachR": "عربجي ريدان", "coachRh": "عربجي رينهارت", "coachRo": "عربجي رولينج", "coachT": "عربجي تيتان", "coachHi2": "العربيات بتلف على المدن الكبيرة. واللي لسه ملوش كلاس بيركب ببلاش، أكيد رايح لمدرّبه.", "oCoachTo": "سافر لـ{z} ({g} دهب)", "oCoachFree": "سافر لـ{z} (ببلاش، لسه ملكش كلاس)", "oWhereTr": "المدربين فين؟", "whereTr": "مدرب المحاربين ومدربة الرماة هنا في وينستون، والنكرومانسر في معبد ياتان على أطراف البلد. معلم السحر في برج السحر في ريدان، ومدرب الفرسان مع الفرسان الحُمر في تيتان، وكاسوس في كنيسة ريبيكا في رولينج، والراجل المقنّع في حواري رينهارت. وعربياتي بتوصلك لكل دول."});
 Object.assign(STR.en,{"coachR": "Reidan Coachman", "coachRh": "Reinhardt Coachman", "coachRo": "Rolling Coachman", "coachT": "Titan Coachman", "coachHi2": "The carriages run between the big cities. Anyone without a class yet rides free; you must be on your way to a trainer.", "oCoachTo": "Travel to {z} ({g} gold)", "oCoachFree": "Travel to {z} (free: you have no class yet)", "oWhereTr": "Where are the trainers?", "whereTr": "The warrior and archer trainers are here in Winston, and the necromancer at the Yatan temple on the edge of town. The magic instructor is at the magic tower in Reidan, the knight trainer with the Red Knights in Titan, Cassus at the Rebecca Church in Rolling, and the hooded man in the back streets of Reinhardt. My carriages go to all of them."});
+/* The Legendary Blacksmith's Patience and Eyes (major, owner 2026-10-21; Breath is the passive `focus`). Novel lines:
+   "[Legendary Blacksmith's Patience] Vitality, defense, and dexterity will rise by 200% for one hour. * This skill doesn't
+   consume mana. * This skill can't be used intentionally. It was naturally be triggered if you continue to persevere." It
+   fired for Grid at the anvil ("Concentration, stamina, and defense will rise to the extremes for one hour"). Here it wakes
+   when a blacksmith holds on in a fight below 30% health for 6 seconds, or keeps at the anvil through a sixth make in a
+   row; Stamina, Dexterity and defense x3 (+200%) and better work at the anvil, for an hour of real time, once a day.
+   "[Blacksmith's Eyes] You can see some of the abilities and options when looking at the target item. Limited to equipped
+   items. * The closer the distance to the target item, the better the analytical power." Standing still near a monster
+   that carries a named item for 5 seconds sees one, a line or more by how close you stand: "[Blacksmith's Eyes (Lv. 1) has
+   seen through the target's item.]" From skill Lv 5 (or as Pagma's Descendant) it becomes the Legendary Blacksmith's
+   Eyes: "peek at item information when observing it for more than three seconds", every line at once. Observing is also
+   a way to understand an item (v1.00: "up to 100% understanding by observing, using, disassembling"): each new line seen
+   gives a blacksmith 10%, up to 50% by eyes alone. Each player's own (S.pat1, S.patD, S.eyes); nothing shared. */
+function patOn(){return !!(S&&S.pat1&&S.pat1>Date.now());}
+function patTry(){if(!pasOn('lpat')||patOn()||S.patD===today())return false;S.patD=today();S.pat1=Date.now()+3600000*(skLv('lpat')>=5?1.5:1);skUse('lpat',12);
+ announce(t('lpatOn'),1);SFX.legendary();vfx('rage',P.x,P.y);sbSig='';hudDirty=true;save(true);return true;}
+let LPT=0,LPW=false;
+function lpTick(dt){if(!S||!P)return;const on=patOn();if(LPW&&!on){toast(t('lpatOff'),'warn');}LPW=on;
+ if(on&&rand()<dt*2)fx.push({x:P.x+(rand()-.5)*12,y:P.y-6,vx:0,vy:-16,t:.6,c:'#ffb04a',fl:1});
+ if(on||mode!=='play'||!pasOn('lpat')||S.patD===today()){LPT=0;return;}const mh=maxHP();
+ if(P.hp>mh*.6||P.hp<=0){LPT=0;return;}if(P.hp>=mh*.3)return;
+ if(!mons.some(m=>!m.dead&&m.eng>0&&Math.hypot(m.x-P.x,m.y-P.y)<320))return;if((LPT+=dt)>=6){LPT=0;patTry();}}
+// the eyes: what a monster's named item shows, line by line
+const EYC={};
+function eyLines(id){if(EYC[id])return EYC[id];const it=mkItem(id,0),rc=rcById(id)||{},L=[];
+ for(const s of statShort(it).split(' · '))if(s)L.push({l:s.replace(/\s*[+\d.%]+%?$/,''),v:s});
+ (rc.isk||[]).forEach(k=>L.push({l:'',v:t('iskL',{s:t('sk_'+k)})}));(rc.ip||[]).forEach(k=>L.push({l:'',v:t('ipd_'+k)}));
+ return EYC[id]={it,L};}
+const eyLeg=()=>S.cls==='pagma'||skLv('beyes')>=5;
+const eyLvl=d=>eyLeg()?99:d<60?3:d<110?2:1;
+const eyKnown=id=>((S.eyes||{})[id]||0);
+let EYT=0,EYM=null,EYX=0,EYY=0,eyT=0;
+function eyTick(dt){if(eyT>0&&(eyT-=dt)<=0)$('eyesW').hidden=true;if(!S||!P||mode!=='play'||!pasOn('beyes')){EYT=0;return;}
+ const mv=Math.hypot(P.x-EYX,P.y-EYY);EYX=P.x;EYY=P.y;if(mv>1.5){EYT=0;return;}
+ const R=eyLeg()?(skLv('beyes')>=10?280:220):160;let best=null,bd=R;
+ for(const m of mons){if(m.dead||m.tmp||!NDROP[m.type])continue;const d=Math.hypot(m.x-P.x,m.y-P.y);if(d<bd){bd=d;best=m;}}
+ if(best!==EYM){EYM=best;EYT=0;}if(!best||(best.eyed||0)>=eyLvl(bd))return;
+ if(NDROP[best.type].every(([id])=>eyKnown(id)>=eyLines(id).L.length)&&best.eyed)return;
+ if((EYT+=dt)<(eyLeg()?3:5))return;EYT=0;eySee(best,bd);}
+function eySee(m,d){const ids=NDROP[m.type].map(x=>x[0]),id=ids.find(i=>eyKnown(i)<eyLines(i).L.length)||ids[0],E=eyLines(id),n=Math.min(E.L.length,eyLvl(d)),was=eyKnown(id);
+ m.eyed=Math.max(m.eyed||0,eyLvl(d));S.eyes=S.eyes||{};if(n>was)S.eyes[id]=n;const k=Math.max(n,was);skUse('beyes',n>was?3:1);
+ const W=$('eyesW'),opt=i=>t('eyOpt',{n:i});let j=0;
+ W.innerHTML=`<div class="head">${esc(eyLeg()?t('eyHeadL'):t('eyHead',{n:skLv('beyes')}))}</div><div>${esc(t('eySaw',{it:t(id),m:t(m.type+'N')}))}</div><b class="rt rt${E.it.r}">${esc(inm(E.it))}</b>`+
+  E.L.map((x,i)=>`<div class="eyl">${i<k?esc(x.v):esc(x.l?x.l:opt(++j))+': ???'}</div>`).join('');
+ W.hidden=false;eyT=document.body.classList.contains('touch')?5:7;SFX.rare&&SFX.rare();
+ if(n>was&&isSm()&&rcById(id)&&rcById(id).drop){S.und=S.und||{};const u0=undOf(id),u=Math.max(u0,Math.min(50,u0+(n-was)*10));if(u>u0){S.und[id]=u;setTimeout(()=>toast(t('undUp',{it:t(id),n:u}),'good'),600);}}
+ hudDirty=true;save(true);}
+window.__GBS={patOn:()=>patOn(),patTry:()=>patTry(),tick:dt=>lpTick(dt),eyTick:dt=>eyTick(dt),see:(m,d)=>eySee(m,d),lines:id=>eyLines(id).L.map(x=>x.v),lvl:d=>eyLvl(d),leg:()=>eyLeg(),reset:()=>{LPT=0;EYT=0;EYM=null;}}; // tests
+Object.assign(STR.ar,{"sk_lpat": "صبر الحداد الأسطوري", "skd_lpat": "الحيوية والدفاع والمهارة بيزيدوا 200% لمدة ساعة. السكيل ده مبيصرفش مانا ومينفعش تستخدمه بمزاجك: بيشتغل لوحده لو فضلت صابر (تستحمل في قتال وصحتك تحت 30% لمدة 6 ثواني، أو تكمّل على السندان لحد تاني ست قطع ورا بعض). مرة في اليوم.", "sk_beyes": "عيون الحداد", "skd_beyes": "اقف ثابت جنب وحش لابس قطعة باسم 5 ثواني، وهتشوف شوية من قدراتها وخصائصها. كل ما تقرّب تشوف أكتر. وكل سطر جديد بيدي الحداد 10% فهم للقطعة (لحد 50%).", "skO5_beyes": "عيون الحداد الأسطوري: 3 ثواني، وكل السطور، ومن أبعد", "skO10_beyes": "بتشوف من أبعد كمان", "skO5_lpat": "بيفضل ساعة ونص", "skO10_lpat": "مساعدته على السندان بتتضاعف", "lpatOn": "[سكيل صبر الحداد الأسطوري اشتغل. التركيز والقدرة على التحمل والدفاع هيوصلوا للآخر لمدة ساعة.]", "lpatOff": "صبر الحداد الأسطوري خلص.", "lpatL": "الصبر", "lpatRow": "التحمل والمهارة والدفاع ×3 · {n} دقيقة", "eyHead": "[عيون الحداد (Lv. {n}) شافت القطعة اللي على الهدف.]", "eyHeadL": "[عيون الحداد الأسطوري]", "eySaw": "[استكشفت وظيفة {it} اللي {m} لابسه!]", "eyOpt": "الخاصية {n}"});
+Object.assign(STR.en,{"sk_lpat": "Legendary Blacksmith's Patience", "skd_lpat": "Vitality, defense, and dexterity will rise by 200% for one hour. This skill doesn't consume mana and can't be used intentionally: it is triggered naturally if you continue to persevere (hold on in a fight below 30% health for 6 seconds, or keep at the anvil through a sixth make in a row). Once a day.", "sk_beyes": "Blacksmith's Eyes", "skd_beyes": "Stand still near a monster that wears a named item for 5 seconds to see some of its abilities and options. The closer you stand, the more you see. Each new line gives a blacksmith 10% understanding of it (up to 50%).", "skO5_beyes": "Legendary Blacksmith's Eyes: 3 seconds, every line, from further away", "skO10_beyes": "Seen from even further away", "skO5_lpat": "Lasts an hour and a half", "skO10_lpat": "Twice the help at the anvil", "lpatOn": "[The Legendary Blacksmith's Patience skill has been activated. Concentration, stamina, and defense will rise to the extremes for one hour.]", "lpatOff": "Legendary Blacksmith's Patience has worn off.", "lpatL": "Patience", "lpatRow": "Stamina, Dexterity, defense ×3 · {n} min", "eyHead": "[Blacksmith's Eyes (Lv. {n}) has seen through the target's item.]", "eyHeadL": "[Legendary Blacksmith's Eyes]", "eySaw": "[You have explored the function of the {it} that {m} is wearing!]", "eyOpt": "Option {n}"});
 /* ---------------- town life (owner 2026-10-20: town life) ----------------
    Horse races at Winston, dice at the inn tables and the town festival, all on the world clock (wNow), so everyone online
    shares the same race, the same dice rounds and the same festival without any new message or rules change: your race
@@ -4206,7 +4257,7 @@ function freshState(){
 // Advancements (SAT-CLASS-002): every 100 levels the body breaks through a limit. Each one adds +10 to every stat and
 // multiplies all stats by a further 5% (first at 100, second at 200, ...).
 const advN=()=>Math.min(9,Math.floor((S&&S.lv||1)/100));
-const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Math.round((S.st[k]+S.bonus+a*10+(S.tl.sonlaw?20:0))*(1+a*.05)*bhStat(k)*(S.tl.paint?1.03:1)*(candyOn()?1.3:1))+setBon(k);};
+const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Math.round((S.st[k]+S.bonus+a*10+(S.tl.sonlaw?20:0))*(1+a*.05)*bhStat(k)*(S.tl.paint?1.03:1)*(candyOn()?1.3:1)*((k==='sta'||k==='dex')&&patOn()?3:1))+setBon(k);};
 // Piaro's lesson (manhwa): keep Strength and Stamina at 1:1. Once learned, while the two stay within 10% of each other the
 // body is balanced: +8% damage and max HP, faster stamina recovery, cheaper dodges, and Second Wind when health runs low.
 // the golden ratio (novel ch 315, 1423): Strength and Agility kept 1:1. A hidden stat: always on, never shown in the status window
@@ -4256,7 +4307,7 @@ function wear(i,p){if(!i||rand()>=p)return;const d=durOf(i);if(d<=0)return;i.dur
  else if(i.dur===10||i.dur===5){announce(t('durCrit',{it:inm(i),n:i.dur}),1);SFX.deny();}
  else if(i.dur<=20&&gTime>durRemT){durRemT=gTime+40;toast(t('lowDur',{it:inm(i),n:i.dur}),'warn');}}
 function atkV(){return Math.round(iAtk(weapon())*dmgMult()*(P&&P.icb>0?icbM():1));}
-function defV(){let d=setBon('def');for(const sl of GEAR){const i=eqIt(sl);if(i)d+=iDef(i);}return Math.round((d+Math.floor(stat('sta')*.15))*(P&&P.icb>0?icbM():1)*(S.tl.oath?1.05:1));}
+function defV(){let d=setBon('def');for(const sl of GEAR){const i=eqIt(sl);if(i)d+=iDef(i);}return Math.round((d+Math.floor(stat('sta')*.15))*(P&&P.icb>0?icbM():1)*(S.tl.oath?1.05:1)*(patOn()?3:1));}
 // spawns read the world as generated (GM0), not this player's copy with its chopped trees and stumps, so every
 // client places the same monsters at the same spots and shared monsters line up (owner report: half stayed local)
 let GM0=null;const at0=(x,y)=>(x<0||y<-YO||x>=GW||y>=MH)?CW:GM0[(y+YO)*GW+x],sol0=(x,y)=>SOLID[at0(x,y)]===1;
@@ -5431,7 +5482,7 @@ function drawForgeView(){const c=$('mgv'),g=c.getContext('2d');g.imageSmoothingE
   g.lineWidth=2;g.strokeStyle='#ffffff';g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Math.cos(A(p))*(rr+5),cy+Math.sin(A(p))*(rr+5));g.stroke();g.lineWidth=1;R(g,cx-2,cy-2,4,4,'#ffffff');}
  MG.steam.forEach(s=>{g.globalAlpha=Math.max(0,s.t*.6);R(g,s.x,s.y,3,3,'#e8eef4');});g.globalAlpha=1;}
 function finishMG(){const rc=MG.rc;
- const q=mgScore()+.025*(S.smith-1)+S.patience+(pasOn('focus')?(skLv('focus')>=5?.06:.04):0)+gbB('q')+(rand()-.5)*.08;let r=Math.min(craftRate(q),maxRating());if(r>=3)setTimeout(()=>annW('craftLeg',{rk:r}),300);
+ const q=mgScore()+.025*(S.smith-1)+S.patience+(patOn()?(skLv('lpat')>=10?.08:.04):0)+(pasOn('focus')?(skLv('focus')>=5?.06:.04):0)+gbB('q')+(rand()-.5)*.08;let r=Math.min(craftRate(q),maxRating());if(r>=3)setTimeout(()=>annW('craftLeg',{rk:r}),300);
  let it=null;
  if(rc.slot==='x'){S.arrows[r]++;S.arrowsMade++;}
  else{it=mkItem(rc.id,r);breathFeat(it);if(pasOn('focus'))skUse('focus');if(P){vfx('forge',P.x,P.y-8);vfx('loot',P.x,P.y,{rarity:r});}
@@ -5439,7 +5490,7 @@ function finishMG(){const rc=MG.rc;
  S.made[rc.id]=(S.made[rc.id]||0)+1;qEvent('craft',rc.id,r,rc.slot);
  if(isSm()&&rc.slot!=='x'&&CREPC[r])setTimeout(()=>crepAdd(CREPC[r]),1200);
  let bonus='';const gk=rc.id+r;if(isSm()&&rc.slot!=='x'&&STATB[r]&&!S.got[gk]){S.got[gk]=1;S.bonus+=STATB[r];bonus=t('bonusGot',{n:STATB[r]});}
- let pat='';if(S.cls!=='smith')S.patience=0;else if(r<4){S.patience=Math.min(.05,S.patience+.01);pat=t('patience',{n:Math.round(S.patience*100)});}else S.patience=0;
+ let pat='';if(S.cls!=='smith')S.patience=0;else if(r<4){if(S.patience>=.05)setTimeout(patTry,900);S.patience=Math.min(.05,S.patience+.01);pat=t('patience',{n:Math.round(S.patience*100)});}else S.patience=0;
  S.sxp+=Math.round((20+r*12)*(1+dvB('smith')));let up='';while(S.sxp>=50*S.smith){S.sxp-=50*S.smith;S.smith++;up=t('smithUp',{n:S.smith});}
  gainXP(6+r*6);
  const stat2=rc.slot==='x'?`${ARROWG[r]}G`:statShort(it);
@@ -5639,7 +5690,7 @@ const SKD={
  // smith skills from the novel (owner 2026-10-19: the crafting skill took a slot and was never used, so it is passive now):
  // Blacksmith Breath is always on at the anvil (pas); Repair mends worn gear in the field (Legendary Blacksmith Repair, ch 1);
  // Item Combination merges weapon and armor for a while (ch 236). also: other classes that are smiths too.
- focus:{cls:'smith',also:['pagma'],lv:7,pas:1,col:'#ffc21a'},lrep:{cls:'smith',also:['pagma'],lv:10,qd:'kh5',mp:14,cd:45,col:'#9fd8ff'},icomb:{cls:'smith',also:['pagma'],lv:35,qd:'kh6',mp:18,cd:90,col:'#bfe0ff'},
+ focus:{cls:'smith',also:['pagma'],lv:7,pas:1,col:'#ffc21a'},beyes:{cls:'smith',also:['pagma'],lv:12,pas:1,col:'#9fd8ff'},lpat:{cls:'smith',also:['pagma'],lv:15,pas:1,col:'#ffb04a'},lrep:{cls:'smith',also:['pagma'],lv:10,qd:'kh5',mp:14,cd:45,col:'#9fd8ff'},icomb:{cls:'smith',also:['pagma'],lv:35,qd:'kh6',mp:18,cd:90,col:'#bfe0ff'},
  link:{cls:'pagma',lv:1,mp:10,cd:8,need:'melee',col:'#ffd27a'},kill:{cls:'pagma',lv:1,qd:'pg1',mp:18,cd:15,need:'melee',col:'#ff7a5a'},restraint:{cls:'pagma',lv:1,qd:'pg1',mp:20,cd:14,col:'#bfe8ff'},
  mcross:{cls:'saint',lv:1,mp:14,cd:3,need:'melee',col:'#bfe0ff'},mflash:{cls:'saint',lv:1,qd:'ms1',mp:22,cd:8,need:'melee',col:'#ffffff'},mwind:{cls:'saint',lv:160,qd:'ms2',mp:30,cd:10,need:'melee',col:'#9fd8ff'},mheaven:{cls:'saint',lv:170,qd:'ms3',mp:55,cd:45,need:'melee',col:'#fff4c0'},
  wave:{cls:'pagma',lv:1,qd:'pg2',mp:18,cd:9,need:'melee',col:'#ffe08a'},transcend:{cls:'pagma',lv:100,qd:'pg3',mp:24,cd:16,need:'melee',col:'#fff4c0'},revolve:{cls:'pagma',lv:120,qd:'pg4',mp:28,cd:18,need:'melee',col:'#ffb85a'},pinnacle:{cls:'pagma',lv:150,qd:'pg5',mp:50,cd:60,need:'melee',col:'#ff6a3a'},
@@ -5675,7 +5726,7 @@ const pasOn=k=>!!(S&&pasSkills().includes(k));
    passive Breath 2. Owner 2026-10-20: shown as a % to the next level and not linear: n to n+1 takes 12*n^1.5 (12, 34,
    62 ... 324), up to Lv 10. Saves from before (S.skv unset) counted uses at 6*n each; they keep their level and share. Each level gives +6% skill damage, -3% MP and cooldown, +5% buff time, and
    Lv 5 and Lv 10 open an extra effect (SKO; skills without their own get a crit chance, then bleeding hits). */
-const SKN=12,SKMAX=10,SKO={icomb:'icb',lrep:'lrep',focus:'focus'};let SKC=null;const skNeed=l=>Math.round(SKN*l**1.5);
+const SKN=12,SKMAX=10,SKO={icomb:'icb',lrep:'lrep',focus:'focus',beyes:'beyes',lpat:'lpat'};let SKC=null;const skNeed=l=>Math.round(SKN*l**1.5);
 function skMig(){S.skv=2;const o=S.skx;if(!o)return;for(const k in o){let l=1,c=o[k];while(l<SKMAX&&c>=6*l){c-=6*l;l++;}let x=0;for(let i=1;i<l;i++)x+=skNeed(i);o[k]=l<SKMAX?x+Math.floor(c/(6*l)*skNeed(l)):x;}}
 function skProg(k){if(S&&!S.skv)skMig();let l=1,c=((S&&S.skx)||{})[k]||0;while(l<SKMAX&&c>=skNeed(l)){c-=skNeed(l);l++;}return [l,c,l<SKMAX?skNeed(l):0];}
 const skLv=k=>skProg(k)[0],skDm=k=>1+.06*(skLv(k)-1),skCostM=k=>1-.03*(skLv(k)-1),skDur=k=>1+.05*(skLv(k)-1),icbM=()=>skLv('icomb')>=5?1.3:1.2;
@@ -5920,6 +5971,8 @@ function skIcon(k){const id='sk_'+k;if(ICN[id])return ICN[id];const c=SKD[k].col
  else if(k==='bolt'){[[9,1],[7,4],[9,6],[6,9],[8,11],[5,14]].forEach(([x,y],i,a)=>{if(i)for(let s=0;s<6;s++){const q=s/6;p(Math.round(a[i-1][0]+(x-a[i-1][0])*q),Math.round(a[i-1][1]+(y-a[i-1][1])*q),2,1);}});}
  else if(k==='smash'){for(let i=0;i<8;i++)p(3+i,13-i,1,1,'#7a5634');p(8,2,6,5);p(8,2,6,1,'#fff');}
  else if(k==='focus'){p(7,2,2,12);p(2,7,12,2);p(6,6,4,4,'#fff');}
+ else if(k==='beyes'){for(let a=0;a<16;a++){const an=a*.39;p(8+Math.cos(an)*6|0,8+Math.sin(an)*3|0,1,1);}p(6,6,4,4);p(7,7,2,2,'#fff');}
+ else if(k==='lpat'){p(3,12,10,2,'#7a5634');p(5,4,6,8);p(6,5,4,1,'#fff');}
  else if(k==='rage'){blob(g,8,10,4,4,c);p(6,3,2,5);p(9,4,2,4);p(7,1,1,3,'#ffd24a');}
  else if(k==='roar'){for(let r=2;r<8;r+=2)for(let a=-.9;a<.9;a+=.12)p(4+Math.cos(a)*r|0,8+Math.sin(a)*r|0,1,1);p(2,7,2,2);}
  else if(k==='link'){for(let j=0;j<3;j++)for(let i=0;i<6;i++)p(2+j*4+i*.3|0,12-i*2+j,1,1);p(12,2,2,2,'#fff');}
@@ -5976,7 +6029,7 @@ function barPlace(k,i){const a=barSkills().slice(0,5),j=a.indexOf(k),prev=a[i];a
 function closeStatus(){BPICK=null;SFX.close();$('statusW').hidden=true;mode='play';hudDirty=true;}
 let STAB='main';
 function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,tip,btn,extra,id)=>`<div class="srow"${tip?` data-tip="${esc(tip)}"`:''}><span>${k}</span><span><b${id?` id="sv_${id}"`:''}>${v}</b>${extra||''}${btn||''}</span></div>`;
- const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+row(t('cls'),t('cl_'+S.cls))+(S.cls==='aura'?row(t('auRateL'),t('auR'+auR())):'')+(dvOn()?row(t('dvL'),t('dvRow',{g:t('godN_'+S.dv.g),n:Math.ceil((S.dv.until-Date.now())/60000)})):'')+(S.cls==='smith'&&(!S.sec||S.sec==='smith')?'':row(t('secL'),S.sec?t('sec_'+S.sec):t('none')))+(S.bank?row(t('bankL'),S.bank.toLocaleString('en')):'')+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
+ const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+row(t('cls'),t('cl_'+S.cls))+(S.cls==='aura'?row(t('auRateL'),t('auR'+auR())):'')+(dvOn()?row(t('dvL'),t('dvRow',{g:t('godN_'+S.dv.g),n:Math.ceil((S.dv.until-Date.now())/60000)})):'')+(patOn()?row(t('lpatL'),t('lpatRow',{n:Math.ceil((S.pat1-Date.now())/60000)})):'')+(S.cls==='smith'&&(!S.sec||S.sec==='smith')?'':row(t('secL'),S.sec?t('sec_'+S.sec):t('none')))+(S.bank?row(t('bankL'),S.bank.toLocaleString('en')):'')+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
  h+=`<div class="ssec">${t('basic')}<span class="sptc${S.pts>0?' on':''}">${t('pts',{n:S.pts})}</span></div><div class="sgrid">`+['str','sta','agi','int','dex'].map(k=>row(t(k),stat(k),t('t'+k),S.pts>0?`<button data-stat="${k}">+</button>${S.pts>=5?`<button class="p5" data-stat="${k}" data-n="5">+5</button>`:''}${TOUCH&&S.pts>5?`<button class="p5" data-stat="${k}" data-n="all">${t('ptsAllB')}</button>`:''}`:'',S.bonus?` <em>(+${S.bonus})</em>`:'',k)).join('')+'</div>';
  if(S.respec>0)h+=`<div class="note"><button data-respec="1" data-tip="${esc(t('respecD'))}">${t('respecUse',{n:S.respec})}</button></div>`;
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
@@ -6406,7 +6459,7 @@ function update(dt){
  if(P.food<20&&!P.hungryT){P.hungryT=true;toast(t('hungry'),'warn');}if(P.food>=25)P.hungryT=false;
  if(pain&&!P.painT){P.painT=true;toast(t('pain'),'warn');}if(!pain)P.painT=false;
  // monsters
- tfTick(dt);tlTick(dt);c2Tick(dt);phTick(dt);rgTick(dt);necTick(dt);hcTick(dt);fbTick(dt);dvTick(dt);brTick(dt);epTick();const safe=!!inTown(P.x,P.y);
+ tfTick(dt);tlTick(dt);c2Tick(dt);phTick(dt);rgTick(dt);necTick(dt);hcTick(dt);fbTick(dt);dvTick(dt);lpTick(dt);eyTick(dt);brTick(dt);epTick();const safe=!!inTown(P.x,P.y);
  for(const m of mons){try{
   const b=MT[m.type];monVox(m,b,dt);
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
