@@ -58,14 +58,14 @@ test('the whole chain: every story quest is reachable in order for any class, an
     await g.step(3);
     const r = await g.eval(() => {
       const G = window.__G, S = G.S, M = window.__GMS, o = { order: [] };
-      S.cls = 'mage'; S.lv = 460; G.gainXP(1);
+      S.cls = 'mage'; S.lv = 480; G.gainXP(1);
       for (const C of M.MSC) { M.s().i[C.k] = 1; for (const id of C.q) { const av = Object.keys(G.QD).filter((q) => G.QD[q].ms && !S.qs[q]); o.order.push(G.QD[id].ms ? av[0] : id); G.acceptQ(id); S.qs[id].c = G.QD[id].obj.n; G.completeQ(id); } }
       o.cur = M.cur(); o.hud = M.hud(); o.done = Object.keys(M.s().d).sort();
       return o;
     });
-    assert.deepEqual(r.order, ['gj1', 'gj2', 'gj3', 'gj4', 'gj5', 'gj6', 'gj7', 'gj8', 'gj9', 'asm', 'gj10', 'gj11', 'gj12', 'gj13']);
+    assert.deepEqual(r.order, ['gj1', 'gj2', 'gj3', 'gj4', 'gj5', 'gj6', 'gj7', 'gj8', 'gj9', 'asm', 'gj10', 'gj11', 'gj12', 'gj13', 'gj14', 'gj15', 'gj16', 'gj17']);
     assert.equal(r.cur, -1); assert.equal(r.hud, '');
-    assert.deepEqual(r.done, ['msc1', 'msc2', 'msc3', 'msc4', 'msc5', 'msc6', 'msc7']);
+    assert.deepEqual(r.done, ['msc1', 'msc2', 'msc3', 'msc4', 'msc5', 'msc6', 'msc7', 'msc8', 'msc9']);
     await g.page.waitForTimeout(2800);
     assert.match(await toasts(g), /The story continues in a coming update/);
     assert.deepEqual(g.errors, []);
@@ -131,6 +131,25 @@ test('chapters 5 to 7: Dark Bus and Asmophel, the Behen death knights, Berith at
     await g.page.waitForTimeout(500);
     await g.step(2);
     assert.match(await g.eval(() => window.__G.DL.lines.join('\n')), /army of 3,000 demons[\s\S]*Defeat 30 demons/);
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});
+
+test('chapters 8 and 9: Jishuka sends you after the divine beasts, then Piaro gathers the raid on Belial', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g);
+    await g.step(3);
+    await g.eval(() => { const G = window.__G, S = G.S; for (let i = 1; i <= 13; i++)S.qs['gj' + i] = { st: 2, c: 0 }; S.qs.asm = { st: 2, c: 0 }; for (let i = 1; i <= 7; i++) { window.__GMS.s().i['msc' + i] = 1; window.__GMS.s().d['msc' + i] = 1; } S.cls = 'archer'; S.lv = 455; G.gainXP(1); });
+    await g.step(3);
+    assert.match(await g.eval(() => document.getElementById('qtext').textContent), /Chapter 8: The Divine Beasts’ Breaths.*The Red Phoenix’s Breath from Jishuka/);
+    await g.eval(() => window.__G.talkNPC('jishuka'));
+    await g.step(2);
+    assert.match(await g.eval(() => document.getElementById('card').textContent), /Chapter 8: The Divine Beasts’ Breaths[\s\S]*East Continent contest/);
+    // chapter 9 opens with Piaro once both breaths are taken
+    await g.eval(() => { const G = window.__G, S = G.S; S.qs.gj14 = { st: 2, c: 0 }; S.qs.gj15 = { st: 2, c: 0 }; window.__GMS.s().i.msc8 = 1; window.__GMS.s().d.msc8 = 1; S.lv = 470; G.gainXP(1); });
+    await g.step(3);
+    assert.match(await g.eval(() => document.getElementById('qtext').textContent), /Chapter 9: The 32nd Great Demon.*Aslan’s Ritual from Piaro/);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });

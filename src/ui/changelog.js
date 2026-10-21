@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v120', ver: '1.20', d: '2026-10-21',
+      ar: ['القصة الرئيسية: الفصل 8 "أنفاس الوحوش الإلهية" مع جيشوكا. اهزم العنقاء الحمرا في الجنوب والنمر الأبيض في الغرب علشان القوس اللي يليق بيها',
+        'الفصل 9 "الشيطان العظيم رقم 32" مع بيارو: افتح طريق الحافة الرابعة من 20 بطل نصف تنين، وبعدين غارة بيليال مع الكل',
+        'الفصلين بيكمّلوا بعد الفصل 7 من غير ما يلمسوا تقدمك القديم، وكل فصل ليه صفحته وجُمله من الرواية'],
+      en: ['Main story: chapter 8, "The Divine Beasts’ Breaths", with Jishuka. Defeat the Red Phoenix in the south and the White Tiger in the west for a bow worthy of her',
+        'Chapter 9, "The 32nd Great Demon", with Piaro: clear the Fourth Ridge road of 20 Half-Draconian Champions, then raid Belial together',
+        'Both chapters continue after chapter 7 without touching earlier progress, each with its own page and lines from the novel'] },
     { v: '2026-10-21v119', ver: '1.19', d: '2026-10-21',
       ar: ['الشيطان العظيم رقم 32 بيليال (لفل 480) مستنية عند بوابة الجحيم في السلسلة الرابعة من جبال الفوضى، على عربيتها اللي بتجرّها كلاب الجحيم. World Boss مشترك وبترجع بعد ساعتين',
         'حقل الجحيم حواليها: مفيش تجدد صحة ولا مانا، ومفيش جرعات، وسرعة الهجوم -20%، واللي يقف جنبها بيتحرق. "درع المراية" عند 85% و60% و35%: 30% بس من ضربك بيوصلها و70% بيرجعلك',
