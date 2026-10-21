@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v122', ver: '1.22', d: '2026-10-21',
+      ar: ['إليزابيث، صانعة الإكسسوارات في مستوى الحِرفي، فتحت ورشتها في ساحة وينستون جنب البير',
+        'خانتين جداد في نافذة العتاد (U): العقد والأسورة',
+        'إليزابيث بس اللي بتعملهم، بالجواهر والميثريل والدهب: طقم الحارس (لفل 100، القطعتين +100 دفاع زي الرواية)، طقم إليزابيث الياقوت الأزرق (لفل 300، +5% ضرر و+5% سرعة هجوم)، وطقم جوهرة بيليال السودا الأسطوري (لفل 450، +10% ضرر و+10% صحة)'],
+      en: ['Elizabeth, a craftsman level accessories maker, opened her workshop in the Winston square by the well',
+        'Two new slots in the gear window (U): necklace and bracelet',
+        'Only Elizabeth makes them, for jewels, mithril and gold: the Guardian’s set (Lv 100, +100 defense for the pair, as in the novel), Elizabeth’s Sapphire set (Lv 300, +5% damage and attack speed) and the legendary Black Jewel set from Belial’s jewels (Lv 450, +10% damage and HP)'] },
     { v: '2026-10-21v121', ver: '1.21', d: '2026-10-21',
       ar: ['موسوعة الوحوش (زرار B): صفحة لكل وحش في اللعبة. اللي لسه ماقتلتهوش بيبان ضل أسود و"???"',
         'أول قتلة بتفتح صفحته (الاسم واللفل والصحة والضرر والعنصر)، و10 قتلات (أو قتلة واحدة للبوس) بتوريك اللي بيوقعه',

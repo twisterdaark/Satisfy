@@ -110,6 +110,7 @@ const FIG={
  dk_povia:{hair:'long',hc:'#c8d8a8',hl:'#e8f4d0',skin:'#d8d4c4',sk2:'#a8a494',top:'#2a5a3a',top2:'#1a3e28',sleeves:true,belt:'#8a6a3a',cape:'#1a3e28',pants:'#1a3e28',boots:'#3a2a1a'},
  dk_madra:{hair:'helm',hc:'#1a1418',hl:'#3a3038',skin:'#d8d4c4',sk2:'#a8a494',top:'#14101a',top2:'#0a080e',sleeves:true,pad:'#5a1a2a',pad2:'#3a0e1a',chest:'#2a0a14',belt:'#5a1a2a',cape:'#4a0a14',pants:'#0a080e',boots:'#14101a'},
  flenit:{hair:'short',hc:'#9a9aa2',hl:'#c8c8d0',skin:'#e8b890',sk2:'#c8946a',top:'#2a3a6a',top2:'#1a2448',collar:'#d8b04a',sleeves:true,beard:'#9a9aa2',beard2:'#74747c',belt:'#c8a050',cape:'#6a1a2a',pants:'#2a2430',boots:'#1a1418'},
+ eliz:{hair:'pony',hc:'#e8a050',hl:'#ffd08a',skin:'#f4d4b8',sk2:'#d8ae8e',top:'#7a2a5a',top2:'#521a3c',collar:'#e8c860',sleeves:true,belt:'#c8a050',pants:'#3a2430',boots:'#2a1a20'},
  sticks:{hair:'long',hc:'#e8ecd8',hl:'#ffffff',skin:'#f1d0b0',sk2:'#d0aa88',top:'#2a6a3a',top2:'#1a4a28',sleeves:true,robe:1,collar:'#e8d8a0',belt:'#c8a050',pants:'#1a4a28',boots:'#3a2a1a'},
  hayate:{hair:'short',hc:'#e8c860',hl:'#fff0a8',skin:'#f1c193',sk2:'#d3a070',top:'#e8ecf4',top2:'#b8c0d0',sleeves:true,collar:'#c8a050',beard:'#e0c058',beard2:'#b89a40',belt:'#c8a050',cape:'#2a3a7a',pants:'#2a3a5a',boots:'#3a2a1e'},
  fronz:{hair:'long',hc:'#9a9aa0',hl:'#c8c8d0',skin:'#c8946a',sk2:'#a87450',top:'#6a4a2a',top2:'#4a321c',sleeves:false,pad:'#8a8a92',pad2:'#5a5a62',beard:'#aaaab0',beard2:'#7a7a80',longBeard:1,belt:'#2a1a10',pants:'#4a321c',boots:'#2a1a10'},

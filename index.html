@@ -1018,6 +1018,7 @@ const FIG={
  dk_povia:{hair:'long',hc:'#c8d8a8',hl:'#e8f4d0',skin:'#d8d4c4',sk2:'#a8a494',top:'#2a5a3a',top2:'#1a3e28',sleeves:true,belt:'#8a6a3a',cape:'#1a3e28',pants:'#1a3e28',boots:'#3a2a1a'},
  dk_madra:{hair:'helm',hc:'#1a1418',hl:'#3a3038',skin:'#d8d4c4',sk2:'#a8a494',top:'#14101a',top2:'#0a080e',sleeves:true,pad:'#5a1a2a',pad2:'#3a0e1a',chest:'#2a0a14',belt:'#5a1a2a',cape:'#4a0a14',pants:'#0a080e',boots:'#14101a'},
  flenit:{hair:'short',hc:'#9a9aa2',hl:'#c8c8d0',skin:'#e8b890',sk2:'#c8946a',top:'#2a3a6a',top2:'#1a2448',collar:'#d8b04a',sleeves:true,beard:'#9a9aa2',beard2:'#74747c',belt:'#c8a050',cape:'#6a1a2a',pants:'#2a2430',boots:'#1a1418'},
+ eliz:{hair:'pony',hc:'#e8a050',hl:'#ffd08a',skin:'#f4d4b8',sk2:'#d8ae8e',top:'#7a2a5a',top2:'#521a3c',collar:'#e8c860',sleeves:true,belt:'#c8a050',pants:'#3a2430',boots:'#2a1a20'},
  sticks:{hair:'long',hc:'#e8ecd8',hl:'#ffffff',skin:'#f1d0b0',sk2:'#d0aa88',top:'#2a6a3a',top2:'#1a4a28',sleeves:true,robe:1,collar:'#e8d8a0',belt:'#c8a050',pants:'#1a4a28',boots:'#3a2a1a'},
  hayate:{hair:'short',hc:'#e8c860',hl:'#fff0a8',skin:'#f1c193',sk2:'#d3a070',top:'#e8ecf4',top2:'#b8c0d0',sleeves:true,collar:'#c8a050',beard:'#e0c058',beard2:'#b89a40',belt:'#c8a050',cape:'#2a3a7a',pants:'#2a3a5a',boots:'#3a2a1e'},
  fronz:{hair:'long',hc:'#9a9aa0',hl:'#c8c8d0',skin:'#c8946a',sk2:'#a87450',top:'#6a4a2a',top2:'#4a321c',sleeves:false,pad:'#8a8a92',pad2:'#5a5a62',beard:'#aaaab0',beard2:'#7a7a80',longBeard:1,belt:'#2a1a10',pants:'#4a321c',boots:'#2a1a10'},
@@ -1343,7 +1344,7 @@ const DUN=[{k:'zDun1',x0:232,x1:286,y0:WMH+2,y1:WMH+21},{k:'zDun2',x0:290,x1:344
 const SHRINES=[];
 // gem stats (SAT-GEM-001) and equipment sets (SAT-SET-001), defined early because gearSum runs while the first state is built.
 // A set grants the highest tier reached among the pieces worn (weapon included); hpp is a share of max health.
-const SETS={leather:{it:['larmor','lhelm','lgloves','lboots'],b:{2:{ms:.05},4:{ms:.05,as:.08}}},iron:{it:['parmor','ihelm','igloves','iboots'],b:{2:{hpp:.06},4:{hpp:.12,dm:.04}}},mith:{it:['marmor','mhelm','msword'],b:{2:{dm:.06},3:{dm:.1,as:.06}}},
+const SETS={gd:{it:['gdneck','gdbrace'],b:{2:{def:100}}},ez:{it:['ezneck','ezbrace'],b:{2:{dm:.05,as:.05}}},bj:{it:['bjneck','bjbrace'],b:{2:{dm:.1,hpp:.1}}},leather:{it:['larmor','lhelm','lgloves','lboots'],b:{2:{ms:.05},4:{ms:.05,as:.08}}},iron:{it:['parmor','ihelm','igloves','iboots'],b:{2:{hpp:.06},4:{hpp:.12,dm:.04}}},mith:{it:['marmor','mhelm','msword'],b:{2:{dm:.06},3:{dm:.1,as:.06}}},
  fo:{it:['ochelm','ocarmor','ocgloves','ocboots','ocring'],b:{3:{str:50,sta:80},5:{str:100,sta:200}}},
  em:{it:['emarmor','emhelm','emgloves','emboots'],b:{2:{hpp:.1,def:10},4:{hpp:.18,def:25}}},
  mg:{it:['mgsword','mgarmor','mghelm','mggloves','mgboots'],b:{2:{dm:.04},3:{dm:.06,hpp:.06},4:{dm:.08,hpp:.08,as:.05},5:{dm:.12,hpp:.12,as:.08}}},
@@ -3371,6 +3372,20 @@ window.__GMB={get MT(){return MT},list:mbList,need:mbNeed,ms:mbMs,seen:()=>mbSee
 function mbUp(k){if(MBX.has(k)||!MT[k])return;const n=mbK(k);if(n===1)toast(t('mbNew',{m:mbName(k)}));if(n===mbNeed(k)){toast(t('mbMsUp',{m:mbName(k),p:Math.round(mbB()*100)}),'good');SFX.click();}}
 Object.assign(STR.ar,{"kMb": "الوحوش", "mbT": "موسوعة الوحوش", "mbSumT": "اكتشفت {s}/{n} · أتقنت {m} · الإتقان: +{p}% ضرر على الوحش و-{p}% من ضربه", "mbF_all": "الكل", "mbF_seen": "المكتشفة", "mbF_boss": "البوسات", "mbF_ms": "المتقنة", "mbUnk": "لسه ماقتلتهوش. اقتله مرة علشان صفحته تتفتح.", "mbWb": "بوس عالمي", "mbBoss": "بوس", "mbEl_fire": "نار", "mbEl_thunder": "رعد", "mbEl_earth": "أرض", "mbEl_water": "مياه", "mbNoDrop": "مابيوقعش حاجة معروفة.", "mbDropAt": "اللي بيوقعه بيبان بعد {n} قتلة.", "mbLv": "لفل {l}", "mbLvS": "لف {l}", "mbStats": "الصحة {h} · الضرر {d}", "mbMsT": "متقن: +{p}% ضرر و-{p}% ضرر واخده", "mbKills": "القتلات {n}/{m} للإتقان", "mbNone": "مفيش حاجة هنا لسه.", "mbNew": "صفحة جديدة في موسوعة الوحوش: {m} (B)", "mbMsUp": "[أتقنت {m}!] +{p}% ضرر عليه و-{p}% من ضربه.", "ach_mb30": "باحث مبتدئ", "achD_mb30": "اكتشف 30 وحش في الموسوعة.", "ach_mb60": "عالم الوحوش", "achD_mb60": "اكتشف 60 وحش في الموسوعة.", "ach_mbm25": "صياد خبير", "achD_mbm25": "أتقن 25 وحش.", "tl_mbook": "عالم الوحوش", "tl_mbookD": "مكافأة الإتقان بتبقى الضعف (6%)."});
 Object.assign(STR.en,{"kMb": "Monsters", "mbT": "Monster Encyclopedia", "mbSumT": "Discovered {s}/{n} · Mastered {m} · Mastery: +{p}% damage to that monster, −{p}% damage from it", "mbF_all": "All", "mbF_seen": "Discovered", "mbF_boss": "Bosses", "mbF_ms": "Mastered", "mbUnk": "Not defeated yet. Defeat it once to open its page.", "mbWb": "World boss", "mbBoss": "Boss", "mbEl_fire": "Fire", "mbEl_thunder": "Thunder", "mbEl_earth": "Earth", "mbEl_water": "Water", "mbNoDrop": "No known drops.", "mbDropAt": "Its drops show after {n} kills.", "mbLv": "Level {l}", "mbLvS": "Lv {l}", "mbStats": "HP {h} · Damage {d}", "mbMsT": "Mastered: +{p}% damage, −{p}% damage taken", "mbKills": "Kills {n}/{m} to master", "mbNone": "Nothing here yet.", "mbNew": "New page in the Monster Encyclopedia: {m} (B)", "mbMsUp": "[You have mastered {m}!] +{p}% damage to it, −{p}% damage from it.", "ach_mb30": "Novice Researcher", "achD_mb30": "Discover 30 monsters in the encyclopedia.", "ach_mb60": "Monster Scholar", "achD_mb60": "Discover 60 monsters in the encyclopedia.", "ach_mbm25": "Expert Hunter", "achD_mbm25": "Master 25 monsters.", "tl_mbook": "Monster Scholar", "tl_mbookD": "Mastery bonuses double (6%)."});
+/* ---------------- Elizabeth's jewelry (owner 2026-10-21: Elizabeth's jewelry) ----------------
+   Elizabeth, a craftsman level accessories maker (Eat Spicy Jokbal's niece), keeps a workshop in Winston. Two new gear
+   slots, necklace (n) and bracelet (r), take what she makes: three two-piece sets (the Guardian's set gives +100
+   defense, as in the novel), paid with jewels, mithril and gold. Only she makes them; a smith cannot forge them. */
+const EZC={gdneck:30000,gdbrace:30000,ezneck:150000,ezbrace:150000,bjneck:400000,bjbrace:400000};
+const ezHas=id=>Object.entries(rcById(id).need).every(([k,n])=>((S.mats||{})[k]||0)>=n)&&S.gold>=EZC[id];
+function ezSt(id){const rc=rcById(id),it=mkItem(id,rc.fix);S.uid--;return statShort(it)+' · '+t('mbLv',{l:rc.lvr})+'<br>'+Object.entries(rc.need).map(([k,n])=>`${esc(t(k))} ${((S.mats||{})[k]||0)}/${n}`).join(' · ');}
+function ezOpts(){return Object.keys(EZC).map(id=>({l:t('oEzMake',{it:t(id)}),pr:EZC[id],ic:id,poor:!ezHas(id),st:ezSt(id),f:()=>ezMake(id)}));}
+function ezMake(id){const rc=rcById(id);if(!ezHas(id)){SFX.deny();return dialog('eliz',[t('ezNo')]);}
+ S.gold-=EZC[id];for(const [k,n] of Object.entries(rc.need))S.mats[k]-=n;const it=mkItem(id,rc.fix);S.items.push(it);SFX.coin();
+ dialog('eliz',[t(id.startsWith('bj')?'ezDoneBj':'ezDone',{it:t(id)})]);toast(t('ezGot',{it:t(id)}),'good');hudDirty=true;save(true);return it;}
+window.__GEZ={C:EZC,has:ezHas,make:ezMake,opts:ezOpts};
+Object.assign(STR.ar,{"neckS": "العقد", "braceS": "الأسورة", "eliz": "إليزابيث", "ez_hi": "اسمي إليزابيث. كلاسي صانعة إكسسوارات وأنا في مستوى الحِرفي.", "ez_i1": "قليل أوي من الحاجات اللي صعب تلاقيها زي الإكسسوارات، خصوصًا الأطقم. هات الجواهر وأنا أعملهالك من غير حظ.", "ez_i2": "العقد والأسورة من نفس الطقم مع بعض بيدّوا تأثير الطقم. لابسهم الاتنين!", "ez_i3": "ماتندهليش باسمي الحقيقي. إليزابيث وبس.", "oEzMake": "اعملي {it}", "ezNo": "الخامات أو الدهب مش كفاية. ارجعلي لما تجمعهم.", "ezDone": "خلصت {it}. شغل نضيف، صح؟", "ezDoneBj": "قطعت جوهرة بيليال السودا بنفسي. {it} جاهز.", "ezGot": "إليزابيث عملتلك {it}!", "gdneck": "عقد الحارس", "gdbrace": "أسورة الحارس", "ezneck": "عقد إليزابيث الياقوت الأزرق", "ezbrace": "أسورة إليزابيث الياقوت الأزرق", "bjneck": "عقد جوهرة بيليال السودا", "bjbrace": "أسورة جوهرة بيليال السودا", "set_gd": "طقم الحارس", "set_ez": "طقم إليزابيث", "set_bj": "طقم الجوهرة السودا"});
+Object.assign(STR.en,{"neckS": "Necklace", "braceS": "Bracelet", "eliz": "Elizabeth", "ez_hi": "My name is Elizabeth. My class is an accessories maker and I am at the craftsman level.", "ez_i1": "Few items are as hard to find as accessories, especially accessory sets. Bring me jewels and I will make them, no luck needed.", "ez_i2": "A necklace and a bracelet of the same set give its set effect together. Wear both!", "ez_i3": "Don’t call me by my real name. Just Elizabeth.", "oEzMake": "Make {it}", "ezNo": "You don’t have the materials or the gold. Come back when you do.", "ezDone": "{it} is done. Clean work, isn’t it?", "ezDoneBj": "I cut Belial’s Black Jewel myself. {it} is ready.", "ezGot": "Elizabeth made you {it}!", "gdneck": "Guardian’s Necklace", "gdbrace": "Guardian’s Bracelet", "ezneck": "Elizabeth’s Sapphire Necklace", "ezbrace": "Elizabeth’s Sapphire Bracelet", "bjneck": "Belial’s Black Jewel Necklace", "bjbrace": "Belial’s Black Jewel Bracelet", "set_gd": "Guardian’s Set", "set_ez": "Elizabeth’s Set", "set_bj": "Black Jewel Set"});
 /* ---------------- town life (owner 2026-10-20: town life) ----------------
    Horse races at Winston, dice at the inn tables and the town festival, all on the world clock (wNow), so everyone online
    shares the same race, the same dice rounds and the same festival without any new message or rules change: your race
@@ -4339,7 +4354,7 @@ const NPCS=[{id:'smith',spr:'smith',tx:22,ty:18},{id:'grid',spr:'grid',tx:17,ty:
  {id:'pedW',spr:'merchant',tx:147.5,ty:78.4,dir:3,ph:1},{id:'pedE',spr:'merchant',tx:296.5,ty:78.4,dir:3,ph:1},{id:'rcS',spr:'recruiter',tx:141.5,ty:81.4,dir:0},
  {id:'piaro',spr:'piaro',tx:283.5,ty:70.4,ph:1,clr:1},
  // the story's givers (v0.98): Sticks on the landing at the end of the Behen pier, Earl Flenitium behind Fort Taleren's wall
- {id:'stickp',spr:'sticks',tx:303,ty:257.4,ph:1},{id:'flenit',spr:'flenit',tx:464,ty:140.4,ph:1},
+ {id:'stickp',spr:'sticks',tx:303,ty:257.4,ph:1},{id:'flenit',spr:'flenit',tx:464,ty:140.4,ph:1},{id:'eliz',spr:'eliz',tx:211,ty:82.2,ph:1,dir:0},
  // Reidan, the mining town past the third belt (SAT-REIDAN-001)
  {id:'foreman',spr:'foreman',tx:553.5,ty:72.4,ph:1,dir:3},{id:'smithR',spr:'armorer',tx:532.5,ty:72.4,ph:1},{id:'merchantR',spr:'merchant',tx:526.5,ty:80.4,ph:1},{id:'innR',spr:'inn',tx:522.5,ty:93.4,ph:1},
  // Reinhardt, the capital (SAT-GUILD-001)
@@ -4412,6 +4427,9 @@ RC.push(
  {id:'ochelm',slot:'h',def:14,hpp:.1,fix:3,lvr:140,ip:['fear'],isk:['rcut'],drop:1,unlock:()=>false},
  {id:'ocarmor',slot:'a',def:34,hpp:.05,fix:3,lvr:140,drop:1,unlock:()=>false},{id:'ocgloves',slot:'g',def:10,as:.06,fix:3,lvr:140,drop:1,unlock:()=>false},
  {id:'ocboots',slot:'b',def:9,ms:.06,fix:3,lvr:140,drop:1,unlock:()=>false},{id:'ocring',slot:'k',dm:.05,hpp:.04,fix:3,lvr:140,drop:1,unlock:()=>false},
+ {id:'gdneck',slot:'n',def:8,hpp:.03,fix:2,lvr:100,need:{mith:3,topaz:1},jw:1,unlock:()=>false},{id:'gdbrace',slot:'r',def:8,ms:.03,fix:2,lvr:100,need:{mith:3,topaz:1},jw:1,unlock:()=>false},
+ {id:'ezneck',slot:'n',dm:.04,hpp:.04,fix:3,lvr:300,need:{sapph:3,diam:1,mith:10},jw:1,unlock:()=>false},{id:'ezbrace',slot:'r',as:.05,mpb:40,fix:3,lvr:300,need:{sapph:3,diam:1,mith:10},jw:1,unlock:()=>false},
+ {id:'bjneck',slot:'n',dm:.08,hpp:.06,fix:4,lvr:450,need:{bljewel:1,diam:2,mith:20},jw:1,unlock:()=>false},{id:'bjbrace',slot:'r',dm:.05,as:.07,fix:4,lvr:450,need:{bljewel:1,diam:2,mith:20},jw:1,unlock:()=>false},
  // the death knights of the Behen Archipelago (islands 61-65) leave the gear of the old legends
  {id:'lantd',slot:'w',atk:420,spd:.2,fix:3,lvr:350,ip:['bleed'],drop:1,unlock:()=>false},
  {id:'alexb',slot:'w',atk:470,spd:.25,fix:3,lvr:360,ip:['larrow'],drop:1,unlock:()=>false},
@@ -4561,7 +4579,7 @@ function weapon(){return S.items.find(i=>i.uid===S.eqW)||S.items[0];}
 function armorIt(){return S.items.find(i=>i.uid===S.eqA);}
 // equipment (SAT-EQUIP-001): every item is plain JSON in S.items (uid, id, slot, rating, stats, dur, en) so it can move to a
 // server inventory as is. Durability 0 = broken: the item still works at 30%. Enhancement +n adds 6% per level.
-const GEAR=['a','h','g','b','k'];
+const GEAR=['a','h','g','b','k','n','r'];
 function eqIt(sl){if(sl==='w')return weapon();if(sl==='a')return armorIt();const u=(S.eq||{})[sl];return u?S.items.find(i=>i.uid===u):null;}
 const isEq=i=>i.uid===S.eqW||i.uid===S.eqA||Object.values(S.eq||{}).includes(i.uid);
 function equip(i){const b=setTiers(),r=equip0(i);setNote(b);return r;}
@@ -5260,7 +5278,7 @@ const NPCT={
  abellio:{hi:'twHi_abellio',idle:()=>'twId_abellio',opts:()=>twOpts('abellio'),noGift:1},
  jessica:{hi:'twHi_jessica',idle:()=>'twId_jessica',opts:()=>twOpts('jessica'),noGift:1},
  sticks:{hi:'bhSt0',idle:()=>'bhStHi',opts:()=>sticksOpts(),noGift:1},
- stickp:{hi:'stp_hi',idle:()=>'stp_idle',noGift:1},flenit:{hi:'flen_hi',idle:()=>'flen_idle',noGift:1},
+ stickp:{hi:'stp_hi',idle:()=>'stp_idle',noGift:1},flenit:{hi:'flen_hi',idle:()=>'flen_idle',noGift:1},eliz:{hi:'ez_hi',idle:()=>['ez_i1','ez_i2','ez_i3'][Math.floor(rand()*3)],opts:()=>ezOpts(),noGift:1},
  khan:{hi:'kh_hi',idle:()=>isSm()?(rand()<.5?'kh_s1':'kh_s2'):S.ev.grid&&rand()<.5?'kh_grid':'kh_idle',opts:()=>[...secOpt('khan'),...(isSm()?[{l:t('oBuyOre'),qty:1,f:()=>buyMat('khan','ore',8)}]:[]),...svcOpts('khan')]},
  smith:{hi:'sm_hi',idle:()=>isSm()?'sm_s1':'sm_idle',opts:()=>[...secOpt('smith'),...(isSm()?[{l:t('oBuyOre'),qty:1,f:()=>buyMat('smith','ore',8)}]:[]),...svcOpts('smith')]},
  tw:{low:()=>trLine('tw'),idle:()=>trLine('tw')},
@@ -5900,12 +5918,12 @@ function openEquip(){SFX.open();mode='equip';$('equipW').hidden=false;$('hint').
 function closeEquip(){SFX.close();$('equipW').hidden=true;mode='play';}
 function eqSlot(it,ph,lbl,sl){const tip=it?itemTip(it)+`<br><small>${t('pickT',{s:t(lbl)})}</small>`:`${t(lbl)}: ${t('empty')}`;return `<div><button class="slotb ${it?'r'+it.r:''}" data-eq="${sl}" data-tip="${esc(tip)}"><img src="${icon(it?it.id:ph)}"></button><small>${t(lbl)}</small></div>`;}
 function renderEquip(){const w=weapon(),a=armorIt(),wi=w&&WSH[w.id]?w:null;
- $('eqL').innerHTML=eqSlot(eqIt('h'),'slotH','helm','h')+eqSlot(a,'slotA','armor','a')+eqSlot(eqIt('g'),'slotG','gloves','g');
- $('eqR').innerHTML=eqSlot(wi,'slotW','weapon','w')+eqSlot(eqIt('b'),'slotB','bootsS','b')+eqSlot(eqIt('k'),'slotX','acc','k');
+ $('eqL').innerHTML=eqSlot(eqIt('h'),'slotH','helm','h')+eqSlot(a,'slotA','armor','a')+eqSlot(eqIt('g'),'slotG','gloves','g')+eqSlot(eqIt('n'),'slotN','neckS','n');
+ $('eqR').innerHTML=eqSlot(wi,'slotW','weapon','w')+eqSlot(eqIt('b'),'slotB','bootsS','b')+eqSlot(eqIt('k'),'slotX','acc','k')+eqSlot(eqIt('r'),'slotR','braceS','r');
  const g=$('pview').getContext('2d');g.clearRect(0,0,16,24);g.drawImage(SH[pSpr()].canvas,0,0,16,24,0,0,16,24);weapPix(g,13,17,wi,0);
  $('eqInfo').innerHTML=`<div class="eqstats"><span>${t('atk')}<b>${atkV()}</b></span><span>${t('def')}<b>${defV()}</b></span><span>${t('cls')}<b>${t('cl_'+S.cls)}</b></span></div><div class="note">${t('wk_'+weapKind())}</div>`;}
 // clicking a gear slot opens a picker of what in the bag fits it
-const SLN={w:'weapon',a:'armor',h:'helm',g:'gloves',b:'bootsS',k:'acc'};
+const SLN={w:'weapon',a:'armor',h:'helm',g:'gloves',b:'bootsS',k:'acc',n:'neckS',r:'braceS'};
 function openPick(sl){const box=$('eqPick'),cur=eqIt(sl),pw=i=>(i.atk?iAtk(i):0)+(i.def?iDef(i):0)+(i.r||0)*.01,list=S.items.filter(i=>i.slot===sl&&(sl!=='w'||WSH[i.id])).sort((a,b)=>(b===cur)-(a===cur)||pw(b)-pw(a));SFX.open();
  let h=`<div class="ptitle"><span class="head" style="font-size:calc(var(--u)*1.7)">${t('pickT',{s:t(SLN[sl])})}</span><button class="x" data-act="closePick">✕</button></div>`;
 h+='<div class="pkl">';h+=list.length?list.map(i=>`<button class="pk${i===cur?' eq':''}" data-pick="${i.uid}" data-tip="${esc(itemTip(i))}"><img src="${icon(i.id)}"><span class="rt rt${i.r}">${esc(inm(i))}</span><small>${statShort(i)}${durOf(i)<=0?' · '+t('broken'):''}${i===cur?' · '+t('equipped'):''}</small></button>`).join(''):`<div class="note">${t('nothingFit')}</div>`;
