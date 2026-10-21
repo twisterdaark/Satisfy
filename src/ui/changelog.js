@@ -5,6 +5,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v98', ver: '0.98', d: '2026-10-21',
+      ar: ['القصة الرئيسية كملت بتلات فصول جديدة من الرواية، بصفحاتها ونوافذ مهماتها',
+        'الفصل 5، الخادم السابع (لفل 270): بيارو بيبعتك لقصر أسموفيل تهزم دارك باس، وبعدها مهمة SS بتاعة الخاين الحقيقي للفرسان الحمر بتقفل الفصل',
+        'الفصل 6، أرخبيل بيهين (لفل 400): الحكيم ستيكس مستنيك على رصيف الجسر. اهزم قاتل الشياطين أليكس على الجزيرة 62، وبعده الملك اللي ما اتهزمش مادرا على الجزيرة 66',
+        'الفصل 7، الشيطان العظيم رقم 22 (لفل 445): الإيرل فلينيتيوم ورا سور حصن تالرين. صدّ جيش التلات آلاف شيطان، وبعدين اعمل غارة على بيريث',
+        'كل فصل بيخلص بيزوّد سمعتك في القارة 2,000'],
+      en: ['The main story goes on with three new chapters from the novel, each with its pages and quest windows',
+        'Chapter 5, The Seventh Servant (Lv 270): Piaro sends you to Asmophel’s mansion to defeat Dark Bus; his SS quest, The True Traitor of the Red Knights, closes the chapter',
+        'Chapter 6, The Behen Archipelago (Lv 400): Sage Sticks waits on the bridge’s landing. Defeat Demon Slayer Alex on the 62nd island, then the Undefeated King Madra on the 66th',
+        'Chapter 7, The 22nd Great Demon (Lv 445): Earl Flenitium stands behind Fort Taleren’s wall. Push back the army of 3,000 demons, then raid Berith',
+        'Every finished chapter still raises your continent reputation by 2,000'] },
     { v: '2026-10-21v97', ver: '0.97', d: '2026-10-21',
       ar: ['تطوّر الحيوانات الأليفة: لما الحيوان يوصل لفل 20 تقدر تطوّره مرة واحدة من نافذة الحالة. بيرجع لفل 1 بشكل جديد، وميزته بتبقى الضعف، وبيحارب جنبك من أول لفل',
         'نوي بيتطوّر بحجر رعد زي الرواية: "[الممفيس ‘نوي’ نجح في التطوّر!]". فروه بيبقى دهبي وقرونه بتتقسم، وبياخد مهارة "تفريغ!!" اللي بتصعق لحد 10 وحوش قريبين',
