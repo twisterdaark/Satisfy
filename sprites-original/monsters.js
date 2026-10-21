@@ -18,7 +18,7 @@ function polish(g,W,H,out){const id=g.getImageData(0,0,W,H),d=id.data,OUT=out||'
  rim.forEach(([x,y,c])=>R(g,x,y,1,1,shade(c,.14)));o.forEach(([x,y,c])=>R(g,x,y,1,1,c));}
 
 // PER_CODE snapshot of index.html PAL @ ce29772 (body, dark, light, scale). A test checks drift.
-const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15],hwolf:['#6e6258','#4e443c','#968878',1.05],rboar:['#7a3a2a','#55261a','#a05a40',1.3],cwolf:['#c8d4e0','#8a9cb0','#eef4fa',1.1],cbear:['#d8dce4','#9aa2b0','#f4f6fa',1.6],cboar:['#4a5a3a','#323e26','#6e7e52',1.35],fboar:['#8a6a5a','#5e4a3e','#b08a78',1.2],sanju1:['#8a8a90','#5e5e66','#b4b4bc',2.4],sanju2:['#7a7a82','#52525a','#a4a4ae',2.5],sanju3:['#6a6a74','#46464e','#94949e',2.6],sanju4:['#5a5660','#3a363e','#86828e',2.8],gargoyle:['#7a7a82','#55555e','#a2a2ac',1.25],salamander:['#c8603a','#8a3a22','#e89a6a',1.3],hydra:['#3e6a4a','#264a32','#6a9a6a',1.5],ogolem:['#3e3638','#221c1e','#5e5254',1.35],aweapon:['#8a7a4e','#5a4e2e','#c8b47a',2.7],sellobu:['#3a2e4a','#241a32','#6a5a8a',1.1],foxmouse:['#d8843a','#a85a22','#f4d0a0',.6],hrabbit:['#8a7a6a','#5e5040','#b4a490',1.15,'horn'],grabbit:['#e8c040','#b08a20','#fff0a0',1,'gold'],slime:['#5ac84a','#3a8a2e','#a8f08a',1.25],mslime:['#6ad85a','#3e9a32','#b8f8a0',.75],cbat:['#4a3a5a','#2a1e36','#7a6a8a',1.1],sscorp:['#c89a5a','#8a6a36','#ecc890',1.3],mimic:['#8a5a2e','#5a3a1a','#b07a44',1.2]};
+const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15],hwolf:['#6e6258','#4e443c','#968878',1.05],rboar:['#7a3a2a','#55261a','#a05a40',1.3],cwolf:['#c8d4e0','#8a9cb0','#eef4fa',1.1],cbear:['#d8dce4','#9aa2b0','#f4f6fa',1.6],cboar:['#4a5a3a','#323e26','#6e7e52',1.35],fboar:['#8a6a5a','#5e4a3e','#b08a78',1.2],sanju1:['#8a8a90','#5e5e66','#b4b4bc',2.4],sanju2:['#7a7a82','#52525a','#a4a4ae',2.5],sanju3:['#6a6a74','#46464e','#94949e',2.6],sanju4:['#5a5660','#3a363e','#86828e',2.8],gargoyle:['#7a7a82','#55555e','#a2a2ac',1.25],salamander:['#c8603a','#8a3a22','#e89a6a',1.3],hydra:['#3e6a4a','#264a32','#6a9a6a',1.5],ogolem:['#3e3638','#221c1e','#5e5254',1.35],aweapon:['#8a7a4e','#5a4e2e','#c8b47a',2.7],sellobu:['#3a2e4a','#241a32','#6a5a8a',1.1],foxmouse:['#d8843a','#a85a22','#f4d0a0',.6],hrabbit:['#8a7a6a','#5e5040','#b4a490',1.15,'horn'],grabbit:['#e8c040','#b08a20','#fff0a0',1,'gold'],slime:['#5ac84a','#3a8a2e','#a8f08a',1.25],mslime:['#6ad85a','#3e9a32','#b8f8a0',.75],cbat:['#4a3a5a','#2a1e36','#7a6a8a',1.1],sscorp:['#c89a5a','#8a6a36','#ecc890',1.3],mimic:['#8a5a2e','#5a3a1a','#b07a44',1.2],felem:['#e8581e','#9a200c','#ffc04a',1],ielem:['#7ac8f0','#2a6aa8','#d8f4ff',1],selem:['#5a6a8a','#2a3450','#a8b8d8',1],slord:['#4a5878','#1e2640','#8a9ac0',1.9],vbat:['#6a1a2a','#3a0a14','#a83a4a',1.15]};
 const POSES=[['idle',2],['walk',4],['atk',2],['hurt',1]];
 const TIMING={idle:[.5,.5],walk:[.1,.1,.1,.1],atk:[.12,.16],hurt:[.2]};
 
@@ -107,6 +107,37 @@ function mimic(g,p,pose,f){const [B,D,L]=p,W=20,H=18,G='#e8c040',G2='#a8801a';co
  if(open){const e=pose==='hurt'?'#fff':'#ff4a2a';R(g,5,ly+1,1,1,e);R(g,14,ly+1,1,1,e);}
  return {W,H};}
 
+// Elementals (third batch, plan U125-U127): a body of fire, ice or storm cloud floating over its shadow. 30x40, anchor on the shadow
+function elemental(k){return function(g,p,pose,f){const [B,D,L]=p,W=30,H=40,AX=15;
+ const bob=pose==='walk'?[0,-1,-2,-1][f]:pose==='idle'?[0,-1][f]:pose==='hurt'?1:0,lean=pose==='atk'?(f===0?-2:3):pose==='hurt'?-2:0,cx=15+lean,cy=20+bob,t=f+(pose==='walk'?0:pose==='atk'?5:pose==='hurt'?7:9),ar=pose==='atk'&&f===1?6:0;
+ R(g,cx-6,H-1,13,1,'rgba(10,6,14,.35)');
+ if(k==='fire'){ // tongues of flame rise off a white-hot core
+  for(let i=0;i<5;i++){const x=cx-7+i*3.5,h=9+((i*5+t*3)%7),sw=Math.round(Math.sin(t*1.7+i)*2);dpoly(g,[[x-3,cy-3],[x+3,cy-3],[x+sw,cy-5-h]],i%2?D:B);if(i%2===0)dpoly(g,[[x-1,cy-4],[x+2,cy-4],[x+sw,cy-1-h]],L);}
+  ell(g,cx,cy,8,10,D);ell(g,cx,cy-1,7,9,B);ell(g,cx,cy+1,5,6,L);ell(g,cx,cy+2,3,4,'#fff4c0');
+  {const sw=Math.round(Math.sin(t*1.3)*2);dpoly(g,[[cx-5,cy+7],[cx+5,cy+7],[cx+sw,cy+19]],D);dpoly(g,[[cx-3,cy+7],[cx+3,cy+7],[cx+sw,cy+16]],B);}
+  ell(g,cx-10,cy-1+(t%2),3,2,D);ell(g,cx-10,cy-2+(t%2),2,1,B);ell(g,cx+10+ar,cy-2-ar/3,3,2,D);ell(g,cx+10+ar,cy-3-ar/3,2,1,L);
+  if(ar){ell(g,cx+15+ar,cy-4,2,2,L);R(g,cx+15+ar,cy-4,1,1,'#fff4c0');}
+  const e=pose==='hurt'?'#ffffff':'#3a0a04';R(g,cx+1,cy-5,2,2,e);R(g,cx+5,cy-5,2,2,e);R(g,cx+2,cy,4,1,shade(D,-.3));}
+ else if(k==='ice'){ // a crystal body with shards that circle it
+  for(let i=0;i<3;i++){const a=i/3*6.28+t*.7;if(Math.sin(a)>0)continue;const x=cx+Math.round(Math.cos(a)*12),y=cy-2+Math.round(Math.sin(a)*4);dpoly(g,[[x,y-3],[x+2,y],[x,y+3],[x-2,y]],D);}
+  dpoly(g,[[cx,cy-14],[cx+7,cy-6],[cx+6,cy+6],[cx,cy+12],[cx-6,cy+6],[cx-7,cy-6]],D);
+  dpoly(g,[[cx,cy-12],[cx+5,cy-6],[cx+4,cy+5],[cx,cy+10],[cx-4,cy+5],[cx-5,cy-6]],B);
+  dpoly(g,[[cx-1,cy-11],[cx+2,cy-6],[cx,cy+2],[cx-3,cy-5]],L);R(g,cx-2,cy-9,1,3,'#ffffff');
+  {const sw=Math.round(Math.sin(t*1.3));dpoly(g,[[cx-2,cy+10],[cx+2,cy+10],[cx+sw,cy+18]],D);R(g,cx+sw,cy+15,1,2,L);}
+  dpoly(g,[[cx+1,cy-23],[cx+6,cy-17],[cx+1,cy-12],[cx-4,cy-17]],D);dpoly(g,[[cx+1,cy-21],[cx+4,cy-17],[cx+1,cy-14],[cx-2,cy-17]],B);R(g,cx,cy-20,1,2,L);
+  dpoly(g,[[cx-6,cy-9],[cx-13,cy-5],[cx-9,cy+1]],D);dpoly(g,[[cx-7,cy-8],[cx-11,cy-5],[cx-9,cy-1]],B);
+  dpoly(g,[[cx+6,cy-9],[cx+13+ar,cy-6],[cx+9+ar,cy+1]],D);dpoly(g,[[cx+7,cy-8],[cx+11+ar,cy-6],[cx+9+ar,cy-1]],B);
+  const e=pose==='hurt'?'#ffffff':'#0e2a6a';R(g,cx,cy-18,1,1,e);R(g,cx+2,cy-18,1,1,e);
+  for(let i=0;i<3;i++){const a=i/3*6.28+t*.7;if(Math.sin(a)<=0)continue;const x=cx+Math.round(Math.cos(a)*12),y=cy-2+Math.round(Math.sin(a)*4);dpoly(g,[[x,y-3],[x+2,y],[x,y+3],[x-2,y]],L);}}
+ else{ // a knot of thundercloud with lightning inside it
+  for(const [dx,dy,rx,ry,c] of [[-6,2,6,5,D],[6,1,6,5,D],[0,-5,8,6,D],[-4,-1,5,4,B],[5,-2,5,4,B],[0,-6,6,4,B],[-2,-8,3,2,L],[4,-4,2,1,L]])ell(g,cx+dx+Math.round(Math.sin(t*1.1+dx)*.8),cy+dy,rx,ry,c);
+  {const sw=Math.round(Math.sin(t*1.3)*2);dpoly(g,[[cx-6,cy+5],[cx+6,cy+5],[cx+sw,cy+19]],D);dpoly(g,[[cx-3,cy+6],[cx+3,cy+6],[cx+sw,cy+15]],B);}
+  const Y='#fff27a',zz=(x,y,s,n)=>{let px=x,py=y;for(let i=0;i<n;i++){const nx=px+(i%2?s:-s),ny=py+3;dline(g,px,py,nx,ny,1,Y);px=nx;py=ny;}};
+  if((t%3)!==1||pose==='atk')zz(cx-3+(t%2)*2,cy-3,2,4);
+  ell(g,cx-10,cy,3,2,D);ell(g,cx+10+ar,cy-1-ar/3,3,2,D);
+  if(ar){zz(cx+13+ar,cy-4,2,3);dline(g,cx+14+ar,cy+4,cx+20+ar,cy+10,1,Y);}
+  const e=pose==='hurt'?'#ffffff':'#e8f6ff';R(g,cx+1,cy-5,2,1,e);R(g,cx+5,cy-5,2,1,e);}
+ return {W,H,AX};};}
 // Stone / crystal golem. 32x36, anchor (16,36). k: 'golem' | 'cgolem'
 function golem(k){return function(g,p,pose,f){const cr=k==='cgolem',mo=k==='mgolem',ob=k==='ogolem',aw=k==='aweapon',B=cr?'#7ab8d8':mo?'#5a6a4a':ob?'#3e3638':aw?'#8a7a4e':'#7a7068',D=cr?'#4a88b0':mo?'#3e4a32':ob?'#221c1e':aw?'#5a4e2e':'#544c46',L=cr?'#c8f0ff':mo?'#8a9a6a':ob?'#5e5254':aw?'#c8b47a':'#9a908a',E=cr?'#ffffff':mo?'#b8ff6a':ob?'#ff6a2a':aw?'#7af0ff':'#ffb040',W=32,H=36;
  const st=pose==='walk'?[1,0,-1,0][f]:0,bob=pose==='idle'?f:pose==='walk'&&(f%2)?-1:0,arm=pose==='atk'?(f===0?-8:4):0;const x=16,y=H;
@@ -228,7 +259,7 @@ function spider(g,p,pose,f){const [B,D,L]=p,W=34,H=18,AX=16,st=legSteps(pose,f),
  legs(D,0);
  return {W,H,AX};}
 
-const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null],trauka:[trauka,null,[230,170]],cwolf:[wolf,'cwolf'],cbear:[bear,'cbear'],cboar:[boar,'cboar'],fboar:[boar,'fboar'],sanju1:[bear,'sanju1'],sanju2:[bear,'sanju2'],sanju3:[bear,'sanju3'],sanju4:[bear,'sanju4'],gargoyle:[gargoyle,'gargoyle'],salamander:[salamander,'salamander'],hydra:[hydra,'hydra',[150,130]],ogolem:[golem('ogolem'),'ogolem'],aweapon:[golem('aweapon'),'aweapon'],sellobu:[spider,'sellobu'],foxmouse:[wolf,'foxmouse'],hrabbit:[rabbit,'hrabbit'],grabbit:[rabbit,'grabbit'],slime:[slime,'slime'],mslime:[slime,'mslime'],cbat:[bat,'cbat'],sscorp:[scorpion,'sscorp'],mimic:[mimic,'mimic']};
+const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null],trauka:[trauka,null,[230,170]],cwolf:[wolf,'cwolf'],cbear:[bear,'cbear'],cboar:[boar,'cboar'],fboar:[boar,'fboar'],sanju1:[bear,'sanju1'],sanju2:[bear,'sanju2'],sanju3:[bear,'sanju3'],sanju4:[bear,'sanju4'],gargoyle:[gargoyle,'gargoyle'],salamander:[salamander,'salamander'],hydra:[hydra,'hydra',[150,130]],ogolem:[golem('ogolem'),'ogolem'],aweapon:[golem('aweapon'),'aweapon'],sellobu:[spider,'sellobu'],foxmouse:[wolf,'foxmouse'],hrabbit:[rabbit,'hrabbit'],grabbit:[rabbit,'grabbit'],slime:[slime,'slime'],mslime:[slime,'mslime'],cbat:[bat,'cbat'],sscorp:[scorpion,'sscorp'],mimic:[mimic,'mimic'],felem:[elemental('fire'),'felem'],ielem:[elemental('ice'),'ielem'],selem:[elemental('storm'),'selem'],slord:[elemental('storm'),'slord'],vbat:[bat,'vbat']};
 
 // Build a sheet: columns = frames of the longest pose, rows = poses. Returns {canvas, W, H, anchor}.
 // Frames are drawn with a margin and cropped to the union of their pixels (+1 for the outline),

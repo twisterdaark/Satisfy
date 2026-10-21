@@ -927,6 +927,10 @@ const FIG={
  grid:{...GH,top:'#8d919b',top2:'#6a6e78',sleeves:true,belt:'#4a3424',pants:'#33323c',boots:'#4a3424'},
  smith:{hair:'short',hc:'#3a2a1e',hl:'#5a4030',skin:'#d9a070',sk2:'#b47c50',top:'#d9a070',top2:'#b47c50',sleeves:false,beard:'#3a2a1e',beard2:'#22180f',apron:'#5a3a24',apron2:'#3e2616',pants:'#3a3028',boots:'#22180f'},
  goblin:{hair:'bald',hc:'#2e4a1e',hl:'#8ac46a',skin:'#6aa84a',sk2:'#4a8030',top:'#6a5236',top2:'#4e3a24',sleeves:false,shorts:'#5a4028',pants:'#5a4028',boots:'#4a8030'},
+ vthrall:{hair:'messy',hc:'#2a2228',hl:'#4a3a44',skin:'#d8ccd8',sk2:'#b0a0b4',top:'#4a3a40',top2:'#2e2228',sleeves:false,belt:'#3a1a1a',pants:'#2a2228',boots:'#1a1418'},
+ vknight:{hair:'helm',hc:'#2a2a34',hl:'#5a5a6a',skin:'#e0d6e0',sk2:'#b8acbc',top:'#1e1a24',top2:'#120e16',sleeves:true,pad:'#5a5a6a',pad2:'#2a2a34',chest:'#8a1a2a',belt:'#120e16',cape:'#6a0a1a',pants:'#1a1620',boots:'#0e0a10'},
+ vlord:{hair:'long',hc:'#e8e4f0',hl:'#ffffff',skin:'#ece4ec',sk2:'#c4b8c8',top:'#1a0e1a',top2:'#0e060e',sleeves:true,collar:'#8a0a1a',belt:'#c8a050',cape:'#7a0a1a',pants:'#140a14',boots:'#0a060a'},
+ vcenv:{hair:'side',hc:'#3a2a3a',hl:'#5a4a5a',skin:'#e4dce4',sk2:'#bcb0c0',top:'#2a1a2a',top2:'#1a0e1a',sleeves:true,robe:1,collar:'#c8a050',belt:'#6a0a1a',cape:'#4a0a1a',pants:'#1a0e1a',boots:'#120a12'},
  gobsc:{hair:'cap',hc:'#2e4a1e',hl:'#8ac46a',cap:'#5a3a1e',skin:'#6aa84a',sk2:'#4a8030',top:'#4a5a2a',top2:'#34401c',sleeves:false,belt:'#c8a050',shorts:'#4a3a24',pants:'#4a3a24',boots:'#4a8030'},
  gchief:{hair:'helm',hc:'#cbbf9a',hl:'#efe6c8',skin:'#4f8a36',sk2:'#356a22',top:'#5a3a2a',top2:'#3e261a',sleeves:false,pad:'#8a7a5a',pad2:'#6a5a3a',belt:'#2a1a10',shorts:'#3e261a',pants:'#3e261a',boots:'#356a22'},
  cgob:{hair:'bald',hc:'#1e3a16',hl:'#5a8a3a',skin:'#4a7a3a',sk2:'#33602a',top:'#3a3a44',top2:'#26262e',sleeves:false,shorts:'#2e2a26',pants:'#2e2a26',boots:'#33602a'},
@@ -1758,6 +1762,35 @@ const asmoIn=(tx,ty)=>tx>=ASMO.x0&&tx<=ASMO.x1&&ty>=ASMO.y0&&ty<=ASMO.y1;
   if(out){if(solidT(x,y))setT(x,y,GR);continue;}setT(x,y,edge&&!(y===A.y1&&Math.abs(x-A.gx)<=1)?WL:Math.abs(x-A.gx)<=1&&y>A.y0+5?PA:GR);}
  for(let y=A.y1+2;y<=A.y1+4;y++)for(let x=A.gx-1;x<=A.gx+1;x++)setT(x,y,PA);
  const b={x:A.gx-4,y:A.y0+1,w:9,h:5,k:'hall'};b.lx=b.x;buildings.push(b);for(let y=b.y+2;y<b.y+b.h;y++)for(let x=b.x;x<b.x+b.w;x++)setT(x,y,BL);})();
+// The third batch, patch 3 (owner 2026-10-21: plan U125-U129, U132, U133, U160, U176, U179, U180, U349): the Storm Temple
+// in western Pedro, the wyvern nest east of it, and the Vampire City in Gauss with its catacombs. Physical columns.
+const STT={x0:70,x1:100,y0:200,y1:224,gy:212,cx:88,rods:[[75,204],[95,204],[75,220],[95,220]]};
+const WYN={cx:240,cy:216,rx:15,ry:10,eggs:[[236,215],[243,214],[239,218],[245,218],[234,219]]};
+const VMC={x0:630,x1:714,y0:196,y1:230,gy:212,cat:{x0:682,x1:713,y0:216,y1:229,dx:697,bx:709,by:223},env:[625,209]};
+const sttIn=(tx,ty)=>tx>=STT.x0&&tx<=STT.x1&&ty>=STT.y0&&ty<=STT.y1;
+const wynIn=(tx,ty)=>((tx-WYN.cx)/(WYN.rx+2))**2+((ty-WYN.cy)/(WYN.ry+2))**2<=1;
+const vmcIn=(tx,ty)=>tx>=VMC.x0&&tx<=VMC.x1&&ty>=VMC.y0&&ty<=VMC.y1;
+const catIn=(tx,ty)=>{const C=VMC.cat;return tx>=C.x0&&tx<=C.x1&&ty>=C.y0&&ty<=C.y1;};
+(function genP3(){
+ // the Storm Temple: a walled court of pale stone, open to the west, with a row of pillars down each side
+ {const A=STT;for(let y=A.y0-1;y<=A.y1+1;y++)for(let x=A.x0-1;x<=A.x1+1;x++){const out=x<A.x0||x>A.x1||y<A.y0||y>A.y1;if(out){if(solidT(x,y))setT(x,y,GR);continue;}
+   const edge=x===A.x0||x===A.x1||y===A.y0||y===A.y1,gate=x===A.x0&&Math.abs(y-A.gy)<=1,pil=(y===A.y0+5||y===A.y1-5)&&x>A.x0+6&&x<A.x1-6&&(x-A.x0)%4===0;
+   setT(x,y,edge&&!gate||pil?WL:PA);}
+  for(let x=A.x0-12;x<A.x0;x++)for(let y=A.gy-1;y<=A.gy+1;y++)setT(x,y,PA);}
+ // the wyvern nest: a crater of dirt in a ring of rock, open to the north
+ {const N=WYN;for(let y=N.cy-N.ry-3;y<=N.cy+N.ry+3;y++)for(let x=N.cx-N.rx-3;x<=N.cx+N.rx+3;x++){const e=((x-N.cx)/N.rx)**2+((y-N.cy)/N.ry)**2;
+   if(e<=1)setT(x,y,DR);else if(e<=1.5)setT(x,y,y<N.cy&&Math.abs(x-N.cx)<=1?DR:RK);else if(solidT(x,y))setT(x,y,GR);}}
+ // the Vampire City: a black wall, the gate on the west, the high street to the catacombs, stone houses either side
+ {const V=VMC,C=V.cat;for(let y=V.y0-1;y<=V.y1+1;y++)for(let x=V.x0-1;x<=V.x1+1;x++){const out=x<V.x0||x>V.x1||y<V.y0||y>V.y1;if(out){if(solidT(x,y))setT(x,y,GR);continue;}
+   const edge=x===V.x0||x===V.x1||y===V.y0||y===V.y1,gate=x===V.x0&&Math.abs(y-V.gy)<=1;setT(x,y,edge&&!gate?WL:DR);}
+  for(let x=V.x0-8;x<V.x1;x++)for(let y=V.gy-1;y<=V.gy+1;y++)setT(x,y,PA);
+  for(const sx of [655,676])for(let y=V.y0+1;y<V.y1;y++)for(let x=sx;x<sx+2;x++)if(!catIn(x,y))setT(x,y,PA);
+  const H=[{x:634,y:199,w:7,h:5,k:'armory'},{x:644,y:198,w:8,h:6,k:'tower'},{x:659,y:199,w:7,h:5,k:'armory'},{x:667,y:198,w:7,h:6,k:'tower'},{x:682,y:199,w:8,h:5,k:'armory'},{x:693,y:198,w:9,h:6,k:'tower'},{x:705,y:199,w:7,h:5,k:'armory'},
+   {x:634,y:217,w:7,h:5,k:'tower'},{x:644,y:218,w:8,h:5,k:'armory'},{x:659,y:217,w:7,h:6,k:'tower'},{x:667,y:218,w:7,h:5,k:'armory'}];
+  H.forEach(b=>{b.lx=b.x;buildings.push(b);for(let y=b.y+2;y<b.y+b.h;y++)for(let x=b.x;x<b.x+b.w;x++)setT(x,y,BL);});
+  // the catacombs: a crypt of rough stone in the south-east corner, entered from the high street
+  for(let y=C.y0;y<=C.y1;y++)for(let x=C.x0;x<=C.x1;x++){const edge=x===C.x0||y===C.y0,door=y===C.y0&&Math.abs(x-C.dx)<=1;setT(x,y,edge&&!door?CW:CF);}
+  for(let y=C.y0+3;y<C.y1-1;y+=4)for(let x=C.x0+4;x<C.x1-4;x+=6)setT(x,y,CW);}})();
 for(let x=0;x<MW;x++)for(const y of [82,83])if(at(x,y)===TR)setT(x,y,PA);
 // terrain from sprites-original/tiles.js: whole map in one pass, trees registered for live drawing as before
 for(let y=-NR;y<MH;y++)for(let x=0;x<MW;x++)if(at(x,y)===TR)VT.push(vtree(x,y,mulberry32(x*73856093^y*19349663)));   // the tiles themselves are painted per chunk (chunkLayer)
@@ -1793,7 +1826,7 @@ const FURNS=buildings.filter(b=>b.k==='forge').map(b=>({x:b.x*TS+10,y:(b.y+2)*TS
 // Players list materials and potions at the Reinhardt auction house and buy what others listed. The listings and the
 // earnings waiting for each seller are shared world state (WS.auction), so online every player trades on one board.
 // Offline, merchants from across the continent keep a few listings up, and buyers come for yours sooner the fairer the price.
-const AUK=['diam','ruby','topaz','emer','sapph','mith','mstone','estone','dscale','brphx','brdrg','brtig','brtor','bljewel','blhorn','gfish','sfish','fish','bherb','herb','leather','ore','wood','hpot','mpot'],AUFEE=.05;
+const AUK=['diam','ruby','topaz','emer','sapph','mith','mstone','estone','dscale','brphx','brdrg','brtig','brtor','bljewel','blhorn','fess','iess','sess','bvial','wegg','gfish','sfish','fish','bherb','herb','leather','ore','wood','hpot','mpot'],AUFEE=.05;
 const auMarket=k=>k==='hpot'?60:k==='mpot'?70:Math.round((MATP[k]||5)*2);
 const auHave=k=>k==='hpot'||k==='mpot'?S[k]||0:S.mats[k]||0;
 const auTake=(k,n)=>{if(k==='hpot'||k==='mpot')S[k]-=n;else S.mats[k]-=n;},auGive=(k,n)=>{if(k==='hpot'||k==='mpot')S[k]=(S[k]||0)+n;else addMat(k,n);};
@@ -3044,7 +3077,7 @@ function epDone(id){const q=QD[id];if(!q||!q.gr)return;crepAdd(q.gr==='SS'?3000:
  setTimeout(()=>{announce(t('epClrN',{n:t('pname'),g:q.gr,q:qName(id)}));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!netId)return;NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:'epClrN',p:{f:EPQ.indexOf(id)}});},2400);}
 function epNewsIn(m){const id=EPQ[m.p&&m.p.f|0];if(!id)return;announce(t('epClrN',{n:Satisfy.chat.clean(m.h,24)||'?',g:QD[id].gr,q:qName(id)}));SFX.notice();}
 // Irene, by the altar of Yatan's ruins: seen only by a player on the quest
-const epVis=o=>o.qv?epAct(o.qv)&&!qReady(o.qv):true;
+const epVis=o=>o.p3?p3Vis(o):o.qv?epAct(o.qv)&&!qReady(o.qv):true;
 function epInit(){if(SHRINES.some(o=>o.k==='irene'))return;const mx=(YATAN.x0+YATAN.x1)>>1,ty=YATAN.y0+3;let spot=null;
  for(let r=0;r<=4&&!spot;r++)for(const dx of [3+r,-3-r])if(!solidT(mx+dx,ty)&&!solidT(mx+dx,ty-1)){spot={x:(mx+dx)*TS+8,y:ty*TS+10};break;}
  SHRINES.push({k:'irene',qv:'irn',...(spot||{x:(mx+3)*TS+8,y:ty*TS+10}),hint:'hIrene'});}
@@ -3391,7 +3424,7 @@ Object.assign(STR.en,{"kMb": "Monsters", "mbT": "Monster Encyclopedia", "mbSumT"
    Elizabeth, a craftsman level accessories maker (Eat Spicy Jokbal's niece), keeps a workshop in Winston. Two new gear
    slots, necklace (n) and bracelet (r), take what she makes: three two-piece sets (the Guardian's set gives +100
    defense, as in the novel), paid with jewels, mithril and gold. Only she makes them; a smith cannot forge them. */
-const EZC={gdneck:30000,gdbrace:30000,ezneck:150000,ezbrace:150000,bjneck:400000,bjbrace:400000};
+const EZC={gdneck:30000,gdbrace:30000,ezneck:150000,ezbrace:150000,bjneck:400000,bjbrace:400000,flneck:200000,frbrace:200000,stbrace:220000};
 const ezHas=id=>Object.entries(rcById(id).need).every(([k,n])=>((S.mats||{})[k]||0)>=n)&&S.gold>=EZC[id];
 function ezSt(id){const rc=rcById(id),it=mkItem(id,rc.fix);S.uid--;return statShort(it)+' · '+t('mbLv',{l:rc.lvr})+'<br>'+Object.entries(rc.need).map(([k,n])=>`${esc(t(k))} ${((S.mats||{})[k]||0)}/${n}`).join(' · ');}
 function ezOpts(){return Object.keys(EZC).map(id=>({l:t('oEzMake',{it:t(id)}),pr:EZC[id],ic:id,poor:!ezHas(id),st:ezSt(id),f:()=>ezMake(id)}));}
@@ -3936,7 +3969,7 @@ let WXF=null,wxP=[],wxBolt=4,wxFlash=0,wxAg=1,wxLast=null;
 function wxNow(){if(WXF)return WXF;const sl=Math.floor(wNow()/WXS); // SAT-ONLINE-044: the server's clock online, so the weather is the same for everyone
 return WXT[((sl*40503)>>>0)%WXT.length];}
 const outdoors=()=>!!(P&&P.y<WMH*TS);
-function wxHere(){const w=wxNow();if(!outdoors())return 'clear';if(P.y<NWALL*TS)return 'snow';   // the Chaos Mountains: a blizzard all year
+function wxHere(){const w=wxNow();if(!outdoors())return 'clear';if(p3Storm())return 'storm';if(P.y<NWALL*TS)return 'snow';   // the Chaos Mountains: a blizzard all year
  if((w==='rain'||w==='storm')&&snowAt(P.x/TS|0,P.y/TS|0))return 'snow';return w;}
 function updateWeather(dt){if(!S||!P)return;const w=wxHere();wxAg=w==='fog'?.6:1;
  if(w!==wxLast){if(wxLast!==null&&w!=='clear')toast(t('wx_'+w));wxLast=w;}
@@ -4376,6 +4409,18 @@ const MT={
  sscorp:{lv:[105,112],hp:52000,dmg:1700,spd:48,xp:3900,gold:45,aggro:90,r:8,oy:18,drop:[['leather',.5],['ruby',.02]]},
  mimic:{lv:[70,72],hp:14000,dmg:420,spd:46,xp:1600,gold:250,aggro:90,r:8,oy:20,drop:[['mstone',.8],['emer',.08],['ruby',.05]]},
  gobsc:{lv:[10,13],hp:520,dmg:55,spd:56,xp:60,gold:5,aggro:120,r:6,oy:28,drop:[['mstone',.2]]},
+ // the third batch, patch 3 (v1.30): elementals, the Storm Lord, wyverns, drakes and their queen, the vampires of the Vampire City
+ felem:{lv:[205,212],hp:520000,dmg:5000,spd:46,xp:31000,gold:130,aggro:130,r:8,oy:34,drop:[['fess',.35],['mstone',.6]]},
+ ielem:{lv:[205,212],hp:560000,dmg:4800,spd:42,xp:31000,gold:130,aggro:130,r:8,oy:36,drop:[['iess',.35],['mstone',.6]]},
+ selem:{lv:[220,228],hp:640000,dmg:5600,spd:54,xp:36000,gold:150,aggro:140,r:8,oy:34,drop:[['sess',.35],['mstone',.7]]},
+ slord:{lv:[240,240],hp:30000000,dmg:9000,spd:44,xp:2400000,gold:40000,aggro:170,r:14,oy:64,boss:1,leash:200,slam:14000,slamR:60,wb:1800,drop:[['sess',10],['mith',6],['mstone',10]]},
+ wyvern:{lv:[230,240],hp:700000,dmg:6000,spd:62,xp:38000,gold:150,aggro:150,r:10,oy:30,drop:[['leather',1.2],['dscale',.04]]},
+ drake:{lv:[250,262],hp:950000,dmg:7000,spd:46,xp:46000,gold:180,aggro:110,r:11,oy:22,drop:[['leather',1.4],['dscale',.06]]},
+ wqueen:{lv:[275,275],hp:40000000,dmg:11000,spd:56,xp:3200000,gold:50000,aggro:170,r:16,oy:56,boss:1,leash:240,slam:16000,slamR:64,wb:1800,adds:'wyvern',drop:[['dscale',6],['wegg',2],['mith',8],['mstone',12]]},
+ vthrall:{lv:[262,272],hp:1000000,dmg:7400,spd:58,xp:42000,gold:200,aggro:120,r:6,oy:28,drop:[['bvial',.25],['mstone',.8]]},
+ vknight:{lv:[278,288],hp:1500000,dmg:8800,spd:52,xp:52000,gold:260,aggro:140,r:6,oy:30,sc:1.1,drop:[['bvial',.35],['mith',.3]]},
+ vlord:{lv:[300,300],hp:60000000,dmg:13000,spd:60,xp:5000000,gold:80000,aggro:180,r:7,oy:36,boss:1,leash:200,slam:20000,slamR:56,wb:3600,sc:1.4,adds:'vbat',drop:[['bvial',8],['mith',10],['diam',1],['blue',1]]},
+ vbat:{lv:[260,264],hp:300000,dmg:4000,spd:84,xp:9000,gold:20,aggro:160,r:5,oy:30,drop:[]},
  lizw:{lv:[300,300],hp:5000000,dmg:9000,spd:50,xp:900000,gold:0,aggro:170,r:8,oy:38,boss:1,leash:420,slam:16000,slamR:50,sc:1.3,drop:[]},
  gcrown:{lv:[380,380],hp:3000000,dmg:15000,spd:46,xp:200000,gold:0,aggro:150,r:8,oy:40,sc:1.4,bhm:.25,drop:[]},
  tlord:{lv:[440,440],hp:9000000,dmg:20000,spd:48,xp:2000000,gold:0,aggro:170,r:10,oy:46,boss:1,leash:420,slam:30000,slamR:56,sc:1.7,regen:.01,drop:[]},
@@ -4523,7 +4568,7 @@ const NPCS=[{id:'smith',spr:'smith',tx:22,ty:18},{id:'grid',spr:'grid',tx:17,ty:
  {id:'pedW',spr:'merchant',tx:147.5,ty:78.4,dir:3,ph:1},{id:'pedE',spr:'merchant',tx:296.5,ty:78.4,dir:3,ph:1},{id:'rcS',spr:'recruiter',tx:141.5,ty:81.4,dir:0},
  {id:'piaro',spr:'piaro',tx:283.5,ty:70.4,ph:1,clr:1},
  // the story's givers (v0.98): Sticks on the landing at the end of the Behen pier, Earl Flenitium behind Fort Taleren's wall
- {id:'stickp',spr:'sticks',tx:303,ty:257.4,ph:1},{id:'flenit',spr:'flenit',tx:464,ty:140.4,ph:1},{id:'eliz',spr:'eliz',tx:211,ty:82.2,ph:1,dir:0},
+ {id:'stickp',spr:'sticks',tx:303,ty:257.4,ph:1},{id:'flenit',spr:'flenit',tx:464,ty:140.4,ph:1},{id:'eliz',spr:'eliz',tx:211,ty:82.2,ph:1,dir:0},{id:'vcenv',spr:'vcenv',tx:625,ty:209.4,ph:1,dir:2},
  // Reidan, the mining town past the third belt (SAT-REIDAN-001)
  {id:'foreman',spr:'foreman',tx:553.5,ty:72.4,ph:1,dir:3},{id:'smithR',spr:'armorer',tx:532.5,ty:72.4,ph:1},{id:'merchantR',spr:'merchant',tx:526.5,ty:80.4,ph:1},{id:'innR',spr:'inn',tx:522.5,ty:93.4,ph:1},
  // Reinhardt, the capital (SAT-GUILD-001)
@@ -4599,6 +4644,7 @@ RC.push(
  {id:'gdneck',slot:'n',def:8,hpp:.03,fix:2,lvr:100,need:{mith:3,topaz:1},jw:1,unlock:()=>false},{id:'gdbrace',slot:'r',def:8,ms:.03,fix:2,lvr:100,need:{mith:3,topaz:1},jw:1,unlock:()=>false},
  {id:'ezneck',slot:'n',dm:.04,hpp:.04,fix:3,lvr:300,need:{sapph:3,diam:1,mith:10},jw:1,unlock:()=>false},{id:'ezbrace',slot:'r',as:.05,mpb:40,fix:3,lvr:300,need:{sapph:3,diam:1,mith:10},jw:1,unlock:()=>false},
  {id:'bjneck',slot:'n',dm:.08,hpp:.06,fix:4,lvr:450,need:{bljewel:1,diam:2,mith:20},jw:1,unlock:()=>false},{id:'bjbrace',slot:'r',dm:.05,as:.07,fix:4,lvr:450,need:{bljewel:1,diam:2,mith:20},jw:1,unlock:()=>false},
+ {id:'flneck',slot:'n',dm:.06,hpp:.03,fix:3,lvr:220,need:{fess:8,ruby:2,mith:10},jw:1,unlock:()=>false},{id:'frbrace',slot:'r',def:16,hpp:.06,fix:3,lvr:220,need:{iess:8,sapph:2,mith:10},jw:1,unlock:()=>false},{id:'stbrace',slot:'r',as:.07,ms:.03,fix:3,lvr:230,need:{sess:8,topaz:2,mith:10},jw:1,unlock:()=>false},
  // the death knights of the Behen Archipelago (islands 61-65) leave the gear of the old legends
  {id:'lantd',slot:'w',atk:420,spd:.2,fix:3,lvr:350,ip:['bleed'],drop:1,unlock:()=>false},
  {id:'alexb',slot:'w',atk:470,spd:.25,fix:3,lvr:360,ip:['larrow'],drop:1,unlock:()=>false},
@@ -4804,7 +4850,9 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   // the four divine beasts (second ten, major 5), after them for the same reason
   for(const k in BEAST){const B=BEAST[k],d=newMon(k,B.x*TS+8,B.y*TS+8,rf),u=WS&&WS.wb&&WS.wb[k];d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the 32nd Great Demon Belial at the gate of hell (major 7), after them for the same reason
-  {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}}
+  {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
+  // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
+  p3Spawn();}
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
  {const now=Date.now(),D=(S&&S.mrt)||{};for(const m of mons){const u=D[mobKey(m)];if(u>now){m.dead=true;m.dying=0;m.rt=(u-now)/1000;}}}
@@ -4973,7 +5021,7 @@ const monY=m=>m.y-(m.type==='guardian'?18:m.type==='gchief'?10:4);
 // one hit on one monster; returns 0 (no effect), 1 (hit) or 2 (crit)
 function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}
  if(m.type==='kraugel'&&!m.st&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
- let dmg=(o.aura?auAtkV():atkV())*mul*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*dvAtk(m)*epAtk(m)*(S.tl.blslay&&DEMK.has(m.type)?1.05:1)*mbAtk(m),crit=rand()<Math.min(.5,.05+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
+ let dmg=(o.aura?auAtkV():atkV())*mul*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*dvAtk(m)*epAtk(m)*(S.tl.blslay&&DEMK.has(m.type)?1.05:1)*mbAtk(m),crit=rand()<Math.min(.5,.05+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -4986,7 +5034,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,m
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(burn)vfx('fire',m.x,my);if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
  if(burn&&!S.burnSeen){S.burnSeen=1;toast(t('burn'),'good');}else if(burn)num(m.x,my-18,lang==='ar'?'لهب!':'FLAME','#ff9a2a',false);
- c2Hit(m,o);p2Hit(m,o);rgHit(m,o);hcHit(m,o);fbHit(m,o);brHit(m,dmg);epHit(m);if(!netHit(m,dmg)&&m.hp<=0)killMon(m);return crit||burn?2:1;}
+ c2Hit(m,o);p2Hit(m,o);p3Hit(m,dmg);rgHit(m,o);hcHit(m,o);fbHit(m,o);brHit(m,dmg);epHit(m);if(!netHit(m,dmg)&&m.hp<=0)killMon(m);return crit||burn?2:1;}
 function tryAttack(ax,ay,mul){
  if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);if(PVP)pvpSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
@@ -5023,7 +5071,7 @@ function hurtPlayer(d,ml,src){return asMe(()=>hurtPlayer0(d,ml,src));}
 function hurtPlayer0(d,ml,src){if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(rgEvade(src)||hcEvade(src))return 0;if(src&&src.dmul)d*=src.dmul;if(src&&src.type)P.lastSrc=src.type;if(S.tl.hking&&src&&HKV.has(src.type))d*=.85;
  if(P.qm>0&&rand()<.3){numP(-20,t('ipEvade'),'#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
- d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,2.2)*150/(150+defV())*rlDef(src)));d=p2Hurt(c2Hurt(d,src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=bthHurt(d,src);d=dmHurt(d,src);d=mbHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
+ d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,2.2)*150/(150+defV())*rlDef(src)));d=p3Hurt(p2Hurt(c2Hurt(d,src),src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=bthHurt(d,src);d=dmHurt(d,src);d=mbHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
  if(P.guard&&src){const sx=src.x-P.x,sy=src.y-P.y,sl=Math.hypot(sx,sy)||1;
   const GK=S.cls==='gknight';if(P.fort>0||(sx*P.gx+sy*P.gy)/sl>-.15){const ang=Math.atan2(sy,sx),bx=P.x+sx/sl*10,by=P.y-8+sy/sl*10;vfx('block',bx,by,{angle:ang});
    if(!src.hv&&P.gT<(GK?.18:.12)*clamp(1-((ml||S.lv)-S.lv)*.015,.6,1)){vfx('crit',bx,by);hcParry();qEvent('block','guard');numP(-24,t('parry'),'#9fe3ff',false);SFX.crit();P.inv=.35;P.gd=Math.min(100,P.gd+15);
@@ -5063,7 +5111,7 @@ function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh)(b.drop||[]).forEach(([k,p])=>{if(rand()<p)addMat(k,1);});
  if(m.lv>=20&&!m.tmp){if(b.boss)addMat('estone',1+(m.lv/50|0));else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
- crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
+ crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
  if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;annW('annGuard',{lv:S.lv});}giveTitle('forest');S.raid=0;}
  if(m.type==='gchief'){shake=.3;giveTitle('chief');}
  if((S.kills.rabbit||0)+(S.kills.goblin||0)>=40)giveTitle('hunter');
@@ -5241,6 +5289,10 @@ const QD={
  c2m:{by:'ta',lv:30,from:['archer'],mst:['bow',4],obj:{t:'kill',it:'cgob',n:25,wk:'bow'},xp:9000,gold:400,promo:'bowmaster'},
  c2g:{by:'tm',lv:30,from:['mage'],mst:['staff',4],obj:{t:'kill',it:'cgob',n:20,wk:'staff'},xp:9000,gold:400,promo:'bmage'},
  c2w:{by:'tm',lv:30,from:['mage'],mst:['staff',4],obj:{t:'kill',it:'gshaman',n:15,wk:'staff'},xp:9000,gold:400,promo:'warlock'},
+ // the Vampire Covenant (third batch, patch 3)
+ vc1:{by:'vcenv',lv:255,obj:{t:'kill',it:'vthrall',n:30},xp:1500000,gold:20000},
+ vc2:{by:'vcenv',pre:'vc1',lv:260,obj:{t:'have',it:'bvial',n:10,take:1},xp:2000000,gold:20000},
+ vc3:{by:'vcenv',pre:'vc2',lv:280,obj:{t:'kill',it:'vlord',n:1},xp:5000000,gold:100000},
  // churches (major 7): the Priest vows at Cassus (no chat and no food until done), the Paladin road patrol
  cp:{by:'cassus',lv:10,obj:{t:'pray',it:'altar',n:5},xp:900,cls:'priest',item:'staff'},
  c2p:{by:'cassus',lv:25,from:['gknight','priest'],mst:['melee',2],obj:{t:'kill',it:'outlaw',n:10},xp:9000,gold:400,promo:'paladin'},
@@ -5455,7 +5507,7 @@ const NPCT={
  abellio:{hi:'twHi_abellio',idle:()=>'twId_abellio',opts:()=>twOpts('abellio'),noGift:1},
  jessica:{hi:'twHi_jessica',idle:()=>'twId_jessica',opts:()=>twOpts('jessica'),noGift:1},
  sticks:{hi:'bhSt0',idle:()=>'bhStHi',opts:()=>sticksOpts(),noGift:1},
- stickp:{hi:'stp_hi',idle:()=>'stp_idle',noGift:1},flenit:{hi:'flen_hi',idle:()=>'flen_idle',noGift:1},eliz:{hi:'ez_hi',idle:()=>['ez_i1','ez_i2','ez_i3'][Math.floor(rand()*3)],opts:()=>ezOpts(),noGift:1},
+ stickp:{hi:'stp_hi',idle:()=>'stp_idle',noGift:1},flenit:{hi:'flen_hi',idle:()=>'flen_idle',noGift:1},eliz:{hi:'ez_hi',idle:()=>['ez_i1','ez_i2','ez_i3'][Math.floor(rand()*3)],opts:()=>ezOpts(),noGift:1},vcenv:{hi:'vce_hi',idle:()=>'vce_idle',opts:()=>p3EnvOpts(),noGift:1},
  khan:{hi:'kh_hi',idle:()=>isSm()?(rand()<.5?'kh_s1':'kh_s2'):S.ev.grid&&rand()<.5?'kh_grid':'kh_idle',opts:()=>[...secOpt('khan'),...(isSm()?[{l:t('oBuyOre'),qty:1,f:()=>buyMat('khan','ore',8)}]:[]),...svcOpts('khan')]},
  smith:{hi:'sm_hi',idle:()=>isSm()?'sm_s1':'sm_idle',opts:()=>[...secOpt('smith'),...(isSm()?[{l:t('oBuyOre'),qty:1,f:()=>buyMat('smith','ore',8)}]:[]),...svcOpts('smith')]},
  tw:{low:()=>trLine('tw'),idle:()=>trLine('tw')},
@@ -5583,7 +5635,7 @@ function talkNPC(id){if(id==='board')return openBoard();if(id==='auction'&&!npcK
  shopD(id,ac?ac+'_w':line);}
 function offerQ(id,av){const n=NPCT[id]||{},lines=[];if(n.hi&&!S.met[id])lines.push(n.hi);S.met[id]=1;lines.push((QD[av].gr?epLines(av)+'\n':'')+t(av+'_o')+'\n'+t('rwLine',{r:qRewards(av).join(' · ')}));return dialog(id,lines,null,[{l:t('qAccept'),f:()=>acceptQ(av)},{l:t('qDecline')}]);}
 function buyMat(who,k,g){const n=buyCount(99,g);if(!n){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g*n;S.mats[k]=(S.mats[k]||0)+n;boughtFx(k,n,g*n);shopD(who,isSm()&&who!=='merchant'?'kh_s3':'mHi');}
-const MATP={tstone:600,ruby:200,topaz:200,emer:200,sapph:200,diam:800,wood:2,ore:3,leather:4,mstone:12,estone:150,mith:30,dscale:600,brphx:5000,brdrg:5000,brtig:5000,brtor:5000,bljewel:3000,blhorn:8000,fish:4,sfish:6,gfish:45,herb:3,bherb:7};
+const MATP={tstone:600,ruby:200,topaz:200,emer:200,sapph:200,diam:800,wood:2,ore:3,leather:4,mstone:12,estone:150,mith:30,dscale:600,brphx:5000,brdrg:5000,brtig:5000,brtor:5000,bljewel:3000,blhorn:8000,fess:900,iess:900,sess:1200,bvial:400,wegg:20000,fish:4,sfish:6,gfish:45,herb:3,bherb:7};
 function gearCmp(id){const rc=rcById(id),cv=(d,f)=>{d=+d.toFixed(f||0);return d?`<span class="${d>0?'cup':'cdn'}">${d>0?'▲':'▼'}${Math.abs(d)}</span>`:'<span class="ceq">=</span>';};
  if(rc.slot==='w'){const w=weapon(),k=WSH[id].k,as=1/rc.spd;return `${t('atk')} ${rc.atk} ${cv(rc.atk-w.atk)} · ${t('spd')} <bdi>${as.toFixed(1)}${t('perS')}</bdi> ${cv(as-1/w.spd,1)} · ${t('wk_'+k)}<br>${t('vsEq')}: <b class="rt rt${w.r}">${esc(inm(w))}</b> (${t('atk')} ${w.atk})`;}
  const a=eqIt(rc.slot);if(!rc.def)return `${statShort(rc)}<br>${t('vsEq')}: ${a?`<b class="rt rt${a.r}">${esc(inm(a))}</b> (${statShort(a)})`:t('noneEq')}`;const d=a?iDef(a):0;return `${statShort(rc)} ${cv(rc.def-d)}<br>${t('vsEq')}: ${a?`<b class="rt rt${a.r}">${esc(inm(a))}</b> (${t('def')} ${d})`:t('noneEq')}`;}
@@ -5715,7 +5767,7 @@ function drawBanner(T){const o=WS.terr[T.k],x=Math.round(T.x),y=Math.round(T.y),
  if(Math.hypot(T.x-P.x,T.y-P.y)<110)TX.push({s:t(T.k)+' · '+(o.own?gName(o.own):t('gNone')),x:T.x,y:T.y-(w&&w.cap?52:42),f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:8,c:o.own?c:'#d0d4dc'});}
 // Pagma's Rare Book (SAT-PAGMA-001). Legendary classes are one per world, as in the novel: the first player to read the
 // book is Pagma's Successor, and the registry lives in shared world state so an online server can enforce it.
-function shrineAct(o){if(o.k==='god')return godAct(o);if(o.k==='irene')return ireneAct(o);if(o.k==='msword')return mswordAct();if(o.k==='sthrone')return throneAct();if(o.k==='bsoul')return soulAct();if(o.k==='yaltar')return altarAct();if(o.k==='mural'){qEvent('visit','mural');return dialog('mural',['mur1','mur2',S.cls==='pagma'?'mur3p':'mur3']);}
+function shrineAct(o){if(o.p3)return p3Act(o);if(o.k==='god')return godAct(o);if(o.k==='irene')return ireneAct(o);if(o.k==='msword')return mswordAct();if(o.k==='sthrone')return throneAct();if(o.k==='bsoul')return soulAct();if(o.k==='yaltar')return altarAct();if(o.k==='mural'){qEvent('visit','mural');return dialog('mural',['mur1','mur2',S.cls==='pagma'?'mur3p':'mur3']);}
  const L=WS.legends||(WS.legends={}),own=L.pagma;
  if(S.cls==='pagma')return dialog('pbookN',['pbDone']);
  if(own&&own.pid!==pidOf())return dialog('pbookN',[t('pbTaken',{n:own.n})]);
@@ -6016,7 +6068,7 @@ function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>$
  LIFEM.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t('lifeMD')}</small>`});});
  Object.keys(DISH).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickEat')}</small>`});});
  RSUSE.filter(k=>!DISH[k]).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickUse')}</small>`});});
- ['wood','ore','leather','mstone','estone','mith','dscale','blue','tstone','brphx','brdrg','brtig','brtor','bljewel','blhorn'].forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(STR.en[k+'D']?k+'D':'matD')}</small>`});});
+ ['wood','ore','leather','mstone','estone','mith','dscale','blue','tstone','brphx','brdrg','brtig','brtor','bljewel','blhorn','fess','iess','sess','bvial','wegg'].forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(STR.en[k+'D']?k+'D':'matD')}</small>`});});
  GEMK.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(k+'D')}</small>`});});
  S.arrows.forEach((n,r)=>{if(n)a.push({k:'arrows',n,r,tip:`<b class="rt rt${r}">${t('arrows')}</b><br>${t('r'+r)} · ${ARROWG[r]}G`});});
  S.items.forEach(i=>{if(WSH[i.id]||(i.slot!=='w'&&i.slot!=='x')){const on=isEq(i);a.push({k:i.id,n:1,r:i.r,it:i,eq:on,tip:itemTip(i)+`<br><small>${on?t('eqMark'):t('clickEquip')}</small>`});}});
@@ -6595,7 +6647,7 @@ function sahZone(tx,ty){const T=TITAN,B=BUTIN,R=ROLL,A=ABYSS;
  if(ty>96&&tx<854)return 'zDran';
  if(asmoIn(tx,ty))return 'zAsmo';if(ty<T.y0-2&&tx>=846)return 'zSahHills';
  return tx<856&&ty<=78?'zTatur':'zSahFarm';}
-function zoneAt(x,y){if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;if(inRace(x,y))return 'zRace';return (roomAt(x,y)||{}).z||'zWin';}if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
+function zoneAt(x,y){if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;if(inRace(x,y))return 'zRace';return (roomAt(x,y)||{}).z||'zWin';}if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS,pz=p3Zone(tx,y/TS);if(pz)return pz;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
 /* fog of war (Nitro's feedback): the map shows only what you have seen, in cells of FOGC tiles, saved in S.fog. A paper map
    (sold at inns) draws the whole land in sepia, but no monsters, people or quests where you haven't been yourself. */
 const FOGC=8,FOGW=Math.ceil(MW/FOGC),FOGH=Math.ceil((WMH+NR)/FOGC);let FOG=null,fogT=0,fogV=0;
@@ -6934,7 +6986,7 @@ function update(dt){
  if(TSV&&walk&&!(P.stun>0)){ix=TSV.x;iy=TSV.y;tsf=Math.max(.45,Math.min(1,Math.hypot(ix,iy)*1.3));}
  if(FOLLOW){if(ix||iy)folStop('folOff');else if(walk&&!(P.stun>0)&&!(P.dash>0)){const v=folDir(dt);if(v){ix=v[0];iy=v[1];}}} // SAT-ONLINE-068: your own keys stop it
  if(P.dash>0){P.dash-=dt;move(P,P.dx*230*dt,P.dy*230*dt,4);P.trail.push({x:P.x,y:P.y,dir:P.dir,frame:P.frame,t:.22,r:P.ride?myMt():0});}
- else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(S.tl.legend?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*(1+Math.min(.3,gearSum('ms')))*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1);move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
+ else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(S.tl.legend?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*p3Spd()*(1+Math.min(.3,gearSum('ms')))*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1);move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
  else P.frame=0;
  if(P.guard)P.dir=Math.abs(P.gx)>Math.abs(P.gy)?(P.gx>0?2:3):(P.gy>0?0:1);
  if(K.atk&&inp){const wk=weapKind(),v=(TOUCH&&tAim((wk==='bow'||wk==='staff')&&!hcMelee()?170:44))||[[0,1],[0,-1],[1,0],[-1,0]][P.dir];tryAttack(v[0],v[1]);}
@@ -6961,7 +7013,7 @@ function update(dt){
  if(P.food<20&&!P.hungryT){P.hungryT=true;toast(t('hungry'),'warn');}if(P.food>=25)P.hungryT=false;
  if(pain&&!P.painT){P.painT=true;toast(t('pain'),'warn');}if(!pain)P.painT=false;
  // monsters
- tfTick(dt);tlTick(dt);c2Tick(dt);p2Tick(dt);phTick(dt);rgTick(dt);necTick(dt);hcTick(dt);fbTick(dt);dvTick(dt);lpTick(dt);eyTick(dt);brTick(dt);epTick();const safe=!!inTown(P.x,P.y);
+ tfTick(dt);tlTick(dt);c2Tick(dt);p2Tick(dt);p3Tick(dt);phTick(dt);rgTick(dt);necTick(dt);hcTick(dt);fbTick(dt);dvTick(dt);lpTick(dt);eyTick(dt);brTick(dt);epTick();const safe=!!inTown(P.x,P.y);
  for(const m of mons){try{
   const b=MT[m.type];monVox(m,b,dt);
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
@@ -7103,7 +7155,7 @@ function monAct(m,b,AI,dx,dy,d,mr,dt){m.atkT=Math.max(0,(m.atkT||0)-dt);
 }
 // thrown rocks and knives
 function updateEProj(dt){eproj=eproj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.t<=0||solidT(p.x/TS|0,(p.y+8)/TS|0)){vfx('dust',p.x,p.y+6,{n:3});return false;}
- if(mode!=='dead'&&Math.hypot(P.x-p.x,P.y-8-p.y)<8){hurtPlayer(MT[p.m.type].dmg*p.mv.mul,p.m.lv,{x:p.x,y:p.y+8,dmul:p.m.dmul});return false;}return true;});}
+ if(mode!=='dead'&&Math.hypot(P.x-p.x,P.y-8-p.y)<8){if(hurtPlayer(MT[p.m.type].dmg*p.mv.mul,p.m.lv,{x:p.x,y:p.y+8,dmul:p.m.dmul}))p3PHit(p);return false;}return true;});}
 // gates: a dark cave mouth with a rock rim outdoors; glowing stairs inside (down) or a pale shaft of light (up)
 // enhanced weapons shine like the manhwa's: a glint from +4, a coloured aura from +7 (blue, violet, gold, crimson as it climbs),
 // rising sparks from +9 and two orbiting lights at +10. Kept subtle and short-lived (Twister: too much was irritating)
@@ -7128,6 +7180,7 @@ function drawGate(g){const x=Math.round(g.x),y=Math.round(g.y),pul=.5+Math.sin(g
  ctx.restore();}
 function drawEProj(){for(const p of eproj){if(p.sp==='rock'){blob(ctx,p.x,p.y,3,3,'#6a6560');R(ctx,p.x-2,p.y-2,2,1,'#9a958f');ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(p.x-3,p.y+8,6,2);}
  else if(p.sp==='fire'){blob(ctx,p.x,p.y,3,3,'#ff8a1e');R(ctx,p.x-1,p.y-1,2,2,'#ffe08a');if(rand()<.5)fx.push({x:p.x,y:p.y,vx:0,vy:-10,t:.25,c:'#ff8a1e',fl:1});}
+ else if(P3SP[p.sp])P3SP[p.sp](p);
  else if(p.sp==='pois'){blob(ctx,p.x,p.y,3,3,'#5ab83a');R(ctx,p.x-1,p.y-1,2,2,'#d8ffb0');if(rand()<.4)fx.push({x:p.x,y:p.y,vx:0,vy:8,t:.3,c:'#7ad04a'});}
  else if(p.sp==='beam'){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.globalAlpha=.9;R(ctx,-7,-1,11,3,'#c8c0a0');R(ctx,-4,0,7,1,'#fff8d8');ctx.restore();}   // a gargoyle's petrifying beam
  else if(p.sp==='wave'){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.globalAlpha=.9;ctx.strokeStyle='#bfe0ff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(-5,0,10,-1.1,1.1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(-4,0,10,-.9,.9);ctx.stroke();ctx.restore();}
@@ -7146,7 +7199,7 @@ function drawTele(m){const b=MT[m.type],mv=m.mv;if(!mv||m.dead||m.st!=='tele')re
 
 /* ---------------- render ---------------- */
 const darkC=mk(VW,VH,()=>{}),dg=darkC.getContext('2d');
-const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15],hwolf:['#6e6258','#4e443c','#968878',1.05],rboar:['#7a3a2a','#55261a','#a05a40',1.3],cwolf:['#c8d4e0','#8a9cb0','#eef4fa',1.1],cbear:['#d8dce4','#9aa2b0','#f4f6fa',1.6],cboar:['#4a5a3a','#323e26','#6e7e52',1.35],fboar:['#8a6a5a','#5e4a3e','#b08a78',1.2],sanju1:['#8a8a90','#5e5e66','#b4b4bc',2.4],sanju2:['#7a7a82','#52525a','#a4a4ae',2.5],sanju3:['#6a6a74','#46464e','#94949e',2.6],sanju4:['#5a5660','#3a363e','#86828e',2.8],gargoyle:['#7a7a82','#55555e','#a2a2ac',1.25],salamander:['#c8603a','#8a3a22','#e89a6a',1.3],hydra:['#3e6a4a','#264a32','#6a9a6a',1.5],ogolem:['#3e3638','#221c1e','#5e5254',1.35],aweapon:['#8a7a4e','#5a4e2e','#c8b47a',2.7],sellobu:['#3a2e4a','#241a32','#6a5a8a',1.1],foxmouse:['#d8843a','#a85a22','#f4d0a0',.6],hrabbit:['#8a7a6a','#5e5040','#b4a490',1.15,'horn'],grabbit:['#e8c040','#b08a20','#fff0a0',1,'gold'],slime:['#5ac84a','#3a8a2e','#a8f08a',1.25],mslime:['#6ad85a','#3e9a32','#b8f8a0',.75],cbat:['#4a3a5a','#2a1e36','#7a6a8a',1.1],sscorp:['#c89a5a','#8a6a36','#ecc890',1.3],mimic:['#8a5a2e','#5a3a1a','#b07a44',1.2]};
+const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15],hwolf:['#6e6258','#4e443c','#968878',1.05],rboar:['#7a3a2a','#55261a','#a05a40',1.3],cwolf:['#c8d4e0','#8a9cb0','#eef4fa',1.1],cbear:['#d8dce4','#9aa2b0','#f4f6fa',1.6],cboar:['#4a5a3a','#323e26','#6e7e52',1.35],fboar:['#8a6a5a','#5e4a3e','#b08a78',1.2],sanju1:['#8a8a90','#5e5e66','#b4b4bc',2.4],sanju2:['#7a7a82','#52525a','#a4a4ae',2.5],sanju3:['#6a6a74','#46464e','#94949e',2.6],sanju4:['#5a5660','#3a363e','#86828e',2.8],gargoyle:['#7a7a82','#55555e','#a2a2ac',1.25],salamander:['#c8603a','#8a3a22','#e89a6a',1.3],hydra:['#3e6a4a','#264a32','#6a9a6a',1.5],ogolem:['#3e3638','#221c1e','#5e5254',1.35],aweapon:['#8a7a4e','#5a4e2e','#c8b47a',2.7],sellobu:['#3a2e4a','#241a32','#6a5a8a',1.1],foxmouse:['#d8843a','#a85a22','#f4d0a0',.6],hrabbit:['#8a7a6a','#5e5040','#b4a490',1.15,'horn'],grabbit:['#e8c040','#b08a20','#fff0a0',1,'gold'],slime:['#5ac84a','#3a8a2e','#a8f08a',1.25],mslime:['#6ad85a','#3e9a32','#b8f8a0',.75],cbat:['#4a3a5a','#2a1e36','#7a6a8a',1.1],sscorp:['#c89a5a','#8a6a36','#ecc890',1.3],mimic:['#8a5a2e','#5a3a1a','#b07a44',1.2],felem:['#e8581e','#9a200c','#ffc04a',1],ielem:['#7ac8f0','#2a6aa8','#d8f4ff',1],selem:['#5a6a8a','#2a3450','#a8b8d8',1],slord:['#4a5878','#1e2640','#8a9ac0',1.9],vbat:['#6a1a2a','#3a0a14','#a83a4a',1.15]};
 
 // monster sheets from sprites-original/monsters.js for the non-humanoid types; humanoids use character sheets
 const MSH={};SA.monsters.KINDS.forEach(k=>MSH[k]=SA.monsters.buildSheet(k));
@@ -7156,7 +7209,7 @@ function drawMonSheet(x,y,m){const s=MSH[m.type],[pose,f]=monPose(m),r=SA.monste
  ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(x,y,Math.max(4,s.W*sc*.3),2.5*sc,0,0,7);ctx.fill();
  ctx.save();ctx.translate(x,y);if(m.face<0)ctx.scale(-1,1);ctx.drawImage(s.canvas,r.sx,r.sy,r.sw,r.sh,dx,dy,w,h);
  if(m.hurt>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha*=.55;ctx.drawImage(s.canvas,r.sx,r.sy,r.sw,r.sh,dx,dy,w,h);}ctx.restore();}
-function drawMon(m){if(m.fake&&!m.fk){m.fk=1;ctx.save();ctx.globalAlpha*=.55;try{drawMon(m);}finally{ctx.restore();m.fk=0;}return;}if(m.type==='trauka')return drawDragon(m);if(m.type==='berith')return drawBerith(m);if(BEAST[m.type])return drawBeast(m);if(m.dorm&&m.type==='sscorp')return drawMound(m);if(m.type==='belial')return drawBelial(m);if(m.type==='bhclone')return drawClone(m);if(m.look)return drawChar(remoteSpr(m.look,0),m.x,m.y,m.face>0?2:3,m.mvd?((m.at||0)*6|0)%2:0,false,1,m);const x=Math.round(m.x),hop=m.st==='dash'?m.hop||0:m.type==='rabbit'&&m.mvd?Math.abs(Math.sin((m.at||0)*9))*3:0,y=Math.round(m.y-hop),b=MT[m.type];if(m.grdT>0){ctx.save();ctx.strokeStyle='rgba(190,230,255,.85)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y-10,11,(m.face>0?0:Math.PI)-.9,(m.face>0?0:Math.PI)+.9);ctx.stroke();ctx.restore();}if(hop>1){ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x,Math.round(m.y),b.r+1,2.5,0,0,7);ctx.fill();}if(MSH[m.type])drawMonSheet(x,y,m);
+function drawMon(m){if(m.fake&&!m.fk){m.fk=1;ctx.save();ctx.globalAlpha*=.55;try{drawMon(m);}finally{ctx.restore();m.fk=0;}return;}if(m.type==='trauka')return drawDragon(m);if(m.type==='berith')return drawBerith(m);if(BEAST[m.type])return drawBeast(m);if(m.dorm&&m.type==='sscorp')return drawMound(m);if(m.type==='belial')return drawBelial(m);if(m.type==='bhclone')return drawClone(m);if(m.look)return drawChar(remoteSpr(m.look,0),m.x,m.y,m.face>0?2:3,m.mvd?((m.at||0)*6|0)%2:0,false,1,m);const x=Math.round(m.x),hop=m.st==='dash'?m.hop||0:m.type==='rabbit'&&m.mvd?Math.abs(Math.sin((m.at||0)*9))*3:0,y=Math.round(m.y-hop),b=MT[m.type];if(m.grdT>0){ctx.save();ctx.strokeStyle='rgba(190,230,255,.85)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y-10,11,(m.face>0?0:Math.PI)-.9,(m.face>0?0:Math.PI)+.9);ctx.stroke();ctx.restore();}if(hop>1){ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x,Math.round(m.y),b.r+1,2.5,0,0,7);ctx.fill();}if(P3D[m.type]&&!MSH[m.type])p3Sheet(m.type);if(MSH[m.type])drawMonSheet(x,y,m);
  else{const sc=b.sc||0,h=Math.round(22*(sc||1));drawChar(m.vr?m.type+'~'+m.vr:m.type,x,y,m.face>0?2:3,m.mvd?((m.at||0)*6|0)%2:0,false,sc,m);if(m.type==='merman'||m.type==='smerman'){const hx=x+(m.face>0?6:-7);R(ctx,hx,y-20,1,18,'#c8b070');R(ctx,hx-2,y-22,5,1,'#e8d890');R(ctx,hx-2,y-24,1,2,'#e8d890');R(ctx,hx+2,y-24,1,2,'#e8d890');R(ctx,hx,y-25,1,3,'#e8d890');}
   const wp=MWPN[m.type];if(wp){ctx.save();ctx.translate(x,y);ctx.scale((m.face>0?1:-1)*(sc||1),sc||1);wp();ctx.restore();}}}
 // weapons in the hands of the Saharan Empire's humanoid monsters (drawn facing right, scaled with the body)
@@ -7196,7 +7249,7 @@ function render(dt){
   for(const g of DGATES){if(g.hide||g.bhg&&!['next','exit','goal','box'].includes(g.bh)||g.tw&&!['up','down','exit'].includes(g.tw))continue;if(g.x<camX-30||g.x>camX+VW+30||g.y<camY-30||g.y>camY+VH+30)continue;ents.push({y:g.y-14,f:()=>drawGate(g)});}
   for(const c of CAMPS){if(c.x<camX-30||c.x>camX+VW+30||c.y<camY-30||c.y>camY+VH+40)continue;ents.push({y:c.y-2,f:()=>drawCamp(c)});}
   if(FISH)ents.push({y:P.y+1,f:drawFish});
-  for(const o of SHRINES){if(!epVis(o))continue;if(o.x<camX-40||o.x>camX+VW+40||o.y<camY-20||o.y>camY+VH+60)continue;ents.push({y:o.y,f:()=>drawShrine(o)});}
+  for(const o of SHRINES){if(!epVis(o)||o.p3)continue;if(o.x<camX-40||o.x>camX+VW+40||o.y<camY-20||o.y>camY+VH+60)continue;ents.push({y:o.y,f:()=>drawShrine(o)});}
   if(WS)for(const T of TERR){if(T.x<camX-40||T.x>camX+VW+40||T.y<camY-20||T.y>camY+VH+60)continue;ents.push({y:T.y,f:()=>drawBanner(T)});}
   if(ESC){const E=ESC;ents.push({y:E.y,f:()=>{drawChar(E.id,E.x,E.y,E.dir,E.frame||0,E.hurtT>0&&(gTime*20|0)%2,0,E);txBar(E.x,E.y-28,16,Math.max(0,E.hp)/E.max,HPY,hpLag(E,Math.max(0,E.hp)/E.max,'hl'));}});}
   npcs.forEach(n=>{if(n.hidden||n.obj)return;ents.push({y:n.y,f:()=>{const ko=npcKO(n.id);if(ko)ctx.globalAlpha=.38;if(n.hitT>0)n.hitT-=1/60;drawChar(n.spr,n.x,n.y,n.dir,n.frame||0,n.hitT>0,0,n);ctx.globalAlpha=1;
@@ -7213,7 +7266,7 @@ function render(dt){
   if(!titleCam&&mode!=='dead'&&!P.ghost)if(PET)ents.push({y:PET.y,f:()=>drawPet(PET)});
   ents.push({y:P.y,f:()=>{P.trail.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;const am=a.r&&MOUNTS[a.r];if(am){drawHorse(a.x,a.y,a.dir,2,am);drawRider(a.x,a.y,a.dir,2,P);drawHorse(a.x,a.y,a.dir,2,am,ctx,'head');}else drawChar(pSpr(),a.x,a.y,a.dir,a.frame,false);});ctx.globalAlpha=1;const rd=P.ride&&MOUNTS[myMt()];const hf=rd&&P.rmv>0?1+((P.rgT||0)*10|0)%4:0,blk=P.inv>0&&((gTime*20|0)%2===0)&&P.dash<=0;if(rd)drawHorse(P.x,P.y,P.dir,hf,rd);const wen=(weapon()||{}).en||0;if(wen>=7)drawEnh(P.x,P.y-(rd?9:0),wen,0);if(rd){if(!blk)drawRider(P.x,P.y,P.dir,hf,P);drawHorse(P.x,P.y,P.dir,hf,rd,ctx,'head');const hm=rhpMax(S.mount),hh=rhp(S.mount);if(hh<hm&&!(RCR&&RCR.in)){R(ctx,P.x-9,P.y-37,18,3,'#000');R(ctx,P.x-8,P.y-36,16*hh/hm,1,'#e8a060');}}else{if(P.stl>0)ctx.globalAlpha=.35;if(!bmDraw(P.bmf,'me',P.x,P.y,P.dir,P.rmv>0,blk,!!P.slash))drawChar(pSpr(),P.x,P.y,P.dir,P.frame,blk,0,P);ctx.globalAlpha=1;}if(wen>=4)drawEnh(P.x,P.y-(rd?9:0),wen,1);
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(hcHand(hx,hy,P.dir,P.slash)){}else if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,w.id,w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
-  if(BHR)bhEnts(ents);if(S&&S.wis)twEnts(ents);if(S){c2Ents(ents);p2Ents(ents);phEnts(ents);necEnts(ents);hcEnts(ents);fbEnts(ents);brEnts(ents);blEnts(ents);}if(SKA)tAimEnts(ents);if(S)tlEnts(ents);if(NET&&!titleCam)netEnts(ents);}
+  if(BHR)bhEnts(ents);if(S&&S.wis)twEnts(ents);if(S){c2Ents(ents);p2Ents(ents);p3Ents(ents);phEnts(ents);necEnts(ents);hcEnts(ents);fbEnts(ents);brEnts(ents);blEnts(ents);}if(SKA)tAimEnts(ents);if(S)tlEnts(ents);if(NET&&!titleCam)netEnts(ents);}
  // one broken drawing (a stale sprite file after an update) must not hide the player and everything after it
  ents.sort((a,b)=>a.y-b.y).forEach(e=>{try{e.f();}catch(err){ctx.globalAlpha=1;gameErr(err);}});
  drawGDrop();drawEProj();proj.forEach(p=>{if(p.kind==='arrow'){const l=Math.hypot(p.vx,p.vy)||1,ux=p.vx/l,uy=p.vy/l;ctx.strokeStyle='#e8e0d0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x-ux*7,p.y-uy*7);ctx.lineTo(p.x,p.y);ctx.stroke();R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}else if(p.kind==='wave'){const a=Math.atan2(p.vy,p.vx);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.globalAlpha=.85;ctx.strokeStyle='#ffe08a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(-6,0,12,-1.1,1.1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(-5,0,12,-.9,.9);ctx.stroke();ctx.restore();}else{const f=p.kind==='fire';R(ctx,p.x-2,p.y-2,f?5:4,f?5:4,f?'#ff8a1e':'#9fd8ff');R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}});
@@ -7238,7 +7291,7 @@ function render(dt){
   if(f.coin){R(ctx,f.x-1,f.y-1,3,3,'#8a6418');R(ctx,f.x-1,f.y-1,2,2,f.c);return;}if(f.fl)ctx.globalAlpha=Math.min(1,f.t*1.5)*(.6+.4*Math.sin(f.t*40));R(ctx,f.x,f.y,f.t>.2?2:1,f.t>.2?2:1,f.c);ctx.globalAlpha=1;});
  nums.forEach(n=>TX.push({s:n.s,x:n.x,y:n.y,f:'{s}px "Press Start 2P", monospace',z:n.big?9:7,c:n.c,a:Math.min(1,n.t*2)}));
  if(COOKG&&P)drawCook();if(SEWG&&P)drawSew();if(MIXG&&P)drawMix();if(FARMG&&P)drawFarm();
- ctx.restore();drawWeather();
+ ctx.restore();drawWeather();p3Dark();
  if(P&&S&&mode!=='title'&&mode!=='lang'){const k=P.y<WH*TS&&P.x<BW*TS?clamp((P.x-49*TS)/40,0,1):0;if(k>0){dg.globalCompositeOperation='source-over';dg.clearRect(0,0,VW,VH);dg.fillStyle=`rgba(3,12,6,${.62*k})`;dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='destination-out';const px=P.x-camX,py=P.y-8-camY,g=dg.createRadialGradient(px,py,10,px,py,95);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(0,0,VW,VH);ctx.drawImage(darkC,0,0);}
   const hole=(x,y,r)=>{const g=dg.createRadialGradient(x-camX,y-camY,r*.15,x-camX,y-camY,r);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(x-camX-r,y-camY-r,r*2,r*2);};
   if(P.cc>0){ctx.globalCompositeOperation='lighter';const px=P.x-camX,py=P.y-10-camY,gl=ctx.createRadialGradient(px,py,2,px,py,50);gl.addColorStop(0,'rgba(190,230,255,.75)');gl.addColorStop(1,'rgba(90,160,255,0)');ctx.fillStyle=gl;ctx.fillRect(px-50,py-50,100,100);ctx.globalCompositeOperation='source-over';}
@@ -7335,6 +7388,96 @@ function musicTick(){if(!ac||!musicOn)return;if(!musicG){musicG=ac.createGain();
  const tr=TRACKS[mTrack],sd=60/tr.bpm/2;if(mNext<ac.currentTime-.5)mNext=ac.currentTime+.05;
  while(mNext<ac.currentTime+.2){const m=tr.mel[mStep%tr.mel.length],b=tr.bass[mStep%tr.bass.length];if(m!=null)mtone(tr.root*Math.pow(2,m/12),sd*1.8,tr.w,tr.v,mNext);if(b!=null)mtone(tr.root/2*Math.pow(2,b/12),sd*(mTrack==='boss'?1:6),mTrack==='boss'?'sawtooth':'triangle',tr.v*.8,mNext);mStep++;mNext+=sd;}}
 
+/* ---------------- the Storm Temple, the wyvern nest and the Vampire City (owner 2026-10-21: third batch, patch 3) ----------------
+   Elementals of fire (Dran Valley), ice (the glacier lakes) and storm (around the Storm Temple). Inside the temple lightning
+   strikes where you stand; the Storm Lord at its heart takes a tenth of your damage until you ground its four lightning rods
+   (E, two seconds standing still), and lightning never strikes beside a grounded rod. Wyverns and drakes guard the nest of the
+   Wyvern Queen, whose eggs you can steal. The Vampire City lies dark behind its wall: thralls, knights and the Vampire Lord in
+   the catacombs heal on what they hit. The envoy at the gate takes those who prove themselves into the Vampire Covenant.
+   Online: monsters and bosses are shared like the rest (boss timers in WS.wb); rods, eggs and the covenant are each player's
+   own, so nothing new is published. */
+const P3={rod:[0,0,0,0],ch:null,away:0,strike:[],sT:2,chill:0,ls:0,shT:0};
+const P3WB=['slord','wqueen','vlord'],P3VAMP=new Set(['vthrall','vknight','vlord','vbat']),P3WYV=new Set(['wyvern','drake','wqueen']);
+const p3S=()=>S.p3||(S.p3={egg:{}});
+function p3Zone(tx,ty){if(sttIn(tx,ty))return 'zStorm';if(wynIn(tx,ty))return 'zWyvern';if(catIn(tx,ty))return 'zCata';if(vmcIn(tx,ty))return 'zVamp';return null;}
+const p3InT=()=>!!P&&sttIn(P.x/TS,P.y/TS);
+function p3Storm(){if(!P)return false;const tx=P.x/TS,ty=P.y/TS;return tx>STT.x0-14&&tx<STT.x1+14&&ty>STT.y0-12&&ty<STT.y1+12;}
+const p3Grounded=()=>P3.rod.every(Boolean);
+const p3RodXY=i=>({x:STT.rods[i][0]*TS+8,y:STT.rods[i][1]*TS+14});
+// the new monsters, spawned last with their own dice so every older monster keeps its id and spot
+function p3Spawn(){const r=mulberry32(8803),put=(type,x0,x1,y0,y1,n,ok)=>{let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=x0+(r()*(x1-x0)|0),y=y0+(r()*(y1-y0)|0);if(sol0(x,y)||sol0(x+1,y)||ok&&!ok(x,y))continue;const m=newMon(type,x*TS+8,y*TS+8,r);m.far=1;mons.push(m);c++;}};
+ put('ielem',430,590,-50,-12,12);put('felem',782,848,150,236,12);put('selem',STT.x0-12,STT.x1+12,STT.y0-10,STT.y1+10,14);
+ put('wyvern',WYN.cx-34,WYN.cx+34,WYN.cy-20,WYN.cy+22,12);put('drake',WYN.cx-50,WYN.cx+50,WYN.cy-26,WYN.cy+24,8,(x,y)=>!wynIn(x,y));
+ put('vthrall',VMC.x0+2,VMC.cat.x0-2,VMC.y0+2,VMC.y1-2,16);put('vknight',VMC.cat.x0+2,VMC.cat.x1-2,VMC.cat.y0+2,VMC.cat.y1-1,8);put('vknight',VMC.x0+30,VMC.x1-2,VMC.y0+2,VMC.gy+2,4);
+ for(const [k,x,y] of [['slord',STT.cx,STT.gy],['wqueen',WYN.cx,WYN.cy-2],['vlord',VMC.cat.bx,VMC.cat.by]]){const d=newMon(k,x*TS+8,y*TS+8,r),u=WS&&WS.wb&&WS.wb[k];d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}}
+// wyverns and the queen are the red dragon's sheet in green, drakes the salamander's in bronze (made on first sight)
+const P3D={wyvern:{base:'trauka',f:'hue-rotate(100deg) saturate(.75) brightness(.95)',sc:.42},wqueen:{base:'trauka',f:'hue-rotate(68deg) saturate(.9) brightness(1.05)',sc:.68},
+ drake:{base:'salamander',f:'sepia(.5) saturate(1.8) hue-rotate(-20deg) brightness(.75)',sc:1.3}};
+function p3Sheet(k){const B=P3D[k],s=MSH[B.base];if(!s)return null;const c=document.createElement('canvas');c.width=s.canvas.width;c.height=s.canvas.height;const g=c.getContext('2d');g.filter=B.f;g.drawImage(s.canvas,0,0);g.filter='none';return MSH[k]={...s,canvas:c,scale:(s.scale||1)*B.sc};}
+Object.assign(AIK,{felem:'soldier',ielem:'slam',selem:'lunge',slord:'slam',wyvern:'lunge',drake:'charge',wqueen:'lunge',vthrall:'soldier',vknight:'soldier',vlord:'soldier',vbat:'lunge'});
+Object.assign(RKMV,{
+ felem:[{k:'shot',w:3,min:40,max:170,tele:.5,spd:170,mul:1,rec:.4,cd:1.8,sp:'fire'},{k:'arc',w:3,max:28,tele:.3,reach:26,arc:1.1,mul:1,rec:.3,cd:1.2},{k:'ring',w:1,max:44,tele:.7,reach:42,mul:1.3,rec:.5,cd:4}],
+ ielem:[{k:'shot',w:3,min:40,max:170,tele:.55,spd:150,mul:.9,rec:.4,cd:2,sp:'ice'},{k:'arc',w:3,max:28,tele:.32,reach:26,arc:1,mul:1,rec:.3,cd:1.3},{k:'ring',w:1,max:40,tele:.8,reach:38,mul:1.2,rec:.5,cd:5,stun:.4}],
+ selem:[{k:'blink',w:2,min:50,max:170,tele:.3,mul:1.1,rec:.35,cd:3},{k:'shot',w:3,min:40,max:180,tele:.4,spd:260,mul:1,rec:.35,cd:1.8,sp:'bolt'},{k:'arc',w:2,max:28,tele:.26,reach:26,arc:1.1,mul:1,rec:.3,cd:1.2}],
+ slord:[{k:'shot',w:3,min:40,max:220,tele:.5,spd:280,mul:1,rec:.3,cd:1.6,sp:'bolt'},{k:'ring',w:2,max:90,tele:.95,reach:80,mul:1.2,rec:.6,cd:6,stun:.6},{k:'blink',w:2,min:60,max:200,tele:.3,mul:1.3,rec:.4,cd:4},{k:'arc',w:2,max:36,tele:.34,reach:36,arc:1.2,mul:1.2,rec:.3,cd:1.4,combo:2}],
+ wqueen:[{k:'leap',w:3,min:40,max:160,tele:.5,dashT:.36,mul:1.4,rec:.55,cd:2.4},{k:'ring',w:2,max:70,tele:.8,reach:62,mul:1,rec:.5,cd:5,kb:44},{k:'arc',w:3,max:36,tele:.3,reach:34,arc:1.2,mul:1.1,rec:.3,cd:1.3,combo:2},{k:'shot',w:2,min:50,max:180,tele:.6,spd:170,mul:1.1,rec:.4,cd:3,sp:'pois'}],
+ vlord:[{k:'blink',w:3,min:40,max:180,tele:.24,mul:1.4,rec:.35,cd:2.2},{k:'arc',w:3,max:30,tele:.24,reach:30,arc:1.2,mul:1.1,rec:.3,cd:1.3,combo:3},{k:'ring',w:2,max:100,tele:.9,reach:84,mul:.8,rec:.6,cd:6,pull:40},{k:'shot',w:2,min:50,max:190,tele:.45,spd:240,mul:1.2,rec:.3,cd:2.4,sp:'blood'}]});
+Object.assign(XMOVES,{drake:[{k:'shot',w:2,min:40,max:140,tele:.6,spd:160,mul:1.1,rec:.5,cd:2.6,sp:'fire'}],vknight:[{k:'shot',w:1,min:50,max:150,tele:.5,spd:220,mul:.9,rec:.35,cd:3,sp:'blood'}]});
+Object.assign(NAMEK,{felem:'felemN',ielem:'ielemN',selem:'selemN',slord:'slordN',wyvern:'wyvernN',drake:'drakeN',wqueen:'wqueenN',vthrall:'vthrallN',vknight:'vknightN',vlord:'vlordN',vbat:'vbatN'});
+Object.assign(BEL,{felem:'fire',ielem:'water',selem:'thunder',slord:'thunder',drake:'fire'});
+Object.assign(NDROP,{vlord:[['vring',.5]],vknight:[['vring',.008]]});
+// the four rods and the five eggs are things you press E at; only you see a rod grounded or an egg taken
+STT.rods.forEach((r,i)=>{const p=p3RodXY(i);SHRINES.push({k:'p3rod',p3:1,i,x:p.x,y:p.y,hint:'hRod'});});
+WYN.eggs.forEach(([x,y],i)=>SHRINES.push({k:'p3egg',p3:1,i,x:x*TS+8,y:y*TS+10,hint:'hEgg'}));
+const p3Vis=o=>o.k!=='p3egg'||!(p3S().egg[o.i]>Date.now());
+function p3Act(o){if(o.k==='p3rod'){if(P3.rod[o.i]){toast(t('rodAlready'));return;}P3.ch={i:o.i,t:2};SFX.magic();toast(t('rodStart'));return;}
+ if(o.k==='p3egg'){p3S().egg[o.i]=Date.now()+600000;addMat('wegg',1);SFX.rare();toast(t('eggT'),'warn');vfx('dust',o.x,o.y,{n:6});
+  for(const m of mons)if(!m.dead&&P3WYV.has(m.type)&&Math.hypot(m.x-o.x,m.y-o.y)<240){m.agg=1;m.eng=4;m.prov=gTime+10;m.provU=NET?NET.uid:null;}save(true);}}
+// your damage: the Storm Lord is shielded by its charged rods
+function p3Atk(m){if(m.type==='slord'&&!p3Grounded()){if(gTime>P3.shT){P3.shT=gTime+8;toast(t('slShield'),'warn');}return .1;}return 1;}
+// the covenant's blood pact: 3% of what you deal comes back as health (at most 2% of your health a hit, 6% a second)
+function p3Hit(m,dmg){if(!S.p3||!S.p3.cov||!(dmg>0))return;const mh=maxHP(),h=Math.min(dmg*.03,mh*.02,mh*.06-P3.ls);if(h<1)return;P3.ls+=h;P.hp=Math.min(mh,P.hp+h);}
+function p3Hurt(d,src){if(d>0&&P3.ch){P3.ch=null;toast(t('rodInt'),'warn');}if(!src||!src.type)return d;
+ if(P3VAMP.has(src.type)){if(S.p3&&S.p3.cov)d=Math.max(1,Math.round(d*.85));if(!src.dead&&src.hp>0){const k=src.type==='vlord'?(src.hp<src.max*.5?4:2):1,h=Math.round(d*k);src.hp=Math.min(src.max,src.hp+h);num(src.x,monY(src)-22,'+'+h,'#7ad04a',false);}}
+ if(src.type==='ielem')P3.chill=Math.max(P3.chill,1.5);return d;}
+function p3PHit(p){if(p.sp==='ice')P3.chill=2;else if(p.sp==='bolt'&&!(P.sImm>0)){P.stun=Math.max(P.stun||0,.25);P.sImm=2.25;}}
+const p3Spd=()=>P3.chill>0?.7:1;
+function p3Kill(m){const k=m.type;if(P3WB.includes(k)&&!m.tmp){WS.wb=WS.wb||{};WS.wb[k]=Date.now()+MT[k].wb*1000;wbPut(k);setTimeout(()=>annW(k+'Dn'),400);save(true);}if(k==='slord')P3.rod=[0,0,0,0];}
+function p3Tick(dt){if(!S||!P||S.__demo)return;const s=p3S();P3.ls=Math.max(0,P3.ls-maxHP()*.06*dt);P3.chill=Math.max(0,P3.chill-dt);
+ if(qDone('vc3')&&!s.ring){s.ring=1;S.items.push(mkItem('vring',3));toast(t('got',{n:1,item:t('vring')}),'good');SFX.rare();save(true);}
+ if(qDone('vc2')&&s.cov===undefined){s.cov=1;setTimeout(()=>{announce(t('covJoin'),1);SFX.legendary();},300);save(true);}
+ if(P3.ch){if(P.rmv>0||mode!=='play'){P3.ch=null;toast(t('rodInt'),'warn');}else if((P3.ch.t-=dt)<=0){const i=P3.ch.i;P3.ch=null;P3.rod[i]=1;const p=p3RodXY(i);vfx('bolt',p.x,p.y-20);SFX.zap();const n=P3.rod.filter(Boolean).length;
+   if(n===4){announce(t('rodAll'),1);SFX.legendary();}else toast(t('rodDone',{n}),'good');}}
+ if(p3Storm())P3.away=0;else if((P3.away+=dt)>30&&P3.rod.some(Boolean))P3.rod=[0,0,0,0];   // the rods charge again while nobody grounds them
+ if(p3InT()&&mode==='play'&&(P3.sT-=dt)<=0){P3.sT=2.2+rand()*1.2;let x=P.x+(rand()-.5)*50,y=P.y+(rand()-.5)*30,rod=-1;
+  for(let i=0;i<4;i++){const p=p3RodXY(i);if(P3.rod[i]&&Math.hypot(p.x-x,p.y-y)<56){x=p.x;y=p.y;rod=i;}}P3.strike.push({x,y,t:1,rod,ft:.2});}
+ P3.strike=P3.strike.filter(k=>{k.t-=dt;if(k.t<=0&&!k.hit){k.hit=1;wxFlash=Math.max(wxFlash,.1);SFX.zap();vfx('bolt',k.x,k.y);shake=Math.max(shake,.12);
+   if(k.rod<0&&mode==='play'&&Math.hypot(P.x-k.x,P.y-k.y)<20)hurtPlayer(MT.selem.dmg*1.6,224,{x:k.x,y:k.y,el:'thunder'});}
+  if(k.hit)k.ft-=dt;return k.ft>0;});}
+// the Covenant's envoy: once you are in it you may leave it, and come back, as often as you like
+function p3EnvOpts(){if(!qDone('vc2'))return [];const s=p3S();return [{l:t(s.cov?'oCovLeave':'oCovJoin'),f:()=>{s.cov=s.cov?0:1;toast(t(s.cov?'covBack':'covLeft'),s.cov?'good':'warn');SFX.notice();save(true);}}];}
+const P3SP={ice:p=>{ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);R(ctx,-5,-1,8,3,'#7ac8f0');R(ctx,-3,0,6,1,'#e8f8ff');R(ctx,3,-1,2,3,'#d8f4ff');ctx.restore();if(rand()<.3)fx.push({x:p.x,y:p.y,vx:0,vy:6,t:.3,c:'#bfe8ff'});},
+ bolt:p=>{ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.strokeStyle='#fff27a';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-8,0);ctx.lineTo(-4,-3);ctx.lineTo(-1,2);ctx.lineTo(3,-2);ctx.lineTo(6,0);ctx.stroke();R(ctx,5,-1,2,2,'#ffffff');ctx.restore();},
+ blood:p=>{blob(ctx,p.x,p.y,3,3,'#8a0a1a');R(ctx,p.x-1,p.y-1,2,2,'#e84a5a');if(rand()<.4)fx.push({x:p.x,y:p.y,vx:0,vy:10,t:.3,c:'#a81a2a'});}};
+function p3Ents(ents){if(!P)return;const near=(x,y)=>Math.abs(x-P.x)<VW&&Math.abs(y-P.y)<VH;
+ for(let i=0;i<4;i++){const p=p3RodXY(i);if(!near(p.x,p.y))continue;const on=!P3.rod[i];ents.push({y:p.y,f:()=>{const x=p.x,y=p.y;R(ctx,x-4,y-2,8,3,'#4a4a52');R(ctx,x-1,y-30,2,29,'#8a8e9a');R(ctx,x,y-30,1,29,'#c8ccd6');
+   ctx.fillStyle=on?'#fff27a':'#5a6478';ctx.beginPath();ctx.arc(x,y-32,2.5,0,7);ctx.fill();
+   if(on){if((gTime*9+i|0)%3===0){ctx.strokeStyle='rgba(255,242,122,.9)';ctx.beginPath();ctx.moveTo(x,y-32);ctx.lineTo(x+(rand()-.5)*14,y-38-rand()*6);ctx.stroke();}
+    const L=mons.find(m=>m.type==='slord'&&!m.dead);if(L&&p3InT()){ctx.save();ctx.globalAlpha=.18+.1*Math.sin(gTime*6+i);ctx.strokeStyle='#9fd8ff';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y-32);ctx.lineTo(L.x,monY(L)-24);ctx.stroke();ctx.restore();}}
+   else{ctx.save();ctx.globalAlpha=.3;ctx.fillStyle='#5ac8ff';ctx.beginPath();ctx.ellipse(x,y,9,3,0,0,7);ctx.fill();ctx.restore();}}});}
+ const s=p3S();WYN.eggs.forEach(([tx,ty],i)=>{if(s.egg[i]>Date.now())return;const x=tx*TS+8,y=ty*TS+10;if(!near(x,y))return;ents.push({y,f:()=>{blob(ctx,x,y-4,4,5,'#6a7a3a');blob(ctx,x,y-4,3,4,'#a8b878');R(ctx,x-2,y-7,1,1,'#e8f0c8');R(ctx,x+1,y-4,2,1,'#5a6a2a');R(ctx,x-1,y-1,1,1,'#5a6a2a');}});});
+ for(const k of P3.strike)ents.push({y:k.y-1,f:()=>{if(!k.hit){const a=1-k.t;ctx.save();ctx.globalAlpha=.25+a*.4;ctx.strokeStyle='#fff27a';ctx.beginPath();ctx.ellipse(k.x,k.y,20*a+4,(20*a+4)*.45,0,0,7);ctx.stroke();ctx.restore();}
+   else{ctx.save();ctx.globalAlpha=Math.min(1,k.ft*6);ctx.strokeStyle='#ffffff';ctx.lineWidth=2;ctx.beginPath();let x=k.x,y=k.y-160;ctx.moveTo(x,y);while(y<k.y){y+=16;x=k.x+(y<k.y?(rand()-.5)*14:0);ctx.lineTo(x,Math.min(y,k.y));}ctx.stroke();ctx.restore();}}});
+ const L=mons.find(m=>m.type==='slord'&&!m.dead);if(L&&!p3Grounded()&&near(L.x,L.y))ents.push({y:L.y+2,f:()=>{ctx.save();ctx.globalAlpha=.16+.06*Math.sin(gTime*4);ctx.fillStyle='#7ac8ff';ctx.beginPath();ctx.ellipse(L.x,monY(L)-26,30,40,0,0,7);ctx.fill();ctx.globalAlpha=.5;ctx.strokeStyle='#cfefff';ctx.stroke();ctx.restore();}});
+ if(P3.ch)ents.push({y:P.y+2,f:()=>{const k=1-P3.ch.t/2;ctx.save();ctx.strokeStyle='#fff27a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(P.x,P.y-34,6,-Math.PI/2,-Math.PI/2+k*6.283);ctx.stroke();ctx.restore();}});}
+// the Vampire City is always night: you see only around you, less still in the catacombs
+function p3Dark(){if(!P||!S||mode==='title'||mode==='lang')return;const tx=P.x/TS,ty=P.y/TS;if(!vmcIn(tx,ty))return;const cat=catIn(tx,ty),r=cat?78:110;
+ dg.globalCompositeOperation='source-over';dg.clearRect(0,0,VW,VH);dg.fillStyle=cat?'rgba(4,1,6,.84)':'rgba(10,2,14,.72)';dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='destination-out';
+ const px=P.x-camX,py=P.y-8-camY,g=dg.createRadialGradient(px,py,10,px,py,r);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='source-over';
+ ctx.drawImage(darkC,0,0);ctx.fillStyle='rgba(120,10,30,.07)';ctx.fillRect(0,0,VW,VH);}
+window.__GP3={P3,STT,WYN,VMC,zone:p3Zone,act:p3Act,vis:p3Vis,atk:p3Atk,hit:p3Hit,hurt:p3Hurt,tick:p3Tick,grounded:p3Grounded,storm:p3Storm,spd:p3Spd,env:p3EnvOpts,sheet:k=>MSH[k]||p3Sheet(k),s:p3S,mh:()=>maxHP()};
+Object.assign(STR.ar,{"felemN": "إلمنتال النار", "ielemN": "إلمنتال التلج", "selemN": "إلمنتال العاصفة", "slordN": "سيد العاصفة", "wyvernN": "وايفرن", "drakeN": "دريك", "wqueenN": "ملكة الوايفرن", "vthrallN": "عبد مصاص الدماء", "vknightN": "فارس مصاص دماء", "vlordN": "سيد مصاصي الدماء", "vbatN": "خفاش الدم", "vcenv": "مبعوث العهد", "zStorm": "معبد العاصفة (لفل 220+)", "zWyvern": "عش الوايفرن (لفل 230+)", "zVamp": "مدينة مصاصي الدماء (لفل 260+)", "zCata": "سراديب مصاصي الدماء (لفل 280+)", "hRod": "E: فرّغ عمود البرق", "hEgg": "E: خد بيضة وايفرن", "rodAlready": "العمود ده متفرّغ خلاص.", "rodStart": "بتفرّغ عمود البرق... متتحركش.", "rodInt": "اتقطعت! العمود لسه مشحون.", "rodDone": "عمود البرق اتفرّغ ({n}/4). البرق مش هيضرب جنبه.", "rodAll": "الأعمدة الأربعة اتفرّغت! درع سيد العاصفة وقع قدامك.", "slShield": "سيد العاصفة متحامي بأعمدة البرق: بياخد عُشر ضربك بس. فرّغ الأربع أعمدة (E).", "eggT": "خدت بيضة وايفرن... الوايفرن شافوك!", "covJoin": "دخلت عهد مصاصي الدماء! 3% من ضربك بيرجعلك صحة، ومصاصين الدماء بيضربوك أقل 15%.", "covBack": "رجعت للعهد.", "covLeft": "سبت العهد. ميزة الدم راحت.", "oCovLeave": "اسيب العهد", "oCovJoin": "ارجع للعهد", "slordDn": "{n} هزم سيد العاصفة في معبد العاصفة! هيرجع بعد نص ساعة.", "wqueenDn": "{n} وقّع ملكة الوايفرن في عشها! هترجع بعد نص ساعة.", "vlordDn": "{n} هزم سيد مصاصي الدماء في السراديب! هيصحى تاني بعد ساعة.", "fess": "جوهر النار", "fessD": "بيقع من إلمنتال النار. إليزابيث بتعمل بيه قلادة اللهب.", "iess": "جوهر التلج", "iessD": "بيقع من إلمنتال التلج. إليزابيث بتعمل بيه أسورة الصقيع.", "sess": "جوهر العاصفة", "sessD": "بيقع من إلمنتال العاصفة. إليزابيث بتعمل بيه أسورة العاصفة.", "bvial": "قارورة دم", "bvialD": "دم مصاصين الدماء. مبعوث العهد بيطلبها.", "wegg": "بيضة وايفرن", "weggD": "بيضة من عش الوايفرن. غالية جدا عند التجار.", "flneck": "قلادة اللهب", "frbrace": "أسورة الصقيع", "stbrace": "أسورة العاصفة", "vce_hi": "[مبعوث العهد] إنسان؟ هنا؟ المدينة دي بتاكل اللي زيك. إلا لو العهد قبلك.", "vce_idle": "السيد صاحي في السراديب. الدم مابينامش.", "q_vc1": "دم العهد", "vc1_o": "العبيد جعانين ومابيشبعوش. قلّل عددهم، والعهد هيسمع اسمك.\nشرط إتمام المهمة: اقتل 30 عبد مصاص دماء", "vc1_w": "لسه العبيد مالين الشوارع.", "vc1_d": "كويس. الريحة اللي عليك بقت ريحتنا.", "q_vc2": "دعوة السيد", "vc2_o": "هات 10 قوارير دم، والعهد هيقبلك. اللي في العهد بيشرب من ضربه.\nشرط إتمام المهمة: هات 10 قوارير دم", "vc2_w": "القوارير بتقع من العبيد والفرسان.", "vc2_d": "العهد قبلك. دمك بقى بيعرف طريقه.", "q_vc3": "سيد السراديب", "vc3_o": "السيد بقى جعان أوي، وجوعه هيخرب المدينة. انزل السراديب وخلّصنا منه. خاتمه هيبقى ليك.\nشرط إتمام المهمة: اهزم سيد مصاصي الدماء", "vc3_w": "السراديب في الركن اللي تحت على اليمين من المدينة.", "vc3_d": "السيد نام... لحد ما يصحى. الخاتم ده بتاعك."});
+Object.assign(STR.en,{"felemN": "Fire Elemental", "ielemN": "Ice Elemental", "selemN": "Storm Elemental", "slordN": "Storm Lord", "wyvernN": "Wyvern", "drakeN": "Drake", "wqueenN": "Wyvern Queen", "vthrallN": "Vampire Thrall", "vknightN": "Vampire Knight", "vlordN": "Vampire Lord", "vbatN": "Blood Bat", "vcenv": "Covenant Envoy", "zStorm": "Storm Temple (Lv 220+)", "zWyvern": "Wyvern Nest (Lv 230+)", "zVamp": "Vampire City (Lv 260+)", "zCata": "Vampire Catacombs (Lv 280+)", "hRod": "E: ground the lightning rod", "hEgg": "E: take a wyvern egg", "rodAlready": "This rod is already grounded.", "rodStart": "Grounding the lightning rod... hold still.", "rodInt": "Interrupted! The rod is still charged.", "rodDone": "Lightning rod grounded ({n}/4). Lightning won't strike beside it.", "rodAll": "All four rods are grounded! The Storm Lord's shield is down for you.", "slShield": "The Storm Lord is shielded by its lightning rods and takes a tenth of your damage. Ground all four rods (E).", "eggT": "You took a wyvern egg... the wyverns saw you!", "covJoin": "You joined the Vampire Covenant! 3% of your damage comes back as health, and vampires hit you 15% softer.", "covBack": "You are back in the Covenant.", "covLeft": "You left the Covenant. The blood pact is gone.", "oCovLeave": "Leave the Covenant", "oCovJoin": "Rejoin the Covenant", "slordDn": "{n} defeated the Storm Lord in the Storm Temple! It returns in half an hour.", "wqueenDn": "{n} brought down the Wyvern Queen in her nest! She returns in half an hour.", "vlordDn": "{n} defeated the Vampire Lord in the catacombs! He wakes again in an hour.", "fess": "Fire Essence", "fessD": "Dropped by Fire Elementals. Elizabeth makes the Flame Necklace from it.", "iess": "Ice Essence", "iessD": "Dropped by Ice Elementals. Elizabeth makes the Frost Bracelet from it.", "sess": "Storm Essence", "sessD": "Dropped by Storm Elementals. Elizabeth makes the Storm Bracelet from it.", "bvial": "Blood Vial", "bvialD": "Vampire blood. The Covenant Envoy asks for it.", "wegg": "Wyvern Egg", "weggD": "An egg from the wyvern nest. Merchants pay a lot for it.", "flneck": "Flame Necklace", "frbrace": "Frost Bracelet", "stbrace": "Storm Bracelet", "vce_hi": "[Covenant Envoy] A human? Here? This city eats your kind. Unless the Covenant takes you.", "vce_idle": "The Lord is awake in the catacombs. Blood never sleeps.", "q_vc1": "Blood of the Covenant", "vc1_o": "The thralls hunger and are never full. Thin them out and the Covenant will hear your name.\nQuest Clear Conditions: Slay 30 Vampire Thralls", "vc1_w": "The thralls still fill the streets.", "vc1_d": "Good. You smell like one of us now.", "q_vc2": "The Lord's Invitation", "vc2_o": "Bring 10 blood vials and the Covenant will take you. Those in the Covenant drink from their own blows.\nQuest Clear Conditions: Bring 10 Blood Vials", "vc2_w": "The vials drop from thralls and knights.", "vc2_d": "The Covenant takes you. Your blood knows its way now.", "q_vc3": "Master of the Catacombs", "vc3_o": "The Lord's hunger has grown, and it will ruin the city. Go down to the catacombs and end him. His ring will be yours.\nQuest Clear Conditions: Defeat the Vampire Lord", "vc3_w": "The catacombs are in the city's south-east corner.", "vc3_d": "The Lord sleeps... until he wakes. The ring is yours."});
 /* ---------------- loop ---------------- */
 freshState();spawnWorld();S.__demo=true;MAPV=mapHash();
 let last=performance.now(),hudT=0,saveT=0;

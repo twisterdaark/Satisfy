@@ -5,6 +5,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v130', ver: '1.30', d: '2026-10-21',
+      ar: ['إلمنتالز: إلمنتال النار في وادي دران، إلمنتال التلج في بحيرات الجليد، وإلمنتال العاصفة حوالين معبد العاصفة (لفل 205+). الجواهر اللي بيوقعوها إليزابيث بتعمل بيها قلادة اللهب وأسورة الصقيع وأسورة العاصفة',
+        'معبد العاصفة غرب ريف بيدرو: البرق بيضرب مكان ما انت واقف (الدايرة الصفرا بتنبهك). سيد العاصفة متحامي بأربع أعمدة برق، وبياخد عُشر ضربك بس لحد ما تفرّغ الأربعة (E وانت واقف ثانيتين). البرق مابيضربش جنب عمود متفرّغ',
+        'عش الوايفرن في بيدرو: وايفرن ودريك وملكة الوايفرن. تقدر تسرق بيض الوايفرن (غالي عند التجار)، بس العش كله هيهجم عليك',
+        'مدينة مصاصي الدماء في جاوس: مدينة ضلمة على طول، عبيد وفرسان بيتعالجوا من ضربهم فيك، وسيد مصاصي الدماء في السراديب',
+        'عهد مصاصي الدماء: مبعوث العهد عند البوابة. خلّص مهماته وتدخل العهد: 3% من ضربك بيرجعلك صحة، ومصاصين الدماء بيضربوك أقل 15%. وسيد مصاصي الدماء بيدّيك خاتم مصاص الدماء'],
+      en: ['Elementals: Fire Elementals in Dran Valley, Ice Elementals at the glacier lakes and Storm Elementals around the Storm Temple (Lv 205+). Elizabeth makes the Flame Necklace, Frost Bracelet and Storm Bracelet from their essences',
+        'The Storm Temple in western Pedro: lightning strikes where you stand (the yellow ring warns you). The Storm Lord is shielded by four lightning rods and takes a tenth of your damage until you ground all four (E, standing still for 2 s). Lightning never strikes beside a grounded rod',
+        'The wyvern nest in Pedro: wyverns, drakes and the Wyvern Queen. You can steal wyvern eggs (merchants pay well), but the whole nest comes for you',
+        'The Vampire City in Gauss: always dark, with thralls and knights that heal on their hits, and the Vampire Lord in the catacombs',
+        'The Vampire Covenant: its envoy waits at the gate. Finish the envoy\'s quests to join: 3% of your damage comes back as health and vampires hit you 15% softer. The Vampire Lord\'s quest gives the Vampire Ring'] },
     { v: '2026-10-21v129', ver: '1.29', d: '2026-10-21',
       ar: ['كلاسات جديدة من لفل 30 (مع إتقان السلاح 4): الآرتشر يقدر يبقى سنايبر أو بو ماستر عند مدرب الآرتشر، والميج يبقى باتل ميج أو وورلوك عند مدرب السحر في ريدان. المهارات القديمة بتفضل معاك',
         'سنايبر: طلقة مشحونة 500% بتخترق خط كامل لو وقفت مكانك ثانية وربع، عين النسر، وضرب أقوى وانت واقف',
