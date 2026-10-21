@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v118', ver: '1.18', d: '2026-10-21',
+      ar: ['أطقم الوحوش الإلهية الأسطورية: الحداد من لفل حدادة 9 بيصنعها على السندان من نَفَس كل وحش، وكلها أسطورية. كل قطعة محتاجة نَفَس وحشها (السلاح محتاج اتنين)',
+        'طقم العنقاء الحمرا (القوس والرداء والتاج والحذاء): قطعتين تجديد صحة 20%، و4 قطع 40%. طقم النمر الأبيض (الدرع والخوذة والمخالب والطماق): 3 قطع الدفاع والصحة +10%، و4 قطع +15%',
+        'طقم التنين الأزرق (الرمح والقفاز والدرع والخوذة): +6% ضرر، و4 قطع +12% ضرر و+6% سرعة هجوم. طقم السلحفاة السودا (الشوكة والدرقة والخوذة والحذاء): 3 قطع سرعة هجوم +10% وفرصة تأثيرات +15% (ضربتك ممكن تشلّ الوحش)'],
+      en: ["The divine beasts' legendary sets: a blacksmith at smithing level 9 makes them at the anvil from each beast's breath, always legendary. Every piece needs its beast's breath (the weapon two)",
+        'Red Phoenix set (bow, robe, crown, shoes): 2 pieces health regeneration 20%, 4 pieces 40%. White Tiger set (armor, helmet, claws, gaiters): 3 pieces defense and health +10%, 4 pieces +15%',
+        'Blue Dragon set (spear, gauntlet, armor, helmet): +6% damage, 4 pieces +12% damage and +6% attack speed. Black Tortoise set (thorn, shell, helmet, boots): 3 pieces attack speed +10% and status effect chance +15% (your hits can stun)'] },
     { v: '2026-10-21v117', ver: '1.17', d: '2026-10-21',
       ar: ['الوحوش الإلهية الأربعة: التنين الأزرق في الشرق (وادي دران، لفل 350)، النمر الأبيض في الغرب (ريف بيدرو، لفل 330)، العنقاء الحمرا في الجنوب (حدود مملكة جاوس، لفل 320)، والسلحفاة السودا في الشمال (بحيرات الجليد، لفل 360)',
         'كل وحش بيوريك مكان نَفَسه قبلها بثانية وبعدين بيضرب بعنصره: برق في خط طويل، زئير حواليه، لهب واسع، وطوفان بعيد. أونلاين الوحش واحد للكل، ولما يقع بيفضل ميت ساعة على كل الشاشات',

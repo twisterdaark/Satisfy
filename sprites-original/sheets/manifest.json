@@ -20571,7 +20571,23 @@
    "brphx",
    "brdrg",
    "brtig",
-   "brtor"
+   "brtor",
+   "rpbow",
+   "rparmor",
+   "rphelm",
+   "rpboots",
+   "tgarmor",
+   "tghelm",
+   "tggloves",
+   "tgboots",
+   "dgspear",
+   "dggaunt",
+   "dgarmor",
+   "dghelm",
+   "ttthorn",
+   "ttshell",
+   "tthelm",
+   "ttboots"
   ]
  }
 }
