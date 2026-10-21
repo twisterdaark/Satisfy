@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v126', ver: '1.26', d: '2026-10-21',
+      ar: ['الشاشة السودا على الموبايل: اللعبة كانت بترسم خريطة العالم كلها أول ما تفتح (صورة 27 مليون بكسل، حوالي 250 ميجا رام)، والموبايل ساعات كان بيقفل التاب. دلوقتي الخريطة بتترسم على أجزاء في الخلفية، وشكلها زي ما هو بالظبط',
+        'رسومات الشخصيات والوحوش بتترسم أول ما تظهر بس، فالتحميل بقى أسرع أكتر من مرتين',
+        'شاشة "جاري التحميل" بدل الشاشة السودا، والخطوط مابقتش بتوقف الصفحة لو سيرفر الخطوط بطيء'],
+      en: ['Black screen on phones: the game painted the whole world map at start (27 million pixels, about 250 MB of memory), and phones sometimes closed the tab. The map is now painted in pieces in the background, and looks exactly the same',
+        'Character and monster sheets are painted the first time they show, so the game loads more than twice as fast',
+        'A loading screen instead of a black one, and the fonts no longer hold the page when the font server is slow'] },
     { v: '2026-10-21banner', ver: '1.25', d: '2026-10-21',
       ar: ["أونلاين: شعار الجيلد: القائد بيختار شعار من G ← شعار الجيلد (تنين، نسر، ديب، سيفين وغيرهم)، وبيظهر قبل اسم الجيلد تحت اسم كل عضو عند الكل، وفي G"],
       en: ["Online: guild banners: the master picks an emblem in G -> Guild banner (a dragon, an eagle, a wolf, crossed swords and more); it shows before the guild name under every member's name for everyone, and in G"] },

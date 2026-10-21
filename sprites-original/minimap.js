@@ -18,8 +18,13 @@ const ROOF={house:['#a8322a','#7a2420','#c8483a'],forge:['#4a4f5c','#3a3e4a','#5
  palace:['#c8a040','#9a7a28','#e8c868'],temple:['#e4e0d6','#b4b0a6','#fbf8f0']};   // the palaces and Rebecca's temples (Titan, Reinhardt)
 const groundKind=v=>v===FL?GR:v===BL||v===TR||v===PL?-1:v;
 
-function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,cw=W*s,ch=H*s,doc=root.document,NY=o.noiseRow||0;   // noiseRow: the tile row the texture noise is anchored to, so rows added above keep the old land's look
- const cv=doc?doc.createElement('canvas'):A.makeCanvas(cw,ch);cv.width=cw;cv.height=ch;const g=cv.getContext('2d');
+// o.x0/o.y0/o.cols/o.rows paint only that window of tiles (owner 2026-10-21: the whole 8 px world is 27 million pixels,
+// too much memory and time for a phone at start): it is painted with 2 tiles of margin and cut, so the pieces join exactly
+function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,doc=root.document,NY=o.noiseRow||0;   // noiseRow: the tile row the texture noise is anchored to, so rows added above keep the old land's look
+ const win=o.cols!=null||o.rows!=null,M=win?2:0,X0=o.x0||0,Y0=o.y0||0,CO=o.cols!=null?o.cols:W,RO=o.rows!=null?o.rows:H,ox=X0-M,oy=Y0-M;
+ const tx0=Math.max(0,ox),tx1=Math.min(W,X0+CO+M),ty0=Math.max(0,oy),ty1=Math.min(H,Y0+RO+M),cw=(CO+2*M)*s,ch=(RO+2*M)*s;
+ const mkc=(w,h)=>{const c=doc?doc.createElement('canvas'):A.makeCanvas(w,h);c.width=w;c.height=h;return c;};
+ const cv=mkc(cw,ch),g=cv.getContext('2d');
  const img=g.createImageData(cw,ch),D=img.data,kind=new Int8Array(cw*ch);
  const at=(x,y)=>x<0||y<0||x>=W||y>=H?-9:env.at(x,y);
  // ground under trees, props and fences = the most common open neighbour (same idea as tiles.js baseAt)
@@ -28,7 +33,7 @@ function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,cw=W*s,ch=H*s,doc=root.doc
   for(const k2 in n)if(n[k2]>bc){bc=n[k2];best=+k2;}return best===GR&&env.snowAt(x,y)?SN:best;};
  const put=(px,py,c,k)=>{const i=(py*cw+px)*4;D[i]=c[0];D[i+1]=c[1];D[i+2]=c[2];D[i+3]=255;if(k!==undefined)kind[py*cw+px]=k;};
  const tri=(r,v)=>v<.36?r[0]:v<.64?r[1]:r[2];
- for(let ty=0;ty<H;ty++)for(let tx=0;tx<W;tx++){const k=base(tx,ty),raw=at(tx,ty);
+ for(let ty=ty0;ty<ty1;ty++)for(let tx=tx0;tx<tx1;tx++){const k=base(tx,ty),raw=at(tx,ty);
   for(let j=0;j<s;j++)for(let i=0;i<s;i++){const wx=tx*s+i,wy=ty*s+j,ny=wy-NY*s,fx=wx/s,fy=wy/s,n=vn(fx*1.6,(ty-NY+j/s)*1.6,1,301)*.7+hash(wx,ny,302)*.3;let c;
    if(k===WA){// depth: distance to the nearest non-water tile, sampled per pixel
     let d=9;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){if(at(tx+dx,ty+dy)===WA||at(tx+dx,ty+dy)===-9)continue;const ex=Math.max(0,Math.abs(fx-(tx+dx+.5))-.5),ey=Math.max(0,Math.abs(fy-(ty+dy+.5))-.5);d=Math.min(d,Math.hypot(ex,ey));}
@@ -41,26 +46,26 @@ function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,cw=W*s,ch=H*s,doc=root.doc
    else if(k===CW)c=C.cave[0];else if(k===CF)c=tri(C.cave,n);
    else c=tri(C.grass,n);
    if(raw===FL&&hash(wx,ny,304)<.035)c=C.flower[(hash(wx,ny,305)*4)|0];
-   put(wx,wy,c,k);}}
+   put(wx-ox*s,wy-oy*s,c,k);}}
  // ink: a darker 1px line where one terrain meets another (lower/right side), so regions read as a drawn map
- for(let y=1;y<ch;y++)for(let x=1;x<cw;x++){const k=kind[y*cw+x],u=kind[(y-1)*cw+x],l=kind[y*cw+x-1];if(k===u&&k===l)continue;
+ for(let y=Math.max(1,(ty0-oy)*s+(ty0?0:1)),ye=(ty1-oy)*s;y<ye;y++)for(let x=Math.max(1,(tx0-ox)*s+(tx0?0:1)),xe=(tx1-ox)*s;x<xe;x++){const k=kind[y*cw+x],u=kind[(y-1)*cw+x],l=kind[y*cw+x-1];if(k===u&&k===l)continue;
   const i=(y*cw+x)*4;if(k===WA||u===WA||l===WA)continue;const c=mix([D[i],D[i+1],D[i+2]],C.ink,.32);D[i]=c[0];D[i+1]=c[1];D[i+2]=c[2];}
- g.putImageData(img,0,0);
+ g.putImageData(img,0,0);g.translate(-ox*s,-oy*s);
  // forests: a canopy blob per tree tile, back to front, with a soft shadow; snowy trees get white tops
- for(let ty=0;ty<H;ty++)for(let tx=0;tx<W;tx++){if(at(tx,ty)!==TR)continue;const sn=env.snowAt(tx,ty),L=sn?C.snowLeaf:C.leaf,r=s*.62,cx=tx*s+s/2+(hash(tx,ty-NY,310)-.5)*s*.3,cy=ty*s+s/2+(hash(tx,ty-NY,311)-.5)*s*.3;
+ for(let ty=ty0;ty<ty1;ty++)for(let tx=tx0;tx<tx1;tx++){if(at(tx,ty)!==TR)continue;const sn=env.snowAt(tx,ty),L=sn?C.snowLeaf:C.leaf,r=s*.62,cx=tx*s+s/2+(hash(tx,ty-NY,310)-.5)*s*.3,cy=ty*s+s/2+(hash(tx,ty-NY,311)-.5)*s*.3;
   g.fillStyle='rgba(10,20,10,.35)';g.beginPath();g.ellipse(cx+s*.12,cy+s*.22,r,r*.8,0,0,7);g.fill();
   const rgb=c=>`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;g.fillStyle=rgb(L[0]);g.beginPath();g.arc(cx,cy,r,0,7);g.fill();
   g.fillStyle=rgb(L[1]);g.beginPath();g.arc(cx-r*.1,cy-r*.12,r*.8,0,7);g.fill();g.fillStyle=rgb(L[2]);g.beginPath();g.arc(cx-r*.28,cy-r*.3,r*.42,0,7);g.fill();
   if(s>=6){g.fillStyle=rgb(L[3]);g.fillRect(Math.round(cx-r*.4),Math.round(cy-r*.45),Math.max(1,s/8|0),Math.max(1,s/8|0));}}
  // fences: dotted posts along PL tiles
- for(let ty=0;ty<H;ty++)for(let tx=0;tx<W;tx++){if(at(tx,ty)!==PL)continue;g.fillStyle='#6e4828';const hor=at(tx-1,ty)===PL||at(tx+1,ty)===PL;
+ for(let ty=ty0;ty<ty1;ty++)for(let tx=tx0;tx<tx1;tx++){if(at(tx,ty)!==PL)continue;g.fillStyle='#6e4828';const hor=at(tx-1,ty)===PL||at(tx+1,ty)===PL;
   if(hor)g.fillRect(tx*s,ty*s+s/2-1,s,Math.max(1,s/6|0));else g.fillRect(tx*s+s/2-1,ty*s,Math.max(1,s/6|0),s);}
  // buildings: roof with ridge, outline and a drop shadow to the lower right
- for(const b of o.buildings||[]){const R=(ROOF[b.k]||ROOF.house),x=b.x*s,y=b.y*s,w=b.w*s,h=b.h*s,sh=Math.max(1,s*.35);
+ for(const b of o.buildings||[]){if(b.x+b.w<tx0-1||b.x>tx1||b.y+b.h<ty0-1||b.y>ty1)continue;const R=(ROOF[b.k]||ROOF.house),x=b.x*s,y=b.y*s,w=b.w*s,h=b.h*s,sh=Math.max(1,s*.35);
   g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x+sh,y+sh,w,h);g.fillStyle=R[1];g.fillRect(x,y,w,h);g.fillStyle=R[0];g.fillRect(x+1,y+1,w-2,h/2-1);
   g.fillStyle=R[2];g.fillRect(x+1,y+h/2-1,w-2,Math.max(1,s/5));g.fillStyle='#1a1018';g.fillRect(x+w/2-s*.35,y+h-s*.6,s*.7,s*.6);
   g.strokeStyle='#1a1018';g.lineWidth=1;g.strokeRect(x+.5,y+.5,w-1,h-1);}
- return cv;}
+ if(!M)return cv;const out=mkc(CO*s,RO*s);out.getContext('2d').drawImage(cv,-M*s,-M*s);return out;}
 
 // ---- markers (screen pixels; size = base unit, about 1 css px * zoom) ----
 function poly(g,pts){g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();}
