@@ -521,6 +521,16 @@ test('appeals (SAT-ONLINE-087): a muted player its own, once a mute; read by adm
   assert.equal(D.$uid.a['.validate'], "newData.val() === 'lift' || newData.val() === 'keep'");
 });
 
+test('balance figures (SAT-ONLINE-088): each player its own week\'s numbers, bounded; only admins read them', () => {
+  const B = rules.balance, u = B.$uid;
+  assert.equal(B['.read'], "auth != null && root.child('admins').child(auth.uid).val() === true");
+  assert.equal(u['.write'], 'auth != null && auth.uid === $uid');
+  assert.equal(u['.validate'], "newData.hasChildren(['wk', 'cls', 'lv', 'n', 's', 'w', 'l', 't'])");
+  for (const k of ['n', 'w', 'l']) assert.equal(u[k]['.validate'], 'newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000', k);
+  assert.equal(u.wk['.validate'], 'newData.isString() && newData.val().matches(/^w[0-9]{1,6}$/)');
+  assert.equal(u.$other['.validate'], false);
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);

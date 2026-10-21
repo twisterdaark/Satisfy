@@ -730,6 +730,8 @@
       decide: function (uid, mt, a, by) { var u = {}; u['appealDone/' + uid] = { mt: mt, a: a, by: by, t: D.serverTimestamp() }; if (a === 'lift') u['mutes/' + uid] = null; return D.update(D.ref(db), u); },
       watchAppealDone: function (uid, cb) { var off = D.onValue(at('appealDone/' + uid), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
       uidOf: function (id) { return D.get(at('handles/' + String(id).toLowerCase())).then(function (s) { return typeof s.val() === 'string' ? s.val() : null; }); },
+      // SAT-ONLINE-088: every player's numbers for this week, balance/{uid} {wk, cls, lv, n, s, w, l, t} (admins read them)
+      balance: function () { return all('balance'); },
       ranks: function () { return Promise.all([all('ranks/gold'), all('ranks/lv')]).then(function (r) { return { gold: r[0], lv: r[1] }; }); },
     };
   }

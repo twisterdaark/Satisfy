@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22balance', ver: '1.30', d: '2026-10-22',
+      ar: ["لوحة التوازن لصاحب اللعبة: /balance بتجمع أرقام الأسبوع لكل كلاس: عدد اللاعيبة ومتوسط اللفل، القتلات ومتوسط الوقت لقتل الوحش، ونسبة الفوز في الـPvP (المبارزات والـPvP المفتوح)",
+        "كل لعبة أونلاين بتبعت أرقامها هي بس كل 5 دقايق لما تتغير، ومحدش غير صاحب اللعبة بيقراها، واللوحة مفيهاش أسامي لاعيبة"],
+      en: ["A balance board for the game's owner: /balance adds up this week's numbers by class: players and average level, kills and the average time to kill a monster, and the PvP win rate (duels and open PvP)",
+        "Each online game sends only its own numbers, at most every 5 minutes while they change; only the owner reads them, and the board names no player"] },
     { v: '2026-10-21appeal', ver: '1.30', d: '2026-10-21',
       ar: ["الطعن في الكتم: لو اتكتمت في الشات العام وشايف إنه غلط، اكتب /appeal والسبب. الطعن بيروح لصاحب اللعبة بس، ومرة واحدة لكل كتمة",
         "صاحب اللعبة بيكتب /appeals ويشوف الطعون، كل واحد معاه ميعاد الكتم وسببه، ويشيل الكتم أو يخليه، واللاعب بيتبلغ بالرد"],
