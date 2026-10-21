@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v123', ver: '1.23', d: '2026-10-21',
+      ar: ['الموبايل بالعرض: أي لمسة بتطلب ملء الشاشة بأكتر من طريقة، فشريط العنوان بيختفي واللعبة بتملا الشاشة كلها (اتجربت على شاشة 20:9 زي أوبو رينو 13F)',
+        'زرار "ملء الشاشة" في الشاشة الرئيسية وقايمة الإيقاف طول ما الشاشة مش مليانة، ولو المتصفح رفض بيقولك تضيف اللعبة للشاشة الرئيسية من قايمة كروم',
+        'زرار "رتّب الأزرار" بقى جوا قايمة الأزرار ▦ وكمان في قايمة الإيقاف',
+        'التاب القديم اللي الموبايل بيرجعه من الكاش بقى بيعرف إنه قديم ويعمل ريفريش للنسخة الجديدة'],
+      en: ['Phones held sideways: any tap asks for full screen in more ways, so the address bar goes and the game fills the screen (tested on a 20:9 screen like the Oppo Reno 13F)',
+        'A Full screen button on the title and pause menus while the screen is not full; if the browser refuses, it tells you to add the game to the home screen from Chrome’s menu',
+        'Arrange buttons now lives in the ▦ button menu and in the pause menu',
+        'An old tab a phone brings back from its cache now knows it is old and refreshes to the new version'] },
     { v: '2026-10-21v122', ver: '1.22', d: '2026-10-21',
       ar: ['إليزابيث، صانعة الإكسسوارات في مستوى الحِرفي، فتحت ورشتها في ساحة وينستون جنب البير',
         'خانتين جداد في نافذة العتاد (U): العقد والأسورة',

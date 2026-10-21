@@ -413,7 +413,7 @@ body.touch,body.touch #stage{touch-action:none;-webkit-touch-callout:none;-webki
 body.touch:not(.keysOpen) #keys{display:none}
 #tKeysT{position:absolute;left:calc(var(--u)*22);bottom:calc(var(--u)*1.2);width:calc(var(--u)*5.6);height:calc(var(--u)*5);border-radius:calc(var(--u)*1);font-size:calc(var(--u)*2.2);background:rgba(14,24,52,.78);border:1px solid rgba(166,214,246,.55);color:#e8f0ff;padding:0}#tKeysT.open{background:rgba(255,220,120,.45)}
 body.touch #keys{inset-inline-end:auto;left:calc(var(--u)*28.5);bottom:calc(var(--u)*.6);grid-template-columns:repeat(4,auto);gap:calc(var(--u)*.4);padding:calc(var(--u)*.4);direction:ltr}
-body.touch #kA,body.touch #kD,body.touch #kG,body.touch #kE{display:none}body.touch:has(#dialog:not([hidden])) :is(#tAct button:not([data-tk="KeyE"]),#tStick,#tKeysT,#tNetT,#tNet){visibility:hidden}body.touch #dialog{right:calc(var(--u)*14)}body:not(.touch) #kLay,body.touch #tLayT{display:none}
+body.touch #kA,body.touch #kD,body.touch #kG,body.touch #kE{display:none}body.touch:has(#dialog:not([hidden])) :is(#tAct button:not([data-tk="KeyE"]),#tStick,#tKeysT,#tNetT,#tNet){visibility:hidden}body.touch #dialog{right:calc(var(--u)*14)}body:not(.touch) #kLay,body:not(.touch) .tOnly,body.touch #tLayT{display:none}
 body.touch #keys kbd{display:none}body.touch #keys .key{min-width:0}body.touch #keys .key span{display:block;min-width:calc(var(--u)*6.6);padding:calc(var(--u)*.75) calc(var(--u)*.6);text-align:center;font-size:calc(var(--u)*1.3);font-weight:700;color:#e8f0ff;background:rgba(14,24,52,.78);border:1px solid rgba(166,214,246,.55);border-radius:calc(var(--u)*.5)}body.touch #keys .key.press span,body.touch #keys .key:active span{background:rgba(255,220,120,.4)}
 body.touch #skillbar{inset-inline-start:auto;left:auto;right:calc(var(--u)*22);top:auto;bottom:calc(var(--u)*.6);grid-template-columns:repeat(4,auto);grid-auto-flow:row;padding:calc(var(--u)*.3);direction:ltr}
 body.touch #skillbar .sk{width:calc(var(--u)*5.6);height:calc(var(--u)*5.6)}
@@ -596,6 +596,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
         <button data-act="controls" data-i18n="controls"></button>
         <button data-act="updLog" data-i18n="updLogB"></button>
         <button data-act="lang" data-i18n="langBtn"></button>
+        <button data-act="fullscr" class="fsBtn" data-i18n="fullB" hidden></button>
       </div>
       <div class="foot" data-i18n="fanNote"></div>
       <div id="idW" class="panel" hidden><div class="head" id="idH"></div><div id="idT"></div><input id="idIn" maxlength="16" autocomplete="off" spellcheck="false"><div id="idErr"></div><div id="idA"><button data-act="idCheck" id="idCheck"></button><button data-act="idOk" id="idOk"></button></div><button class="x" data-act="idClose">✕</button></div>
@@ -614,6 +615,8 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
         <button data-act="menuSize" id="mzB"></button>
         <label class="vol"><span data-i18n="volSfx"></span><input type="range" id="vol_sfx" min="0" max="100" step="5"><b id="volv_sfx"></b></label>
         <label class="vol"><span data-i18n="volMus"></span><input type="range" id="vol_mus" min="0" max="100" step="5"><b id="volv_mus"></b></label>
+        <button data-act="tLay" class="tOnly" data-i18n="kLay"></button>
+        <button data-act="fullscr" class="fsBtn" data-i18n="fullB" hidden></button>
         <button data-act="quit" data-i18n="saveQuit"></button>
       </div>
     </div>
@@ -3386,6 +3389,19 @@ function ezMake(id){const rc=rcById(id);if(!ezHas(id)){SFX.deny();return dialog(
 window.__GEZ={C:EZC,has:ezHas,make:ezMake,opts:ezOpts};
 Object.assign(STR.ar,{"neckS": "العقد", "braceS": "الأسورة", "eliz": "إليزابيث", "ez_hi": "اسمي إليزابيث. كلاسي صانعة إكسسوارات وأنا في مستوى الحِرفي.", "ez_i1": "قليل أوي من الحاجات اللي صعب تلاقيها زي الإكسسوارات، خصوصًا الأطقم. هات الجواهر وأنا أعملهالك من غير حظ.", "ez_i2": "العقد والأسورة من نفس الطقم مع بعض بيدّوا تأثير الطقم. لابسهم الاتنين!", "ez_i3": "ماتندهليش باسمي الحقيقي. إليزابيث وبس.", "oEzMake": "اعملي {it}", "ezNo": "الخامات أو الدهب مش كفاية. ارجعلي لما تجمعهم.", "ezDone": "خلصت {it}. شغل نضيف، صح؟", "ezDoneBj": "قطعت جوهرة بيليال السودا بنفسي. {it} جاهز.", "ezGot": "إليزابيث عملتلك {it}!", "gdneck": "عقد الحارس", "gdbrace": "أسورة الحارس", "ezneck": "عقد إليزابيث الياقوت الأزرق", "ezbrace": "أسورة إليزابيث الياقوت الأزرق", "bjneck": "عقد جوهرة بيليال السودا", "bjbrace": "أسورة جوهرة بيليال السودا", "set_gd": "طقم الحارس", "set_ez": "طقم إليزابيث", "set_bj": "طقم الجوهرة السودا"});
 Object.assign(STR.en,{"neckS": "Necklace", "braceS": "Bracelet", "eliz": "Elizabeth", "ez_hi": "My name is Elizabeth. My class is an accessories maker and I am at the craftsman level.", "ez_i1": "Few items are as hard to find as accessories, especially accessory sets. Bring me jewels and I will make them, no luck needed.", "ez_i2": "A necklace and a bracelet of the same set give its set effect together. Wear both!", "ez_i3": "Don’t call me by my real name. Just Elizabeth.", "oEzMake": "Make {it}", "ezNo": "You don’t have the materials or the gold. Come back when you do.", "ezDone": "{it} is done. Clean work, isn’t it?", "ezDoneBj": "I cut Belial’s Black Jewel myself. {it} is ready.", "ezGot": "Elizabeth made you {it}!", "gdneck": "Guardian’s Necklace", "gdbrace": "Guardian’s Bracelet", "ezneck": "Elizabeth’s Sapphire Necklace", "ezbrace": "Elizabeth’s Sapphire Bracelet", "bjneck": "Belial’s Black Jewel Necklace", "bjbrace": "Belial’s Black Jewel Bracelet", "set_gd": "Guardian’s Set", "set_ez": "Elizabeth’s Set", "set_bj": "Black Jewel Set"});
+/* full screen on a phone (owner 2026-10-21): Android browsers keep the address bar until the page asks for full screen
+   inside a tap; an app added to the home screen opens full screen from the manifest and never needs this */
+const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
+const fsStand=()=>{try{return matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone;}catch(e){return false;}};
+const fsCan=()=>{const d=document.documentElement;return !!(d.requestFullscreen||d.webkitRequestFullscreen);};
+let fsBusy=0,fsNo=0,fsAsk=0;
+function fsUI(){const on=TOUCH&&fsCan()&&!fsEl()&&!fsStand();document.querySelectorAll('.fsBtn').forEach(b=>b.hidden=!on);}
+function goFull(ask){if(ask)fsAsk=1;if(!TOUCH||fsEl()||fsStand()||fsBusy)return;const d=document.documentElement,f=d.requestFullscreen||d.webkitRequestFullscreen;if(!f)return;
+ let r;try{r=f.call(d,{navigationUI:'hide'});}catch(e){r=null;}fsBusy=1;
+ const ok=()=>{fsBusy=0;fsNo=0;fsAsk=0;fsUI();try{screen.orientation.lock('landscape').catch(()=>{});}catch(_){}},no=()=>{fsBusy=0;fsNo++;fsUI();if(fsAsk)toast(t('fullNo'));fsAsk=0;};
+ if(r&&r.then)r.then(ok,no);else setTimeout(()=>{fsEl()?ok():no();},300);}
+Object.assign(STR.ar,{fullB:'ملء الشاشة',fullNo:'المتصفح رفض ملء الشاشة: من قايمة كروم (⋮) اختار "إضافة للشاشة الرئيسية" وافتح اللعبة من الأيقونة'});
+Object.assign(STR.en,{fullB:'Full screen',fullNo:'The browser refused full screen: in Chrome\'s menu (⋮) pick "Add to Home screen" and open the game from its icon'});
 /* ---------------- town life (owner 2026-10-20: town life) ----------------
    Horse races at Winston, dice at the inn tables and the town festival, all on the world clock (wNow), so everyone online
    shares the same race, the same dice rounds and the same festival without any new message or rules change: your race
@@ -6639,6 +6655,8 @@ function act(a){
  else if(a==='controls'){ctrlBack=mode==='pause'?'pauseScreen':'titleScreen';mode='controls';REB=-1;renderRebind();showOnly('controlsScreen');}
  else if(a==='back'){showOnly(ctrlBack);mode=ctrlBack==='pauseScreen'?'pause':'title';}
  else if(a==='lang'){mode='lang';showOnly('langScreen');}
+ else if(a==='fullscr')goFull(true);
+ else if(a==='tLay'){resume();tLayOpen();} // owner 2026-10-21: arranging the buttons also lives in the pause menu
  else if(a==='online')netPlay();
  else if(a==='plClose')plOpen(false);else if(a==='plRnk')rnkBoard();else if(a==='plHide')plHideT();
  else if(a==='idOk')idOk();else if(a==='idCheck')idCheck();else if(a==='idClose')$('idW').hidden=true;
@@ -7224,8 +7242,16 @@ function updBanner(){if(UPD)return;UPD=1;const v=document.createElement('div');v
 // one would reload into the same build and see the old player again, every 15 s (SAT-ONLINE-045)
 let updChk=()=>{};
 (function(){if(!/\.github\.io$/.test(location.hostname)||!window.fetch)return;let tag=null,last=0;
- const chk=()=>{last=Date.now();return fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>{const e=r.headers.get('etag')||r.headers.get('last-modified');if(!e||UPD)return;if(tag===null)tag=e;else if(e!==tag)updBanner();}).catch(()=>{});};
+ // (owner 2026-10-21) a phone that brings back an old tab from its cache runs that old build, and the first ETag was taken as
+ // this page's own: the first check also compares the live page's date with this page's date (once per few minutes, so
+ // a server that is still rolling out cannot make it refresh over and over), and a tab that comes back checks at once
+ const own=Date.parse(document.lastModified)||0;let lmOnce=0;
+ const chk=()=>{last=Date.now();return fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>{const e=r.headers.get('etag')||r.headers.get('last-modified');if(!e||UPD)return;
+  if(!lmOnce){lmOnce=1;const lm=Date.parse(r.headers.get('last-modified')||'')||0;let recent=0;try{recent=Date.now()-(+sessionStorage.getItem('satisfy_lmchk')||0)<300000;}catch(_){}
+   if(lm&&own&&lm-own>5000&&!recent){try{sessionStorage.setItem('satisfy_lmchk',String(Date.now()));}catch(_){}updBanner();return;}}
+  if(tag===null)tag=e;else if(e!==tag)updBanner();}).catch(()=>{});};
  updChk=()=>{if(Date.now()-last>10000)chk();};
+ addEventListener('pageshow',e=>{if(e.persisted)chk();});document.addEventListener('visibilitychange',()=>{if(!document.hidden)updChk();});
  chk();setInterval(chk,60000);})();
 Object.assign(STR.ar,{updT:'نزل تحديث جديد للعبة: لازم تعمل ريفريش عشان تكمل مع الباقيين',updB:'ريفريش',updAuto:'هيعمل ريفريش لوحده كمان {n} ثانية'});
 Object.assign(STR.en,{updT:'A new version of the game is out: refresh to keep playing with everyone',updB:'Refresh',updAuto:'Refreshing by itself in {n} s'});
@@ -8621,8 +8647,10 @@ if(TOUCH){document.body.classList.add('touch');fit();mzUI();const st=$('tStick')
  $('keys').addEventListener('pointerdown',e=>{const el=e.target.closest('.key');if(el&&el.id==='kLay'){e.preventDefault();document.body.classList.remove('keysOpen');$('tKeysT').classList.remove('open');tLayOpen();return;}const c=el&&TKEY[el.id];if(!c)return;e.preventDefault();tKey(c,true);tKey(c,false);document.body.classList.remove('keysOpen');$('tKeysT').classList.remove('open');});
  // the first tap goes full screen and holds the screen sideways where the browser allows it (Android; an iPhone keeps its
  // bars unless the game is added to the home screen, which opens it full screen from the manifest)
- const full=()=>{const d=document.documentElement;if(document.fullscreenElement||!d.requestFullscreen)return;d.requestFullscreen({navigationUI:'hide'}).then(()=>{try{screen.orientation.lock('landscape').catch(()=>{});}catch(_){}},()=>{});};
- addEventListener('pointerup',full,true);
+ // (owner 2026-10-21, Oppo Reno 13F: the bars stayed): touchend and click also ask, the webkit form is tried, the menus
+ // keep a full screen button while it is off, and a refusal says how to get it from the browser's menu
+ addEventListener('pointerup',()=>goFull(),true);addEventListener('touchend',()=>goFull(),true);addEventListener('click',()=>goFull(),true);
+ for(const ev of ['fullscreenchange','webkitfullscreenchange'])document.addEventListener(ev,()=>{fsUI();setTimeout(fit,80);});fsUI();
  // a long press shows what a mouse would show on hover (item, skill and button details); the tap after it does nothing
  let lpT=0,lpEl=null,lpShown=false;const lpOff=()=>{clearTimeout(lpT);lpEl=null;};
  UI.addEventListener('pointerdown',e=>{const el=e.target.closest('[data-tip]');lpOff();if(!el)return;lpEl=el;const x=e.clientX,y=e.clientY;
