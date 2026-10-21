@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21calendar', ver: '1.05', d: '2026-10-21',
+      ar: ['أونلاين: "المواعيد" في قايمة اللاعبين (O): الأحداث العالمية الجاية، والمسابقة الوطنية، وحصار قلعة ريدان، ومهرجان المدن، وسباق الخيل، وإمتى تراوكا وبيريث يرجعوا',
+        'كل ميعاد بتوقيتك وبتوقيت جرينتش، والوقت الفاضل عليه. والمواعيد من ساعة السيرفر، فهي واحدة عند الكل'],
+      en: ['Online: "Calendar" in the player list (O): the coming world events, the National Competition, the siege of Reidan Castle, the town festival, the horse race, and when Trauka and Berith are back',
+        'Every time in your own time zone and in UTC, with the time left. They come from the server\'s clock, so they are the same for everyone'] },
     { v: '2026-10-21guildlead', ver: '1.04', d: '2026-10-21',
       ar: ['أونلاين: قائد الجيلد يقدر يسلّم الجيلد لضابط من كارته في G ← الأعضاء، فيبقى هو القائد وإنت ضابط. ولو القائد غاب 14 يوم، أي ضابط ياخد القيادة',
         'إعلان الجيلد: القائد والضباط بيكتبوه من G، وبيظهر فوق في G، وكل الأعضاء بيوصلهم لما يتغير',

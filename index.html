@@ -482,7 +482,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
       <div id="loot"></div>
       <div id="evbar" class="sys" hidden></div><div id="tlbar" class="sys" hidden></div>
       <div id="sgbar" class="sys" hidden></div><div id="natbar" class="sys" hidden></div>
-      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plBnt" data-act="plBnt" data-i18n="bntBoard"></button><button id="plRnk" data-act="plRnk" data-i18n="rnkBoard"></button><button id="plFr" data-act="plFr" data-i18n="frBoard"></button><button id="plLfg" data-act="plLfg" data-i18n="lfgBoard"></button><button id="plNat" data-act="plNat" data-i18n="natBoard"></button></div></div>
+      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plBnt" data-act="plBnt" data-i18n="bntBoard"></button><button id="plRnk" data-act="plRnk" data-i18n="rnkBoard"></button><button id="plFr" data-act="plFr" data-i18n="frBoard"></button><button id="plLfg" data-act="plLfg" data-i18n="lfgBoard"></button><button id="plNat" data-act="plNat" data-i18n="natBoard"></button><button id="plCal" data-act="plCal" data-i18n="calBoard"></button></div></div>
       <div id="netRepW" class="sys" hidden><div id="netRepT"></div><div class="row"><button id="netRepBtn" data-act="netTakeBack"></button></div></div>
       <div id="duelInv" class="sys" hidden><div id="duelInvT"></div><div class="row"><button id="duelBtnA" data-act="dAccept"></button><button id="duelBtnB" data-act="dDecline"></button><button id="duelBtnC" class="blk" data-act="dBlock" data-i18n="pBlock"></button></div></div>
       <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
@@ -6266,6 +6266,7 @@ function act(a){
  else if(a==='plFr')frBoard();
  else if(a==='plLfg')lfgBoard();
  else if(a==='plNat')natBoard();
+ else if(a==='plCal')calBoard();
  else if(/^tr[A-Z]/.test(a))tradeAct(a);
  else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
@@ -7638,6 +7639,29 @@ function rptAsk(r){if(!rptOn()||!r||!r.uid)return;const n=Satisfy.chat.clean(r.h
 function rptSend(r,n,why){RPTT[r.uid]=performance.now();const said=CHAT?CHAT.log().filter(l=>l.from===r.uid&&!l.self).slice(-3).map(l=>l.text).join(' | '):'';
  Satisfy.firebase.reportStore(FB).report({by:NET.uid,byN:netId||S.look.n,about:r.uid,aboutN:n,why,said}).then(()=>toast(t('rptDone',{n}),'good'),()=>{delete RPTT[r.uid];toast(t('rptFail'),'warn');});}
 window.__GRP={ask:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);rptAsk(r);},get filter(){return CHATF}}; // tests
+/* the event calendar (SAT-ONLINE-077, plan U331). "Calendar" in the player list (O) shows what comes next on the world clock:
+   the next three world events (each slot's event is known in advance), the National Competition, the siege of Reidan Castle,
+   the town festival, the horse race, and when Trauka and Berith are back. Every time is in your own time zone and in UTC.
+   The world clock is the server's online (wNow), so everyone's calendar is the same and nobody's device clock can move it. */
+Object.assign(STR.ar,{calBoard:'المواعيد',calH:'المواعيد (بتوقيتك {z})',calH2:'المواعيد: الحصار والمهرجان والسباق والبوسات',calFs:'مهرجان المدن',calRace:'سباق الخيل',calNow:'دلوقتي (فاضل {m} دقيقة)',calAt:'{l} (UTC {u}) بعد {d}',calUp:'موجود دلوقتي',calBack:'راجع {l} (UTC {u}) بعد {d}',calMin:'{m} دقيقة',calHr:'{h} ساعة و{m} دقيقة'});
+Object.assign(STR.en,{calBoard:'Calendar',calH:'Calendar (your time, {z})',calH2:'Calendar: siege, festival, race, world bosses',calFs:'Town festival',calRace:'Horse race',calNow:'now ({m} min left)',calAt:'{l} (UTC {u}), in {d}',calUp:'up now',calBack:'back at {l} (UTC {u}), in {d}',calMin:'{m} min',calHr:'{h} h {m} min'});
+// what is on or comes next from world time n: [{k, at, end}] (k a string key); the same for everyone at the same n
+function calList(n){const out=[],add=(k,at,len)=>out.push({k,at,end:at+len});
+ {let sl=Math.floor(n/EVS);if(n-sl*EVS>=EVLEN)sl++;for(let i=0;i<3;i++,sl++)add('evN_'+EVT[((sl*2654435761)>>>0)%EVT.length].k,sl*EVS,EVLEN);}
+ {const C=Satisfy.natcomp.C,L=C.STAGE*C.STAGES.length;let st=Math.floor((n-C.OFFSET)/C.PERIOD)*C.PERIOD+C.OFFSET;if(n-st>=L)st+=C.PERIOD;add('natN',st,L);}
+ {let st=Math.floor((n-SIEGO)/SIEGP)*SIEGP+SIEGO;if(n-st>=SIEGL)st+=SIEGP;add('sgN',st,SIEGL);}
+ {const H=3600000;for(let h=Math.floor(n/H);;h++)if(new Date(h*H).getUTCHours()%3===1&&n<h*H+60*60000){add('calFs',h*H+35*60000,25*60000);break;}}
+ {const sl=Math.floor(n/RCS),st=sl*RCS+RCGO;add('calRace',n<sl*RCS+RCEND?st:st+RCS,RCEND-RCGO);}
+ return out;}
+function calTime(ms,utc){const d=new Date(ms),h=utc?d.getUTCHours():d.getHours(),m=utc?d.getUTCMinutes():d.getMinutes();return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}
+function calIn(ms){const m=Math.max(1,Math.ceil(ms/60000));return m<60?t('calMin',{m}):t('calHr',{h:Math.floor(m/60),m:m%60});}
+function calWhen(e,n){return n>=e.at?t('calNow',{m:Math.max(1,Math.ceil((e.end-n)/60000))}):t('calAt',{l:calTime(e.at),u:calTime(e.at,true),d:calIn(e.at-n)});}
+function calBoss(k,n){const u=WS&&WS.wb&&WS.wb[k];return t(k+'N')+': '+(u&&u>n?t('calBack',{l:calTime(u),u:calTime(u,true),d:calIn(u-n)}):t('calUp'));}
+function calZone(){const o=-new Date().getTimezoneOffset(),a=Math.abs(o);return 'UTC'+(o<0?'−':'+')+Math.floor(a/60)+(a%60?':'+String(a%60).padStart(2,'0'):'');}
+function calBoard(){const n=wNow(),L=calList(n),line=e=>t(e.k)+': '+calWhen(e,n);plOpen(false);
+ dialog('guild',[t('calH',{z:calZone()})+' · '+L.filter(e=>/^evN_|^natN$/.test(e.k)).map(line).join(' · '),
+  t('calH2')+' · '+L.filter(e=>!/^evN_|^natN$/.test(e.k)).map(line).concat(['trauka','berith'].map(k=>calBoss(k,n))).join(' · ')],null,[{l:t('oClose')}]);}
+window.__GCAL={list:n=>calList(n==null?wNow():n),board:()=>calBoard(),zone:()=>calZone()}; // tests
 /* the group finder (SAT-ONLINE-073, plan U185). "Group finder" in the player list (O) shows who is looking for a raid, a party,
    a dungeon group or a duel, with level, class and where they are, and lets you say what you are looking for yourself
    (lfg/{uid}, yours only: gone when you stop, leave, or after half an hour). Go to them, or whisper a friend. */
