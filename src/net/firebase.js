@@ -407,7 +407,25 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; return up(u); },
+      // SAT-ONLINE-076: the master moves to `to` (an officer), who becomes 'm' while `from` becomes 'o', in one update; the
+      // master writes it, or the officer when the master has been away AWAY_MS (the rules check both). Ranks only change:
+      // each entry keeps its name, contribution and last seen.
+      handover: function (gid, from, to) {
+        return Promise.all([D.get(at('guildMembers/' + gid + '/' + from)), D.get(at('guildMembers/' + gid + '/' + to)), D.get(at('guilds/' + gid))]).then(function (r) {
+          var a = r[0].val(), b = r[1].val(), g = r[2].val(); if (!a || !b || !g) throw new Error('gone');
+          var u = {};
+          u['guilds/' + gid] = { name: g.name, nk: g.nk, master: to, col: g.col, t: g.t };
+          u['guildMembers/' + gid + '/' + to] = { rk: 'm', n: b.n, c: b.c, on: b.on };
+          u['guildMembers/' + gid + '/' + from] = { rk: 'o', n: a.n, c: a.c, on: a.on };
+          return up(u);
+        });
+      },
+      // guildNote/{gid} = {s, by, n, v, t}: the notice; members read it, the master and officers write the next version
+      watchNote: function (gid, cb) { return watch('guildNote/' + gid, cb); },
+      setNote: function (gid, n) { var u = {}; u['guildNote/' + gid] = { s: n.s, by: n.by, n: n.n, v: n.v, t: SV() }; return up(u); },
+      // SAT-ONLINE-076: every guild and its members, for the guild rankings (read once when the board opens)
+      readAll: function () { return Promise.all([D.get(at('guilds')), D.get(at('guildMembers'))]).then(function (r) { return { guilds: r[0].val() || {}, members: r[1].val() || {} }; }); },
       // SAT-ONLINE-065: the treasury guildBank/{gid} = {in, s, lb, lg, t} (in: all gold given, s: all spent on buildings; lb,
       // lg: the last gift's giver and amount, which the rules add to in), the buildings guildBuild/{gid}/{b} = level and
       // guildLog/{gid}/{id} = {by, n, k, g, b?, l?, t}. A gift or a build reads the treasury and writes it back with the

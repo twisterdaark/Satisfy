@@ -15,19 +15,25 @@
  * plain values, or a stack); the master and officers take anything out, a member takes back its own. Taking writes
  * guildVaultTaken/{gid}/{vid} once in the same update, so two players can't both take one thing.
  *
+ * The master and the notice (SAT-ONLINE-076, plan U241/U243): the master hands the guild to an officer in one update
+ * (guilds/{gid}/master, the officer's entry to 'm', the old master's to 'o'), and when the master has not been seen for
+ * AWAY_MS an officer takes it over the same way. guildNote/{gid} {s, by, n, v, t} is the notice the master and officers
+ * write and members read; v counts the versions. The guild id stays 'g_' + the founder's uid after a handover.
+ *
  * Not cheat-proof yet: contributions are each member's own number. A game server (D3) owns them later.
  *
  * Exposes `Satisfy.guild.create({ store, uid, handle, now?, serverNow? })` and the helpers `validName`, `nameKey`,
  * `gidOf`, `can`, `C`, `memoryStore`.
  *   store: { watchInv(uid, cb), watchGuild(gid, cb), watchMembers(gid, cb) -> off; create(gid, uid, guild, member),
  *            invite(uid, gid, inv), uninvite(uid, gid), join(gid, uid, member), leave(gid, uid), kick(gid, uid),
- *            setRank(gid, uid, rk), beat(gid, uid, part), disband(gid, nk), readGuild(gid), readMember(gid, uid) }:
+ *            setRank(gid, uid, rk), beat(gid, uid, part), disband(gid, nk), readGuild(gid), readMember(gid, uid),
+ *            handover(gid, from, to), watchNote(gid, cb), setNote(gid, note) }:
  *          promises; Satisfy.firebase.guildStore(sdk) is the database one.
  */
 (function (root) {
   'use strict';
 
-  var C = Object.freeze({ NAME_MIN: 2, NAME_MAX: 18, MAX_MEMBERS: 250, VAULT_MAX: 60, VID_RE: /^v_[A-Za-z0-9_-]{1,80}$/, INV_MS: 7 * 24 * 3600 * 1000, BEAT_MS: 60000, ON_MS: 150000, C_MAX: 1e12, COLORS: ['#5aa0ff', '#4ab06a', '#d8a840', '#9a6ad8', '#e05a5a', '#3ac8c8', '#e88a3a', '#c8c8d0'] });
+  var C = Object.freeze({ NAME_MIN: 2, NAME_MAX: 18, MAX_MEMBERS: 250, VAULT_MAX: 60, VID_RE: /^v_[A-Za-z0-9_-]{1,80}$/, INV_MS: 7 * 24 * 3600 * 1000, BEAT_MS: 60000, ON_MS: 150000, C_MAX: 1e12, AWAY_MS: 14 * 24 * 3600 * 1000, NOTE_MAX: 240, COLORS: ['#5aa0ff', '#4ab06a', '#d8a840', '#9a6ad8', '#e05a5a', '#3ac8c8', '#e88a3a', '#c8c8d0'] });
   var GID_RE = /^g_[A-Za-z0-9]{1,128}$/, RK = { m: 3, o: 2, r: 1 };
 
   // a guild name: trimmed, single spaces, NAME_MIN..NAME_MAX characters, none that a database key can't hold
@@ -47,6 +53,9 @@
     if (act === 'disband') return r === 3;
     if (act === 'leave') return r > 0 && r < 3;
     if (act === 'take') return r >= 2;
+    if (act === 'handover') return r === 3 && t === 2; // to an officer
+    if (act === 'claim') return r === 2; // an officer, when the master is away
+    if (act === 'note') return r >= 2;
     return false;
   }
   function cleanEntry(v) {
@@ -59,9 +68,13 @@
     if (!v || typeof v !== 'object' || !RK[v.rk]) return null;
     return { rk: v.rk, n: typeof v.n === 'string' ? v.n.slice(0, 24) : '?', c: Math.max(0, Math.min(C.C_MAX, Math.floor(+v.c || 0))), on: +v.on || 0 };
   }
+  function cleanNote(v) {
+    if (!v || typeof v !== 'object' || typeof v.s !== 'string' || typeof v.by !== 'string') return null;
+    return { s: v.s.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, C.NOTE_MAX), by: v.by, n: typeof v.n === 'string' ? v.n.slice(0, 24) : '?', v: Math.max(1, Math.floor(+v.v || 1)), t: +v.t || 0 };
+  }
   function cleanGuild(v, gid) {
     if (!v || typeof v !== 'object' || typeof v.name !== 'string' || !validName(v.name) || typeof v.master !== 'string') return null;
-    if (gidOf(v.master) !== gid) return null;
+    if (!/^[A-Za-z0-9]{1,128}$/.test(v.master) || !GID_RE.test(gid)) return null; // the founder's, or the one it was handed to
     return { name: v.name, nk: nameKey(v.name), master: v.master, col: /^#[0-9a-fA-F]{6}$/.test(v.col || '') ? v.col : C.COLORS[0] };
   }
 
@@ -78,7 +91,7 @@
     // watch one guild: its node and its members; we are in it while our entry is there
     function follow(gid, why) {
       unfollow();
-      G = { gid: gid, guild: null, members: {}, vault: {}, seen: false, offs: [], why: why || '' };
+      G = { gid: gid, guild: null, members: {}, vault: {}, note: null, seen: false, offs: [], why: why || '' };
       var g = G;
       g.offs.push(store.watchGuild(gid, function (v) {
         if (G !== g) return;
@@ -96,6 +109,8 @@
           g.seen = true; cMine = Math.max(cMine, m[self].c);
           // the vault is for members only: watch it once we know we are one
           if (store.watchVault) g.offs.push(store.watchVault(gid, function (v) { if (G !== g) return; var o = {}, k; for (k in (v || {})) { var e = C.VID_RE.test(k) && cleanEntry(v[k]); if (e) o[k] = e; } g.vault = o; emit({ type: 'vault' }); }));
+          // fresh: changed while we watch (not what was there when we came in), by someone else
+          if (store.watchNote) g.offs.push(store.watchNote(gid, function (v) { if (G !== g) return; var n = cleanNote(v), first = !g.noteIn; g.noteIn = true; if (JSON.stringify(n) !== JSON.stringify(g.note)) { var was = g.note; g.note = n; emit({ type: 'note', note: n, fresh: !first && !!n && n.by !== self && (!was || n.v > was.v) }); } }));
           emit({ type: 'joined', gid: gid, why: g.why, name: g.guild ? g.guild.name : '' });
         }
         emit({ type: 'changed' });
@@ -192,6 +207,31 @@
         if (!e || !api.canTake(vid)) return Promise.reject(new Error('rank'));
         return store.withdraw(G.gid, vid, self).then(function () { return e; });
       },
+      /** The master hands the guild to an officer: they become master, you an officer. */
+      handover: function (uid) {
+        var t = G && G.members[uid];
+        if (!G || !G.guild || !t || uid === self || !can(myRank(), 'handover', t.rk)) return Promise.reject(new Error('rank'));
+        return store.handover(G.gid, self, uid);
+      },
+      /** Has the master not been seen for AWAY_MS (so an officer may take the guild over)? */
+      masterAway: function () {
+        var m = G && G.guild && G.members[G.guild.master];
+        return !!G && !!G.guild && G.guild.master !== self && (!m || serverNow() - m.on > C.AWAY_MS);
+      },
+      /** An officer takes the guild over from a master who has been away AWAY_MS. */
+      claim: function () {
+        if (!G || !G.guild || !can(myRank(), 'claim') || !api.masterAway()) return Promise.reject(new Error('rank'));
+        return store.handover(G.gid, G.guild.master, self);
+      },
+      /** The guild notice: {s, by, n, v, t} or null. */
+      note: function () { return G ? G.note : null; },
+      /** The master or an officer writes the notice (the next version). */
+      setNote: function (text) {
+        if (!G || !can(myRank(), 'note')) return Promise.reject(new Error('rank'));
+        var s = String(text == null ? '' : text).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, C.NOTE_MAX);
+        if (!s) return Promise.reject(new Error('empty'));
+        return store.setNote(G.gid, { s: s, by: self, n: String(handle() || '').slice(0, 24) || '?', v: (G.note ? G.note.v : 0) + 1 });
+      },
       /** Add to your contribution (the guild's experience); written with the next heartbeat. */
       contribute: function (n) { n = Math.floor(+n || 0); if (n > 0 && me()) cMine = Math.min(C.C_MAX, cMine + n); },
       /** Heartbeat (who is online) and pending contributions. Call about once per frame. */
@@ -211,7 +251,7 @@
   // An in-memory database with the rules' checks, for tests: memoryStore().as(uid) is the store one player uses (the
   // acting uid stands in for auth.uid). guildStore in firebase.js has the same shape.
   function memoryStore() {
-    var d = { guilds: {}, names: {}, members: {}, inv: {}, vault: {}, taken: {} }, watchers = [], clock = 1;
+    var d = { guilds: {}, names: {}, members: {}, inv: {}, vault: {}, taken: {}, notes: {} }, watchers = [], clock = 1;
     function fire() { watchers.slice().forEach(function (w) { try { w(); } catch (e) { /* ignore */ } }); }
     function watch(get, cb) { var last; var w = function () { var v = JSON.stringify(get() || null); if (v !== last) { last = v; cb(JSON.parse(v)); } }; watchers.push(w); w(); return function () { var i = watchers.indexOf(w); if (i >= 0) watchers.splice(i, 1); }; }
     function no(why) { return Promise.reject(new Error('PERMISSION_DENIED: ' + why)); }
@@ -240,7 +280,20 @@
         kick: function (gid, uid) { if (!can(rk(gid, me), 'kick', rk(gid, uid))) return no('kick'); delete d.members[gid][uid]; return ok(); },
         setRank: function (gid, uid, r) { if (!can(rk(gid, me), 'rank', rk(gid, uid)) || (r !== 'o' && r !== 'r')) return no('rank'); d.members[gid][uid].rk = r; return ok(); },
         beat: function (gid, uid, p) { var m = (d.members[gid] || {})[uid]; if (uid !== me || !m || p.rk !== m.rk) return no('beat'); m.n = p.n; m.c = p.c; m.on = clock; return ok(); },
-        disband: function (gid, nk) { if (rk(gid, me) !== 'm' || d.names[nk] !== gid) return no('disband'); delete d.guilds[gid]; delete d.names[nk]; delete d.members[gid]; delete d.vault[gid]; delete d.taken[gid]; return ok(); },
+        disband: function (gid, nk) { if (rk(gid, me) !== 'm' || d.names[nk] !== gid) return no('disband'); delete d.guilds[gid]; delete d.names[nk]; delete d.members[gid]; delete d.vault[gid]; delete d.taken[gid]; delete d.notes[gid]; return ok(); },
+        // as the rules: the master to an officer, or an officer from a master away AWAY_MS (`clock` is the server time)
+        handover: function (gid, from, to) {
+          var g = d.guilds[gid], ms = d.members[gid] || {}, a = ms[from], b = ms[to];
+          if (!g || g.master !== from || !a || a.rk !== 'm' || !b || b.rk !== 'o') return no('handover');
+          if (!(me === from || (me === to && clock - a.on > C.AWAY_MS))) return no('handover');
+          g.master = to; b.rk = 'm'; a.rk = 'o'; return ok();
+        },
+        watchNote: function (gid, cb) { return watch(function () { return rk(gid, me) ? d.notes[gid] : null; }, cb); },
+        setNote: function (gid, n) {
+          var r = rk(gid, me), old = d.notes[gid];
+          if ((r !== 'm' && r !== 'o') || n.by !== me || n.v !== (old ? old.v : 0) + 1 || !n.s || n.s.length > C.NOTE_MAX) return no('note');
+          d.notes[gid] = { s: n.s, by: me, n: n.n, v: n.v, t: clock }; return ok();
+        },
         watchVault: function (gid, cb) { return watch(function () { return rk(gid, me) ? d.vault[gid] : null; }, cb); },
         deposit: function (gid, vid, v) { if (!rk(gid, me) || v.by !== me || (d.vault[gid] || {})[vid]) return no('deposit'); (d.vault[gid] = d.vault[gid] || {})[vid] = JSON.parse(JSON.stringify(v)); return ok(); },
         withdraw: function (gid, vid, uid) {
@@ -256,5 +309,5 @@
   }
 
   var ns = root.Satisfy = root.Satisfy || {};
-  ns.guild = Object.freeze({ create: create, memoryStore: memoryStore, validName: validName, nameKey: nameKey, gidOf: gidOf, can: can, cleanGuild: cleanGuild, cleanEntry: cleanEntry, C: C, GID_RE: GID_RE });
+  ns.guild = Object.freeze({ create: create, memoryStore: memoryStore, validName: validName, nameKey: nameKey, gidOf: gidOf, can: can, cleanGuild: cleanGuild, cleanEntry: cleanEntry, cleanNote: cleanNote, C: C, GID_RE: GID_RE });
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -148,11 +148,11 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U237 | Guild research tree | 🟡 | Three buildings of three levels paid from the treasury (065); no tree |
 | U238 | Guild alliances | ❌ | |
 | U239 | Guild wars | ❌ | |
-| U240 | Territory objectives | ❌ | Sieges exist as world events (B), not owned by guilds |
-| U241 | Guild leader handover | ❌ | Next: the master hands the guild to an officer |
+| U240 | Territory objectives | 🟡 | Guilds capture territory banners and the castle; who holds them is shared online (`world/satisfy/own`, with world news); no weekly limit |
+| U241 | Guild leader handover | ✅ | SAT-ONLINE-076: the master hands the guild to an officer, or an officer takes it over from a master unseen 14 days; the ranks swap in the same write, so there is never a second master (`regression/guildlead`, `unit/guild`) |
 | U242 | Guild event calendar | ❌ | |
-| U243 | Guild notice board | ❌ | Next: a notice the master and officers write |
-| U244 | Guild rankings | ❌ | Next: guilds by level and members |
+| U243 | Guild notice board | ✅ | SAT-ONLINE-076: `guildNote/{gid}`, written by the master and officers, each write the next version; members read it and hear when it changes; shown as text, never as HTML |
+| U244 | Guild rankings | ✅ | SAT-ONLINE-076: every online guild next to the canon ones, by level from the members' summed contribution (the same formula as your own guild's) |
 | U245 | Guild diplomacy | ❌ | |
 | U246 | Guild seasonal rewards | ❌ | |
 
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 25 · 🟡 39 · ⏳ 6 · ❌ 34 of 104. Next from here: guild leader handover, notice board and rankings (U241, U243, U244), the event calendar (U331), guild recruitment (U229) and data export (U346).
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 28 · 🟡 40 · ⏳ 6 · ❌ 30 of 104. Next from here: the event calendar (U331), guild recruitment (U229) and data export (U346).
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

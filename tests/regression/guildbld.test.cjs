@@ -22,7 +22,9 @@ async function until(games, fn, ms = 10000, arg) {
     await games[0].page.waitForTimeout(30);
   }
 }
-const toasts = (g) => g.eval(() => document.getElementById('toasts').textContent);
+// a toast lives 2.6 s of real time, which a busy machine steps past: every page keeps the toasts it has shown
+const toasts = (g) => g.eval(() => window.__toastSeen || '');
+const keepToasts = (g) => g.eval(() => { window.__toastSeen = ''; const box = document.getElementById('toasts'); new MutationObserver(() => { window.__toastSeen += '|' + box.textContent; }).observe(box, { childList: true, subtree: true, characterData: true }); });
 const bank = (g) => g.eval(() => window.__GBD.bank());
 
 test('online guild buildings: gifts to the treasury, buildings raised from it, applied for every member', async () => {
@@ -34,6 +36,7 @@ test('online guild buildings: gifts to the treasury, buildings raised from it, a
       await g.eval(([u, n]) => { window.__fakeRTDB.data.set('accountIds/' + u, n); window.__fakeRTDB.nextName = n; window.__fakeRTDB.nextUid = u; document.getElementById('onlineBtn').click(); }, [uid, name]);
       await until([g], () => !!Satisfy.local.net() && Satisfy.local.net().state === 'ONLINE', 15000);
       await H.newGame(g, look);
+      await keepToasts(g);
     }
     const { a, b } = P;
     await b.eval(() => { window.__G.P.x += 20; });

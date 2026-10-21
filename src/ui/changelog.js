@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21guildlead', ver: '1.04', d: '2026-10-21',
+      ar: ['أونلاين: قائد الجيلد يقدر يسلّم الجيلد لضابط من كارته في G ← الأعضاء، فيبقى هو القائد وإنت ضابط. ولو القائد غاب 14 يوم، أي ضابط ياخد القيادة',
+        'إعلان الجيلد: القائد والضباط بيكتبوه من G، وبيظهر فوق في G، وكل الأعضاء بيوصلهم لما يتغير',
+        'ترتيب الجيلدات أونلاين: كل الجيلدات اللي في العالم جنب جيلدات الرواية، باللفل من مجموع مساهمة الأعضاء، وجيلدك عليه نجمة'],
+      en: ['Online: the guild master can hand the guild to an officer from their card in G -> Members; they become master and you an officer. If the master has been away 14 days, any officer can take it over',
+        'The guild notice: the master and officers write it from G; it shows at the top of G, and every member hears when it changes',
+        'Guild rankings online: every guild in the world next to the novel\'s, by level from the members\' summed contribution, with a star on yours'] },
     { v: '2026-10-21v103', ver: '1.03', d: '2026-10-21',
       ar: ['الفحص والخواص المخفية: أي قطعة أعلى من "عادي" وأي قطعة مسمّاة من زعيم بتبقى "لسه متفحصتش" لحد ما حد يفحصها',
         'الحدادين بيفحصوا بأجرة (اختيار "افحص قطعة")، والحداد بنفسه بيفحص ببلاش من زرار "فحص" على السندان',

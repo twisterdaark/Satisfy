@@ -309,7 +309,7 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 #keys{grid-template-columns:repeat(5,auto)}
 .key.lock kbd::after{content:"🔒";position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--u)*.8);background:rgba(0,0,0,.55)}
 #gnBox{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:40;display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*.8);padding:calc(var(--u)*1.2) calc(var(--u)*2);pointer-events:auto;min-width:calc(var(--u)*34)}#gnBox .gnr{display:flex;gap:calc(var(--u)*.8)}#gnBox .gnd{opacity:.85;text-align:center}
-#nameIn{font:inherit;color:#fff;background:rgba(0,0,0,.5);border:1px solid var(--gold);padding:calc(var(--u)*.3) calc(var(--u)*.8);text-align:center;pointer-events:auto;user-select:text;-webkit-user-select:text;width:calc(var(--u)*30)}
+#nameIn,#lineIn{font:inherit;color:#fff;background:rgba(0,0,0,.5);border:1px solid var(--gold);padding:calc(var(--u)*.3) calc(var(--u)*.8);text-align:center;pointer-events:auto;user-select:text;-webkit-user-select:text;width:calc(var(--u)*30)}
 /* patch 3 */
 #keys{grid-template-columns:repeat(4,auto)}
 #rcol{position:absolute;inset-inline-end:calc(var(--u)*1);top:calc(var(--u)*1);display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*.6);pointer-events:none}
@@ -3511,7 +3511,7 @@ function legendLines(){const L=WS.legends||{};return ['pagma','braham','muller']
 // each ranking opens straight on its list, titled "Rankings Clerk: Wealth" and so on
 function rankerOpts(){const back=()=>shopD('ranker','rk_hi'),hd=k=>t(k).replace(/^\[|\]$/g,'').split(/:\s*/).pop(),D=(k,...ls)=>dialog('ranker',ls.map(l=>[t('ranker')+': '+hd(k),l]),back);return [
  {l:t('rkLv'),f:()=>D('rkLvH',rankList('lv'))},{l:t('rkGold'),f:()=>D('rkGoldH',rankList('gold'))},
- {l:t('rkGuild'),f:()=>D('rkGuild',rankLine())},{l:t('rkLeg'),f:()=>D('rkLeg',legendLines())},
+ {l:t('rkGuild'),f:()=>gRankFresh(()=>D('rkGuild',rankLine()))},{l:t('rkLeg'),f:()=>D('rkLeg',legendLines())},
  {l:t('rkArena'),f:()=>D('rkArena',WS.arena&&WS.arena.day===today()?t('rkArToday',{n:WS.arena.n}):t('rkArNone'),t('rkArMe',{n:S.arW||0}))},
  {l:t('rkTower'),f:()=>D('rkTower',WS.tower?t('twrRecW',{n:WS.tower.n,f:WS.tower.f}):t('twrRecNone'),t('twrRecMe',{n:S.twB||0}))}];}
 
@@ -5077,18 +5077,21 @@ function donMats(){const ks=Object.keys(DONM).filter(k=>S.mats[k]>0);if(!ks.leng
  dialog('guild',['oDonMats'],null,[...ks.map(k=>({l:t('oDonM',{n:S.mats[k],it:t(k),x:S.mats[k]*DONM[k]}),ic:k,f:()=>{const n=S.mats[k];S.mats[k]=0;gContrib(n*DONM[k]);toast(t('gDonated',{x:n*DONM[k]}),'good');SFX.coin();donMats();}})),{l:t('oBack'),f:guildPanel}]);}
 function donGold(){if(S.gold<1000){SFX.deny();return guildPanel();}S.gold-=1000;gContrib(500);toast(t('gDonated',{x:500}),'good');SFX.coin();hudDirty=true;guildPanel();}
 function terrList(back){dialog('guild',[castleLine(),...TERR.map(T=>{const o=WS.terr[T.k];return `[${t(T.k)}] ${o.own?gName(o.own):t('gNone')} · Lv ${T.lv}${o.sh>Date.now()?' · '+t('shL',{m:shieldMin(o)}):''} · ${t('pk_'+T.k)}`;})],back||null);}
-function rankLine(){return t('rankH')+Object.values(WS.guilds).sort((a,b)=>gLv(b)-gLv(a)||b.xp-a.xp).map((g,i)=>`${i+1}. ${gName(g.id)} (Lv ${gLv(g)}, ${TERR.filter(T=>WS.terr[T.k].own===g.id).length} ${t('terrN')})`).join(' · ');}
+function rankLine(){const all={};for(const k in (GRANK||{}))all[k]=Object.assign({},GRANK[k]);for(const k in WS.guilds)all[k]=Object.assign(all[k]||{},WS.guilds[k]);
+ const L=Object.values(all).sort((a,b)=>gLv(b)-gLv(a)||(b.xp||0)-(a.xp||0)),nm=g=>WS.guilds[g.id]?gName(g.id):Satisfy.chat.clean(g.name,18)||'?',k=L.findIndex(g=>g.id===(S&&S.guild));
+ return t('rankH')+L.slice(0,10).map((g,i)=>`${i+1}. ${g.id===(S&&S.guild)?'★ ':''}${nm(g)} (Lv ${gLv(g)}, ${TERR.filter(T=>WS.terr[T.k].own===g.id).length} ${t('terrN')})`).join(' · ')+(k>=10?' · '+t('gdRankMe',{k:k+1}):'');}
 function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],null,[{l:t('oTerrList'),f:()=>terrList()},{l:t('oClose')}]);
  const l=gLv(g),me=g.members[pidOf()]||{c:0},nx=GXP[l];
  const info=t('gInfo',{g:gName(g.id),n:l,x:g.npc?'-':nx?`${g.xp}/${nx}`:t('gMax'),m:Object.keys(g.members).length,cap:l*25,c:me.c});
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
- dialog('guild',[info,perks],null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
-  ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD}]:[]),
+ dialog('guild',[info,perks,g.online?guildNoteLine():''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
+  ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},
+   ...(Satisfy.guild.can(GUILD.state().rank,'note')?[{l:t('gdNoteW'),f:guildNoteW}]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
 function guildMOpts(){const o=[],back=()=>shopD('guildM','gm_hi');
  if(!S.guild)o.push({l:t('oMakeG',{g:GCOST,l:GLV}),ic:'book',poor:S.gold<GCOST||S.lv<GLV,f:()=>S.lv<GLV?dialog('guildM',[t('gNeedLv',{n:GLV})],back):S.gold<GCOST?dialog('guildM',[t('noGold')],back):openGName()});
  else o.push({l:t('oMyG'),f:guildPanel});
- o.push({l:t('oRank'),f:()=>dialog('guildM',[rankLine()],back)},{l:t('oTerrList'),f:()=>terrList(back)});return o;}
+ o.push({l:t('oRank'),f:()=>gRankFresh(()=>dialog('guildM',[rankLine()],back))},{l:t('oTerrList'),f:()=>terrList(back)});return o;}
 // Territory banners. Claiming one: beat the owner guild's guards, then hold the banner for CAPT seconds without being hit.
 // A captured banner is shielded for a while; after that it can be contested again. Online the challengers are other
 // players' guilds; offline the canon guilds send raids to win their land back.
@@ -7368,7 +7371,10 @@ function guildEv(e){if(!S||S.__demo||gdFor!==S)return;gdSig='';
  if(e.type==='changed')guildMirror();
  else if(e.type==='joined'){guildMirror();if(e.why==='join'){toast(t('gJoined',{g:e.name||gName(S.guild)}),'good');SFX.quest();save(true);}}
  else if(e.type==='left'){const g=Satisfy.chat.clean(e.name,18)||gName(e.gid);guildDrop(e.gid);if(e.why!=='left')toast(t({kicked:'gdKicked',disbanded:'gdDisb',gone:'gdGone'}[e.why]||'gdGone',{g}),'warn');else toast(t('gLeft',{g}));}
- else if(e.type==='invited'&&!S.guild)SFX.notice&&SFX.notice();}
+ else if(e.type==='invited'&&!S.guild)SFX.notice&&SFX.notice();
+ else if(e.type==='note'&&e.fresh&&e.note)toast(t('gdNoteNew',{n:e.note.n,s:e.note.s}),'good');
+ if(e.type==='changed'){const st=GUILD.state(),mm=st.guild&&st.guild.master;if(mm&&GDM&&mm!==GDM&&GDM!==NET.uid&&st.gid){const m=st.members[mm];toast(mm===NET.uid?t('gdClaimDone',{g:st.guild.name}):t('gdNewM',{n:m?m.n:'?'}),'good');}GDM=mm||null;}
+ if(e.type==='left')GDM=null;}
 function guildMirror(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!st.guild||!WS||!S)return;const me=NET.uid,g=WS.guilds[st.gid]||{},mem={};
  for(const u in st.members){const m=st.members[u];mem[u===me?pidOf():'u:'+u]={n:m.n,rk:m.rk,c:m.c,uid:u};}
  WS.guilds[st.gid]=Object.assign(g,{id:st.gid,name:st.guild.name,master:st.guild.master===me?pidOf():'u:'+st.guild.master,lv:1,xp:st.xp,col:st.guild.col,online:1,members:mem});
@@ -7461,8 +7467,34 @@ function guildMemberD(u){const st=GUILD&&GUILD.state(),m=st&&st.members[u];if(!m
  const after=(p,ok)=>p.then(()=>{if(ok)toast(ok,'good');guildMembersD();},()=>{toast(t('gdFail'),'warn');guildMembersD();});
  if(u!==NET.uid){
   if(can(st.rank,'rank',m.rk))o.push(m.rk==='r'?{l:t('gdMkO',{n:m.n}),f:()=>after(GUILD.setRank(u,'o'),t('gdRkDone',{n:m.n}))}:{l:t('gdMkR',{n:m.n}),f:()=>after(GUILD.setRank(u,'r'),t('gdRkDone',{n:m.n}))});
-  if(can(st.rank,'kick',m.rk))o.push({l:t('gdKick',{n:m.n}),f:()=>dialog('guild',[t('gdKickQ',{n:m.n})],null,[{l:t('gYes'),f:()=>after(GUILD.kick(u),t('gdKickDone',{n:m.n}))},{l:t('gNo'),f:guildMembersD}])});}
+  if(can(st.rank,'kick',m.rk))o.push({l:t('gdKick',{n:m.n}),f:()=>dialog('guild',[t('gdKickQ',{n:m.n})],null,[{l:t('gYes'),f:()=>after(GUILD.kick(u),t('gdKickDone',{n:m.n}))},{l:t('gNo'),f:guildMembersD}])});
+  if(can(st.rank,'handover',m.rk))o.push({l:t('gdHand',{n:m.n}),f:()=>dialog('guild',[t('gdHandQ',{n:m.n,g:st.guild.name})],null,[{l:t('gYes'),f:()=>after(GUILD.handover(u),t('gdHandDone',{n:m.n,g:st.guild.name}))},{l:t('gNo'),f:guildMembersD}])});
+  if(m.rk==='m'&&can(st.rank,'claim')&&GUILD.masterAway())o.push({l:t('gdClaim',{n:m.n}),f:()=>after(GUILD.claim(),t('gdClaimDone',{g:st.guild.name}))});}
  dialog('guild',[m.n+' · '+t('gdRk_'+m.rk)+' · '+t(GUILD.online(m)?'gdOn':'gdOff')],null,[...o,{l:t('oBack'),f:guildMembersD}]);}
+/* the guild master and the notice (SAT-ONLINE-076, plan U241/U243/U244). The master hands the guild to an officer from
+   that officer's card (they become master, you an officer); when the master has not been seen for 14 days an officer takes
+   it over from the master's card. The notice: one line the master and officers write ("Write the notice" in G), shown at the
+   top of G and as a toast when it changes. Guild rankings online list every guild in the database next to the canon ones, by
+   level from the members' summed contribution (your own guild's formula), then experience. */
+Object.assign(STR.ar,{gdHand:'سلّم الجيلد لـ{n}',gdHandQ:'تسلّم {g} لـ{n}؟ هيبقى هو القائد وإنت ضابط',gdHandDone:'{n} بقى قائد {g}',gdClaim:'خد قيادة الجيلد ({n} غايب من 14 يوم)',gdClaimDone:'إنت بقيت قائد {g}',gdNewM:'{n} بقى قائد الجيلد',gdNoteL:'📌 {s} ({n})',gdNoteW:'اكتب إعلان الجيلد',gdNoteT:'إعلان الجيلد (لحد 240 حرف)',gdNoteNew:'إعلان جديد في الجيلد من {n}: {s}',gdNoteDone:'الإعلان اتنشر',lnOk:'انشر',gdRankMe:'جيلدك: {k}.'});
+Object.assign(STR.en,{gdHand:'Hand the guild to {n}',gdHandQ:'Hand {g} to {n}? They become the master and you an officer',gdHandDone:'{n} is the master of {g} now',gdClaim:'Take the guild over ({n} has been away 14 days)',gdClaimDone:'You are the master of {g} now',gdNewM:'{n} is the guild master now',gdNoteL:'📌 {s} ({n})',gdNoteW:'Write the guild notice',gdNoteT:'Guild notice (up to 240 letters)',gdNoteNew:'New guild notice from {n}: {s}',gdNoteDone:'The notice is up',lnOk:'Post',gdRankMe:'Your guild: {k}.'});
+var GDM=null,GRANK=null,GRANK_T=0;
+function guildNoteLine(){const n=GUILD&&GUILD.note();return n?t('gdNoteL',{s:n.s,n:n.n}):'';}
+function guildNoteW(){const st=GUILD&&GUILD.state();if(!st||!Satisfy.guild.can(st.rank,'note'))return guildPanel();const n=GUILD.note();
+ askLine(t('gdNoteT'),n?n.s:'',Satisfy.guild.C.NOTE_MAX,v=>{if(v==null)return guildPanel();GUILD.setNote(v).then(()=>{toast(t('gdNoteDone'),'good');guildPanel();},()=>{toast(t('gdFail'),'warn');guildPanel();});});}
+// one line of text from the player (a guild notice): cb(text) on Post or Enter, cb(null) on Back or Escape
+function askLine(title,val,max,cb){mode='gname';const box=document.createElement('div');box.id='gnBox';box.className='sys panel';box.innerHTML=`<div class="head">${esc(title)}</div>`;
+ const inp=document.createElement('input');inp.id='lineIn';inp.maxLength=max;inp.value=val||'';const ok=document.createElement('button'),no=document.createElement('button');ok.textContent=t('lnOk');no.textContent=t('oBack');
+ const close=()=>{box.remove();mode='play';};ok.onclick=()=>{const v=inp.value;close();cb(v);};no.onclick=()=>{close();SFX.close();cb(null);};
+ inp.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')ok.onclick();else if(e.key==='Escape')no.onclick();};
+ const row=document.createElement('div');row.className='gnr';row.append(ok,no);box.append(inp,row);$('dialog').parentNode.appendChild(box);setTimeout(()=>{inp.focus();inp.select();},30);SFX.open();}
+// every online guild with its members' summed contribution, read once a minute at most, then cb (also if the read fails)
+function gRankFresh(cb){const st=GDS&&NETTR&&NETTR.kind==='firebase'&&GDS.readAll?GDS:null;if(!st||GRANK&&performance.now()-GRANK_T<60000){cb();return;}
+ let done=false;const fin=()=>{if(!done){done=true;cb();}};setTimeout(fin,4000);
+ st.readAll().then(v=>{const out={};for(const gid in v.guilds){const g=Satisfy.guild.cleanGuild(v.guilds[gid],gid);if(!g)continue;const ms=v.members[gid]||{};let xp=0,n=0;
+   for(const u in ms){const m=ms[u];if(m&&typeof m==='object'){n++;xp+=Math.max(0,Math.min(1e12,Math.floor(+m.c||0)));}}out[gid]={id:gid,name:g.name,xp,m:n,col:g.col};}
+  GRANK=out;GRANK_T=performance.now();fin();},fin);}
+window.__GLD={hand:u=>GUILD.handover(u),claim:()=>GUILD.claim(),away:()=>GUILD.masterAway(),note:()=>GUILD.note(),setNote:v=>GUILD.setNote(v),disband:()=>GUILD.disband(),fb:()=>FB,rank:()=>new Promise(r=>gRankFresh(()=>r(rankLine()))),get grank(){return GRANK}}; // tests
 /* duels (SAT-ONLINE-006, doc §09 R4): K challenges the nearest player outside towns; Y/N answers, Y is the ready check.
    Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
 Object.assign(STR.ar,{dHint:'[K] مبارزة',dSent:'اتبعت تحدي مبارزة لـ{n}',dFrom:'{n} بيتحداك في مبارزة',dReadyQ:'مبارزة مع {n}: جاهز؟',dReady:'جاهز (Y)',dWait:'مستني {n}…',dNone:'مفيش حد قريب كفاية للمبارزة',dSafe:'ممنوع المبارزة جوه المدن',dBusy:'{n} مشغول دلوقتي',dFar:'قرّب من {n} الأول',dDeclined:'{n} رفض المبارزة',dCancel:'المبارزة اتلغت',dFight:'ابدأ!',dOut:'ارجع للحلبة وإلا هتخسر!',dWin:'كسبت المبارزة ضد {n} {w}',dLose:'خسرت المبارزة ضد {n} {w}',dYield:'استسلام',dYou:'إنت',dTitle:'مبارزة ضد {n}',dRec:'المبارزات: {w} فوز · {l} خسارة',dw_yield:'(استسلام)',dw_arena:'(خرج من الحلبة)',dw_teleport:'(ساب القتال)',dw_safe:'(دخل مدينة)',dw_gone:'(الخصم مشي)',dw_death:'(مات)',dw_hp:''});
