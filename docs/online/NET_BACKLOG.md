@@ -188,7 +188,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U330 | Seasonal progression | ✅ | Monthly arena seasons; ratings reset, items stay (SAT-ONLINE-053) |
 | U331 | World boss calendar | ✅ | SAT-ONLINE-077: "Calendar" in the player list: the next world events, the competition, the siege, the festival, the race, Trauka and Berith; in your time zone and UTC, from the server clock (`regression/calendar`) |
 | U332 | Limited festivals | ✅ | The town festival every third hour (B, v0.94) |
-| U333 | Balance dashboard | ❌ | |
+| U333 | Balance dashboard | ✅ | SAT-ONLINE-088: each game writes its own class's week (`balance/{uid}`: kills, seconds from first hit to kill, PvP wins and losses from duels and open PvP; bounded by the rules), the owner's `/balance` sums them by class (PvE time to kill, PvP win rate); admins only read them; no names on the board (`regression/balance`) |
 | U334 | Economy health | 🟡 | `/economy` (082) is a snapshot of wealth; no gold in/out counters or alerts |
 | U335 | Content flags | 🟡 | Older pages skip what they don't know (fx tags, presence fields) |
 | U336 | Announcement system | ✅ | SAT-ONLINE-079: `/announce text` from an admin account (`admins/{uid}`, set in the console only); everyone online sees it once, late joiners within 10 min; the rules refuse anyone else (`regression/announce`) |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 41 · 🟡 38 · ⏳ 6 · ❌ 19 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 42 · 🟡 38 · ⏳ 6 · ❌ 18 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

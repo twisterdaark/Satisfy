@@ -418,6 +418,12 @@
       return Object.keys(v).sort().join(',') === 'about,aboutN,by,byN,said,t,why' && typeof v.about === 'string' && v.about !== user.uid && ['spam', 'abuse', 'cheat', 'other'].includes(v.why) && typeof v.said === 'string' && v.said.length <= 360 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'reports fields';
     }
     if (seg[0] === 'admins') return 'PERMISSION_DENIED: admins'; // SAT-ONLINE-079: set in the console only
+    if (seg[0] === 'balance') { // SAT-ONLINE-088: your own week's numbers; admins read them
+      if (!user || seg.length !== 2 || seg[1] !== user.uid) return 'PERMISSION_DENIED: balance ' + p;
+      if (v === null) return null;
+      const n6 = (x) => isInt(x, 0) && x <= 1000000;
+      return Object.keys(v).sort().join(',') === 'cls,l,lv,n,s,t,w,wk' && typeof v.wk === 'string' && /^w[0-9]{1,6}$/.test(v.wk) && typeof v.cls === 'string' && v.cls.length >= 1 && v.cls.length <= 16 && isInt(v.lv, 1) && v.lv <= 999 && n6(v.n) && typeof v.s === 'number' && v.s >= 0 && v.s <= 100000000 && n6(v.w) && n6(v.l) && isSV(v.t) ? null : 'balance values';
+    }
     if (seg[0] === 'crashes' || seg[0] === 'mutes' || seg[0] === 'reportDone') { // SAT-ONLINE-082
       const adm = !!user && data.get('admins/' + user.uid) === true, now = Date.now(), old = data.get(p);
       if (!user || seg.length !== 2) return 'PERMISSION_DENIED: ' + seg[0];
@@ -692,7 +698,7 @@
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
-      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat', 'lfg', 'guildRecruit'].includes(seg[0]) ? !!user : seg[0] === 'guildWeekPaid' ? !!user && seg.length === 4 && seg[3] === user.uid : (seg[0] === 'guildApply' || seg[0] === 'guildRej') ? !!user && (seg.length === 3 ? seg[2] === user.uid : ['m', 'o'].includes(rkOf(seg[1], user.uid))) : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : ['guildBank', 'guildBuild', 'guildLog', 'guildNote'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts', 'friends', 'friendReq', 'whisper', 'admins'].includes(seg[0]) && user && seg[1] === user.uid || ['crashes', 'reports', 'reportDone'].includes(seg[0]) && !!user && data.get('admins/' + user.uid) === true || seg[0] === 'mutes' && !!user || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat', 'lfg', 'guildRecruit'].includes(seg[0]) ? !!user : seg[0] === 'guildWeekPaid' ? !!user && seg.length === 4 && seg[3] === user.uid : (seg[0] === 'guildApply' || seg[0] === 'guildRej') ? !!user && (seg.length === 3 ? seg[2] === user.uid : ['m', 'o'].includes(rkOf(seg[1], user.uid))) : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : ['guildBank', 'guildBuild', 'guildLog', 'guildNote'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts', 'friends', 'friendReq', 'whisper', 'admins'].includes(seg[0]) && user && seg[1] === user.uid || ['crashes', 'reports', 'reportDone', 'balance'].includes(seg[0]) && !!user && data.get('admins/' + user.uid) === true || seg[0] === 'mutes' && !!user || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));

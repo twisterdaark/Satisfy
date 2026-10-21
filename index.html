@@ -4981,7 +4981,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,m
  dmg=ipHit(m,dmg,crit,o);if(o.skill&&S.tl.duke)dmg*=1.15;if(m.tw)twHit(m,crit,o);if(m.type==='gcrown'&&m.bh&&!crit&&!o.skill)dmg=1;if(o.skill&&S.bh&&S.bh.mm)dmg*=1.03;if(S.tl.hking&&HKV.has(m.type))dmg*=1.15;
  let mblk=false;if(AIK[m.type]==='soldier'&&!o.skill&&!o.aura&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
   mblk=true;dmg*=.2;crit=false;burn=false;m.grdT=.6;m.cd=Math.min(m.cd,.15);vfx('block',m.x+m.face*7,my-2,{angle:m.face>0?Math.PI:0});num(m.x,my-20,t('mBlock'),'#9fc8ff',false);SFX.hit();}
- dmg=Math.max(1,Math.round(dmg));dmg=blRefl(m,dmg);m.hp-=dmg;m.hurt=mblk?0:.15;trainMast();wear(w,.125);m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
+ dmg=Math.max(1,Math.round(dmg));dmg=blRefl(m,dmg);m.hp-=dmg;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;trainMast();wear(w,.125);m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
  num(m.x,my-8,String(dmg),crit||burn?'#ffd24a':'#ffffff',crit||burn);
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(burn)vfx('fire',m.x,my);if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
@@ -5059,7 +5059,7 @@ function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type!=='
 const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','lgloves','lboots','cring','ihelm','igloves','iboots','parmor','mring'];
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.4:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.25:.1)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh)gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);if(NET&&b.boss&&!m.bh)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(S.tl.viscount?.05:0)+(S.tl.pioneer?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)+(S.tl.shero?.05:0)+(S.tl.baron?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh)gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);if(NET&&b.boss&&!m.bh)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(S.tl.viscount?.05:0)+(S.tl.pioneer?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)+(S.tl.shero?.05:0)+(S.tl.baron?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh)(b.drop||[]).forEach(([k,p])=>{if(rand()<p)addMat(k,1);});
  if(m.lv>=20&&!m.tmp){if(b.boss)addMat('estone',1+(m.lv/50|0));else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
@@ -7458,6 +7458,7 @@ function netTick(){NET.tick();const live=netLive();
  lockTick();
  natTick();
  annTick();
+ balTick(live);
  if(GUILD)guildTick();
  if(PRAID)PRAID.tick();
  mobTick(live);
@@ -7841,7 +7842,7 @@ function karmaTick(dt){if(!S||S.__demo||mode!=='play'||karma()>=0)return;S.karT=
 function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
   room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
-  else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
+  else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);balPvp(true);const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
    if(v&&v.ol){S.karma=Math.min(KARMA_MAX,karma()+1);netForce=true;save(true);toast(t('kaJust',{n,k:S.karma}),'good');SFX.quest&&SFX.quest();return;} // an outlaw: justice
    S.karma=Math.max(KARMA_MIN,karma()-1);S.karT=0;const ms=Math.round(Satisfy.pvp.C.OUTLAW_MS*(1+Math.max(0,-S.karma-1)*.5));
    S.olT=Math.max(S.olT||0,Date.now()+ms);netForce=true;save(true);toast(t(S.karma<=MURDER?'kaMurder':'pvpKill',{n,m:Math.round(ms/60000),k:S.karma}),'warn');SFX.slam&&SFX.slam();}});}
@@ -7891,7 +7892,7 @@ function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Sati
  let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}
  P.hp-=d;numP(-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();asMe(()=>vfx('blood',P.x,P.y-10,{}));shake=.12;}hudDirty=true;
  if(P.hp<=0){if(S.tl&&S.tl.legend&&S.immT<=0){P.hp=1;S.immT=120;P.inv=1.5;toast(t('immune'),'good');flash();SFX.notice();return;}
-  die();PVP.died(e.uid);bntKilled(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
+  die();PVP.died(e.uid);balPvp(false);bntKilled(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
 // your own red tag while you are an outlaw, and the notice when it ends
 function pvpEnts(){const ol=outlaw();if(pvpOlWas&&!ol&&S&&!S.__demo){toast(t('pvpOlEnd'),'good');netForce=true;}pvpOlWas=ol;
  if(ol&&mode==='play')TX.push({s:t(olPub()===2?'kaMurderT':'pvpOl'),x:P.x,y:P.y-30,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff3b30'});}
@@ -8217,7 +8218,7 @@ function duelStart(){rnkStart();DUEL=Satisfy.duel.create({presence:NET,uid:NET.u
   else if(e.type==='fight'){toast(t('dFight'),'good');SFX.notice();rnkSnap(DUEL.state().foe);}
   else if(e.type==='outside')toast(t('dOut'),'warn');
   else if(e.type==='hurt'){numP(-20,'-'+e.dmg,'#ff6a5a',false);SFX.hit();}
-  else if(e.type==='result'){const win=e.result==='win';if(S&&!S.__demo){S.duels=S.duels||{w:0,l:0};S.duels[win?'w':'l']++;}
+  else if(e.type==='result'){const win=e.result==='win';if(S&&!S.__demo){S.duels=S.duels||{w:0,l:0};S.duels[win?'w':'l']++;balPvp(win);}
    toast(t(win?'dWin':'dLose',{n,w:t('dw_'+e.why)}),win?'good':'warn');if(win)SFX.quest();rnkResult(win,e.foe);natDuel(win,e.foe);
    if(S&&S.duels)setTimeout(()=>toast(t('dRec',S.duels)),500);}});}
 /* ranked arena seasons (SAT-ONLINE-053; Claude-B #13 item 23): every duel online moves both players' rating in this
@@ -8386,8 +8387,8 @@ window.__GANN={get q(){return ANNQ.slice()},get admin(){return ANNADM},get maint
    the gold of the ranked players (total, median, top 10%, richest) and their average level. A muted player can't write in the
    world chat until the time (the rules refuse it; the game says until when). Every signed-in page sends its own errors as a
    crash report (at most three a session, each message once), with the build, the zone and a stack with long ids cut out. */
-Object.assign(STR.ar,{admReports:'البلاغات المفتوحة ({n})',admRepRow:'{b}: {w}',admRep:'{a} بلّغ عن {b} ({w}) · آخر كلامه: "{s}"',admNone:'مفيش بلاغات مفتوحة',admMute:'اكتم {n} يوم',admOk:'اقفل البلاغ من غير حاجة',admMuted:'{n} مكتوم لحد {l}',admResolved:'البلاغ اتقفل',admCrashes:'تقارير الأعطال ({n})',admCrashRow:'{v} · {m} ({z})',admEco:'الاقتصاد ({n} لاعب في الترتيب): إجمالي {g} دهب · المتوسط {m} · أعلى 10% من {p} · الأغنى {x} · متوسط اللفل {lv}',mutedYou:'إنت مكتوم في الشات العام لحد {l}',admNoId:'مفيش لاعب بالـID ده: {n}',admUnmuted:'{n} يقدر يتكلم تاني',admHelp:'/reports · /crashes · /economy · /mute ID ساعات سبب · /unmute ID',why_spam:'سبام',why_abuse:'شتيمة',why_cheat:'غش',why_other:'حاجة تانية'});
-Object.assign(STR.en,{admReports:'Open reports ({n})',admRepRow:'{b}: {w}',admRep:'{a} reported {b} ({w}) · their last lines: "{s}"',admNone:'No open reports',admMute:'Mute {n} for a day',admOk:'Resolve, no action',admMuted:'{n} is muted until {l}',admResolved:'Report resolved',admCrashes:'Crash reports ({n})',admCrashRow:'{v} · {m} ({z})',admEco:'Economy ({n} ranked players): total {g} gold · median {m} · top 10% from {p} · richest {x} · average level {lv}',mutedYou:'You are muted in the world chat until {l}',admNoId:'No player with the ID {n}',admUnmuted:'{n} can talk again',admHelp:'/reports · /crashes · /economy · /mute ID hours reason · /unmute ID',why_spam:'spam',why_abuse:'insults',why_cheat:'cheating',why_other:'something else'});
+Object.assign(STR.ar,{admReports:'البلاغات المفتوحة ({n})',admRepRow:'{b}: {w}',admRep:'{a} بلّغ عن {b} ({w}) · آخر كلامه: "{s}"',admNone:'مفيش بلاغات مفتوحة',admMute:'اكتم {n} يوم',admOk:'اقفل البلاغ من غير حاجة',admMuted:'{n} مكتوم لحد {l}',admResolved:'البلاغ اتقفل',admCrashes:'تقارير الأعطال ({n})',admCrashRow:'{v} · {m} ({z})',admEco:'الاقتصاد ({n} لاعب في الترتيب): إجمالي {g} دهب · المتوسط {m} · أعلى 10% من {p} · الأغنى {x} · متوسط اللفل {lv}',mutedYou:'إنت مكتوم في الشات العام لحد {l}',admNoId:'مفيش لاعب بالـID ده: {n}',admUnmuted:'{n} يقدر يتكلم تاني',admHelp:'/reports · /crashes · /economy · /balance · /mute ID ساعات سبب · /unmute ID',why_spam:'سبام',why_abuse:'شتيمة',why_cheat:'غش',why_other:'حاجة تانية'});
+Object.assign(STR.en,{admReports:'Open reports ({n})',admRepRow:'{b}: {w}',admRep:'{a} reported {b} ({w}) · their last lines: "{s}"',admNone:'No open reports',admMute:'Mute {n} for a day',admOk:'Resolve, no action',admMuted:'{n} is muted until {l}',admResolved:'Report resolved',admCrashes:'Crash reports ({n})',admCrashRow:'{v} · {m} ({z})',admEco:'Economy ({n} ranked players): total {g} gold · median {m} · top 10% from {p} · richest {x} · average level {lv}',mutedYou:'You are muted in the world chat until {l}',admNoId:'No player with the ID {n}',admUnmuted:'{n} can talk again',admHelp:'/reports · /crashes · /economy · /balance · /mute ID hours reason · /unmute ID',why_spam:'spam',why_abuse:'insults',why_cheat:'cheating',why_other:'something else'});
 var MUTED=null,MUTOFF=null,CRN=0,CRSEEN=[];
 function modSt(){return NETTR&&NETTR.kind==='firebase'&&FB&&NET&&Satisfy.firebase.modStore?Satisfy.firebase.modStore(FB):null;}
 function modStart(){if(!(NETTR&&NETTR.kind==='firebase'))return;modStop();const st=modSt();if(!st)return;MUTOFF=st.watchMute(NET.uid,v=>{MUTED=v&&typeof v==='object'&&+v.until>0?{until:+v.until}:null;});}
@@ -8412,16 +8413,43 @@ function admCrashes(st){st.crashes().then(v=>{const L=Object.values(v||{}).filte
 function ecoStats(gold,lv){const g=Object.values(gold||{}).map(e=>e&&+e.v).filter(x=>x>=0).sort((a,b)=>a-b),l=Object.values(lv||{}).map(e=>e&&+e.v).filter(x=>x>0);
  const q=f=>g.length?g[Math.min(g.length-1,Math.floor(f*g.length))]:0;return {n:g.length,total:g.reduce((a,b)=>a+b,0),median:q(.5),p90:q(.9),max:g.length?g[g.length-1]:0,lv:l.length?Math.round(l.reduce((a,b)=>a+b,0)/l.length):0};}
 function admEco(st){st.ranks().then(r=>{const e=ecoStats(r.gold,r.lv),f=x=>Math.round(x).toLocaleString('en-US');dialog('guild',[t('admEco',{n:e.n,g:f(e.total),m:f(e.median),p:f(e.p90),x:f(e.max),lv:e.lv})],null,[{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
+/* balance figures (SAT-ONLINE-088, plan U333). Each signed-in game keeps this week's numbers for its own class (the lockouts'
+   week, Monday 00:00 UTC): the monsters it killed and how long each took from its first hit (game seconds), and its PvP wins
+   and losses (duels and open PvP). It writes them to balance/{uid} at most every 5 minutes while they change. The game's
+   owner's "/balance" adds them up by class: players, average level, kills and the average time to kill, PvP win rate. Only
+   admins read them, and the board names no player. */
+Object.assign(STR.ar,{admBal:'التوازن ({w}، {n} لاعب)',admBalRow:'{c}: {p} لاعب (لفل {lv}) · {k} قتلة، {s} ث للوحش · PvP {w}–{l} ({r})',admBalNone:'لسه مفيش أرقام الأسبوع ده'});
+Object.assign(STR.en,{admBal:'Balance ({w}, {n} players)',admBalRow:'{c}: {p} players (Lv {lv}) · {k} kills, {s} s each · PvP {w}–{l} ({r})',admBalNone:'No numbers this week yet'});
+var BAL=null,balT=0,balSig='';
+const balKey=()=>'satisfy_bal@'+(NET&&NET.uid||'');
+function balOn(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&S&&!S.__demo);}
+// this week's numbers for this account on this device (a new week starts again at 0)
+function balGet(){const wk=lockWeek();if(!BAL||BAL.k!==balKey()){let v=null;try{v=JSON.parse(localStorage.getItem(balKey())||'null');}catch(e){}BAL={k:balKey(),v:v&&typeof v==='object'?v:null};}
+ if(!BAL.v||BAL.v.wk!==wk)BAL.v={wk,n:0,s:0,w:0,l:0};return BAL.v;}
+function balSave(){try{localStorage.setItem(balKey(),JSON.stringify(BAL.v));}catch(e){}}
+// a monster we hit died: the time since our first hit (up to 10 min counts)
+function balKill(m){const f=m.fh;m.fh=0;if(!f||m.mobKill||!balOn())return;const d=Math.max(0,gTime-f);if(d>600)return;const v=balGet();v.n++;v.s=Math.round((v.s+d)*10)/10;balSave();}
+function balPvp(win){if(!balOn())return;const v=balGet();v[win?'w':'l']++;balSave();}
+function balTick(live,force){if(!live||!balOn())return;const n=performance.now();if(!force&&balT&&n-balT<300000)return;const v=balGet();if(!(v.n+v.w+v.l))return;
+ const sig=JSON.stringify([v,S.cls,S.lv|0]);if(sig===balSig)return;balT=n;balSig=sig;const D=FB.m.database,u={};
+ u['balance/'+NET.uid]={wk:v.wk,cls:String(S.cls||'novice').slice(0,16),lv:Math.max(1,Math.min(999,S.lv|0)),n:Math.min(1000000,v.n),s:Math.min(100000000,v.s),w:Math.min(1000000,v.w),l:Math.min(1000000,v.l),t:D.serverTimestamp()};
+ D.update(D.ref(FB.db),u).catch(()=>{balSig='';});}
+// the board: this week's numbers by class, most players first
+function balStats(all,wk){const C={};for(const k in (all||{})){const e=all[k];if(!e||e.wk!==wk||typeof e.cls!=='string')continue;const c=C[e.cls]||(C[e.cls]={c:e.cls,p:0,lv:0,n:0,s:0,w:0,l:0});c.p++;c.lv+=+e.lv||0;c.n+=+e.n||0;c.s+=+e.s||0;c.w+=+e.w||0;c.l+=+e.l||0;}
+ return Object.values(C).map(c=>({c:c.c,p:c.p,lv:Math.round(c.lv/c.p),n:c.n,ttk:c.n?Math.round(c.s/c.n*10)/10:0,w:c.w,l:c.l,rate:c.w+c.l?Math.round(c.w*100/(c.w+c.l)):null})).sort((a,b)=>b.p-a.p||a.c.localeCompare(b.c));}
+function admBal(st){st.balance().then(all=>{const wk=lockWeek(),L=balStats(all,wk),f=x=>Math.round(x).toLocaleString('en-US');
+ dialog('guild',[L.length?t('admBal',{w:wk,n:L.reduce((a,c)=>a+c.p,0)}):t('admBalNone'),...L.slice(0,12).map(c=>t('admBalRow',{c:t('cl_'+c.c),p:c.p,lv:c.lv,k:f(c.n),s:c.ttk,w:c.w,l:c.l,r:c.rate==null?'-':c.rate+'%'}))],null,[{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
 // the owner's chat commands; true when the line was one of them
 function admCmd(v){let m;
  if(/^\/reports\s*$/i.test(v)){admOnly(admReports);return true;}
  if(/^\/crashes\s*$/i.test(v)){admOnly(admCrashes);return true;}
  if(/^\/economy\s*$/i.test(v)){admOnly(admEco);return true;}
+ if(/^\/balance\s*$/i.test(v)){admOnly(admBal);return true;}
  if(/^\/admin\s*$/i.test(v)){admOnly(()=>toast(t('admHelp')));return true;}
  if((m=/^\/mute\s+(\S+)\s+(\d{1,3})\s*([\s\S]*)$/i.exec(v))){const id=m[1],h=Math.max(1,Math.min(720,+m[2])),why=m[3].trim().slice(0,60);admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}const until=wNow()+h*3600000;return st.mute(u,until,why,NET.uid).then(()=>toast(t('admMuted',{n:id,l:calTime(until)}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  if((m=/^\/unmute\s+(\S+)\s*$/i.exec(v))){const id=m[1];admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}return st.unmute(u).then(()=>toast(t('admUnmuted',{n:id}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  return false;}
-window.__GMOD={get muted(){return MUTED},cmd:v=>admCmd(v),eco:(g,l)=>ecoStats(g,l),redact:x=>crashRedact(x),crash:(m,s)=>crashSend(m,s),get sent(){return CRN},store:()=>modSt()}; // tests
+window.__GMOD={get muted(){return MUTED},bal:()=>balGet(),balPush:()=>{balT=0;balTick(true,true);},balStats:(a,w)=>balStats(a,w),cmd:v=>admCmd(v),eco:(g,l)=>ecoStats(g,l),redact:x=>crashRedact(x),crash:(m,s)=>crashSend(m,s),get sent(){return CRN},store:()=>modSt()}; // tests
 /* the event calendar (SAT-ONLINE-077, plan U331). "Calendar" in the player list (O) shows what comes next on the world clock:
    the next three world events (each slot's event is known in advance), the National Competition, the siege of Reidan Castle,
    the town festival, the horse race, and when Trauka and Berith are back. Every time is in your own time zone and in UTC.
