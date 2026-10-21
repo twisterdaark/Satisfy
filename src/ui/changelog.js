@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v119', ver: '1.19', d: '2026-10-21',
+      ar: ['الشيطان العظيم رقم 32 بيليال (لفل 480) مستنية عند بوابة الجحيم في السلسلة الرابعة من جبال الفوضى، على عربيتها اللي بتجرّها كلاب الجحيم. World Boss مشترك وبترجع بعد ساعتين',
+        'حقل الجحيم حواليها: مفيش تجدد صحة ولا مانا، ومفيش جرعات، وسرعة الهجوم -20%، واللي يقف جنبها بيتحرق. "درع المراية" عند 85% و60% و35%: 30% بس من ضربك بيوصلها و70% بيرجعلك',
+        'بتنادي سكيوبس لفل 320، وبترمي نيزك بيقع مكانك ونار الجحيم قدامها. عدّاد صحتها مزيّف: بيخلص عند ربع صحتها وبعدين بتتحول لشكلها الأخير، صغيرة بجناحات وسحرها أسرع',
+        'التعويض حسب مساهمتك: 5% من صحتها تديك لقب "قاهر بيليال" (-10% من ضرر الشياطين و+5% ضرر عليهم) وجوهرة بيليال السودا، و20% تديك قرن بيليال. وعصا بيليال بتوقع منها'],
+      en: ['The 32nd Great Demon Belial (Lv 480) waits at the gate of hell on the Fourth Ridge of the Chaos Mountains, on her chariot drawn by cerberi. A shared world boss who returns after two hours',
+        'Her hell field: no health or mana regeneration, no potions, attack speed -20%, and a burn for anyone close. The Mirror Shield at 85%, 60% and 35%: only 30% of your hits land and 70% come back',
+        'She calls Lv 320 succubi, drops a meteor where you stand and breathes the flames of hell ahead of her. Her health gauge is fake: it empties at a quarter of her health, then she takes her final form, small and winged, and her magic comes faster',
+        "Pay by your part: 5% of her health earns the title Belial's Bane (-10% damage from demons, +5% damage to them) and Belial's Black Jewel, 20% her horn. She also drops Belial's Staff"] },
     { v: '2026-10-21v118', ver: '1.18', d: '2026-10-21',
       ar: ['أطقم الوحوش الإلهية الأسطورية: الحداد من لفل حدادة 9 بيصنعها على السندان من نَفَس كل وحش، وكلها أسطورية. كل قطعة محتاجة نَفَس وحشها (السلاح محتاج اتنين)',
         'طقم العنقاء الحمرا (القوس والرداء والتاج والحذاء): قطعتين تجديد صحة 20%، و4 قطع 40%. طقم النمر الأبيض (الدرع والخوذة والمخالب والطماق): 3 قطع الدفاع والصحة +10%، و4 قطع +15%',
