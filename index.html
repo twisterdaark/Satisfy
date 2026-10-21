@@ -275,6 +275,7 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 #inv.sell{background:linear-gradient(180deg,rgba(40,34,12,.92),rgba(14,22,40,.95))}#inv.sell .itrash{display:none}
 #auW{width:calc(var(--u)*92);max-width:96vw;max-height:88%;overflow:auto;background:var(--sys2)}#auW .aub{display:grid;grid-template-columns:1fr 1.3fr;gap:calc(var(--u)*1.6)}#auW .auh{opacity:.8;margin-bottom:calc(var(--u)*.4)}#auBag .slotb.sel{outline:2px solid #ffd24a;box-shadow:0 0 calc(var(--u)*.8) rgba(255,210,74,.6)}#auW .igrid{grid-template-columns:repeat(6,1fr);max-height:34vh;overflow-y:auto}#auF{margin-top:calc(var(--u)*.8);padding-top:calc(var(--u)*.8);border-top:1px solid rgba(127,180,255,.25);display:grid;gap:calc(var(--u)*.5)}#auF label{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*.8)}#auW input{width:calc(var(--u)*12);font:inherit;color:#fff;background:rgba(0,0,0,.35);border:1px solid rgba(143,216,255,.45);padding:calc(var(--u)*.3) calc(var(--u)*.6)}#auQ{width:100%!important;box-sizing:border-box;margin:calc(var(--u)*.5) 0}#auF small,#auL small{opacity:.75}.autabs{display:flex;gap:calc(var(--u)*.5)}.autabs button{width:auto;flex:1}.autabs button.on{background:rgba(143,216,255,.3);box-shadow:inset 0 -2px 0 #8fd8ff}#auL{max-height:44vh;overflow-y:auto}.aurow{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:calc(var(--u)*.8);padding:calc(var(--u)*.35) 0;border-bottom:1px solid rgba(143,216,255,.14)}.aurow img{width:calc(var(--u)*2.6);height:calc(var(--u)*2.6);image-rendering:pixelated}.aurow button,#auF button,#auC button{width:auto;padding:0 calc(var(--u)*1)}.aurow .pr{color:#f2c14e}.aurow.poor .pr{color:#ff8a7a}#auL .none{opacity:.7;padding:calc(var(--u)*1) 0;text-align:center}
 .inote{margin-top:calc(var(--u)*.6);color:var(--muted);font-size:calc(var(--u)*.9);text-align:center;min-height:1em}
+#creW{z-index:70;width:calc(var(--u)*46);max-height:92%;overflow:auto;text-align:center}#creW .cgrid{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.6);justify-content:center;margin:calc(var(--u)*.8) 0}#creW canvas{display:block;margin:calc(var(--u)*.6) auto;width:100%;max-width:calc(var(--u)*40);background:#0e1a3a;border:1px solid rgba(143,216,255,.4)}#creW label{display:flex;align-items:center;gap:calc(var(--u)*.8);justify-content:space-between;margin:calc(var(--u)*.3) 0}#creW label input{flex:1;min-width:0}#creW .cst{color:#ffe7a8;margin:calc(var(--u)*.6) 0}
 #cfmW{z-index:80;width:calc(var(--u)*30);text-align:center}#cfmB{margin:calc(var(--u)*.8) 0;line-height:1.6}.cfmbtns{display:flex;gap:calc(var(--u)*1);justify-content:center}#cfmY{color:#ffd0c0;border-color:rgba(255,120,100,.7)}
 .gdrag-img{position:fixed;z-index:90;width:calc(var(--u)*3);height:calc(var(--u)*3);pointer-events:none;image-rendering:pixelated;filter:drop-shadow(0 0 4px #000);transform:translate(-50%,-50%)}
 .igold{color:var(--gold);font-weight:700;margin-inline-start:auto}
@@ -527,6 +528,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
         <div class="aur"><div class="autabs"><button data-autab="list" data-i18n="auTabL"></button><button data-autab="mine" data-i18n="auTabM"></button></div><input id="auQ" autocomplete="off"><div id="auL"></div><div id="auC"></div></div></div>
     </div>
 
+    <div id="creW" class="sys panel center" hidden></div>
     <div id="cfmW" class="sys panel center" hidden>
       <div class="ptitle"><span class="head" id="cfmT"></span></div>
       <div id="cfmB"></div>
@@ -3118,6 +3120,68 @@ function eySee(m,d){const ids=NDROP[m.type].map(x=>x[0]),id=ids.find(i=>eyKnown(
 window.__GBS={patOn:()=>patOn(),patTry:()=>patTry(),tick:dt=>lpTick(dt),eyTick:dt=>eyTick(dt),see:(m,d)=>eySee(m,d),lines:id=>eyLines(id).L.map(x=>x.v),lvl:d=>eyLvl(d),leg:()=>eyLeg(),reset:()=>{LPT=0;EYT=0;EYM=null;}}; // tests
 Object.assign(STR.ar,{"sk_lpat": "صبر الحداد الأسطوري", "skd_lpat": "الحيوية والدفاع والمهارة بيزيدوا 200% لمدة ساعة. السكيل ده مبيصرفش مانا ومينفعش تستخدمه بمزاجك: بيشتغل لوحده لو فضلت صابر (تستحمل في قتال وصحتك تحت 30% لمدة 6 ثواني، أو تكمّل على السندان لحد تاني ست قطع ورا بعض). مرة في اليوم.", "sk_beyes": "عيون الحداد", "skd_beyes": "اقف ثابت جنب وحش لابس قطعة باسم 5 ثواني، وهتشوف شوية من قدراتها وخصائصها. كل ما تقرّب تشوف أكتر. وكل سطر جديد بيدي الحداد 10% فهم للقطعة (لحد 50%).", "skO5_beyes": "عيون الحداد الأسطوري: 3 ثواني، وكل السطور، ومن أبعد", "skO10_beyes": "بتشوف من أبعد كمان", "skO5_lpat": "بيفضل ساعة ونص", "skO10_lpat": "مساعدته على السندان بتتضاعف", "lpatOn": "[سكيل صبر الحداد الأسطوري اشتغل. التركيز والقدرة على التحمل والدفاع هيوصلوا للآخر لمدة ساعة.]", "lpatOff": "صبر الحداد الأسطوري خلص.", "lpatL": "الصبر", "lpatRow": "التحمل والمهارة والدفاع ×3 · {n} دقيقة", "eyHead": "[عيون الحداد (Lv. {n}) شافت القطعة اللي على الهدف.]", "eyHeadL": "[عيون الحداد الأسطوري]", "eySaw": "[استكشفت وظيفة {it} اللي {m} لابسه!]", "eyOpt": "الخاصية {n}"});
 Object.assign(STR.en,{"sk_lpat": "Legendary Blacksmith's Patience", "skd_lpat": "Vitality, defense, and dexterity will rise by 200% for one hour. This skill doesn't consume mana and can't be used intentionally: it is triggered naturally if you continue to persevere (hold on in a fight below 30% health for 6 seconds, or keep at the anvil through a sixth make in a row). Once a day.", "sk_beyes": "Blacksmith's Eyes", "skd_beyes": "Stand still near a monster that wears a named item for 5 seconds to see some of its abilities and options. The closer you stand, the more you see. Each new line gives a blacksmith 10% understanding of it (up to 50%).", "skO5_beyes": "Legendary Blacksmith's Eyes: 3 seconds, every line, from further away", "skO10_beyes": "Seen from even further away", "skO5_lpat": "Lasts an hour and a half", "skO10_lpat": "Twice the help at the anvil", "lpatOn": "[The Legendary Blacksmith's Patience skill has been activated. Concentration, stamina, and defense will rise to the extremes for one hour.]", "lpatOff": "Legendary Blacksmith's Patience has worn off.", "lpatL": "Patience", "lpatRow": "Stamina, Dexterity, defense ×3 · {n} min", "eyHead": "[Blacksmith's Eyes (Lv. {n}) has seen through the target's item.]", "eyHeadL": "[Legendary Blacksmith's Eyes]", "eySaw": "[You have explored the function of the {it} that {m} is wearing!]", "eyOpt": "Option {n}"});
+/* The Legendary Blacksmith's Creation (major, owner 2026-10-21). Novel: "[Legendary Blacksmith's Creation Skill] You can
+   create three equipment item production methods every time the skill level of the 'Legendary Blacksmith's Craftsmanship
+   Skill' goes up. * When items are produced using this skill, the name of the creator is automatically placed on the
+   item." Grid answers "[What item do you want to create?]" (a greatsword) and "[What materials would you like to use?]"
+   (Blue Orichalcum), then "[Please design the item.]": a blank blueprint he draws the blade on. Here a blacksmith or
+   Pagma's Descendant (skill from Lv 10) picks a kind of item and a main material at the anvil, then shapes it on the
+   blueprint (a weapon's length, width and curve; armour's thickness, coverage and flex), which trades its stats against
+   each other, and names it. Three creations per smithing level (skill Lv 5 and 10 add three more each). The recipe sits
+   at the top of the anvil list and forges like any other. The item keeps a base recipe id (so trades and the rest of the
+   game know it) with its own name, stats and "Made by" its creator. Each player's own (S.cre). */
+const CRET={gs:{b:'gsword',a:100,s:.46},sw:{b:'isword',a:70,s:.34},sp:{b:'spear',a:75,s:.45},bw:{b:'bow',a:60,s:.5},st:{b:'staff',a:62,s:.55},dg:{b:'dagger',a:45,s:.24},hm:{b:'hammer',a:80,s:.42},
+ ar:{b:'parmor',d:18},hl:{b:'ihelm',d:8},gl:{b:'igloves',d:5,as:.05},bt:{b:'iboots',d:5,ms:.07}};
+const CREM={ore:{m:1,q:6},leather:{m:.9,q:5,f:'hpp',v:.03},wood:{m:.9,q:5,f:'as',v:.03},mstone:{m:1.3,q:3,f:'mpb',v:20},blue:{m:2,q:2,f:'dm',v:.06},mith:{m:2.4,q:4,f:'as',v:.04},tstone:{m:2.6,q:3,f:'dm',v:.08}};
+const creOK=()=>!!S&&pasOn('lcre');
+const creMax=()=>3*Math.max(1,S.smith||1)+(skLv('lcre')>=5?3:0)+(skLv('lcre')>=10?3:0);
+const creList=()=>S.cre||(S.cre=[]);
+function creStats(c){const T=CRET[c.ty],M=CREM[c.mat],k=M.m*(1+.03*((c.sl||1)-1)),L=(c.L-50)/50,W=(c.W-50)/50,C=c.C/100,o={};
+ if(T.a){o.atk=Math.round(T.a*k*(1+L*.15+W*.1-C*.06));o.spd=+Math.max(.18,T.s*(1+L*.1+W*.08-C*.06)).toFixed(3);if(C>0)o.as=+(C*.06).toFixed(3);}
+ else{o.def=Math.max(1,Math.round(T.d*k*(1+L*.18+W*.08-C*.08)));if(T.as)o.as=T.as;if(T.ms)o.ms=T.ms;if(C>0){o.as=+((o.as||0)+C*.03).toFixed(3);o.ms=+((o.ms||0)+C*.03).toFixed(3);}
+  if(L>0&&o.ms)o.ms=+Math.max(0,o.ms-L*.03).toFixed(3);if(W>0)o.hpp=+(W*.04).toFixed(3);}
+ if(M.f)o[M.f]=+((o[M.f]||0)+M.v).toFixed(3);return o;}
+function creNeed(c){const M=CREM[c.mat],s=CRET[c.ty].a?'wood':'leather',o={[c.mat]:M.q};if(c.mat!==s)o[s]=(o[s]||0)+1;if(!['ore','wood','leather'].includes(c.mat))o.ore=(o.ore||0)+2;return o;}
+function creRc(c){const base=rcById(CRET[c.ty].b),o=Object.assign({},base);for(const k of ['atk','def','spd','as','ms','dm','hpp','mpb'])delete o[k];
+ return Object.assign(o,creStats(c),{id:base.id,need:creNeed(c),diff:Math.min(1.6,1+CREM[c.mat].m*.18),strikes:Math.min(9,6+Math.round(CREM[c.mat].m)),cre:c});}
+function creApply(it,c,r){const st=creStats(c),g=1+(MULT[r]-1)*.5;for(const k of ['atk','def','spd','as','ms','dm','hpp','mpb'])delete it[k];
+ if(st.atk)it.atk=Math.round(st.atk*MULT[r]);if(st.spd)it.spd=st.spd;if(st.def)it.def=Math.round(st.def*MULT[r]);
+ for(const k of ['as','ms','dm','hpp'])if(st[k])it[k]=+(st[k]*g).toFixed(3);if(st.mpb)it.mpb=Math.round(st.mpb*MULT[r]);
+ it.nm=c.nm;it.by=c.by;it.cr=c.id;skUse('lcre',3);}
+let CRE=null; // the creation on the blueprint
+function creOpen(){if(!creOK()){toast(t('creNo'),'warn');SFX.deny();return;}if(creList().length>=creMax()){toast(t('creFull',{n:creMax()}),'warn');SFX.deny();return;}
+ CRE={ty:null,mat:null,L:50,W:50,C:0,nm:''};creStep();}
+function creStep(){const w=$('creW'),c=CRE;w.hidden=false;SFX.open();const head=`<div class="head">${esc(t('sk_lcre'))} (${creList().length}/${creMax()})</div>`;
+ if(!c.ty)w.innerHTML=head+`<div>${esc(t('creQ1'))}</div><div class="cgrid">${Object.keys(CRET).map(k=>`<button data-cty="${k}">${esc(t('cty_'+k))}</button>`).join('')}</div><button data-cx="1">${esc(t('back'))}</button>`;
+ else if(!c.mat)w.innerHTML=head+`<div>${esc(t('creQ2'))}</div><div class="cgrid">${Object.keys(CREM).map(k=>`<button data-cmat="${k}">${esc(t(k))} <small>(${S.mats[k]||0})</small></button>`).join('')}</div><button data-cb="ty">${esc(t('back'))}</button>`;
+ else{const lab=CRET[c.ty].a?['cL','cW','cC']:['cT','cV','cF'];if(!c.nm)c.nm=t('creDefNm',{n:t('pname'),ty:t('cty_'+c.ty)}).slice(0,24);
+  w.innerHTML=head+`<div>${esc(t('creQ3'))}</div><canvas id="creC" width="240" height="96"></canvas>`+
+   [['L',lab[0]],['W',lab[1]],['C',lab[2]]].map(([k,l])=>`<label>${esc(t(l))}<input type="range" min="0" max="100" value="${c[k]}" data-csl="${k}"></label>`).join('')+
+   `<label>${esc(t('creNmL'))}<input id="creNm" maxlength="24" value="${esc(c.nm)}"></label><div class="cst" id="creS"></div><div class="req" id="creR"></div>`+
+   `<div class="cfmbtns"><button data-cb="mat">${esc(t('back'))}</button><button data-cgo="1">${esc(t('creGo'))}</button></div>`;
+  creDraw();}}
+// the blueprint: the shape follows the sliders, with what it makes and needs underneath
+function creDraw(){const cv=$('creC');if(!cv||!CRE)return;const g=cv.getContext('2d'),c=CRE,L=c.L/100,W=c.W/100,C=c.C/100;g.clearRect(0,0,240,96);g.lineWidth=1;g.strokeStyle='rgba(143,216,255,.15)';
+ for(let x=0;x<=240;x+=12){g.beginPath();g.moveTo(x,0);g.lineTo(x,96);g.stroke();}for(let y=0;y<=96;y+=12){g.beginPath();g.moveTo(0,y);g.lineTo(240,y);g.stroke();}
+ g.strokeStyle='#bfe8ff';g.fillStyle='rgba(191,232,255,.18)';g.lineWidth=2;g.beginPath();
+ if(c.ty==='bw'){const h=26+L*20,r=C*30;g.moveTo(110,48-h);g.bezierCurveTo(150+r,48-h*.6,150+r,48+h*.6,110,48+h);g.moveTo(110,48-h);g.lineTo(110,48+h);g.lineWidth=1+W*3;g.stroke();}
+ else if(CRET[c.ty].a){const pole=c.ty==='sp'||c.ty==='st',len=pole?40+L*50:60+L*130,wd=4+W*(c.ty==='hm'?30:16),x0=pole?120:36,y0=48,hl=pole?100:22;g.moveTo(x0-hl,y0);g.lineTo(x0,y0);g.stroke();g.beginPath();
+  g.moveTo(x0,y0-wd/2);g.quadraticCurveTo(x0+len*.5,y0-wd/2-C*26,x0+len,y0-C*20);g.quadraticCurveTo(x0+len*.5,y0+wd/2-C*26,x0,y0+wd/2);g.closePath();g.fill();g.stroke();
+  g.beginPath();g.moveTo(x0,y0-wd/2-4);g.lineTo(x0,y0+wd/2+4);g.stroke();}
+ else{const wd=50+W*80,th=1+L*7;g.lineWidth=th;g.strokeRect(120-wd/2,18,wd,60);g.lineWidth=1;for(let i=1;i<=Math.round(C*6);i++){g.beginPath();g.moveTo(120-wd/2,18+i*8.5);g.lineTo(120+wd/2,18+i*8.5);g.stroke();}}
+ $('creS').textContent=statShort(creStats(c));$('creR').innerHTML=esc(t('req'))+': '+Object.entries(creNeed(c)).map(([k,n])=>`<span class="${(S.mats[k]||0)>=n?'ok':'no'}">${esc(t(k))} ${n}</span>`).join(' · ');}
+function creDone(){const c=CRE;if(!c||!c.ty||!c.mat)return;const nm=Satisfy.chat.clean(($('creNm')||{}).value||'',24)||t('creDefNm',{n:t('pname'),ty:t('cty_'+c.ty)}).slice(0,24);c.nm=nm;
+ cfm(t('creSure'),`<b class="rt rt3">${esc(nm)}</b><br>${esc(statShort(creStats(c)))}`,t('creGo'),()=>{if(creList().length>=creMax())return;
+  creList().push({id:'c'+Date.now().toString(36),ty:c.ty,mat:c.mat,L:c.L,W:c.W,C:c.C,sl:S.smith||1,nm,by:Satisfy.chat.clean(t('pname'),24)||'?'});CRE=null;$('creW').hidden=true;
+  SFX.legendary();toast(t('creMade',{n:nm}),'good');skUse('lcre',6);save(true);if(!$('forge').hidden)renderRecipes();});}
+document.addEventListener('click',e=>{const w=e.target.closest&&e.target.closest('#creW');if(!w||!CRE)return;const b=e.target.closest('button');if(!b)return;SFX.click();
+ if(b.dataset.cty){CRE.ty=b.dataset.cty;creStep();}else if(b.dataset.cmat){CRE.mat=b.dataset.cmat;creStep();}else if(b.dataset.cb==='ty'){CRE.ty=null;creStep();}else if(b.dataset.cb==='mat'){CRE.mat=null;CRE.nm='';creStep();}
+ else if(b.dataset.cx){CRE=null;w.hidden=true;SFX.close();}else if(b.dataset.cgo)creDone();});
+document.addEventListener('input',e=>{const k=e.target&&e.target.dataset&&e.target.dataset.csl;if(!k||!CRE)return;CRE[k]=Math.max(0,Math.min(100,+e.target.value||0));creDraw();});
+document.addEventListener('keydown',e=>{if(e.target&&e.target.id==='creNm')e.stopPropagation();},true);
+window.__GCR={open:()=>creOpen(),get cur(){return CRE},list:()=>creList(),max:()=>creMax(),stats:c=>creStats(c),need:c=>creNeed(c),done:()=>creDone(),forge:i=>startMG(creRc(creList()[i]))}; // tests
+Object.assign(STR.ar,{"sk_lcre": "إبداع الحداد الأسطوري", "skd_lcre": "بتقدر تبتكر طرق صنع 3 قطع معدات كل ما مستوى صنعتك يعلى. اللي بتصنعه بالسكيل ده بيتكتب عليه اسمك. (عند السندان: \"إبداع\". بتختار نوع القطعة والخامة، وترسمها على المخطط، وتسميها.)", "skO5_lcre": "3 إبداعات زيادة", "skO10_lcre": "3 إبداعات زيادة كمان", "fCreB": "إبداع ({a}/{b})", "creQ1": "[عايز تبتكر قطعة إيه؟]", "creQ2": "[عايز تستخدم خامات إيه؟]", "creQ3": "[من فضلك صمّم القطعة.]", "creSure": "[قررت؟]", "cty_gs": "سيف عظيم", "cty_sw": "سيف", "cty_sp": "رمح", "cty_bw": "قوس", "cty_st": "عصا", "cty_dg": "خنجر", "cty_hm": "مطرقة", "cty_ar": "درع", "cty_hl": "خوذة", "cty_gl": "جوانتي", "cty_bt": "جزمة", "cL": "الطول", "cW": "العرض", "cC": "الانحناء", "cT": "السُمك", "cV": "التغطية", "cF": "المرونة", "creNmL": "الاسم", "creDefNm": "{ty} {n}", "creGo": "ابتكرها", "creMade": "عملت طريقة صنع \"{n}\". هتلاقيها أول القايمة عند السندان.", "creNo": "الإبداع لحداد أو وريث باجما من لفل 10.", "creFull": "تقدر تبتكر {n} قطع في لفل الحدادة ده. علّيه وتاخد 3 كمان.", "creTag": "إبداعك", "creBy": "صنع {n}"});
+Object.assign(STR.en,{"sk_lcre": "Legendary Blacksmith's Creation", "skd_lcre": "You can create three equipment item production methods every time your craftsmanship goes up a level. When items are produced using this skill, the name of the creator is automatically placed on the item. (At the anvil: \"Creation\". Pick the kind of item and the material, draw it on the blueprint and name it.)", "skO5_lcre": "Three more creations", "skO10_lcre": "Three more creations again", "fCreB": "Creation ({a}/{b})", "creQ1": "[What item do you want to create?]", "creQ2": "[What materials would you like to use?]", "creQ3": "[Please design the item.]", "creSure": "[Have you decided?]", "cty_gs": "Greatsword", "cty_sw": "Sword", "cty_sp": "Spear", "cty_bw": "Bow", "cty_st": "Staff", "cty_dg": "Dagger", "cty_hm": "Hammer", "cty_ar": "Armour", "cty_hl": "Helmet", "cty_gl": "Gloves", "cty_bt": "Boots", "cL": "Length", "cW": "Width", "cC": "Curve", "cT": "Thickness", "cV": "Coverage", "cF": "Flex", "creNmL": "Name", "creDefNm": "{n}'s {ty}", "creGo": "Create", "creMade": "You created the production method of \"{n}\". It is at the top of the anvil list.", "creNo": "Creation is for a blacksmith or Pagma's Descendant from level 10.", "creFull": "You can create {n} items at this smithing level. Raise it for three more.", "creTag": "Your creation", "creBy": "Made by {n}"});
 /* ---------------- town life (owner 2026-10-20: town life) ----------------
    Horse races at Winston, dice at the inn tables and the town festival, all on the world clock (wNow), so everyone online
    shares the same race, the same dice rounds and the same festival without any new message or rules change: your race
@@ -5369,7 +5433,7 @@ function advance(){if(twDone())return;if(!DL||DL.optOn)return;DL.i++;if(DL.i>=DL
 let MG=null;
 const has=need=>Object.keys(need).every(k=>(S.mats[k]||0)>=need[k]);
 function openForge(){SFX.open();mode='forge';MG=null;$('forge').hidden=false;$('mg').hidden=true;$('res').hidden=true;$('rlist').hidden=false;$('hint').hidden=true;renderRecipes();}
-function closeForge(){if(MG&&!MG.done)return;for(const k in S.rcN||{})delete S.rcN[k];SFX.close();$('rays').classList.remove('on');$('forge').hidden=true;mode='play';MG=null;}
+function closeForge(){if(MG&&!MG.done)return;$('creW').hidden=true;CRE=null;for(const k in S.rcN||{})delete S.rcN[k];SFX.close();$('rays').classList.remove('on');$('forge').hidden=true;mode='play';MG=null;}
 // Recipes (Twister 2026-10-19): you only see the ones you have discovered. A recipe is learned the moment its condition
 // is first met (a quest, your smithing level, the Blacksmith class), with a discovery toast and a NEW badge at the anvil;
 // the rest show as ??? with a hint. Tabs split weapons, armour, helmet/gloves/boots, rings and the rest; search by name.
@@ -5381,7 +5445,7 @@ setInterval(()=>{if(S&&mode==='play')rcLearn();},2000);
 function rcHint(rc){const f=String(rc.unlock),h=[];let m;const re=/(?:qDone\('|S\.qs\.)(\w+)/g;while((m=re.exec(f)))if(QD[m[1]])h.push(t('rcHq',{q:qName(m[1])}));
  if((m=/S\.smith>=(\d+)/.exec(f)))h.push(t('rcHs',{n:m[1]}));if(/isSm\(\)/.test(f))h.push(t('rcHc'));if(/undOf/.test(f))h.push(t('rcHu'));return h.join(' · ');}
 function renderRecipes(){const el=$('rlist');el.innerHTML='';rcLearn();{const sv=document.createElement('div');sv.className='recipe';const rc=repairCost('anvil');
- sv.innerHTML=`<button data-act="fRepair">${rc?t('oRepair',{g:rc}):t('oRepair0')}</button><button data-act="fEnh">${t('oEnh')}</button><button data-act="fGem">${t('oGemA')}</button><button data-act="fSalv">${t('fSalvB')}</button>${isSm()?`<button data-act="fApr">${t('fAprB')}</button>`:''}`;el.appendChild(sv);}
+ sv.innerHTML=`<button data-act="fRepair">${rc?t('oRepair',{g:rc}):t('oRepair0')}</button><button data-act="fEnh">${t('oEnh')}</button><button data-act="fGem">${t('oGemA')}</button><button data-act="fSalv">${t('fSalvB')}</button>${isSm()?`<button data-act="fApr">${t('fAprB')}</button>`:''}${creOK()?`<button data-act="fCre">${t('fCreB',{a:creList().length,b:creMax()})}</button>`:''}`;el.appendChild(sv);}
  const tb=document.createElement('div');tb.className='stabs rtabs';tb.innerHTML=Object.keys(RCAT).map(k=>`<button data-rtab="${k}" class="${RTAB===k?'on':''}">${t('rc_'+k)}</button>`).join('');
  tb.onclick=e=>{const b=e.target.closest('[data-rtab]');if(!b)return;SFX.click();RTAB=b.dataset.rtab;tb.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));rcRows();};el.appendChild(tb);
  const q=document.createElement('input');q.id='rsearch';q.placeholder=t('rcSearch');q.value=RQ;q.oninput=()=>{RQ=q.value;rcRows();};q.onkeydown=e=>{if(e.code==='Escape'){e.stopPropagation();q.blur();}};el.appendChild(q);
@@ -5389,6 +5453,9 @@ function renderRecipes(){const el=$('rlist');el.innerHTML='';rcLearn();{const sv
 function rcRows(){const el=$('rrows');if(!el)return;el.innerHTML='';const cat=RCAT[RTAB],qq=RQ.trim().toLowerCase(),inCat=rc=>!cat||cat.includes(rc.slot);
  const known=RC.filter(rc=>S.rcK[rc.id]&&inCat(rc)&&(!qq||t(rc.id).toLowerCase().includes(qq)||rc.id.includes(qq))),unk=qq?[]:RC.filter(rc=>!S.rcK[rc.id]&&inCat(rc));
  const hd=document.createElement('div');hd.className='rcount';hd.textContent=t('rcCount',{a:RC.filter(rc=>S.rcK[rc.id]).length,b:RC.length});el.appendChild(hd);
+ if(creOK())for(const c of creList()){const rc=creRc(c);if(!inCat(rc)||qq&&!c.nm.toLowerCase().includes(qq))continue;const row=document.createElement('div');row.className='recipe cre';const req=Object.keys(rc.need).map(k=>`<span class="${(S.mats[k]||0)>=rc.need[k]?'ok':'no'}">${t(k)} ${Math.min(S.mats[k]||0,rc.need[k])}/${rc.need[k]}</span>`).join(' · ');
+  row.innerHTML=`<div><div class="rn"><img class="ric" src="${icon(rc.id)}">${esc(c.nm)} <small style="color:#ffe7a8">${t('creTag')}</small> <small style="color:var(--muted)">(${statShort(rc)})</small></div><div class="req">${t('req')}: ${req}</div></div>`;
+  const b=document.createElement('button');b.textContent=t('forgeBtn');b.disabled=!has(rc.need);b.onclick=()=>startMG(rc);row.appendChild(b);el.appendChild(row);}
  known.forEach(rc=>{const row=document.createElement('div');row.className='recipe';const req=Object.keys(rc.need).map(k=>`<span class="${(S.mats[k]||0)>=rc.need[k]?'ok':'no'}">${t(k)} ${Math.min(S.mats[k]||0,rc.need[k])}/${rc.need[k]}</span>`).join(' · ');
   const st=rc.slot==='x'?`${ARROWG[0]}-${ARROWG[4]}G`:statShort(rc);
   row.innerHTML=`<div><div class="rn"><img class="ric" src="${icon(rc.id)}">${t(rc.id)}${S.rcN[rc.id]?` <span class="rnew">${t('rcNewB')}</span>`:''} <small style="color:var(--muted)">(${st})</small></div><div class="req">${t('req')}: ${req}</div></div>`;
@@ -5397,7 +5464,7 @@ function rcRows(){const el=$('rrows');if(!el)return;el.innerHTML='';const cat=RC
  unk.forEach(rc=>{const row=document.createElement('div');row.className='recipe unk';row.innerHTML=`<div><div class="rn">${t('rcUnk')}</div><div class="req">${t('rcHint',{h:rcHint(rc)||'?'})}</div></div>`;el.appendChild(row);});
  const bt=el.querySelector('.recipe button:not(:disabled)');if(bt&&document.activeElement!==$('rsearch'))bt.focus();}
 // Forging runs in three stages: heat the metal, hammer it into shape, quench it. Each stage is scored; the item takes shape in the preview.
-function startMG(rc){SFX.click();for(const k in rc.need)S.mats[k]-=rc.need[k];MG={rc,stage:0,p:0,dir:1,center:.5,heat:100,reh:0,res:[],sc:[],fbT:0,done:false,combo:0,lock:false,hold:false,sq:0,steam:[]};$('combo').textContent='';$('rlist').hidden=true;$('mg').hidden=false;$('mgname').textContent=t(rc.id);stage.focus();setupStage();}
+function startMG(rc){SFX.click();for(const k in rc.need)S.mats[k]-=rc.need[k];MG={rc,stage:0,p:0,dir:1,center:.5,heat:100,reh:0,res:[],sc:[],fbT:0,done:false,combo:0,lock:false,hold:false,sq:0,steam:[]};$('combo').textContent='';$('rlist').hidden=true;$('mg').hidden=false;$('mgname').textContent=rc.cre?rc.cre.nm:t(rc.id);stage.focus();setupStage();}
 function setupStage(){const st0=MG.stage;if(st0===0)setTimeout(()=>{if(MG&&MG.stage===0)$('mghint').textContent=t('hHeat')+' · '+t(MG.rc.id==='jaffa'?'tJaffa':MG.rc.id==='gsword'?'tBlue':/bow|staff/.test(MG.rc.id)?'tWood':'tIron');},0);const st=MG.stage,b=1+stat('dex')*.002+(S.smith-1)*.04;MG.p=0;MG.dir=1;MG.hold=false;
  if(st===0){MG.T=.1;MG.vel=0;MG.prog=0;MG.acc=0;MG.tt=0;MG.ent=0;MG.tAll=0;MG.zk='';MG.c0=.55+rand()*.12;MG.ph=rand()*6;MG.center=MG.c0;MG.zp=Math.min(.14,.07*b);MG.zg=.2;MG.pump=0;}else if(st===1){newZone();}else{MG.center=.5+rand()*.3;MG.zp=.09*b;MG.zg=.24;}
  [...$('stg').children].forEach((e,i)=>{e.className=i<st?'ok':i===st?'on':'';});document.querySelector('.mgbar').hidden=st!==1;$('mghint').textContent=t(['hHeat','hHam','hQuench'][st]);$('hamrow').hidden=st!==1;$('fb').textContent='';$('combo').textContent='';renderDots();}
@@ -5485,7 +5552,7 @@ function finishMG(){const rc=MG.rc;
  const q=mgScore()+.025*(S.smith-1)+S.patience+(patOn()?(skLv('lpat')>=10?.08:.04):0)+(pasOn('focus')?(skLv('focus')>=5?.06:.04):0)+gbB('q')+(rand()-.5)*.08;let r=Math.min(craftRate(q),maxRating());if(r>=3)setTimeout(()=>annW('craftLeg',{rk:r}),300);
  let it=null;
  if(rc.slot==='x'){S.arrows[r]++;S.arrowsMade++;}
- else{it=mkItem(rc.id,r);breathFeat(it);if(pasOn('focus'))skUse('focus');if(P){vfx('forge',P.x,P.y-8);vfx('loot',P.x,P.y,{rarity:r});}
+ else{it=mkItem(rc.id,r);if(rc.cre)creApply(it,rc.cre,r);breathFeat(it);if(pasOn('focus'))skUse('focus');if(P){vfx('forge',P.x,P.y-8);vfx('loot',P.x,P.y,{rarity:r});}
   S.items.push(it);if(rc.slot==='w'&&it.atk>weapon().atk&&(WSH[it.id]||{}).k===weapKind())S.eqW=it.uid;if(rc.slot==='a'&&(!armorIt()||it.def>armorIt().def))S.eqA=it.uid;if(GEAR.includes(rc.slot)&&rc.slot!=='a'&&!eqIt(rc.slot))equip(it);}
  S.made[rc.id]=(S.made[rc.id]||0)+1;qEvent('craft',rc.id,r,rc.slot);
  if(isSm()&&rc.slot!=='x'&&CREPC[r])setTimeout(()=>crepAdd(CREPC[r]),1200);
@@ -5494,14 +5561,14 @@ function finishMG(){const rc=MG.rc;
  S.sxp+=Math.round((20+r*12)*(1+dvB('smith')));let up='';while(S.sxp>=50*S.smith){S.sxp-=50*S.smith;S.smith++;up=t('smithUp',{n:S.smith});}
  gainXP(6+r*6);
  const stat2=rc.slot==='x'?`${ARROWG[r]}G`:statShort(it);
- const res=$('res');res.innerHTML=`<div>${t('made')}</div><div class="rname rt rt0" id="rname">${t(rc.id)}</div><div>${t('rating')}: <span class="rt rt0" id="rlab">${t('r0')}</span> · ${stat2}</div><div id="rextra" hidden>${r===4&&rc.id==='gsword'?`<div class="rt rt4">${t('legSkill')}</div>`:''}${bonus?`<div style="color:#9fe39a">${bonus}</div>`:''}${pat?`<div style="color:#bfe0ff">${pat}</div>`:''}${up?`<div style="color:#9fe39a">${up}</div>`:''}</div>`;
+ const res=$('res');res.innerHTML=`<div>${t('made')}</div><div class="rname rt rt0" id="rname">${rc.cre?esc(rc.cre.nm):t(rc.id)}</div><div>${t('rating')}: <span class="rt rt0" id="rlab">${t('r0')}</span> · ${stat2}</div><div id="rextra" hidden>${r===4&&rc.id==='gsword'&&!rc.cre?`<div class="rt rt4">${t('legSkill')}</div>`:''}${bonus?`<div style="color:#9fe39a">${bonus}</div>`:''}${pat?`<div style="color:#bfe0ff">${pat}</div>`:''}${up?`<div style="color:#9fe39a">${up}</div>`:''}</div>`;
  const b=document.createElement('button');b.textContent=t('ok');b.hidden=true;b.onclick=()=>{SFX.click();$('rays').classList.remove('on');$('forge').hidden=true;mode='play';MG=null;afterCraft(rc);};res.appendChild(b);
  $('mg').hidden=true;res.hidden=false;
  // rating reveal: roll up through the tiers, then land
  let i=0;const step=()=>{const nm=$('rname'),lb=$('rlab');if(!nm)return;nm.className='rname rt rt'+i;lb.className='rt rt'+i;lb.textContent=t('r'+i);
   if(i<r){SFX.tick(1+i*.25);i++;setTimeout(step,170+i*40);return;}
   nm.classList.add('burst');$('rextra').hidden=false;b.hidden=false;b.focus();
-  if(it&&r>=3)askName(it);
+  if(it&&r>=3&&!rc.cre)askName(it);
   if(S.cls==='pagma'){const g=[0,0,2,4,25][r]||0;if(g){S.bonus+=g;setTimeout(()=>toast(t('pgStat',{n:g}),'good'),500);}}
   if(r===4){SFX.legendary();flash();$('rays').classList.add('on');if(!S.firstLeg){S.firstLeg=1;annW('annLeg');}if(isSm())giveTitle('smith');for(let k=0;k<70;k++)fx.push({x:ANVIL.tx*TS+8,y:ANVIL.ty*TS,vx:(rand()-.5)*170,vy:-rand()*170,t:1,c:'#ffd24a'});}
   else if(r>=2)SFX.rare();else SFX.click();};
@@ -5522,7 +5589,7 @@ function statShort(i){const a=[];if(i.atk)a.push(`${t('atk')} ${i.uid?iAtk(i):i.
  if(i.as)a.push(`${t('gAs')} +${Math.round(i.as*enF(i)*100)}%`);if(i.ms)a.push(`${t('gMs')} +${Math.round(i.ms*enF(i)*100)}%`);if(i.dm)a.push(`${t('gDm')} +${Math.round(i.dm*enF(i)*100)}%`);if(i.mpb)a.push(`${t('gMp')} +${Math.round(i.mpb*enF(i))}`);if(i.hpp)a.push(`${t('gHp')} +${Math.round(i.hpp*enF(i)*100)}%`);if(i.gem)a.push(t('gemIn',{g:t(i.gem)}));return a.join(' · ');}
 function setTip(i){const sk=Object.keys(SETS).find(k=>SETS[k].it.includes(i.id));if(!sk)return '';const n=setCount(sk),c=setTier(sk);
  return `<br><small style="color:#9fe39a">${t('set_'+sk)} (${n}/${SETS[sk].it.length})</small>`+Object.keys(SETS[sk].b).map(k=>`<br><small style="color:${+k===c?'#9fe39a':'#8a96a8'}">${t('setPc',{n:k})}: ${t('setD_'+sk+k)}</small>`).join('');}
-function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br><small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+hidTip(i)+setTip(i)+itemSkillTip(i);}
+function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+hidTip(i)+setTip(i)+itemSkillTip(i);}
 function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>${t('bread')}</b><br><small>${t('clickEat')}</small>`});['hpot','mpot'].forEach(k=>{if(S[k])a.push({k,n:S[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickDrink',{k:keyName(POT[k].key)})}</small>`});});
  LIFEM.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t('lifeMD')}</small>`});});
  Object.keys(DISH).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickEat')}</small>`});});
@@ -5690,7 +5757,7 @@ const SKD={
  // smith skills from the novel (owner 2026-10-19: the crafting skill took a slot and was never used, so it is passive now):
  // Blacksmith Breath is always on at the anvil (pas); Repair mends worn gear in the field (Legendary Blacksmith Repair, ch 1);
  // Item Combination merges weapon and armor for a while (ch 236). also: other classes that are smiths too.
- focus:{cls:'smith',also:['pagma'],lv:7,pas:1,col:'#ffc21a'},beyes:{cls:'smith',also:['pagma'],lv:12,pas:1,col:'#9fd8ff'},lpat:{cls:'smith',also:['pagma'],lv:15,pas:1,col:'#ffb04a'},lrep:{cls:'smith',also:['pagma'],lv:10,qd:'kh5',mp:14,cd:45,col:'#9fd8ff'},icomb:{cls:'smith',also:['pagma'],lv:35,qd:'kh6',mp:18,cd:90,col:'#bfe0ff'},
+ focus:{cls:'smith',also:['pagma'],lv:7,pas:1,col:'#ffc21a'},beyes:{cls:'smith',also:['pagma'],lv:12,pas:1,col:'#9fd8ff'},lpat:{cls:'smith',also:['pagma'],lv:15,pas:1,col:'#ffb04a'},lcre:{cls:'smith',also:['pagma'],lv:10,pas:1,col:'#ffe7a8'},lrep:{cls:'smith',also:['pagma'],lv:10,qd:'kh5',mp:14,cd:45,col:'#9fd8ff'},icomb:{cls:'smith',also:['pagma'],lv:35,qd:'kh6',mp:18,cd:90,col:'#bfe0ff'},
  link:{cls:'pagma',lv:1,mp:10,cd:8,need:'melee',col:'#ffd27a'},kill:{cls:'pagma',lv:1,qd:'pg1',mp:18,cd:15,need:'melee',col:'#ff7a5a'},restraint:{cls:'pagma',lv:1,qd:'pg1',mp:20,cd:14,col:'#bfe8ff'},
  mcross:{cls:'saint',lv:1,mp:14,cd:3,need:'melee',col:'#bfe0ff'},mflash:{cls:'saint',lv:1,qd:'ms1',mp:22,cd:8,need:'melee',col:'#ffffff'},mwind:{cls:'saint',lv:160,qd:'ms2',mp:30,cd:10,need:'melee',col:'#9fd8ff'},mheaven:{cls:'saint',lv:170,qd:'ms3',mp:55,cd:45,need:'melee',col:'#fff4c0'},
  wave:{cls:'pagma',lv:1,qd:'pg2',mp:18,cd:9,need:'melee',col:'#ffe08a'},transcend:{cls:'pagma',lv:100,qd:'pg3',mp:24,cd:16,need:'melee',col:'#fff4c0'},revolve:{cls:'pagma',lv:120,qd:'pg4',mp:28,cd:18,need:'melee',col:'#ffb85a'},pinnacle:{cls:'pagma',lv:150,qd:'pg5',mp:50,cd:60,need:'melee',col:'#ff6a3a'},
@@ -5726,7 +5793,7 @@ const pasOn=k=>!!(S&&pasSkills().includes(k));
    passive Breath 2. Owner 2026-10-20: shown as a % to the next level and not linear: n to n+1 takes 12*n^1.5 (12, 34,
    62 ... 324), up to Lv 10. Saves from before (S.skv unset) counted uses at 6*n each; they keep their level and share. Each level gives +6% skill damage, -3% MP and cooldown, +5% buff time, and
    Lv 5 and Lv 10 open an extra effect (SKO; skills without their own get a crit chance, then bleeding hits). */
-const SKN=12,SKMAX=10,SKO={icomb:'icb',lrep:'lrep',focus:'focus',beyes:'beyes',lpat:'lpat'};let SKC=null;const skNeed=l=>Math.round(SKN*l**1.5);
+const SKN=12,SKMAX=10,SKO={icomb:'icb',lrep:'lrep',focus:'focus',beyes:'beyes',lpat:'lpat',lcre:'lcre'};let SKC=null;const skNeed=l=>Math.round(SKN*l**1.5);
 function skMig(){S.skv=2;const o=S.skx;if(!o)return;for(const k in o){let l=1,c=o[k];while(l<SKMAX&&c>=6*l){c-=6*l;l++;}let x=0;for(let i=1;i<l;i++)x+=skNeed(i);o[k]=l<SKMAX?x+Math.floor(c/(6*l)*skNeed(l)):x;}}
 function skProg(k){if(S&&!S.skv)skMig();let l=1,c=((S&&S.skx)||{})[k]||0;while(l<SKMAX&&c>=skNeed(l)){c-=skNeed(l);l++;}return [l,c,l<SKMAX?skNeed(l):0];}
 const skLv=k=>skProg(k)[0],skDm=k=>1+.06*(skLv(k)-1),skCostM=k=>1-.03*(skLv(k)-1),skDur=k=>1+.05*(skLv(k)-1),icbM=()=>skLv('icomb')>=5?1.3:1.2;
@@ -5972,6 +6039,7 @@ function skIcon(k){const id='sk_'+k;if(ICN[id])return ICN[id];const c=SKD[k].col
  else if(k==='smash'){for(let i=0;i<8;i++)p(3+i,13-i,1,1,'#7a5634');p(8,2,6,5);p(8,2,6,1,'#fff');}
  else if(k==='focus'){p(7,2,2,12);p(2,7,12,2);p(6,6,4,4,'#fff');}
  else if(k==='beyes'){for(let a=0;a<16;a++){const an=a*.39;p(8+Math.cos(an)*6|0,8+Math.sin(an)*3|0,1,1);}p(6,6,4,4);p(7,7,2,2,'#fff');}
+ else if(k==='lcre'){g.strokeStyle=c;g.strokeRect(2.5,3.5,11,9);p(4,6,8,1);p(4,9,5,1);p(10,8,3,3,'#fff');}
  else if(k==='lpat'){p(3,12,10,2,'#7a5634');p(5,4,6,8);p(6,5,4,1,'#fff');}
  else if(k==='rage'){blob(g,8,10,4,4,c);p(6,3,2,5);p(9,4,2,4);p(7,1,1,3,'#ffd24a');}
  else if(k==='roar'){for(let r=2;r<8;r+=2)for(let a=-.9;a<.9;a+=.12)p(4+Math.cos(a)*r|0,8+Math.sin(a)*r|0,1,1);p(2,7,2,2);}
@@ -6346,7 +6414,7 @@ function act(a){
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
  else if(a==='menuSize'){const v=[100,120,140],c=mzOf();MZ=v[(v.indexOf(c)+1)%v.length]||100;try{localStorage.setItem('satisfy_mz',String(MZ));}catch(e){}fit();mzUI();}
  else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='guiReset')guiReset();else if(a==='quit'){save(true);fadeTo(toTitle);}
- else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='mgReheat'){reheat();}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='fApr'){closeForge();openApr('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qtoggle')toggleQuest();
+ else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='mgReheat'){reheat();}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='fCre'){creOpen();}else if(a==='fApr'){closeForge();openApr('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qtoggle')toggleQuest();
  else if(a==='cardNext'){if(CARD)CARD('next');}else if(a==='cardSkip'){if(CARD)CARD('skip');}
  else if(a==='cRand'){CL.hair=rand()*LOOK.hair.length|0;CL.hc=rand()*LOOK.hc.length|0;CL.skin=rand()*LOOK.skin.length|0;CL.top=rand()*LOOK.top.length|0;renderCreate();}
  else if(a==='cStart'){const n=$('cname').value.trim();if(n.length<2||n.length>12){$('cerr').textContent=t('cNameErr');SFX.deny();$('cname').focus();return;}CL.n=n;newGame(CL);}
