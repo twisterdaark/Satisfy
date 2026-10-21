@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21gweek', ver: '1.14', d: '2026-10-21',
+      ar: ['أونلاين: هدف الجيلد الأسبوعي: قتلات كل الأعضاء بتتجمع طول الأسبوع (من الاتنين 00:00 بتوقيت جرينتش). عند 300 و1,000 و3,000 قتيلة كل عضو بياخد جايزة المستوى مرة واحدة من G ← هدف الأسبوع',
+        'الوحوش اللي أقل منك بأكتر من 15 لفل مبتتحسبش، وكل عضو بيتحسبله لحد 1,500 قتيلة. والكل بيوصلهم إشعار لما الجيلد يوصل لمستوى'],
+      en: ["Online: the guild's weekly goal: every member's kills add up through the week (from Monday 00:00 UTC). At 300, 1,000 and 3,000 kills each member takes that tier's reward once, from G -> Weekly goal",
+        'Monsters more than 15 levels below you do not count, and each member counts up to 1,500 kills. Everyone is told when the guild reaches a tier'] },
     { v: '2026-10-21gevents', ver: '1.13', d: '2026-10-21',
       ar: ['أونلاين: مواعيد الجيلد: القائد أو ضابط يضيف ميعاد من G (اسمه، وبعدين إمتى: بعد نص ساعة لساعتين، أو النهارده أو بكره الساعة 6 أو 8 أو 10 بالليل)',
         'الأعضاء بيشوفوه في G وفي المواعيد (O) بتوقيتهم وبتوقيت جرينتش، ويقولوا "أنا رايح"، وبيوصلهم تنبيه قبله بعشر دقايق ولما يبدأ'],

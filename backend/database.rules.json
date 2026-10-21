@@ -176,6 +176,40 @@
         }
       }
     },
+    "guildWeek": {
+      "$gid": {
+        ".read": "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid",
+        "$wk": {
+          ".validate": "$wk.matches(/^w[0-9]{4,6}$/)",
+          ".write": "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && (!newData.exists() || root.child('guildMembers').child($gid).child(auth.uid).exists())",
+            ".validate": "newData.hasChildren(['n', 'k', 't']) && (!data.exists() || newData.child('k').val() >= data.child('k').val())",
+            "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
+            "k": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1500 && newData.val() % 1 === 0" },
+            "t": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        }
+      }
+    },
+    "guildWeekPaid": {
+      "$gid": {
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid",
+        "$wk": {
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid",
+            "$tier": {
+              ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('guildMembers').child($gid).child(auth.uid).exists()",
+              ".validate": "$tier.matches(/^[123]$/) && newData.hasChildren(['t'])",
+              "t": { ".validate": "newData.val() === now" },
+              "$other": { ".validate": false }
+            }
+          }
+        }
+      }
+    },
     "guildNames": {
       ".read": "auth != null",
       "$nk": {

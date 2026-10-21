@@ -4900,7 +4900,7 @@ function qCount(id){const o=QD[id].obj,s=S.qs[id];if(!s)return 0;if(o.t==='have'
 const qReady=id=>{const s=S.qs[id];return !!s&&s.st===1&&qCount(id)>=QD[id].obj.n;};
 function qAvail(id){const q=QD[id];return !S.qs[id]&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)));}
 function qObjText(id){const o=QD[id].obj;return t(QD[id].ot||(o.t==='craftR'?'o_craftR':'o_'+o.t),{it:o.t==='deliver'?t(o.it):o.t==='escort'?t('escN_'+o.it):itN(o.it),c:Math.min(qCount(id),o.n),n:o.n})+(o.low?' '+t('oLow',{p:Math.round(o.low*100)}):'')+(o.wk?' '+t('oWk',{w:wkN(o.wk)}):'')+(o.stl?' '+t('oStl'):'')+(QD[id].lim&&epAct(id)&&!qReady(id)?' · ⏳ '+epClock(epLeft(id)):'');}
-function qEvent(type,key,r,slot){domainEv(type,key,r,slot);natEv(type,key,r);for(const id in S.qs){const s=S.qs[id],q=QD[id];if(!q||s.st!==1)continue;const o=q.obj,was=qReady(id);
+function qEvent(type,key,r,slot){domainEv(type,key,r,slot);natEv(type,key,r);if(type==='kill'&&typeof gwKill==='function')gwKill(key);for(const id in S.qs){const s=S.qs[id],q=QD[id];if(!q||s.st!==1)continue;const o=q.obj,was=qReady(id);
   if((o.t===type&&o.it===key&&(!o.wk||weapKind()===o.wk)&&(!o.low||P.hp<maxHP()*o.low)&&(!o.stl||RG.kAsn))||(type==='craft'&&o.t==='craftR'&&r>=1&&slot!=='x')){s.c=(s.c||0)+1;if(!was&&qReady(id)&&!q.hid){toast(t('retTo',{w:t(q.by)}),'good');SFX.quest();}}}hudDirty=true;}
 function acceptQ(id){S.qs[id]={st:1,c:0};epAccept(id);if(QD[id].obj.t==='escort')setTimeout(()=>startEscort(id),300);toast(t('qNew',{q:qName(id)}),'good');SFX.quest();hudDirty=true;checkSkills();save(true);}
 function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]);S.arrows[r]-=k;n-=k;}}
@@ -5149,9 +5149,9 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
  const l=gLv(g),me=g.members[pidOf()]||{c:0},nx=GXP[l];
  const info=t('gInfo',{g:gName(g.id),n:l,x:g.npc?'-':nx?`${g.xp}/${nx}`:t('gMax'),m:Object.keys(g.members).length,cap:l*25,c:me.c});
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
- dialog('guild',[info,perks,g.online?guildNoteLine():''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
+ dialog('guild',[info,perks+(g.online&&GWK?' · '+gwLine():''),g.online?guildNoteLine():''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
   ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},
-   ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD}]:[]),
+   ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),
    ...(Satisfy.guild.can(GUILD.state().rank,'note')?[{l:t('gdNoteW'),f:guildNoteW},...(recSt()?[{l:t('gdApps',{n:Object.keys(GAPPS).length}),f:recAppsD},{l:t('gdRecOn'),f:recPost},{l:t('gdRecOff'),f:recStop}]:[])]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
 function guildMOpts(){const o=[],back=()=>shopD('guildM','gm_hi');
@@ -7445,7 +7445,7 @@ var gdSig='',gdFor=null,GDS=null,gdBusy=0,gdFetchT=0;const GDN=new Map(); // GDN
 function guildStart(){GUILD=null;gdFor=null;GDS=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.guildStore))return; // NETTR first: FB and GDN are declared below (?net=local starts during load)
  GDN.clear();GDS=Satisfy.firebase.guildStore(FB);GUILD=Satisfy.guild.create({store:GDS,uid:NET.uid,handle:()=>netId||(S&&S.look.n)||'',now:()=>performance.now(),serverNow:()=>wNow()});GUILD.on(guildEv);}
 // (re)start for the character being played: the title's demo has no guild; loading another save starts over
-function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}guildChatSync();recAppsSync();geSync();return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();guildChatSync();recAppsSync();geSync();geTick();}
+function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}guildChatSync();recAppsSync();geSync();gwSync();return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();guildChatSync();recAppsSync();geSync();geTick();gwSync();gwTick();}
 function guildEv(e){if(!S||S.__demo||gdFor!==S)return;gdSig='';
  if(e.type==='changed')guildMirror();
  else if(e.type==='joined'){guildMirror();if(e.why==='join'){toast(t('gJoined',{g:e.name||gName(S.guild)}),'good');SFX.quest();save(true);}}
@@ -7642,6 +7642,35 @@ function geNewD(){if(geCome(wNow()).length>=10){toast(t('geFull'),'warn');return
  askLine(t('geTitleT'),'',60,v=>{const title=String(v||'').replace(/\s+/g,' ').trim().slice(0,60);if(!title)return geListD();
   dialog('guild',[t('geWhenQ')],null,[...geTimes(wNow()).map(o=>({l:o.l,f:()=>geAdd(title,o.at).then(()=>{toast(t('geAdded',{s:title}),'good');geListD();},e=>{toast(t(e&&e.message==='full'?'geFull':'gdFail'),'warn');geListD();})})),{l:t('oBack'),f:geListD}]);});}
 window.__GEV={add:(title,at)=>geAdd(title,at),list:()=>geListD(),one:id=>geOneD(id),get ev(){return GEV},get signs(){return GSIGN},times:n=>geTimes(n),store:()=>GDS}; // tests
+/* the guild's weekly goal (SAT-ONLINE-081, plan U233). Every week (Monday 00:00 UTC, the lockouts' week) the guild hunts
+   together: each member's kills of monsters no more than 15 levels below them count, up to 1,500 a member (so a high level
+   farming rabbits, or one player's alts, can't carry it). At 300, 1,000 and 3,000 kills each member takes that tier's
+   reward once (2,000 / 6,000 / 15,000 gold and as much guild contribution), from G -> Weekly goal. */
+Object.assign(STR.ar,{gwLine:'هدف الأسبوع: {n} / {g} قتيلة (المستوى {t} من 3)',gwGoal:'هدف الأسبوع',gwH:'هدف الأسبوع للجيلد (بيتجدد يوم الاتنين 00:00 بتوقيت جرينتش، بعد {d})',gwTier:'المستوى {t}: {g} قتيلة · {r} دهب · {s}',gwTop:'أكتر الأعضاء: {l}',gwGot:'خدتها',gwReady:'جاهزة',gwNot:'لسه',gwClaim:'خد جايزة المستوى {t} ({r} دهب)',gwPaid:'خدت جايزة المستوى {t}: {r} دهب',gwReach:'الجيلد وصل للمستوى {t} من هدف الأسبوع! خد جايزتك من G',gwCap:'(بيتحسب لحد {c} قتيلة لكل عضو)'});
+Object.assign(STR.en,{gwLine:'Weekly goal: {n} / {g} kills (tier {t} of 3)',gwGoal:'Weekly goal',gwH:'Guild weekly goal (resets Monday 00:00 UTC, in {d})',gwTier:'Tier {t}: {g} kills · {r} gold · {s}',gwTop:'Most kills: {l}',gwGot:'taken',gwReady:'ready',gwNot:'not yet',gwClaim:'Take the tier {t} reward ({r} gold)',gwPaid:'You took the tier {t} reward: {r} gold',gwReach:'The guild reached tier {t} of the weekly goal! Take your reward in G',gwCap:'(up to {c} kills count per member)'});
+const GW_T=[300,1000,3000],GW_G=[2000,6000,15000],GW_CAP=1500;
+var GWK=null,GWV={},GWOff=null,GWMine=0,GWSent=-1,GWT=0,GWPAID={},GWTIER=-1;
+function gwSt(){return GDS&&NETTR&&NETTR.kind==='firebase'&&GDS.watchWeek?GDS:null;}
+function gwSync(){const st=gwSt(),gs=GUILD&&GUILD.state(),gid=st&&gs&&gs.gid&&gs.rank?gs.gid:null,wk=gid?lockWeek():null,key=gid?gid+'/'+wk:null;if(key===GWK)return;
+ if(GWOff){GWOff();GWOff=null;}GWK=key;GWV={};GWMine=0;GWSent=-1;GWPAID={};GWTIER=-1;if(!key)return;
+ GWOff=st.watchWeek(gid,wk,v=>{if(GWK!==key)return;const o={};for(const u in (v||{})){const e=v[u];if(e&&typeof e==='object')o[u]={n:Satisfy.chat.clean(e.n,24)||'?',k:Math.max(0,Math.min(GW_CAP,Math.floor(+e.k||0)))};}
+  GWV=o;if(o[NET.uid]){GWMine=Math.max(GWMine,o[NET.uid].k);if(GWSent<0)GWSent=o[NET.uid].k;}else if(GWSent<0)GWSent=0;const tier=gwTier();if(GWTIER>=0&&tier>GWTIER)toast(t('gwReach',{t:tier}),'good');GWTIER=tier;});
+ st.weekPaid(gid,wk,NET.uid).then(p=>{if(GWK===key)GWPAID=p||{};},()=>{});}
+function gwTotal(){let n=0;for(const u in GWV)if(u!==NET.uid)n+=GWV[u].k;return n+Math.min(GW_CAP,GWMine);}
+function gwTier(){const n=gwTotal();return GW_T.filter(x=>n>=x).length;}
+// a kill of yours (qEvent): counts when the monster is at most 15 levels below you
+function gwKill(type){if(!GWK||!MT[type]||GWMine>=GW_CAP||GWSent<0)return;if((MT[type].lv||[1])[0]<S.lv-15)return;GWMine++;const tier=gwTier();if(GWTIER>=0&&tier>GWTIER){GWTIER=tier;toast(t('gwReach',{t:tier}),'good');}}
+function gwTick(){if(!GWK||GWSent<0||GWMine===GWSent||performance.now()-GWT<5000)return;const st=gwSt();if(!st)return;GWT=performance.now();const k=GWMine,[gid,wk]=GWK.split('/');
+ st.weekPut(gid,wk,NET.uid,{n:netId||S.look.n,k}).then(()=>{GWSent=Math.max(GWSent,k);},()=>{});}
+function gwLine(){return GWK?t('gwLine',{n:gwTotal().toLocaleString('en-US'),g:GW_T[Math.min(2,gwTier())].toLocaleString('en-US'),t:gwTier()}):'';}
+function gwD(){const st=gwSt();if(!st||!GWK)return guildPanel();const [gid,wk]=GWK.split('/'),n=gwTotal(),tier=gwTier(),end=(Math.floor((wNow()-LOCK_E)/LOCK_WK)+1)*LOCK_WK+LOCK_E;
+ const top=Object.keys(GWV).map(u=>[GWV[u].n,u===NET.uid?Math.min(GW_CAP,GWMine):GWV[u].k]).sort((a,b)=>b[1]-a[1]).slice(0,5).map(x=>x[0]+' '+x[1]).join(', ');
+ const lines=[t('gwH',{d:calIn(end-wNow())})+' · '+gwLine()+' '+t('gwCap',{c:GW_CAP.toLocaleString('en-US')}),GW_T.map((g,i)=>t('gwTier',{t:i+1,g:g.toLocaleString('en-US'),r:GW_G[i].toLocaleString('en-US'),s:t(GWPAID[i+1]?'gwGot':n>=g?'gwReady':'gwNot')})).join(' · ')+(top?' · '+t('gwTop',{l:top}):'')];
+ const opts=GW_T.map((g,i)=>i+1).filter(k=>tier>=k&&!GWPAID[k]).map(k=>({l:t('gwClaim',{t:k,r:GW_G[k-1].toLocaleString('en-US')}),f:()=>gwClaim(k)}));
+ dialog('guild',lines,null,[...opts,{l:t('oBack'),f:guildPanel}]);}
+function gwClaim(k){const st=gwSt();if(!st||!GWK||gwTier()<k||GWPAID[k])return gwD();const [gid,wk]=GWK.split('/'),key=GWK;
+ st.weekClaim(gid,wk,NET.uid,k).then(()=>{if(GWK!==key)return;GWPAID[k]={t:wNow()};const r=GW_G[k-1];S.gold+=r;gContrib(r);toast(t('gwPaid',{t:k,r:r.toLocaleString('en-US')}),'good');SFX.quest();save(true);hudDirty=true;gwD();},()=>{toast(t('gdFail'),'warn');gwD();});}
+window.__GWK={get key(){return GWK},get mine(){return GWMine},get total(){return gwTotal()},get tier(){return gwTier()},get paid(){return GWPAID},kill:ty=>gwKill(ty),open:()=>gwD(),claim:k=>gwClaim(k),store:()=>GDS}; // tests
 /* duels (SAT-ONLINE-006, doc §09 R4): K challenges the nearest player outside towns; Y/N answers, Y is the ready check.
    Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
 Object.assign(STR.ar,{dHint:'[K] مبارزة',dSent:'اتبعت تحدي مبارزة لـ{n}',dFrom:'{n} بيتحداك في مبارزة',dReadyQ:'مبارزة مع {n}: جاهز؟',dReady:'جاهز (Y)',dWait:'مستني {n}…',dNone:'مفيش حد قريب كفاية للمبارزة',dSafe:'ممنوع المبارزة جوه المدن',dBusy:'{n} مشغول دلوقتي',dFar:'قرّب من {n} الأول',dDeclined:'{n} رفض المبارزة',dCancel:'المبارزة اتلغت',dFight:'ابدأ!',dOut:'ارجع للحلبة وإلا هتخسر!',dWin:'كسبت المبارزة ضد {n} {w}',dLose:'خسرت المبارزة ضد {n} {w}',dYield:'استسلام',dYou:'إنت',dTitle:'مبارزة ضد {n}',dRec:'المبارزات: {w} فوز · {l} خسارة',dw_yield:'(استسلام)',dw_arena:'(خرج من الحلبة)',dw_teleport:'(ساب القتال)',dw_safe:'(دخل مدينة)',dw_gone:'(الخصم مشي)',dw_death:'(مات)',dw_hp:''});
