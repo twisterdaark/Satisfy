@@ -720,6 +720,15 @@
       mute: function (uid, until, why, by) { var u = {}; u['mutes/' + uid] = { until: until, why: String(why || '').slice(0, 60), by: by, t: D.serverTimestamp() }; return D.update(D.ref(db), u); },
       unmute: function (uid) { return D.remove(at('mutes/' + uid)); },
       watchMute: function (uid, cb) { var off = D.onValue(at('mutes/' + uid), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      // SAT-ONLINE-087 appeals (plan U340): appeals/{uid} {mt, why, n, t}: a muted player's own, once a mute (mt: the mute's
+      // t, the moderation event it answers); appealDone/{uid} {mt, a, by, t}: the owner's answer (lift also removes the mute).
+      // Only admins and the player read them.
+      appeal: function (uid, v) { var u = {}; u['appeals/' + uid] = { mt: v.mt, why: String(v.why).slice(0, 300), n: String(v.n || '?').slice(0, 24), t: D.serverTimestamp() }; return D.update(D.ref(db), u); },
+      myAppeal: function (uid) { return D.get(at('appeals/' + uid)).then(function (s) { return s.val(); }); },
+      appeals: function () { return Promise.all([all('appeals'), all('appealDone')]).then(function (r) { return { appeals: r[0], done: r[1] }; }); },
+      muteOf: function (uid) { return D.get(at('mutes/' + uid)).then(function (s) { return s.val(); }); },
+      decide: function (uid, mt, a, by) { var u = {}; u['appealDone/' + uid] = { mt: mt, a: a, by: by, t: D.serverTimestamp() }; if (a === 'lift') u['mutes/' + uid] = null; return D.update(D.ref(db), u); },
+      watchAppealDone: function (uid, cb) { var off = D.onValue(at('appealDone/' + uid), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
       uidOf: function (id) { return D.get(at('handles/' + String(id).toLowerCase())).then(function (s) { return typeof s.val() === 'string' ? s.val() : null; }); },
       ranks: function () { return Promise.all([all('ranks/gold'), all('ranks/lv')]).then(function (r) { return { gold: r[0], lv: r[1] }; }); },
     };

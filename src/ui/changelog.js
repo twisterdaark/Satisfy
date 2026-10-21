@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21appeal', ver: '1.30', d: '2026-10-21',
+      ar: ["الطعن في الكتم: لو اتكتمت في الشات العام وشايف إنه غلط، اكتب /appeal والسبب. الطعن بيروح لصاحب اللعبة بس، ومرة واحدة لكل كتمة",
+        "صاحب اللعبة بيكتب /appeals ويشوف الطعون، كل واحد معاه ميعاد الكتم وسببه، ويشيل الكتم أو يخليه، واللاعب بيتبلغ بالرد"],
+      en: ["Appeals: muted in the world chat and think it is a mistake? Type /appeal and why. Only the game's owner reads it, and each mute is appealed once",
+        "The owner's /appeals lists them, each with the mute's time and reason, to lift the mute or keep it; the player is told the answer"] },
     { v: '2026-10-21war', ver: '1.31', d: '2026-10-21',
       ar: ["حروب الجيلد: القائد أو الضابط يعلن حرب على جيلد تاني باسمه (G ← الحروب) لساعة واحدة في ميعاد ثابت على رأس الساعة، والجيلد التاني يوافق أو يرفض. ومينفعش تحارب حلفائك",
         "في ساعة الحرب، كل قتلة لحد من الجيلد التاني برا المدن بتتحسب للجيلد ومبتخسركش كارما ولا بتخليك خارج عن القانون، وبيظهر ⚔ جنب اسم جيلدهم",

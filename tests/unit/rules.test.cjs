@@ -509,6 +509,18 @@ test('guild wars (SAT-ONLINE-086): on a full hour ahead, accepted by the other s
   for (const x of ['warask', 'war', 'warno']) assert.ok(rules.guildDiplo.$gid.$id.k['.validate'].includes("newData.val() === '" + x + "'"), x);
 });
 
+test('appeals (SAT-ONLINE-087): a muted player its own, once a mute; read by admins and the player; answered by admins', () => {
+  const A = rules.appeals, D = rules.appealDone, adm = "root.child('admins').child(auth.uid).val() === true";
+  assert.equal(A['.read'], 'auth != null && ' + adm);
+  assert.equal(A.$uid['.read'], 'auth != null && auth.uid === $uid', 'private: the owner and the player');
+  assert.ok(A.$uid['.write'].includes("auth.uid === $uid && newData.exists() && root.child('mutes').child($uid).child('until').val() > now && (!data.exists() || data.child('mt').val() !== root.child('mutes').child($uid).child('t').val())"), 'only while muted, once a mute');
+  assert.equal(A.$uid.mt['.validate'], "newData.val() === root.child('mutes').child($uid).child('t').val()", 'linked to the mute it answers');
+  assert.equal(D['.read'], 'auth != null && ' + adm);
+  assert.equal(D.$uid['.write'], 'auth != null && ' + adm + ' && newData.exists()');
+  assert.equal(D.$uid.mt['.validate'], "newData.val() === root.child('appeals').child($uid).child('mt').val()");
+  assert.equal(D.$uid.a['.validate'], "newData.val() === 'lift' || newData.val() === 'keep'");
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);
