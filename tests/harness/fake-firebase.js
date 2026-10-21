@@ -144,7 +144,8 @@
       const claim = !!old && rkOf(gid, me) === 'o' && away(old.master) && !!v && v.master === me && rkAfter(me) === 'm' && rkAfter(old.master) === 'o';
       if (!(old ? old.master === me || claim : gid === 'g_' + me)) return 'PERMISSION_DENIED: guilds write ' + path;
       if (v === null) return null;
-      if (Object.keys(v).sort().join(',') !== 'col,master,name,nk,t') return 'guilds fields';
+      const gk = Object.keys(v).sort().join(',');
+      if (gk !== 'col,master,name,nk,t' && !(gk === 'col,emb,master,name,nk,t' && isInt(v.emb, 0) && v.emb <= 15)) return 'guilds fields'; // emb: the banner (SAT-ONLINE-084)
       // the master is yourself, or (the master handing over) an officer who becomes 'm' while you become 'o'
       const handTo = !!old && old.master === me && v.master !== me && rkOf(gid, v.master) === 'o' && rkAfter(v.master) === 'm' && rkAfter(me) === 'o';
       if (!(typeof v.name === 'string' && v.name.length >= 2 && v.name.length <= 18 && v.nk === v.name.toLowerCase() && (v.master === me || handTo) && /^#[0-9a-fA-F]{6}$/.test(v.col))) return 'guilds values';

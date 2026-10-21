@@ -139,7 +139,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U228 | Guild creation | ✅ | SAT-ONLINE-046 (#79): unique names (case-folded, `guildNames`), the founder is master |
 | U229 | Guild recruitment | ✅ | SAT-ONLINE-078: a recruiting message (`guildRecruit`), requests to join (`guildApply`, only for yourself and while it recruits), refusals kept a week (`guildRej`); joining still needs the invitation (`regression/guildrecruit`) |
 | U230 | Guild rank permissions | 🟡 | Master, officer, member with fixed rights, checked by the rules; no custom ranks |
-| U231 | Guild banners | 🟡 | A guild colour at founding; no emblem |
+| U231 | Guild banners | ✅ | SAT-ONLINE-084: the colour, and an emblem the master picks from 15 fixed symbols (`guilds/{gid}/emb`; no uploaded pictures, so nothing to moderate), shown before the guild name for everyone (`regression/guildbanner`) |
 | U232 | Guild chat | ✅ | SAT-ONLINE-049 (#81): `/g`, members only by the rules, so a removed member loses it |
 | U233 | Guild weekly quests | ✅ | SAT-ONLINE-081: the weekly goal: members' kills add up (`guildWeek`, each its own count, only upward, at most 1,500, monsters within 15 levels), three tiers, each reward taken once (`guildWeekPaid`) (`regression/guildweek`) |
 | U234 | Guild forge | ✅ | SAT-ONLINE-065 (#99): the Guild Forge, +2% quality a level, capped at 3 levels |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 40 · 🟡 39 · ⏳ 6 · ❌ 19 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 41 · 🟡 38 · ⏳ 6 · ❌ 19 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

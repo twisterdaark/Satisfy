@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21banner', ver: '1.25', d: '2026-10-21',
+      ar: ["أونلاين: شعار الجيلد: القائد بيختار شعار من G ← شعار الجيلد (تنين، نسر، ديب، سيفين وغيرهم)، وبيظهر قبل اسم الجيلد تحت اسم كل عضو عند الكل، وفي G"],
+      en: ["Online: guild banners: the master picks an emblem in G -> Guild banner (a dragon, an eagle, a wolf, crossed swords and more); it shows before the guild name under every member's name for everyone, and in G"] },
     { v: '2026-10-21bossscale', ver: '1.24', d: '2026-10-21',
       ar: ["أونلاين: البوس بقى على قد اللي بيحاربوه: كل لاعب زيادة جنبه بيزود صحته 60%، لحد 10 لاعيبة. واللي لوحده بيلاقي البوس زي ما هو",
         "لما حد يجي أو يمشي، الجزء اللي فاضل من صحة البوس بيفضل زي ما هو، والشريط واحد عند الكل"],
