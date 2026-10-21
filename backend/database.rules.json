@@ -144,6 +144,38 @@
         }
       }
     },
+    "guildEvents": {
+      "$gid": {
+        ".read": "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid",
+        "$eid": {
+          ".write": "auth != null && (root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o') && (!data.exists() || !newData.exists())",
+          ".validate": "$eid.matches(/^e_[A-Za-z0-9_-]{1,40}$/) && newData.hasChildren(['title', 'at', 'by', 'n', 't'])",
+          "title": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },
+          "at": { ".validate": "newData.isNumber() && newData.val() > now && newData.val() <= now + 2592000000" },
+          "by": { ".validate": "newData.val() === auth.uid" },
+          "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "guildEventSign": {
+      "$gid": {
+        ".read": "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid",
+        "$eid": {
+          ".write": "auth != null && !newData.exists() && (root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o')",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('guildMembers').child($gid).child(auth.uid).exists() && (!newData.exists() || root.child('guildEvents').child($gid).child($eid).exists())",
+            ".validate": "newData.hasChildren(['n', 't'])",
+            "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
+            "t": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        }
+      }
+    },
     "guildNames": {
       ".read": "auth != null",
       "$nk": {

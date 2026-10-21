@@ -150,7 +150,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U239 | Guild wars | ❌ | |
 | U240 | Territory objectives | 🟡 | Guilds capture territory banners and the castle; who holds them is shared online (`world/satisfy/own`, with world news); no weekly limit |
 | U241 | Guild leader handover | ✅ | SAT-ONLINE-076: the master hands the guild to an officer, or an officer takes it over from a master unseen 14 days; the ranks swap in the same write, so there is never a second master (`regression/guildlead`, `unit/guild`) |
-| U242 | Guild event calendar | ❌ | |
+| U242 | Guild event calendar | ✅ | SAT-ONLINE-080: events added by the master or officers (`guildEvents`), "I'm going" (`guildEventSign`), reminders 10 min before and at the start, in G and in the Calendar; one stored instant, shown in each player's time zone and UTC (`regression/guildevents`) |
 | U243 | Guild notice board | ✅ | SAT-ONLINE-076: `guildNote/{gid}`, written by the master and officers, each write the next version; members read it and hear when it changes; shown as text, never as HTML |
 | U244 | Guild rankings | ✅ | SAT-ONLINE-076: every online guild next to the canon ones, by level from the members' summed contribution (the same formula as your own guild's) |
 | U245 | Guild diplomacy | ❌ | |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 33 · 🟡 38 · ⏳ 6 · ❌ 27 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 33 · 🟡 39 · ⏳ 6 · ❌ 26 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
