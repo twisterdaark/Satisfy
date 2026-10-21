@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v100', ver: '1.00', d: '2026-10-21',
+      ar: ['فكّ القطع: أي معدات في الشنطة تقدر تفكّها وتاخد جزء من الخامات اللي اتعملت منها',
+        'عند الحدادين: "فكّ قطعة" من خدماتهم، بأجرة، ومش بتفشل. على السندان: زرار "فكّ قطعة"، بتاخد أكتر كل ما لفل الحدادة يعلى، وفيه فرصة صغيرة إن "[الفك فشل.]" والقطعة بتتخدش بس',
+        'القطع اللي ملهاش وصفة بتطلّع أحجار مانا على حسب ندرتها، وقوس الرعد بيطلّع تلات أحجار رعد',
+        'الفهم، زي الرواية: الحداد لما يفكّ قطعة مسماة من الزعماء على السندان بيفهمها 20% (سليل باجما 34%). لما يوصل 100% بيتعلم طريقة صنعها ويقدر يصنعها على السندان'],
+      en: ['Taking items apart: any gear in your bag can be taken apart for part of the materials it was made from',
+        'At a smithy: "Take an item apart" among the smith’s services, for a fee, and it never fails. At the anvil: a "Take apart" button; you get more back as your smithing level rises, with a small chance that "[The disassembly has failed.]", which only scuffs the item',
+        'Items no recipe makes give mana stones by rating, and the Thunder Bow its three thunder stones',
+        'Understanding, as in the novel: a blacksmith who takes a boss’s named item apart at the anvil gains 20% understanding of it (Pagma’s Descendant 34%). At 100% its production method is learned and it can be forged at the anvil'] },
     { v: '2026-10-21v99', ver: '0.99', d: '2026-10-21',
       ar: ['أطقم معدات جديدة: لما تلبس كذا قطعة من نفس الطقم بيتفعّل تأثير زيادة، وبيظهرلك تنبيه أول ما التأثير يشتغل',
         'طقم زعيم أوركات ضوء الصقيع (لفل 140): الخوذة بقى معاها درع وقفازات وجزمة وخاتم، بيوقعوا من زعيم الأوركات (ونادر جدا من الأوركات). 3 قطع: القوة +50 والتحمّل +80. 5 قطع: القوة +100 والتحمّل +200، وأوركات ضوء الصقيع مش بتهاجمك، زي ما في الرواية',

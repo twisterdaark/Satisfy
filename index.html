@@ -268,7 +268,7 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 #mgv{display:block;margin:0 auto;width:calc(var(--u)*32);height:calc(var(--u)*11.2);image-rendering:pixelated}
 #inv{width:calc(var(--u)*52);background:var(--sys2)}
 .itrash{display:flex;align-items:center;justify-content:center;width:calc(var(--u)*2.2);height:calc(var(--u)*2.2);padding:calc(var(--u)*.35);margin-inline-start:calc(var(--u)*.6);color:#ffb0a0;fill:currentColor}.itrash svg{width:100%;height:100%;fill:currentColor}
-#inv.trash .itrash,#inv .itrash.hot{background:rgba(255,90,70,.35);color:#fff;box-shadow:0 0 calc(var(--u)*.8) rgba(255,90,70,.7)}#inv.trash .slotb:not(.e){cursor:not-allowed}#inv.trash .slotb:not(.e):hover{background:rgba(255,90,70,.3)}
+#inv.trash .itrash,#inv .itrash.hot{background:rgba(255,90,70,.35);color:#fff;box-shadow:0 0 calc(var(--u)*.8) rgba(255,90,70,.7)}#inv.trash .slotb:not(.e){cursor:not-allowed}#inv.trash .slotb:not(.e):hover{background:rgba(255,90,70,.3)}#inv.salv .slotb:not(.e):hover{background:rgba(242,193,78,.3)}
 #inv.sell{background:linear-gradient(180deg,rgba(40,34,12,.92),rgba(14,22,40,.95))}#inv.sell .itrash{display:none}
 #auW{width:calc(var(--u)*92);max-width:96vw;max-height:88%;overflow:auto;background:var(--sys2)}#auW .aub{display:grid;grid-template-columns:1fr 1.3fr;gap:calc(var(--u)*1.6)}#auW .auh{opacity:.8;margin-bottom:calc(var(--u)*.4)}#auBag .slotb.sel{outline:2px solid #ffd24a;box-shadow:0 0 calc(var(--u)*.8) rgba(255,210,74,.6)}#auW .igrid{grid-template-columns:repeat(6,1fr);max-height:34vh;overflow-y:auto}#auF{margin-top:calc(var(--u)*.8);padding-top:calc(var(--u)*.8);border-top:1px solid rgba(127,180,255,.25);display:grid;gap:calc(var(--u)*.5)}#auF label{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*.8)}#auW input{width:calc(var(--u)*12);font:inherit;color:#fff;background:rgba(0,0,0,.35);border:1px solid rgba(143,216,255,.45);padding:calc(var(--u)*.3) calc(var(--u)*.6)}#auQ{width:100%!important;box-sizing:border-box;margin:calc(var(--u)*.5) 0}#auF small,#auL small{opacity:.75}.autabs{display:flex;gap:calc(var(--u)*.5)}.autabs button{width:auto;flex:1}.autabs button.on{background:rgba(143,216,255,.3);box-shadow:inset 0 -2px 0 #8fd8ff}#auL{max-height:44vh;overflow-y:auto}.aurow{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:calc(var(--u)*.8);padding:calc(var(--u)*.35) 0;border-bottom:1px solid rgba(143,216,255,.14)}.aurow img{width:calc(var(--u)*2.6);height:calc(var(--u)*2.6);image-rendering:pixelated}.aurow button,#auF button,#auC button{width:auto;padding:0 calc(var(--u)*1)}.aurow .pr{color:#f2c14e}.aurow.poor .pr{color:#ff8a7a}#auL .none{opacity:.7;padding:calc(var(--u)*1) 0;text-align:center}
 .inote{margin-top:calc(var(--u)*.6);color:var(--muted);font-size:calc(var(--u)*.9);text-align:center;min-height:1em}
@@ -4104,6 +4104,45 @@ RC.push(
 // who drops them (rolled per player, like rare drops); chances per kill
 const NDROP={ypriest:[['iyarugt',.25],['vring',.15],['absurd',.1]],demon:[['iyarugt',.004],['vring',.006]],bknight:[['dains',.2],['elfin',.15],['bboots',.15]],scmd:[['dains',.15]],
  warlord:[['tbow',.2]],kking:[['tbow',.15]],guardian:[['wisdom',.15]],trauka:[['wisdom',.2],['absurd',.25]],wraith:[['elfin',.01]],dcapt:[['doran',.12]],gwar:[['doran',.1]],fochief:[['ochelm',.2],['ocarmor',.12],['ocgloves',.15],['ocboots',.15],['ocring',.1]],forc:[['ocgloves',.003],['ocboots',.003],['ocring',.002]]};
+/* Taking items apart (v1.00). In the novel a blacksmith has "Blacksmith's Disassembly" and Grid breaks items down to
+   learn them: "He could get up to 100% understanding by observing, using, disassembling, and assembling an item. Once
+   he succeeded in acquiring 100% understanding, he could gain the method to make the item." It can fail: "[The
+   disassembly has failed.]". Here any gear in the bag comes apart for part of what made it: at your own anvil (more back
+   as your smithing level rises, a small chance to fail, which only scuffs the item) or at a smithy for a fee (less back,
+   never fails). Items no recipe makes give mana stones by rating, the Thunder Bow its three thunder stones. A blacksmith
+   who takes a boss's named item apart at the anvil gains 20% understanding of it (Pagma's Descendant 34%); at 100% its
+   production method is learned and it can be forged like any recipe. Each player's own bag and S.und; nothing shared. */
+const SALVX={tbow:{tstone:3}},SALVR=[{},{mstone:1},{mstone:2},{mstone:5,blue:1},{mstone:10,blue:2,diam:1}];
+const UNDN=[{mith:4,mstone:4},{mith:4,mstone:4,blue:1},{mith:6,mstone:5,blue:1},{mith:8,mstone:6,blue:2,leather:2},{mith:14,mstone:12,blue:4,diam:2}];
+const undOf=id=>(S&&S.und&&S.und[id])||0;
+// the named items the bosses drop: learnable by understanding, with a production method by their rating
+for(const rc of RC)if(rc.drop){rc.need=rc.need||{...UNDN[rc.fix||3]};rc.diff=rc.diff||1.6;rc.strikes=rc.strikes||9;rc.unlock=()=>isSm()&&undOf(rc.id)>=100;}
+const salvSelf=w=>!w||w==='anvil';
+function salvYield(it,w){const rc=rcById(it.id),o={};if(SALVX[it.id])Object.assign(o,SALVX[it.id]);
+ else if(rc&&rc.need&&!rc.drop){const f=Math.min(.95,(salvSelf(w)?Math.min(.8,.4+(S.smith||1)*.03):.3)+(it.r||0)*.1);let top='',tn=0;
+  for(const k in rc.need){const n=Math.floor(rc.need[k]*f);if(n>0)o[k]=n;if(rc.need[k]>tn){tn=rc.need[k];top=k;}}if(top&&!o[top])o[top]=1;}
+ else if((it.r||0)>0||rc&&rc.drop)Object.assign(o,SALVR[it.r||0]);
+ if(it.en>=2)o.mstone=(o.mstone||0)+Math.floor(it.en/2);if(it.gem&&GEMS[it.gem])o[it.gem]=(o[it.gem]||0)+1;return o;}
+const salvTxt=o=>Object.entries(o).map(([k,n])=>t(k)+' ×'+n).join(', ');
+const salvFee=(it,w)=>salvSelf(w)?0:price(w,40*(1+(it.r||0)*2));
+const salvFail=()=>Math.max(.03,.15-(S.smith||1)*.01);
+const salvUnd=it=>{const rc=rcById(it.id);return !!(rc&&rc.drop&&isSm());};
+function salvTip(s){if(s.eq)return `<br><small style="color:#ff9a8a">${t('unEqFirst')}</small>`;const o=salvYield(s.it,INVX.salv),g=salvFee(s.it,INVX.salv);
+ return `<br><small style="color:#f2c14e">${Object.keys(o).length?t('salvGet',{m:salvTxt(o)}):t('salvNothing')}${g?' · '+t('salvFeeT',{g}):''}</small>`+(salvSelf(INVX.salv)&&salvUnd(s.it)?`<br><small style="color:#bfe0ff">${t('undL',{n:undOf(s.it.id)})}</small>`:'');}
+function openSalv(who){INVX={salv:who||'anvil'};SFX.open();mode='inv';$('inv').hidden=false;$('hint').hidden=true;renderInv();}
+function invSalv(s){if(!s.it){toast(t('salvNo'),'warn');SFX.deny();return;}if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
+ const w=INVX.salv,it=s.it,o=salvYield(it,w),g=salvFee(it,w);if(!Object.keys(o).length){toast(t('salvNothing'),'warn');SFX.deny();return;}
+ cfm(t('salvT'),t('salvQ',{it:`<b class="rt rt${it.r||0}">${esc(inm(it))}</b>`,m:esc(salvTxt(o))})+(g?'<br>'+t('salvFeeT',{g}):'')+(salvSelf(w)?'<br><small>'+t('salvRisk',{n:Math.round(salvFail()*100)})+'</small>':''),t('salvY'),()=>doSalv(it,w));}
+function doSalv(it,w){const i=S.items.indexOf(it);if(i<0||isEq(it))return;const o=salvYield(it,w),g=salvFee(it,w);
+ if(g){if(S.gold<g){SFX.deny();toast(t('salvPoor',{g}),'warn');return;}S.gold-=g;}
+ if(salvSelf(w)&&rand()<salvFail()){it.dur=Math.max(0,durOf(it)-20);SFX.deny();toast(t('salvFail'),'warn');renderInv();save(true);return false;}
+ S.items.splice(i,1);for(const k in o)addMat(k,o[k]);SFX.slam();vfx('forge',P.x,P.y-10);toast(t('salvDone',{it:inm(it),m:salvTxt(o)}),'good');
+ if(salvSelf(w)&&salvUnd(it)){S.und=S.und||{};const u0=undOf(it.id),u=Math.min(100,u0+(S.cls==='pagma'?34:20));S.und[it.id]=u;
+  setTimeout(()=>{toast(t(u>=100?'undDone':'undUp',{it:t(it.id),n:u}),'good');if(u>=100){SFX.legendary();rcLearn();}},700);}
+ hudDirty=true;renderInv();save(true);return true;}
+window.__GSV={yield:(it,w)=>salvYield(it,w),fee:(it,w)=>salvFee(it,w),doSalv:(it,w)=>doSalv(it,w),open:w=>openSalv(w),undOf:id=>undOf(id),fail:()=>salvFail(),rc:id=>rcById(id),inv:i=>invClick(i)}; // tests
+Object.assign(STR.ar,{"oSalv": "فكّ قطعة", "fSalvB": "فكّ قطعة", "salvT": "فكّ القطع", "salvNote": "دوس على قطعة عشان تفكّها وتاخد جزء من خاماتها.", "salvGet": "بتطلّع: {m}", "salvNothing": "مفيش حاجة تطلع من القطعة دي.", "salvFeeT": "الأجرة {g} دهب", "salvNo": "الحاجات اللي بتتفك هي المعدات بس.", "salvQ": "تفكّ {it}؟ هتطلع منها: {m}.", "salvY": "فكّها", "salvRisk": "فرصة الفشل {n}% (القطعة بتتخدش بس)", "salvPoor": "الأجرة {g} دهب، ومعاكش.", "salvFail": "[الفك فشل.]", "salvDone": "{it} اتفكّت: {m}", "undL": "الفهم: {n}%", "undUp": "فهمك لـ{it} وصل {n}%.", "undDone": "فهمك لـ{it} وصل 100%. اتعلمت طريقة صنعها!", "rcHu": "فكّ القطعة دي على السندان لحد ما تفهمها 100%"});
+Object.assign(STR.en,{"oSalv": "Take an item apart", "fSalvB": "Take apart", "salvT": "Take items apart", "salvNote": "Click a piece of gear to take it apart for part of its materials.", "salvGet": "Gives: {m}", "salvNothing": "Nothing would come of taking this apart.", "salvFeeT": "Fee {g} gold", "salvNo": "Only equipment can be taken apart.", "salvQ": "Take {it} apart? It gives: {m}.", "salvY": "Take it apart", "salvRisk": "{n}% chance to fail (the item is only scuffed)", "salvPoor": "The fee is {g} gold, and you do not have it.", "salvFail": "[The disassembly has failed.]", "salvDone": "{it} came apart: {m}", "undL": "Understanding: {n}%", "undUp": "Your understanding of {it} is now {n}%.", "undDone": "Your understanding of {it} reached 100%. You have learned how to make it!", "rcHu": "Take this item apart at the anvil until you understand it 100%"});
 const STATB=[0,2,4,12,25]; // canon craftsmanship: rare +2, epic +4, unique +12, legendary +25 to all stats
 const ARROWG=[12,20,35,60,150];
 const MULT=[1,1.25,1.55,1.9,2.6];
@@ -5134,7 +5173,7 @@ function smithMenu(who,W,A,svc=true){const back={l:t('oBack'),f:()=>shopD(who,'a
 // repair and enhancement are smith work (Khan, Smith, the Reidan and Reinhardt smiths) or done yourself at an anvil;
 // setting gems needs a master (Khan, the Reinhardt smith) or your own anvil. Armorers are only traders.
 const GEMSM=new Set(['khan','smithRh']);
-function svcOpts(who){const rc=repairCost(who);return [...(GEMSM.has(who)?[{l:t('oGem',{g:GEMC}),ic:'ruby',f:()=>gemMenu(who)}]:[]),{l:rc?t('oRepair',{g:rc}):t('oRepair0'),ic:'hammer',poor:S.gold<rc,f:()=>repairAll(who)},{l:t('oEnh'),ic:'mstone',f:()=>enhMenu(who)},...(S.items.some(i=>i.id==='tbow')?[{l:t('oTbow'),ic:'tbow',f:()=>tbowBreak(who)}]:[])];}
+function svcOpts(who){const rc=repairCost(who);return [...(GEMSM.has(who)?[{l:t('oGem',{g:GEMC}),ic:'ruby',f:()=>gemMenu(who)}]:[]),{l:rc?t('oRepair',{g:rc}):t('oRepair0'),ic:'hammer',poor:S.gold<rc,f:()=>repairAll(who)},{l:t('oEnh'),ic:'mstone',f:()=>enhMenu(who)},...(S.items.some(i=>i.id==='tbow')?[{l:t('oTbow'),ic:'tbow',f:()=>tbowBreak(who)}]:[]),{l:t('oSalv'),ic:'hammer',f:()=>openSalv(who)}];}
 const svcBack=who=>NPCT[who]&&NPCT[who].opts?shopD(who,'svcMore'):null;
 function repairCost(who){let g=0;for(const i of S.items){const d=durOf(i);if(d<100&&i.slot!=='x')g+=Math.ceil((100-d)*.4*(1+i.r));}return g?price(who,g):0;}
 function repairAll(who){const g=repairCost(who);if(!g)return dialog(who,['arNoRep'],()=>svcBack(who));if(S.gold<g){SFX.deny();return dialog(who,['arNo']);}
@@ -5221,9 +5260,9 @@ function rcLearn(quiet){if(!S)return;S.rcK=S.rcK||{};S.rcN=S.rcN||{};const nw=RC
  if(nw.length>=3&&!quiet){toast(t('rcNewN',{n:nw.length}),'good');SFX.rare();}}
 setInterval(()=>{if(S&&mode==='play')rcLearn();},2000);
 function rcHint(rc){const f=String(rc.unlock),h=[];let m;const re=/(?:qDone\('|S\.qs\.)(\w+)/g;while((m=re.exec(f)))if(QD[m[1]])h.push(t('rcHq',{q:qName(m[1])}));
- if((m=/S\.smith>=(\d+)/.exec(f)))h.push(t('rcHs',{n:m[1]}));if(/isSm\(\)/.test(f))h.push(t('rcHc'));return h.join(' · ');}
+ if((m=/S\.smith>=(\d+)/.exec(f)))h.push(t('rcHs',{n:m[1]}));if(/isSm\(\)/.test(f))h.push(t('rcHc'));if(/undOf/.test(f))h.push(t('rcHu'));return h.join(' · ');}
 function renderRecipes(){const el=$('rlist');el.innerHTML='';rcLearn();{const sv=document.createElement('div');sv.className='recipe';const rc=repairCost('anvil');
- sv.innerHTML=`<button data-act="fRepair">${rc?t('oRepair',{g:rc}):t('oRepair0')}</button><button data-act="fEnh">${t('oEnh')}</button><button data-act="fGem">${t('oGemA')}</button>`;el.appendChild(sv);}
+ sv.innerHTML=`<button data-act="fRepair">${rc?t('oRepair',{g:rc}):t('oRepair0')}</button><button data-act="fEnh">${t('oEnh')}</button><button data-act="fGem">${t('oGemA')}</button><button data-act="fSalv">${t('fSalvB')}</button>`;el.appendChild(sv);}
  const tb=document.createElement('div');tb.className='stabs rtabs';tb.innerHTML=Object.keys(RCAT).map(k=>`<button data-rtab="${k}" class="${RTAB===k?'on':''}">${t('rc_'+k)}</button>`).join('');
  tb.onclick=e=>{const b=e.target.closest('[data-rtab]');if(!b)return;SFX.click();RTAB=b.dataset.rtab;tb.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));rcRows();};el.appendChild(tb);
  const q=document.createElement('input');q.id='rsearch';q.placeholder=t('rcSearch');q.value=RQ;q.oninput=()=>{RQ=q.value;rcRows();};q.onkeydown=e=>{if(e.code==='Escape'){e.stopPropagation();q.blur();}};el.appendChild(q);
@@ -5373,11 +5412,11 @@ function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>$
  GEMK.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(k+'D')}</small>`});});
  S.arrows.forEach((n,r)=>{if(n)a.push({k:'arrows',n,r,tip:`<b class="rt rt${r}">${t('arrows')}</b><br>${t('r'+r)} · ${ARROWG[r]}G`});});
  S.items.forEach(i=>{if(WSH[i.id]||(i.slot!=='w'&&i.slot!=='x')){const on=isEq(i);a.push({k:i.id,n:1,r:i.r,it:i,eq:on,tip:itemTip(i)+`<br><small>${on?t('eqMark'):t('clickEquip')}</small>`});}});
- const sell=INVX&&INVX.who;if(sell)a.forEach(s=>{s.tip+=s.eq?`<br><small style="color:#ff9a8a">${t('unEqFirst')}</small>`:`<br><small style="color:#f2c14e">${t('sellAt',{g:unitVal(s)})}${s.n>1?' · '+t('sellAll',{g:unitVal(s)*s.n}):''}</small>`;});
- $('inv').classList.toggle('sell',!!sell);$('inv').classList.toggle('trash',INVX==='trash');$('invH').textContent=t(sell?'sellT':'bagT');$('invNote').textContent=sell?t('sellNote'):INVX==='trash'?t('trashNote'):t('bagNote');$('invTrash').dataset.tip=t('trashTip');
+ const sell=INVX&&INVX.who;if(INVX&&INVX.salv)a.forEach(s=>{if(s.it)s.tip=s.tip.replace(t('clickEquip'),t('salvY'))+salvTip(s);});if(sell)a.forEach(s=>{s.tip+=s.eq?`<br><small style="color:#ff9a8a">${t('unEqFirst')}</small>`:`<br><small style="color:#f2c14e">${t('sellAt',{g:unitVal(s)})}${s.n>1?' · '+t('sellAll',{g:unitVal(s)*s.n}):''}</small>`;});
+ $('inv').classList.toggle('sell',!!sell);$('inv').classList.toggle('trash',INVX==='trash');$('inv').classList.toggle('salv',!!(INVX&&INVX.salv));$('invH').textContent=t(sell?'sellT':INVX&&INVX.salv?'salvT':'bagT');$('invNote').textContent=sell?t('sellNote'):INVX&&INVX.salv?t('salvNote'):INVX==='trash'?t('trashNote'):t('bagNote');$('invTrash').dataset.tip=t('trashTip');
  INVS=a;let h='';for(let i=0,N=Math.max(36,Math.ceil(a.length/9)*9);i<N;i++){const s=a[i];h+=s?`<button class="slotb r${s.r||0}${s.eq?' eq':''}" data-inv="${i}" data-tip="${esc(s.tip)}"><img src="${icon(s.k)}"><b>${s.n>1?s.n:''}</b></button>`:'<div class="slotb e"></div>';}
  $('igrid').innerHTML=h;$('invGold').textContent=t('gold',{n:S.gold});}
-function invClick(i,all){const s=INVS[i];if(!s)return;if(INVX==='trash'){invTrash(s);return;}if(INVX&&INVX.who){invSell(s,all);return;}if(s.k==='bread')eat();else if(DISH[s.k])eatDish(s.k);else if(RSUSE.includes(s.k))rsUse(s.k);else if(POT[s.k])drink(s.k);else if(s.it){if(equip(s.it)!==false){SFX.click();toast(t('equipped')+': '+inm(s.it));}hudDirty=true;sbSig='';}renderInv();$('tip').classList.remove('on');}
+function invClick(i,all){const s=INVS[i];if(!s)return;if(INVX==='trash'){invTrash(s);return;}if(INVX&&INVX.salv){invSalv(s);return;}if(INVX&&INVX.who){invSell(s,all);return;}if(s.k==='bread')eat();else if(DISH[s.k])eatDish(s.k);else if(RSUSE.includes(s.k))rsUse(s.k);else if(POT[s.k])drink(s.k);else if(s.it){if(equip(s.it)!==false){SFX.click();toast(t('equipped')+': '+inm(s.it));}hudDirty=true;sbSig='';}renderInv();$('tip').classList.remove('on');}
 /* bag actions (owner 2026-10-19): destroy a thing (arm the bin in the bag's title, or drag the thing onto it), drop it on
    the ground by dragging it out of the bag (it lies there for a minute for anyone to pick up, then it is gone), and sell
    anything in the bag to a merchant from a window like the bag instead of one dialog line per material. Each asks first. */
@@ -6175,7 +6214,7 @@ function act(a){
  else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
  else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='guiReset')guiReset();else if(a==='quit'){save(true);fadeTo(toTitle);}
- else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qtoggle')toggleQuest();
+ else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qtoggle')toggleQuest();
  else if(a==='cardNext'){if(CARD)CARD('next');}else if(a==='cardSkip'){if(CARD)CARD('skip');}
  else if(a==='cRand'){CL.hair=rand()*LOOK.hair.length|0;CL.hc=rand()*LOOK.hc.length|0;CL.skin=rand()*LOOK.skin.length|0;CL.top=rand()*LOOK.top.length|0;renderCreate();}
  else if(a==='cStart'){const n=$('cname').value.trim();if(n.length<2||n.length>12){$('cerr').textContent=t('cNameErr');SFX.deny();$('cname').focus();return;}CL.n=n;newGame(CL);}
