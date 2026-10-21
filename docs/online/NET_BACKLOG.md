@@ -107,8 +107,8 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U184 | Raid weekly lockouts | ✅ | SAT-ONLINE-059 (#92): `lockouts/{uid}/{week}/{boss}` once per account and UTC week, so changing the time zone resets nothing |
 | U185 | Raid party finder | ✅ | SAT-ONLINE-073 (#106): the group finder; stopping, signing out or dropping removes your entry |
 | U186 | Raid replay | ❌ | Needs an event log of the fight |
-| U187 | Boss encyclopedia | ❌ | Content (B): traits revealed after a confirmed kill |
-| U188 | Adaptive difficulty | ❌ | Boss health by party size |
+| U187 | Boss encyclopedia | ✅ | B's monster encyclopedia (v1.21): a page per monster opens on the first kill, drops after 10 kills (1 for a boss), mastery after 100 |
+| U188 | Adaptive difficulty | ✅ | SAT-ONLINE-083: the host gives a boss the health of the n players of its group within 600 px (+60% a player, up to 10), the share left kept as players come and go (`regression/bossscale`) |
 | U189 | Seasonal world boss | 🟡 | Trauka's half hour and Berith's two-hour rest are shared through `world/satisfy/wb` (056, B's v0.87); no season schedule |
 
 ### Economy and trade (plan §42)
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 38 · 🟡 39 · ⏳ 6 · ❌ 21 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 40 · 🟡 39 · ⏳ 6 · ❌ 19 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

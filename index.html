@@ -8372,6 +8372,7 @@ function spaceIn(){const k=spaceKey();if(k!==SPIN.k)SPIN={k,t:Math.floor(wNow()/
 function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!ARN&&!TWR&&!solo(P.x,P.y));const me=out?spaceIn():0,room=out?(roomAt(P.x,P.y)||{}).id||null:null;
  const rs=out?mobGroup(NET.remotes().filter(r=>r.uid&&(r.room||null)===room&&r.mv===mapV()&&!isBlocked(r.uid)&&typeof r.x==='number'&&!solo(r.x,r.y))):[];MOBN.rs=rs;
  const inOf=r=>{const f=FXS.get(r.sid);return f&&f.inT>0?f.inT:9e9;};let h=NET.uid,ht=me;for(const r of rs){const t=inOf(r);if(t<ht||t===ht&&r.uid<h){h=r.uid;ht=t;}}MOBN.host=rs.length?h:null;
+ if(!MOBN.host||MOBN.host===NET.uid)bossScaleTick(rs);
  const z=MOBN.host?'h'+MOBN.host.replace(/[^A-Za-z0-9_-]/g,'').slice(0,23):null;
  if(z!==MOBN.zone){if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}MOBN.zone=z;MOBN.all={};MOBN.hits.clear();NETTR.mobsOn(z,a=>{MOBN.all=a;});
   // a new host or none: monsters hidden for the old host come back on their own, and copies made from its list go
@@ -8379,6 +8380,17 @@ function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!ARN&&!TWR&&!solo(P
  if(!z)return;
  if(MOBN.host===NET.uid){const t=performance.now();for(const m of mons)if(m.biteT>0)m.biteT-=1/60;if(t-MOBN.sent>=(MOBN.fast?MOB_FAST:MOB_MS)){MOBN.sent=t;MOBN.fast=0;NETTR.mobsPut(z,mobList(rs),NET.uid);MOBN.put=true;}}
  else{if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}mobMake();}}
+/* bosses scale with the group fighting them (SAT-ONLINE-083, plan U188). Online, the client the others follow (the mob
+   host, or a player alone) gives every boss within 600 px of n players of its group n-player health: +60% a player past the
+   first, for up to 10 (the encounter's power budget), so a raid of ten meets a boss built for ten, not a solo boss melted in
+   seconds, and a solo player keeps the old one. The share of health left is kept when players come or go, and the others see
+   the host's share as always, so every screen shows the same bar. Damage, rewards and levels don't change. */
+const BSC={PER:.6,R:600,MAX:10};let bsT=0;
+function bossScaleOf(n){return 1+BSC.PER*(Math.max(1,Math.min(BSC.MAX,n|0))-1);}
+function bossScaleTick(rs){const t=performance.now();if(t-bsT<500||!P)return;bsT=t;const pts=[P].concat(rs||[]);
+ for(const m of mons){if(m.dead||!MT[m.type]||!MT[m.type].boss||!mobOk(m))continue;let n=0;for(const p of pts)if(Math.abs(p.x-m.x)<BSC.R&&Math.abs(p.y-m.y)<BSC.R&&Math.hypot(p.x-m.x,p.y-m.y)<BSC.R)n++;
+  n=Math.max(1,Math.min(BSC.MAX,n));const was=m.bsN||1;if(n===was)continue;const share=m.hp/m.max;m.max=Math.max(1,Math.round(m.max*bossScaleOf(n)/bossScaleOf(was)));m.hp=Math.max(1,Math.round(m.max*share));m.bsN=n;}}
+window.__GBSC={of:n=>bossScaleOf(n),tick:rs=>{bsT=0;bossScaleTick(rs);},C:BSC}; // tests
 // follower: a monster on the host's list that this client never spawned (an event wave, a boss's adds, a squad) is made
 // here from its key, "<type>@<spawn x>,<spawn y>", and then follows the host like the others
 let mobMkT=0;function mobMake(){const t=performance.now();if(t-mobMkT<500)return;mobMkT=t;const L=MOBN.all[MOBN.host];if(!L||!L.m)return;

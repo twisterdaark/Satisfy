@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21bossscale', ver: '1.24', d: '2026-10-21',
+      ar: ["أونلاين: البوس بقى على قد اللي بيحاربوه: كل لاعب زيادة جنبه بيزود صحته 60%، لحد 10 لاعيبة. واللي لوحده بيلاقي البوس زي ما هو",
+        "لما حد يجي أو يمشي، الجزء اللي فاضل من صحة البوس بيفضل زي ما هو، والشريط واحد عند الكل"],
+      en: ["Online: a boss now matches the group fighting it: each player past the first near it adds 60% to its health, up to 10 players. Alone, you meet the boss as before",
+        "When someone comes or goes, the share of health it has left stays the same, and every screen shows the same bar"] },
     { v: '2026-10-21v123', ver: '1.23', d: '2026-10-21',
       ar: ['الموبايل بالعرض: أي لمسة بتطلب ملء الشاشة بأكتر من طريقة، فشريط العنوان بيختفي واللعبة بتملا الشاشة كلها (اتجربت على شاشة 20:9 زي أوبو رينو 13F)',
         'زرار "ملء الشاشة" في الشاشة الرئيسية وقايمة الإيقاف طول ما الشاشة مش مليانة، ولو المتصفح رفض بيقولك تضيف اللعبة للشاشة الرئيسية من قايمة كروم',
