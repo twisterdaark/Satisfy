@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v103', ver: '1.03', d: '2026-10-21',
+      ar: ['الفحص والخواص المخفية: أي قطعة أعلى من "عادي" وأي قطعة مسمّاة من زعيم بتبقى "لسه متفحصتش" لحد ما حد يفحصها',
+        'الحدادين بيفحصوا بأجرة (اختيار "افحص قطعة")، والحداد بنفسه بيفحص ببلاش من زرار "فحص" على السندان',
+        'الرد زي الرواية: "[مفيش خاصية مخفية.]" أو "[القطعة دي فيها خاصية مخفية.]". الخاصية (قوة، رشاقة، تحمّل، ذكاء، براعة، دفاع، صحة أو سرعة هجوم) مبتشتغلش غير بعد ما تتكشف، وكل ما القطعة أندر فرصتها أكبر وقيمتها أعلى',
+        'الحداد اللي بيفحص قطعة مسمّاة من زعيم فهمه ليها بيزيد 10% (سليل باجما 17%)، والخاصية المكشوفة بتفضل مع القطعة لو اتبادلت'],
+      en: ['Appraisal and hidden functions: any item above Normal, and every named item a boss drops, is "Unappraised" until someone appraises it',
+        'Smithies appraise for a fee ("Appraise an item"), and a blacksmith appraises for free with the "Appraise" button at the anvil',
+        'The answer is the novel\'s: "[A hidden function doesn\'t exist.]" or "[This item has a hidden function.]". The function (strength, agility, stamina, intelligence, dexterity, defense, health or attack speed) works only once it is found, and rarer items find one more often and a stronger one',
+        'A blacksmith who appraises a boss\'s named item gains 10% understanding of it (Pagma\'s Descendant 17%), and a found function stays with the item when it is traded'] },
     { v: '2026-10-21v102', ver: '1.02', d: '2026-10-21',
       ar: ['الموبايل 2: ترتيب شريط المهارات باللمس. في نافذة الحالة فيه صف بخانات الشريط الخمسة: دوس على مهارة وبعدين على الخانة اللي عايزها، أو دوس على خانة فيها مهارة وبعدين على خانة تانية عشان تبدّلهم',
         'القوايم بقت أكبر على الموبايل (120%)، والكلام الصغير في القوايم بقى أوضح',
