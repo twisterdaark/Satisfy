@@ -775,6 +775,8 @@
         "s": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
         "w": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000" },
         "l": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000" },
+        "gi": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 100000000000" },
+        "go": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 100000000000" },
         "t": { ".validate": "newData.val() === now" },
         "$other": { ".validate": false }
       }

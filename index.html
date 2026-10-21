@@ -9035,7 +9035,12 @@ function admCrashes(st){st.crashes().then(v=>{const L=Object.values(v||{}).filte
 // the gold of the ranked players: a picture of the economy from what the game already keeps
 function ecoStats(gold,lv){const g=Object.values(gold||{}).map(e=>e&&+e.v).filter(x=>x>=0).sort((a,b)=>a-b),l=Object.values(lv||{}).map(e=>e&&+e.v).filter(x=>x>0);
  const q=f=>g.length?g[Math.min(g.length-1,Math.floor(f*g.length))]:0;return {n:g.length,total:g.reduce((a,b)=>a+b,0),median:q(.5),p90:q(.9),max:g.length?g[g.length-1]:0,lv:l.length?Math.round(l.reduce((a,b)=>a+b,0)/l.length):0};}
-function admEco(st){st.ranks().then(r=>{const e=ecoStats(r.gold,r.lv),f=x=>Math.round(x).toLocaleString('en-US');dialog('guild',[t('admEco',{n:e.n,g:f(e.total),m:f(e.median),p:f(e.p90),x:f(e.max),lv:e.lv})],null,[{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
+function admEco(st){Promise.all([st.ranks(),st.balance().catch(()=>({}))]).then(([r,bal])=>{const e=ecoStats(r.gold,r.lv),f=x=>Math.round(x).toLocaleString('en-US'),fl=ecoFlow(bal,lockWeek());
+ dialog('guild',[t('admEco',{n:e.n,g:f(e.total),m:f(e.median),p:f(e.p90),x:f(e.max),lv:e.lv}),...(fl.n?[t('ecoFlow',{n:fl.n,i:f(fl.gi),o:f(fl.go),d:(fl.gi>=fl.go?'+':'−')+f(Math.abs(fl.gi-fl.go))})+(fl.warn?' · '+t('ecoWarn',{r:fl.r}):'')]:[])],null,[{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
+// SAT-ONLINE-093: this week's gold in and out over every player who wrote numbers; a warning when much more comes in than
+// goes out (more than twice, with at least three players)
+function ecoFlow(all,wk){let n=0,gi=0,go=0;for(const k in (all||{})){const e=all[k];if(!e||e.wk!==wk)continue;n++;gi+=Math.max(0,+e.gi||0);go+=Math.max(0,+e.go||0);}
+ const r=go?Math.round(gi/go*10)/10:gi?Infinity:0;return {n,gi,go,r:r===Infinity?'∞':r,warn:n>=3&&gi>2*go};}
 /* appeals (SAT-ONLINE-087, plan U340). A muted player types "/appeal why" (once a mute: the appeal names the mute it answers,
    so a second one for the same mute is refused); only the game's owner (an admin) and the player read it. The owner's
    "/appeals" lists the open ones, each with the mute's time and reason, to lift the mute or keep it; the player is told the
@@ -9059,20 +9064,25 @@ function admAppeals(st){st.appeals().then(({appeals,done})=>{const L=Object.keys
    owner's "/balance" adds them up by class: players, average level, kills and the average time to kill, PvP win rate. Only
    admins read them, and the board names no player. */
 Object.assign(STR.ar,{admBal:'التوازن ({w}، {n} لاعب)',admBalRow:'{c}: {p} لاعب (لفل {lv}) · {k} قتلة، {s} ث للوحش · PvP {w}–{l} ({r})',admBalNone:'لسه مفيش أرقام الأسبوع ده'});
+Object.assign(STR.ar,{ecoFlow:'الأسبوع ده ({n} لاعب): دخل {i} دهب وخرج {o}، الفرق {d}',ecoWarn:'⚠ الداخل {r} مرة قد الخارج'});
+Object.assign(STR.en,{ecoFlow:'This week ({n} players): {i} gold came in and {o} went out, {d}',ecoWarn:'⚠ {r} times as much comes in as goes out'});
 Object.assign(STR.en,{admBal:'Balance ({w}, {n} players)',admBalRow:'{c}: {p} players (Lv {lv}) · {k} kills, {s} s each · PvP {w}–{l} ({r})',admBalNone:'No numbers this week yet'});
-var BAL=null,balT=0,balSig='';
+var BAL=null,balT=0,balSig='',balS=null,balG=0,balDirty=0;
 const balKey=()=>'satisfy_bal@'+(NET&&NET.uid||'');
 function balOn(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&S&&!S.__demo);}
 // this week's numbers for this account on this device (a new week starts again at 0)
 function balGet(){const wk=lockWeek();if(!BAL||BAL.k!==balKey()){let v=null;try{v=JSON.parse(localStorage.getItem(balKey())||'null');}catch(e){}BAL={k:balKey(),v:v&&typeof v==='object'?v:null};}
- if(!BAL.v||BAL.v.wk!==wk)BAL.v={wk,n:0,s:0,w:0,l:0};return BAL.v;}
+ if(!BAL.v||BAL.v.wk!==wk)BAL.v={wk,n:0,s:0,w:0,l:0,gi:0,go:0};BAL.v.gi=+BAL.v.gi||0;BAL.v.go=+BAL.v.go||0;return BAL.v;}
 function balSave(){try{localStorage.setItem(balKey(),JSON.stringify(BAL.v));}catch(e){}}
 // a monster we hit died: the time since our first hit (up to 10 min counts)
 function balKill(m){const f=m.fh;m.fh=0;if(!f||m.mobKill||!balOn())return;const d=Math.max(0,gTime-f);if(d>600)return;const v=balGet();v.n++;v.s=Math.round((v.s+d)*10)/10;balSave();}
 function balPvp(win){if(!balOn())return;const v=balGet();v[win?'w':'l']++;balSave();}
-function balTick(live,force){if(!live||!balOn())return;const n=performance.now();if(!force&&balT&&n-balT<300000)return;const v=balGet();if(!(v.n+v.w+v.l))return;
+/* SAT-ONLINE-093 (plan U334): the gold that came in and went out this week, from every change of the bag's gold (a new or
+   loaded character starts the count again) */
+function balGold(){if(!balOn())return;if(balS!==S){balS=S;balG=S.gold;return;}const d=Math.round(S.gold-balG);if(!d)return;balG=S.gold;const v=balGet();if(d>0)v.gi+=d;else v.go-=d;balDirty=1;}
+function balTick(live,force){balGold();if(!live||!balOn())return;const n=performance.now();if(balDirty&&n-(balTick.sv||0)>5000){balTick.sv=n;balDirty=0;balSave();}if(!force&&balT&&n-balT<300000)return;const v=balGet();if(!(v.n+v.w+v.l+v.gi+v.go))return;
  const sig=JSON.stringify([v,S.cls,S.lv|0]);if(sig===balSig)return;balT=n;balSig=sig;const D=FB.m.database,u={};
- u['balance/'+NET.uid]={wk:v.wk,cls:String(S.cls||'novice').slice(0,16),lv:Math.max(1,Math.min(999,S.lv|0)),n:Math.min(1000000,v.n),s:Math.min(100000000,v.s),w:Math.min(1000000,v.w),l:Math.min(1000000,v.l),t:D.serverTimestamp()};
+ u['balance/'+NET.uid]={wk:v.wk,cls:String(S.cls||'novice').slice(0,16),lv:Math.max(1,Math.min(999,S.lv|0)),n:Math.min(1000000,v.n),s:Math.min(100000000,v.s),w:Math.min(1000000,v.w),l:Math.min(1000000,v.l),gi:Math.min(1e11,v.gi),go:Math.min(1e11,v.go),t:D.serverTimestamp()};
  D.update(D.ref(FB.db),u).catch(()=>{balSig='';});}
 // the board: this week's numbers by class, most players first
 function balStats(all,wk){const C={};for(const k in (all||{})){const e=all[k];if(!e||e.wk!==wk||typeof e.cls!=='string')continue;const c=C[e.cls]||(C[e.cls]={c:e.cls,p:0,lv:0,n:0,s:0,w:0,l:0});c.p++;c.lv+=+e.lv||0;c.n+=+e.n||0;c.s+=+e.s||0;c.w+=+e.w||0;c.l+=+e.l||0;}
@@ -9091,7 +9101,7 @@ function admCmd(v){let m;
  if((m=/^\/mute\s+(\S+)\s+(\d{1,3})\s*([\s\S]*)$/i.exec(v))){const id=m[1],h=Math.max(1,Math.min(720,+m[2])),why=m[3].trim().slice(0,60);admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}const until=wNow()+h*3600000;return st.mute(u,until,why,NET.uid).then(()=>toast(t('admMuted',{n:id,l:calTime(until)}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  if((m=/^\/unmute\s+(\S+)\s*$/i.exec(v))){const id=m[1];admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}return st.unmute(u).then(()=>toast(t('admUnmuted',{n:id}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  return false;}
-window.__GMOD={get muted(){return MUTED},appeal:x=>apSend(x),bal:()=>balGet(),balPush:()=>{balT=0;balTick(true,true);},balStats:(a,w)=>balStats(a,w),cmd:v=>admCmd(v),eco:(g,l)=>ecoStats(g,l),redact:x=>crashRedact(x),crash:(m,s)=>crashSend(m,s),get sent(){return CRN},store:()=>modSt()}; // tests
+window.__GMOD={get muted(){return MUTED},appeal:x=>apSend(x),bal:()=>balGet(),flow:(a,w)=>ecoFlow(a,w),balPush:()=>{balT=0;balTick(true,true);},balStats:(a,w)=>balStats(a,w),cmd:v=>admCmd(v),eco:(g,l)=>ecoStats(g,l),redact:x=>crashRedact(x),crash:(m,s)=>crashSend(m,s),get sent(){return CRN},store:()=>modSt()}; // tests
 /* the event calendar (SAT-ONLINE-077, plan U331). "Calendar" in the player list (O) shows what comes next on the world clock:
    the next three world events (each slot's event is known in advance), the National Competition, the siege of Reidan Castle,
    the town festival, the horse race, and when Trauka and Berith are back. Every time is in your own time zone and in UTC.
