@@ -131,7 +131,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U224 | Rare gem exchange | 🟡 | Socketing and paid upgrades (B); no exchange between players |
 | U225 | Repair market | ❌ | |
 | U226 | Taxation caps | ❌ | There are no city taxes yet |
-| U227 | Inflation dashboard | ❌ | |
+| U227 | Inflation dashboard | ✅ | SAT-ONLINE-082: `/economy` for the owner: total, median, top 10% and richest gold of the ranked players, and their average level |
 
 ### Guilds (plan §43)
 | ID | Item | Status | Where / what's left |
@@ -189,14 +189,14 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U331 | World boss calendar | ✅ | SAT-ONLINE-077: "Calendar" in the player list: the next world events, the competition, the siege, the festival, the race, Trauka and Berith; in your time zone and UTC, from the server clock (`regression/calendar`) |
 | U332 | Limited festivals | ✅ | The town festival every third hour (B, v0.94) |
 | U333 | Balance dashboard | ❌ | |
-| U334 | Economy health | ❌ | |
+| U334 | Economy health | 🟡 | `/economy` (082) is a snapshot of wealth; no gold in/out counters or alerts |
 | U335 | Content flags | 🟡 | Older pages skip what they don't know (fx tags, presence fields) |
 | U336 | Announcement system | ✅ | SAT-ONLINE-079: `/announce text` from an admin account (`admins/{uid}`, set in the console only); everyone online sees it once, late joiners within 10 min; the rules refuse anyone else (`regression/announce`) |
 | U337 | Maintenance notices | ✅ | SAT-ONLINE-079: `/maint minutes text`: the time, reminders 10/5/1 min before, a save when it starts; and "a new version" asks only the older page to refresh (SAT-ONLINE-045) |
 | U338 | Hotfix pipeline | 🟡 | Small PRs, a review, then main |
-| U339 | Moderation console | 🟡 | Reports reach the database; the owner reads them in the Firebase console |
+| U339 | Moderation console | ✅ | SAT-ONLINE-082: `/reports`, `/mute ID hours`, `/unmute ID` for admins only; a mute has an expiry and keeps the player out of the world chat by the rules (`regression/moderation`) |
 | U340 | Player appeal flow | ❌ | |
-| U341 | Crash reporting | ❌ | |
+| U341 | Crash reporting | ✅ | SAT-ONLINE-082: errors on a signed-in page go to `crashes` (admins read): message and stack with long ids, e-mails and paths cut out, build and zone, at most three a session; `/crashes` lists them |
 | U342 | A/B testing ethics | ⏳ | No tests on players; owner decision |
 | U343 | Community feedback triage | 🟡 | GitHub issues and in-game reports |
 | U344 | Season rewards | 🟡 | Titles for the National Champion and the arena; cosmetic |
@@ -223,12 +223,12 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U380 | Art provenance audit | 🟡 | `docs/art/ART_CONTRACT.md` (B) |
 | U381 | Security incident drill | ⏳ | Owner (Firebase console) |
 | U382 | Data retention review | 🟡 | Only what play needs is online; entries expire (lfg 30 min, chat lines, inbox) |
-| U383 | Community report resolution | ❌ | |
+| U383 | Community report resolution | ✅ | SAT-ONLINE-082: each report is resolved with its action (`reportDone/{id}` {a: ok or mute, by, t}), so what was done and by whom is kept |
 | U384 | Version gate report | 🟡 | Every PR lists the tests it ran |
 | U385 | Rollback rehearsal | ❌ | |
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 34 · 🟡 39 · ⏳ 6 · ❌ 25 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 38 · 🟡 39 · ⏳ 6 · ❌ 21 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

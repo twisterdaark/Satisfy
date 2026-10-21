@@ -7042,7 +7042,7 @@ function netTabStore(){try{const s=sessionStorage;s.getItem('x');return s;}catch
 Object.assign(STR.ar,{pKick:'اطرد',pKickQ:'تطرد {n}؟',pKickYes:'اطرد',pKickNo:'لأ',pKickDone:'{n} اتشال من الفريق',pLeaderLeft:'{n} ساب، فالفريق اتفكك',pRejoined:'رجعت لبارتي {n}',pYouLead:'القائد مشي: إنت قائد البارتي دلوقتي',pNewLead:'القائد مشي: {n} قائد البارتي دلوقتي',pReplaced:'البارتي اختارت قائد جديد وإنت مش موجود، هترجع لهم'});
 Object.assign(STR.en,{pKick:'Kick',pKickQ:'Kick {n}?',pKickYes:'Kick',pKickNo:'Cancel',pKickDone:'{n} was removed from the party',pLeaderLeft:'{n} left, so the party broke up',pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
-function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();rlStart();phStart();bntStart();frStart();annStart();tradeStart();guildStart();dropStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
+function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();rlStart();phStart();bntStart();frStart();annStart();modStart();tradeStart();guildStart();dropStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
  PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],leaderLeft:['pLeaderLeft','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn'],raid:[e.on?(e.self?'pRaidMade':'pRaidNow'):(e.self?'pPartyMade':'pPartyNow'),'good']}[e.type];
   if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
@@ -7095,9 +7095,10 @@ $('chatX').addEventListener('click',e=>{e.stopPropagation();chatMin(true);});$('
 function chatOpen(){if(!CHAT)return;if(CHATMIN)chatMin(false);chatCh(CHCH);const i=$('chatIn');i.hidden=false;$('chatW').hidden=false;i.focus();chatSig='';}
 function chatClose(){const i=$('chatIn');i.hidden=true;i.value='';i.blur();chatSig='';}
 function chatSend(){if(!CHAT)return chatClose();let v=$('chatIn').value,ch=CHCH;
- if(annCmd(v.trim())){chatClose();return;}/* SAT-ONLINE-079: /announce and /maint, for the game's owner */
+ if(annCmd(v.trim())||admCmd(v.trim())){chatClose();return;}/* SAT-ONLINE-079/082: the game's owner's commands */
  {const w=/^\/(?:w|whisper)\s+(\S+)\s*([\s\S]*)$/i.exec(v);if(w){const f=frByName(w[1]);if(!f){toast(t('wNoFriend',{n:Satisfy.chat.clean(w[1],24)}),'warn');return;}const r=CHAT.sayTo(f.uid,f.n,w[2]);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}if(r==='sent')CHWTO=f.n;chatClose();return;}}/* SAT-ONLINE-070: /w name text */
  if(/^\/filter\s*$/i.test(v)){CHATF=!CHATF;try{localStorage.setItem('satisfy_chatf',CHATF?'1':'0');}catch(e){}toast(t(CHATF?'chatFOn':'chatFOff'));chatClose();return;}/* SAT-ONLINE-071: /filter turns the word filter off and on */const m=/^\/(p|a|g)\s+/i.exec(v);if(m){const k=m[1].toLowerCase();ch=k==='p'?'party':k==='g'?'guild':'all';v=v.slice(m[0].length);} // /p party, /a everyone, /g guild
+ if(ch==='all'&&mutedNow()){toast(t('mutedYou',{l:calTime(MUTED.until)}),'warn');chatClose();return;}/* SAT-ONLINE-082: muted in the world chat */
  const r=CHAT.say(v,ch);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}vowBreak('silence');chatClose();}
 $('chatIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Tab'){e.preventDefault();chatNext();return;}if(e.code==='Enter'||e.code==='NumpadEnter'){e.preventDefault();chatSend();}else if(e.code==='Escape'){e.preventDefault();chatClose();}});
 $('chatIn').addEventListener('blur',()=>{if(!$('chatIn').hidden&&!$('chatIn').value)chatClose();});
@@ -7847,6 +7848,48 @@ function annCmd(v){const a=/^\/announce\s+([\s\S]+)$/i.exec(v),m=/^\/maint(?:\s+
  const s=String(a?a[1]:m[2]||'').replace(/\s+/g,' ').trim().slice(0,200)||(m?t('annMaintNow'):'');if(!s)return true;
  (ANNADM?Promise.resolve(true):st.isAdmin(NET.uid)).then(ok=>{ANNADM=ok;if(!ok){toast(t('annNotAdmin'),'warn');return;}st.post(a?{k:'msg',ar:s,en:s,by:NET.uid}:{k:'maint',ar:s,en:s,by:NET.uid,at:wNow()+Math.max(1,Math.min(1440,+m[1]))*60000}).then(()=>toast(t('annSent'),'good'),()=>toast(t('annNotAdmin'),'warn'));});return true;}
 window.__GANN={get q(){return ANNQ.slice()},get admin(){return ANNADM},get maint(){return ANNM},cmd:v=>annCmd(v),seen:()=>annSeen().slice()}; // tests
+/* moderation, crash reports and the economy (SAT-ONLINE-082, plan U339/U341/U383/U227). For the game's owner (an admin, see
+   079), from the chat: "/reports" lists the open player reports (who, about whom, why, their last lines) to mute that player
+   for a day or resolve; "/mute ID hours reason" and "/unmute ID"; "/crashes" lists the latest crash reports; "/economy" shows
+   the gold of the ranked players (total, median, top 10%, richest) and their average level. A muted player can't write in the
+   world chat until the time (the rules refuse it; the game says until when). Every signed-in page sends its own errors as a
+   crash report (at most three a session, each message once), with the build, the zone and a stack with long ids cut out. */
+Object.assign(STR.ar,{admReports:'البلاغات المفتوحة ({n})',admRepRow:'{b}: {w}',admRep:'{a} بلّغ عن {b} ({w}) · آخر كلامه: "{s}"',admNone:'مفيش بلاغات مفتوحة',admMute:'اكتم {n} يوم',admOk:'اقفل البلاغ من غير حاجة',admMuted:'{n} مكتوم لحد {l}',admResolved:'البلاغ اتقفل',admCrashes:'تقارير الأعطال ({n})',admCrashRow:'{v} · {m} ({z})',admEco:'الاقتصاد ({n} لاعب في الترتيب): إجمالي {g} دهب · المتوسط {m} · أعلى 10% من {p} · الأغنى {x} · متوسط اللفل {lv}',mutedYou:'إنت مكتوم في الشات العام لحد {l}',admNoId:'مفيش لاعب بالـID ده: {n}',admUnmuted:'{n} يقدر يتكلم تاني',admHelp:'/reports · /crashes · /economy · /mute ID ساعات سبب · /unmute ID',why_spam:'سبام',why_abuse:'شتيمة',why_cheat:'غش',why_other:'حاجة تانية'});
+Object.assign(STR.en,{admReports:'Open reports ({n})',admRepRow:'{b}: {w}',admRep:'{a} reported {b} ({w}) · their last lines: "{s}"',admNone:'No open reports',admMute:'Mute {n} for a day',admOk:'Resolve, no action',admMuted:'{n} is muted until {l}',admResolved:'Report resolved',admCrashes:'Crash reports ({n})',admCrashRow:'{v} · {m} ({z})',admEco:'Economy ({n} ranked players): total {g} gold · median {m} · top 10% from {p} · richest {x} · average level {lv}',mutedYou:'You are muted in the world chat until {l}',admNoId:'No player with the ID {n}',admUnmuted:'{n} can talk again',admHelp:'/reports · /crashes · /economy · /mute ID hours reason · /unmute ID',why_spam:'spam',why_abuse:'insults',why_cheat:'cheating',why_other:'something else'});
+var MUTED=null,MUTOFF=null,CRN=0,CRSEEN=[];
+function modSt(){return NETTR&&NETTR.kind==='firebase'&&FB&&NET&&Satisfy.firebase.modStore?Satisfy.firebase.modStore(FB):null;}
+function modStart(){if(!(NETTR&&NETTR.kind==='firebase'))return;modStop();const st=modSt();if(!st)return;MUTOFF=st.watchMute(NET.uid,v=>{MUTED=v&&typeof v==='object'&&+v.until>0?{until:+v.until}:null;});}
+function modStop(){if(MUTOFF){MUTOFF();MUTOFF=null;}MUTED=null;}
+function mutedNow(){return !!(MUTED&&MUTED.until>wNow());}
+// a crash report: no ids, keys or addresses (long tokens and e-mails cut out), at most three a session, each message once
+function crashRedact(x){return String(x||'').replace(/[A-Za-z0-9_-]{24,}/g,'…').replace(/[^\s@]+@[^\s@]+/g,'…').replace(/file:[^\s)]+/g,'file');}
+function crashSend(msg,stack){try{const st=modSt();if(!st||!netUser||CRN>=3)return;const m=crashRedact(msg).slice(0,200)||'?';if(CRSEEN.includes(m))return;CRSEEN.push(m);CRN++;
+ const v=String((Satisfy.CHANGELOG&&Satisfy.CHANGELOG[0]&&Satisfy.CHANGELOG[0].ver)||'?'),z=P&&S?String(zoneAt(P.x,P.y)||'').slice(0,24):'';
+ st.crash({m,s:crashRedact(stack).split('\n').slice(0,8).join('\n').slice(0,800),v,z,by:NET.uid}).catch(()=>{});}catch(e){}}
+window.addEventListener('error',e=>crashSend(e&&e.message,e&&e.error&&e.error.stack));
+window.addEventListener('unhandledrejection',e=>{const r=e&&e.reason;crashSend(r&&r.message||String(r),r&&r.stack);});
+function admOnly(f){const st=modSt(),an=annSt();if(!st||!an){toast(t('annNotAdmin'),'warn');return;}(ANNADM?Promise.resolve(true):an.isAdmin(NET.uid)).then(ok=>{ANNADM=ok;if(!ok){toast(t('annNotAdmin'),'warn');return;}f(st);});}
+function admReports(st){st.reports().then(({reports,done})=>{const L=Object.keys(reports||{}).filter(id=>!(done||{})[id]).map(id=>Object.assign({id},reports[id])).filter(r=>r&&typeof r.about==='string').sort((a,b)=>(b.t||0)-(a.t||0));
+ const nm=r=>Satisfy.chat.clean(r.aboutN,24)||'?',why=r=>t('why_'+(['spam','abuse','cheat','other'].includes(r.why)?r.why:'other'));
+ dialog('guild',[L.length?t('admReports',{n:L.length}):t('admNone')],null,[...L.slice(0,10).map(r=>({l:t('admRepRow',{b:nm(r),w:why(r)}),f:()=>dialog('guild',[t('admRep',{a:Satisfy.chat.clean(r.byN,24)||'?',b:nm(r),w:why(r),s:Satisfy.chat.clean(r.said,360)})],null,[
+   {l:t('admMute',{n:nm(r)}),f:()=>{const until=wNow()+86400000;st.mute(r.about,until,why(r),NET.uid).then(()=>st.resolve(r.id,'mute',NET.uid)).then(()=>{toast(t('admMuted',{n:nm(r),l:calTime(until)}),'good');admReports(st);},()=>toast(t('gdFail'),'warn'));}},
+   {l:t('admOk'),f:()=>st.resolve(r.id,'ok',NET.uid).then(()=>{toast(t('admResolved'));admReports(st);},()=>toast(t('gdFail'),'warn'))},{l:t('oBack'),f:()=>admReports(st)}])})),{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
+function admCrashes(st){st.crashes().then(v=>{const L=Object.values(v||{}).filter(c=>c&&typeof c.m==='string').sort((a,b)=>(b.t||0)-(a.t||0)).slice(0,10);
+ dialog('guild',[t('admCrashes',{n:Object.keys(v||{}).length})+(L.length?' · '+L.map(c=>t('admCrashRow',{v:c.v||'?',m:c.m,z:c.z||'-'})).join(' · '):'')],null,[{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
+// the gold of the ranked players: a picture of the economy from what the game already keeps
+function ecoStats(gold,lv){const g=Object.values(gold||{}).map(e=>e&&+e.v).filter(x=>x>=0).sort((a,b)=>a-b),l=Object.values(lv||{}).map(e=>e&&+e.v).filter(x=>x>0);
+ const q=f=>g.length?g[Math.min(g.length-1,Math.floor(f*g.length))]:0;return {n:g.length,total:g.reduce((a,b)=>a+b,0),median:q(.5),p90:q(.9),max:g.length?g[g.length-1]:0,lv:l.length?Math.round(l.reduce((a,b)=>a+b,0)/l.length):0};}
+function admEco(st){st.ranks().then(r=>{const e=ecoStats(r.gold,r.lv),f=x=>Math.round(x).toLocaleString('en-US');dialog('guild',[t('admEco',{n:e.n,g:f(e.total),m:f(e.median),p:f(e.p90),x:f(e.max),lv:e.lv})],null,[{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
+// the owner's chat commands; true when the line was one of them
+function admCmd(v){let m;
+ if(/^\/reports\s*$/i.test(v)){admOnly(admReports);return true;}
+ if(/^\/crashes\s*$/i.test(v)){admOnly(admCrashes);return true;}
+ if(/^\/economy\s*$/i.test(v)){admOnly(admEco);return true;}
+ if(/^\/admin\s*$/i.test(v)){admOnly(()=>toast(t('admHelp')));return true;}
+ if((m=/^\/mute\s+(\S+)\s+(\d{1,3})\s*([\s\S]*)$/i.exec(v))){const id=m[1],h=Math.max(1,Math.min(720,+m[2])),why=m[3].trim().slice(0,60);admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}const until=wNow()+h*3600000;return st.mute(u,until,why,NET.uid).then(()=>toast(t('admMuted',{n:id,l:calTime(until)}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
+ if((m=/^\/unmute\s+(\S+)\s*$/i.exec(v))){const id=m[1];admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}return st.unmute(u).then(()=>toast(t('admUnmuted',{n:id}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
+ return false;}
+window.__GMOD={get muted(){return MUTED},cmd:v=>admCmd(v),eco:(g,l)=>ecoStats(g,l),redact:x=>crashRedact(x),crash:(m,s)=>crashSend(m,s),get sent(){return CRN},store:()=>modSt()}; // tests
 /* the event calendar (SAT-ONLINE-077, plan U331). "Calendar" in the player list (O) shows what comes next on the world clock:
    the next three world events (each slot's event is known in advance), the National Competition, the siege of Reidan Castle,
    the town festival, the horse race, and when Trauka and Berith are back. Every time is in your own time zone and in UTC.
@@ -8115,7 +8158,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
 function netStop(){if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(()=>{});}LFGK=null;try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
- if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
+ if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
 // what the game itself keeps online under the account, for "Delete my online data" (SAT-ONLINE-066): presence, the
 // rankings (055), this and last month's arena rating (053), the weekly lockouts (059), the group finder entry (073). A held legend is freed too.
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
@@ -8178,7 +8221,7 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
 function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF=true; // from now on this tab never saves: the newer tab owns the save (review of #30)
- try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
+ try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
 // another Google account on this device (owner request): the chooser opens straight from the click, the new
