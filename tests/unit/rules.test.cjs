@@ -188,7 +188,7 @@ test('guilds: a founder makes one guild with a unique name; joining needs an inv
   assert.match(m['.write'], /newData\.child\('rk'\)\.val\(\) === data\.child\('rk'\)\.val\(\)/, 'nobody changes their own rank');
   assert.match(m['.write'], /data\.child\('rk'\)\.val\(\) !== 'm'\)/, 'the master does not just leave');
   assert.match(m['.write'], /data\.child\('rk'\)\.val\(\) === 'r' && root\.child\('guildMembers'\)\.child\(\$gid\)\.child\(auth\.uid\)\.child\('rk'\)\.val\(\) === 'o'/, 'an officer kicks members only');
-  assert.match(m.rk['.validate'], /newData\.val\(\) === 'm' && \$uid === auth\.uid && \$gid === 'g_' \+ auth\.uid/, 'the only master is the founder');
+  assert.match(m.rk['.validate'], /newData\.val\(\) === 'm' && newData\.parent\(\)\.parent\(\)\.parent\(\)\.parent\(\)\.child\('guilds'\)\.child\(\$gid\)\.child\('master'\)\.val\(\) === \$uid/, 'the only \'m\' is the guild\'s master after the write');
   assert.equal(inv['.read'], 'auth != null && auth.uid === $uid', 'your invitations are yours to read');
   assert.match(inv.$gid['.write'], /=== 'm' \|\| .*=== 'o'\)/, 'masters and officers invite');
   assert.equal(inv.$gid.by['.validate'], 'newData.val() === auth.uid');
@@ -372,6 +372,29 @@ function dupKeys(src) {
   val('');
   return out;
 }
+
+test('guild master handover and the notice (SAT-ONLINE-076): to an officer only, one master at a time; the notice by master and officers, versioned', () => {
+  const g = rules.guilds.$gid, m = rules.guildMembers.$gid.$uid, nm = rules.guildNames.$nk, nt = rules.guildNote.$gid;
+  // the master hands over: the new master was an officer and becomes 'm', the old one becomes 'o', in the same write
+  assert.match(g.master['.validate'], /data\.val\(\) === auth\.uid && root\.child\('guildMembers'\)\.child\(\$gid\)\.child\(newData\.val\(\)\)\.child\('rk'\)\.val\(\) === 'o'/);
+  assert.ok(g.master['.validate'].includes(".child(newData.val()).child('rk').val() === 'm'") && g.master['.validate'].includes(".child(auth.uid).child('rk').val() === 'o'"), 'no two masters');
+  // an officer takes over only from a master unseen 14 days, the same way
+  assert.ok(g['.write'].includes("child(data.child('master').val()).child('on').val() < now - 1209600000"), 'away 14 days');
+  assert.ok(g['.write'].includes("child(auth.uid).child('rk').val() === 'm'") && g['.write'].includes("child(data.child('master').val()).child('rk').val() === 'o'"), 'and the ranks swap in the same write');
+  // ranks: a master steps down only when the master moved; an officer steps up only when it is the master after the write
+  assert.ok(m['.write'].includes("data.child('rk').val() === 'm' && newData.child('rk').val() === 'o' && newData.parent().parent().parent().child('guilds').child($gid).child('master').val() !== auth.uid"));
+  assert.ok(m['.write'].includes("data.child('rk').val() === 'o' && newData.child('rk').val() === 'm' && newData.parent().parent().parent().child('guilds').child($gid).child('master').val() === auth.uid"));
+  // the name goes only with its guild's current master (a founder who handed over can't free it)
+  assert.ok(nm['.write'].includes("root.child('guilds').child(data.val()).child('master').val() === auth.uid"));
+  assert.ok(nm['.write'].includes("data.val() === 'g_' + auth.uid && !root.child('guilds').child(data.val()).exists()"));
+  assert.equal(nt['.read'], "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()");
+  assert.match(nt['.write'], /=== 'm' \|\| .*=== 'o'/);
+  assert.ok(nt['.validate'].includes("newData.child('v').val() === data.child('v').val() + 1"), 'each write is the next version');
+  assert.equal(nt.s['.validate'], 'newData.isString() && newData.val().length >= 1 && newData.val().length <= 240');
+  assert.equal(nt.by['.validate'], 'newData.val() === auth.uid');
+  assert.equal(nt.t['.validate'], 'newData.val() === now');
+  assert.equal(nt.$other['.validate'], false);
+});
 
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');

@@ -158,3 +158,55 @@ test('vault (SAT-ONLINE-050): members put things in; the master and officers tak
   assert.deepEqual([e.k, e.n], ['wood', 12]);
   assert.deepEqual(a.g.vault(), {});
 });
+
+test('SAT-ONLINE-076: the master hands the guild to an officer; an officer takes over from a master away 14 days; one master at a time', async () => {
+  const w = world([['ua', 'Ahmed'], ['ub', 'Bassem'], ['uc', 'Carim']]), { ua: A, ub: B, uc: Cc } = w.ps;
+  assert.ok(G.can('m', 'handover', 'o') && !G.can('m', 'handover', 'r') && !G.can('o', 'handover', 'r'));
+  assert.ok(G.can('o', 'claim') && !G.can('r', 'claim') && !G.can('m', 'claim'));
+  await A.g.found('Iron Hands', C.COLORS[1]); await tick();
+  const gid = A.g.state().gid;
+  for (const p of [B, Cc]) { await A.g.invite(p.uid, p.n); await tick(); await p.g.accept(gid); await tick(); }
+  await assert.rejects(A.g.handover('ub'), /rank/, 'only to an officer');
+  await A.g.setRank('ub', 'o'); await tick();
+  await assert.rejects(B.g.claim(), /rank/, 'the master is here');
+  await assert.rejects(Cc.g.handover('ub'), /rank/, 'a member hands nothing');
+  await A.g.handover('ub'); await tick();
+  assert.equal(w.db.data.guilds[gid].master, 'ub');
+  assert.deepEqual(['ua', 'ub', 'uc'].map((u) => w.db.data.members[gid][u].rk), ['o', 'm', 'r'], 'one master: B; A is an officer');
+  assert.equal(B.g.state().rank, 'm');
+  assert.equal(G.cleanGuild(w.db.data.guilds[gid], gid).master, 'ub', 'a guild whose master is not its founder is still a guild');
+  await A.g.leave(); await tick();
+  assert.equal(A.g.state().gid, null, 'the old master may leave now');
+  // B goes away; C becomes an officer and, 14 days later, takes over
+  await B.g.setRank('uc', 'o'); await tick();
+  B.g.stop(); // B stops playing: no more heartbeats
+  w.adv(1000); // C's heartbeat
+  assert.equal(Cc.g.masterAway(), false);
+  w.adv(C.AWAY_MS - 5000); Cc.g.tick(); await tick();
+  await assert.rejects(Cc.g.claim(), /rank/, 'not away long enough');
+  // the store checks the time too: a client that thinks the master is away is still refused
+  await assert.rejects(w.db.as('uc').handover(gid, 'ub', 'uc'), /PERMISSION_DENIED/);
+  w.adv(60000);
+  assert.equal(Cc.g.masterAway(), true);
+  await Cc.g.claim(); await tick();
+  assert.equal(w.db.data.guilds[gid].master, 'uc');
+  assert.deepEqual(['ub', 'uc'].map((u) => w.db.data.members[gid][u].rk), ['o', 'm']);
+});
+
+test('SAT-ONLINE-076: the guild notice: master and officers write the next version, members read it, the text is cleaned', async () => {
+  const w = world([['ua', 'Ahmed'], ['ub', 'Bassem']]), { ua: A, ub: B } = w.ps;
+  await A.g.found('Iron Hands', C.COLORS[1]); await tick();
+  const gid = A.g.state().gid;
+  await A.g.invite('ub', 'Bassem'); await tick(); await B.g.accept(gid); await tick();
+  await assert.rejects(B.g.setNote('hi'), /rank/, 'a member writes no notice');
+  await assert.rejects(A.g.setNote('   '), /empty/);
+  await A.g.setNote('  Raid at  9\npm\u0000 '); await tick();
+  assert.deepEqual(B.g.note(), { s: 'Raid at 9 pm', by: 'ua', n: 'Ahmed', v: 1, t: w.db.data.notes[gid].t });
+  await A.g.setNote('x'.repeat(400)); await tick();
+  assert.equal(B.g.note().s.length, C.NOTE_MAX);
+  assert.equal(B.g.note().v, 2);
+  const fresh = B.events.filter((e) => e.type === 'note' && e.fresh);
+  assert.equal(fresh.length, 2, 'B hears about both versions, written while B was in the guild');
+  // a stale version is refused by the store (two officers writing at once)
+  await assert.rejects(w.db.as('ua').setNote(gid, { s: 'old', by: 'ua', n: 'Ahmed', v: 2 }), /PERMISSION_DENIED/);
+});
