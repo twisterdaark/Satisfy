@@ -2412,7 +2412,7 @@ const C2={traps:[],walls:[],trk:0,trkL:[]};
 const clsIs=c=>!!S&&(S.cls===c||S.cbase===c);
 const mstOk=q=>{const [k,n]=q.mst||['',0];return (k==='melee'?Math.max(...['sword','spear','dagger','hammer'].map(mastLv)):mastLv(k))>=n;};
 const wkN=k=>k==='melee'?t('wkMelee'):t('wk_'+k).split(' · ')[0];
-function promoTalk(id){if(!S||!['tk','tw','ta','cassus','hood'].includes(id))return false;const ps=Object.keys(QD).filter(q=>QD[q].promo&&QD[q].by===id&&qAvail(q)&&S.lv>=QD[q].lv);if(!ps.length)return false;
+function promoTalk(id){if(!S||!['tk','tw','ta','tm','cassus','hood'].includes(id))return false;const ps=Object.keys(QD).filter(q=>QD[q].promo&&QD[q].by===id&&qAvail(q)&&S.lv>=QD[q].lv);if(!ps.length)return false;
  const opts=ps.map(q=>{const d=QD[q],ok=mstOk(d);return {l:t('prPath',{c:t('cl_'+d.promo)})+(ok?'':' 🔒'),f:()=>ok?offerQ(id,q):dialog(id,[t('prNeed',{c:t('cl_'+d.promo),w:wkN(d.mst[0]),n:d.mst[1]})])};});
  const av=Object.keys(QD).find(q=>QD[q].by===id&&!QD[q].promo&&qAvail(q)&&S.lv>=(QD[q].lv||1));if(av)opts.push({l:t('oQuestAsk',{q:qName(av)}),f:()=>offerQ(id,av)});
  S.met[id]=1;dialog(id,[t('prHi_'+id)],null,[...opts,{l:t('oLeave')}]);return true;}
@@ -2506,7 +2506,7 @@ function phNear(ch,r){for(const m of phMates(r)){const s=FXS.get(m.sid);if(s&&s.
 // a blow from a monster and a blow on one
 function phHurt(d,src){if(!src||!src.type||src.spar)return d;if(P.bls>0||phNear('b',120))d*=.9;if(P.jud>0||phNear('j',120))d*=.85;if(P.pdv>0)d*=.6;return Math.max(1,Math.round(d));}
 function phAtk(m){if(m.spar)return 1;return (P.bls>0||phNear('b',120)?1.1:1)*(P.jud>0||phNear('j',120)?1.1:1)*(P.dom>0?1.25:1);}
-function phHeal(pm){const n=rlHeal(pm);if(P.stun>0)P.stun=0;for(const m of phMates(150))NET.send('raid.state',{to:m.uid,raid:'p|'+PARTY.id(),k:pm});return n;}
+function phHeal(pm){const n=rlHeal(pm);p2Heal(n,phMates(150).length);if(P.stun>0)P.stun=0;for(const m of phMates(150))NET.send('raid.state',{to:m.uid,raid:'p|'+PARTY.id(),k:pm});return n;}
 function phRing(c){fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*20,y:P.y-4,vx:(rand()-.5)*14,vy:-26-rand()*16,t:.7,c,fl:1});}
 function phHoly(mul,r,o){let n=0;for(const m of mons){if(m.dead)continue;const d=Math.hypot(m.x-P.x,monY(m)-(P.y-6));if(d<r+MT[m.type].r&&hitMon(m,mul*(HOLYX.has(m.type)?2:1),{skill:1,...(o||{})}))n++;}return n;}
 const PHSK={
@@ -2717,10 +2717,10 @@ const hcMelee=()=>auOn()||!!P.bmf;
 const bmHalf=()=>!!P.bmf&&pasOn('bhalf');
 // eligible for a hidden class change: a novice or a first class, not already on a hidden trial or done with one
 function hcOk(){if(!S||!(S.cls==='novice'||Object.values(QD).some(q=>q.cls===S.cls)))return false;return !HCQ.some(id=>S.qs[id]);}
-function hcOfferK(){if(!hcOk())return null;const H=hcS();
+function hcOfferK(){{const p=p2OfferK();if(p)return p;}if(!hcOk())return null;const H=hcS();
  if(S.lv>=QD.hau.lv&&H.pr>=30)return 'hau';if(S.lv>=QD.hbm.lv&&H.bs>=100)return 'hbm';if(S.lv>=QD.hor.lv&&H.tk.length>=(H.no.hor||0)+30)return 'hor';return null;}
 function hcOffer(id){SFX.legendary();flash();dialog('sysN',['hcMet_'+id,t(id+'_o')+'\n'+t('rwLine',{r:qRewards(id).join(' · ')}),'hcWarn'],null,[{l:t('qAccept'),f:()=>acceptQ(id)},{l:t('qDecline'),f:()=>hcNo(id)}]);}
-function hcNo(id){const H=hcS();if(id==='hau')H.pr=0;else if(id==='hbm')H.bs=0;else H.no.hor=H.tk.length;toast(t('hcDecl'));save(true);}
+function hcNo(id){if(id==='hds'||id==='hsa')return p2No(id);const H=hcS();if(id==='hau')H.pr=0;else if(id==='hbm')H.bs=0;else H.no.hor=H.tk.length;toast(t('hcDecl'));save(true);}
 function hcDone(q){const H=hcS();S.cls=q.hcls;S.cbase=null;S.church=null;S.bar=null;sbSig='';P.bmf=null;H.ar=0;H.ax=0;SFX.legendary();flash();
  dialog('sysN',['hcGot_'+q.hcls,'hcLose','hcPerk_'+q.hcls],()=>checkSkills());hudDirty=true;}
 // the conditions: a parry, a kill, a talk
@@ -3452,6 +3452,98 @@ function drawMound(m){const x=Math.round(m.x),y=Math.round(m.y),w=gTime*2+m.t;ct
 window.__GMP={tick:mpTick,dorm:mpDorm,kill:mpKill,wake:mpWake,DORM:MPDORM};
 Object.assign(STR.ar,{"hrabbitN": "أرنب بقرن", "grabbitN": "الأرنب الدهبي", "slimeN": "سلايم", "mslimeN": "سلايم صغير", "cbatN": "خفاش الكهوف", "sscorpN": "عقرب الرمل", "mimicN": "ميميك", "gobscN": "كشاف جوبلن", "hornT": "📯 بوق!"});
 Object.assign(STR.en,{"hrabbitN": "Horned Rabbit", "grabbitN": "Golden Rabbit", "slimeN": "Slime", "mslimeN": "Little Slime", "cbatN": "Cave Bat", "sscorpN": "Sand Scorpion", "mimicN": "Mimic", "gobscN": "Goblin Scout", "hornT": "📯 Horn!"});
+/* ---------------- new class paths (owner 2026-10-21: plan U072, U073, U078, U079, U087, U088) ----------------
+   From Lv 30 an Archer with bow mastery 4 can take a trial with the archery trainer to become a Sniper or a Bowmaster, and a
+   Mage with staff mastery 4 one with the magic trainer to become a Battlemage or a Warlock (one path, the old skills stay).
+   Sniper: Charged Shot aims for 1.2 s along a line that stops at walls; moving or taking a blow breaks it and nothing is
+   fired (plan: "no damage after an interruption"). Eagle Eye: arrows fly 40% further and hit 10% harder for 10 s. Steady
+   Aim (passive): standing still, bow hits deal 15% more.
+   Bowmaster: Combo (passive): hits on the same monster within 2 s stack to 5, +4% each. Arrow Chain: three pairs of arrows;
+   Arrow Storm: ten arrows in 1.2 s. Each arrow hits a monster once (its own hit list).
+   Battlemage: Mana Blade, a staff swing for 230% that gives back 3 MP a monster (9 at most); Arcane Armor, 20% less damage
+   for 10 s while your MP does not refill and drains; Spell Slam leaps forward and blasts around where you land.
+   Warlock: Curse (10 s: the monsters take 15% more and deal 20% less), Rot (8 s of damage over time) and Soul Siphon (6 s:
+   your rot heals you). A boss that enters a new phase shakes them off; a rot ends in a town (a safe zone).
+   Hidden paths (plan U087/U088), offered by the system like the other hidden classes. Demon Slayer: 50 demons slain from
+   Lv 180, then 30 more; Hellfire Cut, Demon Seal and Bane (passive: 25% less damage from demons, 20% more to them; with the
+   seal and the cut it never goes past +60%). Saintess: a priest of Lv 40 who has seen both escorts home, then 40 heals;
+   Saint's Prayer heals you and the party near you, Grace mends you slowly, and Second Life lifts you once every 10 minutes
+   (the time is kept with the character, so no endless revivals). Monsters only: none of this touches player-versus-player. */
+const P2={rot:[]},P2NOT=['pagma','braham','saint','dslayer','saintess','aura','beast','orator','lsword','esorc'];
+HCQ.push('hds','hsa');
+const p2Still=()=>!(P.rmv>0)&&!(P.dash>0);
+function p2Atk(m,o){if(m.spar)return 1;let k=1;const wk=weapKind();
+ if(S.cls==='sniper'&&wk==='bow'){if(pasOn('snaim')&&p2Still())k*=1.15;if(P.sne>0)k*=1.1;}
+ if(S.cls==='bowmaster'&&wk==='bow'&&pasOn('bmcombo')&&P.bmM===m&&P.bmT>0)k*=1+.04*(P.bmc||0);
+ if(m.wlc>0)k*=1.15;
+ if(S.cls==='dslayer'&&DEMK.has(m.type)){let d=(pasOn('dsbane')?1.2:1)*(m.dss>0?1.2:1)*(o&&o.dem||1);k*=Math.min(1.6,d);}
+ return k;}
+function p2Hit(m,o){if(S.cls==='bowmaster'&&weapKind()==='bow'&&!o.dot){if(P.bmM===m&&P.bmT>0)P.bmc=Math.min(5,(P.bmc||0)+1);else P.bmc=1;P.bmM=m;P.bmT=2;}}
+function p2Hurt(d,src){if(P.snc){P.snc=null;toast(t('snInt'),'warn');SFX.deny();}
+ if(P.bga>0)d*=.8;if(src&&src.wlc>0)d*=.8;if(src&&S.cls==='dslayer'&&pasOn('dsbane')&&DEMK.has(src.type))d*=.75;return Math.max(1,Math.round(d));}
+function p2Kill(m){if(!S||m.spar)return;if(DEMK.has(m.type)){const H=hcS();H.dm=(H.dm||0)+1;qEvent('demon','demon');}}
+function p2Heal(n,mates){if(!S||!(n>0||mates))return;const H=hcS();H.hl=(H.hl||0)+1+(mates?1:0);qEvent('saheal','saheal');if(mates)qEvent('saheal','saheal');}
+// hidden offers (from hcOfferK): any class but the legendary and hidden ones, not already on a hidden trial
+function p2OfferK(){if(!S||P2NOT.includes(S.cls)||HCQ.some(id=>S.qs[id]))return null;const H=hcS();
+ if(S.lv>=QD.hds.lv&&(H.dm||0)>=50+(H.no.hds||0))return 'hds';
+ if(S.lv>=QD.hsa.lv&&clsIs('priest')&&qDone('es1')&&qDone('es2')&&(H.hl||0)>=(H.no.hsa||0))return 'hsa';return null;}
+function p2No(id){const H=hcS();if(id==='hds')H.no.hds=H.dm||0;else H.no.hsa=(H.hl||0)+20;toast(t('hcDecl'));save(true);}
+function p2Life(){if(!S||S.cls!=='saintess'||!pasOn('salife')||mode!=='play')return false;const H=hcS();if(Date.now()-(H.saT||0)<600000)return false;
+ H.saT=Date.now();P.hp=Math.round(maxHP()*.4);P.inv=2;flash();SFX.legendary();phRing('#fff3b0');toast(t('saLifeT'),'good');save(true);hudDirty=true;return true;}
+function p2Rot(m,n){m.rot={t:8*skDur('wlrot'),k:1};if(!P2.rot.includes(m))P2.rot.push(m);}
+const P2SK={
+ snshot:()=>{const v=fdir();P.snc={t:1.2,v};SFX.bow();toast(t('snCharge'));},
+ sneye:()=>{P.sne=10*skDur('sneye');vfx('rage',P.x,P.y);toast(t('sneOn'),'good');},
+ bmchain:()=>{const v=fdir(),a=Math.atan2(v[1],v[0]);for(let i=0;i<3;i++)setTimeout(()=>{if(mode!=='play')return;for(const s of [-.06,.06])shoot('arrow',Math.cos(a+s),Math.sin(a+s),1.1,{range:.75});},i*140);},
+ bmstorm:()=>{const v=fdir(),a=Math.atan2(v[1],v[0]);for(let i=0;i<10;i++)setTimeout(()=>{if(mode!=='play')return;const b=a+(rand()-.5)*.3;shoot('arrow',Math.cos(b),Math.sin(b),.9,{range:.7});},i*120);},
+ bgblade:()=>{const v=fdir(),a=Math.atan2(v[1],v[0]);let n=0;vfx('slash',P.x+v[0]*6,P.y-7+v[1]*6,{angle:a,rarity:2});fx.push({arc:1,x:P.x,y:P.y-8,a,t:.25});
+  for(const m of mons){if(m.dead)continue;const dx=m.x-P.x,dy=monY(m)-(P.y-6),d=Math.hypot(dx,dy);if(d<34+MT[m.type].r&&(dx*v[0]+dy*v[1])/(d||1)>-.1&&hitMon(m,2.3,{skill:1,kx:v[0],ky:v[1]}))n++;}
+  if(n){P.mp=Math.min(maxMP(),P.mp+Math.min(9,3*n));SFX.hit();shake=.1;}},
+ bgarmor:()=>{P.bga=10*skDur('bgarmor');fx.push({ring:true,x:P.x,y:P.y-6,t:.4});toast(t('bgArmOn'),'good');},
+ bgslam:()=>{const v=fdir(),L=c2Line(v,50);P.dx=v[0];P.dy=v[1];P.dash=.2*Math.max(.3,L/50);P.inv=Math.max(P.inv,.3);SFX.dodge();
+  setTimeout(()=>{if(mode!=='play')return;SFX.slam();shake=.2;fx.push({ring:true,big:1,x:P.x,y:P.y-4,t:.45});vfx('dust',P.x,P.y,{n:12});aoe(P.x,P.y-6,40,2.6,{stun:1});},220);},
+ wlcurse:()=>{const v=fdir(),cx=P.x+v[0]*50,cy=P.y-6+v[1]*50;let n=0;fx.push({ring:true,x:cx,y:cy,t:.45});
+  for(const m of mons){if(m.dead||m.spar)continue;if(Math.hypot(m.x-cx,monY(m)-cy)<60+MT[m.type].r){m.wlc=10*skDur('wlcurse');m.wlPh=m.ph||0;n++;}}toast(t('wlCurseOn',{n}),n?'good':'');SFX.magic(.4);},
+ wlrot:()=>{const v=fdir();let best=null,bd=1e9;for(const m of mons){if(m.dead||m.spar)continue;const dx=m.x-P.x,dy=m.y-P.y,d=Math.hypot(dx,dy);if(d<120&&(dx*v[0]+dy*v[1])/(d||1)>.3&&d<bd){best=m;bd=d;}}
+  if(!best){toast(t('noTarget'),'warn');return;}p2Rot(best);best.wlPh=best.ph||0;vfx('bolt',P.x,P.y-10,{x1:best.x,y1:monY(best)});SFX.magic(.3);},
+ wlsiph:()=>{P.wls=6*skDur('wlsiph');vfx('heal',P.x,P.y);toast(t('wlSiphOn'),'good');},
+ dscut:()=>{const v=fdir(),a=Math.atan2(v[1],v[0]);let n=0;vfx('slash',P.x+v[0]*6,P.y-7+v[1]*6,{angle:a,rarity:4});
+  for(const m of mons){if(m.dead)continue;const dx=m.x-P.x,dy=monY(m)-(P.y-6),d=Math.hypot(dx,dy);if(d<36+MT[m.type].r&&(dx*v[0]+dy*v[1])/(d||1)>0&&hitMon(m,3,{skill:1,kx:v[0],ky:v[1],dem:1.5}))n++;}if(n){SFX.crit();shake=.15;}},
+ dsseal:()=>{let n=0;fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});for(const m of mons){if(m.dead||!DEMK.has(m.type)||Math.hypot(m.x-P.x,m.y-P.y)>80)continue;m.dss=8;m.stun=Math.max(m.stun||0,MT[m.type].boss?.8:2);vfx('stun',m.x,m.y-(MT[m.type].oy||16),{life:m.stun});n++;}
+  toast(t('dsSealOn',{n}),n?'good':'');SFX.clang();},
+ sapray:()=>{phHeal(Math.round(300*(pasOn('sagrace')?1.2:1)));phRing('#fff3b0');}};
+function p2Tick(dt){if(!S||!P)return;for(const k of ['sne','bga','wls','bmT'])if(P[k]>0)P[k]-=dt;
+ if(P.bga>0){P.mp=Math.max(0,P.mp-1.5*dt);if(P.mp<=0){P.bga=0;toast(t('bgArmOff'),'warn');}}
+ if(S.cls==='saintess'&&pasOn('sagrace')&&P.hp>0&&P.hp<maxHP())P.hp=Math.min(maxHP(),P.hp+maxHP()*.01*dt);
+ if(P.snc){const c=P.snc;if(!p2Still()||mode!=='play'){P.snc=null;toast(t('snInt'),'warn');}else if((c.t-=dt)<=0){P.snc=null;const L=c2Line(c.v,220);SFX.crit();shake=.15;c2Seg(P.x,P.y-6,c.v,L,5,{});}}
+ for(const m of mons){if(m.wlc>0){m.wlc-=dt;if(MT[m.type].boss&&(m.ph||0)!==(m.wlPh||0)){m.wlc=0;if(m.rot)m.rot.t=0;num(m.x,monY(m)-18,t('wlCleanse'),'#cfe8ff',false);}}if(m.dss>0)m.dss-=dt;}
+ for(let i=P2.rot.length-1;i>=0;i--){const m=P2.rot[i],r=m.rot;if(!r||m.dead||r.t<=0||inTown(m.x,m.y)||inTown(P.x,P.y)){if(r)m.rot=null;P2.rot.splice(i,1);continue;}
+  r.t-=dt;if((r.k-=dt)>0)continue;r.k=1;const h0=m.hp;hitMon(m,.45,{skill:1,dot:1});if(P.wls>0&&h0>m.hp)P.hp=Math.min(maxHP(),P.hp+Math.min(maxHP()*.05,(h0-m.hp)*.3));}}
+function p2Ents(ents){if(P.snc)ents.push({y:P.y+1,f:()=>{const c=P.snc,L=c2Line(c.v,220),k=1-c.t/1.2;ctx.save();ctx.strokeStyle=`rgba(255,${120+k*100|0},90,${.35+k*.5})`;ctx.lineWidth=1;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(P.x,P.y-6);ctx.lineTo(P.x+c.v[0]*L,P.y-6+c.v[1]*L);ctx.stroke();ctx.restore();}});
+ for(const m of P2.rot)if(m.rot&&!m.dead)ents.push({y:m.y+1,f:()=>{if((gTime*5|0)%2)R(ctx,Math.round(m.x)-1,Math.round(monY(m))-14,2,2,'#7ad04a');}});
+ if(P.bga>0)ents.push({y:P.y+1,f:()=>{ctx.save();ctx.strokeStyle='rgba(140,170,255,.5)';ctx.beginPath();ctx.ellipse(Math.round(P.x),Math.round(P.y-8),9,12,0,0,7);ctx.stroke();ctx.restore();}});}
+const P2ICO={
+ snshot:p=>{p(2,8,10,1,'#c8a070');p(12,7,3,3,'#fff');p(3,4,1,9);p(3,4,3,1);p(3,12,3,1);},
+ sneye:p=>{p(3,6,10,4);p(6,7,4,2,'#fff');p(7,7,2,2,'#101a33');},
+ snaim:p=>{p(7,2,2,12);p(2,7,12,2);p(6,6,4,4,'#fff');p(7,7,2,2,'#101a33');},
+ bmcombo:p=>{for(let i=0;i<5;i++)p(2+i*3,11-i*2,2,2+i*2);p(14,2,1,1,'#fff');},
+ bmchain:p=>{for(let k=0;k<3;k++){p(2+k*3,5+k*3,7,1,'#c8a070');p(9+k*3,5+k*3,2,1,'#fff');}},
+ bmstorm:p=>{for(let k=0;k<6;k++){p(2+(k%3)*4,3+k*2,6,1,'#c8a070');p(8+(k%3)*4,3+k*2,1,1,'#fff');}},
+ bgblade:p=>{p(4,11,2,3,'#8a5a3a');p(5,2,2,9);p(6,3,1,7,'#fff');p(3,10,5,1,'#9fd8ff');},
+ bgarmor:p=>{p(4,3,8,10);p(5,4,6,8,'#101a33');p(7,5,2,6,'#9fd8ff');},
+ bgslam:p=>{p(7,2,2,7);p(3,11,10,2);p(2,13,12,1,'#fff');p(6,9,4,2,'#9fd8ff');},
+ wlcurse:p=>{p(5,3,6,6);p(6,5,1,1,'#101a33');p(9,5,1,1,'#101a33');p(6,10,4,4);p(4,12,8,1,'#7ad04a');},
+ wlrot:p=>{p(6,2,4,4,'#7ad04a');p(4,6,8,6,'#5a8a3a');p(6,8,1,1,'#fff');p(9,9,1,1,'#fff');p(7,12,2,2,'#7ad04a');},
+ wlsiph:p=>{p(3,6,4,4,'#7ad04a');p(9,6,4,4,'#ff6a7a');p(7,7,2,2,'#fff');},
+ dscut:p=>{for(let i=0;i<10;i++)p(3+i,12-i,2,2);p(4,3,3,3,'#ff4a2a');p(11,11,3,3,'#ff4a2a');},
+ dsseal:p=>{p(3,3,10,10,'#ff4a2a');p(4,4,8,8,'#101a33');p(7,4,2,8);p(4,7,8,2);},
+ dsbane:p=>{p(5,2,6,4,'#ff4a2a');p(4,6,8,6);p(7,7,2,4,'#fff');},
+ sapray:p=>{p(7,2,2,10);p(4,5,8,2);p(5,13,6,1,'#fff3b0');},
+ sagrace:p=>{p(3,3,10,10,'#fff3b0');p(4,4,8,8,'#101a33');p(7,5,2,6,'#fff3b0');p(5,7,6,2,'#fff3b0');},
+ salife:p=>{p(4,4,8,6,'#ff6a7a');p(6,10,4,2,'#ff6a7a');p(7,12,2,1,'#ff6a7a');p(7,5,2,4,'#fff');}};
+window.__GP2={P2,atk:(m,o)=>p2Atk(m,o||{}),hurt:(d,src)=>p2Hurt(d,src),tick:dt=>p2Tick(dt),offerK:()=>p2OfferK(),life:()=>p2Life(),kill:m=>p2Kill(m),sk:k=>SKF[k](),still:()=>p2Still()};
+Object.assign(STR.ar,{"cl_sniper": "سنايبر", "cl_bowmaster": "بو ماستر", "cl_bmage": "باتل ميج", "cl_warlock": "وورلوك", "cl_dslayer": "صياد الشياطين", "cl_saintess": "القديسة", "prHi_ta": "الصيد الحقيقي بيبدأ قبل السهم. الأثر والفخ والصبر للرينجر، النيشان من بعيد للسنايبر، والسهام ورا بعض للبو ماستر. تختار مين؟", "prHi_tm": "السحر مش بس كور نار من بعيد. فيه اللي بيمسك العصاية ويدخل في النص، وفيه اللي بيلعن عدوه ويسيبه يدوب. طريق واحد بس.", "q_c2s": "اختبار السنايبر", "c2s_o": "السنايبر بيضرب من مكان محدش شايفه. اقتل 15 خارج عن القانون بالقوس.", "c2s_w": "لسه. خد نفس وانشن.", "c2s_d": "إيدك بقت ثابتة زي الصخر. إنت سنايبر.", "q_c2m": "اختبار البو ماستر", "c2m_o": "البو ماستر مابيسيبش فرصة لعدوه يتنفس. اقتل 25 عفريت كهف بالقوس.", "c2m_w": "لسه. أسرع.", "c2m_d": "سهامك بقت مطر. إنت بو ماستر.", "q_c2g": "اختبار الباتل ميج", "c2g_o": "الساحر اللي بيخاف من القرب بيموت. اقتل 20 عفريت كهف بالعصاية.", "c2g_w": "لسه. ادخل أقرب.", "c2g_d": "العصاية بقت سيف في إيدك. إنت باتل ميج.", "q_c2w": "اختبار الوورلوك", "c2w_o": "اللعنة أقوى من النار. اقتل 15 شامان عفاريت بالعصاية.", "c2w_w": "لسه. خليهم يدوبوا.", "c2w_d": "الضلمة بقت بتسمع كلامك. إنت وورلوك.", "q_hds": "صيد في الجحيم", "hcMet_hds": "[اتحقق شرط مخفي]\nقتلت شياطين كتير. دمهم بقى ريحته على سلاحك، وهما بقوا بيخافوا منك.", "hds_o": "[★ كويست كلاس مخفي: صيد في الجحيم]\n\"اللي بيصطاد الشياطين لازم يعرف ريحتهم.\" اقتل 30 شيطان كمان.", "q_hsa": "طريق القديسة", "hcMet_hsa": "[اتحقق شرط مخفي]\nرجّعت ناس كانوا تايهين لبيوتهم بأمان. ريبيكا شايفة قلبك.", "hsa_o": "[★ كويست كلاس مخفي: طريق القديسة]\n\"اللي بيعالج غيره بيعالج نفسه.\" عالج نفسك أو أصحابك 40 مرة بالصلاة.", "hcGot_dslayer": "[اتحولت للكلاس المخفي النادر 'صياد الشياطين'.]\n* الشياطين بتخاف من ريحتك.", "hcPerk_dslayer": "ضربة نار الجحيم بتقطع الشياطين، وختم الشيطان بيوقفهم، وبتاخد منهم ضرر أقل وبتضربهم أقوى (لحد +60% بس).", "hcGot_saintess": "[اتحولت للكلاس المخفي النادر 'القديسة'.]\n* ريبيكا اختارتك.", "hcPerk_saintess": "صلاة القديسة بتعالجك إنت والبارتي اللي جنبك، والنعمة بتعالجك بالراحة، والحياة التانية بتقومك مرة كل 10 دقايق.", "o_demon": "اقتل شياطين: {c}/{n}", "o_saheal": "عالج بالصلاة: {c}/{n}", "sk_snshot": "الطلقة المشحونة", "skd_snshot": "بتنشن 1.2 ثانية على خط لحد أول حيطة وبعدين طلقة 500% بتخترق كل اللي في الخط. لو اتحركت أو اتضربت بتبوظ ومفيش ضرر.", "sk_sneye": "عين النسر", "skd_sneye": "10 ثواني سهامك بتروح أبعد 40% وبتضرب أقوى 10%.", "sk_snaim": "النيشان الثابت", "skd_snaim": "وإنت واقف مكانك ضربات القوس بتاعتك أقوى 15%.", "sk_bmcombo": "الكومبو", "skd_bmcombo": "كل ضربة على نفس الوحش في خلال ثانيتين بتزود ضربك 4%، لحد 5 مرات.", "sk_bmchain": "سلسلة السهام", "skd_bmchain": "3 دفعات ورا بعض، كل دفعة سهمين. كل سهم بيصيب الوحش مرة واحدة بس.", "sk_bmstorm": "عاصفة السهام", "skd_bmstorm": "10 سهام في 1.2 ثانية قدامك.", "sk_bgblade": "نصل المانا", "skd_bgblade": "ضربة بالعصاية 230% قدامك، وكل وحش بتصيبه بيرجعلك 3 مانا (9 بالكتير).", "sk_bgarmor": "الدرع السحري", "skd_bgarmor": "10 ثواني بتاخد ضرر أقل 20%، بس المانا مابتتملاش وبتخلص بالراحة.", "sk_bgslam": "ضربة السحر", "skd_bgslam": "بتنط لقدام وتفجر اللي حواليك 260% وتدوخهم ثانية.", "sk_wlcurse": "اللعنة", "skd_wlcurse": "الوحوش اللي قدامك بتتلعن 10 ثواني: بتاخد ضرر أكتر 15% وبتضرب أقل 20%. البوس بيفك اللعنة لما يدخل مرحلة جديدة.", "sk_wlrot": "العفن", "skd_wlrot": "أقرب وحش قدامك بياخد 45% كل ثانية لمدة 8 ثواني. بيقف لو دخل مدينة.", "sk_wlsiph": "امتصاص الروح", "skd_wlsiph": "6 ثواني العفن بتاعك بيعالجك 30% من ضرره.", "sk_dscut": "ضربة نار الجحيم", "skd_dscut": "ضربة 300% قدامك، أقوى على الشياطين.", "sk_dsseal": "ختم الشيطان", "skd_dsseal": "الشياطين اللي حواليك بتدوخ ثانيتين (البوس أقل) وبتاخد ضرر أكتر 8 ثواني.", "sk_dsbane": "لعنة الشياطين", "skd_dsbane": "بتاخد من الشياطين ضرر أقل 25% وبتضربهم أقوى 20%. كل زيادات الشياطين مع بعض مابتعديش +60%.", "sk_sapray": "صلاة القديسة", "skd_sapray": "بتعالجك 30% وبتعالج البارتي اللي جنبك.", "sk_sagrace": "النعمة", "skd_sagrace": "بتتعالج 1% كل ثانية، وصلاة القديسة أقوى 20%.", "sk_salife": "الحياة التانية", "skd_salife": "لو وقعت بتقوم بـ40% صحة. مرة كل 10 دقايق.", "snCharge": "بتنشن... متتحركش", "snInt": "النيشان باظ!", "sneOn": "عين النسر شغالة", "bgArmOn": "الدرع السحري شغال", "bgArmOff": "المانا خلصت والدرع وقع", "wlCurseOn": "لعنت {n}", "wlSiphOn": "امتصاص الروح شغال", "wlCleanse": "فك اللعنة!", "dsSealOn": "ختمت {n} شيطان", "saLifeT": "الحياة التانية! ريبيكا رجعتك", "noTarget": "مفيش هدف قدامك"});
+Object.assign(STR.en,{"cl_sniper": "Sniper", "cl_bowmaster": "Bowmaster", "cl_bmage": "Battlemage", "cl_warlock": "Warlock", "cl_dslayer": "Demon Slayer", "cl_saintess": "Saintess", "prHi_ta": "Real hunting starts before the arrow. The trail and the trap for a Ranger, the far shot for a Sniper, arrow after arrow for a Bowmaster. Which one?", "prHi_tm": "Magic is not just fireballs from afar. Some take the staff into the thick of it, some curse the enemy and watch it wither. Only one road.", "q_c2s": "The Sniper's Trial", "c2s_o": "A Sniper strikes from where no one is looking. Kill 15 outlaws with a bow.", "c2s_w": "Not yet. Breathe, then aim.", "c2s_d": "Your hand is steady as rock. You are a Sniper.", "q_c2m": "The Bowmaster's Trial", "c2m_o": "A Bowmaster never lets the enemy breathe. Kill 25 cave goblins with a bow.", "c2m_w": "Not yet. Faster.", "c2m_d": "Your arrows fall like rain. You are a Bowmaster.", "q_c2g": "The Battlemage's Trial", "c2g_o": "A mage afraid of closing in dies. Kill 20 cave goblins with a staff.", "c2g_w": "Not yet. Get closer.", "c2g_d": "The staff is a blade in your hands. You are a Battlemage.", "q_c2w": "The Warlock's Trial", "c2w_o": "A curse is stronger than fire. Kill 15 goblin shamans with a staff.", "c2w_w": "Not yet. Let them wither.", "c2w_d": "The dark listens to you now. You are a Warlock.", "q_hds": "Hunting in Hell", "hcMet_hds": "[A hidden condition has been met]\nYou have slain many demons. Their blood is on your weapon, and they have learned to fear you.", "hds_o": "[★ Hidden class change quest: Hunting in Hell]\n\"One who hunts demons must know their scent.\" Slay 30 more demons.", "q_hsa": "The Saintess's Road", "hcMet_hsa": "[A hidden condition has been met]\nYou brought the lost home safely. Rebecca sees your heart.", "hsa_o": "[★ Hidden class change quest: The Saintess's Road]\n\"One who heals others heals herself.\" Heal yourself or your party 40 times with prayer.", "hcGot_dslayer": "[You have changed to the rare hidden class 'Demon Slayer'.]\n* Demons fear your scent.", "hcPerk_dslayer": "Hellfire Cut cleaves demons, Demon Seal holds them, and you take less from them and deal more (up to +60%, never more).", "hcGot_saintess": "[You have changed to the rare hidden class 'Saintess'.]\n* Rebecca has chosen you.", "hcPerk_saintess": "Saint's Prayer heals you and the party near you, Grace mends you slowly, and Second Life lifts you once every 10 minutes.", "o_demon": "Slay demons: {c}/{n}", "o_saheal": "Heal with prayer: {c}/{n}", "sk_snshot": "Charged Shot", "skd_snshot": "Aim for 1.2 s along a line up to the first wall, then a 500% shot pierces all on it. Moving or taking a blow breaks it, and nothing is fired.", "sk_sneye": "Eagle Eye", "skd_sneye": "For 10 s your arrows fly 40% further and hit 10% harder.", "sk_snaim": "Steady Aim", "skd_snaim": "Standing still, your bow hits deal 15% more.", "sk_bmcombo": "Combo", "skd_bmcombo": "Each hit on the same monster within 2 s adds 4% damage, up to 5 times.", "sk_bmchain": "Arrow Chain", "skd_bmchain": "Three volleys of two arrows. Each arrow hits a monster only once.", "sk_bmstorm": "Arrow Storm", "skd_bmstorm": "Ten arrows ahead of you in 1.2 s.", "sk_bgblade": "Mana Blade", "skd_bgblade": "A 230% staff swing ahead; each monster hit gives back 3 MP (9 at most).", "sk_bgarmor": "Arcane Armor", "skd_bgarmor": "For 10 s you take 20% less damage, but your MP does not refill and slowly drains.", "sk_bgslam": "Spell Slam", "skd_bgslam": "Leap forward and blast what is around you for 260%, dazing it for 1 s.", "sk_wlcurse": "Curse", "skd_wlcurse": "The monsters ahead are cursed for 10 s: they take 15% more and deal 20% less. A boss shakes it off when it enters a new phase.", "sk_wlrot": "Rot", "skd_wlrot": "The nearest monster ahead takes 45% every second for 8 s. It ends in a town.", "sk_wlsiph": "Soul Siphon", "skd_wlsiph": "For 6 s your rot heals you for 30% of its damage.", "sk_dscut": "Hellfire Cut", "skd_dscut": "A 300% slash ahead, stronger against demons.", "sk_dsseal": "Demon Seal", "skd_dsseal": "Demons around you are dazed for 2 s (bosses less) and take more damage for 8 s.", "sk_dsbane": "Bane", "skd_dsbane": "You take 25% less from demons and deal 20% more to them. All demon bonuses together never pass +60%.", "sk_sapray": "Saint's Prayer", "skd_sapray": "Heals you for 30% and the party near you.", "sk_sagrace": "Grace", "skd_sagrace": "You mend 1% each second, and Saint's Prayer heals 20% more.", "sk_salife": "Second Life", "skd_salife": "When you fall you rise with 40% health. Once every 10 minutes.", "snCharge": "Aiming... hold still", "snInt": "The aim broke!", "sneOn": "Eagle Eye is on", "bgArmOn": "Arcane Armor is on", "bgArmOff": "Your MP ran out and the armor fell", "wlCurseOn": "Cursed {n}", "wlSiphOn": "Soul Siphon is on", "wlCleanse": "Cleansed!", "dsSealOn": "Sealed {n} demons", "saLifeT": "Second Life! Rebecca brought you back", "noTarget": "No target ahead"});
 /* ---------------- town life (owner 2026-10-20: town life) ----------------
    Horse races at Winston, dice at the inn tables and the town festival, all on the world clock (wNow), so everyone online
    shares the same race, the same dice rounds and the same festival without any new message or rules change: your race
@@ -4881,7 +4973,7 @@ const monY=m=>m.y-(m.type==='guardian'?18:m.type==='gchief'?10:4);
 // one hit on one monster; returns 0 (no effect), 1 (hit) or 2 (crit)
 function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}
  if(m.type==='kraugel'&&!m.st&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
- let dmg=(o.aura?auAtkV():atkV())*mul*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*dvAtk(m)*epAtk(m)*(S.tl.blslay&&DEMK.has(m.type)?1.05:1)*mbAtk(m),crit=rand()<Math.min(.5,.05+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
+ let dmg=(o.aura?auAtkV():atkV())*mul*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*dvAtk(m)*epAtk(m)*(S.tl.blslay&&DEMK.has(m.type)?1.05:1)*mbAtk(m),crit=rand()<Math.min(.5,.05+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -4894,7 +4986,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,m
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(burn)vfx('fire',m.x,my);if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
  if(burn&&!S.burnSeen){S.burnSeen=1;toast(t('burn'),'good');}else if(burn)num(m.x,my-18,lang==='ar'?'لهب!':'FLAME','#ff9a2a',false);
- c2Hit(m,o);rgHit(m,o);hcHit(m,o);fbHit(m,o);brHit(m,dmg);epHit(m);if(!netHit(m,dmg)&&m.hp<=0)killMon(m);return crit||burn?2:1;}
+ c2Hit(m,o);p2Hit(m,o);rgHit(m,o);hcHit(m,o);fbHit(m,o);brHit(m,dmg);epHit(m);if(!netHit(m,dmg)&&m.hp<=0)killMon(m);return crit||burn?2:1;}
 function tryAttack(ax,ay,mul){
  if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);if(PVP)pvpSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
@@ -4906,7 +4998,7 @@ function tryAttack(ax,ay,mul){
  else{const tr=vtNear(hx,hy,18).find(tr=>Math.hypot(tr.x-hx,tr.y-8-hy)<18);if(tr&&(chopped.get(tr.k)||0)<=gTime)chop(tr);}
 }
 // arrows (bow), magic bolts (staff) and fireballs fly as projectiles
-function shoot(kind,ax,ay,mul,o={}){const sp=kind==='arrow'?260:200;proj.push({kind,x:P.x+ax*6,y:P.y-8+ay*6,vx:ax*sp,vy:ay*sp,t:o.range||(kind==='arrow'?.62:.65),mul,pierce:o.pierce,boom:o.boom,stun:o.stun,hit:new Set()});if(kind==='arrow')SFX.bow();else SFX.magic(kind==='fire'?.5:1);}
+function shoot(kind,ax,ay,mul,o={}){const sp=kind==='arrow'?260:200;proj.push({kind,x:P.x+ax*6,y:P.y-8+ay*6,vx:ax*sp,vy:ay*sp,t:(o.range||(kind==='arrow'?.62:.65))*(kind==='arrow'&&P.sne>0?1.4:1),mul,pierce:o.pierce,boom:o.boom,stun:o.stun,hit:new Set()});if(kind==='arrow')SFX.bow();else SFX.magic(kind==='fire'?.5:1);}
 // any hit that lands on a standing tree chops it, same as a melee swing (max caps how many one hit fells)
 function hitTrees(x,y,r,max){let n=0;for(const tr of vtNear(x,y,r+8)){if(n>=(max||1))break;if((chopped.get(tr.k)||0)>gTime)continue;if(Math.hypot(tr.x-x,tr.y-8-y)<r){chop(tr);n++;}}return n;}
 function boom(p){hitTrees(p.x,p.y,30,3);SFX.crit();shake=.15;vfx('fire',p.x,p.y);fx.push({ring:true,big:1,x:p.x,y:p.y,t:.5});for(let i=0;i<18;i++)fx.push({x:p.x,y:p.y,vx:(rand()-.5)*120,vy:(rand()-.5)*120,t:.4,c:rand()<.5?'#ff8a1e':'#ffd24a'});mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-p.x,monY(m)-p.y)<30)hitMon(m,p.mul,{});});}
@@ -4931,7 +5023,7 @@ function hurtPlayer(d,ml,src){return asMe(()=>hurtPlayer0(d,ml,src));}
 function hurtPlayer0(d,ml,src){if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(rgEvade(src)||hcEvade(src))return 0;if(src&&src.dmul)d*=src.dmul;if(src&&src.type)P.lastSrc=src.type;if(S.tl.hking&&src&&HKV.has(src.type))d*=.85;
  if(P.qm>0&&rand()<.3){numP(-20,t('ipEvade'),'#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
- d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,2.2)*150/(150+defV())*rlDef(src)));d=c2Hurt(d,src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=bthHurt(d,src);d=dmHurt(d,src);d=mbHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
+ d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,2.2)*150/(150+defV())*rlDef(src)));d=p2Hurt(c2Hurt(d,src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=bthHurt(d,src);d=dmHurt(d,src);d=mbHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
  if(P.guard&&src){const sx=src.x-P.x,sy=src.y-P.y,sl=Math.hypot(sx,sy)||1;
   const GK=S.cls==='gknight';if(P.fort>0||(sx*P.gx+sy*P.gy)/sl>-.15){const ang=Math.atan2(sy,sx),bx=P.x+sx/sl*10,by=P.y-8+sy/sl*10;vfx('block',bx,by,{angle:ang});
    if(!src.hv&&P.gT<(GK?.18:.12)*clamp(1-((ml||S.lv)-S.lv)*.015,.6,1)){vfx('crit',bx,by);hcParry();qEvent('block','guard');numP(-24,t('parry'),'#9fe3ff',false);SFX.crit();P.inv=.35;P.gd=Math.min(100,P.gd+15);
@@ -4949,7 +5041,7 @@ function hurtPlayer0(d,ml,src){if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.w
 function deathPenalty(){const loss=Math.round(xpNeed()*.5);let lv='';
  if(S.xp>=loss)S.xp-=loss;else if(S.lv>1){const rest=loss-S.xp;S.lv--;S.xp=Math.max(0,xpNeed()-rest);let n=PTS_LV;const u=Math.min(S.pts,n);S.pts-=u;n-=u;while(n-->0){const k=['str','sta','agi','int','dex'].reduce((a,b)=>S.st[b]>S.st[a]?b:a);if(S.st[k]>1)S.st[k]--;}lv=t('deadLv',{n:S.lv});}else S.xp=0;
  return t('deadX',{x:loss})+(lv?' '+lv:'');}
-function die(){if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;if(BHR)bhDied();['inv','statusW','eqW','logW','mapW','qdW','forge','pauseScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
+function die(){if(p2Life())return;if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;if(BHR)bhDied();['inv','statusW','eqW','logW','mapW','qdW','forge','pauseScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
 const xpNeed=()=>40+S.lv*30+S.lv*S.lv*3;
 const PTS_LV=10; // stat points per level-up (canon)
 function gainXP(n){if(xpbOn())n*=1.2;S.xp+=Math.round(n);while(S.xp>=xpNeed()){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}),1);flash();SFX.rare();if(P)asMe(()=>vfx('levelup',P.x,P.y));},600);}P.hp=maxHP();if(P)asMe(()=>vfx('levelup',P.x,P.y));toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();checkSkills();}hudDirty=true;}
@@ -4971,7 +5063,7 @@ function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh)(b.drop||[]).forEach(([k,p])=>{if(rand()<p)addMat(k,1);});
  if(m.lv>=20&&!m.tmp){if(b.boss)addMat('estone',1+(m.lv/50|0));else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
- crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
+ crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
  if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;annW('annGuard',{lv:S.lv});}giveTitle('forest');S.raid=0;}
  if(m.type==='gchief'){shake=.3;giveTitle('chief');}
  if((S.kills.rabbit||0)+(S.kills.goblin||0)>=40)giveTitle('hunter');
@@ -5144,6 +5236,11 @@ const QD={
  c2b:{by:'tw',lv:20,from:['warrior'],mst:['melee',3],obj:{t:'kill',it:'merman',n:12,low:.5},xp:4000,gold:200,promo:'berserker'},
  c2l:{by:'tw',lv:20,from:['warrior'],mst:['spear',3],obj:{t:'kill',it:'merman',n:15,wk:'spear'},xp:4000,gold:200,promo:'lancer'},
  c2r:{by:'ta',lv:20,from:['archer'],mst:['bow',3],obj:{t:'cache',it:'cache',n:3},xp:4000,gold:200,promo:'ranger'},
+ // new paths (owner 2026-10-21): Sniper and Bowmaster from the Archer, Battlemage and Warlock from the Mage
+ c2s:{by:'ta',lv:30,from:['archer'],mst:['bow',4],obj:{t:'kill',it:'outlaw',n:15,wk:'bow'},xp:9000,gold:400,promo:'sniper'},
+ c2m:{by:'ta',lv:30,from:['archer'],mst:['bow',4],obj:{t:'kill',it:'cgob',n:25,wk:'bow'},xp:9000,gold:400,promo:'bowmaster'},
+ c2g:{by:'tm',lv:30,from:['mage'],mst:['staff',4],obj:{t:'kill',it:'cgob',n:20,wk:'staff'},xp:9000,gold:400,promo:'bmage'},
+ c2w:{by:'tm',lv:30,from:['mage'],mst:['staff',4],obj:{t:'kill',it:'gshaman',n:15,wk:'staff'},xp:9000,gold:400,promo:'warlock'},
  // churches (major 7): the Priest vows at Cassus (no chat and no food until done), the Paladin road patrol
  cp:{by:'cassus',lv:10,obj:{t:'pray',it:'altar',n:5},xp:900,cls:'priest',item:'staff'},
  c2p:{by:'cassus',lv:25,from:['gknight','priest'],mst:['melee',2],obj:{t:'kill',it:'outlaw',n:10},xp:9000,gold:400,promo:'paladin'},
@@ -5156,6 +5253,8 @@ const QD={
  hau:{by:'sys',lv:20,hid:1,cond:'parry',obj:{t:'over',it:'over',n:15},xp:4000,hcls:'aura'},
  hbm:{by:'sys',lv:25,hid:1,cond:'beast',obj:{t:'beast',it:'beast',n:20,wk:'dagger'},xp:5000,hcls:'beast'},
  hor:{by:'sys',lv:15,hid:1,cond:'talk',obj:{t:'talk',it:'talk',n:12},xp:3000,hcls:'orator'},
+ hds:{by:'sys',lv:180,hid:1,cond:'demon',obj:{t:'demon',it:'demon',n:30},xp:400000,hcls:'dslayer'},
+ hsa:{by:'sys',lv:40,hid:1,cond:'rescue',obj:{t:'saheal',it:'saheal',n:40},xp:12000,hcls:'saintess'},
  bnt:{by:'board',lv:8,obj:{t:'kill',it:'gchief',n:1},xp:400,gold:120},
  pt1:{by:'pcap',lv:45,obj:{t:'kill',it:'hwolf',n:10},xp:2600,gold:120},
  pt2:{by:'pcap',lv:48,pre:'pt1',obj:{t:'kill',it:'rboar',n:8},xp:3400,gold:150,pts:5},
@@ -6092,6 +6191,13 @@ const SKD={
  bfury:{cls:'berserker',lv:20,pas:1,col:'#ff5a3a'},cleave:{cls:'berserker',lv:20,mp:16,cd:7,need:'melee',col:'#ff7a5a'},lstand:{cls:'berserker',lv:28,mp:24,cd:60,col:'#ff3a2a'},
  thrust:{cls:'lancer',lv:20,mp:12,cd:5,need:'spear',col:'#cfe0ff'},skewer:{cls:'lancer',lv:24,mp:18,cd:10,need:'spear',col:'#9fd8ff'},swall:{cls:'lancer',lv:28,mp:26,cd:20,need:'spear',col:'#e8f4ff'},
  track:{cls:'ranger',lv:20,mp:12,cd:20,col:'#c8e07a'},trap:{cls:'ranger',lv:22,mp:10,cd:6,col:'#d8b070'},volley:{cls:'ranger',lv:26,mp:20,cd:9,need:'bow',col:'#9fe39a'},
+ // new paths (owner 2026-10-21)
+ snshot:{cls:'sniper',lv:30,mp:22,cd:10,need:'bow',col:'#ffb07a'},sneye:{cls:'sniper',lv:32,mp:16,cd:30,col:'#ffe08a'},snaim:{cls:'sniper',lv:30,pas:1,col:'#ffd0a0'},
+ bmcombo:{cls:'bowmaster',lv:30,pas:1,col:'#9fe39a'},bmchain:{cls:'bowmaster',lv:30,mp:18,cd:8,need:'bow',col:'#c8f0a0'},bmstorm:{cls:'bowmaster',lv:34,mp:30,cd:18,need:'bow',col:'#e8ffc8'},
+ bgblade:{cls:'bmage',lv:30,mp:14,cd:5,need:'staff',col:'#9fd8ff'},bgarmor:{cls:'bmage',lv:32,mp:20,cd:30,col:'#8aa8ff'},bgslam:{cls:'bmage',lv:35,mp:28,cd:14,need:'staff',col:'#c8b8ff'},
+ wlcurse:{cls:'warlock',lv:30,mp:16,cd:12,col:'#a07ad0'},wlrot:{cls:'warlock',lv:30,mp:14,cd:6,col:'#7ad04a'},wlsiph:{cls:'warlock',lv:34,mp:20,cd:20,col:'#ff6a7a'},
+ dscut:{cls:'dslayer',lv:180,mp:30,cd:6,need:'melee',col:'#ff6a3a'},dsseal:{cls:'dslayer',lv:185,mp:40,cd:25,col:'#ff4a2a'},dsbane:{cls:'dslayer',lv:180,pas:1,col:'#c83a2a'},
+ sapray:{cls:'saintess',lv:40,mp:30,cd:18,col:'#fff3b0'},sagrace:{cls:'saintess',lv:40,pas:1,col:'#fff8d0'},salife:{cls:'saintess',lv:45,pas:1,col:'#ff8a9a'},
  // churches (major 7): church: the paladin church a skill belongs to
  pheal:{cls:'priest',lv:10,mp:18,cd:5,col:'#fff3b0'},pbless:{cls:'priest',lv:12,mp:24,cd:30,col:'#ffe08a'},plight:{cls:'priest',lv:15,mp:22,cd:8,col:'#fff7c8'},
  pdprot:{cls:'paladin',lv:25,mp:20,cd:25,col:'#cfe6ff'},psmite:{cls:'paladin',lv:25,mp:14,cd:6,need:'melee',col:'#fff3b0'},
@@ -6164,6 +6270,7 @@ const fdir=()=>{if(TOUCH){const a=tAim(200);if(!a)return [[0,1],[0,-1],[1,0],[-1
 const aoe=(x,y,r,mul,o)=>{let n=0;hitTrees(x,y,r,3);mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-x,monY(m)-y)<r&&hitMon(m,mul,o||{}))n++;});return n;};
 const SKF={
  ...C2SK,
+ ...P2SK,
  ...PHSK,
  ...RGSK,
  ...NESK,
@@ -6349,7 +6456,7 @@ Object.assign(STR.en,{sk_lrep:"Legendary Blacksmith's Repair",skd_lrep:'Restores
 function namedDrop(m){const L=NDROP[m.type];if(!L||m.tmp)return;for(const [id,p] of L){if(rand()>=p)continue;const it=mkItem(id,0);S.items.push(it);vfx('loot',m.x,m.y,{rarity:it.r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+it.r)}));break;}}
 // small procedural skill icons
 function skIcon(k){const id='sk_'+k;if(ICN[id])return ICN[id];const c=SKD[k].col;ICN[id]=mk(16,16,g=>{const p=(x,y,w,h,cc)=>R(g,x,y,w,h,cc||c);R(g,0,0,16,16,'#101a33');
- if(C2ICO[k])C2ICO[k](p);else if(PHICO[k])PHICO[k](p);else if(RGICO[k])RGICO[k](p);else if(NEICO[k])NEICO[k](p);else if(HCICO[k])HCICO[k](p);else if(FBICO[k])FBICO[k](p);else if(k==='strike'){for(let i=0;i<10;i++)p(3+i,12-i,2,2);p(11,2,3,1,'#fff');}
+ if(P2ICO[k])P2ICO[k](p);else if(C2ICO[k])C2ICO[k](p);else if(PHICO[k])PHICO[k](p);else if(RGICO[k])RGICO[k](p);else if(NEICO[k])NEICO[k](p);else if(HCICO[k])HCICO[k](p);else if(FBICO[k])FBICO[k](p);else if(k==='strike'){for(let i=0;i<10;i++)p(3+i,12-i,2,2);p(11,2,3,1,'#fff');}
  else if(k==='bash'){p(4,3,8,9,'#5a6a8a');p(5,4,6,7);p(7,5,2,5,'#fff');p(5,12,6,1,'#5a6a8a');p(6,13,4,1,'#5a6a8a');p(12,7,3,1,'#fff');p(13,5,1,1,'#fff');p(13,9,1,1,'#fff');}
  else if(k==='fort'){p(3,6,10,8);p(3,4,2,2);p(7,4,2,2);p(11,4,2,2);p(7,10,2,4,'#101a33');p(4,7,8,1,'#fff');}
  else if(k==='taunt'){for(let i=0;i<8;i++){const an=i*.785;p(8+Math.cos(an)*6|0,8+Math.sin(an)*6|0,1,1);}p(7,3,2,7);p(7,11,2,2);}
@@ -6831,7 +6938,7 @@ function update(dt){
  else P.frame=0;
  if(P.guard)P.dir=Math.abs(P.gx)>Math.abs(P.gy)?(P.gx>0?2:3):(P.gy>0?0:1);
  if(K.atk&&inp){const wk=weapKind(),v=(TOUCH&&tAim((wk==='bow'||wk==='staff')&&!hcMelee()?170:44))||[[0,1],[0,-1],[1,0],[-1,0]][P.dir];tryAttack(v[0],v[1]);}
- P.acd-=dt;P.inv-=dt;P.dcd-=dt;P.pcd=(P.pcd||0)-dt;S.immT-=dt;P.scd-=dt;for(const k in P.cd)P.cd[k]-=dt;S.playT+=dt;P.mp=Math.min(maxMP(),P.mp+(1.2+maxMP()*.003)*dt*(S.cls==='braham'?2.5:1)*(ipOn('absurd')?2:1)*(brHell()?0:1));if(P.rage>0){P.rage-=dt;if(rand()<dt*20)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*16,vx:0,vy:-30,t:.5,c:'#ff5a3a',fl:1});}if(P.slash){P.slash.t-=dt;if(P.slash.t<=0)P.slash=null;}
+ P.acd-=dt;P.inv-=dt;P.dcd-=dt;P.pcd=(P.pcd||0)-dt;S.immT-=dt;P.scd-=dt;for(const k in P.cd)P.cd[k]-=dt;S.playT+=dt;P.mp=Math.min(maxMP(),P.mp+(1.2+maxMP()*.003)*dt*(S.cls==='braham'?2.5:1)*(ipOn('absurd')?2:1)*(brHell()?0:1)*(P.bga>0?0:1));if(P.rage>0){P.rage-=dt;if(rand()<dt*20)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*16,vx:0,vy:-30,t:.5,c:'#ff5a3a',fl:1});}if(P.slash){P.slash.t-=dt;if(P.slash.t<=0)P.slash=null;}
  P.lcd=(P.lcd||0)-dt;if(P.lbT>0)P.lbT-=dt;else P.st=Math.min(maxST(),P.st+(P.food<20?8:20)*(balanced()?1.25:1)*(S.wis&&S.wis.mht?1.5:1)*dt);
  // Second Wind (balanced body): below 35% health, recover 3% of max HP per second for 5 s; once a minute
  if(balanced()&&P.hp>0&&P.hp<mh*.35&&(S.swT||0)<=S.playT){S.swT=S.playT+60;P.sw=5;vfx('heal',P.x,P.y);toast(t('secondWind'),'good');SFX.notice();}
@@ -6854,7 +6961,7 @@ function update(dt){
  if(P.food<20&&!P.hungryT){P.hungryT=true;toast(t('hungry'),'warn');}if(P.food>=25)P.hungryT=false;
  if(pain&&!P.painT){P.painT=true;toast(t('pain'),'warn');}if(!pain)P.painT=false;
  // monsters
- tfTick(dt);tlTick(dt);c2Tick(dt);phTick(dt);rgTick(dt);necTick(dt);hcTick(dt);fbTick(dt);dvTick(dt);lpTick(dt);eyTick(dt);brTick(dt);epTick();const safe=!!inTown(P.x,P.y);
+ tfTick(dt);tlTick(dt);c2Tick(dt);p2Tick(dt);phTick(dt);rgTick(dt);necTick(dt);hcTick(dt);fbTick(dt);dvTick(dt);lpTick(dt);eyTick(dt);brTick(dt);epTick();const safe=!!inTown(P.x,P.y);
  for(const m of mons){try{
   const b=MT[m.type];monVox(m,b,dt);
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
@@ -7106,7 +7213,7 @@ function render(dt){
   if(!titleCam&&mode!=='dead'&&!P.ghost)if(PET)ents.push({y:PET.y,f:()=>drawPet(PET)});
   ents.push({y:P.y,f:()=>{P.trail.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;const am=a.r&&MOUNTS[a.r];if(am){drawHorse(a.x,a.y,a.dir,2,am);drawRider(a.x,a.y,a.dir,2,P);drawHorse(a.x,a.y,a.dir,2,am,ctx,'head');}else drawChar(pSpr(),a.x,a.y,a.dir,a.frame,false);});ctx.globalAlpha=1;const rd=P.ride&&MOUNTS[myMt()];const hf=rd&&P.rmv>0?1+((P.rgT||0)*10|0)%4:0,blk=P.inv>0&&((gTime*20|0)%2===0)&&P.dash<=0;if(rd)drawHorse(P.x,P.y,P.dir,hf,rd);const wen=(weapon()||{}).en||0;if(wen>=7)drawEnh(P.x,P.y-(rd?9:0),wen,0);if(rd){if(!blk)drawRider(P.x,P.y,P.dir,hf,P);drawHorse(P.x,P.y,P.dir,hf,rd,ctx,'head');const hm=rhpMax(S.mount),hh=rhp(S.mount);if(hh<hm&&!(RCR&&RCR.in)){R(ctx,P.x-9,P.y-37,18,3,'#000');R(ctx,P.x-8,P.y-36,16*hh/hm,1,'#e8a060');}}else{if(P.stl>0)ctx.globalAlpha=.35;if(!bmDraw(P.bmf,'me',P.x,P.y,P.dir,P.rmv>0,blk,!!P.slash))drawChar(pSpr(),P.x,P.y,P.dir,P.frame,blk,0,P);ctx.globalAlpha=1;}if(wen>=4)drawEnh(P.x,P.y-(rd?9:0),wen,1);
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(hcHand(hx,hy,P.dir,P.slash)){}else if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,w.id,w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
-  if(BHR)bhEnts(ents);if(S&&S.wis)twEnts(ents);if(S){c2Ents(ents);phEnts(ents);necEnts(ents);hcEnts(ents);fbEnts(ents);brEnts(ents);blEnts(ents);}if(SKA)tAimEnts(ents);if(S)tlEnts(ents);if(NET&&!titleCam)netEnts(ents);}
+  if(BHR)bhEnts(ents);if(S&&S.wis)twEnts(ents);if(S){c2Ents(ents);p2Ents(ents);phEnts(ents);necEnts(ents);hcEnts(ents);fbEnts(ents);brEnts(ents);blEnts(ents);}if(SKA)tAimEnts(ents);if(S)tlEnts(ents);if(NET&&!titleCam)netEnts(ents);}
  // one broken drawing (a stale sprite file after an update) must not hide the player and everything after it
  ents.sort((a,b)=>a.y-b.y).forEach(e=>{try{e.f();}catch(err){ctx.globalAlpha=1;gameErr(err);}});
  drawGDrop();drawEProj();proj.forEach(p=>{if(p.kind==='arrow'){const l=Math.hypot(p.vx,p.vy)||1,ux=p.vx/l,uy=p.vy/l;ctx.strokeStyle='#e8e0d0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x-ux*7,p.y-uy*7);ctx.lineTo(p.x,p.y);ctx.stroke();R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}else if(p.kind==='wave'){const a=Math.atan2(p.vy,p.vx);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.globalAlpha=.85;ctx.strokeStyle='#ffe08a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(-6,0,12,-1.1,1.1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(-5,0,12,-.9,.9);ctx.stroke();ctx.restore();}else{const f=p.kind==='fire';R(ctx,p.x-2,p.y-2,f?5:4,f?5:4,f?'#ff8a1e':'#9fd8ff');R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}});

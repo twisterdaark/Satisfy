@@ -28,7 +28,7 @@ test('counts match the audited baseline',()=>{
   const n=o=>Array.isArray(o)?o.length:Object.keys(o).length;
   assert.deepStrictEqual({MT:n(D.monsters.types),BOSSES:n(D.monsters.bosses),SPAWN:n(D.monsters.spawns),QD:n(D.quests.quests),RC:n(D.recipes.recipes),
     SKD:n(D.skills.skills),NPC:n(D.npcs.npcs),interior:Object.values(D.npcs.npcs).filter(x=>x.interior).length,ZR:n(D.zones.regions),TOWNS:n(D.zones.towns),classes:n(D.classes.classes)},
-    {MT: 107,BOSSES:5,SPAWN:19,QD:128,RC:25,SKD:91,NPC:89,interior:8,ZR:17,TOWNS:3,classes:23});});
+    {MT: 107,BOSSES:5,SPAWN:19,QD:134,RC:25,SKD:109,NPC:89,interior:8,ZR:17,TOWNS:3,classes:29});});
 
 // condition vocabulary (docs/content/CONTENT_SCHEMA.md)
 function checkCond(c,where){assert.ok(c&&typeof c==='object'&&!Array.isArray(c),where+': condition must be an object');
@@ -40,7 +40,7 @@ function checkCond(c,where){assert.ok(c&&typeof c==='object'&&!Array.isArray(c),
     case 'cls':[].concat(v).forEach(c=>assert.ok(D.classes.classes[c],`${where}: unknown class ${c}`));break;
     case 'title':assert.ok(D.skills.titleSkills[v],`${where}: unknown title ${v}`);break;
     case 'lv':case 'smithLv':assert.ok(Number.isInteger(v.gte)&&Object.keys(v).length===1,where+': expects {gte:int}');break;
-    case 'hiddenCondition':assert.ok(['parry','beast','talk'].includes(v),where+': hidden condition');break;
+    case 'hiddenCondition':assert.ok(['parry','beast','talk','demon','rescue'].includes(v),where+': hidden condition');break;
     case 'classQuestActive':case 'promoQuestActive':assert.strictEqual(v,true,where);break;
     case 'mastery':assert.ok(['sword','spear','dagger','bow','staff','hammer','melee'].includes(v.k)&&Number.isInteger(v.gte),where+': expects {k,gte}');break;
     default:assert.fail(`${where}: unknown operator ${k}`);}}
@@ -54,7 +54,7 @@ test('cross-references point at things that exist',()=>{
   for(const q of Object.values(Q)){assert.ok(N[q.by]||q.hid&&q.by==='sys',`quest ${q.id} giver ${q.by}`);if(q.pre)assert.ok(Q[q.pre],`quest ${q.id} pre`);
     const o=q.obj;if(o.t==='kill')assert.ok(types[o.it],`quest ${q.id} kills ${o.it}`);else if(o.t==='have')assert.ok(MATS.includes(o.it),`quest ${q.id} has ${o.it}`);
     else if(o.t==='craft')assert.ok(R[o.it],`quest ${q.id} crafts ${o.it}`);else if(o.t==='visit')assert.ok(VISIT_TARGETS.includes(o.it),`quest ${q.id} visits ${o.it}`);
-    else if(['over','beast','talk'].includes(o.t))assert.ok(q.hid&&o.it===o.t,`quest ${q.id} hidden trial`);
+    else if(['over','beast','talk','demon','saheal'].includes(o.t))assert.ok(q.hid&&o.it===o.t,`quest ${q.id} hidden trial`);
     else if(o.t==='corpse')assert.strictEqual(o.it,'corpse',`quest ${q.id} gathers corpses`);
     else if(o.t==='steal')assert.strictEqual(o.it,'steal',`quest ${q.id} steals`);
     else if(o.t==='pray')assert.strictEqual(o.it,'altar',`quest ${q.id} prays`);

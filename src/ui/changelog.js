@@ -5,6 +5,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v129', ver: '1.29', d: '2026-10-21',
+      ar: ['كلاسات جديدة من لفل 30 (مع إتقان السلاح 4): الآرتشر يقدر يبقى سنايبر أو بو ماستر عند مدرب الآرتشر، والميج يبقى باتل ميج أو وورلوك عند مدرب السحر في ريدان. المهارات القديمة بتفضل معاك',
+        'سنايبر: طلقة مشحونة 500% بتخترق خط كامل لو وقفت مكانك ثانية وربع، عين النسر، وضرب أقوى وانت واقف',
+        'بو ماستر: كومبو بيزيد ضربك على نفس الوحش، سلسلة سهام، وعاصفة سهام',
+        'باتل ميج: نصل المانا بيرجعلك مانا، درع سحري بيقلل الضرر، وقفزة بتفجر اللي حواليك',
+        'وورلوك: لعنة بتزود الضرر على الوحوش، عفن بياكل صحتهم كل ثانية، وامتصاص روح بيعالجك',
+        'كلاسات مخفية: صياد الشياطين (من لفل 180 لأي حد قتل 50 شيطان) والقديسة (للبريست اللي وصّل القافلتين بأمان، من لفل 40) وعندها حياة تانية مرة كل 10 دقايق'],
+      en: ['New classes from Lv 30 (with weapon mastery 4): an Archer can become a Sniper or a Bowmaster at the archery trainer, a Mage a Battlemage or a Warlock at the magic trainer in Reidan. Your old skills stay',
+        'Sniper: a 500% charged shot that pierces a whole line if you stand still for 1.2 s, Eagle Eye, and harder hits while standing',
+        'Bowmaster: a combo that grows on the same monster, Arrow Chain and Arrow Storm',
+        'Battlemage: Mana Blade gives MP back, Arcane Armor cuts damage, and a leap that blasts what is around you',
+        'Warlock: a curse that makes monsters take more, rot that eats their health every second, and Soul Siphon that heals you',
+        'Hidden classes: Demon Slayer (from Lv 180, for anyone who has slain 50 demons) and Saintess (a priest who brought both caravans through safely, from Lv 40), who rises again once every 10 minutes'] },
     { v: '2026-10-21v128', ver: '1.28', d: '2026-10-21',
       ar: ['وحوش جديدة: أرانب بقرن والأرنب الدهبي (بيهرب منك ونادر) جنب وينستون، سلايم بيتقسم لاتنين صغيرين لما تقتله، ميميك متخبي كأنه صندوق في المستنقع، خفافيش الكهوف في المرتفعات، عقارب رمل مدفونة في الصحرا الجنوبية بتطلع لما تقرب منها، وكشافة العفاريت اللي لما يشوفك بينفخ في البوق ويجيب المعسكر كله عليك',
         'الشنطة بقى ليها تابات: الكل، العتاد، الخامات، الاستهلاك',
