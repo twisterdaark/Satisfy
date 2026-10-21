@@ -7948,13 +7948,8 @@ function netStop(){if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(()=>{});}L
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
  const nc=Satisfy.natcomp?Satisfy.natcomp.now(wNow()):null,ni=nc?+nc.id.slice(1):-1; /* the National Competition's last two (SAT-ONLINE-069) */
  return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
-/* "Download my online data" (SAT-ONLINE-078, plan U346): a JSON file with everything the account keeps online that it can
-   read: what "Delete my online data" removes, plus the guild invitations, its guild entry and its whispers. */
-function netExportPaths(uid){return netErasePaths(uid).concat(['guildInv/'+uid,'whisper/'+uid],S&&S.gon?['guildMembers/'+S.gon+'/'+uid]:[]);}
-function cloudExport(){const C=cloudApi();if(!C||!C.exportAll||!netUser)return;const uid=netUser.uid;
- return C.exportAll(netExportPaths(uid)).then(d=>{const doc={game:'Satisfy',account:uid,id:netId||null,exported:new Date(wNow()).toISOString(),data:d};
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(doc,null,1)],{type:'application/json'}));a.download='satisfy-my-online-data.json';
-  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);toast(t('cloudExOk',{n:Object.keys(d).length}),'good');return doc;},e=>{toast(t('cloudErr',{e:e&&e.message||'?'}),'warn');});}
+/* owner 2026-10-21: no "Download my online data" and no manual Upload/Download of characters: a character moves only by
+   the automatic sync (cloudAuto while playing, cloudPull on sign-in), so no copy of it can be made by hand. */
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid,lf=erase?Promise.all([legFree(uid),frFree()]):null;netStop();
  (erase?lf.then(()=>C.eraseAll(netErasePaths(uid))):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
@@ -7968,13 +7963,12 @@ function armBtn(label,run){const b=document.createElement('button');b.textConten
 function cloudLocal(){const r=STORE.read();if(r.status!=='ok')return null;const d=r.data;if(!Satisfy.ids.isCharId(d.S.pid)){Satisfy.ids.ensure(d.S);if(!STORE.replace(JSON.stringify(d),'before-ids-'+Date.now().toString(36)))return null;}
  return {raw:STORE.read().raw,pid:d.S.pid,n:(d.S.look&&d.S.look.n)||'?',lv:d.S.lv||1,at:+d.savedAt||0};}
 function cloudOpen(){const C=cloudApi();if(!C)return;$('cloudW').hidden=false;$('cloudH').textContent=t('cloudH');const L=cloudLocal(),N=$('cloudN'),box=$('cloudL'),A=$('cloudA');
- A.textContent='';const out=document.createElement('button');out.textContent=t('cloudOut');out.onclick=()=>{out.disabled=true;netSignOut(false);};A.appendChild(out);A.appendChild(armBtn(t('cloudErase'),()=>netSignOut(true)));{const x=document.createElement('button');x.textContent=t('cloudExport');x.onclick=()=>cloudExport();A.appendChild(x);}
+ A.textContent='';const out=document.createElement('button');out.textContent=t('cloudOut');out.onclick=()=>{out.disabled=true;netSignOut(false);};A.appendChild(out);A.appendChild(armBtn(t('cloudErase'),()=>netSignOut(true)));
  const nb=BLK.list().length;if(nb){const u=document.createElement('button');u.textContent=t('blkClear',{n:nb});u.onclick=()=>{BLK.clear();toast(t('blkCleared'));cloudOpen();};A.appendChild(u);}
- N.textContent=L?t('cloudLocal',{n:L.n,lv:L.lv}):t('cloudNoLocal');{const nt=document.createElement('div');nt.className='note';nt.textContent=t('cloudAutoNote');N.appendChild(nt);}if(L)N.appendChild(armBtn(t('cloudUp'),()=>C.upload(L.raw).then(i=>{toast(t('cloudUpOk',{n:i.handle}),'good');cloudOpen();},e=>{cloudErr(e);cloudOpen();})));
+ N.textContent=L?t('cloudLocal',{n:L.n,lv:L.lv}):t('cloudNoLocal');{const nt=document.createElement('div');nt.className='note';nt.textContent=t('cloudAutoNote');N.appendChild(nt);}
  box.textContent=t('cloudLoading');
  C.list().then(list=>{box.textContent=list.length?'':t('cloudNone');for(const c of list){const row=document.createElement('div');row.className='cr';row.dataset.pid=c.pid;
    const lab=document.createElement('span');lab.textContent=`${c.handle} · ${t('lv',{n:c.lv})} · ${t('cl_'+c.cls)} · ${new Date(c.savedAt||c.rev).toLocaleString(lang==='ar'?'ar-EG':'en-GB')}`+(L&&L.pid===c.pid?' '+t('cloudSame'):'');row.appendChild(lab);
-   row.appendChild(armBtn(t('cloudDown'),()=>C.download(c.pid).then(raw=>{if(!raw||!STORE.replace(raw,'before-cloud-'+Date.now().toString(36)))throw new Error('restore');toast(t('cloudDownOk',{n:c.handle}),'good');$('contBtn').disabled=!hasSave();cloudOpen();}).catch(e=>{cloudErr(e);cloudOpen();})));
    row.appendChild(armBtn(t('cloudDel'),()=>C.remove(c.pid).then(()=>{toast(t('cloudDelOk',{n:c.handle}));cloudOpen();},e=>{cloudErr(e);cloudOpen();})));box.appendChild(row);}},e=>{box.textContent='';cloudErr(e);});}
 /* owner 2026-10-20 ("on the phone there was no cloud save and no account"): signed in, the character follows the Google
    account by itself. While you play, the save goes up when it changed (every 30 s, and when the page is hidden or closed);

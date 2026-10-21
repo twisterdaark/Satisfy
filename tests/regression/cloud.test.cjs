@@ -21,7 +21,9 @@ async function signIn(g, name) {
 const click = (g, sel) => g.eval((s) => document.querySelector(s).click(), sel);
 const rows = (g) => g.eval(() => [...document.querySelectorAll('#cloudL .cr')].map((r) => ({ pid: r.dataset.pid, text: r.querySelector('span').textContent })));
 
-test('upload from one device, download on another; both need a second click; the old save is kept', async () => {
+// owner 2026-10-21: no manual Upload/Download (fewer chances of duplicated data): the window lists the account's
+// characters with Delete only, and a character moves only by the automatic sync (the next test)
+test('the cloud window: the save went up by itself, no manual upload or download, Delete only', async () => {
   const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
   try {
     // device A: a character with some progress, back on the title screen
@@ -40,54 +42,24 @@ test('upload from one device, download on another; both need a second click; the
     assert.equal(prof.handle, 'Grid');
     assert.equal(typeof prof.revision, 'number');
 
+    await until(a, ([u, p]) => window.__fakeRTDB.data.has('cloudSaves/' + u + '/' + p), 5000, [UID, mine.pid]);
     await click(a, '#cloudBtn');
     await until(a, () => !document.getElementById('cloudW').hidden && !/Loading/.test(document.getElementById('cloudL').textContent));
     assert.match(await a.eval(() => document.getElementById('cloudN').textContent), /On this device: Grid · Lv \d+/);
-    // the save went up by itself while playing (owner 2026-10-20); the button still uploads it again on a second click
-    assert.equal(await a.eval(([u, p]) => window.__fakeRTDB.data.has('cloudSaves/' + u + '/' + p), [UID, mine.pid]), true, 'auto-uploaded');
-    const rev0 = await a.eval(([u, p]) => window.__fakeRTDB.data.get('cloudIndex/' + u + '/' + p).rev, [UID, mine.pid]);
-    await click(a, '#cloudN button');
-    await a.step(2);
-    assert.equal(await a.eval(([u, p]) => window.__fakeRTDB.data.get('cloudIndex/' + u + '/' + p).rev, [UID, mine.pid]), rev0, 'one click uploads nothing');
-    await click(a, '#cloudN button');
-    await until(a, ([u, p, r]) => window.__fakeRTDB.data.get('cloudIndex/' + u + '/' + p).rev > r, 5000, [UID, mine.pid, rev0]);
+    assert.equal(await a.eval(() => document.querySelectorAll('#cloudN button').length), 0, 'no Upload');
     await until(a, () => document.getElementById('cloudL').querySelectorAll('.cr').length === 1);
     assert.deepEqual((await rows(a)).map((r) => r.pid), [mine.pid]);
     assert.match((await rows(a))[0].text, /Grid · Lv \d+ .*\(same character\)/);
-
-    // device B: same account, its own (different) character on the title screen
-    const b = await H.openGame({ ctx, query: '?net=online&slot=b' });
-    await signIn(b, 'Ahmed');
-    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
-    await b.eval(() => window.__G.act('quit'));
-    await b.waitMode('title');
-    const before = await b.eval(() => localStorage.getItem('satisfy_proto_v4@b'));
-    await click(b, '#cloudBtn');
-    const row = `#cloudL .cr[data-pid="${mine.pid}"] button`; // Faker may be listed too: it goes up by itself
-    await until(b, (r) => !!document.querySelector(r), 5000, row);
-    await click(b, row);
-    await b.step(2);
-    assert.equal(await b.eval(() => localStorage.getItem('satisfy_proto_v4@b')), before, 'one click changes nothing');
-    await click(b, row);
-    await until(b, () => JSON.parse(localStorage.getItem('satisfy_proto_v4@b')).S.look.n === 'Grid');
-    const st = await b.storage();
-    const backups = Object.keys(st).filter((k) => k.startsWith('satisfy_proto_v4@b.backup.before-cloud-'));
-    assert.equal(backups.length, 1, 'the replaced save is kept');
-    assert.equal(st[backups[0]], before);
-    await H.continueGame(b);
-    const got = await b.eval(() => ({ pid: window.__G.S.pid, gold: window.__G.S.gold, n: window.__G.S.look.n }));
-    assert.deepEqual(got, { pid: mine.pid, gold: 4321, n: 'Grid' });
-
+    assert.deepEqual(await a.eval(() => [...document.querySelectorAll('#cloudL .cr button')].map((b) => b.textContent)), ['Delete'], 'no Download');
+    assert.deepEqual(await a.eval(() => [...document.querySelectorAll('#cloudA button')].map((b) => b.textContent)), ['Sign out', 'Delete my online data']);
     // T36: another account's cloud saves can't be read (the fake applies the owner-only rule)
-    const other = await b.eval(async () => {
+    const other = await a.eval(async () => {
       const sdk = await window.__SATISFY_FIREBASE_LOADER__();
       try { await sdk.database.get({ path: 'cloudSaves/gSomeoneElse' }); return 'read'; } catch (e) { return e.code; }
     });
     assert.equal(other, 'PERMISSION_DENIED');
     assert.deepEqual(await a.eval(() => window.__fakeRTDB.rejected), []);
-    assert.deepEqual(await b.eval(() => window.__fakeRTDB.rejected), []);
     assert.deepEqual(a.errors, []);
-    assert.deepEqual(b.errors, []);
   } finally { await ctx.close(); }
 });
 

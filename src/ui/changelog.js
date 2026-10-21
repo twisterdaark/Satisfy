@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v108', ver: '1.08', d: '2026-10-21',
+      ar: ['الحفظ السحابي: اتشال الرفع والتنزيل اليدوي و"تحميل بياناتي أونلاين"، عشان نقلل فرص تكرار الداتا. الشخصية بتترفع لحسابك لوحدها وإنت بتلعب، وبتنزل لوحدها لما تدخل بجوجل من جهاز تاني'],
+      en: ['Cloud saves: the manual Upload and Download and "Download my online data" are gone, to cut the chance of duplicated data. Your character goes up to your account by itself while you play, and comes down by itself when you sign in with Google on another device'] },
     { v: '2026-10-21recruit', ver: '1.07', d: '2026-10-21',
       ar: ['أونلاين: الجيلد يقدر يجنّد: القائد أو ضابط يكتب رسالة تجنيد من G، واللي ملوش جيلد يشوف الجيلدات اللي بتجنّد عند جمعية الجيلدات أو في G ويطلب ينضم',
         'القائد والضباط بيوصلهم إشعار بكل طلب، ومن G ← طلبات الانضمام: "ابعت دعوة" (بتوصل الدعوة العادية) أو "ارفض". اللي اترفض يقدر يطلب تاني من نفس الجيلد بعد أسبوع',
