@@ -441,9 +441,18 @@
           var a = r[0].val(), b = r[1].val(), g = r[2].val(); if (!a || !b || !g) throw new Error('gone');
           var u = {};
           u['guilds/' + gid] = { name: g.name, nk: g.nk, master: to, col: g.col, t: g.t };
+          if (typeof g.emb === 'number') u['guilds/' + gid].emb = g.emb; // the banner stays (SAT-ONLINE-084)
           u['guildMembers/' + gid + '/' + to] = { rk: 'm', n: b.n, c: b.c, on: b.on };
           u['guildMembers/' + gid + '/' + from] = { rk: 'o', n: a.n, c: a.c, on: a.on };
           return up(u);
+        });
+      },
+      // SAT-ONLINE-084: the banner, guilds/{gid}/emb (an index into Satisfy.guild.C.EMBLEMS), set by the master: the guild as
+      // it is with the new emblem (the rules let only the master write the guild)
+      setEmblem: function (gid, i) {
+        return D.get(at('guilds/' + gid)).then(function (s) {
+          var g = s.val(); if (!g) throw new Error('gone');
+          var u = {}; u['guilds/' + gid] = { name: g.name, nk: g.nk, master: g.master, col: g.col, t: g.t, emb: i }; return up(u);
         });
       },
       // guildNote/{gid} = {s, by, n, v, t}: the notice; members read it, the master and officers write the next version

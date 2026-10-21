@@ -466,6 +466,14 @@ test('moderation (SAT-ONLINE-082): admins read reports and crashes, write mutes 
   for (const n of [rules.crashes.$id, rules.mutes.$uid, rules.reportDone.$id]) assert.equal(n.$other['.validate'], false);
 });
 
+test('guild banners (SAT-ONLINE-084): one of the fixed emblems, written with the guild by its master', () => {
+  const { guild: GU } = loadModules('src/net/guild.js');
+  assert.equal(rules.guilds.$gid.emb['.validate'], 'newData.isNumber() && newData.val() >= 0 && newData.val() <= ' + (GU.C.EMBLEMS.length - 1) + ' && newData.val() % 1 === 0');
+  assert.equal(GU.cleanGuild({ name: 'Dragons', master: 'u1', col: '#5aa0ff', emb: 3 }, 'g_u1').emb, 3);
+  assert.equal(GU.cleanGuild({ name: 'Dragons', master: 'u1', col: '#5aa0ff', emb: 99 }, 'g_u1').emb, 0, 'outside the set: none');
+  assert.ok(GU.can('m', 'emblem') && !GU.can('o', 'emblem'));
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);

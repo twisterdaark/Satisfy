@@ -85,6 +85,7 @@
         "nk": { ".validate": "newData.isString()" },
         "master": { ".validate": "newData.val() === auth.uid || (data.val() === auth.uid && root.child('guildMembers').child($gid).child(newData.val()).child('rk').val() === 'o' && newData.parent().parent().parent().child('guildMembers').child($gid).child(newData.val()).child('rk').val() === 'm' && newData.parent().parent().parent().child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o')" },
         "col": { ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)" },
+        "emb": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 15 && newData.val() % 1 === 0" },
         "t": { ".validate": "newData.val() === now || newData.val() === data.val()" },
         "$other": { ".validate": false }
       }

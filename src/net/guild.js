@@ -33,7 +33,7 @@
 (function (root) {
   'use strict';
 
-  var C = Object.freeze({ NAME_MIN: 2, NAME_MAX: 18, MAX_MEMBERS: 250, VAULT_MAX: 60, VID_RE: /^v_[A-Za-z0-9_-]{1,80}$/, INV_MS: 7 * 24 * 3600 * 1000, BEAT_MS: 60000, ON_MS: 150000, C_MAX: 1e12, AWAY_MS: 14 * 24 * 3600 * 1000, NOTE_MAX: 240, COLORS: ['#5aa0ff', '#4ab06a', '#d8a840', '#9a6ad8', '#e05a5a', '#3ac8c8', '#e88a3a', '#c8c8d0'] });
+  var C = Object.freeze({ NAME_MIN: 2, NAME_MAX: 18, MAX_MEMBERS: 250, VAULT_MAX: 60, VID_RE: /^v_[A-Za-z0-9_-]{1,80}$/, INV_MS: 7 * 24 * 3600 * 1000, BEAT_MS: 60000, ON_MS: 150000, C_MAX: 1e12, EMBLEMS: ['', '⚔', '🛡', '🐉', '🦅', '🐺', '🔥', '❄', '⚡', '☀', '🌙', '⭐', '👑', '⚒', '🏹', '🌿'], AWAY_MS: 14 * 24 * 3600 * 1000, NOTE_MAX: 240, COLORS: ['#5aa0ff', '#4ab06a', '#d8a840', '#9a6ad8', '#e05a5a', '#3ac8c8', '#e88a3a', '#c8c8d0'] });
   var GID_RE = /^g_[A-Za-z0-9]{1,128}$/, RK = { m: 3, o: 2, r: 1 };
 
   // a guild name: trimmed, single spaces, NAME_MIN..NAME_MAX characters, none that a database key can't hold
@@ -56,6 +56,7 @@
     if (act === 'handover') return r === 3 && t === 2; // to an officer
     if (act === 'claim') return r === 2; // an officer, when the master is away
     if (act === 'note') return r >= 2;
+    if (act === 'emblem') return r === 3; // SAT-ONLINE-084: the master picks the banner
     return false;
   }
   function cleanEntry(v) {
@@ -75,7 +76,8 @@
   function cleanGuild(v, gid) {
     if (!v || typeof v !== 'object' || typeof v.name !== 'string' || !validName(v.name) || typeof v.master !== 'string') return null;
     if (!/^[A-Za-z0-9]{1,128}$/.test(v.master) || !GID_RE.test(gid)) return null; // the founder's, or the one it was handed to
-    return { name: v.name, nk: nameKey(v.name), master: v.master, col: /^#[0-9a-fA-F]{6}$/.test(v.col || '') ? v.col : C.COLORS[0] };
+    var e = Math.floor(+v.emb || 0);
+    return { name: v.name, nk: nameKey(v.name), master: v.master, col: /^#[0-9a-fA-F]{6}$/.test(v.col || '') ? v.col : C.COLORS[0], emb: e >= 0 && e < C.EMBLEMS.length ? e : 0 };
   }
 
   function create(o) {
@@ -213,6 +215,12 @@
         if (!G || !G.guild || !t || uid === self || !can(myRank(), 'handover', t.rk)) return Promise.reject(new Error('rank'));
         return store.handover(G.gid, self, uid);
       },
+      /** SAT-ONLINE-084: the master picks the guild's banner, an index into C.EMBLEMS (0: none). */
+      setEmblem: function (i) {
+        i = Math.floor(+i);
+        if (!G || !G.guild || !can(myRank(), 'emblem') || !(i >= 0 && i < C.EMBLEMS.length)) return Promise.reject(new Error('rank'));
+        return store.setEmblem(G.gid, i);
+      },
       /** Has the master not been seen for AWAY_MS (so an officer may take the guild over)? */
       masterAway: function () {
         var m = G && G.guild && G.members[G.guild.master];
@@ -288,6 +296,7 @@
           if (!(me === from || (me === to && clock - a.on > C.AWAY_MS))) return no('handover');
           g.master = to; b.rk = 'm'; a.rk = 'o'; return ok();
         },
+        setEmblem: function (gid, i) { var g = d.guilds[gid]; if (!g || g.master !== me || !(i >= 0 && i < C.EMBLEMS.length)) return no('emblem'); g.emb = i; return ok(); },
         watchNote: function (gid, cb) { return watch(function () { return rk(gid, me) ? d.notes[gid] : null; }, cb); },
         setNote: function (gid, n) {
           var r = rk(gid, me), old = d.notes[gid];

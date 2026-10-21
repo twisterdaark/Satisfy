@@ -5455,11 +5455,12 @@ function rankLine(){const all={};for(const k in (GRANK||{}))all[k]=Object.assign
  return t('rankH')+L.slice(0,10).map((g,i)=>`${i+1}. ${g.id===(S&&S.guild)?'★ ':''}${nm(g)} (Lv ${gLv(g)}, ${TERR.filter(T=>WS.terr[T.k].own===g.id).length} ${t('terrN')})`).join(' · ')+(k>=10?' · '+t('gdRankMe',{k:k+1}):'');}
 function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],null,[...(recSt()?[{l:t('gdRecList'),f:()=>recBoard(guildPanel)}]:[]),{l:t('oTerrList'),f:()=>terrList()},{l:t('oClose')}]);
  const l=gLv(g),me=g.members[pidOf()]||{c:0},nx=GXP[l];
- const info=t('gInfo',{g:gName(g.id),n:l,x:g.npc?'-':nx?`${g.xp}/${nx}`:t('gMax'),m:Object.keys(g.members).length,cap:l*25,c:me.c});
+ const info=t('gInfo',{g:gdEmb(g.emb)+gName(g.id),n:l,x:g.npc?'-':nx?`${g.xp}/${nx}`:t('gMax'),m:Object.keys(g.members).length,cap:l*25,c:me.c});
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
  dialog('guild',[info,perks+(g.online&&GWK?' · '+gwLine():''),g.online?guildNoteLine():''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
   ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},
    ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),
+   ...(Satisfy.guild.can(GUILD.state().rank,'emblem')?[{l:t('gdBan'),f:guildBanD}]:[]),
    ...(Satisfy.guild.can(GUILD.state().rank,'note')?[{l:t('gdNoteW'),f:guildNoteW},...(recSt()?[{l:t('gdApps',{n:Object.keys(GAPPS).length}),f:recAppsD},{l:t('gdRecOn'),f:recPost},{l:t('gdRecOff'),f:recStop}]:[])]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
 function guildMOpts(){const o=[],back=()=>shopD('guildM','gm_hi');
@@ -7337,7 +7338,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   const gi=guildOf(r),gy=gi?6:0; // SAT-ONLINE-046: «guild» under the name, the name and the bar a line higher
   TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol===2?'#b0102a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038), 2 a murderer (052)
-  if(gi)TX.push({s:'«'+gi.n+'»',x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
+  if(gi)TX.push({s:'«'+gdEmb(gi.emb)+gi.n+'»',x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37-gy,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
   if(near&&r.uid===near.uid&&!foe)TX.push({s:[t('pcHint'),mate?'':t('pInvite'),!mate&&DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?t('dHint'):''].filter(Boolean).join(' · '),x:r.x,y:r.y-(typeof r.hp==='number'?46:37)-gy,f:F,z:6,c:'#ffe7a8'});}
@@ -7770,7 +7771,7 @@ function guildEv(e){if(!S||S.__demo||gdFor!==S)return;gdSig='';
  if(e.type==='left')GDM=null;}
 function guildMirror(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!st.guild||!WS||!S)return;const me=NET.uid,g=WS.guilds[st.gid]||{},mem={};
  for(const u in st.members){const m=st.members[u];mem[u===me?pidOf():'u:'+u]={n:m.n,rk:m.rk,c:m.c,uid:u};}
- WS.guilds[st.gid]=Object.assign(g,{id:st.gid,name:st.guild.name,master:st.guild.master===me?pidOf():'u:'+st.guild.master,lv:1,xp:st.xp,col:st.guild.col,online:1,members:mem});
+ WS.guilds[st.gid]=Object.assign(g,{id:st.gid,name:st.guild.name,master:st.guild.master===me?pidOf():'u:'+st.guild.master,lv:1,xp:st.xp,col:st.guild.col,emb:st.guild.emb|0,online:1,members:mem});
  if(gbFor!==st.gid)gbStart(st.gid);else guildMirrorB();
  if(S.guild!==st.gid||S.gon!==st.gid){S.guild=st.gid;S.gon=st.gid;save(true);}hudDirty=true;}
 function guildDrop(gid){if(gbFor===gid)gbStop();if(gid&&WS&&WS.guilds[gid]&&WS.guilds[gid].online)delete WS.guilds[gid];if(S.guild===gid)S.guild='';if(S.gon===gid)S.gon='';hudDirty=true;save(true);}
@@ -7786,9 +7787,9 @@ function guildAct(a){const v=guildInvNow();gdSig='';if(!v)return;
 // another player's guild, for the label under its name: the name from guilds/{gd}, once its member entry is there
 // (a copied guild id shows nothing); your own guild comes from your copy
 function guildOf(r){if(!r.gd||!GUILD||!GDS)return null;const st=gdFor===S?GUILD.state():null;
- if(st&&st.gid===r.gd&&st.guild)return st.members[r.uid]?{n:st.guild.name,col:st.guild.col}:null;
+ if(st&&st.gid===r.gd&&st.guild)return st.members[r.uid]?{n:st.guild.name,col:st.guild.col,emb:st.guild.emb|0}:null;
  const now=performance.now();let e=GDN.get(r.gd);if(!e){if(GDN.size>200)GDN.clear();GDN.set(r.gd,e={n:null,col:'#9a9aa6',at:-1e9,q:0,mem:new Map()});}
- if(now-e.at>60000&&!e.q&&now-gdFetchT>200){gdFetchT=now;e.q=1;GDS.readGuild(r.gd).then(v=>{const c=Satisfy.guild.cleanGuild(v,r.gd);e.n=c?c.name:null;if(c)e.col=c.col;e.at=performance.now();e.q=0;e.mem.clear();},()=>{e.at=performance.now();e.q=0;});}
+ if(now-e.at>60000&&!e.q&&now-gdFetchT>200){gdFetchT=now;e.q=1;GDS.readGuild(r.gd).then(v=>{const c=Satisfy.guild.cleanGuild(v,r.gd);e.n=c?c.name:null;if(c){e.col=c.col;e.emb=c.emb;}e.at=performance.now();e.q=0;e.mem.clear();},()=>{e.at=performance.now();e.q=0;});}
  if(!e.n)return null;const m=e.mem.get(r.uid);
  if(m===undefined&&now-gdFetchT>200){gdFetchT=now;e.mem.set(r.uid,null);GDS.readMember(r.gd,r.uid).then(ok=>e.mem.set(r.uid,ok),()=>e.mem.delete(r.uid));}
  return m?e:null;}
@@ -7864,6 +7865,15 @@ function guildMemberD(u){const st=GUILD&&GUILD.state(),m=st&&st.members[u];if(!m
   if(can(st.rank,'handover',m.rk))o.push({l:t('gdHand',{n:m.n}),f:()=>dialog('guild',[t('gdHandQ',{n:m.n,g:st.guild.name})],null,[{l:t('gYes'),f:()=>after(GUILD.handover(u),t('gdHandDone',{n:m.n,g:st.guild.name}))},{l:t('gNo'),f:guildMembersD}])});
   if(m.rk==='m'&&can(st.rank,'claim')&&GUILD.masterAway())o.push({l:t('gdClaim',{n:m.n}),f:()=>after(GUILD.claim(),t('gdClaimDone',{g:st.guild.name}))});}
  dialog('guild',[m.n+' · '+t('gdRk_'+m.rk)+' · '+t(GUILD.online(m)?'gdOn':'gdOff')],null,[...o,{l:t('oBack'),f:guildMembersD}]);}
+/* guild banners (SAT-ONLINE-084, plan U231). The master picks the guild's emblem in G -> Guild banner from a fixed set of
+   symbols (no uploaded pictures, so nothing to moderate and nothing large); it shows before the guild's name under every
+   member's name for everyone, and in G. */
+Object.assign(STR.ar,{gdBan:'شعار الجيلد',gdBanQ:'اختار شعار الجيلد',gdBanNone:'من غير شعار',gdBanDone:'الشعار اتغير'});
+Object.assign(STR.en,{gdBan:'Guild banner',gdBanQ:'Pick the guild banner',gdBanNone:'No banner',gdBanDone:'The banner is changed'});
+function gdEmb(i){const E=Satisfy.guild.C.EMBLEMS;return i>0&&i<E.length?E[i]+' ':'';}
+function guildBanD(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!Satisfy.guild.can(st.rank,'emblem'))return guildPanel();const E=Satisfy.guild.C.EMBLEMS;
+ dialog('guild',[t('gdBanQ')],null,[...E.map((e,i)=>({l:i?e+' '+st.guild.name:t('gdBanNone'),f:()=>GUILD.setEmblem(i).then(()=>{toast(t('gdBanDone'),'good');guildPanel();},()=>{toast(t('gdFail'),'warn');guildPanel();})})),{l:t('oBack'),f:guildPanel}]);}
+window.__GBAN={set:i=>GUILD.setEmblem(i),of:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);return r?guildOf(r):null;},open:()=>guildBanD(),E:()=>Satisfy.guild.C.EMBLEMS}; // tests
 /* the guild master and the notice (SAT-ONLINE-076, plan U241/U243/U244). The master hands the guild to an officer from
    that officer's card (they become master, you an officer); when the master has not been seen for 14 days an officer takes
    it over from the master's card. The notice: one line the master and officers write ("Write the notice" in G), shown at the
