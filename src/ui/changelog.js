@@ -5,6 +5,21 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v138', ver: '1.38', d: '2026-10-21',
+      ar: ['حقل بيارو (جنب بيت بيارو على طريق باتريان): 8 أحواض تزرع فيها قمح وفراولة وبطيخ وقرع عسلي وكرنب الصقيع. المواسم بتتغير كل يومين، واللي في موسمه بيطلع أسرع وأكتر. 3 أعشاب في الصندوق = سماد بيسرّع ويزوّد المحصول',
+           'للفلاحين (تخصص فلاح): كويستات بيارو "طريق الفلاح" و"الحقل الأسطوري"، وآخرها تايتل "الفلاح الأسطوري" (زرع أسرع، محصول أكتر، وحفر أكتر في الحقل)',
+           'أكلات جديدة: فطيرة قرع وتارت فراولة',
+           'ميناء بيدرو جنوب بيدرو: رصيف ومنارة. مدير الميناء بيوديك جزيرة كورك بالمعدّية (300 دهب) أو يأجّرلك مركب (150 دهب) تبحر بيه في البحر وتنزل على أي شط',
+           'الكراكن (لفل 290، وحش عالمي) في المياه شرق جزيرة كورك: وهو تحت المية بياخد 10% بس من الضرر، وبيطلع كل شوية. المجسّات بتضرب والحبر بيعمي 4 ثواني. بيوقّع حبر الكراكن ولؤلؤة البحر، ومنهم قلادة لؤلؤ البحر (لفل 280)',
+           'البارد (تخصص جديد من المنشد في ساحة باتريان): أغنية الشجاعة وكورس السرعة وترنيمة الراحة. اعزف النوتات صح وأغنيتك تقوّي كل اللي حواليك أونلاين',
+           'مسرح باتريان: اطلع على المسرح وارقص، وكل حركة صح بتكسب دهب. الأرضية الملونة بتعمل نغمات لما تمشي عليها'],
+      en: ["Piaro's Field (by Piaro's house on the Patrian road): 8 plots for wheat, strawberries, melons, pumpkins and frost cabbage. Seasons change every two days, and a crop in season grows faster and gives more. 3 herbs in the bin make compost that speeds and raises the harvest",
+           "For farmers (the Farmer trade): Piaro's quests The Farmer's Path and The Legendary Field, ending in the Legendary Farmer title (faster growing, bigger harvests, more digs in the field)",
+           'New dishes: pumpkin pie and strawberry tart',
+           'Pedro Harbor south of Pedro: a pier and a lighthouse. The harbour master takes you to Cork Island by ferry (300 gold) or hires you a boat (150 gold) to sail the sea and land on any beach',
+           'The Kraken (Lv 290, world boss) in the waters east of Cork Island: under the water it takes only 10% damage, and it surfaces now and then. Its tentacles strike and its ink blinds for 4 s. It drops Kraken Ink and Sea Pearls, for the Sea Pearl Necklace (Lv 280)',
+           'The Bard (a new trade from the Minstrel in the Patrian square): Ballad of Valor, Swift Chorus and Hymn of Rest. Play the notes right and your song strengthens everyone around you, online too',
+           "Patrian's stage: step up and dance, every right move earns gold. The coloured floor plays notes as you walk on it"] },
     { v: '2026-10-21v137', ver: '1.37', d: '2026-10-21',
       ar: ['سهم المهمات: سهم بيدلّك على مكان المهمة. لو المكان على الشاشة بيبقى فوقه، ولو بعيد بيلف حواليك ويشاور عليه ومعاه المسافة بالمتر. الأزرق للمهمة نفسها، والدهبي لما تخلص وترجع للي إداك المهمة',
            'مهمات القتل بتشاور على أقرب وحش من النوع المطلوب، ومهمات الحاجات بتشاور على أقرب وحش بيوقّعها، ومهمات الزيارة على المكان نفسه',

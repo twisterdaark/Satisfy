@@ -4,8 +4,8 @@
 const test=require('node:test'),assert=require('node:assert'),fs=require('fs'),path=require('path'),vm=require('vm');
 const repo=path.join(__dirname,'..','..'),dataDir=path.join(repo,'data');
 const FILES=['monsters','quests','recipes','skills','npcs','zones','classes'];
-const MATS=['fess','iess','sess','bvial','wegg','ore','wood','leather','blue','mstone','mith','fish','sfish','gfish','herb','bherb','cfish','stew','feast','dscale','ruby','topaz','emer','sapph','diam','brphx','brdrg','brtig','brtor','bljewel','blhorn'];
-const VISIT_TARGETS=['grave','mural','yaltar','irene']; // landmarks with their own trigger in the engine (visitGrave)
+const MATS=['fess','iess','sess','bvial','wegg','ore','wood','leather','blue','mstone','mith','fish','sfish','gfish','herb','bherb','cfish','stew','feast','dscale','ruby','topaz','emer','sapph','diam','brphx','brdrg','brtig','brtor','bljewel','blhorn','kink','kpearl'];
+const VISIT_TARGETS=['grave','mural','yaltar','irene','lfk','lfield']; // landmarks with their own trigger in the engine (visitGrave)
 
 const loadAll=()=>{const ctx={};ctx.globalThis=ctx;vm.createContext(ctx);
   for(const f of FILES)vm.runInContext(fs.readFileSync(path.join(dataDir,f+'.js'),'utf8'),ctx,{filename:f+'.js'});return ctx.SATISFY_DATA;};
@@ -28,7 +28,7 @@ test('counts match the audited baseline',()=>{
   const n=o=>Array.isArray(o)?o.length:Object.keys(o).length;
   assert.deepStrictEqual({MT:n(D.monsters.types),BOSSES:n(D.monsters.bosses),SPAWN:n(D.monsters.spawns),QD:n(D.quests.quests),RC:n(D.recipes.recipes),
     SKD:n(D.skills.skills),NPC:n(D.npcs.npcs),interior:Object.values(D.npcs.npcs).filter(x=>x.interior).length,ZR:n(D.zones.regions),TOWNS:n(D.zones.towns),classes:n(D.classes.classes)},
-    {MT: 118,BOSSES:5,SPAWN:19,QD:137,RC:25,SKD:112,NPC:90,interior:8,ZR:17,TOWNS:3,classes:29});});
+    {MT: 120,BOSSES:5,SPAWN:19,QD:139,RC:25,SKD:112,NPC:93,interior:8,ZR:17,TOWNS:3,classes:29});});
 
 // condition vocabulary (docs/content/CONTENT_SCHEMA.md)
 function checkCond(c,where){assert.ok(c&&typeof c==='object'&&!Array.isArray(c),where+': condition must be an object');
