@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22repair', ver: '1.40', d: '2026-10-22',
+      ar: ["طلبات تصليح للحدادين اللاعيبة: أونلاين، عند أي حداد، تقدر تطلب من حداد لاعب يصلح حاجة بايظة بأجرة إنت بتحددها (من نص لكل اللي الحداد بياخده). الأجرة بتطلع من شنطتك وبترجع لو شلت الطلب",
+        "الحداد اللاعب (كلاس الحداد) بيشوف كل الطلبات ويصلح واحد: الحاجة بتتصلح في شنطة صاحبها على طول (نفس الحاجة بنفس الـID) وبيتبلغ، والحداد بيستلم أجرته"],
+      en: ["Repair orders for player smiths: online, at any smith's, ask a player smith to mend a worn piece for a fee you choose (half to all of what that smith asks). The fee leaves your bag and comes back if you take the order off",
+        "A player Blacksmith sees every order and mends one: the piece is mended in its owner's bag (the same piece, the same id), they are told, and the smith collects the fee"] },
     { v: '2026-10-21v139', ver: '1.39', d: '2026-10-21',
       ar: ['الغابة الغامضة غرب جاوس (لفل 250+): ضباب أخضر وطريق واحد بيلف لحد فسحة في النص. ناسك الغابة واقف عند أول الطريق وعنده كويستين',
            'نسخة باجما (لفل 260): زعيم عالمي لابس وش باجما وبيحارب بحركات سيفه (القتل، الربط، الموجة، التجاوز، الدوران). كل 30 ثانية بتتقسم لظلال، وطول ما الظلال واقفة بتاخد تلت ضربك بس. كل ما اللاعبين حواليها يكتروا الظلال بتكتر. بترجع بعد ساعة',
