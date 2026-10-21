@@ -20554,7 +20554,20 @@
    "dskewer",
    "choco",
    "blocks",
-   "tstone"
+   "tstone",
+   "ocarmor",
+   "ocgloves",
+   "ocboots",
+   "ocring",
+   "emarmor",
+   "emhelm",
+   "emgloves",
+   "emboots",
+   "mgsword",
+   "mgarmor",
+   "mghelm",
+   "mggloves",
+   "mgboots"
   ]
  }
 }

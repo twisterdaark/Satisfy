@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v99', ver: '0.99', d: '2026-10-21',
+      ar: ['أطقم معدات جديدة: لما تلبس كذا قطعة من نفس الطقم بيتفعّل تأثير زيادة، وبيظهرلك تنبيه أول ما التأثير يشتغل',
+        'طقم زعيم أوركات ضوء الصقيع (لفل 140): الخوذة بقى معاها درع وقفازات وجزمة وخاتم، بيوقعوا من زعيم الأوركات (ونادر جدا من الأوركات). 3 قطع: القوة +50 والتحمّل +80. 5 قطع: القوة +100 والتحمّل +200، وأوركات ضوء الصقيع مش بتهاجمك، زي ما في الرواية',
+        'طقم إيموس (لفل 330): الحداد من لفل حدادة 8 يقدر يصنع الدرع والخوذة والقفازات والجزمة، ودايما بيطلعوا فريدين. قطعتين: +10% صحة و+10 دفاع. 4 قطع: +18% صحة و+25 دفاع',
+        'طقم جريد (إنتاج كمّي، لفل 200): سيف ودرع وخوذة وقفازات وجزمة من لفل حدادة 6. التأثير بيبدأ من قطعتين ويكبر لحد 5 قطع: +12% ضرر و+12% صحة و+8% سرعة هجوم'],
+      en: ['New equipment sets: wearing several pieces of one set turns on an extra effect, and a message says so when it starts',
+        'Frostlight Orc Chief’s set (Lv 140): the helmet now has an armor, gauntlets, boots and a ring, dropped by the orc chief (and very rarely by his orcs). 3 pieces: Strength +50, stamina +80. 5 pieces: Strength +100, stamina +200, and the frostlight orcs leave you be, as in the novel',
+        'Emous’ set (Lv 330): a blacksmith at smithing level 8 can make the armor, helmet, gloves and shoes, always unique. 2 pieces: +10% health, +10 defense. 4 pieces: +18% health, +25 defense',
+        'Mass-produced Grid set (Lv 200): a sword, armor, helmet, gauntlets and boots from smithing level 6. Its effect starts at two pieces and grows to five: +12% damage, +12% health, +8% attack speed'] },
     { v: '2026-10-21v98', ver: '0.98', d: '2026-10-21',
       ar: ['القصة الرئيسية كملت بتلات فصول جديدة من الرواية، بصفحاتها ونوافذ مهماتها',
         'الفصل 5، الخادم السابع (لفل 270): بيارو بيبعتك لقصر أسموفيل تهزم دارك باس، وبعدها مهمة SS بتاعة الخاين الحقيقي للفرسان الحمر بتقفل الفصل',

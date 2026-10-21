@@ -18,7 +18,7 @@ function finish(I,ghost){const d=I.d,src=d.slice();
  return d;}
 
 // PER_CODE: weapon colors and the great sword's blue edge from WSH
-const BLADE={failure:['#5a6a7a','#2e3a48','#a8b8c8'],iyarugt:['#c8282a','#6a0a0e','#ff7a6a'],dains:['#e8c050','#9a7418','#fff4c0'],wisdom:['#e8f4ff','#7a9ab8','#ffffff'],rusty:['#9b8b78','#6e6052','#c4b4a0'],isword:['#c4c8d0','#7a808c','#eef0f4'],ssword:['#dfe6ee','#8a94a4','#ffffff'],gsword:['#6ab0ff','#2a5ab0','#d0e8ff'],msword:['#c8e8f4','#7aa0b8','#ffffff']};
+const BLADE={mgsword:['#e0e4ec','#2a3a6a','#ffffff'],failure:['#5a6a7a','#2e3a48','#a8b8c8'],iyarugt:['#c8282a','#6a0a0e','#ff7a6a'],dains:['#e8c050','#9a7418','#fff4c0'],wisdom:['#e8f4ff','#7a9ab8','#ffffff'],rusty:['#9b8b78','#6e6052','#c4b4a0'],isword:['#c4c8d0','#7a808c','#eef0f4'],ssword:['#dfe6ee','#8a94a4','#ffffff'],gsword:['#6ab0ff','#2a5ab0','#d0e8ff'],msword:['#c8e8f4','#7aa0b8','#ffffff']};
 function sword(I,k){const [b,dk,lt]=BLADE[k]||BLADE.rusty,long=k==='gsword'||k==='failure'||k==='dains';const tx=long?14:13,ty=long?1:2;
  for(let i=0;i<=tx-5;i++){I.set(5+i,10-i,b);I.set(6+i,10-i,dk);I.set(5+i,9-i,lt);}I.set(tx,ty,lt);
  if(long)for(let i=1;i<tx-5;i+=2)I.set(6+i,10-i,'#9fd0ff');
@@ -31,11 +31,14 @@ function staff(I,k){const orb=k==='sstaff'?['#7a4ab0','#b07aff','#e8d0ff']:['#2a
  I.line(3,14,10,7,'#7a5634');I.line(4,14,11,7,'#5a3a20');I.ell(11.5,4.5,3,3,orb[0]);I.ell(11,4,2,2,orb[1]);I.set(10,3,orb[2]);I.set(11,3,orb[2]);I.set(9,7,'#c8a050');I.set(10,8,'#c8a050');}
 function hammer(I,k){const h=k==='shammer'?['#c8ccd6','#8a909a','#ffffff']:['#9aa0aa','#6a707a','#d0d4dc'];
  I.line(3,14,9,8,'#7a5634');I.line(4,14,10,8,'#5a3a20');I.rect(8,2,6,5,h[0]);I.rect(8,2,6,1,h[2]);I.rect(13,3,1,4,h[1]);I.rect(8,6,6,1,h[1]);I.set(10,4,h[1]);}
-function armor(I,k){const a=k==='larmor'?['#8a5a32','#a8743f','#5a3a20']:k==='parmor'?['#9aa4b4','#c8d0dc','#5a6474']:k==='marmor'?['#a8d0e4','#e0f2fa','#4a7890']:['#dfe2ea','#f2f4f8','#7a3a2c'];
+function armor(I,k){const a=k==='larmor'?['#8a5a32','#a8743f','#5a3a20']:k==='parmor'?['#9aa4b4','#c8d0dc','#5a6474']:k==='marmor'?['#a8d0e4','#e0f2fa','#4a7890']:k==='ocarmor'?['#d8dce4','#ffffff','#7a8494']:k==='emarmor'?['#3a3e4a','#6a7080','#c8a050']:k==='mgarmor'?['#c8d0dc','#eef2f8','#2a3a6a']:['#dfe2ea','#f2f4f8','#7a3a2c'];
  I.rect(4,3,8,10,a[0]);I.rect(2,3,3,4,a[1]);I.rect(11,3,3,4,a[1]);I.rect(6,3,4,2,'#2a1a10');I.set(6,5,'#2a1a10');I.set(9,5,'#2a1a10');I.rect(4,9,8,1,a[2]);I.rect(7,5,1,7,a[2]);I.rect(5,13,6,1,a[2]);
  if(k==='larmor')for(let y=6;y<12;y+=2){I.set(5,y,a[1]);I.set(10,y,a[1]);}
  if(k==='parmor'){I.set(5,6,'#ffffff');I.set(10,6,'#ffffff');I.set(5,11,a[1]);I.set(10,11,a[1]);}
  if(k==='marmor'){I.set(5,6,'#ffffff');I.set(10,6,'#ffffff');I.rect(7,5,1,7,'#4a90c0');}
+ if(k==='ocarmor'){I.set(6,8,'#c8282a');I.set(9,8,'#c8282a');I.rect(2,2,1,2,'#ffffff');I.rect(13,2,1,2,'#ffffff');}
+ if(k==='emarmor'){I.rect(7,5,1,7,'#c8a050');I.set(5,6,'#e8c870');I.set(10,6,'#e8c870');}
+ if(k==='mgarmor'){I.rect(7,5,1,7,'#2a3a6a');I.set(5,6,'#ffffff');I.set(10,6,'#ffffff');I.rect(6,10,4,1,'#e8c050');}
  if(k==='warmor'){I.rect(7,5,1,7,'#a83a2c');I.rect(4,9,8,1,'#a83a2c');}}
 function helm(I,a,visor){I.ell(8,8,5,5,a[0]);for(let y=11;y<16;y++)for(let x=0;x<16;x++)I.d[(y*16+x)*4+3]=0;
  I.rect(2,9,12,2,a[2]);I.rect(5,4,4,1,a[1]);I.set(4,5,a[1]);if(visor){I.rect(5,7,6,1,'#1a1220');I.rect(7,4,2,4,a[1]);}else I.rect(7,3,2,6,a[1]);}
@@ -91,6 +94,11 @@ const DRAW={
  // the death knights' gear from the Behen Archipelago, and the cure for Sticks
  lantd:I=>{for(let i=0;i<5;i++){I.set(7+i,8-i,'#e8eef8');I.set(8+i,8-i,'#8a94a4');I.set(7+i,7-i,'#ffffff');}I.line(5,7,8,10,'#a81a1a');I.line(4,11,6,9,'#3a2a1e');I.set(3,12,'#a81a1a');},
  alexb:I=>{I.rect(2,8,10,2,'#4a5a7a');I.rect(2,8,10,1,'#9ab0d0');I.rect(11,7,4,1,'#e8eef8');I.set(14,6,'#ffffff');I.rect(3,10,2,4,'#5a3a20');I.rect(6,10,2,2,'#3a2a1e');I.set(9,7,'#c8a050');},
+ ocgloves:I=>{glove(I,['#d8dce4','#ffffff','#7a8494']);I.set(6,9,'#c8282a');I.set(8,9,'#c8282a');},ocboots:I=>{boot(I,['#d8dce4','#ffffff','#7a8494']);I.set(7,7,'#c8282a');},
+ ocring:I=>ring(I,'#d8dce4','#ffffff','#c8282a'),emhelm:I=>{helm(I,['#3a3e4a','#6a7080','#c8a050'],1);I.set(7,4,'#e8c870');I.set(8,4,'#e8c870');},
+ emgloves:I=>{glove(I,['#3a3e4a','#6a7080','#c8a050']);I.set(7,9,'#e8c870');},emboots:I=>{boot(I,['#3a3e4a','#6a7080','#c8a050']);I.set(7,7,'#e8c870');},
+ mghelm:I=>{helm(I,['#c8d0dc','#eef2f8','#2a3a6a'],1);I.set(7,9,'#e8c050');I.set(8,9,'#e8c050');},mggloves:I=>{glove(I,['#c8d0dc','#eef2f8','#2a3a6a']);I.set(7,9,'#2a3a6a');},
+ mgboots:I=>{boot(I,['#c8d0dc','#eef2f8','#2a3a6a']);I.set(7,7,'#2a3a6a');},
  alexg:I=>{glove(I,['#2a3a5a','#6a7a9a','#141c30']);I.set(6,9,'#c8a050');I.set(8,9,'#c8a050');},
  kcloth:I=>{I.rect(3,3,10,10,'#6a6a74');I.rect(3,3,10,1,'#9a9aa6');for(let y=5;y<13;y+=2)I.rect(4,y,8,1,'#4a4a52');I.rect(12,4,1,9,'#4a4a52');I.set(6,6,'#c8c0ff');I.set(9,9,'#c8c0ff');},
  gisp:I=>{I.line(3,14,10,7,'#6a4a2a');I.line(4,14,11,7,'#4a3020');I.line(6,4,13,4,'#8a9aa8');I.line(6,4,5,7,'#8a9aa8');I.line(13,4,14,7,'#8a9aa8');I.set(9,4,'#c8d0dc');I.set(10,5,'#6a7480');},
@@ -122,9 +130,9 @@ const SLOT={slotW:I=>{for(let i=0;i<8;i++)I.set(5+i,10-i,'#bfe0ff');I.line(3,10,
 function iconRGBA(k){const I=Img();
  if(SLOT[k]){SLOT[k](I);for(let i=3;i<I.d.length;i+=4)if(I.d[i])I.d[i]=64;return finish(I,true);}
  if(DRAW[k])DRAW[k](I);else if(k==='bow'||k==='sbow')bow(I,k);else if(k==='staff'||k==='sstaff')staff(I,k);else if(k==='hammer'||k==='shammer')hammer(I,k);
- else if(k==='larmor'||k==='parmor'||k==='marmor'||k==='warmor')armor(I,k);else sword(I,k);
+ else if(k==='larmor'||k==='parmor'||k==='marmor'||k==='warmor'||k==='ocarmor'||k==='emarmor'||k==='mgarmor')armor(I,k);else sword(I,k);
  return finish(I,false);}
 function iconCanvas(k){const c=document.createElement('canvas');c.width=c.height=16;c.getContext('2d').putImageData(new ImageData(iconRGBA(k),16,16),0,0);return c;}
-const KEYS=['rusty','isword','ssword','gsword','bow','sbow','staff','sstaff','hammer','shammer','larmor','parmor','warmor','jaffa','arrows','bread','wood','ore','leather','blue','mstone','book','hpot','mpot','lhelm','ihelm','lgloves','igloves','lboots','iboots','cring','mring','spear','dagger','mith','msword','marmor','mhelm','tHood','tGloves','tBoots','tRobe','dscale','ruby','topaz','emer','sapph','diam','fish','sfish','gfish','herb','bherb','cfish','stew','feast','slotW','slotA','slotH','slotG','slotB','slotX','coin','estone','respec','failure','ideal','gale','iyarugt','dains','tbow','wisdom','elfin','vring','doran','absurd','bboots','ochelm','lantd','alexb','alexg','kcloth','gisp','povt','wtneck','bcoco','wtleaf','mnring','candy','sgl','rsdraw','xpot','hairpin','dskewer','choco','blocks','tstone'];
+const KEYS=['rusty','isword','ssword','gsword','bow','sbow','staff','sstaff','hammer','shammer','larmor','parmor','warmor','jaffa','arrows','bread','wood','ore','leather','blue','mstone','book','hpot','mpot','lhelm','ihelm','lgloves','igloves','lboots','iboots','cring','mring','spear','dagger','mith','msword','marmor','mhelm','tHood','tGloves','tBoots','tRobe','dscale','ruby','topaz','emer','sapph','diam','fish','sfish','gfish','herb','bherb','cfish','stew','feast','slotW','slotA','slotH','slotG','slotB','slotX','coin','estone','respec','failure','ideal','gale','iyarugt','dains','tbow','wisdom','elfin','vring','doran','absurd','bboots','ochelm','lantd','alexb','alexg','kcloth','gisp','povt','wtneck','bcoco','wtleaf','mnring','candy','sgl','rsdraw','xpot','hairpin','dskewer','choco','blocks','tstone','ocarmor','ocgloves','ocboots','ocring','emarmor','emhelm','emgloves','emboots','mgsword','mgarmor','mghelm','mggloves','mgboots'];
 A.icons={KEYS,iconRGBA,iconCanvas};
 })(typeof window!=='undefined'?window:globalThis);
