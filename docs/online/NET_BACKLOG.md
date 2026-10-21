@@ -1,6 +1,6 @@
 # NET/PVP backlog U001–U038 (plan doc §33–§34) — status
 
-Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-064 (2026-10-20) · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
+Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (2026-10-21) · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
 
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
@@ -58,19 +58,19 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-064 (
 | U052 | Party pings | ✅ | SAT-ONLINE-021: Alt+click (touch: Ping marks where you stand) → `party.ping`; a ring on the ground and the minimap for 3 s; one per member per 1.5 s |
 | U053 | Party chat | 🟡 | SAT-ONLINE-016: party lines, rate-limited, block list; world chat for everyone (SAT-ONLINE-026), guild chat (SAT-ONLINE-049, #81), world notices as lines (SAT-ONLINE-041); no profanity filter |
 | U054 | Party summon | ⏳ | A teleport needs a movement authority |
-| U055 | Party follow | ❌ | |
+| U055 | Party follow | ✅ | SAT-ONLINE-068 (#102): "Follow" on a party mate's card walks after them; any move key stops it (`regression/follow`) |
 | U056 | Shared PvE XP | ⏳ | Needs a combat authority; a party raid pays each member their own rewards (009) |
 | U057 | Personal loot | 🟡 | SAT-ONLINE-009: each member's own game pays the boss kill once per encounter; no server ledger |
 | U058 | Need/Greed loot | 🟡 | SAT-ONLINE-063 (#96): every raid boss kill rolls one bonus piece among those who fought it, Need/Greed/Pass run by the raid leader, the roll a hash anyone checks; only the winner's game makes it; server random + ledger still D3 |
-| U059 | Friends and follow | ❌ | |
+| U059 | Friends and follow | ✅ | SAT-ONLINE-067 (#101): ask from the card, accept, online list with level and place, told when they come online; whispers to friends anywhere (070, #104) |
 | U060 | Guild invitations | 🟡 | SAT-ONLINE-046/049/050 (#79, #81, #82): guilds in the database (unique names, ranks master/officer/member), invites from the card, remove, disband, the guild under the name, guild chat and the vault. Guild buildings: SAT-ONLINE-065 (#99) |
 | U061 | Emotes | ✅ | SAT-ONLINE-022: V (touch: Emote) → wave/dance/point/cheer for 3 s as `PlayerPublic.em` (a fixed list, no text); one per 2 s |
-| U062 | Chat moderation | 🟡 | Block list + rate limit (016); no report or keyword filter |
+| U062 | Chat moderation | ✅ | Block list + rate limit (016); Report from the card (`reports`, read by the owner) and insults as stars with `/filter` (071, #105) |
 | U063 | Player trade request | 🟡 | SAT-ONLINE-039 (#76): serverless trade, Accept then Confirm, any change resets the accepts, one update with the `tradedItems` ledger so an item can't be traded twice; gold has no ledger (D3) |
 | U064 | Player inspect | ✅ | SAT-ONLINE-020: the card shows only PlayerPublic (name, level, class, title, party, armour) |
 | U065 | Party reconnect | ✅ | SAT-ONLINE-023: the party lives in the tab's sessionStorage; within 60 s a reloaded member auto-accepts its leader's invite back and a reloaded leader keeps its party. Leaving on purpose is final (`regression/rejoin`) |
 
-**Totals (social):** ✅ 9 · 🟡 7 · ⏳ 2 · ❌ 2.
+**Totals (social):** ✅ 12 · 🟡 6 · ⏳ 2 · ❌ 0.
 
 ## Online since the backlog (owner requests and Claude-B's #13 handoff), not in U001–U065
 
@@ -95,5 +95,140 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-064 (
 | Whispers to friends anywhere (`/w name text`) | SAT-ONLINE-070 (#104) | ✅ |
 | Report a player; insults in others' chat as stars (`/filter`) | SAT-ONLINE-071 (#105) | ✅ |
 | Group finder (plan U185): who is looking for a raid, party, dungeon group or duel, with level, class, party role and place; your own entry goes when you stop, sign out or drop | SAT-ONLINE-073 (#106) | ✅ |
+
+
+## The plan's later updates in Claude-A's areas (U184–U189, U210–U246, U308–U348, U368–U387)
+
+The plan document has 387 updates. Claude-B takes the content ones (classes, crafts, monsters, maps, quests, items, town life, end game). These are the online, economy, guild, engine, live-ops and QA ones. Same marks as above.
+
+### Raids, online parts (plan §40)
+| ID | Item | Status | Where / what's left |
+|---|---|---|---|
+| U184 | Raid weekly lockouts | ✅ | SAT-ONLINE-059 (#92): `lockouts/{uid}/{week}/{boss}` once per account and UTC week, so changing the time zone resets nothing |
+| U185 | Raid party finder | ✅ | SAT-ONLINE-073 (#106): the group finder; stopping, signing out or dropping removes your entry |
+| U186 | Raid replay | ❌ | Needs an event log of the fight |
+| U187 | Boss encyclopedia | ❌ | Content (B): traits revealed after a confirmed kill |
+| U188 | Adaptive difficulty | ❌ | Boss health by party size |
+| U189 | Seasonal world boss | 🟡 | Trauka's half hour and Berith's two-hour rest are shared through `world/satisfy/wb` (056, B's v0.87); no season schedule |
+
+### Economy and trade (plan §42)
+| ID | Item | Status | Where / what's left |
+|---|---|---|---|
+| U210 | NPC price catalog | ✅ | B's one sell-price rule (v0.62): nothing sells for its buying price or more |
+| U211 | Player-to-player trade | ✅ | SAT-ONLINE-039 (#76): Accept then Confirm, one update, both or neither |
+| U212 | Trade cancel on disconnect | ✅ | A trade ends when the other player leaves or changes anything; the `tradedItems` ledger refuses the same item twice after a reconnect (`regression/trade`) |
+| U213 | Auction market | 🟡 | B's auction window (v0.70) is the NPC auction house on each device; a market between players needs a ledger |
+| U214 | Searchable item market | 🟡 | The auction window searches its listings; local only |
+| U215 | Seller history | ❌ | |
+| U216 | Bank deposits | 🟡 | The town bank keeps gold and items in the player's own save; not online |
+| U217 | Bank withdrawal locks | 🟡 | Same as U216 |
+| U218 | Gold sinks | 🟡 | Repairs, fees, the inn, the guild treasury, reputation-store prices (B); no counter of gold in and out |
+| U219 | Crafting commissions | ❌ | |
+| U220 | Region merchant caravans | ❌ | |
+| U221 | Guild treasury | ✅ | SAT-ONLINE-065 (#99) + 069: gifts add exactly their amount, only the master and officers spend, and only on a building raised in the same write; `guildLog` keeps who did what |
+| U222 | Fish market | ❌ | Content (B) |
+| U223 | Crop wholesale market | ❌ | Content (B) |
+| U224 | Rare gem exchange | 🟡 | Socketing and paid upgrades (B); no exchange between players |
+| U225 | Repair market | ❌ | |
+| U226 | Taxation caps | ❌ | There are no city taxes yet |
+| U227 | Inflation dashboard | ❌ | |
+
+### Guilds (plan §43)
+| ID | Item | Status | Where / what's left |
+|---|---|---|---|
+| U228 | Guild creation | ✅ | SAT-ONLINE-046 (#79): unique names (case-folded, `guildNames`), the founder is master |
+| U229 | Guild recruitment | ❌ | Next: a recruiting board with applications |
+| U230 | Guild rank permissions | 🟡 | Master, officer, member with fixed rights, checked by the rules; no custom ranks |
+| U231 | Guild banners | 🟡 | A guild colour at founding; no emblem |
+| U232 | Guild chat | ✅ | SAT-ONLINE-049 (#81): `/g`, members only by the rules, so a removed member loses it |
+| U233 | Guild weekly quests | ❌ | |
+| U234 | Guild forge | ✅ | SAT-ONLINE-065 (#99): the Guild Forge, +2% quality a level, capped at 3 levels |
+| U235 | Guild housing | ❌ | |
+| U236 | Guild treasury | ✅ | Same as U221 |
+| U237 | Guild research tree | 🟡 | Three buildings of three levels paid from the treasury (065); no tree |
+| U238 | Guild alliances | ❌ | |
+| U239 | Guild wars | ❌ | |
+| U240 | Territory objectives | ❌ | Sieges exist as world events (B), not owned by guilds |
+| U241 | Guild leader handover | ❌ | Next: the master hands the guild to an officer |
+| U242 | Guild event calendar | ❌ | |
+| U243 | Guild notice board | ❌ | Next: a notice the master and officers write |
+| U244 | Guild rankings | ❌ | Next: guilds by level and members |
+| U245 | Guild diplomacy | ❌ | |
+| U246 | Guild seasonal rewards | ❌ | |
+
+### Engine (plan §47)
+| ID | Item | Status | Where / what's left |
+|---|---|---|---|
+| U308 | Extract state store | 🟡 | `src/core/state.js`: durable, volatile and UI keys (ADR-002); the game still writes `S` directly |
+| U309 | Extract world generator | 🟡 | Seeded spawns (`mulberry32`), the same tiles on every client (`regression/worldparity`); still inside `index.html` |
+| U310 | Renderer batching | 🟡 | The big map draws only the visible land from a cached copy (B, v0.60) |
+| U311 | Entity registry | 🟡 | Stable keys for monsters (`type@sx,sy`), item ids (`iid`), character id (`pid`) |
+| U312 | Animation state machine | ❌ | |
+| U313 | Fixed tick simulator | ❌ | Tests step frames by hand (the harness); the game runs on frame time |
+| U314 | Dedicated game clock | ✅ | Server clock offset (`wNow`, SAT-ONLINE-044) for everything shared |
+| U315 | Localization bundles | 🟡 | `STR.ar`/`STR.en` in the page; the UI falls back to the key |
+| U316 | Asset loader | 🟡 | Sprite sheets in `sprites-original/` (B) |
+| U317 | Save migrations | ✅ | Save versions with backups (ADR-001); old saves keep working (`regression/golden`, `regression/save`) |
+| U318 | Map testing | ✅ | `regression/towns`, `worldparity`, `boot`; every door reachable |
+| U319 | Command validation | ✅ | Every message is checked against the contract and dropped when invalid, oversized, replayed or too frequent (`src/net/contracts.js`, `unit/contracts`, `unit/presence`) |
+| U320 | Data catalogs | ✅ | `data/*.js` with `tests/content/data` |
+| U321 | Audio mixer | 🟡 | One volume; no separate channels |
+| U322 | Accessibility QA | 🟡 | Keyboard and touch for every menu (B, v1.01) |
+| U323 | Replay recorder | ❌ | |
+| U324 | Exception boundary | 🟡 | A failing listener can't stop presence; network errors show in the badge |
+| U325 | Performance profiler | 🟡 | `net().link` (round trip, sent, received, dropped) in the badge tooltip; no frame-time budget |
+| U326 | Build pipeline | 🟡 | Tests on every PR by hand; GitHub Pages serves main as it is |
+| U327 | Staging deployment | ⏳ | Needs a second Firebase project (owner) |
+| U328 | Rollback support | 🟡 | Every update is one merge on main, so reverting one is one commit; rules have `rules-next` |
+
+### Live ops (plan §48)
+| ID | Item | Status | Where / what's left |
+|---|---|---|---|
+| U329 | Daily world events | ✅ | World events by the server clock, once for everyone (SAT-ONLINE-041/044) |
+| U330 | Seasonal progression | ✅ | Monthly arena seasons; ratings reset, items stay (SAT-ONLINE-053) |
+| U331 | World boss calendar | ❌ | Next: a calendar of the coming events in your own time zone |
+| U332 | Limited festivals | ✅ | The town festival every third hour (B, v0.94) |
+| U333 | Balance dashboard | ❌ | |
+| U334 | Economy health | ❌ | |
+| U335 | Content flags | 🟡 | Older pages skip what they don't know (fx tags, presence fields) |
+| U336 | Announcement system | ❌ | World notices come from events only; no owner message |
+| U337 | Maintenance notices | 🟡 | "A new version" box asks only the older page to refresh (SAT-ONLINE-045) |
+| U338 | Hotfix pipeline | 🟡 | Small PRs, a review, then main |
+| U339 | Moderation console | 🟡 | Reports reach the database; the owner reads them in the Firebase console |
+| U340 | Player appeal flow | ❌ | |
+| U341 | Crash reporting | ❌ | |
+| U342 | A/B testing ethics | ⏳ | No tests on players; owner decision |
+| U343 | Community feedback triage | 🟡 | GitHub issues and in-game reports |
+| U344 | Season rewards | 🟡 | Titles for the National Champion and the arena; cosmetic |
+| U345 | Retention without grind | 🟡 | Nothing is lost for a missed day; daily caps on repeatable quests (B) |
+| U346 | Data export/delete | 🟡 | "Delete my online data" (SAT-ONLINE-015/066); export is next |
+| U347 | Disaster recovery | ⏳ | Database backups need the Blaze plan (owner) |
+| U348 | Shard scale-out | ⏳ | One shard (`main`) |
+
+### QA (plan §50)
+| ID | Item | Status | Where / what's left |
+|---|---|---|---|
+| U368 | Automated unit test harness | ✅ | `tests/unit`, `tests/content`, `tests/regression` with a seeded random and a frame clock |
+| U369 | Firebase rules fuzzing | 🟡 | The fake applies a copy of the rules and every test checks `rejected`; `unit/rules` checks each block, duplicate keys and expression syntax; no random fuzzing |
+| U370 | Multi-browser smoke | 🟡 | Chromium in the tests; the owner tests desktop and phone |
+| U371 | Reconnect soak | 🟡 | `unit/chaos` (drops, delays, duplicates); `regression/online-firebase` reconnects |
+| U372 | Load test 100 clients | 🟡 | `COST_MODEL.md` measured numbers; no 100-client run |
+| U373 | Combat determinism | 🟡 | Seeded random and frame clock in tests |
+| U374 | Dupe attack cases | ✅ | Replayed and reordered messages dropped (`unit/presence`); claims once (`dropClaims`, `tradedItems`, `bountyPaid`, `natPaid`, lockouts) |
+| U375 | Safe zone exploit cases | ✅ | No duel or PvP damage in towns, checked on both sides (`regression/pvp`, SAT-ONLINE-038) |
+| U376 | Trade race tests | ✅ | `regression/trade`: any change resets the accepts; the same item twice is refused |
+| U377 | Boss raid race tests | ✅ | `regression/raid`, `raidloot`: one boss death, one reward each, nothing paid twice |
+| U378 | Save backward compatibility | ✅ | `regression/golden` and the characterization tests against the R0 baseline |
+| U379 | Localization regressions | 🟡 | Tests run in English; Arabic lines are written with each feature |
+| U380 | Art provenance audit | 🟡 | `docs/art/ART_CONTRACT.md` (B) |
+| U381 | Security incident drill | ⏳ | Owner (Firebase console) |
+| U382 | Data retention review | 🟡 | Only what play needs is online; entries expire (lfg 30 min, chat lines, inbox) |
+| U383 | Community report resolution | ❌ | |
+| U384 | Version gate report | 🟡 | Every PR lists the tests it ran |
+| U385 | Rollback rehearsal | ❌ | |
+| U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
+| U387 | Pilot invite-only rollout | ⏳ | Owner |
+
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 25 · 🟡 39 · ⏳ 6 · ❌ 34 of 104. Next from here: guild leader handover, notice board and rankings (U241, U243, U244), the event calendar (U331), guild recruitment (U229) and data export (U346).
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
