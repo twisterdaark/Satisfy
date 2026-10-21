@@ -36,6 +36,8 @@
     'eq', 'bar', 'aff', 'rep', 'guild', 'comp', 'life',
     // repair orders posted to player smiths and not answered yet (SAT-ONLINE-096)
     'rord',
+    // crafting commissions posted to player crafters and not answered yet (SAT-ONLINE-098)
+    'cord',
     // mounts and pets owned/active (SAT-MOUNT), the daily arena lockout (a date, so it must sync)
     'mounts', 'mount', 'pets', 'pet', 'arenaDay',
     // achievements earned (SAT-ACH-001), arena wins and the highest level ever reached (SAT-RANK-001),

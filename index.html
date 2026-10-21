@@ -6108,7 +6108,7 @@ function smithMenu(who,W,A,svc=true){const back={l:t('oBack'),f:()=>shopD(who,'a
 // repair and enhancement are smith work (Khan, Smith, the Reidan and Reinhardt smiths) or done yourself at an anvil;
 // setting gems needs a master (Khan, the Reinhardt smith) or your own anvil. Armorers are only traders.
 const GEMSM=new Set(['khan','smithRh']);
-function svcOpts(who){const rc=repairCost(who);return [...(GEMSM.has(who)?[{l:t('oGem',{g:GEMC}),ic:'ruby',f:()=>gemMenu(who)}]:[]),{l:rc?t('oRepair',{g:rc}):t('oRepair0'),ic:'hammer',poor:S.gold<rc,f:()=>repairAll(who)},{l:t('oEnh'),ic:'mstone',f:()=>enhMenu(who)},...(S.items.some(i=>i.id==='tbow')?[{l:t('oTbow'),ic:'tbow',f:()=>tbowBreak(who)}]:[]),{l:t('oSalv'),ic:'hammer',f:()=>openSalv(who)},...(repOn()?[{l:t('oRepOrd',{n:(S.rord||[]).length}),ic:'hammer',f:()=>repD(who)}]:[])];}
+function svcOpts(who){const rc=repairCost(who);return [...(GEMSM.has(who)?[{l:t('oGem',{g:GEMC}),ic:'ruby',f:()=>gemMenu(who)}]:[]),{l:rc?t('oRepair',{g:rc}):t('oRepair0'),ic:'hammer',poor:S.gold<rc,f:()=>repairAll(who)},{l:t('oEnh'),ic:'mstone',f:()=>enhMenu(who)},...(S.items.some(i=>i.id==='tbow')?[{l:t('oTbow'),ic:'tbow',f:()=>tbowBreak(who)}]:[]),{l:t('oSalv'),ic:'hammer',f:()=>openSalv(who)},...(repOn()?[{l:t('oRepOrd',{n:(S.rord||[]).length}),ic:'hammer',f:()=>repD(who)}]:[]),...(comOn()?[{l:t('oComm',{n:(S.cord||[]).length}),ic:'hammer',f:()=>comD(who)}]:[])];}
 /* repair orders for player smiths (SAT-ONLINE-096, plan U225). Online, at any smith's services, a player posts an order to
    mend a worn piece for a fee they choose (half to all of what the smith there asks); the fee leaves the bag and comes back
    if the order is taken off. A player smith (the Blacksmith class) sees every order there and mends one in a single write
@@ -6158,6 +6158,47 @@ function repMend(who,o){const st=repSt();if(!st||repBusy||!repSmith())return;rep
 function repCollect(who){const st=repSt();if(!st||repBusy)return;const ks=Object.keys(REPP);if(!ks.length)return repD(who);repBusy=1;
  Promise.all(ks.map(k=>{const g=REPP[k]||0;return st.collect(NET.uid,k).then(()=>{delete REPP[k];S.gold+=g;return g;},()=>0);})).then(gs=>{const g=gs.reduce((a,b)=>a+b,0);if(g){toast(t('repGot',{g}),'good');SFX.coin&&SFX.coin();hudDirty=true;save(true);}}).finally(()=>{repBusy=0;repD(who);});}
 window.__GREP={get orders(){return REPO},get paid(){return REPP},get busy(){return repBusy},open:who=>repD(who),store:()=>repSt(),tick:()=>repTick()}; // tests
+/* crafting commissions (SAT-ONLINE-098, plan U219). Online, at any smith's services, a player commissions a piece: a recipe
+   whose materials they have, and a fee; the materials and the fee leave the bag (they come back if the order is taken
+   off). A player crafter who knows the recipe forges it at the anvil from the order's materials, not their own; the
+   piece carries "Made by" its crafter and goes to the order's poster in one write that also pays the crafter
+   (craft*; the rules take it only for the order as it is: its recipe, its fee, by someone else). If the order went
+   meanwhile, the piece goes back to the forge (it was made of the poster's materials). */
+Object.assign(STR.ar,{oComm:'طلبات صناعة ({n})',comH:'اطلب من لاعب صانع يعمل لك حاجة: إنت بتدي الخامات والأجرة، وهم بيرجعولك لو شلت الطلب',comPost:'اطلب صناعة',comPick:'تتعمل إيه؟ (اللي عندك خاماته)',comFeeQ:'الأجرة لـ {it}؟',comFee:'{g} دهب',comPosted:'طلب الصناعة اتعرض',comMine:'{it} · {g} دهب · شيل الطلب',comOff:'الطلب اتشال، والخامات و{g} دهب رجعولك',comWork:'شغل ({n})',comWorkRow:'اعمل {it} لـ {n} بـ {g} دهب',comGot:'{n} عملك {it}!',comMade:'{it} راحت لـ {n}. الأجرة مستنياك هنا',comGone:'الطلب ده اتشال، فالحاجة رجعت للفرن',comPay:'استلم أجرتك ({g} دهب)',comPaid:'استلمت {g} دهب أجرة صناعة',comNone:'معندكش خامات حاجة تتعمل',comFull:'عندك 3 طلبات بالفعل',comNoRc:'مش عارف الوصفة دي'});
+Object.assign(STR.en,{oComm:'Crafting commissions ({n})',comH:'Ask a player crafter to make you a piece: you put up the materials and the fee, and both come back if you take the order off',comPost:'Commission a piece',comPick:'What should they make? (you have the materials)',comFeeQ:'The fee for {it}?',comFee:'{g} gold',comPosted:'Your commission is up for the crafters',comMine:'{it} · {g} gold · Take the order off',comOff:'Order taken off; the materials and {g} gold are back',comWork:'Work ({n})',comWorkRow:'Make {it} for {n} for {g} gold',comGot:'{n} made your {it}!',comMade:'Your {it} went to {n}. Your fee waits here',comGone:'That order was taken off, so the piece went back to the forge',comPay:'Collect your pay ({g} gold)',comPaid:'You collected {g} gold for crafting',comNone:'You have the materials for nothing',comFull:'You have 3 commissions up already',comNoRc:"You don't know that recipe"});
+var COMO={},COMP={},comDOff=null,comPOff=null,comBusy=0;const COM_FEE=[100,500,2000];
+function comOn(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&S&&!S.__demo&&Satisfy.firebase.craftStore);}
+function comSt(){return comOn()?Satisfy.firebase.craftStore(FB):null;}
+const comRcs=()=>RC.filter(rc=>rc.slot&&rc.slot!=='x'&&!rc.cre&&rc.need&&Object.keys(rc.need).every(k=>(S.mats[k]||0)>=rc.need[k]));
+// the poster's answers: watched while this character has a commission up (from sign-in on); each brings its piece once
+function comTick(){if(!comOn()||comDOff||!(S.cord&&S.cord.length))return;const st=comSt(),uid=NET.uid;
+ comDOff=st.watchDone(uid,v=>{for(const k in (v||{})){const e=v[k];if(!e||typeof e!=='object')continue;const o=(S.cord||[]).find(x=>x.cid===k);if(!o)continue;
+  st.took(uid,k).catch(()=>{});S.cord=S.cord.filter(x=>x!==o);const it=tradeItemIn(String(e.it||''));if(it&&it.id===o.rc){S.items.push(it);Satisfy.ids.ensure(S);}
+  toast(t('comGot',{n:Satisfy.chat.clean(e.bn,24)||'?',it:it?inm(it):t(o.rc)}),'good');SFX.rare&&SFX.rare();hudDirty=true;save(true);}});}
+function comPaidWatch(){const st=comSt();if(!st||comPOff)return;comPOff=st.watchPaid(NET.uid,v=>{const o={};for(const k in (v||{})){const e=v[k];if(e&&+e.g>0)o[k]=+e.g|0;}COMP=o;});}
+function comD(who){const st=comSt();if(!st)return svcBack(who);comPaidWatch();
+ st.list().then(v=>{COMO={};for(const k in (v||{})){const e=v[k];if(/^c_[A-Za-z0-9_-]{1,60}$/.test(k)&&e&&typeof e.by==='string'&&+e.fee>0&&rcById(e.rc))COMO[k]=Object.assign({cid:k},e);}
+  const mine=S.cord||[],work=Object.values(COMO).filter(o=>o.by!==NET.uid&&S.rcK&&S.rcK[o.rc]).sort((a,b)=>b.fee-a.fee),pay=Object.values(COMP).reduce((a,b)=>a+b,0);
+  dialog(who,[t('comH')+' · '+t('comWork',{n:work.length})],null,[{l:t('comPost'),f:()=>comPick(who)},...mine.map(o=>({l:t('comMine',{it:t(o.rc),g:o.fee}),f:()=>comCancel(who,o)})),
+   ...work.slice(0,8).map(o=>({l:t('comWorkRow',{it:t(o.rc),n:Satisfy.chat.clean(o.n,24)||'?',g:o.fee}),ic:o.rc,f:()=>comStart(o)})),...(pay?[{l:t('comPay',{g:pay}),f:()=>comCollect(who)}]:[]),{l:t('oBack'),f:()=>svcBack(who)}]);},
+  ()=>{toast(t('gdFail'),'warn');svcBack(who);});}
+function comPick(who){const L=comRcs().slice(0,8);if(!L.length)return dialog(who,['comNone'],()=>comD(who));if((S.cord||[]).length>=3){toast(t('comFull'),'warn');return comD(who);}
+ dialog(who,[t('comPick')],null,[...L.map(rc=>({l:t(rc.id),ic:rc.id,f:()=>dialog(who,[t('comFeeQ',{it:t(rc.id)})],null,[...COM_FEE.map(g=>({l:t('comFee',{g}),poor:S.gold<g,f:()=>comPost(who,rc,g)})),{l:t('oBack'),f:()=>comD(who)}])})),{l:t('oBack'),f:()=>comD(who)}]);}
+function comPost(who,rc,g){const st=comSt();if(!st||comBusy)return;if(S.gold<g){SFX.deny();return toast(t('noGold'),'warn');}if(!Object.keys(rc.need).every(k=>(S.mats[k]||0)>=rc.need[k]))return comD(who);comBusy=1;
+ const cid='c_'+String(NET.uid).slice(0,24).replace(/[^A-Za-z0-9_-]/g,'')+'_'+Date.now().toString(36),o={cid,rc:rc.id,fee:g,need:Object.assign({},rc.need)};
+ S.gold-=g;for(const k in o.need)S.mats[k]-=o.need[k];(S.cord=S.cord||[]).push(o);hudDirty=true;save(true);
+ st.post(cid,{by:NET.uid,n:netId||S.look.n,rc:rc.id,fee:g}).then(()=>{comBusy=0;toast(t('comPosted'),'good');comTick();comD(who);},
+  ()=>{comBusy=0;S.gold+=g;for(const k in o.need)S.mats[k]=(S.mats[k]||0)+o.need[k];S.cord=S.cord.filter(x=>x!==o);hudDirty=true;save(true);toast(t('gdFail'),'warn');comD(who);});}
+function comCancel(who,o){const st=comSt();if(!st||comBusy)return;comBusy=1;st.cancel(o.cid).then(()=>{comBusy=0;S.cord=(S.cord||[]).filter(x=>x!==o);S.gold+=o.fee;for(const k in (o.need||{}))S.mats[k]=(S.mats[k]||0)+o.need[k];hudDirty=true;save(true);toast(t('comOff',{g:o.fee}));comD(who);},
+  ()=>{comBusy=0;toast(t('comGone'),'warn');comD(who);});}
+// the crafter forges the order at the anvil from its materials (lent for the forge, which uses them up)
+function comStart(o){const rc=rcById(o.rc);if(!rc||!S.rcK||!S.rcK[o.rc]){toast(t('comNoRc'),'warn');return;}for(const k in rc.need)S.mats[k]=(S.mats[k]||0)+rc.need[k];openForge();startMG(rc);MG.com=o;}
+// the piece made for an order: to its poster, "Made by" its crafter; if the order went, back to the forge
+function comDeliver(o,it){const st=comSt();if(!st)return;const me=String(netId||S.look.n||'?').slice(0,24);it.by=me;const v={};for(const k in it)if(k!=='uid'&&k!=='iid')v[k]=it[k];
+ st.deliver(o.cid,o,NET.uid,me,JSON.stringify(v)).then(()=>{delete COMO[o.cid];COMP[o.cid]=o.fee;toast(t('comMade',{it:inm(it),n:Satisfy.chat.clean(o.n,24)||'?'}),'good');},()=>toast(t('comGone'),'warn'));}
+function comCollect(who){const st=comSt();if(!st||comBusy)return;const ks=Object.keys(COMP);if(!ks.length)return comD(who);comBusy=1;
+ Promise.all(ks.map(k=>st.collect(NET.uid,k).then(()=>{const g=COMP[k]||0;delete COMP[k];S.gold+=g;return g;},()=>0))).then(gs=>{comBusy=0;const g=gs.reduce((a,b)=>a+b,0);if(g){toast(t('comPaid',{g}),'good');SFX.coin&&SFX.coin();hudDirty=true;save(true);}comD(who);});}
+window.__GCOM={get orders(){return COMO},get paid(){return COMP},get busy(){return comBusy},open:who=>comD(who),store:()=>comSt()}; // tests
 const svcBack=who=>NPCT[who]&&NPCT[who].opts?shopD(who,'svcMore'):null;
 function repairCost(who){let g=0;for(const i of S.items){const d=durOf(i);if(d<100&&i.slot!=='x')g+=Math.ceil((100-d)*.4*(1+i.r));}return g?price(who,g):0;}
 function repairAll(who){const g=repairCost(who);if(!g)return dialog(who,['arNoRep'],()=>svcBack(who));if(S.gold<g){SFX.deny();return dialog(who,['arNo']);}
@@ -6360,12 +6401,12 @@ function drawForgeView(){const c=$('mgv'),g=c.getContext('2d');g.imageSmoothingE
   g.strokeStyle='#f2c14e';g.beginPath();g.arc(cx,cy,rr,A(MG.center-MG.zp/2),A(MG.center+MG.zp/2));g.stroke();
   g.lineWidth=2;g.strokeStyle='#ffffff';g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Math.cos(A(p))*(rr+5),cy+Math.sin(A(p))*(rr+5));g.stroke();g.lineWidth=1;R(g,cx-2,cy-2,4,4,'#ffffff');}
  MG.steam.forEach(s=>{g.globalAlpha=Math.max(0,s.t*.6);R(g,s.x,s.y,3,3,'#e8eef4');});g.globalAlpha=1;}
-function finishMG(){const rc=MG.rc;
+function finishMG(){const rc=MG.rc,com=MG.com||null;
  const q=mgScore()+.025*(S.smith-1)+S.patience+(patOn()?(skLv('lpat')>=10?.08:.04):0)+(pasOn('focus')?(skLv('focus')>=5?.06:.04):0)+(pasOn('scraft')?(skLv('scraft')>=5?.03:.02):0)+gbB('q')+(rand()-.5)*.08;let r=Math.min(craftRate(q),maxRating());if(r>=3)setTimeout(()=>annW('craftLeg',{rk:r}),300);
  let it=null;
  if(rc.slot==='x'){S.arrows[r]++;S.arrowsMade++;}
  else{it=mkItem(rc.id,r);if(rc.cre)creApply(it,rc.cre,r);breathFeat(it);if(pasOn('focus'))skUse('focus');if(pasOn('scraft'))skUse('scraft');if(pasOn('stemp'))skUse('stemp',1);if(P){vfx('forge',P.x,P.y-8);vfx('loot',P.x,P.y,{rarity:r});}
-  S.items.push(it);if(rc.slot==='w'&&it.atk>weapon().atk&&(WSH[it.id]||{}).k===weapKind())S.eqW=it.uid;if(rc.slot==='a'&&(!armorIt()||it.def>armorIt().def))S.eqA=it.uid;if(GEAR.includes(rc.slot)&&rc.slot!=='a'&&!eqIt(rc.slot))equip(it);}
+  if(com)comDeliver(com,it);else{S.items.push(it);if(rc.slot==='w'&&it.atk>weapon().atk&&(WSH[it.id]||{}).k===weapKind())S.eqW=it.uid;if(rc.slot==='a'&&(!armorIt()||it.def>armorIt().def))S.eqA=it.uid;if(GEAR.includes(rc.slot)&&rc.slot!=='a'&&!eqIt(rc.slot))equip(it);}}
  S.made[rc.id]=(S.made[rc.id]||0)+1;qEvent('craft',rc.id,r,rc.slot);
  if(isSm()&&rc.slot!=='x'&&CREPC[r])setTimeout(()=>crepAdd(CREPC[r]),1200);
  let bonus='';const gk=rc.id+r;if(isSm()&&rc.slot!=='x'&&STATB[r]&&!S.got[gk]){S.got[gk]=1;S.bonus+=STATB[r];bonus=t('bonusGot',{n:STATB[r]});}
@@ -6380,7 +6421,7 @@ function finishMG(){const rc=MG.rc;
  let i=0;const step=()=>{const nm=$('rname'),lb=$('rlab');if(!nm)return;nm.className='rname rt rt'+i;lb.className='rt rt'+i;lb.textContent=t('r'+i);
   if(i<r){SFX.tick(1+i*.25);i++;setTimeout(step,170+i*40);return;}
   nm.classList.add('burst');$('rextra').hidden=false;b.hidden=false;b.focus();
-  if(it&&r>=3&&!rc.cre)askName(it);
+  if(it&&r>=3&&!rc.cre&&!com)askName(it);
   if(S.cls==='pagma'){const g=[0,0,2,4,25][r]||0;if(g){S.bonus+=g;setTimeout(()=>toast(t('pgStat',{n:g}),'good'),500);}}
   if(r===4){SFX.legendary();flash();$('rays').classList.add('on');if(!S.firstLeg){S.firstLeg=1;annW('annLeg');}if(isSm())giveTitle('smith');for(let k=0;k<70;k++)fx.push({x:ANVIL.tx*TS+8,y:ANVIL.ty*TS,vx:(rand()-.5)*170,vy:-rand()*170,t:1,c:'#ffd24a'});}
   else if(r>=2)SFX.rare();else SFX.click();};
@@ -8507,7 +8548,7 @@ function netTick(){faultAt('netTick');NET.tick();const live=netLive();
  lockTick();
  natTick();
  annTick();
- repTick();
+ repTick();comTick();
  balTick(live);
  if(GUILD)guildTick();
  if(PRAID)PRAID.tick();

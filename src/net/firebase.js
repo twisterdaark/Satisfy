@@ -798,6 +798,30 @@
     };
   }
 
+  // SAT-ONLINE-098: crafting commissions. craftOrders/{cid} {by, n, rc, fee, t}: a recipe to be forged for its poster, who
+  // put up the materials and the fee; a crafter delivers in one update that removes it, hands its poster the piece
+  // (craftDone/{poster}/{cid} {it, id, by, bn, fee, t}) and pays the crafter (craftPaid/{crafter}/{cid} {g, t}); the rules
+  // take that only for the order as it is (its recipe, its fee), by someone else. Each side removes what it took.
+  function craftStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, SV = function () { return D.serverTimestamp(); };
+    var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
+    return {
+      list: function () { return D.get(at('craftOrders')).then(function (s) { return s.val() || {}; }); },
+      post: function (cid, v) { var u = {}; u['craftOrders/' + cid] = { by: v.by, n: String(v.n || '?').slice(0, 24), rc: v.rc, fee: v.fee, t: SV() }; return D.update(D.ref(db), u); },
+      cancel: function (cid) { return D.remove(at('craftOrders/' + cid)); },
+      deliver: function (cid, o, crafter, cn, json) {
+        var u = {}; u['craftOrders/' + cid] = null;
+        u['craftDone/' + o.by + '/' + cid] = { it: String(json).slice(0, 600), id: o.rc, by: crafter, bn: String(cn || '?').slice(0, 24), fee: o.fee, t: SV() };
+        u['craftPaid/' + crafter + '/' + cid] = { g: o.fee, t: SV() };
+        return D.update(D.ref(db), u);
+      },
+      watchDone: function (uid, cb) { return watch('craftDone/' + uid, cb); },
+      took: function (uid, cid) { return D.remove(at('craftDone/' + uid + '/' + cid)); },
+      watchPaid: function (uid, cb) { return watch('craftPaid/' + uid, cb); },
+      collect: function (uid, cid) { return D.remove(at('craftPaid/' + uid + '/' + cid)); },
+    };
+  }
+
   // SAT-ONLINE-073: the group finder, lfg/{uid} = {n, lv, cls, k, z, t}: yours only, gone when you leave (onDisconnect)
   function lfgStore(sdk) {
     var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
@@ -853,6 +877,7 @@
     reportStore: reportStore,
     lfgStore: lfgStore,
     repairStore: repairStore,
+    craftStore: craftStore,
     announceStore: announceStore,
     modStore: modStore,
     natStore: natStore,

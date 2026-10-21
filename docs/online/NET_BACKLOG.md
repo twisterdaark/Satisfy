@@ -123,7 +123,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U216 | Bank deposits | 🟡 | The town bank keeps gold and items in the player's own save; not online |
 | U217 | Bank withdrawal locks | 🟡 | Same as U216 |
 | U218 | Gold sinks | 🟡 | Repairs, fees, the inn, the guild treasury, reputation-store prices (B); no counter of gold in and out |
-| U219 | Crafting commissions | ❌ | |
+| U219 | Crafting commissions | ✅ | SAT-ONLINE-098: the poster puts up the materials and the fee (`craftOrders`); a crafter who knows the recipe forges it from the order's materials and delivers in one write that takes the order off, hands the piece to its poster "Made by" the crafter (`craftDone`) and pays the crafter (`craftPaid`), checked by the rules (its recipe, its fee, someone else); a piece for an order taken off meanwhile goes back to the forge (`regression/commission`) |
 | U220 | Region merchant caravans | ❌ | |
 | U221 | Guild treasury | ✅ | SAT-ONLINE-065 (#99) + 069: gifts add exactly their amount, only the master and officers spend, and only on a building raised in the same write; `guildLog` keeps who did what |
 | U222 | Fish market | ❌ | Content (B) |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 75 · 🟡 17 · ⏳ 6 · ❌ 6 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 76 · 🟡 17 · ⏳ 6 · ❌ 5 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
