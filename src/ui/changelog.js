@@ -5,6 +5,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v101', ver: '1.01', d: '2026-10-21',
+      ar: ['الموبايل: كل حاجة بالكيبورد بقت تتعمل باللمس',
+        'الألعاب الصغيرة بترد أول ما صباعك يلمس الشاشة: التسخين والتبريد في الحدادة والتسخين في الكيميا بيفضلوا شغالين طول ما صباعك على الشاشة',
+        'الزراعة: دوس على المربع اللي عايز تحفره. وفيه زرار خروج من الزراعة والطبخ والخياطة والكيميا',
+        'الحدادة: زرار "سخّن تاني" بدل حرف R، للموبايل والماوس',
+        'زرار السجل (L) في لوحة الأزرار، وفي المحلات أزرار ×1 و×10 والكل، وفي البيع "بيع واحدة" و"بيع الكل"، ونقط الإحصائيات ليها زرار "الكل"'],
+      en: ['Phones: everything the keyboard does can now be done by touch',
+        'The minigames answer the moment your finger lands: the forge’s heating and quenching and the alchemy heat keep going for as long as your finger stays down',
+        'Farming: tap the square you want to dig. Farming, cooking, sewing and alchemy have a leave button',
+        'Forge: a "Reheat" button instead of the R key, for a finger and a mouse alike',
+        'A Log (L) key on the controls panel; shops get ×1, ×10 and Max buttons, the sell window "Sell one" and "Sell all", and stat points an "All" button'] },
     { v: '2026-10-21v100', ver: '1.00', d: '2026-10-21',
       ar: ['فكّ القطع: أي معدات في الشنطة تقدر تفكّها وتاخد جزء من الخامات اللي اتعملت منها',
         'عند الحدادين: "فكّ قطعة" من خدماتهم، بأجرة، ومش بتفشل. على السندان: زرار "فكّ قطعة"، بتاخد أكتر كل ما لفل الحدادة يعلى، وفيه فرصة صغيرة إن "[الفك فشل.]" والقطعة بتتخدش بس',

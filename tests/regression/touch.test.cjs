@@ -355,3 +355,69 @@ test('a phone: ✥ moves and resizes the buttons, nothing else answers meanwhile
     assert.deepEqual(g.errors, []); assert.deepEqual(g2.errors, []);
   } finally { await ctx.close(); }
 });
+
+// v1.01: everything a keyboard does, a finger does: the minigames answer as the finger lands and hold while it stays
+// down, a tap on the farm plot digs that square, a leave button in the minigames, the forge's reheat button, the log
+// key, x1 / x10 / Max in the shops and the sell window, and all stat points at once
+test('a phone: forge and alchemy hold under the finger, the farm digs where you tap, the leave button, the log, amounts', async () => {
+  const g = await H.openGame({ query: '?touch=1' });
+  const at = (type, x, y) => g.eval(([t, x, y]) => { const el = document.getElementById('game'); el.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: 9, pointerType: 'touch', isPrimary: true, clientX: x, clientY: y })); }, [type, x, y]);
+  const mid = () => g.eval(() => { const b = document.getElementById('game').getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; });
+  try {
+    await H.newGame(g, LOOK);
+    await g.step(3);
+    const [cx, cy] = await mid();
+    // the forge's heat stage holds while the finger is down
+    await g.eval(() => { const G = window.__G; G.S.mats.ore = 20; G.S.mats.wood = 20; window.__GTC.openForge(); G.startMG('isword'); });
+    assert.equal(await g.mode(), 'forge');
+    await at('pointerdown', cx, cy);
+    assert.equal(await g.eval(() => window.__G.MG.hold), true);
+    await at('pointerup', cx, cy);
+    assert.equal(await g.eval(() => window.__G.MG.hold), false);
+    assert.equal(await g.eval(() => !!document.getElementById('mgReheat')), true);
+    await g.eval(() => { window.__G.finishMG()(); });
+    await g.eval(() => window.__GTC.closeForge());
+    // alchemy heats while held
+    await g.eval(() => { const G = window.__G, U = window.__GU; G.S.mats.herb = 9; G.S.mode; U.mixStart('hpot'); });
+    await g.step(1);
+    assert.equal(await g.mode(), 'mix');
+    assert.equal(await g.eval(() => document.getElementById('tQuit').hidden), false, 'the leave button shows');
+    await at('pointerdown', cx, cy);
+    assert.equal(await g.eval(() => window.__GU.getMIX().h), 1);
+    await at('pointerup', cx, cy);
+    assert.equal(await g.eval(() => window.__GU.getMIX().h), 0);
+    await g.page.click('#tQuit');
+    await g.page.waitForTimeout(1600);
+    await g.step(2);
+    assert.notEqual(await g.mode(), 'mix');
+    // the farm: a tap on a square digs that square
+    await g.eval(() => { window.__G.DL = null; window.__G.S.mode; window.__GU.farmStart(); });
+    await g.step(1);
+    assert.equal(await g.mode(), 'farm');
+    const xy = await g.eval(() => { const G = window.__G, P = G.P, F = window.__GU.getFARM(), C = 12, x0 = Math.round(P.x - 6 * C / 2), y0 = Math.round(P.y - 40 - 4 * C); const wx = x0 + 3 * C + 6, wy = y0 + 2 * C + 6; return window.__GTC.w2s(wx, wy); });
+    await at('pointerdown', xy[0], xy[1]);
+    const f = await g.eval(() => { const F = window.__GU.getFARM(); return [F.cx, F.cy, Object.keys(F.dug)]; });
+    assert.deepEqual(f.slice(0, 2), [3, 2]);
+    assert.ok(f[2].includes('3,2'));
+    await g.page.click('#tQuit');
+    await g.page.waitForTimeout(1200);
+    await g.step(2);
+    // the log has a key; the stat points go all at once
+    assert.equal(await g.eval(() => !!document.getElementById('kL')), true);
+    await g.eval(() => { window.__G.S.pts = 12; window.__GTC.openStatus(); });
+    await g.step(1);
+    const s0 = await g.eval(() => window.__G.S.st.str);
+    await g.page.click('#statusW [data-stat="str"][data-n="all"]');
+    assert.deepEqual(await g.eval(() => [window.__G.S.st.str, window.__G.S.pts]), [s0 + 12, 0]);
+    await g.eval(() => document.querySelector('[data-act="closeStatus"]').click());
+    // a shop: x10 buys ten
+    await g.eval(() => { const G = window.__G; G.S.gold = 100000; G.DL = null; G.talkNPC('merchant'); });
+    await g.step(2);
+    await g.eval(() => { const G = window.__G; for (let i = 0; i < 6 && G.DL && !G.DL.optOn; i++) G.advance(); });
+    await g.step(1);
+    assert.equal(await g.eval(() => !!document.querySelector('#dopts .qrow')), true, 'the amount buttons');
+    await ptr(g, '#dopts .qrow [data-bq="10"]', 'pointerdown');
+    assert.equal(await g.eval(() => window.__GTC.TBQ), 10);
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});
