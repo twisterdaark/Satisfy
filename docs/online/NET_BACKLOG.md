@@ -191,8 +191,8 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U333 | Balance dashboard | ❌ | |
 | U334 | Economy health | ❌ | |
 | U335 | Content flags | 🟡 | Older pages skip what they don't know (fx tags, presence fields) |
-| U336 | Announcement system | ❌ | World notices come from events only; no owner message |
-| U337 | Maintenance notices | 🟡 | "A new version" box asks only the older page to refresh (SAT-ONLINE-045) |
+| U336 | Announcement system | ✅ | SAT-ONLINE-079: `/announce text` from an admin account (`admins/{uid}`, set in the console only); everyone online sees it once, late joiners within 10 min; the rules refuse anyone else (`regression/announce`) |
+| U337 | Maintenance notices | ✅ | SAT-ONLINE-079: `/maint minutes text`: the time, reminders 10/5/1 min before, a save when it starts; and "a new version" asks only the older page to refresh (SAT-ONLINE-045) |
 | U338 | Hotfix pipeline | 🟡 | Small PRs, a review, then main |
 | U339 | Moderation console | 🟡 | Reports reach the database; the owner reads them in the Firebase console |
 | U340 | Player appeal flow | ❌ | |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 31 · 🟡 39 · ⏳ 6 · ❌ 28 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 33 · 🟡 38 · ⏳ 6 · ❌ 27 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
