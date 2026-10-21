@@ -179,7 +179,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U325 | Performance profiler | 🟡 | `net().link` (round trip, sent, received, dropped) in the badge tooltip; no frame-time budget |
 | U326 | Build pipeline | 🟡 | Tests on every PR by hand; GitHub Pages serves main as it is |
 | U327 | Staging deployment | ⏳ | Needs a second Firebase project (owner) |
-| U328 | Rollback support | 🟡 | Every update is one merge on main, so reverting one is one commit; rules have `rules-next` |
+| U328 | Rollback support | ✅ | Every update is one merge on main, so reverting one is one commit (GitHub's Revert); the rules go back with main's copy; saves survive both ways (SAT-ONLINE-091, `docs/online/ROLLBACK.md`) |
 
 ### Live ops (plan §48)
 | ID | Item | Status | Where / what's left |
@@ -225,10 +225,10 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U382 | Data retention review | 🟡 | Only what play needs is online; entries expire (lfg 30 min, chat lines, inbox) |
 | U383 | Community report resolution | ✅ | SAT-ONLINE-082: each report is resolved with its action (`reportDone/{id}` {a: ok or mute, by, t}), so what was done and by whom is kept |
 | U384 | Version gate report | 🟡 | Every PR lists the tests it ran |
-| U385 | Rollback rehearsal | ❌ | |
+| U385 | Rollback rehearsal | ✅ | SAT-ONLINE-091: `regression/rollback` takes a save this build wrote to the previous release (the baseline build) and back: nothing dropped on the way, a key the old build doesn't know kept, the same save again; a save from a newer build is backed up first. `ROLLBACK.md` has the owner's steps (revert on GitHub, the rules from main, a database export) |
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 47 · 🟡 38 · ⏳ 6 · ❌ 13 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 49 · 🟡 37 · ⏳ 6 · ❌ 12 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
