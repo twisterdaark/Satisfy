@@ -4,7 +4,7 @@
 const test=require('node:test'),assert=require('node:assert'),fs=require('fs'),path=require('path'),vm=require('vm');
 const repo=path.join(__dirname,'..','..'),dataDir=path.join(repo,'data');
 const FILES=['monsters','quests','recipes','skills','npcs','zones','classes'];
-const MATS=['ore','wood','leather','blue','mstone','mith','fish','sfish','gfish','herb','bherb','cfish','stew','feast','dscale','ruby','topaz','emer','sapph','diam'];
+const MATS=['ore','wood','leather','blue','mstone','mith','fish','sfish','gfish','herb','bherb','cfish','stew','feast','dscale','ruby','topaz','emer','sapph','diam','brphx','brdrg','brtig','brtor'];
 const VISIT_TARGETS=['grave','mural','yaltar','irene']; // landmarks with their own trigger in the engine (visitGrave)
 
 const loadAll=()=>{const ctx={};ctx.globalThis=ctx;vm.createContext(ctx);
@@ -28,7 +28,7 @@ test('counts match the audited baseline',()=>{
   const n=o=>Array.isArray(o)?o.length:Object.keys(o).length;
   assert.deepStrictEqual({MT:n(D.monsters.types),BOSSES:n(D.monsters.bosses),SPAWN:n(D.monsters.spawns),QD:n(D.quests.quests),RC:n(D.recipes.recipes),
     SKD:n(D.skills.skills),NPC:n(D.npcs.npcs),interior:Object.values(D.npcs.npcs).filter(x=>x.interior).length,ZR:n(D.zones.regions),TOWNS:n(D.zones.towns),classes:n(D.classes.classes)},
-    {MT:93,BOSSES:5,SPAWN:19,QD:124,RC:25,SKD:91,NPC:88,interior:8,ZR:17,TOWNS:3,classes:23});});
+    {MT:97,BOSSES:5,SPAWN:19,QD:124,RC:25,SKD:91,NPC:88,interior:8,ZR:17,TOWNS:3,classes:23});});
 
 // condition vocabulary (docs/content/CONTENT_SCHEMA.md)
 function checkCond(c,where){assert.ok(c&&typeof c==='object'&&!Array.isArray(c),where+': condition must be an object');

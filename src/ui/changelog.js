@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21v117', ver: '1.17', d: '2026-10-21',
+      ar: ['الوحوش الإلهية الأربعة: التنين الأزرق في الشرق (وادي دران، لفل 350)، النمر الأبيض في الغرب (ريف بيدرو، لفل 330)، العنقاء الحمرا في الجنوب (حدود مملكة جاوس، لفل 320)، والسلحفاة السودا في الشمال (بحيرات الجليد، لفل 360)',
+        'كل وحش بيوريك مكان نَفَسه قبلها بثانية وبعدين بيضرب بعنصره: برق في خط طويل، زئير حواليه، لهب واسع، وطوفان بعيد. أونلاين الوحش واحد للكل، ولما يقع بيفضل ميت ساعة على كل الشاشات',
+        'كل وحش بيوقّع "نَفَسه": وإنت شايله بيشيل 30% من ضرر عنصره (نار، برق، أرض، ميه). لقب "صياد الوحوش الإلهية" (-10% من ضرر العناصر) وإنجاز "الاتجاهات الأربعة" لما تهزمهم كلهم (لقب +5% ضرر)'],
+      en: ['The Four Divine Beasts: the Blue Dragon in the east (Dran Valley, Lv 350), the White Tiger in the west (Pedro Countryside, Lv 330), the Red Phoenix in the south (Gauss Kingdom Border, Lv 320) and the Black Tortoise in the north (Glacier Lakes, Lv 360)',
+        'Each one shows where its breath will land a moment before, then strikes with its element: lightning in a long line, a roar all around it, a wide flame, a far-reaching torrent. Online everyone fights the same beast, and once down it stays dead for an hour on every screen',
+        "Each beast drops its breath: while you carry it, it takes 30% off damage of its element (fire, lightning, earth, water). The title Divine Beast Hunter (-10% elemental damage), and the achievement The Four Directions for defeating all four (a title with +5% damage)"] },
     { v: '2026-10-21moderation', ver: '1.16', d: '2026-10-21',
       ar: ['أونلاين: لصاحب اللعبة: /reports بيوريه البلاغات المفتوحة ويقدر يكتم اللي اتبلّغ عنه يوم أو يقفل البلاغ، و/mute و/unmute لأي ID، و/crashes لتقارير الأعطال، و/economy لدهب اللاعبين',
         'اللي مكتوم ميقدرش يكتب في الشات العام لحد الميعاد، واللعبة بتقوله لحد إمتى',
