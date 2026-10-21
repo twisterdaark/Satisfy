@@ -211,6 +211,62 @@
         }
       }
     },
+    "guildAllyAsk": {
+      "$to": {
+        ".read": "auth != null && (root.child('guildMembers').child($to).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($to).child(auth.uid).child('rk').val() === 'o')",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($to).child('master').val() === auth.uid",
+        "$from": {
+          ".read": "auth != null && (root.child('guildMembers').child($from).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($from).child(auth.uid).child('rk').val() === 'o')",
+          ".write": "auth != null && ((newData.exists() && (root.child('guildMembers').child($from).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($from).child(auth.uid).child('rk').val() === 'o') && $from !== $to && root.child('guilds').child($to).exists() && (!root.child('guildAllyCd').child($from).child($to).exists() || root.child('guildAllyCd').child($from).child($to).child('t').val() < now - 86400000) && (!root.child('guildAllyCd').child($to).child($from).exists() || root.child('guildAllyCd').child($to).child($from).child('t').val() < now - 86400000)) || (!newData.exists() && ((root.child('guildMembers').child($from).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($from).child(auth.uid).child('rk').val() === 'o') || (root.child('guildMembers').child($to).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($to).child(auth.uid).child('rk').val() === 'o'))))",
+          ".validate": "newData.hasChildren(['n', 'by', 't'])",
+          "n": { ".validate": "newData.val() === root.child('guilds').child($from).child('name').val()" },
+          "by": { ".validate": "newData.val() === auth.uid" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "guildAlly": {
+      "$g": {
+        ".read": "auth != null",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($g).child('master').val() === auth.uid",
+        "$o": {
+          ".write": "auth != null && ((newData.exists() && (((root.child('guildMembers').child($g).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($g).child(auth.uid).child('rk').val() === 'o') && root.child('guildAllyAsk').child($g).child($o).child('t').val() > now - 604800000) || ((root.child('guildMembers').child($o).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($o).child(auth.uid).child('rk').val() === 'o') && root.child('guildAllyAsk').child($o).child($g).child('t').val() > now - 604800000))) || (!newData.exists() && ((root.child('guildMembers').child($g).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($g).child(auth.uid).child('rk').val() === 'o') || (root.child('guildMembers').child($o).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($o).child(auth.uid).child('rk').val() === 'o'))))",
+          ".validate": "newData.hasChildren(['n', 'until', 't'])",
+          "n": { ".validate": "newData.val() === root.child('guilds').child($o).child('name').val()" },
+          "until": { ".validate": "newData.isNumber() && newData.val() > now && newData.val() <= now + 2678400000" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "guildAllyCd": {
+      "$g": {
+        "$o": {
+          ".read": "auth != null",
+          ".write": "auth != null && newData.exists() && (root.child('guildMembers').child($g).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($g).child(auth.uid).child('rk').val() === 'o')",
+          ".validate": "newData.hasChildren(['t'])",
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "guildDiplo": {
+      "$gid": {
+        ".read": "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid",
+        "$id": {
+          ".write": "auth != null && !data.exists() && newData.exists() && ((root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o') || ((root.child('guildMembers').child(newData.child('o').val()).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child(newData.child('o').val()).child(auth.uid).child('rk').val() === 'o') && (root.child('guildAlly').child($gid).child(newData.child('o').val()).exists() || root.child('guildAllyAsk').child(newData.child('o').val()).child($gid).exists())))",
+          ".validate": "$id.matches(/^d_[A-Za-z0-9_-]{1,40}$/) && newData.hasChildren(['k', 'o', 'n', 'by', 't'])",
+          "k": { ".validate": "newData.val() === 'ask' || newData.val() === 'ally' || newData.val() === 'decline' || newData.val() === 'break' || newData.val() === 'end'" },
+          "o": { ".validate": "newData.isString() && newData.val().matches(/^g_[A-Za-z0-9]{1,128}$/) && newData.val() !== $gid" },
+          "n": { ".validate": "newData.isString() && newData.val().length <= 18" },
+          "by": { ".validate": "newData.val() === auth.uid" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "guildNames": {
       ".read": "auth != null",
       "$nk": {

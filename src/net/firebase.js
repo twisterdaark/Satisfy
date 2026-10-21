@@ -407,7 +407,7 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; return up(u); },
       // SAT-ONLINE-081 the weekly goal: guildWeek/{gid}/{wk}/{uid} {n, k, t}: each member's own kills this week (only upward,
       // at most 1,500); guildWeekPaid/{gid}/{wk}/{uid}/{tier} {t}: a tier's reward, taken once
       watchWeek: function (gid, wk, cb) { return watch('guildWeek/' + gid + '/' + wk, cb); },
@@ -453,6 +453,43 @@
         return D.get(at('guilds/' + gid)).then(function (s) {
           var g = s.val(); if (!g) throw new Error('gone');
           var u = {}; u['guilds/' + gid] = { name: g.name, nk: g.nk, master: g.master, col: g.col, t: g.t, emb: i }; return up(u);
+        });
+      },
+      // SAT-ONLINE-085 alliances (plan U238/U245). guildAllyAsk/{to}/{from} {n, by, t}: a proposal from the master or an
+      // officer of `from` (n: its name), read by both sides' masters and officers; guildAlly/{g}/{o} {n, until, t}: g's side
+      // of an alliance with o (n: o's name), both sides written at once by whoever takes the other's proposal (from the last
+      // week); either side ends it, removing both; guildAllyCd/{g}/{o} {t}: g broke it (no proposal either way for a day);
+      // guildDiplo/{gid}/{id} {k, o, n, by, t}: the guild's diplomacy log (k: ask, ally, decline, break, end; o, n: the
+      // other guild), members read it; the other side writes the answer, the break or the end into it too.
+      watchAllies: function (gid, cb) { return watch('guildAlly/' + gid, cb); },
+      watchAllyAsks: function (gid, cb) { return watch('guildAllyAsk/' + gid, cb); },
+      watchDiplo: function (gid, cb) { var ref = at('guildDiplo/' + gid), q = D.limitToLast ? D.query(ref, D.limitToLast(12)) : ref; var off = D.onValue(q, function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      findGuild: function (nk) { return D.get(at('guildNames/' + nk)).then(function (s) { var gid = s.val(); return typeof gid === 'string' ? D.get(at('guilds/' + gid)).then(function (g) { return g.val() ? { gid: gid, g: g.val() } : null; }) : null; }); },
+      allyCd: function (a, b) { return Promise.all([D.get(at('guildAllyCd/' + a + '/' + b)), D.get(at('guildAllyCd/' + b + '/' + a))]).then(function (r) { return Math.max(+((r[0].val() || {}).t) || 0, +((r[1].val() || {}).t) || 0); }); },
+      allyAsk: function (me, meN, o, oN, uid, id) {
+        var u = {}; u['guildAllyAsk/' + o + '/' + me] = { n: meN, by: uid, t: SV() };
+        u['guildDiplo/' + me + '/' + id] = { k: 'ask', o: o, n: oN, by: uid, t: SV() }; return up(u);
+      },
+      allyAccept: function (me, meN, o, oN, uid, until, id) {
+        var u = {}; u['guildAlly/' + me + '/' + o] = { n: oN, until: until, t: SV() }; u['guildAlly/' + o + '/' + me] = { n: meN, until: until, t: SV() };
+        u['guildAllyAsk/' + me + '/' + o] = null; u['guildAllyAsk/' + o + '/' + me] = null;
+        u['guildDiplo/' + me + '/' + id + 'a'] = { k: 'ally', o: o, n: oN, by: uid, t: SV() }; u['guildDiplo/' + o + '/' + id + 'b'] = { k: 'ally', o: me, n: meN, by: uid, t: SV() };
+        return up(u);
+      },
+      allyDecline: function (me, meN, o, oN, uid, id) {
+        var u = {}; u['guildAllyAsk/' + me + '/' + o] = null;
+        u['guildDiplo/' + me + '/' + id + 'a'] = { k: 'decline', o: o, n: oN, by: uid, t: SV() }; u['guildDiplo/' + o + '/' + id + 'b'] = { k: 'decline', o: me, n: meN, by: uid, t: SV() };
+        return up(u);
+      },
+      // end an alliance: k 'break' (before it runs out: a day before either side may propose again) or 'end' (it ran out, or
+      // the guild is closing). The other side's entry and log only while it still has them (a closed guild has neither).
+      allyEnd: function (me, meN, o, oN, uid, k, id) {
+        return D.get(at('guildAlly/' + o + '/' + me)).then(function (s) {
+          var u = {}; u['guildAlly/' + me + '/' + o] = null; u['guildAllyAsk/' + me + '/' + o] = null; u['guildAllyAsk/' + o + '/' + me] = null;
+          u['guildDiplo/' + me + '/' + id + 'a'] = { k: k, o: o, n: oN, by: uid, t: SV() };
+          if (s.val()) { u['guildAlly/' + o + '/' + me] = null; u['guildDiplo/' + o + '/' + id + 'b'] = { k: k, o: me, n: meN, by: uid, t: SV() }; }
+          if (k === 'break') u['guildAllyCd/' + me + '/' + o] = { t: SV() };
+          return up(u);
         });
       },
       // guildNote/{gid} = {s, by, n, v, t}: the notice; members read it, the master and officers write the next version

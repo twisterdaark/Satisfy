@@ -474,6 +474,27 @@ test('guild banners (SAT-ONLINE-084): one of the fixed emblems, written with the
   assert.ok(GU.can('m', 'emblem') && !GU.can('o', 'emblem'));
 });
 
+test('guild alliances (SAT-ONLINE-085): asked by one side, written by the other, either ends it; a day apart after a break; logged', () => {
+  const A = rules.guildAllyAsk.$to, ask = A.$from, al = rules.guildAlly.$g, cd = rules.guildAllyCd.$g.$o, dl = rules.guildDiplo.$gid;
+  const mo = (g) => "(root.child('guildMembers').child(" + g + ").child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child(" + g + ").child(auth.uid).child('rk').val() === 'o')";
+  assert.equal(A['.read'], 'auth != null && ' + mo('$to'), 'the asked guild\'s master and officers read the proposals');
+  assert.equal(ask['.read'], 'auth != null && ' + mo('$from'), 'the asking guild\'s too, its own');
+  assert.ok(ask['.write'].startsWith('auth != null && ((newData.exists() && ' + mo('$from') + ' && $from !== $to'), 'only for your own guild, not to itself');
+  assert.match(ask['.write'], /guildAllyCd'\)\.child\(\$from\)\.child\(\$to\)\.child\('t'\)\.val\(\) < now - 86400000\) && \(!root\.child\('guildAllyCd'\)\.child\(\$to\)\.child\(\$from\)/, 'a day after a break, either way');
+  assert.equal(ask.n['.validate'], "newData.val() === root.child('guilds').child($from).child('name').val()");
+  // one guild can't make an alliance alone: each side is written only against a fresh proposal from the other
+  assert.ok(al.$o['.write'].includes(mo('$g') + " && root.child('guildAllyAsk').child($g).child($o).child('t').val() > now - 604800000"));
+  assert.ok(al.$o['.write'].includes(mo('$o') + " && root.child('guildAllyAsk').child($o).child($g).child('t').val() > now - 604800000"));
+  assert.ok(al.$o['.write'].endsWith('(!newData.exists() && (' + mo('$g') + ' || ' + mo('$o') + ')))'), 'either side ends it');
+  assert.equal(al.$o.until['.validate'], 'newData.isNumber() && newData.val() > now && newData.val() <= now + 2678400000', 'it runs out, within a month');
+  assert.equal(cd['.write'], 'auth != null && newData.exists() && ' + mo('$g'), 'a break is kept');
+  // the log: your own guild's, or the other side's while you are its partner or answer its proposal
+  assert.equal(dl['.read'], "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()");
+  assert.match(dl.$id['.write'], /^auth != null && !data\.exists\(\) && newData\.exists\(\) && /, 'entries are never changed');
+  assert.ok(dl.$id['.write'].includes("root.child('guildAlly').child($gid).child(newData.child('o').val()).exists() || root.child('guildAllyAsk').child(newData.child('o').val()).child($gid).exists()"));
+  for (const k of ['ask', 'ally', 'decline', 'break', 'end']) assert.ok(dl.$id.k['.validate'].includes("newData.val() === '" + k + "'"), k);
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);

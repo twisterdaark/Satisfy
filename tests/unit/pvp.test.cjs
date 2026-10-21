@@ -15,9 +15,9 @@ function world(n, o = {}) {
   const players = [];
   for (let i = 0; i < n; i++) {
     const uid = 'u' + i;
-    const p = { uid, name: 'P' + i, x: 4000 + i * 20, y: 1500, zone: o.zone || 'zPlains', room: null, party: null, duel: false, dead: false, events: [] };
+    const p = { uid, name: 'P' + i, x: 4000 + i * 20, y: 1500, zone: o.zone || 'zPlains', room: null, party: null, duel: false, dead: false, allies: [], events: [] };
     p.pres = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net, uid, sid: 'sess' + i + 'xxxxxxxx' });
-    p.pvp = SN.pvp.create({ presence: p.pres, uid, now, pos: () => ({ x: p.x, y: p.y }), zone: () => p.zone, room: () => p.room, party: () => p.party, busy: () => p.duel, alive: () => !p.dead, policy: SN.net.zonePolicy });
+    p.pvp = SN.pvp.create({ presence: p.pres, uid, now, pos: () => ({ x: p.x, y: p.y }), zone: () => p.zone, room: () => p.room, party: () => p.party, ally: (r) => p.allies.includes(r.uid), busy: () => p.duel, alive: () => !p.dead, policy: SN.net.zonePolicy });
     p.pvp.on((e) => p.events.push(e));
     players.push(p);
   }
@@ -74,6 +74,12 @@ test('no hits in a town (either side), in another room, inside a party, during a
   a.pres.send('pvp.hit', { to: 'u1', k: 50, n: 1 });
   assert.equal(w.hurts(b).length, 0);
   assert.equal(b.events.at(-1).why, 'mate');
+  // SAT-ONLINE-085: nor between allied guilds, checked by the victim too
+  a.party = b.party = null; a.allies = ['u1']; w.advance(200);
+  assert.equal(a.pvp.why(w.remote(a, b)), 'ally');
+  b.allies = ['u0']; a.pres.send('pvp.hit', { to: 'u1', k: 50, n: 2 }); w.advance(100);
+  assert.equal(w.hurts(b).length, 0);
+  assert.equal(b.events.at(-1).why, 'ally');
 });
 
 test('the victim rejects hits from too far and more than HITS_PER_S a second', () => {

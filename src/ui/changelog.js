@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-21ally', ver: '1.30', d: '2026-10-21',
+      ar: ["تحالفات الجيلد: القائد أو الضابط يطلب تحالف من جيلد تاني باسمه (G ← الدبلوماسية)، والجيلد التاني يقبل أو يرفض. محدش يقدر يعمل تحالف لوحده",
+        "الحلفاء ميقدروش يضربوا بعض في الـPvP المفتوح، وبيظهر 🤝 جنب اسم جيلدهم. التحالف 30 يوم، وفي آخر أسبوع تقدر تطلب تجديد، وأقصى حاجة 3 حلفاء",
+        "أي طرف يفك التحالف في أي وقت: الجيلدين بيتبلغوا، وبيتكتب في سجل الدبلوماسية بتاع الاتنين مين فكه، ومحدش فيهم يطلب تاني لمدة يوم"],
+      en: ["Guild alliances: the master or an officer proposes one to another guild by its name (G → Diplomacy), and that guild accepts or declines. No guild can make one alone",
+        "Allies can't hurt each other in open PvP and carry 🤝 by their guild's name. An alliance lasts 30 days (ask to renew in its last week), up to 3 at once",
+        "Either side ends it at any time: both guilds are told, both diplomacy logs say who ended it, and neither may propose again for a day"] },
     { v: '2026-10-21v130', ver: '1.30', d: '2026-10-21',
       ar: ['إلمنتالز: إلمنتال النار في وادي دران، إلمنتال التلج في بحيرات الجليد، وإلمنتال العاصفة حوالين معبد العاصفة (لفل 205+). الجواهر اللي بيوقعوها إليزابيث بتعمل بيها قلادة اللهب وأسورة الصقيع وأسورة العاصفة',
         'معبد العاصفة غرب ريف بيدرو: البرق بيضرب مكان ما انت واقف (الدايرة الصفرا بتنبهك). سيد العاصفة متحامي بأربع أعمدة برق، وبياخد عُشر ضربك بس لحد ما تفرّغ الأربعة (E وانت واقف ثانيتين). البرق مابيضربش جنب عمود متفرّغ',
