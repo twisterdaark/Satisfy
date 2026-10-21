@@ -5100,6 +5100,7 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
  dialog('guild',[info,perks,g.online?guildNoteLine():''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
   ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},
+   ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD}]:[]),
    ...(Satisfy.guild.can(GUILD.state().rank,'note')?[{l:t('gdNoteW'),f:guildNoteW},...(recSt()?[{l:t('gdApps',{n:Object.keys(GAPPS).length}),f:recAppsD},{l:t('gdRecOn'),f:recPost},{l:t('gdRecOff'),f:recStop}]:[])]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
 function guildMOpts(){const o=[],back=()=>shopD('guildM','gm_hi');
@@ -7391,7 +7392,7 @@ var gdSig='',gdFor=null,GDS=null,gdBusy=0,gdFetchT=0;const GDN=new Map(); // GDN
 function guildStart(){GUILD=null;gdFor=null;GDS=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.guildStore))return; // NETTR first: FB and GDN are declared below (?net=local starts during load)
  GDN.clear();GDS=Satisfy.firebase.guildStore(FB);GUILD=Satisfy.guild.create({store:GDS,uid:NET.uid,handle:()=>netId||(S&&S.look.n)||'',now:()=>performance.now(),serverNow:()=>wNow()});GUILD.on(guildEv);}
 // (re)start for the character being played: the title's demo has no guild; loading another save starts over
-function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}guildChatSync();recAppsSync();return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();guildChatSync();recAppsSync();}
+function guildTick(){if(!S||S.__demo){if(gdFor){GUILD.stop();gdFor=null;}guildChatSync();recAppsSync();geSync();return;}if(gdFor!==S){GUILD.stop();gdFor=S;GUILD.start(S.gon||null);gdSig='';}GUILD.tick();guildChatSync();recAppsSync();geSync();geTick();}
 function guildEv(e){if(!S||S.__demo||gdFor!==S)return;gdSig='';
  if(e.type==='changed')guildMirror();
  else if(e.type==='joined'){guildMirror();if(e.why==='join'){toast(t('gJoined',{g:e.name||gName(S.guild)}),'good');SFX.quest();save(true);}}
@@ -7550,6 +7551,44 @@ function recAppsD(){const st=recSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gi
    {l:t('gdAppInv',{n:a.n}),f:()=>GUILD.invite(a.u,a.n).then(()=>st.unapply(gs.gid,a.u)).then(()=>{toast(t('gdInvSent',{n:a.n}),'good');recAppsD();},()=>{toast(t('gdFail'),'warn');recAppsD();})},
    {l:t('gdAppNo',{n:a.n}),f:()=>st.refuse(gs.gid,a.u,NET.uid).then(()=>{toast(t('gdAppNoDone',{n:a.n}));recAppsD();},()=>{toast(t('gdFail'),'warn');recAppsD();})},{l:t('oBack'),f:recAppsD}])})),{l:t('oBack'),f:guildPanel}]);}
 window.__GREC={list:()=>recBoard(),apply:gid=>recApply({gid,n:gid},null),post:msg=>{const st=recSt(),gs=GUILD.state();return st.recruitPut(gs.gid,{n:gs.guild.name,msg,m:Object.keys(gs.members).length,by:NET.uid});},stop:()=>recStop(),apps:()=>GAPPS,appsD:()=>recAppsD(),store:()=>GDS}; // tests
+/* guild events (SAT-ONLINE-080, plan U242). The master or an officer adds an event in G (a title, then a time: in 30 min to
+   2 h, or today/tomorrow at 18:00, 20:00 or 22:00 in their own time zone), up to 10 at once, or cancels one. Members see them
+   in G and in the Calendar (O), each in their own time zone and in UTC (the time is stored as one instant, so it is the same
+   moment for everyone), say "I'm going" or "Not going", and are told 10 minutes before and when it starts. */
+Object.assign(STR.ar,{geList:'مواعيد الجيلد ({n})',geNone:'مفيش مواعيد للجيلد',geRow:'{s} · {w} · {c} رايحين',geNew:'ميعاد جديد للجيلد',geTitleT:'اسم الميعاد (مثلاً: غارة على زعيم العفاريت)',geWhenQ:'إمتى؟',geIn:'بعد {d}',geToday:'النهارده {h}',geTom:'بكره {h}',geAdded:'الميعاد اتضاف: {s}',geGo:'أنا رايح',geNo:'مش رايح',geGoing:'رايحين: {l}',geNobody:'لسه محدش',geCancel:'الغي الميعاد',geCancelled:'الميعاد اتلغى',geFull:'فيه 10 مواعيد بالفعل',geSoon:'ميعاد الجيلد بعد 10 دقايق: {s}',geNow:'ميعاد الجيلد بدأ: {s}',geH:'مواعيد الجيلد'});
+Object.assign(STR.en,{geList:'Guild events ({n})',geNone:'No guild events',geRow:'{s} · {w} · {c} going',geNew:'New guild event',geTitleT:'What is it? (e.g. Raid on the Goblin Chief)',geWhenQ:'When?',geIn:'In {d}',geToday:'Today {h}',geTom:'Tomorrow {h}',geAdded:'Event added: {s}',geGo:"I'm going",geNo:'Not going',geGoing:'Going: {l}',geNobody:'nobody yet',geCancel:'Cancel the event',geCancelled:'The event is cancelled',geFull:'There are 10 events already',geSoon:'Guild event in 10 minutes: {s}',geNow:'Guild event now: {s}',geH:'Guild events'});
+var GEV={},GSIGN={},GEW=null,GEOff=[],GEWARN={};
+function geSt(){return GDS&&NETTR&&NETTR.kind==='firebase'&&GDS.watchEvents?GDS:null;}
+// watch the events of your guild while you are in one
+function geSync(){const st=geSt(),gs=GUILD&&GUILD.state(),gid=st&&gs&&gs.gid&&gs.rank?gs.gid:null;if(gid===GEW)return;
+ GEOff.forEach(f=>{try{f();}catch(e){}});GEOff=[];GEW=gid;GEV={};GSIGN={};if(!gid)return;
+ GEOff.push(st.watchEvents(gid,v=>{if(GEW!==gid)return;const o={};for(const k in (v||{})){const e=v[k];if(/^e_[A-Za-z0-9_-]{1,40}$/.test(k)&&e&&typeof e==='object'&&typeof e.title==='string'&&+e.at>0)o[k]={title:Satisfy.chat.clean(e.title,60)||'?',at:+e.at,n:Satisfy.chat.clean(e.n,24)||'?'};}GEV=o;}));
+ GEOff.push(st.watchSigns(gid,v=>{if(GEW!==gid)return;const o={};for(const k in (v||{})){o[k]={};for(const u in (v[k]||{}))if(v[k][u]&&typeof v[k][u]==='object')o[k][u]=Satisfy.chat.clean(v[k][u].n,24)||'?';}GSIGN=o;}));}
+// what is still to come or running (an event counts as on for two hours), soonest first
+function geCome(n){return Object.keys(GEV).map(id=>Object.assign({id},GEV[id])).filter(e=>e.at+7200000>n).sort((a,b)=>a.at-b.at);}
+function geTick(){if(!GEW)return;const n=wNow();for(const e of geCome(n)){const w=GEWARN[e.id]||(GEWARN[e.id]={});
+  if(!w.s&&e.at-n<=600000&&e.at-n>540000){w.s=1;toast(t('geSoon',{s:e.title}),'good');SFX.notice&&SFX.notice();}
+  if(!w.n&&n>=e.at&&n-e.at<300000){w.n=1;toast(t('geNow',{s:e.title}),'good');SFX.notice&&SFX.notice();}}}
+function geWhen(e,n){return calWhen({at:e.at,end:e.at+7200000},n);}
+function geListD(){const gs=GUILD&&GUILD.state(),n=wNow(),L=geCome(n),mo=gs&&(gs.rank==='m'||gs.rank==='o');
+ dialog('guild',[t('geList',{n:L.length})+' · '+(L.length?L.map(e=>t('geRow',{s:e.title,w:geWhen(e,n),c:Object.keys(GSIGN[e.id]||{}).length})).join(' · '):t('geNone'))],null,
+  [...L.slice(0,10).map(e=>({l:e.title+' · '+calTime(e.at),f:()=>geOneD(e.id)})),...(mo?[{l:t('geNew'),f:geNewD}]:[]),{l:t('oBack'),f:guildPanel}]);}
+function geOneD(id){const e=GEV[id],st=geSt(),gs=GUILD&&GUILD.state();if(!e||!st||!gs)return geListD();const n=wNow(),go=GSIGN[id]||{},me=!!go[NET.uid],mo=gs.rank==='m'||gs.rank==='o';
+ const after=(p,ok)=>p.then(()=>{if(ok)toast(ok,'good');geOneD(id);},()=>{toast(t('gdFail'),'warn');geListD();});
+ dialog('guild',[e.title+' · '+geWhen(e,n)+' · '+t('geGoing',{l:Object.values(go).join(', ')||t('geNobody')})],null,[
+  me?{l:t('geNo'),f:()=>after(st.unsign(gs.gid,id,NET.uid))}:{l:t('geGo'),f:()=>after(st.sign(gs.gid,id,NET.uid,netId||S.look.n))},
+  ...(mo?[{l:t('geCancel'),f:()=>st.cancelEvent(gs.gid,id).then(()=>{toast(t('geCancelled'));geListD();},()=>{toast(t('gdFail'),'warn');geListD();})}]:[]),{l:t('oBack'),f:geListD}]);}
+// the times offered for a new event, in the player's own time zone
+function geTimes(n){const out=[30,60,120].map(m=>({l:t('geIn',{d:calIn(m*60000)}),at:n+m*60000}));
+ for(const d of [0,1])for(const h of [18,20,22]){const x=new Date(n);x.setDate(x.getDate()+d);x.setHours(h,0,0,0);const at=x.getTime();if(at>n+60000)out.push({l:t(d?'geTom':'geToday',{h:calTime(at)}),at});}
+ return out;}
+function geAdd(title,at){const st=geSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return Promise.reject(new Error('rank'));
+ if(geCome(wNow()).length>=10)return Promise.reject(new Error('full'));
+ return st.addEvent(gs.gid,'e_'+String(NET.uid).slice(0,24).replace(/[^A-Za-z0-9_-]/g,'')+'_'+Date.now().toString(36),{title,at,by:NET.uid,n:netId||S.look.n});}
+function geNewD(){if(geCome(wNow()).length>=10){toast(t('geFull'),'warn');return geListD();}
+ askLine(t('geTitleT'),'',60,v=>{const title=String(v||'').replace(/\s+/g,' ').trim().slice(0,60);if(!title)return geListD();
+  dialog('guild',[t('geWhenQ')],null,[...geTimes(wNow()).map(o=>({l:o.l,f:()=>geAdd(title,o.at).then(()=>{toast(t('geAdded',{s:title}),'good');geListD();},e=>{toast(t(e&&e.message==='full'?'geFull':'gdFail'),'warn');geListD();})})),{l:t('oBack'),f:geListD}]);});}
+window.__GEV={add:(title,at)=>geAdd(title,at),list:()=>geListD(),one:id=>geOneD(id),get ev(){return GEV},get signs(){return GSIGN},times:n=>geTimes(n),store:()=>GDS}; // tests
 /* duels (SAT-ONLINE-006, doc §09 R4): K challenges the nearest player outside towns; Y/N answers, Y is the ready check.
    Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
 Object.assign(STR.ar,{dHint:'[K] مبارزة',dSent:'اتبعت تحدي مبارزة لـ{n}',dFrom:'{n} بيتحداك في مبارزة',dReadyQ:'مبارزة مع {n}: جاهز؟',dReady:'جاهز (Y)',dWait:'مستني {n}…',dNone:'مفيش حد قريب كفاية للمبارزة',dSafe:'ممنوع المبارزة جوه المدن',dBusy:'{n} مشغول دلوقتي',dFar:'قرّب من {n} الأول',dDeclined:'{n} رفض المبارزة',dCancel:'المبارزة اتلغت',dFight:'ابدأ!',dOut:'ارجع للحلبة وإلا هتخسر!',dWin:'كسبت المبارزة ضد {n} {w}',dLose:'خسرت المبارزة ضد {n} {w}',dYield:'استسلام',dYou:'إنت',dTitle:'مبارزة ضد {n}',dRec:'المبارزات: {w} فوز · {l} خسارة',dw_yield:'(استسلام)',dw_arena:'(خرج من الحلبة)',dw_teleport:'(ساب القتال)',dw_safe:'(دخل مدينة)',dw_gone:'(الخصم مشي)',dw_death:'(مات)',dw_hp:''});
@@ -7747,7 +7786,8 @@ function calBoss(k,n){const u=WS&&WS.wb&&WS.wb[k];return t(k+'N')+': '+(u&&u>n?t
 function calZone(){const o=-new Date().getTimezoneOffset(),a=Math.abs(o);return 'UTC'+(o<0?'−':'+')+Math.floor(a/60)+(a%60?':'+String(a%60).padStart(2,'0'):'');}
 function calBoard(){const n=wNow(),L=calList(n),line=e=>t(e.k)+': '+calWhen(e,n);plOpen(false);
  dialog('guild',[t('calH',{z:calZone()})+' · '+L.filter(e=>/^evN_|^natN$/.test(e.k)).map(line).join(' · '),
-  t('calH2')+' · '+L.filter(e=>!/^evN_|^natN$/.test(e.k)).map(line).concat(['trauka','berith'].map(k=>calBoss(k,n))).join(' · ')],null,[{l:t('oClose')}]);}
+  t('calH2')+' · '+L.filter(e=>!/^evN_|^natN$/.test(e.k)).map(line).concat(['trauka','berith'].map(k=>calBoss(k,n))).join(' · '),
+  ...(typeof geCome==='function'&&GEW&&geCome(n).length?[t('geH')+' · '+geCome(n).map(e=>e.title+': '+geWhen(e,n)).join(' · ')]:[])],null,[{l:t('oClose')}]);}
 window.__GCAL={list:n=>calList(n==null?wNow():n),board:()=>calBoard(),zone:()=>calZone()}; // tests
 /* the group finder (SAT-ONLINE-073, plan U185). "Group finder" in the player list (O) shows who is looking for a raid, a party,
    a dungeon group or a duel, with level, class and where they are, and lets you say what you are looking for yourself

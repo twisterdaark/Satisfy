@@ -428,6 +428,18 @@ test('owner announcements (SAT-ONLINE-079): admins set in the console only; only
   assert.equal(e.$other['.validate'], false);
 });
 
+test('guild events (SAT-ONLINE-080): added or cancelled by the master and officers, ahead and within 30 days; each member signs only itself', () => {
+  const ev = rules.guildEvents.$gid, sg = rules.guildEventSign.$gid;
+  assert.equal(ev['.read'], "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()");
+  assert.match(ev.$eid['.write'], /=== 'm' \|\| .*=== 'o'\) && \(!data\.exists\(\) \|\| !newData\.exists\(\)\)/, 'added or cancelled, never edited');
+  assert.equal(ev.$eid.at['.validate'], 'newData.isNumber() && newData.val() > now && newData.val() <= now + 2592000000');
+  assert.equal(ev.$eid.by['.validate'], 'newData.val() === auth.uid');
+  assert.ok(sg.$eid.$uid['.write'].startsWith("auth != null && auth.uid === $uid && root.child('guildMembers').child($gid).child(auth.uid).exists()"), 'yourself, a member');
+  assert.ok(sg.$eid.$uid['.write'].includes("root.child('guildEvents').child($gid).child($eid).exists()"), 'only for an event that exists');
+  assert.match(sg.$eid['.write'], /^auth != null && !newData\.exists\(\) && /, 'cancelling clears the list');
+  for (const n of [ev.$eid, sg.$eid.$uid]) assert.equal(n.$other['.validate'], false);
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);

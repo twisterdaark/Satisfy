@@ -407,7 +407,15 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; return up(u); },
+      // SAT-ONLINE-080 guild events: guildEvents/{gid}/{eid} {title, at, by, n, t} (the master or an officer adds or cancels
+      // one; members read them), guildEventSign/{gid}/{eid}/{uid} {n, t} (a member's own "going"; cancelling clears them)
+      watchEvents: function (gid, cb) { return watch('guildEvents/' + gid, cb); },
+      watchSigns: function (gid, cb) { return watch('guildEventSign/' + gid, cb); },
+      addEvent: function (gid, eid, v) { var u = {}; u['guildEvents/' + gid + '/' + eid] = { title: String(v.title).slice(0, 60), at: v.at, by: v.by, n: String(v.n || '?').slice(0, 24), t: SV() }; return up(u); },
+      cancelEvent: function (gid, eid) { var u = {}; u['guildEvents/' + gid + '/' + eid] = null; u['guildEventSign/' + gid + '/' + eid] = null; return up(u); },
+      sign: function (gid, eid, uid, n) { var u = {}; u['guildEventSign/' + gid + '/' + eid + '/' + uid] = { n: String(n || '?').slice(0, 24), t: SV() }; return up(u); },
+      unsign: function (gid, eid, uid) { return D.remove(at('guildEventSign/' + gid + '/' + eid + '/' + uid)); },
       // SAT-ONLINE-078 recruiting: guildRecruit/{gid} {n, msg, m, by, t} (posted by the master or an officer, read by all);
       // guildApply/{gid}/{uid} {n, lv, t} (the player's own, only while the guild recruits and not refused in the last week;
       // read by the master and officers); guildRej/{gid}/{uid} {by, t}: a refusal, written with the application's removal
