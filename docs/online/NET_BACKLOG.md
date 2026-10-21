@@ -117,8 +117,8 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U210 | NPC price catalog | ✅ | B's one sell-price rule (v0.62): nothing sells for its buying price or more |
 | U211 | Player-to-player trade | ✅ | SAT-ONLINE-039 (#76): Accept then Confirm, one update, both or neither |
 | U212 | Trade cancel on disconnect | ✅ | A trade ends when the other player leaves or changes anything; the `tradedItems` ledger refuses the same item twice after a reconnect (`regression/trade`) |
-| U213 | Auction market | 🟡 | B's auction window (v0.70) is the NPC auction house on each device; a market between players needs a ledger |
-| U214 | Searchable item market | 🟡 | The auction window searches its listings; local only |
+| U213 | Auction market | ✅ | SAT-ONLINE-094: signed in, players' listings are one board (`auction`); a sale is one write that takes the listing off and pays its seller its price (`auctionPaid`), checked by the rules, so one of two buyers gets it; the seller is told and collects less the 5% fee; merchants and offline listings stay local (`regression/auctiononline`) |
+| U214 | Searchable item market | ✅ | The auction window searches the online board by name too, cheapest (per piece) first (SAT-ONLINE-094) |
 | U215 | Seller history | ✅ | SAT-ONLINE-089: after a trade each side writes its own record (`tradeLog`: with whom, gold given and got, checked by the rules against the trade's immutable sides, item counts; yours only) and a public one (`tradeRep`: with whom), once and only for a done trade, so the count can't be forged; the card shows trades and partners, `/trades` your last ten; the trade itself (`trades`, `tradeSides`, `tradeDone`, `tradedItems`) stays as the dispute trace (`regression/trade`) |
 | U216 | Bank deposits | 🟡 | The town bank keeps gold and items in the player's own save; not online |
 | U217 | Bank withdrawal locks | 🟡 | Same as U216 |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 75 · 🟡 17 · ⏳ 6 · ❌ 6 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 77 · 🟡 15 · ⏳ 6 · ❌ 6 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

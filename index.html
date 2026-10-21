@@ -1935,11 +1935,44 @@ function auWS(){const A=WS.auction||(WS.auction={list:[],paid:{},npcAt:0,id:0});
  if(A.npcAt<now){A.list=A.list.filter(l=>l.pid!=='npc');const pool=['mith','bherb','gfish','mstone','dscale','sfish','leather','herb'],r=mulberry32(now/1e5|0);
   for(let i=0;i<6;i++){const k=pool[(r()*pool.length)|0],q=k==='dscale'?1:1+(r()*5|0);A.list.push({id:++A.id,pid:'npc',n:t('auNpc'),it:k,q,price:Math.round(auMarket(k)*q*(1.1+r()*.5)),t:now});}A.npcAt=now+20*60000;}
  return A;}
+/* the auction house online (SAT-ONLINE-094, plan U213/U214). Signed in, the players' listings are one board for everyone:
+   auction/{lid} {by, n, it, q, price, t}. A sale is one write that takes the listing off and pays the seller
+   (auctionPaid/{seller}/{lid} {g, by, bn, it, q, t}); the rules take it only for a listing still there and at its price, so
+   two buyers can't both get it. The seller is told of each sale while playing and collects the gold (less the 5% fee) at
+   the auction house. The merchants' listings, and listings made offline, stay on the device as before. */
+Object.assign(STR.ar,{auSoldOn:'{b} اشترى {q}× {it} بتوعك بـ {g} دهب. استلمهم من المزاد',auOnFail:'المزاد مش متاح دلوقتي، جرّب تاني'});
+Object.assign(STR.en,{auSoldOn:'{b} bought your {q}× {it} for {g} gold. Collect it at the auction house',auOnFail:'The auction house is not answering; try again'});
+var AUON={},AUPD={},auOnOff=null,auPdSeen=null,auBusy=0;
+function aucOn(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&S&&!S.__demo);}
+function auSt(){return aucOn()&&Satisfy.firebase.auctionStore?Satisfy.firebase.auctionStore(FB):null;}
+// the board and your sales, watched from the first visit to the auction house in a session
+function auWatch(){const st=auSt();if(!st||auOnOff)return;const uid=NET.uid;
+ const a=st.watch(v=>{const o={};for(const k in (v||{})){const e=v[k];if(/^a_[A-Za-z0-9_-]{1,60}$/.test(k)&&e&&typeof e==='object'&&AUK.includes(e.it)&&+e.q>0&&+e.price>0)o[k]={id:k,on:1,by:e.by,pid:e.by===uid?pidOf():'u:'+e.by,n:Satisfy.chat.clean(e.n,24)||'?',it:e.it,q:+e.q|0,price:+e.price|0,t:+e.t||0};}AUON=o;renderAu();});
+ const b=st.watchPaid(uid,v=>{const o={};for(const k in (v||{})){const e=v[k];if(e&&typeof e==='object'&&+e.g>0&&AUK.includes(e.it))o[k]={g:+e.g|0,bn:Satisfy.chat.clean(e.bn,24)||'?',it:e.it,q:+e.q|0};}
+  if(auPdSeen)for(const k in o)if(!auPdSeen.has(k)){toast(t('auSoldOn',{b:o[k].bn,q:o[k].q,it:t(o[k].it),g:Math.round(o[k].g*(1-AUFEE))}),'good');SFX.coin();}
+  auPdSeen=new Set(Object.keys(o));AUPD=o;renderAu();});
+ auOnOff=()=>{a();b();};}
+function auAll(){const A=auWS();return aucOn()?A.list.concat(Object.values(AUON)):A.list;}
+function auFind(id){return auAll().find(l=>String(l.id)===String(id));}
+function auPaidOn(){let g=0;for(const k in AUPD)g+=Math.round(AUPD[k].g*(1-AUFEE));return aucOn()?g:0;}
+function auMineN(){return auAll().filter(l=>l.pid===pidOf()).length;}
+// buy an online listing: the gold and the goods change hands once the database took the sale
+function auBuyOn(l,done){const st=auSt();if(!st||auBusy)return;if(S.gold<l.price){SFX.deny();toast(t('noGold'),'warn');return;}auBusy=1;
+ st.buy(l.id,{seller:l.by,g:l.price,by:NET.uid,bn:String(netId||S.look.n||'?').slice(0,24),it:l.it,q:l.q}).then(()=>{auBusy=0;S.gold-=l.price;auGive(l.it,l.q);delete AUON[l.id];SFX.coin();hudDirty=true;save(true);done(true);},
+  ()=>{auBusy=0;toast(t('auGone'),'warn');done(false);});}
+function auListOn(k,q,price){const st=auSt();if(!st||auBusy)return false;auBusy=1;const lid='a_'+String(NET.uid).slice(0,24).replace(/[^A-Za-z0-9_-]/g,'')+'_'+Date.now().toString(36);
+ auTake(k,q);hudDirty=true;save(true);
+ st.list(lid,{by:NET.uid,n:String(netId||S.look.n||'?').slice(0,24),it:k,q,price}).then(()=>{auBusy=0;SFX.coin();toast(t('auListed',{q,it:t(k),g:price}),'good');renderAu();},
+  ()=>{auBusy=0;auGive(k,q);hudDirty=true;save(true);toast(t('auOnFail'),'warn');renderAu();});return true;}
+function auBackOn(l,done){const st=auSt();if(!st||auBusy)return;auBusy=1;st.unlist(l.id).then(()=>{auBusy=0;delete AUON[l.id];auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);done();},()=>{auBusy=0;toast(t('auOnFail'),'warn');done();});}
+function auCollectOn(){const st=auSt();if(!st||auBusy)return;const ks=Object.keys(AUPD);if(!ks.length)return;auBusy=1;
+ Promise.all(ks.map(k=>st.collect(NET.uid,k).then(()=>{const g=Math.round(AUPD[k].g*(1-AUFEE));delete AUPD[k];S.gold+=g;return g;},()=>0))).then(gs=>{auBusy=0;const g=gs.reduce((a,b)=>a+b,0);if(g){SFX.coin();toast(t('auGot',{g}),'good');hudDirty=true;save(true);}renderAu();});}
+window.__GAU={get on(){return AUON},get paid(){return AUPD},all:()=>auAll(),watch:()=>auWatch(),store:()=>auSt()}; // tests
 /* the auction window (owner 2026-10-20: "like the shop when you sell: your bag, and you pick what to list"): your goods on
    the left, pick one, set how many and the price, List; on the right what is listed (search by name, Buy) and your own
    listings (Withdraw), and the gold waiting for you */
 let AUV={tab:'list',sel:null};
-function openAu(){SFX.open();mode='au';$('auW').hidden=false;$('hint').hidden=true;AUV.sel=null;$('auQ').value='';renderAu();}
+function openAu(){auWatch();SFX.open();mode='au';$('auW').hidden=false;$('hint').hidden=true;AUV.sel=null;$('auQ').value='';renderAu();}
 function closeAu(){SFX.close();$('auW').hidden=true;mode='play';}
 function renderAu(){if($('auW').hidden)return;const A=auWS(),me=pidOf(),ks=AUK.filter(k=>auHave(k)>0);if(AUV.sel&&!auHave(AUV.sel))AUV.sel=null;
  let h='';for(let i=0,N=Math.max(18,Math.ceil(ks.length/6)*6);i<N;i++){const k=ks[i];h+=k?`<button class="slotb${AUV.sel===k?' sel':''}" data-auk="${k}" data-tip="${esc(`<b>${t(k)}</b><br><small>${t('auMkt',{g:auMarket(k)})}</small>`)}"><img src="${icon(k)}"><b>${auHave(k)}</b></button>`:'<div class="slotb e"></div>';}
@@ -1952,30 +1985,33 @@ function renderAu(){if($('auW').hidden)return;const A=auWS(),me=pidOf(),ks=AUK.f
  $('auBag').querySelectorAll('[data-auk]').forEach(b=>b.onclick=()=>{SFX.click();AUV.sel=b.dataset.auk;renderAu();});
  document.querySelectorAll('#auW [data-autab]').forEach(b=>{b.classList.toggle('on',b.dataset.autab===AUV.tab);b.onclick=()=>{AUV.tab=b.dataset.autab;renderAu();};});
  const q=$('auQ');q.hidden=AUV.tab!=='list';q.placeholder=t('auFind');q.oninput=()=>renderAu();const qs=q.value.trim().toLowerCase();
- const L=AUV.tab==='list'?A.list.filter(l=>l.pid!==me&&(!qs||t(l.it).toLowerCase().includes(qs)||l.it.includes(qs))):A.list.filter(l=>l.pid===me);
+ const L=AUV.tab==='list'?auAll().filter(l=>l.pid!==me&&(!qs||t(l.it).toLowerCase().includes(qs)||l.it.includes(qs))).sort((a,b)=>a.price/a.q-b.price/b.q):auAll().filter(l=>l.pid===me);
  $('auL').innerHTML=L.length?L.map(l=>`<div class="aurow${AUV.tab==='list'&&S.gold<l.price?' poor':''}" data-tip="${esc(`<b>${t(l.it)}</b><br><small>${t('auMkt',{g:auMarket(l.it)})}</small>`)}"><img src="${icon(l.it)}"><span>${l.q}× ${esc(t(l.it))}<br><small>${esc(l.n||'')}</small></span><span class="pr">${l.price.toLocaleString('en')} ${t('auG')}</span><button data-aul="${l.id}">${t(AUV.tab==='list'?'auBuyB':'auBackB')}</button></div>`).join(''):`<div class="none">${t(AUV.tab==='list'?'auEmpty':'auNoMine')}</div>`;
- $('auL').querySelectorAll('[data-aul]').forEach(b=>b.onclick=()=>{const id=+b.dataset.aul;if(AUV.tab==='list')auBuyW(id);else auBackW(id);});
- const pd=A.paid[me]||0;$('auC').innerHTML=pd?`<button id="auCol">${t('oAuCollect',{g:pd})}</button>`:'';if(pd)$('auCol').onclick=()=>{auCollect();renderAu();};}
-function auBuyW(id){const A=auWS(),l=A.list.find(l=>l.id===id);if(!l){toast(t('auGone'),'warn');return renderAu();}if(S.gold<l.price){SFX.deny();return toast(t('noGold'),'warn');}
+ $('auL').querySelectorAll('[data-aul]').forEach(b=>b.onclick=()=>{const id=b.dataset.aul;if(AUV.tab==='list')auBuyW(id);else auBackW(id);});
+ const pd=(A.paid[me]||0)+auPaidOn();$('auC').innerHTML=pd?`<button id="auCol">${t('oAuCollect',{g:pd})}</button>`:'';if(pd)$('auCol').onclick=()=>{auCollect();renderAu();};}
+function auBuyW(id){const A=auWS(),l=auFind(id);if(!l){toast(t('auGone'),'warn');return renderAu();}if(S.gold<l.price){SFX.deny();return toast(t('noGold'),'warn');}
+ if(l.on)return auBuyOn(l,ok=>{if(ok)toast(t('auBought',{q:l.q,it:t(l.it),g:l.price}),'good');renderAu();});
  S.gold-=l.price;A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);if(l.pid!=='npc')A.paid[l.pid]=(A.paid[l.pid]||0)+Math.round(l.price*(1-AUFEE));
  SFX.coin();toast(t('auBought',{q:l.q,it:t(l.it),g:l.price}),'good');hudDirty=true;save(true);renderAu();}
-function auBackW(id){const A=auWS(),l=A.list.find(l=>l.id===id&&l.pid===pidOf());if(!l)return renderAu();A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);renderAu();}
-function auOpts(){const A=auWS(),pd=A.paid[pidOf()]||0;return [{l:t('oAuBuy'),f:auBrowse},{l:t('oAuSell'),f:auSellMenu},{l:t('oAuMine'),f:auMine},...(pd?[{l:t('oAuCollect',{g:pd}),f:auCollect}]:[])];}
-function auBrowse(){const A=auWS(),mine=pidOf(),L=A.list.filter(l=>l.pid!==mine).slice(0,8);if(!L.length)return dialog('auction',['auEmpty']);
+function auBackW(id){const A=auWS(),l=auFind(id);if(!l||l.pid!==pidOf())return renderAu();if(l.on)return auBackOn(l,renderAu);A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);renderAu();}
+function auOpts(){auWatch();const A=auWS(),pd=(A.paid[pidOf()]||0)+auPaidOn();return [{l:t('oAuBuy'),f:auBrowse},{l:t('oAuSell'),f:auSellMenu},{l:t('oAuMine'),f:auMine},...(pd?[{l:t('oAuCollect',{g:pd}),f:auCollect}]:[])];}
+function auBrowse(){const mine=pidOf(),L=auAll().filter(l=>l.pid!==mine).sort((a,b)=>a.price/a.q-b.price/b.q).slice(0,8);if(!L.length)return dialog('auction',['auEmpty']);
  dialog('auction',['auBrowseL'],null,[...L.map(l=>({l:t('auRow',{q:l.q,it:t(l.it),g:l.price,n:l.n}),ic:l.it,f:()=>auBuy(l.id)})),{l:t('oLeave')}]);if(DL&&DL.optOn)selOpt(L.length);}// Leave is preselected, so pressing E through the greeting never buys by accident
-function auBuy(id){const A=auWS(),l=A.list.find(l=>l.id===id);if(!l)return toast(t('auGone'),'warn');if(S.gold<l.price){SFX.deny();return dialog('auction',[t('noGold')]);}
+function auBuy(id){const A=auWS(),l=auFind(id);if(!l)return toast(t('auGone'),'warn');if(S.gold<l.price){SFX.deny();return dialog('auction',[t('noGold')]);}
+ if(l.on)return auBuyOn(l,ok=>{if(ok)dialog('auction',[t('auBought',{q:l.q,it:t(l.it),g:l.price})]);});
  S.gold-=l.price;A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);if(l.pid!=='npc')A.paid[l.pid]=(A.paid[l.pid]||0)+Math.round(l.price*(1-AUFEE));
  SFX.coin();hudDirty=true;save(true);dialog('auction',[t('auBought',{q:l.q,it:t(l.it),g:l.price})]);}
 function auSellMenu(){const ks=AUK.filter(k=>auHave(k)>0).slice(0,8);if(!ks.length)return dialog('auction',['auNothing']);
  dialog('auction',['auSellL'],null,[...ks.map(k=>({l:t('auHaveRow',{it:t(k),n:auHave(k),g:auMarket(k)}),ic:k,f:()=>auQty(k)})),{l:t('oLeave')}]);}
 function auQty(k){const h=auHave(k),qs=[...new Set([1,5,h].filter(q=>q<=h))];dialog('auction',[t('auQtyL',{it:t(k)})],null,[...qs.map(q=>({l:t('auQty',{q}),f:()=>auPrice(k,q)})),{l:t('oLeave')}]);}
 function auPrice(k,q){const m=auMarket(k)*q;dialog('auction',[t('auPriceL',{g:m})],null,[[.9,'auCheap'],[1.2,'auFair'],[1.8,'auHigh']].map(([f,lb])=>({l:t(lb,{g:Math.round(m*f)}),f:()=>auList(k,q,Math.round(m*f))})).concat([{l:t('oLeave')}]));}
-function auList(k,q,price){if(auHave(k)<q)return;const A=auWS(),mine=A.list.filter(l=>l.pid===pidOf()).length;if(mine>=8){SFX.deny();toast(t('auFull'),'warn');return false;}
+function auList(k,q,price){if(auHave(k)<q)return;const A=auWS(),mine=auMineN();if(mine>=8){SFX.deny();toast(t('auFull'),'warn');return false;}
+ if(aucOn())return auListOn(k,q,price);
  auTake(k,q);const now=Date.now(),ratio=price/(auMarket(k)*q),wait=ratio>2.5?1e12:(60+540*clamp((ratio-.6)/1.4,0,1))*1000*(.7+rand()*.6);
  A.list.push({id:++A.id,pid:pidOf(),n:S.look.n||t('pname'),it:k,q,price,t:now,sell:now+wait});SFX.coin();toast(t('auListed',{q,it:t(k),g:price}),'good');hudDirty=true;save(true);return true;}
-function auMine(){const A=auWS(),L=A.list.filter(l=>l.pid===pidOf());if(!L.length)return dialog('auction',['auNoMine']);
- dialog('auction',['auMineL'],null,[...L.map(l=>({l:t('auMineRow',{q:l.q,it:t(l.it),g:l.price}),ic:l.it,f:()=>{A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));save(true);auMine();}})),{l:t('oLeave')}]);}
-function auCollect(){const A=auWS(),g=A.paid[pidOf()]||0;if(!g)return;delete A.paid[pidOf()];S.gold+=g;SFX.coin();toast(t('auGot',{g}),'good');hudDirty=true;save(true);}
+function auMine(){const A=auWS(),L=auAll().filter(l=>l.pid===pidOf());if(!L.length)return dialog('auction',['auNoMine']);
+ dialog('auction',['auMineL'],null,[...L.map(l=>({l:t('auMineRow',{q:l.q,it:t(l.it),g:l.price}),ic:l.it,f:()=>{if(l.on)return auBackOn(l,auMine);A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));save(true);auMine();}})),{l:t('oLeave')}]);}
+function auCollect(){auCollectOn();const A=auWS(),g=A.paid[pidOf()]||0;if(!g)return;delete A.paid[pidOf()];S.gold+=g;SFX.coin();toast(t('auGot',{g}),'good');hudDirty=true;save(true);}
 // offline buyers: a listing sells when its time comes; online the server matches real buyers instead
 function auTick(){if(!WS||!WS.auction)return;const A=WS.auction,now=Date.now();let sold=0;
  for(const l of [...A.list])if(l.pid!=='npc'&&l.sell&&l.sell<=now){A.list=A.list.filter(x=>x!==l);A.paid[l.pid]=(A.paid[l.pid]||0)+Math.round(l.price*(1-AUFEE));if(l.pid===pidOf()){sold++;renderAu();toast(t('auSold',{q:l.q,it:t(l.it),g:Math.round(l.price*(1-AUFEE))}),'good');}}
