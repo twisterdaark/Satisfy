@@ -190,7 +190,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U332 | Limited festivals | ✅ | The town festival every third hour (B, v0.94) |
 | U333 | Balance dashboard | ✅ | SAT-ONLINE-088: each game writes its own class's week (`balance/{uid}`: kills, seconds from first hit to kill, PvP wins and losses from duels and open PvP; bounded by the rules), the owner's `/balance` sums them by class (PvE time to kill, PvP win rate); admins only read them; no names on the board (`regression/balance`) |
 | U334 | Economy health | 🟡 | `/economy` (082) is a snapshot of wealth; no gold in/out counters or alerts |
-| U335 | Content flags | 🟡 | Older pages skip what they don't know (fx tags, presence fields) |
+| U335 | Content flags | 🟡 | Older pages skip what they don't know (fx tags, presence fields). SAT-ONLINE-121: live switches, world chat, trading and dueling, which the owner turns off and on for everyone without a release (`/switch`), held by the rules for every page (`flags`). Left: content packs by region and player group |
 | U336 | Announcement system | ✅ | SAT-ONLINE-079: `/announce text` from an admin account (`admins/{uid}`, set in the console only); everyone online sees it once, late joiners within 10 min; the rules refuse anyone else (`regression/announce`) |
 | U337 | Maintenance notices | ✅ | SAT-ONLINE-079: `/maint minutes text`: the time, reminders 10/5/1 min before, a save when it starts; and "a new version" asks only the older page to refresh (SAT-ONLINE-045) |
 | U338 | Hotfix pipeline | 🟡 | Small PRs, a review, then main |

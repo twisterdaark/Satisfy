@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22switches', ver: '1.42', d: '2026-10-22',
+      ar: ["صاحب اللعبة بقى يقدر يقفل شات العالم أو التبادل أو المبارزات لكل اللاعيبة لفترة (زي وقت سبام)، من غير تحديث. بيظهرلك تنبيه لما حاجة تتقفل ولما ترجع"],
+      en: ["The game's owner can now switch world chat, trading or dueling off for everyone for a while (during a spam wave, say), without an update. You are told when one goes off and when it comes back"] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },
