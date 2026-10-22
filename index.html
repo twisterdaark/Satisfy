@@ -4933,7 +4933,7 @@ const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Mat
 // the golden ratio (novel ch 315, 1423): Strength and Agility kept 1:1. A hidden stat: always on, never shown in the status window
 const balanced=()=>!!(S&&S.st.str>=20&&S.st.agi>=20&&Math.abs(S.st.str-S.st.agi)<=Math.max(S.st.str,S.st.agi)*.1);
 const dodgeCost=()=>balanced()?20:25;
-function maxHP(){return Math.round((1+achB('hp'))*(100+stat('sta')*10+(S.tl.chief?60:0))*(balanced()?1.08:1)*(S.cls==='gknight'?1.15:S.cls==='knight'?1.2:S.cls==='paladin'?1.15:S.cls==='necro'?.9:S.cls==='orator'?.8:1)*(S.tl.purifier?1.1:1)*(S.tl.climber?1.05:1)*(1+gearSum('hpp')));}
+function maxHP(){return Math.round((1+achB('hp'))*(100+stat('sta')*10+(S.tl.chief?60:0))*(balanced()?1.08:1)*(S.cls==='gknight'?1.15:S.cls==='knight'?1.2:S.cls==='paladin'?1.15:S.cls==='necro'?.9:S.cls==='orator'?.8:1)*(S.tl.purifier?1.1:1)*(S.tl.climber?1.05:1)*(1+gearSum('hpp'))*(1+rsB('hp')));} // rsB: the guild's research (SAT-ONLINE-105)
 function maxST(){return 80+stat('sta')*2;}
 function maxMP(){return Math.round((stat('int')*3+Math.round(gearSum('mpb')))*(1+.1*Math.min(2,(S.wis&&S.wis.pill)||0))*(S.tl.echo?1.08:1));}
 const weapKind=()=>(WSH[weapon().id]||{}).k||'sword';
@@ -9127,10 +9127,33 @@ function gbStart(gid){gbStop();if(!GDS||!gid||!GDS.watchBank)return;gbFor=gid;
  gbOff=()=>o.forEach(f=>{try{f();}catch(e){}});}
 function gbStop(){if(gbOff)gbOff();gbOff=null;GBK=GBL=GBLOG=null;gbFor=null;}
 function gbLv(b){const g=myG();return g&&g.online&&g.bld?Math.max(0,Math.min(3,g.bld[b]|0)):0;}
-function gbB(k){let n=0;for(const b in GB)if(GB[b].k===k)n+=gbLv(b)*GB[b].v;return n;}
+function gbB(k){let n=0;for(const b in GB)if(GB[b].k===k)n+=gbLv(b)*GB[b].v;return n+rsB(k);}
+// the research's bonus of a kind (var GB_RS: health is asked for before this part of the page has run)
+function rsB(k){let n=0;if(GB_RS)for(const r in GB_RS)if(rsOn(r))n+=GB_RS[r].e[k]||0;return n;}
 // the buildings into the mirrored guild (what gXPB, gGoldB and crafting read); a level that went up is told
 function guildMirrorB(){const g=myG();if(!g||!g.online||!GBL)return;const was=g.bld||null;g.bld={};
- for(const b in GB){const l=Math.max(0,Math.min(3,GBL[b]|0));g.bld[b]=l;if(was&&l>(was[b]|0))toast(t('gbBuilt',{b:t('gb_'+b),l}),'good');}hudDirty=true;}
+ for(const b in GB){const l=Math.max(0,Math.min(3,GBL[b]|0));g.bld[b]=l;if(was&&l>(was[b]|0))toast(t('gbBuilt',{b:t('gb_'+b),l}),'good');}
+ for(const r in GB_RS)if(GBL[r]===1){g.bld[r]=1;if(was&&was[r]!==1)toast(t('rsDone',{r:t('rs_'+r)}),'good');}hudDirty=true;}
+/* the research tree (SAT-ONLINE-105, plan U237): seven studies paid from the treasury, each once and after the ones it
+   needs, each a bonus for every member: experience, gold, crafting quality, then more of them and health, and at the top a
+   bit of all three. Kept beside the buildings (guildBuild/{gid}/{node} = 1); the rules check the order and that exactly its
+   cost leaves the treasury (no cost is ever negative or skipped). */
+var GB_RS={xp1:{c:30000,need:[],e:{xp:.02}},gd1:{c:30000,need:[],e:{gd:.02}},q1:{c:30000,need:[],e:{q:.01}},
+ xp2:{c:120000,need:['xp1'],e:{xp:.03}},gd2:{c:120000,need:['gd1'],e:{gd:.03}},hp1:{c:120000,need:['q1'],e:{hp:.03}},all:{c:400000,need:['xp2','gd2','hp1'],e:{xp:.02,gd:.02,hp:.02}}};
+Object.assign(STR.ar,{rsTree:'شجرة البحث',rsH:'البحث بيتدفع من خزينة الجيلد مرة واحدة، وكل بحث بيدي كل الأعضاء ميزة. الخزينة: {g} دهب',rs_xp1:'دراسة الصيد',rs_gd1:'دراسة التجارة',rs_q1:'دراسة الصنعة',rs_xp2:'فنون القتال',rs_gd2:'طرق القوافل',rs_hp1:'دروع الحدادين',rs_all:'إرث الجيلد',
+ rsE_xp:'+{v}% خبرة',rsE_gd:'+{v}% دهب',rsE_q:'+{v}% جودة صناعة',rsE_hp:'+{v}% صحة',rsRowOn:'✓ {r}: {e}',rsRowGo:'{r}: {e} · {g} دهب',rsRowNo:'🔒 {r}: {e} · محتاج {n}',rsGo:'ابحث {r} ({g} دهب)',rsDone:'الجيلد خلّص بحث {r}!',rsLog:'{n} بحث {r}'});
+Object.assign(STR.en,{rsTree:'Research tree',rsH:'Research is paid from the guild treasury once, and each study gives every member a bonus. Treasury: {g} gold',rs_xp1:'Hunting Studies',rs_gd1:'Trade Studies',rs_q1:'Craft Studies',rs_xp2:'Arts of War',rs_gd2:'Caravan Roads',rs_hp1:"Smiths' Armour",rs_all:'Guild Legacy',
+ rsE_xp:'+{v}% experience',rsE_gd:'+{v}% gold',rsE_q:'+{v}% crafting quality',rsE_hp:'+{v}% health',rsRowOn:'✓ {r}: {e}',rsRowGo:'{r}: {e} · {g} gold',rsRowNo:'🔒 {r}: {e} · needs {n}',rsGo:'Research {r} ({g} gold)',rsDone:'Your guild finished {r}!',rsLog:'{n} researched {r}'});
+function rsOn(r){const g=myG();return !!(g&&g.online&&g.bld&&g.bld[r]===1);}
+function rsOpen(r){return !rsOn(r)&&GB_RS[r].need.every(rsOn);}
+const rsEff=r=>Object.entries(GB_RS[r].e).map(([k,v])=>t('rsE_'+k,{v:Math.round(v*100)})).join(', ');
+function rsDo(r,tries){tries=tries|0;if(!GDS||!GUILD||!GB_RS[r])return;const st=GUILD.state(),cost=GB_RS[r].c,k=GBK||{in:0,s:0};if(!st.gid||!rsOpen(r)||!gCan('spend'))return;
+ if(k.in-k.s<cost){toast(t('gbPoor'),'warn');return;}
+ GDS.build(st.gid,NET.uid,netId||S.look.n,r,1,cost,gbLid()).then(()=>{SFX.level();},e=>{if(tries<2&&gbFail(e))setTimeout(()=>rsDo(r,tries+1),300);else toast(t('gdFail'),'warn');});}
+function guildRsD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const k=GBK||{in:0,s:0},have=k.in-k.s,boss=gCan('spend');
+ const L=[t('rsH',{g:have.toLocaleString()}),Object.keys(GB_RS).map(r=>{const e=rsEff(r),n=t('rs_'+r);return rsOn(r)?t('rsRowOn',{r:n,e}):rsOpen(r)?t('rsRowGo',{r:n,e,g:GB_RS[r].c.toLocaleString()}):t('rsRowNo',{r:n,e,n:GB_RS[r].need.filter(q=>!rsOn(q)).map(q=>t('rs_'+q)).join(', ')});}).join(' · ')];
+ const o=boss?Object.keys(GB_RS).filter(rsOpen).map(r=>({l:t('rsGo',{r:t('rs_'+r),g:GB_RS[r].c.toLocaleString()}),poor:have<GB_RS[r].c,f:()=>{rsDo(r);setTimeout(guildRsD,700);}})):[];
+ dialog('guild',L,null,[...o,{l:t('oBack'),f:guildBldD}]);}
 function gbLid(){return 'l_'+Date.now().toString(36)+(++gbSeq).toString(36)+NET.uid.slice(0,8);}
 function gbFail(e){return /PERMISSION/i.test(String(e&&(e.code||e.message)));}
 function gbGive(g,tries){tries=tries|0;if(!GDS||!GUILD||!S||S.gold<g)return;const st=GUILD.state();if(!st.gid)return;S.gold-=g;hudDirty=true;save(true);
@@ -9141,12 +9164,13 @@ function gbBuild(b,tries){tries=tries|0;if(!GDS||!GUILD)return;const st=GUILD.st
  GDS.build(st.gid,NET.uid,netId||S.look.n,b,l+1,cost,gbLid()).then(()=>{SFX.level();},e=>{if(tries<2&&gbFail(e))setTimeout(()=>gbBuild(b,tries+1),300);else toast(t('gdFail'),'warn');});}
 function guildBldD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const st=GUILD.state(),k=GBK||{in:0,s:0},have=k.in-k.s,boss=gCan('spend');
  const L=[t('gbH',{g:have.toLocaleString()})];for(const b in GB){const l=gbLv(b);L.push(t('gbRow',{ic:GB[b].ic,b:t('gb_'+b),l,e:Math.round(l*GB[b].v*100),w:t('gbE_'+b),nx:l<3?t('gbNext',{g:GB_COST[l].toLocaleString()}):t('gbMax')}));}
- const log=Object.values(GBLOG||{}).filter(x=>x&&typeof x.t==='number').sort((a,b)=>b.t-a.t).slice(0,5).map(x=>{const n=Satisfy.chat.clean(x.n,24)||'?';return x.k==='build'&&GB[x.b]?t('gbLogB',{n,b:t('gb_'+x.b),l:x.l|0}):t('gbLogG',{n,g:(x.g|0).toLocaleString()});});
+ const log=Object.values(GBLOG||{}).filter(x=>x&&typeof x.t==='number').sort((a,b)=>b.t-a.t).slice(0,5).map(x=>{const n=Satisfy.chat.clean(x.n,24)||'?';return x.k==='build'&&GB[x.b]?t('gbLogB',{n,b:t('gb_'+x.b),l:x.l|0}):x.k==='build'&&GB_RS[x.b]?t('rsLog',{n,r:t('rs_'+x.b)}):t('gbLogG',{n,g:(x.g|0).toLocaleString()});});
  if(log.length)L.push(log.join(' · '));
  const o=GB_GIVE.filter(g=>S.gold>=g).map(g=>({l:t('gbGive',{g:g.toLocaleString()}),f:()=>{gbGive(g);setTimeout(guildBldD,700);}}));
  if(boss)for(const b in GB){const l=gbLv(b);if(l<3)o.push({l:t('gbBuild',{b:t('gb_'+b),l:l+1,g:GB_COST[l].toLocaleString()}),poor:have<GB_COST[l],f:()=>{gbBuild(b);setTimeout(guildBldD,700);}});}
+ o.push({l:t('rsTree')+' ('+Object.keys(GB_RS).filter(rsOn).length+'/'+Object.keys(GB_RS).length+')',f:guildRsD});
  dialog('guild',L,null,[...o,{l:t('oBack'),f:guildPanel}]);}
-window.__GBD={fb:()=>FB,store:()=>GDS,give:g=>gbGive(g),build:b=>gbBuild(b),bank:()=>GBK,lv:b=>gbLv(b),xpB:()=>gXPB(),goldB:()=>gGoldB(),q:()=>gbB('q'),open:()=>guildBldD(),log:()=>GBLOG}; // tests
+window.__GBD={research:r=>rsDo(r),rsOn:r=>rsOn(r),rs:()=>guildRsD(),hpB:()=>gbB('hp'),fb:()=>FB,store:()=>GDS,give:g=>gbGive(g),build:b=>gbBuild(b),bank:()=>GBK,lv:b=>gbLv(b),xpB:()=>gXPB(),goldB:()=>gGoldB(),q:()=>gbB('q'),open:()=>guildBldD(),log:()=>GBLOG}; // tests
 function guildVaultD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const V=GUILD.vault(),ks=Object.keys(V).sort((a,b)=>V[b].t-V[a].t);
  const o=ks.slice(0,24).map(k=>{const e=V[k],can=GUILD.canTake(k);return {l:vaultName(e)+' · '+e.byN,ic:e.k,poor:!can,f:()=>can?dialog('guild',[t('gdTakeQ',{it:vaultName(e)})],null,[{l:t('gYes'),f:()=>guildTake(k)},{l:t('gNo'),f:guildVaultD}]):guildVaultD()};});
  dialog('guild',[t('gdVaultH',{n:ks.length,m:Satisfy.guild.C.VAULT_MAX}),ks.length?'':t('gdVaultEmpty')].filter(Boolean),null,[{l:t('gdPut'),f:guildPutD},...o,{l:t('oBack'),f:guildPanel}]);}
