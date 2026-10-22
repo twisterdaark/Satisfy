@@ -93,3 +93,20 @@ test('#138: rank rights: the master decides who takes from the vault; the vault 
   await no(db(A).ref('guilds/' + G + '/perm/m').set({ take: false }), 'there are no rights to set for the master');
   await no(db(A).ref('guildVault/' + G).remove(), 'the whole vault goes only with the guild');
 });
+
+test('#129: the auction: your own listing, bought once by someone else with the exact price, collected by the seller', async () => {
+  const L = 'a_' + A + '_0', item = { by: A, n: 'Ahmed', it: 'ore', q: 5, price: 300, t: SV };
+  await no(db(B).ref('auction/' + L).set(Object.assign({}, item)), 'nobody lists in another name');
+  await no(db(A).ref('auction/a_' + A + '_8').set(item), 'eight slots a seller');
+  await yes(db(A).ref('auction/' + L).set(item), 'A lists ore');
+  await yes(db(C).ref('auction').once('value'), 'everyone reads the market');
+  const buy = (who, g) => db(who).ref().update({ ['auction/' + L]: null, ['auctionPaid/' + A + '/' + L]: { g, by: who, bn: 'x', it: 'ore', q: 5, t: SV } });
+  await no(buy(B, 1), 'not below the price');
+  await no(db(B).ref('auction/' + L).remove(), 'nor taken off without paying');
+  await no(buy(A, 300), 'the seller does not buy its own');
+  await yes(buy(B, 300), 'B buys it: the listing goes and the gold waits for A');
+  await no(buy(C, 300), 'bought once');
+  await no(db(B).ref('auctionPaid/' + A + '/' + L).remove(), 'only the seller collects');
+  await no(db(B).ref('auctionPaid/' + A).once('value'), 'nor reads it');
+  await yes(db(A).ref('auctionPaid/' + A + '/' + L).remove(), 'A collects');
+});
