@@ -34,11 +34,15 @@
     'qs', 'bqa', 'adqa', 'adqO', 'adqT', 'adqK', 'exd', 'exc', 'exf','cbase','church','hc','dv','dt','ms','rc','dcb','crep','rsh','cdy','xpb','pevo','mxp','und','pat1','patD','eyes','cre', 'qOff', 'p3', 'p4', 'kills', 'met', 'ev', 'guardDown', 'vis', 'books', 'chest', 'chops', 'hag', 'burnSeen',
     // equipment slots, skill bar, NPC affinity and town reputation, guild membership, companion, life skills
     'eq', 'bar', 'aff', 'rep', 'guild', 'comp', 'life',
+    // repair orders posted to player smiths and not answered yet (SAT-ONLINE-096)
+    'rord',
     // mounts and pets owned/active (SAT-MOUNT), the daily arena lockout (a date, so it must sync)
     'mounts', 'mount', 'pets', 'pet', 'arenaDay',
     // achievements earned (SAT-ACH-001), arena wins and the highest level ever reached (SAT-RANK-001),
     // today's daily bounties and streak (SAT-DAILY-001; a date inside, so it must sync)
     'ach', 'arW', 'peak', 'dly',
+    // the days (UTC dates, the last 7) you cleared all three daily bounties (SAT-ONLINE-130)
+    'dlyW',
     // costumes owned (SAT-STYLE-001), pet growth (SAT-PETLV-001), best Tower of Trials floor (SAT-TOWER-001)
     'cos', 'petx', 'twB',
     // the inn you are bound to respawn at (main 6991032)
@@ -63,8 +67,12 @@
     'karma', 'karT',
     // the National Competition (SAT-ONLINE-064) this character scored in and is still to be paid for (its id)
     'natIn',
+    // the guild hall being visited (SAT-ONLINE-115, plan U013): {gid, name, guest, dx, dy}, so a reload inside goes on there
+    'hall',
     // recipes learned and recipe use counts (main rcLearn)
     'rcK', 'rcN',
+    // divine-beast breaths ever held, which open their set recipes (owner 2026-10-22)
+    'kmat',
     // map cells seen (fog of war, Nitro's feedback): base64 bitset
     'fog', 'sec', 'respec', 'bank',
     // skill experience that sets each skill's level (owner 2026-10-19), and its format (2 = experience, 2026-10-20)
@@ -78,7 +86,7 @@
     // the Tower of Wisdom (major #5): map, Tower's Mission, basic tests, members' tests, Dragon Pills, Matchless Heart, 10th Seat
     'wis',
   ];
-  var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT', 'qTrk', 'qGOff'];
+  var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk'];
   var META = ['v', 'wv', 'uid', 'pid'];
   // Never saved: set on the title-screen demo state only.
   var TRANSIENT = ['__demo'];

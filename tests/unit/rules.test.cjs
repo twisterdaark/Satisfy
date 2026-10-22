@@ -86,7 +86,7 @@ test('presence is indexed on exactly the children the interest queries order by 
 test('inbox: only the owner reads and deletes; senders create write-once messages as themselves', () => {
   const box = rules.inbox.$uid, msg = box.$msg;
   assert.equal(box['.read'], 'auth != null && auth.uid === $uid');
-  assert.equal(msg['.write'], "auth != null && ((auth.uid === $uid && !newData.exists()) || (!data.exists() && newData.child('from').val() === auth.uid))");
+  assert.equal(msg['.write'], "auth != null && ((auth.uid === $uid && !newData.exists()) || (!data.exists() && newData.child('from').val() === auth.uid && (newData.child('type').val() !== 'trade.ask' || root.child('flags').child('trade').child('on').val() !== false) && (newData.child('type').val() !== 'duel.challenge' || root.child('flags').child('duel').child('on').val() !== false)))", 'no new trade or duel while the owner has it switched off (SAT-ONLINE-121)');
   assert.equal(msg.payload.to['.validate'], 'newData.val() === $uid');
   assert.equal(msg.t['.validate'], 'newData.val() === now');
   assert.equal(msg.$other['.validate'], false);
@@ -165,7 +165,7 @@ test('presence: one shard name only', () => {
 // SAT-ONLINE-039: the trade swap is guarded by the rules, not only by the clients
 test('trades: participants only; each writes its own offer until the swap; the swap needs both confirms; the ledger moves an item once', () => {
   const tr = rules.trades.$tid, sides = rules.tradeSides.$tid, done = rules.tradeDone.$tid, led = rules.tradedItems.$iid;
-  assert.equal(tr['.write'], "auth != null && !data.exists() && newData.child('a').val() === auth.uid", 'the asker creates it, once');
+  assert.equal(tr['.write'], "auth != null && !data.exists() && newData.child('a').val() === auth.uid && root.child('flags').child('trade').child('on').val() !== false", 'the asker creates it, once, unless trading is switched off');
   assert.match(tr['.read'], /data\.child\('a'\)\.val\(\) === auth\.uid \|\| data\.child\('b'\)\.val\(\) === auth\.uid/);
   assert.match(sides.$uid['.write'], /^auth != null && auth\.uid === \$uid && /, 'only your own offer');
   assert.match(sides.$uid['.write'], /!root\.child\('tradeDone'\)\.child\(\$tid\)\.exists\(\)$/, 'frozen once the swap is written');
@@ -462,7 +462,7 @@ test('moderation (SAT-ONLINE-082): admins read reports and crashes, write mutes 
   const ADM = "root.child('admins').child(auth.uid).val() === true";
   assert.equal(rules.reports['.read'], 'auth != null && ' + ADM);
   assert.equal(rules.crashes['.read'], 'auth != null && ' + ADM);
-  assert.equal(rules.crashes.$id['.write'], 'auth != null && !data.exists()', 'anyone signed in sends one, once');
+  assert.equal(rules.crashes.$id['.write'], 'auth != null && (!data.exists() || (!newData.exists() && ' + ADM + '))', 'anyone signed in sends one, once; only an admin removes one (SAT-ONLINE-111)');
   assert.equal(rules.crashes.$id.by['.validate'], 'newData.val() === auth.uid');
   assert.equal(rules.mutes.$uid['.write'], 'auth != null && ' + ADM);
   assert.equal(rules.mutes.$uid.until['.validate'], 'newData.isNumber() && newData.val() > now && newData.val() <= now + 2592000000', 'an expiry within 30 days');
@@ -548,6 +548,26 @@ test('seller history (SAT-ONLINE-089): your own record of a trade done between t
   assert.equal(L.$tid.gi['.validate'], "newData.val() === root.child('tradeSides').child($tid).child(newData.parent().child('o').val()).child('g').val()");
 });
 
+test('guild seasons (SAT-ONLINE-090): trophies written by admins only, three kinds; admins read the weekly goals', () => {
+  const adm = "root.child('admins').child(auth.uid).val() === true", T = rules.guildTrophy;
+  assert.equal(T['.read'], 'auth != null', 'everyone sees them');
+  assert.equal(T.$gid.$season['.write'], 'auth != null && ' + adm, 'nobody else gives one');
+  assert.equal(T.$gid.$season.k['.validate'], "newData.val() === 'gold' || newData.val() === 'silver' || newData.val() === 'bronze'");
+  assert.match(T.$gid.$season['.validate'], /^\$season\.matches\(\/\^s\[0-9\]\{4\}-\[0-9\]\{2\}\$\/\)/);
+  assert.equal(rules.guildWeek['.read'], 'auth != null && ' + adm, 'the owner reads every guild\'s weekly goal to close a season');
+});
+
+test('repair orders (SAT-ONLINE-096): your own order; mended by someone else, who tells its owner and is paid its fee', () => {
+  const O = rules.repairOrders.$oid, D = rules.repairDone.$uid.$oid, P = rules.repairPaid.$uid.$oid, o = "root.child('repairOrders').child($oid)";
+  assert.ok(O['.write'].includes("newData.parent().parent().child('repairDone').child(data.child('by').val()).child($oid).child('by').val() === auth.uid"), 'off only with its owner told');
+  assert.ok(D['.write'].includes(o + ".child('by').val() === $uid && $uid !== auth.uid && !newData.parent().parent().parent().child('repairOrders').child($oid).exists()"), "someone else's order, gone in the same write");
+  assert.equal(D.iid['.validate'], 'newData.val() === ' + o + ".child('iid').val()", 'the same piece');
+  assert.ok(P['.write'].includes("newData.parent().parent().parent().child('repairDone').child(" + o + ".child('by').val()).child($oid).child('by').val() === $uid"), 'paid only for mending it');
+  assert.equal(P.g['.validate'], 'newData.val() === ' + o + ".child('fee').val()", 'its fee');
+  assert.equal(rules.repairDone.$uid['.read'], 'auth != null && auth.uid === $uid');
+  assert.ok(P['.write'].endsWith("|| (data.exists() && !newData.exists()))"), 'a fee collected once (Claude-B, #131)');
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);
@@ -576,4 +596,35 @@ test('every rule expression is well formed: balanced parentheses, closed strings
     }
   })(rules, '');
   assert.deepEqual(bad, []);
+});
+
+test('the guild hall (SAT-ONLINE-115): members and guests read it, the master and officers furnish it and let guests in, the guest only leaves', () => {
+  const MEM = "root.child('guildMembers').child($gid).child(auth.uid).exists()";
+  const MO = "(root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o')";
+  const h = rules.guildHall.$gid, g = rules.guildHallGuest.$gid, v = rules.hallInv.$uid;
+  assert.equal(h['.read'], `auth != null && (${MEM} || root.child('guildHallGuest').child($gid).child(auth.uid).exists())`);
+  assert.ok(h['.write'].startsWith('auth != null && (' + MO + ' || '), 'the master and officers furnish');
+  assert.match(h.$slot['.validate'], /^\$slot\.matches\(\/\^s\[0-7\]\$\/\) && newData\.hasChildren\(\['k', 'by', 'n', 't'\]\)/, 'eight places');
+  assert.equal(h.$slot.k['.validate'], "newData.isString() && newData.val().matches(/^(table|shelf|rack|barrel|anvil|bed|board|well|counter)$/)");
+  assert.equal(h.$slot.by['.validate'], 'newData.val() === auth.uid');
+  assert.equal(h.$slot.t['.validate'], 'newData.val() === now');
+  assert.equal(g['.read'], 'auth != null && ' + MEM);
+  assert.equal(g.$uid['.read'], 'auth != null && $uid === auth.uid', 'a guest reads its own invitation');
+  assert.equal(g.$uid['.write'], 'auth != null && $uid === auth.uid && !newData.exists()', 'and may only take it away');
+  assert.match(g.$uid['.validate'], /!root\.child\('guildMembers'\)\.child\(\$gid\)\.child\(\$uid\)\.exists\(\)/, 'not a member already');
+  assert.equal(v['.read'], 'auth != null && $uid === auth.uid');
+  assert.equal(v.$gid['.write'], `auth != null && (($uid === auth.uid && !newData.exists()) || ${MO})`);
+  assert.match(v.$gid['.validate'], /newData\.parent\(\)\.parent\(\)\.parent\(\)\.child\('guildHallGuest'\)\.child\(\$gid\)\.child\(\$uid\)\.exists\(\)/, 'only with the guest entry it points to');
+  for (const n of [h.$slot, g.$uid, v.$gid]) assert.equal(n.$other['.validate'], false);
+});
+
+test('live switches (SAT-ONLINE-121): only admins turn world chat, trading or duels off; the rules then refuse new ones', () => {
+  const f = rules.flags, OFF = (k) => "root.child('flags').child('" + k + "').child('on').val() !== false";
+  assert.equal(f['.read'], 'auth != null', 'every page follows them');
+  assert.equal(f.$k['.write'], "auth != null && root.child('admins').child(auth.uid).val() === true");
+  assert.equal(f.$k['.validate'], "$k.matches(/^(chat|trade|duel)$/) && newData.hasChildren(['on', 'by', 't'])", 'three switches, no others');
+  assert.equal(f.$k.on['.validate'], 'newData.isBoolean()');
+  assert.equal(f.$k.$other['.validate'], false);
+  assert.ok(rules.chat.$world.$id['.write'].includes("newData.child('from').val() === auth.uid && " + OFF('chat')), 'no new world line while chat is off');
+  assert.ok(!rules.chat.$world.$id['.write'].split('||').pop().includes('flags'), 'old lines can still be cleared');
 });

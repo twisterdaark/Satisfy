@@ -423,7 +423,7 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildTax/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; u['guildWar/' + gid] = null; u['guildWarAsk/' + gid] = null; u['guildWarKill/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; u['guildWar/' + gid] = null; u['guildWarAsk/' + gid] = null; u['guildWarKill/' + gid] = null; u['guildTax/' + gid] = null; u['guildHall/' + gid] = null; u['guildHallGuest/' + gid] = null; return up(u); },
       // SAT-ONLINE-081 the weekly goal: guildWeek/{gid}/{wk}/{uid} {n, k, t}: each member's own kills this week (only upward,
       // at most 1,500); guildWeekPaid/{gid}/{wk}/{uid}/{tier} {t}: a tier's reward, taken once
       watchWeek: function (gid, wk, cb) { return watch('guildWeek/' + gid + '/' + wk, cb); },
@@ -747,6 +747,9 @@
         var off = D.onValue(q, function (s) { cb(s.val() || {}); }, function () { cb({}); });
         return function () { try { off(); } catch (e) { /* ignore */ } };
       },
+      // SAT-ONLINE-121 live switches: flags/{chat|trade|duel} {on, why?, by, t}; admins write them, every page follows them
+      watchFlags: function (cb) { var off = null; try { off = D.onValue(at('flags'), function (s) { cb(s.val() || {}); }, function () { cb({}); }); } catch (e) { cb({}); } return function () { try { if (off) off(); } catch (e) { /* ignore */ } }; },
+      setFlag: function (k, on, why, by) { var e = { on: !!on, by: by, t: D.serverTimestamp() }; if (why) e.why = String(why).slice(0, 80); var u = {}; u['flags/' + k] = e; return D.update(D.ref(db), u); },
       post: function (v) {
         var e = { k: v.k, ar: String(v.ar).slice(0, 200), en: String(v.en).slice(0, 200), by: v.by, t: D.serverTimestamp() };
         if (v.k === 'maint') e.at = v.at;
@@ -764,6 +767,8 @@
     return {
       crash: function (v) { var e = { m: String(v.m).slice(0, 200) || '?', s: String(v.s || '').slice(0, 800), v: String(v.v || '').slice(0, 16), by: v.by, t: D.serverTimestamp() }; if (v.z) e.z = String(v.z).slice(0, 24); return D.push(at('crashes'), e); },
       crashes: function () { return all('crashes'); },
+      // SAT-ONLINE-111 (plan U382): an admin removes the given crash reports, at most 500 in one write
+      clearCrashes: function (ids) { var u = {}; (ids || []).slice(0, 500).forEach(function (id) { u['crashes/' + id] = null; }); return Object.keys(u).length ? D.update(D.ref(db), u) : Promise.resolve(); },
       reports: function () { return Promise.all([all('reports'), all('reportDone')]).then(function (r) { return { reports: r[0], done: r[1] }; }); },
       resolve: function (id, a, by) { var u = {}; u['reportDone/' + id] = { a: a, by: by, t: D.serverTimestamp() }; return D.update(D.ref(db), u); },
       mute: function (uid, until, why, by) { var u = {}; u['mutes/' + uid] = { until: until, why: String(why || '').slice(0, 60), by: by, t: D.serverTimestamp() }; return D.update(D.ref(db), u); },
@@ -781,7 +786,36 @@
       uidOf: function (id) { return D.get(at('handles/' + String(id).toLowerCase())).then(function (s) { return typeof s.val() === 'string' ? s.val() : null; }); },
       // SAT-ONLINE-088: every player's numbers for this week, balance/{uid} {wk, cls, lv, n, s, w, l, t} (admins read them)
       balance: function () { return all('balance'); },
+      // SAT-ONLINE-090 guild seasons: every guild's weekly goal counts (admins read them) and its names, to close a season;
+      // guildTrophy/{gid}/{season} {k, p, by, t}: a season's trophy (gold, silver, bronze; p: its points), written by admins
+      seasonData: function () { return Promise.all([all('guildWeek'), all('guilds')]).then(function (r) { return { weeks: r[0], guilds: r[1] }; }); },
+      trophy: function (gid, season, k, p, by) { var u = {}; u['guildTrophy/' + gid + '/' + season] = { k: k, p: p, by: by, t: D.serverTimestamp() }; return D.update(D.ref(db), u); },
+      trophies: function (gid) { return D.get(at('guildTrophy/' + gid)).then(function (s) { return s.val() || {}; }); },
       ranks: function () { return Promise.all([all('ranks/gold'), all('ranks/lv')]).then(function (r) { return { gold: r[0], lv: r[1] }; }); },
+    };
+  }
+
+  // SAT-ONLINE-096: repair orders for player smiths. repairOrders/{oid} {by, n, iid, it, d, fee, t}: a piece to mend and
+  // its fee; a smith answers it in one update that removes it, tells its owner (repairDone/{owner}/{oid} {iid, by, sn, fee,
+  // t}) and pays the smith (repairPaid/{smith}/{oid} {g, t}); the rules take that only for the order as it is, by someone
+  // else. The owner and the smith each remove what they took.
+  function repairStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, SV = function () { return D.serverTimestamp(); };
+    var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
+    return {
+      list: function () { return D.get(at('repairOrders')).then(function (s) { return s.val() || {}; }); },
+      post: function (oid, v) { var u = {}; u['repairOrders/' + oid] = { by: v.by, n: String(v.n || '?').slice(0, 24), iid: v.iid, it: String(v.it || '?').slice(0, 40), d: v.d, fee: v.fee, t: SV() }; return D.update(D.ref(db), u); },
+      cancel: function (oid) { return D.remove(at('repairOrders/' + oid)); },
+      mend: function (oid, o, smith, sn) {
+        var u = {}; u['repairOrders/' + oid] = null;
+        u['repairDone/' + o.by + '/' + oid] = { iid: o.iid, by: smith, sn: String(sn || '?').slice(0, 24), fee: o.fee, t: SV() };
+        u['repairPaid/' + smith + '/' + oid] = { g: o.fee, t: SV() };
+        return D.update(D.ref(db), u);
+      },
+      watchDone: function (uid, cb) { return watch('repairDone/' + uid, cb); },
+      took: function (uid, oid) { return D.remove(at('repairDone/' + uid + '/' + oid)); },
+      watchPaid: function (uid, cb) { return watch('repairPaid/' + uid, cb); },
+      collect: function (uid, oid) { return D.remove(at('repairPaid/' + uid + '/' + oid)); },
     };
   }
 
@@ -800,8 +834,37 @@
     };
   }
 
+  // SAT-ONLINE-115 (plan U235) the guild hall: guildHall/{gid}/{s0..s7} {k, by, n, t}: what stands in each of the hall's
+  // eight places, who put it there and when (the master and officers place and clear them); guildHallGuest/{gid}/{uid}
+  // {n, by, t}: players outside the guild whom the master or an officer let in; hallInv/{uid}/{gid} {g, by, t}: the same
+  // invitation where the guest finds it. Members and guests read the hall; it goes with the guild.
+  function hallStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, SV = function () { return D.serverTimestamp(); };
+    var at = function (p) { return D.ref(db, p); }, up = function (u) { return D.update(D.ref(db), u); };
+    var get = function (p) { return D.get(at(p)).then(function (s) { return s.val() || {}; }); };
+    return {
+      // cb(slots) on every change; lost() when the read is refused (no longer a member or a guest)
+      watch: function (gid, cb, lost) {
+        var off = null, gone = function () { if (lost) lost(); };
+        try { off = D.onValue(at('guildHall/' + gid), function (s) { cb(s.val() || {}); }, gone); } catch (e) { setTimeout(gone, 0); }
+        return function () { try { if (off) off(); } catch (e) { /* ignore */ } };
+      },
+      read: function (gid) { return get('guildHall/' + gid); },
+      uidOf: function (id) { return D.get(at('handles/' + String(id).toLowerCase())).then(function (s) { return typeof s.val() === 'string' ? s.val() : null; }); },
+      nameOf: function (uid) { return D.get(at('accountIds/' + uid)).then(function (s) { return typeof s.val() === 'string' ? s.val() : null; }); },
+      place: function (gid, slot, k, uid, n) { var u = {}; u['guildHall/' + gid + '/' + slot] = k ? { k: k, by: uid, n: String(n || '?').slice(0, 24), t: SV() } : null; return up(u); },
+      guests: function (gid) { return get('guildHallGuest/' + gid); },
+      invite: function (gid, g, uid, n, by) { var u = {}; u['guildHallGuest/' + gid + '/' + uid] = { n: String(n).slice(0, 24), by: by, t: SV() }; u['hallInv/' + uid + '/' + gid] = { g: String(g).slice(0, 18), by: by, t: SV() }; return up(u); },
+      uninvite: function (gid, uid) { var u = {}; u['guildHallGuest/' + gid + '/' + uid] = null; u['hallInv/' + uid + '/' + gid] = null; return up(u); },
+      invites: function (uid) { return get('hallInv/' + uid); },
+      // the guest's own way out: both copies of the invitation
+      drop: function (uid, gid) { var u = {}; u['hallInv/' + uid + '/' + gid] = null; u['guildHallGuest/' + gid + '/' + uid] = null; return up(u); },
+    };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
   ns.firebase = Object.freeze({
+    hallStore: hallStore,
     tradeStore: tradeStore,
     guildStore: guildStore,
     dropStore: dropStore,
@@ -811,6 +874,7 @@
     friendStore: friendStore,
     reportStore: reportStore,
     lfgStore: lfgStore,
+    repairStore: repairStore,
     announceStore: announceStore,
     modStore: modStore,
     natStore: natStore,

@@ -16,16 +16,16 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U010 | Smooth remote movement | ✅ | Interpolation 100 ms in the past, snap on jumps (`unit/presence`) |
 | U011 | Remote animations | ✅ | `anim` idle/walk/attack/dodge/dead |
 | U012 | Network room browser | ❌ | One world shard today (`main`) |
-| U013 | Rejoin same room | 🟡 | Reconnect after a drop and after reload (`regression/online-firebase`), and back into the same party (SAT-ONLINE-023); one room only |
+| U013 | Rejoin same room | ✅ | Reconnect after a drop and after reload (`regression/online-firebase`), and back into the same party (SAT-ONLINE-023); SAT-ONLINE-115: a reload inside a guild hall goes on in the same guild's hall (the save keeps the visit and where you came in), or puts you back where you came in when it can't (offline 15 s, no longer a member or a guest) (`regression/guildhall`) |
 | U014 | Stale state watchdog | ✅ | Remotes expire (15 s online, 5 s local); onDisconnect on the server |
 | U015 | Latency diagnostics | ✅ | SAT-ONLINE-012: smoothed write round trip in `net().link` and the badge tooltip |
 | U016 | Public profile projection | ✅ | SAT-ONLINE-007 (public fields only, §23) |
 | U017 | Cloud Function command bus | ⏳ | Blaze (D3) |
 | U018 | Offline-to-online migration | 🟡 | SAT-ONLINE-007 moves a save between devices with consent; a wallet migration is server-side (D4) |
 | U019 | Rate limiting | ✅ | Presence per-sender budget, duel hits per second, rules on every write |
-| U020 | Network observability | 🟡 | `net().stats`/`net().link` and the badge tooltip (SAT-ONLINE-012); no dashboard |
-| U021 | Auth emulator CI | 🟡 | A fake Firebase that applies a copy of the rules; the real emulator isn't reachable from this sandbox |
-| U022 | Config/env isolation | 🟡 | Public web config in `src/net/firebase-config.js`; no staging project |
+| U020 | Network observability | ✅ | `net().stats`/`net().link` and the badge tooltip (SAT-ONLINE-012); the owner's `/net` (SAT-ONLINE-108): online in the last minute by zone and level, this page's link, the last day's crashes (`regression/netdash`) |
+| U021 | Auth emulator CI | ✅ | SAT-ONLINE-116: the real rules on the Realtime Database emulator in CI (`tests/emulator/rules.emu.cjs`, `.github/workflows/emulator.yml`), players A and B and an admin: A can't change what is B's (account ID, presence, profile, saves, session, friends, chat lines, guild rank); the fake still mirrors the rules for the browser tests |
+| U022 | Config/env isolation | ✅ | Public web config in `src/net/firebase-config.js`; SAT-ONLINE-120: a test environment apart from the real one, the local Firebase emulators with `?emu`, honoured only on a page served from this computer, so the public site can't point at a test database (`unit/firebase-load`; [EMULATOR.md](EMULATOR.md)). A second Firebase project (staging) stays the owner's call (U327) |
 | U023 | Protocol versioning | ✅ | Envelope `v: 1`, `PROTOCOL_VERSION` (§25) |
 | U024 | Load testing swarm | ✅ | `unit/chaos` 100-client soak (in memory) |
 | U025 | World shard migration | ❌ | U009 is in, but there is still one shard (`main`); migration needs more than one |
@@ -51,26 +51,26 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 |---|---|---|---|
 | U046 | Nearby player context | ✅ | SAT-ONLINE-020: click/tap a player → card with Invite / Duel / Block, aimed at their uid (`regression/playermenu`: twin names) |
 | U047 | Party invite | ✅ | SAT-ONLINE-003: invites expire after 30 s, decline, busy/full replies; blocked senders dropped (016) |
-| U048 | Party accept | 🟡 | The leader caps the party at 5 when accepts arrive, a raid at 10 (SAT-ONLINE-060, #93); no server transaction yet |
+| U048 | Party accept | ✅ | The leader is the one place membership is decided, one accept at a time, so it works as the transaction: invites out count against the cap, and everyone accepting at once still gives 5 (a raid 10); forged and duplicate accepts change nothing (SAT-ONLINE-060, #93). An accept the leader can't take (its side of the invite ran out first, or the party filled up or is gone) is answered at once (`party.kick` k = 2), so that player isn't left believing it joined (SAT-ONLINE-126, `unit/partycap`) |
 | U049 | Party leader election | ✅ | SAT-ONLINE-024: a leader gone 15 s (longer than a reload) is replaced by the remaining member with the lowest uid; members whose clocks differ still agree; a returning old leader joins the new party (`regression/partylead`) |
 | U050 | Party roles | ✅ | SAT-ONLINE-025: a badge (tank/healer/damage/support) picked in the party panel, `PlayerPublic.role`; in a raid against bosses it does something (SAT-ONLINE-061, #95): a tank draws the boss and takes 30% less, a healer heals the raid near it every 3 s, damage +15%, support -15% near it |
 | U051 | Party HP UI | ✅ | SAT-ONLINE-021: `PlayerPublic.hp` (5% steps, nothing else of the profile); a bar per member in the party panel |
 | U052 | Party pings | ✅ | SAT-ONLINE-021: Alt+click (touch: Ping marks where you stand) → `party.ping`; a ring on the ground and the minimap for 3 s; one per member per 1.5 s |
-| U053 | Party chat | 🟡 | SAT-ONLINE-016: party lines, rate-limited, block list; world chat for everyone (SAT-ONLINE-026), guild chat (SAT-ONLINE-049, #81), world notices as lines (SAT-ONLINE-041); no profanity filter |
+| U053 | Party chat | ✅ | SAT-ONLINE-016: party lines, rate-limited, block list; world chat for everyone (SAT-ONLINE-026), guild chat (SAT-ONLINE-049, #81), world notices as lines (SAT-ONLINE-041); insults shown as stars in every channel unless the player turns it off with `/filter` (SAT-ONLINE-071, #105) |
 | U054 | Party summon | ⏳ | A teleport needs a movement authority |
 | U055 | Party follow | ✅ | SAT-ONLINE-068 (#102): "Follow" on a party mate's card walks after them; any move key stops it (`regression/follow`) |
 | U056 | Shared PvE XP | ⏳ | Needs a combat authority; a party raid pays each member their own rewards (009) |
 | U057 | Personal loot | 🟡 | SAT-ONLINE-009: each member's own game pays the boss kill once per encounter; no server ledger |
 | U058 | Need/Greed loot | 🟡 | SAT-ONLINE-063 (#96): every raid boss kill rolls one bonus piece among those who fought it, Need/Greed/Pass run by the raid leader, the roll a hash anyone checks; only the winner's game makes it; server random + ledger still D3 |
 | U059 | Friends and follow | ✅ | SAT-ONLINE-067 (#101): ask from the card, accept, online list with level and place, told when they come online; whispers to friends anywhere (070, #104) |
-| U060 | Guild invitations | 🟡 | SAT-ONLINE-046/049/050 (#79, #81, #82): guilds in the database (unique names, ranks master/officer/member), invites from the card, remove, disband, the guild under the name, guild chat and the vault. Guild buildings: SAT-ONLINE-065 (#99) |
+| U060 | Guild invitations | ✅ | SAT-ONLINE-046/049/050 (#79, #81, #82): guilds in the database (unique names, ranks master/officer/member), invites from the card, remove, disband, the guild under the name, guild chat and the vault. Guild buildings: SAT-ONLINE-065 (#99). SAT-ONLINE-104: the master decides which ranks may invite (the officers by default, the members if allowed), and the rules refuse an invitation from anyone else |
 | U061 | Emotes | ✅ | SAT-ONLINE-022: V (touch: Emote) → wave/dance/point/cheer for 3 s as `PlayerPublic.em` (a fixed list, no text); one per 2 s |
 | U062 | Chat moderation | ✅ | Block list + rate limit (016); Report from the card (`reports`, read by the owner) and insults as stars with `/filter` (071, #105) |
-| U063 | Player trade request | 🟡 | SAT-ONLINE-039 (#76): serverless trade, Accept then Confirm, any change resets the accepts, one update with the `tradedItems` ledger so an item can't be traded twice; gold has no ledger (D3) |
+| U063 | Player trade request | ✅ | SAT-ONLINE-039 (#76): serverless trade, Accept then Confirm, any change resets the accepts, one update with the `tradedItems` ledger so an item can't be traded twice. SAT-ONLINE-128: a side whose tab closed (or connection dropped, or read failed) after it confirmed gets the swap when it comes back: the save keeps the confirmed trade (`S.trPend`) until it is applied, the game finds `tradeDone` and both offers, and `S.trDone` applies each trade once (`unit/traderecover`, `regression/traderecover`). Gold offered beyond what a modified client has still needs the server (D3) |
 | U064 | Player inspect | ✅ | SAT-ONLINE-020: the card shows only PlayerPublic (name, level, class, title, party, armour) |
 | U065 | Party reconnect | ✅ | SAT-ONLINE-023: the party lives in the tab's sessionStorage; within 60 s a reloaded member auto-accepts its leader's invite back and a reloaded leader keeps its party. Leaving on purpose is final (`regression/rejoin`) |
 
-**Totals (social):** ✅ 12 · 🟡 6 · ⏳ 2 · ❌ 0.
+**Totals (social):** ✅ 13 · 🟡 5 · ⏳ 2 · ❌ 0.
 
 ## Online since the backlog (owner requests and Claude-B's #13 handoff), not in U001–U065
 
@@ -109,7 +109,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U186 | Raid replay | ❌ | Needs an event log of the fight |
 | U187 | Boss encyclopedia | ✅ | B's monster encyclopedia (v1.21): a page per monster opens on the first kill, drops after 10 kills (1 for a boss), mastery after 100 |
 | U188 | Adaptive difficulty | ✅ | SAT-ONLINE-083: the host gives a boss the health of the n players of its group within 600 px (+60% a player, up to 10), the share left kept as players come and go (`regression/bossscale`) |
-| U189 | Seasonal world boss | 🟡 | Trauka's half hour and Berith's two-hour rest are shared through `world/satisfy/wb` (056, B's v0.87); no season schedule |
+| U189 | Seasonal world boss | ✅ | SAT-ONLINE-124: the world boss hunt, every Saturday 19:00–20:00 UTC, one boss a week over a ten-week season (Trauka, the Storm Lord, Pagma's Doppelganger, the Wyvern Queen, the Vampire Lord, the four Divine Beasts, Berith). It is on the calendar and told 10 minutes before; the boss is back at its lair for it on every screen (a kill before the hunt is set aside, its shared timer too); anyone within 40 levels goes there for free from the calendar and back after (opt-in transport); the killer gets a cosmetic title and one hunt mark a week, never twice (`S.hunt`); a kill whose timer the rules refused while an older one ran is written again after it (`regression/hunt`). Timers stay `world/satisfy/wb` (056, B's v0.87) |
 
 ### Economy and trade (plan §42)
 | ID | Item | Status | Where / what's left |
@@ -129,7 +129,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U222 | Fish market | ❌ | Content (B) |
 | U223 | Crop wholesale market | ❌ | Content (B) |
 | U224 | Rare gem exchange | 🟡 | Socketing and paid upgrades (B); no exchange between players |
-| U225 | Repair market | ❌ | |
+| U225 | Repair market | ✅ | SAT-ONLINE-096: work orders (`repairOrders`) a player posts with a fee at any smith's; a player Blacksmith mends one in one write that takes it off, tells its owner (`repairDone`) and pays the smith (`repairPaid`), checked by the rules; the piece is mended in its owner's bag with the same id (`regression/repair`) |
 | U226 | Taxation caps | ❌ | There are no city taxes yet |
 | U227 | Inflation dashboard | ✅ | SAT-ONLINE-082: `/economy` for the owner: total, median, top 10% and richest gold of the ranked players, and their average level |
 
@@ -138,12 +138,12 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 |---|---|---|---|
 | U228 | Guild creation | ✅ | SAT-ONLINE-046 (#79): unique names (case-folded, `guildNames`), the founder is master |
 | U229 | Guild recruitment | ✅ | SAT-ONLINE-078: a recruiting message (`guildRecruit`), requests to join (`guildApply`, only for yourself and while it recruits), refusals kept a week (`guildRej`); joining still needs the invitation (`regression/guildrecruit`) |
-| U230 | Guild rank permissions | 🟡 | Master, officer, member with fixed rights, checked by the rules; no custom ranks |
+| U230 | Guild rank permissions | ✅ | SAT-ONLINE-104: the master sets, for officers and members, the rights to invite (and handle requests), take from the vault, spend the treasury, write the notice and plan events (`guilds/{gid}/perm`); the rules check each one (an officer without "take" can't take another's thing, also writing the database); a guild's records go only with the guild (`regression/guildperm`, `unit/rules-fuzz` on the real rules) |
 | U231 | Guild banners | ✅ | SAT-ONLINE-084: the colour, and an emblem the master picks from 15 fixed symbols (`guilds/{gid}/emb`; no uploaded pictures, so nothing to moderate), shown before the guild name for everyone (`regression/guildbanner`) |
 | U232 | Guild chat | ✅ | SAT-ONLINE-049 (#81): `/g`, members only by the rules, so a removed member loses it |
 | U233 | Guild weekly quests | ✅ | SAT-ONLINE-081: the weekly goal: members' kills add up (`guildWeek`, each its own count, only upward, at most 1,500, monsters within 15 levels), three tiers, each reward taken once (`guildWeekPaid`) (`regression/guildweek`) |
 | U234 | Guild forge | ✅ | SAT-ONLINE-065 (#99): the Guild Forge, +2% quality a level, capped at 3 levels |
-| U235 | Guild housing | ❌ | |
+| U235 | Guild housing | ✅ | SAT-ONLINE-115: the guild hall, a room each guild furnishes (eight places, nine pieces, who placed what kept with it; `guildHall`); members go in from the guild panel, the master and officers let other players in by account ID (`guildHallGuest`, `hallInv`), guests and members only read it and only the master and officers furnish (the rules); presence keeps each hall to itself; it goes with the guild (`regression/guildhall`) |
 | U236 | Guild treasury | ✅ | Same as U221 |
 | U237 | Guild research tree | 🟡 | Three buildings of three levels paid from the treasury (065); no tree |
 | U238 | Guild alliances | ✅ | SAT-ONLINE-085: proposed by the master or an officer, accepted or declined by the other guild's; the rules write each side only against a fresh proposal from the other (one guild can't force it); 30 days, renewable in the last week, up to 3; no open PvP between allies (pvp.js `ally`) (`guildAllyAsk`, `guildAlly`) (`regression/guildally`) |
@@ -153,8 +153,8 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U242 | Guild event calendar | ✅ | SAT-ONLINE-080: events added by the master or officers (`guildEvents`), "I'm going" (`guildEventSign`), reminders 10 min before and at the start, in G and in the Calendar; one stored instant, shown in each player's time zone and UTC (`regression/guildevents`) |
 | U243 | Guild notice board | ✅ | SAT-ONLINE-076: `guildNote/{gid}`, written by the master and officers, each write the next version; members read it and hear when it changes; shown as text, never as HTML |
 | U244 | Guild rankings | ✅ | SAT-ONLINE-076: every online guild next to the canon ones, by level from the members' summed contribution (the same formula as your own guild's) |
-| U245 | Guild diplomacy | 🟡 | SAT-ONLINE-085: treaties (alliances) with a day's cooldown after a break, and a diplomacy log in both guilds (ask, ally, decline, break, end); the break records who (`guildAllyCd`, `guildDiplo`). Faction standings not yet |
-| U246 | Guild seasonal rewards | ❌ | |
+| U245 | Guild diplomacy | ✅ | SAT-ONLINE-085: treaties (alliances) with a day's cooldown after a break, and a diplomacy log in both guilds (ask, ally, decline, break, end); the break records who (`guildAllyCd`, `guildDiplo`). Standings between guilds (SAT-ONLINE-123): from that log and what is in force, the same on both sides, by a formula the game shows (G → Diplomacy → Standings: allied, friendly, neutral, hostile, at war over the last 30 days); a hostile guild carries 💢 by its name, and a proposal or a war declared on you shows the standing (`unit/diplo`, `regression/guildstand`) |
+| U246 | Guild seasonal rewards | ✅ | SAT-ONLINE-090: a season is a month; each week a guild earns the weekly-goal tier it reached (0–3); `/season` (the owner, standing in for a server job: admins read every guild's `guildWeek`) gives fixed-tier trophies (`guildTrophy`: gold 10, silver 6, bronze 3), shown by the guild's name and in G; cosmetic only, nothing in fights (`regression/season`) |
 
 ### Engine (plan §47)
 | ID | Item | Status | Where / what's left |
@@ -163,21 +163,21 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U309 | Extract world generator | 🟡 | Seeded spawns (`mulberry32`), the same tiles on every client (`regression/worldparity`); still inside `index.html` |
 | U310 | Renderer batching | 🟡 | The big map draws only the visible land from a cached copy (B, v0.60) |
 | U311 | Entity registry | 🟡 | Stable keys for monsters (`type@sx,sy`), item ids (`iid`), character id (`pid`) |
-| U312 | Animation state machine | ❌ | |
+| U312 | Animation state machine | ✅ | `src/core/anim.js` (SAT-ONLINE-114): idle, walk, attack, hurt, dodge, dead per entity by rank, timed ones ending by game time with nothing scheduled; your swing as others see it, and other players flash when hurt (`unit/anim`, `regression/anim`). Monsters keep their own poses (B) |
 | U313 | Fixed tick simulator | ✅ | SAT-ONLINE-099: `?tick=fixed` (off by default) moves the world in steps of 1/60 s at any frame rate; drawing, sound and the network draw their random numbers from a stream of their own. tests/regression/fixedtick |
 | U314 | Dedicated game clock | ✅ | Server clock offset (`wNow`, SAT-ONLINE-044) for everything shared |
-| U315 | Localization bundles | 🟡 | `STR.ar`/`STR.en` in the page; the UI falls back to the key |
+| U315 | Localization bundles | 🟡 | `STR.ar`/`STR.en` in the page; every line in both languages (`unit/i18n`, SAT-ONLINE-092) and every key the page asks for by name has its lines (SAT-ONLINE-118), so a missing key fails the tests. Left: the tables are still in the page, not bundles of their own |
 | U316 | Asset loader | 🟡 | Sprite sheets in `sprites-original/` (B) |
 | U317 | Save migrations | ✅ | Save versions with backups (ADR-001); old saves keep working (`regression/golden`, `regression/save`) |
 | U318 | Map testing | ✅ | `regression/towns`, `worldparity`, `boot`; every door reachable |
 | U319 | Command validation | ✅ | Every message is checked against the contract and dropped when invalid, oversized, replayed or too frequent (`src/net/contracts.js`, `unit/contracts`, `unit/presence`) |
 | U320 | Data catalogs | ✅ | `data/*.js` with `tests/content/data` |
-| U321 | Audio mixer | 🟡 | One volume; no separate channels |
-| U322 | Accessibility QA | 🟡 | Keyboard and touch for every menu (B, v1.01) |
-| U323 | Replay recorder | ❌ | |
-| U324 | Exception boundary | 🟡 | A failing listener can't stop presence; network errors show in the badge |
-| U325 | Performance profiler | 🟡 | `net().link` (round trip, sent, received, dropped) in the badge tooltip; no frame-time budget |
-| U326 | Build pipeline | 🟡 | Tests on every PR by hand; GitHub Pages serves main as it is |
+| U321 | Audio mixer | ✅ | SAT-ONLINE-101: "Sound" in the pause menu: game sounds, music, world sounds (monsters' voices and swings, fireworks) and other players (their swings, deaths, news), each with its own volume and off, remembered on the device (`regression/mixer`) |
+| U322 | Accessibility QA | ✅ | Keyboard and touch for every menu (B, v1.01); `regression/zoom` (SAT-ONLINE-118): at 125% in the windows a 1280x720 and a 1366x768 screen give (and a small one), the title, Esc menu, bag, status and a dialog have every control inside the window and clickable at its centre |
+| U323 | Replay recorder | ✅ | SAT-ONLINE-100: offline, `?tick=fixed&rec` records from Continue (the save, a seed, the start clock, keys and dialog choices at their steps; clock and timers run on the steps), `?tick=fixed&replay` plays it back in its own save slot and checks the world every 10 s and at the end (`regression/replay`: recorded at 60 fps, the same at 30 and 144; one key taken out and it says when it went apart) |
+| U324 | Exception boundary | ✅ | SAT-ONLINE-117: each part that adds to the scene is its own boundary (the other players above all), as are the network tick, the minimap and each drawing; a broken one costs only itself, told once (`regression/boundary`, which breaks them on purpose); a failing listener can't stop presence |
+| U325 | Performance profiler | ✅ | SAT-ONLINE-103: F9 (or `?perf`): fps, frame time p50/p95/max, the work a frame takes (update + draw, p95), network writes/s, round trip and failures, what is on the map; red over budget (frame ≤ 20 ms; work ≤ 8 ms on a computer, 14 on a phone); each device keeps its own numbers every minute of play (`satisfy_perf`) (`regression/perf`) |
+| U326 | Build pipeline | ✅ | SAT-ONLINE-107: GitHub Actions (`.github/workflows/tests.yml`) runs the unit and content tests and a smoke set of the browser tests on every pull request and push to main; GitHub Pages serves main as it is |
 | U327 | Staging deployment | ⏳ | Needs a second Firebase project (owner) |
 | U328 | Rollback support | ✅ | Every update is one merge on main, so reverting one is one commit (GitHub's Revert); the rules go back with main's copy; saves survive both ways (SAT-ONLINE-091, `docs/online/ROLLBACK.md`) |
 
@@ -189,18 +189,18 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U331 | World boss calendar | ✅ | SAT-ONLINE-077: "Calendar" in the player list: the next world events, the competition, the siege, the festival, the race, Trauka and Berith; in your time zone and UTC, from the server clock (`regression/calendar`) |
 | U332 | Limited festivals | ✅ | The town festival every third hour (B, v0.94) |
 | U333 | Balance dashboard | ✅ | SAT-ONLINE-088: each game writes its own class's week (`balance/{uid}`: kills, seconds from first hit to kill, PvP wins and losses from duels and open PvP; bounded by the rules), the owner's `/balance` sums them by class (PvE time to kill, PvP win rate); admins only read them; no names on the board (`regression/balance`) |
-| U334 | Economy health | 🟡 | `/economy` (082) is a snapshot of wealth; no gold in/out counters or alerts |
-| U335 | Content flags | 🟡 | Older pages skip what they don't know (fx tags, presence fields) |
+| U334 | Economy health | ✅ | SAT-ONLINE-093: every game counts the gold that came in and went out this week from each change of the bag (`balance/{uid}` `gi`, `go`, with 088); `/economy` adds the week's flow over all players and warns when more than twice as much comes in as goes out (three players or more) (`regression/balance`) |
+| U335 | Content flags | 🟡 | Older pages skip what they don't know (fx tags, presence fields). SAT-ONLINE-121: live switches, world chat, trading and dueling, which the owner turns off and on for everyone without a release (`/switch`), held by the rules for every page (`flags`). Left: content packs by region and player group |
 | U336 | Announcement system | ✅ | SAT-ONLINE-079: `/announce text` from an admin account (`admins/{uid}`, set in the console only); everyone online sees it once, late joiners within 10 min; the rules refuse anyone else (`regression/announce`) |
 | U337 | Maintenance notices | ✅ | SAT-ONLINE-079: `/maint minutes text`: the time, reminders 10/5/1 min before, a save when it starts; and "a new version" asks only the older page to refresh (SAT-ONLINE-045) |
-| U338 | Hotfix pipeline | 🟡 | Small PRs, a review, then main |
+| U338 | Hotfix pipeline | ✅ | [HOTFIX.md](HOTFIX.md) (SAT-ONLINE-111): a `HOTFIX:` PR from main with its failing test, reviewed first, rules deployed first; ROLLBACK.md when it can't wait |
 | U339 | Moderation console | ✅ | SAT-ONLINE-082: `/reports`, `/mute ID hours`, `/unmute ID` for admins only; a mute has an expiry and keeps the player out of the world chat by the rules (`regression/moderation`) |
 | U340 | Player appeal flow | ✅ | SAT-ONLINE-087: `/appeal why` while muted, once a mute (`appeals/{uid}`, `mt` = the mute's time: linked to the moderation event); read only by admins and the player (privacy); `/appeals` lifts or keeps it (`appealDone`), the player is told once; a second appeal for the same mute and anyone else's answer are refused by the rules (`regression/appeal`) |
 | U341 | Crash reporting | ✅ | SAT-ONLINE-082: errors on a signed-in page go to `crashes` (admins read): message and stack with long ids, e-mails and paths cut out, build and zone, at most three a session; `/crashes` lists them |
 | U342 | A/B testing ethics | ⏳ | No tests on players; owner decision |
-| U343 | Community feedback triage | ✅ | SAT-ONLINE-125: players send `/bug what went wrong` (one every 2 minutes, held by the rules: `bugs`, `bugLast`); the owner's `/bugs` lists them with the crash reports, crashes with one message (numbers aside) as one group (`src/net/triage.js`); tags actionable, fixed, not a bug, or the same as another report, which merges it there and keeps every report's sender, build, zone and time (`bugTriage`); a fixed one with a newer report is back; closed reports older than 30 days are cleared (`unit/triage`, `regression/bugs`). GitHub issues as before |
-| U344 | Season rewards | 🟡 | Titles for the National Champion and the arena; cosmetic |
-| U345 | Retention without grind | 🟡 | Nothing is lost for a missed day; daily caps on repeatable quests (B) |
+| U343 | Community feedback triage | ✅ | GitHub issue templates for bugs and ideas (Arabic and English, sorted by part of the game: SAT-ONLINE-107) and in-game reports |
+| U344 | Season rewards | ✅ | SAT-ONLINE-129: when a month's arena season is over, each player's game gives cosmetic titles once: Arena Regular for 10 duels (taking part is enough, win or lose), Arena Top 10 for a top-ten place among those with 5 duels, Arena Champion for the first (`S.arnS`); the board says how. `unit/seasontitles` fails if a season or competition title (these and the National Champion) gets a stat, a stats line or a skill; no paid items exist (`regression/arenaseason`) |
+| U345 | Retention without grind | ✅ | SAT-ONLINE-130: the daily bounties' bonus was a streak that a missed day reset to 0; now it is +10% for each day you cleared all three in the last 7 days (up to +50%, `S.dlyW`), so a missed day takes nothing away, and an old save's streak becomes the days it stood for. The day is the world clock's (`today()` follows `wNow`), the same for everyone online. Daily caps on repeatable quests (B) as before (`regression/dailyweek`) |
 | U346 | Data export/delete | 🟡 | "Delete my online data" (SAT-ONLINE-015/066). The owner took out "Download my online data" (078) and the manual cloud Upload/Download on 2026-10-21, to cut the chance of duplicated data: characters move only by the automatic sync |
 | U347 | Disaster recovery | ⏳ | Database backups need the Blaze plan (owner) |
 | U348 | Shard scale-out | ⏳ | One shard (`main`) |
@@ -209,11 +209,11 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
 | U368 | Automated unit test harness | ✅ | `tests/unit`, `tests/content`, `tests/regression` with a seeded random and a frame clock |
-| U369 | Firebase rules fuzzing | 🟡 | The fake applies a copy of the rules and every test checks `rejected`; `unit/rules` checks each block, duplicate keys and expression syntax; no random fuzzing |
-| U370 | Multi-browser smoke | 🟡 | Chromium in the tests; the owner tests desktop and phone |
-| U371 | Reconnect soak | 🟡 | `unit/chaos` (drops, delays, duplicates); `regression/online-firebase` reconnects |
-| U372 | Load test 100 clients | 🟡 | `COST_MODEL.md` measured numbers; no 100-client run |
-| U373 | Combat determinism | 🟡 | With `?tick=fixed` the same fight at 30, 60 and 144 fps ends the same to the last digit (tests/regression/fixedtick, seeded random). Left: a seed per session for replays (U323) |
+| U369 | Firebase rules fuzzing | ✅ | SAT-ONLINE-102: `tests/harness/rules-eval.cjs` evaluates the real `database.rules.json` in Node (cascading .read/.write, .validate, wildcards, auth/now/root/data/newData). `unit/rules-fuzz` sends thousands of random writes and reads: nothing signed out, nothing into another account's own nodes, no client-chosen server time; drops, bounties and friend requests played through. `SATISFY_RULES=<file>` runs it on a PR's rules |
+| U370 | Multi-browser smoke | ✅ | Chromium in every test; CI also runs boot and saves in Firefox and WebKit (SAT-ONLINE-107, `SATISFY_BROWSER`); the owner tests desktop and phone |
+| U371 | Reconnect soak | ✅ | `unit/chaos` (drops, delays, duplicates); `regression/soak` (SAT-ONLINE-112): 20 drops and reconnects of two players in a party, moving while away; each sees the other once where it is, and the pages listen to exactly what they did after the first |
+| U372 | Load test 100 clients | ✅ | `unit/load100` (SAT-ONLINE-113): 100 real transports over an in-process database for a simulated minute; everyone sees who is near and its party; 522 kB/s against the model's 528 at k = 14 (COST_MODEL.md) |
+| U373 | Combat determinism | ✅ | With `?tick=fixed` the same fight at 30, 60 and 144 fps ends the same to the last digit (`regression/fixedtick`); a recorded session has its own seed, and its replay ends in the same world (`regression/replay`, SAT-ONLINE-100) |
 | U374 | Dupe attack cases | ✅ | Replayed and reordered messages dropped (`unit/presence`); claims once (`dropClaims`, `tradedItems`, `bountyPaid`, `natPaid`, lockouts) |
 | U375 | Safe zone exploit cases | ✅ | No duel or PvP damage in towns, checked on both sides (`regression/pvp`, SAT-ONLINE-038) |
 | U376 | Trade race tests | ✅ | `regression/trade`: any change resets the accepts; the same item twice is refused |
@@ -222,13 +222,13 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U379 | Localization regressions | ✅ | SAT-ONLINE-092: `unit/i18n` reads every string table in the page: each line in both languages (Arabic feminine forms aside), the same `{placeholders}`, empty in both or neither. Play tests still run in English |
 | U380 | Art provenance audit | 🟡 | `docs/art/ART_CONTRACT.md` (B) |
 | U381 | Security incident drill | ⏳ | Owner (Firebase console) |
-| U382 | Data retention review | 🟡 | Only what play needs is online; entries expire (lfg 30 min, chat lines, inbox) |
+| U382 | Data retention review | ✅ | [DATA_RETENTION.md](DATA_RETENTION.md) (SAT-ONLINE-111): every node, who reads it and when it goes; admins clear crash reports older than 30 days (they piled up for ever) |
 | U383 | Community report resolution | ✅ | SAT-ONLINE-082: each report is resolved with its action (`reportDone/{id}` {a: ok or mute, by, t}), so what was done and by whom is kept |
-| U384 | Version gate report | 🟡 | Every PR lists the tests it ran |
+| U384 | Version gate report | ✅ | Every PR shows its CI checks (SAT-ONLINE-107) and lists the tests it ran |
 | U385 | Rollback rehearsal | ✅ | SAT-ONLINE-091: `regression/rollback` takes a save this build wrote to the previous release (the baseline build) and back: nothing dropped on the way, a key the old build doesn't know kept, the same save again; a save from a newer build is backed up first. `ROLLBACK.md` has the owner's steps (revert on GitHub, the rules from main, a database export) |
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 50 · 🟡 37 · ⏳ 6 · ❌ 11 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 75 · 🟡 17 · ⏳ 6 · ❌ 6 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

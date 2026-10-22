@@ -3,6 +3,7 @@
 // week (monsters killed and the time from the first hit, PvP wins and losses) and writes them to balance/{uid}; the
 // owner's "/balance" adds them up by class. A warrior and a mage kill monsters and fight once; the board shows both
 // classes with their kills, time to kill and PvP record. Only admins read the numbers; nobody writes another's.
+// SAT-ONLINE-093: the gold that came in and went out this week, summed in "/economy" with a warning.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -40,6 +41,7 @@ async function pages(g) {
   for (let i = 0; i < 16; i++) { out.push(await g.eval(() => document.getElementById('dtext').textContent)); if (!(await g.eval(() => document.getElementById('dopts').hidden))) break; await g.eval(() => window.__G.advance()); await g.step(2); }
   return out;
 }
+async function shut(g) { for (let i = 0; i < 8 && (await g.eval(() => window.__G.mode)) === 'dialog'; i++) { await g.eval(() => { const o = [...document.querySelectorAll('#dopts button')]; if (document.getElementById('dopts').hidden || !o.length) window.__G.advance(); else o[o.length - 1].click(); }); await g.step(2); } }
 const canRead = (g, p) => g.eval(async (path) => { const F = window.__GLD.fb(), D = F.m.database; try { await D.get(D.ref(F.db, path)); return 'ok'; } catch (e) { return 'no'; } }, p);
 const write = (g, u) => g.eval(async (x) => { const F = window.__GLD.fb(), D = F.m.database; for (const k in x) if (x[k] && x[k].t === 'SV') x[k].t = D.serverTimestamp(); try { await D.update(D.ref(F.db), x); return 'ok'; } catch (e) { return 'no'; } }, u);
 // hit one monster away from the others (alone, the game runs its own monsters), wait `secs` of game time, then kill it with
@@ -117,6 +119,22 @@ test('balance figures: each class\'s kills, time to kill and PvP record this wee
     // the sums: last week's numbers don't count; no PvP is "-"
     assert.deepEqual(await own.eval(() => window.__GMOD.balStats({ a: { wk: 'w9', cls: 'mage', lv: 10, n: 10, s: 30, w: 1, l: 1 }, b: { wk: 'w9', cls: 'mage', lv: 20, n: 0, s: 0, w: 2, l: 0 }, c: { wk: 'w8', cls: 'mage', lv: 50, n: 99, s: 1, w: 0, l: 9 }, d: { wk: 'w9', cls: 'archer', lv: 5, n: 4, s: 10, w: 0, l: 0 } }, 'w9')),
       [{ c: 'mage', p: 2, lv: 15, n: 10, ttk: 3, w: 3, l: 1, rate: 75 }, { c: 'archer', p: 1, lv: 5, n: 4, ttk: 2.5, w: 0, l: 0, rate: null }]);
+    // SAT-ONLINE-093: gold in and out this week, from every change of the bag's gold; "/economy" sums it and warns
+    await shut(own);
+    const g0 = await b.eval(() => Object.assign({}, window.__GMOD.bal()));
+    await b.eval(() => { window.__G.S.gold += 1000; }); await b.step(2);
+    await b.eval(() => { window.__G.S.gold -= 300; }); await b.step(2);
+    const g1 = await b.eval(() => window.__GMOD.bal());
+    assert.equal(g1.gi - g0.gi, 1000); assert.equal(g1.go - g0.go, 300);
+    await own.eval(() => { window.__G.S.gold += 5000; }); await own.step(2);
+    for (const g of [own, b, c]) await g.eval(() => window.__GMOD.balPush());
+    await until([own], () => { const v = window.__fakeRTDB.data.get('balance/gBaB2'); return !!v && v.gi >= 1000 && window.__fakeRTDB.data.has('balance/gBaA1'); });
+    await type(own, '/economy'); await own.step(2);
+    await until([own], () => /Economy \(/.test(document.getElementById('dialog').textContent));
+    const E = await pages(own);
+    assert.match(E[1], /^This week \(3 players\): [\d,]+ gold came in and [\d,]+ went out, \+[\d,]+ · ⚠ [\d.]+ times as much comes in as goes out$/);
+    assert.deepEqual(await own.eval(() => window.__GMOD.flow({ a: { wk: 'w9', gi: 100, go: 100 }, b: { wk: 'w9', gi: 50, go: 0 }, c: { wk: 'w8', gi: 9999, go: 0 } }, 'w9')), { n: 2, gi: 150, go: 100, r: 1.5, warn: false });
+    assert.equal((await own.eval(() => window.__GMOD.flow({ a: { wk: 'w9', gi: 900, go: 100 }, b: { wk: 'w9', gi: 0, go: 50 }, c: { wk: 'w9' } }, 'w9'))).warn, true, 'three players, six times as much in');
     for (const g of [own, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/balance/.test(x))), []);
     for (const g of [own, b, c]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
