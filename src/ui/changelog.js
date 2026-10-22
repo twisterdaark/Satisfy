@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22doran', ver: '1.87', d: '2026-10-22',
+      ar: ["مهمة دوران (S) بقت أصعب: إيرين محبوسة في طقس لكبير الطائفة و3 من أتباعه، ومتقدرش تفكها إلا لما تقتلهم كلهم. الجايزة بقت 400 ألف خبرة و15 ألف دهب وخاتم دوران",
+        "أي مهمة ليها درجة (B وA وS وSS) لما تخلّصها بتسمع موسيقى انتصار ويطلع لمعة دهب",
+        "شلنا زرار سهم المهمات اللي فوق لوحة المهام. والدوس على سطر القصة الرئيسية بيفتح تفاصيل المهمة الجاية فيها",
+        "أي فرع سحر (وارلوك، باتل ميج، نيكرومانسر...) يقدر ياخد كلاس براهام الأسطوري، وأي فرع محارب يقدر ياخد سيف مولر. الكلاسات المخفية وكلاسات كتب الضباب بتفضل فاكرة أصلها",
+        "شاشة التحكم بقى فيها سكرول وزرار ✕ تقفلها بيه، ومبقتش مقصوصة",
+        "لو الزرار اللي اخترته مستخدم في حاجة تانية، بيقولك مستخدم لإيه، ولو دوست عليه تاني الزرارين بيتبدلوا"],
+      en: ["Doran's quest (S) is harder: Irene is held in a ritual by a cult elder and 3 followers, and you can only free her once they are all dead. It now gives 400,000 XP, 15,000 gold and Doran's Ring",
+        "Finishing any graded quest (B, A, S or SS) plays a victory fanfare with a golden flash",
+        "The quest arrow button above the quest list is gone. Clicking the main story line opens the details of its next quest",
+        "Any magic branch (warlock, battlemage, necromancer...) can take Braham's legendary class, and any warrior branch Muller's sword. Hidden and fog-book classes remember their root",
+        "The controls screen scrolls and has a ✕ to close it; it is no longer cut off",
+        "If the key you pick is already used, you are told what for, and pressing it again swaps the two keys"] },
     { v: '2026-10-22keys', ver: '1.86', d: '2026-10-22',
       ar: ["الإيرل آدن كان بيقول كود زي \"ad202610222_w\" وانت شغال في مهمة ملكية. دلوقتي بيقول اسم المهمة ووصلت لفين فيها، وفيه فحص لكل مهام اللعبة إن ليها جملها بالعربي والإنجليزي",
         "كل مهمة في لوحة المهام جنبها زرار 📍 تختار بيه تتبع أنهي مهمة بالظبط. والدوس على المهمة نفسها بيفتح تفاصيلها وجايزتها وزرار التتبع وزرار سيب المهمة",

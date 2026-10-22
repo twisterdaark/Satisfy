@@ -21,14 +21,18 @@ test('move the bag to O, put a skill on the old key, and a side mouse button on 
     // the bag to O
     await g.eval(() => document.querySelector('[data-rb="ainv"]').click());
     await key(g, 'KeyO');
+    await key(g, 'KeyO'); // O is the players list's key: the second press swaps them
     assert.equal(await g.eval(() => document.querySelector('[data-rb="ainv"]').textContent), 'O');
     // skill 1 to U (the equipment's key): told what U was for, and they swap
     await g.eval(() => { window.__toastNew = []; new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1) window.__toastNew.push(n.textContent); }).observe(document.getElementById('toasts'), { childList: true }); });
     await g.eval(() => document.querySelector('[data-rb="k0"]').click());
     await key(g, 'KeyU');
+    // first press: told what U is for, nothing changes yet; the second press swaps (owner 2026-10-22)
+    assert.deepEqual(await g.eval(() => [document.querySelector('[data-rb="k0"]').textContent, document.querySelector('[data-rb="aequip"]').textContent]), ['...', 'U']);
+    assert.ok(await g.eval(() => window.__toastNew.some((x) => /U is used for: Equipment\. To swap the two, press U again/.test(x))), JSON.stringify(await g.eval(() => window.__toastNew)));
+    await key(g, 'KeyU');
     assert.deepEqual(await g.eval(() => [document.querySelector('[data-rb="k0"]').textContent, document.querySelector('[data-rb="aequip"]').textContent]), ['U', '1']);
-    assert.ok(await g.eval(() => window.__toastNew.some((x) => /used for: Equipment/.test(x))), JSON.stringify(await g.eval(() => window.__toastNew)));
-    // Escape is fixed: refused, with what it does
+        // Escape is fixed: refused, with what it does
     await g.eval(() => document.querySelector('[data-rb="k1"]').click());
     await key(g, 'ArrowUp');
     assert.ok(await g.eval(() => window.__toastNew.some((x) => /used for: Move/.test(x))));

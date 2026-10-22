@@ -23,15 +23,20 @@ test('the S quest: Doran offers it with its grade; Irene is freed in time and he
     await g.eval(() => { const G = window.__G; for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } G.S.lv = 150; G.gainXP(1); });
     const o = await offer(g, 'doranS');
     const txt = o.lines.join('\n');
-    assert.ok(/Difficulty: S/.test(txt) && /60 minutes/.test(txt) && /Level -2/.test(txt) && /3,000|3000/.test(txt), txt);
+    assert.ok(/Difficulty: S/.test(txt) && /60 minutes/.test(txt) && /Level -2/.test(txt) && /15,000|15000/.test(txt) && /Doran's Ring/.test(txt), txt);
     await g.eval(() => { const G = window.__G; for (let i = 0; i < 6 && !(G.DL && G.DL.optOn); i++) G.advance(); G.pickOpt(0); });
     await g.step(2);
     const a = await g.eval(() => { const G = window.__G, E = window.__GEP, s = G.S.qs.irn, o = E.irene(); return { st: s && s.st, left: Math.round(E.left('irn') / 60000), vis: E.vis(o), name: document.getElementById('quest').textContent }; });
     assert.equal(a.st, 1); assert.equal(a.left, 60); assert.equal(a.vis, true);
     assert.ok(/\(S\)/.test(a.name) && /⏳/.test(a.name), a.name);
-    // free Irene by the altar, then Doran pays 3,000 gold
-    const b = await g.eval(() => { const G = window.__G, E = window.__GEP, o = E.irene(); G.P.x = o.x; G.P.y = o.y + 8; E.act(o); const g0 = G.S.gold; G.completeQ('irn'); return { vis: E.vis(o), gold: G.S.gold - g0, st: G.S.qs.irn.st, z: G.zoneAt(o.x, o.y) }; });
-    assert.deepEqual(b, { vis: false, gold: 3000, st: 2, z: 'zYatan' });
+    // owner 2026-10-22: no walking in and out. By the altar the elders of Yatan wake, and the ropes hold while they live
+    const h = await g.eval(() => { const G = window.__G, E = window.__GEP, o = E.irene(); G.P.x = o.x; G.P.y = o.y + 8; E.tick(); E.act(o);
+      const gd = G.mons().filter((m) => m.irnG && !m.dead); return { n: gd.length, elder: gd.filter((m) => m.nm === 'Elder of Yatan').length, ready: G.S.qs.irn.c || 0 }; });
+    assert.deepEqual(h, { n: 4, elder: 1, ready: 0 });
+    await g.eval(() => { const G = window.__G; G.DL = null; for (const m of G.mons()) if (m.irnG && !m.dead) window.__GU.killMon(m); window.__GEP.tick(); });
+    // free Irene, then Doran pays 15,000 gold, Doran's Ring and a level's worth of experience, with a fanfare
+    const b = await g.eval(() => { const G = window.__G, E = window.__GEP, o = E.irene(); E.act(o); const g0 = G.S.gold, l0 = G.S.lv; G.completeQ('irn'); return { vis: E.vis(o), gold: G.S.gold - g0, up: G.S.lv > l0, ring: G.S.items.some((i) => i.id === 'doran'), st: G.S.qs.irn.st, z: G.zoneAt(o.x, o.y) }; });
+    assert.deepEqual(b, { vis: false, gold: 15000, up: true, ring: true, st: 2, z: 'zYatan' });
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });

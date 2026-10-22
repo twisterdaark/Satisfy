@@ -7,6 +7,8 @@ const FILES=['monsters','quests','recipes','skills','npcs','zones','classes'];
 const MATS=['fess','iess','sess','bvial','wegg','ore','wood','leather','blue','mstone','mith','fish','sfish','gfish','herb','bherb','cfish','stew','feast','dscale','ruby','topaz','emer','sapph','diam','brphx','brdrg','brtig','brtor','bljewel','blhorn','kink','kpearl'];
 const VISIT_TARGETS=['grave','mural','yaltar','irene','lfk','lfield','myfc']; // landmarks with their own trigger in the engine (visitGrave)
 
+// unique items index.html adds with a later RC.push (the data build reads only the first RC table)
+const LATE_RC=new Set([...fs.readFileSync(path.join(repo,'index.html'),'utf8').matchAll(/^ \{id:'(\w+)',slot:/gm)].map(m=>m[1]));
 const loadAll=()=>{const ctx={};ctx.globalThis=ctx;vm.createContext(ctx);
   for(const f of FILES)vm.runInContext(fs.readFileSync(path.join(dataDir,f+'.js'),'utf8'),ctx,{filename:f+'.js'});return ctx.SATISFY_DATA;};
 const plain=v=>JSON.parse(JSON.stringify(v)); // also strips anything a vm realm adds
@@ -63,7 +65,7 @@ test('cross-references point at things that exist',()=>{
     else if(o.t==='deliver')assert.ok(N[o.it]&&o.it!==q.by,`quest ${q.id} delivers to ${o.it}`);
     else if(o.t==='escort')assert.ok(Array.isArray(o.to)&&o.to.length===2&&o.hp>0&&typeof o.it==='string',`quest ${q.id} escort`);
     else assert.strictEqual(o.t,'craftR',`quest ${q.id} objective type`);
-    assert.ok(Number.isInteger(o.n)&&o.n>0);if(q.item)assert.ok(R[q.item],`quest ${q.id} item`);if(q.cls)assert.ok(C[q.cls],`quest ${q.id} class`);if(q.cl2)assert.ok(C[q.cl2]);if(q.promo){assert.ok(C[q.promo]&&C[q.promo].tier===2,`quest ${q.id} promo`);q.from.forEach(c=>assert.ok(C[c]&&!C[c].tier,`quest ${q.id} from ${c}`));}
+    assert.ok(Number.isInteger(o.n)&&o.n>0);if(q.item)assert.ok(R[q.item]||LATE_RC.has(q.item),`quest ${q.id} item`);if(q.cls)assert.ok(C[q.cls],`quest ${q.id} class`);if(q.cl2)assert.ok(C[q.cl2]);if(q.promo){assert.ok(C[q.promo]&&C[q.promo].tier===2,`quest ${q.id} promo`);q.from.forEach(c=>assert.ok(C[c]&&!C[c].tier,`quest ${q.id} from ${c}`));}
     if(q.title)assert.ok(D.skills.titleSkills[q.title],`quest ${q.id} title`);checkCond(q.offer,'quest '+q.id);}
   for(const s of Object.values(SK)){if(s.cls)assert.ok(s.cls==='any'||C[s.cls],`skill ${s.id} class`);if(s.need)assert.ok(['melee','bow','staff','spear'].includes(s.need));checkCond(s.unlock,'skill '+s.id);}
   for(const [t,k] of Object.entries(D.skills.titleSkills))assert.ok(SK[k]&&SK[k].title===t,`title ${t} -> ${k}`);

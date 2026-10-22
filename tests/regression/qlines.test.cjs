@@ -82,7 +82,7 @@ test('each quest in the list has its own track button; it picks the quest withou
     await g.eval((s) => document.querySelector(s).click(), sel);
     assert.equal(await g.eval(() => !!window.__G.S.qGOff), true, 'a second press stops tracking');
     // the row itself still opens the details, with track and abandon
-    await g.eval(() => document.querySelector('#qtext .qi[data-qd] b').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 })));
+    await g.eval(() => document.querySelector('#qtext .qi[data-qd]:not(.ms) b').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 })));
     assert.equal(await g.eval(() => !document.getElementById('qdW').hidden && !!document.getElementById('qdCancel')), true);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
