@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22offmig', ver: '1.86', d: '2026-10-22',
+      ar: ["لو لعبت أوفلاين على جهاز وبعدين دخلت بحساب جوجل فيه شخصية أعلى، شخصيتك اللي على الجهاز بتتحفظ في حسابك الأول بكل حاجتها (الأدوات وجودتها والمهمات) قبل ما الشخصية التانية تنزل، فمفيش حاجة بتضيع"],
+      en: ["If you played offline on a device and then sign in with a Google account that has a further character, the one on the device is first kept in your account with everything it has (items, their quality, quests) before the other comes down, so nothing is lost"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",

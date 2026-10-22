@@ -21,7 +21,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U015 | Latency diagnostics | ✅ | SAT-ONLINE-012: smoothed write round trip in `net().link` and the badge tooltip |
 | U016 | Public profile projection | ✅ | SAT-ONLINE-007 (public fields only, §23) |
 | U017 | Cloud Function command bus | ⏳ | Blaze (D3) |
-| U018 | Offline-to-online migration | 🟡 | SAT-ONLINE-007 moves a save between devices with consent; a wallet migration is server-side (D4) |
+| U018 | Offline-to-online migration | ✅ | A save from an older build is migrated on load (the schema ladder in `src/core/storage.js`, S.v 4 → 5) and the old save is kept as a backup (`from-v4`). Signed in, the character goes up as it is (SAT-ONLINE-007, automatic since 2026-10-20). SAT-ONLINE-139: a device whose own offline character would be replaced by the account's further one uploads it first as a character of its own (and keeps it as a backup), so nothing of it is lost; one too large to go up stays and nothing comes down. `regression/offlinemigrate`: every item with its quality, enhancement and gem, the quests and materials, no item twice, on both devices and after a reconnect. The online wallet stays separate (D4) |
 | U019 | Rate limiting | ✅ | Presence per-sender budget, duel hits per second, rules on every write |
 | U020 | Network observability | ✅ | `net().stats`/`net().link` and the badge tooltip (SAT-ONLINE-012); the owner's `/net` (SAT-ONLINE-108): online in the last minute by zone and level, this page's link, the last day's crashes (`regression/netdash`) |
 | U021 | Auth emulator CI | ✅ | SAT-ONLINE-116: the real rules on the Realtime Database emulator in CI (`tests/emulator/rules.emu.cjs`, `.github/workflows/emulator.yml`), players A and B and an admin: A can't change what is B's (account ID, presence, profile, saves, session, friends, chat lines, guild rank); the fake still mirrors the rules for the browser tests |
@@ -43,7 +43,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U037 | Outlaw flag | ✅ | SAT-ONLINE-038: a kill makes the killer an outlaw for 10 min (`PlayerPublic.ol`, red name for everyone, `S.olT` kept across a reload); the kill counts only from a real, recent hit |
 | U038 | Bounty board | 🟡 | SAT-ONLINE-051 (#84): gold on an outlaw's head from its card, paid once to its PvP killer through the victim's own kill record (`bountyPaid`), taken back from the board; karma (SAT-ONLINE-052, #85): murders cost points and lengthen the red name, -5 is a murderer; gold has no ledger (D3) |
 
-**Totals:** ✅ 24 · 🟡 9 · ⏳ 3 · ❌ 2.
+**Totals:** ✅ 29 · 🟡 4 · ⏳ 3 · ❌ 2.
 
 ## Social U046–U065 (plan doc §35 [SOC])
 
