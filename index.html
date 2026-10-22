@@ -7117,7 +7117,9 @@ Object.assign(STR.en,{oPMap:'Buy a paper map',oPMapD:"This area only, drawn by h
 function openMap(){SFX.open();mode='map';$('mapW').hidden=false;$('hint').hidden=true;const pp=outPos();MV.z=4;MV.cx=pp.x/TS;MV.cy=pp.y/TS;mapClamp($('mapC'));drawMapNow();}
 function closeMap(){SFX.close();$('mapW').hidden=true;mode='play';}
 // where a quest is done or turned in (world tiles), for the map
-const wTile=(x,y)=>{const R=roomAt(x,y);return R?{x:R.dx/TS,y:R.dy/TS}:{x:x/TS,y:y/TS};};
+// a spot inside a cave or dungeon shows as its mouth outdoors (owner 2026-10-22: the arrow to the mural behind Loran Falls
+// pointed past the south coast, where the caves are laid out, instead of at the cave in the canyon)
+const wTile=(x,y)=>{const R=roomAt(x,y);if(R)return {x:R.dx/TS,y:R.dy/TS};const D=dunAt(x,y);if(D&&dunAt(P.x,P.y)!==D){const g=DGATES.find(g=>!dunAt(g.x,g.y)&&dunAt(g.to.x,g.to.y)===D);if(g)return {x:g.x/TS,y:g.y/TS};}return {x:x/TS,y:y/TS};};
 function qSpot(id){const q=QD[id],o=q.obj;if(qReady(id)){const n=npcs.find(n=>n.id===q.by);return n?{...wTile(n.x,n.y),ret:1}:null;}
  const bs=BOSSES.find(b=>b[0]===o.it);if(o.t==='kill'&&bs)return{x:bs[1],y:bs[2]};
  const src={leather:'rabbit'}[o.it]||o.it,sp=SPAWN.find(s=>s[0]===src);if((o.t==='kill'||o.t==='have')&&sp)return{x:wX((sp[1]+sp[2])/2),y:(sp[3]+sp[4])/2,area:1};

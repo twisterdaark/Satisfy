@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22cave', ver: '1.76', d: '2026-10-22',
+      ar: ["سهم المهمات والخريطة بيدلوك على باب الكهف لما المهمة جوا كهف أو دانجن (زي رسمة شلالات لوران) بدل ما يشاوروا ناحية البحر"],
+      en: ["The quest arrow and the map point to the cave mouth when a quest is inside a cave or dungeon (like the mural behind Loran Falls) instead of out to sea"] },
     { v: '2026-10-22qd', ver: '1.75', d: '2026-10-22',
       ar: ["تفاصيل المهمة بتوري نوعها فوق (القصة، يومية، جانبية) أو رتبتها لو مهمة S، وزرار سهم المهمات بقى بلون عادي وزرار الإلغاء بس هو الأحمر"],
       en: ["Quest details show the kind at the top (Story, Daily, Side) or the grade for S quests, and the quest arrow button is a plain colour now; only Cancel is red"] },
