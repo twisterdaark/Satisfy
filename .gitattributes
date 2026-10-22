@@ -1,0 +1,6 @@
+# SAT-ONLINE-119: two files every pull request adds to at the same place, so any two open ones conflict there. At a merge,
+# git keeps both sides' lines instead (the built-in "union" driver): the owner's test guide gets both new rows, and the
+# update log both new entries (still to renumber at the merge: tests/unit/changelog fails until the versions run on).
+# Only for these two; NET_BACKLOG.md edits rows in place, where keeping both sides would duplicate them.
+docs/online/OWNER_TEST_GUIDE.md merge=union
+src/ui/changelog.js merge=union
