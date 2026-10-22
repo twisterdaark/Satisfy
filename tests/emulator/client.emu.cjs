@@ -141,7 +141,7 @@ test('a trade on the real SDK and rules: ask, accept, an item for gold, both acc
     const asked = ta.ask(a.sees(b));
     must(asked === 'sent', 'A asks B: ' + asked);
     await until(() => !!tb.pendingAsk(), 'B is asked').catch((e) => must(false, e.message));
-    must(tb.accept(tb.pendingAsk().id) === true, 'B accepts');
+    must(tb.accept(tb.pendingAsk().trade) === true, 'B accepts');
     await until(() => ta.state().phase === 'open' && tb.state().phase === 'open', 'the trade is open on both sides').catch((e) => must(false, e.message));
     must(ta.toggle(iid) === true, 'A offers the sword');
     must(tb.setGold(300) === true, 'B offers 300 gold');
