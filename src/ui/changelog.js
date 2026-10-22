@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22bagfix', ver: '1.97', d: '2026-10-22',
+      ar: ["سحب خاتم أو أي حاجة من الشنطة للشريط بقى بيحطها في الخانة على طول، من غير سؤال الرمي. والشريط بيظهر وإنت بتسحب حتى والشنطة مفتوحة",
+        "الصورة اللي بتسحبها بقت نفس خانة الشنطة بحجمها وإطار ندرتها. ولو سبتها فوق أي حتة من الواجهة مبيحصلش حاجة، والرمي بس لو سبتها فوق اللعبة نفسها",
+        "الشنطة والمعدات والحالة بتتحرك من العنوان أو من أي حتة فاضية فيهم"],
+      en: ["Dragging a ring or anything else from the bag to the bar now puts it in that slot at once, with no throw-away question. The bar shows while you drag, even with the bag open",
+        "The picture you drag is now the bag slot itself, its size and rarity frame. Letting go over any part of the HUD does nothing; it is thrown away only over the game itself",
+        "The bag, equipment and status windows move by the title or by any empty part of the window"] },
     { v: '2026-10-22bargear', ver: '1.96', d: '2026-10-22',
       ar: ["الخواتم والسلاح والدروع وكل حاجة بتتلبس، والأكل والجرعات واللفايف، بقت تتحط في الشريط الأساسي اللي تحت كمان، بالسحب من الشنطة وهي مفتوحة",
         "تدوس على قطعة في الشريط تلبسها، وتدوس تاني تقلعها وترجع القطعة اللي كانت لابسها قبلها. والقطعة اللي لابسها ليها إطار أخضر، والأكل والجرعات عليها العدد",
