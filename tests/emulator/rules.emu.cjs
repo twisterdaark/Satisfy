@@ -61,6 +61,8 @@ test('presence: only your own node, with your own uid and ID, and no field outsi
   await no(db(B).ref('presence/satisfy/main/' + B).set(presence(B, 'Ahmed')), 'nor A\'s account ID');
   await no(db(A).ref('presence/satisfy/main/' + A).update({ gold: 1 }), 'unknown fields are refused');
   await no(db(A).ref('presence/satisfy/main/' + A).update({ anim: 'fly' }), 'only the known animations');
+  await yes(db(A).ref('presence/satisfy/main/' + A).update({ pv: 1 }), 'PvE only (SAT-ONLINE-145)');
+  await no(db(A).ref('presence/satisfy/main/' + A).update({ pv: 2 }), 'which is 1 or nothing');
   await no(db(A).ref('presence/satisfy/main/' + A).update({ t: 5 }), 'server time only');
   await no(db(A).ref('presence/satisfy/other/' + A).set(presence(A, 'Ahmed')), 'one shard');
 });

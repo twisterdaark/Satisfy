@@ -12,13 +12,18 @@
  * so nobody dies to one blow. Dying to a player costs the normal death penalty only (the game's die()); nothing
  * changes hands.
  *
+ * PvE only (SAT-ONLINE-145, plan U035): a player can leave open PvP (o.pve(); the others see PlayerPublic.pv). It is
+ * both ways: nobody hits them and they hit nobody, checked on both sides like the towns. The game keeps it from being a
+ * way out of a fight (not within FIGHT_MS of a hit either way, not while an outlaw) and from being flipped back and
+ * forth (once every COOL_MS).
+ *
  * Trust model (no server yet, as for duels): the victim applies the hits it receives after checking the rate (at
  * most HITS_PER_S in any second), the range (attacker within HIT_RANGE of the victim's real position), the zones and
  * the party. The outlaw mark is set by the killer's own client when the victim reports the kill, and only for a
  * player it really hit in the last KILL_MS. A modified client could ignore hits or hide its mark; Trusted Combat on a
  * server (R5) closes that later.
  *
- * Exposes `Satisfy.pvp.create({ presence, uid, now?, pos, zone, room?, party, ally?, busy?, alive?, policy? })`.
+ * Exposes `Satisfy.pvp.create({ presence, uid, now?, pos, zone, room?, party, ally?, busy?, alive?, policy?, pve? })`.
  *   pos(): {x, y} of the local player; zone(): its zone id; room(): its house interior id or null; party(): its party id or null;
  *   ally(r): true when remote r is in a guild allied with ours; busy(): true while in a duel; alive(): false while dead.
  */
@@ -27,6 +32,7 @@
 
   var C = Object.freeze({
     MIN_HIT: 30, MAX_HIT: 90, HITS_PER_S: 4, HIT_RANGE: 200, KILL_MS: 8000, OUTLAW_MS: 10 * 60 * 1000,
+    PVE_FIGHT_MS: 30000, PVE_COOL_MS: 2 * 60 * 1000, // the owner, 2026-10-22: two minutes
   });
   var TYPES = ['pvp.hit', 'pvp.kill'];
 
@@ -34,6 +40,7 @@
     var P = o.presence, self = o.uid, now = o.now || function () { return Date.now(); };
     var pos = o.pos, zone = o.zone, party = o.party || function () { return null; }, room = o.room || function () { return null; };
     var busy = o.busy || function () { return false; }, alive = o.alive || function () { return true; };
+    var pve = o.pve || function () { return false; };
     var ally = o.ally || function () { return false; };
     var policy = o.policy || (root.Satisfy && root.Satisfy.net && root.Satisfy.net.zonePolicy) || function () { return { safe: false }; };
     var listeners = [], hitsIn = new Map(), hitsOut = [], hitN = 0;
@@ -48,6 +55,7 @@
       if (!r || !r.uid || r.uid === self) return 'bad';
       if ((r.room || null) !== (room() || null)) return 'room';
       if (noFight(zone()) || noFight(r.zone)) return 'safe';
+      if (pve() || r.pv === 1) return 'pve';
       if (mate(r)) return 'mate';
       if (ally(r)) return 'ally';
       if (busy() || r.duel) return 'duel';
@@ -82,7 +90,7 @@
     });
 
     var api = {
-      /** Can the local player hit remote r right now? Returns null, or why not: bad, room, safe, mate, ally, duel, dead. */
+      /** Can the local player hit remote r right now? Returns null, or why not: bad, room, safe, pve, mate, ally, duel, dead. */
       why: why,
       /** Send one hit of power pow (game units). Returns the per-mille sent (0 when it can't land or is too fast). */
       hit: function (r, pow) {

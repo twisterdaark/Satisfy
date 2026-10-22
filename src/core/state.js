@@ -63,6 +63,8 @@
     'arnS',
     // karma (SAT-ONLINE-052): -10..10, down for killing a player who isn't an outlaw, up for killing an outlaw; karT: play time toward the next point back
     'karma', 'karT',
+    // PvE only (SAT-ONLINE-145): chosen, and when it was last changed (server clock, ms)
+    'pve', 'pveT',
     // the National Competition (SAT-ONLINE-064) this character scored in and is still to be paid for (its id)
     'natIn',
     // Pagma's Successor saw the mural behind Loran Falls (the five sword techniques)

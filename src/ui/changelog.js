@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22pveonly', ver: '1.89', d: '2026-10-22',
+      ar: ["وضع PvE بس: من قايمة اللاعيبة (O) تقدر تطلع من الـ PvP المفتوح، فمحدش من اللاعيبة يقدر يأذيك وإنت متقدرش تأذي حد، والباقيين بيشوفوا 🕊 جنب اسمك",
+        "مينفعش وإنت في خناقة (30 ثانية بعد آخر ضربة) ولا وإنت خارج عن القانون، وتقدر تغيّره كل دقيقتين. المبارزة زي ما هي"],
+      en: ["PvE only: from the players list (O) you can leave open PvP, so no player can hurt you and you can hurt no one, and the others see 🕊 by your name",
+        "Not in a fight (30 s after the last blow) or while you are an outlaw, and you can change it every 2 minutes. Duels are as before"] },
     { v: '2026-10-22horse', ver: '1.88', d: '2026-10-22',
       ar: ["أي عربجي في أي مدينة بيعالج حصانك لو وقع، مش لازم تسافر لعربجي معين. وكل العربجية بيبيعوا علف الحصان (بيقوّمه بنص صحته) وعشبة الحيوية (بيقوّمه بصحته كلها)",
         "عشبة الحيوية كمان بتطلع ساعات وانت بتجمع الأعشاب. أكّل العلف أو العشبة لحصانك من الشنطة في أي حتة، يقوم لو وقع أو يتعالج لو متعور",

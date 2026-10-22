@@ -15,16 +15,16 @@ function world(n, o = {}) {
   const players = [];
   for (let i = 0; i < n; i++) {
     const uid = 'u' + i;
-    const p = { uid, name: 'P' + i, x: 4000 + i * 20, y: 1500, zone: o.zone || 'zPlains', room: null, party: null, duel: false, dead: false, allies: [], events: [] };
+    const p = { uid, name: 'P' + i, x: 4000 + i * 20, y: 1500, zone: o.zone || 'zPlains', room: null, party: null, duel: false, dead: false, pve: false, allies: [], events: [] };
     p.pres = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net, uid, sid: 'sess' + i + 'xxxxxxxx' });
-    p.pvp = SN.pvp.create({ presence: p.pres, uid, now, pos: () => ({ x: p.x, y: p.y }), zone: () => p.zone, room: () => p.room, party: () => p.party, ally: (r) => p.allies.includes(r.uid), busy: () => p.duel, alive: () => !p.dead, policy: SN.net.zonePolicy });
+    p.pvp = SN.pvp.create({ presence: p.pres, uid, now, pos: () => ({ x: p.x, y: p.y }), zone: () => p.zone, room: () => p.room, party: () => p.party, ally: (r) => p.allies.includes(r.uid), busy: () => p.duel, alive: () => !p.dead, policy: SN.net.zonePolicy, pve: () => p.pve });
     p.pvp.on((e) => p.events.push(e));
     players.push(p);
   }
   const sync = () => {
     for (const p of players) {
       const pp = SN.net.toPlayerPublic({ look: { n: p.name }, cls: 'novice', lv: 2, title: '' }, { x: p.x, y: p.y, dir: 0 },
-        { zone: p.zone, room: p.room, uid: p.uid, sid: p.pres.sid, party: p.party, anim: p.dead ? 'dead' : 'idle' });
+        { zone: p.zone, room: p.room, uid: p.uid, sid: p.pres.sid, party: p.party, anim: p.dead ? 'dead' : 'idle', pv: p.pve });
       p.pres.publish(pp, true);
     }
     for (const p of players) p.pres.tick();
@@ -80,6 +80,28 @@ test('no hits in a town (either side), in another room, inside a party, during a
   b.allies = ['u0']; a.pres.send('pvp.hit', { to: 'u1', k: 50, n: 2 }); w.advance(100);
   assert.equal(w.hurts(b).length, 0);
   assert.equal(b.events.at(-1).why, 'ally');
+});
+
+// plan U035 (PvE only): a player out of open PvP is out both ways, checked on both sides
+test('PvE only: nobody hits that player and that player hits nobody, whatever is sent', () => {
+  const w = world(2), [a, b] = w.players;
+  b.pve = true; w.advance(200);
+  assert.equal(w.remote(a, b).pv, 1, 'shown to the others');
+  assert.equal(a.pvp.why(w.remote(a, b)), 'pve');
+  assert.equal(a.pvp.hit(w.remote(a, b), 10), 0);
+  a.pres.send('pvp.hit', { to: 'u1', k: 50, n: 61 }); // sent anyway
+  assert.equal(w.hurts(b).length, 0);
+  assert.equal(b.events.at(-1).why, 'pve');
+  assert.equal(b.pvp.why(w.remote(b, a)), 'pve', 'B hits nobody');
+  b.pres.send('pvp.hit', { to: 'u0', k: 50, n: 62 });
+  assert.equal(w.hurts(a).length, 0);
+  assert.equal(a.events.at(-1).why, 'pve', 'nor what B sends');
+  b.pve = false; w.advance(200);
+  assert.equal(w.remote(a, b).pv, null);
+  assert.equal(a.pvp.hit(w.remote(a, b), 10), 40);
+  assert.equal(w.hurts(b).length, 1);
+  assert.deepEqual([C.PVE_FIGHT_MS, C.PVE_COOL_MS], [30000, 120000]);
+  assert.deepEqual(SN.net.validatePlayerPublic({ ...SN.net.toPlayerPublic({ look: { n: 'X' }, cls: 'novice', lv: 2 }, { x: 1, y: 1, dir: 0 }, {}), pv: 2 }).errors, ['pv']);
 });
 
 test('the victim rejects hits from too far and more than HITS_PER_S a second', () => {

@@ -103,7 +103,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #netB{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*.6);padding:calc(var(--u)*.3) calc(var(--u)*1.2);font-size:calc(var(--u)*1.5);color:#9fe0ff;white-space:nowrap;pointer-events:auto;cursor:pointer}
 #plW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*4.4);padding:calc(var(--u)*.8) calc(var(--u)*1.4);width:calc(var(--u)*34);max-height:calc(var(--u)*30);overflow-y:auto;font-size:calc(var(--u)*1.5);pointer-events:auto;z-index:45}
 #plL div{padding:calc(var(--u)*.25) 0;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:calc(var(--u)*.8)}#plL div.me{color:#ffe7a8}#plL .pm{width:auto;min-width:calc(var(--u)*3);padding:0 calc(var(--u)*.8);line-height:1.2;flex:none}
-#plW .row{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*.5);margin-top:calc(var(--u)*.6)}#plW .row #plHide{grid-column:1/-1}#plW .row button{width:auto;margin:0;padding:calc(var(--u)*.2) calc(var(--u)*.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#plW .row{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*.5);margin-top:calc(var(--u)*.6)}#plW .row #plHide,#plW .row #plPve{grid-column:1/-1}#plW .row button{width:auto;margin:0;padding:calc(var(--u)*.2) calc(var(--u)*.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 #updV{position:absolute;inset:0;z-index:59;pointer-events:auto;background:rgba(4,8,20,.72)}#updW small{opacity:.8}#updW{position:absolute;left:50%;transform:translate(-50%,-50%);top:50%;flex-wrap:wrap;justify-content:center;z-index:60;pointer-events:auto;display:flex;align-items:center;gap:calc(var(--u)*1);padding:calc(var(--u)*.8) calc(var(--u)*1.4);font-size:calc(var(--u)*1.5)}#updW button{font:inherit;cursor:pointer}
 body.photo #ui>*:not(#photoBar){visibility:hidden!important}body.photo #photoBar,body.photo #photoBar *{visibility:visible!important}#photoBar{position:absolute;bottom:calc(var(--u)*2);left:50%;transform:translateX(-50%);display:flex;gap:calc(var(--u)*1);z-index:60}#photoBar button{opacity:.55;font-size:calc(var(--u)*1.5);padding:calc(var(--u)*.5) calc(var(--u)*1.2)}#photoBar button:hover{opacity:1}#photoBar.flash{animation:phF .4s}@keyframes phF{0%{filter:brightness(3)}100%{filter:none}}
 .itabs{display:flex;gap:calc(var(--u)*.5);margin:calc(var(--u)*.3) 0 calc(var(--u)*.6);flex-wrap:wrap}.itabs button{padding:calc(var(--u)*.3) calc(var(--u)*1);font-size:calc(var(--u)*1.35)}.itabs button small{opacity:.7}
@@ -509,7 +509,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
       <div id="loot"></div>
       <div id="evbar" class="sys" hidden></div><div id="tlbar" class="sys" hidden></div>
       <div id="sgbar" class="sys" hidden></div><div id="natbar" class="sys" hidden></div>
-      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plBnt" data-act="plBnt" data-i18n="bntBoard"></button><button id="plRnk" data-act="plRnk" data-i18n="rnkBoard"></button><button id="plFr" data-act="plFr" data-i18n="frBoard"></button><button id="plLfg" data-act="plLfg" data-i18n="lfgBoard"></button><button id="plNat" data-act="plNat" data-i18n="natBoard"></button><button id="plCal" data-act="plCal" data-i18n="calBoard"></button></div></div>
+      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plPve" data-act="plPve"></button><button id="plBnt" data-act="plBnt" data-i18n="bntBoard"></button><button id="plRnk" data-act="plRnk" data-i18n="rnkBoard"></button><button id="plFr" data-act="plFr" data-i18n="frBoard"></button><button id="plLfg" data-act="plLfg" data-i18n="lfgBoard"></button><button id="plNat" data-act="plNat" data-i18n="natBoard"></button><button id="plCal" data-act="plCal" data-i18n="calBoard"></button></div></div>
       <div id="netRepW" class="sys" hidden><div id="netRepT"></div><div class="row"><button id="netRepBtn" data-act="netTakeBack"></button></div></div>
       <div id="duelInv" class="sys" hidden><div id="duelInvT"></div><div class="row"><button id="duelBtnA" data-act="dAccept"></button><button id="duelBtnB" data-act="dDecline"></button><button id="duelBtnC" class="blk" data-act="dBlock" data-i18n="pBlock"></button></div></div>
       <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
@@ -7476,7 +7476,7 @@ function act(a){
  else if(a==='fullscr')goFull(true);
  else if(a==='tLay'){resume();tLayOpen();} // owner 2026-10-21: arranging the buttons also lives in the pause menu
  else if(a==='online')netPlay();
- else if(a==='plClose')plOpen(false);else if(a==='plRnk')rnkBoard();else if(a==='plHide')plHideT();
+ else if(a==='plClose')plOpen(false);else if(a==='plRnk')rnkBoard();else if(a==='plHide')plHideT();else if(a==='plPve')pveToggle();
  else if(a==='idOk')idOk();else if(a==='idCheck')idCheck();else if(a==='idClose')$('idW').hidden=true;
  else if(a==='netTakeBack')netTakeBack();
  else if(a==='cloud')cloudOpen();else if(a==='updLog')updLogOpen();else if(a==='qgtoggle')qgToggle();else if(a==='updLogClose')updLogClose();else if(a==='switchAcc')netSwitch();else if(a==='cloudClose')$('cloudW').hidden=true;
@@ -8463,7 +8463,7 @@ Satisfy.local=Object.freeze({api:1,
  zoneAt:(x,y)=>netZone(x,y), // 'void' where the world defines nothing (SAT-ONLINE-019)
  roomAt:(x,y)=>{const R=roomAt(x,y);return R?{id:R.id,kind:R.kind,zone:R.z}:null;},
  inGame:()=>!!S&&!S.__demo,
- playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,wp:(()=>{const w=weapon();return w&&WSH[w.id]?w.id+':'+Math.max(0,Math.min(9,w.r|0))+(w.en>0?':'+Math.min(99,w.en|0):''):null;})(),fx:fxPub(),gu:guPub(),zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null}),
+ playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,wp:(()=>{const w=weapon();return w&&WSH[w.id]?w.id+':'+Math.max(0,Math.min(9,w.r|0))+(w.en>0?':'+Math.min(99,w.en|0):''):null;})(),fx:fxPub(),gu:guPub(),zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null,pv:pveOn()?1:null}),
  backups:()=>STORE.backups(),
  profile:()=>!S||S.__demo?null:Satisfy.state.profileOf(S),
  events:()=>DEVT.log(),
@@ -8718,7 +8718,7 @@ function netEnts(ents){faultAt('netEnts');const myRoom=(roomAt(P.x,P.y)||{}).id|
   if(PCTX&&PCTX.uid===r.uid)ents.push({y:r.y-1,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,231,168,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(r.x,r.y+1,9,4,0,0,7);ctx.stroke();ctx.restore();}});
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   const gi=guildOf(r),gy=gi?6:0; // SAT-ONLINE-046: «guild» under the name, the name and the bar a line higher
-  TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol===2?'#b0102a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038), 2 a murderer (052)
+  TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':'')+(r.pv===1?' 🕊':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol===2?'#b0102a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038), 2 a murderer (052)
   if(gi)TX.push({s:'«'+gdEmb(gi.emb)+gi.n+'»'+gtroTag(r.gd)+gstMark(r.gd),x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37-gy,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
@@ -8949,8 +8949,20 @@ Object.assign(STR.ar,{plH:'اللاعيبة أونلاين ({n})',plHideLv:'اخ
 Object.assign(STR.en,{plH:'Players online ({n})',plHideLv:'Hide my level',plShowLv:'Show my level',plHidden:'Your level is hidden from everyone',plShown:'Your level is visible again'});
 function lvTxt(n){return n>0?String(n):'?';}
 function plOpen(on){const w=$('plW');if(on===undefined)on=w.hidden;if(!NET||!Satisfy.local.inGame())on=false;w.hidden=!on;if(on)plFill();}
+/* PvE only (SAT-ONLINE-145, plan U035): from the players list (O) a player leaves open PvP, both ways: nobody can hurt them
+   and they can hurt nobody, outside towns too (src/net/pvp.js, PlayerPublic.pv, a 🕊 by the name). It is no way out of
+   a fight: not within 30 s of a blow either way, not while an outlaw; and it changes at most once every 2 minutes (the owner, 2026-10-22; the
+   server clock, kept in the save, so a reload doesn't reset it). Duels, which both accept, are not affected. */
+var pvpFightT=-1e9;
+function pveOn(){return !!(S&&!S.__demo&&S.pve);}
+function pveWhyNot(){if(!S||S.__demo)return ['pveNo'];const C=Satisfy.pvp.C,f=C.PVE_FIGHT_MS-(performance.now()-pvpFightT);if(f>0)return ['pveFight',{s:Math.ceil(f/1000)}];
+ if(!S.pve&&outlaw())return ['pveOl'];const left=(S.pveT||0)+C.PVE_COOL_MS-wNow();return left>0?['pveCool',{m:Math.ceil(left/60000)}]:null;}
+function pveToggle(){const w=pveWhyNot();if(w){SFX.deny();toast(t(w[0],w[1]),'warn');return;}S.pve=!S.pve;S.pveT=wNow();netForce=true;save(true);SFX.notice();toast(t(S.pve?'pveOnT':'pveOffT'),'good');plFill();}
+Object.assign(STR.ar,{pveBOn:'🕊 خليني PvE بس (محدش يضربني ومضربش حد)',pveBOff:'⚔ رجّعني للـ PvP المفتوح',pveOnT:'بقيت PvE بس: محدش من اللاعيبة يقدر يأذيك وإنت متقدرش تأذي حد، حتى برّه المدن. تقدر تغيّرها تاني بعد دقيقتين',pveOffT:'رجعت للـ PvP المفتوح: برّه المدن اللاعيبة يقدروا يضربوك وإنت تضربهم',pveFight:'مش وإنت في خناقة: استنى {s} ثانية بعد آخر ضربة',pveCool:'تقدر تغيّرها تاني بعد {m} دقيقة',pveOl:'مش وإنت خارج عن القانون',pveNo:'مش دلوقتي'});
+Object.assign(STR.en,{pveBOn:'🕊 PvE only (nobody hits me, I hit nobody)',pveBOff:'⚔ Back to open PvP',pveOnT:'PvE only: no player can hurt you and you can hurt no one, outside towns too. You can change it again in 2 minutes',pveOffT:'Open PvP again: outside towns, players can fight you and you them',pveFight:'Not in a fight: wait {s} s after the last blow',pveCool:'You can change it again in {m} min',pveOl:'Not while you are an outlaw',pveNo:'Not now'});
+window.__GPVE={on:()=>pveOn(),toggle:()=>pveToggle(),why:()=>pveWhyNot()}; // tests
 function plHideT(){HIDELV=!HIDELV;try{localStorage.setItem('satisfy_hidelv',HIDELV?'1':'0');}catch(e){}netForce=true;partySig='';toast(t(HIDELV?'plHidden':'plShown'));plFill();}
-function plFill(){const box=$('plL');$('plHide').textContent=t(HIDELV?'plShowLv':'plHideLv');
+function plFill(){const box=$('plL');$('plHide').textContent=t(HIDELV?'plShowLv':'plHideLv');$('plPve').textContent=t(pveOn()?'pveBOff':'pveBOn');
  const me={self:true,handle:netId||S.look.n,lv:HIDELV?0:S.lv,zone:netZone(P.x,P.y)};
  const show=arr=>{$('plH').textContent=t('plH',{n:arr.length});box.textContent='';for(const r of arr){const d=document.createElement('div');if(r.self)d.className='me';
   const s=document.createElement('span');s.textContent=[r.handle||'?',t('lv',{n:lvTxt(r.lv)}),pctxName(r.zone||'')].filter(Boolean).join(' · ');d.appendChild(s);
@@ -9015,7 +9027,7 @@ function olPub(){return outlaw()?(karma()<=MURDER?2:1):0;}
 window.__GK={karma:()=>karma(),set:k=>{S.karma=k;},ol:()=>olPub(),respawn:()=>respawn()}; // test hook
 function karmaTick(dt){if(!S||S.__demo||mode!=='play'||karma()>=0)return;S.karT=(S.karT||0)+dt;if(S.karT>=KARMA_BACK){S.karT=0;S.karma=karma()+1;toast(t('kaBack',{k:S.karma}),'good');netForce=true;}}
 function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
-  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
+  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo,pve:()=>pveOn()});
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
   else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);balPvp(true);const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
    if(v&&warOf(v)){gwrKill(v.gd);return;} // a guild war (SAT-ONLINE-086): it counts for the guild, no karma lost
@@ -9060,10 +9072,10 @@ function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoo
  for(const r of NET.remotes()){if(!netSees(r,myRoom)||PVP.why(r)||!seeL(P.x,P.y-4,r.x,r.y-4))continue;const dx=r.x-P.x,dy=(r.y-8)-(P.y-6),d=Math.hypot(dx,dy);
   if(ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):(d>30||(dx*ax+dy*ay)/(d*l||1)<-.2))continue;if(d<bd){bd=d;best=r;}}
  if(!best)return;const crit=rand()<.12,pow=(8+rand()*5)*(crit?1.5:1)*Math.min(1.5,mul||1),pm=PVP.hit(best,pow);
- if(pm){num(best.x,best.y-24,'-'+Math.max(1,Math.round(pm/10))+'%',crit?'#ffd24a':'#ffffff',crit);vfx(crit?'crit':'hit',best.x,best.y-10,{angle:Math.atan2(best.y-P.y,best.x-P.x)});}}
+ if(pm){pvpFightT=performance.now();num(best.x,best.y-24,'-'+Math.max(1,Math.round(pm/10))+'%',crit?'#ffd24a':'#ffffff',crit);vfx(crit?'crit':'hit',best.x,best.y-10,{angle:Math.atan2(best.y-P.y,best.x-P.x)});}}
 // a hit from another player, already checked by pvp.js: a share of our max HP; a dodge's frames avoid it, a raised guard
 // takes a quarter. The lethal one goes back to the attacker as a kill.
-function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Satisfy.chat.clean(e.handle,24)||'?',now=performance.now();
+function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Satisfy.chat.clean(e.handle,24)||'?',now=performance.now();pvpFightT=now;
  if(!pvpFrom.has(e.uid)||now-pvpFrom.get(e.uid)>15000)toast(t('pvpHit',{n}),'warn');pvpFrom.set(e.uid,now);
  let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}
  P.hp-=d;numP(-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();asMe(()=>vfx('blood',P.x,P.y-10,{}));shake=.12;}hudDirty=true;

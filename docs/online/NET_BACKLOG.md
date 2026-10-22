@@ -38,12 +38,12 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U032 | Duel arena ring | ✅ | SAT-ONLINE-006 |
 | U033 | Duel normalized mode | ✅ | SAT-ONLINE-006 (4–18 of 100 duel HP per hit) |
 | U034 | Duel spectator | ✅ | SAT-ONLINE-013: `PlayerPublic.duel` ("id:HP"), bars over both duelists and a ring for everyone nearby |
-| U035 | Open PvP toggle | 🟡 | SAT-ONLINE-038 (#72, owner 2026-10-19): open PvP outside towns, capped hits (3–9% of max HP) applied by the victim's own client, the victim checks rate and range; not cheat-proof until Trusted Combat (D3) |
+| U035 | Open PvP toggle | ✅ | SAT-ONLINE-038 (#72, owner 2026-10-19): open PvP outside towns, capped hits (3–9% of max HP) applied by the victim's own client. SAT-ONLINE-145: "PvE only" from the players list (O): nobody can hurt that player and they hurt nobody, checked on both sides (`PlayerPublic.pv`, a 🕊 by the name); not within 30 s of a blow either way, not while an outlaw, at most once every 2 minutes (the owner, 2026-10-22), kept in the save (`unit/pvp`, `regression/pveonly`). **Rules change**. Not cheat-proof until Trusted Combat (D3) |
 | U036 | Party friendly fire | ✅ | SAT-ONLINE-038: no hits inside a party, checked by the attacker and again by the victim (`unit/pvp`, `regression/pvp`) |
 | U037 | Outlaw flag | ✅ | SAT-ONLINE-038: a kill makes the killer an outlaw for 10 min (`PlayerPublic.ol`, red name for everyone, `S.olT` kept across a reload); the kill counts only from a real, recent hit |
 | U038 | Bounty board | 🟡 | SAT-ONLINE-051 (#84): gold on an outlaw's head from its card, paid once to its PvP killer through the victim's own kill record (`bountyPaid`), taken back from the board; karma (SAT-ONLINE-052, #85): murders cost points and lengthen the red name, -5 is a murderer; gold has no ledger (D3) |
 
-**Totals:** ✅ 24 · 🟡 9 · ⏳ 3 · ❌ 2.
+**Totals:** ✅ 29 · 🟡 4 · ⏳ 3 · ❌ 2.
 
 ## Social U046–U065 (plan doc §35 [SOC])
 
@@ -57,7 +57,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U051 | Party HP UI | ✅ | SAT-ONLINE-021: `PlayerPublic.hp` (5% steps, nothing else of the profile); a bar per member in the party panel |
 | U052 | Party pings | ✅ | SAT-ONLINE-021: Alt+click (touch: Ping marks where you stand) → `party.ping`; a ring on the ground and the minimap for 3 s; one per member per 1.5 s |
 | U053 | Party chat | ✅ | SAT-ONLINE-016: party lines, rate-limited, block list; world chat for everyone (SAT-ONLINE-026), guild chat (SAT-ONLINE-049, #81), world notices as lines (SAT-ONLINE-041); insults shown as stars in every channel unless the player turns it off with `/filter` (SAT-ONLINE-071, #105) |
-| U054 | Party summon | ⏳ | A teleport needs a movement authority |
+| U054 | Party summon | ⏳ | Not to be built: the owner (2026-10-22) keeps summoning for the Knights system |
 | U055 | Party follow | ✅ | SAT-ONLINE-068 (#102): "Follow" on a party mate's card walks after them; any move key stops it (`regression/follow`) |
 | U056 | Shared PvE XP | ⏳ | Needs a combat authority; a party raid pays each member their own rewards (009) |
 | U057 | Personal loot | 🟡 | SAT-ONLINE-009: each member's own game pays the boss kill once per encounter; no server ledger |

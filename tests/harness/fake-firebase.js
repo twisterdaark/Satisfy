@@ -84,7 +84,7 @@
     return acked();
   }
 
-  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'rd', 'ol', 'gd', 'seq', 't'];
+  const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'rd', 'ol', 'gd', 'pv', 'seq', 't'];
   const POS_X = 16384, POS_Y = 8192, POS_Y0 = -4096; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
   // SAT-ONLINE-039 trades, as backend/database.rules.json: every condition reads the data as it was before the write
@@ -654,6 +654,7 @@
     if ('rs' in v && !(typeof v.rs === 'string' && v.rs.length <= 1160 && /^[A-Za-z0-9:_.-]+( [A-Za-z0-9:_.-]+){0,8}$/.test(v.rs))) return 'rs';
     if ('rd' in v && v.rd !== 1) return 'rd';
     if ('ol' in v && v.ol !== 1 && v.ol !== 2) return 'ol';
+    if ('pv' in v && v.pv !== 1) return 'pv';
     if ('gd' in v && !(typeof v.gd === 'string' && /^g_[A-Za-z0-9]{1,128}$/.test(v.gd))) return 'gd';
     if ('wp' in v && !/^[a-z0-9_]{1,16}:[0-9](:[0-9]{1,2})?$/.test(v.wp)) return 'wp';
     if ('fx' in v && !(typeof v.fx === 'string' && v.fx.length <= 2400)) return 'fx';

@@ -49,7 +49,7 @@
   // PlayerPublic.gu: the raised guard, 1..256 (direction and flags, see the game's guPub)
   var FX_MAX = 2400;
   var GD_RE = /^g_[A-Za-z0-9]{1,128}$/; // SAT-ONLINE-046 = Satisfy.guild.GID_RE
-  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'rd', 'ol', 'gd', 't'];
+  var PUBLIC_FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'rd', 'ol', 'gd', 'pv', 't'];
   // Keys of S that are private or server-owned. Listed so tests can prove none leak into presence.
   // S.uid (the local item-instance counter) is private too, but its name collides with the public
   // account `uid`, so it is checked by value in the tests instead of listed here.
@@ -153,6 +153,7 @@
       rd: ctx.rd ? 1 : null, // SAT-ONLINE-060: the leader's party is a raid
       ol: ctx.ol === 2 ? 2 : ctx.ol ? 1 : null, // SAT-ONLINE-038: an outlaw (killed a player lately): a red name for everyone; 2: a murderer (SAT-ONLINE-052, low karma)
       gd: typeof ctx.gd === 'string' && GD_RE.test(ctx.gd) ? ctx.gd : null, // SAT-ONLINE-046: the guild id; others read its name from guilds/{gd}
+      pv: ctx.pv ? 1 : null, // SAT-ONLINE-145 (plan U035): this player chose PvE only, out of open PvP both ways
       t: ctx.t || 0,
     };
   }
@@ -192,6 +193,7 @@
     if (o.rs !== undefined && o.rs !== null && !(typeof o.rs === 'string' && RS_RE.test(o.rs))) e.push('rs');
     if (o.rd !== undefined && o.rd !== null && o.rd !== 1) e.push('rd');
     if (o.ol !== undefined && o.ol !== null && o.ol !== 1 && o.ol !== 2) e.push('ol');
+    if (o.pv !== undefined && o.pv !== null && o.pv !== 1) e.push('pv');
     if (o.gd !== undefined && o.gd !== null && !(typeof o.gd === 'string' && GD_RE.test(o.gd))) e.push('gd');
     return { ok: e.length === 0, errors: e };
   }
