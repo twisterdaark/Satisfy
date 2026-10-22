@@ -1940,9 +1940,12 @@ function auWS(){const A=WS.auction||(WS.auction={list:[],paid:{},npcAt:0,id:0});
    (auctionPaid/{seller}/{lid} {g, by, bn, it, q, t}); the rules take it only for a listing still there and at its price, so
    two buyers can't both get it. The seller is told of each sale while playing and collects the gold (less the 5% fee) at
    the auction house. The merchants' listings, and listings made offline, stay on the device as before. */
-Object.assign(STR.ar,{auSoldOn:'{b} اشترى {q}× {it} بتوعك بـ {g} دهب. استلمهم من المزاد',auOnFail:'المزاد مش متاح دلوقتي، جرّب تاني'});
-Object.assign(STR.en,{auSoldOn:'{b} bought your {q}× {it} for {g} gold. Collect it at the auction house',auOnFail:'The auction house is not answering; try again'});
-var AUON={},AUPD={},auOnOff=null,auPdSeen=null,auBusy=0;
+Object.assign(STR.ar,{auMax:'المزاد بياخد لحد {q} من الحاجة الواحدة ولحد {g} دهب',auExpired:'{q}× {it} بتوعك مااتباعوش في 14 يوم ورجعولك',auSoldOn:'{b} اشترى {q}× {it} بتوعك بـ {g} دهب. استلمهم من المزاد',auOnFail:'المزاد مش متاح دلوقتي، جرّب تاني'});
+Object.assign(STR.en,{auMax:'The auction house takes up to {q} of a kind and up to {g} gold',auExpired:'Your {q}× {it} did not sell in 14 days and came back to you',auSoldOn:'{b} bought your {q}× {it} for {g} gold. Collect it at the auction house',auOnFail:'The auction house is not answering; try again'});
+var AUON={},AUPD={},auOnOff=null,auPdSeen=null,auBusy=0,auBackSeen=new Set();
+// what the rules take (Claude-B, #129): eight listings a seller (slots a_{uid}_0 to _7), up to 999 of a kind for up to a
+// billion gold, bought for 14 days; after that the seller's game takes it back
+const AUQMAX=999,AUGMAX=1e9,AUDAYS=14*864e5;
 function aucOn(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&S&&!S.__demo);}
 function auSt(){return aucOn()&&Satisfy.firebase.auctionStore?Satisfy.firebase.auctionStore(FB):null;}
 // the board and your sales, watched from the first visit to the auction house in a session
@@ -1952,7 +1955,10 @@ function auWatch(){const st=auSt();if(!st||auOnOff)return;const uid=NET.uid;
   if(auPdSeen)for(const k in o)if(!auPdSeen.has(k)){toast(t('auSoldOn',{b:o[k].bn,q:o[k].q,it:t(o[k].it),g:Math.round(o[k].g*(1-AUFEE))}),'good');SFX.coin();}
   auPdSeen=new Set(Object.keys(o));AUPD=o;renderAu();});
  auOnOff=()=>{a();b();};}
-function auAll(){const A=auWS();return aucOn()?A.list.concat(Object.values(AUON)):A.list;}
+function auExpire(l){const key=l.id+'@'+l.t;if(auBackSeen.has(key))return;auBackSeen.add(key);const st=auSt();if(!st)return;st.unlist(l.id).then(()=>{delete AUON[l.id];auGive(l.it,l.q);toast(t('auExpired',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);renderAu();},()=>auBackSeen.delete(key));}
+// the listings that can still be bought; your own past 14 days come back to you
+function auFresh(){const now=Date.now(),L=[];for(const k in AUON){const l=AUON[k];if(l.t>now-AUDAYS)L.push(l);else if(l.by===NET.uid)auExpire(l);}return L;}
+function auAll(){const A=auWS();return aucOn()?A.list.concat(auFresh()):A.list;}
 function auFind(id){return auAll().find(l=>String(l.id)===String(id));}
 function auPaidOn(){let g=0;for(const k in AUPD)g+=Math.round(AUPD[k].g*(1-AUFEE));return aucOn()?g:0;}
 function auMineN(){return auAll().filter(l=>l.pid===pidOf()).length;}
@@ -1960,13 +1966,15 @@ function auMineN(){return auAll().filter(l=>l.pid===pidOf()).length;}
 function auBuyOn(l,done){const st=auSt();if(!st||auBusy)return;if(S.gold<l.price){SFX.deny();toast(t('noGold'),'warn');return;}auBusy=1;
  st.buy(l.id,{seller:l.by,g:l.price,by:NET.uid,bn:String(netId||S.look.n||'?').slice(0,24),it:l.it,q:l.q}).then(()=>{auBusy=0;S.gold-=l.price;auGive(l.it,l.q);delete AUON[l.id];SFX.coin();hudDirty=true;save(true);done(true);},
   ()=>{auBusy=0;toast(t('auGone'),'warn');done(false);});}
-function auListOn(k,q,price){const st=auSt();if(!st||auBusy)return false;auBusy=1;const lid='a_'+String(NET.uid).slice(0,24).replace(/[^A-Za-z0-9_-]/g,'')+'_'+Date.now().toString(36);
- auTake(k,q);hudDirty=true;save(true);
+function auListOn(k,q,price){const st=auSt();if(!st||auBusy)return false;if(q>AUQMAX||price>AUGMAX){SFX.deny();toast(t('auMax',{q:AUQMAX,g:AUGMAX.toLocaleString('en')}),'warn');return false;}
+ const used=new Set(Object.keys(AUON)),slot=[0,1,2,3,4,5,6,7].find(i=>!used.has('a_'+NET.uid+'_'+i));if(slot==null){SFX.deny();toast(t('auFull'),'warn');return false;}
+ auBusy=1;const lid='a_'+NET.uid+'_'+slot;auTake(k,q);hudDirty=true;save(true);
  st.list(lid,{by:NET.uid,n:String(netId||S.look.n||'?').slice(0,24),it:k,q,price}).then(()=>{auBusy=0;SFX.coin();toast(t('auListed',{q,it:t(k),g:price}),'good');renderAu();},
   ()=>{auBusy=0;auGive(k,q);hudDirty=true;save(true);toast(t('auOnFail'),'warn');renderAu();});return true;}
 function auBackOn(l,done){const st=auSt();if(!st||auBusy)return;auBusy=1;st.unlist(l.id).then(()=>{auBusy=0;delete AUON[l.id];auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);done();},()=>{auBusy=0;toast(t('auOnFail'),'warn');done();});}
+// each sale's gold is read before its write: the database drops the paid entry from AUPD (its listener) before .then runs
 function auCollectOn(){const st=auSt();if(!st||auBusy)return;const ks=Object.keys(AUPD);if(!ks.length)return;auBusy=1;
- Promise.all(ks.map(k=>st.collect(NET.uid,k).then(()=>{const g=Math.round(AUPD[k].g*(1-AUFEE));delete AUPD[k];S.gold+=g;return g;},()=>0))).then(gs=>{auBusy=0;const g=gs.reduce((a,b)=>a+b,0);if(g){SFX.coin();toast(t('auGot',{g}),'good');hudDirty=true;save(true);}renderAu();});}
+ Promise.all(ks.map(k=>{const g=Math.round(AUPD[k].g*(1-AUFEE));return st.collect(NET.uid,k).then(()=>{delete AUPD[k];S.gold+=g;return g;},()=>0);})).then(gs=>{const g=gs.reduce((a,b)=>a+b,0);if(g){SFX.coin();toast(t('auGot',{g}),'good');hudDirty=true;save(true);}}).finally(()=>{auBusy=0;renderAu();});}
 window.__GAU={get on(){return AUON},get paid(){return AUPD},all:()=>auAll(),watch:()=>auWatch(),store:()=>auSt()}; // tests
 /* the auction window (owner 2026-10-20: "like the shop when you sell: your bag, and you pick what to list"): your goods on
    the left, pick one, set how many and the price, List; on the right what is listed (search by name, Buy) and your own
@@ -1978,10 +1986,11 @@ function renderAu(){if($('auW').hidden)return;const A=auWS(),me=pidOf(),ks=AUK.f
  let h='';for(let i=0,N=Math.max(18,Math.ceil(ks.length/6)*6);i<N;i++){const k=ks[i];h+=k?`<button class="slotb${AUV.sel===k?' sel':''}" data-auk="${k}" data-tip="${esc(`<b>${t(k)}</b><br><small>${t('auMkt',{g:auMarket(k)})}</small>`)}"><img src="${icon(k)}"><b>${auHave(k)}</b></button>`:'<div class="slotb e"></div>';}
  $('auBag').innerHTML=h;$('auGold').textContent=t('gold',{n:S.gold});
  const k=AUV.sel,F=$('auF');if(!k)F.innerHTML=`<small>${t(ks.length?'auPick':'auNothing')}</small>`;else{const hv=auHave(k);
-  F.innerHTML=`<b>${t(k)}</b><label>${t('auQtyH',{n:hv})}<input id="auN" type="number" min="1" max="${hv}" value="${Math.min(hv,5)}"></label><label>${t('auPriceH')}<input id="auP" type="number" min="1"></label><small id="auHint"></small><button id="auGo">${t('auListB')}</button>`;
-  const n=$('auN'),pr=$('auP'),hint=()=>{const q=clamp(+n.value|0,1,hv),m=auMarket(k)*q;$('auHint').textContent=t('auHintT',{g:m,f:Math.round((+pr.value||0)*(1-AUFEE))});};
-  const fill=()=>{pr.value=Math.round(auMarket(k)*clamp(+n.value|0,1,hv)*1.2);hint();};fill();n.oninput=fill;pr.oninput=hint;
-  $('auGo').onclick=()=>{const q=clamp(+n.value|0,1,hv),g=Math.max(1,+pr.value|0);if(auList(k,q,g)){AUV.sel=auHave(k)?k:null;renderAu();}};}
+  const qm=aucOn()?Math.min(hv,AUQMAX):hv;
+  F.innerHTML=`<b>${t(k)}</b><label>${t('auQtyH',{n:hv})}<input id="auN" type="number" min="1" max="${qm}" value="${Math.min(qm,5)}"></label><label>${t('auPriceH')}<input id="auP" type="number" min="1"${aucOn()?` max="${AUGMAX}"`:''}></label><small id="auHint"></small><button id="auGo">${t('auListB')}</button>`;
+  const n=$('auN'),pr=$('auP'),hint=()=>{const q=clamp(+n.value|0,1,qm),m=auMarket(k)*q;$('auHint').textContent=t('auHintT',{g:m,f:Math.round((+pr.value||0)*(1-AUFEE))});};
+  const fill=()=>{pr.value=Math.min(aucOn()?AUGMAX:Infinity,Math.round(auMarket(k)*clamp(+n.value|0,1,qm)*1.2));hint();};fill();n.oninput=fill;pr.oninput=hint;
+  $('auGo').onclick=()=>{const q=clamp(+n.value|0,1,qm),g=Math.max(1,Math.min(aucOn()?AUGMAX:2147483647,Math.floor(+pr.value)||0));if(auList(k,q,g)){AUV.sel=auHave(k)?k:null;renderAu();}};}
  $('auBag').querySelectorAll('[data-auk]').forEach(b=>b.onclick=()=>{SFX.click();AUV.sel=b.dataset.auk;renderAu();});
  document.querySelectorAll('#auW [data-autab]').forEach(b=>{b.classList.toggle('on',b.dataset.autab===AUV.tab);b.onclick=()=>{AUV.tab=b.dataset.autab;renderAu();};});
  const q=$('auQ');q.hidden=AUV.tab!=='list';q.placeholder=t('auFind');q.oninput=()=>renderAu();const qs=q.value.trim().toLowerCase();
@@ -2003,7 +2012,7 @@ function auBuy(id){const A=auWS(),l=auFind(id);if(!l)return toast(t('auGone'),'w
  SFX.coin();hudDirty=true;save(true);dialog('auction',[t('auBought',{q:l.q,it:t(l.it),g:l.price})]);}
 function auSellMenu(){const ks=AUK.filter(k=>auHave(k)>0).slice(0,8);if(!ks.length)return dialog('auction',['auNothing']);
  dialog('auction',['auSellL'],null,[...ks.map(k=>({l:t('auHaveRow',{it:t(k),n:auHave(k),g:auMarket(k)}),ic:k,f:()=>auQty(k)})),{l:t('oLeave')}]);}
-function auQty(k){const h=auHave(k),qs=[...new Set([1,5,h].filter(q=>q<=h))];dialog('auction',[t('auQtyL',{it:t(k)})],null,[...qs.map(q=>({l:t('auQty',{q}),f:()=>auPrice(k,q)})),{l:t('oLeave')}]);}
+function auQty(k){const h=aucOn()?Math.min(auHave(k),AUQMAX):auHave(k),qs=[...new Set([1,5,h].filter(q=>q<=h))];dialog('auction',[t('auQtyL',{it:t(k)})],null,[...qs.map(q=>({l:t('auQty',{q}),f:()=>auPrice(k,q)})),{l:t('oLeave')}]);}
 function auPrice(k,q){const m=auMarket(k)*q;dialog('auction',[t('auPriceL',{g:m})],null,[[.9,'auCheap'],[1.2,'auFair'],[1.8,'auHigh']].map(([f,lb])=>({l:t(lb,{g:Math.round(m*f)}),f:()=>auList(k,q,Math.round(m*f))})).concat([{l:t('oLeave')}]));}
 function auList(k,q,price){if(auHave(k)<q)return;const A=auWS(),mine=auMineN();if(mine>=8){SFX.deny();toast(t('auFull'),'warn');return false;}
  if(aucOn())return auListOn(k,q,price);

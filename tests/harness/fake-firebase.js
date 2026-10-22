@@ -71,7 +71,8 @@
   // write(), so a promise settled on a later timer resolves after them.
   const acked = (v) => new Promise((res) => setTimeout(() => res(v), 0));
   // the paths a root update claims for its first writer only (each one's rules need !data.exists() or the like)
-  const CLAIM_RE = /^(repairOrders|auction|guildNames|guildVaultTaken|guildBank|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb))\//, CLAIM_WAIT = 120;
+  const AU_DAYS = 14 * 864e5; // SAT-ONLINE-094: an auction listing can be bought for 14 days
+  const CLAIM_RE = /^(repairOrders|auction|auctionPaid|guildNames|guildVaultTaken|guildBank|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb))\//, CLAIM_WAIT = 120;
   function rootUpdate(diff) {
     const ps = Object.keys(diff);curDiff = diff;bDiff = diff;let errs;try{errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);}finally{curDiff = null;bDiff = null;}
     F.log.push({ op: 'update', path: '', err: errs[0] || null, keys: ps.slice().sort() });
@@ -566,12 +567,14 @@
       const me = user.uid, old = data.get(p);
       if (seg[0] === 'auction') {
         if (seg.length !== 2 || !/^a_[A-Za-z0-9_-]{1,60}$/.test(seg[1])) return 'PERMISSION_DENIED: auction ' + p;
-        if (v === null) return old && (old.by === me || ((after('auctionPaid/' + old.by + '/' + seg[1]) || {}).by === me && !data.has('auctionPaid/' + old.by + '/' + seg[1]))) ? null : 'PERMISSION_DENIED: auction remove';
-        if (old || v.by !== me) return 'PERMISSION_DENIED: auction write';
+        // bought only while it is fresh (14 days); its seller takes it off any time
+        if (v === null) return old && (old.by === me || (old.t > Date.now() - AU_DAYS && (after('auctionPaid/' + old.by + '/' + seg[1]) || {}).by === me && !data.has('auctionPaid/' + old.by + '/' + seg[1]))) ? null : 'PERMISSION_DENIED: auction remove';
+        // one of the seller's eight slots: a_{uid}_{0-7}
+        if (old || v.by !== me || seg[1] !== 'a_' + me + '_' + seg[1].slice(-1) || !/_[0-7]$/.test(seg[1])) return 'PERMISSION_DENIED: auction write';
         return Object.keys(v).sort().join(',') === 'by,it,n,price,q,t' && typeof v.n === 'string' && v.n.length <= 24 && /^[a-z]{2,12}$/.test(v.it) && isInt(v.q, 1) && v.q <= 999 && isInt(v.price, 1) && v.price <= 1e9 && isSV(v.t) ? null : 'auction values';
       }
       if (seg.length !== 3) return 'PERMISSION_DENIED: auctionPaid ' + p;
-      if (v === null) return seg[1] === me ? null : 'PERMISSION_DENIED: auctionPaid remove';
+      if (v === null) return seg[1] === me && old !== undefined ? null : 'PERMISSION_DENIED: auctionPaid remove'; // collected once: two pages of one account can't both
       const L = data.get('auction/' + seg[2]);
       if (old || !L || L.by !== seg[1] || seg[1] === me || after('auction/' + seg[2]) !== null) return 'PERMISSION_DENIED: auctionPaid write';
       return Object.keys(v).sort().join(',') === 'bn,by,g,it,q,t' && v.g === L.price && v.it === L.it && v.q === L.q && v.by === me && typeof v.bn === 'string' && v.bn.length <= 24 && isSV(v.t) ? null : 'auctionPaid values';

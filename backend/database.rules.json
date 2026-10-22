@@ -864,8 +864,8 @@
     "auction": {
       ".read": "auth != null",
       "$lid": {
-        ".write": "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid) || (data.exists() && !newData.exists() && (data.child('by').val() === auth.uid || newData.parent().parent().child('auctionPaid').child(data.child('by').val()).child($lid).child('by').val() === auth.uid)))",
-        ".validate": "$lid.matches(/^a_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['by', 'n', 'it', 'q', 'price', 't'])",
+        ".write": "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid) || (data.exists() && !newData.exists() && (data.child('by').val() === auth.uid || (data.child('t').val() > now - 1209600000 && newData.parent().parent().child('auctionPaid').child(data.child('by').val()).child($lid).child('by').val() === auth.uid))))",
+        ".validate": "$lid.matches(/^a_[A-Za-z0-9_-]{1,60}_[0-7]$/) && $lid.beginsWith('a_' + newData.child('by').val() + '_') && $lid.length === newData.child('by').val().length + 4 && newData.hasChildren(['by', 'n', 'it', 'q', 'price', 't'])",
         "by": { ".validate": "newData.isString()" },
         "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
         "it": { ".validate": "newData.isString() && newData.val().matches(/^[a-z]{2,12}$/)" },
@@ -879,7 +879,7 @@
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         "$lid": {
-          ".write": "auth != null && ((!data.exists() && newData.exists() && root.child('auction').child($lid).child('by').val() === $uid && $uid !== auth.uid && !newData.parent().parent().parent().child('auction').child($lid).exists()) || (auth.uid === $uid && !newData.exists()))",
+          ".write": "auth != null && ((!data.exists() && newData.exists() && root.child('auction').child($lid).child('by').val() === $uid && $uid !== auth.uid && !newData.parent().parent().parent().child('auction').child($lid).exists()) || (auth.uid === $uid && data.exists() && !newData.exists()))",
           ".validate": "newData.hasChildren(['g', 'by', 'bn', 'it', 'q', 't'])",
           "g": { ".validate": "newData.val() === root.child('auction').child($lid).child('price').val()" },
           "by": { ".validate": "newData.val() === auth.uid" },
