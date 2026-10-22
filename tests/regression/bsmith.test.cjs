@@ -52,6 +52,13 @@ test('the Legendary Eyes see a named item whole and help understanding', async (
     assert.match(l.txt, /\[Legendary Blacksmith's Eyes\]/);
     assert.doesNotMatch(l.txt, /\?\?\?/);
     assert.equal(l.eyes.ochelm, l.n);
+    // the chief dead, a plain orc beside you: its 0.3% share of the chief set is not something it wears, so nothing shows
+    // (owner 2026-10-22: the Eyes named the chief's gloves with the chief long dead)
+    const o = await g.eval(() => { const G = window.__G, S = G.S, B = window.__GBS; S.eyes = {}; const w = document.getElementById('eyesW'); w.hidden = true;
+      for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } const f = G.spawnMon('forc', G.P.x + 60, G.P.y); f.max = f.hp = 1e9; f.tmp = 0;
+      B.reset(); for (let i = 0; i < 61; i++) B.eyTick(.1); return { hid: w.hidden, eyes: S.eyes }; });
+    assert.equal(o.hid, true);
+    assert.deepEqual(o.eyes, {});
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });

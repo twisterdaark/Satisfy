@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22bar8', ver: '1.79', d: '2026-10-22',
+      ar: ["شريط المهارات بقى 8 خانات (من 1 لـ 8) غير خانة اللقب (R) والبوشنين، ومترتب في عمودين جنب البوشنات. مهاراتك القديمة فضلت في أماكنها",
+        "عيون الحداد الأسطوري بتشوف بس وحش عايش قدامك على الشاشة ومن غير حيطة بينكم، وبتقرا بس الحاجة اللي هو لابسها فعلًا: أوركات ضوء الصقيع العادية مبقتش بتظهر إنها لابسة قفازات الزعيم"],
+      en: ["The skill bar has 8 slots (1 to 8) besides the title slot (R) and the two potions, laid out in two columns beside the potions. Your skills stay where they were",
+        "Legendary Blacksmith's Eyes only read a living monster in front of you, on screen, with no wall between you, and only what it really wears: plain Frostlight orcs no longer show the chief's gauntlets"] },
     { v: '2026-10-22mural', ver: '1.78', d: '2026-10-22',
       ar: ["الجدارية ورا شلالات لوران بقت بتديك حركات فن سيف باغما الخمسة فعلًا، بمشهد: الشاشة بتغمق، ضربات سيف بتلف حواليك، وعمود نور بيطلع منك، ورسالة النظام بأسماء الحركات. لو كنت زرتها قبل كده بتاخدهم أول ما تفتح اللعبة",
         "مسابقة الأمم بقت كل 6 ساعات واختيارية: زرار \"انضم\" في الشريط بينقلك لأرض المسابقة، النقط بتتحسب جوا بس، وفيها سندان ببلاش ووحوش صيد على قد لفلك، وبترجع لأقرب بلد لما تخلص",
