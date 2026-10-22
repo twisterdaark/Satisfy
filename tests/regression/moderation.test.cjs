@@ -2,7 +2,8 @@
 // SAT-ONLINE-082 (plan U339/U341/U383/U227) over the fake Firebase with the rules' checks: a player reports another; only
 // the owner (admin) reads reports and crash reports; "/reports" mutes the reported player for a day from the report and
 // resolves it; a muted player is told and can't post in the world chat (the rules refuse it too); "/unmute" and "/mute ID
-// hours"; a page's crash reports are cut of long ids and e-mails, at most three a session; "/economy" from the rankings.
+// hours"; a page's crash reports are cut of long ids and e-mails, at most three a session; the owner clears those older than
+// 30 days (SAT-ONLINE-111); "/economy" from the rankings.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -100,14 +101,29 @@ test('moderation: reports to the owner, mute from a report, muted out of the wor
     await type(own, '/crashes'); await own.step(2);
     await until([own], () => /Crash reports \(3\)/.test(document.getElementById('dialog').textContent));
     assert.match(await dtext(own), /· TypeError \d in … \(/);
-    await own.eval(() => window.__G.advance()); await own.step(2);
+    assert.deepEqual(await opts(own), ['Close']); // none older than 30 days
+    await pick(own, /Close/); await own.step(2);
+
+    // SAT-ONLINE-111 (plan U382): they no longer pile up for ever: the owner clears those older than 30 days; nobody else can
+    const ck = await own.eval(() => { const D = window.__fakeRTDB.data, k = [...D.keys()].filter((x) => /^crashes\/[^/]+$/.test(x)).sort()[0]; D.set(k, Object.assign({}, D.get(k), { t: Date.now() - 40 * 86400000 })); return k; });
+    assert.equal(await c.eval(async (k) => { const F = window.__GLD.fb(), D = F.m.database; try { await D.remove(D.ref(F.db, k)); return 'ok'; } catch (e) { return 'no'; } }, ck), 'no');
+    await type(own, '/crashes'); await own.step(2);
+    await until([own], () => /Crash reports \(3\)/.test(document.getElementById('dialog').textContent));
+    assert.deepEqual(await opts(own), ['Clear the ones older than 30 days (1)', 'Close']);
+    await pick(own, /Clear the ones/); await own.step(2);
+    await until([own], () => /Old crash reports cleared: 1/.test(window.__toastSeen) && /Crash reports \(2\)/.test(document.getElementById('dialog').textContent));
+    assert.equal(await own.eval((k) => window.__fakeRTDB.data.has(k), ck), false);
+    assert.equal(await own.eval(() => [...window.__fakeRTDB.data.keys()].filter((x) => /^crashes\/[^/]+$/.test(x)).length), 2);
+    assert.deepEqual(await opts(own), ['Close']);
+    assert.deepEqual(await c.eval(() => window.__fakeRTDB.rejected.filter((x) => /crashes write/.test(x)).length), 1);
+    await pick(own, /Close/); await own.step(2);
 
     // the economy from the rankings
     await type(own, '/economy'); await own.step(2);
     await until([own], () => /Economy \(\d+ ranked players\)/.test(document.getElementById('dialog').textContent));
     assert.match(await dtext(own), /^Economy \(\d+ ranked players\): total [\d,]+ gold · median [\d,]+ · top 10% from [\d,]+ · richest [\d,]+ · average level \d+$/);
     assert.deepEqual(await own.eval(() => window.__GMOD.eco({ a: { v: 10 }, b: { v: 30 }, c: { v: 20 }, d: { v: 1000 } }, { a: { v: 2 }, b: { v: 4 } })), { n: 4, total: 1060, median: 30, p90: 1000, max: 1000, lv: 3 });
-    for (const g of [own, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/muted|mutes admins only|read reports|read crashes/.test(x))), []);
+    for (const g of [own, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/muted|mutes admins only|read reports|read crashes|crashes write/.test(x))), []);
     for (const g of [own, b, c]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
