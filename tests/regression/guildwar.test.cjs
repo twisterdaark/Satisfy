@@ -56,7 +56,7 @@ async function strike(a, b) {
   await a.step(1);
   await settle(a, b);
 }
-const place = (g, dx) => g.eval((d) => { const G = window.__G; G.P.x = 90 * 16 + d; G.P.y = 60 * 16; G.P.inv = 0; for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } }, dx);
+const place = (g, dx) => g.eval((d) => { const G = window.__G; G.P.x = 90 * 16 + d; G.P.y = 60 * 16; G.P.inv = 0; if (window.__GPVP) window.__GPVP.end(); /* the spawn shield (SAT-ONLINE-142) is its own test */ for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } }, dx);
 const HU = 'g_gWrA1', WO = 'g_gWrB2';
 
 test('guild wars: declared for a set hour and accepted, kills count only in it and cost no karma, the score at the end', async () => {

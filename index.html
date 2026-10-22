@@ -8350,7 +8350,7 @@ Satisfy.local=Object.freeze({api:1,
  zoneAt:(x,y)=>netZone(x,y), // 'void' where the world defines nothing (SAT-ONLINE-019)
  roomAt:(x,y)=>{const R=roomAt(x,y);return R?{id:R.id,kind:R.kind,zone:R.z}:null;},
  inGame:()=>!!S&&!S.__demo,
- playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,wp:(()=>{const w=weapon();return w&&WSH[w.id]?w.id+':'+Math.max(0,Math.min(9,w.r|0))+(w.en>0?':'+Math.min(99,w.en|0):''):null;})(),fx:fxPub(),gu:guPub(),zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null}),
+ playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,wp:(()=>{const w=weapon();return w&&WSH[w.id]?w.id+':'+Math.max(0,Math.min(9,w.r|0))+(w.en>0?':'+Math.min(99,w.en|0):''):null;})(),fx:fxPub(),gu:guPub(),zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null,sh:pvpSh()?1:null}),
  backups:()=>STORE.backups(),
  profile:()=>!S||S.__demo?null:Satisfy.state.profileOf(S),
  events:()=>DEVT.log(),
@@ -8492,7 +8492,7 @@ function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(inBh(P.x,P
 Object.assign(STR.ar,{netOtherV:'{n} قريب منك بس على نسخة تانية من اللعبة: اعملوا الاتنين ريفريش عشان تشوفوا بعض'});
 Object.assign(STR.en,{netOtherV:'{n} is nearby on a different version of the game: reload both pages to see each other'});
 function netWatch(){const ids=PARTY?PARTY.follow():[],w=ids.join(' ');if(NETTR.wsig!==w){NETTR.wsig=w;NETTR.party(ids);}} // party.follow(): review #55
-function netTick(){faultAt('netTick');NET.tick();const live=netLive();
+function netTick(){faultAt('netTick');NET.tick();if(PVP)pvpShTick();const live=netLive();
  if(PARTY)PARTY.tick();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
@@ -8605,7 +8605,7 @@ function netEnts(ents){faultAt('netEnts');const myRoom=(roomAt(P.x,P.y)||{}).id|
   if(PCTX&&PCTX.uid===r.uid)ents.push({y:r.y-1,f:()=>{ctx.save();ctx.strokeStyle='rgba(255,231,168,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(r.x,r.y+1,9,4,0,0,7);ctx.stroke();ctx.restore();}});
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   const gi=guildOf(r),gy=gi?6:0; // SAT-ONLINE-046: «guild» under the name, the name and the bar a line higher
-  TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol===2?'#b0102a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038), 2 a murderer (052)
+  TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':'')+(r.sh===1?' 🛡':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol===2?'#b0102a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038), 2 a murderer (052)
   if(gi)TX.push({s:'«'+gdEmb(gi.emb)+gi.n+'»'+gtroTag(r.gd)+gstMark(r.gd),x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37-gy,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
@@ -8901,8 +8901,19 @@ function karma(){return S&&!S.__demo?Math.max(KARMA_MIN,Math.min(KARMA_MAX,S.kar
 function olPub(){return outlaw()?(karma()<=MURDER?2:1):0;}
 window.__GK={karma:()=>karma(),set:k=>{S.karma=k;},ol:()=>olPub(),respawn:()=>respawn()}; // test hook
 function karmaTick(dt){if(!S||S.__demo||mode!=='play'||karma()>=0)return;S.karT=(S.karT||0)+dt;if(S.karT>=KARMA_BACK){S.karT=0;S.karma=karma()+1;toast(t('kaBack',{k:S.karma}),'good');netForce=true;}}
+/* spawn shield (SAT-ONLINE-142, plan U028): for a few seconds after coming into the online world (signing in, entering the
+   game, coming back from death) no open PvP hit lands on you and the others see a 🛡 by your name; striking a player ends
+   it at once (pvpSwing), so it is no cover for an attack. */
+var pvpShT=0;
+function pvpSh(){return performance.now()<pvpShT;}
+function pvpShield(){if(!NET||!S||S.__demo||!Satisfy.pvp)return;const ms=Satisfy.pvp.C.SHIELD_MS;pvpShT=performance.now()+ms;netForce=true;if(!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe)toast(t('pvpShOn',{s:ms/1000}),'good');}
+// from the title, the character screen, the opening, a death... into the world (netTick, every frame online)
+var pvpShWas='';function pvpShTick(){if(mode==='play'&&/^(|title|create|cut|lang|dead|end)$/.test(pvpShWas))pvpShield();pvpShWas=mode;}
+Object.assign(STR.ar,{pvpShOn:'درع البداية: محدش من اللاعيبة يقدر يأذيك {s} ثواني (بيقف لو ضربت حد)',pvpShOff:'درع البداية وقف: بقيت تقدر تضرب وتنضرب'});
+Object.assign(STR.en,{pvpShOn:'Spawn shield: no player can hurt you for {s} s (it ends if you strike one)',pvpShOff:'Spawn shield off: you can strike and be struck'});
+window.__GPVP={get on(){return pvpSh();},end:()=>{pvpShT=0;pvpShWas=mode;netForce=true;}}; // tests: a shield ended at once (and none started for a move into the world it hasn't seen yet)
 function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
-  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
+  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo,shield:()=>pvpSh()});pvpShield();
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
   else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);balPvp(true);const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
    if(v&&warOf(v)){gwrKill(v.gd);return;} // a guild war (SAT-ONLINE-086): it counts for the guild, no karma lost
@@ -8946,7 +8957,7 @@ window.__GB={all:()=>BNTS,on:uid=>bntOn(uid),post:(uid,g)=>{const r=NET.remotes(
 function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoom=(roomAt(P.x,P.y)||{}).id||null,l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';let best=null,bd=1e9;
  for(const r of NET.remotes()){if(!netSees(r,myRoom)||PVP.why(r)||!seeL(P.x,P.y-4,r.x,r.y-4))continue;const dx=r.x-P.x,dy=(r.y-8)-(P.y-6),d=Math.hypot(dx,dy);
   if(ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):(d>30||(dx*ax+dy*ay)/(d*l||1)<-.2))continue;if(d<bd){bd=d;best=r;}}
- if(!best)return;const crit=rand()<.12,pow=(8+rand()*5)*(crit?1.5:1)*Math.min(1.5,mul||1),pm=PVP.hit(best,pow);
+ if(!best)return;if(pvpSh()){pvpShT=0;netForce=true;toast(t('pvpShOff'),'warn');return;} /* striking a player ends your own spawn shield first (SAT-ONLINE-142): the others see it gone before your next blow */const crit=rand()<.12,pow=(8+rand()*5)*(crit?1.5:1)*Math.min(1.5,mul||1),pm=PVP.hit(best,pow);
  if(pm){num(best.x,best.y-24,'-'+Math.max(1,Math.round(pm/10))+'%',crit?'#ffd24a':'#ffffff',crit);vfx(crit?'crit':'hit',best.x,best.y-10,{angle:Math.atan2(best.y-P.y,best.x-P.x)});}}
 // a hit from another player, already checked by pvp.js: a share of our max HP; a dodge's frames avoid it, a raised guard
 // takes a quarter. The lethal one goes back to the attacker as a kill.

@@ -10,7 +10,7 @@ test.after(() => H.closeBrowser());
 async function settle(...games) {
   for (let i = 0; i < 8; i++) { for (const g of games) await g.step(7); await games[0].page.waitForTimeout(30); }
 }
-const place = (g, dx) => g.eval((d) => { const G = window.__G; G.P.x = 90 * 16 + d; G.P.y = 60 * 16; G.P.inv = 0; for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } }, dx);
+const place = (g, dx) => g.eval((d) => { const G = window.__G; G.P.x = 90 * 16 + d; G.P.y = 60 * 16; G.P.inv = 0; if (window.__GPVP) window.__GPVP.end(); /* the spawn shield (SAT-ONLINE-142) is its own test */ for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } }, dx);
 async function kill(a, b) {
   const uid = await b.eval(() => Satisfy.local.net().uid);
   await b.eval(() => { const G = window.__G; G.P.hp = 1; G.S.tl = G.S.tl || {}; G.S.tl.legend = false; });

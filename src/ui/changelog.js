@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22spawnsh', ver: '1.86', d: '2026-10-22',
+      ar: ["درع البداية: أول 10 ثواني بعد ما تدخل العالم أونلاين (أو ترجع من الموت) محدش من اللاعيبة يقدر يأذيك، والباقيين بيشوفوا 🛡 جنب اسمك",
+        "الدرع بيقف أول ما تضرب لاعب (الضربة دي بتوقفه بس)، واللي عليه الدرع ميقدرش يأذي حد"],
+      en: ["Spawn shield: for the first 10 seconds after you come into the online world (or back from death) no player can hurt you, and the others see 🛡 by your name",
+        "It ends the moment you strike a player (that blow only ends it), and nobody showing it can hurt anyone"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",

@@ -31,7 +31,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U025 | World shard migration | ❌ | U009 is in, but there is still one shard (`main`); migration needs more than one |
 | U026 | Safe Bairan | 🟡 | `SAFE_ZONES` (SAT-ONLINE-003): no duels and no open PvP inside (SAT-ONLINE-038 checks it on both sides), but it is still a client-side policy, not a server PvP authority (doc §59 C16; D3). The undefined interior strip is `void`, never safe (SAT-ONLINE-019, C06) |
 | U027 | Safe Winston | 🟡 | Same as U026; every town is in the list (Patrian, Reidan, Reinhardt too) |
-| U028 | Spawn shield | ⏳ | Only matters with open PvP (R5) |
+| U028 | Spawn shield | ✅ | SAT-ONLINE-142: for 10 s after coming into the online world (entering the game, coming back from death, a reload, signing in) no open PvP hit lands and the others see 🛡 by the name (`PlayerPublic.sh`); striking a player ends it at once (that blow only ends it), and a player showing it can't hit anyone, so it is no cover for an attack (`unit/pvp`, `regression/pvp`). **Rules change** |
 | U029 | Projectile boundary test | ⏳ | R5 |
 | U030 | Duel request UI | ✅ | SAT-ONLINE-006 (K, Y/N prompt) |
 | U031 | Duel countdown | ✅ | SAT-ONLINE-006 |
@@ -43,7 +43,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U037 | Outlaw flag | ✅ | SAT-ONLINE-038: a kill makes the killer an outlaw for 10 min (`PlayerPublic.ol`, red name for everyone, `S.olT` kept across a reload); the kill counts only from a real, recent hit |
 | U038 | Bounty board | 🟡 | SAT-ONLINE-051 (#84): gold on an outlaw's head from its card, paid once to its PvP killer through the victim's own kill record (`bountyPaid`), taken back from the board; karma (SAT-ONLINE-052, #85): murders cost points and lengthen the red name, -5 is a murderer; gold has no ledger (D3) |
 
-**Totals:** ✅ 24 · 🟡 9 · ⏳ 3 · ❌ 2.
+**Totals:** ✅ 29 · 🟡 5 · ⏳ 2 · ❌ 2.
 
 ## Social U046–U065 (plan doc §35 [SOC])
 

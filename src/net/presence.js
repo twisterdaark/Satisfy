@@ -131,7 +131,7 @@
         var t = now();
         var changed = !lastPP || pp.x !== lastPP.x || pp.y !== lastPP.y || pp.dir !== lastPP.dir || pp.anim !== lastPP.anim || pp.hp !== lastPP.hp || pp.fx !== lastPP.fx || pp.gu !== lastPP.gu;
         var meta = !lastPP || pp.room !== lastPP.room || pp.zone !== lastPP.zone || pp.lv !== lastPP.lv ||
-          pp.handle !== lastPP.handle || pp.arm !== lastPP.arm || pp.party !== lastPP.party || pp.duel !== lastPP.duel || pp.mv !== lastPP.mv || pp.em !== lastPP.em || pp.role !== lastPP.role || pp.rs !== lastPP.rs || pp.rd !== lastPP.rd || pp.ol !== lastPP.ol || pp.gd !== lastPP.gd || JSON.stringify(pp.look) !== JSON.stringify(lastPP.look);
+          pp.handle !== lastPP.handle || pp.arm !== lastPP.arm || pp.party !== lastPP.party || pp.duel !== lastPP.duel || pp.mv !== lastPP.mv || pp.em !== lastPP.em || pp.role !== lastPP.role || pp.rs !== lastPP.rs || pp.rd !== lastPP.rd || pp.ol !== lastPP.ol || pp.sh !== lastPP.sh || pp.gd !== lastPP.gd || JSON.stringify(pp.look) !== JSON.stringify(lastPP.look);
         var gap = 1000 / (changed ? cfg.moveHz : cfg.idleHz);
         if (!force && !meta && t - lastSent < gap) return false;
         sendEnv('presence.state', pp);

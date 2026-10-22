@@ -25,7 +25,7 @@ async function strike(a, b) {
   await a.step(1);
   await settle(a, b);
 }
-const place = (g, dx, x = 90 * 16, y = 60 * 16) => g.eval(([d, X, Y]) => { const G = window.__G; G.P.x = X + d; G.P.y = Y; G.P.inv = 0; for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } }, [dx, x, y]);
+const place = (g, dx, x = 90 * 16, y = 60 * 16) => g.eval(([d, X, Y]) => { const G = window.__G; G.P.x = X + d; G.P.y = Y; G.P.inv = 0; if (window.__GPVP) window.__GPVP.end(); /* the spawn shield (SAT-ONLINE-142) is its own test */ for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } }, [dx, x, y]);
 
 test('outside town a hit takes a capped share of HP; a party or a town stops it; a kill makes an outlaw', async () => {
   const ctx = await H.newContext();
@@ -89,6 +89,60 @@ test('outside town a hit takes a capped share of HP; a party or a town stops it;
     await settle(a, b); await settle(a, b);
     assert.match(await toasts(a), /You are no longer an outlaw/);
     assert.equal(await b.eval((u) => Satisfy.local.net().remotes.find((r) => r.uid === u).ol, ua), null);
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+// plan U028 (spawn shield): nobody can catch a player as they come into the world. For 10 s after entering the game, coming
+// back from death or a reload, no open PvP hit lands on them and the others see it; striking a player ends it at once.
+const placeKeep = (g, dx, x = 90 * 16, y = 60 * 16) => g.eval(([d, X, Y]) => { const G = window.__G; G.P.x = X + d; G.P.y = Y; G.P.inv = 0; for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } }, [dx, x, y]);
+const shown = (g, of) => g.eval((u) => (Satisfy.local.net().remotes.find((r) => r.uid === u) || {}).sh, of);
+test('a spawn shield: no hit lands for 10 s after coming into the world, the others see it, and striking ends it', async () => {
+  const ctx = await H.newContext();
+  try {
+    const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
+    const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    const ua = await a.eval(() => Satisfy.local.net().uid), ub = await b.eval(() => Satisfy.local.net().uid);
+    await toasts(a); await toasts(b);
+    await placeKeep(a, 0); await placeKeep(b, 18);
+    await settle(a, b);
+    assert.equal(await b.eval(() => window.__GPVP.on), true, 'B came into the world: shielded');
+    assert.equal(await shown(a, ub), 1, 'A sees it');
+    await b.eval(() => { window.__G.P.hp = window.__G.maxHP(); });
+    let hp = await b.eval(() => window.__G.P.hp);
+    await strike(a, b);
+    assert.ok((await b.eval(() => window.__G.P.hp)) >= hp, 'no hit lands');
+    // 10 s of B's clock later it is over, and the same strike lands
+    for (let i = 0; i < 6; i++) { await b.step(110); await a.step(10); }
+    await settle(a, b);
+    assert.equal(await b.eval(() => window.__GPVP.on), false);
+    assert.notEqual(await shown(a, ub), 1, 'not shown any more');
+    // A is still shielded (A's clock barely moved): striking B ends it at once, and B can strike back
+    assert.equal(await a.eval(() => window.__GPVP.on), true);
+    assert.equal(await shown(b, ua), 1);
+    hp = await b.eval(() => window.__G.P.hp);
+    await strike(a, b);
+    assert.equal(await a.eval(() => window.__GPVP.on), false, 'striking a player ends your own shield');
+    assert.ok((await b.eval(() => window.__G.P.hp)) >= hp, 'that first blow only ends it');
+    assert.match(await toasts(a), /Spawn shield off/);
+    await settle(a, b);
+    assert.notEqual(await shown(b, ua), 1, 'B sees it gone');
+    await a.eval(() => { window.__G.P.hp = window.__G.maxHP(); });
+    const hpA = await a.eval(() => window.__G.P.hp);
+    await strike(b, a);
+    assert.ok((await a.eval(() => window.__G.P.hp)) < hpA, 'B strikes back');
+    hp = await b.eval(() => window.__G.P.hp);
+    await strike(a, b);
+    assert.ok((await b.eval(() => window.__G.P.hp)) < hp, "and A's next blow lands");
+
+    // back from death: shielded again
+    await b.eval(() => { window.__G.P.hp = 0; window.__G.die(); });
+    await b.step(5);
+    assert.equal(await b.mode(), 'dead');
+    await b.eval(() => window.__GK.respawn()); await b.step(2);
+    assert.equal(await b.eval(() => window.__GPVP.on), true, 'shielded after coming back');
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });

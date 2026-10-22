@@ -12,13 +12,18 @@
  * so nobody dies to one blow. Dying to a player costs the normal death penalty only (the game's die()); nothing
  * changes hands.
  *
+ * Spawn shield (SAT-ONLINE-142, plan U028): for SHIELD_MS after coming into the world (signing in, entering the game,
+ * coming back from death) a player takes no open PvP hits and shows it (PlayerPublic.sh), so nobody can catch them as
+ * they appear. It is no cover for attacking: the game ends it the moment its player strikes another, and while it shows,
+ * that player's hits are refused too. o.shield() says the local player is shielded.
+ *
  * Trust model (no server yet, as for duels): the victim applies the hits it receives after checking the rate (at
  * most HITS_PER_S in any second), the range (attacker within HIT_RANGE of the victim's real position), the zones and
  * the party. The outlaw mark is set by the killer's own client when the victim reports the kill, and only for a
  * player it really hit in the last KILL_MS. A modified client could ignore hits or hide its mark; Trusted Combat on a
  * server (R5) closes that later.
  *
- * Exposes `Satisfy.pvp.create({ presence, uid, now?, pos, zone, room?, party, ally?, busy?, alive?, policy? })`.
+ * Exposes `Satisfy.pvp.create({ presence, uid, now?, pos, zone, room?, party, ally?, busy?, alive?, policy?, shield? })`.
  *   pos(): {x, y} of the local player; zone(): its zone id; room(): its house interior id or null; party(): its party id or null;
  *   ally(r): true when remote r is in a guild allied with ours; busy(): true while in a duel; alive(): false while dead.
  */
@@ -26,7 +31,7 @@
   'use strict';
 
   var C = Object.freeze({
-    MIN_HIT: 30, MAX_HIT: 90, HITS_PER_S: 4, HIT_RANGE: 200, KILL_MS: 8000, OUTLAW_MS: 10 * 60 * 1000,
+    MIN_HIT: 30, MAX_HIT: 90, HITS_PER_S: 4, HIT_RANGE: 200, KILL_MS: 8000, OUTLAW_MS: 10 * 60 * 1000, SHIELD_MS: 10000,
   });
   var TYPES = ['pvp.hit', 'pvp.kill'];
 
@@ -34,6 +39,7 @@
     var P = o.presence, self = o.uid, now = o.now || function () { return Date.now(); };
     var pos = o.pos, zone = o.zone, party = o.party || function () { return null; }, room = o.room || function () { return null; };
     var busy = o.busy || function () { return false; }, alive = o.alive || function () { return true; };
+    var shield = o.shield || function () { return false; };
     var ally = o.ally || function () { return false; };
     var policy = o.policy || (root.Satisfy && root.Satisfy.net && root.Satisfy.net.zonePolicy) || function () { return { safe: false }; };
     var listeners = [], hitsIn = new Map(), hitsOut = [], hitN = 0;
@@ -48,6 +54,7 @@
       if (!r || !r.uid || r.uid === self) return 'bad';
       if ((r.room || null) !== (room() || null)) return 'room';
       if (noFight(zone()) || noFight(r.zone)) return 'safe';
+      if (r.sh === 1) return 'shield';
       if (mate(r)) return 'mate';
       if (ally(r)) return 'ally';
       if (busy() || r.duel) return 'duel';
@@ -65,7 +72,7 @@
       if (env.type === 'pvp.hit') {
         var k = +pl.k;
         if (!(k >= 1)) return;
-        var no = why(from);
+        var no = shield() ? 'shield' : why(from);
         if (no) { emit({ type: 'rejected', why: no }); return; }
         if (dist(pos(), from) > C.HIT_RANGE) { emit({ type: 'rejected', why: 'range' }); return; }
         var list = (hitsIn.get(from.uid) || []).filter(function (x) { return t - x < 1000; });
@@ -82,7 +89,7 @@
     });
 
     var api = {
-      /** Can the local player hit remote r right now? Returns null, or why not: bad, room, safe, mate, ally, duel, dead. */
+      /** Can the local player hit remote r right now? Returns null, or why not: bad, room, safe, shield, mate, ally, duel, dead. */
       why: why,
       /** Send one hit of power pow (game units). Returns the per-mille sent (0 when it can't land or is too fast). */
       hit: function (r, pow) {
