@@ -22,7 +22,9 @@ async function until(games, fn, ms = 10000, arg) {
   }
 }
 const head = (g) => g.eval(() => document.getElementById('pHead').textContent);
-const toasts = (g) => g.eval(() => document.getElementById('toasts').textContent);
+// every toast since keepToasts (a toast fades after 2.6 s of real time, which a loaded machine can outlast before the check)
+const keepToasts = (g) => g.eval(() => { window.__toastLog = []; new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.textContent) window.__toastLog.push(n.textContent); }).observe(document.getElementById('toasts'), { childList: true }); });
+const toasts = (g) => g.eval(() => window.__toastLog.join(' | ') + ' | ' + document.getElementById('toasts').textContent);
 
 test('online: Raid in the party panel makes a raid of up to 10 for every member, and Party makes it a party again', async () => {
   const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
@@ -37,6 +39,7 @@ test('online: Raid in the party panel makes a raid of up to 10 for every member,
     await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
     await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
     await b.eval(() => { window.__G.P.x += 20; });
+    await keepToasts(b);
     await settle(a, b);
     await a.page.keyboard.press('KeyP');
     await until([b], () => !document.getElementById('partyInv').hidden);
