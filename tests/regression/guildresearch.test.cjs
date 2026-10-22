@@ -95,13 +95,16 @@ test('guild research: studies paid once from the treasury, in order, a bonus for
     assert.deepEqual(offers.filter((x) => /^Research /.test(x)).map((x) => x.match(/^Research ([A-Za-z' ]+?)\s*(\(|\d|$)/)[1]), ['Hunting Studies', 'Trade Studies', 'Craft Studies'], 'only the open ones are offered');
 
     // the rules: nothing out of order, no cost short or negative, nobody without "spend"
-    const bk = await bank(a), st = (s) => ({ in: bk.in, s, lb: bk.lb, lg: bk.lg, t: 'SV' });
-    assert.equal(await write(b, { 'guildBuild/g_gRsA1/xp2': 1, 'guildBank/g_gRsA1': st(bk.s + 120000) }), 'no', 'not before what it needs');
+    const bk = await bank(a), st = (s, b = 'xp1') => ({ in: bk.in, s, lb: bk.lb, lg: bk.lg, b, t: 'SV' });
+    assert.equal(await write(b, { 'guildBuild/g_gRsA1/xp2': 1, 'guildBank/g_gRsA1': st(bk.s + 120000, 'xp2') }), 'no', 'not before what it needs');
     assert.equal(await write(b, { 'guildBuild/g_gRsA1/xp1': 1, 'guildBank/g_gRsA1': st(bk.s + 1) }), 'no', 'not for less');
     assert.equal(await write(b, { 'guildBuild/g_gRsA1/xp1': 1, 'guildBank/g_gRsA1': st(bk.s - 30000) }), 'no', 'no negative cost');
     assert.equal(await write(b, { 'guildBuild/g_gRsA1/xp1': 1 }), 'no', 'not free');
     assert.equal(await write(c, { 'guildBuild/g_gRsA1/xp1': 1, 'guildBank/g_gRsA1': st(bk.s + 30000) }), 'no', 'a member without "spend"');
     assert.equal(await write(b, { 'guildBuild/g_gRsA1/xp1': 2, 'guildBank/g_gRsA1': st(bk.s + 30000) }), 'no', 'a study has one level');
+    // Claude-B's review: one update buys one node, the one the treasury names (three at the price of one were accepted)
+    assert.equal(await write(b, { 'guildBuild/g_gRsA1/xp1': 1, 'guildBuild/g_gRsA1/gd1': 1, 'guildBuild/g_gRsA1/q1': 1, 'guildBank/g_gRsA1': st(bk.s + 30000) }), 'no', 'three studies for the price of one');
+    assert.equal(await write(b, { 'guildBuild/g_gRsA1/xp1': 1, 'guildBank/g_gRsA1': st(bk.s + 30000, 'gd1') }), 'no', 'the treasury names another one');
 
     // the officer researches the first one: its cost leaves the treasury; every member gets the bonus
     const x0 = await c.eval(() => window.__GBD.xpB());
