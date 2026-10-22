@@ -134,9 +134,11 @@ test('a trade on the real SDK and rules: ask, accept, an item for gold, both acc
   const iid = 'it_' + a.uid.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30) + '_1';
   a.bag = [{ iid, json: '{"id":"sword","r":1}' }]; a.gold = 0; b.bag = []; b.gold = 500;
   const mk = (c) => SN.trade.create({ presence: c.pres, uid: c.uid, store: SN.firebase.tradeStore({ m: { database: fbDb }, db: c.db }), pos: () => ({ x: c.x, y: c.y }), bag: () => c.bag, gold: () => c.gold });
-  const ta = mk(a), tb = mk(b), tick = setInterval(() => { ta.tick(); tb.tick(); }, 100);
+  const ta = mk(a), tb = mk(b), tick = setInterval(() => { ta.tick(); tb.tick(); }, 100), evA = [], evB = [];
+  ta.on((e) => evA.push(e)); tb.on((e) => evB.push(e));
   try {
-    const st = () => JSON.stringify({ a: ta.state(), b: tb.state(), errA: a.errs, errB: b.errs }).slice(0, 900);
+    const ends = (L) => L.filter((e) => e.type !== 'changed').map((e) => e.type + (e.why ? ':' + e.why : ''));
+    const st = () => JSON.stringify({ a: ta.state(), b: tb.state(), evA: ends(evA), evB: ends(evB), errA: a.errs, errB: b.errs }).slice(0, 900);
     const must = (ok, what) => { if (!ok) throw new Error(what + ' · ' + st()); };
     const asked = ta.ask(a.sees(b));
     must(asked === 'sent', 'A asks B: ' + asked);
@@ -149,9 +151,12 @@ test('a trade on the real SDK and rules: ask, accept, an item for gold, both acc
     ta.acceptOffer(); tb.acceptOffer();
     await until(() => ta.state().canConfirm && tb.state().canConfirm, 'both accepted').catch((e) => must(false, e.message));
     must(ta.confirm() === true, 'A confirms'); must(tb.confirm() === true, 'B confirms');
-    await until(() => ta.state().phase === 'done' && tb.state().phase === 'done', 'the swap is written, once', 20000).catch((e) => must(false, e.message));
+    const id = ta.state().id;
+    await until(() => evA.some((e) => e.type === 'done') && evB.some((e) => e.type === 'done'), 'the swap is written, once', 20000).catch((e) => must(false, e.message));
+    const dA = evA.find((e) => e.type === 'done'), dB = evB.find((e) => e.type === 'done');
+    must(!!dA.give.it[iid] && dB.get.it[iid] && dA.get.g === 300 && dB.give.g === 300, 'each side applies what was agreed');
     const led = (await fbDb.get(fbDb.ref(b.db, 'tradedItems/' + iid))).val();
     assert.equal(led && led.o, b.uid, 'the ledger says the sword is B\'s now');
-    assert.equal((await fbDb.get(fbDb.ref(a.db, 'tradeDone/' + ta.state().id))).exists(), true);
+    assert.equal((await fbDb.get(fbDb.ref(a.db, 'tradeDone/' + id))).exists(), true);
   } finally { clearInterval(tick); }
 });
