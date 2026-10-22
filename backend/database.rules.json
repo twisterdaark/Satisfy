@@ -1164,6 +1164,9 @@
             "sh": {
               ".validate": "newData.val() === 1"
             },
+            "pv": {
+              ".validate": "newData.val() === 1"
+            },
             "seq": {
               ".validate": "newData.isNumber() && newData.val() >= 0"
             },

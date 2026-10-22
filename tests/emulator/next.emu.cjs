@@ -292,3 +292,10 @@ test('#179: a spawn shield in presence, 1 or nothing', async () => {
   await no(db(A).ref('presence/satisfy/main/' + A).update({ sh: 2 }), 'only 1');
   await yes(db(A).ref('presence/satisfy/main/' + A + '/sh').remove(), 'and it goes');
 });
+
+test('#183: PvE only in presence, 1 or nothing', async () => {
+  const pres = { v: 1, uid: A, sid: 'sess0123456789ab', handle: 'Ahmed', look: { hair: 1, hc: 2, skin: 1, top: 3 }, cls: 'novice', lv: 3, zone: 'zWin', x: 2000, y: 1300, dir: 0, anim: 'idle', arm: 0, seq: 1, t: SV };
+  await yes(db(A).ref('presence/satisfy/main/' + A).set(Object.assign({ pv: 1 }, pres)), 'PvE only');
+  await no(db(A).ref('presence/satisfy/main/' + A).update({ pv: 2 }), 'only 1');
+  await yes(db(A).ref('presence/satisfy/main/' + A + '/pv').remove(), 'and it goes');
+});
