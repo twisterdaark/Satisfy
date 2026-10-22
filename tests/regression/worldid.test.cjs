@@ -29,6 +29,8 @@ test('a player on another map version is tracked but not drawn, invited or chall
     await b.eval(() => window.__GW.setMapV('0badc0de'));
     await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
     await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    // toasts fade after a few seconds of real time, which a slow machine spends in settle(): record them as they appear
+    await a.eval(() => { window.__toastLog = []; new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => window.__toastLog.push(n.textContent)))).observe(document.getElementById('toasts'), { childList: true }); });
     await b.eval(() => { window.__G.P.x += 20; });
     await settle(a, b);
     const mvA = (await a.eval(() => Satisfy.local.playerPublic())).mv, mvB = (await b.eval(() => Satisfy.local.playerPublic())).mv;
@@ -38,10 +40,10 @@ test('a player on another map version is tracked but not drawn, invited or chall
     assert.equal(na.remotes.length, 1, 'still tracked (counted, expires normally)');
     assert.equal(na.remotes[0].mv, mvB);
     assert.equal(na.drawn, 0, 'not drawn');
-    assert.match(await a.eval(() => document.getElementById('toasts').textContent), /Faker is nearby on a different version of the game/);
+    assert.match(await a.eval(() => window.__toastLog.join(' | ')), /Faker is nearby on a different version of the game/);
     await a.page.keyboard.press('KeyP');
     await a.step(2);
-    assert.match(await a.eval(() => document.getElementById('toasts').textContent), /Nobody nearby to invite/);
+    assert.match(await a.eval(() => window.__toastLog.join(' | ')), /Nobody nearby to invite/);
     assert.equal(await b.eval(() => document.getElementById('partyInv').hidden), true);
 
     // a third tab on A's map sees A and is seen

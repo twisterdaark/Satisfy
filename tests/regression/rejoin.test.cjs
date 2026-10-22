@@ -10,14 +10,16 @@ test.after(() => H.closeBrowser());
 async function settle(...games) {
   for (let i = 0; i < 8; i++) { for (const g of games) await g.step(7); await games[0].page.waitForTimeout(30); }
 }
-async function until(games, fn, ms = 15000) {
+// frames: how many to step each round. The leader re-invites a reloaded member after GRACE_MS (10 s) of game time, so
+// those waits step more frames a round: a slow machine runs fewer rounds in the same real time.
+async function until(games, fn, ms = 15000, frames = 6) {
   const end = Date.now() + ms;
   for (;;) {
     let ok = true;
     for (const g of games) if (!(await g.eval(fn))) { ok = false; break; }
     if (ok) return;
     if (Date.now() > end) throw new Error('timed out waiting for ' + fn);
-    for (const g of games) await g.step(6);
+    for (const g of games) await g.step(frames);
     await games[0].page.waitForTimeout(30);
   }
 }
@@ -51,7 +53,7 @@ test('a member or the leader reloads: the party comes back without a prompt', as
     await H.continueGame(b);
     // toasts fade after a few seconds: record them as they appear
     await b.eval(() => { window.__toastLog = []; new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => window.__toastLog.push(n.textContent)))).observe(document.getElementById('toasts'), { childList: true }); });
-    await until([a, b], inParty, 30000);
+    await until([a, b], inParty, 60000, 30);
     assert.equal(await b.eval(() => Satisfy.local.net().party.id), pid);
     assert.equal(await b.eval(() => document.getElementById('partyInv').hidden), true, 'no prompt');
     assert.ok((await b.eval(() => window.__toastLog)).some((x) => /Back in Grid's party/.test(x)), 'told it is back');
@@ -63,7 +65,7 @@ test('a member or the leader reloads: the party comes back without a prompt', as
     await a.reload();
     await until([a], () => !!Satisfy.local.net() && Satisfy.local.net().state === 'ONLINE');
     await H.continueGame(a);
-    await until([a, b], inParty, 30000);
+    await until([a, b], inParty, 60000, 30);
     assert.equal(await a.eval(() => Satisfy.local.net().party.id), pid);
     assert.equal(await b.eval(() => Satisfy.local.net().party.id), pid);
 
