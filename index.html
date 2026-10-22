@@ -5054,6 +5054,7 @@ function onKey(c){if(c==="Escape"&&!$("updLog").hidden){updLogClose();return;}
  if(c==='Tab'&&(mode==='play'||mode==='cut')){toggleQuest();return;}
  if(mode==='play'){
   if(PHOTO){if(c==='Escape'||c==='F8'){photoOff();return;}if(c==='Enter'){photoShot();return;}}else if(c==='F8'){photoOn();return;}
+  if(c==='F9'){pfToggle();return;}
   const si=slotOfKey(c);if(si>=0){useSlot(si);return;}const ij=IKB.indexOf(c);if(ij>=0){useISlot(ij);return;}
   if(c==='Space')dodge();else if(c===POT.hpot.key){pressKey('pot_hpot');drink('hpot');}else if(c===POT.mpot.key){pressKey('pot_mpot');drink('mpot');}else if(c==='KeyE')interact();else if(c==='KeyI'){pressKey('kI');openInv();}else if(c==='KeyC'){pressKey('kC');openStatus();}else if(c==='KeyU'){pressKey('kU');openEquip();}else if(c==='KeyG'){pressKey('kGu');guildPanel();}else if(c==='KeyH'){pressKey('kMo');toggleRide();}else if(c==='KeyL'){pressKey('kL');openLog();}else if(c==='KeyB'){pressKey('kB');openMB();}else if(c==='KeyM'){pressKey('kM');openMap();}else if(c==='Escape'){pressKey('kEsc');openPause();}
  }else if(mode==='cut'){if(SM&&(c==='KeyE'||c==='Space'||c==='Enter'))SM.done();else if(CARD&&(c==='KeyE'||c==='Space'||c==='Enter'))CARD('next');else if(CARD&&c==='Escape')CARD('skip');}
@@ -7937,6 +7938,31 @@ let last=performance.now(),hudT=0,saveT=0;
 const ERRS=new Set();
 function gameErr(e,m){if(m){m.st=null;m.tele=0;m.combo=0;m.flee=0;}const k=String(e&&e.message||e);if(ERRS.has(k))return;ERRS.add(k);console.error(e);try{logMsg('ERR '+k+' '+String(e&&e.stack||'').split('\n')[1]);toast(t('gameErr',{e:k.slice(0,90)}),'warn');}catch(_){}}
 let loopAt=0;
+/* the performance profiler (SAT-ONLINE-103, plan U325). F9 in play (or ?perf in the address) shows, over the last 600
+   frames: frames a second, the frame time (p50/p95/max), the work a frame takes (p95: the world's update and the drawing),
+   the network (writes a second, round trip, failures) and what is on the map. Each has its budget: a frame within 20 ms
+   (50 a second), the work within 8 ms on a computer and 14 on a phone; over it the line turns red. Every minute of play
+   the device keeps its own numbers (satisfy_perf: p95s, frames a second, screen, phone or not), so each device's budget
+   is measured where it runs. The clock is the real one, also when a replay runs the game's on its steps. */
+const pfNow=(p=>()=>p())(performance.now.bind(performance));
+var PF={on:/[?&]perf(&|$)/.test(location.search),N:600,fr:new Float32Array(600),up:new Float32Array(600),dr:new Float32Array(600),n:0,i:0,w1:0,show:0,keep:0,el:null,net:null};
+function pfFrame(dt,w0){const w2=pfNow(),i=PF.i;PF.fr[i]=dt*1000;PF.up[i]=Math.max(0,PF.w1-w0);PF.dr[i]=Math.max(0,w2-PF.w1);PF.i=(i+1)%PF.N;if(PF.n<PF.N)PF.n++;
+ if(PF.on&&(PF.show-=dt)<=0){PF.show=.5;pfDraw();}if(mode==='play'&&(PF.keep+=dt)>=60){PF.keep=0;pfKeep();}}
+const pfQ=(a,q)=>{if(!a.length)return 0;const b=Float64Array.from(a).sort();return b[Math.min(b.length-1,Math.floor(q*(b.length-1)+.5))];};
+function pfStats(){const n=PF.n,fr=PF.fr.subarray(0,n),up=PF.up.subarray(0,n),dr=PF.dr.subarray(0,n),wk=new Float64Array(n);for(let i=0;i<n;i++)wk[i]=up[i]+dr[i];
+ let sum=0;for(let i=0;i<n;i++)sum+=fr[i];const r=x=>Math.round(x*10)/10,dev=TOUCH?'phone':'computer',bw=TOUCH?14:8;
+ const L=NETTR&&NETTR.netStats?NETTR.netStats():null,now=pfNow();let ws=0;if(L){const p=PF.net;if(p&&now>p.t)ws=(L.writes-p.w)*1000/(now-p.t);if(!p||now-p.t>2000)PF.net={t:now,w:L.writes};}
+ const s={n,fps:n&&sum?Math.round(n*1000/sum):0,frame:{p50:r(pfQ(fr,.5)),p95:r(pfQ(fr,.95)),max:r(pfQ(fr,1))},work:{p95:r(pfQ(wk,.95)),up:r(pfQ(up,.95)),draw:r(pfQ(dr,.95))},
+  budget:{frame:20,work:bw},dev,net:L?{ws:r(ws),rtt:Math.round(L.rtt||0),fails:L.fails|0}:null,ents:{mons:mons.filter(m=>!m.dead).length,fx:fx.length,remotes:NET?NET.count():0}};
+ s.over={frame:s.frame.p95>s.budget.frame,work:s.work.p95>s.budget.work};return s;}
+function pfDraw(){let el=PF.el;if(!el){el=PF.el=document.createElement('div');el.id='perfHud';el.style.cssText='position:fixed;left:6px;bottom:6px;z-index:70;background:#000b;color:#cfe;font:11px/1.35 monospace;padding:4px 7px;border-radius:4px;pointer-events:none;white-space:pre';document.body.appendChild(el);}
+ el.hidden=!PF.on;if(!PF.on)return;const s=pfStats(),red=b=>b?'color:#ff7a6a':'';
+ el.innerHTML=`<b>${s.fps} fps</b> · ${s.dev}\n<span style="${red(s.over.frame)}">frame ${s.frame.p50} / p95 ${s.frame.p95} / max ${s.frame.max} ms (≤ ${s.budget.frame})</span>\n<span style="${red(s.over.work)}">work p95 ${s.work.p95} ms = update ${s.work.up} + draw ${s.work.draw} (≤ ${s.budget.work})</span>`+
+  (s.net?`\nnet ${s.net.ws} writes/s · rtt ${s.net.rtt} ms · fails ${s.net.fails}`:'')+`\n${s.ents.mons} monsters · ${s.ents.fx} effects · ${s.ents.remotes} players`;
+ el.dataset.over=(s.over.frame?'f':'')+(s.over.work?'w':'');}
+function pfToggle(){PF.on=!PF.on;PF.show=0;pfDraw();}
+function pfKeep(){if(PF.n<60)return;const s=pfStats();try{localStorage.setItem('satisfy_perf',JSON.stringify({fps:s.fps,frame95:s.frame.p95,work95:s.work.p95,up95:s.work.up,draw95:s.work.draw,dev:s.dev,scr:innerWidth+'x'+innerHeight,over:s.over,at:Date.now()}));}catch(e){}}
+window.__PERF={stats:()=>pfStats(),toggle:()=>pfToggle(),keep:()=>pfKeep(),get on(){return PF.on},add:(f,u,d)=>{const i=PF.i;PF.fr[i]=f;PF.up[i]=u;PF.dr[i]=d;PF.i=(i+1)%PF.N;if(PF.n<PF.N)PF.n++;},clear:()=>{PF.n=0;PF.i=0;}}; // tests
 /* the fixed tick (SAT-ONLINE-099, plan U313/U373; ?tick=fixed, off by default): the world moves in steps of exactly 1/60 s
    whatever the screen's rate (a 144 Hz screen draws more often; a slow one runs up to three steps a frame, as a frame's time
    is capped at 0.05 s and what is left over is under a step: FSTEP*4 only bounds it), and a key
@@ -7945,10 +7971,10 @@ let loopAt=0;
    two players' streams differ), so how often a screen draws doesn't change the world's. */
 const FIXT=/[?&]tick=fixed(&|$)/.test(location.search),FSTEP=1/60;let facc=0;
 const VRAND=(()=>{let a=FIXT?Math.random()*4294967296>>>0:0;return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};})();
-function loop(now){requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;
+function loop(now){const w0=pfNow();requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;
  if(FIXT){facc=Math.min(facc+dt,FSTEP*4);while(facc>=FSTEP-1e-9){if(RPL&&RPL.done){facc=0;break;}facc-=FSTEP;if(SIM)simPre();try{update(FSTEP);}catch(e){gameErr(e);}FSTEPS++;if(SIM)simPost();}}else try{update(dt);}catch(e){gameErr(e);}
- const r0=rand,m0=Math.random;if(FIXT){rand=VRAND;if(SIM)Math.random=VRAND;}try{loopRest(dt);}finally{rand=r0;Math.random=m0;}}
-function loopRest(dt){if(NET)try{netTick();}catch(e){gameErr(e);}try{huntTick();}catch(e){gameErr(e);}if(TOUCH)try{touchTick();}catch(e){gameErr(e);}try{render(dt);}catch(e){gameErr(e);}try{guiTick();}catch(e){gameErr(e);}
+ const r0=rand,m0=Math.random;if(FIXT){rand=VRAND;if(SIM)Math.random=VRAND;}try{loopRest(dt);}finally{rand=r0;Math.random=m0;}pfFrame(dt,w0);}
+function loopRest(dt){PF.w1=pfNow();if(NET)try{netTick();}catch(e){gameErr(e);}try{huntTick();}catch(e){gameErr(e);}if(TOUCH)try{touchTick();}catch(e){gameErr(e);}try{render(dt);}catch(e){gameErr(e);}try{guiTick();}catch(e){gameErr(e);}
  if(mode==='play')updateKeys();
  if(mode==='create')drawPrev();if(DL&&DL.pv)drawDPrev();
  if(mode==='map'&&(gTime*2|0)!==(Math.max(0,gTime-dt)*2|0))drawMap();
