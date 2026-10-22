@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22wpass3', ver: '1.84', d: '2026-10-22',
+      ar: ["الصعق بقى للأسلحة اللي ليها علاقة بالبرق بس (اللي معمولة بنفس التنين الأزرق) أو اللي فيها حجر برق. الأسلحة التانية اللي كان طالعلها صعق اتبدل بباسيف تاني. وعدد القفزات (1 لـ 3 حسب التصنيف) ومدة الشلل (0.2 لـ 0.5 ثانية) بقوا عشوائيين لكل سلاح وبيبانوا في الوصف",
+        "الضربات الزيادة بقت ممكن تبقى أكتر من واحدة حسب التصنيف والخامات: ضربة أساسية، و+1 للفريد، و+1 للأسطوري، و+1 للأوريكالكوم الأزرق أو نفس وحش مقدس، و+1 كمان للنفس، لحد 4. وكل سلاح بيطلع بعدد عشوائي من 1 لأقصى عدد ليه"],
+      en: ["Shock is now only for weapons tied to lightning (made with the Blue Dragon's breath) or holding a Thunder Stone. Other weapons that had rolled shock got another passive instead. How many it jumps to (1 to 3 by grade) and how long it stuns (0.2 to 0.5 s) now roll per weapon and show in the tooltip",
+        "Extra strikes can now be more than one, by grade and materials: one to start, +1 for unique, +1 for legendary, +1 for blue orichalcum or a divine beast's breath, +1 more for the breath, up to 4. Each weapon rolls a random number from 1 to its most"] },
     { v: '2026-10-22wpass2', ver: '1.83', d: '2026-10-22',
       ar: ["باسيفز سلاح جديدة: ضربة مزدوجة (السلاح بيضرب تاني لوحده)، صعق (برق بيزود الضربة 50% ويقفز على اتنين جنب الهدف ويشلهم لحظة)، امتصاص (جزء من الضرر اللي بتاخده بيترد في ضربتك الجاية)، تجميد (بيبطّأ الهدف)، وزق (بيرمي الهدف لورا)",
         "حجر البرق: جوهرة جديدة بتتركب في السلاح عند خان، وبتدي السلاح صعق بفرصة 15%. بتقع من الوحوش العالية والزعماء",

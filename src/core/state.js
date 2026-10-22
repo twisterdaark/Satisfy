@@ -69,6 +69,7 @@
     'pgMur',
     'fus',
     'wpfix',
+    'wpfix2',
     // the town to go back to from the competition grounds, kept so a reload mid-competition lands there (owner 2026-10-22)
     'natR',
     // the guild hall being visited (SAT-ONLINE-115, plan U013): {gid, name, guest, dx, dy}, so a reload inside goes on there

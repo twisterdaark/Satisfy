@@ -50,19 +50,29 @@ test('double strike, shock, absorb, frost and push work in a fight; the Thunder 
     await g.eval(() => { const G = window.__G, S = G.S; S.lv = 200; G.P.hp = 1e9; });
     const spawn = (n) => g.eval((n) => { const G = window.__G; for (const m of window.__ms || []) m.dead = true; window.__ms = []; for (let i = 0; i < n; i++) { const m = G.spawnMon('wolf', G.P.x + 30 + i * 20, G.P.y); m.hp = m.max = 1e9; m.tmp = 0; window.__ms.push(m); } }, n);
     const setWp = (wp, gem) => g.eval(([wp, gem]) => { const S = window.__G.S, w = S.items.find((i) => i.uid === S.eqW) || S.items.find((i) => i.slot === 'w'); w.wp = wp; if (gem) w.gem = gem; else delete w.gem; }, [wp, gem]);
-    // double strike: a second hit lands a moment later
-    await spawn(1); await setWp([{ k: 'dbl', v: 1 }]);
-    await g.eval(() => { window.__h0 = window.__ms[0].hp; window.__GWP.hit(window.__ms[0]); window.__h1 = window.__ms[0].hp; });
-    await g.page.waitForTimeout(400); await g.step(2);
-    const dbl = await g.eval(() => [window.__h0 - window.__h1, window.__h1 - window.__ms[0].hp]);
-    assert.ok(dbl[0] > 0 && dbl[1] > 0, 'two hits: ' + dbl);
-    // shock: the two beside the target are hit too
+    // extra strikes: a weapon with three of them lands four hits in all
+    await spawn(1); await setWp([{ k: 'dbl', v: 1, n: 3 }]);
+    await g.eval(() => { const m = window.__ms[0]; window.__hs = []; const h0 = m.hp; window.__GWP.hit(m); window.__hs.push(h0 - m.hp); window.__hp = m.hp; });
+    await g.page.waitForTimeout(800); await g.step(2);
+    const dbl = await g.eval(() => [window.__hs[0], window.__hp - window.__ms[0].hp]);
+    assert.ok(dbl[0] > 0 && dbl[1] >= dbl[0] * 2, 'first hit then three more: ' + dbl);
+    // shock does nothing on a weapon with nothing to do with lightning
     await spawn(3); await setWp([{ k: 'shock', v: 1 }]);
+    assert.equal(await g.eval(() => window.__GWP.V('shock')), 0);
+    // with a Thunder Stone set in it: the stone's 15% and the passive, and the two beside the target are hit too
+    await setWp([{ k: 'shock', v: 1 }], 'thund');
+    assert.equal(await g.eval(() => window.__GWP.V('shock')), 1.15);
     const sh = await g.eval(() => { const M = window.__ms, h = M.map((m) => m.hp); window.__GWP.hit(M[0]); return M.map((m, i) => h[i] - m.hp); });
     assert.ok(sh.every((d) => d > 0), 'all three took damage: ' + sh);
-    // a Thunder Stone alone gives the shock chance
-    await setWp([], 'thund');
-    assert.equal(await g.eval(() => window.__GWP.V('shock')), 0.15);
+    // rolls: no shock on an iron sword; the Blue Dragon spear can; extra strikes by grade and materials
+    const rl = await g.eval(() => { const X = window.__G.isk; let ironShock = 0, spearShock = 0, ironN = 0, spearN = 0; const js = new Set(), st = new Set();
+      for (let i = 0; i < 300; i++) { const a = X.mkItem('isword', 4), b = X.mkItem('dgspear', 4);
+        for (const p of a.wp) { if (p.k === 'shock') ironShock++; if (p.k === 'dbl') ironN = Math.max(ironN, p.n); }
+        for (const p of b.wp) { if (p.k === 'shock') { spearShock++; js.add(p.j); st.add(p.st); } if (p.k === 'dbl') spearN = Math.max(spearN, p.n); } }
+      return { ironShock, spearShock, ironN, spearN, js: [...js].sort(), st: [...st].length, stMin: Math.min(...st), stMax: Math.max(...st) }; });
+    assert.equal(rl.ironShock, 0); assert.ok(rl.spearShock > 0, 'the Blue Dragon spear rolls shock');
+    assert.deepEqual(rl.js, [1, 2, 3], 'a legendary shock jumps to 1, 2 or 3'); assert.ok(rl.st > 5 && rl.stMin >= .2 && rl.stMax <= .5, 'stun between 0.2 and 0.5 s, not fixed');
+    assert.equal(rl.ironN, 3, 'a legendary iron sword: up to 3 extra strikes'); assert.equal(rl.spearN, 4, 'a legendary breath weapon: up to 4');
     // absorb: half of 1000 taken comes back in the next hit
     await spawn(1); await setWp([{ k: 'abs', v: 0.5 }]);
     const ab = await g.eval(() => { const G = window.__G; G.P.inv = 0; G.P.dash = 0; window.__GWP.hurt(1000); const b = window.__GWP.absB; window.__GWP.hit(window.__ms[0]); return [b, window.__GWP.absB]; });
