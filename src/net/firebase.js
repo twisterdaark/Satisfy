@@ -556,7 +556,7 @@
       setNote: function (gid, n) { var u = {}; u['guildNote/' + gid] = { s: n.s, by: n.by, n: n.n, v: n.v, t: SV() }; return up(u); },
       // SAT-ONLINE-076: every guild and its members, for the guild rankings (read once when the board opens)
       readAll: function () { return Promise.all([D.get(at('guilds')), D.get(at('guildMembers'))]).then(function (r) { return { guilds: r[0].val() || {}, members: r[1].val() || {} }; }); },
-      // SAT-ONLINE-065: the treasury guildBank/{gid} = {in, s, lb, lg, t} (in: all gold given, s: all spent on buildings; lb,
+      // SAT-ONLINE-065: the treasury guildBank/{gid} = {in, s, lb, lg, b?, t} (in: all gold given, s: all spent on buildings; lb,
       // lg: the last gift's giver and amount, which the rules add to in), the buildings guildBuild/{gid}/{b} = level and
       // guildLog/{gid}/{id} = {by, n, k, g, b?, l?, t}. A gift or a build reads the treasury and writes it back with the
       // change: one written meanwhile makes the rules refuse it (the caller tries again).
@@ -575,7 +575,8 @@
         return D.get(at('guildBank/' + gid)).then(function (s) {
           var v = s.val(); if (!v) throw new Error('empty');
           var u = {};
-          u['guildBank/' + gid] = { in: +v.in || 0, s: (+v.s || 0) + cost, lb: v.lb, lg: v.lg, t: SV() };
+          // b: the one building or study this spend buys; the rules let each node written match it, so one update buys one
+          u['guildBank/' + gid] = { in: +v.in || 0, s: (+v.s || 0) + cost, lb: v.lb, lg: v.lg, b: b, t: SV() };
           u['guildBuild/' + gid + '/' + b] = l;
           u['guildLog/' + gid + '/' + lid] = { by: uid, n: String(n || '?').slice(0, 24), k: 'build', g: cost, b: b, l: l, t: SV() };
           return up(u);

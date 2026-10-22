@@ -204,3 +204,38 @@ test('real rules (SAT-ONLINE-104): the ranks\' rights the master sets, and a gui
   assert.equal(D.w('uA', { ['guildLog/' + G]: null }), 'no', 'the log stays');
   assert.equal(D.w('uA', { ['guilds/' + G]: null, 'guildNames/rights': null, ['guildMembers/' + G]: null, ['guildVault/' + G]: null, ['guildWeekPaid/' + G]: null, ['guildNote/' + G]: null, ['guildLog/' + G]: null }), 'ok', 'all of it with the guild');
 });
+
+test('real rules (SAT-ONLINE-105): a research is paid once, in order, exactly its cost; never negative or short', () => {
+  const D = db(), G = 'g_uA';
+  D.set({
+    guilds: { [G]: { name: 'Scholars', nk: 'scholars', master: 'uA', col: '#5aa0ff', t: NOW } }, guildNames: { scholars: G },
+    guildMembers: { [G]: { uA: { rk: 'm', n: 'Ahmed', c: 0, on: NOW }, uB: { rk: 'o', n: 'Bassem', c: 0, on: NOW }, uC: { rk: 'r', n: 'Carim', c: 0, on: NOW } } },
+    guildBank: { [G]: { in: 900000, s: 0, lb: 'uA', lg: 100000, t: NOW } },
+  });
+  const go = (uid, node, cost, v = 1, b = node) => { const k = D.st.guildBank[G]; return D.w(uid, { ['guildBuild/' + G + '/' + node]: v, ['guildBank/' + G]: { in: k.in, s: k.s + cost, lb: k.lb, lg: k.lg, b, t: SV } }); };
+  assert.equal(go('uB', 'xp2', 120000), 'no', 'not before what it needs');
+  assert.equal(go('uB', 'xp1', 29999), 'no', 'not short');
+  assert.equal(go('uB', 'xp1', -30000), 'no', 'never negative');
+  assert.equal(go('uB', 'xp1', 30001), 'no', 'not more either');
+  assert.equal(go('uC', 'xp1', 30000), 'no', 'a member without "spend"');
+  assert.equal(go('uB', 'xp1', 30000, 2), 'no', 'one level');
+  assert.equal(go('uB', 'zz', 30000), 'no', 'only the seven');
+  assert.equal(D.w('uB', { ['guildBuild/' + G + '/xp1']: 1 }), 'no', 'not free');
+  // Claude-B's review of #139: one update buys one node, the one the treasury names
+  { const k = D.st.guildBank[G]; assert.equal(D.w('uB', { ['guildBuild/' + G + '/xp1']: 1, ['guildBuild/' + G + '/gd1']: 1, ['guildBuild/' + G + '/q1']: 1, ['guildBank/' + G]: { in: k.in, s: k.s + 30000, lb: k.lb, lg: k.lg, b: 'xp1', t: SV } }), 'no', 'three for the price of one'); }
+  assert.equal(go('uB', 'xp1', 30000, 1, 'gd1'), 'no', 'the treasury names another one');
+  assert.equal(go('uB', 'xp1', 30000, 1, 'xp1x'), 'no', 'or something else');
+  assert.equal(go('uB', 'xp1', 30000), 'ok');
+  assert.equal(go('uB', 'xp1', 30000), 'no', 'once');
+  assert.equal(D.w('uB', { ['guildBuild/' + G + '/xp1']: null }), 'no', 'nothing bought is taken away (validate does not run on a delete)');
+  assert.equal(D.w('uA', { ['guildBuild/' + G + '/xp1']: null }), 'no', 'not by the master either');
+  for (const [n, c] of [['gd1', 30000], ['q1', 30000], ['xp2', 120000], ['gd2', 120000]]) assert.equal(go('uB', n, c), 'ok', n);
+  assert.equal(go('uB', 'all', 400000), 'no', 'the top needs all three below it');
+  assert.equal(go('uB', 'hp1', 120000), 'ok');
+  assert.equal(go('uA', 'all', 400000), 'ok');
+  assert.equal(D.st.guildBank[G].s, 850000);
+  // the treasury never spends more than was given
+  assert.equal(D.w('uA', { ['guildBuild/' + G + '/forge']: 1, ['guildBank/' + G]: { in: 900000, s: 900001, lb: 'uA', lg: 100000, b: 'forge', t: SV } }), 'no');
+  // buildings too: one level of one building an update
+  { const k = D.st.guildBank[G]; assert.equal(D.w('uA', { ['guildBuild/' + G + '/forge']: 1, ['guildBuild/' + G + '/train']: 1, ['guildBank/' + G]: { in: k.in + 0, s: k.s + 50000, lb: k.lb, lg: k.lg, b: 'forge', t: SV } }), 'no', 'two buildings for the price of one'); }
+});
