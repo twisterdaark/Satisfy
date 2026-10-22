@@ -73,3 +73,23 @@ test('#156: live switches: only admins set them; while off, no new world line, t
   await yes(db(M).ref('flags/chat').set({ on: true, by: M, t: SV }), 'back on');
   await yes(db(A).ref('chat/satisfy/l3').set({ from: A, h: 'Ahmed', text: 'back', t: SV }), 'a world line again');
 });
+
+test('#138: rank rights: the master decides who takes from the vault; the vault goes only with the guild', async () => {
+  const D = 'uidDina05';
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await ctx.database().ref().update({
+      ['accountIds/' + D]: 'Dina', 'handles/dina': D,
+      ['guildMembers/' + G + '/' + D]: { rk: 'o', n: 'Dina', c: 0, on: Date.now() },
+      ['guildVault/' + G + '/v_1']: { k: 'ore', n: 3, r: 0, by: A, t: 1 },
+      ['guildVault/' + G + '/v_2']: { k: 'wood', n: 2, r: 0, by: A, t: 1 },
+    });
+  });
+  await no(db(B).ref('guildVault/' + G + '/v_1').remove(), 'a member takes nothing by default');
+  await yes(db(A).ref('guilds/' + G + '/perm/r').set({ take: true }), 'the master lets members take');
+  await no(db(B).ref('guilds/' + G + '/perm/r').set({ take: true, spend: true }), 'a member sets no rights');
+  await yes(db(B).ref('guildVault/' + G + '/v_1').remove(), 'now the member takes');
+  await yes(db(A).ref('guilds/' + G + '/perm/o').set({ take: false }), 'the master stops the officers taking');
+  await no(db(D).ref('guildVault/' + G + '/v_2').remove(), 'the officer no longer takes');
+  await no(db(A).ref('guilds/' + G + '/perm/m').set({ take: false }), 'there are no rights to set for the master');
+  await no(db(A).ref('guildVault/' + G).remove(), 'the whole vault goes only with the guild');
+});
