@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22terr', ver: '1.84', d: '2026-10-22',
+      ar: ["الأراضي أونلاين بقت ليها قواعد على السيرفر: المكان اللي اتاخد بيفضل محمي 45 دقيقة من وقت السيرفر، وكل جيلد ياخد 4 أماكن بالكتير (أراضي أو القلعة) في أي 7 أيام",
+        "لو الجيلد خد 4 أماكن، اللعبة بتقولك المكان الجاي يتاح إمتى، وكل مكان بيرجع متاح بعد أسبوع من استخدامه. محدش ياخد مكان لجيلد هو مش فيه"],
+      en: ["Territories online now have server rules: a place taken is safe for 45 minutes by the server's clock, and a guild takes at most 4 places (territories or the castle) in any 7 days",
+        "After 4, the game says when the next one frees; each frees a week after it was used. Nobody takes a place for a guild they are not in"] },
     { v: '2026-10-22wpass2', ver: '1.83', d: '2026-10-22',
       ar: ["باسيفز سلاح جديدة: ضربة مزدوجة (السلاح بيضرب تاني لوحده)، صعق (برق بيزود الضربة 50% ويقفز على اتنين جنب الهدف ويشلهم لحظة)، امتصاص (جزء من الضرر اللي بتاخده بيترد في ضربتك الجاية)، تجميد (بيبطّأ الهدف)، وزق (بيرمي الهدف لورا)",
         "حجر البرق: جوهرة جديدة بتتركب في السلاح عند خان، وبتدي السلاح صعق بفرصة 15%. بتقع من الوحوش العالية والزعماء",

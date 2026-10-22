@@ -148,7 +148,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U237 | Guild research tree | 🟡 | Three buildings of three levels paid from the treasury (065); no tree |
 | U238 | Guild alliances | ✅ | SAT-ONLINE-085: proposed by the master or an officer, accepted or declined by the other guild's; the rules write each side only against a fresh proposal from the other (one guild can't force it); 30 days, renewable in the last week, up to 3; no open PvP between allies (pvp.js `ally`) (`guildAllyAsk`, `guildAlly`) (`regression/guildally`) |
 | U239 | Guild wars | ✅ | SAT-ONLINE-086: declared for one full hour 30 min–7 days ahead, accepted by the other guild (`guildWarAsk` → `guildWar`, the same hour), never on an ally; kills of enemy members outside towns count only during the hour (`guildWarKill`, the rules check it: a war can't start off-schedule), cost no karma, at most 200 a member; called off up to 10 min before, never during; told before, at the start and with the score at the end. Declared by guilds, not matched by the game (`regression/guildwar`) |
-| U240 | Territory objectives | 🟡 | Guilds capture territory banners and the castle; who holds them is shared online (`world/satisfy/own`, with world news); no weekly limit |
+| U240 | Territory objectives | ✅ | SAT-ONLINE-095: the rules hold the capture: a member for their guild, 45 minutes after the last change (the server's time), and four places a guild in any seven days (`capSlot/{gid}/{a..d}`, written with the capture, free a week after, never cleared, the guild master neither); a capture the server refuses gives no reward or news and is undone on screen; the canon guilds win a place back only from its holder's member. The key rule took only lower case, so no capture of `tCanyon`, `tWay` or `tMine` had reached the server; fixed (`regression/territory`) |
 | U241 | Guild leader handover | ✅ | SAT-ONLINE-076: the master hands the guild to an officer, or an officer takes it over from a master unseen 14 days; the ranks swap in the same write, so there is never a second master (`regression/guildlead`, `unit/guild`) |
 | U242 | Guild event calendar | ✅ | SAT-ONLINE-080: events added by the master or officers (`guildEvents`), "I'm going" (`guildEventSign`), reminders 10 min before and at the start, in G and in the Calendar; one stored instant, shown in each player's time zone and UTC (`regression/guildevents`) |
 | U243 | Guild notice board | ✅ | SAT-ONLINE-076: `guildNote/{gid}`, written by the master and officers, each write the next version; members read it and hear when it changes; shown as text, never as HTML |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 75 · 🟡 17 · ⏳ 6 · ❌ 6 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 76 · 🟡 16 · ⏳ 6 · ❌ 6 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

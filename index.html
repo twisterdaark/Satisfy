@@ -4206,8 +4206,10 @@ function sgSpawn(type,x,y,gd){const m=newMon(type,x,y);m.tmp=1;m.eng=4;m.agg=1;m
 function sgSpot(x0,x1,y0,y1,rnd=rand){for(let i=0;i<40;i++){const tx=x0+(rnd()*(x1-x0)|0),ty=y0+(rnd()*(y1-y0)|0);if(!sol0(tx,ty)&&!sol0(tx+1,ty))return [tx*TS+8,ty*TS+8];}return [538*TS,(CAST.y1-4)*TS];}
 function startSiege(n){SG={slot:n.slot,end:n.end,def:null,atk:[],wave:0,wt:30,by:null,cap:null,demo:!!S.__demo};if(SG.demo)return;
  if(typeof n.slot==='number'&&wNow()-(n.end-SIEGL)>EV_LATE)toast(t('sgOngoing',{g:gName(WS.castle.own)}),'good');else{announce(t('sgStart',{g:gName(WS.castle.own)}));SFX.notice();}} // SAT-ONLINE-041: late and demo as for events
-function castleTaken(gid,remote){const o=WS.castle;o.own=gid;o.at=Date.now();if(!remote)ownPut('castle',gid);
- if(gid&&gid===S.guild){gContrib(3000);announce(t('sgWon',{g:gName(gid)}));SFX.legendary();flash();if(SG){SG.wt=30;SG.by=null;}}else toast(t('sgLost',{g:gName(gid)}),'warn');hudDirty=true;save(true);}
+function castleTaken(gid,remote){const o=WS.castle,was={own:o.own,at:o.at};o.own=gid;o.at=Date.now();
+ const won=()=>{if(gid&&gid===S.guild){gContrib(3000);announce(t('sgWon',{g:gName(gid)}));SFX.legendary();flash();if(SG){SG.wt=30;SG.by=null;}}else toast(t('sgLost',{g:gName(gid)}),'warn');hudDirty=true;save(true);};
+ // online the rewards wait for the server to take the capture, and a refused one is undone (Claude-B, #130)
+ if(!remote&&ownPut('castle',gid,won,()=>{o.own=was.own;o.at=was.at;hudDirty=true;}))return;won();}
 function endSiege(){const G=SG;SG=null;const mine=!!(S.guild&&WS.castle.own===S.guild);
  if(mine&&G.by&&G.atk.some(m=>!m.dead&&inCastle(m)))castleTaken(G.by);else if(mine&&G.wave){gContrib(1500);toast(t('sgHeld'),'good');SFX.quest();}else toast(t('sgOver',{g:gName(WS.castle.own)}));
  mons=mons.filter(m=>!(m.sg&&!m.dead));$('sgbar').hidden=true;save(true);}
@@ -5972,6 +5974,7 @@ function legTick(){if(!legOff&&legOnline())legSub();if(LEGS&&legW!==WS)legApply(
 function legWrap(k,f){return function(...a){if(!legOnline()||!S||S.__demo)return f.apply(this,a);const L=WS.legends||{};if(L[k]&&L[k].pid!==pidOf())return f.apply(this,a); // f says it is taken
  legClaim(k).then(()=>{(WS.legends||(WS.legends={}))[k]={pid:pidOf(),n:netId||S.look.n};f.apply(this,a);},()=>{const v=LEGS&&LEGS[k];SFX.deny();toast(t('legTaken',{n:v?Satisfy.chat.clean(v.n,24)||'?':'?'}),'warn');});};}
 becomePagma=legWrap('pagma',becomePagma);becomeBraham=legWrap('braham',becomeBraham);becomeSaint=legWrap('muller',becomeSaint);
+window.__GTERR={capture:k=>{const T=TERR.find(x=>x.k===k);if(T)captureT(T,S.guild,false);},castle:()=>castleTaken(S.guild),lose:(k,by)=>{const T=TERR.find(x=>x.k===k);if(T)captureT(T,by,true);},get slots(){return CSLOT},free:()=>cslFree(),T:()=>TERR.map(x=>x.k),act:k=>bannerAct(TERR.find(x=>x.k===k)),own:()=>OWN,mine:k=>WS.terr[k].own||null,contrib:()=>{const g=myG(),m=g&&g.members[pidOf()];return m?m.c:0;}}; // tests
 window.__GL={become:k=>({pagma:becomePagma,braham:becomeBraham,muller:becomeSaint})[k](),legends:()=>WS&&WS.legends,db:()=>LEGS,apply:()=>legApply()}; // test hook
 const OWNG={};let OWN=null,ownOff=null;
 function ownSub(){if(ownOff||!FB||!netUser||!NET||!WS)return;const D=FB.m.database;if(!D.onValue){ownOff=1;return;}
@@ -5980,20 +5983,47 @@ function ownApply(){if(!OWN||!WS||!S)return;for(const k in OWN){const v=OWN[k];i
   if(!WS.guilds[v.g])OWNG[v.g]={n:Satisfy.chat.clean(String(v.n||'?'),24)||'?',col:/^#[0-9a-fA-F]{6}$/.test(v.c||'')?v.c:'#9a9aa6'};
   const T=TERR.find(T=>T.k===k);
   if(k==='castle'){if(WS.castle.own!==v.g)castleTaken(v.g,true);}else if(T&&WS.terr[k]&&WS.terr[k].own!==v.g)captureT(T,v.g,WS.terr[k].own===S.guild,true);}}
-function ownPut(k,gid){if(!FB||!netUser||!NET||!gid||!S||S.__demo)return;const D=FB.m.database,g=WS.guilds[gid]||OWNG[gid]||{},T=TERR.findIndex(T=>T.k===k);
- D.set(D.ref(FB.db,'world/satisfy/own/'+k),{g:gid,n:String(gName(gid)).slice(0,24),c:g.col||'#9a9aa6',h:netId||'?',uid:netUser.uid,t:D.serverTimestamp()}).catch(()=>{});
- if(gid===S.guild&&NETTR&&NETTR.feedSay&&netId)NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:k==='castle'?'castNews':'terrNews',p:{f:Math.max(0,T)}});}
-function captureT(T,gid,lost,remote){const o=WS.terr[T.k];o.own=gid;o.sh=Date.now()+SHIELD;if(!remote)ownPut(T.k,gid);
- if(gid&&gid===S.guild){gContrib(2000);announce(t('terrWon',{g:gName(gid),t:t(T.k)}));SFX.legendary();flash();}else toast(t(lost?'terrLost':'terrTaken',{g:gName(gid),t:t(T.k)}),'warn');hudDirty=true;save(true);}
+/* territory objectives (SAT-ONLINE-095, plan U240). Online the rules hold what the game already shows: a place taken is
+   safe for 45 minutes (from the server's time of the capture), and a guild takes at most four places (territories or the
+   castle) in any seven days: each capture uses one of its four slots (capSlot/{gid}/{a..d} {k, t}), written with the
+   capture, and a slot is free again a week after it was used. Only a member takes a place for their guild. When the
+   canon guilds win back a place from your guild (an offline raid), that needs no slot. */
+Object.assign(STR.ar,{bnWeek:'الجيلد خد 4 أماكن في آخر 7 أيام. المكان الجاي يتاح بعد {h}',capOff:'الاستيلاء ده متسجلش أونلاين، فالباقيين مش شايفينه',capDays:'{d} يوم',capHrs:'{h} ساعة'});
+Object.assign(STR.en,{bnWeek:'Your guild has taken 4 places in the last 7 days. The next one frees in {h}',capOff:'This capture did not reach the server, so others do not see it',capDays:'{d} days',capHrs:'{h} h'});
+var CSLOT=null,cslOff=null,cslFor=null;const CS_K=['a','b','c','d'],CS_WK=604800000,NPCGID=['g_tzed','g_giant','g_snake'];
+function cslOn(){return !!(FB&&netUser&&NET&&NETTR&&NETTR.kind==='firebase'&&S&&!S.__demo&&S.guild&&GUILD&&GUILD.state&&GUILD.state().gid===S.guild);}
+// your guild's capture slots, watched while you are in an online guild
+function cslSync(){const gid=cslOn()?S.guild:null;if(gid===cslFor)return;if(cslOff){try{cslOff();}catch(e){}cslOff=null;}cslFor=gid;CSLOT=null;if(!gid)return;
+ const D=FB.m.database;try{cslOff=D.onValue(D.ref(FB.db,'capSlot/'+gid),s=>{if(cslFor===gid)CSLOT=s.val()||{};},()=>{CSLOT=null;});}catch(e){}}
+// a free slot, or null; and when the next one frees
+function cslFree(){if(!CSLOT)return 'a';const n=wNow();return CS_K.find(k=>!CSLOT[k]||+CSLOT[k].t<n-CS_WK)||null;}
+function cslNext(){const n=wNow(),ts=CS_K.map(k=>CSLOT&&CSLOT[k]?+CSLOT[k].t+CS_WK-n:0).filter(x=>x>0);return ts.length?Math.min(...ts):0;}
+function cslLeft(ms){const h=Math.max(1,Math.ceil(ms/3600000));return h>=48?t('capDays',{d:Math.floor(h/24)}):t('capHrs',{h});}
+// a capture written online: ok() once the server took it (the rewards and the news), no() if it was refused (the place goes
+// back to what it was, here and on the map). false when there is nobody to tell (offline), and for a guild that isn't
+// online (a canon guild you joined, Tzed to Jishuka, or one made offline: the rules take captures only from members of
+// online guilds; Claude-B's re-review of #130): the caller goes on as before, the capture kept on this page only
+function ownPut(k,gid,ok,no){if(!FB||!netUser||!NET||!gid||!S||S.__demo)return false;const D=FB.m.database,g=WS.guilds[gid]||OWNG[gid]||{},T=TERR.findIndex(T=>T.k===k);
+ const npc=NPCGID.includes(gid)&&gid!==S.guild;if(!npc&&gid!==S.gon)return false;
+ const sl=npc?'-':cslFree(),u={};if(!sl){toast(t('capOff'),'warn');if(no)no();ownApply();return true;}
+ u['world/satisfy/own/'+k]={g:gid,n:String(gName(gid)).slice(0,24),c:g.col||'#9a9aa6',h:netId||'?',uid:netUser.uid,s:sl,t:D.serverTimestamp()};if(!npc)u['capSlot/'+gid+'/'+sl]={k,t:D.serverTimestamp()};
+ D.update(D.ref(FB.db),u).then(()=>{if(!npc&&CSLOT)CSLOT[sl]={k,t:wNow()};if(ok)ok();
+   if(gid===S.guild&&NETTR&&NETTR.feedSay&&netId)NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:k==='castle'?'castNews':'terrNews',p:{f:Math.max(0,T)}});},
+  ()=>{if(gid===S.guild)toast(t('capOff'),'warn');if(no)no();ownApply();}); // refused: back to what everyone sees
+ return true;}
+function captureT(T,gid,lost,remote){const o=WS.terr[T.k],was={own:o.own,sh:o.sh};o.own=gid;o.sh=Date.now()+SHIELD;
+ const won=()=>{if(gid&&gid===S.guild){gContrib(2000);announce(t('terrWon',{g:gName(gid),t:t(T.k)}));SFX.legendary();flash();}else toast(t(lost?'terrLost':'terrTaken',{g:gName(gid),t:t(T.k)}),'warn');hudDirty=true;save(true);};
+ if(!remote&&ownPut(T.k,gid,won,()=>{o.own=was.own;o.sh=was.sh;hudDirty=true;save(true);}))return;won();}
 function bannerAct(T){const o=WS.terr[T.k],w=TW[T.k],gn=o.own?gName(o.own):t('gNone'),pk=t('pk_'+T.k);
  if(!S.guild)return dialog('banner',[t('bnInfo',{t:t(T.k),g:gn,p:pk}),'bnNoG']);
  if(o.own===S.guild)return dialog('banner',[t('bnOurs',{t:t(T.k),p:pk,m:o.sh>Date.now()?shieldMin(o):0})]);
+ if(cslOn()&&!cslFree())return dialog('banner',[t('bnWeek',{h:cslLeft(cslNext())})]);
  if(o.sh>Date.now())return dialog('banner',[t('bnShield',{t:t(T.k),g:gn,m:shieldMin(o)})]);
  if(w&&w.cap)return;
  if(o.own&&!(w&&w.def)){TW[T.k]={def:spawnSquad(T,4,o.own)};SFX.slam();shake=.3;return toast(t('bnDef',{g:gn}),'warn');}
  if(w&&w.def&&!w.def.every(m=>m.dead)){SFX.deny();return toast(t('bnFight'),'warn');}
  (TW[T.k]=TW[T.k]||{}).cap={t:0,hp:P.hp};toast(t('bnCap',{n:CAPT}));SFX.notice();}
-function updateTerr(dt){if(!S||!WS||!P)return;
+function updateTerr(dt){if(!S||!WS||!P)return;cslSync();
  for(const T of TERR){const w=TW[T.k];if(!w)continue;
   if(w.def){if(!w.cap&&Math.hypot(P.x-T.x,P.y-T.y)>480){mons=mons.filter(m=>!w.def.includes(m));delete TW[T.k];continue;}if(!w.clear&&w.def.every(m=>m.dead)){w.clear=1;toast(t('terrClear',{t:t(T.k)}),'good');}}
   if(w.cap){const c=w.cap;if(Math.hypot(P.x-T.x,P.y-T.y)>30||P.hp<c.hp-1||P.ghost||!S.guild){w.cap=null;toast(t('capBroke'),'warn');SFX.deny();continue;}c.t+=dt;if(c.t>=CAPT){delete TW[T.k];captureT(T,S.guild,false);}}}
