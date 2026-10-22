@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22research', ver: '1.84', d: '2026-10-22',
+      ar: ["شجرة بحث للجيلد (G ← المباني ← \"Research tree\"): 7 أبحاث بتتدفع من خزينة الجيلد مرة واحدة وبالترتيب، وكل بحث بيدي كل الأعضاء ميزة: خبرة، دهب، جودة صناعة، صحة، وفي الآخر \"إرث الجيلد\" بيدي شوية من التلاتة"],
+      en: ["A research tree for guilds (G → Buildings → \"Research tree\"): 7 studies paid from the guild treasury, once and in order, each a bonus for every member: experience, gold, crafting quality, health, and at the top \"Guild Legacy\" with a bit of all three"] },
     { v: '2026-10-22wpass2', ver: '1.83', d: '2026-10-22',
       ar: ["باسيفز سلاح جديدة: ضربة مزدوجة (السلاح بيضرب تاني لوحده)، صعق (برق بيزود الضربة 50% ويقفز على اتنين جنب الهدف ويشلهم لحظة)، امتصاص (جزء من الضرر اللي بتاخده بيترد في ضربتك الجاية)، تجميد (بيبطّأ الهدف)، وزق (بيرمي الهدف لورا)",
         "حجر البرق: جوهرة جديدة بتتركب في السلاح عند خان، وبتدي السلاح صعق بفرصة 15%. بتقع من الوحوش العالية والزعماء",
@@ -161,10 +164,6 @@
       en: ["Crash reports no longer pile up for ever: `/crashes` now offers \"Clear the ones older than 30 days\", and only an admin can remove them",
         "New for the owner: everything the online game keeps, who reads it and when it goes (docs/online/DATA_RETENTION.md), and the steps of a quick fix (HOTFIX.md)"] },
     { v: '2026-10-22rights', ver: '1.62', d: '2026-10-22',
-    { v: '2026-10-22research', ver: '1.43', d: '2026-10-22',
-      ar: ["شجرة بحث للجيلد (G ← المباني ← \"Research tree\"): 7 أبحاث بتتدفع من خزينة الجيلد مرة واحدة وبالترتيب، وكل بحث بيدي كل الأعضاء ميزة: خبرة، دهب، جودة صناعة، صحة، وفي الآخر \"إرث الجيلد\" بيدي شوية من التلاتة"],
-      en: ["A research tree for guilds (G → Buildings → \"Research tree\"): 7 studies paid from the guild treasury, once and in order, each a bonus for every member: experience, gold, crafting quality, health, and at the top \"Guild Legacy\" with a bit of all three"] },
-    { v: '2026-10-22rights', ver: '1.42', d: '2026-10-22',
       ar: ["قائد الجيلد يقدر يحدد صلاحيات الضباط والأعضاء (G ← \"Rank rights\"): الدعوة وطلبات الانضمام، الأخذ من الخزنة، الصرف على المباني، كتابة الإعلان، وعمل الأحداث. الضباط عندهم كله والأعضاء مفيش لحد ما القائد يغيّر",
         "سجلات الجيلد (المكافآت الأسبوعية اللي اتاخدت، السجل) متتمسحش غير مع حل الجيلد"],
       en: ["A guild master sets what officers and members may do (G → \"Rank rights\"): invite and answer requests, take from the vault, spend the treasury on buildings, write the notice and plan events. Officers have all of it and members none until the master changes it",

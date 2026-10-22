@@ -346,12 +346,13 @@
       if (seg.length === 2 && v === null) return master && gone(gid) ? null : 'PERMISSION_DENIED: ' + seg[0] + ' remove';
       if (seg[0] === 'guildBank') {
         if (seg.length !== 2 || !member) return 'PERMISSION_DENIED: guildBank ' + path;
-        if (Object.keys(v).sort().join(',') !== 'in,lb,lg,s,t' || !isInt(v.in, 0) || !isInt(v.s, 0) || !isInt(v.lg, 1) || v.lg > 1e6 || typeof v.lb !== 'string' || !isSV(v.t) || v.s > v.in) return 'guildBank fields';
+        if (!['in,lb,lg,s,t', 'b,in,lb,lg,s,t'].includes(Object.keys(v).sort().join(',')) || (v.b !== undefined && !/^[a-z0-9]{1,8}$/.test(v.b)) || !isInt(v.in, 0) || !isInt(v.s, 0) || !isInt(v.lg, 1) || v.lg > 1e6 || typeof v.lb !== 'string' || !isSV(v.t) || v.s > v.in) return 'guildBank fields';
         const give = old ? v.s === old.s && v.in === old.in + v.lg && v.lb === me : v.s === 0 && v.in === v.lg && v.lb === me;
         const spend = !!old && v.in === old.in && v.s > old.s && boss && ['forge', 'train', 'gold', ...Object.keys(G_RS)].some((b) => { const n = after('guildBuild/' + gid + '/' + b), o = data.get('guildBuild/' + gid + '/' + b); return n != null && (o == null || n > o); }); // only with a building raised (Claude-B's review of #99)
         return give || spend ? null : 'PERMISSION_DENIED: guildBank stale or not yours';
       }
       if (seg[0] === 'guildBuild') {
+        if (seg.length === 3 && (after('guildBank/' + gid) || {}).b !== seg[2]) return 'PERMISSION_DENIED: guildBuild not the one the bank names'; // one node an update (Claude-B's review of #139)
         const rs = G_RS[seg[2]]; // SAT-ONLINE-105: a research node, once, after the ones it needs, at its cost
         if (seg.length === 3 && boss && rs) {
           if (old != null || v !== 1 || !rs[1].every((q) => data.get('guildBuild/' + gid + '/' + q) === 1)) return 'PERMISSION_DENIED: guildBuild research';
