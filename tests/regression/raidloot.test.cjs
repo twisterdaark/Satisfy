@@ -74,6 +74,24 @@ test('online: a raid boss kill rolls one bonus piece among those who fought it; 
     await until([b], (o) => window.__G.S.items.some((it) => it.uid > o.u && it.id === o.it && it.r === o.r), 10000, { u: uid0, it: offer.it, r: offer.r });
     assert.match(await toasts(b), new RegExp('You won .+ in the raid roll \\(Need ' + roll + '\\)'));
     await until([a], (r) => new RegExp('Mate won .+ in the raid roll \\(Need ' + r + '\\)').test(window.__toastSeen), 10000, roll);
+    // plan U058, one result for the raid: the piece is made once, by B only
+    const pieces = (g, o) => g.eval((x) => window.__G.S.items.filter((it) => it.uid > x.u && it.id === x.it && it.r === x.r).length, o);
+    const uidA = await a.eval(() => window.__G.S.uid);
+    assert.equal(await pieces(b, { u: uid0, it: offer.it, r: offer.r }), 1);
+    // the result announced again (a message sent twice, a leader that repeats itself): nothing more is made
+    const sid = await a.eval(() => Satisfy.local.net().sid);
+    const sendAs = (g, to, raid, k, n, seq) => g.eval(async ([t, r, kk, nn, sq, sd]) => { const F = window.__GLD.fb(), D = F.m.database; await D.push(D.ref(F.db, 'inbox/' + t), { from: Satisfy.local.net().uid, sid: sd, seq: sq, type: 'raid.state', payload: { to: t, raid: r, k: kk, n: nn }, t: D.serverTimestamp() }); }, [to, raid, k, n, seq, sid]);
+    await b.eval(() => { window.__new = []; new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.textContent) window.__new.push(n.textContent); }).observe(document.getElementById('toasts'), { childList: true }); });
+    await sendAs(a, 'gLtB2', 'w|' + offer.id + '|gLtB2', roll, 2, 1e9);
+    await settle(a, b); await settle(a, b);
+    assert.equal(await pieces(b, { u: uid0, it: offer.it, r: offer.r }), 1, 'still one piece');
+    assert.ok(!(await b.eval(() => window.__new.some((x) => /You won/.test(x)))), 'not told again');
+    // and the boss reported killed again within the minute: no second roll for it
+    const sidB = await b.eval(() => Satisfy.local.net().sid);
+    await b.eval(async ([sd]) => { const F = window.__GLD.fb(), D = F.m.database; await D.push(D.ref(F.db, 'inbox/gLtA1'), { from: 'gLtB2', sid: sd, seq: 1e9, type: 'raid.state', payload: { to: 'gLtA1', raid: 'k|gchief', k: 0 }, t: D.serverTimestamp() }); }, [sidB]);
+    await settle(a, b); await settle(a, b);
+    assert.equal(await a.eval(() => window.__GRL.loot().l), null, 'no second roll');
+    assert.equal(await pieces(a, { u: uidA, it: offer.it, r: offer.r }), 0, 'A, who lost the roll, has no piece');
     for (const g of [a, b]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
     assert.deepEqual(a.errors, []);
     assert.deepEqual(b.errors, []);

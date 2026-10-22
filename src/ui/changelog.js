@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22lootonce', ver: '1.86', d: '2026-10-22', hide: 1,
+      ar: ["للتيستات والأمان: قطعة قرعة الغارة بتتعمل مرة واحدة بس حتى لو النتيجة وصلت مرتين، وتيست بيتأكد إن اللي ضرب البوس واللي قتله بياخدوا نفس الدهب"],
+      en: ["Tests and safety: a raid roll's piece is made once even when the result arrives twice, and a test that the one who hit the boss and the one who killed it get the same gold"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
