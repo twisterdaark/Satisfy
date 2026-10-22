@@ -100,6 +100,7 @@
           break;
         case 'duel.hit': {
           if (!mineDuel || d.phase !== 'fight') return;
+          if (safeHere()) { emit({ type: 'rejected', why: 'safe' }); return; } // in a town no hit lands (U026/U027); the next tick yields
           var t = now(), k = +pl.k;
           if (!(k >= 1)) return;
           d.hitsIn = d.hitsIn.filter(function (x) { return t - x < 1000; });
@@ -180,7 +181,7 @@
       hit: function (power) {
         if (!d || d.phase !== 'fight') return 0;
         var r = byUid(d.foe);
-        if (!r || dist(pos(), r) > C.HIT_RANGE) return 0;
+        if (!r || dist(pos(), r) > C.HIT_RANGE || safeHere() || noFight(r.zone)) return 0;
         var k = Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(+power || 0)));
         send('duel.hit', { k: k, n: ++d.hitN });
         return k;

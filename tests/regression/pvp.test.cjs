@@ -93,6 +93,41 @@ test('outside town a hit takes a capped share of HP; a party or a town stops it;
   } finally { await ctx.close(); }
 });
 
+// plan U026/U027 (Safe Bairan, Safe Winston): from inside a town no player damage can be received, also from a modified
+// client. A skips the game's own checks and puts hits straight on the channel the pages talk on, as a changed page could:
+// B in Winston takes none of them; outside, the same hits land, so it is the town that stops them.
+const forge = (g, to, n) => g.eval(([u, k]) => { const me = Satisfy.local.net(), ch = new BroadcastChannel('satisfy-net-v1'); ch.postMessage(Satisfy.net.envelope('pvp.hit', { to: u, k: 90, n: k }, { sessionId: me.sid, seq: 1e9 + k })); ch.close(); }, [to, n]);
+test("in a town a modified client's hits do not land; outside the same hits do", async () => {
+  const ctx = await H.newContext();
+  try {
+    const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
+    const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    const town = await b.eval(() => ({ x: window.__G.P.x, y: window.__G.P.y }));
+    await toasts(b);
+    const ub = await b.eval(() => Satisfy.local.net().uid);
+    let n = 0;
+    for (const [where, x, y] of [['Winston', town.x, town.y], ['the plains', 90 * 16, 60 * 16]]) {
+      await place(a, 0, x, y); await place(b, 18, x, y);
+      await settle(a, b); await settle(a, b);
+      await b.eval(() => { window.__G.P.hp = window.__G.maxHP(); });
+      const hp = await b.eval(() => window.__G.P.hp), inTown = where === 'Winston';
+      assert.equal((await b.eval(() => Satisfy.local.world().towns)).includes(await b.eval(() => Satisfy.local.zoneAt(window.__G.P.x, window.__G.P.y))), inTown, 'B is in ' + where);
+      for (let i = 0; i < 3; i++) { await forge(a, ub, ++n); await settle(a, b); }
+      const hp2 = await b.eval(() => window.__G.P.hp);
+      if (inTown) {
+        assert.ok(hp2 >= hp, 'no damage in a town: ' + hp + ' -> ' + hp2);
+        assert.doesNotMatch(await toasts(b), /attacking you/);
+      } else {
+        assert.ok(hp2 < hp, 'outside, the forged hits land: ' + hp + ' -> ' + hp2);
+        assert.match(await toasts(b), /Grid is attacking you!/);
+      }
+    }
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
 test('online: the hits, the kill report and the outlaw mark pass the database rules', async () => {
   const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
   try {
