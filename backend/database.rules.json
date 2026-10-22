@@ -595,6 +595,21 @@
         }
       }
     },
+    "guildTax": {
+      "$gid": {
+        ".read": "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()",
+        ".write": "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid && !newData.parent().parent().child('guilds').child($gid).exists()",
+        "$id": {
+          ".write": "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid && root.child('world').child('satisfy').child('tax').child('g').val() === $gid && root.child('world').child('satisfy').child('own').child('castle').child('g').val() === $gid && root.child('world').child('satisfy').child('tax').child('r').val() > 0 && !root.child('guildMembers').child($gid).child(auth.uid).exists()) || (data.exists() && !newData.exists() && newData.parent().parent().parent().child('guildBank').child($gid).child('tx').val() === $id && ((root.child('guildBank').child($gid).exists() && newData.parent().parent().parent().child('guildBank').child($gid).child('in').val() === root.child('guildBank').child($gid).child('in').val() + data.child('g').val()) || (!root.child('guildBank').child($gid).exists() && newData.parent().parent().parent().child('guildBank').child($gid).child('in').val() === data.child('g').val()))))",
+          ".validate": "$id.matches(/^x_[A-Za-z0-9_-]{1,80}$/) && newData.hasChildren(['g', 'by', 'n', 't'])",
+          "g": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 100000" },
+          "by": { ".validate": "newData.val() === auth.uid" },
+          "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "guildBank": {
       "$gid": {
         ".read": "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()",
@@ -606,6 +621,7 @@
         "lg": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 1000000 && newData.val() % 1 === 0" },
         "t": { ".validate": "newData.val() === now" },
         "b": { ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9]{1,8}$/)" },
+        "tx": { ".validate": "newData.isString() && newData.val().matches(/^x_[A-Za-z0-9_-]{1,80}$/)" },
         "$other": { ".validate": false }
       }
     },
@@ -1255,6 +1271,16 @@
             "t": { ".validate": "newData.val() === now" },
             "$other": { ".validate": false }
           }
+        },
+        "tax": {
+          ".read": "auth != null",
+          ".write": "auth != null && newData.exists() && $world === 'satisfy' && root.child('world').child($world).child('own').child('castle').child('g').val() === newData.child('g').val() && root.child('guilds').child(newData.child('g').val()).child('master').val() === auth.uid && (!data.exists() || data.child('g').val() !== newData.child('g').val() || data.child('t').val() < now - 3600000)",
+          ".validate": "newData.hasChildren(['g', 'r', 'by', 't'])",
+          "g": { ".validate": "newData.isString() && newData.val().matches(/^g_[A-Za-z0-9]{1,128}$/)" },
+          "r": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 10" },
+          "by": { ".validate": "newData.val() === auth.uid" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
         },
         "$other": { ".validate": false }
       }

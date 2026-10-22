@@ -239,3 +239,33 @@ test('real rules (SAT-ONLINE-105): a research is paid once, in order, exactly it
   // buildings too: one level of one building an update
   { const k = D.st.guildBank[G]; assert.equal(D.w('uA', { ['guildBuild/' + G + '/forge']: 1, ['guildBuild/' + G + '/train']: 1, ['guildBank/' + G]: { in: k.in + 0, s: k.s + 50000, lb: k.lb, lg: k.lg, b: 'forge', t: SV } }), 'no', 'two buildings for the price of one'); }
 });
+
+test('real rules (SAT-ONLINE-106): the castle city tax is at most 10%, set once an hour by the castle guild\'s master; its entries collected once', () => {
+  const D = db(), G = 'g_uA';
+  D.set({
+    guilds: { [G]: { name: 'Crown', nk: 'crown', master: 'uA', col: '#5aa0ff', t: NOW } }, guildNames: { crown: G },
+    guildMembers: { [G]: { uA: { rk: 'm', n: 'Ahmed', c: 0, on: NOW }, uC: { rk: 'r', n: 'Carim', c: 0, on: NOW } } },
+    world: { satisfy: { own: { castle: { g: G, n: 'Crown', c: '#5aa0ff', h: 'Ahmed', uid: 'uA', t: NOW } } } },
+  });
+  const tax = (r, by = 'uA', g = G) => ({ 'world/satisfy/tax': { g, r, by, t: SV } });
+  assert.equal(D.w('uA', tax(11)), 'no', 'never more than 10%');
+  assert.equal(D.w('uA', tax(100)), 'no', 'never 100%');
+  assert.equal(D.w('uA', tax(-1)), 'no', 'never negative');
+  assert.equal(D.w('uA', tax(2.5)), 'no', 'whole percents');
+  assert.equal(D.w('uC', tax(5, 'uC')), 'no', 'the master only');
+  assert.equal(D.w('uA', tax(10)), 'ok');
+  assert.equal(D.w('uA', tax(5), NOW + 60000), 'no', 'once an hour');
+  assert.equal(D.w('uA', tax(5), NOW + 3600001), 'ok', 'an hour later');
+  const e = (by, g, n = 'Bassem') => ({ ['guildTax/' + G + '/x_' + by + '_1']: { g, by, n, t: SV } });
+  assert.equal(D.w('uC', e('uC', 500, 'Carim')), 'no', "a member doesn't make tax for its own guild");
+  assert.equal(D.w('uB', e('uB', 0)), 'no', 'at least 1');
+  assert.equal(D.w('uB', e('uB', 100001)), 'no', 'at most 100,000');
+  assert.equal(D.w('uB', e('uB', 50)), 'ok');
+  const k = 'x_uB_1', bank = (inc, by = 'uC') => ({ ['guildTax/' + G + '/' + k]: null, ['guildBank/' + G]: { in: inc, s: 0, lb: by, lg: inc, tx: k, t: SV } });
+  assert.equal(D.w('uB', { ['guildTax/' + G + '/' + k]: null }), 'no', 'not off without the treasury');
+  assert.equal(D.w('uC', bank(51)), 'no', 'its own amount');
+  assert.equal(D.w('uB', bank(50, 'uB')), 'no', 'a member collects');
+  assert.equal(D.w('uC', bank(50)), 'ok');
+  assert.equal(D.w('uC', bank(50)), 'no', 'once');
+  assert.equal(D.st.guildBank[G].in, 50);
+});

@@ -130,7 +130,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U223 | Crop wholesale market | ❌ | Content (B) |
 | U224 | Rare gem exchange | 🟡 | Socketing and paid upgrades (B); no exchange between players |
 | U225 | Repair market | ✅ | SAT-ONLINE-096: work orders (`repairOrders`) a player posts with a fee at any smith's; a player Blacksmith mends one in one write that takes it off, tells its owner (`repairDone`) and pays the smith (`repairPaid`), checked by the rules; the piece is mended in its owner's bag with the same id (`regression/repair`) |
-| U226 | Taxation caps | ❌ | There are no city taxes yet |
+| U226 | Taxation caps | ✅ | SAT-ONLINE-106: the castle guild's master sets Reidan's tax, 0–10% and once an hour (`world/satisfy/tax`, the rules refuse more); outsiders pay it on top of Reidan's prices, as entries (`guildTax/{gid}/{id}`) a member collects into the treasury, each once and only for its amount; members pay none and can't make tax for their guild (`regression/tax`, `unit/rules-fuzz`) |
 | U227 | Inflation dashboard | ✅ | SAT-ONLINE-082: `/economy` for the owner: total, median, top 10% and richest gold of the ranked players, and their average level |
 
 ### Guilds (plan §43)
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 76 · 🟡 16 · ⏳ 6 · ❌ 6 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 77 · 🟡 16 · ⏳ 6 · ❌ 5 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
