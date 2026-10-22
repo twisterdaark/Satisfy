@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22gfound', ver: '1.86', d: '2026-10-22',
+      ar: ["تأسيس الجيلد أونلاين بقى بياخد الـ 5,000 دهب أول ما تضغط (وبترجعلك لو الاسم مأخوذ)، فاللي تصرفه وإنت مستني مبيخليش دهبك بالسالب"],
+      en: ["Founding a guild online now takes the 5,000 gold the moment you ask (given back if the name is taken), so gold spent while it answers can't leave you below zero"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
