@@ -457,7 +457,7 @@ test('moderation (SAT-ONLINE-082): admins read reports and crashes, write mutes 
   const ADM = "root.child('admins').child(auth.uid).val() === true";
   assert.equal(rules.reports['.read'], 'auth != null && ' + ADM);
   assert.equal(rules.crashes['.read'], 'auth != null && ' + ADM);
-  assert.equal(rules.crashes.$id['.write'], 'auth != null && !data.exists()', 'anyone signed in sends one, once');
+  assert.equal(rules.crashes.$id['.write'], 'auth != null && (!data.exists() || (!newData.exists() && ' + ADM + '))', 'anyone signed in sends one, once; only an admin removes one (SAT-ONLINE-111)');
   assert.equal(rules.crashes.$id.by['.validate'], 'newData.val() === auth.uid');
   assert.equal(rules.mutes.$uid['.write'], 'auth != null && ' + ADM);
   assert.equal(rules.mutes.$uid.until['.validate'], 'newData.isNumber() && newData.val() > now && newData.val() <= now + 2592000000', 'an expiry within 30 days');

@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22retention', ver: '1.42', d: '2026-10-22',
+      ar: ["أعطال اللعبة اللي بتوصل للأدمن مبقتش بتتراكم على طول: `/crashes` فيه دلوقتي \"امسح اللي أقدم من 30 يوم\"، والأدمن بس اللي يقدر يمسح",
+        "ورقة جديدة للمالك: كل حاجة اللعبة أونلاين بتحفظها، مين يقراها، وإمتى بتتمسح (docs/online/DATA_RETENTION.md)، وخطوات التصليح السريع (HOTFIX.md)"],
+      en: ["Crash reports no longer pile up for ever: `/crashes` now offers \"Clear the ones older than 30 days\", and only an admin can remove them",
+        "New for the owner: everything the online game keeps, who reads it and when it goes (docs/online/DATA_RETENTION.md), and the steps of a quick fix (HOTFIX.md)"] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },

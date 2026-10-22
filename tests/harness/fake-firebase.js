@@ -487,7 +487,8 @@
       const adm = !!user && data.get('admins/' + user.uid) === true, now = Date.now(), old = data.get(p);
       if (!user || seg.length !== 2) return 'PERMISSION_DENIED: ' + seg[0];
       if (seg[0] === 'crashes') {
-        if (old !== undefined || v === null) return 'PERMISSION_DENIED: crashes write';
+        if (v === null) return old === undefined || adm ? null : 'PERMISSION_DENIED: crashes write'; // SAT-ONLINE-111: an admin clears old ones
+        if (old !== undefined) return 'PERMISSION_DENIED: crashes write';
         const ks = Object.keys(v).sort().join(',');
         if (ks !== 'by,m,s,t,v' && ks !== 'by,m,s,t,v,z') return 'crashes fields';
         return typeof v.m === 'string' && v.m.length >= 1 && v.m.length <= 200 && typeof v.s === 'string' && v.s.length <= 800 && typeof v.v === 'string' && v.v.length <= 16 && (v.z === undefined || (typeof v.z === 'string' && v.z.length <= 24)) && v.by === user.uid && isSV(v.t) ? null : 'crashes values';

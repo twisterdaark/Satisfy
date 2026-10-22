@@ -724,6 +724,8 @@
     return {
       crash: function (v) { var e = { m: String(v.m).slice(0, 200) || '?', s: String(v.s || '').slice(0, 800), v: String(v.v || '').slice(0, 16), by: v.by, t: D.serverTimestamp() }; if (v.z) e.z = String(v.z).slice(0, 24); return D.push(at('crashes'), e); },
       crashes: function () { return all('crashes'); },
+      // SAT-ONLINE-111 (plan U382): an admin removes the given crash reports, at most 500 in one write
+      clearCrashes: function (ids) { var u = {}; (ids || []).slice(0, 500).forEach(function (id) { u['crashes/' + id] = null; }); return Object.keys(u).length ? D.update(D.ref(db), u) : Promise.resolve(); },
       reports: function () { return Promise.all([all('reports'), all('reportDone')]).then(function (r) { return { reports: r[0], done: r[1] }; }); },
       resolve: function (id, a, by) { var u = {}; u['reportDone/' + id] = { a: a, by: by, t: D.serverTimestamp() }; return D.update(D.ref(db), u); },
       mute: function (uid, until, why, by) { var u = {}; u['mutes/' + uid] = { until: until, why: String(why || '').slice(0, 60), by: by, t: D.serverTimestamp() }; return D.update(D.ref(db), u); },

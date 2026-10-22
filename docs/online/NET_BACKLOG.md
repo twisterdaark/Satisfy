@@ -193,7 +193,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U335 | Content flags | 🟡 | Older pages skip what they don't know (fx tags, presence fields) |
 | U336 | Announcement system | ✅ | SAT-ONLINE-079: `/announce text` from an admin account (`admins/{uid}`, set in the console only); everyone online sees it once, late joiners within 10 min; the rules refuse anyone else (`regression/announce`) |
 | U337 | Maintenance notices | ✅ | SAT-ONLINE-079: `/maint minutes text`: the time, reminders 10/5/1 min before, a save when it starts; and "a new version" asks only the older page to refresh (SAT-ONLINE-045) |
-| U338 | Hotfix pipeline | 🟡 | Small PRs, a review, then main |
+| U338 | Hotfix pipeline | ✅ | [HOTFIX.md](HOTFIX.md) (SAT-ONLINE-111): a `HOTFIX:` PR from main with its failing test, reviewed first, rules deployed first; ROLLBACK.md when it can't wait |
 | U339 | Moderation console | ✅ | SAT-ONLINE-082: `/reports`, `/mute ID hours`, `/unmute ID` for admins only; a mute has an expiry and keeps the player out of the world chat by the rules (`regression/moderation`) |
 | U340 | Player appeal flow | ✅ | SAT-ONLINE-087: `/appeal why` while muted, once a mute (`appeals/{uid}`, `mt` = the mute's time: linked to the moderation event); read only by admins and the player (privacy); `/appeals` lifts or keeps it (`appealDone`), the player is told once; a second appeal for the same mute and anyone else's answer are refused by the rules (`regression/appeal`) |
 | U341 | Crash reporting | ✅ | SAT-ONLINE-082: errors on a signed-in page go to `crashes` (admins read): message and stack with long ids, e-mails and paths cut out, build and zone, at most three a session; `/crashes` lists them |
@@ -222,13 +222,13 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U379 | Localization regressions | ✅ | SAT-ONLINE-092: `unit/i18n` reads every string table in the page: each line in both languages (Arabic feminine forms aside), the same `{placeholders}`, empty in both or neither. Play tests still run in English |
 | U380 | Art provenance audit | 🟡 | `docs/art/ART_CONTRACT.md` (B) |
 | U381 | Security incident drill | ⏳ | Owner (Firebase console) |
-| U382 | Data retention review | 🟡 | Only what play needs is online; entries expire (lfg 30 min, chat lines, inbox) |
+| U382 | Data retention review | ✅ | [DATA_RETENTION.md](DATA_RETENTION.md) (SAT-ONLINE-111): every node, who reads it and when it goes; admins clear crash reports older than 30 days (they piled up for ever) |
 | U383 | Community report resolution | ✅ | SAT-ONLINE-082: each report is resolved with its action (`reportDone/{id}` {a: ok or mute, by, t}), so what was done and by whom is kept |
 | U384 | Version gate report | 🟡 | Every PR lists the tests it ran |
 | U385 | Rollback rehearsal | ✅ | SAT-ONLINE-091: `regression/rollback` takes a save this build wrote to the previous release (the baseline build) and back: nothing dropped on the way, a key the old build doesn't know kept, the same save again; a save from a newer build is backed up first. `ROLLBACK.md` has the owner's steps (revert on GitHub, the rules from main, a database export) |
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 50 · 🟡 37 · ⏳ 6 · ❌ 11 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 52 · 🟡 35 · ⏳ 6 · ❌ 11 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
