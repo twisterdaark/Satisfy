@@ -1,0 +1,53 @@
+# SAT-ONLINE-107 (plan U326): the tests on every pull request and every push to main, so a PR shows green or red before
+# review instead of only the list of tests its author ran by hand. The unit and content tests run in full (about a
+# minute); the regression job runs a smoke set of the browser tests (boot, saves, the online stack over the fake,
+# rendering against the baseline, and the newest features), the whole set takes too long for every push.
+name: tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the golden tests export the baseline commit with git archive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run test:unit
+      - run: npm run test:content
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: regression smoke set
+        run: >-
+          node --test --test-concurrency=2
+          tests/regression/boot.test.cjs
+          tests/regression/save.test.cjs
+          tests/regression/golden.test.cjs
+          tests/regression/ids.test.cjs
+          tests/regression/online-local.test.cjs
+          tests/regression/online-firebase.test.cjs
+          tests/regression/party.test.cjs
+          tests/regression/guild.test.cjs
+          tests/regression/drops.test.cjs
+          tests/regression/fixedtick.test.cjs

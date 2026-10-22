@@ -177,7 +177,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U323 | Replay recorder | ❌ | |
 | U324 | Exception boundary | 🟡 | A failing listener can't stop presence; network errors show in the badge |
 | U325 | Performance profiler | 🟡 | `net().link` (round trip, sent, received, dropped) in the badge tooltip; no frame-time budget |
-| U326 | Build pipeline | 🟡 | Tests on every PR by hand; GitHub Pages serves main as it is |
+| U326 | Build pipeline | ✅ | SAT-ONLINE-107: GitHub Actions (`.github/workflows/tests.yml`) runs the unit and content tests and a smoke set of the browser tests on every pull request and push to main; GitHub Pages serves main as it is |
 | U327 | Staging deployment | ⏳ | Needs a second Firebase project (owner) |
 | U328 | Rollback support | ✅ | Every update is one merge on main, so reverting one is one commit (GitHub's Revert); the rules go back with main's copy; saves survive both ways (SAT-ONLINE-091, `docs/online/ROLLBACK.md`) |
 
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 50 · 🟡 37 · ⏳ 6 · ❌ 11 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 51 · 🟡 36 · ⏳ 6 · ❌ 11 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
