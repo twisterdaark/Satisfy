@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22fusion', ver: '1.80', d: '2026-10-22',
+      ar: ["مهارات الدمج بتاعة فن سيف باغما زي الرواية: لو عملت رقصتين ورا بعض بيتولدوا مرة واحدة ومعاهم +10 ذكاء. القتل والربط بيدوا القتل المترابط، والقمة والقتل بيدوا قمة القتل، والتجاوز والربط بيدوا الربط المتجاوز (لما الربط يبقى لفل 2)، وبعد ما تعرف القتل المترابط: الربط والقتل وبعدهم الموجة بيدوا موجة القتل المترابط",
+        "شاشة الستات: الرقم الأساسي بقى تحت الإجمالي بخط صغير، فالأزرار مبقتش بتنزل سطر تحت"],
+      en: ["Pagma's Swordsmanship fusion skills as in the novel: two sword dances back to back fuse once, with +10 intelligence. Kill and Link make Linked Kill, Pinnacle and Kill make Pinnacle Kill, Transcend and Link make Transcended Link (once Link is level 2), and once you know Linked Kill, Link and Kill then Wave make Linked Kill Wave",
+        "Status screen: the base number sits under the total in small type, so the buttons no longer drop to a new line"] },
     { v: '2026-10-22bar8', ver: '1.79', d: '2026-10-22',
       ar: ["شريط المهارات بقى 8 خانات (من 1 لـ 8) غير خانة اللقب (R) والبوشنين، ومترتب في عمودين جنب البوشنات. مهاراتك القديمة فضلت في أماكنها",
         "عيون الحداد الأسطوري بتشوف بس وحش عايش قدامك على الشاشة ومن غير حيطة بينكم، وبتقرا بس الحاجة اللي هو لابسها فعلًا: أوركات ضوء الصقيع العادية مبقتش بتظهر إنها لابسة قفازات الزعيم"],
