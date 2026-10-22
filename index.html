@@ -9757,18 +9757,22 @@ function bugSend(x){const s=String(x||'').replace(/\s+/g,' ').trim().slice(0,300
  const st=bugSt();if(!st||!netUser){toast(t('bugOff'),'warn');return;}if(BUGT&&Date.now()-BUGT<120000){toast(t('bugWait'),'warn');return;}BUGT=Date.now();
  const v=String((Satisfy.CHANGELOG&&Satisfy.CHANGELOG[0]&&Satisfy.CHANGELOG[0].ver)||'?'),z=P&&S?String(zoneAt(P.x,P.y)||'').slice(0,24):'';
  st.send('b_'+String(NET.uid).slice(0,24).replace(/[^A-Za-z0-9_-]/g,'')+'_'+Date.now().toString(36),NET.uid,{s:crashRedact(s).slice(0,300),v,z,n:netId||(S&&S.look&&S.look.n)||''})
-  .then(()=>toast(t('bugSent'),'good'),()=>toast(t('bugWait'),'warn'));}
+  .then(()=>toast(t('bugSent'),'good'),e=>{if(e&&e.code==='PERMISSION_DENIED')toast(t('bugWait'),'warn');else{BUGT=0;toast(t('gdFail'),'warn');}});} // only the rules' refusal is "too soon"
 const bugMark=x=>x.back?'🔁':BUGE[x.s]||'🆕',bugStat=x=>bugMark(x)+' '+t(x.back?'bugBack':'bugSt_'+x.s);
 function bugWhen(ms){if(!(ms>0))return '?';const d=new Date(ms);return d.getDate()+'/'+(d.getMonth()+1)+' '+calTime(ms);}
 function bugGroups(){return BUGD?Satisfy.triage.groups(BUGD.crashes,BUGD.bugs,BUGD.triage):[];}
-// the players' reports in closed groups (fixed or not a bug, and nothing since) older than 30 days
-function bugOld(G){const n=wNow(),o=[];for(const x of G)if(!x.open)for(const i of x.items)if(i.kind==='bug'&&i.t>0&&n-i.t>BUGKEEP)o.push(i.id);return o;}
+// the players' reports in closed groups (fixed or not a bug, and nothing since) older than 30 days. A group goes whole or not
+// at all (Claude-B's review of #161): its target, every report merged into it and their tags together, and only when all of
+// them are players' reports past 30 days. Otherwise a newer report merged into an old one would stand alone again as new.
+function bugOld(G){const n=wNow(),o=[];for(const x of G)if(!x.open&&x.items.length&&x.items.every(i=>i.kind==='bug'&&i.t>0&&n-i.t>BUGKEEP))for(const i of x.items)o.push(i.id);return o;}
+var BUGCLR=false;
+function bugClr(st,old){if(BUGCLR)return;BUGCLR=true;st.clear(old).then(()=>{BUGCLR=false;toast(t('bugCleared',{n:old.length}),'good');bugAdm();},()=>{BUGCLR=false;toast(t('gdFail'),'warn');});}
 function bugAdm(){const st=bugSt();if(!st)return;st.all().then(r=>{BUGD=r;bugList(st);},()=>toast(t('gdFail'),'warn'));}
 function bugList(st){const G=bugGroups(),open=G.filter(x=>x.open),L=BUGALL?G:open,old=bugOld(G),cnt=k=>G.filter(x=>x.s===k&&!x.back).length;
  dialog('guild',[G.length?t('bugH',{o:open.length,a:open.filter(x=>x.s==='act').length,f:cnt('fixed'),x:cnt('no')}):t('bugNone')],null,[
   ...L.slice(0,12).map(x=>({l:t('bugRow',{e:bugMark(x),s:x.text.slice(0,48).trim(),n:x.n}),f:()=>bugOne(st,x.key)})),
   ...(!BUGALL&&G.length>open.length?[{l:t('bugShowAll',{n:G.length-open.length}),f:()=>{BUGALL=true;bugList(st);}}]:[]),
-  ...(old.length?[{l:t('bugClear',{n:old.length}),f:()=>st.clear(old).then(()=>{toast(t('bugCleared',{n:old.length}),'good');bugAdm();},()=>toast(t('gdFail'),'warn'))}]:[]),
+  ...(old.length?[{l:t('bugClear',{n:old.length}),f:()=>bugClr(st,old)}]:[]),
   {l:t('oClose'),f:()=>{BUGALL=false;}}]);}
 // one group: what it says, how many reports from whom, its last five (each with who, build, zone and when), and the tags
 function bugOne(st,key){const x=bugGroups().find(g=>g.key===key);if(!x)return bugList(st);const who=i=>Satisfy.chat.clean(i.n,24)||String(i.by||'?').slice(0,6)+'…';
@@ -9780,7 +9784,7 @@ function bugOne(st,key){const x=bugGroups().find(g=>g.key===key);if(!x)return bu
   ...(x.s!=='new'?[{l:t('bugReopen'),f:()=>tag('new')}]:[]),
   ...(others.length?[{l:t('bugDup'),f:()=>dialog('guild',[t('bugDupQ')],null,[...others.map(g=>({l:t('bugRow',{e:bugMark(g),s:g.text.slice(0,48).trim(),n:g.n}),f:()=>tag('dup',g.key)})),{l:t('oBack'),f:()=>bugOne(st,key)}])}]:[]),
   {l:t('oBack'),f:()=>bugList(st)}]);}
-window.__GBUG={send:x=>bugSend(x),open:()=>admOnly(bugAdm),groups:()=>bugGroups(),reset:()=>{BUGT=0;},store:()=>bugSt()}; // tests
+window.__GBUG={send:x=>bugSend(x),open:()=>admOnly(bugAdm),groups:()=>bugGroups(),reset:()=>{BUGT=0;},store:()=>bugSt(),old:G=>bugOld(G)}; // tests
 /* balance figures (SAT-ONLINE-088, plan U333). Each signed-in game keeps this week's numbers for its own class (the lockouts'
    week, Monday 00:00 UTC): the monsters it killed and how long each took from its first hit (game seconds), and its PvP wins
    and losses (duels and open PvP). It writes them to balance/{uid} at most every 5 minutes while they change. The game's

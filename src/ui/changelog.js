@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22bugs', ver: '1.84', d: '2026-10-22',
+      ar: ["لو لقيت مشكلة في اللعبة وإنت أونلاين، اكتب في الشات /bug وبعدها إيه اللي حصل، والبلاغ بيوصل لفريق اللعبة على طول ومعاه نسخة اللعبة والمكان اللي كنت فيه (بلاغ واحد كل دقيقتين)"],
+      en: ["Found something wrong in the game? Online, type /bug and what happened in the chat: it goes straight to the people who make the game, with the game's version and where you were (one report every 2 minutes)"] },
     { v: '2026-10-22wpass2', ver: '1.83', d: '2026-10-22',
       ar: ["باسيفز سلاح جديدة: ضربة مزدوجة (السلاح بيضرب تاني لوحده)، صعق (برق بيزود الضربة 50% ويقفز على اتنين جنب الهدف ويشلهم لحظة)، امتصاص (جزء من الضرر اللي بتاخده بيترد في ضربتك الجاية)، تجميد (بيبطّأ الهدف)، وزق (بيرمي الهدف لورا)",
         "حجر البرق: جوهرة جديدة بتتركب في السلاح عند خان، وبتدي السلاح صعق بفرصة 15%. بتقع من الوحوش العالية والزعماء",
@@ -234,10 +237,6 @@
       ar: ['شاشة التحميل: النقط والدواير بقت بتطلع من تحت لفوق وهي بتتمايل، وبتصغر وتبهت لحد ما تختفي، وفيه منها أكتر على الجناب. وبقت بدقة الشاشة كاملة بدل ما كانت متمطوطة'],
       en: ['Loading screen: the sparks and rings now rise from the bottom with a gentle sway, shrinking and fading until they vanish, with more of them along the sides. They are drawn at full screen resolution instead of stretched'] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22', hide: 1,
-    { v: '2026-10-22bugs', ver: '1.42', d: '2026-10-22',
-      ar: ["لو لقيت مشكلة في اللعبة وإنت أونلاين، اكتب في الشات /bug وبعدها إيه اللي حصل، والبلاغ بيروح لصاحب اللعبة على طول ومعاه نسخة اللعبة والمكان اللي كنت فيه (بلاغ واحد كل دقيقتين)"],
-      en: ["Found something wrong in the game? Online, type /bug and what happened in the chat: it goes straight to the game's owner, with the game's version and where you were (one report every 2 minutes)"] },
-    { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },
     { v: '2026-10-22v140', ver: '1.40', d: '2026-10-22',

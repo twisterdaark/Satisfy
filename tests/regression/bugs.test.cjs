@@ -85,6 +85,10 @@ test('bug reports: sent by players at most every 2 minutes, triaged by the owner
 
     // players can't read the reports or tag them
     for (const g of [b, c]) { assert.equal(await canRead(g, 'bugs'), 'no'); assert.equal(await canRead(g, 'bugTriage'), 'no'); }
+    // Claude-B's review of #161: nobody removes their own bugLast to send again at once
+    const write = (g, u) => g.eval(async (x) => { const F = window.__GLD.fb(), D = F.m.database; for (const k in x) if (x[k] && x[k].t === 'SV') x[k].t = D.serverTimestamp(); try { await D.update(D.ref(F.db), x); return 'ok'; } catch (e) { return 'no'; } }, u);
+    assert.equal(await write(b, { 'bugLast/gBgB2': null }), 'no', 'bugLast stays');
+    assert.equal(await write(b, { 'bugLast/gBgB2/t': null }), 'no', 'and its time');
     const tagAs = (g, key, s) => g.eval(async ([k, x]) => { try { await window.__GBUG.store().tag(k, x, Satisfy.local.net().uid); return 'ok'; } catch (e) { return 'no'; } }, [key, s]);
     assert.equal(await tagAs(c, 'b_x', 'fixed'), 'no');
     await type(c, '/bugs'); await settle(c);
@@ -141,9 +145,16 @@ test('bug reports: sent by players at most every 2 minutes, triaged by the owner
     await until([own], () => /Cleared 2 reports/.test(window.__toastSeen));
     assert.equal(await bugsIn(own), 0);
     assert.equal(await own.eval(() => [...window.__fakeRTDB.data.keys()].filter((k) => /^crashes\//.test(k)).length), 3);
+    // a second click on Clear (the reports already gone) goes through
+    assert.equal(await own.eval((ids) => window.__GBUG.store().clear(ids).then(() => 'ok', () => 'no'), [merged.key, 'b_gone1']), 'ok');
+    // a group goes whole: an old fixed report with a newer one merged into it stays, both of them, until both are 30 days old
+    const T = t0 + 31 * 86400000, D = 86400000;
+    const keep = await own.eval(([T, D]) => window.__GBUG.old(Satisfy.triage.groups({}, { b_old1: { s: 'old one', v: '1', by: 'u1', t: T - 40 * D }, b_new1: { s: 'new one', v: '1', by: 'u2', t: T - 2 * D }, b_old2: { s: 'alone', v: '1', by: 'u3', t: T - 40 * D } },
+      { b_old1: { s: 'fixed', by: 'gBgA1', t: T - 1 * D }, b_new1: { s: 'dup', dup: 'b_old1', by: 'gBgA1', t: T - 1 * D }, b_old2: { s: 'no', by: 'gBgA1', t: T - 35 * D } })), [T, D]);
+    assert.deepEqual(keep, ['b_old2']);
 
     assert.deepEqual(await own.eval(() => window.__fakeRTDB.rejected), []);
-    assert.deepEqual(await b.eval(() => window.__fakeRTDB.rejected.filter((x) => !/bugs too soon/.test(x))), []);
+    assert.deepEqual(await b.eval(() => window.__fakeRTDB.rejected.filter((x) => !/bugs too soon|bugLast/.test(x))), []);
     assert.deepEqual(await c.eval(() => window.__fakeRTDB.rejected.filter((x) => !/bugTriage admins only|read bug/.test(x))), []);
     for (const g of [own, b, c]) assert.deepEqual(g.errors.filter((e) => !/TypeError: x is undefined/.test(e)), []);
   } finally { await ctx.close(); }
