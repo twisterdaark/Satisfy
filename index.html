@@ -843,9 +843,9 @@ const VOX={ // a: sees you, w: winds up (or roams), s: strikes, h: is hit, d: di
   s:p=>{noise(.07,.18,2000);tone(520*p,.08,'triangle',.05,-200*p);},h:()=>rattle(4),d:p=>{tone(400*p,1,'sine',.06,-300*p);tone(415*p,1,'sine',.05,-300*p);rattle(6,.1);}},
  demon:{a:p=>{growl(80*p,.7,.1);tone(160*p,.7,'square',.04,-60*p);tone(1200*p,.5,'sine',.03,-900*p);},w:p=>growl(70*p,.5,.09),s:p=>{noise(.1,.2,700*p);tone(150*p,.12,'sawtooth',.08,-60*p);},
   h:p=>growl(130*p,.2,.08),d:p=>{growl(70*p,1.2,.1);tone(900*p,1,'sine',.04,-800*p);}}};
-const VOXC=[];
+const VOXC=[],VOXL={}; // VOXL: when each kind last made each sound (owner 2026-10-22: a pack of one kind overlapped into a buzz)
 function voxPlay(m,b,k,soft){if(!P)return;const d=Math.hypot(m.x-P.x,m.y-P.y);if(d>=SFXR)return;const now=performance.now()/1000;while(VOXC.length&&now-VOXC[0]>.5)VOXC.shift();
- if(VOXC.length>=5&&k!=='d'&&!b.boss)return;VOXC.push(now);const [c,pm]=voxOf(m.type),V=VOX[c],f=V&&V[k];if(!f)return;
+ if(VOXC.length>=5&&k!=='d'&&!b.boss)return;const vk=m.type+k;if(now-(VOXL[vk]??-9)<(k==='d'?.15:.35))return;VOXL[vk]=now;VOXC.push(now);const [c,pm]=voxOf(m.type),V=VOX[c],f=V&&V[k];if(!f)return;
  const p=pm*clamp(7/(b.r||7),.45,1.35)*(b.boss?.85:1)*(.95+monHash(m)*.1);if(window.__GS&&__GS.vox&&__GS.vox.length<80)__GS.vox.push(m.type+':'+c+':'+k);
  SFXV=Math.max(.06,(1-d/SFXR)*(b.boss?1:.8)*(soft?.5:1));try{sfxOn('amb',()=>f(p));}finally{SFXV=1;}}
 // watches each monster for the moments it should be heard (state from the last frame in m.vx)
@@ -4265,7 +4265,7 @@ function npcKOSay(n){if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!netId||!EV|
 function npcKOIn(m){if(!m||m.k!=='npcKO'||!NET||m.from===NET.uid||!S||S.__demo||!m.p)return;const E=EV,n=npcs[m.p.f|0];if(!E||typeof E.slot!=='number'||m.p.lv!==E.slot%100000||!n||npcKO(n.id))return;
  WS.nko=WS.nko||{};WS.nko[n.id]=E.end;E.fallen=(E.fallen||0)+1;n.nhp=NPCHP;if(Math.hypot(n.x-P.x,n.y-P.y)<900){dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');}}
 window.__GW={setMapV:v=>{MAPV=String(v);},ev:()=>EV&&{slot:EV.slot,k:EV.e.k},wnow:()=>wNow(),nodes:()=>nodes.map(n=>[n.kind,n.tx,n.ty]),wx:()=>wxNow(),npcs:()=>npcs.map(n=>n.id),ko:id=>npcKO(id),knock:i=>{const n=npcs[i];if(n){n.nhp=1;npcHit(n,{cap:1,face:1});}}}; // tests (SAT-ONLINE-044)
-function npcHit(n,m){if(p6Ally(n.id)){vfx('hit',n.x,n.y-10,{angle:m.face>0?0:Math.PI});SFX.clang();m.at=0;return;}const d=m.cap?18:9+(rand()*4|0);n.nhp=(n.nhp??NPCHP)-d;n.hitT=.2;m.at=0;vfx('hit',n.x,n.y-10,{angle:m.face>0?0:Math.PI});num(n.x,n.y-26,'-'+d,'#ff8a7a',false);SFX.hit();
+function npcHit(n,m){if(p6Ally(n.id)){vfx('hit',n.x,n.y-10,{angle:m.face>0?0:Math.PI});sfxAt(n.x,n.y,()=>SFX.clang(),.5);m.at=0;return;}const d=m.cap?18:9+(rand()*4|0);n.nhp=(n.nhp??NPCHP)-d;n.hitT=.2;m.at=0;vfx('hit',n.x,n.y-10,{angle:m.face>0?0:Math.PI});num(n.x,n.y-26,'-'+d,'#ff8a7a',false);sfxAt(n.x,n.y,()=>SFX.hit(),.7);
  if(n.nhp<=0){n.nhp=NPCHP;WS.nko=WS.nko||{};WS.nko[n.id]=EV?EV.end:Date.now()+60e3;if(EV)EV.fallen=(EV.fallen||0)+1;npcKOSay(n);dissolve(n.x,n.y-8,['#fff','#ff9a8a'],12);toast(t(gk(n.id,'npcKO'),{n:t(n.id)}),'warn');SFX.deny();if(m.nt===n)m.nt=null;}}
 // townsfolk fight back: guards and trainers strike invaders from a few steps away, everyone else hits whatever is beating
 // on them. A monster struck by an NPC turns on them, and NPCs can finish monsters off (no reward for you then)
@@ -6837,7 +6837,14 @@ function skIcon(k){const id='sk_'+k;if(ICN[id])return ICN[id];const c=SKD[k].col
  else if(k==='fly'){for(let i=0;i<6;i++){p(1+i,6+(i>>1),1,3);p(14-i,6+(i>>1),1,3);}p(7,5,2,7,'#ffffff');}
  else if(k==='rcut'){for(let a=0;a<24;a++){const r=2+a*.24,an=a*.55;p(8+Math.cos(an)*r|0,8+Math.sin(an)*r|0,2,1);}}
  else{p(7,2,2,8);p(7,12,2,2);}
- g.strokeStyle='rgba(143,216,255,.5)';g.strokeRect(.5,.5,15,15);}).toDataURL();return ICN[id];}
+ skCenter(g);g.strokeStyle='rgba(143,216,255,.5)';g.strokeRect(.5,.5,15,15);}).toDataURL();return ICN[id];}
+// owner 2026-10-22: every skill's picture sits in the middle of its slot (some were drawn a few pixels off): the drawn part
+// (anything but the background) is measured and moved so its middle is the tile's middle
+function skCenter(g){const im=g.getImageData(0,0,16,16),d=im.data;let x0=16,y0=16,x1=-1,y1=-1;
+ for(let y=0;y<16;y++)for(let x=0;x<16;x++){const i=(y*16+x)*4;if(d[i+3]<40||(Math.abs(d[i]-16)<6&&Math.abs(d[i+1]-26)<6&&Math.abs(d[i+2]-51)<6))continue;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+ if(x1<0)return;const dx=Math.max(-x0,Math.min(15-x1,Math.round(8-(x0+x1+1)/2))),dy=Math.max(-y0,Math.min(15-y1,Math.round(8-(y0+y1+1)/2)));if(!dx&&!dy)return;
+ R(g,0,0,16,16,'#101a33');g.putImageData(im,dx,dy);}
+window.__GSK={icon:k=>skIcon(k),keys:()=>Object.keys(SKD)}; // tests
 let sbSig='';
 function renderSkillbar(){const b=barSkills(),ik=itemSkills(),sig=b.join()+'|'+ik.join()+'|'+KB.join()+IKB.join()+'|'+S.lv+lang+[...b,...ik].map(k=>k?skLv(k):0).join();if(sig===sbSig)return;sbSig=sig;
  $('skillbar').innerHTML=b.map((k,i)=>{const kb=`<kbd>${keyName(KB[i])}</kbd>`;if(!k)return `<button class="sk e" data-sk="${i}" data-tip="${esc(i===5?t('slot6'):t('skSlotE'))}">${kb}<i></i></button>`;const d=SKD[k],lock=!skOK(k);
@@ -7267,8 +7274,8 @@ UI.addEventListener('pointermove',e=>{const el=e.target.closest('[data-tip]');
 const tipOff=()=>tip.classList.remove('on');stage.addEventListener('pointerleave',tipOff);addEventListener('blur',tipOff);document.addEventListener('mouseleave',tipOff);addEventListener('keydown',tipOff);
 let langSaved=false;try{const l=localStorage.getItem('satisfy_lang');if(l){lang=l;langSaved=true;}}catch(e){}
 for(const k of ['sfx','mus','amb','soc'])$('vol_'+k).addEventListener('input',e=>{setVol(k,e.target.value);if(k!=='mus')sfxOn(k,()=>SFX.tick());});
-window.__GMIX={played:[],vol:(k,v)=>setVol(k,v),get v(){return {sfx:sfxV,mus:musV,amb:ambV,soc:socV};},play:(ch,k)=>sfxOn(ch,()=>SFX[k||'hit']()),
- vox:()=>{const m=mons.filter(x=>!x.dead&&Math.hypot(x.x-P.x,x.y-P.y)<SFXR).sort((a,b)=>Math.hypot(a.x-P.x,a.y-P.y)-Math.hypot(b.x-P.x,b.y-P.y))[0];if(!m)return null;VOXC.length=0;for(const k of ['h','w','s','d'])voxPlay(m,MT[m.type],k);return m.type;}}; // tests
+window.__GMIX={played:[],vol:(k,v)=>setVol(k,v),get v(){return {sfx:sfxV,mus:musV,amb:ambV,soc:socV};},play:(ch,k)=>{SFXT.burst.length=0;for(const x in SFXT.last)delete SFXT.last[x];return sfxOn(ch,()=>SFX[k||'hit']());},
+ vox:()=>{const m=mons.filter(x=>!x.dead&&Math.hypot(x.x-P.x,x.y-P.y)<SFXR).sort((a,b)=>Math.hypot(a.x-P.x,a.y-P.y)-Math.hypot(b.x-P.x,b.y-P.y))[0];if(!m)return null;VOXC.length=0;for(const k in VOXL)delete VOXL[k];for(const k of ['h','w','s','d'])voxPlay(m,MT[m.type],k);return m.type;}}; // tests
 // drag a skill from the status list (or another bar slot) onto any of the first five bar slots; an occupied slot swaps
 UI.addEventListener('dragstart',e=>{const s=e.target.closest&&e.target.closest('[data-dsk],#skillbar [data-sk]');if(!s)return;const i=s.dataset.sk!=null?+s.dataset.sk:-1,k=s.dataset.dsk||(i>=0&&i<5?barSkills()[i]:null);if(!k){e.preventDefault();return;}try{e.dataTransfer.setData('text/plain',k);e.dataTransfer.effectAllowed='move';}catch(_){}document.body.classList.add('skdrag');});
 UI.addEventListener('dragend',()=>{document.body.classList.remove('skdrag');document.querySelectorAll('.dropon').forEach(x=>x.classList.remove('dropon'));});
@@ -8071,7 +8078,7 @@ function p6Tick(dt){if(!S||!P||mode==='title')return;const on=evOn('renW'),pr=np
   let tg=null,bd=220;for(const m of live){const d=Math.hypot(m.x-n.x,m.y-n.y);if(d<bd&&Math.hypot(m.x-hx,m.y-hy)<260){bd=d;tg=m;}}
   const gx=tg?tg.x:hx,gy=tg?tg.y:hy,dx=gx-n.x,dy=gy-n.y,dd=Math.hypot(dx,dy);
   if(dd>(tg?A.r*.8:2)){const s=Math.min(dd,80*dt);n.x+=dx/dd*s;n.y+=dy/dd*s;n.dir=Math.abs(dx)>Math.abs(dy)?(dx>0?2:3):(dy>0?0:1);}
-  if(!tg||n.p6>0||dd>A.r)continue;n.p6=A.cd;SFX.swing();
+  if(!tg||n.p6>0||dd>A.r)continue;n.p6=A.cd;sfxAt(n.x,n.y,()=>SFX.swing(),.6);
   if(A.aoe){fx.push({ring:true,x:n.x,y:n.y-4,t:.3});for(let i=0;i<10;i++)fx.push({x:n.x,y:n.y-4,vx:(rand()-.5)*120,vy:(rand()-.5)*70,t:.4,c:i%2?'#8a6a3a':'#5a9a3a'});
    for(const m of live)if(!m.dead&&Math.hypot(m.x-n.x,m.y-n.y)<A.r)p6Hit(n,m,A);if(rand()<.2)num(n.x,n.y-28,t('piWeed'),'#e8c860',false);}
   else{fx.push({bolt:[[n.x,n.y-10],[tg.x,monY(tg)]],t:.12});vfx('slash',tg.x,monY(tg),{angle:Math.atan2(tg.y-n.y,tg.x-n.x),rarity:3});p6Hit(n,tg,A);}}
@@ -8359,6 +8366,14 @@ function meRun(fn,self,args){if(FXME||!NET||!P||mode!=='play')return fn.apply(se
 const SFXNET=['swing','hit','crit','hurt','dodge','chop','mine','clang','miss','slam','level','legendary','bow','magic','fire','zap','frost','holy','cast','power','guardup','buff'],SFXR=360;
 for(const k of SFXNET){const f=SFX[k];SFX[k]=function(...a){if(FXME&&NET&&P&&mode!=='title')try{fxR(['s',k,typeof a[0]==='number'?Math.round(a[0]*100)/100:0]);}catch(e){}return f.apply(this,a);};}
 window.__GS={heard:[],vox:[]}; // test hook: the other players' sounds played here
+/* owner 2026-10-22: sounds heard from far away and the same sound piling up (a dozen monsters biting in one frame came out
+   as one harsh buzz). The same sound never starts twice within 80 ms, and at most 6 sounds start in any 120 ms (menu sounds
+   always play). sfxAt plays a sound made somewhere in the world: softer with distance, silent past SFXR (in front of you only) */
+const SFXT={last:{},burst:[]}; // tests clear it
+{const UI=new Set(['hover','click','open','close','deny','coin','level','quest','notice','rare','legendary','tick']),last=SFXT.last,burst=SFXT.burst;
+ for(const k of Object.keys(SFX)){const f=SFX[k];SFX[k]=function(...a){const n=performance.now(),lk=SFXCH+k;if(n-(last[lk]??-1e9)<80)return;
+  while(burst.length&&n-burst[0]>120)burst.shift();if(burst.length>=6&&!UI.has(k))return;last[lk]=n;burst.push(n);if(window.__GS.played&&__GS.played.length<400)__GS.played.push(k);return f.apply(this,a);};}}
+function sfxAt(x,y,f,v=1){if(!P||mode==='title')return;const d=Math.hypot(x-P.x,y-P.y);if(d>=SFXR)return;const s0=SFXV;SFXV=Math.max(.05,(1-d/SFXR)*v);try{sfxOn('amb',f);}finally{SFXV=s0;}}
 /* SAT-ONLINE-058 (owner, via Claude-B on #13): a player near you dying or coming back is heard too, the sounds yours make,
    softer with distance; from their presence turning to 'dead' and back (none for one already dead when first seen) */
 function remLife(r,fs){const a=r.anim==='dead'?1:0;if(fs.lf===undefined){fs.lf=a;return;}if(fs.lf===a)return;fs.lf=a;if(!P||mode==='title')return;

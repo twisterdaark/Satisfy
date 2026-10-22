@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22sfx', ver: '1.71', d: '2026-10-22',
+      ar: ["صوت الحديد اللي كان بيتسمع من بعيد (حلفاء حرب رين والحرس وهم بيصدوا الوحوش) بقى بيتسمع بس لو انت قريب، وبيوطى مع البعد",
+        "نفس الصوت مبيتكررش فوق بعضه: الوحوش من نفس النوع بتطلع صوت واحد بدل ما تركب على بعض، ومفيش أكتر من كام صوت في نفس اللحظة",
+        "كل أيقونات السكيلات بقت في نص الخانة بالظبط، مش غضب الحداد بس"],
+      en: ["The clang of metal heard from far away (Ren's war allies and the guards blocking monsters) is only heard when you are near, softer with distance",
+        "The same sound no longer piles on itself: a pack of one kind makes one sound instead of overlapping, and only a few sounds start at once",
+        "Every skill icon now sits right in the middle of its slot, not only Blacksmith's Rage"] },
     { v: '2026-10-22mbtrk', ver: '1.70', d: '2026-10-22',
       ar: ["تقدر تمشي والموسوعة مفتوحة، والسكرول فيها بقى أخف",
         "زرار 🎯 تتبع في الموسوعة: سهم المهمات بيدلّك على أقرب وحش من النوع ده (أو مكانه)، ودوسه تاني عشان توقف",
