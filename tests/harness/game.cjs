@@ -50,7 +50,9 @@ const INIT_SCRIPT = `(() => {
 let browserPromise = null;
 function browser() {
   // SATISFY_BROWSER=firefox|webkit runs the same tests in another engine (SAT-ONLINE-107, plan U370; CI installs them)
-  if (!browserPromise) browserPromise = (PW[process.env.SATISFY_BROWSER || 'chromium'] || chromium).launch();
+  // Firefox gives each file:// page an origin of its own by default, so the storage seeded on the blank page would not reach the game
+  const name = process.env.SATISFY_BROWSER || 'chromium';
+  if (!browserPromise) browserPromise = (PW[name] || chromium).launch(name === 'firefox' ? { firefoxUserPrefs: { 'security.fileuri.strict_origin_policy': false } } : {});
   return browserPromise;
 }
 async function closeBrowser() {

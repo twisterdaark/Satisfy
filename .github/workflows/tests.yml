@@ -3,6 +3,7 @@
 # minute); the regression job runs a smoke set of the browser tests (boot, saves, the online stack over the fake,
 # rendering against the baseline, and the newest features), the whole set takes too long for every push; the browsers job
 # runs the first steps (boot, a new game, saves) in Firefox and WebKit too (plan U370), as phones and Safari use them.
+# A failing step lists its failed tests as annotations (.github/scripts/annotate.cjs), shown on the pull request.
 name: tests
 on:
   pull_request:
@@ -26,8 +27,12 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
-      - run: npm run test:unit
-      - run: npm run test:content
+      - run: |
+          set -o pipefail
+          npm run test:unit 2>&1 | tee test.log || { node .github/scripts/annotate.cjs test.log; exit 1; }
+      - run: |
+          set -o pipefail
+          npm run test:content 2>&1 | tee test.log || { node .github/scripts/annotate.cjs test.log; exit 1; }
   regression:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
@@ -41,18 +46,9 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
       - name: regression smoke set
-        run: >-
-          node --test --test-concurrency=2
-          tests/regression/boot.test.cjs
-          tests/regression/save.test.cjs
-          tests/regression/golden.test.cjs
-          tests/regression/ids.test.cjs
-          tests/regression/online-local.test.cjs
-          tests/regression/online-firebase.test.cjs
-          tests/regression/party.test.cjs
-          tests/regression/guild.test.cjs
-          tests/regression/drops.test.cjs
-          tests/regression/fixedtick.test.cjs
+        run: |
+          set -o pipefail
+          node --test --test-concurrency=2 tests/regression/{boot,save,golden,ids,online-local,online-firebase,party,guild,drops,fixedtick}.test.cjs 2>&1 | tee test.log || { node .github/scripts/annotate.cjs test.log; exit 1; }
   browsers:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -70,4 +66,6 @@ jobs:
       - name: boot and saves in ${{ matrix.browser }}
         env:
           SATISFY_BROWSER: ${{ matrix.browser }}
-        run: node --test --test-concurrency=1 tests/regression/boot.test.cjs tests/regression/save.test.cjs
+        run: |
+          set -o pipefail
+          node --test --test-concurrency=1 tests/regression/boot.test.cjs tests/regression/save.test.cjs 2>&1 | tee test.log || { node .github/scripts/annotate.cjs test.log; exit 1; }
