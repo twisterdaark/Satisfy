@@ -9096,9 +9096,11 @@ function ssnLast(){const d=new Date(wNow()),pm=new Date(Date.UTC(d.getUTCFullYea
 function admSeason(st,ym){st.seasonData().then(({weeks,guilds})=>{const P=ssnPoints(weeks,ym),L=Object.keys(P).map(g=>({g,p:P[g],k:ssnKind(P[g])})).filter(x=>x.k&&guilds&&guilds[x.g]).sort((a,b)=>b.p-a.p);
  return Promise.all(L.map(x=>st.trophy(x.g,'s'+ym,x.k,Math.min(100,x.p),NET.uid))).then(()=>{GTRO.clear();
   dialog('guild',[L.length?t('ssnDone',{s:ym,l:L.map(x=>t('ssnRow',{e:SSN_E[x.k],g:Satisfy.chat.clean(guilds[x.g].name,18)||'?',p:x.p})).join(' · ')}):t('ssnNone',{s:ym})],null,[{l:t('oClose')}]);});}).catch(()=>toast(t('gdFail'),'warn'));}
-// a guild's trophies, newest first (read at most every 5 minutes a guild)
-function gtroOf(gid){const st=modSt();if(!st||!gid)return null;const now=performance.now(),e=GTRO.get(gid);
- if((!e||now-e.at>300000)&&!(e&&e.q)&&now-gtroT>300){gtroT=now;const x=e||{L:[],at:0};x.q=1;GTRO.set(gid,x);
+// a guild's trophies, newest first (read at most every 5 minutes a guild). Drawn for each tagged player every frame, so
+// the store is made only when a read is due (Claude-B, #126)
+function gtroOf(gid){if(!gid||!(NETTR&&NETTR.kind==='firebase'&&FB&&NET))return null;const now=performance.now(),e=GTRO.get(gid);
+ const st=(!e||now-e.at>300000)&&!(e&&e.q)&&now-gtroT>300?modSt():null;
+ if(st){gtroT=now;const x=e||{L:[],at:0};x.q=1;GTRO.set(gid,x);
   st.trophies(gid).then(v=>{const L=Object.keys(v||{}).filter(k=>/^s\d{4}-\d{2}$/.test(k)&&v[k]&&SSN_E[v[k].k]).sort().reverse().map(k=>({s:k.slice(1),k:v[k].k}));GTRO.set(gid,{L,at:performance.now()});},()=>{x.q=0;x.at=performance.now();});}
  return e&&e.L&&e.L.length?e.L:null;}
 function gtroTag(gid){const L=gtroOf(gid);return L?' '+SSN_E[L[0].k]:'';}
