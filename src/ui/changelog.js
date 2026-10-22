@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22mbfast', ver: '1.69', d: '2026-10-22',
+      ar: ["موسوعة الوحوش (B) بتفتح على طول بدل ما تعلّق اللعبة، والصور بتظهر واحدة ورا التانية",
+        "خانة بحث في الموسوعة: اكتب اسم الوحش بالعربي أو الإنجليزي",
+        "العالم بيفضل شغال وانت فاتح الموسوعة أو المزاد (الوحوش والناس والإيفكتات مبتقفش)",
+        "الكروت في الموسوعة بقت تكتب \"لفل\" بدل \"لف\"",
+        "رسالة قائد الغزو بقت بتقول المكان: \"قائد غزو ريدان وصل!\". وكان أصلًا غزو واحد بس بيحصل في نفس الوقت"],
+      en: ["The Bestiary (B) opens at once instead of freezing the game, and its pictures fill in one after another",
+        "A search box in the Bestiary: type a monster's name in Arabic or English",
+        "The world keeps going while the Bestiary or the auction is open (monsters, people and effects no longer freeze)",
+        "The Bestiary cards spell the level out in full in Arabic (they had a cut-off word)",
+        "The invasion captain's news now names the place: \"The Reidan invasion captain has arrived!\". Only one invasion runs at a time, as before"] },
     { v: '2026-10-22los', ver: '1.68', d: '2026-10-22',
       ar: ["الملحمي والفريد والأسطوري بقوا أندر. في الحدادة بتقييم كامل: الحداد بيطلّع ملحمي تقريبًا 1 من 6، وفريد 1 من 65، وأسطوري 1 من 800 (وبيتحسن مع مستوى الحدادة). الزعماء بيوقّعوا فريد 10% بس من الحاجات النادرة بدل 25%، والدانجن 4% بدل 10%. حاجاتك القديمة زي ما هي",
         "مفيش ضرب من ورا الحيطة: ضربة السلاح القريب والمهارات اللي حواليك مبتعديش حيطة أو سور أو مبنى أو جرف، ونفس الكلام في المبارزات والـ PvP. الأسهم بتقف عند الحيطة زي الأول، وسحر مكان الماوس (زي النيزك والمطر) بينزل عادي ورا الحيطة"],
