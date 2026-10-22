@@ -175,7 +175,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U321 | Audio mixer | 🟡 | One volume; no separate channels |
 | U322 | Accessibility QA | 🟡 | Keyboard and touch for every menu (B, v1.01) |
 | U323 | Replay recorder | ❌ | |
-| U324 | Exception boundary | 🟡 | A failing listener can't stop presence; network errors show in the badge |
+| U324 | Exception boundary | ✅ | SAT-ONLINE-117: each part that adds to the scene is its own boundary (the other players above all), as are the network tick, the minimap and each drawing; a broken one costs only itself, told once (`regression/boundary`, which breaks them on purpose); a failing listener can't stop presence |
 | U325 | Performance profiler | 🟡 | `net().link` (round trip, sent, received, dropped) in the badge tooltip; no frame-time budget |
 | U326 | Build pipeline | 🟡 | Tests on every PR by hand; GitHub Pages serves main as it is |
 | U327 | Staging deployment | ⏳ | Needs a second Firebase project (owner) |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 50 · 🟡 37 · ⏳ 6 · ❌ 11 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 51 · 🟡 36 · ⏳ 6 · ❌ 11 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

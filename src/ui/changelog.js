@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22boundary', ver: '1.42', d: '2026-10-22',
+      ar: ["لو حاجة باظت في جزء من الشاشة (زي لاعب تاني بعت بيانات غلط)، الجزء ده بس هو اللي بيقف، والعالم والـ HUD بيكمّلوا عادي بدل ما الشاشة كلها تقف"],
+      en: ["If one part of the screen breaks (another player sending bad data, say), only that part stops; the world and the HUD carry on instead of the whole screen freezing"] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },

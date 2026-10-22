@@ -7359,7 +7359,7 @@ dk_madra:()=>{R(ctx,6,-30,3,26,'#2a2430');R(ctx,7,-30,1,26,'#8a1a2a');R(ctx,4,-5
  aprison:()=>{for(const [cx,cy] of [[-6,-9],[-7,-7],[-6,-5],[-7,-3],[6,-9],[7,-7],[6,-5]])R(ctx,cx,cy,2,1,'#7a7a82');R(ctx,-7,-11,3,2,'#4a4a52');R(ctx,5,-11,3,2,'#4a4a52');}};
 function drawNode(x,y,n){if(n.kind==='herb'||n.kind==='bherb')return drawHerb(x,y,n);if(n.dep>0){R(ctx,x-5,y-3,10,3,'#6a6560');R(ctx,x-3,y-4,4,2,'#7f7a76');return;}ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(x-7,y-1,14,2);blob(ctx,x,y-5,7,5,'#55504c');blob(ctx,x,y-6,6,4,'#7f7a76');R(ctx,x-3,y-9,4,2,'#9a958f');
  const mi=n.kind==='mith',a=mi?'#9fd8ff':'#c8743a',b=mi?'#e8f6ff':'#d9894a';R(ctx,x-3,y-6,2,2,a);R(ctx,x+2,y-7,2,2,b);R(ctx,x,y-4,2,1,a);if(mi&&(gTime*2+x)%3<.4)R(ctx,x+1,y-8,1,1,'#ffffff');}
-function render(dt){
+function render(dt){DRAWN=0;netDrawn=0;
  const sx=shake>0?(rand()-.5)*4:0,sy=shake>0?(rand()-.5)*4:0;
  const titleCam=mode==='lang'||mode==='title'||(mode==='controls'&&ctrlBack==='titleScreen');
  let tx,ty;const RM=!titleCam&&P&&roomAt(P.x,P.y);if(titleCam){tx=8*TS+Math.sin(gTime*.08)*120+120;ty=14*TS;}else if(RM){tx=(RM.rx+6)*TS-W/2;ty=(RM.ry+4)*TS-H/2;}else{tx=P.x-W/2;ty=P.y-H/2-8;}
@@ -7403,9 +7403,11 @@ function render(dt){
   if(!titleCam&&mode!=='dead'&&!P.ghost)if(PET)ents.push({y:PET.y,f:()=>drawPet(PET)});
   ents.push({y:P.y,f:()=>{P.trail.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;const am=a.r&&MOUNTS[a.r];if(am){drawHorse(a.x,a.y,a.dir,2,am);drawRider(a.x,a.y,a.dir,2,P);drawHorse(a.x,a.y,a.dir,2,am,ctx,'head');}else drawChar(pSpr(),a.x,a.y,a.dir,a.frame,false);});ctx.globalAlpha=1;const rd=P.ride&&MOUNTS[myMt()];const hf=rd&&P.rmv>0?1+((P.rgT||0)*10|0)%4:0,blk=P.inv>0&&((gTime*20|0)%2===0)&&P.dash<=0;if(rd)drawHorse(P.x,P.y,P.dir,hf,rd);const wen=(weapon()||{}).en||0;if(wen>=7)drawEnh(P.x,P.y-(rd?9:0),wen,0);if(rd){if(!blk)drawRider(P.x,P.y,P.dir,hf,P);drawHorse(P.x,P.y,P.dir,hf,rd,ctx,'head');const hm=rhpMax(S.mount),hh=rhp(S.mount);if(hh<hm&&!(RCR&&RCR.in)){R(ctx,P.x-9,P.y-37,18,3,'#000');R(ctx,P.x-8,P.y-36,16*hh/hm,1,'#e8a060');}}else{if(P.stl>0)ctx.globalAlpha=.35;if(!bmDraw(P.bmf,'me',P.x,P.y,P.dir,P.rmv>0,blk,!!P.slash))drawChar(pSpr(),P.x,P.y,P.dir,P.frame,blk,0,P);ctx.globalAlpha=1;}if(wen>=4)drawEnh(P.x,P.y-(rd?9:0),wen,1);
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(hcHand(hx,hy,P.dir,P.slash)){}else if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,w.id,w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
-  if(BHR)bhEnts(ents);if(S&&S.wis)twEnts(ents);if(S){c2Ents(ents);p2Ents(ents);p3Ents(ents);p4Ents(ents);phEnts(ents);necEnts(ents);hcEnts(ents);fbEnts(ents);brEnts(ents);blEnts(ents);}if(SKA)tAimEnts(ents);if(S)tlEnts(ents);if(NET&&!titleCam)netEnts(ents);}
+  // SAT-ONLINE-117 (plan U324): each part that adds to the scene is its own boundary, the other players' part (netEnts) above
+  // all: a bad message or a bug in one part costs that part this frame, never the whole world
+  if(BHR)entsOf(bhEnts,ents);if(S&&S.wis)entsOf(twEnts,ents);if(S){entsOf(c2Ents,ents);entsOf(p2Ents,ents);entsOf(p3Ents,ents);entsOf(p4Ents,ents);entsOf(phEnts,ents);entsOf(necEnts,ents);entsOf(hcEnts,ents);entsOf(fbEnts,ents);entsOf(brEnts,ents);entsOf(blEnts,ents);}if(SKA)entsOf(tAimEnts,ents);if(S)entsOf(tlEnts,ents);if(NET&&!titleCam)entsOf(netEnts,ents);}
  // one broken drawing (a stale sprite file after an update) must not hide the player and everything after it
- ents.sort((a,b)=>a.y-b.y).forEach(e=>{try{e.f();}catch(err){ctx.globalAlpha=1;gameErr(err);}});
+ ents.sort((a,b)=>a.y-b.y).forEach(e=>{try{e.f();DRAWN++;}catch(err){ctx.globalAlpha=1;gameErr(err);}});
  drawGDrop();drawEProj();proj.forEach(p=>{if(p.kind==='arrow'){const l=Math.hypot(p.vx,p.vy)||1,ux=p.vx/l,uy=p.vy/l;ctx.strokeStyle='#e8e0d0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x-ux*7,p.y-uy*7);ctx.lineTo(p.x,p.y);ctx.stroke();R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}else if(p.kind==='wave'){const a=Math.atan2(p.vy,p.vx);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.globalAlpha=.85;ctx.strokeStyle='#ffe08a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(-6,0,12,-1.1,1.1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(-5,0,12,-.9,.9);ctx.stroke();ctx.restore();}else{const f=p.kind==='fire';R(ctx,p.x-2,p.y-2,f?5:4,f?5:4,f?'#ff8a1e':'#9fd8ff');R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}});
  VX.draw(ctx);
  og.blit(ctx,camX,camY,VW,VH,camX,camY);
@@ -7896,6 +7898,12 @@ let last=performance.now(),hudT=0,saveT=0;
 // a bug in one frame must never freeze the world: report it once (console, log, toast) and keep the loop running.
 // One bad monster is reset to idle instead of stopping every other monster behind it.
 const ERRS=new Set();
+/* SAT-ONLINE-117 (plan U324) exception boundaries: FAULT names parts a test breaks on purpose ('netEnts', 'netTick', 'mini'),
+   to check the rest goes on; DRAWN counts what the last frame drew */
+var FAULT=new Set(),DRAWN=0;
+function faultAt(k){if(FAULT.size&&FAULT.has(k))throw new Error('fault: '+k);}
+function entsOf(f,ents){try{f(ents);}catch(e){gameErr(e);}}
+window.__GFAULT={on:k=>FAULT.add(k),off:k=>FAULT.delete(k),get drawn(){return DRAWN},get net(){return netDrawn},get errs(){return [...ERRS]}}; // tests
 function gameErr(e,m){if(m){m.st=null;m.tele=0;m.combo=0;m.flee=0;}const k=String(e&&e.message||e);if(ERRS.has(k))return;ERRS.add(k);console.error(e);try{logMsg('ERR '+k+' '+String(e&&e.stack||'').split('\n')[1]);toast(t('gameErr',{e:k.slice(0,90)}),'warn');}catch(_){}}
 let loopAt=0;
 /* the fixed tick (SAT-ONLINE-099, plan U313/U373; ?tick=fixed, off by default): the world moves in steps of exactly 1/60 s
@@ -7912,7 +7920,7 @@ function loopRest(dt){if(NET)try{netTick();}catch(e){gameErr(e);}if(TOUCH)try{to
  if(mode==='play')updateKeys();
  if(mode==='create')drawPrev();if(DL&&DL.pv)drawDPrev();
  if(mode==='map'&&(gTime*2|0)!==(Math.max(0,gTime-dt)*2|0))drawMap();
- musicTick();miniT-=dt;if(miniT<=0){miniT=.2;drawMini();}
+ musicTick();miniT-=dt;if(miniT<=0){miniT=.2;try{faultAt('mini');drawMini();}catch(e){gameErr(e);}}
  if(mode==='play'||mode==='forge'||mode==='inv'||mode==='au'||mode==='dialog'||mode==='status'||mode==='dead'||mode==='cut'||mode==='equip'||mode==='log'||mode==='map'){hudT-=dt;if(hudT<=0||hudDirty){updateHUD();hudT=.1;hudDirty=false;}saveT+=dt;if(saveT>20&&mode==='play'){saveT=0;save(true);}}
 }
 requestAnimationFrame(loop);{const b=document.getElementById('boot');if(b)b.remove();}   // the loading screen goes with the first frame
@@ -8010,7 +8018,7 @@ function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(inBh(P.x,P
 Object.assign(STR.ar,{netOtherV:'{n} قريب منك بس على نسخة تانية من اللعبة: اعملوا الاتنين ريفريش عشان تشوفوا بعض'});
 Object.assign(STR.en,{netOtherV:'{n} is nearby on a different version of the game: reload both pages to see each other'});
 function netWatch(){const ids=PARTY?PARTY.follow():[],w=ids.join(' ');if(NETTR.wsig!==w){NETTR.wsig=w;NETTR.party(ids);}} // party.follow(): review #55
-function netTick(){NET.tick();const live=netLive();
+function netTick(){faultAt('netTick');NET.tick();const live=netLive();
  if(PARTY)PARTY.tick();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
@@ -8091,7 +8099,7 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
  else if(ty==='s'&&SFXNET.includes(ev[3])&&P){const d=Math.hypot(x-P.x,y-P.y);if(d<SFXR){SFXV=.1+.5*(1-d/SFXR);try{SFX[ev[3]](n(ev[4])||undefined);if(__GS.heard.length<40)__GS.heard.push(ev[3]);}finally{SFXV=1;}}}}
 // due replays, at where each player is drawn now; players off screen or out of sight just drop theirs
 function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
-function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)
+function netEnts(ents){faultAt('netEnts');const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)
  for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const fs=fxSt(r.sid);fxIn(r,fs);remLife(r,fs);if(fs.st&&fs.st.indexOf('f')>=0&&rand()<.23)fx.push({x:r.x+(rand()-.5)*14,y:r.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});if(fs.st&&fs.st.indexOf('g')>=0&&rand()<.12)fx.push({x:r.x+(rand()-.5)*24,y:r.y-6,vx:0,vy:-16,t:.6,c:'#ffe08a',fl:1});if(fs.st&&/[bj]/.test(fs.st)&&rand()<.1)fx.push({x:r.x+(rand()-.5)*28,y:r.y-4,vx:0,vy:-18,t:.7,c:fs.st.indexOf('j')>=0?'#9fd8ff':'#fff3b0',fl:1});/* their flight, as yours (updateItemFx) */if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
   const k=remoteSpr(r.look,r.arm,fs.gl),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
   // their weapon in hand and each swing once, the way your own is drawn (SAT-ONLINE-026, owner feedback 7): a swing starts when
