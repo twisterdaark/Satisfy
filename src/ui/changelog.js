@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22entities', ver: '1.86', d: '2026-10-22',
+      ar: ["لو وحشين من نفس النوع طلعوا في نفس المكان (زي فرسان أسموفيل الحمر)، كل واحد فيهم بقى ليه اسم خاص بيه: أونلاين مبقوش بيتحركوا كأنهم واحد، ولو قتلت واحد وقفلت اللعبة، اللي قتلته بس هو اللي بيفضل ميت"],
+      en: ["Two monsters of one kind that spawned on the same spot (like two of Asmophel's red knights) now each have an id of their own: online they no longer move as one, and if you kill one and quit, only that one stays dead"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",

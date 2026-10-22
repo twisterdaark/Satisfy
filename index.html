@@ -8356,7 +8356,7 @@ Satisfy.local=Object.freeze({api:1,
  profile:()=>!S||S.__demo?null:Satisfy.state.profileOf(S),
  events:()=>DEVT.log(),
  // SAT-ONLINE-127 (U311): every entity by its stable id: monsters by their key, NPCs by id, players by uid
- entities:()=>({mons:mons.filter(mobOk).map(m=>({key:mobKey(m),type:m.type,lv:m.lv,x:Math.round(m.x),y:Math.round(m.y),dead:!!m.dead})),npcs:npcs.map(n=>({id:n.id,x:Math.round(n.x),y:Math.round(n.y),hidden:!!n.hidden})),players:NET?NET.remotes().map(r=>({uid:r.uid,handle:r.handle||'',x:Math.round(r.x),y:Math.round(r.y)})):[]}),
+ entities:()=>({mons:mons.filter(mobOk).map(m=>({key:mobKey(m),sp:(m.sx|0)+','+(m.sy|0),type:m.type,lv:m.lv,x:Math.round(m.x),y:Math.round(m.y),dead:!!m.dead})),npcs:npcs.map(n=>({id:n.id,x:Math.round(n.x),y:Math.round(n.y),hidden:!!n.hidden})),players:NET?NET.remotes().map(r=>({uid:r.uid,handle:r.handle||'',x:Math.round(r.x),y:Math.round(r.y)})):[]}),
  onEvent:fn=>DEVT.on(fn),
  net:()=>NET?{mode:NETQ,state:netState,uid:NET.uid,sid:NET.sid,count:NET.count(),drawn:netDrawn,remotes:NET.remotes(),stats:NET.stats(),
   party:PARTY?{id:PARTY.id(),leader:PARTY.leader(),members:PARTY.members(),invite:PARTY.pendingInvite()}:null,
@@ -10007,7 +10007,11 @@ function mobKey(m){return m.nk||(m.nk=m.type+'@'+(m.sx|0)+','+(m.sy|0));}
    for another of its type on the same spawn tile (two red knights can land on one). The key outlives a respawn, so the
    shared monsters online (the host's list), the respawn times kept in the save (S.mrt) and a party raid's hits never
    mistake one monster for its twin. NPCs have fixed ids (NPCS) and players their account's uid. */
-function mobKeys(){const seen=new Map();for(const m of mons){const k=m.type+'@'+(m.sx|0)+','+(m.sy|0),n=(seen.get(k)||0)+1;seen.set(k,n);m.nk=n>1?k+'#'+n:k;}}
+// A twin (a second monster of one type on one spawn tile) gets the key of the first free spot below it, one pixel at a time:
+// the key keeps the database's form (type@x,y: Firebase allows no '#' in a key, and the rules' pattern holds it), so it
+// syncs online like any other (Claude-B's review of #163). The same on every client: the spawn order is the world's.
+function mobKeys(){const base=new Set(),used=new Set(),k0=m=>m.type+'@'+(m.sx|0)+',';for(const m of mons)base.add(k0(m)+(m.sy|0));
+ for(const m of mons){let y=m.sy|0,k=k0(m)+y;if(used.has(k))do{y++;k=k0(m)+y;}while(used.has(k)||base.has(k));used.add(k);m.nk=k;}}
 // bosses too (Twister 2026-10-19: a boss stood in one place for one player and elsewhere for the friends who arrived): the
 // group's host moves and fights every outdoor boss, world and event ones included, and the others follow its copy. Adds, arena,
 // siege and trial monsters stay on one client.

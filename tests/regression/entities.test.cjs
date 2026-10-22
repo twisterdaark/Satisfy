@@ -26,10 +26,12 @@ test('every monster and NPC has an id of its own, the same on two clients, kept 
     assert.deepEqual(Eb.mons.map((m) => m.key), E.mons.map((m) => m.key), 'the same keys on another client');
     assert.deepEqual(E.players, [], 'offline: nobody else');
 
-    // twins: two of one type on one spawn tile get '#2'
-    const twins = E.mons.filter((m) => /#\d+$/.test(m.key));
+    // every key has the database's form (Firebase allows no '#'; the rules' pattern for mobs/…/m)
+    assert.deepEqual(E.mons.map((m) => m.key).filter((k) => !/^[a-z0-9_]{1,16}@-?[0-9]{1,6},-?[0-9]{1,6}$/.test(k)), []);
+    // twins: two of one type on one spawn tile; the second takes the first free spot below it
+    const twins = E.mons.filter((m) => m.key !== m.type + '@' + m.sp);
     assert.ok(twins.length >= 1, 'this world has twins (two red knights on one tile at the mansion)');
-    const k2 = twins[0].key, k1 = k2.replace(/#\d+$/, '');
+    const k2 = twins[0].key, k1 = twins[0].type + '@' + twins[0].sp;
     assert.ok(E.mons.some((m) => m.key === k1), 'its twin has the plain key');
 
     // a respawn keeps the key: kill both, bring them back away from the player
@@ -59,5 +61,38 @@ test('every monster and NPC has an id of its own, the same on two clients, kept 
     assert.equal(E3.mons.find((m) => m.key === k1).dead, false, 'its twin is not');
     assert.deepEqual(a.errors, []);
     assert.deepEqual(b.errors, []);
+  } finally { await ctx.close(); }
+});
+
+// Claude-B's review of #163: a twin's key went to the database with '#', which Firebase refuses (the SDK throws), so the host
+// published none of its monsters. Now the host shares both twins, and the follower plays them as the host's.
+const frames = async (gs, n) => { for (let k = 0; k < n; k++) { for (const g of gs) await g.step(2); await gs[0].page.waitForTimeout(12); } };
+async function online(ctx, k, uid, name) {
+  const g = await H.openGame({ ctx, query: '?net=online&slot=' + k });
+  await g.eval(([u, n]) => { window.__fakeRTDB.data.set('accountIds/' + u, n); window.__fakeRTDB.nextName = n; window.__fakeRTDB.nextUid = u; document.getElementById('onlineBtn').click(); }, [uid, name]);
+  for (let i = 0; i < 80 && !(await g.eval(() => !!Satisfy.local.net() && Satisfy.local.net().state === 'ONLINE')); i++) { await g.step(3); await g.page.waitForTimeout(30); }
+  return g;
+}
+
+test('online: twins are shared like any other monster, under keys the database takes', async () => {
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE, H.fixedClock()] });
+  try {
+    const a = await online(ctx, 'a', 'gEnA1', 'Ahmed');
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    const b = await online(ctx, 'b', 'gEnB2', 'Bassem'); // arrives second: A hosts
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    const tw = await a.eval(() => Satisfy.local.entities().mons.find((m) => m.key !== m.type + '@' + m.sp));
+    const k1 = tw.type + '@' + tw.sp, k2 = tw.key, [sx, sy] = tw.sp.split(',').map(Number);
+    for (const [g, dx] of [[a, -30], [b, 30]]) await g.eval(([x, y, d]) => { const G = window.__G; G.P.x = x + d; G.P.y = y; G.P.inv = 1e9; }, [sx, sy, dx]);
+    const pub = () => a.eval(() => { const o = {}; for (const [p, v] of window.__fakeRTDB.data) if (/^mobs\/satisfy\/[^/]+\/gEnA1$/.test(p) && v && v.m) Object.assign(o, v.m); return Object.keys(o); });
+    let keys = [];
+    for (let i = 0; i < 40 && !(keys.includes(k1) && keys.includes(k2)); i++) { await frames([a, b], 5); keys = await pub(); }
+    assert.ok(keys.includes(k1) && keys.includes(k2), 'the host publishes both twins: ' + keys.filter((k) => k.startsWith(tw.type)).join(' '));
+    assert.ok(keys.length > 2, 'and the monsters around them: ' + keys.length);
+    let led = [];
+    for (let i = 0; i < 40 && led.length < 2; i++) { await frames([a, b], 5); led = await b.eval((ks) => window.__G.mons().filter((m) => m.led && ks.includes(m.nk)).map((m) => m.nk), [k1, k2]); }
+    assert.deepEqual(led.sort(), [k1, k2].sort(), 'the follower plays both as the host\'s');
+    for (const g of [a, b]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
