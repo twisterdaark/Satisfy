@@ -62,10 +62,12 @@ test('a hidden function works only once it is known; a blacksmith appraises for 
     assert.deepEqual(tr, [{ k: 'str', v: 7 }, null, { k: 'hpp', v: .12 }]);
     // the anvil's Appraise button is a blacksmith's; free, and a named item's understanding rises 10%
     assert.equal(await g.eval(() => { window.__G.S.cls = 'warrior'; window.__GTC.openForge(); const b = !!document.querySelector('[data-act="fApr"]'); window.__GTC.closeForge(); return b; }), false);
+    // the toasts from here on, as they appear (the forty appraisals above fill the toast box for a while; QA)
+    await g.eval(() => { window.__toastNew = []; new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1) window.__toastNew.push(n.textContent); }).observe(document.getElementById('toasts'), { childList: true }); });
     const u = await g.eval(() => { const G = window.__G, S = G.S; S.cls = 'smith'; const it = G.eqx.mkItem('ochelm', 0); S.items.push(it); const n = window.__GAP.need(it), f = window.__GAP.fee(it, 'anvil'); window.__GAP.doApr(it, 'anvil'); return [n, f, window.__GSV.undOf('ochelm')]; });
     assert.deepEqual(u, [true, 0, 10]);
-    await g.page.waitForTimeout(1000);
-    assert.match(await toasts(g), /Your understanding of Frostlight Orc Chief.s Helmet is now 10%/);
+    for (let i = 0; i < 40 && !(await g.eval(() => window.__toastNew.some((x) => /Your understanding of Frostlight Orc Chief.s Helmet is now 10%/.test(x)))); i++) { await g.step(3); await g.page.waitForTimeout(100); }
+    assert.ok(await g.eval(() => window.__toastNew.some((x) => /Your understanding of Frostlight Orc Chief.s Helmet is now 10%/.test(x))), 'told: ' + JSON.stringify(await g.eval(() => window.__toastNew)));
     assert.equal(await g.eval(() => { window.__GTC.openForge(); return !!document.querySelector('[data-act="fApr"]'); }), true);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
