@@ -479,7 +479,7 @@
       // other guild), members read it; the other side writes the answer, the break or the end into it too.
       watchAllies: function (gid, cb) { return watch('guildAlly/' + gid, cb); },
       watchAllyAsks: function (gid, cb) { return watch('guildAllyAsk/' + gid, cb); },
-      watchDiplo: function (gid, cb) { var ref = at('guildDiplo/' + gid), q = D.limitToLast ? D.query(ref, D.limitToLast(12)) : ref; var off = D.onValue(q, function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      watchDiplo: function (gid, cb) { var ref = at('guildDiplo/' + gid), q = D.limitToLast ? D.query(ref, D.limitToLast(60)) : ref; var off = D.onValue(q, function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
       findGuild: function (nk) { return D.get(at('guildNames/' + nk)).then(function (s) { var gid = s.val(); return typeof gid === 'string' ? D.get(at('guilds/' + gid)).then(function (g) { return g.val() ? { gid: gid, g: g.val() } : null; }) : null; }); },
       allyCd: function (a, b) { return Promise.all([D.get(at('guildAllyCd/' + a + '/' + b)), D.get(at('guildAllyCd/' + b + '/' + a))]).then(function (r) { return Math.max(+((r[0].val() || {}).t) || 0, +((r[1].val() || {}).t) || 0); }); },
       allyAsk: function (me, meN, o, oN, uid, id) {
