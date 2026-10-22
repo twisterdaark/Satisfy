@@ -104,6 +104,8 @@ async function openGame(opts = {}) {
   page.on('console', (m) => {
     if (m.type() !== 'error') return;
     if (/^Failed to load resource/.test(m.text())) return; // aborted external request, tracked in `external`
+    // the same in WebKit's words; and Firefox's for a request a reload cut short (SAT-ONLINE-107: CI runs both)
+    if (/^Origin null is not allowed by Access-Control-Allow-Origin/.test(m.text()) || /InvalidStateError: Navigated away from page/.test(m.text())) return;
     errors.push('console: ' + m.text());
   });
   const url = pathToFileURL(html).href + (opts.query || '');
