@@ -24,7 +24,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U018 | Offline-to-online migration | 🟡 | SAT-ONLINE-007 moves a save between devices with consent; a wallet migration is server-side (D4) |
 | U019 | Rate limiting | ✅ | Presence per-sender budget, duel hits per second, rules on every write |
 | U020 | Network observability | 🟡 | `net().stats`/`net().link` and the badge tooltip (SAT-ONLINE-012); no dashboard |
-| U021 | Auth emulator CI | 🟡 | A fake Firebase that applies a copy of the rules; the real emulator isn't reachable from this sandbox |
+| U021 | Auth emulator CI | 🟡 | A fake Firebase that applies a copy of the rules, and (SAT-ONLINE-102) an evaluator of the real rules file in the unit tests; the real emulator isn't reachable from this sandbox |
 | U022 | Config/env isolation | 🟡 | Public web config in `src/net/firebase-config.js`; no staging project |
 | U023 | Protocol versioning | ✅ | Envelope `v: 1`, `PROTOCOL_VERSION` (§25) |
 | U024 | Load testing swarm | ✅ | `unit/chaos` 100-client soak (in memory) |
@@ -209,7 +209,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
 | U368 | Automated unit test harness | ✅ | `tests/unit`, `tests/content`, `tests/regression` with a seeded random and a frame clock |
-| U369 | Firebase rules fuzzing | 🟡 | The fake applies a copy of the rules and every test checks `rejected`; `unit/rules` checks each block, duplicate keys and expression syntax; no random fuzzing |
+| U369 | Firebase rules fuzzing | ✅ | SAT-ONLINE-102: `tests/harness/rules-eval.cjs` evaluates the real `database.rules.json` in Node (cascading .read/.write, .validate, wildcards, auth/now/root/data/newData). `unit/rules-fuzz` sends thousands of random writes and reads: nothing signed out, nothing into another account's own nodes, no client-chosen server time; drops, bounties and friend requests played through. `SATISFY_RULES=<file>` runs it on a PR's rules |
 | U370 | Multi-browser smoke | 🟡 | Chromium in the tests; the owner tests desktop and phone |
 | U371 | Reconnect soak | 🟡 | `unit/chaos` (drops, delays, duplicates); `regression/online-firebase` reconnects |
 | U372 | Load test 100 clients | 🟡 | `COST_MODEL.md` measured numbers; no 100-client run |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 50 · 🟡 37 · ⏳ 6 · ❌ 11 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 51 · 🟡 36 · ⏳ 6 · ❌ 11 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
