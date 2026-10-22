@@ -44,6 +44,23 @@ test('every line in both languages, with the same placeholders, empty in both or
   assert.deepEqual(both.filter((k) => !T.en[k].trim() !== !T.ar[k].trim()), [], 'a line empty in one language only');
 });
 
+// SAT-ONLINE-118 (plan U315): every key the page asks for by name, in t('key') or t('key', {...}) and in data-i18n="key", is in
+// the tables; the page would show the bare key otherwise. Keys built at run time (t('cl_' + k)) are not checked here.
+function asked(src) {
+  const out = new Map();
+  for (const m of src.matchAll(/\bt\('([A-Za-z0-9_]+)'\s*[,)]/g)) if (!out.has(m[1])) out.set(m[1], 't()');
+  for (const m of src.matchAll(/data-i18n(?:-[a-z]+)?="([A-Za-z0-9_]+)"/g)) if (!out.has(m[1])) out.set(m[1], 'data-i18n');
+  return out;
+}
+test('every key the page asks for by name has its lines', () => {
+  const T = tables(SRC), A = asked(SRC);
+  assert.ok(A.size > 1000, 'found the keys: ' + A.size);
+  assert.deepEqual([...A].filter(([k]) => !(k in T.en)).map(([k, w]) => k + ' (' + w + ')'), [], 'asked for with no English line');
+  assert.deepEqual([...A].filter(([k]) => !(k in T.ar)).map(([k, w]) => k + ' (' + w + ')'), [], 'asked for with no Arabic line');
+  const B = asked("t('a');t('b',{n:1});t('c'+k);t( 'd');x.t('e');<b data-i18n=\"f\"></b><i data-i18n-title=\"g\"></i>");
+  assert.deepEqual([...B.keys()], ['a', 'b', 'e', 'f', 'g'], 'the scan itself: whole keys only, not prefixes');
+});
+
 test('the checker finds what it should', () => {
   const T = tables('const STR={ar:{a:"س {n}",bF:"ب"},en:{a:"A {n}",c:"C"}};\nObject.assign(STR.ar,{d:"د {x}"});Object.assign(STR.en,{d:"D {y}",e:"it\'s {z}"});');
   assert.equal(T.blocks, 2);
