@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22perf', ver: '1.42', d: '2026-10-22',
+      ar: ["F9 وإنت بتلعب (أو ?perf في آخر الرابط) بيوريك أداء اللعبة على جهازك: الفريمات في الثانية، وقت الفريم، والشغل اللي بياخده كل فريم، والنت. السطر بيحمر لو الجهاز أبطأ من المطلوب"],
+      en: ["F9 while playing (or ?perf at the end of the address) shows how the game runs on your device: frames a second, frame time, the work each frame takes and the network. A line turns red when the device is slower than it should be"] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },
