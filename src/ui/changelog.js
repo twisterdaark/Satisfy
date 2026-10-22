@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22boat', ver: '1.94', d: '2026-10-22',
+      ar: ["القارب بقى أسرع بحوالي 25%، وبيسيب وراه موجات ورغوة، ورشّة مية قدامه، وصوت مجاديف وهو ماشي",
+        "الشخصية بقت قاعدة في القارب بتتمايل معاه بدل ما هي ماشية جواه، واللاعيبة التانيين بيشوفوك كده برضه",
+        "مينفعش تركب القارب وإنت متحول (صقر، ذئب، دب): ارجع لشكلك الأول. ومينفعش تتحول وإنت في القارب",
+        "لو راكب حصان بتنزل من عليه لما تركب القارب، والحصان معاك تركبه تاني لما تنزل على البر"],
+      en: ["The boat is about 25% faster and leaves a foam wake, spray at the bow and the sound of oars as it moves",
+        "You now sit in the boat, bobbing with it, instead of walking inside it, and other players see you that way too",
+        "You can't take the boat in a beast form (eagle, wolf, bear): return to your own form first. You can't change form in the boat either",
+        "On a horse you get off when you take the boat, and the horse is yours to ride again once you land"] },
     { v: '2026-10-22eagle', ver: '1.93', d: '2026-10-22',
       ar: ["الصقر بتاع البيست ماستر بقى بيطير فوق المية والشجر (الحيطان والصخور والبيوت والدانجن لسه بتوقفه)، ومينفعش تنزل منه وإنت فوق المية"],
       en: ["The Beast Master's eagle now flies over water and trees (walls, rocks, houses and dungeons still stop it), and you can't land while over water"] },
