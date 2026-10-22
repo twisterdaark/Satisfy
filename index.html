@@ -1162,7 +1162,7 @@ const map=new Uint8Array(MW*(MH+NR));let GM=new Uint8Array(LW*MH),GW=LW,YO=0;   
 const at=(x,y)=>(x<0||y<-YO||x>=GW||y>=MH)?CW:GM[(y+YO)*GW+x];
 const setT=(x,y,v)=>{if(x>=0&&y>=-YO&&x<GW&&y<MH)GM[(y+YO)*GW+x]=v;};
 const SOLID=[0,0,0,1,1,0,1,1,1,0,0,1,0,1,1];
-const solidT=(tx,ty)=>SOLID[at(tx,ty)]===1;
+const solidT=(tx,ty)=>SOLID[at(tx,ty)]===1||!!(HALLB&&HALLB.has(tx*1000+ty)); // HALLB: the guild hall's furniture (SAT-ONLINE-115)
 const buildings=[{x:3,y:12,w:6,h:5,k:'house'},{x:17,y:12,w:7,h:5,k:'forge'},{x:3,y:24,w:6,h:5,k:'house'},{x:20,y:24,w:6,h:5,k:'house'},
  {x:137,y:66,w:7,h:5,k:'forge'},{x:118,y:66,w:6,h:5,k:'house'},{x:129,y:66,w:6,h:5,k:'hall'},{x:109,y:67,w:6,h:5,k:'shop'},{x:110,y:76,w:6,h:5,k:'house'},{x:138,y:76,w:6,h:5,k:'house'},
  {x:109,y:86,w:6,h:5,k:'tower'},{x:117,y:86,w:6,h:5,k:'house'},{x:130,y:86,w:6,h:5,k:'lodge'},{x:138,y:86,w:7,h:5,k:'inn'},{x:109,y:94,w:6,h:5,k:'house'},{x:117,y:94,w:6,h:5,k:'armory'},{x:130,y:94,w:6,h:5,k:'house'},
@@ -1584,6 +1584,12 @@ function genRoom(b,bi,kind,rx,ry,z){const R={id:'r'+bi,bi,b,kind,rx,ry,z,dx:b.x*
   else{P0('counter',3,3,6);P0('rack',1,2);P0('rack',10,2);P0('shelf',4,1,4,{back:1});P0('barrel',10,6);}}
 (function genInteriors(){let i=0;
  buildings.forEach((b,bi)=>{if(!['house','shop','armory','inn'].includes(b.k))return;genRoom(b,bi,bi===3?'inn':b.k,1+i*13,WMH+8,b.y<WH?'zBai':(b.lx??b.x)>=160?'zPat':'zWin');i++;});})();
+/* SAT-ONLINE-115 (plan U235): the guild hall, one more room below the map (free tiles past the house interiors) that each
+   guild furnishes for itself. While you are in, its id is your hall's ('h' + a hash of the guild id), so presence shows you
+   only the players in the same guild's hall; outside it is 'rGH'. Leaving takes you back where you came in from. */
+var HALLB=null,HALLV=null;
+const HALL=(()=>{const rx=218,ry=WMH+16,W0=TOWNS.find(z=>z.k==='zWin')||TOWNS[0],R={id:'rGH',bi:-1,b:null,kind:'hall',rx,ry,z:'zWin',dx:W0.rx*TS+8,dy:W0.ry*TS+6};
+ for(let y=ry;y<ry+8;y++)for(let x=rx;x<rx+12;x++)setT(x,y,(y<ry+2||y===ry+7||x===rx||x===rx+11)?IW:FW);setT(rx+6,ry+7,FW);ROOMS.push(R);return R;})();
 const roomAt=(x,y)=>y<WMH*TS?null:ROOMS.find(R=>x>=R.rx*TS&&x<(R.rx+12)*TS&&y>=R.ry*TS&&y<(R.ry+8)*TS);
 const doorOf=b=>({x:b.x*TS+b.w*8,y:(b.y+b.h)*TS+2});
 
@@ -5214,7 +5220,7 @@ function buyPot(who,k){if((S[k]||0)>=10)return shopD(who,'potFull');const g=pric
 const potOpts=who=>['hpot','mpot'].map(k=>{const g=price(who,POT[k].price);return{l:t('oBuyPot',{p:t(k),g}),qty:1,ic:k,st:`${t(k+'D')} (${S[k]||0}/10)`,poor:S.gold<g,f:()=>buyPot(who,k)};});
 function eat(){if(S.bread<=0){toast(t('noBread'),'warn');SFX.deny();return;}if(P.food>=95){toast(t('full'));SFX.deny();return;}S.bread--;vowBreak('fast');P.food=Math.min(100,P.food+40);P.hp=Math.min(maxHP(),P.hp+15);vfx('heal',P.x,P.y);toast(t('ate'));SFX.eat();hudDirty=true;}
 function nearTree(){if(inRace(P.x,P.y))return null;const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];let best=null,bs=1e9,bc=null,bcs=1e9;for(const tr of vtNear(P.x,P.y,30)){const dx=tr.x-P.x,dy=tr.y-P.y,d=Math.hypot(dx,dy);if(d>30)continue;const s=d-((dx*v[0]+dy*v[1])/(d||1))*12;if((chopped.get(tr.k)||0)>gTime){if(s<bcs){bcs=s;bc=tr;}}else if(s<bs){bs=s;best=tr;}}return best||bc;}
-function nearest(){let best=null,bd=26;const cand=[...npcs.filter(n=>!n.hidden).map(n=>({k:'npc',o:n,x:n.x,y:n.y})),...ANVILS.map(a=>({k:'anvil',o:a,x:a.tx*TS+8,y:a.ty*TS+8})),...nodes.filter(n=>!(n.dep>0&&(n.kind==='herb'||n.kind==='bherb'))).map(n=>({k:'node',o:n,x:n.x,y:n.y,hint:n.kind==='herb'||n.kind==='bherb'?(n.dep>0?'hPicked':'hHerb'):undefined})),...CAMPS.map(c=>({k:'camp',o:c,x:c.x,y:c.y,hint:'hCamp'})),...ROOMS.map(R=>{const d=doorOf(R.b);return{k:'door',o:R,x:d.x,y:d.y,hint:'hEnter'};}),...PROPS.filter(p=>p.k==='chest'||p.k==='shelf'||p.k==='bed'||dcTab(p)).map(p=>({k:'prop',o:p,x:p.tx*TS+p.w*8,y:p.ty*TS+(p.back?22:10),hint:{chest:'hChest',shelf:'hShelf',bed:'hBed',table:'hDice'}[p.k]})),{k:'grave',o:GRAVE,x:GRAVE.tx*TS+8,y:GRAVE.ty*TS+16,hint:'hGrave'},...lmList().map(l=>({k:'lm',o:l,x:l.x,y:l.y,hint:'hRead'})),...exNear().map(c=>({k:'cache',o:c,x:c.x,y:c.y,hint:'hCache'})),...tfNear().map(f=>({k:'folk',o:f,x:f.x,y:f.y,hint:'hTalk'})),...DGATES.filter(g=>!(g.hide&&g.bh!=='key'&&!(g.tw&&Math.hypot(g.x-P.x,g.y-P.y)<22))&&!g.got&&!g.out&&!g.gone&&!(g.tw==='enter'&&!(S.wis&&S.wis.map))).map(g=>({k:'gate',o:g,x:g.x,y:g.y,hint:g.hint})),...TERR.map(T=>({k:'banner',o:T,x:T.x,y:T.y-4,hint:'hBanner'})),...SHRINES.filter(epVis).map(o=>({k:'shrine',o,x:o.x,y:o.y,hint:o.hint})),...(COMPO?[{k:'npc',o:COMPO,x:COMPO.x,y:COMPO.y}]:[])];for(const c of cand){const d=Math.hypot(c.x-P.x,c.y-P.y)-(c.o&&c.o.reach||0);if(d<bd){bd=d;best=c;}}const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
+function nearest(){let best=null,bd=26;const cand=[...npcs.filter(n=>!n.hidden).map(n=>({k:'npc',o:n,x:n.x,y:n.y})),...ANVILS.map(a=>({k:'anvil',o:a,x:a.tx*TS+8,y:a.ty*TS+8})),...nodes.filter(n=>!(n.dep>0&&(n.kind==='herb'||n.kind==='bherb'))).map(n=>({k:'node',o:n,x:n.x,y:n.y,hint:n.kind==='herb'||n.kind==='bherb'?(n.dep>0?'hPicked':'hHerb'):undefined})),...CAMPS.map(c=>({k:'camp',o:c,x:c.x,y:c.y,hint:'hCamp'})),...ROOMS.filter(R=>R.b).map(R=>{const d=doorOf(R.b);return{k:'door',o:R,x:d.x,y:d.y,hint:'hEnter'};}),...PROPS.filter(p=>p.k==='chest'||p.k==='shelf'||p.k==='bed'||dcTab(p)).map(p=>({k:'prop',o:p,x:p.tx*TS+p.w*8,y:p.ty*TS+(p.back?22:10),hint:{chest:'hChest',shelf:'hShelf',bed:'hBed',table:'hDice'}[p.k]})),{k:'grave',o:GRAVE,x:GRAVE.tx*TS+8,y:GRAVE.ty*TS+16,hint:'hGrave'},...lmList().map(l=>({k:'lm',o:l,x:l.x,y:l.y,hint:'hRead'})),...exNear().map(c=>({k:'cache',o:c,x:c.x,y:c.y,hint:'hCache'})),...tfNear().map(f=>({k:'folk',o:f,x:f.x,y:f.y,hint:'hTalk'})),...DGATES.filter(g=>!(g.hide&&g.bh!=='key'&&!(g.tw&&Math.hypot(g.x-P.x,g.y-P.y)<22))&&!g.got&&!g.out&&!g.gone&&!(g.tw==='enter'&&!(S.wis&&S.wis.map))).map(g=>({k:'gate',o:g,x:g.x,y:g.y,hint:g.hint})),...TERR.map(T=>({k:'banner',o:T,x:T.x,y:T.y-4,hint:'hBanner'})),...SHRINES.filter(epVis).map(o=>({k:'shrine',o,x:o.x,y:o.y,hint:o.hint})),...(COMPO?[{k:'npc',o:COMPO,x:COMPO.x,y:COMPO.y}]:[])];for(const c of cand){const d=Math.hypot(c.x-P.x,c.y-P.y)-(c.o&&c.o.reach||0);if(d<bd){bd=d;best=c;}}const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
  if(!best||best.k==='tree'){const w=nearWater();if(w)best={k:'water',o:w,x:w.x,y:w.y,hint:FISH?'hReel':'hFish'};}return best;}
 function interact(){if(FISH){fishAct();return;}const n=nearest();if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
 let roomFade=false;
@@ -5777,16 +5783,71 @@ function terrList(back){dialog('guild',[castleLine(),...TERR.map(T=>{const o=WS.
 function rankLine(){const all={};for(const k in (GRANK||{}))all[k]=Object.assign({},GRANK[k]);for(const k in WS.guilds)all[k]=Object.assign(all[k]||{},WS.guilds[k]);
  const L=Object.values(all).sort((a,b)=>gLv(b)-gLv(a)||(b.xp||0)-(a.xp||0)),nm=g=>WS.guilds[g.id]?gName(g.id):Satisfy.chat.clean(g.name,18)||'?',k=L.findIndex(g=>g.id===(S&&S.guild));
  return t('rankH')+L.slice(0,10).map((g,i)=>`${i+1}. ${g.id===(S&&S.guild)?'★ ':''}${nm(g)} (Lv ${gLv(g)}, ${TERR.filter(T=>WS.terr[T.k].own===g.id).length} ${t('terrN')})`).join(' · ')+(k>=10?' · '+t('gdRankMe',{k:k+1}):'');}
-function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],null,[...(recSt()?[{l:t('gdRecList'),f:()=>recBoard(guildPanel)}]:[]),{l:t('oTerrList'),f:()=>terrList()},{l:t('oClose')}]);
+function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],null,[...(recSt()?[{l:t('gdRecList'),f:()=>recBoard(guildPanel)}]:[]),...(hallSt()?[{l:t('ghVisits'),f:()=>hallVisitsD(guildPanel)}]:[]),{l:t('oTerrList'),f:()=>terrList()},{l:t('oClose')}]);
  const l=gLv(g),me=g.members[pidOf()]||{c:0},nx=GXP[l];
  const info=t('gInfo',{g:gdEmb(g.emb)+gName(g.id),n:l,x:g.npc?'-':nx?`${g.xp}/${nx}`:t('gMax'),m:Object.keys(g.members).length,cap:l*25,c:me.c});
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
  dialog('guild',[info,perks+(g.online&&GWK?' · '+gwLine():''),g.online?guildNoteLine():''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
-  ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},
+  ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},...(hallSt()?[{l:t('ghHall'),f:hallMenu}]:[]),
    ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),...(galSt()?[{l:t('gdDip')+(galMo()&&Object.keys(GALA).length?' ('+Object.keys(GALA).length+')':''),f:galD}]:[]),...(gwrSt()?[{l:t('gdWar')+(galMo()&&Object.keys(GWRA).length?' ('+Object.keys(GWRA).length+')':''),f:gwrD}]:[]),
    ...(Satisfy.guild.can(GUILD.state().rank,'emblem')?[{l:t('gdBan'),f:guildBanD}]:[]),
    ...(Satisfy.guild.can(GUILD.state().rank,'note')?[{l:t('gdNoteW'),f:guildNoteW},...(recSt()?[{l:t('gdApps',{n:Object.keys(GAPPS).length}),f:recAppsD},{l:t('gdRecOn'),f:recPost},{l:t('gdRecOff'),f:recStop}]:[])]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
+/* SAT-ONLINE-115 (plan U235) the guild hall. Eight places, each with one piece of furniture from HALLK (the house props'
+   drawings, sprites-original/buildings.js), placed or cleared by the master and officers, each with who put it there and when
+   (guildHall/{gid}/{slot}). Members come in from the guild panel; the master and officers let other players in as guests by
+   account ID, and a guest finds the invitation in the guild panel too. Only they can read the hall; the rules refuse
+   furnishing to anyone else, guests included. Furniture blocks the way like a house's (HALLB in solidT). */
+const HALLS=[[1,2],[4,2],[7,2],[9,2],[1,5],[9,5],[3,4],[7,4]],HALLK=['table','shelf','rack','barrel','anvil','bed','board','well','counter'],HALLW={table:2,shelf:2,bed:2,counter:2};
+const hallSt=()=>NETTR&&NETTR.kind==='firebase'&&FB&&NET&&Satisfy.firebase.hallStore?Satisfy.firebase.hallStore(FB):null;
+function hallId(gid){let h=0x811c9dc5;for(const c of String(gid)){h^=c.charCodeAt(0);h=Math.imul(h,0x01000193)>>>0;}return 'h'+h.toString(36);}
+function hallClean(v){const o={};if(v&&typeof v==='object')for(let i=0;i<HALLS.length;i++){const e=v['s'+i];if(e&&typeof e==='object'&&HALLK.includes(e.k))o['s'+i]={k:e.k,n:Satisfy.chat.clean(e.n,24)||'?',by:typeof e.by==='string'?e.by:'',t:+e.t||0};}return o;}
+function hallBlock(){if(!HALLV){HALLB=null;return;}const B=new Set();for(const k in HALLV.slots){const i=+k.slice(1),[x,y]=HALLS[i],w=HALLW[HALLV.slots[k].k]||1;for(let j=0;j<w;j++)B.add((HALL.rx+x+j)*1000+HALL.ry+y);}HALLB=B;}
+const HALLC={};
+function hallCv(k){if(HALLC[k])return HALLC[k];const f=SA.buildings.PROP[k],w=HALLW[k]||1,L=f?f(w*TS,{k,w,tx:0,ty:0,back:k==='shelf'?1:0}):[];
+ const part=up=>mk(w*TS+8,40,g=>{for(const [x,y,ww,h,col,l] of L)if(!!l===up){g.fillStyle=col;g.fillRect(x+4,y+20,ww,h);}});return HALLC[k]={lo:part(false),hi:part(true)};}
+function hallEnts(ents){if(!HALLV)return;for(const k in HALLV.slots){const i=+k.slice(1),[x,y]=HALLS[i],c=hallCv(HALLV.slots[k].k),px=(HALL.rx+x)*TS-4,py=(HALL.ry+y)*TS-20;
+ ents.push({y:HALL.ry*TS,f:()=>ctx.drawImage(c.lo,px,py)},{y:(HALL.ry+y)*TS+8,f:()=>ctx.drawImage(c.hi,px,py)});}}
+function hallOff(){if(HALLV&&HALLV.off)try{HALLV.off();}catch(e){}HALLV=null;HALLB=null;HALL.id='rGH';}
+function hallLost(){if(!HALLV)return;toast(t('ghGone'),'warn');const R=HALL;hallOff();if(roomAt(P.x,P.y)===R)leaveRoom(R);}
+// each frame: out of the hall (the door, a respawn, unstuck) ends the visit; in it with no visit (a reload) puts you outside
+function hallTick(){if(roomFade||!P)return;const inH=roomAt(P.x,P.y)===HALL;if(HALLV&&!inH)hallOff();else if(!HALLV&&inH){P.x=HALL.dx;P.y=HALL.dy+4;camSnap=true;}
+ else if(HALLV&&!HALLV.guest&&S&&S.guild!==HALLV.gid)hallLost();}
+function hallGo(gid,name,guest){const st=hallSt();if(!st||!P||roomFade||mode==='dead')return;if(roomAt(P.x,P.y)===HALL)return;
+ hallOff();const back=roomAt(P.x,P.y);HALL.dx=back?back.dx:P.x;HALL.dy=back?back.dy:P.y-4;HALL.id=hallId(gid);
+ const V=HALLV={gid,name,guest:!!guest,slots:{},off:null};V.off=st.watch(gid,v=>{if(HALLV!==V)return;V.slots=hallClean(v);hallBlock();},()=>{if(HALLV===V)hallLost();});
+ enterRoom(HALL);toast(t('ghWelcome',{g:name}),'good');}
+function hallMine(){const st=GUILD&&GUILD.state();return st&&st.gid&&S&&S.guild===st.gid?st:null;}
+function hallCan(){const g=hallMine();return !!g&&Satisfy.guild.can(g.rank,'note');} // the master and officers, as for the notice
+function hallMenu(){const g=hallMine(),st=hallSt();if(!g||!st)return guildPanel();
+ st.read(g.gid).then(v=>{const sl=hallClean(v),n=Object.keys(sl).length;
+  dialog('guild',[t('ghInfo',{n,m:HALLS.length})],null,[{l:t('ghGo'),f:()=>hallGo(g.gid,gName(g.gid),false)},...(hallCan()?[{l:t('ghDeco'),f:()=>hallDecoD(sl)},{l:t('ghGuestsO'),f:hallGuestsD}]:[]),
+   {l:t('ghVisits'),f:()=>hallVisitsD(hallMenu)},{l:t('oBack'),f:guildPanel}]);},()=>toast(t('gdFail'),'warn'));}
+function hallDecoD(sl){if(!hallCan())return guildPanel();dialog('guild',[t('ghDecoQ')],null,[...HALLS.map((_,i)=>{const e=sl['s'+i];return {l:t('ghSlot',{n:i+1,k:e?t('hk_'+e.k):t('ghEmpty')}),f:()=>hallPickD(i,sl)};}),{l:t('oBack'),f:hallMenu}]);}
+function hallPickD(i,sl){const e=sl['s'+i];dialog('guild',[t('ghPickQ',{n:i+1,k:e?t('hk_'+e.k)+t('ghBy',{n:e.n}):t('ghEmpty')})],null,[...HALLK.map(k=>({l:t('hk_'+k),f:()=>hallPlace(i,k,sl)})),...(e?[{l:t('ghClear'),f:()=>hallPlace(i,null,sl)}]:[]),{l:t('oBack'),f:()=>hallDecoD(sl)}]);}
+function hallPlace(i,k,sl){const g=hallMine(),st=hallSt();if(!g||!st||!hallCan())return;st.place(g.gid,'s'+i,k,NET.uid,netId||(S&&S.look.n)||'?').then(()=>{toast(t(k?'ghPlaced':'ghCleared'),'good');SFX.coin();
+ const nv=Object.assign({},sl);if(k)nv['s'+i]={k,n:netId||'?',by:NET.uid,t:wNow()};else delete nv['s'+i];hallDecoD(nv);},()=>{toast(t('gdFail'),'warn');SFX.deny();});}
+function hallGuestsD(){const g=hallMine(),st=hallSt();if(!g||!st||!hallCan())return guildPanel();
+ st.guests(g.gid).then(v=>{const L=Object.keys(v||{}).filter(u=>v[u]&&typeof v[u].n==='string');
+  dialog('guild',[L.length?t('ghGuestsL',{l:L.map(u=>Satisfy.chat.clean(v[u].n,24)).join(' · ')}):t('ghNoGuests')],null,[{l:t('ghInvite'),f:hallInviteW},...L.map(u=>({l:t('ghUninv',{n:Satisfy.chat.clean(v[u].n,24)}),f:()=>st.uninvite(g.gid,u).then(()=>{toast(t('ghUninvited',{n:Satisfy.chat.clean(v[u].n,24)}));hallGuestsD();},()=>toast(t('gdFail'),'warn'))})),{l:t('oBack'),f:hallMenu}]);},()=>toast(t('gdFail'),'warn'));}
+function hallInviteW(){askLine(t('ghInviteQ'),'',24,v=>{v=(v||'').trim();if(!v)return hallGuestsD();const g=hallMine(),st=hallSt();if(!g||!st)return;
+ st.uidOf(v).then(u=>{if(!u){toast(t('admNoId',{n:v}),'warn');return hallGuestsD();}if(g.members&&g.members[u]){toast(t('ghMember',{n:v}),'warn');return hallGuestsD();}
+  return st.nameOf(u).then(n=>st.invite(g.gid,gName(g.gid),u,n||v,NET.uid).then(()=>{toast(t('ghInvited',{n:n||v}),'good');hallGuestsD();}));}).catch(()=>{toast(t('gdFail'),'warn');hallGuestsD();});});}
+function hallVisitsD(back){const st=hallSt();if(!st)return;back=back||guildPanel;
+ st.invites(NET.uid).then(v=>{const L=Object.keys(v||{}).filter(g=>v[g]&&typeof v[g].g==='string');
+  dialog('guild',[L.length?t('ghVisitsL'):t('ghVisitsNone')],null,[...L.map(gid=>{const nm=Satisfy.chat.clean(v[gid].g,18)||'?';return {l:t('ghVisitQ',{g:nm}),f:()=>dialog('guild',[t('ghVisitQ',{g:nm})],null,[{l:t('ghGo'),f:()=>hallGo(gid,nm,true)},
+   {l:t('ghDrop'),f:()=>st.drop(NET.uid,gid).then(()=>{toast(t('ghDropped'));hallVisitsD(back);},()=>toast(t('gdFail'),'warn'))},{l:t('oBack'),f:()=>hallVisitsD(back)}])};}),{l:t('oBack'),f:back}]);},()=>toast(t('gdFail'),'warn'));}
+window.__GHALL={get v(){return HALLV},get blocked(){return HALLB?[...HALLB]:null},room:()=>({id:HALL.id,rx:HALL.rx,ry:HALL.ry,dx:HALL.dx,dy:HALL.dy}),inside:()=>!!P&&roomAt(P.x,P.y)===HALL,id:hallId,solid:(tx,ty)=>solidT(tx,ty),menu:()=>hallMenu(),visits:()=>hallVisitsD(),off:()=>hallOff()}; // tests
+Object.assign(STR.ar,{ghHall:'قاعة الجيلد',ghInfo:'قاعة الجيلد: {n} من {m} أماكن متفرشة. الأعضاء بيدخلوا من هنا، والماستر والأوفيسرز بيفرشوها وبيدخّلوا ضيوف',ghGo:'ادخل',ghDeco:'فرش القاعة',ghDecoQ:'اختار مكان في القاعة',
+ ghSlot:'مكان {n}: {k}',ghEmpty:'فاضي',ghPickQ:'مكان {n} · دلوقتي: {k}',ghBy:' (حطه {n})',ghClear:'شيله',ghPlaced:'اتحط في القاعة',ghCleared:'اتشال من القاعة',ghGuestsO:'الضيوف',ghGuestsL:'الضيوف اللي يقدروا يدخلوا: {l}',
+ ghNoGuests:'مفيش ضيوف لسه',ghInvite:'دخّل لاعب (بالـ ID بتاعه)',ghInviteQ:'الـ ID بتاع اللاعب اللي هيدخل القاعة',ghInvited:'{n} يقدر يزور القاعة دلوقتي',ghUninv:'الغي دعوة {n}',ghUninvited:'{n} مبقاش يقدر يدخل القاعة',
+ ghMember:'{n} في الجيلد أصلًا',ghVisits:'قاعات جيلد تانية مدعو ليها',ghVisitsL:'قاعات الجيلد اللي تقدر تزورها:',ghVisitsNone:'مفيش جيلد دعاك لقاعته لسه',ghVisitQ:'قاعة {g}',ghDrop:'ارفض الدعوة',ghDropped:'الدعوة اترفضت',
+ ghGone:'مبقتش تقدر تفضل في القاعة دي',ghWelcome:'قاعة {g}',hk_table:'ترابيزة',hk_shelf:'مكتبة',hk_rack:'حامل سلاح',hk_barrel:'برميل',hk_anvil:'سندان',hk_bed:'سرير',hk_board:'لوحة إعلانات',hk_well:'بير',hk_counter:'كاونتر'});
+Object.assign(STR.en,{ghHall:'Guild hall',ghInfo:'The guild hall: {n} of {m} places furnished. Members come in from here; the master and officers furnish it and let guests in',ghGo:'Go in',ghDeco:'Furnish the hall',ghDecoQ:'Pick a place in the hall',
+ ghSlot:'Place {n}: {k}',ghEmpty:'empty',ghPickQ:'Place {n} · now: {k}',ghBy:' (by {n})',ghClear:'Clear it',ghPlaced:'Placed in the hall',ghCleared:'Cleared from the hall',ghGuestsO:'Guests',ghGuestsL:'Guests who may come in: {l}',
+ ghNoGuests:'No guests yet',ghInvite:'Let a player in (account ID)',ghInviteQ:'The account ID of the player to let in',ghInvited:'{n} may visit the hall now',ghUninv:'Take back: {n}',ghUninvited:'{n} can no longer come in',
+ ghMember:'{n} is in the guild already',ghVisits:"Other guilds' halls you may visit",ghVisitsL:'Guild halls you may visit:',ghVisitsNone:'No guild has let you in yet',ghVisitQ:'The hall of {g}',ghDrop:'Turn it down',ghDropped:'Invitation turned down',
+ ghGone:'You can no longer be in this hall',ghWelcome:'The hall of {g}',hk_table:'Table',hk_shelf:'Bookshelf',hk_rack:'Weapon rack',hk_barrel:'Barrel',hk_anvil:'Anvil',hk_bed:'Bed',hk_board:'Notice board',hk_well:'Well',hk_counter:'Counter'});
 function guildMOpts(){const o=[],back=()=>shopD('guildM','gm_hi');
  if(!S.guild)o.push({l:t('oMakeG',{g:GCOST,l:GLV}),ic:'book',poor:S.gold<GCOST||S.lv<GLV,f:()=>S.lv<GLV?dialog('guildM',[t('gNeedLv',{n:GLV})],back):S.gold<GCOST?dialog('guildM',[t('noGold')],back):openGName()});
  else o.push({l:t('oMyG'),f:guildPanel});
@@ -7144,6 +7205,7 @@ function update(dt){
  if(P.y<NWALL*TS&&!P.ghost){const k=ridgeAt(P.x/TS,P.y/TS);if(k>0&&(P.chT=(P.chT??4)-dt)<=0){P.chT=4;if(!CAMPS.some(c=>Math.hypot(c.x-P.x,c.y-P.y)<64)){const d=Math.max(1,Math.round(maxHP()*.01*k));P.hp=Math.max(1,P.hp-d);numP(-26,'-'+d,'#bfe6ff');hudDirty=true;}}}
  {const rg=npcs.find(n=>n.id==='regas');if(rg)rg.hidden=!!allies.length||!!COMPO&&COMPO.id==='regas';}
  {const Rm=roomAt(P.x,P.y);if(Rm&&P.y>=(Rm.ry+7)*TS+5)leaveRoom(Rm);}
+ hallTick();
  npcs.forEach(n=>{if(n.hidden||n.obj)return;if(n.d0===undefined)n.d0=n.dir;const dx=P.x-n.x,dy=P.y-n.y;n.dir=!P.ghost&&Math.hypot(dx,dy)<40?(Math.abs(dx)>Math.abs(dy)?(dx>0?2:3):(dy>0?0:1)):n.d0;});
  if(P.food>30)P.hp=Math.min(mh,P.hp+.7*dt);
  if(P.food<=0){P.hp-=1.2*dt;if(!P.starveT){P.starveT=true;toast(t('starving'),'warn');}if(P.hp<=0)die();}else P.starveT=false;
@@ -7380,7 +7442,7 @@ function render(dt){
   for(const m of TFB){const st=TFS.get(m);if(st&&st.t>gTime&&!m.dead)TX.push({s:st.s,x:m.x,y:m.y-(MT[m.type].oy||16)-24,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff9a8a'});}
   for(const c of exNear()){ents.push({y:c.y-6,f:()=>drawCache(c)});ents.push({y:c.y+400,f:()=>drawCacheG(c)});}
   for(const l of lmList())if(l.x>camX-20&&l.x<camX+VW+20&&l.y>camY-10&&l.y<camY+VH+40)ents.push({y:l.y,f:()=>drawLm(l)});
-  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});}
+  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});if(rm===HALL)hallEnts(ents);}
   if(COMPO){const a=COMPO;ents.push({y:a.y,f:()=>{if(a.hide>0)return;drawChar(a.spr,a.x,a.y,a.dir,a.frame||0,false,0,a);}});}
   allies.forEach(a=>{if(a.dead)return;ents.push({y:a.y,f:()=>{drawChar(a.id,a.x,a.y,a.dir,a.frame||0,false,0,a);R(ctx,a.x-7,a.y-30,14,2,'#000');R(ctx,a.x-7,a.y-30,14*a.hp/a.max,2,'#5ad06a');}});});
   for(const g of DGATES){if(g.hide||g.bhg&&!['next','exit','goal','box'].includes(g.bh)||g.tw&&!['up','down','exit'].includes(g.tw))continue;if(g.x<camX-30||g.x>camX+VW+30||g.y<camY-30||g.y>camY+VH+30)continue;ents.push({y:g.y-14,f:()=>drawGate(g)});}

@@ -5,6 +5,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22hall', ver: '1.42', d: '2026-10-22',
+      ar: ["قاعة الجيلد: كل جيلد ليه قاعة من G ← قاعة الجيلد. فيها 8 أماكن، والماستر والأوفيسرز بيفرشوها (ترابيزة، مكتبة، حامل سلاح، برميل، سندان، سرير، لوحة إعلانات، بير، كاونتر)، وكل حاجة مكتوب عليها مين حطها",
+        "الأعضاء بيدخلوا القاعة ويشوفوا بعض جواها، واللي برة مبيشوفوهمش. الماستر والأوفيسرز يقدروا يدخّلوا لاعب من برة الجيلد كضيف بالـ ID بتاعه، والضيف بيلاقي الدعوة في G ويقدر يدخل أو يرفض، بس ميقدرش يغيّر الفرش",
+        "لما تخرج من باب القاعة بترجع مكان ما كنت. ولو الجيلد اتحل، القاعة بتتمسح معاه"],
+      en: ["The guild hall: every guild has one, from G → Guild hall. It has 8 places; the master and officers furnish them (table, bookshelf, weapon rack, barrel, anvil, bed, notice board, well, counter), and each piece shows who put it there",
+        "Members go in and see each other inside; nobody outside sees them. The master and officers can let a player from outside the guild in as a guest by account ID; the guest finds the invitation in G and can go in or turn it down, but can't change the furniture",
+        "Walking out of the hall's door takes you back where you were. If the guild is disbanded, its hall goes with it"] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },

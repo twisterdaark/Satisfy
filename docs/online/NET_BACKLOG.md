@@ -143,7 +143,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U232 | Guild chat | ✅ | SAT-ONLINE-049 (#81): `/g`, members only by the rules, so a removed member loses it |
 | U233 | Guild weekly quests | ✅ | SAT-ONLINE-081: the weekly goal: members' kills add up (`guildWeek`, each its own count, only upward, at most 1,500, monsters within 15 levels), three tiers, each reward taken once (`guildWeekPaid`) (`regression/guildweek`) |
 | U234 | Guild forge | ✅ | SAT-ONLINE-065 (#99): the Guild Forge, +2% quality a level, capped at 3 levels |
-| U235 | Guild housing | ❌ | |
+| U235 | Guild housing | ✅ | SAT-ONLINE-115: the guild hall, a room each guild furnishes (eight places, nine pieces, who placed what kept with it; `guildHall`); members go in from the guild panel, the master and officers let other players in by account ID (`guildHallGuest`, `hallInv`), guests and members only read it and only the master and officers furnish (the rules); presence keeps each hall to itself; it goes with the guild (`regression/guildhall`) |
 | U236 | Guild treasury | ✅ | Same as U221 |
 | U237 | Guild research tree | 🟡 | Three buildings of three levels paid from the treasury (065); no tree |
 | U238 | Guild alliances | ✅ | SAT-ONLINE-085: proposed by the master or an officer, accepted or declined by the other guild's; the rules write each side only against a fresh proposal from the other (one guild can't force it); 30 days, renewable in the last week, up to 3; no open PvP between allies (pvp.js `ally`) (`guildAllyAsk`, `guildAlly`) (`regression/guildally`) |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 50 · 🟡 37 · ⏳ 6 · ❌ 11 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 51 · 🟡 37 · ⏳ 6 · ❌ 10 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

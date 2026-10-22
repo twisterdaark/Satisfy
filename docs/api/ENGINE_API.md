@@ -32,7 +32,7 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 | `api` | `1` |
 | `defs()` | Deep copy of content tables as plain JSON: `MT`, `BOSSES`, `SPAWN`, `QD` (static quests only, no generated board quests), `RC`, `SKD`, `NPCS`, `TOWNS`, `ZR`, `MATS`. Functions (e.g. `RC[i].unlock`) become `{ "$fn": "<source>" }`. Also at `window.__G.defs()`. |
 | `world()` | `{ id: 'satisfy', tile: 16, w: 724, h: 144, outdoorH: 120, zones: [...ZR ids], towns: ['zBai','zWin','zPat','zReid','zRein'] }` (w is the physical width with the wilderness belts, from `MW`; it grows as towns are added). Rows `>= outdoorH` hold house interiors. |
-| `rooms()` | House interiors: `[{ id: 'r<n>', kind: 'house'|'shop'|'armory'|'inn', zone }]`. Ids are stable for a given map. |
+| `rooms()` | House interiors: `[{ id: 'r<n>', kind: 'house'|'shop'|'armory'|'inn', zone }]`. Ids are stable for a given map. One more, kind `'hall'`, is the guild hall (SAT-ONLINE-115): its id is `'rGH'`, or `'h…'` (a hash of the guild id) while the player is visiting a guild's hall, so presence keeps each guild's hall to itself. |
 | `zoneAt(x, y)` | Zone id at a pixel position (`'zWin'`, `'zPlains'`, …); `'void'` in the interior strip outside every room and dungeon (SAT-ONLINE-019). |
 | `roomAt(x, y)` | `{ id, kind, zone }` if the position is inside a house interior, else `null`. |
 | `inGame()` | `false` on title/demo screens. |
