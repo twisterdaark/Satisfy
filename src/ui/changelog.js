@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22hunt', ver: '1.42', d: '2026-10-22',
+      ar: ["صيد البوس: كل سبت من 7 لـ 8 بالليل بتوقيت جرينتش فيه بوس عالمي واحد عليه الدور (10 بوسات، بوس كل أسبوع). البوس بيرجع مكانه لما الصيد يبدأ حتى لو حد قتله قبلها، وتقدر تروحله ببلاش من المواعيد (O ← المواعيد ← انضم للصيد) لو لفلك قريب من لفله، وترجع مكانك بعدها. اللي يقتله في الصيد بياخد لقب صياد البوسات وعلامة صيد، مرة واحدة في الأسبوع"],
+      en: ["The world boss hunt: every Saturday 19:00–20:00 UTC one world boss is hunted, a different one each week over a season of ten. It is back at its lair when the hunt starts even if someone killed it before, and you can go there for free from the calendar (O → Calendar → Join the hunt) if your level is near its level, and come back after. Whoever kills it in the hunt gets the World Boss Hunter title and a hunt mark, once a week"] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },

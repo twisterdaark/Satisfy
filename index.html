@@ -1957,18 +1957,24 @@ function dragonDown(m){WS.wb=WS.wb||{};WS.wb.trauka=Date.now()+MT.trauka.wb*1000
 let WBS=null,wbOff=null;
 function wbOnline(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET);}
 function wbOffs(){return NETTR&&NETTR.serverOffset?NETTR.serverOffset():0;}
-function wbPut(type){if(!wbOnline()||!MT[type]||!MT[type].wb)return;const D=FB.m.database,u={};u['world/satisfy/wb/'+type]={at:Math.round(Date.now()+wbOffs()+MT[type].wb*1000),by:NET.uid,t:D.serverTimestamp()};D.update(D.ref(FB.db),u).catch(()=>{});}
+function wbPut(type){if(!wbOnline()||!MT[type]||!MT[type].wb)return;const D=FB.m.database,u={};u['world/satisfy/wb/'+type]={at:Math.round(Date.now()+wbOffs()+MT[type].wb*1000),by:NET.uid,t:D.serverTimestamp()};D.update(D.ref(FB.db),u).catch(()=>{WBRE[type]=u['world/satisfy/wb/'+type].at;});}
 function wbSub(){if(wbOff||!wbOnline())return;const D=FB.m.database;if(!D.onValue){wbOff=1;return;}
  try{wbOff=D.onValue(D.ref(FB.db,'world/satisfy/wb'),s=>{WBS=s.val()||{};wbApply();},()=>{WBS=null;});}catch(e){wbOff=1;}}
 /* a live one is put down quietly only off screen: near you, the fight's own sync ends it (with its rewards); a dead one
    keeps its corpse until the shared time instead of the 25 s a follower's copy waits */
 function wbApply(){if(!WBS||!WS||!S||S.__demo)return false;WS.wb=WS.wb||{};const now=Date.now();let run=false;
- for(const type in WBS){const v=WBS[type];if(!v||typeof v.at!=='number'||!MT[type])continue;const at=v.at-wbOffs();if(at<=now)continue;run=true;
+ for(const type in WBS){const v=WBS[type];if(!v||typeof v.at!=='number'||!MT[type])continue;const at=v.at-wbOffs();if(at<=now||huntLift(type,v.at))continue;run=true;
   if(!(WS.wb[type]>=at-2000))WS.wb[type]=at;const r=(at-now)/1000;
   for(const m of mons){if(m.type!==type)continue;if(!m.dead){if(Math.hypot(m.x-P.x,m.y-P.y)>360){m.dead=true;m.dying=0;m.rt=r;}}else if(m.rt<r-2)m.rt=r;}}
  return run;}
 let wbW=null,wbT=0;
-function wbTick(){if(!wbOff&&wbOnline())wbSub();if(!WBS)return;const n=performance.now();if(wbW!==WS||n-wbT>2000){wbW=WS;wbT=n;if(!wbApply())wbT=n+1e4;}}
+function wbTick(){if(!wbOff&&wbOnline())wbSub();if(!WBS)return;wbRetry();const n=performance.now();if(wbW!==WS||n-wbT>2000){wbW=WS;wbT=n;if(!wbApply())wbT=n+1e4;}}
+// a kill's timer the rules refused because an older one still ran (the hunt brings a boss back before its timer is over,
+// SAT-ONLINE-124): written again, with the same end, once the older one is over
+var WBRE={},wbReT=0;
+function wbRetry(){const p=performance.now();if(p-wbReT<3000)return;wbReT=p;const now=Date.now()+wbOffs();
+ for(const type in WBRE){const at=WBRE[type],v=WBS[type];if(at<=now+5000){delete WBRE[type];continue;}if(v&&typeof v.at==='number'&&v.at>now)continue;
+  const D=FB.m.database,u={};u['world/satisfy/wb/'+type]={at,by:NET.uid,t:D.serverTimestamp()};delete WBRE[type];D.update(D.ref(FB.db),u).catch(()=>{WBRE[type]=at;});}}
 window.__GB2={get data(){return WBS},apply:wbApply,put:wbPut,kill:m=>killMon(m),fb:()=>FB}; // tests
 function updateDragon(dt){const m=mons.find(m=>m.type==='trauka');if(!m||m.dead||mode==='dead')return;
  // SAT-ONLINE-045: online the host times and aims the breath (at the player the dragon is after) and sends it as an
@@ -5193,7 +5199,7 @@ function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='
 const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','lgloves','lboots','cring','ihelm','igloves','iboots','parmor','mring'];
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.4:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.25:.1)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh)gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);if(NET&&b.boss&&!m.bh)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(S.tl.viscount?.05:0)+(S.tl.pioneer?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)+(S.tl.shero?.05:0)+(S.tl.baron?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh)gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);if(NET&&b.boss&&!m.bh)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(S.tl.viscount?.05:0)+(S.tl.pioneer?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)+(S.tl.shero?.05:0)+(S.tl.baron?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh)(b.drop||[]).forEach(([k,p])=>{if(rand()<p)addMat(k,1);});
  if(m.lv>=20&&!m.tmp){if(b.boss)addMat('estone',1+(m.lv/50|0));else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
@@ -7908,7 +7914,7 @@ const VRAND=(()=>{let a=FIXT?Math.random()*4294967296>>>0:0;return ()=>{a|=0;a=a
 function loop(now){requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;
  if(FIXT){facc=Math.min(facc+dt,FSTEP*4);while(facc>=FSTEP-1e-9){facc-=FSTEP;try{update(FSTEP);}catch(e){gameErr(e);}}}else try{update(dt);}catch(e){gameErr(e);}
  const r0=rand;if(FIXT)rand=VRAND;try{loopRest(dt);}finally{rand=r0;}}
-function loopRest(dt){if(NET)try{netTick();}catch(e){gameErr(e);}if(TOUCH)try{touchTick();}catch(e){gameErr(e);}try{render(dt);}catch(e){gameErr(e);}try{guiTick();}catch(e){gameErr(e);}
+function loopRest(dt){if(NET)try{netTick();}catch(e){gameErr(e);}try{huntTick();}catch(e){gameErr(e);}if(TOUCH)try{touchTick();}catch(e){gameErr(e);}try{render(dt);}catch(e){gameErr(e);}try{guiTick();}catch(e){gameErr(e);}
  if(mode==='play')updateKeys();
  if(mode==='create')drawPrev();if(DL&&DL.pv)drawDPrev();
  if(mode==='map'&&(gTime*2|0)!==(Math.max(0,gTime-dt)*2|0))drawMap();
@@ -9179,17 +9185,69 @@ function calList(n){const out=[],add=(k,at,len)=>out.push({k,at,end:at+len});
  {let st=Math.floor((n-SIEGO)/SIEGP)*SIEGP+SIEGO;if(n-st>=SIEGL)st+=SIEGP;add('sgN',st,SIEGL);}
  {const H=3600000;for(let h=Math.floor(n/H);;h++)if(new Date(h*H).getUTCHours()%3===1&&n<h*H+60*60000){add('calFs',h*H+35*60000,25*60000);break;}}
  {const sl=Math.floor(n/RCS),st=sl*RCS+RCGO;add('calRace',n<sl*RCS+RCEND?st:st+RCS,RCEND-RCGO);}
+ {const h0=huntOf(n),h=n<h0.end?h0:huntOf(h0.at+LOCK_WK);out.push({k:'huntN',l:t('huntCal',{b:t(h.k+'N'),s:h.season,i:h.i}),at:h.at,end:h.end,b:h.k});}
  return out;}
 function calTime(ms,utc){const d=new Date(ms),h=utc?d.getUTCHours():d.getHours(),m=utc?d.getUTCMinutes():d.getMinutes();return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}
 function calIn(ms){const m=Math.max(1,Math.ceil(ms/60000));return m<60?t('calMin',{m}):t('calHr',{h:Math.floor(m/60),m:m%60});}
 function calWhen(e,n){return n>=e.at?t('calNow',{m:Math.max(1,Math.ceil((e.end-n)/60000))}):t('calAt',{l:calTime(e.at),u:calTime(e.at,true),d:calIn(e.at-n)});}
 function calBoss(k,n){const u=WS&&WS.wb&&WS.wb[k];return t(k+'N')+': '+(u&&u>n?t('calBack',{l:calTime(u),u:calTime(u,true),d:calIn(u-n)}):t('calUp'));}
 function calZone(){const o=-new Date().getTimezoneOffset(),a=Math.abs(o);return 'UTC'+(o<0?'−':'+')+Math.floor(a/60)+(a%60?':'+String(a%60).padStart(2,'0'):'');}
-function calBoard(){const n=wNow(),L=calList(n),line=e=>t(e.k)+': '+calWhen(e,n);plOpen(false);
+function calBoard(){const n=wNow(),L=calList(n),line=e=>(e.l||t(e.k))+': '+calWhen(e,n);plOpen(false);
  dialog('guild',[t('calH',{z:calZone()})+' · '+L.filter(e=>/^evN_|^natN$/.test(e.k)).map(line).join(' · '),
   t('calH2')+' · '+L.filter(e=>!/^evN_|^natN$/.test(e.k)).map(line).concat(['trauka','berith','belial',...Object.keys(BEAST)].map(k=>calBoss(k,n))).join(' · '),
-  ...(typeof geCome==='function'&&GEW&&geCome(n).length?[t('geH')+' · '+geCome(n).map(e=>e.title+': '+geWhen(e,n)).join(' · ')]:[])],null,[{l:t('oClose')}]);}
+  ...(typeof geCome==='function'&&GEW&&geCome(n).length?[t('geH')+' · '+geCome(n).map(e=>e.title+': '+geWhen(e,n)).join(' · ')]:[])],null,[...huntOpts(n),{l:t('oClose')}]);}
 window.__GCAL={list:n=>calList(n==null?wNow():n),board:()=>calBoard(),zone:()=>calZone()}; // tests
+/* the world boss hunt (SAT-ONLINE-124, plan U189 "seasonal world boss: event schedule, opt-in region transport"). Every
+   Saturday 19:00-20:00 UTC one world boss is hunted, by turns over a season of ten weeks (HUNT_L). At 19:00 it is back at
+   its lair even if it was killed before, on every screen alike: a kill before the hunt is set aside (its shared timer in
+   world/satisfy/wb too), never one during it, and a kill in the hunt whose timer the rules refused while the old one ran
+   is written again when that one is over (wbRetry). From 18:50 until 20:00 anyone within 40 levels of the boss goes there
+   for free from the calendar (O -> Calendar -> Join the hunt), and back to where they were until 20:30. Who kills it in
+   the hunt gets the World Boss Hunter title once and one hunt mark a week, however many times the kill reaches its game.
+   The schedule is the world clock's (wNow), so it is the same for everyone and no device clock moves it online. */
+Object.assign(STR.ar,{huntCal:'صيد البوس: {b} (الموسم {s}، الأسبوع {i} من 10)',huntSoon:'صيد البوس هيبدأ بعد {m} دقيقة: {b}. انضم من المواعيد (O ← المواعيد)',huntOn:'صيد البوس بدأ: {b} رجع مكانه لحد {l} (UTC {u})! انضم من المواعيد (O ← المواعيد)',huntJoin:'انضم للصيد: {b} (ببلاش)',huntBack:'ارجع مكانك',huntLv:'صيد {b} من لفل {l} وطالع',huntNo:'مينفعش تتنقل من هنا',huntGone:'مش لاقيين {b}',huntArr:'وصلت للصيد: {b} قريب منك. بالتوفيق!',huntBackT:'رجعت مكانك',huntWon:'كسبت صيد الأسبوع: {b}! علامات الصيد: {n}',tl_whunt:'صياد البوسات',tl_whuntD:'كسب صيد بوس أسبوعي (شكل بس، من غير أي زيادة)'});
+Object.assign(STR.en,{huntCal:'World boss hunt: {b} (season {s}, week {i} of 10)',huntSoon:'The world boss hunt starts in {m} min: {b}. Join it from the calendar (O → Calendar)',huntOn:'The world boss hunt is on: {b} is back at its lair until {l} (UTC {u})! Join it from the calendar (O → Calendar)',huntJoin:'Join the hunt: {b} (free)',huntBack:'Go back to where you were',huntLv:'The hunt for {b} is for level {l} and up',huntNo:"You can't travel from here",huntGone:"{b} can't be found",huntArr:'You are at the hunt: {b} is close. Good luck!',huntBackT:'Back where you were',huntWon:"You won this week's hunt: {b}! Hunt marks: {n}",tl_whunt:'World Boss Hunter',tl_whuntD:'Won a weekly world boss hunt (cosmetic, no stats)'});
+const HUNT_L=['trauka','slord','dopp','wqueen','vlord','sbird','stiger','sdrag','stort','berith'],HUNT_AT=5*86400000+19*3600000,HUNT_LEN=3600000,HUNT_PRE=600000,HUNT_BACK=1800000,HUNT_LV=40,HUNT_R=200;
+var HUNTT=0,HUNTSAW={};
+// the hunt of the week the world time n is in: {w, k, at, end, open, back, season, i}; the same for everyone at the same n
+function huntOf(n){const w=Math.floor((n-LOCK_E)/LOCK_WK),L=HUNT_L.length,x=((w%L)+L)%L,at=LOCK_E+w*LOCK_WK+HUNT_AT;
+ return {w,k:HUNT_L[x],at,end:at+HUNT_LEN,open:at-HUNT_PRE,back:at+HUNT_LEN+HUNT_BACK,season:Math.floor(w/L)+1,i:x+1};}
+// the hunt you may join now (from 10 minutes before), or null
+function huntNow(n){const h=huntOf(n);return n>=h.open&&n<h.end?h:null;}
+// is the boss's shared timer (`at`, server time) from a kill before its hunt, which is on now? Then it is set aside
+function huntLift(type,at){const n=wNow(),h=huntOf(n);return h.k===type&&n>=h.at&&n<h.end&&!!MT[type]&&at-MT[type].wb*1000<h.at;}
+const huntLvOf=k=>Math.max(1,(MT[k].lv||[1])[0]-HUNT_LV),huntMon=k=>mons.find(m=>m.type===k&&!m.tmp);
+function huntTick(){if(!S||S.__demo||!P||!Satisfy.local.inGame())return;const p=performance.now();if(p-HUNTT<250)return;HUNTT=p;
+ const n=wNow(),h=huntOf(n),k=h.k,ok=S.lv>=huntLvOf(k);
+ if(n>=h.open&&n<h.at&&!HUNTSAW['s'+h.w]){HUNTSAW['s'+h.w]=1;if(ok)toast(t('huntSoon',{b:t(k+'N'),m:Math.ceil((h.at-n)/60000)}),'warn');}
+ if(n<h.at||n>=h.end)return;
+ if(!HUNTSAW['o'+h.w]){HUNTSAW['o'+h.w]=1;if(ok){toast(t('huntOn',{b:t(k+'N'),l:calTime(h.end),u:calTime(h.end,true)}),'good');SFX.notice&&SFX.notice();}}
+ // back at its lair: a timer from a kill before the hunt is over now (on every screen, from the same clock)
+ WS.wb=WS.wb||{};const u=WS.wb[k],off=n-Date.now(),inHunt=u>Date.now()&&u+off-MT[k].wb*1000>=h.at;
+ if(u>Date.now()&&!inHunt)WS.wb[k]=Date.now()-1;
+ if(!inHunt)for(const m of mons)if(m.type===k&&!m.tmp&&m.dead&&m.rt>60&&m.rt<1e8)m.rt=0;}
+// where the hunt sends you: free ground HUNT_R from the boss's lair
+function huntSpot(m){for(let i=0;i<24;i++){const a=Math.PI/2+(i%2?1:-1)*Math.ceil(i/2)*Math.PI/12,x=m.sx+Math.cos(a)*HUNT_R,y=m.sy+Math.sin(a)*HUNT_R;
+  if(!hitBox(x,y,5)&&!roomAt(x,y)&&zoneAt(x,y)!=='void')return {x,y};}
+ return freeNear(m.sx,m.sy+HUNT_R,5);}
+function huntCan(){return mode!=='dead'&&P&&!roomAt(P.x,P.y)&&zoneAt(P.x,P.y)!=='void'&&!(DUEL&&DUEL.locked&&DUEL.locked())&&!SPAR;}
+function huntGo(){const n=wNow(),h=huntNow(n);if(!h)return;const k=h.k,b=t(k+'N'),lv=huntLvOf(k);
+ if(S.lv<lv){toast(t('huntLv',{b,l:lv}),'warn');SFX.deny();return;}
+ if(!huntCan()){toast(t('huntNo'),'warn');SFX.deny();return;}
+ const m=huntMon(k),to=m&&huntSpot(m);if(!to){toast(t('huntGone',{b}),'warn');return;}
+ S.hunt=S.hunt||{};S.hunt.back={x:Math.round(P.x),y:Math.round(P.y),until:h.back};
+ fadeTo(()=>{P.x=to.x;P.y=to.y;camSnap=true;vfx('spawn',P.x,P.y);allies=[];S.raid=0;hudDirty=true;toast(t('huntArr',{b}),'good');save(true);});}
+function huntRet(){const B=S.hunt&&S.hunt.back;if(!B)return;if(!huntCan()){toast(t('huntNo'),'warn');SFX.deny();return;}delete S.hunt.back;
+ fadeTo(()=>{P.x=B.x;P.y=B.y;camSnap=true;vfx('spawn',P.x,P.y);allies=[];hudDirty=true;toast(t('huntBackT'),'good');save(true);});}
+// the calendar's choices: join the hunt while it is open, go back after it
+function huntOpts(n){const h=huntNow(n),B=S&&S.hunt&&S.hunt.back,o=[];if(h)o.push({l:t('huntJoin',{b:t(h.k+'N')}),f:huntGo});
+ if(B&&n<B.until)o.push({l:t('huntBack'),f:huntRet});return o;}
+// a kill of the hunted boss in its hour (or the minute after): the title once, one mark a week, never twice
+function huntKill(m){if(!S||S.__demo||m.tmp)return;const n=wNow(),h=huntOf(n);if(m.type!==h.k||n<h.at||n>=h.end+60000)return;
+ S.hunt=S.hunt||{};const W=S.hunt.w=S.hunt.w||{};if(W[h.w])return;W[h.w]=1;S.hunt.n=(S.hunt.n||0)+1;
+ const ks=Object.keys(W).map(Number).sort((a,b)=>a-b);while(ks.length>20)delete W[ks.shift()];
+ giveTitle('whunt');setTimeout(()=>toast(t('huntWon',{b:t(m.type+'N'),n:S.hunt.n}),'good'),700);save(true);}
+window.__GHUNT={of:n=>huntOf(n==null?wNow():n),now:n=>huntNow(n==null?wNow():n),lift:(k,at)=>huntLift(k,at),go:()=>huntGo(),back:()=>huntRet(),opts:()=>huntOpts(wNow()).map(o=>o.l),get re(){return WBRE},L:HUNT_L}; // tests
 /* the group finder (SAT-ONLINE-073, plan U185). "Group finder" in the player list (O) shows who is looking for a raid, a party,
    a dungeon group or a duel, with level, class and where they are, and lets you say what you are looking for yourself
    (lfg/{uid}, yours only: gone when you stop, leave, or after half an hour). Go to them, or whisper a friend. */

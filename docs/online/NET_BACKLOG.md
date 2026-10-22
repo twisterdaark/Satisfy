@@ -109,7 +109,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U186 | Raid replay | ❌ | Needs an event log of the fight |
 | U187 | Boss encyclopedia | ✅ | B's monster encyclopedia (v1.21): a page per monster opens on the first kill, drops after 10 kills (1 for a boss), mastery after 100 |
 | U188 | Adaptive difficulty | ✅ | SAT-ONLINE-083: the host gives a boss the health of the n players of its group within 600 px (+60% a player, up to 10), the share left kept as players come and go (`regression/bossscale`) |
-| U189 | Seasonal world boss | 🟡 | Trauka's half hour and Berith's two-hour rest are shared through `world/satisfy/wb` (056, B's v0.87); no season schedule |
+| U189 | Seasonal world boss | ✅ | SAT-ONLINE-124: the world boss hunt, every Saturday 19:00–20:00 UTC, one boss a week over a ten-week season (Trauka, the Storm Lord, Pagma's Doppelganger, the Wyvern Queen, the Vampire Lord, the four Divine Beasts, Berith). It is on the calendar and told 10 minutes before; the boss is back at its lair for it on every screen (a kill before the hunt is set aside, its shared timer too); anyone within 40 levels goes there for free from the calendar and back after (opt-in transport); the killer gets a cosmetic title and one hunt mark a week, never twice (`S.hunt`); a kill whose timer the rules refused while an older one ran is written again after it (`regression/hunt`). Timers stay `world/satisfy/wb` (056, B's v0.87) |
 
 ### Economy and trade (plan §42)
 | ID | Item | Status | Where / what's left |
