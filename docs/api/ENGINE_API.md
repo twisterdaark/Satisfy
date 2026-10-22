@@ -16,6 +16,7 @@ global namespace `window.Satisfy`; the game adds a read-only `Satisfy.local` at 
 <script src="src/net/contracts.js"></script>  <!-- Satisfy.net -->
 <script src="src/net/presence.js"></script>   <!-- Satisfy.presence (SAT-ONLINE-002) -->
 <script src="src/net/transport-local.js"></script> <!-- Satisfy.transports -->
+<script src="src/net/transport-ws.js"></script>    <!-- Satisfy.transports.ws / .split (SAT-ONLINE-148) -->
 <script src="src/net/party.js"></script>      <!-- Satisfy.party (SAT-ONLINE-003) -->
 <script src="src/net/duel.js"></script>       <!-- Satisfy.duel (SAT-ONLINE-006) -->
 <script src="src/net/raid.js"></script>       <!-- Satisfy.raid (SAT-ONLINE-009) -->
@@ -131,6 +132,10 @@ are reported in `PlayerPublic.room` so remote players inside a house are only dr
 Untrusted input is dropped: wrong protocol, invalid or spoofed `PlayerPublic` (`sid` must match the envelope), replayed or old `seq`, more than 30 messages/s per sender, more than 64 remotes.
 
 Transports (`{ kind, send, onmessage, close }`): `Satisfy.transports.local(name)` (BroadcastChannel, tabs of one browser) and `Satisfy.transports.hub().connect()` (in-memory, tests). The Firebase transport (SAT-ONLINE-004) has the same shape.
+
+SAT-ONLINE-148 (plan U025): `Satisfy.transports.ws(url, { uid, token?, bind?, onConnection?, WebSocket? })` is the same shape over the WebSocket relay `backend/ws-relay.cjs` (`ws://host/w/<world>/<shard>`): the first message is a hello with the Firebase ID token (`token()`) or, on a relay on this computer, the uid; until the relay answers, sends wait (64 at most, 2 s at most); a dropped connection is tried again (250 ms doubling to 5 s) unless a newer connection of the account replaced it (`state()` `'replaced'`) or the account was refused (`'refused'`). With `bind`, a remote session is `uid.sid` with the uid the relay proved, as the Firebase transport does. `state()`, `wsStats()` → `{sent, recv, dropped, reconnects, queued}`. `Satisfy.transports.split(social, combat)` sends `COMBAT` types (`duel.*`, `pvp.*`, `raid.*`) through `combat` and the rest through `social`, takes each kind only from its own path, keeps the social transport's `kind` and extras, and gives presence `chanOf(type)` so the order is checked per path. The game uses it when `Satisfy.combatRelay` is set (`?combat=ws://…` on a local page; [COMBAT_RELAY.md](../online/COMBAT_RELAY.md)).
+
+The relay (`createRelay({ verify?, types?, limits?, origins? })`, `firebaseVerifier(projectId)`, `devVerifier()`): one room per shard; combat types only, a well-formed envelope, 16 KB and 60 a second per connection; each message goes on as `{t:'m', f:<proven uid>, e:<envelope>}` to `payload.to`'s account or the whole room, never back and never to another room; a newer connection of an account in a room closes the older one (4000).
 
 In the game: `?net=local` turns it on; remote players are drawn only inside the same house interior (or both outdoors), with their name and look; a badge shows the player count. Use `?slot=a` / `?slot=b` so two tabs don't share one save.
 

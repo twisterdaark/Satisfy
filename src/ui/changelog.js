@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23wsrelay', ver: '1.98', d: '2026-10-23', hide: 1,
+      ar: ["تجربة على جهازك بس: الدويلات والـ PvP وضربات الريد ممكن تعدي على سيرفر WebSocket صغير (backend/ws-relay.cjs) بدل الداتابيز، والباقي يفضل في Firebase. مقفولة على الموقع (docs/online/COMBAT_RELAY.md)"],
+      en: ["On your own computer only: duels, open PvP and raid hits can go through a small WebSocket server (backend/ws-relay.cjs) instead of the database, the rest staying in Firebase. Off on the site (docs/online/COMBAT_RELAY.md)"] },
     { v: '2026-10-22bagfix', ver: '1.97', d: '2026-10-22',
       ar: ["سحب خاتم أو أي حاجة من الشنطة للشريط بقى بيحطها في الخانة على طول، من غير سؤال الرمي. والشريط بيظهر وإنت بتسحب حتى والشنطة مفتوحة",
         "الصورة اللي بتسحبها بقت نفس خانة الشنطة بحجمها وإطار ندرتها. ولو سبتها فوق أي حتة من الواجهة مبيحصلش حاجة، والرمي بس لو سبتها فوق اللعبة نفسها",

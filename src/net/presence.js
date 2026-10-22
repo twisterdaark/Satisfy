@@ -73,8 +73,10 @@
       var t = now();
       var r = remotes.get(env.sessionId);
       // presence and directed messages may travel different paths (Firebase: presence node vs inbox),
-      // so order is only guaranteed within a channel; replay checks are per channel
+      // so order is only guaranteed within a channel; replay checks are per channel. A transport made of two (SAT-ONLINE-148:
+      // combat through a WebSocket relay) names the channel of each type (chanOf: 'seq', 'mseq' or 'cseq').
       var chan = (env.type === 'presence.state' || env.type === 'presence.leave') ? 'seq' : 'mseq';
+      if (chan === 'mseq' && transport.chanOf && transport.chanOf(env.type) === 'cseq') chan = 'cseq';
       if (r) {
         r.win = r.win.filter(function (x) { return t - x < 1000; });
         if (r.win.length >= cfg.maxPerSec) return drop();
@@ -86,7 +88,7 @@
       }
       if (env.type !== 'presence.state') {
         if (!r) return drop(); // other messages only from players we can see
-        r.win.push(t); r.mseq = env.seq;
+        r.win.push(t); r[chan] = env.seq;
         emit({ type: 'message', sid: env.sessionId, env: env });
         return;
       }
@@ -95,7 +97,7 @@
       var fresh = !r;
       if (fresh) {
         if (remotes.size >= cfg.maxRemotes) return drop();
-        r = { sid: env.sessionId, buf: [], win: [], seq: -1, mseq: -1 };
+        r = { sid: env.sessionId, buf: [], win: [], seq: -1, mseq: -1, cseq: -1 };
         remotes.set(env.sessionId, r);
       }
       r.win.push(t);

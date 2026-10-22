@@ -28,7 +28,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U022 | Config/env isolation | ✅ | Public web config in `src/net/firebase-config.js`; SAT-ONLINE-120: a test environment apart from the real one, the local Firebase emulators with `?emu`, honoured only on a page served from this computer, so the public site can't point at a test database (`unit/firebase-load`; [EMULATOR.md](EMULATOR.md)). A second Firebase project (staging) stays the owner's call (U327) |
 | U023 | Protocol versioning | ✅ | Envelope `v: 1`, `PROTOCOL_VERSION` (§25) |
 | U024 | Load testing swarm | ✅ | `unit/chaos` 100-client soak (in memory) |
-| U025 | World shard migration | ❌ | U009 is in, but there is still one shard (`main`); migration needs more than one |
+| U025 | World shard migration | 🟡 | SAT-ONLINE-148: duels, open PvP and raid hits can go through a WebSocket relay (`backend/ws-relay.cjs`, no dependencies, ready for Cloud Run: one room per shard, the account proven by its Firebase ID token, combat types only, size and rate limits) while presence, parties, chat and trades stay in the database (`transports.split`). The same contract tests run over the hub and the relay, and the same duel and PvP fight comes out the same over both (`unit/transport-ws`); the game's duel over the fake Firebase plus the relay (`regression/duel` `[ws]`); a dropped connection comes back. Behind `?combat=ws://…` on a page served from this computer only; without it nothing changes (the rollback). Left: a relay for the public site (Cloud Run needs billing, D3), moving the fight's logic into it, and more than one shard |
 | U026 | Safe Bairan | 🟡 | `SAFE_ZONES` (SAT-ONLINE-003): no duels and no open PvP inside (SAT-ONLINE-038 checks it on both sides), but it is still a client-side policy, not a server PvP authority (doc §59 C16; D3). The undefined interior strip is `void`, never safe (SAT-ONLINE-019, C06) |
 | U027 | Safe Winston | 🟡 | Same as U026; every town is in the list (Patrian, Reidan, Reinhardt too) |
 | U028 | Spawn shield | ⏳ | Only matters with open PvP (R5) |
@@ -43,7 +43,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U037 | Outlaw flag | ✅ | SAT-ONLINE-038: a kill makes the killer an outlaw for 10 min (`PlayerPublic.ol`, red name for everyone, `S.olT` kept across a reload); the kill counts only from a real, recent hit |
 | U038 | Bounty board | 🟡 | SAT-ONLINE-051 (#84): gold on an outlaw's head from its card, paid once to its PvP killer through the victim's own kill record (`bountyPaid`), taken back from the board; karma (SAT-ONLINE-052, #85): murders cost points and lengthen the red name, -5 is a murderer; gold has no ledger (D3) |
 
-**Totals:** ✅ 24 · 🟡 9 · ⏳ 3 · ❌ 2.
+**Totals:** ✅ 24 · 🟡 10 · ⏳ 3 · ❌ 1.
 
 ## Social U046–U065 (plan doc §35 [SOC])
 
@@ -203,7 +203,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U345 | Retention without grind | ✅ | SAT-ONLINE-130: the daily bounties' bonus was a streak that a missed day reset to 0; now it is +10% for each day you cleared all three in the last 7 days (up to +50%, `S.dlyW`), so a missed day takes nothing away, and an old save's streak becomes the days it stood for. The day is the world clock's (`today()` follows `wNow`), the same for everyone online. Daily caps on repeatable quests (B) as before (`regression/dailyweek`) |
 | U346 | Data export/delete | 🟡 | "Delete my online data" (SAT-ONLINE-015/066). The owner took out "Download my online data" (078) and the manual cloud Upload/Download on 2026-10-21, to cut the chance of duplicated data: characters move only by the automatic sync |
 | U347 | Disaster recovery | ⏳ | Database backups need the Blaze plan (owner) |
-| U348 | Shard scale-out | ⏳ | One shard (`main`) |
+| U348 | Shard scale-out | 🟡 | SAT-ONLINE-148: the combat relay keeps one room per world shard (`/w/<world>/<shard>`), 20 rooms at once without cross talk (`unit/transport-ws`). Left: a room allocator and session redirect, which need more than one shard (`main` today) |
 
 ### QA (plan §50)
 | ID | Item | Status | Where / what's left |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 75 · 🟡 17 · ⏳ 6 · ❌ 6 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 75 · 🟡 18 · ⏳ 5 · ❌ 6 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

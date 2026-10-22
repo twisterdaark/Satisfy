@@ -34,6 +34,15 @@
     if (!lanHost(host)) return null;
     return Object.freeze({ host: host, dbPort: 9000, authUrl: 'http://' + host + ':9099' });
   })();
+  // SAT-ONLINE-148 (plan U025): duels, open PvP and raid hits through a WebSocket relay (backend/ws-relay.cjs) instead of the
+  // database. With ?combat=ws://host:port, and only on a page served from this computer, to a relay on this computer or the
+  // local network (as ?emu above); a value set before this file loads is kept (the tests). Everywhere else it is off: a relay
+  // for the public site is the owner's call (Cloud Run needs billing, like Cloud Functions: D3).
+  if (ns.combatRelay === undefined) ns.combatRelay = (function () {
+    var L = root.location, h = L && L.hostname || '', m = /[?&]combat=(wss?):\/\/([A-Za-z0-9.-]{1,64})(?::(\d{1,5}))?\/?(?:&|$)/.exec(L && L.search || '');
+    if (!m || !/^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(h) || !lanHost(m[2].toLowerCase())) return null;
+    return m[1] + '://' + m[2].toLowerCase() + (m[3] ? ':' + m[3] : '');
+  })();
   function lanHost(x) {
     if (x === 'localhost' || /^[a-z0-9]([a-z0-9-]{0,62})?\.local$/.test(x)) return true;
     var p = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(x);

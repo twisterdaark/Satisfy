@@ -43,17 +43,19 @@
     return {
       peers: function () { return peers.length; },
       connect: function () {
-        var me = { handler: null };
+        var me = { handler: null, closed: false };
         peers.push(me);
         return {
           kind: 'memory',
-          // structured clone keeps receivers from sharing objects with the sender
+          // structured clone keeps receivers from sharing objects with the sender; closed, it sends nothing (SAT-ONLINE-148:
+          // the same contract as the others)
           send: function (env) {
+            if (me.closed) return;
             var copy = JSON.parse(JSON.stringify(env));
             peers.forEach(function (p) { if (p !== me && p.handler) p.handler(JSON.parse(JSON.stringify(copy))); });
           },
           onmessage: function (fn) { me.handler = fn; },
-          close: function () { me.handler = null; peers = peers.filter(function (p) { return p !== me; }); },
+          close: function () { me.closed = true; me.handler = null; peers = peers.filter(function (p) { return p !== me; }); },
         };
       },
     };

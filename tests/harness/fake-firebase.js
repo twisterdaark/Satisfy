@@ -897,19 +897,21 @@
   // what this page listens to and has armed for a disconnect now (SAT-ONLINE-112: a reconnect must not add listeners)
   F.active = () => ({ child: listeners.length, value: [...valueCbs.values()].reduce((n, a) => n + a.length, 0), conn: connCbs.length, discon: [...discon].sort() });
 
+  // a stand-in for the user's ID token (SAT-ONLINE-148: the combat relay in tests takes it as proof of the uid)
+  const idToken = (u) => u && Object.assign(u, { getIdToken: () => Promise.resolve('fake-id-token.' + u.uid) });
   const auth = {
     getAuth: () => ({}),
     // the real provider's setCustomParameters (37f15f6: prompt=select_account shows the account chooser every time)
     GoogleAuthProvider: function GoogleAuthProvider() { this.params = {}; this.setCustomParameters = (o) => { this.params = Object.assign({}, o); return this; }; },
     onAuthStateChanged: (a, cb) => {
-      if (!user) { try { user = JSON.parse(sessionStorage.getItem('fakeFirebaseUser')); } catch (e) { user = null; } }
+      if (!user) { try { user = idToken(JSON.parse(sessionStorage.getItem('fakeFirebaseUser'))); } catch (e) { user = null; } }
       setTimeout(() => cb(user), 0);
       return () => {};
     },
     signInWithPopup: (a, provider) => {
       F.authParams = provider && provider.params ? provider.params : null;
       if (F.popupBlocked) return Promise.reject(Object.assign(new Error('blocked'), { code: 'auth/popup-blocked' }));
-      user = { uid: F.nextUid || 'g' + rid(), displayName: F.nextName }; // nextUid: the same Google account on a second device
+      user = idToken({ uid: F.nextUid || 'g' + rid(), displayName: F.nextName }); // nextUid: the same Google account on a second device
       sessionStorage.setItem('fakeFirebaseUser', JSON.stringify(user));
       return Promise.resolve({ user });
     },

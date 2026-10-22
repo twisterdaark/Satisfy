@@ -32,7 +32,7 @@ Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it app
 | T23 | Privileged database write denied | ✅ | `unit/rules` (deny by default, owner-only paths, unknown fields rejected); every fake-backed regression test asserts `rejected = []` for the client's own writes |
 | T24 | Offline quests and forge still work | ✅ | `regression/golden`, `regression/ids` (forge through the real minigame, quest turn-in) |
 | T25 | Lag 300 ms and 1 s | ✅ | `unit/chaos` (presence, a party and a whole duel over 300 ± 60 ms and 1 s ± 200 ms) |
-| T26 | Reordering and duplication | ✅ | `unit/chaos` (jitter + 50% duplicates: each duel hit counts once), `unit/presence` (separate replay windows) |
+| T26 | Reordering and duplication | ✅ | `unit/chaos` (jitter + 50% duplicates: each duel hit counts once), `unit/presence` (separate replay windows), `unit/transport-ws` (combat on the relay later than a newer social message still counts; a replay on the relay is dropped) |
 | T27 | 1% loss | ✅ | `unit/chaos` (presence complete, positions converge) |
 | T28 | Simultaneous party invites | ✅ | `unit/chaos` (both bounce, the next invite works) |
 | T29 | Party leader disconnects | ✅ | `unit/party` (members leave when the leader disappears) |

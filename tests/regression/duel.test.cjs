@@ -1,11 +1,19 @@
 'use strict';
 // SAT-ONLINE-006 (doc §09 R4): a consent-based duel between two tabs with the real keys,
-// over the local transport and over the fake Firebase (inbox + rules).
+// over the local transport and over the fake Firebase (inbox + rules). SAT-ONLINE-148 (plan U025): the same fight with
+// the duel's messages through the WebSocket relay (backend/ws-relay.cjs) and the rest in the fake Firebase ('ws').
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
+const { createRelay } = require('../../backend/ws-relay.cjs');
 
-test.after(() => H.closeBrowser());
+// the relay takes the fake sign-in's ID token as proof of the uid, as it takes a real one with --project
+let relay = null, relayPort = 0;
+test.before(async () => {
+  relay = createRelay({ verify: (h) => Promise.resolve(h && /^fake-id-token\.(g[A-Za-z0-9]+)$/.test(h.token || '') ? h.token.slice(14) : null) });
+  relayPort = await relay.listen(0);
+});
+test.after(async () => { await H.closeBrowser(); await relay.close(); });
 
 const LOOK_A = { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 };
 const LOOK_B = { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 };
@@ -24,7 +32,10 @@ const text = (g, id) => g.eval((i) => document.getElementById(i).textContent, id
 
 // Both players in the plains west of Winston (not a safe zone), B 20 px right of A, no monsters around.
 async function pair(mode) {
-  const ctx = await H.newContext(mode === 'online' ? { scripts: [H.FAKE_FIREBASE] } : {});
+  const ws = mode === 'ws';
+  if (ws) mode = 'online';
+  const relayAt = { content: 'window.Satisfy = window.Satisfy || {}; window.Satisfy.combatRelay = "ws://127.0.0.1:' + relayPort + '";' };
+  const ctx = await H.newContext(mode === 'online' ? { scripts: ws ? [H.FAKE_FIREBASE, relayAt] : [H.FAKE_FIREBASE] } : {});
   const a = await H.openGame({ ctx, query: `?net=${mode}&slot=a` });
   const b = await H.openGame({ ctx, query: `?net=${mode}&slot=b` });
   if (mode === 'online') {
@@ -32,6 +43,7 @@ async function pair(mode) {
       await g.eval((name) => { window.__fakeRTDB.nextName = name; document.getElementById('onlineBtn').click(); }, n);
       await until(g, () => !!Satisfy.local.net());
     }
+    if (ws) for (const g of [a, b]) await until(g, () => window.__GNET && window.__GNET.combat() === 'open', 8000);
   }
   await H.newGame(a, LOOK_A);
   await H.newGame(b, LOOK_B);
@@ -63,8 +75,9 @@ async function startFight(a, b) {
   for (const g of [a, b]) await until(g, () => Satisfy.local.net().duel.phase === 'fight');
 }
 
-for (const mode of ['local', 'online']) {
+for (const mode of ['local', 'online', 'ws']) {
   test(`[${mode}] K challenges, Y accepts and readies, A wins on HP; nothing else changes`, async () => {
+    const s0 = relay.stats();
     const { ctx, a, b } = await pair(mode);
     try {
       const before = await b.eval(() => { const S = window.__G.S; return { gold: S.gold, items: JSON.stringify(S.items), mats: JSON.stringify(S.mats), hp: window.__G.P.hp }; });
@@ -83,11 +96,18 @@ for (const mode of ['local', 'online']) {
       const after = await b.eval(() => { const S = window.__G.S; return { gold: S.gold, items: JSON.stringify(S.items), mats: JSON.stringify(S.mats), hp: window.__G.P.hp }; });
       assert.deepEqual(after, before, 'a duel costs no gold, items, materials, durability or real HP');
       assert.equal(await b.eval(() => window.__G.mode), 'play', 'losing a duel is not a death');
-      if (mode === 'online') {
+      if (mode !== 'local') {
         assert.deepEqual(await a.eval(() => window.__fakeRTDB.rejected), []);
         assert.deepEqual(await b.eval(() => window.__fakeRTDB.rejected), []);
         const types = await a.eval(() => [...new Set(window.__fakeRTDB.log.filter((l) => l.op === 'push').map((l) => l.path.split('/')[0]))]);
-        assert.deepEqual(types, ['inbox']);
+        const s1 = relay.stats(), via = Object.keys(s1.byType).filter((k) => s1.byType[k] > (s0.byType[k] || 0)).sort();
+        if (mode === 'ws') {
+          assert.deepEqual(types, [], 'nothing of the duel in the database inbox');
+          assert.deepEqual(via, ['duel.accept', 'duel.challenge', 'duel.end', 'duel.hit', 'duel.hp', 'duel.ready'], 'all of it through the relay');
+        } else {
+          assert.deepEqual(types, ['inbox']);
+          assert.deepEqual(via, [], 'the relay is not used unless asked for');
+        }
         // SAT-ONLINE-053: the duel counts in this month's arena season: 1000 each before, +-16 after (Elo, K 32)
         await until(a, () => window.__GR.mine().then((v) => !!v), 8000).catch(() => {});
         for (let i = 0; i < 40; i++) { const ok = (await a.eval(() => window.__GR.mine())) && (await b.eval(() => window.__GR.mine())); if (ok) break; await settle(a, b); }
