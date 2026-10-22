@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22bountyonce', ver: '1.82', d: '2026-10-22', hide: 1,
+      ar: ["للتيستات: تيست بيتأكد إن نفس الجايزة على راس الخارج عن القانون مابتتدفعش مرتين، لا للقاتل ولا لحد تاني"],
+      en: ["For the tests: a test that the same bounty on an outlaw's head is never paid twice, to the killer or anyone else"] },
     { v: '2026-10-22achd', ver: '1.81', d: '2026-10-22',
       ar: ["إنجازات الاستكشاف الستة (أول خطوات، دليل الطرق، شاف الدنيا، مكتشف المناطق، رسام الخرايط، صياد الكنوز) بقى ليها وصف بدل الكود زي achD_zones30"],
       en: ["The six exploring achievements (First Steps, Pathfinder, Seen the World, Region Hunter, Cartographer, Treasure Hunter) have a description instead of a raw key like achD_zones30"] },

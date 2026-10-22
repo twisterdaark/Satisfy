@@ -70,6 +70,12 @@ test('online: a bounty on an outlaw goes to the player who kills it, once; a bou
     await until([a], () => /Carim claimed a 500 gold bounty on an outlaw/.test(window.__toastLog.join(' | ') + document.body.textContent), 10000);
     await settle(a, b, c);
     assert.equal(await c.eval(() => window.__G.S.gold), 500, 'paid once');
+    // plan U038 "the same bounty is never paid twice" (SAT-ONLINE-135): the rules refuse a second claim, by anyone
+    const write = (g, u) => g.eval(async (x) => { const F = window.__GLD.fb(), D = F.m.database; for (const k in x) if (x[k] && x[k].t === 'SV') x[k].t = D.serverTimestamp(); try { await D.update(D.ref(F.db), x); return 'ok'; } catch (e) { return 'no'; } }, u);
+    const paid = await c.eval(() => { for (const [k, v] of window.__fakeRTDB.data) if (/^bountyPaid\//.test(k)) return { bid: k.split('/')[1], v }; return null; });
+    assert.ok(paid && paid.v.by === 'gBnC3' && paid.v.g === 500, JSON.stringify(paid));
+    for (const [g, uid] of [[c, 'gBnC3'], [a, 'gBnA1']]) assert.equal(await write(g, { ['bountyPaid/' + paid.bid]: { by: uid, kid: paid.v.kid, g: 500, t: 'SV' } }), 'no', 'a second claim by ' + uid);
+    assert.equal(await write(c, { ['bountyPaid/' + paid.bid]: null }), 'no', 'nor is the claim taken away to claim again');
 
     // A sets another one and takes it back from the board: the gold comes back
     assert.equal(await a.eval(() => window.__GB.post('gBnB2', 100)), true);
@@ -81,7 +87,7 @@ test('online: a bounty on an outlaw goes to the player who kills it, once; a bou
     await a.step(1);
     await a.eval(() => window.__G.pickOpt(0));
     await until([a], () => window.__G.S.gold === 1500 && window.__GB.on('gBnB2') === 0);
-    for (const g of [a, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
+    for (const g of [a, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/bountyPaid/.test(x))), []);
     for (const g of [a, b, c]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
