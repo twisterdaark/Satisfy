@@ -1,6 +1,6 @@
 # Online cost model (plan doc §28) — with this build's real numbers
 
-Owner: Claude-A · SAT-ONLINE-008, updated by SAT-ONLINE-011 and SAT-ONLINE-014 · Regenerate the table with `node tools/cost-model.cjs`.
+Owner: Claude-A · SAT-ONLINE-008, updated by SAT-ONLINE-011, SAT-ONLINE-014 and SAT-ONLINE-113 · Regenerate the table with `node tools/cost-model.cjs`.
 
 The doc's example is illustrative: 120-byte events, 8 recipients. This build measures the real
 presence node instead (`Satisfy.net.toPlayerPublic` + `seq` + server time, as `src/net/firebase.js`
@@ -53,10 +53,25 @@ Spark gives **10 GB/month** of downloads and **100 simultaneous connections** (d
     The range has no borders and keeps one node path. y is not filtered (RTDB queries one child); the
     map is 724 × 144 tiles, so x carries almost all of the distance.
 
+## Measured: 100 clients (SAT-ONLINE-113, plan U372)
+
+`tests/unit/load100` runs 100 real presence transports (`src/net/firebase.js`) over one in-process database
+(`tests/harness/node-rtdb.cjs`, with range and party queries), with the game's online settings, for 60 simulated
+seconds. Sixty players stand in four towns and forty are spread over the map. Half walk at 150 px/s, and ten
+parties of three are scattered.
+
+| Run | k (average within 800 px) | download, all clients | the model with that k | GB per hour |
+|---|---|---|---|---|
+| interest (800 px, re-centred every 400 px) | 14.4 | 522 kB/s (4,400 child events/s) | 528 kB/s | 1.88 |
+| whole shard | 99 | 2,800 kB/s (26,000 events/s) | 2,960 kB/s | 10.1 |
+
+- **The model holds.** It counts bytes the same way: the same framing, and a change costs the fields written. So the run checks the code's side of the model: how often it sends, how many players hear each one, and how often queries re-centre. The model is within 1% with interest and about 5% without.
+- **Town crowds raise k** from the table's 10 to 14. A full 100-player shard is then about 1.9 GB an hour, about 5 hours a month on Spark.
+- **Everyone sees who they should.** Everyone within 350 px is seen, nobody past 1,250 px is, and every party member is seen wherever they are. Each client holds at most 7 listeners (3 for the range, 3 for the party, 1 for the inbox), and the run takes about 4 s of CPU.
+
 ## Next steps
 
-1. **Measure k.** The table assumes 5 players near each one in a 20-player shard. Town crowds are the
-   worst case: in a single town k is still N − 1.
+1. **Measure k in play.** The run above gives about 14 for 100 players gathered in four towns. With everyone in a single town, k is still N − 1.
 2. **Past that, alternative B in the doc:** Firebase Auth plus a WebSocket shard on Cloud Run (Blaze,
    owner decision). Fan-out costs are then server CPU instead of database downloads.
 

@@ -46,7 +46,7 @@ Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it app
 | T37 | Spectators | 🟡 | `regression/duel` (U034, SAT-ONLINE-013: a third player sees both duelists' HP and the ring). No free spectator camera. |
 | T38 | Frame rate on mobile | ❌ | Needs a device lab. Mobile is playable since SAT-ONLINE-017 (touch controls, `regression/touch`), so the owner's phone check is the first real measurement. |
 | T39 | 8-hour session | ❌ | A long soak needs a real browser and time. |
-| T40 | 100-client soak | ✅ | `unit/chaos` (100 presence clients, a simulated minute: tables bounded, under 30 s CPU) |
+| T40 | 100-client soak | ✅ | `unit/chaos` (100 presence clients, a simulated minute: tables bounded, under 30 s CPU); `unit/load100` (100 real Firebase transports with interest management: who sees whom, downloads against the cost model) |
 
 **Totals:** ✅ 27 · 🟡 6 · ⏳ 5 · ❌ 2 (T38, T39 need devices and time, not code).
 
