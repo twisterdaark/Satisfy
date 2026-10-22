@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22weekbonus', ver: '1.58', d: '2026-10-22',
+      ar: ["مهام اليوم: الزيادة في الجوايز (+10% لكل يوم، لحد +50%) بقت بتتحسب من الأيام اللي خلصت فيها المهام التلاتة في آخر 7 أيام، بدل السلسلة اللي كانت بترجع صفر لو فوّت يوم. يعني لو غبت يوم مبتخسرش حاجة"],
+      en: ["Daily bounties: the reward bonus (+10% a day, up to +50%) now counts the days you cleared all three in the last 7 days, instead of a streak that went back to zero after one missed day. Missing a day costs you nothing"] },
     { v: '2026-10-22v157', ver: '1.57', d: '2026-10-22',
       ar: ['شاشة التحميل: النقط والدواير بقت بتتحرك فعلا وهي بتحمّل (كانت بتقف لأن تحميل اللعبة كان شاغل المتصفح). بتطلع لفوق وتتمايل وتصغر لحد ما تختفي','سجل التحديثات بقى فيه بس اللي يهم اللاعبين: سطور الأدوات والتيستات وحاجات صاحب اللعبة مستخبية'],
       en: ['Loading screen: the sparks and rings now really move while the game loads (they stood still because loading kept the browser busy). They rise, sway and shrink until they vanish','The update log now shows only what matters to players: lines about tools, tests and the owner\'s own commands are hidden'] },
@@ -58,10 +61,6 @@
       ar: ['شاشة التحميل: النقط والدواير بقت بتطلع من تحت لفوق وهي بتتمايل، وبتصغر وتبهت لحد ما تختفي، وفيه منها أكتر على الجناب. وبقت بدقة الشاشة كاملة بدل ما كانت متمطوطة'],
       en: ['Loading screen: the sparks and rings now rise from the bottom with a gentle sway, shrinking and fading until they vanish, with more of them along the sides. They are drawn at full screen resolution instead of stretched'] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22', hide: 1,
-    { v: '2026-10-22weekbonus', ver: '1.42', d: '2026-10-22',
-      ar: ["مهام اليوم: الزيادة في الجوايز (+10% لكل يوم، لحد +50%) بقت بتتحسب من الأيام اللي خلصت فيها المهام التلاتة في آخر 7 أيام، بدل السلسلة اللي كانت بترجع صفر لو فوّت يوم. يعني لو غبت يوم مبتخسرش حاجة"],
-      en: ["Daily bounties: the reward bonus (+10% a day, up to +50%) now counts the days you cleared all three in the last 7 days, instead of a streak that went back to zero after one missed day. Missing a day costs you nothing"] },
-    { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },
     { v: '2026-10-22v140', ver: '1.40', d: '2026-10-22',
