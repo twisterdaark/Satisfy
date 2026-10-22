@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22bargear', ver: '1.96', d: '2026-10-22',
+      ar: ["الخواتم والسلاح والدروع وكل حاجة بتتلبس، والأكل والجرعات واللفايف، بقت تتحط في الشريط الأساسي اللي تحت كمان، بالسحب من الشنطة وهي مفتوحة",
+        "تدوس على قطعة في الشريط تلبسها، وتدوس تاني تقلعها وترجع القطعة اللي كانت لابسها قبلها. والقطعة اللي لابسها ليها إطار أخضر، والأكل والجرعات عليها العدد",
+        "الشنطة بتتحرك: اسحبها من شريط العنوان لأي مكان، وبتفتح في نفس المكان المرة الجاية. والمعدات والحالة كمان. و\"إعادة الواجهة\" بترجعهم مكانهم",
+        "البيست ماستر: الذئب بقى ذئب رمادي، والذئب والدب والنسر اترسموا من جديد بحركة حقيقية: الذئب بيجري وديله بيتهز، والدب بيتمايل في مشيته، والنسر بيرفرف وبيفرد جناحاته لما يقف",
+        "وكل تحول بيحارب بطريقة مختلفة: عضة الذئب بتنزّف وكل تالت عضة بتعض مرتين، والدب صحته +30% وبياخد ضرر أقل 40% وضربته بتكنس كل اللي قدامه وتزقهم وتشلهم، والنسر بينقض على الوحوش وبيغطس عليهم بس بياخد ضرر أكتر 25%"],
+      en: ["Rings, weapons, armour and anything you wear, and food, potions and scrolls, now go on the main bar too, dragged from the open bag",
+        "Press a piece on the bar to put it on, press again to take it off and put back what you wore before. A worn piece has a green frame, and food and potions show how many are left",
+        "The bag moves: drag it by its title bar anywhere, and it opens there next time. So do the equipment and status windows. \"Reset the HUD\" puts them back",
+        "Beast Master: the wolf is now a grey wolf, and the wolf, the bear and the eagle are drawn anew with real motion: the wolf trots with its tail swinging, the bear lumbers, the eagle beats its wings and glides",
+        "Each form fights its own way: the wolf's bites bleed and every third bite bites twice; the bear has 30% more health, takes 40% less damage and its swipe sweeps, knocks back and staggers everything in front of it; the eagle swoops onto foes and dives, but takes 25% more damage"] },
     { v: '2026-10-22rings', ver: '1.95', d: '2026-10-22',
       ar: ["تقدر تلبس لحد 10 خواتم زي الرواية (\"العشر خواتم اللي في صوابع كراوجل\" وبولد): خانة الإكسسوار و9 خانات خواتم تحت المعدات، والخواتم بس هي اللي بتتلبس فيها",
         "الحاجة اللي بتعملها بنفسك عند السندان أو الخياطة بتفضل بالتقييم اللي طلعت بيه، بدل ما القطع المسماة كانت بتتحفظ فريدة دايمًا",
