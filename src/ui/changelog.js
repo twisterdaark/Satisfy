@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22rckey', ver: '1.67', d: '2026-10-22',
+      ar: ["وصفات أطقم الوحوش الإلهية (النمر الأبيض، التنين الأزرق، العنقاء الحمرا، السلحفاة السودا) بقت مقفولة لحد ما تجيب النَّفَس بتاعها أول مرة. أول ما يدخل شنطتك، كل وصفات طقمه بتتفتح مرة واحدة. اللي كانت مفتوحة معاك من غير ما تجيبه رجعت مقفولة"],
+      en: ["The divine-beast set recipes (White Tiger, Blue Dragon, Red Phoenix, Black Tortoise) stay locked until you get that beast's breath for the first time. The moment it is in your bag, its whole set opens at once. Ones you had without ever getting the breath are locked again"] },
     { v: '2026-10-22qarrow', ver: '1.66', d: '2026-10-22',
       ar: ["سهم المهمات بقى ناعم ومش مبكسل، ورقم المسافة أوضح وبعيد عن السهم شوية",
         "زرار 📍 جنب عنوان الكويستات بيخفي سهم المهمات ويظهره",

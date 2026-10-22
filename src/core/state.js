@@ -69,6 +69,8 @@
     'hall',
     // recipes learned and recipe use counts (main rcLearn)
     'rcK', 'rcN',
+    // divine-beast breaths ever held, which open their set recipes (owner 2026-10-22)
+    'kmat',
     // map cells seen (fog of war, Nitro's feedback): base64 bitset
     'fog', 'sec', 'respec', 'bank',
     // skill experience that sets each skill's level (owner 2026-10-19), and its format (2 = experience, 2026-10-20)
