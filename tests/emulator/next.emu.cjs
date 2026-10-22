@@ -110,3 +110,29 @@ test('#129: the auction: your own listing, bought once by someone else with the 
   await no(db(B).ref('auctionPaid/' + A).once('value'), 'nor reads it');
   await yes(db(A).ref('auctionPaid/' + A + '/' + L).remove(), 'A collects');
 });
+
+test('#140: the city tax: set by the master of the castle guild, at most 10%, once an hour; paid into it by others', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => { await ctx.database().ref('world/satisfy/own/castle').set({ g: G, n: 'Dragons', c: '#ff0000', h: 'Ahmed', uid: A, t: 1 }); });
+  const tax = (by, r) => db(by).ref('world/satisfy/tax').set({ g: G, r, by, t: SV });
+  await no(tax(B, 5), 'a member does not set it');
+  await no(tax(A, 11), 'at most 10%');
+  await yes(tax(A, 5), 'the master of the castle guild sets 5%');
+  await no(tax(A, 6), 'once an hour');
+  await yes(db(C).ref('world/satisfy/tax').once('value'), 'everyone reads it');
+  await no(db(B).ref('guildTax/' + G + '/x_b1').set({ g: 10, by: B, n: 'Bassem', t: SV }), 'members pay no tax to their own guild');
+  await yes(db(C).ref('guildTax/' + G + '/x_c1').set({ g: 10, by: C, n: 'Carim', t: SV }), 'C pays the tax of a purchase');
+  await no(db(C).ref('guildTax/' + G + '/x_c2').set({ g: 100001, by: C, n: 'Carim', t: SV }), 'within the bounds');
+  await no(db(C).ref('guildTax/' + G + '/x_c1').remove(), 'nobody takes it back');
+});
+
+test('#144: a caravan: one at a time, delivered after its time and before it spoils, with the same load', async () => {
+  const car = { id: 'v_1', f: 'zWin', to: 'zReid', g: 400, r: 1, md: 60000, t: SV };
+  await no(db(B).ref('caravans/' + A).set(car), 'nobody sends a caravan in another name');
+  await no(db(A).ref('caravans/' + A).set(Object.assign({}, car, { to: 'zWin' })), 'somewhere else');
+  await no(db(A).ref('caravans/' + A).set(Object.assign({}, car, { md: 1000 })), 'a minute at least');
+  await yes(db(A).ref('caravans/' + A).set(car), 'A sends one');
+  await no(db(A).ref('caravans/' + A).set(Object.assign({}, car, { g: 900 })), 'one at a time, the load is not changed');
+  await no(db(A).ref().update({ ['caravans/' + A]: null, ['caravanDone/' + A + '/v_1']: { f: 'zWin', to: 'zReid', g: 400, r: 1, t: SV } }), 'not delivered before its time');
+  await no(db(B).ref('caravans/' + A).once('value'), 'others do not read it');
+  await yes(db(A).ref('caravans/' + A).remove(), 'dropped');
+});
