@@ -469,6 +469,12 @@
   }
   // SAT-ONLINE-054: world/satisfy/legends/{k} {uid, n, t}: taken once, then only its owner changes or frees it
   function worldRules(seg, v) {
+    if (seg[2] === 'own') { // world/satisfy/own/{k}: who holds the castle and each territory. An online guild (g_) only by its own member; a canon guild (a raid on yours, a siege) only by the guild that held it (Claude-B's review of #140)
+      if (!user || seg.length !== 4 || seg[1] !== 'satisfy' || !/^[a-z0-9_]{1,24}$/.test(seg[3]) || !v) return 'PERMISSION_DENIED: own ' + seg.join('/');
+      const old = data.get(seg.join('/')), g = String(v.g);
+      if (!(/^g_/.test(g) ? data.has('guildMembers/' + g + '/' + user.uid) : (!old || data.has('guildMembers/' + old.g + '/' + user.uid)))) return 'PERMISSION_DENIED: own not your guild';
+      return Object.keys(v).sort().join(',') === 'c,g,h,n,t,uid' && /^[A-Za-z0-9_:.-]{1,48}$/.test(g) && typeof v.n === 'string' && v.n.length >= 1 && v.n.length <= 24 && /^#[0-9a-fA-F]{6}$/.test(v.c) && typeof v.h === 'string' && v.h.length <= 24 && v.uid === user.uid && isSV(v.t) ? null : 'own values';
+    }
     if (seg[2] === 'tax') { // SAT-ONLINE-106: the castle city's tax, set by the master of the guild holding the castle, at most 10%, once an hour
       if (!user || seg.length !== 3 || seg[1] !== 'satisfy' || v === null) return 'PERMISSION_DENIED: tax';
       const own = data.get('world/satisfy/own/castle'), old = data.get('world/satisfy/tax');

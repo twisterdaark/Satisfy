@@ -3886,7 +3886,7 @@ function honOpts(who){const z=townOfNpc(who),rk=repRank(z),D=dlyS(),h=(D.hon||{}
  return {l:t('oHon',{it:t(k),g}),ic:k,st:t('honLeft',{r:t('rep'+H.r),n:left}),poor:left<=0||S.gold<g,f:()=>honBuy(who,k)};});}
 function honBuy(who,k){const z=townOfNpc(who),H=HONS[k],D=dlyS(),g=price(who,H.g);D.hon=D.hon||{};const h=D.hon[z]=D.hon[z]||{};
  if((h[k]||0)>=H.n){SFX.deny();return shopD(who,t('honOut'));}if(S.gold<g){SFX.deny();return shopD(who,t('noGold'));}
- S.gold-=g;h[k]=(h[k]||0)+1;addMat(k,1);boughtFx(k,1,g);save(true);shopD(who,t('honThanks'));}
+ S.gold-=g;taxNote(who,g);h[k]=(h[k]||0)+1;addMat(k,1);boughtFx(k,1,g);save(true);shopD(who,t('honThanks'));}
 function restOpt(who,g){const free=repRank(townOfNpc(who))>=4,p=free?0:price(who,g);return {l:free?t('oRestFree'):t('oRest',{g:p}),f:()=>rest(who,p)};}
 // what each rank of the town gives (status window)
 const repPerk=r=>t('repP'+r);
@@ -4875,7 +4875,7 @@ function invSalv(s){if(!s.it){toast(t('salvNo'),'warn');SFX.deny();return;}if(s.
  const w=INVX.salv,it=s.it,o=salvYield(it,w),g=salvFee(it,w);if(!Object.keys(o).length){toast(t('salvNothing'),'warn');SFX.deny();return;}
  cfm(t('salvT'),t('salvQ',{it:`<b class="rt rt${it.r||0}">${esc(inm(it))}</b>`,m:esc(salvTxt(o))})+(g?'<br>'+t('salvFeeT',{g}):'')+(salvSelf(w)?'<br><small>'+t('salvRisk',{n:Math.round(salvFail()*100)})+'</small>':''),t('salvY'),()=>doSalv(it,w));}
 function doSalv(it,w){const i=S.items.indexOf(it);if(i<0||isEq(it))return;const o=salvYield(it,w),g=salvFee(it,w);
- if(g){if(S.gold<g){SFX.deny();toast(t('salvPoor',{g}),'warn');return;}S.gold-=g;}
+ if(g){if(S.gold<g){SFX.deny();toast(t('salvPoor',{g}),'warn');return;}S.gold-=g;taxNote(w,g);}
  if(salvSelf(w)&&rand()<salvFail()){it.dur=Math.max(0,durOf(it)-20);SFX.deny();toast(t('salvFail'),'warn');renderInv();save(true);return false;}
  S.items.splice(i,1);for(const k in o)addMat(k,o[k]);SFX.slam();vfx('forge',P.x,P.y-10);toast(t('salvDone',{it:inm(it),m:salvTxt(o)}),'good');
  if(salvSelf(w)&&salvUnd(it)){S.und=S.und||{};const u0=undOf(it.id),u=Math.min(100,u0+(S.cls==='pagma'?34:20));S.und[it.id]=u;
@@ -4902,7 +4902,7 @@ function openApr(who){if(!canApr()){SFX.deny();toast(t('aprPg'),'warn');return;}
 function aprTip(s){if(!s.it)return '';if(!aprNeed(s.it))return `<br><small style="color:#9fb4c8">${t(s.it.apr?'aprDone':'aprNo')}</small>`;const g=aprFee(s.it,INVX.apr);
  return `<br><small style="color:#f2c14e">${t('aprClick')}${g?' · '+t('salvFeeT',{g}):''}</small>`+(aprSelf(INVX.apr)&&salvUnd(s.it)?`<br><small style="color:#bfe0ff">${t('undL',{n:undOf(s.it.id)})}</small>`:'');}
 function invApr(s){if(!s.it||!aprNeed(s.it)){toast(t(s.it&&s.it.apr?'aprDone':'aprNo'),'warn');SFX.deny();return;}doApr(s.it,INVX.apr);}
-function doApr(it,w){if(!canApr()||!aprNeed(it))return null;const g=aprFee(it,w);if(g){if(S.gold<g){SFX.deny();toast(t('salvPoor',{g}),'warn');return null;}S.gold-=g;}
+function doApr(it,w){if(!canApr()||!aprNeed(it))return null;const g=aprFee(it,w);if(g){if(S.gold<g){SFX.deny();toast(t('salvPoor',{g}),'warn');return null;}S.gold-=g;taxNote(w,g);}
  it.apr=1;const has=rand()<aprChance(it);if(has)it.hid=hidRoll(it);if(has&&it.slot==='w'&&rand()<.4&&(it.wp||[]).length<4){const p=wpOne(Math.max(2,it.r||0),(it.wp||[]).map(x=>x.k),it);p.h=1;(it.wp=it.wp||[]).push(p);setTimeout(()=>toast(t('wpHid',{p:wpTxt(p)}),'good'),700);}
  if(has){SFX.quest();toast(t('aprHas'),'good');setTimeout(()=>toast(t('aprUpd',{it:inm(it)})+' '+hidTxt(it.hid),'good'),350);}else{SFX.click();toast(t('aprNone'));}
  if(aprSelf(w)&&salvUnd(it)&&undOf(it.id)<100){S.und=S.und||{};const u=Math.min(100,undOf(it.id)+(S.cls==='pagma'?17:10));S.und[it.id]=u;
@@ -5985,24 +5985,26 @@ window.__GL={become:k=>({pagma:becomePagma,braham:becomeBraham,muller:becomeSain
 const OWNG={};let OWN=null,ownOff=null;
 function ownSub(){if(ownOff||!FB||!netUser||!NET||!WS)return;const D=FB.m.database;if(!D.onValue){ownOff=1;return;}
  try{ownOff=D.onValue(D.ref(FB.db,'world/satisfy/own'),s=>{OWN=s.val()||{};ownApply();},()=>{OWN=null;});}catch(e){ownOff=1;}
- try{D.onValue(D.ref(FB.db,'world/satisfy/tax'),s=>{const v=s.val();TAXR=v&&typeof v==='object'&&typeof v.g==='string'?{g:v.g,r:Math.max(0,Math.min(TAX_MAX,v.r|0)),t:+v.t||0}:null;},()=>{TAXR=null;});}catch(e){}} // SAT-ONLINE-106
+ try{if(typeof taxOff==='function')taxOff();taxOff=D.onValue(D.ref(FB.db,'world/satisfy/tax'),s=>{const v=s.val();TAXR=v&&typeof v==='object'&&typeof v.g==='string'?{g:v.g,r:Math.max(0,Math.min(TAX_MAX,v.r|0)),t:+v.t||0}:null;},()=>{TAXR=null;});}catch(e){}} // SAT-ONLINE-106 (one listener: Claude-B's review)
+addEventListener('pagehide',()=>{try{taxTick(true);}catch(e){}}); // leaving: what is owed goes out (the next start sends what didn't)
+function taxStop(){taxTick(true);if(typeof taxOff==='function')try{taxOff();}catch(e){}taxOff=null;TAXR=null;}
 /* the castle city's tax (SAT-ONLINE-106, plan U226). The master of the guild holding Reidan Castle sets a tax on what
    Reidan's people sell, at most 10% (TAX_MAX; the rules refuse more) and changed at most once an hour. A buyer from
    outside that guild pays it on top of the price; it goes to the guild as entries (guildTax/{gid}/{id} {g, by, n, t},
    paid every 20 s or on leaving), which any member collects into the treasury, each once (the rules check the gold
    added is the entry's). The guild's own members pay none. Offline, or a tax set by a guild that no longer holds the
    castle, costs nothing. */
-var TAXR=null,TAXQ=0,TAXT=0,taxBusy=0;const TAX_MAX=10,TAX_TOWN='zReid';
+var TAXR=null,TAXQ=0,TAXT=0,taxBusy=0,taxOff=null;const TAX_MAX=10,TAX_TOWN='zReid';
 Object.assign(STR.ar,{txLine:'ضريبة مدينة ريدان: {r}% (لجيلد {g})',txSet:'ضريبة المدينة: {r}%',txSetQ:'ضريبة على اللي بيتباع في ريدان لغير أعضاء الجيلد (لحد 10%). تتغير مرة كل ساعة',txSetR:'{r}%',txDone:'ضريبة المدينة بقت {r}%',txSoon:'الضريبة اتغيرت من شوية. جرّب بعد ساعة',txCol:'اجمع الضرايب ({g} دهب)',txGot:'دخل الخزينة {g} دهب ضرايب',txPaid:'ضريبة ريدان {r}%'});
 Object.assign(STR.en,{txLine:'Reidan city tax: {r}% (to {g})',txSet:'City tax: {r}%',txSetQ:"A tax on what Reidan's people sell to anyone outside your guild (up to 10%). It changes once an hour",txSetR:'{r}%',txDone:'The city tax is now {r}%',txSoon:'The tax changed recently. Try again in an hour',txCol:'Collect the taxes ({g} gold)',txGot:'{g} gold of taxes went into the treasury',txPaid:'Reidan tax {r}%'});
 // the rate a buyer pays at this seller (0: no tax here, now, for you)
 function taxRate(who){const T=TAXR;if(!T||!T.r||!FB||!netUser||!WS||!WS.castle||WS.castle.own!==T.g||S&&S.guild===T.g||!who||townOfNpc(who)!==TAX_TOWN)return 0;return T.r;}
 // a purchase of `paid` gold (with the tax in it) at `who`: its tax is owed to the castle guild
-function taxNote(who,paid){const r=taxRate(who);if(!r||!(paid>0))return;TAXQ+=paid-Math.round(paid/(1+r/100));}
-function taxTick(force){if(TAXQ<1||taxBusy||!TAXR||!FB||!netUser)return;const now=performance.now();if(!force&&now-TAXT<20000)return;TAXT=now;
+function taxNote(who,paid){const r=taxRate(who);if(!r||!(paid>0))return;TAXQ+=paid-Math.round(paid/(1+r/100));if(S)S.taxQ=Math.round(TAXQ);} // kept in the save until it is paid
+function taxTick(force){if(TAXQ<1&&S&&!S.__demo&&S.taxQ>0)TAXQ=S.taxQ;if(TAXQ<1||taxBusy||!TAXR||!FB||!netUser)return;const now=performance.now();if(!force&&now-TAXT<20000)return;TAXT=now;
  const g=Math.min(100000,Math.round(TAXQ)),D=FB.m.database,id='x_'+String(netUser.uid).replace(/[^A-Za-z0-9]/g,'').slice(0,40)+'_'+Date.now().toString(36),u={};if(g<1)return;
  u['guildTax/'+TAXR.g+'/'+id]={g,by:netUser.uid,n:String(netId||S.look.n||'?').slice(0,24),t:D.serverTimestamp()};taxBusy=1;
- D.update(D.ref(FB.db),u).then(()=>{TAXQ=Math.max(0,TAXQ-g);},()=>{TAXQ=0;}).finally(()=>{taxBusy=0;});} // refused (the castle changed hands): owed to nobody
+ D.update(D.ref(FB.db),u).then(()=>{TAXQ=Math.max(0,TAXQ-g);if(S)S.taxQ=Math.round(TAXQ);},()=>{if(!TAXR||!WS||!WS.castle||WS.castle.own!==TAXR.g){TAXQ=0;if(S)S.taxQ=0;}}).finally(()=>{taxBusy=0;});} // refused: kept for the next try, unless the castle changed hands (then it is owed to nobody)
 // the master of the castle guild sets it
 function taxSetD(){const st=GUILD&&GUILD.state(),T=TAXR;if(!st||!st.gid||WS.castle.own!==st.gid||!gCan('perm'))return guildPanel();const cur=T&&T.g===st.gid?T.r:0;
  dialog('guild',[t('txSetQ')],null,[...[0,2,5,8,10].map(r=>({l:t('txSetR',{r})+(r===cur?' ✓':''),f:()=>taxSet(r)})),{l:t('oBack'),f:guildPanel}]);}
@@ -10229,7 +10231,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
 function netStop(){if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(()=>{});}LFGK=null;try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
- if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
+ taxStop();if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
 // what the game itself keeps online under the account, for "Delete my online data" (SAT-ONLINE-066): presence, the
 // rankings (055), this and last month's arena rating (053), the weekly lockouts (059), the group finder entry (073). A held legend is freed too.
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
@@ -10292,7 +10294,7 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
 function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF=true; // from now on this tab never saves: the newer tab owns the save (review of #30)
- try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
+ try{NETTR.release();}catch(e){}taxStop();if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
 // another Google account on this device (owner request): the chooser opens straight from the click, the new

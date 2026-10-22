@@ -269,3 +269,23 @@ test('real rules (SAT-ONLINE-106): the castle city tax is at most 10%, set once 
   assert.equal(D.w('uC', bank(50)), 'no', 'once');
   assert.equal(D.st.guildBank[G].in, 50);
 });
+
+test("real rules (Claude-B's review of #140): who holds the castle is written only by that guild's member, or by the guild it was taken from", () => {
+  const D = db(), G = 'g_uA', G2 = 'g_uB';
+  D.set({
+    guilds: { [G]: { name: 'Crown', nk: 'crown', master: 'uA', col: '#5aa0ff', t: NOW }, [G2]: { name: 'Wolves', nk: 'wolves', master: 'uB', col: '#e05a5a', t: NOW } },
+    guildNames: { crown: G, wolves: G2 },
+    guildMembers: { [G]: { uA: { rk: 'm', n: 'Ahmed', c: 0, on: NOW } }, [G2]: { uB: { rk: 'm', n: 'Bassem', c: 0, on: NOW } } },
+    world: { satisfy: { own: { castle: { g: G, n: 'Crown', c: '#5aa0ff', h: 'Ahmed', uid: 'uA', t: NOW } } } },
+  });
+  const own = (g, uid, n = 'X') => ({ 'world/satisfy/own/castle': { g, n, c: '#5aa0ff', h: 'h', uid, t: SV } });
+  assert.equal(D.w('uB', own(G, 'uB')), 'no', "Bassem can't write the castle to a guild he isn't in");
+  assert.equal(D.w('uC', own(G2, 'uC')), 'no', 'nor can a player in no guild');
+  assert.equal(D.w('uB', tax(G2, 'uB')), 'no', 'nor set the tax before his guild holds it');
+  assert.equal(D.w('uB', own(G2, 'uB')), 'ok', 'his own guild takes it (a capture: the client says so, as before)');
+  // a canon guild's raid or siege takes it from the guild holding it, written by that guild's member
+  assert.equal(D.w('uA', own('bd', 'uA')), 'no', 'not by a guild that lost it before');
+  assert.equal(D.w('uB', own('bd', 'uB')), 'ok', 'by the guild it is taken from');
+  assert.equal(D.w('uC', own('rt', 'uC')), 'no', "and not by anyone else");
+  function tax(g, by) { return { 'world/satisfy/tax': { g, r: 10, by, t: SV } }; }
+});

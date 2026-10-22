@@ -1239,7 +1239,7 @@
         "own": {
           ".read": "auth != null",
           "$k": {
-            ".write": "auth != null",
+            ".write": "auth != null && ((newData.child('g').val().matches(/^g_/) && root.child('guildMembers').child(newData.child('g').val()).child(auth.uid).exists()) || (!newData.child('g').val().matches(/^g_/) && (!data.exists() || root.child('guildMembers').child(data.child('g').val()).child(auth.uid).exists())))",
             ".validate": "$k.matches(/^[a-z0-9_]{1,24}$/) && newData.hasChildren(['g', 'n', 'c', 'h', 'uid', 't'])",
             "g": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_:.-]{1,48}$/)" },
             "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
