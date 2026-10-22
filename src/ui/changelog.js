@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22acctdel', ver: '1.86', d: '2026-10-22',
+      ar: ["لو خرجت من حسابك أو مسحت بياناتك أونلاين وإنت جوه العالم، الوحوش بقت بتكمل عادي (كان بيطلع إيرور)"],
+      en: ["Signing out or deleting your online data while in the world no longer breaks the monsters around you (it showed an error)"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",

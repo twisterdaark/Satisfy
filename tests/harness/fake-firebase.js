@@ -833,6 +833,8 @@
       return acked();
     },
     remove: (r) => {
+      // a test can make some removes fail as a lost connection would (SAT-ONLINE-143): F.failRemove = 'regexp source'
+      if (F.failRemove && new RegExp(F.failRemove).test(r.path)) { F.log.push({ op: 'remove', path: r.path, err: 'network' }); return Promise.reject(Object.assign(new Error('network'), { code: 'NETWORK_ERROR' })); }
       const err = rules(r.path, null, true);
       F.log.push({ op: 'remove', path: r.path, err });
       if (err) { F.rejected.push(err); return Promise.reject(new Error(err)); }
