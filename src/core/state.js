@@ -53,6 +53,8 @@
     'duels', 'raidDone', 'olT', 'gon',
     // a confirmed trade not applied yet, and the last trades applied (SAT-ONLINE-128): so a swap seen late is applied once
     'trPend', 'trDone',
+    // the world boss hunt (SAT-ONLINE-124): {w: weeks won, n: hunt marks, back: {x, y, until} where you joined it from}
+    'hunt',
     // karma (SAT-ONLINE-052): -10..10, down for killing a player who isn't an outlaw, up for killing an outlaw; karT: play time toward the next point back
     'karma', 'karT',
     // the National Competition (SAT-ONLINE-064) this character scored in and is still to be paid for (its id)
