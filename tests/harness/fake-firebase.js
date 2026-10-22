@@ -65,6 +65,15 @@
     if (m.op === 'set' && cur && m.v && typeof cur.t === 'number' && typeof m.v.t === 'number' && m.v.t < cur.t) return;
     apply(m.op, m.p, m.v);
   };
+  // the SDK refuses, synchronously, a key with . # $ [ ] (or a / inside a value's key), before anything reaches the server
+  // (Claude-B's review of #163: a monster key with '#' threw inside the game's network tick)
+  function badKeys(op, path, v) {
+    const bad = (k) => typeof k !== 'string' || !k.length || /[.#$[\]]/.test(k);
+    const segs = String(path || '').split('/').filter(Boolean);
+    const walk = (x, at) => { if (!x || typeof x !== 'object') return; for (const k of Object.keys(x)) { if (k !== '.sv' && (bad(k) || k.includes('/'))) throw new Error(op + ' failed: value argument contains an invalid key (' + k + ') in property \'' + at + '\'. Keys must be non-empty strings and can\'t contain ".", "#", "$", "/", "[", or "]"'); walk(x[k], at + '.' + k); } };
+    for (const k of segs) if (bad(k)) throw new Error(op + ' failed: first argument was an invalid path = "' + path + '". Paths must be non-empty strings and can\'t contain ".", "#", "$", "[", or "]"');
+    walk(v, segs.join('.'));
+  }
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
   // The real database fires this page's own listeners for a write before the write's promise resolves (a local remove()
   // has already dropped the node when .then runs: Claude-B, #129/#131). The listeners above run on timers queued by
@@ -796,6 +805,7 @@
       return connected ? acked({ key: keyOf(p) }) : Promise.resolve({ key: keyOf(p) });
     },
     set: (r, v) => {
+      badKeys('set', r.path, v);
       const err = rules(r.path, v, false);
       F.log.push({ op: 'set', path: r.path, err });
       if (err) { F.rejected.push(err); return Promise.reject(Object.assign(new Error(err), { code: 'PERMISSION_DENIED' })); }
@@ -807,6 +817,7 @@
     },
     // RTDB update(): merge into the stored node (null removes a field), then check the rules on the result
     update: (r, diff) => {
+      for (const k in diff) badKeys('update', (r.path ? r.path + '/' : '') + k, diff[k]); // as the SDK, before anything is sent
       if (!r.path) { // a multi-location update at the root (SAT-ONLINE-039): all or nothing, each path checked against the data before it
         // A claim (a path the rules let only its first writer take) waits its turn across the pages, as the real database
         // orders writes: the pages hold one lock in turn, and each waits for the last one's copy to arrive before it checks.

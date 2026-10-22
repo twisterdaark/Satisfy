@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22entities', ver: '1.84', d: '2026-10-22',
+      ar: ["لو وحشين من نفس النوع طلعوا في نفس المكان (زي فرسان أسموفيل الحمر)، كل واحد فيهم بقى ليه اسم خاص بيه: أونلاين مبقوش بيتحركوا كأنهم واحد، ولو قتلت واحد وقفلت اللعبة، اللي قتلته بس هو اللي بيفضل ميت"],
+      en: ["Two monsters of one kind that spawned on the same spot (like two of Asmophel's red knights) now each have an id of their own: online they no longer move as one, and if you kill one and quit, only that one stays dead"] },
     { v: '2026-10-22wpass2', ver: '1.83', d: '2026-10-22',
       ar: ["باسيفز سلاح جديدة: ضربة مزدوجة (السلاح بيضرب تاني لوحده)، صعق (برق بيزود الضربة 50% ويقفز على اتنين جنب الهدف ويشلهم لحظة)، امتصاص (جزء من الضرر اللي بتاخده بيترد في ضربتك الجاية)، تجميد (بيبطّأ الهدف)، وزق (بيرمي الهدف لورا)",
         "حجر البرق: جوهرة جديدة بتتركب في السلاح عند خان، وبتدي السلاح صعق بفرصة 15%. بتقع من الوحوش العالية والزعماء",
