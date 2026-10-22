@@ -12,6 +12,11 @@ const node = rules.presence.$world.$shard.$uid;
 const firebaseJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'firebase.json'), 'utf8'));
 const NULLABLE = ['title', 'room', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'rd', 'ol', 'gd']; // omitted when null/empty is allowed by the client
 
+// SAT-ONLINE-104: a right of a rank (guilds/{gid}/perm/{o|r}/{x}): the master; an officer unless taken away; a member if given
+const RK = "root.child('guildMembers').child($gid).child(auth.uid).child('rk').val()";
+const RIGHT = (x) => '(' + RK + " === 'm' || (" + RK + " === 'o' && root.child('guilds').child($gid).child('perm').child('o').child('" + x + "').val() !== false) || (" + RK + " === 'r' && root.child('guilds').child($gid).child('perm').child('r').child('" + x + "').val() === true))";
+const GONE = (d) => " && !newData" + '.parent()'.repeat(d) + ".child('guilds').child($gid).exists()";
+
 test('deny by default; presence readable only when signed in, writable only by its owner', () => {
   assert.equal(rules['.read'], false);
   assert.equal(rules['.write'], false);
@@ -183,14 +188,14 @@ test('guilds: a founder makes one guild with a unique name; joining needs an inv
   assert.match(g['.validate'], /child\('guildNames'\)\.child\(newData\.child\('nk'\)\.val\(\)\)\.val\(\) === \$gid/, 'written with its name entry');
   assert.equal(g.name['.validate'], 'newData.isString() && newData.val().length >= ' + GU.C.NAME_MIN + ' && newData.val().length <= ' + GU.C.NAME_MAX);
   assert.match(nm['.write'], /!data\.exists\(\) && newData\.val\(\) === 'g_' \+ auth\.uid/, 'a name is taken once');
-  assert.equal(mem['.write'], "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid", 'the master removes all members (disband)');
+  assert.equal(mem['.write'], "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid" + GONE(2), 'the master removes all members (disband), with the guild');
   assert.match(m['.write'], /newData\.child\('rk'\)\.val\(\) === 'r' && root\.child\('guildInv'\)\.child\(\$uid\)\.child\(\$gid\)\.exists\(\)/, 'join as a member, only while invited');
   assert.match(m['.write'], /newData\.child\('rk'\)\.val\(\) === data\.child\('rk'\)\.val\(\)/, 'nobody changes their own rank');
   assert.match(m['.write'], /data\.child\('rk'\)\.val\(\) !== 'm'\)/, 'the master does not just leave');
   assert.match(m['.write'], /data\.child\('rk'\)\.val\(\) === 'r' && root\.child\('guildMembers'\)\.child\(\$gid\)\.child\(auth\.uid\)\.child\('rk'\)\.val\(\) === 'o'/, 'an officer kicks members only');
   assert.match(m.rk['.validate'], /newData\.val\(\) === 'm' && newData\.parent\(\)\.parent\(\)\.parent\(\)\.parent\(\)\.child\('guilds'\)\.child\(\$gid\)\.child\('master'\)\.val\(\) === \$uid/, 'the only \'m\' is the guild\'s master after the write');
   assert.equal(inv['.read'], 'auth != null && auth.uid === $uid', 'your invitations are yours to read');
-  assert.match(inv.$gid['.write'], /=== 'm' \|\| .*=== 'o'\)/, 'masters and officers invite');
+  assert.ok(inv.$gid['.write'].includes(RIGHT('inv')), 'the ranks with the right invite');
   assert.equal(inv.$gid.by['.validate'], 'newData.val() === auth.uid');
   for (const n of [g, m, inv.$gid]) assert.equal(n.$other['.validate'], false);
   assert.equal(node.gd['.validate'], "newData.isString() && newData.val().matches(/" + GU.GID_RE.source + "/)", 'presence gd: a guild id');
@@ -198,7 +203,7 @@ test('guilds: a founder makes one guild with a unique name; joining needs an inv
   const gv = rules.guildVault.$gid, gt = rules.guildVaultTaken.$gid;
   assert.equal(gv['.read'], "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()");
   assert.match(gv.$vid['.write'], /!data\.exists\(\) && newData\.child\('by'\)\.val\(\) === auth\.uid/, 'a member puts things in as itself');
-  assert.match(gv.$vid['.write'], /=== 'o'\) \|\| data\.child\('by'\)\.val\(\) === auth\.uid\)/, 'the master and officers take out, a member its own');
+  assert.ok(gv.$vid['.write'].includes(RIGHT('take') + " || data.child('by').val() === auth.uid)"), 'the ranks with the right take out, a member its own');
   assert.match(gt.$vid['.write'], /!data\.exists\(\) && newData\.child\('by'\)\.val\(\) === auth\.uid && root\.child\('guildVault'\)\.child\(\$gid\)\.child\(\$vid\)\.exists\(\)/, 'once per thing');
   assert.equal(gv.$vid.it['.validate'], rules.tradeSides.$tid.$uid.it.$iid['.validate'].replace(/^\$iid\.matches\([^)]*\) && /, ''), 'an item as plain values, as in trades');
   // SAT-ONLINE-049: guild chat, members only
@@ -296,9 +301,9 @@ test('guild buildings (SAT-ONLINE-065): members give to the treasury, the master
   const k = rules.guildBank.$gid, b = rules.guildBuild.$gid, l = rules.guildLog.$gid;
   assert.match(k['.validate'], /newData\.child\('in'\)\.val\(\) === data\.child\('in'\)\.val\(\) \+ newData\.child\('lg'\)\.val\(\)/, 'a gift adds exactly its amount');
   assert.match(k['.validate'], /newData\.child\('s'\)\.val\(\) <= newData\.child\('in'\)\.val\(\)/, 'no spending what was not given');
-  assert.match(k['.validate'], /=== 'm' \|\| .*=== 'o'\) && \(/, 'only the master and officers spend');
+  assert.ok(k['.validate'].includes(RIGHT('spend') + ' && ('), 'only the ranks with the right spend');
   for (const b of ['forge', 'train', 'gold']) assert.ok(k['.validate'].includes("newData.parent().parent().child('guildBuild').child($gid).child('" + b + "').val() > root.child('guildBuild').child($gid).child('" + b + "').val()"), 'a spend comes with a building raised: ' + b);
-  assert.match(b['.write'], /=== 'm' \|\| .*=== 'o'\)/);
+  assert.ok(b['.write'].includes(RIGHT('spend')));
   for (const [lv, cost] of [[1, 50000], [2, 150000], [3, 400000]]) assert.ok(b.$b['.validate'].includes('newData.val() === ' + lv + ' && ') && b.$b['.validate'].includes(" + " + cost + ")"), 'level ' + lv + ' costs ' + cost);
   assert.match(b.$b['.validate'], /newData\.val\(\) <= 3/);
   assert.equal(l.$id['.write'], "auth != null && !data.exists() && root.child('guildMembers').child($gid).child(auth.uid).exists()", 'the log is written once, by members');
@@ -400,20 +405,20 @@ test('guild master handover and the notice (SAT-ONLINE-076): to an officer only,
 test('guild recruiting (SAT-ONLINE-078): posted by the master or officers; you ask only for yourself, only while it recruits, not a week after a refusal', () => {
   const rc = rules.guildRecruit, ap = rules.guildApply.$gid, rj = rules.guildRej.$gid;
   assert.equal(rc['.read'], 'auth != null');
-  assert.match(rc.$gid['.write'], /=== 'm' \|\| .*=== 'o'\)/);
+  assert.ok(rc.$gid['.write'].includes(RIGHT('inv')));
   assert.ok(rc.$gid['.validate'].includes("root.child('guilds').child($gid).exists()"), 'only for a guild that exists');
   assert.equal(rc.$gid.by['.validate'], 'newData.val() === auth.uid');
-  assert.match(ap['.read'], /=== 'm' \|\| .*=== 'o'\)/, 'the master and officers read the requests');
+  assert.ok(ap['.read'].includes(RIGHT('inv')), 'the ranks that invite read the requests');
   assert.equal(ap.$uid['.read'], 'auth != null && auth.uid === $uid', 'and you your own');
   const w = ap.$uid['.write'];
   assert.ok(w.includes("auth.uid === $uid && (!newData.exists() || (root.child('guildRecruit').child($gid).exists()"), 'yourself, only while it recruits');
   assert.ok(w.includes("!root.child('guildMembers').child($gid).child($uid).exists()"), 'not when you are a member');
   assert.ok(w.includes("root.child('guildRej').child($gid).child($uid).child('t').val() < now - 604800000"), 'a week after a refusal');
   assert.match(rules.guildMembers.$gid.$uid['.write'], /newData\.child\('rk'\)\.val\(\) === 'r' && root\.child\('guildInv'\)/, 'joining still needs the invitation, whatever was asked');
-  assert.match(rj.$uid['.write'], /=== 'm' \|\| .*=== 'o'\)/);
+  assert.ok(rj.$uid['.write'].includes(RIGHT('inv')));
   assert.equal(rj.$uid['.read'], 'auth != null && auth.uid === $uid');
   for (const n of [rc.$gid, ap.$uid, rj.$uid]) assert.equal(n.$other['.validate'], false);
-  for (const n of [ap, rj]) assert.equal(n['.write'], "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid", 'the master clears them on disband');
+  for (const n of [ap, rj]) assert.equal(n['.write'], "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid" + GONE(2), 'the master clears them on disband');
 });
 
 test('owner announcements (SAT-ONLINE-079): admins set in the console only; only an admin posts; a maintenance time ahead', () => {
@@ -432,7 +437,7 @@ test('owner announcements (SAT-ONLINE-079): admins set in the console only; only
 test('guild events (SAT-ONLINE-080): added or cancelled by the master and officers, ahead and within 30 days; each member signs only itself', () => {
   const ev = rules.guildEvents.$gid, sg = rules.guildEventSign.$gid;
   assert.equal(ev['.read'], "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()");
-  assert.match(ev.$eid['.write'], /=== 'm' \|\| .*=== 'o'\) && \(!data\.exists\(\) \|\| !newData\.exists\(\)\)/, 'added or cancelled, never edited');
+  assert.ok(ev.$eid['.write'].includes(RIGHT('ev') + ' && (!data.exists() || !newData.exists())'), 'added or cancelled, never edited');
   assert.equal(ev.$eid.at['.validate'], 'newData.isNumber() && newData.val() > now && newData.val() <= now + 2592000000');
   assert.equal(ev.$eid.by['.validate'], 'newData.val() === auth.uid');
   assert.ok(sg.$eid.$uid['.write'].startsWith("auth != null && auth.uid === $uid && root.child('guildMembers').child($gid).child(auth.uid).exists()"), 'yourself, a member');

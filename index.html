@@ -5784,8 +5784,8 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
  dialog('guild',[info,perks+(g.online&&GWK?' · '+gwLine():''),g.online?guildNoteLine():''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
   ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},
    ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),...(galSt()?[{l:t('gdDip')+(galMo()&&Object.keys(GALA).length?' ('+Object.keys(GALA).length+')':''),f:galD}]:[]),...(gwrSt()?[{l:t('gdWar')+(galMo()&&Object.keys(GWRA).length?' ('+Object.keys(GWRA).length+')':''),f:gwrD}]:[]),
-   ...(Satisfy.guild.can(GUILD.state().rank,'emblem')?[{l:t('gdBan'),f:guildBanD}]:[]),
-   ...(Satisfy.guild.can(GUILD.state().rank,'note')?[{l:t('gdNoteW'),f:guildNoteW},...(recSt()?[{l:t('gdApps',{n:Object.keys(GAPPS).length}),f:recAppsD},{l:t('gdRecOn'),f:recPost},{l:t('gdRecOff'),f:recStop}]:[])]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
+   ...(gCan('emblem')?[{l:t('gdBan'),f:guildBanD},{l:t('gpRights'),f:guildPermD}]:[]),
+   ...(gCan('note')?[{l:t('gdNoteW'),f:guildNoteW}]:[]),...(gCan('invite')&&recSt()?[{l:t('gdApps',{n:Object.keys(GAPPS).length}),f:recAppsD},{l:t('gdRecOn'),f:recPost},{l:t('gdRecOff'),f:recStop}]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
 function guildMOpts(){const o=[],back=()=>shopD('guildM','gm_hi');
  if(!S.guild)o.push({l:t('oMakeG',{g:GCOST,l:GLV}),ic:'book',poor:S.gold<GCOST||S.lv<GLV,f:()=>S.lv<GLV?dialog('guildM',[t('gNeedLv',{n:GLV})],back):S.gold<GCOST?dialog('guildM',[t('noGold')],back):openGName()});
@@ -8571,7 +8571,7 @@ function guildMirror(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!st.guild|
  if(S.guild!==st.gid||S.gon!==st.gid){S.guild=st.gid;S.gon=st.gid;save(true);}hudDirty=true;}
 function guildDrop(gid){if(gbFor===gid)gbStop();if(gid&&WS&&WS.guilds[gid]&&WS.guilds[gid].online)delete WS.guilds[gid];if(S.guild===gid)S.guild='';if(S.gon===gid)S.gon='';hudDirty=true;save(true);}
 function guildPub(){const st=GUILD&&gdFor===S&&GUILD.state();return st&&st.gid&&st.members[NET.uid]?st.gid:null;}
-function guildCanInvite(r){const st=GUILD&&gdFor===S&&GUILD.state();return !!(st&&st.gid&&Satisfy.guild.can(st.rank,'invite')&&r&&r.uid&&!st.members[r.uid]&&!r.gd);}
+function guildCanInvite(r){const st=GUILD&&gdFor===S&&GUILD.state();return !!(st&&st.gid&&gCan('invite')&&r&&r.uid&&!st.members[r.uid]&&!r.gd);}
 // the invitation prompt: shown while you are in no guild (leave yours first to take another)
 function guildInvNow(){const st=GUILD&&gdFor===S&&S&&!S.guild?GUILD.state():null;return st&&!st.gid&&st.invites.length?st.invites[st.invites.length-1]:null;}
 function guildUI(live){const I=$('guildInv'),v=live&&GUILD?guildInvNow():null,sig=[lang,v&&v.gid].join('|');if(sig===gdSig)return;gdSig=sig;
@@ -8618,10 +8618,10 @@ function gbFail(e){return /PERMISSION/i.test(String(e&&(e.code||e.message)));}
 function gbGive(g,tries){tries=tries|0;if(!GDS||!GUILD||!S||S.gold<g)return;const st=GUILD.state();if(!st.gid)return;S.gold-=g;hudDirty=true;save(true);
  GDS.give(st.gid,NET.uid,netId||S.look.n,g,gbLid()).then(()=>{toast(t('gbGave',{g:g.toLocaleString()}),'good');SFX.coin();},e=>{S.gold+=g;hudDirty=true;save(true);
   if(tries<3&&gbFail(e))setTimeout(()=>gbGive(g,tries+1),250+rand()*250);else toast(t('gdFail'),'warn');});} // another gift came first: read it again
-function gbBuild(b,tries){tries=tries|0;if(!GDS||!GUILD)return;const st=GUILD.state(),l=gbLv(b);if(!st.gid||l>=3||!Satisfy.guild.can(st.rank,'invite'))return;const cost=GB_COST[l],k=GBK||{in:0,s:0};
+function gbBuild(b,tries){tries=tries|0;if(!GDS||!GUILD)return;const st=GUILD.state(),l=gbLv(b);if(!st.gid||l>=3||!gCan('spend'))return;const cost=GB_COST[l],k=GBK||{in:0,s:0};
  if(k.in-k.s<cost){toast(t('gbPoor'),'warn');return;}
  GDS.build(st.gid,NET.uid,netId||S.look.n,b,l+1,cost,gbLid()).then(()=>{SFX.level();},e=>{if(tries<2&&gbFail(e))setTimeout(()=>gbBuild(b,tries+1),300);else toast(t('gdFail'),'warn');});}
-function guildBldD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const st=GUILD.state(),k=GBK||{in:0,s:0},have=k.in-k.s,boss=Satisfy.guild.can(st.rank,'invite');
+function guildBldD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const st=GUILD.state(),k=GBK||{in:0,s:0},have=k.in-k.s,boss=gCan('spend');
  const L=[t('gbH',{g:have.toLocaleString()})];for(const b in GB){const l=gbLv(b);L.push(t('gbRow',{ic:GB[b].ic,b:t('gb_'+b),l,e:Math.round(l*GB[b].v*100),w:t('gbE_'+b),nx:l<3?t('gbNext',{g:GB_COST[l].toLocaleString()}):t('gbMax')}));}
  const log=Object.values(GBLOG||{}).filter(x=>x&&typeof x.t==='number').sort((a,b)=>b.t-a.t).slice(0,5).map(x=>{const n=Satisfy.chat.clean(x.n,24)||'?';return x.k==='build'&&GB[x.b]?t('gbLogB',{n,b:t('gb_'+x.b),l:x.l|0}):t('gbLogG',{n,g:(x.g|0).toLocaleString()});});
  if(log.length)L.push(log.join(' · '));
@@ -8651,7 +8651,7 @@ window.__GG={state:()=>GUILD&&GUILD.state(),create:n=>createGuild(n),leave:()=>l
 function guildMembersD(){const st=GUILD&&GUILD.state();if(!st||!st.gid)return guildPanel();
  const list=Object.keys(st.members).map(u=>Object.assign({u},st.members[u])).sort((a,b)=>GRK[a.rk]-GRK[b.rk]||(GUILD.online(b)?1:0)-(GUILD.online(a)?1:0)||b.c-a.c);
  const on=list.filter(m=>GUILD.online(m)).length,o=list.slice(0,30).map(m=>({l:(GUILD.online(m)?'● ':'○ ')+m.n+' · '+t('gdRk_'+m.rk)+' · '+m.c,f:()=>guildMemberD(m.u)}));
- dialog('guild',[t('gdMemH',{n:list.length,o:on}),Satisfy.guild.can(st.rank,'invite')?t('gdInvHint'):''].filter(Boolean),null,[...o,{l:t('oBack'),f:guildPanel}]);}
+ dialog('guild',[t('gdMemH',{n:list.length,o:on}),gCan('invite')?t('gdInvHint'):''].filter(Boolean),null,[...o,{l:t('oBack'),f:guildPanel}]);}
 function guildMemberD(u){const st=GUILD&&GUILD.state(),m=st&&st.members[u];if(!m)return guildMembersD();const can=Satisfy.guild.can,o=[];
  const after=(p,ok)=>p.then(()=>{if(ok)toast(ok,'good');guildMembersD();},()=>{toast(t('gdFail'),'warn');guildMembersD();});
  if(u!==NET.uid){
@@ -8666,7 +8666,19 @@ function guildMemberD(u){const st=GUILD&&GUILD.state(),m=st&&st.members[u];if(!m
 Object.assign(STR.ar,{gdBan:'شعار الجيلد',gdBanQ:'اختار شعار الجيلد',gdBanNone:'من غير شعار',gdBanDone:'الشعار اتغير'});
 Object.assign(STR.en,{gdBan:'Guild banner',gdBanQ:'Pick the guild banner',gdBanNone:'No banner',gdBanDone:'The banner is changed'});
 function gdEmb(i){const E=Satisfy.guild.C.EMBLEMS;return i>0&&i<E.length?E[i]+' ':'';}
-function guildBanD(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!Satisfy.guild.can(st.rank,'emblem'))return guildPanel();const E=Satisfy.guild.C.EMBLEMS;
+/* the ranks' rights (SAT-ONLINE-104, plan U230): the master gives or takes away, for officers and for members, the right
+   to invite (and handle requests to join), take others' things from the vault, spend the treasury on buildings, write
+   the notice and plan events. Officers have them all and members none until the master changes it; the rules check
+   every one of them on the server. */
+Object.assign(STR.ar,{gpRights:'صلاحيات الرتب',gpH:'إيه اللي كل رتبة تقدر تعمله؟ القائد يقدر يعمل كل حاجة',gpO:'الضباط',gpR:'الأعضاء',gp_inv:'يدعوا ويردّوا على طلبات الانضمام',gp_take:'ياخدوا حاجات غيرهم من الخزنة',gp_spend:'يصرفوا من خزينة الدهب على المباني',gp_note:'يكتبوا إعلان الجيلد',gp_ev:'يعملوا أحداث الجيلد',gpRow:'{w}: {r} {on}',gpDone:'الصلاحيات اتغيرت'});
+Object.assign(STR.en,{gpRights:'Rank rights',gpH:'What may each rank do? The master may do everything',gpO:'Officers',gpR:'Members',gp_inv:'invite and answer requests to join',gp_take:"take others' things from the vault",gp_spend:'spend the treasury on buildings',gp_note:'write the guild notice',gp_ev:'plan guild events',gpRow:'{w}: {r} {on}',gpDone:'The rights changed'});
+function gCan(a){const st=GUILD&&GUILD.state();return !!(st&&st.gid&&GUILD.can&&GUILD.can(a));}
+function guildPermD(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!gCan('perm'))return guildPanel();const G=Satisfy.guild,P=st.perm||{},o=[];
+ for(const rk of ['o','r'])for(const x of G.RIGHTS){const on=G.hasRight(rk,x,P);o.push({l:t('gpRow',{w:t(rk==='o'?'gpO':'gpR'),r:t('gp_'+x),on:on?'✓':'✗'}),f:()=>{const n=JSON.parse(JSON.stringify(P));(n[rk]=n[rk]||{})[x]=!on;
+  // a right back at its default is stored as nothing
+  if((rk==='o')===!on)delete n[rk][x];if(!Object.keys(n[rk]).length)delete n[rk];GUILD.setPerm(Object.keys(n).length?n:null).then(()=>{toast(t('gpDone'),'good');setTimeout(guildPermD,150);},()=>{toast(t('gdFail'),'warn');guildPermD();});}});}
+ dialog('guild',[t('gpH')],null,[...o,{l:t('oBack'),f:guildPanel}]);}
+function guildBanD(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!gCan('emblem'))return guildPanel();const E=Satisfy.guild.C.EMBLEMS;
  dialog('guild',[t('gdBanQ')],null,[...E.map((e,i)=>({l:i?e+' '+st.guild.name:t('gdBanNone'),f:()=>GUILD.setEmblem(i).then(()=>{toast(t('gdBanDone'),'good');guildPanel();},()=>{toast(t('gdFail'),'warn');guildPanel();})})),{l:t('oBack'),f:guildPanel}]);}
 window.__GBAN={set:i=>GUILD.setEmblem(i),of:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);return r?guildOf(r):null;},open:()=>guildBanD(),E:()=>Satisfy.guild.C.EMBLEMS}; // tests
 /* guild alliances and diplomacy (SAT-ONLINE-085, plan U238/U245). The master or an officer proposes an alliance to another
@@ -8790,7 +8802,7 @@ Object.assign(STR.ar,{gdHand:'سلّم الجيلد لـ{n}',gdHandQ:'تسلّم
 Object.assign(STR.en,{gdHand:'Hand the guild to {n}',gdHandQ:'Hand {g} to {n}? They become the master and you an officer',gdHandDone:'{n} is the master of {g} now',gdClaim:'Take the guild over ({n} has been away 14 days)',gdClaimDone:'You are the master of {g} now',gdNewM:'{n} is the guild master now',gdNoteL:'📌 {s} ({n})',gdNoteW:'Write the guild notice',gdNoteT:'Guild notice (up to 240 letters)',gdNoteNew:'New guild notice from {n}: {s}',gdNoteDone:'The notice is up',lnOk:'Post',gdRankMe:'Your guild: {k}.'});
 var GDM=null,GRANK=null,GRANK_T=0;
 function guildNoteLine(){const n=GUILD&&GUILD.note();return n?t('gdNoteL',{s:n.s,n:n.n}):'';}
-function guildNoteW(){const st=GUILD&&GUILD.state();if(!st||!Satisfy.guild.can(st.rank,'note'))return guildPanel();const n=GUILD.note();
+function guildNoteW(){const st=GUILD&&GUILD.state();if(!st||!gCan('note'))return guildPanel();const n=GUILD.note();
  askLine(t('gdNoteT'),n?n.s:'',Satisfy.guild.C.NOTE_MAX,v=>{if(v==null)return guildPanel();GUILD.setNote(v).then(()=>{toast(t('gdNoteDone'),'good');guildPanel();},()=>{toast(t('gdFail'),'warn');guildPanel();});});}
 // one line of text from the player (a guild notice): cb(text) on Post or Enter, cb(null) on Back or Escape
 function askLine(title,val,max,cb){mode='gname';const box=document.createElement('div');box.id='gnBox';box.className='sys panel';box.innerHTML=`<div class="head">${esc(title)}</div>`;
@@ -8804,7 +8816,7 @@ function gRankFresh(cb){const st=GDS&&NETTR&&NETTR.kind==='firebase'&&GDS.readAl
  st.readAll().then(v=>{const out={};for(const gid in v.guilds){const g=Satisfy.guild.cleanGuild(v.guilds[gid],gid);if(!g)continue;const ms=v.members[gid]||{};let xp=0,n=0;
    for(const u in ms){const m=ms[u];if(m&&typeof m==='object'){n++;xp+=Math.max(0,Math.min(1e12,Math.floor(+m.c||0)));}}out[gid]={id:gid,name:g.name,xp,m:n,col:g.col};}
   GRANK=out;GRANK_T=performance.now();fin();},fin);}
-window.__GLD={hand:u=>GUILD.handover(u),claim:()=>GUILD.claim(),away:()=>GUILD.masterAway(),note:()=>GUILD.note(),setNote:v=>GUILD.setNote(v),disband:()=>GUILD.disband(),fb:()=>FB,rank:()=>new Promise(r=>gRankFresh(()=>r(rankLine()))),get grank(){return GRANK}}; // tests
+window.__GLD={can:a=>gCan(a),emblem:i=>GUILD.setEmblem(i),perm:p=>GUILD.setPerm(p),hand:u=>GUILD.handover(u),claim:()=>GUILD.claim(),away:()=>GUILD.masterAway(),note:()=>GUILD.note(),setNote:v=>GUILD.setNote(v),disband:()=>GUILD.disband(),fb:()=>FB,rank:()=>new Promise(r=>gRankFresh(()=>r(rankLine()))),get grank(){return GRANK}}; // tests
 /* guild recruiting (SAT-ONLINE-078, plan U229). The master or an officer posts a recruiting message from G; anyone without
    a guild sees the recruiting guilds at the Guild Association (and in G) and asks to join one. The master and officers see
    the requests in G and are told of new ones: "Invite" sends the usual invitation (joining still needs it), "Turn down"
@@ -8827,7 +8839,7 @@ function recApply(r,back){const st=recSt();if(!st)return;const again=()=>recBoar
 function recPost(){const st=recSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return guildPanel();
  askLine(t('gdRecT'),'',120,v=>{if(v==null)return guildPanel();st.recruitPut(gs.gid,{n:gs.guild.name,msg:String(v).replace(/\s+/g,' ').trim().slice(0,120),m:Object.keys(gs.members).length,by:NET.uid}).then(()=>{toast(t('gdRecPosted'),'good');guildPanel();},()=>{toast(t('gdFail'),'warn');guildPanel();});});}
 function recStop(){const st=recSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return;st.recruitOff(gs.gid).then(()=>{toast(t('gdRecStopped'));guildPanel();},()=>toast(t('gdFail'),'warn'));}
-function recAppsSync(){const st=recSt(),gs=GUILD&&GUILD.state(),gid=st&&gs&&gs.gid&&(gs.rank==='m'||gs.rank==='o')?gs.gid:null;if(gid===GAPW)return;
+function recAppsSync(){const st=recSt(),gs=GUILD&&GUILD.state(),gid=st&&gs&&gs.gid&&gCan('invite')?gs.gid:null;if(gid===GAPW)return;
  if(GAPOff){GAPOff();GAPOff=null;}GAPW=gid;GAPPS={};if(!gid)return;let first=true;
  GAPOff=st.watchApps(gid,v=>{if(GAPW!==gid)return;const next={};for(const u in (v||{})){const a=v[u];if(!a||typeof a!=='object')continue;next[u]={n:Satisfy.chat.clean(a.n,24)||'?',lv:a.lv|0,t:+a.t||0};if(!first&&!GAPPS[u])toast(t('gdAppNew',{n:next[u].n}),'good');}GAPPS=next;first=false;});}
 function recAppsD(){const st=recSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return guildPanel();const L=Object.keys(GAPPS).map(u=>Object.assign({u},GAPPS[u])).sort((a,b)=>a.t-b.t);
@@ -8854,10 +8866,10 @@ function geTick(){if(!GEW)return;const n=wNow();for(const e of geCome(n)){const 
   if(!w.s&&e.at-n<=600000&&e.at-n>540000){w.s=1;toast(t('geSoon',{s:e.title}),'good');SFX.notice&&SFX.notice();}
   if(!w.n&&n>=e.at&&n-e.at<300000){w.n=1;toast(t('geNow',{s:e.title}),'good');SFX.notice&&SFX.notice();}}}
 function geWhen(e,n){return calWhen({at:e.at,end:e.at+7200000},n);}
-function geListD(){const gs=GUILD&&GUILD.state(),n=wNow(),L=geCome(n),mo=gs&&(gs.rank==='m'||gs.rank==='o');
+function geListD(){const gs=GUILD&&GUILD.state(),n=wNow(),L=geCome(n),mo=gs&&gCan('ev');
  dialog('guild',[t('geList',{n:L.length})+' · '+(L.length?L.map(e=>t('geRow',{s:e.title,w:geWhen(e,n),c:Object.keys(GSIGN[e.id]||{}).length})).join(' · '):t('geNone'))],null,
   [...L.slice(0,10).map(e=>({l:e.title+' · '+calTime(e.at),f:()=>geOneD(e.id)})),...(mo?[{l:t('geNew'),f:geNewD}]:[]),{l:t('oBack'),f:guildPanel}]);}
-function geOneD(id){const e=GEV[id],st=geSt(),gs=GUILD&&GUILD.state();if(!e||!st||!gs)return geListD();const n=wNow(),go=GSIGN[id]||{},me=!!go[NET.uid],mo=gs.rank==='m'||gs.rank==='o';
+function geOneD(id){const e=GEV[id],st=geSt(),gs=GUILD&&GUILD.state();if(!e||!st||!gs)return geListD();const n=wNow(),go=GSIGN[id]||{},me=!!go[NET.uid],mo=gCan('ev');
  const after=(p,ok)=>p.then(()=>{if(ok)toast(ok,'good');geOneD(id);},()=>{toast(t('gdFail'),'warn');geListD();});
  dialog('guild',[e.title+' · '+geWhen(e,n)+' · '+t('geGoing',{l:Object.values(go).join(', ')||t('geNobody')})],null,[
   me?{l:t('geNo'),f:()=>after(st.unsign(gs.gid,id,NET.uid))}:{l:t('geGo'),f:()=>after(st.sign(gs.gid,id,NET.uid,netId||S.look.n))},

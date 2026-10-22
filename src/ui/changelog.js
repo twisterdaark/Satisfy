@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22rights', ver: '1.42', d: '2026-10-22',
+      ar: ["قائد الجيلد يقدر يحدد صلاحيات الضباط والأعضاء (G ← \"Rank rights\"): الدعوة وطلبات الانضمام، الأخذ من الخزنة، الصرف على المباني، كتابة الإعلان، وعمل الأحداث. الضباط عندهم كله والأعضاء مفيش لحد ما القائد يغيّر",
+        "سجلات الجيلد (المكافآت الأسبوعية اللي اتاخدت، السجل) متتمسحش غير مع حل الجيلد"],
+      en: ["A guild master sets what officers and members may do (G → \"Rank rights\"): invite and answer requests, take from the vault, spend the treasury on buildings, write the notice and plan events. Officers have all of it and members none until the master changes it",
+        "A guild's records (weekly rewards taken, the log) are cleared only when the guild is disbanded"] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },

@@ -44,19 +44,33 @@
   }
   function nameKey(n) { return String(n).toLowerCase(); }
   function gidOf(uid) { return /^[A-Za-z0-9]{1,128}$/.test(String(uid)) ? 'g_' + uid : null; }
-  // may a member of rank `rk` do `act` (to a member of rank `to`)?
-  function can(rk, act, to) {
+  // SAT-ONLINE-104 (plan U230): the rights the master gives or takes away, per rank: perm = {o: {...}, r: {...}} of booleans.
+  // Officers have each right unless the master takes it away; members have it only when given; the master always.
+  var RIGHTS = ['inv', 'take', 'spend', 'note', 'ev'], RIGHT_OF = { invite: 'inv', take: 'take', spend: 'spend', note: 'note', ev: 'ev' };
+  function hasRight(rk, x, perm) {
+    var p = perm && typeof perm === 'object' ? perm : {};
+    if (rk === 'm') return true;
+    if (rk === 'o') return !(p.o && p.o[x] === false);
+    if (rk === 'r') return !!(p.r && p.r[x] === true);
+    return false;
+  }
+  function cleanPerm(v) {
+    if (!v || typeof v !== 'object') return null;
+    var out = {}, any = false;
+    ['o', 'r'].forEach(function (k) { var x = v[k]; if (!x || typeof x !== 'object') return; var o = {}; RIGHTS.forEach(function (r) { if (typeof x[r] === 'boolean') { o[r] = x[r]; any = true; } }); if (Object.keys(o).length) out[k] = o; });
+    return any ? out : null;
+  }
+  // may a member of rank `rk` do `act` (to a member of rank `to`), with the guild's rights `perm`?
+  function can(rk, act, to, perm) {
     var r = RK[rk] || 0, t = RK[to] || 0;
-    if (act === 'invite') return r >= 2;
+    if (RIGHT_OF[act]) return hasRight(rk, RIGHT_OF[act], perm);
     if (act === 'kick') return r >= 2 && t > 0 && t < r;
     if (act === 'rank') return r === 3 && t > 0 && t < 3;
     if (act === 'disband') return r === 3;
     if (act === 'leave') return r > 0 && r < 3;
-    if (act === 'take') return r >= 2;
     if (act === 'handover') return r === 3 && t === 2; // to an officer
     if (act === 'claim') return r === 2; // an officer, when the master is away
-    if (act === 'note') return r >= 2;
-    if (act === 'emblem') return r === 3; // SAT-ONLINE-084: the master picks the banner
+    if (act === 'emblem' || act === 'perm') return r === 3; // SAT-ONLINE-084: the master picks the banner; 104: and the rights
     return false;
   }
   function cleanEntry(v) {
@@ -77,7 +91,9 @@
     if (!v || typeof v !== 'object' || typeof v.name !== 'string' || !validName(v.name) || typeof v.master !== 'string') return null;
     if (!/^[A-Za-z0-9]{1,128}$/.test(v.master) || !GID_RE.test(gid)) return null; // the founder's, or the one it was handed to
     var e = Math.floor(+v.emb || 0);
-    return { name: v.name, nk: nameKey(v.name), master: v.master, col: /^#[0-9a-fA-F]{6}$/.test(v.col || '') ? v.col : C.COLORS[0], emb: e >= 0 && e < C.EMBLEMS.length ? e : 0 };
+    var g = { name: v.name, nk: nameKey(v.name), master: v.master, col: /^#[0-9a-fA-F]{6}$/.test(v.col || '') ? v.col : C.COLORS[0], emb: e >= 0 && e < C.EMBLEMS.length ? e : 0 }, pm = cleanPerm(v.perm);
+    if (pm) g.perm = pm;
+    return g;
   }
 
   function create(o) {
@@ -88,6 +104,7 @@
     function off(f) { try { if (f) f(); } catch (e) { /* ignore */ } }
     function me() { return G && G.members[self] || null; }
     function myRank() { var m = me(); return m ? m.rk : ''; }
+    function permOf() { return G && G.guild && G.guild.perm || null; }
     function sum() { var n = 0; for (var k in G.members) n += G.members[k].c; return n; }
 
     // watch one guild: its node and its members; we are in it while our entry is there
@@ -139,7 +156,7 @@
       },
       stop: function () { off(offInv); offInv = null; unfollow(); },
       state: function () {
-        return { gid: G ? G.gid : null, guild: G && G.guild, members: G ? G.members : {}, rank: myRank(), xp: G ? sum() : 0, invites: Object.keys(invites).map(function (k) { return invites[k]; }) };
+        return { gid: G ? G.gid : null, guild: G && G.guild, members: G ? G.members : {}, rank: myRank(), perm: permOf(), xp: G ? sum() : 0, invites: Object.keys(invites).map(function (k) { return invites[k]; }) };
       },
       /** Is this member online (seen in the last ON_MS)? */
       online: function (m) { return !!m && (m === me() || serverNow() - m.on < C.ON_MS); },
@@ -155,7 +172,7 @@
       },
       /** Invite a player (by uid) into your guild. Returns a promise; rejects 'rank', 'member'. */
       invite: function (uid, nameOfThem) {
-        if (!G || !G.guild || !can(myRank(), 'invite')) return Promise.reject(new Error('rank'));
+        if (!G || !G.guild || !can(myRank(), 'invite', null, permOf())) return Promise.reject(new Error('rank'));
         if (G.members[uid]) return Promise.reject(new Error('member'));
         if (Object.keys(G.members).length >= C.MAX_MEMBERS) return Promise.reject(new Error('full'));
         return store.invite(uid, G.gid, { n: G.guild.name, by: self, byN: String(handle() || '').slice(0, 24) });
@@ -193,7 +210,7 @@
       /** The vault: {vid: {k, n, r, it?, by, byN, t}}. */
       vault: function () { return G ? G.vault : {}; },
       /** May you take this vault entry out (the master and officers anything, a member its own)? */
-      canTake: function (vid) { var e = G && G.vault[vid]; return !!e && (can(myRank(), 'take') || e.by === self); },
+      canTake: function (vid) { var e = G && G.vault[vid]; return !!e && (can(myRank(), 'take', null, permOf()) || e.by === self); },
       /** Put a thing in: {k, n, r, it?} (it: the item as plain values). Rejects 'full', 'rank' (not a member). */
       deposit: function (x) {
         if (!G || !me()) return Promise.reject(new Error('rank'));
@@ -215,6 +232,14 @@
         if (!G || !G.guild || !t || uid === self || !can(myRank(), 'handover', t.rk)) return Promise.reject(new Error('rank'));
         return store.handover(G.gid, self, uid);
       },
+      /** SAT-ONLINE-104: may I do `act` (invite, take, spend, note, ev, kick, rank...) with this guild's rights? */
+      can: function (act, to) { return can(myRank(), act, to, permOf()); },
+      /** SAT-ONLINE-104: the master sets the officers' and members' rights: {o: {inv, take, spend, note, ev}, r: {...}}. */
+      setPerm: function (perm) {
+        var pm = cleanPerm(perm);
+        if (!G || !G.guild || !can(myRank(), 'perm')) return Promise.reject(new Error('rank'));
+        return store.setPerm(G.gid, pm);
+      },
       /** SAT-ONLINE-084: the master picks the guild's banner, an index into C.EMBLEMS (0: none). */
       setEmblem: function (i) {
         i = Math.floor(+i);
@@ -235,7 +260,7 @@
       note: function () { return G ? G.note : null; },
       /** The master or an officer writes the notice (the next version). */
       setNote: function (text) {
-        if (!G || !can(myRank(), 'note')) return Promise.reject(new Error('rank'));
+        if (!G || !can(myRank(), 'note', null, permOf())) return Promise.reject(new Error('rank'));
         var s = String(text == null ? '' : text).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, C.NOTE_MAX);
         if (!s) return Promise.reject(new Error('empty'));
         return store.setNote(G.gid, { s: s, by: self, n: String(handle() || '').slice(0, 24) || '?', v: (G.note ? G.note.v : 0) + 1 });
@@ -276,10 +301,10 @@
           d.members[gid] = {}; d.members[gid][me] = { rk: 'm', n: m.n, c: 0, on: clock }; return ok();
         },
         invite: function (uid, gid, v) {
-          if (!d.guilds[gid] || !can(rk(gid, me), 'invite') || v.by !== me) return no('invite');
+          if (!d.guilds[gid] || !can(rk(gid, me), 'invite', null, d.guilds[gid].perm) || v.by !== me) return no('invite');
           (d.inv[uid] = d.inv[uid] || {})[gid] = { n: v.n, by: me, byN: v.byN, t: clock }; return ok();
         },
-        uninvite: function (uid, gid) { if (uid !== me && !can(rk(gid, me), 'invite')) return no('uninvite'); if (d.inv[uid]) delete d.inv[uid][gid]; return ok(); },
+        uninvite: function (uid, gid) { if (uid !== me && !can(rk(gid, me), 'invite', null, (d.guilds[gid] || {}).perm)) return no('uninvite'); if (d.inv[uid]) delete d.inv[uid][gid]; return ok(); },
         join: function (gid, uid, m) {
           if (uid !== me || !d.guilds[gid] || !(d.inv[me] || {})[gid] || (d.members[gid] || {})[me] || m.rk !== 'r') return no('join');
           d.members[gid][me] = { rk: 'r', n: m.n, c: 0, on: clock }; delete d.inv[me][gid]; return ok();
@@ -297,17 +322,18 @@
           g.master = to; b.rk = 'm'; a.rk = 'o'; return ok();
         },
         setEmblem: function (gid, i) { var g = d.guilds[gid]; if (!g || g.master !== me || !(i >= 0 && i < C.EMBLEMS.length)) return no('emblem'); g.emb = i; return ok(); },
+        setPerm: function (gid, pm) { var g = d.guilds[gid]; if (!g || g.master !== me) return no('perm'); if (pm) g.perm = JSON.parse(JSON.stringify(pm)); else delete g.perm; return ok(); },
         watchNote: function (gid, cb) { return watch(function () { return rk(gid, me) ? d.notes[gid] : null; }, cb); },
         setNote: function (gid, n) {
           var r = rk(gid, me), old = d.notes[gid];
-          if ((r !== 'm' && r !== 'o') || n.by !== me || n.v !== (old ? old.v : 0) + 1 || !n.s || n.s.length > C.NOTE_MAX) return no('note');
+          if (!can(r, 'note', null, (d.guilds[gid] || {}).perm) || n.by !== me || n.v !== (old ? old.v : 0) + 1 || !n.s || n.s.length > C.NOTE_MAX) return no('note');
           d.notes[gid] = { s: n.s, by: me, n: n.n, v: n.v, t: clock }; return ok();
         },
         watchVault: function (gid, cb) { return watch(function () { return rk(gid, me) ? d.vault[gid] : null; }, cb); },
         deposit: function (gid, vid, v) { if (!rk(gid, me) || v.by !== me || (d.vault[gid] || {})[vid]) return no('deposit'); (d.vault[gid] = d.vault[gid] || {})[vid] = JSON.parse(JSON.stringify(v)); return ok(); },
         withdraw: function (gid, vid, uid) {
           var e = (d.vault[gid] || {})[vid], tk = (d.taken[gid] = d.taken[gid] || {});
-          if (uid !== me || !e || tk[vid] || !(can(rk(gid, me), 'take') || e.by === me)) return no('withdraw');
+          if (uid !== me || !e || tk[vid] || !(can(rk(gid, me), 'take', null, (d.guilds[gid] || {}).perm) || e.by === me)) return no('withdraw');
           tk[vid] = { by: me }; delete d.vault[gid][vid]; return ok();
         },
         readGuild: function (gid) { return Promise.resolve(d.guilds[gid] || null); },
@@ -318,5 +344,5 @@
   }
 
   var ns = root.Satisfy = root.Satisfy || {};
-  ns.guild = Object.freeze({ create: create, memoryStore: memoryStore, validName: validName, nameKey: nameKey, gidOf: gidOf, can: can, cleanGuild: cleanGuild, cleanEntry: cleanEntry, cleanNote: cleanNote, C: C, GID_RE: GID_RE });
+  ns.guild = Object.freeze({ create: create, memoryStore: memoryStore, validName: validName, nameKey: nameKey, gidOf: gidOf, can: can, cleanGuild: cleanGuild, cleanPerm: cleanPerm, hasRight: hasRight, RIGHTS: RIGHTS, cleanEntry: cleanEntry, cleanNote: cleanNote, C: C, GID_RE: GID_RE });
 })(typeof window !== 'undefined' ? window : globalThis);

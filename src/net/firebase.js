@@ -451,6 +451,7 @@
           var u = {};
           u['guilds/' + gid] = { name: g.name, nk: g.nk, master: to, col: g.col, t: g.t };
           if (typeof g.emb === 'number') u['guilds/' + gid].emb = g.emb; // the banner stays (SAT-ONLINE-084)
+          if (g.perm) u['guilds/' + gid].perm = g.perm; // and the ranks' rights (SAT-ONLINE-104)
           u['guildMembers/' + gid + '/' + to] = { rk: 'm', n: b.n, c: b.c, on: b.on };
           u['guildMembers/' + gid + '/' + from] = { rk: 'o', n: a.n, c: a.c, on: a.on };
           return up(u);
@@ -461,7 +462,16 @@
       setEmblem: function (gid, i) {
         return D.get(at('guilds/' + gid)).then(function (s) {
           var g = s.val(); if (!g) throw new Error('gone');
-          var u = {}; u['guilds/' + gid] = { name: g.name, nk: g.nk, master: g.master, col: g.col, t: g.t, emb: i }; return up(u);
+          var u = {}; u['guilds/' + gid] = { name: g.name, nk: g.nk, master: g.master, col: g.col, t: g.t, emb: i }; if (g.perm) u['guilds/' + gid].perm = g.perm; return up(u);
+        });
+      },
+      // SAT-ONLINE-104 (plan U230): the ranks' rights, guilds/{gid}/perm {o: {inv, take, spend, note, ev}, r: {...}}, set by
+      // the master with the guild as it is (null: the defaults, officers all and members none)
+      setPerm: function (gid, pm) {
+        return D.get(at('guilds/' + gid)).then(function (s) {
+          var g = s.val(); if (!g) throw new Error('gone');
+          var v = { name: g.name, nk: g.nk, master: g.master, col: g.col, t: g.t }; if (typeof g.emb === 'number') v.emb = g.emb; if (pm) v.perm = pm;
+          var u = {}; u['guilds/' + gid] = v; return up(u);
         });
       },
       // SAT-ONLINE-085 alliances (plan U238/U245). guildAllyAsk/{to}/{from} {n, by, t}: a proposal from the master or an
