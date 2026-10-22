@@ -8,9 +8,10 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const { pathToFileURL } = require('node:url');
 
-let chromium;
+let chromium, PW;
 try {
-  ({ chromium } = require('playwright'));
+  PW = require('playwright');
+  ({ chromium } = PW);
 } catch (e) {
   throw new Error('playwright is not installed. Run: npm install && npm run setup:browsers');
 }
@@ -48,7 +49,8 @@ const INIT_SCRIPT = `(() => {
 
 let browserPromise = null;
 function browser() {
-  if (!browserPromise) browserPromise = chromium.launch();
+  // SATISFY_BROWSER=firefox|webkit runs the same tests in another engine (SAT-ONLINE-107, plan U370; CI installs them)
+  if (!browserPromise) browserPromise = (PW[process.env.SATISFY_BROWSER || 'chromium'] || chromium).launch();
   return browserPromise;
 }
 async function closeBrowser() {
