@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22v143', ver: '1.43', d: '2026-10-22',
+      ar: ['صيانة: تيستات أثبت على الأجهزة البطيئة، وتيست بيتأكد إن كل كلمة في اللعبة ليها ترجمة عربي وإنجليزي، وتيست للواجهة على زووم 125%'],
+      en: ['Maintenance: steadier tests on slow machines, a test that every line the game shows has Arabic and English text, and a test of the interface at 125% zoom'] },
     { v: '2026-10-22v142', ver: '1.42', d: '2026-10-22',
       ar: ['شاشة التحميل: النقط والدواير بقت بتطلع من تحت لفوق وهي بتتمايل، وبتصغر وتبهت لحد ما تختفي، وفيه منها أكتر على الجناب. وبقت بدقة الشاشة كاملة بدل ما كانت متمطوطة'],
       en: ['Loading screen: the sparks and rings now rise from the bottom with a gentle sway, shrinking and fading until they vanish, with more of them along the sides. They are drawn at full screen resolution instead of stretched'] },
