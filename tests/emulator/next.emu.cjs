@@ -284,3 +284,11 @@ test('#173: content packs: admins set them, with a cohort (level, share) only fo
   await no(db(M).ref('flags/pk_nat').set(pk({ zone: 'zWin' })), 'nothing else');
   await yes(db(A).ref('flags').once('value'), 'every page reads them');
 });
+
+test('#179: a spawn shield in presence, 1 or nothing', async () => {
+  const pres = { v: 1, uid: A, sid: 'sess0123456789ab', handle: 'Ahmed', look: { hair: 1, hc: 2, skin: 1, top: 3 }, cls: 'novice', lv: 3, zone: 'zWin', x: 2000, y: 1300, dir: 0, anim: 'idle', arm: 0, seq: 1, t: SV };
+  await yes(db(A).ref('presence/satisfy/main/' + A).set(pres), 'presence as before');
+  await yes(db(A).ref('presence/satisfy/main/' + A).update({ sh: 1 }), 'with a shield');
+  await no(db(A).ref('presence/satisfy/main/' + A).update({ sh: 2 }), 'only 1');
+  await yes(db(A).ref('presence/satisfy/main/' + A + '/sh').remove(), 'and it goes');
+});

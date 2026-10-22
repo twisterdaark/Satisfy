@@ -1161,6 +1161,9 @@
             "gd": {
               ".validate": "newData.isString() && newData.val().matches(/^g_[A-Za-z0-9]{1,128}$/)"
             },
+            "sh": {
+              ".validate": "newData.val() === 1"
+            },
             "seq": {
               ".validate": "newData.isNumber() && newData.val() >= 0"
             },
