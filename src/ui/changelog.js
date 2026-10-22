@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22raid', ver: '1.72', d: '2026-10-22',
+      ar: ["حارس الغابة وباقي الزعماء مبقوش بيقتلوا باللمس: ضربتهم القريبة بقت بتتحضر نص ثانية (علامة ! حمرا ودايرة)، فتقدر تتفاداها بالداش أو تبعد",
+        "صيادين ريجاس في غارة الحارس بيسبقوك على العرين ويستنوك هناك بدل ما يمشوا جنبك، ومبيخشوش في الحيطان. ولو الحارس مش موجود ريجاس بيقولك تستنى لما يظهر، وتقدر تلغي الغارة من عنده",
+        "الرقص على المسرح بقى شغال: الأسهم بتاخد، والعالم مبيقفش حواليك، وEsc بيخرجك",
+        "زهر النُّزل مبقاش بيظهر فوق الحيطة كل 20 ثانية: بيظهر بس لو انت أو حد جنبك راهن"],
+      en: ["The Guardian of the Forest and the other bosses no longer kill on touch: their close blow winds up for half a second (a red ! and a ring), so a dodge or a step back beats it",
+        "Regas's hunters in the Guardian raid go ahead to the den and wait for you there instead of walking at your side, and they no longer pass through walls. If the Guardian is not around Regas tells you to wait for it, and he can call the raid off",
+        "Dancing on the stage works: the arrows take, the world keeps going around you, and Esc leaves",
+        "The inn's dice no longer show over the wall every 20 seconds: only when you or someone near you placed a bet"] },
     { v: '2026-10-22sfx', ver: '1.71', d: '2026-10-22',
       ar: ["صوت الحديد اللي كان بيتسمع من بعيد (حلفاء حرب رين والحرس وهم بيصدوا الوحوش) بقى بيتسمع بس لو انت قريب، وبيوطى مع البعد",
         "نفس الصوت مبيتكررش فوق بعضه: الوحوش من نفس النوع بتطلع صوت واحد بدل ما تركب على بعض، ومفيش أكتر من كام صوت في نفس اللحظة",

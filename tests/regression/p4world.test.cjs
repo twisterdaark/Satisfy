@@ -176,7 +176,9 @@ test('the stage: a pad sings under your feet; the dance takes ten arrows and pay
     assert.equal(await g.eval(() => window.__G.mode), 'dance');
     const KEY = { L: 'ArrowLeft', U: 'ArrowUp', R: 'ArrowRight', D: 'ArrowDown' };
     for (let i = 0; i < 10; i++) {
-      await g.eval(() => { window.__GP4.P4.dance.gap = 0; window.__GP4.P4.dance.t = 9; });
+      // the pause between arrows runs out by itself (owner 2026-10-22: the dance froze the game, so the arrows never took)
+      await g.eval(() => { window.__GP4.P4.dance.t = 9; });
+      await g.step(45);
       const d = await g.eval(() => window.__GP4.P4.dance.seq[window.__GP4.P4.dance.i]);
       await g.page.keyboard.press(KEY[d]);
     }
