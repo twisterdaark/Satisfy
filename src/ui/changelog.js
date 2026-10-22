@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22caravan', ver: '2.63', d: '2026-10-22',
+      ar: ["قوافل التجار: من تاجر أي مدينة اشتري بضاعة لتاجر مدينة تانية ووصّلها بنفسك. كل ما المدينة أبعد البضاعة أغلى ولازم تقعد على الطريق وقت أطول. الطريق الآمن بيكسب 30% والبضاعة مبتضيعش لو وقعت، والطريق الخطر بيكسب 80% بس قطاع طرق بيهجموا عليك برّه المدن ولو وقعت البضاعة بتضيع"],
+      en: ["Merchant caravans: at any town's merchant buy goods for another town's merchant and carry them there yourself. The farther the town, the dearer the goods and the longer they must be on the road. The safe road pays 30% more and the goods survive a fall; the risky road pays 80% more, but outlaws ambush you outside towns and a fall loses the load"] },
     { v: '2026-10-24class2', ver: '2.62', d: '2026-10-24',
       ar: ["الكلاس التاني، زي هوروي في الرواية، ونادر جدًا جدًا: خمس كلاسات تانية بس، وكل واحدة منهم ليها صاحب واحد بس في العالم كله، وكل شخصية تاخد واحدة بس. كل واحدة مستخبية ورا شرط محدش بيتقاله عليه",
           "الكلاس التاني مش بيشيل كلاسك الأولاني: سكيلاتك فاضلة، والكلاس التاني بيزود سكيلين وميزة، و+2 نقطة ستات كل ليفل (12 بدل 10 زي الرواية)، وبيظهر في شباك الحالة «الأولاني (التاني)»",
@@ -1073,10 +1076,6 @@
       ar: ['شاشة التحميل: النقط والدواير بقت بتطلع من تحت لفوق وهي بتتمايل، وبتصغر وتبهت لحد ما تختفي، وفيه منها أكتر على الجناب. وبقت بدقة الشاشة كاملة بدل ما كانت متمطوطة'],
       en: ['Loading screen: the sparks and rings now rise from the bottom with a gentle sway, shrinking and fading until they vanish, with more of them along the sides. They are drawn at full screen resolution instead of stretched'] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22', hide: 1,
-    { v: '2026-10-22caravan', ver: '1.42', d: '2026-10-22',
-      ar: ["قوافل التجار: من تاجر أي مدينة اشتري بضاعة لتاجر مدينة تانية ووصّلها بنفسك. كل ما المدينة أبعد البضاعة أغلى ولازم تقعد على الطريق وقت أطول. الطريق الآمن بيكسب 30% والبضاعة مبتضيعش لو وقعت، والطريق الخطر بيكسب 80% بس قطاع طرق بيهجموا عليك برّه المدن ولو وقعت البضاعة بتضيع"],
-      en: ["Merchant caravans: at any town's merchant buy goods for another town's merchant and carry them there yourself. The farther the town, the dearer the goods and the longer they must be on the road. The safe road pays 30% more and the goods survive a fall; the risky road pays 80% more, but outlaws ambush you outside towns and a fall loses the load"] },
-    { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },
     { v: '2026-10-22v140', ver: '1.40', d: '2026-10-22',

@@ -632,7 +632,8 @@ test('live switches (SAT-ONLINE-121): only admins turn world chat, trading or du
 
 test('merchant caravans (SAT-ONLINE-110): your own, one at a time, stamped by the server; delivered after its road, for the same goods', () => {
   const c = rules.caravans.$uid, d = rules.caravanDone.$uid.$id, C = "root.child('caravans').child($uid)";
-  assert.equal(c['.write'], 'auth != null && auth.uid === $uid && (!data.exists() || !newData.exists())', 'yours, started or dropped, never changed');
+  assert.equal(c['.write'], "auth != null && auth.uid === $uid && (!data.exists() || !newData.exists() || now > data.child('t').val() + 7200000)", 'yours, started or dropped, never changed; a start left behind is replaced after two hours');
+  assert.equal(rules.caravanDone.$uid['.write'], 'auth != null && auth.uid === $uid && !newData.exists()', 'your deliveries removed at once, nothing else');
   assert.equal(c.t['.validate'], 'newData.val() === now');
   assert.equal(c.md['.validate'], 'newData.isNumber() && newData.val() >= 60000 && newData.val() <= 3600000', 'a minute to an hour on the road');
   assert.ok(d['.write'].includes('now >= ' + C + ".child('t').val() + " + C + ".child('md').val()"), 'not before its time on the road');

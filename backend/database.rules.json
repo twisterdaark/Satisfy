@@ -864,7 +864,7 @@
     "caravans": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid && (!data.exists() || !newData.exists())",
+        ".write": "auth != null && auth.uid === $uid && (!data.exists() || !newData.exists() || now > data.child('t').val() + 7200000)",
         ".validate": "newData.hasChildren(['id', 'f', 'to', 'g', 'r', 'md', 't']) && newData.child('f').val() !== newData.child('to').val()",
         "id": { ".validate": "newData.isString() && newData.val().matches(/^v_[A-Za-z0-9_-]{1,60}$/)" },
         "f": { ".validate": "newData.isString() && newData.val().matches(/^z[A-Za-z]{2,12}$/)" },
@@ -879,6 +879,7 @@
     "caravanDone": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && !newData.exists()",
         "$id": {
           ".write": "auth != null && auth.uid === $uid && ((!data.exists() && root.child('caravans').child($uid).exists() && !newData.parent().parent().parent().child('caravans').child($uid).exists() && now >= root.child('caravans').child($uid).child('t').val() + root.child('caravans').child($uid).child('md').val() && now <= root.child('caravans').child($uid).child('t').val() + 7200000 && newData.child('f').val() === root.child('caravans').child($uid).child('f').val() && newData.child('to').val() === root.child('caravans').child($uid).child('to').val() && newData.child('g').val() === root.child('caravans').child($uid).child('g').val() && newData.child('r').val() === root.child('caravans').child($uid).child('r').val() && $id === root.child('caravans').child($uid).child('id').val()) || !newData.exists())",
           ".validate": "newData.hasChildren(['f', 'to', 'g', 'r', 't'])",

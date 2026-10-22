@@ -513,9 +513,10 @@
     if (seg[0] === 'caravans') {
       if (seg.length !== 2) return 'PERMISSION_DENIED: caravans ' + path;
       if (v === null) return null;
-      if (old) return 'PERMISSION_DENIED: caravans one at a time';
+      if (old && !(now > old.t + 7200000)) return 'PERMISSION_DENIED: caravans one at a time'; // a start left behind goes after two hours
       return Object.keys(v).sort().join(',') === 'f,g,id,md,r,t,to' && typeof v.id === 'string' && /^v_[A-Za-z0-9_-]{1,60}$/.test(v.id) && town(v.f) && town(v.to) && v.f !== v.to && isInt(v.g, 100) && v.g <= 1e6 && (v.r === 0 || v.r === 1) && typeof v.md === 'number' && v.md >= 60000 && v.md <= 3600000 && isSV(v.t) ? null : 'caravans values';
     }
+    if (seg.length === 2 && v === null) return null; // all of your own at once ("Delete my online data")
     if (seg.length !== 3) return 'PERMISSION_DENIED: caravanDone ' + path;
     if (v === null) return null;
     const c = data.get('caravans/' + user.uid);
