@@ -113,6 +113,7 @@ body.photo #ui>*:not(#photoBar){visibility:hidden!important}body.photo #photoBar
 @keyframes tin{from{opacity:0;transform:translateY(-6px)}}
 #ui:has(#dialog:not([hidden])) #evbar,#ui:has(#dialog:not([hidden])) #sgbar,#ui:has(#dialog:not([hidden])) #natbar{visibility:hidden}
 #natbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*6.4);padding:calc(var(--u)*.35) calc(var(--u)*1.4);text-align:center;pointer-events:none;border-color:#5aa2ff;white-space:nowrap}#natbar b{color:#9fd0ff}
+#natbar button{pointer-events:auto;margin-inline-start:calc(var(--u)*.6);padding:0 calc(var(--u)*.6)}
 #tlbar{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*12);padding:calc(var(--u)*.4) calc(var(--u)*1.4);text-align:center;pointer-events:none;white-space:nowrap;font-size:calc(var(--u)*1.5);border-color:var(--gold)}#tlbar.big{font-size:calc(var(--u)*2)}#tlbar.big b{font-size:calc(var(--u)*4);color:var(--gold);display:block;line-height:1.1}
 #tlbar .rcsp{display:flex;align-items:center;gap:calc(var(--u)*.6);justify-content:center;margin-top:calc(var(--u)*.3);font-size:calc(var(--u)*1.1)}#tlbar .rcsp i{display:block;width:calc(var(--u)*14);height:calc(var(--u)*.9);background:rgba(0,0,0,.45);border:1px solid rgba(143,216,255,.6)}#tlbar .rcsp u{display:block;height:100%;background:linear-gradient(90deg,#ffb84a,#ffe08a)}
 #evbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*1.2);padding:calc(var(--u)*.35) calc(var(--u)*1.4);text-align:center;pointer-events:none;border-color:var(--gold);white-space:nowrap}#evbar b{color:var(--gold)}#sgbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*3.8);padding:calc(var(--u)*.35) calc(var(--u)*1.4);text-align:center;pointer-events:none;border-color:#c83a3a;white-space:nowrap}#sgbar b{color:#ff8a7a}
@@ -1452,6 +1453,8 @@ const dunAt=(x,y)=>y<WMH*TS?null:DUN.find(D=>x>=D.x0*TS&&x<(D.x1+1)*TS&&y>=D.y0*
  SHRINES.push({k:'bsoul',...px(BR.x1-3,cy),hint:'hSoul'});
  // the tournament arena: one open floor, no rocks or inner walls
  const AN=DUN[8];for(let y=AN.y0+1;y<AN.y1;y++)for(let x=AN.x0+1;x<AN.x1;x++)setT(x,y,DR);
+ // an anvil anyone may use: the National Competition's production stage is held on this floor
+ ANVILS.push({id:'anvN',tx:AN.x0+3,ty:AN.y0+3,free:1});setT(AN.x0+3,AN.y0+3,BL);
  // the Winston racecourse (town life): a dirt oval between the rail and a hedge round the pond in the middle
  {const C=RCX;for(let y=C.y0;y<=C.y1;y++)for(let x=C.x0;x<=C.x1;x++){const ex=x+.5-C.cx,ey=y+.5-C.cy,eo=Math.hypot(ex/C.a,ey/C.b),ei=Math.hypot(ex/C.ia,ey/C.ib);setT(x,y,eo>1.12?TR:eo>1?WL:ei<.7?WA:ei<1?TR:DR);}}
  // the Red Dragon's Peak (SAT-DRAGON-001): scorched ground in a ring of boulders, with a gap to the south
@@ -5059,7 +5062,7 @@ function load(){const r=STORE.read(),SCH=Satisfy.storage.SCHEMA;
  if((S.wv||1)<2){S.wv=2;if(P.y<OWH*TS)P.x=wX(P.x/TS)*TS;}
  if(S.wv<3){S.wv=3;if(P.y>=OWH*TS)P.y+=SR*TS;}   // SAT-WORLD-003: the south took rows OWH..WMH-1, interiors and caves moved down SR rows
  if(S.wv<4){S.wv=4;if(P.y>=OS*TS)P.y+=(WMH-OS)*TS;}   // the map doubled: the far south took rows OS..WMH-1, interiors and caves moved down again
- S.bqa=S.bqa||{};for(const id in S.bqa)regBQ(S.bqa[id]);for(const id in S.adqa||{})regAD(S.adqa[id]);(S.bq||[]).forEach(regBQ);if(isLeg()&&!S.lgfix){S.lgfix=1;S.bonus=0;S.got={};}gearFit();if(!isSm()){S.bonus=0;S.got={};S.patience=0;if(S.tl.smith){delete S.tl.smith;if(S.title==='smith')S.title='';}}S.vis=S.vis||{zWin:1};buildMe(S.look);Satisfy.ids.ensure(S);DEVT.reset();return true;}catch(e){STORE.backup('corrupt',r.raw);return false;}}
+ S.bqa=S.bqa||{};for(const id in S.bqa)regBQ(S.bqa[id]);for(const id in S.adqa||{})regAD(S.adqa[id]);(S.bq||[]).forEach(regBQ);if(S.cls==='pagma'&&!S.pgMur&&S.qs.pg1&&(S.qs.pg1.c>=1||S.qs.pg1.st===2))S.pgMur=1;if(S.natR){const T=TOWNS.find(T=>T.k===S.natR)||TOWNS[1];P.x=T.rx*TS+8;P.y=T.ry*TS+10;delete S.natR;S.natJ=null;}if(isLeg()&&!S.lgfix){S.lgfix=1;S.bonus=0;S.got={};}gearFit();if(!isSm()){S.bonus=0;S.got={};S.patience=0;if(S.tl.smith){delete S.tl.smith;if(S.title==='smith')S.title='';}}S.vis=S.vis||{zWin:1};buildMe(S.look);Satisfy.ids.ensure(S);DEVT.reset();return true;}catch(e){STORE.backup('corrupt',r.raw);return false;}}
 
 /* ---------------- input ---------------- */
 const K={};
@@ -5412,7 +5415,7 @@ Object.assign(STR.en,{hRead:'E: Read',
  lmGauss:'The Gauss Border',lmGauss1:'"The fortified city, Patrian. It was a strategic point at the border of the Gauss Kingdom, while also establishing the boundary that separated the western and northern parts of the Eternal Kingdom."',lmGauss2:'"The Eternal Kingdom and Gauss Kingdom didn\'t have a good relationship. Over the past decades, there had been countless disputes and frequent bloodshed."',
  lmCork:'Cork Island',lmCork1:'"Cork Island?" It was a place located in the South Sea of the Eternal Kingdom. It would take a week to get to the nearest port and ride a boat there.',lmCork2:'Minor: "It is a dungeon on Cork Island."',
  lmYatan:'Yatan Temple',lmYatan1:'Doran: "As you know, the Yatan Temple is filled with evil energy. Ordinary people will become afraid if they stay here for a while."',lmYatan2:'"Kiyaaaaak! The sharp scream of a woman in pain came from underground."'});
-function tryForge(a){if(!qDone(a.perm)){SFX.deny();return dialog(a.own,['noAnvil']);}ANVIL=a;openForge();}
+function tryForge(a){if(!a.free&&!qDone(a.perm)){SFX.deny();return dialog(a.own,['noAnvil']);}ANVIL=a;openForge();}
 // Uprooting (Twister 2026-10-19): a stump can be dug out with three more blows, leaving open ground for good. Shared world
 // state (WS.roots), so the spot is clear for every player. Trees that form a boundary (the world's edges, the old tree
 // line, and straight tree walls of 12 or more) cannot be uprooted.
@@ -6003,7 +6006,26 @@ function drawBanner(T){const o=WS.terr[T.k],x=Math.round(T.x),y=Math.round(T.y),
  if(Math.hypot(T.x-P.x,T.y-P.y)<110)TX.push({s:t(T.k)+' · '+(o.own?gName(o.own):t('gNone')),x:T.x,y:T.y-(w&&w.cap?52:42),f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:8,c:o.own?c:'#d0d4dc'});}
 // Pagma's Rare Book (SAT-PAGMA-001). Legendary classes are one per world, as in the novel: the first player to read the
 // book is Pagma's Successor, and the registry lives in shared world state so an online server can enforce it.
-function shrineAct(o){if(o.p4)return p4Act(o);if(o.p3)return p3Act(o);if(o.k==='god')return godAct(o);if(o.k==='irene')return ireneAct(o);if(o.k==='msword')return mswordAct();if(o.k==='sthrone')return throneAct();if(o.k==='bsoul')return soulAct();if(o.k==='yaltar')return altarAct();if(o.k==='mural'){qEvent('visit','mural');return dialog('mural',['mur1','mur2',S.cls==='pagma'?'mur3p':'mur3']);}
+/* the mural behind Loran Falls (novel ch 78): Pagma's Successor learns the five sword techniques on the spot. A short
+   scene marks it: the cave darkens, the sword dance spins round you, a beam pierces the sky, and the system names
+   the techniques (owner 2026-10-22: the skills did not come, and it should feel like an achievement) */
+let PGSC=null;
+function muralAct(){qEvent('visit','mural');const learn=S.cls==='pagma'&&!S.pgMur;
+ dialog('mural',['mur1','mur2',S.cls==='pagma'?'mur3p':'mur3'],learn?()=>{S.pgMur=1;PGSC={t:0,sl:0,done:0};P.inv=Math.max(P.inv||0,4);SFX.notice();save(true);}:null);}
+function pgScene(){const G=PGSC;if(!G)return;G.t+=1/60;const tm=G.t,sx=P.x-camX,sy=P.y-camY;
+ const dk=Math.min(.72,tm*1.8)*(tm>3.4?Math.max(0,1-(tm-3.4)*1.5):1);ctx.fillStyle='rgba(4,6,18,'+dk.toFixed(3)+')';ctx.fillRect(0,0,VW,VH);
+ if(tm<2.2&&tm>=G.sl){G.sl=tm+.13;const a=tm*9;P.dir=[0,2,1,3][(tm*8|0)%4];vfx('slash',P.x+Math.cos(a)*6,P.y-10+Math.sin(a)*4,{angle:a,rarity:4});noise(.03,.08,1400+(tm*300|0));}
+ if(tm>.9&&tm<3.6){const k=Math.min(1,(tm-.9)*3)*(tm>3?Math.max(0,1-(tm-3)*1.7):1),w=Math.round(2+k*8),g=ctx.createLinearGradient(0,0,0,sy);
+  g.addColorStop(0,'rgba(255,250,220,0)');g.addColorStop(.6,'rgba(255,236,160,'+(.55*k).toFixed(3)+')');g.addColorStop(1,'rgba(255,255,255,'+(.9*k).toFixed(3)+')');
+  ctx.fillStyle=g;ctx.fillRect(Math.round(sx-w/2),0,w,Math.round(sy-8));ctx.fillStyle='rgba(255,255,255,'+(.8*k).toFixed(3)+')';ctx.fillRect(Math.round(sx-1),0,2,Math.round(sy-8));
+  for(let i=0;i<3;i++)fx.push({x:P.x+(rand()-.5)*w*2,y:P.y-10-rand()*40,vx:(rand()-.5)*20,vy:-60-rand()*80,t:.5,c:rand()<.5?'#ffe7a8':'#fff'});}
+ if(tm>1.2&&!G.done){G.done=1;flash();shake=.5;SFX.legendary();const L=['wave','restraint','link','kill','transcend'].map(pgSkN).join(lang==='ar'?'، ':', ');announce(t('pgLearn',{s:L}),1);checkSkills();hudDirty=true;}
+ if(tm>4.2)PGSC=null;}
+const pgSkN=k=>{const n=t('sk_'+k);return n.includes(':')?n.split(':').pop().trim():n;};
+Object.assign(STR.ar,{stBase:'أساسي {n}',stBaseTip:'الرقم الكبير = الأساسي + بونص الحدادة والترقيات والألقاب، مضروب في نسب الترقية. الزراير بتزود الأساسي بس.',p5Tip:'+5 للأساسي. الإجمالي ممكن يزيد 6 أو أكتر بسبب نسب الترقية.',pgLearn:'[ تعلمت فن سيف باغما: {s} ]',skMural:'بتتعلمها من الجدارية ورا شلالات لوران'});
+Object.assign(STR.en,{stBase:'base {n}',stBaseTip:'Big number = base + smithing, advancement and title bonuses, times advancement percentages. The buttons raise the base only.',p5Tip:'+5 to the base. The total can rise by 6 or more from advancement percentages.',pgLearn:"[ You learned Pagma's Swordsmanship: {s} ]",skMural:'Learned at the mural behind Loran Falls'});
+window.__GPG={mural:()=>muralAct(),scene:()=>PGSC}; // tests
+function shrineAct(o){if(o.p4)return p4Act(o);if(o.p3)return p3Act(o);if(o.k==='god')return godAct(o);if(o.k==='irene')return ireneAct(o);if(o.k==='msword')return mswordAct();if(o.k==='sthrone')return throneAct();if(o.k==='bsoul')return soulAct();if(o.k==='yaltar')return altarAct();if(o.k==='mural')return muralAct();
  const L=WS.legends||(WS.legends={}),own=L.pagma;
  if(S.cls==='pagma')return dialog('pbookN',['pbDone']);
  if(own&&own.pid!==pidOf())return dialog('pbookN',[t('pbTaken',{n:own.n})]);
@@ -6529,9 +6551,9 @@ const SKD={
  // Item Repair (mends the worn gear, less than the legendary one) and Tempering (the gear you wear wears out slower).
  focus:{cls:'pagma',lv:7,pas:1,col:'#ffc21a'},beyes:{cls:'pagma',lv:12,pas:1,col:'#9fd8ff'},lpat:{cls:'pagma',lv:15,pas:1,col:'#ffb04a'},lcre:{cls:'pagma',lv:10,pas:1,col:'#ffe7a8'},lrep:{cls:'pagma',lv:10,qd:'kh5',mp:14,cd:45,col:'#9fd8ff'},icomb:{cls:'pagma',lv:35,qd:'kh6',mp:18,cd:90,col:'#bfe0ff'},
  scraft:{cls:'smith',lv:7,pas:1,col:'#e0a060'},srep:{cls:'smith',lv:10,qd:'kh5',mp:12,cd:60,col:'#aab0ba'},stemp:{cls:'smith',lv:12,pas:1,col:'#ff8a4a'},
- link:{cls:'pagma',lv:1,qd:'pg1',mp:10,cd:8,need:'melee',col:'#ffd27a'},kill:{cls:'pagma',lv:1,qd:'pg1',mp:18,cd:15,need:'melee',col:'#ff7a5a'},restraint:{cls:'pagma',lv:1,qd:'pg1',mp:20,cd:14,col:'#bfe8ff'},
+ link:{cls:'pagma',lv:1,mur:1,mp:10,cd:8,need:'melee',col:'#ffd27a'},kill:{cls:'pagma',lv:1,mur:1,mp:18,cd:15,need:'melee',col:'#ff7a5a'},restraint:{cls:'pagma',lv:1,mur:1,mp:20,cd:14,col:'#bfe8ff'},
  mcross:{cls:'saint',lv:1,mp:14,cd:3,need:'melee',col:'#bfe0ff'},mflash:{cls:'saint',lv:1,qd:'ms1',mp:22,cd:8,need:'melee',col:'#ffffff'},mwind:{cls:'saint',lv:160,qd:'ms2',mp:30,cd:10,need:'melee',col:'#9fd8ff'},mheaven:{cls:'saint',lv:170,qd:'ms3',mp:55,cd:45,need:'melee',col:'#fff4c0'},
- wave:{cls:'pagma',lv:1,qd:'pg1',mp:18,cd:9,need:'melee',col:'#ffe08a'},transcend:{cls:'pagma',lv:1,qd:'pg1',mp:24,cd:16,need:'melee',col:'#fff4c0'},revolve:{cls:'pagma',lv:1,qd:'dp2',mp:28,cd:18,need:'melee',col:'#ffb85a'},pinnacle:{cls:'pagma',lv:1,qd:'dp2',mp:50,cd:60,need:'melee',col:'#ff6a3a'},
+ wave:{cls:'pagma',lv:1,mur:1,mp:18,cd:9,need:'melee',col:'#ffe08a'},transcend:{cls:'pagma',lv:1,mur:1,mp:24,cd:16,need:'melee',col:'#fff4c0'},revolve:{cls:'pagma',lv:1,qd:'dp2',mp:28,cd:18,need:'melee',col:'#ffb85a'},pinnacle:{cls:'pagma',lv:1,qd:'dp2',mp:50,cd:60,need:'melee',col:'#ff6a3a'},
  bmiss:{cls:'braham',lv:1,mp:16,cd:4,need:'staff',col:'#c89aff'},bmeteor:{cls:'braham',lv:1,qd:'br1',mp:40,cd:14,need:'staff',col:'#ff7a3a'},bchain:{cls:'braham',lv:160,qd:'br2',mp:36,cd:10,need:'staff',col:'#bfe0ff'},bzero:{cls:'braham',lv:170,qd:'br3',mp:60,cd:40,need:'staff',col:'#9feaff'},
  // Tier-2 (major 6)
  kstance:{cls:'knight',lv:20,mp:14,cd:14,col:'#9fc8ff'},glink:{cls:'knight',lv:26,mp:20,cd:30,col:'#ffe08a'},
@@ -6580,8 +6602,9 @@ const skOptTxt=(k,l)=>t('skO'+l+'_'+(SKO[k]||'any'));
 function skLvTxt(k){const [l,c,nx]=skProg(k),nxO=l<5?5:l<10?10:0;return `<br><small style="color:#ffe08a">${t('skLvT',{n:l})}${nx?` · ${t('skUses',{p:Math.floor(c/nx*100)})}`:` · ${t('skMax')}`}</small>`+(nxO?`<br><small style="color:#9fb8d8">${t('skNext',{n:nxO,o:skOptTxt(k,nxO)})}</small>`:'')+(l>=5?`<br><small style="color:#9fe39a">✓ ${skOptTxt(k,5)}</small>`:'')+(l>=10?`<br><small style="color:#9fe39a">✓ ${skOptTxt(k,10)}</small>`:'');}
 const clsSkills=()=>Object.keys(SKD).filter(k=>!SKD[k].pas&&(!SKD[k].church||SKD[k].church===S.church)&&(!SKD[k].sec||SKD[k].sec===S.sec)&&(!SKD[k].bk||!!(S.bh&&S.bh.sb&&S.bh.sb[SKD[k].bk]))).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior');
 function barSkills(){const cs=clsSkills().filter(skOK),a=Array.isArray(S.bar)&&S.bar.length===5?S.bar.map(k=>k&&cs.includes(k)?k:null):cs.slice(0,5);while(a.length<5)a.push(null);a.push(TLS[S.title]||null);return a;}
-const skOK=k=>{const d=SKD[k];return d.title?S.title===d.title:S.lv>=d.lv&&(!d.qd||qDone(d.qd));};
-const lockTxt=d=>d.qd&&!qDone(d.qd)?t('skQuest',{q:qName(d.qd)}):t('skUnlock',{n:d.lv});
+// mur: learned at the mural behind Loran Falls (novel ch 78: the skills come the moment Grid sees it, before he reports to Khan)
+const skOK=k=>{const d=SKD[k];return d.title?S.title===d.title:S.lv>=d.lv&&(!d.qd||qDone(d.qd))&&(!d.mur||!!S.pgMur||qDone('pg1'));};
+const lockTxt=d=>d.mur&&!S.pgMur&&!qDone('pg1')?t('skMural'):d.qd&&!qDone(d.qd)?t('skQuest',{q:qName(d.qd)}):t('skUnlock',{n:d.lv});
 const DEFKB=['Digit1','Digit2','Digit3','Digit4','Digit5','KeyR'];let KB=[...DEFKB];try{const k=JSON.parse(localStorage.getItem('satisfy_keys'));if(Array.isArray(k)&&k.length===6){KB=k;if(k[5]==='Digit6'&&!k.includes('KeyR'))KB[5]='KeyR';}}catch(e){}
 const RESERVED=['KeyQ','KeyF','KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyJ','Space','KeyE','KeyI','KeyC','KeyU','KeyL','KeyM','Tab','Escape','Enter','KeyG','KeyH'];
 const keyName=c=>(c||'').replace(/^Key|^Digit/,'').replace('Numpad','Num');
@@ -6889,7 +6912,7 @@ function closeStatus(){BPICK=null;SFX.close();$('statusW').hidden=true;mode='pla
 let STAB='main';
 function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,tip,btn,extra,id)=>`<div class="srow"${tip?` data-tip="${esc(tip)}"`:''}><span>${k}</span><span><b${id?` id="sv_${id}"`:''}>${v}</b>${extra||''}${btn||''}</span></div>`;
  const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+row(t('cls'),t('cl_'+S.cls))+(S.cls==='aura'?row(t('auRateL'),t('auR'+auR())):'')+(dvOn()?row(t('dvL'),t('dvRow',{g:t('godN_'+S.dv.g),n:Math.ceil((S.dv.until-Date.now())/60000)})):'')+(patOn()?row(t('lpatL'),t('lpatRow',{n:Math.ceil((S.pat1-Date.now())/60000)})):'')+(S.cls==='smith'&&(!S.sec||S.sec==='smith')?'':row(t('secL'),S.sec?t('sec_'+S.sec):t('none')))+(S.bank?row(t('bankL'),S.bank.toLocaleString('en')):'')+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
- h+=`<div class="ssec">${t('basic')}<span class="sptc${S.pts>0?' on':''}">${t('pts',{n:S.pts})}</span></div><div class="sgrid">`+['str','sta','agi','int','dex'].map(k=>row(t(k),stat(k),t('t'+k),S.pts>0?`<button data-stat="${k}">+</button>${S.pts>=5?`<button class="p5" data-stat="${k}" data-n="5">+5</button>`:''}${TOUCH&&S.pts>5?`<button class="p5" data-stat="${k}" data-n="all">${t('ptsAllB')}</button>`:''}`:'',S.bonus?` <em>(+${S.bonus})</em>`:'',k)).join('')+'</div>';
+ h+=`<div class="ssec">${t('basic')}<span class="sptc${S.pts>0?' on':''}">${t('pts',{n:S.pts})}</span></div><div class="sgrid">`+['str','sta','agi','int','dex'].map(k=>row(t(k),stat(k),t('t'+k),S.pts>0?`<button data-stat="${k}">+</button>${S.pts>=5?`<button class="p5" data-stat="${k}" data-n="5" data-tip="${esc(t('p5Tip'))}">+5</button>`:''}${TOUCH&&S.pts>5?`<button class="p5" data-stat="${k}" data-n="all">${t('ptsAllB')}</button>`:''}`:'',stat(k)!==S.st[k]?` <em data-tip="${esc(t('stBaseTip'))}">(${t('stBase',{n:S.st[k]})})</em>`:'',k)).join('')+'</div>';
  if(S.respec>0)h+=`<div class="note"><button data-respec="1" data-tip="${esc(t('respecD'))}">${t('respecUse',{n:S.respec})}</button></div>`;
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
  h+=`<div class="ssec">${t('special')}</div><div class="sgrid">`+['comp','indom','dign','insi',...(S.hid.pers?['pers']:[])].map(k=>row(t(k),S.hid[k],t('t'+k)+'<br><small>'+t('noDist')+'</small>')).join('')+'</div>';
@@ -7668,7 +7691,7 @@ function render(dt){DRAWN=0;netDrawn=0;
   if(f.coin){R(ctx,f.x-1,f.y-1,3,3,'#8a6418');R(ctx,f.x-1,f.y-1,2,2,f.c);return;}if(f.fl)ctx.globalAlpha=Math.min(1,f.t*1.5)*(.6+.4*Math.sin(f.t*40));R(ctx,f.x,f.y,f.t>.2?2:1,f.t>.2?2:1,f.c);ctx.globalAlpha=1;});
  nums.forEach(n=>TX.push({s:n.s,x:n.x,y:n.y,f:'{s}px "Press Start 2P", monospace',z:n.big?9:7,c:n.c,a:Math.min(1,n.t*2)}));
  if(COOKG&&P)drawCook();if(SEWG&&P)drawSew();if(MIXG&&P)drawMix();if(FARMG&&P)drawFarm();if((P4.rh||P4.dance)&&P)p4DrawGame();
- ctx.restore();drawWeather();p3Dark();p4Dark();p5Dark();qGuide();
+ ctx.restore();drawWeather();p3Dark();p4Dark();p5Dark();pgScene();qGuide();
  if(P&&S&&mode!=='title'&&mode!=='lang'){const k=P.y<WH*TS&&P.x<BW*TS?clamp((P.x-49*TS)/40,0,1):0;if(k>0){dg.globalCompositeOperation='source-over';dg.clearRect(0,0,VW,VH);dg.fillStyle=`rgba(3,12,6,${.62*k})`;dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='destination-out';const px=P.x-camX,py=P.y-8-camY,g=dg.createRadialGradient(px,py,10,px,py,95);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(0,0,VW,VH);ctx.drawImage(darkC,0,0);}
   const hole=(x,y,r)=>{const g=dg.createRadialGradient(x-camX,y-camY,r*.15,x-camX,y-camY,r);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(x-camX-r,y-camY-r,r*2,r*2);};
   if(P.cc>0){ctx.globalCompositeOperation='lighter';const px=P.x-camX,py=P.y-10-camY,gl=ctx.createRadialGradient(px,py,2,px,py,50);gl.addColorStop(0,'rgba(190,230,255,.75)');gl.addColorStop(1,'rgba(90,160,255,0)');ctx.fillStyle=gl;ctx.fillRect(px-50,py-50,100,100);ctx.globalCompositeOperation='source-over';}
@@ -9372,12 +9395,12 @@ window.__GARN={prev:n=>arnPrev(n),of:(top,me,uid)=>arnOf(top,me,uid),tick:()=>{a
    stage, the time left, your points and your rank; "Nat. Comp." in the player list shows the board. Your scores go to
    nat/{id}/{uid} every 15 s while they change; half a minute after the end each player who scored is paid once by its
    rank (natPaid/{id}/{uid}), the winner gets the title and the whole world hears it. */
-Object.assign(STR.ar,{natN:'المسابقة الوطنية',natK_hunt:'الصيد',natK_craft:'الصناعة',natK_duel:'الساحة',natBar:'<b>المسابقة الوطنية</b> · المرحلة {i}/3: {k} · {m} · {p} نقطة{r}',natGo_hunt:'المسابقة الوطنية بدأت! المرحلة 1/3: الصيد: كل وحش بتقتله بيجيب نقط',natGo_craft:'المرحلة 2/3: الصناعة: كل حاجة بتصنعها بتجيب نقط، والأحسن أكتر',natGo_duel:'المرحلة 3/3: الساحة: كل مبارزة أونلاين بتجيب نقط، والفوز أكتر',natEnd:'المسابقة الوطنية خلصت: الجوايز بعد شوية',natBoard:'المسابقة',natH:'المسابقة الوطنية ({s})',natRow:'{i}. {n}: {s} (صيد {h} · صناعة {c} · ساحة {d})',natMe:'إنت: {s} (صيد {h} · صناعة {c} · ساحة {d})',natNone:'محدش جاب نقط لسه',natNext:'المسابقة الجاية بعد {m} دقيقة',natPay:'المسابقة الوطنية: المركز {r}، {g} دهب',natPay0:'المسابقة الوطنية: {g} دهب على المشاركة',natWin:'{n} كسب المسابقة الوطنية!',tl_natChamp:'بطل المسابقة الوطنية',tl_natChampD:'كسبت المسابقة الوطنية مرة',natFail:'مقدرناش نجيب الترتيب دلوقتي'});
-Object.assign(STR.en,{natN:'National Competition',natK_hunt:'Hunting',natK_craft:'Production',natK_duel:'Arena',natBar:'<b>National Competition</b> · Stage {i}/3: {k} · {m} · {p} pts{r}',natGo_hunt:'The National Competition begins! Stage 1/3: Hunting: every monster you kill scores',natGo_craft:'Stage 2/3: Production: every item you craft scores, better ones more',natGo_duel:'Stage 3/3: Arena: every duel online scores, a win more',natEnd:'The National Competition is over: rewards in a moment',natBoard:'Nat. Comp.',natH:'National Competition ({s})',natRow:'{i}. {n}: {s} (hunt {h} · craft {c} · arena {d})',natMe:'You: {s} (hunt {h} · craft {c} · arena {d})',natNone:'No scores yet',natNext:'Next National Competition in {m} min',natPay:'National Competition: rank {r}, {g} gold',natPay0:'National Competition: {g} gold for taking part',natWin:'{n} won the National Competition!',tl_natChamp:'National Champion',tl_natChampD:'Won the National Competition once',natFail:'Could not load the board right now'});
+Object.assign(STR.ar,{natN:'المسابقة الوطنية',natK_hunt:'الصيد',natK_craft:'الصناعة',natK_duel:'الساحة',natBar:'<b>المسابقة الوطنية</b> · المرحلة {i}/3: {k} · {m} · {p} نقطة{r}',natGo_hunt:'المسابقة الوطنية بدأت! اضغط اشترك في الشريط تحت عشان تروح الساحة. المرحلة 1/3: الصيد: كل وحش بتقتله بيجيب نقط',natGo_craft:'المرحلة 2/3: الصناعة: كل حاجة بتصنعها بتجيب نقط، والأحسن أكتر',natGo_duel:'المرحلة 3/3: الساحة: كل مبارزة أونلاين بتجيب نقط، والفوز أكتر',natEnd:'المسابقة الوطنية خلصت: الجوايز بعد شوية',natBoard:'المسابقة',natH:'المسابقة الوطنية ({s})',natRow:'{i}. {n}: {s} (صيد {h} · صناعة {c} · ساحة {d})',natMe:'إنت: {s} (صيد {h} · صناعة {c} · ساحة {d})',natNone:'محدش جاب نقط لسه',natNext:'المسابقة الجاية بعد {m} دقيقة',natPay:'المسابقة الوطنية: المركز {r}، {g} دهب',natPay0:'المسابقة الوطنية: {g} دهب على المشاركة',natWin:'{n} كسب المسابقة الوطنية!',tl_natChamp:'بطل المسابقة الوطنية',tl_natChampD:'كسبت المسابقة الوطنية مرة',natFail:'مقدرناش نجيب الترتيب دلوقتي'});
+Object.assign(STR.en,{natN:'National Competition',natK_hunt:'Hunting',natK_craft:'Production',natK_duel:'Arena',natBar:'<b>National Competition</b> · Stage {i}/3: {k} · {m} · {p} pts{r}',natGo_hunt:'The National Competition begins! Press Join on the bar below to go to the grounds. Stage 1/3: Hunting: every monster you kill scores',natGo_craft:'Stage 2/3: Production: every item you craft scores, better ones more',natGo_duel:'Stage 3/3: Arena: every duel online scores, a win more',natEnd:'The National Competition is over: rewards in a moment',natBoard:'Nat. Comp.',natH:'National Competition ({s})',natRow:'{i}. {n}: {s} (hunt {h} · craft {c} · arena {d})',natMe:'You: {s} (hunt {h} · craft {c} · arena {d})',natNone:'No scores yet',natNext:'Next National Competition in {m} min',natPay:'National Competition: rank {r}, {g} gold',natPay0:'National Competition: {g} gold for taking part',natWin:'{n} won the National Competition!',tl_natChamp:'National Champion',tl_natChampD:'Won the National Competition once',natFail:'Could not load the board right now'});
 var NATS=null,NATF=0,natSc=null,natPutT=-1e9,natTop=null,natTopT=-1e9,natSt=null,natPaidId=null,natPayT=-1e9,natBarS='';
 function natOnline(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&Satisfy.natcomp&&Satisfy.firebase.natStore&&S&&!S.__demo);}
 function natNow(){return Satisfy.natcomp.now(wNow(),NATF);}
-function natAdd(k,n){const c=natNow();if(!natSc||!c.running||natSc.id!==c.id||c.kind!==k||!(n>0))return;natSc[k[0]]+=n;natSc.dirty=true;if(S.natIn!==c.id){S.natIn=c.id;save(true);}natLoad();} // S.natIn: the competition to be paid for (kept through a reload)
+function natAdd(k,n){const c=natNow();if(!natSc||!c.running||natSc.id!==c.id||c.kind!==k||!(n>0)||!natHere(c))return;natSc[k[0]]+=n;natSc.dirty=true;if(S.natIn!==c.id){S.natIn=c.id;save(true);}natLoad();} // S.natIn: the competition to be paid for (kept through a reload)
 function natEv(type,key,r){try{if(!natOnline())return;}catch(e){return;}/* qEvent may run before the network's declarations */if(type==='kill'&&MT[key])natAdd('hunt',Satisfy.natcomp.huntPts(MT[key].lv[0],MT[key].boss));else if(type==='craft')natAdd('craft',Satisfy.natcomp.craftPts(r));}
 function natDuel(win,foe){if(!natOnline()||!natSc||!foe)return;const c=natNow();if(!c.running||c.kind!=='duel'||natSc.id!==c.id)return;const f=natSc.foes[foe]||0;natSc.foes[foe]=f+1;natAdd('duel',Satisfy.natcomp.duelPts(win,f));}
 // the first points of a competition: what this account already has in it (a reload, another device) adds to them; nothing
@@ -9390,10 +9413,36 @@ function natTick(){if(!natOnline()){if(natBarS){natBarS='';$('natbar').hidden=tr
   if(natSc.dirty&&natSc.ld===2&&pn-natPutT>15000)natWrite();
   if(natSc.ld===2&&pn-natTopT>30000){natTopT=pn;NATS.top(c.id,Satisfy.natcomp.C.TOP_N).then(a=>{natTop=a;}).catch(()=>{});}
   const me=natSc.h+natSc.c+natSc.d,rk=natTop?natTop.findIndex(x=>x.uid===NET.uid)+1:0,left=Math.max(0,c.stageEnd-wNow());
-  const h=t('natBar',{i:c.stage+1,k:t('natK_'+c.kind),m:Math.floor(left/60000)+':'+String(Math.floor(left/1000)%60).padStart(2,'0'),p:me,r:rk?' · #'+rk:''});if(h!==natBarS){natBarS=h;const b=$('natbar');b.innerHTML=h;b.hidden=false;}return;}
+  natGrounds(c,pn);const h=t('natBar',{i:c.stage+1,k:t('natK_'+c.kind),m:Math.floor(left/60000)+':'+String(Math.floor(left/1000)%60).padStart(2,'0'),p:me,r:rk?' · #'+rk:''})+(S.natJ===c.id?` <button data-nat="leave">${t('natLeaveB')}</button>`:` <button data-nat="join">${t('natJoinB')}</button>`);if(h!==natBarS){natBarS=h;const b=$('natbar');b.innerHTML=h;b.hidden=false;}return;}
  if(natBarS){natBarS='';$('natbar').hidden=true;}
+ if(S.natJ&&!natBackT){natBackT=setTimeout(()=>{natBackT=0;natLeave('natBack');},3000);}
  if(natSc&&natSc.id===c.id){if(natSt!==c.id+'end'){natSt=c.id+'end';announce(t('natEnd'));}if(natSc.dirty)natWrite();}
  if(S.natIn&&natPaidId!==S.natIn&&pn>natPayT&&(S.natIn!==c.id||wNow()>c.end+Satisfy.natcomp.C.CLAIM_MS)){natPaidId=S.natIn;natClaim(S.natIn);}}
+/* owner 2026-10-22: taking part is a choice. "Join" on the bar takes you to the competition grounds (the arena floor), where
+   the hunting stage sends monsters near your level, an anvil anyone may use stands for the production stage, and the
+   other players who joined are there for the arena stage. Only what you do there scores. When it ends (or "Leave") you go
+   back to the town you came from; a reload mid-competition puts you there too (S.natR). */
+let natBackT=0,natSpT=0;
+const natIn=()=>!!P&&dunAt(P.x,P.y)===DUN[8];
+const natHere=c=>S.natJ===c.id&&natIn();
+function natJoin(){const c=natNow();if(!c.running||!S||S.natJ===c.id)return;
+ if(mode!=='play'||ARN||TWR||BHR||inBh(P.x,P.y)||inTw(P.x,P.y)||P.hp<=0){SFX.deny();return toast(t('natNoJoin'),'warn');}
+ const o=outPos(),T=TOWNS.reduce((a,T)=>Math.hypot(T.rx*TS-o.x,T.ry*TS-o.y)<Math.hypot(a.rx*TS-o.x,a.ry*TS-o.y)?T:a);
+ S.natJ=c.id;S.natR=T.k;natSpT=performance.now()+3000;if(P.ride)dismount();if(S.comp)S.comp=null;save(true);const A=DUN[8];
+ fadeTo(()=>{P.x=(A.x0+Math.round((A.x1-A.x0)/2))*TS+8;P.y=(A.y0+Math.round((A.y1-A.y0)/2))*TS+10;P.dir=0;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);toast(t('natIn'),'good');SFX.notice();});natBarS='';}
+function natLeave(msg){if(!S)return;const k=S.natR,inG=natIn();S.natJ=null;delete S.natR;mons=mons.filter(m=>!m.nat);save(true);if(!inG||!k)return;
+ const T=TOWNS.find(T=>T.k===k)||TOWNS[1];fadeTo(()=>{P.x=T.rx*TS+8;P.y=T.ry*TS+10;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);toast(t(msg||'natOut',{z:t(T.k)}),'good');});natBarS='';}
+// the grounds while it runs: monsters near your level in the hunting stage; leave the floor (a death, a gate) and you are out
+function natGrounds(c,pn){if(!S.natJ)return;if(S.natJ!==c.id){S.natJ=null;delete S.natR;return;}
+ if(!natIn()){if(!roomFade&&mode!=='dead'&&pn>natSpT+4000){S.natJ=null;delete S.natR;mons=mons.filter(m=>!m.nat);natBarS='';save(true);}return;}
+ if(c.kind!=='hunt'){if(mons.some(m=>m.nat))mons=mons.filter(m=>!m.nat);return;}
+ if(pn<natSpT)return;natSpT=pn+1500;if(mons.filter(m=>m.nat&&!m.dead).length>=6)return;
+ const A=DUN[8],near=twNear(S.lv,TWP).slice(0,3),k=near[rand()*near.length|0];
+ for(let n=0;n<20;n++){const x=(A.x0+2+rand()*(A.x1-A.x0-4))*TS,y=(A.y0+2+rand()*(A.y1-A.y0-4))*TS;if(Math.hypot(x-P.x,y-P.y)<90)continue;
+  const m=newMon(k,x,y);m.tmp=1;m.nat=1;m.agg=1;m.eng=99;mons.push(m);vfx('spawn',x,y,{color:'#5aa2ff'});break;}}
+$('natbar').addEventListener('click',e=>{const b=e.target.closest('[data-nat]');if(!b)return;SFX.click();if(b.dataset.nat==='join')natJoin();else natLeave();});
+Object.assign(STR.ar,{natJoinB:'اشترك',natLeaveB:'انسحب',natIn:'دخلت ساحة المسابقة الوطنية: الصيد والصناعة (السندان) والمبارزات هنا بس، ولما تخلص هترجع البلد',natOut:'رجعت {z}',natBack:'المسابقة خلصت، رجعت {z}',natNoJoin:'مينفعش تشترك وانت في تحدي أو دانجن أو جوا الجزر'});
+Object.assign(STR.en,{natJoinB:'Join',natLeaveB:'Leave',natIn:'You are on the National Competition grounds: hunting, production (the anvil) and duels count only here, and you go back to town when it ends',natOut:'Back in {z}',natBack:'The competition is over: back in {z}',natNoJoin:"You can't join during a challenge, in the tower or on the islands"});
 // paid once per account (natPaid), by the rank on the final board
 function natClaim(id){if(!NATS)return;const uid=NET.uid,done=()=>{if(S&&S.natIn===id){S.natIn=null;save(true);}};NATS.paid(id,uid).then(p=>{if(p){done();return null;}return Promise.all([NATS.top(id,Satisfy.natcomp.C.TOP_N),NATS.get(id,uid)]);}).then(r=>{if(!r)return;const me=Satisfy.natcomp.clean(r[1]);
   if(!me||!(me.s>0)){done();return;}const rank=r[0].findIndex(x=>x.uid===uid)+1,g=Satisfy.natcomp.reward(rank,me.s);
@@ -9402,7 +9451,7 @@ function natBoard(){if(!NATS||!NET){toast(t('natFail'),'warn');return;}const c=n
  Promise.all([NATS.top(c.id,Satisfy.natcomp.C.TOP_N),NATS.get(c.id,NET.uid)]).then(([top,v])=>{plOpen(false);const me=Satisfy.natcomp.clean(v),d=new Date(c.start);
   const rows=top.map((x,i)=>t('natRow',{i:i+1,n:Satisfy.chat.clean(x.n,24)||'?',s:x.s,h:x.h,c:x.c,d:x.d}));
   dialog('guild',[t('natH',{s:String(d.getUTCHours()).padStart(2,'0')+':00 UTC'}),rows.length?rows.join(' · '):t('natNone'),me?t('natMe',me):'',c.running?'':t('natNext',{m:Math.max(1,Math.ceil((c.next-wNow())/60000))})].filter(Boolean),null,[{l:t('oClose')}]);},()=>toast(t('natFail'),'warn'));}
-window.__GNC={force:ms=>{NATF=ms==null?0:wNow()-ms;},sc:()=>natSc&&{id:natSc.id,h:natSc.h,c:natSc.c,d:natSc.d},now:()=>natNow(),top:()=>natTop,write:()=>natWrite(),duel:(w,f)=>natDuel(w,f),board:()=>natBoard()}; // tests
+window.__GNC={force:ms=>{NATF=ms==null?0:wNow()-ms;},sc:()=>natSc&&{id:natSc.id,h:natSc.h,c:natSc.c,d:natSc.d},now:()=>natNow(),top:()=>natTop,write:()=>natWrite(),duel:(w,f)=>natDuel(w,f),board:()=>natBoard(),here:()=>natIn(),joined:()=>S.natJ}; // tests
 /* party follow (SAT-ONLINE-068, plan U055). A party mate's card has Follow: your character walks after them, as your
    own keys would, keeping a step behind; any key you press, the mate leaving your sight or the party, a different room,
    or no way through for a few seconds stops it. Nothing is sent: it is your own movement. */

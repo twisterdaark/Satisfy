@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22mural', ver: '1.78', d: '2026-10-22',
+      ar: ["الجدارية ورا شلالات لوران بقت بتديك حركات فن سيف باغما الخمسة فعلًا، بمشهد: الشاشة بتغمق، ضربات سيف بتلف حواليك، وعمود نور بيطلع منك، ورسالة النظام بأسماء الحركات. لو كنت زرتها قبل كده بتاخدهم أول ما تفتح اللعبة",
+        "مسابقة الأمم بقت كل 6 ساعات واختيارية: زرار \"انضم\" في الشريط بينقلك لأرض المسابقة، النقط بتتحسب جوا بس، وفيها سندان ببلاش ووحوش صيد على قد لفلك، وبترجع لأقرب بلد لما تخلص",
+        "شاشة الستات بتكتب الأساسي جنب الإجمالي: زرار +5 بيزود الأساسي 5 بالظبط، والإجمالي ممكن يزيد 6 بسبب نسب الترقية"],
+      en: ["The mural behind Loran Falls really gives the five Pagma's Swordsmanship moves now, with a scene: the screen darkens, sword slashes spin around you, a pillar of light rises from you and the system message names the moves. If you visited it before, you get them as soon as you load",
+        "The National Competition runs every 6 hours and is optional: the \"Join\" button on the bar takes you to the grounds, points only count there, with a free anvil and hunt monsters near your level, and you go back to the nearest town when it ends",
+        "The status screen shows the base beside the total: +5 raises the base by exactly 5, and the total can rise by 6 from advancement percentages"] },
     { v: '2026-10-22behen', ver: '1.77', d: '2026-10-22',
       ar: ["وحوش جزر بيهين والبرج بقت بتهاجمك فعلًا: اللعبة كانت حاسباها جوا البلد فكانت بتسيبك في حالك، ووحوش الجزيرة مبقتش بترجع مكانها وتسيبك",
         "مفيش ركوب حصان في جزر بيهين والبرج: بتنزل من عليه أول ما تدخل",

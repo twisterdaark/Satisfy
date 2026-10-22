@@ -65,6 +65,10 @@
     'karma', 'karT',
     // the National Competition (SAT-ONLINE-064) this character scored in and is still to be paid for (its id)
     'natIn',
+    // Pagma's Successor saw the mural behind Loran Falls (the five sword techniques)
+    'pgMur',
+    // the town to go back to from the competition grounds, kept so a reload mid-competition lands there (owner 2026-10-22)
+    'natR',
     // the guild hall being visited (SAT-ONLINE-115, plan U013): {gid, name, guest, dx, dy}, so a reload inside goes on there
     'hall',
     // recipes learned and recipe use counts (main rcLearn)
@@ -84,7 +88,7 @@
     // the Tower of Wisdom (major #5): map, Tower's Mission, basic tests, members' tests, Dragon Pills, Matchless Heart, 10th Seat
     'wis',
   ];
-  var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk'];
+  var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk', 'natJ'];
   var META = ['v', 'wv', 'uid', 'pid'];
   // Never saved: set on the title-screen demo state only.
   var TRANSIENT = ['__demo'];
