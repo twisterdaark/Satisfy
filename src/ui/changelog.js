@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22v144', ver: '1.44', d: '2026-10-22',
+      ar: ['صيانة الأونلاين: التيستات بتشتغل لوحدها على كل PR (كروم وفايرفوكس وسفاري)، وتيستات لقواعد قاعدة البيانات الحقيقية، و100 لاعب في نفس الوقت، وقطع ورجوع النت 20 مرة','للتجربة على الجهاز بس: اللعبة تقدر تشتغل على نسخة محلية من Firebase (مش بتأثر على الموقع العام)'],
+      en: ['Online maintenance: the tests now run on every pull request (Chrome, Firefox and Safari), with tests of the real database rules, 100 players at once, and 20 network drops in a row','For local testing only: the game can run against a local copy of Firebase (the public site is not affected)'] },
     { v: '2026-10-22v143', ver: '1.43', d: '2026-10-22',
       ar: ['صيانة: تيستات أثبت على الأجهزة البطيئة، وتيست بيتأكد إن كل كلمة في اللعبة ليها ترجمة عربي وإنجليزي، وتيست للواجهة على زووم 125%'],
       en: ['Maintenance: steadier tests on slow machines, a test that every line the game shows has Arabic and English text, and a test of the interface at 125% zoom'] },
