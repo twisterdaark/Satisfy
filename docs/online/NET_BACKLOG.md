@@ -163,7 +163,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U309 | Extract world generator | 🟡 | Seeded spawns (`mulberry32`), the same tiles on every client (`regression/worldparity`); still inside `index.html` |
 | U310 | Renderer batching | 🟡 | The big map draws only the visible land from a cached copy (B, v0.60) |
 | U311 | Entity registry | 🟡 | Stable keys for monsters (`type@sx,sy`), item ids (`iid`), character id (`pid`) |
-| U312 | Animation state machine | ❌ | |
+| U312 | Animation state machine | ✅ | `src/core/anim.js` (SAT-ONLINE-114): idle, walk, attack, hurt, dodge, dead per entity by rank, timed ones ending by game time with nothing scheduled; your swing as others see it, and other players flash when hurt (`unit/anim`, `regression/anim`). Monsters keep their own poses (B) |
 | U313 | Fixed tick simulator | ✅ | SAT-ONLINE-099: `?tick=fixed` (off by default) moves the world in steps of 1/60 s at any frame rate; drawing, sound and the network draw their random numbers from a stream of their own. tests/regression/fixedtick |
 | U314 | Dedicated game clock | ✅ | Server clock offset (`wNow`, SAT-ONLINE-044) for everything shared |
 | U315 | Localization bundles | 🟡 | `STR.ar`/`STR.en` in the page; every line in both languages (`unit/i18n`, SAT-ONLINE-092) and every key the page asks for by name has its lines (SAT-ONLINE-118), so a missing key fails the tests. Left: the tables are still in the page, not bundles of their own |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 65 · 🟡 23 · ⏳ 6 · ❌ 10 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 66 · 🟡 23 · ⏳ 6 · ❌ 9 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

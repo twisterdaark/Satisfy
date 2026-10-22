@@ -721,6 +721,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
  'src/ui/changelog.js',
  'src/core/state.js',
  'src/core/events.js',
+ 'src/core/anim.js',
  'src/net/contracts.js',
  'src/net/presence.js',
  'src/net/transport-local.js',
@@ -8084,7 +8085,15 @@ window.__REC={get rec(){return REC},get rpl(){return RPL},get steps(){return FST
 const NET_OFF=['title','lang','create'];
 function netLive(){return Satisfy.local.inGame()&&!NET_OFF.includes(mode)&&!(mode==='controls'&&ctrlBack==='titleScreen');}
 // a swing is shorter than the 200 ms between presence updates: keep 'attack' up for 350 ms so the others see it
-var netAtkT=-1e9;function netAnim(){if(mode==='dead')return 'dead';if(P.dash>0)return 'dodge';if(P.slash)netAtkT=performance.now();if(performance.now()-netAtkT<230)return 'attack';return netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3)?'walk':'idle';}
+/* SAT-ONLINE-114 (plan U312): your animation as the others see it, from one state machine (src/core/anim.js) on the game's
+   clock instead of the wall clock: a swing lasts 230 ms of play, so a paused game, ?tick=fixed or a replay sends the same */
+var PANIM=null;function netAnim(){const T=gTime*1000;if(!PANIM)PANIM=Satisfy.anim.create();PANIM.set('dead',mode==='dead');PANIM.set('dodge',P.dash>0);if(P.slash)PANIM.pulse('attack',T);
+ PANIM.set('walk',!!netPrev&&(Math.abs(P.x-netPrev.x)>.3||Math.abs(P.y-netPrev.y)>.3));const s=PANIM.state(T);return Satisfy.net.ANIMS.indexOf(s)>=0?s:'idle';}
+/* each other player's own machine: hurt (drawn flashing, like a monster that is hit) when the health they send drops,
+   and nothing left behind when they go */
+var RANIM=new Map();function ranim(r){let a=RANIM.get(r.sid);if(!a){a=Satisfy.anim.create();a.hp=r.hp;RANIM.set(r.sid,a);}
+ a.set('dead',r.anim==='dead');if(typeof r.hp==='number'&&typeof a.hp==='number'&&r.hp<a.hp&&r.anim!=='dead')a.pulse('hurt',gTime*1000);a.hp=r.hp;return a;}
+window.__GANIM={me:()=>PANIM,remote:sid=>RANIM.get(sid)||null,get n(){return RANIM.size},anim:()=>netAnim(),t:()=>gTime*1000}; // tests
 // Interest management (doc U009): online, a client listens only to players within NET_INTEREST.radius px
 // of it along the map (the screen is W=480 px wide, so the re-centre step keeps it covered), plus its
 // everyone in its party wherever they are (raid hits, chat and the party list need them; SAT-ONLINE-018 follows the
@@ -8215,7 +8224,7 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
 // due replays, at where each player is drawn now; players off screen or out of sight just drop theirs
 function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
 function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)
- for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const fs=fxSt(r.sid);fxIn(r,fs);remLife(r,fs);if(fs.st&&fs.st.indexOf('f')>=0&&rand()<.23)fx.push({x:r.x+(rand()-.5)*14,y:r.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});if(fs.st&&fs.st.indexOf('g')>=0&&rand()<.12)fx.push({x:r.x+(rand()-.5)*24,y:r.y-6,vx:0,vy:-16,t:.6,c:'#ffe08a',fl:1});if(fs.st&&/[bj]/.test(fs.st)&&rand()<.1)fx.push({x:r.x+(rand()-.5)*28,y:r.y-4,vx:0,vy:-18,t:.7,c:fs.st.indexOf('j')>=0?'#9fd8ff':'#fff3b0',fl:1});/* their flight, as yours (updateItemFx) */if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
+ for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const am=ranim(r),fs=fxSt(r.sid);fxIn(r,fs);remLife(r,fs);if(fs.st&&fs.st.indexOf('f')>=0&&rand()<.23)fx.push({x:r.x+(rand()-.5)*14,y:r.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});if(fs.st&&fs.st.indexOf('g')>=0&&rand()<.12)fx.push({x:r.x+(rand()-.5)*24,y:r.y-6,vx:0,vy:-16,t:.6,c:'#ffe08a',fl:1});if(fs.st&&/[bj]/.test(fs.st)&&rand()<.1)fx.push({x:r.x+(rand()-.5)*28,y:r.y-4,vx:0,vy:-18,t:.7,c:fs.st.indexOf('j')>=0?'#9fd8ff':'#fff3b0',fl:1});/* their flight, as yours (updateItemFx) */if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
   const k=remoteSpr(r.look,r.arm,fs.gl),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
   // their weapon in hand and each swing once, the way your own is drawn (SAT-ONLINE-026, owner feedback 7): a swing starts when
   // their anim turns to 'attack' and plays 0.14 s on this clock, however long the state stays up
@@ -8228,7 +8237,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{fs.tr.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;drawChar(k,a.x,a.y,a.dir,1,false);});ctx.globalAlpha=1;
    if(r.anim==='dead')ctx.globalAlpha=.45;else if(fs.st&&fs.st.indexOf('s')>=0)ctx.globalAlpha=.3;if(wen>=7)drawEnh(r.x,r.y-bob,wen,0,r.dir);
    if(rd){const b=[0,0,-1,0,1][hf],ry=Math.round(r.y)-9+b;drawHorse(r.x,r.y,r.dir,hf,rd);ctx.save();ctx.beginPath();ctx.rect(Math.round(r.x)-9,ry-25,18,17);ctx.clip();drawChar(k,r.x,ry,r.dir,0,false);ctx.restore();drawHorse(r.x,r.y,r.dir,hf,rd,ctx,'head');}
-   else if(!bmDraw(hcFormOf(fs.st),r.sid,r.x,r.y-bob,r.dir,fr,false,sw>=0))drawChar(k,r.x,r.y-bob,r.dir,fr,false);if(wen>=4&&!rd)drawEnh(r.x,r.y-bob,wen,1,r.dir);
+   else{const bl=am.blink(gTime*1000);if(!bmDraw(hcFormOf(fs.st),r.sid,r.x,r.y-bob,r.dir,fr,bl,sw>=0))drawChar(k,r.x,r.y-bob,r.dir,fr,bl);}if(wen>=4&&!rd)drawEnh(r.x,r.y-bob,wen,1,r.dir);
    if(hcHandR(r,fs,bob,sw)){}else if(wi&&r.anim!=='dead'){const hx=Math.round(r.x)+(r.dir===3?-6:5),hy=Math.round(r.y-bob)-7;if(sw<0)weapPix(ctx,hx,hy,wi,r.dir);else SA.weapons.draw(ctx,wi.id,wi.r,hx,hy,fs.sw.a-1.1+2.2*sw+Math.PI/2,Math.cos(fs.sw.a)<0);}
    if(gu>=0&&r.anim!=='dead')guardArc(r.x,r.y-bob,(gu&63)/64*2*Math.PI,gu&128?1:.55,!!(gu&64));ctx.globalAlpha=1;}});
   if(r.em)emoBubble(ents,r.em,r.x,r.y,r.dir);
@@ -8240,7 +8249,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37-gy,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
   if(near&&r.uid===near.uid&&!foe)TX.push({s:[t('pcHint'),mate?'':t('pInvite'),!mate&&DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?t('dHint'):''].filter(Boolean).join(' · '),x:r.x,y:r.y-(typeof r.hp==='number'?46:37)-gy,f:F,z:6,c:'#ffe7a8'});}
- fxRun(seen);for(const sid of FXS.keys())if(!NET.get||!NET.get(sid))FXS.delete(sid);
+ fxRun(seen);for(const sid of FXS.keys())if(!NET.get||!NET.get(sid))FXS.delete(sid);for(const sid of RANIM.keys())if(!NET.get||!NET.get(sid))RANIM.delete(sid);
  duelWatch(ents,myRoom);pingEnts(ents,myRoom,F);pvpEnts();const me=emoNow();if(me)emoBubble(ents,me,P.x,P.y,P.dir);
  const ds=DUEL&&DUEL.state();if(ds&&ds.arena&&!myRoom)ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle=ds.phase==='fight'?'rgba(255,120,90,.7)':'rgba(255,210,74,.7)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(ds.arena.x,ds.arena.y,ds.arena.r,0,7);ctx.stroke();ctx.restore();}});}
 if(NETQ==='local'&&typeof BroadcastChannel!=='undefined'){
