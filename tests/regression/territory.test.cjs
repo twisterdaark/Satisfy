@@ -126,3 +126,27 @@ test('territories online: shared, safe 45 minutes, four places a week a guild, m
     for (const g of [a, b]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/own capture|capSlot/.test(x))), []);
   } finally { await ctx.close(); }
 });
+
+// Claude-B's re-review of #130: the rules take captures only from members of online guilds. A signed-in player in a guild
+// that isn't online (a canon guild, or one made offline) still takes places and the castle, kept on that page as before.
+test('territories online: a player whose guild is not online still takes a place and the castle, on this page', async () => {
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  try {
+    const c = await signIn(ctx, 'c', 'gTeC3', 'Carim', { n: 'Zed', hair: 2, hc: 1, skin: 0, top: 2 });
+    await settle(c);
+    await c.eval(() => { const S = window.__G.S; S.lv = 60; S.guild = 'g_tzed'; delete S.gon; });
+    const T = await c.eval(() => window.__GTERR.T());
+    const was = await c.eval((k) => window.__GTERR.mine(k), T[0]);
+    assert.notEqual(was, 'g_tzed');
+    await c.eval((k) => window.__GTERR.capture(k), T[0]);
+    await settle(c);
+    assert.equal(await c.eval((k) => window.__GTERR.mine(k), T[0]), 'g_tzed', 'taken, and it stays');
+    await c.eval(() => window.__GTERR.castle());
+    await settle(c);
+    assert.equal(await c.eval(() => window.__GU.WS.castle.own), 'g_tzed', 'the castle too');
+    assert.equal(await c.eval((k) => window.__fakeRTDB.data.has('world/satisfy/own/' + k) || window.__fakeRTDB.data.has('world/satisfy/own/castle'), T[0]), false, 'nothing written for a guild that is not online');
+    assert.doesNotMatch(await c.eval(() => window.__toastSeen), /did not reach the server/);
+    assert.deepEqual(await c.eval(() => window.__fakeRTDB.rejected), []);
+    assert.deepEqual(c.errors, []);
+  } finally { await ctx.close(); }
+});
