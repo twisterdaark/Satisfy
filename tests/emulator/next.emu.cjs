@@ -136,3 +136,18 @@ test('#144: a caravan: one at a time, delivered after its time and before it spo
   await no(db(B).ref('caravans/' + A).once('value'), 'others do not read it');
   await yes(db(A).ref('caravans/' + A).remove(), 'dropped');
 });
+
+test('#131: repair orders: posted by the owner of the item, answered once by a smith with the fee, then closed', async () => {
+  const O = 'r_' + A + '_1', order = { by: A, n: 'Ahmed', iid: 'it_' + A.toLowerCase() + '_1', it: 'sword', d: 40, fee: 500, t: SV };
+  await no(db(B).ref('repairOrders/' + O).set(order), 'nobody posts in another name');
+  await yes(db(A).ref('repairOrders/' + O).set(order), 'A posts its sword');
+  await yes(db(B).ref('repairOrders').once('value'), 'smiths read the board');
+  const answer = (who, fee) => db(who).ref().update({ ['repairOrders/' + O]: null, ['repairDone/' + A + '/' + O]: { iid: order.iid, by: who, sn: 'Smith', fee, t: SV }, ['repairPaid/' + who + '/' + O]: { g: fee, t: SV } });
+  await no(answer(A, 500), 'not your own');
+  await no(answer(B, 5000), 'the fee posted, not more');
+  await yes(answer(B, 500), 'B repairs it: the order goes, A is told, B is owed the fee');
+  await no(answer(C, 500), 'answered once');
+  await no(db(B).ref('repairDone/' + A).once('value'), 'the answer is A\'s to read');
+  await yes(db(A).ref('repairDone/' + A + '/' + O).remove(), 'A takes the sword back');
+  await yes(db(B).ref('repairPaid/' + B + '/' + O).remove(), 'B collects');
+});
