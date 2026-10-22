@@ -289,7 +289,56 @@ function spider(g,p,pose,f){const [B,D,L]=p,W=34,H=18,AX=16,st=legSteps(pose,f),
  legs(D,0);
  return {W,H,AX};}
 
-const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null],trauka:[trauka,null,[230,170]],cwolf:[wolf,'cwolf'],cbear:[bear,'cbear'],cboar:[boar,'cboar'],fboar:[boar,'fboar'],sanju1:[bear,'sanju1'],sanju2:[bear,'sanju2'],sanju3:[bear,'sanju3'],sanju4:[bear,'sanju4'],gargoyle:[gargoyle,'gargoyle'],salamander:[salamander,'salamander'],hydra:[hydra,'hydra',[150,130]],ogolem:[golem('ogolem'),'ogolem'],aweapon:[golem('aweapon'),'aweapon'],sellobu:[spider,'sellobu'],foxmouse:[wolf,'foxmouse'],hrabbit:[rabbit,'hrabbit'],grabbit:[rabbit,'grabbit'],slime:[slime,'slime'],mslime:[slime,'mslime'],cbat:[bat,'cbat'],sscorp:[scorpion,'sscorp'],mimic:[mimic,'mimic'],felem:[elemental('fire'),'felem'],ielem:[elemental('ice'),'ielem'],selem:[elemental('storm'),'selem'],slord:[elemental('storm'),'slord'],vbat:[bat,'vbat'],kraken:[kraken,'kraken',[140,112]],ktent:[ktent,'ktent']};
+// The Black Tortoise (owner 2026-10-22: it was a recoloured hydra): a great black shell of plates on four pillar legs, a
+// blunt old head and a serpent for a tail that rises over the shell, water glinting on the plates. 130x76, anchor (64,76).
+function tortoise(g,p,pose,f){const W=130,H=76,AX=64,S='#1e2230',S2='#2c3244',PL='#3a4560',RM='#6a7ea8',SK='#2e3436',SK2='#1c2022',SL='#4e5a5e',SN='#1e4a4a',SN2='#2e6a66',E='#ffd24a',WA='#7ac0ff';
+ const st=pose==='walk'?[1,0,-1,0][f]:0,bob=pose==='idle'?f:pose==='walk'?[0,1,0,1][f]:0,lunge=pose==='atk'?(f===0?-4:8):pose==='hurt'?-4:0,cx=60,by=H-26+bob;
+ // serpent tail behind: from the rear of the shell, up and over in an S, the head looking forward
+ const sw=pose==='idle'?f:pose==='walk'?[0,1,0,-1][f]:0,sa=pose==='atk'?(f===0?-5:7):0;
+ for(let k=0;k<=18;k++){const t=k/18,x=cx-40+t*34+Math.sin(t*5+sw*.4)*6+sa*t*t,y=by+2-t*46-Math.sin(t*3.2)*6,r=Math.round(4-t*1.6);ell(g,x,y,r,r,k%2?SN:SN2);}
+ const shx=cx-6+Math.sin(5+sw*.4)*6+sa,shy=by-50;ell(g,shx,shy,5,3,SN2);R(g,shx+3,shy-1,5,3,SN2);R(g,shx+3,shy+1,5,1,SN);R(g,shx+2,shy-2,2,1,pose==='hurt'?'#fff':E);
+ if(pose==='atk'&&f===1){R(g,shx+8,shy+1,3,1,'#c83a5a');R(g,shx+10,shy,2,1,'#c83a5a');}
+ // far legs
+ const leg=(x,s,col,cl)=>{R(g,x+s,by+4,11,H-by-6,col);R(g,x+s-1,H-3,13,3,shade(col,-.2));for(let k=0;k<3;k++)R(g,x+s+k*4,H-1,2,1,cl);};
+ leg(cx-34,-st,SK2,SL);leg(cx+20,st,SK2,SL);
+ // shell: dome, rim and plates
+ ell(g,cx,by,46,24,S);ell(g,cx,by-3,44,22,S2);R(g,cx-46,by+6,92,4,S);R(g,cx-44,by+6,88,1,RM);
+ const plate=(x,y,w,h)=>{ell(g,x,y,w,h,PL);ell(g,x,y-1,w-2,h-2,S2);R(g,x-w+2,y-h+1,w,1,RM);};
+ plate(cx,by-12,12,8);plate(cx-24,by-6,11,8);plate(cx+24,by-6,11,8);plate(cx-12,by+2,9,5);plate(cx+12,by+2,9,5);plate(cx-36,by+2,6,5);plate(cx+36,by+2,6,5);
+ for(const [wx,wy] of [[-4,-18],[-28,-10],[20,-10],[8,-1]])R(g,cx+wx,by+wy,3,1,WA);
+ // near legs
+ leg(cx-26,st,SK,SL);leg(cx+28,-st,SK,SL);
+ // head on a short thick neck, out of the shell's front
+ const hx=cx+52+lunge,hy=by-2-(pose==='atk'&&f===1?2:0);R(g,cx+40,hy-1,hx-cx-40,10,SK);R(g,cx+40,hy+7,hx-cx-40,2,SK2);
+ ell(g,hx,hy+2,9,7,SK);R(g,hx+4,hy+3,8,5,SK);R(g,hx+4,hy+7,8,1,SK2);R(g,hx-4,hy-3,8,1,SL);
+ R(g,hx+3,hy-1,2,2,pose==='hurt'?'#fff':E);R(g,hx+10,hy+4,2,1,'#0e1012');
+ if(pose==='atk'&&f===1){R(g,hx+5,hy+6,7,2,'#5a1a2a');ell(g,hx+16,hy+6,3,2,WA);R(g,hx+18,hy+5,4,1,'#e8f8ff');}
+ return {W,H,AX};}
+
+// The Red Phoenix (owner 2026-10-22: it was a recoloured gargoyle): a firebird with a crested head, a hooked beak, wide
+// wings of flame-tipped feathers and long trailing tail plumes; it hovers, wings beating. 96x84, anchor (46,84).
+function phoenix(g,p,pose,f){const W=96,H=88,AX=46,B='#e8501e',D='#a82a12',DD='#6a160c',L='#ffb030',Y='#ffe680',BK='#f2c14e';
+ const flap=pose==='walk'?[0,1,2,1][f]:pose==='idle'?f*2:pose==='atk'?(f===0?0:2):1,hov=pose==='walk'?[0,-1,-2,-1][f]:pose==='idle'?-f:0;
+ const cx=44+(pose==='atk'&&f===1?5:pose==='hurt'?-3:0),cy=46+hov,wy=[-30,-14,2][flap];
+ // tail plumes trailing down and back
+ for(let i=0;i<3;i++){const ex=cx-30-i*5,ey=cy+30+i*4;dline(g,cx-6,cy+8,ex,ey,3-i*.5,i?D:B);ell(g,ex,ey,3,2,i===1?L:Y);R(g,ex-2,ey+2,2,2,L);}
+ // far wing
+ const wing=(o,col,tip)=>{const bx=cx-2+o,b2=cy-6;dpoly(g,[[bx,b2],[bx-30,b2+wy-6],[bx-36,b2+wy+2],[bx-28,b2+wy+6],[bx-30,b2+wy+12],[bx-20,b2+wy+12],[bx-18,b2+wy+18],[bx-6,b2+10]],col);
+  dline(g,bx,b2,bx-30,b2+wy-6,2,shade(col,.2));for(let k=0;k<4;k++){const tx=bx-34+k*5,ty=b2+wy+2+k*4;R(g,tx-2,ty,4,3,tip);R(g,tx-1,ty-2,2,2,Y);}};
+ wing(5,shade(D,-.15),D);
+ // legs tucked, talons
+ R(g,cx-3,cy+14,2,6,BK);R(g,cx+2,cy+14,2,6,BK);R(g,cx-5,cy+19,5,1,BK);R(g,cx+1,cy+19,5,1,BK);
+ // body
+ ell(g,cx,cy+4,11,13,D);ell(g,cx,cy+3,10,12,B);ell(g,cx+2,cy+6,6,8,L);R(g,cx+1,cy+4,3,6,Y);
+ // neck and head
+ dline(g,cx+4,cy-6,cx+11,cy-18,6,B);const hx=cx+13,hy=cy-22;ell(g,hx,hy,6,5,B);R(g,hx-3,hy-4,6,2,L);
+ dpoly(g,[[hx+5,hy-2],[hx+13,hy+1],[hx+6,hy+3]],BK);R(g,hx+11,hy+1,2,2,shade(BK,-.3));R(g,hx+2,hy-2,2,2,pose==='hurt'?'#fff':'#1a0a08');R(g,hx+2,hy-2,1,1,Y);
+ for(let k=0;k<4;k++)dline(g,hx-2-k,hy-4,hx-8-k*3,hy-12-k*2+(k%2)*2,1.5,k%2?L:Y);
+ if(pose==='atk'&&f===0){ell(g,hx+16,hy+1,4,3,L);ell(g,hx+17,hy+1,2,2,Y);}
+ wing(0,B,L);
+ return {W,H,AX};}
+
+const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null],trauka:[trauka,null,[230,170]],cwolf:[wolf,'cwolf'],cbear:[bear,'cbear'],cboar:[boar,'cboar'],fboar:[boar,'fboar'],sanju1:[bear,'sanju1'],sanju2:[bear,'sanju2'],sanju3:[bear,'sanju3'],sanju4:[bear,'sanju4'],gargoyle:[gargoyle,'gargoyle'],salamander:[salamander,'salamander'],hydra:[hydra,'hydra',[150,130]],ogolem:[golem('ogolem'),'ogolem'],aweapon:[golem('aweapon'),'aweapon'],sellobu:[spider,'sellobu'],foxmouse:[wolf,'foxmouse'],hrabbit:[rabbit,'hrabbit'],grabbit:[rabbit,'grabbit'],slime:[slime,'slime'],mslime:[slime,'mslime'],cbat:[bat,'cbat'],sscorp:[scorpion,'sscorp'],mimic:[mimic,'mimic'],felem:[elemental('fire'),'felem'],ielem:[elemental('ice'),'ielem'],selem:[elemental('storm'),'selem'],slord:[elemental('storm'),'slord'],vbat:[bat,'vbat'],kraken:[kraken,'kraken',[140,112]],ktent:[ktent,'ktent'],stort:[tortoise,null,[180,130,1.2]],sbird:[phoenix,null,[150,130,1.6]]};
 
 // Build a sheet: columns = frames of the longest pose, rows = poses. Returns {canvas, W, H, anchor}.
 // Frames are drawn with a margin and cropped to the union of their pixels (+1 for the outline),
@@ -299,8 +348,10 @@ function buildSheet(type){const [fn,pk,cs]=KINDS[type],p=pk?PAL[pk]:null,PAD=16;
  let x0=1e9,y0=1e9,x1=-1,y1=-1;frames.forEach(({c})=>{const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++)if(d[(y*c.width+x)*4+3]){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}});
  x0-=1;y0-=1;x1+=1;y1+=1;const W=x1-x0+1,H=y1-y0+1,cols=Math.max(...POSES.map(([,n])=>n));const sh=canvas(W*cols,H*POSES.length),sg=sh.getContext('2d');
  frames.forEach(({c,ri,f})=>{const t=canvas(W,H),tg=t.getContext('2d');tg.drawImage(c,x0,y0,W,H,0,0,W,H);polish(tg,W,H);sg.drawImage(t,f*W,ri*H);});
- return {canvas:sh,W,H,anchor:{x:(dims.AX??dims.W/2)+PAD-x0,y:dims.H+PAD-y0},scale:pk?PAL[pk][3]:1};}
+ return {canvas:sh,W,H,anchor:{x:(dims.AX??dims.W/2)+PAD-x0,y:dims.H+PAD-y0},scale:pk?PAL[pk][3]:(cs&&cs[2])||1};}
 function rect(type,W,H,pose,f){const ri=POSES.findIndex(([p])=>p===pose);return {sx:f*W,sy:ri*H,sw:W,sh:H};}
 
-A.monsters={PAL,POSES,TIMING,KINDS:Object.keys(KINDS),buildSheet,rect};
+// sheets drawn at a size of their own (no PAL row): the third entry of a KINDS size
+const XSCALE={};for(const k in KINDS){const cs=KINDS[k][2];if(!KINDS[k][1]&&cs&&cs[2])XSCALE[k]=cs[2];}
+A.monsters={PAL,POSES,TIMING,KINDS:Object.keys(KINDS),XSCALE,buildSheet,rect};
 })(typeof window!=='undefined'?window:globalThis);

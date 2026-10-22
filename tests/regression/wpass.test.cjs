@@ -40,3 +40,37 @@ test('a Protection Stone keeps the enhancement level when a try fails', async ()
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// owner 2026-10-22 (more passives): a second strike, lightning that jumps to two more, damage taken paid back in the
+// next hit, frost that slows, a throw back; a Thunder Stone set in the weapon shocks too
+test('double strike, shock, absorb, frost and push work in a fight; the Thunder Stone shocks', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await g.eval(() => { const G = window.__G, S = G.S; S.lv = 200; G.P.hp = 1e9; });
+    const spawn = (n) => g.eval((n) => { const G = window.__G; for (const m of window.__ms || []) m.dead = true; window.__ms = []; for (let i = 0; i < n; i++) { const m = G.spawnMon('wolf', G.P.x + 30 + i * 20, G.P.y); m.hp = m.max = 1e9; m.tmp = 0; window.__ms.push(m); } }, n);
+    const setWp = (wp, gem) => g.eval(([wp, gem]) => { const S = window.__G.S, w = S.items.find((i) => i.uid === S.eqW) || S.items.find((i) => i.slot === 'w'); w.wp = wp; if (gem) w.gem = gem; else delete w.gem; }, [wp, gem]);
+    // double strike: a second hit lands a moment later
+    await spawn(1); await setWp([{ k: 'dbl', v: 1 }]);
+    await g.eval(() => { window.__h0 = window.__ms[0].hp; window.__GWP.hit(window.__ms[0]); window.__h1 = window.__ms[0].hp; });
+    await g.page.waitForTimeout(400); await g.step(2);
+    const dbl = await g.eval(() => [window.__h0 - window.__h1, window.__h1 - window.__ms[0].hp]);
+    assert.ok(dbl[0] > 0 && dbl[1] > 0, 'two hits: ' + dbl);
+    // shock: the two beside the target are hit too
+    await spawn(3); await setWp([{ k: 'shock', v: 1 }]);
+    const sh = await g.eval(() => { const M = window.__ms, h = M.map((m) => m.hp); window.__GWP.hit(M[0]); return M.map((m, i) => h[i] - m.hp); });
+    assert.ok(sh.every((d) => d > 0), 'all three took damage: ' + sh);
+    // a Thunder Stone alone gives the shock chance
+    await setWp([], 'thund');
+    assert.equal(await g.eval(() => window.__GWP.V('shock')), 0.15);
+    // absorb: half of 1000 taken comes back in the next hit
+    await spawn(1); await setWp([{ k: 'abs', v: 0.5 }]);
+    const ab = await g.eval(() => { const G = window.__G; G.P.inv = 0; G.P.dash = 0; window.__GWP.hurt(1000); const b = window.__GWP.absB; window.__GWP.hit(window.__ms[0]); return [b, window.__GWP.absB]; });
+    assert.ok(ab[0] > 0 && ab[1] === 0, 'stored then paid back: ' + ab);
+    // frost slows; push throws back
+    await spawn(1); await setWp([{ k: 'frost', v: 1 }, { k: 'push', v: 1 }]);
+    const fp = await g.eval(() => { const m = window.__ms[0], x0 = m.x; window.__GWP.hit(m); return { slow: m.slowU > 0, moved: Math.abs(m.x - x0) }; });
+    assert.ok(fp.slow, 'slowed'); assert.ok(fp.moved > 4, 'pushed ' + fp.moved);
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});

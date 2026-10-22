@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22wpass2', ver: '1.83', d: '2026-10-22',
+      ar: ["باسيفز سلاح جديدة: ضربة مزدوجة (السلاح بيضرب تاني لوحده)، صعق (برق بيزود الضربة 50% ويقفز على اتنين جنب الهدف ويشلهم لحظة)، امتصاص (جزء من الضرر اللي بتاخده بيترد في ضربتك الجاية)، تجميد (بيبطّأ الهدف)، وزق (بيرمي الهدف لورا)",
+        "حجر البرق: جوهرة جديدة بتتركب في السلاح عند خان، وبتدي السلاح صعق بفرصة 15%. بتقع من الوحوش العالية والزعماء",
+        "شلنا حد الخبرة للقتلة الواحدة: كل وحش بيديك خبرته كاملة (والأعلى منك بكتير بالكتير 1.3 منها)، والمنحنى بقى أسهل: لفل 100 محتاج حوالي 63 ألف بدل 386 ألف (حوالي 10 ساعات صيد في وحوش قدك)",
+        "السلحفاة السودا اترسمت من جديد: قوقعة سودا ضخمة بألواح، ورجلين زي العواميد، وتعبان بدل الديل. والعنقاء الحمرا بقت طاير نار بجناحات وريش ديل طويل بدل الشكل القديم",
+        "الكوبولد وملك الكوبولد بقى ليهم بوز كلب وودان وديل، والهيكل العظمي الحارس بقى جمجمة وضلوع، ومحاربين نصف التنين بقى ليهم قرون وحراشيف وديل وعيون صفرا، والأوجر والترول بقوا أضخم بأنياب (والترول بمناخير كبيرة)"],
+      en: ["New weapon passives: double strike (the weapon strikes again by itself), shock (lightning adds 50% to the hit, jumps to two foes beside the target and stuns them a moment), absorb (part of the damage you take comes back in your next hit), frost (slows the target) and push (throws the target back)",
+        "Thunder Stone: a new gem Khan sets in a weapon, giving it a 15% chance to shock. High monsters and bosses drop it",
+        "The per-kill XP limit is gone: every monster gives its whole XP (at most 1.3 times it from one far above you), and the curve is easier: level 100 needs about 63 thousand instead of 386 thousand (about 10 hours hunting monsters of your level)",
+        "The Black Tortoise is redrawn: a huge black shell of plates, pillar legs and a serpent for a tail. The Red Phoenix is now a firebird with wide wings and long tail plumes instead of the old shape",
+        "Kobolds and the Kobold King have a dog's muzzle, ears and a tail; the Tomb Guardian Skeleton is a skull and ribs; the Half-Draconian warriors have horns, scales, a tail and yellow eyes; ogres and trolls are bigger with tusks (and the troll a big nose)"] },
     { v: '2026-10-22wpass', ver: '1.82', d: '2026-10-22',
       ar: ["الأسلحة الملحمية وأعلى بقت بتطلع بباسيفز عشوائية: واحد للملحمي، واتنين للفريد، وتلاتة للأسطوري (ضرر، ضرر على الزعماء، كريتيكال، ضرر الكريتيكال، سرقة صحة، مانا مع الضربة، حرق، شلل). الأسلحة اللي معاك أخدت باسيفز مرة واحدة",
         "فحص القطعة: الخاصية المخفية في السلاح ممكن تطلع باسيف جديد للسلاح",

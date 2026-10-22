@@ -146,6 +146,24 @@ function frame(c,dir,pose,f){
  if(c.rept){const sn=shade(c.skin,.12),E='#f2d23a';if(U){q(7,0,2,1,c.hl);q(7,3,2,1,c.hl);q(7,6,2,1,c.hl);}
   else if(S_){q(12,6,2,3,c.skin);q(13,8,1,1,c.sk2);q(12,9,2,1,c.sk2);if(!o.blink&&!o.hurt)q(10,6,1,1,E);q(7,0,2,1,c.hl);q(5,1,2,1,c.hl);}
   else{q(6,7,4,3,sn);q(7,8,1,1,c.sk2);q(8,8,1,1,c.sk2);q(6,10,4,1,c.sk2);if(!o.blink&&!o.hurt){q(6,6,1,1,E);q(9,6,1,1,E);}q(7,0,2,2,c.hl);q(5,1,1,1,c.hl);q(10,1,1,1,c.hl);}}
+ // owner 2026-10-22: monsters whose look had nothing to do with their name
+ // kobold: a dog's muzzle with a black nose, pointed ears and a short tail
+ if(c.kob){const mz=shade(c.skin,.18),N='#1a1012',E='#ffcf4a';if(U){q(3,1,2,3,c.sk2);q(11,1,2,3,c.sk2);}
+  else if(S_){q(11,6,4,3,mz);q(14,6,1,1,N);q(11,9,4,1,c.sk2);q(6,0,2,3,c.sk2);q(7,-1,1,1,c.sk2);if(!o.blink&&!o.hurt)q(10,6,1,1,E);}
+  else{q(6,7,4,3,mz);q(7,7,2,1,N);q(6,10,4,1,c.sk2);q(3,0,2,4,c.sk2);q(11,0,2,4,c.sk2);q(3,-1,1,1,c.sk2);q(12,-1,1,1,c.sk2);if(!o.blink&&!o.hurt){q(6,6,1,1,E);q(9,6,1,1,E);}}}
+ // skeleton: a skull with dark sockets and teeth, ribs and a spine over the torso, bony limbs
+ if(c.bone){const K='#141018',BN=c.skin;if(!U){if(S_){q(9,5,3,3,K);q(10,6,1,1,'#ff4a3a');q(10,9,2,1,K);q(11,8,1,1,BN);q(7,12,4,1,BN);q(7,14,4,1,BN);q(6,11,1,5,BN);}
+  else{q(5,5,2,3,K);q(9,5,2,3,K);q(6,6,1,1,'#ff4a3a');q(9,6,1,1,'#ff4a3a');q(7,8,2,1,K);q(5,9,6,1,K);q(6,9,1,1,BN);q(8,9,1,1,BN);q(10,9,1,1,BN);
+   q(7,11,2,5,BN);q(5,12,6,1,BN);q(5,14,6,1,BN);q(6,13,1,1,K);q(9,13,1,1,K);}}else{q(7,11,2,5,BN);q(5,12,6,1,BN);q(5,14,6,1,BN);}}
+ // half-draconian: horns, scaled cheeks and brow, slit yellow eyes (the tail comes from c.tail)
+ if(c.drac){const HN='#e8dcc0',HD='#a89a80',SC=shade(c.skin,-.25),E='#ffd24a';
+  if(U){q(4,0,1,2,HN);q(3,-1,1,1,HD);q(11,0,1,2,HN);q(12,-1,1,1,HD);q(6,3,1,1,SC);q(9,5,1,1,SC);}
+  else if(S_){q(6,0,2,2,HN);q(5,-1,1,1,HD);q(4,-2,1,1,HD);q(8,4,1,1,SC);q(7,8,1,1,SC);q(9,8,1,1,SC);if(!o.blink&&!o.hurt){q(10,6,1,2,E);q(10,7,1,1,'#1a0a0a');}}
+  else{q(4,0,1,2,HN);q(3,-1,1,1,HD);q(2,-2,1,1,HD);q(11,0,1,2,HN);q(12,-1,1,1,HD);q(13,-2,1,1,HD);q(4,7,1,1,SC);q(11,7,1,1,SC);q(5,9,1,1,SC);q(10,9,1,1,SC);q(7,4,2,1,SC);
+   if(!o.blink&&!o.hurt){q(6,6,1,2,E);q(9,6,1,2,E);q(6,7,1,1,'#1a0a0a');q(9,7,1,1,'#1a0a0a');}}}
+ // ogre and troll: tusks; a troll's big hooked nose
+ if(c.nose&&!U){if(S_){q(12,6,2,2,c.skin);q(13,8,1,1,c.sk2);}else{q(7,6,2,3,shade(c.skin,.1));q(7,9,2,1,c.sk2);}}
+ if(c.tusk&&!U){const T='#f0e8d0';if(S_)q(11,9,1,2,T);else{q(5,9,1,2,T);q(10,9,1,2,T);}}
  late.forEach(fn=>fn());
  polish(g);
  return {c:cv,hand};}
