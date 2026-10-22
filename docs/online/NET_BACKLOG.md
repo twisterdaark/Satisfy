@@ -189,7 +189,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U331 | World boss calendar | ✅ | SAT-ONLINE-077: "Calendar" in the player list: the next world events, the competition, the siege, the festival, the race, Trauka and Berith; in your time zone and UTC, from the server clock (`regression/calendar`) |
 | U332 | Limited festivals | ✅ | The town festival every third hour (B, v0.94) |
 | U333 | Balance dashboard | ✅ | SAT-ONLINE-088: each game writes its own class's week (`balance/{uid}`: kills, seconds from first hit to kill, PvP wins and losses from duels and open PvP; bounded by the rules), the owner's `/balance` sums them by class (PvE time to kill, PvP win rate); admins only read them; no names on the board (`regression/balance`) |
-| U334 | Economy health | 🟡 | `/economy` (082) is a snapshot of wealth; no gold in/out counters or alerts |
+| U334 | Economy health | ✅ | SAT-ONLINE-093: every game counts the gold that came in and went out this week from each change of the bag (`balance/{uid}` `gi`, `go`, with 088); `/economy` adds the week's flow over all players and warns when more than twice as much comes in as goes out (three players or more) (`regression/balance`) |
 | U335 | Content flags | 🟡 | Older pages skip what they don't know (fx tags, presence fields) |
 | U336 | Announcement system | ✅ | SAT-ONLINE-079: `/announce text` from an admin account (`admins/{uid}`, set in the console only); everyone online sees it once, late joiners within 10 min; the rules refuse anyone else (`regression/announce`) |
 | U337 | Maintenance notices | ✅ | SAT-ONLINE-079: `/maint minutes text`: the time, reminders 10/5/1 min before, a save when it starts; and "a new version" asks only the older page to refresh (SAT-ONLINE-045) |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 69 · 🟡 21 · ⏳ 6 · ❌ 8 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 70 · 🟡 20 · ⏳ 6 · ❌ 8 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
