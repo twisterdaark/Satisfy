@@ -24,7 +24,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U018 | Offline-to-online migration | 🟡 | SAT-ONLINE-007 moves a save between devices with consent; a wallet migration is server-side (D4) |
 | U019 | Rate limiting | ✅ | Presence per-sender budget, duel hits per second, rules on every write |
 | U020 | Network observability | 🟡 | `net().stats`/`net().link` and the badge tooltip (SAT-ONLINE-012); no dashboard |
-| U021 | Auth emulator CI | 🟡 | A fake Firebase that applies a copy of the rules; the real emulator isn't reachable from this sandbox |
+| U021 | Auth emulator CI | ✅ | SAT-ONLINE-116: the real rules on the Realtime Database emulator in CI (`tests/emulator/rules.emu.cjs`, `.github/workflows/emulator.yml`), players A and B and an admin: A can't change what is B's (account ID, presence, profile, saves, session, friends, chat lines, guild rank); the fake still mirrors the rules for the browser tests |
 | U022 | Config/env isolation | 🟡 | Public web config in `src/net/firebase-config.js`; no staging project |
 | U023 | Protocol versioning | ✅ | Envelope `v: 1`, `PROTOCOL_VERSION` (§25) |
 | U024 | Load testing swarm | ✅ | `unit/chaos` 100-client soak (in memory) |
@@ -43,7 +43,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U037 | Outlaw flag | ✅ | SAT-ONLINE-038: a kill makes the killer an outlaw for 10 min (`PlayerPublic.ol`, red name for everyone, `S.olT` kept across a reload); the kill counts only from a real, recent hit |
 | U038 | Bounty board | 🟡 | SAT-ONLINE-051 (#84): gold on an outlaw's head from its card, paid once to its PvP killer through the victim's own kill record (`bountyPaid`), taken back from the board; karma (SAT-ONLINE-052, #85): murders cost points and lengthen the red name, -5 is a murderer; gold has no ledger (D3) |
 
-**Totals:** ✅ 24 · 🟡 9 · ⏳ 3 · ❌ 2.
+**Totals:** ✅ 25 · 🟡 8 · ⏳ 3 · ❌ 2.
 
 ## Social U046–U065 (plan doc §35 [SOC])
 
