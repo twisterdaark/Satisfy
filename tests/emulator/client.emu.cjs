@@ -40,7 +40,8 @@ async function player(name, x) {
   const uid = (await fbAuth.signInAnonymously(auth)).user.uid;
   await env.withSecurityRulesDisabled(async (ctx) => { await ctx.database().ref().update({ ['accountIds/' + uid]: name, ['handles/' + name.toLowerCase()]: uid }); });
   const c = { name, uid, app, db, x, y: 1300, events: [] };
-  c.tr = SN.firebase.transport({ m: { database: fbDb }, db }, { uid, world: WORLD.id, shard: 'main', interest: { radius: 800, step: 400 } });
+  c.errs = [];
+  c.tr = SN.firebase.transport({ m: { database: fbDb }, db }, { uid, world: WORLD.id, shard: 'main', interest: { radius: 800, step: 400 }, onError: (e) => c.errs.push(String(e && (e.code || e.message) || e)) });
   c.pres = SN.presence.create({ transport: c.tr, uid, world: WORLD, net: SN.net, now: () => Date.now(), config: { moveHz: 5, idleHz: 0.2, expireMs: 30000 } });
   c.pres.on((e) => c.events.push(e));
   c.pp = () => SN.net.toPlayerPublic({ look: { n: name, hair: 1, hc: 2, skin: 1, top: 3 }, cls: 'novice', lv: 3, title: '' }, { x: c.x, y: c.y, dir: 0 }, { zone: 'zWin', uid, sid: c.pres.sid, handle: name, anim: 'idle' });
@@ -64,7 +65,10 @@ test('the emulators answer', { timeout: 20000 }, async () => {
 test('two clients on the real SDK and rules: presence, a move, a dropped connection and back, a party invitation', { timeout: 90000 }, async () => {
   const a = await player('Ahmed', 2000), b = await player('Bassem', 2030);
   a.publish(true); b.publish(true);
-  await until(() => a.sees(b) && b.sees(a), 'each sees the other');
+  await until(() => a.sees(b) && b.sees(a), 'each sees the other').catch(async (e) => {
+    const pres = await env.withSecurityRulesDisabled(async (ctx) => (await ctx.database().ref('presence/satisfy/main').once('value')).val());
+    throw new Error(e.message + ' · errors A ' + JSON.stringify(a.errs) + ' B ' + JSON.stringify(b.errs) + ' · stored ' + JSON.stringify(pres).slice(0, 600) + ' · events B ' + JSON.stringify(b.events.map((x) => x.type)).slice(0, 200));
+  });
   assert.equal(b.sees(a).handle, 'Ahmed');
 
   // a move goes out as an update of the changed fields and arrives
