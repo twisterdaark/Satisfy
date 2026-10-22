@@ -1193,7 +1193,7 @@ const buildings=[{x:3,y:12,w:6,h:5,k:'house'},{x:17,y:12,w:7,h:5,k:'forge'},{x:3
 const ANVILS=[{id:'anvB',tx:20,ty:18,own:'smith',perm:'sm1'},{id:'anvW',tx:140,ty:73,own:'khan',perm:'kh1'}];let ANVIL=ANVILS[0];
 const WELLS=[{tx:11,ty:17},{tx:131,ty:79},{tx:194,ty:79}],BOARD={tx:123,ty:79},GRAVE={tx:130,ty:55},TENTS=[[154,75],[110,50],[132,108],[145,110],[138,114],[63,103],[72,110],[65,113],[104,13],[115,12],[109,19],[119,18]];
 const TOWNS=[{k:'zBai',x0:2,x1:27,y0:2,y1:41,rx:15,ry:19},{k:'zWin',x0:106,x1:146,y0:64,y1:100,rx:126,ry:84},{k:'zPat',x0:172,x1:208,y0:64,y1:100,rx:189,ry:84}];
-const inTown=(x,y)=>y>=WMH*TS?(dunAt(x,y)?null:TOWNS.find(T=>T.k===((roomAt(x,y)||{}).z||'zWin'))):TOWNS.find(T=>x>=T.x0*TS&&x<(T.x1+1)*TS&&y>=T.y0*TS&&y<(T.y1+1)*TS);
+const inTown=(x,y)=>y>=WMH*TS?(dunAt(x,y)||inBh(x,y)||inTw(x,y)?null:TOWNS.find(T=>T.k===((roomAt(x,y)||{}).z||'zWin'))):TOWNS.find(T=>x>=T.x0*TS&&x<(T.x1+1)*TS&&y>=T.y0*TS&&y<(T.y1+1)*TS);
 const nodes=[],chopped=new Map();
 function genMap(){
  const r=mulberry32(1337);
@@ -2145,6 +2145,8 @@ function bhEnter(n,how){const b=bhS();bhClean();let o=bhIsle(n);
  fadeTo(()=>{const p=bhPx(B.sx,B.sy);P.x=p.x;P.y=p.y;P.dir=1;P.hp=Math.max(P.hp,Math.round(maxHP()*.5));camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y,{color:'#7ad8ff'});
   toast(t('bhIn',{n:bhOrd(n)}),'good');SFX.notice();bhStart();save(true);});}
 function bhStart(){const R=BHR,o=R.o,B=R.B,b=bhS();
+ // owner 2026-10-22: every island has a way back to the pier beside where you land, not only the save islands
+ if(o.k!=='save'){const c=[[-2,0],[2,0],[0,2],[0,-2],[-3,1],[3,1]].map(([dx,dy])=>[B.sx+dx,B.sy+dy]).find(([x,y])=>!SOLID[at(x,y)])||[B.sx,B.sy+1];bhG({...bhPx(c[0],c[1]),bh:'exit',hint:'hBhOut'});}
  if(o.k==='save'){bhOpen(1);bhG({...bhPx(B.x0+27,BHCY-3),bh:'exit',hint:'hBhOut'});
   setTimeout(()=>{if(BHR!==R)return;if(b.sv>=R.n){toast(t('bhSaved',{n:bhOrd(R.n)}));return;}
    dialog('bhSys',[bhSys('bhSaveQ')],null,[{l:t('bhYes'),f:()=>{b.sv=R.n;toast(t('bhSaveOk',{n:bhOrd(R.n)}),'good');SFX.quest();save(true);}},{l:t('bhNo')}]);},700);return;}
@@ -3612,6 +3614,9 @@ Object.assign(STR.en,{"hrabbitN": "Horned Rabbit", "grabbitN": "Golden Rabbit", 
    seal and the cut it never goes past +60%). Saintess: a priest of Lv 40 who has seen both escorts home, then 40 heals;
    Saint's Prayer heals you and the party near you, Grace mends you slowly, and Second Life lifts you once every 10 minutes
    (the time is kept with the character, so no endless revivals). Monsters only: none of this touches player-versus-player. */
+// no riding in caves, dungeons, houses, the swamp, the Behen islands or the tower (owner 2026-10-22: a horse in the middle of
+// the first island kept every monster off)
+const noRideAt=(x,y)=>!!(dunAt(x,y)||roomAt(x,y)||swampAt(x,y)||inBh(x,y)||inTw(x,y));
 const P2={rot:[]},P2NOT=['pagma','braham','saint','dslayer','saintess','aura','beast','orator','lsword','esorc'];
 HCQ.push('hds','hsa');
 const p2Still=()=>!(P.rmv>0)&&!(P.dash>0);
@@ -3903,7 +3908,7 @@ function buyPet(k){const Q=PETS[k];if(S.lv<Q.lv){SFX.deny();return toast(t('ride
 function setPet(k){S.pet=k||null;PET=null;if(k){toast(t('petGot',{n:t('pt_'+k)}),'good');SFX.notice();}hudDirty=true;save(true);}
 function toggleRide(){if(RCR&&RCR.in)return;if(P.boat){toast(t('boatNoRide'),'warn');return;}if(P.ride){dismount();return;}if(!S.mount||!(S.mounts||{})[S.mount]){SFX.deny();return toast(t('noMount'),'warn');}
  if(S.mdead&&S.mdead[S.mount]){SFX.deny();return toast(t('rideIsDead',{n:t('mt_'+S.mount)}),'warn');}
- if(dunAt(P.x,P.y)||roomAt(P.x,P.y)||swampAt(P.x,P.y)){SFX.deny();return toast(t('noRideHere'),'warn');}P.ride=1;P.rsp=0;P.guard=0;vfx('dust',P.x,P.y,{n:8});noise(.12,.12,600);hudDirty=true;}
+ if(noRideAt(P.x,P.y)){SFX.deny();return toast(t('noRideHere'),'warn');}P.ride=1;P.rsp=0;P.guard=0;vfx('dust',P.x,P.y,{n:8});noise(.12,.12,600);hudDirty=true;}
 function dismount(){if(!P.ride)return;P.ride=0;P.rsp=0;vfx('dust',P.x,P.y,{n:6});hudDirty=true;}
 const rhpMax=k=>Math.round(maxHP()*((MOUNTS[k]||{}).hpk||1)*(1+(mtLv(k)-1)*.05));
 const rhp=k=>{S.mhp=S.mhp||{};if(S.mhp[k]===undefined)S.mhp[k]=rhpMax(k);return S.mhp[k];};
@@ -7412,8 +7417,8 @@ function update(dt){
   if(m.ret){const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);m.st=null;m.tele=0;m.retT=(m.retT||0)+dt;if(hd>4){const ox=m.x,oy=m.y;chase(m,hx,hy,hd,b.spd*1.2,mr,dt);m.stuckN=0;m.ret=1;if(Math.hypot(m.x-ox,m.y-oy)>.01)m.rsT=0;else m.rsT=(m.rsT||0)+dt;if(m.rsT>2||m.retT>12){m.x=m.sx;m.y=m.sy;m.path=null;m.rsT=0;}}m.hp=Math.min(m.max,m.hp+m.max*.08*dt);if(hd<=4||hd<20&&m.hp>=m.max){m.ret=0;m.retT=0;m.path=null;}continue;}
   // a monster walking round a wall toward you (m.fl) stays on you while its way round is short enough, even though that
   // takes it further from you and from its spawn for a while
-  const eng=ag&&(!safe||m.evt||m.spar)&&(d<ag||m.prov>gTime&&d<560||(m.eng>0&&(d<ag*2.4||m.fl&&m.fd>0&&m.fd<=MFAR)));
-  if(eng){m.eng=4;if(!m.goal&&Math.hypot(m.x-m.sx,m.y-m.sy)>(m.fl?MFAR*TS:m.prov>gTime?520:AI?260:200)){m.ret=1;m.eng=0;m.fl=0;continue;}
+  const eng=ag&&(!safe||m.evt||m.spar)&&(m.bh&&m.agg||d<ag||m.prov>gTime&&d<560||(m.eng>0&&(d<ag*2.4||m.fl&&m.fd>0&&m.fd<=MFAR)));
+  if(eng){m.eng=4;if(!m.goal&&!m.bh&&Math.hypot(m.x-m.sx,m.y-m.sy)>(m.fl?MFAR*TS:m.prov>gTime?520:AI?260:200)){m.ret=1;m.eng=0;m.fl=0;continue;}
    if(AI){packTick(m,AI,dt);const ox=m.x;monAct(m,b,AI,dx,dy,d,mr,dt);monTurn(m,b,ox,dt);}else{if(d>6)chase(m,dx,dy,d,b.spd,mr,dt);m.face=dx>0?1:-1;if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;mobBite(m);}}}
   else{m.eng-=dt;m.st=null;m.tele=0;m.wt-=dt;if(m.wt<=0){m.wt=1+rand()*2.5;if((m.blk|0)>3){m.sx=m.x;m.sy=m.y;m.blk=0;}const back=Math.hypot(m.sx-m.x,m.sy-m.y)>50&&!(m.blk&1);if(back){const l=Math.hypot(m.sx-m.x,m.sy-m.y);m.wx=(m.sx-m.x)/l;m.wy=(m.sy-m.y)/l;}else if(rand()<.5){m.wx=0;m.wy=0;}else{const a=rand()*6.28;m.wx=Math.cos(a);m.wy=Math.sin(a);}}
    {const x0=m.x,y0=m.y,dx=m.wx*b.spd*.25*dt,dy=m.wy*b.spd*.25*dt;move(m,dx,dy,mr);if(m.wx)m.face=m.wx>0?1:-1;
@@ -7421,7 +7426,7 @@ function update(dt){
     // another way next time, and after a few tries makes where it stands its home
     if((dx||dy)&&Math.hypot(m.x-x0,m.y-y0)<Math.hypot(dx,dy)*.2){m.wx=0;m.wy=0;m.wt=Math.min(m.wt,.4+rand()*.6);m.blk=(m.blk|0)+1;}else if(dx||dy)m.blk=0;}}
  }catch(err){gameErr(err,m);}finally{if(MOBP){P=MOBP;MOBP=null;}}}
- if(P.rmv>0)P.rmv-=dt;else if(P.rsp)P.rsp=Math.max(0,P.rsp-dt*2);horseRegen(dt);if(P.ride&&!(RCR&&RCR.in)&&(dunAt(P.x,P.y)||roomAt(P.x,P.y)||swampAt(P.x,P.y))){dismount();toast(t('rideOffHere'));} // walked into a no-ride place: off the horse at once
+ if(P.rmv>0)P.rmv-=dt;else if(P.rsp)P.rsp=Math.max(0,P.rsp-dt*2);horseRegen(dt);if(P.ride&&!(RCR&&RCR.in)&&noRideAt(P.x,P.y)){dismount();toast(t('rideOffHere'));} // walked into a no-ride place: off the horse at once
  updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);karmaTick(dt);updateEvents(dt);updateSiege(dt);achTick(dt);updateWeather(dt);fogTick(dt);updateComp(dt);updateItemFx(dt);updateGDrop();updatePet(dt);updateArena(dt);updateTower(dt);updateBehen(dt);updateTowerW(dt);updateDragon(dt);updateBeasts(dt);mpTick(dt);dsTick(dt);updateBelial(dt);updateAuction(dt);
 }
 

@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22behen', ver: '1.77', d: '2026-10-22',
+      ar: ["وحوش جزر بيهين والبرج بقت بتهاجمك فعلًا: اللعبة كانت حاسباها جوا البلد فكانت بتسيبك في حالك، ووحوش الجزيرة مبقتش بترجع مكانها وتسيبك",
+        "مفيش ركوب حصان في جزر بيهين والبرج: بتنزل من عليه أول ما تدخل",
+        "كل جزيرة فيها بوابة \"اخرج من الأرخبيل\" جنب مكان ما بتنزل، ترجعك للرصيف"],
+      en: ["Monsters on the Behen islands and in the tower really attack now: the game counted those places as inside a town and left you alone, and island monsters no longer walk back home mid-fight",
+        "No riding on the Behen islands or in the tower: you get off the horse as you arrive",
+        "Every island has a \"Leave the archipelago\" gate beside where you land, back to the pier"] },
     { v: '2026-10-22cave', ver: '1.76', d: '2026-10-22',
       ar: ["سهم المهمات والخريطة بيدلوك على باب الكهف لما المهمة جوا كهف أو دانجن (زي رسمة شلالات لوران) بدل ما يشاوروا ناحية البحر"],
       en: ["The quest arrow and the map point to the cave mouth when a quest is inside a cave or dungeon (like the mural behind Loran Falls) instead of out to sea"] },
