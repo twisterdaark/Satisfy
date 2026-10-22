@@ -98,7 +98,9 @@ test('online: a bounty on an outlaw goes to the player who kills it, once; a bou
     await a.step(1);
     await a.eval(() => window.__G.pickOpt(0));
     await until([a], () => window.__G.S.gold === 1500 && window.__GB.on('gBnB2') === 0);
-    for (const g of [a, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/bountyPaid/.test(x))), []);
+    // nothing refused but the second claims of that one bounty above (Claude-B's review of #172: not every bountyPaid write)
+    for (const g of [a, b, c]) assert.deepEqual(await g.eval((bid) => window.__fakeRTDB.rejected.filter((x) => !(/bountyPaid/.test(x) && x.includes('bountyPaid/' + bid))), paid.bid), []);
+    assert.ok((await c.eval(() => window.__fakeRTDB.rejected.filter((x) => /bountyPaid/.test(x)).length)) >= 3, 'the three refused above on C');
     for (const g of [a, b, c]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
