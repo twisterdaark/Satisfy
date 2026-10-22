@@ -2629,7 +2629,7 @@ const hirePrice=()=>price('cassus',50+S.lv*20);
 function casOpts(){const o=[],s=S.qs.cp;
  if(s&&s.st===1&&!qReady('cp'))o.push({l:t('oPray'),f:()=>{PH.pray={t:12,x:P.x,y:P.y};toast(t('prayGo'));}});
  if(S.cls==='paladin'&&!S.church)o.push({l:t('oChurch'),f:phChurch});
- o.push({l:t('oHire',{g:hirePrice()}),f:()=>{const g=hirePrice();if(S.gold<g){SFX.deny();return dialog('cassus',[t('noGold')]);}S.gold-=g;PH.hire={t:300,x:P.x-14,y:P.y,hk:2,dir:0,fr:0};hudDirty=true;SFX.coin&&SFX.coin();dialog('cassus',[t('hireOk')]);}});
+ o.push({l:t('oHire',{g:hirePrice()}),f:()=>{const g=hirePrice();if(S.gold<g){SFX.deny();return dialog('cassus',[t('noGold')]);}S.gold-=g;taxNote('cassus',g);PH.hire={t:300,x:P.x-14,y:P.y,hk:2,dir:0,fr:0};hudDirty=true;SFX.coin&&SFX.coin();dialog('cassus',[t('hireOk')]);}});
  return o;}
 function phDone(q){if(q.promo==='paladin')setTimeout(phChurch,600);}
 function phTick(dt){if(!S||!P)return;for(const k of ['bls','jud','dom','pdv'])if(P[k]>0)P[k]-=dt;
@@ -5210,7 +5210,7 @@ function drink(k){if(!S||mode==='dead')return;if(blNear()){toast(t('blNoPot'),'w
 let BUYQ=1;const buyQ=e=>{BUYQ=e.ctrlKey||e.metaKey?999:e.shiftKey?10:TOUCH?TBQ:1;};addEventListener('pointerdown',buyQ,true);addEventListener('keydown',buyQ,true);
 const buyCount=(room,g)=>Math.max(0,Math.min(BUYQ,room,Math.floor(S.gold/g)));
 function boughtFx(k,n,g){SFX.coin();num(P.x,P.y-26,'-'+g+'G','#f2c14e',false);toast(n>1?t('boughtN',{n,it:t(k),g}):t('got',{n:1,item:t(k)}));hudDirty=true;}
-function buyPot(who,k){if((S[k]||0)>=10)return shopD(who,'potFull');const g=price(who,POT[k].price),n=buyCount(10-(S[k]||0),g);if(!n){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g*n;S[k]=(S[k]||0)+n;boughtFx(k,n,g*n);shopD(who,'potBuy');}
+function buyPot(who,k){if((S[k]||0)>=10)return shopD(who,'potFull');const g=price(who,POT[k].price),n=buyCount(10-(S[k]||0),g);if(!n){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g*n;taxNote(who,g*n);S[k]=(S[k]||0)+n;boughtFx(k,n,g*n);shopD(who,'potBuy');}
 const potOpts=who=>['hpot','mpot'].map(k=>{const g=price(who,POT[k].price);return{l:t('oBuyPot',{p:t(k),g}),qty:1,ic:k,st:`${t(k+'D')} (${S[k]||0}/10)`,poor:S.gold<g,f:()=>buyPot(who,k)};});
 function eat(){if(S.bread<=0){toast(t('noBread'),'warn');SFX.deny();return;}if(P.food>=95){toast(t('full'));SFX.deny();return;}S.bread--;vowBreak('fast');P.food=Math.min(100,P.food+40);P.hp=Math.min(maxHP(),P.hp+15);vfx('heal',P.x,P.y);toast(t('ate'));SFX.eat();hudDirty=true;}
 function nearTree(){if(inRace(P.x,P.y))return null;const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];let best=null,bs=1e9,bc=null,bcs=1e9;for(const tr of vtNear(P.x,P.y,30)){const dx=tr.x-P.x,dy=tr.y-P.y,d=Math.hypot(dx,dy);if(d>30)continue;const s=d-((dx*v[0]+dy*v[1])/(d||1))*12;if((chopped.get(tr.k)||0)>gTime){if(s<bcs){bcs=s;bc=tr;}}else if(s<bs){bs=s;best=tr;}}return best||bc;}
@@ -5564,7 +5564,7 @@ const heartsH=id=>`<span class="hearts">${[0,1,2].map(i=>`<i class="${affTier(id
 const affTxt=id=>heartsH(id)+' '+t(gk(id,'aff'+affTier(id)));
 const repOf=k=>(S.rep||{})[k]||0,repRank=k=>REPT.filter(v=>repOf(k)>=v).length;
 function townOfNpc(id){const n=npcs.find(n=>n.id===id);if(!n)return null;const Rm=roomAt(n.x,n.y);if(Rm)return Rm.z;const z=zoneAt(n.x,n.y);return TOWNS.some(T=>T.k===z)?z:null;}
-function price(who,g){const d=(pasOn('opers')?.1:0)+Math.min(.25,affTier(who)*.05+(who&&NPCT[who]?repRank(townOfNpc(who))*.02:0));return Math.max(1,Math.round(g*(1-d)));}
+function price(who,g){const d=(pasOn('opers')?.1:0)+Math.min(.25,affTier(who)*.05+(who&&NPCT[who]?repRank(townOfNpc(who))*.02:0)),r=taxRate(who);return Math.max(1,Math.round(Math.round(g*(1-d))*(1+r/100)));} // r: the castle city's tax (SAT-ONLINE-106)
 const NOAFF=new Set(['board','auction','herald']);
 function addAff(id,n){if(!NPCT[id]||!n||NOAFF.has(id))return;S.aff=S.aff||{};const was=affTier(id);S.aff[id]=Math.min(100,affOf(id)+(n>0&&pasOn('opers')?Math.ceil(n*1.5):n));const now=affTier(id);
  if(now>was){toast(t('affUp',{w:t(id),r:t('aff'+now)}),'good');SFX.notice();if(now===2){S.hpot=Math.min(10,(S.hpot||0)+2);toast(t('affGift2',{w:t(id)}),'good');}if(now===3){S.mats.mstone=(S.mats.mstone||0)+3;toast(t('affGift3',{w:t(id)}),'good');}}}
@@ -5673,7 +5673,7 @@ function cGo(dest,who){const g=cFare(who,dest);if(S.gold<g){SFX.deny();return di
 // shop options shared by the Winston and Patrian merchants
 // stat reset scroll (owner request): very expensive; reading it returns every distributed point to spend again
 const RESPEC_G=100000;
-function respecOpt(who){const g=price(who,RESPEC_G);return [{l:t('oRespec',{g}),ic:'respec',st:`${t('respecD')} (${S.respec||0})`,poor:S.gold<g,f:()=>{if(S.gold<g){toast(t('noGold'),'warn');return;}S.gold-=g;S.respec=(S.respec||0)+1;SFX.coin();toast(t('respecGot'),'good');hudDirty=true;save(true);}}];}
+function respecOpt(who){const g=price(who,RESPEC_G);return [{l:t('oRespec',{g}),ic:'respec',st:`${t('respecD')} (${S.respec||0})`,poor:S.gold<g,f:()=>{if(S.gold<g){toast(t('noGold'),'warn');return;}S.gold-=g;taxNote(who,g);S.respec=(S.respec||0)+1;SFX.coin();toast(t('respecGot'),'good');hudDirty=true;save(true);}}];}
 function useRespec(){if(!(S.respec>0))return;const n=['str','sta','agi','int','dex'].reduce((a,k)=>a+S.st[k],0)-50;if(n<=0){toast(t('respecNone'),'warn');return;}
  S.respec--;S.st={str:10,sta:10,agi:10,int:10,dex:10};S.pts+=n;if(P){P.hp=Math.min(P.hp,maxHP());P.mp=Math.min(P.mp,maxMP());}SFX.rare();toast(t('respecDone',{n}),'good');hudDirty=true;save(true);renderStatus();}
 Object.assign(STR.ar,{oRespec:'لفافة إعادة التوزيع ({g} دهب)',respecD:'بترجعلك كل نقط الستات اللي وزعتها عشان توزعها من الأول',respecGot:'اشتريت لفافة إعادة التوزيع، استخدمها من نافذة الحالة (C)',respecUse:'اقرا لفافة إعادة التوزيع (معاك {n})',respecNone:'مفيش نقط موزعة ترجع',respecDone:'رجعتلك {n} نقطة، وزعهم من الأول'});
@@ -5785,6 +5785,7 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
   ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},
    ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),...(galSt()?[{l:t('gdDip')+(galMo()&&Object.keys(GALA).length?' ('+Object.keys(GALA).length+')':''),f:galD}]:[]),...(gwrSt()?[{l:t('gdWar')+(galMo()&&Object.keys(GWRA).length?' ('+Object.keys(GWRA).length+')':''),f:gwrD}]:[]),
    ...(gCan('emblem')?[{l:t('gdBan'),f:guildBanD},{l:t('gpRights'),f:guildPermD}]:[]),
+   ...(gCan('perm')&&WS.castle.own===GUILD.state().gid&&FB?[{l:t('txSet',{r:TAXR&&TAXR.g===GUILD.state().gid?TAXR.r:0}),f:taxSetD}]:[]),...(taxWaiting()?[{l:t('txCol',{g:taxWaiting().toLocaleString()}),f:()=>{taxCollect();setTimeout(guildPanel,900);}}]:[]),
    ...(gCan('note')?[{l:t('gdNoteW'),f:guildNoteW}]:[]),...(gCan('invite')&&recSt()?[{l:t('gdApps',{n:Object.keys(GAPPS).length}),f:recAppsD},{l:t('gdRecOn'),f:recPost},{l:t('gdRecOff'),f:recStop}]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
   {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
 function guildMOpts(){const o=[],back=()=>shopD('guildM','gm_hi');
@@ -5827,7 +5828,40 @@ becomePagma=legWrap('pagma',becomePagma);becomeBraham=legWrap('braham',becomeBra
 window.__GL={become:k=>({pagma:becomePagma,braham:becomeBraham,muller:becomeSaint})[k](),legends:()=>WS&&WS.legends,db:()=>LEGS,apply:()=>legApply()}; // test hook
 const OWNG={};let OWN=null,ownOff=null;
 function ownSub(){if(ownOff||!FB||!netUser||!NET||!WS)return;const D=FB.m.database;if(!D.onValue){ownOff=1;return;}
- try{ownOff=D.onValue(D.ref(FB.db,'world/satisfy/own'),s=>{OWN=s.val()||{};ownApply();},()=>{OWN=null;});}catch(e){ownOff=1;}}
+ try{ownOff=D.onValue(D.ref(FB.db,'world/satisfy/own'),s=>{OWN=s.val()||{};ownApply();},()=>{OWN=null;});}catch(e){ownOff=1;}
+ try{D.onValue(D.ref(FB.db,'world/satisfy/tax'),s=>{const v=s.val();TAXR=v&&typeof v==='object'&&typeof v.g==='string'?{g:v.g,r:Math.max(0,Math.min(TAX_MAX,v.r|0)),t:+v.t||0}:null;},()=>{TAXR=null;});}catch(e){}} // SAT-ONLINE-106
+/* the castle city's tax (SAT-ONLINE-106, plan U226). The master of the guild holding Reidan Castle sets a tax on what
+   Reidan's people sell, at most 10% (TAX_MAX; the rules refuse more) and changed at most once an hour. A buyer from
+   outside that guild pays it on top of the price; it goes to the guild as entries (guildTax/{gid}/{id} {g, by, n, t},
+   paid every 20 s or on leaving), which any member collects into the treasury, each once (the rules check the gold
+   added is the entry's). The guild's own members pay none. Offline, or a tax set by a guild that no longer holds the
+   castle, costs nothing. */
+var TAXR=null,TAXQ=0,TAXT=0,taxBusy=0;const TAX_MAX=10,TAX_TOWN='zReid';
+Object.assign(STR.ar,{txLine:'ضريبة مدينة ريدان: {r}% (لجيلد {g})',txSet:'ضريبة المدينة: {r}%',txSetQ:'ضريبة على اللي بيتباع في ريدان لغير أعضاء الجيلد (لحد 10%). تتغير مرة كل ساعة',txSetR:'{r}%',txDone:'ضريبة المدينة بقت {r}%',txSoon:'الضريبة اتغيرت من شوية. جرّب بعد ساعة',txCol:'اجمع الضرايب ({g} دهب)',txGot:'دخل الخزينة {g} دهب ضرايب',txPaid:'ضريبة ريدان {r}%'});
+Object.assign(STR.en,{txLine:'Reidan city tax: {r}% (to {g})',txSet:'City tax: {r}%',txSetQ:"A tax on what Reidan's people sell to anyone outside your guild (up to 10%). It changes once an hour",txSetR:'{r}%',txDone:'The city tax is now {r}%',txSoon:'The tax changed recently. Try again in an hour',txCol:'Collect the taxes ({g} gold)',txGot:'{g} gold of taxes went into the treasury',txPaid:'Reidan tax {r}%'});
+// the rate a buyer pays at this seller (0: no tax here, now, for you)
+function taxRate(who){const T=TAXR;if(!T||!T.r||!FB||!netUser||!WS||!WS.castle||WS.castle.own!==T.g||S&&S.guild===T.g||!who||townOfNpc(who)!==TAX_TOWN)return 0;return T.r;}
+// a purchase of `paid` gold (with the tax in it) at `who`: its tax is owed to the castle guild
+function taxNote(who,paid){const r=taxRate(who);if(!r||!(paid>0))return;TAXQ+=paid-Math.round(paid/(1+r/100));}
+function taxTick(force){if(TAXQ<1||taxBusy||!TAXR||!FB||!netUser)return;const now=performance.now();if(!force&&now-TAXT<20000)return;TAXT=now;
+ const g=Math.min(100000,Math.round(TAXQ)),D=FB.m.database,id='x_'+String(netUser.uid).replace(/[^A-Za-z0-9]/g,'').slice(0,40)+'_'+Date.now().toString(36),u={};if(g<1)return;
+ u['guildTax/'+TAXR.g+'/'+id]={g,by:netUser.uid,n:String(netId||S.look.n||'?').slice(0,24),t:D.serverTimestamp()};taxBusy=1;
+ D.update(D.ref(FB.db),u).then(()=>{TAXQ=Math.max(0,TAXQ-g);},()=>{TAXQ=0;}).finally(()=>{taxBusy=0;});} // refused (the castle changed hands): owed to nobody
+// the master of the castle guild sets it
+function taxSetD(){const st=GUILD&&GUILD.state(),T=TAXR;if(!st||!st.gid||WS.castle.own!==st.gid||!gCan('perm'))return guildPanel();const cur=T&&T.g===st.gid?T.r:0;
+ dialog('guild',[t('txSetQ')],null,[...[0,2,5,8,10].map(r=>({l:t('txSetR',{r})+(r===cur?' ✓':''),f:()=>taxSet(r)})),{l:t('oBack'),f:guildPanel}]);}
+function taxSet(r){const st=GUILD&&GUILD.state(),D=FB&&FB.m.database;if(!st||!D)return;r=Math.max(0,Math.min(TAX_MAX,r|0));
+ D.set(D.ref(FB.db,'world/satisfy/tax'),{g:st.gid,r,by:netUser.uid,t:D.serverTimestamp()}).then(()=>{toast(t('txDone',{r}),'good');guildPanel();},()=>{toast(t('txSoon'),'warn');guildPanel();});}
+// the guild's taxes waiting, and collecting them into the treasury (one entry a write; the rules check each)
+var TAXL=null,taxLOff=null,taxLFor=null;
+function taxWatch(){const st=GUILD&&GUILD.state(),gid=st&&st.gid&&FB?st.gid:null;if(gid===taxLFor)return;if(taxLOff)try{taxLOff();}catch(e){}taxLOff=null;taxLFor=gid;TAXL=null;if(!gid)return;
+ const D=FB.m.database;try{taxLOff=D.onValue(D.ref(FB.db,'guildTax/'+gid),s=>{const v=s.val()||{},o={};for(const k in v){const e=v[k];if(/^x_[A-Za-z0-9_-]{1,80}$/.test(k)&&e&&+e.g>=1)o[k]=+e.g|0;}TAXL=o;},()=>{TAXL=null;});}catch(e){}}
+const taxWaiting=()=>Object.values(TAXL||{}).reduce((a,b)=>a+b,0);
+function taxCollect(){const st=GUILD&&GUILD.state(),ks=Object.keys(TAXL||{});if(!st||!st.gid||!ks.length||taxBusy||!FB)return;taxBusy=1;let got=0;const D=FB.m.database;
+ const one=i=>{if(i>=ks.length){taxBusy=0;if(got){toast(t('txGot',{g:got.toLocaleString()}),'good');SFX.coin();}return;}const k=ks[i],g=TAXL[k];
+  D.get(D.ref(FB.db,'guildBank/'+st.gid)).then(s=>{const v=s.val()||{},u={};u['guildBank/'+st.gid]={in:(+v.in||0)+g,s:+v.s||0,lb:netUser.uid,lg:g,tx:k,t:D.serverTimestamp()};u['guildTax/'+st.gid+'/'+k]=null;return D.update(D.ref(FB.db),u);})
+   .then(()=>{got+=g;one(i+1);},()=>one(i+1));};one(0);}
+window.__GTAX={pot:(w,k)=>buyPot(w,k),town:w=>townOfNpc(w),price:(w,g)=>price(w,g),get rate(){return TAXR},set:r=>taxSet(r),rateAt:w=>taxRate(w),note:(w,g)=>taxNote(w,g),get owed(){return TAXQ},flush:()=>taxTick(true),get waiting(){return TAXL},collect:()=>taxCollect(),watch:()=>taxWatch(),setD:()=>taxSetD()}; // tests
 function ownApply(){if(!OWN||!WS||!S)return;for(const k in OWN){const v=OWN[k];if(!v||typeof v.g!=='string'||v.g.length>48)continue;
   if(!WS.guilds[v.g])OWNG[v.g]={n:Satisfy.chat.clean(String(v.n||'?'),24)||'?',col:/^#[0-9a-fA-F]{6}$/.test(v.c||'')?v.c:'#9a9aa6'};
   const T=TERR.find(T=>T.k===k);
@@ -5929,7 +5963,7 @@ function svcOpts(who){const rc=repairCost(who);return [...(GEMSM.has(who)?[{l:t(
 const svcBack=who=>NPCT[who]&&NPCT[who].opts?shopD(who,'svcMore'):null;
 function repairCost(who){let g=0;for(const i of S.items){const d=durOf(i);if(d<100&&i.slot!=='x')g+=Math.ceil((100-d)*.4*(1+i.r));}return g?price(who,g):0;}
 function repairAll(who){const g=repairCost(who);if(!g)return dialog(who,['arNoRep'],()=>svcBack(who));if(S.gold<g){SFX.deny();return dialog(who,['arNo']);}
- S.gold-=g;S.items.forEach(i=>{if(i.slot!=='x')i.dur=100;});SFX.coin();vfx('forge',P.x,P.y-8);num(P.x,P.y-26,'-'+g+'G','#f2c14e',false);toast(t('repDone'),'good');hudDirty=true;svcBack(who);}
+ S.gold-=g;taxNote(who,g);S.items.forEach(i=>{if(i.slot!=='x')i.dur=100;});SFX.coin();vfx('forge',P.x,P.y-8);num(P.x,P.y-26,'-'+g+'G','#f2c14e',false);toast(t('repDone'),'good');hudDirty=true;svcBack(who);}
 // Gems (SAT-GEM-001): rare drops from monsters of level 60 and up (bosses drop one a third of the time). Any smith sets one
 // gem in a piece of gear for GEMC gold; setting a new one breaks the old. Gem stats ignore durability and enhancement.
 function gemDrop(m,b){if(!b||b.lv[0]<60||m.tmp&&!b.boss||rand()>=(b.boss?.3:.004))return;const g=rand()<.1?'diam':GEMK[(rand()*4)|0];addMat(g,1);toast(t('gemDrop',{g:t(g)}),'good');SFX.rare();}
@@ -5962,8 +5996,8 @@ function enhFx(i,ok,n,p,done){const prev=mode;mode='enhfx';const o=document.crea
   setTimeout(()=>{o.remove();mode=prev==='enhfx'?'play':prev;done();},ok?1500:1100);};
  const late=n>=6?900:450;[0,420,840].forEach((d,k)=>T.push(setTimeout(()=>{blow(k);if(k===2)card.classList.add('charge');},d)));T.push(setTimeout(end,840+late+300));
  o.onclick=()=>end();}
-function buyGear(id,g,who='armorer'){if(S.gold<g){SFX.deny();return dialog(who,['arNo']);}S.gold-=g;const it=mkItem(id,0);it.bp=g;S.items.push(it);if(it.slot!=='w'&&it.slot!=='a'&&!eqIt(it.slot))equip(it);SFX.coin();toast(t('gotItem',{it:inm(it)}),'good');hudDirty=true;shopD(who,'arBuy');}
-function rest(who,g){if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;fadeTo(()=>{P.hp=maxHP();P.mp=maxMP();P.st=maxST();P.food=Math.min(100,P.food+40);hudDirty=true;toast(t('restT'),'good');SFX.quest();save(true);});}
+function buyGear(id,g,who='armorer'){if(S.gold<g){SFX.deny();return dialog(who,['arNo']);}S.gold-=g;taxNote(who,g);const it=mkItem(id,0);it.bp=g;S.items.push(it);if(it.slot!=='w'&&it.slot!=='a'&&!eqIt(it.slot))equip(it);SFX.coin();toast(t('gotItem',{it:inm(it)}),'good');hudDirty=true;shopD(who,'arBuy');}
+function rest(who,g){if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;taxNote(who,g);fadeTo(()=>{P.hp=maxHP();P.mp=maxMP();P.st=maxST();P.food=Math.min(100,P.food+40);hudDirty=true;toast(t('restT'),'good');SFX.quest();save(true);});}
 function buyBread(who){if(S.bread>=9)return shopD(who,'bfull');const n=buyCount(9-S.bread,5);if(!n){SFX.deny();return dialog(who,['bno']);}S.gold-=5*n;S.bread+=n;boughtFx('bread',n,5*n);shopD(who,'bbuy');}
 // Regas buys your arrows himself (canon: Grid's arrows to Regas); the merchants buy through the sell window
 function sellOpt(who){const n=arrowN();if(!n)return[];const g=S.arrows.reduce((a,c,r)=>a+c*ARROWG[r],0);return[{l:t('oSell',{n,g}),f:()=>sellArrows(who,n,g)}];}
@@ -6911,7 +6945,7 @@ function fogDraw(g,X,Y,sc){const paper=pmRegions().length>0,k=fogV+'|'+PMRk;
 // owner 2026-10-21: an inn does not sell the map of land you have already walked (85% of its area seen): it would show nothing new
 function pmKnown(who){const n=npcs.find(n=>n.id===who);if(!n||!FOG)return false;const w=wTile(n.x,n.y);let a=0,b=0;
  for(let y=Math.floor((w.y-PM_RY+NR)/FOGC);y<=Math.floor((w.y+PM_RY+NR)/FOGC);y++)for(let x=Math.floor((w.x-PM_RX)/FOGC);x<=Math.floor((w.x+PM_RX)/FOGC);x++){if(x<0||y<0||x>=FOGW||y>=FOGH)continue;a++;if(FOG[y*FOGW+x])b++;}return a>0&&b/a>=.85;}
-const mapOpt=who=>pmOwned()[who]||pmKnown(who)?[]:[{l:t('oPMap'),pr:price(who,300),ic:'book',st:t('oPMapD'),poor:S.gold<price(who,300),f:()=>{const g=price(who,300);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;S.ev.pmap=Object.assign({},pmOwned(),{[who]:1});SFX.coin();toast(t('pMapGot'),'good');hudDirty=true;save(true);dialog(who,['pMapT']);}}];
+const mapOpt=who=>pmOwned()[who]||pmKnown(who)?[]:[{l:t('oPMap'),pr:price(who,300),ic:'book',st:t('oPMapD'),poor:S.gold<price(who,300),f:()=>{const g=price(who,300);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;taxNote(who,g);S.ev.pmap=Object.assign({},pmOwned(),{[who]:1});SFX.coin();toast(t('pMapGot'),'good');hudDirty=true;save(true);dialog(who,['pMapT']);}}];
 Object.assign(STR.ar,{oPMap:'اشتري خريطة ورق',oPMapD:'خريطة المنطقة دي بس، مرسومة بالإيد: الأماكن تقريبية ومش كلها موجودة',pMapGot:'الخريطة الورق معاك: M تفتحها',pMapT:'رحالة رسمها من دماغه للمنطقة اللي حوالين هنا. هتقرّبك من الأماكن، بس متعتمدش عليها: اللي تمشيه بنفسك هو اللي هيبان مظبوط.'});
 Object.assign(STR.en,{oPMap:'Buy a paper map',oPMapD:"This area only, drawn by hand: places are roughly placed and some are missing",pMapGot:'You have the paper map: M opens it',pMapT:"A traveller sketched the land around here from memory. It gets you close, but don't trust it fully: only what you walk yourself shows exactly."});
 function openMap(){SFX.open();mode='map';$('mapW').hidden=false;$('hint').hidden=true;const pp=outPos();MV.z=4;MV.cx=pp.x/TS;MV.cy=pp.y/TS;mapClamp($('mapC'));drawMapNow();}
@@ -8010,7 +8044,7 @@ function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(inBh(P.x,P
 Object.assign(STR.ar,{netOtherV:'{n} قريب منك بس على نسخة تانية من اللعبة: اعملوا الاتنين ريفريش عشان تشوفوا بعض'});
 Object.assign(STR.en,{netOtherV:'{n} is nearby on a different version of the game: reload both pages to see each other'});
 function netWatch(){const ids=PARTY?PARTY.follow():[],w=ids.join(' ');if(NETTR.wsig!==w){NETTR.wsig=w;NETTR.party(ids);}} // party.follow(): review #55
-function netTick(){NET.tick();const live=netLive();
+function netTick(){NET.tick();const live=netLive();if(live){taxTick();taxWatch();}
  if(PARTY)PARTY.tick();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
