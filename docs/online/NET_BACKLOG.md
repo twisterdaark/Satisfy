@@ -56,7 +56,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U050 | Party roles | ✅ | SAT-ONLINE-025: a badge (tank/healer/damage/support) picked in the party panel, `PlayerPublic.role`; in a raid against bosses it does something (SAT-ONLINE-061, #95): a tank draws the boss and takes 30% less, a healer heals the raid near it every 3 s, damage +15%, support -15% near it |
 | U051 | Party HP UI | ✅ | SAT-ONLINE-021: `PlayerPublic.hp` (5% steps, nothing else of the profile); a bar per member in the party panel |
 | U052 | Party pings | ✅ | SAT-ONLINE-021: Alt+click (touch: Ping marks where you stand) → `party.ping`; a ring on the ground and the minimap for 3 s; one per member per 1.5 s |
-| U053 | Party chat | 🟡 | SAT-ONLINE-016: party lines, rate-limited, block list; world chat for everyone (SAT-ONLINE-026), guild chat (SAT-ONLINE-049, #81), world notices as lines (SAT-ONLINE-041); no profanity filter |
+| U053 | Party chat | ✅ | SAT-ONLINE-016: party lines, rate-limited, block list; world chat for everyone (SAT-ONLINE-026), guild chat (SAT-ONLINE-049, #81), world notices as lines (SAT-ONLINE-041), insults shown as stars (SAT-ONLINE-071, see U062) |
 | U054 | Party summon | ⏳ | A teleport needs a movement authority |
 | U055 | Party follow | ✅ | SAT-ONLINE-068 (#102): "Follow" on a party mate's card walks after them; any move key stops it (`regression/follow`) |
 | U056 | Shared PvE XP | ⏳ | Needs a combat authority; a party raid pays each member their own rewards (009) |
@@ -177,7 +177,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U323 | Replay recorder | ❌ | |
 | U324 | Exception boundary | 🟡 | A failing listener can't stop presence; network errors show in the badge |
 | U325 | Performance profiler | 🟡 | `net().link` (round trip, sent, received, dropped) in the badge tooltip; no frame-time budget |
-| U326 | Build pipeline | 🟡 | Tests on every PR by hand; GitHub Pages serves main as it is |
+| U326 | Build pipeline | ✅ | SAT-ONLINE-107: GitHub Actions (`.github/workflows/tests.yml`) runs the unit and content tests and a smoke set of the browser tests on every pull request and push to main; GitHub Pages serves main as it is |
 | U327 | Staging deployment | ⏳ | Needs a second Firebase project (owner) |
 | U328 | Rollback support | ✅ | Every update is one merge on main, so reverting one is one commit (GitHub's Revert); the rules go back with main's copy; saves survive both ways (SAT-ONLINE-091, `docs/online/ROLLBACK.md`) |
 
@@ -198,7 +198,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U340 | Player appeal flow | ✅ | SAT-ONLINE-087: `/appeal why` while muted, once a mute (`appeals/{uid}`, `mt` = the mute's time: linked to the moderation event); read only by admins and the player (privacy); `/appeals` lifts or keeps it (`appealDone`), the player is told once; a second appeal for the same mute and anyone else's answer are refused by the rules (`regression/appeal`) |
 | U341 | Crash reporting | ✅ | SAT-ONLINE-082: errors on a signed-in page go to `crashes` (admins read): message and stack with long ids, e-mails and paths cut out, build and zone, at most three a session; `/crashes` lists them |
 | U342 | A/B testing ethics | ⏳ | No tests on players; owner decision |
-| U343 | Community feedback triage | 🟡 | GitHub issues and in-game reports |
+| U343 | Community feedback triage | ✅ | GitHub issue templates for bugs and ideas (Arabic and English, sorted by part of the game: SAT-ONLINE-107) and in-game reports |
 | U344 | Season rewards | 🟡 | Titles for the National Champion and the arena; cosmetic |
 | U345 | Retention without grind | 🟡 | Nothing is lost for a missed day; daily caps on repeatable quests (B) |
 | U346 | Data export/delete | 🟡 | "Delete my online data" (SAT-ONLINE-015/066). The owner took out "Download my online data" (078) and the manual cloud Upload/Download on 2026-10-21, to cut the chance of duplicated data: characters move only by the automatic sync |
@@ -210,7 +210,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 |---|---|---|---|
 | U368 | Automated unit test harness | ✅ | `tests/unit`, `tests/content`, `tests/regression` with a seeded random and a frame clock |
 | U369 | Firebase rules fuzzing | ✅ | SAT-ONLINE-102: `tests/harness/rules-eval.cjs` evaluates the real `database.rules.json` in Node (cascading .read/.write, .validate, wildcards, auth/now/root/data/newData). `unit/rules-fuzz` sends thousands of random writes and reads: nothing signed out, nothing into another account's own nodes, no client-chosen server time; drops, bounties and friend requests played through. `SATISFY_RULES=<file>` runs it on a PR's rules |
-| U370 | Multi-browser smoke | 🟡 | Chromium in the tests; the owner tests desktop and phone |
+| U370 | Multi-browser smoke | ✅ | Chromium in every test; CI also runs boot and saves in Firefox and WebKit (SAT-ONLINE-107, `SATISFY_BROWSER`); the owner tests desktop and phone |
 | U371 | Reconnect soak | 🟡 | `unit/chaos` (drops, delays, duplicates); `regression/online-firebase` reconnects |
 | U372 | Load test 100 clients | 🟡 | `COST_MODEL.md` measured numbers; no 100-client run |
 | U373 | Combat determinism | 🟡 | With `?tick=fixed` the same fight at 30, 60 and 144 fps ends the same to the last digit (tests/regression/fixedtick, seeded random). Left: a seed per session for replays (U323) |
@@ -224,11 +224,11 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U381 | Security incident drill | ⏳ | Owner (Firebase console) |
 | U382 | Data retention review | 🟡 | Only what play needs is online; entries expire (lfg 30 min, chat lines, inbox) |
 | U383 | Community report resolution | ✅ | SAT-ONLINE-082: each report is resolved with its action (`reportDone/{id}` {a: ok or mute, by, t}), so what was done and by whom is kept |
-| U384 | Version gate report | 🟡 | Every PR lists the tests it ran |
+| U384 | Version gate report | ✅ | Every PR shows its CI checks (SAT-ONLINE-107) and lists the tests it ran |
 | U385 | Rollback rehearsal | ✅ | SAT-ONLINE-091: `regression/rollback` takes a save this build wrote to the previous release (the baseline build) and back: nothing dropped on the way, a key the old build doesn't know kept, the same save again; a save from a newer build is backed up first. `ROLLBACK.md` has the owner's steps (revert on GitHub, the rules from main, a database export) |
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 51 · 🟡 36 · ⏳ 6 · ❌ 11 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 56 · 🟡 31 · ⏳ 6 · ❌ 11 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
