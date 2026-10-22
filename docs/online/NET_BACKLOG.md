@@ -135,7 +135,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U217 | Bank withdrawal locks | ✅ | Same as U216: neither the bag nor the bank goes below zero, whatever was shown or pressed twice; one device plays a character at a time (the session lease, U006), so no second client spends the same balance |
 | U218 | Gold sinks | ✅ | Repairs, fees, the inn, the guild treasury, reputation-store prices (B). Inflow and outflow are observable: every game counts the gold that comes in and goes out each week from each change of the bag (SAT-ONLINE-093, `balance/{uid}` `gi`/`go`), and `/economy` adds them up over all players with a warning when far more comes in (U334, `regression/balance`) |
 | U219 | Crafting commissions | ❌ | |
-| U220 | Region merchant caravans | ❌ | |
+| U220 | Region merchant caravans | ✅ | SAT-ONLINE-110: at a merchant, goods for another town's merchant, priced and timed by distance; the safe road pays 30% more and survives a fall, the risky road 80% with outlaw ambushes outside towns and lost in a fall; online the server stamps the start (`caravans/{uid}`) and takes the delivery (`caravanDone/{uid}/{id}`) only after its time on the road and within two hours, for the same route and goods (`regression/caravan`) |
 | U221 | Guild treasury | ✅ | SAT-ONLINE-065 (#99) + 069: gifts add exactly their amount, only the master and officers spend, and only on a building raised in the same write; `guildLog` keeps who did what |
 | U222 | Fish market | ❌ | Content (B) |
 | U223 | Crop wholesale market | ❌ | Content (B) |
@@ -246,15 +246,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 82 · 🟡 11 · ⏳ 5 · ❌ 6 of 104.
-
-## From other ranges (2026-10-24)
-| U | Update | Status | Where |
-|---|---|---|---|
-| U264 | Damage accessibility | ✅ | SAT-ONLINE-167: High contrast in the pause menu's Accessibility screen (`satisfy_hc`, the system's prefers-contrast when unset): a crit ends in "!", thicker number outlines, white frames on head bars and wind-ups, framed HUD bars; `regression/contrast` |
-| U266 | Controller support | ✅ | SAT-ONLINE-172: a standard gamepad through the Gamepad API (`gpTick` in the loop): the left stick walks (analog), A/B/X/Y attack, dodge, use, guard, the four shoulders the skill slots, the sticks' clicks the potions, the right stick the windows; in menus the D-pad and A/B send the arrow keys, Enter and Esc (`gpKey`, `KSYN`); a hit rumbles (`gpRumble`, off with `satisfy_gpvib`); nothing runs with no pad; `regression/gamepad` |
-| U267 | Reduced motion | ✅ | SAT-ONLINE-164: a device setting in the pause menu (Accessibility since SAT-ONLINE-167) (`satisfy_rmo`, the system's prefers-reduced-motion when unset): no camera shake, no white flash, the UI's shakes and pulses stop, particles capped (`RMOFX`, `RMOVX`); telegraphs (`drawTele`) untouched; `regression/rmotion` |
-| U269 | Armor pieces (render sprite overlays) | ✅ | SAT-ONLINE-165: helmet, armour, gloves and boots each draw their own look (`GEARL`, 48 ids), for you and the others (`gr:` fx tag); `regression/gearlook` |
-| U289 | Inn rest | ✅ | SAT-ONLINE-168: sleep at an inn and log out within 30 min; the time away (30 min to 3 days, by `wNow()`: the server's clock online) fills a rested pool, 5% of a level per 8 h, at most 1.5 levels; kills give double XP until it runs out (`innWake`, `innXP`, `S.inn`/`S.svT`/`S.rx`); a clock gone back gives nothing; `regression/innrest` |
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 89 · 🟡 11 · ⏳ 5 · ❌ 5 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

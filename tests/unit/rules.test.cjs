@@ -629,3 +629,15 @@ test('live switches (SAT-ONLINE-121): only admins turn world chat, trading or du
   assert.ok(rules.chat.$world.$id['.write'].includes("newData.child('from').val() === auth.uid && " + OFF('chat')), 'no new world line while chat is off');
   assert.ok(!rules.chat.$world.$id['.write'].split('||').pop().includes('flags'), 'old lines can still be cleared');
 });
+
+test('merchant caravans (SAT-ONLINE-110): your own, one at a time, stamped by the server; delivered after its road, for the same goods', () => {
+  const c = rules.caravans.$uid, d = rules.caravanDone.$uid.$id, C = "root.child('caravans').child($uid)";
+  assert.equal(c['.write'], 'auth != null && auth.uid === $uid && (!data.exists() || !newData.exists())', 'yours, started or dropped, never changed');
+  assert.equal(c.t['.validate'], 'newData.val() === now');
+  assert.equal(c.md['.validate'], 'newData.isNumber() && newData.val() >= 60000 && newData.val() <= 3600000', 'a minute to an hour on the road');
+  assert.ok(d['.write'].includes('now >= ' + C + ".child('t').val() + " + C + ".child('md').val()"), 'not before its time on the road');
+  assert.ok(d['.write'].includes('now <= ' + C + ".child('t').val() + 7200000"), 'within two hours');
+  assert.ok(d['.write'].includes("!newData.parent().parent().parent().child('caravans').child($uid).exists()"), 'the caravan gone in the same write');
+  for (const k of ['f', 'to', 'g', 'r']) assert.ok(d['.write'].includes("newData.child('" + k + "').val() === " + C + ".child('" + k + "').val()"), 'the same ' + k);
+  assert.equal(c.$other['.validate'], false);
+});
