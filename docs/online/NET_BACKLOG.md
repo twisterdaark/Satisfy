@@ -211,7 +211,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U368 | Automated unit test harness | ✅ | `tests/unit`, `tests/content`, `tests/regression` with a seeded random and a frame clock |
 | U369 | Firebase rules fuzzing | ✅ | SAT-ONLINE-102: `tests/harness/rules-eval.cjs` evaluates the real `database.rules.json` in Node (cascading .read/.write, .validate, wildcards, auth/now/root/data/newData). `unit/rules-fuzz` sends thousands of random writes and reads: nothing signed out, nothing into another account's own nodes, no client-chosen server time; drops, bounties and friend requests played through. `SATISFY_RULES=<file>` runs it on a PR's rules |
 | U370 | Multi-browser smoke | ✅ | Chromium in every test; CI also runs boot and saves in Firefox and WebKit (SAT-ONLINE-107, `SATISFY_BROWSER`); the owner tests desktop and phone |
-| U371 | Reconnect soak | 🟡 | `unit/chaos` (drops, delays, duplicates); `regression/online-firebase` reconnects |
+| U371 | Reconnect soak | ✅ | `unit/chaos` (drops, delays, duplicates); `regression/soak` (SAT-ONLINE-112): 20 drops and reconnects of two players in a party, moving while away; each sees the other once where it is, and the pages listen to exactly what they did after the first |
 | U372 | Load test 100 clients | 🟡 | `COST_MODEL.md` measured numbers; no 100-client run |
 | U373 | Combat determinism | 🟡 | With `?tick=fixed` the same fight at 30, 60 and 144 fps ends the same to the last digit (tests/regression/fixedtick, seeded random). Left: a seed per session for replays (U323) |
 | U374 | Dupe attack cases | ✅ | Replayed and reordered messages dropped (`unit/presence`); claims once (`dropClaims`, `tradedItems`, `bountyPaid`, `natPaid`, lockouts) |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 56 · 🟡 31 · ⏳ 6 · ❌ 11 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 57 · 🟡 30 · ⏳ 6 · ❌ 11 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

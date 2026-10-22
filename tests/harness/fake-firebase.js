@@ -814,6 +814,8 @@
     for (const cb of connCbs) setTimeout(() => cb(snap('.info/connected', connected)), 0);
   };
   addEventListener('pagehide', () => { for (const p of discon) ch.postMessage({ op: 'remove', p }); });
+  // what this page listens to and has armed for a disconnect now (SAT-ONLINE-112: a reconnect must not add listeners)
+  F.active = () => ({ child: listeners.length, value: [...valueCbs.values()].reduce((n, a) => n + a.length, 0), conn: connCbs.length, discon: [...discon].sort() });
 
   const auth = {
     getAuth: () => ({}),
