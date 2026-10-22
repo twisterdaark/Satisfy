@@ -58,7 +58,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|announce|admins|guildTrophy|tradeLog|tradeRep|trades|tradeSides|tradeDone|tradedItems|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|announce|admins|guildTrophy|repairOrders|repairDone|repairPaid|tradeLog|tradeRep|trades|tradeSides|tradeDone|tradedItems|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -66,8 +66,12 @@
     apply(m.op, m.p, m.v);
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
+  // The real database fires this page's own listeners for a write before the write's promise resolves (a local remove()
+  // has already dropped the node when .then runs: Claude-B, #129/#131). The listeners above run on timers queued by
+  // write(), so a promise settled on a later timer resolves after them.
+  const acked = (v) => new Promise((res) => setTimeout(() => res(v), 0));
   // the paths a root update claims for its first writer only (each one's rules need !data.exists() or the like)
-  const CLAIM_RE = /^(guildNames|guildVaultTaken|guildBank|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb))\//, CLAIM_WAIT = 120;
+  const CLAIM_RE = /^(repairOrders|guildNames|guildVaultTaken|guildBank|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb))\//, CLAIM_WAIT = 120;
   function rootUpdate(diff) {
     const ps = Object.keys(diff);curDiff = diff;bDiff = diff;let errs;try{errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);}finally{curDiff = null;bDiff = null;}
     F.log.push({ op: 'update', path: '', err: errs[0] || null, keys: ps.slice().sort() });
@@ -77,7 +81,7 @@
       if (diff[p] === null) { for (const k of [...data.keys()]) if (k === p || k.startsWith(p + '/')) { mine.delete(k); write('remove', k); } continue; }
       mine.add(p); write('set', p, fix(clone(diff[p])));
     }
-    return Promise.resolve();
+    return acked();
   }
 
   const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'rd', 'ol', 'gd', 'seq', 't'];
@@ -489,6 +493,27 @@
       if (v === null) return null;
       return /^s[0-9]{4}-[0-9]{2}$/.test(seg[2]) && Object.keys(v).sort().join(',') === 'by,k,p,t' && ['gold', 'silver', 'bronze'].includes(v.k) && isInt(v.p, 0) && v.p <= 100 && v.by === user.uid && isSV(v.t) ? null : 'guildTrophy values';
     }
+    if (['repairOrders', 'repairDone', 'repairPaid'].includes(seg[0])) { // SAT-ONLINE-096: repair orders for player smiths
+      if (!user) return 'PERMISSION_DENIED: ' + seg[0];
+      const me = user.uid, old = data.get(p);
+      if (seg[0] === 'repairOrders') {
+        if (seg.length !== 2 || !/^r_[A-Za-z0-9_-]{1,60}$/.test(seg[1])) return 'PERMISSION_DENIED: repairOrders ' + p;
+        if (v === null) return old && (old.by === me || ((after('repairDone/' + old.by + '/' + seg[1]) || {}).by === me && !data.has('repairDone/' + old.by + '/' + seg[1]))) ? null : 'PERMISSION_DENIED: repairOrders remove';
+        if (old || v.by !== me) return 'PERMISSION_DENIED: repairOrders write';
+        return Object.keys(v).sort().join(',') === 'by,d,fee,iid,it,n,t' && typeof v.n === 'string' && v.n.length <= 24 && IID_RE.test(v.iid) && typeof v.it === 'string' && v.it.length >= 1 && v.it.length <= 40 && isInt(v.d, 0) && v.d <= 99 && isInt(v.fee, 1) && v.fee <= 1e7 && isSV(v.t) ? null : 'repairOrders values';
+      }
+      if (seg.length !== 3) return 'PERMISSION_DENIED: ' + seg[0] + ' ' + p;
+      const O = data.get('repairOrders/' + seg[2]);
+      if (seg[0] === 'repairDone') {
+        if (v === null) return seg[1] === me ? null : 'PERMISSION_DENIED: repairDone remove';
+        if (old || !O || O.by !== seg[1] || seg[1] === me || after('repairOrders/' + seg[2]) !== null) return 'PERMISSION_DENIED: repairDone write';
+        return Object.keys(v).sort().join(',') === 'by,fee,iid,sn,t' && v.iid === O.iid && v.fee === O.fee && v.by === me && typeof v.sn === 'string' && v.sn.length <= 24 && isSV(v.t) ? null : 'repairDone values';
+      }
+      if (seg[1] !== me) return 'PERMISSION_DENIED: repairPaid ' + p;
+      if (v === null) return old !== undefined ? null : 'PERMISSION_DENIED: repairPaid remove'; // collected once: two pages of one account can't both
+      if (old || !O || O.by === me || (after('repairDone/' + O.by + '/' + seg[2]) || {}).by !== me) return 'PERMISSION_DENIED: repairPaid write';
+      return Object.keys(v).sort().join(',') === 'g,t' && v.g === O.fee && isSV(v.t) ? null : 'repairPaid values';
+    }
     if (seg[0] === 'crashes' || seg[0] === 'mutes' || seg[0] === 'reportDone') { // SAT-ONLINE-082
       const adm = !!user && data.get('admins/' + user.uid) === true, now = Date.now(), old = data.get(p);
       if (!user || seg.length !== 2) return 'PERMISSION_DENIED: ' + seg[0];
@@ -716,7 +741,7 @@
       if (err) { F.rejected.push(err); return Promise.reject(Object.assign(new Error(err), { code: 'PERMISSION_DENIED' })); }
       const stored = clone(v); stored.t = Date.now();
       if (connected) write('set', p, stored); else pending.set(p, stored);
-      return Promise.resolve({ key: keyOf(p) });
+      return connected ? acked({ key: keyOf(p) }) : Promise.resolve({ key: keyOf(p) });
     },
     set: (r, v) => {
       const err = rules(r.path, v, false);
@@ -726,7 +751,7 @@
       mine.add(r.path);
       if (!connected) { pending.set(r.path, stored); return Promise.resolve(); }
       write('set', r.path, stored);
-      return Promise.resolve();
+      return acked();
     },
     // RTDB update(): merge into the stored node (null removes a field), then check the rules on the result
     update: (r, diff) => {
@@ -753,7 +778,7 @@
       mine.add(r.path);
       if (!connected) { pending.set(r.path, stored); return Promise.resolve(); }
       write('set', r.path, stored);
-      return Promise.resolve();
+      return acked();
     },
     remove: (r) => {
       const err = rules(r.path, null, true);
@@ -761,7 +786,7 @@
       if (err) { F.rejected.push(err); return Promise.reject(new Error(err)); }
       mine.delete(r.path); pending.delete(r.path);
       if (connected) write('remove', r.path);
-      return Promise.resolve();
+      return connected ? acked() : Promise.resolve();
     },
     // one-shot read: the node, nested as the server holds it (SAT-ONLINE-090; it was one level, enough for the cloud index)
     // the server answers reads with everything stored; here the other pages' copies arrive as hello replies, so a read
@@ -771,7 +796,7 @@
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
-      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat', 'lfg', 'guildRecruit', 'guildAlly', 'guildAllyCd', 'guildWar', 'guildWarKill', 'tradeRep', 'guildTrophy'].includes(seg[0]) ? !!user : seg[0] === 'guildWeek' && seg.length === 1 ? !!user && data.get('admins/' + user.uid) === true : seg[0] === 'tradeLog' ? !!user && seg[1] === user.uid : seg[0] === 'guildAllyAsk' ? !!user && seg.length === 3 && ['m', 'o'].includes(rkOf(seg[2], user.uid)) : seg[0] === 'guildWeekPaid' ? !!user && seg.length === 4 && seg[3] === user.uid : (seg[0] === 'guildApply' || seg[0] === 'guildRej') ? !!user && (seg.length === 3 ? seg[2] === user.uid : ['m', 'o'].includes(rkOf(seg[1], user.uid))) : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : ['guildBank', 'guildBuild', 'guildLog', 'guildNote'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts', 'friends', 'friendReq', 'whisper', 'admins'].includes(seg[0]) && user && seg[1] === user.uid || ['crashes', 'reports', 'reportDone', 'balance'].includes(seg[0]) && !!user && data.get('admins/' + user.uid) === true || ['appeals', 'appealDone'].includes(seg[0]) && !!user && (data.get('admins/' + user.uid) === true || (seg.length === 2 && seg[1] === user.uid)) || seg[0] === 'mutes' && !!user || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat', 'lfg', 'guildRecruit', 'guildAlly', 'guildAllyCd', 'guildWar', 'guildWarKill', 'tradeRep', 'guildTrophy', 'repairOrders'].includes(seg[0]) ? !!user : seg[0] === 'guildWeek' && seg.length === 1 ? !!user && data.get('admins/' + user.uid) === true : (seg[0] === 'repairDone' || seg[0] === 'repairPaid') ? !!user && seg[1] === user.uid : seg[0] === 'tradeLog' ? !!user && seg[1] === user.uid : seg[0] === 'guildAllyAsk' ? !!user && seg.length === 3 && ['m', 'o'].includes(rkOf(seg[2], user.uid)) : seg[0] === 'guildWeekPaid' ? !!user && seg.length === 4 && seg[3] === user.uid : (seg[0] === 'guildApply' || seg[0] === 'guildRej') ? !!user && (seg.length === 3 ? seg[2] === user.uid : ['m', 'o'].includes(rkOf(seg[1], user.uid))) : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : ['guildBank', 'guildBuild', 'guildLog', 'guildNote'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts', 'friends', 'friendReq', 'whisper', 'admins'].includes(seg[0]) && user && seg[1] === user.uid || ['crashes', 'reports', 'reportDone', 'balance'].includes(seg[0]) && !!user && data.get('admins/' + user.uid) === true || ['appeals', 'appealDone'].includes(seg[0]) && !!user && (data.get('admins/' + user.uid) === true || (seg.length === 2 && seg[1] === user.uid)) || seg[0] === 'mutes' && !!user || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       return Promise.resolve(snap(r.path, nodeVal(r.path))); // the node as the server holds it, nested (SAT-ONLINE-090: guildWeek)
@@ -785,7 +810,7 @@
         const seg = r.path.split('/');
         const tm = (seg[0] === 'tradeSides' && seg.length === 3) || (seg[0] === 'tradeDone' && seg.length === 2) ? tradeMeta(seg[1]) : null;
         const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : ['guildVault', 'guildBank', 'guildBuild', 'guildLog', 'guildNote', 'guildEvents', 'guildEventSign', 'guildDiplo'].includes(seg[0]) && seg.length === 2 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : (seg[0] === 'guildAlly' || seg[0] === 'guildWar') && seg.length === 2 ? !!user : seg[0] === 'guildWarKill' && seg.length === 3 ? !!user : (seg[0] === 'guildAllyAsk' || seg[0] === 'guildWarAsk') && seg.length === 2 ? !!user && ['m', 'o'].includes(rkOf(seg[1], user.uid)) : seg[0] === 'guildWeek' && seg.length === 3 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildApply' && seg.length === 2 ? !!user && ['m', 'o'].includes(rkOf(seg[1], user.uid)) : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
-        const ok = gl !== null ? gl : r.path === 'bounties' || r.path === 'lfg' || r.path === 'announce' || seg[0] === 'mutes' && seg.length === 2 ? !!user : seg[0] === 'appealDone' && seg.length === 2 ? !!user && seg[1] === user.uid : seg[0] === 'sessions' || seg[0] === 'lockouts' || seg[0] === 'friends' || seg[0] === 'friendReq' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb') && !!user;
+        const ok = gl !== null ? gl : r.path === 'bounties' || r.path === 'lfg' || r.path === 'announce' || seg[0] === 'mutes' && seg.length === 2 ? !!user : seg[0] === 'appealDone' && seg.length === 2 ? !!user && seg[1] === user.uid : seg[0] === 'sessions' || seg[0] === 'lockouts' || seg[0] === 'friends' || seg[0] === 'friendReq' || ((seg[0] === 'repairDone' || seg[0] === 'repairPaid') && seg.length === 2) ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);

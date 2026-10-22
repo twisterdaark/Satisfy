@@ -796,6 +796,48 @@
         "$other": { ".validate": false }
       }
     },
+    "repairOrders": {
+      ".read": "auth != null",
+      "$oid": {
+        ".write": "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid) || (data.exists() && !newData.exists() && (data.child('by').val() === auth.uid || newData.parent().parent().child('repairDone').child(data.child('by').val()).child($oid).child('by').val() === auth.uid)))",
+        ".validate": "$oid.matches(/^r_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['by', 'n', 'iid', 'it', 'd', 'fee', 't'])",
+        "by": { ".validate": "newData.isString()" },
+        "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
+        "iid": { ".validate": "newData.isString() && newData.val().matches(/^it_[a-z0-9_]{4,40}_[0-9]+$/)" },
+        "it": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40" },
+        "d": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 99" },
+        "fee": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 10000000" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "repairDone": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$oid": {
+          ".write": "auth != null && ((!data.exists() && newData.exists() && root.child('repairOrders').child($oid).child('by').val() === $uid && $uid !== auth.uid && !newData.parent().parent().parent().child('repairOrders').child($oid).exists()) || (auth.uid === $uid && !newData.exists()))",
+          ".validate": "newData.hasChildren(['iid', 'by', 'sn', 'fee', 't'])",
+          "iid": { ".validate": "newData.val() === root.child('repairOrders').child($oid).child('iid').val()" },
+          "by": { ".validate": "newData.val() === auth.uid" },
+          "sn": { ".validate": "newData.isString() && newData.val().length <= 24" },
+          "fee": { ".validate": "newData.val() === root.child('repairOrders').child($oid).child('fee').val()" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "repairPaid": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$oid": {
+          ".write": "auth != null && auth.uid === $uid && ((!data.exists() && newData.exists() && root.child('repairOrders').child($oid).exists() && root.child('repairOrders').child($oid).child('by').val() !== $uid && newData.parent().parent().parent().child('repairDone').child(root.child('repairOrders').child($oid).child('by').val()).child($oid).child('by').val() === $uid) || (data.exists() && !newData.exists()))",
+          ".validate": "newData.hasChildren(['g', 't'])",
+          "g": { ".validate": "newData.val() === root.child('repairOrders').child($oid).child('fee').val()" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",

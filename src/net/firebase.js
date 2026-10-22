@@ -757,6 +757,30 @@
     };
   }
 
+  // SAT-ONLINE-096: repair orders for player smiths. repairOrders/{oid} {by, n, iid, it, d, fee, t}: a piece to mend and
+  // its fee; a smith answers it in one update that removes it, tells its owner (repairDone/{owner}/{oid} {iid, by, sn, fee,
+  // t}) and pays the smith (repairPaid/{smith}/{oid} {g, t}); the rules take that only for the order as it is, by someone
+  // else. The owner and the smith each remove what they took.
+  function repairStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, SV = function () { return D.serverTimestamp(); };
+    var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
+    return {
+      list: function () { return D.get(at('repairOrders')).then(function (s) { return s.val() || {}; }); },
+      post: function (oid, v) { var u = {}; u['repairOrders/' + oid] = { by: v.by, n: String(v.n || '?').slice(0, 24), iid: v.iid, it: String(v.it || '?').slice(0, 40), d: v.d, fee: v.fee, t: SV() }; return D.update(D.ref(db), u); },
+      cancel: function (oid) { return D.remove(at('repairOrders/' + oid)); },
+      mend: function (oid, o, smith, sn) {
+        var u = {}; u['repairOrders/' + oid] = null;
+        u['repairDone/' + o.by + '/' + oid] = { iid: o.iid, by: smith, sn: String(sn || '?').slice(0, 24), fee: o.fee, t: SV() };
+        u['repairPaid/' + smith + '/' + oid] = { g: o.fee, t: SV() };
+        return D.update(D.ref(db), u);
+      },
+      watchDone: function (uid, cb) { return watch('repairDone/' + uid, cb); },
+      took: function (uid, oid) { return D.remove(at('repairDone/' + uid + '/' + oid)); },
+      watchPaid: function (uid, cb) { return watch('repairPaid/' + uid, cb); },
+      collect: function (uid, oid) { return D.remove(at('repairPaid/' + uid + '/' + oid)); },
+    };
+  }
+
   // SAT-ONLINE-073: the group finder, lfg/{uid} = {n, lv, cls, k, z, t}: yours only, gone when you leave (onDisconnect)
   function lfgStore(sdk) {
     var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
@@ -782,6 +806,7 @@
     friendStore: friendStore,
     reportStore: reportStore,
     lfgStore: lfgStore,
+    repairStore: repairStore,
     announceStore: announceStore,
     modStore: modStore,
     natStore: natStore,

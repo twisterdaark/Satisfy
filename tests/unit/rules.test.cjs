@@ -552,6 +552,17 @@ test('guild seasons (SAT-ONLINE-090): trophies written by admins only, three kin
   assert.equal(rules.guildWeek['.read'], 'auth != null && ' + adm, 'the owner reads every guild\'s weekly goal to close a season');
 });
 
+test('repair orders (SAT-ONLINE-096): your own order; mended by someone else, who tells its owner and is paid its fee', () => {
+  const O = rules.repairOrders.$oid, D = rules.repairDone.$uid.$oid, P = rules.repairPaid.$uid.$oid, o = "root.child('repairOrders').child($oid)";
+  assert.ok(O['.write'].includes("newData.parent().parent().child('repairDone').child(data.child('by').val()).child($oid).child('by').val() === auth.uid"), 'off only with its owner told');
+  assert.ok(D['.write'].includes(o + ".child('by').val() === $uid && $uid !== auth.uid && !newData.parent().parent().parent().child('repairOrders').child($oid).exists()"), "someone else's order, gone in the same write");
+  assert.equal(D.iid['.validate'], 'newData.val() === ' + o + ".child('iid').val()", 'the same piece');
+  assert.ok(P['.write'].includes("newData.parent().parent().parent().child('repairDone').child(" + o + ".child('by').val()).child($oid).child('by').val() === $uid"), 'paid only for mending it');
+  assert.equal(P.g['.validate'], 'newData.val() === ' + o + ".child('fee').val()", 'its fee');
+  assert.equal(rules.repairDone.$uid['.read'], 'auth != null && auth.uid === $uid');
+  assert.ok(P['.write'].endsWith("|| (data.exists() && !newData.exists()))"), 'a fee collected once (Claude-B, #131)');
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);
