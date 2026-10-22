@@ -758,7 +758,7 @@ let ac=null,master=null,sfxG=null,muted=false,musicOn=true,sfxV=80,musV=50;
    the menus), music, the world around you (monsters' voices and swings, fireworks) and other players (their swings and
    spells, dying and coming back, their news). A sound plays on the channel in SFXCH when it is made (sfxOn). */
 let ambG=null,socG=null,ambV=80,socV=80,SFXCH='sfx';
-try{const ls=localStorage,a=ls.getItem('satisfy_sfxv'),b=ls.getItem('satisfy_musv'),c=ls.getItem('satisfy_ambv'),d=ls.getItem('satisfy_socv');sfxV=a!=null?+a:ls.getItem('satisfy_mute')==='1'?0:80;musV=b!=null?+b:ls.getItem('satisfy_music')==='0'?0:50;if(c!=null)ambV=+c;if(d!=null)socV=+d;}catch(e){}
+try{const ls=localStorage,a=ls.getItem('satisfy_sfxv'),b=ls.getItem('satisfy_musv'),c=ls.getItem('satisfy_ambv'),d=ls.getItem('satisfy_socv');sfxV=a!=null?+a:ls.getItem('satisfy_mute')==='1'?0:80;musV=b!=null?+b:ls.getItem('satisfy_music')==='0'?0:50;ambV=c!=null?+c:sfxV;socV=d!=null?+d:sfxV;}catch(e){}
 muted=sfxV<=0;musicOn=musV>0;
 function setVol(k,v){v=Math.max(0,Math.min(100,Math.round(+v)||0));if(k==='sfx'){sfxV=v;muted=v<=0;if(sfxG)sfxG.gain.value=v/100;}else if(k==='amb'){ambV=v;if(ambG)ambG.gain.value=v/100;}else if(k==='soc'){socV=v;if(socG)socG.gain.value=v/100;}else{musV=v;musicOn=v>0;if(musicG)musicG.gain.value=v/100;}try{localStorage.setItem('satisfy_'+k+'v',String(v));}catch(e){}volUI();}
 const chVol=()=>SFXCH==='amb'?ambV:SFXCH==='soc'?socV:muted?0:sfxV;
@@ -1996,16 +1996,20 @@ function wbSub(){if(wbOff||!wbOnline())return;const D=FB.m.database;if(!D.onValu
 /* a live one is put down quietly only off screen: near you, the fight's own sync ends it (with its rewards); a dead one
    keeps its corpse until the shared time instead of the 25 s a follower's copy waits */
 function wbApply(){if(!WBS||!WS||!S||S.__demo)return false;WS.wb=WS.wb||{};const now=Date.now();let run=false;
- for(const type in WBS){const v=WBS[type];if(!v||typeof v.at!=='number'||!MT[type])continue;const at=v.at-wbOffs();if(at<=now||huntLift(type,v.at))continue;run=true;
+ const hn=wNow(),hh=huntOf(hn),hon=hn>=hh.at&&hn<hh.end;
+ for(const type in WBS){const v=WBS[type];if(!v||typeof v.at!=='number'||!MT[type])continue;const at=v.at-wbOffs();if(at<=now||huntLift(type,v.at,v.t))continue;run=true;
   if(!(WS.wb[type]>=at-2000))WS.wb[type]=at;const r=(at-now)/1000;
-  for(const m of mons){if(m.type!==type)continue;if(!m.dead){if(Math.hypot(m.x-P.x,m.y-P.y)>360){m.dead=true;m.dying=0;m.rt=r;}}else if(m.rt<r-2)m.rt=r;}}
+  // in the boss's hunt, someone else's kill also ends a copy near you that nobody has hurt (and that isn't the shared
+  // fight's), so a player who arrives after the kill can't kill a copy of their own for a second one (Claude-B's note on #160)
+  const other=hon&&hh.k===type&&v.by!==(NET&&NET.uid);
+  for(const m of mons){if(m.type!==type)continue;if(!m.dead){if(Math.hypot(m.x-P.x,m.y-P.y)>360||other&&!m.led&&m.hp>=m.max){m.dead=true;m.dying=0;m.rt=r;}}else if(m.rt<r-2)m.rt=r;}}
  return run;}
 let wbW=null,wbT=0;
 function wbTick(){if(!wbOff&&wbOnline())wbSub();if(!WBS)return;wbRetry();const n=performance.now();if(wbW!==WS||n-wbT>2000){wbW=WS;wbT=n;if(!wbApply())wbT=n+1e4;}}
 // a kill's timer the rules refused because an older one still ran (the hunt brings a boss back before its timer is over,
 // SAT-ONLINE-124): written again, with the same end, once the older one is over
 var WBRE={},wbReT=0;
-function wbRetry(){const p=performance.now();if(p-wbReT<3000)return;wbReT=p;const now=Date.now()+wbOffs();
+function wbRetry(){if(!wbOnline())return;const p=performance.now();if(p-wbReT<3000)return;wbReT=p;const now=Date.now()+wbOffs();
  for(const type in WBRE){const at=WBRE[type],v=WBS[type];if(at<=now+5000){delete WBRE[type];continue;}if(v&&typeof v.at==='number'&&v.at>now)continue;
   const D=FB.m.database,u={};u['world/satisfy/wb/'+type]={at,by:NET.uid,t:D.serverTimestamp()};delete WBRE[type];D.update(D.ref(FB.db),u).catch(()=>{WBRE[type]=at;});}}
 window.__GB2={get data(){return WBS},apply:wbApply,put:wbPut,kill:m=>killMon(m),fb:()=>FB}; // tests
@@ -5145,7 +5149,7 @@ addEventListener('keydown',e=>{
  if(mode==='controls'&&REB!=null){e.preventDefault();if(REB[0]==='x'){if(/^(Shift|Alt|Control|Meta)/.test(e.code))return;rebindTo(e.code==='Escape'?e.code:kCombo(e));}else rebindTo(e.code);return;} // an extra bar's key may carry Shift, Alt or Ctrl
  const rng=e.target&&e.target.type==='range'&&e.code==='Escape'; // a volume slider takes the arrows, not Escape
  if(e.target&&e.target.tagName==='INPUT'&&!rng)return;
- if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+ if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','F9'].includes(e.code))e.preventDefault(); // F9: the profiler, not Firefox's Reader View
  if(KM[e.code])K[KM[e.code]]=true;
  if(e.target&&e.target.tagName==='INPUT'&&!rng){if(e.code==='Enter'&&mode==='create')act('cStart');return;}
  if(e.repeat)return;
@@ -8510,9 +8514,9 @@ window.__PERF={stats:()=>pfStats(),toggle:()=>pfToggle(),keep:()=>pfKeep(),get o
    two players' streams differ), so how often a screen draws doesn't change the world's. */
 const FIXT=/[?&]tick=fixed(&|$)/.test(location.search),FSTEP=1/60;let facc=0;
 const VRAND=(()=>{let a=FIXT?Math.random()*4294967296>>>0:0;return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};})();
-function loop(now){const w0=pfNow();requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;
+function loop(now){const w0=pfNow();requestAnimationFrame(loop);loopAt=performance.now();const raw=Math.max(0,(now-last)/1000),dt=Math.min(.05,raw);last=now;
  if(FIXT){facc=Math.min(facc+dt,FSTEP*4);while(facc>=FSTEP-1e-9){if(RPL&&RPL.done){facc=0;break;}facc-=FSTEP;if(SIM)simPre();try{update(FSTEP);}catch(e){gameErr(e);}FSTEPS++;if(SIM)simPost();}}else try{update(dt);}catch(e){gameErr(e);}
- const r0=rand,m0=Math.random;if(FIXT){rand=VRAND;if(SIM)Math.random=VRAND;}try{loopRest(dt);}finally{rand=r0;Math.random=m0;}pfFrame(dt,w0);}
+ const r0=rand,m0=Math.random;if(FIXT){rand=VRAND;if(SIM)Math.random=VRAND;}try{loopRest(dt);}finally{rand=r0;Math.random=m0;}pfFrame(Math.min(raw,1),w0);} // the frame's real time, not the world's capped step (Claude-B's note on #137); a hidden tab's gap left out
 function loopRest(dt){PF.w1=pfNow();if(NET)try{netTick();}catch(e){gameErr(e);}try{huntTick();}catch(e){gameErr(e);}if(TOUCH)try{touchTick();}catch(e){gameErr(e);}try{render(dt);}catch(e){gameErr(e);}try{guiTick();}catch(e){gameErr(e);}
  if(mode==='play'){updateKeys();holdAtk();}
  if(mode==='create')drawPrev();if(DL&&DL.pv)drawDPrev();
@@ -8571,8 +8575,8 @@ const NETQ=RPLQ||(FIXT&&QS.has('rec'))?null:(q=>q==='off'?null:q)(QS.get('net')|
    controls and clicks other than dialog choices are not recorded. ?tick=fixed&replay plays it back in a save slot of its own:
    the same save, seed, clock and inputs at the same steps, the player's keys and clicks ignored, and checks the world
    every 10 s against the recording's; at the end it stops there and says whether it ended the same, or when it went apart. */
-Object.assign(STR.ar,{rplNone:'مفيش تسجيل على الجهاز ده. سجّل الأول بـ ?tick=fixed&rec',rplOn:'▶ إعادة {a} من {b}',rplSame:'الإعادة خلصت زي اللعب بالظبط',rplApart:'الإعادة اختلفت عن اللعب عند {a}',recOn:'● بيسجّل',recFull:'التسجيل وصل لساعة ووقف'});
-Object.assign(STR.en,{rplNone:'No recording on this device. Record one first with ?tick=fixed&rec',rplOn:'▶ Replay {a} of {b}',rplSame:'The replay ended exactly as the game did',rplApart:'The replay went apart from the game at {a}',recOn:'● Recording',recFull:'The recording reached an hour and stopped'});
+Object.assign(STR.ar,{rplNone:'مفيش تسجيل على الجهاز ده. سجّل الأول بـ ?tick=fixed&rec',rplOn:'▶ إعادة {a} من {b}',rplOver:'■ الإعادة خلصت: العالم واقف عند آخر خطوة فيها (اعمل ريلود عشان تتفرج تاني)',rplSame:'الإعادة خلصت زي اللعب بالظبط',rplApart:'الإعادة اختلفت عن اللعب عند {a}',recOn:'● بيسجّل',recFull:'التسجيل وصل لساعة ووقف'});
+Object.assign(STR.en,{rplNone:'No recording on this device. Record one first with ?tick=fixed&rec',rplOn:'▶ Replay {a} of {b}',rplOver:'■ The replay is over: the world stays at its last step (reload to watch it again)',rplSame:'The replay ended exactly as the game did',rplApart:'The replay went apart from the game at {a}',recOn:'● Recording',recFull:'The recording reached an hour and stopped'});
 var SIM=null,REC=null,RPL=null,FSTEPS=0;const RECK='satisfy_replay',RECMAX=216000,RECCP=600,T_ST=window.setTimeout.bind(window),T_CT=window.clearTimeout.bind(window),T_SI=window.setInterval.bind(window),T_CI=window.clearInterval.bind(window);
 function recOn(){return FIXT&&!NETQ&&!RPLQ&&QS.has('rec');}
 // the raw save before Continue loads it (the recording starts from it)
@@ -8606,7 +8610,8 @@ function recIn(e,ty){if(RPL&&SIM&&!RPL.done&&e.isTrusted){e.stopImmediatePropaga
 function rplInput(x){if(x[1]==='o'){const b=$('dopts').querySelectorAll('button')[x[2]];if(b)b.click();return;}
  const f=x[4]|0;(document.activeElement||document.body).dispatchEvent(new KeyboardEvent(x[1]==='d'?'keydown':'keyup',{code:x[2],key:x[3],shiftKey:!!(f&1),ctrlKey:!!(f&2),altKey:!!(f&4),metaKey:!!(f&8),repeat:!!(f&16),bubbles:true,cancelable:true}));}
 addEventListener('keydown',e=>recIn(e,'d'),true);addEventListener('keyup',e=>recIn(e,'u'),true);addEventListener('click',e=>recIn(e,'o'),true);
-for(const ty of ['pointerdown','pointerup','mousedown','mouseup','wheel','contextmenu','touchstart'])addEventListener(ty,e=>{if(RPL&&SIM&&!RPL.done&&e.isTrusted){e.stopImmediatePropagation();e.preventDefault();}},{capture:true,passive:false});
+// only on a replay page (Claude-B's note on #134): a non-passive touchstart/wheel listener on every page slows scrolling
+if(RPLQ)for(const ty of ['pointerdown','pointerup','mousedown','mouseup','wheel','contextmenu','touchstart'])addEventListener(ty,e=>{if(RPL&&SIM&&!RPL.done&&e.isTrusted){e.stopImmediatePropagation();e.preventDefault();}},{capture:true,passive:false});
 addEventListener('pagehide',recKeep);document.addEventListener('visibilitychange',()=>{if(document.hidden)recKeep();});
 // the replay: the recording's save in the replay's own slot, its key bindings, then Continue
 function rplStart(){if(RPL||SIM)return;let R=null;try{R=JSON.parse(localStorage.getItem(RECK));}catch(e){}
@@ -8614,7 +8619,8 @@ function rplStart(){if(RPL||SIM)return;let R=null;try{R=JSON.parse(localStorage.
  try{localStorage.setItem(STORE0.key,R.save);}catch(e){return;}if(Array.isArray(R.kb)&&R.kb.length===6)KB=R.kb.slice();RPL=R;startGame(true);}
 const rplT=n=>{const s=Math.floor(n/60);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
 function rplLabel(){let el=$('rplL');if(!el){el=document.createElement('div');el.id='rplL';el.style.cssText='position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:60;background:#000a;color:#fff;font:12px monospace;padding:3px 8px;border-radius:4px;pointer-events:none';document.body.appendChild(el);}
- el.textContent=RPL?t('rplOn',{a:rplT(FSTEPS),b:rplT(RPL.end||0)})+(RPL.bad>=0?' ✗':''):t('recOn');}
+ // over, the world stops at the replay's last step on purpose (that is the step its check compared): the label says so
+ el.textContent=RPL?(RPL.done?t('rplOver'):t('rplOn',{a:rplT(FSTEPS),b:rplT(RPL.end||0)}))+(RPL.bad>=0?' ✗':''):t('recOn');}
 function rplEnd(h){const R=RPL;if(!R||R.done)return;R.done=1;const same=R.bad<0&&h===R.h;R.result=same?'same':'apart';if(R.bad<0&&!same)R.bad=FSTEPS;
  announce(same?t('rplSame'):t('rplApart',{a:rplT(R.bad)}),1);rplLabel();}
 window.__REC={get rec(){return REC},get rpl(){return RPL},get steps(){return FSTEPS},get sim(){return !!SIM},keep:()=>recKeep(true),hash:()=>simHash(),start:()=>rplStart()}; // tests
@@ -9154,7 +9160,8 @@ Object.assign(STR.en,{pcTrade:'Trade',trYes:'Trade',trFrom:'{n} wants to trade',
  trSAcc:'Accepted',trSConf:'Confirmed',trSWait:'Waiting…',trNone:'Nothing',trSwapped:'Trade with {n} done',trDeclined:'{n} declined the trade',trCancelled:'The trade was cancelled',trFailed:'The trade did not go through: something changed, or an item is no longer theirs',trFar:'The trade was cancelled: you walked apart'});
 var trSig='';
 // what you may give: bag items that aren't worn, of a kind every client knows (so the other side can take them)
-function tradeBag(){if(!S||S.__demo)return [];const w=weapon();return S.items.filter(i=>i&&i.iid&&!isEq(i)&&i!==w&&rcById(i.id)).map(i=>{const o={};for(const k in i)if(k!=='uid'&&k!=='iid')o[k]=i[k];return {iid:i.iid,json:JSON.stringify(o),it:i};}).filter(x=>x.json.length<=Satisfy.trade.C.ITEM_MAX);}
+// what you may offer: the bag, and what a confirmed trade holds (S.trPend.esc), which is still yours to offer in that trade
+function tradeBag(){if(!S||S.__demo)return [];const w=weapon();return S.items.concat(trEsc().it).filter(i=>i&&i.iid&&!isEq(i)&&i!==w&&rcById(i.id)).map(i=>{const o={};for(const k in i)if(k!=='uid'&&k!=='iid')o[k]=i[k];return {iid:i.iid,json:JSON.stringify(o),it:i};}).filter(x=>x.json.length<=Satisfy.trade.C.ITEM_MAX);}
 // an item from the other side, rebuilt from plain values only, as a new item of yours (a new uid; ids.ensure gives the iid)
 function tradeItemIn(json){let o;try{o=JSON.parse(json);}catch(e){return null;}if(!o||typeof o!=='object'||typeof o.id!=='string')return null;const rc=rcById(o.id);if(!rc)return null;
  const it={};for(const k in o){const v=o[k];if(k==='uid'||k==='iid'||k==='__proto__')continue;if((typeof v==='number'&&isFinite(v))||(typeof v==='string'&&v.length<=40)||typeof v==='boolean')it[k]=v;}
@@ -9164,14 +9171,17 @@ function tradeItemIn(json){let o;try{o=JSON.parse(json);}catch(e){return null;}i
  it.uid=++S.uid;return it;}
 function tradeName(json){try{const o=JSON.parse(json);return o&&o.id?inm(o):'?';}catch(e){return '?';}}
 function tradeStart(){TRADE=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.tradeStore))return; // NETTR first: FB is declared below, a local start must not touch it
- TRADE=Satisfy.trade.create({presence:NET,uid:NET.uid,now:()=>performance.now(),store:Satisfy.firebase.tradeStore(FB),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},bag:tradeBag,gold:()=>S&&!S.__demo?S.gold:0,blocked:isBlocked});
+ TRADE=Satisfy.trade.create({presence:NET,uid:NET.uid,now:()=>performance.now(),store:Satisfy.firebase.tradeStore(FB),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},bag:tradeBag,gold:()=>S&&!S.__demo?S.gold+trEsc().g:0,blocked:isBlocked});
  TRADE.on(e=>{const n=Satisfy.chat.clean(e.handle,24)||'?';trSig='';
   if(e.type==='ask')SFX.notice&&SFX.notice();
   else if(e.type==='open'){$('trGold').value='0';}
-  else if(e.type==='confirmed'){if(S&&!S.__demo){S.trPend={id:e.id,foe:e.foe,n,t:wNow()};save(true);}} // SAT-ONLINE-128: kept until the swap is applied
+  else if(e.type==='confirmed'){if(S&&!S.__demo){if(!S.trPend||S.trPend.id!==e.id)S.trPend={id:e.id,foe:e.foe,n,t:wNow()};else S.trPend.t=wNow();trEscrow(e.id);save(true);}} // SAT-ONLINE-128: kept until the swap is applied
   else if(e.type==='declined')toast(t('trDeclined',{n}),'warn');
   else if(e.type==='cancelled')toast(t(e.why==='far'?'trFar':'trCancelled'),'warn');
   else if(e.type==='failed')toast(t('trFailed'),'warn');
+  // a confirmed trade that ended here without its swap: what it held comes back now (the save still looks the trade up, in
+  // case the other side's swap got in first: then it is applied as usual). Not after a failed read: the swap is there
+  if((e.type==='cancelled'||e.type==='failed'&&e.why!=='read')&&S&&S.trPend&&S.trPend.id===e.id&&S.trPend.esc){trUnescrow();save(true);if(!$('inv').hidden&&typeof renderInv==='function')renderInv();}
   else if(e.type==='done')tradeApply(e,n);});}
 /* seller history (SAT-ONLINE-089, plan U215). After a trade each side writes its own record of it: tradeLog (with whom, the
    gold given and got, which the rules check against the trade's own sides, and how many items; only you read it) and a
@@ -9197,23 +9207,31 @@ window.__GTR={hist:()=>trHist(),rep:uid=>trRepOf(uid),get cache(){return TREP},s
    stays in the save (S.trPend) until the swap is applied; online, every 15 s and at the start, the game looks it up
    (Satisfy.trade recover) and applies it then. S.trDone keeps the last 20 trades applied, so none is applied twice. A trade
    not done a minute after you confirmed it can't be done any more (the other side gave up on it): it is forgotten. */
-Object.assign(STR.ar,{trRecovered:'التبادل مع {n} اتم وإنت مش موجود: اللي خدته بقى معاك'});
-Object.assign(STR.en,{trRecovered:'Your trade with {n} went through while you were away: what you got is yours now'});
+Object.assign(STR.ar,{trRecovered:'التبادل مع {n} اتم وإنت مش موجود: اللي خدته بقى معاك',trWaitLast:'آخر تبادل أكدته لسه بيتراجع. جرّب كمان شوية'});
+Object.assign(STR.en,{trRecovered:'Your trade with {n} went through while you were away: what you got is yours now',trWaitLast:'Your last confirmed trade is still being checked. Try again in a moment'});
 var trRecT=-1e9;
+// escrow (Claude-B's note on #164): what you confirm leaves the bag and the purse into S.trPend.esc {g, it: [items]} until
+// the swap is applied (then it goes, as the swap says) or the trade turns out not done (then it comes back), so nothing
+// you confirmed can be sold, dropped or spent meanwhile and still be paid for on recovery
+function trEsc(){const E=S&&S.trPend&&S.trPend.esc;return {g:E?E.g|0:0,it:E&&Array.isArray(E.it)?E.it.filter(Boolean):[]};}
+function trUnescrow(){const R=S&&S.trPend,E=R&&R.esc;if(!E)return;delete R.esc;S.gold+=E.g|0;for(const i of (Array.isArray(E.it)?E.it:[]))if(i)S.items.push(i);hudDirty=true;}
+function trEscrow(id){const st=TRADE&&TRADE.state(),m=st&&st.id===id&&st.mine;if(!S.trPend||S.trPend.id!==id||!m)return;trUnescrow(); // confirmed again: the first hold comes back first
+ const ids=new Set(Object.keys(m.it||{})),g=Math.max(0,Math.min(S.gold,m.g|0));S.trPend.esc={g,it:S.items.filter(i=>i&&ids.has(i.iid))};
+ S.items=S.items.filter(i=>!(i&&ids.has(i.iid)));S.gold-=g;hudDirty=true;if(!$('inv').hidden&&typeof renderInv==='function')renderInv();}
 function trOnce(id){if(!id)return true;S.trDone=Array.isArray(S.trDone)?S.trDone:[];if(S.trDone.includes(id))return false;S.trDone.push(id);if(S.trDone.length>20)S.trDone.splice(0,S.trDone.length-20);if(S.trPend&&S.trPend.id===id)delete S.trPend;return true;}
 function trRecTick(force){const p=performance.now();if(!force&&p-trRecT<15000)return;trRecT=p;const R=S.trPend,st=TRADE.state();
  if(!R||typeof R.id!=='string'||(st.id===R.id&&st.phase!=='idle'))return;
- TRADE.recover(R.id,R.foe).then(r=>{if(!S||S.trPend!==R)return;if(r){const fresh=!(S.trDone||[]).includes(R.id);tradeApply(Object.assign(r,{handle:R.n}),R.n);if(S.trPend===R)delete S.trPend;if(fresh)toast(t('trRecovered',{n:R.n}),'good');save(true);}else if(wNow()-(+R.t||0)>60000){delete S.trPend;save(true);}},()=>{if(S&&S.trPend===R&&wNow()-(+R.t||0)>600000){delete S.trPend;save(true);}});} // a read refused for ten minutes (no such trade): forgotten too
-function tradeApply(e,n){if(!S||S.__demo)return;if(!trOnce(e.id))return;const give=e.give||{g:0,it:{}},get=e.get||{g:0,it:{}};
+ TRADE.recover(R.id,R.foe).then(r=>{if(!S||S.trPend!==R)return;if(r){const fresh=!(S.trDone||[]).includes(R.id);tradeApply(Object.assign(r,{handle:R.n}),R.n);if(S.trPend===R)delete S.trPend;if(fresh)toast(t('trRecovered',{n:R.n}),'good');save(true);}else if(wNow()-(+R.t||0)>60000){trUnescrow();delete S.trPend;save(true);}},()=>{if(S&&S.trPend===R&&wNow()-(+R.t||0)>600000){trUnescrow();delete S.trPend;save(true);}});} // a read refused for ten minutes (no such trade): forgotten too
+function tradeApply(e,n){if(!S||S.__demo)return;if(S.trPend&&S.trPend.id===e.id&&!(S.trDone||[]).includes(e.id))trUnescrow();if(!trOnce(e.id))return;const give=e.give||{g:0,it:{}},get=e.get||{g:0,it:{}};
  const out=new Set(Object.keys(give.it||{}));S.items=S.items.filter(i=>!(i&&out.has(i.iid)));S.gold=Math.max(0,S.gold-(give.g|0))+(get.g|0);
  for(const k in get.it||{}){const it=tradeItemIn(get.it[k]);if(it)S.items.push(it);}
  Satisfy.ids.ensure(S);save(true);hudDirty=true;if(!$('inv').hidden&&typeof renderInv==='function')renderInv();toast(t('trSwapped',{n}),'good');SFX.quest&&SFX.quest();trRecord(e,n);}
-window.__GTRR={tick:()=>trRecTick(true),get pend(){return S&&S.trPend},get done(){return S&&S.trDone}}; // tests
+window.__GTRR={tick:()=>trRecTick(true),get pend(){return S&&S.trPend},get done(){return S&&S.trDone},esc:()=>trEsc()}; // tests
 function tradeAct(a){if(!TRADE)return;const st=TRADE.state();
  if(a==='trYes'){const ask=TRADE.pendingAsk();if(ask)TRADE.accept(ask.trade);}
  else if(a==='trNo'){const ask=TRADE.pendingAsk();if(ask)TRADE.decline(ask.trade);}
  else if(a==='trOk')TRADE.acceptOffer();
- else if(a==='trConf')TRADE.confirm();
+ else if(a==='trConf'){if(S.trPend&&S.trPend.id!==st.id){toast(t('trWaitLast'),'warn');trRecTick(true);}else TRADE.confirm();} // one confirmed trade at a time: the last one is checked first
  else if(a==='trCancel'&&st.phase!=='idle')TRADE.cancel();
  trSig='';}
 function tradeUI(live){const I=$('tradeInv'),W=$('tradeW');if(!TRADE||!live){if(!I.hidden)I.hidden=true;if(!W.hidden)W.hidden=true;return;}
@@ -9692,13 +9710,16 @@ Object.assign(STR.en,{tl_arnReg:'Arena Regular',tl_arnRegD:'Fought 10 duels in a
 const ARN_REG=10,ARN_TOP=5;var arnT=-1e9,arnBusy=false;
 // the season before the one the world time n is in
 function arnPrev(n){const d=new Date(n),y=d.getUTCFullYear(),m=d.getUTCMonth(),p=m?[y,m-1]:[y-1,11];return 's'+p[0]+String(p[1]+1).padStart(2,'0');}
-// what a season's board (top: by rating, {uid, r, w, l}; me: your own entry) gives the player uid
-function arnOf(top,me,uid){const out=[];if(me&&(me.w|0)+(me.l|0)>=ARN_REG)out.push('arnReg');const L=(top||[]).filter(x=>x&&(x.w|0)+(x.l|0)>=ARN_TOP).slice(0,10),i=L.findIndex(x=>x.uid===uid);if(i>=0)out.push(i===0?'arnChamp':'arnTop');return out;}
+// what a season's board (top: by rating, {uid, r, w, l, t}; me: your own entry) gives the player uid. An entry written
+// (t, the server's time) after the season ended (end) doesn't count: the rules still take writes to a past season
+// (Claude-B's note on #165)
+function arnOf(top,me,uid,end){const ok=x=>x&&!(end&&+x.t>=end);const out=[];if(ok(me)&&(me.w|0)+(me.l|0)>=ARN_REG)out.push('arnReg');const L=(top||[]).filter(x=>ok(x)&&(x.w|0)+(x.l|0)>=ARN_TOP).slice(0,10),i=L.findIndex(x=>x.uid===uid);if(i>=0)out.push(i===0?'arnChamp':'arnTop');return out;}
+const arnEnd=se=>Date.UTC(+se.slice(1,5),+se.slice(5),1); // the first moment of the month after season 'sYYYYMM'
 function arnTick(){if(!RNK||!NET||!S||S.__demo||arnBusy)return;const p=performance.now();if(p-arnT<60000)return;arnT=p;const se=arnPrev(wNow());S.arnS=S.arnS||{};if(se in S.arnS)return;arnBusy=true;
- Promise.all([RNK.top(se,50),RNK.get(se,NET.uid)]).then(([top,me])=>{arnBusy=false;if(!S||S.__demo||(se in (S.arnS||{})))return;const got=arnOf(top,me,NET.uid);S.arnS[se]=got.join(',');
+ Promise.all([RNK.top(se,50),RNK.get(se,NET.uid)]).then(([top,me])=>{arnBusy=false;if(!S||S.__demo||(se in (S.arnS||{})))return;const got=arnOf(top,me,NET.uid,arnEnd(se));S.arnS[se]=got.join(',');
   const ks=Object.keys(S.arnS).sort();while(ks.length>24)delete S.arnS[ks.shift()];
   if(got.length){got.forEach(giveTitle);toast(t('arnGot',{s:se.slice(1,5)+'-'+se.slice(5),l:got.map(k=>t('tl_'+k)).join(', ')}),'good');}save(true);},()=>{arnBusy=false;});}
-window.__GARN={prev:n=>arnPrev(n),of:(top,me,uid)=>arnOf(top,me,uid),tick:()=>{arnT=-1e9;arnTick();},get got(){return S&&S.arnS}}; // tests
+window.__GARN={prev:n=>arnPrev(n),of:(top,me,uid,end)=>arnOf(top,me,uid,end),tick:()=>{arnT=-1e9;arnTick();},get got(){return S&&S.arnS}}; // tests
 /* the National Competition (SAT-ONLINE-064, Claude-B #13 item 25; Satisfy.natcomp has the schedule and the scoring). Online,
    every two hours on the server clock, three stages of ten minutes: hunting (each monster you kill), production (each item
    you craft, better ones more) and the arena (each duel online, a win more; three a foe). The bar over the HUD shows the
@@ -10074,8 +10095,10 @@ function huntOf(n){const w=Math.floor((n-LOCK_E)/LOCK_WK),L=HUNT_L.length,x=((w%
  return {w,k:HUNT_L[x],at,end:at+HUNT_LEN,open:at-HUNT_PRE,back:at+HUNT_LEN+HUNT_BACK,season:Math.floor(w/L)+1,i:x+1};}
 // the hunt you may join now (from 10 minutes before), or null
 function huntNow(n){const h=huntOf(n);return n>=h.open&&n<h.end?h:null;}
-// is the boss's shared timer (`at`, server time) from a kill before its hunt, which is on now? Then it is set aside
-function huntLift(type,at){const n=wNow(),h=huntOf(n);return h.k===type&&n>=h.at&&n<h.end&&!!MT[type]&&at-MT[type].wb*1000<h.at;}
+// is the boss's shared timer (`at`, server time) from a kill before its hunt, which is on now? Then it is set aside. `t` is
+// when it was written (server time): one written before the hunt goes too, whatever its end, so an `at` set far ahead
+// before the hunt doesn't keep the boss away (Claude-B's note on #160)
+function huntLift(type,at,tw){const n=wNow(),h=huntOf(n);return h.k===type&&n>=h.at&&n<h.end&&!!MT[type]&&(at-MT[type].wb*1000<h.at||typeof tw==='number'&&tw<h.at);}
 const huntLvOf=k=>Math.max(1,(MT[k].lv||[1])[0]-HUNT_LV),huntMon=k=>mons.find(m=>m.type===k&&!m.tmp);
 function huntTick(){if(!S||S.__demo||!P||!Satisfy.local.inGame())return;const p=performance.now();if(p-HUNTT<250)return;HUNTT=p;
  const n=wNow(),h=huntOf(n),k=h.k,ok=S.lv>=huntLvOf(k);
@@ -10083,14 +10106,16 @@ function huntTick(){if(!S||S.__demo||!P||!Satisfy.local.inGame())return;const p=
  if(n<h.at||n>=h.end)return;
  if(!HUNTSAW['o'+h.w]){HUNTSAW['o'+h.w]=1;if(ok){toast(t('huntOn',{b:t(k+'N'),l:calTime(h.end),u:calTime(h.end,true)}),'good');SFX.notice&&SFX.notice();}}
  // back at its lair: a timer from a kill before the hunt is over now (on every screen, from the same clock)
- WS.wb=WS.wb||{};const u=WS.wb[k],off=n-Date.now(),inHunt=u>Date.now()&&u+off-MT[k].wb*1000>=h.at;
+ // (not the copy of a timer the hunt sets aside: one written before it, with a far end; Claude-B's note on #160)
+ WS.wb=WS.wb||{};const u=WS.wb[k],off=n-Date.now(),v=WBS&&WBS[k],lifted=!!v&&typeof v.at==='number'&&huntLift(k,v.at,v.t)&&Math.abs(u-(v.at-wbOffs()))<3000,
+  inHunt=u>Date.now()&&!lifted&&u+off-MT[k].wb*1000>=h.at;
  if(u>Date.now()&&!inHunt)WS.wb[k]=Date.now()-1;
  if(!inHunt)for(const m of mons)if(m.type===k&&!m.tmp&&m.dead&&m.rt>60&&m.rt<1e8)m.rt=0;}
 // where the hunt sends you: free ground HUNT_R from the boss's lair
 function huntSpot(m){for(let i=0;i<24;i++){const a=Math.PI/2+(i%2?1:-1)*Math.ceil(i/2)*Math.PI/12,x=m.sx+Math.cos(a)*HUNT_R,y=m.sy+Math.sin(a)*HUNT_R;
   if(!hitBox(x,y,5)&&!roomAt(x,y)&&zoneAt(x,y)!=='void')return {x,y};}
  return freeNear(m.sx,m.sy+HUNT_R,5);}
-function huntCan(){return mode!=='dead'&&P&&!roomAt(P.x,P.y)&&zoneAt(P.x,P.y)!=='void'&&!(DUEL&&DUEL.locked&&DUEL.locked())&&!SPAR;}
+function huntCan(){return mode!=='dead'&&P&&!ARN&&!TWR&&!roomAt(P.x,P.y)&&zoneAt(P.x,P.y)!=='void'&&!(DUEL&&DUEL.locked&&DUEL.locked())&&!SPAR;} // not out of the arena or the tower either (Claude-B's note on #160)
 function huntGo(){const n=wNow(),h=huntNow(n);if(!h)return;const k=h.k,b=t(k+'N'),lv=huntLvOf(k);
  if(S.lv<lv){toast(t('huntLv',{b,l:lv}),'warn');SFX.deny();return;}
  if(!huntCan()){toast(t('huntNo'),'warn');SFX.deny();return;}
@@ -10107,7 +10132,7 @@ function huntKill(m){if(!S||S.__demo||m.tmp)return;const n=wNow(),h=huntOf(n);if
  S.hunt=S.hunt||{};const W=S.hunt.w=S.hunt.w||{};if(W[h.w])return;W[h.w]=1;S.hunt.n=(S.hunt.n||0)+1;
  const ks=Object.keys(W).map(Number).sort((a,b)=>a-b);while(ks.length>20)delete W[ks.shift()];
  giveTitle('whunt');setTimeout(()=>toast(t('huntWon',{b:t(m.type+'N'),n:S.hunt.n}),'good'),700);save(true);}
-window.__GHUNT={of:n=>huntOf(n==null?wNow():n),now:n=>huntNow(n==null?wNow():n),lift:(k,at)=>huntLift(k,at),go:()=>huntGo(),back:()=>huntRet(),opts:()=>huntOpts(wNow()).map(o=>o.l),get re(){return WBRE},L:HUNT_L}; // tests
+window.__GHUNT={of:n=>huntOf(n==null?wNow():n),now:n=>huntNow(n==null?wNow():n),lift:(k,at,tw)=>huntLift(k,at,tw),can:()=>huntCan(),go:()=>huntGo(),back:()=>huntRet(),opts:()=>huntOpts(wNow()).map(o=>o.l),get re(){return WBRE},L:HUNT_L}; // tests
 /* the group finder (SAT-ONLINE-073, plan U185). "Group finder" in the player list (O) shows who is looking for a raid, a party,
    a dungeon group or a duel, with level, class and where they are, and lets you say what you are looking for yourself
    (lfg/{uid}, yours only: gone when you stop, leave, or after half an hour). Go to them, or whisper a friend. */

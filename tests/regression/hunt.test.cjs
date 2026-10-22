@@ -101,6 +101,10 @@ test('world boss hunt: on the calendar, joined from it, the boss back for it, th
     await settle(a);
     assert.match(await toasts(a), /You won this week's hunt: Trauka the Red Dragon! Hunt marks: 1/);
     assert.equal(await a.eval(() => window.__G.S.tl.whunt), 1);
+    // shown and worn from the status screen (C), like every title (Claude-B, v1.51: the list there missed it)
+    assert.equal(await a.eval(() => { window.__GU.openStatus(); return !!document.querySelector('#statusW [data-title="whunt"]'); }), true, 'on the C screen');
+    await a.page.keyboard.press('Escape'); await a.step(2);
+    assert.equal(await a.mode(), 'play');
     await kill(a);
     await settle(a);
     assert.deepEqual(await a.eval(() => ({ n: window.__G.S.hunt.n, w: Object.keys(window.__G.S.hunt.w) })), { n: 1, w: [String(W)] });
@@ -122,6 +126,15 @@ test('world boss hunt: on the calendar, joined from it, the boss back for it, th
     assert.equal(await a.eval(() => Object.keys(window.__GHUNT.re).length), 0);
     assert.equal(await a.eval((t) => window.__GHUNT.lift('trauka', t), nw.at), false, 'a kill in the hunt counts');
     await until([b], () => { const m = window.__G.mons().find((x) => x.type === 'trauka'); return m.dead && m.rt > 20 * 60; }, 15000);
+    // Claude-B's notes on #160: someone else's kill in the hunt also ends a copy nobody hurt near you (no second kill of
+    // your own), not one you are fighting; a timer written before the hunt is set aside whatever its end
+    const near = (hurt) => b.eval((h) => { const G = window.__G, m = G.mons().find((x) => x.type === 'trauka'); G.P.x = m.sx - 60; G.P.y = m.sy; m.dead = false; m.dying = 0; m.led = false; m.hp = h ? m.max - 1 : m.max; window.__GB2.apply(); return m.dead; }, hurt); // a copy of its own, not the shared fight's
+    assert.equal(await near(true), false, 'a fight of your own goes on');
+    assert.equal(await near(false), true, 'an untouched copy goes down');
+    assert.equal(await a.eval((t) => window.__GHUNT.lift('trauka', t + 100 * 60000, t - 10 * 60000), T), true, 'written before the hunt, ending far ahead: aside');
+    assert.equal(await a.eval((t) => window.__GHUNT.lift('trauka', t + 100 * 60000, t + 2 * 60000), T), false, 'written in the hunt: it counts');
+    // not from the arena or the tower
+    assert.equal(await b.eval(() => window.__GHUNT.can()), true);
 
     // after the hour: next week's boss on the calendar, nothing to join or go back to
     for (const g of [a, b]) await goTo(g, T + 61 * MIN);

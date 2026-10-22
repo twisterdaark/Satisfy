@@ -491,7 +491,8 @@
       // other guild), members read it; the other side writes the answer, the break or the end into it too.
       watchAllies: function (gid, cb) { return watch('guildAlly/' + gid, cb); },
       watchAllyAsks: function (gid, cb) { return watch('guildAllyAsk/' + gid, cb); },
-      watchDiplo: function (gid, cb) { var ref = at('guildDiplo/' + gid), q = D.limitToLast ? D.query(ref, D.limitToLast(60)) : ref; var off = D.onValue(q, function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      // the last 60 by time (Claude-B's note on #159: the ids start with the writer's uid, so by key it was the last 60 uids)
+      watchDiplo: function (gid, cb) { var ref = at('guildDiplo/' + gid), q = D.limitToLast && D.orderByChild ? D.query(ref, D.orderByChild('t'), D.limitToLast(60)) : ref; var off = D.onValue(q, function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
       findGuild: function (nk) { return D.get(at('guildNames/' + nk)).then(function (s) { var gid = s.val(); return typeof gid === 'string' ? D.get(at('guilds/' + gid)).then(function (g) { return g.val() ? { gid: gid, g: g.val() } : null; }) : null; }); },
       allyCd: function (a, b) { return Promise.all([D.get(at('guildAllyCd/' + a + '/' + b)), D.get(at('guildAllyCd/' + b + '/' + a))]).then(function (r) { return Math.max(+((r[0].val() || {}).t) || 0, +((r[1].val() || {}).t) || 0); }); },
       allyAsk: function (me, meN, o, oN, uid, id) {
@@ -650,7 +651,7 @@
       // the top `n` by rating (the fake has no limitToLast: then everything, sorted here)
       top: function (season, n) {
         var ref = at('arena/' + season), q = D.limitToLast && D.orderByChild ? D.query(ref, D.orderByChild('r'), D.limitToLast(n)) : ref;
-        return D.get(q).then(function (s) { var v = s.val() || {}, a = []; for (var k in v) if (v[k] && typeof v[k].r === 'number') a.push({ uid: k, r: v[k].r, w: v[k].w | 0, l: v[k].l | 0, n: String(v[k].n || '?') }); a.sort(function (x, y) { return y.r - x.r; }); return a.slice(0, n); });
+        return D.get(q).then(function (s) { var v = s.val() || {}, a = []; for (var k in v) if (v[k] && typeof v[k].r === 'number') a.push({ uid: k, r: v[k].r, w: v[k].w | 0, l: v[k].l | 0, n: String(v[k].n || '?'), t: +v[k].t || 0 }); a.sort(function (x, y) { return y.r - x.r; }); return a.slice(0, n); });
       },
     };
   }

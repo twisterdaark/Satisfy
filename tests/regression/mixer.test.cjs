@@ -58,3 +58,20 @@ test('mixer: game sounds, music, the world and other players each turn down and 
     assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+// Claude-B's note on #135: a player who had muted the game before the mixer (satisfy_mute, or game sounds at 0) doesn't
+// suddenly hear the world and other players at 80%: with nothing stored for them, they start where game sounds were
+test('mixer: the world and other players start at the game sounds\' volume when nothing is stored for them', async () => {
+  const ctx = await H.newContext();
+  try {
+    for (const [k, v, want] of [['satisfy_mute', '1', 0], ['satisfy_sfxv', '0', 0], ['satisfy_sfxv', '35', 35]]) {
+      const g = await H.openGame({ ctx });
+      await g.eval(([kk, vv]) => { for (const x of ['satisfy_mute', 'satisfy_sfxv', 'satisfy_ambv', 'satisfy_socv']) localStorage.removeItem(x); localStorage.setItem(kk, vv); }, [k, v]);
+      await g.reload();
+      const m = await g.eval(() => window.__GMIX.v);
+      assert.deepEqual([m.sfx, m.amb, m.soc], [want, want, want], k + '=' + v);
+      assert.deepEqual(g.errors, []);
+      await g.close();
+    }
+  } finally { await ctx.close(); }
+});

@@ -100,3 +100,18 @@ test('replay: a session recorded at 60 fps plays back the same at 30 and 144, in
     await g.close();
   } finally { await ctx.close(); }
 });
+
+// Claude-B's note on #134: the replay's input guard (non-passive touchstart and wheel listeners on the window) is only on a
+// replay page; every other page scrolls and touches as before
+test('replay: its input guard is only on a replay page', async () => {
+  const spy = { content: "window.__np=[];const _ae=EventTarget.prototype.addEventListener;EventTarget.prototype.addEventListener=function(t,f,o){if(this===window&&o&&typeof o==='object'&&o.passive===false)window.__np.push(t);return _ae.call(this,t,f,o);};" };
+  const ctx = await H.newContext({ scripts: [spy] });
+  try {
+    const g = await H.openGame({ ctx });
+    assert.deepEqual(await g.eval(() => window.__np.filter((t) => t === 'touchstart' || t === 'wheel')), [], 'a normal page');
+    await g.close();
+    const r = await H.openGame({ ctx, query: '?tick=fixed&replay' });
+    assert.deepEqual((await r.eval(() => window.__np.filter((t) => t === 'touchstart' || t === 'wheel'))).sort(), ['touchstart', 'wheel'], 'a replay page');
+    await r.close();
+  } finally { await ctx.close(); }
+});

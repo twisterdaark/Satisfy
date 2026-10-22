@@ -37,8 +37,16 @@ test('profiler: F9 shows it; p95s from the last 600 frames; red over budget; kep
     assert.equal(typeof k.frame95, 'number');
     assert.match(k.scr, /^\d+x\d+$/);
 
-    // F9 again: off
-    await g.page.keyboard.press('F9'); await g.step(2);
+    // Claude-B's note on #137: a frame's real time, not the world's step capped at 50 ms
+    await g.eval(() => window.__PERF.clear());
+    await g.step(20, 80);
+    const slow = await g.eval(() => window.__PERF.stats());
+    assert.ok(slow.frame.max >= 79 && slow.frame.p95 >= 79, 'an 80 ms frame shows as 80: ' + JSON.stringify(slow.frame));
+
+    // F9 again: off; the key is the game's (in Firefox it would open Reader View)
+    const prevented = await g.eval(() => { const e = new KeyboardEvent('keydown', { code: 'F9', key: 'F9', cancelable: true, bubbles: true }); window.dispatchEvent(e); return e.defaultPrevented; });
+    assert.equal(prevented, true);
+    await g.step(2);
     assert.equal(await hud(g), null);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
