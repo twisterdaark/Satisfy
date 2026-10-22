@@ -154,7 +154,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U243 | Guild notice board | ✅ | SAT-ONLINE-076: `guildNote/{gid}`, written by the master and officers, each write the next version; members read it and hear when it changes; shown as text, never as HTML |
 | U244 | Guild rankings | ✅ | SAT-ONLINE-076: every online guild next to the canon ones, by level from the members' summed contribution (the same formula as your own guild's) |
 | U245 | Guild diplomacy | ✅ | SAT-ONLINE-085: treaties (alliances) with a day's cooldown after a break, and a diplomacy log in both guilds (ask, ally, decline, break, end); the break records who (`guildAllyCd`, `guildDiplo`). Standings between guilds (SAT-ONLINE-123): from that log and what is in force, the same on both sides, by a formula the game shows (G → Diplomacy → Standings: allied, friendly, neutral, hostile, at war over the last 30 days); a hostile guild carries 💢 by its name, and a proposal or a war declared on you shows the standing (`unit/diplo`, `regression/guildstand`) |
-| U246 | Guild seasonal rewards | ❌ | |
+| U246 | Guild seasonal rewards | ✅ | SAT-ONLINE-090: a season is a month; each week a guild earns the weekly-goal tier it reached (0–3); `/season` (the owner, standing in for a server job: admins read every guild's `guildWeek`) gives fixed-tier trophies (`guildTrophy`: gold 10, silver 6, bronze 3), shown by the guild's name and in G; cosmetic only, nothing in fights (`regression/season`) |
 
 ### Engine (plan §47)
 | ID | Item | Status | Where / what's left |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 68 · 🟡 21 · ⏳ 6 · ❌ 9 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 69 · 🟡 21 · ⏳ 6 · ❌ 8 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

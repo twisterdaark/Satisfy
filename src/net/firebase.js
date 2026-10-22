@@ -748,6 +748,11 @@
       uidOf: function (id) { return D.get(at('handles/' + String(id).toLowerCase())).then(function (s) { return typeof s.val() === 'string' ? s.val() : null; }); },
       // SAT-ONLINE-088: every player's numbers for this week, balance/{uid} {wk, cls, lv, n, s, w, l, t} (admins read them)
       balance: function () { return all('balance'); },
+      // SAT-ONLINE-090 guild seasons: every guild's weekly goal counts (admins read them) and its names, to close a season;
+      // guildTrophy/{gid}/{season} {k, p, by, t}: a season's trophy (gold, silver, bronze; p: its points), written by admins
+      seasonData: function () { return Promise.all([all('guildWeek'), all('guilds')]).then(function (r) { return { weeks: r[0], guilds: r[1] }; }); },
+      trophy: function (gid, season, k, p, by) { var u = {}; u['guildTrophy/' + gid + '/' + season] = { k: k, p: p, by: by, t: D.serverTimestamp() }; return D.update(D.ref(db), u); },
+      trophies: function (gid) { return D.get(at('guildTrophy/' + gid)).then(function (s) { return s.val() || {}; }); },
       ranks: function () { return Promise.all([all('ranks/gold'), all('ranks/lv')]).then(function (r) { return { gold: r[0], lv: r[1] }; }); },
     };
   }
