@@ -574,7 +574,6 @@
     if (seg[0] === 'capSlot') { // SAT-ONLINE-095: a guild's four capture slots, each free again a week after its use
       if (!user) return 'PERMISSION_DENIED: capSlot';
       const me = user.uid, now = Date.now();
-      if (seg.length === 2) return v === null && (data.get('guilds/' + seg[1]) || {}).master === me ? null : 'PERMISSION_DENIED: capSlot ' + p;
       if (seg.length !== 3 || v === null || !/^[abcd]$/.test(seg[2]) || !data.has('guildMembers/' + seg[1] + '/' + me)) return 'PERMISSION_DENIED: capSlot ' + p;
       const old = data.get(p);
       if (old && !(old.t < now - 604800000)) return 'PERMISSION_DENIED: capSlot used';
