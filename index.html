@@ -5622,7 +5622,7 @@ const qDone=id=>!!S.qs[id]&&S.qs[id].st===2;
 const arrowN=()=>S.arrows.reduce((a,b)=>a+b,0);
 function qCount(id){const o=QD[id].obj,s=S.qs[id];if(!s)return 0;if(o.t==='have')return S.mats[o.it]||0;return s.c||0;}
 const qReady=id=>{const s=S.qs[id];return !!s&&s.st===1&&qCount(id)>=QD[id].obj.n;};
-function qAvail(id){const q=QD[id];return !S.qs[id]&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2||q.cl2==='smith'&&S.cls==='pagma')&&(!q.sec||S.sec===q.sec)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)));}
+function qAvail(id){const q=QD[id];return !S.qs[id]&&packOn(q.pack)&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2||q.cl2==='smith'&&S.cls==='pagma')&&(!q.sec||S.sec===q.sec)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)));}
 function qObjText(id){const o=QD[id].obj;return t(QD[id].ot||(o.t==='craftR'?(o.r===0?'o_craftA':'o_craftR'):'o_'+o.t),{it:o.t==='deliver'?t(o.it):o.t==='escort'?t('escN_'+o.it):itN(o.it),c:Math.min(qCount(id),o.n),n:o.n})+(o.low?' '+t('oLow',{p:Math.round(o.low*100)}):'')+(o.wk?' '+t('oWk',{w:wkN(o.wk)}):'')+(o.stl?' '+t('oStl'):'')+(QD[id].lim&&epAct(id)&&!qReady(id)?' · ⏳ '+epClock(epLeft(id)):'');}
 function qEvent(type,key,r,slot){domainEv(type,key,r,slot);natEv(type,key,r);if(type==='kill'&&typeof gwKill==='function')gwKill(key);for(const id in S.qs){const s=S.qs[id],q=QD[id];if(!q||s.st!==1)continue;const o=q.obj,was=qReady(id);
   if((o.t===type&&o.it===key&&(!o.wk||weapKind()===o.wk)&&(!o.low||P.hp<maxHP()*o.low)&&(!o.stl||RG.kAsn))||(type==='craft'&&o.t==='craftR'&&r>=(o.r??1)&&slot!=='x')){s.c=(s.c||0)+1;if(!was&&qReady(id)&&!q.hid){toast(t('retTo',{w:t(q.by)}),'good');SFX.quest();}}}hudDirty=true;}
@@ -8680,7 +8680,7 @@ $('chatX').addEventListener('click',e=>{e.stopPropagation();chatMin(true);});$('
 function chatOpen(){if(!CHAT)return;if(CHATMIN)chatMin(false);chatCh(CHCH);const i=$('chatIn');i.hidden=false;$('chatW').hidden=false;i.focus();chatSig='';}
 function chatClose(){const i=$('chatIn');i.hidden=true;i.value='';i.blur();chatSig='';}
 function chatSend(){if(!CHAT)return chatClose();let v=$('chatIn').value,ch=CHCH;
- if(annCmd(v.trim())||admCmd(v.trim())||trCmd(v.trim())||swCmd(v.trim())){chatClose();return;}/* SAT-ONLINE-079/082: the game's owner's commands */
+ if(annCmd(v.trim())||admCmd(v.trim())||trCmd(v.trim())||swCmd(v.trim())||packCmd(v.trim())){chatClose();return;}/* SAT-ONLINE-079/082: the game's owner's commands */
  {const w=/^\/(?:w|whisper)\s+(\S+)\s*([\s\S]*)$/i.exec(v);if(w){const f=frByName(w[1]);if(!f){toast(t('wNoFriend',{n:Satisfy.chat.clean(w[1],24)}),'warn');return;}const r=CHAT.sayTo(f.uid,f.n,w[2]);if(r==='tooFast'){toast(t('chatFast'),'warn');return;}if(r==='sent')CHWTO=f.n;chatClose();return;}}/* SAT-ONLINE-070: /w name text */
  if(/^\/filter\s*$/i.test(v)){CHATF=!CHATF;try{localStorage.setItem('satisfy_chatf',CHATF?'1':'0');}catch(e){}toast(t(CHATF?'chatFOn':'chatFOff'));chatClose();return;}/* SAT-ONLINE-071: /filter turns the word filter off and on */const m=/^\/(p|a|g)\s+/i.exec(v);if(m){const k=m[1].toLowerCase();ch=k==='p'?'party':k==='g'?'guild':'all';v=v.slice(m[0].length);} // /p party, /a everyone, /g guild
  if(ch==='all'&&mutedNow()){toast(t('mutedYou',{l:calTime(MUTED.until)}),'warn');chatClose();return;}/* SAT-ONLINE-082: muted in the world chat */
@@ -9517,7 +9517,7 @@ Object.assign(STR.en,{natN:'National Competition',natK_hunt:'Hunting',natK_craft
 var NATS=null,NATF=0,natSc=null,natPutT=-1e9,natTop=null,natTopT=-1e9,natSt=null,natPaidId=null,natPayT=-1e9,natBarS='';
 function natOnline(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&Satisfy.natcomp&&Satisfy.firebase.natStore&&S&&!S.__demo);}
 function natNow(){return Satisfy.natcomp.now(wNow(),NATF);}
-function natAdd(k,n){const c=natNow();if(!natSc||!c.running||natSc.id!==c.id||c.kind!==k||!(n>0)||!natHere(c))return;natSc[k[0]]+=n;natSc.dirty=true;if(S.natIn!==c.id){S.natIn=c.id;save(true);}natLoad();} // S.natIn: the competition to be paid for (kept through a reload)
+function natAdd(k,n){if(!packOn('nat'))return;const c=natNow();if(!natSc||!c.running||natSc.id!==c.id||c.kind!==k||!(n>0)||!natHere(c))return;natSc[k[0]]+=n;natSc.dirty=true;if(S.natIn!==c.id){S.natIn=c.id;save(true);}natLoad();} // S.natIn: the competition to be paid for (kept through a reload)
 function natEv(type,key,r){try{if(!natOnline())return;}catch(e){return;}/* qEvent may run before the network's declarations */if(type==='kill'&&MT[key])natAdd('hunt',Satisfy.natcomp.huntPts(MT[key].lv[0],MT[key].boss));else if(type==='craft')natAdd('craft',Satisfy.natcomp.craftPts(r));}
 function natDuel(win,foe){if(!natOnline()||!natSc||!foe)return;const c=natNow();if(!c.running||c.kind!=='duel'||natSc.id!==c.id)return;const f=natSc.foes[foe]||0;natSc.foes[foe]=f+1;natAdd('duel',Satisfy.natcomp.duelPts(win,f));}
 // the first points of a competition: what this account already has in it (a reload, another device) adds to them; nothing
@@ -9671,6 +9671,7 @@ var SWOFF=null,SW={};const SWK=['chat','trade','duel'];
 function swOn(k){const f=SW[k];return !(f&&f.on===false);}
 function swStart(){swStop();const st=annSt();if(!st||!st.watchFlags)return;let first=true;
  SWOFF=st.watchFlags(v=>{const prev=SW;SW={};for(const k of SWK)if(v&&v[k]&&typeof v[k].on==='boolean')SW[k]={on:v[k].on,why:Satisfy.chat.clean(v[k].why||'',80)};
+  for(const k in v||{})if(/^pk_[a-z]{2,8}$/.test(k)&&v[k]&&typeof v[k].on==='boolean')SW[k]={on:v[k].on,why:Satisfy.chat.clean(v[k].why||'',80),lv:+v[k].lv||0,pct:typeof v[k].pct==='number'?v[k].pct:100};
   if(!first)for(const k of SWK){const was=!(prev[k]&&prev[k].on===false),now=swOn(k);if(was!==now){const l=t(now?'swBack':'swGone',{w:t('sw_'+k)})+(!now&&SW[k].why?' ('+SW[k].why+')':'');toast(l,now?'good':'warn');if(CHAT&&CHAT.note)CHAT.note(l);}}
   first=false;});}
 function swStop(){if(SWOFF){SWOFF();SWOFF=null;}SW={};}
@@ -9679,7 +9680,29 @@ function swGate(k){if(swOn(k))return true;toast(t('swOff',{w:t('sw_'+k)})+(SW[k]
 function swCmd(v){const m=/^\/switch(?:\s+(chat|trade|duel)\s+(on|off)\s*([\s\S]*))?\s*$/i.exec(v);if(!m)return false;
  admOnly(()=>{const st=annSt();if(!m[1]){dialog('guild',[t('swList',{l:SWK.map(k=>t('sw_'+k)+': '+t(swOn(k)?'swIsOn':'swIsOff')+(swOn(k)||!SW[k].why?'':' ('+SW[k].why+')')).join(' · ')})],null,[{l:t('oClose')}]);return;}
   const k=m[1].toLowerCase(),on=m[2].toLowerCase()==='on';st.setFlag(k,on,m[3].trim(),NET.uid).then(()=>toast(t(on?'swSetOn':'swSetOff',{w:t('sw_'+k)}),'good'),()=>toast(t('gdFail'),'warn'));});return true;}
-window.__GSW={get sw(){return SW},on:k=>swOn(k),cmd:v=>swCmd(v)}; // tests
+/* content packs (SAT-ONLINE-137, plan U335 "enable data packs by region and player cohort; new quests do not disappear
+   midrun"). A pack is a part of the game the owner can close or open for everyone, or open for a cohort only, without a
+   release: flags/pk_{name} {on, lv?, pct?, why?}. lv: from that level; pct: that share of characters (a hash of each one's
+   id, the same on every device). Unset means on for everyone. A pack closed or not yet open for you offers nothing new
+   (a quest tagged with it, `pack` in its data, is not offered; the boss hunt is not joined; the National Competition
+   scores nothing), but what you already started goes on: an accepted quest stays in your log and can be finished. What
+   changes the world for everyone (the hunted boss back early) follows the pack unless it is closed for all. */
+const PACKS=['hunt','nat'];
+function packBucket(){const s=String(S&&S.pid||'');let h=0x811c9dc5;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619)>>>0;return h%100;}
+function packOn(k){if(!k)return true;const f=SW['pk_'+k];if(!f)return true;if(f.on===false)return false;if(f.lv&&!(S&&S.lv>=f.lv))return false;return !(f.pct<100&&packBucket()>=f.pct);}
+function packWorld(k){const f=SW['pk_'+k];return !(f&&f.on===false);}
+function packGate(k){if(packOn(k))return true;toast(t('packOff',{w:t('pk_'+k)}),'warn');SFX.deny();return false;}
+function packState(k){const f=SW['pk_'+k];if(!f||f.on&&!f.lv&&f.pct>=100)return t('swIsOn');if(f.on===false)return t('swIsOff')+(f.why?' ('+f.why+')':'');
+ return t('packFor',{c:[f.lv?t('packLv',{n:f.lv}):'',f.pct<100?t('packPct',{n:f.pct}):''].filter(Boolean).join(', ')});}
+// "/pack" lists them; "/pack hunt off why", "/pack hunt on", "/pack hunt on lv 100 pct 25" (admins only; the rules refuse anyone else)
+function packCmd(v){const m=/^\/pack(?:\s+([a-z]{2,8})\s+(on|off)((?:\s+(?:lv|pct)\s+\d{1,3})*)\s*([\s\S]*))?\s*$/i.exec(v);if(!m)return false;
+ admOnly(()=>{const st=annSt();if(!m[1]){dialog('guild',[t('packList',{l:PACKS.map(k=>t('pk_'+k)+': '+packState(k)).join(' · ')})],null,[{l:t('oClose')}]);return;}
+  const k=m[1].toLowerCase();if(!PACKS.includes(k)){toast(t('packNone',{l:PACKS.join(', ')}),'warn');return;}
+  const on=m[2].toLowerCase()==='on',o={},lv=/lv\s+(\d+)/i.exec(m[3]||''),pc=/pct\s+(\d+)/i.exec(m[3]||'');if(on&&lv)o.lv=Math.max(1,Math.min(999,+lv[1]));if(on&&pc)o.pct=Math.max(0,Math.min(100,+pc[1]));
+  st.setFlag('pk_'+k,on,m[4].trim(),NET.uid,o).then(()=>toast(t('packSet',{w:t('pk_'+k),s:on?(o.lv||o.pct!=null?t('packFor',{c:[o.lv?t('packLv',{n:o.lv}):'',o.pct!=null?t('packPct',{n:o.pct}):''].filter(Boolean).join(', ')}):t('swIsOn')):t('swIsOff')}),'good'),()=>toast(t('gdFail'),'warn'));});return true;}
+Object.assign(STR.ar,{pk_hunt:'صيد الزعيم',pk_nat:'المسابقة الوطنية',packOff:'{w} مش متاح ليك دلوقتي',packList:'أجزاء اللعبة: {l}',packFor:'شغال لـ {c}',packLv:'لفل {n} وفوق',packPct:'{n}% من الشخصيات',packNone:'الأجزاء: {l}',packSet:'{w}: {s}'});
+Object.assign(STR.en,{pk_hunt:'The world boss hunt',pk_nat:'The National Competition',packOff:'{w} is not open for you right now',packList:'Content packs: {l}',packFor:'on for {c}',packLv:'level {n} and up',packPct:'{n}% of characters',packNone:'Packs: {l}',packSet:'{w}: {s}'});
+window.__GSW={get sw(){return SW},on:k=>swOn(k),cmd:v=>swCmd(v),pack:k=>packOn(k),world:k=>packWorld(k),bucket:()=>packBucket(),pcmd:v=>packCmd(v)}; // tests
 Object.assign(STR.ar,{sw_chat:'شات العالم',sw_trade:'التبادل',sw_duel:'المبارزات',swOff:'{w} مقفول دلوقتي من صاحب اللعبة',swGone:'صاحب اللعبة قفل {w} دلوقتي',swBack:'{w} رجع تاني',
  swList:'المفاتيح: {l}',swIsOn:'شغال',swIsOff:'مقفول',swSetOn:'{w} اتفتح لكل اللاعيبة',swSetOff:'{w} اتقفل لكل اللاعيبة'});
 Object.assign(STR.en,{sw_chat:'World chat',sw_trade:'Trading',sw_duel:'Dueling',swOff:"{w} is switched off by the game's owner for now",swGone:"The game's owner switched {w} off for now",swBack:'{w} is back on',
@@ -9848,11 +9871,11 @@ Object.assign(STR.en,{calBoard:'Calendar',calH:'Calendar (your time, {z})',calH2
 // what is on or comes next from world time n: [{k, at, end}] (k a string key); the same for everyone at the same n
 function calList(n){const out=[],add=(k,at,len)=>out.push({k,at,end:at+len});
  {let sl=Math.floor(n/EVS);if(n-sl*EVS>=EVLEN)sl++;for(let i=0;i<3;i++,sl++)add('evN_'+EVT[((sl*2654435761)>>>0)%EVT.length].k,sl*EVS,EVLEN);}
- {const C=Satisfy.natcomp.C,L=C.STAGE*C.STAGES.length;let st=Math.floor((n-C.OFFSET)/C.PERIOD)*C.PERIOD+C.OFFSET;if(n-st>=L)st+=C.PERIOD;add('natN',st,L);}
+ if(packOn('nat')){const C=Satisfy.natcomp.C,L=C.STAGE*C.STAGES.length;let st=Math.floor((n-C.OFFSET)/C.PERIOD)*C.PERIOD+C.OFFSET;if(n-st>=L)st+=C.PERIOD;add('natN',st,L);}
  {let st=Math.floor((n-SIEGO)/SIEGP)*SIEGP+SIEGO;if(n-st>=SIEGL)st+=SIEGP;add('sgN',st,SIEGL);}
  {const H=3600000;for(let h=Math.floor(n/H);;h++)if(new Date(h*H).getUTCHours()%3===1&&n<h*H+60*60000){add('calFs',h*H+35*60000,25*60000);break;}}
  {const sl=Math.floor(n/RCS),st=sl*RCS+RCGO;add('calRace',n<sl*RCS+RCEND?st:st+RCS,RCEND-RCGO);}
- {const h0=huntOf(n),h=n<h0.end?h0:huntOf(h0.at+LOCK_WK);out.push({k:'huntN',l:t('huntCal',{b:t(h.k+'N'),s:h.season,i:h.i}),at:h.at,end:h.end,b:h.k});}
+ if(packOn('hunt')){const h0=huntOf(n),h=n<h0.end?h0:huntOf(h0.at+LOCK_WK);out.push({k:'huntN',l:t('huntCal',{b:t(h.k+'N'),s:h.season,i:h.i}),at:h.at,end:h.end,b:h.k});}
  return out;}
 function calTime(ms,utc){const d=new Date(ms),h=utc?d.getUTCHours():d.getHours(),m=utc?d.getUTCMinutes():d.getMinutes();return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}
 function calIn(ms){const m=Math.max(1,Math.ceil(ms/60000));return m<60?t('calMin',{m}):t('calHr',{h:Math.floor(m/60),m:m%60});}
@@ -9882,14 +9905,16 @@ function huntOf(n){const w=Math.floor((n-LOCK_E)/LOCK_WK),L=HUNT_L.length,x=((w%
 // the hunt you may join now (from 10 minutes before), or null
 function huntNow(n){const h=huntOf(n);return n>=h.open&&n<h.end?h:null;}
 // is the boss's shared timer (`at`, server time) from a kill before its hunt, which is on now? Then it is set aside
-function huntLift(type,at){const n=wNow(),h=huntOf(n);return h.k===type&&n>=h.at&&n<h.end&&!!MT[type]&&at-MT[type].wb*1000<h.at;}
+function huntLift(type,at){if(!packWorld('hunt'))return false;const n=wNow(),h=huntOf(n);return h.k===type&&n>=h.at&&n<h.end&&!!MT[type]&&at-MT[type].wb*1000<h.at;}
 const huntLvOf=k=>Math.max(1,(MT[k].lv||[1])[0]-HUNT_LV),huntMon=k=>mons.find(m=>m.type===k&&!m.tmp);
 function huntTick(){if(!S||S.__demo||!P||!Satisfy.local.inGame())return;const p=performance.now();if(p-HUNTT<250)return;HUNTT=p;
- const n=wNow(),h=huntOf(n),k=h.k,ok=S.lv>=huntLvOf(k);
+ const n=wNow(),h=huntOf(n),k=h.k,ok=S.lv>=huntLvOf(k)&&packOn('hunt');
  if(n>=h.open&&n<h.at&&!HUNTSAW['s'+h.w]){HUNTSAW['s'+h.w]=1;if(ok)toast(t('huntSoon',{b:t(k+'N'),m:Math.ceil((h.at-n)/60000)}),'warn');}
  if(n<h.at||n>=h.end)return;
  if(!HUNTSAW['o'+h.w]){HUNTSAW['o'+h.w]=1;if(ok){toast(t('huntOn',{b:t(k+'N'),l:calTime(h.end),u:calTime(h.end,true)}),'good');SFX.notice&&SFX.notice();}}
- // back at its lair: a timer from a kill before the hunt is over now (on every screen, from the same clock)
+ // back at its lair: a timer from a kill before the hunt is over now (on every screen, from the same clock), unless the
+ // owner has closed the hunt for everyone (SAT-ONLINE-137)
+ if(!packWorld('hunt'))return;
  WS.wb=WS.wb||{};const u=WS.wb[k],off=n-Date.now(),inHunt=u>Date.now()&&u+off-MT[k].wb*1000>=h.at;
  if(u>Date.now()&&!inHunt)WS.wb[k]=Date.now()-1;
  if(!inHunt)for(const m of mons)if(m.type===k&&!m.tmp&&m.dead&&m.rt>60&&m.rt<1e8)m.rt=0;}
@@ -9898,7 +9923,7 @@ function huntSpot(m){for(let i=0;i<24;i++){const a=Math.PI/2+(i%2?1:-1)*Math.cei
   if(!hitBox(x,y,5)&&!roomAt(x,y)&&zoneAt(x,y)!=='void')return {x,y};}
  return freeNear(m.sx,m.sy+HUNT_R,5);}
 function huntCan(){return mode!=='dead'&&P&&!roomAt(P.x,P.y)&&zoneAt(P.x,P.y)!=='void'&&!(DUEL&&DUEL.locked&&DUEL.locked())&&!SPAR;}
-function huntGo(){const n=wNow(),h=huntNow(n);if(!h)return;const k=h.k,b=t(k+'N'),lv=huntLvOf(k);
+function huntGo(){const n=wNow(),h=huntNow(n);if(!h||!packGate('hunt'))return;const k=h.k,b=t(k+'N'),lv=huntLvOf(k);
  if(S.lv<lv){toast(t('huntLv',{b,l:lv}),'warn');SFX.deny();return;}
  if(!huntCan()){toast(t('huntNo'),'warn');SFX.deny();return;}
  const m=huntMon(k),to=m&&huntSpot(m);if(!to){toast(t('huntGone',{b}),'warn');return;}
@@ -9907,10 +9932,10 @@ function huntGo(){const n=wNow(),h=huntNow(n);if(!h)return;const k=h.k,b=t(k+'N'
 function huntRet(){const B=S.hunt&&S.hunt.back;if(!B)return;if(!huntCan()){toast(t('huntNo'),'warn');SFX.deny();return;}delete S.hunt.back;
  fadeTo(()=>{P.x=B.x;P.y=B.y;camSnap=true;vfx('spawn',P.x,P.y);allies=[];hudDirty=true;toast(t('huntBackT'),'good');save(true);});}
 // the calendar's choices: join the hunt while it is open, go back after it
-function huntOpts(n){const h=huntNow(n),B=S&&S.hunt&&S.hunt.back,o=[];if(h)o.push({l:t('huntJoin',{b:t(h.k+'N')}),f:huntGo});
+function huntOpts(n){const h=huntNow(n),B=S&&S.hunt&&S.hunt.back,o=[];if(h&&packOn('hunt'))o.push({l:t('huntJoin',{b:t(h.k+'N')}),f:huntGo});
  if(B&&n<B.until)o.push({l:t('huntBack'),f:huntRet});return o;}
 // a kill of the hunted boss in its hour (or the minute after): the title once, one mark a week, never twice
-function huntKill(m){if(!S||S.__demo||m.tmp)return;const n=wNow(),h=huntOf(n);if(m.type!==h.k||n<h.at||n>=h.end+60000)return;
+function huntKill(m){if(!S||S.__demo||m.tmp||!packOn('hunt'))return;const n=wNow(),h=huntOf(n);if(m.type!==h.k||n<h.at||n>=h.end+60000)return;
  S.hunt=S.hunt||{};const W=S.hunt.w=S.hunt.w||{};if(W[h.w])return;W[h.w]=1;S.hunt.n=(S.hunt.n||0)+1;
  const ks=Object.keys(W).map(Number).sort((a,b)=>a-b);while(ks.length>20)delete W[ks.shift()];
  giveTitle('whunt');setTimeout(()=>toast(t('huntWon',{b:t(m.type+'N'),n:S.hunt.n}),'good'),700);save(true);}

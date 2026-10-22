@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22packs', ver: '1.86', d: '2026-10-22', hide: 1,
+      ar: ["لصاحب اللعبة: /pack يقفل جزء من اللعبة للكل (صيد الزعيم، المسابقة الوطنية) أو يفتحه لمجموعة بس (من لفل معين، أو نسبة من الشخصيات)، من غير تحديث. اللي بدأ قبل القفل بيكمل"],
+      en: ["For the game's owner: /pack closes a part of the game for everyone (the boss hunt, the National Competition) or opens it for a cohort only (from a level, or a share of characters), without a release. What was already started goes on"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",

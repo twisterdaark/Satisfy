@@ -728,7 +728,9 @@
       },
       // SAT-ONLINE-121 live switches: flags/{chat|trade|duel} {on, why?, by, t}; admins write them, every page follows them
       watchFlags: function (cb) { var off = null; try { off = D.onValue(at('flags'), function (s) { cb(s.val() || {}); }, function () { cb({}); }); } catch (e) { cb({}); } return function () { try { if (off) off(); } catch (e) { /* ignore */ } }; },
-      setFlag: function (k, on, why, by) { var e = { on: !!on, by: by, t: D.serverTimestamp() }; if (why) e.why = String(why).slice(0, 80); var u = {}; u['flags/' + k] = e; return D.update(D.ref(db), u); },
+      // a content pack (SAT-ONLINE-137: k = 'pk_' + its name) may be on for a cohort only: o.lv (from that level), o.pct (that
+      // share of characters, by a hash of each one's id)
+      setFlag: function (k, on, why, by, o) { var e = { on: !!on, by: by, t: D.serverTimestamp() }; if (why) e.why = String(why).slice(0, 80); if (o && o.lv) e.lv = o.lv | 0; if (o && o.pct != null) e.pct = o.pct | 0; var u = {}; u['flags/' + k] = e; return D.update(D.ref(db), u); },
       post: function (v) {
         var e = { k: v.k, ar: String(v.ar).slice(0, 200), en: String(v.en).slice(0, 200), by: v.by, t: D.serverTimestamp() };
         if (v.k === 'maint') e.at = v.at;
