@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22bossreplay', ver: '1.84', d: '2026-10-22',
+      ar: ["المعارك مع البوسات بتتسجّل: من L (السجل) تقدر تتفرج على آخر 5 معارك كأشباح في نفس المكان بسرعة الضعف، والكاميرا ماشية مع البوس. وإنت بتتفرج محدش يقدر يأذيك، وEsc يوقفها. التسجيل فيه الأماكن والصحة بس، مفيش شنطة ولا دهب"],
+      en: ["Boss fights are recorded: from L (the log) watch your last 5 as ghosts where they happened, at double speed, the view following the boss. Nothing can hurt you while you watch, and Esc stops it. Only positions and health are kept, no bag or gold"] },
     { v: '2026-10-22wpass2', ver: '1.83', d: '2026-10-22',
       ar: ["باسيفز سلاح جديدة: ضربة مزدوجة (السلاح بيضرب تاني لوحده)، صعق (برق بيزود الضربة 50% ويقفز على اتنين جنب الهدف ويشلهم لحظة)، امتصاص (جزء من الضرر اللي بتاخده بيترد في ضربتك الجاية)، تجميد (بيبطّأ الهدف)، وزق (بيرمي الهدف لورا)",
         "حجر البرق: جوهرة جديدة بتتركب في السلاح عند خان، وبتدي السلاح صعق بفرصة 15%. بتقع من الوحوش العالية والزعماء",

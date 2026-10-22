@@ -298,6 +298,7 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 #eqInfo{margin-top:calc(var(--u)*.8)}
 #dtext{white-space:pre-line}#qdW{width:calc(var(--u)*44)}#qdB .ssec:first-child{border-top:0;margin-top:0}#qdB p{margin:calc(var(--u)*.4) 0}#qdB ul{margin:0;padding-inline-start:calc(var(--u)*1.6)}#qdB li{color:var(--gold)}#qtext .qi{cursor:pointer}#qtext .qi:hover b{color:#fff;text-decoration:underline}
 #logW{width:calc(var(--u)*50);max-height:80%;overflow:auto;background:var(--sys2)}
+#logL .rrs{border-bottom:1px solid rgba(143,216,255,.3);padding-bottom:calc(var(--u)*.5)}#logL .rrb{display:block;width:100%;text-align:start;margin:calc(var(--u)*.2) 0} /* SAT-ONLINE-109: the fight replays */
 #mbW{width:calc(var(--u)*66);max-width:96%;height:86%;display:flex;flex-direction:column;overflow:hidden;background:var(--sys2)}#mbG{flex:1;min-height:0;overflow-y:auto;align-content:start;padding-right:calc(var(--u)*.3)}#mbSum{font-size:calc(var(--u)*1.35);color:#bfe8ff;text-align:center;margin:calc(var(--u)*.4) 0}#mbF{display:flex;gap:calc(var(--u)*.6);justify-content:center;flex-wrap:wrap;margin-bottom:calc(var(--u)*.8)}#mbF button{padding:calc(var(--u)*.4) calc(var(--u)*1.2);font-size:calc(var(--u)*1.4)}#mbF button.on{background:rgba(120,190,255,.35);border-color:#9fd8ff}#mbD .mbd{display:flex;gap:calc(var(--u)*1.2);align-items:flex-start;padding:calc(var(--u)*1);margin-bottom:calc(var(--u)*.8);border:1px solid rgba(160,210,255,.35);background:rgba(10,24,50,.55)}#mbD .mbd>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:calc(var(--u)*.35)}#mbD b{font-size:calc(var(--u)*1.9);color:#ffe9a8}#mbD small{font-size:calc(var(--u)*1.3);opacity:.9}.mbpb{width:calc(var(--u)*11);height:calc(var(--u)*11);image-rendering:pixelated;background:rgba(0,0,0,.35);border:1px solid rgba(160,210,255,.3);flex:none}.mbbar{position:relative;height:calc(var(--u)*2.2);background:rgba(0,0,0,.45);border:1px solid rgba(160,210,255,.35)}.mbbar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#3a7ad8,#7fc8ff)}[dir=rtl] .mbbar i{inset:0 0 0 auto}.mbbar span{position:relative;display:block;text-align:center;font-size:calc(var(--u)*1.25);line-height:calc(var(--u)*2.2)}.mbdr{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.5) calc(var(--u)*1)}.mbi{display:inline-flex;align-items:center;gap:calc(var(--u)*.4);font-size:calc(var(--u)*1.3)}.mbi img{width:calc(var(--u)*2.2);height:calc(var(--u)*2.2);image-rendering:pixelated}#mbG{display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(var(--u)*10.5),1fr));gap:calc(var(--u)*.6)}.mbc{display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*.2);padding:calc(var(--u)*.5);border:1px solid rgba(160,210,255,.25);background:rgba(10,24,50,.45);cursor:pointer;text-align:center;min-width:0}.mbc:hover,.mbc.sel{border-color:#9fd8ff;background:rgba(40,80,140,.5)}.mbc.ms{border-color:#f2c14e}.mbc b{font-size:calc(var(--u)*1.2);line-height:1.15;overflow-wrap:anywhere}.mbc small{font-size:calc(var(--u)*1.05);opacity:.8}.mbp{width:calc(var(--u)*6);height:calc(var(--u)*6);image-rendering:pixelated}img.mbld{visibility:hidden}#mbW{backdrop-filter:none}#mbG{contain:content}.mbc{content-visibility:auto;contain-intrinsic-size:auto calc(var(--u)*10)}.mbtrk{width:auto;align-self:flex-start;font-size:calc(var(--u)*1);padding:calc(var(--u)*.15) calc(var(--u)*.6);vertical-align:middle;margin-inline-start:calc(var(--u)*.6)}.mbtrk.on{border-color:#ffd23a;color:#ffd23a}#mbQ{display:block;width:60%;margin:calc(var(--u)*.6) auto;padding:calc(var(--u)*.4) calc(var(--u)*.8);font:inherit;font-size:calc(var(--u)*1.2);color:#eaf4ff;background:rgba(6,14,32,.6);border:1px solid rgba(160,210,255,.35);border-radius:4px;outline:none}#mbQ:focus{border-color:#9fd8ff}.un .mbp,.mbpb.un{filter:brightness(0) opacity(.55)}.mbq{display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*2.6);color:#9fd8ff;background:rgba(0,0,0,.3);border-radius:50%}
 #logL div{padding:calc(var(--u)*.25) 0;border-bottom:1px solid rgba(143,216,255,.12);font-size:calc(var(--u)*1.15)}#logL small{color:var(--muted);margin-inline-end:calc(var(--u)*.6);direction:ltr;display:inline-block}
 #sysm{position:absolute;min-width:calc(var(--u)*30);max-width:calc(var(--u)*56);text-align:center;font-size:calc(var(--u)*1.7);white-space:pre-line;border-color:#bfe8ff;box-shadow:0 0 calc(var(--u)*2.2) rgba(143,216,255,.6);animation:pin .25s cubic-bezier(.3,1.4,.5,1);z-index:30;pointer-events:auto}
@@ -2917,6 +2918,46 @@ const hcFormOf=st=>!st?null:st.indexOf('u')>=0?'bear':st.indexOf('w')>=0?'wolf':
 // another player's hands: aura blades or a beast's paws (true), else their weapon
 function hcHandR(r,fs,bob,sw){const st=fs.st||'';if(hcFormOf(st))return true;const i='xyz'.indexOf((st.match(/[xyz]/)||[])[0]);if(i<0||r.anim==='dead')return false;
  const hx=Math.round(r.x)+(r.dir===3?-6:5),hy=Math.round(r.y-bob)-7;auBlade(hx,hy,i,sw>=0&&fs.sw?fs.sw.a-1.1+2.2*sw:null);return true;}
+/* boss fight replays (SAT-ONLINE-109, plan U186). A fight with a boss near you is recorded as it goes, twice a second: the
+   boss (where, its health) and you and your party near you (name, where, health, down or not), with its start, a wipe
+   and how it ended (killed, reset, left, too long). No bag, gold or items: only what anyone there saw. The last five
+   stay on this device (satisfy_raidlogs), under L (the log). A replay plays the fight back at double speed as ghosts
+   where it happened, the view following the boss. Watching is a spectator state (mode 'rr', like a window: the world runs
+   on, you don't move, attack or use skills; Claude-B's review of #143): any key or a click ends it, and so does being hit,
+   so it never shields a fight. */
+Object.assign(STR.ar,{rrSaved:'اتسجّلت معركة {b}. تقدر تتفرج عليها من L',rrRow:'▶ {b} · {r} · {d}',rr_kill:'اتقتل',rr_reset:'رجع',rr_left:'سبتوه',rr_long:'طويلة',rrOn:'▶ إعادة معركة {b} (Esc يوقفها)',rrOff:'الإعادة خلصت',rrLbl:'▶ {b} {a} / {z}'});
+Object.assign(STR.en,{rrSaved:'The fight with {b} was recorded. Watch it from L',rrRow:'▶ {b} · {r} · {d}',rr_kill:'killed',rr_reset:'reset',rr_left:'left',rr_long:'long',rrOn:'▶ Replay of the fight with {b} (Esc stops it)',rrOff:'The replay ended',rrLbl:'▶ {b} {a} / {z}'});
+var RRL=null,RRC=null,RRP=null;const RR_K='satisfy_raidlogs',RR_MAX=5,RR_DT=.5,RR_CAP=360;
+function rrLogs(){if(RRL)return RRL;try{RRL=JSON.parse(localStorage.getItem(RR_K))||[];}catch(e){RRL=[];}if(!Array.isArray(RRL))RRL=[];return RRL;}
+function rrKeep(){try{localStorage.setItem(RR_K,JSON.stringify(rrLogs().slice(0,RR_MAX)));}catch(e){}}
+const rrT=x=>Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0');
+// you and your party near you: [id, name, x, y, health %, down]
+function rrWho(){const o=[['me',String(netId||S.look.n||'?').slice(0,16),Math.round(P.x),Math.round(P.y),Math.round(Math.max(0,P.hp)/maxHP()*100),mode==='dead'?1:0]];
+ // the others by their place in the list (p1, p2...), not by any account id
+ if(NET&&PARTY&&PARTY.id()){const mem=new Set(PARTY.members());for(const r of NET.remotes())if(r.uid!==NET.uid&&mem.has(r.uid)&&Math.hypot(r.x-P.x,r.y-P.y)<700)o.push(['p'+o.length,Satisfy.chat.clean(r.handle||'?',16)||'?',Math.round(r.x),Math.round(r.y),Math.round(+r.hp||0),r.anim==='dead'?1:0]);}
+ return o;}
+function rrTick(dt){if(!S||!P||S.__demo||RRP||mode==='rr')return;
+ if(!RRC){const m=mons.find(m=>!m.dead&&MT[m.type]&&MT[m.type].boss&&m.hp<m.max&&Math.hypot(m.x-P.x,m.y-P.y)<360);if(!m)return;RRC={m,k:m.type,at:Date.now(),t:0,s:[],ev:[['start',0]],far:0,acc:RR_DT};}
+ const C=RRC,m=C.m,tt=()=>Math.round(C.t*10)/10;C.t+=dt;C.acc+=dt;
+ if(C.acc>=RR_DT){C.acc=0;C.gone=!mons.includes(m);C.s.push([tt(),Math.round(m.x),Math.round(m.y),Math.round(Math.max(0,m.hp)/m.max*100),rrWho()]);}
+ if(mode==='dead'&&!C.down){C.down=1;C.ev.push(['down',tt()]);}
+ C.far=Math.hypot(m.x-P.x,m.y-P.y)>800?C.far+dt:0;
+ const end=m.dead?'kill':C.gone?'left':m.hp>=m.max&&C.t>3?'reset':C.far>10?'left':C.s.length>=RR_CAP?'long':null;
+ if(end){C.ev.push([end,tt()]);if(C.s.length>=4){const L=rrLogs();L.unshift({k:C.k,at:C.at,dur:Math.round(C.t),res:end,s:C.s,ev:C.ev});L.length=Math.min(L.length,RR_MAX);rrKeep();toast(t('rrSaved',{b:mbName(C.k)}));}RRC=null;}}
+function rrPlay(i){const L=rrLogs()[i];if(!L||!Array.isArray(L.s)||!L.s.length||RRP)return;if(mode==='log')closeLog();if(mode!=='play')return;
+ RRP={L,t:0,i:0,cam:{x:L.s[0][1],y:L.s[0][2]}};mode='rr';for(const k in K)K[k]=false;guardOff();P.slash=null;camSnap=true;toast(t('rrOn',{b:mbName(L.k)}));}
+function rrPlayTick(dt){const R=RRP;if(!R)return;if(mode!=='rr'){rrStop();return;} // a dialog, death or anything else that took the screen ends it
+ const A=R.L.s;R.t+=dt*2;while(R.i<A.length-1&&A[R.i+1][0]<=R.t)R.i++;R.cam={x:A[R.i][1],y:A[R.i][2]};
+ let el=$('rrL');if(!el){el=document.createElement('div');el.id='rrL';el.style.cssText='position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:60;background:#000a;color:#fff;font:12px monospace;padding:3px 8px;border-radius:4px;cursor:pointer';el.onclick=()=>rrStop();document.body.appendChild(el);}
+ el.hidden=false;el.textContent=t('rrLbl',{b:mbName(R.L.k),a:rrT(Math.min(R.t,A[A.length-1][0])),z:rrT(A[A.length-1][0])});if(R.t>A[A.length-1][0]+1)rrStop();}
+function rrStop(){if(!RRP)return;RRP=null;if(mode==='rr')mode='play';camSnap=true;const el=$('rrL');if(el)el.hidden=true;toast(t('rrOff'));}
+// the ghosts: each of you as a ring with a name and a health bar, the boss as a larger red one
+function rrRing(x,y,r,col,name,hp,down){ctx.globalAlpha=down?.3:.6;ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,y-8,r,0,6.283);ctx.stroke();
+ R(ctx,x-8,y-r-14,16,2,'#300');R(ctx,x-8,y-r-14,16*Math.max(0,Math.min(100,hp))/100,2,'#5ce07a');ctx.fillStyle='#fff';ctx.font='6px monospace';ctx.textAlign='center';ctx.fillText(String(name).slice(0,16),x,y-r-17);ctx.globalAlpha=1;}
+function rrEnts(ents){const Q=RRP;if(!Q)return;const s=Q.L.s[Q.i];if(!s)return;
+ ents.push({y:s[2],f:()=>rrRing(s[1],s[2],14,'#ff6a5a',mbName(Q.L.k),s[3],0)});
+ for(const w of s[4]||[])ents.push({y:w[3],f:()=>rrRing(w[2],w[3],7,w[0]==='me'?'#ffe27a':'#8fd8ff',w[1],w[4],w[5])});}
+window.__RREP={boss:()=>{const P0=P;return mons.filter(m=>!m.dead&&MT[m.type]&&MT[m.type].boss).sort((a,b)=>Math.hypot(a.x-P0.x,a.y-P0.y)-Math.hypot(b.x-P0.x,b.y-P0.y))[0]||null;},logs:()=>rrLogs(),get rec(){return RRC},get play(){return RRP},playI:i=>rrPlay(i),stop:()=>rrStop(),kill:m=>killMon(m),hurt:d=>hurtPlayer(d,S.lv,null),get K(){return K}}; // tests
 function hcEnts(ents){for(const g of HC.ghosts)ents.push({y:g.y,f:()=>{ctx.globalAlpha=Math.min(.6,g.t*2);drawMonSheet(Math.round(g.x),Math.round(g.y),{type:g.k,face:g.face,t:0,at:0,hurt:0,tele:0,atkT:1,cd:0});ctx.globalAlpha=1;}});
  if(P.agrd>0||P.sens>0)ents.push({y:P.y+1,f:()=>{ctx.save();ctx.strokeStyle=AUC[auR()];ctx.globalAlpha=.5;ctx.setLineDash(P.sens>0?[2,4]:[]);ctx.beginPath();if(P.sens>0)ctx.ellipse(Math.round(P.x),Math.round(P.y-4),160,104,0,0,7);else ctx.ellipse(Math.round(P.x),Math.round(P.y-8),11,13,0,0,7);ctx.stroke();ctx.restore();}});}
 const HCICO={
@@ -5094,11 +5135,13 @@ stage.addEventListener('mousedown',e=>{if(TMG.has(mode)&&performance.now()-TPD<9
  if(mode==='dialog'){advance();return;}
  if(mode==='cook'){cookHit();return;}if(mode==='sew'){sewHit();return;}if(mode==='mix'){if(MIXG)MIXG.h=1;return;}if(mode==='farm'){farmTap(e);return;}if(mode==='song'||mode==='dance'){p4Tap(e);return;}
  if(mode==='cut'){if(SM)SM.done();return;}
+ if(mode==='rr'){rrStop();return;} // a click ends a replay, without a swing
  if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar')){stage.focus();const b=stage.getBoundingClientRect();const mx=(e.clientX-b.left)/SC+camXf,my=(e.clientY-b.top)/SC+camYf;if(NET&&e.altKey){netPing(mx,my);return;}const dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);LHOLD=1;}});
 // owner 2026-10-22: holding the left button keeps attacking toward the cursor, no need to click again and again
 let LHOLD=0;addEventListener('mouseup',e=>{if(e.button===0)LHOLD=0;});addEventListener('blur',()=>{LHOLD=0;});
 function holdAtk(){if(!LHOLD)return;if(mode!=='play'||MSX==null){LHOLD=0;return;}if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const b=stage.getBoundingClientRect(),mx=(MSX-b.left)/SC+camXf,my=(MSY-b.top)/SC+camYf,dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);}
 function onKey(c){if(c==="Escape"&&!$("updLog").hidden){updLogClose();return;}
+ if(mode==='rr'){rrStop();return;} // a replay: any key ends it, and does nothing else
  if(c==='Tab'&&(mode==='play'||mode==='cut')){toggleQuest();return;}
  if(mode==='play'){
   if(PHOTO){if(c==='Escape'||c==='F8'){photoOff();return;}if(c==='Enter'){photoShot();return;}}else if(c==='F8'){photoOn();return;}
@@ -5239,7 +5282,7 @@ function guardArc(x,y,a,k,fort){const cx=Math.round(x),cy=Math.round(y)-8;ctx.sa
 function drawGuard(){if(P.guard)guardArc(P.x,P.y,Math.atan2(P.gy,P.gx),P.gT<.22?1:.55,P.fort>0);
  const g=P.gd??100;if(g<100||P.guard){const x=Math.round(P.x)-9,y=Math.round(P.y)+3;ctx.fillStyle='rgba(10,16,30,.6)';ctx.fillRect(x,y,18,3);ctx.fillStyle=g<30?'#ff8a5a':'#8fd0ff';ctx.fillRect(x+1,y+1,Math.round(16*g/100),1);}}
 function hurtPlayer(d,ml,src){return asMe(()=>hurtPlayer0(d,ml,src));}
-function hurtPlayer0(d,ml,src){P.hitT=gTime;if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(rgEvade(src)||hcEvade(src))return 0;if(src&&src.dmul)d*=src.dmul;if(src&&src.type)P.lastSrc=src.type;if(S.tl.hking&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
+function hurtPlayer0(d,ml,src){P.hitT=gTime;if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(rgEvade(src)||hcEvade(src))return 0;if(RRP)rrStop();/* hit while watching a replay: back to the fight, unshielded */if(src&&src.dmul)d*=src.dmul;if(src&&src.type)P.lastSrc=src.type;if(S.tl.hking&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
  if(P.qm>0&&rand()<.3){numP(-20,t('ipEvade'),'#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
  d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,3.2)*150/(150+defV())*rlDef(src)));d=p3Hurt(p2Hurt(c2Hurt(d,src),src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=bthHurt(d,src);d=dmHurt(d,src);d=mbHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
@@ -6496,7 +6539,10 @@ function pSpr(){if(!S||!S.items)return 'me';const sg=!!(S.rsh&&S.rsh.g&&S.rsh.w)
 const LOG=[];function logMsg(m){const d=new Date();LOG.push({tm:d.toTimeString().slice(0,5),m});if(LOG.length>60)LOG.shift();}
 function toast(msg,cls){const box0=$('toasts'),dup=[...box0.children].find(e=>!e.classList.contains('out')&&e.textContent===msg);if(dup){clearTimeout(dup._t);dup._t=setTimeout(()=>{dup.classList.add('out');setTimeout(()=>dup.remove(),360);},2600);return;}
  logMsg(msg);const el=document.createElement('div');el.className='toast'+(cls?' '+cls:'');el.textContent=msg;const box=$('toasts');box.appendChild(el);const live=[...box.children].filter(e=>!e.classList.contains('out'));if(live.length>(document.body.classList.contains('touch')?2:4))live[0].classList.add('out');el._t=setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),360);},document.body.classList.contains('touch')?1700:2600);}
-function openLog(){SFX.open();mode='log';$('logW').hidden=false;$('hint').hidden=true;$('logL').innerHTML=LOG.length?[...LOG].reverse().map(l=>`<div><small>${l.tm}</small>${esc(l.m)}</div>`).join(''):`<div>${t('logEmpty')}</div>`;}
+function openLog(){SFX.open();mode='log';$('logW').hidden=false;$('hint').hidden=true;
+ const rr=rrLogs().map((L,i)=>`<button data-rr="${i}" class="rrb">${esc(t('rrRow',{b:mbName(L.k),r:t('rr_'+(['kill','reset','left','long'].includes(L.res)?L.res:'left')),d:rrT(+L.dur||0)}))}</button>`).join('');
+ $('logL').innerHTML=(rr?`<div class="rrs">${rr}</div>`:'')+(LOG.length?[...LOG].reverse().map(l=>`<div><small>${l.tm}</small>${esc(l.m)}</div>`).join(''):`<div>${t('logEmpty')}</div>`);
+ $('logL').querySelectorAll('[data-rr]').forEach(b=>b.onclick=()=>{SFX.click();rrPlay(+b.dataset.rr);});}
 let qdId=null,qdArm=false;
 function openQD(id){const q=QD[id];if(!q)return;qdId=id;qdArm=false;SFX.open();mode='qd';$('qdW').hidden=false;$('hint').hidden=true;$('qdT').textContent=qName(id);const r=qReady(id),off=STR.en[id+'_o']?t(id+'_o'):'';
  $('qdB').innerHTML=`<div class="qdtag">${esc(q.gr?t('qdGr',{g:q.gr}):t('qf_'+qCat(id)))}</div><div class="ssec">${t('qdFrom',{w:t(q.by)})}</div>${q.gr?`<p>${esc(epLines(id)).replace(/\n/g,'<br>')}</p>`:''}${off?`<p>${esc(off)}</p>`:''}<div class="ssec">${t('qdObj')}</div><p>${esc(r?t('retTo',{w:t(q.by)}):qObjText(id))}</p><div class="ssec">${t('rwH')}</div><ul>${qRewards(id).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${S.qs[id]&&S.qs[id].st===1?`<div class="qdc">${qSpot(id)?`<button data-act="qgFollow">${esc(t(S.qTrk===id&&!S.qGOff?'qgHide':'qgFollow'))}</button> `:''}<button id="qdCancel" data-act="cancelQ">${esc(t('qCancel'))}</button></div>`:''}`;}
@@ -7443,7 +7489,7 @@ const ZT={};
 // WASD/arrows move you; attacks, E and skills still need the window closed so clicks in it never become swings
 const WALKM=['inv','status','equip','log','qd','map','mb'];
 function update(dt){
- gTime+=dt;
+ gTime+=dt;try{rrTick(dt);rrPlayTick(dt);}catch(e){gameErr(e);}
  for(let i=DGATES.length-1;i>=0;i--)if(DGATES[i].tmp&&gTime>DGATES[i].til)DGATES.splice(i,1);
  for(const n of nodes)if(n.dep>0){n.dep-=dt;if(n.dep<=0&&(n.kind==='herb'||n.kind==='bherb'))herbSpot(n);}
  if(annT>0){annT-=dt;if(annT<=0)$('announce').hidden=true;}
@@ -7460,7 +7506,7 @@ function update(dt){
  if(P){P.trail.forEach(a=>a.t-=dt);P.trail=P.trail.filter(a=>a.t>0);}
  for(const m of mons)if(m.dead&&m.dying>0)m.dying-=dt;
  // the world keeps running behind menus and windows (inventory, status, map, dialog, the Esc menu...); only the player's input stops
- const LIVE=mode==='play'||['inv','status','equip','log','map','qd','dialog','pause','sound','forge','mb','au','gname','enhfx','song','dance'].includes(mode)||(mode==='controls'&&ctrlBack==='pauseScreen');
+ const LIVE=mode==='play'||['inv','status','equip','log','map','qd','dialog','pause','sound','forge','mb','au','gname','enhfx','song','dance','rr'].includes(mode)||(mode==='controls'&&ctrlBack==='pauseScreen');
  if(!LIVE||!S||S.__demo&&mode!=='play')return;const inp=mode==='play';
  // player
  const mh=maxHP(),pain=P.hp/mh<.25;
@@ -7716,7 +7762,7 @@ function drawNode(x,y,n){if(n.kind==='herb'||n.kind==='bherb')return drawHerb(x,
 function render(dt){DRAWN=0;netDrawn=0;
  const sx=shake>0?(rand()-.5)*4:0,sy=shake>0?(rand()-.5)*4:0;
  const titleCam=mode==='lang'||mode==='title'||(mode==='controls'&&ctrlBack==='titleScreen');
- let tx,ty;const RM=!titleCam&&P&&roomAt(P.x,P.y);if(titleCam){tx=8*TS+Math.sin(gTime*.08)*120+120;ty=14*TS;}else if(RM){tx=(RM.rx+6)*TS-W/2;ty=(RM.ry+4)*TS-H/2;}else{tx=P.x-W/2;ty=P.y-H/2-8;}
+ let tx,ty;const RM=!titleCam&&P&&roomAt(P.x,P.y);if(titleCam){tx=8*TS+Math.sin(gTime*.08)*120+120;ty=14*TS;}else if(RM){tx=(RM.rx+6)*TS-W/2;ty=(RM.ry+4)*TS-H/2;}else{tx=P.x-W/2;ty=P.y-H/2-8;}if(RRP&&!titleCam){tx=RRP.cam.x-W/2;ty=RRP.cam.y-H/2-8;} // a fight replay: the view follows the boss's ghost
  // a house room (12x8 tiles) is smaller than the screen: the view centres on it (Twister: the Reidan merchant sat under the HUD)
  // above ground the view stops at the world's edge, so the cave rows stored under it never show
  const yMax=!titleCam&&P&&P.y<WMH*TS?WMH*TS-VH:MH*TS-VH+8*TS;const yMin=!titleCam&&P&&P.y>=WMH*TS?WMH*TS:-NR*TS;if(!RM){tx=clamp(tx,0,MW*TS-VW);ty=clamp(ty,yMin,yMax);}
@@ -7759,7 +7805,7 @@ function render(dt){DRAWN=0;netDrawn=0;
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(hcHand(hx,hy,P.dir,P.slash)){}else if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,w.id,w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
   // SAT-ONLINE-117 (plan U324): each part that adds to the scene is its own boundary, the other players' part (netEnts) above
   // all: a bad message or a bug in one part costs that part this frame, never the whole world
-  if(BHR)entsOf(bhEnts,ents);if(S&&S.wis)entsOf(twEnts,ents);if(S){entsOf(c2Ents,ents);entsOf(p2Ents,ents);entsOf(p3Ents,ents);entsOf(p4Ents,ents);entsOf(phEnts,ents);entsOf(necEnts,ents);entsOf(hcEnts,ents);entsOf(fbEnts,ents);entsOf(brEnts,ents);entsOf(blEnts,ents);}if(SKA)entsOf(tAimEnts,ents);if(S)entsOf(tlEnts,ents);if(NET&&!titleCam)entsOf(netEnts,ents);}
+  if(BHR)entsOf(bhEnts,ents);if(S&&S.wis)entsOf(twEnts,ents);if(S){entsOf(c2Ents,ents);entsOf(p2Ents,ents);entsOf(p3Ents,ents);entsOf(p4Ents,ents);entsOf(phEnts,ents);entsOf(necEnts,ents);entsOf(hcEnts,ents);entsOf(rrEnts,ents);entsOf(fbEnts,ents);entsOf(brEnts,ents);entsOf(blEnts,ents);}if(SKA)entsOf(tAimEnts,ents);if(S)entsOf(tlEnts,ents);if(NET&&!titleCam)entsOf(netEnts,ents);}
  // one broken drawing (a stale sprite file after an update) must not hide the player and everything after it
  ents.sort((a,b)=>a.y-b.y).forEach(e=>{try{e.f();DRAWN++;}catch(err){ctx.globalAlpha=1;gameErr(err);}});
  drawGDrop();drawEProj();proj.forEach(p=>{if(p.kind==='arrow'){const l=Math.hypot(p.vx,p.vy)||1,ux=p.vx/l,uy=p.vy/l;ctx.strokeStyle='#e8e0d0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x-ux*7,p.y-uy*7);ctx.lineTo(p.x,p.y);ctx.stroke();R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}else if(p.kind==='wave'){const a=Math.atan2(p.vy,p.vx);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.globalAlpha=.85;ctx.strokeStyle='#ffe08a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(-6,0,12,-1.1,1.1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(-5,0,12,-.9,.9);ctx.stroke();ctx.restore();}else{const f=p.kind==='fire';R(ctx,p.x-2,p.y-2,f?5:4,f?5:4,f?'#ff8a1e':'#9fd8ff');R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}});
@@ -8315,7 +8361,7 @@ function loopRest(dt){PF.w1=pfNow();if(NET)try{netTick();}catch(e){gameErr(e);}t
  if(mode==='create')drawPrev();if(DL&&DL.pv)drawDPrev();
  if(mode==='map'&&(gTime*2|0)!==(Math.max(0,gTime-dt)*2|0))drawMap();
  musicTick();miniT-=dt;if(miniT<=0){miniT=.2;try{faultAt('mini');drawMini();}catch(e){gameErr(e);}}
- if(mode==='play'||mode==='forge'||mode==='inv'||mode==='au'||mode==='dialog'||mode==='status'||mode==='dead'||mode==='cut'||mode==='equip'||mode==='log'||mode==='map'){hudT-=dt;if(hudT<=0||hudDirty){updateHUD();hudT=.1;hudDirty=false;}saveT+=dt;if(saveT>20&&mode==='play'){saveT=0;save(true);}}
+ if(mode==='play'||mode==='rr'||mode==='forge'||mode==='inv'||mode==='au'||mode==='dialog'||mode==='status'||mode==='dead'||mode==='cut'||mode==='equip'||mode==='log'||mode==='map'){hudT-=dt;if(hudT<=0||hudDirty){updateHUD();hudT=.1;hudDirty=false;}saveT+=dt;if(saveT>20&&mode==='play'){saveT=0;save(true);}}
 }
 requestAnimationFrame(loop);{const b=document.getElementById('boot');if(b)b.remove();}   // the loading screen goes with the first frame
 /* SAT-ONLINE-026: browsers pause requestAnimationFrame in a hidden, minimised or covered window, and with it presence and the
