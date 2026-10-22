@@ -25,7 +25,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U019 | Rate limiting | ✅ | Presence per-sender budget, duel hits per second, rules on every write |
 | U020 | Network observability | 🟡 | `net().stats`/`net().link` and the badge tooltip (SAT-ONLINE-012); no dashboard |
 | U021 | Auth emulator CI | ✅ | SAT-ONLINE-116: the real rules on the Realtime Database emulator in CI (`tests/emulator/rules.emu.cjs`, `.github/workflows/emulator.yml`), players A and B and an admin: A can't change what is B's (account ID, presence, profile, saves, session, friends, chat lines, guild rank); the fake still mirrors the rules for the browser tests |
-| U022 | Config/env isolation | 🟡 | Public web config in `src/net/firebase-config.js`; no staging project |
+| U022 | Config/env isolation | ✅ | Public web config in `src/net/firebase-config.js`; SAT-ONLINE-120: a test environment apart from the real one, the local Firebase emulators with `?emu`, honoured only on a page served from this computer, so the public site can't point at a test database (`unit/firebase-load`; [EMULATOR.md](EMULATOR.md)). A second Firebase project (staging) stays the owner's call (U327) |
 | U023 | Protocol versioning | ✅ | Envelope `v: 1`, `PROTOCOL_VERSION` (§25) |
 | U024 | Load testing swarm | ✅ | `unit/chaos` 100-client soak (in memory) |
 | U025 | World shard migration | ❌ | U009 is in, but there is still one shard (`main`); migration needs more than one |

@@ -37,7 +37,13 @@
       // keep the Google sign-in across reloads (owner feedback #4). It is getAuth's default, but set it explicitly so a
       // browser or SDK change can't quietly make every F5 ask again.
       var keep = m.auth.setPersistence && m.auth.browserLocalPersistence ? m.auth.setPersistence(auth, m.auth.browserLocalPersistence).catch(function () { /* the default stays */ }) : null;
-      return Promise.resolve(keep).then(function () { return { m: m, app: app, auth: auth, db: m.database.getDatabase(app, cfg.databaseURL) }; });
+      var db = m.database.getDatabase(app, cfg.databaseURL), emu = root.Satisfy && root.Satisfy.firebaseEmulator;
+      // SAT-ONLINE-120: the local emulators instead of the project, only as firebase-config.js allows (a local page with ?emu)
+      if (emu && m.database.connectDatabaseEmulator && m.auth.connectAuthEmulator) {
+        m.database.connectDatabaseEmulator(db, emu.host, emu.dbPort);
+        m.auth.connectAuthEmulator(auth, emu.authUrl, { disableWarnings: true });
+      }
+      return Promise.resolve(keep).then(function () { return { m: m, app: app, auth: auth, db: db, emulator: !!emu }; });
     });
     cache.catch(function () { cache = null; });
     return cache;
