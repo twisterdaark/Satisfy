@@ -709,7 +709,7 @@
     "bugs": {
       ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
       "$id": {
-        ".write": "auth != null && ((!data.exists() && newData.exists() && newData.child('by').val() === auth.uid && newData.parent().parent().child('bugLast').child(auth.uid).child('t').val() === now && (!root.child('bugLast').child(auth.uid).exists() || root.child('bugLast').child(auth.uid).child('t').val() < now - 120000)) || (data.exists() && !newData.exists() && root.child('admins').child(auth.uid).val() === true))",
+        ".write": "auth != null && ((!data.exists() && newData.exists() && newData.child('by').val() === auth.uid && newData.parent().parent().child('bugLast').child(auth.uid).child('t').val() === now && (!root.child('bugLast').child(auth.uid).exists() || root.child('bugLast').child(auth.uid).child('t').val() < now - 120000)) || (!newData.exists() && root.child('admins').child(auth.uid).val() === true))",
         ".validate": "$id.matches(/^b_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['s', 'v', 'by', 't'])",
         "s": { ".validate": "newData.isString() && newData.val().length >= 3 && newData.val().length <= 300" },
         "v": { ".validate": "newData.isString() && newData.val().length <= 16" },
@@ -722,7 +722,7 @@
     },
     "bugLast": {
       "$uid": {
-        ".write": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && newData.exists()",
         ".validate": "newData.hasChildren(['t'])",
         "t": { ".validate": "newData.val() === now" },
         "$other": { ".validate": false }

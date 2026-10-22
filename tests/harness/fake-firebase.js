@@ -522,10 +522,11 @@
       const KEY = /^[bc]_[A-Za-z0-9_-]{1,60}$/;
       if (seg[0] === 'bugLast') {
         if (seg[1] !== user.uid) return 'PERMISSION_DENIED: bugLast';
-        return v === null || (Object.keys(v).join(',') === 't' && isSV(v.t)) ? null : 'bugLast values';
+        if (v === null) return 'PERMISSION_DENIED: bugLast remove'; // Claude-B's review of #161: else remove it and send again, forever
+        return Object.keys(v).join(',') === 't' && isSV(v.t) ? null : 'bugLast values';
       }
       if (seg[0] === 'bugs') {
-        if (v === null) return old !== undefined && adm ? null : 'PERMISSION_DENIED: bugs remove';
+        if (v === null) return adm ? null : 'PERMISSION_DENIED: bugs remove'; // one already gone too (a second click on Clear)
         const last = data.get('bugLast/' + user.uid), sent = curDiff && curDiff['bugLast/' + user.uid]; // curDiff: the other paths of the same update
         if (old !== undefined || v.by !== user.uid) return 'PERMISSION_DENIED: bugs write';
         if (!sent) return 'PERMISSION_DENIED: bugs without bugLast';

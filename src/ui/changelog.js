@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22bugs', ver: '1.86', d: '2026-10-22',
+      ar: ["لو لقيت مشكلة في اللعبة وإنت أونلاين، اكتب في الشات /bug وبعدها إيه اللي حصل، والبلاغ بيوصل لفريق اللعبة على طول ومعاه نسخة اللعبة والمكان اللي كنت فيه (بلاغ واحد كل دقيقتين)"],
+      en: ["Found something wrong in the game? Online, type /bug and what happened in the chat: it goes straight to the people who make the game, with the game's version and where you were (one report every 2 minutes)"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
@@ -246,10 +249,6 @@
       ar: ['شاشة التحميل: النقط والدواير بقت بتطلع من تحت لفوق وهي بتتمايل، وبتصغر وتبهت لحد ما تختفي، وفيه منها أكتر على الجناب. وبقت بدقة الشاشة كاملة بدل ما كانت متمطوطة'],
       en: ['Loading screen: the sparks and rings now rise from the bottom with a gentle sway, shrinking and fading until they vanish, with more of them along the sides. They are drawn at full screen resolution instead of stretched'] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22', hide: 1,
-    { v: '2026-10-22bugs', ver: '1.42', d: '2026-10-22',
-      ar: ["لو لقيت مشكلة في اللعبة وإنت أونلاين، اكتب في الشات /bug وبعدها إيه اللي حصل، والبلاغ بيروح لصاحب اللعبة على طول ومعاه نسخة اللعبة والمكان اللي كنت فيه (بلاغ واحد كل دقيقتين)"],
-      en: ["Found something wrong in the game? Online, type /bug and what happened in the chat: it goes straight to the game's owner, with the game's version and where you were (one report every 2 minutes)"] },
-    { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },
     { v: '2026-10-22v140', ver: '1.40', d: '2026-10-22',
