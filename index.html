@@ -715,6 +715,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
  'src/net/pvp.js',
  'src/net/trade.js',
  'src/net/guild.js',
+ 'src/net/diplo.js',
  'src/net/natcomp.js',
  'src/net/chat.js',
  'src/net/raid.js',
@@ -8113,7 +8114,7 @@ function netEnts(ents){const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'
   const mate=PARTY&&PARTY.id()&&r.party===PARTY.id(),foe=DUEL&&DUEL.state().foe===r.uid&&DUEL.state().phase!=='over';
   const gi=guildOf(r),gy=gi?6:0; // SAT-ONLINE-046: «guild» under the name, the name and the bar a line higher
   TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol===2?'#b0102a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038), 2 a murderer (052)
-  if(gi)TX.push({s:'«'+gdEmb(gi.emb)+gi.n+'»'+(galOf(r.gd)?' 🤝':warNow(r.gd)?' ⚔':''),x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
+  if(gi)TX.push({s:'«'+gdEmb(gi.emb)+gi.n+'»'+gstMark(r.gd),x:r.x,y:r.y-22,f:F,z:6,c:gi.col});
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37-gy,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
   if(near&&r.uid===near.uid&&!foe)TX.push({s:[t('pcHint'),mate?'':t('pInvite'),!mate&&DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?t('dHint'):''].filter(Boolean).join(' · '),x:r.x,y:r.y-(typeof r.hp==='number'?46:37)-gy,f:F,z:6,c:'#ffe7a8'});}
@@ -8700,7 +8701,7 @@ function galLogLine(e){const gs=GUILD&&GUILD.state(),m=gs&&gs.members&&gs.member
 function galD(){const st=galSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return guildPanel();const n=wNow(),mo=galMo(),me=gs.guild.name;
  const live=Object.keys(GAL).filter(k=>GAL[k].until>n),gone=Object.keys(GAL).filter(k=>GAL[k].until<=n),asks=Object.keys(GALA);
  const lines=[t('galH',{n:live.length,m:GAL_MAX})+' · '+(live.length||gone.length?[...live.map(k=>t('galRow',{g:GAL[k].n,d:galLeft(GAL[k].until-n)})),...gone.map(k=>t('galGone',{g:GAL[k].n}))].join(' · '):t('galNone'))];
- if(mo&&asks.length)lines.push(asks.map(k=>t('galAskIn',{g:GALA[k].n})).join(' · '));
+ if(mo&&asks.length)lines.push(asks.map(k=>t('galAskIn',{g:GALA[k].n})+gstSuf(k)).join(' · '));
  const log=Object.keys(GALD).sort().slice(-6).reverse().map(k=>galLogLine(GALD[k])).filter(Boolean);if(log.length)lines.push(t('galLogH')+': '+log.join(' · '));
  const done=(p,ok)=>p.then(()=>{if(ok)toast(ok,'good');galD();},()=>{toast(t('gdFail'),'warn');galD();});
  const opts=[];
@@ -8709,6 +8710,7 @@ function galD(){const st=galSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)re
   for(const k of live)if(GAL[k].until-n<GAL_RENEW)opts.push({l:t('galRenew',{g:GAL[k].n}),f:()=>galAsk(k,GAL[k].n)});
   for(const k of [...live,...gone])opts.push({l:t('galEnd',{g:GAL[k].n}),f:()=>{const g=GAL[k].n,brk=GAL[k].until>wNow();if(!brk)return done(st.allyEnd(gs.gid,me,k,g,NET.uid,'end',galId()));
    dialog('guild',[t('galEndQ',{g})],null,[{l:t('gYes'),f:()=>done(st.allyEnd(gs.gid,me,k,g,NET.uid,'break',galId()))},{l:t('gNo'),f:galD}]);}});}
+ opts.push({l:t('gdStand'),f:gstD});
  opts.push({l:t('oBack'),f:guildPanel});dialog('guild',lines,null,opts);}
 // propose to the guild called name (after the day's wait when one of the two broke an alliance between them)
 function galAsk(gid,name){const st=galSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid||!galMo())return Promise.reject(new Error('rank'));
@@ -8722,6 +8724,26 @@ function galPropose(){const st=galSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.
 function galEndAll(){const st=galSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)return Promise.resolve();
  return Promise.all(Object.keys(GAL).map((k,i)=>st.allyEnd(gs.gid,gs.guild.name,k,GAL[k].n,NET.uid,'end',galId()+i).catch(()=>{})));}
 window.__GAL={open:()=>galD(),ask:name=>new Promise(r=>{const st=galSt();st.findGuild(String(name).toLowerCase()).then(x=>galAsk(x.gid,x.g.name).then(r));}),of:gid=>galOf(gid),get all(){return GAL},get asks(){return GALA},get log(){return GALD},line:e=>galLogLine(e),endAll:()=>galEndAll(),store:()=>GDS}; // tests
+/* standings between guilds (SAT-ONLINE-123, plan U245): from the diplomacy log and what is in force (src/net/diplo.js;
+   no new data and no new rules), the same for both guilds. G -> Diplomacy -> Standings lists them with the formula; an
+   alliance proposal or a war declared on you shows the standing with that guild; a hostile guild's members (or a guild's with
+   a war set) carry 💢 by their guild's name, as allies carry 🤝 and enemies ⚔ in the war's hour. */
+Object.assign(STR.ar,{gdStand:'العلاقات',gstH:'علاقة جيلدك بالجيلدات التانية (آخر 30 يوم)',gstNone:'مفيش تعاملات مع جيلدات تانية في آخر 30 يوم: كلهم محايدين',gstRow:'{g}: {s} ({p})',gstSuf:' (العلاقة {s} {p})',gst_ally:'حلفاء',gst_war:'في حرب',gst_friendly:'ودّية',gst_neutral:'محايدة',gst_hostile:'عدائية',gstW_ally:'تحالف ×{n}',gstW_end:'تحالف خلص بهدوء ×{n}',gstW_gone:'التحالف خلصت مدته',gstW_break:'تحالف اتكسر ×{n}',gstW_decline:'طلب اترفض ×{n}',gstW_war:'حرب ×{n}',gstW_warno:'حرب اترفضت ×{n}',gstW_live:'تحالف شغال',gstHow:'الحساب: كل حاجة حصلت في آخر 30 يوم بتتحسب مرة واحدة: تحالف +20، تحالف خلص بهدوء أو خلصت مدته +10، تحالف اتكسر -50، طلب تحالف اترفض -5، حرب -30، حرب اترفضت -10، وتحالف شغال +50. من 25 وطالع ودّية، ومن -25 ونازل عدائية. الجيلدين بيشوفوا نفس العلاقة. الجيلد العدائي أو اللي بينكم حرب متحدد ميعادها جنب اسمه 💢 (والحلفاء 🤝، ووقت الحرب ⚔)'});
+Object.assign(STR.en,{gdStand:'Standings',gstH:'Standings with other guilds (the last 30 days)',gstNone:'No dealings with other guilds in the last 30 days: every guild is neutral',gstRow:'{g}: {s} ({p})',gstSuf:' (standing: {s} {p})',gst_ally:'allied',gst_war:'at war',gst_friendly:'friendly',gst_neutral:'neutral',gst_hostile:'hostile',gstW_ally:'alliance made ×{n}',gstW_end:'ended in order ×{n}',gstW_gone:'ran out',gstW_break:'broken ×{n}',gstW_decline:'declined ×{n}',gstW_war:'war fought ×{n}',gstW_warno:'war refused ×{n}',gstW_live:'alliance in force',gstHow:'How: each event of the last 30 days counts once: an alliance made +20, ended in order or ran out +10, broken -50, a proposal declined -5, a war fought -30, a war refused -10; an alliance in force +50. 25 and up is friendly, -25 and down hostile. Both guilds see the same standing. A hostile guild, or one with a war set, carries 💢 by its name (🤝 allies, ⚔ during the war)'});
+var GST={d:null,a:null,w:null,m:-1,v:{}};
+// every standing of your guild, worked out again when the log, the alliances or the wars change, or a minute passes
+function gstAll(){const n=wNow(),m=Math.floor(n/60000);if(GST.d===GALD&&GST.a===GAL&&GST.w===GWR&&GST.m===m)return GST.v;
+ const w={};for(const k in GWR)w[k]={n:GWR[k].n,end:GWR[k].at+GWR_MS};
+ GST.v=Satisfy.diplo.standings(GALD,n,GAL,w);GST.d=GALD;GST.a=GAL;GST.w=GWR;GST.m=m;return GST.v;}
+const gstOf=gid=>gid&&gstAll()[gid]||null,gstPts=p=>(p>0?'+':'')+p;
+// ' (standing: hostile -30)' after a proposal or a war from that guild, when the two guilds have a history
+function gstSuf(gid){const s=gstOf(gid);return s&&(s.k!=='neutral'||s.pts)?t('gstSuf',{s:t('gst_'+s.k),p:gstPts(s.pts)}):'';}
+// the mark by a guild's name over its members' heads: 🤝 allied, ⚔ in the war's hour, 💢 hostile or a war set
+function gstMark(gid){if(!gid)return '';if(galOf(gid))return ' 🤝';if(warNow(gid))return ' ⚔';const s=gstOf(gid);return s&&(s.k==='hostile'||s.k==='war')?' 💢':'';}
+function gstD(){const gs=GUILD&&GUILD.state();if(!galSt()||!gs||!gs.gid)return guildPanel();const v=gstAll(),L=Object.keys(v).sort((a,b)=>v[b].pts-v[a].pts||(v[a].n<v[b].n?-1:v[a].n>v[b].n?1:0));
+ const row=k=>{const s=v[k],w=Object.keys(s.why).map(x=>t('gstW_'+x,{n:s.why[x]})).join(', ');return t('gstRow',{g:s.n,s:t('gst_'+s.k),p:gstPts(s.pts)})+(w?' · '+w:'');};
+ dialog('guild',[t('gstH')+' · '+(L.length?L.map(row).join(' · '):t('gstNone')),t('gstHow')],null,[{l:t('oBack'),f:galD}]);}
+window.__GST={open:()=>gstD(),all:()=>gstAll(),of:gid=>gstOf(gid),mark:gid=>gstMark(gid),tag:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid),gi=r&&guildOf(r);return gi?'«'+gdEmb(gi.emb)+gi.n+'»'+gstMark(r.gd):null;}}; // tests
 /* guild wars (SAT-ONLINE-086, plan U239). The master or an officer declares war on another guild (G -> Wars) for one hour
    on a set hour (a full hour at least an hour ahead: the next four, or the same four tomorrow); that guild's master or
    officers accept or refuse it, and an ally can't be at war. During that hour the two guilds' members fight as in open PvP
@@ -8766,7 +8788,7 @@ function gwrD(){const st=gwrSt(),gs=GUILD&&GUILD.state();if(!st||!gs||!gs.gid)re
  const L=Object.keys(GWR).sort((a,b)=>GWR[a].at-GWR[b].at),asks=Object.keys(GWRA);
  const row=k=>{const w=GWR[k],[a,b]=gwrScore(k);return t('gwrRow',{g:w.n,w:n>=w.at+GWR_MS?t('gwrOver')+' · '+gwrRes(a,b):calWhen({at:w.at,end:w.at+GWR_MS},n),a,b});};
  const lines=[t('gwrH',{n:L.length})+' · '+(L.length?L.map(row).join(' · '):t('gwrNone'))];
- if(mo&&asks.length)lines.push(asks.map(k=>t('gwrAskIn',{g:GWRA[k].n,h:gwrAt(GWRA[k].at)})).join(' · '));
+ if(mo&&asks.length)lines.push(asks.map(k=>t('gwrAskIn',{g:GWRA[k].n,h:gwrAt(GWRA[k].at)})+gstSuf(k)).join(' · '));
  const done=p=>Promise.resolve(p).then(()=>gwrD(),()=>{toast(t('gdFail'),'warn');gwrD();}),opts=[];
  if(mo){for(const k of asks){const x=GWRA[k];opts.push({l:t('gwrAccept',{g:x.n,h:gwrAt(x.at)}),f:()=>{if(galOf(k)){toast(t('gwrAlly',{g:x.n}),'warn');return gwrD();}const w=GWR[k];if(w&&wNow()<w.at+GWR_MS){toast(t('gwrBusy',{g:x.n}),'warn');return gwrD();}
    done(st.warAccept(gs.gid,me,k,x.n,NET.uid,x.at,galId()));}},{l:t('gwrRefuse',{g:x.n}),f:()=>done(st.warDecline(gs.gid,me,k,x.n,NET.uid,x.at,galId()))});}

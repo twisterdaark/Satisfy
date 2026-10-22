@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22standings', ver: '1.42', d: '2026-10-22',
+      ar: ["الجيلدات بقى ليها علاقات ببعض: من G ← الدبلوماسية ← العلاقات بتشوف علاقة جيلدك بكل جيلد اتعاملت معاه في آخر 30 يوم (حلفاء، ودّية، محايدة، عدائية، في حرب) والحساب مكتوب قدامك. التحالف بيقرّب، وكسر التحالف والحرب بيبعّدوا. اللي في جيلد عدائي جنب اسم جيلده 💢، ولما جيلد يطلب تحالف أو يعلن حرب بتشوف علاقتكم جنب الطلب"],
+      en: ["Guilds now have standings with each other: G -> Diplomacy -> Standings shows your guild's standing with every guild it dealt with in the last 30 days (allied, friendly, neutral, hostile, at war), with the formula in front of you. Alliances bring guilds closer; a broken alliance or a war pushes them apart. A hostile guild's members carry 💢 by their guild's name, and a proposal or a war declared on you shows your standing with that guild"] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },

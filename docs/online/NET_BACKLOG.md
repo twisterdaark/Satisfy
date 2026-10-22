@@ -153,7 +153,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U242 | Guild event calendar | ✅ | SAT-ONLINE-080: events added by the master or officers (`guildEvents`), "I'm going" (`guildEventSign`), reminders 10 min before and at the start, in G and in the Calendar; one stored instant, shown in each player's time zone and UTC (`regression/guildevents`) |
 | U243 | Guild notice board | ✅ | SAT-ONLINE-076: `guildNote/{gid}`, written by the master and officers, each write the next version; members read it and hear when it changes; shown as text, never as HTML |
 | U244 | Guild rankings | ✅ | SAT-ONLINE-076: every online guild next to the canon ones, by level from the members' summed contribution (the same formula as your own guild's) |
-| U245 | Guild diplomacy | 🟡 | SAT-ONLINE-085: treaties (alliances) with a day's cooldown after a break, and a diplomacy log in both guilds (ask, ally, decline, break, end); the break records who (`guildAllyCd`, `guildDiplo`). Faction standings not yet |
+| U245 | Guild diplomacy | ✅ | SAT-ONLINE-085: treaties (alliances) with a day's cooldown after a break, and a diplomacy log in both guilds (ask, ally, decline, break, end); the break records who (`guildAllyCd`, `guildDiplo`). Standings between guilds (SAT-ONLINE-123): from that log and what is in force, the same on both sides, by a formula the game shows (G → Diplomacy → Standings: allied, friendly, neutral, hostile, at war over the last 30 days); a hostile guild carries 💢 by its name, and a proposal or a war declared on you shows the standing (`unit/diplo`, `regression/guildstand`) |
 | U246 | Guild seasonal rewards | ❌ | |
 
 ### Engine (plan §47)
