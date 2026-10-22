@@ -444,18 +444,22 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
 
 <div id="rotW"><b>📱</b><span id="rotT">لف الموبايل بالعرض عشان تلعب<br>Turn your phone sideways to play</span></div>
 <div id="boot"><canvas></canvas><b>SATISFY</b><i></i><span id="bootT">Loading<em>.</em><em>.</em><em>.</em></span></div>
-<script>/* the loading screen (owner 2026-10-21): one line in the player's language, and sparks drifting up behind the title */
+<script>/* the loading screen (owner 2026-10-21): one line in the player's language, and sparks rising behind the title */
 (function(){var b=document.getElementById('boot');if(!b)return;var l=null;try{l=localStorage.getItem('satisfy_lang');}catch(e){}if(!l)l=/^ar/i.test(navigator.language||'')?'ar':'en';
  if(l==='ar'){var t=document.getElementById('bootT');t.dir='rtl';t.innerHTML='جاري التحميل<em>.</em><em>.</em><em>.</em>';}
- var c=b.querySelector('canvas'),g=c.getContext('2d'),W=0,H=0,P=[],C=['242,193,78','143,216,255','255,243,196','190,150,255'];
- function size(){W=c.width=Math.min(innerWidth,1280);H=c.height=Math.min(innerHeight,800);}size();addEventListener('resize',size);
- function add(y){P.push({x:Math.random()*W,y:y==null?H+6:y,r:.6+Math.random()*2.2,v:12+Math.random()*34,w:Math.random()*6.28,s:.6+Math.random()*1.6,c:C[Math.random()*C.length|0],a:.25+Math.random()*.65,ring:Math.random()<.12});}
- for(var i=0;i<70;i++)add(Math.random()*H);var last=performance.now();
- (function f(now){if(!b.isConnected)return;var dt=Math.min(.05,(now-last)/1000);last=now;g.clearRect(0,0,W,H);if(P.length<90&&Math.random()<.5)add();
-  for(var i=P.length-1;i>=0;i--){var p=P[i];p.y-=p.v*dt;p.w+=p.s*dt;p.x+=Math.sin(p.w)*.35;var k=Math.min(1,(H-p.y)/80,p.y/120);if(p.y<-8){P.splice(i,1);continue;}
-   var al=p.a*Math.max(0,k)*(.7+.3*Math.sin(p.w*3));if(p.ring){g.strokeStyle='rgba('+p.c+','+al*.8+')';g.lineWidth=1;g.beginPath();g.arc(p.x,p.y,p.r*2.6,0,6.283);g.stroke();}
-   else{var gr=g.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*3);gr.addColorStop(0,'rgba('+p.c+','+al+')');gr.addColorStop(1,'rgba('+p.c+',0)');g.fillStyle=gr;g.beginPath();g.arc(p.x,p.y,p.r*3,0,6.283);g.fill();}}
-  requestAnimationFrame(f);})(last);})();</script>
+ /* owner 2026-10-22: each spark rises from the bottom, sways, and shrinks and fades until it is gone */
+ var c=b.querySelector('canvas'),g=c.getContext('2d'),W=0,H=0,P=[],N=0,C=['242,193,78','143,216,255','255,243,196','190,150,255'],SP=C.map(function(k){var s=document.createElement('canvas');s.width=s.height=64;var x=s.getContext('2d'),r=x.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.18,'rgba('+k+',.95)');r.addColorStop(.5,'rgba('+k+',.28)');r.addColorStop(1,'rgba('+k+',0)');x.fillStyle=r;x.fillRect(0,0,64,64);return s;});
+ function size(){var d=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;c.width=W*d;c.height=H*d;g.setTransform(d,0,0,d,0,0);N=Math.min(140,Math.max(40,W*H/12000|0));}size();addEventListener('resize',size);
+ function add(pre){var L=3+Math.random()*4,e=Math.random()<.45,x=e?(Math.random()<.5?Math.random()*.22:1-Math.random()*.22)*W:Math.random()*W;
+  P.push({x:x,y:H+10-Math.random()*H*.12,v:38+Math.random()*80,r:1.6+Math.random()*3.8,L:L,t:pre?Math.random()*L:0,w:Math.random()*6.28,s:1+Math.random()*2,sw:8+Math.random()*22,i:Math.random()*C.length|0,a:.45+Math.random()*.55,ring:Math.random()<.14});if(pre)P[P.length-1].y-=P[P.length-1].v*P[P.length-1].t;}
+ for(var i=0;i<N;i++)add(1);var last=performance.now();
+ (function f(now){if(!b.isConnected)return;var dt=Math.min(.05,(now-last)/1000);last=now;g.clearRect(0,0,W,H);g.globalCompositeOperation='lighter';
+  for(var n=0;P.length<N&&n<3;n++)add();
+  for(var i=P.length-1;i>=0;i--){var p=P[i];p.t+=dt;var q=p.t/p.L;if(q>=1||p.y<-20){P.splice(i,1);continue;}
+   p.y-=p.v*(1+q*.6)*dt;p.w+=p.s*dt;var x=p.x+Math.sin(p.w)*p.sw*q,k=1-q,al=p.a*Math.min(1,p.t/.35)*k*(.8+.2*Math.sin(p.w*4));
+   if(p.ring){var rr=p.r*(2.2+1.4*q)*k+.4;g.strokeStyle='rgba('+C[p.i]+','+al*.75+')';g.lineWidth=Math.max(.4,1.4*k);g.beginPath();g.arc(x,p.y,rr,0,6.283);g.stroke();}
+   else{var R=p.r*3.2*(.15+.85*k);g.globalAlpha=al;g.drawImage(SP[p.i],x-R,p.y-R,R*2,R*2);g.globalAlpha=1;}}
+  g.globalCompositeOperation='source-over';requestAnimationFrame(f);})(last);})();</script>
 <div id="stage" tabindex="0">
   <canvas id="game" width="481" height="271"></canvas>
   <canvas id="txt"></canvas>
