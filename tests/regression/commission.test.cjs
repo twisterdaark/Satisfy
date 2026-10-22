@@ -101,6 +101,7 @@ test('crafting commissions: materials and fee up front, forged by a player craft
     await pick(b, /Collect your pay/);
     await until([b], (x) => window.__G.S.gold === x, 10000, g0 + 500);
     await until([b], () => ![...window.__fakeRTDB.data.keys()].some((k) => /^craftPaid\//.test(k)));
+    assert.equal(await write(b, { ['craftPaid/gCmB2/' + cid]: null }), 'no', 'collected once: a second page of the account gets nothing');
 
     // an order taken off: materials and fee back. One taken off while it is forged: the piece goes back to the forge
     await commission(a);

@@ -576,6 +576,7 @@ test('crafting commissions (SAT-ONLINE-098): the piece only for its order, by so
   assert.equal(D.fee['.validate'], 'newData.val() === ' + o + ".child('fee').val()", 'its fee');
   assert.equal(D.by['.validate'], 'newData.val() === auth.uid', 'the crafter, for the credit');
   assert.ok(P['.write'].includes("newData.parent().parent().parent().child('craftDone').child(" + o + ".child('by').val()).child($cid).child('by').val() === $uid"), 'paid only for the piece');
+  assert.ok(P['.write'].endsWith("|| (data.exists() && !newData.exists()))"), 'a fee collected once (Claude-B, #131)');
 });
 
 test('no key appears twice in one object of the rules file', () => {

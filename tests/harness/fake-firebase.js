@@ -578,7 +578,7 @@
         return Object.keys(v).sort().join(',') === 'bn,by,fee,id,it,t' && typeof v.it === 'string' && v.it.length <= 600 && v.id === O.rc && v.fee === O.fee && v.by === me && typeof v.bn === 'string' && v.bn.length <= 24 && isSV(v.t) ? null : 'craftDone values';
       }
       if (seg[1] !== me) return 'PERMISSION_DENIED: craftPaid ' + p;
-      if (v === null) return null;
+      if (v === null) return old !== undefined ? null : 'PERMISSION_DENIED: craftPaid remove'; // collected once: two pages of one account can't both
       if (old || !O || O.by === me || (after('craftDone/' + O.by + '/' + seg[2]) || {}).by !== me) return 'PERMISSION_DENIED: craftPaid write';
       return Object.keys(v).sort().join(',') === 'g,t' && v.g === O.fee && isSV(v.t) ? null : 'craftPaid values';
     }
