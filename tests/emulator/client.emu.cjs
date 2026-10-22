@@ -16,7 +16,9 @@ const { loadModules } = require('../harness/load-module.cjs');
 
 const RULES = fs.readFileSync(path.join(__dirname, '..', '..', 'backend', 'database.rules.json'), 'utf8');
 const PROJECT = 'demo-satisfy', NS = PROJECT + '-default-rtdb';
-const DBH = process.env.FIREBASE_DATABASE_EMULATOR_HOST || '127.0.0.1:9000', AUTHH = process.env.FIREBASE_AUTH_EMULATOR_HOST || '127.0.0.1:9099';
+// the emulators' addresses as emulators:exec gives them, with localhost as 127.0.0.1 (Node may try ::1 first, where they don't listen)
+const v4 = (h) => String(h).replace(/^localhost(?=:)/, '127.0.0.1');
+const DBH = v4(process.env.FIREBASE_DATABASE_EMULATOR_HOST || '127.0.0.1:9000'), AUTHH = v4(process.env.FIREBASE_AUTH_EMULATOR_HOST || '127.0.0.1:9099');
 const SN = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/firebase-config.js', 'src/net/firebase.js');
 const WORLD = { id: 'satisfy', tile: 16, w: 724, h: 144 };
 let env;
@@ -52,6 +54,11 @@ test.before(async () => { env = await initializeTestEnvironment({ projectId: PRO
 test.after(async () => {
   for (const c of clients) { try { c.pres.close(); } catch (e) { /* closing */ } try { fbDb.goOffline(c.db); await fbApp.deleteApp(c.app); } catch (e) { /* closing */ } }
   if (env) await env.cleanup();
+});
+
+test('the emulators answer', async () => {
+  const r = await fetch('http://' + AUTHH + '/', { method: 'GET' }).then((x) => x.status, (e) => 'unreachable: ' + e.message);
+  assert.notEqual(String(r).slice(0, 11), 'unreachable', 'the Auth emulator at ' + AUTHH + ' (env ' + process.env.FIREBASE_AUTH_EMULATOR_HOST + '): ' + r);
 });
 
 test('two clients on the real SDK and rules: presence, a move, a dropped connection and back, a party invitation', async () => {
