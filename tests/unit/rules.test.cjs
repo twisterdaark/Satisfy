@@ -565,6 +565,11 @@ test('repair orders (SAT-ONLINE-096): your own order; mended by someone else, wh
   assert.ok(P['.write'].includes("newData.parent().parent().parent().child('repairDone').child(" + o + ".child('by').val()).child($oid).child('by').val() === $uid"), 'paid only for mending it');
   assert.equal(P.g['.validate'], 'newData.val() === ' + o + ".child('fee').val()", 'its fee');
   assert.equal(rules.repairDone.$uid['.read'], 'auth != null && auth.uid === $uid');
+  // SAT-ONLINE-133: each order holds one of five places, written and freed with it
+  assert.ok(O['.write'].includes("newData.parent().parent().child('repairSlot').child(auth.uid).child(newData.child('s').val()).val() === $oid"), 'an order needs its place');
+  assert.ok(O['.write'].includes("!newData.parent().parent().child('repairSlot').child(data.child('by').val()).child(data.child('s').val()).exists()"), 'and frees it');
+  assert.equal(O.s['.validate'], 'newData.isString() && newData.val().matches(/^[0-4]$/)', 'five places');
+  assert.equal(rules.repairSlot.$uid.$s['.validate'], '$s.matches(/^[0-4]$/) && newData.isString() && newData.val().matches(/^r_[A-Za-z0-9_-]{1,60}$/)');
   assert.ok(P['.write'].endsWith("|| (data.exists() && !newData.exists()))"), 'a fee collected once (Claude-B, #131)');
 });
 

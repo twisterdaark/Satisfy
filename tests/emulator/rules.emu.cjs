@@ -137,3 +137,22 @@ test("a parent's .validate holds a write to one of its children", async () => {
   await no(db(A).ref('lfg/' + A + '/lv').remove(), 'one child removed leaves the entry without it');
   await yes(db(A).ref('lfg/' + A).remove(), 'the whole entry removed is not validated');
 });
+
+// SAT-ONLINE-133 (Claude-B's note on #131): repair orders each hold one of their poster's five places
+test('repair orders: five places an account, each written and freed with its order', async () => {
+  const ord = (by, s) => ({ by, n: 'Ahmed', iid: 'it_' + by.toLowerCase() + '_1', it: 'Helm', d: 30, fee: 50, s, t: SV });
+  const post = (uid, oid, s) => db(uid).ref().update({ ['repairOrders/' + oid]: ord(uid, s), ['repairSlot/' + uid + '/' + s]: oid });
+  await no(db(A).ref('repairOrders/r_A_1').set(ord(A, '0')), 'not without its place');
+  await no(db(A).ref().update({ 'repairOrders/r_A_1': ord(A, '0'), [`repairSlot/${A}/0`]: 'r_A_other' }), 'its place names it');
+  await no(db(A).ref().update({ 'repairOrders/r_A_1': ord(A, '5'), [`repairSlot/${A}/5`]: 'r_A_1' }), 'five places only');
+  await no(db(B).ref().update({ 'repairOrders/r_B_1': ord(B, '0'), [`repairSlot/${A}/0`]: 'r_B_1' }), "not in another account's places");
+  for (const k of ['0', '1', '2', '3', '4']) await yes(post(A, 'r_A_' + k, k), 'place ' + k);
+  await no(post(A, 'r_A_9', '0'), 'a sixth');
+  await no(db(A).ref(`repairSlot/${A}/0`).remove(), "a live order's place stays");
+  await no(db(A).ref('repairOrders/r_A_0').remove(), 'the order does not go without freeing its place');
+  await yes(db(A).ref().update({ 'repairOrders/r_A_0': null, [`repairSlot/${A}/0`]: null }), 'taken off with its place');
+  // a smith mends one: the order, its place, the owner told and the smith paid, in one update
+  await yes(db(B).ref().update({ 'repairOrders/r_A_1': null, [`repairSlot/${A}/1`]: null, [`repairDone/${A}/r_A_1`]: { iid: 'it_' + A.toLowerCase() + '_1', by: B, sn: 'Bassem', fee: 50, t: SV }, [`repairPaid/${B}/r_A_1`]: { g: 50, t: SV } }), 'mended');
+  await yes(post(A, 'r_A_5', '0'), 'a freed place takes a new order');
+  await no(db(B).ref(`repairSlot/${A}`).once('value'), 'the places are their account\'s to read');
+});

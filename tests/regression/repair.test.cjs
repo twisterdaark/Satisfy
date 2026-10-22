@@ -74,6 +74,21 @@ test('repair orders: posted with a fee, mended by a player smith in the owner\'s
     const [oid] = await orders(a);
     assert.match(oid, /^r_/);
     assert.equal(await a.eval(() => window.__G.S.rord.length), 1);
+    // Claude-B's note on #131: it holds one of the account's five places, which only that order can hold
+    assert.equal(await a.eval(() => window.__fakeRTDB.data.get('repairSlot/gRpA1/0')), oid);
+    const O = await a.eval((x) => window.__fakeRTDB.data.get('repairOrders/' + x), oid);
+    assert.equal(O.s, '0');
+    const ord = (by, s, x) => ({ by, n: 'X', iid, it: 'Helm', d: 30, fee: 10, s, t: 'SV', ...(x || {}) });
+    assert.equal(await write(c, { 'repairOrders/r_gRpC3_x1': ord('gRpC3', '0') }), 'no', 'not without its place');
+    assert.equal(await write(c, { 'repairOrders/r_gRpC3_x1': ord('gRpC3', '0'), 'repairSlot/gRpC3/0': 'r_gRpC3_other' }), 'no', 'its place names it');
+    assert.equal(await write(c, { 'repairOrders/r_gRpC3_x1': ord('gRpC3', '5'), 'repairSlot/gRpC3/5': 'r_gRpC3_x1' }), 'no', 'five places only');
+    assert.equal(await write(c, { 'repairOrders/r_gRpC3_x1': ord('gRpC3', '0'), 'repairSlot/gRpA1/0': 'r_gRpC3_x1' }), 'no', "not in another's places");
+    assert.equal(await write(c, { 'repairSlot/gRpA1/0': null }), 'no', "a live order's place stays");
+    assert.equal(await write(a, { ['repairOrders/' + oid]: null }), 'no', 'nor does it go without freeing its place');
+    // Carim fills his five; a sixth has no place
+    for (const k of ['0', '1', '2', '3', '4']) assert.equal(await write(c, { ['repairOrders/r_gRpC3_f' + k]: ord('gRpC3', k), ['repairSlot/gRpC3/' + k]: 'r_gRpC3_f' + k }), 'ok', 'place ' + k);
+    assert.equal(await write(c, { 'repairOrders/r_gRpC3_f9': ord('gRpC3', '0'), 'repairSlot/gRpC3/0': 'r_gRpC3_f9' }), 'no', 'a sixth');
+    for (const k of ['0', '1', '2', '3', '4']) assert.equal(await write(c, { ['repairOrders/r_gRpC3_f' + k]: null, ['repairSlot/gRpC3/' + k]: null }), 'ok', 'taken off with its place');
 
     // Carim is no smith: no work for him; Bassem is: he mends it
     await c.eval(() => window.__GREP.open('smith')); await c.step(3);
@@ -89,6 +104,7 @@ test('repair orders: posted with a fee, mended by a player smith in the owner\'s
     await pick(b, new RegExp("Mend Ahmed's .+ \\(30%\\) for " + fee + ' gold'));
     await until([b], () => /You mended Ahmed's/.test(window.__toastSeen));
     assert.deepEqual(await orders(b), []);
+    assert.equal(await b.eval(() => window.__fakeRTDB.data.has('repairSlot/gRpA1/0')), false, 'its place is free again');
 
     // Ahmed's piece is mended in his bag, the same piece; he is told
     await until([a], (x) => { const i = window.__G.S.items.find((y) => y.iid === x); return !!i && i.dur === 100; }, 10000, iid);
@@ -116,6 +132,23 @@ test('repair orders: posted with a fee, mended by a player smith in the owner\'s
     await a.eval(() => window.__GREP.open('smith')); await a.step(3);
     await pick(a, /Take the order off/);
     await until([a], (x) => window.__G.S.gold === x && window.__G.S.rord.length === 0, 10000, gA + f2);
+    assert.deepEqual(await orders(a), []);
+    assert.deepEqual(await a.eval(() => [...window.__fakeRTDB.data.keys()].filter((k) => /^repairSlot\//.test(k))), [], 'and its place');
+
+    // an order no smith took in 14 days comes back with its fee when its poster is at a smith's
+    await a.eval(() => window.__GREP.open('smith')); await a.step(3);
+    await pick(a, /^(\d+\.\s*)?Post a repair order/); await pick(a, /\(30%\)$/);
+    const f3 = (await opts(a)).filter((x) => /^\d+ gold$/.test(x)).map((x) => parseInt(x, 10))[0];
+    await pick(a, new RegExp('^(\\d+\\.\\s*)?' + f3 + ' gold$'));
+    await until([a], () => window.__G.S.rord.length === 1 && !window.__GREP.busy && [...window.__fakeRTDB.data.keys()].some((k) => /^repairOrders\//.test(k)));
+    const gB = await a.eval(() => window.__G.S.gold);
+    await a.eval(() => { const D = window.__fakeRTDB.data, k = [...D.keys()].find((x) => /^repairOrders\//.test(x)); D.set(k, Object.assign({}, D.get(k), { t: Date.now() - 15 * 864e5 })); });
+    await b.eval(() => { const D = window.__fakeRTDB.data; for (const [k, v] of window.__fakeRTDB.data) if (/^repairOrders\//.test(k)) D.set(k, Object.assign({}, v, { t: Date.now() - 15 * 864e5 })); });
+    await b.eval(() => window.__GREP.open('smith')); await b.step(3);
+    assert.ok(!(await opts(b)).some((x) => /^Mend /.test(x)), 'too old for the smiths');
+    await a.eval(() => window.__GREP.open('smith')); await a.step(3);
+    await until([a], (x) => window.__G.S.gold === x && window.__G.S.rord.length === 0, 10000, gB + f3);
+    await until([a], () => /No smith took your order/.test(window.__toastSeen));
     assert.deepEqual(await orders(a), []);
     for (const g of [a, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/repair/.test(x))), []);
     for (const g of [a, b, c]) assert.deepEqual(g.errors, []);
