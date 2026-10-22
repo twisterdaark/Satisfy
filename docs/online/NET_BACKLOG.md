@@ -199,7 +199,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U341 | Crash reporting | ✅ | SAT-ONLINE-082: errors on a signed-in page go to `crashes` (admins read): message and stack with long ids, e-mails and paths cut out, build and zone, at most three a session; `/crashes` lists them |
 | U342 | A/B testing ethics | ⏳ | No tests on players; owner decision |
 | U343 | Community feedback triage | 🟡 | GitHub issues and in-game reports |
-| U344 | Season rewards | 🟡 | Titles for the National Champion and the arena; cosmetic |
+| U344 | Season rewards | ✅ | SAT-ONLINE-129: when a month's arena season is over, each player's game gives cosmetic titles once: Arena Regular for 10 duels (taking part is enough, win or lose), Arena Top 10 for a top-ten place among those with 5 duels, Arena Champion for the first (`S.arnS`); the board says how. `unit/seasontitles` fails if a season or competition title (these and the National Champion) gets a stat, a stats line or a skill; no paid items exist (`regression/arenaseason`) |
 | U345 | Retention without grind | 🟡 | Nothing is lost for a missed day; daily caps on repeatable quests (B) |
 | U346 | Data export/delete | 🟡 | "Delete my online data" (SAT-ONLINE-015/066). The owner took out "Download my online data" (078) and the manual cloud Upload/Download on 2026-10-21, to cut the chance of duplicated data: characters move only by the automatic sync |
 | U347 | Disaster recovery | ⏳ | Database backups need the Blaze plan (owner) |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 50 · 🟡 37 · ⏳ 6 · ❌ 11 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 51 · 🟡 36 · ⏳ 6 · ❌ 11 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22arenarewards', ver: '1.42', d: '2026-10-22',
+      ar: ["جوايز موسم الساحة: لما الشهر يخلص، اللي لعب 10 مبارزات أونلاين في الموسم بياخد لقب \"من رواد الساحة\" (كسب أو خسر)، وأول 10 (اللي لعبوا 5 مبارزات على الأقل) بياخدوا \"من أحسن 10 في الساحة\"، والأول بياخد \"بطل الساحة\". الألقاب دي شكل بس، من غير أي زيادة في القوة"],
+      en: ["Arena season rewards: when the month ends, anyone who fought 10 duels online in the season gets the Arena Regular title (win or lose), the top ten (with 5 duels at least) get Arena Top 10, and the first gets Arena Champion. These titles are cosmetic only: no stats"] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },

@@ -8019,6 +8019,7 @@ function netTick(){NET.tick();const live=netLive();
  lootTick();
  legTick();
  rankTick(live);
+ arnTick();
  wbTick();
  lockTick();
  natTick();
@@ -8936,7 +8937,25 @@ function rnkResult(win,foe){if(!RNK||!NET||!S||S.__demo||!foe)return;const sn=RN
 function rnkBoard(){if(!RNK||!NET)return;const se=rnkSeason(),d=new Date(wNow()),sn=d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');
  Promise.all([RNK.top(se,10),RNK.get(se,NET.uid)]).then(([top,me])=>{plOpen(false);
   const rows=top.map((x,i)=>t('rnkRow',{i:i+1,n:Satisfy.chat.clean(x.n,24)||'?',r:x.r,w:x.w,l:x.l}));
-  dialog('guild',[t('rnkH',{s:sn}),rows.length?rows.join(' · '):t('rnkNone'),me?t('rnkMe',{r:me.r,w:me.w|0,l:me.l|0}):t('rnkNew')],null,[{l:t('oClose')}]);},()=>toast(t('rnkFail'),'warn'));}
+  dialog('guild',[t('rnkH',{s:sn}),rows.length?rows.join(' · '):t('rnkNone'),(me?t('rnkMe',{r:me.r,w:me.w|0,l:me.l|0}):t('rnkNew'))+' · '+t('arnHow')],null,[{l:t('oClose')}]);},()=>toast(t('rnkFail'),'warn'));}
+/* arena season rewards (SAT-ONLINE-129, plan U344 "season rewards: non-competitive cosmetics first; no paid PvP dominance").
+   When a month's season is over, each player's game looks at it once (online, from the next month on) and gives titles
+   that are cosmetic only: worn by the name and listed in C, with no stat of any kind (unit/seasontitles checks it). Arena
+   Regular for 10 duels in the season, win or lose (taking part is enough); Arena Top 10 for a place in the top ten of
+   those with 5 duels at least; Arena Champion for the first of them. S.arnS {season: what it gave} keeps the seasons
+   looked at, so each one gives once. */
+Object.assign(STR.ar,{tl_arnReg:'من رواد الساحة',tl_arnRegD:'لعب 10 مبارزات في موسم من مواسم الساحة (شكل بس، من غير أي زيادة)',tl_arnTop:'من أحسن 10 في الساحة',tl_arnTopD:'خلّص موسم الساحة في أول 10 (شكل بس، من غير أي زيادة)',tl_arnChamp:'بطل الساحة',tl_arnChampD:'خلّص موسم الساحة الأول (شكل بس، من غير أي زيادة)',arnGot:'موسم الساحة {s} خلص: {l}',arnHow:'جوايز الموسم (شكل بس): 10 مبارزات ← من رواد الساحة · أول 10 (5 مبارزات على الأقل) ← من أحسن 10 · الأول ← بطل الساحة'});
+Object.assign(STR.en,{tl_arnReg:'Arena Regular',tl_arnRegD:'Fought 10 duels in an arena season (cosmetic, no stats)',tl_arnTop:'Arena Top 10',tl_arnTopD:'Finished an arena season in the top ten (cosmetic, no stats)',tl_arnChamp:'Arena Champion',tl_arnChampD:'Finished an arena season first (cosmetic, no stats)',arnGot:'Arena season {s} is over: {l}',arnHow:'Season rewards (cosmetic only): 10 duels → Arena Regular · top ten (5 duels at least) → Arena Top 10 · first → Arena Champion'});
+const ARN_REG=10,ARN_TOP=5;var arnT=-1e9,arnBusy=false;
+// the season before the one the world time n is in
+function arnPrev(n){const d=new Date(n),y=d.getUTCFullYear(),m=d.getUTCMonth(),p=m?[y,m-1]:[y-1,11];return 's'+p[0]+String(p[1]+1).padStart(2,'0');}
+// what a season's board (top: by rating, {uid, r, w, l}; me: your own entry) gives the player uid
+function arnOf(top,me,uid){const out=[];if(me&&(me.w|0)+(me.l|0)>=ARN_REG)out.push('arnReg');const L=(top||[]).filter(x=>x&&(x.w|0)+(x.l|0)>=ARN_TOP).slice(0,10),i=L.findIndex(x=>x.uid===uid);if(i>=0)out.push(i===0?'arnChamp':'arnTop');return out;}
+function arnTick(){if(!RNK||!NET||!S||S.__demo||arnBusy)return;const p=performance.now();if(p-arnT<60000)return;arnT=p;const se=arnPrev(wNow());S.arnS=S.arnS||{};if(se in S.arnS)return;arnBusy=true;
+ Promise.all([RNK.top(se,50),RNK.get(se,NET.uid)]).then(([top,me])=>{arnBusy=false;if(!S||S.__demo||(se in (S.arnS||{})))return;const got=arnOf(top,me,NET.uid);S.arnS[se]=got.join(',');
+  const ks=Object.keys(S.arnS).sort();while(ks.length>24)delete S.arnS[ks.shift()];
+  if(got.length){got.forEach(giveTitle);toast(t('arnGot',{s:se.slice(1,5)+'-'+se.slice(5),l:got.map(k=>t('tl_'+k)).join(', ')}),'good');}save(true);},()=>{arnBusy=false;});}
+window.__GARN={prev:n=>arnPrev(n),of:(top,me,uid)=>arnOf(top,me,uid),tick:()=>{arnT=-1e9;arnTick();},get got(){return S&&S.arnS}}; // tests
 /* the National Competition (SAT-ONLINE-064, Claude-B #13 item 25; Satisfy.natcomp has the schedule and the scoring). Online,
    every two hours on the server clock, three stages of ten minutes: hunting (each monster you kill), production (each item
    you craft, better ones more) and the arena (each duel online, a win more; three a foe). The bar over the HUD shows the
