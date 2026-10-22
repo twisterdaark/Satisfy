@@ -56,7 +56,7 @@ test('crafting commissions: materials and fee up front, forged by a player craft
     const b = await signIn(ctx, 'b', 'gCmB2', 'Bassem', { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
     const c = await signIn(ctx, 'c', 'gCmC3', 'Carim', { n: 'Zed', hair: 2, hc: 1, skin: 0, top: 2 });
     for (const g of [a, b, c]) await g.eval(() => { const S = window.__G.S; S.gold = 5000; S.mats.ore = 12; S.mats.wood = 3; });
-    await b.eval(() => { window.__G.S.rcK.isword = 1; });
+    await b.eval(() => { window.__G.S.rcK.isword = 1; window.__G.S.qs.sm1 = { st: 2 }; }); // Bassem may use the smith's anvil
     const swords0 = (await swords(a)).length;
     await settle(a, b, c);
 
@@ -78,6 +78,14 @@ test('crafting commissions: materials and fee up front, forged by a player craft
     // Carim doesn't know the recipe: no work for him; Bassem does: he forges it from the order's materials
     await c.eval(() => window.__GCOM.open('smith')); await c.step(3);
     assert.ok(!(await opts(c)).some((x) => /^Make /.test(x)), 'no work without the recipe');
+    // Claude-B's review: knowing it isn't enough, the crafter needs an anvil they may use (as at the anvil itself)
+    await c.eval(() => { window.__G.S.rcK.isword = 1; });
+    await c.eval(() => window.__GCOM.open('smith')); await c.step(3);
+    await pick(c, /Make Iron Sword for Ahmed for 500/);
+    assert.notEqual(await c.eval(() => window.__G.mode), 'forge', 'no anvil for Carim yet');
+    await c.eval(() => { delete window.__G.S.rcK.isword; });
+    for (let i = 0; i < 4 && await c.eval(() => window.__G.mode === 'dialog'); i++) { await c.eval(() => window.__G.advance()); await c.step(2); }
+    const xp0 = await b.eval(() => { const S = window.__G.S; return { sxp: S.sxp, smith: S.smith, made: (S.made || {}).isword || 0, xp: S.xp, lv: S.lv }; });
     await b.eval(() => window.__GCOM.open('smith')); await b.step(3);
     await pick(b, /Make Iron Sword for Ahmed for 500/);
     assert.equal(await b.eval(() => window.__G.mode), 'forge');
@@ -85,6 +93,8 @@ test('crafting commissions: materials and fee up front, forged by a player craft
     await until([b], () => /Your Iron Sword went to Ahmed/.test(window.__toastSeen));
     assert.deepEqual(await b.eval(() => ({ ore: window.__G.S.mats.ore, wood: window.__G.S.mats.wood })), { ore: 12, wood: 3 }, "the crafter's own materials untouched");
     assert.equal((await swords(b)).length, 0, 'the crafter keeps nothing of it');
+    // the crafter's rewards come with the delivery
+    await until([b], (x) => { const S = window.__G.S; return ((S.made || {}).isword || 0) === x.made + 1 && (S.sxp !== x.sxp || S.smith !== x.smith); }, 10000, xp0);
 
     // Ahmed has it, "Made by" Bassem; told once
     await until([a], (n) => window.__G.S.items.filter((i) => i.id === 'isword').length === n, 10000, swords0 + 1);
@@ -116,9 +126,14 @@ test('crafting commissions: materials and fee up front, forged by a player craft
     await pick(a, /Take the order off/);
     await until([a], () => window.__G.S.cord.length === 0 && !window.__GCOM.busy);
     await settle(a, b);
+    // Claude-B's review: an order taken off mid-forge gives the crafter nothing either (no smith XP, experience, count,
+    // reputation or first-make bonus), so a poster and an alt can't forge for rewards forever with one set of materials
+    const r0 = await b.eval(() => { const S = window.__G.S; return JSON.stringify({ sxp: S.sxp, smith: S.smith, made: S.made, xp: S.xp, lv: S.lv, bonus: S.bonus, got: S.got, crep: S.crep }); });
     await b.eval(() => window.__G.finishMG()());
     await until([b], () => /That order was taken off, so the piece went back to the forge/.test(window.__toastSeen));
     assert.equal((await swords(b)).length, 0);
+    await settle(a, b);
+    assert.equal(await b.eval(() => { const S = window.__G.S; return JSON.stringify({ sxp: S.sxp, smith: S.smith, made: S.made, xp: S.xp, lv: S.lv, bonus: S.bonus, got: S.got, crep: S.crep }); }), r0, 'nothing for a piece nobody got');
     for (const g of [a, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/craft/.test(x))), []);
     for (const g of [a, b, c]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }

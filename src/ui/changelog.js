@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22commission', ver: '1.86', d: '2026-10-22',
+      ar: ["طلبات الصناعة: أونلاين، عند أي حداد، تقدر تطلب من لاعب صانع يعملك حاجة. بتختار وصفة عندك خاماتها وأجرة، والخامات والأجرة بيطلعوا من شنطتك وبيرجعوا لو شلت الطلب",
+        "اللاعب اللي عارف الوصفة بيعملها في الفرن من خاماتك إنت مش خاماته، والحاجة بتوصلك مكتوب عليها \"اتعملت بإيد\" اسمه، وهو بيستلم أجرته"],
+      en: ["Crafting commissions: online, at any smith's, ask a player crafter to make you a piece: a recipe you have the materials for, and a fee; both leave your bag and come back if you take the order off",
+        "A player who knows the recipe forges it at the anvil from your materials, not theirs; the piece reaches you \"Made by\" them, and they collect the fee"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
@@ -257,11 +262,6 @@
            'Piaro comes to Reidan for the war and fights with his farming (a sweep all around him), Laden the "Northern Nova" strikes with sword aura, and every 25 s Lauel the strategist calls a plan that gives everyone in the town +15% damage against the army. None of them can be knocked out, but the commanders are your work',
            "Two quests from Lauel in Reidan, ending with the title Defender of Reidan (+10% damage against the Eternal Kingdom's army). Win the war and Ren throws down his sword",
            'Fix: the golem war on Reinhardt now has a written notice instead of its code name'] },
-    { v: '2026-10-22commission', ver: '1.40', d: '2026-10-22',
-      ar: ["طلبات الصناعة: أونلاين، عند أي حداد، تقدر تطلب من لاعب صانع يعملك حاجة. بتختار وصفة عندك خاماتها وأجرة، والخامات والأجرة بيطلعوا من شنطتك وبيرجعوا لو شلت الطلب",
-        "اللاعب اللي عارف الوصفة بيعملها في الفرن من خاماتك إنت مش خاماته، والحاجة بتوصلك مكتوب عليها \"اتعملت بإيد\" اسمه، وهو بيستلم أجرته"],
-      en: ["Crafting commissions: online, at any smith's, ask a player crafter to make you a piece: a recipe you have the materials for, and a fee; both leave your bag and come back if you take the order off",
-        "A player who knows the recipe forges it at the anvil from your materials, not theirs; the piece reaches you \"Made by\" them, and they collect the fee"] },
     { v: '2026-10-21v139', ver: '1.39', d: '2026-10-21',
       ar: ['الغابة الغامضة غرب جاوس (لفل 250+): ضباب أخضر وطريق واحد بيلف لحد فسحة في النص. ناسك الغابة واقف عند أول الطريق وعنده كويستين',
            'نسخة باجما (لفل 260): زعيم عالمي لابس وش باجما وبيحارب بحركات سيفه (القتل، الربط، الموجة، التجاوز، الدوران). كل 30 ثانية بتتقسم لظلال، وطول ما الظلال واقفة بتاخد تلت ضربك بس. كل ما اللاعبين حواليها يكتروا الظلال بتكتر. بترجع بعد ساعة',
