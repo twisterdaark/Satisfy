@@ -24,11 +24,22 @@
   // SAT-ONLINE-120 (plan U022): a test environment kept apart from the real one. With ?emu (or ?emu=host), and only when the
   // page itself is served from this computer (localhost, 127.0.0.1, ::1), online play talks to the Firebase emulators on that
   // host (the database on 9000, sign-in on 9099; docs/online/EMULATOR.md) instead of the project above. On any other host,
-  // the public site included, ?emu is ignored, so nothing the players load can point at a test database.
+  // the public site included, ?emu is ignored, so nothing the players load can point at a test database. Claude-B's review of
+  // #155: the emulator host is this computer or one on the local network too (127.x, 10.x, 172.16-31.x, 192.168.x, a .local
+  // name); any other host is ignored, so a link can't send a local page's sign-in to a machine on the internet.
   ns.firebaseEmulator = (function () {
     var L = root.location, h = L && L.hostname || '', q = L && L.search || '', m = /[?&]emu(?:=([A-Za-z0-9.-]{1,64}))?(?:&|$)/.exec(q);
     if (!m || !/^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(h)) return null;
-    var host = m[1] && m[1] !== '1' ? m[1] : '127.0.0.1';
+    var host = m[1] && m[1] !== '1' ? m[1].toLowerCase() : '127.0.0.1';
+    if (!lanHost(host)) return null;
     return Object.freeze({ host: host, dbPort: 9000, authUrl: 'http://' + host + ':9099' });
   })();
+  function lanHost(x) {
+    if (x === 'localhost' || /^[a-z0-9]([a-z0-9-]{0,62})?\.local$/.test(x)) return true;
+    var p = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(x);
+    if (!p) return false;
+    var a = +p[1], b = +p[2];
+    if (+p[1] > 255 || +p[2] > 255 || +p[3] > 255 || +p[4] > 255) return false;
+    return a === 127 || a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168);
+  }
 })(typeof window !== 'undefined' ? window : globalThis);

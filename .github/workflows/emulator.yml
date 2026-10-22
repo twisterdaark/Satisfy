@@ -28,7 +28,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - run: npm install --no-audit --no-fund --no-save --legacy-peer-deps firebase-tools@14 @firebase/rules-unit-testing@4 firebase@11
+      - run: npm install --no-audit --no-fund --no-save --legacy-peer-deps firebase-tools@14 @firebase/rules-unit-testing@4 firebase@12.19.0
       - name: rules with three accounts; two clients
         run: |
           set -o pipefail

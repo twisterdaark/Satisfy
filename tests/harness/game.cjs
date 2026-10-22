@@ -105,7 +105,8 @@ async function openGame(opts = {}) {
     if (m.type() !== 'error') return;
     if (/^Failed to load resource/.test(m.text())) return; // aborted external request, tracked in `external`
     // the same in WebKit's words; and Firefox's for a request a reload cut short (SAT-ONLINE-107: CI runs both)
-    if (/^Origin null is not allowed by Access-Control-Allow-Origin/.test(m.text()) || /InvalidStateError: Navigated away from page/.test(m.text())) return;
+    // WebKit and Firefox only (Claude-B's review of #141): under Chromium these would be real errors, so they still count there
+    if ((process.env.SATISFY_BROWSER || 'chromium') !== 'chromium' && (/^Origin null is not allowed by Access-Control-Allow-Origin/.test(m.text()) || /InvalidStateError: Navigated away from page/.test(m.text()))) return;
     errors.push('console: ' + m.text());
   });
   const url = pathToFileURL(html).href + (opts.query || '');

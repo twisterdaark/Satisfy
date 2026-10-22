@@ -87,7 +87,10 @@ test('two signed-in players see each other through the database; writes pass the
     // and the save going up by itself (owner 2026-10-20; regression/cloud tests it), only under this account
     const cloud = paths.filter((p) => /^cloud(Index|Saves)\//.test(p));
     assert.ok(cloud.every((p) => p.startsWith('cloudIndex/' + na.uid + '/') || p.startsWith('cloudSaves/' + na.uid + '/')), cloud.join());
-    assert.deepEqual(paths.filter((p) => !p.startsWith('mobs/') && !p.startsWith('ranks/') && !cloud.includes(p) && p !== '').sort(), ['accountIds/' + na.uid, 'presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]);
+    // and the last arena season's board and your own entry in it, read once for its titles (SAT-ONLINE-129)
+    const arena = paths.filter((p) => /^arena\/s\d{6}(\/|$)/.test(p));
+    assert.ok(arena.every((p) => /^arena\/s\d{6}$/.test(p) || p.endsWith('/' + na.uid)), arena.join());
+    assert.deepEqual(paths.filter((p) => !p.startsWith('mobs/') && !p.startsWith('ranks/') && !cloud.includes(p) && !arena.includes(p) && p !== '').sort(), ['accountIds/' + na.uid, 'presence/satisfy/main/' + na.uid, 'profiles/' + na.uid, 'sessions/' + na.uid]);
     const roots = await a.eval(() => [...new Set(window.__fakeRTDB.log.filter((l) => l.op === 'update' && l.path === '').flatMap((l) => l.keys))]);
     assert.ok(roots.every((k) => k === 'ranks/lv/' + na.uid || k === 'ranks/gold/' + na.uid), 'root updates: ' + roots);
     assert.deepEqual((await fake(a)).rejected, []);

@@ -5,7 +5,7 @@
 // what is account B's (B's account ID, presence, profile, saves, session, friends, lines, guild rank), and the denials
 // that matter for each part. CI runs it (.github/workflows/emulator.yml): the emulator needs Java and a download that
 // this sandbox can't reach. To run it by hand:
-//   npm install --no-save firebase-tools@14 @firebase/rules-unit-testing@4 firebase@11
+//   npm install --no-save --legacy-peer-deps firebase-tools@14 @firebase/rules-unit-testing@4 firebase@12.19.0 (the SDK the game pins)
 //   npx firebase emulators:exec --only database --project demo-satisfy "node --test tests/emulator/"
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -126,4 +126,14 @@ test('guilds: B, a member, can\'t take A\'s guild, raise its own rank or let its
   await no(db(B).ref('guildMembers/' + G).remove(), 'nor disband it');
   await no(db(B).ref().update({ ['guilds/g_' + B]: { name: 'Dragons', nk: 'dragons', master: B, col: 1, t: SV }, 'guildNames/dragons': 'g_' + B }), 'nor take its name');
   await yes(db(B).ref('guildMembers/' + G + '/' + B).remove(), 'B may leave');
+});
+
+// Claude-B's review of #136: the real database checks a parent's .validate on a write to its child, as the rules
+// evaluator in Node (tests/harness/rules-eval.cjs) now does too. lfg/$uid has newData.hasChildren([... 'lv' ...]).
+test("a parent's .validate holds a write to one of its children", async () => {
+  const lfg = { n: 'Ahmed', lv: 12, cls: 'novice', r: '', k: 'party', z: 'zWin', t: SV };
+  await yes(db(A).ref('lfg/' + A).set(lfg), 'A posts a whole entry');
+  await yes(db(A).ref('lfg/' + A + '/lv').set(13), 'one child changed, the entry still whole');
+  await no(db(A).ref('lfg/' + A + '/lv').remove(), 'one child removed leaves the entry without it');
+  await yes(db(A).ref('lfg/' + A).remove(), 'the whole entry removed is not validated');
 });
