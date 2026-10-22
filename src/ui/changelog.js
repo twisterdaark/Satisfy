@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22safetowns', ver: '1.86', d: '2026-10-22',
+      ar: ["جوه المدن محدش يقدر يأذيك خالص: لا ضربة PvP ولا ضربة مبارزة بتوصلك وإنت في المدينة، حتى لو اللي بيضرب لعبته متعدّلة",
+        "واللي واقف جوه مدينة ميقدرش يضرب حد برّاها"],
+      en: ["Inside a town nobody can hurt you: no PvP hit and no duel hit reaches you there, even from a player whose game was changed",
+        "And a player standing in a town can't hit anyone outside it"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
@@ -19,11 +24,6 @@
         "الضربات الزيادة بقت ممكن تبقى أكتر من واحدة حسب التصنيف والخامات: ضربة أساسية، و+1 للفريد، و+1 للأسطوري، و+1 للأوريكالكوم الأزرق أو نفس وحش مقدس، و+1 كمان للنفس، لحد 4. وكل سلاح بيطلع بعدد عشوائي من 1 لأقصى عدد ليه"],
       en: ["Shock is now only for weapons tied to lightning (made with the Blue Dragon's breath) or holding a Thunder Stone. Other weapons that had rolled shock got another passive instead. How many it jumps to (1 to 3 by grade) and how long it stuns (0.2 to 0.5 s) now roll per weapon and show in the tooltip",
         "Extra strikes can now be more than one, by grade and materials: one to start, +1 for unique, +1 for legendary, +1 for blue orichalcum or a divine beast's breath, +1 more for the breath, up to 4. Each weapon rolls a random number from 1 to its most"] },
-    { v: '2026-10-22safetowns', ver: '1.84', d: '2026-10-22',
-      ar: ["جوه المدن محدش يقدر يأذيك خالص: لا ضربة PvP ولا ضربة مبارزة بتوصلك وإنت في المدينة، حتى لو اللي بيضرب لعبته متعدّلة",
-        "واللي واقف جوه مدينة ميقدرش يضرب حد برّاها"],
-      en: ["Inside a town nobody can hurt you: no PvP hit and no duel hit reaches you there, even from a player whose game was changed",
-        "And a player standing in a town can't hit anyone outside it"] },
     { v: '2026-10-22wpass2', ver: '1.83', d: '2026-10-22',
       ar: ["باسيفز سلاح جديدة: ضربة مزدوجة (السلاح بيضرب تاني لوحده)، صعق (برق بيزود الضربة 50% ويقفز على اتنين جنب الهدف ويشلهم لحظة)، امتصاص (جزء من الضرر اللي بتاخده بيترد في ضربتك الجاية)، تجميد (بيبطّأ الهدف)، وزق (بيرمي الهدف لورا)",
         "حجر البرق: جوهرة جديدة بتتركب في السلاح عند خان، وبتدي السلاح صعق بفرصة 15%. بتقع من الوحوش العالية والزعماء",

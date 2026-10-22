@@ -32,7 +32,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U026 | Safe Bairan | ✅ | `SAFE_ZONES` (SAT-ONLINE-003). SAT-ONLINE-138: the client that takes a hit checks its own zone, so from inside a town no player damage is received, open PvP or a duel's, whatever a modified attacker sends or says about where it is; one standing in a town can't hit out by naming another zone (checked where it is on the victim's map). `unit/pvp`, `unit/duel`, `regression/pvp` (forged hits on the channel). A modified client can still refuse hits *it* is sent (Trusted Combat, D3). The undefined interior strip is `void`, never safe (SAT-ONLINE-019, C06) |
 | U027 | Safe Winston | ✅ | Same as U026; every town is in the list (Patrian, Reidan, Reinhardt, Titan, Butin too); `regression/pvp` sends the forged hits in Winston |
 | U028 | Spawn shield | ⏳ | Only matters with open PvP (R5) |
-| U029 | Projectile boundary test | ⏳ | R5 |
+| U029 | Projectile boundary test | ✅ | SAT-ONLINE-138: the target's own client checks its own zone, so an arrow or a spell shot from outside a town hurts nobody inside it (`regression/pvp`: a bow shot across Winston's edge does nothing, the same shot just outside lands) |
 | U030 | Duel request UI | ✅ | SAT-ONLINE-006 (K, Y/N prompt) |
 | U031 | Duel countdown | ✅ | SAT-ONLINE-006 |
 | U032 | Duel arena ring | ✅ | SAT-ONLINE-006 |
@@ -43,7 +43,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U037 | Outlaw flag | ✅ | SAT-ONLINE-038: a kill makes the killer an outlaw for 10 min (`PlayerPublic.ol`, red name for everyone, `S.olT` kept across a reload); the kill counts only from a real, recent hit |
 | U038 | Bounty board | 🟡 | SAT-ONLINE-051 (#84): gold on an outlaw's head from its card, paid once to its PvP killer through the victim's own kill record (`bountyPaid`), taken back from the board; karma (SAT-ONLINE-052, #85): murders cost points and lengthen the red name, -5 is a murderer; gold has no ledger (D3) |
 
-**Totals:** ✅ 30 · 🟡 3 · ⏳ 3 · ❌ 2.
+**Totals:** ✅ 31 · 🟡 3 · ⏳ 2 · ❌ 2.
 
 ## Social U046–U065 (plan doc §35 [SOC])
 
