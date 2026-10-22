@@ -2007,7 +2007,7 @@ function drawDragon(m){const x=Math.round(m.x),y=Math.round(m.y),f=m.face||1;if(
 // shared record in WS.arena. Online the server will run brackets between real players; these rankers stand in until then.
 const ARNK=['huroi','peaks','zibal','kraugel'];
 let ARN=null;
-const today=()=>new Date().toISOString().slice(0,10);
+const today=()=>new Date(Date.now()).toISOString().slice(0,10);
 function startArena(){if(ARN||TWR)return;S.arenaDay=today();if(P.ride)dismount();if(S.comp)S.comp=null;const A=DUN[8];ARN={r:0,ret:{x:P.x,y:P.y},wait:3,m:null};save(true);
  fadeTo(()=>{P.x=(A.x0+4)*TS+8;P.y=(WMH+11)*TS+10;P.dir=2;P.hp=maxHP();P.mp=maxMP();P.cd={};camSnap=true;hudDirty=true;toast(t('arnStart'),'good');SFX.notice();});}
 function arenaSpawn(){const k=ARNK[ARN.r],A=DUN[8];
@@ -4959,7 +4959,9 @@ function newMon(type,x,y,rg=rand){const b=MT[type];const vr=VARY[type]!==undefin
 // The key stays 'satisfy_proto_v4' so older builds still read the same save; the schema version is S.v.
 // ?slot=<name> keeps a separate save (two tabs testing online play); ?net=local turns on local online play.
 const QS=(()=>{try{return new URLSearchParams(location.search);}catch(e){return new URLSearchParams('');}})();
-const SLOT=/^[A-Za-z0-9_-]{1,16}$/.test(QS.get('slot')||'')?QS.get('slot'):null;
+// SAT-ONLINE-100: a replay (?tick=fixed&replay) plays in a save slot of its own, so the player's own save is never touched
+const RPLQ=/[?&]tick=fixed(&|$)/.test(location.search)&&QS.has('replay');
+const SLOT=RPLQ?'rpl':/^[A-Za-z0-9_-]{1,16}$/.test(QS.get('slot')||'')?QS.get('slot'):null;
 const STORE0=(()=>{let ls=null;try{ls=localStorage;}catch(e){}return Satisfy.storage.create(ls,{slot:SLOT});})();
 let STORE=STORE0;
 // one character per Google account on a shared device (owner request): signed in online, the save lives under
@@ -6739,8 +6741,8 @@ function updLogClose(){$('updLog').hidden=true;try{if(UPDL[0])localStorage.setIt
 function updLogAuto(){if(!UPDL[0])return;let seen=null;try{seen=localStorage.getItem('satisfy_log');if(seen==null&&!STORE0.exists()){localStorage.setItem('satisfy_log',UPDL[0].v);return;}}catch(e){return;}if(seen!==UPDL[0].v)setTimeout(updLogOpen,300);} // a first launch has nothing new to show
 Object.assign(STR.ar,{updLogB:'سجل التحديثات',updLogNew:'الجديد'});Object.assign(STR.en,{updLogB:'Update log',updLogNew:'New'});
 let ctrlBack='titleScreen';
-function toTitle(){mode='title';showOnly('titleScreen');$('hud').hidden=true;$('contBtn').disabled=!hasSave();setTimeout(()=>$('titleScreen').querySelector('button:not(:disabled)').focus(),0);}
-function startGame(cont){if(!cont||!hasSave())return openCreate();fadeTo(()=>{if(!load())freshState();S.raid=0;allies=[];proj=[];spawnWorld();showOnly(null);$('hud').hidden=false;mode='play';camSnap=true;hudDirty=true;sbSig='';applyLang();stage.focus();setTimeout(checkSkills,1500);});}
+function toTitle(){if(RPLQ&&!RPL&&!SIM)setTimeout(rplStart,400);if(REC){recKeep();REC=null;}mode='title';showOnly('titleScreen');$('hud').hidden=true;$('contBtn').disabled=!hasSave();setTimeout(()=>$('titleScreen').querySelector('button:not(:disabled)').focus(),0);}
+function startGame(cont){if(!cont||!hasSave())return openCreate();const rs=recSave();fadeTo(()=>{simBegin(rs);if(!load())freshState();S.raid=0;allies=[];proj=[];spawnWorld();showOnly(null);$('hud').hidden=false;mode='play';camSnap=true;hudDirty=true;sbSig='';applyLang();stage.focus();setTimeout(checkSkills,1500);});}
 // character creation: name + look; the look is stored in S.look so another client could draw the same character
 let CL=null;
 function openCreate(){CL={...DEFLOOK,n:''};mode='create';showOnly('create');$('cname').value='';$('cerr').textContent='';renderCreate();setTimeout(()=>$('cname').focus(),60);}
@@ -6976,7 +6978,7 @@ function mapZoom(f,px,py){const c=$('mapC'),sc0=mapFit(c)*MV.z;px=px??c.width/2;
  MV.z=clamp(MV.z*f,1,6);const sc=mapFit(c)*MV.z;MV.cx=wx-(px-c.width/2)/sc;MV.cy=wy-(py-c.height/2)/sc;mapClamp(c);drawMap();}
 function mapCenter(){const pp=outPos();MV.cx=pp.x/TS;MV.cy=pp.y/TS;if(MV.z<2)MV.z=2.5;mapClamp($('mapC'));drawMap();}
 // redraws from dragging and the wheel are folded into one per frame (a mouse sends 100+ moves a second)
-let mapRAF=0;function drawMap(){if(mapRAF)return;mapRAF=requestAnimationFrame(()=>{mapRAF=0;if(mode==='map')drawMapNow();});}
+let mapRAF=0;function drawMap(){if(mapRAF)return;mapRAF=requestAnimationFrame(()=>{mapRAF=0;if(mode!=='map')return;const m0=Math.random,r0=rand;if(SIM){Math.random=VRAND;rand=VRAND;}try{drawMapNow();}finally{Math.random=m0;rand=r0;}});} // drawn between steps: not with the world's random numbers (SAT-ONLINE-100)
 function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=$('mapC'),dpr=Math.min(2,window.devicePixelRatio||1),cw=Math.round(c.clientWidth*dpr),chh=Math.round(c.clientHeight*dpr);if(cw&&(c.width!==cw||c.height!==chh)){c.width=cw;c.height=chh;}
  mapClamp(c);const g=c.getContext('2d'),sc=mapFit(c)*MV.z,X=x=>(x-MV.cx)*sc+c.width/2,Y=y=>(y-MV.cy)*sc+c.height/2,u=dpr*Math.min(1.8,.9+MV.z*.25),F=lang==='ar'?'Tajawal, sans-serif':'Oswald, sans-serif';
  g.fillStyle='#0a1220';g.fillRect(0,0,c.width,c.height);g.imageSmoothingEnabled=sc<8;g.imageSmoothingQuality='high';
@@ -7910,15 +7912,16 @@ const ERRS=new Set();
 function gameErr(e,m){if(m){m.st=null;m.tele=0;m.combo=0;m.flee=0;}const k=String(e&&e.message||e);if(ERRS.has(k))return;ERRS.add(k);console.error(e);try{logMsg('ERR '+k+' '+String(e&&e.stack||'').split('\n')[1]);toast(t('gameErr',{e:k.slice(0,90)}),'warn');}catch(_){}}
 let loopAt=0;
 /* the fixed tick (SAT-ONLINE-099, plan U313/U373; ?tick=fixed, off by default): the world moves in steps of exactly 1/60 s
-   whatever the screen's rate (a 144 Hz screen draws more often, a slow one runs up to three steps a frame), and a key
+   whatever the screen's rate (a 144 Hz screen draws more often; a slow one runs up to three steps a frame, as a frame's time
+   is capped at 0.05 s and what is left over is under a step: FSTEP*4 only bounds it), and a key
    pressed between two frames is seen by the next step, so the same inputs give the same outcome at any frame rate.
    Drawing, sound and the network take their random numbers from a stream of their own (seeded once from the world's, so
    two players' streams differ), so how often a screen draws doesn't change the world's. */
 const FIXT=/[?&]tick=fixed(&|$)/.test(location.search),FSTEP=1/60;let facc=0;
 const VRAND=(()=>{let a=FIXT?Math.random()*4294967296>>>0:0;return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};})();
 function loop(now){requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;
- if(FIXT){facc=Math.min(facc+dt,FSTEP*4);while(facc>=FSTEP-1e-9){facc-=FSTEP;try{update(FSTEP);}catch(e){gameErr(e);}}}else try{update(dt);}catch(e){gameErr(e);}
- const r0=rand;if(FIXT)rand=VRAND;try{loopRest(dt);}finally{rand=r0;}}
+ if(FIXT){facc=Math.min(facc+dt,FSTEP*4);while(facc>=FSTEP-1e-9){if(RPL&&RPL.done){facc=0;break;}facc-=FSTEP;if(SIM)simPre();try{update(FSTEP);}catch(e){gameErr(e);}FSTEPS++;if(SIM)simPost();}}else try{update(dt);}catch(e){gameErr(e);}
+ const r0=rand,m0=Math.random;if(FIXT){rand=VRAND;if(SIM)Math.random=VRAND;}try{loopRest(dt);}finally{rand=r0;Math.random=m0;}}
 function loopRest(dt){if(NET)try{netTick();}catch(e){gameErr(e);}try{huntTick();}catch(e){gameErr(e);}if(TOUCH)try{touchTick();}catch(e){gameErr(e);}try{render(dt);}catch(e){gameErr(e);}try{guiTick();}catch(e){gameErr(e);}
  if(mode==='play')updateKeys();
  if(mode==='create')drawPrev();if(DL&&DL.pv)drawDPrev();
@@ -7968,7 +7971,62 @@ let NET=null,NETTR=null,netLinkT=0,netReplaced=false,netForce=false,netPrev=null
 // Twister 2026-10-19: the public site opens online with no ?net=online; ?net=off plays offline there, ?net=local stays for two-tab tests.
 // The switch is Satisfy.netOnlineOnly (src/net/firebase-config.js): true on the GitHub Pages host, so local files and the test
 // harness keep the offline default; a test (or another domain) can set it before the config loads (SAT-ONLINE-034).
-const NETQ=(q=>q==='off'?null:q)(QS.get('net')||(Satisfy.netOnlineOnly?'online':null));
+const NETQ=RPLQ||(FIXT&&QS.has('rec'))?null:(q=>q==='off'?null:q)(QS.get('net')||(Satisfy.netOnlineOnly?'online':null)); // a recording and its replay are offline (SAT-ONLINE-100)
+/* the replay recorder (SAT-ONLINE-100, plan U323/U373). Offline with ?tick=fixed&rec, the game records the session from
+   Continue: the save as it was, a seed for the world's random numbers, the clock it started at, and every key pressed and
+   dialog choice made, each at the step it happened before. Its clock (Date.now, performance.now, timers) runs on the
+   steps, so nothing depends on how fast the screen draws. It keeps the last recording on this device (satisfy_replay,
+   up to an hour), written every 10 s, when the page goes and back at the title (which ends it). Both are offline; touch
+   controls and clicks other than dialog choices are not recorded. ?tick=fixed&replay plays it back in a save slot of its own:
+   the same save, seed, clock and inputs at the same steps, the player's keys and clicks ignored, and checks the world
+   every 10 s against the recording's; at the end it stops there and says whether it ended the same, or when it went apart. */
+Object.assign(STR.ar,{rplNone:'مفيش تسجيل على الجهاز ده. سجّل الأول بـ ?tick=fixed&rec',rplOn:'▶ إعادة {a} من {b}',rplSame:'الإعادة خلصت زي اللعب بالظبط',rplApart:'الإعادة اختلفت عن اللعب عند {a}',recOn:'● بيسجّل',recFull:'التسجيل وصل لساعة ووقف'});
+Object.assign(STR.en,{rplNone:'No recording on this device. Record one first with ?tick=fixed&rec',rplOn:'▶ Replay {a} of {b}',rplSame:'The replay ended exactly as the game did',rplApart:'The replay went apart from the game at {a}',recOn:'● Recording',recFull:'The recording reached an hour and stopped'});
+var SIM=null,REC=null,RPL=null,FSTEPS=0;const RECK='satisfy_replay',RECMAX=216000,RECCP=600,T_ST=window.setTimeout.bind(window),T_CT=window.clearTimeout.bind(window),T_SI=window.setInterval.bind(window),T_CI=window.clearInterval.bind(window);
+function recOn(){return FIXT&&!NETQ&&!RPLQ&&QS.has('rec');}
+// the raw save before Continue loads it (the recording starts from it)
+function recSave(){if(!recOn()&&!RPL)return null;try{return localStorage.getItem(STORE.key);}catch(e){return null;}}
+const recClock=s=>{const sp=1000/60;return [()=>s.t0+FSTEPS*sp,()=>s.p0+FSTEPS*sp];};
+// the session's clock, random numbers and timers from here on run on the steps
+function simBegin(raw){if(SIM||!FIXT)return;let s;
+ if(RPL)s={seed:RPL.seed,t0:RPL.t0,p0:RPL.p0,gt:RPL.gt};else if(recOn()&&raw)s={seed:(VRAND()*4294967296)>>>0,t0:Date.now(),p0:performance.now(),gt:gTime};else return;
+ SIM=Object.assign(s,{tq:[],tid:0,rnd:mulberry32(s.seed)});FSTEPS=0;facc=0;gTime=s.gt;
+ const [dn,pn]=recClock(SIM);Date.now=dn;performance.now=pn;Math.random=SIM.rnd;rand=SIM.rnd;
+ window.setTimeout=(f,ms,...a)=>simTimer(f,ms,a,0);window.setInterval=(f,ms,...a)=>simTimer(f,ms,a,1);window.clearTimeout=window.clearInterval=id=>{if(typeof id==='string'&&id[0]==='v')SIM.tq=SIM.tq.filter(x=>x.id!==id);else{T_CT(id);T_CI(id);}};
+ if(RPL){RPL.at=0;RPL.bad=-1;}else REC={v:1,seed:s.seed,t0:s.t0,p0:s.p0,gt:s.gt,save:raw,kb:KB.slice(),ev:[],cp:[]};rplLabel();}
+function simTimer(f,ms,a,rep){const n=Math.max(1,Math.ceil((+ms||0)/(1000/60))),id='v'+(++SIM.tid);SIM.tq.push({id,at:FSTEPS+n,n,rep,f:typeof f==='function'?f:()=>{},a});return id;}
+// before a step: (a replay) the inputs recorded before it, then the timers due
+function simPre(){if(RPL&&!RPL.done){const E=RPL.ev;while(RPL.at<E.length&&E[RPL.at][0]<=FSTEPS)rplInput(E[RPL.at++]);}
+ const due=SIM.tq.filter(x=>x.at<=FSTEPS).sort((x,y)=>x.at-y.at||x.id.slice(1)-y.id.slice(1));
+ for(const x of due){if(x.rep)x.at+=x.n;else SIM.tq=SIM.tq.filter(y=>y!==x);try{x.f(...x.a);}catch(e){gameErr(e);}}}
+// after a step: every 10 s the world's state, kept (recording) or checked (replay)
+function simPost(){if(RPL&&!RPL.done&&FSTEPS>=RPL.end){rplEnd(simHash());return;}if(FSTEPS%RECCP)return;const h=simHash();
+ if(REC){REC.cp.push([FSTEPS,h]);recKeep();if(FSTEPS>=RECMAX){toast(t('recFull'),'warn');REC=null;}}
+ else if(RPL&&!RPL.done){const c=RPL.cp.find(x=>x[0]===FSTEPS);if(c&&c[1]!==h&&RPL.bad<0)RPL.bad=FSTEPS;rplLabel();}}
+function simHash(){const a=[mode,Math.round(P.x*100),Math.round(P.y*100),Math.round(P.hp*100),Math.round(P.mp*100),S.gold,S.xp,S.lv,S.items.length];
+ for(const m of mons)a.push(m.dead?0:Math.round(m.x)+','+Math.round(m.y)+','+Math.round(m.hp));
+ const str=a.join('|');let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function recKeep(now){if(!REC)return;const c=REC.cp[REC.cp.length-1];if(now){REC.end=FSTEPS;REC.h=simHash();}else if(c&&!(REC.end>c[0])){REC.end=c[0];REC.h=c[1];}
+ if(REC.end==null)return;try{localStorage.setItem(RECK,JSON.stringify(REC));}catch(e){}}
+// the inputs: keys (code, key, shift/ctrl/alt/meta/repeat) and dialog choices, with the step they came before
+function recIn(e,ty){if(RPL&&SIM&&!RPL.done&&e.isTrusted){e.stopImmediatePropagation();e.preventDefault();return;}if(!REC||!SIM||!e.isTrusted)return;
+ if(ty==='o'){const b=e.target&&e.target.closest&&e.target.closest('#dopts button');if(b)REC.ev.push([FSTEPS,'o',[...$('dopts').querySelectorAll('button')].indexOf(b)]);return;}
+ REC.ev.push([FSTEPS,ty,e.code,e.key,(e.shiftKey?1:0)|(e.ctrlKey?2:0)|(e.altKey?4:0)|(e.metaKey?8:0)|(e.repeat?16:0)]);}
+function rplInput(x){if(x[1]==='o'){const b=$('dopts').querySelectorAll('button')[x[2]];if(b)b.click();return;}
+ const f=x[4]|0;(document.activeElement||document.body).dispatchEvent(new KeyboardEvent(x[1]==='d'?'keydown':'keyup',{code:x[2],key:x[3],shiftKey:!!(f&1),ctrlKey:!!(f&2),altKey:!!(f&4),metaKey:!!(f&8),repeat:!!(f&16),bubbles:true,cancelable:true}));}
+addEventListener('keydown',e=>recIn(e,'d'),true);addEventListener('keyup',e=>recIn(e,'u'),true);addEventListener('click',e=>recIn(e,'o'),true);
+for(const ty of ['pointerdown','pointerup','mousedown','mouseup','wheel','contextmenu','touchstart'])addEventListener(ty,e=>{if(RPL&&SIM&&!RPL.done&&e.isTrusted){e.stopImmediatePropagation();e.preventDefault();}},{capture:true,passive:false});
+addEventListener('pagehide',recKeep);document.addEventListener('visibilitychange',()=>{if(document.hidden)recKeep();});
+// the replay: the recording's save in the replay's own slot, its key bindings, then Continue
+function rplStart(){if(RPL||SIM)return;let R=null;try{R=JSON.parse(localStorage.getItem(RECK));}catch(e){}
+ if(!R||R.v!==1||typeof R.save!=='string'||!Array.isArray(R.ev)){toast(t('rplNone'),'warn');return;}
+ try{localStorage.setItem(STORE0.key,R.save);}catch(e){return;}if(Array.isArray(R.kb)&&R.kb.length===6)KB=R.kb.slice();RPL=R;startGame(true);}
+const rplT=n=>{const s=Math.floor(n/60);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+function rplLabel(){let el=$('rplL');if(!el){el=document.createElement('div');el.id='rplL';el.style.cssText='position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:60;background:#000a;color:#fff;font:12px monospace;padding:3px 8px;border-radius:4px;pointer-events:none';document.body.appendChild(el);}
+ el.textContent=RPL?t('rplOn',{a:rplT(FSTEPS),b:rplT(RPL.end||0)})+(RPL.bad>=0?' ✗':''):t('recOn');}
+function rplEnd(h){const R=RPL;if(!R||R.done)return;R.done=1;const same=R.bad<0&&h===R.h;R.result=same?'same':'apart';if(R.bad<0&&!same)R.bad=FSTEPS;
+ announce(same?t('rplSame'):t('rplApart',{a:rplT(R.bad)}),1);rplLabel();}
+window.__REC={get rec(){return REC},get rpl(){return RPL},get steps(){return FSTEPS},get sim(){return !!SIM},keep:()=>recKeep(true),hash:()=>simHash(),start:()=>rplStart()}; // tests
 // every screen of a running game counts as in the world (review of #23: quest dialog, guild name, enhance effect and the
 // controls opened from pause used to stop presence and forfeit a duel); only the title, language and creation screens don't
 const NET_OFF=['title','lang','create'];
