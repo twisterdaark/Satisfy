@@ -568,6 +568,17 @@ test('repair orders (SAT-ONLINE-096): your own order; mended by someone else, wh
   assert.ok(P['.write'].endsWith("|| (data.exists() && !newData.exists()))"), 'a fee collected once (Claude-B, #131)');
 });
 
+test('crafting commissions (SAT-ONLINE-098): the piece only for its order, by someone else, with its recipe and fee', () => {
+  const O = rules.craftOrders.$cid, D = rules.craftDone.$uid.$cid, P = rules.craftPaid.$uid.$cid, o = "root.child('craftOrders').child($cid)";
+  assert.ok(O['.write'].includes("newData.parent().parent().child('craftDone').child(data.child('by').val()).child($cid).child('by').val() === auth.uid"), 'off only with the piece to its poster');
+  assert.ok(D['.write'].includes(o + ".child('by').val() === $uid && $uid !== auth.uid && !newData.parent().parent().parent().child('craftOrders').child($cid).exists()"), "someone else's order, gone in the same write");
+  assert.equal(D.id['.validate'], 'newData.val() === ' + o + ".child('rc').val()", 'its recipe');
+  assert.equal(D.fee['.validate'], 'newData.val() === ' + o + ".child('fee').val()", 'its fee');
+  assert.equal(D.by['.validate'], 'newData.val() === auth.uid', 'the crafter, for the credit');
+  assert.ok(P['.write'].includes("newData.parent().parent().parent().child('craftDone').child(" + o + ".child('by').val()).child($cid).child('by').val() === $uid"), 'paid only for the piece');
+  assert.ok(P['.write'].endsWith("|| (data.exists() && !newData.exists()))"), 'a fee collected once (Claude-B, #131)');
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);

@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22commission', ver: '1.86', d: '2026-10-22',
+      ar: ["طلبات الصناعة: أونلاين، عند أي حداد، تقدر تطلب من لاعب صانع يعملك حاجة. بتختار وصفة عندك خاماتها وأجرة، والخامات والأجرة بيطلعوا من شنطتك وبيرجعوا لو شلت الطلب",
+        "اللاعب اللي عارف الوصفة بيعملها في الفرن من خاماتك إنت مش خاماته، والحاجة بتوصلك مكتوب عليها \"اتعملت بإيد\" اسمه، وهو بيستلم أجرته"],
+      en: ["Crafting commissions: online, at any smith's, ask a player crafter to make you a piece: a recipe you have the materials for, and a fee; both leave your bag and come back if you take the order off",
+        "A player who knows the recipe forges it at the anvil from your materials, not theirs; the piece reaches you \"Made by\" them, and they collect the fee"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
