@@ -14,7 +14,7 @@ test('epic and better weapons roll passives, appraisal can add a hidden one', as
     const r = await g.eval(() => { const X = window.__G.isk, A = window.__GAP;
       const n = [0, 1, 2, 3, 4].map((q) => (X.mkItem('isword', q).wp || []).length);
       const it = X.mkItem('isword', 4), tip = X.itemTip(it);
-      let hid = 0; for (let i = 0; i < 60; i++) { const w = X.mkItem('isword', 1); window.__G.S.gold = 1e9; A.doApr(w, 'anvil'); if ((w.wp || []).some((p) => p.h)) hid++; }
+      let hid = 0; window.__G.S.cls = 'pagma'; for (let i = 0; i < 60; i++) { const w = X.mkItem('isword', 1); window.__G.S.gold = 1e9; A.doApr(w, 'anvil'); if ((w.wp || []).some((p) => p.h)) hid++; }
       return { n, kinds: new Set(it.wp.map((p) => p.k)).size, tip, hid }; });
     assert.deepEqual(r.n, [0, 0, 1, 2, 3]);
     assert.equal(r.kinds, 3, 'no passive twice on one weapon');

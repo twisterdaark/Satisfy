@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
+      ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
+        "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
+        "فحص القطع بقى لوريث باجما بس، على السندان ببلاش. شلناه من الحداد العادي ومن الحدادين الـ NPC"],
+      en: ["A search box in the bag: type part of an item's name to find it in any tab",
+        "The trade window now shows item pictures like the bag (stars, colour and enhancement), with categories (all, weapons, armour, accessories) and their counts, and a search box",
+        "Appraising items is now for Pagma's Successor only, free at the anvil. Ordinary blacksmiths and NPC smiths no longer offer it"] },
     { v: '2026-10-22wpass3', ver: '1.84', d: '2026-10-22',
       ar: ["الصعق بقى للأسلحة اللي ليها علاقة بالبرق بس (اللي معمولة بنفس التنين الأزرق) أو اللي فيها حجر برق. الأسلحة التانية اللي كان طالعلها صعق اتبدل بباسيف تاني. وعدد القفزات (1 لـ 3 حسب التصنيف) ومدة الشلل (0.2 لـ 0.5 ثانية) بقوا عشوائيين لكل سلاح وبيبانوا في الوصف",
         "الضربات الزيادة بقت ممكن تبقى أكتر من واحدة حسب التصنيف والخامات: ضربة أساسية، و+1 للفريد، و+1 للأسطوري، و+1 للأوريكالكوم الأزرق أو نفس وحش مقدس، و+1 كمان للنفس، لحد 4. وكل سلاح بيطلع بعدد عشوائي من 1 لأقصى عدد ليه"],
