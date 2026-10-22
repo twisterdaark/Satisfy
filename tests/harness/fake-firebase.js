@@ -516,6 +516,32 @@
       if (!user || seg.length !== 2 || data.has(p) || !v || v.by !== user.uid) return 'PERMISSION_DENIED: reports';
       return Object.keys(v).sort().join(',') === 'about,aboutN,by,byN,said,t,why' && typeof v.about === 'string' && v.about !== user.uid && ['spam', 'abuse', 'cheat', 'other'].includes(v.why) && typeof v.said === 'string' && v.said.length <= 360 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'reports fields';
     }
+    if (seg[0] === 'bugs' || seg[0] === 'bugLast' || seg[0] === 'bugTriage') { // SAT-ONLINE-125: bug reports and their triage
+      const adm = !!user && data.get('admins/' + user.uid) === true, now = Date.now(), old = data.get(p);
+      if (!user || seg.length !== 2) return 'PERMISSION_DENIED: ' + seg[0] + ' ' + p;
+      const KEY = /^[bc]_[A-Za-z0-9_-]{1,60}$/;
+      if (seg[0] === 'bugLast') {
+        if (seg[1] !== user.uid) return 'PERMISSION_DENIED: bugLast';
+        if (v === null) return 'PERMISSION_DENIED: bugLast remove'; // Claude-B's review of #161: else remove it and send again, forever
+        return Object.keys(v).join(',') === 't' && isSV(v.t) ? null : 'bugLast values';
+      }
+      if (seg[0] === 'bugs') {
+        if (v === null) return adm ? null : 'PERMISSION_DENIED: bugs remove'; // one already gone too (a second click on Clear)
+        const last = data.get('bugLast/' + user.uid), sent = curDiff && curDiff['bugLast/' + user.uid]; // curDiff: the other paths of the same update
+        if (old !== undefined || v.by !== user.uid) return 'PERMISSION_DENIED: bugs write';
+        if (!sent) return 'PERMISSION_DENIED: bugs without bugLast';
+        if (last && !(last.t < now - 120000)) return 'PERMISSION_DENIED: bugs too soon';
+        const ks = Object.keys(v).sort().join(',');
+        if (!/^b_[A-Za-z0-9_-]{1,60}$/.test(seg[1]) || !['by,s,t,v', 'by,s,t,v,z', 'by,n,s,t,v', 'by,n,s,t,v,z'].includes(ks)) return 'bugs fields';
+        return typeof v.s === 'string' && v.s.length >= 3 && v.s.length <= 300 && typeof v.v === 'string' && v.v.length <= 16 && (v.z === undefined || (typeof v.z === 'string' && v.z.length <= 24)) && (v.n === undefined || (typeof v.n === 'string' && v.n.length <= 24)) && isSV(v.t) ? null : 'bugs values';
+      }
+      if (!adm) return 'PERMISSION_DENIED: bugTriage admins only';
+      if (v === null) return null;
+      const ks = Object.keys(v).sort().join(',');
+      if (!KEY.test(seg[1]) || !['by,s,t', 'by,dup,s,t', 'by,note,s,t', 'by,dup,note,s,t'].includes(ks)) return 'bugTriage fields';
+      if (!['new', 'act', 'fixed', 'no', 'dup'].includes(v.s) || (v.s === 'dup') !== (v.dup !== undefined)) return 'bugTriage status';
+      return (v.dup === undefined || (typeof v.dup === 'string' && KEY.test(v.dup) && v.dup !== seg[1])) && (v.note === undefined || (typeof v.note === 'string' && v.note.length <= 120)) && v.by === user.uid && isSV(v.t) ? null : 'bugTriage values';
+    }
     if (seg[0] === 'admins') return 'PERMISSION_DENIED: admins'; // SAT-ONLINE-079: set in the console only
     if (seg[0] === 'appeals' || seg[0] === 'appealDone') { // SAT-ONLINE-087: a muted player's appeal, the owner's answer
       const adm = !!user && data.get('admins/' + user.uid) === true, now = Date.now(), old = data.get(p), mu = data.get('mutes/' + seg[1]);
@@ -848,7 +874,7 @@
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
-      const readable = ['flags', 'profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat', 'lfg', 'guildRecruit', 'guildAlly', 'guildAllyCd', 'guildWar', 'guildWarKill', 'tradeRep', 'guildTrophy', 'repairOrders'].includes(seg[0]) ? !!user : seg[0] === 'guildWeek' && seg.length === 1 ? !!user && data.get('admins/' + user.uid) === true : (seg[0] === 'repairDone' || seg[0] === 'repairPaid') ? !!user && seg[1] === user.uid : seg[0] === 'tradeLog' ? !!user && seg[1] === user.uid : seg[0] === 'guildAllyAsk' ? !!user && seg.length === 3 && ['m', 'o'].includes(rkOf(seg[2], user.uid)) : seg[0] === 'guildWeekPaid' ? !!user && seg.length === 4 && seg[3] === user.uid : (seg[0] === 'guildApply' || seg[0] === 'guildRej') ? !!user && (seg.length === 3 ? seg[2] === user.uid : rightOf(seg[1], user.uid, 'inv')) : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : seg[0] === 'guildHallGuest' ? !!user && (data.has('guildMembers/' + seg[1] + '/' + user.uid) || (seg.length === 3 && seg[2] === user.uid)) : seg[0] === 'hallInv' ? !!user && seg[1] === user.uid : seg[0] === 'guildHall' ? !!user && seg.length === 2 && (data.has('guildMembers/' + seg[1] + '/' + user.uid) || data.has('guildHallGuest/' + seg[1] + '/' + user.uid)) : ['guildBank', 'guildBuild', 'guildLog', 'guildNote'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts', 'friends', 'friendReq', 'whisper', 'admins'].includes(seg[0]) && user && seg[1] === user.uid || ['crashes', 'reports', 'reportDone', 'balance'].includes(seg[0]) && !!user && data.get('admins/' + user.uid) === true || ['appeals', 'appealDone'].includes(seg[0]) && !!user && (data.get('admins/' + user.uid) === true || (seg.length === 2 && seg[1] === user.uid)) || seg[0] === 'mutes' && !!user || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
+      const readable = ['flags', 'profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat', 'lfg', 'guildRecruit', 'guildAlly', 'guildAllyCd', 'guildWar', 'guildWarKill', 'tradeRep', 'guildTrophy', 'repairOrders'].includes(seg[0]) ? !!user : seg[0] === 'guildWeek' && seg.length === 1 ? !!user && data.get('admins/' + user.uid) === true : (seg[0] === 'repairDone' || seg[0] === 'repairPaid') ? !!user && seg[1] === user.uid : seg[0] === 'tradeLog' ? !!user && seg[1] === user.uid : seg[0] === 'guildAllyAsk' ? !!user && seg.length === 3 && ['m', 'o'].includes(rkOf(seg[2], user.uid)) : seg[0] === 'guildWeekPaid' ? !!user && seg.length === 4 && seg[3] === user.uid : (seg[0] === 'guildApply' || seg[0] === 'guildRej') ? !!user && (seg.length === 3 ? seg[2] === user.uid : rightOf(seg[1], user.uid, 'inv')) : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : seg[0] === 'guildHallGuest' ? !!user && (data.has('guildMembers/' + seg[1] + '/' + user.uid) || (seg.length === 3 && seg[2] === user.uid)) : seg[0] === 'hallInv' ? !!user && seg[1] === user.uid : seg[0] === 'guildHall' ? !!user && seg.length === 2 && (data.has('guildMembers/' + seg[1] + '/' + user.uid) || data.has('guildHallGuest/' + seg[1] + '/' + user.uid)) : ['guildBank', 'guildBuild', 'guildLog', 'guildNote'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts', 'friends', 'friendReq', 'whisper', 'admins'].includes(seg[0]) && user && seg[1] === user.uid || ['crashes', 'reports', 'reportDone', 'balance', 'bugs', 'bugTriage'].includes(seg[0]) && !!user && data.get('admins/' + user.uid) === true || ['appeals', 'appealDone'].includes(seg[0]) && !!user && (data.get('admins/' + user.uid) === true || (seg.length === 2 && seg[1] === user.uid)) || seg[0] === 'mutes' && !!user || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       return Promise.resolve(snap(r.path, nodeVal(r.path))); // the node as the server holds it, nested (SAT-ONLINE-090: guildWeek)

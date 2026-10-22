@@ -706,6 +706,41 @@
         "$other": { ".validate": false }
       }
     },
+    "bugs": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$id": {
+        ".write": "auth != null && ((!data.exists() && newData.exists() && newData.child('by').val() === auth.uid && newData.parent().parent().child('bugLast').child(auth.uid).child('t').val() === now && (!root.child('bugLast').child(auth.uid).exists() || root.child('bugLast').child(auth.uid).child('t').val() < now - 120000)) || (!newData.exists() && root.child('admins').child(auth.uid).val() === true))",
+        ".validate": "$id.matches(/^b_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['s', 'v', 'by', 't'])",
+        "s": { ".validate": "newData.isString() && newData.val().length >= 3 && newData.val().length <= 300" },
+        "v": { ".validate": "newData.isString() && newData.val().length <= 16" },
+        "z": { ".validate": "newData.isString() && newData.val().length <= 24" },
+        "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
+        "by": { ".validate": "newData.isString()" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "bugLast": {
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid && newData.exists()",
+        ".validate": "newData.hasChildren(['t'])",
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "bugTriage": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$key": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        ".validate": "$key.matches(/^[bc]_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['s', 'by', 't']) && (newData.child('s').val() !== 'dup' || newData.hasChild('dup'))",
+        "s": { ".validate": "newData.val() === 'new' || newData.val() === 'act' || newData.val() === 'fixed' || newData.val() === 'no' || newData.val() === 'dup'" },
+        "dup": { ".validate": "newData.isString() && newData.val().matches(/^[bc]_[A-Za-z0-9_-]{1,60}$/) && newData.val() !== $key && newData.parent().child('s').val() === 'dup'" },
+        "note": { ".validate": "newData.isString() && newData.val().length <= 120" },
+        "by": { ".validate": "newData.val() === auth.uid" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
     "admins": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
