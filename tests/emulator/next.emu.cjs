@@ -151,3 +151,16 @@ test('#131: repair orders: posted by the owner of the item, answered once by a s
   await yes(db(A).ref('repairDone/' + A + '/' + O).remove(), 'A takes the sword back');
   await yes(db(B).ref('repairPaid/' + B + '/' + O).remove(), 'B collects');
 });
+
+test('#139: guild research: paid from the treasury at its exact price, in the order of the tree, by those who may spend', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => { await ctx.database().ref('guildBank/' + G).set({ in: 300000, s: 0, lb: A, lg: 300000, t: 1 }); });
+  const research = (who, b, s) => db(who).ref().update({ ['guildBuild/' + G + '/' + b]: 1, ['guildBank/' + G + '/s']: s, ['guildBank/' + G + '/lb']: who, ['guildBank/' + G + '/t']: SV });
+  await no(research(B, 'xp1', 30000), 'a member does not spend by default');
+  await no(research(A, 'xp1', 29999), 'the exact price');
+  await no(research(A, 'xp2', 120000), 'not before its first step');
+  await yes(research(A, 'xp1', 30000), 'the master researches the first step');
+  await no(research(A, 'xp1', 60000), 'once');
+  await yes(research(A, 'xp2', 150000), 'then the second, 120,000 more');
+  await no(research(A, 'all', 550000), 'the last one needs all three second steps');
+  await no(db(C).ref('guildBuild/' + G).once('value'), 'others do not read it');
+});
