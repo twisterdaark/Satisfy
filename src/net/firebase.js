@@ -364,6 +364,7 @@
       watch: function (id, uid, cb) { var off = D.onValue(at('tradeSides/' + id + '/' + uid), function (s) { cb(s.val()); }, function () {}); return function () { try { off(); } catch (e) { /* ignore */ } }; },
       read: function (id, uid) { return D.get(at('tradeSides/' + id + '/' + uid)).then(function (s) { return s.val(); }); },
       watchDone: function (id, cb) { var off = D.onValue(at('tradeDone/' + id), function (s) { cb(s.val()); }, function () {}); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      done: function (id) { return D.get(at('tradeDone/' + id)).then(function (s) { return s.val(); }); }, // SAT-ONLINE-128: a confirmed trade looked up later
       // SAT-ONLINE-089 seller history (plan U215): after a trade each side writes its own record, tradeLog/{uid}/{tid}
       // {o, on, gg, gi, ig, ii, t} (with whom, gold given and got as the trade's sides hold them, how many items; yours only)
       // and tradeRep/{uid}/{tid} {o, t} (public: the count of trades and of partners). Only for a trade done between the two.
