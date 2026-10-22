@@ -6000,9 +6000,12 @@ function cslFree(){if(!CSLOT)return 'a';const n=wNow();return CS_K.find(k=>!CSLO
 function cslNext(){const n=wNow(),ts=CS_K.map(k=>CSLOT&&CSLOT[k]?+CSLOT[k].t+CS_WK-n:0).filter(x=>x>0);return ts.length?Math.min(...ts):0;}
 function cslLeft(ms){const h=Math.max(1,Math.ceil(ms/3600000));return h>=48?t('capDays',{d:Math.floor(h/24)}):t('capHrs',{h});}
 // a capture written online: ok() once the server took it (the rewards and the news), no() if it was refused (the place goes
-// back to what it was, here and on the map). false when there is nobody to tell (offline): the caller goes on as before
+// back to what it was, here and on the map). false when there is nobody to tell (offline), and for a guild that isn't
+// online (a canon guild you joined, Tzed to Jishuka, or one made offline: the rules take captures only from members of
+// online guilds; Claude-B's re-review of #130): the caller goes on as before, the capture kept on this page only
 function ownPut(k,gid,ok,no){if(!FB||!netUser||!NET||!gid||!S||S.__demo)return false;const D=FB.m.database,g=WS.guilds[gid]||OWNG[gid]||{},T=TERR.findIndex(T=>T.k===k);
- const npc=NPCGID.includes(gid)&&gid!==S.guild,sl=npc?'-':cslFree(),u={};if(!sl){toast(t('capOff'),'warn');if(no)no();ownApply();return true;}
+ const npc=NPCGID.includes(gid)&&gid!==S.guild;if(!npc&&gid!==S.gon)return false;
+ const sl=npc?'-':cslFree(),u={};if(!sl){toast(t('capOff'),'warn');if(no)no();ownApply();return true;}
  u['world/satisfy/own/'+k]={g:gid,n:String(gName(gid)).slice(0,24),c:g.col||'#9a9aa6',h:netId||'?',uid:netUser.uid,s:sl,t:D.serverTimestamp()};if(!npc)u['capSlot/'+gid+'/'+sl]={k,t:D.serverTimestamp()};
  D.update(D.ref(FB.db),u).then(()=>{if(!npc&&CSLOT)CSLOT[sl]={k,t:wNow()};if(ok)ok();
    if(gid===S.guild&&NETTR&&NETTR.feedSay&&netId)NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:k==='castle'?'castNews':'terrNews',p:{f:Math.max(0,T)}});},

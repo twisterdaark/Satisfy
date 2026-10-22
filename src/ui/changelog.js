@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22terr', ver: '1.84', d: '2026-10-22',
+      ar: ["الأراضي أونلاين بقت ليها قواعد على السيرفر: المكان اللي اتاخد بيفضل محمي 45 دقيقة من وقت السيرفر، وكل جيلد ياخد 4 أماكن بالكتير (أراضي أو القلعة) في أي 7 أيام",
+        "لو الجيلد خد 4 أماكن، اللعبة بتقولك المكان الجاي يتاح إمتى، وكل مكان بيرجع متاح بعد أسبوع من استخدامه. محدش ياخد مكان لجيلد هو مش فيه"],
+      en: ["Territories online now have server rules: a place taken is safe for 45 minutes by the server's clock, and a guild takes at most 4 places (territories or the castle) in any 7 days",
+        "After 4, the game says when the next one frees; each frees a week after it was used. Nobody takes a place for a guild they are not in"] },
     { v: '2026-10-22wpass2', ver: '1.83', d: '2026-10-22',
       ar: ["باسيفز سلاح جديدة: ضربة مزدوجة (السلاح بيضرب تاني لوحده)، صعق (برق بيزود الضربة 50% ويقفز على اتنين جنب الهدف ويشلهم لحظة)، امتصاص (جزء من الضرر اللي بتاخده بيترد في ضربتك الجاية)، تجميد (بيبطّأ الهدف)، وزق (بيرمي الهدف لورا)",
         "حجر البرق: جوهرة جديدة بتتركب في السلاح عند خان، وبتدي السلاح صعق بفرصة 15%. بتقع من الوحوش العالية والزعماء",
@@ -245,11 +250,6 @@
            'Piaro comes to Reidan for the war and fights with his farming (a sweep all around him), Laden the "Northern Nova" strikes with sword aura, and every 25 s Lauel the strategist calls a plan that gives everyone in the town +15% damage against the army. None of them can be knocked out, but the commanders are your work',
            "Two quests from Lauel in Reidan, ending with the title Defender of Reidan (+10% damage against the Eternal Kingdom's army). Win the war and Ren throws down his sword",
            'Fix: the golem war on Reinhardt now has a written notice instead of its code name'] },
-    { v: '2026-10-22terr', ver: '1.40', d: '2026-10-22',
-      ar: ["الأراضي أونلاين بقت ليها قواعد على السيرفر: المكان اللي اتاخد بيفضل محمي 45 دقيقة من وقت السيرفر، وكل جيلد ياخد 4 أماكن بالكتير (أراضي أو القلعة) في أي 7 أيام",
-        "لو الجيلد خد 4 أماكن، اللعبة بتقولك المكان الجاي يتاح إمتى، وكل مكان بيرجع متاح بعد أسبوع من استخدامه. محدش ياخد مكان لجيلد هو مش فيه"],
-      en: ["Territories online now have server rules: a place taken is safe for 45 minutes by the server's clock, and a guild takes at most 4 places (territories or the castle) in any 7 days",
-        "After 4, the game says when the next one frees; each frees a week after it was used. Nobody takes a place for a guild they are not in"] },
     { v: '2026-10-21v139', ver: '1.39', d: '2026-10-21',
       ar: ['الغابة الغامضة غرب جاوس (لفل 250+): ضباب أخضر وطريق واحد بيلف لحد فسحة في النص. ناسك الغابة واقف عند أول الطريق وعنده كويستين',
            'نسخة باجما (لفل 260): زعيم عالمي لابس وش باجما وبيحارب بحركات سيفه (القتل، الربط، الموجة، التجاوز، الدوران). كل 30 ثانية بتتقسم لظلال، وطول ما الظلال واقفة بتاخد تلت ضربك بس. كل ما اللاعبين حواليها يكتروا الظلال بتكتر. بترجع بعد ساعة',
