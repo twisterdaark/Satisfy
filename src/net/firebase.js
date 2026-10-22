@@ -39,11 +39,13 @@
       var keep = m.auth.setPersistence && m.auth.browserLocalPersistence ? m.auth.setPersistence(auth, m.auth.browserLocalPersistence).catch(function () { /* the default stays */ }) : null;
       var db = m.database.getDatabase(app, cfg.databaseURL), emu = root.Satisfy && root.Satisfy.firebaseEmulator;
       // SAT-ONLINE-120: the local emulators instead of the project, only as firebase-config.js allows (a local page with ?emu)
+      var onEmu = false; // true only once both connect calls ran (Claude-B's review of #155)
       if (emu && m.database.connectDatabaseEmulator && m.auth.connectAuthEmulator) {
         m.database.connectDatabaseEmulator(db, emu.host, emu.dbPort);
         m.auth.connectAuthEmulator(auth, emu.authUrl, { disableWarnings: true });
+        onEmu = true;
       }
-      return Promise.resolve(keep).then(function () { return { m: m, app: app, auth: auth, db: db, emulator: !!emu }; });
+      return Promise.resolve(keep).then(function () { return { m: m, app: app, auth: auth, db: db, emulator: onEmu }; });
     });
     cache.catch(function () { cache = null; });
     return cache;

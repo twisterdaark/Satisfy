@@ -65,6 +65,15 @@ test('rules evaluator: a write is granted on its own path only, never by the rul
   assert.equal(E.write(rules, state, { 'a/x': null, 'a/y': null }).ok, true, 'a multi-location update of the children is');
 });
 
+test("rules evaluator: a parent's .validate holds a write to a child (Claude-B's review of #136)", () => {
+  const rules = { '.read': false, '.write': false, a: { $k: { '.write': 'true', '.validate': "newData.hasChildren(['x', 'y'])", x: { '.validate': 'newData.isNumber()' }, y: { '.validate': 'newData.isNumber()' } } } };
+  assert.equal(E.write(rules, {}, { 'a/k/x': 1 }).ok, false, 'x alone leaves a/k without y');
+  assert.equal(E.write(rules, {}, { 'a/k': { x: 1, y: 2 } }).ok, true);
+  assert.equal(E.write(rules, { a: { k: { x: 1, y: 2 } } }, { 'a/k/x': 3 }).ok, true, 'a/k still has both');
+  assert.equal(E.write(rules, { a: { k: { x: 1, y: 2 } } }, { 'a/k/y': null }).ok, false, 'removing y leaves it without');
+  assert.equal(E.write(rules, { a: { k: { x: 1, y: 2 } } }, { 'a/k': null }).ok, true, 'a location left empty is not validated');
+});
+
 test('fuzz: nobody signed out writes anything, in any state, also inside a multi-location update', () => {
   const bad = [];
   for (let i = 0; i < 6000; i++) {

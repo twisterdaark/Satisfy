@@ -3,10 +3,11 @@
 // the real file, not the fake's hand-written copy, so a test here checks what Firebase will be told.
 //
 // What it models (Firebase RTDB security rules):
-// - .read and .write cascade. Access to a location is granted if a rule on the location or on any ancestor grants it.
-//   A write that no rule on its path grants is still allowed when every location it changes beneath is granted further down.
-// - .validate runs, after a write is granted, on every location the write leaves with data: the written location and
-//   everything under it. It does not cascade, and a location left empty is not validated.
+// - .read and .write cascade. Access to a location is granted if a rule on the location or on any ancestor grants it,
+//   and only then: rules beneath a written location never grant it (207528f, proven on the emulator).
+// - .validate runs, after a write is granted, on every location whose data the write changes and leaves non-empty: the
+//   written location, everything under it, and every location above it (Claude-B's review of #136: a parent's
+//   `newData.hasChildren([...])` holds a child write too). A .validate rule does not cascade to the locations below it.
 // - A literal key's rules take precedence over a $wildcard's; the wildcard binds $name to the key.
 // - In expressions: auth (null or {uid}), now, root/data/newData snapshots (child, parent, val, exists, hasChild,
 //   hasChildren, isNumber, isString, isBoolean), and the string methods beginsWith, endsWith, contains, matches,
@@ -142,7 +143,17 @@ function write(rules, state, update, who = {}) {
     return null;
   }
   for (const p of Object.keys(update)) if (!granted(segs(p))) return { ok: false, granted: false, why: p + ' .write' };
-  for (const p of Object.keys(update)) { const e = valid(segs(p)); if (e) return { ok: false, granted: true, why: e }; }
+  // the locations above a written one: their data changes with it, so their .validate holds it too
+  function validUp(ss) {
+    for (let d = 0; d < ss.length; d++) {
+      const up = ss.slice(0, d);
+      if (getAt(after, up) === null) continue;
+      const ch = chain(rules, up), c = ch[ch.length - 1];
+      if (ch.length === up.length + 1 && '.validate' in c.node && !evalExpr(c.node['.validate'], env(c.vars, up))) return '/' + up.join('/') + ' .validate';
+    }
+    return null;
+  }
+  for (const p of Object.keys(update)) { const e = valid(segs(p)) || validUp(segs(p)); if (e) return { ok: false, granted: true, why: e }; }
   return { ok: true, granted: true, after };
 }
 
