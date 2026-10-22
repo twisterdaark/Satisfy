@@ -33,7 +33,7 @@
     // quests, NPC memory, world flags, discovery
     'qs', 'bqa', 'adqa', 'adqO', 'adqT', 'adqK', 'exd', 'exc', 'exf','cbase','church','hc','dv','dt','ms','rc','dcb','crep','rsh','cdy','xpb','pevo','mxp','und','pat1','patD','eyes','cre', 'qOff', 'p3', 'p4', 'kills', 'met', 'ev', 'guardDown', 'vis', 'books', 'chest', 'chops', 'hag', 'burnSeen',
     // equipment slots, skill bar, NPC affinity and town reputation, guild membership, companion, life skills
-    'eq', 'bar', 'xbar', 'croot', 'aff', 'rep', 'guild', 'comp', 'life',
+    'eq', 'bar', 'xbar', 'croot', 'aff', 'stash', 'rep', 'guild', 'comp', 'life',
     // repair orders posted to player smiths and not answered yet (SAT-ONLINE-096)
     'rord',
     // mounts and pets owned/active (SAT-MOUNT), the daily arena lockout (a date, so it must sync)

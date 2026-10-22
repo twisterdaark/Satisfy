@@ -14,7 +14,10 @@
  * midpoint at the start; outside for OUT_MS = yield); a combat lock (a jump of more than
  * TELEPORT_PX in one tick = yield); surrender, leaving and disconnect all end it; the result is
  * only win/loss: no gold, items, materials, durability or quest credit change hands.
- * Damage is normalized: every hit is MIN..MAX_HIT duel HP out of HP, whatever the levels.
+ * Damage is normalized: every hit is MIN..MAX_HIT duel HP out of HP, whatever the levels. With o.hurt (owner
+ * 2026-10-22: "duels with your real damage and health") a hit carries the attacker's real damage and the defender
+ * turns it into duel HP with its own defence, guard and dodge: o.hurt(k) returns the share of its max health lost
+ * (0..HP, 0 for a dodge). Duel HP stays a share of 100, so the public "<id>:<hp>" and the rules do not change.
  *
  * Trust model (no server yet): each side owns its own duel HP and applies the hits it receives
  * after checking rate (at most HITS_PER_S in any second, so network jitter that bunches two hits
@@ -36,7 +39,7 @@
 
   function create(o) {
     var P = o.presence, self = o.uid, now = o.now || function () { return Date.now(); };
-    var pos = o.pos, zone = o.zone, blocked = o.blocked || function () { return false; }; // SAT-ONLINE-016
+    var pos = o.pos, zone = o.zone, hurt = typeof o.hurt === 'function' ? o.hurt : null, blocked = o.blocked || function () { return false; }; // SAT-ONLINE-016
     var policy = o.policy || (root.Satisfy && root.Satisfy.net && root.Satisfy.net.zonePolicy) || function () { return { safe: false }; };
     var seq = 0, listeners = [];
     var incoming = new Map();   // duel id -> {duel, from, sid, handle, t}
@@ -107,7 +110,8 @@
           var me = pos(), r = byUid(from.uid);
           if (!r || dist(me, r) > C.HIT_RANGE) { emit({ type: 'rejected', why: 'range' }); return; }
           d.hitsIn.push(t);
-          k = Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(k)));
+          k = hurt ? Math.max(0, Math.min(C.HP, +hurt(k) || 0)) : Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(k)));
+          if (!(k > 0)) break;
           d.hp = Math.max(0, d.hp - k);
           emit({ type: 'hurt', dmg: k, hp: d.hp });
           if (d.hp <= 0) finish('lose', 'hp', { type: 'duel.end', extra: { k: 0 } });
@@ -181,7 +185,7 @@
         if (!d || d.phase !== 'fight') return 0;
         var r = byUid(d.foe);
         if (!r || dist(pos(), r) > C.HIT_RANGE) return 0;
-        var k = Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(+power || 0)));
+        var k = hurt ? Math.max(1, Math.min(1e9, Math.round(+power || 0))) : Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(+power || 0)));
         send('duel.hit', { k: k, n: ++d.hitN });
         return k;
       },

@@ -42,3 +42,28 @@ test('quest rows open their details again and again, over other windows', async 
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// owner 2026-10-22: "clicking the quest name makes my character attack": a quest panel moved with its grip lives in the
+// HUD and must still take the click instead of letting it through to the game
+test('a moved quest panel still opens a quest, and the click does not attack', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g);
+    await g.step(3);
+    await g.eval(() => { const G = window.__G; ['kh1', 'kh2'].forEach((k) => G.acceptQ(k)); });
+    await g.step(20);
+    // drag the panel by its grip
+    const q = await g.eval(() => { const r = document.getElementById('quest').getBoundingClientRect(); return [r.x + r.width / 2, r.y + 10]; });
+    await g.page.mouse.move(q[0], q[1]); await g.step(20);
+    const gp = await g.eval(() => { const e = document.querySelector('#g_quest .gm'); const r = e.getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; });
+    await g.page.mouse.move(gp[0], gp[1]); await g.page.mouse.down(); await g.page.mouse.move(gp[0] - 250, gp[1] + 120, { steps: 6 }); await g.page.mouse.up();
+    await g.step(5);
+    assert.equal(await g.eval(() => document.getElementById('quest').parentNode.id), 'hud', 'the panel moved into the HUD');
+    const b = await g.eval(() => { const e = document.querySelector('#qtext .qi[data-qd]:not(.ms) b'); const r = e.getBoundingClientRect(); return [r.x + 8, r.y + r.height / 2]; });
+    const hit = await g.eval((p) => { const e = document.elementFromPoint(p[0], p[1]); return !!(e && e.closest('#quest')); }, b);
+    assert.equal(hit, true, 'the click lands on the panel');
+    await g.page.mouse.click(b[0], b[1]); await g.step(2);
+    assert.equal(await g.eval(() => window.__G.mode), 'qd');
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});

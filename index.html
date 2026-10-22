@@ -324,7 +324,7 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 /* patch 3 */
 #keys{grid-template-columns:repeat(4,auto)}
 #rcol{position:absolute;inset-inline-end:calc(var(--u)*1);top:calc(var(--u)*1);display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*.6);pointer-events:none}
-#rcol #quest,#rcol #mini{position:relative;inset:auto;top:auto}#rcol #quest{pointer-events:auto}
+#rcol #quest,#rcol #mini{position:relative;inset:auto;top:auto}#rcol #quest,#quest{pointer-events:auto}
 #mini{cursor:pointer;pointer-events:auto;image-rendering:auto;border-radius:calc(var(--u)*.4)}
 #qtext .qi{position:relative;padding-inline-end:calc(var(--u)*2.6)}#qtext .qtk{position:absolute;inset-inline-end:0;top:calc(var(--u)*.3);min-width:calc(var(--u)*2.2);height:calc(var(--u)*2.2);padding:0;font-size:calc(var(--u)*1.1);line-height:1;opacity:.45;filter:grayscale(1)}#qtext .qtk.on{opacity:1;filter:none;border-color:var(--gold)}#qtext .qtk:disabled{opacity:.15}#qtext .qi{padding-top:calc(var(--u)*.2);padding-bottom:calc(var(--u)*.2);border-top:1px solid rgba(143,216,255,.15);font-size:calc(var(--u)*1.2)}#qtext .qi:first-child{border-top:0}
 #qtext .qi b{display:block;color:#dff6ff;font-size:calc(var(--u)*1.1)}#qtext .qi.ret span{color:var(--gold)}#qtext .qn{color:var(--muted);font-size:calc(var(--u)*1.05)}
@@ -337,7 +337,7 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 .sk i{position:absolute;inset-inline:0;bottom:0;background:rgba(0,0,0,.72);height:0;pointer-events:none}
 .sk.lock{opacity:.45;filter:grayscale(1)}.sk.e{opacity:.3}.sk.off img{opacity:.5}.sk.tl{border-color:var(--gold)}.sk.it{border-color:#ff8a1e;box-shadow:0 0 calc(var(--u)*.5) rgba(255,138,30,.45)}
 .sk.lock::after{content:"🔒";position:absolute;font-size:calc(var(--u)*1.1)}
-.sk.press{transform:scale(.88)}
+.sk.press{transform:scale(.88)}.xbar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*4.2);display:flex;gap:calc(var(--u)*.45);padding:calc(var(--u)*.45);pointer-events:auto;direction:ltr}#xbar1{bottom:calc(var(--u)*9.4)}#xbar2{bottom:calc(var(--u)*14.6)}#xbar3{bottom:calc(var(--u)*19.8)}#skillbar .sk.xadd{width:calc(var(--u)*1.9);height:calc(var(--u)*1.9);font-size:calc(var(--u)*1.3);line-height:1;color:var(--gold)}#skillbar .sk.xadd:disabled{opacity:.3}.xbar .sk.eq{border-color:var(--gold);box-shadow:0 0 calc(var(--u)*.5) rgba(242,193,78,.5)}.xbar .sk.e{opacity:.35}.xbar .sk.dropon{box-shadow:0 0 0 2px var(--gold),0 0 calc(var(--u)*.8) var(--gold)}body.skdrag #ui .xbar{opacity:1!important;pointer-events:auto!important;z-index:40}body.touch .xbar{display:none}
 #ui:has(.panel:not([hidden])) #keys,#ui:has(.panel:not([hidden])) #skillbar,#ui:has(#sysm:not([hidden])) #skillbar{opacity:0;pointer-events:none}
 #mapEx{white-space:pre-line;font-size:calc(var(--u)*1.15);color:#bfe8ff;opacity:.85;margin-bottom:calc(var(--u)*.6)}#mapW{display:flex;gap:calc(var(--u)*1.4);align-items:stretch;background:var(--sys2)}
 #mapC{height:calc(var(--u)*40);aspect-ratio:160/120;border:1px solid rgba(143,216,255,.45);border-radius:calc(var(--u)*.4);background:#0a1220;cursor:grab;touch-action:none;box-shadow:inset 0 0 0 1px rgba(6,14,32,.8),0 0 calc(var(--u)*1.2) rgba(80,170,255,.18)}.mzoom{display:flex;gap:calc(var(--u)*.5)}.mzoom button{min-width:calc(var(--u)*3);padding:calc(var(--u)*.3) calc(var(--u)*.8)}
@@ -384,7 +384,7 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 button{background:linear-gradient(180deg,rgba(36,52,108,.85),rgba(22,32,74,.85));border:1px solid #a6d6f6;text-shadow:1px 1px 0 var(--ol)}
 .toast{background:rgba(22,30,70,.92);border:0;border-top:2px solid #a6d6f6;border-bottom:2px solid #a6d6f6;border-radius:0;text-shadow:1px 1px 0 var(--ol)}
 .slotb{background:rgba(16,24,56,.55)}
-#forge,#inv,#statusW,#logW,#controls,#mapW{overflow:visible;max-height:none}#inv .igrid{max-height:58vh;overflow-y:auto;overflow-x:hidden;padding-right:calc(var(--u)*.3)}#dopts .qnote{display:block;margin-top:calc(var(--u)*.5);font-size:calc(var(--u)*1.2);color:#bfe8ff;opacity:.8;text-align:center}#qdW .qdc{margin-top:calc(var(--u)*1.2);text-align:center}#qdW .qdc #qdCancel{border-color:#c0584a;color:#ffc4b8}#qdW .qdc #qdCancel.arm{background:linear-gradient(180deg,rgba(150,40,34,.9),rgba(96,22,20,.9));color:#fff}#statusW{max-height:86%;display:flex;flex-direction:column}#sbody{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6)}#logL{max-height:calc(var(--u)*34);overflow:auto}
+#forge,#inv,#statusW,#logW,#mapW{overflow:visible;max-height:none}#inv .igrid{max-height:58vh;overflow-y:auto;overflow-x:hidden;padding-right:calc(var(--u)*.3)}#dopts .qnote{display:block;margin-top:calc(var(--u)*.5);font-size:calc(var(--u)*1.2);color:#bfe8ff;opacity:.8;text-align:center}#qdW .qdc{margin-top:calc(var(--u)*1.2);text-align:center}#qdW .qdc #qdCancel{border-color:#c0584a;color:#ffc4b8}#qdW .qdc #qdCancel.arm{background:linear-gradient(180deg,rgba(150,40,34,.9),rgba(96,22,20,.9));color:#fff}#statusW{max-height:86%;display:flex;flex-direction:column}#sbody{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#8fd8ff rgba(6,18,40,.6)}#logL{max-height:calc(var(--u)*34);overflow:auto}
 #tip{background:linear-gradient(180deg,rgba(44,62,128,.8),rgba(26,38,90,.84));margin-top:calc(var(--u)*1.6);padding:calc(var(--u)*.9) calc(var(--u)*1.2);min-width:calc(var(--u)*14)}
 #tip::before{top:calc(var(--u)*-2.3);height:calc(var(--u)*2.6);background:var(--orn) 14% top/auto calc(var(--u)*2.3) no-repeat,var(--bar) center bottom/100% calc(var(--u)*.3) no-repeat;box-shadow:none;filter:drop-shadow(0 0 calc(var(--u)*.4) rgba(170,220,255,.8))}
 @media (prefers-reduced-motion:reduce){.toast,.panel,.pop,#forge.hit,#rays,.key.glow kbd{animation:none}}
@@ -502,7 +502,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
         <div id="tAct"><button data-tk="atk" class="big" data-i18n="kA"></button><button data-tk="Space" data-i18n="kD"></button><button data-tk="guard" data-i18n="kG"></button><button data-tk="KeyE" data-i18n="kE"></button></div>
         <button id="tNetT" data-tk="netrow" hidden>☰</button><button id="tKeysT" data-tk="keysrow">▦</button><div id="tNet" hidden><button data-tk="KeyT" data-i18n="tOpt"></button><button data-tk="KeyP" data-i18n="tParty"></button><button data-tk="KeyK" data-i18n="tDuel"></button><button data-tk="Enter" data-i18n="tChat"></button><button data-tk="ping" data-i18n="tPing"></button><button data-tk="emote" data-i18n="tEmote"></button></div><div id="tAsk" hidden><button data-tk="KeyY" data-i18n="tYes"></button><button data-tk="KeyN" data-i18n="tNo"></button></div></div>
       <button id="tQuit" hidden>✕</button>
-      <div id="skillbar" class="sys"></div>
+      <div id="skillbar" class="sys"></div><div id="xbar0" class="sys xbar" hidden></div><div id="xbar1" class="sys xbar" hidden></div><div id="xbar2" class="sys xbar" hidden></div><div id="xbar3" class="sys xbar" hidden></div>
       <div id="hint" hidden></div>
       <div id="toasts"></div>
       <div id="photoBar" hidden><button data-act="photoSave" data-i18n="photoSave"></button><button data-act="photoExit" data-i18n="photoExit"></button></div>
@@ -2146,6 +2146,8 @@ function bhOrd(n){return lang==='ar'?t('bhOrdA',{n}):n+({1:'st',2:'nd',3:'rd'}[n
 function bhEnter(n,how){const b=bhS();bhClean();let o=bhIsle(n);
  if(['hunt','boss','surv','past'].includes(o.k)&&how!=='load'&&rand()<.04)o={...o,k:'fog',th:'palm',cp:0};
  if(o.k==='dk'&&b.dk[n])o={...o,pure:1};
+ // an island already cleared stays clear (owner 2026-10-22: "once you finish an island no monsters spawn again"): the way on is open
+ if(n<=b.best&&how!=='replay'&&!['save','fog','tres','shop'].includes(o.k))o={...o,pure:1,done:1};
  const B=bhBox(o.th);if(P.ride)dismount();if(S.comp)S.comp=null;b.cur=n;
  BHR={n,o,B,ph:'wait',wait:o.k==='save'||o.k==='fog'||o.k==='tres'||o.pure||o.k==='sticks'?.6:4,t:0,ms:[],gates:[],keys:0,box:0,got:0,hit:0,ev:[],step:0};
  fadeTo(()=>{const p=bhPx(B.sx,B.sy);P.x=p.x;P.y=p.y;P.dir=1;P.hp=Math.max(P.hp,Math.round(maxHP()*.5));camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y,{color:'#7ad8ff'});
@@ -2158,7 +2160,7 @@ function bhStart(){const R=BHR,o=R.o,B=R.B,b=bhS();
    dialog('bhSys',[bhSys('bhSaveQ')],null,[{l:t('bhYes'),f:()=>{b.sv=R.n;toast(t('bhSaveOk',{n:bhOrd(R.n)}),'good');SFX.quest();save(true);}},{l:t('bhNo')}]);},700);return;}
  if(o.k==='fog'||o.k==='tres'){R.t=o.k==='tres'?180:300;bhG({...bhPx(B.x0+26,BHCY-2),bh:'shop',hint:'hBhShop'});bhOpen(1);
   setTimeout(()=>{if(BHR===R)dialog('bhSys',o.k==='tres'?[bhSys('bhTres'),bhSys('bhTres2'),bhSys('bhFogHaunt')]:[bhSys('bhFogLuck',{n:bhOrd(R.n)})]);},500);return;}
- if(o.pure){bhOpen(1);toast(t('bhPure'));return;}
+ if(o.pure){bhOpen(1);toast(t(o.done?'bhDoneI':'bhPure',{n:bhOrd(R.n)}));return;}
  if(o.k==='sticks'&&b.st){bhOpen(1);return;}
  const lines=[bhSys('bhMis'),t('bhM_'+o.k,{n:bhGoal(o)})];if(o.k==='dk')lines.push(t('bhDK_'+o.dk));if(R.n>=20&&!b.bini){b.bini=1;lines.push(['bini',t('bhBini1')],['bini',t('bhBini2')]);}else if(R.n>=20&&t('bhTip_'+o.k)!=='bhTip_'+o.k)lines.push(['bini',t('bhTip_'+o.k)]);
  dialog('bhSys',lines,()=>{if(BHR===R){toast(t('bhMisGo',{n:bhOrd(R.n)}),'warn');SFX.notice();}});}
@@ -2215,7 +2217,8 @@ function bhDied(){const R=BHR;if(!R)return;R.dead=1;R.ph='done';const src=P.last
 function bhRespawn(){const R=BHR,b=bhS();P.hp=Math.round(maxHP()*.5);P.inv=2;cvs.classList.remove('dead');$('deathW').hidden=true;mode='play';
  toast(t('bhFail'),'warn');if(b.sv&&R&&b.sv<=R.n){toast(t('bhToSave',{n:bhOrd(b.sv)}));bhEnter(b.sv);}else{toast(t('bhOut',{n:bhOrd(R?R.n:1)}));bhLeave();}hudDirty=true;}
 // the gate on the bridge off the south coast
-function bhAsk(){const b=bhS();const o=[{l:t('bhGo1'),f:()=>bhEnter(1)}];if(b.sv)o.push({l:t('bhGoSv',{n:bhOrd(b.sv)}),f:()=>bhEnter(b.sv)});if(b.pur)o.push({l:t('bhGoHall'),f:()=>bhHall()});o.push({l:t('bhNo')});
+// the gate goes on from the first island not cleared yet (owner 2026-10-22: "take me back to the last island I reached")
+function bhAsk(){const b=bhS();const nx=Math.min(66,b.best+1),o=[...(b.best>0&&b.best<66?[{l:t('bhGoNx',{n:bhOrd(nx)}),f:()=>bhEnter(nx)}]:[]),{l:t('bhGo1'),f:()=>bhEnter(1)}];if(b.sv)o.push({l:t('bhGoSv',{n:bhOrd(b.sv)}),f:()=>bhEnter(b.sv)});if(b.pur)o.push({l:t('bhGoHall'),f:()=>bhHall()});o.push({l:t('bhNo')});
  dialog('bhSys',[bhSys('bhAsk1'),bhSys('bhAsk2'),t('bhMyRec',{f:b.best,c:b.cp.toLocaleString('en')})],null,o);}
 function bhUse(g){if(g.bh==='enter')return bhAsk();const R=BHR;if(!R)return;
  if(g.bh==='next')return bhNext();
@@ -2318,7 +2321,8 @@ function bhEnts(ents){const H=BHR,B=H.B;
  if(B.circ.length&&H.o.k==='surv')for(const [x,y] of B.circ)ents.push({y:y*TS,f:()=>{const cx=x*TS+8,cy=y*TS+8,p=.5+Math.sin(gTime*4)*.5;ctx.strokeStyle=`rgba(150,90,255,${.5+p*.4})`;ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(cx,cy,14,7,0,0,7);ctx.stroke();ctx.beginPath();ctx.ellipse(cx,cy,9,4.5,gTime,0,7);ctx.stroke();}});
  if(H.rods)for(const r of H.rods)if(r.hp>0)ents.push({y:r.y,f:()=>{R(ctx,r.x-1,r.y-30,2,30,'#9aa4b4');R(ctx,r.x-1,r.y-30,1,30,'#e8eef8');R(ctx,r.x-2,r.y-32,4,2,'#c8d0dc');}});
  if(B.fires.length&&(H.o.k==='cold'))for(const [x,y] of B.fires)ents.push({y:y*TS+12,f:()=>{const cx=x*TS+8,cy=y*TS+12;R(ctx,cx-6,cy-2,12,3,'#5a3a1a');for(let i=0;i<3;i++)R(ctx,cx-4+i*3,cy-8-((Math.sin(gTime*9+i)*2+2)|0),3,6,i===1?'#ffd24a':'#ff7a1a');}});
- for(const g of H.gates){if(g.hide)continue;if(g.bh==='key'&&((gTime*1.3+g.x)%3)<.35)ents.push({y:g.y,f:()=>{R(ctx,g.x-1,g.y-6,2,2,'#fff4c0');R(ctx,g.x-3,g.y-5,6,1,'#ffe07a');}});
+ // the hidden keys glint now and then, and steadily once you are close (owner 2026-10-22: "where do I get the keys?"; they never showed)
+ for(const g of H.gates){if(g.hide&&!(g.bh==='key'&&!g.got))continue;if(g.bh==='key'&&(((gTime*1.3+g.x)%3)<.35||Math.hypot(g.x-P.x,g.y-P.y)<90&&((gTime*4+g.x)%1)<.5))ents.push({y:g.y,f:()=>{R(ctx,g.x-1,g.y-6,2,2,'#fff4c0');R(ctx,g.x-3,g.y-5,6,1,'#ffe07a');}});
   if(g.bh==='blaze')ents.push({y:g.y,f:()=>{for(let i=0;i<4;i++){const h=6+((Math.sin(gTime*11+i*1.7+g.x)*3+3)|0);R(ctx,g.x-6+i*3,g.y-h,3,h,i%2?'#ffd24a':'#ff6a1a');}}});
   if(g.bh==='coco')ents.push({y:g.y+20,f:()=>{const p=.5+Math.sin(gTime*3+g.x)*.5;ctx.fillStyle=`rgba(120,190,255,${.15+p*.2})`;ctx.beginPath();ctx.ellipse(g.x,g.y-6,9,6,0,0,7);ctx.fill();for(const [dx,dy] of [[-4,-8],[1,-9],[-1,-5]]){R(ctx,g.x+dx,g.y+dy,4,4,'#2a5ab0');R(ctx,g.x+dx,g.y+dy,3,3,'#3a7ad8');R(ctx,g.x+dx,g.y+dy,1,1,'#bfe0ff');}}});
   if(g.bh==='ore')ents.push({y:g.y,f:()=>{const p=.6+Math.sin(gTime*3+g.x)*.4;R(ctx,g.x-4,g.y-8,8,7,'#2a4a8a');R(ctx,g.x-2,g.y-11,4,4,`rgba(110,190,255,${p})`);R(ctx,g.x+1,g.y-7,2,2,'#cfe8ff');}});
@@ -3912,6 +3916,14 @@ Object.assign(STR.ar,{"crUp": "سمعتك في القارة كلها هتزيد 
 Object.assign(STR.en,{"crUp": "Reputation throughout the continent will rise by +{n}.", "crOpen": "You currently have {n} reputation throughout the continent. You can now use the Reputation Store.", "crLocked": "You currently have {n} reputation throughout the continent. You can use the Reputation Store when your reputation reaches over {m}.", "crH": "Continent reputation", "crL": "Across the continent", "crD": "Grows with great deeds: blacksmiths earn it from rare, epic, unique and legendary items (+30 / +80 / +300 / +1,000), and everyone from quests, S and SS quests, main story chapters, the first kill of each boss and every new town rank. It is spent at the Reputation Store.", "rsB": "Reputation Store!", "rsBNo": "The Reputation Store opens at {m} reputation", "rsAbout": "[Reputation Store]\nA special store for all users. It is possible to purchase goods with reputation.\nThere are many rare items, so please be sure to use it.", "rstore": "Reputation Store", "rsHi": "This is a special service for the best in Satisfy!", "rsIntro": "[Introducing the luxurious goods to our guest!]", "rsBal": "You have {n} reputation.", "rsCost": "{n} reputation", "rsPoor": "Not enough reputation. You have {n}.", "rsGot": "[Congratulations! {it} has been acquired!]", "rsFail": "[This! You have failed! Unfortunately, please look for the next opportunity.]", "rsCandy": "Sweet Candy", "rsCandyD": "All stats +30% for 5 minutes. {n} of 5 left per account", "rsCandyMax": "This item can only be purchased five times per account.", "rsGlass": "Good-looking Sunglasses", "rsGlassD": "A simple accessory with no special function other than a visual effect", "rsGlassOn": "Wear the Good-looking Sunglasses", "rsGlassOff": "Take off the Good-looking Sunglasses", "rsGlassW": "You are wearing the sunglasses. Other players see them on you.", "rsGlassT": "You took off the sunglasses.", "rsDraw": "Draw! Draw! Draw everything!", "rsDrawD": "A random drawing machine; there is a certain chance of an experience buff potion", "candy": "Sweet Candy", "candyD": "A little candy bar! A candy with natural sweetness is the best! There are no chemicals added!\nWhen the sweet candy is in your mouth, all stats will rise by 30% for 5 minutes.", "candyOn": "The Sweet Candy is in your mouth: all stats +30% for 5 minutes!", "sgl": "Good-looking Sunglasses", "xpot": "Experience Increase Potion", "xpotD": "Increases experience gained by 20% for the next three days.", "xpotOn": "Experience Increase Potion: +20% experience for three days!", "hairpin": "Pretty Hairpin", "hairpinD": "A colourful and pretty hairpin.\nIf you gift it to a woman, she will be delighted.", "hairpinUse": "Give it to a woman in town as a gift; she will be delighted.", "dskewer": "World’s Most Delicious Skewer", "dskewerD": "It is a skewer of a hell dog’s hind legs aged for 100 days, then roasted with a secret sauce.\nIt is the supreme taste that gourmet raiders enjoy.", "choco": "The best chocolate", "chocoD": "Fills you up and restores half your health, then you recover faster for a while.", "blocks": "Block Toys to Help a Child’s Development", "blocksD": "Coloured blocks. No use at all in a fight.", "blocksUse": "You build a little castle from the blocks, then put them back in the bag.", "clickUse": "Click to use", "rsBuff": "Sweet Candy: {s}", "xpBuff": "Experience potion: +20% · {s} left", "oHon": "Honoured stock: {it} ({g} gold)", "honLeft": "For the {r}: {n} left today", "honOut": "That stock is gone for today. Come back tomorrow.", "honThanks": "From the stock we keep for the best people of this town.", "oRestFree": "A free room (Town Hero)", "repPH": "What town ranks give", "repP1": "Known: prices in the town 2% lower", "repP2": "Respected: prices 4% lower", "repP3": "Honoured: 6% lower, and the merchant sells you 3 mana stones a day", "repP4": "Town Hero: 8% lower, an enchant stone a day from the merchant, and free rooms at the inn"});
 Object.assign(STR.ar,{"hfeed": "علف الحصان", "hfeedD": "علف مغذّي من العربجي.\nأكّله لحصانك: لو وقع بيقوم بنص صحته، ولو متعور بيرجعله نص صحته. دوس عليه من الشنطة.", "vherb": "عشبة الحيوية", "vherbD": "عشبة نادرة بتطلع ساعات وانت بتجمع الأعشاب.\nأكّلها لحصانك: لو وقع بيقوم بصحته كلها، ولو متعور بيرجع كامل. دوس عليها من الشنطة.", "hfFull": "حصانك صحته كاملة، مش محتاج ياكل", "hfWoke": "{n} أكل {it} وقام تاني!", "hfHeal": "{n} أكل {it} ورجعله صحته", "oBuyHF": "اشتري {it} ({g} دهب)"});
 Object.assign(STR.en,{"hfeed": "Horse Feed", "hfeedD": "Nourishing feed from a stable keeper.\nFeed it to your horse: a fallen horse gets up at half health, a hurt one gets half its health back. Click it in your bag.", "vherb": "Vitality Herb", "vherbD": "A rare herb that sometimes turns up while you pick herbs.\nFeed it to your horse: a fallen horse gets up at full health, a hurt one is fully healed. Click it in your bag.", "hfFull": "Your horse is at full health and does not need to eat", "hfWoke": "{n} ate the {it} and is back on its feet!", "hfHeal": "{n} ate the {it} and is healed", "oBuyHF": "Buy {it} ({g} gold)"}); // horse food (owner 2026-10-22)
+Object.assign(STR.ar,{"bhGoNx": "كمّل من الجزيرة {n}", "bhDoneI": "[خلصت الجزيرة {n} قبل كده: مفيش وحوش، والطريق مفتوح.]"});
+Object.assign(STR.en,{"bhGoNx": "Go on from the {n} island", "bhDoneI": "[You have already cleared the {n} island: no monsters, the way is open.]"}); // Behen: go on, cleared islands
+Object.assign(STR.ar,{"xbAdd": "زوّد شريط مهارات", "xbSub": "شيل آخر شريط (حاجاته بتفضل محفوظة)", "xbGone": "القطعة دي مبقتش معاك"});
+Object.assign(STR.en,{"xbAdd": "Add a skill bar", "xbSub": "Remove the last bar (what is on it is kept)", "xbGone": "You no longer have this item"});
+Object.assign(STR.ar,{"oStash": "المخزن", "stashD": "صندوق تخزين واحد لكل النُّزل: {n}/{m}", "stT": "المخزن", "stBag": "الشنطة", "stBox": "المخزن {n}/{m}", "stNoteP": "دوس على حاجة تتحط في المخزن (Shift + دوسة = واحدة بس)", "stNoteT": "دوس على حاجة ترجع الشنطة (Shift + دوسة = واحدة بس)", "stPut": "دوس تحطها في المخزن", "stTake": "دوس ترجعها الشنطة", "stNo": "دي مينفعش تتحط في المخزن (اقلعها الأول لو لابسها)", "stFull": "المخزن مليان ({m} مكان)"});
+Object.assign(STR.en,{"oStash": "Storage chest", "stashD": "One chest shared by every inn: {n}/{m}", "stT": "Storage", "stBag": "Bag", "stBox": "Chest {n}/{m}", "stNoteP": "Click a thing to put it in the chest (Shift-click: just one)", "stNoteT": "Click a thing to take it back to the bag (Shift-click: just one)", "stPut": "Click to put it in the chest", "stTake": "Click to take it back", "stNo": "This cannot go in the chest (take it off first if you wear it)", "stFull": "The chest is full ({m} places)"}); // the storage chest
+Object.assign(STR.ar,{"rbX": "الشرايط الزيادة", "xbarShow": "عدد الشرايط الزيادة اللي ظاهرة", "xbarN": "شريط {b} · خانة {n}", "xbEmpty": "اسحب هنا مهارة، أو أكل أو جرعة من الشنطة", "xbClear": "كليك يمين يفضّي الخانة", "xbNone": "مفيش معاك {it}", "xbNoSk": "المهارة دي مش بتاعة كلاسك دلوقتي"});
+Object.assign(STR.en,{"rbX": "Extra bars", "xbarShow": "Extra bars shown", "xbarN": "Bar {b} · slot {n}", "xbEmpty": "Drag a skill here, or food or a potion from the bag", "xbClear": "Right-click empties the slot", "xbNone": "You have no {it}", "xbNoSk": "That skill is not your class's now"}); // extra skill bars
 Object.assign(STR.ar,{"sglOnT": "دوس عشان تلبسها", "sglOffT": "دوس عشان تقلعها"});
 Object.assign(STR.en,{"sglOnT": "Click to put them on", "sglOffT": "Click to take them off"});
 Object.assign(STR.ar,{"o_lfa1": "احصد أنواع محاصيل مختلفة في حقل بيارو: {c}/{n}", "o_lfa2": "لاقي النبع المستخبي في حقل بيارو: {c}/{n}", "o_dp1": "روح للفسحة اللي في قلب الغابة: {c}/{n}", "o_ya3": "طهّر مذبح ياتان ببركة ريبيكا: {c}/{n}"});
@@ -5130,7 +5142,7 @@ function kRemap(e){if(KSYN||!e.code||mode==='controls')return;const tg=e.target;
 addEventListener('keydown',kRemap,true);addEventListener('keyup',kRemap,true);
 const KM={KeyW:'up',ArrowUp:'up',KeyS:'down',ArrowDown:'down',KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',KeyJ:'atk'};
 addEventListener('keydown',e=>{
- if(mode==='controls'&&REB!=null){e.preventDefault();rebindTo(e.code);return;}
+ if(mode==='controls'&&REB!=null){e.preventDefault();if(REB[0]==='x'){if(/^(Shift|Alt|Control|Meta)/.test(e.code))return;rebindTo(e.code==='Escape'?e.code:kCombo(e));}else rebindTo(e.code);return;} // an extra bar's key may carry Shift, Alt or Ctrl
  const rng=e.target&&e.target.type==='range'&&e.code==='Escape'; // a volume slider takes the arrows, not Escape
  if(e.target&&e.target.tagName==='INPUT'&&!rng)return;
  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
@@ -5148,12 +5160,12 @@ for(const ev of ['pointerup','pointercancel'])addEventListener(ev,e=>{if(e.point
 window.__GTC={w2s:(x,y)=>{const b=stage.getBoundingClientRect();return [b.left+(x-camXf)*SC,b.top+(y-camYf)*SC];},openForge:()=>openForge(),closeForge:()=>closeForge(),openStatus:()=>openStatus(),get TBQ(){return TBQ}}; // tests
 stage.addEventListener('contextmenu',e=>{if(!e.target.closest('input,textarea'))e.preventDefault();});
 addEventListener('blur',()=>{for(const k in K)K[k]=false;guardOff();});
-stage.addEventListener('mousedown',e=>{if(TMG.has(mode)&&performance.now()-TPD<900)return;if(e.button===2){if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar,button')){e.preventDefault();guardOn();}return;}if(e.button!==0)return;audio();if(e.target.closest('button'))return;
+stage.addEventListener('mousedown',e=>{if(TMG.has(mode)&&performance.now()-TPD<900)return;if(e.button===2){if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar,.xbar,button')){e.preventDefault();guardOn();}return;}if(e.button!==0)return;audio();if(e.target.closest('button'))return;
  if(mode==='forge'&&MG&&!MG.done){e.preventDefault();strike();return;}
  if(mode==='dialog'){advance();return;}
  if(mode==='cook'){cookHit();return;}if(mode==='sew'){sewHit();return;}if(mode==='mix'){if(MIXG)MIXG.h=1;return;}if(mode==='farm'){farmTap(e);return;}if(mode==='song'||mode==='dance'){p4Tap(e);return;}
  if(mode==='cut'){if(SM)SM.done();return;}
- if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar')){stage.focus();const b=stage.getBoundingClientRect();const mx=(e.clientX-b.left)/SC+camXf,my=(e.clientY-b.top)/SC+camYf;if(NET&&e.altKey){netPing(mx,my);return;}const dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);LHOLD=1;}});
+ if(mode==='play'&&!e.target.closest('#keys,.panel,#rcol,#skillbar,.xbar')){stage.focus();const b=stage.getBoundingClientRect();const mx=(e.clientX-b.left)/SC+camXf,my=(e.clientY-b.top)/SC+camYf;if(NET&&e.altKey){netPing(mx,my);return;}const dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);LHOLD=1;}});
 // owner 2026-10-22: holding the left button keeps attacking toward the cursor, no need to click again and again
 let LHOLD=0;addEventListener('mouseup',e=>{if(e.button===0)LHOLD=0;});addEventListener('blur',()=>{LHOLD=0;});
 function holdAtk(){if(!LHOLD)return;if(mode!=='play'||MSX==null){LHOLD=0;return;}if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const b=stage.getBoundingClientRect(),mx=(MSX-b.left)/SC+camXf,my=(MSY-b.top)/SC+camYf,dx=mx-P.x,dy=my-(P.y-8),l=Math.hypot(dx,dy)||1;tryAttack(dx/l,dy/l);}
@@ -5834,7 +5846,21 @@ function bankMenu(who){const b=S.bank||0,g=S.gold,mv=(n,dep)=>{n=Math.floor(n);i
  const o=[];if(g>0){o.push({l:t('bankDepAll',{n:g.toLocaleString('en')}),f:()=>mv(g,1)});if(g>=2)o.push({l:t('bankDepHalf',{n:Math.floor(g/2).toLocaleString('en')}),f:()=>mv(g/2,1)});}
  if(b>0){o.push({l:t('bankWdAll',{n:b.toLocaleString('en')}),f:()=>mv(b,0)});for(const n of [1000,10000])if(b>n)o.push({l:t('bankWd',{n:n.toLocaleString('en')}),f:()=>mv(n,0)});}
  o.push({l:t('oBack'),f:()=>svcBack(who)});dialog(who,[t('bankHi',{b:b.toLocaleString('en'),g:g.toLocaleString('en')})],null,o);}
-const bankOpt=who=>[{l:t('oBank'),st:t('bankD'),f:()=>bankMenu(who)}];
+const bankOpt=who=>[{l:t('oBank'),st:t('bankD'),f:()=>bankMenu(who)},{l:t('oStash'),st:t('stashD',{n:(S.stash||[]).length,m:STN}),f:()=>openStash()}];
+/* the storage chest (owner 2026-10-22: "a chest to keep the weapons and things you do not need now, to use later"): one
+   chest shared by every inn, 60 places, kept with the character (S.stash). The bag window opens with two sides, the bag
+   and the chest: a click moves a whole stack across, Shift+click one. Worn gear and the sunglasses stay in the bag; the
+   chest closes when you walk away from the inn. */
+const STN=60;
+function openStash(){INVX={stash:1,side:'bag',x:P.x,y:P.y};SFX.open();mode='inv';$('invQ').value='';$('inv').hidden=false;$('hint').hidden=true;renderInv();}
+const stashArr=()=>Array.isArray(S.stash)?S.stash:(S.stash=[]);
+function stashList(){return stashArr().map((o,i)=>({k:o.it?o.it.id:o.k,n:o.it?1:o.n,r:o.it?o.it.r:o.r,it:o.it,sti:i,tip:(o.it?itemTip(o.it):`<b${o.k==='arrows'?` class="rt rt${o.r}"`:''}>${t(o.k)}</b>`)+`<br><small>${t('stTake')}</small>`}));}
+function stashClick(s,one){const A=stashArr();
+ if(INVX.side==='st'){const o=A[s.sti];if(!o)return;if(o.it){slotIn({it:o.it});A.splice(s.sti,1);}else{const n=one?1:o.n;slotIn({k:o.k,n,r:o.r});o.n-=n;if(o.n<=0)A.splice(s.sti,1);}}
+ else{if(s.k==='sgl'||s.eq){toast(t('stNo'),'warn');SFX.deny();return;}const same=!s.it&&A.find(o=>!o.it&&o.k===s.k&&o.r===s.r);if(!same&&A.length>=STN){toast(t('stFull',{m:STN}),'warn');SFX.deny();return;}
+  const o=slotOut(s,!one);if(!o)return;if(same)same.n+=o.n;else A.push(o.it?{it:o.it}:{k:o.k,n:o.n,r:o.r});}
+ SFX.click();hudDirty=true;sbSig='';renderInv();save(true);}
+function stashHead(){$('invH').textContent=t('stT');$('invNote').innerHTML=`<div class="qrow"><button data-stside="bag" class="${INVX.side!=='st'?'on':''}">${esc(t('stBag'))}</button><button data-stside="st" class="${INVX.side==='st'?'on':''}">${esc(t('stBox',{n:stashArr().length,m:STN}))}</button></div><small>${esc(t(INVX.side==='st'?'stNoteT':'stNoteP'))}</small>`;}
 Object.assign(STR.ar,{oBank:'البنك',bankD:'الفلوس اللي في البنك مبتضيعش لما تموت',bankHi:'رصيدك في البنك: {b} دهب · معاك: {g} دهب',bankDepAll:'حط كل فلوسك ({n})',bankDepHalf:'حط النص ({n})',bankWdAll:'اسحب الكل ({n})',bankWd:'اسحب {n}',bankIn:'حطيت {n} دهب في البنك',bankOut:'سحبت {n} دهب من البنك',bankL:'البنك'});
 Object.assign(STR.en,{oBank:'Bank',bankD:"Gold in the bank isn't lost when you die",bankHi:'In the bank: {b} gold · on you: {g} gold',bankDepAll:'Deposit all ({n})',bankDepHalf:'Deposit half ({n})',bankWdAll:'Withdraw all ({n})',bankWd:'Withdraw {n}',bankIn:'Deposited {n} gold',bankOut:'Withdrew {n} gold',bankL:'Bank'});
 function merchOpts(who){return [...potOpts(who),...honOpts(who),...respecOpt(who),{l:t('oBuyBread'),qty:1,f:()=>buyBread(who)},{l:t('oSellW'),f:()=>openSell(who)}];}   // owner 2026-10-20: selling only through the sell window
@@ -6473,13 +6499,14 @@ function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>$
  GEMK.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(k+'D')}</small>`});});
  S.arrows.forEach((n,r)=>{if(n)a.push({k:'arrows',n,r,tip:`<b class="rt rt${r}">${t('arrows')}</b><br>${t('r'+r)} · ${ARROWG[r]}G`});});
  S.items.forEach(i=>{if(WSH[i.id]||(i.slot!=='w'&&i.slot!=='x')){const on=isEq(i);a.push({k:i.id,n:1,r:i.r,it:i,eq:on,tip:itemTip(i)+`<br><small>${on?t('eqMark'):t('clickEquip')}</small>`});}});
+ if(INVX&&INVX.stash){if(INVX.side==='st'){a.length=0;a.push(...stashList());}else a.forEach(s=>{s.tip+=`<br><small>${t(s.k==='sgl'||s.eq?'stNo':'stPut')}</small>`;});}
  const sell=INVX&&INVX.who;if(sell&&TOUCH)setTimeout(()=>{const n=$('invNote');if(n&&!n.querySelector('.qrow')){const r=document.createElement('div');r.className='qrow';r.innerHTML=[[1,t('sellOneB')],[999,t('sellAllB')]].map(([q,l])=>`<button data-bq="${q}" class="${(TBQ>1)===(q>1)?'on':''}">${l}</button>`).join('');r.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-bq]');if(!b)return;e.stopPropagation();TBQ=+b.dataset.bq;SFX.click();r.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));},true);n.appendChild(r);}},0);if(INVX&&INVX.salv)a.forEach(s=>{if(s.it)s.tip=s.tip.replace(t('clickEquip'),t('salvY'))+salvTip(s);});if(INVX&&INVX.apr)a.forEach(s=>{if(s.it)s.tip=s.tip.replace(t('clickEquip'),'')+aprTip(s);});if(sell)a.forEach(s=>{s.tip+=s.eq?`<br><small style="color:#ff9a8a">${t('unEqFirst')}</small>`:`<br><small style="color:#f2c14e">${t('sellAt',{g:unitVal(s)})}${s.n>1?' · '+t('sellAll',{g:unitVal(s)*s.n}):''}</small>`;});
- $('inv').classList.toggle('sell',!!sell);$('inv').classList.toggle('trash',INVX==='trash');$('inv').classList.toggle('salv',!!(INVX&&(INVX.salv||INVX.apr)));$('invH').textContent=t(sell?'sellT':INVX&&INVX.salv?'salvT':INVX&&INVX.apr?'aprT':'bagT');$('invNote').textContent=sell&&TOUCH?'':sell?t('sellNote'):INVX&&INVX.salv?t('salvNote'):INVX&&INVX.apr?t('aprNote'):INVX==='trash'?t('trashNote'):t('bagNote');$('invTrash').dataset.tip=t('trashTip');
- const A=bagTabs(a);INVS=A;let h='';for(let i=0,N=Math.max(36,Math.ceil(A.length/9)*9);i<N;i++){const s=A[i];h+=s?`<button class="slotb r${s.r||0}${s.eq?' eq':''}" data-inv="${i}" data-tip="${esc(s.tip)}"><img src="${icon(s.k)}"><b>${s.n>1?s.n:''}</b></button>`:'<div class="slotb e"></div>';}
+ $('inv').classList.toggle('sell',!!sell);$('inv').classList.toggle('trash',INVX==='trash');$('inv').classList.toggle('salv',!!(INVX&&(INVX.salv||INVX.apr)));$('invH').textContent=t(sell?'sellT':INVX&&INVX.salv?'salvT':INVX&&INVX.apr?'aprT':'bagT');$('invNote').textContent=sell&&TOUCH?'':sell?t('sellNote'):INVX&&INVX.salv?t('salvNote'):INVX&&INVX.apr?t('aprNote'):INVX==='trash'?t('trashNote'):t('bagNote');$('invTrash').dataset.tip=t('trashTip');if(INVX&&INVX.stash)stashHead();
+ const A=bagTabs(a);INVS=A;let h='';for(let i=0,N=Math.max(36,Math.ceil(A.length/9)*9);i<N;i++){const s=A[i];h+=s?`<button class="slotb r${s.r||0}${s.eq?' eq':''}" data-inv="${i}"${s.k!=='arrows'&&!TOUCH&&!(INVX&&INVX.stash)?' draggable="true"':''} data-tip="${esc(s.tip)}"><img src="${icon(s.k)}"><b>${s.n>1?s.n:''}</b></button>`:'<div class="slotb e"></div>';}
  $('igrid').innerHTML=h;$('invGold').textContent=t('gold',{n:S.gold});$('invQ').placeholder=t('bagQ');}
 function qRow(){const r=document.createElement('div');r.className='qrow';r.innerHTML=`<span>${t('bqT')}</span>`+[[1,'×1'],[10,'×10'],[999,t('bqMax')]].map(([n,l])=>`<button data-bq="${n}" class="${TBQ===n?'on':''}">${l}</button>`).join('');
  r.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-bq]');if(!b)return;e.stopPropagation();TBQ=+b.dataset.bq;SFX.click();r.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));},true);return r;}
-function invClick(i,all){if(TOUCH&&INVX&&INVX.who&&TBQ>1)all=true;const s=INVS[i];if(!s)return;if(s.k==='sgl'){if(!INVX)sglToggle();return;}if(INVX==='trash'){invTrash(s);return;}if(INVX&&INVX.salv){invSalv(s);return;}if(INVX&&INVX.apr){invApr(s);return;}if(INVX&&INVX.who){invSell(s,all);return;}if(s.k==='bread')eat();else if(DISH[s.k])eatDish(s.k);else if(RSUSE.includes(s.k))rsUse(s.k);else if(POT[s.k])drink(s.k);else if(s.it){if(equip(s.it)!==false){SFX.click();toast(t('equipped')+': '+inm(s.it));}hudDirty=true;sbSig='';}renderInv();$('tip').classList.remove('on');}
+function invClick(i,all){if(TOUCH&&INVX&&INVX.who&&TBQ>1)all=true;const s=INVS[i];if(!s)return;if(INVX&&INVX.stash){stashClick(s,all);return;}if(s.k==='sgl'){if(!INVX)sglToggle();return;}if(INVX==='trash'){invTrash(s);return;}if(INVX&&INVX.salv){invSalv(s);return;}if(INVX&&INVX.apr){invApr(s);return;}if(INVX&&INVX.who){invSell(s,all);return;}if(s.k==='bread')eat();else if(DISH[s.k])eatDish(s.k);else if(RSUSE.includes(s.k))rsUse(s.k);else if(POT[s.k])drink(s.k);else if(s.it){if(equip(s.it)!==false){SFX.click();toast(t('equipped')+': '+inm(s.it));}hudDirty=true;sbSig='';}renderInv();$('tip').classList.remove('on');}
 /* bag actions (owner 2026-10-19): destroy a thing (arm the bin in the bag's title, or drag the thing onto it), drop it on
    the ground by dragging it out of the bag (it lies there for a minute for anyone to pick up, then it is gone), and sell
    anything in the bag to a merchant from a window like the bag instead of one dialog line per material. Each asks first. */
@@ -6507,6 +6534,7 @@ function invSell(s,all){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;
 function openSell(who){INVX={who};SFX.open();mode='inv';$('inv').hidden=false;$('hint').hidden=true;renderInv();}
 // drag a bag slot: onto the bin = destroy, out of the bag = drop on the ground
 $('invQ').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'||e.key==='Enter')e.target.blur();});$('invQ').addEventListener('keyup',e=>e.stopPropagation());$('invQ').addEventListener('input',()=>renderInv());
+$('invNote').addEventListener('click',e=>{const b=e.target.closest('[data-stside]');if(!b||!(INVX&&INVX.stash))return;INVX.side=b.dataset.stside;SFX.click();renderInv();});
 $('invTabs').addEventListener('click',e=>{const b=e.target.closest('[data-btab]');if(!b)return;SFX.click();BTAB=b.dataset.btab;renderInv();});
 $('igrid').addEventListener('pointerdown',e=>{const b=e.target.closest('[data-inv]');if(!b||e.button||INVX)return;INVDR={i:+b.dataset.inv,x:e.clientX,y:e.clientY,moved:false,img:null};});
 addEventListener('pointermove',e=>{const d=INVDR;if(!d)return;if(!d.moved&&Math.hypot(e.clientX-d.x,e.clientY-d.y)<8)return;const s=INVS[d.i];if(!s){INVDR=null;return;}
@@ -6700,8 +6728,44 @@ const skOK=k=>{const d=SKD[k];return d.title?S.title===d.title:S.lv>=d.lv&&(!d.q
 const lockTxt=d=>d.fus&&!(S.fus&&S.fus[d.fus])?t('fusHow_'+d.fus):d.mur&&!S.pgMur&&!qDone('pg1')?t('skMural'):d.qd&&!qDone(d.qd)?t('skQuest',{q:qName(d.qd)}):t('skUnlock',{n:d.lv});
 const DEFKB=['Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','KeyR'];let KB=[...DEFKB];try{let k=JSON.parse(localStorage.getItem('satisfy_keys'));if(Array.isArray(k)&&k.length===6){if(k[5]==='Digit6'&&!k.includes('KeyR'))k[5]='KeyR';k=[...k.slice(0,5),...DEFKB.slice(5,NSK).map(c=>k.includes(c)?'':c),k[5]];}if(Array.isArray(k)&&k.length===NSK+1)KB=k;}catch(e){}
 const RESERVED=['KeyQ','KeyF','KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyJ','Space','KeyE','KeyI','KeyC','KeyU','KeyL','KeyM','Tab','Escape','Enter','KeyG','KeyH'];
-const keyName=c=>(c||'').replace(/^Key|^Digit/,'').replace('Numpad','Num').replace(/^Mouse(\d)$/,(_,n)=>'M'+(+n+1)); // Mouse3/Mouse4: the side buttons, shown M4/M5
+const keyName=c=>(c||'').split('+').map(p=>p==='Shift'?'⇧':p==='Ctrl'?'^':p.replace(/^Key|^Digit/,'').replace('Numpad','Num').replace(/^Mouse(\d)$/,(_,n)=>'M'+(+n+1))).join(''); // Mouse3/Mouse4: the side buttons, shown M4/M5
 function slotOfKey(c){let i=KB.indexOf(c);if(i<0&&/^Numpad[1-8]$/.test(c))i=KB.indexOf('Digit'+c.slice(6));return i;}
+/* extra skill bars (owner 2026-10-22: "like Fiesta Online and World of Warcraft, more than one skill bar, used with the
+   mouse or their own keys"): up to four bars of ten under the screen's middle, added and taken away with + and - on the
+   main bar; a bar taken away keeps what was on it for when it comes back. Gear from the bag goes on them too (a click
+   puts it on), and any stack of the bag. Drag a skill onto them from the bar or the status
+   window, or food, potions and the bag's usable things from the bag; click a slot to use it, right-click to empty it, drag
+   one slot onto another to swap. What is on them is saved with the character (S.xbar); their keys and how many show are
+   per device. A bar's keys may carry Shift, Alt or Ctrl: by default Shift+1..0 for the first, Alt+1..0 for the second. */
+const XBS=10,XMAX=4,XDIG=['Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9','Digit0'],XDEF=[XDIG.map(c=>'Shift+'+c),XDIG.map(c=>'Alt+'+c),Array(XBS).fill(''),Array(XBS).fill('')];
+let XKB=XDEF.map(r=>[...r]),XBN=1;try{const k=JSON.parse(localStorage.getItem('satisfy_xkeys'));if(Array.isArray(k)&&k.length>=2&&k.length<=XMAX&&k.every(r=>Array.isArray(r)&&r.length===XBS))XKB=[...k,...XDEF.slice(k.length).map(r=>[...r])];const n=+localStorage.getItem('satisfy_xbars');if(n>=0&&n<=XMAX&&localStorage.getItem('satisfy_xbars')!=null)XBN=n;}catch(e){}
+const XITEM=k=>k==='hpot'||k==='mpot'||k==='bread'||k==='sgl'||!!DISH[k]||RSUSE.includes(k),XGEAR=k=>typeof k==='string'&&k.startsWith('g:'),xGear=k=>S.items.find(i=>'g:'+i.uid===k)||null;
+const xRows=()=>{if(!Array.isArray(S.xbar))S.xbar=[];while(S.xbar.length<XMAX)S.xbar.push(Array(XBS).fill(null));return S.xbar;};
+const xCount=k=>XGEAR(k)?(xGear(k)?1:0):k==='hpot'||k==='mpot'||k==='bread'?S[k]||0:k==='sgl'?(S.rsh&&S.rsh.g?1:0):(S.mats[k]||0);
+const kCombo=e=>(e.ctrlKey?'Ctrl+':'')+(e.altKey?'Alt+':'')+(e.shiftKey?'Shift+':'')+e.code;
+function xOfKey(c){if(!c)return null;for(let b=0;b<XMAX;b++){const i=XKB[b].indexOf(c);if(i>=0)return [b,i];}return null;}
+function xSet(b,i,k){const R=xRows();R[b][i]=k||null;sbSig='';SFX.click();hudDirty=true;save(true);}
+function xDrop(b,i,k){if(!k)return;const R=xRows();if(k.startsWith('x:')){const [,b2,i2]=k.split(':').map(Number),v=R[b2][i2];R[b2][i2]=R[b][i];R[b][i]=v;sbSig='';SFX.click();hudDirty=true;save(true);return;}
+ if(SKD[k]?clsSkills().filter(skOK).includes(k):XGEAR(k)?!!xGear(k):XITEM(k)||S.mats[k]>0)xSet(b,i,k);}
+function xUse(b,i){const k=xRows()[b][i],el=$('xbar'+b).children[i];if(!k){SFX.deny();return;}
+ if(SKD[k]){if(mode!=='play')return;if(!clsSkills().includes(k)){toast(t('xbNoSk'),'warn');SFX.deny();return;}castSk(k,el);return;}
+ if(!(xCount(k)>0)){toast(t('xbNone',{it:t(k)}),'warn');SFX.deny();return;}
+ if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}
+ if(XGEAR(k)){const it=xGear(k);if(isEq(it)){SFX.deny();return;}if(equip(it)!==false){SFX.click();toast(t('equipped')+': '+inm(it));}sbSig='';hudDirty=true;return;}
+ if(k==='hpot'||k==='mpot')drink(k);else if(k==='bread')eat();else if(DISH[k])eatDish(k);else if(k==='sgl')sglToggle();else if(RSUSE.includes(k))rsUse(k);else{toast(t(k)+' ×'+xCount(k));SFX.click();}hudDirty=true;}
+function renderXbars(){const R=xRows(),sig=JSON.stringify(R)+XKB.join()+XBN+lang+S.lv+(TOUCH?1:0)+S.items.length;for(let b=0;b<XMAX;b++)$('xbar'+b).hidden=TOUCH||b>=XBN;if(sig===renderXbars.sig)return;renderXbars.sig=sig;
+ for(let b=0;b<XMAX;b++)$('xbar'+b).innerHTML=R[b].map((k,i)=>{const kb=`<kbd>${esc(keyName(XKB[b][i]))}</kbd>`;
+  if(!k)return `<button class="sk e" data-xb="${b}" data-xi="${i}" data-tip="${esc(t('xbEmpty'))}">${kb}<i></i></button>`;const sk=!!SKD[k],gi=XGEAR(k)?xGear(k):null;
+  if(XGEAR(k))return `<button class="sk${gi?'':' off'}" data-xb="${b}" data-xi="${i}" draggable="true" data-tip="${esc((gi?itemTip(gi)+'<br><small>'+t('clickEquip')+'</small>':t('xbGone'))+'<br><small>'+t('xbClear')+'</small>')}">${gi?`<img src="${icon(gi.id)}">`:''}${kb}<i></i></button>`;
+  const tip=sk?`<b>${t('sk_'+k)}</b><br>${t('skd_'+k)}<br><small>${t('skCost',{mp:mpC(k),cd:Math.round(SKD[k].cd*skCostM(k))})}</small>`:`<b>${t(k)}</b>${STR.en[k+'D']?'<br>'+t(k+'D'):''}`;
+  return `<button class="sk${sk?'':' pot'}" data-xb="${b}" data-xi="${i}" draggable="true" data-tip="${esc(tip+'<br><small>'+t('xbClear')+'</small>')}"><img src="${sk?skIcon(k):icon(k)}">${kb}${sk?'':'<b class="pn"></b>'}<i></i></button>`;}).join('');}
+function updateXbars(){renderXbars();const R=xRows();for(let b=0;b<XBN&&!TOUCH;b++){const els=$('xbar'+b).children;R[b].forEach((k,i)=>{const el=els[i];if(!k||!el)return;
+ if(XGEAR(k)){const gi=xGear(k);el.classList.toggle('eq',!!gi&&isEq(gi));return;}
+ if(SKD[k]){const c=P.cd[k]||0;el.classList.toggle('off',c>0||P.mp<mpC(k));el.querySelector('i').style.height=(c>0?clamp(c/SKD[k].cd,0,1)*100:0)+'%';return;}
+ const n=xCount(k),pc=(k==='hpot'||k==='mpot')&&(P.pcd||0)>0;el.querySelector('.pn').textContent=k==='sgl'?'':n;el.classList.toggle('off',!n||pc);el.querySelector('i').style.height=(pc?clamp(P.pcd/5,0,1)*100:0)+'%';});}}
+// a bar's own key, before anything else hears it (a Shift+1 is not skill 1)
+addEventListener('keydown',e=>{if(e.repeat||KSYN||!e.code||mode==='controls'||/^(Shift|Alt|Control|Meta)/.test(e.code))return;const tg=e.target;if(tg&&(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'||tg.isContentEditable))return;
+ const x=xOfKey(kCombo(e));if(!x)return;e.preventDefault();e.stopImmediatePropagation();if(mode==='play'||WALKM.includes(mode))xUse(x[0],x[1]);},true);
 let MSX=null,MSY=null;stage.addEventListener('mousemove',e=>{MSX=e.clientX;MSY=e.clientY;});
 // skills fire toward the mouse cursor (falls back to facing before the mouse has moved)
 /* owner 2026-10-20: aiming on a touch screen, like the mobile action games. The emulated mouse of a tap must not aim
@@ -6824,12 +6888,14 @@ Object.assign(SKF,{
    const a=Math.atan2(v[1],v[0]);vfx('slash',P.x+v[0]*10,P.y-7+v[1]*10,{angle:a+.8,rarity:4});
    setTimeout(()=>{if(mode!=='play'||!P)return;if(m&&!m.dead){vfx('slash',m.x,monY(m),{angle:a-.8,rarity:4});hitMon(m,9,{skill:1,kx:v[0],ky:v[1]});}else tryAttack(v[0],v[1],9);flash();SFX.slam();SFX.crit();shake=.4;},180);}
 });
-function useSlot(i){if(brSeal()){toast(t('brSealT'),'warn');SFX.deny();return;}if(TOW&&TOW.seal){toast(t('twSeal'),'warn');SFX.deny();return;}const k=barSkills()[i];if(!k){SFX.deny();return;}const d=SKD[k];
+function useSlot(i){const k=barSkills()[i];if(!k){SFX.deny();return;}castSk(k,$('skillbar').children[i]);}
+// one skill cast, from the main bar or an extra bar (el: the button that flashes)
+function castSk(k,el){if(brSeal()){toast(t('brSealT'),'warn');SFX.deny();return;}if(TOW&&TOW.seal){toast(t('twSeal'),'warn');SFX.deny();return;}const d=SKD[k];
  if(!skOK(k)){toast(lockTxt(d),'warn');SFX.deny();return;}
  if((P.cd[k]||0)>0||P.dash>0){SFX.deny();return;}
  const wk=weapKind();if((d.need==='bow'&&wk!=='bow')||(d.need==='staff'&&wk!=='staff')||(d.need==='melee'&&(wk==='bow'||wk==='staff'))||(d.need==='spear'&&wk!=='spear')){toast(t(d.need==='bow'?'needBow':d.need==='staff'?'needStaff':d.need==='spear'?'needSpear':'needMelee'),'warn');SFX.deny();return;}
  if(P.mp<mpC(k)){toast(t('noMP'),'warn');SFX.deny();return;}
- const FK=fusTry(k);P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k);SKC={k,t:gTime};SKH.push(SKC);if(SKH.length>3)SKH.shift();skUse(k);const el=$('skillbar').children[i];if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}if(FK){fusLearn(FK);hudDirty=true;return;}SKF[k]();skSnd(k);skVfx(k);numP(-34,t('sk_'+k),d.col,false);hudDirty=true;}
+ const FK=fusTry(k);P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k);SKC={k,t:gTime};SKH.push(SKC);if(SKH.length>3)SKH.shift();skUse(k);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}if(FK){fusLearn(FK);hudDirty=true;return;}SKF[k]();skSnd(k);skVfx(k);numP(-34,t('sk_'+k),d.col,false);hudDirty=true;}
 function skVfx(k){const v=fdir(),a=Math.atan2(v[1],v[0]);({whirl:()=>{for(let i=0;i<4;i++)vfx('slash',P.x,P.y-7,{angle:a+i*Math.PI/2,rarity:2});},charge:()=>vfx('dust',P.x,P.y,{n:10,angle:a+Math.PI}),nova:()=>vfx('frost',P.x,P.y-6),bolt:()=>vfx('bolt',P.x,P.y-10,{x1:P.x+v[0]*90,y1:P.y-10+v[1]*90}),smash:()=>{vfx('hit',P.x+v[0]*12,P.y-4+v[1]*12);vfx('dust',P.x+v[0]*12,P.y+v[1]*12,{n:10});},focus:()=>vfx('mana',P.x,P.y-8),rage:()=>vfx('rage',P.x,P.y),roar:()=>vfx('heal',P.x,P.y),cry:()=>vfx('rage',P.x,P.y),strike:()=>vfx('crit',P.x+v[0]*14,P.y-7+v[1]*14),
  // the skills that showed nothing of their own when cast (owner 2026-10-22: "any skill missing effects")
  skewer:()=>{vfx('slash',P.x+v[0]*14,P.y-7+v[1]*14,{angle:a,rarity:3});vfx('crit',P.x+v[0]*26,P.y-7+v[1]*26);},
@@ -6902,7 +6968,7 @@ function wpHit(m,dmg,crit,o){const w=weapon();if(!w||!(w.wp&&w.wp.length||w.gem=
  if(!o.skill&&V('mpr'))P.mp=Math.min(maxMP(),P.mp+V('mpr'));
  if(V('burn')&&rand()<V('burn')){if(!m.bl)num(m.x,monY(m)-16,t('wpBurnT'),'#ff8a3a',false);m.bl={t:3,n:0};}
  if(!b.boss&&V('stun')&&rand()<V('stun'))m.stun=Math.max(m.stun||0,.5);
- if(V('ls')&&P.hp>0){const h=Math.max(1,Math.min(Math.round(maxHP()*.02),Math.round(dmg*V('ls'))));P.hp=Math.min(maxHP(),P.hp+h);}
+ if(V('ls')&&P.hp>0){const h=Math.max(1,Math.min(Math.round(maxHP()*.05),Math.round(dmg*V('ls'))));P.hp=Math.min(maxHP(),P.hp+h);P.lsA=(P.lsA||0)+h;if(gTime>(P.lsT||0)){P.lsT=gTime+.5;numP(-26,'+'+P.lsA,'#7ae07a',false);P.lsA=0;}hudDirty=true;} // shown, and up to 5% of max health a hit (owner 2026-10-22: lifesteal that seemed to do nothing)
  if(P.absB>0){dmg+=P.absB;num(m.x,my-26,t('wpAbsT',{n:Math.round(P.absB).toLocaleString('en')}),'#9fe0ff',true);vfx('mana',m.x,my,{});P.absB=0;}
  if(V('frost')&&rand()<V('frost')){m.slowU=gTime+2.5;num(m.x,my-16,t('wpFrostT'),'#9ad8ff',false);vfx('frost',m.x,my,{});}
  if(!b.boss&&V('push')&&rand()<V('push')){const a=Math.atan2(m.y-P.y,m.x-P.x);move(m,Math.cos(a)*20,Math.sin(a)*20,Math.max(3,b.r-2));m.stun=Math.max(m.stun||0,.25);vfx('dust',m.x,m.y,{n:5});}
@@ -6913,7 +6979,7 @@ function wpHit(m,dmg,crit,o){const w=weapon();if(!w||!(w.wp&&w.wp.length||w.gem=
  if(!o.skill&&V('dbl')&&rand()<V('dbl')){const n=Math.max(1,...(w.wp||[]).filter(p=>p.k==='dbl').map(p=>p.n||1));num(m.x,my-30,t(n>1?'wpDblNT':'wpDblT',{n:n+1}),'#ffb0ff',false);
   for(let i=1;i<=n;i++)setTimeout(()=>{if(!m.dead&&P&&P.hp>0){vfx('slash',m.x,monY(m),{angle:0});hitMon(m,1,{dot:1});}},140*i);}
  return dmg;}
-window.__GWP={hit:(m,mul)=>hitMon(m,mul||1,{}),hurt:d=>hurtPlayer(d,0,null),V:k=>wpV(k),get absB(){return P&&P.absB||0}}; // tests
+window.__GWP={hit:(m,mul)=>hitMon(m,mul||1,{}),hitS:(m,mul)=>hitMon(m,mul||1,{skill:1}),hurt:d=>hurtPlayer(d,0,null),V:k=>wpV(k),get absB(){return P&&P.absB||0}}; // tests
 function ipHit(m,dmg,crit,o){if(o.dot)return dmg;dmg=wpHit(m,dmg,crit,o);const b=MT[m.type],skill=!!o.skill;
  if(ipOn('dpgs'))dmg*=skill?1.2:1.1;
  if(ipOn('crowd')){let n=0;for(const q of mons)if(!q.dead&&q!==m&&Math.hypot(q.x-m.x,q.y-m.y)<60)n++;dmg*=1+Math.min(.3,n*.06);}
@@ -6925,7 +6991,7 @@ function ipHit(m,dmg,crit,o){if(o.dot)return dmg;dmg=wpHit(m,dmg,crit,o);const b
  if(!skill&&ipOn('gale')){P.gale=Math.min(30,(P.gale||0)+1);P.galeT=3;}
  if(!skill&&ipOn('wisdom')&&rand()<.05){const ks=Object.keys(P.cd).filter(k=>P.cd[k]>0);if(ks.length){const k=ks.sort((a,c)=>P.cd[c]-P.cd[a])[0];P.cd[k]=0;numP(-30,t('ipWisdom'),'#9fd8ff',false);vfx('mana',P.x,P.y-8);}}
  const heal=(p,cd,key)=>{if((P[key]||0)>gTime)return;P[key]=gTime+cd;const h=Math.max(1,Math.round(dmg*p));P.hp=Math.min(maxHP(),P.hp+h);numP(-26,'+'+h,'#ff7a9a',false);};
- if(ipOn('elfin'))heal(skill?.05:.12,21,'elfT');if(!skill&&ipOn('vamp'))heal(.1,12,'vampT');
+ if(ipOn('elfin'))heal(skill?.05:.12,21,'elfT');if(ipOn('vamp'))heal(skill?.05:.1,1.5,'vampT'); // skills too (owner 2026-10-22: a Braham mage saw the lifesteal and never healed)
  return dmg;}
 // Blacksmith's Breath: "There is a rare chance of giving special features to your production items" (5%, Pagma's
 // Descendant 10%, on rare or better gear)
@@ -6952,7 +7018,7 @@ Object.assign(STR.ar,{failure:'فشل (Failure)',ideal:'الخنجر المثا�
  ipd_jnt5:'فيه فرصة تشتغل "5 ضربات متصلة"',ipd_cut:'فرصة كبيرة تشتغل "القطع": العدو بينزف 3 ثواني',ipd_fear:'العدو اللي أقل منك بـ20 لفل أو أكتر ممكن يخاف ويهرب',
  ipd_gale:'سرعة الضرب بتزيد 1% مع كل ضربة بتوصل (لحد 30%)',ipd_bleed:'الضربة الحرجة بتخلي العدو ينزف 3 ثواني',ipd_combo:'تالت ضربة ورا بعض: الضرر ×3 لمدة ثانية، والخامسة بتشلّ العدو لحظة',
  ipd_crowd:'كل ما الأعداء حواليك يكتروا، الضرر يزيد',ipd_larrow:'مبتحطش فيه سهام: كل شدة بتطلع سهم نور بيعدي في عدوين',ipd_wisdom:'الضربة العادية ليها فرصة ترجّع سكيل من الكولداون',
- ipd_elfin:'الضربة العادية بترجعلك 12% من الضرر صحة، والسكيل 5% (مرة كل 21 ثانية)',ipd_vamp:'الضربة العادية بترجعلك 10% من الضرر صحة (مرة كل 12 ثانية)',
+ ipd_elfin:'الضربة العادية بترجعلك 12% من الضرر صحة، والسكيل 5% (مرة كل 21 ثانية)',ipd_vamp:'كل ضربة بترجعلك صحة: الضربة العادية 10% من الضرر، والسكيل 5% (مرة كل ثانية ونص)',
  ipd_doran:'50% من الضرر اللي بتاخده بيرجع على طول (مرة كل 3 دقايق)',ipd_absurd:'المانا اللي السكيلات بتاخدها بقت النص، والمانا بترجع أسرع مرتين',ipd_cdr:'كولداون السكيلات أقل بـ20%',
  nq_failure:'"صممه حداد أسطوري. هو سيف كبير، بس قدرته على القطع ممتازة بسبب شكله الفريد. شبه مفترس البحر، القرش، وبيخوّف الأعداء."',
  nq_ideal:'"خنجر صنعه حِرفي عنده مهارة وموهبة كبيرة، بس ناقصه الخبرة والسمعة."',nq_gale:'"خفيف جدًا، فكل ما المستخدم يبقى أمهر، قوته تطلع أكتر. بس الخفة دي ممكن تبقى عيب."',
@@ -6971,7 +7037,7 @@ Object.assign(STR.en,{failure:'Failure',ideal:'Ideal Dagger',gale:'Gale Spear',i
  ipd_jnt5:"A certain probability of activating '5 Joint Attacks'",ipd_cut:"A high probability of activating 'Cutting': the enemy bleeds for 3 s",ipd_fear:'Enemies 20 or more levels below you may be struck with fear and flee',
  ipd_gale:'Attack speed increases by 1% for every attack that connects (up to 30%)',ipd_bleed:'A critical strike causes bleeding for 3 s',ipd_combo:'A third hit in a row: damage ×3 for 1 s; the fifth stuns the target for a moment',
  ipd_crowd:'The greater the number of enemies, the greater the damage',ipd_larrow:'Arrows can\'t be loaded: every pull makes a light arrow that passes through two enemies',ipd_wisdom:'Normal attacks have a chance to reset a skill\'s cooldown',
- ipd_elfin:'Normal attacks restore 12% of the damage as health, skills 5% (once every 21 s)',ipd_vamp:'Normal attacks restore 10% of the damage as health (once every 12 s)',
+ ipd_elfin:'Normal attacks restore 12% of the damage as health, skills 5% (once every 21 s)',ipd_vamp:'Every hit restores health: normal attacks 10% of the damage, skills 5% (once every 1.5 s)',
  ipd_doran:'50% of the damage received is instantly recovered (once every 3 minutes)',ipd_absurd:'Skills cost half the mana, and mana recovers twice as fast',ipd_cdr:'20% reduction in skill cooldown time',
  nq_failure:'"It is designed by a legendary blacksmith. It is a greatsword, but its cutting ability is excellent because of its unique shape. It resembles the predator of the sea, a shark, and gives fear to the enemy."',
  nq_ideal:'"A dagger created by a craftsman with great skills and potential, but lacks experience and reputation."',nq_gale:'"It is very light so the more skilled the user, the more the power can be maximized. However, this lightness can be a disadvantage."',
@@ -7056,15 +7122,16 @@ function skCenter(g){const im=g.getImageData(0,0,16,16),d=im.data;let x0=16,y0=1
  R(g,0,0,16,16,'#101a33');g.putImageData(im,dx,dy);}
 window.__GSK={icon:k=>skIcon(k),keys:()=>Object.keys(SKD)}; // tests
 let sbSig='';
-function renderSkillbar(){const b=barSkills(),ik=itemSkills(),sig=b.join()+'|'+ik.join()+'|'+KB.join()+IKB.join()+'|'+S.lv+lang+[...b,...ik].map(k=>k?skLv(k):0).join();if(sig===sbSig)return;sbSig=sig;
+function renderSkillbar(){const b=barSkills(),ik=itemSkills(),sig=XBN+b.join()+'|'+ik.join()+'|'+KB.join()+IKB.join()+'|'+S.lv+lang+[...b,...ik].map(k=>k?skLv(k):0).join();if(sig===sbSig)return;sbSig=sig;
  $('skillbar').innerHTML=b.map((k,i)=>{const kb=`<kbd>${keyName(KB[i])}</kbd>`;if(!k)return `<button class="sk e" data-sk="${i}" data-tip="${esc(i===NSK?t('slot6'):t('skSlotE'))}">${kb}<i></i></button>`;const d=SKD[k],lock=!skOK(k);
   const tip=`<b>${t('sk_'+k)}</b>${d.title?` <small>(${t('skTitle')})</small>`:''}<br>${t('skd_'+k)}<br><small>${t('skCost',{mp:mpC(k),cd:Math.round(d.cd*skCostM(k))})}</small>${lock?'':skLvTxt(k)}${lock?`<br><small style="color:#ff9a8a">${lockTxt(d)}</small>`:''}`;
   return `<button class="sk${lock?' lock':''}${d.title?' tl':''}" data-sk="${i}"${i<NSK&&!TOUCH?' draggable="true"':''} data-tip="${esc(tip)}"><img src="${skIcon(k)}">${kb}${lock?'':`<b class="lv">${skLv(k)}</b>`}<i></i></button>`;}).join('')
   // the two item-skill slots: only shown while something worn carries a skill
   +(ik[0]?ik.map((k,j)=>{const kb=`<kbd>${keyName(IKB[j])}</kbd>`;if(!k)return `<button class="sk e it" id="isk${j}" data-isk="${j}" data-tip="${esc(t('iskSlotE'))}">${kb}<i></i></button>`;const d=SKD[k];
    return `<button class="sk it" id="isk${j}" data-isk="${j}" data-tip="${esc(`<b>${t('sk_'+k)}</b> <small>(${t('iskItem')})</small><br>${t('skd_'+k)}<br><small>${t('skCost',{mp:mpC(k),cd:Math.round(d.cd*skCostM(k))})}</small>${skLvTxt(k)}`)}"><img src="${skIcon(k)}">${kb}<b class="lv">${skLv(k)}</b><i></i></button>`;}).join(''):'')
+  +(TOUCH?'':`<button class="sk xadd" data-xbadd="1"${XBN>=XMAX?' disabled':''} data-tip="${esc(t('xbAdd'))}">+</button><button class="sk xadd" data-xbadd="-1"${XBN<=0?' disabled':''} data-tip="${esc(t('xbSub'))}">−</button>`)
   +['hpot','mpot'].map(k=>`<button class="sk pot" id="pot_${k}" data-pot="${k}" data-tip="${esc(`<b>${t(k)}</b><br>${t(k+'D')}`)}"><img src="${icon(k)}"><kbd>${keyName(POT[k].key)}</kbd><b class="pn"></b><i></i></button>`).join('');if(TOUCH&&TLAY.bar)tLayOne('bar');}
-function updateSkillbar(){renderSkillbar();const b=barSkills(),els=$('skillbar').children;for(let i=0;i<=NSK;i++){const k=b[i],el=els[i];if(!k||!el)continue;const d=SKD[k],c=P.cd[k]||0;el.classList.toggle('off',c>0||P.mp<mpC(k));el.querySelector('i').style.height=(c>0?clamp(c/d.cd,0,1)*100:0)+'%';}
+function updateSkillbar(){renderSkillbar();updateXbars();const b=barSkills(),els=$('skillbar').children;for(let i=0;i<=NSK;i++){const k=b[i],el=els[i];if(!k||!el)continue;const d=SKD[k],c=P.cd[k]||0;el.classList.toggle('off',c>0||P.mp<mpC(k));el.querySelector('i').style.height=(c>0?clamp(c/d.cd,0,1)*100:0)+'%';}
  itemSkills().forEach((k,j)=>{const el=$('isk'+j);if(!k||!el)return;const d=SKD[k],c=P.cd[k]||0;el.classList.toggle('off',c>0||P.mp<mpC(k));el.querySelector('i').style.height=(c>0?clamp(c/d.cd,0,1)*100:0)+'%';});
  ['hpot','mpot'].forEach(k=>{const el=$('pot_'+k);if(!el)return;const n=S[k]||0;el.querySelector('.pn').textContent=n;el.classList.toggle('off',!n||(P.pcd||0)>0);el.querySelector('i').style.height=((P.pcd||0)>0?clamp(P.pcd/5,0,1)*100:0)+'%';});}
 const KEYS={kA:()=>[P.acd>0||P.dash>0,P.acd>0?P.acd/atkCD():0],kD:()=>[P.dcd>0||P.st<dodgeCost(),P.dcd>0?P.dcd/.7:0],kG:()=>[(P.gd??100)<10,P.guard?0:1-(P.gd??100)/100],kE:()=>[!nearest(),0],kC:()=>[false,0],kI:()=>[false,0],kU:()=>[false,0],kM:()=>[false,0],kEsc:()=>[false,0]};
@@ -7074,19 +7141,21 @@ function updateKeys(){for(const id in KEYS){const el=keyEls[id]||(keyEls[id]=$(i
  updateSkillbar();}
 // controls screen: every key that can change, in groups; a key already in use says what for, and the two swap
 let REB=null;
-function keyUse(c){const i=KB.indexOf(c);if(i>=0)return {id:'k'+i,n:t('skBar')+' '+(i+1)};const j=IKB.indexOf(c);if(j>=0)return {id:'i'+j,n:t('rbItem',{n:j+1})};
+function keyUse(c){const i=KB.indexOf(c);if(i>=0)return {id:'k'+i,n:t('skBar')+' '+(i+1)};const j=IKB.indexOf(c);if(j>=0)return {id:'i'+j,n:t('rbItem',{n:j+1})};const x=xOfKey(c);if(x)return {id:'x'+x[0]+'_'+x[1],n:t('xbarN',{b:x[0]+2,n:x[1]+1})};
  const a=ACTK.find(a=>actKey(a[1])===c);if(a)return {id:'a'+a[1],n:t('ka_'+a[1])};return KFIX[c]?{fix:1,n:t(KFIX[c])}:null;}
-function rbGet(id){return id[0]==='k'?KB[+id.slice(1)]:id[0]==='i'?IKB[+id.slice(1)]:actKey(id.slice(1));}
-function rbSet(id,c){if(id[0]==='k')KB[+id.slice(1)]=c;else if(id[0]==='i')IKB[+id.slice(1)]=c;else{const a=id.slice(1);if(c===ACTD[a])delete ABIND[a];else ABIND[a]=c;}}
+const xId=id=>id.slice(1).split('_').map(Number);
+function rbGet(id){if(id[0]==='x'){const [b,i]=xId(id);return XKB[b][i];}return id[0]==='k'?KB[+id.slice(1)]:id[0]==='i'?IKB[+id.slice(1)]:actKey(id.slice(1));}
+function rbSet(id,c){if(id[0]==='x'){const [b,i]=xId(id);XKB[b][i]=c;}else if(id[0]==='k')KB[+id.slice(1)]=c;else if(id[0]==='i')IKB[+id.slice(1)]=c;else{const a=id.slice(1);if(c===ACTD[a])delete ABIND[a];else ABIND[a]=c;}}
 function renderRebind(){const row=(id,lbl,k)=>`<div class="rb"><span>${esc(lbl)}</span><button data-rb="${id}" class="${REB===id?'wait':''}">${REB===id?'...':esc(keyName(k))}</button></div>`,
   grp=(h,rows)=>`<div class="ssec">${t(h)}</div><div class="rbl">${rows.join('')}</div>`;
  $('rebindL').innerHTML=grp('rbSk',[...KB.map((k,i)=>row('k'+i,t('skBar')+' '+(i+1),k)),...IKB.map((k,j)=>row('i'+j,t('rbItem',{n:j+1}),k))])
+  +grp('rbX',[`<div class="rb"><span>${esc(t('xbarShow'))}</span><button data-xbn="1">${XBN}</button></div>`,...XKB.flatMap((r,b)=>r.map((k,i)=>row('x'+b+'_'+i,t('xbarN',{b:b+2,n:i+1}),k)))])
   +['mv','win','net'].map(g=>grp('rbG_'+g,ACTK.filter(a=>a[0]===g).map(([,a])=>row('a'+a,t('ka_'+a),actKey(a))))).join('')+(REB!=null?`<div class="note">${RBQ&&RBQ.id===REB?esc(t('keyAsk',{a:(keyUse(RBQ.c)||{}).n||'',k:keyName(RBQ.c)})):t('pressKey')}</div>`:'');}
-function rbSave(){try{localStorage.setItem('satisfy_keys',JSON.stringify(KB));localStorage.setItem('satisfy_ikeys',JSON.stringify(IKB));localStorage.setItem('satisfy_binds',JSON.stringify(ABIND));}catch(e){}KMAP=null;sbSig='';}
+function rbSave(){try{localStorage.setItem('satisfy_keys',JSON.stringify(KB));localStorage.setItem('satisfy_ikeys',JSON.stringify(IKB));localStorage.setItem('satisfy_binds',JSON.stringify(ABIND));localStorage.setItem('satisfy_xkeys',JSON.stringify(XKB));localStorage.setItem('satisfy_xbars',String(XBN));}catch(e){}KMAP=null;sbSig='';}
 // a skill or an action on an extra mouse button (owner 2026-10-22): the wheel button and the two side buttons bind like keys
 addEventListener('mousedown',e=>{if(e.button!==1&&e.button!==3&&e.button!==4)return;const c='Mouse'+e.button;
  if(mode==='controls'&&REB!=null){e.preventDefault();rebindTo(c);return;}
- if(mode==='play'&&!e.target.closest('input,textarea')){const si=slotOfKey(c),ij=IKB.indexOf(c),to=kmap()[c];if(si>=0){e.preventDefault();useSlot(si);}else if(ij>=0){e.preventDefault();useISlot(ij);}else if(to){e.preventDefault();KSYN=1;try{onKey(to);}finally{KSYN=0;}}}},true);
+ if(mode==='play'&&!e.target.closest('input,textarea')){const si=slotOfKey(c),ij=IKB.indexOf(c),xb=xOfKey(c),to=kmap()[c];if(xb){e.preventDefault();xUse(xb[0],xb[1]);}else if(si>=0){e.preventDefault();useSlot(si);}else if(ij>=0){e.preventDefault();useISlot(ij);}else if(to){e.preventDefault();KSYN=1;try{onKey(to);}finally{KSYN=0;}}}},true);
 addEventListener('mouseup',e=>{if((e.button===3||e.button===4)&&(mode==='controls'||mode==='play'&&keyUse('Mouse'+e.button)))e.preventDefault();},true); // not "back" in the browser
 Object.assign(STR.ar,{rbSk:'المهارات والآيتمز',rbItem:'خانة آيتم {n}',rbG_mv:'الحركة والقتال',rbG_win:'النوافذ',rbG_net:'الأونلاين',keyTakenBy:'الزرار ده مستخدم لـ: {a}، ومينفعش يتغير',keySwap:'اتبدلوا: {a} بقى على {k}',keyAsk:'{k} مستخدم لـ: {a}. لو عايز تبدّل الزرارين دوس {k} تاني',
  ka_up:'فوق',ka_down:'تحت',ka_left:'شمال',ka_right:'يمين',ka_atk:'هجوم',ka_dodge:'تفادي',ka_use:'كلام / استخدام',ka_hpot:'بوشن صحة',ka_mpot:'بوشن مانا',ka_inv:'الشنطة',ka_equip:'المعدات',ka_status:'الحالة',ka_map:'الخريطة',ka_log:'السجل',ka_quests:'المهام',ka_book:'كتاب الوحوش',ka_guild:'الجيلد',ka_ride:'الركوب',ka_photo:'وضع التصوير',
@@ -7500,7 +7569,7 @@ function act(a){
  else if(a==='cRand'){CL.hair=rand()*LOOK.hair.length|0;CL.hc=rand()*LOOK.hc.length|0;CL.skin=rand()*LOOK.skin.length|0;CL.top=rand()*LOOK.top.length|0;renderCreate();}
  else if(a==='cStart'){const n=$('cname').value.trim();if(n.length<2||n.length>12){$('cerr').textContent=t('cNameErr');SFX.deny();$('cname').focus();return;}CL.n=n;newGame(CL);}
  else if(a==='cBack')toTitle();else if(a==='closeMap')closeMap();else if(a==='closePick'){$('eqPick').hidden=true;}
- else if(a==='resetKeys'){KB=[...DEFKB];IKB=['KeyZ','KeyX'];ABIND={};REB=null;rbSave();try{localStorage.removeItem('satisfy_keys');localStorage.removeItem('satisfy_ikeys');localStorage.removeItem('satisfy_binds');}catch(e){}renderRebind();}
+ else if(a==='resetKeys'){KB=[...DEFKB];IKB=['KeyZ','KeyX'];ABIND={};XKB=XDEF.map(r=>[...r]);REB=null;rbSave();try{localStorage.removeItem('satisfy_keys');localStorage.removeItem('satisfy_ikeys');localStorage.removeItem('satisfy_binds');}catch(e){}renderRebind();}
  else if(a==='keepPlaying'){$('end').hidden=true;$('hud').hidden=false;mode='play';stage.focus();}
 }
 /* owner 2026-10-20: one press on a potion or a skill on the bar uses it, with the mouse or a finger, like its key. It
@@ -7540,10 +7609,13 @@ for(const k of ['sfx','mus','amb','soc'])$('vol_'+k).addEventListener('input',e=
 window.__GMIX={played:[],vol:(k,v)=>setVol(k,v),get v(){return {sfx:sfxV,mus:musV,amb:ambV,soc:socV};},play:(ch,k)=>{SFXT.burst.length=0;for(const x in SFXT.last)delete SFXT.last[x];return sfxOn(ch,()=>SFX[k||'hit']());},
  vox:()=>{const m=mons.filter(x=>!x.dead&&Math.hypot(x.x-P.x,x.y-P.y)<SFXR).sort((a,b)=>Math.hypot(a.x-P.x,a.y-P.y)-Math.hypot(b.x-P.x,b.y-P.y))[0];if(!m)return null;VOXC.length=0;for(const k in VOXL)delete VOXL[k];for(const k of ['h','w','s','d'])voxPlay(m,MT[m.type],k);return m.type;}}; // tests
 // drag a skill from the status list (or another bar slot) onto any of the first five bar slots; an occupied slot swaps
-UI.addEventListener('dragstart',e=>{const s=e.target.closest&&e.target.closest('[data-dsk],#skillbar [data-sk]');if(!s)return;const i=s.dataset.sk!=null?+s.dataset.sk:-1,k=s.dataset.dsk||(i>=0&&i<NSK?barSkills()[i]:null);if(!k){e.preventDefault();return;}try{e.dataTransfer.setData('text/plain',k);e.dataTransfer.effectAllowed='move';}catch(_){}document.body.classList.add('skdrag');});
+UI.addEventListener('dragstart',e=>{const s=e.target.closest&&e.target.closest('[data-dsk],#skillbar [data-sk],.xbar [data-xb],#igrid [data-inv]');if(!s)return;const i=s.dataset.sk!=null?+s.dataset.sk:-1,iv=s.dataset.inv!=null&&INVS[+s.dataset.inv],k=s.dataset.xb!=null?(xRows()[+s.dataset.xb][+s.dataset.xi]?'x:'+s.dataset.xb+':'+s.dataset.xi:null):iv?(iv.it?'g:'+iv.it.uid:iv.k!=='arrows'?iv.k:null):s.dataset.dsk||(i>=0&&i<NSK?barSkills()[i]:null);if(!k){e.preventDefault();return;}try{e.dataTransfer.setData('text/plain',k);e.dataTransfer.effectAllowed='move';}catch(_){}document.body.classList.add('skdrag');});
 UI.addEventListener('dragend',()=>{document.body.classList.remove('skdrag');document.querySelectorAll('.dropon').forEach(x=>x.classList.remove('dropon'));});
-UI.addEventListener('dragover',e=>{const s=e.target.closest&&e.target.closest('#skillbar [data-sk]');if(s&&+s.dataset.sk<NSK){e.preventDefault();document.querySelectorAll('.dropon').forEach(x=>x!==s&&x.classList.remove('dropon'));s.classList.add('dropon');}});
-UI.addEventListener('drop',e=>{const s=e.target.closest&&e.target.closest('#skillbar [data-sk]');if(!s)return;e.preventDefault();s.classList.remove('dropon');let k='';try{k=e.dataTransfer.getData('text/plain');}catch(_){}const i=+s.dataset.sk;if(!SKD[k]||i>=NSK||!clsSkills().filter(skOK).includes(k))return;barPlace(k,i);if(!$('statusW').hidden)renderStatus();});
+UI.addEventListener('dragover',e=>{const s=e.target.closest&&e.target.closest('#skillbar [data-sk],.xbar [data-xb]');if(s&&(s.dataset.xb!=null||+s.dataset.sk<NSK)){e.preventDefault();document.querySelectorAll('.dropon').forEach(x=>x!==s&&x.classList.remove('dropon'));s.classList.add('dropon');}});
+UI.addEventListener('drop',e=>{const s=e.target.closest&&e.target.closest('#skillbar [data-sk],.xbar [data-xb]');if(!s)return;e.preventDefault();s.classList.remove('dropon');let k='';try{k=e.dataTransfer.getData('text/plain');}catch(_){}if(s.dataset.xb!=null){xDrop(+s.dataset.xb,+s.dataset.xi,k);return;}const i=+s.dataset.sk;if(!SKD[k]||i>=NSK||!clsSkills().filter(skOK).includes(k))return;barPlace(k,i);if(!$('statusW').hidden)renderStatus();});
+UI.addEventListener('pointerdown',e=>{if(e.button)return;const a=e.target.closest&&e.target.closest('[data-xbadd]');if(a){e.stopPropagation();if(a.disabled)return;XBN=Math.max(0,Math.min(XMAX,XBN+(+a.dataset.xbadd)));rbSave();SFX.click();hudDirty=true;return;}const b=e.target.closest&&e.target.closest('.xbar [data-xb]');if(!b)return;e.stopPropagation();xUse(+b.dataset.xb,+b.dataset.xi);});
+UI.addEventListener('contextmenu',e=>{const b=e.target.closest&&e.target.closest('.xbar [data-xb]');if(!b)return;e.preventDefault();if(xRows()[+b.dataset.xb][+b.dataset.xi])xSet(+b.dataset.xb,+b.dataset.xi,null);});
+$('rebindL').addEventListener('click',e=>{if(!e.target.closest('[data-xbn]'))return;XBN=(XBN+1)%(XMAX+1);rbSave();SFX.click();renderRebind();hudDirty=true;});
 UI.addEventListener('click',e=>{const r=e.target.closest&&e.target.closest('#statusW [data-dsk]');if(!r||e.target.closest('button'))return;const k=r.dataset.dsk;BPICK=BPICK===k?null:k;SFX.click();renderStatus();});
 $('mini').addEventListener('click',()=>{if(mode==='play')openMap();});
 // a quest opens from the panel whatever walkable window is up (owner 2026-10-22: "opened one quest's details once, then no
@@ -7563,6 +7635,7 @@ const ZT={};
 const WALKM=['inv','status','equip','log','qd','map','mb'];
 function update(dt){
  gTime+=dt;
+ if(INVX&&INVX.stash&&P&&Math.hypot(P.x-INVX.x,P.y-INVX.y)>140)closeInv(); // walked away from the inn's chest
  for(let i=DGATES.length-1;i>=0;i--)if(DGATES[i].tmp&&gTime>DGATES[i].til)DGATES.splice(i,1);
  for(const n of nodes)if(n.dep>0){n.dep-=dt;if(n.dep<=0&&(n.kind==='herb'||n.kind==='bherb'))herbSpot(n);}
  if(annT>0){annT-=dt;if(annT<=0)$('announce').hidden=true;}
@@ -9570,7 +9643,14 @@ window.__GWK={get key(){return GWK},get mine(){return GWMine},get total(){return
    Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
 Object.assign(STR.ar,{dHint:'[K] مبارزة',dSent:'اتبعت تحدي مبارزة لـ{n}',dFrom:'{n} بيتحداك في مبارزة',dReadyQ:'مبارزة مع {n}: جاهز؟',dReady:'جاهز (Y)',dWait:'مستني {n}…',dNone:'مفيش حد قريب كفاية للمبارزة',dSafe:'ممنوع المبارزة جوه المدن',dBusy:'{n} مشغول دلوقتي',dFar:'قرّب من {n} الأول',dDeclined:'{n} رفض المبارزة',dCancel:'المبارزة اتلغت',dFight:'ابدأ!',dOut:'ارجع للحلبة وإلا هتخسر!',dWin:'كسبت المبارزة ضد {n} {w}',dLose:'خسرت المبارزة ضد {n} {w}',dYield:'استسلام',dYou:'إنت',dTitle:'مبارزة ضد {n}',dRec:'المبارزات: {w} فوز · {l} خسارة',dw_yield:'(استسلام)',dw_arena:'(خرج من الحلبة)',dw_teleport:'(ساب القتال)',dw_safe:'(دخل مدينة)',dw_gone:'(الخصم مشي)',dw_death:'(مات)',dw_hp:''});
 Object.assign(STR.en,{dHint:'[K] Duel',dSent:'Duel challenge sent to {n}',dFrom:'{n} challenges you to a duel',dReadyQ:'Duel with {n}: ready?',dReady:'Ready (Y)',dWait:'Waiting for {n}…',dNone:'Nobody close enough to duel',dSafe:'No duels inside towns',dBusy:'{n} is busy right now',dFar:'Get closer to {n} first',dDeclined:'{n} declined the duel',dCancel:'Duel cancelled',dFight:'Fight!',dOut:'Back to the arena or you forfeit!',dWin:'You won the duel against {n} {w}',dLose:'You lost the duel against {n} {w}',dYield:'Yield',dYou:'You',dTitle:'Duel with {n}',dRec:'Duels: {w} won · {l} lost',dw_yield:'(surrender)',dw_arena:'(left the arena)',dw_teleport:'(left the fight)',dw_safe:'(entered a town)',dw_gone:'(opponent left)',dw_death:'(died)',dw_hp:''});
-function duelStart(){rnkStart();DUEL=Satisfy.duel.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):''});
+// duels with your real damage and health (owner 2026-10-22: "the duel numbers are made up"): the attacker sends its real
+// hit (attack, crit, skills' strength); the defender takes it through its own defence, a raised guard (a quarter) and a
+// dodge (nothing), at most a third of its max health in one blow, and loses that share of its duel bar. Health itself is
+// untouched: a duel never kills or costs anything.
+function duelHurt(k){if(!P||P.dash>0)return 0;let d=Math.max(1,Math.round(k*150/(150+defV())));if(P.guard){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}
+ const mh=maxHP();d=Math.min(d,Math.round(mh/3));DUELD=d;return d/mh*100;}
+let DUELD=0;
+function duelStart(){rnkStart();DUEL=Satisfy.duel.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',hurt:duelHurt});
  DUEL.on(e=>{const n=e.handle||((DUEL.state().handle)||'?');duelSig='';
   if(e.type==='challenge'){SFX.notice();}
   else if(e.type==='declined')toast(t('dDeclined',{n}),'warn');
@@ -9578,7 +9658,7 @@ function duelStart(){rnkStart();DUEL=Satisfy.duel.create({presence:NET,uid:NET.u
   else if(e.type==='safeHere')toast(t('dSafe'),'warn');
   else if(e.type==='fight'){toast(t('dFight'),'good');SFX.notice();rnkSnap(DUEL.state().foe);}
   else if(e.type==='outside')toast(t('dOut'),'warn');
-  else if(e.type==='hurt'){numP(-20,'-'+e.dmg,'#ff6a5a',false);SFX.hit();}
+  else if(e.type==='hurt'){numP(-20,'-'+(DUELD||Math.round(e.dmg)),'#ff6a5a',false);SFX.hit();}
   else if(e.type==='result'){const win=e.result==='win';if(S&&!S.__demo){S.duels=S.duels||{w:0,l:0};S.duels[win?'w':'l']++;balPvp(win);}
    toast(t(win?'dWin':'dLose',{n,w:t('dw_'+e.why)}),win?'good':'warn');if(win)SFX.quest();rnkResult(win,e.foe);natDuel(win,e.foe);
    if(S&&S.duels)setTimeout(()=>toast(t('dRec',S.duels)),500);}});}
@@ -10048,7 +10128,7 @@ window.__GR={season:()=>rnkSeason(),mine:()=>RNK?RNK.get(rnkSeason(),NET.uid):nu
 function duelSwing(ax,ay,mul,k){if(DUEL.state().phase!=='fight')return;const f=DUEL.foe();if(!f)return;
  const dx=f.x-P.x,dy=(f.y-8)-(P.y-6),d=Math.hypot(dx,dy),l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';
  if((ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):d>30)||!seeL(P.x,P.y-4,f.x,f.y-4))return;
- const crit=rand()<.12,pow=(8+rand()*5)*(crit?1.5:1)*Math.min(1.5,mul||1),dmg=DUEL.hit(pow);
+ const crit=rand()<Math.min(.5,.05+stat('dex')*.001+(k==='dagger'?.1:0)),pow=atkV()*(mul||1)*(.9+rand()*.2)*(crit?1.8:1),dmg=DUEL.hit(pow);
  if(dmg){num(f.x,f.y-24,'-'+dmg,crit?'#ffd24a':'#ffffff',crit);if(crit)vfx('crit',f.x,f.y-10);}}
 // U034 spectators: while fighting, each duelist publishes "<duel id>:<duel HP>"; everyone else sees a bar over
 // each duelist and a dashed ring between the two
@@ -10369,7 +10449,7 @@ const TOUCH=(()=>{const q=new URLSearchParams(location.search).get('touch');if(q
    small tab (+ opens it again). Places and folds are kept per browser (localStorage satisfy_gui) as fractions of the
    screen, so they survive reloads and window sizes; "Reset the HUD" in the pause menu puts everything back. Touch keeps
    the fixed layout. */
-const GUI_IDS=['stats','quest','mini','partyW','chatW','skillbar','keys','evbar','boss'],GUIK='satisfy_gui';
+const GUI_IDS=['stats','quest','mini','partyW','chatW','skillbar','xbar0','xbar1','xbar2','xbar3','keys','evbar','boss'],GUIK='satisfy_gui';
 let GUI=(()=>{try{return JSON.parse(localStorage.getItem(GUIK)||'{}')||{};}catch(e){return {};}})(),guiDrag=null;
 function guiSave(){try{localStorage.setItem(GUIK,JSON.stringify(GUI));}catch(e){}}
 function guiPlace(id){const el=$(id),g=GUI[id],hud=$('hud');if(!el||!g||g.x==null)return;if(el.parentNode!==hud)hud.appendChild(el);const W=hud.clientWidth,H=hud.clientHeight,r=el.getBoundingClientRect();
