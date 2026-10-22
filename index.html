@@ -7901,7 +7901,8 @@ const ERRS=new Set();
 function gameErr(e,m){if(m){m.st=null;m.tele=0;m.combo=0;m.flee=0;}const k=String(e&&e.message||e);if(ERRS.has(k))return;ERRS.add(k);console.error(e);try{logMsg('ERR '+k+' '+String(e&&e.stack||'').split('\n')[1]);toast(t('gameErr',{e:k.slice(0,90)}),'warn');}catch(_){}}
 let loopAt=0;
 /* the fixed tick (SAT-ONLINE-099, plan U313/U373; ?tick=fixed, off by default): the world moves in steps of exactly 1/60 s
-   whatever the screen's rate (a 144 Hz screen draws more often, a slow one runs up to three steps a frame), and a key
+   whatever the screen's rate (a 144 Hz screen draws more often; a slow one runs up to three steps a frame, as a frame's time
+   is capped at 0.05 s and what is left over is under a step: FSTEP*4 only bounds it), and a key
    pressed between two frames is seen by the next step, so the same inputs give the same outcome at any frame rate.
    Drawing, sound and the network take their random numbers from a stream of their own (seeded once from the world's, so
    two players' streams differ), so how often a screen draws doesn't change the world's. */
