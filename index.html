@@ -3121,7 +3121,7 @@ const dtFw=z=>!!z&&(dtS().fw[z]||0)>Date.now();
 function dtXP(m){const z=dtZone(m.x,m.y);return z?DTR[z]*.05+(dtFw(z)?.2:0):0;}
 function dtGold(m){const z=dtZone(m.x,m.y);return z?DTR[z]*.05:0;}
 function dtChestP(g){const z=dtZone(g.x,g.y);return z?(dtFw(z)?1:DTR[z]*.05):0;}
-function dtChestR(g,r){const z=dtZone(g.x,g.y);return dtFw(z)&&rand()<.5?Math.max(r,3):r;}
+function dtChestR(g,r){const z=dtZone(g.x,g.y);return dtFw(z)&&rand()<.25?Math.max(r,3):r;}
 function dtEnter(z){if(!(z in DTR)||!S||S.__demo)return;const s=dtS(),k=DTR[z],L=[t('dtIn',{d:t(z)}),t('dtRate',{r:t('r'+k)})];if(k)L.push(t('dtBonus',{x:k*5}));
  if(s.clr[z]===1){s.clr[z]=2;L.push(t('dtBack'));}
  L.forEach((l,i)=>setTimeout(()=>toast(l,i?'':'good'),400+i*700));
@@ -4375,7 +4375,7 @@ function sewHit(){const G=SEWG;if(!G||G.end)return;let bi=-1,bd=9;G.marks.forEac
  if(bi>=0&&bd<=G.w){G.hit[bi]=bd<=G.w*.35?2:1;SFX.click();}else{G.miss++;SFX.deny();}}
 function sewEnd(quit){const G=SEWG;if(!G||G.end)return;G.end=performance.now();const h=G.hit.filter(Boolean).length,acc=quit?0:Math.max(0,(h-G.miss*.5)/G.n),rc=G.rc;
  if(acc<.5){lifeXP('sew',Math.ceil(rc.xp/3));G.res=0;toast(t('sewFail'),'warn');SFX.deny();}
- else{const r=Math.min(lifeLv('sew')>=5?3:2,acc>=.98?3:acc>=.85?2:acc>=.7?1:0),it=mkItem(rc.id,r);S.items.push(it);if(!eqIt(rc.slot))equip(it);
+ else{const r=Math.min(lifeLv('sew')>=5?3:2,acc>=.995?3:acc>=.85?2:acc>=.7?1:0),it=mkItem(rc.id,r);S.items.push(it);if(!eqIt(rc.slot))equip(it);
   lifeXP('sew',rc.xp*(r+1));G.res=r+1;const gk='t'+rc.id+r;let bonus='';if(STATB[r]&&!S.got[gk]){S.got[gk]=1;S.bonus+=STATB[r];bonus=' · '+t('craftBonus',{n:STATB[r]});}
   vfx('loot',P.x,P.y,{rarity:r});toast(t('sewOk',{it:t(rc.id)})+bonus,'good');r>=2?SFX.legendary():SFX.quest();qEvent('craft',rc.id,r,rc.slot);}
  hudDirty=true;save(true);setTimeout(()=>{if(SEWG!==G)return;SEWG=null;if(mode==='sew')mode='play';},800);}
@@ -5111,7 +5111,8 @@ function gridPath(sx,sy,tx,ty,R){const W2=R*2+1,ox=sx-R,oy=sy-R,prev=new Int32Ar
  const path=[];for(let c=best;c!==prev[c];c=prev[c])path.push([c%W2+ox,(c/W2|0)+oy]);return path.reverse();}
 // sight: walls (cave rock, buildings, castle walls, ice, pillars) block a monster from striking or aiming at you; water, trees and rocks do not
 const SEEB=[0,0,0,0,0,0,1,1,1,0,0,0,0,1,1];
-const seeP=m=>{const ax=m.x,ay=m.y-4,bx=P.x,by=P.y-4,n=Math.ceil(Math.hypot(bx-ax,by-ay)/6);for(let i=1;i<n;i++){const k=i/n;if(SEEB[at(Math.floor((ax+(bx-ax)*k)/TS),Math.floor((ay+(by-ay)*k)/TS))])return false;}return true;};
+const seeL=(ax,ay,bx,by)=>{const n=Math.ceil(Math.hypot(bx-ax,by-ay)/6);for(let i=1;i<n;i++){const k=i/n;if(SEEB[at(Math.floor((ax+(bx-ax)*k)/TS),Math.floor((ay+(by-ay)*k)/TS))])return false;}return true;},
+ seeP=m=>seeL(m.x,m.y-4,P.x,P.y-4); // walls, cliffs, buildings and palisades block a blow both ways (owner 2026-10-22); trees, rocks and water do not
 const lineClear=(m,x,y,r)=>{const d=Math.hypot(x-m.x,y-m.y),n=Math.ceil(d/8);for(let i=1;i<n;i++){const k=i/n;if(hitBox(m.x+(x-m.x)*k,m.y+(y-m.y)*k,r))return false;}return true;};
 // flow field from the player (owner 2026-10-19: monsters outside a wall pressed into it in a heap instead of walking
 // round through the gate): a BFS out to MFR tiles from your tile, redone when you change tile or every 0.4 s, and only
@@ -5177,7 +5178,7 @@ function tryAttack(ax,ay,mul){
  if((k==='bow'||k==='staff')&&!hcMelee()){if(k==='bow'&&ipOn('larrow')){shoot('magic',ax,ay,(mul||1)*1.1,{pierce:1});return;}shoot(k==='bow'?'arrow':'magic',ax,ay,mul||1);return;}
  P.slash={t:.14,a:Math.atan2(ay,ax)};if(FXME)fxR(['w',Math.round(P.slash.a*100)/100]);SFX.swing({dagger:1.35,spear:.85,hammer:.7}[k]||1);vfx('slash',P.x+ax*4,P.y-7+ay*4,{angle:P.slash.a,rarity:weapon().r||0});
  const rch=auOn()?16:k==='spear'?19:k==='dagger'?10:12,hx=P.x+ax*rch,hy=P.y-6+ay*rch;let res=0;
- for(const m of mons){if(m.dead)continue;if(Math.hypot(m.x-hx,monY(m)-hy)<(k==='spear'?16:14)+MT[m.type].r)res=Math.max(res,hitMon(m,(mul||1)*(P.mul||1),{kx:ax,ky:ay,aura:auOn()}));}
+ for(const m of mons){if(m.dead)continue;if(Math.hypot(m.x-hx,monY(m)-hy)<(k==='spear'?16:14)+MT[m.type].r&&seeP(m))res=Math.max(res,hitMon(m,(mul||1)*(P.mul||1),{kx:ax,ky:ay,aura:auOn()}));}
  if(res)res===2?SFX.crit():SFX.hit();
  else{const tr=vtNear(hx,hy,18).find(tr=>Math.hypot(tr.x-hx,tr.y-8-hy)<18);if(tr&&(chopped.get(tr.k)||0)<=gTime)chop(tr);}
 }
@@ -5241,7 +5242,7 @@ function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='
  if(b.adds)for(let i=0;i<1+ph;i++){const a=rand()*6.28,x=m.x+Math.cos(a)*36,y=m.y+Math.sin(a)*24;if(solidT(x/TS|0,y/TS|0))continue;const s=newMon(b.adds,x,y);s.tmp=1;s.eng=4;s.agg=1;mons.push(s);vfx('spawn',x,y,{color:'#ff7a5a'});}}
 // rare drops: bosses have a 40% chance of a Rare (sometimes Epic) piece of gear, dungeon monsters 3%; rolled per player
 const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','lgloves','lboots','cring','ihelm','igloves','iboots','parmor','mring'];
-function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.4:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.25:.1)?3:2,it=mkItem(id,r);S.items.push(it);
+function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.4:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.1:.04)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
 function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh)gemDrop(m,b);dailyKill(m.type);if(m.type==='mshade'){S.mtr=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);if(NET&&b.boss&&!m.bh)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.06,.1,2)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(S.tl.viscount?.05:0)+(S.tl.pioneer?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)+(S.tl.shero?.05:0)+(S.tl.baron?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
@@ -6217,10 +6218,11 @@ function renderDots(){const d=$('dots');d.innerHTML='';for(let i=0;i<MG.rc.strik
 const RCOL=['#d9d9d9','#5aa2ff','#b07bff','#ff9a3d','#ffc21a'];
 function rateOf(q){return q<.5?0:q<.75?1:q<.9?2:q<.97?3:4;}
 // what a craft actually turns out: skill reliably earns rare, but epic and above are a lucky strike on top of near-perfect
-// work. At a perfect score a normal crafter sees epic about 1 in 9, unique about 1 in 70 and legendary about
-// 1 in 750; smiths roll twice as well and grow with smithing level. Unique and legendary gear is announced to the world.
+// work. Owner 2026-10-22: epic, unique and legendary all rarer. At a perfect score a normal crafter sees epic about
+// 1 in 13, unique about 1 in 260 and legendary about 1 in 6,500; a smith rolls twice as well (unique about 1 in 65,
+// legendary about 1 in 800) and grows with smithing level (top smith: about 1 in 35 and 1 in 330). Unique and legendary gear is announced to the world.
 function craftRate(q){const k=(isSm()?2:1)*(1+.04*((S.smith||1)-1));let r=q<.5?0:1;
- if(q>=.85&&rand()<(.04+(q-.85)*.6)*k){r=2;if(q>=.95&&rand()<(.05+(q-.95)*1.5)*k){r=3;if(q>=.99&&rand()<.08*k)r=4;}}return r;}
+ if(q>=.85&&rand()<(.025+(q-.85)*.35)*k){r=2;if(q>=.95&&rand()<(.025+(q-.95)*.5)*k){r=3;if(q>=.99&&rand()<.04*k)r=4;}}return r;}
 function sparks(n,col){const bar=document.querySelector('.mgbar');const x=MG.p*bar.clientWidth;for(let i=0;i<n;i++){const e=document.createElement('i');e.className='spk';e.style.left=x+'px';e.style.top='40%';e.style.background=col[i%col.length];const a=rand()*Math.PI*2,d=20+rand()*70;e.style.setProperty('--dx',Math.cos(a)*d+'px');e.style.setProperty('--dy',(Math.sin(a)*d-30)+'px');bar.appendChild(e);setTimeout(()=>e.remove(),560);}}
 function strike(){if(!MG||MG.done||MG.lock)return;if(MG.stage===0){if(!MG.hold){MG.hold=true;noise(.3,.08,600);}return;}if(MG.stage===2)return qStart();if(MG.reh>0)return;MG.sq=.15;const z=zoneW(),d=Math.abs(MG.p-MG.center);let s,k,c;if(d<z.p/2){s=1;k='perfect';c='';}else if(d<z.g/2){s=.6;k='good';c='g';}else{s=.12;k='miss';c='m';}
  MG.res.push(s);const fb=$('fb');fb.textContent=t(k);fb.className=c;fb.classList.remove('pop');void fb.offsetWidth;fb.classList.add('pop');MG.heat=Math.max(0,MG.heat-6);
@@ -6585,7 +6587,7 @@ function tAimEnts(ents){if(!S||!P)return;const a=SKA.on?TAIM:null,m=!SKA.on&&tNe
   else{ctx.strokeStyle='rgba(255,224,130,'+(.55+p*.45)+')';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(m.x,m.y,MT[m.type].r+5,(MT[m.type].r+5)*.45,0,0,7);ctx.stroke();}
   ctx.restore();}});}
 const fdir=()=>{if(TOUCH){const a=tAim(200);if(!a)return [[0,1],[0,-1],[1,0],[-1,0]][P.dir];P.dir=Math.abs(a[0])>Math.abs(a[1])?(a[0]>0?2:3):(a[1]>0?0:1);return a;}if(MSX===null)return [[0,1],[0,-1],[1,0],[-1,0]][P.dir];const b=stage.getBoundingClientRect(),dx=(MSX-b.left)/SC+camXf-P.x,dy=(MSY-b.top)/SC+camYf-(P.y-8),l=Math.hypot(dx,dy)||1;P.dir=Math.abs(dx)>Math.abs(dy)?(dx>0?2:3):(dy>0?0:1);return [dx/l,dy/l];};
-const aoe=(x,y,r,mul,o)=>{let n=0;hitTrees(x,y,r,3);mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-x,monY(m)-y)<r&&hitMon(m,mul,o||{}))n++;});return n;};
+const aoe=(x,y,r,mul,o)=>{let n=0;hitTrees(x,y,r,3);mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-x,monY(m)-y)<r&&seeL(x,y,m.x,monY(m))&&hitMon(m,mul,o||{}))n++;});return n;}; // a blast does not reach round a wall
 const SKF={
  ...C2SK,
  ...P2SK,
@@ -6596,7 +6598,7 @@ const SKF={
  ...FBSK,
  strike:()=>{const v=fdir();P.acd=0;tryAttack(v[0],v[1],1.8);shake=.12;},
  // Guardian Knight: shield bash stuns a cone in front; Fortress makes the guard unbreakable and all-round, and turns blocks back on the attacker; Taunt pulls every monster nearby onto you and hardens you for it
- bash:()=>{const v=fdir(),a=Math.atan2(v[1],v[0]);SFX.slam();shake=.12;vfx('block',P.x+v[0]*12,P.y-8+v[1]*12,{angle:a});let n=0;mons.forEach(m=>{if(m.dead)return;const dx=m.x-P.x,dy=monY(m)-(P.y-6),d=Math.hypot(dx,dy);if(d<30+MT[m.type].r&&(dx*v[0]+dy*v[1])/(d||1)>.35&&hitMon(m,1.2,{stun:1.2,skill:1,kx:v[0],ky:v[1]}))n++;});if(n)SFX.hit();},
+ bash:()=>{const v=fdir(),a=Math.atan2(v[1],v[0]);SFX.slam();shake=.12;vfx('block',P.x+v[0]*12,P.y-8+v[1]*12,{angle:a});let n=0;mons.forEach(m=>{if(m.dead)return;const dx=m.x-P.x,dy=monY(m)-(P.y-6),d=Math.hypot(dx,dy);if(d<30+MT[m.type].r&&(dx*v[0]+dy*v[1])/(d||1)>.35&&seeL(P.x,P.y-6,m.x,monY(m))&&hitMon(m,1.2,{stun:1.2,skill:1,kx:v[0],ky:v[1]}))n++;});if(n)SFX.hit();},
  fort:()=>{P.fort=5;P.gd=100;vfx('block',P.x,P.y-8,{});fx.push({ring:true,x:P.x,y:P.y-6,t:.35});toast(t('fortOn'),'good');},
  taunt:()=>{let n=0;mons.forEach(m=>{if(m.dead||MT[m.type].boss&&!m.eng)return;if(Math.hypot(m.x-P.x,m.y-P.y)<100){m.agg=1;m.eng=4;m.ret=0;m.flee=0;n++;}});P.prov=6;vfx('rage',P.x,P.y);SFX.notice();P.hp=Math.min(maxHP(),P.hp+maxHP()*.04*Math.min(n,5));toast(t('tauntN',{n}),'good');},
  whirl:()=>{SFX.swing();setTimeout(SFX.swing,90);fx.push({ring:true,x:P.x,y:P.y-6,t:.25});fx.push({arc:1,x:P.x,y:P.y-8,a:gTime*7,t:.25});if(aoe(P.x,P.y-6,34,1.5))SFX.hit();},
@@ -6627,7 +6629,7 @@ const SKF={
   let n=0;mons.forEach(m=>{if(m.dead)return;const dx=m.x-x0,dy=monY(m)-y0,al=dx*v[0]+dy*v[1],pp=Math.abs(dx*v[1]-dy*v[0]);if(al>-6&&al<86&&pp<14+MT[m.type].r*.5&&hitMon(m,3.5,{skill:1,kx:v[0],ky:v[1]}))n++;});if(n){SFX.crit();shake=.2;}},
  revolve:()=>{let i=0;const f=()=>{if(mode!=='play'||!P)return;SFX.swing();fx.push({arc:1,x:P.x,y:P.y-8,a:i*1.3,t:.2});mons.forEach(m=>{if(m.dead||MT[m.type].boss)return;const dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy)||1;if(d<60&&d>14)move(m,dx/d*6,dy/d*6,MT[m.type].r||6);});if(aoe(P.x,P.y-6,40,1.3,{skill:1}))SFX.hit();if(++i<5)setTimeout(f,150);};f();},
  pinnacle:()=>{const v=fdir();P.inv=Math.max(P.inv,.6);vfx('mana',P.x,P.y-8);SFX.notice();setTimeout(()=>{if(mode!=='play'||!P)return;const a=Math.atan2(v[1],v[0]);for(let i=-2;i<=2;i++)vfx('slash',P.x+v[0]*16,P.y-7+v[1]*16,{angle:a+i*.35,rarity:4});flash();SFX.slam();SFX.crit();shake=.45;
-  mons.forEach(m=>{if(m.dead)return;const dx=m.x-P.x,dy=monY(m)-(P.y-6),d=Math.hypot(dx,dy);if(d<70+MT[m.type].r&&(dx*v[0]+dy*v[1])/(d||1)>.3)hitMon(m,7,{skill:1,stun:1.5,kx:v[0],ky:v[1]});});hitTrees(P.x+v[0]*30,P.y-6+v[1]*30,40,4);},450);},
+  mons.forEach(m=>{if(m.dead)return;const dx=m.x-P.x,dy=monY(m)-(P.y-6),d=Math.hypot(dx,dy);if(d<70+MT[m.type].r&&(dx*v[0]+dy*v[1])/(d||1)>.3&&seeL(P.x,P.y-6,m.x,monY(m)))hitMon(m,7,{skill:1,stun:1.5,kx:v[0],ky:v[1]});});hitTrees(P.x+v[0]*30,P.y-6+v[1]*30,40,4);},450);},
  restraint:()=>{fx.push({ring:true,x:P.x,y:P.y-6,t:.35});mons.forEach(m=>{if(m.dead)return;const dx=m.x-P.x,dy=m.y-P.y,d=Math.hypot(dx,dy)||1;if(d>48)return;if(!MT[m.type].boss)move(m,dx/d*30,dy/d*30,MT[m.type].r||6);m.stun=Math.max(m.stun||0,MT[m.type].boss?.3:.8);});SFX.slam();shake=.15;},
  // Braham's magic: missiles that find their own targets, a meteor where you aim, lightning that leaps from foe to foe, and
  // absolute zero, which freezes everything around you
@@ -8563,7 +8565,7 @@ function lootWho(uid){if(uid===NET.uid)return netId||S.look.n;const r=NET.remote
 function lootKilled(m){if(!rlOn()||!rlBoss(m)||m.tmp||m.arena||m.evt||m.sg)return;lootFought=performance.now();
  if(PARTY.isLeader())lootStart(m.type);else NET.send('raid.state',{to:PARTY.leader(),raid:'k|'+String(m.type).slice(0,16),k:0});}
 function lootStart(type){if(!PARTY||!PARTY.isLeader()||LOOTL||!MT[type])return;const now=performance.now();lootLast=lootLast||{};if(lootLast[type]&&now-lootLast[type]<LROLL.AGAIN_MS)return;lootLast[type]=now;
- const id=(Date.now().toString(36)+(++lootSeq).toString(36)).slice(-10),it=DROPG[rand()*DROPG.length|0],r=rand()<.15?3:2;
+ const id=(Date.now().toString(36)+(++lootSeq).toString(36)).slice(-10),it=DROPG[rand()*DROPG.length|0],r=rand()<.08?3:2;
  LOOTL={id,it,r,until:now+LROLL.S*1000,ch:new Map()};const raid='r|'+id+'|'+it+':'+r;
  for(const m of PARTY.members())if(!m.self)NET.send('raid.state',{to:m.uid,raid,k:LROLL.S});
  lootOffer({id,it,r,until:LOOTL.until,from:NET.uid});}
@@ -8735,7 +8737,7 @@ function bntBoard(){if(!BNT)return;const by={};for(const k in BNTS){const b=BNTS
 window.__GB={all:()=>BNTS,on:uid=>bntOn(uid),post:(uid,g)=>{const r=NET.remotes().find(x=>x.uid===uid);return !!r&&bntNew(r,g);}}; // test hook
 // the local attack reaches a player outside town: melee within reach, bow/staff along the aim; the nearest one it can hit
 function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoom=(roomAt(P.x,P.y)||{}).id||null,l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';let best=null,bd=1e9;
- for(const r of NET.remotes()){if(!netSees(r,myRoom)||PVP.why(r))continue;const dx=r.x-P.x,dy=(r.y-8)-(P.y-6),d=Math.hypot(dx,dy);
+ for(const r of NET.remotes()){if(!netSees(r,myRoom)||PVP.why(r)||!seeL(P.x,P.y-4,r.x,r.y-4))continue;const dx=r.x-P.x,dy=(r.y-8)-(P.y-6),d=Math.hypot(dx,dy);
   if(ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):(d>30||(dx*ax+dy*ay)/(d*l||1)<-.2))continue;if(d<bd){bd=d;best=r;}}
  if(!best)return;const crit=rand()<.12,pow=(8+rand()*5)*(crit?1.5:1)*Math.min(1.5,mul||1),pm=PVP.hit(best,pow);
  if(pm){num(best.x,best.y-24,'-'+Math.max(1,Math.round(pm/10))+'%',crit?'#ffd24a':'#ffffff',crit);vfx(crit?'crit':'hit',best.x,best.y-10,{angle:Math.atan2(best.y-P.y,best.x-P.x)});}}
@@ -9692,7 +9694,7 @@ window.__GR={season:()=>rnkSeason(),mine:()=>RNK?RNK.get(rnkSeason(),NET.uid):nu
 // The local attack reaches the opponent: melee within reach, bow/staff along the aim. Power is a normalized roll.
 function duelSwing(ax,ay,mul,k){if(DUEL.state().phase!=='fight')return;const f=DUEL.foe();if(!f)return;
  const dx=f.x-P.x,dy=(f.y-8)-(P.y-6),d=Math.hypot(dx,dy),l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';
- if(ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):d>30)return;
+ if((ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):d>30)||!seeL(P.x,P.y-4,f.x,f.y-4))return;
  const crit=rand()<.12,pow=(8+rand()*5)*(crit?1.5:1)*Math.min(1.5,mul||1),dmg=DUEL.hit(pow);
  if(dmg){num(f.x,f.y-24,'-'+dmg,crit?'#ffd24a':'#ffffff',crit);if(crit)vfx('crit',f.x,f.y-10);}}
 // U034 spectators: while fighting, each duelist publishes "<duel id>:<duel HP>"; everyone else sees a bar over

@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22los', ver: '1.68', d: '2026-10-22',
+      ar: ["الملحمي والفريد والأسطوري بقوا أندر. في الحدادة بتقييم كامل: الحداد بيطلّع ملحمي تقريبًا 1 من 6، وفريد 1 من 65، وأسطوري 1 من 800 (وبيتحسن مع مستوى الحدادة). الزعماء بيوقّعوا فريد 10% بس من الحاجات النادرة بدل 25%، والدانجن 4% بدل 10%. حاجاتك القديمة زي ما هي",
+        "مفيش ضرب من ورا الحيطة: ضربة السلاح القريب والمهارات اللي حواليك مبتعديش حيطة أو سور أو مبنى أو جرف، ونفس الكلام في المبارزات والـ PvP. الأسهم بتقف عند الحيطة زي الأول، وسحر مكان الماوس (زي النيزك والمطر) بينزل عادي ورا الحيطة"],
+      en: ["Epic, unique and legendary are all rarer. At a perfect forge score a smith turns out epic about 1 in 6, unique about 1 in 65 and legendary about 1 in 800 (better with smithing level). Bosses drop unique on 10% of their rare items instead of 25%, dungeons 4% instead of 10%. Items you already have stay as they are",
+        "No hitting through walls: melee blows and skills around you do not pass a wall, palisade, building or cliff, in duels and PvP too. Arrows still stop at a wall, and magic aimed at the cursor (meteor, arrow rain) still lands behind one"] },
     { v: '2026-10-22rckey', ver: '1.67', d: '2026-10-22',
       ar: ["وصفات أطقم الوحوش الإلهية (النمر الأبيض، التنين الأزرق، العنقاء الحمرا، السلحفاة السودا) بقت مقفولة لحد ما تجيب النَّفَس بتاعها أول مرة. أول ما يدخل شنطتك، كل وصفات طقمه بتتفتح مرة واحدة. اللي كانت مفتوحة معاك من غير ما تجيبه رجعت مقفولة"],
       en: ["The divine-beast set recipes (White Tiger, Blue Dragon, Red Phoenix, Black Tortoise) stay locked until you get that beast's breath for the first time. The moment it is in your bag, its whole set opens at once. Ones you had without ever getting the breath are locked again"] },
