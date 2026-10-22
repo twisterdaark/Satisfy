@@ -7086,11 +7086,13 @@ ACH.push({k:'ex10',c:()=>[exPctAll(),10],pb:{xp:.01}},{k:'ex30',c:()=>[exPctAll(
 Object.assign(STR.ar,{life_carto:'رسم الخرايط',lifeD_carto:'بيكبر مع كل حتة أرض جديدة تشوفها. لفله بيوسّع اللي بتكشفه حواليك، وبيخليك تلمح المخابئ من أبعد، ومن لفل 3 بيعلّم المخابئ على الماب في المناطق اللي رسمتها (ومن لفل 6 في كل الأرض اللي شفتها).',
  exFound:'اكتشفت منطقة جديدة: {z}',exFoundR:'+{n} خبرة من الاستكشاف',exChart:'رسمت خريطة {z}! (+{g} دهب)',exCacheGot:'لقيت مخبأ مستكشف: +{g} دهب و{q} {it}',hCache:'E: احفر المخبأ',
  mapEx:'شفت {a}% من العالم · المنطقة دي {b}%',mapEx2:'مناطق اكتشفتها {d} · رسمتها {c} · مخابئ لقيتها {f}',
+ achD_ex10:'شوف 10% من العالم.',achD_ex30:'شوف 30% من العالم.',achD_ex60:'شوف 60% من العالم.',achD_zones30:'اكتشف 30 منطقة.',achD_chart15:'ارسم خريطة 15 منطقة.',achD_cache25:'احفر 25 مخبأ مستكشف.',
  ach_ex10:'أول خطوات',ach_ex30:'دليل الطرق',ach_ex60:'شاف الدنيا',ach_zones30:'مكتشف المناطق',ach_chart15:'رسام الخرايط',ach_cache25:'صياد الكنوز',
  tl_pathfinder:'دليل الطرق',tl_pathfinderD:'+20% مكافآت الاستكشاف.',tl_cartog:'رسام الخرايط',tl_cartogD:'+50% دهب من المخابئ.'});
 Object.assign(STR.en,{life_carto:'Cartography',lifeD_carto:'Grows with every new patch of land you see. Its level widens what you uncover around you, lets you spot caches from further away, and from level 3 marks caches on the map in regions you have charted (from 6, in all land you have seen).',
  exFound:'New region discovered: {z}',exFoundR:'+{n} XP for exploring',exChart:'You charted {z}! (+{g} gold)',exCacheGot:"Explorer's cache: +{g} gold and {q} {it}",hCache:'E: Dig up the cache',
  mapEx:'Seen {a}% of the world · this region {b}%',mapEx2:'Regions found {d} · charted {c} · caches dug up {f}',
+ achD_ex10:'See 10% of the world.',achD_ex30:'See 30% of the world.',achD_ex60:'See 60% of the world.',achD_zones30:'Discover 30 regions.',achD_chart15:'Chart 15 regions.',achD_cache25:"Dig up 25 explorer's caches.",
  ach_ex10:'First Steps',ach_ex30:'Pathfinder',ach_ex60:'Seen the World',ach_zones30:'Region Hunter',ach_chart15:'Cartographer',ach_cache25:'Treasure Hunter',
  tl_pathfinder:'Pathfinder',tl_pathfinderD:'+20% exploring rewards.',tl_cartog:'Cartographer',tl_cartogD:'+50% gold from caches.'});
 window.__GX={grid:()=>{const E=exGrid();return {k:E.k,n:E.n};},caches:()=>exCaches(),stats:()=>{const s=exStats();return {all:s.all,seen:s.seen};},dig:c=>exDig(c),near:()=>exNear(),zone:z=>exZone(z),seen:n=>exSeen(n),pct:z=>exPct(z),fill:z=>{const E=exGrid(),i=E.ix[z];for(let j=0;j<E.z.length;j++)if(E.z[j]===i)FOG[j]=1;fogV++;}}; // tests
