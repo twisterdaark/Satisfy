@@ -176,6 +176,16 @@ test('#144: a caravan: one at a time, delivered after its time and before it spo
   await no(db(A).ref().update({ ['caravans/' + A]: null, ['caravanDone/' + A + '/v_1']: { f: 'zWin', to: 'zReid', g: 400, r: 1, t: SV } }), 'not delivered before its time');
   await no(db(B).ref('caravans/' + A).once('value'), 'others do not read it');
   await yes(db(A).ref('caravans/' + A).remove(), 'dropped');
+  // Claude-B's review: a start left behind is replaced once it is two hours old, not before
+  await yes(db(A).ref('caravans/' + A).set(car), 'A sends another');
+  await no(db(A).ref('caravans/' + A).set(Object.assign({}, car, { id: 'v_2' })), 'not over one that can still be delivered');
+  await env.withSecurityRulesDisabled(async (ctx) => { await ctx.database().ref('caravans/' + A + '/t').set(Date.now() - 2 * 3600000 - 60000); });
+  await yes(db(A).ref('caravans/' + A).set(Object.assign({}, car, { id: 'v_2' })), 'over one two hours old');
+  await no(db(B).ref('caravans/' + A).set(Object.assign({}, car, { id: 'v_3' })), 'still nobody else');
+  await env.withSecurityRulesDisabled(async (ctx) => { await ctx.database().ref('caravanDone/' + A + '/v_0').set({ f: 'zWin', to: 'zReid', g: 400, r: 1, t: 1 }); });
+  await no(db(A).ref('caravanDone/' + A).set({ v_9: { f: 'zWin', to: 'zReid', g: 400, r: 1, t: SV } }), 'deliveries are not written whole');
+  await no(db(B).ref('caravanDone/' + A).remove(), 'nor removed by others');
+  await yes(db(A).ref('caravanDone/' + A).remove(), 'A removes all of its own at once (Delete my online data)');
 });
 
 test('#131: repair orders: posted by the owner of the item, answered once by a smith with the fee, then closed', async () => {
