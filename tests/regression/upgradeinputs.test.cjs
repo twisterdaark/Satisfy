@@ -75,22 +75,19 @@ test('upgrades take exactly their inputs: a gem and 500 gold to set one, the pri
       for (let i = 0; i < 20 && await g.eval(() => window.__G.mode !== 'play'); i++) { await g.step(5); await g.eval(() => window.__G.mode === 'dialog' && window.__G.advance()); }
     }
     await g.eval(() => { const S = window.__G.S; S.mats.pstone = 0; window.__wpn().en = Math.min(window.__wpn().en | 0, 9); });
-    const s2 = await st(), bb = await bag(g), cc = await g.eval(() => window.__GENH.cost(window.__wpn()));
+    const bb = await bag(g), cc = await g.eval(() => window.__GENH.cost(window.__wpn()));
     await g.eval(() => window.__GENH.go(window.__wpn(), 'khan', { pr: true })); await g.step(2);
     const ba = await bag(g);
     assert.deepEqual([(await st()).p, bb.gold - ba.gold], [0, cc.g], 'no Protection Stone left: none taken, the price as usual');
-    void s2;
     await g.eval(() => { for (let i = 0; i < 6 && window.__G.mode === 'dialog'; i++) window.__G.advance(); });
     for (let i = 0; i < 20 && await g.eval(() => window.__G.mode !== 'play'); i++) { await g.step(5); await g.eval(() => window.__G.mode === 'dialog' && window.__G.advance()); }
 
-    // short of magic stones: nothing taken
-    await g.eval(() => { window.__G.S.mats.mstone = 0; });
-    const b0 = await bag(g), en0 = await g.eval(() => window.__wpn().en | 0);
-    if (en0 < 10) {
-      await g.eval(() => window.__GENH.go(window.__wpn())); await g.step(2);
-      assert.deepEqual(await bag(g), b0, 'short of stones: nothing');
-      assert.equal(await g.eval(() => window.__wpn().en | 0), en0);
-    }
+    // short of magic stones: nothing taken (at +5, so the check can't be skipped by a weapon already at +10)
+    await g.eval(() => { window.__G.S.mats.mstone = 0; window.__wpn().en = 5; });
+    const b0 = await bag(g);
+    await g.eval(() => window.__GENH.go(window.__wpn())); await g.step(2);
+    assert.deepEqual(await bag(g), b0, 'short of stones: nothing');
+    assert.equal(await g.eval(() => window.__wpn().en | 0), 5);
     assert.equal(await g.eval(() => window.__wpn().id), w, 'the same weapon all along');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }

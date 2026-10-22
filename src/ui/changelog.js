@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22upgradeinputs', ver: '1.90', d: '2026-10-22', hide: 1,
+      ar: ["للتيستات: تيست بيتأكد إن تركيب الجوهرة والتطوير بياخدوا بالظبط اللي عليهم (جوهرة و500 دهب، وتمن التطوير نجح أو فشل)، ومفيش حاجة بتتاخد لو ناقص"],
+      en: ["For the tests: a test that setting a gem and enhancing take exactly their inputs (a gem and 500 gold; the enhancement's price, whether it works or not), and nothing when something is short"] },
     { v: '2026-10-22bars', ver: '1.89', d: '2026-10-22',
       ar: ["شرايط مهارات زيادة زي Fiesta وWoW: زرار + و- على الشريط الأول بيزوّدوا لحد 4 شرايط تحت نص الشاشة أو يشيلوها، والشريط اللي بتشيله بيفضل فاكر حاجاته",
         "اسحب على الشرايط مهارات من الشريط أو الحالة، وأي حاجة من الشنطة: جرعات وعيش وأكل، وسلاح أو درع (الدوسة بتلبسه على طول). كليك يمين بيفضّي الخانة، والسحب من خانة لخانة بيبدّلهم",
@@ -71,9 +74,6 @@
         "The controls screen lists every key that can change: skills and items, movement and combat, windows, and online. A key already in use says what it is used for, and the two swap",
         "A skill or any action can go on the mouse side buttons (M4 and M5) or the wheel button (M3), and they no longer send the page back",
         "Tracking a monster that lives in a cave or dungeon from the encyclopedia raised an error. Fixed, and the arrow leads to the cave's entrance"] },
-    { v: '2026-10-22upgradeinputs', ver: '1.86', d: '2026-10-22', hide: 1,
-      ar: ["للتيستات: تيست بيتأكد إن تركيب الجوهرة والتطوير بياخدوا بالظبط اللي عليهم (جوهرة و500 دهب، وتمن التطوير نجح أو فشل)، ومفيش حاجة بتتاخد لو ناقص"],
-      en: ["For the tests: a test that setting a gem and enhancing take exactly their inputs (a gem and 500 gold; the enhancement's price, whether it works or not), and nothing when something is short"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
