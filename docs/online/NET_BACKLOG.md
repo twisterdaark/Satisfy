@@ -166,7 +166,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U312 | Animation state machine | ❌ | |
 | U313 | Fixed tick simulator | ✅ | SAT-ONLINE-099: `?tick=fixed` (off by default) moves the world in steps of 1/60 s at any frame rate; drawing, sound and the network draw their random numbers from a stream of their own. tests/regression/fixedtick |
 | U314 | Dedicated game clock | ✅ | Server clock offset (`wNow`, SAT-ONLINE-044) for everything shared |
-| U315 | Localization bundles | 🟡 | `STR.ar`/`STR.en` in the page; the UI falls back to the key |
+| U315 | Localization bundles | 🟡 | `STR.ar`/`STR.en` in the page; every line in both languages (`unit/i18n`, SAT-ONLINE-092) and every key the page asks for by name has its lines (SAT-ONLINE-118), so a missing key fails the tests. Left: the tables are still in the page, not bundles of their own |
 | U316 | Asset loader | 🟡 | Sprite sheets in `sprites-original/` (B) |
 | U317 | Save migrations | ✅ | Save versions with backups (ADR-001); old saves keep working (`regression/golden`, `regression/save`) |
 | U318 | Map testing | ✅ | `regression/towns`, `worldparity`, `boot`; every door reachable |
