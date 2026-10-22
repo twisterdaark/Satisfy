@@ -947,16 +947,26 @@
     "repairOrders": {
       ".read": "auth != null",
       "$oid": {
-        ".write": "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid) || (data.exists() && !newData.exists() && (data.child('by').val() === auth.uid || newData.parent().parent().child('repairDone').child(data.child('by').val()).child($oid).child('by').val() === auth.uid)))",
-        ".validate": "$oid.matches(/^r_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['by', 'n', 'iid', 'it', 'd', 'fee', 't'])",
+        ".write": "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid && newData.child('s').isString() && newData.child('s').val().matches(/^[0-4]$/) && newData.parent().parent().child('repairSlot').child(auth.uid).child(newData.child('s').val()).val() === $oid) || (data.exists() && !newData.exists() && (data.child('by').val() === auth.uid || newData.parent().parent().child('repairDone').child(data.child('by').val()).child($oid).child('by').val() === auth.uid) && (!data.child('s').exists() || !newData.parent().parent().child('repairSlot').child(data.child('by').val()).child(data.child('s').val()).exists())))",
+        ".validate": "$oid.matches(/^r_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['by', 'n', 'iid', 'it', 'd', 'fee', 's', 't'])",
         "by": { ".validate": "newData.isString()" },
         "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
         "iid": { ".validate": "newData.isString() && newData.val().matches(/^it_[a-z0-9_]{4,40}_[0-9]+$/)" },
         "it": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40" },
         "d": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 99" },
         "fee": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 10000000" },
+        "s": { ".validate": "newData.isString() && newData.val().matches(/^[0-4]$/)" },
         "t": { ".validate": "newData.val() === now" },
         "$other": { ".validate": false }
+      }
+    },
+    "repairSlot": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$s": {
+          ".write": "auth != null && ((!data.exists() && newData.exists() && auth.uid === $uid && newData.isString() && newData.val().matches(/^r_[A-Za-z0-9_-]{1,60}$/) && newData.parent().parent().parent().child('repairOrders').child(newData.val()).child('by').val() === $uid && newData.parent().parent().parent().child('repairOrders').child(newData.val()).child('s').val() === $s) || (data.exists() && !newData.exists() && !newData.parent().parent().parent().child('repairOrders').child(data.val()).exists()))",
+          ".validate": "$s.matches(/^[0-4]$/) && newData.isString() && newData.val().matches(/^r_[A-Za-z0-9_-]{1,60}$/)"
+        }
       }
     },
     "repairDone": {
