@@ -128,7 +128,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U221 | Guild treasury | ✅ | SAT-ONLINE-065 (#99) + 069: gifts add exactly their amount, only the master and officers spend, and only on a building raised in the same write; `guildLog` keeps who did what |
 | U222 | Fish market | ❌ | Content (B) |
 | U223 | Crop wholesale market | ❌ | Content (B) |
-| U224 | Rare gem exchange | 🟡 | Socketing and paid upgrades (B); no exchange between players |
+| U224 | Rare gem exchange | ✅ | Gems change hands between players on the online auction house (SAT-ONLINE-094, #129: they are among its goods). SAT-ONLINE-134: setting a gem takes exactly one gem and 500 gold, a gem set over another takes its own and the old one is gone, an enhancement takes exactly its price (gold, magic and enhancement stones) whether it works or not, and nothing is taken when something is short (`regression/upgradeinputs`) |
 | U225 | Repair market | ✅ | SAT-ONLINE-096: work orders (`repairOrders`) a player posts with a fee at any smith's; a player Blacksmith mends one in one write that takes it off, tells its owner (`repairDone`) and pays the smith (`repairPaid`), checked by the rules; the piece is mended in its owner's bag with the same id (`regression/repair`) |
 | U226 | Taxation caps | ❌ | There are no city taxes yet |
 | U227 | Inflation dashboard | ✅ | SAT-ONLINE-082: `/economy` for the owner: total, median, top 10% and richest gold of the ranked players, and their average level |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 75 · 🟡 17 · ⏳ 6 · ❌ 6 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 76 · 🟡 16 · ⏳ 6 · ❌ 6 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
