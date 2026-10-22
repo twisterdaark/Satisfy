@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22research', ver: '1.43', d: '2026-10-22',
+      ar: ["شجرة بحث للجيلد (G ← المباني ← \"Research tree\"): 7 أبحاث بتتدفع من خزينة الجيلد مرة واحدة وبالترتيب، وكل بحث بيدي كل الأعضاء ميزة: خبرة، دهب، جودة صناعة، صحة، وفي الآخر \"إرث الجيلد\" بيدي شوية من التلاتة"],
+      en: ["A research tree for guilds (G → Buildings → \"Research tree\"): 7 studies paid from the guild treasury, once and in order, each a bonus for every member: experience, gold, crafting quality, health, and at the top \"Guild Legacy\" with a bit of all three"] },
     { v: '2026-10-22rights', ver: '1.42', d: '2026-10-22',
       ar: ["قائد الجيلد يقدر يحدد صلاحيات الضباط والأعضاء (G ← \"Rank rights\"): الدعوة وطلبات الانضمام، الأخذ من الخزنة، الصرف على المباني، كتابة الإعلان، وعمل الأحداث. الضباط عندهم كله والأعضاء مفيش لحد ما القائد يغيّر",
         "سجلات الجيلد (المكافآت الأسبوعية اللي اتاخدت، السجل) متتمسحش غير مع حل الجيلد"],

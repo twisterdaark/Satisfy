@@ -145,7 +145,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U234 | Guild forge | ✅ | SAT-ONLINE-065 (#99): the Guild Forge, +2% quality a level, capped at 3 levels |
 | U235 | Guild housing | ❌ | |
 | U236 | Guild treasury | ✅ | Same as U221 |
-| U237 | Guild research tree | 🟡 | Three buildings of three levels paid from the treasury (065); no tree |
+| U237 | Guild research tree | ✅ | SAT-ONLINE-105: seven studies in three tiers (experience, gold, crafting quality, then more and health, then all three), paid from the treasury once and after the ones they need, a bonus for every member; the rules take exactly each cost (none skipped, short or negative; `guildBuild/{gid}/{node}`), by the ranks with "spend" (`regression/guildresearch`, `unit/rules-fuzz`) |
 | U238 | Guild alliances | ✅ | SAT-ONLINE-085: proposed by the master or an officer, accepted or declined by the other guild's; the rules write each side only against a fresh proposal from the other (one guild can't force it); 30 days, renewable in the last week, up to 3; no open PvP between allies (pvp.js `ally`) (`guildAllyAsk`, `guildAlly`) (`regression/guildally`) |
 | U239 | Guild wars | ✅ | SAT-ONLINE-086: declared for one full hour 30 min–7 days ahead, accepted by the other guild (`guildWarAsk` → `guildWar`, the same hour), never on an ally; kills of enemy members outside towns count only during the hour (`guildWarKill`, the rules check it: a war can't start off-schedule), cost no karma, at most 200 a member; called off up to 10 min before, never during; told before, at the start and with the score at the end. Declared by guilds, not matched by the game (`regression/guildwar`) |
 | U240 | Territory objectives | 🟡 | Guilds capture territory banners and the castle; who holds them is shared online (`world/satisfy/own`, with world news); no weekly limit |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 52 · 🟡 35 · ⏳ 6 · ❌ 11 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 53 · 🟡 34 · ⏳ 6 · ❌ 11 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
