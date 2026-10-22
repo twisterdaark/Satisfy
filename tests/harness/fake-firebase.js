@@ -58,7 +58,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|announce|admins|tradeLog|tradeRep|trades|tradeSides|tradeDone|tradedItems|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|announce|admins|tradeLog|tradeRep|trades|tradeSides|tradeDone|tradedItems|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb)|guildTax|world\/satisfy\/(legends|wb|tax))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -67,7 +67,7 @@
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
   // the paths a root update claims for its first writer only (each one's rules need !data.exists() or the like)
-  const CLAIM_RE = /^(guildNames|guildVaultTaken|guildBank|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb))\//, CLAIM_WAIT = 120;
+  const CLAIM_RE = /^(guildNames|guildVaultTaken|guildBank|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb|tax))\//, CLAIM_WAIT = 120;
   function rootUpdate(diff) {
     const ps = Object.keys(diff);curDiff = diff;bDiff = diff;let errs;try{errs = ps.map((p) => rules(p, diff[p], data.has(p))).filter(Boolean);}finally{curDiff = null;bDiff = null;}
     F.log.push({ op: 'update', path: '', err: errs[0] || null, keys: ps.slice().sort() });
@@ -130,11 +130,18 @@
   let curDiff = null;
   const GID_RE = /^g_[A-Za-z0-9]{1,128}$/;
   const after = (p) => (curDiff && p in curDiff ? curDiff[p] : data.has(p) ? data.get(p) : null);
+  // SAT-ONLINE-105: the guild research tree, as in the rules: node -> [cost, the nodes it needs]
+  const G_RS = { xp1: [30000, []], gd1: [30000, []], q1: [30000, []], xp2: [120000, ['xp1']], gd2: [120000, ['gd1']], hp1: [120000, ['q1']], all: [400000, ['xp2', 'gd2', 'hp1']] };
   const rkOf = (gid, uid) => { const m = data.get('guildMembers/' + gid + '/' + uid); return m && m.rk || ''; };
+  const rightOf = (g, uid, x) => { const r = rkOf(g, uid), pm = (data.get('guilds/' + g) || {}).perm || {}; return r === 'm' || (r === 'o' && (pm.o || {})[x] !== false) || (r === 'r' && (pm.r || {})[x] === true); }; // SAT-ONLINE-104
   const isSV = (x) => JSON.stringify(x) === JSON.stringify(SV);
   function guildRules(seg, v) {
     if (!user) return 'PERMISSION_DENIED: guild';
     const me = user.uid, path = seg.join('/'), old = data.has(path) ? data.get(path) : null;
+    // SAT-ONLINE-104: a right of a rank (perm/{o|r}/{inv, take, spend, note, ev}, set by the master): the master always; an
+    // officer unless the master took it away; a member if the master gave it. And a guild's records go only with the guild
+    const right = (g, x) => { const r = rkOf(g, me), pm = (data.get('guilds/' + g) || {}).perm || {}; return r === 'm' || (r === 'o' && (pm.o || {})[x] !== false) || (r === 'r' && (pm.r || {})[x] === true); };
+    const gone = (g) => !after('guilds/' + g);
     if (seg[0] === 'guilds') {
       const gid = seg[1];
       if (seg.length !== 2 || !GID_RE.test(gid)) return 'PERMISSION_DENIED: guilds ' + path;
@@ -145,7 +152,9 @@
       if (!(old ? old.master === me || claim : gid === 'g_' + me)) return 'PERMISSION_DENIED: guilds write ' + path;
       if (v === null) return null;
       const gk = Object.keys(v).sort().join(',');
-      if (gk !== 'col,master,name,nk,t' && !(gk === 'col,emb,master,name,nk,t' && isInt(v.emb, 0) && v.emb <= 15)) return 'guilds fields'; // emb: the banner (SAT-ONLINE-084)
+      const gk0 = gk.replace(/,?perm/, ''); // perm: the ranks' rights (SAT-ONLINE-104)
+      if (gk0 !== 'col,master,name,nk,t' && !(gk0 === 'col,emb,master,name,nk,t' && isInt(v.emb, 0) && v.emb <= 15)) return 'guilds fields'; // emb: the banner (SAT-ONLINE-084)
+      if ('perm' in v && !(v.perm && typeof v.perm === 'object' && Object.keys(v.perm).every((k) => (k === 'o' || k === 'r') && v.perm[k] && typeof v.perm[k] === 'object' && Object.keys(v.perm[k]).every((x) => ['inv', 'take', 'spend', 'note', 'ev'].includes(x) && typeof v.perm[k][x] === 'boolean')))) return 'guilds perm';
       // the master is yourself, or (the master handing over) an officer who becomes 'm' while you become 'o'
       const handTo = !!old && old.master === me && v.master !== me && rkOf(gid, v.master) === 'o' && rkAfter(v.master) === 'm' && rkAfter(me) === 'o';
       if (!(typeof v.name === 'string' && v.name.length >= 2 && v.name.length <= 18 && v.nk === v.name.toLowerCase() && (v.master === me || handTo) && /^#[0-9a-fA-F]{6}$/.test(v.col))) return 'guilds values';
@@ -161,7 +170,7 @@
     }
     if (seg[0] === 'guildWeek' || seg[0] === 'guildWeekPaid') { // SAT-ONLINE-081: the weekly goal and its rewards
       const gid = seg[1], member = data.has('guildMembers/' + gid + '/' + me), master = (data.get('guilds/' + gid) || {}).master === me;
-      if (seg.length <= 3) return v === null && master && (seg.length === 2 || seg[0] === 'guildWeek') ? null : 'PERMISSION_DENIED: ' + seg[0] + ' ' + path;
+      if (seg.length <= 3) return v === null && master && gone(gid) && (seg.length === 2 || seg[0] === 'guildWeek') ? null : 'PERMISSION_DENIED: ' + seg[0] + ' ' + path;
       if (!/^w[0-9]{4,6}$/.test(seg[2]) || seg[3] !== me) return 'PERMISSION_DENIED: ' + seg[0] + ' write';
       if (seg[0] === 'guildWeek') {
         if (seg.length !== 4) return 'PERMISSION_DENIED: guildWeek ' + path;
@@ -174,8 +183,8 @@
       return Object.keys(v).join(',') === 't' && isSV(v.t) ? null : 'guildWeekPaid values';
     }
     if (seg[0] === 'guildEvents' || seg[0] === 'guildEventSign') { // SAT-ONLINE-080: guild events and who is going
-      const gid = seg[1], r = rkOf(gid, me), mo = r === 'm' || r === 'o', master = (data.get('guilds/' + gid) || {}).master === me;
-      if (seg.length === 2) return v === null && master ? null : 'PERMISSION_DENIED: ' + seg[0] + ' ' + path;
+      const gid = seg[1], mo = right(gid, 'ev'), master = (data.get('guilds/' + gid) || {}).master === me;
+      if (seg.length === 2) return v === null && master && gone(gid) ? null : 'PERMISSION_DENIED: ' + seg[0] + ' ' + path;
       if (seg[0] === 'guildEvents') {
         if (seg.length !== 3 || !mo || (old && v !== null)) return 'PERMISSION_DENIED: guildEvents write';
         if (v === null) return null;
@@ -213,7 +222,7 @@
     }
     if (['guildAllyAsk', 'guildAlly', 'guildAllyCd', 'guildDiplo'].includes(seg[0])) { // SAT-ONLINE-085: alliances and the diplomacy log
       const mo = (g) => ['m', 'o'].includes(rkOf(g, me)), now = Date.now();
-      if (seg.length === 2) return v === null && seg[0] !== 'guildAllyCd' && (data.get('guilds/' + seg[1]) || {}).master === me ? null : 'PERMISSION_DENIED: ' + seg[0] + ' ' + path;
+      if (seg.length === 2) return v === null && seg[0] !== 'guildAllyCd' && (data.get('guilds/' + seg[1]) || {}).master === me && (seg[0] !== 'guildDiplo' || gone(seg[1])) ? null : 'PERMISSION_DENIED: ' + seg[0] + ' ' + path;
       if (seg.length !== 3) return 'PERMISSION_DENIED: ' + seg[0] + ' ' + path;
       if (seg[0] === 'guildAllyAsk') {
         const to = seg[1], from = seg[2];
@@ -239,14 +248,14 @@
     if (seg[0] === 'guildRecruit') { // SAT-ONLINE-078: posted by the master or an officer, for all to read
       const gid = seg[1], r = rkOf(gid, me);
       if (seg.length !== 2) return 'PERMISSION_DENIED: guildRecruit ' + path;
-      if (!(r === 'm' || r === 'o' || (v === null && !data.has('guilds/' + gid)))) return 'PERMISSION_DENIED: guildRecruit write';
+      if (!(right(gid, 'inv') || (v === null && !data.has('guilds/' + gid)))) return 'PERMISSION_DENIED: guildRecruit write';
       if (v === null) return null;
       if (Object.keys(v).sort().join(',') !== 'by,m,msg,n,t') return 'guildRecruit fields';
       return typeof v.n === 'string' && v.n.length >= 2 && v.n.length <= 18 && typeof v.msg === 'string' && v.msg.length <= 120 && isInt(v.m, 0) && v.m <= 250 && v.by === me && isSV(v.t) && data.has('guilds/' + gid) ? null : 'guildRecruit values';
     }
     if (seg[0] === 'guildApply' || seg[0] === 'guildRej') { // SAT-ONLINE-078: applications and refusals
-      const gid = seg[1], r = rkOf(gid, me), mo = r === 'm' || r === 'o';
-      if (seg.length === 2) return v === null && (data.get('guilds/' + gid) || {}).master === me ? null : 'PERMISSION_DENIED: ' + seg[0] + ' ' + path;
+      const gid = seg[1], mo = right(gid, 'inv');
+      if (seg.length === 2) return v === null && (data.get('guilds/' + gid) || {}).master === me && gone(gid) ? null : 'PERMISSION_DENIED: ' + seg[0] + ' ' + path;
       if (seg.length !== 3) return 'PERMISSION_DENIED: ' + seg[0] + ' ' + path;
       const uid = seg[2];
       if (seg[0] === 'guildApply') {
@@ -263,14 +272,14 @@
     if (seg[0] === 'guildNote') { // SAT-ONLINE-076: the notice; the master and officers write the next version
       const gid = seg[1], r = rkOf(gid, me);
       if (seg.length !== 2) return 'PERMISSION_DENIED: guildNote ' + path;
-      if (v === null) return r === 'm' || r === 'o' || (data.get('guilds/' + gid) || {}).master === me ? null : 'PERMISSION_DENIED: guildNote remove';
-      if (r !== 'm' && r !== 'o') return 'PERMISSION_DENIED: guildNote write';
+      if (v === null) return right(gid, 'note') || ((data.get('guilds/' + gid) || {}).master === me && gone(gid)) ? null : 'PERMISSION_DENIED: guildNote remove';
+      if (!right(gid, 'note')) return 'PERMISSION_DENIED: guildNote write';
       if (Object.keys(v).sort().join(',') !== 'by,n,s,t,v') return 'guildNote fields';
       return typeof v.s === 'string' && v.s.length >= 1 && v.s.length <= 240 && v.by === me && typeof v.n === 'string' && v.n.length <= 24 && v.v === (old ? old.v + 1 : 1) && isSV(v.t) ? null : 'guildNote values';
     }
     if (seg[0] === 'guildMembers') {
       const gid = seg[1], master = (data.get('guilds/' + gid) || {}).master === me;
-      if (seg.length === 2) return v === null && master ? null : 'PERMISSION_DENIED: guildMembers ' + path;
+      if (seg.length === 2) return v === null && master && gone(gid) ? null : 'PERMISSION_DENIED: guildMembers ' + path;
       if (seg.length !== 3) return 'PERMISSION_DENIED: guildMembers ' + path;
       const uid = seg[2], masterAfter = (after('guilds/' + gid) || {}).master;
       let ok = false;
@@ -288,17 +297,32 @@
       if (!(typeof v.n === 'string' && v.n.length <= 24 && isInt(v.c, 0) && v.c <= 1e12)) return 'guildMembers n/c';
       return isSV(v.on) || (old && v.on === old.on) ? null : 'guildMembers on';
     }
+    if (seg[0] === 'guildTax') { // SAT-ONLINE-106: tax paid to the castle guild by a buyer from outside it; collected into the treasury once
+      const gid = seg[1];
+      if (seg.length === 2) return v === null && (data.get('guilds/' + gid) || {}).master === me && gone(gid) ? null : 'PERMISSION_DENIED: guildTax ' + path;
+      if (seg.length !== 3 || !/^x_[A-Za-z0-9_-]{1,80}$/.test(seg[2])) return 'PERMISSION_DENIED: guildTax ' + path;
+      const tx = data.get('world/satisfy/tax'), own = data.get('world/satisfy/own/castle');
+      if (v === null) { const b0 = data.get('guildBank/' + gid), b1 = after('guildBank/' + gid); return old && b1 && b1.tx === seg[2] && b1.in === (b0 ? b0.in : 0) + old.g ? null : 'PERMISSION_DENIED: guildTax collect'; }
+      if (old || v.by !== me || !tx || tx.g !== gid || !own || own.g !== gid || !(tx.r > 0) || data.has('guildMembers/' + gid + '/' + me)) return 'PERMISSION_DENIED: guildTax write';
+      return Object.keys(v).sort().join(',') === 'by,g,n,t' && isInt(v.g, 1) && v.g <= 100000 && typeof v.n === 'string' && v.n.length <= 24 && isSV(v.t) ? null : 'guildTax values';
+    }
     if (seg[0] === 'guildBank' || seg[0] === 'guildBuild' || seg[0] === 'guildLog') { // SAT-ONLINE-065: the treasury, the buildings, the log
-      const gid = seg[1], member = data.has('guildMembers/' + gid + '/' + me), master = (data.get('guilds/' + gid) || {}).master === me, rk = rkOf(gid, me), boss = rk === 'm' || rk === 'o';
-      if (seg.length === 2 && v === null) return master ? null : 'PERMISSION_DENIED: ' + seg[0] + ' remove';
+      const gid = seg[1], member = data.has('guildMembers/' + gid + '/' + me), master = (data.get('guilds/' + gid) || {}).master === me, boss = right(gid, 'spend');
+      if (seg.length === 2 && v === null) return master && gone(gid) ? null : 'PERMISSION_DENIED: ' + seg[0] + ' remove';
       if (seg[0] === 'guildBank') {
         if (seg.length !== 2 || !member) return 'PERMISSION_DENIED: guildBank ' + path;
-        if (Object.keys(v).sort().join(',') !== 'in,lb,lg,s,t' || !isInt(v.in, 0) || !isInt(v.s, 0) || !isInt(v.lg, 1) || v.lg > 1e6 || typeof v.lb !== 'string' || !isSV(v.t) || v.s > v.in) return 'guildBank fields';
+        if (!['in,lb,lg,s,t', 'b,in,lb,lg,s,t', 'in,lb,lg,s,t,tx', 'b,in,lb,lg,s,t,tx'].includes(Object.keys(v).sort().join(',')) || (v.b !== undefined && !/^[a-z0-9]{1,8}$/.test(v.b)) || ('tx' in v && !/^x_[A-Za-z0-9_-]{1,80}$/.test(v.tx)) || !isInt(v.in, 0) || !isInt(v.s, 0) || !isInt(v.lg, 1) || v.lg > 1e6 || typeof v.lb !== 'string' || !isSV(v.t) || v.s > v.in) return 'guildBank fields';
         const give = old ? v.s === old.s && v.in === old.in + v.lg && v.lb === me : v.s === 0 && v.in === v.lg && v.lb === me;
-        const spend = !!old && v.in === old.in && v.s > old.s && boss && ['forge', 'train', 'gold'].some((b) => { const n = after('guildBuild/' + gid + '/' + b), o = data.get('guildBuild/' + gid + '/' + b); return n != null && (o == null || n > o); }); // only with a building raised (Claude-B's review of #99)
+        const spend = !!old && v.in === old.in && v.s > old.s && boss && ['forge', 'train', 'gold', ...Object.keys(G_RS)].some((b) => { const n = after('guildBuild/' + gid + '/' + b), o = data.get('guildBuild/' + gid + '/' + b); return n != null && (o == null || n > o); }); // only with a building raised (Claude-B's review of #99)
         return give || spend ? null : 'PERMISSION_DENIED: guildBank stale or not yours';
       }
       if (seg[0] === 'guildBuild') {
+        if (seg.length === 3 && (after('guildBank/' + gid) || {}).b !== seg[2]) return 'PERMISSION_DENIED: guildBuild not the one the bank names'; // one node an update (Claude-B's review of #139)
+        const rs = G_RS[seg[2]]; // SAT-ONLINE-105: a research node, once, after the ones it needs, at its cost
+        if (seg.length === 3 && boss && rs) {
+          if (old != null || v !== 1 || !rs[1].every((q) => data.get('guildBuild/' + gid + '/' + q) === 1)) return 'PERMISSION_DENIED: guildBuild research';
+          return (after('guildBank/' + gid) || {}).s === (data.get('guildBank/' + gid) || {}).s + rs[0] ? null : 'PERMISSION_DENIED: guildBuild research cost';
+        }
         if (seg.length !== 3 || !boss || !['forge', 'train', 'gold'].includes(seg[2])) return 'PERMISSION_DENIED: guildBuild ' + path;
         if (!(isInt(v, 1) && v <= 3 && v === (old || 0) + 1)) return 'guildBuild level';
         const s0 = (data.get('guildBank/' + gid) || {}).s, s1 = (after('guildBank/' + gid) || {}).s;
@@ -311,7 +335,7 @@
     }
     if (seg[0] === 'guildChat') { // SAT-ONLINE-049: members write new lines as themselves; the master clears it all on disband
       const gid = seg[1], member = data.has('guildMembers/' + gid + '/' + me);
-      if (seg.length === 2) return v === null && (data.get('guilds/' + gid) || {}).master === me ? null : 'PERMISSION_DENIED: guildChat ' + path;
+      if (seg.length === 2) return v === null && (data.get('guilds/' + gid) || {}).master === me && gone(gid) ? null : 'PERMISSION_DENIED: guildChat ' + path;
       if (seg.length !== 3 || !member) return 'PERMISSION_DENIED: guildChat ' + path;
       if (v === null) return old && old.t < Date.now() - 86400000 ? null : 'PERMISSION_DENIED: guildChat remove';
       if (old || v.from !== me) return 'PERMISSION_DENIED: guildChat write';
@@ -320,25 +344,25 @@
     }
     if (seg[0] === 'guildVault' || seg[0] === 'guildVaultTaken') { // SAT-ONLINE-050
       const gid = seg[1], r = rkOf(gid, me), master = (data.get('guilds/' + gid) || {}).master === me;
-      if (seg.length === 2) return v === null && master ? null : 'PERMISSION_DENIED: ' + path;
+      if (seg.length === 2) return v === null && master && gone(gid) ? null : 'PERMISSION_DENIED: ' + path;
       if (seg.length !== 3) return 'PERMISSION_DENIED: ' + path;
-      const e = data.get('guildVault/' + gid + '/' + seg[2]);
+      const e = data.get('guildVault/' + gid + '/' + seg[2]), take = right(gid, 'take');
       if (seg[0] === 'guildVault') {
         if (!r) return 'PERMISSION_DENIED: guildVault member';
-        if (v === null) return old && (r === 'm' || r === 'o' || old.by === me) ? null : 'PERMISSION_DENIED: guildVault take';
+        if (v === null) return old && (take || old.by === me) ? null : 'PERMISSION_DENIED: guildVault take';
         if (old || v.by !== me || !/^v_[A-Za-z0-9_-]{1,80}$/.test(seg[2])) return 'PERMISSION_DENIED: guildVault put';
         for (const k in v) if (!['k', 'n', 'r', 'it', 'by', 'byN', 't'].includes(k)) return 'guildVault field ' + k;
         if (!(typeof v.k === 'string' && /^[a-z0-9_]{1,24}$/.test(v.k) && isInt(v.n, 1) && v.n <= 99999 && isInt(v.r, 0) && v.r <= 9 && (!('it' in v) || (typeof v.it === 'string' && v.it.length <= 600)))) return 'guildVault values';
         return isSV(v.t) ? null : 'guildVault t';
       }
       if (v === null) return old && old.t < Date.now() - 86400000 ? null : 'PERMISSION_DENIED: guildVaultTaken remove';
-      if (old || v.by !== me || !e || !(r === 'm' || r === 'o' || e.by === me)) return 'PERMISSION_DENIED: guildVaultTaken ' + path;
+      if (old || v.by !== me || !e || !(take || e.by === me)) return 'PERMISSION_DENIED: guildVaultTaken ' + path;
       return Object.keys(v).sort().join(',') === 'by,t' && isSV(v.t) ? null : 'guildVaultTaken fields';
     }
     // guildInv/{uid}/{gid}
     if (seg.length !== 3) return 'PERMISSION_DENIED: guildInv ' + path;
-    const uid = seg[1], gid = seg[2], r = rkOf(gid, me);
-    if (!((uid === me && v === null) || ((r === 'm' || r === 'o') && (v === null || !data.has('guildMembers/' + gid + '/' + uid))))) return 'PERMISSION_DENIED: guildInv write ' + path;
+    const uid = seg[1], gid = seg[2];
+    if (!((uid === me && v === null) || (right(gid, 'inv') && (v === null || !data.has('guildMembers/' + gid + '/' + uid))))) return 'PERMISSION_DENIED: guildInv write ' + path;
     if (v === null) return null;
     for (const k in v) if (!['n', 'by', 'byN', 't'].includes(k)) return 'guildInv field ' + k;
     if (!(typeof v.n === 'string' && v.n.length <= 18 && v.by === me && (!('byN' in v) || (typeof v.byN === 'string' && v.byN.length <= 24)))) return 'guildInv values';
@@ -401,6 +425,18 @@
   }
   // SAT-ONLINE-054: world/satisfy/legends/{k} {uid, n, t}: taken once, then only its owner changes or frees it
   function worldRules(seg, v) {
+    if (seg[2] === 'own') { // world/satisfy/own/{k}: who holds the castle and each territory. An online guild (g_) only by its own member; a canon guild (a raid on yours, a siege) only by the guild that held it (Claude-B's review of #140)
+      if (!user || seg.length !== 4 || seg[1] !== 'satisfy' || !/^[a-z0-9_]{1,24}$/.test(seg[3]) || !v) return 'PERMISSION_DENIED: own ' + seg.join('/');
+      const old = data.get(seg.join('/')), g = String(v.g);
+      if (!(/^g_/.test(g) ? data.has('guildMembers/' + g + '/' + user.uid) : (!old || data.has('guildMembers/' + old.g + '/' + user.uid)))) return 'PERMISSION_DENIED: own not your guild';
+      return Object.keys(v).sort().join(',') === 'c,g,h,n,t,uid' && /^[A-Za-z0-9_:.-]{1,48}$/.test(g) && typeof v.n === 'string' && v.n.length >= 1 && v.n.length <= 24 && /^#[0-9a-fA-F]{6}$/.test(v.c) && typeof v.h === 'string' && v.h.length <= 24 && v.uid === user.uid && isSV(v.t) ? null : 'own values';
+    }
+    if (seg[2] === 'tax') { // SAT-ONLINE-106: the castle city's tax, set by the master of the guild holding the castle, at most 10%, once an hour
+      if (!user || seg.length !== 3 || seg[1] !== 'satisfy' || v === null) return 'PERMISSION_DENIED: tax';
+      const own = data.get('world/satisfy/own/castle'), old = data.get('world/satisfy/tax');
+      if (!own || own.g !== v.g || (data.get('guilds/' + v.g) || {}).master !== user.uid || (old && old.g === v.g && !(old.t < Date.now() - 3600000))) return 'PERMISSION_DENIED: tax write';
+      return Object.keys(v).sort().join(',') === 'by,g,r,t' && /^g_[A-Za-z0-9]{1,128}$/.test(v.g) && isInt(v.r, 0) && v.r <= 10 && v.by === user.uid && isSV(v.t) ? null : 'tax values';
+    }
     if (!user || seg.length !== 4 || seg[1] !== 'satisfy' || seg[2] !== 'legends' || !/^[a-z0-9_]{1,24}$/.test(seg[3])) return 'PERMISSION_DENIED: ' + seg.join('/');
     const old = data.get(seg.join('/'));
     if (old && old.uid !== user.uid) return 'PERMISSION_DENIED: legend taken';
@@ -545,7 +581,7 @@
     if (seg[0] === 'world' && seg[2] === 'wb') return wbRules(seg, v);
     if (seg[0] === 'world') return worldRules(seg, v);
     if (seg[0] === 'ranks') return rankRules(seg, v);
-    if (['guilds', 'guildNames', 'guildMembers', 'guildInv', 'guildChat', 'guildVault', 'guildVaultTaken', 'guildBank', 'guildBuild', 'guildLog', 'guildNote', 'guildRecruit', 'guildApply', 'guildRej', 'guildEvents', 'guildEventSign', 'guildWeek', 'guildWeekPaid', 'guildAllyAsk', 'guildAlly', 'guildAllyCd', 'guildDiplo', 'guildWarAsk', 'guildWar', 'guildWarKill'].includes(seg[0])) return guildRules(seg, v);
+    if (['guilds', 'guildNames', 'guildMembers', 'guildInv', 'guildChat', 'guildVault', 'guildVaultTaken', 'guildBank', 'guildTax', 'guildBuild', 'guildLog', 'guildNote', 'guildRecruit', 'guildApply', 'guildRej', 'guildEvents', 'guildEventSign', 'guildWeek', 'guildWeekPaid', 'guildAllyAsk', 'guildAlly', 'guildAllyCd', 'guildDiplo', 'guildWarAsk', 'guildWar', 'guildWarKill'].includes(seg[0])) return guildRules(seg, v);
     if (seg[0] === 'drops' || seg[0] === 'dropClaims') return dropRules(seg, v);
     if (seg[0] === 'kills' || seg[0] === 'bounties' || seg[0] === 'bountyPaid') return bountyRules(seg, v);
     if (seg[0] === 'inbox') return inboxRules(seg, v, existing);
@@ -790,7 +826,7 @@
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
-      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat', 'lfg', 'guildRecruit', 'guildAlly', 'guildAllyCd', 'guildWar', 'guildWarKill', 'tradeRep'].includes(seg[0]) ? !!user : seg[0] === 'tradeLog' ? !!user && seg[1] === user.uid : seg[0] === 'guildAllyAsk' ? !!user && seg.length === 3 && ['m', 'o'].includes(rkOf(seg[2], user.uid)) : seg[0] === 'guildWeekPaid' ? !!user && seg.length === 4 && seg[3] === user.uid : (seg[0] === 'guildApply' || seg[0] === 'guildRej') ? !!user && (seg.length === 3 ? seg[2] === user.uid : ['m', 'o'].includes(rkOf(seg[1], user.uid))) : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : ['guildBank', 'guildBuild', 'guildLog', 'guildNote'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts', 'friends', 'friendReq', 'whisper', 'admins'].includes(seg[0]) && user && seg[1] === user.uid || ['crashes', 'reports', 'reportDone', 'balance', 'bugs', 'bugTriage'].includes(seg[0]) && !!user && data.get('admins/' + user.uid) === true || ['appeals', 'appealDone'].includes(seg[0]) && !!user && (data.get('admins/' + user.uid) === true || (seg.length === 2 && seg[1] === user.uid)) || seg[0] === 'mutes' && !!user || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
+      const readable = ['profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat', 'lfg', 'guildRecruit', 'guildAlly', 'guildAllyCd', 'guildWar', 'guildWarKill', 'tradeRep'].includes(seg[0]) ? !!user : seg[0] === 'tradeLog' ? !!user && seg[1] === user.uid : seg[0] === 'guildAllyAsk' ? !!user && seg.length === 3 && ['m', 'o'].includes(rkOf(seg[2], user.uid)) : seg[0] === 'guildWeekPaid' ? !!user && seg.length === 4 && seg[3] === user.uid : (seg[0] === 'guildApply' || seg[0] === 'guildRej') ? !!user && (seg.length === 3 ? seg[2] === user.uid : rightOf(seg[1], user.uid, 'inv')) : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : ['guildBank', 'guildBuild', 'guildLog', 'guildNote', 'guildTax'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts', 'friends', 'friendReq', 'whisper', 'admins'].includes(seg[0]) && user && seg[1] === user.uid || ['crashes', 'reports', 'reportDone', 'balance', 'bugs', 'bugTriage'].includes(seg[0]) && !!user && data.get('admins/' + user.uid) === true || ['appeals', 'appealDone'].includes(seg[0]) && !!user && (data.get('admins/' + user.uid) === true || (seg.length === 2 && seg[1] === user.uid)) || seg[0] === 'mutes' && !!user || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       if (data.has(r.path)) return Promise.resolve(snap(r.path, data.get(r.path)));
@@ -806,8 +842,8 @@
       if (r.path !== '.info/connected') {
         const seg = r.path.split('/');
         const tm = (seg[0] === 'tradeSides' && seg.length === 3) || (seg[0] === 'tradeDone' && seg.length === 2) ? tradeMeta(seg[1]) : null;
-        const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : ['guildVault', 'guildBank', 'guildBuild', 'guildLog', 'guildNote', 'guildEvents', 'guildEventSign', 'guildDiplo'].includes(seg[0]) && seg.length === 2 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : (seg[0] === 'guildAlly' || seg[0] === 'guildWar') && seg.length === 2 ? !!user : seg[0] === 'guildWarKill' && seg.length === 3 ? !!user : (seg[0] === 'guildAllyAsk' || seg[0] === 'guildWarAsk') && seg.length === 2 ? !!user && ['m', 'o'].includes(rkOf(seg[1], user.uid)) : seg[0] === 'guildWeek' && seg.length === 3 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildApply' && seg.length === 2 ? !!user && ['m', 'o'].includes(rkOf(seg[1], user.uid)) : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
-        const ok = gl !== null ? gl : r.path === 'bounties' || r.path === 'lfg' || r.path === 'announce' || seg[0] === 'mutes' && seg.length === 2 ? !!user : seg[0] === 'appealDone' && seg.length === 2 ? !!user && seg[1] === user.uid : seg[0] === 'sessions' || seg[0] === 'lockouts' || seg[0] === 'friends' || seg[0] === 'friendReq' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb') && !!user;
+        const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : ['guildVault', 'guildBank', 'guildTax', 'guildBuild', 'guildLog', 'guildNote', 'guildEvents', 'guildEventSign', 'guildDiplo'].includes(seg[0]) && seg.length === 2 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : (seg[0] === 'guildAlly' || seg[0] === 'guildWar') && seg.length === 2 ? !!user : seg[0] === 'guildWarKill' && seg.length === 3 ? !!user : (seg[0] === 'guildAllyAsk' || seg[0] === 'guildWarAsk') && seg.length === 2 ? !!user && ['m', 'o'].includes(rkOf(seg[1], user.uid)) : seg[0] === 'guildWeek' && seg.length === 3 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildApply' && seg.length === 2 ? !!user && rightOf(seg[1], user.uid, 'inv') : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
+        const ok = gl !== null ? gl : r.path === 'bounties' || r.path === 'lfg' || r.path === 'announce' || r.path === 'world/satisfy/tax' || seg[0] === 'mutes' && seg.length === 2 ? !!user : seg[0] === 'appealDone' && seg.length === 2 ? !!user && seg[1] === user.uid : seg[0] === 'sessions' || seg[0] === 'lockouts' || seg[0] === 'friends' || seg[0] === 'friendReq' ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);
