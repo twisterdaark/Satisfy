@@ -7,6 +7,23 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22keys', ver: '1.86', d: '2026-10-22',
+      ar: ["الإيرل آدن كان بيقول كود زي \"ad202610222_w\" وانت شغال في مهمة ملكية. دلوقتي بيقول اسم المهمة ووصلت لفين فيها، وفيه فحص لكل مهام اللعبة إن ليها جملها بالعربي والإنجليزي",
+        "كل مهمة في لوحة المهام جنبها زرار 📍 تختار بيه تتبع أنهي مهمة بالظبط. والدوس على المهمة نفسها بيفتح تفاصيلها وجايزتها وزرار التتبع وزرار سيب المهمة",
+        "\"الأسطورة لا تموت\": أي كلاس أسطوري لما ياخد ضربة كانت هتقتله، صحته بتفضل 1 ومفيش حاجة بتأذيه 3 ثواني، بدايرة دهبي حواليه. مرة كل دقيقتين، وبتظهر في السكيلات السلبية في شاشة الحالة",
+        "أغاني البارد بقى ليها نوت موسيقية طايرة بلون الأغنية، ودواير صوت حوالين اللي بيغني، ونغمات هادية طول ما الأغنية شغالة، ولما تخلّص الأغنية بنجاح بتطلع نوت كتير ونغمة",
+        "كل السكيلات اتراجعت: اللي مكانش ليه إيفكت لما تستخدمه بقى ليه (الحربة، الطلقة، السلسلة، العاصفة، اللعنة، الظل، الانفجار، الامتصاص، الهيكل، السرقة، الفخ وغيرهم)، وكل سكيل بقى ليه صوت من نوعه بدل الصوت العادي",
+        "شاشة التحكم فيها كل الزراير اللي تتغير: المهارات والآيتمز، والحركة والقتال، والنوافذ، والأونلاين. ولو الزرار مستخدم بيقولك مستخدم لإيه ويبدّلهم",
+        "تقدر تحط مهارة أو أي أمر على زراير الماوس الجانبية (M4 وM5) أو زرار العجلة (M3)، ومبيرجعش الصفحة لورا",
+        "تتبع وحش عايش جوه كهف أو دانجن من الموسوعة كان بيطلع خطأ. اتصلح، والسهم بيوديك لمدخل الكهف"],
+      en: ["Earl Aden said a code like \"ad202610222_w\" while you were on a royal task. He now says the task's name and how far along you are, and every quest in the game is checked for its lines in both languages",
+        "Each quest in the quest list has a 📍 button to pick exactly which one to track. Clicking the quest itself opens its details and reward, with track and abandon buttons",
+        "\"A Legend Does Not Die\": a legendary class hit by a blow that would kill stays at 1 HP and takes no harm for 3 seconds, ringed in gold. Once every two minutes, listed with the passives in the status window",
+        "Bard songs now have floating notes in the song's colour, rings of sound around the singer, soft notes while the song plays, and a burst of notes and a chord when a song succeeds",
+        "Every skill was reviewed: the ones with no effect of their own on use now have one (skewer, sniper shot, chain, storm, rot, shadow, explosion, drain, skeleton, steal, trap and more), and each skill has a sound of its kind instead of the plain one",
+        "The controls screen lists every key that can change: skills and items, movement and combat, windows, and online. A key already in use says what it is used for, and the two swap",
+        "A skill or any action can go on the mouse side buttons (M4 and M5) or the wheel button (M3), and they no longer send the page back",
+        "Tracking a monster that lives in a cave or dungeon from the encyclopedia raised an error. Fixed, and the arrow leads to the cave's entrance"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
