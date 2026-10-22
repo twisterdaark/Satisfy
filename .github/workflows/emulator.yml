@@ -1,14 +1,15 @@
-# SAT-ONLINE-116 (plan U021): the database rules on the real Realtime Database emulator, with three accounts, on every pull
-# request that changes the rules or these tests (tests/emulator/rules.emu.cjs). The emulator and its test library are
+# SAT-ONLINE-116 (plan U021): the database rules on the real Realtime Database emulator, with three accounts, and the game's
+# own online code between two clients on the real SDK and the Auth emulator, on every pull request that changes the rules,
+# the online code or these tests (tests/emulator/). The emulator and its test library are
 # installed here only (--no-save), so the game's package.json stays as it is. A failed check shows its failed tests as
 # annotations on the pull request.
 name: rules on the emulator
 on:
   pull_request:
-    paths: ['backend/**', 'tests/emulator/**', '.github/workflows/emulator.yml', 'firebase.json']
+    paths: ['backend/**', 'src/net/**', 'tests/emulator/**', '.github/workflows/emulator.yml', 'firebase.json']
   push:
     branches: [main]
-    paths: ['backend/**', 'tests/emulator/**', '.github/workflows/emulator.yml', 'firebase.json']
+    paths: ['backend/**', 'src/net/**', 'tests/emulator/**', '.github/workflows/emulator.yml', 'firebase.json']
 permissions:
   contents: read
 concurrency:
@@ -28,10 +29,10 @@ jobs:
           distribution: temurin
           java-version: 21
       - run: npm install --no-audit --no-fund --no-save --legacy-peer-deps firebase-tools@14 @firebase/rules-unit-testing@4 firebase@11
-      - name: rules with three accounts
+      - name: rules with three accounts; two clients
         run: |
           set -o pipefail
-          npx firebase emulators:exec --only database --project demo-satisfy "node --test tests/emulator/rules.emu.cjs" 2>&1 | tee test.log || {
+          npx firebase emulators:exec --only database,auth --project demo-satisfy "node --test --test-concurrency=1 tests/emulator/rules.emu.cjs tests/emulator/client.emu.cjs" 2>&1 | tee test.log || {
             grep -E "^not ok|^\s+error:|^\s+(Error|FirebaseError)|PERMISSION_DENIED|Expected request to (fail|succeed)" test.log | head -30 | sed 's/^/::error::/'
             exit 1
           }
