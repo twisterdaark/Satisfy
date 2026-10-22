@@ -24,6 +24,8 @@ const WORLD = { id: 'satisfy', tile: 16, w: 724, h: 144 };
 let env;
 const clients = [];
 
+// a read with the rules off (withSecurityRulesDisabled resolves with nothing, so the value comes out through a variable)
+async function adminRead(p) { let v; await env.withSecurityRulesDisabled(async (ctx) => { v = (await ctx.database().ref(p).once('value')).val(); }); return v; }
 async function until(fn, what, ms = 15000) {
   const end = Date.now() + ms;
   for (;;) { if (await fn()) return; if (Date.now() > end) throw new Error('timed out: ' + what); await new Promise((r) => setTimeout(r, 100)); }
@@ -66,8 +68,8 @@ test('two clients on the real SDK and rules: presence, a move, a dropped connect
   const a = await player('Ahmed', 2000), b = await player('Bassem', 2030);
   a.publish(true); b.publish(true);
   await until(() => a.sees(b) && b.sees(a), 'each sees the other').catch(async (e) => {
-    const pres = await env.withSecurityRulesDisabled(async (ctx) => (await ctx.database().ref('presence/satisfy/main').once('value')).val());
-    throw new Error(e.message + ' · errors A ' + JSON.stringify(a.errs) + ' B ' + JSON.stringify(b.errs) + ' · stored ' + JSON.stringify(pres).slice(0, 600) + ' · events B ' + JSON.stringify(b.events.map((x) => x.type)).slice(0, 200));
+    const pres = await adminRead('presence/satisfy/main');
+    throw new Error(e.message + ' · errors A ' + JSON.stringify(a.errs) + ' B ' + JSON.stringify(b.errs) + ' · stored ' + String(JSON.stringify(pres)).slice(0, 600) + ' · events B ' + JSON.stringify(b.events.map((x) => x.type)).slice(0, 200));
   });
   assert.equal(b.sees(a).handle, 'Ahmed');
 
@@ -85,6 +87,6 @@ test('two clients on the real SDK and rules: presence, a move, a dropped connect
   // a party invitation through the inbox, from a session the other side knows
   a.pres.send('party.invite', { to: b.uid, party: 'p_' + a.uid });
   await until(() => b.events.some((e) => e.type === 'message' && e.env.type === 'party.invite' && e.env.payload.to === b.uid), 'the invitation arrives');
-  const inbox = await env.withSecurityRulesDisabled(async (ctx) => (await ctx.database().ref('inbox/' + b.uid).once('value')).val());
+  const inbox = await adminRead('inbox/' + b.uid);
   assert.equal(inbox, null, 'read and removed by its recipient');
 });
