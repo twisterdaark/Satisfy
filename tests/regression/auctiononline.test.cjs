@@ -129,6 +129,25 @@ test('online auction: one board; one buyer of two gets it; the seller is told an
     await until([a], () => /did not sell in 14 days and came back/.test(window.__toastSeen));
     await until([a, b], () => Object.keys(window.__GAU.on).length === 0);
     assert.equal(await a.eval(() => window.__G.S.mats.mith), 1500);
+
+    // Claude-B's review: a slot whose sale isn't collected yet is still taken. The next listing goes to the next slot, so
+    // its buyer isn't refused as "already sold" (auctionPaid for that slot is still there)
+    await a.eval(() => document.querySelector('#auW [data-autab="list"]').click());
+    await list(a, 'mith', 1, 100);
+    await until([a, b], () => Object.keys(window.__GAU.on).length === 1);
+    const s0 = await a.eval(() => Object.keys(window.__GAU.on)[0]);
+    await until([b], (id) => !!document.querySelector('#auL [data-aul="' + id + '"]'), 10000, s0);
+    await b.eval((id) => document.querySelector('#auL [data-aul="' + id + '"]').click(), s0);
+    await until([a], (id) => id in window.__GAU.paid && Object.keys(window.__GAU.on).length === 0, 10000, s0);
+    await list(a, 'mith', 1, 100);
+    await until([a, c], () => Object.keys(window.__GAU.on).length === 1);
+    const s1 = await a.eval(() => Object.keys(window.__GAU.on)[0]);
+    assert.notEqual(s1, s0, 'not the slot waiting to be collected: ' + s0);
+    await until([c], (id) => !!document.querySelector('#auL [data-aul="' + id + '"]'), 10000, s1);
+    const c0 = await c.eval(() => window.__G.S.mats.mith);
+    await c.eval((id) => document.querySelector('#auL [data-aul="' + id + '"]').click(), s1);
+    await until([c], (n) => window.__G.S.mats.mith === n + 1, 10000, c0);
+    await until([a], (id) => id in window.__GAU.paid, 10000, s1);
     for (const g of [a, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/auction/.test(x))), []);
     for (const g of [a, b, c]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }

@@ -1940,9 +1940,9 @@ function auWS(){const A=WS.auction||(WS.auction={list:[],paid:{},npcAt:0,id:0});
    (auctionPaid/{seller}/{lid} {g, by, bn, it, q, t}); the rules take it only for a listing still there and at its price, so
    two buyers can't both get it. The seller is told of each sale while playing and collects the gold (less the 5% fee) at
    the auction house. The merchants' listings, and listings made offline, stay on the device as before. */
-Object.assign(STR.ar,{auMax:'المزاد بياخد لحد {q} من الحاجة الواحدة ولحد {g} دهب',auExpired:'{q}× {it} بتوعك مااتباعوش في 14 يوم ورجعولك',auSoldOn:'{b} اشترى {q}× {it} بتوعك بـ {g} دهب. استلمهم من المزاد',auOnFail:'المزاد مش متاح دلوقتي، جرّب تاني'});
-Object.assign(STR.en,{auMax:'The auction house takes up to {q} of a kind and up to {g} gold',auExpired:'Your {q}× {it} did not sell in 14 days and came back to you',auSoldOn:'{b} bought your {q}× {it} for {g} gold. Collect it at the auction house',auOnFail:'The auction house is not answering; try again'});
-var AUON={},AUPD={},auOnOff=null,auPdSeen=null,auBusy=0,auBackSeen=new Set();
+Object.assign(STR.ar,{auMax:'المزاد بياخد لحد {q} من الحاجة الواحدة ولحد {g} دهب',auPdFull:'أماكنك الـ8 محجوزة لحد ما تستلم فلوس اللي اتباع: استلمها الأول',auExpired:'{q}× {it} بتوعك مااتباعوش في 14 يوم ورجعولك',auSoldOn:'{b} اشترى {q}× {it} بتوعك بـ {g} دهب. استلمهم من المزاد',auOnFail:'المزاد مش متاح دلوقتي، جرّب تاني'});
+Object.assign(STR.en,{auMax:'The auction house takes up to {q} of a kind and up to {g} gold',auPdFull:'Your eight places are taken until you collect what sold: collect it first',auExpired:'Your {q}× {it} did not sell in 14 days and came back to you',auSoldOn:'{b} bought your {q}× {it} for {g} gold. Collect it at the auction house',auOnFail:'The auction house is not answering; try again'});
+var AUON={},AUPD={},auOnOff=null,auPdSeen=null,auOnSeen=false,auBusy=0,auBackSeen=new Set();
 // what the rules take (Claude-B, #129): eight listings a seller (slots a_{uid}_0 to _7), up to 999 of a kind for up to a
 // billion gold, bought for 14 days; after that the seller's game takes it back
 const AUQMAX=999,AUGMAX=1e9,AUDAYS=14*864e5;
@@ -1950,7 +1950,7 @@ function aucOn(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&S&&
 function auSt(){return aucOn()&&Satisfy.firebase.auctionStore?Satisfy.firebase.auctionStore(FB):null;}
 // the board and your sales, watched from the first visit to the auction house in a session
 function auWatch(){const st=auSt();if(!st||auOnOff)return;const uid=NET.uid;
- const a=st.watch(v=>{const o={};for(const k in (v||{})){const e=v[k];if(/^a_[A-Za-z0-9_-]{1,60}$/.test(k)&&e&&typeof e==='object'&&AUK.includes(e.it)&&+e.q>0&&+e.price>0)o[k]={id:k,on:1,by:e.by,pid:e.by===uid?pidOf():'u:'+e.by,n:Satisfy.chat.clean(e.n,24)||'?',it:e.it,q:+e.q|0,price:+e.price|0,t:+e.t||0};}AUON=o;renderAu();});
+ const a=st.watch(v=>{const o={};for(const k in (v||{})){const e=v[k];if(/^a_[A-Za-z0-9_-]{1,60}$/.test(k)&&e&&typeof e==='object'&&AUK.includes(e.it)&&+e.q>0&&+e.price>0)o[k]={id:k,on:1,by:e.by,pid:e.by===uid?pidOf():'u:'+e.by,n:Satisfy.chat.clean(e.n,24)||'?',it:e.it,q:+e.q|0,price:+e.price|0,t:+e.t||0};}AUON=o;auOnSeen=true;renderAu();});
  const b=st.watchPaid(uid,v=>{const o={};for(const k in (v||{})){const e=v[k];if(e&&typeof e==='object'&&+e.g>0&&AUK.includes(e.it))o[k]={g:+e.g|0,bn:Satisfy.chat.clean(e.bn,24)||'?',it:e.it,q:+e.q|0};}
   if(auPdSeen)for(const k in o)if(!auPdSeen.has(k)){toast(t('auSoldOn',{b:o[k].bn,q:o[k].q,it:t(o[k].it),g:Math.round(o[k].g*(1-AUFEE))}),'good');SFX.coin();}
   auPdSeen=new Set(Object.keys(o));AUPD=o;renderAu();});
@@ -1966,8 +1966,11 @@ function auMineN(){return auAll().filter(l=>l.pid===pidOf()).length;}
 function auBuyOn(l,done){const st=auSt();if(!st||auBusy)return;if(S.gold<l.price){SFX.deny();toast(t('noGold'),'warn');return;}auBusy=1;
  st.buy(l.id,{seller:l.by,g:l.price,by:NET.uid,bn:String(netId||S.look.n||'?').slice(0,24),it:l.it,q:l.q}).then(()=>{auBusy=0;S.gold-=l.price;auGive(l.it,l.q);delete AUON[l.id];SFX.coin();hudDirty=true;save(true);done(true);},
   ()=>{auBusy=0;toast(t('auGone'),'warn');done(false);});}
+// a slot is taken while it is on the board and while its sale isn't collected (auctionPaid/{uid}/{slot} must be empty for
+// the next buyer: Claude-B's review of #129), so the slot is picked only once both have been read
 function auListOn(k,q,price){const st=auSt();if(!st||auBusy)return false;if(q>AUQMAX||price>AUGMAX){SFX.deny();toast(t('auMax',{q:AUQMAX,g:AUGMAX.toLocaleString('en')}),'warn');return false;}
- const used=new Set(Object.keys(AUON)),slot=[0,1,2,3,4,5,6,7].find(i=>!used.has('a_'+NET.uid+'_'+i));if(slot==null){SFX.deny();toast(t('auFull'),'warn');return false;}
+ if(!auOnSeen||!auPdSeen){auWatch();SFX.deny();toast(t('auOnFail'),'warn');return false;}
+ const used=new Set(Object.keys(AUON).concat(Object.keys(AUPD))),slot=[0,1,2,3,4,5,6,7].find(i=>!used.has('a_'+NET.uid+'_'+i));if(slot==null){SFX.deny();toast(t(Object.keys(AUPD).length?'auPdFull':'auFull'),'warn');return false;}
  auBusy=1;const lid='a_'+NET.uid+'_'+slot;auTake(k,q);hudDirty=true;save(true);
  st.list(lid,{by:NET.uid,n:String(netId||S.look.n||'?').slice(0,24),it:k,q,price}).then(()=>{auBusy=0;SFX.coin();toast(t('auListed',{q,it:t(k),g:price}),'good');renderAu();},
   ()=>{auBusy=0;auGive(k,q);hudDirty=true;save(true);toast(t('auOnFail'),'warn');renderAu();});return true;}
