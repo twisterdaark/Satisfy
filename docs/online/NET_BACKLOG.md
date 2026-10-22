@@ -172,7 +172,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U318 | Map testing | ✅ | `regression/towns`, `worldparity`, `boot`; every door reachable |
 | U319 | Command validation | ✅ | Every message is checked against the contract and dropped when invalid, oversized, replayed or too frequent (`src/net/contracts.js`, `unit/contracts`, `unit/presence`) |
 | U320 | Data catalogs | ✅ | `data/*.js` with `tests/content/data` |
-| U321 | Audio mixer | 🟡 | One volume; no separate channels |
+| U321 | Audio mixer | ✅ | SAT-ONLINE-101: "Sound" in the pause menu: game sounds, music, world sounds (monsters' voices and swings, fireworks) and other players (their swings, deaths, news), each with its own volume and off, remembered on the device (`regression/mixer`) |
 | U322 | Accessibility QA | 🟡 | Keyboard and touch for every menu (B, v1.01) |
 | U323 | Replay recorder | ❌ | |
 | U324 | Exception boundary | 🟡 | A failing listener can't stop presence; network errors show in the badge |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 50 · 🟡 37 · ⏳ 6 · ❌ 11 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 51 · 🟡 36 · ⏳ 6 · ❌ 11 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
