@@ -33,6 +33,9 @@ async function signIn(ctx, k, uid, name, look) {
   await keepToasts(g);
   return g;
 }
+// a member's count goes out at most every 5 s of its own game clock, which only moves when the test steps it: step
+// each page past that (how many waiting loops fit in real time depends on the machine, and slower frames made it fall short)
+const sendWait = async (...games) => { for (const g of games) await g.step(320); };
 const kills = (g, type, n) => g.eval(([ty, k]) => { for (let i = 0; i < k; i++) window.__GWK.kill(ty); }, [type, n]);
 const GID = 'g_gWkA1';
 const write = (g, path, v) => g.eval(async ([p, x]) => { const F = window.__GLD.fb(), D = F.m.database; if (x && x.t === 'SV') x.t = D.serverTimestamp(); try { await D.update(D.ref(F.db), { [p]: x }); return 'ok'; } catch (e) { return 'no'; } }, [path, v]);
@@ -64,10 +67,10 @@ test('guild weekly goal: kills add up, capped and level-gated; tier reached, tol
     assert.equal(await a.eval(() => window.__GWK.mine), 0, 'far below level 60');
     await a.eval(() => { window.__G.S.lv = 1; });
     await kills(a, 'goblin', 200); await kills(b, 'goblin', 99);
-    await settle(a, b);
+    await settle(a, b); await sendWait(a, b);
     await until([a, b], () => window.__GWK.total === 299, 15000);
     assert.equal(await a.eval(() => window.__GWK.tier), 0);
-    await kills(b, 'goblin', 1); await settle(a, b);
+    await kills(b, 'goblin', 1); await settle(a, b); await sendWait(a, b);
     await until([a, b], () => window.__GWK.tier === 1, 15000); // both pages step: B's count goes out with its own clock
     await settle(a, b);
     for (const g of [a, b]) assert.match(await toasts(g), /The guild reached tier 1 of the weekly goal! Take your reward in G/);
@@ -86,7 +89,7 @@ test('guild weekly goal: kills add up, capped and level-gated; tier reached, tol
     // B's count stops at 1,500; the rules refuse more, a lower count, and C outside the guild
     await kills(b, 'goblin', 2000);
     assert.equal(await b.eval(() => window.__GWK.mine), 1500);
-    await settle(a, b);
+    await settle(a, b); await sendWait(a, b);
     await until([a, b], () => window.__GWK.total === 200 + 1500, 15000);
     assert.equal(await write(b, 'guildWeek/' + GID + '/' + wk + '/gWkB2', { n: 'Bassem', k: 1501, t: 'SV' }), 'no', 'past the cap');
     assert.equal(await write(a, 'guildWeek/' + GID + '/' + wk + '/gWkA1', { n: 'Ahmed', k: 5, t: 'SV' }), 'no', 'never down');

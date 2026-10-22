@@ -45,6 +45,7 @@ test('online: a National Competition in three stages; scores in the database; ea
     for (const g of [a, b]) await g.eval(() => document.querySelector('#natbar [data-nat=join]').click());
     await until([a, b], () => window.__GNC.here() && window.__G.mode === 'play', 10000);
     assert.match(await bar(a), /Leave/);
+    await a.step(190); // the first ones come 3 s of the game's clock after joining, which moves only when the test steps it
     await until([a], () => window.__G.mons().some((m) => m.nat && !m.dead), 10000); // the hunting stage sends monsters to the grounds
 
     // stage 1: A kills three monsters; B's kills would count too, but B hunts nothing

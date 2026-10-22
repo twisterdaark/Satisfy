@@ -56,6 +56,9 @@ test('the leader leaves without a word: the two members elect one leader and sta
     const expect = [...uids].sort()[0];
 
     await a.close(); // gone (no reload)
+    // the election waits LEAD_MS (15 s) of each page's own clock, which moves only when the test steps it: step both past
+    // it in turns (how many waiting loops fit in 40 s of real time depends on the machine's load)
+    for (let i = 0; i < 10; i++) { await b.step(100); await c.step(100); await b.page.waitForTimeout(20); }
     await until([b, c], () => { const p = Satisfy.local.net().party; return !!p.id && p.leader !== null && p.members.length === 2 && p.members.some((m) => m.leader); }, 40000);
     const pb = await party(b), pc = await party(c);
     assert.equal(pb.id, pc.id, 'one party');
