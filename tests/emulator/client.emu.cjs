@@ -16,7 +16,7 @@ const PROJECT = 'demo-satisfy', NS = PROJECT + '-default-rtdb';
 // the emulators' addresses as emulators:exec gives them, with localhost as 127.0.0.1 (Node may try ::1 first, where they don't listen)
 const v4 = (h) => String(h).replace(/^localhost(?=:)/, '127.0.0.1');
 const DBH = v4(process.env.FIREBASE_DATABASE_EMULATOR_HOST || '127.0.0.1:9000'), AUTHH = v4(process.env.FIREBASE_AUTH_EMULATOR_HOST || '127.0.0.1:9099');
-const SN = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/firebase-config.js', 'src/net/firebase.js');
+const SN = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/guild.js', 'src/net/firebase-config.js', 'src/net/firebase.js');
 const WORLD = { id: 'satisfy', tile: 16, w: 724, h: 144 };
 const DBURL = 'http://' + DBH + '?ns=' + NS;
 const clients = [];
@@ -92,4 +92,36 @@ test('two clients on the real SDK and rules: presence, a move, a dropped connect
   await until(async () => (await fbDb.get(fbDb.ref(b.db, 'inbox/' + b.uid))).val() === null, 'the inbox is empty again');
   const inbox = (await fbDb.get(fbDb.ref(b.db, 'inbox/' + b.uid))).val();
   assert.equal(inbox, null, 'read and removed by its recipient');
+});
+
+test('a guild on the real SDK and rules: found, invite, join, deposit and take once, a member can not take, leave, disband', { timeout: 90000 }, async () => {
+  const a = clients.find((c) => c.name === 'Ahmed') || await player('Ahmed', 2000);
+  const b = clients.find((c) => c.name === 'Bassem') || await player('Bassem', 2030);
+  const mk = (c) => {
+    const store = SN.firebase.guildStore({ m: { database: fbDb }, db: c.db });
+    const g = SN.guild.create({ store, uid: c.uid, handle: () => c.name, now: () => Date.now(), serverNow: () => Date.now() });
+    g.start(null);
+    return g;
+  };
+  const ga = mk(a), gb = mk(b);
+  const gid = await ga.found('Dragons ' + String(Date.now() % 1e6), SN.guild.C.COLORS[0]);
+  await until(() => ga.state().rank === 'm' && ga.state().guild, 'A is the master');
+  await ga.invite(b.uid, 'Bassem');
+  await until(() => gb.state().invites.some((x) => x.gid === gid), 'B sees the invitation');
+  await gb.accept(gid);
+  await until(() => gb.state().rank === 'r' && ga.state().members[b.uid], 'B is a member, and A sees it');
+  // a deposit by A; B, a member, can't take it; A takes it once
+  const vid = await ga.deposit({ k: 'ore', n: 3, r: 0 });
+  await until(() => !!gb.vault()[vid], 'B sees the deposit');
+  await assert.rejects(gb.withdraw(vid), /rank/, 'a member does not take what is not its own');
+  await assert.rejects(fbDb.remove(fbDb.ref(b.db, 'guildVault/' + gid + '/' + vid)), /PERMISSION/i, 'nor by writing');
+  const got = await ga.withdraw(vid);
+  assert.equal(got.k, 'ore');
+  await assert.rejects(ga.withdraw(vid), /./, 'once');
+  // B leaves; A disbands, and nothing of the guild is left
+  await gb.leave();
+  await until(() => !ga.state().members[b.uid], 'A sees B go');
+  await ga.disband();
+  await until(async () => (await fbDb.get(fbDb.ref(b.db, 'guilds/' + gid))).val() === null, 'the guild is gone');
+  ga.stop(); gb.stop();
 });
