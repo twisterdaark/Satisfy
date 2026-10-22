@@ -7,6 +7,12 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22tax', ver: '1.87', d: '2026-10-22',
+      ar: ["ضريبة مدينة ريدان: قائد الجيلد اللي ماسك قلعة ريدان يحط ضريبة لحد 10% على اللي بيتباع في ريدان (G ← \"City tax\")، وتتغير مرة كل ساعة. اللي من برّه الجيلد بيدفعها زيادة على السعر، وأي عضو يجمعها في خزينة الجيلد (\"Collect the taxes\"). أعضاء الجيلد مبيدفعوش"],
+      en: ["Reidan city tax: the master of the guild holding Reidan Castle sets a tax of up to 10% on what Reidan's people sell (G → \"City tax\"), changed once an hour. Buyers from outside the guild pay it on top of the price, and any member collects it into the guild treasury (\"Collect the taxes\"). The guild's own members pay none"] },
+    { v: '2026-10-22research', ver: '1.86', d: '2026-10-22',
+      ar: ["شجرة بحث للجيلد (G ← المباني ← \"Research tree\"): 7 أبحاث بتتدفع من خزينة الجيلد مرة واحدة وبالترتيب، وكل بحث بيدي كل الأعضاء ميزة: خبرة، دهب، جودة صناعة، صحة، وفي الآخر \"إرث الجيلد\" بيدي شوية من التلاتة"],
+      en: ["A research tree for guilds (G → Buildings → \"Research tree\"): 7 studies paid from the guild treasury, once and in order, each a bonus for every member: experience, gold, crafting quality, health, and at the top \"Guild Legacy\" with a bit of all three"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
