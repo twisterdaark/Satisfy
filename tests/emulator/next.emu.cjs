@@ -173,3 +173,24 @@ test('#126: guild trophies: given by the owner for a season, read by everyone', 
   await yes(db(M).ref('guildTrophy/' + G + '/s2026-10').set(tro(M)), 'the owner gives it');
   await yes(db(C).ref('guildTrophy/' + G).once('value'), 'everyone reads it');
 });
+
+test('#132: crafting commissions: answered once by another crafter with the recipe asked and the fee', async () => {
+  const O = 'c_' + A + '_1';
+  await yes(db(A).ref('craftOrders/' + O).set({ by: A, n: 'Ahmed', rc: 'ironSword', fee: 800, t: SV }), 'A asks for an iron sword');
+  const answer = (who, id, fee) => db(who).ref().update({ ['craftOrders/' + O]: null, ['craftDone/' + A + '/' + O]: { it: '{"id":"' + id + '"}', id, by: who, bn: 'Smith', fee, t: SV }, ['craftPaid/' + who + '/' + O]: { g: fee, t: SV } });
+  await no(answer(B, 'woodBow', 800), 'the recipe asked, not another');
+  await no(answer(B, 'ironSword', 900), 'the fee posted');
+  await yes(answer(B, 'ironSword', 800), 'B makes it');
+  await no(answer(C, 'ironSword', 800), 'once');
+  await yes(db(A).ref('craftDone/' + A + '/' + O).remove(), 'A takes the sword');
+});
+
+test('#128: the balance numbers: your own week only, gold in and out bounded; read by admins', async () => {
+  const row = (o = {}) => Object.assign({ wk: 'w2916', cls: 'novice', lv: 3, n: 10, s: 30, w: 1, l: 0, gi: 500, go: 200, t: SV }, o);
+  await yes(db(A).ref('balance/' + A).set(row()), 'A writes its week');
+  await no(db(B).ref('balance/' + A).set(row()), 'not another player\'s');
+  await no(db(A).ref('balance/' + A).set(row({ gi: -1 })), 'no gold in below zero');
+  await no(db(A).ref('balance/' + A).set(row({ gold: 1 })), 'nothing else');
+  await no(db(A).ref('balance').once('value'), 'players do not read them');
+  await yes(db(M).ref('balance').once('value'), 'the owner does');
+});
