@@ -655,6 +655,28 @@
     };
   }
 
+  // SAT-ONLINE-125 bug reports (plan U343): bugs/{id} {s, v, z?, n?, by, t}, a player's own, one every 2 minutes (bugLast/{uid}
+  // {t} goes in the same update, and the rules want the last one 2 minutes old); admins read and clear them. bugTriage/{key}
+  // {s: new | act | fixed | no | dup, dup?, note?, by, t}: an admin's tag on a report, or on a group of crash reports (key
+  // 'c_' + the hash of its message, Satisfy.triage)
+  function bugStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, up = function (u) { return D.update(D.ref(db), u); };
+    var all = function (p) { return D.get(at(p)).then(function (s) { return s.val() || {}; }); };
+    return {
+      send: function (id, uid, v) {
+        var u = {}, e = { s: String(v.s).slice(0, 300), v: String(v.v || '').slice(0, 16), by: uid, t: D.serverTimestamp() };
+        if (v.z) e.z = String(v.z).slice(0, 24);
+        if (v.n) e.n = String(v.n).slice(0, 24);
+        u['bugs/' + id] = e; u['bugLast/' + uid] = { t: D.serverTimestamp() };
+        return up(u);
+      },
+      all: function () { return Promise.all([all('crashes'), all('bugs'), all('bugTriage')]).then(function (r) { return { crashes: r[0], bugs: r[1], triage: r[2] }; }); },
+      tag: function (key, s, by, dup, note) { var u = {}, e = { s: s, by: by, t: D.serverTimestamp() }; if (dup) e.dup = dup; if (note) e.note = String(note).slice(0, 120); u['bugTriage/' + key] = e; return up(u); },
+      // at most 500 in one update; each report's own tag goes with it
+      clear: function (ids) { var u = {}; ids.slice(0, 500).forEach(function (id) { u['bugs/' + id] = null; u['bugTriage/' + id] = null; }); return ids.length ? up(u) : Promise.resolve(); },
+    };
+  }
+
   // SAT-ONLINE-064: the National Competition, nat/{id}/{uid} = {h, c, d, s, n, t} and natPaid/{id}/{uid} = {g, t}
   function natStore(sdk) {
     var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, up = function (u) { return D.update(D.ref(db), u); };
@@ -849,6 +871,7 @@
     dropStore: dropStore,
     bountyStore: bountyStore,
     arenaStore: arenaStore,
+    bugStore: bugStore,
     friendStore: friendStore,
     reportStore: reportStore,
     lfgStore: lfgStore,
