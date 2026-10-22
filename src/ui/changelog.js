@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22eagle', ver: '1.93', d: '2026-10-22',
+      ar: ["الصقر بتاع البيست ماستر بقى بيطير فوق المية والشجر (الحيطان والصخور والبيوت والدانجن لسه بتوقفه)، ومينفعش تنزل منه وإنت فوق المية"],
+      en: ["The Beast Master's eagle now flies over water and trees (walls, rocks, houses and dungeons still stop it), and you can't land while over water"] },
     { v: '2026-10-22bhfire', ver: '1.92', d: '2026-10-22',
       ar: ["رقم العلاج الأخضر (وأي رقم بيطلع فوق الشخصية) بقى رقم صحيح من غير كسور، والصحة نفسها بتتقرّب",
         "جزيرة النار في أرخبيل بيهين: الـ 12 نار بيظهروا كلهم، جنب الشجر المحروق ومش جواه، وكل واحدة تقدر توصلها",
