@@ -6170,6 +6170,7 @@ Object.assign(STR.ar,{goldW:'دهب',enhOdds:'نسبة النجاح {p}%',enhRis
 function enhance(i,who){const c=enhCost(i);if((i.en||0)>=10)return enhMenu(who);if(S.gold<c.g){SFX.deny();return dialog(who,['arNo']);}if((S.mats.mstone||0)<c.m){SFX.deny();return dialog(who,[t('noMs')],()=>enhMenu(who));}if((S.mats.estone||0)<c.e){SFX.deny();return dialog(who,[t('noEs')],()=>enhMenu(who));}
  S.gold-=c.g;S.mats.mstone-=c.m;S.mats.estone-=c.e;hudDirty=true;const n=i.en||0,ok=rand()<c.p,down=!ok&&n>=6;if(ok)i.en=n+1;else if(down)i.en=n-1;save(true);
  enhFx(i,ok,n,c.p,()=>{if(ok){vfx('loot',P.x,P.y,{rarity:Math.min(4,i.r+1)});toast(t('enhOk',{it:inm(i)}),'good');}else{vfx('dust',P.x,P.y,{n:8});toast(down?t('enhDown',{it:inm(i)}):t('enhFail'),'warn');}enhMenu(who);});}
+window.__GENH={cost:i=>enhCost(i),go:(i,w)=>enhance(i,w||'khan')}; // tests (SAT-ONLINE-134: an upgrade takes exactly what it costs)
 // the +1 moment: the item on the anvil, three hammer blows with sparks, a held breath before the last one (longer from +6),
 // then a burst of light and the new number, or grey dust. A click skips to the result.
 function enhFx(i,ok,n,p,done){const prev=mode;mode='enhfx';const o=document.createElement('div');o.id='enhfx';

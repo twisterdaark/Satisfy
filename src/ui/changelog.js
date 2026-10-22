@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22upgradeinputs', ver: '1.82', d: '2026-10-22', hide: 1,
+      ar: ["للتيستات: تيست بيتأكد إن تركيب الجوهرة والتطوير بياخدوا بالظبط اللي عليهم (جوهرة و500 دهب، وتمن التطوير نجح أو فشل)، ومفيش حاجة بتتاخد لو ناقص"],
+      en: ["For the tests: a test that setting a gem and enhancing take exactly their inputs (a gem and 500 gold; the enhancement's price, whether it works or not), and nothing when something is short"] },
     { v: '2026-10-22achd', ver: '1.81', d: '2026-10-22',
       ar: ["إنجازات الاستكشاف الستة (أول خطوات، دليل الطرق، شاف الدنيا، مكتشف المناطق، رسام الخرايط، صياد الكنوز) بقى ليها وصف بدل الكود زي achD_zones30"],
       en: ["The six exploring achievements (First Steps, Pathfinder, Seen the World, Region Hunter, Cartographer, Treasure Hunter) have a description instead of a raw key like achD_zones30"] },
