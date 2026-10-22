@@ -9110,6 +9110,19 @@ function admReports(st){st.reports().then(({reports,done})=>{const L=Object.keys
    {l:t('admOk'),f:()=>st.resolve(r.id,'ok',NET.uid).then(()=>{toast(t('admResolved'));admReports(st);},()=>toast(t('gdFail'),'warn'))},{l:t('oBack'),f:()=>admReports(st)}])})),{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
 function admCrashes(st){st.crashes().then(v=>{const L=Object.values(v||{}).filter(c=>c&&typeof c.m==='string').sort((a,b)=>(b.t||0)-(a.t||0)).slice(0,10);
  dialog('guild',[t('admCrashes',{n:Object.keys(v||{}).length})+(L.length?' · '+L.map(c=>t('admCrashRow',{v:c.v||'?',m:c.m,z:c.z||'-'})).join(' · '):'')],null,[{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
+/* the network at a glance for the owner (SAT-ONLINE-108, plan U020): "/net" reads who is online now (presence seen in
+   the last minute) and shows how many, in which zones and at which levels, this page's link (round trip, writes,
+   failures) and the crash reports of the last day with the newest. */
+Object.assign(STR.ar,{nwH:'الشبكة دلوقتي',nwOn:'أونلاين: {n} لاعب (في آخر دقيقة)',nwZones:'الأماكن: {l}',nwLv:'اللفلات: {l}',nwLink:'الاتصال من هنا: {r} ms · {w} كتابة · {f} فشل',nwCr:'أعطال آخر يوم: {n}{m}'});
+Object.assign(STR.en,{nwH:'The network now',nwOn:'Online: {n} players (in the last minute)',nwZones:'Where: {l}',nwLv:'Levels: {l}',nwLink:'This page: {r} ms round trip · {w} writes · {f} failed',nwCr:'Crashes in the last day: {n}{m}'});
+// presence entries -> the counts: online in the last minute, by zone and by level band
+function nwStats(pr,now){const on=Object.values(pr||{}).filter(e=>e&&typeof e==='object'&&+e.t>now-60000),cnt=(f)=>{const o={};for(const e of on){const k=String(f(e)||'?').slice(0,24);o[k]=(o[k]||0)+1;}return Object.entries(o).sort((a,b)=>b[1]-a[1]||(a[0]<b[0]?-1:1));};
+ const band=l=>l>=60?'60+':l>=30?'30-59':l>=10?'10-29':'1-9';return {n:on.length,zones:cnt(e=>e.zone),lv:cnt(e=>band(+e.lv||1))};}
+function admNet(st){const D=FB&&FB.m.database;if(!D)return;const now=wNow();
+ Promise.all([D.get(D.ref(FB.db,'presence/satisfy/main')).then(s=>s.val(),()=>null),st.crashes().then(v=>v,()=>null)]).then(([pr,cr])=>{const S0=nwStats(pr,now),L=NETTR&&NETTR.netStats?NETTR.netStats():{rtt:0,writes:0,fails:0};
+  const day=Object.values(cr||{}).filter(c=>c&&typeof c.m==='string'&&+c.t>now-864e5).sort((a,b)=>(b.t||0)-(a.t||0));
+  dialog('guild',[t('nwH'),t('nwOn',{n:S0.n}),S0.zones.length?t('nwZones',{l:S0.zones.slice(0,6).map(([z,n])=>(STR.en[z]?t(z):z)+' '+n).join(' · ')}):'',S0.lv.length?t('nwLv',{l:S0.lv.map(([b,n])=>b+': '+n).join(' · ')}):'',
+   t('nwLink',{r:Math.round(L.rtt||0),w:L.writes|0,f:L.fails|0}),t('nwCr',{n:day.length,m:day.length?' · '+Satisfy.chat.clean(day[0].m,80):''})].filter(Boolean),null,[{l:t('oClose')}]);});}
 // the gold of the ranked players: a picture of the economy from what the game already keeps
 function ecoStats(gold,lv){const g=Object.values(gold||{}).map(e=>e&&+e.v).filter(x=>x>=0).sort((a,b)=>a-b),l=Object.values(lv||{}).map(e=>e&&+e.v).filter(x=>x>0);
  const q=f=>g.length?g[Math.min(g.length-1,Math.floor(f*g.length))]:0;return {n:g.length,total:g.reduce((a,b)=>a+b,0),median:q(.5),p90:q(.9),max:g.length?g[g.length-1]:0,lv:l.length?Math.round(l.reduce((a,b)=>a+b,0)/l.length):0};}
@@ -9161,6 +9174,7 @@ function admBal(st){st.balance().then(all=>{const wk=lockWeek(),L=balStats(all,w
 function admCmd(v){let m;
  if(/^\/reports\s*$/i.test(v)){admOnly(admReports);return true;}
  if(/^\/crashes\s*$/i.test(v)){admOnly(admCrashes);return true;}
+ if(/^\/net\s*$/i.test(v)){admOnly(admNet);return true;}
  if(/^\/appeals\s*$/i.test(v)){admOnly(admAppeals);return true;}
  if(/^\/appeal(\s|$)/i.test(v)){apSend(v.replace(/^\/appeal/i,''));return true;}
  if(/^\/economy\s*$/i.test(v)){admOnly(admEco);return true;}
@@ -9169,7 +9183,7 @@ function admCmd(v){let m;
  if((m=/^\/mute\s+(\S+)\s+(\d{1,3})\s*([\s\S]*)$/i.exec(v))){const id=m[1],h=Math.max(1,Math.min(720,+m[2])),why=m[3].trim().slice(0,60);admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}const until=wNow()+h*3600000;return st.mute(u,until,why,NET.uid).then(()=>toast(t('admMuted',{n:id,l:calTime(until)}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  if((m=/^\/unmute\s+(\S+)\s*$/i.exec(v))){const id=m[1];admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}return st.unmute(u).then(()=>toast(t('admUnmuted',{n:id}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  return false;}
-window.__GMOD={get muted(){return MUTED},appeal:x=>apSend(x),bal:()=>balGet(),balPush:()=>{balT=0;balTick(true,true);},balStats:(a,w)=>balStats(a,w),cmd:v=>admCmd(v),eco:(g,l)=>ecoStats(g,l),redact:x=>crashRedact(x),crash:(m,s)=>crashSend(m,s),get sent(){return CRN},store:()=>modSt()}; // tests
+window.__GMOD={get muted(){return MUTED},appeal:x=>apSend(x),bal:()=>balGet(),balPush:()=>{balT=0;balTick(true,true);},balStats:(a,w)=>balStats(a,w),nw:(p,n)=>nwStats(p,n),cmd:v=>admCmd(v),eco:(g,l)=>ecoStats(g,l),redact:x=>crashRedact(x),crash:(m,s)=>crashSend(m,s),get sent(){return CRN},store:()=>modSt()}; // tests
 /* the event calendar (SAT-ONLINE-077, plan U331). "Calendar" in the player list (O) shows what comes next on the world clock:
    the next three world events (each slot's event is known in advance), the National Competition, the siege of Reidan Castle,
    the town festival, the horse race, and when Trauka and Berith are back. Every time is in your own time zone and in UTC.
