@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22bhfire', ver: '1.92', d: '2026-10-22',
+      ar: ["رقم العلاج الأخضر (وأي رقم بيطلع فوق الشخصية) بقى رقم صحيح من غير كسور، والصحة نفسها بتتقرّب",
+        "جزيرة النار في أرخبيل بيهين: الـ 12 نار بيظهروا كلهم، جنب الشجر المحروق ومش جواه، وكل واحدة تقدر توصلها",
+        "كل حاجة بتظهر في الجزر (المفاتيح والوحوش والنار) بقت في مكان تقدر توصله من مكان ما بتنزل"],
+      en: ["The green heal number (and every number over your character) is a whole number now, and health itself is rounded",
+        "Behen's fire island: all 12 blazes appear, beside the burning trees rather than inside them, and you can reach every one",
+        "Everything that appears on the islands (keys, monsters, blazes) is now somewhere you can walk to from where you land"] },
     { v: '2026-10-22sbfit', ver: '1.91', d: '2026-10-22',
       ar: ["الشريط الأساسي بقى على قد الخانات بالظبط من غير فراغ في النص، وتحته رقم الشرايط الزيادة صغير مع + و−"],
       en: ["The main bar now fits its slots exactly, with no gap in the middle; under it a small count of extra bars with + and −"] },
