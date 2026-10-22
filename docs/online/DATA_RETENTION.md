@@ -65,7 +65,7 @@ Owner: Claude-A · SAT-ONLINE-111 (2026-10-22) · from `backend/database.rules.j
 |---|---|---|---|
 | `auction/{id}` (#129) | a listing | players | sold, taken back, or after 14 days (the seller's game takes it back) |
 | `auctionPaid/{uid}/{id}` | a sale's gold waiting | own | when collected |
-| `repairOrders`, `repairDone`, `repairPaid` (#131) | repair orders, answers, fees | players / own | when done or taken off; answers for nobody after 30 days |
+| `repairOrders`, `repairSlot`, `repairDone`, `repairPaid` (#131, SAT-ONLINE-133) | repair orders, their places (five an account), answers, fees | players / own | when done or taken off; an order nobody took in 14 days goes back to its poster; answers for nobody after 30 days |
 | `craftOrders`, `craftDone`, `craftPaid` (#132) | crafting commissions | players / own | same |
 | `caravans/{uid}`, `caravanDone/{uid}/{id}` (#144) | a caravan out, and those delivered | own | delivered, dropped or spoiled (2 hours); deliveries kept, and their owner may remove them |
 
