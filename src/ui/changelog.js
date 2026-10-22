@@ -5,6 +5,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22replay', ver: '1.42', d: '2026-10-22',
+      ar: ["تجربة للمطوّرين: ?tick=fixed&rec بيسجّل اللعب من \"Continue\" (الحفظ والمفاتيح اللي ضغطتها)، و?tick=fixed&replay بيعيده بالظبط على أي شاشة في خانة حفظ لوحدها (حفظك مبيتلمسش)، وفي الآخر بيقولك الإعادة طلعت زي اللعب ولا اختلفت وإمتى"],
+      en: ["For testing: ?tick=fixed&rec records your play from Continue (the save and the keys you press), and ?tick=fixed&replay plays it back exactly, on any screen, in a save slot of its own (your save is never touched); at the end it says whether it ended the same, or when it went apart"] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },

@@ -174,7 +174,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U320 | Data catalogs | ✅ | `data/*.js` with `tests/content/data` |
 | U321 | Audio mixer | 🟡 | One volume; no separate channels |
 | U322 | Accessibility QA | 🟡 | Keyboard and touch for every menu (B, v1.01) |
-| U323 | Replay recorder | ❌ | |
+| U323 | Replay recorder | ✅ | SAT-ONLINE-100: offline, `?tick=fixed&rec` records from Continue (the save, a seed, the start clock, keys and dialog choices at their steps; clock and timers run on the steps), `?tick=fixed&replay` plays it back in its own save slot and checks the world every 10 s and at the end (`regression/replay`: recorded at 60 fps, the same at 30 and 144; one key taken out and it says when it went apart) |
 | U324 | Exception boundary | 🟡 | A failing listener can't stop presence; network errors show in the badge |
 | U325 | Performance profiler | 🟡 | `net().link` (round trip, sent, received, dropped) in the badge tooltip; no frame-time budget |
 | U326 | Build pipeline | 🟡 | Tests on every PR by hand; GitHub Pages serves main as it is |
@@ -213,7 +213,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U370 | Multi-browser smoke | 🟡 | Chromium in the tests; the owner tests desktop and phone |
 | U371 | Reconnect soak | 🟡 | `unit/chaos` (drops, delays, duplicates); `regression/online-firebase` reconnects |
 | U372 | Load test 100 clients | 🟡 | `COST_MODEL.md` measured numbers; no 100-client run |
-| U373 | Combat determinism | 🟡 | With `?tick=fixed` the same fight at 30, 60 and 144 fps ends the same to the last digit (tests/regression/fixedtick, seeded random). Left: a seed per session for replays (U323) |
+| U373 | Combat determinism | ✅ | With `?tick=fixed` the same fight at 30, 60 and 144 fps ends the same to the last digit (`regression/fixedtick`); a recorded session has its own seed, and its replay ends in the same world (`regression/replay`, SAT-ONLINE-100) |
 | U374 | Dupe attack cases | ✅ | Replayed and reordered messages dropped (`unit/presence`); claims once (`dropClaims`, `tradedItems`, `bountyPaid`, `natPaid`, lockouts) |
 | U375 | Safe zone exploit cases | ✅ | No duel or PvP damage in towns, checked on both sides (`regression/pvp`, SAT-ONLINE-038) |
 | U376 | Trade race tests | ✅ | `regression/trade`: any change resets the accepts; the same item twice is refused |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 50 · 🟡 37 · ⏳ 6 · ❌ 11 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 52 · 🟡 36 · ⏳ 6 · ❌ 10 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
