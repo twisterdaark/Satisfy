@@ -9,9 +9,11 @@ const H = require('../harness/game.cjs');
 test.after(() => H.closeBrowser());
 
 const RCS = 3600000, RCG = RCS - 46000, RCGO = RCS - 40000, RCEND = RCS - 4000, RCBACK = RCS - 2000; // once an hour
-// move this page's clock so that the race slot is at `ms` (the next slot when the current one is already past it)
+// move this page's clock so that the race slot is at `ms` (the next slot when the current one is already past it). The
+// clock then stands still except for the test's own moves (ride() adds to __off): a slow machine would otherwise let real
+// seconds go by between two steps, and the gate's countdown and the stable riders run on without the player.
 const raceClock = (g, ms) => g.eval((ms) => {
-  if (!window.__realNow) window.__realNow = Date.now.bind(Date);
+  if (!window.__realNow) { const t0 = Date.now(); window.__realNow = () => t0; }
   if (window.__raceSlot == null) window.__raceSlot = Math.floor(window.__realNow() / 3600000) + 1;
   window.__off = window.__raceSlot * 3600000 + ms - window.__realNow(); Date.now = () => window.__realNow() + window.__off;
 }, ms);
@@ -72,7 +74,7 @@ test('horse race: sign up with the steward, the gate takes you to the track on a
     // two laps in about 20 seconds beat every stable rider (the best of them needs 24 at the very least)
     await ride(g, 17);
     const fin = await g.eval(() => window.__GTL.RCR.fin);
-    assert.ok(fin > 17 && fin < 23, 'finish time ' + fin);
+    assert.ok(fin > 16 && fin < 23, 'finish time ' + fin);
     assert.match(await bar(g), /Finished! Place 1 of 4/);
     const gold0 = await g.eval(() => window.__G.S.gold);
     await raceClock(g, RCEND + 200);

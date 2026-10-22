@@ -22,6 +22,9 @@ test('the gate of hell: her field, the fake gauge, the Mirror Shield, succubi an
     await g.eval(() => { const G = window.__G; G.S.lv = 450; G.S.hpot = 3; });
     await near(g);
     await g.step(2);
+    // level 450 makes this character the first at 400: the Pioneer title's dialog opens, and keys wait for it to close
+    for (let i = 0; i < 6 && await g.eval(() => window.__G.mode === 'dialog'); i++) { await g.eval(() => window.__G.advance()); await g.step(2); }
+    assert.equal(await g.eval(() => window.__G.mode), 'play');
     // the hell field: potions do nothing, attacks are slower
     const cd0 = await g.eval(() => { const m = window.__GBL.of(); m.eng = 0; return window.__G.eqx.atkCD(); });
     const f = await g.eval(() => { const G = window.__G, m = window.__GBL.of(); m.eng = 5; G.P.hp = 10; const r = { near: window.__GBL.near(), cd: G.eqx.atkCD() }; return r; });

@@ -15,12 +15,19 @@
  * isn't recorded as someone else's: so an item can't be traded twice (a reloaded old save still has it, but the ledger
  * says it left). The update is all or nothing; when tradeDone appears each side applies the swap to its own save once.
  *
+ * A side that confirmed and then never saw tradeDone (its tab closed, its connection dropped, the read of the offers
+ * failed) gets the swap later (SAT-ONLINE-128, plan U063 "no side loses anything without getting its part"): the game
+ * keeps the confirmed trade's id in the save, and recover(id, foe) finds tradeDone and both offers as they were done, so
+ * the game applies them then, once (it keeps the ids it applied).
+ *
  * Not cheat-proof yet (owner): gold has no ledger, and a modified client could offer what it doesn't have. A game
  * server (D3) closes that later.
  *
  * Exposes `Satisfy.trade.create({ presence, uid, now?, store, pos, bag, gold, blocked? })`.
  *   store: { create(id, a, b), side(id, uid, offer), watch(id, uid, cb) -> off, read(id, uid), watchDone(id, cb) -> off,
- *            commit(id, by, a, b, offerA, offerB) }: promises; Satisfy.firebase.tradeStore(sdk) is the database one.
+ *            done(id), commit(id, by, a, b, offerA, offerB) }: promises; Satisfy.firebase.tradeStore(sdk) is the database one.
+ * Events: ask, open, changed, confirmed {id, foe} (this side confirmed: the game keeps it until the swap is applied),
+ *         declined, cancelled, failed, done {id, foe, give, get}.
  *   bag(): the items the local player may give, [{iid, json}]; gold(): the gold it has.
  */
 (function (root) {
@@ -198,7 +205,7 @@
         if (T.mine.g > (gold() || 0)) return false;
         var have = {}; (bag() || []).forEach(function (x) { have[x.iid] = 1; });
         for (var k in T.mine.it) if (!have[k]) return false;
-        T.mine.conf = T.theirs.rev; writeMine(); emit({ type: 'changed' }); maybeCommit(); return true;
+        T.mine.conf = T.theirs.rev; writeMine(); emit({ type: 'confirmed', id: T.id, foe: T.foe, handle: T.handle }); emit({ type: 'changed' }); maybeCommit(); return true;
       },
       cancel: function () { if (T && T.phase !== 'done') close('cancelled', 'me', true); },
       /** Expire asks; cancel when the other walks away or goes; the fallback commit. Call about once per frame. */
@@ -223,6 +230,19 @@
           canConfirm: !!(T.mine && agreed(T.mine, T.theirs)) };
       },
       on: function (fn) { listeners.push(fn); },
+      /**
+       * A trade this side confirmed, looked up later: { id, foe, give, get } when it was done (the offers as they were
+       * swapped), null when it wasn't (yet). It changes nothing: the game applies it once.
+       */
+      recover: function (id, foe) {
+        if (!ID_RE.test(String(id)) || !foe || !store.done) return Promise.resolve(null);
+        return store.done(id).then(function (d) {
+          if (!d) return null;
+          return Promise.all([store.read(id, self), store.read(id, foe)]).then(function (v) {
+            return { id: id, foe: foe, give: cleanOffer(v[0]) || { g: 0, it: {} }, get: cleanOffer(v[1]) || { g: 0, it: {} } };
+          });
+        });
+      },
     };
     return api;
   }
@@ -245,6 +265,7 @@
       watch: function (id, uid, cb) { var last; var w = function () { var v = JSON.stringify(sideOf(id, uid)); if (v !== last) { last = v; cb(sideOf(id, uid)); } }; watchers.push(w); w(); return function () { var i = watchers.indexOf(w); if (i >= 0) watchers.splice(i, 1); }; },
       read: function (id, uid) { return Promise.resolve(sideOf(id, uid)); },
       watchDone: function (id, cb) { var sent = false; var w = function () { if (!sent && data.done[id]) { sent = true; cb(data.done[id]); } }; watchers.push(w); w(); return function () { var i = watchers.indexOf(w); if (i >= 0) watchers.splice(i, 1); }; },
+      done: function (id) { return Promise.resolve(data.done[id] || null); },
       commit: function (id, by, a, b) {
         var m = data.trades[id], s = both(id);
         if (!m || data.done[id] || (by !== m.a && by !== m.b) || !confirmed(s[0], s[1])) return Promise.reject(new Error('PERMISSION_DENIED'));

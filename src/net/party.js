@@ -112,9 +112,13 @@
           emit({ type: 'invite', party: pl.party, handle: from.handle });
           break;
         case 'party.accept':
-          if (!id || leader !== self || pl.party !== id || !outgoing.has(from.uid)) return;
+          // SAT-ONLINE-126 (plan U048): the leader alone decides who is in, one accept at a time, so the party never passes
+          // its cap however many accept at once. An accept it can't take (the invite ran out on its side first, or the party
+          // is full or gone) is answered at once with k = 2, so that player isn't left believing it joined.
+          if (pl.party !== idFor(self) || accepted.has(from.uid)) return;
+          if (!id || leader !== self || pl.party !== id || !outgoing.has(from.uid)) { P.send('party.kick', { to: from.uid, party: pl.party, k: 2 }); return; }
           outgoing.delete(from.uid);
-          if (accepted.size + 1 >= cap()) { P.send('party.kick', { to: from.uid, party: id }); emit({ type: 'full', handle: from.handle }); return; }
+          if (accepted.size + 1 >= cap()) { P.send('party.kick', { to: from.uid, party: id, k: 2 }); emit({ type: 'full', handle: from.handle }); return; }
           accepted.set(from.uid, now());
           emit({ type: 'joined', uid: from.uid, handle: from.handle });
           break;
@@ -134,7 +138,8 @@
         case 'party.kick':
           // k === 1: the leader removed us (SAT-ONLINE-037); without it the leader left and the party is over. Either way the
           // rejoin memo goes, so nothing brings us back to that party by itself; a fresh invite needs Y.
-          if (id && pl.party === id && leader === from.uid) { clear(); forget(); emit({ type: pl.k === 1 ? 'kicked' : 'leaderLeft', handle: from.handle }); }
+          // k === 2: our accept came too late or the party was full (SAT-ONLINE-126): we never joined.
+          if (id && pl.party === id && leader === from.uid) { clear(); forget(); emit({ type: pl.k === 1 ? 'kicked' : pl.k === 2 ? 'notJoined' : 'leaderLeft', handle: from.handle }); }
           else if (pl.k === 1 && memo && memo.id === pl.party && memo.leader === from.uid) { forget(); emit({ type: 'kicked', handle: from.handle }); } // kicked while we were out of sight
           break;
       }

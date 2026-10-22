@@ -14,7 +14,7 @@ Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it app
 | T05 | Redirect sign-in on mobile | ✅ | `regression/online-firebase` (blocked popup → redirect) |
 | T06 | Token refresh | 🟡 | `regression/online-firebase` (saved session reconnects after reload). Refresh within a session is the SDK's job; not testable with the fake. |
 | T07 | Second-tab policy | 🟡 | `regression/online-local` (`?slot=` keeps saves apart; each tab is its own session). No rule yet for the same account in two tabs; both show as players. |
-| T08 | Reconnect, onDisconnect | ✅ | `regression/online-firebase` (drop → removed for others → back on reconnect) |
+| T08 | Reconnect, onDisconnect | ✅ | `regression/online-firebase` (drop → removed for others → back on reconnect); `regression/soak` (20 drops of one, the other or both: positions, the party, one presence each, and no listener or onDisconnect added) |
 | T09 | Stale ghost presence | ✅ | `unit/presence` (silent players expire), `regression/online-local` (closed tab removed) |
 | T10 | Cross-instance filtering | ✅ | `unit/contracts` (room keys), `regression/online-local` (a player in a house is drawn only inside that house) |
 | T11 | Invalid x/y | ✅ | `unit/contracts` (out-of-world rejected), `unit/rules` (database bounds cover the map; a wider map fails the test) |
@@ -46,7 +46,7 @@ Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it app
 | T37 | Spectators | 🟡 | `regression/duel` (U034, SAT-ONLINE-013: a third player sees both duelists' HP and the ring). No free spectator camera. |
 | T38 | Frame rate on mobile | ❌ | Needs a device lab. Mobile is playable since SAT-ONLINE-017 (touch controls, `regression/touch`), so the owner's phone check is the first real measurement. |
 | T39 | 8-hour session | ❌ | A long soak needs a real browser and time. |
-| T40 | 100-client soak | ✅ | `unit/chaos` (100 presence clients, a simulated minute: tables bounded, under 30 s CPU) |
+| T40 | 100-client soak | ✅ | `unit/chaos` (100 presence clients, a simulated minute: tables bounded, under 30 s CPU); `unit/load100` (100 real Firebase transports with interest management: who sees whom, downloads against the cost model) |
 
 **Totals:** ✅ 27 · 🟡 6 · ⏳ 5 · ❌ 2 (T38, T39 need devices and time, not code).
 

@@ -8,9 +8,10 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const { pathToFileURL } = require('node:url');
 
-let chromium;
+let chromium, PW;
 try {
-  ({ chromium } = require('playwright'));
+  PW = require('playwright');
+  ({ chromium } = PW);
 } catch (e) {
   throw new Error('playwright is not installed. Run: npm install && npm run setup:browsers');
 }
@@ -48,7 +49,10 @@ const INIT_SCRIPT = `(() => {
 
 let browserPromise = null;
 function browser() {
-  if (!browserPromise) browserPromise = chromium.launch();
+  // SATISFY_BROWSER=firefox|webkit runs the same tests in another engine (SAT-ONLINE-107, plan U370; CI installs them)
+  // Firefox gives each file:// page an origin of its own by default, so the storage seeded on the blank page would not reach the game
+  const name = process.env.SATISFY_BROWSER || 'chromium';
+  if (!browserPromise) browserPromise = (PW[name] || chromium).launch(name === 'firefox' ? { firefoxUserPrefs: { 'security.fileuri.strict_origin_policy': false } } : {});
   return browserPromise;
 }
 async function closeBrowser() {
@@ -100,6 +104,8 @@ async function openGame(opts = {}) {
   page.on('console', (m) => {
     if (m.type() !== 'error') return;
     if (/^Failed to load resource/.test(m.text())) return; // aborted external request, tracked in `external`
+    // the same in WebKit's words; and Firefox's for a request a reload cut short (SAT-ONLINE-107: CI runs both)
+    if (/^Origin null is not allowed by Access-Control-Allow-Origin/.test(m.text()) || /InvalidStateError: Navigated away from page/.test(m.text())) return;
     errors.push('console: ' + m.text());
   });
   const url = pathToFileURL(html).href + (opts.query || '');

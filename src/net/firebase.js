@@ -37,7 +37,13 @@
       // keep the Google sign-in across reloads (owner feedback #4). It is getAuth's default, but set it explicitly so a
       // browser or SDK change can't quietly make every F5 ask again.
       var keep = m.auth.setPersistence && m.auth.browserLocalPersistence ? m.auth.setPersistence(auth, m.auth.browserLocalPersistence).catch(function () { /* the default stays */ }) : null;
-      return Promise.resolve(keep).then(function () { return { m: m, app: app, auth: auth, db: m.database.getDatabase(app, cfg.databaseURL) }; });
+      var db = m.database.getDatabase(app, cfg.databaseURL), emu = root.Satisfy && root.Satisfy.firebaseEmulator;
+      // SAT-ONLINE-120: the local emulators instead of the project, only as firebase-config.js allows (a local page with ?emu)
+      if (emu && m.database.connectDatabaseEmulator && m.auth.connectAuthEmulator) {
+        m.database.connectDatabaseEmulator(db, emu.host, emu.dbPort);
+        m.auth.connectAuthEmulator(auth, emu.authUrl, { disableWarnings: true });
+      }
+      return Promise.resolve(keep).then(function () { return { m: m, app: app, auth: auth, db: db, emulator: !!emu }; });
     });
     cache.catch(function () { cache = null; });
     return cache;
@@ -364,6 +370,7 @@
       watch: function (id, uid, cb) { var off = D.onValue(at('tradeSides/' + id + '/' + uid), function (s) { cb(s.val()); }, function () {}); return function () { try { off(); } catch (e) { /* ignore */ } }; },
       read: function (id, uid) { return D.get(at('tradeSides/' + id + '/' + uid)).then(function (s) { return s.val(); }); },
       watchDone: function (id, cb) { var off = D.onValue(at('tradeDone/' + id), function (s) { cb(s.val()); }, function () {}); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      done: function (id) { return D.get(at('tradeDone/' + id)).then(function (s) { return s.val(); }); }, // SAT-ONLINE-128: a confirmed trade looked up later
       // SAT-ONLINE-089 seller history (plan U215): after a trade each side writes its own record, tradeLog/{uid}/{tid}
       // {o, on, gg, gi, ig, ii, t} (with whom, gold given and got as the trade's sides hold them, how many items; yours only)
       // and tradeRep/{uid}/{tid} {o, t} (public: the count of trades and of partners). Only for a trade done between the two.
@@ -472,7 +479,7 @@
       // other guild), members read it; the other side writes the answer, the break or the end into it too.
       watchAllies: function (gid, cb) { return watch('guildAlly/' + gid, cb); },
       watchAllyAsks: function (gid, cb) { return watch('guildAllyAsk/' + gid, cb); },
-      watchDiplo: function (gid, cb) { var ref = at('guildDiplo/' + gid), q = D.limitToLast ? D.query(ref, D.limitToLast(12)) : ref; var off = D.onValue(q, function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
+      watchDiplo: function (gid, cb) { var ref = at('guildDiplo/' + gid), q = D.limitToLast ? D.query(ref, D.limitToLast(60)) : ref; var off = D.onValue(q, function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; },
       findGuild: function (nk) { return D.get(at('guildNames/' + nk)).then(function (s) { var gid = s.val(); return typeof gid === 'string' ? D.get(at('guilds/' + gid)).then(function (g) { return g.val() ? { gid: gid, g: g.val() } : null; }) : null; }); },
       allyCd: function (a, b) { return Promise.all([D.get(at('guildAllyCd/' + a + '/' + b)), D.get(at('guildAllyCd/' + b + '/' + a))]).then(function (r) { return Math.max(+((r[0].val() || {}).t) || 0, +((r[1].val() || {}).t) || 0); }); },
       allyAsk: function (me, meN, o, oN, uid, id) {

@@ -58,7 +58,7 @@
     if (!connected) return;
     const m = e.data;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|announce|admins|tradeLog|tradeRep|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|announce|admins|tradeLog|tradeRep|trades|tradeSides|tradeDone|tradedItems|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -839,6 +839,8 @@
     for (const cb of connCbs) setTimeout(() => cb(snap('.info/connected', connected)), 0);
   };
   addEventListener('pagehide', () => { for (const p of discon) ch.postMessage({ op: 'remove', p }); });
+  // what this page listens to and has armed for a disconnect now (SAT-ONLINE-112: a reconnect must not add listeners)
+  F.active = () => ({ child: listeners.length, value: [...valueCbs.values()].reduce((n, a) => n + a.length, 0), conn: connCbs.length, discon: [...discon].sort() });
 
   const auth = {
     getAuth: () => ({}),
