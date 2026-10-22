@@ -1,5 +1,10 @@
 {
   "database": {
     "rules": "backend/database.rules.json"
+  },
+  "emulators": {
+    "database": { "port": 9000 },
+    "auth": { "port": 9099 },
+    "ui": { "enabled": true, "port": 4000 }
   }
 }
