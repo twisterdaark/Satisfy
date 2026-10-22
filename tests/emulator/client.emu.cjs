@@ -56,12 +56,12 @@ test.after(async () => {
   if (env) await env.cleanup();
 });
 
-test('the emulators answer', async () => {
+test('the emulators answer', { timeout: 20000 }, async () => {
   const r = await fetch('http://' + AUTHH + '/', { method: 'GET' }).then((x) => x.status, (e) => 'unreachable: ' + e.message);
   assert.notEqual(String(r).slice(0, 11), 'unreachable', 'the Auth emulator at ' + AUTHH + ' (env ' + process.env.FIREBASE_AUTH_EMULATOR_HOST + '): ' + r);
 });
 
-test('two clients on the real SDK and rules: presence, a move, a dropped connection and back, a party invitation', async () => {
+test('two clients on the real SDK and rules: presence, a move, a dropped connection and back, a party invitation', { timeout: 90000 }, async () => {
   const a = await player('Ahmed', 2000), b = await player('Bassem', 2030);
   a.publish(true); b.publish(true);
   await until(() => a.sees(b) && b.sees(a), 'each sees the other');
