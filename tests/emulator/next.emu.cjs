@@ -164,3 +164,12 @@ test('#139: guild research: paid from the treasury at its exact price, in the or
   await no(research(A, 'all', 550000), 'the last one needs all three second steps');
   await no(db(C).ref('guildBuild/' + G).once('value'), 'others do not read it');
 });
+
+test('#126: guild trophies: given by the owner for a season, read by everyone', async () => {
+  const tro = (by, o = {}) => Object.assign({ k: 'gold', p: 3, by, t: SV }, o);
+  await no(db(A).ref('guildTrophy/' + G + '/s2026-10').set(tro(A)), 'a master does not give its guild one');
+  await no(db(M).ref('guildTrophy/' + G + '/s2026-10').set(tro(M, { k: 'platinum' })), 'gold, silver or bronze');
+  await no(db(M).ref('guildTrophy/' + G + '/autumn').set(tro(M)), 'a season is a month');
+  await yes(db(M).ref('guildTrophy/' + G + '/s2026-10').set(tro(M)), 'the owner gives it');
+  await yes(db(C).ref('guildTrophy/' + G).once('value'), 'everyone reads it');
+});
