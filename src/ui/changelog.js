@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22bank', ver: '1.86', d: '2026-10-22',
+      ar: ["البنك بقى بيحرّك اللي معاك فعلاً: لو فلوسك اتغيرت والقايمة مفتوحة، الإيداع مبياخدش أكتر من اللي معاك والسحب مبيطلّعش أكتر من اللي في البنك"],
+      en: ["The bank moves only what is really there: if your gold changed while its menu was open, a deposit takes no more than you have and a withdrawal no more than the bank holds"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
