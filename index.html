@@ -2022,7 +2022,9 @@ function drawDragon(m){const x=Math.round(m.x),y=Math.round(m.y),f=m.face||1;if(
 // shared record in WS.arena. Online the server will run brackets between real players; these rankers stand in until then.
 const ARNK=['huroi','peaks','zibal','kraugel'];
 let ARN=null;
-const today=()=>new Date(Date.now()).toISOString().slice(0,10);
+// the UTC date on the world clock (SAT-ONLINE-130: wNow, the server's online, so a device whose clock is off sees the same
+// day's bounties and lockouts as everyone; wNow is set up further down, so before that the device clock)
+const today=()=>{let n;try{n=wNow();}catch(e){n=Date.now();}return new Date(n).toISOString().slice(0,10);};
 function startArena(){if(ARN||TWR)return;S.arenaDay=today();if(P.ride)dismount();if(S.comp)S.comp=null;const A=DUN[8];ARN={r:0,ret:{x:P.x,y:P.y},wait:3,m:null};save(true);
  fadeTo(()=>{P.x=(A.x0+4)*TS+8;P.y=(WMH+11)*TS+10;P.dir=2;P.hp=maxHP();P.mp=maxMP();P.cd={};camSnap=true;hudDirty=true;toast(t('arnStart'),'good');SFX.notice();});}
 function arenaSpawn(){const k=ARNK[ARN.r],A=DUN[8];
@@ -4080,18 +4082,29 @@ function drawWeather(){if(!S||!P||mode==='title'||mode==='lang')return;ctx.globa
 
 /* ---------------- daily bounties (SAT-DAILY-001) ---------------- */
 // Three bounties a day, the same for every player in the world: the UTC date seeds which monster each tier hunts, drawn
-// only from monsters that really spawn. Progress is per player (S.dly) and is turned in at any quest board. Clearing all
-// three in a day grows a streak (+10% rewards a day, up to +50%); a missed day resets it.
+// only from monsters that really spawn. Progress is per player (S.dly) and is turned in at any quest board. Each day you
+// clear all three adds +10% to the rewards, up to +50%, counted over the last 7 days (S.dlyW): a missed day loses nothing,
+// it only doesn't add (SAT-ONLINE-130, plan U345 "retention without grind: no progress lost for missing a day"; it was a
+// streak that a missed day reset).
 const DTIER=[{k:'dB',lo:1,hi:60,n:30},{k:'dS',lo:60,hi:130,n:25},{k:'dG',lo:130,hi:260,n:20}];
 let dlyC=null;
 function dailyList(){const d=today();if(dlyC&&dlyC.d===d)return dlyC.l;let h=7;for(const c of d)h=(h*31+c.charCodeAt(0))|0;const r=mulberry32(h>>>0),seen=[...new Set([...SPAWN,...BSPAWN,...DSPAWN].map(x=>x[0]))].sort();
  const l=DTIER.map(T=>{const pool=seen.filter(k=>MT[k]&&!MT[k].boss&&MT[k].lv[0]>=T.lo&&MT[k].lv[0]<T.hi);return pool.length?{...T,it:pool[(r()*pool.length)|0]}:null;}).filter(Boolean);dlyC={d,l};return l;}
-function dlyS(){const d=today();if(!S.dly||S.dly.day!==d){const pv=S.dly,y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.dly={day:d,c:{},done:{},all:0,streak:pv&&pv.day===y&&pv.all?(pv.streak||0):0};}return S.dly;}
+Object.assign(STR.ar,{dHead:'[مهام النهارده للعالم كله · خلصتها كلها {s} يوم من آخر 7 أيام]',dAll:'خلصت كل مهام النهارده! كده خلصتها {n} يوم من آخر 7 أيام.'});
+Object.assign(STR.en,{dHead:"[Today's bounties for the whole world · all three cleared on {s} of the last 7 days]",dAll:"You finished all of today's bounties! That's {n} of the last 7 days."});
+const dlyDay=(d,k)=>new Date(Date.parse(d+'T00:00:00Z')+k*864e5).toISOString().slice(0,10);
+// how many days (UTC dates) you cleared all three in the 7 days before d, or the 7 ending with d itself (withToday)
+function dlyWeek(d,withToday){const lo=dlyDay(d,withToday?-6:-7);return (Array.isArray(S.dlyW)?S.dlyW:[]).filter(x=>typeof x==='string'&&x>=lo&&(withToday?x<=d:x<d)).length;}
+function dlyMark(D){S.dlyW=(Array.isArray(S.dlyW)?S.dlyW:[]).filter(x=>typeof x==='string'&&x>=dlyDay(D.day,-7)&&x!==D.day);S.dlyW.push(D.day);S.dlyW.sort();D.streak=dlyWeek(D.day,true);}
+// a save from before: its streak of days in a row, ending yesterday (or the day before when that day wasn't cleared), as dates
+function dlyMigrate(pv,y){if(Array.isArray(S.dlyW)||!pv||!(pv.streak>0)||typeof pv.day!=='string')return;const end=pv.all?pv.day:dlyDay(pv.day,-1);S.dlyW=[];for(let i=Math.min(7,pv.streak|0)-1;i>=0;i--)S.dlyW.push(dlyDay(end,-i));}
+window.__GDLY={week:(d,w)=>dlyWeek(d,w),mark:D=>dlyMark(D),get W(){return S&&S.dlyW},S:()=>dlyS(),lines:()=>dailyLines(),reward:x=>dailyReward(x)}; // tests
+function dlyS(){const d=today();if(!S.dly||S.dly.day!==d){const pv=S.dly,y=new Date(Date.now()-864e5).toISOString().slice(0,10);dlyMigrate(pv,y);S.dly={day:d,c:{},done:{},all:0,streak:dlyWeek(d,false)};}return S.dly;}
 function dailyKill(type){if(!S)return;const D=dlyS();for(const x of dailyList())if(x.it===type&&!D.done[x.k])D.c[x.k]=Math.min(x.n,(D.c[x.k]||0)+1);}
 function dailyReward(x){const b=MT[x.it],m=1+Math.min(5,dlyS().streak||0)*.1;return {xp:Math.round(b.xp*x.n*1.5*m),g:Math.round(((b.gold||1)*x.n*2+200)*m)};}
 function dailyOpts(){const D=dlyS(),L=dailyList(),o=[];for(const x of L){if(D.done[x.k]||(D.c[x.k]||0)<x.n)continue;const rw=dailyReward(x);
  o.push({l:t('dTurn',{q:t(x.k),it:itN(x.it)}),f:()=>{D.done[x.k]=1;gainXP(rw.xp);S.gold+=rw.g;toast(t('dGot',{x:rw.xp,g:rw.g}),'good');SFX.quest();
-  if(!D.all&&L.every(y=>D.done[y.k])){D.all=1;D.streak=(D.streak||0)+1;addMat('mstone',3);addMat('estone',1);toast(t('dAll',{n:D.streak}),'good');}hudDirty=true;save(true);openDaily();}});}return o;}
+  if(!D.all&&L.every(y=>D.done[y.k])){D.all=1;dlyMark(D);addMat('mstone',3);addMat('estone',1);toast(t('dAll',{n:D.streak}),'good');}hudDirty=true;save(true);openDaily();}});}return o;}
 function dailyLines(){const D=dlyS();return t('dHead',{s:D.streak||0})+'\n'+dailyList().map(x=>`${t(x.k)}: ${itN(x.it)} ${D.done[x.k]?'✓':`${D.c[x.k]||0}/${x.n}`}`).join('\n');}
 
 /* ---------------- rankings (SAT-RANK-001) ---------------- */

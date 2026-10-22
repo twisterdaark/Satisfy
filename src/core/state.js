@@ -39,6 +39,8 @@
     // achievements earned (SAT-ACH-001), arena wins and the highest level ever reached (SAT-RANK-001),
     // today's daily bounties and streak (SAT-DAILY-001; a date inside, so it must sync)
     'ach', 'arW', 'peak', 'dly',
+    // the days (UTC dates, the last 7) you cleared all three daily bounties (SAT-ONLINE-130)
+    'dlyW',
     // costumes owned (SAT-STYLE-001), pet growth (SAT-PETLV-001), best Tower of Trials floor (SAT-TOWER-001)
     'cos', 'petx', 'twB',
     // the inn you are bound to respawn at (main 6991032)

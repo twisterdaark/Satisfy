@@ -200,7 +200,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U342 | A/B testing ethics | ⏳ | No tests on players; owner decision |
 | U343 | Community feedback triage | ✅ | GitHub issue templates for bugs and ideas (Arabic and English, sorted by part of the game: SAT-ONLINE-107) and in-game reports |
 | U344 | Season rewards | ✅ | SAT-ONLINE-129: when a month's arena season is over, each player's game gives cosmetic titles once: Arena Regular for 10 duels (taking part is enough, win or lose), Arena Top 10 for a top-ten place among those with 5 duels, Arena Champion for the first (`S.arnS`); the board says how. `unit/seasontitles` fails if a season or competition title (these and the National Champion) gets a stat, a stats line or a skill; no paid items exist (`regression/arenaseason`) |
-| U345 | Retention without grind | 🟡 | Nothing is lost for a missed day; daily caps on repeatable quests (B) |
+| U345 | Retention without grind | ✅ | SAT-ONLINE-130: the daily bounties' bonus was a streak that a missed day reset to 0; now it is +10% for each day you cleared all three in the last 7 days (up to +50%, `S.dlyW`), so a missed day takes nothing away, and an old save's streak becomes the days it stood for. The day is the world clock's (`today()` follows `wNow`), the same for everyone online. Daily caps on repeatable quests (B) as before (`regression/dailyweek`) |
 | U346 | Data export/delete | 🟡 | "Delete my online data" (SAT-ONLINE-015/066). The owner took out "Download my online data" (078) and the manual cloud Upload/Download on 2026-10-21, to cut the chance of duplicated data: characters move only by the automatic sync |
 | U347 | Disaster recovery | ⏳ | Database backups need the Blaze plan (owner) |
 | U348 | Shard scale-out | ⏳ | One shard (`main`) |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 67 · 🟡 22 · ⏳ 6 · ❌ 9 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 68 · 🟡 21 · ⏳ 6 · ❌ 9 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
