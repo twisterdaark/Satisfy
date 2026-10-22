@@ -19,10 +19,11 @@ test('the gate of hell: her field, the fake gauge, the Mirror Shield, succubi an
     const at = await g.eval(() => { const m = window.__GBL.of(); return { lv: m.lv, z: window.__G.zoneAt(m.x, m.y), boss: window.__G.mons().filter((x) => x.type === 'belial').length }; });
     assert.deepEqual(at, { lv: 480, z: 'zChaos4', boss: 1 });
     assert.deepEqual(await g.eval(() => window.__G.monNames().filter(([k]) => k === 'belial' || k === 'succ').map(([, n]) => n)), ['32nd Great Demon Belial', 'Succubus']);
-    await g.eval(() => { const G = window.__G; G.S.lv = 450; G.S.hpot = 3; });
+    // level 450 would make this character the first at 400, and the Pioneer title's dialog opens 1.2 s (real time) later,
+    // in the middle of the test: it has the title already
+    await g.eval(() => { const G = window.__G; G.S.lv = 450; G.S.hpot = 3; G.S.tl.pioneer = 1; });
     await near(g);
     await g.step(2);
-    // level 450 makes this character the first at 400: the Pioneer title's dialog opens, and keys wait for it to close
     for (let i = 0; i < 6 && await g.eval(() => window.__G.mode === 'dialog'); i++) { await g.eval(() => window.__G.advance()); await g.step(2); }
     assert.equal(await g.eval(() => window.__G.mode), 'play');
     // the hell field: potions do nothing, attacks are slower
