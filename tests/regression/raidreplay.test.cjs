@@ -39,7 +39,8 @@ test('boss fight replays: recorded with no private data, kept under L, watched a
     assert.match(row, /^▶ .+ · killed · 0:0\d$/);
     // walk away first: the view goes where the fight was
     await g.eval(() => document.querySelector('#logL [data-rr="0"]').click()); await g.step(2);
-    await g.eval(() => { window.__G.P.x -= 2000; window.__G.P.inv = 0; });
+    // (nothing alive around there: without a shield, monsters could kill you before the checks below)
+    await g.eval(() => { const G = window.__G; G.P.x -= 2000; G.P.inv = 0; G.P.hp = G.maxHP(); for (const m of G.mons()) if (Math.hypot(m.x - G.P.x, m.y - G.P.y) < 800) { m.dead = true; m.rt = 1e9; } });
     await g.step(10);
     assert.ok(await g.eval(() => !!window.__RREP.play), 'watching');
     assert.equal(await g.mode(), 'rr', 'a spectator');
