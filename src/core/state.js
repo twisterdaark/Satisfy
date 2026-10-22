@@ -68,7 +68,7 @@
     // the guild hall being visited (SAT-ONLINE-115, plan U013): {gid, name, guest, dx, dy}, so a reload inside goes on there
     'hall',
     // recipes learned and recipe use counts (main rcLearn)
-    'rcK', 'rcN',
+    'rcK', 'rcN', 'lgfix',
     // divine-beast breaths ever held, which open their set recipes (owner 2026-10-22)
     'kmat',
     // map cells seen (fog of war, Nitro's feedback): base64 bitset

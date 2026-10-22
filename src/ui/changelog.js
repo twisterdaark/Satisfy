@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22arrow', ver: '1.73', d: '2026-10-22',
+      ar: ["سهم المهمات بقى بكسل آرت زي الشخصيات، وبيقف جنب راسك بنفس حجم سهم صغير، والمسافة بعده بشوية",
+        "صيادين ريجاس بيطلعوا على عرين الحارس أول ما تقبل الغارة على طول، ومبيمشوش وراك خالص، وسهم المهمات بيدلك عليهم",
+        "تقدر تفضل دايس كليك شمال عشان تفضل تضرب، من غير ما تدوس كل مرة",
+        "التحويل لكلاس أسطوري بيرجع كل الستات 10 بجد، حتى بونص الحدادة، والمعدات اللي محتاجة لفل أعلى منك بتتقلع وترجع الشنطة",
+        "فرق اللفل بقى أصعب بكتير: لو الوحش أعلى منك بأكتر من 50 لفل ضررك بيقل جامد، ولحد 2% بس عند 100 لفل، وضربته فيك أقوى"],
+      en: ["The quest arrow is pixel art like the characters now, sitting beside your head at the size of a small arrow, with the distance just past it",
+        "Regas's hunters set out for the Guardian's den the moment you accept the raid and never trail behind you; the quest arrow points to them",
+        "Hold the left mouse button to keep attacking instead of clicking each time",
+        "Taking a legendary class really puts every stat back to 10, the smithing bonus too, and gear that needs a higher level than yours comes off into the bag",
+        "Level gaps are much harder: against a monster more than 50 levels above you your damage drops sharply, down to 2% at 100 levels, and its blows hit you harder"] },
     { v: '2026-10-22raid', ver: '1.72', d: '2026-10-22',
       ar: ["حارس الغابة وباقي الزعماء مبقوش بيقتلوا باللمس: ضربتهم القريبة بقت بتتحضر نص ثانية (علامة ! حمرا ودايرة)، فتقدر تتفاداها بالداش أو تبعد",
         "صيادين ريجاس في غارة الحارس بيسبقوك على العرين ويستنوك هناك بدل ما يمشوا جنبك، ومبيخشوش في الحيطان. ولو الحارس مش موجود ريجاس بيقولك تستنى لما يظهر، وتقدر تلغي الغارة من عنده",
