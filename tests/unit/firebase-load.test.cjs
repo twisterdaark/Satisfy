@@ -78,3 +78,56 @@ test('the switch is on by default on the GitHub Pages host only', () => {
     if (hadLoc) globalThis.location = prevLoc; else delete globalThis.location;
   }
 });
+
+// SAT-ONLINE-120 (plan U022): ?emu points online play at the local emulators, only on a page served from this computer
+function configAt(hostname, search) {
+  const file = path.join(__dirname, '..', '..', 'src/net/firebase-config.js');
+  const had = Object.prototype.hasOwnProperty.call(globalThis, 'Satisfy'), prev = globalThis.Satisfy;
+  const hadLoc = Object.prototype.hasOwnProperty.call(globalThis, 'location'), prevLoc = globalThis.location;
+  try {
+    globalThis.Satisfy = {};
+    globalThis.location = { hostname, search };
+    vm.runInThisContext(fs.readFileSync(file, 'utf8'), { filename: file });
+    return globalThis.Satisfy;
+  } finally {
+    if (had) globalThis.Satisfy = prev; else delete globalThis.Satisfy;
+    if (hadLoc) globalThis.location = prevLoc; else delete globalThis.location;
+  }
+}
+
+test('the emulator switch: only ?emu on a local page; the public site never points at a test database', () => {
+  assert.deepEqual({ ...configAt('localhost', '?net=online&emu').firebaseEmulator }, { host: '127.0.0.1', dbPort: 9000, authUrl: 'http://127.0.0.1:9099' });
+  assert.equal(configAt('127.0.0.1', '?emu=1').firebaseEmulator.host, '127.0.0.1');
+  assert.equal(configAt('localhost', '?emu=devbox.local&net=online').firebaseEmulator.authUrl, 'http://devbox.local:9099');
+  assert.equal(configAt('localhost', '?net=online').firebaseEmulator, null, 'not asked for');
+  for (const h of ['twisterdaark.github.io', 'example.com', 'localhost.evil.com', '192.168.1.5', '']) assert.equal(configAt(h, '?net=online&emu').firebaseEmulator, null, h || 'file://');
+  assert.equal(configAt('localhost', '?emu=a/b').firebaseEmulator, null, 'a host name only');
+  const C = configAt('twisterdaark.github.io', '').firebaseConfig;
+  assert.match(C.databaseURL, /^https:\/\/satisfy-online-8yjeix-default-rtdb\.[a-z0-9-]+\.firebasedatabase\.app$/, 'the real project');
+  assert.equal(JSON.stringify(C).match(/localhost|127\.0\.0\.1|demo-|emulator/i), null, 'nothing local in the shipped config');
+});
+
+test('load() connects to the emulators when the switch says so, and only then', async () => {
+  const calls = [];
+  const sdkE = () => {
+    const s = sdk([]);
+    s.database.connectDatabaseEmulator = (db, host, port) => calls.push(['db', host, port]);
+    s.auth.connectAuthEmulator = (a, url, o) => calls.push(['auth', url, !!(o && o.disableWarnings)]);
+    return s;
+  };
+  globalThis.__SATISFY_FIREBASE_LOADER__ = () => Promise.resolve(sdkE());
+  try {
+    const S = loadModules('src/net/firebase-config.js', 'src/net/firebase.js');
+    const r = await S.firebase.load(S.firebaseConfig);
+    assert.deepEqual(calls, [], 'no switch: the real project');
+    assert.equal(r.emulator, false);
+    const S2 = loadModules('src/net/firebase-config.js', 'src/net/firebase.js');
+    S2.firebaseEmulator = { host: '127.0.0.1', dbPort: 9000, authUrl: 'http://127.0.0.1:9099' };
+    const prev = globalThis.Satisfy; globalThis.Satisfy = S2;
+    try {
+      const r2 = await S2.firebase.load(S2.firebaseConfig);
+      assert.deepEqual(calls, [['db', '127.0.0.1', 9000], ['auth', 'http://127.0.0.1:9099', true]]);
+      assert.equal(r2.emulator, true);
+    } finally { if (prev === undefined) delete globalThis.Satisfy; else globalThis.Satisfy = prev; }
+  } finally { delete globalThis.__SATISFY_FIREBASE_LOADER__; }
+});

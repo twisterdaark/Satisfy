@@ -25,7 +25,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U019 | Rate limiting | ✅ | Presence per-sender budget, duel hits per second, rules on every write |
 | U020 | Network observability | 🟡 | `net().stats`/`net().link` and the badge tooltip (SAT-ONLINE-012); no dashboard |
 | U021 | Auth emulator CI | 🟡 | A fake Firebase that applies a copy of the rules; the real emulator isn't reachable from this sandbox |
-| U022 | Config/env isolation | 🟡 | Public web config in `src/net/firebase-config.js`; no staging project |
+| U022 | Config/env isolation | ✅ | Public web config in `src/net/firebase-config.js`; SAT-ONLINE-120: a test environment apart from the real one, the local Firebase emulators with `?emu`, honoured only on a page served from this computer, so the public site can't point at a test database (`unit/firebase-load`; [EMULATOR.md](EMULATOR.md)). A second Firebase project (staging) stays the owner's call (U327) |
 | U023 | Protocol versioning | ✅ | Envelope `v: 1`, `PROTOCOL_VERSION` (§25) |
 | U024 | Load testing swarm | ✅ | `unit/chaos` 100-client soak (in memory) |
 | U025 | World shard migration | ❌ | U009 is in, but there is still one shard (`main`); migration needs more than one |
@@ -43,7 +43,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U037 | Outlaw flag | ✅ | SAT-ONLINE-038: a kill makes the killer an outlaw for 10 min (`PlayerPublic.ol`, red name for everyone, `S.olT` kept across a reload); the kill counts only from a real, recent hit |
 | U038 | Bounty board | 🟡 | SAT-ONLINE-051 (#84): gold on an outlaw's head from its card, paid once to its PvP killer through the victim's own kill record (`bountyPaid`), taken back from the board; karma (SAT-ONLINE-052, #85): murders cost points and lengthen the red name, -5 is a murderer; gold has no ledger (D3) |
 
-**Totals:** ✅ 24 · 🟡 9 · ⏳ 3 · ❌ 2.
+**Totals:** ✅ 25 · 🟡 8 · ⏳ 3 · ❌ 2.
 
 ## Social U046–U065 (plan doc §35 [SOC])
 

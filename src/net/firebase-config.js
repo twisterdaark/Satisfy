@@ -21,4 +21,14 @@
   // and the test harness stay offline; ?net=off plays offline anywhere and ?net=local stays for two-tab tests. A value set
   // before this file loads is kept: a test turns it on that way, and a custom domain can be added here.
   if (ns.netOnlineOnly === undefined) ns.netOnlineOnly = !!(root.location && /\.github\.io$/.test(root.location.hostname || ''));
+  // SAT-ONLINE-120 (plan U022): a test environment kept apart from the real one. With ?emu (or ?emu=host), and only when the
+  // page itself is served from this computer (localhost, 127.0.0.1, ::1), online play talks to the Firebase emulators on that
+  // host (the database on 9000, sign-in on 9099; docs/online/EMULATOR.md) instead of the project above. On any other host,
+  // the public site included, ?emu is ignored, so nothing the players load can point at a test database.
+  ns.firebaseEmulator = (function () {
+    var L = root.location, h = L && L.hostname || '', q = L && L.search || '', m = /[?&]emu(?:=([A-Za-z0-9.-]{1,64}))?(?:&|$)/.exec(q);
+    if (!m || !/^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(h)) return null;
+    var host = m[1] && m[1] !== '1' ? m[1] : '127.0.0.1';
+    return Object.freeze({ host: host, dbPort: 9000, authUrl: 'http://' + host + ':9099' });
+  })();
 })(typeof window !== 'undefined' ? window : globalThis);
