@@ -71,10 +71,17 @@ test('the emulators answer', { timeout: 20000 }, async () => {
 
 test('two clients on the real SDK and rules: presence, a move, a dropped connection and back, a party invitation', { timeout: 90000 }, async () => {
   const a = await player('Ahmed', 2000), b = await player('Bassem', 2030);
+  // what this client may do as itself: a read any signed-in player may do, its own session, and what the fixtures hold
+  const probe = async (c) => {
+    const r = await fbDb.get(fbDb.ref(c.db, 'accountIds/' + c.uid)).then((x) => 'read ' + JSON.stringify(x.val()), (e) => 'read ' + (e.code || e.message));
+    const w = await fbDb.set(fbDb.ref(c.db, 'sessions/' + c.uid), { sid: c.pres.sid, t: fbDb.serverTimestamp() }).then(() => 'write ok', (e) => 'write ' + (e.code || e.message));
+    return c.name + ' (' + c.uid + ', signed in: ' + !!fbAuth.getAuth(c.app).currentUser + '): ' + r + ', ' + w + ', fixture ' + JSON.stringify(await adminRead('accountIds/' + c.uid));
+  };
+  const probes = [await probe(a), await probe(b)];
   a.publish(true); b.publish(true);
   await until(() => a.sees(b) && b.sees(a), 'each sees the other').catch(async (e) => {
     const pres = await adminRead('presence/satisfy/main');
-    throw new Error(e.message + ' · db ' + DBURL + ' · errors A ' + JSON.stringify(a.errs) + ' B ' + JSON.stringify(b.errs) + ' · stored ' + String(JSON.stringify(pres)).slice(0, 600) + ' · events B ' + JSON.stringify(b.events.map((x) => x.type)).slice(0, 200));
+    throw new Error(e.message + ' · ' + probes.join(' · ') + ' · db ' + DBURL + ' · errors A ' + JSON.stringify(a.errs) + ' B ' + JSON.stringify(b.errs) + ' · stored ' + String(JSON.stringify(pres)).slice(0, 600) + ' · events B ' + JSON.stringify(b.events.map((x) => x.type)).slice(0, 200));
   });
   assert.equal(b.sees(a).handle, 'Ahmed');
 
