@@ -125,7 +125,7 @@ test('town ranks: the Honoured buy rare stock from the merchant, the Town Hero s
     assert.equal(got, 3);
     await g.eval(() => { window.__G.S.rep.zWin = 800; });
     m = await g.eval(() => window.__GRS.merch('merchant'));
-    assert.equal(m.filter((l) => /Honoured stock/.test(l)).length, 2, m.join(' / '));
+    assert.equal(m.filter((l) => /Honoured stock/.test(l)).length, 4, m.join(' / ')); // + the blessing and protection stones (v1.82)
     const inn = await g.eval(() => window.__GRS.inn('inn'));
     assert.ok(inn.includes('A free room (Town Hero)'), inn.join(' / '));
   } finally { await g.close(); }

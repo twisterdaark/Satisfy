@@ -7,6 +7,23 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22wpass', ver: '1.82', d: '2026-10-22',
+      ar: ["الأسلحة الملحمية وأعلى بقت بتطلع بباسيفز عشوائية: واحد للملحمي، واتنين للفريد، وتلاتة للأسطوري (ضرر، ضرر على الزعماء، كريتيكال، ضرر الكريتيكال، سرقة صحة، مانا مع الضربة، حرق، شلل). الأسلحة اللي معاك أخدت باسيفز مرة واحدة",
+        "فحص القطعة: الخاصية المخفية في السلاح ممكن تطلع باسيف جديد للسلاح",
+        "حجر حماية (لو التطوير فشل مبينزلش) وحجر بركة (+10% فرصة نجاح): بيقعوا من الزعماء، والتاجر بيبيعهم للمكرّمين وبطل البلد، وبتختار تستعملهم ولا لأ قبل كل محاولة",
+        "التلفيل بقى أصعب بكتير: الخبرة اللي محتاجها لكل لفل زادت (لفل 100 محتاج حوالي 386 ألف بدل 33 ألف)، والوحش اللي أعلى منك بكتير بيديك بالكتير 1.3 من خبرته، وقتلة واحدة مبتديش أكتر من 12% من لفل (نص لفل من الزعيم)، وبونصات الخبرة زي البركات والألقاب بتتحسب فوق الحد ده",
+        "سحلية المستنقع وسحالي عشيرة إيران والمرأة السحلية بقى ليهم بوز وديل وعيون صفرا بدل شكل العفريت",
+        "نافذة الحالة: الكلام الطويل (زي الصبر) بيتلف جوا خانته ومبقاش بيركب على عمود الألقاب",
+        "قايمة اللاعيبة أونلاين: الأزرار بقت متقسمة صفوف مرتبة بدل ما تتقطع على الجنب",
+        "11 إنجاز جديد: آفة الوحوش، من الرانكرز (لفل 300)، سيد المهمات، جبل دهب، صنايعي معلم، التعزيز الكامل (+10)، سلاح بتلت خواص، الفنون المدمجة، كاسر الظل، صياد الكراكن، قاهر الشياطين"],
+      en: ["Epic and better weapons roll random passives: one for epic, two for unique, three for legendary (damage, damage to bosses, critical chance, critical damage, life steal, mana per hit, burn, stun). The weapons you have got theirs once",
+        "Appraisal: a hidden function on a weapon can turn out to be a new weapon passive",
+        "Protection Stone (a failed enhancement does not drop) and Blessing Stone (+10% success): bosses drop them, the merchant sells them to the Honoured and Town Heroes, and you pick whether to use them before each try",
+        "Leveling is much slower: each level needs more XP (level 100 needs about 386 thousand instead of 33 thousand), a monster far above you gives at most 1.3 times its XP, and one kill gives no more than 12% of a level (half a level from a boss); XP bonuses such as blessings and titles count on top of that limit",
+        "Swamp lizards, Iran clan lizards and the Lizard Woman have a snout, a tail and yellow eyes instead of a goblin look",
+        "Status window: long values (like Patience) wrap in their cell and no longer run over the titles column",
+        "Players online list: the buttons sit in tidy rows instead of being cut off at the side",
+        "11 new achievements: Monster Bane, Ranker (level 300), Quest Master, Mountain of Gold, Master Craftsman, Fully Enhanced (+10), Three Passives, Linked Arts, Shadow Breaker, Kraken Hunter, Demon Conqueror"] },
     { v: '2026-10-22achd', ver: '1.81', d: '2026-10-22',
       ar: ["إنجازات الاستكشاف الستة (أول خطوات، دليل الطرق، شاف الدنيا، مكتشف المناطق، رسام الخرايط، صياد الكنوز) بقى ليها وصف بدل الكود زي achD_zones30"],
       en: ["The six exploring achievements (First Steps, Pathfinder, Seen the World, Region Hunter, Cartographer, Treasure Hunter) have a description instead of a raw key like achD_zones30"] },
