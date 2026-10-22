@@ -597,3 +597,23 @@ test('every rule expression is well formed: balanced parentheses, closed strings
   })(rules, '');
   assert.deepEqual(bad, []);
 });
+
+test('the guild hall (SAT-ONLINE-115): members and guests read it, the master and officers furnish it and let guests in, the guest only leaves', () => {
+  const MEM = "root.child('guildMembers').child($gid).child(auth.uid).exists()";
+  const MO = "(root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'm' || root.child('guildMembers').child($gid).child(auth.uid).child('rk').val() === 'o')";
+  const h = rules.guildHall.$gid, g = rules.guildHallGuest.$gid, v = rules.hallInv.$uid;
+  assert.equal(h['.read'], `auth != null && (${MEM} || root.child('guildHallGuest').child($gid).child(auth.uid).exists())`);
+  assert.ok(h['.write'].startsWith('auth != null && (' + MO + ' || '), 'the master and officers furnish');
+  assert.match(h.$slot['.validate'], /^\$slot\.matches\(\/\^s\[0-7\]\$\/\) && newData\.hasChildren\(\['k', 'by', 'n', 't'\]\)/, 'eight places');
+  assert.equal(h.$slot.k['.validate'], "newData.isString() && newData.val().matches(/^(table|shelf|rack|barrel|anvil|bed|board|well|counter)$/)");
+  assert.equal(h.$slot.by['.validate'], 'newData.val() === auth.uid');
+  assert.equal(h.$slot.t['.validate'], 'newData.val() === now');
+  assert.equal(g['.read'], 'auth != null && ' + MEM);
+  assert.equal(g.$uid['.read'], 'auth != null && $uid === auth.uid', 'a guest reads its own invitation');
+  assert.equal(g.$uid['.write'], 'auth != null && $uid === auth.uid && !newData.exists()', 'and may only take it away');
+  assert.match(g.$uid['.validate'], /!root\.child\('guildMembers'\)\.child\(\$gid\)\.child\(\$uid\)\.exists\(\)/, 'not a member already');
+  assert.equal(v['.read'], 'auth != null && $uid === auth.uid');
+  assert.equal(v.$gid['.write'], `auth != null && (($uid === auth.uid && !newData.exists()) || ${MO})`);
+  assert.match(v.$gid['.validate'], /newData\.parent\(\)\.parent\(\)\.parent\(\)\.child\('guildHallGuest'\)\.child\(\$gid\)\.child\(\$uid\)\.exists\(\)/, 'only with the guest entry it points to');
+  for (const n of [h.$slot, g.$uid, v.$gid]) assert.equal(n.$other['.validate'], false);
+});

@@ -16,7 +16,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U010 | Smooth remote movement | ✅ | Interpolation 100 ms in the past, snap on jumps (`unit/presence`) |
 | U011 | Remote animations | ✅ | `anim` idle/walk/attack/dodge/dead |
 | U012 | Network room browser | ❌ | One world shard today (`main`) |
-| U013 | Rejoin same room | 🟡 | Reconnect after a drop and after reload (`regression/online-firebase`), and back into the same party (SAT-ONLINE-023); one room only |
+| U013 | Rejoin same room | ✅ | Reconnect after a drop and after reload (`regression/online-firebase`), and back into the same party (SAT-ONLINE-023); SAT-ONLINE-115: a reload inside a guild hall goes on in the same guild's hall (the save keeps the visit and where you came in), or puts you back where you came in when it can't (offline 15 s, no longer a member or a guest) (`regression/guildhall`) |
 | U014 | Stale state watchdog | ✅ | Remotes expire (15 s online, 5 s local); onDisconnect on the server |
 | U015 | Latency diagnostics | ✅ | SAT-ONLINE-012: smoothed write round trip in `net().link` and the badge tooltip |
 | U016 | Public profile projection | ✅ | SAT-ONLINE-007 (public fields only, §23) |
@@ -143,7 +143,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U232 | Guild chat | ✅ | SAT-ONLINE-049 (#81): `/g`, members only by the rules, so a removed member loses it |
 | U233 | Guild weekly quests | ✅ | SAT-ONLINE-081: the weekly goal: members' kills add up (`guildWeek`, each its own count, only upward, at most 1,500, monsters within 15 levels), three tiers, each reward taken once (`guildWeekPaid`) (`regression/guildweek`) |
 | U234 | Guild forge | ✅ | SAT-ONLINE-065 (#99): the Guild Forge, +2% quality a level, capped at 3 levels |
-| U235 | Guild housing | ❌ | |
+| U235 | Guild housing | ✅ | SAT-ONLINE-115: the guild hall, a room each guild furnishes (eight places, nine pieces, who placed what kept with it; `guildHall`); members go in from the guild panel, the master and officers let other players in by account ID (`guildHallGuest`, `hallInv`), guests and members only read it and only the master and officers furnish (the rules); presence keeps each hall to itself; it goes with the guild (`regression/guildhall`) |
 | U236 | Guild treasury | ✅ | Same as U221 |
 | U237 | Guild research tree | 🟡 | Three buildings of three levels paid from the treasury (065); no tree |
 | U238 | Guild alliances | ✅ | SAT-ONLINE-085: proposed by the master or an officer, accepted or declined by the other guild's; the rules write each side only against a fresh proposal from the other (one guild can't force it); 30 days, renewable in the last week, up to 3; no open PvP between allies (pvp.js `ally`) (`guildAllyAsk`, `guildAlly`) (`regression/guildally`) |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 74 · 🟡 17 · ⏳ 6 · ❌ 7 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 75 · 🟡 17 · ⏳ 6 · ❌ 6 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

@@ -65,6 +65,8 @@
     'karma', 'karT',
     // the National Competition (SAT-ONLINE-064) this character scored in and is still to be paid for (its id)
     'natIn',
+    // the guild hall being visited (SAT-ONLINE-115, plan U013): {gid, name, guest, dx, dy}, so a reload inside goes on there
+    'hall',
     // recipes learned and recipe use counts (main rcLearn)
     'rcK', 'rcN',
     // map cells seen (fog of war, Nitro's feedback): base64 bitset
