@@ -47,6 +47,9 @@ test('#161: bug reports: your own, one every 2 minutes; admins read, tag and cle
   await no(send(B, 'bad id', bug(B)), 'a key of its own form');
   await yes(send(B, 'b_B_1', bug(B)), 'Bassem sends one');
   await no(send(B, 'b_B_2', bug(B)), 'a second within 2 minutes');
+  await no(db(B).ref('bugLast/' + B).remove(), "Claude-B's review: bugLast can't be removed to send again at once");
+  await no(db(B).ref('bugLast/' + B + '/t').remove(), 'nor its time');
+  await no(db(B).ref().update({ ['bugLast/' + B]: null, ['bugs/b_B_2']: bug(B) }), 'nor in the same update');
   await no(send(B, 'b_B_1', bug(B, 'changed it')), 'never changed');
   await no(db(A).ref('bugs').once('value'), 'players do not read them');
   await yes(db(M).ref('bugs').once('value'), 'the owner does');
@@ -61,6 +64,8 @@ test('#161: bug reports: your own, one every 2 minutes; admins read, tag and cle
   await no(db(A).ref('bugTriage').once('value'), 'players do not read tags');
   await no(db(B).ref('bugs/b_B_1').remove(), 'the sender does not remove it');
   await yes(db(M).ref().update({ 'bugs/b_B_1': null, 'bugTriage/b_B_1': null }), 'the owner clears it');
+  await yes(db(M).ref().update({ 'bugs/b_B_1': null, 'bugTriage/b_B_1': null }), 'a second click on Clear: already gone');
+  await no(db(B).ref('bugs/b_gone').remove(), 'a player removes none, gone or not');
 });
 
 test('#151: the guild hall: members and guests read it, the master furnishes it, a guest only leaves', async () => {
