@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22qd', ver: '1.75', d: '2026-10-22',
+      ar: ["تفاصيل المهمة بتوري نوعها فوق (القصة، يومية، جانبية) أو رتبتها لو مهمة S، وزرار سهم المهمات بقى بلون عادي وزرار الإلغاء بس هو الأحمر"],
+      en: ["Quest details show the kind at the top (Story, Daily, Side) or the grade for S quests, and the quest arrow button is a plain colour now; only Cancel is red"] },
     { v: '2026-10-22pagma', ver: '1.74', d: '2026-10-22',
       ar: ["فن سيف باغما بقى زي الرواية: رسمة الجبل ورا شلالات لوران (مهمة خان الأولى) بتعلمك الخمس حركات مرة واحدة: الموجة والتقييد والربط والقتل والتجاوز، من غير شرط لفل",
         "الدوران والقمة بتتعلمهم من قتال قرين باغما في الغابة الغامضة (مهمة الناسك التانية)، زي جريد",
