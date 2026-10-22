@@ -9183,7 +9183,7 @@ function tradeStart(){TRADE=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisf
   // (then no swap can have been written). If both had (the swap may be in the database, unseen: a dropped connection),
   // it stays held until the recovery looks the trade up and finds no swap, a minute after the confirm (Claude-B's review
   // of #168); a failed read always waits, the swap is there
-  if((e.type==='cancelled'||e.type==='failed')&&S&&S.trPend&&S.trPend.id===e.id&&S.trPend.esc){if(e.why!=='read'&&!e.both){trUnescrow();save(true);if(!$('inv').hidden&&typeof renderInv==='function')renderInv();}else toast(t('trHeld'),'warn');}
+  if((e.type==='cancelled'||e.type==='failed')&&S&&S.trPend&&S.trPend.id===e.id&&S.trPend.esc){if(e.why!=='read'&&!e.both){trUnescrow();delete S.trPend;/* only this side had confirmed: no swap, nothing to recover (Claude-B's review of #168) */save(true);if(!$('inv').hidden&&typeof renderInv==='function')renderInv();}else toast(t('trHeld'),'warn');}
   else if(e.type==='done')tradeApply(e,n);});}
 /* seller history (SAT-ONLINE-089, plan U215). After a trade each side writes its own record of it: tradeLog (with whom, the
    gold given and got, which the rules check against the trade's own sides, and how many items; only you read it) and a

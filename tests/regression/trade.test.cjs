@@ -154,6 +154,25 @@ test('online: offer, any change resets the accepts, Accept + Confirm swap once; 
     assert.equal(await w(a, { ['tradeLog/gTradeA1/' + tid]: { o: 'gTradeB2', on: 'Bassem', gg: 100, gi: 5000, ig: 1, ii: 0 } }), 'no', 'not another amount');
     assert.equal(await w(a, { ['tradeLog/gTradeA1/' + tid]: { o: 'gTradeX9', on: 'Bassem', gg: 100, gi: 50, ig: 1, ii: 0 } }), 'no', 'not another partner');
     assert.equal(await a.eval(async () => { const F = window.__GLD.fb(), D = F.m.database; try { await D.get(D.ref(F.db, 'tradeLog/gTradeB2')); return 'ok'; } catch (e) { return 'no'; } }), 'no', "B's record is B's");
+    // Claude-B's review of #168: a trade cancelled when only this side had confirmed gives the hold back and forgets it at
+    // once (no swap can have happened), so the next trade can be confirmed without waiting for the recovery's minute
+    await openCard(a, 'gTradeB2');
+    await click(a, '#pctx [data-act="pcTrade"]');
+    await until([b], () => !document.getElementById('tradeInv').hidden);
+    await click(b, '#tradeInv [data-act="trYes"]');
+    await until([a, b], () => !document.getElementById('tradeW').hidden);
+    const g0 = await a.eval(() => window.__G.S.gold);
+    await setGold(a, 40);
+    await until([b], () => /40 Gold/.test(document.getElementById('trTh').textContent));
+    await click(a, '#trOk'); await click(b, '#trOk'); await settle(a, b);
+    await until([a, b], () => !document.getElementById('trConf').disabled);
+    await click(a, '#trConf'); await settle(a, b);
+    assert.ok(await a.eval(() => !!window.__GTRR.pend), 'A confirmed: the trade is pending');
+    await click(b, '#tradeW [data-act="trCancel"]');
+    await until([a], () => document.getElementById('tradeW').hidden, 10000);
+    await settle(a, b);
+    assert.equal(await a.eval(() => window.__GTRR.pend || null), null, 'forgotten at once');
+    assert.equal(await a.eval(() => window.__G.S.gold), g0, 'the 40 gold back');
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
