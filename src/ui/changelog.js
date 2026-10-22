@@ -5,6 +5,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22anim', ver: '1.42', d: '2026-10-22',
+      ar: ["اللاعيبة التانيين بقوا بيلمعوا لما ياخدوا ضربة، زي الوحوش بالظبط (لما صحتهم تقل)",
+        "ضربتك بتبان عند الباقيين بنفس الطول دايمًا: 230 ملي ثانية من وقت اللعب، حتى لو اللعبة واقفة أو بخطوات ثابتة (?tick=fixed)"],
+      en: ["Other players now flash when they take a hit, the way monsters do (when their health drops)",
+        "Your swing shows for the others for the same time every time: 230 ms of play, even with the game paused or in fixed steps (?tick=fixed)"] },
     { v: '2026-10-22fixedtick', ver: '1.41', d: '2026-10-22',
       ar: ["تجربة: لو زوّدت ?tick=fixed في آخر رابط اللعبة، العالم بيتحرك بخطوات ثابتة (1/60 من الثانية)، فالحركة والضرب ونتيجة القتال بيبقوا هما هما على شاشة 30 أو 60 أو 144 هرتز. من غيرها اللعبة زي ما هي"],
       en: ["Try it: add ?tick=fixed to the game's address and the world moves in fixed steps of 1/60 s, so moving, swinging and how a fight ends are the same on a 30, 60 or 144 Hz screen. Without it the game is as it was"] },
