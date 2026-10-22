@@ -160,3 +160,38 @@ test('real rules: a friend request is from its sender, accepted by its receiver 
   assert.equal(D.w('uB', { 'friends/uB/uA': { n: 'Ahmed', t: SV }, 'friends/uA/uB': { n: 'Bassem', t: SV }, 'friendReq/uB/uA': null }), 'ok', 'the receiver accepts: both lists and the request gone, in one write');
   assert.equal(E.read(R, D.st, 'friends/uA', { auth: { uid: 'uB' }, now: NOW }), false, "your list is yours");
 });
+
+test('real rules (SAT-ONLINE-104): the ranks\' rights the master sets, and a guild\'s records going only with the guild', () => {
+  const D = db(), G = 'g_uA';
+  // a guild of three: Ahmed the master, Bassem an officer, Carim a member
+  D.set({
+    guilds: { [G]: { name: 'Rights', nk: 'rights', master: 'uA', col: '#5aa0ff', t: NOW } }, guildNames: { rights: G },
+    guildMembers: { [G]: { uA: { rk: 'm', n: 'Ahmed', c: 0, on: NOW }, uB: { rk: 'o', n: 'Bassem', c: 0, on: NOW }, uC: { rk: 'r', n: 'Carim', c: 0, on: NOW } } },
+    guildVault: { [G]: { v_1: { k: 'ore', n: 5, r: 0, by: 'uC', byN: 'Carim', t: NOW } } },
+    guildWeekPaid: { [G]: { w100: { uB: { 1: { t: NOW } } } } },
+    guildLog: { [G]: { l_1: { by: 'uC', n: 'Carim', k: 'give', g: 100, t: NOW } } },
+  });
+  const take = (uid) => ({ ['guildVault/' + G + '/v_1']: null, ['guildVaultTaken/' + G + '/v_1']: { by: uid, t: SV } });
+  const note = (uid, n, v) => ({ ['guildNote/' + G]: { s: 'Hello', by: uid, n, v, t: SV } });
+  const st0 = JSON.parse(JSON.stringify(D.st));
+  // the defaults: the officer takes and writes the notice; the member does neither
+  assert.equal(E.write(R, st0, take('uB'), { auth: { uid: 'uB' }, now: NOW }).ok, true, 'an officer takes');
+  assert.equal(E.write(R, st0, take('uC'), { auth: { uid: 'uC' }, now: NOW }).ok, true, 'a member takes its own');
+  const st1 = JSON.parse(JSON.stringify(st0)); st1.guildVault[G].v_1.by = 'uA';
+  assert.equal(E.write(R, st1, take('uC'), { auth: { uid: 'uC' }, now: NOW }).ok, false, "a member doesn't take another's");
+  assert.equal(E.write(R, st0, note('uC', 'Carim', 1), { auth: { uid: 'uC' }, now: NOW }).ok, false, 'a member writes no notice');
+  // only the master sets the rights, booleans of the five
+  const perm = { o: { take: false }, r: { note: true } }, g = Object.assign({}, st0.guilds[G], { perm });
+  assert.equal(D.w('uB', { ['guilds/' + G]: g }), 'no', 'not an officer');
+  assert.equal(D.w('uA', { ['guilds/' + G]: Object.assign({}, g, { perm: { o: { take: 'no' } } }) }), 'no', 'booleans');
+  assert.equal(D.w('uA', { ['guilds/' + G]: Object.assign({}, g, { perm: { o: { kick: true } } }) }), 'no', 'the five rights only');
+  assert.equal(D.w('uA', { ['guilds/' + G]: Object.assign({}, g, { perm: { m: { take: false } } }) }), 'no', 'nothing for the master');
+  assert.equal(D.w('uA', { ['guilds/' + G]: g }), 'ok');
+  assert.equal(D.w('uB', take('uB')), 'no', 'the officer without "take" takes nothing of others');
+  assert.equal(D.w('uC', note('uC', 'Carim', 1)), 'ok', 'the member with "note" writes the notice');
+  assert.equal(D.w('uB', note('uB', 'Bassem', 2)), 'ok', 'and the officer still does');
+  // a guild's own records go only with the guild
+  assert.equal(D.w('uA', { ['guildWeekPaid/' + G]: null }), 'no', 'the weekly rewards taken stay taken');
+  assert.equal(D.w('uA', { ['guildLog/' + G]: null }), 'no', 'the log stays');
+  assert.equal(D.w('uA', { ['guilds/' + G]: null, 'guildNames/rights': null, ['guildMembers/' + G]: null, ['guildVault/' + G]: null, ['guildWeekPaid/' + G]: null, ['guildNote/' + G]: null, ['guildLog/' + G]: null }), 'ok', 'all of it with the guild');
+});

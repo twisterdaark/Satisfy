@@ -63,7 +63,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U057 | Personal loot | 🟡 | SAT-ONLINE-009: each member's own game pays the boss kill once per encounter; no server ledger |
 | U058 | Need/Greed loot | 🟡 | SAT-ONLINE-063 (#96): every raid boss kill rolls one bonus piece among those who fought it, Need/Greed/Pass run by the raid leader, the roll a hash anyone checks; only the winner's game makes it; server random + ledger still D3 |
 | U059 | Friends and follow | ✅ | SAT-ONLINE-067 (#101): ask from the card, accept, online list with level and place, told when they come online; whispers to friends anywhere (070, #104) |
-| U060 | Guild invitations | 🟡 | SAT-ONLINE-046/049/050 (#79, #81, #82): guilds in the database (unique names, ranks master/officer/member), invites from the card, remove, disband, the guild under the name, guild chat and the vault. Guild buildings: SAT-ONLINE-065 (#99) |
+| U060 | Guild invitations | ✅ | SAT-ONLINE-046/049/050 (#79, #81, #82): guilds in the database (unique names, ranks master/officer/member), invites from the card, remove, disband, the guild under the name, guild chat and the vault. Guild buildings: SAT-ONLINE-065 (#99). SAT-ONLINE-104: the master decides which ranks may invite (the officers by default, the members if allowed), and the rules refuse an invitation from anyone else |
 | U061 | Emotes | ✅ | SAT-ONLINE-022: V (touch: Emote) → wave/dance/point/cheer for 3 s as `PlayerPublic.em` (a fixed list, no text); one per 2 s |
 | U062 | Chat moderation | ✅ | Block list + rate limit (016); Report from the card (`reports`, read by the owner) and insults as stars with `/filter` (071, #105) |
 | U063 | Player trade request | ✅ | SAT-ONLINE-039 (#76): serverless trade, Accept then Confirm, any change resets the accepts, one update with the `tradedItems` ledger so an item can't be traded twice. SAT-ONLINE-128: a side whose tab closed (or connection dropped, or read failed) after it confirmed gets the swap when it comes back: the save keeps the confirmed trade (`S.trPend`) until it is applied, the game finds `tradeDone` and both offers, and `S.trDone` applies each trade once (`unit/traderecover`, `regression/traderecover`). Gold offered beyond what a modified client has still needs the server (D3) |
@@ -138,7 +138,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 |---|---|---|---|
 | U228 | Guild creation | ✅ | SAT-ONLINE-046 (#79): unique names (case-folded, `guildNames`), the founder is master |
 | U229 | Guild recruitment | ✅ | SAT-ONLINE-078: a recruiting message (`guildRecruit`), requests to join (`guildApply`, only for yourself and while it recruits), refusals kept a week (`guildRej`); joining still needs the invitation (`regression/guildrecruit`) |
-| U230 | Guild rank permissions | 🟡 | Master, officer, member with fixed rights, checked by the rules; no custom ranks |
+| U230 | Guild rank permissions | ✅ | SAT-ONLINE-104: the master sets, for officers and members, the rights to invite (and handle requests), take from the vault, spend the treasury, write the notice and plan events (`guilds/{gid}/perm`); the rules check each one (an officer without "take" can't take another's thing, also writing the database); a guild's records go only with the guild (`regression/guildperm`, `unit/rules-fuzz` on the real rules) |
 | U231 | Guild banners | ✅ | SAT-ONLINE-084: the colour, and an emblem the master picks from 15 fixed symbols (`guilds/{gid}/emb`; no uploaded pictures, so nothing to moderate), shown before the guild name for everyone (`regression/guildbanner`) |
 | U232 | Guild chat | ✅ | SAT-ONLINE-049 (#81): `/g`, members only by the rules, so a removed member loses it |
 | U233 | Guild weekly quests | ✅ | SAT-ONLINE-081: the weekly goal: members' kills add up (`guildWeek`, each its own count, only upward, at most 1,500, monsters within 15 levels), three tiers, each reward taken once (`guildWeekPaid`) (`regression/guildweek`) |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 71 · 🟡 20 · ⏳ 6 · ❌ 7 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 72 · 🟡 19 · ⏳ 6 · ❌ 7 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
