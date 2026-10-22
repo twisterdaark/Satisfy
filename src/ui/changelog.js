@@ -5,6 +5,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22v140', ver: '1.40', d: '2026-10-22',
+      ar: ['حرب رين (حدث عالمي جديد على ريدان، لفل 290+): الأمير رين جاي بجيش المملكة الخالدة في 6 موجات من الجنود والرماة والفرسان الملكيين. فيريل الرامي الملكي (لفل 305) بيقود الموجة التالتة، وتشاكسلي قائد الفرسان الملكيين (لفل 313) بيقود السادسة',
+           'بيارو بييجي ريدان وقت الحرب وبيحارب بالفلاحة (ضربة بتلف حواليه)، ولادين "نوفا الشمال" بيضرب بهالة السيف، ولاويل الاستراتيجي كل 25 ثانية بيعمل خطة بتدي كل اللي في المدينة +15% ضرر على الجيش. محدش يقدر يوقّعهم، بس القادة شغلكم انتو',
+           'كويستين من لاويل في ريدان، وآخرهم تايتل "حامي ريدان" (+10% ضرر على جيش المملكة الخالدة). ولو كسبتوا الحرب، رين بيرمي سيفه',
+           'تصليح: حرب الجولم على راينهارت بقى ليها إعلان مكتوب بدل ما يظهر اسم الكود'],
+      en: ["Ren's War (a new world event on Reidan, Lv 290+): Prince Ren comes with the Eternal Kingdom's army in 6 waves of soldiers, archers and royal knights. Ferrell the Royal Archer (Lv 305) leads the third wave and Chucksley, the Royal Knights Commander (Lv 313), the sixth",
+           'Piaro comes to Reidan for the war and fights with his farming (a sweep all around him), Laden the "Northern Nova" strikes with sword aura, and every 25 s Lauel the strategist calls a plan that gives everyone in the town +15% damage against the army. None of them can be knocked out, but the commanders are your work',
+           "Two quests from Lauel in Reidan, ending with the title Defender of Reidan (+10% damage against the Eternal Kingdom's army). Win the war and Ren throws down his sword",
+           'Fix: the golem war on Reinhardt now has a written notice instead of its code name'] },
     { v: '2026-10-21v139', ver: '1.39', d: '2026-10-21',
       ar: ['الغابة الغامضة غرب جاوس (لفل 250+): ضباب أخضر وطريق واحد بيلف لحد فسحة في النص. ناسك الغابة واقف عند أول الطريق وعنده كويستين',
            'نسخة باجما (لفل 260): زعيم عالمي لابس وش باجما وبيحارب بحركات سيفه (القتل، الربط، الموجة، التجاوز، الدوران). كل 30 ثانية بتتقسم لظلال، وطول ما الظلال واقفة بتاخد تلت ضربك بس. كل ما اللاعبين حواليها يكتروا الظلال بتكتر. بترجع بعد ساعة',

@@ -34,7 +34,7 @@ async function eventClock(games, ms) {
     const EVS = 15 * 60 * 1000;
     let slot = Math.floor(Date.now() / EVS) + 1;
     const quiet = (t) => { const m = t % 7200000; return m > 35 * 60000 && m < 115 * 60000; }; // not in a National Competition (the first half hour of even UTC hours, SAT-ONLINE-064), whose own notice would come first
-    while (((slot * 2654435761) >>> 0) % 9 !== 0 || !quiet(slot * EVS)) slot++; // EVT[0]: the invasion of Winston (9 events since the Defense War)
+    while (((slot * 2654435761) >>> 0) % 10 !== 0 || !quiet(slot * EVS)) slot++; // EVT[0]: the invasion of Winston (10 events since Ren's War)
     return slot * EVS;
   });
   for (const g of games) await g.eval(([t0, d]) => { if (!window.__realNow) window.__realNow = Date.now.bind(Date); const off = t0 + d - window.__realNow(); Date.now = () => window.__realNow() + off; }, [at, ms]);
