@@ -9079,7 +9079,9 @@ function balKill(m){const f=m.fh;m.fh=0;if(!f||m.mobKill||!balOn())return;const 
 function balPvp(win){if(!balOn())return;const v=balGet();v[win?'w':'l']++;balSave();}
 /* SAT-ONLINE-093 (plan U334): the gold that came in and went out this week, from every change of the bag's gold (a new or
    loaded character starts the count again) */
-function balGold(){if(!balOn())return;if(balS!==S){balS=S;balG=S.gold;return;}const d=Math.round(S.gold-balG);if(!d)return;balG=S.gold;const v=balGet();if(d>0)v.gi+=d;else v.go-=d;balDirty=1;}
+// signed out, the count forgets where gold was: gold made or spent offline is not counted as one jump at the next sign-in
+// (Claude-B, #128)
+function balGold(){if(!balOn()){balS=null;return;}if(balS!==S){balS=S;balG=S.gold;return;}const d=Math.round(S.gold-balG);if(!d)return;balG=S.gold;const v=balGet();if(d>0)v.gi+=d;else v.go-=d;balDirty=1;}
 function balTick(live,force){balGold();if(!live||!balOn())return;const n=performance.now();if(balDirty&&n-(balTick.sv||0)>5000){balTick.sv=n;balDirty=0;balSave();}if(!force&&balT&&n-balT<300000)return;const v=balGet();if(!(v.n+v.w+v.l+v.gi+v.go))return;
  const sig=JSON.stringify([v,S.cls,S.lv|0]);if(sig===balSig)return;balT=n;balSig=sig;const D=FB.m.database,u={};
  u['balance/'+NET.uid]={wk:v.wk,cls:String(S.cls||'novice').slice(0,16),lv:Math.max(1,Math.min(999,S.lv|0)),n:Math.min(1000000,v.n),s:Math.min(100000000,v.s),w:Math.min(1000000,v.w),l:Math.min(1000000,v.l),gi:Math.min(1e11,v.gi),go:Math.min(1e11,v.go),t:D.serverTimestamp()};
