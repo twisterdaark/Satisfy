@@ -16,7 +16,7 @@ const PROJECT = 'demo-satisfy', NS = PROJECT + '-default-rtdb';
 // the emulators' addresses as emulators:exec gives them, with localhost as 127.0.0.1 (Node may try ::1 first, where they don't listen)
 const v4 = (h) => String(h).replace(/^localhost(?=:)/, '127.0.0.1');
 const DBH = v4(process.env.FIREBASE_DATABASE_EMULATOR_HOST || '127.0.0.1:9000'), AUTHH = v4(process.env.FIREBASE_AUTH_EMULATOR_HOST || '127.0.0.1:9099');
-const SN = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/guild.js', 'src/net/firebase-config.js', 'src/net/firebase.js');
+const SN = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/guild.js', 'src/net/trade.js', 'src/net/firebase-config.js', 'src/net/firebase.js');
 const WORLD = { id: 'satisfy', tile: 16, w: 724, h: 144 };
 const DBURL = 'http://' + DBH + '?ns=' + NS;
 const clients = [];
@@ -124,4 +124,31 @@ test('a guild on the real SDK and rules: found, invite, join, deposit and take o
   await ga.disband();
   await until(async () => (await fbDb.get(fbDb.ref(b.db, 'guilds/' + gid))).val() === null, 'the guild is gone');
   ga.stop(); gb.stop();
+});
+
+test('a trade on the real SDK and rules: ask, accept, an item for gold, both accept and confirm, one swap, the ledger moves the item', { timeout: 90000 }, async () => {
+  const a = clients.find((c) => c.name === 'Ahmed') || await player('Ahmed', 2000);
+  const b = clients.find((c) => c.name === 'Bassem') || await player('Bassem', 2030);
+  a.x = 2010; b.x = 2040; a.publish(true); b.publish(true);
+  await until(() => { const ra = b.sees(a), rb = a.sees(b); return ra && rb && ra.x === 2010 && rb.x === 2040; }, 'close to each other');
+  const iid = 'it_' + a.uid.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30) + '_1';
+  a.bag = [{ iid, json: '{"id":"sword","r":1}' }]; a.gold = 0; b.bag = []; b.gold = 500;
+  const mk = (c) => SN.trade.create({ presence: c.pres, uid: c.uid, store: SN.firebase.tradeStore({ m: { database: fbDb }, db: c.db }), pos: () => ({ x: c.x, y: c.y }), bag: () => c.bag, gold: () => c.gold });
+  const ta = mk(a), tb = mk(b), tick = setInterval(() => { ta.tick(); tb.tick(); }, 100);
+  try {
+    assert.equal(ta.ask(a.sees(b)), 'sent');
+    await until(() => !!tb.pendingAsk(), 'B is asked');
+    assert.equal(tb.accept(tb.pendingAsk().id), true);
+    await until(() => ta.state().phase === 'open' && tb.state().phase === 'open', 'the trade is open on both sides');
+    assert.equal(ta.toggle(iid), true, 'A offers the sword');
+    assert.equal(tb.setGold(300), true, 'B offers 300 gold');
+    await until(() => ta.state().theirs && ta.state().theirs.g === 300 && tb.state().theirs && !!tb.state().theirs.it[iid], 'each sees the other offer');
+    ta.acceptOffer(); tb.acceptOffer();
+    await until(() => ta.state().canConfirm && tb.state().canConfirm, 'both accepted');
+    assert.equal(ta.confirm(), true); assert.equal(tb.confirm(), true);
+    await until(() => ta.state().phase === 'done' && tb.state().phase === 'done', 'the swap is written, once', 20000);
+    const led = (await fbDb.get(fbDb.ref(b.db, 'tradedItems/' + iid))).val();
+    assert.equal(led && led.o, b.uid, 'the ledger says the sword is B\'s now');
+    assert.equal((await fbDb.get(fbDb.ref(a.db, 'tradeDone/' + ta.state().id))).exists(), true);
+  } finally { clearInterval(tick); }
 });
