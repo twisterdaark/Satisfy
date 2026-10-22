@@ -150,6 +150,17 @@ test('#140: the city tax: set by the master of the castle guild, at most 10%, on
   await no(db(C).ref('guildTax/' + G + '/x_c1').remove(), 'nobody takes it back');
 });
 
+test("#140: who holds the castle is written only by that guild's member, or by the guild it is taken from", async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => { await ctx.database().ref('world/satisfy/own/castle').set({ g: G, n: 'Dragons', c: '#ff0000', h: 'Ahmed', uid: A, t: 1 }); });
+  const own = (who, g) => db(who).ref('world/satisfy/own/castle').set({ g, n: 'X', c: '#ff0000', h: 'h', uid: who, t: SV });
+  await no(own(C, G), 'C is not in the Dragons');
+  await no(own(C, 'g_' + C), 'nor in a guild of its own');
+  await no(own(C, 'bd'), 'nor in the guild that holds it');
+  await yes(own(B, 'bd'), 'a canon guild takes it from the Dragons, written by their member');
+  await no(own(A, 'rt'), 'then not by the Dragons any more');
+  await yes(own(A, G), 'the Dragons take it back');
+});
+
 test('#144: a caravan: one at a time, delivered after its time and before it spoils, with the same load', async () => {
   const car = { id: 'v_1', f: 'zWin', to: 'zReid', g: 400, r: 1, md: 60000, t: SV };
   await no(db(B).ref('caravans/' + A).set(car), 'nobody sends a caravan in another name');
@@ -179,11 +190,15 @@ test('#131: repair orders: posted by the owner of the item, answered once by a s
 
 test('#139: guild research: paid from the treasury at its exact price, in the order of the tree, by those who may spend', async () => {
   await env.withSecurityRulesDisabled(async (ctx) => { await ctx.database().ref('guildBank/' + G).set({ in: 300000, s: 0, lb: A, lg: 300000, t: 1 }); });
-  const research = (who, b, s) => db(who).ref().update({ ['guildBuild/' + G + '/' + b]: 1, ['guildBank/' + G + '/s']: s, ['guildBank/' + G + '/lb']: who, ['guildBank/' + G + '/t']: SV });
+  const research = (who, b, s, named = b) => db(who).ref().update({ ['guildBuild/' + G + '/' + b]: 1, ['guildBank/' + G + '/s']: s, ['guildBank/' + G + '/lb']: who, ['guildBank/' + G + '/b']: named, ['guildBank/' + G + '/t']: SV });
   await no(research(B, 'xp1', 30000), 'a member does not spend by default');
   await no(research(A, 'xp1', 29999), 'the exact price');
   await no(research(A, 'xp2', 120000), 'not before its first step');
+  // Claude-B's review: one update buys one node, the one the treasury names
+  await no(db(A).ref().update({ ['guildBuild/' + G + '/xp1']: 1, ['guildBuild/' + G + '/gd1']: 1, ['guildBuild/' + G + '/q1']: 1, ['guildBank/' + G + '/s']: 30000, ['guildBank/' + G + '/lb']: A, ['guildBank/' + G + '/b']: 'xp1', ['guildBank/' + G + '/t']: SV }), 'three studies for the price of one');
+  await no(research(A, 'xp1', 30000, 'gd1'), 'the treasury names another one');
   await yes(research(A, 'xp1', 30000), 'the master researches the first step');
+  await no(db(A).ref('guildBuild/' + G + '/xp1').remove(), 'nothing bought is taken away');
   await no(research(A, 'xp1', 60000), 'once');
   await yes(research(A, 'xp2', 150000), 'then the second, 120,000 more');
   await no(research(A, 'all', 550000), 'the last one needs all three second steps');
