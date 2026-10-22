@@ -164,7 +164,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U310 | Renderer batching | 🟡 | The big map draws only the visible land from a cached copy (B, v0.60) |
 | U311 | Entity registry | 🟡 | Stable keys for monsters (`type@sx,sy`), item ids (`iid`), character id (`pid`) |
 | U312 | Animation state machine | ❌ | |
-| U313 | Fixed tick simulator | ❌ | Tests step frames by hand (the harness); the game runs on frame time |
+| U313 | Fixed tick simulator | ✅ | SAT-ONLINE-099: `?tick=fixed` (off by default) moves the world in steps of 1/60 s at any frame rate; drawing, sound and the network draw their random numbers from a stream of their own. tests/regression/fixedtick |
 | U314 | Dedicated game clock | ✅ | Server clock offset (`wNow`, SAT-ONLINE-044) for everything shared |
 | U315 | Localization bundles | 🟡 | `STR.ar`/`STR.en` in the page; the UI falls back to the key |
 | U316 | Asset loader | 🟡 | Sprite sheets in `sprites-original/` (B) |
@@ -213,7 +213,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U370 | Multi-browser smoke | 🟡 | Chromium in the tests; the owner tests desktop and phone |
 | U371 | Reconnect soak | 🟡 | `unit/chaos` (drops, delays, duplicates); `regression/online-firebase` reconnects |
 | U372 | Load test 100 clients | 🟡 | `COST_MODEL.md` measured numbers; no 100-client run |
-| U373 | Combat determinism | 🟡 | Seeded random and frame clock in tests |
+| U373 | Combat determinism | 🟡 | With `?tick=fixed` the same fight at 30, 60 and 144 fps ends the same to the last digit (tests/regression/fixedtick, seeded random). Left: a seed per session for replays (U323) |
 | U374 | Dupe attack cases | ✅ | Replayed and reordered messages dropped (`unit/presence`); claims once (`dropClaims`, `tradedItems`, `bountyPaid`, `natPaid`, lockouts) |
 | U375 | Safe zone exploit cases | ✅ | No duel or PvP damage in towns, checked on both sides (`regression/pvp`, SAT-ONLINE-038) |
 | U376 | Trade race tests | ✅ | `regression/trade`: any change resets the accepts; the same item twice is refused |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 49 · 🟡 37 · ⏳ 6 · ❌ 12 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 50 · 🟡 37 · ⏳ 6 · ❌ 11 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
