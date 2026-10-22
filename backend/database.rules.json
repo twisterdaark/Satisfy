@@ -29,7 +29,7 @@
     "trades": {
       "$tid": {
         ".read": "auth != null && (data.child('a').val() === auth.uid || data.child('b').val() === auth.uid)",
-        ".write": "auth != null && !data.exists() && newData.child('a').val() === auth.uid",
+        ".write": "auth != null && !data.exists() && newData.child('a').val() === auth.uid && root.child('flags').child('trade').child('on').val() !== false",
         ".validate": "$tid.matches(/^t_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['a', 'b', 't'])",
         "a": { ".validate": "newData.val() === auth.uid" },
         "b": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128 && newData.val() !== auth.uid" },
@@ -768,6 +768,18 @@
         }
       }
     },
+    "flags": {
+      ".read": "auth != null",
+      "$k": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        ".validate": "$k.matches(/^(chat|trade|duel)$/) && newData.hasChildren(['on', 'by', 't'])",
+        "on": { ".validate": "newData.isBoolean()" },
+        "why": { ".validate": "newData.isString() && newData.val().length <= 80" },
+        "by": { ".validate": "newData.val() === auth.uid" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
     "crashes": {
       ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
       "$id": {
@@ -1005,7 +1017,7 @@
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         "$msg": {
-          ".write": "auth != null && ((auth.uid === $uid && !newData.exists()) || (!data.exists() && newData.child('from').val() === auth.uid))",
+          ".write": "auth != null && ((auth.uid === $uid && !newData.exists()) || (!data.exists() && newData.child('from').val() === auth.uid && (newData.child('type').val() !== 'trade.ask' || root.child('flags').child('trade').child('on').val() !== false) && (newData.child('type').val() !== 'duel.challenge' || root.child('flags').child('duel').child('on').val() !== false)))",
           ".validate": "newData.hasChildren(['from', 'sid', 'seq', 'type', 'payload', 't'])",
           "from": {
             ".validate": "newData.isString() && newData.val().length <= 128"
@@ -1064,7 +1076,7 @@
         ".indexOn": ["t"],
         ".validate": "$world === 'satisfy'",
         "$id": {
-          ".write": "auth != null && ((!data.exists() && newData.child('from').val() === auth.uid && (!root.child('mutes').child(auth.uid).exists() || root.child('mutes').child(auth.uid).child('until').val() < now)) || (data.exists() && !newData.exists() && data.child('t').val() < now - 600000))",
+          ".write": "auth != null && ((!data.exists() && newData.child('from').val() === auth.uid && root.child('flags').child('chat').child('on').val() !== false && (!root.child('mutes').child(auth.uid).exists() || root.child('mutes').child(auth.uid).child('until').val() < now)) || (data.exists() && !newData.exists() && data.child('t').val() < now - 600000))",
           ".validate": "newData.hasChildren(['from', 'h', 'text', 't'])",
           "from": { ".validate": "newData.val() === auth.uid" },
           "h": { ".validate": "newData.isString() && newData.val() === root.child('accountIds').child(auth.uid).val()" },
