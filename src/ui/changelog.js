@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23classpacks', ver: '1.92', d: '2026-10-23', hide: 1,
+      ar: ["للمطورين: الكلاسات بقت ممكن تتكتب كبيانات (src/content/classpacks.js): الاسم، واختبار الترقية عند المدرّب، والسكيلات (طعنة، اندفاع، ضربة قدام، دايرة، رمية، تقوية، علاج، وباسيف)، وبتتحط في اللعبة لوحدها"],
+      en: ["For developers: classes can be written as data (src/content/classpacks.js): the name, the trial at a trainer, and the skills (thrust, dash, sweep, nova, shot, buff, heal, and passive), installed by the game at load"] },
     { v: '2026-10-22sbfit', ver: '1.91', d: '2026-10-22',
       ar: ["الشريط الأساسي بقى على قد الخانات بالظبط من غير فراغ في النص، وتحته رقم الشرايط الزيادة صغير مع + و−"],
       en: ["The main bar now fits its slots exactly, with no gap in the middle; under it a small count of extra bars with + and −"] },

@@ -732,7 +732,8 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
  'src/net/raid.js',
  'src/net/cloud.js',
  'src/net/firebase-config.js',
- 'src/net/firebase.js'
+ 'src/net/firebase.js',
+ 'src/content/classpacks.js'
 ].forEach(function(f){document.write('<script src="'+f+'?b='+b+'"><\/script>');});})();</script>
 <script>
 (()=>{
@@ -4986,12 +4987,12 @@ const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Mat
 // the golden ratio (novel ch 315, 1423): Strength and Agility kept 1:1. A hidden stat: always on, never shown in the status window
 const balanced=()=>!!(S&&S.st.str>=20&&S.st.agi>=20&&Math.abs(S.st.str-S.st.agi)<=Math.max(S.st.str,S.st.agi)*.1);
 const dodgeCost=()=>balanced()?20:25;
-function maxHP(){return Math.round((1+achB('hp'))*(100+stat('sta')*10+(S.tl.chief?60:0))*(balanced()?1.08:1)*(S.cls==='gknight'?1.15:S.cls==='knight'?1.2:S.cls==='paladin'?1.15:S.cls==='necro'?.9:S.cls==='orator'?.8:1)*(S.tl.purifier?1.1:1)*(S.tl.climber?1.05:1)*(1+gearSum('hpp')));}
+function maxHP(){return Math.round((1+cpStat('hp'))*(1+achB('hp'))*(100+stat('sta')*10+(S.tl.chief?60:0))*(balanced()?1.08:1)*(S.cls==='gknight'?1.15:S.cls==='knight'?1.2:S.cls==='paladin'?1.15:S.cls==='necro'?.9:S.cls==='orator'?.8:1)*(S.tl.purifier?1.1:1)*(S.tl.climber?1.05:1)*(1+gearSum('hpp')));}
 function maxST(){return 80+stat('sta')*2;}
 function maxMP(){return Math.round((stat('int')*3+Math.round(gearSum('mpb')))*(1+.1*Math.min(2,(S.wis&&S.wis.pill)||0))*(S.tl.echo?1.08:1));}
 const weapKind=()=>(WSH[weapon().id]||{}).k||'sword';
 const mainStat=()=>({bow:'dex',staff:'int',dagger:'dex'})[weapKind()]||'str';
-function dmgMult(){return (1+achB('dmg'))*(1+stat(mainStat())*.008)*(1+mastLv(weapKind())*.01)*(balanced()?1.08:1)*(S.tl.smith?1.1:1)*(isLeg()?1.2:1)*(P.buf&&P.buf.k==='might'?1.1:1)*(P.rage>0?1.3:1)*(S.tl.forest?1.15:1)*(S.tl.hunter?1.1:1)*(S.tl.champ?1.05:1)*(1+petB('noe'))*(S.tl.dslayer?1.08:1)*(S.tl.four?1.05:1)*(S.tl.slayer?1.03:1)*(S.tl.savior?1.03:1)*(1+gearSum('dm'))*(S.bh&&S.bh.wm?1.02:1)*(S.tl.bibanF&&weapKind()==='sword'?1.05:1)*c2Dmg();}
+function dmgMult(){return (1+cpStat('atk'))*(1+achB('dmg'))*(1+stat(mainStat())*.008)*(1+mastLv(weapKind())*.01)*(balanced()?1.08:1)*(S.tl.smith?1.1:1)*(isLeg()?1.2:1)*(P.buf&&P.buf.k==='might'?1.1:1)*(P.rage>0?1.3:1)*(S.tl.forest?1.15:1)*(S.tl.hunter?1.1:1)*(S.tl.champ?1.05:1)*(1+petB('noe'))*(S.tl.dslayer?1.08:1)*(S.tl.four?1.05:1)*(S.tl.slayer?1.03:1)*(S.tl.savior?1.03:1)*(1+gearSum('dm'))*(S.bh&&S.bh.wm?1.02:1)*(S.tl.bibanF&&weapKind()==='sword'?1.05:1)*c2Dmg();}
 // weapon mastery (SAT-CLASS-003): every hit trains the kind of weapon in your hand; each mastery level is +1% damage and
 // slightly faster attacks with that kind (level 1 at 15 hits, 10 at 1500, capped at 50)
 const mastLv=k=>Math.min(50,Math.floor(Math.sqrt(((S.mast||{})[k]||0)/15)));
@@ -5040,7 +5041,7 @@ function wear(i,p){if(i)p*=WEARR[i.r|0]??.4;if(pasOn('stemp'))p*=skLv('stemp')>=
  else if(i.dur===10||i.dur===5){announce(t('durCrit',{it:inm(i),n:i.dur}),1);SFX.deny();}
  else if(i.dur<=20&&gTime>durRemT){durRemT=gTime+40;toast(t('lowDur',{it:inm(i),n:i.dur}),'warn');}}
 function atkV(){return Math.round(iAtk(weapon())*dmgMult()*(P&&P.icb>0?icbM():1));}
-function defV(){let d=setBon('def');for(const sl of GEAR){const i=eqIt(sl);if(i)d+=iDef(i);}return Math.round((d+Math.floor(stat('sta')*.15))*(P&&P.icb>0?icbM():1)*(1+setBon('dfp'))*(S.tl.oath?1.05:1)*(patOn()?3:1));}
+function defV(){let d=setBon('def');for(const sl of GEAR){const i=eqIt(sl);if(i)d+=iDef(i);}return Math.round((1+cpStat('def'))*(d+Math.floor(stat('sta')*.15))*(P&&P.icb>0?icbM():1)*(1+setBon('dfp'))*(S.tl.oath?1.05:1)*(patOn()?3:1));}
 // spawns read the world as generated (GM0), not this player's copy with its chopped trees and stumps, so every
 // client places the same monsters at the same spots and shared monsters line up (owner report: half stayed local)
 let GM0=null;const at0=(x,y)=>(x<0||y<-YO||x>=GW||y>=MH)?CW:GM0[(y+YO)*GW+x],sol0=(x,y)=>SOLID[at0(x,y)]===1;
@@ -6937,6 +6938,46 @@ function skVfx(k){const v=fdir(),a=Math.atan2(v[1],v[0]);({whirl:()=>{for(let i=
  wlrot:()=>vfx('shadow',P.x+v[0]*20,P.y-6+v[1]*20),wlsiph:()=>{vfx('shadow',P.x+v[0]*20,P.y-6+v[1]*20);vfx('heal',P.x,P.y);},ashadow:()=>vfx('shadow',P.x,P.y-6),
  tstealth:()=>vfx('shadow',P.x,P.y-6),trap:()=>vfx('dust',P.x+v[0]*10,P.y+v[1]*10,{n:6}),sbrain:()=>vfx('fire',P.x+v[0]*30,P.y-20+v[1]*30),tsteal:()=>{vfx('shadow',P.x+v[0]*14,P.y-6+v[1]*14);vfx('loot',P.x,P.y-12);},nskel:()=>{vfx('death',P.x+v[0]*16,P.y+v[1]*16);vfx('shadow',P.x+v[0]*16,P.y-4+v[1]*16);},nexpl:()=>{vfx('death',P.x+v[0]*20,P.y-6+v[1]*20);vfx('fire',P.x+v[0]*20,P.y-6+v[1]*20);},ndrain:()=>{vfx('shadow',P.x+v[0]*18,P.y-6+v[1]*18);vfx('heal',P.x,P.y);},
  blord:()=>vfx('rage',P.x,P.y),ospite:()=>vfx('stun',P.x+v[0]*18,P.y-10+v[1]*18),sbdash:()=>{vfx('dust',P.x,P.y,{n:10,angle:a+Math.PI});vfx('slash',P.x+v[0]*12,P.y-7+v[1]*12,{angle:a,rarity:2});}}[k]||(()=>{}))();}
+/* class packs (SAT-ONLINE-147): classes described as data (src/content/classpacks.js, Satisfy.classPacks) and installed
+   here at load, next to the hand-made ones: the class (its name, its root for CROOT), the trial that makes it (a promotion
+   quest at one of the trainers, like the Lancer's), and its skills. A pack skill is one of a few kinds built on the same
+   helpers the hand-made ones use, so it hits, stuns and shows the same way:
+     line  (r, mul, stun?)      a thrust along the facing, stopped by walls
+     dash  (r, mul, stun?)      you dash forward and everything on the way is hit
+     cone  (r, mul, slow?)      a sweep in front of you
+     nova  (r, mul, stun?, slow?) everything around you
+     proj  (proj, mul, pierce?, boom?, stun?) a shot: 'arrow' or a spell ('magic', 'fire', ...)
+     buff  (stat, pct, dur)     for a while: atk / def / hp, + pct
+     heal  (pct)                back to health, a share of the most
+     pas   (stat, pct)          always on once learned (a passive)
+   A pack never replaces a class, skill or quest that exists. Names and texts come in English and Arabic. */
+var CPK={},CPAS={};
+function cpStat(k){if(!S||!P)return 0;let v=0;const L=CPAS[S.cls];if(L)for(const s of L)if(s.stat===k&&S.lv>=SKD[s.id].lv)v+=s.pct;const b=P.cpb&&P.cpb[k];if(b&&gTime<b.until)v+=b.v;return v;}
+function cpFn(s){const mul=+s.mul||1.6,r=+s.r||60,o={stun:s.stun,slow:s.slow};
+ const near=(cx,cy,rad,f)=>{let n=0;for(const m of mons){if(m.dead)continue;const dx=m.x-cx,dy=monY(m)-cy,d=Math.hypot(dx,dy);if(d<rad+MT[m.type].r&&f(m,dx,dy,d))n++;}return n;};
+ const hit=(m,dx,dy,d)=>hitMon(m,mul,{skill:1,kx:dx/(d||1),ky:dy/(d||1),...o});
+ switch(s.kind){
+  case 'line':return ()=>{const v=fdir(),L=c2Line(v,r);P.acd=Math.max(P.acd,.25);vfx('slash',P.x+v[0]*14,P.y-7+v[1]*14,{angle:Math.atan2(v[1],v[0]),rarity:3});if(c2Seg(P.x,P.y-6,v,L,mul,o)){shake=.1;SFX.hit();}};
+  case 'dash':return ()=>{const v=fdir(),L=c2Line(v,r),x0=P.x,y0=P.y-6;P.dx=v[0];P.dy=v[1];P.dash=.22*Math.max(.25,L/60);P.inv=Math.max(P.inv,.25);SFX.dodge();vfx('dust',P.x,P.y,{n:10,angle:Math.atan2(v[1],v[0])+Math.PI});setTimeout(()=>{if(mode!=='play')return;if(c2Seg(x0,y0,v,L+8,mul,o)){SFX.crit();shake=.15;}},200);};
+  case 'cone':return ()=>{const v=fdir(),a=Math.atan2(v[1],v[0]);fx.push({arc:1,x:P.x,y:P.y-8,a,t:.25});vfx('slash',P.x+v[0]*6,P.y-7+v[1]*6,{angle:a,rarity:3});if(near(P.x,P.y-6,r,(m,dx,dy,d)=>(dx*v[0]+dy*v[1])/(d||1)>-.2&&hit(m,dx,dy,d))){SFX.hit();shake=.12;}};
+  case 'nova':return ()=>{fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});vfx(s.vfx||'frost',P.x,P.y-6);if(near(P.x,P.y-6,r,hit)){SFX.hit();shake=.12;}};
+  case 'proj':return ()=>{const v=fdir();shoot(s.proj||'magic',v[0],v[1],mul,{pierce:s.pierce,boom:s.boom,stun:s.stun});};
+  case 'buff':return ()=>{P.cpb=P.cpb||{};P.cpb[s.stat]={v:+s.pct||.2,until:gTime+(+s.dur||10)*skDur(s.id)};vfx('rage',P.x,P.y);toast(t('cpBuff',{s:t('sk_'+s.id),n:Math.round((+s.dur||10)*skDur(s.id))}),'good');};
+  case 'heal':return ()=>{P.hp=Math.min(maxHP(),P.hp+maxHP()*(+s.pct||.25));vfx('heal',P.x,P.y);hudDirty=true;};
+ }
+ return ()=>{};}
+function cpAdd(c){const ID=/^[a-z][a-z0-9]{1,15}$/;if(!c||!ID.test(c.id||'')||CROOT[c.id]||CPK[c.id]||STR.en['cl_'+c.id]||!c.n||!c.n.en)return false;
+ const two=(k,v)=>{if(!v)return;STR.en[k]=v.en||v.ar||'';STR.ar[k]=v.ar||v.en||'';};
+ CPK[c.id]=c;CROOT[c.id]=CROOT[c.root]||c.root||'warrior';two('cl_'+c.id,c.n);CPAS[c.id]=[];
+ if(c.by&&c.q){const q='cp'+c.id;if(!QD[q]){QD[q]={by:c.by,lv:c.lv||20,from:c.from||[c.root],mst:c.mst||['melee',1],obj:c.obj,xp:c.xp||4000,gold:c.gold||200,promo:c.id};two('q_'+q,c.q.n);two(q+'_o',c.q.o);two(q+'_w',c.q.w);two(q+'_d',c.q.d);}}
+ for(const sk of c.skills||[]){if(!sk||!ID.test(sk.id||'')||SKD[sk.id]||SKF[sk.id])continue;
+  SKD[sk.id]={cls:c.id,lv:sk.lv||c.lv||20,mp:sk.kind==='pas'?0:sk.mp||14,cd:sk.kind==='pas'?0:sk.cd||8,col:sk.col||c.col||'#cfe0ff',...(sk.need?{need:sk.need}:{}),...(sk.kind==='pas'?{pas:1}:{})};
+  two('sk_'+sk.id,sk.n);two('skd_'+sk.id,sk.d);if(sk.kind==='pas')CPAS[c.id].push(sk);else SKF[sk.id]=cpFn(sk);}
+ return true;}
+function cpInstall(){for(const c of (Satisfy.classPacks||[]))try{cpAdd(c);}catch(e){console.warn('class pack',c&&c.id,e);}}
+cpInstall();
+Object.assign(STR.ar,{cpBuff:'{s}: {n} ثانية'});Object.assign(STR.en,{cpBuff:'{s}: {n} s'});
+window.__GCP={packs:()=>Object.keys(CPK),stat:k=>cpStat(k),add:c=>cpAdd(c),t:(k,v)=>t(k,v),boss:ty=>!!(MT[ty]&&MT[ty].boss),atk:()=>atkV()}; // tests
 window.__GSKF={keys:()=>Object.keys(SKF),cast:k=>{SKF[k]();skSnd(k);skVfx(k);},snd:k=>SKSND[k]||null,fx:()=>fx.length+proj.length,vn:()=>VXn}; // tests: every skill shows and sounds
 function checkSkills(){pasSkills().forEach(k=>{if(!S.sk[k]){S.sk[k]=1;setTimeout(()=>{toast(t('pasNew',{s:t('sk_'+k)}),'good');SFX.notice();},500);}});clsSkills().forEach(k=>{if(skOK(k)&&!S.sk[k]){S.sk[k]=1;let i=barSkills().indexOf(k);if(i<0){const b=barSkills().slice(0,NSK),e=b.indexOf(null);if(e>=0){b[e]=k;S.bar=b;i=e;}}setTimeout(()=>{toast(i<0?t('skNewC',{s:t('sk_'+k)}):t('skNew',{s:t('sk_'+k),k:keyName(KB[i])}),'good');SFX.notice();},500);}});sbSig='';}
 /* item skills (owner 2026-10-19, "weapons and rings that come with an active skill while you use them, as in the novel"):
