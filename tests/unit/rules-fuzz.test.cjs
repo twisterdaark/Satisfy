@@ -57,6 +57,14 @@ test('rules evaluator: == as ===, regexes and strings left alone', () => {
   assert.ok(LOCS.length > 400, 'every rule location: ' + LOCS.length);
 });
 
+test('rules evaluator: a write is granted on its own path only, never by the rules of the children it changes', () => {
+  // as the real Realtime Database does (tests/emulator: a guild master can't delete the whole vault whose items it may take)
+  const rules = { '.read': false, '.write': false, a: { $k: { '.write': 'true' } } }, state = { a: { x: 1, y: 2 } };
+  assert.equal(E.write(rules, state, { 'a/x': null }).ok, true, 'each child on its own');
+  assert.equal(E.write(rules, state, { a: null }).ok, false, 'not the parent, even when every child would be');
+  assert.equal(E.write(rules, state, { 'a/x': null, 'a/y': null }).ok, true, 'a multi-location update of the children is');
+});
+
 test('fuzz: nobody signed out writes anything, in any state, also inside a multi-location update', () => {
   const bad = [];
   for (let i = 0; i < 6000; i++) {

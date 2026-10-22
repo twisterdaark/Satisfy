@@ -123,17 +123,13 @@ function write(rules, state, update, who = {}) {
   after = prune(after);
   const rootS = new Snap(before, []);
   const env = (vars, ss) => ({ auth, now, root: rootS, data: new Snap(before, ss), newData: new Snap(after, ss), vars });
-  // a write at ss: granted on its path, or else every changed location beneath is
+  // a write at ss: granted by a .write on its own path, the location or above it. Rules beneath it never grant a write to it,
+  // even when each changed child would be granted on its own: the real Realtime Database emulator refuses a guild master's
+  // delete of the whole guildVault/{gid} whose items the master may each take (tests/emulator, SAT-ONLINE-116), and so does
+  // tests/harness/fake-firebase.js
   function granted(ss) {
-    const ch = chain(rules, ss);
-    for (const c of ch) if ('.write' in c.node && evalExpr(c.node['.write'], env(c.vars, ss.slice(0, c.depth)))) return true;
-    if (ch.length <= ss.length) return false; // no rules down to here: nothing below can grant
-    const o = getAt(before, ss), n = getAt(after, ss);
-    if (!isObj(o) && !isObj(n)) return false;
-    const ks = new Set([...Object.keys(isObj(o) ? o : {}), ...Object.keys(isObj(n) ? n : {})]);
-    let any = false;
-    for (const k of ks) { if (JSON.stringify(getAt(before, ss.concat(k))) === JSON.stringify(getAt(after, ss.concat(k)))) continue; any = true; if (!granted(ss.concat(k))) return false; }
-    return any;
+    for (const c of chain(rules, ss)) if ('.write' in c.node && evalExpr(c.node['.write'], env(c.vars, ss.slice(0, c.depth)))) return true;
+    return false;
   }
   function valid(ss) {
     const v = getAt(after, ss);
