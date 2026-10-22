@@ -8019,6 +8019,7 @@ function netTick(){NET.tick();const live=netLive();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
  if(TRADE)TRADE.tick();
+ if(TRADE&&S&&S.trPend)trRecTick();
  rlTick();
  lootTick();
  legTick();
@@ -8491,6 +8492,7 @@ function tradeStart(){TRADE=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisf
  TRADE.on(e=>{const n=Satisfy.chat.clean(e.handle,24)||'?';trSig='';
   if(e.type==='ask')SFX.notice&&SFX.notice();
   else if(e.type==='open'){$('trGold').value='0';}
+  else if(e.type==='confirmed'){if(S&&!S.__demo){S.trPend={id:e.id,foe:e.foe,n,t:wNow()};save(true);}} // SAT-ONLINE-128: kept until the swap is applied
   else if(e.type==='declined')toast(t('trDeclined',{n}),'warn');
   else if(e.type==='cancelled')toast(t(e.why==='far'?'trFar':'trCancelled'),'warn');
   else if(e.type==='failed')toast(t('trFailed'),'warn');
@@ -8514,10 +8516,23 @@ function trHist(){const st=trSt();if(!st)return;st.history(NET.uid).then(v=>{con
  dialog('guild',[L.length?t('trHist',{n:L.length}):t('trHistNone'),...L.slice(0,10).map(r=>t('trHistRow',{w:d(r.t),o:Satisfy.chat.clean(r.on,24)||'?',g:f(r.gg),gi:r.ig?t('trItems',{n:r.ig}):'',r:f(r.gi),ri:r.ii?t('trItems',{n:r.ii}):''}))],null,[{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
 function trCmd(v){if(!/^\/trades\s*$/i.test(v))return false;if(trSt())trHist();else toast(t('trOnline'));return true;}
 window.__GTR={hist:()=>trHist(),rep:uid=>trRepOf(uid),get cache(){return TREP},store:()=>trSt()}; // tests
-function tradeApply(e,n){if(!S||S.__demo)return;const give=e.give||{g:0,it:{}},get=e.get||{g:0,it:{}};
+/* a trade you confirmed whose swap you never saw (SAT-ONLINE-128, plan U063 "no side loses anything without getting its
+   part"): your tab closed, your connection dropped or reading the offers failed while the other side wrote the swap. Its id
+   stays in the save (S.trPend) until the swap is applied; online, every 15 s and at the start, the game looks it up
+   (Satisfy.trade recover) and applies it then. S.trDone keeps the last 20 trades applied, so none is applied twice. A trade
+   not done a minute after you confirmed it can't be done any more (the other side gave up on it): it is forgotten. */
+Object.assign(STR.ar,{trRecovered:'التبادل مع {n} اتم وإنت مش موجود: اللي خدته بقى معاك'});
+Object.assign(STR.en,{trRecovered:'Your trade with {n} went through while you were away: what you got is yours now'});
+var trRecT=-1e9;
+function trOnce(id){if(!id)return true;S.trDone=Array.isArray(S.trDone)?S.trDone:[];if(S.trDone.includes(id))return false;S.trDone.push(id);if(S.trDone.length>20)S.trDone.splice(0,S.trDone.length-20);if(S.trPend&&S.trPend.id===id)delete S.trPend;return true;}
+function trRecTick(force){const p=performance.now();if(!force&&p-trRecT<15000)return;trRecT=p;const R=S.trPend,st=TRADE.state();
+ if(!R||typeof R.id!=='string'||(st.id===R.id&&st.phase!=='idle'))return;
+ TRADE.recover(R.id,R.foe).then(r=>{if(!S||S.trPend!==R)return;if(r){const fresh=!(S.trDone||[]).includes(R.id);tradeApply(Object.assign(r,{handle:R.n}),R.n);if(S.trPend===R)delete S.trPend;if(fresh)toast(t('trRecovered',{n:R.n}),'good');save(true);}else if(wNow()-(+R.t||0)>60000){delete S.trPend;save(true);}},()=>{if(S&&S.trPend===R&&wNow()-(+R.t||0)>600000){delete S.trPend;save(true);}});} // a read refused for ten minutes (no such trade): forgotten too
+function tradeApply(e,n){if(!S||S.__demo)return;if(!trOnce(e.id))return;const give=e.give||{g:0,it:{}},get=e.get||{g:0,it:{}};
  const out=new Set(Object.keys(give.it||{}));S.items=S.items.filter(i=>!(i&&out.has(i.iid)));S.gold=Math.max(0,S.gold-(give.g|0))+(get.g|0);
  for(const k in get.it||{}){const it=tradeItemIn(get.it[k]);if(it)S.items.push(it);}
  Satisfy.ids.ensure(S);save(true);hudDirty=true;if(!$('inv').hidden&&typeof renderInv==='function')renderInv();toast(t('trSwapped',{n}),'good');SFX.quest&&SFX.quest();trRecord(e,n);}
+window.__GTRR={tick:()=>trRecTick(true),get pend(){return S&&S.trPend},get done(){return S&&S.trDone}}; // tests
 function tradeAct(a){if(!TRADE)return;const st=TRADE.state();
  if(a==='trYes'){const ask=TRADE.pendingAsk();if(ask)TRADE.accept(ask.trade);}
  else if(a==='trNo'){const ask=TRADE.pendingAsk();if(ask)TRADE.decline(ask.trade);}

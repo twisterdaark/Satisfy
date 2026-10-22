@@ -51,6 +51,8 @@
     // outlaw until (wall-clock ms) after killing a player in open PvP (SAT-ONLINE-038), kept across a reload;
     // the online guild's id (SAT-ONLINE-046): the guild itself lives in the database
     'duels', 'raidDone', 'olT', 'gon',
+    // a confirmed trade not applied yet, and the last trades applied (SAT-ONLINE-128): so a swap seen late is applied once
+    'trPend', 'trDone',
     // karma (SAT-ONLINE-052): -10..10, down for killing a player who isn't an outlaw, up for killing an outlaw; karT: play time toward the next point back
     'karma', 'karT',
     // the National Competition (SAT-ONLINE-064) this character scored in and is still to be paid for (its id)
