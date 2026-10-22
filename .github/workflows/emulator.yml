@@ -32,7 +32,7 @@ jobs:
       - name: rules with three accounts; two clients
         run: |
           set -o pipefail
-          npx firebase emulators:exec --only database,auth --project demo-satisfy "node --test --test-concurrency=1 --test-force-exit --test-timeout=120000 tests/emulator/rules.emu.cjs tests/emulator/client.emu.cjs" 2>&1 | tee test.log || {
+          npx firebase emulators:exec --only database,auth --project demo-satisfy "node --test --test-concurrency=1 --test-force-exit --test-timeout=120000 tests/emulator/*.emu.cjs" 2>&1 | tee test.log || {
             grep -E "^not ok|^\s+error:|^\s+(Error|FirebaseError)|PERMISSION_DENIED|Expected request to (fail|succeed)" test.log | head -30 | sed 's/^/::error::/'
             exit 1
           }

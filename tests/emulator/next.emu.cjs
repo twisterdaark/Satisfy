@@ -1,0 +1,75 @@
+'use strict';
+// rules-next only: the rules of the open pull requests that this branch carries, on the real Realtime Database emulator, before
+// the owner deploys them. Players A and B, an admin M, and C outside A's guild. One test per pull request, named by it.
+const test = require('node:test');
+const fs = require('node:fs');
+const path = require('node:path');
+const { initializeTestEnvironment, assertFails, assertSucceeds } = require('@firebase/rules-unit-testing');
+
+const RULES = fs.readFileSync(path.join(__dirname, '..', '..', 'backend', 'database.rules.json'), 'utf8');
+const SV = { '.sv': 'timestamp' };
+const A = 'uidAhmed01', B = 'uidBassem02', M = 'uidAdmin03', C = 'uidCarim04', G = 'g_' + A;
+let env;
+
+test.before(async () => { env = await initializeTestEnvironment({ projectId: 'demo-satisfy-next', database: { rules: RULES } }); });
+test.after(async () => { if (env) await env.cleanup(); });
+test.beforeEach(async () => {
+  await env.clearDatabase();
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await ctx.database().ref().set({
+      accountIds: { [A]: 'Ahmed', [B]: 'Bassem', [M]: 'Owner', [C]: 'Carim' },
+      handles: { ahmed: A, bassem: B, owner: M, carim: C },
+      admins: { [M]: true },
+      guilds: { [G]: { name: 'Dragons', nk: 'dragons', master: A, col: 2, t: 1 } },
+      guildNames: { dragons: G },
+      guildMembers: { [G]: { [A]: { rk: 'm', n: 'Ahmed', c: 0, on: Date.now() }, [B]: { rk: 'r', n: 'Bassem', c: 0, on: Date.now() } } },
+      crashes: { c1: { m: 'TypeError', s: 'at f', v: '1.41', by: B, t: 1 } },
+    });
+  });
+});
+const db = (uid) => env.authenticatedContext(uid).database();
+async function no(p, why) { try { await assertFails(p); } catch (e) { throw new Error('should be refused: ' + why + ' (' + e.message + ')'); } }
+async function yes(p, why) { try { await assertSucceeds(p); } catch (e) { throw new Error('should pass: ' + why + ' (' + e.message + ')'); } }
+
+test('#145: an admin removes crash reports, nobody else does', async () => {
+  await no(db(B).ref('crashes/c1').remove(), 'the player who sent it');
+  await no(db(A).ref('crashes/c1').remove(), 'another player');
+  await yes(db(M).ref('crashes/c1').remove(), 'the owner');
+  await yes(db(B).ref('crashes/c2').set({ m: 'TypeError', s: 'at f', v: '1.42', by: B, t: SV }), 'sending one still works');
+});
+
+test('#151: the guild hall: members and guests read it, the master furnishes it, a guest only leaves', async () => {
+  const piece = (by, n, k = 'table') => ({ k, by, n, t: SV });
+  await yes(db(A).ref('guildHall/' + G + '/s0').set(piece(A, 'Ahmed')), 'the master furnishes');
+  await no(db(B).ref('guildHall/' + G + '/s1').set(piece(B, 'Bassem')), 'a member does not');
+  await no(db(A).ref('guildHall/' + G + '/s9').set(piece(A, 'Ahmed')), 'eight places only');
+  await no(db(A).ref('guildHall/' + G + '/s1').set(piece(A, 'Ahmed', 'throne')), 'nine pieces only');
+  await yes(db(B).ref('guildHall/' + G).once('value'), 'members read it');
+  await no(db(C).ref('guildHall/' + G).once('value'), 'others do not');
+  await no(db(B).ref().update({ ['guildHallGuest/' + G + '/' + C]: { n: 'Carim', by: B, t: SV }, ['hallInv/' + C + '/' + G]: { g: 'Dragons', by: B, t: SV } }), 'a member lets nobody in');
+  await no(db(A).ref().update({ ['guildHallGuest/' + G + '/' + B]: { n: 'Bassem', by: A, t: SV }, ['hallInv/' + B + '/' + G]: { g: 'Dragons', by: A, t: SV } }), 'a member is not a guest');
+  await no(db(A).ref('hallInv/' + C + '/' + G).set({ g: 'Dragons', by: A, t: SV }), 'an invitation needs its guest entry');
+  await yes(db(A).ref().update({ ['guildHallGuest/' + G + '/' + C]: { n: 'Carim', by: A, t: SV }, ['hallInv/' + C + '/' + G]: { g: 'Dragons', by: A, t: SV } }), 'the master lets C in');
+  await yes(db(C).ref('guildHall/' + G).once('value'), 'the guest reads the hall');
+  await yes(db(C).ref('hallInv/' + C).once('value'), 'and its invitations');
+  await no(db(C).ref('guildHall/' + G + '/s2').set(piece(C, 'Carim')), 'a guest does not furnish');
+  await no(db(C).ref('guildHallGuest/' + G + '/' + C).set({ n: 'Me', by: C, t: SV }), 'nor changes its entry');
+  await yes(db(C).ref().update({ ['hallInv/' + C + '/' + G]: null, ['guildHallGuest/' + G + '/' + C]: null }), 'it may turn it down');
+  await no(db(C).ref('guildHall/' + G).once('value'), 'then it reads nothing');
+});
+
+test('#156: live switches: only admins set them; while off, no new world line, trade or challenge', async () => {
+  await no(db(A).ref('flags/chat').set({ on: false, by: A, t: SV }), 'a player does not switch');
+  await no(db(M).ref('flags/pvp').set({ on: false, by: M, t: SV }), 'three switches only');
+  await yes(db(A).ref('chat/satisfy/l1').set({ from: A, h: 'Ahmed', text: 'hi', t: SV }), 'chat on (unset)');
+  await yes(db(M).ref('flags').update({ chat: { on: false, why: 'spam', by: M, t: SV }, trade: { on: false, by: M, t: SV }, duel: { on: false, by: M, t: SV } }), 'the owner switches all three off');
+  await yes(db(B).ref('flags').once('value'), 'every player reads them');
+  await no(db(A).ref('chat/satisfy/l2').set({ from: A, h: 'Ahmed', text: 'hi again', t: SV }), 'no world line while chat is off');
+  await no(db(A).ref('trades/t_' + A + '_1').set({ a: A, b: B, t: SV }), 'no new trade');
+  const msg = (type, payload) => ({ from: A, sid: 'sess0123456789ab', seq: 1, type, payload, t: SV });
+  await no(db(A).ref('inbox/' + B + '/m1').set(msg('trade.ask', { to: B, trade: 't_' + A + '_1' })), 'no trade request');
+  await no(db(A).ref('inbox/' + B + '/m2').set(msg('duel.challenge', { to: B, duel: 'd_x1' })), 'no duel challenge');
+  await yes(db(A).ref('inbox/' + B + '/m3').set(msg('party.invite', { to: B, party: 'p_' + A })), 'the rest of the inbox works');
+  await yes(db(M).ref('flags/chat').set({ on: true, by: M, t: SV }), 'back on');
+  await yes(db(A).ref('chat/satisfy/l3').set({ from: A, h: 'Ahmed', text: 'back', t: SV }), 'a world line again');
+});
