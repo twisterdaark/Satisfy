@@ -5808,14 +5808,23 @@ function hallCv(k){if(HALLC[k])return HALLC[k];const f=SA.buildings.PROP[k],w=HA
  const part=up=>mk(w*TS+8,40,g=>{for(const [x,y,ww,h,col,l] of L)if(!!l===up){g.fillStyle=col;g.fillRect(x+4,y+20,ww,h);}});return HALLC[k]={lo:part(false),hi:part(true)};}
 function hallEnts(ents){if(!HALLV)return;for(const k in HALLV.slots){const i=+k.slice(1),[x,y]=HALLS[i],c=hallCv(HALLV.slots[k].k),px=(HALL.rx+x)*TS-4,py=(HALL.ry+y)*TS-20;
  ents.push({y:HALL.ry*TS,f:()=>ctx.drawImage(c.lo,px,py)},{y:(HALL.ry+y)*TS+8,f:()=>ctx.drawImage(c.hi,px,py)});}}
-function hallOff(){if(HALLV&&HALLV.off)try{HALLV.off();}catch(e){}HALLV=null;HALLB=null;HALL.id='rGH';}
+function hallOff(keep){if(HALLV&&HALLV.off)try{HALLV.off();}catch(e){}HALLV=null;HALLB=null;HALL.id='rGH';HALLWAIT=0;if(!keep&&S)delete S.hall;}
 function hallLost(){if(!HALLV)return;toast(t('ghGone'),'warn');const R=HALL;hallOff();if(roomAt(P.x,P.y)===R)leaveRoom(R);}
-// each frame: out of the hall (the door, a respawn, unstuck) ends the visit; in it with no visit (a reload) puts you outside
-function hallTick(){if(roomFade||!P)return;const inH=roomAt(P.x,P.y)===HALL;if(HALLV&&!inH)hallOff();else if(!HALLV&&inH){P.x=HALL.dx;P.y=HALL.dy+4;camSnap=true;}
- else if(HALLV&&!HALLV.guest&&S&&S.guild!==HALLV.gid)hallLost();}
+// each frame: out of the hall (the door, a respawn, unstuck) ends the visit. In it with no visit (a reload): the save's visit
+// (S.hall, plan U013) goes on in the same guild's hall once the game is online again, or after 15 s of play without it, or when
+// it isn't yours to go on, you are put back where you came in from
+var HALLWAIT=0;
+function hallTick(){if(roomFade||!P)return;const inH=roomAt(P.x,P.y)===HALL;if(HALLV&&!inH){hallOff();return;}
+ if(!HALLV&&inH){const H=S&&S.hall,ok=H&&typeof H.gid==='string'&&/^g_[A-Za-z0-9]{1,128}$/.test(H.gid)&&(H.guest||S.guild===H.gid);
+  if(ok&&hallSt()){hallResume(H);return;}if(ok){if(!HALLWAIT)HALLWAIT=gTime+15;if(gTime<HALLWAIT)return;}
+  const out=H&&+H.dx>0?{x:+H.dx,y:+H.dy}:{x:HALL.dx,y:HALL.dy};hallOff();P.x=out.x;P.y=out.y+4;camSnap=true;return;}
+ if(HALLV&&!HALLV.guest&&S&&S.guild!==HALLV.gid)hallLost();}
+function hallWatch(V){const st=hallSt();V.off=st.watch(V.gid,v=>{if(HALLV!==V)return;V.slots=hallClean(v);hallBlock();},()=>{if(HALLV===V)hallLost();});}
+function hallResume(H){HALL.dx=+H.dx||HALL.dx;HALL.dy=+H.dy||HALL.dy;HALL.id=hallId(H.gid);HALLWAIT=0;const V=HALLV={gid:H.gid,name:Satisfy.chat.clean(H.name,18)||'?',guest:!!H.guest,slots:{},off:null};hallWatch(V);toast(t('ghWelcome',{g:V.name}),'good');}
 function hallGo(gid,name,guest){const st=hallSt();if(!st||!P||roomFade||mode==='dead')return;if(roomAt(P.x,P.y)===HALL)return;
  hallOff();const back=roomAt(P.x,P.y);HALL.dx=back?back.dx:P.x;HALL.dy=back?back.dy:P.y-4;HALL.id=hallId(gid);
- const V=HALLV={gid,name,guest:!!guest,slots:{},off:null};V.off=st.watch(gid,v=>{if(HALLV!==V)return;V.slots=hallClean(v);hallBlock();},()=>{if(HALLV===V)hallLost();});
+ S.hall={gid,name:String(name).slice(0,18),guest:!!guest,dx:Math.round(HALL.dx),dy:Math.round(HALL.dy)}; // kept with the save, for a reload inside
+ const V=HALLV={gid,name,guest:!!guest,slots:{},off:null};hallWatch(V);
  enterRoom(HALL);toast(t('ghWelcome',{g:name}),'good');}
 function hallMine(){const st=GUILD&&GUILD.state();return st&&st.gid&&S&&S.guild===st.gid?st:null;}
 function hallCan(){const g=hallMine();return !!g&&Satisfy.guild.can(g.rank,'note');} // the master and officers, as for the notice
@@ -5837,7 +5846,7 @@ function hallVisitsD(back){const st=hallSt();if(!st)return;back=back||guildPanel
  st.invites(NET.uid).then(v=>{const L=Object.keys(v||{}).filter(g=>v[g]&&typeof v[g].g==='string');
   dialog('guild',[L.length?t('ghVisitsL'):t('ghVisitsNone')],null,[...L.map(gid=>{const nm=Satisfy.chat.clean(v[gid].g,18)||'?';return {l:t('ghVisitQ',{g:nm}),f:()=>dialog('guild',[t('ghVisitQ',{g:nm})],null,[{l:t('ghGo'),f:()=>hallGo(gid,nm,true)},
    {l:t('ghDrop'),f:()=>st.drop(NET.uid,gid).then(()=>{toast(t('ghDropped'));hallVisitsD(back);},()=>toast(t('gdFail'),'warn'))},{l:t('oBack'),f:()=>hallVisitsD(back)}])};}),{l:t('oBack'),f:back}]);},()=>toast(t('gdFail'),'warn'));}
-window.__GHALL={get v(){return HALLV},get blocked(){return HALLB?[...HALLB]:null},room:()=>({id:HALL.id,rx:HALL.rx,ry:HALL.ry,dx:HALL.dx,dy:HALL.dy}),inside:()=>!!P&&roomAt(P.x,P.y)===HALL,id:hallId,solid:(tx,ty)=>solidT(tx,ty),menu:()=>hallMenu(),visits:()=>hallVisitsD(),off:()=>hallOff()}; // tests
+window.__GHALL={forget:()=>hallOff(true),get saved(){return S&&S.hall||null},get v(){return HALLV},get blocked(){return HALLB?[...HALLB]:null},room:()=>({id:HALL.id,rx:HALL.rx,ry:HALL.ry,dx:HALL.dx,dy:HALL.dy}),inside:()=>!!P&&roomAt(P.x,P.y)===HALL,id:hallId,solid:(tx,ty)=>solidT(tx,ty),menu:()=>hallMenu(),visits:()=>hallVisitsD(),off:()=>hallOff()}; // tests
 Object.assign(STR.ar,{ghHall:'قاعة الجيلد',ghInfo:'قاعة الجيلد: {n} من {m} أماكن متفرشة. الأعضاء بيدخلوا من هنا، والماستر والأوفيسرز بيفرشوها وبيدخّلوا ضيوف',ghGo:'ادخل',ghDeco:'فرش القاعة',ghDecoQ:'اختار مكان في القاعة',
  ghSlot:'مكان {n}: {k}',ghEmpty:'فاضي',ghPickQ:'مكان {n} · دلوقتي: {k}',ghBy:' (حطه {n})',ghClear:'شيله',ghPlaced:'اتحط في القاعة',ghCleared:'اتشال من القاعة',ghGuestsO:'الضيوف',ghGuestsL:'الضيوف اللي يقدروا يدخلوا: {l}',
  ghNoGuests:'مفيش ضيوف لسه',ghInvite:'دخّل لاعب (بالـ ID بتاعه)',ghInviteQ:'الـ ID بتاع اللاعب اللي هيدخل القاعة',ghInvited:'{n} يقدر يزور القاعة دلوقتي',ghUninv:'الغي دعوة {n}',ghUninvited:'{n} مبقاش يقدر يدخل القاعة',

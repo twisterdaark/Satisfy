@@ -156,9 +156,15 @@ test('the guild hall: furnished by the master, members and invited guests only, 
     assert.equal(await c.eval((gid) => window.__fakeRTDB.data.has('hallInv/gHlC3/' + gid) || window.__fakeRTDB.data.has('guildHallGuest/' + gid + '/gHlC3'), GID), false);
     await pick(c, /^Back$/);
 
-    // in the hall with no visit (as after a reload): put outside
+    // a reload inside (the page forgets the visit, the save keeps it): the visit goes on in the same hall (plan U013)
+    assert.equal(await b.eval(() => window.__GHALL.saved && window.__GHALL.saved.gid), GID, 'the save knows the visit');
+    await b.eval(() => window.__GHALL.forget());
+    await until([b], (gid) => window.__GHALL.inside() && !!window.__GHALL.v && window.__GHALL.v.gid === gid && window.__GHALL.room().id !== 'rGH', 6000, GID);
+    assert.equal(await b.eval(() => window.__GHALL.v.slots.s0 && window.__GHALL.v.slots.s0.k), 'table', 'with its furniture');
+    // with no visit in the save (an older save, or one left behind): put outside, where the save says it came in
     await b.eval(() => window.__GHALL.off());
     await until([b], () => !window.__GHALL.inside(), 4000);
+    assert.equal(await b.eval(() => window.__GHALL.saved), null, 'leaving forgets the visit');
 
     // a disband takes the hall and its guests with it
     await a.eval(() => window.__GHALL.off());

@@ -16,7 +16,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U010 | Smooth remote movement | ✅ | Interpolation 100 ms in the past, snap on jumps (`unit/presence`) |
 | U011 | Remote animations | ✅ | `anim` idle/walk/attack/dodge/dead |
 | U012 | Network room browser | ❌ | One world shard today (`main`) |
-| U013 | Rejoin same room | 🟡 | Reconnect after a drop and after reload (`regression/online-firebase`), and back into the same party (SAT-ONLINE-023); one room only |
+| U013 | Rejoin same room | ✅ | Reconnect after a drop and after reload (`regression/online-firebase`), and back into the same party (SAT-ONLINE-023); SAT-ONLINE-115: a reload inside a guild hall goes on in the same guild's hall (the save keeps the visit and where you came in), or puts you back where you came in when it can't (offline 15 s, no longer a member or a guest) (`regression/guildhall`) |
 | U014 | Stale state watchdog | ✅ | Remotes expire (15 s online, 5 s local); onDisconnect on the server |
 | U015 | Latency diagnostics | ✅ | SAT-ONLINE-012: smoothed write round trip in `net().link` and the badge tooltip |
 | U016 | Public profile projection | ✅ | SAT-ONLINE-007 (public fields only, §23) |
@@ -43,7 +43,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U037 | Outlaw flag | ✅ | SAT-ONLINE-038: a kill makes the killer an outlaw for 10 min (`PlayerPublic.ol`, red name for everyone, `S.olT` kept across a reload); the kill counts only from a real, recent hit |
 | U038 | Bounty board | 🟡 | SAT-ONLINE-051 (#84): gold on an outlaw's head from its card, paid once to its PvP killer through the victim's own kill record (`bountyPaid`), taken back from the board; karma (SAT-ONLINE-052, #85): murders cost points and lengthen the red name, -5 is a murderer; gold has no ledger (D3) |
 
-**Totals:** ✅ 24 · 🟡 9 · ⏳ 3 · ❌ 2.
+**Totals:** ✅ 25 · 🟡 8 · ⏳ 3 · ❌ 2.
 
 ## Social U046–U065 (plan doc §35 [SOC])
 
