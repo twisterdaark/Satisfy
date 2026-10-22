@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22mbtrk', ver: '1.70', d: '2026-10-22',
+      ar: ["تقدر تمشي والموسوعة مفتوحة، والسكرول فيها بقى أخف",
+        "زرار 🎯 تتبع في الموسوعة: سهم المهمات بيدلّك على أقرب وحش من النوع ده (أو مكانه)، ودوسه تاني عشان توقف",
+        "مسابقة الحدادة في مهمة خان (الفصل 1) بتقبل أي سلاح أو درع تصنعه، بأي تقييم، عشان أي كلاس يقدر يخلصها",
+        "مهرجان المدن والصواريخ بقى كل 6 ساعات لمدة ربع ساعة بدل كل 3 ساعات، والصواريخ أقل بكتير"],
+      en: ["You can walk while the Bestiary is open, and scrolling it is lighter",
+        "A 🎯 Track button in the Bestiary: the quest arrow points to the nearest monster of that kind (or where it lives); press it again to stop",
+        "The smithing contest in Khan's quest (chapter 1) takes any weapon or armor you craft, at any rating, so every class can clear it",
+        "The town festival and its fireworks come every 6 hours for a quarter of an hour instead of every 3 hours, with far fewer fireworks"] },
     { v: '2026-10-22mbfast', ver: '1.69', d: '2026-10-22',
       ar: ["موسوعة الوحوش (B) بتفتح على طول بدل ما تعلّق اللعبة، والصور بتظهر واحدة ورا التانية",
         "خانة بحث في الموسوعة: اكتب اسم الوحش بالعربي أو الإنجليزي",
