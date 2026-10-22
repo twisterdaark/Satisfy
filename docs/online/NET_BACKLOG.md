@@ -200,7 +200,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U342 | A/B testing ethics | ⏳ | No tests on players; owner decision |
 | U343 | Community feedback triage | 🟡 | GitHub issues and in-game reports |
 | U344 | Season rewards | 🟡 | Titles for the National Champion and the arena; cosmetic |
-| U345 | Retention without grind | 🟡 | Nothing is lost for a missed day; daily caps on repeatable quests (B) |
+| U345 | Retention without grind | ✅ | SAT-ONLINE-130: the daily bounties' bonus was a streak that a missed day reset to 0; now it is +10% for each day you cleared all three in the last 7 days (up to +50%, `S.dlyW`), so a missed day takes nothing away, and an old save's streak becomes the days it stood for. The day is the world clock's (`today()` follows `wNow`), the same for everyone online. Daily caps on repeatable quests (B) as before (`regression/dailyweek`) |
 | U346 | Data export/delete | 🟡 | "Delete my online data" (SAT-ONLINE-015/066). The owner took out "Download my online data" (078) and the manual cloud Upload/Download on 2026-10-21, to cut the chance of duplicated data: characters move only by the automatic sync |
 | U347 | Disaster recovery | ⏳ | Database backups need the Blaze plan (owner) |
 | U348 | Shard scale-out | ⏳ | One shard (`main`) |
