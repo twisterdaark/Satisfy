@@ -9,7 +9,9 @@
 //   - B was fighting before A came near: the monster stays where it was, with the health it had, on both screens;
 //   - a monster only B has (an event wave A missed): it stays on B's screen and A sees it too;
 //   - B's share of a kill when the host's "it died" message is lost: B still gets it, once;
-//   - the host leaves in the middle of a fight: B goes on with the same monster as it was.
+//   - the host leaves in the middle of a fight: B goes on with the same monster as it was;
+//   - the world's NPC allies (a town's defenders, the war's allies), run on every screen, hit once (the host's), while your
+//     own (a companion, Regas's knights) hit as you do.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -204,5 +206,46 @@ test('the host leaves in the middle of a fight: B goes on with the same monster,
     assert.ok(top <= 520, 'its health as it was: ' + top);
     assert.equal((await state(b, k)).max, 4000, "the host's full health kept");
     assert.deepEqual(b.errors, []);
+  } finally { await ctx.close(); }
+});
+
+test("NPC allies every screen runs hit once, on the host; a player's own ally hits like the player", async () => {
+  const { ctx, a, b } = await pair();
+  try {
+    const [k] = await nearest(b, 1);
+    for (const g of [a, b]) await on(g, (k) => { const m = by(k); m.max = m.hp = 1e6; m.agg = 0; m.eng = 0; }, k);
+    await frames([a, b], 30);
+    assert.ok((await state(b, k)).led, 'B follows it');
+    // on B: a town defender's blow (ally) is the host's to deal; B's copy keeps its health and nothing goes to the host
+    const r = await on(b, (k) => { const m = by(k), h = m.hp; m.hp -= 500; const handed = window.__GM.hit(m, 500, 1); return [handed, m.hp === h]; }, k);
+    assert.deepEqual(r, [true, true]);
+    await frames([a, b], 60);
+    assert.equal(await on(a, (k) => by(k).hp, k), 1e6, 'not dealt again on the host');
+    // B's own ally (a companion, Regas's knights): handed over like B's own hit, and dealt on the host
+    await on(b, (k) => { const m = by(k); m.hp -= 500; window.__GM.hit(m, 500); }, k);
+    await frames([a, b], 60);
+    assert.equal(await on(a, (k) => by(k).hp, k), 1e6 - 500, 'dealt once on the host');
+    // on the host, an ally's blow is just dealt there
+    assert.equal(await on(a, (k) => { const m = by(k); m.hp -= 300; return window.__GM.hit(m, 300, 1); }, k), false);
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+test("B's knockback moves the host's copy too, and B's copy doesn't spring back", async () => {
+  const { ctx, a, b } = await pair();
+  try {
+    const [k] = await nearest(b, 1);
+    for (const g of [a, b]) await on(g, (k) => { const m = by(k); m.max = m.hp = 1e6; m.agg = 0; m.eng = 0; }, k);
+    await on(a, (k) => { by(k).stun = 30; }, k); // held still on the host: only the knockback moves it
+    await frames([a, b], 40);
+    const x0 = (await state(a, k)).x;
+    for (let i = 0; i < 3; i++) { await on(b, (k) => window.__GHC.hit(by(k), { kx: 1, ky: 0 }), k); await frames([a, b], 8); }
+    let back = 0, prev = (await state(b, k)).x;
+    for (let i = 0; i < 20; i++) { await frames([a, b], 3); const x = (await state(b, k)).x; if (x < prev - 3) back++; prev = x; }
+    const xa = (await state(a, k)).x, xb = (await state(b, k)).x;
+    assert.ok(xa - x0 >= 12, 'pushed on the host: ' + (xa - x0).toFixed(1) + ' px');
+    assert.ok(Math.abs(xa - xb) <= 10, 'the same place on both: ' + xa.toFixed(1) + ' / ' + xb.toFixed(1));
+    assert.equal(back, 0, 'no spring back on B');
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
