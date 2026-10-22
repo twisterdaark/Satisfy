@@ -35,25 +35,26 @@ test('calendar: what comes next, in your time zone and UTC, from the world clock
     assert.equal((await g.eval((n) => window.__GCAL.list(n), at(10, 20))).find((e) => e.k === 'calFs').at, at(10, 35));
     assert.equal((await g.eval((n) => window.__GCAL.list(n), at(11, 1))).find((e) => e.k === 'calFs').at, at(13, 35));
 
-    // the board, in Tokyo time and UTC
+    // the board, in Tokyo time and UTC. The clock runs on from 09:40:30 in real time, so on a busy machine a test that takes
+    // a minute sees "in N min" one less: each count may be one minute short
     assert.equal(await g.eval(() => window.__GCAL.zone()), 'UTC+9');
     await g.eval(() => window.__GCAL.board()); await g.step(2);
     const p1 = await g.eval(() => document.getElementById('dtext').textContent);
     assert.match(p1, /^Calendar \(your time, UTC\+9\) · /);
-    assert.match(p1, /National Competition: 19:00 \(UTC 10:00\), in 20 min/);
-    assert.match(p1, /: 18:45 \(UTC 09:45\), in 5 min/);
+    assert.match(p1, /National Competition: 19:00 \(UTC 10:00\), in (19|20) min/);
+    assert.match(p1, /: 18:45 \(UTC 09:45\), in [45] min/);
     await g.eval(() => window.__G.advance()); await g.step(2);
     const p2 = await g.eval(() => document.getElementById('dtext').textContent);
-    assert.match(p2, /Siege of Reidan Castle: 20:00 \(UTC 11:00\), in 1 h 20 min/);
-    assert.match(p2, /Town festival: 19:35 \(UTC 10:35\), in 55 min/);
-    assert.match(p2, /Horse race: 18:59 \(UTC 09:59\), in 19 min/);
+    assert.match(p2, /Siege of Reidan Castle: 20:00 \(UTC 11:00\), in 1 h (19|20) min/);
+    assert.match(p2, /Town festival: 19:35 \(UTC 10:35\), in (54|55) min/);
+    assert.match(p2, /Horse race: 18:59 \(UTC 09:59\), in (18|19) min/);
     assert.match(p2, /Trauka the Red Dragon: up now/);
     // Trauka killed: back half an hour later
     await g.eval((u) => { const W = window.__GU.WS; W.wb = W.wb || {}; W.wb.trauka = u; }, at(10, 10));
     await g.eval(() => window.__G.advance()); await g.step(2);
     await g.eval(() => window.__GCAL.board()); await g.step(2);
     await g.eval(() => window.__G.advance()); await g.step(2);
-    assert.match(await g.eval(() => document.getElementById('dtext').textContent), /Trauka the Red Dragon: back at 19:10 \(UTC 10:10\), in 30 min/);
+    assert.match(await g.eval(() => document.getElementById('dtext').textContent), /Trauka the Red Dragon: back at 19:10 \(UTC 10:10\), in (29|30) min/);
     assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
