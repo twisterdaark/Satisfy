@@ -21,7 +21,7 @@ const v4 = (h) => String(h).replace(/^localhost(?=:)/, '127.0.0.1');
 const DBH = v4(process.env.FIREBASE_DATABASE_EMULATOR_HOST || '127.0.0.1:9000'), AUTHH = v4(process.env.FIREBASE_AUTH_EMULATOR_HOST || '127.0.0.1:9099');
 const SN = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/firebase-config.js', 'src/net/firebase.js');
 const WORLD = { id: 'satisfy', tile: 16, w: 724, h: 144 };
-let env;
+let env, DBURL = 'http://' + DBH + '?ns=' + NS;
 const clients = [];
 
 // a read with the rules off (withSecurityRulesDisabled resolves with nothing, so the value comes out through a variable)
@@ -33,7 +33,7 @@ async function until(fn, what, ms = 15000) {
 
 // one player: its own app, signed in anonymously on the Auth emulator, its account ID set, the game's transport and presence
 async function player(name, x) {
-  const app = fbApp.initializeApp({ apiKey: 'demo-key', projectId: PROJECT, databaseURL: 'http://' + DBH + '?ns=' + NS }, name);
+  const app = fbApp.initializeApp({ apiKey: 'demo-key', projectId: PROJECT, databaseURL: DBURL }, name);
   const auth = fbAuth.getAuth(app);
   fbAuth.connectAuthEmulator(auth, 'http://' + AUTHH, { disableWarnings: true });
   const db = fbDb.getDatabase(app);
@@ -53,7 +53,12 @@ async function player(name, x) {
   return c;
 }
 
-test.before(async () => { env = await initializeTestEnvironment({ projectId: PROJECT, database: { rules: RULES } }); });
+test.before(async () => {
+  env = await initializeTestEnvironment({ projectId: PROJECT, database: { rules: RULES } });
+  // the clients use the same database (namespace) the test library loaded the rules and writes the fixtures into
+  const d = env.unauthenticatedContext().database(), u = d.app && d.app.options && d.app.options.databaseURL;
+  if (u) DBURL = String(u).replace('localhost', '127.0.0.1');
+});
 test.after(async () => {
   for (const c of clients) { try { c.pres.close(); } catch (e) { /* closing */ } try { fbDb.goOffline(c.db); await fbApp.deleteApp(c.app); } catch (e) { /* closing */ } }
   if (env) await env.cleanup();
@@ -69,7 +74,7 @@ test('two clients on the real SDK and rules: presence, a move, a dropped connect
   a.publish(true); b.publish(true);
   await until(() => a.sees(b) && b.sees(a), 'each sees the other').catch(async (e) => {
     const pres = await adminRead('presence/satisfy/main');
-    throw new Error(e.message + ' · errors A ' + JSON.stringify(a.errs) + ' B ' + JSON.stringify(b.errs) + ' · stored ' + String(JSON.stringify(pres)).slice(0, 600) + ' · events B ' + JSON.stringify(b.events.map((x) => x.type)).slice(0, 200));
+    throw new Error(e.message + ' · db ' + DBURL + ' · errors A ' + JSON.stringify(a.errs) + ' B ' + JSON.stringify(b.errs) + ' · stored ' + String(JSON.stringify(pres)).slice(0, 600) + ' · events B ' + JSON.stringify(b.events.map((x) => x.type)).slice(0, 200));
   });
   assert.equal(b.sees(a).handle, 'Ahmed');
 
