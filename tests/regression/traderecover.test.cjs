@@ -73,6 +73,9 @@ test('a trade confirmed before the tab closed is applied when that player comes 
     const tid = await z.eval(() => window.__GTRR.pend.id);
     const aName = await z.eval(() => Satisfy.local.net().remotes.find((r) => r.uid === 'gTrcA1').handle);
     assert.deepEqual(await z.eval(() => { const p = window.__GTRR.pend; return [p.foe, p.n]; }), ['gTrcA1', aName]);
+    // Claude-B's note on #164: what he confirmed is held, out of the bag, so he can't sell it and still be paid for it
+    assert.deepEqual(await z.eval((iid) => [window.__G.S.items.some((i) => i.iid === iid), window.__GTRR.esc().it.map((i) => i.iid)], it.iid), [false, [it.iid]]);
+    assert.ok(await z.eval((iid) => !!document.querySelector('#trBag button[data-iid="' + iid + '"]'), it.iid), 'still his to offer in this trade');
     await z.eval(() => window.__GU.save(true));
     await z.page.close();
 
@@ -103,12 +106,13 @@ test('a trade confirmed before the tab closed is applied when that player comes 
     // a confirmed trade that was never done: kept while it could still go through, forgotten after a minute
     // (a trade of its own that was asked and confirmed, but Ahmed never confirmed it: there is no swap to find)
     await z.eval(() => { const F = window.__GLD.fb(), D = F.m.database; return D.set(D.ref(F.db, 'trades/t_gTrcZ9_never1'), { a: 'gTrcZ9', b: 'gTrcA1', t: D.serverTimestamp() }); });
-    await z.eval(() => { window.__G.S.trPend = { id: 't_gTrcZ9_never1', foe: 'gTrcA1', n: 'Ahmed', t: Date.now() }; window.__GTRR.tick(); });
+    await z.eval(() => { window.__G.S.gold -= 50; window.__G.S.trPend = { id: 't_gTrcZ9_never1', foe: 'gTrcA1', n: 'Ahmed', t: Date.now(), esc: { g: 50, it: [{ id: 'isword', slot: 'w', r: 1, dur: 100, uid: 9901, iid: 'it_held_1' }] } }; window.__GTRR.tick(); });
     await settle(z);
     assert.equal(await z.eval(() => window.__GTRR.pend && window.__GTRR.pend.id), 't_gTrcZ9_never1');
     await z.eval(() => { window.__G.S.trPend.t = Date.now() - 61000; window.__GTRR.tick(); });
     await until([z], () => !window.__GTRR.pend);
-    assert.equal(await z.eval(() => window.__G.S.gold), 800);
+    assert.equal(await z.eval(() => window.__G.S.gold), 800, 'the gold it held is back');
+    assert.ok(await z.eval(() => window.__G.S.items.some((i) => i.uid === 9901 && i.id === 'isword')), 'and the piece');
     for (const g of [a, z]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
     assert.deepEqual(a.errors, []);
     assert.deepEqual(z1.errors, []);

@@ -294,6 +294,7 @@
     },
     "guildDiplo": {
       "$gid": {
+        ".indexOn": ["t"],
         ".read": "auth != null && root.child('guildMembers').child($gid).child(auth.uid).exists()",
         ".write": "auth != null && !newData.exists() && root.child('guilds').child($gid).child('master').val() === auth.uid && !newData.parent().parent().child('guilds').child($gid).exists()",
         "$id": {

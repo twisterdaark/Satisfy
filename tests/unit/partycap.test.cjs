@@ -34,6 +34,7 @@ const inParty = (p, pid) => p.party.id() === pid;
 
 test('everyone accepting at once: the party stops at 5; invites past the cap are refused; forged accepts change nothing', () => {
   const w = world(9), [a, ...rest] = w.players, pid = 'p_' + a.uid;
+  const kicks = []; const send0 = a.pres.send.bind(a.pres); a.pres.send = (ty, pl) => { if (ty === 'party.kick') kicks.push(pl.to); return send0(ty, pl); };
   assert.deepEqual(rest.map((p) => a.party.invite(w.remote(a, p))), ['sent', 'sent', 'sent', 'sent', 'full', 'full', 'full', 'full'], 'an invite out counts against the cap');
   // the four invited and four who weren't all "accept" in the same moment
   for (const p of rest.slice(0, 4)) assert.equal(p.party.accept(pid), true);
@@ -44,6 +45,7 @@ test('everyone accepting at once: the party stops at 5; invites past the cap are
   assert.deepEqual(rest.map((p) => inParty(p, pid)), [true, true, true, true, false, false, false, false]);
   assert.deepEqual(rest.slice(0, 4).map((p) => p.party.members().length), [5, 5, 5, 5], 'every member sees the same five');
   assert.ok(rest.slice(4).every((p) => p.events.length === 0), 'nothing happens to the forgers');
+  assert.deepEqual(kicks, [], "Claude-B's note on #162: and the leader answers none of them (it never invited them)");
   assert.equal(a.events.filter((e) => e === 'joined').length, 4, 'each joins once');
   assert.equal(a.party.invite(w.remote(a, rest[4])), 'full');
 });

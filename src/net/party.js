@@ -38,6 +38,7 @@
   var MAX = 5;
   var RAID_MAX = 10;      // a raid (SAT-ONLINE-060)
   var INVITE_MS = 30000;  // an unanswered invite expires
+  var ASKED_MS = 120000;  // a late accept from someone we invited is still answered for this long
   var GRACE_MS = 10000;   // presence may lag; a member/leader missing this long has left (a closed tab leaves presence at once)
   var PING_MS = 1500;     // pings: at most one per member this often (sent and received)
   var REJOIN_MS = 60000;  // a dropped member or a reloaded tab can come back this long (wall clock)
@@ -52,6 +53,9 @@
     var id = null, leader = null;
     var accepted = new Map();   // leader: uid -> last time presence showed them in the party
     var outgoing = new Map();   // leader: uid -> invite time
+    // leader: uid -> when we last invited them (kept past the invite and the party, ASKED_MS): only they are answered when an
+    // accept can't be taken; a forged accept from anyone else gets nothing back (Claude-B's note on #162)
+    var asked = new Map();
     var invites = new Map();    // invitee: partyId -> {party, from, sid, handle, t}
     var leaderOk = 0, lastTick = 0, listeners = [], pingOut = -1e9, pingIn = new Map();
     var store = o.store || null, wall = o.wall || function () { return Date.now(); };
@@ -68,6 +72,7 @@
     var raid = false;       // leader: the party is a raid (up to RAID_MAX)
     var raidSeen = false;   // member: the leader's presence says it is a raid
     function cap() { return raid ? RAID_MAX : max; }
+    function wasAsked(uid) { var t = asked.get(uid); return t !== undefined && now() - t <= ASKED_MS; }
     function save() {
       if (!store || !id) return;
       var s = JSON.stringify({ id: id, leader: leader, members: leader === self ? Array.from(accepted.keys()).concat(Array.from(recent.keys())) : [], raid: leader === self && raid ? 1 : 0 });
@@ -116,8 +121,8 @@
           // its cap however many accept at once. An accept it can't take (the invite ran out on its side first, or the party
           // is full or gone) is answered at once with k = 2, so that player isn't left believing it joined.
           if (pl.party !== idFor(self) || accepted.has(from.uid)) return;
-          if (!id || leader !== self || pl.party !== id || !outgoing.has(from.uid)) { P.send('party.kick', { to: from.uid, party: pl.party, k: 2 }); return; }
-          outgoing.delete(from.uid);
+          if (!id || leader !== self || pl.party !== id || !outgoing.has(from.uid)) { if (wasAsked(from.uid)) { asked.delete(from.uid); P.send('party.kick', { to: from.uid, party: pl.party, k: 2 }); } return; }
+          outgoing.delete(from.uid); asked.delete(from.uid);
           if (accepted.size + 1 >= cap()) { P.send('party.kick', { to: from.uid, party: id, k: 2 }); emit({ type: 'full', handle: from.handle }); return; }
           accepted.set(from.uid, now());
           emit({ type: 'joined', uid: from.uid, handle: from.handle });
@@ -184,7 +189,7 @@
         if (remote.party) return 'busy';
         if (id && accepted.size + 1 + outgoing.size >= cap()) return 'full';
         if (!id) { id = idFor(self); leader = self; }
-        outgoing.set(remote.uid, now());
+        outgoing.set(remote.uid, now()); asked.set(remote.uid, now());
         send('party.invite', remote.uid);
         return 'sent';
       },
@@ -264,6 +269,7 @@
         lastTick = t;
         invites.forEach(function (v, k) { if (t - v.t > INVITE_MS) invites.delete(k); });
         outgoing.forEach(function (v, k) { if (t - v > INVITE_MS) outgoing.delete(k); });
+        asked.forEach(function (v, k) { if (t - v > ASKED_MS) asked.delete(k); });
         if (!id) return;
         if (leader === self) {
           accepted.forEach(function (seen, uid) {
@@ -285,7 +291,7 @@
               emit({ type: 'replaced' });
               stop = true;
             }
-            if (r && !r.party && !outgoing.has(uid) && accepted.size + 1 + outgoing.size < cap()) { outgoing.set(uid, t); send('party.invite', uid); }
+            if (r && !r.party && !outgoing.has(uid) && accepted.size + 1 + outgoing.size < cap()) { outgoing.set(uid, t); asked.set(uid, t); send('party.invite', uid); }
           });
           if (stop) return;
           if (!accepted.size && !outgoing.size && !recent.size) { clear(); forget(); emit({ type: 'dissolved' }); return; }

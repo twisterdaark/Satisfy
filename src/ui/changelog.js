@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22notes132', ver: '1.90', d: '2026-10-22', hide: [3],
+      ar: ["التبادل: الحاجة والدهب اللي أكدت إنك هتديهم بيتحجزوا لحد ما التبادل يخلص (وبيرجعوا لو ماتمش)، فمحدش يقدر يبيعهم وياخد التبادل كمان",
+        "الصوت: لو كنت قافل صوت اللعبة من قبل ما يبقى فيه خلاط، أصوات العالم واللاعيبة التانيين بتبدأ مقفولة هي كمان بدل 80%",
+        "صيد الزعيم: اللي يوصل بعد ما الزعيم اتقتل في الصيد مايقدرش يقتل نسخته لوحده مرة تانية، وتوقيت مكتوب قبل الصيد مايأخرش رجوع الزعيم، ومينفعش تدخل الصيد من الأرينا أو البرج",
+        "للتيستات: البروفايلر بيحسب وقت الفريم الحقيقي، وF9 مابيفتحش Reader View في فايرفوكس، وحماية الإعادة بس في صفحة الإعادة"],
+      en: ["Trades: the items and gold you confirm are held until the trade is done (and come back if it isn't), so nobody can sell them and still get the trade",
+        "Sound: if you had muted the game before the mixer, the world and other players start muted too instead of at 80%",
+        "World boss hunt: arriving after the boss fell in the hunt, you can't kill a copy of your own for a second kill; a timer written before the hunt no longer keeps the boss away; and you can't join the hunt from the arena or the tower",
+        "For the tests: the profiler counts a frame's real time, F9 no longer opens Firefox's Reader View, and the replay's input guard is only on a replay page"] },
     { v: '2026-10-22bars', ver: '1.89', d: '2026-10-22',
       ar: ["شرايط مهارات زيادة زي Fiesta وWoW: زرار + و- على الشريط الأول بيزوّدوا لحد 4 شرايط تحت نص الشاشة أو يشيلوها، والشريط اللي بتشيله بيفضل فاكر حاجاته",
         "اسحب على الشرايط مهارات من الشريط أو الحالة، وأي حاجة من الشنطة: جرعات وعيش وأكل، وسلاح أو درع (الدوسة بتلبسه على طول). كليك يمين بيفضّي الخانة، والسحب من خانة لخانة بيبدّلهم",
