@@ -57,6 +57,8 @@
   ch.onmessage = (e) => {
     if (!connected) return;
     const m = e.data;
+    // F.dropIn (a regexp source): writes from other pages to matching paths never reach this one, as a message lost on the way
+    if (F.dropIn && m && typeof m.p === 'string' && new RegExp(F.dropIn).test(m.p)) return;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
     if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|guildHall|guildHallGuest|hallInv|flags|announce|admins|guildTrophy|repairOrders|repairDone|repairPaid|tradeLog|tradeRep|trades|tradeSides|tradeDone|tradedItems|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
