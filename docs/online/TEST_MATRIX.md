@@ -14,7 +14,7 @@ Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it app
 | T05 | Redirect sign-in on mobile | ✅ | `regression/online-firebase` (blocked popup → redirect) |
 | T06 | Token refresh | 🟡 | `regression/online-firebase` (saved session reconnects after reload). Refresh within a session is the SDK's job; not testable with the fake. |
 | T07 | Second-tab policy | 🟡 | `regression/online-local` (`?slot=` keeps saves apart; each tab is its own session). No rule yet for the same account in two tabs; both show as players. |
-| T08 | Reconnect, onDisconnect | ✅ | `regression/online-firebase` (drop → removed for others → back on reconnect) |
+| T08 | Reconnect, onDisconnect | ✅ | `regression/online-firebase` (drop → removed for others → back on reconnect); `regression/soak` (20 drops of one, the other or both: positions, the party, one presence each, and no listener or onDisconnect added) |
 | T09 | Stale ghost presence | ✅ | `unit/presence` (silent players expire), `regression/online-local` (closed tab removed) |
 | T10 | Cross-instance filtering | ✅ | `unit/contracts` (room keys), `regression/online-local` (a player in a house is drawn only inside that house) |
 | T11 | Invalid x/y | ✅ | `unit/contracts` (out-of-world rejected), `unit/rules` (database bounds cover the map; a wider map fails the test) |
