@@ -51,12 +51,12 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 |---|---|---|---|
 | U046 | Nearby player context | ✅ | SAT-ONLINE-020: click/tap a player → card with Invite / Duel / Block, aimed at their uid (`regression/playermenu`: twin names) |
 | U047 | Party invite | ✅ | SAT-ONLINE-003: invites expire after 30 s, decline, busy/full replies; blocked senders dropped (016) |
-| U048 | Party accept | 🟡 | The leader caps the party at 5 when accepts arrive, a raid at 10 (SAT-ONLINE-060, #93); no server transaction yet |
+| U048 | Party accept | ✅ | The leader is the one place membership is decided, one accept at a time, so it works as the transaction: invites out count against the cap, and everyone accepting at once still gives 5 (a raid 10); forged and duplicate accepts change nothing (SAT-ONLINE-060, #93). An accept the leader can't take (its side of the invite ran out first, or the party filled up or is gone) is answered at once (`party.kick` k = 2), so that player isn't left believing it joined (SAT-ONLINE-126, `unit/partycap`) |
 | U049 | Party leader election | ✅ | SAT-ONLINE-024: a leader gone 15 s (longer than a reload) is replaced by the remaining member with the lowest uid; members whose clocks differ still agree; a returning old leader joins the new party (`regression/partylead`) |
 | U050 | Party roles | ✅ | SAT-ONLINE-025: a badge (tank/healer/damage/support) picked in the party panel, `PlayerPublic.role`; in a raid against bosses it does something (SAT-ONLINE-061, #95): a tank draws the boss and takes 30% less, a healer heals the raid near it every 3 s, damage +15%, support -15% near it |
 | U051 | Party HP UI | ✅ | SAT-ONLINE-021: `PlayerPublic.hp` (5% steps, nothing else of the profile); a bar per member in the party panel |
 | U052 | Party pings | ✅ | SAT-ONLINE-021: Alt+click (touch: Ping marks where you stand) → `party.ping`; a ring on the ground and the minimap for 3 s; one per member per 1.5 s |
-| U053 | Party chat | ✅ | SAT-ONLINE-016: party lines, rate-limited, block list; world chat for everyone (SAT-ONLINE-026), guild chat (SAT-ONLINE-049, #81), world notices as lines (SAT-ONLINE-041), insults shown as stars (SAT-ONLINE-071, see U062) |
+| U053 | Party chat | ✅ | SAT-ONLINE-016: party lines, rate-limited, block list; world chat for everyone (SAT-ONLINE-026), guild chat (SAT-ONLINE-049, #81), world notices as lines (SAT-ONLINE-041); insults shown as stars in every channel unless the player turns it off with `/filter` (SAT-ONLINE-071, #105) |
 | U054 | Party summon | ⏳ | A teleport needs a movement authority |
 | U055 | Party follow | ✅ | SAT-ONLINE-068 (#102): "Follow" on a party mate's card walks after them; any move key stops it (`regression/follow`) |
 | U056 | Shared PvE XP | ⏳ | Needs a combat authority; a party raid pays each member their own rewards (009) |
