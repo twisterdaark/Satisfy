@@ -783,10 +783,14 @@
     var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
     return {
       list: function () { return D.get(at('repairOrders')).then(function (s) { return s.val() || {}; }); },
-      post: function (oid, v) { var u = {}; u['repairOrders/' + oid] = { by: v.by, n: String(v.n || '?').slice(0, 24), iid: v.iid, it: String(v.it || '?').slice(0, 40), d: v.d, fee: v.fee, t: SV() }; return D.update(D.ref(db), u); },
-      cancel: function (oid) { return D.remove(at('repairOrders/' + oid)); },
+      // each order holds one of its poster's five places (repairSlot/{uid}/{0-4} = the order's id), written and freed with
+      // it, so an account has at most five up (Claude-B's note on #131)
+      slots: function (uid) { return D.get(at('repairSlot/' + uid)).then(function (s) { return s.val() || {}; }); },
+      free: function (uid, s) { return D.remove(at('repairSlot/' + uid + '/' + s)); },
+      post: function (oid, v) { var u = {}; u['repairOrders/' + oid] = { by: v.by, n: String(v.n || '?').slice(0, 24), iid: v.iid, it: String(v.it || '?').slice(0, 40), d: v.d, fee: v.fee, s: v.s, t: SV() }; u['repairSlot/' + v.by + '/' + v.s] = oid; return D.update(D.ref(db), u); },
+      cancel: function (oid, o) { var u = {}; u['repairOrders/' + oid] = null; if (o && o.s != null) u['repairSlot/' + o.by + '/' + o.s] = null; return D.update(D.ref(db), u); },
       mend: function (oid, o, smith, sn) {
-        var u = {}; u['repairOrders/' + oid] = null;
+        var u = {}; u['repairOrders/' + oid] = null; if (o.s != null) u['repairSlot/' + o.by + '/' + o.s] = null;
         u['repairDone/' + o.by + '/' + oid] = { iid: o.iid, by: smith, sn: String(sn || '?').slice(0, 24), fee: o.fee, t: SV() };
         u['repairPaid/' + smith + '/' + oid] = { g: o.fee, t: SV() };
         return D.update(D.ref(db), u);

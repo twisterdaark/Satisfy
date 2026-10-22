@@ -6115,8 +6115,8 @@ function svcOpts(who){const rc=repairCost(who);return [...(GEMSM.has(who)?[{l:t(
    that takes the order off, tells its owner and pays the smith (repair*; the rules take it only for the order as it is,
    by someone else). The piece is mended in its owner's bag the moment they are told, the same piece with the same id,
    and the smith collects the fee there. */
-Object.assign(STR.ar,{oRepOrd:'طلبات تصليح للحدادين ({n})',repOrdH:'اطلب من حداد لاعب يصلح حاجة بأجرة إنت بتحددها. الأجرة بتطلع من شنطتك وبترجع لو شلت الطلب',repPost:'اطلب تصليح',repPick:'تصلح إيه؟',repPickRow:'{it} ({d}%)',repFeeQ:'الأجرة لـ {it}؟',repFee:'{g} دهب',repPosted:'طلب التصليح اتعرض للحدادين',repMine:'طلباتك ({n})',repMineRow:'{it} ({d}%) · {g} دهب',repOff:'شيل الطلب',repOffDone:'الطلب اتشال ورجعلك {g} دهب',repWork:'شغل للحدادين ({n})',repWorkRow:'صلّح {it} بتاع {n} ({d}%) بـ {g} دهب',repMended:'صلحت {it} بتاع {n}. الأجرة مستنياك هنا',repPay:'استلم أجرتك ({g} دهب)',repGot:'استلمت {g} دهب أجرة تصليح',repDoneMine:'{n} صلّح {it} بتاعك!',repNone:'مفيش حاجة محتاجة تصليح',repNoWork:'مفيش طلبات دلوقتي',repFull:'عندك 3 طلبات بالفعل',repGone:'الطلب ده اتاخد خلاص'});
-Object.assign(STR.en,{oRepOrd:'Repair orders for player smiths ({n})',repOrdH:'Ask a player smith to mend a piece for a fee you choose. The fee leaves your bag and comes back if you take the order off',repPost:'Post a repair order',repPick:'Which piece?',repPickRow:'{it} ({d}%)',repFeeQ:'The fee for {it}?',repFee:'{g} gold',repPosted:'Your repair order is up for the smiths',repMine:'Your orders ({n})',repMineRow:'{it} ({d}%) · {g} gold',repOff:'Take the order off',repOffDone:'Order taken off; {g} gold back',repWork:'Work for smiths ({n})',repWorkRow:"Mend {n}'s {it} ({d}%) for {g} gold",repMended:"You mended {n}'s {it}. Your fee waits here",repPay:'Collect your pay ({g} gold)',repGot:'You collected {g} gold for repairs',repDoneMine:'{n} mended your {it}!',repNone:'Nothing needs mending',repNoWork:'No orders right now',repFull:'You have 3 orders up already',repGone:'Someone took that order already'});
+Object.assign(STR.ar,{oRepOrd:'طلبات تصليح للحدادين ({n})',repOrdH:'اطلب من حداد لاعب يصلح حاجة بأجرة إنت بتحددها. الأجرة بتطلع من شنطتك وبترجع لو شلت الطلب',repPost:'اطلب تصليح',repPick:'تصلح إيه؟',repPickRow:'{it} ({d}%)',repFeeQ:'الأجرة لـ {it}؟',repFee:'{g} دهب',repPosted:'طلب التصليح اتعرض للحدادين',repMine:'طلباتك ({n})',repMineRow:'{it} ({d}%) · {g} دهب',repOff:'شيل الطلب',repOffDone:'الطلب اتشال ورجعلك {g} دهب',repWork:'شغل للحدادين ({n})',repWorkRow:'صلّح {it} بتاع {n} ({d}%) بـ {g} دهب',repMended:'صلحت {it} بتاع {n}. الأجرة مستنياك هنا',repPay:'استلم أجرتك ({g} دهب)',repGot:'استلمت {g} دهب أجرة تصليح',repDoneMine:'{n} صلّح {it} بتاعك!',repNone:'مفيش حاجة محتاجة تصليح',repNoWork:'مفيش طلبات دلوقتي',repFull:'عندك 3 طلبات بالفعل',repGone:'الطلب ده اتاخد خلاص',repSlots:'حسابك عليه 5 طلبات خلاص (بتوع شخصياتك التانية كمان)',repOld:'محدش من الحدادين خد طلب تصليح {it} في 14 يوم: الطلب اتشال ورجعلك {g} دهب'});
+Object.assign(STR.en,{oRepOrd:'Repair orders for player smiths ({n})',repOrdH:'Ask a player smith to mend a piece for a fee you choose. The fee leaves your bag and comes back if you take the order off',repPost:'Post a repair order',repPick:'Which piece?',repPickRow:'{it} ({d}%)',repFeeQ:'The fee for {it}?',repFee:'{g} gold',repPosted:'Your repair order is up for the smiths',repMine:'Your orders ({n})',repMineRow:'{it} ({d}%) · {g} gold',repOff:'Take the order off',repOffDone:'Order taken off; {g} gold back',repWork:'Work for smiths ({n})',repWorkRow:"Mend {n}'s {it} ({d}%) for {g} gold",repMended:"You mended {n}'s {it}. Your fee waits here",repPay:'Collect your pay ({g} gold)',repGot:'You collected {g} gold for repairs',repDoneMine:'{n} mended your {it}!',repNone:'Nothing needs mending',repNoWork:'No orders right now',repFull:'You have 3 orders up already',repGone:'Someone took that order already',repSlots:'Your account has 5 orders up already (your other characters\' too)',repOld:'No smith took your order for {it} in 14 days: it is off, and {g} gold is back'});
 var REPO={},REPP={},repDOff=null,repPOff=null,repBusy=0,repFor=null; // repFor: the account the watches are for
 function repOn(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&S&&!S.__demo&&Satisfy.firebase.repairStore);}
 function repSt(){return repOn()?Satisfy.firebase.repairStore(FB):null;}
@@ -6125,17 +6125,23 @@ const repWorn=()=>S.items.filter(i=>i&&i.iid&&i.slot&&i.slot!=='x'&&durOf(i)<100
 const repNpc=(who,i)=>price(who,Math.ceil((100-durOf(i))*.4*(1+(i.r||0))));
 // the owner's answers: watched while this character has an order up (from sign-in on), each mends its piece once
 // another account signed in on this page: its own watches (Claude-B, #131)
-function repAcct(){if(repFor===NET.uid)return;if(repDOff)repDOff();if(repPOff)repPOff();repDOff=repPOff=null;REPP={};repFor=NET.uid;}
+function repAcct(){if(repFor===NET.uid)return;if(repDOff)repDOff();if(repPOff)repPOff();repDOff=repPOff=null;REPP={};REPDV=null;repDS=null;repFor=NET.uid;}
 // an answer for none of this character's orders is left for the account's other character it may be for; after 30 days
 // nobody is waiting for it, and it goes
-function repTick(){if(!repOn())return;repAcct();if(repDOff||!(S.rord&&S.rord.length))return;const st=repSt(),uid=NET.uid;
- repDOff=st.watchDone(uid,v=>{for(const k in (v||{})){const e=v[k];if(!e||typeof e!=='object')continue;const o=(S.rord||[]).find(x=>x.oid===k);
+// the account's other character playing on this page later gets its answers from the last ones seen, without waiting for
+// the next change (Claude-B's note on #131)
+var REPDV=null,repDS=null;
+function repDone(v){const st=repSt();if(!st||!S)return;const uid=NET.uid;repDS=S;
+ for(const k in (v||{})){const e=v[k];if(!e||typeof e!=='object')continue;const o=(S.rord||[]).find(x=>x.oid===k);
   if(!o){if(+e.t<Date.now()-30*864e5)st.took(uid,k).catch(()=>{});continue;}st.took(uid,k).catch(()=>{});S.rord=S.rord.filter(x=>x!==o);const i=S.items.find(x=>x.iid===e.iid);if(i)i.dur=100;
-  toast(t('repDoneMine',{n:Satisfy.chat.clean(e.sn,24)||'?',it:i?inm(i):o.it}),'good');SFX.coin&&SFX.coin();hudDirty=true;save(true);}});}
+  toast(t('repDoneMine',{n:Satisfy.chat.clean(e.sn,24)||'?',it:i?inm(i):o.it}),'good');SFX.coin&&SFX.coin();hudDirty=true;save(true);}}
+function repTick(){if(!repOn())return;repAcct();if(repDOff){if(repDS!==S&&REPDV&&S.rord&&S.rord.length)repDone(REPDV);return;}if(!(S.rord&&S.rord.length))return;const st=repSt(),uid=NET.uid;
+ repDOff=st.watchDone(uid,v=>{REPDV=v;repDone(v);});}
 function repPaidWatch(){const st=repSt();if(!st)return;repAcct();if(repPOff)return;repPOff=st.watchPaid(NET.uid,v=>{const o={};for(const k in (v||{})){const e=v[k];if(e&&+e.g>0)o[k]=+e.g|0;}REPP=o;});}
 function repD(who){const st=repSt();if(!st)return svcBack(who);repPaidWatch();const back=()=>repD(who);
  st.list().then(v=>{REPO={};for(const k in (v||{})){const e=v[k];if(/^r_[A-Za-z0-9_-]{1,60}$/.test(k)&&e&&typeof e.by==='string'&&+e.fee>0)REPO[k]=Object.assign({oid:k},e);}
-  const mine=(S.rord||[]),work=repSmith()?Object.values(REPO).filter(o=>o.by!==NET.uid).sort((a,b)=>b.fee-a.fee):[],pay=Object.values(REPP).reduce((a,b)=>a+b,0);
+  repExpire(st);
+  const mine=(S.rord||[]),work=repSmith()?Object.values(REPO).filter(o=>o.by!==NET.uid&&+o.t>Date.now()-REP_DAYS).sort((a,b)=>b.fee-a.fee):[],pay=Object.values(REPP).reduce((a,b)=>a+b,0);
   const L=[{l:t('repPost'),f:()=>repPick(who)},...mine.map(o=>({l:t('repMineRow',{it:o.it,d:o.d,g:o.fee})+' · '+t('repOff'),f:()=>repCancel(who,o)})),
    ...work.slice(0,8).map(o=>({l:t('repWorkRow',{n:Satisfy.chat.clean(o.n,24)||'?',it:Satisfy.chat.clean(o.it,40)||'?',d:+o.d|0,g:o.fee}),ic:'hammer',f:()=>repMend(who,o)})),
    ...(pay?[{l:t('repPay',{g:pay}),f:()=>repCollect(who)}]:[]),{l:t('oBack'),f:()=>svcBack(who)}];
@@ -6144,12 +6150,20 @@ function repPick(who){const W=repWorn().slice(0,6);if(!W.length)return dialog(wh
  dialog(who,[t('repPick')],null,[...W.map(i=>({l:t('repPickRow',{it:inm(i),d:durOf(i)}),f:()=>repFee(who,i)})),{l:t('oBack'),f:()=>repD(who)}]);}
 function repFee(who,i){const c=repNpc(who,i),F=[...new Set([.5,.75,1].map(f=>Math.max(1,Math.round(c*f))))];
  dialog(who,[t('repFeeQ',{it:inm(i)})],null,[...F.map(g=>({l:t('repFee',{g}),poor:S.gold<g,f:()=>repPost(who,i,g)})),{l:t('oBack'),f:()=>repD(who)}]);}
+// an order takes one of the account's five places (repairSlot); one still held by an order no longer on the board is
+// freed first. Orders nobody took in 14 days come back to their poster with the fee (Claude-B's note on #131)
+const REP_S=['0','1','2','3','4'],REP_DAYS=14*864e5;
 function repPost(who,i,g){const st=repSt();if(!st||repBusy)return;if(S.gold<g){SFX.deny();return toast(t('noGold'),'warn');}repBusy=1;
- const oid='r_'+String(NET.uid).slice(0,24).replace(/[^A-Za-z0-9_-]/g,'')+'_'+Date.now().toString(36),o={oid,iid:i.iid,it:String(inm(i)).slice(0,40),d:Math.max(0,Math.min(99,durOf(i)|0)),fee:g};
- S.gold-=g;(S.rord=S.rord||[]).push(o);hudDirty=true;save(true);
- st.post(oid,{by:NET.uid,n:netId||S.look.n,iid:o.iid,it:o.it,d:o.d,fee:g}).then(()=>{repBusy=0;toast(t('repPosted'),'good');SFX.coin&&SFX.coin();repTick();repD(who);},
-  ()=>{repBusy=0;S.gold+=g;S.rord=S.rord.filter(x=>x!==o);hudDirty=true;save(true);toast(t('gdFail'),'warn');repD(who);});}
-function repCancel(who,o){const st=repSt();if(!st||repBusy)return;repBusy=1;st.cancel(o.oid).then(()=>{repBusy=0;S.rord=(S.rord||[]).filter(x=>x!==o);S.gold+=o.fee;hudDirty=true;save(true);toast(t('repOffDone',{g:o.fee}));repD(who);},
+ const fail=()=>{repBusy=0;toast(t('gdFail'),'warn');repD(who);};
+ st.slots(NET.uid).then(sl=>{const s=REP_S.find(k=>!sl[k])||REP_S.find(k=>!REPO[sl[k]]);if(s==null){repBusy=0;SFX.deny();toast(t('repSlots'),'warn');return repD(who);}
+  return (sl[s]?st.free(NET.uid,s):Promise.resolve()).then(()=>{
+   const oid='r_'+String(NET.uid).slice(0,24).replace(/[^A-Za-z0-9_-]/g,'')+'_'+Date.now().toString(36),o={oid,iid:i.iid,it:String(inm(i)).slice(0,40),d:Math.max(0,Math.min(99,durOf(i)|0)),fee:g,s};
+   S.gold-=g;(S.rord=S.rord||[]).push(o);hudDirty=true;save(true);
+   return st.post(oid,{by:NET.uid,n:netId||S.look.n,iid:o.iid,it:o.it,d:o.d,fee:g,s}).then(()=>{repBusy=0;toast(t('repPosted'),'good');SFX.coin&&SFX.coin();repTick();repD(who);},
+    ()=>{S.gold+=g;S.rord=S.rord.filter(x=>x!==o);hudDirty=true;save(true);fail();});});},fail);}
+function repExpire(st){const old=(S.rord||[]).filter(o=>REPO[o.oid]&&+REPO[o.oid].t>0&&+REPO[o.oid].t<Date.now()-REP_DAYS);
+ for(const o of old)st.cancel(o.oid,{by:NET.uid,s:o.s!=null?o.s:REPO[o.oid].s}).then(()=>{if(!(S.rord||[]).includes(o))return;S.rord=S.rord.filter(x=>x!==o);S.gold+=o.fee;delete REPO[o.oid];hudDirty=true;save(true);toast(t('repOld',{it:o.it,g:o.fee}));},()=>{});}
+function repCancel(who,o){const st=repSt();if(!st||repBusy)return;repBusy=1;st.cancel(o.oid,{by:NET.uid,s:o.s!=null?o.s:(REPO[o.oid]||{}).s}).then(()=>{repBusy=0;S.rord=(S.rord||[]).filter(x=>x!==o);S.gold+=o.fee;hudDirty=true;save(true);toast(t('repOffDone',{g:o.fee}));repD(who);},
   ()=>{repBusy=0;toast(t('repGone'),'warn');repD(who);});}
 function repMend(who,o){const st=repSt();if(!st||repBusy||!repSmith())return;repBusy=1;
  st.mend(o.oid,o,NET.uid,netId||S.look.n).then(()=>{repBusy=0;delete REPO[o.oid];REPP[o.oid]=o.fee;vfx('forge',P.x,P.y-8);SFX.coin&&SFX.coin();toast(t('repMended',{n:Satisfy.chat.clean(o.n,24)||'?',it:Satisfy.chat.clean(o.it,40)||'?'}),'good');repD(who);},

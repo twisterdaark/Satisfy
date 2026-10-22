@@ -129,7 +129,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U222 | Fish market | ❌ | Content (B) |
 | U223 | Crop wholesale market | ❌ | Content (B) |
 | U224 | Rare gem exchange | 🟡 | Socketing and paid upgrades (B); no exchange between players |
-| U225 | Repair market | ✅ | SAT-ONLINE-096: work orders (`repairOrders`) a player posts with a fee at any smith's; a player Blacksmith mends one in one write that takes it off, tells its owner (`repairDone`) and pays the smith (`repairPaid`), checked by the rules; the piece is mended in its owner's bag with the same id (`regression/repair`) |
+| U225 | Repair market | ✅ | SAT-ONLINE-096: work orders (`repairOrders`) a player posts with a fee at any smith's; a player Blacksmith mends one in one write that takes it off, tells its owner (`repairDone`) and pays the smith (`repairPaid`), checked by the rules; the piece is mended in its owner's bag with the same id (`regression/repair`); SAT-ONLINE-133: each order holds one of its account's five places (`repairSlot/{uid}/{0-4}`), written and freed with it in the rules, and one nobody took in 14 days comes back with its fee |
 | U226 | Taxation caps | ❌ | There are no city taxes yet |
 | U227 | Inflation dashboard | ✅ | SAT-ONLINE-082: `/economy` for the owner: total, median, top 10% and richest gold of the ranked players, and their average level |
 

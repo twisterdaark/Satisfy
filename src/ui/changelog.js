@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22repcap', ver: '1.86', d: '2026-10-22',
+      ar: ["طلبات التصليح: كل حساب عليه لحد 5 طلبات في نفس الوقت (بشخصياته كلها)، والطلب اللي محدش من الحدادين خده في 14 يوم بيتشال وبترجعلك أجرته"],
+      en: ["Repair orders: an account has up to 5 up at a time (all its characters together), and an order no smith took in 14 days is taken off with its fee back"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
