@@ -137,3 +137,18 @@ test("a parent's .validate holds a write to one of its children", async () => {
   await no(db(A).ref('lfg/' + A + '/lv').remove(), 'one child removed leaves the entry without it');
   await yes(db(A).ref('lfg/' + A).remove(), 'the whole entry removed is not validated');
 });
+
+// SAT-ONLINE-137 (plan U335): content packs live under flags as pk_{name}, set by admins, with an optional cohort
+test('content packs: admins set them, with a cohort (level, share) only for a pack', async () => {
+  const pk = (o) => Object.assign({ on: true, by: M, t: SV }, o);
+  await no(db(A).ref('flags/pk_hunt').set(Object.assign(pk(), { by: A })), 'not a player');
+  await yes(db(M).ref('flags/pk_hunt').set(pk({ on: false, why: 'next week' })), 'the owner closes the hunt');
+  await yes(db(M).ref('flags/pk_nat').set(pk({ lv: 100, pct: 50 })), 'and opens the competition for a cohort');
+  await no(db(M).ref('flags/pk_HUNT').set(pk()), 'lower-case names');
+  await no(db(M).ref('flags/pk_x').set(pk()), 'two letters at least');
+  await no(db(M).ref('flags/chat').set(pk({ lv: 5 })), 'a cohort only for a pack');
+  await no(db(M).ref('flags/pk_nat').set(pk({ pct: 101 })), 'a share up to 100%');
+  await no(db(M).ref('flags/pk_nat').set(pk({ lv: 0 })), 'from level 1');
+  await no(db(M).ref('flags/pk_nat').set(pk({ zone: 'zWin' })), 'nothing else');
+  await yes(db(A).ref('flags').once('value'), 'every page reads them');
+});

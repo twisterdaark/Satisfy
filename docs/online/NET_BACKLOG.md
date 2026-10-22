@@ -190,7 +190,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U332 | Limited festivals | ✅ | The town festival every third hour (B, v0.94) |
 | U333 | Balance dashboard | ✅ | SAT-ONLINE-088: each game writes its own class's week (`balance/{uid}`: kills, seconds from first hit to kill, PvP wins and losses from duels and open PvP; bounded by the rules), the owner's `/balance` sums them by class (PvE time to kill, PvP win rate); admins only read them; no names on the board (`regression/balance`) |
 | U334 | Economy health | ✅ | SAT-ONLINE-093: every game counts the gold that came in and went out this week from each change of the bag (`balance/{uid}` `gi`, `go`, with 088); `/economy` adds the week's flow over all players and warns when more than twice as much comes in as goes out (three players or more) (`regression/balance`) |
-| U335 | Content flags | 🟡 | Older pages skip what they don't know (fx tags, presence fields). SAT-ONLINE-121: live switches, world chat, trading and dueling, which the owner turns off and on for everyone without a release (`/switch`), held by the rules for every page (`flags`). Left: content packs by region and player group |
+| U335 | Content flags | ✅ | Older pages skip what they don't know (fx tags, presence fields). SAT-ONLINE-121: live switches for world chat, trading and dueling (`/switch`, held by the rules). SAT-ONLINE-137: content packs, `flags/pk_{name}` set by admins with `/pack`: closed for everyone, or open for a cohort (from a level, and/or a share of characters by a hash of their id). A closed pack offers nothing new (the boss hunt, the National Competition, any quest tagged `pack`), but what was already started goes on (`regression/packs`, emulator) |
 | U336 | Announcement system | ✅ | SAT-ONLINE-079: `/announce text` from an admin account (`admins/{uid}`, set in the console only); everyone online sees it once, late joiners within 10 min; the rules refuse anyone else (`regression/announce`) |
 | U337 | Maintenance notices | ✅ | SAT-ONLINE-079: `/maint minutes text`: the time, reminders 10/5/1 min before, a save when it starts; and "a new version" asks only the older page to refresh (SAT-ONLINE-045) |
 | U338 | Hotfix pipeline | ✅ | [HOTFIX.md](HOTFIX.md) (SAT-ONLINE-111): a `HOTFIX:` PR from main with its failing test, reviewed first, rules deployed first; ROLLBACK.md when it can't wait |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 75 · 🟡 17 · ⏳ 6 · ❌ 6 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 76 · 🟡 16 · ⏳ 6 · ❌ 6 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

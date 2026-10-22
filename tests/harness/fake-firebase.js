@@ -100,10 +100,11 @@
   const switchedOff = (k) => { const f = data.get('flags/' + k); return !!f && f.on === false; };
   function flagRules(seg, v) {
     if (!user || data.get('admins/' + user.uid) !== true) return 'PERMISSION_DENIED: flags admins only';
-    if (seg.length !== 2 || !/^(chat|trade|duel)$/.test(seg[1])) return 'PERMISSION_DENIED: flags ' + seg.join('/');
+    if (seg.length !== 2 || !/^(chat|trade|duel|pk_[a-z]{2,8})$/.test(seg[1])) return 'PERMISSION_DENIED: flags ' + seg.join('/');
     if (v === null) return null;
-    const ks = Object.keys(v).sort().join(',');
-    return (ks === 'by,on,t' || ks === 'by,on,t,why') && typeof v.on === 'boolean' && (v.why === undefined || (typeof v.why === 'string' && v.why.length <= 80)) && v.by === user.uid && isSV(v.t) ? null : 'flags values';
+    const ks = Object.keys(v).filter((k) => k !== 'why' && k !== 'lv' && k !== 'pct').sort().join(','), pk = /^pk_/.test(seg[1]); // SAT-ONLINE-137: content packs take lv and pct
+    const int = (x, a, b) => typeof x === 'number' && x % 1 === 0 && x >= a && x <= b;
+    return ks === 'by,on,t' && typeof v.on === 'boolean' && (v.why === undefined || (typeof v.why === 'string' && v.why.length <= 80)) && (v.lv === undefined || (pk && int(v.lv, 1, 999))) && (v.pct === undefined || (pk && int(v.pct, 0, 100))) && v.by === user.uid && isSV(v.t) ? null : 'flags values';
   }
   function tradeRules(seg, v) {
     if (!user) return 'PERMISSION_DENIED: trade';

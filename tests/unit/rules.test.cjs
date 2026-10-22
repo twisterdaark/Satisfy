@@ -622,7 +622,8 @@ test('live switches (SAT-ONLINE-121): only admins turn world chat, trading or du
   const f = rules.flags, OFF = (k) => "root.child('flags').child('" + k + "').child('on').val() !== false";
   assert.equal(f['.read'], 'auth != null', 'every page follows them');
   assert.equal(f.$k['.write'], "auth != null && root.child('admins').child(auth.uid).val() === true");
-  assert.equal(f.$k['.validate'], "$k.matches(/^(chat|trade|duel)$/) && newData.hasChildren(['on', 'by', 't'])", 'three switches, no others');
+  assert.equal(f.$k['.validate'], "$k.matches(/^(chat|trade|duel|pk_[a-z]{2,8})$/) && newData.hasChildren(['on', 'by', 't'])", 'three switches and the content packs (SAT-ONLINE-137), no others');
+  for (const k of ['lv', 'pct']) assert.ok(f.$k[k]['.validate'].endsWith("&& $k.beginsWith('pk_')"), 'a cohort (' + k + ') only for a pack');
   assert.equal(f.$k.on['.validate'], 'newData.isBoolean()');
   assert.equal(f.$k.$other['.validate'], false);
   assert.ok(rules.chat.$world.$id['.write'].includes("newData.child('from').val() === auth.uid && " + OFF('chat')), 'no new world line while chat is off');

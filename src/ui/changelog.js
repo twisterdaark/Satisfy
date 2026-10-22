@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22packs', ver: '1.84', d: '2026-10-22', hide: 1,
+      ar: ["لصاحب اللعبة: /pack يقفل جزء من اللعبة للكل (صيد الزعيم، المسابقة الوطنية) أو يفتحه لمجموعة بس (من لفل معين، أو نسبة من الشخصيات)، من غير تحديث. اللي بدأ قبل القفل بيكمل"],
+      en: ["For the game's owner: /pack closes a part of the game for everyone (the boss hunt, the National Competition) or opens it for a cohort only (from a level, or a share of characters), without a release. What was already started goes on"] },
     { v: '2026-10-22wpass2', ver: '1.83', d: '2026-10-22',
       ar: ["باسيفز سلاح جديدة: ضربة مزدوجة (السلاح بيضرب تاني لوحده)، صعق (برق بيزود الضربة 50% ويقفز على اتنين جنب الهدف ويشلهم لحظة)، امتصاص (جزء من الضرر اللي بتاخده بيترد في ضربتك الجاية)، تجميد (بيبطّأ الهدف)، وزق (بيرمي الهدف لورا)",
         "حجر البرق: جوهرة جديدة بتتركب في السلاح عند خان، وبتدي السلاح صعق بفرصة 15%. بتقع من الوحوش العالية والزعماء",
