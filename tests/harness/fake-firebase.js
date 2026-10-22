@@ -66,6 +66,10 @@
     apply(m.op, m.p, m.v);
   };
   function write(op, p, v) { apply(op, p, v); ch.postMessage({ op, p, v }); }
+  // The real database fires this page's own listeners for a write before the write's promise resolves (a local remove()
+  // has already dropped the node when .then runs: Claude-B, #129/#131). The listeners above run on timers queued by
+  // write(), so a promise settled on a later timer resolves after them.
+  const acked = (v) => new Promise((res) => setTimeout(() => res(v), 0));
   // the paths a root update claims for its first writer only (each one's rules need !data.exists() or the like)
   const CLAIM_RE = /^(repairOrders|guildNames|guildVaultTaken|guildBank|dropClaims|tradeDone|tradedItems|bountyPaid|world\/satisfy\/(legends|wb))\//, CLAIM_WAIT = 120;
   function rootUpdate(diff) {
@@ -77,7 +81,7 @@
       if (diff[p] === null) { for (const k of [...data.keys()]) if (k === p || k.startsWith(p + '/')) { mine.delete(k); write('remove', k); } continue; }
       mine.add(p); write('set', p, fix(clone(diff[p])));
     }
-    return Promise.resolve();
+    return acked();
   }
 
   const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'rd', 'ol', 'gd', 'seq', 't'];
@@ -500,7 +504,7 @@
         return Object.keys(v).sort().join(',') === 'by,fee,iid,sn,t' && v.iid === O.iid && v.fee === O.fee && v.by === me && typeof v.sn === 'string' && v.sn.length <= 24 && isSV(v.t) ? null : 'repairDone values';
       }
       if (seg[1] !== me) return 'PERMISSION_DENIED: repairPaid ' + p;
-      if (v === null) return null;
+      if (v === null) return old !== undefined ? null : 'PERMISSION_DENIED: repairPaid remove'; // collected once: two pages of one account can't both
       if (old || !O || O.by === me || (after('repairDone/' + O.by + '/' + seg[2]) || {}).by !== me) return 'PERMISSION_DENIED: repairPaid write';
       return Object.keys(v).sort().join(',') === 'g,t' && v.g === O.fee && isSV(v.t) ? null : 'repairPaid values';
     }
@@ -731,7 +735,7 @@
       if (err) { F.rejected.push(err); return Promise.reject(Object.assign(new Error(err), { code: 'PERMISSION_DENIED' })); }
       const stored = clone(v); stored.t = Date.now();
       if (connected) write('set', p, stored); else pending.set(p, stored);
-      return Promise.resolve({ key: keyOf(p) });
+      return connected ? acked({ key: keyOf(p) }) : Promise.resolve({ key: keyOf(p) });
     },
     set: (r, v) => {
       const err = rules(r.path, v, false);
@@ -741,7 +745,7 @@
       mine.add(r.path);
       if (!connected) { pending.set(r.path, stored); return Promise.resolve(); }
       write('set', r.path, stored);
-      return Promise.resolve();
+      return acked();
     },
     // RTDB update(): merge into the stored node (null removes a field), then check the rules on the result
     update: (r, diff) => {
@@ -768,7 +772,7 @@
       mine.add(r.path);
       if (!connected) { pending.set(r.path, stored); return Promise.resolve(); }
       write('set', r.path, stored);
-      return Promise.resolve();
+      return acked();
     },
     remove: (r) => {
       const err = rules(r.path, null, true);
@@ -776,7 +780,7 @@
       if (err) { F.rejected.push(err); return Promise.reject(new Error(err)); }
       mine.delete(r.path); pending.delete(r.path);
       if (connected) write('remove', r.path);
-      return Promise.resolve();
+      return connected ? acked() : Promise.resolve();
     },
     // one-shot read: the exact node, or its direct children as an object (enough for the cloud index)
     // the server answers reads with everything stored; here the other pages' copies arrive as hello replies, so a read

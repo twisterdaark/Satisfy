@@ -551,6 +551,7 @@ test('repair orders (SAT-ONLINE-096): your own order; mended by someone else, wh
   assert.ok(P['.write'].includes("newData.parent().parent().parent().child('repairDone').child(" + o + ".child('by').val()).child($oid).child('by').val() === $uid"), 'paid only for mending it');
   assert.equal(P.g['.validate'], 'newData.val() === ' + o + ".child('fee').val()", 'its fee');
   assert.equal(rules.repairDone.$uid['.read'], 'auth != null && auth.uid === $uid');
+  assert.ok(P['.write'].endsWith("|| (data.exists() && !newData.exists()))"), 'a fee collected once (Claude-B, #131)');
 });
 
 test('no key appears twice in one object of the rules file', () => {

@@ -813,7 +813,7 @@
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         "$oid": {
-          ".write": "auth != null && auth.uid === $uid && ((!data.exists() && newData.exists() && root.child('repairOrders').child($oid).exists() && root.child('repairOrders').child($oid).child('by').val() !== $uid && newData.parent().parent().parent().child('repairDone').child(root.child('repairOrders').child($oid).child('by').val()).child($oid).child('by').val() === $uid) || !newData.exists())",
+          ".write": "auth != null && auth.uid === $uid && ((!data.exists() && newData.exists() && root.child('repairOrders').child($oid).exists() && root.child('repairOrders').child($oid).child('by').val() !== $uid && newData.parent().parent().parent().child('repairDone').child(root.child('repairOrders').child($oid).child('by').val()).child($oid).child('by').val() === $uid) || (data.exists() && !newData.exists()))",
           ".validate": "newData.hasChildren(['g', 't'])",
           "g": { ".validate": "newData.val() === root.child('repairOrders').child($oid).child('fee').val()" },
           "t": { ".validate": "newData.val() === now" },

@@ -3,7 +3,7 @@
 // order to mend a worn piece for a fee (it leaves his bag); a player who is not a smith sees no work; Bassem the
 // Blacksmith mends it: the order goes, Ahmed's piece is mended in his bag (the same piece, the same id) and he is told,
 // and Bassem collects the fee once. An order taken off gives its fee back. The rules: nobody mends their own order, takes
-// one off without telling its owner, or pays themselves without mending it, or for another fee.
+// one off without telling its owner, or pays themselves without mending it, or for another fee, or collects a fee twice.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -103,6 +103,7 @@ test('repair orders: posted with a fee, mended by a player smith in the owner\'s
     await pick(b, new RegExp('Collect your pay\\s*\\(?' + fee)); // the price shows as a badge
     await until([b], (x) => window.__G.S.gold === x, 10000, g0 + fee);
     await until([b], () => ![...window.__fakeRTDB.data.keys()].some((k) => /^repairPaid\//.test(k)));
+    assert.equal(await write(b, { ['repairPaid/gRpB2/' + oid]: null }), 'no', 'collected once: a second page of the account gets nothing');
 
     // an order taken off gives its fee back
     await wornItem(a);
