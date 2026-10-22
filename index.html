@@ -718,6 +718,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
  'src/net/natcomp.js',
  'src/net/chat.js',
  'src/net/raid.js',
+ 'src/net/triage.js',
  'src/net/cloud.js',
  'src/net/firebase-config.js',
  'src/net/firebase.js'
@@ -9127,6 +9128,44 @@ function admAppeals(st){st.appeals().then(({appeals,done})=>{const L=Object.keys
   dialog('guild',[O.length?t('admAppeals',{n:O.length}):t('admApNone')],null,[...O.slice(0,10).map(a=>({l:t('admApRow',{n:nm(a),l:calTime(+a.m.until)}),f:()=>dialog('guild',[t('admAp',{n:nm(a),l:calTime(+a.m.until),w:Satisfy.chat.clean(a.m.why,60)||'-',s:Satisfy.chat.clean(a.why,300)})],null,[
    {l:t('admApLift'),f:()=>st.decide(a.u,+a.mt,'lift',NET.uid).then(()=>{toast(t('admUnmuted',{n:nm(a)}),'good');admAppeals(st);},()=>toast(t('gdFail'),'warn'))},
    {l:t('admApKeep'),f:()=>st.decide(a.u,+a.mt,'keep',NET.uid).then(()=>{toast(t('admApKept',{n:nm(a)}));admAppeals(st);},()=>toast(t('gdFail'),'warn'))},{l:t('oBack'),f:()=>admAppeals(st)}])})),{l:t('oClose')}]);});},()=>toast(t('gdFail'),'warn'));}
+/* bug reports and their triage (SAT-ONLINE-125, plan U343 "community feedback triage"). A signed-in player types "/bug
+   what went wrong" (one every 2 minutes, which the rules hold to; long ids and e-mails are cut out, as in a crash report),
+   with the build and the zone. The game's owner's "/bugs" lists the crash reports and the bug reports in one list
+   (src/net/triage.js): crash reports with the same message are one group; the owner tags each group actionable, fixed or
+   not a bug, or the same as another report, which merges it there and keeps where every report came from (who, build,
+   zone, when). A fixed one that gets a new report comes back as open. Closed reports older than 30 days can be cleared. */
+Object.assign(STR.ar,{bugBad:'اكتب: /bug وإيه اللي حصل (3 حروف على الأقل)',bugOff:'سجّل دخول أونلاين عشان تبعت بلاغ عن مشكلة',bugWait:'بلاغ واحد كل دقيقتين. جرّب كمان شوية',bugSent:'شكرًا! البلاغ راح لصاحب اللعبة',bugH:'بلاغات المشاكل والأعطال: {o} مفتوح ({a} هيتصلح) · {f} اتصلح · {x} مش مشكلة',bugNone:'مفيش بلاغات',bugRow:'{e} {s} ×{n}',bugSt_new:'جديد',bugSt_act:'هيتصلح',bugSt_fixed:'اتصلح',bugSt_no:'مش مشكلة',bugBack:'رجع بعد ما اتصلح',bugCrash:'عطل',bugRep:'بلاغ',bugOne:'{k} ({e}): "{s}" · ×{n} · اللاعيبة: {w} · النسخة {v} · {z} · أول مرة {f}، آخر مرة {l}',bugItem:'{n} ({v}، {z}) {d}: "{s}"',bugAct:'هيتصلح',bugFix:'اتصلح',bugNo:'مش مشكلة',bugReopen:'افتحه تاني',bugDup:'ده نفس بلاغ تاني…',bugDupQ:'نفس أنهي بلاغ؟',bugTagged:'اتعلّم: {s}',bugMerged:'اتضم لـ "{s}"',bugShowAll:'اعرض المقفولين كمان ({n})',bugClear:'امسح البلاغات المقفولة اللي عدّى عليها 30 يوم ({n})',bugCleared:'اتمسح {n} بلاغ'});
+Object.assign(STR.en,{bugBad:'Type: /bug and what went wrong (3 letters at least)',bugOff:'Sign in online to send a bug report',bugWait:'One report every 2 minutes. Try again in a moment',bugSent:"Thanks! Your report went to the game's owner",bugH:'Bug reports and crashes: {o} open ({a} actionable) · {f} fixed · {x} not a bug',bugNone:'No reports',bugRow:'{e} {s} ×{n}',bugSt_new:'new',bugSt_act:'actionable',bugSt_fixed:'fixed',bugSt_no:'not a bug',bugBack:'back after the fix',bugCrash:'Crash',bugRep:'Bug report',bugOne:'{k} ({e}): "{s}" · ×{n} · players: {w} · build {v} · {z} · first {f}, last {l}',bugItem:'{n} ({v}, {z}) {d}: "{s}"',bugAct:'Actionable',bugFix:'Fixed',bugNo:'Not a bug',bugReopen:'Open again',bugDup:'The same as another report…',bugDupQ:'The same as which one?',bugTagged:'Tagged: {s}',bugMerged:'Merged into "{s}"',bugShowAll:'Show the closed ones too ({n})',bugClear:'Clear the closed reports older than 30 days ({n})',bugCleared:'Cleared {n} reports'});
+var BUGT=0,BUGALL=false,BUGD=null;const BUGE={new:'🆕',act:'🔧',fixed:'✅',no:'🚫'},BUGKEEP=30*86400000;
+function bugSt(){return NETTR&&NETTR.kind==='firebase'&&FB&&NET&&Satisfy.firebase.bugStore?Satisfy.firebase.bugStore(FB):null;}
+function bugSend(x){const s=String(x||'').replace(/\s+/g,' ').trim().slice(0,300);if(s.length<3){toast(t('bugBad'),'warn');return;}
+ const st=bugSt();if(!st||!netUser){toast(t('bugOff'),'warn');return;}if(BUGT&&Date.now()-BUGT<120000){toast(t('bugWait'),'warn');return;}BUGT=Date.now();
+ const v=String((Satisfy.CHANGELOG&&Satisfy.CHANGELOG[0]&&Satisfy.CHANGELOG[0].ver)||'?'),z=P&&S?String(zoneAt(P.x,P.y)||'').slice(0,24):'';
+ st.send('b_'+String(NET.uid).slice(0,24).replace(/[^A-Za-z0-9_-]/g,'')+'_'+Date.now().toString(36),NET.uid,{s:crashRedact(s).slice(0,300),v,z,n:netId||(S&&S.look&&S.look.n)||''})
+  .then(()=>toast(t('bugSent'),'good'),()=>toast(t('bugWait'),'warn'));}
+const bugMark=x=>x.back?'🔁':BUGE[x.s]||'🆕',bugStat=x=>bugMark(x)+' '+t(x.back?'bugBack':'bugSt_'+x.s);
+function bugWhen(ms){if(!(ms>0))return '?';const d=new Date(ms);return d.getDate()+'/'+(d.getMonth()+1)+' '+calTime(ms);}
+function bugGroups(){return BUGD?Satisfy.triage.groups(BUGD.crashes,BUGD.bugs,BUGD.triage):[];}
+// the players' reports in closed groups (fixed or not a bug, and nothing since) older than 30 days
+function bugOld(G){const n=wNow(),o=[];for(const x of G)if(!x.open)for(const i of x.items)if(i.kind==='bug'&&i.t>0&&n-i.t>BUGKEEP)o.push(i.id);return o;}
+function bugAdm(){const st=bugSt();if(!st)return;st.all().then(r=>{BUGD=r;bugList(st);},()=>toast(t('gdFail'),'warn'));}
+function bugList(st){const G=bugGroups(),open=G.filter(x=>x.open),L=BUGALL?G:open,old=bugOld(G),cnt=k=>G.filter(x=>x.s===k&&!x.back).length;
+ dialog('guild',[G.length?t('bugH',{o:open.length,a:open.filter(x=>x.s==='act').length,f:cnt('fixed'),x:cnt('no')}):t('bugNone')],null,[
+  ...L.slice(0,12).map(x=>({l:t('bugRow',{e:bugMark(x),s:x.text.slice(0,48).trim(),n:x.n}),f:()=>bugOne(st,x.key)})),
+  ...(!BUGALL&&G.length>open.length?[{l:t('bugShowAll',{n:G.length-open.length}),f:()=>{BUGALL=true;bugList(st);}}]:[]),
+  ...(old.length?[{l:t('bugClear',{n:old.length}),f:()=>st.clear(old).then(()=>{toast(t('bugCleared',{n:old.length}),'good');bugAdm();},()=>toast(t('gdFail'),'warn'))}]:[]),
+  {l:t('oClose'),f:()=>{BUGALL=false;}}]);}
+// one group: what it says, how many reports from whom, its last five (each with who, build, zone and when), and the tags
+function bugOne(st,key){const x=bugGroups().find(g=>g.key===key);if(!x)return bugList(st);const who=i=>Satisfy.chat.clean(i.n,24)||String(i.by||'?').slice(0,6)+'…';
+ const lines=[t('bugOne',{k:t(x.kind==='crash'?'bugCrash':'bugRep'),e:bugStat(x),s:x.text,n:x.n,w:x.by.length,v:x.v.join(', ')||'?',z:x.z.join(', ')||'-',f:bugWhen(x.first),l:bugWhen(x.last)}),
+  x.items.slice(-5).reverse().map(i=>t('bugItem',{n:who(i),v:i.v||'?',z:i.z||'-',d:bugWhen(i.t),s:i.kind==='crash'?(String(i.stack||'').split('\n')[1]||i.text).trim().slice(0,120):i.text.slice(0,120)})).join(' · ')];
+ const tag=(s,dup)=>st.tag(key,s,NET.uid,dup).then(()=>{toast(dup?t('bugMerged',{s:(bugGroups().find(g=>g.key===dup)||{text:dup}).text.slice(0,40)}):t('bugTagged',{s:t('bugSt_'+s)}),'good');bugAdm();},()=>toast(t('gdFail'),'warn'));
+ const others=bugGroups().filter(g=>g.key!==key&&g.open).slice(0,10);
+ dialog('guild',lines,null,[...(x.s!=='act'||x.back?[{l:t('bugAct'),f:()=>tag('act')}]:[]),...(x.s!=='fixed'||x.back?[{l:t('bugFix'),f:()=>tag('fixed')}]:[]),...(x.s!=='no'?[{l:t('bugNo'),f:()=>tag('no')}]:[]),
+  ...(x.s!=='new'?[{l:t('bugReopen'),f:()=>tag('new')}]:[]),
+  ...(others.length?[{l:t('bugDup'),f:()=>dialog('guild',[t('bugDupQ')],null,[...others.map(g=>({l:t('bugRow',{e:bugMark(g),s:g.text.slice(0,48).trim(),n:g.n}),f:()=>tag('dup',g.key)})),{l:t('oBack'),f:()=>bugOne(st,key)}])}]:[]),
+  {l:t('oBack'),f:()=>bugList(st)}]);}
+window.__GBUG={send:x=>bugSend(x),open:()=>admOnly(bugAdm),groups:()=>bugGroups(),reset:()=>{BUGT=0;},store:()=>bugSt()}; // tests
 /* balance figures (SAT-ONLINE-088, plan U333). Each signed-in game keeps this week's numbers for its own class (the lockouts'
    week, Monday 00:00 UTC): the monsters it killed and how long each took from its first hit (game seconds), and its PvP wins
    and losses (duels and open PvP). It writes them to balance/{uid} at most every 5 minutes while they change. The game's
@@ -9161,7 +9200,9 @@ function admCmd(v){let m;
  if(/^\/appeal(\s|$)/i.test(v)){apSend(v.replace(/^\/appeal/i,''));return true;}
  if(/^\/economy\s*$/i.test(v)){admOnly(admEco);return true;}
  if(/^\/balance\s*$/i.test(v)){admOnly(admBal);return true;}
- if(/^\/admin\s*$/i.test(v)){admOnly(()=>toast(t('admHelp')));return true;}
+ if(/^\/admin\s*$/i.test(v)){admOnly(()=>toast(t('admHelp')+' · /bugs'));return true;}
+ if(/^\/bugs\s*$/i.test(v)){admOnly(bugAdm);return true;}
+ if(/^\/bug(\s|$)/i.test(v)){bugSend(v.replace(/^\/bug/i,''));return true;}
  if((m=/^\/mute\s+(\S+)\s+(\d{1,3})\s*([\s\S]*)$/i.exec(v))){const id=m[1],h=Math.max(1,Math.min(720,+m[2])),why=m[3].trim().slice(0,60);admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}const until=wNow()+h*3600000;return st.mute(u,until,why,NET.uid).then(()=>toast(t('admMuted',{n:id,l:calTime(until)}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  if((m=/^\/unmute\s+(\S+)\s*$/i.exec(v))){const id=m[1];admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}return st.unmute(u).then(()=>toast(t('admUnmuted',{n:id}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  return false;}

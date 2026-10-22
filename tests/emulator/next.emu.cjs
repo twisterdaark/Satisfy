@@ -38,6 +38,31 @@ test('#145: an admin removes crash reports, nobody else does', async () => {
   await yes(db(B).ref('crashes/c2').set({ m: 'TypeError', s: 'at f', v: '1.42', by: B, t: SV }), 'sending one still works');
 });
 
+test('#161: bug reports: your own, one every 2 minutes; admins read, tag and clear them', async () => {
+  const bug = (by, s = 'the shop stays open') => ({ s, v: '1.42', z: 'zWin', n: 'Bassem', by, t: SV });
+  const send = (uid, id, v) => db(uid).ref().update({ ['bugs/' + id]: v, ['bugLast/' + uid]: { t: SV } });
+  await no(db(B).ref('bugs/b_B_1').set(bug(B)), 'without bugLast in the same update');
+  await no(send(B, 'b_B_1', bug(A)), 'as someone else');
+  await no(send(B, 'b_B_1', bug(B, 'ok')), 'too short');
+  await no(send(B, 'bad id', bug(B)), 'a key of its own form');
+  await yes(send(B, 'b_B_1', bug(B)), 'Bassem sends one');
+  await no(send(B, 'b_B_2', bug(B)), 'a second within 2 minutes');
+  await no(send(B, 'b_B_1', bug(B, 'changed it')), 'never changed');
+  await no(db(A).ref('bugs').once('value'), 'players do not read them');
+  await yes(db(M).ref('bugs').once('value'), 'the owner does');
+  await no(db(A).ref('bugTriage/b_B_1').set({ s: 'act', by: A, t: SV }), 'players do not tag');
+  await yes(db(M).ref('bugTriage/b_B_1').set({ s: 'act', by: M, t: SV }), 'the owner tags it actionable');
+  await yes(db(M).ref('bugTriage/c_1x2y').set({ s: 'fixed', note: 'fixed in 1.42', by: M, t: SV }), 'and a crash group fixed');
+  await no(db(M).ref('bugTriage/b_B_1').set({ s: 'dup', by: M, t: SV }), 'the same as nothing');
+  await no(db(M).ref('bugTriage/b_B_1').set({ s: 'dup', dup: 'b_B_1', by: M, t: SV }), 'the same as itself');
+  await no(db(M).ref('bugTriage/b_B_1').set({ s: 'act', dup: 'c_1x2y', by: M, t: SV }), 'a dup only with dup');
+  await no(db(M).ref('bugTriage/b_B_1').set({ s: 'later', by: M, t: SV }), 'five tags only');
+  await yes(db(M).ref('bugTriage/b_B_1').set({ s: 'dup', dup: 'c_1x2y', by: M, t: SV }), 'merged into the crash group');
+  await no(db(A).ref('bugTriage').once('value'), 'players do not read tags');
+  await no(db(B).ref('bugs/b_B_1').remove(), 'the sender does not remove it');
+  await yes(db(M).ref().update({ 'bugs/b_B_1': null, 'bugTriage/b_B_1': null }), 'the owner clears it');
+});
+
 test('#151: the guild hall: members and guests read it, the master furnishes it, a guest only leaves', async () => {
   const piece = (by, n, k = 'table') => ({ k, by, n, t: SV });
   await yes(db(A).ref('guildHall/' + G + '/s0').set(piece(A, 'Ahmed')), 'the master furnishes');
