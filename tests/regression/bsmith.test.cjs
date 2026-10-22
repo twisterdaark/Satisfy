@@ -52,6 +52,12 @@ test('the Legendary Eyes see a named item whole and help understanding', async (
     assert.match(l.txt, /\[Legendary Blacksmith's Eyes\]/);
     assert.doesNotMatch(l.txt, /\?\?\?/);
     assert.equal(l.eyes.ochelm, l.n);
+    // a second chief wearing the same, already known helm: no new discovery window (owner 2026-10-22: the same ring
+    // "discovered" four times and more)
+    const again = await g.eval(() => { const G = window.__G, B = window.__GBS, w = document.getElementById('eyesW'); w.hidden = true;
+      for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } const m = G.spawnMon('fochief', G.P.x + 120, G.P.y); m.max = m.hp = 1e9; m.tmp = 0;
+      for (const id of B.ids(m)) G.S.eyes[id] = B.lines(id).length; B.reset(); for (let i = 0; i < 61; i++) B.eyTick(.1); return w.hidden; });
+    assert.equal(again, true, 'the known helm is not discovered again');
     // the chief dead, a plain orc beside you: its 0.3% share of the chief set is not something it wears, so nothing shows
     // (owner 2026-10-22: the Eyes named the chief's gloves with the chief long dead)
     const o = await g.eval(() => { const G = window.__G, S = G.S, B = window.__GBS; S.eyes = {}; const w = document.getElementById('eyesW'); w.hidden = true;

@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22horse', ver: '1.88', d: '2026-10-22',
+      ar: ["أي عربجي في أي مدينة بيعالج حصانك لو وقع، مش لازم تسافر لعربجي معين. وكل العربجية بيبيعوا علف الحصان (بيقوّمه بنص صحته) وعشبة الحيوية (بيقوّمه بصحته كلها)",
+        "عشبة الحيوية كمان بتطلع ساعات وانت بتجمع الأعشاب. أكّل العلف أو العشبة لحصانك من الشنطة في أي حتة، يقوم لو وقع أو يتعالج لو متعور",
+        "تفاصيل المهام بتفتح كل مرة: حتى لو تفاصيل مهمة تانية أو الشنطة أو الخريطة مفتوحة، الدوس على المهمة بيقفلهم ويفتح تفاصيلها",
+        "أهداف مهام كانت مكتوبة بالكود زي \"زور yaltar\" بقت بأسماء: تطهير مذبح ياتان، ونبع حقل بيارو، ومحاصيله، وفسحة الغابة. وفيه فحص لكل المهام",
+        "نضارة السمعة بتظهر في الشنطة، ودوسة عليها بتقلعها أو تلبسها من غير ما تفتح محل السمعة",
+        "عيون الحداد مبقتش بتكتشف نفس القطعة كل ما الوحش يرجع. بتفتح بس لو فيه حاجة جديدة تشوفها"],
+      en: ["Any coachman in any town wakes your fallen horse; no travelling to one in particular. Every coachman also sells Horse Feed (back up at half health) and the Vitality Herb (back up at full health)",
+        "The Vitality Herb also turns up now and then while you pick herbs. Feed the feed or the herb to your horse from the bag anywhere: it gets up if it fell or heals if hurt",
+        "Quest details open every time: even with another quest's details, the bag or the map open, clicking a quest closes them and opens its details",
+        "Quest objectives that showed a code like \"Visit yaltar\" now have names: purifying Yatan's altar, the spring and the crops of Piaro's field, the forest clearing. Every quest is checked",
+        "The reputation sunglasses show in the bag, and a click takes them off or puts them on without opening the Reputation Store",
+        "The Blacksmith's Eyes no longer discover the same item every time its monster comes back. The window opens only when there is something new to see"] },
     { v: '2026-10-22doran', ver: '1.87', d: '2026-10-22',
       ar: ["مهمة دوران (S) بقت أصعب: إيرين محبوسة في طقس لكبير الطائفة و3 من أتباعه، ومتقدرش تفكها إلا لما تقتلهم كلهم. الجايزة بقت 400 ألف خبرة و15 ألف دهب وخاتم دوران",
         "أي مهمة ليها درجة (B وA وS وSS) لما تخلّصها بتسمع موسيقى انتصار ويطلع لمعة دهب",
