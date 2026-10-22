@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22rings', ver: '1.95', d: '2026-10-22',
+      ar: ["تقدر تلبس لحد 10 خواتم زي الرواية (\"العشر خواتم اللي في صوابع كراوجل\" وبولد): خانة الإكسسوار و9 خانات خواتم تحت المعدات، والخواتم بس هي اللي بتتلبس فيها",
+        "الحاجة اللي بتعملها بنفسك عند السندان أو الخياطة بتفضل بالتقييم اللي طلعت بيه، بدل ما القطع المسماة كانت بتتحفظ فريدة دايمًا",
+        "إليزابيث بتقولك تقييم كل قطعة قبل ما تعملها",
+        "بونص طقم إليزابيث والحارس والجوهرة السودا بقى مكتوب بدل الكود (setD_ez2)"],
+      en: ["You can wear up to 10 rings as in the novel (\"the ten rings on Kraugel's fingers\", and Pauld's): the accessory slot and 9 ring slots under your gear, for rings only",
+        "What you make yourself at the anvil or the sewing table keeps the rating it came out at, instead of named pieces always saving as unique",
+        "Elizabeth tells you each piece's rating before she makes it",
+        "The Elizabeth, Guardian and Black Jewel set bonuses are written out instead of a code (setD_ez2)"] },
     { v: '2026-10-22boat', ver: '1.94', d: '2026-10-22',
       ar: ["القارب بقى أسرع بحوالي 25%، وبيسيب وراه موجات ورغوة، ورشّة مية قدامه، وصوت مجاديف وهو ماشي",
         "الشخصية بقت قاعدة في القارب بتتمايل معاه بدل ما هي ماشية جواه، واللاعيبة التانيين بيشوفوك كده برضه",
