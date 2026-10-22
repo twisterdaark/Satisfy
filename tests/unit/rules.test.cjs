@@ -574,6 +574,8 @@ test('territories (SAT-ONLINE-095): a member takes a place with a free weekly sl
   assert.ok(O['.write'].includes("(!data.exists() || data.child('t').val() < now - 2700000)"), 'safe 45 minutes');
   assert.ok(O['.write'].includes("newData.parent().parent().parent().parent().child('capSlot').child(newData.child('g').val()).child(newData.child('s').val()).child('k').val() === $k"), 'its slot written with it');
   assert.ok(O['.write'].includes("root.child('capSlot').child(newData.child('g').val()).child(newData.child('s').val()).child('t').val() < now - 604800000"), 'a slot is free a week after');
+  assert.equal(rules.capSlot.$g['.write'], undefined, 'nobody clears the slots, the master neither (Claude-B, #130)');
+  assert.ok(C['.write'].includes('newData.exists()'), 'a slot is only ever written, never removed');
   assert.equal(O.s['.validate'], 'newData.isString() && newData.val().matches(/^[abcd-]$/)', 'four slots, or none for a canon guild winning it back');
   assert.ok(C['.write'].includes("(!data.exists() || data.child('t').val() < now - 604800000)"));
   assert.match(C['.validate'], /^\$s\.matches\(\/\^\[abcd\]\$\/\)/);

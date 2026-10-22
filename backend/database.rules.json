@@ -359,7 +359,6 @@
     "capSlot": {
       "$g": {
         ".read": "auth != null && root.child('guildMembers').child($g).child(auth.uid).exists()",
-        ".write": "auth != null && !newData.exists() && root.child('guilds').child($g).child('master').val() === auth.uid",
         "$s": {
           ".write": "auth != null && newData.exists() && root.child('guildMembers').child($g).child(auth.uid).exists() && (!data.exists() || data.child('t').val() < now - 604800000) && newData.parent().parent().parent().child('world').child('satisfy').child('own').child(newData.child('k').val()).child('g').val() === $g",
           ".validate": "$s.matches(/^[abcd]$/) && newData.hasChildren(['k', 't'])",

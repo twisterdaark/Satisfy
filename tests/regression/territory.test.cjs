@@ -3,7 +3,9 @@
 // territory: everyone sees it, with the server's time of the capture; Wolves can't take it for 45 minutes (the rules
 // refuse it too), then can. A guild takes at most four places in seven days: each capture uses one of four slots, written
 // with it; the fifth waits (the game says when), and the slot is free again a week later. Only a member takes a place for
-// their guild; the canon guilds win a place back from its holder's member only.
+// their guild; the canon guilds win a place back from its holder's member only. A capture the server refuses gives nothing
+// (no contribution, no news) and the place goes back to what it was, also one the server never had; nobody clears the
+// slots, the guild master neither (Claude-B's review of #130).
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -35,7 +37,9 @@ async function signIn(ctx, k, uid, name, look) {
 }
 // move a page's clock on by ms from where it is (its Date.now, which the fake's rules use too)
 const later = (g, ms) => g.eval((d) => { if (!window.__now0) { window.__now0 = Date.now; window.__dt = 0; } window.__dt += d; const b = window.__now0; Date.now = () => b() + window.__dt; }, ms);
+const write = (g, u) => g.eval(async (x) => { const F = window.__GLD.fb(), D = F.m.database; try { await D.update(D.ref(F.db), x); return 'ok'; } catch (e) { return 'no'; } }, u);
 const owner = (g, k) => g.eval((x) => { const v = window.__fakeRTDB.data.get('world/satisfy/own/' + x); return v ? v.g : null; }, k);
+const news = (g) => g.eval(() => [...window.__fakeRTDB.data.keys()].filter((k) => /^news\//.test(k)).length);
 const HU = 'g_gTeA1', WO = 'g_gTeB2', MIN = 60000;
 
 test('territories online: shared, safe 45 minutes, four places a week a guild, members only', async () => {
@@ -62,10 +66,28 @@ test('territories online: shared, safe 45 minutes, four places a week a guild, m
 
     // safe for 45 minutes: Wolves's capture doesn't reach the server (and the game says so); after 46 it does
     await until([b], () => !!window.__GTERR.slots);
+    const c0 = await b.eval(() => window.__GTERR.contrib()), n0 = await news(b);
     await b.eval((k) => window.__GTERR.capture(k), T[0]);
     await settle(a, b);
     assert.equal(await owner(a, T[0]), HU, 'still Hunters');
     await until([b], () => /This capture did not reach the server/.test(window.__toastSeen));
+    await until([b], (k) => window.__GTERR.mine(k) === 'g_gTeA1', 10000, T[0]);
+    assert.equal(await b.eval(() => window.__GTERR.contrib()), c0, 'no contribution for a refused capture');
+    assert.equal(await news(b), n0, 'and no news');
+    // one the server never had goes back to its holder in the story (its slot taken meanwhile, unknown to this page: the rules refuse it)
+    await b.eval(() => window.__fakeRTDB.data.set('capSlot/g_gTeB2/a', { k: 'x', t: Date.now() }));
+    const was1 = await b.eval((k) => window.__GTERR.mine(k), T[1]);
+    assert.notEqual(was1, 'g_gTeB2');
+    await b.eval((k) => window.__GTERR.capture(k), T[1]);
+    assert.equal(await b.eval((k) => window.__GTERR.mine(k), T[1]), 'g_gTeB2', 'shown at once');
+    await settle(a, b);
+    assert.equal(await owner(a, T[1]), null);
+    await until([b], ([k, w]) => window.__GTERR.mine(k) === w, 10000, [T[1], was1]);
+    assert.equal(await b.eval(() => window.__GTERR.contrib()), c0);
+    await b.eval(() => window.__fakeRTDB.data.delete('capSlot/g_gTeB2/a'));
+    // nobody clears the slots: a guild master neither
+    assert.equal(await write(a, { 'capSlot/g_gTeA1/a': null }), 'no', 'a slot stays');
+    assert.equal(await write(a, { 'capSlot/g_gTeA1': null }), 'no', 'all of them too');
     for (const g of [a, b]) await later(g, 46 * MIN);
     await b.eval((k) => window.__GTERR.capture(k), T[0]);
     await until([a], (k) => { const v = window.__fakeRTDB.data.get('world/satisfy/own/' + k); return !!v && v.g === 'g_gTeB2'; }, 10000, T[0]);
