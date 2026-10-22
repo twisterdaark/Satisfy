@@ -57,6 +57,8 @@ test('online: offer, any change resets the accepts, Accept + Confirm swap once; 
     await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
     await b.eval(() => { window.__G.P.x += 20; });
     for (const g of [a, b]) await g.eval(() => { window.__G.S.gold = 500; });
+    // every toast as it appears (a toast lives 2.6 s of real time: on a busy machine the box is empty again by the check)
+    for (const g of [a, b]) await g.eval(() => { window.__toastSeen = ''; const box = document.getElementById('toasts'); new MutationObserver(() => { window.__toastSeen += '|' + box.textContent; }).observe(box, { childList: true, subtree: true, characterData: true }); });
     const it = await giveItem(a);
     await settle(a, b); await settle(a, b);
 
@@ -91,8 +93,8 @@ test('online: offer, any change resets the accepts, Accept + Confirm swap once; 
     await click(a, '#trConf'); await click(b, '#trConf');
     await until([a, b], () => document.getElementById('tradeW').hidden, 15000);
     await settle(a, b);
-    assert.match(await text(a, 'toasts'), /Trade with Bassem done/);
-    assert.match(await text(b, 'toasts'), /Trade with Ahmed done/);
+    await until([a], () => /Trade with Bassem done/.test(window.__toastSeen));
+    await until([b], () => /Trade with Ahmed done/.test(window.__toastSeen));
     assert.equal(await a.eval(() => window.__G.S.gold), 450);
     assert.equal(await b.eval(() => window.__G.S.gold), 550);
     assert.equal(await a.eval((iid) => window.__G.S.items.some((i) => i.iid === iid), it.iid), false, 'A gave it');
@@ -129,8 +131,13 @@ test('online: offer, any change resets the accepts, Accept + Confirm swap once; 
     await click(a, '#trOk'); await click(b, '#trOk'); await settle(a, b);
     await until([a, b], () => !document.getElementById('trConf').disabled);
     await click(a, '#trConf'); await click(b, '#trConf');
-    await until([a], () => /did not go through/.test(document.getElementById('toasts').textContent), 15000);
+    await until([a], () => /did not go through/.test(window.__toastSeen), 15000);
     await settle(a, b);
+    // both had confirmed, so the swap could have been written unseen: what A offered stays held until the recovery finds
+    // no swap, a minute after the confirm (Claude-B's review of #168); then it is back
+    assert.deepEqual(await a.eval((iid) => [window.__G.S.items.filter((i) => i.iid === iid).length, window.__GTRR.esc().it.map((i) => i.iid)], it.iid), [0, [it.iid]], 'held');
+    await a.eval(() => { window.__G.S.trPend.t = Date.now() - 61000; window.__GTRR.tick(); });
+    await until([a], () => !window.__GTRR.pend, 10000);
     assert.equal(await a.eval((iid) => window.__G.S.items.filter((i) => i.iid === iid).length, it.iid), 1, 'A still has its copy');
     assert.equal(await b.eval((id) => window.__G.S.items.filter((i) => i.id === id && i.r === 2 && i.def === 7).length, it.id), 1, 'B did not get a second one');
     const rej = [...await a.eval(() => window.__fakeRTDB.rejected), ...await b.eval(() => window.__fakeRTDB.rejected)];

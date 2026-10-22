@@ -64,7 +64,9 @@
       if (tell) send('trade.cancel', T.foe, T.id);
       (T.offs || []).forEach(function (f) { try { f(); } catch (e) { /* ignore */ } });
       var was = T; T = null;
-      emit({ type: type, why: why || '', handle: was.handle, id: was.id });
+      // both: the two sides had confirmed each other's offer, so the swap may have been written (by either) even though
+      // this side never saw it; the game then keeps what it held until it can tell (Claude-B's review of #168)
+      emit({ type: type, why: why || '', handle: was.handle, id: was.id, both: !!(was.mine && was.theirs && confirmed(was.mine, was.theirs)) });
     }
     function writeMine() { if (T && T.phase === 'open') store.side(T.id, self, T.mine).catch(function () { close('failed', 'write', true); }); }
     function changed() { if (!T) return; T.mine.rev++; T.mine.acc = -1; T.mine.conf = -1; T.since = now(); writeMine(); emit({ type: 'changed' }); }

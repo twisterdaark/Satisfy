@@ -9179,9 +9179,11 @@ function tradeStart(){TRADE=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisf
   else if(e.type==='declined')toast(t('trDeclined',{n}),'warn');
   else if(e.type==='cancelled')toast(t(e.why==='far'?'trFar':'trCancelled'),'warn');
   else if(e.type==='failed')toast(t('trFailed'),'warn');
-  // a confirmed trade that ended here without its swap: what it held comes back now (the save still looks the trade up, in
-  // case the other side's swap got in first: then it is applied as usual). Not after a failed read: the swap is there
-  if((e.type==='cancelled'||e.type==='failed'&&e.why!=='read')&&S&&S.trPend&&S.trPend.id===e.id&&S.trPend.esc){trUnescrow();save(true);if(!$('inv').hidden&&typeof renderInv==='function')renderInv();}
+  // a confirmed trade that ended here without its swap: what it held comes back now, if the other side hadn't confirmed
+  // (then no swap can have been written). If both had (the swap may be in the database, unseen: a dropped connection),
+  // it stays held until the recovery looks the trade up and finds no swap, a minute after the confirm (Claude-B's review
+  // of #168); a failed read always waits, the swap is there
+  if((e.type==='cancelled'||e.type==='failed')&&S&&S.trPend&&S.trPend.id===e.id&&S.trPend.esc){if(e.why!=='read'&&!e.both){trUnescrow();save(true);if(!$('inv').hidden&&typeof renderInv==='function')renderInv();}else toast(t('trHeld'),'warn');}
   else if(e.type==='done')tradeApply(e,n);});}
 /* seller history (SAT-ONLINE-089, plan U215). After a trade each side writes its own record of it: tradeLog (with whom, the
    gold given and got, which the rules check against the trade's own sides, and how many items; only you read it) and a
@@ -9207,8 +9209,8 @@ window.__GTR={hist:()=>trHist(),rep:uid=>trRepOf(uid),get cache(){return TREP},s
    stays in the save (S.trPend) until the swap is applied; online, every 15 s and at the start, the game looks it up
    (Satisfy.trade recover) and applies it then. S.trDone keeps the last 20 trades applied, so none is applied twice. A trade
    not done a minute after you confirmed it can't be done any more (the other side gave up on it): it is forgotten. */
-Object.assign(STR.ar,{trRecovered:'التبادل مع {n} اتم وإنت مش موجود: اللي خدته بقى معاك',trWaitLast:'آخر تبادل أكدته لسه بيتراجع. جرّب كمان شوية'});
-Object.assign(STR.en,{trRecovered:'Your trade with {n} went through while you were away: what you got is yours now',trWaitLast:'Your last confirmed trade is still being checked. Try again in a moment'});
+Object.assign(STR.ar,{trRecovered:'التبادل مع {n} اتم وإنت مش موجود: اللي خدته بقى معاك',trWaitLast:'آخر تبادل أكدته لسه بيتراجع. جرّب كمان شوية',trHeld:'اللي عرضته محجوز دقيقة، لحد ما يتأكد إن التبادل ماتمش'});
+Object.assign(STR.en,{trRecovered:'Your trade with {n} went through while you were away: what you got is yours now',trWaitLast:'Your last confirmed trade is still being checked. Try again in a moment',trHeld:'What you offered is held for a minute, until it is sure the trade did not go through'});
 var trRecT=-1e9;
 // escrow (Claude-B's note on #164): what you confirm leaves the bag and the purse into S.trPend.esc {g, it: [items]} until
 // the swap is applied (then it goes, as the swap says) or the trade turns out not done (then it comes back), so nothing
