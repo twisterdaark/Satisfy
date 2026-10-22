@@ -5010,6 +5010,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
   p3Spawn();p4Spawn();p5Spawn();}
+ mobKeys();
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
  {const now=Date.now(),D=(S&&S.mrt)||{};for(const m of mons){const u=D[mobKey(m)];if(u>now){m.dead=true;m.dying=0;m.rt=(u-now)/1000;}}}
@@ -7502,7 +7503,7 @@ function update(dt){
  for(const m of mons){try{
   const b=MT[m.type];monVox(m,b,dt);
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
-  if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy,fa=m.far;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));if(fa)m.far=1;vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}continue;}
+  if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy,fa=m.far,nk=m.nk;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));if(fa)m.far=1;if(nk)m.nk=nk;vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}continue;}
   // the far north and south sleep while nobody is near (the map doubled: they would roll dice and spend time for nothing)
   if(m.far&&!(m.eng>0)&&Math.hypot(m.x-P.x,m.y-P.y)>900&&!(MOBN&&MOBN.rs&&MOBN.rs.some(r=>Math.hypot(r.x-m.x,r.y-m.y)<900)))continue;
   if(m.mvd)m.at=(m.at||0)+dt;m.mvd=0;m.t+=dt;if(m.grdT>0)m.grdT-=dt;m.cd-=dt;if(m.hurt>0)m.hurt-=dt;if(m.weak>0)m.weak-=dt;if(m.stun>0){m.stun-=dt;continue;}
@@ -8337,6 +8338,8 @@ Satisfy.local=Object.freeze({api:1,
  backups:()=>STORE.backups(),
  profile:()=>!S||S.__demo?null:Satisfy.state.profileOf(S),
  events:()=>DEVT.log(),
+ // SAT-ONLINE-127 (U311): every entity by its stable id: monsters by their key, NPCs by id, players by uid
+ entities:()=>({mons:mons.filter(mobOk).map(m=>({key:mobKey(m),type:m.type,lv:m.lv,x:Math.round(m.x),y:Math.round(m.y),dead:!!m.dead})),npcs:npcs.map(n=>({id:n.id,x:Math.round(n.x),y:Math.round(n.y),hidden:!!n.hidden})),players:NET?NET.remotes().map(r=>({uid:r.uid,handle:r.handle||'',x:Math.round(r.x),y:Math.round(r.y)})):[]}),
  onEvent:fn=>DEVT.on(fn),
  net:()=>NET?{mode:NETQ,state:netState,uid:NET.uid,sid:NET.sid,count:NET.count(),drawn:netDrawn,remotes:NET.remotes(),stats:NET.stats(),
   party:PARTY?{id:PARTY.id(),leader:PARTY.leader(),members:PARTY.members(),invite:PARTY.pendingInvite()}:null,
@@ -9976,6 +9979,12 @@ function praidHit(m,dmg){if(!praidShared(m))return false;if(PRAID.hit(praidKey(m
    group); event monsters are shared when every client spawns them alike (m.ek); temporary ones and those indoors stay local. */
 var MOBN,MOBP,MOB_MS=250,MOB_MAX=100,MOB_BX=700,MOB_BY=450; // the host lists monsters within MOB_BX x MOB_BY of any player in the group (more than a screen) // no initial values: ?net=local starts the network above this line
 function mobKey(m){return m.nk||(m.nk=m.type+'@'+(m.sx|0)+','+(m.sy|0));}
+/* SAT-ONLINE-127 (plan U311, "stable ids for monsters, NPCs and players; no duplicate id on respawn"): every monster of the
+   world gets its key once, in spawn order, which is the same on every client: its type and spawn point, then '#2', '#3'
+   for another of its type on the same spawn tile (two red knights can land on one). The key outlives a respawn, so the
+   shared monsters online (the host's list), the respawn times kept in the save (S.mrt) and a party raid's hits never
+   mistake one monster for its twin. NPCs have fixed ids (NPCS) and players their account's uid. */
+function mobKeys(){const seen=new Map();for(const m of mons){const k=m.type+'@'+(m.sx|0)+','+(m.sy|0),n=(seen.get(k)||0)+1;seen.set(k,n);m.nk=n>1?k+'#'+n:k;}}
 // bosses too (Twister 2026-10-19: a boss stood in one place for one player and elsewhere for the friends who arrived): the
 // group's host moves and fights every outdoor boss, world and event ones included, and the others follow its copy. Adds, arena,
 // siege and trial monsters stay on one client.

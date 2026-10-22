@@ -162,7 +162,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U308 | Extract state store | 🟡 | `src/core/state.js`: durable, volatile and UI keys (ADR-002); the game still writes `S` directly |
 | U309 | Extract world generator | 🟡 | Seeded spawns (`mulberry32`), the same tiles on every client (`regression/worldparity`); still inside `index.html` |
 | U310 | Renderer batching | 🟡 | The big map draws only the visible land from a cached copy (B, v0.60) |
-| U311 | Entity registry | 🟡 | Stable keys for monsters (`type@sx,sy`), item ids (`iid`), character id (`pid`) |
+| U311 | Entity registry | ✅ | SAT-ONLINE-127: `Satisfy.local.entities()` lists every monster by its key, every NPC by its id and every player by uid. Monster keys (`type@sx,sy`) are given once in spawn order, the same on every client, with `#2`, `#3` for another of its type on the same spawn tile (two red knights shared one, so the host's list, `S.mrt` and raid hits mixed them up), and a respawn keeps its key (`regression/entities`). Item ids (`iid`), character id (`pid`) as before |
 | U312 | Animation state machine | ✅ | `src/core/anim.js` (SAT-ONLINE-114): idle, walk, attack, hurt, dodge, dead per entity by rank, timed ones ending by game time with nothing scheduled; your swing as others see it, and other players flash when hurt (`unit/anim`, `regression/anim`). Monsters keep their own poses (B) |
 | U313 | Fixed tick simulator | ✅ | SAT-ONLINE-099: `?tick=fixed` (off by default) moves the world in steps of 1/60 s at any frame rate; drawing, sound and the network draw their random numbers from a stream of their own. tests/regression/fixedtick |
 | U314 | Dedicated game clock | ✅ | Server clock offset (`wNow`, SAT-ONLINE-044) for everything shared |
@@ -229,6 +229,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 75 · 🟡 17 · ⏳ 6 · ❌ 6 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 76 · 🟡 16 · ⏳ 6 · ❌ 6 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
