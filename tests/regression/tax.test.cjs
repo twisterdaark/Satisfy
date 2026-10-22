@@ -85,6 +85,8 @@ test('city tax: up to 10%, once an hour, paid by outsiders in Reidan, collected 
     assert.equal(await write(a, TAX(15, 'gTxA1')), 'no', 'never more than 10%');
     assert.equal(await write(a, TAX(5, 'gTxA1')), 'no', 'once an hour');
     assert.equal(await write(b, TAX(1, 'gTxB2')), 'no', "only the castle guild's master");
+    // Claude-B's review: nobody points the castle at a guild they aren't in (then sets that guild's tax, or none)
+    assert.equal(await write(b, { 'world/satisfy/own/castle': { g: G, n: 'Crown', c: '#5aa0ff', h: 'Bassem', uid: 'gTxB2', t: 'SV' } }), 'no', 'not to a guild he is not in');
 
     // Bassem, from outside, pays 10% more at Reidan's inn; Carim, of Crown, pays the price; elsewhere nobody pays it
     assert.equal(await b.eval(() => window.__GTAX.rateAt('innR')), 10);
@@ -97,8 +99,10 @@ test('city tax: up to 10%, once an hour, paid by outsiders in Reidan, collected 
     const paid = g0 - await b.eval(() => window.__G.S.gold), owed = paid - Math.round(paid / 1.1);
     assert.ok(owed >= 1, 'a tax on ' + paid);
     assert.equal(await b.eval(() => window.__GTAX.owed), owed);
+    assert.equal(await b.eval(() => window.__G.S.taxQ), owed, 'what is owed is in the save until it is paid');
     await b.eval(() => window.__GTAX.flush());
     await until([a], (x) => Object.values((() => { const o = {}; for (const [p, v] of window.__fakeRTDB.data) if (/^guildTax\/g_gTxA1\//.test(p)) o[p] = v.g; return o; })()).reduce((s, y) => s + y, 0) === x, 10000, owed);
+    await until([b], () => window.__G.S.taxQ === 0 && window.__GTAX.owed === 0);
 
     // the rules: a member makes no tax for its own guild, nobody pays it to a guild without the castle
     assert.equal(await write(c, { 'guildTax/g_gTxA1/x_fake1': { g: 50000, by: 'gTxC3', n: 'Carim', t: 'SV' } }), 'no', "a member can't make tax for its guild");
@@ -118,7 +122,7 @@ test('city tax: up to 10%, once an hour, paid by outsiders in Reidan, collected 
     // an hour later the master changes it
     await later(a, 61 * 60000);
     assert.equal(await write(a, TAX(5, 'gTxA1')), 'ok');
-    for (const g of [a, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/tax|guildTax|guildBank/.test(x))), []);
+    for (const g of [a, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected.filter((x) => !/tax|guildTax|guildBank|own not your guild/.test(x))), []);
     for (const g of [a, b, c]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
