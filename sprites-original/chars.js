@@ -7,11 +7,20 @@
 const A=root.SatArt=root.SatArt||{};
 const FW=16,FH=24;
 // built-up hairstyles for the character creator (owner 2026-10-23): len 0 ear .. 4 waist, a fringe, a tail or bun
-const HAIRP={longS:{len:4,bang:'part'},hime:{len:4,bang:'full'},bob:{len:2,bang:'full'},bobS:{len:2,bang:'side'},braid:{len:1,bang:'part',tail:'braid'},twinB:{len:1,bang:'full',tail:'twinb'},
- hbun:{len:1,bang:'side',tail:'hbun'},sidep:{len:1,bang:'side',tail:'sidep'},wavy:{len:3,bang:'part',wave:1},shoulder:{len:2,bang:'part'},ponyH:{len:0,bang:'side',tail:'ponyL'},lowTw:{len:1,bang:'part',tail:'low2'},
- odango:{len:1,bang:'full',tail:'buns2'},emo:{len:1,bang:'emo'},undercut:{len:0,bang:'side',top:'tall',shave:1},slick:{len:0,bang:'none',back:1},topknot:{len:0,bang:'none',tail:'knot',shave:1},afro:{top:'afro'},
- wolf:{len:1,bang:'side',back:2},spikyL:{len:3,bang:'spiky'},princess:{len:4,bang:'side',tail:'bunS'},
- crew:{len:0,bang:'part'},fringeS:{len:0,bang:'full'},curtain:{len:1,bang:'part'},spikyS:{len:0,bang:'spiky'},mop:{len:1,bang:'full'},sideS:{len:0,bang:'side'},midS:{len:1,bang:'side'},longP:{len:3,bang:'part'},longF:{len:3,bang:'full'},longSd:{len:3,bang:'side'},waist:{len:4,bang:'none'},wavyF:{len:3,bang:'full',wave:1},wavyL:{len:4,bang:'side',wave:1},curlsS:{len:2,bang:'part',wave:1},bobP:{len:2,bang:'part'},bobE:{len:2,bang:'emo'},emoL:{len:3,bang:'emo'},braidL:{len:3,bang:'part',tail:'braid'},braidF:{len:1,bang:'full',tail:'braid'},twinBs:{len:1,bang:'side',tail:'twinb'},twinS:{len:1,bang:'full',tail:'low2'},hbunF:{len:1,bang:'full',tail:'hbun'},hbunL:{len:3,bang:'part',tail:'hbun'},ponyF:{len:0,bang:'full',tail:'ponyL'},ponyP:{len:1,bang:'part',tail:'ponyL'},sidepF:{len:1,bang:'full',tail:'sidep'},sidepL:{len:3,bang:'part',tail:'sidep'},odangoL:{len:3,bang:'full',tail:'buns2'},odangoS:{len:0,bang:'side',tail:'buns2'},knotL:{len:2,bang:'none',tail:'knot'},knotF:{len:0,bang:'part',tail:'knot'},princessF:{len:4,bang:'full',tail:'bunS'},halfUp:{len:2,bang:'part',tail:'bunS'},undercutL:{len:1,bang:'emo',top:'tall',shave:1},pompadour:{len:0,bang:'none',top:'tall'},faux:{len:0,bang:'spiky',top:'tall',shave:1},wolfL:{len:2,bang:'spiky',back:3},mullet:{len:0,bang:'side',back:3},shag:{len:2,bang:'spiky',wave:1},lionM:{len:3,bang:'spiky',wave:1},slickL:{len:2,bang:'none'},bangsW:{len:4,bang:'full',wave:1}};
+// Built-up styles: len 0-4, a fringe (bang), a tail or bun, waves, and the outline details that keep any two apart
+// (owner 2026-10-23: clear differences between all the styles): vol 1 puffy / 3 messy crown, end flip / in / layer,
+// tip (lighter ends), streak, ahoge, hime side locks, and the fringes micro, blunt, curtain and swoop.
+const HAIRP={longS:{len:4,bang:'part',end:'in',peak:1},hime:{len:4,bang:'blunt',hime:1},bob:{len:2,bang:'full',end:'in',vol:1},bobS:{len:2,bang:'swoop',end:'flip',gloss:1},braid:{len:1,bang:'part',tail:'braid'},twinB:{len:1,bang:'full',tail:'twinb'},
+ hbun:{len:1,bang:'side',tail:'hbun'},sidep:{len:1,bang:'side',tail:'sidep'},wavy:{len:3,bang:'part',wave:1},shoulder:{len:2,bang:'curtain',end:'flip',wave:1,peak:1},ponyH:{len:0,bang:'side',tail:'ponyL'},lowTw:{len:1,bang:'part',tail:'low2'},
+ odango:{len:1,bang:'full',tail:'buns2'},emo:{len:1,bang:'emo'},undercut:{len:0,bang:'side',top:'tall',shave:1},slick:{len:0,bang:'none',back:1,peak:1,gloss:1},topknot:{len:0,bang:'none',tail:'knot',shave:1},afro:{top:'afro'},
+ wolf:{len:1,bang:'side',back:2},spikyL:{len:3,bang:'spiky',end:'layer',vol:3},princess:{len:4,bang:'side',tail:'bunS',bow:1},
+ crew:{len:0,bang:'micro',shave:1},fringeS:{len:0,bang:'blunt',vol:1},curtain:{len:1,bang:'curtain',end:'layer',peak:1},spikyS:{len:0,bang:'spiky',vol:3},mop:{len:1,bang:'blunt',vol:1},sideS:{len:0,bang:'swoop',lock:1},midS:{len:1,bang:'side',end:'flip',vol:3},
+ longP:{len:3,bang:'part',tip:1,ahoge:1},longF:{len:3,bang:'full',end:'in',tip:1},longSd:{len:3,bang:'swoop',streak:1},waist:{len:4,bang:'none',vol:1,ahoge:1,end:'in'},wavyF:{len:3,bang:'full',wave:1,vol:1},wavyL:{len:4,bang:'side',wave:1,tip:1},
+ curlsS:{len:2,bang:'part',wave:1,vol:1},bobP:{len:2,bang:'part',end:'in',ahoge:1,lock:1},bobE:{len:2,bang:'emo',end:'layer',tip:1},emoL:{len:3,bang:'emo',end:'layer'},braidL:{len:3,bang:'part',tail:'braid'},braidF:{len:1,bang:'blunt',tail:'braid',vol:1},
+ twinBs:{len:3,bang:'swoop',tail:'twinb',end:'flip'},twinS:{len:0,bang:'blunt',tail:'pig'},hbunF:{len:1,bang:'blunt',tail:'hbun',bow:1},hbunL:{len:3,bang:'part',tail:'hbun'},ponyF:{len:1,bang:'blunt',tail:'ponyL',bow:1},ponyP:{len:1,bang:'part',tail:'ponyL',streak:1},
+ sidepF:{len:1,bang:'blunt',tail:'sidep',bow:1},sidepL:{len:3,bang:'part',tail:'sidep'},odangoL:{len:3,bang:'full',tail:'buns2'},odangoS:{len:0,bang:'side',tail:'buns2'},knotL:{len:2,bang:'none',tail:'knot'},knotF:{len:0,bang:'part',tail:'knot'},
+ princessF:{len:4,bang:'blunt',tail:'bunS',end:'flip',tip:1},halfUp:{len:2,bang:'curtain',tail:'bunS',bow:1},undercutL:{len:1,bang:'emo',top:'tall',shave:1},pompadour:{len:0,bang:'none',top:'tall'},faux:{len:0,bang:'spiky',top:'ridge',shave:1},
+ wolfL:{len:2,bang:'spiky',back:3,vol:3},mullet:{len:0,bang:'side',back:3},shag:{len:2,bang:'spiky',wave:1,end:'layer'},lionM:{len:3,bang:'spiky',wave:1,vol:3,back:4,end:'layer'},slickL:{len:2,bang:'none',streak:1},bangsW:{len:4,bang:'blunt',wave:1}};
 // Sheet layout: one row per direction (d=down/front, u=up/back, s=side facing right; left = mirrored s).
 const POSES=[['idle',2],['walk',4],['atk',3],['hurt',1]];
 const COLS=[];POSES.forEach(([p,n])=>{for(let f=0;f<n;f++)COLS.push([p,f]);});
@@ -42,7 +51,7 @@ function poseOf(dir,pose,f){
 // Draws one frame. Returns {c: canvas, hand:{x,y}} where hand is the weapon-holding pixel in frame coords.
 function frame(c,dir,pose,f){
  const cv=canvas(FW,FH),g=cv.getContext('2d');const S_=dir==='s',U=dir==='u',o=poseOf(dir,pose,f);
- const OY=2,lx=S_?o.lean:0,by=o.bob,late=[];let hand={x:S_?9:12,y:17};
+ const OY=2,lx=S_?o.lean:0,by=o.bob,late=[];let hand={x:S_?9:12,y:17},HT=null;
  const p=(x,y,w,h,col)=>R(g,x,y+OY,w,h,col);            // legs / ground layer
  const q=(x,y,w,h,col)=>R(g,x+lx,y+by+OY,w,h,col);      // upper body layer
  const lg=c.shorts?c.skin:c.pants,lgD=shade(lg,-.22),btD=shade(c.boots,-.25);
@@ -134,18 +143,35 @@ function frame(c,dir,pose,f){
  // the creator's built-up styles (owner 2026-10-23): a length, a fringe and a tail or bun, drawn in three views
  function hairP(H){const L=H.len||0,end=[6,9,12,15,19][L],bk=[9,10,13,16,19][H.back!=null?H.back:L],sw=pose==='walk'?(f%2):0,TIE=H.tie||'#c84a5a';
   if(H.top==='afro'){if(U){q(2,-1,12,11,h);q(4,0,1,1,hl);q(9,1,1,1,hl);}else if(S_){q(3,-1,10,6,h);q(2,1,4,8,h);q(6,0,1,1,hl);q(9,1,1,1,hl);}else{q(2,-1,12,5,h);q(1,1,2,7,h);q(13,1,2,7,h);q(3,4,1,4,h);q(12,4,1,4,h);q(5,0,1,1,hl);q(9,0,1,1,hl);q(11,2,1,1,hl);}return;}
-  const sd=H.shave?mixC(h,c.skin,.55):h;
+  const sd=H.shave?mixC(h,c.skin,.55):h;HT=H;
   if(H.top==='tall'){if(S_)q(6,-1,5,2,h);else q(5,-1,6,2,h);}
+  if(H.top==='ridge'){if(U)q(6,-2,4,4,h);else if(S_){q(6,-2,6,2,h);q(8,-3,3,1,h);}else{q(6,-2,4,2,h);q(7,-3,2,1,h);}q(7,-2,1,2,hl);}
+  if(H.vol===1){if(U)q(3,0,10,9,h);else if(S_)q(4,0,8,4,h);else{q(3,1,10,3,h);q(4,0,8,1,h);}}
+  if(H.vol===3){if(S_){q(6,-1,1,1,h);q(9,-1,1,1,h);q(11,0,1,1,h);}else{q(4,-1,1,1,h);q(7,-1,2,1,h);q(10,-1,1,1,h);q(3,1,1,1,h);q(12,1,1,1,h);}}
+  if(H.ahoge){q(8,-2,1,2,h);q(S_?7:9,-2,1,1,h);}
   if(U){q(4,1,8,8,h);q(5,0,6,1,h);if(L>=1){q(3,2,1,end-2,h);q(12,2,1,end-2,h);}if(bk>9){const w=L>=3?10:8;q(L>=3?3:4,9,w,bk-9,h);if(H.wave)for(let y=10;y<bk;y+=2){q(2,y,1,1,h);q(13,y+1,1,1,h);}}q(6,2,1,2,hl);q(9,3,1,2,hl);
-   if(H.shave){q(4,6,8,3,sd);q(5,1,6,5,h);}}
+   if(H.shave){q(4,6,8,3,sd);q(5,1,6,5,h);}
+   if(H.end==='flip'&&bk>9){q(2,bk-1,1,1,h);q(13,bk-1,1,1,h);}else if(H.end==='in'&&bk>9)q(4,bk,8,1,h);else if(H.end==='layer'&&bk>9){q(2,bk,1,1,h);q(13,bk,1,1,h);q(7,bk,2,1,h);}
+   if(H.streak)q(5,1,1,Math.max(4,bk-2),hl);}
   else if(S_){q(5,1,7,3,h);q(6,0,5,1,h);q(4,2,2,5,sd);if(L>=1)q(4,4,3,end-4,h);else q(5,4,2,3,sd);if(L>=3)q(3,8,2,end-8,h);if(H.wave&&L>=2)for(let y=9;y<end;y+=2)q(2,y,1,1,h);
    const B=H.bang;if(B==='full')q(9,4,3,2,h);else if(B==='side')q(10,4,2,1,h);else if(B==='part')q(10,4,1,1,h);else if(B==='emo'){q(9,4,3,3,h);}else if(B==='spiky'){q(11,3,2,1,h);q(12,4,1,1,h);q(10,4,1,1,h);}
+   if(B==='blunt')q(9,4,3,2,h);else if(B==='curtain')q(10,4,1,2,h);else if(B==='swoop'){q(9,4,3,1,h);q(10,5,2,1,h);}
+   if(L>=1){if(H.end==='flip')q(2,end-1,1,1,h);else if(H.end==='in')q(5,end-1,1,1,h);else if(H.end==='layer')q(2,end-3,1,1,h);}if(H.streak)q(7,0,1,4,hl);
    q(6,2,3,1,hl);}
   else{q(4,1,8,3,h);q(5,0,6,1,h);
    if(L===0){q(4,4,1,2,sd);q(11,4,1,2,sd);}else{q(3,2,1,end-2,h);q(12,2,1,end-2,h);q(4,4,1,3,h);q(11,4,1,3,h);if(L>=2){q(2,8,1,end-8,h);q(13,8,1,end-8,h);}if(H.wave&&L>=2)for(let y=8;y<end;y+=2){q(1,y,1,1,h);q(14,y+1,1,1,h);}}
    const B=H.bang;if(B==='full'){q(4,4,8,2,h);q(5,6,1,1,h);q(10,6,1,1,h);}else if(B==='side'){q(4,4,5,1,h);q(4,5,3,1,h);q(10,4,2,1,h);}else if(B==='part'){q(4,4,3,1,h);q(9,4,3,1,h);q(4,5,1,1,h);q(11,5,1,1,h);}
    else if(B==='emo'){q(4,4,6,1,h);q(4,5,5,1,h);q(5,6,3,2,h);q(10,4,2,1,h);}else if(B==='spiky'){q(4,4,2,1,h);q(7,4,2,1,h);q(10,4,2,1,h);q(4,5,1,1,h);q(11,5,1,1,h);q(3,1,1,2,h);q(12,1,1,2,h);q(2,2,1,1,h);q(13,2,1,1,h);}
+   else if(B==='blunt'){q(4,4,8,2,h);q(4,5,8,1,shade(h,-.1));}else if(B==='micro'){q(4,4,1,1,h);q(11,4,1,1,h);}
+   else if(B==='curtain'){q(4,4,2,1,h);q(10,4,2,1,h);q(6,4,1,1,h);q(9,4,1,1,h);q(4,5,1,3,h);q(11,5,1,3,h);}else if(B==='swoop'){q(4,4,8,1,h);q(7,5,5,1,h);q(10,6,2,1,h);}
+   if(H.hime){q(4,4,1,5,h);q(11,4,1,5,h);q(3,4,1,6,h);q(12,4,1,6,h);q(3,10,2,1,shade(h,-.15));q(11,10,2,1,shade(h,-.15));q(3,8,1,1,shade(h,-.15));q(12,8,1,1,shade(h,-.15));}
+   if(L>=1){if(H.end==='flip'){q(2,end-1,1,1,h);q(13,end-1,1,1,h);if(L>=2){q(1,end-1,1,1,h);q(14,end-1,1,1,h);}}else if(H.end==='in'&&L>=2){q(3,end,1,1,h);q(12,end,1,1,h);q(4,end-1,1,1,h);q(11,end-1,1,1,h);}else if(H.end==='layer'){q(1,end-3,1,2,h);q(14,end-3,1,2,h);q(3,end,1,1,h);q(12,end,1,1,h);}}
+   if(H.streak){q(5,1,1,3,hl);q(4,4,1,Math.min(5,end-4),hl);}
    q(6,1,2,1,hl);q(9,2,2,1,hl);}
+  if(H.peak&&!U){if(S_)q(11,4,1,1,h);else{q(7,4,2,1,h);q(7,5,1,1,shade(h,-.1));}}
+  if(H.gloss){if(S_)q(6,1,5,1,hl);else q(5,1,6,1,hl);}
+  if(H.lock&&!U){if(S_){q(10,4,2,4,h);q(11,8,1,1,h);}else{q(11,4,2,6,h);q(12,10,1,1,h);q(11,5,1,3,hl);}}
+  if(H.bow){const BW=shade(TIE,-.25);if(U){q(3,0,4,2,TIE);q(4,0,2,1,BW);}else if(S_){q(4,-1,3,3,TIE);q(5,0,1,1,BW);}else{q(10,-1,4,3,TIE);q(11,0,2,1,BW);q(11,2,1,1,TIE);}}
   const T=H.tail;if(!T)return;
   if(T==='braid'){if(U){for(let i=0;i<5;i++)q(7,9+i*2,2,2,i&1?hl:h);q(7,19,2,1,TIE);}else if(S_){for(let i=0;i<5;i++)q(3,6+i*2,2,2,i&1?hl:h);q(3,16,2,1,TIE);}}
   else if(T==='twinb'){const B2=(x,y0)=>{for(let i=0;i<5;i++)q(x,y0+i*2,2,2,i&1?hl:h);q(x,y0+10,2,1,TIE);};if(U){B2(2,5);B2(12,5);}else if(S_)B2(3,5);else{B2(1,5);B2(13,5);}}
@@ -155,6 +181,7 @@ function frame(c,dir,pose,f){
   else if(T==='sidep'){if(U){q(2,4,2,2,h);q(1,6+sw,2,7,h);q(2,4,2,1,TIE);}else if(S_)q(3,5+sw,2,7,h);else{q(12,4,2,2,h);q(13,6+sw,2,7,h);q(12,4,2,1,TIE);}}
   else if(T==='ponyL'){if(U){q(7,1,2,1,TIE);q(7,2,2,16,h);q(7,4,1,10,hl);}else if(S_){q(3,1,2,2,h);q(2,3+sw,3,3,h);q(1,6+sw,3,9,h);q(3,2,1,1,TIE);}else{q(12,5,2,5,h);q(13,10,1,4,h);}}
   else if(T==='low2'){if(U){q(3,9,2,8,h);q(11,9,2,8,h);q(3,9,2,1,TIE);q(11,9,2,1,TIE);}else if(S_){q(3,8+sw,2,8,h);q(3,8,2,1,TIE);}else{q(2,8+sw,2,8,h);q(12,8+sw,2,8,h);q(2,8,2,1,TIE);q(12,8,2,1,TIE);}}
+  else if(T==='pig'){if(U){q(1,4,2,4,h);q(13,4,2,4,h);q(0,5,1,2,h);q(15,5,1,2,h);}else if(S_){q(2,4+sw,3,4,h);q(1,5+sw,1,2,h);q(4,4,1,1,TIE);}else{q(1,4+sw,2,4,h);q(13,4+sw,2,4,h);q(0,5+sw,1,2,h);q(15,5+sw,1,2,h);q(3,4,1,1,TIE);q(12,4,1,1,TIE);}}
   else if(T==='bunS'){if(U){q(6,3,4,3,h);q(7,3,1,1,hl);}else if(S_){q(3,2,2,3,h);}}}
  if(c.hair==='spiky'){
   if(U){q(4,1,8,9,h);q(5,0,1,1,h);q(7,0,1,1,h);q(10,0,1,1,h);q(3,3,1,3,h);q(12,3,1,3,h);q(5,10,1,1,h);q(8,10,1,1,h);q(10,10,1,1,h);q(6,2,1,2,hl);q(9,3,1,2,hl);}
@@ -254,14 +281,14 @@ function frame(c,dir,pose,f){
   if(U){q(3,0,1,2,Hn);q(2,-1,1,2,Hn);q(12,0,1,2,Hn);q(13,-1,1,2,Hn);}
   else if(S_){q(6,0,2,2,Hn);q(5,-1,2,1,Hn);q(4,-2,2,1,H2);q(3,-2,1,1,H2);}
   else{q(3,1,2,1,Hn);q(2,0,1,1,Hn);q(1,-1,1,1,H2);q(1,-2,1,1,H2);q(11,1,2,1,Hn);q(13,0,1,1,Hn);q(14,-1,1,1,H2);q(14,-2,1,1,H2);}}
- if(c.hfx&&c.hc&&c.hair!=='bald'&&c.hair!=='helm'&&!c.hood&&!c.hat&&!c.turban)hairFx(g,c,U);
+ if(c.hfx&&c.hc&&c.hair!=='bald'&&c.hair!=='helm'&&!c.hood&&!c.hat&&!c.turban)hairFx(g,c,U,HT);
  // accessories (owner 2026-10-23 vanity): glasses, earrings, a flower, cat ears, a halo, a tiara, a scarf
  if(c.gls&&!U){const G=c.gls;if(S_){q(9,6,1,2,G);q(11,6,1,2,G);q(9,5,3,1,G);q(7,6,2,1,G);}else{q(5,5,3,1,G);q(8,5,3,1,G);q(5,6,1,2,G);q(7,6,2,1,G);q(10,6,1,2,G);}}
- if(c.ear&&!U){if(S_)q(7,8,1,1,c.ear);else{q(3,8,1,1,c.ear);q(12,8,1,1,c.ear);}}
- if(c.flw){const F=c.flw,F2=shade(F,.35);if(S_){q(5,1,2,2,F);q(5,1,1,1,F2);}else if(U){q(10,2,2,2,F);q(10,2,1,1,F2);}else{q(10,1,2,2,F);q(11,1,1,1,F2);q(12,2,1,1,'#5aa04a');}}
+ if(c.ear&&!U){const E=c.ear,E2=shade(E,.4);if(S_){q(7,8,1,2,E);q(7,8,1,1,E2);}else{q(3,8,1,2,E);q(12,8,1,2,E);q(3,8,1,1,E2);q(12,8,1,1,E2);}}   // drop earrings, bolder so the stylist shows them
+ if(c.flw){const F=c.flw,F2=shade(F,.35),FC='#ffe070';if(S_){q(4,0,3,3,F);q(5,1,1,1,FC);q(4,0,1,1,F2);}else if(U){q(10,1,3,3,F);q(11,2,1,1,FC);}else{q(10,0,3,3,F);q(11,1,1,1,FC);q(10,0,1,1,F2);q(13,2,1,1,'#5aa04a');}}
  if(c.catE){const K=c.catE,P='#e88aa0';if(S_){q(6,-1,2,2,K);q(8,0,1,1,K);q(7,0,1,1,P);}else{q(4,-1,2,2,K);q(10,-1,2,2,K);q(3,0,1,1,K);q(12,0,1,1,K);if(!U){q(4,0,1,1,P);q(11,0,1,1,P);}}}
- if(c.tiara&&!U){const T=c.tiara;if(S_){q(7,1,4,1,T);q(9,0,1,1,T);}else{q(5,1,6,1,T);q(7,0,2,1,T);q(7,0,1,1,'#ff6a8a');}}
- if(c.halo){const HA=c.halo;if(S_)q(6,-2,5,1,HA);else{q(5,-2,6,1,HA);q(4,-1,1,1,shade(HA,-.2));q(11,-1,1,1,shade(HA,-.2));}}
+ if(c.tiara&&!U){const T=c.tiara,T2=shade(T,.35);if(S_){q(7,1,4,1,T);q(8,0,2,1,T);q(9,-1,1,1,T2);q(8,0,1,1,'#ff6a8a');}else{q(5,1,6,1,T);q(5,0,1,1,T);q(10,0,1,1,T);q(7,-1,2,2,T);q(7,-1,1,1,T2);q(7,0,2,1,'#ff6a8a');}}
+ if(c.halo){const HA=c.halo,HG=shade(HA,.45);if(S_){q(6,-2,5,1,HA);q(7,-2,3,1,HG);q(5,-1,1,1,HA);q(11,-1,1,1,HA);}else{q(5,-2,6,1,HA);q(6,-2,4,1,HG);q(4,-1,1,1,HA);q(11,-1,1,1,HA);q(3,-1,1,1,shade(HA,-.2));q(12,-1,1,1,shade(HA,-.2));}}
  if(c.scarf){const SF=c.scarf,S2=shade(SF,-.25);if(S_){q(6,10,5,2,SF);q(5,11,2,3,S2);}else if(U){q(4,10,8,2,SF);q(9,12,2,3,S2);}else{q(4,10,8,2,SF);q(10,12,2,3,S2);q(4,11,8,1,S2);}}
  late.forEach(fn=>fn());
  polish(g);
@@ -269,7 +296,7 @@ function frame(c,dir,pose,f){
 
 // Hair detail (owner 2026-10-23, a player's note: more detail in the hair): a glossy ring across the crown, strand lines
 // down long hair and darker tips, worked on the hair's own pixels after it is drawn. Player looks only (c.hfx).
-function hairFx(g,c,back){
+function hairFx(g,c,back,HT){
  const id=g.getImageData(0,0,FW,FH),d=id.data,H=hx(c.hc),HL=hx(c.hl||c.hc),eq=(i,C)=>d[i+3]>0&&d[i]===C[0]&&d[i+1]===C[1]&&d[i+2]===C[2];
  const isH=(x,y)=>x>=0&&y>=0&&x<FW&&y<FH&&(eq((y*FW+x)*4,H)||eq((y*FW+x)*4,HL));
  const put=(x,y,C)=>{const i=(y*FW+x)*4;d[i]=C[0];d[i+1]=C[1];d[i+2]=C[2];};
@@ -285,6 +312,7 @@ function hairFx(g,c,back){
   else if(!dn&&up&&y>8)ch.push([x,y,TP]);
   else if(up&&dn&&y>=8&&(x*5+(y>>2))%3===0)ch.push([x,y,ST]);}
  ch.forEach(([x,y,C])=>{if(C)put(x,y,C);});
+ if(HT&&HT.tip){const TC=hx(mixC(c.hl||c.hc,'#fff4e0',.45));for(let y=0;y<FH;y++)for(let x=0;x<FW;x++){const t=top[x];if(t>=0&&y>=t+(back?10:9)&&eq((y*FW+x)*4,H))put(x,y,TC);}}   // lighter ends
  g.putImageData(id,0,0);}
 
 // Post-pass: rim light on the top edge, then a selective outline (dark tint of the neighbour on

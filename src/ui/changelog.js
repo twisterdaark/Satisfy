@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23hairdiff', ver: '2.41', d: '2026-10-23',
+      ar: ["كل تسريحة شعر بقت شكلها مختلف بوضوح عن الباقي، للولاد والبنات: غُرَر جديدة (قصيرة، مستقيمة، ستارة، مايلة)، أطراف ملفوفة لجوا أو لبرا أو مدرّجة، شعر منفوش، خصلة واقفة، خصلة فاتحة، أطراف فاتحة، فيونكة، ضفاير قصيرة على الجنبين، وتسريحة عرف في النص.",
+          "مربعات الستايلست بقت أكبر: التسريحات بتبان لحد الكتف، ولون العيون والوش والشفايف والإكسسوارات بيتعمل لهم زووم على الراس عشان الفرق يبان.",
+          "الحلق والوردة والتاج والهالة بقوا أوضح على الشخصية."],
+      en: ["Every hairstyle now looks clearly different from the rest, for boys and girls: new fringes (micro, blunt, curtain, swoop), ends curled in, flipped out or layered, puffy volume, an ahoge, a light streak, lighter tips, a bow, short pigtails and a ridge cut.",
+          "The stylist's grid cells are bigger: hairstyles show down to the shoulders, and eye colour, face, lip colour and accessories zoom on the head so the difference shows.",
+          "Earrings, the hair flower, the tiara and the halo are bolder on the character."] },
     { v: '2026-10-23salon', ver: '2.40', d: '2026-10-23',
       ar: ["ليلى الستايلست بقت شغالة جوا صالون في ونستون: البيت اللي عليه يافطة المقص جنب سايس السباق. جواه مرايات وكراسي تسريح ورفوف فساتين.",
           "مربعات الستايلست مبقتش بتهنّج اللعبة وهي بتحمّل صور التسريحات.",
