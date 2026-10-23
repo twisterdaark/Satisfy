@@ -64,17 +64,17 @@ test('Explosion Sorcerer: a blast where you point, the rune that bursts later, C
 });
 
 // owner 2026-10-23: "I bought Madra's diary and can't find it in my bag or my skills"
-test("Madra's diary goes in the bag and raises you three levels when read; one bought before is handed over", async () => {
+test("Madra's diary goes in the bag and raises you three levels when first read; one bought before is handed over", async () => {
   const g = await H.openGame();
   try {
     await H.newGame(g);
     await g.step(3);
     const r = await g.eval(() => { const G = window.__G, S = G.S, B = window.__GBH, F = window.__GFB; S.lv = 100; const b = B.s(); b.diary = 1; delete S.mats.bk_mdiary;
-      const old = (B.s(), S.mats.bk_mdiary); const lv0 = S.lv; F.use('bk_mdiary'); const after = { lv: S.lv - lv0, left: S.mats.bk_mdiary };
-      S.mats.bk_mdiary = 1; F.use('bk_mdiary'); return { old, after, again: S.mats.bk_mdiary }; });
+      const old = (B.s(), S.mats.bk_mdiary); const lv0 = S.lv; F.use('bk_mdiary'); const after = { lv: S.lv - lv0, left: S.mats.bk_mdiary, ma1: S.mats.bk_ma1 };
+      F.use('bk_mdiary'); return { old, after, again: S.mats.bk_mdiary }; });
     assert.equal(r.old, 1, 'the diary bought before is in the bag');
-    assert.deepEqual(r.after, { lv: 3, left: 0 }, 'read: three levels at once');
-    assert.equal(r.again, 1, 'a second copy is kept: it can be sold or given');
+    assert.deepEqual(r.after, { lv: 3, left: 1, ma1: 1 }, 'read: three levels at once, the first swordsmanship book, and the diary kept for its next chapters');
+    assert.equal(r.again, 1, 'shut until the book is learned, and still yours');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
