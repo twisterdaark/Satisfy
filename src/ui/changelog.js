@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23titles', ver: '2.37', d: '2026-10-23',
+      ar: ["تايتلز جديدة من الرواية. التايتل بيشتغل بس وانت لابسه: تأثيره وسكيلاته، والتايتلز القديمة كمان. وسكيلات التايتل اللي لابسه تقدر تحطها على البار",
+          "رسول العدالة (من كويست قائد الهربانين): كل الإحصائيات +10، ولما صحتك تقل عن 30% بتزيد 20%، وسكيل العدالة اللي متتكسرش: ضربة بـ 300% من هجومك في لحظة. والبطل السري خد سكيلين: الاكتساح والهيبة. وملك الأبطال بقى معاه روح القتال، كل ضربة بتزوّد قوتك وسرعتك وتحمّلك",
+          "وكمان: قاتل الفرسان، وأول صانع لقطعة يونيك وأسطورية، وبطل المملكة، وضربة واحدة واحد خلص! واللي قابل إله القتال (ضربة بتصعق حتى البوس)، وملك مذابح مصاصي الدماء، وأول ملك (درع لما صحتك تقل)، وبطل العصرين، وأسطورة الوادي، وحارس معبد ياتان، واللي ليه صلة بالجحيم، وضيف وينستون المميّز",
+          "وتايتلز للإنجازات: سفّاح الوحوش، واللي وصل للقمة، والبطل الرحّال، والصنايعي الأستاذ، وكابوس البوسات، والحوت، وسيد كل الصنايع، وحارس أرض الآلهة القديمة (الجاذبية في الشرق مبقتش بتتقل عليك). واللي عملته قبل كده بيتحسب: لو خلصت الكويست أو الإنجاز قبل التحديث، التايتل بيجيلك"],
+      en: ["New titles from the novel. A title works only while you wear it: its effects and its skills, the old titles' too. The worn title's skills go on the bar",
+          "Apostle of Justice (from the Deserter Captain): all stats +10, +20% more below 30% health, and the skill Unbreakable Justice, a strike for 300% of your attack at once. The Secret Hero gains two skills, Unstoppable and Majesty. The Hero King gains Fighting Spirit: each blow raises your Strength, Agility and Stamina",
+          "Also: Knight Slayer, First Unique and First Legendary Item Maker, Kingdom's Hero, One Hit, One Kill!, One Who Met the Martial God (a blow that stuns even a boss), Vampire Slaughter King, First King (a shield when your health runs low), Protagonist of Two Eras, Legend of the Canyon, Guardian of the Yatan Temple, One Connected to Hell and Winston's Person of Distinction",
+          "And titles for achievements: Monster Slaughterer, One Who Reached the Peak, Wandering Hero, Master Artisan, Bane of Bosses, Tycoon and Master of Every Trade, and the Guardian of the Land of the Old Gods (the East's gravity no longer weighs on you). What you did before counts: a quest or achievement finished before this update gives you its title"] },
     { v: '2026-10-23look', ver: '2.36', d: '2026-10-23',
       ar: ["إنشاء الشخصية: بقيت تختار ولد أو بنت، وشكل البنات بقى أنثوي أكتر. وفيه 21 تسريحة جديدة (طويل مفرود، وغرة، وبوب، وضفيرة، وضفيرتين، وكعكة، وديل حصان، وأفرو، وأندركت، وساموراي وغيرهم)، وألوان شعر وبشرة وهدوم أكتر.",
           "اختيارات جديدة: لون العيون، والدقن (سكسوكة، ودقن خفيفة، وشنب، ودقن على الفك، وطويلة)، ونمش أو جرح على العين، ولون الشفايف، وجيبة بدل البنطلون، واتنين إكسسوار بلونهم (نضارة، وحلق، ووردة، وباندانة، وكابيشون، وودان قطة، وقرون، وهالة، وتاج، وكوفية، ولثام، وجناحات، وريش). وكلها موجودة كمان عند الستايلست في \"الجسم والوش والإكسسوارات\".",
