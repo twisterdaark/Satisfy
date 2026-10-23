@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23madrafarm', ver: '2.11', d: '2026-10-23',
+      ar: ["وريث الملك الذي لا يُهزم (مادرا) زي الرواية: الغمد القديم بيقع نادر من الفرسان الحمر في قصر أسموفيل. لو عمرك ما اتهزمت، الغمد بيفتح الكويست: دمّر 100 فارس أحمر في 22 يوم قبل ما الفارس الأول يوصل، وإنت مرشّح عندك إحساس فائق ومقاومة للحالات الغريبة",
+        "لو اتهزمت مرة واحدة أو الأيام خلصت، الكويست بيضيع وبيتغير لكويست مهارة سيف المئة ألف جيش، ودي بتتعلمها أي كلاس. والوريث عنده سيف حصار المئة ألف جيش (كل عدو قدامك متحاصر 3 ثواني)، وسيف المئتين ألف جيش في لفل 200",
+        "الفلاح الأسطوري زي الرواية: بيارو بيدّي السيّاف اللي متخصص في الفلاحة (لفل 250 ومستوى فلاحة 6) كويست \"فلاح، مش سيد سيف\": تكسب غيطه 30 مرة وبعدين تبارزه وتغلبه",
+        "الزراعة الحرة: البذر والنمو السريع (بيربط الأعداء مكان البذور) وحرث الأرض والحصاد والدرس والتلميع ودقة الهون، والحالة الطبيعية بتديك قوة من الأرض، واستفزاز الفلاح"],
+      en: ["The Undefeated King's Descendant (Madra) as in the novel: his Old Sheath rarely drops from the Red Knights at Asmophel's Mansion. If you have never been defeated it opens the quest: destroy 100 Red Knights in 22 days before the First Knight arrives, with a candidate's super sensitivity and resistance to abnormal states",
+        "Be defeated once or run out of days and the quest is lost, turning into the 100,000 Army Swordsmanship skill quest that any class can finish. The Descendant has the 100,000 Army Blockade Sword (every enemy before you blocked 3 seconds) and 200,000 Army Swordsmanship at level 200",
+        "The Legendary Farmer as in the novel: Piaro gives a farming swordsman (level 250, farming level 6) the quest 'A Farmer, Not a Sword Saint': win his field 30 times, then spar with him and win",
+        "Free Farming: Sowing, Rapid Growth (binds the enemies where the seeds fell), Plowing the Field, Harvest, Flailing, Polishing and Pounding Mortar, with Natural State drawing strength from the earth, and Farmer's Provocation"] },
     { v: '2026-10-23newleg', ver: '2.10', d: '2026-10-23',
       ar: ["أساطير جديدة من الرواية، كل واحدة لواحد بس في العالم، وبتبدأ من لفل 1: لانتير، قديس القوس، وريث تزودان، ووريث مومود",
         "لانتير: دوران بيدّي أي حرامي من لفل 150 تقنيات دوران وكاسيم، وبعدين تبارز باين لانتير الحالي وتغلبه. مهاراته: لدغة القمر، سم لانتير، تقنية الضل، جنود الضل، والجشع اللي بيخلّص على أي عدو تحت 15% من دمه",
