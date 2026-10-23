@@ -158,9 +158,11 @@ test('a monster only B has (an event wave A missed): it stays on B\'s screen, A 
     assert.ok(sa && !sa.dead, 'A sees it');
     assert.ok(Math.hypot(sa.x - sb.x, sa.y - sb.y) <= 60, 'in the same place');
     const hp0 = (await state(a, k)).pm;
-    for (let i = 0; i < 80 && !(await state(b, k)).dead; i++) { await on(b, (k) => { const m = by(k); if (m && !m.dead) window.__GWP.hit(m, 8); }, k); await frames([a, b], 4); }
+    for (let i = 0; i < 80; i++) { const s = await state(b, k); if (!s || s.dead) break; await on(b, (k) => { const m = by(k); if (m && !m.dead) window.__GWP.hit(m, 8); }, k); await frames([a, b], 4); }
     await frames([a, b], 60);
-    assert.ok((await state(b, k)).dead, 'dead on B: ' + JSON.stringify([hp0, await state(a, k), await state(b, k)]));
+    // dead, or already gone: a dead monster that never comes back leaves the list after 2 s (SAT-ONLINE-160)
+    const db = await state(b, k);
+    assert.ok(!db || db.dead, 'dead on B: ' + JSON.stringify([hp0, await state(a, k), db]));
     const da = await state(a, k);
     assert.ok(!da || da.dead, 'dead on A');
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
@@ -420,6 +422,30 @@ test("a stun B's skill gives without a hit (a war cry, a stomp) stuns the host's
     let stunned = 0;
     for (let i = 0; i < 20 && !stunned; i++) { await frames([a, b], 2); if (await on(a, (k) => (by(k).stun || 0) > 1, k)) stunned = 1; }
     assert.equal(stunned, 1, "the host's copy is stunned");
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+// SAT-ONLINE-160: B kept a total for every monster it ever hit (one that went home, healed or left the host's list stayed
+// for the session), and past 100 of them a new fight's damage was never written: the host's monster held, B's sat at 1 HP
+test("past a hundred old totals on B (monsters hit once and left), B's new hits still reach the host, and the old ones go", async () => {
+  const { ctx, a, b } = await pair();
+  try {
+    assert.equal(await hostOf(b), A_UID, 'A hosts');
+    const [k] = await nearest(b, 1);
+    assert.ok(k, 'a monster near B');
+    await on(a, (k) => { const m = by(k); m.max *= 3; m.hp = m.max; m.agg = 1; m.eng = 4; }, k); // it lives through the hits
+    await frames([a, b], 20);
+    // 120 totals from fights long over, on monsters far away (each grew last a minute and more ago)
+    await b.eval(() => { const C = window.__GM.cum; for (let i = 0; i < 120; i++) C.set('rabbit@' + (i * 16 + 8) + ',8', { e: 0, d: 5, q: 0, s: 0, kx: 0, ky: 0, h: 0, wq: 0, ws: 0, sq: 0, ss: 0, t: -1e9 }); });
+    const hp = () => on(a, (k) => { const m = by(k); return m && !m.dead ? m.hp : 0; }, k);
+    const h0 = await hp();
+    for (let i = 0; i < 3; i++) { await on(b, (k) => { const m = by(k); m.x = window.__G.P.x + 20; window.__GWP.hit(m, 1); }, k); await frames([a, b], 8); }
+    await frames([a, b], 30);
+    const h1 = await hp();
+    assert.ok(h1 > 0 && h1 < h0, `the host's copy took B's hits: ${h0} -> ${h1}`);
+    const left = await b.eval(() => [...window.__GM.cum.keys()]);
+    assert.deepEqual(left, [k], 'only the fight going on is still written');
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });

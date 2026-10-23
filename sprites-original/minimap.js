@@ -83,7 +83,7 @@ function player(g,x,y,ang,u,t){u=u||1;g.save();const pr=(t||0)%1.2/1.2;g.beginPa
  g.translate(x,y);g.rotate(ang);const r=6*u;poly(g,[[r,0],[-r*.7,-r*.62],[-r*.35,0],[-r*.7,r*.62]]);g.fillStyle='#ffffff';g.fill();g.lineJoin='round';g.lineWidth=1.6*u;g.strokeStyle='#c8281e';g.stroke();g.restore();}
 // text with a crisp thin outline (no heavy 5px stroke); band = rounded navy pill behind it
 function label(g,text,x,y,o){o=o||{};const sz=o.size||12;g.save();g.font=`${o.weight||600} ${sz}px ${o.font||'Tajawal, sans-serif'}`;g.textAlign=o.align||'center';g.textBaseline='middle';
- if('letterSpacing' in g)g.letterSpacing=o.spacing||'0px';
+ {const ls=o.spacing||'0px';if('letterSpacing' in g&&g.letterSpacing!==ls)g.letterSpacing=ls;} // set only when it changes: each set makes the canvas resolve the font again
  if(o.band){const w=g.measureText(text).width+sz*.9,h=sz*1.45,bx=o.align==='left'?x-sz*.45:x-w/2;g.fillStyle=o.band;g.beginPath();if(g.roundRect)g.roundRect(bx,y-h/2,w,h,h/2);else g.rect(bx,y-h/2,w,h);g.fill();
   g.strokeStyle=o.edge||'rgba(143,216,255,.45)';g.lineWidth=1;g.stroke();}
  else{g.lineJoin='round';g.lineWidth=Math.max(2,sz*.22);g.strokeStyle='rgba(8,12,26,.88)';g.strokeText(text,x,y);}

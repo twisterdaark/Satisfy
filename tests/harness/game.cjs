@@ -20,8 +20,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const CURRENT_HTML = process.env.SATISFY_HTML ? path.resolve(process.env.SATISFY_HTML) : path.join(ROOT, 'index.html');
 // Golden/render baseline: the main commit this branch is based on. Bump it when rebasing onto a
 // newer main (or set SATISFY_BASELINE=<sha> to compare with any other commit).
-// R0 history: ce29772 (pre-online), 1899cdb (+ #6 CSS hotfix), 6ef0595 (+ v2 art, #5), 6295a5f (+ Patrian, AI, wider map), 3c343ec (+ town quests, Piaro balance, Guardian Knight), fe34ae0 (+ equipment, guilds, WS world state, events), daaef26 (+ companions, dragon, auction, Yatan), 7d57d5f (+ siege, Muller), 1d8ed5d (v1.22), 7e7a02b (v1.28 monster pack), e9f66b6 (v1.38 + the merges: the quest guide arrow and the harbor are drawn), 9400850 (v1.82: slower leveling, weapon passives), ffea01c (v1.83: the per-kill XP cap gone, an easier curve), c7caaca (v1.84: wpfix2 in new saves).
-const BASELINE_SHA = process.env.SATISFY_BASELINE || 'c7caaca2a5cf4decc03f33c14dc194679fbcfb65';
+// R0 history: ce29772 (pre-online), 1899cdb (+ #6 CSS hotfix), 6ef0595 (+ v2 art, #5), 6295a5f (+ Patrian, AI, wider map), 3c343ec (+ town quests, Piaro balance, Guardian Knight), fe34ae0 (+ equipment, guilds, WS world state, events), daaef26 (+ companions, dragon, auction, Yatan), 7d57d5f (+ siege, Muller), 1d8ed5d (v1.22), 7e7a02b (v1.28 monster pack), e9f66b6 (v1.38 + the merges: the quest guide arrow and the harbor are drawn), 9400850 (v1.82: slower leveling, weapon passives), ffea01c (v1.83: the per-kill XP cap gone, an easier curve), c7caaca (v1.84: wpfix2 in new saves), de7a67c (v2.28, SAT-ONLINE-160: monsters out of every player's reach sleep, so the ones near Winston roll other dice).
+const BASELINE_SHA = process.env.SATISFY_BASELINE || 'de7a67c4929490ca78fc9ba908edd99e6c311e1c';
 // the R0 baseline (before the safe saves and ids): the characterization tests document its bugs, so they keep it when
 // BASELINE_SHA moves on for the parity tests (it moved in aaa59ee, and the corrupt-save one failed since)
 const R0_SHA = '34b2ea5094d6d1597b4acb67d338d99d8765b745';
