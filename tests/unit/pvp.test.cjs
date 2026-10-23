@@ -17,7 +17,7 @@ function world(n, o = {}) {
     const uid = 'u' + i;
     const p = { uid, name: 'P' + i, x: 4000 + i * 20, y: 1500, zone: o.zone || 'zPlains', room: null, party: null, duel: false, dead: false, allies: [], events: [] };
     p.pres = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net, uid, sid: 'sess' + i + 'xxxxxxxx' });
-    p.pvp = SN.pvp.create({ presence: p.pres, uid, now, pos: () => ({ x: p.x, y: p.y }), zone: () => p.zone, room: () => p.room, party: () => p.party, ally: (r) => p.allies.includes(r.uid), busy: () => p.duel, alive: () => !p.dead, policy: SN.net.zonePolicy });
+    p.pvp = SN.pvp.create({ presence: p.pres, uid, now, pos: () => ({ x: p.x, y: p.y }), zone: () => p.zone, room: () => p.room, party: () => p.party, ally: (r) => p.allies.includes(r.uid), busy: () => p.duel, alive: () => !p.dead, policy: SN.net.zonePolicy, zoneAt: o.zoneAt });
     p.pvp.on((e) => p.events.push(e));
     players.push(p);
   }
@@ -80,6 +80,32 @@ test('no hits in a town (either side), in another room, inside a party, during a
   b.allies = ['u0']; a.pres.send('pvp.hit', { to: 'u1', k: 50, n: 2 }); w.advance(100);
   assert.equal(w.hurts(b).length, 0);
   assert.equal(b.events.at(-1).why, 'ally');
+});
+
+// plan U026/U027 (Safe Bairan, Safe Winston): from inside a town no player damage can be received. The victim's client
+// applies hits, and its own zone is the one it checks: a modified attacker that skips its checks gets nowhere.
+test('in a town no hit lands, whatever a modified attacker sends or says about where it is', () => {
+  const town = (x) => (x < 4010 ? 'zWin' : 'zPlains'); // a town's edge between the two, on everyone's map
+  const w = world(2, { zoneAt: town }), [a, b] = w.players;
+  // B inside Winston, A outside: A skips its own checks and sends hits straight away
+  b.zone = 'zWin'; b.x = 4000; a.x = 4030; w.advance(200);
+  for (let i = 0; i < 3; i++) a.pres.send('pvp.hit', { to: 'u1', k: 90, n: 100 + i });
+  assert.equal(w.hurts(b).length, 0, 'nothing taken in town');
+  assert.equal(b.events.at(-1).why, 'safe');
+  // nor when A also says it is in the town with B, or anywhere else
+  a.zone = 'zWin'; a.x = 4005; w.advance(200);
+  a.pres.send('pvp.hit', { to: 'u1', k: 90, n: 200 });
+  assert.equal(w.hurts(b).length, 0);
+  // A standing in the town names the field as its zone: B, outside, checks where A really is on its own map
+  b.zone = 'zPlains'; b.x = 4030; a.zone = 'zPlains'; a.x = 4000; w.advance(200);
+  assert.equal(b.pvp.why(w.remote(b, a)), 'safe', 'A is in the town on B\'s map');
+  a.pres.send('pvp.hit', { to: 'u1', k: 90, n: 300 });
+  assert.equal(w.hurts(b).length, 0, 'no hitting out of a town');
+  assert.equal(b.events.at(-1).why, 'safe');
+  // both outside: the same hit lands (the check above is the zone, nothing else)
+  a.x = 4020; w.advance(200);
+  a.pres.send('pvp.hit', { to: 'u1', k: 90, n: 400 });
+  assert.equal(w.hurts(b).length, 1);
 });
 
 test('the victim rejects hits from too far and more than HITS_PER_S a second', () => {

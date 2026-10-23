@@ -128,6 +128,18 @@ test('the defender rejects hits that come too fast or from out of range', () => 
   assert.ok(b.events.includes('rejected:range'));
 });
 
+// plan U026/U027: in a town no player damage is received, a duel's neither, even in the moment before the fight ends
+test('in a town no duel hit lands or goes out, even before the fight ends', () => {
+  const w = world(2), [a, b] = w.players;
+  w.fight(a, b);
+  b.zone = 'zWin'; // B steps into Winston: a hit sent before B's next tick yields the fight
+  a.pres.send('duel.hit', { to: 'u1', duel: a.duel.state().duel, k: 10, n: 99 });
+  assert.equal(b.duel.state().hp, C.HP, 'nothing taken in town');
+  assert.ok(b.events.includes('rejected:safe'));
+  b.zone = 'zPlains'; a.zone = 'zPat'; // and from a town none goes out
+  assert.equal(a.duel.hit(10), 0);
+});
+
 test('surrender, leaving the arena, a teleport, a safe zone and a disconnect all end the fight', () => {
   let w = world(2), [a, b] = w.players;
   w.fight(a, b);

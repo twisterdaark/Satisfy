@@ -10861,7 +10861,7 @@ function olPub(){return outlaw()?(karma()<=MURDER?2:1):0;}
 window.__GK={karma:()=>karma(),set:k=>{S.karma=k;},ol:()=>olPub(),respawn:()=>respawn()}; // test hook
 function karmaTick(dt){if(!S||S.__demo||mode!=='play'||karma()>=0)return;S.karT=(S.karT||0)+dt;if(S.karT>=KARMA_BACK){S.karT=0;S.karma=karma()+1;toast(t('kaBack',{k:S.karma}),'good');netForce=true;}}
 function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
-  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
+  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo,zoneAt:(x,y)=>netZone(x,y)});
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
   else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);balPvp(true);const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
    if(v&&warOf(v)){gwrKill(v.gd);return;} // a guild war (SAT-ONLINE-086): it counts for the guild, no karma lost
