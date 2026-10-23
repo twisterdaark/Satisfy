@@ -18,7 +18,7 @@ test('the Berserker trial: class, level and mastery gate it, one path only, the 
     // the trainer offers both paths; a locked one says what it needs
     assert.equal(await g.eval(() => window.__GC2.talk('tw')), true);
     const opts = await g.eval(() => [...document.querySelectorAll('#dialog button')].map((b) => b.textContent));
-    assert.ok(opts.some((o) => /Berserker/.test(o) && /🔒/.test(o)) && opts.some((o) => /Lancer/.test(o)), opts.join(' | '));
+    assert.ok(opts.some((o) => /Berserker/.test(o) && /🔒/.test(o)) && opts.some((o) => /Spear Knight/.test(o)), opts.join(' | '));
     await g.eval(() => { window.__G.S.mast.sword = 200; window.__GC2.accept('c2b'); });
     assert.equal(await g.eval(() => window.__GC2.avail('c2l')), false, 'one path at a time');
     // only kills below half health count
