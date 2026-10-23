@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24gamepad', ver: '2.54', d: '2026-10-24',
+      ar: ["ذراع التحكم (جيم باد): وصّل أي ذراع والعب بيه على طول. العصاية الشمال أو الأسهم بتمشي، A ضرب (دوس عليه وسيبه متدوس)، B تفادي، X تفاعل، Y دفاع، LB وRB وLT وRT أول أربع سكيلات، ضغط العصاية الشمال جرعة صحة واليمين جرعة مانا، Back الكويستات وStart القايمة. العصاية اليمين بتفتح الخريطة (فوق) والشنطة (تحت) والحالة (شمال) والعتاد (يمين). جوه القوايم الأسهم بتتحرك وA اختيار وB رجوع",
+          "الذراع بيهتز لما تاخد ضربة، وتقدر تقفل الاهتزاز من شاشة التحكم. الكيبورد والماوس واللمس شغالين زي ما هما"],
+      en: ["Gamepad: plug in any controller and play. The left stick or the D-pad walks, A attacks (hold it), B dodges, X uses, Y guards, LB, RB, LT and RT are your first four skills, clicking the left stick drinks a health potion and the right one a mana potion, Back opens the quests and Start the menu. The right stick opens the map (up), the bag (down), the status (left) and the equipment (right). In menus the arrows move, A picks and B goes back",
+          "The pad rumbles when you take a hit; turn the rumble off in the Controls screen. Keyboard, mouse and touch work as before"] },
     { v: '2026-10-23monsee', ver: '2.53', d: '2026-10-23',
       ar: ["مصاصين الدماء النبلا، وإيرلات الدم من المدينة 6 لتحت، وماري روز، وفنرير كانوا مختفيين. دلوقتي بيبانوا بشكلهم، واتراجعت كل الوحوش التانية ومفيش حد ناقص.",
           "كويستات \"اقتل وصحتك أقل من 50%\": لو لفلك أعلى من الوحش بـ 20 أو أكتر، شرط الصحة بيتلغى لأنه مستحيل يوصلك ليها، والكويست بيقول كده.",
