@@ -40,6 +40,7 @@
     HP: 100, MIN_HIT: 4, MAX_HIT: 18, HITS_PER_S: 4,
     CHALLENGE_R: 64, HIT_RANGE: 200, ARENA_R: 220, OUT_MS: 3000, TELEPORT_PX: 120,
     INVITE_MS: 30000, READY_MS: 20000, COUNTDOWN_MS: 3000, GRACE_MS: 6000, HP_MS: 200, OVER_MS: 4000,
+    JUMP_MS: 1000, // SAT-ONLINE-151 (plan U044): no hit lands from an attacker who jumped this long ago
   });
   var LOG_MAX = 400; // events a duel keeps (SAT-ONLINE-150): about a minute and a half of a fast fight
   var TYPES = ['duel.challenge', 'duel.accept', 'duel.decline', 'duel.ready', 'duel.hit', 'duel.hp', 'duel.yield', 'duel.end'];
@@ -118,6 +119,7 @@
           if (d.hitsIn.length >= C.HITS_PER_S) { rec({ e: 'rej', why: 'rate' }); emit({ type: 'rejected', why: 'rate' }); return; }
           var me = pos(), r = byUid(from.uid);
           if (!r || dist(me, r) > C.HIT_RANGE) { rec({ e: 'rej', why: 'range' }); emit({ type: 'rejected', why: 'range' }); return; }
+          if (P.jumped && t - (P.jumped(ev.sid) || -1e12) < C.JUMP_MS) { rec({ e: 'rej', why: 'jump' }); emit({ type: 'rejected', why: 'jump' }); return; }
           d.hitsIn.push(t);
           k = hurt ? Math.max(0, Math.min(C.HP, +hurt(k) || 0)) : Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(k)));
           if (!(k > 0)) { rec({ e: 'in', k: 0, hp: d.hp }); break; }
@@ -130,7 +132,9 @@
         }
         case 'duel.hp':
           if (!mineDuel || d.phase !== 'fight') return;
-          if (+pl.k >= 0 && +pl.k <= C.HP && +pl.k !== d.foeHp) { d.foeHp = +pl.k; rec({ e: 'foe', hp: d.foeHp }); }
+          // a defender's HP only goes down in a duel: a report of more than it said before is a lie (SAT-ONLINE-151)
+          if (+pl.k >= 0 && +pl.k < d.foeHp) { d.foeHp = +pl.k; rec({ e: 'foe', hp: d.foeHp }); }
+          else if (+pl.k > d.foeHp) { rec({ e: 'rej', why: 'hp' }); emit({ type: 'rejected', why: 'hp' }); }
           break;
         case 'duel.yield':
           if (!mineDuel) { incoming.delete(pl.duel); return; }

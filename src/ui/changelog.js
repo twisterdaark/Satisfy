@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23antiexploit', ver: '2.07', d: '2026-10-23',
+      ar: ["PvP: مفيش ضربة بتعدي من حد لسه عامل تيليبورت جنبك (لمدة ثانية)، والجري والاندفاع والقفزة القصيرة مش محسوبين. ولو الخصم في المبارزة قال إن صحته رجعت تاني، اللعبة مبتصدقوش"],
+      en: ["PvP: no hit lands from someone who has just teleported next to you (for a second; running, dashing and a short blink don't count), and in a duel a foe's health that claims to go back up is not believed"] },
     { v: '2026-10-23fightlog', ver: '2.06', d: '2026-10-23',
       ar: ["اكتب /fightlog في الشات تشوف آخر مبارزة: كل ضربة ضربتها، وكل ضربة جتلك وصحتك بعدها، واللي رفضته وليه، والوقت من أول القتال لآخره",
         "ولو اتقتلت في PvP: بتشوف مين ضربك وكام ضربة في كام ثانية. وآخر المبارزة بيظهر ملخصها في شباكها"],

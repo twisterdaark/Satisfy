@@ -28,6 +28,7 @@
   var C = Object.freeze({
     MIN_HIT: 30, MAX_HIT: 90, HITS_PER_S: 4, HIT_RANGE: 200, KILL_MS: 8000, OUTLAW_MS: 10 * 60 * 1000,
     RECAP_MS: 15000, RECAP_MAX: 60, // SAT-ONLINE-150: the hits a death recap shows
+    JUMP_MS: 1000, // SAT-ONLINE-151 (plan U044): no hit lands from an attacker who jumped (a teleport) this long ago
   });
   var TYPES = ['pvp.hit', 'pvp.kill'];
 
@@ -70,6 +71,7 @@
         var no = why(from);
         if (no) { emit({ type: 'rejected', why: no }); return; }
         if (dist(pos(), from) > C.HIT_RANGE) { emit({ type: 'rejected', why: 'range' }); return; }
+        if (P.jumped && t - (P.jumped(ev.sid) || -1e12) < C.JUMP_MS) { emit({ type: 'rejected', why: 'jump' }); return; }
         var list = (hitsIn.get(from.uid) || []).filter(function (x) { return t - x < 1000; });
         if (list.length >= C.HITS_PER_S) { emit({ type: 'rejected', why: 'rate' }); return; }
         list.push(t); hitsIn.set(from.uid, list);
