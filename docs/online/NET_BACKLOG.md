@@ -127,9 +127,9 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U213 | Auction market | 🟡 | B's auction window (v0.70) is the NPC auction house on each device; a market between players needs a ledger |
 | U214 | Searchable item market | 🟡 | The auction window searches its listings; local only |
 | U215 | Seller history | ✅ | SAT-ONLINE-089: after a trade each side writes its own record (`tradeLog`: with whom, gold given and got, checked by the rules against the trade's immutable sides, item counts; yours only) and a public one (`tradeRep`: with whom), once and only for a done trade, so the count can't be forged; the card shows trades and partners, `/trades` your last ten; the trade itself (`trades`, `tradeSides`, `tradeDone`, `tradedItems`) stays as the dispute trace (`regression/trade`) |
-| U216 | Bank deposits | 🟡 | The town bank keeps gold and items in the player's own save; not online |
-| U217 | Bank withdrawal locks | 🟡 | Same as U216 |
-| U218 | Gold sinks | 🟡 | Repairs, fees, the inn, the guild treasury, reputation-store prices (B); no counter of gold in and out |
+| U216 | Bank deposits | ✅ | The town bank (every inn, B) keeps gold in the character's own save, which goes with the character to the account (U018). SAT-ONLINE-140: a deposit or withdrawal takes from what is there at that moment, not from the numbers the menu showed (the world runs behind the menu: gold can change while it is open), so a choice made again moves nothing more (`regression/bank`, also through a reload) |
+| U217 | Bank withdrawal locks | ✅ | Same as U216: neither the bag nor the bank goes below zero, whatever was shown or pressed twice; one device plays a character at a time (the session lease, U006), so no second client spends the same balance |
+| U218 | Gold sinks | ✅ | Repairs, fees, the inn, the guild treasury, reputation-store prices (B). Inflow and outflow are observable: every game counts the gold that comes in and goes out each week from each change of the bag (SAT-ONLINE-093, `balance/{uid}` `gi`/`go`), and `/economy` adds them up over all players with a warning when far more comes in (U334, `regression/balance`) |
 | U219 | Crafting commissions | ❌ | |
 | U220 | Region merchant caravans | ❌ | |
 | U221 | Guild treasury | ✅ | SAT-ONLINE-065 (#99) + 069: gifts add exactly their amount, only the master and officers spend, and only on a building raised in the same write; `guildLog` keeps who did what |
@@ -236,6 +236,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 77 · 🟡 15 · ⏳ 6 · ❌ 6 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 78 · 🟡 14 · ⏳ 6 · ❌ 6 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
