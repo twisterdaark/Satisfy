@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23pvpwear', ver: '2.02', d: '2026-10-23',
+      ar: ["PvP: لو لاعب قتلك، كل حاجة لابسها (السلاح والدرع والخواتم) بتخسر 5 من متانتها، بس عمرها ما بتنزل تحت 10. يعني الـ PvP لوحده عمره ما يكسر معداتك، والحداد بيصلحها. ومفيش حاجة بتقع منك. والمبارزة ملهاش أي تمن"],
+      en: ["PvP: when a player kills you, everything you wear (weapon, armour, rings) loses 5 durability, but never below 10, so PvP alone never breaks your gear and the smith repairs it; nothing is dropped. A duel still costs nothing"] },
     { v: '2026-10-23antiexploit', ver: '2.01', d: '2026-10-23',
       ar: ["PvP: مفيش ضربة بتعدي من حد لسه عامل تيليبورت جنبك (لمدة ثانية)، والجري والاندفاع والقفزة القصيرة مش محسوبين. ولو الخصم في المبارزة قال إن صحته رجعت تاني، اللعبة مبتصدقوش"],
       en: ["PvP: no hit lands from someone who has just teleported next to you (for a second; running, dashing and a short blink don't count), and in a duel a foe's health that claims to go back up is not believed"] },
