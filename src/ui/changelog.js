@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23townlv', ver: '2.54', d: '2026-10-23',
+      ar: ["كل مدينة بقى ليها لفل مقترح: بيظهر تحت اسمها في الخريطة، وبيتكتب لما تدخلها.",
+          "ماري روز اترسمت من جديد زي المانهوا.",
+          "كويستات \"اقتل وصحتك أقل من 50%\": لو الوحش ضعيف عليك (لفلك أعلى منه بـ 20 أو أكتر)، الشرط مابقاش بيتلغى. بدل كده أي وحش قريب من لفلك (مش بوس) بيتحسب، طول ما صحتك تحت النص.",
+          "موسوعة الوحوش: صورة الوحش اللي فاتحه بتظهر على طول، بدل ما تستنى صور القايمة كلها."],
+      en: ["Every town has a recommended level now: it shows under its name on the map and when you walk in.",
+          "Marie Rose is redrawn as in the manhwa.",
+          "\"Kill it below 50% health\" quests: when the monster is too weak for you (20 or more levels under you) the rule is no longer waived; any monster near your level (not a boss) counts instead, while you are below half health.",
+          "Bestiary: the picture of the monster you open shows at once instead of waiting for the whole list's pictures."] },
     { v: '2026-10-23monsee', ver: '2.53', d: '2026-10-23',
       ar: ["مصاصين الدماء النبلا، وإيرلات الدم من المدينة 6 لتحت، وماري روز، وفنرير كانوا مختفيين. دلوقتي بيبانوا بشكلهم، واتراجعت كل الوحوش التانية ومفيش حد ناقص.",
           "كويستات \"اقتل وصحتك أقل من 50%\": لو لفلك أعلى من الوحش بـ 20 أو أكتر، شرط الصحة بيتلغى لأنه مستحيل يوصلك ليها، والكويست بيقول كده.",

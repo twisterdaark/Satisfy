@@ -92,6 +92,9 @@ function frame(c,dir,pose,f){
  else{q(4,11,8,6,c.top);q(11,11,1,6,c.top2);q(4,16,8,1,shade(c.top,-.12));if(!U)q(5,11,1,4,shade(c.top,.12));}
  if(c.chest&&!U){if(S_)q(5,11,4,4,c.chest);else{q(5,11,6,4,c.chest);q(10,11,1,4,c.pad2);q(5,13,6,1,c.pad2);q(6,11,2,1,shade(c.chest,.2));}}
  if(c.chest&&!U&&c.fem){if(S_){q(9,12,2,2,c.chest);q(10,12,1,1,shade(c.chest,.22));}else{q(5,12,2,1,shade(c.chest,.24));q(9,12,2,1,shade(c.chest,.24));q(7,12,2,1,shade(c.chest,-.15));q(6,14,4,1,c.chest);}}
+ if(c.big&&c.fem&&!U){const B=c.top,BH=shade(B,.28),BD=shade(B,-.32);   // a fuller figure (owner 2026-10-24: Marie Rose)
+  if(S_){q(10,11,2,1,B);q(11,12,2,2,B);q(12,12,1,1,BH);q(11,14,2,1,BD);q(10,14,1,1,shade(c.top,-.2));}
+  else{q(4,12,3,2,B);q(9,12,3,2,B);q(5,12,1,1,BH);q(10,12,1,1,BH);q(4,14,3,1,BD);q(9,14,3,1,BD);q(7,11,2,2,c.skin);q(7,12,1,1,c.sk2);q(3,12,1,2,shade(B,-.12));q(12,12,1,2,shade(B,-.12));}}
  if(c.sash&&!U){if(S_){q(6,12,4,1,c.sash);q(7,13,3,1,c.sash);}else for(let i=0;i<5;i++)q(5+i,11+i,2,1,c.sash);}
  if(c.fem)q(S_?6:5,16,S_?5:6,1,c.belt||c.boots);else q(S_?5:4,16,S_?6:8,1,c.belt||c.boots);if(!U&&c.belt)q(S_?8:7,16,2,1,shade(c.belt,.35));
  if(c.cape&&U)q(4,11,8,8,c.cape),q(4,11,8,1,shade(c.cape,.15));
@@ -296,6 +299,8 @@ if(L>=3)q(3,8,2,end-8,h);if(H.wave&&L>=2)for(let y=9;y<end;y+=2)q(2,y,1,1,h);
   else if(c.mask==='iron'){const M=c.maskC||c.hc;if(S_){q(8,3,4,7,M);q(9,6,3,1,K);q(10,6,1,1,GL);q(11,8,1,1,shade(M,-.3));}
    else{q(4,3,8,7,M);q(5,6,6,1,K);q(6,6,1,1,GL);q(9,6,1,1,GL);q(7,8,2,1,shade(M,-.3));q(7,3,2,3,shade(M,.2));q(4,9,8,1,shade(M,-.2));}}}
  // horns over everything (demons, horned helms)
+ if(c.buns&&c.hair!=='bald'){const h=c.hc,hl=c.hl||shade(c.hc,.3),hd=shade(c.hc,-.25);   // twin buns on top (Marie Rose)
+  if(S_){q(5,0,3,3,h);q(6,0,1,1,hl);q(5,2,3,1,hd);}else{q(2,0,3,3,h);q(11,0,3,3,h);if(!U){q(3,0,1,1,hl);q(12,0,1,1,hl);}q(2,2,3,1,hd);q(11,2,3,1,hd);}}
  if(c.horns){const Hn=c.horns,H2=shade(Hn,-.3);
   if(U){q(3,0,1,2,Hn);q(2,-1,1,2,Hn);q(12,0,1,2,Hn);q(13,-1,1,2,Hn);}
   else if(S_){q(6,0,2,2,Hn);q(5,-1,2,1,Hn);q(4,-2,2,1,H2);q(3,-2,1,1,H2);}
