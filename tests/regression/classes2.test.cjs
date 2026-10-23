@@ -29,10 +29,10 @@ test('the Berserker trial: class, level and mastery gate it, one path only, the 
     assert.equal(done.cls, 'berserker'); assert.equal(done.base, 'warrior');
     assert.ok(done.sk.includes('whirl') && done.sk.includes('cleave'), done.sk.join());
     assert.ok(done.pas.includes('bfury'));
-    // Fury from a real fight, and Last Stand keeps you up against monsters
-    const f = await g.eval(() => { const G = window.__G, C = window.__GC2; const m = G.spawnMon('wolf', G.P.x + 20, G.P.y); m.max = m.hp = 1e7; C.hit(m); C.hit(m);
-      const fury = G.P.fury; G.P.lst = 6; G.P.lstOn = 1; G.P.inv = 0; G.P.dash = 0; C.hurt(1e7, m); return { fury, hp: G.P.hp }; });
-    assert.equal(f.fury, 2); assert.equal(f.hp, 1);
+    // Berserk (the novel's, ch131): every hit drinks a little health back; and Last Stand keeps you up against monsters
+    const f = await g.eval(() => { const G = window.__G, C = window.__GC2; const m = G.spawnMon('wolf', G.P.x + 20, G.P.y); m.max = m.hp = 1e7; G.P.hp = Math.round(G.maxHP() / 2); const h0 = G.P.hp; C.hit(m); C.hit(m);
+      const drank = G.P.hp > h0; G.P.lst = 6; G.P.lstOn = 1; G.P.inv = 0; G.P.dash = 0; C.hurt(1e7, m); return { drank, hp: G.P.hp }; });
+    assert.equal(f.drank, true); assert.equal(f.hp, 1);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });

@@ -217,8 +217,10 @@
       skills: [
         sk('gajudge', 'Judgment', 'الحُكم', 'A blow of the goddess\' light.', 'ضربة من نور الإلهة.', 150, 'line', { r: 65, mul: 2.4, mp: 16, cd: 5, col: '#fff8c0' }),
         sk('gaagent', 'Agent of the Goddess', 'وكيل الإلهة', 'All stats raised: +10% damage and defence.', 'كل الإحصائيات زادت: +10% ضرر ودفاع.', 150, 'pas', { stat: 'atk', pct: 0.1, also: [{ stat: 'def', pct: 0.1 }] }),
-        sk('galight', 'Light\'s Blessing', 'بركة النور', '+80% damage and defence for 3 minutes.', '+80% ضرر ودفاع لمدة 3 دقايق.', 150, 'buff', { stat: 'atk', pct: 0.8, dur: 180, also: [{ stat: 'def', pct: 0.8 }], mp: 80, cd: 600 }),
-        sk('gadesire', 'Heart\'s Desire', 'رغبة القلب', 'Half your health back.', 'يرجعلك نص صحتك.', 170, 'heal', { pct: 0.5, mp: 40, cd: 90 }),
+        sk('galight', 'Light\'s Blessing', 'بركة النور', 'A golden pillar falls from the sky: +80% damage and defence and +10% critical hits for 3 minutes, for you and your party nearby.', 'عمود دهبي بينزل من السما: +80% ضرر ودفاع و+10% كريتيكال لمدة 3 دقايق، ليك وللبارتي اللي جنبك.', 150, 'buff', { stat: 'atk', pct: 0.8, dur: 180, also: [{ stat: 'def', pct: 0.8 }, { stat: 'crit', pct: 0.1 }], mp: 80, cd: 300 }),
+        sk('gadesire', 'Heart\'s Desire', 'رغبة القلب', 'The dead are resurrected on the spot: every fallen party member near you rises with full health. Players only.', 'الميتين بيقوموا في مكانهم: كل حد من البارتي وقع جنبك بيقوم بصحة كاملة. للاعيبة بس.', 170, 'heal', { pct: 0, mp: 40, cd: 600 }),
+        sk('gabreath', 'Goddess\' Breath', 'نَفَس الإلهة', 'All your health back, and 70% of it to your party nearby.', 'كل صحتك بترجع، و70% منها للبارتي اللي جنبك.', 150, 'heal', { pct: 1, mp: 30, cd: 300 }),
+        sk('gashield', 'Goddess\' Protection', 'حماية الإلهة', 'A shield of absolute defence: the next blow you take, within 30 s, does nothing.', 'درع دفاع مطلق: الضربة الجاية اللي هتاخدها، في خلال 30 ثانية، مش هتعمل حاجة.', 160, 'heal', { pct: 0, mp: 20, cd: 120 }),
         sk('gaprot', 'Divine Protection', 'الحماية الإلهية', '+20% defence for 3 minutes.', '+20% دفاع لمدة 3 دقايق.', 200, 'buff', { stat: 'def', pct: 0.2, dur: 180, mp: 40, cd: 300 })
       ] }
   );

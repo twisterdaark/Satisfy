@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23novel1', ver: '2.21', d: '2026-10-23',
+      ar: ["سكيلات زي الرواية: الساحر بقى عنده الصاروخ السحري (أول تعويذة لأي ساحر، ضعيفة بس أسرع واحدة)، وموجة الصقيع بقت حقل الجليد اللي بيجمّد الأرض وبعدين يبطّأ",
+          "البيرسيركر: الغضب بقى الجنون زي الرواية، كل ما صحتك تقل كل ما تضرب أقوى وأسرع (لحد +80% هجوم و+50% سرعة)، وكل ضربة بترجعلك شوية صحة، وسكيل جديد: جنون السيف، تسع ضربات وعينيك بتحمرّ",
+          "فارس الحماية: قوة الحارس (الضربة الجاية مش بتوصل واللي ضربك بيدوخ)، ورمي الدرع، وتقليل الضرر، والحصن بقى جارد الصلب",
+          "وريث تزودان بقى عنده سكيلات المحارب وسيف تزودان العظيم، وفي الخمس خطوات بتظهر آثار رجلين من نور حواليك: دوس على خمسة ورا بعض والضربة الجاية ضرر حقيقي",
+          "وكيل الإلهة: رغبة القلب بقت بتقوّم اللي مات من البارتي بصحة كاملة، وبركة النور بتنزل عمود دهبي على البارتي كلها، وسكيلين جداد: نَفَس الإلهة وحماية الإلهة. وتضحية القدّيسة بقت بتقوّم الميتين",
+          "صبر الحداد الأسطوري بقى بيشتغل على السندان لخليفة باجما، ومكافأة صانع الإكسسوارات بقت بتشتغل على الخواتم"],
+      en: ["Skills as in the novel: the Magician has Magic Missile (every magician's first spell, weak but the fastest), and Frost Nova is now Ice Field, which freezes the ground and then slows",
+          "The Berserker: Fury is now Berserk as in the novel, the less health you have the harder and faster you hit (up to +80% attack and +50% attack speed), every hit drinks a little health back, and a new skill: Sword Frenzy, nine blows as your eyes turn red",
+          "The Guardian Knight: Guardian's Power (the next blow does nothing and stuns the attacker), Shield Throw and Reduce Damage Received, and Fortress is now Guard of Steel",
+          "Tzudan's Successor keeps the warrior's skills and gets Tzudan's Greatsword, and Five Steps lights footprints around you: step on five in a row and the next blow is true damage",
+          "The Goddess' Agent: Heart's Desire now raises fallen party members at full health, Light's Blessing falls as a golden pillar on the whole party, and two new skills: Goddess' Breath and Goddess' Protection. The Saintess' Sacrifice now raises the dead",
+          "The Legendary Blacksmith's Patience now works at the anvil for Pagma's Successor, and the Accessory Maker's bonus now works on rings"] },
     { v: '2026-10-23beastnovel', ver: '2.20', d: '2026-10-23',
       ar: ["البيست ماستر بقى زي الرواية: ملك الوحوش أسد ضخم زئيره بيوقّع اللي حواليه، وسيد السما (النسر) بيفلت من أي قيد، ونص إنسان نص وحش بقى تحوّل حقيقي لمستذئب شايل سلاحه بلبدة زي المانهوا وصحته بترجع بسرعة، وضربة السيد بيطلع فيها راس أسد دهبي",
           "سكيلات جديدة للبيست ماستر: زئير الأسد بيضعف الأعداء، وشكل النمر بيقطّع وينزّف، وشكل الفهد الثلجي أسرع شكل وبيتفادى، وشكل المستذئب القديم بقى اسمه شكل الذئب"],
