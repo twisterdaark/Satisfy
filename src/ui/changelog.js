@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23expr', ver: '2.42', d: '2026-10-23',
+      ar: ["تعبير الوش بقى اختيار في إنشاء الشخصية وعند ليلى الستايلست (300 جولد): عادي، ابتسامة، هادي، مكشّر، نعسان، غمزة، متفاجئ، مطلّع لسانه، مكسوف.",
+          "التعبير اللي تختاره بيفضل ظاهر على وشك طول الوقت وبيشوفه اللاعيبة التانيين أونلاين، والرمشة وتعبير الوجع لما تتضرب بيظهروا لحظة وبعدين يرجع تعبيرك."],
+      en: ["Facial expression is now a choice in character creation and at Layla the stylist (300 gold): neutral, smile, calm, frown, sleepy, wink, surprised, tongue out, blush.",
+          "The expression you pick stays on your face all the time and other players see it online; a blink or the hurt face when you're hit shows for a moment, then your expression comes back."] },
     { v: '2026-10-23hairdiff', ver: '2.41', d: '2026-10-23',
       ar: ["كل تسريحة شعر بقت شكلها مختلف بوضوح عن الباقي، للولاد والبنات: غُرَر جديدة (قصيرة، مستقيمة، ستارة، مايلة)، أطراف ملفوفة لجوا أو لبرا أو مدرّجة، شعر منفوش، خصلة واقفة، خصلة فاتحة، أطراف فاتحة، فيونكة، ضفاير قصيرة على الجنبين، وتسريحة عرف في النص.",
           "مربعات الستايلست بقت أكبر: التسريحات بتبان لحد الكتف، ولون العيون والوش والشفايف والإكسسوارات بيتعمل لهم زووم على الراس عشان الفرق يبان.",

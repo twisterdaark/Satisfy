@@ -135,6 +135,19 @@ function frame(c,dir,pose,f){
    else if(o.hurt){q(5,6,2,1,EYE);q(9,6,2,1,EYE);}
    else{q(6,6,1,2,EYE);q(9,6,1,2,EYE);q(6,6,1,1,CL);q(9,6,1,1,CL);q(5,8,1,1,mixC(c.skin,'#e86a6a',c.fem?.32:.22));q(10,8,1,1,mixC(c.skin,'#e86a6a',c.fem?.32:.22));if(c.fem){q(5,6,1,1,EYE);q(10,6,1,1,EYE);}}   // lashes
    if(c.fem){q(6,5,1,1,bc);q(9,5,1,1,bc);q(7,8,2,1,o.hurt?shade(LIP,-.2):LIP);}else{q(5,5,2,1,bc);q(9,5,2,1,bc);q(7,8,2,1,o.hurt?shade(c.sk2,-.2):c.lip||c.sk2);}}
+  // the chosen expression (owner 2026-10-23), drawn over the resting face; a blink or a hit still shows for a moment
+  if(c.ex&&!o.hurt){const X=c.ex,SK=c.skin,F=!!c.fem,LS=F?(c.mk?'#120c14':'#2a1e2e'):EYE,IR=F?(c.eye||'#3e3458'):EYE,MD=mixC(SK,'#5a1a2a',.72),PK='#ff7a8a',BS=mixC(SK,'#ff5a7a',.55),mr=F?9:8,op=!o.blink;
+   const shut=(r)=>{if(S_){q(10,F?5:6,2,F?3:2,SK);}else if(F){q(4,5,3,3,SK);q(9,5,3,3,SK);}else{q(5,6,2,2,SK);q(9,6,2,2,SK);}};
+   const arc=(x)=>{q(x,7,1,1,LS);q(x+1,6,1,1,LS);q(x+2,7,1,1,LS);};   // a closed happy eye
+   const mouth=()=>{if(S_)q(11,8,1,1,SK);else q(6,mr,4,1,SK);};
+   if(X==='smile'){mouth();if(S_){q(11,8,1,1,MD);q(10,8,1,1,mixC(SK,MD,.5));}else{q(7,mr,2,1,MD);q(6,mr-1,1,1,MD);q(9,mr-1,1,1,MD);}}
+   else if(X==='calm'){if(op){shut();if(S_){q(10,7,1,1,LS);q(11,6,1,1,LS);}else{arc(F?4:5);arc(F?9:8);}}mouth();if(S_)q(11,8,1,1,mixC(SK,MD,.55));else q(7,mr,2,1,mixC(SK,MD,.55));}
+   else if(X==='frown'){mouth();if(S_)q(11,8,1,1,MD);else{q(7,mr-1,2,1,MD);q(6,mr,1,1,MD);q(9,mr,1,1,MD);}}
+   else if(X==='sleepy'){if(op){shut();if(S_){q(10,7,2,1,LS);q(10,8,1,1,mixC(SK,IR,.5));}else{q(F?5:5,7,2,1,LS);q(9,7,2,1,LS);q(F?5:6,8,1,1,mixC(SK,IR,.5));q(F?10:9,8,1,1,mixC(SK,IR,.5));}}mouth();if(S_)q(11,8,1,1,MD);else{q(7,mr,2,1,mixC(SK,MD,.5));q(7,mr,1,1,MD);}}
+   else if(X==='wink'){if(op){if(S_){shut();q(10,7,1,1,LS);q(11,6,1,1,LS);}else{q(9,5,3,3,SK);if(!F)q(9,6,2,2,SK);arc(F?9:8);}}mouth();if(S_)q(11,8,1,1,MD);else{q(7,mr,2,1,MD);q(9,mr-1,1,1,MD);}}
+   else if(X==='surp'){if(op){shut();if(S_){q(10,5,2,1,LS);q(10,6,1,2,IR);q(11,6,1,1,'#ffffff');q(11,7,1,1,IR);}else{const L=F?5:5;q(L,5,2,1,LS);q(9,5,2,1,LS);q(L,6,2,2,IR);q(9,6,2,2,IR);q(L+1,6,1,1,'#ffffff');q(10,6,1,1,'#ffffff');}}mouth();if(S_)q(11,8,1,1,'#4a1420');else{q(7,mr-1,2,2,'#4a1420');q(7,mr-1,2,1,MD);}}
+   else if(X==='tongue'){mouth();if(S_){q(11,8,1,1,MD);q(12,8,1,1,PK);}else{q(7,mr-1,2,1,MD);q(6,mr-2,1,1,MD);q(9,mr-2,1,1,MD);q(8,mr,1,1,PK);q(7,mr,1,1,mixC(PK,MD,.3));}}
+   else if(X==='blush'){if(S_){q(10,8,2,1,BS);q(10,8,1,1,shade(BS,-.15));q(11,8,1,1,MD);}else{q(4,8,2,1,BS);q(10,8,2,1,BS);q(4,7,1,1,BS);q(11,7,1,1,BS);mouth();q(7,mr,1,1,MD);q(8,mr,1,1,mixC(SK,MD,.5));}}}
   // freckles and a scar
   if(c.frk){const F=shade(c.skin,-.28);if(S_){q(9,8,1,1,F);q(11,7,1,1,F);}else{q(5,7,1,1,F);q(10,7,1,1,F);q(4,8,1,1,F);q(11,8,1,1,F);}}
   if(c.scar){const SC=mixC(c.skin,'#8a2a2a',.5);if(S_){q(10,4,1,1,SC);q(11,5,1,1,SC);q(11,7,1,1,SC);}else{q(10,4,1,1,SC);q(10,5,1,1,SC);q(11,7,1,1,SC);}}}
@@ -282,6 +295,9 @@ function frame(c,dir,pose,f){
   else if(S_){q(6,0,2,2,Hn);q(5,-1,2,1,Hn);q(4,-2,2,1,H2);q(3,-2,1,1,H2);}
   else{q(3,1,2,1,Hn);q(2,0,1,1,Hn);q(1,-1,1,1,H2);q(1,-2,1,1,H2);q(11,1,2,1,Hn);q(13,0,1,1,Hn);q(14,-1,1,1,H2);q(14,-2,1,1,H2);}}
  if(c.hfx&&c.hc&&c.hair!=='bald'&&c.hair!=='helm'&&!c.hood&&!c.hat&&!c.turban)hairFx(g,c,U,HT);
+ if(c.ex&&!U&&!o.hurt&&!c.hood&&!c.hat&&c.hair!=='helm'&&(c.ex==='frown'||c.ex==='surp')){const BR=shade(c.hc||'#3a2a2a',-.35);   // brows over the fringe, anime style
+  if(c.ex==='frown'){if(S_){q(9,4,1,1,BR);q(10,5,1,1,BR);}else{q(4,4,1,1,BR);q(5,4,1,1,BR);q(6,5,1,1,BR);q(11,4,1,1,BR);q(10,4,1,1,BR);q(9,5,1,1,BR);}}
+  else{if(S_)q(10,3,2,1,BR);else{q(5,3,2,1,BR);q(9,3,2,1,BR);}}}
  // accessories (owner 2026-10-23 vanity): glasses, earrings, a flower, cat ears, a halo, a tiara, a scarf
  if(c.gls&&!U){const G=c.gls;if(S_){q(9,6,1,2,G);q(11,6,1,2,G);q(9,5,3,1,G);q(7,6,2,1,G);}else{q(5,5,3,1,G);q(8,5,3,1,G);q(5,6,1,2,G);q(7,6,2,1,G);q(10,6,1,2,G);}}
  if(c.ear&&!U){const E=c.ear,E2=shade(E,.4);if(S_){q(7,8,1,2,E);q(7,8,1,1,E2);}else{q(3,8,1,2,E);q(12,8,1,2,E);q(3,8,1,1,E2);q(12,8,1,1,E2);}}   // drop earrings, bolder so the stylist shows them

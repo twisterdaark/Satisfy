@@ -69,6 +69,12 @@ test("hide a piece's look, keep its stats; the other player sees the same body, 
     fa = await mine(a);
     assert.equal(fa.hair, 'waist', JSON.stringify(fa));
     assert.deepEqual(await seen(b, ua), fa, 'the long hair shows for the other player too');
+    // the chosen expression (a wink) shows for her and for the other player
+    await a.eval(() => { const G = window.__G; G.S.look.ex = 5; G.buildMe ? G.buildMe(G.S.look) : 0; });
+    await settle(a, b);
+    fa = await mine(a);
+    assert.equal(fa.ex, 'wink', JSON.stringify(fa));
+    assert.deepEqual(await seen(b, ua), fa, 'the wink shows for the other player too');
     // the stylist's mirror: you now and with the option you're on, beside the list
     await a.eval(() => window.__GLOOK.sty('hair'));
     await a.step(3);
