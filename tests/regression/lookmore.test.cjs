@@ -26,7 +26,7 @@ test('the creator: a girl has no beard, new hairs and accessories draw; the figu
     assert.equal(r.boy.beard, r.boy.hc, 'a full beard for him');
     assert.ok(r.girl.fem && !r.girl.beard, 'none for her: ' + JSON.stringify(r.girl));
     assert.ok(r.girl.lip && r.girl.skirt && r.girl.flw && r.girl.ear, JSON.stringify(r.girl));
-    assert.ok(r.n >= 30 && r.n <= 32 && r.ok, 'every hairstyle draws, and the index still fits the presence (0..31)');
+    assert.ok(r.n >= 70 && r.ok, 'every hairstyle draws (' + r.n + ')');
     // the create screen: Female hides the beard row
     await g.eval(() => window.__GLOOK.create());
     await g.step(2);
@@ -51,7 +51,7 @@ test("hide a piece's look, keep its stats; the other player sees the same body, 
     await wear(a, ['ihelm', 'parmor']);
     await settle(a, b);
     const ua = await a.eval(() => Satisfy.local.net().uid);
-    assert.equal(await a.eval(() => window.__GLOOK.bd()), '1000243001');
+    assert.equal(await a.eval(() => window.__GLOOK.bd()), '10002430010');
     let fa = await mine(a);
     assert.ok(fa.fem && fa.hair === 'helm' && fa.chest, 'helmet and armour show: ' + JSON.stringify(fa));
     assert.deepEqual(await seen(b, ua), fa);
@@ -63,6 +63,19 @@ test("hide a piece's look, keep its stats; the other player sees the same body, 
     assert.ok(fa.hair === 'hime' && !fa.chest && fa.band, 'her own hair and headband again: ' + JSON.stringify(fa));
     assert.deepEqual(await seen(b, ua), fa, 'and so for the other player');
     assert.equal(await a.eval(() => window.__G.eqx.defV()), d0, 'the stats stay');
+    // a hairstyle past the presence range (0..31) still reaches the other player through the bd tag
+    await a.eval(() => { const G = window.__G, X = window.__GLOOK; G.S.look.hair = X.LOOK.hair.indexOf('waist'); G.buildMe ? G.buildMe(G.S.look) : 0; });
+    await settle(a, b);
+    fa = await mine(a);
+    assert.equal(fa.hair, 'waist', JSON.stringify(fa));
+    assert.deepEqual(await seen(b, ua), fa, 'the long hair shows for the other player too');
+    // the stylist's mirror: you now and with the option you're on, beside the list
+    await a.eval(() => window.__GLOOK.sty('hair'));
+    await a.step(3);
+    await a.page.keyboard.press('ArrowDown'); await a.page.keyboard.press('ArrowDown');
+    await a.step(5);
+    const m = await a.eval(() => ({ on: !document.getElementById('styW').hidden, diff: document.getElementById('styNewT').classList.contains('diff'), side: document.body.classList.contains('styon') }));
+    assert.deepEqual(m, { on: true, diff: true, side: true });
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });

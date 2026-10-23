@@ -131,7 +131,8 @@
       uid: ctx.uid || null,
       sid: ctx.sid || null,
       handle: str(ctx.handle || L.n, LIMITS.handle), // online: the account ID (SAT-ONLINE-026); otherwise the character name
-      look: { hair: L.hair | 0, hc: L.hc | 0, skin: L.skin | 0, top: L.top | 0 },
+      look: { hair: (L.hair | 0) & 31, // past 31 the rest rides in fx (bd: hh)
+                hc: L.hc | 0, skin: L.skin | 0, top: L.top | 0 },
       cls: str(S.cls || 'novice', 16),
       lv: ctx.hideLv ? 0 : S.lv | 0, // 0 = the player hides their level (SAT-ONLINE-026)
       title: str(S.title, LIMITS.title),

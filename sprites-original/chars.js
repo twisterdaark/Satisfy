@@ -10,7 +10,8 @@ const FW=16,FH=24;
 const HAIRP={longS:{len:4,bang:'part'},hime:{len:4,bang:'full'},bob:{len:2,bang:'full'},bobS:{len:2,bang:'side'},braid:{len:1,bang:'part',tail:'braid'},twinB:{len:1,bang:'full',tail:'twinb'},
  hbun:{len:1,bang:'side',tail:'hbun'},sidep:{len:1,bang:'side',tail:'sidep'},wavy:{len:3,bang:'part',wave:1},shoulder:{len:2,bang:'part'},ponyH:{len:0,bang:'side',tail:'ponyL'},lowTw:{len:1,bang:'part',tail:'low2'},
  odango:{len:1,bang:'full',tail:'buns2'},emo:{len:1,bang:'emo'},undercut:{len:0,bang:'side',top:'tall',shave:1},slick:{len:0,bang:'none',back:1},topknot:{len:0,bang:'none',tail:'knot',shave:1},afro:{top:'afro'},
- wolf:{len:1,bang:'side',back:2},spikyL:{len:3,bang:'spiky'},princess:{len:4,bang:'side',tail:'bunS'}};
+ wolf:{len:1,bang:'side',back:2},spikyL:{len:3,bang:'spiky'},princess:{len:4,bang:'side',tail:'bunS'},
+ crew:{len:0,bang:'part'},fringeS:{len:0,bang:'full'},curtain:{len:1,bang:'part'},spikyS:{len:0,bang:'spiky'},mop:{len:1,bang:'full'},sideS:{len:0,bang:'side'},midS:{len:1,bang:'side'},longP:{len:3,bang:'part'},longF:{len:3,bang:'full'},longSd:{len:3,bang:'side'},waist:{len:4,bang:'none'},wavyF:{len:3,bang:'full',wave:1},wavyL:{len:4,bang:'side',wave:1},curlsS:{len:2,bang:'part',wave:1},bobP:{len:2,bang:'part'},bobE:{len:2,bang:'emo'},emoL:{len:3,bang:'emo'},braidL:{len:3,bang:'part',tail:'braid'},braidF:{len:1,bang:'full',tail:'braid'},twinBs:{len:1,bang:'side',tail:'twinb'},twinS:{len:1,bang:'full',tail:'low2'},hbunF:{len:1,bang:'full',tail:'hbun'},hbunL:{len:3,bang:'part',tail:'hbun'},ponyF:{len:0,bang:'full',tail:'ponyL'},ponyP:{len:1,bang:'part',tail:'ponyL'},sidepF:{len:1,bang:'full',tail:'sidep'},sidepL:{len:3,bang:'part',tail:'sidep'},odangoL:{len:3,bang:'full',tail:'buns2'},odangoS:{len:0,bang:'side',tail:'buns2'},knotL:{len:2,bang:'none',tail:'knot'},knotF:{len:0,bang:'part',tail:'knot'},princessF:{len:4,bang:'full',tail:'bunS'},halfUp:{len:2,bang:'part',tail:'bunS'},undercutL:{len:1,bang:'emo',top:'tall',shave:1},pompadour:{len:0,bang:'none',top:'tall'},faux:{len:0,bang:'spiky',top:'tall',shave:1},wolfL:{len:2,bang:'spiky',back:3},mullet:{len:0,bang:'side',back:3},shag:{len:2,bang:'spiky',wave:1},lionM:{len:3,bang:'spiky',wave:1},slickL:{len:2,bang:'none'},bangsW:{len:4,bang:'full',wave:1}};
 // Sheet layout: one row per direction (d=down/front, u=up/back, s=side facing right; left = mirrored s).
 const POSES=[['idle',2],['walk',4],['atk',3],['hurt',1]];
 const COLS=[];POSES.forEach(([p,n])=>{for(let f=0;f<n;f++)COLS.push([p,f]);});
@@ -74,11 +75,12 @@ function frame(c,dir,pose,f){
  const arm=c.armC||(c.sleeves?c.top:c.skin),arm2=c.armC2||(c.sleeves?c.top2:c.sk2);const hnd=c.glove||c.skin;   // gloves recolour the hands
  if(S_&&o.atk<0){const ob=-o.armS;q(6+ob,11,2,4,shade(arm2,-.12));q(6+ob,15,2,1,c.sk2);}
  // torso with soft vertical shading
- if(c.fem){if(S_){q(5,11,6,3,c.top);q(6,14,5,3,c.top);q(10,11,1,6,c.top2);q(5,11,1,3,shade(c.top,.1));if(!c.chest)q(10,12,1,1,shade(c.top,.14));}   // a narrower waist
-  else{q(4,11,8,3,c.top);q(5,14,6,3,c.top);q(11,11,1,3,c.top2);q(10,14,1,3,c.top2);q(5,16,6,1,shade(c.top,-.12));if(!U){q(5,11,1,3,shade(c.top,.12));if(!c.chest){q(6,12,1,1,shade(c.top,.16));q(9,12,1,1,shade(c.top,.16));}}}}
+ if(c.fem){const CB=c.chest||c.top;if(S_){q(5,11,6,3,c.top);q(6,14,5,3,c.top);q(10,11,1,6,c.top2);q(5,11,1,3,shade(c.top,.1));q(11,12,1,2,CB);q(11,13,1,1,shade(CB,-.25));q(10,12,1,1,shade(CB,.16));}   // the figure (owner 2026-10-23)
+  else{q(4,11,8,3,c.top);q(5,14,6,3,c.top);q(11,11,1,3,c.top2);q(10,14,1,3,c.top2);q(5,16,6,1,shade(c.top,-.12));if(!U){q(5,11,1,2,shade(c.top,.12));if(!c.chest){q(5,12,2,1,shade(c.top,.26));q(9,12,2,1,shade(c.top,.26));q(6,12,1,1,shade(c.top,.36));q(9,12,1,1,shade(c.top,.36));q(5,13,2,1,shade(c.top,-.3));q(9,13,2,1,shade(c.top,-.3));q(7,12,2,2,shade(c.top,-.2));}}}}
  else if(S_){q(5,11,6,6,c.top);q(10,11,1,6,c.top2);q(5,11,1,5,shade(c.top,.1));}
  else{q(4,11,8,6,c.top);q(11,11,1,6,c.top2);q(4,16,8,1,shade(c.top,-.12));if(!U)q(5,11,1,4,shade(c.top,.12));}
  if(c.chest&&!U){if(S_)q(5,11,4,4,c.chest);else{q(5,11,6,4,c.chest);q(10,11,1,4,c.pad2);q(5,13,6,1,c.pad2);q(6,11,2,1,shade(c.chest,.2));}}
+ if(c.chest&&!U&&c.fem){if(S_){q(9,12,2,2,c.chest);q(10,12,1,1,shade(c.chest,.22));}else{q(5,12,2,1,shade(c.chest,.24));q(9,12,2,1,shade(c.chest,.24));q(7,12,2,1,shade(c.chest,-.15));q(6,14,4,1,c.chest);}}
  if(c.sash&&!U){if(S_){q(6,12,4,1,c.sash);q(7,13,3,1,c.sash);}else for(let i=0;i<5;i++)q(5+i,11+i,2,1,c.sash);}
  if(c.fem)q(S_?6:5,16,S_?5:6,1,c.belt||c.boots);else q(S_?5:4,16,S_?6:8,1,c.belt||c.boots);if(!U&&c.belt)q(S_?8:7,16,2,1,shade(c.belt,.35));
  if(c.cape&&U)q(4,11,8,8,c.cape),q(4,11,8,1,shade(c.cape,.15));
@@ -100,10 +102,10 @@ function frame(c,dir,pose,f){
  if(c.pad){if(S_){q(6,10,4,2,c.pad);q(6,11,4,1,c.pad2);q(6,10,2,1,shade(c.pad,.2));}else{q(2,10,3,2,c.pad);q(11,10,3,2,c.pad);q(2,11,3,1,c.pad2);q(11,11,3,1,c.pad2);q(2,10,1,1,shade(c.pad,.25));q(11,10,1,1,shade(c.pad,.25));}}
  if(c.spike){const K=c.spike;if(S_){q(7,8,1,2,K);q(9,9,1,1,K);}else{q(2,9,1,1,K);q(3,8,1,2,K);q(12,8,1,2,K);q(13,9,1,1,K);}}
  // head + neck
- q(6,10,4,1,c.sk2);
+ if(c.fem)q(7,10,2,1,mixC(c.skin,c.sk2,.45));else q(6,10,4,1,c.sk2);   // her neck slim and soft, not a dark band under the chin (owner 2026-10-23)
  if(c.collar&&!U){if(S_)q(7,10,3,1,c.collar);else{q(5,10,6,1,c.collar);q(5,11,1,1,c.collar);q(10,11,1,1,c.collar);}}
  if(c.fem){if(S_){q(5,2,7,7,c.skin);q(6,9,5,1,c.skin);q(12,7,1,1,c.skin);q(11,3,1,5,c.sk2);}   // a rounder chin and no jaw shadow (owner 2026-10-23: girls had a beard-like line)
-  else{q(4,2,8,7,c.skin);q(5,9,6,1,c.skin);q(11,3,1,6,c.sk2);if(!U)q(5,3,1,4,shade(c.skin,.12));}}
+  else{q(4,2,8,7,c.skin);q(6,9,4,1,c.skin);q(11,3,1,6,c.sk2);if(!U)q(5,3,1,4,shade(c.skin,.12));}}
  else if(S_){q(5,2,7,8,c.skin);q(12,7,1,1,c.skin);q(5,9,7,1,c.sk2);q(11,3,1,6,c.sk2);}
  else{q(4,2,8,8,c.skin);q(11,3,1,7,c.sk2);q(5,9,6,1,c.sk2);if(!U)q(5,3,1,4,shade(c.skin,.12));}
  // face: 2px eyes with a catchlight, blink and hurt squint

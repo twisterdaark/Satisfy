@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23mirror', ver: '2.37', d: '2026-10-23',
+      ar: ["الستايلست بقت عندها مراية: بتشوف شكلك دلوقتي وجنبه شكلك بالاختيار اللي واقف عليه (تسريحة أو لون أو هدوم أو إكسسوار) قبل ما تدفع، وتقدر تلف الشخصية تشوفها من كل ناحية.",
+          "42 تسريحة جديدة، يعني بقوا 74: قصيرة ومتوسطة وطويلة لحد الوسط، وغرة على عين، وضفاير، وديل حصان، وكعكات، ومويج، وكيرلي، وموليت، وأندركت، وغيرهم. واللاعبين التانيين بيشوفوهم كلهم أونلاين.",
+          "شكل البنات بقى أنثوي أكتر، ومفيش ظل تحت الوش شبه الدقن."],
+      en: ["The stylist now has a mirror: you see yourself as you are next to how you would look with the option you are on (hairstyle, colour, clothes or accessory) before you pay, and you can turn the character around.",
+          "42 new hairstyles, 74 in all: short, medium and waist-length cuts, fringes over one eye, braids, ponytails, buns, waves, curls, a mullet, undercuts and more. Other players see all of them online.",
+          "Female characters look more feminine, with no beard-like shadow under the face."] },
     { v: '2026-10-23look', ver: '2.36', d: '2026-10-23',
       ar: ["إنشاء الشخصية: بقيت تختار ولد أو بنت، وشكل البنات بقى أنثوي أكتر. وفيه 21 تسريحة جديدة (طويل مفرود، وغرة، وبوب، وضفيرة، وضفيرتين، وكعكة، وديل حصان، وأفرو، وأندركت، وساموراي وغيرهم)، وألوان شعر وبشرة وهدوم أكتر.",
           "اختيارات جديدة: لون العيون، والدقن (سكسوكة، ودقن خفيفة، وشنب، ودقن على الفك، وطويلة)، ونمش أو جرح على العين، ولون الشفايف، وجيبة بدل البنطلون، واتنين إكسسوار بلونهم (نضارة، وحلق، ووردة، وباندانة، وكابيشون، وودان قطة، وقرون، وهالة، وتاج، وكوفية، ولثام، وجناحات، وريش). وكلها موجودة كمان عند الستايلست في \"الجسم والوش والإكسسوارات\".",
