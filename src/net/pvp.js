@@ -27,6 +27,8 @@
 
   var C = Object.freeze({
     MIN_HIT: 30, MAX_HIT: 90, HITS_PER_S: 4, HIT_RANGE: 200, KILL_MS: 8000, OUTLAW_MS: 10 * 60 * 1000,
+    RECAP_MS: 15000, RECAP_MAX: 60, // SAT-ONLINE-150: the hits a death recap shows
+    JUMP_MS: 1000, // SAT-ONLINE-151 (plan U044): no hit lands from an attacker who jumped (a teleport) this long ago
   });
   var TYPES = ['pvp.hit', 'pvp.kill'];
 
@@ -38,6 +40,7 @@
     var policy = o.policy || (root.Satisfy && root.Satisfy.net && root.Satisfy.net.zonePolicy) || function () { return { safe: false }; };
     var listeners = [], hitsIn = new Map(), hitsOut = [], hitN = 0;
     var struck = new Map(); // uid -> last time we hit them (a kill report only counts for those)
+    var taken = []; // SAT-ONLINE-150 (plan U039): the hits we took, after our checks: {at, uid, handle, pm}
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function noFight(z) { var p = policy(z) || {}; return !!p.safe || p.known === false; }
@@ -68,10 +71,13 @@
         var no = why(from);
         if (no) { emit({ type: 'rejected', why: no }); return; }
         if (dist(pos(), from) > C.HIT_RANGE) { emit({ type: 'rejected', why: 'range' }); return; }
+        if (P.jumped && t - (P.jumped(ev.sid) || -1e12) < C.JUMP_MS) { emit({ type: 'rejected', why: 'jump' }); return; }
         var list = (hitsIn.get(from.uid) || []).filter(function (x) { return t - x < 1000; });
         if (list.length >= C.HITS_PER_S) { emit({ type: 'rejected', why: 'rate' }); return; }
         list.push(t); hitsIn.set(from.uid, list);
         k = Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(k)));
+        taken.push({ at: t, uid: from.uid, handle: from.handle || '', pm: k });
+        if (taken.length > C.RECAP_MAX) taken.shift();
         emit({ type: 'hurt', pm: k, uid: from.uid, handle: from.handle || '' });
       } else if (env.type === 'pvp.kill') {
         var at = struck.get(from.uid);
@@ -95,6 +101,17 @@
         struck.set(r.uid, t);
         P.send('pvp.hit', { to: r.uid, k: k, n: ++hitN });
         return k;
+      },
+      /**
+       * SAT-ONLINE-150 (plan U039): who hurt us in the last RECAP_MS, for a death recap. {pm: per mille of max HP in all,
+       * ms: from the first hit to the last, by: [{uid, handle, hits, pm, last}] most hits first, lines: [{ms, uid, handle, pm}]}
+       */
+      recap: function () {
+        var t = now(), L = taken.filter(function (e) { return t - e.at <= C.RECAP_MS; }), by = {}, out = [], pm = 0;
+        L.forEach(function (e) { var b = by[e.uid] || (by[e.uid] = { uid: e.uid, handle: e.handle, hits: 0, pm: 0, last: 0 }); b.hits++; b.pm += e.pm; b.last = e.at; if (e.handle) b.handle = e.handle; pm += e.pm; });
+        for (var u in by) out.push(by[u]);
+        out.sort(function (x, y) { return y.hits - x.hits || y.pm - x.pm || y.last - x.last; });
+        return { pm: pm, ms: L.length ? L[L.length - 1].at - L[0].at : 0, by: out, lines: L.map(function (e) { return { ms: e.at - L[0].at, uid: e.uid, handle: e.handle, pm: e.pm }; }) };
       },
       /** The local player died to a hit from uid: tell them (they turn outlaw). */
       died: function (uid) { if (uid && uid !== self) P.send('pvp.kill', { to: uid, k: 0 }); },

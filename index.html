@@ -10436,7 +10436,8 @@ function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Sati
  let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}
  P.hp-=d;numP(-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();asMe(()=>vfx('blood',P.x,P.y-10,{}));shake=.12;}hudDirty=true;
  if(P.hp<=0){if(legSave())return;
-  die();PVP.died(e.uid);balPvp(false);bntKilled(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
+  const R=PVP.recap?PVP.recap():null;if(R)FLOG.pvp={n:e.handle,r:R};
+  die();PVP.died(e.uid);balPvp(false);bntKilled(e.uid);setTimeout(()=>{toast(t('pvpDied',{n}),'warn');if(R&&R.lines.length)toast(t('flPvpT',{h:R.lines.length,s:(R.ms/1000).toFixed(1)}),'warn');},300);}}
 // your own red tag while you are an outlaw, and the notice when it ends
 function pvpEnts(){const ol=outlaw();if(pvpOlWas&&!ol&&S&&!S.__demo){toast(t('pvpOlEnd'),'good');netForce=true;}pvpOlWas=ol;
  if(ol&&mode==='play')TX.push({s:t(olPub()===2?'kaMurderT':'pvpOl'),x:P.x,y:P.y-30,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff3b30'});}
@@ -11322,6 +11323,7 @@ function admCmd(v){let m;
  if(/^\/economy\s*$/i.test(v)){admOnly(admEco);return true;}
  if(/^\/season(\s|$)/i.test(v)){const x=/^\/season(?:\s+(\d{4}-(?:0[1-9]|1[0-2])))?\s*$/i.exec(v);if(!x){toast(t('ssnBad'),'warn');return true;}const ym=x[1]||ssnLast();admOnly(st=>admSeason(st,ym));return true;}
  if(/^\/balance\s*$/i.test(v)){admOnly(admBal);return true;}
+ if(/^\/fightlog\s*$/i.test(v)){flogShow();return true;} // anyone's (SAT-ONLINE-150)
  if(/^\/admin\s*$/i.test(v)){admOnly(()=>toast(t('admHelp')));return true;}
  if((m=/^\/mute\s+(\S+)\s+(\d{1,3})\s*([\s\S]*)$/i.exec(v))){const id=m[1],h=Math.max(1,Math.min(720,+m[2])),why=m[3].trim().slice(0,60);admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}const until=wNow()+h*3600000;return st.mute(u,until,why,NET.uid).then(()=>toast(t('admMuted',{n:id,l:calTime(until)}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  if((m=/^\/unmute\s+(\S+)\s*$/i.exec(v))){const id=m[1];admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}return st.unmute(u).then(()=>toast(t('admUnmuted',{n:id}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
@@ -11445,6 +11447,28 @@ function duelKey(c){if(!DUEL)return false;const inv=DUEL.pendingChallenge(),st=D
   const res=DUEL.challenge(r);toast(t({sent:'dSent',busy:'dBusy',safe:'dSafe',far:'dFar'}[res]||'dBusy',{n:r.handle}),res==='sent'?'good':'warn');duelSig='';return true;}
  if((c==='KeyY'||c==='KeyN')&&(inv||st.phase==='ready'||st.phase==='asking')){duelAct(c==='KeyY'?'dAccept':'dDecline');return true;}
  return false;}
+/* fight log (SAT-ONLINE-150, plan U039): the last duel's events, each side's own (src/net/duel.js: what you sent, what you
+   took after your checks, what you turned down, the foe's HP as it reported it), and who hurt you before your last death in
+   open PvP (src/net/pvp.js recap): "/fightlog" in the chat. A duel's summary shows in its window when it ends. */
+let FLOG={pvp:null};
+function flogDuel(){const st=DUEL&&DUEL.state(),L=st&&st.last;return L&&Array.isArray(L.log)&&L.log.length?{L,r:Satisfy.duel.report(L.log)}:null;}
+const flN=x=>String(Math.round((+x||0)*10)/10); // duel HP is a share of 100, a fraction with real damage (owner 2026-10-22)
+function flogSum(){const D=flogDuel();return D&&D.r.ms!=null?t('flSum',{s:(D.r.ms/1000).toFixed(1),o:D.r.hitsOut,i:D.r.hitsIn,b:flN(D.r.biggest)}):'';}
+function flogShow(){const out=[],D=flogDuel(),nm=x=>Satisfy.chat.clean(x||'',24)||'?',sec=ms=>((ms||0)/1000).toFixed(1);
+ if(D){const {L,r}=D,n=nm(L.handle);out.push(t(r.result==='win'?'flDWin':'flDLose',{n,w:t('dw_'+r.why),s:sec(r.ms)}).replace(/ {2,}/g,' '));
+  out.push(t('flDTot',{o:r.hitsOut,d:flN(r.dealt),i:r.hitsIn,k:flN(r.taken),g:r.dodged,j:r.rejected}));
+  for(const l of r.lines.filter(l=>l.e!=='cd').slice(-10))out.push(sec(l.ms)+'s · '+(l.e==='out'?t('flOut',{n}):l.e==='in'?(l.k>0?t('flIn',{n,k:flN(l.k),hp:flN(l.hp)}):t('flDodge',{n})):l.e==='foe'?t('flFoe',{n,hp:flN(l.hp)}):l.e==='rej'?t('flRej',{w:t('flW_'+l.why)}):l.e==='fight'?t('flStart'):t('flEnd')));}
+ if(FLOG.pvp){const R=FLOG.pvp.r;out.push(t('flPvp',{n:nm(FLOG.pvp.n),h:R.lines.length,s:sec(R.ms)}));for(const b of R.by.slice(0,5))out.push(t('flBy',{n:nm(b.handle),h:b.hits,p:Math.round(b.pm/10)}));}
+ if(!out.length)out.push(t('flNone'));dialog('guild',out,null,[{l:t('oClose')}]);}
+window.__GFLOG={show:()=>flogShow(),get pvp(){return FLOG.pvp},sum:()=>flogSum()}; // tests
+Object.assign(STR.ar,{flSum:'{s} ثانية · ضربت {o} مرة، واتضربت {i} · أكبر ضربة {b} · /fightlog',flDWin:'كسبت المبارزة ضد {n} {w} في {s} ثانية',flDLose:'خسرت المبارزة ضد {n} {w} في {s} ثانية',
+ flDTot:'ضرباتك: {o} ({d} من صحته) · ضرباته: {i} ({k} من صحتك) · تفاديت {g} · رفضت {j}',flOut:'ضربت {n}',flIn:'{n} ضربك -{k} (فاضلك {hp})',flDodge:'تفاديت ضربة {n}',flFoe:'{n} بقى {hp}',
+ flRej:'رفضت ضربة ({w})',flW_rate:'أسرع من أي سلاح',flW_range:'من بعيد',flW_jump:'بعد تيليبورت على طول',flW_hp:'قال إن صحته رجعت',flStart:'بدأ القتال',flEnd:'خلص',flPvp:'آخر موتة: {n} قتلك · {h} ضربة في {s} ثانية',flBy:'{n}: {h} ضربة، {p}% من صحتك',
+ flNone:'لسه مفيش قتال تشوفه',flPvpT:'{h} ضربة في {s} ثانية · اكتب /fightlog تشوف مين ضربك'});
+Object.assign(STR.en,{flSum:'{s} s · you hit {o} times, took {i} · biggest {b} · /fightlog',flDWin:'You won the duel against {n} {w} in {s} s',flDLose:'You lost the duel against {n} {w} in {s} s',
+ flDTot:'Your hits: {o} ({d} of their HP) · theirs: {i} ({k} of yours) · dodged {g} · turned down {j}',flOut:'You hit {n}',flIn:'{n} hit you -{k} (you have {hp})',flDodge:'You dodged {n}',flFoe:'{n} is at {hp}',
+ flRej:'Turned down a hit ({w})',flW_rate:'faster than any weapon',flW_range:'from too far',flW_jump:'right after a teleport',flW_hp:'health said to go back up',flStart:'The fight starts',flEnd:'Over',flPvp:'Your last death: {n} killed you · {h} hits in {s} s',flBy:'{n}: {h} hits, {p}% of your health',
+ flNone:'No fight to show yet',flPvpT:'{h} hits in {s} s · type /fightlog to see who hit you'});
 function duelTick(live){DUEL.tick();const st=DUEL.state();
  if(DUEL.locked()&&(mode==='dead'||!live))DUEL.yield(mode==='dead'?'death':'teleport');
  const inv=live?DUEL.pendingChallenge():null,cd=Math.ceil(st.countdown/1000);
@@ -11454,7 +11478,7 @@ function duelTick(live){DUEL.tick();const st=DUEL.state();
  else if(ask){$('duelInvT').textContent=st.meReady?t('dWait',{n:st.handle}):t('dReadyQ',{n:st.handle});$('duelBtnA').textContent=t('dReady');$('duelBtnA').hidden=st.meReady;$('duelBtnB').textContent=t('pDecline');$('duelBtnC').hidden=true;}
  const on=live&&(st.phase==='countdown'||st.phase==='fight'||st.phase==='over');$('duelW').hidden=!on;if(!on)return;
  $('duelT').textContent=t('dTitle',{n:st.handle||'?'});$('duelMeN').textContent=t('dYou')+' '+st.hp;$('duelFoeN').textContent=(st.handle||'?')+' '+st.foeHp;
- $('duelMeB').style.width=st.hp+'%';$('duelFoeB').style.width=st.foeHp+'%';$('duelCd').textContent=st.phase==='countdown'?String(cd||''):'';
+ $('duelMeB').style.width=st.hp+'%';$('duelFoeB').style.width=st.foeHp+'%';$('duelCd').textContent=st.phase==='countdown'?String(cd||''):st.phase==='over'?flogSum():'';
  $('duelYield').textContent=t('dYield');$('duelYield').hidden=st.phase==='over';}
 /* party raid (SAT-ONLINE-009, doc §10 R6): in a party, the leader's copy of a boss is the one that counts. Members'
    hits go to the leader, everyone sees the leader's boss HP, and its death kills every hitter's copy with that
