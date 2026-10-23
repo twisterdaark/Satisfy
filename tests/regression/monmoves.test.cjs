@@ -65,3 +65,15 @@ test('a hurt outlaw drinks a potion; a priest\'s root holds you and calls the ot
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// owner 2026-10-23: the people drink potions when hurt, the vampires drink blood
+test('the people among the monsters carry a potion, the vampires drink blood', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, LOOK);
+    const r = await g.eval(() => { const V = window.__GMV, f = (k) => (V.RKMV[k] || V.XMOVES[k] || []).find((m) => m.k === 'heal');
+      return { pot: ['kraugel', 'peaks', 'ferB', 'chuckB', 'cultist'].map((k) => !!(f(k) && f(k).pot)), blood: ['vknight', 'vlord', 'vhigh'].map((k) => !!(f(k) && !f(k).pot)) }; });
+    assert.deepEqual(r, { pot: [true, true, true, true, true], blood: [true, true, true] });
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});

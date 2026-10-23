@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23bag', ver: '2.23', d: '2026-10-23',
+      ar: ["الشنطة: فلتر بالمكان (سلاح، درع، خوذة...) وبالندرة، وترتيب بالأحدث أو الندرة أو السعر أو الهجوم أو الدفاع.",
+          "تقدر تعمل ★ مفضلة أو 🔒 قفل لأي سلاح أو درع، وليهم تاب لوحدهم. القطعة المقفولة متتباعش ومتترميش ومتتفككش بالغلط.",
+          "لما تقف على سلاح أو درع في الشنطة بيقارنه باللي انت لابسه في نفس المكان: الأخضر ↑ أحسن، والأحمر ↓ أوحش.",
+          "الوحوش البشرية (زي كراوجل وعبدة الشياطين) بقت بتشرب جرعة لما صحتها تقل، ومصاصين الدماء بيشربوا دم."],
+      en: ["The bag: filter by slot (weapon, armour, helmet...) and by rarity, and sort by newest, rarity, price, attack or defence.",
+          "You can ★ favourite or 🔒 lock any weapon or armour, with a tab of their own. A locked piece can't be sold, thrown away or salvaged by mistake.",
+          "Hovering a weapon or armour in the bag compares it with what you wear in that slot: green ↑ is better, red ↓ is worse.",
+          "Human foes (like Kraugel and the cultists) now drink a potion when their health runs low, and vampires drink blood."] },
     { v: '2026-10-23mirror', ver: '2.22', d: '2026-10-23',
       ar: ["نسختك في الجزيرة 41 بقت بتحاربك بسكيلات شريطك انت بالظبط، بنفس الشكل والصوت والكولداون، وضربتها العادية هي ضربتك بسلاحك.",
           "لفل السكيل بقى متعلق بالسكيل نفسه: الهجوم بياخد كريتيكال ونزيف، والأغاني والدروع مانا أقل وكولداون أقصر، والعلاج بيعالج أكتر.",
