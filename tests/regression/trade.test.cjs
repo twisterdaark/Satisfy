@@ -26,6 +26,9 @@ async function until(games, fn, ms = 10000, arg) {
 const shown = (g, id) => g.eval((i) => !document.getElementById(i).hidden, id);
 const click = (g, sel) => g.eval((s) => document.querySelector(s).click(), sel);
 const text = (g, id) => g.eval((i) => document.getElementById(i).textContent, id);
+// every toast since the page opened: one fades after 2.6 s of real time, which the swap's two pages can outlast
+const keepToasts = (g) => g.eval(() => { window.__toastSeen = ''; const box = document.getElementById('toasts'); new MutationObserver(() => { window.__toastSeen += '|' + box.textContent; }).observe(box, { childList: true, subtree: true, characterData: true }); });
+const toastsSeen = (g) => g.eval(() => window.__toastSeen);
 // the card of the player next to you: T where it exists, else a click on their name
 async function openCard(g, uid) {
   await g.page.keyboard.press('KeyT'); await g.step(2);
@@ -56,6 +59,7 @@ test('online: offer, any change resets the accepts, Accept + Confirm swap once; 
     await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
     await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
     await b.eval(() => { window.__G.P.x += 20; });
+    for (const g of [a, b]) await keepToasts(g);
     for (const g of [a, b]) await g.eval(() => { window.__G.S.gold = 500; });
     const it = await giveItem(a);
     await settle(a, b); await settle(a, b);
@@ -91,8 +95,8 @@ test('online: offer, any change resets the accepts, Accept + Confirm swap once; 
     await click(a, '#trConf'); await click(b, '#trConf');
     await until([a, b], () => document.getElementById('tradeW').hidden, 15000);
     await settle(a, b);
-    assert.match(await text(a, 'toasts'), /Trade with Bassem done/);
-    assert.match(await text(b, 'toasts'), /Trade with Ahmed done/);
+    assert.match(await toastsSeen(a), /Trade with Bassem done/);
+    assert.match(await toastsSeen(b), /Trade with Ahmed done/);
     assert.equal(await a.eval(() => window.__G.S.gold), 450);
     assert.equal(await b.eval(() => window.__G.S.gold), 550);
     assert.equal(await a.eval((iid) => window.__G.S.items.some((i) => i.iid === iid), it.iid), false, 'A gave it');
