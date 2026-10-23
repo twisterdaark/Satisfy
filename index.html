@@ -5544,7 +5544,7 @@ const monY=m=>m.y-(m.type==='guardian'?18:m.type==='gchief'?10:4);
 // one hit on one monster; returns 0 (no effect), 1 (hit) or 2 (crit)
 function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}
  if(m.type==='kraugel'&&!m.st&&!(P.bdetU>gTime)&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
- let dmg=(o.aura?auAtkV():atkV())*mul*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(S.tl.blslay&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*(m.wardT>gTime?m.wardR||.4:1),crit=rand()<Math.min(.5,.05+(P.bdetU>gTime?.1:0)+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
+ let dmg=(o.aura?auAtkV():atkV())*mul*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(S.tl.blslay&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*(m.wardT>gTime?m.wardR||.4:1),crit=rand()<Math.min(.5,.05+cpStat('crit')+(P.bdetU>gTime?.1:0)+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -5552,12 +5552,12 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,m
  dmg=ipHit(m,dmg,crit,o);if(o.skill&&S.tl.duke)dmg*=1.15;if(o.skill&&S.cls==='braham'&&S.sk.bcont&&rand()<.3)dmg*=1.3;if(P.shwU>gTime)dmg*=saEvil(m)?1.5:1.2;dmg=tzHit(m,dmg,o);if(!o.dot)kyArc(m);if(o.skill&&S.cls==='mumud'&&pasOn('mmreint'))dmg*=1.15;if(m.tw===1)twHit(m,crit,o);if(m.type==='gcrown'&&m.bh&&!crit&&!o.skill)dmg=1;if(o.skill&&S.bh&&S.bh.mm)dmg*=1.03;if(S.tl.hking&&HKV.has(m.type))dmg*=1.15;
  let mblk=false;if(AIK[m.type]==='soldier'&&!o.skill&&!o.aura&&!(P.bdetU>gTime)&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
   mblk=true;dmg*=.2;crit=false;burn=false;m.grdT=.6;m.cd=Math.min(m.cd,.15);vfx('block',m.x+m.face*7,my-2,{angle:m.face>0?Math.PI:0});num(m.x,my-20,t('mBlock'),'#9fc8ff',false);SFX.hit();}
- dmg=Math.max(1,Math.round(dmg));dmg=blRefl(m,dmg);m.hp-=dmg;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;trainMast();if(!o.chain&&wearT!==gTime){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
+ dmg+=cpErode(m,o);dmg=Math.max(1,Math.round(dmg));dmg=blRefl(m,dmg);m.hp-=dmg;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;trainMast();if(!o.chain&&wearT!==gTime){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
  num(m.x,my-8,String(dmg),crit||burn?'#ffd24a':'#ffffff',crit||burn);
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(burn)vfx('fire',m.x,my);if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
  if(burn&&!S.burnSeen){S.burnSeen=1;toast(t('burn'),'good');}else if(burn)num(m.x,my-18,lang==='ar'?'لهب!':'FLAME','#ff9a2a',false);
- c2Hit(m,o);p2Hit(m,o);p3Hit(m,dmg);rgHit(m,o);hcHit(m,o);fbHit(m,o);brHit(m,dmg);epHit(m);if(!netHit(m,dmg)&&m.hp<=0)killMon(m);return crit||burn?2:1;}
+ c2Hit(m,o);p2Hit(m,o);p3Hit(m,dmg);rgHit(m,o);hcHit(m,o);fbHit(m,o);brHit(m,dmg);cpHit(m,dmg);epHit(m);if(!netHit(m,dmg)&&m.hp<=0)killMon(m);return crit||burn?2:1;}
 function tryAttack(ax,ay,mul){
  if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);if(PVP)pvpSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
@@ -5593,7 +5593,7 @@ function guardArc(x,y,a,k,fort){const cx=Math.round(x),cy=Math.round(y)-8;ctx.sa
 function drawGuard(){if(P.guard)guardArc(P.x,P.y,Math.atan2(P.gy,P.gx),P.gT<.22?1:.55,P.fort>0);
  const g=P.gd??100;if(g<100||P.guard){const x=Math.round(P.x)-9,y=Math.round(P.y)+3;ctx.fillStyle='rgba(10,16,30,.6)';ctx.fillRect(x,y,18,3);ctx.fillStyle=g<30?'#ff8a5a':'#8fd0ff';ctx.fillRect(x+1,y+1,Math.round(16*g/100),1);}}
 function hurtPlayer(d,ml,src){return asMe(()=>hurtPlayer0(d,ml,src));}
-function hurtPlayer0(d,ml,src){P.hitT=gTime;if(P.rvU>gTime){pgRevolve(d,src);return 0;}if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(rgEvade(src)||hcEvade(src)||mdEvade(src))return 0;d=bzShield(d);if(d<=0)return 0;if(P.lkBU>gTime)d*=.3;if(src&&src.type&&lkSee())d*=.85;if(P.kyTU>gTime&&src&&src.type&&!src.dead){d*=.7;hitMon(src,.3,{skill:1,dot:1});}if(src&&src.type&&S.cls==='saintess'&&pasOn('sagrace')&&saEvil(src))d*=.8;if(src&&src.dmul)d*=src.dmul;if(src&&src.fury>gTime)d*=1.25;if(src&&src.type)P.lastSrc=src.type;if(S.tl.hking&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
+function hurtPlayer0(d,ml,src){P.hitT=gTime;if(P.rvU>gTime){pgRevolve(d,src);return 0;}if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(rgEvade(src)||hcEvade(src)||mdEvade(src)||cpEvade())return 0;d=bzShield(d);if(d<=0)return 0;if(P.lkBU>gTime)d*=.3;if(src&&src.type&&lkSee())d*=.85;if(P.kyTU>gTime&&src&&src.type&&!src.dead){d*=.7;hitMon(src,.3,{skill:1,dot:1});}if(src&&src.type&&S.cls==='saintess'&&pasOn('sagrace')&&saEvil(src))d*=.8;if(src&&src.dmul)d*=src.dmul;if(src&&src.fury>gTime)d*=1.25;if(src&&src.type)P.lastSrc=src.type;if(S.tl.hking&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
  if(P.qm>0&&rand()<.3){numP(-20,t('ipEvade'),'#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
  d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,3.2)*150/(150+defV())*rlDef(src)));d=p3Hurt(p2Hurt(c2Hurt(d,src),src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=bthHurt(d,src);d=dmHurt(d,src);d=mbHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
@@ -7314,13 +7314,24 @@ function skVfx(k){const v=fdir(),a=Math.atan2(v[1],v[0]);({whirl:()=>{for(let i=
      dash  (r, mul, stun?)      you dash forward and everything on the way is hit
      cone  (r, mul, slow?)      a sweep in front of you
      nova  (r, mul, stun?, slow?) everything around you
-     proj  (proj, mul, pierce?, boom?, stun?) a shot: 'arrow' or a spell ('magic', 'fire', ...)
-     buff  (stat, pct, dur)     for a while: atk / def / hp, + pct
+     proj  (proj, mul, pierce?, boom?, stun?, n?, range?) a shot: 'arrow' or a spell ('magic', 'fire', ...); n shots fan out
+     buff  (stat, pct, dur, also?) for a while: atk / def / hp / eva / crit / ls / mhp, + pct (also: [{stat, pct}] more)
      heal  (pct)                back to health, a share of the most
-     pas   (stat, pct)          always on once learned (a passive)
+     pas   (stat, pct, also?, cond?) always on once learned (a passive); cond: 'ride', 'water' or 'crowd' (cpCond)
+     dup   ()                   Duplication: casts a plain class's skill at random
    A pack never replaces a class, skill or quest that exists. Names and texts come in English and Arabic. */
 var CPK={},CPAS={};
-function cpStat(k){if(!S||!P)return 0;let v=0;const L=CPAS[S.cls];if(L)for(const s of L)if(s.stat===k&&S.lv>=SKD[s.id].lv)v+=s.pct;const b=P.cpb&&P.cpb[k];if(b&&gTime<b.until)v+=b.v;return v;}
+function cpStat(k){if(!S||!P)return 0;let v=0;const L=CPAS[S.cls];if(L)for(const s of L){if(S.lv<SKD[s.id].lv||s.cond&&!cpCond(s.cond))continue;if(s.stat===k)v+=s.pct;for(const a of s.also||[])if(a.stat===k)v+=a.pct;}const b=P.cpb&&P.cpb[k];if(b&&gTime<b.until)v+=b.v;return v;}
+// a passive may hold only while: ride (mounted), water (water within a few steps), crowd (three foes or more close by)
+let cpWT=-1,cpWV=false;
+function cpCond(c){if(c==='ride')return !!P.ride;if(c==='crowd'){let n=0;for(const m of mons)if(!m.dead&&Math.hypot(m.x-P.x,m.y-P.y)<80&&++n>=3)return true;return false;}
+ if(c==='water'){if(gTime-cpWT>.5){cpWT=gTime;cpWV=false;const tx=P.x/TS|0,ty=P.y/TS|0;if(P.y<WMH*TS)for(let dy=-4;dy<=4&&!cpWV;dy++)for(let dx=-4;dx<=4;dx++)if(at(tx+dx,ty+dy)===WA){cpWV=true;break;}}return cpWV;}return true;}
+// eva: a chance to slip a blow (up to 70%); ls: health back from the damage dealt (up to 5% of the most a hit); mhp: a skill also takes a share of the foe's most health (a tenth of it on bosses); crit: added to the critical chance
+function cpEvade(){const e=Math.min(.7,cpStat('eva'));if(e>0&&rand()<e){numP(-20,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);return true;}return false;}
+function cpErode(m,o){const e=cpStat('mhp');return e>0&&o.skill&&!o.dot?m.max*e*(MT[m.type].boss?.1:1):0;}
+function cpHit(m,dmg){const ls=cpStat('ls');if(ls>0&&P.hp>0&&P.hp<maxHP()){P.hp=Math.min(maxHP(),Math.round(P.hp+Math.max(1,Math.min(maxHP()*.05,dmg*ls))));hudDirty=true;}}
+// Duplication: a skill seen in another class (a plain one, never a legend's or a hidden one's), cast at once without a chant
+const CPDUP=['warrior','knight','berserker','lancer','archer','ranger','sniper','bowmaster','mage','bmage','warlock','esorc','thief','assassin','priest','paladin','gknight'];
 function cpFn(s){const mul=+s.mul||1.6,r=+s.r||60,o={stun:s.stun,slow:s.slow};
  const near=(cx,cy,rad,f)=>{let n=0;for(const m of mons){if(m.dead)continue;const dx=m.x-cx,dy=monY(m)-cy,d=Math.hypot(dx,dy);if(d<rad+MT[m.type].r&&f(m,dx,dy,d))n++;}return n;};
  const hit=(m,dx,dy,d)=>hitMon(m,mul,{skill:1,kx:dx/(d||1),ky:dy/(d||1),...o});
@@ -7329,9 +7340,10 @@ function cpFn(s){const mul=+s.mul||1.6,r=+s.r||60,o={stun:s.stun,slow:s.slow};
   case 'dash':return ()=>{const v=fdir(),L=c2Line(v,r),x0=P.x,y0=P.y-6;P.dx=v[0];P.dy=v[1];P.dash=.22*Math.max(.25,L/60);P.inv=Math.max(P.inv,.25);SFX.dodge();vfx('dust',P.x,P.y,{n:10,angle:Math.atan2(v[1],v[0])+Math.PI});setTimeout(()=>{if(mode!=='play')return;if(c2Seg(x0,y0,v,L+8,mul,o)){SFX.crit();shake=.15;}},200);};
   case 'cone':return ()=>{const v=fdir(),a=Math.atan2(v[1],v[0]);fx.push({arc:1,x:P.x,y:P.y-8,a,t:.25});vfx('slash',P.x+v[0]*6,P.y-7+v[1]*6,{angle:a,rarity:3});if(near(P.x,P.y-6,r,(m,dx,dy,d)=>(dx*v[0]+dy*v[1])/(d||1)>-.2&&hit(m,dx,dy,d))){SFX.hit();shake=.12;}};
   case 'nova':return ()=>{fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});vfx(s.vfx||'frost',P.x,P.y-6);if(near(P.x,P.y-6,r,hit)){SFX.hit();shake=.12;}};
-  case 'proj':return ()=>{const v=fdir();shoot(s.proj||'magic',v[0],v[1],mul,{pierce:s.pierce,boom:s.boom,stun:s.stun});};
-  case 'buff':return ()=>{P.cpb=P.cpb||{};P.cpb[s.stat]={v:+s.pct||.2,until:gTime+(+s.dur||10)*skDur(s.id)};vfx('rage',P.x,P.y);toast(t('cpBuff',{s:t('sk_'+s.id),n:Math.round((+s.dur||10)*skDur(s.id))}),'good');};
+  case 'proj':return ()=>{const v=fdir(),a=Math.atan2(v[1],v[0]),n=Math.max(1,s.n|0);for(let i=0;i<n;i++){const b=a+(i-(n-1)/2)*.16;shoot(s.proj||'magic',Math.cos(b),Math.sin(b),mul,{pierce:s.pierce,boom:s.boom,stun:s.stun,...(s.range?{range:s.range}:{})});}};
+  case 'buff':return ()=>{P.cpb=P.cpb||{};const u=gTime+(+s.dur||10)*skDur(s.id);P.cpb[s.stat]={v:+s.pct||.2,until:u};for(const a of s.also||[])P.cpb[a.stat]={v:+a.pct,until:u};vfx('rage',P.x,P.y);toast(t('cpBuff',{s:t('sk_'+s.id),n:Math.round((+s.dur||10)*skDur(s.id))}),'good');};
   case 'heal':return ()=>{P.hp=Math.min(maxHP(),P.hp+maxHP()*(+s.pct||.25));vfx('heal',P.x,P.y);hudDirty=true;};
+  case 'dup':return ()=>{const ks=Object.keys(SKF).filter(k=>SKD[k]&&CPDUP.includes(SKD[k].cls)&&!SKD[k].pas&&!SKD[k].need&&(SKD[k].cd||0)<=60);const k=ks[(rand()*ks.length)|0];vfx('mana',P.x,P.y-6,{});if(!k)return;toast(t('cpDup',{s:t('sk_'+k)}),'good');SKF[k]();skVfx(k);};
  }
  return ()=>{};}
 function cpAdd(c){const ID=/^[a-z][a-z0-9]{1,15}$/;if(!c||!ID.test(c.id||'')||CROOT[c.id]||CPK[c.id]||STR.en['cl_'+c.id]||!c.n||!c.n.en)return false;
@@ -7340,12 +7352,14 @@ function cpAdd(c){const ID=/^[a-z][a-z0-9]{1,15}$/;if(!c||!ID.test(c.id||'')||CR
  if(c.by&&c.q){const q='cp'+c.id;if(!QD[q]){QD[q]={by:c.by,lv:c.lv||20,from:c.from||[c.root],mst:c.mst||['melee',1],obj:c.obj,xp:c.xp||4000,gold:c.gold||200,promo:c.id};two('q_'+q,c.q.n);two(q+'_o',c.q.o);two(q+'_w',c.q.w);two(q+'_d',c.q.d);}}
  for(const sk of c.skills||[]){if(!sk||!ID.test(sk.id||'')||SKD[sk.id]||SKF[sk.id])continue;
   SKD[sk.id]={cls:c.id,lv:sk.lv||c.lv||20,mp:sk.kind==='pas'?0:sk.mp||14,cd:sk.kind==='pas'?0:sk.cd||8,col:sk.col||c.col||'#cfe0ff',...(sk.need?{need:sk.need}:{}),...(sk.kind==='pas'?{pas:1}:{})};
-  two('sk_'+sk.id,sk.n);two('skd_'+sk.id,sk.d);if(sk.kind==='pas')CPAS[c.id].push(sk);else SKF[sk.id]=cpFn(sk);}
+  two('sk_'+sk.id,sk.n);two('skd_'+sk.id,sk.d);if(sk.kind==='pas')CPAS[c.id].push(sk);else{SKF[sk.id]=cpFn(sk);if(!SKSND[sk.id])SKSND[sk.id]=sk.snd||cpSnd(sk,c);}}
  return true;}
+// each pack skill gets a sound of its kind (sk.snd names one): a shot or a spell by what it throws, a blessing or a heal holy, the rest by the class's root
+function cpSnd(s,c){if(s.kind==='proj')return s.proj==='arrow'?'bow':s.proj==='fire'?'fire':'magic';if(s.kind==='buff'||s.kind==='heal')return CROOT[c.id]==='priest'||c.root==='priest'?'holy':'power';if(s.vfx==='fire')return 'fire';if(s.slow&&c.root==='mage')return 'frost';return c.root==='mage'||s.kind==='dup'?'magic':'power';}
 function cpInstall(){for(const c of (Satisfy.classPacks||[]))try{cpAdd(c);}catch(e){console.warn('class pack',c&&c.id,e);}}
 cpInstall();
-Object.assign(STR.ar,{cpBuff:'{s}: {n} ثانية'});Object.assign(STR.en,{cpBuff:'{s}: {n} s'});
-window.__GCP={packs:()=>Object.keys(CPK),stat:k=>cpStat(k),add:c=>cpAdd(c),t:(k,v)=>t(k,v),boss:ty=>!!(MT[ty]&&MT[ty].boss),atk:()=>atkV()}; // tests
+Object.assign(STR.ar,{cpBuff:'{s}: {n} ثانية',cpDup:'نسخت: {s}'});Object.assign(STR.en,{cpBuff:'{s}: {n} s',cpDup:'Duplicated: {s}'});
+window.__GCP={packs:()=>Object.keys(CPK),stat:k=>cpStat(k),add:c=>cpAdd(c),t:(k,v)=>t(k,v),boss:ty=>!!(MT[ty]&&MT[ty].boss),atk:()=>atkV(),sk:c=>Object.keys(SKD).filter(k=>SKD[k].cls===c).map(k=>[k,!!SKD[k].pas]),hurt:d=>hurtPlayer(d,null,null)}; // tests
 window.__GSKF={keys:()=>Object.keys(SKF),cast:k=>{SKF[k]();skSnd(k);skVfx(k);},snd:k=>SKSND[k]||null,fx:()=>fx.length+proj.length,vn:()=>VXn}; // tests: every skill shows and sounds
 function checkSkills(){pasSkills().forEach(k=>{if(!S.sk[k]){S.sk[k]=1;setTimeout(()=>{toast(t('pasNew',{s:t('sk_'+k)}),'good');SFX.notice();},500);}});clsSkills().forEach(k=>{if(skOK(k)&&!S.sk[k]){S.sk[k]=1;let i=barSkills().indexOf(k);if(i<0){const b=barSkills().slice(0,NSK),e=b.indexOf(null);if(e>=0){b[e]=k;S.bar=b;i=e;}}setTimeout(()=>{toast(i<0?t('skNewC',{s:t('sk_'+k)}):t('skNew',{s:t('sk_'+k),k:keyName(KB[i])}),'good');SFX.notice();},500);}});sbSig='';}
 /* item skills (owner 2026-10-19, "weapons and rings that come with an active skill while you use them, as in the novel"):

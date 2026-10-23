@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23wikicls', ver: '2.17', d: '2026-10-23',
+      ar: ["20 كلاس جديد من الرواية عند المدرّبين، بسكيلات أصحابها: فنان القتال (ريجاس)، الراهب (ميد)، سيد التشي (لاويل)، متصوّف الجليد (بوندري)، ساحر النار (لايلا)، البهلوان (زيفير)، سيّاف السحب السريع أو السيف الخفي (بيك سورد)، رامي اللهب الأحمر (جيشوكا)، محارب الدم (كاتس)، الناسخ (يوفيمينا)، قائد الحرب (هافيس) وغيرهم",
+          "الكلاسات المخفية فيهم (حامل البندقية، المحطِّم، محارب الدم، ساحر الأوهام، الناسخ، فارس القديسة، وكيل الإلهة) ليها اختبارات أصعب ومستويات أعلى، والجندي بيكبر لقائد الحرب",
+          "سكيلات جديدة بتعمل حاجات جديدة: تفادي الضربات، ومص الدم، وتآكل صحة العدو، وقوة وانت راكب، وقوة جنب الميّه، ونسخ سكيل كلاس تاني"],
+      en: ["20 new classes from the novel at the trainers, with their holders' skills: Martial Artist (Regas), Monk (Med), Qigong Master (Lauel), Ice Mystic (Bondre), Fire Magician (Laella), Acrobat (Zephyr), Quick Draw Swordsman or Hidden Sword (Peak Sword), Red Flame Archer (Jishuka), Blood Warrior (Katz), Duplicator (Euphemina), War Commander (Havis) and more",
+          "The hidden ones among them (Gunman, Crusher, Blood Warrior, Illusionist, Duplicator, Saintess' Knight, Goddess' Agent) have harder trials and higher levels, and the Soldier grows into the War Commander",
+          "New skills do new things: dodging blows, drinking blood, eroding a foe's health, strength on a mount, strength near water, and copying another class's skill"] },
     { v: '2026-10-23classpacks', ver: '2.16', d: '2026-10-23', hide: 1,
       ar: ["للمطورين: الكلاسات بقت ممكن تتكتب كبيانات (src/content/classpacks.js): الاسم، واختبار الترقية عند المدرّب، والسكيلات (طعنة، اندفاع، ضربة قدام، دايرة، رمية، تقوية، علاج، وباسيف)، وبتتحط في اللعبة لوحدها"],
       en: ["For developers: classes can be written as data (src/content/classpacks.js): the name, the trial at a trainer, and the skills (thrust, dash, sweep, nova, shot, buff, heal, and passive), installed by the game at load"] },

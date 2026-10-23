@@ -30,7 +30,7 @@ test('class packs: installed with their trial and skills; each kind of skill wor
   try {
     const g = await H.openGame({ ctx });
     await H.newGame(g);
-    assert.deepEqual(await g.eval(() => window.__GCP.packs()), ['tstcls'], 'the new one only');
+    assert.deepEqual((await g.eval(() => window.__GCP.packs())).filter((k) => k === 'tstcls' || k === 'lancer'), ['tstcls'], 'the new one, not the Lancer');
     assert.deepEqual(await g.eval(() => { const G = window.__G, Q = G.QD.cptstcls; return [Q.by, Q.lv, Q.promo, Q.from]; }), ['tw', 20, 'tstcls', ['warrior']], 'its trial at the trainer');
     assert.equal(await g.eval(() => window.__GCP.t('cl_tstcls')), 'Test Blade');
     assert.equal(await g.eval(() => window.__GCP.t('cl_lancer')), 'Lancer', 'the Lancer is still the Lancer');

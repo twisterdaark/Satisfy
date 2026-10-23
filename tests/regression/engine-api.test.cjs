@@ -31,7 +31,9 @@ test('defs(): content tables as plain JSON, functions replaced by {$fn}', async 
     assert.equal(Object.keys(d.MT).length, Object.keys(DATA.monsters.types).length);
     assert.equal(d.BOSSES.length, DATA.monsters.bosses.length);
     assert.equal(d.SPAWN.length, DATA.monsters.spawns.length);
-    assert.equal(Object.keys(d.QD).length, Object.keys(DATA.quests.quests).length);
+    // the class packs' trials are made at load from src/content/classpacks.js, not from the data tables
+    const pk = await g.eval(() => window.__GCP.packs());
+    assert.equal(Object.keys(d.QD).filter((k) => !pk.includes(d.QD[k].promo)).length, Object.keys(DATA.quests.quests).length);
     // data/recipes.js holds the base RC table; the named items added later with RC.push live only in the engine
     for (const id of Object.keys(DATA.recipes.recipes)) assert.ok(d.RC.some((r) => r.id === id), 'engine has recipe ' + id);
     // the same for skills: Object.assign(SKD, ...) adds item and class skills after the base table
