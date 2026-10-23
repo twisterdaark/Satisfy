@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23race', ver: '2.00', d: '2026-10-23',
+      ar: ["يوم وليل في العالم على ساعة السيرفر، نفس السما لكل اللاعبين: اليوم 40 دقيقة، الغروب من 6، الليل من 8 لـ 4 الفجر، والشروق لحد 6. الساعة ظاهرة جنب الدهب",
+        "العروق: كل اللاعبين بيبدأوا بشر، والعرق ظاهر في نافذة الحالة وعليه شرح لما تقف عليه",
+        "ولي عهد مصاصي الدماء واقف عند بوابة المدينة: بيشرحلك العهد (هو إيه، مميزاته وعيوبه) وتقبل أو ترفض. ولو إنت في العهد يديك الدم الأبدي وتبقى مصاص دماء، ويقدر يرجعك بشري بفلوس",
+        "مصاص الدماء بالليل أقوى 20% وأسرع 10% وبيمص 5% من ضربه، وبالنهار أضعف 10% والشمس بتحرقه برا الضل (البيوت والكهوف والدانجن والسراديب، أو المطر والضباب) لحد ما يموت. واللاعبين التانيين بيشوفوك بتتحرق",
+        "مصاصين الدماء بيستخبوا في البيوت بالنهار وبيطلعوا بالليل وهم أقوى، والمبعوث وولي العهد واقفين تحت شماسي سودا بالنهار"],
+      en: ["Day and night in the world on the server's clock, the same sky for every player: a day is 40 minutes, dusk from 18:00, night from 20:00 to 04:00 and dawn until 06:00. The clock shows next to your gold",
+        "Races: every player starts as a Human, and your race shows in the status window with a tooltip",
+        "The Vampire Crown Prince stands at the city gate: he explains the Covenant (what it is, what it gives and what it costs) and you accept or decline. A Covenant member can take his Eternal Blood and become a Vampire, and he can make you human again for gold",
+        "A vampire is 20% stronger, 10% faster and drinks 5% of what it deals at night; by day it is 10% weaker and the sun burns it outside shade (houses, caves, dungeons, the catacombs, or rain and fog) until it dies. Other players see you burn",
+        "Vampires hide indoors by day and come out at night, stronger; the envoy and the prince stand under black parasols by day"] },
     { v: '2026-10-23monart', ver: '1.99', d: '2026-10-23',
       ar: ["مفيش وحشين شبه بعض تاني: كهنة معبد ياتان والشياطين وفرسان الموت الستة والفامباير والعفاريت وفرسان كل مملكة وقطاع الطرق اترسموا من جديد، كل واحد بشكل خاص بيه (أقنعة، قلنسوات، عمايم، قرون، أجنحة، خوذ بريش، عيون بتنور)",
         "البشر والعفاريت بقى ليهم أكتر من تصميم: 16 نوع كل واحد بـ 3 أشكال مختلفة غير الأصلي (عصابة، قناع جمجمة، قلنسوة، شعر، خوذة)، وكل شكل بسلاحه هو",

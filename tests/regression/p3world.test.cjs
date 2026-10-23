@@ -79,7 +79,9 @@ test('vampires heal on what they hit; the Covenant takes you after the envoy\'s 
   const g = await H.openGame();
   try {
     await H.newGame(g, LOOK);
+    await g.eval(() => window.__GVP.force(22)); // owner 2026-10-22: the thralls hide indoors by day, so this runs at night, when they hit 15% harder
     await at(g, 640, 212);
+    await g.step(40);
     const r = await g.eval(() => {
       const G = window.__G, X = window.__GP3, C = window.__GC2, m = G.mons().find((v) => v.type === 'vthrall'); m.hp = m.max - 5000;
       const plain = X.hurt(1000, m), healed = m.max - m.hp;
@@ -87,10 +89,10 @@ test('vampires heal on what they hit; the Covenant takes you after the envoy\'s 
       const cov = G.S.p3.cov, soft = X.hurt(1000, m); G.P.hp = 100; X.P3.ls = 0; X.hit(m, 10000); const back = G.P.hp - 100;
       return { plain, healed, cov, soft, back, want: Math.min(300, window.__GP3.mh() * .02), bv: G.S.mats.bvial, env: X.env().length };
     });
-    assert.equal(r.plain, 1000);
-    assert.equal(r.healed, 4000, 'the thrall drank 1000');
+    assert.equal(r.plain, 1150);
+    assert.equal(r.healed, 3850, 'the thrall drank 1150');
     assert.equal(r.cov, 1);
-    assert.equal(r.soft, 850);
+    assert.equal(r.soft, 978);
     assert.ok(Math.abs(r.back - r.want) < 1e-6, '3% of 10000 comes back, at most 2% of your health: ' + JSON.stringify(r));
     assert.equal(r.bv, 0, 'the vials were taken');
     assert.equal(r.env, 1, 'the envoy offers to leave');

@@ -27,8 +27,8 @@ test('the Thief: trial by stealing, Stealth loses the monsters and doubles the f
     // Stealth: an engaged monster lets go; the first blow lands double and ends it; a blow taken ends it too
     const st = await g.eval(() => { const G = window.__G, X = window.__GRG, C = window.__GC2, P = G.P; G.S.lv = 30;
       const m = G.spawnMon('wolf', P.x + 40, P.y); m.max = m.hp = 1e9; m.lv = 30; m.eng = 4; X.sk('tstealth'); const let_go = m.eng === 0, hidden = P.stl > 0, tag = C.st();
-      let plain = 0, amb = 0; for (let i = 0; i < 6; i++) { const h = m.hp; C.hit(m); plain += h - m.hp; }
-      for (let i = 0; i < 6; i++) { P.stl = 5; const h = m.hp; C.hit(m); amb += h - m.hp; }
+      let plain = 0, amb = 0; for (let i = 0; i < 30; i++) { const h = m.hp; C.hit(m); plain += h - m.hp; }
+      for (let i = 0; i < 30; i++) { P.stl = 5; const h = m.hp; C.hit(m); amb += h - m.hp; }
       const ended = !(P.stl > 0); P.stl = 5; P.inv = 0; P.dash = 0; C.hurt(10, { x: P.x + 5, y: P.y, type: 'wolf', spar: 1 }); return { let_go, hidden, tag, plain, amb, ended, afterHurt: P.stl > 0 }; });
     assert.ok(st.let_go && st.hidden, JSON.stringify(st));
     assert.match(st.tag, /s/, 'stealth rides in the presence fx');
