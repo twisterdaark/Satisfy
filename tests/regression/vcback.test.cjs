@@ -34,3 +34,23 @@ test('the ant hill offers the cleared cities and the next one; a lit return ston
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+test('the cities go down to the 1st: the 7th opens on the 6th, each has its master, nothing below the 1st', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g);
+    await g.step(3);
+    const r = await g.eval(() => { const V = window.__GVC, S = window.__G.S; S.lv = 500; S.vc = { c: { 15: 1, 14: 1, 13: 1, 12: 1, 11: 1, 10: 1, 9: 1, 8: 1, 7: 1 } };
+      const ns = V.VC.map((C) => C.n), masters = {}; for (const o of V.VCMS) masters[o.n] = o.m.type;
+      const down7 = V.gate({ vc: 7, vdown: 1 }), down1 = (S.vc.c[1] = 1, V.gate({ vc: 1, vdown: 1 }));
+      const C6 = V.VC.find((C) => C.n === 6), at6 = V.at(C6.x0 + 5, C6.ym);
+      return { ns, masters, down7, down1, at6: at6 && at6.n, next: (delete S.vc.c[1], V.next()) }; });
+    assert.deepEqual(r.ns, [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
+    assert.equal(r.down7, true, 'the way down from the 7th opens once its master is dead');
+    assert.equal(r.down1, false, 'nothing below the 1st');
+    assert.equal(r.at6, 6);
+    assert.equal(r.next, 6);
+    for (const [n, k] of [[6, 'vb6'], [5, 'vb5'], [4, 'vb4'], [3, 'vb3'], [2, 'vmrose'], [1, 'vfenrir']]) assert.equal(r.masters[n], k);
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});

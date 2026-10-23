@@ -16,7 +16,7 @@ const gate = (g, q) => g.eval((q) => { const G = window.__G, X = window.__GVC, d
 const spot = (g) => g.eval(() => { const G = window.__G, C = window.__GVC.at(G.P.x / 16, G.P.y / 16); return [C ? C.n : 0, G.zoneAt(G.P.x, G.P.y)]; });
 const go = async (g, q) => { const to = await gate(g, q); await g.page.waitForTimeout(700); await g.step(30); return to; };
 
-test('nine cities below the desert, each walkable from its cave to the way down, with their people and masters', async () => {
+test('fifteen cities below the desert, each walkable from its cave to the way down, with their people and masters', async () => {
   const g = await H.openGame();
   try {
     await H.newGame(g, LOOK);
@@ -31,9 +31,9 @@ test('nine cities below the desert, each walkable from its cave to the way down,
       }
       return { out, ant: !!G.eqx.DGATES.find((d) => d.ant), gates: G.eqx.DGATES.filter((d) => d.vc).length };
     });
-    assert.equal(r.out.length, 9);
+    assert.equal(r.out.length, 15);
     assert.equal(r.ant, true);
-    assert.equal(r.gates, 1 + 9 * 2);
+    assert.equal(r.gates, 1 + 15 * 3); // up, down and the red return stone
     for (const c of r.out) {
       assert.equal(c.z, 'zVc' + c.n);
       assert.ok(c.hall && c.down, `city ${c.n} walks through to the master and the way down`);
@@ -62,7 +62,7 @@ test('the ant hill leads to the 15th city; the ways stay sealed until its master
     const k = await g.eval(() => { const G = window.__G, X = window.__GVC, o = X.VCMS.find((o) => o.n === 15); G.P.x = o.m.x - 100; G.P.y = o.m.y; for (const m of G.mons()) if (m !== o.m) { m.dead = true; m.rt = 1e9; } return o.m.type; });
     assert.equal(k, 'vb15');
     await g.step(10);
-    assert.match(await toasts(g), /The master of the 15th city, True Blood Baron/);
+    assert.match(await toasts(g), /The master of city 15, True Blood Baron/);
     await g.eval(() => { const G = window.__G, o = window.__GVC.VCMS.find((o) => o.n === 15); window.__GU.killMon(o.m); });
     await g.step(10); await g.page.waitForTimeout(1000); await g.step(5);
     assert.equal(await g.eval(() => window.__GVC.done(15)), true);
@@ -78,13 +78,12 @@ test('the ant hill leads to the 15th city; the ways stay sealed until its master
     const s = await spot(g);
     assert.equal(s[0], 0, 'back on the sand');
     assert.equal(await g.eval(() => window.__G.S.vc.c[15]), 1);
-    // the 7th city: its way down stays shut (the 6th is not built)
+    // the 7th city: its way down leads on to the 6th once its masters are dead (the rest is in vcback)
     await g.eval(() => { for (const n of [13, 12, 11, 10, 9, 8, 7]) window.__GVC.clear(n); });
     await go(g, { vc: 8, k: 'vdown' });
     assert.deepEqual((await spot(g))[0], 7);
     await go(g, { vc: 7, k: 'vdown' });
-    assert.deepEqual((await spot(g))[0], 7);
-    assert.match(await toasts(g), /The way down to the 6th city is not open yet/);
+    assert.deepEqual((await spot(g))[0], 6);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
