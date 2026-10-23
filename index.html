@@ -1197,8 +1197,8 @@ function buildMe(L){L=L||DEFLOOK;SH.me=SA.chars.buildSheet(lookFig(L,0));SH.meA=
 // hides armour. Sheets are built once per combination and kept until the look changes.
 const GLK={l:{hair:'cap',cap:'#8a5a32',glove:'#7a5030',boots:'#5a3a20'},i:{hair:'helm',hc:'#9aa2ae',hl:'#d8dee6',glove:'#b8c0ca',boots:'#7a828e'},m:{hair:'helm',hc:'#6aa8d8',hl:'#d8f0ff',glove:'#8ac8ee',boots:'#5a90c0'}};
 const gTier=i=>i?GLK[i.id[0]]||GLK.i:null,gearSig=()=>(armorIt()?'1':'0')+['h','g','b'].map(sl=>{const i=eqIt(sl);return i?i.id[0]:'-';}).join('');
-function gearFig(L){const c=lookFig(L,armorIt()?1:0);if(L.cos)return c;const h=gTier(eqIt('h')),g=gTier(eqIt('g')),b=gTier(eqIt('b'));
- if(h){c.hair=h.hair;if(h.cap)c.cap=h.cap;else{c.hc=h.hc;c.hl=h.hl;}}if(g)c.glove=g.glove;if(b)c.boots=b.boots;return c;}
+function gearFig(L){const c=lookFig(L,armorIt()?1:0);if(L.cos)return c;return gearOn(c,gTier(eqIt('h')),gTier(eqIt('g')),gTier(eqIt('b')));}
+function gearOn(c,h,g,b){if(h){c.hair=h.hair;if(h.cap)c.cap=h.cap;else{c.hc=h.hc;c.hl=h.hl;}}if(g)c.glove=g.glove;if(b)c.boots=b.boots;return c;}
 buildMe();
 const DIR4=['d','u','s','l'],ANIM=new WeakMap();let HAND=null;
 // walking while the entity's move clock (.at) advances; otherwise idle with a blink at its own phase
@@ -10041,8 +10041,23 @@ function netTick(){faultAt('netTick');NET.tick();const live=netLive();
  const netSafe=live&&Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
   b.textContent=(NETQ==='local'?t('netOn',{n:NET.count()+1}):netState==='ONLINE'?t('netOnline',{n:NET.count()+1}):t(netState==='RECONNECTING'?'netRe':'netJoin'))+(netSafe?' · '+t('safeZone'):'')+(FB&&FB.emulator?' · '+t('netEmu'):'');}} // SAT-ONLINE-120: on the local emulators
 // remote looks are validated (0..31) but may index past LOOK; fall back to the first option
-function remoteSpr(L,arm,sg){const ix=(a,i)=>i>=0&&i<a.length?i:0,K={hair:ix(LOOK.hair,L.hair),hc:ix(LOOK.hc,L.hc),skin:ix(LOOK.skin,L.skin),top:ix(LOOK.top,L.top)};
- const k='rp_'+K.hair+'_'+K.hc+'_'+K.skin+'_'+K.top+'_'+(arm?1:0)+(sg?'g':'');if(!SH[k]){const c=lookFig(K,arm?1:0);if(sg)c.sg=1;SH[k]=SA.chars.buildSheet(c);}return k;}
+/* SAT-ONLINE-155 (owner 2026-10-23: "1:1 for everyone"): what you wear shows on the others' screens as on yours. Presence
+   has always carried the hair, its colour, the skin and the shirt; the cape and trouser dyes, the costume and the helmet,
+   gloves and boots (their tier) ride along in the fx field as one "lk:" tag, so no new presence field and no rules deploy
+   (as the pet and mount, SAT-ONLINE-045): "<cape>.<trousers>.<costume>.<helmet gloves boots>", e.g. "3..noble.li-". Older
+   pages skip the tag and draw what they did; a dye, costume or tier a page doesn't know is left off. */
+function lkPub(){if(!S||!S.look)return '';const L=S.look,dy=v=>v!=null&&DYE[v]?String(v|0):'',cos=L.cos&&COS[L.cos]?L.cos:'',g=cos?'---':['h','g','b'].map(sl=>{const i=eqIt(sl);return i?(GLK[i.id[0]]?i.id[0]:'i'):'-';}).join('');
+ const v=dy(L.cape)+'.'+dy(L.pants)+'.'+cos+'.'+g;return v==='...---'?'':v;}
+function lkOf(v){const m=/^(\d{0,2})\.(\d{0,2})\.([a-z0-9]{0,12})\.([a-z-]{3})$/.exec(v||'');if(!m)return null;const o={g:[...m[4]].map(ch=>GLK[ch]?ch:'-').join('')};
+ if(m[1]!==''&&DYE[+m[1]])o.cape=+m[1];if(m[2]!==''&&DYE[+m[2]])o.pants=+m[2];if(m[3]&&COS[m[3]])o.cos=m[3];return o;}
+// another player's figure, built the way yours is (gearFig): base look, armour, dyes, costume, worn tiers, glasses
+function remoteFig(L,arm,sg,lk){const ix=(a,i)=>i>=0&&i<a.length?i:0,K={hair:ix(LOOK.hair,L.hair),hc:ix(LOOK.hc,L.hc),skin:ix(LOOK.skin,L.skin),top:ix(LOOK.top,L.top)},x=lkOf(lk);
+ if(x){if(x.cape!=null)K.cape=x.cape;if(x.pants!=null)K.pants=x.pants;if(x.cos)K.cos=x.cos;}const c=lookFig(K,arm?1:0);
+ if(x&&!K.cos)gearOn(c,...[...x.g].map(ch=>GLK[ch]||null));if(sg)c.sg=1;return c;}
+function remoteSpr(L,arm,sg,lk){const x=lkOf(lk),ix=(a,i)=>i>=0&&i<a.length?i:0;
+ const k='rp_'+ix(LOOK.hair,L.hair)+'_'+ix(LOOK.hc,L.hc)+'_'+ix(LOOK.skin,L.skin)+'_'+ix(LOOK.top,L.top)+'_'+(arm?1:0)+(sg?'g':'')+(x?'_'+(x.cape??'')+'.'+(x.pants??'')+'.'+(x.cos||'')+'.'+(x.cos?'---':x.g):'');
+ if(!SH[k])SH[k]=SA.chars.buildSheet(remoteFig(L,arm,sg,lk));return k;}
+window.__GLK={pub:()=>lkPub(),of:v=>lkOf(v),mine:()=>{const c=gearFig(S.look||DEFLOOK);if(S.rsh&&S.rsh.g&&S.rsh.w)c.sg=1;return c;},theirs:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return remoteFig(r.look,r.arm,fs.gl,fs.lk);},spr:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return remoteSpr(r.look,r.arm,fs.gl,fs.lk);}}; // tests
 /* 1:1 effects (SAT-ONLINE-026, owner feedback 9/10): whatever your own attack, dash or skill draws is recorded while it runs
    (each vfx call with its seed, the fx particles, rings and bolts it adds, its projectiles, the weapon swing and the dash
    trail) and published with presence as offsets from you. The others replay the same calls at your position, so they see
@@ -10084,13 +10099,13 @@ const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(try
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
 // clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
 function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+vpSt():'';}
-function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
+function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
  let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
 function guPub(){if(!P||!P.guard)return null;const a=Math.atan2(P.gy,P.gx);return 1+((Math.round(a/(2*Math.PI)*64)%64+64)%64)+(P.fort>0?64:0)+(P.gT<.22?128:0);}
 function fxSt(sid){let s=FXS.get(sid);if(!s)FXS.set(sid,s={last:-1,off:null,raw:'',sw:null,du:0,tr:[],lt:0});return s;}
-function fxIn(r,s){if(!r.fx){s.pt=null;s.st='';s.tl='';s.gl=0;return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
- s.pt=null;s.inT=0;s.st='';s.tl='';s.gl=0;for(const ev of a)if(typeof ev==='string'){const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}const q=/^st:([a-z]{1,12})$/.exec(ev);if(q)s.st=q[1];const w=/^tl:([a-z0-9.]{1,40})$/.exec(ev);if(w)s.tl=w[1];if(ev==='gl:1')s.gl=1;} // pet, mount and when they got to this place ride along in fx (fxPub)
+function fxIn(r,s){if(!r.fx){s.pt=null;s.st='';s.tl='';s.gl=0;s.lk='';return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
+ s.pt=null;s.inT=0;s.st='';s.tl='';s.gl=0;s.lk='';for(const ev of a)if(typeof ev==='string'){const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}const q=/^st:([a-z]{1,12})$/.exec(ev);if(q)s.st=q[1];const w=/^tl:([a-z0-9.]{1,40})$/.exec(ev);if(w)s.tl=w[1];if(ev==='gl:1')s.gl=1;const lk=/^lk:(\S{5,32})$/.exec(ev);if(lk)s.lk=lk[1];} // pet, mount and when they got to this place ride along in fx (fxPub)
  for(const ev of a){if(!Array.isArray(ev)||!(ev[0]>s.last)||typeof ev[1]!=='number')continue;s.last=ev[0];const lat=now-ev[1];
   // the sender's clock: keep the lowest delay seen (creeping up slowly) so steps of one skill keep their spacing
   if(s.off==null||lat<s.off)s.off=lat;else s.off+=(lat-s.off)*.02;FXQ.push({at:ev[1]+s.off,sid:r.sid,ev});}
@@ -10108,7 +10123,7 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
 function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
 function netEnts(ents){faultAt('netEnts');const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)
  for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const am=ranim(r),fs=fxSt(r.sid);fxIn(r,fs);remLife(r,fs);if(fs.st&&fs.st.indexOf('f')>=0&&rand()<.23)fx.push({x:r.x+(rand()-.5)*14,y:r.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});if(fs.st&&fs.st.indexOf('g')>=0&&rand()<.12)fx.push({x:r.x+(rand()-.5)*24,y:r.y-6,vx:0,vy:-16,t:.6,c:'#ffe08a',fl:1});if(fs.st&&/[bj]/.test(fs.st)&&rand()<.1)fx.push({x:r.x+(rand()-.5)*28,y:r.y-4,vx:0,vy:-18,t:.7,c:fs.st.indexOf('j')>=0?'#9fd8ff':'#fff3b0',fl:1});/* their flight, as yours (updateItemFx) */if(fs.st&&fs.st.indexOf('X')>=0&&rand()<.5)sunFx(r);if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
-  const k=remoteSpr(r.look,r.arm,fs.gl),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
+  const k=remoteSpr(r.look,r.arm,fs.gl,fs.lk),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
   // their weapon in hand and each swing once, the way your own is drawn (SAT-ONLINE-026, owner feedback 7): a swing starts when
   // their anim turns to 'attack' and plays 0.14 s on this clock, however long the state stays up
   // drawn the way your own character is (the player draw in render): dash trail, enhancement glow, weapon in hand or the

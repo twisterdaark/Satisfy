@@ -102,6 +102,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | Whispers to friends anywhere (`/w name text`) | SAT-ONLINE-070 (#104) | ✅ |
 | Report a player; insults in others' chat as stars (`/filter`) | SAT-ONLINE-071 (#105) | ✅ |
 | Group finder (plan U185): who is looking for a raid, party, dungeon group or duel, with level, class, party role and place; your own entry goes when you stop, sign out or drop | SAT-ONLINE-073 (#106) | ✅ |
+| What you wear seen by everyone as by you: the costume, the dyed cape and trousers, the helmet, gloves and boots (an `lk:` tag in the presence fx field, no rules change; `regression/looks`) | SAT-ONLINE-155 | ✅ |
 
 
 ## The plan's later updates in Claude-A's areas (U184–U189, U210–U246, U308–U348, U368–U387)
