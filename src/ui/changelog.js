@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23qrec', ver: '2.52', d: '2026-10-23',
+      ar: ["زرار ⭐ في خانة الكويستات: بيختارلك كويست على قد لفلك تقدر تاخده دلوقتي، والسهم بيوديك للي بيدّيه.",
+          "حماية بعد الدخول: أول ما تدخل اللعبة أو ترجع للحياة محدش يقدر يأذيك لحد ما تضرب، أو تستخدم سكيل، أو تتحرك 3 ثواني (عشان لو في غزو تلحق تهرب). بيبان حواليك درع أزرق.",
+          "الهوفر في القوايم اتصلح: مابقاش بينوّر الخانة اللي قبل اللي الماوس عليها، ولا بيعمل سكرول لوحده، ولا بيكبّر ويصغّر الخانات.",
+          "لما تشتري زي أو تغيّر شكلك عند ليلى الصور مابقتش بتتحمل من الأول.",
+          "عند ليلى وفي إنشاء الشخصية: الولد بيشوف تسريحات وحاجات الرجالة بس، والبنت حاجات البنات بس (الجيبة، ولون الشفايف، والتاج، وأزياء البنات)."],
+      en: ["A ⭐ button in the quest box picks a quest at your level you can take now, and the arrow leads you to its giver.",
+          "Spawn protection: after you load in or come back to life nothing can hurt you until you attack, use a skill or move for 3 seconds (so you can run from an invasion). A blue shield shows around you.",
+          "Hovering in lists is fixed: it no longer lights the cell before the one under the mouse, scrolls on its own, or makes the cells grow and shrink.",
+          "Buying an outfit or changing your look at Layla's no longer loads the pictures from scratch.",
+          "At Layla's and in character creation, men see only men's hairstyles and looks, and girls only girls' (the skirt, lip colour, tiara and girls' outfits)."] },
     { v: '2026-10-23marriage', ver: '2.51', d: '2026-10-23',
       ar: ["نظام الجواز بين اللاعيبة: قفوا انتو الاتنين جنب قسيس ريبيكا (رينهارت، ورولينج، والمعبد الكبير)، وواحد يطلب إيد التاني بـ 10,000 ذهب، والتاني يقبل. لازم لفل 20 على الأقل.",
           "كل واحد بياخد خاتم جواز. وانتو قريبين من بعض: خبرة +10%، وضرر +5%، وصحة +5%، والضعف وانت لابس الخاتم.",

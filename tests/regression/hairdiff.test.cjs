@@ -46,6 +46,6 @@ test('no two hairstyles are near copies, and the stylist grid zooms face choices
     await g.eval(() => window.__GLOOK.sty('hair'));
     await g.step(10);
     const h = await g.eval(() => [...document.querySelectorAll('#dopts canvas[data-lk]')].map(x => x.className + x.height));
-    assert.ok(h.length >= 70 && h.every(x => x === 'hr20'), h.slice(0, 3).join(','));
+    assert.ok(h.length >= 30 && h.every(x => x === 'hr20'), h.slice(0, 3).join(','));
   } finally { await g.close(); }
 });

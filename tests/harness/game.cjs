@@ -110,7 +110,7 @@ async function openGame(opts = {}) {
     errors.push('console: ' + m.text());
   });
   const url = pathToFileURL(html).href + (opts.query || '');
-  const storage = { satisfy_lang: 'en', satisfy_tw: '0', ...(opts.storage || {}) }; // satisfy_tw: dialog lines show at once
+  const storage = { satisfy_lang: 'en', satisfy_tw: '0', satisfy_spw: '0', ...(opts.storage || {}) }; // satisfy_tw: dialog lines show at once; satisfy_spw: no spawn protection
   // Seed localStorage from an empty file:// page first (all file: URLs share one storage origin),
   // then load the game once. This used to be goto(game) + seed + reload: two full boots.
   // A page in a shared context (two tabs) keeps what the other tab stored.
