@@ -26,7 +26,8 @@ test('every town has townsfolk at the same spots on two pages, and highwaymen ou
     const A = await snap(a), B = await snap(b);
     for (const k of A.towns0) assert.ok((A.towns[k] || 0) >= 4, k + ' has townsfolk');
     assert.deepEqual(A.at, B.at, 'same positions for the same world time');
-    assert.equal(A.bandits.length, A.towns0.length * 3);
+    // the West's towns; outside the East's (SAT-ONLINE-159) Hwang Gildong's robbers stand instead, from the East's own spawns
+    assert.equal(A.bandits.length, A.towns0.filter((k) => !/^zEa/.test(k)).length * 3);
     assert.deepEqual(A.bandits, B.bandits, 'same highwaymen everywhere');
   } finally { await a.close(); await b.close(); }
 });
