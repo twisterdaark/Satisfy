@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24hcon', ver: '2.57', d: '2026-10-24',
+      ar: ["في الإعدادات (من قايمة الإيقاف) بقى فيه «تباين عالي» جنب «حركة أقل»",
+          "التباين العالي: رقم الضربة الكريتيكال بقى آخره «!» (مش بس أصفر وأكبر)، فالضربة العادية والكريتيكال والدمج اللي بتاخده (-) واللي بتكسبه (+) بيبانوا من غير الألوان. والأرقام بقى حواليها خط أتخن وبقت أكبر شوية، وبارات الصحة فوق الراسين ليها إطار أبيض، وتحضير ضربة الوحش ليه خط أبيض، وبارات الواجهة والرسايل ليها إطار"],
+      en: ["Settings (from the pause menu) has High contrast, next to Reduced motion",
+          "High contrast: a critical hit's number ends in \"!\" (not only yellow and bigger), so a hit, a critical hit, damage taken (-) and a gain (+) read apart without their colours. The numbers get a thicker outline and a size up, health bars over heads a white frame, a monster's wind-up a white outline, and the HUD's bars and messages a frame"] },
     { v: '2026-10-24ctlsword', ver: '2.56', d: '2026-10-24',
       ar: ["شكل السكيلات اتغيّر: كل سكيل بقى ليه إيفيكت من اسمه وسلاحه ولونه (هلال، طعنة، قطع على شكل X، سيوف بتنزل من السما وسيوف طايرة، ورد، تنين، عمود نور، دوامة، برق بيتنقل من عدو للتاني، انفجار، هزة في الأرض، هالة...)، وسيف الفضاء بقى بيفتح شق في الفضاء بدل ما يبقى سلاش أكبر.",
           "سيف التحكم (Sword Saint) اتعمل من جديد زي الرواية: سيوف بتطلع من الشنطة وبتحارب بإرادتك 10 ثواني، 4 في الأول وسيف زيادة كل لفلين للسكيل لحد 10. كل سيف بيطير على عدو قريب ويقطعه ويرجع، واللي جنبك بيصد عنك الضربة ويطير على اللي ضربك.",
