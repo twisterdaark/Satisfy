@@ -249,3 +249,29 @@ test("B's knockback moves the host's copy too, and B's copy doesn't spring back"
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+test('the host goes away, the others fight on, the host comes back: the monster keeps the health they left it with', async () => {
+  const { ctx, a, b } = await pair();
+  try {
+    const [k] = await nearest(b, 1);
+    await on(a, (k) => { const m = by(k); m.max = 4000; m.hp = 2000; m.agg = 1; m.eng = 4; }, k);
+    await frames([a, b], 30);
+    assert.ok(Math.abs((await state(b, k)).pm - 500) <= 20, 'half, on both');
+    // A walks far off (or died and respawned in town): B is on its own and takes it down to a quarter
+    await a.eval(() => { window.__G.P.x += 2600; });
+    await frames([a, b], 30);
+    assert.equal(await hostOf(b), null, 'B alone');
+    for (let i = 0; i < 80 && (await state(b, k)).pm > 250; i++) { await on(b, (k) => { const m = by(k); m.agg = 1; m.eng = 4; m.x = window.__G.P.x + 20; window.__GWP.hit(m, 3); }, k); await frames([b], 4); }
+    const s1 = await state(b, k);
+    assert.ok(s1.pm <= 250 && s1.pm > 0, 'B has it at ' + s1.pm + '‰');
+    // A comes back: it was there first, so it hosts again, with its old copy at half
+    await a.eval(([x, y]) => { const P = window.__G.P; P.x = x + 120; P.y = y; }, [s1.x, s1.y]);
+    let top = 0;
+    for (let i = 0; i < 40; i++) { await frames([a, b], 3); const s = await state(b, k); if (s && !s.dead) top = Math.max(top, s.pm); }
+    assert.equal(await hostOf(b), A_UID, 'A hosts again');
+    assert.ok(top <= s1.pm + 30, "B's monster never went back to A's old health: " + top + '‰ (was ' + s1.pm + '‰)');
+    const sa = await state(a, k);
+    assert.ok(Math.abs(sa.pm - s1.pm) <= 40, 'A has it as B left it: ' + sa.pm + '‰');
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});

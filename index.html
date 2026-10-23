@@ -11182,7 +11182,7 @@ function mobKey(m){return m.nk||(m.nk=m.type+'@'+(m.sx|0)+','+(m.sy|0));}
 // host's list is the truth, a follower makes the ones it lacks from their keys and hides its own that the host doesn't list
 function mobOk(m){const b=MT[m.type];return !!b&&!m.arena&&!m.tower&&!m.spar;}
 function mobByKey(k){for(const m of mons)if(mobOk(m)&&mobKey(m)===k)return m;return null;}
-function mobStart(){if(!NETTR||!NETTR.mobsPut)return;MOBN={zone:null,zoneHost:null,all:{},allN:0,allD:0,host:null,rs:[],sent:0,put:false,seq:0,hits:new Map(),cum:new Map(),ep:new Map(),dirty:0,fT:0,seen:new Map(),merge:null,mergeT:0};
+function mobStart(){if(!NETTR||!NETTR.mobsPut)return;MOBN={zone:null,all:{},allN:0,allD:0,host:null,rs:[],sent:0,put:false,seq:0,hits:new Map(),cum:new Map(),ep:new Map(),dirty:0,fT:0,seen:new Map(),merge:null,mergeT:0};
  NET.on(ev=>{if(ev.type!=='message'||!MOBN)return;const env=ev.env,pl=env.payload||{};if((env.type!=='raid.hit'&&env.type!=='raid.state')||pl.to!==NET.uid||typeof pl.raid!=='string'||pl.raid.slice(0,2)!=='m|')return;
   const from=NET.get(ev.sid);if(!from||!from.uid||isBlocked(from.uid))return;const m=mobByKey(pl.raid.slice(2));if(!m||m.dead)return;
   if(env.type==='raid.hit'){if(MOBN.host!==NET.uid)return;const k=Math.round(+pl.k);if(!(k>=1&&k<=1e6))return;mobGotHit(m,k,from.uid,0);} // an older page's hit, one message a hit
@@ -11232,16 +11232,17 @@ function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!ARN&&!TWR&&!solo(P
  const inOf=r=>{const f=FXS.get(r.sid);return f&&f.inT>0?f.inT:9e9;};let h=NET.uid,ht=me;for(const r of rs){const t=inOf(r);if(t<ht||t===ht&&r.uid<h){h=r.uid;ht=t;}}MOBN.host=rs.length?h:null;
  if(!MOBN.host||MOBN.host===NET.uid)bossScaleTick(rs);
  const z=MOBN.host?'h'+MOBN.host.replace(/[^A-Za-z0-9_-]/g,'').slice(0,23):null;
- if(z!==MOBN.zone){if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}const was=MOBN.zone?MOBN.zoneHost:null;MOBN.zone=z;MOBN.zoneHost=MOBN.host;MOBN.all={};MOBN.allN++;MOBN.hits.clear();MOBN.cum.clear();MOBN.ep.clear();MOBN.seen.clear();MOBN.merge=null;NETTR.mobsOn(z,a=>{MOBN.all=a;MOBN.allN++;});
+ if(z!==MOBN.zone){if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}MOBN.zone=z;MOBN.all={};MOBN.allN++;MOBN.hits.clear();MOBN.cum.clear();MOBN.ep.clear();MOBN.seen.clear();MOBN.merge=null;NETTR.mobsOn(z,a=>{MOBN.all=a;MOBN.allN++;});
   // a new host or none: monsters hidden for the old host come back on their own; copies made from its list go, but not one
   // still alive near you (SAT-ONLINE-149: a fight with a wave the old host had went on when it left)
   mons=mons.filter(m=>!m.mk||!m.dead&&Math.abs(m.x-P.x)<MOB_BX&&Math.abs(m.y-P.y)<MOB_BY);for(const m of mons){m.mk=0;if(m.hidN){m.hidN=0;m.rt=1;}}
-  // SAT-ONLINE-149 (owner 2026-10-23: the golems disappeared when people came near). Joining someone else's group, from being
-  // alone or the host: what you see around you goes to the new host first (MOB_MERGE ms), so the monsters you were fighting
+  // SAT-ONLINE-149 (owner 2026-10-23: the golems disappeared when people came near). When someone else becomes your host,
+  // what you see around you goes to the new host first (MOB_MERGE ms), so the monsters you were fighting
   // stay where they are with the health they have, the ones you killed stay dead, and ones the host never had (an event's
   // wave it missed) are made on its side, instead of all taking the host's copies or vanishing
   // (only the ones in use: fighting, hurt, dead by your hand, or an event's; one just standing about takes the host's copy)
-  if(MOBN.host&&MOBN.host!==NET.uid&&(!was||was===NET.uid)){MOBN.merge=new Set();for(const m of mons)if(mobOk(m)&&Math.abs(m.x-P.x)<MOB_BX&&Math.abs(m.y-P.y)<MOB_BY&&(m.dead?m.rt<1e8&&!m.hidN:m.eng>0||m.hp<m.max||m.ek))MOBN.merge.add(mobKey(m));MOBN.mergeT=performance.now()+MOB_MERGE;MOBN.dirty=1;}}
+  // (at every change of host: a new group, the host left, or an old host back and hosting again)
+  if(MOBN.host&&MOBN.host!==NET.uid){MOBN.merge=new Set();for(const m of mons)if(mobOk(m)&&Math.abs(m.x-P.x)<MOB_BX&&Math.abs(m.y-P.y)<MOB_BY&&(m.dead?m.rt<1e8&&!m.hidN:m.eng>0||m.hp<m.max||m.ek))MOBN.merge.add(mobKey(m));MOBN.mergeT=performance.now()+MOB_MERGE;MOBN.dirty=1;}}
  if(!z)return;
  if(MOBN.host===NET.uid){const t=performance.now();for(const m of mons)if(m.biteT>0)m.biteT-=1/60;if(MOBN.allD!==MOBN.allN){MOBN.allD=MOBN.allN;mobHits();}if(t-MOBN.sent>=(MOBN.fast?MOB_FAST:MOB_MS)){MOBN.sent=t;MOBN.fast=0;NETTR.mobsPut(z,mobList(rs),NET.uid);MOBN.put=true;}}
  else{mobMake();mobFlush(z);}}
@@ -11261,17 +11262,20 @@ function mobHits(){for(const u in MOBN.all){if(u===NET.uid||u===MOBN.host||!MOBN
    const o=Sn.get(k),same=o&&o.e===e,dd=same?d-o.d:d,dq=same?q-o.q:q,dx=same?kx-o.kx:kx,dy=same?ky-o.ky:ky;Sn.set(k,{e,d,q,kx,ky});if(!(dd>0)&&!(dq>0)&&!dx&&!dy)continue;
    const m=mobByKey(k);if(!m||m.dead)continue;mobGotHit(m,Math.min(1e6,Math.max(0,dd)),u,dq>0?st:0);if((dx||dy)&&!m.dead&&!MT[m.type].boss)move(m,Math.max(-60,Math.min(60,dx)),Math.max(-60,Math.min(60,dy)),Math.max(3,MT[m.type].r-2));}
   for(const k of [...Sn.keys()])if(!(k in L.m))Sn.delete(k);}}
-// host: a monster a joining player saw. Theirs wins unless this copy is in use here (hurt, or fighting near the host); one
-// they only saw standing near the host stays as the host has it, so nothing jumps on the host's screen either
+// host: a monster a player coming into the group saw. Its health is the lower of the two (a fight goes on, whoever was in
+// it: the host coming back to a fight the others carried on included); its place and target are the other player's,
+// unless the host itself is hitting it now; a kill there is a kill here; one it only saw standing about moves here only
+// when this copy is standing about too, away from the host, so nothing jumps on the host's screen
 function mobAdopt(k,v,u){const w=v.split(','),n=w.slice(0,5).map(Number);if(![5,6].includes(w.length)||n.some(x=>!isFinite(x)))return;const [x,y,hp,fl,lv]=n,mx=w.length===6?mobMaxOf(w[5]):0;
- let m=mobByKey(k);const live=!(fl&1),used=fl&2||hp<1000||!live,ad=!!m&&m.adU===u&&performance.now()-(m.adT||0)<MOB_MERGE+1500;
+ let m=mobByKey(k);const live=!(fl&1),used=fl&2||hp<1000||!live;
  if(!m){if(!live)return;const r=/^([a-z0-9_]{1,16})@(-?\d{1,6}),(-?\d{1,6})$/.exec(k);if(!r||!MT[r[1]]||mons.length>=1500)return;m=newMon(r[1],+r[2],+r[3]);m.ek=1;m.tmp=1;m.nk=k;m.lv=lv;m.max=mx||mobBaseMax(m);m.hp=m.max;mons.push(m);}
- else if(!ad&&(!m.dead&&(m.hp<m.max||m.eng>0&&Math.hypot(m.x-P.x,m.y-P.y)<360)||!used&&Math.hypot(m.x-P.x,m.y-P.y)<320))return;
- const first=!ad;m.adU=u;m.adT=performance.now();m.x=x;m.y=y;
+ const now=!m.dead&&m.prov>gTime&&m.provU===NET.uid;
+ if(!used&&(now||m.dead||m.eng>0||m.hp<m.max||Math.hypot(m.x-P.x,m.y-P.y)<320))return;
  if(!live){if(!m.dead){m.dead=true;m.dying=0;m.rt=mobRt(m);}MOBN.fast=1;return;}
- if(m.dead){const keep={ek:m.ek,tmp:m.tmp,evt:m.evt,sg:m.sg,nk:m.nk,far:m.far,adU:u,adT:m.adT},ty=m.type,ox=m.sx,oy=m.sy;for(const q in m)delete m[q];Object.assign(m,newMon(ty,ox,oy));for(const q in keep)if(keep[q]!==undefined)m[q]=keep[q];m.x=x;m.y=y;m.lv=lv;m.max=mx||mobBaseMax(m);}
- const nh=Math.max(1,Math.round(m.max*hp/1000));m.hp=first?nh:Math.min(m.hp,nh);m.face=fl&4?-1:1;
- if(fl&2){m.eng=4;m.agg=1;m.prov=gTime+10;m.provU=u;}if(hp<1000)mobHitBy(m,u);MOBN.fast=1;}
+ let fresh=false;if(m.dead){fresh=true;const keep={ek:m.ek,tmp:m.tmp,evt:m.evt,sg:m.sg,nk:m.nk,far:m.far},ty=m.type,ox=m.sx,oy=m.sy;for(const q in m)delete m[q];Object.assign(m,newMon(ty,ox,oy));for(const q in keep)if(keep[q]!==undefined)m[q]=keep[q];m.lv=lv;m.max=mx||mobBaseMax(m);}
+ const nh=Math.max(1,Math.round(m.max*hp/1000));m.hp=fresh?nh:Math.min(m.hp,nh);
+ if(!now){m.x=x;m.y=y;m.face=fl&4?-1:1;if(fl&2){m.eng=4;m.agg=1;m.prov=gTime+10;m.provU=u;}}
+ if(hp<1000)mobHitBy(m,u);MOBN.fast=1;}
 /* bosses scale with the group fighting them (SAT-ONLINE-083, plan U188). Online, the client the others follow (the mob
    host, or a player alone) gives every boss within 600 px of n players of its group n-player health: +60% a player past the
    first, for up to 10 (the encounter's power budget), so a raid of ten meets a boss built for ten, not a solo boss melted in
