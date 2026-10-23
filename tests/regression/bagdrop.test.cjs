@@ -27,6 +27,14 @@ test('drag a ring from the bag to the bar with the mouse; a window moves from it
     const r = await g.eval(() => ({ dlg: !document.getElementById('dialog').hidden, bar: window.__G.S.bar && window.__G.S.bar[5], still: window.__G.S.items.some((i) => i.uid === window.__uid) }));
     assert.equal(r.bar, 'g:' + await g.eval(() => window.__uid), 'the ring is on the bar');
     assert.equal(r.dlg, false, 'no throw-away question'); assert.ok(r.still, 'the ring is still yours');
+    // owner 2026-10-23: with the bag still open the bar shows the ring at once, and a right click on the slot clears it
+    const vis = await g.eval(() => { const b = document.getElementById('skillbar'), s = b.querySelector('[data-sk="5"]'); return { bag: !document.getElementById('inv').hidden, op: +getComputedStyle(b).opacity, pe: getComputedStyle(s).pointerEvents, img: !!s.querySelector('img,canvas') || /url\(/.test(getComputedStyle(s).backgroundImage) || s.innerHTML.length > 20 }; });
+    assert.ok(vis.bag && vis.op === 1 && vis.pe !== 'none' && vis.img, 'the bar shows the ring with the bag open: ' + JSON.stringify(vis));
+    const b5 = await center(g, '#skillbar [data-sk="5"]');
+    await g.page.mouse.click(b5.x, b5.y, { button: 'right' }); await g.step(3);
+    const dbg = await g.eval(([x, y]) => { const el = document.elementFromPoint(x, y); return { el: el && (el.id || el.className || el.tagName), bar: window.__G.S.bar }; }, [b5.x, b5.y]);
+    assert.ok(!(await g.eval(() => window.__G.S.bar && window.__G.S.bar[5])), 'a right click cleared the slot with the bag open ' + JSON.stringify(dbg));
+    assert.equal(await g.eval(() => document.getElementById('inv').hidden), false, 'the bag is still open');
     // letting go over another HUD part cancels
     const q = await center(g, '#skillbar');
     await g.page.mouse.move(a.x, a.y); await g.page.mouse.down(); await g.page.mouse.move(q.x, q.y - 200, { steps: 6 });

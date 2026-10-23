@@ -122,7 +122,8 @@ test('Demon Slayer and Saintess: offered by their hidden conditions; demon bonus
     assert.deepEqual(o, [null, 'hds', 'hsa', null]);
     await setup(g, 'dslayer', 200, 'sword', 'demon');
     const k = await g.eval(() => { const m = window.__m, X = window.__GP2; const a = X.atk(m); m.dss = 5; return [a, X.atk(m), X.atk(m, { dem: 1.5 })]; });
-    assert.ok(Math.abs(k[0] - 1.2) < 1e-9 && Math.abs(k[1] - 1.44) < 1e-9 && Math.abs(k[2] - 1.6) < 1e-9, JSON.stringify(k));
+    // v1.92: Weapons Mastery adds 10% on top of the demon bonuses
+    assert.ok(Math.abs(k[0] - 1.32) < 1e-9 && Math.abs(k[1] - 1.584) < 1e-9 && Math.abs(k[2] - 1.76) < 1e-9, JSON.stringify(k));
     assert.equal(await g.eval(() => window.__GP2.hurt(100, window.__m)), 75);
     const l = await g.eval(() => { const G = window.__G, S = G.S, P = G.P, X = window.__GP2; S.cls = 'saintess'; S.lv = 50; window.__GHC.s().saT = 0; const a = X.life(); P.hp = 0; const b = X.life(); return [a, b, P.hp]; });
     assert.equal(l[0], true);

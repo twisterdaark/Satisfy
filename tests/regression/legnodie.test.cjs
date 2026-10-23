@@ -16,8 +16,8 @@ test('a legendary class survives a killing blow at 1 HP, untouched for 3 seconds
       window.__GWP.hurt(1e9); const h1 = P.hp, m1 = G.mode; window.__GWP.hurt(1e9); return { h1, m1, h2: P.hp, m2: G.mode, inv: P.inv, cd: S.immT }; });
     assert.equal(a.h1, 1); assert.equal(a.m1, 'play');
     assert.equal(a.h2, 1, 'no harm while it lasts'); assert.equal(a.m2, 'play');
-    assert.ok(a.inv > 2.9 && a.inv <= 3, String(a.inv)); assert.equal(a.cd, 120);
-    for (let i = 0; i < 4; i++) await g.step(60);
+    assert.ok(a.inv > 4.9 && a.inv <= 5, String(a.inv)); // novel ch 289: five seconds assert.equal(a.cd, 120);
+    for (let i = 0; i < 6; i++) await g.step(60);
     const b = await g.eval(() => { const G = window.__G, P = G.P; P.dash = 0; const inv = P.inv, im = G.S.immT; window.__GWP.hurt(1e9); return { hp: P.hp, mode: G.mode, inv, im }; });
     assert.equal(b.mode, 'dead', 'the cooldown has not run out: ' + JSON.stringify(b));
     assert.deepEqual(g.errors, []);
