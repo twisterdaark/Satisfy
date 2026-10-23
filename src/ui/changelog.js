@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24expo', ver: '2.69', d: '2026-10-24',
+      ar: ["معرض الحدادين: كل 30 يوم موسم جديد. من لوحة أي مدينة (وانت أونلاين) تقدر تشارك بصنعة واحدة من صنعاتك، وتتفرج على صنعات الحدادين التانيين بإحصائياتهم وخاماتهم، وتصوّت لصنعة واحدة مش بتاعتك",
+          "أكتر صنعة تاخد أصوات في الموسم صاحبها بياخد لقب «بطل معرض الحدادين» (للشكل بس)، والكل بيسمع الخبر. التصويت محمي: صوت واحد لكل حساب، ومحتاج لفل 10، والحسابات الجديدة بتصوّت من الموسم اللي بعده"],
+      en: ["Blacksmith Expo: a new season every 30 days. At any town's board (online) you can enter one of your creations, look at the other smiths' creations with their stats and materials, and vote for one that isn't yours",
+          "The creation with the most votes of the season wins its maker the title Champion of the Blacksmith Expo (just to show), and everyone hears it. The voting is protected: one vote an account, level 10 needed, and new accounts vote from the next season"] },
     { v: '2026-10-24polls', ver: '2.68', d: '2026-10-24',
       ar: ["استفتاءات المجتمع: لما يكون فيه سؤال عن حفلة أو حدث جاي، في لوحة أي مدينة (وانت أونلاين) بتلاقي «📊 استفتاء المجتمع» بالإجابات وعدد الأصوات لحد دلوقتي. كل حساب يصوّت مرة واحدة، ومحدش يقدر يعرف مين صوّت لإيه: الأرقام بس اللي بتبان"],
       en: ["Community polls: when there's a question about a coming festival or event, every town's board (online) shows \"📊 Community poll\" with the answers and the votes so far. Each account votes once, and nobody can see who voted for what: only the counts show"] },

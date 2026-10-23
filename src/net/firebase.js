@@ -662,6 +662,33 @@
     };
   }
 
+  // SAT-ONLINE-174 (plan U290): the Blacksmith expo, a 30-day season on the server's clock. expo/{season}/{uid} = one
+  // creation an account enters (its shape and materials, so every page draws the same stats); expoVotes/{season}/{uid}
+  // = the entry voted for, once, read by that account alone; expoTally/{season}/{entry} = its count, raised by one in the
+  // same write as the vote. firstSeen/{uid} = the server's time this account was first seen online: an account made
+  // during a season votes from the next one (the rules check it, with the account ID and a level 10 profile).
+  function expoStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    var val = function (p) { return D.get(at(p)).then(function (s) { var v = s.val(); return v === undefined ? null : v; }); };
+    return {
+      season: function (p) { return Promise.all([val('expo/' + p), val('expoTally/' + p)]).then(function (r) { return { e: r[0] || {}, t: r[1] || {} }; }); },
+      mine: function (p, uid) { return val('expoVotes/' + p + '/' + uid).catch(function () { return null; }); },
+      enter: function (p, uid, e) { var o = {}; for (var k in e) o[k] = e[k]; o.t = D.serverTimestamp(); return D.set(at('expo/' + p + '/' + uid), o); },
+      // the vote and the count go together: if someone voted in between, the count is read again and it is tried again
+      vote: function (p, uid, e) {
+        var go = function (n) { return D.get(at('expoTally/' + p + '/' + e)).then(function (s) { var u = {}; u['expoVotes/' + p + '/' + uid] = e; u['expoTally/' + p + '/' + e] = (s.val() | 0) + 1; return D.update(D.ref(db), u).catch(function (x) { if (n > 0) return go(n - 1); throw x; }); }); };
+        return go(3);
+      },
+      // this account's first time online (written the first time it is asked): the server's time
+      seen: function (uid) {
+        return val('firstSeen/' + uid).then(function (v) {
+          if (typeof v === 'number') return v;
+          return D.set(at('firstSeen/' + uid), D.serverTimestamp()).then(function () { return val('firstSeen/' + uid); });
+        }).catch(function () { return null; });
+      },
+    };
+  }
+
   // SAT-ONLINE-064: the National Competition, nat/{id}/{uid} = {h, c, d, s, n, t} and natPaid/{id}/{uid} = {g, t}
   function natStore(sdk) {
     var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, up = function (u) { return D.update(D.ref(db), u); };
@@ -890,6 +917,7 @@
     dropStore: dropStore,
     bountyStore: bountyStore,
     arenaStore: arenaStore,
+    expoStore: expoStore,
     friendStore: friendStore,
     reportStore: reportStore,
     lfgStore: lfgStore,
