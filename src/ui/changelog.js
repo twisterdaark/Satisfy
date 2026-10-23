@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23legkits', ver: '2.09', d: '2026-10-23',
+      ar: ["رقصات سيف باجما زي الرواية: الربط سيل ضربات على عدو واحد، والقتل ضربة بتنزّف وبتوقّع في اليأس وبتاكل نص طاقتك، والموجة بتطلع حواليك وبتبطّأ وموجاتها بتروح للبعيد، والقيد محدش يقرب منك 3 ثواني غير الأموات، والتجاوز هجومك الضعف وضرباتك بتطير 30 ثانية، والدوران بيرجّع أي ضربة في نص الثانية الجاية، والقمة ضربة بتتجاهل 60% من الدروع",
+        "كل الرقصات والدمج على مقياس واحد من الرواية (الضرر ×0.4 والكولداون ÷20). ونَفَس الحداد الأسطوري والصبر والإبداع والتصليح بييجوا مع الكلاس من لفل 1 زي الرواية",
+        "وريث براهام بقى عنده تعاويذ براهام من الرواية: الدرع، النار، الانتقال، تسحير السلاح، كشف القوة، قاطع الريح، البرق، الشحم، سحب المانا، البرق العملاق، تأمل السحر والاندماج. الصاروخ السحري بقى 3 صواريخ على عدو واحد، والصفر المطلق (ده سحر بوندري) بقى العاصفة المتجمدة",
+        "القديسة زي الرواية: الأمل والانضباط والنور الرحيم والقلب المستقيم (مفيش حالة غريبة بتمسك فيها) والتضحية من أول الكلاس، وبعدين السلاح المقدس والصدمة المقدسة، وإعلان الحرم في لفل 380. الحياة التانية اتشالت لأنها مش في الرواية"],
+      en: ["Pagma's sword dances as in the novel: Link is a flurry on one enemy, Kill one blow that bleeds and brings despair for half your stamina, Wave rings out around you and slows, its waves homing on those further off, Restraint keeps all but the undead away for 3 seconds, Transcend doubles your attack and sends your cuts flying for 30 seconds, Revolve sends back every blow in the next half second, Pinnacle is one cut that ignores 60% of the armour",
+        "All dances and fusions on one scale from the novel (damage x0.4, cooldowns /20). The Legendary Blacksmith's Breath, Patience, Creation and Repair come with the class at level 1, as in the novel",
+        "Braham's Successor has Braham's spells from the novel: Shield, Fire, Teleport, Weapon Enchant, Detect Force, Wind Cutter, Lightning, Grease, Mana Drain, Giga Lightning, Magic Contemplation and Assimilation. Magic Missile is three missiles at one enemy, and Absolute Zero (Bondre's spell) became Frozen Tempest",
+        "The Saintess as in the novel: Hope, Discipline, Benevolent Light, Upright Heart (no abnormal condition takes hold) and Sacrifice from the class change, then Holy Weapon, Holy Impact, and Sanctuary Declaration at level 380. Second Life is gone since it is not in the novel"] },
     { v: '2026-10-23rbooks', ver: '2.08', d: '2026-10-23',
       ar: ["الوصفات بقت كتب لكل الحِرف: الطبخ والكيميا والخياطة والحدادة. بتشتريها من ناس الحرفة، أو بتقع من الوحوش والزعما، أو بتبدّلها وتبيعها في المزاد. دوس على الكتاب في الشنطة عشان تتعلم الوصفة",
         "الوصفة اللي لسه متعرفهاش بتظهر ??? ومكتوب جنبها مين بيبيع كتابها أو مين بيوقعه",

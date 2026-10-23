@@ -125,9 +125,7 @@ test('Demon Slayer and Saintess: offered by their hidden conditions; demon bonus
     // v1.92: Weapons Mastery adds 10% on top of the demon bonuses
     assert.ok(Math.abs(k[0] - 1.32) < 1e-9 && Math.abs(k[1] - 1.584) < 1e-9 && Math.abs(k[2] - 1.76) < 1e-9, JSON.stringify(k));
     assert.equal(await g.eval(() => window.__GP2.hurt(100, window.__m)), 75);
-    const l = await g.eval(() => { const G = window.__G, S = G.S, P = G.P, X = window.__GP2; S.cls = 'saintess'; S.lv = 50; window.__GHC.s().saT = 0; const a = X.life(); P.hp = 0; const b = X.life(); return [a, b, P.hp]; });
-    assert.equal(l[0], true);
-    assert.equal(l[1], false, 'not twice within 10 minutes');
+    // the Saintess's Second Life is gone (not in the novel); Sacrifice is tested in saintess.test.cjs
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });

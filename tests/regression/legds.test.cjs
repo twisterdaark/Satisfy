@@ -9,13 +9,13 @@ const H = require('../harness/game.cjs');
 
 test.after(() => H.closeBrowser());
 
-test('legends resist stuns; others do not', async () => {
+test('legends resist stuns, and the Saintess too (Upright Heart, novel ch200); others do not', async () => {
   const g = await H.openGame({ storage: { satisfy_lang: 'en' } });
   try {
     await H.newGame(g, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
     const r = await g.eval(() => { const G = window.__G, S = G.S, D = window.__GDSL; const out = [];
       for (const c of ['pagma', 'braham', 'saint', 'dslayer', 'warrior', 'saintess']) { S.cls = c; out.push(D.resist()); } return out; });
-    assert.deepEqual(r, [true, true, true, true, false, false]);
+    assert.deepEqual(r, [true, true, true, true, false, true]);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });

@@ -13,10 +13,10 @@ test('create a greatsword of Blue Orichalcum on the blueprint, then forge it', a
   try {
     await H.newGame(g, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
     await g.step(3);
-    // a level 5 smith cannot yet; at level 10 the skill is there, three creations at smithing level 1
-    const lo = await g.eval(() => { const G = window.__G, S = G.S; S.cls = 'pagma'; S.lv = 5; window.__GCR.open(); return !document.getElementById('creW').hidden; });
+    // an ordinary smith cannot; Pagma's Successor has it from the class change (novel ch2), three creations at smithing level 1
+    const lo = await g.eval(() => { const G = window.__G, S = G.S; S.cls = 'smith'; S.lv = 12; window.__GCR.open(); return !document.getElementById('creW').hidden; });
     assert.equal(lo, false);
-    await g.eval(() => { const G = window.__G, S = G.S; S.lv = 12; S.smith = 1; S.mats.blue = 5; S.mats.ore = 20; S.mats.wood = 5; G.eqx.openForge(); });
+    await g.eval(() => { const G = window.__G, S = G.S; S.cls = 'pagma'; S.lv = 1; S.smith = 1; S.mats.blue = 5; S.mats.ore = 20; S.mats.wood = 5; G.eqx.openForge(); });
     await g.step(1);
     assert.match(await g.eval(() => document.getElementById('rlist').textContent), /Creation \(0\/3\)/);
     await g.page.click('[data-act="fCre"]');
