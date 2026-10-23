@@ -46,7 +46,11 @@ for (const [w, h] of [[1024, 576], [1093, 614], [800, 450]]) {
       await open(g, 'KeyC', 'statusW');
       assert.deepEqual(await problems(g, 'statusW'), [], 'status');
       await g.page.keyboard.press('KeyC'); await g.step(3);
-      await open(g, 'KeyG', 'dialog');
+      await open(g, 'KeyG', 'guildW');
+      assert.deepEqual(await problems(g, 'guildW'), [], 'the guild window');
+      await g.page.keyboard.press('KeyG'); await g.step(3);
+      await g.eval(() => window.__GDW.dlg()); await g.step(3); // the guild page as a dialog when the window is shut
+      assert.equal(await g.eval(() => !document.getElementById('dialog').hidden), true);
       assert.deepEqual(await problems(g, 'dialog'), [], 'a dialog with choices');
       assert.deepEqual(g.errors, []);
     } finally { await ctx.close(); }

@@ -102,6 +102,8 @@
         o.party = String(p.party || '');
         if (type === 'party.ping') { o.k = Math.max(0, Math.min(1000000000, Math.round(+p.k || 0))); o.n = Math.max(-4096, Math.min(1000000000, Math.round(+p.n || 0))); }
         if (type === 'party.kick' && p.k === 1) o.k = 1; // a kick by the leader, not the leader leaving (SAT-ONLINE-037)
+        if (type === 'party.kick' && (p.k === 2 || p.k === 3)) o.k = p.k; // too late or full (SAT-ONLINE-126); the lead handed over (owner 2026-10-23)
+        if (type === 'party.invite' && p.k === 4) o.k = 4; // a member asks the leader to invite someone (owner 2026-10-23)
         return o;
       }
       if (type.indexOf('chat.') === 0) { o.party = String(p.party || ''); o.text = String(p.text || ''); return o; }

@@ -37,11 +37,12 @@ async function type(g, text) {
   await g.page.keyboard.type(text); await g.page.keyboard.press('Enter'); await g.step(2);
 }
 async function pages(g) {
+  if (await g.eval(() => window.__GDW.on())) return g.eval(() => window.__GDW.lines()); // the guild window shows every line at once
   const out = [];
-  for (let i = 0; i < 8; i++) { out.push(await g.eval(() => document.getElementById('dtext').textContent)); if (!(await g.eval(() => document.getElementById('dopts').hidden))) break; await g.eval(() => window.__G.advance()); await g.step(2); }
+  for (let i = 0; i < 8; i++) { out.push(await g.eval(() => (window.__GDW.on() ? window.__GDW.text() : document.getElementById('dtext').textContent))); if (!(await g.eval(() => (document.getElementById('dopts').hidden && !document.querySelector('#gwB .gwopts button'))))) break; await g.eval(() => window.__G.advance()); await g.step(2); }
   return out;
 }
-async function shut(g) { for (let i = 0; i < 8 && (await g.eval(() => window.__G.mode)) === 'dialog'; i++) { await g.eval(() => { const o = [...document.querySelectorAll('#dopts button')]; if (document.getElementById('dopts').hidden || !o.length) window.__G.advance(); else o[o.length - 1].click(); }); await g.step(2); } }
+async function shut(g) { for (let i = 0; i < 8 && (await g.eval(() => window.__G.mode)) === 'dialog'; i++) { await g.eval(() => { const o = [...document.querySelectorAll('#dopts button, #gwB .gwopts button')]; if ((document.getElementById('dopts').hidden && !document.querySelector('#gwB .gwopts button')) || !o.length) window.__G.advance(); else o[o.length - 1].click(); }); await g.step(2); } }
 const write = (g, u) => g.eval(async (x) => { const F = window.__GLD.fb(), D = F.m.database; for (const k in x) if (x[k] && x[k].t === 'SV') x[k].t = D.serverTimestamp(); try { await D.update(D.ref(F.db), x); return 'ok'; } catch (e) { return 'no'; } }, u);
 const HU = 'g_gSnA2';
 
@@ -96,7 +97,7 @@ test('guild seasons: a month of weekly-goal tiers gives gold, silver or bronze; 
     for (const g of [a, b]) await g.eval(() => window.__GMOD.troClear()); // read again now (the game reads a guild's every 5 minutes)
     await until([b], () => { const L = window.__GMOD.tro('g_gSnA2'); return !!L && L[0].k === 'gold'; });
     await until([a], () => !!window.__GMOD.tro('g_gSnA2'));
-    await a.page.keyboard.press('KeyG'); await a.step(2);
+    await a.page.keyboard.press('KeyG'); await a.step(2); await a.eval(() => window.__GDW.tab('x')); await a.step(2);
     assert.ok((await pages(a)).includes('Trophies: 🏆 2026-01'), 'in G');
     await shut(a);
     assert.deepEqual(await a.eval(() => ({ atk: window.__G.eqx.atkV(), def: window.__G.eqx.defV(), cd: window.__G.eqx.atkCD() })), before, 'no fight advantage');

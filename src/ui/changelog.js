@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23guildwin', ver: '2.32', d: '2026-10-23',
+      ar: ["الجيلد بقى شباك زي الشنطة والحالة (G): بيتسحب من فوق وتقدر تمشي وهو مفتوح. فيه تبويب معلومات، وتبويب أعضاء (أونلاين ولا آخر ظهور، واللفل والكلاس والمكان للي قريب منك)، وتبويب إدارة فيه كل حاجات الجيلد: الخزنة والمباني والتبرع والأراضي والتحالفات والصلاحيات وغيرهم، وكلهم بيفتحوا جوه الشباك.",
+          "تحت في شباك الجيلد: دعوة لاعب بالـID بتاعه، وشات الجيلد، وتسليم القيادة، ومغادرة الجيلد، وللقائد حل الجيلد (Disband) بعد ما تكتب اسمه. ولما تدوس على عضو تقدر تدعيه للبارتي أو تهمسله لو صاحبك.",
+          "البارتي: القائد يقدر يخلي أي عضو القائد (زرار 👑 جنب اسمه)، وأي عضو يقدر يدعو حد (الدعوة بتروح عن طريق القائد)، وفيه زرار ＋ للدعوة. ولو القائد ساب البارتي وفيها اتنين أو أكتر، القيادة بتروح لأقدم عضو بدل ما البارتي تتفك.",
+          "لما حد من الجيلد يدخل اللعبة بيظهرلك إشعار صغير."],
+      en: ["The guild is a window like the bag and the status (G): drag it by its title, walk with it open. An Info tab, a Members tab (online or last seen, and level, class and place for those near you) and a Manage tab with everything the guild has: the vault, buildings, donations, land, alliances, rights and more, all opening inside the window.",
+          "At the bottom of the guild window: invite a player by account ID, guild chat, hand over the lead, leave, and for the master Disband after typing the guild's name. Click a member to invite them to your party, or whisper if they are your friend.",
+          "Party: the leader can make any member the leader (the 👑 beside their name), any member can invite (the invite goes through the leader), and a ＋ button invites. A leader who leaves a party of three or more hands it to the member who joined first instead of breaking it up.",
+          "A short notice when someone from your guild comes online."] },
     { v: '2026-10-23acct', ver: '2.31', d: '2026-10-23',
       ar: ["حاجتين من الأونلاين اتدمجوا (تحت): مسح بياناتك أونلاين وإنت جوه العالم مبيبوّظش الوحوش، وتأسيس الجيلد بياخد الدهب أول ما تضغط."],
       en: ["Two online fixes join this update (below): deleting your online data in the world no longer breaks the monsters, and founding a guild takes the gold at the click."] },

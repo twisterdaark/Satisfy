@@ -53,10 +53,10 @@ async function inviteFromCard(a, b, uidB, rank) {
 const write = (g, u) => g.eval(async (x) => { const F = window.__GLD.fb(), D = F.m.database; for (const k in x) if (x[k] && x[k].t === 'SV') x[k].t = D.serverTimestamp(); try { await D.update(D.ref(F.db), x); return 'ok'; } catch (e) { return 'no'; } }, u);
 const can = (g, a) => g.eval((x) => window.__GG.state() && window.__GLD.can(x), a);
 async function opts(g) {
-  for (let i = 0; i < 4 && await g.eval(() => document.getElementById('dopts').hidden); i++) { await g.eval(() => window.__G.advance()); await g.step(2); }
-  return g.eval(() => [...document.querySelectorAll('#dopts button')].map((x) => x.textContent.replace(/^\d+\.\s*/, '')));
+  for (let i = 0; i < 4 && await g.eval(() => (document.getElementById('dopts').hidden && !document.querySelector('#gwB .gwopts button'))); i++) { await g.eval(() => window.__G.advance()); await g.step(2); }
+  return g.eval(() => [...document.querySelectorAll('#dopts button, #gwB .gwopts button')].map((x) => x.textContent.replace(/^\d+\.\s*/, '')));
 }
-const pick = async (g, re) => { await opts(g); await g.eval((src) => { const r = new RegExp(src); [...document.querySelectorAll('#dopts button')].find((x) => r.test(x.textContent)).click(); }, re.source); await g.step(2); };
+const pick = async (g, re) => { await opts(g); await g.eval((src) => { const r = new RegExp(src); [...document.querySelectorAll('#dopts button, #gwB .gwopts button')].find((x) => r.test(x.textContent)).click(); }, re.source); await g.step(2); };
 
 test('guild rank rights: the master gives and takes them, the rules hold them; guild records go only with the guild', async () => {
   const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
@@ -86,14 +86,14 @@ test('guild rank rights: the master gives and takes them, the rules hold them; g
     assert.equal(await b.eval((v) => window.__GG.canTake(v), vid), true);
 
     // the master, in G -> Rank rights: officers can't take others' things; members may write the notice
-    await a.page.keyboard.press('KeyG'); await a.step(2);
+    await a.page.keyboard.press('KeyG'); await a.step(2); await a.eval(() => window.__GDW.tab('x')); await a.step(2);
     await pick(a, /^(\d+\.\s*)?Rank rights$/);
     const rows = await opts(a);
     assert.deepEqual(rows.slice(0, 10), ["Officers: invite and answer requests to join ✓", "Officers: take others' things from the vault ✓", 'Officers: spend the treasury on buildings ✓', 'Officers: write the guild notice ✓', 'Officers: plan guild events ✓',
       "Members: invite and answer requests to join ✗", "Members: take others' things from the vault ✗", 'Members: spend the treasury on buildings ✗', 'Members: write the guild notice ✗', 'Members: plan guild events ✗']);
     await pick(a, /^(\d+\.\s*)?Officers: take others' things from the vault ✓$/);
     await until([a], () => /The rights changed/.test(window.__toastSeen));
-    await until([a], () => [...document.querySelectorAll('#dopts button')].some((x) => /Officers: take others' things from the vault ✗/.test(x.textContent)));
+    await until([a], () => [...document.querySelectorAll('#dopts button, #gwB .gwopts button')].some((x) => /Officers: take others' things from the vault ✗/.test(x.textContent)));
     await pick(a, /^(\d+\.\s*)?Members: write the guild notice ✗$/);
     await until([b, c], () => { const p = window.__GG.state().perm; return !!p && p.o && p.o.take === false && p.r && p.r.note === true; });
     assert.deepEqual(await a.eval(() => window.__fakeRTDB.data.get('guilds/g_gPrA1').perm), { o: { take: false }, r: { note: true } }, 'only what differs from the defaults');

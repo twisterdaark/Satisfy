@@ -59,13 +59,46 @@ test('decline and invite expiry', () => {
   assert.equal(c.party.accept('p_u0'), false);
 });
 
-test('only the leader invites; a member cannot pull others into the party', () => {
-  const w = world(3), [a, b, c] = w.players;
+test('a member asks the leader, who sends the invite (owner 2026-10-23); a member cannot invite on its own', () => {
+  const w = world(4), [a, b, c, d] = w.players;
+  const ev = []; a.party.on((e) => ev.push(e));
   a.party.invite(w.remote(a, b)); b.party.accept('p_u0'); w.sync();
-  assert.equal(b.party.invite(w.remote(b, c)), 'notLeader');
   // a forged invite naming someone else's party is ignored
   b.pres.send('party.invite', { to: 'u2', party: 'p_u0' });
   assert.equal(c.party.pendingInvite(), null);
+  // a stranger asking the leader is ignored
+  d.pres.send('party.invite', { to: 'u0', party: 'p_u2', k: 4 });
+  assert.equal(c.party.pendingInvite(), null);
+  assert.equal(b.party.invite(w.remote(b, c)), 'asked');
+  const inv = c.party.pendingInvite();
+  assert.equal(inv && inv.party, 'p_u0', "the invite is the leader's own");
+  const e = ev.find((x) => x.type === 'askInvite');
+  assert.equal(e.handle, 'P1'); assert.equal(e.who, 'P2'); assert.equal(e.res, 'sent');
+  c.party.accept(inv.party); w.sync();
+  assert.deepEqual(a.party.members().map((m) => m.uid).sort(), ['u0', 'u1', 'u2']);
+});
+
+test('make leader: the party moves to the new leader at once and everyone stays in it (owner 2026-10-23)', () => {
+  const w = world(3), [a, b, c] = w.players;
+  const evs = w.players.map((p) => { const L = []; p.party.on((e) => L.push(e)); return L; });
+  a.party.invite(w.remote(a, b)); b.party.accept('p_u0');
+  a.party.invite(w.remote(a, c)); c.party.accept('p_u0');
+  w.sync();
+  assert.equal(b.party.makeLeader('u2'), false, 'only the leader');
+  assert.equal(a.party.makeLeader('u9'), false, 'only a member');
+  assert.equal(a.party.makeLeader('u2'), true);
+  for (const p of [a, b, c]) assert.equal(p.party.id(), 'p_u2');
+  assert.equal(c.party.isLeader(), true);
+  assert.equal(a.party.isLeader(), false);
+  assert.ok(evs[2].some((e) => e.type === 'leadTo' && e.self && e.handle === 'P0'));
+  assert.ok(evs[1].some((e) => e.type === 'leadTo' && !e.self && e.handle === 'P2'));
+  w.sync();
+  w.advance(SN.party.LEAD_MS + SN.party.GRACE_MS + 10);
+  assert.deepEqual(c.party.members().map((m) => m.uid).sort(), ['u0', 'u1', 'u2'], 'nobody fell out');
+  assert.equal(c.party.roster(), 'u0 u1');
+  // a forged hand-over from a member is ignored
+  b.pres.send('party.kick', { to: 'u0', party: 'p_u1', k: 3 });
+  assert.equal(a.party.id(), 'p_u2');
 });
 
 test('an accept without an invite is ignored; party size is capped at 5', () => {
@@ -465,16 +498,23 @@ test('kick while the member had lost sight of the leader: the memo goes, so the 
   assert.equal(b.party.id(), null);
 });
 
-test('a leader who leaves is not a kick: the members are told the party broke up', () => {
-  const { a, b, c, advance } = kickWorld();
-  a.party.leave();
-  advance(300);
-  for (const m of [b, c]) {
-    assert.equal(m.party.id(), null);
-    assert.ok(!m.events.some((e) => e.type === 'kicked'));
-    const e = m.events.find((x) => x.type === 'leaderLeft');
+test('a leader who leaves is not a kick: with one member the party breaks up, with two the first who joined leads', () => {
+  {
+    const { a, b, advance } = kickWorld(2);
+    a.party.leave();
+    advance(300);
+    assert.equal(b.party.id(), null);
+    assert.ok(!b.events.some((e) => e.type === 'kicked'));
+    const e = b.events.find((x) => x.type === 'leaderLeft');
     assert.equal(e && e.handle, 'Lead');
   }
+  const { a, b, c, advance } = kickWorld();
+  a.party.leave();
+  advance(SN.party.GRACE_MS + 500);
+  assert.equal(a.party.id(), null);
+  for (const m of [b, c]) { assert.equal(m.party.id(), 'p_u1'); assert.ok(!m.events.some((e) => e.type === 'kicked' || e.type === 'leaderLeft')); }
+  assert.equal(b.party.isLeader(), true);
+  assert.deepEqual(b.party.members().map((m) => m.uid), ['u1', 'u2']);
 });
 
 // SAT-ONLINE-060 (Claude-B #13 item 24): raids of up to 10

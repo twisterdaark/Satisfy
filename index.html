@@ -67,7 +67,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #partyW{pointer-events:auto;width:calc(var(--u)*26);font-size:calc(var(--u)*1.5)}#partyW .x{font-size:calc(var(--u)*1.3);width:auto;padding:0 calc(var(--u)*.6)}#partyL div{display:flex;justify-content:space-between;gap:calc(var(--u)*1)}#partyL .ld{color:#ffe07a}
 #partyL .role{display:inline-block;min-width:1.2em;text-align:center}#partyL button.role{width:auto;padding:0 calc(var(--u)*.3);font-size:calc(var(--u)*1.3)}
 #partyL{max-height:calc(var(--u)*44);overflow-y:auto}#partyL i.php{display:block;height:calc(var(--u)*.5);margin:calc(var(--u)*.1) 0 calc(var(--u)*.4);background:rgba(90,26,26,.8)}#partyL i.php b{display:block;height:100%;background:#e2493a}
-#partyL button.blk{width:auto;padding:0 calc(var(--u)*.4);font-size:calc(var(--u)*1.2);opacity:.7}#partyL button.kick,#partyL .kq button{width:auto;padding:0 calc(var(--u)*.5);font-size:calc(var(--u)*1.2)}#partyL .kq{color:#ffb4a8;align-items:center}#partyL button.kyes{color:#ff8a7a}
+#partyL button.mkld{width:auto;padding:0 calc(var(--u)*.3);font-size:calc(var(--u)*1.1)}#partyL button.blk{width:auto;padding:0 calc(var(--u)*.4);font-size:calc(var(--u)*1.2);opacity:.7}#partyL button.kick,#partyL .kq button{width:auto;padding:0 calc(var(--u)*.5);font-size:calc(var(--u)*1.2)}#partyL .kq{color:#ffb4a8;align-items:center}#partyL button.kyes{color:#ff8a7a}
 #chatW{position:absolute;inset-inline-start:calc(var(--u)*8);bottom:calc(var(--u)*5.5);z-index:30;pointer-events:auto;width:calc(var(--u)*30);font-size:calc(var(--u)*1.4);overflow-wrap:anywhere}
 #chatX{position:absolute;top:calc(var(--u)*.2);inset-inline-end:calc(var(--u)*.3);width:auto;padding:0 calc(var(--u)*.5);font-size:calc(var(--u)*1.1);line-height:1.4;background:rgba(0,0,0,.35);z-index:1}#chatW{position:absolute}#chatBar{position:absolute;inset-inline-start:calc(var(--u)*8);bottom:calc(var(--u)*5.5);z-index:30;pointer-events:auto;width:auto;font-size:calc(var(--u)*1.2);padding:calc(var(--u)*.2) calc(var(--u)*.8)}#chatBar.new{border-color:#ffd24a;color:#ffe7a8}#ui:has(#dialog:not([hidden])) #chatW,#ui:has(.panel:not([hidden]):not(#partyW):not(#chatW)) #chatW,#ui:has(#dialog:not([hidden])) #chatBar{opacity:0;pointer-events:none}
 #chatTabs{display:flex;gap:calc(var(--u)*.4);margin-bottom:calc(var(--u)*.3)}
@@ -226,6 +226,12 @@ body.touch #keys .key{cursor:pointer}
 .key.glow kbd{animation:kglow 1s ease-in-out infinite alternate}@keyframes kglow{to{box-shadow:0 calc(var(--u)*.25) 0 #0b1226,0 0 calc(var(--u)*1.4) var(--gold);border-color:var(--gold)}}
 .key b.badge{position:absolute;top:calc(var(--u)*-.5);inset-inline-end:calc(var(--u)*.1);background:var(--gold);color:#2a1600;border-radius:99px;font-size:calc(var(--u)*.8);padding:0 calc(var(--u)*.4)}
 #statusW{width:calc(var(--u)*50);background:var(--sys2)}
+#guildW{width:calc(var(--u)*60);max-width:96%;background:var(--sys2);display:flex;flex-direction:column;max-height:88%}#guildW[hidden]{display:none}
+.gwtabs{display:flex;gap:calc(var(--u)*.5);margin:calc(var(--u)*.6) 0}.gwtabs button{flex:1;opacity:.7}.gwtabs button.on{opacity:1;border-color:#9fe0ff;color:#bfe8ff}
+#gwB{overflow-y:auto;min-height:calc(var(--u)*14);max-height:58vh;font-size:calc(var(--u)*1.45);padding-inline-end:calc(var(--u)*.3)}#gwB p{margin:calc(var(--u)*.4) 0;white-space:pre-wrap}#gwB .gwbig{font-size:calc(var(--u)*2);color:#ffe07a;margin-bottom:calc(var(--u)*.6)}#gwB .gwh{opacity:.8}
+.gwmem{display:flex;flex-direction:column;gap:calc(var(--u)*.35)}.gwmem button{display:grid;grid-template-columns:1fr auto;text-align:start;gap:0 calc(var(--u)*1);width:100%;opacity:.75}.gwmem button.on{opacity:1}.gwmem button.me b{color:#ffe07a}.gwmem small{grid-column:1/-1;opacity:.8;font-size:calc(var(--u)*1.2)}.gwmem .rk{color:#bfe8ff}
+.gwopts{display:flex;flex-direction:column;gap:calc(var(--u)*.35);margin-top:calc(var(--u)*.6)}.gwopts button{text-align:start;display:flex;align-items:center;gap:calc(var(--u)*.6)}.gwopts button img{width:calc(var(--u)*2.2);height:calc(var(--u)*2.2);image-rendering:pixelated}.gwopts button.poor{opacity:.5}
+.gwfoot{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.5);margin-top:calc(var(--u)*.8)}.gwfoot button{flex:1 1 auto}.gwfoot button.bad{border-color:#c0584a;color:#ff9a8a}
 #statusW .ptitle .head{font-size:calc(var(--u)*2.1);letter-spacing:.03em}
 .srow{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*1);padding:calc(var(--u)*.3) calc(var(--u)*.4);border-bottom:1px solid rgba(143,216,255,.14);transition:background .12s;pointer-events:auto}
 .srow:hover{background:rgba(143,216,255,.08)}.srow b{color:#fff;font-variant-numeric:tabular-nums}.srow em{font-style:normal;color:#9fe39a;font-size:calc(var(--u)*1)}
@@ -489,7 +495,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
       </div>
       <div id="rcol"><div id="quest" class="sys"><div class="qhead"><span class="head" data-i18n="questH"></span><span class="qhb"><button class="x" id="toastLog"><span>📜</span></button><button class="x qtog" data-act="qtoggle" title="Tab">▾</button></span></div><div id="qtext"></div></div>
       <canvas id="mini" class="sys" width="128" height="88" data-tip=""></canvas>
-      <div id="partyW" class="sys" hidden><div class="qhead"><span class="head" id="pHead"></span><button class="x" data-act="pRaid" id="pRaidB" hidden></button><button class="x" data-act="pLeave" data-i18n="pLeave"></button></div><div id="partyL"></div></div></div>
+      <div id="partyW" class="sys" hidden><div class="qhead"><span class="head" id="pHead"></span><button class="x" data-act="pInv" id="pInvB"></button><button class="x" data-act="pRaid" id="pRaidB" hidden></button><button class="x" data-act="pLeave" data-i18n="pLeave"></button></div><div id="partyL"></div></div></div>
       <div id="boss" class="sys" hidden><div class="head" data-i18n="guardian"></div><div class="bar"><i id="bossb" style="background:linear-gradient(90deg,#8f1d17,#e2493a)"></i><span id="bosst"></span></div></div>
       
       <div id="keys" class="sys">
@@ -549,6 +555,13 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
     <div id="statusW" class="sys panel center" hidden>
       <div class="ptitle"><span class="head" data-i18n="statusT"></span><button class="x" data-act="closeStatus">✕</button></div>
       <div id="sbody"></div>
+    </div>
+
+    <div id="guildW" class="sys panel center" hidden>
+      <div class="ptitle"><span class="head" id="gwT"></span><button class="x" data-act="closeGuildW">✕</button></div>
+      <div class="gwtabs" id="gwTabs"></div>
+      <div id="gwB"></div>
+      <div class="gwfoot" id="gwF"></div>
     </div>
 
     <div id="inv" class="sys panel center" hidden>
@@ -5839,7 +5852,7 @@ function onKey(c){if(c==="Escape"&&!$("updLog").hidden){updLogClose();return;}
   if(PHOTO){if(c==='Escape'||c==='F8'){photoOff();return;}if(c==='Enter'){photoShot();return;}}else if(c==='F8'){photoOn();return;}
   if(c==='F9'){pfToggle();return;}
   const si=KSYN?-1:slotOfKey(c);if(si>=0){useSlot(si);return;}const ij=KSYN?-1:IKB.indexOf(c);if(ij>=0){useISlot(ij);return;} // a remapped key arrives as its action's default, never as a slot key
-  if(c==='Space')dodge();else if(c===POT.hpot.key){pressKey('pot_hpot');drink('hpot');}else if(c===POT.mpot.key){pressKey('pot_mpot');drink('mpot');}else if(c==='KeyE')interact();else if(c==='KeyI'){pressKey('kI');openInv();}else if(c==='KeyC'){pressKey('kC');openStatus();}else if(c==='KeyU'){pressKey('kU');openEquip();}else if(c==='KeyG'){pressKey('kGu');guildPanel();}else if(c==='KeyH'){pressKey('kMo');toggleRide();}else if(c==='KeyL'){pressKey('kL');openLog();}else if(c==='KeyB'){pressKey('kB');openMB();}else if(c==='KeyM'){pressKey('kM');openMap();}else if(c==='Escape'){pressKey('kEsc');openPause();}
+  if(c==='Space')dodge();else if(c===POT.hpot.key){pressKey('pot_hpot');drink('hpot');}else if(c===POT.mpot.key){pressKey('pot_mpot');drink('mpot');}else if(c==='KeyE')interact();else if(c==='KeyI'){pressKey('kI');openInv();}else if(c==='KeyC'){pressKey('kC');openStatus();}else if(c==='KeyU'){pressKey('kU');openEquip();}else if(c==='KeyG'){pressKey('kGu');openGuildW();}else if(c==='KeyH'){pressKey('kMo');toggleRide();}else if(c==='KeyL'){pressKey('kL');openLog();}else if(c==='KeyB'){pressKey('kB');openMB();}else if(c==='KeyM'){pressKey('kM');openMap();}else if(c==='Escape'){pressKey('kEsc');openPause();}
  }else if(mode==='cut'){if(SM&&(c==='KeyE'||c==='Space'||c==='Enter'))SM.done();else if(CARD&&(c==='KeyE'||c==='Space'||c==='Enter'))CARD('next');else if(CARD&&c==='Escape')CARD('skip');}
  else if(mode==='dialog'&&DL&&DL.optOn){const n=+c.replace(/\D/g,'');if(/^(Digit|Numpad)[1-9]$/.test(c))pickOpt(n-1);else if(c==='ArrowUp'||c==='KeyW')selOpt((DL.sel+DL.opts.length-1)%DL.opts.length);else if(c==='ArrowDown'||c==='KeyS')selOpt((DL.sel+1)%DL.opts.length);else if(c==='KeyE'||c==='Space'||c==='Enter')pickOpt(DL.sel);else if(c==='Escape')pickOpt(DL.opts.length-1);}
  else if(mode==='dialog'){if(c==='KeyE'||c==='Space'||c==='Enter')advance();}
@@ -5858,6 +5871,7 @@ function onKey(c){if(c==="Escape"&&!$("updLog").hidden){updLogClose();return;}
  else if(mode==='mb'){if(c==='Escape'||c==='KeyB')closeMB();}
  else if(mode==='qd'){if(c==='Escape'||c==='Tab')closeQD();}
  else if(mode==='status'){if(c==='Escape'||c==='KeyC')closeStatus();}
+ else if(mode==='guild'){if(c==='Escape'||c==='KeyG')closeGuildW();}
  else if(mode==='pause'){if(c==='Escape')resume();}
  else if(mode==='controls'){if(c==='Escape')act('back');}
  else if(mode==='sound'){if(c==='Escape')act('sndBack');}
@@ -6677,7 +6691,7 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
    ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),...(galSt()?[{l:t('gdDip')+(galMo()&&Object.keys(GALA).length?' ('+Object.keys(GALA).length+')':''),f:galD}]:[]),...(gwrSt()?[{l:t('gdWar')+(galMo()&&Object.keys(GWRA).length?' ('+Object.keys(GWRA).length+')':''),f:gwrD}]:[]),
    ...(gCan('emblem')?[{l:t('gdBan'),f:guildBanD},{l:t('gpRights'),f:guildPermD}]:[]),
    ...(gCan('note')?[{l:t('gdNoteW'),f:guildNoteW}]:[]),...(gCan('invite')&&recSt()?[{l:t('gdApps',{n:Object.keys(GAPPS).length}),f:recAppsD},{l:t('gdRecOn'),f:recPost},{l:t('gdRecOff'),f:recStop}]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
-  {l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])},{l:t('oClose')}]);}
+  ...(gdwOn()?[]:g.master===pidOf()&&!g.npc?[{l:t('gdwDis'),f:gdwDisband}]:[{l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])}]),{l:t('oClose')}]);}
 /* SAT-ONLINE-115 (plan U235) the guild hall. Eight places, each with one piece of furniture from HALLK (the house props'
    drawings, sprites-original/buildings.js), placed or cleared by the master and officers, each with who put it there and when
    (guildHall/{gid}/{slot}). Members come in from the guild panel; the master and officers let other players in as guests by
@@ -6706,7 +6720,7 @@ function hallTick(){if(roomFade||!P)return;const inH=roomAt(P.x,P.y)===HALL;if(H
  if(HALLV&&!HALLV.guest&&S&&S.guild!==HALLV.gid)hallLost();}
 function hallWatch(V){const st=hallSt();V.off=st.watch(V.gid,v=>{if(HALLV!==V)return;V.slots=hallClean(v);hallBlock();},()=>{if(HALLV===V)hallLost();});}
 function hallResume(H){HALL.dx=+H.dx||HALL.dx;HALL.dy=+H.dy||HALL.dy;HALL.id=hallId(H.gid);HALLWAIT=0;const V=HALLV={gid:H.gid,name:Satisfy.chat.clean(H.name,18)||'?',guest:!!H.guest,slots:{},off:null};hallWatch(V);toast(t('ghWelcome',{g:V.name}),'good');}
-function hallGo(gid,name,guest){const st=hallSt();if(!st||!P||roomFade||mode==='dead')return;if(roomAt(P.x,P.y)===HALL)return;
+function hallGo(gid,name,guest){const st=hallSt();if(!st||!P||roomFade||mode==='dead')return;if(roomAt(P.x,P.y)===HALL)return;if(gdwOn())closeGuildW(); // going in from the guild window: it shuts, as the dialog did
  hallOff();const back=roomAt(P.x,P.y);HALL.dx=back?back.dx:P.x;HALL.dy=back?back.dy:P.y-4;HALL.id=hallId(gid);
  S.hall={gid,name:String(name).slice(0,18),guest:!!guest,dx:Math.round(HALL.dx),dy:Math.round(HALL.dy)}; // kept with the save, for a reload inside
  const V=HALLV={gid,name,guest:!!guest,slots:{},off:null};hallWatch(V);
@@ -7067,7 +7081,7 @@ function twStart(el,txt){const d=DL;clearInterval(d.twI);d.full=txt;const ch=[..
  if(!TWON||ch.length<2){el.textContent=txt;d.typing=false;return;}let n=0;d.typing=true;el.textContent='';
  d.twI=setInterval(()=>{if(DL!==d){clearInterval(d.twI);return;}n+=ch.length>140?2:1;el.textContent=ch.slice(0,n).join('');if(n>=ch.length){clearInterval(d.twI);d.typing=false;}},26);}
 function twDone(){if(!DL||!DL.typing)return false;clearInterval(DL.twI);DL.typing=false;$('dtext').textContent=DL.full;return true;}
-function dialog(who,lines,done,opts){DL={who,lines,i:0,done,opts,prev:mode==='dialog'?'play':mode};mode='dialog';$('dialog').hidden=false;$('hint').hidden=true;showLine();}
+function dialog(who,lines,done,opts){if(who==='guild'&&gdwOn())return gdwDlg(lines,done,opts);DL={who,lines,i:0,done,opts,prev:mode==='dialog'?'play':mode};mode='dialog';$('dialog').hidden=false;$('hint').hidden=true;showLine();}
 function showLine(){let ln=DL.lines[DL.i],who=DL.who;if(Array.isArray(ln)){who=ln[0];ln=ln[1];}$('dname').textContent=t(who);$('dprev').hidden=true;$('dialog').classList.remove('pv');twStart($('dtext'),t(ln));
  const o=$('dopts');o.innerHTML='';DL.optOn=!!(DL.opts&&DL.i===DL.lines.length-1);o.hidden=!DL.optOn;$('dialog').querySelector('.more').hidden=DL.optOn;
  o.classList.toggle('grid',!!(DL.optOn&&DL.opts.some(x=>x.cell)));o.classList.toggle('many',!!(DL.optOn&&DL.opts.length>7)); // long lists (shops): compact rows, a scrollbar, the detail line in the tooltip
@@ -8759,7 +8773,7 @@ function act(a){
  else if(a==='idOk')idOk();else if(a==='idCheck')idCheck();else if(a==='idClose')$('idW').hidden=true;
  else if(a==='netTakeBack')netTakeBack();
  else if(a==='cloud')cloudOpen();else if(a==='updLog')updLogOpen();else if(a==='qgtoggle')qgToggle();else if(a==='updLogClose')updLogClose();else if(a==='switchAcc')netSwitch();else if(a==='cloudClose')$('cloudW').hidden=true;
- else if(a==='pAccept'||a==='pDecline'||a==='pLeave'||a==='pRaid')partyAct(a);
+ else if(a==='pAccept'||a==='pDecline'||a==='pLeave'||a==='pRaid'||a==='pInv')partyAct(a);
  else if(a==='lootN'||a==='lootG'||a==='lootP')lootAnswer(a==='lootN'?2:a==='lootG'?1:0);
  else if(a==='pBlock'||a==='dBlock')blockAct(a);
  else if(a==='pcClose'||a==='pcInvite'||a==='pcDuel'||a==='pcBlock'||a==='pcTrade'||a==='pcGuild'||a==='pcBounty'||a==='pcFollow'||a==='pcFriend'||a==='pcReport')pctxAct(a);
@@ -8774,7 +8788,7 @@ function act(a){
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
  else if(a==='menuSize'){const v=[100,120,140],c=mzOf();MZ=v[(v.indexOf(c)+1)%v.length]||100;try{localStorage.setItem('satisfy_mz',String(MZ));}catch(e){}fit();mzUI();}
  else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='guiReset')guiReset();else if(a==='quit'){save(true);fadeTo(toTitle);}
- else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='mgReheat'){reheat();}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='fCre'){creOpen();}else if(a==='fApr'){closeForge();openApr('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='photo'){act('resume');setTimeout(photoOn,0);}else if(a==='photoSave')photoShot();else if(a==='photoExit')photoOff();else if(a==='closeMB')closeMB();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qgFollow')qgFollow();else if(a==='qtoggle')toggleQuest();
+ else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='mgReheat'){reheat();}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='fCre'){creOpen();}else if(a==='fApr'){closeForge();openApr('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeGuildW')closeGuildW();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='photo'){act('resume');setTimeout(photoOn,0);}else if(a==='photoSave')photoShot();else if(a==='photoExit')photoOff();else if(a==='closeMB')closeMB();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qgFollow')qgFollow();else if(a==='qtoggle')toggleQuest();
  else if(a==='cardNext'){if(CARD)CARD('next');}else if(a==='cardSkip'){if(CARD)CARD('skip');}
  else if(a==='cRand'){CL.hair=rand()*LOOK.hair.length|0;CL.hc=rand()*LOOK.hc.length|0;CL.skin=rand()*LOOK.skin.length|0;CL.top=rand()*LOOK.top.length|0;renderCreate();}
  else if(a==='cStart'){const n=$('cname').value.trim();if(n.length<2||n.length>12){$('cerr').textContent=t('cNameErr');SFX.deny();$('cname').focus();return;}CL.n=n;newGame(CL);}
@@ -8843,7 +8857,7 @@ $('mini').addEventListener('click',()=>{if(mode==='play')openMap();});
 // a quest opens from the panel whatever walkable window is up (owner 2026-10-22: "opened one quest's details once, then no
 // other would open"): the other window closes first. qDown only swallows the click of the same press, so it clears on
 // any pointerup, even one over the details window that opened under the pointer
-const WCLOSE={inv:()=>closeInv(),status:()=>closeStatus(),equip:()=>closeEquip(),log:()=>closeLog(),map:()=>closeMap(),mb:()=>closeMB()};
+const WCLOSE={inv:()=>closeInv(),status:()=>closeStatus(),guild:()=>closeGuildW(),equip:()=>closeEquip(),log:()=>closeLog(),map:()=>closeMap(),mb:()=>closeMB()};
 $('qtext').addEventListener('pointerdown',e=>{if(e.button||e.target.closest('[data-qtk],[data-qf],button'))return;const q=e.target.closest('[data-qd]');if(!q||!(mode==='play'||mode==='qd'||WCLOSE[mode]))return;
  e.preventDefault();if(WCLOSE[mode])WCLOSE[mode]();qDown=1;openQD(q.dataset.qd);});let qDown=0;addEventListener('pointerup',()=>{if(qDown)setTimeout(()=>{qDown=0;},0);},true);
 $('qtext').addEventListener('click',e=>{if(qDown){qDown=0;return;}const tk=e.target.closest('[data-qtk]');if(tk){if(!tk.disabled&&(mode==='play'||WALKM.includes(mode)))qTrkT(tk.dataset.qtk);return;}const qf=e.target.closest('[data-qf]');if(qf){QFLT=qf.dataset.qf;qPage=0;qLast='';hudDirty=true;SFX.click();return;}const pb=e.target.closest('[data-qp]');if(pb){const n=Math.ceil(qFilt(Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1))[0].length/3)||1;qPage=(qPage+(+pb.dataset.qp)+n)%n;qLast='';SFX.click();return;}const q=e.target.closest('[data-qd]');if(q&&mode==='play')openQD(q.dataset.qd);});
@@ -8854,7 +8868,7 @@ if(langSaved)toTitle();else setTimeout(()=>{const b=document.querySelector(`.lan
 const ZT={};
 // windows you can walk with (Twister 2026-10-19): the bag, status, equipment, log, quests and the big map stay open while
 // WASD/arrows move you; attacks, E and skills still need the window closed so clicks in it never become swings
-const WALKM=['inv','status','equip','log','qd','map','mb'];
+const WALKM=['inv','status','equip','log','qd','map','mb','guild'];
 var MSWT=2;
 function update(dt){
  gTime+=dt;
@@ -11419,7 +11433,7 @@ function netTick(){faultAt('netTick');NET.tick();pxpSeen();const live=netLive();
  mobTick(live);
  if(live&&FB&&netUser&&performance.now()-cloudProfT>60000)cloudProfile();if(live&&FB&&netUser)cloudAuto();
  if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,rd:PARTY&&PARTY.isLeader()&&PARTY.isRaid()?1:0,duel:duelPublic(),ol:olPub(),gd:guildPub()}),netForce);netForce=false;}
- partyUI(live);chatUI(live);pctxUI(live);tradeUI(live);guildUI(live);
+ partyUI(live);chatUI(live);pctxUI(live);tradeUI(live);guildUI(live);gdwTick();
  netPrev=P?{x:P.x,y:P.y}:null;
  const netSafe=live&&Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
   b.textContent=(NETQ==='local'?t('netOn',{n:NET.count()+1}):netState==='ONLINE'?t('netOnline',{n:NET.count()+1}):t(netState==='RECONNECTING'?'netRe':'netJoin'))+(netSafe?' · '+t('safeZone'):'')+(FB&&FB.emulator?' · '+t('netEmu'):'');}} // SAT-ONLINE-120: on the local emulators
@@ -11545,15 +11559,15 @@ Object.assign(STR.ar,{pKick:'اطرد',pKickQ:'تطرد {n}؟',pKickYes:'اطر�
 Object.assign(STR.en,{pKick:'Kick',pKickQ:'Kick {n}?',pKickYes:'Kick',pKickNo:'Cancel',pKickDone:'{n} was removed from the party',pLeaderLeft:'{n} left, so the party broke up',pRejoined:'Back in {n}\'s party',pYouLead:'The leader is gone: you lead the party now',pNewLead:'The leader is gone: {n} leads the party now',pReplaced:'Your party picked a new leader while you were away; joining them'});
 /* SAT-ONLINE-024 (doc §35 U049): a leader gone 15 s is replaced by the remaining members (lowest uid); see party.js */
 // SAT-ONLINE-126 (plan U048): an accept the leader couldn't take (the invite ran out on its side, or the party filled up)
-Object.assign(STR.ar,{pNotJoined:'ملحقتش تدخل فريق {n}: الدعوة خلصت أو الفريق اتملى'});
-Object.assign(STR.en,{pNotJoined:"You didn't get into {n}'s party: the invite ran out or the party filled up"});
+Object.assign(STR.ar,{pLeadYou:'{n} خلاك قائد البارتي',pLeadTo:'{n} بقى قائد البارتي',pMkLead:'خلي {n} القائد',pInvAsked:'طلبت من القائد يدعي {n}',pAskInv:'{n} طلب تدعي {w}: الدعوة اتبعتت',pAskNo:'{n} طلب تدعي {w}، بس مينفعش دلوقتي (بعيد أو في بارتي تانية أو البارتي مليانة)',pInvTip:'ادعي اللاعب اللي جنبك (أو اختار من قايمة اللاعبين)',pInvTipM:'اطلب من القائد يدعي اللاعب اللي جنبك',pInvPick:'مفيش حد جنبك: اختار اللاعب من القايمة',pNotJoined:'ملحقتش تدخل فريق {n}: الدعوة خلصت أو الفريق اتملى'});
+Object.assign(STR.en,{pLeadYou:'{n} made you the party leader',pLeadTo:'{n} leads the party now',pMkLead:'Make {n} the leader',pInvAsked:'You asked the leader to invite {n}',pAskInv:'{n} asked you to invite {w}: the invite is sent',pAskNo:"{n} asked you to invite {w}, but it can't be done now (too far, in another party, or the party is full)",pInvTip:'Invite the player next to you (or pick one from the player list)',pInvTipM:'Ask the leader to invite the player next to you',pInvPick:'Nobody is next to you: pick the player from the list',pNotJoined:"You didn't get into {n}'s party: the invite ran out or the party filled up"});
 function netStart(pres){NET=pres;PARTY=Satisfy.party.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,store:netTabStore(),gap:2000});duelStart();pvpStart();rlStart();phStart();nvStart();bntStart();frStart();annStart();swStart();modStart();tradeStart();guildStart();dropStart();praidStart();chatStart();mobStart();if(NETTR&&NETTR.feedOn){NETTR.feedOn('news',newsIn);NETTR.feedOn('news',npcKOIn);}
- PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],leaderLeft:['pLeaderLeft','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn'],notJoined:['pNotJoined','warn'],raid:[e.on?(e.self?'pRaidMade':'pRaidNow'):(e.self?'pPartyMade':'pPartyNow'),'good']}[e.type];
-  if(m)toast(t(m[0],{n}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
+ PARTY.on(e=>{const n=e.handle||'?';const m={joined:['pJoined','good'],youJoined:['pYouJoined','good'],rejoined:['pRejoined','good'],newLeader:[e.self?'pYouLead':'pNewLead','good'],replaced:['pReplaced'],declined:['pDeclined'],left:['pLeft'],memberLeft:['pMemberLeft'],kicked:['pKicked','warn'],leaderLeft:['pLeaderLeft','warn'],dissolved:['pDissolved','warn'],full:['pFull','warn'],notJoined:['pNotJoined','warn'],leadTo:[e.self?'pLeadYou':'pLeadTo','good'],askInvite:[e.res==='sent'?'pAskInv':'pAskNo',e.res==='sent'?'good':'warn'],raid:[e.on?(e.self?'pRaidMade':'pRaidNow'):(e.self?'pPartyMade':'pPartyNow'),'good']}[e.type];
+  if(m)toast(t(m[0],{n,w:e.who||'?'}),m[1]);if(e.type==='invite')SFX.notice();if(e.type==='ping')pingAdd(e);partySig='';});}
 function partyNear(){const myRoom=(roomAt(P.x,P.y)||{}).id||null;let best=null,bd=PARTY_R;for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const d=Math.hypot(r.x-P.x,r.y-P.y);if(d<bd){bd=d;best=r;}}return best;}
 function partyInviteNear(){const r=partyNear();if(!r)return toast(t('pNone'));const res=PARTY.invite(r);
- toast(t({sent:'pInvSent',busy:'pBusy',full:'pFull',notLeader:'pNotLeader'}[res]||'pBusy',{n:r.handle}),res==='sent'?'good':'warn');partySig='';}
-function partyAct(a){if(!PARTY)return;const inv=PARTY.pendingInvite();if(a==='pAccept'&&inv)PARTY.accept(inv.party);else if(a==='pDecline'&&inv)PARTY.decline(inv.party);else if(a==='pLeave')PARTY.leave();
+ toast(t({sent:'pInvSent',asked:'pInvAsked',busy:'pBusy',full:'pFull',notLeader:'pNotLeader'}[res]||'pBusy',{n:r.handle}),res==='sent'||res==='asked'?'good':'warn');partySig='';}
+function partyAct(a){if(!PARTY)return;const inv=PARTY.pendingInvite();if(a==='pAccept'&&inv)PARTY.accept(inv.party);else if(a==='pDecline'&&inv)PARTY.decline(inv.party);else if(a==='pLeave')PARTY.leave();else if(a==='pInv'){if(partyNear())partyInviteNear();else{toast(t('pInvPick'));plOpen();}}
  else if(a==='pRaid'&&PARTY.setRaid(!PARTY.isRaid())==='big')toast(t('pRaidBig',{n:Satisfy.party.MAX}),'warn');partySig='';netForce=true;}
 /* raids (SAT-ONLINE-060, Claude-B #13 item 24): the leader makes the party a raid of up to 10 from the party panel, and a
    party again while it has 5 or fewer; members see it in the title */
@@ -11565,9 +11579,9 @@ function partyUI(live){if(!PARTY)return;const inv=live?PARTY.pendingInvite():nul
  const lead=PARTY.isLeader();if(KICKQ&&!mem.some(m=>!m.self&&m.uid===KICKQ))KICKQ=null;
  const rd=PARTY.isRaid(),sig=lang+'|'+(inv?inv.party:'')+'|'+lead+'|'+rd+'|'+KICKQ+'|'+mem.map(m=>m.uid+':'+m.lv+':'+m.leader+':'+hpOf(m)+':'+roleOf(m)).join(',');if(sig===partySig)return;partySig=sig;
  $('partyInv').hidden=!inv;if(inv)$('partyInvT').textContent=t('pInvFrom',{n:inv.handle});
- $('partyW').hidden=mem.length<2;$('pHead').textContent=rd?t('pRaidT',{n:mem.length,m:Satisfy.party.RAID_MAX}):t('pTitle');
+ $('partyW').hidden=mem.length<2;{const b=$('pInvB');b.textContent='＋';b.dataset.tip=t(lead?'pInvTip':'pInvTipM');}$('pHead').textContent=rd?t('pRaidT',{n:mem.length,m:Satisfy.party.RAID_MAX}):t('pTitle');
  {const b=$('pRaidB');b.hidden=!lead;b.textContent=rd?t('pRaidOff'):t('pRaidOn');b.dataset.tip=rd?t('pPartyTip',{m:Satisfy.party.MAX}):t('pRaidTip',{m:Satisfy.party.RAID_MAX});}
- $('partyL').innerHTML=mem.map(m=>`<div class="${m.leader?'ld':''}"><span>${m.self?`<button class="role" data-tip="${esc(t(rd?'rlTip':'roleTip'))}">${ROLE_B[ROLE]||'＋'}</button> `:roleOf(m)?`<span class="role" title="${esc(t('role_'+roleOf(m)))}">${ROLE_B[roleOf(m)]}</span> `:''}${m.leader?'★ ':''}${esc(m.self?netId||S.look.n:m.handle||'?')}</span><span>${t('lv',{n:m.self?S.lv:lvTxt(m.lv)})}${m.self?'':`${lead?` <button class="kick" data-uid="${esc(m.uid)}" data-tip="${esc(t('pKick'))}">${esc(t('pKick'))}</button>`:''} <button class="blk" data-uid="${esc(m.uid)}" data-tip="${esc(t('pBlock'))}">⊘</button>`}</span></div>${lead&&!m.self&&KICKQ===m.uid?`<div class="kq"><span>${esc(t('pKickQ',{n:m.handle||'?'}))}</span><span><button class="kyes" data-uid="${esc(m.uid)}">${esc(t('pKickYes'))}</button> <button class="kno">${esc(t('pKickNo'))}</button></span></div>`:''}${hpOf(m)==null?'':`<i class="php" data-hp="${hpOf(m)}"><b style="width:${hpOf(m)}%"></b></i>`}`).join('');}
+ $('partyL').innerHTML=mem.map(m=>`<div class="${m.leader?'ld':''}"><span>${m.self?`<button class="role" data-tip="${esc(t(rd?'rlTip':'roleTip'))}">${ROLE_B[ROLE]||'＋'}</button> `:roleOf(m)?`<span class="role" title="${esc(t('role_'+roleOf(m)))}">${ROLE_B[roleOf(m)]}</span> `:''}${m.leader?'★ ':''}${esc(m.self?netId||S.look.n:m.handle||'?')}</span><span>${t('lv',{n:m.self?S.lv:lvTxt(m.lv)})}${m.self?'':`${lead?` <button class="mkld" data-uid="${esc(m.uid)}" data-tip="${esc(t('pMkLead',{n:m.handle||'?'}))}">👑</button> <button class="kick" data-uid="${esc(m.uid)}" data-tip="${esc(t('pKick'))}">${esc(t('pKick'))}</button>`:''} <button class="blk" data-uid="${esc(m.uid)}" data-tip="${esc(t('pBlock'))}">⊘</button>`}</span></div>${lead&&!m.self&&KICKQ===m.uid?`<div class="kq"><span>${esc(t('pKickQ',{n:m.handle||'?'}))}</span><span><button class="kyes" data-uid="${esc(m.uid)}">${esc(t('pKickYes'))}</button> <button class="kno">${esc(t('pKickNo'))}</button></span></div>`:''}${hpOf(m)==null?'':`<i class="php" data-hp="${hpOf(m)}"><b style="width:${hpOf(m)}%"></b></i>`}`).join('');}
 addEventListener('keydown',e=>{if(!PARTY||mode!=='play'||e.repeat||!KSYN&&KB.includes(e.code))return;
  if(e.target&&e.target.tagName==='INPUT')return; // typing in the chat line
  if(e.code==='Enter'){chatOpen();return;}
@@ -11631,6 +11645,7 @@ function blockAct(a){if(a==='pBlock'&&PARTY){const inv=PARTY.pendingInvite();if(
 var KICKQ=null; // var: partyUI can run before this line (?net=local starts during load)
 function partyKick(uid){const m=PARTY&&PARTY.members().find(x=>!x.self&&x.uid===uid);KICKQ=null;partySig='';if(!m)return;if(PARTY.kick(uid))toast(t('pKickDone',{n:m.handle||'?'}));}
 $('partyL').addEventListener('click',e=>{if(e.target.closest&&e.target.closest('button.role')){roleCycle();return;}
+ {const mk=e.target.closest&&e.target.closest('button.mkld');if(mk&&PARTY){if(PARTY.makeLeader(mk.dataset.uid))SFX.click();partySig='';netForce=true;return;}}
  const k=e.target.closest&&e.target.closest('button.kick,button.kyes,button.kno');if(k&&PARTY){if(k.classList.contains('kick'))KICKQ=k.dataset.uid;else if(k.classList.contains('kyes'))return partyKick(k.dataset.uid);else KICKQ=null;partySig='';return;}const b=e.target.closest&&e.target.closest('button.blk');if(!b||!PARTY)return;const m=PARTY.members().find(x=>x.uid===b.dataset.uid);if(m)blockUid(m.uid,m.handle);});
 /* party roles (SAT-ONLINE-025, doc §35 U050): a badge you pick in the party panel (tank, healer, damage, support),
    shown to your party; it changes nothing in combat and is separate from your class. Remembered on this device. */
@@ -11815,7 +11830,7 @@ function pctxUI(live){const W=$('pctx'),r=live?pctxRemote():null;if(PCTX&&!r){if
  // a player out of range (from the list): invites and duels only reach players you can see, so those wait until you are close
  for(const a of ['pcInvite','pcDuel'])W.querySelector(`[data-act="${a}"]`).disabled=far;}
 function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig='';return;}if(r===PCTX.snap&&(a==='pcInvite'||a==='pcDuel')){toast(t('pcFar'),'warn');return;}
- if(a==='pcInvite'&&PARTY){const res=PARTY.invite(r);toast(t({sent:'pInvSent',busy:'pBusy',full:'pFull',notLeader:'pNotLeader',already:'pcMate'}[res]||'pBusy',{n:r.handle}),res==='sent'?'good':'warn');partySig='';}
+ if(a==='pcInvite'&&PARTY){const res=PARTY.invite(r);toast(t({sent:'pInvSent',asked:'pInvAsked',busy:'pBusy',full:'pFull',notLeader:'pNotLeader',already:'pcMate'}[res]||'pBusy',{n:r.handle}),res==='sent'||res==='asked'?'good':'warn');partySig='';}
  else if(a==='pcDuel'&&DUEL){if(!swGate('duel'))return;const st=DUEL.state();if(st.phase!=='idle'&&st.phase!=='over')return;const res=DUEL.challenge(r);toast(t({sent:'dSent',busy:'dBusy',safe:'dSafe',far:'dFar'}[res]||'dBusy',{n:r.handle}),res==='sent'?'good':'warn');duelSig='';}
  else if(a==='pcGuild'&&GUILD){GUILD.invite(r.uid).then(()=>toast(t('gdInvSent',{n:r.handle||'?'}),'good'),e=>toast(t(String(e&&e.message)==='member'?'gdInvMem':'gdFail'),'warn'));PCTX=null;}
  else if(a==='pcBounty'&&BNT){PCTX=null;bntPost(r);}
@@ -12132,7 +12147,81 @@ function guildMemberD(u){const st=GUILD&&GUILD.state(),m=st&&st.members[u];if(!m
   if(can(st.rank,'kick',m.rk))o.push({l:t('gdKick',{n:m.n}),f:()=>dialog('guild',[t('gdKickQ',{n:m.n})],null,[{l:t('gYes'),f:()=>after(GUILD.kick(u),t('gdKickDone',{n:m.n}))},{l:t('gNo'),f:guildMembersD}])});
   if(can(st.rank,'handover',m.rk))o.push({l:t('gdHand',{n:m.n}),f:()=>dialog('guild',[t('gdHandQ',{n:m.n,g:st.guild.name})],null,[{l:t('gYes'),f:()=>after(GUILD.handover(u),t('gdHandDone',{n:m.n,g:st.guild.name}))},{l:t('gNo'),f:guildMembersD}])});
   if(m.rk==='m'&&can(st.rank,'claim')&&GUILD.masterAway())o.push({l:t('gdClaim',{n:m.n}),f:()=>after(GUILD.claim(),t('gdClaimDone',{g:st.guild.name}))});}
+ {const r=NET&&NET.remotes().find(x=>x.uid===u);if(u!==NET.uid&&r&&PARTY&&!(PARTY.id()&&r.party===PARTY.id()))o.push({l:t('gdwPInv'),f:()=>{const res=PARTY.invite(r);toast(t({sent:'pInvSent',asked:'pInvAsked',busy:'pBusy',full:'pFull'}[res]||'pBusy',{n:r.handle||m.n}),res==='sent'||res==='asked'?'good':'warn');partySig='';guildMemberD(u);}});
+  if(u!==NET.uid&&CHAT&&typeof frByName==='function'&&frByName(m.n))o.push({l:t('gdwWh'),f:()=>{if(gdwOn())closeGuildW();chatOpen();$('chatIn').value='/w '+String(m.n).replace(/\s+/g,'_')+' ';}});}
  dialog('guild',[m.n+' · '+t('gdRk_'+m.rk)+' · '+t(GUILD.online(m)?'gdOn':'gdOff')],null,[...o,{l:t('oBack'),f:guildMembersD}]);}
+/* the guild window (owner 2026-10-23: "make the guild a window like the bag and the status, it and everything in it"). G opens
+   it; it moves by its title bar and stays open while you walk, like the bag. Tabs: Info, Members and Manage. Every guild
+   page that used to be a dialog (the vault, buildings, donations, land, diplomacy, rights, recruiting...) opens inside the
+   window instead while it is up: dialog('guild', ...) draws its lines and choices in the window's body. At the bottom:
+   invite (by account ID), guild chat, hand over the lead, leave, and for the master a Disband that asks for the guild's
+   name. Members show online or last seen, and for those you can see, level, class and where they are. */
+Object.assign(STR.ar,{gdwT:'الجيلد',gdwTabI:'معلومات',gdwTabM:'الأعضاء',gdwTabX:'إدارة',gdwNone:'إنت مش في جيلد.',gdwInv:'دعوة لاعب',gdwInvQ:'اكتب الـID بتاع اللاعب اللي عايز تدعيه',gdwChat:'شات الجيلد',gdwHand:'تسليم القيادة',gdwHandQ:'تسلّم قيادة الجيلد لمين؟',gdwLeave:'مغادرة الجيلد',gdwLeaveQ:'تسيب الجيلد {g}؟',gdwDis:'حل الجيلد (Disband)',gdwDisQ:'تحل الجيلد {g}؟ كل الأعضاء هيخرجوا، والأراضي والقلعة هيبقوا من غير صاحب. ده مش بيرجع.',gdwDisN:'اكتب اسم الجيلد بالظبط عشان تأكد',gdwDisNo:'الاسم مش مطابق، الجيلد متحلش',gdwMasterLeave:'إنت القائد: سلّم القيادة لحد الأول، أو حل الجيلد',gdwOk:'تمام',gdwBack:'رجوع',gdwSeen:'آخر ظهور من {t}',gdwNow:'دلوقتي',gdwMin:'{n} دقيقة',gdwHr:'{n} ساعة',gdwDay:'{n} يوم',gdwC:'مساهمة {n}',gdwAt:'في {z}',gdwNote:'إعلان: {s}',gdwLand:'الأراضي: {t}',gdwPick:'دوس على عضو عشان تشوف اللي تقدر تعمله معاه',gdwMem:'{n}/{m} عضو · {o} أونلاين',gdwPInv:'دعوة للبارتي',gdwWh:'همس',gdwCame:'{n} من الجيلد دخل اللعبة'});
+Object.assign(STR.en,{gdwT:'Guild',gdwTabI:'Info',gdwTabM:'Members',gdwTabX:'Manage',gdwNone:'You are not in a guild.',gdwInv:'Invite a player',gdwInvQ:"Type the player's account ID to invite them",gdwChat:'Guild chat',gdwHand:'Hand over the lead',gdwHandQ:'Hand the guild to whom?',gdwLeave:'Leave the guild',gdwLeaveQ:'Leave the {g} guild?',gdwDis:'Disband the guild',gdwDisQ:'Disband {g}? Every member leaves, and its land and castle are left without an owner. This cannot be undone.',gdwDisN:"Type the guild's name exactly to confirm",gdwDisNo:"The name doesn't match; the guild was not disbanded",gdwMasterLeave:'You are the master: hand over the lead first, or disband the guild',gdwOk:'OK',gdwBack:'Back',gdwSeen:'last seen {t} ago',gdwNow:'now',gdwMin:'{n} min',gdwHr:'{n} h',gdwDay:'{n} d',gdwC:'contribution {n}',gdwAt:'in {z}',gdwNote:'Notice: {s}',gdwLand:'Land: {t}',gdwPick:'Click a member to see what you can do with them',gdwMem:'{n}/{m} members · {o} online',gdwPInv:'Invite to party',gdwWh:'Whisper',gdwCame:'{n} of your guild came online'});
+let GDWTAB='i',GDWSUB=false,GDWH='',GDWT=0;
+const gdwOn=()=>mode==='guild'&&!$('guildW').hidden;
+function openGuildW(tab){SFX.open();mode='guild';$('guildW').hidden=false;$('hint').hidden=true;gdwShow(tab||GDWTAB);}
+function closeGuildW(){SFX.close();$('guildW').hidden=true;GDWSUB=false;mode='play';hudDirty=true;}
+// the online guild when there is one (members with ranks and last seen), else the local one
+function gdwMine(){const g=myG(),st=GUILD&&gdFor===S&&GUILD.state();if(st&&st.gid&&g&&g.online)return {g,st,on:true,mem:st.members,master:st.guild&&st.guild.master,name:st.guild?st.guild.name:gName(g.id)};
+ return g?{g,st:null,on:false,mem:g.members||{},master:g.master,name:gName(g.id)}:null;}
+function gdwAgo(ms){const m=Math.max(0,ms/60000|0);return m<1?t('gdwNow'):m<60?t('gdwMin',{n:m}):m<1440?t('gdwHr',{n:m/60|0}):t('gdwDay',{n:m/1440|0});}
+function gdwShow(tab){GDWTAB=tab;GDWSUB=false;GDWH='';const M=gdwMine();
+ $('gwT').textContent=M?gdEmb(M.g.emb)+M.name:t('gdwT');
+ $('gwTabs').innerHTML=(M?['i','m','x']:['x']).map(k=>`<button data-gwtab="${k}" class="${k===tab?'on':''}">${esc(t('gdwTab'+k.toUpperCase()))}</button>`).join('');
+ if(!M){GDWTAB='x';$('gwF').innerHTML='';return guildPanel();}
+ if(tab==='x'){gdwFoot(M);return guildPanel();}
+ gdwBody(M);gdwFoot(M);}
+function gdwBody(M){let h='';const g=M.g;
+ if(GDWTAB==='i'){const l=gLv(g),me=M.mem[M.on?NET.uid:pidOf()]||{c:0},nx=GXP[l],land=TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr');
+  const n=M.on?guildNoteLine():'';
+  h=`<div class="gwbig">${esc(gdEmb(g.emb)+M.name)} · Lv ${l}</div>`+[t('gInfo',{g:M.name,n:l,x:g.npc?'-':nx?`${g.xp}/${nx}`:t('gMax'),m:Object.keys(M.mem).length,cap:l*25,c:me.c||0}),
+   t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:land})+(g.online&&GWK?' · '+gwLine():''),castleLine(),n,M.on?gtroLine(g.id):''].filter(Boolean).map(x=>`<p>${esc(x)}</p>`).join('');}
+ else{const on=u=>M.on?GUILD.online(M.mem[u]):u===pidOf(),R=NET?NET.remotes():[];
+  const L=Object.keys(M.mem).sort((a,b)=>(GRK[M.mem[a].rk]??9)-(GRK[M.mem[b].rk]??9)||(on(b)?1:0)-(on(a)?1:0)||(M.mem[b].c||0)-(M.mem[a].c||0));
+  h=`<p class="gwh">${esc(t('gdwMem',{n:L.length,m:gLv(g)*25,o:L.filter(on).length}))} · ${esc(t('gdwPick'))}</p><div class="gwmem">`+L.map(u=>{const m=M.mem[u],me=M.on?u===NET.uid:u===pidOf(),r=R.find(x=>x.uid===u),o=on(u)||me;
+   const sub=[r?t('lv',{n:lvTxt(r.lv)}):me?t('lv',{n:S.lv}):'',r&&r.cls?pctxName('cl_'+r.cls):me?pctxName('cl_'+S.cls):'',r&&r.zone?t('gdwAt',{z:t(r.zone)}):'',t('gdwC',{n:m.c||0}),o?t('gdOn'):m.on?t('gdwSeen',{t:gdwAgo(wNow()-m.on)}):t('gdOff')].filter(Boolean).join(' · ');
+   return `<button data-gwmem="${esc(u)}" class="${o?'on':''}${me?' me':''}"><b>${o?'●':'○'} ${esc(m.n||'?')}</b><span class="rk">${esc(t('gdRk_'+(m.rk||'r')))}</span><small>${esc(sub)}</small></button>`;}).join('')+'</div>';}
+ if(h!==GDWH){GDWH=h;$('gwB').innerHTML=h;}}
+function gdwFoot(M){const me=M.on?NET.uid:pidOf(),master=M.master===me,b=[];
+ if(M.on&&gCan('invite'))b.push(['inv','gdwInv']);
+ if(M.on)b.push(['chat','gdwChat']);
+ if(master&&M.on&&Object.keys(M.mem).length>1)b.push(['hand','gdwHand']);
+ if(!master)b.push(['leave','gdwLeave']);else if(!M.g.npc)b.push(['dis','gdwDis']);
+ $('gwF').innerHTML=b.map(([k,s])=>`<button data-gwf="${k}" class="${k==='dis'?'bad':''}">${esc(t(s))}</button>`).join('');}
+// a guild page drawn inside the window (from dialog('guild', ...))
+function gdwDlg(lines,done,opts){GDWSUB=true;GDWH='';const B=$('gwB');B.innerHTML='';
+ for(let ln of lines||[]){if(Array.isArray(ln))ln=ln[1];const p=document.createElement('p');p.textContent=t(ln);B.appendChild(p);}
+ const o=document.createElement('div');o.className='gwopts';B.appendChild(o);
+ const add=(l,f,op)=>{const b=document.createElement('button');if(op&&op.ic){b.innerHTML=`<img src="${icon(op.ic)}"><span>${esc(l)}</span>`;}else b.textContent=l;if(op&&op.poor)b.classList.add('poor');b.onclick=()=>{SFX.click();if(f)f();else if(l===t('oClose'))closeGuildW();else gdwShow(GDWTAB);};o.appendChild(b);};
+ if(opts&&opts.length)for(const op of opts){const [l,pr]=optPrice(op);add(pr?l+' ('+pr+')':l,op.f,op);}else add(t('gdwOk'),done,null);
+ B.scrollTop=0;}
+function gdwAct(k){const M=gdwMine();if(!M)return;
+ if(k==='inv')return askLine(t('gdwInvQ'),'',24,v=>{v=(v||'').trim();if(!v)return;const st=hallSt();if(!st||!st.uidOf)return toast(t('gdFail'),'warn');
+  st.uidOf(v).then(u=>{if(!u)return toast(t('admNoId',{n:v}),'warn');return GUILD.invite(u,v).then(()=>toast(t('gdInvSent',{n:v}),'good'),e=>toast(t(String(e&&e.message)==='member'?'gdInvMem':'gdFail'),'warn'));},()=>toast(t('gdFail'),'warn'));});
+ if(k==='chat'){closeGuildW();chatCh('guild');chatOpen();return;}
+ if(k==='hand'){const o=Object.keys(M.mem).filter(u=>u!==NET.uid).map(u=>({l:M.mem[u].n+' · '+t('gdRk_'+M.mem[u].rk),f:()=>dialog('guild',[t('gdHandQ',{n:M.mem[u].n,g:M.name})],null,[{l:t('gYes'),f:()=>(M.mem[u].rk==='o'?Promise.resolve():GUILD.setRank(u,'o')).then(()=>GUILD.handover(u)).then(()=>{toast(t('gdHandDone',{n:M.mem[u].n,g:M.name}),'good');gdwShow('m');},()=>toast(t('gdFail'),'warn'))},{l:t('gNo')}])}));
+  return dialog('guild',['gdwHandQ'],null,[...o,{l:t('gdwBack')}]);}
+ if(k==='leave'){if(M.master===(M.on?NET.uid:pidOf()))return toast(t('gdwMasterLeave'),'warn');
+  return dialog('guild',[t('gdwLeaveQ',{g:M.name})],null,[{l:t('gYes'),f:()=>{leaveGuild();if(gdwOn())gdwShow('x');}},{l:t('gNo')}]);}
+ if(k==='dis')return gdwDisband();}
+function gdwDisband(){const M=gdwMine();if(!M||M.master!==(M.on?NET.uid:pidOf()))return;
+ dialog('guild',[t('gdwDisQ',{g:M.name})],null,[{l:t('gdwDis'),f:()=>askLine(t('gdwDisN'),'',24,v=>{if(v==null)return;if(String(v).trim().toLowerCase()!==String(M.name).trim().toLowerCase()){SFX.deny();return toast(t('gdwDisNo'),'warn');}
+  leaveGuild();if(gdwOn())gdwShow('x');})},{l:t('gNo')}]);}
+// the lead goes to an officer (the rules): the footer's hand over makes a member one first
+// a guild member who comes online gets a short notice (owner 2026-10-23, QOL), checked every 2 s; the first look after
+// you sign in or join only remembers who is there
+let GDWON=null,GDWOT=0;
+function gdwOnline(){if(gTime-GDWOT<2)return;GDWOT=gTime;const st=GUILD&&gdFor===S&&GUILD.state();if(!st||!st.gid||!NET){GDWON=null;return;}
+ const now=new Set(Object.keys(st.members).filter(u=>u!==NET.uid&&GUILD.online(st.members[u])));
+ if(GDWON&&GDWON.gid===st.gid)for(const u of now)if(!GDWON.s.has(u))toast(t('gdwCame',{n:st.members[u].n||'?'}));
+ GDWON={gid:st.gid,s:now};}
+// once a second while a tab (not a page) is shown: members come and go, the guild levels
+function gdwTick(){gdwOnline();if(!gdwOn()||GDWSUB||GDWTAB==='x'||gTime-GDWT<1)return;GDWT=gTime;const M=gdwMine();if(!M)return gdwShow('x');gdwBody(M);}
+window.__GDW={on:()=>gdwOn(),tab:k=>gdwShow(k),lines:()=>[...$('gwB').children].filter(x=>x.tagName!=='DIV'||!x.classList.contains('gwopts')).map(x=>x.textContent),text:()=>window.__GDW.lines().join('\n'),opts:()=>[...document.querySelectorAll('#gwB .gwopts button')].map(x=>x.textContent),dlg:()=>guildPanel()}; // tests
+$('guildW').addEventListener('click',e=>{const tb=e.target.closest('[data-gwtab]');if(tb){SFX.click();return gdwShow(tb.dataset.gwtab);}
+ const f=e.target.closest('[data-gwf]');if(f){SFX.click();return gdwAct(f.dataset.gwf);}
+ const m=e.target.closest('[data-gwmem]');if(m){SFX.click();const u=m.dataset.gwmem,M=gdwMine();if(M&&M.on)return guildMemberD(u);}});
 /* guild banners (SAT-ONLINE-084, plan U231). The master picks the guild's emblem in G -> Guild banner from a fixed set of
    symbols (no uploaded pictures, so nothing to moderate and nothing large); it shows before the guild's name under every
    member's name for everyone, and in G. */
@@ -12299,9 +12388,9 @@ function guildNoteLine(){const n=GUILD&&GUILD.note();return n?t('gdNoteL',{s:n.s
 function guildNoteW(){const st=GUILD&&GUILD.state();if(!st||!gCan('note'))return guildPanel();const n=GUILD.note();
  askLine(t('gdNoteT'),n?n.s:'',Satisfy.guild.C.NOTE_MAX,v=>{if(v==null)return guildPanel();GUILD.setNote(v).then(()=>{toast(t('gdNoteDone'),'good');guildPanel();},()=>{toast(t('gdFail'),'warn');guildPanel();});});}
 // one line of text from the player (a guild notice): cb(text) on Post or Enter, cb(null) on Back or Escape
-function askLine(title,val,max,cb){mode='gname';const box=document.createElement('div');box.id='gnBox';box.className='sys panel';box.innerHTML=`<div class="head">${esc(title)}</div>`;
+function askLine(title,val,max,cb){const gw=gdwOn();mode='gname';const box=document.createElement('div');box.id='gnBox';box.className='sys panel';box.innerHTML=`<div class="head">${esc(title)}</div>`;
  const inp=document.createElement('input');inp.id='lineIn';inp.maxLength=max;inp.value=val||'';const ok=document.createElement('button'),no=document.createElement('button');ok.textContent=t('lnOk');no.textContent=t('oBack');
- const close=()=>{box.remove();mode='play';};ok.onclick=()=>{const v=inp.value;close();cb(v);};no.onclick=()=>{close();SFX.close();cb(null);};
+ const close=()=>{box.remove();mode=gw&&!$('guildW').hidden?'guild':'play';};ok.onclick=()=>{const v=inp.value;close();cb(v);};no.onclick=()=>{close();SFX.close();cb(null);};
  inp.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')ok.onclick();else if(e.key==='Escape')no.onclick();};
  const row=document.createElement('div');row.className='gnr';row.append(ok,no);box.append(inp,row);$('dialog').parentNode.appendChild(box);setTimeout(()=>{inp.focus();inp.select();},30);SFX.open();}
 // every online guild with its members' summed contribution, read once a minute at most, then cb (also if the read fails)
@@ -13401,7 +13490,7 @@ addEventListener('pointermove',guiMove);addEventListener('pointerup',guiEnd);add
 // owner 2026-10-22: the bag moves: drag a window by its title bar (not its buttons) anywhere on the screen; the place is kept
 // per browser (satisfy_pmov, fractions of the screen) and the window opens there next time. The equipment and status
 // windows move the same way. The window keeps its pointer while you drag, so a press on it never reaches the game.
-const PMOV=['inv','equipW','statusW'],PMK='satisfy_pmov';let PMP=(()=>{try{return JSON.parse(localStorage.getItem(PMK)||'{}')||{};}catch(e){return {};}})(),pmDrag=null;
+const PMOV=['inv','equipW','statusW','guildW'],PMK='satisfy_pmov';let PMP=(()=>{try{return JSON.parse(localStorage.getItem(PMK)||'{}')||{};}catch(e){return {};}})(),pmDrag=null;
 function pmPlace(id){const el=$(id),g=PMP[id];if(!el||!g)return;const ui=document.getElementById('ui'),W=ui.clientWidth,H=ui.clientHeight,r=el.getBoundingClientRect(),w=r.width||200,h=r.height||200;
  const x=Math.max(0,Math.min(W-Math.min(w,W),g.x*W)),y=Math.max(0,Math.min(H-Math.min(h,H),g.y*H));Object.assign(el.style,{left:x+'px',top:y+'px',transform:'none',margin:'0'});}
 for(const id of PMOV){const el=$(id);if(!el)continue;new MutationObserver(()=>{if(!el.hidden)requestAnimationFrame(()=>pmPlace(id));}).observe(el,{attributes:true,attributeFilter:['hidden']});
