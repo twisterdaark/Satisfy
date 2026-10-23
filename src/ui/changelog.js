@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23fightlog', ver: '2.06', d: '2026-10-23',
+      ar: ["اكتب /fightlog في الشات تشوف آخر مبارزة: كل ضربة ضربتها، وكل ضربة جتلك وصحتك بعدها، واللي رفضته وليه، والوقت من أول القتال لآخره",
+        "ولو اتقتلت في PvP: بتشوف مين ضربك وكام ضربة في كام ثانية. وآخر المبارزة بيظهر ملخصها في شباكها"],
+      en: ["Type /fightlog in the chat to see your last duel: every hit you landed, every hit you took and your health after it, what was turned down and why, and the time from start to end",
+        "Killed in PvP: see who hit you and how many hits in how many seconds. A duel's summary also shows in its window when it ends"] },
     { v: '2026-10-23mobfol', ver: '2.05', d: '2026-10-23',
       ar: ["أونلاين: الوحوش عند اللي معاك في البارتي بقت ماشية ورا اللي عند الهوست بتأخير أقل، فالضربات بتيجي في مكانها"],
       en: ["Online: monsters on a party member's screen keep closer to the host's, so their blows land where you see them"] },

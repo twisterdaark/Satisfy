@@ -83,6 +83,19 @@ for (const mode of ['local', 'online']) {
       const after = await b.eval(() => { const S = window.__G.S; return { gold: S.gold, items: JSON.stringify(S.items), mats: JSON.stringify(S.mats), hp: window.__G.P.hp }; });
       assert.deepEqual(after, before, 'a duel costs no gold, items, materials, durability or real HP');
       assert.equal(await b.eval(() => window.__G.mode), 'play', 'losing a duel is not a death');
+      // SAT-ONLINE-150 (plan U039): each side's fight log, from "/fightlog"
+      const logOf = (g) => g.eval(() => {
+        const G = window.__G; window.__GFLOG.show(); const L = G.DL.lines.slice();
+        for (let i = 0; i < 60 && G.mode === 'dialog'; i++) { const b = document.querySelector('#dopts button'); if (b && !document.getElementById('dopts').hidden) { b.click(); break; } G.advance(); }
+        return L;
+      });
+      const la = await logOf(a), lb = await logOf(b);
+      assert.match(la[0], /^You won the duel against Faker in \d+\.\d s$/);
+      assert.match(la[1], /^Your hits: \d+ \(100 of their HP\) · theirs: 0 /);
+      assert.ok(la.some((l) => /s · You hit Faker$/.test(l)), la.join(' | '));
+      assert.match(lb[0], /^You lost the duel against Grid in \d+\.\d s$/);
+      assert.match(lb[1], /· theirs: \d+ \(100 of yours\)/);
+      assert.ok(lb.some((l) => /s · Grid hit you -[\d.]+ \(you have 0\)$/.test(l)), lb.join(' | '));
       if (mode === 'online') {
         assert.deepEqual(await a.eval(() => window.__fakeRTDB.rejected), []);
         assert.deepEqual(await b.eval(() => window.__fakeRTDB.rejected), []);
