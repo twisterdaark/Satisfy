@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23hairgap', ver: '2.43', d: '2026-10-23',
+      ar: ["مفيش صلعة في الشعر تاني: الفتحات الصغيرة اللي كانت في الغرة تحت التاج اتقفلت في كل التسريحات، والفرق في النص بقى خط أغمق في الشعر مش جلد.",
+          "المنظر الجانبي: الشعر بقى مغطي ورا الراس وفوق الودن بدل شريط رفيع، فالوش من الجنب مبقاش باين كأنه أصلع."],
+      en: ["No more bald spots: the small gaps in the fringe right under the crown are closed on every hairstyle, and a parting is now a darker line in the hair instead of skin.",
+          "Side view: the hair now covers the back of the head and over the ear instead of a thin strip, so the head no longer looks bald from the side."] },
     { v: '2026-10-23expr', ver: '2.42', d: '2026-10-23',
       ar: ["تعبير الوش بقى اختيار في إنشاء الشخصية وعند ليلى الستايلست (300 جولد): عادي، ابتسامة، هادي، مكشّر، نعسان، غمزة، متفاجئ، مطلّع لسانه، مكسوف.",
           "التعبير اللي تختاره بيفضل ظاهر على وشك طول الوقت وبيشوفه اللاعيبة التانيين أونلاين، والرمشة وتعبير الوجع لما تتضرب بيظهروا لحظة وبعدين يرجع تعبيرك."],
