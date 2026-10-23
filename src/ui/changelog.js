@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23moves', ver: '2.04', d: '2026-10-23',
+      ar: ["كل وحش بقى ليه أسلوبه وضرباته الخاصة، من الأرنب لحد البوسات والشياطين العظام: 127 نوع، ومفيش اتنين بيحاربوا زي بعض",
+        "البشر بيشربوا جرعات لما يتعوروا، والكهنة والشامانات بيعالجوا صحابهم ويحطوا عليهم دروع، وتعويذة التقييد بتمسكك مكانك وصحابه بيهجموا عليك في نفس اللحظة (التفادي بيفكّك)",
+        "حركات جديدة: رمي كذا حاجة مرة واحدة، رمي في كل الاتجاهات، علامات على الأرض بتنفجر أو بيقع عليها حاجة من السما، برك سم ونار بتفضل، صرخة حرب، نداء القطيع، خطاف بيشدك، اختفاء وظهور وراك، ونط لورا",
+        "السم والنزيف والحرق بياكلوا من صحتك شوية شوية (من غير ما يموتوك)، والتجميد بيبطّأك",
+        "كل بوس بقى ليه من 3 لـ 6 ضربات خاصة بيه، وكل مرحلة (66% و33%) بتفتح ضربات أقوى، بدل الدايرة اللي بتكبر والطوب اللي كانوا كلهم بيعملوه",
+        "موسوعة الوحوش بتقولك أسلوب كل وحش وضرباته عشان تعرف تتعامل معاه"],
+      en: ["Every monster has its own style and moves, from the rabbit to the bosses and Great Demons: 127 kinds, no two fighting alike",
+        "People drink potions when hurt, priests and shamans heal and shield their friends, and a binding spell holds you still while the others strike at once (a dodge breaks it)",
+        "New moves: spreads of shots, shots all round, marked spots that erupt or are struck from the sky, lingering poison and fire pools, war cries, pack calls, hooks that pull you in, vanishing to appear behind you, leaping back",
+        "Poison, bleeding and burning eat your health a little at a time (never the last point), and frost slows you",
+        "Every boss has 3 to 6 moves of its own, and each phase (66% and 33%) opens stronger ones, instead of the growing circle and rocks they all shared",
+        "The monster book tells you each monster's style and moves, so you can learn how to fight it"] },
     { v: '2026-10-23rscroll', ver: '2.03', d: '2026-10-23',
       ar: ["لفافة العودة: بترجعك للنُزل اللي مسجّل فيه (أو أقرب مدينة) بعد ثانيتين ونص من النور، ولو اتضربت وانت بتقراها بتتلغي. مرة كل دقيقة، ومبتشتغلش في الحلبة ولا البرج ولا جزر بيهين ولا المبارزة ولا السباق ولا جوه القلعة وقت الحصار",
         "بتتباع غالية في كل النُزل، وبتنزل نادر من الوحوش وأكتر من البوسات، وستيكس (بعد ما تعالجه) ساعات بيديك واحدة لو سألته، مرة في اليوم"],
