@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23boost', ver: '2.35', d: '2026-10-23',
+      ar: ["الخبرة من وحش قتله غيرك بقت لأي حد قريب منه وقت موته، حتى لو مضربش. الغنايم بس هي اللي محتاجة إنك تكون شاركت (5% من صحته أو ضربته في آخر 30 ثانية).",
+          "الـBoosting رجع زي ما كان قبل آخر تعديل، بس بنص السرعة: لو في البارتي حد أعلى منك بأكتر من 20 لفل، الوحوش اللي أعلى منك بأكتر من 20 لفل بتديك نص الخبرة اللي كانت بتديها. واتشالت قاعدة العُشر وحد الـ3%. لوحدك أو مع ناس في لفلك مفيش تغيير."],
+      en: ["XP from a monster someone else killed now goes to anyone near it when it dies, even without a hit. Only the loot needs a real part (5% of its health or a hit in the last 30 s).",
+          "Boosting is back to how it was before the last change, at half speed: with someone more than 20 levels above you in the party, monsters more than 20 levels above you give half the XP they did. The tenth-of-the-damage rule and the 3% cap are gone. Alone or with players of your level nothing changes."] },
     { v: '2026-10-23crem', ver: '2.34', d: '2026-10-23',
       ar: ["إبداع الحداد الأسطوري: بقيت تختار لحد 4 خامات من الشنطة مع بعض وتحدد كمية كل واحدة (حديد، أحجار، جواهر، جواهر العناصر، حراشف التنين، أنفاس الوحوش الأربعة، دروب بيليال وغيرهم). الأقوى بتحدد القوة والباقي يضيف خصايصه، والكمية بتفرق لحد الضعف. أنفاس الوحوش الأربعة بتعمل سلاح في مستوى إياروغت أو أعلى، وكل نفس بيدّي خاصية (نزيف، سرعة متزايدة، امتصاص حياة، صحة). والخامات اللي معاكش منها بتبان رمادي وتقدر تشوف بتدّي إيه، وفيه معاينة بتقارن بسلاحك.",
           "دعوة البارتي: أي عضو يقدر يدعو على طول من غير القائد. اللي اتدعى بيشوف \"فلان بيدعوك لبارتي القائد\"، ولما يقبل بيدخل حتى لو تاب القائد في الخلفية.",

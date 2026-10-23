@@ -71,12 +71,14 @@ test('party XP: a quarter to a member near the kill and playing; nothing far awa
     assert.ok(ga > 0, 'A got the kill: ' + ga);
     assert.ok(gb > 0 && Math.abs(gb - ga / 4) <= 1, 'B got a quarter: ' + gb + ' of ' + ga);
 
-    // boosting slower (owner 2026-10-23): far above you it pays less, a kill you barely hit pays the share, and at most 3% a kill
-    const bo = await b.eval(() => { const X = window.__GPXP, S = window.__G.S, need = window.__G.xpNeed ? window.__G.xpNeed() : null;
-      return { g: [10, 20, 40, 60, 100].map((d) => +X.gap(d).toFixed(2)), hit: X.kf({ lv: S.lv + 5, max: 100, myd: 50 }), low: X.kf({ lv: S.lv + 5, max: 100, myd: 5 }), far: X.kf({ lv: S.lv + 60, max: 100, myd: 50 }), cap: X.cap(1e9, S.lv + 30), near: X.cap(1e9, S.lv + 10) }; });
-    assert.deepEqual(bo.g, [1.3, 1.3, 0.75, 0.2, 0.2]);
-    assert.ok(Math.abs(bo.hit - 1.15) < 1e-9 && Math.abs(bo.low - 1.15 / 4) < 1e-9 && Math.abs(bo.far - 0.2) < 1e-9, JSON.stringify(bo));
-    assert.ok(bo.cap < 1e9 && bo.cap > 0, 'capped: ' + bo.cap); assert.equal(bo.near, 1e9);
+    // boosting at half speed (owner 2026-10-23): only with someone 20+ levels above you in the party, for monsters 20+ above you
+    assert.deepEqual(await b.eval(() => [10, 40].map((d) => +window.__GPXP.gap(d).toFixed(2))), [1.3, 1.3], 'same level: as before');
+    await b.eval(() => { window.__G.S.lv = 10; });
+    await settle(a, b); await settle(a, b);
+    await a.eval(() => { window.__G.S.lv = 40; });
+    await until(b, () => window.__GPXP.gap(40) < 1);
+    assert.deepEqual(await b.eval(() => [10, 40].map((d) => +window.__GPXP.gap(d).toFixed(2))), [1.3, 0.65], 'carried: half');
+    await b.eval(() => { window.__G.S.lv = 40; });
 
     // far away (out of the radius): nothing
     await arena(a, b, 900);
