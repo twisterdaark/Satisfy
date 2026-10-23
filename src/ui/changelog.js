@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23beastnovel', ver: '2.20', d: '2026-10-23',
+      ar: ["البيست ماستر بقى زي الرواية: ملك الوحوش أسد ضخم زئيره بيوقّع اللي حواليه، وسيد السما (النسر) بيفلت من أي قيد، ونص إنسان نص وحش بقى تحوّل حقيقي لمستذئب شايل سلاحه بلبدة زي المانهوا وصحته بترجع بسرعة، وضربة السيد بيطلع فيها راس أسد دهبي",
+          "سكيلات جديدة للبيست ماستر: زئير الأسد بيضعف الأعداء، وشكل النمر بيقطّع وينزّف، وشكل الفهد الثلجي أسرع شكل وبيتفادى، وشكل المستذئب القديم بقى اسمه شكل الذئب"],
+      en: ["The Beast Master as in the novel: King of the Beasts is a giant lion whose roar fells those around it, Lord of Heaven (the eagle) slips any shackle, and Half Man Half Beast is now a real maned werewolf form, as in the manhwa, that keeps its weapon and recovers fast, and Lord's Strike shows a great golden lion's head",
+          "New Beast Master skills: the Lion's Roar weakens foes, the Tiger Form rends and bleeds, the Snow Leopard Form is the fastest and dodges, and the old Werewolf Form is now the Wolf Form"] },
     { v: '2026-10-23wikisec', ver: '2.19', d: '2026-10-23',
       ar: ["13 تخصص إنتاجي جديد من الرواية جنب الفلاح والطباخ والكيميائي والخياط والمنشد، كل واحد بميزة واحدة: صيّاد سمك (عند الصياد)، وعامل منجم وبنّاء وعامل بناء ومهندس معماري (عند الريّس في رايدان)، وتاجر (عند تاجر راينهارت)، وطبيب (عند معبد تيتان)، وباحث وكاشف وحوش (عند باحث راينهارت)، ورسّام (عند الستايليست)، وصانع إكسسوارات (عند إليزابيث)، ومنظّف (عند صاحب الفندق في رايدان)، وسيد الحيوانات الأليفة (عند الصياد اللي في البلد)"],
       en: ["13 new production specializations from the novel next to the Farmer, Chef, Alchemist, Tailor and Bard, each with one bonus: Fisherman (at the fisher), Miner, Builder, Construction Worker and Architect (the Reidan foreman), Merchant (Reinhardt's merchant), Doctor (Titan's temple), Scholar and Monster Discerner (Reinhardt's scholar), Painter (the stylist), Accessory Maker (Elizabeth), Cleaner (the Reidan innkeeper) and Pet Master (the town hunter)"] },
