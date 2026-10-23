@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23mana', ver: '2.28', d: '2026-10-23',
+      ar: ["المانا بقت زي الرواية: كل نقطة ذكاء بـ3 مانا، ومن لفل 200 (الصحوة التانية) بـ6. يعني 2500 ذكاء بقوا حوالي 15,000 مانا بدل 7,500، غير العتاد.",
+          "تكلفة السكيل مبقتش نسبة من المانا بتاعتك، بقت على قد لفلك (زي ما Linked Kill Wave بتاخد 2,000 من 70,000 عند جريد)، فالذكاء الزيادة بيديك ضربات أكتر. السكيل اللي كانت بتاخد 6,500 بقت حوالي 4,300 في لفل 450.",
+          "لو وقفت ثابت برا القتال ثانيتين، المانا بترجع أسرع مرتين ونص.",
+          "تقدر تشيل 30 بوشن من كل نوع بدل 10.",
+          "زرار 📜 بقى صغير في هيدر لوحة الكويستات جنب زرار التصغير، ظاهر على طول، وعليه رقم بالرسايل الجديدة من آخر مرة فتحت السجل.",
+          "وصف القطعة بقى بيطلع فوق الإشعارات وكل الشبابيك، ولو طويل بيتزق جوه الشاشة بدل ما يتقص."],
+      en: ["Mana works like the novel: 3 MP per Intelligence point, 6 from level 200 (the Second Awakening). 2,500 Intelligence is now about 15,000 mana instead of 7,500, before gear.",
+          "A skill's cost is no longer a share of your own mana but set by your level (as Linked Kill Wave costs 2,000 of Grid's 70,000), so extra Intelligence buys more casts. A skill that took 6,500 takes about 4,300 at level 450.",
+          "Standing still for two seconds out of a fight refills mana two and a half times as fast.",
+          "You can carry 30 potions of each kind instead of 10.",
+          "The 📜 button is small on the quest panel's header beside its minimise button, always shown, with a count of new messages since you last opened the log.",
+          "An item's tooltip now draws over the notices and every window, and a long one is pushed inside the screen instead of being cut off."] },
     { v: '2026-10-23qtrack', ver: '2.27', d: '2026-10-23',
       ar: ["كل الكويستات بقى ليها تتبع: الوحش اللي مش جنبك أو ميت أو جاي في حدث (زي دارك باس وسيد المدينة 13 وجنود المملكة الخالدة والسلاح القديم والجولمات) السهم بيوديك لمكانه.",
           "اللي تحت الأرض أو في دانجن أو جزر بيهين، السهم بيوديك للمدخل الأول، وجوه بيوديك للوحش نفسه أو لطريق الخروج.",
