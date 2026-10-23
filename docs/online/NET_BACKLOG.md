@@ -245,6 +245,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 ## From other ranges (2026-10-24)
 | U | Update | Status | Where |
 |---|---|---|---|
+| U266 | Controller support | ✅ | SAT-ONLINE-172: a standard gamepad through the Gamepad API (`gpTick` in the loop): the left stick walks (analog), A/B/X/Y attack, dodge, use, guard, the four shoulders the skill slots, the sticks' clicks the potions, the right stick the windows; in menus the D-pad and A/B send the arrow keys, Enter and Esc (`gpKey`, `KSYN`); a hit rumbles (`gpRumble`, off with `satisfy_gpvib`); nothing runs with no pad; `regression/gamepad` |
 | U267 | Reduced motion | ✅ | SAT-ONLINE-164: a device setting in the pause menu (`satisfy_rmo`, the system's prefers-reduced-motion when unset): no camera shake, no white flash, the UI's shakes and pulses stop, particles capped (`RMOFX`, `RMOVX`); telegraphs (`drawTele`) untouched; `regression/rmotion` |
 | U269 | Armor pieces (render sprite overlays) | ✅ | SAT-ONLINE-165: helmet, armour, gloves and boots each draw their own look (`GEARL`, 48 ids), for you and the others (`gr:` fx tag); `regression/gearlook` |
 
