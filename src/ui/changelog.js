@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23monsee', ver: '2.53', d: '2026-10-23',
+      ar: ["مصاصين الدماء النبلا، وإيرلات الدم من المدينة 6 لتحت، وماري روز، وفنرير كانوا مختفيين. دلوقتي بيبانوا بشكلهم، واتراجعت كل الوحوش التانية ومفيش حد ناقص.",
+          "كويستات \"اقتل وصحتك أقل من 50%\": لو لفلك أعلى من الوحش بـ 20 أو أكتر، شرط الصحة بيتلغى لأنه مستحيل يوصلك ليها، والكويست بيقول كده.",
+          "تايتل \"أول ملك\" مابقاش بييجي من مسك قلعة ريدان، لأن مسك القلعة مش بيخليك ملك. أعلى رتبة دلوقتي فيسكونت، واللي خده قبل كده اتشال منه.",
+          "حرب الدفاع ضد جيش الجوليم: \"السلاح القديم\" بقى بييجي مع كل موجة بدل كل 3 موجات، فكويست حرب الدفاع 2 بقى يخلص."],
+      en: ["The vampire nobles, the Blood Earls from city 6 down, Marie Rose and Fenrir were invisible; they show now, and every other monster was checked, none missing.",
+          "\"Kill it below 50% health\" quests: 20 or more levels above the monster, the health rule is waived, since it can't bring you that low, and the quest says so.",
+          "The First King title no longer comes from holding Reidan Castle, since that makes no one a king (viscount is the highest rank now); those who had it lose it.",
+          "In the defense war against the Golem Army an Ancient Weapon now comes with every wave instead of every third, so Defense War 2 can be finished."] },
     { v: '2026-10-23qrec', ver: '2.52', d: '2026-10-23',
       ar: ["زرار ⭐ في خانة الكويستات: بيختارلك كويست على قد لفلك تقدر تاخده دلوقتي، والسهم بيوديك للي بيدّيه.",
           "حماية بعد الدخول: أول ما تدخل اللعبة أو ترجع للحياة محدش يقدر يأذيك لحد ما تضرب، أو تستخدم سكيل، أو تتحرك 3 ثواني (عشان لو في غزو تلحق تهرب). بيبان حواليك درع أزرق.",
