@@ -242,4 +242,9 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 
 **Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 82 · 🟡 11 · ⏳ 5 · ❌ 6 of 104.
 
+## From other ranges (2026-10-24)
+| U | Update | Status | Where |
+|---|---|---|---|
+| U269 | Armor pieces (render sprite overlays) | ✅ | SAT-ONLINE-165: helmet, armour, gloves and boots each draw their own look (`GEARL`, 48 ids), for you and the others (`gr:` fx tag); `regression/gearlook` |
+
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
