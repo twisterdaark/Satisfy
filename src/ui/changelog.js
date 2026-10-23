@@ -7,6 +7,20 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23arenapairs', ver: '2.03', d: '2026-10-23',
+      ar: ["الساحة: مع نفس اللاعب بتتحسبلك 5 مبارزات متقيمة بس في الموسم. بعدها المبارزة بتتحسب مكسب أو خسارة، بس تقييمك مبيتحركش، فمحدش يقدر يرفع تقييمه من صاحبه"],
+      en: ["Arena: only 5 rated duels a season count with the same player; after that a duel is still a win or a loss but the rating doesn't move, so nobody can farm a friend for rating"] },
+    { v: '2026-10-23pvpwear', ver: '2.02', d: '2026-10-23',
+      ar: ["PvP: لو لاعب قتلك، كل حاجة لابسها (السلاح والدرع والخواتم) بتخسر 5 من متانتها، بس عمرها ما بتنزل تحت 10. يعني الـ PvP لوحده عمره ما يكسر معداتك، والحداد بيصلحها. ومفيش حاجة بتقع منك. والمبارزة ملهاش أي تمن"],
+      en: ["PvP: when a player kills you, everything you wear (weapon, armour, rings) loses 5 durability, but never below 10, so PvP alone never breaks your gear and the smith repairs it; nothing is dropped. A duel still costs nothing"] },
+    { v: '2026-10-23antiexploit', ver: '2.01', d: '2026-10-23',
+      ar: ["PvP: مفيش ضربة بتعدي من حد لسه عامل تيليبورت جنبك (لمدة ثانية)، والجري والاندفاع والقفزة القصيرة مش محسوبين. ولو الخصم في المبارزة قال إن صحته رجعت تاني، اللعبة مبتصدقوش"],
+      en: ["PvP: no hit lands from someone who has just teleported next to you (for a second; running, dashing and a short blink don't count), and in a duel a foe's health that claims to go back up is not believed"] },
+    { v: '2026-10-23fightlog', ver: '2.00', d: '2026-10-23',
+      ar: ["اكتب /fightlog في الشات تشوف آخر مبارزة: كل ضربة ضربتها، وكل ضربة جتلك وصحتك بعدها، واللي رفضته وليه، والوقت من أول القتال لآخره",
+        "ولو اتقتلت في PvP: بتشوف مين ضربك وكام ضربة في كام ثانية. وآخر المبارزة بيظهر ملخصها في شباكها"],
+      en: ["Type /fightlog in the chat to see your last duel: every hit you landed, every hit you took and your health after it, what was turned down and why, and the time from start to end",
+        "Killed in PvP: see who hit you and how many hits in how many seconds. A duel's summary also shows in its window when it ends"] },
     { v: '2026-10-23monart', ver: '1.99', d: '2026-10-23',
       ar: ["مفيش وحشين شبه بعض تاني: كهنة معبد ياتان والشياطين وفرسان الموت الستة والفامباير والعفاريت وفرسان كل مملكة وقطاع الطرق اترسموا من جديد، كل واحد بشكل خاص بيه (أقنعة، قلنسوات، عمايم، قرون، أجنحة، خوذ بريش، عيون بتنور)",
         "البشر والعفاريت بقى ليهم أكتر من تصميم: 16 نوع كل واحد بـ 3 أشكال مختلفة غير الأصلي (عصابة، قناع جمجمة، قلنسوة، شعر، خوذة)، وكل شكل بسلاحه هو",

@@ -25,7 +25,13 @@
  * position). A modified client could ignore hits, but a duel has no stakes, so it gains nothing.
  * Open PvP with stakes (R5) needs Trusted Combat on a server.
  *
- * Exposes `Satisfy.duel.create({ presence, uid, now?, pos, zone, policy? })`.
+ * Fight log (SAT-ONLINE-150, plan U039 "PvP combat log: validated damage events with origin, cause and timing; the
+ * report rebuilds a duel's result with its timing"). Each side records its own fight: the countdown and the start, every
+ * hit it sent (`out`), every hit it took after its own checks (`in`, with its duel HP after; k 0 = a dodge), every hit it
+ * turned down and why (`rej`), the foe's HP as the foe reported it (`foe`), and the end. `state().last.log` keeps the last
+ * duel's; `Satisfy.duel.report(log)` rebuilds the result, the time and the totals from those events alone.
+ *
+ * Exposes `Satisfy.duel.create({ presence, uid, now?, pos, zone, policy? })`, `Satisfy.duel.report(log)`.
  */
 (function (root) {
   'use strict';
@@ -34,7 +40,9 @@
     HP: 100, MIN_HIT: 4, MAX_HIT: 18, HITS_PER_S: 4,
     CHALLENGE_R: 64, HIT_RANGE: 200, ARENA_R: 220, OUT_MS: 3000, TELEPORT_PX: 120,
     INVITE_MS: 30000, READY_MS: 20000, COUNTDOWN_MS: 3000, GRACE_MS: 6000, HP_MS: 200, OVER_MS: 4000,
+    JUMP_MS: 1000, // SAT-ONLINE-151 (plan U044): no hit lands from an attacker who jumped this long ago
   });
+  var LOG_MAX = 400; // events a duel keeps (SAT-ONLINE-150): about a minute and a half of a fast fight
   var TYPES = ['duel.challenge', 'duel.accept', 'duel.decline', 'duel.ready', 'duel.hit', 'duel.hp', 'duel.yield', 'duel.end'];
 
   function create(o) {
@@ -45,6 +53,7 @@
     var incoming = new Map();   // duel id -> {duel, from, sid, handle, t}
     var d = null;               // the current duel
     var lastResult = null;
+    function rec(e) { if (!d) return; if (d.log.length >= LOG_MAX) return; e.at = now(); d.log.push(e); }
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function byUid(uid) { var hit = null; P.remotes().forEach(function (r) { if (r.uid === uid) hit = r; }); return hit; }
@@ -63,13 +72,14 @@
     function start(id, foe, handle, mine) {
       d = { id: id, foe: foe, handle: handle || '', mine: !!mine, phase: mine ? 'asking' : 'ready',
         since: now(), meReady: false, foeReady: false, hp: C.HP, foeHp: C.HP, seen: now(),
-        arena: null, outT: 0, last: null, hitsIn: [], hitN: 0, hpDirty: false, hpSent: 0 };
+        arena: null, outT: 0, last: null, hitsIn: [], hitN: 0, hpDirty: false, hpSent: 0, log: [] };
     }
     function finish(result, why, tell) {
       if (!d || d.phase === 'over') return;
       if (tell) send(tell.type, tell.extra);
       d.phase = 'over'; d.since = now();
-      lastResult = { duel: d.id, foe: d.foe, handle: d.handle, result: result, why: why, hp: d.hp, foeHp: d.foeHp };
+      rec({ e: 'end', result: result, why: why, hp: d.hp, foeHp: d.foeHp });
+      lastResult = { duel: d.id, foe: d.foe, handle: d.handle, result: result, why: why, hp: d.hp, foeHp: d.foeHp, log: d.log.slice() };
       emit({ type: 'result', result: result, why: why, handle: d.handle, foe: d.foe });
     }
 
@@ -106,13 +116,15 @@
           var t = now(), k = +pl.k;
           if (!(k >= 1)) return;
           d.hitsIn = d.hitsIn.filter(function (x) { return t - x < 1000; });
-          if (d.hitsIn.length >= C.HITS_PER_S) { emit({ type: 'rejected', why: 'rate' }); return; }
+          if (d.hitsIn.length >= C.HITS_PER_S) { rec({ e: 'rej', why: 'rate' }); emit({ type: 'rejected', why: 'rate' }); return; }
           var me = pos(), r = byUid(from.uid);
-          if (!r || dist(me, r) > C.HIT_RANGE) { emit({ type: 'rejected', why: 'range' }); return; }
+          if (!r || dist(me, r) > C.HIT_RANGE) { rec({ e: 'rej', why: 'range' }); emit({ type: 'rejected', why: 'range' }); return; }
+          if (P.jumped && t - (P.jumped(ev.sid) || -1e12) < C.JUMP_MS) { rec({ e: 'rej', why: 'jump' }); emit({ type: 'rejected', why: 'jump' }); return; }
           d.hitsIn.push(t);
           k = hurt ? Math.max(0, Math.min(C.HP, +hurt(k) || 0)) : Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(k)));
-          if (!(k > 0)) break;
+          if (!(k > 0)) { rec({ e: 'in', k: 0, hp: d.hp }); break; }
           d.hp = Math.max(0, d.hp - k);
+          rec({ e: 'in', k: k, hp: d.hp });
           emit({ type: 'hurt', dmg: k, hp: d.hp });
           if (d.hp <= 0) finish('lose', 'hp', { type: 'duel.end', extra: { k: 0 } });
           else d.hpDirty = true;
@@ -120,7 +132,9 @@
         }
         case 'duel.hp':
           if (!mineDuel || d.phase !== 'fight') return;
-          if (+pl.k >= 0 && +pl.k <= C.HP) d.foeHp = +pl.k;
+          // a defender's HP only goes down in a duel: a report of more than it said before is a lie (SAT-ONLINE-151)
+          if (+pl.k >= 0 && +pl.k < d.foeHp) { d.foeHp = +pl.k; rec({ e: 'foe', hp: d.foeHp }); }
+          else if (+pl.k > d.foeHp) { rec({ e: 'rej', why: 'hp' }); emit({ type: 'rejected', why: 'hp' }); }
           break;
         case 'duel.yield':
           if (!mineDuel) { incoming.delete(pl.duel); return; }
@@ -186,6 +200,7 @@
         var r = byUid(d.foe);
         if (!r || dist(pos(), r) > C.HIT_RANGE) return 0;
         var k = hurt ? Math.max(1, Math.min(1e9, Math.round(+power || 0))) : Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(+power || 0)));
+        rec({ e: 'out', k: k });
         send('duel.hit', { k: k, n: ++d.hitN });
         return k;
       },
@@ -228,6 +243,7 @@
             d.phase = 'countdown'; d.since = t;
             d.arena = r ? { x: (me.x + r.x) / 2, y: (me.y + r.y) / 2 } : { x: me.x, y: me.y };
             d.last = { x: me.x, y: me.y };
+            rec({ e: 'cd' });
             emit({ type: 'countdown' });
           }
           return;
@@ -240,7 +256,7 @@
           if (!d.outT) { d.outT = t; emit({ type: 'outside' }); }
           else if (t - d.outT > C.OUT_MS) { api.yield('arena'); return; }
         } else d.outT = 0;
-        if (d.phase === 'countdown' && t - d.since >= C.COUNTDOWN_MS) { d.phase = 'fight'; d.since = t; emit({ type: 'fight' }); }
+        if (d.phase === 'countdown' && t - d.since >= C.COUNTDOWN_MS) { d.phase = 'fight'; d.since = t; rec({ e: 'fight' }); emit({ type: 'fight' }); }
         if (d.phase === 'fight' && d.hpDirty && t - d.hpSent >= C.HP_MS) { d.hpDirty = false; d.hpSent = t; send('duel.hp', { k: d.hp }); }
       },
       on: function (fn) { listeners.push(fn); },
@@ -248,6 +264,33 @@
     return api;
   }
 
+  /**
+   * A duel's result rebuilt from its log alone: your duel HP from the hits you took, the foe's from what it reported, the
+   * time from the start of the fight. ok: the rebuilt HP and result are the ones the duel ended with (a log cut short at
+   * LOG_MAX, or changed, is not). lines: each event with its time from the start (ms).
+   */
+  function report(log) {
+    log = Array.isArray(log) ? log : [];
+    var t0 = null, end = null, hp = C.HP, foe = C.HP, taken = 0, dealt = 0, hitsIn = 0, dodged = 0, hitsOut = 0, rej = 0, big = 0, lines = [];
+    for (var i = 0; i < log.length; i++) if (log[i] && log[i].e === 'fight') { t0 = log[i].at; break; }
+    if (t0 === null && log.length) t0 = log[0].at;
+    for (var j = 0; j < log.length; j++) {
+      var e = log[j];
+      if (!e || typeof e.at !== 'number') continue;
+      if (e.e === 'in') { var k = Math.max(0, +e.k || 0); if (k > 0) { taken += Math.min(hp, k); hp = Math.max(0, hp - k); hitsIn++; big = Math.max(big, k); } else dodged++; }
+      else if (e.e === 'out') hitsOut++;
+      else if (e.e === 'foe') { var f = +e.hp; if (f >= 0 && f <= C.HP) { if (f < foe) dealt += foe - f; foe = f; } }
+      else if (e.e === 'rej') rej++;
+      else if (e.e === 'end') end = e;
+      lines.push({ ms: Math.round(e.at - t0), e: e.e, k: e.k, hp: e.hp, why: e.why, result: e.result });
+    }
+    var res = hp <= 0 ? { result: 'lose', why: 'hp' } : end ? { result: end.result, why: end.why } : { result: null, why: null };
+    if (end && end.why === 'hp' && end.result === 'win') { dealt += foe; foe = 0; }
+    var ok = !!end && end.hp === hp && end.result === res.result && end.why === res.why && log.length < LOG_MAX;
+    return { result: res.result, why: res.why, ms: end && t0 !== null ? Math.round(end.at - t0) : null, hp: hp, foeHp: foe, taken: taken, dealt: dealt,
+      hitsIn: hitsIn, dodged: dodged, hitsOut: hitsOut, rejected: rej, biggest: big, ok: ok, lines: lines };
+  }
+
   var ns = root.Satisfy = root.Satisfy || {};
-  ns.duel = Object.freeze({ create: create, C: C, TYPES: Object.freeze(TYPES.slice()) });
+  ns.duel = Object.freeze({ create: create, report: report, C: C, TYPES: Object.freeze(TYPES.slice()), LOG_MAX: LOG_MAX });
 })(typeof window !== 'undefined' ? window : globalThis);
