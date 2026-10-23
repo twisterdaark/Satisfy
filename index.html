@@ -745,7 +745,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
 <script>
 (()=>{
 'use strict';
-const W=(()=>{try{if(/touch=0/.test(location.search)||!matchMedia('(pointer: coarse)').matches)return 480;const a=Math.max(screen.width,screen.height)/Math.min(screen.width,screen.height);return Math.max(480,Math.min(624,Math.round(270*a/2)*2));}catch(e){return 480;}})(),H=270,TS=16,LW=224,GAPS=[[104,80],[158,110],[224,150],[224,160]],EX=LW+GAPS.reduce((a,g)=>a+g[1],0),EW=240,MW=EX+EW,MH=326,WH=44,BW=64,WMH=272,OWH=120,SR=40,NR=172,ON=60,OS=OWH+SR; // Bairan block = x<BW,y<WH; the open world is rows -NR..WMH-1 (the first map was rows 0..OWH-1; the north -ON..-1 and the south OWH..OS-1 came next; the map doubled north and south, owner 2026-10-19: the far north -NR..-ON-1, the far south OS..WMH-1); columns EX..MW-1 are the Saharan Empire past Reinhardt (owner 2026-10-19); rows WMH..MH-1 hold house interiors and caves
+const W=(()=>{try{if(/touch=0/.test(location.search)||!matchMedia('(pointer: coarse)').matches)return 480;const a=Math.max(screen.width,screen.height)/Math.min(screen.width,screen.height);return Math.max(480,Math.min(624,Math.round(270*a/2)*2));}catch(e){return 480;}})(),H=270,TS=16,LW=224,GAPS=[[104,80],[158,110],[224,150],[224,160]],EX=LW+GAPS.reduce((a,g)=>a+g[1],0),EW=240,MW=EX+EW,MH=362,WH=44,BW=64,WMH=272,OWH=120,SR=40,NR=172,ON=60,OS=OWH+SR; // Bairan block = x<BW,y<WH; the open world is rows -NR..WMH-1 (the first map was rows 0..OWH-1; the north -ON..-1 and the south OWH..OS-1 came next; the map doubled north and south, owner 2026-10-19: the far north -NR..-ON-1, the far south OS..WMH-1); columns EX..MW-1 are the Saharan Empire past Reinhardt (owner 2026-10-19); rows WMH..MH-1 hold house interiors and caves
 const cvs=document.getElementById('game');if(cvs.width!==W+1)cvs.width=W+1;const ctx=cvs.getContext('2d');ctx.imageSmoothingEnabled=false;
 const stage=document.getElementById('stage'),UI=document.getElementById('ui');
 const $=id=>document.getElementById(id);
@@ -976,6 +976,27 @@ const FIG={
  vthrall:{hair:'messy',hc:'#2a2228',hl:'#4a3a44',skin:'#d8ccd8',sk2:'#b0a0b4',eye:'#ff3a3a',top:'#8a7a70',top2:'#5a4e48',sleeves:false,belt:'#3a1a1a',pants:'#3a3030',boots:'#b0a0b4'},
  vknight:{hair:'helm',hc:'#2a2a34',hl:'#5a5a6a',mask:'iron',maskC:'#2a2a34',eye:'#ff2a3a',plume:'#8a0a1a',plumeL:1,skin:'#e0d6e0',sk2:'#b8acbc',top:'#3a3a48',top2:'#22222c',sleeves:true,pad:'#5a5a6a',pad2:'#2a2a34',chest:'#8a1a2a',belt:'#120e16',cape:'#6a0a1a',pants:'#2a2a34',boots:'#0e0a10'},
  vlord:{hair:'long',hc:'#e8e4f0',hl:'#ffffff',skin:'#ece4ec',sk2:'#c4b8c8',eye:'#ff2a3a',wings:'#3a0a14',top:'#1a0e1a',top2:'#0e060e',sleeves:true,collar:'#8a0a1a',sash:'#c8a050',belt:'#c8a050',cape:'#7a0a1a',pants:'#140a14',boots:'#0a060a'},
+ vjun:{hair:'messy',hc:'#1a141a',hl:'#3a2a34',skin:'#d8ccd8',sk2:'#b0a0b4',eye:'#ff3a3a',top:'#4a4048',top2:'#2e282e',sleeves:false,belt:'#2a1418',pants:'#2a2228',boots:'#1a1418'},
+ vint:{hair:'short',hc:'#141018',hl:'#3a3040',skin:'#dcd0dc',sk2:'#b4a6b8',eye:'#ff2a3a',top:'#3a2a3a',top2:'#22161e',sleeves:true,collar:'#6a0a18',cape:'#4a0a14',pants:'#1e161c',boots:'#100a0e'},
+ vtrue:{hair:'long',hc:'#2a2430',hl:'#8a8494',skin:'#e4dae4',sk2:'#bcaec0',eye:'#ff1a2a',top:'#1e141e',top2:'#120a12',sleeves:true,collar:'#a01020',cape:'#8a0a1a',sash:'#5a0a14',pants:'#160e16',boots:'#0a060a'},
+ vguard:{hair:'helm',hc:'#24222c',hl:'#545262',mask:'iron',maskC:'#24222c',eye:'#ff2a3a',plume:'#6a0a18',skin:'#e0d6e0',sk2:'#b8acbc',top:'#34323e',top2:'#1e1c26',sleeves:true,pad:'#545262',pad2:'#24222c',chest:'#7a1424',belt:'#100c14',cape:'#4a0a14',pants:'#24222c',boots:'#0c0a10'},
+ vskel:{hair:'bald',hc:'#d8d0c0',hl:'#f0ead8',mask:'skull',skin:'#d8d0c0',sk2:'#a89e8a',eye:'#a05aff',top:'#4a4440',top2:'#2e2a28',sleeves:false,belt:'#3a2a1e',pants:'#3a3430',boots:'#d8d0c0'},
+ vhigh:{hair:'side',hc:'#e8e4ec',hl:'#ffffff',skin:'#ece2ec',sk2:'#c4b6c8',eye:'#ff1a2a',top:'#141018',top2:'#0a080c',sleeves:true,collar:'#d8b050',sash:'#c8a050',cape:'#9a0a1e',pants:'#141018',boots:'#0a080c'},
+ lexi:{hair:'pony',hc:'#120c12',hl:'#3a2a3a',skin:'#e8dce8',sk2:'#c0b0c4',eye:'#ff2a3a',top:'#7a0a1a',top2:'#4a0610',sleeves:true,collar:'#1a0a10',cape:'#2a0a14',belt:'#c8a050',pants:'#1a0e14',boots:'#0e080c'},
+ vb15:{hair:'short',hc:'#2a1c18',hl:'#4a342c',skin:'#dcd0dc',sk2:'#b4a6b8',eye:'#ff2a3a',top:'#2a1e2e',top2:'#1a121c',sleeves:true,collar:'#c8a050',cape:'#5a1a6a',pants:'#1a121c',boots:'#0e0a10'},
+ vb14:{hair:'long',hc:'#5a0e16',hl:'#8a2a34',skin:'#e0d4e0',sk2:'#b8aabc',eye:'#ff2a3a',top:'#1e1418',top2:'#12090e',sleeves:true,collar:'#d8b050',cape:'#7a1020',sash:'#c8a050',pants:'#160c12',boots:'#0c060a'},
+ vb12:{hair:'side',hc:'#b8bcc8',hl:'#e8ecf4',skin:'#e4dae4',sk2:'#bcaec0',eye:'#ff2a3a',top:'#24283a',top2:'#161a28',sleeves:true,collar:'#a01020',cape:'#2a1a4a',pants:'#161a28',boots:'#0a0c14'},
+ vb11:{hair:'spiky',hc:'#0e0a10',hl:'#2a2030',mask:'veil',maskC:'#1a0a10',skin:'#dcd0dc',sk2:'#b4a6b8',eye:'#ff2a3a',top:'#2a0e16',top2:'#18080c',sleeves:true,collar:'#c8a050',cape:'#4a0812',pants:'#18080c',boots:'#0a0406'},
+ vb10:{hair:'pony',hc:'#f0ecf4',hl:'#ffffff',skin:'#ece2ec',sk2:'#c4b6c8',eye:'#ff2a3a',top:'#3a0a18',top2:'#22060e',sleeves:true,collar:'#e8c860',sash:'#e8c860',cape:'#1a0a14',pants:'#22060e',boots:'#0e0408'},
+ velfin:{hair:'short',hc:'#e8cc6a',hl:'#fff0a8',skin:'#efe6ef',sk2:'#c8bac8',eye:'#ff2a3a',top:'#f0eef4',top2:'#c8c4d0',sleeves:true,collar:'#8a0a1a',sash:'#8a0a1a',cape:'#e0dce8',pants:'#e8e6ee',boots:'#2a2228'},
+ vran:{hair:'long',hc:'#0c080c',hl:'#2a1e2a',skin:'#e4d8e4',sk2:'#bcaec0',eye:'#ff2a3a',top:'#1a1018',top2:'#0e080c',sleeves:false,belt:'#5a0a14',shorts:'#1a1018',pants:'#1a1018',boots:'#0a060a'},
+ vmount:{hair:'helm',hc:'#3a3644',hl:'#6a6676',mask:'iron',maskC:'#3a3644',eye:'#ff2a3a',plume:'#8a0a1a',plumeL:1,skin:'#d8ccd8',sk2:'#b0a0b4',top:'#4a4654',top2:'#2a2834',sleeves:true,armC:'#6a6676',armC2:'#3a3644',pad:'#7a7686',pad2:'#3a3644',chest:'#5a0a18',belt:'#1a1420',pants:'#3a3644',boots:'#1a1420'},
+ vtira:{hair:'long',hc:'#d8dce4',hl:'#ffffff',skin:'#e8dee8',sk2:'#c0b2c4',eye:'#ff1a2a',top:'#1a2034',top2:'#0e1220',sleeves:true,collar:'#c8a050',cape:'#8a0a1a',sash:'#5a0a14',pants:'#0e1220',boots:'#06080e'},
+ vlatina:{hair:'long',hc:'#2a1238',hl:'#5a3a6a',skin:'#e4dae8',sk2:'#bcaec4',eye:'#c05aff',robe:'#24142e',robeL:1,top:'#24142e',top2:'#160a1e',sleeves:true,collar:'#a05aff',trim:'#c8a050',pants:'#160a1e',boots:'#0c0610'},
+ vcray:{hair:'spiky',hc:'#9a0a1a',hl:'#e8283a',skin:'#e4d8e4',sk2:'#bcaec0',eye:'#ff1a2a',tail:'#c8102a',top:'#120a10',top2:'#08040a',sleeves:true,collar:'#c8102a',cape:'#3a040c',pants:'#0c060a',boots:'#060204'},
+ vyet:{hair:'short',hc:'#0c0a0e',hl:'#2a2630',skin:'#dcd0dc',sk2:'#b4a6b8',eye:'#ff2a3a',top:'#3a3844',top2:'#22202a',sleeves:true,armC:'#5a5866',armC2:'#2a2834',pad:'#6a6876',pad2:'#2a2834',chest:'#7a0a1a',belt:'#c8a050',cape:'#5a0812',pants:'#22202a',boots:'#0e0c12'},
+ vruson:{hair:'long',hc:'#140a12',hl:'#3a2034',skin:'#f0e8f0',sk2:'#c8bac8',eye:'#ff0a3a',top:'#5a0614',top2:'#36040c',sleeves:true,collar:'#120a10',cape:'#120a10',sash:'#c8102a',pants:'#1a0a12',boots:'#0a0408'},
+ vnoll:{hair:'short',hc:'#8a8494',hl:'#c8c4d0',skin:'#e4dae4',sk2:'#bcaec0',eye:'#ff2a3a',robe:'#e8e2ea',top:'#e8e2ea',top2:'#b8b0bc',sleeves:true,collar:'#c8a050',trim:'#8a0a1a',sash:'#8a0a1a',pants:'#b8b0bc',boots:'#3a2a30'},
  vcenv:{hair:'side',hc:'#3a2a3a',hl:'#5a4a5a',skin:'#e4dce4',sk2:'#bcb0c0',top:'#2a1a2a',top2:'#1a0e1a',sleeves:true,robe:1,collar:'#c8a050',belt:'#6a0a1a',cape:'#4a0a1a',pants:'#1a0e1a',boots:'#120a12'},
  vprince:{hair:'crown',hc:'#1a1420',hl:'#3a3048',hat:'#c8a050',skin:'#ece6ee',sk2:'#c4b8ca',eye:'#e81a2a',top:'#2a0a14',top2:'#14040a',sleeves:true,collar:'#e8e0e8',chest:'#6a0a1a',belt:'#c8a050',cape:'#7a0a1a',pants:'#140a14',boots:'#0a060a'},
 hbm:{hair:'cap',hc:'#5a4a3a',hl:'#7a6a5a',cap:'#2a3a6a',skin:'#d9a070',sk2:'#b47c50',top:'#2a4a7a',top2:'#1e3458',sleeves:true,beard:'#5a4a3a',beard2:'#3a2e22',belt:'#6a4a2a',pants:'#3a3a4a',boots:'#2a1c12'},
@@ -1636,7 +1657,7 @@ function bChestGive(g){g.open=1;const b=MT[g.b];(S.bch||(S.bch={}))[g.b]=today()
 function bossChest(m,b){if(!b.boss||m.tmp||m.arena||m.evt||m.sg||m.bh||m.spar||m.fake||m.mob||ARN||TWR||bchUsed(m.type))return;const til=gTime+120;
  DGATES.push({x:m.x-14,y:m.y+4,to:{x:m.x,y:m.y},hint:'hBChest',tmp:1,chest:1,til,b:m.type,lv:0});setTimeout(()=>toast(t('bcHas',{b:itN(m.type)}),'good'),800);}
 Object.assign(STR.ar,{"bcToday": "صندوق {b} اتفتح النهارده. بيرجع بكرة، والدروب العادي بينزل كل مرة.", "bcHas": "{b} ساب صندوقه اليومي! افتحه قبل ما يختفي.", "mbChest": "صندوق الزعيم (مرة في اليوم): قطعة مضمونة بتقييم أعلى، وخاماته كاملة، وأحجار تقوية وأحجار نادرة", "mbNorm": "الدروب العادي (كل مرة):"});Object.assign(STR.en,{"bcToday": "You opened {b}'s chest today. It comes back tomorrow; the normal drops fall every time.", "bcHas": "{b} left its daily chest! Open it before it fades.", "mbChest": "Boss chest (once a day): a guaranteed item of a higher rating, all its materials, enhancement and rare stones", "mbNorm": "Normal drops (every kill):"});
-function useGate(g){if(g.bh)return bhUse(g);if(g.tw)return twUse(g);if(g.chest)return openBChest(g);if(roomFade)return;if(P.ride)dismount();if(g.lv&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
+function useGate(g){if(g.bh)return bhUse(g);if(g.tw)return twUse(g);if(g.chest)return openBChest(g);if(roomFade)return;if(g.vc&&!vcGate(g))return;if(P.ride)dismount();if(g.lv&&!g.ant&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
 const ROOMS=[],PROPS=[];
 function genRoom(b,bi,kind,rx,ry,z){const R={id:'r'+bi,bi,b,kind,rx,ry,z,dx:b.x*TS+b.w*8,dy:(b.y+b.h)*TS+8};ROOMS.push(R);
   for(let y=ry;y<ry+8;y++)for(let x=rx;x<rx+12;x++)setT(x,y,(y<ry+2||y===ry+7||x===rx||x===rx+11)?IW:FW);
@@ -1868,6 +1889,16 @@ const sttIn=(tx,ty)=>tx>=STT.x0&&tx<=STT.x1&&ty>=STT.y0&&ty<=STT.y1;
 const wynIn=(tx,ty)=>((tx-WYN.cx)/(WYN.rx+2))**2+((ty-WYN.cy)/(WYN.ry+2))**2<=1;
 const vmcIn=(tx,ty)=>tx>=VMC.x0&&tx<=VMC.x1&&ty>=VMC.y0&&ty<=VMC.y1;
 const catIn=(tx,ty)=>{const C=VMC.cat;return tx>=C.x0&&tx<=C.x1&&ty>=C.y0&&ty<=C.y1;};
+// The Vampire's Underground Cities (owner 2026-10-23; the novel ch 259-730): fifteen numbered cities hidden under the
+// desert south of Reidan, cleared from the 15th toward the 1st, each harder than the last. An ant hill in the sand leads
+// down; inside, the way back up stays sealed until the city's master dies (or you do), and the way down to the next city
+// opens with it. Cities 15 to 7 are built; the way to the 6th is sealed for now. Rows VCY0.. below the Behen boxes.
+const VCY0=326,VCN=[15,14,13,12,11,10,9,8,7],VC=VCN.map((n,i)=>{const x0=6+i*106;return {n,i,x0,x1:x0+99,y0:VCY0+2,y1:VCY0+33,ym:VCY0+17,mx:x0+76};}),VCANT={x:530,y:128};
+const vcAt=(tx,ty)=>ty<VCY0?null:VC.find(C=>tx>=C.x0&&tx<=C.x1&&ty>=C.y0&&ty<=C.y1)||null;
+const vcCity=n=>VC.find(C=>C.n===n);
+const vcHall=(C,tx,ty)=>tx>=C.mx&&tx<=C.x1&&ty>=(C.n===7?C.y0+3:C.y0+5)&&ty<=(C.n===7?C.y1-3:C.y1-5);
+const VCS=()=>S.vc||(S.vc={c:{}}),vcDone=n=>!!VCS().c[n];
+const VCB={vb15:15,vb14:14,velfin:13,vb12:12,vb11:11,vb10:10,vtira:9,vlatina:8,vyet:7},VCMS=[];let VCZ=0,VCAP=0,VCLA=0;
 (function genP3(){
  // the Storm Temple: a walled court of pale stone, open to the west, with a row of pillars down each side
  {const A=STT;for(let y=A.y0-1;y<=A.y1+1;y++)for(let x=A.x0-1;x<=A.x1+1;x++){const out=x<A.x0||x>A.x1||y<A.y0||y>A.y1;if(out){if(solidT(x,y))setT(x,y,GR);continue;}
@@ -1888,6 +1919,47 @@ const catIn=(tx,ty)=>{const C=VMC.cat;return tx>=C.x0&&tx<=C.x1&&ty>=C.y0&&ty<=C
   // the catacombs: a crypt of rough stone in the south-east corner, entered from the high street
   for(let y=C.y0;y<=C.y1;y++)for(let x=C.x0;x<=C.x1;x++){const edge=x===C.x0||y===C.y0,door=y===C.y0&&Math.abs(x-C.dx)<=1;setT(x,y,edge&&!door?CW:CF);}
   for(let y=C.y0+3;y<C.y1-1;y+=4)for(let x=C.x0+4;x<C.x1-4;x+=6)setT(x,y,CW);}})();
+// the underground cities: a cave under the ant hill, a cliff with one way down, dark gothic streets with spired houses
+// (the 9th a walled labyrinth, the 8th only seven buildings), and the master's mansion at the far end
+(function genVC(){const r=mulberry32(3150);
+ for(let y=VCY0;y<MH;y++)for(let x=0;x<MW;x++)setT(x,y,CW);
+ const house=(x,y,w,h)=>{const b={x,y,w,h,k:r()<.55?'tower':'armory',vc:1};b.lx=b.x;buildings.push(b);for(let yy=y+2;yy<y+h;yy++)for(let xx=x;xx<x+w;xx++)setT(xx,yy,BL);};
+ for(const C of VC){const {x0,x1,y0,y1,ym,n,mx}=C;
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)setT(x,y,CF);
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x0+9;x++)setT(x,y,r()<.07&&Math.abs(y-ym)>2&&x>x0+2?RK:DR);
+  for(let y=y0;y<=y1;y++)if(Math.abs(y-ym)>1)setT(x0+10,y,RK);
+  for(let x=x0+10;x<mx;x++)for(let y=ym-1;y<=ym+1;y++)setT(x,y,PA);
+  if(n===9){// the 9th city: one huge castle, a labyrinth of halls (ch 369)
+   const ax=x0+12,ay=y0+1,cw=Math.floor((mx-2-ax)/4),ch=Math.floor((y1-1-ay)/4),seen=new Set(),st=[[0,Math.floor((ym-ay-1)/4)]];
+   for(let y=ay;y<=ay+ch*4;y++)for(let x=ax;x<=ax+cw*4;x++)setT(x,y,WL);
+   const open=(i,j)=>{for(let y=ay+j*4+1;y<=ay+j*4+3;y++)for(let x=ax+i*4+1;x<=ax+i*4+3;x++)setT(x,y,PA);};
+   seen.add(st[0]+'');open(...st[0]);
+   while(st.length){const [i,j]=st[st.length-1],nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[i+a,j+b]).filter(([a,b])=>a>=0&&b>=0&&a<cw&&b<ch&&!seen.has(a+','+b));
+    if(!nb.length){st.pop();continue;}const [a,b]=nb[r()*nb.length|0];seen.add(a+','+b);open(a,b);
+    for(let k=1;k<=3;k++){if(a!==i)setT(ax+Math.max(a,i)*4,ay+j*4+k,PA);else setT(ax+i*4+k,ay+Math.max(b,j)*4,PA);}st.push([a,b]);}
+   for(let k=0;k<cw*ch*.18;k++){const i=1+(r()*(cw-1)|0),j=r()*ch|0;for(let q=1;q<=3;q++)setT(ax+i*4,ay+j*4+q,PA);}
+   for(let x=x0+10;x<=ax;x++)for(let y=ym-1;y<=ym+1;y++)setT(x,y,PA);
+   for(let x=ax+cw*4-4;x<mx;x++)for(let y=ym-1;y<=ym+1;y++)setT(x,y,PA);}
+  else{const cs=n===8?[x0+34,x0+56]:[x0+22,x0+38,x0+54,x0+68];
+   for(const cx of cs)for(let y=y0+1;y<y1;y++)for(let x=cx;x<cx+2;x++)setT(x,y,PA);
+   if(n===8){// the 8th city: only seven buildings, most of its people asleep (ch 497)
+    for(const [x,y] of [[x0+16,y0+3],[x0+16,ym+3],[x0+40,y0+2],[x0+40,ym+4],[x0+62,y0+3],[x0+62,ym+3],[x0+24,y0+3]])house(x,y,9,7);}
+   else{const ed=[x0+11,...cs.map(c=>c+2)],en=[...cs,mx-1];
+    for(let k=0;k<ed.length;k++){const bx0=ed[k]+1,bx1=en[k]-2;
+     for(const [by0,by1] of [[y0+2,ym-3],[ym+3,y1-2]]){let x=bx0;while(bx1-x+1>=6){const w=Math.min(bx1-x+1,6+(r()*3|0)),h=Math.min(by1-by0+1,5+(r()*3|0));
+      if(r()<(n===7?.95:.8))house(x,by0+(r()*Math.max(1,by1-by0-h+2)|0),w,h);x+=w+2;}}}}}
+  // the master's mansion: a walled hall with a gate on the high street and the way down behind the master
+  const hy0=n===7?y0+3:y0+5,hy1=n===7?y1-3:y1-5;
+  for(let y=hy0;y<=hy1;y++)for(let x=mx;x<=x1;x++){const edge=x===mx||x===x1||y===hy0||y===hy1,gate=x===mx&&Math.abs(y-ym)<=1;setT(x,y,edge&&!gate?WL:PA);}
+  for(let y=hy0+3;y<=hy1-3;y+=4)for(const x of [mx+5,x1-8])if(Math.abs(y-ym)>1)setT(x,y,WL);}
+ // the ant hill in the sand south of Reidan: not on any map, gone into the sand a moment after you go in (ch 259)
+ const near=(x0,y0)=>{for(let rr=0;rr<16;rr++)for(let dy=-rr;dy<=rr;dy++)for(let dx=-rr;dx<=rr;dx++){const x=x0+dx,y=y0+dy;let free=1;for(let j=-1;j<=2;j++)for(let i=-1;i<=1;i++)if(SOLID[at(x+i,y+j)])free=0;if(free)return [x,y];}return [x0,y0];};
+ const ah=near(VCANT.x,VCANT.y);VCANT.x=ah[0];VCANT.y=ah[1];
+ const px=(x,y)=>({x:x*TS+8,y:y*TS+10}),G=(a,to,hint,o)=>DGATES.push({...px(...a),to:px(...to),hint,...o});
+ VC.forEach((C,i)=>{const dn=VC[i+1];
+  if(!i)G(ah,[C.x0+5,C.ym],'hAnt',{lv:250,vc:C.n,ant:1});
+  G([C.x0+1,C.ym],i?[VC[i-1].x1-5,VC[i-1].ym]:[ah[0],ah[1]+2],'hVcUp',{vc:C.n,vup:1});
+  G([C.x1-3,C.ym],dn?[dn.x0+5,dn.ym]:[C.x1-5,C.ym],'hVcDown',{vc:C.n,vdown:1});});})();
 // The third batch, patch 4 (plan U091-U093, U113, U137, U165, U293, U294): Piaro's new field east of his house, Pedro
 // Harbor on the South Sea with a pier on Cork Island, the Kraken's waters east of the island, and a stage on Patrian's
 // square. Physical columns.
@@ -4906,7 +4978,30 @@ const MT={
  kobold:{lv:[70,78],hp:9500,dmg:380,spd:50,xp:600,gold:14,aggro:95,r:6,oy:28,drop:[['ore',.6],['mith',.15]]},
  kking:{lv:[88,88],hp:220000,dmg:700,spd:44,xp:22000,gold:1200,aggro:130,r:10,oy:46,boss:1,leash:240,slam:1600,slamR:46,sc:1.7,adds:'kobold',drop:[['mith',4],['mstone',3]]},
  dcapt:{lv:[80,80],hp:120000,dmg:520,spd:44,xp:15000,gold:600,aggro:120,r:8,oy:36,boss:1,leash:160,slam:1400,slamR:38,sc:1.3,drop:[['mstone',2],['ore',3]]},
- guardian:{lv:[200,200],hp:300000,dmg:5000,spd:24,xp:80000,gold:3000,aggro:150,r:16,oy:64,boss:1,leash:150,slam:12000,slamR:48,drop:[['blue',1]]}};
+ guardian:{lv:[200,200],hp:300000,dmg:5000,spd:24,xp:80000,gold:3000,aggro:150,r:16,oy:64,boss:1,leash:150,slam:12000,slamR:48,drop:[['blue',1]]},
+ // the Vampire Underground Cities under the Reidan desert (novel ch 259-730): familiars, vampires by rank, the city masters
+ vwolf:{lv:[250,258],hp:700000,dmg:6400,spd:80,xp:30000,gold:120,aggro:150,r:9,oy:22,drop:[['vwleath',.45],['bvial',.1]]},
+ vjun:{lv:[252,262],hp:850000,dmg:6900,spd:56,xp:36000,gold:160,aggro:130,r:6,oy:28,drop:[['bvial',.2],['mstone',.6]]},
+ vint:{lv:[280,292],hp:1600000,dmg:9000,spd:60,xp:56000,gold:260,aggro:140,r:6,oy:28,drop:[['bvial',.35],['mith',.2]]},
+ vtrue:{lv:[292,300],hp:3200000,dmg:10500,spd:64,xp:110000,gold:600,aggro:160,r:6,oy:30,sc:1.05,drop:[['bvial',.8],['mith',.4]]},
+ vguard:{lv:[320,334],hp:4500000,dmg:12500,spd:60,xp:160000,gold:800,aggro:160,r:7,oy:30,sc:1.1,drop:[['bvial',1],['mith',.5]]},
+ vskel:{lv:[340,350],hp:3800000,dmg:12000,spd:52,xp:150000,gold:400,aggro:150,r:6,oy:28,drop:[['mstone',1],['bvial',.3]]},
+ vhigh:{lv:[355,370],hp:6000000,dmg:14500,spd:66,xp:220000,gold:1000,aggro:170,r:6,oy:30,sc:1.05,drop:[['bvial',1.2],['mith',.6]]},
+ lexi:{lv:[296,296],hp:12000000,dmg:11500,spd:66,xp:600000,gold:6000,aggro:180,r:6,oy:30,sc:1.1,drop:[['bvial',3],['diam',.2]]},
+ vb15:{lv:[270,270],hp:30000000,dmg:10500,spd:58,xp:2200000,gold:40000,aggro:180,r:7,oy:34,boss:1,leash:220,slam:14000,slamR:50,sc:1.25,drop:[['bvial',6],['mith',8],['vwleath',4],['ruby',1]]},
+ vb14:{lv:[280,280],hp:36000000,dmg:11000,spd:58,xp:2600000,gold:46000,aggro:180,r:7,oy:34,boss:1,leash:220,slam:15000,slamR:52,sc:1.25,drop:[['bvial',6],['mith',9],['vwleath',4],['sapph',1]]},
+ velfin:{lv:[300,300],hp:70000000,dmg:13500,spd:62,xp:5500000,gold:90000,aggro:200,r:7,oy:36,boss:1,leash:240,slam:20000,slamR:56,sc:1.35,drop:[['bvial',10],['mith',12],['diam',1],['blue',1]]},
+ vb12:{lv:[305,305],hp:60000000,dmg:13500,spd:60,xp:5000000,gold:80000,aggro:190,r:7,oy:34,boss:1,leash:220,slam:19000,slamR:54,sc:1.3,drop:[['bvial',8],['mith',10],['emer',1]]},
+ vb11:{lv:[315,315],hp:66000000,dmg:14000,spd:60,xp:5600000,gold:86000,aggro:190,r:7,oy:34,boss:1,leash:220,slam:20000,slamR:56,sc:1.3,drop:[['bvial',8],['mith',11],['topaz',1]]},
+ vb10:{lv:[325,325],hp:74000000,dmg:14800,spd:62,xp:6200000,gold:92000,aggro:190,r:7,oy:34,boss:1,leash:220,slam:21000,slamR:56,sc:1.3,drop:[['bvial',9],['mith',12],['diam',1]]},
+ vran:{lv:[340,340],hp:25000000,dmg:14000,spd:74,xp:1800000,gold:20000,aggro:200,r:6,oy:30,sc:1.1,drop:[['bvial',4],['ruby',.5]]},
+ vmount:{lv:[340,340],hp:30000000,dmg:15500,spd:46,xp:2000000,gold:22000,aggro:180,r:10,oy:44,sc:1.5,drop:[['bvial',4],['mith',6]]},
+ vtira:{lv:[360,360],hp:110000000,dmg:17000,spd:64,xp:9000000,gold:140000,aggro:220,r:7,oy:36,boss:1,leash:260,slam:24000,slamR:60,sc:1.35,drop:[['bvial',12],['mith',16],['diam',2],['blue',1]]},
+ vlatina:{lv:[370,370],hp:120000000,dmg:17500,spd:62,xp:10000000,gold:150000,aggro:220,r:7,oy:36,boss:1,leash:260,slam:25000,slamR:60,sc:1.3,drop:[['bvial',12],['mith',16],['diam',2],['sapph',2]]},
+ vcray:{lv:[385,385],hp:120000000,dmg:18500,spd:66,xp:9000000,gold:120000,aggro:240,r:7,oy:36,boss:1,leash:300,slam:26000,slamR:62,sc:1.35,drop:[['bvial',12],['mith',16],['ruby',2]]},
+ vyet:{lv:[390,390],hp:140000000,dmg:19000,spd:60,xp:12000000,gold:180000,aggro:240,r:8,oy:38,boss:1,leash:300,slam:28000,slamR:64,sc:1.4,drop:[['bvial',14],['mith',20],['diam',3],['blue',2]]},
+ vruson:{lv:[385,385],hp:120000000,dmg:20000,spd:66,xp:9000000,gold:120000,aggro:240,r:7,oy:36,boss:1,leash:300,slam:27000,slamR:62,sc:1.35,drop:[['bvial',12],['mith',16],['emer',2]]},
+ vnoll:{lv:[380,380],hp:100000000,dmg:15000,spd:58,xp:8000000,gold:110000,aggro:240,r:7,oy:36,boss:1,leash:300,slam:22000,slamR:60,sc:1.3,drop:[['bvial',12],['mith',14],['topaz',2]]},};
 const SPAWN=[['rabbit',104,150,42,62,14],['rabbit',147,157,62,100,6],['boar',147,157,64,104,8],['boar',100,118,44,62,5],['goblin',109,152,105,116,14],['merman',80,106,88,112,12],['pwolf',64,100,42,90,12],
  ['outlaw',58,80,99,116,10],['forc',80,150,4,24,16],['gbear',66,156,26,37,12],['wolf',3,62,46,84,14],['bear',3,62,46,84,6],['golem',29,49,3,41,10],['cgolem',50,61,12,22,4],
  ['hwolf',160,221,40,62,14],['rboar',160,221,42,62,8],['deserter',160,221,103,118,12],['mgolem',160,221,104,118,6],['gbear',160,221,26,37,8]];
@@ -5178,7 +5273,7 @@ function armorIt(){return S.items.find(i=>i.uid===S.eqA);}
 // server inventory as is. Durability 0 = broken: the item still works at 30%. Enhancement +n adds 6% per level.
 // owner 2026-10-22: rings on all ten fingers as in the novel (Kraugel's and Pauld's "ten rings", Grid's "eight fingers were almost always
 // empty"): the accessory slot plus nine ring slots that take rings only
-const RINGS=new Set(['cring','mring','elfin','vring','doran','absurd','ocring','mnring','povt']),RSL=['k1','k2','k3','k4','k5','k6','k7','k8','k9'];
+const RINGS=new Set(['cring','mring','elfin','jvring','vring','avring','hvring','doran','absurd','ocring','mnring','povt']),RSL=['k1','k2','k3','k4','k5','k6','k7','k8','k9'];
 const GEAR=['a','h','g','b','k','n','r',...RSL];
 // owner 2026-10-23: ten rings at once was overpowered. The accessory slot is always open; the nine ring slots open one by one
 // with your level (a legendary class, which starts again at Lv 1, opens them at half the level)
@@ -5248,7 +5343,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   // the 32nd Great Demon Belial at the gate of hell (major 7), after them for the same reason
   {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
-  p3Spawn();p4Spawn();p5Spawn();}
+  p3Spawn();p4Spawn();p5Spawn();vcSpawn();}
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
  {const now=Date.now(),D=(S&&S.mrt)||{};for(const m of mons){const u=D[mobKey(m)];if(u>now){m.dead=true;m.dying=0;m.rt=(u-now)/1000;}}}
@@ -5453,7 +5548,7 @@ const monY=m=>m.y-(m.type==='guardian'?18:m.type==='gchief'?10:4);
 // one hit on one monster; returns 0 (no effect), 1 (hit) or 2 (crit)
 function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}
  if(m.type==='kraugel'&&!m.st&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
- let dmg=(o.aura?auAtkV():atkV())*mul*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(S.tl.blslay&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*(m.wardT>gTime?m.wardR||.4:1),crit=rand()<Math.min(.5,.05+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
+ let dmg=(o.aura?auAtkV():atkV())*mul*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(S.tl.blslay&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*(m.wardT>gTime?m.wardR||.4:1),crit=rand()<Math.min(.5,.05+(S.tl.senses?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8;dmg*=rlAtk(m);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -6739,7 +6834,7 @@ function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>$
  Object.keys(DISH).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickEat')}</small>`});});
  RSUSE.filter(k=>!DISH[k]).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickUse')}</small>`});});
  if(S.rsh&&S.rsh.g)a.push({k:'sgl',n:1,tip:`<b>${t('sgl')}</b><br>${t('rsGlassD')}<br><small>${t(S.rsh.w?'sglOffT':'sglOnT')}</small>`}); // the glasses come off and on from the bag (owner 2026-10-22)
- ['wood','ore','leather','mstone','estone','pstone','bstone','mith','dscale','blue','tstone','brphx','brdrg','brtig','brtor','bljewel','blhorn','fess','iess','sess','bvial','wegg','wheat','straw','melon','pumpk','fcab','compost','kink','kpearl'].forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(STR.en[k+'D']?k+'D':'matD')}</small>`});});
+ ['wood','ore','leather','mstone','estone','pstone','bstone','mith','dscale','blue','tstone','brphx','brdrg','brtig','brtor','bljewel','blhorn','fess','iess','sess','bvial','vwleath','wegg','wheat','straw','melon','pumpk','fcab','compost','kink','kpearl'].forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(STR.en[k+'D']?k+'D':'matD')}</small>`});});
  GEMK.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(k+'D')}</small>`});});
  S.arrows.forEach((n,r)=>{if(n)a.push({k:'arrows',n,r,tip:`<b class="rt rt${r}">${t('arrows')}</b><br>${t('r'+r)} · ${ARROWG[r]}G`});});
  S.items.forEach(i=>{if(WSH[i.id]||(i.slot!=='w'&&i.slot!=='x')){const on=isEq(i);a.push({k:i.id,n:1,r:i.r,it:i,eq:on,tip:itemTip(i)+`<br><small>${on?t('eqMark'):t('clickEquip')}</small>`});}});
@@ -7516,7 +7611,7 @@ function renderTab(){let h='';const row=(k,v,tip,extra)=>`<div class="srow"${tip
    a race or a siege; once a minute. Dear at the inns, a rare drop (bosses more often), and Sticks gives one now and then. */
 const RSPRICE=8000,RSCAST=2.5,RSCD=60;
 function scrollOpt(who){const g=price(who,RSPRICE);return [{l:t('oBuyRS',{g}),ic:'rscroll',st:t('rscrollD').split('\n')[0],poor:S.gold<g,f:()=>{if(S.gold<g){SFX.deny();return toast(t('noGold'),'warn');}S.gold-=g;addMat('rscroll',1);SFX.coin();toast(t('rsGotB'),'good');hudDirty=true;save(true);}}];}
-const scrollBlock=()=>!!(ARN||TWR||BHR||RCR&&RCR.in||SPAR||SG&&inCastle(P)||DUEL&&DUEL.state()&&DUEL.state().phase&&DUEL.state().phase!=='over'&&DUEL.state().phase!=='idle'||P.ghost||mode==='dead');
+const scrollBlock=()=>!!(ARN||TWR||BHR||RCR&&RCR.in||SPAR||SG&&inCastle(P)||DUEL&&DUEL.state()&&DUEL.state().phase&&DUEL.state().phase!=='over'&&DUEL.state().phase!=='idle'||P.ghost||!!vcAt(P.x/TS,P.y/TS)||mode==='dead');
 function scrollUse(){if(!(S.mats.rscroll>0))return;if(P.rcast)return;if(scrollBlock()){SFX.deny();return toast(t('rsNo'),'warn');}
  const w=Math.ceil((S.rsT||0)-S.playT);if(w>0){SFX.deny();return toast(t('rsCd',{n:w}),'warn');}
  P.rcast=RSCAST;SFX.notice();toast(t('rsCast'));closeInv&&!$('inv').hidden&&closeInv();}
@@ -7578,7 +7673,7 @@ function sahZone(tx,ty){const T=TITAN,B=BUTIN,R=ROLL,A=ABYSS;
  if(ty>96&&tx<854)return 'zDran';
  if(asmoIn(tx,ty))return 'zAsmo';if(ty<T.y0-2&&tx>=846)return 'zSahHills';
  return tx<856&&ty<=78?'zTatur':'zSahFarm';}
-function zoneAt(x,y){if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;if(inRace(x,y))return 'zRace';return (roomAt(x,y)||{}).z||'zWin';}if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS,pz=p3Zone(tx,y/TS)||p4Zone(tx,y/TS)||p5Zone(tx,y/TS);if(pz)return pz;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
+function zoneAt(x,y){if(y>=VCY0*TS){const C=vcAt(x/TS,y/TS);return C?'zVc'+C.n:'void';}if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;if(inRace(x,y))return 'zRace';return (roomAt(x,y)||{}).z||'zWin';}if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS,pz=p3Zone(tx,y/TS)||p4Zone(tx,y/TS)||p5Zone(tx,y/TS);if(pz)return pz;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
 /* fog of war (Nitro's feedback): the map shows only what you have seen, in cells of FOGC tiles, saved in S.fog. A paper map
    (sold at inns) draws the whole land in sepia, but no monsters, people or quests where you haven't been yourself. */
 const FOGC=8,FOGW=Math.ceil(MW/FOGC),FOGH=Math.ceil((WMH+NR)/FOGC);let FOG=null,fogT=0,fogV=0;
@@ -8025,7 +8120,7 @@ function update(dt){
  if(TSV&&walk&&!(P.stun>0)){ix=TSV.x;iy=TSV.y;tsf=Math.max(.45,Math.min(1,Math.hypot(ix,iy)*1.3));}
  if(FOLLOW){if(ix||iy)folStop('folOff');else if(walk&&!(P.stun>0)&&!(P.dash>0)){const v=folDir(dt);if(v){ix=v[0];iy=v[1];}}} // SAT-ONLINE-068: your own keys stop it
  if(P.dash>0){P.dash-=dt;move(P,P.dx*230*dt,P.dy*230*dt,4);P.trail.push({x:P.x,y:P.y,dir:P.dir,frame:P.frame,t:.22,r:P.ride?myMt():0});}
- else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(S.tl.legend?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*p3Spd()*vpSpd()*mxSpd()*p4Spd()*(1+Math.min(.3,gearSum('ms')))*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1)*roadSp();move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
+ else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(S.tl.legend?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*p3Spd()*vcSpd()*vpSpd()*mxSpd()*p4Spd()*(1+Math.min(.3,gearSum('ms')))*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1)*roadSp();move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
  else P.frame=0;
  if(P.guard)P.dir=Math.abs(P.gx)>Math.abs(P.gy)?(P.gx>0?2:3):(P.gy>0?0:1);
  if(K.atk&&inp){const wk=weapKind(),v=(TOUCH&&tAim((wk==='bow'||wk==='staff')&&!hcMelee()?170:44))||[[0,1],[0,-1],[1,0],[-1,0]][P.dir];tryAttack(v[0],v[1]);}
@@ -8036,7 +8131,7 @@ function update(dt){
  if(P.sw>0){P.sw-=dt;P.hp=Math.min(mh,P.hp+mh*.03*dt);if(rand()<dt*6)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*14,vx:0,vy:-24,t:.5,c:'#7ae07a',fl:1});}
  // hunger only drops while you do something (Twister 2026-10-19): walking, riding, attacking, dodging or guarding
  {const busy=Math.abs(P.x-(P.fqx??P.x))+Math.abs(P.y-(P.fqy??P.y))>.01||P.acd>0||P.dash>0||P.guard;P.fqx=P.x;P.fqy=P.y;if(busy)P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));}
- updateProj(dt);mxTick(dt);
+ updateProj(dt);mxTick(dt);vcTick(dt);
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
@@ -8224,7 +8319,7 @@ function drawEnh(x,y,en,front,dir){const c=ENHC[Math.min(4,Math.max(0,en-6))],d=
  if(rand()<(en>=9?.12:en>=7?.05:.02))fx.push({x:hx+(rand()-.5)*6,y:hy+(rand()-.5)*8,vx:(rand()-.5)*6,vy:-10-rand()*12,t:.22,c:en>=7?c:'#ffffff'});
  if(en>=10){ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<2;i++){const a=gTime*1.8+i*3.142,ox=x+Math.cos(a)*11,oy=y-11+Math.sin(a)*5;ctx.fillStyle=c;ctx.globalAlpha=.55;ctx.fillRect(ox-1,oy-1,2,2);}
   ctx.restore();}}
-function drawGate(g){const x=Math.round(g.x),y=Math.round(g.y),pul=.5+Math.sin(gTime*3)*.5;
+function drawGate(g){const x=Math.round(g.x),y=Math.round(g.y),pul=.5+Math.sin(gTime*3)*.5;if(g.vc&&vcDrawGate(g,x,y))return;
  if(g.chest){ctx.save();if(!g.open){ctx.fillStyle=`rgba(242,193,78,${.18+pul*.2})`;ctx.beginPath();ctx.ellipse(x,y,14,6,0,0,7);ctx.fill();}
   R(ctx,x-9,y-10,18,10,'#6a3a1a');R(ctx,x-9,y-10,18,2,'#8a5226');R(ctx,x-9,y-3,18,1,'#4a2810');R(ctx,x-10,y-10,2,10,'#d8b050');R(ctx,x+8,y-10,2,10,'#d8b050');
   if(g.open){R(ctx,x-9,y-15,18,4,'#5a2e12');R(ctx,x-10,y-15,20,1,'#d8b050');}else{R(ctx,x-9,y-14,18,4,'#7a4420');R(ctx,x-10,y-14,20,1,'#d8b050');R(ctx,x-2,y-11,4,4,'#f2c14e');
@@ -8393,7 +8488,7 @@ function render(dt){DRAWN=0;netDrawn=0;
   if(f.coin){R(ctx,f.x-1,f.y-1,3,3,'#8a6418');R(ctx,f.x-1,f.y-1,2,2,f.c);return;}if(f.fl)ctx.globalAlpha=Math.min(1,f.t*1.5)*(.6+.4*Math.sin(f.t*40));R(ctx,f.x,f.y,f.t>.2?2:1,f.t>.2?2:1,f.c);ctx.globalAlpha=1;});
  nums.forEach(n=>TX.push({s:n.s,x:n.x,y:n.y,f:'{s}px "Press Start 2P", monospace',z:n.big?9:7,c:n.c,a:Math.min(1,n.t*2)}));
  if(COOKG&&P)drawCook();if(SEWG&&P)drawSew();if(MIXG&&P)drawMix();if(FARMG&&P)drawFarm();if((P4.rh||P4.dance)&&P)p4DrawGame();
- ctx.restore();drawWeather();dnDraw();p3Dark();p4Dark();p5Dark();pgScene();qGuide();
+ ctx.restore();drawWeather();dnDraw();p3Dark();p4Dark();p5Dark();vcDark();pgScene();qGuide();
  if(P&&S&&mode!=='title'&&mode!=='lang'){const k=P.y<WH*TS&&P.x<BW*TS?clamp((P.x-49*TS)/40,0,1):0;if(k>0){dg.globalCompositeOperation='source-over';dg.clearRect(0,0,VW,VH);dg.fillStyle=`rgba(3,12,6,${.62*k})`;dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='destination-out';const px=P.x-camX,py=P.y-8-camY,g=dg.createRadialGradient(px,py,10,px,py,95);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(0,0,VW,VH);ctx.drawImage(darkC,0,0);}
   const hole=(x,y,r)=>{const g=dg.createRadialGradient(x-camX,y-camY,r*.15,x-camX,y-camY,r);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(x-camX-r,y-camY-r,r*2,r*2);};
   if(P.cc>0){ctx.globalCompositeOperation='lighter';const px=P.x-camX,py=P.y-10-camY,gl=ctx.createRadialGradient(px,py,2,px,py,50);gl.addColorStop(0,'rgba(190,230,255,.75)');gl.addColorStop(1,'rgba(90,160,255,0)');ctx.fillStyle=gl;ctx.fillRect(px-50,py-50,100,100);ctx.globalCompositeOperation='source-over';}
@@ -9223,6 +9318,133 @@ Object.assign(STR.en,{mxPot:'Drinks a potion!',mxRegen:'Closes its wounds',mxCal
   dk_madra:[F({min:30,max:220,n:7,sprd:1.1,spd:240,sp:'fire',mul:.7,dot:FI,cd:3.4}),Rn({min:20,max:230,n:7,zr:16,sp:'fire',mul:1.2,cd:5}),Rn({min:20,max:230,pat:'ring',n:10,reach:70,zr:15,up:1,sp:'ice',mul:1,slow:2.5,cd:6}),B({min:20,max:100,tele:.25,away:110,rec:.2,cd:5,ph:1}),U({max:150,n:16,spd:200,sp:'bolt',mul:.6,cd:6,ph:2})],
   bhclone:[A({max:28,tele:.3,reach:26,mul:1,cd:1.2,combo:2}),N({min:30,max:120,tele:.4,dash:280,dashT:.25,mul:1.3,cd:2.4}),B({min:40,max:150,tele:.3,mul:1.2,cd:3.6})]});
 })();
+// ---- the Vampire's Underground Cities (owner 2026-10-23; the novel ch 259-730; notes in project files vampire/novel-notes.md):
+// the cities are carved in genVC; here their people, their masters' fights from the novel, what they drop, and the rules:
+// the way up is sealed until the city's master dies near you (or you die), and so is the way down to the next city.
+Object.assign(P3D,{vwolf:{base:'hwolf',f:'saturate(.4) brightness(.55) sepia(.6) hue-rotate(-40deg) saturate(2.2)',sc:1.7}});
+(()=>{const A=o=>({k:'arc',w:3,max:28,tele:.3,reach:26,arc:1.05,mul:1,rec:.3,cd:1.2,...o}),L=o=>({k:'leap',w:3,min:30,max:110,tele:.42,dashT:.3,mul:1.2,rec:.5,cd:2,...o}),
+ N=o=>({k:'line',w:3,min:30,max:120,tele:.5,dash:230,dashT:.5,mul:1.4,rec:.5,cd:2.4,...o}),G=o=>({k:'ring',w:2,max:40,tele:.7,reach:38,mul:1.3,rec:.5,cd:3,...o}),
+ S=o=>({k:'shot',w:3,min:40,max:160,tele:.5,spd:170,mul:.9,rec:.35,cd:2,sp:'blood',...o}),F=o=>({k:'fan',w:2,min:30,max:170,tele:.6,spd:200,mul:.7,rec:.4,cd:3,n:3,sprd:.8,sp:'blood',...o}),
+ U=o=>({k:'burst',w:2,max:100,tele:.8,spd:140,mul:.6,rec:.5,cd:5,n:10,sp:'blood',...o}),Rn=o=>({k:'rain',w:2,min:0,max:190,tele:.6,mul:1,rec:.4,cd:5,n:5,zr:16,fall:.8,pat:'around',sp:'blood',...o}),
+ H=o=>({k:'heal',w:4,max:999,tele:.8,rec:.3,cd:1,hpb:.4,pct:.2,once:30,...o}),M=o=>({k:'mend',w:4,max:999,tele:.7,rec:.3,cd:3,pct:.1,rng:200,...o}),
+ W=o=>({k:'ward',w:2,max:999,tele:.5,rec:.25,cd:7,t:4,red:.45,...o}),C=o=>({k:'call',w:3,max:999,tele:.6,rec:.3,cd:1,once:20,...o}),
+ Y=o=>({k:'cry',w:2,max:220,tele:.6,rec:.3,cd:1,once:14,t:6,...o}),B=o=>({k:'blink',w:2,min:40,max:170,tele:.28,mul:1.2,rec:.35,cd:3,...o}),
+ BL=[.01,4,'blood'],FI=[.012,3,'fire'],DK=[.012,4,'dark'],VK=['vjun','vint','vtrue','vguard','vhigh','vbat','vwolf'];
+ Object.assign(AIK,{vwolf:'lunge',vjun:'soldier',vint:'soldier',vtrue:'caster',vguard:'soldier',vskel:'soldier',vhigh:'soldier',lexi:'caster',vran:'lunge',vmount:'brute'});
+ Object.assign(RKMV,{
+  vwolf:[L({min:30,max:130,tele:.4,dashT:.3,mul:1.3,drain:.02}),A({max:30,tele:.28,reach:28,mul:1.05,combo:2,dot:BL}),C({kin:['vwolf'],once:25,rng:260})],   // bear-sized familiars that hunt in packs (ch 288)
+  vjun:[A({max:28,tele:.3,reach:27,mul:1,cd:1.1,drain:.03}),S({min:40,max:150,tele:.5,spd:200,sp:'dark',mul:.85,cd:2.6}),L({min:30,max:90,tele:.4,dashT:.3,mul:1.1,cd:3})],   // Dark Missile (ch 291)
+  vint:[A({max:30,tele:.28,reach:28,mul:1.05,combo:2,drain:.03}),S({min:40,max:170,tele:.45,spd:230,mul:.95,cd:2.2}),B({min:40,max:150,tele:.3,mul:1.15,cd:4,behind:1}),H({hpb:.4,pct:.2,once:30})],   // Blood Transfusion
+  vtrue:[S({min:40,max:180,tele:.45,spd:220,mul:1,cd:2.4,root:1.2}),W({t:4,red:.5,cd:8}),B({min:40,max:170,tele:.26,mul:1.2,cd:3}),A({max:30,tele:.26,reach:28,mul:1.1,cd:1.2,drain:.04})],   // Blood Chain, Blood Shield, smoke form (ch 296)
+  vguard:[A({max:32,tele:.3,reach:30,arc:1.2,mul:1.15,combo:3}),N({min:30,max:130,tele:.45,dash:260,dashT:.35,mul:1.4}),W({t:4,red:.4,cd:9}),Y({once:16,t:6})],
+  vskel:[A({max:28,tele:.34,reach:26,mul:1,cd:1.3,dot:DK}),L({min:20,max:80,tele:.5,dashT:.32,mul:1.1,cd:3}),C({kin:['vskel'],once:30})],   // the dead Latina raises
+  vhigh:[A({max:32,tele:.24,reach:30,mul:1.15,combo:3,drain:.03}),B({min:40,max:170,tele:.24,mul:1.3,cd:2.6,behind:1}),F({min:30,max:170,n:5,sprd:.9,spd:220,mul:.7,cd:3.4}),G({max:60,tele:.7,reach:54,mul:1.2,cd:6,pull:30})],
+  lexi:[S({min:40,max:190,tele:.4,spd:240,mul:1.05,cd:2.2,root:1.4}),W({t:5,red:.55,cd:9}),B({min:40,max:180,tele:.22,mul:1.25,cd:2.6}),F({min:30,max:170,n:3,sprd:.6,spd:230,mul:.8,cd:3})],   // Lexi: Blood Chain, Blood Shield, smoke (ch 296)
+  vb15:[A({max:30,tele:.28,reach:30,mul:1.1,combo:2,drain:.02}),S({min:40,max:200,tele:.45,spd:230,mul:1.1,cd:2.2}),B({min:40,max:180,tele:.3,mul:1.3,cd:3.2}),G({max:80,tele:.85,reach:72,mul:1,cd:6,pull:30,ph:1}),C({kin:['vbat','vwolf'],ph:2,once:30})],
+  vb14:[A({max:32,tele:.28,reach:30,arc:1.2,mul:1.1,combo:3}),N({min:40,max:150,tele:.45,dash:280,dashT:.4,mul:1.45}),F({min:30,max:190,n:5,sprd:.9,spd:220,mul:.75,cd:3.6}),Rn({min:0,max:200,n:5,zr:16,dot:BL,cd:6,ph:1}),Y({once:12,t:8,ph:2})],
+  velfin:[F({min:30,max:220,n:6,sprd:1,spd:240,mul:.8,cd:3}),U({max:110,n:12,spd:150,mul:.7,cd:6}),B({min:40,max:200,tele:.22,mul:1.3,cd:3,behind:1}),A({max:34,tele:.26,reach:34,arc:1.2,mul:1.2,combo:3,dot:BL}),
+   Rn({min:0,max:220,n:7,zr:22,lin:5,pat:'around',mul:.8,dot:BL,drain:.04,cd:9,ph:1}),S({min:40,max:230,tele:.9,spd:260,mul:1.5,drain:.15,cd:20,ph:2}),C({kin:['vbat'],once:16,ph:1})],   // Blood Missiles, Blood Explosion, smoke form, Iyarugt, Blood Field, Extreme Blood Transfusion (ch 297-298)
+  vb12:[A({max:30,tele:.26,reach:30,mul:1.15,combo:2}),B({min:40,max:190,tele:.26,mul:1.35,cd:3,behind:1}),W({t:5,red:.5,cd:10}),U({max:100,n:10,spd:150,mul:.65,cd:6,ph:1}),Rn({min:0,max:200,n:4,zr:20,lin:4,pat:'cross',dot:BL,cd:8,ph:2})],
+  vb11:[A({max:32,tele:.28,reach:30,mul:1.15,combo:3,drain:.02}),S({min:40,max:200,tele:.42,spd:240,mul:1.05,cd:3,root:1.3}),G({max:90,tele:.85,reach:80,mul:1.05,cd:6,pull:40}),F({min:30,max:190,n:5,sprd:1,spd:230,mul:.75,cd:3.6,ph:1}),C({kin:['vint','vtrue'],once:16,ph:2})],
+  vb10:[A({max:32,tele:.26,reach:32,arc:1.3,mul:1.2,combo:3}),L({min:30,max:150,tele:.4,dashT:.32,mul:1.5,cd:2.6}),Rn({min:0,max:210,n:6,zr:18,pat:'ring',dot:BL,cd:6,ph:1}),U({max:110,n:14,spd:150,mul:.65,cd:7,ph:2}),H({hpb:.3,pct:.12,once:60})],
+  vran:[B({min:20,max:190,tele:.2,mul:1.35,cd:2.4,behind:1}),A({max:28,tele:.2,reach:26,mul:1.1,combo:3,dot:BL}),L({min:30,max:140,tele:.32,dashT:.26,mul:1.3,cd:3})],   // Ran hides in the dark and strikes with her nails (ch 369)
+  vmount:[G({max:64,tele:.85,reach:58,mul:1.5,cd:5,stun:.5}),N({min:40,max:150,tele:.6,dash:220,dashT:.55,mul:1.6,wall:1}),A({max:38,tele:.4,reach:36,mul:1.4,kb:30,cd:1.6})],   // Mountain: over 3 m tall in heavy armour
+  vtira:[G({max:110,tele:.9,reach:96,mul:1,cd:6,pull:50}),F({min:30,max:220,n:5,sprd:.9,spd:240,mul:.8,cd:3.2}),W({t:5,red:.55,cd:10}),Rn({min:0,max:220,n:6,zr:18,sp:'fire',dot:FI,cd:6,ph:1}),S({min:40,max:220,tele:.45,spd:250,sp:'fire',mul:1.1,dot:FI,cd:3,ph:2}),A({max:32,tele:.26,reach:30,mul:1.15,combo:2,drain:.03})],   // Blood Tornado, Blood Missiles, Blood Shields, Blood Fire, Blood Burn (ch 370-371)
+  vlatina:[A({max:30,tele:.24,reach:28,mul:1.15,combo:2,dot:DK}),C({kin:['vskel'],once:12}),S({min:40,max:200,tele:.5,spd:200,sp:'dark',mul:.9,slow:2.5,cd:3.4}),Rn({min:0,max:210,n:6,zr:18,sp:'dark',dot:DK,lin:3,cd:7,ph:1}),B({min:40,max:180,tele:.24,mul:1.3,cd:4,ph:2})],   // her nails, the dead she rules (ch 497-498)
+  vcray:[N({min:30,max:160,tele:.4,dash:320,dashT:.32,mul:1.5,combo:2}),A({max:42,tele:.3,reach:40,arc:1.5,mul:1.2,cd:1.6}),S({min:40,max:200,tele:.5,spd:240,mul:1,root:1.5,cd:5}),G({max:120,tele:1,reach:104,mul:.9,cd:7,pull:50,ph:1}),U({max:120,n:16,spd:160,mul:.6,cd:7,ph:2})],   // red blood tails, Direct Suppression, blood tornadoes, Magic Power Emission (ch 718-721)
+  vyet:[A({max:38,tele:.34,reach:36,arc:1.4,mul:1.4,combo:3,kb:20}),N({min:40,max:150,tele:.5,dash:260,dashT:.45,mul:1.6}),G({max:70,tele:.8,reach:64,mul:1.4,cd:6,stun:.6}),Y({once:12,t:8,ph:1}),L({min:40,max:160,tele:.45,dashT:.34,mul:1.7,cd:3,ph:2})],   // Yetima and his greatsword (ch 721-725)
+  vruson:[A({max:32,tele:.22,reach:30,mul:1.6,combo:2}),L({min:30,max:150,tele:.36,dashT:.28,mul:1.6,cd:2.4}),B({min:40,max:180,tele:.22,mul:1.5,cd:3,behind:1}),F({min:30,max:200,n:5,sprd:.8,spd:250,mul:.9,cd:3.4,ph:1}),S({min:40,max:220,tele:.4,spd:260,mul:1.4,cd:2.6,ph:2})],   // overwhelming attack power (ch 725)
+  vnoll:[M({pct:.12,rng:220,cd:4}),W({ally:1,rng:220,t:5,red:.5,cd:8}),S({min:40,max:200,tele:.5,spd:200,sp:'dark',mul:.8,slow:3,cd:4}),Rn({min:0,max:220,n:6,zr:20,pat:'line',lin:3,mul:1,cd:7,ph:1}),A({max:30,tele:.3,reach:28,mul:1,drain:.06,cd:1.4})]});   // Blood Donation, Direct Suppression, blood tsunamis; heals himself with what he deals (ch 726-730)
+})();
+Object.assign(NAMEK,{vwolf:'vwolfN',vjun:'vjunN',vint:'vintN',vtrue:'vtrueN',vguard:'vguardN',vskel:'vskelN',vhigh:'vhighN',lexi:'lexiN',vb15:'vb15N',vb14:'vb14N',velfin:'velfinN',vb12:'vb12N',vb11:'vb11N',vb10:'vb10N',vran:'vranN',vmount:'vmountN',vtira:'vtiraN',vlatina:'vlatinaN',vcray:'vcrayN',vyet:'vyetN',vruson:'vrusonN',vnoll:'vnollN'});
+Object.assign(BEL,{vskel:'dark',vlatina:'dark',vtira:'fire'});
+Object.assign(NDROP,{vtrue:[['jvring',.01]],lexi:[['jvring',.25]],vb15:[['jvring',.2]],vb14:[['jvring',.22]],velfin:[['iyarugt',.2],['elfin',.3]],vb12:[['jvring',.25]],vb11:[['vring',.15]],vb10:[['vring',.3]],
+ vran:[['vring',.12]],vmount:[['vring',.12]],vtira:[['tirbelt',.25],['tirsh',.2]],vlatina:[['latneck',.25],['vpaj',.2]],vcray:[['craybr',.25]],vyet:[['yetgs',.2],['avring',.15]],vruson:[['avring',.2]],vnoll:[['hvring',.15]],
+ vguard:[['avring',.003]],vhigh:[['avring',.004],['hvring',.002]]});
+Object.assign(MWPN,{velfin:()=>{R(ctx,6,-22,1,20,'#c8282a');R(ctx,7,-21,1,18,'#6a0a0e');R(ctx,4,-3,5,1,'#2a0a0e');R(ctx,6,-2,1,3,'#1a0a0a');},
+ vyet:()=>{R(ctx,5,-26,3,24,'#9aa0ac');R(ctx,6,-25,1,22,'#e8eef8');R(ctx,3,-3,7,2,'#7a0a1a');R(ctx,5,-1,3,3,'#2a1a14');},
+ vran:()=>{R(ctx,6,-6,1,3,'#e8283a');R(ctx,8,-6,1,3,'#e8283a');R(ctx,7,-5,1,3,'#e8283a');}});
+// what they drop: the vampire rings by rank, the named pieces of the novel, and the leather of the vampire wolves
+RC.push({id:'jvring',slot:'k',dm:.04,hpp:.03,fix:3,lvr:250,ip:['vamp'],drop:1,unlock:()=>false},
+ {id:'avring',slot:'k',dm:.08,fix:3,lvr:340,ip:['vamp'],drop:1,unlock:()=>false},{id:'hvring',slot:'k',dm:.1,hpp:.05,fix:4,lvr:370,ip:['vamp'],drop:1,unlock:()=>false},
+ {id:'tirbelt',slot:'r',def:20,hpp:.08,fix:3,lvr:340,drop:1,unlock:()=>false},{id:'tirsh',slot:'a',def:95,hpp:.06,fix:4,lvr:340,drop:1,unlock:()=>false},
+ {id:'latneck',slot:'n',dm:.08,mpb:60,fix:3,lvr:350,drop:1,unlock:()=>false},{id:'vpaj',slot:'a',def:80,hpp:.08,ms:.05,fix:3,lvr:350,drop:1,unlock:()=>false},
+ {id:'craybr',slot:'r',dm:.07,as:.06,fix:4,lvr:370,drop:1,unlock:()=>false},{id:'yetgs',slot:'w',atk:600,spd:.5,fix:4,lvr:370,ip:['crowd'],drop:1,unlock:()=>false},
+ {id:'vwarmor',slot:'a',def:66,hpp:.05,fix:3,lvr:250,need:{vwleath:8,mith:8},unlock:()=>isSm()&&S.smith>=7&&vcDone(15),diff:1.55,strikes:9},
+ {id:'vwhelm',slot:'h',def:26,fix:3,lvr:250,need:{vwleath:4,mith:5},unlock:()=>isSm()&&S.smith>=7&&vcDone(15),diff:1.5,strikes:8},
+ {id:'vwgloves',slot:'g',def:15,as:.06,fix:3,lvr:250,need:{vwleath:4,mith:4},unlock:()=>isSm()&&S.smith>=7&&vcDone(14),diff:1.5,strikes:8},
+ {id:'vwboots',slot:'b',def:14,ms:.06,fix:3,lvr:250,need:{vwleath:4,mith:4},unlock:()=>isSm()&&S.smith>=7&&vcDone(14),diff:1.5,strikes:8});
+Object.assign(WSH,{yetgs:{l:14,c:'#9aa0ac',w:1,k:'sword'}});
+Object.assign(SETS,{vwolf:{it:['vwarmor','vwhelm','vwgloves','vwboots'],b:{2:{ms:.05,hpp:.05},4:{ms:.05,hpp:.05,dm:.06,as:.06}}},velfin:{it:['iyarugt','elfin'],b:{2:{dm:.08}}},
+ vrings:{it:['jvring','vring','avring','hvring'],b:{2:{hpp:.06},4:{hpp:.06,dm:.1}}},tira:{it:['tirbelt','tirsh'],b:{2:{hpp:.12,def:40}}},lat:{it:['latneck','vpaj'],b:{2:{dm:.08,ms:.05}}},earls:{it:['craybr','yetgs'],b:{2:{dm:.1,as:.08}}}});
+Object.assign(MATP,{vwleath:700});AUK.push('vwleath');
+// the masters and the familiars, spawned last with their own dice so every older monster keeps its id and spot
+function vcSpawn(){const r=mulberry32(9601);VCMS.length=0;
+ const put=(C,type,n,ok)=>{let c=0,tr=0;while(c<n&&tr<4000){tr++;const x=C.x0+2+(r()*(C.x1-C.x0-4)|0),y=C.y0+1+(r()*(C.y1-C.y0-2)|0);if(sol0(x,y)||sol0(x+1,y)||vcHall(C,x,y)||x<C.x0+(type==='vbat'?3:12)||ok&&!ok(x,y))continue;const m=newMon(type,x*TS+8,y*TS+8,r);m.far=1;mons.push(m);c++;}};
+ const boss=(C,k,dx,dy)=>{const m=newMon(k,(C.x1+dx)*TS+8,(C.ym+dy)*TS+8,r);m.far=1;mons.push(m);if(VCB[k]||MT[k].boss)VCMS.push({m,n:C.n});return m;};
+ const R={15:[['vwolf',10],['vjun',14],['vbat',8]],14:[['vwolf',8],['vjun',16],['vbat',8]],13:[['vjun',10],['vint',10],['vbat',14]],12:[['vint',16],['vtrue',3],['vwolf',6]],11:[['vint',16],['vtrue',4],['vbat',8]],
+  10:[['vint',14],['vtrue',6],['vbat',8]],9:[['vguard',18],['vtrue',4]],8:[['vskel',14],['vguard',4]],7:[['vhigh',18],['vguard',8],['vbat',10]]};
+ for(const C of VC){for(const [k,n] of R[C.n])put(C,k,n);
+  if(C.n===13){const m=newMon('lexi',(C.mx-4)*TS+8,(C.ym+3)*TS+8,r);m.far=1;mons.push(m);}
+  if(C.n===9)for(const [k,dx] of [['vran',-50],['vmount',-34]]){const m=newMon(k,(C.x1+dx)*TS+8,C.ym*TS+8,r);m.far=1;mons.push(m);}
+  if(C.n===7){boss(C,'vyet',-9,0);boss(C,'vcray',-15,-5);boss(C,'vruson',-15,5);boss(C,'vnoll',-5,-4);}
+  else boss(C,{15:'vb15',14:'vb14',13:'velfin',12:'vb12',11:'vb11',10:'vb10',9:'vtira',8:'vlatina'}[C.n],-10,0);}}
+// a gate here: the way up and the way down stay sealed until the city's master dies; the 6th city is not open yet
+function vcGate(g){if(g.ant){if(S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');return true;}
+ if(!vcDone(g.vc)){SFX.deny();toast(t('vcSealed',{n:g.vc}),'warn');return false;}
+ if(g.vdown&&!VC.some(C=>C.n===g.vc-1)){SFX.deny();toast(t('vcDeeper',{n:g.vc-1}),'warn');return false;}return true;}
+function vcClear(n){if(vcDone(n))return;VCS().c[n]=1;setTimeout(()=>toast(t('vcFreed',{n}),'good'),900);SFX.rare();save(true);}
+// the aura of the Viscount Latina: half your attack and 30% of your speed while you stand near her (ch 497)
+const vcLat=()=>{if(!P||!VCZ||VCZ!==8)return null;for(const o of VCMS)if(o.m.type==='vlatina'&&!o.m.dead&&Math.hypot(o.m.x-P.x,o.m.y-P.y)<140)return o.m;return null;};
+const vcAtk=m=>vcLat()?.5:1,vcSpd=()=>vcLat()?.7:1;
+function vcTick(dt){if(!P||!S)return;const C=vcAt(P.x/TS,P.y/TS),n=C?C.n:0;
+ if(n!==VCZ){VCZ=n;VCAP=0;if(n){toast(t('vcEnter',{n}),'warn');if(!vcDone(n))setTimeout(()=>toast(t('vcLocked')),1400);}}
+ for(const o of VCMS){const m=o.m;if(o.n!==n){m.vcSeen=0;continue;}const d=Math.hypot(m.x-P.x,m.y-P.y);
+  if(!m.dead){if(d<420)m.vcSeen=1;if(VCB[m.type]&&d<260&&VCAP!==n){VCAP=n;toast(t('vcMaster',{n,b:t(NAMEK[m.type])}),'warn');SFX.notice();}
+   // Tiramet grows stronger every time he half dies and comes back (ch 371): once a life, at half health
+   if(m.type==='vtira'&&!m.led&&!m.tir&&m.hp<m.max*.5){m.tir=1;m.hp=Math.round(m.max*.8);m.fury=gTime+1e6;vfx('rage',m.x,m.y);toast(t('vcTira'),'warn');}}
+  else{if(m.vcSeen&&VCB[m.type]===n)vcClear(n);m.vcSeen=0;m.tir=0;}}
+ const la=vcLat();if(la&&!VCLA)toast(t('vcLatina'),'warn');VCLA=la?1:0;}
+// below ground it is dark: only a little light round you; Latina's aura shows as a violet haze
+function vcDark(){if(!P||!S||mode==='title'||mode==='lang'||!VCZ)return;
+ dg.globalCompositeOperation='source-over';dg.clearRect(0,0,VW,VH);dg.fillStyle='rgba(6,2,10,.8)';dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='destination-out';
+ const px=P.x-camX,py=P.y-8-camY,g=dg.createRadialGradient(px,py,12,px,py,104);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='source-over';
+ ctx.drawImage(darkC,0,0);ctx.fillStyle='rgba(110,8,26,.06)';ctx.fillRect(0,0,VW,VH);
+ for(const o of VCMS)if(o.m.type==='vlatina'&&!o.m.dead&&o.n===VCZ){ctx.save();ctx.globalAlpha=.16+Math.sin(gTime*3)*.05;ctx.fillStyle='#a05aff';ctx.beginPath();ctx.ellipse(o.m.x-camX,o.m.y-camY,140,70,0,0,7);ctx.fill();ctx.restore();}}
+// the ant hill, the way up (a pale light) and the way down (steps into the dark); a sealed one is barred in red
+function vcDrawGate(g,x,y){if(g.ant){ctx.save();ctx.fillStyle='rgba(40,24,8,.35)';ctx.beginPath();ctx.ellipse(x,y+1,18,5,0,0,7);ctx.fill();ctx.fillStyle='#8a6a3a';ctx.beginPath();ctx.ellipse(x,y-2,15,9,0,Math.PI,0);ctx.fill();ctx.fillStyle='#a8844e';ctx.beginPath();ctx.ellipse(x,y-3,12,7,0,Math.PI,0);ctx.fill();ctx.fillStyle='#d8bc84';ctx.beginPath();ctx.ellipse(x-3,y-5,7,3,0,Math.PI,0);ctx.fill();
+  ctx.fillStyle='#1a1008';ctx.beginPath();ctx.ellipse(x,y-2,4,3,0,0,7);ctx.fill();for(let i=0;i<3;i++)R(ctx,x-9+((gTime*7+i*6)%18|0),y-1+(i%2)*2,1,1,'#2a1a0a');ctx.restore();return true;}
+ if(!g.vdown)return false;const shut=!vcDone(g.vc)||!VC.some(C=>C.n===g.vc-1);ctx.save();ctx.fillStyle='#0a0606';ctx.fillRect(x-9,y-9,18,14);for(let i=0;i<4;i++)R(ctx,x-8+i,y-8+i*3,16-i*2,2,'#3a2a2e');
+ if(shut){for(let i=0;i<4;i++)R(ctx,x-8+i*5,y-11,2,17,'#8a1020');R(ctx,x-9,y-6,18,2,'#8a1020');}else{ctx.globalAlpha=.25+Math.sin(gTime*3)*.12;ctx.fillStyle='#c8102a';ctx.fillRect(x-9,y-9,18,14);}ctx.restore();return true;}
+window.__GVC={VC,VCB,VCMS,ant:VCANT,at:vcAt,s:VCS,done:vcDone,clear:vcClear,gate:vcGate,tick:vcTick,lat:vcLat,atk:vcAtk,spd:vcSpd}; // tests
+Object.assign(STR.ar,{zVc15:"مدينة مصاصي الدماء تحت الأرض 15 (لفل 250+)",zVc14:"مدينة مصاصي الدماء تحت الأرض 14 (لفل 255+)",zVc13:"مدينة مصاصي الدماء تحت الأرض 13 (لفل 280+)",zVc12:"مدينة مصاصي الدماء تحت الأرض 12 (لفل 285+)",
+ zVc11:"مدينة مصاصي الدماء تحت الأرض 11 (لفل 290+)",zVc10:"مدينة مصاصي الدماء تحت الأرض 10 (لفل 295+)",zVc9:"مدينة مصاصي الدماء تحت الأرض 9: القلعة المتاهة (لفل 320+)",zVc8:"مدينة مصاصي الدماء تحت الأرض 8 (لفل 340+)",zVc7:"مدينة مصاصي الدماء تحت الأرض 7 (لفل 355+)",
+ vcEnter:"[دخلت مدينة مصاصي الدماء تحت الأرض ({n}).]",vcLocked:"[الاتصال بالعالم الخارجي اتقفل. مش هتعرف تطلع غير لما سيد المدينة يموت.]",vcMaster:"[سيد المدينة رقم {n}، {b}، ظهر.]",
+ vcFreed:"[سيد المدينة رقم {n} مات. المدخل اتفتح.]",vcSealed:"الطريق مقفول. سيد المدينة رقم {n} لسه عايش.",vcDeeper:"الطريق للمدينة رقم {n} لسه مش مفتوح.",
+ hAnt:"E: انزل في بيت النمل",hVcUp:"E: اطلع لفوق",hVcDown:"E: انزل للمدينة اللي بعدها",vcTira:"[تيرامت نص مات ورجع أقوى!]",vcLatina:"هالة لاتينا تقلت عليك: هجومك بقى النص وخطوتك أبطأ.",
+ vwolfN:"ذئب مصاص الدماء",vjunN:"مصاص دماء مبتدئ",vintN:"مصاص دماء متوسط",vtrueN:"مصاص دماء حقيقي (ترو بلود)",vguardN:"حارس الدم الحقيقي",vskelN:"ميت صاحي",vhighN:"مصاص دماء أعلى",lexiN:"ليكسي",
+ vb15N:"بارون الدم الحقيقي (المدينة 15)",vb14N:"بارون الدم الحقيقي (المدينة 14)",velfinN:"الإيرل مصاص الدماء إلفين ستون",vb12N:"بارون الدم الحقيقي (المدينة 12)",vb11N:"بارون الدم الحقيقي (المدينة 11)",vb10N:"بارون الدم الحقيقي (المدينة 10)",
+ vranN:"البارون ران",vmountN:"البارون ماونتن",vtiraN:"الفيكونت تيرامت",vlatinaN:"الفيكونت مصاصة الدماء لاتينا",vcrayN:"الإيرل كراي",vyetN:"الإيرل يتيما",vrusonN:"الإيرل روسون",vnollN:"الإيرل نول",
+ jvring:"خاتم مصاص الدماء المبتدئ",avring:"خاتم مصاص الدماء المتقدم",hvring:"خاتم مصاص الدماء الأعلى",tirbelt:"حزام تيرامت",tirsh:"درع دم تيرامت",latneck:"عقد لاتينا",vpaj:"روب لاتينا",craybr:"سوار كراي",yetgs:"سيف يتيما العظيم",
+ vwarmor:"درع جلد ذئب مصاص الدماء",vwhelm:"خوذة جلد ذئب مصاص الدماء",vwgloves:"جوانتي جلد ذئب مصاص الدماء",vwboots:"جزمة جلد ذئب مصاص الدماء",
+ vwleath:"جلد ذئب مصاص الدماء",vwleathD:"بيقع من ديابة مصاصي الدماء في المدن تحت الأرض. الحداد (لفل 7) بيعمل منه طقم ذئب مصاص الدماء بعد ما سيد المدينة 15 يموت.",
+ setD_vwolf2:"+5% سرعة مشي و+5% أقصى صحة",setD_vwolf4:"+5% سرعة مشي و+5% أقصى صحة و+6% ضرر و+6% سرعة هجوم",setD_velfin2:"+8% ضرر",setD_vrings2:"+6% أقصى صحة",setD_vrings4:"+6% أقصى صحة و+10% ضرر",
+ setD_tira2:"+12% أقصى صحة و+40 دفاع",setD_lat2:"+8% ضرر و+5% سرعة مشي",setD_earls2:"+10% ضرر و+8% سرعة هجوم",
+ set_vwolf:"طقم ذئب مصاص الدماء",set_velfin:"طقم إلفين ستون",set_vrings:"خواتم مصاصي الدماء",set_tira:"طقم تيرامت",set_lat:"طقم لاتينا",set_earls:"طقم الإيرلات"});
+Object.assign(STR.en,{zVc15:"Vampire Underground City 15 (Lv 250+)",zVc14:"Vampire Underground City 14 (Lv 255+)",zVc13:"Vampire Underground City 13 (Lv 280+)",zVc12:"Vampire Underground City 12 (Lv 285+)",
+ zVc11:"Vampire Underground City 11 (Lv 290+)",zVc10:"Vampire Underground City 10 (Lv 295+)",zVc9:"Vampire Underground City 9: the Labyrinth Castle (Lv 320+)",zVc8:"Vampire Underground City 8 (Lv 340+)",zVc7:"Vampire Underground City 7 (Lv 355+)",
+ vcEnter:"[You have entered the Vampire's Underground City ({n}).]",vcLocked:"[Contact with the outside world has been blocked. You cannot leave until the city's master dies.]",vcMaster:"[The master of the {n}th city, {b}, has appeared.]",
+ vcFreed:"[The master of the {n}th city has died. The entrance has been released.]",vcSealed:"The way is sealed. The master of the {n}th city still lives.",vcDeeper:"The way down to the {n}th city is not open yet.",
+ hAnt:"E: Go down into the ant hill",hVcUp:"E: Climb back up",hVcDown:"E: Go down to the next city",vcTira:"[Tiramet half died and came back stronger!]",vcLatina:"Latina's aura weighs on you: half your attack, slower steps.",
+ vwolfN:"Vampire Wolf",vjunN:"Junior Vampire",vintN:"Intermediate Vampire",vtrueN:"True Blood Vampire",vguardN:"True Blood Guardian",vskelN:"Risen Dead",vhighN:"High Vampire",lexiN:"Lexi",
+ vb15N:"True Blood Baron (City 15)",vb14N:"True Blood Baron (City 14)",velfinN:"Vampire Earl Elfin Stone",vb12N:"True Blood Baron (City 12)",vb11N:"True Blood Baron (City 11)",vb10N:"True Blood Baron (City 10)",
+ vranN:"Baron Ran",vmountN:"Baron Mountain",vtiraN:"Viscount Tiramet",vlatinaN:"Vampire Viscount Latina",vcrayN:"Earl Cray",vyetN:"Earl Yetima",vrusonN:"Earl Ruson",vnollN:"Earl Noll",
+ jvring:"Junior Vampire Ring",avring:"Advanced Vampire Ring",hvring:"High Vampire Ring",tirbelt:"Tiramet's Belt",tirsh:"Tiramet's Blood Mail",latneck:"Latina's Necklace",vpaj:"Latina's Robe",craybr:"Cray's Bracelet",yetgs:"Yetima's Greatsword",
+ vwarmor:"Vampire Wolf Leather Armor",vwhelm:"Vampire Wolf Leather Helmet",vwgloves:"Vampire Wolf Leather Gloves",vwboots:"Vampire Wolf Leather Boots",
+ vwleath:"Vampire Wolf Leather",vwleathD:"Dropped by vampire wolves in the underground cities. A blacksmith (Lv 7) makes the Vampire Wolf set from it once the 15th city's master is dead.",
+ setD_vwolf2:"+5% move speed and +5% max health",setD_vwolf4:"+5% move speed, +5% max health, +6% damage and +6% attack speed",setD_velfin2:"+8% damage",setD_vrings2:"+6% max health",setD_vrings4:"+6% max health and +10% damage",
+ setD_tira2:"+12% max health and +40 defense",setD_lat2:"+8% damage and +5% move speed",setD_earls2:"+10% damage and +8% attack speed",
+ set_vwolf:"Vampire Wolf Set",set_velfin:"Elfin Stone's Set",set_vrings:"Vampire Rings",set_tira:"Tiramet's Set",set_lat:"Latina's Set",set_earls:"The Earls' Set"});
 function loop(now){const w0=pfNow();requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;
  if(FIXT){facc=Math.min(facc+dt,FSTEP*4);while(facc>=FSTEP-1e-9){if(RPL&&RPL.done){facc=0;break;}facc-=FSTEP;if(SIM)simPre();try{update(FSTEP);}catch(e){gameErr(e);}FSTEPS++;if(SIM)simPost();}}else try{update(dt);}catch(e){gameErr(e);}
  const r0=rand,m0=Math.random;if(FIXT){rand=VRAND;if(SIM)Math.random=VRAND;}try{loopRest(dt);}finally{rand=r0;Math.random=m0;}pfFrame(dt,w0);}

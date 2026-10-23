@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23vcity', ver: '2.06', d: '2026-10-23',
+      ar: ["مدن مصاصي الدماء تحت الأرض من الرواية: بيت نمل في الرملة جنوب ريدان بينزّلك المدينة 15 (لفل 250+)، ومنها لتحت لحد المدينة 7",
+        "جوه المدينة الاتصال بالعالم بيتقفل: طريق الطلوع وطريق النزول للمدينة اللي بعدها مقفولين لحد ما سيد المدينة يموت، ولفافة الرجوع مش بتشتغل تحت",
+        "المدينة 13 فيها الإيرل إلفين ستون وليكسي، و9 قلعة متاهة فيها الفيكونت تيرامت (بيرجع أقوى لما يقرب يموت) والبارونات ران وماونتن، و8 فيها سبع بيوت بس والفيكونت لاتينا (هالتها بتنص هجومك)، و7 فيها أربع إيرلات: يتيما وكراي وروسون ونول",
+        "كل زعيم بضرباته من الرواية (صواريخ الدم، إعصار الدم، سلاسل الدم، دروع الدم، الضباب) ومراحل بتفتح ضربات أقوى",
+        "دروب جديدة: خواتم مصاصي الدماء بالرتب، حزام ودرع تيرامت، عقد وروب لاتينا، سوار كراي، سيف يتيما العظيم، و6 سِتات جديدة",
+        "جلد ذئب مصاص الدماء: الحداد لفل 7 بيعمل منه طقم ذئب مصاص الدماء بعد ما تخلّص المدينة 15 و14"],
+      en: ["The Vampire's Underground Cities from the novel: an ant hill in the sand south of Reidan leads down to the 15th city (Lv 250+), and on down to the 7th",
+        "Inside, contact with the outside world is blocked: the way up and the way down to the next city stay sealed until the city's master dies, and return scrolls do not work below",
+        "City 13 holds Earl Elfin Stone and Lexi, city 9 is a labyrinth castle with Viscount Tiramet (who comes back stronger when he half dies) and the barons Ran and Mountain, city 8 has only seven buildings and Viscount Latina (her aura halves your attack), and city 7 has four earls: Yetima, Cray, Ruson and Noll",
+        "Every master fights with the novel's skills (Blood Missiles, Blood Tornado, Blood Chains, Blood Shields, smoke form) and phases that open stronger moves",
+        "New drops: the vampire rings by rank, Tiramet's belt and mail, Latina's necklace and robe, Cray's bracelet, Yetima's greatsword, and 6 new sets",
+        "Vampire Wolf Leather: a level 7 blacksmith makes the Vampire Wolf set from it once you clear the 15th and 14th cities"] },
     { v: '2026-10-23mobfol', ver: '2.05', d: '2026-10-23',
       ar: ["أونلاين: الوحوش عند اللي معاك في البارتي بقت ماشية ورا اللي عند الهوست بتأخير أقل، فالضربات بتيجي في مكانها"],
       en: ["Online: monsters on a party member's screen keep closer to the host's, so their blows land where you see them"] },
