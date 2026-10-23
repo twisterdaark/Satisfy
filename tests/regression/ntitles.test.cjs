@@ -1,8 +1,8 @@
 'use strict';
 // SAT-ONLINE-161 (owner 2026-10-23: "add more titles in general, and above all titles with skills, as in the novel").
 //   - every new title is listed in the status window, in both languages, and gives what it says;
-//   - and then (22:20): "make it only while you wear the title": a title's effects and its skills work while it is worn, the
-//     old titles' too; the others are kept for when you wear them;
+//   - and then (22:55): "the passives work for every title you have and add up, but the active skill needs the title worn":
+//     every owned title's effects count, worn or not, the old titles' too; a title's skill only while it is worn;
 //   - the skills: Unbreakable Justice (ch 707, 300% at once), the Secret Hero's Unstoppable and Majesty;
 //   - the passives: Apostle of Justice below 30% health, Hero King's Fighting Spirit, the First King's shield, Protagonist
 //     of Two Eras after a legend's immortality, One Hit, One Kill! and the Martial God by the record in one hit, the
@@ -23,7 +23,7 @@ async function game() {
   return g;
 }
 
-test('the new titles: listed in both languages; what each gives counts while it is worn, an old title too', async () => {
+test('the new titles: listed in both languages; what each gives counts while you own it, worn or not, an old title too', async () => {
   const g = await game();
   try {
     const r = await g.eval(() => {
@@ -31,29 +31,31 @@ test('the new titles: listed in both languages; what each gives counts while it 
       const miss = T.own().filter((id) => !s('en', 'tl_' + id) || !s('ar', 'tl_' + id) || !s('en', 'tl_' + id + 'D') || !s('ar', 'tl_' + id + 'D'));
       const st0 = {}, st1 = {};
       for (const k of ['str', 'sta', 'agi', 'int', 'dex']) st0[k] = T.stat(k);
-      const h0 = T.mh();
-      for (const id of ['apjus', 'kslay', 'fuim', 'flim', 'khero', 'ytemple', 'hell9', 'purifier']) T.give(id);
-      const flat = {}, worn = (id) => { S.title = id; const a = T.agg(); return { ...a.st, hp: a.hp }; };
-      for (const id of ['apjus', 'kslay', 'fuim', 'flim', 'khero', 'ytemple', 'hell9']) flat[id] = worn(id);
+      const h0 = T.mh(), snap = () => { const a = T.agg(); return { ...a.st, hp: a.hp }; }, none = snap(), flat = {};
+      // each one given in turn, none of them worn: what it adds
+      S.title = '';
+      for (const id of ['apjus', 'kslay', 'fuim', 'flim', 'khero', 'ytemple', 'hell9']) { const p = snap(); T.give(id); S.title = ''; const n = snap(); flat[id] = Object.fromEntries(Object.keys(n).map((k) => [k, n[k] - p[k]])); }
+      T.give('khero'); S.title = ''; const g0 = {}; for (const k of ['str', 'sta', 'agi', 'int', 'dex']) g0[k] = T.stat(k);
       S.title = 'khero'; for (const k of ['str', 'sta', 'agi', 'int', 'dex']) st1[k] = T.stat(k);
-      const h1 = T.mh(); S.title = 'purifier'; const hp10 = T.mh(); S.title = ''; const none = worn(''), h2 = T.mh();
-      return { miss, d: Object.fromEntries(Object.keys(st0).map((k) => [k, st1[k] - st0[k]])), flat, none, h0, h1, h2, hp10, first: S.title, n: T.own().length };
+      const same = Object.keys(g0).every((k) => g0[k] === st1[k]);
+      const h1 = T.mh(); S.title = ''; T.give('purifier'); S.title = ''; const hp10 = T.mh() / h1; S.title = 'purifier'; const hp10w = T.mh() / h1;
+      return { miss, d: Object.fromEntries(Object.keys(st0).map((k) => [k, st1[k] - st0[k]])), flat, none, same, hp10, hp10w, n: T.own().length };
     });
     assert.deepEqual(r.miss, [], 'titles without both names and lines');
     assert.equal(r.n, 22);
     const z = { str: 0, sta: 0, agi: 0, int: 0, dex: 0, hp: 0 }, w = (o) => ({ ...z, ...o });
     assert.deepEqual(r.flat, {
       apjus: w({ str: 10, sta: 10, agi: 10, int: 10, dex: 10 }), kslay: w({ sta: 100, str: 30 }), fuim: w({ dex: 200 }), flim: w({ dex: 350 }),
-      khero: w({ str: 120, sta: 120, agi: 120, int: 120, dex: 120 }), ytemple: w({ int: 60, hp: 1000 }), hell9: w({ hp: 3000 }) }, 'each one alone, worn');
-    assert.deepEqual(r.none, z, 'none worn: nothing');
-    for (const k of Object.keys(r.d)) assert.ok(r.d[k] >= 120, k + ': ' + JSON.stringify(r.d)); // Kingdom's Hero worn, multipliers on top
-    assert.equal(r.h2, r.h0, 'none worn: the health of before');
-    assert.ok(Math.abs(r.hp10 / r.h0 - 1.1) < 0.01, 'an old title (Purifier, +10% health) only while worn: ' + r.h0 + ' -> ' + r.hp10);
+      khero: w({ str: 120, sta: 120, agi: 120, int: 120, dex: 120 }), ytemple: w({ int: 60, hp: 1000 }), hell9: w({ hp: 3000 }) }, 'each one, owned and not worn');
+    assert.deepEqual(r.none, z, 'no title yet: nothing');
+    for (const k of Object.keys(r.d)) assert.ok(r.d[k] >= 120 + 10, k + ': ' + JSON.stringify(r.d)); // Kingdom's Hero and the Apostle add up, multipliers on top
+    assert.ok(r.same, 'worn or not, the same stats');
+    assert.ok(Math.abs(r.hp10 - 1.1) < 0.01 && Math.abs(r.hp10w - 1.1) < 0.01, 'an old title (Purifier, +10% health), worn or not: ' + r.hp10 + ' ' + r.hp10w);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
 
-test("a title's skills while you wear it: Unbreakable Justice strikes for 300%; Unstoppable and Majesty", async () => {
+test("a title's active skills only while you wear it: Unbreakable Justice strikes for 300%; Unstoppable and Majesty", async () => {
   const g = await game();
   try {
     const before = await g.eval(() => { const T = window.__GTTL; return T.cls().filter(T.ok).includes('ujust'); });
@@ -90,40 +92,39 @@ test("a title's skills while you wear it: Unbreakable Justice strikes for 300%; 
   } finally { await g.close(); }
 });
 
-test("the passives, each while worn: Apostle below 30%, Fighting Spirit, the record in one hit, vampires, great demons, the East, Winston", async () => {
+test("the passives, owned and not worn: Apostle below 30%, Fighting Spirit, the record in one hit, vampires, great demons, the East, Winston", async () => {
   const g = await game();
   try {
     const r = await g.eval(() => {
       const T = window.__GTTL, G = window.__G, P = G.P, S = G.S, o = {}, mh = T.mh();
       // Apostle of Justice: all stats +20% below 30% health
-      T.give('apjus'); S.title = 'apjus'; P.hp = mh; T.tick(.016); const s1 = T.stat('str'); P.hp = mh * .2; T.tick(.016); o.jus = T.stat('str') / s1; P.hp = mh; T.tick(.016);
+      T.give('apjus'); S.title = ''; P.hp = mh; T.tick(.016); const s1 = T.stat('str'); P.hp = mh * .2; T.tick(.016); o.jus = T.stat('str') / s1; P.hp = mh; T.tick(.016);
       // Hero King: each blow +1 Fighting Spirit (10 at rest), each point +0.5% Strength; back to 10 after 5 s out of a fight
-      T.give('hking'); S.title = 'hking'; const s2 = T.stat('str'); const w = G.spawnMon('wolf', P.x, P.y + 20); w.max = w.hp = 1e9;
+      T.give('hking'); S.title = ''; const s2 = T.stat('str'); const w = G.spawnMon('wolf', P.x, P.y + 20); w.max = w.hp = 1e9;
       for (let i = 0; i < 20; i++) window.__GWP.hit(w, 1);
       o.fsp = P.fsp; o.fspStr = T.stat('str') / s2;
       // One Hit, One Kill! at 100,000 in one hit, the Martial God at 1,000,000; the critical multiplier follows the record
-      S.title = 'ohok'; T.rec(150000); o.t1 = [!!S.tl.ohok, !!S.tl.mgod, +T.cdm().toFixed(2)];
-      T.rec(2000000); o.t2 = [!!S.tl.ohok, !!S.tl.mgod, +T.cdm().toFixed(2)]; S.title = 'mgod'; o.t3 = +T.cdm().toFixed(2); S.title = ''; o.t4 = +T.cdm().toFixed(2);
+      S.title = ''; T.rec(150000); o.t1 = [!!S.tl.ohok, !!S.tl.mgod, +T.cdm().toFixed(2)];
+      T.rec(2000000); o.t2 = [!!S.tl.ohok, !!S.tl.mgod, +T.cdm().toFixed(2)]; S.title = 'mgod'; o.t3 = +T.cdm().toFixed(2); S.title = '';
       // the Vampire Slaughter King: +10% and 1,000 more a hit, on vampires only
-      T.give('vslay'); S.title = 'vslay'; o.vamp = [T.hit({ type: 'vjun', x: 0, y: 0 }, 10000, false), T.hit({ type: 'wolf', x: 0, y: 0 }, 10000, false)];
+      T.give('vslay'); S.title = ''; o.vamp = [T.hit({ type: 'vjun', x: 0, y: 0 }, 10000, false), T.hit({ type: 'wolf', x: 0, y: 0 }, 10000, false)];
       // the Legend of the Canyon: great demons hit 15% less
-      T.give('canyon'); S.title = 'canyon'; o.canyon = [T.shield(1000, { type: 'berith' }), T.shield(1000, { type: 'wolf' })]; S.title = ''; o.canyon.push(T.shield(1000, { type: 'berith' }));
+      T.give('canyon'); S.title = ''; o.canyon = [T.shield(1000, { type: 'berith' }), T.shield(1000, { type: 'wolf' })]; S.title = 'canyon'; o.canyon.push(T.shield(1000, { type: 'berith' })); S.title = '';
       // Guardian of the Land of the Old Gods: the East's gravity (-10% Strength) no longer weighs
-      const x0 = P.x; P.x = 1500 * 16; const e0 = T.stat('str'); T.give('oldgod'); S.title = 'oldgod'; o.oldgod = T.stat('str') / e0; P.x = x0;
+      const x0 = P.x; P.x = 1500 * 16; const e0 = T.stat('str'); T.give('oldgod'); S.title = ''; o.oldgod = T.stat('str') / e0; P.x = x0;
       // Winston's Person of Distinction: no tax in Winston
       const wn = G.npcs.map((n) => n.id).find((id) => T.town(id) === 'zWin'), out = G.npcs.map((n) => n.id).find((id) => T.town(id) && T.town(id) !== 'zWin');
-      const p0 = T.price(wn, 1000), q0 = T.price(out, 1000); T.give('wdist'); S.title = 'wdist'; o.win = [T.town(wn), p0, T.price(wn, 1000), q0 === T.price(out, 1000)];
-      S.title = 'hking'; // Fighting Spirit, worn again for the drain below
+      const p0 = T.price(wn, 1000), q0 = T.price(out, 1000); T.give('wdist'); S.title = ''; o.win = [T.town(wn), p0, T.price(wn, 1000), q0 === T.price(out, 1000)];
       return o;
     });
     assert.ok(Math.abs(r.jus - 1.2) < 0.02, 'Apostle below 30%: ' + r.jus);
     assert.ok(r.fsp >= 29 && r.fsp <= 31, 'Fighting Spirit after 20 blows: ' + r.fsp);
     assert.ok(r.fspStr > 1.08, 'and Strength with it: ' + r.fspStr);
     assert.deepEqual(r.t1, [true, false, 1.1]);
-    assert.deepEqual(r.t2, [true, true, 1.2], 'One Hit, One Kill! worn, the record at tier 2');
-    assert.deepEqual([r.t3, r.t4], [1.5, 1], 'the Martial God worn; none worn');
+    assert.deepEqual(r.t2, [true, true, 1.7], 'the record at tier 2 (+20%) and the Martial God (+50%), both owned, none worn');
+    assert.equal(r.t3, 1.7, 'worn or not, the same');
     assert.ok(Math.abs(r.vamp[0] - (r.vamp[1] * 1.1 + 1000)) < 1, JSON.stringify(r.vamp));
-    assert.deepEqual(r.canyon, [850, 1000, 1000]);
+    assert.deepEqual(r.canyon, [850, 1000, 850], 'great demons 15% less, worn or not; a wolf the same');
     assert.ok(Math.abs(r.oldgod - 1 / 0.9) < 0.02, 'no gravity in the East: ' + r.oldgod);
     assert.equal(r.win[0], 'zWin');
     assert.ok(r.win[2] < r.win[1], 'cheaper in Winston: ' + r.win[1] + ' -> ' + r.win[2]);
@@ -140,7 +141,7 @@ test("the First King's shield at 70% health lost, and Protagonist of Two Eras wh
   try {
     const r = await g.eval(() => {
       const T = window.__GTTL, G = window.__G, P = G.P, mh = T.mh(), o = {};
-      T.give('fking'); G.S.title = 'fking'; P.inv = 0;
+      T.give('fking'); G.S.title = ''; P.inv = 0;
       // 75% of the health lost in the last minute
       T.hurt(mh * .75); P.hp = mh * .25; T.tick(.016);
       o.fk = [Math.round(P.fkA), Math.round(Math.min(mh * .5, mh * .75)), P.fkU > 0];
@@ -151,7 +152,7 @@ test("the First King's shield at 70% health lost, and Protagonist of Two Eras wh
     assert.ok(r.fk[2]);
     assert.equal(r.absorb, 0);
     // the legend's immortality: 1 HP and 5 s; when it ends, 20% back
-    const h = await g.eval(() => { const T = window.__GTTL; T.give('legend'); T.give('twoera'); window.__G.S.title = 'twoera'; return T.mh(); });
+    const h = await g.eval(() => { const T = window.__GTTL; T.give('legend'); T.give('twoera'); window.__G.S.title = ''; return T.mh(); });
     await g.eval(() => { const G = window.__G, P = G.P; P.hp = 1; P.tlLeg = 1e-9; }); // as legSave leaves it: the end time already past
     await g.step(2);
     const hp = await g.eval(() => window.__G.P.hp);
