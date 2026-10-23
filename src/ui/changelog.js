@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23fairness', ver: '2.19', d: '2026-10-23', hide: 1,
+      ar: ["لوحة التوازن بقت بتفصل المبارزات عن الـ PvP المفتوح، وفيها وقت القتل، وفئة المعدات، وسرعة الاتصال لكل كلاس، والحدود قبل أي ترتيب متقيم (docs/online/FAIRNESS.md)"],
+      en: ["The balance board shows duels apart from open PvP, the time to kill, the gear band and the connection speed by class, and the thresholds before anything ranked (docs/online/FAIRNESS.md)"] },
     { v: '2026-10-23arenapairs', ver: '2.18', d: '2026-10-23',
       ar: ["الساحة: مع نفس اللاعب بتتحسبلك 5 مبارزات متقيمة بس في الموسم. بعدها المبارزة بتتحسب مكسب أو خسارة، بس تقييمك مبيتحركش، فمحدش يقدر يرفع تقييمه من صاحبه"],
       en: ["Arena: only 5 rated duels a season count with the same player; after that a duel is still a win or a loss but the rating doesn't move, so nobody can farm a friend for rating"] },

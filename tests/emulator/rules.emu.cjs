@@ -153,3 +153,12 @@ test('arena (SAT-ONLINE-153, plan U040): a rating names its opponent and counts 
   await no(db(B).ref('arenaPairs/' + se + '/' + A).once('value'), "nor read A's counts");
   await yes(db(A).ref('arenaPairs/' + se + '/' + A).once('value'), 'A reads its own');
 });
+
+test('balance (SAT-ONLINE-154, plan U045): the new figures, optional and bounded', async () => {
+  const base = { wk: 'w2900', cls: 'warrior', lv: 12, n: 1, s: 2, w: 1, l: 0, gi: 0, go: 0, t: SV };
+  await yes(db(A).ref('balance/' + A).set(base), 'without them');
+  await yes(db(A).ref('balance/' + A).set(Object.assign({}, base, { dw: 3, dl: 2, ds: 40.5, pk: 1, pd: 0, pt: 6.2, gb: 2, lp: 180 })), 'with them');
+  await no(db(A).ref('balance/' + A).set(Object.assign({}, base, { gb: 10 })), 'a gear band past 9');
+  await no(db(A).ref('balance/' + A).set(Object.assign({}, base, { lp: 70000 })), 'a p95 past a minute');
+  await no(db(B).ref('balance/' + A).set(base), "B can't write A's");
+});
