@@ -22,7 +22,7 @@ test('four beasts at the four ends, each with its own breath and the breath that
     assert.deepEqual(await g.eval(() => window.__G.monNames().filter(([k]) => /^s(drag|tiger|bird|tort)$/.test(k)).map(([, n]) => n)), ['Blue Dragon', 'White Tiger', 'Red Phoenix', 'Black Tortoise']);
     // a breath in the bag takes 30% off its element; the hunter's title 10% more; other damage is untouched
     const h = await g.eval(() => { const S = window.__G.S, f = window.__GDB.hurt, r = []; r.push(f(1000, { type: 'sbird' }), f(1000, { type: 'golem' }), f(1000, { type: 'wolf' }));
-      S.mats.brphx = 1; r.push(f(1000, { type: 'sbird' }), f(1000, { type: 'salamander' }), f(1000, { type: 'stiger' })); S.tl.dbeast = 1; r.push(f(1000, { type: 'trauka' }), f(1000, { type: 'stort' }), f(1000, { type: 'wolf' })); return r; });
+      S.mats.brphx = 1; r.push(f(1000, { type: 'sbird' }), f(1000, { type: 'salamander' }), f(1000, { type: 'stiger' })); S.tl.dbeast = 1; S.title = 'dbeast'; /* a title works while worn (SAT-ONLINE-161) */ r.push(f(1000, { type: 'trauka' }), f(1000, { type: 'stort' }), f(1000, { type: 'wolf' })); return r; });
     assert.deepEqual(h, [1000, 1000, 1000, 700, 700, 1000, 630, 900, 1000]);
     // the Red Phoenix shows its cone, then breathes fire into it
     const r = await g.eval(() => { const G = window.__G, m = G.mons().find((x) => x.type === 'sbird'); G.P.x = m.x - 90; G.P.y = m.y; G.P.inv = 0; G.S.mats.brphx = 0; G.S.tl.dbeast = 0; m.eng = 5; m.brc = 0; return 1; });
