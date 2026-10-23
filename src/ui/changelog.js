@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23acct', ver: '2.31', d: '2026-10-23',
+      ar: ["حاجتين من الأونلاين اتدمجوا (تحت): مسح بياناتك أونلاين وإنت جوه العالم مبيبوّظش الوحوش، وتأسيس الجيلد بياخد الدهب أول ما تضغط."],
+      en: ["Two online fixes join this update (below): deleting your online data in the world no longer breaks the monsters, and founding a guild takes the gold at the click."] },
+    { v: '2026-10-22acctdel', d: '2026-10-22',
+      ar: ["لو خرجت من حسابك أو مسحت بياناتك أونلاين وإنت جوه العالم، الوحوش بقت بتكمل عادي (كان بيطلع إيرور)"],
+      en: ["Signing out or deleting your online data while in the world no longer breaks the monsters around you (it showed an error)"] },
+    { v: '2026-10-22gfound', d: '2026-10-22',
+      ar: ["تأسيس الجيلد أونلاين بقى بياخد الـ 5,000 دهب أول ما تضغط (وبترجعلك لو الاسم مأخوذ)، فاللي تصرفه وإنت مستني مبيخليش دهبك بالسالب"],
+      en: ["Founding a guild online now takes the 5,000 gold the moment you ask (given back if the name is taken), so gold spent while it answers can't leave you below zero"] },
     { v: '2026-10-23vcities', ver: '2.30', d: '2026-10-23',
       ar: ["المدن من 6 لحد 1 اتبنت تحت الأرض، في صف تاني تحت المدن 15 لحد 7: خمس كونتات دم حقيقيين (لفل 400 لـ445)، والدوقة ماري روز في المدينة 2 (لفل 470)، والماركيز فنرير في المدينة 1 (لفل 490). كل مدينة بتتقفل لحد ما سيدها يموت، وطريق النزول بيفتح اللي بعدها.",
           "حجر الرجوع الأحمر وقائمة بيت النمل بيشملوا المدن الجديدة.",
@@ -504,12 +513,6 @@
     { v: '2026-10-22lootonce', d: '2026-10-22', hide: 1,
       ar: ["للتيستات والأمان: قطعة قرعة الغارة بتتعمل مرة واحدة بس حتى لو النتيجة وصلت مرتين، وتيست بيتأكد إن اللي ضرب البوس واللي قتله بياخدوا نفس الدهب"],
       en: ["Tests and safety: a raid roll's piece is made once even when the result arrives twice, and a test that the one who hit the boss and the one who killed it get the same gold"] },
-    { v: '2026-10-22acctdel', d: '2026-10-22',
-      ar: ["لو خرجت من حسابك أو مسحت بياناتك أونلاين وإنت جوه العالم، الوحوش بقت بتكمل عادي (كان بيطلع إيرور)"],
-      en: ["Signing out or deleting your online data while in the world no longer breaks the monsters around you (it showed an error)"] },
-    { v: '2026-10-22gfound', d: '2026-10-22',
-      ar: ["تأسيس الجيلد أونلاين بقى بياخد الـ 5,000 دهب أول ما تضغط (وبترجعلك لو الاسم مأخوذ)، فاللي تصرفه وإنت مستني مبيخليش دهبك بالسالب"],
-      en: ["Founding a guild online now takes the 5,000 gold the moment you ask (given back if the name is taken), so gold spent while it answers can't leave you below zero"] },
     { v: '2026-10-22bagq', ver: '1.85', d: '2026-10-22',
       ar: ["خانة بحث في الشنطة: اكتب جزء من اسم القطعة وهتلاقيها في أي تبويب",
         "نافذة التبادل بقت بتبين صور القطع زي الشنطة (بالنجوم واللون والتطوير)، وفيها تصنيفات (الكل، أسلحة، دروع، إكسسوارات) بعدد كل واحد، وخانة بحث",
