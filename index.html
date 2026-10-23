@@ -4349,7 +4349,7 @@ function updateComp(dt){if(!S||!P)return;meetTick(dt);const c=MEET?COMPS[MEET.id
  {const m=MEET.m,side=a.x<m.x?-1:1,tx=m.x+side*(bow?70:22),ty=m.y+4,dx=tx-a.x,dy=ty-a.y,dd=Math.hypot(dx,dy);if(dd>3){move(a,dx/dd*Math.min(dd,90*dt),dy/dd*Math.min(dd,90*dt),4);a.at+=dt;a.frame=(a.at*7|0)%2;}else a.frame=0;a.dir=m.x>a.x?2:3;
   a.cd-=dt;if(a.cd<=0){a.cd=1+rand()*.6;vfx(bow?'hit':'slash',m.x,monY(m),{angle:a.dir===2?0:Math.PI,rarity:2});if(Math.hypot(P.x-m.x,P.y-m.y)<220)noise(.04,.1,bow?2200:900);
    // they do real damage while someone is there to see it, a steady chip that never steals the kill outright
-   if(Math.hypot(P.x-m.x,P.y-m.y)<300&&m.hp>m.max*.05){const dmg=Math.round(m.max*(.004+rand()*.003));m.hp-=dmg;m.hurt=.1;num(m.x+(rand()-.5)*10,monY(m)-10,String(dmg),'#9fe39a',false);}}return;}
+   if(!m.led&&Math.hypot(P.x-m.x,P.y-m.y)<300&&m.hp>m.max*.05){const dmg=Math.round(m.max*(.004+rand()*.003)); /* online a follower's copy follows the host's, whose hero chips it (SAT-ONLINE-149: else it sank below the host's bar while you fought, then jumped back) */m.hp-=dmg;m.hurt=.1;num(m.x+(rand()-.5)*10,monY(m)-10,String(dmg),'#9fe39a',false);}}return;}
  let tg=null,bd=bow?150:120;for(const m of mons){if(m.dead||!(m.eng>0||m.agg))continue;const d=Math.hypot(m.x-P.x,m.y-P.y);if(d<bd){bd=d;tg=m;}}
  const rng=bow?100:16+(tg?MT[tg.type].r:0);let tx=P.x-14,ty=P.y+8;
  if(tg){const d=Math.hypot(tg.x-a.x,tg.y-a.y);if(d>rng){tx=tg.x+(a.x<tg.x?-1:1)*rng*.8;ty=tg.y;}else{tx=a.x;ty=a.y;}}

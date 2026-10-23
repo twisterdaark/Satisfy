@@ -369,3 +369,25 @@ test("a weakness or a slow one player's skill gives a monster is on the host's c
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+test("a hero met fighting a boss chips it on the host's copy only: B's bar doesn't sink below the host's while B fights", async () => {
+  const { ctx, a, b } = await pair();
+  try {
+    const M = await b.eval(() => { const m = window.__GU.getMeet(); return m && { id: m.id, x: m.m.x, y: m.m.y }; });
+    assert.ok(M, 'a hero fighting a boss on this clock');
+    for (const [g, d] of [[a, -30], [b, 30]]) await g.eval(([x, y, d]) => { const P = window.__G.P; P.x = x + d; P.y = y + 20; P.inv = 1e9; }, [M.x, M.y, d]);
+    await frames([a, b], 40);
+    const k = await b.eval(() => { const m = window.__GU.getMeet().m; return m.nk || (m.type + '@' + (m.sx | 0) + ',' + (m.sy | 0)); });
+    await on(a, (k) => { const m = by(k); m.max = 1e6; m.hp = 8e5; m.stun = 99; }, k);
+    await frames([a, b], 30);
+    let worst = 0;
+    for (let i = 0; i < 40; i++) {
+      await on(b, (k) => { const m = by(k); if (m && !m.dead) window.__GWP.hit(m, 0.01); }, k); // B keeps hitting it, softly (its own bar stays its own for a moment after each hit)
+      await frames([a, b], 6);
+      const sa = await state(a, k), sb = await state(b, k);
+      if (sa && sb) worst = Math.max(worst, sa.pm - sb.pm);
+    }
+    assert.ok(worst <= 3, "B's bar never below the host's (by a chip of 4-7‰ each time the hero strikes): " + worst + '‰');
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
