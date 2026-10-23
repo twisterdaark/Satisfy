@@ -15,7 +15,11 @@ const ROOF={forge:['#4a4f5c','#3a3e4a','#5c6272'],hall:['#3a4a6a','#2a3850','#52
  shop:['#b8862a','#8a6418','#d8a848'],armory:['#5a6474','#3e4654','#7a8698'],inn:['#a85a2a','#7e3e18','#c8784a'],house:['#a8443a','#8c3530','#c05a48'],
  palace:['#c8a040','#9a7a28','#e8c868'],temple:['#e4e0d6','#b4b0a6','#fbf8f0']};   // Titan (major #2): the Celestial Palace and Rebecca's great temple
 const rampOf=k=>{const [b,d,l]=(ROOF[k]||ROOF.house).map(hex);return [shade(d,-.35),d,b,l,shade(l,.25)];};
-const STONE=['#46423e','#5d5853','#75706a','#8c8781','#a39e97','#bcb7b0'].map(hex),WOOD=['#4a2e18','#5e3e26','#7a5230','#946640','#ad7c50','#c4925e'].map(hex);
+// the East Continent (owner 2026-10-23): b.ea = a hanok, grey clay tiles with turned-up eaves, white plaster, red-brown posts and paper windows
+const ROOFE={palace:['#4a5466','#343c4c','#6a7488'],temple:['#5a5248','#3e3830','#7a7266'],hall:['#3e4656','#2a3040','#5a6478']},ROOFE0=['#46494f','#303338','#62666e'];
+const rampE=k=>{const [b,d,l]=(ROOFE[k]||ROOFE0).map(hex);return [shade(d,-.4),d,b,l,shade(l,.2)];};
+const POSTE=['#3a160e','#5a2216','#7a3020','#94402a','#ae5638','#c46c4a'].map(hex);
+const STONE=['#46423e','#5d5853','#75706a','#8c8781','#a39e97','#bcb7b0'].map(hex),WOOD=['#4a2e18','#5e3e26','#7a5230','#946640','#ad7c50','#c4925e'].map(hex),WOOD0=WOOD;
 const PLANK=['#8a6a3f','#a07e50','#b8925e','#c9a46b','#d8b680','#e6c896'].map(hex),PLASTER=['#b8a888','#cdbd9a','#ddd0b0','#e9dfc4','#f4ecd8'].map(hex);
 const SHUTTER={house:'#4a7a48',shop:'#8a6418',inn:'#8a3a2a',hall:'#3a4a6a',lodge:'#4a6a3a',tower:'#5a3a7a',armory:'#4a5464',palace:'#7a1a1e',temple:'#c8a040'};
 const WALLK={house:'plank',shop:'timber',inn:'timber',hall:'timber',lodge:'log',tower:'stone',armory:'stone',forge:'stone',palace:'stone',temple:'stone'};
@@ -24,7 +28,7 @@ function Img(w,h){const d=new Uint8ClampedArray(w*h*4);return {w,h,d,set(x,y,c,a
  rect(x,y,rw,rh,c){for(let j=y;j<y+rh;j++)for(let i=x;i<x+rw;i++)this.set(i,j,c);}};}
 
 // ---- wall (ground layer): x px..px+w, y wy..py+h, wy = py+30 like today ----
-function wallRGBA(b){const w=b.w*16,h=b.h*16-30,k=b.k,forge=k==='forge',I=Img(w,h),style=WALLK[k]||'plank',X=b.x*16,Y=b.y*16;
+function wallRGBA(b){const w=b.w*16,h=b.h*16-30,k=b.k,forge=k==='forge'&&!b.ea,I=Img(w,h),style=b.ea?'timber':WALLK[k]||'plank',X=b.x*16,Y=b.y*16,WOOD=b.ea?POSTE:WOOD0;
  for(let y=0;y<h;y++)for(let x=0;x<w;x++){let c;
   if(style==='plank'){const row=y>>2,t=2.2+hash(X+((x+row*5)/14|0),Y+row,3)*1.4;c=(y&3)===0?PLANK[0]:pick(PLANK,t+((y&3)===1?.6:0),X+x,Y+y);if((x+row*5)%14===0&&(y&3))c=PLANK[1];}
   else if(style==='timber')c=pick(PLASTER,2.2+hash(X+x,Y+y,5)*.8,X+x,Y+y);
@@ -42,6 +46,11 @@ function wallRGBA(b){const w=b.w*16,h=b.h*16-30,k=b.k,forge=k==='forge',I=Img(w,
   const dx=w-26;for(let y=16;y<h-5;y++)for(let x=dx;x<dx+12;x++)I.set(x,y,x===dx||x===dx+11||y===16?WOOD[0]:((x-dx)%4===0?WOOD[1]:WOOD[2]));
   I.rect(dx+1,22,10,1,STONE[1]);I.rect(dx+1,h-12,10,1,STONE[1]);I.rect(dx+8,28,2,2,hex('#d8b050'));
   const sx=(w>>1)-6;I.rect(sx,2,12,9,WOOD[1]);I.rect(sx+1,3,10,7,hex('#c8a050'));I.rect(sx+3,4,6,2,hex('#3a3a40'));I.rect(sx+2,4,2,1,hex('#3a3a40'));I.rect(sx+5,6,2,3,WOOD[2]);}
+ else if(b.ea){// paper lattice windows (changsal) in a red-brown frame, no shutters; a plain plank door below
+  for(const wx of [8,w-20]){I.rect(wx-1,6,13,12,WOOD[0]);for(let y=7;y<17;y++)for(let x=wx;x<wx+11;x++)I.set(x,y,(x-wx)%3===1||(y-7)%3===1?WOOD[2]:pick(PLASTER,3.4,x,y));I.rect(wx-2,17,15,1,WOOD[1]);}
+  const dx=(w>>1)-6,dy=h-16;I.rect(dx-2,dy-2,16,18,WOOD[0]);for(let y=dy;y<h;y++)for(let x=dx;x<dx+12;x++)I.set(x,y,(x-dx)===6?WOOD[0]:(x-dx)%3===1&&y<dy+9?WOOD[2]:y<dy+9?pick(PLASTER,3.2,x,y):WOOD[(x-dx)%4===0?1:3]);
+  I.rect(dx+4,dy+10,1,2,hex('#e0c060'));I.rect(dx+7,dy+10,1,2,hex('#e0c060'));
+  if(k!=='house'){const sx=(w>>1)-6,sy=3;I.rect(sx-1,sy-1,14,12,WOOD[0]);I.rect(sx,sy,12,10,hex('#1a1c22'));I.rect(sx,sy,12,1,WOOD[3]);signIcon(I,k,sx,sy);}}
  else{// windows with shutters and sills, flower boxes on houses
   for(const wx of [8,w-20]){I.rect(wx-1,6,13,12,WOOD[0]);for(let y=7;y<17;y++)for(let x=wx;x<wx+11;x++){const t=(y-7)/9;I.set(x,y,shade(hex('#a8d0f4'),-t*.45));}
    I.rect(wx+5,7,1,10,WOOD[1]);I.rect(wx,11,11,1,WOOD[1]);I.set(wx+1,8,[255,255,255]);I.set(wx+2,8,[230,244,255]);I.set(wx+1,9,[230,244,255]);I.set(wx+7,12,[230,244,255]);
@@ -71,12 +80,16 @@ function signIcon(I,k,sx,sy){const e=hex('#f2e6c8'),R_=(x,y,w,h,c)=>I.rect(sx+x,
 const BRICK=['#4e2a22','#6a3a2e','#8a4a3a','#a85a46','#c06a52','#d88a6e'].map(hex);
 function chimney(I,x0,y0,w,h,P,sx,sy){const bw=w>8?6:4;for(let y=0;y<h;y++)for(let x=0;x<w;x++){const row=y>>2,off=row%2?bw>>1:0,mortar=(y&3)===3||(x+off)%bw===bw-1;
   let c=mortar?P[1]:P[(hash(sx+((x+off)/bw|0),sy+row,23)>.5?3:2)];if(x===0&&!mortar)c=P[4];if(x>=w-2)c=mortar?P[0]:P[1];I.set(x0+x,y0+y,c);}}
-function roofRGBA(b){const w=b.w*16,W=w+8,top=12,H=top+38,k=b.k,R=rampOf(k),I=Img(W,H),X=b.x*16,Y=b.y*16,forge=k==='forge';
+function roofRGBA(b){const w=b.w*16,W=w+8,top=12,H=top+38,k=b.k,R=b.ea?rampE(k):rampOf(k),I=Img(W,H),X=b.x*16,Y=b.y*16,forge=k==='forge'&&!b.ea;
  for(let i=0;i<9;i++){const inset=Math.max(0,8-i*2),y0=top+i*4,off=i%2?3:0;
   for(let j=0;j<4;j++)for(let x=inset;x<W-inset;x++){const y=y0+j,col=Math.floor((x+off)/6),light=(1-x/W)*.9-.2;let c;
    if(j===3)c=R[0];else if((x+off)%6===0)c=R[1];else c=pick(R,1.8+hash(X+col,Y+i,17)*1.1+light+(j===0?.8:0),X+x,Y+y);
    if(x===inset||x===W-inset-1)c=R[0];if(i===0&&j===0)c=R[4];I.set(x,y,c);}}
  I.rect(0,top+36,W,2,hex('#2a1d18'));I.rect(0,top+35,W,1,R[0]);
+ if(b.ea){// the eaves turn up at both ends, a white ridge line runs along the top, round tile ends along the eave
+  for(let i=0;i<5;i++){I.rect(i,top+30-i*2,2,2,R[i>2?4:3]);I.rect(W-2-i,top+30-i*2,2,2,R[i>2?4:3]);}
+  I.rect(8,top-1,W-16,2,hex('#e8e4dc'));I.rect(8,top+1,W-16,1,R[0]);for(let x=4;x<W-4;x+=4)I.set(x,top+34,R[4]);
+  return {x:X-4,y:Y-4-top,w:W,h:H,d:I.d};}
  if(forge){const cx=W-26;chimney(I,cx,top-14,12,22,STONE,X+cx,Y);
   I.rect(cx-2,top-16,16,4,STONE[4]);I.rect(cx-2,top-16,16,1,STONE[5]);I.rect(cx,top-12,12,1,STONE[0]);I.rect(cx+2,top-15,8,2,hex('#1a1414'));}
  else if(k==='house'||k==='inn'){const cx=Math.round(W*.68);chimney(I,cx,top-6,6,16,BRICK,X+cx,Y);

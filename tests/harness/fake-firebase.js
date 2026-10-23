@@ -87,7 +87,7 @@
   }
 
   const FIELDS = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'title', 'zone', 'room', 'x', 'y', 'dir', 'anim', 'arm', 'party', 'duel', 'mv', 'hp', 'em', 'role', 'wp', 'fx', 'gu', 'rs', 'rd', 'ol', 'gd', 'seq', 't'];
-  const POS_X = 16384, POS_Y = 8192, POS_Y0 = -4096; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
+  const POS_X = 32768, POS_Y = 8192, POS_Y0 = -4096; // = database.rules.json x/y bounds (checked by tests/unit/rules.test.cjs)
   const REQUIRED = ['v', 'uid', 'sid', 'handle', 'look', 'cls', 'lv', 'zone', 'x', 'y', 'dir', 'anim', 'arm', 'seq', 't'];
   // SAT-ONLINE-039 trades, as backend/database.rules.json: every condition reads the data as it was before the write
   const TID_RE = /^t_[A-Za-z0-9_-]{1,60}$/, IID_RE = /^it_[a-z0-9_]{4,40}_[0-9]+$/;
@@ -406,7 +406,7 @@
       if (v === null) { const c = data.get('dropClaims/' + seg[1]); return old && (old.o === me || (c && c.by === me) || now > old.t + 120000) ? null : 'PERMISSION_DENIED: drops remove'; }
       if (old || v.o !== me) return 'PERMISSION_DENIED: drops write';
       for (const k in v) if (!['o', 'x', 'y', 'k', 'n', 'r', 'it', 't'].includes(k)) return 'drops field ' + k;
-      if (!(typeof v.x === 'number' && v.x >= 0 && v.x < 16384 && typeof v.y === 'number' && v.y >= -4096 && v.y < 8192)) return 'drops x/y';
+      if (!(typeof v.x === 'number' && v.x >= 0 && v.x < 32768 && typeof v.y === 'number' && v.y >= -4096 && v.y < 8192)) return 'drops x/y';
       if (!(typeof v.k === 'string' && /^[a-z0-9_]{1,24}$/.test(v.k) && isInt(v.n, 1) && v.n <= 99999 && isInt(v.r, 0) && v.r <= 9)) return 'drops k/n/r';
       if ('it' in v && !(typeof v.it === 'string' && v.it.length <= 600)) return 'drops it';
       return JSON.stringify(v.t) === SVs ? null : 'drops t';

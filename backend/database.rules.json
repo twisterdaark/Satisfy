@@ -459,7 +459,7 @@
         ".write": "auth != null && ((!data.exists() && newData.child('o').val() === auth.uid) || (data.exists() && !newData.exists() && (data.child('o').val() === auth.uid || root.child('dropClaims').child($did).child('by').val() === auth.uid || now > data.child('t').val() + 120000)))",
         ".validate": "$did.matches(/^d_[A-Za-z0-9_-]{1,80}$/) && newData.hasChildren(['o', 'x', 'y', 'k', 'n', 'r', 't'])",
         "o": { ".validate": "newData.val() === auth.uid" },
-        "x": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 16384" },
+        "x": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 32768" },
         "y": { ".validate": "newData.isNumber() && newData.val() >= -4096 && newData.val() < 8192" },
         "k": { ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9_]{1,24}$/)" },
         "n": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 99999 && newData.val() % 1 === 0" },
@@ -947,7 +947,7 @@
               ".validate": "newData.isString() && newData.val().length <= 16"
             },
             "x": {
-              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 16384"
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 32768"
             },
             "y": {
               ".validate": "newData.isNumber() && newData.val() >= -4096 && newData.val() < 8192"

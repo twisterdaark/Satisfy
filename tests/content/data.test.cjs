@@ -5,7 +5,7 @@ const test=require('node:test'),assert=require('node:assert'),fs=require('fs'),p
 const repo=path.join(__dirname,'..','..'),dataDir=path.join(repo,'data');
 const FILES=['monsters','quests','recipes','skills','npcs','zones','classes'];
 const MATS=['fess','iess','sess','bvial','vwleath','wegg','ore','wood','leather','blue','mstone','mith','fish','sfish','gfish','herb','bherb','cfish','stew','feast','dscale','ruby','topaz','emer','sapph','diam','brphx','brdrg','brtig','brtor','bljewel','blhorn','kink','kpearl'];
-const VISIT_TARGETS=['grave','mural','yaltar','irene','lfk','lfield','myfc']; // landmarks with their own trigger in the engine (visitGrave)
+const VISIT_TARGETS=['grave','mural','yaltar','irene','lfk','lfield','myfc','eagate','phxseal','btshrine']; // landmarks with their own trigger in the engine (visitGrave)
 
 // unique items index.html adds with a later RC.push (the data build reads only the first RC table)
 const LATE_RC=new Set([...fs.readFileSync(path.join(repo,'index.html'),'utf8').matchAll(/^ \{id:'(\w+)',slot:/gm)].map(m=>m[1]));
@@ -30,7 +30,7 @@ test('counts match the audited baseline',()=>{
   const n=o=>Array.isArray(o)?o.length:Object.keys(o).length;
   assert.deepStrictEqual({MT:n(D.monsters.types),BOSSES:n(D.monsters.bosses),SPAWN:n(D.monsters.spawns),QD:n(D.quests.quests),RC:n(D.recipes.recipes),
     SKD:n(D.skills.skills),NPC:n(D.npcs.npcs),interior:Object.values(D.npcs.npcs).filter(x=>x.interior).length,ZR:n(D.zones.regions),TOWNS:n(D.zones.towns),classes:n(D.classes.classes)},
-    {MT: 149,BOSSES:5,SPAWN:19,QD:139,RC:25,SKD:133,NPC:100,interior:8,ZR:17,TOWNS:3,classes:29});});
+    {MT: 171,BOSSES:5,SPAWN:19,QD:150,RC:25,SKD:133,NPC:132,interior:8,ZR:17,TOWNS:3,classes:29});});   // SAT-ONLINE-159: the East Continent's 22 monsters, 11 quests and 32 people
 
 // condition vocabulary (docs/content/CONTENT_SCHEMA.md)
 function checkCond(c,where){assert.ok(c&&typeof c==='object'&&!Array.isArray(c),where+': condition must be an object');
@@ -48,7 +48,7 @@ function checkCond(c,where){assert.ok(c&&typeof c==='object'&&!Array.isArray(c),
     default:assert.fail(`${where}: unknown operator ${k}`);}}
 
 test('cross-references point at things that exist',()=>{
-  const {types,bosses,spawns}=D.monsters,Q=D.quests.quests,R=D.recipes.recipes,SK=D.skills.skills,N=D.npcs.npcs,C=D.classes.classes,{MW,WMH}=D.zones.world;
+  const {types,bosses,spawns}=D.monsters,Q=D.quests.quests,R=D.recipes.recipes,SK=D.skills.skills,N=D.npcs.npcs,C=D.classes.classes,{MW,WMH}=D.zones.world,NR=D.zones.world.NR||0;   // rows -NR..-1: the north (the East Continent's kingdoms have people there)
   for(const m of Object.values(types))for(const [it,p] of m.drop){assert.ok(MATS.includes(it),`${m.id} drops ${it}`);assert.ok(p>0,m.id);}
   for(const b of bosses){assert.ok(types[b.type]&&types[b.type].boss,`boss ${b.id}`);assert.ok(b.tx>=0&&b.tx<MW&&b.ty>=0&&b.ty<WMH,`boss ${b.id} on map`);}
   for(const s of spawns){assert.ok(types[s.type],`spawn ${s.id}`);assert.ok(s.x0>=0&&s.x0<s.x1&&s.x1<=MW&&s.y0>=0&&s.y0<s.y1&&s.y1<=WMH,`spawn ${s.id} inside ${MW}x${WMH}`);assert.ok(s.n>0);}
@@ -69,9 +69,9 @@ test('cross-references point at things that exist',()=>{
     if(q.title)assert.ok(D.skills.titleSkills[q.title],`quest ${q.id} title`);checkCond(q.offer,'quest '+q.id);}
   for(const s of Object.values(SK)){if(s.cls)assert.ok(s.cls==='any'||C[s.cls],`skill ${s.id} class`);if(s.need)assert.ok(['melee','bow','staff','spear'].includes(s.need));checkCond(s.unlock,'skill '+s.id);}
   for(const [t,k] of Object.entries(D.skills.titleSkills))assert.ok(SK[k]&&SK[k].title===t,`title ${t} -> ${k}`);
-  for(const n of Object.values(N)){if(n.interior)assert.ok(n.room&&Number.isInteger(n.room.bi),`npc ${n.id} room`);else assert.ok(n.tx>=0&&n.tx<MW&&n.ty>=0&&n.ty<(n.id==='vcenv'||n.id==='vprince'?D.zones.world.MH:WMH),`npc ${n.id} inside ${MW}x${WMH}`); // v2.07: the envoy and the prince wait underground
+  for(const n of Object.values(N)){if(n.interior)assert.ok(n.room&&Number.isInteger(n.room.bi),`npc ${n.id} room`);else assert.ok(n.tx>=0&&n.tx<MW&&n.ty>=-NR&&n.ty<(n.id==='vcenv'||n.id==='vprince'?D.zones.world.MH:WMH),`npc ${n.id} inside ${MW}x${WMH}`); // v2.07: the envoy and the prince wait underground
     if(!n.obj)assert.ok(n.spr,`npc ${n.id} sprite`);assert.ok(n.dialog,`npc ${n.id} dialog`);}
-  for(const z of [...D.zones.towns,...D.zones.regions])assert.ok(z.x0>=0&&z.x0<z.x1&&z.x1<MW&&z.y0>=0&&z.y0<z.y1&&z.y1<WMH,`zone ${z.id} inside map`);
+  for(const z of [...D.zones.towns,...D.zones.regions])assert.ok(z.x0>=0&&z.x0<z.x1&&z.x1<MW&&z.y0>=-NR&&z.y0<z.y1&&z.y1<WMH,`zone ${z.id} inside map`);
   D.zones.regions.forEach((r,i)=>assert.strictEqual(r.order,i,'regions keep first-match order'));
   for(const t of D.zones.towns)assert.ok(D.zones.regions.some(r=>r.id===t.id),`town ${t.id} has a region`);
   for(const c of Object.values(C)){if(c.start)continue;if(c.hidden){assert.ok(c.source==='fogbook'||Q[c.quest]&&Q[c.quest].hcls===c.id&&Q[c.quest].hid,`class ${c.id} quest`);c.skills.forEach(s=>assert.strictEqual(SK[s].cls,c.id));continue;}if(c.legendary){c.skills.forEach(s=>assert.strictEqual(SK[s].cls,c.id));continue;}if(c.tier===2){assert.ok(Q[c.quest]&&Q[c.quest].promo===c.id&&N[c.trainer]&&c.base.every(b=>C[b]),`class ${c.id}`);c.skills.forEach(s=>assert.strictEqual(SK[s].cls,c.id));continue;}assert.ok(Q[c.quest]&&Q[c.quest].cls===c.id,`class ${c.id} quest`);assert.ok(N[c.trainer]);assert.ok(R[c.item]);c.skills.forEach(s=>assert.strictEqual(SK[s].cls,c.id));}});
