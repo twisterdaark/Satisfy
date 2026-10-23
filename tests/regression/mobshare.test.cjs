@@ -391,3 +391,21 @@ test("a hero met fighting a boss chips it on the host's copy only: B's bar doesn
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+test("a stealthed follower is found by the host's monsters only as close as the host would be (12% of the aggro range)", async () => {
+  const { ctx, a, b } = await pair(420); // A far off; B alone by a wolf
+  try {
+    const near = async (stl) => {
+      await b.eval((s) => { window.__G.P.stl = s; }, stl);
+      await frames([a, b], 10);
+      const k = await on(a, ([x, y, s]) => { const G = window.__G, m = G.spawnMon('wolf', x + 50, y + (s ? 6 : 0)); m.agg = 0; m.eng = 0; return key(m); }, await b.eval((s) => [window.__G.P.x, window.__G.P.y, s], stl)); // a wolf of its own each time
+      let eng = 0;
+      for (let i = 0; i < 20; i++) { await b.eval((s) => { window.__G.P.stl = s; }, stl); await frames([a, b], 3); if (await on(a, (k) => { const m = by(k); return !!m && m.eng > 0; }, k)) eng++; }
+      await on(a, (k) => { const m = by(k); if (m) { m.dead = true; m.rt = 1e9; } }, k);
+      return eng;
+    };
+    assert.ok((await near(0)) > 0, 'B in plain sight, 50 px from a wolf: it comes');
+    assert.equal(await near(30), 0, 'B in stealth at the same 50 px: it does not (stealth: 12% of 95 px)');
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
