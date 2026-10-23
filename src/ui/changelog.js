@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23zwin', ver: '2.33', d: '2026-10-23',
+      ar: ["الشنطة والحالة والعتاد والجيلد وكل الشبابيك والحوارات بقت بتطلع فوق شرايط السكيلات ولوحات الشاشة. ولما تسحب حاجة للشريط والشباك مغطيه، الشريط بيطلع فوق لحد ما تحطها.",
+          "زرار دعوة لاعب بقى ظاهر على طول في شباك الجيلد. ولو الجيلد اتعمل وإنت أوفلاين (موجود على جهازك بس)، بيقولك كده ويديك زرار تخليه أونلاين بنفس الاسم واللفل والأراضي ومن غير ما تدفع تاني. ولو الاسم مأخوذ أونلاين بيطلب منك اسم تاني. وتبويب المعلومات بيقول الجيلد أونلاين ولا على جهازك بس."],
+      en: ["The bag, status, equipment, guild and every window and dialog now draw over the skill bars and HUD boxes. Dragging something onto a bar a window covers brings the bar up until you drop it.",
+          "Invite a player always shows in the guild window. A guild founded offline (only on this device) says so and offers to take it online with the same name, level and land, at no second fee; if the name is taken online it asks for another. The Info tab says whether the guild is online or only on this device."] },
     { v: '2026-10-23guildwin', ver: '2.32', d: '2026-10-23',
       ar: ["الجيلد بقى شباك زي الشنطة والحالة (G): بيتسحب من فوق وتقدر تمشي وهو مفتوح. فيه تبويب معلومات، وتبويب أعضاء (أونلاين ولا آخر ظهور، واللفل والكلاس والمكان للي قريب منك)، وتبويب إدارة فيه كل حاجات الجيلد: الخزنة والمباني والتبرع والأراضي والتحالفات والصلاحيات وغيرهم، وكلهم بيفتحوا جوه الشباك.",
           "تحت في شباك الجيلد: دعوة لاعب بالـID بتاعه، وشات الجيلد، وتسليم القيادة، ومغادرة الجيلد، وللقائد حل الجيلد (Disband) بعد ما تكتب اسمه. ولما تدوس على عضو تقدر تدعيه للبارتي أو تهمسله لو صاحبك.",

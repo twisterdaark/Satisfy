@@ -111,3 +111,36 @@ test('the guild window: tabs, invite by ID, members, Manage inside the window, h
     assert.deepEqual(a.errors, []); assert.deepEqual(b.errors, []);
   } finally { await ctx.close(); }
 });
+
+test('a guild founded offline: Invite says why and offers to take it online; same name, level and land, then invites work', async () => {
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  try {
+    const g = await H.openGame({ ctx, query: '?net=online&slot=a' });
+    await g.eval(() => { const D = window.__fakeRTDB.data; D.set('accountIds/gGwO1', 'Omar'); D.set('handles/omar', 'gGwO1'); window.__fakeRTDB.nextName = 'Omar'; window.__fakeRTDB.nextUid = 'gGwO1'; document.getElementById('onlineBtn').click(); });
+    await until([g], () => !!Satisfy.local.net() && Satisfy.local.net().state === 'ONLINE', 15000);
+    await H.newGame(g, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    for (let i = 0; i < 6; i++) { await g.step(7); await g.page.waitForTimeout(30); }
+    // as an old save would have it: a guild only on this device, level 3, holding a land
+    const land = await g.eval(() => { const S = window.__G.S, WS = window.__GU.WS, me = window.__GDW.pid(), k = Object.keys(WS.terr)[0];
+      WS.guilds.g_old = { id: 'g_old', name: 'Shadow Hunters', master: me, lv: 1, xp: 9000, col: '#5aa0ff', members: { [me]: { n: 'Omar', rk: 'm', c: 9000 } } }; S.guild = 'g_old'; WS.terr[k].own = 'g_old'; return k; });
+    await g.page.keyboard.press('KeyG'); await g.step(2);
+    assert.match(await g.eval(() => window.__GDW.text()), /lives only on this device/);
+    const foot = await g.eval(() => [...document.querySelectorAll('#gwF button')].map((x) => x.textContent));
+    assert.ok(foot.includes('Invite a player') && foot.includes('Take the guild online'), foot.join(' | '));
+    await click(g, '#gwF [data-gwf="inv"]'); await g.step(2);
+    assert.match(await g.eval(() => window.__GDW.text()), /founded offline, so nobody can join it/);
+    await pickW(g, /^Take the guild online$/); await g.step(2);
+    await pickW(g, /^Take the guild online$/); await g.step(2);
+    await until([g], () => { const s = window.__GG.state(); return !!s && s.rank === 'm'; });
+    assert.equal(await g.eval(() => window.__GG.state().guild.name), 'Shadow Hunters');
+    assert.equal(await g.eval(() => window.__G.S.guild), 'g_gGwO1');
+    assert.equal(await g.eval((k) => window.__GU.WS.terr[k].own, land), 'g_gGwO1', 'the land moved with it');
+    assert.equal(await g.eval(() => !!window.__GU.WS.guilds.g_old), false);
+    for (let i = 0; i < 4; i++) { await g.step(90); await g.page.waitForTimeout(20); }
+    await until([g], () => window.__GG.state().xp >= 9000, 15000);
+    await g.eval(() => window.__GDW.tab('i')); await g.step(2);
+    assert.match(await g.eval(() => window.__GDW.text()), /The guild is online/);
+    assert.ok((await g.eval(() => [...document.querySelectorAll('#gwF button')].map((x) => x.textContent))).includes('Guild chat'));
+    assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
