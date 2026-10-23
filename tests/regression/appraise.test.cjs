@@ -77,3 +77,18 @@ test('a hidden function works only once it is known; only Pagma\'s Successor app
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// owner 2026-10-23: a successful appraisal teaches Pagma's Successor: smithing experience by rarity, once per item
+test('appraising gives the Successor smithing experience, once per item', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    const r = await g.eval(() => { const G = window.__G, S = G.S; S.cls = 'pagma'; S.smith = 50; S.sxp = 0;
+      const a = G.eqx.mkItem('isword', 1), b = G.eqx.mkItem('isword', 3); S.items.push(a, b);
+      window.__GAP.doApr(a, 'anvil'); const s0 = S.sxp; window.__GAP.doApr(b, 'anvil'); const s1 = S.sxp; window.__GAP.doApr(b, 'anvil'); return { s0, s1, s2: S.sxp }; });
+    assert.ok(r.s0 >= 18, 'an uncommon item teaches a little: ' + JSON.stringify(r));
+    assert.ok(r.s1 - r.s0 >= 38 && r.s1 - r.s0 > r.s0 / 2, 'a rarer one teaches more');
+    assert.equal(r.s2, r.s1, 'not twice for the same item');
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});

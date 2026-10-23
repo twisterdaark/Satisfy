@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23equip', ver: '2.02', d: '2026-10-23',
+      ar: ["شاشة المعدات اتصلحت: أسامي الخانات مبقتش متدارية، وسطر الهجوم والدفاع والكلاس ووصف السلاح بقى ظاهر فوق الشريط",
+        "خانات الخواتم التسعة بتتفتح واحدة واحدة مع اللفل (20، 60، 100، 150، 200، 260، 320، 380، 450)، والكلاس الأسطوري بيفتحها في نص اللفل. الخانة المقفولة عليها قفل وبتقولك هتتفتح امتى، وخانة الإكسسوار مفتوحة على طول",
+        "كل فحص ناجح لوريث باجما بيديه خبرة حدادة على حسب ندرة القطعة (الضعف لو لقى خاصية مخفية)، وخبرة عادية بسيطة، مرة واحدة لكل قطعة"],
+      en: ["The equipment window is fixed: slot names are no longer covered, and the attack, defence, class and weapon line now sits above the bar",
+        "The nine ring slots open one by one with your level (20, 60, 100, 150, 200, 260, 320, 380, 450); a legendary class opens them at half the level. A locked slot shows a lock and when it opens; the accessory slot is always open",
+        "Every appraisal by Pagma's Successor gives smithing experience by the item's rarity (double when it finds a hidden option) and a little experience, once per item"] },
     { v: '2026-10-23bossdrop', ver: '2.01', d: '2026-10-23',
       ar: ["كل زعيم بقى بينزّل دروب عادي كل مرة تقتله: خاماته كذا حتة مرة واحدة، وفرصة أكبر لقطعة معدات",
         "وكل زعيم بيسيب صندوق مكانه مرة في اليوم، وحاجته أحسن بكتير: قطعة مضمونة بتقييم أعلى، وكل خاماته كاملة، وأحجار تقوية ونادرة، وأحيانا سلاحه الأسطوري",

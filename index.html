@@ -295,12 +295,13 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 .slotb b{position:absolute;right:calc(var(--u)*.25);bottom:0;font-size:calc(var(--u)*1);text-shadow:0 0 2px #000,0 0 2px #000;font-family:"Press Start 2P",monospace;font-size:calc(var(--u)*.75)}
 .slotb.r1{border-color:var(--r1)}.slotb.r2{border-color:var(--r2)}.slotb.r3{border-color:var(--r3)}.slotb.r4{border-color:var(--r4);box-shadow:0 0 calc(var(--u)*.8) rgba(255,194,26,.5)}
 .slotb.e:hover{transform:none;background:rgba(0,0,0,.5)}
-#equipW{width:calc(var(--u)*44);background:var(--sys2)}
+#equipW{width:calc(var(--u)*44);background:var(--sys2);top:calc(var(--u)*1.5);transform:translateX(-50%);max-height:calc(100% - var(--u)*11.5);overflow-y:auto} /* owner 2026-10-23: the bottom bar hid the stats line */
 .eqwrap{display:flex;justify-content:center;align-items:center;gap:calc(var(--u)*2);direction:ltr}
 .eqrings{display:grid;grid-template-columns:repeat(9,calc(var(--u)*4));justify-content:center;gap:calc(var(--u)*.5);margin-top:calc(var(--u)*.8);direction:ltr}
 .eqrings .slotb{width:calc(var(--u)*4);height:calc(var(--u)*4)}.eqrings small{display:none}
+.slotb.lock{opacity:.45;cursor:not-allowed}.slotb.lock::after{content:'\1F512';position:absolute;inset:auto 0 calc(var(--u)*-.1) auto;font-size:calc(var(--u)*1.3)}
 .eqside{display:grid;gap:calc(var(--u)*.6);width:calc(var(--u)*6)}
-.eqside .slotb{width:calc(var(--u)*6)}.eqside small{display:block;text-align:center;color:var(--muted);font-size:calc(var(--u)*.85);margin-top:calc(var(--u)*-.4)}
+.eqside .slotb{width:calc(var(--u)*5.2)}.eqside small{display:block;text-align:center;color:var(--muted);font-size:calc(var(--u)*.85);line-height:1.25;margin-top:calc(var(--u)*.25);white-space:nowrap}
 #pview{width:calc(var(--u)*13);height:calc(var(--u)*19.5);image-rendering:pixelated;background:radial-gradient(ellipse at 50% 85%,rgba(143,216,255,.25),transparent 60%)}
 #eqInfo{margin-top:calc(var(--u)*.8)}
 #dtext{white-space:pre-line}#qdW{width:calc(var(--u)*44)}#qdB .ssec:first-child{border-top:0;margin-top:0}#qdB p{margin:calc(var(--u)*.4) 0}#qdB ul{margin:0;padding-inline-start:calc(var(--u)*1.6)}#qdB li{color:var(--gold)}#qtext .qi{cursor:pointer}#qtext .qi:hover b{color:#fff;text-decoration:underline}
@@ -5116,12 +5117,15 @@ function invApr(s){if(!s.it||!aprNeed(s.it)){toast(t(s.it&&s.it.apr?'aprDone':'a
 function doApr(it,w){if(!canApr()||!aprNeed(it))return null;const g=aprFee(it,w);if(g){if(S.gold<g){SFX.deny();toast(t('salvPoor',{g}),'warn');return null;}S.gold-=g;}
  it.apr=1;const has=rand()<aprChance(it);if(has)it.hid=hidRoll(it);if(has&&it.slot==='w'&&rand()<.4&&(it.wp||[]).length<4){const p=wpOne(Math.max(2,it.r||0),(it.wp||[]).map(x=>x.k),it);p.h=1;(it.wp=it.wp||[]).push(p);setTimeout(()=>toast(t('wpHid',{p:wpTxt(p)}),'good'),700);}
  if(has){SFX.quest();toast(t('aprHas'),'good');setTimeout(()=>toast(t('aprUpd',{it:inm(it)})+' '+hidTxt(it.hid),'good'),350);}else{SFX.click();toast(t('aprNone'));}
+ // owner 2026-10-23: every appraisal teaches the Successor something: smithing experience by rarity (double when it finds a hidden
+ // option) and a little experience; once per item, since an appraised item can't be appraised again
+ {const sx=Math.round((8+(it.r||0)*10)*(has?2:1)*(1+dvB('smith')));S.sxp+=sx;let up='';while(S.sxp>=50*S.smith){S.sxp-=50*S.smith;S.smith++;up=t('smithUp',{n:S.smith});}gainXP(3+(it.r||0)*3);numP(-40,'+'+sx+' '+t('aprSx'),'#f2c14e',false);if(up)setTimeout(()=>toast(up,'good'),1100);}
  if(aprSelf(w)&&salvUnd(it)&&undOf(it.id)<100){S.und=S.und||{};const u=Math.min(100,undOf(it.id)+(S.cls==='pagma'?17:10));S.und[it.id]=u;
   setTimeout(()=>{toast(t(u>=100?'undDone':'undUp',{it:t(it.id),n:u}),'good');if(u>=100){SFX.legendary();rcLearn();}},800);}
  hudDirty=true;if(!$('inv').hidden)renderInv();save(true);return has;}
 window.__GAP={need:it=>aprNeed(it),chance:it=>aprChance(it),roll:it=>hidRoll(it),bon:k=>hidBon(k),fee:(it,w)=>aprFee(it,w),doApr:(it,w)=>doApr(it,w),open:w=>openApr(w),tip:i=>itemTip(i),tin:j=>tradeItemIn(j)}; // tests
-Object.assign(STR.ar,{"aprPg": "فحص القطع لوريث باجما بس", "oApr": "افحص قطعة", "fAprB": "فحص", "aprT": "فحص القطع", "aprNote": "دوس على قطعة عشان تفحصها وتكشف لو فيها خاصية مخفية.", "aprClick": "دوس عشان تفحصها", "aprNo": "القطعة دي مفيهاش حاجة تتفحص.", "aprDone": "القطعة دي اتفحصت قبل كده.", "aprUn": "لسه متفحصتش", "aprNone": "[مفيش خاصية مخفية.]", "aprHas": "[القطعة دي فيها خاصية مخفية.]", "aprUpd": "[معلومات {it} اتحدّثت.]", "hidL": "خاصية مخفية"});
-Object.assign(STR.en,{"aprPg": "Only Pagma's Successor can appraise items", "oApr": "Appraise an item", "fAprB": "Appraise", "aprT": "Appraise items", "aprNote": "Click a piece of gear to appraise it and find out whether it hides a function.", "aprClick": "Click to appraise", "aprNo": "There is nothing to appraise on this item.", "aprDone": "This item has already been appraised.", "aprUn": "Unappraised", "aprNone": "[A hidden function doesn't exist.]", "aprHas": "[This item has a hidden function.]", "aprUpd": "[The information of {it} has been updated.]", "hidL": "Hidden function"});
+Object.assign(STR.ar,{"ringLock": "خانة خاتم مقفولة: بتتفتح في لفل {n}", "aprSx": "خبرة حدادة", "aprPg": "فحص القطع لوريث باجما بس", "oApr": "افحص قطعة", "fAprB": "فحص", "aprT": "فحص القطع", "aprNote": "دوس على قطعة عشان تفحصها وتكشف لو فيها خاصية مخفية.", "aprClick": "دوس عشان تفحصها", "aprNo": "القطعة دي مفيهاش حاجة تتفحص.", "aprDone": "القطعة دي اتفحصت قبل كده.", "aprUn": "لسه متفحصتش", "aprNone": "[مفيش خاصية مخفية.]", "aprHas": "[القطعة دي فيها خاصية مخفية.]", "aprUpd": "[معلومات {it} اتحدّثت.]", "hidL": "خاصية مخفية"});
+Object.assign(STR.en,{"ringLock": "Locked ring slot: opens at Lv {n}", "aprSx": "smithing XP", "aprPg": "Only Pagma's Successor can appraise items", "oApr": "Appraise an item", "fAprB": "Appraise", "aprT": "Appraise items", "aprNote": "Click a piece of gear to appraise it and find out whether it hides a function.", "aprClick": "Click to appraise", "aprNo": "There is nothing to appraise on this item.", "aprDone": "This item has already been appraised.", "aprUn": "Unappraised", "aprNone": "[A hidden function doesn't exist.]", "aprHas": "[This item has a hidden function.]", "aprUpd": "[The information of {it} has been updated.]", "hidL": "Hidden function"});
 Object.assign(STR.ar,{"oSalv": "فكّ قطعة", "fSalvB": "فكّ قطعة", "salvT": "فكّ القطع", "salvNote": "دوس على قطعة عشان تفكّها وتاخد جزء من خاماتها.", "salvGet": "بتطلّع: {m}", "salvNothing": "مفيش حاجة تطلع من القطعة دي.", "salvFeeT": "الأجرة {g} دهب", "salvNo": "الحاجات اللي بتتفك هي المعدات بس.", "salvQ": "تفكّ {it}؟ هتطلع منها: {m}.", "salvY": "فكّها", "salvRisk": "فرصة الفشل {n}% (القطعة بتتخدش بس)", "salvPoor": "الأجرة {g} دهب، ومعاكش.", "salvFail": "[الفك فشل.]", "salvDone": "{it} اتفكّت: {m}", "undL": "الفهم: {n}%", "undUp": "فهمك لـ{it} وصل {n}%.", "undDone": "فهمك لـ{it} وصل 100%. اتعلمت طريقة صنعها!", "rcHu": "فكّ القطعة دي على السندان لحد ما تفهمها 100%"});
 Object.assign(STR.en,{"oSalv": "Take an item apart", "fSalvB": "Take apart", "salvT": "Take items apart", "salvNote": "Click a piece of gear to take it apart for part of its materials.", "salvGet": "Gives: {m}", "salvNothing": "Nothing would come of taking this apart.", "salvFeeT": "Fee {g} gold", "salvNo": "Only equipment can be taken apart.", "salvQ": "Take {it} apart? It gives: {m}.", "salvY": "Take it apart", "salvRisk": "{n}% chance to fail (the item is only scuffed)", "salvPoor": "The fee is {g} gold, and you do not have it.", "salvFail": "[The disassembly has failed.]", "salvDone": "{it} came apart: {m}", "undL": "Understanding: {n}%", "undUp": "Your understanding of {it} is now {n}%.", "undDone": "Your understanding of {it} reached 100%. You have learned how to make it!", "rcHu": "Take this item apart at the anvil until you understand it 100%"});
 const STATB=[0,2,4,12,25]; // canon craftsmanship: rare +2, epic +4, unique +12, legendary +25 to all stats
@@ -5167,7 +5171,10 @@ function armorIt(){return S.items.find(i=>i.uid===S.eqA);}
 // empty"): the accessory slot plus nine ring slots that take rings only
 const RINGS=new Set(['cring','mring','elfin','vring','doran','absurd','ocring','mnring','povt']),RSL=['k1','k2','k3','k4','k5','k6','k7','k8','k9'];
 const GEAR=['a','h','g','b','k','n','r',...RSL];
-function eqIt(sl){if(sl==='w')return weapon();if(sl==='a')return armorIt();const u=(S.eq||{})[sl];return u?S.items.find(i=>i.uid===u):null;}
+// owner 2026-10-23: ten rings at once was overpowered. The accessory slot is always open; the nine ring slots open one by one
+// with your level (a legendary class, which starts again at Lv 1, opens them at half the level)
+const RUL=[20,60,100,150,200,260,320,380,450],ringNeed=k=>{const i=RSL.indexOf(k);return i<0?0:isLeg()?Math.ceil(RUL[i]/2):RUL[i];},ringOpen=k=>!RSL.includes(k)||!S||S.lv>=ringNeed(k);
+function eqIt(sl){if(sl==='w')return weapon();if(sl==='a')return armorIt();if(!ringOpen(sl))return null;const u=(S.eq||{})[sl];return u?S.items.find(i=>i.uid===u):null;}
 const isEq=i=>i.uid===S.eqW||i.uid===S.eqA||Object.values(S.eq||{}).includes(i.uid);
 function equip(i){const b=setTiers(),r=equip0(i);setNote(b);return r;}
 // worn gear above your level comes off (a legendary class starting again at Lv 1, an old save): it goes back to the bag
@@ -5175,8 +5182,8 @@ const itLvr=i=>((rcById(i.id)||{}).lvr||i.lvr||0);
 // Pagma's Successor wears anything with no restriction (novel ch 9, 11)
 const lvrOk=n=>!n||S.lv>=n||S.cls==='pagma';
 function gearFit(){if(!S||!S.items)return;const ok=i=>lvrOk(itLvr(i));const w=S.items.find(i=>i.uid===S.eqW);if(w&&!ok(w)){const b=S.items.filter(i=>i.slot==='w'&&ok(i)).sort((a,b)=>(b.atk||0)-(a.atk||0))[0];S.eqW=b?b.uid:0;}
- const a=S.items.find(i=>i.uid===S.eqA);if(a&&!ok(a))S.eqA=0;for(const k in S.eq||{}){const i=S.items.find(i=>i.uid===S.eq[k]);if(i&&!ok(i))delete S.eq[k];}}
-function equip0(i){const rc=rcById(i.id);if(rc&&rc.lvr&&!lvrOk(rc.lvr)){toast(t('needLv',{n:rc.lvr}),'warn');SFX.deny();return false;}if(i.slot==='w')S.eqW=i.uid;else if(i.slot==='a')S.eqA=i.uid;else{S.eq=S.eq||{};if(Object.values(S.eq).includes(i.uid))return;let sl=i.slot;if(sl==='k'&&S.eq.k&&RINGS.has(i.id)){const f=RSL.find(k=>!S.eq[k]);if(f)sl=f;}S.eq[sl]=i.uid;}}
+ const a=S.items.find(i=>i.uid===S.eqA);if(a&&!ok(a))S.eqA=0;for(const k in S.eq||{}){const i=S.items.find(i=>i.uid===S.eq[k]);if(i&&!ok(i)||!ringOpen(k))delete S.eq[k];}}
+function equip0(i){const rc=rcById(i.id);if(rc&&rc.lvr&&!lvrOk(rc.lvr)){toast(t('needLv',{n:rc.lvr}),'warn');SFX.deny();return false;}if(i.slot==='w')S.eqW=i.uid;else if(i.slot==='a')S.eqA=i.uid;else{S.eq=S.eq||{};if(Object.values(S.eq).includes(i.uid))return;let sl=i.slot;if(sl==='k'&&S.eq.k&&RINGS.has(i.id)){const f=RSL.find(k=>!S.eq[k]&&ringOpen(k));if(f)sl=f;}S.eq[sl]=i.uid;}}
 const durOf=i=>i.dur===undefined?100:i.dur,durF=i=>durOf(i)<=0?.3:1,enF=i=>1+.06*(i.en||0);
 const iAtk=i=>Math.round((i.atk||0)*enF(i)*durF(i)),iDef=i=>Math.round((i.def||0)*enF(i)*durF(i));
 function gearSum(k){let v=0;for(const sl of GEAR){const i=eqIt(sl);if(i&&i[k])v+=i[k]*durF(i)*enF(i);if(i&&i.gem&&GEMS[i.gem]&&GEMS[i.gem][k])v+=GEMS[i.gem][k];}
@@ -6812,7 +6819,7 @@ function eqSlot(it,ph,lbl,sl){const tip=it?itemTip(it)+`<br><small>${t('pickT',{
 function renderEquip(){const w=weapon(),a=armorIt(),wi=w&&WSH[w.id]?w:null;
  $('eqL').innerHTML=eqSlot(eqIt('h'),'slotH','helm','h')+eqSlot(a,'slotA','armor','a')+eqSlot(eqIt('g'),'slotG','gloves','g')+eqSlot(eqIt('n'),'slotN','neckS','n');
  $('eqR').innerHTML=eqSlot(wi,'slotW','weapon','w')+eqSlot(eqIt('b'),'slotB','bootsS','b')+eqSlot(eqIt('k'),'slotX','acc','k')+eqSlot(eqIt('r'),'slotR','braceS','r');
- $('eqRing').innerHTML=RSL.map(k=>eqSlot(eqIt(k),'slotX','ringS',k)).join('');
+ $('eqRing').innerHTML=RSL.map(k=>ringOpen(k)?eqSlot(eqIt(k),'slotX','ringS',k):`<div><button class="slotb lock" data-tip="${esc(t('ringLock',{n:ringNeed(k)}))}"><img src="${icon('slotX')}"></button></div>`).join('');
  const g=$('pview').getContext('2d');g.clearRect(0,0,16,24);g.drawImage(SH[pSpr()].canvas,0,0,16,24,0,0,16,24);weapPix(g,13,17,wi,0);
  $('eqInfo').innerHTML=`<div class="eqstats"><span>${t('atk')}<b>${atkV()}</b></span><span>${t('def')}<b>${defV()}</b></span><span>${t('cls')}<b>${t('cl_'+S.cls)}</b></span></div><div class="note">${t('wk_'+weapKind())}</div>`;}
 // clicking a gear slot opens a picker of what in the bag fits it

@@ -26,3 +26,25 @@ test('ten rings: the accessory slot then nine ring slots; rings only; their dama
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// owner 2026-10-23: ten at once was overpowered; the nine ring slots open one by one with level (half the level for a legendary class)
+test('ring slots open with level; a locked slot shows a lock and how it opens; worn rings come off when a slot locks', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    const r = await g.eval(() => { const G = window.__G, S = G.S, o = {};
+      S.lv = 1; for (let i = 0; i < 4; i++) { const it = G.eqx.mkItem('cring', 0); S.items.push(it); G.eqx.equip(it); }
+      o.lv1 = ['k', 'k1', 'k2'].map((k) => !!S.eq[k]);
+      S.lv = 100; for (let i = 0; i < 4; i++) { const it = G.eqx.mkItem('cring', 0); S.items.push(it); G.eqx.equip(it); }
+      o.lv100 = ['k1', 'k2', 'k3', 'k4'].map((k) => !!S.eq[k]);
+      G.eqx.openEquip(); o.open = document.querySelectorAll('#eqRing [data-eq]').length; const lk = document.querySelector('#eqRing .lock'); o.locked = document.querySelectorAll('#eqRing .lock').length; o.tip = lk && lk.dataset.tip;
+      S.cls = 'pagma'; S.lv = 50; G.eqx.openEquip(); o.leg = document.querySelectorAll('#eqRing [data-eq]').length;
+      S.cls = 'novice'; S.lv = 30; window.__GSET && 0; return o; });
+    assert.deepEqual(r.lv1, [true, false, false], 'at Lv 1 only the accessory slot');
+    assert.deepEqual(r.lv100, [true, true, true, false], 'Lv 100 opens three ring slots');
+    assert.equal(r.open, 3); assert.equal(r.locked, 6);
+    assert.ok(/150/.test(r.tip), 'the lock says the level: ' + r.tip);
+    assert.equal(r.leg, 3, 'a legendary class opens them at half the level');
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});
