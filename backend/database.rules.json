@@ -808,7 +808,7 @@
         "$uid": {
           ".read": "auth != null && auth.uid === $uid",
           ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('accountIds').child(auth.uid).exists() && root.child('polls').child($id).child('end').val() > now",
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3 && newData.val() % 1 === 0 && root.child('polls').child($id).child('o').child(newData.val() + '').exists() && newData.parent().parent().parent().child('pollTally').child($id).child(newData.val() + '').val() === (root.child('pollTally').child($id).child(newData.val() + '').exists() ? root.child('pollTally').child($id).child(newData.val() + '').val() : 0) + 1"
+          ".validate": "newData.isString() && newData.val().matches(/^[0-3]$/) && root.child('polls').child($id).child('o').child(newData.val()).exists() && newData.parent().parent().parent().child('pollTally').child($id).child(newData.val()).val() === (root.child('pollTally').child($id).child(newData.val()).exists() ? root.child('pollTally').child($id).child(newData.val()).val() : 0) + 1"
         }
       }
     },
@@ -816,7 +816,7 @@
       ".read": "auth != null",
       "$id": {
         "$i": {
-          ".write": "auth != null && !root.child('pollVotes').child($id).child(auth.uid).exists() && newData.parent().parent().parent().child('pollVotes').child($id).child(auth.uid).val() + '' === $i",
+          ".write": "auth != null && !root.child('pollVotes').child($id).child(auth.uid).exists() && newData.parent().parent().parent().child('pollVotes').child($id).child(auth.uid).val() === $i",
           ".validate": "newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
         }
       }
