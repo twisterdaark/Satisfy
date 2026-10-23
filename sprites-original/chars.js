@@ -153,14 +153,14 @@ function frame(c,dir,pose,f){
    if(H.shave){q(4,6,8,3,sd);q(5,1,6,5,h);}
    if(H.end==='flip'&&bk>9){q(2,bk-1,1,1,h);q(13,bk-1,1,1,h);}else if(H.end==='in'&&bk>9)q(4,bk,8,1,h);else if(H.end==='layer'&&bk>9){q(2,bk,1,1,h);q(13,bk,1,1,h);q(7,bk,2,1,h);}
    if(H.streak)q(5,1,1,Math.max(4,bk-2),hl);}
-  else if(S_){q(5,1,7,3,h);q(6,0,5,1,h);q(4,2,2,5,sd);if(L>=1)q(4,4,3,end-4,h);else q(5,4,2,3,sd);if(L>=3)q(3,8,2,end-8,h);if(H.wave&&L>=2)for(let y=9;y<end;y+=2)q(2,y,1,1,h);
+  else if(S_){q(5,1,7,3,h);q(6,0,5,1,h);q(4,2,2,5,sd);q(5,4,5,1,sd);q(7,5,1,1,sd);if(L>=1)q(4,4,3,end-4,h);else q(5,4,2,3,sd);if(L>=3)q(3,8,2,end-8,h);if(H.wave&&L>=2)for(let y=9;y<end;y+=2)q(2,y,1,1,h);
    const B=H.bang;if(B==='full')q(9,4,3,2,h);else if(B==='side')q(10,4,2,1,h);else if(B==='part')q(10,4,1,1,h);else if(B==='emo'){q(9,4,3,3,h);}else if(B==='spiky'){q(11,3,2,1,h);q(12,4,1,1,h);q(10,4,1,1,h);}
    if(B==='blunt')q(9,4,3,2,h);else if(B==='curtain')q(10,4,1,2,h);else if(B==='swoop'){q(9,4,3,1,h);q(10,5,2,1,h);}
    if(L>=1){if(H.end==='flip')q(2,end-1,1,1,h);else if(H.end==='in')q(5,end-1,1,1,h);else if(H.end==='layer')q(2,end-3,1,1,h);}if(H.streak)q(7,0,1,4,hl);
    q(6,2,3,1,hl);}
   else{q(4,1,8,3,h);q(5,0,6,1,h);
    if(L===0){q(4,4,1,2,sd);q(11,4,1,2,sd);}else{q(3,2,1,end-2,h);q(12,2,1,end-2,h);q(4,4,1,3,h);q(11,4,1,3,h);if(L>=2){q(2,8,1,end-8,h);q(13,8,1,end-8,h);}if(H.wave&&L>=2)for(let y=8;y<end;y+=2){q(1,y,1,1,h);q(14,y+1,1,1,h);}}
-   const B=H.bang;if(B==='full'){q(4,4,8,2,h);q(5,6,1,1,h);q(10,6,1,1,h);}else if(B==='side'){q(4,4,5,1,h);q(4,5,3,1,h);q(10,4,2,1,h);}else if(B==='part'){q(4,4,3,1,h);q(9,4,3,1,h);q(4,5,1,1,h);q(11,5,1,1,h);}
+   const B=H.bang;if(B==='full'){q(4,4,8,2,h);q(5,6,1,1,h);q(10,6,1,1,h);}else if(B==='side'){q(4,4,5,1,h);q(4,5,3,1,h);q(10,4,2,1,h);}else if(B==='part'){q(4,4,3,1,h);q(8,4,4,1,h);q(4,5,1,1,h);q(11,5,1,1,h);}
    else if(B==='emo'){q(4,4,6,1,h);q(4,5,5,1,h);q(5,6,3,2,h);q(10,4,2,1,h);}else if(B==='spiky'){q(4,4,2,1,h);q(7,4,2,1,h);q(10,4,2,1,h);q(4,5,1,1,h);q(11,5,1,1,h);q(3,1,1,2,h);q(12,1,1,2,h);q(2,2,1,1,h);q(13,2,1,1,h);}
    else if(B==='blunt'){q(4,4,8,2,h);q(4,5,8,1,shade(h,-.1));}else if(B==='micro'){q(4,4,1,1,h);q(11,4,1,1,h);}
    else if(B==='curtain'){q(4,4,2,1,h);q(10,4,2,1,h);q(6,4,1,1,h);q(9,4,1,1,h);q(4,5,1,3,h);q(11,5,1,3,h);}else if(B==='swoop'){q(4,4,8,1,h);q(7,5,5,1,h);q(10,6,2,1,h);}
@@ -300,7 +300,7 @@ function hairFx(g,c,back,HT){
  const id=g.getImageData(0,0,FW,FH),d=id.data,H=hx(c.hc),HL=hx(c.hl||c.hc),eq=(i,C)=>d[i+3]>0&&d[i]===C[0]&&d[i+1]===C[1]&&d[i+2]===C[2];
  const isH=(x,y)=>x>=0&&y>=0&&x<FW&&y<FH&&(eq((y*FW+x)*4,H)||eq((y*FW+x)*4,HL));
  const put=(x,y,C)=>{const i=(y*FW+x)*4;d[i]=C[0];d[i+1]=C[1];d[i+2]=C[2];};
- const SK=hx(c.skin),isS=(x,y)=>x>=0&&y>=0&&x<FW&&y<FH&&eq((y*FW+x)*4,SK),ST=hx(shade(c.hc,-.24)),TP=hx(shade(c.hc,-.15)),ED=hx(shade(c.hc,-.12)),RG=hx(mixC(c.hl||c.hc,'#ffffff',.18)),GL=hx(mixC(c.hl||c.hc,'#ffffff',.55));
+ const SK=hx(c.skin),isS=(x,y)=>x>=0&&y>=0&&x<FW&&y<FH&&eq((y*FW+x)*4,SK),ST=hx(shade(c.hc,-.24)),TP=hx(shade(c.hc,-.15)),ED=hx(shade(c.hc,-.12)),RG=hx(mixC(c.hl||c.hc,'#ffffff',.18)),GL=hx(mixC(c.hl||c.hc,'#ffffff',.28));
  const top=[];for(let x=0;x<FW;x++){top[x]=-1;for(let y=0;y<12;y++)if(isH(x,y)){top[x]=y;break;}}
  const ch=[];let ft=-1;for(let y=0;y<FH;y++)if(eq((y*FW+7)*4,SK)||eq((y*FW+8)*4,SK)){ft=y;break;}
  for(let y=0;y<FH-3;y++)for(let x=0;x<FW;x++){const i=(y*FW+x)*4;if(!eq(i,H))continue;if(c.beard&&ft>=0&&y>=ft+3&&x>=3&&x<=12)continue;   // leave a beard as it is
@@ -312,7 +312,7 @@ function hairFx(g,c,back,HT){
   else if(!dn&&up&&y>8)ch.push([x,y,TP]);
   else if(up&&dn&&y>=8&&(x*5+(y>>2))%3===0)ch.push([x,y,ST]);}
  ch.forEach(([x,y,C])=>{if(C)put(x,y,C);});
- if(HT&&HT.tip){const TC=hx(mixC(c.hl||c.hc,'#fff4e0',.45));for(let y=0;y<FH;y++)for(let x=0;x<FW;x++){const t=top[x];if(t>=0&&y>=t+(back?10:9)&&eq((y*FW+x)*4,H))put(x,y,TC);}}   // lighter ends
+ if(HT&&HT.tip){const [r0,g0,b0]=hx(c.hc),lt=(r0*.3+g0*.59+b0*.11)>165,TC=hx(lt?shade(c.hc,-.1):mixC(c.hl||c.hc,'#ffffff',.3));for(let y=0;y<FH;y++)for(let x=0;x<FW;x++){const t=top[x];if(t>=0&&y>=t+(back?10:9)&&eq((y*FW+x)*4,H))put(x,y,TC);}}   // lighter ends
  g.putImageData(id,0,0);}
 
 // Post-pass: rim light on the top edge, then a selective outline (dark tint of the neighbour on
