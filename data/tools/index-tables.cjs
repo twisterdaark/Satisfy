@@ -23,9 +23,10 @@ function readTables(html){
   // interior NPCs are appended right after the outdoor list
   const push=sliceLiteral(html,'NPCS.push');out.NPCS_INTERIOR=vm.runInContext('['+push.slice(1,-1)+']',ctx,{filename:'index.html#NPCS.push'});
   // tables keep logical columns (LW wide); the physical map inserts the GAPS wilderness belts (SAT-WORLD-002)
-  const w=/const W=.*?,H=\d+,TS=(\d+),LW=(\d+),GAPS=(\[\[[\d,\[\]]*\]\]),(?:EX=.*?,EW=(\d+),)?MW=.*?,MH=(\d+),WH=(\d+),BW=(\d+),WMH=(\d+)/.exec(html);if(!w)throw new Error('world constants not found');
-  const GAPS=JSON.parse(w[3]),EX=+w[2]+GAPS.reduce((a,g)=>a+g[1],0),EW=+(w[4]||0);   // EX..MW-1: the Saharan Empire, east of the logical map
-  out.WORLD={TS:+w[1],LW:+w[2],GAPS,EX,EW,MW:EX+EW,MH:+w[5],WH:+w[6],BW:+w[7],WMH:+w[8]};
+  const w=/const W=.*?,H=\d+,TS=(\d+),LW=(\d+),GAPS=(\[\[[\d,\[\]]*\]\]),(?:EX=.*?,EW=(\d+),)?(?:WMW=.*?,RSW=(\d+),EAX=.*?,EAW=(\d+),)?MW=.*?,(?:CSPL=.*?,)?MH=(\d+),WH=(\d+),BW=(\d+),WMH=(\d+)/.exec(html);if(!w)throw new Error('world constants not found');
+  const GAPS=JSON.parse(w[3]),EX=+w[2]+GAPS.reduce((a,g)=>a+g[1],0),EW=+(w[4]||0),RSW=+(w[5]||0),EAW=+(w[6]||0);   // EX..WMW-1: the Saharan Empire, east of the logical map
+  // WMW..: the Red Sea and the East Continent (owner 2026-10-23); MW is the whole map's width
+  out.WORLD={TS:+w[1],LW:+w[2],GAPS,EX,EW,WMW:EX+EW,RSW,EAX:EX+EW+RSW,EAW,MW:EX+EW+RSW+EAW,MH:+w[7],WH:+w[8],BW:+w[9],WMH:+w[10],NR:+((/,NR=(\d+)/.exec(html)||[0,0])[1])};   // the open world is rows -NR..WMH-1
   // gen:1 quests are registered at runtime by regBQ; only static ones are content
   for(const id of Object.keys(out.QD))if(out.QD[id].gen)delete out.QD[id];
   // skill gate and class-quest gate, kept as text for _srcFn

@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23eastcont', ver: '2.28', d: '2026-10-23',
+      ar: ["القارة الشرقية زي الرواية: أرض لوحدها ورا البحر الأحمر، أكبر من قارتنا، مفيش مشي ولا مركب ولا طيران بيعدّيه. فيها أربع ممالك: تشو في الجنوب وعاصمتها كارس وسجن الحمم في بركان خامد، وشينج في الشمال، وكايا مملكة الرمل في الشرق والتلج بينزل على عاصمتها بس، وبا في الشمال الغربي، وكمان أرض البرابرة، ومورونج دووون في النص، وهي أصعب منطقة",
+          "الوحوش الأربعة اتنقلوا هناك: السلحفاة السودا في الشمال، والعنقاء الحمرا في الجنوب، والتنين الأزرق في الشرق، والنمر الأبيض في الغرب",
+          "بتروح بلفافة بوابة القارة الشرقية من متجر جزر بيهين (1,000 نقطة تحدي)، وبتنزل في غابة الشجر الأبيض في نص بانجيا. لفافة العودة مبتعديش بين القارات، ودواير السحر في بانجيا وريانهارت بتعدّيك بعد أول مرة. الجاذبية هناك بتقلل القوة والتحمّل والسرعة 10%",
+          "ناس الرواية وكويستاتها: هان سوكبونج ووايت الحداد ومسابقة الحدادين، ومكان قوس العنقاء الحمرا مع أروبي (تمسكه أو تقتله)، وإنقاذ هان سوكبونج وبنته من سجن الحمم، وحارس العنقاء الحمرا، واحمي السلحفاة السودا من هوانج جيلدونج، ورمح النمر الأبيض، وملكة الفيران، والسايكلوبس اللي كان مفروض كوبولد. فيها كمان 22 نوع وحش من لفل 300 لـ470"],
+      en: ["The East Continent as in the novel: a land of its own past the Red Sea, bigger than ours, with no walking, sailing or flying across. Four kingdoms: Cho in the south with Kars and the Lava Prison in a dormant volcano; Xing in the north; Kaya, the Sand Kingdom, in the east, where snow falls only on the capital; and Pa in the north-west. Then the Land of the Barbarians, and Mureungdowon at the centre, the hardest zone of all",
+          "The four divine beasts moved there: the Black Tortoise in the north, the Red Phoenix in the south, the Blue Dragon in the east and the White Tiger in the west",
+          "Go there with the East Continent Portal Scroll from the Behen Archipelago's store (1,000 Challenger Points); it sets you down in the White Tree Forest in Pangea's heart. A Return Scroll can't cross between continents; the magic circles in Pangea and Reinhardt take you across after your first visit. The East's gravity lowers strength, stamina and agility by 10%",
+          "The novel's people and quests: Han Seokbong, White the blacksmith and the smithing competition; the Location of the Red Phoenix Bow with Arube (capture him or kill him); rescuing Han Seokbong and his daughter from the Lava Prison; the Red Phoenix Guardian; Protect the Black Tortoise against Hwang Gildong; the White Tiger Spear; the Rat Queen; and the cyclops that should have been a kobold. 22 kinds of monster from level 300 to 470"] },
     { v: '2026-10-23qtrack', ver: '2.27', d: '2026-10-23',
       ar: ["كل الكويستات بقى ليها تتبع: الوحش اللي مش جنبك أو ميت أو جاي في حدث (زي دارك باس وسيد المدينة 13 وجنود المملكة الخالدة والسلاح القديم والجولمات) السهم بيوديك لمكانه.",
           "اللي تحت الأرض أو في دانجن أو جزر بيهين، السهم بيوديك للمدخل الأول، وجوه بيوديك للوحش نفسه أو لطريق الخروج.",

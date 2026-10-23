@@ -129,7 +129,7 @@
         case 'party.ping': {
           if (!id || pl.party !== id || !api.members().some(function (m) { return !m.self && m.uid === from.uid; })) return;
           var px = Math.round(+pl.k), py = Math.round(+pl.n), last = pingIn.get(from.uid);
-          if (!(px >= 0 && py >= -4096 && px < 16384 && py < 8192)) return; // north rows are y < 0
+          if (!(px >= 0 && py >= -4096 && px < 32768 && py < 8192)) return; // north rows are y < 0
           if (last != null && now() - last < PING_MS) return;
           pingIn.set(from.uid, now());
           emit({ type: 'ping', uid: from.uid, handle: from.handle, x: px, y: py, self: false });
