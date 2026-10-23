@@ -7,6 +7,23 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23mirror', ver: '2.22', d: '2026-10-23',
+      ar: ["نسختك في الجزيرة 41 بقت بتحاربك بسكيلات شريطك انت بالظبط، بنفس الشكل والصوت والكولداون، وضربتها العادية هي ضربتك بسلاحك.",
+          "لفل السكيل بقى متعلق بالسكيل نفسه: الهجوم بياخد كريتيكال ونزيف، والأغاني والدروع مانا أقل وكولداون أقصر، والعلاج بيعالج أكتر.",
+          "باجما: التقييد بيدوّخ اللي حواليك 3 ثواني. ورقصات جديدة من الرواية: الزهرة والقطع والسقوط والتنين والخدمة والسماء، و22 كومبينيشن جديد لحد ست رقصات ورا بعض.",
+          "البِتس ليهم صحة وشريط فوق راسهم، وممكن يقعوا ويرجعولك بعد 3 دقايق. وراندي ونوي مبياكلوش سمك: راندي بتكبر من سكيلاتك، ونوي من اللي بتقتلوه.",
+          "التلفيل أبطأ بعد لفل 100: وحش في لفلك بقى بيديك حوالي 2 لـ 3% من اللفل.",
+          "الجزيرة 56: كهف شمال وكهف يمين باينين ومنورين وتدخلهم بـ E، وبيتكتب فاضل كام وحش، والوحوش البعيدة بتيجي لحد عندك.",
+          "كتب متجر التحدي وعربية القرع ومذكرات مادرا بقت بتدخل الشنطة: تقراها لما تحب، أو تبيعها، أو تديها لحد. واللي اشترى المذكرات قبل كده هيلاقيها في شنطته.",
+          "مسابقة المملكة مبتبدأش غير لو فيه اتنين أونلاين على الأقل. التتبع لمدن مصاصي الدماء بيوديك لتل النمل مش للبحر. والتلميح بتاع السكيل بيفضل ظاهر وانت بتتحرك."],
+      en: ["Your clone on island 41 now fights you with exactly the skills on your bar, with the same look, sound and cooldowns, and its plain blow is your own swing.",
+          "A skill's level belongs to the skill: attacks gain crits and bleeding, songs and shields cost less mana and cool down faster, heals heal more.",
+          "Pagma: Restraint stuns those around you for 3 s. New dances from the novel: Flower, Chop, Drop, Dragon, Serve and Sky, and 22 new fusions of up to six dances in a row.",
+          "Pets have health and a bar over them; they can fall and come back to you after 3 minutes. Randy and Noe eat no fish: Randy grows from your skills, Noe from what you defeat.",
+          "Levelling is slower past level 100: a monster of your level now gives about 2-3% of a level.",
+          "Island 56: a left and a right cave, lit and named, entered with E; the monsters left are counted, and far ones come to you.",
+          "The books of the Challenger Store and the Pumpkin Cart, and Madra's diary, go in your bag: read them when you like, sell them or give them away. A diary bought before is in your bag.",
+          "The National Competition starts only with at least two players online. Tracking to the vampire cities leads to the ant hill, not the sea. A skill's tooltip stays up while you move."] },
     { v: '2026-10-23novel1', ver: '2.21', d: '2026-10-23',
       ar: ["سكيلات زي الرواية: الساحر بقى عنده الصاروخ السحري (أول تعويذة لأي ساحر، ضعيفة بس أسرع واحدة)، وموجة الصقيع بقت حقل الجليد اللي بيجمّد الأرض وبعدين يبطّأ",
           "البيرسيركر: الغضب بقى الجنون زي الرواية، كل ما صحتك تقل كل ما تضرب أقوى وأسرع (لحد +80% هجوم و+50% سرعة)، وكل ضربة بترجعلك شوية صحة، وسكيل جديد: جنون السيف، تسع ضربات وعينيك بتحمرّ",

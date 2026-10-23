@@ -20,3 +20,17 @@ test('no per-kill cap: a far higher monster gives 1.3 times its XP; level 100 ne
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// owner 2026-10-23: "I kill a Lv 340 at 339 and take 20% of a level or more; make it slower"
+test('past level 100 the curve climbs: a foe of your level at 339 gives a few percent of a level', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    const r = await g.eval(() => { const G = window.__G, S = G.S; const at = (l) => { S.lv = l; return G.xpNeed(); };
+      const o = { n100: at(100), n339: at(339), r200: at(201) / at(200), xp: G.isk.MT.hdrac2.xp }; S.lv = 1; return o; });
+    assert.ok(r.n100 > 55000 && r.n100 < 70000, 'level 100 is as before: ' + r.n100);
+    const pct = r.xp * 1.03 / r.n339 * 100;
+    assert.ok(pct < 3, 'a Lv 340 drake man at 339 gives ' + pct.toFixed(2) + '% of a level');
+    assert.ok(r.r200 > 1.1, 'the step at an advancement: ' + r.r200);
+  } finally { await g.close(); }
+});

@@ -44,7 +44,7 @@
     // the days (UTC dates, the last 7) you cleared all three daily bounties (SAT-ONLINE-130)
     'dlyW',
     // costumes owned (SAT-STYLE-001), pet growth (SAT-PETLV-001), best Tower of Trials floor (SAT-TOWER-001)
-    'cos', 'petx', 'twB',
+    'cos', 'petx', 'php', 'pdead', 'lastSk', 'twB',
     // the inn you are bound to respawn at (main 6991032)
     'bind',
     // mount health and fallen mounts (main 5173f0f), field encounters met (main e68e501)

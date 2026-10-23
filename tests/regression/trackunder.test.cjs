@@ -43,3 +43,21 @@ test('a road is faster than grass: 30% on a horse, 10% on foot', async () => {
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// owner 2026-10-23: "the City 13 lord takes me to the sea; find any tracking like it and fix it": every quest and every
+// monster in the Bestiary is tracked to a spot on the surface (the vampire cities by the ant hill)
+test('every quest and every monster is tracked to the surface; the vampire cities by the ant hill', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g);
+    await g.step(30);
+    const r = await g.eval(() => { const T = window.__GTRK, G = window.__G, bad = [], MT = Satisfy.local.defs().MT;
+      for (const k of Object.keys(G.QD)) { const p = T.spot(k); if (p && p.y >= T.WMH) bad.push('quest ' + k); }
+      for (const k of Object.keys(MT)) { const p = T.mb(k); if (p && p.y >= T.WMH) bad.push('monster ' + k); }
+      const a = window.__GVC.ant, q = T.spot('vc3');
+      return { bad, ant: !!q && Math.hypot(q.x - a.x, q.y - a.y) < 3 }; });
+    assert.deepEqual(r.bad, []);
+    assert.equal(r.ant, true, 'the City 13 lord: to the ant hill');
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});

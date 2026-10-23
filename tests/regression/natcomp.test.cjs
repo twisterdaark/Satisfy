@@ -98,3 +98,18 @@ test('online: a National Competition in three stages; scores in the database; ea
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+test('online: alone in the world the National Competition waits for a second player, and nothing scores', async () => {
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE, H.fixedClock()] });
+  try {
+    const a = await H.openGame({ ctx, query: '?net=online&slot=a' });
+    await a.eval(() => { window.__fakeRTDB.data.set('accountIds/gNcS1', 'Solo'); window.__fakeRTDB.nextName = 'Solo'; window.__fakeRTDB.nextUid = 'gNcS1'; document.getElementById('onlineBtn').click(); });
+    await until([a], () => !!Satisfy.local.net() && Satisfy.local.net().state === 'ONLINE', 15000);
+    await H.newGame(a, { n: 'Solo', hair: 1, hc: 2, skin: 1, top: 3 });
+    await force([a], 0);
+    await until([a], () => window.__GNC.pl() === 1 && /waiting for at least two players/.test(document.getElementById('natbar').textContent));
+    assert.equal(await a.eval(() => !!document.querySelector('#natbar [data-nat=join]')), false, 'no Join while alone');
+    assert.equal(await a.eval(() => window.__GNC.sc()), null, 'nothing scores');
+    assert.deepEqual(a.errors, []);
+  } finally { await ctx.close(); }
+});

@@ -33,3 +33,32 @@ test('sword dances back to back fuse into Linked Kill, Pinnacle Kill and Linked 
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// owner 2026-10-23: "make sure there are no more Pagma combinations like Linked Kill Wave... make sure you added everything he has":
+// Grid's own dances (Flower, Chop, Drop, Dragon, Serve, Sky) and every fusion the novel names, three to six dances long
+test('the later fusions: Wave Pinnacle, Linked Kill Flower, Linked Kill Wave Pinnacle, Transcended Link Flower; every one strikes', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, LOOK);
+    await g.eval(() => { const G = window.__G; G.S.cls = 'pagma'; G.S.lv = 460; G.S.pgMur = 1; G.S.qs.dp2 = { st: 2, c: 1 }; G.S.fus = { lkill: 1, lkwave: 1, pkill: 1, tlink: 1 };
+      G.S.bar = ['link', 'kill', 'wave', 'pinnacle', 'pgflower', 'transcend', 'revolve', 'pgdrop']; G.isk.checkSkills(); G.isk.rs(); G.P.hp = 1e6;
+      const m = G.spawnMon('forc', G.P.x + 20, G.P.y); m.max = m.hp = 1e9; m.tmp = 0; window.__fm = m; });
+    await g.step(10);
+    const seq = async (ks) => { for (const k of ks) { await g.eval((k) => { const P = window.__G.P; P.cd = {}; P.mp = 1e6; window.__GPF.cast(k); }, k); await g.step(4); } await g.step(40); };
+    await seq(['wave', 'pinnacle']);
+    await seq(['link', 'kill', 'pgflower']);
+    await seq(['link', 'kill', 'wave', 'pinnacle']);
+    await seq(['transcend', 'link', 'pgflower']);
+    const fus = await g.eval(() => window.__G.S.fus);
+    for (const f of ['wpinn', 'lkflower', 'lkwp', 'tlflower']) assert.equal(fus[f], 1, f + ' learnt: ' + JSON.stringify(fus));
+    const all = await g.eval(() => window.__GPF.PGFU.map((x) => x[0]).concat(Object.keys(window.__GPF.PGB)));
+    assert.ok(all.length >= 28, 'six dances and the fusions: ' + all.length);
+    for (const k of all) {
+      await g.eval((k) => { const G = window.__G; for (let i = 0; i < 10 && G.DL; i++) G.advance(); G.DL = null; G.P.hp = 1e6; for (const m of G.mons()) if (m !== window.__fm) m.dead = true; const m = window.__fm; m.dead = false; m.hp = 1e9; m.x = G.P.x + 20; m.y = G.P.y; window.__GSKF.cast(k); }, k);
+      for (let i = 0; i < 15; i++) { await g.step(10); await g.eval(() => { const G = window.__G; for (let j = 0; j < 10 && G.DL; j++) G.advance(); }); }
+      const d = await g.eval(() => 1e9 - window.__fm.hp);
+      if (k !== 'pgserve' && k !== 'pgsky') assert.ok(d > 0, k + ' strikes');
+    }
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});
