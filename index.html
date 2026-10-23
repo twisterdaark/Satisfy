@@ -6644,8 +6644,8 @@ function gContrib(n){const g=myG();n=Math.round(n);if(!g||!n)return;if(g.online&
 function createGuild(nm){nm=String(nm||'').trim().slice(0,18);if(nm.length<2){SFX.deny();return toast(t('gNameBad'),'warn');}
  if(Object.values(WS.guilds).some(g=>gName(g.id).toLowerCase()===nm.toLowerCase())){SFX.deny();return toast(t('gNameUsed'),'warn');}
  if(S.gold<GCOST||S.lv<GLV){SFX.deny();return;}
- if(GUILD&&gdFor===S){if(gdBusy)return;gdBusy=1;GUILD.found(nm).then(gid=>{gdBusy=0;S.gold-=GCOST;S.guild=gid;S.gon=gid;guildMirror();SFX.legendary();flash();toast(t('gMade',{g:nm}),'good');hudDirty=true;save(true);},
-  e=>{gdBusy=0;SFX.deny();toast(t(String(e&&e.message)==='taken'?'gNameUsed':String(e&&e.message)==='busy'?'gdBusy':'gdFail'),'warn');});return;} // SAT-ONLINE-046: online the guild is made in the database
+ if(GUILD&&gdFor===S){if(gdBusy)return;gdBusy=1;S.gold-=GCOST;hudDirty=true;/* paid when asked, back if the database says no: gold spent while it answered can't take the bag below zero (SAT-ONLINE-144) */GUILD.found(nm).then(gid=>{gdBusy=0;S.guild=gid;S.gon=gid;guildMirror();SFX.legendary();flash();toast(t('gMade',{g:nm}),'good');hudDirty=true;save(true);},
+  e=>{gdBusy=0;S.gold+=GCOST;hudDirty=true;SFX.deny();toast(t(String(e&&e.message)==='taken'?'gNameUsed':String(e&&e.message)==='busy'?'gdBusy':'gdFail'),'warn');});return;} // SAT-ONLINE-046: online the guild is made in the database
  S.gold-=GCOST;const id='g_'+pidOf();
  WS.guilds[id]={id,name:nm,master:pidOf(),lv:1,xp:0,col:'#5aa0ff',members:{[pidOf()]:{n:S.look.n,rk:'m',c:0}}};S.guild=id;
  SFX.legendary();flash();toast(t('gMade',{g:nm}),'good');hudDirty=true;save(true);}
