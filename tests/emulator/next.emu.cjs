@@ -299,3 +299,16 @@ test('#183: PvE only in presence, 1 or nothing', async () => {
   await no(db(A).ref('presence/satisfy/main/' + A).update({ pv: 2 }), 'only 1');
   await yes(db(A).ref('presence/satisfy/main/' + A + '/pv').remove(), 'and it goes');
 });
+
+test('#191: arena ratings name the opponent and count one more duel against it; at most 5 a season', async () => {
+  const se = 's202610', r = (w, o) => ({ r: 1000 + w, w, l: 0, n: 'Ahmed', t: SV, o });
+  const both = (w, o, n) => ({ ['arena/' + se + '/' + A]: r(w, o), ['arenaPairs/' + se + '/' + A + '/' + o]: n });
+  await no(db(A).ref('arena/' + se + '/' + A).set(r(1, B)), 'a rating without its count');
+  await yes(db(A).ref().update(both(1, B, 1)), 'the first rated duel with B');
+  await new Promise((res) => setTimeout(res, 20));
+  await no(db(A).ref('arenaPairs/' + se + '/' + A + '/' + B).set(2), 'a count without a new rating');
+  for (let i = 2; i <= 5; i++) await yes(db(A).ref().update(both(i, B, i)), 'rated duel ' + i);
+  await no(db(A).ref().update(both(6, B, 6)), 'a sixth with B this season');
+  await yes(db(A).ref().update(both(6, C, 1)), 'a first with C');
+  await no(db(B).ref('arenaPairs/' + se + '/' + A).once('value'), "B can't read A's counts");
+});
