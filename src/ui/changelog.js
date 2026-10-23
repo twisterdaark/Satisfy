@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23arenapairs', ver: '2.03', d: '2026-10-23',
+      ar: ["الساحة: مع نفس اللاعب بتتحسبلك 5 مبارزات متقيمة بس في الموسم. بعدها المبارزة بتتحسب مكسب أو خسارة، بس تقييمك مبيتحركش، فمحدش يقدر يرفع تقييمه من صاحبه"],
+      en: ["Arena: only 5 rated duels a season count with the same player; after that a duel is still a win or a loss but the rating doesn't move, so nobody can farm a friend for rating"] },
     { v: '2026-10-23pvpwear', ver: '2.02', d: '2026-10-23',
       ar: ["PvP: لو لاعب قتلك، كل حاجة لابسها (السلاح والدرع والخواتم) بتخسر 5 من متانتها، بس عمرها ما بتنزل تحت 10. يعني الـ PvP لوحده عمره ما يكسر معداتك، والحداد بيصلحها. ومفيش حاجة بتقع منك. والمبارزة ملهاش أي تمن"],
       en: ["PvP: when a player kills you, everything you wear (weapon, armour, rings) loses 5 durability, but never below 10, so PvP alone never breaks your gear and the smith repairs it; nothing is dropped. A duel still costs nothing"] },
