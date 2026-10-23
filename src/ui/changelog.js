@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23under', ver: '2.48', d: '2026-10-23',
+      ar: ["خانة جديدة في نافذة المعدات: اللبس الداخلي زي الرواية. مش بيبان على الشخصية خالص، بس ليه إحصائيات.",
+          "الخيّاط ووريث باغما يقدروا يخيطوه عند ليلى: اللبس الداخلي النضيف بيزوّد الدفاع والرشاقة، والشمالي بيدفّي في الشمال (ضرر أقل فوق) بس بيقلل الرشاقة 5% والزقة 10%.",
+          "أول لبس داخلي من كل نوع تخيطه بتقييم نادر أو أعلى بيدّيك +2 لكل الإحصائيات على طول وسمعة +30. جريد في الرواية كان بيخيط لبس داخلي طول الوقت عشان يرفع مهارة الخياطة.",
+          "ولبس بيرياتشي الداخلي (أسطوري، مستوى 300) بيوقع نادرًا من ماري روز."],
+      en: ["A new slot in the equipment window: underwear, as in the novel. It never shows on your character, but it has stats.",
+          "Tailors and Pagma's Successor sew it at Layla's: Clean Underwear adds defense and agility; Northern Underwear keeps you warm in the north (less damage up there) but costs 5% agility and 10% dodge length.",
+          "Your first pair of each kind sewn at a rare grade or better gives +2 to all stats for good and +30 reputation. In the novel Grid sewed underwear all the time to raise his Tailoring.",
+          "And Beriache's Underclothing (legendary, level 300) rarely drops from Marie Rose."] },
     { v: '2026-10-23mergeA3', ver: '2.47', d: '2026-10-23',
       ar: ["دخلت تحديثات جديدة: ألقاب أكتر من الرواية بمهارات، وخريطة العالم بتعرض قارتك بس ومن فوق الأرض بس."],
       en: ["New updates are in: more titles from the novel with skills, and the world map shows only your continent and only above the ground."] },

@@ -4146,8 +4146,8 @@ function ezMake(id){const rc=rcById(id);if(!ezHas(id)){SFX.deny();return dialog(
  S.gold-=EZC[id];for(const [k,n] of Object.entries(rc.need))S.mats[k]-=n;const it=mkItem(id,rc.fix);S.items.push(it);SFX.coin();
  dialog('eliz',[t(id.startsWith('bj')?'ezDoneBj':'ezDone',{it:t(id)})]);toast(t('ezGot',{it:t(id)}),'good');hudDirty=true;save(true);return it;}
 window.__GEZ={C:EZC,has:ezHas,make:ezMake,opts:ezOpts};
-Object.assign(STR.ar,{"earS": "الحلق", "iear": "حلق حديد", "mear": "حلق ميثريل", "rbear": "حلق ياقوت أحمر", "saear": "حلق ياقوت أزرق", "neckS": "العقد", "braceS": "الأسورة", "eliz": "إليزابيث", "ez_hi": "اسمي إليزابيث. كلاسي صانعة إكسسوارات وأنا في مستوى الحِرفي.", "ez_i1": "قليل أوي من الحاجات اللي صعب تلاقيها زي الإكسسوارات، خصوصًا الأطقم. هات الجواهر وأنا أعملهالك من غير حظ.", "ez_i2": "العقد والأسورة من نفس الطقم مع بعض بيدّوا تأثير الطقم. لابسهم الاتنين!", "ez_i3": "ماتندهليش باسمي الحقيقي. إليزابيث وبس.", "oEzMake": "اعملي {it}", "ezNo": "الخامات أو الدهب مش كفاية. ارجعلي لما تجمعهم.", "ezDone": "خلصت {it}. شغل نضيف، صح؟", "ezDoneBj": "قطعت جوهرة بيليال السودا بنفسي. {it} جاهز.", "ezGot": "إليزابيث عملتلك {it}!", "gdneck": "عقد الحارس", "gdbrace": "أسورة الحارس", "ezneck": "عقد إليزابيث الياقوت الأزرق", "ezbrace": "أسورة إليزابيث الياقوت الأزرق", "bjneck": "عقد جوهرة بيليال السودا", "bjbrace": "أسورة جوهرة بيليال السودا", "set_gd": "طقم الحارس", "set_ez": "طقم إليزابيث", "set_bj": "طقم الجوهرة السودا", "setD_gd2": "+100 دفاع", "setD_ez2": "+5% ضرر و+5% سرعة هجوم", "setD_bj2": "+10% ضرر و+10% صحة"});
-Object.assign(STR.en,{"earS": "Earrings", "iear": "Iron Earrings", "mear": "Mithril Earrings", "rbear": "Ruby Earrings", "saear": "Sapphire Earrings", "neckS": "Necklace", "braceS": "Bracelet", "eliz": "Elizabeth", "ez_hi": "My name is Elizabeth. My class is an accessories maker and I am at the craftsman level.", "ez_i1": "Few items are as hard to find as accessories, especially accessory sets. Bring me jewels and I will make them, no luck needed.", "ez_i2": "A necklace and a bracelet of the same set give its set effect together. Wear both!", "ez_i3": "Don’t call me by my real name. Just Elizabeth.", "oEzMake": "Make {it}", "ezNo": "You don’t have the materials or the gold. Come back when you do.", "ezDone": "{it} is done. Clean work, isn’t it?", "ezDoneBj": "I cut Belial’s Black Jewel myself. {it} is ready.", "ezGot": "Elizabeth made you {it}!", "gdneck": "Guardian’s Necklace", "gdbrace": "Guardian’s Bracelet", "ezneck": "Elizabeth’s Sapphire Necklace", "ezbrace": "Elizabeth’s Sapphire Bracelet", "bjneck": "Belial’s Black Jewel Necklace", "bjbrace": "Belial’s Black Jewel Bracelet", "set_gd": "Guardian’s Set", "set_ez": "Elizabeth’s Set", "set_bj": "Black Jewel Set", "setD_gd2": "+100 defense", "setD_ez2": "+5% damage and +5% attack speed", "setD_bj2": "+10% damage and +10% health"});
+Object.assign(STR.ar,{"underS": "اللبس الداخلي", "ivSl_u": "لبس داخلي", "cunder": "لبس داخلي نضيف", "nunder": "لبس داخلي شمالي", "bunder": "لبس بيرياتشي الداخلي", "gCold": "مقاومة البرد +{n}%", "gDsh": "مهارات الجزء السفلي {n}%", "undFirst": "أول {it} بتقييم عالي من إيدك: كل الإحصائيات +2 على طول، وسمعة +30", "earS": "الحلق", "iear": "حلق حديد", "mear": "حلق ميثريل", "rbear": "حلق ياقوت أحمر", "saear": "حلق ياقوت أزرق", "neckS": "العقد", "braceS": "الأسورة", "eliz": "إليزابيث", "ez_hi": "اسمي إليزابيث. كلاسي صانعة إكسسوارات وأنا في مستوى الحِرفي.", "ez_i1": "قليل أوي من الحاجات اللي صعب تلاقيها زي الإكسسوارات، خصوصًا الأطقم. هات الجواهر وأنا أعملهالك من غير حظ.", "ez_i2": "العقد والأسورة من نفس الطقم مع بعض بيدّوا تأثير الطقم. لابسهم الاتنين!", "ez_i3": "ماتندهليش باسمي الحقيقي. إليزابيث وبس.", "oEzMake": "اعملي {it}", "ezNo": "الخامات أو الدهب مش كفاية. ارجعلي لما تجمعهم.", "ezDone": "خلصت {it}. شغل نضيف، صح؟", "ezDoneBj": "قطعت جوهرة بيليال السودا بنفسي. {it} جاهز.", "ezGot": "إليزابيث عملتلك {it}!", "gdneck": "عقد الحارس", "gdbrace": "أسورة الحارس", "ezneck": "عقد إليزابيث الياقوت الأزرق", "ezbrace": "أسورة إليزابيث الياقوت الأزرق", "bjneck": "عقد جوهرة بيليال السودا", "bjbrace": "أسورة جوهرة بيليال السودا", "set_gd": "طقم الحارس", "set_ez": "طقم إليزابيث", "set_bj": "طقم الجوهرة السودا", "setD_gd2": "+100 دفاع", "setD_ez2": "+5% ضرر و+5% سرعة هجوم", "setD_bj2": "+10% ضرر و+10% صحة"});
+Object.assign(STR.en,{"underS": "Underwear", "ivSl_u": "Underwear", "cunder": "Clean Underwear", "nunder": "Northern Underwear", "bunder": "Beriache's Underclothing", "gCold": "Cold resistance +{n}%", "gDsh": "Lower body skills {n}%", "undFirst": "Your first high-grade {it}: all stats +2 for good, reputation +30", "earS": "Earrings", "iear": "Iron Earrings", "mear": "Mithril Earrings", "rbear": "Ruby Earrings", "saear": "Sapphire Earrings", "neckS": "Necklace", "braceS": "Bracelet", "eliz": "Elizabeth", "ez_hi": "My name is Elizabeth. My class is an accessories maker and I am at the craftsman level.", "ez_i1": "Few items are as hard to find as accessories, especially accessory sets. Bring me jewels and I will make them, no luck needed.", "ez_i2": "A necklace and a bracelet of the same set give its set effect together. Wear both!", "ez_i3": "Don’t call me by my real name. Just Elizabeth.", "oEzMake": "Make {it}", "ezNo": "You don’t have the materials or the gold. Come back when you do.", "ezDone": "{it} is done. Clean work, isn’t it?", "ezDoneBj": "I cut Belial’s Black Jewel myself. {it} is ready.", "ezGot": "Elizabeth made you {it}!", "gdneck": "Guardian’s Necklace", "gdbrace": "Guardian’s Bracelet", "ezneck": "Elizabeth’s Sapphire Necklace", "ezbrace": "Elizabeth’s Sapphire Bracelet", "bjneck": "Belial’s Black Jewel Necklace", "bjbrace": "Belial’s Black Jewel Bracelet", "set_gd": "Guardian’s Set", "set_ez": "Elizabeth’s Set", "set_bj": "Black Jewel Set", "setD_gd2": "+100 defense", "setD_ez2": "+5% damage and +5% attack speed", "setD_bj2": "+10% damage and +10% health"});
 /* full screen on a phone (owner 2026-10-21): Android browsers keep the address bar until the page asks for full screen
    inside a tap; an app added to the home screen opens full screen from the manifest and never needs this */
 const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
@@ -4166,7 +4166,7 @@ let BTAB='all',QFLT='all',PHOTO=false;
 const bagCat=s=>s.it?'gear':s.k==='sgl'||['bread','hpot','mpot','arrows'].includes(s.k)||DISH[s.k]||RSUSE.includes(s.k)?'use':'mat';
 // owner 2026-10-23 (the bag): filters by slot and rarity, a sort, a favourite star and a lock (a locked piece can't be sold,
 // destroyed, dropped or salvaged by mistake), and each piece compared with what you wear in its slot
-const IVS={slot:'all',r:'all',sort:'bag'},IVSL=['w','a','h','g','b','k','n','r','e'];
+const IVS={slot:'all',r:'all',sort:'bag'},IVSL=['w','a','h','g','b','k','n','r','e','u'];
 function bagTabs(a){const n={all:a.length,gear:0,mat:0,use:0,fav:0};a.forEach(s=>{n[bagCat(s)]++;if(s.it&&(s.it.fav||s.it.lock))n.fav++;});
  const opt=(v,l,cur)=>`<option value="${v}"${v===cur?' selected':''}>${l}</option>`;
  $('invTabs').innerHTML=['all','gear','mat','use','fav'].map(k=>`<button data-btab="${k}" class="${k===BTAB?'on':''}">${t('bt_'+k)} <small>${n[k]}</small></button>`).join('')
@@ -5135,8 +5135,15 @@ const TRC=[
  {id:'tHood',slot:'h',def:4,ms:.04,need:{leather:2,herb:2},xp:10,n:6},
  {id:'tGloves',slot:'g',def:2,as:.07,need:{leather:2,herb:1},xp:10,n:6},
  {id:'tBoots',slot:'b',def:2,ms:.1,need:{leather:3},xp:12,n:7},
- {id:'tRobe',slot:'a',def:9,mpb:30,need:{leather:3,herb:2,bherb:1},xp:18,n:8}];
+ {id:'tRobe',slot:'a',def:9,mpb:30,need:{leather:3,herb:2,bherb:1},xp:18,n:8},
+ // underwear from the novel (owner 2026-10-23), a slot of its own (u) that is never drawn. Clean Underwear: defence 5, agility +1.
+ // Northern Underwear: cold resistance +5% (damage taken in the frozen north), agility -5%, lower body skills -10% (the dodge)
+ {id:'cunder',slot:'u',def:5,agi:1,need:{leather:1,herb:1},xp:8,n:5},
+ {id:'nunder',slot:'u',def:4,cold:.05,agp:-.05,dsh:-.1,need:{leather:2,herb:2},xp:10,n:6}];
 const rcById=id=>RC.find(x=>x.id===id)||TRC.find(x=>x.id===id);
+// the first underwear of unique grade or better a tailor (or Pagma's Successor) sews: all stats +2 for good, reputation +30
+function undFirst(it){if(it.slot!=='u'||it.r<3)return;S.undf=S.undf||{};if(S.undf[it.id])return;S.undf[it.id]=1;S.undfN=(S.undfN||0)+2;crepAdd(30);setTimeout(()=>toast(t('undFirst',{it:t(it.id)}),'good'),500);SFX.legendary();}
+window.__GUND={first:it=>undFirst(it),stat:k=>stat(k),hurt:(d,ml)=>hurtPlayer(d,ml,null),dodge:()=>dodge(),get P(){return P},get NDROP(){return NDROP},sewOk:()=>NPCT.stylist.opts().some(o=>o.l===t('oSew'))};
 function sewMenu(){dialog('stylist',['sewHi'],null,[...TRC.map(r=>rbGate(r.id)?rbLock(r.id,sewMenu):({l:t('oSewIt',{it:t(r.id),n:needTxt(r)}),poor:!canMake(r),f:()=>{if(!canMake(r)){SFX.deny();return sewMenu();}
   for(const [m,n] of Object.entries(r.need))S.mats[m]-=n;sewStart(r);}})),{l:t('oLeave'),f:()=>{}}]);}
 /* sewing minigame: the needle runs along a seam of stitch marks; press E, Space or click as it crosses each one. A better
@@ -5147,7 +5154,7 @@ function sewHit(){const G=SEWG;if(!G||G.end)return;let bi=-1,bd=9;G.marks.forEac
  if(bi>=0&&bd<=G.w){G.hit[bi]=bd<=G.w*.35?2:1;SFX.click();}else{G.miss++;SFX.deny();}}
 function sewEnd(quit){const G=SEWG;if(!G||G.end)return;G.end=performance.now();const h=G.hit.filter(Boolean).length,acc=quit?0:Math.max(0,(h-G.miss*.5)/G.n),rc=G.rc;
  if(acc<.5){lifeXP('sew',Math.ceil(rc.xp/3));G.res=0;toast(t('sewFail'),'warn');SFX.deny();}
- else{const r=Math.min(lifeLv('sew')>=5?3:2,acc>=.995?3:acc>=.85?2:acc>=.7?1:0),it=mkItem(rc.id,r,1);S.items.push(it);if(!eqIt(rc.slot))equip(it);
+ else{const r=Math.min(lifeLv('sew')>=5?3:2,acc>=.995?3:acc>=.85?2:acc>=.7?1:0),it=mkItem(rc.id,r,1);S.items.push(it);if(!eqIt(rc.slot))equip(it);undFirst(it);
   lifeXP('sew',rc.xp*(r+1));G.res=r+1;const gk='t'+rc.id+r;let bonus='';if(STATB[r]&&!S.got[gk]){S.got[gk]=1;S.bonus+=STATB[r];bonus=' · '+t('craftBonus',{n:STATB[r]});}
   vfx('loot',P.x,P.y,{rarity:r});toast(t('sewOk',{it:t(rc.id)})+bonus,'good');r>=2?SFX.legendary():SFX.quest();qEvent('craft',rc.id,r,rc.slot);}
  hudDirty=true;save(true);setTimeout(()=>{if(SEWG!==G)return;SEWG=null;if(mode==='sew')mode='play';},800);}
@@ -5619,7 +5626,9 @@ RC.push(
  // the 32nd Great Demon Belial (second ten, major 7)
  {id:'blstaff',slot:'w',atk:560,spd:.5,mpb:120,fix:4,lvr:450,drop:1,unlock:()=>false},
  // the Doppelganger of Pagma (third batch, patch 5): the Lv 320 legendary of the novel, ignores 20% defense, attack skills +20%
- {id:'dpgs',slot:'w',atk:580,spd:.3,fix:4,lvr:320,ip:['dpgs'],drop:1,unlock:()=>false});
+ {id:'dpgs',slot:'w',atk:580,spd:.3,fix:4,lvr:320,ip:['dpgs'],drop:1,unlock:()=>false},
+ // Beriache's Underclothing (owner 2026-10-23, novel): legendary underwear, worn but not seen; a rare drop of Marie Rose
+ {id:'bunder',slot:'u',def:60,hpp:.08,fix:4,lvr:300,drop:1,unlock:()=>false});
 // set gear made at the anvil (v0.99): the mass-produced Grid set from smithing level 6 (any rating, like other forged gear),
 // Emous' set for blacksmiths from level 8, always unique as the novel's "unique rated production methods"
 RC.push(
@@ -5738,7 +5747,7 @@ function freshState(){
 // Advancements (SAT-CLASS-002): every 100 levels the body breaks through a limit. Each one adds +10 to every stat and
 // multiplies all stats by a further 5% (first at 100, second at 200, ...).
 const advN=()=>Math.min(9,Math.floor((S&&S.lv||1)/100));
-const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Math.round((S.st[k]+S.bonus+a*10+(tlOn('sonlaw')?20:0)+ttSt(k))*(1+a*.05)*bhStat(k)*(tlOn('paint')?1.03:1)*ttStM(k)*(candyOn()?1.3:1)*lkCodeM()*((k==='sta'||k==='dex')&&patOn()?3:1)*(eaPen(k)?.9:1))+setBon(k);};
+const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Math.round((S.st[k]+S.bonus+(S.undfN||0)+a*10+(tlOn('sonlaw')?20:0)+ttSt(k)+(k==='agi'?gearSum('agi'):0))*(1+a*.05)*bhStat(k)*(k==='agi'?1+gearSum('agp'):1)*(tlOn('paint')?1.03:1)*ttStM(k)*(candyOn()?1.3:1)*lkCodeM()*((k==='sta'||k==='dex')&&patOn()?3:1)*(eaPen(k)?.9:1))+setBon(k);};
 // Piaro's lesson (manhwa): keep Strength and Stamina at 1:1. Once learned, while the two stay within 10% of each other the
 // body is balanced: +8% damage and max HP, faster stamina recovery, cheaper dodges, and Second Wind when health runs low.
 // the golden ratio (novel ch 315, 1423): Strength and Agility kept 1:1. A hidden stat: always on, never shown in the status window
@@ -5777,7 +5786,7 @@ function armorIt(){return itemByUid(S.eqA);}
 // owner 2026-10-22: rings on all ten fingers as in the novel (Kraugel's and Pauld's "ten rings", Grid's "eight fingers were almost always
 // empty"): the accessory slot plus nine ring slots that take rings only
 const RINGS=new Set(['cring','mring','elfin','jvring','vring','avring','hvring','doran','absurd','ocring','mnring','povt']),RSL=['k1','k2','k3','k4','k5','k6','k7','k8','k9'];
-const GEAR=['a','h','g','b','k','n','r','e',...RSL];
+const GEAR=['a','h','g','b','k','n','r','e','u',...RSL];
 // owner 2026-10-23: ten rings at once was overpowered. The accessory slot is always open; the nine ring slots open one by one
 // with your level (a legendary class, which starts again at Lv 1, opens them at half the level)
 const RUL=[20,60,100,150,200,260,320,380,450],ringNeed=k=>{const i=RSL.indexOf(k);return i<0?0:isLeg()?Math.ceil(RUL[i]/2):RUL[i];},ringOpen=k=>!RSL.includes(k)||!S||S.lv>=ringNeed(k);
@@ -6099,7 +6108,7 @@ function updateProj(dt){scTick(dt);proj=proj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y
  if(p.t<=0||p4PSolid(Math.floor(p.x/TS),Math.floor((p.y+8)/TS))){if(p.boom)boom(p);return false;}
  for(const m of mons){if(m.dead||p.hit.has(m))continue;if(Math.hypot(m.x-p.x,monY(m)-p.y)<MT[m.type].r+(p.kind==='wave'?13:5)){p.hit.add(m);if(p.boom){boom(p);return false;}if(hitMon(m,p.mul,{kx:Math.sign(p.vx)*.5,ky:Math.sign(p.vy)*.5,stun:p.stun,...(p.kind==='bullet'?{skill:1}:{})}))SFX.hit();if(p.pure&&!m.dead&&(DEMK.has(m.type)||voxOf(m.type)[0]==='dead'))m.weak=Math.max(m.weak||0,6);if(!p.pierce)return false;}}
  return true;});}
-function dodge(){if(RCR&&RCR.in)return rcSpur();if(P.dash>0||P.dcd>0)return;P.guard=0;if(P.st<dodgeCost()){toast(t('tired'),'warn');SFX.deny();return;}let ix=(K.right?1:0)-(K.left?1:0),iy=(K.down?1:0)-(K.up?1:0);if(TSV){ix=TSV.x;iy=TSV.y;}if(!ix&&!iy){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];ix=v[0];iy=v[1];}const l=Math.hypot(ix,iy);P.dx=ix/l;P.dy=iy/l;P.dash=P.ride?.24:.18;P.dcd=.7;P.inv=Math.max(P.inv,.3);P.st-=dodgeCost();pressKey('kD');SFX.dodge();vfx('dust',P.x,P.y,{n:P.ride?14:8,angle:Math.atan2(-P.dy,-P.dx)});
+function dodge(){if(RCR&&RCR.in)return rcSpur();if(P.dash>0||P.dcd>0)return;P.guard=0;if(P.st<dodgeCost()){toast(t('tired'),'warn');SFX.deny();return;}let ix=(K.right?1:0)-(K.left?1:0),iy=(K.down?1:0)-(K.up?1:0);if(TSV){ix=TSV.x;iy=TSV.y;}if(!ix&&!iy){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];ix=v[0];iy=v[1];}const l=Math.hypot(ix,iy);P.dx=ix/l;P.dy=iy/l;P.dash=(P.ride?.24:.18)*(1+gearSum('dsh'));P.dcd=.7;P.inv=Math.max(P.inv,.3);P.st-=dodgeCost();pressKey('kD');SFX.dodge();vfx('dust',P.x,P.y,{n:P.ride?14:8,angle:Math.atan2(-P.dy,-P.dx)});
  for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*8,y:P.y,vx:-P.dx*40+(rand()-.5)*40,vy:-rand()*25,t:.35,c:rand()<.5?'#c8b48a':'#a89870'});fx.push({ring:true,x:P.x,y:P.y-6,t:.25});}
 // guard (SAT-COMBAT-002): hold right click to raise a guard toward the cursor. Hits from the front lose most of their damage
 // and wear the guard gauge down; an empty gauge breaks the guard and stuns you. Raising it just before a hit parries:
@@ -6114,7 +6123,7 @@ function hurtPlayer(d,ml,src){const r=asMe(()=>hurtPlayer0(d,ml,src));if(r&&src&
 function hurtPlayer0(d,ml,src){P.hitT=gTime;if(P.rvU>gTime){pgRevolve(d,src);return 0;}if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(rgEvade(src)||hcEvade(src)||mdEvade(src)||cpEvade()||nvBlock(src))return 0;d=bzShield(d);d=ttShield(d,src);if(d<=0)return 0;d/=1+pasGen();if(P.lkBU>gTime)d*=.3;if(src&&src.type&&lkSee())d*=1-.15*pasM('lkinsight');if(P.kyTU>gTime&&src&&src.type&&!src.dead){d*=.7;hitMon(src,.3,{skill:1,dot:1});}if(src&&src.type&&S.cls==='saintess'&&pasOn('sagrace')&&saEvil(src))d*=1-.2*pasM('sagrace');if(src&&src.dmul)d*=src.dmul;if(src&&src.fury>gTime)d*=1.25;if(src&&src.type)P.lastSrc=src.type;if(tlOn('hking')&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
  if(P.qm>0&&rand()<.3){numP(-20,t('ipEvade'),'#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
- d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,3.2)*150/(150+defV())*rlDef(src)));d=p3Hurt(p2Hurt(c2Hurt(d,src),src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=nvHurt(d,src);d=bthHurt(d,src);d=dmHurt(d,src);d=mbHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
+ d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,3.2)*150/(150+defV())*rlDef(src)));d=p3Hurt(p2Hurt(c2Hurt(d,src),src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=nvHurt(d,src);d=bthHurt(d,src);{const cr=gearSum('cold');if(cr&&P.y<0)d=Math.max(1,Math.round(d*(1-cr)));}d=dmHurt(d,src);d=mbHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
  if(P.guard&&src){const sx=src.x-P.x,sy=src.y-P.y,sl=Math.hypot(sx,sy)||1;
   const GK=S.cls==='gknight';if(P.fort>0||(sx*P.gx+sy*P.gy)/sl>-.15){const ang=Math.atan2(sy,sx),bx=P.x+sx/sl*10,by=P.y-8+sy/sl*10;vfx('block',bx,by,{angle:ang});
    if(!src.hv&&P.gT<(GK?.18:.12)*clamp(1-((ml||S.lv)-S.lv)*.015,.6,1)){vfx('crit',bx,by);hcParry();qEvent('block','guard');numP(-24,t('parry'),'#9fe3ff',false);SFX.crit();P.inv=.35;P.gd=Math.min(100,P.gd+15);
@@ -6531,7 +6540,7 @@ function acceptQ(id){S.qs[id]={st:1,c:0};epAccept(id);if(QD[id].obj.t==='escort'
 function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]);S.arrows[r]-=k;n-=k;}}
 function mkItem(id,r,made){const rc=rcById(id);if(rc.fix!=null&&!(made&&rc.fix<4))r=rc.fix;   // made: your own craft keeps the rating it came out at (owner 2026-10-22: a rare craft showed up unique); a breath piece is always legendary
 const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.hpp)it.hpp=rc.hpp;if(rc.slot==='w'){it.atk=Math.round(rc.atk*MULT[r]);it.spd=rc.spd;}else if(rc.def)it.def=Math.round(rc.def*MULT[r]);
- for(const k of ['as','ms','dm'])if(rc[k])it[k]=+(rc[k]*(1+(MULT[r]-1)*.5)).toFixed(3);if(rc.mpb)it.mpb=Math.round(rc.mpb*MULT[r]);if(rc.slot==='w'&&r>=2)it.wp=wpRoll(r,it);return it;}
+ for(const k of ['as','ms','dm'])if(rc[k])it[k]=+(rc[k]*(1+(MULT[r]-1)*.5)).toFixed(3);if(rc.mpb)it.mpb=Math.round(rc.mpb*MULT[r]);for(const k of ['agi','agp','cold','dsh'])if(rc[k])it[k]=rc[k];if(rc.slot==='w'&&r>=2)it.wp=wpRoll(r,it);return it;}
 function completeQ(id){if(!claimQ(id))return;if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else S.mats[o.it]-=o.n;}if(o.give)giveItem(o.it);
  S.qs[id].st=2;if(q.rep)delete S.qs[id];
  toast(t('qDone',{q:qName(id)}),'good');SFX.quest();
@@ -6634,7 +6643,7 @@ const NPCT={
  kscout:{hi:'ksc_hi',idle:()=>'ksc_idle'},
  towerK:{hi:'tow_hi',idle:()=>'tow_idle',opts:()=>towerOpts()},
  ranker:{hi:'rk_hi',idle:()=>'rk_idle',opts:()=>rankerOpts()},
- stylist:{hi:'sty_hi',idle:()=>S.look.cos?'sty_cos':'sty_idle',opts:()=>[...secOpt('stylist'),...(S.sec==='tailor'?[{l:t('oSew'),ic:'leather',f:sewMenu}]:[]),...rbOpts('stylist'),...styOpts()]},
+ stylist:{hi:'sty_hi',idle:()=>S.look.cos?'sty_cos':'sty_idle',opts:()=>[...secOpt('stylist'),...(S.sec==='tailor'||S.cls==='pagma'?[{l:t('oSew'),ic:'leather',f:sewMenu}]:[]),...rbOpts('stylist'),...styOpts()]},
  auction:{hi:'au_hi',idle:()=>'au_idle',opts:()=>auOpts()},
  herald:{hi:'hr_hi',idle:()=>WS.arena&&WS.arena.day===today()?t('hrChamp',{n:WS.arena.n}):S.arenaDay===today()?'hrTomorrow':'hr_idle',opts:()=>S.lv>=50&&S.arenaDay!==today()?[{l:t('oArena'),f:startArena}]:[]},
  vantner:{hi:'vt_hi',idle:()=>'vt_idle',opts:()=>compOpt('vantner')},faker:{hi:'fk_hi',idle:()=>S.comp==='faker'?'cpIdle_faker':'fk_idle',opts:()=>compOpt('faker')},
@@ -7381,7 +7390,7 @@ function openInv(){SFX.open();mode='inv';INVX=null;$('invQ').value='';$('inv').h
 function closeInv(){SFX.close();$('inv').hidden=true;$('invQ').value='';$('cfmW').hidden=true;INVX=null;mode='play';}
 // one line of an item's numbers (rc = a recipe, i.e. the base values, when cur is not given)
 function statShort(i){const a=[];if(i.atk)a.push(`${t('atk')} ${i.uid?iAtk(i):i.atk}`);if(i.def)a.push(`${t('def')} ${i.uid?iDef(i):i.def}`);
- if(i.as)a.push(`${t('gAs')} +${Math.round(i.as*enF(i)*100)}%`);if(i.ms)a.push(`${t('gMs')} +${Math.round(i.ms*enF(i)*100)}%`);if(i.dm)a.push(`${t('gDm')} +${Math.round(i.dm*enF(i)*100)}%`);if(i.mpb)a.push(`${t('gMp')} +${Math.round(i.mpb*enF(i))}`);if(i.hpp)a.push(`${t('gHp')} +${Math.round(i.hpp*enF(i)*100)}%`);if(i.gem)a.push(t('gemIn',{g:t(i.gem)}));return a.join(' · ');}
+ if(i.as)a.push(`${t('gAs')} +${Math.round(i.as*enF(i)*100)}%`);if(i.ms)a.push(`${t('gMs')} +${Math.round(i.ms*enF(i)*100)}%`);if(i.dm)a.push(`${t('gDm')} +${Math.round(i.dm*enF(i)*100)}%`);if(i.mpb)a.push(`${t('gMp')} +${Math.round(i.mpb*enF(i))}`);if(i.hpp)a.push(`${t('gHp')} +${Math.round(i.hpp*enF(i)*100)}%`);if(i.agi)a.push(`${t('agi')} +${i.agi}`);if(i.agp)a.push(`${t('agi')} ${Math.round(i.agp*100)}%`);if(i.cold)a.push(t('gCold',{n:Math.round(i.cold*100)}));if(i.dsh)a.push(t('gDsh',{n:Math.round(i.dsh*100)}));if(i.gem)a.push(t('gemIn',{g:t(i.gem)}));return a.join(' · ');}
 function setTip(i){const sk=Object.keys(SETS).find(k=>SETS[k].it.includes(i.id));if(!sk)return '';const n=setCount(sk),c=setTier(sk);
  return `<br><small style="color:#9fe39a">${t('set_'+sk)} (${n}/${SETS[sk].it.length})</small>`+Object.keys(SETS[sk].b).map(k=>`<br><small style="color:${+k===c?'#9fe39a':'#8a96a8'}">${t('setPc',{n:k})}: ${t('setD_'+sk+k)}</small>`).join('');}
 function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+hidTip(i)+wpTip(i)+setTip(i)+itemSkillTip(i);}
@@ -7483,13 +7492,13 @@ function eqSlot(it,ph,lbl,sl){const tip=it?itemTip(it)+`<br><small>${t('pickT',{
 // the eye beside a worn slot hides its look and keeps its stats (owner 2026-10-23)
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-vis]');if(!b||!S||!S.look)return;e.stopPropagation();S.look.vh=(S.look.vh|0)^VHB[b.dataset.vis];if(!S.look.vh)delete S.look.vh;buildMe(S.look);SFX.click();save(true);renderEquip();hudDirty=true;},true);
 function renderEquip(){const w=weapon(),a=armorIt(),wi=w&&WSH[w.id]?w:null;
- $('eqL').innerHTML=eqSlot(eqIt('h'),'slotH','helm','h')+eqSlot(a,'slotA','armor','a')+eqSlot(eqIt('g'),'slotG','gloves','g')+eqSlot(eqIt('n'),'slotN','neckS','n');
+ $('eqL').innerHTML=eqSlot(eqIt('h'),'slotH','helm','h')+eqSlot(a,'slotA','armor','a')+eqSlot(eqIt('g'),'slotG','gloves','g')+eqSlot(eqIt('n'),'slotN','neckS','n')+eqSlot(eqIt('u'),'slotU','underS','u');
  $('eqR').innerHTML=eqSlot(wi,'slotW','weapon','w')+eqSlot(eqIt('b'),'slotB','bootsS','b')+eqSlot(eqIt('k'),'slotX','acc','k')+eqSlot(eqIt('r'),'slotR','braceS','r')+eqSlot(eqIt('e'),'slotE','earS','e');
  $('eqRing').innerHTML=RSL.map(k=>ringOpen(k)?eqSlot(eqIt(k),'slotX','ringS',k):`<div><button class="slotb lock" data-tip="${esc(t('ringLock',{n:ringNeed(k)}))}"><img src="${icon('slotX')}"></button></div>`).join('');
  const g=$('pview').getContext('2d');g.clearRect(0,0,16,24);g.drawImage(SH[pSpr()].canvas,0,0,16,24,0,0,16,24);weapPix(g,13,17,wi,0);
  $('eqInfo').innerHTML=`<div class="eqstats"><span>${t('atk')}<b>${atkV()}</b></span><span>${t('def')}<b>${defV()}</b></span><span>${t('cls')}<b>${t('cl_'+S.cls)}</b></span></div><div class="note">${t('wk_'+weapKind())}</div>`;}
 // clicking a gear slot opens a picker of what in the bag fits it
-const SLN={w:'weapon',a:'armor',h:'helm',g:'gloves',b:'bootsS',k:'acc',n:'neckS',r:'braceS',e:'earS'};for(const k of RSL)SLN[k]='ringS';
+const SLN={w:'weapon',a:'armor',h:'helm',g:'gloves',b:'bootsS',k:'acc',n:'neckS',r:'braceS',e:'earS',u:'underS'};for(const k of RSL)SLN[k]='ringS';
 function openPick(sl){const box=$('eqPick'),cur=eqIt(sl),pw=i=>(i.atk?iAtk(i):0)+(i.def?iDef(i):0)+(i.r||0)*.01,list=S.items.filter(i=>(RSL.includes(sl)?i.slot==='k'&&RINGS.has(i.id):i.slot===sl)&&(sl!=='w'||WSH[i.id])).sort((a,b)=>(b===cur)-(a===cur)||pw(b)-pw(a));SFX.open();
  let h=`<div class="ptitle"><span class="head" style="font-size:calc(var(--u)*1.7)">${t('pickT',{s:t(SLN[sl])})}</span><button class="x" data-act="closePick">✕</button></div>`;
 h+='<div class="pkl">';h+=list.length?list.map(i=>`<button class="pk${i===cur?' eq':''}" data-pick="${i.uid}" data-tip="${esc(itemTip(i))}"><img src="${icon(i.id)}"><span class="rt rt${i.r}">${esc(inm(i))}</span><small>${statShort(i)}${durOf(i)<=0?' · '+t('broken'):''}${i===cur?' · '+t('equipped'):''}</small></button>`).join(''):`<div class="note">${t('nothingFit')}</div>`;
@@ -10690,7 +10699,7 @@ Object.assign(FIG,{vnoble:{hair:'side',hc:'#d8d0e0',hl:'#ffffff',skin:'#ece2ec',
  vfenrir:{hair:'long',hc:'#e8cc6a',hl:'#fff0a8',skin:'#efe6ef',sk2:'#c8bac8',eye:'#ff2a3a',top:'#1a1018',top2:'#0e080c',sleeves:true,collar:'#c8a050',sash:'#a01020',cape:'#6a0a1a',pants:'#0e080c',boots:'#08060a'}});
 Object.assign(NAMEK,{vnoble:'vnobleN',vb6:'vb6N',vb5:'vb5N',vb4:'vb4N',vb3:'vb3N',vmrose:'vmroseN',vfenrir:'vfenrirN',vwolf:'vwolfN',vjun:'vjunN',vint:'vintN',vtrue:'vtrueN',vguard:'vguardN',vskel:'vskelN',vhigh:'vhighN',lexi:'lexiN',vb15:'vb15N',vb14:'vb14N',velfin:'velfinN',vb12:'vb12N',vb11:'vb11N',vb10:'vb10N',vran:'vranN',vmount:'vmountN',vtira:'vtiraN',vlatina:'vlatinaN',vcray:'vcrayN',vyet:'vyetN',vruson:'vrusonN',vnoll:'vnollN'});
 Object.assign(BEL,{vskel:'dark',vlatina:'dark',vtira:'fire'});
-Object.assign(NDROP,{vnoble:[['vring',.01]],vb6:[['vring',.3]],vb5:[['vring',.32]],vb4:[['avring',.2]],vb3:[['avring',.25]],vmrose:[['hvring',.3],['avring',.3]],vfenrir:[['hvring',.35],['avring',.35]],vtrue:[['jvring',.01]],lexi:[['jvring',.25]],vb15:[['jvring',.2]],vb14:[['jvring',.22]],velfin:[['iyarugt',.2],['elfin',.3]],vb12:[['jvring',.25]],vb11:[['vring',.15]],vb10:[['vring',.3]],
+Object.assign(NDROP,{vnoble:[['vring',.01]],vb6:[['vring',.3]],vb5:[['vring',.32]],vb4:[['avring',.2]],vb3:[['avring',.25]],vmrose:[['bunder',.06],['hvring',.3],['avring',.3]],vfenrir:[['hvring',.35],['avring',.35]],vtrue:[['jvring',.01]],lexi:[['jvring',.25]],vb15:[['jvring',.2]],vb14:[['jvring',.22]],velfin:[['iyarugt',.2],['elfin',.3]],vb12:[['jvring',.25]],vb11:[['vring',.15]],vb10:[['vring',.3]],
  vran:[['vring',.12]],vmount:[['vring',.12]],vtira:[['tirbelt',.25],['tirsh',.2]],vlatina:[['latneck',.25],['vpaj',.2]],vcray:[['craybr',.25]],vyet:[['yetgs',.2],['avring',.15]],vruson:[['avring',.2]],vnoll:[['hvring',.15]],
  vguard:[['avring',.003]],vhigh:[['avring',.004],['hvring',.002]]});
 Object.assign(MWPN,{velfin:()=>{R(ctx,6,-22,1,20,'#c8282a');R(ctx,7,-21,1,18,'#6a0a0e');R(ctx,4,-3,5,1,'#2a0a0e');R(ctx,6,-2,1,3,'#1a0a0a');},
