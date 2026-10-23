@@ -65,6 +65,8 @@ function frame(c,dir,pose,f){
  else{p(5,17,2,3-o.legL,lg);p(9,17,2,3-o.legR,lg);p(5,20-o.legL,2,2,c.boots);p(9,20-o.legR,2,2,c.boots);
   p(6,17,1,3-o.legL,lgD);p(10,17,1,3-o.legR,lgD);
   if(pose==='atk'&&f===1){p(4,20,1,2,c.boots);p(11,20,1,2,c.boots);}}
+ // tall boots and greaves (SAT-ONLINE-165, Claude-A): the boot goes a pixel up the leg, in its cuff colour (c.bootT)
+ if(c.bootH){const T=c.bootT||shade(c.boots,.2),TD=shade(T,-.25);if(S_){if(o.stride){p(9,19,2,1,o.swap?T:TD);p(5,19,2,1,o.swap?TD:T);}else p(6,19,4,1,T);}else{p(5,19-o.legL,2,1,T);p(9,19-o.legR,2,1,T);}}
  if(c.shorts){if(S_)p(5,17,6,1,c.shorts);else p(4,17,8,1,c.shorts);}
  // a skirt over the legs (owner 2026-10-23 customization), in the trousers' colour
  if(c.skirt){const K=c.skirt,K2=shade(K,-.22),sw=pose==='walk'?(f%2):0;if(S_){p(5,16,6,2,K);p(4-sw,18,8,2,K);p(4-sw,19,8,1,K2);p(10,16,1,3,K2);}else{p(4,16,8,2,K);p(3,18,10,2,K);p(3,19,10,1,K2);p(11,16,1,3,K2);}}
@@ -108,6 +110,9 @@ function frame(c,dir,pose,f){
   else if(o.atk===1){q(12,11,1,2,arm2);q(11,13,1,2,arm2);q(10,15,2,2,hnd);hand={x:10,y:16+by+OY};}
   else if(o.atk===2){q(12,12,1,4,arm2);q(12,16,1,2,hnd);hand={x:12,y:17+by+OY};}
   else{const r=Math.max(0,o.armR)+hl;q(12,11+r,1,4,arm2);q(12,15+r,1,2,hnd);hand={x:12,y:16+r+by+OY};}}
+ // gauntlets (SAT-ONLINE-165, Claude-A): the wrist above the hand in the gauntlet's cuff colour (not on the raised wind-up)
+ if(c.cuff){const K=c.cuff;if(S_){if(o.atk===1)q(11,12,1,2,K);else if(o.atk===2)q(8,14,2,1,K);else if(o.atk<0){const a=o.armS+(o.hurt?-1:0);q(7+a,14,2,1,K);}}
+  else{const hl=o.hurt?-1:0;q(3,14+Math.max(0,o.armL)+hl,1,1,K);if(o.atk===1)q(11,14,1,1,K);else if(o.atk===2)q(12,15,1,1,K);else if(o.atk<0){const r=Math.max(0,o.armR)+hl;q(12,14+r,1,1,K);}}}
  if(c.pad){if(S_){q(6,10,4,2,c.pad);q(6,11,4,1,c.pad2);q(6,10,2,1,shade(c.pad,.2));}else{q(2,10,3,2,c.pad);q(11,10,3,2,c.pad);q(2,11,3,1,c.pad2);q(11,11,3,1,c.pad2);q(2,10,1,1,shade(c.pad,.25));q(11,10,1,1,shade(c.pad,.25));}}
  if(c.spike){const K=c.spike;if(S_){q(7,8,1,2,K);q(9,9,1,1,K);}else{q(2,9,1,1,K);q(3,8,1,2,K);q(12,8,1,2,K);q(13,9,1,1,K);}}
  // head + neck

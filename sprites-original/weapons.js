@@ -52,6 +52,11 @@ const DEF={
  dgspear:()=>{const I=Img(7,22);I.vline(3,5,21,'#2a4a7a');I.vline(3,12,13,'#c8e8ff');I.set(3,0,'#ffffff');I.rect(2,1,3,3,'#5ac8ff');I.vline(3,1,3,'#e8f8ff');I.set(4,3,'#2a6aff');I.set(3,4,'#5ac8ff');I.set(1,4,'#5ac8ff');I.set(5,4,'#5ac8ff');return {I,gx:3,gy:15};},
  ttthorn:()=>sword(5,2,['#3a5a6a','#1a2a3a','#5ad8c8'],'#1a3a3a',(I,cx,top)=>{I.set(cx,top+2,'#ffffff');}),
  blstaff:()=>staff(['#2a0614','#8a1a4a','#ff8ac8'],'#1a0a10',1),
+ // SAT-ONLINE-165 (Claude-A): the three that drew nothing in the hand: the Doppelganger's and Yetima's greatswords, and the
+ // Mass-produced Grid Sword (the colours of their icons)
+ dpgs:()=>sword(14,3,['#5ac8a0','#1e6a50','#d8fff0'],'#2a4a40',(I,cx,top,len)=>{for(let y=top+3;y<top+len-1;y+=3)I.set(cx,y,'#d8fff0');I.set(cx-1,top+len-3,'#1e6a50');}),
+ yetgs:()=>sword(14,3,['#9aa0ac','#4a4e58','#e8eef8'],'#8a6a3a',(I,cx,top,len)=>{I.rect(cx-3,top+len,7,1,'#8a6a3a');for(let y=top+4;y<top+len-2;y+=4)I.set(cx+1,y,'#e8eef8');}),
+ mgsword:()=>sword(10,2,['#e0e4ec','#2a3a6a','#ffffff'],'#2a3a6a',(I,cx,top,len)=>{I.set(cx,top+len-3,'#2a3a6a');}),
  gisp:()=>{const I=Img(11,16);I.vline(5,3,15,'#6a4a2a');I.vline(5,8,8,'#4a3020');I.rect(1,1,9,2,'#8a9aa8');I.set(0,3,'#8a9aa8');I.set(10,3,'#8a9aa8');I.rect(1,1,9,1,'#c8d0dc');return {I,gx:5,gy:11};}};
 function bow(w,tip){const I=Img(8,18);for(let i=0;i<=14;i++){const a=i/14*Math.PI,x=Math.round(2+Math.sin(a)*3.4);I.set(x,1+i,w[0]);I.set(x+1,1+i,i<3||i>11?w[0]:w[1]);if(i===7){I.set(x,1+i,w[2]);I.set(x+1,1+i,w[2]);}}
  I.vline(2,1,15,'#e8e0d0');I.set(2,1,tip||w[2]);I.set(2,15,tip||w[2]);I.rect(5,7,2,3,'#3a2414');return {I,gx:5,gy:8};}

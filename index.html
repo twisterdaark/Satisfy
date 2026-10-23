@@ -1276,8 +1276,59 @@ function buildMe(L){L=L||DEFLOOK;SH.me=SA.chars.buildSheet(lookFig(L,0));SH.meA=
 // helmet, gloves and boots show on your sprite: the tier (leather, iron, mithril) sets the look; a costume hides them as it
 // hides armour. Sheets are built once per combination and kept until the look changes.
 const GLK={l:{hair:'cap',cap:'#8a5a32',glove:'#7a5030',boots:'#5a3a20'},i:{hair:'helm',hc:'#9aa2ae',hl:'#d8dee6',glove:'#b8c0ca',boots:'#7a828e'},m:{hair:'helm',hc:'#6aa8d8',hl:'#d8f0ff',glove:'#8ac8ee',boots:'#5a90c0'}};
-const gTier=i=>i?GLK[i.id[0]]||GLK.i:null,gearSig=()=>(armorIt()&&!vhOn('a')?'1':'0')+['h','g','b'].map(sl=>{const i=eqIt(sl);return i&&!vhOn(sl)?i.id[0]:'-';}).join('');
-function gearFig(L){const c=lookFig(L,armorIt()&&!vhOn('a')?1:0);{const e=eqIt('e');if(e&&EARC[e.id]&&!vhOn('e'))c.ear=EARC[e.id];}if(L.cos)return c;return gearOn(c,...['h','g','b'].map(sl=>vhOn(sl)?null:gTier(eqIt(sl))));}
+/* every gear piece has its own look (SAT-ONLINE-165, owner 2026-10-23: "make sure every armour, glove and the rest changes the
+   character's look instead of it being fixed; now it is all the same picture"). Before, armour was only on or off (the same
+   leather pads for all) and a helmet, gloves or boots drew one of three tiers by the id's first letter. GEARL holds a look for
+   each piece by id, in the colours of its icon: an armour sets the body (top, sleeves with armC), the plate (chest), the
+   shoulders (pad, spike), a collar, a sash, a belt, a cape or a robe; a helmet its shape (helm with a plume, a cap, a hood, a
+   crown, horns, ears, a visor); gloves the hands and a gauntlet's cuff; boots their colour, tall ones with a cuff (bootH,
+   bootT). A piece with no entry (a new one) falls back to the tiers. */
+const GEARL={
+ larmor:{pad:'#a8743f',pad2:'#7a5030',chest:'#8a5a32',belt:'#3a2414'},
+ tRobe:{top:'#2a6a6a',top2:'#1a4a4a',robe:true,collar:'#3a8a8a',belt:'#7a5a3a'},
+ parmor:{top:'#9aa2ae',top2:'#6e7682',armC:'#aab2be',armC2:'#7a828e',chest:'#c8ced8',pad:'#d8dee6',pad2:'#7a828e',belt:'#7a3a2c'},
+ marmor:{top:'#8ab8d0',top2:'#4a7890',armC:'#a8d0e4',armC2:'#6a98b0',chest:'#c8e4f2',pad:'#e0f2fa',pad2:'#4a7890',collar:'#e0f2fa',belt:'#4a7890'},
+ mgarmor:{top:'#2a3a6a',top2:'#1a2648',armC:'#c8d0dc',armC2:'#8a94a6',chest:'#c8d0dc',pad:'#eef2f8',pad2:'#8a94a6',collar:'#2a3a6a',belt:'#2a3a6a'},
+ ocarmor:{top:'#a8b0bc',top2:'#7a8494',armC:'#d8dce4',armC2:'#9aa2ae',chest:'#d8dce4',pad:'#ffffff',pad2:'#7a8494',spike:'#ffffff',sash:'#c8282a',belt:'#5a3a2a'},
+ emarmor:{top:'#3a3e4a',top2:'#262a34',armC:'#4a4e5a',armC2:'#2e323c',chest:'#6a7080',pad:'#6a7080',pad2:'#3a3e4a',collar:'#c8a050',belt:'#c8a050',cape:'#2a2e38'},
+ kcloth:{top:'#5a5a66',top2:'#3e3e48',robeL:true,trim:'#9a7cff',collar:'#9a7cff',belt:'#2a2a34'},
+ vwarmor:{pad:'#5a4a52',pad2:'#3a3036',chest:'#3a3036',collar:'#8a0a1a',spike:'#d8d0d8',belt:'#1a1418'},
+ rparmor:{top:'#c82a1a',top2:'#8a1a0e',robe:true,pad:'#ff7a3a',pad2:'#c82a1a',collar:'#ffd24a',belt:'#ffd24a',cape:'#ff7a3a'},
+ tgarmor:{top:'#e8e4d8',top2:'#b8b4a8',armC:'#e8e4d8',armC2:'#2a2a2a',chest:'#ffffff',pad:'#ffffff',pad2:'#2a2a2a',spike:'#2a2a2a',belt:'#2a2a2a'},
+ dgarmor:{top:'#2a6ab8',top2:'#1a4a88',armC:'#3a7ac8',armC2:'#1a4a88',chest:'#5ac8ff',pad:'#5ac8ff',pad2:'#2a6ab8',spike:'#c8e8ff',collar:'#c8e8ff',belt:'#1a3a68'},
+ ttshell:{top:'#1a2a3a',top2:'#101a26',armC:'#2a3e4e',armC2:'#1a2a3a',chest:'#3a5a6a',pad:'#3a5a6a',pad2:'#1a2a3a',spike:'#5ad8c8',belt:'#5ad8c8',cape:'#3a5a6a'},
+ tirsh:{top:'#8a0a1a',top2:'#5a0610',armC:'#1a2034',armC2:'#10141f',chest:'#1a2034',pad:'#8a0a1a',pad2:'#1a2034',spike:'#c8a050',collar:'#c8a050',belt:'#c8a050'},
+ vpaj:{top:'#24142e',top2:'#160a1e',robeL:true,trim:'#a05aff',collar:'#5a3a6a',cape:'#5a3a6a',belt:'#a05aff'},
+ lhelm:{hair:'cap',cap:'#8a5a32'},
+ tHood:{hood:'#2a6a6a'},
+ ihelm:{hair:'helm',hc:'#9aa2ae',hl:'#d8dee6'},
+ mhelm:{hair:'helm',hc:'#a8d0e4',hl:'#e0f2fa',plume:'#4a7890'},
+ mghelm:{hair:'helm',hc:'#c8d0dc',hl:'#eef2f8',plume:'#2a3a6a',plumeL:1},
+ ochelm:{hair:'helm',hc:'#d8dce4',hl:'#ffffff',plume:0,horns:'#f0e8d0'},
+ emhelm:{hair:'helm',hc:'#3a3e4a',hl:'#6a7080',plume:'#c8a050',plumeL:1},
+ rphelm:{hair:'crown',hat:'#ffb03a'},
+ tghelm:{hair:'helm',hc:'#e8e4d8',hl:'#ffffff',plume:0,catE:'#e8e4d8'},
+ dghelm:{hair:'helm',hc:'#2a6ab8',hl:'#5ac8ff',plume:0,horns:'#c8e8ff'},
+ tthelm:{hair:'helm',hc:'#3a5a6a',hl:'#5ad8c8',plume:0,mask:'iron',maskC:'#1a2a3a',eye:'#5ad8c8'},
+ vwhelm:{hair:'helm',hc:'#3a3036',hl:'#5a4a52',plume:0,catE:'#3a3036'},
+ lgloves:{glove:'#7a5030'},tGloves:{glove:'#b8946a'},igloves:{glove:'#b8c0ca',cuff:'#8a929e'},mggloves:{glove:'#c8d0dc',cuff:'#2a3a6a'},
+ ocgloves:{glove:'#d8dce4',cuff:'#ffffff'},alexg:{glove:'#2a3a5a',cuff:'#6a7a9a'},emgloves:{glove:'#6a7080',cuff:'#c8a050'},
+ tggloves:{glove:'#e8e4d8',cuff:'#2a2a2a'},dggaunt:{glove:'#2a6ab8',cuff:'#5ac8ff'},vwgloves:{glove:'#3a3036',cuff:'#5a4a52'},
+ lboots:{boots:'#5a3a20'},tBoots:{boots:'#a8845a'},iboots:{boots:'#7a828e',bootH:1,bootT:'#b8c0ca'},bboots:{boots:'#2a2a34',bootH:1,bootT:'#9a7cff'},
+ ocboots:{boots:'#d8dce4',bootH:1,bootT:'#ffffff'},mgboots:{boots:'#c8d0dc',bootH:1,bootT:'#2a3a6a'},emboots:{boots:'#3a3e4a'},
+ rpboots:{boots:'#c82a1a'},tgboots:{boots:'#e8e4d8',bootH:1,bootT:'#2a2a2a'},ttboots:{boots:'#1a2a3a',bootH:1,bootT:'#5ad8c8'},
+ vwboots:{boots:'#3a3036',bootH:1,bootT:'#5a4a52'}};
+const GEARS=['a','b','g','h']; // the order they go on: armour, then boots, gloves and the helmet last (it sets the hair)
+// a worn piece's look: its own, or for an id with none the tier of before
+function gearLk(sl,id){if(!id)return null;const e=GEARL[id];if(e)return e;if(sl==='a')return GEARL.larmor;const T=GLK[id[0]]||GLK.i;
+ return sl==='h'?(T.cap?{hair:T.hair,cap:T.cap}:{hair:T.hair,hc:T.hc,hl:T.hl}):sl==='g'?{glove:T.glove}:{boots:T.boots};}
+function gearPut(c,ids){for(const sl of GEARS){const e=gearLk(sl,ids[sl]);if(e)Object.assign(c,e);}if(c.robe||c.robeL)delete c.skirt;return c;}
+// the ids you show: what you wear, less a piece whose look you hide (the eye in the equipment window)
+const gearIds=()=>{const o={};for(const sl of GEARS){const i=eqIt(sl);o[sl]=i&&!vhOn(sl)?i.id:null;}return o;};
+// the worn earrings (v2.45) show over everything, a costume too; they are in the sheet's key
+const earOn=c=>{const e=eqIt('e');if(e&&EARC[e.id]&&!vhOn('e'))c.ear=EARC[e.id];return c;};
+const gearSig=()=>{const o=gearIds(),e=eqIt('e');return GEARS.map(sl=>o[sl]||'-').join('.')+'.'+(e&&EARC[e.id]&&!vhOn('e')?e.id:'-');};
+function gearFig(L){if(L.cos)return earOn(lookFig(L,armorIt()&&!vhOn('a')?1:0));return earOn(gearPut(lookFig(L,0),gearIds()));} // a costume hides the gear, as before
 function gearOn(c,h,g,b){if(h){c.hair=h.hair;if(h.cap)c.cap=h.cap;else{c.hc=h.hc;c.hl=h.hl;}}if(g)c.glove=g.glove;if(b)c.boots=b.boots;return c;}
 buildMe();
 const DIR4=['d','u','s','l'],ANIM=new WeakMap();let HAND=null;
@@ -11666,6 +11717,10 @@ function netTick(){faultAt('netTick');NET.tick();pxpSeen();const live=netLive();
    pages skip the tag and draw what they did; a dye, costume or tier a page doesn't know is left off. */
 function lkPub(){if(!S||!S.look)return '';const L=S.look,dy=v=>v!=null&&DYE[v]?String(v|0):'',cos=L.cos&&COS[L.cos]?L.cos:'',g=cos?'---':['h','g','b'].map(sl=>{const i=eqIt(sl);return i&&!vhOn(sl)?(GLK[i.id[0]]?i.id[0]:'i'):'-';}).join('');
  const v=dy(L.cape)+'.'+dy(L.pants)+'.'+cos+'.'+g;return v==='...---'?'':v;}
+/* SAT-ONLINE-165: the gear's own look rides as "gr:<armour>.<boots>.<gloves>.<helmet>" (item ids, '-' for none or hidden; nothing
+   with a costume). "lk:" keeps the tiers for pages from before, which skip this tag. */
+function grPub(){if(!S||!S.look||S.look.cos&&COS[S.look.cos])return '';const o=gearIds(),v=GEARS.map(sl=>o[sl]||'-').join('.');return v==='-.-.-.-'?'':v;}
+function grOf(v){const m=/^([A-Za-z0-9-]{1,16})\.([A-Za-z0-9-]{1,16})\.([A-Za-z0-9-]{1,16})\.([A-Za-z0-9-]{1,16})$/.exec(v||'');if(!m)return null;const o={};GEARS.forEach((sl,i)=>{o[sl]=m[i+1]==='-'?null:m[i+1];});return o;}
 // the rest of the look rides as "bd:" (owner 2026-10-23): body, eyes, beard, face, lips, two accessories and their colours, skirt
 const BDK=['g','eye','bst','face','lip','acc','acol','acc2','acol2','sk','hh','ex','ee'];   // ee: worn earrings (1 + EARK index) // hh: the hairstyle's index / 32 (presence carries index & 31)
 function bdPub(){if(!S||!S.look)return '';const L=S.look;const ew=eqIt('e'),ee=ew&&!vhOn('e')?EARK.indexOf(ew.id)+1:0;let v=BDK.map(k=>Math.max(0,Math.min(35,k==='hh'?(L.hair|0)>>5:k==='ee'?ee:L[k]|0)).toString(36)).join('');while(v.length>11&&v.endsWith('0'))v=v.slice(0,-1);return /^0+$/.test(v)?'':v;}
@@ -11673,14 +11728,14 @@ function bdOf(v){if(!/^[0-9a-z]{10,16}$/.test(v||''))return null;const o={};BDK.
 function lkOf(v){const m=/^(\d{0,2})\.(\d{0,2})\.([a-z0-9]{0,12})\.([a-z-]{3})$/.exec(v||'');if(!m)return null;const o={g:[...m[4]].map(ch=>GLK[ch]?ch:'-').join('')};
  if(m[1]!==''&&DYE[+m[1]])o.cape=+m[1];if(m[2]!==''&&DYE[+m[2]])o.pants=+m[2];if(m[3]&&COS[m[3]])o.cos=m[3];return o;}
 // another player's figure, built the way yours is (gearFig): base look, armour, dyes, costume, worn tiers, glasses
-function remoteFig(L,arm,sg,lk,bd){const ix=(a,i)=>i>=0&&i<a.length?i:0,K={hair:ix(LOOK.hair,L.hair),hc:ix(LOOK.hc,L.hc),skin:ix(LOOK.skin,L.skin),top:ix(LOOK.top,L.top)},x=lkOf(lk);{const B=bdOf(bd)||{};if(B.hh){K.hair=ix(LOOK.hair,(L.hair&31)+B.hh*32);delete B.hh;}Object.assign(K,B);}
- if(x){if(x.cape!=null)K.cape=x.cape;if(x.pants!=null)K.pants=x.pants;if(x.cos)K.cos=x.cos;}const c=lookFig(K,arm?1:0);
- if(x&&!K.cos)gearOn(c,...[...x.g].map(ch=>GLK[ch]||null));if(sg)c.sg=1;return c;}
-function remoteSpr(L,arm,sg,lk,bd){const x=lkOf(lk),ix=(a,i)=>i>=0&&i<a.length?i:0;bd=bdOf(bd)?bd:'';
- const k='rp_'+ix(LOOK.hair,L.hair)+'_'+ix(LOOK.hc,L.hc)+'_'+ix(LOOK.skin,L.skin)+'_'+ix(LOOK.top,L.top)+'_'+(arm?1:0)+(sg?'g':'')+(x?'_'+(x.cape??'')+'.'+(x.pants??'')+'.'+(x.cos||'')+'.'+(x.cos?'---':x.g):'')+(bd?'_'+bd:'');
- if(!SH[k])SH[k]=SA.chars.buildSheet(remoteFig(L,arm,sg,lk,bd));return k;}
+function remoteFig(L,arm,sg,lk,bd,gr){const ix=(a,i)=>i>=0&&i<a.length?i:0,K={hair:ix(LOOK.hair,L.hair),hc:ix(LOOK.hc,L.hc),skin:ix(LOOK.skin,L.skin),top:ix(LOOK.top,L.top)},x=lkOf(lk);{const B=bdOf(bd)||{};if(B.hh){K.hair=ix(LOOK.hair,(L.hair&31)+B.hh*32);delete B.hh;}Object.assign(K,B);}
+ if(x){if(x.cape!=null)K.cape=x.cape;if(x.pants!=null)K.pants=x.pants;if(x.cos)K.cos=x.cos;}const G=!K.cos&&grOf(gr),c=lookFig(K,arm&&!G?1:0);
+ if(G)gearPut(c,G);else if(x&&!K.cos)gearOn(c,...[...x.g].map(ch=>GLK[ch]||null));if(sg)c.sg=1;return c;}
+function remoteSpr(L,arm,sg,lk,bd,gr){const x=lkOf(lk),ix=(a,i)=>i>=0&&i<a.length?i:0;bd=bdOf(bd)?bd:'';gr=grOf(gr)&&!(x&&x.cos)?gr:'';
+ const k='rp_'+ix(LOOK.hair,L.hair)+'_'+ix(LOOK.hc,L.hc)+'_'+ix(LOOK.skin,L.skin)+'_'+ix(LOOK.top,L.top)+'_'+(arm?1:0)+(sg?'g':'')+(x?'_'+(x.cape??'')+'.'+(x.pants??'')+'.'+(x.cos||'')+'.'+(x.cos?'---':x.g):'')+(bd?'_'+bd:'')+(gr?'_'+gr:'');
+ if(!SH[k])SH[k]=SA.chars.buildSheet(remoteFig(L,arm,sg,lk,bd,gr));return k;}
 window.__GLOOK={fig:(L,a)=>lookFig(L,a),create:()=>openCreate(),sty:k=>styList(k),bd:()=>bdPub(),bdOf:v=>bdOf(v),LOOK,EYEC,LIPC,ACCC,BST,ACCK}; // tests
-window.__GLK={pub:()=>lkPub(),of:v=>lkOf(v),mine:()=>{const c=gearFig(S.look||DEFLOOK);if(S.rsh&&S.rsh.g&&S.rsh.w)c.sg=1;return c;},theirs:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return remoteFig(r.look,r.arm,fs.gl,fs.lk,fs.bd);},spr:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return remoteSpr(r.look,r.arm,fs.gl,fs.lk,fs.bd);},st:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return fs.st;},mySt:()=>stPub()}; // tests
+window.__GLK={pub:()=>lkPub(),of:v=>lkOf(v),gr:()=>grPub(),grOf:v=>grOf(v),GEARL,lk:(sl,id)=>gearLk(sl,id),ids:()=>[...RC,...TRC].filter(r=>GEARS.includes(r.slot)).map(r=>[r.slot,r.id]),sig:()=>gearSig(),sheet:()=>SH[pSpr()].canvas,wsh:()=>WSH,mine:()=>{const c=gearFig(S.look||DEFLOOK);if(S.rsh&&S.rsh.g&&S.rsh.w)c.sg=1;return c;},theirs:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return remoteFig(r.look,r.arm,fs.gl,fs.lk,fs.bd,fs.gr);},spr:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return remoteSpr(r.look,r.arm,fs.gl,fs.lk,fs.bd,fs.gr);},st:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return fs.st;},mySt:()=>stPub()}; // tests
 /* 1:1 effects (SAT-ONLINE-026, owner feedback 9/10): whatever your own attack, dash or skill draws is recorded while it runs
    (each vfx call with its seed, the fx particles, rings and bolts it adds, its projectiles, the weapon swing and the dash
    trail) and published with presence as offsets from you. The others replay the same calls at your position, so they see
@@ -11722,13 +11777,13 @@ const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(try
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
 // clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
 function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+vpSt()+nvSt():'';}
-function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
+function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
  let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
 function guPub(){if(!P||!P.guard)return null;const a=Math.atan2(P.gy,P.gx);return 1+((Math.round(a/(2*Math.PI)*64)%64+64)%64)+(P.fort>0?64:0)+(P.gT<.22?128:0);}
 function fxSt(sid){let s=FXS.get(sid);if(!s)FXS.set(sid,s={last:-1,off:null,raw:'',sw:null,du:0,tr:[],lt:0});return s;}
-function fxIn(r,s){if(!r.fx){s.pt=null;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
- s.pt=null;s.inT=0;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';for(const ev of a)if(typeof ev==='string'){const bdm=/^bd:([0-9a-z]{10,16})$/.exec(ev);if(bdm)s.bd=bdm[1];const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}const q=/^st:([A-Za-z]{1,24})$/.exec(ev);/* capitals too: a saint's Q, a vampire's V and X (SAT-ONLINE-155: the whole tag was dropped for them) */if(q)s.st=q[1];const w=/^tl:([a-z0-9.]{1,40})$/.exec(ev);if(w)s.tl=w[1];if(ev==='gl:1')s.gl=1;const lk=/^lk:(\S{5,32})$/.exec(ev);if(lk)s.lk=lk[1];} // pet, mount and when they got to this place ride along in fx (fxPub)
+function fxIn(r,s){if(!r.fx){s.pt=null;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
+ s.pt=null;s.inT=0;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';for(const ev of a)if(typeof ev==='string'){const grm=/^gr:(\S{7,67})$/.exec(ev);if(grm&&grOf(grm[1]))s.gr=grm[1];const bdm=/^bd:([0-9a-z]{10,16})$/.exec(ev);if(bdm)s.bd=bdm[1];const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}const q=/^st:([A-Za-z]{1,24})$/.exec(ev);/* capitals too: a saint's Q, a vampire's V and X (SAT-ONLINE-155: the whole tag was dropped for them) */if(q)s.st=q[1];const w=/^tl:([a-z0-9.]{1,40})$/.exec(ev);if(w)s.tl=w[1];if(ev==='gl:1')s.gl=1;const lk=/^lk:(\S{5,32})$/.exec(ev);if(lk)s.lk=lk[1];} // pet, mount and when they got to this place ride along in fx (fxPub)
  for(const ev of a){if(!Array.isArray(ev)||!(ev[0]>s.last)||typeof ev[1]!=='number')continue;s.last=ev[0];const lat=now-ev[1];
   // the sender's clock: keep the lowest delay seen (creeping up slowly) so steps of one skill keep their spacing
   if(s.off==null||lat<s.off)s.off=lat;else s.off+=(lat-s.off)*.02;FXQ.push({at:ev[1]+s.off,sid:r.sid,ev});}
@@ -11746,7 +11801,7 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
 function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
 function netEnts(ents){faultAt('netEnts');const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)
  for(const r of NET.remotes()){if(!netSees(r,myRoom))continue;const am=ranim(r),fs=fxSt(r.sid);fxIn(r,fs);remLife(r,fs);if(fs.st&&fs.st.indexOf('f')>=0&&rand()<.23)fx.push({x:r.x+(rand()-.5)*14,y:r.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});if(fs.st&&fs.st.indexOf('g')>=0&&rand()<.12)fx.push({x:r.x+(rand()-.5)*24,y:r.y-6,vx:0,vy:-16,t:.6,c:'#ffe08a',fl:1});if(fs.st&&/[bj]/.test(fs.st)&&rand()<.1)fx.push({x:r.x+(rand()-.5)*28,y:r.y-4,vx:0,vy:-18,t:.7,c:fs.st.indexOf('j')>=0?'#9fd8ff':'#fff3b0',fl:1});/* their flight, as yours (updateItemFx) */if(fs.st&&fs.st.indexOf('X')>=0&&rand()<.5)sunFx(r);if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
-  const k=remoteSpr(r.look,r.arm,fs.gl,fs.lk,fs.bd),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
+  const k=remoteSpr(r.look,r.arm,fs.gl,fs.lk,fs.bd,fs.gr),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
   // their weapon in hand and each swing once, the way your own is drawn (SAT-ONLINE-026, owner feedback 7): a swing starts when
   // their anim turns to 'attack' and plays 0.14 s on this clock, however long the state stays up
   // drawn the way your own character is (the player draw in render): dash trail, enhancement glow, weapon in hand or the

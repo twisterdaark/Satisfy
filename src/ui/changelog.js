@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24gearlook', ver: '2.48', d: '2026-10-24',
+      ar: ["كل قطعة عتاد بقى ليها شكلها على الشخصية: الدروع (جلد، وصفايح، وميثريل، ودرع جريد، ودرع زعيم الأوركات، وإيموس، وروب تايتلز، وكلاب الطيور الأربعة، ودرع دم تيرامت، وروب لاتينا، وجلد الديب مصاص الدماء)، والخوذ (بريشة، وقرون، وودان، وتاج، وقناع، وكابيشون)، والجوانتي (لونها، والجوانتلت ليها حرف عند الرسغ)، والجزم (والعالية منها طالعة على الرجل). قبل كده كل الدروع كانت بنفس الشكل، والخوذ والجوانتي والجزم كانت تلات أشكال بس",
+          "واللاعبين التانيين بيشوفوا نفس الشكل بالظبط. والكوستيوم لسه بيغطي العتاد، والعين في شباك العتاد لسه بتخفي القطعة",
+          "وسيف الدوبلجانجر العظيم، وسيف يتيما العظيم، وسيف جريد المصنوع بالجملة بقوا بيترسموا في إيدك (مكانوش بيظهروا خالص)"],
+      en: ["Every gear piece has its own look on your character: the armours (leather, plate, mithril, Grid's mass-produced, the Frostlight Orc Chief's, Emous', the robes, the four divine beasts' sets, Tiramet's Blood Mail, Latina's Robe, the vampire wolf leather), the helmets (a plume, horns, ears, a crown, a visor, a hood), the gloves (their colour, and a gauntlet's cuff at the wrist) and the boots (tall ones up the leg). Before, every armour looked the same, and helmets, gloves and boots had only three looks",
+          "The other players see exactly the same. A costume still covers your gear, and the eye in the equipment window still hides a piece",
+          "The Doppelganger's Greatsword, Yetima's Greatsword and the Mass-produced Grid Sword are now drawn in your hand (they didn't show at all)"] },
     { v: '2026-10-23mergeA3', ver: '2.47', d: '2026-10-23',
       ar: ["دخلت تحديثات جديدة: ألقاب أكتر من الرواية بمهارات، وخريطة العالم بتعرض قارتك بس ومن فوق الأرض بس."],
       en: ["New updates are in: more titles from the novel with skills, and the world map shows only your continent and only above the ground."] },
