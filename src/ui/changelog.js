@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23rbooks', ver: '2.08', d: '2026-10-23',
+      ar: ["الوصفات بقت كتب لكل الحِرف: الطبخ والكيميا والخياطة والحدادة. بتشتريها من ناس الحرفة، أو بتقع من الوحوش والزعما، أو بتبدّلها وتبيعها في المزاد. دوس على الكتاب في الشنطة عشان تتعلم الوصفة",
+        "الوصفة اللي لسه متعرفهاش بتظهر ??? ومكتوب جنبها مين بيبيع كتابها أو مين بيوقعه",
+        "صياد البحيرة بيبيع وصفات وليمة السمك الدهبي وفطيرة السمك، والخباز فطيرة القرع وتارت الفراولة، وعشّابة وينستون شاي الأعشاب وجرعة القوة، وليلى المصففة وصفات الجزمة والروب",
+        "أكل وجرع جديدة: شاي الأعشاب، فطيرة السمك، الوليمة الدهبية (كتابها بيقع من الزعما)، جرعة القوة، وجرعة التجدد (بتقع من شامان العفاريت والزعما)",
+        "طقم ذئب مصاص الدماء محتاج كتابه، وبيقع من سيد المدينة 15 وسيد المدينة 14",
+        "الفهم زي الرواية: الحداد اللي يفكّك قطعة بيعرف يعملها فهمه ليها بيزيد 10%، ولما يعملها تاني يزيد 10% كمان، وكل ما فهمك يزيد القطعة بتطلع أحسن"],
+      en: ["Recipes are books now for every craft: cooking, alchemy, sewing and smithing. Buy them from the craft's people, get them from monsters and bosses, or trade them and sell them at the auction. Click a book in the bag to learn its recipe",
+        "A recipe you do not know yet shows as ??? with who sells its book or who drops it",
+        "The Lake Fisherman sells the Golden Fish Feast and Fish Pie recipes, the Baker the Pumpkin Pie and Strawberry Tart, the Winston Herbalist the Herb Tea and Potion of Might, and Layla the Stylist the boots and the robe",
+        "New food and potions: Herb Tea, Fish Pie, the Golden Feast (its book drops from bosses), the Potion of Might and the Regeneration Potion (dropped by goblin shamans and bosses)",
+        "The Vampire Wolf set needs its book, dropped by the masters of the 15th and 14th cities",
+        "Item Understanding as in the novel: a blacksmith who takes apart a piece he can forge understands it 10% better, forging it again adds 10% more, and the better you understand it the better it comes out"] },
     { v: '2026-10-23vcmove', ver: '2.07', d: '2026-10-23',
       ar: ["مدينة مصاصي الدماء اللي كانت فوق الأرض اتشالت: مصاصين الدماء كلهم بقوا عايشين تحت الرملة في المدن المرقّمة",
         "مبعوث العهد وولي عهد مصاصي الدماء مستنيينك في الكهف أول ما تنزل من بيت النمل للمدينة 15، ومهمات العهد زي ما هي",
