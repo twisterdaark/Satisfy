@@ -10517,11 +10517,11 @@ function flogShow(){const out=[],D=flogDuel(),nm=x=>Satisfy.chat.clean(x||'',24)
 window.__GFLOG={show:()=>flogShow(),get pvp(){return FLOG.pvp},sum:()=>flogSum()}; // tests
 Object.assign(STR.ar,{flSum:'{s} ثانية · ضربت {o} مرة، واتضربت {i} · أكبر ضربة {b} · /fightlog',flDWin:'كسبت المبارزة ضد {n} {w} في {s} ثانية',flDLose:'خسرت المبارزة ضد {n} {w} في {s} ثانية',
  flDTot:'ضرباتك: {o} ({d} من صحته) · ضرباته: {i} ({k} من صحتك) · تفاديت {g} · رفضت {j}',flOut:'ضربت {n}',flIn:'{n} ضربك -{k} (فاضلك {hp})',flDodge:'تفاديت ضربة {n}',flFoe:'{n} بقى {hp}',
- flRej:'رفضت ضربة ({w})',flW_rate:'أسرع من أي سلاح',flW_range:'من بعيد',flStart:'بدأ القتال',flEnd:'خلص',flPvp:'آخر موتة: {n} قتلك · {h} ضربة في {s} ثانية',flBy:'{n}: {h} ضربة، {p}% من صحتك',
+ flRej:'رفضت ضربة ({w})',flW_rate:'أسرع من أي سلاح',flW_range:'من بعيد',flW_jump:'بعد تيليبورت على طول',flW_hp:'قال إن صحته رجعت',flStart:'بدأ القتال',flEnd:'خلص',flPvp:'آخر موتة: {n} قتلك · {h} ضربة في {s} ثانية',flBy:'{n}: {h} ضربة، {p}% من صحتك',
  flNone:'لسه مفيش قتال تشوفه',flPvpT:'{h} ضربة في {s} ثانية · اكتب /fightlog تشوف مين ضربك'});
 Object.assign(STR.en,{flSum:'{s} s · you hit {o} times, took {i} · biggest {b} · /fightlog',flDWin:'You won the duel against {n} {w} in {s} s',flDLose:'You lost the duel against {n} {w} in {s} s',
  flDTot:'Your hits: {o} ({d} of their HP) · theirs: {i} ({k} of yours) · dodged {g} · turned down {j}',flOut:'You hit {n}',flIn:'{n} hit you -{k} (you have {hp})',flDodge:'You dodged {n}',flFoe:'{n} is at {hp}',
- flRej:'Turned down a hit ({w})',flW_rate:'faster than any weapon',flW_range:'from too far',flStart:'The fight starts',flEnd:'Over',flPvp:'Your last death: {n} killed you · {h} hits in {s} s',flBy:'{n}: {h} hits, {p}% of your health',
+ flRej:'Turned down a hit ({w})',flW_rate:'faster than any weapon',flW_range:'from too far',flW_jump:'right after a teleport',flW_hp:'health said to go back up',flStart:'The fight starts',flEnd:'Over',flPvp:'Your last death: {n} killed you · {h} hits in {s} s',flBy:'{n}: {h} hits, {p}% of your health',
  flNone:'No fight to show yet',flPvpT:'{h} hits in {s} s · type /fightlog to see who hit you'});
 function duelTick(live){DUEL.tick();const st=DUEL.state();
  if(DUEL.locked()&&(mode==='dead'||!live))DUEL.yield(mode==='dead'?'death':'teleport');

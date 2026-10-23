@@ -17,6 +17,8 @@
     expireMs: 5000,   // drop a remote player not heard from for this long
     interpMs: 100,    // draw remotes this far in the past, between two snapshots
     snapPx: 64,       // a jump larger than this (door, teleport) is not interpolated
+    jumpPx: 160,      // SAT-ONLINE-151: a move past jumpPx + jumpPxS px a second since the last snapshot is a jump (a teleport,
+    jumpPxS: 400,     // a door, a cheat; not a blink skill or a dash); jumped(sid) says when, for duel and PvP hits to wait it out
     maxPerSec: 30,    // per-sender message budget
     maxRemotes: 64,
     bufLen: 8,
@@ -100,7 +102,9 @@
       }
       r.win.push(t);
       r.seq = env.seq;
-      if (r.pp && r.pp.room !== pp.room) r.buf = [];
+      var lb = r.buf[r.buf.length - 1];
+      if (r.pp && r.pp.room !== pp.room) { r.buf = []; r.jumpT = t; }
+      else if (lb && Math.hypot(pp.x - lb.x, pp.y - lb.y) > cfg.jumpPx + cfg.jumpPxS * Math.max(0, t - lb.t) / 1000) r.jumpT = t;
       r.pp = pp;
       r.seen = t;
       r.buf.push({ t: t, x: pp.x, y: pp.y });
@@ -160,6 +164,8 @@
         return out;
       },
       get: function (id) { var r = remotes.get(id); return r ? r.pp : null; },
+      /** When remote session id last jumped (teleported, went through a door), or 0. */
+      jumped: function (id) { var r = remotes.get(id); return r && r.jumpT || 0; },
       count: function () { return remotes.size; },
       on: function (fn) { listeners.push(fn); },
       stats: function () { return { sent: stats.sent, recv: stats.recv, dropped: stats.dropped }; },
