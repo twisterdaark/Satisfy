@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23stytabs', ver: '2.50', d: '2026-10-23',
+      ar: ["عند ليلى بقت شاشة تخصيص واحدة بدل 25 زرار: 5 تبويبات (الشعر، والوش، والجسم، والهدوم، والإكسسوارات)، وتحتها أجزاء التبويب، وتحتهم كل الاختيارات. ولما تشتري حاجة بتفضل في نفس التبويب.",
+          "25 زي جديد، فبقوا 48: مدرسة، وهودي، وجاكيت منفوخ، وآيدول، وتشيباو، وهانبوك، وكيمونو، وكاوبوي، وقرصان، وساموراي، وكاهنة المعبد، وبيجامة قطة وغيرهم. الفارس المقدس من لفل 100 والساحرة من لفل 80.",
+          "أزياء نادرة جديدة بتوقع من البوسز بس: ملكة الصقيع، وقاتل الظل، والزي الملكي، والزي الذهبي للإمبراطور (أسطوري) من الشياطين الكبار.",
+          "نافذة المعدات مابقتش بتتقص من تحت بعد خانة اللبس الداخلي، والخط اللي كان قاطعها راح."],
+      en: ["Layla's is one customization screen instead of 25 buttons: five tabs (hair, face, body, clothes, accessories), the parts of each under them, and every choice below. A change keeps you on the same tab.",
+          "25 new outfits, 48 in all: school, hoodie, puffer, idol, qipao, hanbok, kimono, cowboy, pirate, samurai, shrine maiden, cat pajamas and more. The paladin from level 100 and the witch from level 80.",
+          "New rare outfits that only drop from bosses: Frost Queen, Shadow Assassin, Royal, and the Golden Emperor (legendary) from the great demons.",
+          "The equipment window no longer gets cut off at the bottom after the underwear slot, and the line across it is gone."] },
     { v: '2026-10-23mergeA4', ver: '2.49', d: '2026-10-23',
       ar: ["دخل تحديثين جداد: كل قطعة معدات بقالها شكلها الخاص على الشخصية، ليك وللاعيبة التانيين، وإعداد حركة أقل في قايمة الإيقاف."],
       en: ["Two new updates are in: every gear piece has its own look on your character, for you and for the others, and a reduced motion setting in the pause menu."] },
