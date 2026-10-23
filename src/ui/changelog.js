@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23rscroll', ver: '2.03', d: '2026-10-23',
+      ar: ["لفافة العودة: بترجعك للنُزل اللي مسجّل فيه (أو أقرب مدينة) بعد ثانيتين ونص من النور، ولو اتضربت وانت بتقراها بتتلغي. مرة كل دقيقة، ومبتشتغلش في الحلبة ولا البرج ولا جزر بيهين ولا المبارزة ولا السباق ولا جوه القلعة وقت الحصار",
+        "بتتباع غالية في كل النُزل، وبتنزل نادر من الوحوش وأكتر من البوسات، وستيكس (بعد ما تعالجه) ساعات بيديك واحدة لو سألته، مرة في اليوم"],
+      en: ["Return Scroll: takes you to the inn you registered at (or the nearest town) after two and a half seconds of light; a hit while you read it breaks it. Once a minute, and not in the arena, the tower, the Behen islands, a duel, a race or inside the castle during a siege",
+        "Sold dear at every inn, a rare drop from monsters and more often from bosses, and Sticks (once you've cured him) sometimes has one if you ask, once a day"] },
     { v: '2026-10-23equip', ver: '2.02', d: '2026-10-23',
       ar: ["شاشة المعدات اتصلحت: أسامي الخانات مبقتش متدارية، وسطر الهجوم والدفاع والكلاس ووصف السلاح بقى ظاهر فوق الشريط",
         "خانات الخواتم التسعة بتتفتح واحدة واحدة مع اللفل (20، 60، 100، 150، 200، 260، 320، 380، 450)، والكلاس الأسطوري بيفتحها في نص اللفل. الخانة المقفولة عليها قفل وبتقولك هتتفتح امتى، وخانة الإكسسوار مفتوحة على طول",
