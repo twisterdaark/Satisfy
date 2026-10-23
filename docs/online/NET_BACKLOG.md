@@ -247,5 +247,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 |---|---|---|---|
 | U267 | Reduced motion | ✅ | SAT-ONLINE-164: a device setting in the pause menu (`satisfy_rmo`, the system's prefers-reduced-motion when unset): no camera shake, no white flash, the UI's shakes and pulses stop, particles capped (`RMOFX`, `RMOVX`); telegraphs (`drawTele`) untouched; `regression/rmotion` |
 | U269 | Armor pieces (render sprite overlays) | ✅ | SAT-ONLINE-165: helmet, armour, gloves and boots each draw their own look (`GEARL`, 48 ids), for you and the others (`gr:` fx tag); `regression/gearlook` |
+| U302 | Treasure hunts | ✅ | SAT-ONLINE-170: one treasure a week, the same spot for everyone (`thSpot`: the explorers' cache spots of the West, seeded by `lockWeek()`), from Winston's board; a compass line (`#thW`) and E to dig; once a week each (`S.th.got`); the world's first finder (legends `th_<week>`) gets a second share and the news `thFirstN`; no gold; `regression/treasure` |
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

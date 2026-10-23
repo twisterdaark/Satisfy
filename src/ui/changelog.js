@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24treasure', ver: '2.54', d: '2026-10-24',
+      ar: ["صيد الكنز: كل أسبوع فيه كنز مدفون في مكان واحد للكل في العالم. خد الكويست من لوحة وينستون، وهتعرف المنطقة، وفوق الشاشة خط بيقولك تمشي في أنهي اتجاه وأد إيه بعيد، ولما توصل دوس E عشان تحفر. كل واحد يلاقيه مرة في الأسبوع (أوريكالكوم أزرق، وحجر سحري، وخبرة رسم خرايط، من غير فلوس)، وأول واحد في العالم يلاقيه بياخد نصيب زيادة والكل بيسمع"],
+      en: ["Treasure hunts: each week one treasure is buried, in the same spot for everyone in the world. Take the hunt from Winston's board and you learn the region; a line at the top of the screen says which way to walk and how far, and E digs it up when you're there. Everyone finds it once a week (blue orichalcum, magic stones and cartography experience, no gold), and the first in the world to find it gets a second share and everyone hears of it"] },
     { v: '2026-10-23monsee', ver: '2.53', d: '2026-10-23',
       ar: ["مصاصين الدماء النبلا، وإيرلات الدم من المدينة 6 لتحت، وماري روز، وفنرير كانوا مختفيين. دلوقتي بيبانوا بشكلهم، واتراجعت كل الوحوش التانية ومفيش حد ناقص.",
           "كويستات \"اقتل وصحتك أقل من 50%\": لو لفلك أعلى من الوحش بـ 20 أو أكتر، شرط الصحة بيتلغى لأنه مستحيل يوصلك ليها، والكويست بيقول كده.",
