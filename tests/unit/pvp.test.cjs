@@ -124,3 +124,32 @@ test('PlayerPublic.ol is 1 (an outlaw), 2 (a murderer, SAT-ONLINE-052) or null',
   assert.ok(SN.net.validatePlayerPublic(pp(2)).ok);
   assert.deepEqual(SN.net.validatePlayerPublic({ ...pp(true), ol: 3 }).errors, ['ol']);
 });
+
+// plan U041 (PvP CC immunity; acceptance: "the target is never locked beyond the limit"). No crowd control crosses between
+// players: a hit is its damage and nothing else, whatever a modified attacker adds to it, so the limit is zero. Should a stun,
+// a root or a knockback ever travel with a player's hit, it has to come through here and be given diminishing returns.
+test('U041: a hit carries only its damage; stun, root, slow or knockback added by a modified attacker never reach the victim', () => {
+  const w = world(2), [a, b] = w.players;
+  const forged = { to: 'u1', k: 60, n: 7, stun: 9000, root: 9000, slow: 9000, kb: 400, pull: 400, kx: 300, ky: 300, cc: 'lock', x: 0, y: 0 };
+  a.pres.send('pvp.hit', forged);
+  const h = w.hurts(b);
+  assert.equal(h.length, 1, 'the damage lands');
+  assert.deepEqual(Object.keys(h[0]).sort(), ['handle', 'pm', 'type', 'uid'], 'and is all that does: ' + JSON.stringify(h[0]));
+  assert.equal(h[0].pm, 60);
+  // the duel's hit is the same: damage and the HP after it, nothing more
+  const D = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/transport-local.js', 'src/net/duel.js');
+  const hub = D.transports.hub(); let t = 1000; const now = () => t, ev = [];
+  const mk = (i) => { const p = { uid: 'd' + i, x: 4000 + i * 30, y: 1500 }; p.pres = D.presence.create({ transport: hub.connect(), now, world: WORLD, net: D.net, uid: p.uid, sid: 'dsess' + i + 'xxxxxxx' }); p.duel = D.duel.create({ presence: p.pres, uid: p.uid, now, pos: () => ({ x: p.x, y: p.y }), zone: () => 'zPlains', policy: D.net.zonePolicy }); return p; };
+  const x = mk(0), y = mk(1);
+  const sync = () => { for (const p of [x, y]) p.pres.publish(D.net.toPlayerPublic({ look: { n: p.uid }, cls: 'novice', lv: 2, title: '' }, { x: p.x, y: p.y, dir: 0 }, { zone: 'zPlains', uid: p.uid, sid: p.pres.sid }), true); for (const p of [x, y]) { p.pres.tick(); p.duel.tick(); } };
+  const adv = (ms) => { for (let k = 0; k < ms; k += 100) { t += 100; sync(); } };
+  y.duel.on((e) => ev.push(e));
+  sync(); adv(300);
+  x.duel.challenge(x.pres.remotes().find((r) => r.uid === 'd1')); y.duel.accept(y.duel.pendingChallenge().duel); x.duel.ready(); y.duel.ready();
+  adv(100); adv(D.duel.C.COUNTDOWN_MS + 100);
+  assert.equal(y.duel.state().phase, 'fight');
+  x.pres.send('duel.hit', { to: 'd1', duel: x.duel.state().duel, k: 20, n: 1, stun: 9000, root: 9000, kb: 400 });
+  const hd = ev.filter((e) => e.type === 'hurt');
+  assert.equal(hd.length, 1);
+  assert.deepEqual(Object.keys(hd[0]).sort(), ['dmg', 'hp', 'type'], JSON.stringify(hd[0]));
+});

@@ -124,3 +124,40 @@ test('online: the hits, the kill report and the outlaw mark pass the database ru
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+// plan U041 (PvP CC immunity: "the target is never locked beyond the limit"). A modified page puts hits straight on the
+// channel the pages talk on, as fast as B takes them, each with a stun, a root, a slow and a knockback added: B takes the
+// damage and nothing else. It walks as far as without them, and is never stunned, rooted, slowed or pushed.
+const forgeCC = (g, to, n) => g.eval(([u, k]) => { const me = Satisfy.local.net(), ch = new BroadcastChannel('satisfy-net-v1'); ch.postMessage(Satisfy.net.envelope('pvp.hit', { to: u, k: 60, n: k, stun: 9000, root: 9000, slow: 9000, kb: 400, pull: 400, kx: 300, ky: 0 }, { sessionId: me.sid, seq: 2e9 + k })); ch.close(); }, [to, n]);
+test("U041: a burst of hits with crowd control forged on them never locks the victim: it walks on as before", async () => {
+  const ctx = await H.newContext();
+  try {
+    const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
+    const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    const ub = await b.eval(() => Satisfy.local.net().uid);
+    const walk = async (hits) => {
+      await place(a, 0); await place(b, 18); await settle(a, b);
+      await b.eval(() => { const G = window.__G; G.P.hp = G.maxHP(); });
+      const x0 = await b.eval(() => window.__G.P.x), hp0 = await b.eval(() => window.__G.P.hp);
+      await b.page.keyboard.down('KeyD');
+      let n = 0, locked = 0;
+      for (let i = 0; i < 8; i++) {
+        if (hits) await forgeCC(a, ub, 100 * hits + i);
+        await b.step(15); await b.page.waitForTimeout(20);
+        if (await b.eval(() => { const P = window.__G.P, t = window.__GANIM.t() / 1000; return (P.stun || 0) > 0 || (P.rootT || 0) > t || (P.slowT || 0) > t; })) locked++;
+        n++;
+      }
+      await b.page.keyboard.up('KeyD');
+      return { dx: (await b.eval(() => window.__G.P.x)) - x0, lost: hp0 - (await b.eval(() => window.__G.P.hp)), locked, n };
+    };
+    const free = await walk(0);
+    assert.ok(free.dx > 60, 'B walks: ' + free.dx);
+    const hit = await walk(1);
+    assert.ok(hit.lost > 0, 'the hits land: ' + hit.lost + ' HP');
+    assert.equal(hit.locked, 0, 'never stunned, rooted or slowed');
+    assert.ok(hit.dx >= free.dx * 0.9 && hit.dx <= free.dx * 1.1, 'as far as without them, not pushed: ' + hit.dx + ' / ' + free.dx);
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
