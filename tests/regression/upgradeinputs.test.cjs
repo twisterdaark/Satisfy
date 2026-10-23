@@ -60,14 +60,34 @@ test('upgrades take exactly their inputs: a gem and 500 gold to set one, the pri
       await g.eval(() => { for (let i = 0; i < 6 && window.__G.mode === 'dialog'; i++) window.__G.advance(); });
       for (let i = 0; i < 20 && await g.eval(() => window.__G.mode !== 'play'); i++) { await g.step(5); await g.eval(() => window.__G.mode === 'dialog' && window.__G.advance()); }
     }
-    // short of magic stones: nothing taken
-    await g.eval(() => { window.__G.S.mats.mstone = 0; });
-    const b0 = await bag(g), en0 = await g.eval(() => window.__wpn().en | 0);
-    if (en0 < 10) {
-      await g.eval(() => window.__GENH.go(window.__wpn())); await g.step(2);
-      assert.deepEqual(await bag(g), b0, 'short of stones: nothing');
-      assert.equal(await g.eval(() => window.__wpn().en | 0), en0);
+    // with a Protection or a Blessing Stone (v1.82): one of each used is taken too, and a protected try past +6 never drops
+    const st = () => g.eval(() => { const S = window.__G.S; return { p: S.mats.pstone | 0, b: S.mats.bstone | 0 }; });
+    await g.eval(() => { const S = window.__G.S; S.mats.pstone = 6; S.mats.bstone = 6; S.mats.mstone = 200; S.mats.estone = 200; S.gold = 5e6; window.__wpn().en = 7; });
+    for (let k = 0; k < 5; k++) {
+      const before = await bag(g), s0 = await st(), c = await g.eval(() => window.__GENH.cost(window.__wpn())), en = await g.eval(() => window.__wpn().en | 0);
+      if (en >= 10) break;
+      const x = k % 2 ? { pr: true, bl: true } : { pr: true };
+      await g.eval((o) => window.__GENH.go(window.__wpn(), 'khan', o), x); await g.step(2);
+      const after = await bag(g), s1 = await st(), en2 = await g.eval(() => window.__wpn().en | 0);
+      assert.deepEqual([before.gold - after.gold, before.mstone - after.mstone, before.estone - after.estone, s0.p - s1.p, s0.b - s1.b], [c.g, c.m, c.e, 1, x.bl ? 1 : 0], 'stones, try ' + k);
+      assert.ok(en2 >= en, 'protected: no drop (+' + en + ' -> +' + en2 + ')');
+      await g.eval(() => { for (let i = 0; i < 6 && window.__G.mode === 'dialog'; i++) window.__G.advance(); });
+      for (let i = 0; i < 20 && await g.eval(() => window.__G.mode !== 'play'); i++) { await g.step(5); await g.eval(() => window.__G.mode === 'dialog' && window.__G.advance()); }
     }
+    await g.eval(() => { const S = window.__G.S; S.mats.pstone = 0; window.__wpn().en = Math.min(window.__wpn().en | 0, 9); });
+    const bb = await bag(g), cc = await g.eval(() => window.__GENH.cost(window.__wpn()));
+    await g.eval(() => window.__GENH.go(window.__wpn(), 'khan', { pr: true })); await g.step(2);
+    const ba = await bag(g);
+    assert.deepEqual([(await st()).p, bb.gold - ba.gold], [0, cc.g], 'no Protection Stone left: none taken, the price as usual');
+    await g.eval(() => { for (let i = 0; i < 6 && window.__G.mode === 'dialog'; i++) window.__G.advance(); });
+    for (let i = 0; i < 20 && await g.eval(() => window.__G.mode !== 'play'); i++) { await g.step(5); await g.eval(() => window.__G.mode === 'dialog' && window.__G.advance()); }
+
+    // short of magic stones: nothing taken (at +5, so the check can't be skipped by a weapon already at +10)
+    await g.eval(() => { window.__G.S.mats.mstone = 0; window.__wpn().en = 5; });
+    const b0 = await bag(g);
+    await g.eval(() => window.__GENH.go(window.__wpn())); await g.step(2);
+    assert.deepEqual(await bag(g), b0, 'short of stones: nothing');
+    assert.equal(await g.eval(() => window.__wpn().en | 0), 5);
     assert.equal(await g.eval(() => window.__wpn().id), w, 'the same weapon all along');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
