@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23classpacks', ver: '2.16', d: '2026-10-23', hide: 1,
+      ar: ["للمطورين: الكلاسات بقت ممكن تتكتب كبيانات (src/content/classpacks.js): الاسم، واختبار الترقية عند المدرّب، والسكيلات (طعنة، اندفاع، ضربة قدام، دايرة، رمية، تقوية، علاج، وباسيف)، وبتتحط في اللعبة لوحدها"],
+      en: ["For developers: classes can be written as data (src/content/classpacks.js): the name, the trial at a trainer, and the skills (thrust, dash, sweep, nova, shot, buff, heal, and passive), installed by the game at load"] },
     { v: '2026-10-23antiexploit', ver: '2.15', d: '2026-10-23',
       ar: ["PvP: مفيش ضربة بتعدي من حد لسه عامل تيليبورت جنبك (لمدة ثانية)، والجري والاندفاع والقفزة القصيرة مش محسوبين. ولو الخصم في المبارزة قال إن صحته رجعت تاني، اللعبة مبتصدقوش"],
       en: ["PvP: no hit lands from someone who has just teleported next to you (for a second; running, dashing and a short blink don't count), and in a duel a foe's health that claims to go back up is not believed"] },
