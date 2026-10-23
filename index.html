@@ -4177,7 +4177,7 @@ let PET=null;
 const PLMAX=20,petNeed=l=>15*l*l;
 function petLv(k){let x=(S.petx||{})[k]||0,l=1;while(l<PLMAX&&x>=petNeed(l)){x-=petNeed(l);l++;}return l;}
 function petRest(k){let x=(S.petx||{})[k]||0,l=1;while(l<PLMAX&&x>=petNeed(l)){x-=petNeed(l);l++;}return [x,l<PLMAX?petNeed(l):0];}
-const petB=k=>S.pet===k&&(S.pets||{})[k]?PETS[k].b*(pEvo(k)?2:1)*(1+(petLv(k)-1)*.1)*(S.tl.tamer?1.25:1):0;
+const petB=k=>S.pet===k&&(S.pets||{})[k]?PETS[k].b*(pEvo(k)?2:1)*(1+(petLv(k)-1)*.1)*(S.tl.tamer?1.25:1)*(1+secB('pet')):0;
 function petXP(k,n){if(!k||!(S.pets||{})[k]||n<=0)return;const l0=petLv(k);S.petx=S.petx||{};S.petx[k]=(S.petx[k]||0)+n;const l1=petLv(k);
  if(l1>l0){toast(t(l1===5||l1===15?'petGrow':'petUp',{n:t('pt_'+k),l:l1}),'good');SFX.level();if(PET)vfx('spawn',PET.x,PET.y,{color:'#f2c14e'});if(l1===10&&!pEvo(k))setTimeout(()=>toast(t('petFight',{n:t('pt_'+k)}),'good'),600);if(l1>=PLMAX&&pEvoOk(k))setTimeout(()=>toast(t('peReady',{n:t('pt_'+k),m:pEvoNeed(k)}),'good'),1200);hudDirty=true;sbSig='';}}
 function petKill(m,b){if(!S.pet)return;petXP(S.pet,Math.max(1,Math.round(m.lv/10))*(b.boss?10:1)*(S.tl.beastf?1.5:1));
@@ -4640,7 +4640,7 @@ function lifeXP(k,n){if(S.pet==='cat')n=Math.round(n*(1+petB('cat')));S.life=S.l
 let FISH=null;
 function nearWater(){if(!P||P.y>=WMH*TS)return null;const tx=P.x/TS|0,ty=P.y/TS|0;for(const [dx,dy] of [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]])if(at(tx+dx,ty+dy)===WA)return {x:(tx+dx)*TS+8,y:(ty+dy)*TS+8};return null;}
 function startFish(w){const lv=lifeLv('fish');FISH={x:w.x,y:w.y,t:0,bite:Math.max(1.2,2+rand()*3-lv*.12),win:.5+lv*.05,px:P.x,py:P.y};P.dir=Math.abs(w.x-P.x)>Math.abs(w.y-P.y)?(w.x>P.x?2:3):(w.y>P.y?0:1);SFX.swing();toast(t('fCast'));}
-function fishAct(){const F=FISH;FISH=null;if(F.t>=F.bite&&F.t<F.bite+F.win){const lv=lifeLv('fish'),k=rand()<(.02+lv*.008)*(evOn('fishf')?3:1)*(wxHere()==='rain'?1.5:1)?'gfish':snowAt(F.x/TS|0,F.y/TS|0)?'sfish':'fish';addMat(k,1);lifeXP('fish',k==='gfish'?25:6);vfx('mana',F.x,F.y);SFX.coin();if(k==='gfish')toast(t('fGold'),'good');}else{toast(t('fEarly'),'warn');SFX.deny();}hudDirty=true;}
+function fishAct(){const F=FISH;FISH=null;if(F.t>=F.bite&&F.t<F.bite+F.win){const lv=lifeLv('fish'),k=rand()<(.02+lv*.008)*(1+secB('fish'))*(evOn('fishf')?3:1)*(wxHere()==='rain'?1.5:1)?'gfish':snowAt(F.x/TS|0,F.y/TS|0)?'sfish':'fish';addMat(k,1);lifeXP('fish',k==='gfish'?25:6);vfx('mana',F.x,F.y);SFX.coin();if(k==='gfish')toast(t('fGold'),'good');}else{toast(t('fEarly'),'warn');SFX.deny();}hudDirty=true;}
 function pickHerb(n){if(n.dep>0){toast(t('hPicked'));SFX.deny();return;}if(!labor(4))return;const lv=lifeLv('herb');addMat(n.kind,1+(rand()<lv*.06?1:0));if(rand()<.04+lv*.004)addMat('vherb',1);lifeXP('herb',n.kind==='bherb'?8:4);n.dep=n.kind==='bherb'?120:70;SFX.chop();for(let i=0;i<8;i++)fx.push({x:n.x,y:n.y-4,vx:(rand()-.5)*50,vy:-rand()*50,t:.4,c:n.kind==='bherb'?'#7ab8ff':'#5aa83a'});hudDirty=true;}
 // cooking and brewing at a campfire; a better cook burns less
 const COOK={cfish:{need:{fish:1},alt:'sfish',xp:6},stew:{need:{fish:2,herb:2},xp:12},feast:{need:{gfish:1,herb:1,bherb:1},xp:25},ppie:{need:{pumpk:1,wheat:2},xp:20},sjam:{need:{straw:2,wheat:1},xp:16}},BREW={hpot:{need:{herb:3},xp:6},mpot:{need:{bherb:2,herb:1},xp:8}};
@@ -4673,7 +4673,9 @@ function cookQuit(){if(!COOKG)return;if(!COOKG.end){COOKG.p=1;cookHit();}}
 const SEC={smith:['khan','smith'],tailor:['stylist'],alch:['herbW'],chef:['baker'],farmer:['piaro'],bard:['minst']},SEC_SWAP=2000;
 // the Blacksmith class already is the smithing specialization (owner 2026-10-19: "why a class and a specialization?"), so a smith
 // has no second slot; other classes pick one production specialization
-function secOpt(who){const k=Object.keys(SEC).find(k=>SEC[k].includes(who));if(!k||S.sec===k||S.cls==='smith')return [];const cost=S.sec?SEC_SWAP:0;
+// a trainer may teach more than one (the foreman: miner, builder, construction worker, architect)
+function secOpt(who){return Object.keys(SEC).filter(k=>SEC[k].includes(who)).flatMap(k=>secOpt1(who,k));}
+function secOpt1(who,k){if(S.sec===k||S.cls==='smith')return [];const cost=S.sec?SEC_SWAP:0;
  return [{l:t('oSec',{n:t('sec_'+k)}),pr:cost||undefined,st:t('sec_'+k+'D'),poor:S.gold<cost,f:()=>{if(S.gold<cost){SFX.deny();return dialog(who,[t('noGold')]);}
   S.gold-=cost;S.sec=k;hudDirty=true;SFX.quest();toast(t('secGot',{n:t('sec_'+k)}),'good');save(true);dialog(who,['secT_'+k]);}}];}
 // tailoring recipes: soft leather and cloth pieces for the armour slots, sewn only by tailors
@@ -5302,7 +5304,7 @@ function setNote(b){for(const k in SETS){const c=setTier(k);if(c>(b[k]||0)){toas
 let durRemT=0;
 let wearT=-1;const WEARR=[1,.85,.7,.55,.4];
 /* durability (owner 2026-10-22, slower): rarer gear wears slower; hits made in the same frame (AoE skills) roll once */
-function wear(i,p){if(i)p*=WEARR[i.r|0]??.4;if(pasOn('stemp'))p*=skLv('stemp')>=10?.5:skLv('stemp')>=5?.7:.85;if(!i||rand()>=p)return;const d=durOf(i);if(d<=0)return;i.dur=d-1;
+function wear(i,p){p*=1-secB('wear');if(i)p*=WEARR[i.r|0]??.4;if(pasOn('stemp'))p*=skLv('stemp')>=10?.5:skLv('stemp')>=5?.7:.85;if(!i||rand()>=p)return;const d=durOf(i);if(d<=0)return;i.dur=d-1;
  if(i.dur===0){announce(t('brokeT',{it:inm(i)}),1);SFX.deny();shake=.15;hudDirty=true;}
  else if(i.dur===40)toast(t('durNote',{it:inm(i),n:40}));else if(i.dur===20){toast(t('lowDur',{it:inm(i),n:20}),'warn');SFX.notice();}
  else if(i.dur===10||i.dur===5){announce(t('durCrit',{it:inm(i),n:i.dur}),1);SFX.deny();}
@@ -5629,7 +5631,7 @@ function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR)
 // owner 2026-10-22: 1 to 172 took an hour, then 50 hours to 100 was far too long: now about 10 hours of own-level hunting to 100 and 14 to 200, before quests and bonuses (no per-kill cap)
 const xpNeed=()=>Math.round(50+S.lv*30+S.lv*S.lv*3.5+S.lv**3*.025);
 const PTS_LV=10; // stat points per level-up (canon)
-function gainXP(n){if(xpbOn())n*=1.2;S.xp+=Math.round(n);while(S.xp>=xpNeed()){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}),1);flash();SFX.rare();if(P)asMe(()=>vfx('levelup',P.x,P.y));},600);}P.hp=maxHP();if(P)asMe(()=>vfx('levelup',P.x,P.y));toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();checkSkills();}hudDirty=true;}
+function gainXP(n){if(xpbOn())n*=1.2;n*=1+secB('xp');S.xp+=Math.round(n);while(S.xp>=xpNeed()){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}),1);flash();SFX.rare();if(P)asMe(()=>vfx('levelup',P.x,P.y));},600);}P.hp=maxHP();if(P)asMe(()=>vfx('levelup',P.x,P.y));toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();checkSkills();}hudDirty=true;}
 // loot feed: what you just gained slides in at the side as a system box (+n name icon); the same thing again within a few
 // seconds adds to its box instead of stacking a new one
 const LOOT={};
@@ -5646,7 +5648,7 @@ function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.55:D?.03:0)*(D&&D.k.sta
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
 function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);if(NET&&b.boss&&!m.bh)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else bossChest(m,b);{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.03,.1,1.3)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(S.tl.viscount?.05:0)+(S.tl.pioneer?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)+(S.tl.shero?.05:0)+(S.tl.baron?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
- if(!m.bh)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p)addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill
+ if(!m.bh)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p*(1+secB('drop')))addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill
  if(!m.bh&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}rbBossDrop(m,b);
  if(m.lv>=20&&!m.tmp){if(b.boss){addMat('estone',1+(m.lv/50|0));if(rand()<.12)addMat('pstone',1);if(rand()<.25)addMat('bstone',1);}else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
  crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);p4Kill(m);p5Kill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
@@ -5657,7 +5659,7 @@ function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===
 function giveTitle(id){if(S.tl[id])return;S.tl[id]=1;if(!S.title&&TLS[id])S.title=id;sbSig='';setTimeout(()=>{toast(t('newTitleX',{t:t('tl_'+id)}),'good');SFX.notice();},900);}
 // potions: Q heals 40% HP, F restores 50% MP; a shared 5 s cooldown keeps them from replacing dodging
 const POT={hpot:{key:'KeyQ',price:30,f:()=>{const h=Math.round(maxHP()*.4);P.hp=Math.min(maxHP(),P.hp+h);numP(-26,'+'+h,'#7ae07a',false);asMe(()=>vfx('heal',P.x,P.y));}},mpot:{key:'KeyF',price:25,f:()=>{const v=Math.round(maxMP()*.5);P.mp=Math.min(maxMP(),P.mp+v);numP(-26,'+'+v,'#7ab0ff',false);asMe(()=>vfx('mana',P.x,P.y-8));}}};
-function drink(k){if(!S||mode==='dead')return;if(blNear()){toast(t('blNoPot'),'warn');SFX.deny();return;}if(TOW&&TOW.seal){toast(t('twSeal'),'warn');SFX.deny();return;}const n=S[k]||0;if(n<=0){toast(t('noPot',{p:t(k)}),'warn');SFX.deny();return;}if((P.pcd||0)>0){SFX.deny();return;}if(k==='hpot'?P.hp>=maxHP():P.mp>=maxMP()){toast(t(k==='hpot'?'hpFull':'mpFull'),'warn');SFX.deny();return;}S[k]=n-1;P.pcd=5;POT[k].f();SFX.eat();hudDirty=true;sbSig='';}
+function drink(k){if(!S||mode==='dead')return;if(blNear()){toast(t('blNoPot'),'warn');SFX.deny();return;}if(TOW&&TOW.seal){toast(t('twSeal'),'warn');SFX.deny();return;}const n=S[k]||0;if(n<=0){toast(t('noPot',{p:t(k)}),'warn');SFX.deny();return;}if((P.pcd||0)>0){SFX.deny();return;}if(k==='hpot'?P.hp>=maxHP():P.mp>=maxMP()){toast(t(k==='hpot'?'hpFull':'mpFull'),'warn');SFX.deny();return;}S[k]=n-1;P.pcd=5;POT[k].f();if(k==='hpot'&&secB('pot'))P.hp=Math.min(maxHP(),Math.round(P.hp+maxHP()*secB('pot')));SFX.eat();hudDirty=true;sbSig='';}
 // owner 2026-10-20: Shift with the click (or the number key) buys 10, Ctrl buys as many as fit and you can pay for
 let BUYQ=1;const buyQ=e=>{BUYQ=e.ctrlKey||e.metaKey?999:e.shiftKey?10:TOUCH?TBQ:1;};addEventListener('pointerdown',buyQ,true);addEventListener('keydown',buyQ,true);
 const buyCount=(room,g)=>Math.max(0,Math.min(BUYQ,room,Math.floor(S.gold/g)));
@@ -5796,12 +5798,12 @@ function uprootTile(x,y){if(at(x,y)!==TR)return;const n={};for(const [a,b] of [[
  gg.putImageData(new ImageData(SA.tiles.ground(TENV,x,y,0),16,16),x*TS,y*TS);}
 function uproot(tr){if(treeBound(tr.tx,tr.ty)){toast(t('rootBound'),'warn');SFX.deny();return;}tr.rh=(tr.rh||0)+1;SFX.chop();shake=.1;vfx('dust',tr.x,tr.y,{n:6});
  if(tr.rh<3){num(tr.x,tr.y-20,t('rootHit',{n:tr.rh}),'#c8a070',false);return;}WS.roots=WS.roots||{};WS.roots[tr.k]=1;uprootTile(tr.tx,tr.ty);addMat('wood',2);toast(t('rootDone'),'good');save(true);}
-function labor(c){if((P.lcd||0)>0)return false;P.lcd=.35;P.lbT=1.6;if(P.st>=c){P.st-=c;return true;}P.st=0;const h=Math.max(1,Math.ceil(maxHP()*.05));P.hp=Math.max(1,P.hp-h);numP(-22,'-'+h,'#ff6a5a',false);SFX.hurt();if(!(P.lwT>gTime)){P.lwT=gTime+4;toast(t('workTired'),'warn');}hudDirty=true;return true;}
+function labor(c){c=Math.round(c*(1-secB('labor')));if((P.lcd||0)>0)return false;P.lcd=.35;P.lbT=1.6;if(P.st>=c){P.st-=c;return true;}P.st=0;const h=Math.max(1,Math.ceil(maxHP()*.05));P.hp=Math.max(1,P.hp-h);numP(-22,'-'+h,'#ff6a5a',false);SFX.hurt();if(!(P.lwT>gTime)){P.lwT=gTime+4;toast(t('workTired'),'warn');}hudDirty=true;return true;}
 function chop(tr){{const st=(chopped.get(tr.k)||0)>gTime;if(!(st&&treeBound(tr.tx,tr.ty))&&!labor(st?14:10))return;}if((chopped.get(tr.k)||0)>gTime)return uproot(tr);chopped.set(tr.k,gTime+45);addMat('wood',1);S.chops=(S.chops||0)+1;if(S.chops>=40&&!S.hid.pers){S.hid.pers=10;setTimeout(()=>{toast(t('persOpen'),'good');SFX.notice();},600);}else if(S.hid.pers&&S.chops%40===0)S.hid.pers++;SFX.chop();setTimeout(()=>noise(.35,.18,260),120);shake=.08;
  fx.push({img:tr.cn,x:tr.tx*TS-6,y:tr.ty*TS-11,vx:0,vy:22,t:.7,fl:1});
  for(let i=0;i<16;i++)fx.push({x:tr.x+(rand()-.5)*14,y:tr.y-14-rand()*10,vx:(rand()-.5)*80,vy:-rand()*60,t:.6,c:rand()<.5?'#3f8a44':'#58a65a'});
  for(let i=0;i<8;i++)fx.push({x:tr.x,y:tr.y-6,vx:(rand()-.5)*70,vy:-rand()*70,t:.45,c:rand()<.5?'#8a5a32':'#c49a62'});hudDirty=true;}
-function mine(n){if(n.kind==='herb'||n.kind==='bherb')return pickHerb(n);if(n.dep>0){toast(t('hEmpty'));SFX.deny();return;}if(!labor(n.kind==='mith'?18:14))return;if(n.kind==='mith'){addMat('mith',ownsT('tMine')?2:1);if(rand()<.5)addMat('ore',1);n.dep=40;}else{const c=1+(rand()<.45?1:0);addMat('ore',c);n.dep=n.village?15:25;}SFX.mine();shake=.06;for(let i=0;i<10;i++)fx.push({x:n.x,y:n.y-4,vx:(rand()-.5)*70,vy:-rand()*70,t:.4,c:rand()<.5?'#c8743a':'#8f8a86'});hudDirty=true;}
+function mine(n){if(n.kind==='herb'||n.kind==='bherb')return pickHerb(n);if(n.dep>0){toast(t('hEmpty'));SFX.deny();return;}if(!labor(n.kind==='mith'?18:14))return;if(n.kind==='mith'){addMat('mith',ownsT('tMine')?2:1);if(rand()<.5)addMat('ore',1);n.dep=40;}else{const c=1+(rand()<.45?1:0)+secB('ore');addMat('ore',c);n.dep=n.village?15:25;}SFX.mine();shake=.06;for(let i=0;i<10;i++)fx.push({x:n.x,y:n.y-4,vx:(rand()-.5)*70,vy:-rand()*70,t:.4,c:rand()<.5?'#c8743a':'#8f8a86'});hudDirty=true;}
 const npcOf=id=>npcs.find(n=>n.id===id)||P;
 function coinFx(src,g){const n=Math.min(16,4+Math.round(g/8));for(let i=0;i<n;i++)fx.push({x:src.x+(rand()-.5)*6,y:src.y-14,vx:(rand()-.5)*110,vy:-50-rand()*90,t:2,c:rand()<.3?'#fff3b0':'#f2c14e',home:1,dl:.25+rand()*.2,coin:1});
  for(let i=0;i<Math.min(7,n);i++)setTimeout(()=>tone(1100+i*90,.06,'square',.05),300+i*70);setTimeout(SFX.coin,300);
@@ -6015,9 +6017,9 @@ const heartsH=id=>`<span class="hearts">${[0,1,2].map(i=>`<i class="${affTier(id
 const affTxt=id=>heartsH(id)+' '+t(gk(id,'aff'+affTier(id)));
 const repOf=k=>(S.rep||{})[k]||0,repRank=k=>REPT.filter(v=>repOf(k)>=v).length;
 function townOfNpc(id){const n=npcs.find(n=>n.id===id);if(!n)return null;const Rm=roomAt(n.x,n.y);if(Rm)return Rm.z;const z=zoneAt(n.x,n.y);return TOWNS.some(T=>T.k===z)?z:null;}
-function price(who,g){const d=(pasOn('opers')?.1:0)+Math.min(.25,affTier(who)*.05+(who&&NPCT[who]?repRank(townOfNpc(who))*.02:0));return Math.max(1,Math.round(g*(1-d)));}
+function price(who,g){const d=(pasOn('opers')?.1:0)+secB('buy')+Math.min(.25,affTier(who)*.05+(who&&NPCT[who]?repRank(townOfNpc(who))*.02:0));return Math.max(1,Math.round(g*(1-d)));}
 const NOAFF=new Set(['board','auction','herald']);
-function addAff(id,n){if(!NPCT[id]||!n||NOAFF.has(id))return;S.aff=S.aff||{};const was=affTier(id);S.aff[id]=Math.min(100,affOf(id)+(n>0&&pasOn('opers')?Math.ceil(n*1.5):n));const now=affTier(id);
+function addAff(id,n){if(!NPCT[id]||!n||NOAFF.has(id))return;S.aff=S.aff||{};const was=affTier(id);S.aff[id]=Math.min(100,affOf(id)+(n>0?Math.ceil(n*(pasOn('opers')?1.5:1)*(1+secB('aff'))):n));const now=affTier(id);
  if(now>was){toast(t('affUp',{w:t(id),r:t('aff'+now)}),'good');SFX.notice();if(now===2){S.hpot=Math.min(10,(S.hpot||0)+2);toast(t('affGift2',{w:t(id)}),'good');}if(now===3){S.mats.mstone=(S.mats.mstone||0)+3;toast(t('affGift3',{w:t(id)}),'good');}}}
 function addRep(k,n){if(!k||!n)return;if(S.tl.helper&&n>0)n=Math.ceil(n*1.05);S.rep=S.rep||{};const was=repRank(k);S.rep[k]=repOf(k)+n;const now=repRank(k);if(now>was){toast(t('repUp',{z:t(k),r:t('rep'+now)}),'good');SFX.notice();crepAdd(now*100);}}
 // gifts: once every 5 minutes of play per person; what someone likes counts double
@@ -6583,7 +6585,7 @@ function repCollect(who){const st=repSt();if(!st||repBusy)return;const ks=Object
  Promise.all(ks.map(k=>{const g=REPP[k]||0;return st.collect(NET.uid,k).then(()=>{delete REPP[k];S.gold+=g;return g;},()=>0);})).then(gs=>{const g=gs.reduce((a,b)=>a+b,0);if(g){toast(t('repGot',{g}),'good');SFX.coin&&SFX.coin();hudDirty=true;save(true);}}).finally(()=>{repBusy=0;repD(who);});}
 window.__GREP={get orders(){return REPO},get paid(){return REPP},get busy(){return repBusy},open:who=>repD(who),store:()=>repSt(),tick:()=>repTick()}; // tests
 const svcBack=who=>NPCT[who]&&NPCT[who].opts?shopD(who,'svcMore'):null;
-function repairCost(who){let g=0;for(const i of S.items){const d=durOf(i);if(d<100&&i.slot!=='x')g+=Math.ceil((100-d)*.4*(1+i.r));}return g?price(who,g):0;}
+function repairCost(who){let g=0;for(const i of S.items){const d=durOf(i);if(d<100&&i.slot!=='x')g+=Math.ceil((100-d)*.4*(1+i.r));}return g?price(who,Math.max(1,Math.round(g*(1-secB('rep'))))):0;}
 function repairAll(who){const g=repairCost(who);if(!g)return dialog(who,['arNoRep'],()=>svcBack(who));if(S.gold<g){SFX.deny();return dialog(who,['arNo']);}
  S.gold-=g;S.items.forEach(i=>{if(i.slot!=='x')i.dur=100;});SFX.coin();vfx('forge',P.x,P.y-8);num(P.x,P.y-26,'-'+g+'G','#f2c14e',false);toast(t('repDone'),'good');hudDirty=true;svcBack(who);}
 // Gems (SAT-GEM-001): rare drops from monsters of level 60 and up (bosses drop one a third of the time). Any smith sets one
@@ -6785,7 +6787,7 @@ function drawForgeView(){const c=$('mgv'),g=c.getContext('2d');g.imageSmoothingE
   g.lineWidth=2;g.strokeStyle='#ffffff';g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Math.cos(A(p))*(rr+5),cy+Math.sin(A(p))*(rr+5));g.stroke();g.lineWidth=1;R(g,cx-2,cy-2,4,4,'#ffffff');}
  MG.steam.forEach(s=>{g.globalAlpha=Math.max(0,s.t*.6);R(g,s.x,s.y,3,3,'#e8eef4');});g.globalAlpha=1;}
 function finishMG(){const rc=MG.rc;
- const q=undB(rc)+mgScore()+.025*(S.smith-1)+S.patience+(patOn()?(skLv('lpat')>=10?.08:.04):0)+(pasOn('focus')?(skLv('focus')>=5?.06:.04):0)+(pasOn('scraft')?(skLv('scraft')>=5?.03:.02):0)+gbB('q')+(rand()-.5)*.08;let r=Math.min(craftRate(q),maxRating());if(rc.fix>=4)r=rc.fix;if(r>=3)setTimeout(()=>annW('craftLeg',{rk:r}),300);
+ const q=undB(rc)+mgScore()+.025*(S.smith-1)+S.patience+(patOn()?(skLv('lpat')>=10?.08:.04):0)+(pasOn('focus')?(skLv('focus')>=5?.06:.04):0)+(pasOn('scraft')?(skLv('scraft')>=5?.03:.02):0)+gbB('q')+secB('q')+(rc.slot==='r'||rc.slot==='n'?secB('acc'):0)+(rand()-.5)*.08;let r=Math.min(craftRate(q),maxRating());if(rc.fix>=4)r=rc.fix;if(r>=3)setTimeout(()=>annW('craftLeg',{rk:r}),300);
  let it=null;
  if(rc.slot==='x'){S.arrows[r]++;S.arrowsMade++;}
  else{it=mkItem(rc.id,r,1);if(rc.cre)creApply(it,rc.cre,r);breathFeat(it);if(pasOn('focus'))skUse('focus');if(pasOn('scraft'))skUse('scraft');if(pasOn('stemp'))skUse('stemp',1);if(P){vfx('forge',P.x,P.y-8);vfx('loot',P.x,P.y,{rarity:r});}
@@ -6864,7 +6866,7 @@ function invTrash(s){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
  cfm(t('delT'),t('delQ',{it:`<b class="rt rt${s.r||0}">${esc(sName(s))}</b>${s.n>1?' ×'+s.n:''}`}),t('delY'),()=>{if(!slotOut(s,true))return;SFX.deny();toast(t('delDone',{it:sName(s)}),'warn');INVX=null;renderInv();save(true);});}
 function invDrop(s){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
  cfm(t('dropT'),t('dropQ',{it:`<b class="rt rt${s.r||0}">${esc(sName(s))}</b>${s.n>1?' ×'+s.n:''}`}),t('dropY'),()=>{const o=slotOut(s,true);if(!o)return;const d={x:P.x+(rand()-.5)*12,y:P.y+10,o,t:gTime+60,lock:gTime+2};dropPut(d);GDROP.push(d);SFX.swing();toast(t('dropDone',{it:sName(s)}));renderInv();save(true);});}
-function invSell(s,all){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}const n=all?s.n:1,g=unitVal(s)*n;
+function invSell(s,all){if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}const n=all?s.n:1,g=Math.round(unitVal(s)*n*(1+secB('sell')));
  const go=()=>{if(!slotOut(s,all))return;S.gold+=g;SFX.coin();numP(-26,'+'+g+'G','#f2c14e',false);toast(t('soldIt',{it:sName(s)+(n>1?' ×'+n:''),g}),'good');renderInv();save(true);};
  if(s.it&&(s.r||0)>=2)cfm(t('sellT'),t('sellQ',{it:`<b class="rt rt${s.r}">${esc(sName(s))}</b>`,g}),t('sellY'),go);else go();}
 function openSell(who){INVX={who};SFX.open();mode='inv';$('inv').hidden=false;$('hint').hidden=true;renderInv();}
@@ -9860,6 +9862,46 @@ Object.assign(SKF,{
  kytrans:()=>{P.kyTU=gTime+15;flash();vfx('levelup',P.x,P.y);},
  kygod:()=>{P.kyGU=gTime+20;flash();shake=.5;SFX.legendary();vfx('levelup',P.x,P.y);}});
 window.__GNL={merc:()=>mercOpts(),kyle:()=>kyleOpts(),kill:m=>nlKill(m),save:()=>kySave(),codes:()=>lkCodes(),codeM:()=>lkCodeM(),tick:dt=>nlTick(dt),N:KYN}; // tests
+/* ---- The production classes of the novel the game lacked (legends/wiki-production-classes.md), as specializations next to
+   the Farmer, Chef, Alchemist, Tailor and Bard: one per player, learned from a trainer (switching costs as before), each
+   with one bonus where the novel puts its work. Per-player state only (online-safe).
+   Fisherman (ch826, Lim Cheolho: the longer the wait, the better the fish), Miner (ch159, Minor's Minerals Master), Merchant,
+   Builder (ch1013, the rankers who mend Reinhardt's wall), Construction Worker (ch278), Architect (ch1121, Ke Ong), Doctor
+   (ch1152, Hera: wounds closed by hand, not by magic), Scholar (ch1443: scholars read books), Painter (ch886-887, Picasso:
+   a painting of Hexetia won the god's favour), Accessory Maker, the Artisan of the later translation (ch857, Elizabeth and
+   her Artisan's Eyes; ch578, Belial's jewels), Cleaner (ch278), Pet Master (ch329, Doohyun) and Monster Discerner (ch244,
+   Haynes: tells what a monster will drop). */
+var SECX={
+ fisher:{by:'fisher',b:{fish:.5},n:['Fisherman','صيّاد سمك'],d:['Rare fish bite 50% more often.','السمك النادر بيشد 50% أكتر.'],
+  t:['Patience, friend. The longer you wait at the water, the better the fish that finds your hook.','الصبر يا صاحبي. كل ما تستنى على الميّه أكتر، كل ما السمكة اللي تشد سنارتك تبقى أحسن.']},
+ miner:{by:'foreman',b:{ore:1},n:['Miner','عامل منجم'],d:['One more ore from every rock.','حتة خام زيادة من كل صخرة.'],
+  t:['A miner reads the rock before he strikes it. You will never leave a vein with less than it owes you.','عامل المنجم بيقرا الصخرة قبل ما يضربها. عمرك ما هتسيب عرق خام وانت واخد أقل من حقك.']},
+ builder:{by:'foreman',b:{rep:.4},n:['Builder','بنّاء'],d:['Repairs cost 40% less.','التصليح بيتكلف 40% أقل.'],
+  t:['The rankers who mended Reinhardt\'s wall started where you stand. What breaks, you mend for less.','الرانكرز اللي صلّحوا سور راينهارت بدأوا من مكانك ده. اللي يتكسر هتصلّحه بأقل.']},
+ cwork:{by:'foreman',b:{labor:.3},n:['Construction Worker','عامل بناء'],d:['Chopping, mining and gathering tire you 30% less.','التقطيع والتعدين والجمع بيتعبوك 30% أقل.'],
+  t:['Strong back, steady hands. Hard work tires you less from today.','ضهر قوي وإيد ثابتة. الشغل التقيل هيتعبك أقل من النهارده.']},
+ architect:{by:'foreman',b:{gb:.5},n:['Architect','مهندس معماري'],d:['Your guild\'s buildings help you 50% more.','مباني نقابتك بتفيدك 50% أكتر.'],
+  t:['A building is more than its stones. You know how to draw the most out of your guild\'s halls.','المبنى أكتر من حجارته. انت عارف تطلّع أقصى حاجة من مباني نقابتك.']},
+ merchant:{by:'merchantRh',b:{buy:.1,sell:.2},n:['Merchant','تاجر'],d:['Shops sell to you 10% cheaper and buy from you 20% dearer.','المحلات بتبيعلك أرخص 10% وبتشتري منك أغلى 20%.'],
+  t:['Buy low, sell high, and never let them see you smile. Welcome to the trade.','اشتري رخيص وبيع غالي، وأوعى حد يشوفك بتضحك. أهلاً بيك في التجارة.']},
+ doctor:{by:'priestT',b:{pot:.25},n:['Doctor','طبيب'],d:['A health potion also closes your wounds: +25% of your most health.','جرعة الصحة كمان بتقفل جروحك: +25% من أقصى صحتك.'],
+  t:['Not every wound is healed by a prayer. Some need a needle and steady hands. Our infirmary will teach you.','مش كل جرح بيخف بالدعا. فيه جروح محتاجة إبرة وإيد ثابتة. المستوصف بتاعنا هيعلمك.']},
+ scholar:{by:'scholarRh',b:{xp:.05},n:['Scholar','باحث'],d:['+5% experience from everything.','+5% خبرة من كل حاجة.'],
+  t:['Scholars read books, and books teach faster than blows. Every lesson will count a little more.','الباحثين بيقروا كتب، والكتب بتعلّم أسرع من الضرب. كل درس هيتحسب أكتر شوية.']},
+ discern:{by:'scholarRh',b:{drop:.3},n:['Monster Discerner','كاشف الوحوش'],d:['Monsters drop their materials 30% more often.','الوحوش بتوقّع خاماتها 30% أكتر.'],
+  t:['Know a beast and you know what it carries. Haynes, the first of us, could tell a drop before the kill.','اعرف الوحش تعرف هو شايل إيه. هاينز، أول واحد فينا، كان بيعرف الدروب قبل ما يقتله.']},
+ painter:{by:'stylist',b:{aff:.5},n:['Painter','رسّام'],d:['People warm to you 50% faster.','الناس بتحبك أسرع 50%.'],
+  t:['Picasso painted a god and the god smiled on him. Paint well and hearts open to you.','بيكاسو رسم إله والإله رضي عنه. ارسم كويس والقلوب هتتفتحلك.']},
+ artisan:{by:'eliz',b:{acc:.06,q:.02},n:['Accessory Maker','صانع إكسسوارات'],d:['Better rings and necklaces at the forge, and a little better everything.','خواتم وعقود أحسن في الحدادة، وكل حاجة أحسن شوية.'],
+  t:['An artisan\'s eyes see the stone inside the stone. Rings and necklaces will come out finer in your hands.','عين الحِرَفي بتشوف الحجر جوه الحجر. الخواتم والعقود هتطلع من إيدك أحلى.']},
+ cleaner:{by:'innR',b:{wear:.3},n:['Cleaner','منظّف'],d:['Your gear wears down 30% slower.','عدتك بتستهلك أبطأ 30%.'],
+  t:['A clean blade is a long-lived blade. Look after your things and they will look after you.','السلاح النضيف عمره طويل. خلي بالك من حاجتك وهي هتخلي بالها منك.']},
+ petm:{by:'hunter',b:{pet:.5},n:['Pet Master','سيد الحيوانات الأليفة'],d:['Your pet\'s bonus is 50% stronger.','ميزة حيوانك الأليف أقوى 50%.'],
+  t:['Beasts follow a master who understands them. Your pet will give you more than it ever has.','الحيوانات بتمشي ورا سيد فاهمها. حيوانك الأليف هيديك أكتر من أي وقت.']}};
+function secB(k){const x=S&&S.sec&&SECX&&SECX[S.sec];return x&&x.b[k]||0;}
+for(const [k,x] of Object.entries(SECX)){SEC[k]=[x.by];STR.en['sec_'+k]=x.n[0];STR.ar['sec_'+k]=x.n[1];STR.en['sec_'+k+'D']=x.d[0];STR.ar['sec_'+k+'D']=x.d[1];STR.en['secT_'+k]=x.t[0];STR.ar['secT_'+k]=x.t[1];
+ const N=NPCT[x.by];if(N&&!(N.opts&&/secOpt\(/.test(String(N.opts)))&&!N.secW){const o=N.opts;N.secW=1;N.opts=()=>[...secOpt(x.by),...(o?o():[])];}}
+window.__GSEC={b:k=>secB(k),opts:who=>secOpt(who).map(o=>o.l),take:(who,i)=>secOpt(who)[i].f(),keys:()=>Object.keys(SECX),by:k=>SECX[k].by,npc:who=>NPCT[who].opts().map(o=>o.l)}; // tests
 function loop(now){const w0=pfNow();requestAnimationFrame(loop);loopAt=performance.now();const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;
  if(FIXT){facc=Math.min(facc+dt,FSTEP*4);while(facc>=FSTEP-1e-9){if(RPL&&RPL.done){facc=0;break;}facc-=FSTEP;if(SIM)simPre();try{update(FSTEP);}catch(e){gameErr(e);}FSTEPS++;if(SIM)simPost();}}else try{update(dt);}catch(e){gameErr(e);}
  const r0=rand,m0=Math.random;if(FIXT){rand=VRAND;if(SIM)Math.random=VRAND;}try{loopRest(dt);}finally{rand=r0;Math.random=m0;}pfFrame(dt,w0);}
@@ -10664,7 +10706,7 @@ function gbStart(gid){gbStop();if(!GDS||!gid||!GDS.watchBank)return;gbFor=gid;
  gbOff=()=>o.forEach(f=>{try{f();}catch(e){}});}
 function gbStop(){if(gbOff)gbOff();gbOff=null;GBK=GBL=GBLOG=null;gbFor=null;}
 function gbLv(b){const g=myG();return g&&g.online&&g.bld?Math.max(0,Math.min(3,g.bld[b]|0)):0;}
-function gbB(k){let n=0;for(const b in GB)if(GB[b].k===k)n+=gbLv(b)*GB[b].v;return n;}
+function gbB(k){let n=0;for(const b in GB)if(GB[b].k===k)n+=gbLv(b)*GB[b].v;return n*(1+secB('gb'));}
 // the buildings into the mirrored guild (what gXPB, gGoldB and crafting read); a level that went up is told
 function guildMirrorB(){const g=myG();if(!g||!g.online||!GBL)return;const was=g.bld||null;g.bld={};
  for(const b in GB){const l=Math.max(0,Math.min(3,GBL[b]|0));g.bld[b]=l;if(was&&l>(was[b]|0))toast(t('gbBuilt',{b:t('gb_'+b),l}),'good');}hudDirty=true;}

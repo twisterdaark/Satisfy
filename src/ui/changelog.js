@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23wikisec', ver: '2.19', d: '2026-10-23',
+      ar: ["13 تخصص إنتاجي جديد من الرواية جنب الفلاح والطباخ والكيميائي والخياط والمنشد، كل واحد بميزة واحدة: صيّاد سمك (عند الصياد)، وعامل منجم وبنّاء وعامل بناء ومهندس معماري (عند الريّس في رايدان)، وتاجر (عند تاجر راينهارت)، وطبيب (عند معبد تيتان)، وباحث وكاشف وحوش (عند باحث راينهارت)، ورسّام (عند الستايليست)، وصانع إكسسوارات (عند إليزابيث)، ومنظّف (عند صاحب الفندق في رايدان)، وسيد الحيوانات الأليفة (عند الصياد اللي في البلد)"],
+      en: ["13 new production specializations from the novel next to the Farmer, Chef, Alchemist, Tailor and Bard, each with one bonus: Fisherman (at the fisher), Miner, Builder, Construction Worker and Architect (the Reidan foreman), Merchant (Reinhardt's merchant), Doctor (Titan's temple), Scholar and Monster Discerner (Reinhardt's scholar), Painter (the stylist), Accessory Maker (Elizabeth), Cleaner (the Reidan innkeeper) and Pet Master (the town hunter)"] },
     { v: '2026-10-23renames', ver: '2.18', d: '2026-10-23',
       ar: ["تلات كلاسات بقت بأساميها في الرواية: الرمّاح بقى فارس الرمح، والباتل ميج بقى السيّاف السحري، والوورلوك بقى الساحر الأسود (نفس السكيلات)"],
       en: ["Three classes take their names from the novel: the Lancer is now the Spear Knight, the Battlemage the Magic Swordsman, and the Warlock the Black Magician (same skills)"] },
