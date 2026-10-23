@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24polls', ver: '2.66', d: '2026-10-24',
+      ar: ["استفتاءات المجتمع: لما يكون فيه سؤال عن حفلة أو حدث جاي، في لوحة أي مدينة (وانت أونلاين) بتلاقي «📊 استفتاء المجتمع» بالإجابات وعدد الأصوات لحد دلوقتي. كل حساب يصوّت مرة واحدة، ومحدش يقدر يعرف مين صوّت لإيه: الأرقام بس اللي بتبان"],
+      en: ["Community polls: when there's a question about a coming festival or event, every town's board (online) shows \"📊 Community poll\" with the answers and the votes so far. Each account votes once, and nobody can see who voted for what: only the counts show"] },
     { v: '2026-10-24mininow', ver: '2.65', d: '2026-10-24',
       ar: ["الخريطة الصغيرة مبقتش بتوقف اللعبة لما توصل لحتة من العالم لسه مترسمتش (كانت بتوقف ربع ثانية، ونص ثانية أول ما تدخل اللعب): الحتة دي بتترسم في الفريمات اللي بعدها وبتظهر وهي بتتملي."],
       en: ["The minimap no longer stops the game when it reaches a part of the world it hasn't painted yet (a quarter of a second, half a second as you start playing): that part is painted over the next frames and fills in as you watch."] },
