@@ -21,13 +21,13 @@ test('the three places are on the map with their monsters and bosses, and the ne
       return { z: [z(85, 212), z(240, 216), z(640, 212), z(700, 222), z(300, 212)], n, sh: ['wyvern', 'drake', 'wqueen'].map((k) => +X.sheet(k).scale.toFixed(2)),
         envoy: G.npcs.some((p) => p.id === 'vcenv') };
     });
-    assert.deepEqual(r.z, ['zStorm', 'zWyvern', 'zVamp', 'zCata', null]);
+    assert.deepEqual(r.z, ['zStorm', 'zWyvern', null, null, null]); // v2.07: the Vampire City went under the sand (vcity.test)
     for (const k of ['felem', 'ielem', 'selem', 'wyvern', 'drake', 'vthrall', 'vknight']) assert.ok(r.n[k] >= 8, k + ' ' + r.n[k]);
     for (const k of ['slord', 'wqueen', 'vlord']) assert.equal(r.n[k], 1, k);
     assert.deepEqual(r.sh, [0.42, 1.69, 0.68]);
     assert.ok(r.envoy);
     // a walk through each place draws without errors
-    for (const [x, y] of [[88, 214], [240, 208], [642, 212], [702, 222]]) { await at(g, x, y); await g.step(20); }
+    for (const [x, y] of [[88, 214], [240, 208], [642, 212], [12, 340]]) { await at(g, x, y); await g.step(20); }
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
@@ -79,8 +79,8 @@ test('vampires heal on what they hit; the Covenant takes you after the envoy\'s 
   const g = await H.openGame();
   try {
     await H.newGame(g, LOOK);
-    await g.eval(() => window.__GVP.force(22)); // owner 2026-10-22: the thralls hide indoors by day, so this runs at night, when they hit 15% harder
-    await at(g, 640, 212);
+    await g.eval(() => window.__GVP.force(22)); // owner 2026-10-22: at night the thralls hit 15% harder
+    await at(g, 30, 343);
     await g.step(40);
     const r = await g.eval(() => {
       const G = window.__G, X = window.__GP3, C = window.__GC2, m = G.mons().find((v) => v.type === 'vthrall'); m.hp = m.max - 5000;

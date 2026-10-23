@@ -33,25 +33,25 @@ test('day and night follow the world clock, the HUD shows the hour, and the stat
   } finally { await g.close(); }
 });
 
-test('vampire monsters hide indoors by day outside the catacombs and come back at nightfall', async () => {
+test('under the ground the vampires stay out by day: the thralls, the knights and the Lord (v2.07: no more surface city)', async () => {
   const g = await H.openGame();
   try {
     await H.newGame(g, LOOK);
     await g.eval(() => window.__GVP.force(12));
-    await at(g, 640, 212);
+    await at(g, 30, 343);
     await g.step(40);
     const day = await g.eval(() => {
-      const G = window.__G, X = window.__GP3, cat = (m) => X.VMC.cat && m.sx / 16 >= X.VMC.cat.x0 && m.sx / 16 <= X.VMC.cat.x1 && m.sy / 16 >= X.VMC.cat.y0 && m.sy / 16 <= X.VMC.cat.y1;
+      const G = window.__G, X = window.__GP3, cat = (m) => !!window.__GVC.at(m.sx / 16, m.sy / 16);
       const th = G.mons().filter((m) => m.type === 'vthrall'), kn = G.mons().filter((m) => m.type === 'vknight' && cat(m));
       return { th: th.length, hid: th.filter((m) => m.dead && m.vhid).length, kn: kn.length, knUp: kn.filter((m) => !m.dead).length, lord: G.mons().filter((m) => m.type === 'vlord' && !m.dead).length };
     });
-    assert.equal(day.hid, day.th, 'every thrall is indoors by day');
-    assert.ok(day.kn >= 8 && day.knUp === day.kn, 'the catacomb knights stay: ' + JSON.stringify(day));
+    assert.ok(day.th >= 16 && day.hid === 0, 'no thrall hides under the ground: ' + JSON.stringify(day));
+    assert.ok(day.kn >= 12 && day.knUp === day.kn, 'the knights stay: ' + JSON.stringify(day));
     assert.equal(day.lord, 1);
     await g.eval(() => window.__GVP.force(22));
     await g.step(60);
     const night = await g.eval(() => window.__G.mons().filter((m) => m.type === 'vthrall' && !m.dead).length);
-    assert.equal(night, day.th, 'they come back at night');
+    assert.equal(night, day.th, 'and at night');
   } finally { await g.close(); }
 });
 
@@ -59,7 +59,7 @@ test('the Crown Prince explains the Covenant with Accept and Decline, gives the 
   const g = await H.openGame();
   try {
     await H.newGame(g, LOOK);
-    await at(g, 627, 211);
+    await at(g, 12, 340);
     const r = await g.eval(() => {
       const G = window.__G, V = window.__GVP, X = window.__GP3, C = window.__GC2, o = {};
       o.npc = G.npcs.some((p) => p.id === 'vprince');
@@ -80,7 +80,7 @@ test('the Crown Prince explains the Covenant with Accept and Decline, gives the 
     assert.equal(r.withCov, 2, 'a Covenant member is offered the Eternal Blood');
     assert.equal(r.race, 'vampire');
     assert.equal(r.st, 'V');
-    // outdoors by day: the sun burns; night, the catacombs and a house are safe
+    // outdoors by day: the sun burns; night, the underground cities and a house are safe
     await at(g, 300, 120);
     const b = await g.eval(() => {
       const G = window.__G, V = window.__GVP, o = {};
@@ -88,7 +88,7 @@ test('the Crown Prince explains the Covenant with Accept and Decline, gives the 
       o.burning = V.burning(); o.atkDay = V.atk(); for (let i = 0; i < 8; i++) V.tick(0.5);
       o.lost = h0 - G.P.hp; o.st = V.st(); o.max = window.__GP3.mh();
       V.force(22); o.nightBurn = V.burning(); o.atkN = V.atk(); o.spdN = V.spd(); V.tick(0.1); o.stN = V.st();
-      V.force(12); G.P.x = 700 * 16 + 8; G.P.y = 222 * 16 + 8; o.cata = V.burning();
+      V.force(12); G.P.x = 30 * 16 + 8; G.P.y = 343 * 16 + 8; o.cata = V.burning();
       G.S.gold = 60000; V.cure(); o.cured = V.race(); o.gold = G.S.gold;
       return o;
     });
@@ -100,7 +100,7 @@ test('the Crown Prince explains the Covenant with Accept and Decline, gives the 
     assert.equal(b.atkN, 1.2);
     assert.equal(b.spdN, 1.1);
     assert.equal(b.stN, 'V');
-    assert.equal(b.cata, false, 'the catacombs are shade');
+    assert.equal(b.cata, false, 'the underground cities are shade');
     assert.equal(b.cured, 'human');
     assert.equal(b.gold, 10000);
   } finally { await g.close(); }

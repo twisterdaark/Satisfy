@@ -69,7 +69,7 @@ test('cross-references point at things that exist',()=>{
     if(q.title)assert.ok(D.skills.titleSkills[q.title],`quest ${q.id} title`);checkCond(q.offer,'quest '+q.id);}
   for(const s of Object.values(SK)){if(s.cls)assert.ok(s.cls==='any'||C[s.cls],`skill ${s.id} class`);if(s.need)assert.ok(['melee','bow','staff','spear'].includes(s.need));checkCond(s.unlock,'skill '+s.id);}
   for(const [t,k] of Object.entries(D.skills.titleSkills))assert.ok(SK[k]&&SK[k].title===t,`title ${t} -> ${k}`);
-  for(const n of Object.values(N)){if(n.interior)assert.ok(n.room&&Number.isInteger(n.room.bi),`npc ${n.id} room`);else assert.ok(n.tx>=0&&n.tx<MW&&n.ty>=0&&n.ty<WMH,`npc ${n.id} inside ${MW}x${WMH}`);
+  for(const n of Object.values(N)){if(n.interior)assert.ok(n.room&&Number.isInteger(n.room.bi),`npc ${n.id} room`);else assert.ok(n.tx>=0&&n.tx<MW&&n.ty>=0&&n.ty<(n.id==='vcenv'||n.id==='vprince'?D.zones.world.MH:WMH),`npc ${n.id} inside ${MW}x${WMH}`); // v2.07: the envoy and the prince wait underground
     if(!n.obj)assert.ok(n.spr,`npc ${n.id} sprite`);assert.ok(n.dialog,`npc ${n.id} dialog`);}
   for(const z of [...D.zones.towns,...D.zones.regions])assert.ok(z.x0>=0&&z.x0<z.x1&&z.x1<MW&&z.y0>=0&&z.y0<z.y1&&z.y1<WMH,`zone ${z.id} inside map`);
   D.zones.regions.forEach((r,i)=>assert.strictEqual(r.order,i,'regions keep first-match order'));

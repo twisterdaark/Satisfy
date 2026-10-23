@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23vcmove', ver: '2.07', d: '2026-10-23',
+      ar: ["مدينة مصاصي الدماء اللي كانت فوق الأرض اتشالت: مصاصين الدماء كلهم بقوا عايشين تحت الرملة في المدن المرقّمة",
+        "مبعوث العهد وولي عهد مصاصي الدماء مستنيينك في الكهف أول ما تنزل من بيت النمل للمدينة 15، ومهمات العهد زي ما هي",
+        "العبيد في المدن 15 و14، والفرسان في 13 و12، وسيد مصاصي الدماء نايم جنب السور اللي تحت في المدينة 13"],
+      en: ["The Vampire City on the surface is gone: all the vampires now live under the sand in the numbered cities",
+        "The Covenant Envoy and the Vampire Crown Prince wait in the cave at the bottom of the ant hill, in the 15th city, with the Covenant's quests as before",
+        "The thralls are in cities 15 and 14, the knights in 13 and 12, and the Vampire Lord sleeps by the southern wall of the 13th city"] },
     { v: '2026-10-23vcity', ver: '2.06', d: '2026-10-23',
       ar: ["مدن مصاصي الدماء تحت الأرض من الرواية: بيت نمل في الرملة جنوب ريدان بينزّلك المدينة 15 (لفل 250+)، ومنها لتحت لحد المدينة 7",
         "جوه المدينة الاتصال بالعالم بيتقفل: طريق الطلوع وطريق النزول للمدينة اللي بعدها مقفولين لحد ما سيد المدينة يموت، ولفافة الرجوع مش بتشتغل تحت",
