@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23earring', ver: '2.45', d: '2026-10-23',
+      ar: ["حلق بستاتس: خانة جديدة للحلق في شاشة الإكويبمنت (U)، وكل حلق ليه تقييم وستاتس زي الخواتم والعقود.",
+          "حلق حديد (مانا + HP%) بيتباع عند الأرمورر في ونستون وسلاحجي باتريان، وبتصنعه على السندان بعد مهمة خان. حلق ميثريل (مانا + ضرر) من مستوى حدادة 5.",
+          "إليزابيث بتعمل حلق ياقوت أحمر (ضرر + HP%) وحلق ياقوت أزرق (مانا + سرعة ضرب).",
+          "حلق الحديد والميثريل بيوقعوا من الوحوش والبوسات زي باقي الإكويبمنت.",
+          "الحلق اللي لابسه بيبان على شخصيتك واللاعيبة التانيين بيشوفوه، وتقدر تخفيه بالعين اللي جنب الخانة والستاتس تفضل. حلق الستايلست لسه زي ما هو، للشكل بس."],
+      en: ["Earrings with stats: a new earring slot on the equipment window (U), and every pair has a rating and stats like rings and necklaces.",
+          "Iron Earrings (mana + HP%) are sold by the Winston armorer and the Patrian Armorer, and you can forge them at the anvil after Khan's quest. Mithril Earrings (mana + damage) come at smithing level 5.",
+          "Elizabeth makes Ruby Earrings (damage + HP%) and Sapphire Earrings (mana + attack speed).",
+          "Iron and Mithril Earrings drop from monsters and bosses like other gear.",
+          "The earrings you wear show on your character and other players see them; the eye beside the slot hides them while the stats stay. The stylist's earrings are still just for looks."] },
     { v: '2026-10-23hairgloss', ver: '2.44', d: '2026-10-23',
       ar: ["لمعة الشعر فوق الراس بقت درجة أفتح من لون الشعر بدل أبيض، فعلى الشعر الأشقر والفاتح مبقتش باينة كأنها صلعة، وأطراف الشعر الفاتح بتغمق سنة بدل ما تصفر."],
       en: ["The shine on top of the hair is now a lighter shade of the hair instead of near white, so it no longer looks like a bald patch on blonde or light hair, and light hair's tips go a touch darker instead of yellow."] },
