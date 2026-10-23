@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23toasts', ver: '2.26', d: '2026-10-23',
+      ar: ["الإشعارات بتقعد على قد طول الكلام (من 4 لـ12 ثانية)، والمهمة منها (الأخضر والتحذيرات) 8 ثواني على الأقل، والإعلانات 10 ثواني.",
+          "لو الماوس واقف على إشعار مبيختفيش، ولو دوست عليه بيقفل. ولما تيجي رسايل كتير مع بعض، العادية هي اللي بتمشي الأول مش المهمة.",
+          "فيه زرار 📜 جنب الإشعارات بيفتح سجل كل الرسايل اللي فاتت (أو L).",
+          "كتب الشنطة التسعة بقى ليها صور كتب بدل السيف: مذكرات مادرا، وكتب السيافة، وكتب المهارات، وكتب تغيير الكلاس. وغمد مادرا وقماش كروجر اترسموا من جديد."],
+      en: ["Notices stay as long as their text needs (4 to 12 s), important ones (green and warnings) at least 8 s, announcements 10 s.",
+          "A notice under the pointer stays; a click closes it. When many come at once, plain ones leave first, never the important ones.",
+          "A 📜 button beside the notices opens the log of every message so far (or L).",
+          "The nine bag books now show books instead of a sword: Madra's diary, the swordsmanship books, the skill books and the class change books. Madra's sheath and Kruger's cloth are redrawn."] },
     { v: '2026-10-23mdbooks', ver: '2.25', d: '2026-10-23',
       ar: ["مذكرات مادرا بقت بتتقري فصل فصل وبتفتكر وصلت لفين: في الفصل 2 كتاب 100,000 Army Swordsmanship، وفي الفصل 7 كتاب 200,000 Army Swordsmanship، والمذكرات بتتقفل لحد ما تتعلم كل كتاب.",
           "الكتابين إيتمز تتباع وتتدّي، ومحتاجين مادرا يكون عارفك (غلبته في الجزيرة 66)، والتاني لفل 399. بيعلّموك Massacre Sword وBlockade Sword وCrushing Sword، نسخ مادرا الناقصة زي الرواية.",

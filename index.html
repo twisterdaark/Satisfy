@@ -113,6 +113,7 @@ body.photo #ui>*:not(#photoBar){visibility:hidden!important}body.photo #photoBar
 .tgrid .slotb.on{outline:2px solid #ffe7a8;box-shadow:0 0 calc(var(--u)*.8) rgba(255,231,168,.6)}
 .slotb i{position:absolute;left:calc(var(--u)*.2);top:0;font-style:normal;font-family:"Press Start 2P",monospace;font-size:calc(var(--u)*.7);color:#ffe7a8;text-shadow:0 0 2px #000,0 0 2px #000}.itabs button.on,.qflt button.on{background:rgba(120,190,255,.35);border-color:#9fd8ff}.qflt{display:flex;gap:calc(var(--u)*.4);flex-wrap:wrap;margin-bottom:calc(var(--u)*.4)}.qflt button{padding:calc(var(--u)*.15) calc(var(--u)*.7);font-size:calc(var(--u)*1.15)}
 #toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*3.8);z-index:55;pointer-events:none;display:grid;gap:calc(var(--u)*.4);justify-items:center;width:80%}
+#toasts .toast{pointer-events:auto;cursor:pointer}#toastLog{position:absolute;top:calc(var(--u)*3.8);inset-inline-end:calc(var(--u)*7);z-index:56;font-size:calc(var(--u)*1.1);padding:calc(var(--u)*.15) calc(var(--u)*.5);pointer-events:auto}
 .toast{background:rgba(8,14,30,.85);border:1px solid rgba(127,180,255,.5);padding:calc(var(--u)*.3) calc(var(--u)*1.1);border-radius:calc(var(--u)*.4);font-weight:700;animation:tin .25s ease-out}
 .toast.warn{border-color:#ff7a6a;color:#ffd0c8}.toast.good{border-color:var(--gold);color:#ffe7a8}
 @keyframes tin{from{opacity:0;transform:translateY(-6px)}}
@@ -513,7 +514,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
       <button id="tQuit" hidden>✕</button>
       <div id="skillbar" class="sys"></div><div id="xbar0" class="sys xbar" hidden></div><div id="xbar1" class="sys xbar" hidden></div><div id="xbar2" class="sys xbar" hidden></div><div id="xbar3" class="sys xbar" hidden></div>
       <div id="hint" hidden></div>
-      <div id="toasts"></div>
+      <div id="toasts"></div><button id="toastLog" hidden></button>
       <div id="photoBar" hidden><button data-act="photoSave" data-i18n="photoSave"></button><button data-act="photoExit" data-i18n="photoExit"></button></div>
       <div id="loot"></div>
       <div id="evbar" class="sys" hidden></div><div id="tlbar" class="sys" hidden></div>
@@ -7069,8 +7070,23 @@ function pSpr(){if(!S||!S.items)return 'me';const sg=!!(S.rsh&&S.rsh.g&&S.rsh.w)
 
 /* ---------------- ui helpers ---------------- */
 const LOG=[];function logMsg(m){const d=new Date();LOG.push({tm:d.toTimeString().slice(0,5),m});if(LOG.length>60)LOG.shift();}
-function toast(msg,cls){const box0=$('toasts'),dup=[...box0.children].find(e=>!e.classList.contains('out')&&e.textContent===msg);if(dup){clearTimeout(dup._t);dup._t=setTimeout(()=>{dup.classList.add('out');setTimeout(()=>dup.remove(),360);},2600);return;}
- logMsg(msg);const el=document.createElement('div');el.className='toast'+(cls?' '+cls:'');el.textContent=msg;const box=$('toasts');box.appendChild(el);const live=[...box.children].filter(e=>!e.classList.contains('out'));if(live.length>(document.body.classList.contains('touch')?2:4))live[0].classList.add('out');el._t=setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),360);},document.body.classList.contains('touch')?1700:2600);}
+// owner 2026-10-23 ("let the notifications stay longer, especially the important ones, I can't keep up"): a notice stays
+// 3 s plus a second for every 12 letters (4-12 s, the same on a phone); a green or warning one at least 8 s. A notice under
+// the pointer stays until the pointer leaves, a click closes it. When too many come at once the oldest plain one goes
+// first, never an important one for a plain one. The scroll beside them opens the log of everything said (L).
+const TSTIMP=c=>c==='good'||c==='warn'||c==='leg'||c==='rare';
+const tstDur=(m,c)=>{const d=clamp(3+String(m).length/12,4,12);return (TSTIMP(c)?Math.max(8,d):d)*1000;};
+function tstOut(el){if(el.classList.contains('out'))return;clearTimeout(el._t);el.classList.add('out');setTimeout(()=>{el.remove();tstLogB();},360);}
+function tstArm(el,ms){clearTimeout(el._t);el._ms=ms;el._t=setTimeout(()=>{if(el._hov)return;tstOut(el);},ms);}
+function tstLogB(){const b=$('toastLog');if(b)b.dataset.tip=t('tstLogT');if(b)b.hidden=![...$('toasts').children].some(e=>e.classList.contains('toast')&&!e.classList.contains('out'));}
+function toast(msg,cls){const box=$('toasts'),dup=[...box.children].find(e=>e.classList.contains('toast')&&!e.classList.contains('out')&&e.textContent===msg);if(dup){tstArm(dup,tstDur(msg,cls));return;}
+ logMsg(msg);const el=document.createElement('div');el.className='toast'+(cls?' '+cls:'');el.textContent=msg;el._imp=TSTIMP(cls);
+ el.addEventListener('mouseenter',()=>{el._hov=1;clearTimeout(el._t);});el.addEventListener('mouseleave',()=>{el._hov=0;tstArm(el,2500);});el.addEventListener('click',e=>{e.stopPropagation();tstOut(el);});
+ box.appendChild(el);const live=[...box.children].filter(e=>e.classList.contains('toast')&&!e.classList.contains('out')),mx=document.body.classList.contains('touch')?3:5;
+ if(live.length>mx){const v=live.find(e=>!e._imp&&e!==el&&!e._hov)||live.find(e=>e!==el&&!e._hov);if(v)tstOut(v);}
+ tstArm(el,tstDur(msg,cls));tstLogB();}
+window.__GTOAST=(m,c)=>toast(m,c); // tests
+$('toastLog').addEventListener('click',e=>{e.stopPropagation();if(mode==='play')openLog();});
 function openLog(){SFX.open();mode='log';$('logW').hidden=false;$('hint').hidden=true;$('logL').innerHTML=LOG.length?[...LOG].reverse().map(l=>`<div><small>${l.tm}</small>${esc(l.m)}</div>`).join(''):`<div>${t('logEmpty')}</div>`;}
 let qdId=null,qdArm=false;
 function openQD(id){const q=QD[id];if(!q)return;qdId=id;qdArm=false;SFX.open();mode='qd';$('qdW').hidden=false;$('hint').hidden=true;$('qdT').textContent=qName(id);const r=qReady(id),off=STR.en[id+'_o']?t(id+'_o'):'';
@@ -7090,7 +7106,7 @@ function toggleQuest(){$('quest').classList.toggle('min');SFX.click();}
 // your own moments (a broken item, a tower floor, an arena round, an advancement) say "Notice". A world notice also stays
 // in the chat as a line of its own, so whoever was away from the screen or in a menu can still read it.
 let annT=0;function announce(msg,own){logMsg(msg);const W=$('announce');W.querySelector('.head').textContent=t(own?'selfNotice':'worldNotice');W.classList.toggle('own',!!own);
- $('anntext').textContent=msg;W.hidden=false;annT=document.body.classList.contains('touch')?3:5;if(!own&&CHAT&&CHAT.note&&S&&!S.__demo)CHAT.note(msg);}
+ $('anntext').textContent=msg;W.hidden=false;annT=Math.max(10,clamp(3+String(msg).length/12,4,14));if(!own&&CHAT&&CHAT.note&&S&&!S.__demo)CHAT.note(msg);}
 // SAT-ONLINE-026 (owner feedback 12): announcements about you, and the story notices (annGrid), also reach everyone online
 // through the news feed, named by your account ID. A story notice is shown once per character, whoever's clock fires it first.
 const NEWS=['twPioN','bhRec','bhFinal','bhPureN','natWin','bntDone','evWin','evCap','castNews','terrNews','drDown','brDown','dtFirstN','epClrN','arnChamp','twrRec','noeDrop','evBossDown','annGuard','annSaint','annBraham','annPagma','annDslayer','craftLeg','annLeg','annGrid','sdragDn','stigerDn','sbirdDn','stortDn','blDown'];
@@ -8927,7 +8943,7 @@ const say=(who,...lines)=>new Promise(r=>dialog(who,lines,r));
 const walk=(e,x,y,sp=55)=>new Promise(r=>movers.push({e,x,y,sp,r}));
 const choose=(who,key,labels)=>new Promise(r=>dialog(who,[key],null,labels.map((l,i)=>({l,f:()=>r(i)}))));
 function sysMsg(k,auto=1700){return new Promise(r=>{const el=$('sysm');$('sysmT').textContent=t(k);logMsg(t(k).split('\n')[0]);el.hidden=false;el.style.animation='none';void el.offsetWidth;el.style.animation='';tone(880,.12,'triangle',.06);tone(1320,.15,'triangle',.04,0,.06);
- const o={};o.done=()=>{if(SM!==o)return;SM=null;clearTimeout(o.tm);el.hidden=true;r();};SM=o;if(auto)o.tm=setTimeout(o.done,auto);});}
+ const o={};o.done=()=>{if(SM!==o)return;SM=null;clearTimeout(o.tm);el.hidden=true;r();};SM=o;if(auto)o.tm=setTimeout(o.done,Math.max(auto,4000));});}   // at least 4 s (owner 2026-10-23)
 function card(keys,skippable){return new Promise(r=>{const el=$('card');$('cardT').innerHTML=keys.map((k,i)=>`<p style="animation-delay:${i*1.2}s">${esc(Array.isArray(k)?t(k[0],k[1]):t(k))}</p>`).join('');$('cardSkip').hidden=!skippable;el.hidden=false;mode='cut';
  const fn=v=>{if(CARD!==fn)return;CARD=null;SFX.click();fadeTo(()=>{el.hidden=true;r(v);});};CARD=fn;setTimeout(()=>el.querySelector('button').focus(),60);});}
 /* ---------------- guardian raid with the hunting party ---------------- */
@@ -10079,7 +10095,7 @@ Object.assign(STR.en,{"cl_madra": "Undefeated King's Descendant", "mdsheath": "U
 LGB.madra='warrior';LGN.madra='warrior';
 if(!LEGCL.includes('madra'))LEGCL.push('madra');LEGK.madra='madra';CROOT.madra='warrior';if(!P2NOT.includes('madra'))P2NOT.push('madra');
 Object.assign(SKD,{mdarmy:{cls:'madra',lv:1,mp:40,cd:30,col:'#c83a2a'},mdarmy2:{cls:'madra',lv:200,mp:60,cd:30,col:'#ff5a3a'},mdsense:{cls:'madra',lv:1,pas:1,col:'#ffe08a'}});
-SKSND.mdarmy=SKSND.mdarmy2='power';Object.assign(STR.ar,{cdLeft:'فاضل {s}'});Object.assign(STR.en,{cdLeft:'{s} left'});
+SKSND.mdarmy=SKSND.mdarmy2='power';{const b=document.getElementById('toastLog');if(b)b.textContent='📜';}Object.assign(STR.ar,{tstLogT:'كل الرسايل اللي فاتت (L)'});Object.assign(STR.en,{tstLogT:'Every message so far (L)'});Object.assign(STR.ar,{cdLeft:'فاضل {s}'});Object.assign(STR.en,{cdLeft:'{s} left'});
 const MDN=100,MDD=22; // Red Knights to destroy, days before the First Knight arrives
 const mdCand=()=>!!S&&!!S.mdq&&S.mdq.st===1;
 function mdUse(){if(!(S.mats.mdsheath>0))return;if(S.cls==='madra')return toast(t('rbAlready'),'warn');const own=lgOwn('madra');if(own)return toast(t('lgTaken',{n:own.n}),'warn');
