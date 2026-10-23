@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23bossdrop', ver: '2.01', d: '2026-10-23',
+      ar: ["كل زعيم بقى بينزّل دروب عادي كل مرة تقتله: خاماته كذا حتة مرة واحدة، وفرصة أكبر لقطعة معدات",
+        "وكل زعيم بيسيب صندوق مكانه مرة في اليوم، وحاجته أحسن بكتير: قطعة مضمونة بتقييم أعلى، وكل خاماته كاملة، وأحجار تقوية ونادرة، وأحيانا سلاحه الأسطوري",
+        "موسوعة الوحوش بتفرق بين الدروب العادي وصندوق الزعيم اليومي"],
+      en: ["Every boss now drops normal loot every time you kill it: several of its materials at once, and a better chance of a piece of gear",
+        "And every boss leaves a chest where it fell once a day, with much better loot: a guaranteed item of a higher rating, all its materials in full, enhancement and rare stones, and sometimes its legendary item",
+        "The monster book shows the normal drops and the daily boss chest apart"] },
     { v: '2026-10-23race', ver: '2.00', d: '2026-10-23',
       ar: ["يوم وليل في العالم على ساعة السيرفر، نفس السما لكل اللاعبين: اليوم 40 دقيقة، الغروب من 6، الليل من 8 لـ 4 الفجر، والشروق لحد 6. الساعة ظاهرة جنب الدهب",
         "العروق: كل اللاعبين بيبدأوا بشر، والعرق ظاهر في نافذة الحالة وعليه شرح لما تقف عليه",
