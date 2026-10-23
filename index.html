@@ -869,6 +869,8 @@ function voxPlay(m,b,k,soft){if(!P)return;const d=Math.hypot(m.x-P.x,m.y-P.y);if
  SFXV=Math.max(.06,(1-d/SFXR)*(b.boss?1:.8)*(soft?.5:1));try{sfxOn('amb',()=>f(p));}finally{SFXV=1;}}
 // watches each monster for the moments it should be heard (state from the last frame in m.vx)
 function monVox(m,b,dt){if(ambV<=0||!P||mode==='title'||m.hidN)return;const v=m.vx,e=m.eng>0;
+ // out of earshot: only keep up with its state, so nothing plays late when you come near
+ if(v&&Math.abs(m.x-P.x)>SFXR+60||v&&Math.abs(m.y-P.y)>SFXR+60){v.d=m.dead;v.hp=m.hp;v.e=e;v.st=m.st;v.tl=m.tele>0;v.cd=m.cd;return;}
  if(!v){m.vx={st:m.st,hp:m.hp,e,d:m.dead,tl:m.tele>0,cd:m.cd,h:-9,a:-9,w:-9,i:3+monHash(m)*12};return;}
  const now=performance.now()/1000;
  if(m.dead!==v.d){v.d=m.dead;if(m.dead&&!m.vhid)voxPlay(m,b,'d');}
@@ -1695,9 +1697,12 @@ const TENV={at,snowAt,WMH,TS};
 function chunkLayer(base){const CS=512,CX=Math.ceil(MW*TS/CS),Y0=-NR*TS,CY=Math.ceil((MH+NR)*TS/CS),LIM=36,ops=new Map(),live=new Map(),pool=[];let fs='#000',tick=0;
  const each=(x,y,w,h,f)=>{const i0=Math.max(0,Math.floor(x/CS)),i1=Math.min(CX-1,Math.floor((x+w-1)/CS)),j0=Math.max(0,Math.floor((y-Y0)/CS)),j1=Math.min(CY-1,Math.floor((y+h-1-Y0)/CS));for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++)f(j*CX+i,i,j);};
  const run=(e,o)=>{const g=e.g;if(o[0]===0){g.fillStyle=o[5];g.fillRect(o[1],o[2],o[3],o[4]);}else if(o[0]===1)g.drawImage(o[3],o[1],o[2]);else g.putImageData(o[3],o[1]-e.ox,o[2]-e.oy);};
- const rec=(o,w,h)=>{if(!(w>0&&h>0))return;each(o[1],o[2],w,h,k=>{let a=ops.get(k);if(!a)ops.set(k,a=[]);a.push(o);const e=live.get(k);if(e)run(e,o);});};
+ // a chunk's ops in order. A putImageData over the very rectangle of an earlier one replaces it (it overwrites every pixel),
+ // so painting the same tiles again and again (the archipelago's bridges, each tree uprooted) doesn't grow the list each
+ // time a chunk is made again (owner 2026-10-23: the game got slower the longer it ran)
+ let oid=0;const rec=(o,w,h)=>{if(!(w>0&&h>0))return;const ok=o[0]===2?'p'+o[1]+','+o[2]+','+w+','+h:++oid;each(o[1],o[2],w,h,k=>{let a=ops.get(k);if(!a)ops.set(k,a=new Map());a.delete(ok);a.set(ok,o);const e=live.get(k);if(e)run(e,o);});};
  function make(k,i,j){const c=pool.pop()||mk(CS,CS,()=>{}),g=c.getContext('2d'),ox=i*CS,oy=Y0+j*CS,e={c,g,ox,oy,t:tick};
-  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,CS,CS);base(g,ox,oy,CS);g.setTransform(1,0,0,1,-ox,-oy);for(const o of ops.get(k)||[])run(e,o);live.set(k,e);
+  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,CS,CS);base(g,ox,oy,CS);g.setTransform(1,0,0,1,-ox,-oy);{const a=ops.get(k);if(a)for(const o of a.values())run(e,o);}live.set(k,e);
   while(live.size>LIM){let ok=null,ot=Infinity;for(const [kk,v] of live)if(v.t<ot){ot=v.t;ok=kk;}if(ok==null||live.get(ok).t>=tick)break;pool.push(live.get(ok).c);live.delete(ok);}return e;}
  const get=(i,j)=>{const k=j*CX+i,e=live.get(k)||make(k,i,j);e.t=tick;return e;};
  return {get fillStyle(){return fs;},set fillStyle(v){fs=v;},
@@ -1705,7 +1710,7 @@ function chunkLayer(base){const CS=512,CX=Math.ceil(MW*TS/CS),Y0=-NR*TS,CY=Math.
   // copy the world rectangle (sx,sy,sw,sh) to (dx,dy) on ctx; then warm one missing chunk next to the view
   blit(ctx,sx,sy,sw,sh,dx,dy){tick++;each(sx,sy,sw,sh,(k,i,j)=>{const e=get(i,j),x0=Math.max(sx,e.ox),y0=Math.max(sy,e.oy),x1=Math.min(sx+sw,e.ox+CS),y1=Math.min(sy+sh,e.oy+CS);if(x1>x0&&y1>y0)ctx.drawImage(e.c,x0-e.ox,y0-e.oy,x1-x0,y1-y0,dx+x0-sx,dy+y0-sy,x1-x0,y1-y0);});
    let warm=false;each(sx-CS/2,sy-CS/2,sw+CS,sh+CS,(k,i,j)=>{if(!warm&&!live.has(k)&&live.size<LIM){warm=true;get(i,j).t=tick-1;}});},
-  stats:()=>({live:live.size,pool:pool.length,ops:[...ops.values()].reduce((a,v)=>a+v.length,0),lim:LIM}),
+  stats:()=>({live:live.size,pool:pool.length,ops:[...ops.values()].reduce((a,v)=>a+v.size,0),lim:LIM}),
   // tests (SAT-ONLINE-135): is the chunk under world pixel (x,y) drawn now; the hash of its pixels (drawing it if it isn't)
   has(x,y){let r=false;each(x,y,1,1,k=>{r=live.has(k);});return r;},
   hash(x,y){let h=0x811c9dc5;each(x,y,1,1,(k,i,j)=>{const e=get(i,j),d=e.g.getImageData(0,0,CS,CS).data;for(let q=0;q<d.length;q+=4)h=Math.imul(h^(d[q]|d[q+1]<<8|d[q+2]<<16|d[q+3]<<24),16777619)>>>0;});return h;}};}
@@ -1718,10 +1723,12 @@ function blob(g,cx,cy,rx,ry,col){g.fillStyle=col;for(let yy=-ry;yy<=ry;yy++){con
 const VT=[];
 
 const TRK=SA.tiles.trunkCanvas(),CNV=[0,1,2,3,4,5].map(i=>SA.tiles.canopyCanvas(i*977+5,false)),CNS=[0,1,2].map(i=>SA.tiles.canopyCanvas(i*977+5,true));
-const VTM=new Map();
-function vtree(x,y,r){const tr={tx:x,ty:y,x:x*TS+8,y:y*TS+12,k:x+','+y,tr:TRK,cn:snowAt(x,y)?CNS[r()*3|0]:CNV[r()*6|0]};VTM.set(tr.k,tr);return tr;}
-function vtView(f){const x0=Math.floor(camX/TS)-1,y0=Math.floor(camY/TS)-1,x1=x0+Math.ceil(VW/TS)+2,y1=y0+Math.ceil(VH/TS)+3;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const tr=VTM.get(x+','+y);if(tr)f(tr);}}
-function vtNear(px,py,rad){const o=[],cx=Math.floor(px/TS),cy=Math.floor(py/TS),n=Math.ceil(rad/TS)+1;for(let y=cy-n;y<=cy+n;y++)for(let x=cx-n;x<=cx+n;x++){const tr=VTM.get(x+','+y);if(tr)o.push(tr);}return o;}
+// VTM: the trees by their 'x,y' key; VTN: the same trees by a number, so the view's two passes a frame look up ~700 tiles
+// without making ~700 strings (owner 2026-10-23: frame drops)
+const VTM=new Map(),VTN=new Map(),vtK=(x,y)=>(y+8192)*16384+x;
+function vtree(x,y,r){const tr={tx:x,ty:y,x:x*TS+8,y:y*TS+12,k:x+','+y,tr:TRK,cn:snowAt(x,y)?CNS[r()*3|0]:CNV[r()*6|0]};VTM.set(tr.k,tr);VTN.set(vtK(x,y),tr);return tr;}
+function vtView(f){const x0=Math.floor(camX/TS)-1,y0=Math.floor(camY/TS)-1,x1=x0+Math.ceil(VW/TS)+2,y1=y0+Math.ceil(VH/TS)+3;for(let y=y0;y<=y1;y++){const b=(y+8192)*16384;for(let x=x0;x<=x1;x++){const tr=VTN.get(b+x);if(tr)f(tr);}}}
+function vtNear(px,py,rad){const o=[],cx=Math.floor(px/TS),cy=Math.floor(py/TS),n=Math.ceil(rad/TS)+1;for(let y=cy-n;y<=cy+n;y++)for(let x=cx-n;x<=cx+n;x++){const tr=VTN.get(vtK(x,y));if(tr)o.push(tr);}return o;}
 
 // Reidan (SAT-REIDAN-001): a walled mining town at the far east end of the third belt, past Patrian. Houses are closed;
 // the smith and mine foreman work in the open; the merchant and the inn keeper work indoors. The mine shaft (north-east) leads to the mine floors.
@@ -2127,7 +2134,14 @@ function wbRetry(){const p=performance.now();if(p-wbReT<3000)return;wbReT=p;cons
  for(const type in WBRE){const at=WBRE[type],v=WBS[type];if(at<=now+5000){delete WBRE[type];continue;}if(v&&typeof v.at==='number'&&v.at>now)continue;
   const D=FB.m.database,u={};u['world/satisfy/wb/'+type]={at,by:NET.uid,t:D.serverTimestamp()};delete WBRE[type];D.update(D.ref(FB.db),u).catch(()=>{WBRE[type]=at;});}}
 window.__GB2={get data(){return WBS},apply:wbApply,put:wbPut,kill:m=>killMon(m),fb:()=>FB}; // tests
-function updateDragon(dt){const m=mons.find(m=>m.type==='trauka');if(!m||m.dead||mode==='dead')return;
+window.__GPERF={ // tests (SAT-ONLINE-160)
+ counts:()=>({mons:mons.length,txc:TXC.size,btl:BTL.size,ops:gg.stats().ops+og.stats().ops,saves:SAVEN}),
+ put:(x,y)=>gg.putImageData(new ImageData(16,16),x,y),monsOf:ty=>monsOf(ty),item:u=>itemByUid(u),
+ // a text drawn straight and the same text stamped from its sprite: how many pixels differ, and how many are inked
+ txCmp:(s,f,c)=>{const lw=3,W=240,H=70,a=mk(W,H,()=>{}),b=mk(W,H,()=>{}),ga=a.getContext('2d'),gb=b.getContext('2d');ga.textAlign='center';ga.lineJoin='round';ga.font=f;ga.lineWidth=lw;ga.strokeStyle='rgba(0,0,0,.9)';ga.strokeText(s,120,44);ga.fillStyle=c;ga.fillText(s,120,44);
+  const e=txSpr(f,s,c,lw);gb.drawImage(e.cv,120-e.ox,44-e.oy);const A=ga.getImageData(0,0,W,H).data,B=gb.getImageData(0,0,W,H).data;let n=0,ink=0;for(let i=0;i<A.length;i+=4){if(A[i+3])ink++;if(A[i]!==B[i]||A[i+1]!==B[i+1]||A[i+2]!==B[i+2]||A[i+3]!==B[i+3])n++;}return {n,ink};},
+ tx:(s,f,c)=>txSpr(f,s,c,3)&&TXC.size};
+function updateDragon(dt){const m=monsOf('trauka')[0];if(!m||m.dead||mode==='dead')return;
  // SAT-ONLINE-045: online the host times and aims the breath (at the player the dragon is after) and sends it as an
  // action; a follower only plays the breath it was sent, and each screen burns its own player if it stands in the cone
  const fol=!!(m.led&&MOBN&&MOBN.host&&MOBN.host!==NET.uid);
@@ -2603,7 +2617,7 @@ function twEcho(round=0){if(round>=3){const w=wisS();if(!w.done.jessica){w.done.
 function twEchoAsk(seq,i,round){if(i>=seq.length){toast(t('twEchoR',{n:round+1}),'good');SFX.notice();twEcho(round+1);return;}
  dialog('jessica',[t('twEchoQ',{n:i+1})],null,TWRUNE.map((r,j)=>({l:t(r),f:()=>{if(j===seq[i])twEchoAsk(seq,i+1,round);else dialog('jessica',[t('twEchoNo')],twAfter);}})));}
 // the round table's master: Tower's Mission, the dragon radar and the 10th Seat
-function twRadar(){const m=mons.find(m=>m.type==='trauka');if(!m)return t('twRadar0');if(!m.dead)return t('twRadar1',{z:t(zoneAt(m.x,m.y)),h:Math.ceil(m.hp/m.max*100)});return t('twRadar2',{n:Math.max(1,Math.ceil((m.rt||0)/60))});}
+function twRadar(){const m=monsOf('trauka')[0];if(!m)return t('twRadar0');if(!m.dead)return t('twRadar1',{z:t(zoneAt(m.x,m.y)),h:Math.ceil(m.hp/m.max*100)});return t('twRadar2',{n:Math.max(1,Math.ceil((m.rt||0)/60))});}
 function twOpts(id){const w=wisS(),o=[];if(!TOW)return o;
  if(id==='hayate'){if(w.mis===1&&TOW.run)o.push({l:t('twMisDone'),f:()=>{w.mis=2;w.basic=1;TOW.run=0;addMat('dscale',3);const g=100000;S.gold+=g;coinFx(P,g);
    dialog('hayate',[t('twHa1'),bhSys('twMisOk'),bhSys('twBox'),t('twHa2')],()=>{twClean();twStairs(TOW.B);});save(true);}});
@@ -3329,7 +3343,7 @@ Object.assign(STR.en,{"godN_rebecca": "Rebecca, the goddess of light", "godN_hex
    same moment. Rewards follow "different compensation based on their performance" (ch 1053): each player counts the
    damage they dealt, and 5% of his health earns the title 'Savior of the World', more pays more. */
 const BRK={inv:[.75,.5,.25],dist:[.6,.35],up:.3,invT:8,sealT:12,reach:170,hell:240};
-const brOf=()=>mons.find(m=>m.type==='berith');
+const brOf=()=>monsOf('berith')[0];
 const brImm=m=>m.type==='berith'&&(m.brInv||0)>gTime;
 const brSeal=()=>!!P&&(P.brSeal||0)>gTime;
 function brHell(){if(!P)return false;if(blNear())return true;const m=brOf();return !!(m&&!m.dead&&m.eng>0&&Math.hypot(m.x-P.x,m.y-P.y)<BRK.hell);}
@@ -3682,7 +3696,11 @@ Object.assign(STR.en,{"set_rp": "Red Phoenix Set", "set_tg": "White Tiger Set", 
    host times and aims her magic ('f' action), a meteor falls where each screen's own player stands, each screen takes
    only its own player's hits, and every player is paid by the damage they dealt, as at Berith's. */
 const BLL={x:480,y:-160,aura:200,burn:90,mir:[.85,.6,.35],mirT:6,succ:[.75,.5,.25],form:.25,met:1.6,fire:.9,metR:46};
-const blOf=()=>mons.find(m=>m.type==='belial');
+// monsOf: the monsters of one type, in the order of mons. The bosses' ticks looked them up with mons.find over ~1,400
+// monsters several times a frame (owner 2026-10-23: frame drops); the index is made again each frame or when mons changes
+var MIX=null,MIX0=[];
+function monsOf(ty){if(!MIX||MIX.t!==gTime||MIX.a!==mons||MIX.n!==mons.length){const m=new Map();for(const x of mons){const l=m.get(x.type);if(l)l.push(x);else m.set(x.type,[x]);}MIX={t:gTime,a:mons,n:mons.length,m};}return MIX.m.get(ty)||MIX0;}
+const blOf=()=>monsOf('belial')[0];
 function blNear(){if(!P)return false;const m=blOf();return !!(m&&!m.dead&&m.eng>0&&Math.hypot(m.x-P.x,m.y-P.y)<BLL.aura);}
 const blMir=m=>m.type==='belial'&&(m.blMir||0)>gTime;
 const blForm=m=>m.type==='belial'&&m.hp/m.max<=BLL.form;
@@ -5400,8 +5418,13 @@ function atkCD(){return (blNear()?1.25:1)*(auOn()?.3:weapon().spd)*hcAcd()*(1-Ma
 // owner 2026-10-22: a Lv 1 killed a Lv 130 monster. Up to 50 levels above you, you still do at least 35%; past that the
 // floor falls fast, to 2% at 100 levels and more
 const lvF=ml=>{const g=ml-S.lv;return g<=0?1+Math.min(.3,-g*.02):Math.max(g<=50?.35:Math.max(.02,.35-(g-50)*.0066),1/(1+Math.pow(g/10,1.4)));};
-function weapon(){return S.items.find(i=>i.uid===S.eqW)||S.items[0];}
-function armorIt(){return S.items.find(i=>i.uid===S.eqA);}
+// itemByUid: what's worn is looked up many times a frame (stat, gearSum, maxHP...), each a find over the whole bag; an index
+// by uid answers it, checked against the bag on each use and made again when the bag changes (SAT-ONLINE-160)
+let ITM={a:null,n:-1,m:null};
+function itemByUid(u){const A=S.items;if(ITM.a!==A||ITM.n!==A.length){const m=new Map();for(let ix=0;ix<A.length;ix++){const it=A[ix];if(it&&!m.has(it.uid))m.set(it.uid,ix);}ITM={a:A,n:A.length,m};}
+ const ix=ITM.m.get(u);if(ix!==undefined){const it=A[ix];if(it&&it.uid===u)return it;ITM.a=null;}return A.find(i=>i.uid===u);}
+function weapon(){return itemByUid(S.eqW)||S.items[0];}
+function armorIt(){return itemByUid(S.eqA);}
 // equipment (SAT-EQUIP-001): every item is plain JSON in S.items (uid, id, slot, rating, stats, dur, en) so it can move to a
 // server inventory as is. Durability 0 = broken: the item still works at 30%. Enhancement +n adds 6% per level.
 // owner 2026-10-22: rings on all ten fingers as in the novel (Kraugel's and Pauld's "ten rings", Grid's "eight fingers were almost always
@@ -5411,7 +5434,7 @@ const GEAR=['a','h','g','b','k','n','r',...RSL];
 // owner 2026-10-23: ten rings at once was overpowered. The accessory slot is always open; the nine ring slots open one by one
 // with your level (a legendary class, which starts again at Lv 1, opens them at half the level)
 const RUL=[20,60,100,150,200,260,320,380,450],ringNeed=k=>{const i=RSL.indexOf(k);return i<0?0:isLeg()?Math.ceil(RUL[i]/2):RUL[i];},ringOpen=k=>!RSL.includes(k)||!S||S.lv>=ringNeed(k);
-function eqIt(sl){if(sl==='w')return weapon();if(sl==='a')return armorIt();if(!ringOpen(sl))return null;const u=(S.eq||{})[sl];return u?S.items.find(i=>i.uid===u):null;}
+function eqIt(sl){if(sl==='w')return weapon();if(sl==='a')return armorIt();if(!ringOpen(sl))return null;const u=(S.eq||{})[sl];return u?itemByUid(u):null;}
 const isEq=i=>i.uid===S.eqW||i.uid===S.eqA||Object.values(S.eq||{}).includes(i.uid);
 function equip(i){const b=setTiers(),r=equip0(i);setNote(b);return r;}
 // worn gear above your level comes off (a legendary class starting again at Lv 1, an old save): it goes back to the bag
@@ -5427,7 +5450,11 @@ function gearSum(k){let v=0;for(const sl of GEAR){const i=eqIt(sl);if(i&&i[k])v+
  const w=eqIt('w');if(w&&w.gem&&GEMS[w.gem]&&GEMS[w.gem][k])v+=GEMS[w.gem][k];return v+setBon(k);}
 function setCount(sk){const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(i=>i.id);return SETS[sk].it.filter(x=>ids.includes(x)).length;}
 function setTier(sk){const n=setCount(sk);let c=0;for(const k in SETS[sk].b)if(n>=+k)c=+k;return c;}
-function setBon(k){let v=0;const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(i=>i.id);for(const sk in SETS){const B=SETS[sk].b,n=SETS[sk].it.filter(x=>ids.includes(x)).length;let c=0;for(const q in B)if(n>=+q)c=+q;if(c&&B[c][k])v+=B[c][k];}return v+hidBon(k);}
+// setBon: stat() and gearSum() ask for it many times a frame; the sets worn only change with the gear, so the bonus per stat is
+// kept for the same pieces (by id)
+let SBM={k:null,v:null};
+function setBon(k){const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(i=>i.id),key=ids.join('\u0001');if(SBM.k!==key)SBM={k:key,v:Object.create(null)};let v=SBM.v[k];
+ if(v===undefined){v=0;for(const sk in SETS){const B=SETS[sk].b,n=SETS[sk].it.filter(x=>ids.includes(x)).length;let c=0;for(const q in B)if(n>=+q)c=+q;if(c&&B[c][k])v+=B[c][k];}SBM.v[k]=v;}return v+hidBon(k);}
 // the Frostlight Orc Chief's five pieces: "It is possible to command the frostlight orcs" (they leave you be); checked once a frame
 let focT=-1,focV=false;const foCmd=()=>{if(focT!==gTime){focT=gTime;focV=setTier('fo')>=5;}return focV;};
 // a new set tier says so when you put a piece on
@@ -5505,7 +5532,12 @@ function acctStore(uid){if(SLOT||!uid)return;let ls=null;try{ls=localStorage;}ca
 // P is saved trimmed, at the tower/arena return point while inside one (as on main)
 var SAVE_OFF=false; // set when another tab took the account over (SAT-ONLINE-010): this tab must not write the save any more
 function mrtKeep(){const now=Date.now(),o={};let n=0;for(const m of mons){if(!m.dead||m.tmp||m.evt||m.mkN||m.arena||!(m.rt>0)||m.rt>1e8||n>=400)continue;o[mobKey(m)]=Math.round(now+m.rt*1000);n++;}S.mrt=o;}
-function save(quiet){if(!S||S.__demo||SAVE_OFF)return;mrtKeep();const sp=TWR?TWR.ret:ARN?ARN.ret:P;Satisfy.ids.ensure(S);if(STORE.write(S,{x:sp.x,y:sp.y,hp:P.hp,st:P.st,mp:P.mp,food:P.food},{WS})&&!quiet)toast(t('saved'));}
+// a kill saves (SAT-ONLINE-160, owner 2026-10-23: frame drops): an area blow that killed ten saved ten times in that frame,
+// each a whole JSON of the save and a synchronous write. The kills of one go (a frame, a blow) are saved once, at its end
+let KSV=0;
+function killSave(){if(KSV)return;KSV=1;queueMicrotask(()=>{KSV=0;save(true);});}
+let SAVEN=0; // saves written (tests)
+function save(quiet){if(!S||S.__demo||SAVE_OFF)return;SAVEN++;mrtKeep();const sp=TWR?TWR.ret:ARN?ARN.ret:P;Satisfy.ids.ensure(S);if(STORE.write(S,{x:sp.x,y:sp.y,hp:P.hp,st:P.st,mp:P.mp,food:P.food},{WS})&&!quiet)toast(t('saved'));}
 function hasSave(){return STORE.exists();}
 // Stable ids and domain events (SAT-ONLINE-005, doc §05 R0.4/R0.5; src/core/ids.js, state.js, events.js).
 // S.pid (the character id Claude-B's guilds already use) and item.iid are assigned at the first save or load; kills, crafts and quest claims are reported
@@ -5794,7 +5826,7 @@ function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===
  if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;annW('annGuard',{lv:S.lv});}giveTitle('forest');S.raid=0;}
  if(m.type==='gchief'){shake=.3;giveTitle('chief');}
  if((S.kills.rabbit||0)+(S.kills.goblin||0)>=40)giveTitle('hunter');
- hudDirty=true;save(true);}
+ hudDirty=true;killSave();}
 function giveTitle(id){if(S.tl[id])return;S.tl[id]=1;if(!S.title&&TLS[id])S.title=id;sbSig='';setTimeout(()=>{toast(t('newTitleX',{t:t('tl_'+id)}),'good');SFX.notice();},900);}
 // potions: Q heals 40% HP, F restores 50% MP; a shared 5 s cooldown keeps them from replacing dodging
 const POT={hpot:{key:'KeyQ',price:30,f:()=>{const h=Math.round(maxHP()*.4);P.hp=Math.min(maxHP(),P.hp+h);numP(-26,'+'+h,'#7ae07a',false);asMe(()=>vfx('heal',P.x,P.y));}},mpot:{key:'KeyF',price:25,f:()=>{const v=Math.round(maxMP()*.5);P.mp=Math.min(maxMP(),P.mp+v);numP(-26,'+'+v,'#7ab0ff',false);asMe(()=>vfx('mana',P.x,P.y-8));}}};
@@ -5808,9 +5840,13 @@ function buyPot(who,k){if((S[k]||0)>=POTCAP)return shopD(who,'potFull');const g=
 const potOpts=who=>['hpot','mpot'].map(k=>{const g=price(who,POT[k].price);return{l:t('oBuyPot',{p:t(k),g}),qty:1,ic:k,st:`${t(k+'D')} (${S[k]||0}/${POTCAP})`,poor:S.gold<g,f:()=>buyPot(who,k)};});
 function eat(){if(S.bread<=0){toast(t('noBread'),'warn');SFX.deny();return;}if(P.food>=95){toast(t('full'));SFX.deny();return;}S.bread--;vowBreak('fast');P.food=Math.min(100,P.food+40);P.hp=Math.min(maxHP(),P.hp+15);vfx('heal',P.x,P.y);toast(t('ate'));SFX.eat();hudDirty=true;}
 function nearTree(){if(inRace(P.x,P.y))return null;const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];let best=null,bs=1e9,bc=null,bcs=1e9;for(const tr of vtNear(P.x,P.y,30)){const dx=tr.x-P.x,dy=tr.y-P.y,d=Math.hypot(dx,dy);if(d>30)continue;const s=d-((dx*v[0]+dy*v[1])/(d||1))*12;if((chopped.get(tr.k)||0)>gTime){if(s<bcs){bcs=s;bc=tr;}}else if(s<bs){bs=s;best=tr;}}return best||bc;}
-function nearest(){let best=null,bd=26;const cand=[...npcs.filter(n=>!n.hidden).map(n=>({k:'npc',o:n,x:n.x,y:n.y})),...ANVILS.map(a=>({k:'anvil',o:a,x:a.tx*TS+8,y:a.ty*TS+8})),...nodes.filter(n=>!(n.dep>0&&(n.kind==='herb'||n.kind==='bherb'))).map(n=>({k:'node',o:n,x:n.x,y:n.y,hint:n.kind==='herb'||n.kind==='bherb'?(n.dep>0?'hPicked':'hHerb'):undefined})),...CAMPS.map(c=>({k:'camp',o:c,x:c.x,y:c.y,hint:'hCamp'})),...ROOMS.filter(R=>R.b).map(R=>{const d=doorOf(R.b);return{k:'door',o:R,x:d.x,y:d.y,hint:'hEnter'};}),...PROPS.filter(p=>p.k==='chest'||p.k==='shelf'||p.k==='bed'||dcTab(p)).map(p=>({k:'prop',o:p,x:p.tx*TS+p.w*8,y:p.ty*TS+(p.back?22:10),hint:{chest:'hChest',shelf:'hShelf',bed:'hBed',table:'hDice'}[p.k]})),{k:'grave',o:GRAVE,x:GRAVE.tx*TS+8,y:GRAVE.ty*TS+16,hint:'hGrave'},...lmList().map(l=>({k:'lm',o:l,x:l.x,y:l.y,hint:'hRead'})),...exNear().map(c=>({k:'cache',o:c,x:c.x,y:c.y,hint:'hCache'})),...tfNear().map(f=>({k:'folk',o:f,x:f.x,y:f.y,hint:'hTalk'})),...DGATES.filter(g=>!(g.hide&&g.bh!=='key'&&!(g.tw&&Math.hypot(g.x-P.x,g.y-P.y)<22))&&!g.got&&!g.out&&!g.gone&&!(g.tw==='enter'&&!(S.wis&&S.wis.map))).map(g=>({k:'gate',o:g,x:g.x,y:g.y,hint:g.hint})),...TERR.map(T=>({k:'banner',o:T,x:T.x,y:T.y-4,hint:'hBanner'})),...SHRINES.filter(epVis).map(o=>({k:'shrine',o,x:o.x,y:o.y,hint:o.hint})),...(COMPO?[{k:'npc',o:COMPO,x:COMPO.x,y:COMPO.y}]:[])];for(const c of cand){const d=Math.hypot(c.x-P.x,c.y-P.y)-(c.o&&c.o.reach||0);if(d<bd){bd=d;best=c;}}const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
+// nearest: the HUD hint, the marker over it and the E key each asked for it every frame, and it lists every person, node,
+// prop and gate of the world: once a frame is enough (interact asks afresh)
+let NRM=null;
+function nearest(fresh){if(!fresh&&NRM&&NRM.t===gTime&&NRM.x===P.x&&NRM.y===P.y&&NRM.m===mode)return NRM.r;const r=nearest0();NRM={t:gTime,x:P.x,y:P.y,m:mode,r};return r;}
+function nearest0(){let best=null,bd=26;const cand=[...npcs.filter(n=>!n.hidden).map(n=>({k:'npc',o:n,x:n.x,y:n.y})),...ANVILS.map(a=>({k:'anvil',o:a,x:a.tx*TS+8,y:a.ty*TS+8})),...nodes.filter(n=>!(n.dep>0&&(n.kind==='herb'||n.kind==='bherb'))).map(n=>({k:'node',o:n,x:n.x,y:n.y,hint:n.kind==='herb'||n.kind==='bherb'?(n.dep>0?'hPicked':'hHerb'):undefined})),...CAMPS.map(c=>({k:'camp',o:c,x:c.x,y:c.y,hint:'hCamp'})),...ROOMS.filter(R=>R.b).map(R=>{const d=doorOf(R.b);return{k:'door',o:R,x:d.x,y:d.y,hint:'hEnter'};}),...PROPS.filter(p=>p.k==='chest'||p.k==='shelf'||p.k==='bed'||dcTab(p)).map(p=>({k:'prop',o:p,x:p.tx*TS+p.w*8,y:p.ty*TS+(p.back?22:10),hint:{chest:'hChest',shelf:'hShelf',bed:'hBed',table:'hDice'}[p.k]})),{k:'grave',o:GRAVE,x:GRAVE.tx*TS+8,y:GRAVE.ty*TS+16,hint:'hGrave'},...lmList().map(l=>({k:'lm',o:l,x:l.x,y:l.y,hint:'hRead'})),...exNear().map(c=>({k:'cache',o:c,x:c.x,y:c.y,hint:'hCache'})),...tfNear().map(f=>({k:'folk',o:f,x:f.x,y:f.y,hint:'hTalk'})),...DGATES.filter(g=>!(g.hide&&g.bh!=='key'&&!(g.tw&&Math.hypot(g.x-P.x,g.y-P.y)<22))&&!g.got&&!g.out&&!g.gone&&!(g.tw==='enter'&&!(S.wis&&S.wis.map))).map(g=>({k:'gate',o:g,x:g.x,y:g.y,hint:g.hint})),...TERR.map(T=>({k:'banner',o:T,x:T.x,y:T.y-4,hint:'hBanner'})),...SHRINES.filter(epVis).map(o=>({k:'shrine',o,x:o.x,y:o.y,hint:o.hint})),...(COMPO?[{k:'npc',o:COMPO,x:COMPO.x,y:COMPO.y}]:[])];for(const c of cand){const d=Math.hypot(c.x-P.x,c.y-P.y)-(c.o&&c.o.reach||0);if(d<bd){bd=d;best=c;}}const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
  if(!best||best.k==='tree'){const w=nearWater();if(w)best={k:'water',o:w,x:w.x,y:w.y,hint:FISH?'hReel':'hFish'};}return best;}
-function interact(){if(FISH){fishAct();return;}const n=nearest();if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
+function interact(){if(FISH){fishAct();return;}const n=nearest(1);if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
 let roomFade=false;
 function enterRoom(Rm){if(roomFade)return;if(P.ride)dismount();roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=(Rm.rx+6)*TS+8;P.y=(Rm.ry+6)*TS+10;P.dir=1;camSnap=true;hudDirty=true;});}
 // "get unstuck" in the Esc menu: walks you out of a house, or takes you back to the nearest town square (once a minute)
@@ -5934,7 +5970,7 @@ function tryForge(a){if(!a.free&&!qDone(a.perm)){SFX.deny();return dialog(a.own,
 function treeBound(x,y){if(x<3||x>=MW-3||y<-NR+3||y>=WMH-3||y>=-1&&y<=2||y>=OWH-3&&y<=OWH||y>=-ON-3&&y<=-ON+2||y>=OS-3&&y<=OS+1)return true;let h=1,v=1;
  for(let i=1;i<14&&at(x+i,y)===TR;i++)h++;for(let i=1;i<14&&at(x-i,y)===TR;i++)h++;for(let i=1;i<14&&at(x,y+i)===TR;i++)v++;for(let i=1;i<14&&at(x,y-i)===TR;i++)v++;return h>=12||v>=12;}
 function uprootTile(x,y){if(at(x,y)!==TR)return;const n={};for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]){const v=at(x+a,y+b);if(v===GR||v===SN||v===DR||v===FL)n[v]=(n[v]||0)+1;}
- let best=snowAt(x,y)?SN:GR,bc=0;for(const v in n)if(n[v]>bc){bc=n[v];best=+v;}setT(x,y,best===FL?GR:best);const k=x+','+y;VTM.delete(k);const i=VT.findIndex(tr=>tr.k===k);if(i>=0)VT.splice(i,1);chopped.delete(k);
+ let best=snowAt(x,y)?SN:GR,bc=0;for(const v in n)if(n[v]>bc){bc=n[v];best=+v;}setT(x,y,best===FL?GR:best);const k=x+','+y;VTM.delete(k);VTN.delete(vtK(x,y));const i=VT.findIndex(tr=>tr.k===k);if(i>=0)VT.splice(i,1);chopped.delete(k);
  gg.putImageData(new ImageData(SA.tiles.ground(TENV,x,y,0),16,16),x*TS,y*TS);}
 function uproot(tr){if(treeBound(tr.tx,tr.ty)){toast(t('rootBound'),'warn');SFX.deny();return;}tr.rh=(tr.rh||0)+1;SFX.chop();shake=.1;vfx('dust',tr.x,tr.y,{n:6});
  if(tr.rh<3){num(tr.x,tr.y-20,t('rootHit',{n:tr.rh}),'#c8a070',false);return;}WS.roots=WS.roots||{};WS.roots[tr.k]=1;uprootTile(tr.tx,tr.ty);addMat('wood',2);toast(t('rootDone'),'good');save(true);}
@@ -6250,7 +6286,7 @@ const NPCT={
  marketRh:{idle:()=>'mkt_hi',opts:()=>merchOpts('marketRh')},beggarRh:{idle:()=>'bgr_idle'}, rguard1:{idle:()=>'rgd_idle'},rguard2:{idle:()=>'rgd_idle'},scholarRh:{hi:'sch_hi',idle:()=>'sch_idle'},grocerRh:{idle:()=>'grc_hi',opts:()=>merchOpts('grocerRh')},
  guardW:{idle:()=>'gw_idle'},hunter:{idle:()=>'hn_idle'},farmerP:{idle:()=>'fp_idle'},hunterP:{idle:()=>'hp_idle'},
  pedW:{idle:()=>'ped_hi',opts:()=>[...potOpts('pedW'),{l:t('oBuyBread'),qty:1,f:()=>buyBread('pedW')}]},pedE:{idle:()=>'ped_hi',opts:()=>[...potOpts('pedE'),{l:t('oBuyBread'),qty:1,f:()=>buyBread('pedE')}]},
- regas:{idle:()=>S.raid?'rRaidOn':S.comp==='regas'?'cpIdle_regas':'rg_hi',opts:()=>{const o=[...compOpt('regas'),...sellOpt('regas')];if(!S.mats.blue)o.push({l:t('oBlue'),f:buyBlue});const g=mons.find(m=>m.type==='guardian');if(!S.raid)o.push({l:t('oRaid'),f:()=>S.lv<90?dialog('regas',[t('rRaidNo',{lv:S.lv})]):!g||g.dead?dialog('regas',['rRaidWait']):startRaid()});else o.push({l:t('oRaidEnd'),f:endRaid});return o;}},
+ regas:{idle:()=>S.raid?'rRaidOn':S.comp==='regas'?'cpIdle_regas':'rg_hi',opts:()=>{const o=[...compOpt('regas'),...sellOpt('regas')];if(!S.mats.blue)o.push({l:t('oBlue'),f:buyBlue});const g=monsOf('guardian')[0];if(!S.raid)o.push({l:t('oRaid'),f:()=>S.lv<90?dialog('regas',[t('rRaidNo',{lv:S.lv})]):!g||g.dead?dialog('regas',['rRaidWait']):startRaid()});else o.push({l:t('oRaidEnd'),f:endRaid});return o;}},
  coach:{idle:()=>'coachHi',opts:()=>[...stableOpts('coach'),{l:t('oTravelW',{g:fare()}),f:()=>travel(1,'coach')},...(S.hag===undefined?[{l:t('oHaggle'),f:()=>haggle('coach')}]:[])]},
  coachR:{idle:()=>'coachHi2',opts:()=>[...stableOpts('coachR'),...cOpts('coachR')]},coachRh:{idle:()=>'coachHi2',opts:()=>[...stableOpts('coachRh'),...cOpts('coachRh')]},coachRo:{idle:()=>'coachHi2',opts:()=>[...stableOpts('coachRo'),...cOpts('coachRo')]},coachT:{idle:()=>'coachHi2',opts:()=>[...stableOpts('coachT'),...cOpts('coachT')]},
  coachW:{idle:()=>'coachHi',opts:()=>[...rideOpt('horse'),...stableOpts('coachW'),{l:t('oTravelB',{g:fare()}),f:()=>travel(0,'coachW')},{l:t('oTravelP',{g:fare()+80}),f:()=>travel(2,'coachW')},...cOpts('coachW'),{l:t('oWhereTr'),f:()=>dialog('coachW',['whereTr'])},...(S.hag===undefined?[{l:t('oHaggle'),f:()=>haggle('coachW')}]:[])]}};
@@ -6570,12 +6606,12 @@ function shrineAct(o){if(o.p4)return p4Act(o);if(o.p3)return p3Act(o);if(o.k==='
  if(own&&own.pid!==pidOf())return dialog('pbookN',[t('pbTaken',{n:own.n})]);
  dialog('pbookN',['pb1','pbAppr'],null,[{l:t('useY'),f:()=>dialog('pbookN',['pbConfirm'],null,[{l:t('useY'),f:becomePagma},{l:t('useN')}])},{l:t('useN')}]);}
 function altarAct(){qEvent('visit','yaltar');const pure=S.qs.ya3&&S.qs.ya3.st===2;if(pure)return dialog('yaltarN',['yaPure']);
- if(mons.some(m=>m.type==='ypriest'&&!m.dead))return dialog('yaltarN',['ya1l','yaGuard']);dialog('yaltarN',['ya1l','ya2l']);}
+ if(monsOf('ypriest').some(m=>!m.dead))return dialog('yaltarN',['ya1l','yaGuard']);dialog('yaltarN',['ya1l','ya2l']);}
 function mswordAct(){const L=WS.legends||(WS.legends={}),own=L.muller;
  if(S.cls!=='saint')return dialog('mswordN',['ms1',own&&own.pid!==pidOf()?t('msTaken',{n:own.n}):'msNoSaint']);
  if(S.mq)return dialog('mswordN',['msDone']);
  if(S.lv<150)return dialog('mswordN',['ms1',t('msLow',{lv:S.lv})]);
- if(!S.mtr2){if(mons.some(m=>m.type==='mshade'&&!m.dead))return dialog('mswordN',['msFight']);
+ if(!S.mtr2){if(monsOf('mshade').some(m=>!m.dead))return dialog('mswordN',['msFight']);
   return dialog('mswordN',['ms1','ms2'],null,[{l:t('msDraw'),f:()=>{const m=newMon('mshade',MULL.x*TS+8,(MULL.y+3)*TS);m.tmp=1;m.eng=4;m.agg=1;mons.push(m);vfx('spawn',m.x,m.y,{color:'#bfe0ff'});SFX.slam();shake=.3;toast(t('msShade'),'warn');}},{l:t('useN')}]);}
  dialog('mswordN',['ms3','msOffer'],null,[{l:t('msLearn'),f:()=>msEnd(0)},{l:t('msRefuse'),f:()=>msEnd(1)}]);}
 // Kraugel will not memorise Muller's technique; refusing it is the canon road (STR, AGI and Willpower greatly up, ch 1746)
@@ -6640,7 +6676,7 @@ function becomeSaint(){const L=WS.legends||(WS.legends={});if(L.muller&&L.muller
 function soulAct(){const L=WS.legends||(WS.legends={}),own=L.braham;
  if(S.cls==='braham')return dialog('bsoulN',['bsDone']);
  if(own&&own.pid!==pidOf())return dialog('bsoulN',[t('bsTaken',{n:own.n})]);
- if(mons.some(m=>m.type==='bknight'&&!m.dead))return dialog('bsoulN',['bsSealed']);
+ if(monsOf('bknight').some(m=>!m.dead))return dialog('bsoulN',['bsSealed']);
  if(!clsFam('mage'))return dialog('bsoulN',['bs1','bsNoMage']);
  if(S.lv<150)return dialog('bsoulN',['bs1',t('bsLow',{lv:S.lv})]);
  dialog('bsoulN',['bs1','bs2','bsAppr'],null,[{l:t('useY'),f:()=>dialog('bsoulN',['bsConfirm'],null,[{l:t('useY'),f:becomeBraham},{l:t('useN')}])},{l:t('useN')}]);}
@@ -7255,7 +7291,13 @@ function skUse(k,xp=2){S.skx=S.skx||{};if(xp===2&&S.pet==='randy'&&S.lastSk!==k)
 const skOptTxt=(k,l)=>{const d=skKind(k);return t('skO'+l+'_'+(SKO[k]||(d==='atk'?'any':d)));};
 function skLvTxt(k){const [l,c,nx]=skProg(k),nxO=l<5?5:l<10?10:0;if(SKD[k]&&SKD[k].pas&&!PASOWN.has(k))return `<br><small style="color:#ffe08a">${t('skLvT',{n:l})}${nx?` · ${t('skUses',{p:Math.floor(c/nx*100)})}`:` · ${t('skMax')}`}</small><br><small style="color:#9fb8d8">${t('pasHow')} ${t('pasLvHow')}</small><br><small style="color:#9fb8d8">${pasScaled(k)?t('pasPerS',{m:pasM(k).toFixed(2)}):t('pasPerG',{n:l-1})}</small>`;return `<br><small style="color:#ffe08a">${t('skLvT',{n:l})}${nx?` · ${t('skUses',{p:Math.floor(c/nx*100)})}`:` · ${t('skMax')}`}</small>`+(SKO[k]?'':`<br><small style="color:#9fb8d8">${t('skPer_'+skKind(k))}</small>`)+(nxO?`<br><small style="color:#9fb8d8">${t('skNext',{n:nxO,o:skOptTxt(k,nxO)})}</small>`:'')+(l>=5?`<br><small style="color:#9fe39a">✓ ${skOptTxt(k,5)}</small>`:'')+(l>=10?`<br><small style="color:#9fe39a">✓ ${skOptTxt(k,10)}</small>`:'');}
 window.__GSL={kind:k=>skKind(k),opt:(k,l)=>skOptTxt(k,l),mp:k=>mpC(k),cdm:k=>skCdM(k),txt:k=>skLvTxt(k),heal:(k,h)=>skHealUp(k,h)}; // tests
-const clsSkills=()=>Object.keys(SKD).filter(k=>!SKD[k].pas&&(!SKD[k].ncls||SKD[k].ncls!==S.cls)&&(!SKD[k].church||SKD[k].church===S.church)&&(!SKD[k].sec||SKD[k].sec===S.sec)&&(!SKD[k].bk||!!(S.bh&&S.bh.sb&&S.bh.sb[SKD[k].bk]))).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior'||typeof LGB!=='undefined'&&LGB&&LGB[S.cls]===SKD[k].cls||k==='mdarmy'&&!!S.mdsk);
+// clsSkills: the skill bar asked for it two or three times a frame, each time over every skill of the game. It changes only
+// with these inputs (and the table, counted once a frame), so the answer is kept until one of them moves. Callers only read it.
+let CSKM={k:null,r:null},SKDN={t:-1,n:0};
+const skdN=()=>{if(SKDN.t!==gTime){SKDN.t=gTime;let n=0;for(const k in SKD)n++;SKDN.n=n;}return SKDN.n;};
+const clsSkills=()=>{const sb=S.bh&&S.bh.sb,k=[S.cls,S.cbase,S.church,S.sec,!!S.mdsk,sb?Object.keys(sb).filter(x=>sb[x]).join(','):'',typeof LGB!=='undefined'&&LGB?LGB[S.cls]:'',skdN()].join('|');
+ if(CSKM.k!==k||CSKM.s!==S){CSKM={k,s:S,r:clsSkills0()};}return CSKM.r;};
+const clsSkills0=()=>Object.keys(SKD).filter(k=>!SKD[k].pas&&(!SKD[k].ncls||SKD[k].ncls!==S.cls)&&(!SKD[k].church||SKD[k].church===S.church)&&(!SKD[k].sec||SKD[k].sec===S.sec)&&(!SKD[k].bk||!!(S.bh&&S.bh.sb&&S.bh.sb[SKD[k].bk]))).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior'||typeof LGB!=='undefined'&&LGB&&LGB[S.cls]===SKD[k].cls||k==='mdarmy'&&!!S.mdsk);
 const NSK=8; // skill slots on the bar (keys 1-8); the title slot comes after them
 // owner 2026-10-22: gear (rings, weapons, armour) and things you use go on the main bar too, as on the extra bars
 const barThing=k=>typeof k==='string'&&!SKD[k]&&(XGEAR(k)||XITEM(k)||!!(S.mats&&k in S.mats));
@@ -8561,6 +8603,7 @@ const ZT={};
 // windows you can walk with (Twister 2026-10-19): the bag, status, equipment, log, quests and the big map stay open while
 // WASD/arrows move you; attacks, E and skills still need the window closed so clicks in it never become swings
 const WALKM=['inv','status','equip','log','qd','map','mb'];
+var MSWT=2;
 function update(dt){
  gTime+=dt;
  if(INVX&&INVX.stash&&P&&Math.hypot(P.x-INVX.x,P.y-INVX.y)>140)closeInv(); // walked away from the inn's chest
@@ -8579,6 +8622,10 @@ function update(dt){
  if(mode==='dead'&&P&&P.deadT>0){P.deadT-=dt;$('deadP').innerHTML=`<div>${esc(P.dpen||'')}</div><div>${t('deadIn',{n:Math.max(1,Math.ceil(P.deadT))})}</div>`;if(P.deadT<=0)deadChoice();}
  if(P){P.trail.forEach(a=>a.t-=dt);P.trail=P.trail.filter(a=>a.t>0);}
  for(const m of mons)if(m.dead&&m.dying>0)m.dying-=dt;
+ // dead monsters that never come back (an invasion's, a boss's adds, a copy made from the host's list: rt 1e9) leave mons
+ // every 2 s (owner 2026-10-23: the game got slower the longer it ran; they stayed all session, ~80 an invasion, and the
+ // ~30 passes over mons a frame walked them all). The arena, the tower, the archipelago and the tournament clear their own.
+ if((MSWT-=dt)<=0){MSWT=2;let w=0;for(let i=0;i<mons.length;i++){const m=mons[i];if(m.dead&&!(m.dying>0)&&m.rt>1e8&&(m.tmp||m.mkN)&&!m.hidN&&!m.arena&&!m.tower&&!m.bh&&m.tw!==1&&!m.nat){if(MOBN)MOBN.hits.delete(m);continue;}mons[w++]=m;}mons.length=w;}
  // the world keeps running behind menus and windows (inventory, status, map, dialog, the Esc menu...); only the player's input stops
  const LIVE=mode==='play'||['inv','status','equip','log','map','qd','dialog','pause','sound','forge','mb','au','gname','enhfx','song','dance'].includes(mode)||(mode==='controls'&&ctrlBack==='pauseScreen');
  if(!LIVE||!S||S.__demo&&mode!=='play')return;const inp=mode==='play';
@@ -8623,8 +8670,9 @@ function update(dt){
   const b=MT[m.type];monVox(m,b,dt);
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
   if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy,fa=m.far;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));if(fa)m.far=1;vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}continue;}
-  // the far north and south sleep while nobody is near (the map doubled: they would roll dice and spend time for nothing)
-  if(m.far&&!(m.eng>0)&&Math.hypot(m.x-P.x,m.y-P.y)>900&&!(MOBN&&MOBN.rs&&MOBN.rs.some(r=>Math.hypot(r.x-m.x,r.y-m.y)<900)))continue;
+  // a monster sleeps while nobody is within 900 px (owner 2026-10-23: frames dropped with many monsters). The far north and
+  // south did this first; now the whole map does, so ~1,300 monsters out of sight no longer roll dice and walk each frame
+  if(!(m.eng>0)&&(m.x-P.x)**2+(m.y-P.y)**2>810000&&!(MOBN&&MOBN.rs&&MOBN.rs.some(r=>(r.x-m.x)**2+(r.y-m.y)**2<810000)))continue;
   if(m.mvd)m.at=(m.at||0)+dt;m.mvd=0;m.t+=dt;if(m.grdT>0)m.grdT-=dt;m.cd-=dt;if(m.hurt>0)m.hurt-=dt;if(m.weak>0)m.weak-=dt;if(m.stun>0){m.stun-=dt;continue;}
   if(MOBN&&MOBN.host===NET.uid&&MOBN.rs&&MOBN.rs.length){const tg=mobTarget(m);if(tg){MOBP=P;P=tg;}} // host: it may be after another player, a boss too (SAT-ONLINE-045: a boss chased and leashed by the host alone walked home and healed while someone else fought it)
   if(MOBN&&MOBN.host===NET.uid)m.tgU=P.remote||NET.uid; // SAT-ONLINE-042: the player it is after goes out with each action
@@ -8913,7 +8961,7 @@ function render(dt){DRAWN=0;netDrawn=0;
  const fl=.5+.5*Math.sin(gTime*9)*Math.sin(gTime*3.7);
  FURNS.forEach(FURN=>{R(ctx,FURN.x+2,FURN.y+4,18,14,fl>.5?'#ff8a1e':'#ffa83a');R(ctx,FURN.x+6,FURN.y+9,10,9,'#ffe07a');for(let i=0;i<5;i++)R(ctx,FURN.x+3+i*3,FURN.y+10-((Math.sin(gTime*10+i*2)*3+3)|0),3,8,'#ff7a1a');});
  const ents=[];
- if(S){nodes.forEach(n=>ents.push({y:n.y,f:()=>drawNode(n.x,n.y,n)}));
+ if(S){nodes.forEach(n=>{if(n.x<camX-40||n.x>camX+VW+40||n.y<camY-20||n.y>camY+VH+60)return;ents.push({y:n.y,f:()=>drawNode(n.x,n.y,n)});}); // on screen only (SAT-ONLINE-160)
   for(const f of tfVis()){ents.push({y:f.y,f:()=>tfDraw(f)});tfText(f);}
   for(const m of TFB){const st=TFS.get(m);if(st&&st.t>gTime&&!m.dead)TX.push({s:st.s,x:m.x,y:m.y-(MT[m.type].oy||16)-24,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff9a8a'});}
   for(const c of exNear()){ents.push({y:c.y-6,f:()=>drawCache(c)});ents.push({y:c.y+400,f:()=>drawCacheG(c)});}
@@ -8928,10 +8976,13 @@ function render(dt){DRAWN=0;netDrawn=0;
   for(const o of SHRINES){if(!epVis(o)||o.p3||o.p4)continue;if(o.x<camX-40||o.x>camX+VW+40||o.y<camY-20||o.y>camY+VH+60)continue;ents.push({y:o.y,f:()=>drawShrine(o)});}
   if(WS)for(const T of TERR){if(T.x<camX-40||T.x>camX+VW+40||T.y<camY-20||T.y>camY+VH+60)continue;ents.push({y:T.y,f:()=>drawBanner(T)});}
   if(ESC){const E=ESC;ents.push({y:E.y,f:()=>{drawChar(E.id,E.x,E.y,E.dir,E.frame||0,E.hurtT>0&&(gTime*20|0)%2,0,E);txBar(E.x,E.y-28,16,Math.max(0,E.hp)/E.max,HPY,hpLag(E,Math.max(0,E.hp)/E.max,'hl'));}});}
-  npcs.forEach(n=>{if(n.hidden||n.obj)return;ents.push({y:n.y,f:()=>{const ko=npcKO(n.id);if(ko)ctx.globalAlpha=.38;if(n.hitT>0)n.hitT-=1/60;drawChar(n.spr,n.x,n.y,n.dir,n.frame||0,n.hitT>0,0,n);ctx.globalAlpha=1;
+  // only what can be on screen is drawn (owner 2026-10-23: frame drops; every monster and person of the whole map was drawn
+  // each frame, off screen too). The margins hold the biggest sprites, a boss's slam ring and a beast's breath.
+  const vx0=camX-160,vx1=camX+VW+160,vy0=camY-120,vy1=camY+VH+280,offV=(x,y,k)=>x<vx0-k||x>vx1+k||y<vy0-k||y>vy1+k;
+  npcs.forEach(n=>{if(n.hidden||n.obj||offV(n.x,n.y,0))return;ents.push({y:n.y,f:()=>{const ko=npcKO(n.id);if(ko)ctx.globalAlpha=.38;if(n.hitT>0)n.hitT-=1/60;drawChar(n.spr,n.x,n.y,n.dir,n.frame||0,n.hitT>0,0,n);ctx.globalAlpha=1;
    if(!ko&&n.nhp<NPCHP)txBar(n.x,n.y-28,16,n.nhp/NPCHP,HPC,hpLag(n,n.nhp/NPCHP,'hl'));}});});
   const MWP=MSX==null?null:(()=>{const r=stage.getBoundingClientRect();return [(MSX-r.left)/SC+camXf,(MSY-r.top)/SC+camYf];})();
-  mons.forEach(m=>{if(m.dead&&!(m.dying>0))return;drawTele(m);if(m.wardT>gTime&&!m.dead)drawWard(m);if(MT[m.type].boss&&!m.dead&&m.tele>0&&!m.st){const k=1-m.tele/.9,SR=MT[m.type].slamR;ctx.fillStyle=`rgba(255,60,40,${.15+k*.25})`;ctx.beginPath();ctx.ellipse(m.x,m.y,Math.max(1,SR*k+4),Math.max(1,SR*.58*k+3),0,0,7);ctx.fill();ctx.strokeStyle='rgba(255,120,90,.9)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(m.x,m.y,SR,SR*.58,0,0,7);ctx.stroke();}
+  mons.forEach(m=>{if(m.dead&&!(m.dying>0)||offV(m.x,m.y,MT[m.type].boss?260:0))return;drawTele(m);if(m.wardT>gTime&&!m.dead)drawWard(m);if(MT[m.type].boss&&!m.dead&&m.tele>0&&!m.st){const k=1-m.tele/.9,SR=MT[m.type].slamR;ctx.fillStyle=`rgba(255,60,40,${.15+k*.25})`;ctx.beginPath();ctx.ellipse(m.x,m.y,Math.max(1,SR*k+4),Math.max(1,SR*.58*k+3),0,0,7);ctx.fill();ctx.strokeStyle='rgba(255,120,90,.9)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(m.x,m.y,SR,SR*.58,0,0,7);ctx.stroke();}
    ents.push({y:m.y,f:()=>{if(m.dead)ctx.globalAlpha=Math.max(0,m.dying/.5);if(m.stun>0){const a=gTime*8;R(ctx,m.x+Math.cos(a)*6,m.y-22+Math.sin(a)*2,2,2,'#ffe07a');R(ctx,m.x-Math.cos(a)*6,m.y-22-Math.sin(a)*2,2,2,'#ffe07a');}drawMon(m);ctx.globalAlpha=1;if(m.dead)return;
     const oy=MT[m.type].oy,hf=m.hp/m.max,hl=hpLag(m,hf,'hl');if(!MT[m.type].boss&&(hf<1||hl>hf))txBar(m.x,m.y-oy+2,16,hf,HPC,hl);
     // owner 2026-10-20: the name with the level, always together (close by or under the mouse): "name" over "Lv n",
@@ -8982,10 +9033,11 @@ const txg=document.getElementById('txt').getContext('2d');
 const HPC=['#c4241d','#ff7a5a','#6a0d0a'],HPG=['#2fa84a','#8dff9a','#0d4a1c'],HPY=['#cf9c12','#ffe680','#7a5806'];
 function txBar(x,y,w,p,col,lag,fr){p=Math.max(0,Math.min(1,p));TX.push({bar:p,lag:Math.max(p,lag??p),x,y,w,col:col||HPC,fr});}
 function hpLag(o,p,k){const l=o[k];o[k]=l==null||l<p?p:Math.max(p,l-.012);return l==null?p:l;}
+const TXBG=new Map(); // a bar's gradient by colours and height (it was made new for every bar each frame)
 function drawTXBar(g,o,x,y,k){const w=Math.round(o.w*k),h=Math.max(3,Math.round(2.4*k)),x0=x-(w>>1),y0=y-h;
  g.fillStyle='rgba(0,0,0,.85)';g.fillRect(x0-1,y0-1,w+2,h+2);g.fillStyle='#160c12';g.fillRect(x0,y0,w,h);
  if(o.lag>o.bar){g.fillStyle='rgba(255,236,214,.75)';g.fillRect(x0,y0,Math.round(w*o.lag),h);}
- const fw=Math.round(w*o.bar);if(fw>0){const gr=g.createLinearGradient(0,y0,0,y0+h);gr.addColorStop(0,o.col[1]);gr.addColorStop(.5,o.col[0]);gr.addColorStop(1,o.col[2]);g.fillStyle=gr;g.fillRect(x0,y0,fw,h);g.fillStyle='rgba(255,255,255,.4)';g.fillRect(x0,y0,fw,Math.max(1,Math.round(h*.3)));}
+ const fw=Math.round(w*o.bar);if(fw>0){const gk=o.col[0]+o.col[1]+o.col[2]+h;let gr=TXBG.get(gk);if(!gr){gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,o.col[1]);gr.addColorStop(.5,o.col[0]);gr.addColorStop(1,o.col[2]);if(TXBG.size>64)TXBG.clear();TXBG.set(gk,gr);}g.fillStyle=gr;g.translate(0,y0);g.fillRect(x0,0,fw,h);g.translate(0,-y0);g.fillStyle='rgba(255,255,255,.4)';g.fillRect(x0,y0,fw,Math.max(1,Math.round(h*.3)));}
  g.fillStyle='rgba(0,0,0,.45)';for(let i=1;i<4;i++)g.fillRect(x0+Math.round(w*i/4),y0,1,h);
  if(o.fr){g.strokeStyle=o.fr;g.lineWidth=1;g.strokeRect(x0-1.5,y0-1.5,w+3,h+3);}}
 // the quest arrow on the sharp layer: a rounded dart with a dark rim and a light edge
@@ -8993,8 +9045,25 @@ function drawTXArrow(g,o,x,y,k){const u=k*o.z;g.save();g.translate(x,y);g.rotate
  const path=()=>{g.beginPath();g.moveTo(8*u,0);g.lineTo(-5*u,-6*u);g.quadraticCurveTo(-2.2*u,0,-5*u,6*u);g.closePath();};
  g.shadowColor='rgba(0,0,0,.45)';g.shadowBlur=3*k;path();g.lineWidth=2.4*k;g.strokeStyle='rgba(6,14,32,.9)';g.stroke();g.shadowBlur=0;
  const gr=g.createLinearGradient(0,-6*u,0,6*u);gr.addColorStop(0,'#ffffff');gr.addColorStop(.35,o.c);gr.addColorStop(1,o.c);g.fillStyle=gr;path();g.fill();g.restore();}
+// text sprites (owner 2026-10-23: frames dropped with many monsters): every name, level and number over a head took two
+// text rasters a frame, a stroke and a fill. The same text in the same font, size and colour is drawn once into a small
+// bitmap and stamped after that; the least recently used goes past TXCN, and its canvas is reused for the next one. At
+// full opacity the stamp is the same pixels, since the text sits on whole pixels either way.
+const TXC=new Map(),TXCN=400,TXM=document.createElement('canvas').getContext('2d');
+try{document.fonts.addEventListener('loadingdone',()=>TXC.clear());}catch(e){} // a font that came late: draw again with it
+function txSpr(f,s,c,lw){const key=f+'\u0001'+lw+'\u0001'+c+'\u0001'+s;let e=TXC.get(key);if(e){TXC.delete(key);TXC.set(key,e);return e;}
+ TXM.font=f;TXM.textAlign='center';const m=TXM.measureText(s),p=Math.ceil(lw/2)+2,ox=Math.ceil(m.actualBoundingBoxLeft||0)+p,oy=Math.ceil(m.actualBoundingBoxAscent||0)+p;
+ const w=ox+Math.ceil(m.actualBoundingBoxRight||0)+p,h=oy+Math.ceil(m.actualBoundingBoxDescent||0)+p;if(!(w>0&&h>0)||w*h>4e5)return null;
+ let cv=null;if(TXC.size>=TXCN){const k0=TXC.keys().next().value;cv=TXC.get(k0).cv;TXC.delete(k0);}
+ if(!cv)cv=typeof OffscreenCanvas==='function'?new OffscreenCanvas(w,h):document.createElement('canvas');cv.width=w;cv.height=h;
+ const g=cv.getContext('2d');g.font=f;g.textAlign='center';g.lineJoin='round';g.lineWidth=lw;g.strokeStyle='rgba(0,0,0,.9)';g.strokeText(s,ox,oy);g.fillStyle=c;g.fillText(s,ox,oy);
+ e={cv,ox,oy};TXC.set(key,e);return e;}
 function drawTX(cx,cy){const g=txg,k=TXS;g.clearRect(0,0,g.canvas.width,g.canvas.height);g.textAlign='center';g.lineJoin='round';
- for(const o of TX){g.globalAlpha=o.arw?1:o.a??1;if(o.arw){drawTXArrow(g,o,(o.x-cx)*k,(o.y-cy)*k,k);continue;}if(o.bar!=null){drawTXBar(g,o,Math.round((o.x-cx)*k),Math.round((o.y-cy)*k),k);continue;}g.font=o.f.replace('{s}',(o.z*k).toFixed(1));const x=Math.round((o.x-cx)*k),y=Math.round((o.y-cy)*k);g.lineWidth=Math.max(2,k*1.5);g.strokeStyle='rgba(0,0,0,.9)';g.strokeText(o.s,x,y);g.fillStyle=o.c;g.fillText(o.s,x,y);}
+ const lw=Math.max(2,k*1.5),late=document.fonts&&document.fonts.status==='loading';let fz=null;
+ for(const o of TX){g.globalAlpha=o.arw?1:o.a??1;if(o.arw){drawTXArrow(g,o,(o.x-cx)*k,(o.y-cy)*k,k);continue;}if(o.bar!=null){drawTXBar(g,o,Math.round((o.x-cx)*k),Math.round((o.y-cy)*k),k);continue;}
+  const f=o.f.replace('{s}',(o.z*k).toFixed(1)),x=Math.round((o.x-cx)*k),y=Math.round((o.y-cy)*k),e=!late&&txSpr(f,String(o.s),o.c,lw);
+  if(e){g.drawImage(e.cv,x-e.ox,y-e.oy);continue;}
+  if(f!==fz){g.font=fz=f;}g.lineWidth=lw;g.strokeStyle='rgba(0,0,0,.9)';g.strokeText(o.s,x,y);g.fillStyle=o.c;g.fillText(o.s,x,y);}
  g.globalAlpha=1;TX.length=0;}
 
 /* ---------------- cutscene helpers ---------------- */
@@ -9013,10 +9082,10 @@ function card(keys,skippable){return new Promise(r=>{const el=$('card');$('cardT
 function startRaid(){if(S.comp==='regas')setComp(null);S.raid=1;const r=npcOf('regas');allies=['hunter','regas','hunter'].map((id,i)=>({id,x:r.x+(i-1)*12,y:r.y+10,dir:2,frame:0,at:0,hp:42000,max:42000,cd:rand(),off:[[-18,8],[18,8],[0,20]][i]}));SFX.quest();dialog('regas',['rRaid']);
  allies.forEach(a=>{vfx('spawn',a.x,a.y);a.go=1;});raidAhead();}
 // owner 2026-10-22: they set out the moment you accept: gone from Regas at once and waiting at the den, never at your side
-function raidAhead(){const g=mons.find(m=>m.type==='guardian');if(!S.raid||!allies.length||!g)return false;allies.forEach(a=>{let x=(g.sx??g.x)+a.off[0]*1.6,y=(g.sy??g.y)+60+a.off[1];for(let r=0;r<8&&solidT(x/TS|0,y/TS|0);r++)y+=TS;a.x=x;a.y=y;a.wait=1;a.go=0;});toast(t('rRaidAhead'),'good');return true;}
+function raidAhead(){const g=monsOf('guardian')[0];if(!S.raid||!allies.length||!g)return false;allies.forEach(a=>{let x=(g.sx??g.x)+a.off[0]*1.6,y=(g.sy??g.y)+60+a.off[1];for(let r=0;r<8&&solidT(x/TS|0,y/TS|0);r++)y+=TS;a.x=x;a.y=y;a.wait=1;a.go=0;});toast(t('rRaidAhead'),'good');return true;}
 function endRaid(){S.raid=0;allies=[];dialog('regas',['rRaidEnded']);}
 window.__GRAID={start:()=>startRaid(),end:()=>endRaid(),solid:(x,y)=>solidT(x/TS|0,y/TS|0)}; // tests
-function updateAllies(dt){if(!allies.length)return;const g=mons.find(m=>m.type==='guardian');
+function updateAllies(dt){if(!allies.length)return;const g=monsOf('guardian')[0];
  if(allies[0].go&&!raidAhead())return; // the den is not loaded yet: they stay hidden on the road
  allies.forEach(a=>{if(a.dead)return;const fight=g&&!g.dead&&inDen()&&Math.hypot(g.x-a.x,g.y-a.y)<220;if(!fight){a.frame=0;return;} // waiting at the den, never trailing you till you come
   const tx=fight?g.x+a.off[0]:P.x+a.off[0],ty=fight?g.y+a.off[1]:P.y+a.off[1];
@@ -9038,7 +9107,8 @@ function miniBand(){const R=16,y0=miniY,H=WMH+NR;if(y0>=H)return false;const a=M
  g.save();g.beginPath();g.rect(0,y0*4,MW*4,Math.min(R,H-y0)*4);g.clip();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(piece,0,a*4,MW*4,(b-a)*4);g.restore();miniY=y0+R;return miniY<H;}
 function miniB(){while(miniBand());return miniCv;}
 setTimeout(function miniIdle(){if(miniBand())setTimeout(miniIdle,mode==='play'?0:30);},0);
-let LOWB=null;const BTL={},baseTile=(i,j)=>BTL[i+','+j]||(BTL[i+','+j]=mk(1024,1024,g=>{const H=WMH+NR,c=Math.min(128,MW-i*128),r=Math.min(128,H-j*128);if(c>0&&r>0)g.drawImage(MMO({x0:i*128,cols:c,y0:j*128,rows:r}),0,0);}));   // the 8 px copy in 1024 px pieces, painted when the map first shows them
+let LOWB=null;const BTL=new Map(),baseTile=(i,j)=>{const k=i+','+j;let c=BTL.get(k);if(c){BTL.delete(k);BTL.set(k,c);return c;} // the last 30 pieces seen are kept, enough for a 4K screen (4 MB each: browsing the whole map kept them all)
+  c=mk(1024,1024,g=>{const H=WMH+NR,c=Math.min(128,MW-i*128),r=Math.min(128,H-j*128);if(c>0&&r>0)g.drawImage(MMO({x0:i*128,cols:c,y0:j*128,rows:r}),0,0);});BTL.set(k,c);while(BTL.size>30)BTL.delete(BTL.keys().next().value);return c;};   // the 8 px copy in 1024 px pieces, painted when the map first shows them
 const lowBase=()=>LOWB||(LOWB=mk(MW*2,(WMH+NR)*2,g=>{g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(miniB(),0,0,MW*2,(WMH+NR)*2);}));   // both start at world row -NR
 // where the player is on the world map (outside position while indoors)
 const outPos=()=>{if(ARN)return ARN.ret;if(TWR)return TWR.ret;if(inBh(P.x,P.y))return {x:BHPIER.gx,y:BHPIER.gy};if(inTw(P.x,P.y)){const g=twSpot();return {x:g.x,y:g.y+14};}const R=roomAt(P.x,P.y);if(R)return {x:R.dx,y:R.dy};let D=dunAt(P.x,P.y);for(let i=0;D&&i<8;i++){const g=DGATES.find(g=>g.to&&g.hint==='hUp'&&dunAt(g.x,g.y)===D);if(!g)break;if(g.to.y<WMH*TS)return g.to;D=dunAt(g.to.x,g.to.y);}return P;};// below ground the map shows the cave mouth you came down
@@ -9049,19 +9119,20 @@ function invMark(g,fx,fy,u,sc,fs,F){if(!EV||!EV.e.tw)return;const T=TOWNS.find(T
  g.save();g.strokeStyle=`rgba(255,70,50,${.9-k*.7})`;g.lineWidth=2.5*u;g.beginPath();g.arc(x,y,r0*(.8+k*.5),0,7);g.stroke();g.strokeStyle='rgba(255,90,60,.85)';g.lineWidth=1.5*u;g.setLineDash([5*u,4*u]);g.beginPath();g.arc(x,y,r0,0,7);g.stroke();g.restore();
  for(const m of EV.mons)if(!m.dead){const mx=fx(m.x),my=fy(m.y);g.fillStyle=m.cap?'#ffd24a':'#ff4a3a';g.strokeStyle='#2a0806';g.lineWidth=1;g.beginPath();g.arc(mx,my,(m.cap?3.4:2.4)*u,0,7);g.fill();g.stroke();}
  MM.label(g,t('invMap'),x,y-r0-6*u,{size:fs,color:'#ff8a7a',weight:700,font:F,band:'rgba(40,6,4,.85)'});}
+let MINIGR=null; // the HUD map's edge shade, made once
 function drawMini(){const c=$('mini');const show=!miniOff&&S&&!$('hud').hidden;c.hidden=!show;if(!show)return;if(c.width!==256){c.width=256;c.height=176;}
  const g=c.getContext('2d'),u=1.6;g.imageSmoothingEnabled=false;const pp=outPos(),ox=clamp(pp.x/TS-32,0,MW-64),oy=clamp(pp.y/TS-22,-NR,WMH-44);
  g.fillStyle='#0a1220';g.fillRect(0,0,256,176);g.drawImage(miniB(),Math.round(ox*4),Math.round((oy+NR)*4),256,176,0,0,256,176);
- const sx=x=>(x/TS-ox)*4,sy=y=>(y/TS-oy)*4;
+ const sx=x=>(x/TS-ox)*4,sy=y=>(y/TS-oy)*4,on=(x,y,k)=>x>-k&&x<256+k&&y>-k&&y<176+k; // on: only what lands on the 256x176 piece (it drew every monster and person of the world, 5 times a second)
  ANVILS.forEach(a=>MM.marker(g,'anvil',(a.tx+.5-ox)*4,(a.ty+.5-oy)*4,u*.8));
- mons.forEach(m=>{if(m.dead)return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',sx(m.x),sy(m.y),b.boss?u*.7:u);});
+ mons.forEach(m=>{if(m.dead)return;const x=sx(m.x),y=sy(m.y);if(!on(x,y,16))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',x,y,b.boss?u*.7:u);});
  allies.forEach(a=>{if(!a.dead)MM.marker(g,'ally',sx(a.x),sy(a.y),u);});if(COMPO)MM.marker(g,'ally',sx(COMPO.x),sy(COMPO.y),u);
- npcs.forEach(n=>{if(n.hidden)return;const w=wTile(n.x,n.y),x=(w.x-ox)*4,y=(w.y-oy)*4;MM.marker(g,'npc',x,y,u);const mk=npcMark(n.id);if(mk)MM.label(g,mk[0],x,y-9*u,{size:13,color:mk[1],weight:700,font:'Oswald, sans-serif'});});
+ npcs.forEach(n=>{if(n.hidden)return;const w=wTile(n.x,n.y),x=(w.x-ox)*4,y=(w.y-oy)*4;if(!on(x,y,40))return;MM.marker(g,'npc',x,y,u);const mk=npcMark(n.id);if(mk)MM.label(g,mk[0],x,y-9*u,{size:13,color:mk[1],weight:700,font:'Oswald, sans-serif'});});
  Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1).forEach(id=>{const p=qSpot(id);if(p)MM.marker(g,p.ret?'ret':'quest',(p.x-ox)*4,(p.y-oy)*4,u*.85);});
  invMark(g,sx,sy,u,4,13,lang==='ar'?'Tajawal, sans-serif':'Oswald, sans-serif');
  if(NET)netMini(g,sx,sy,u);MM.player(g,sx(pp.x),sy(pp.y),dirAng(P.dir),u,gTime);
  // frame: inner glow edge, compass, zone band
- const gr=g.createRadialGradient(128,88,60,128,88,160);gr.addColorStop(0,'rgba(6,14,32,0)');gr.addColorStop(1,'rgba(6,14,32,.55)');g.fillStyle=gr;g.fillRect(0,0,256,176);
+ if(!MINIGR){MINIGR=g.createRadialGradient(128,88,60,128,88,160);MINIGR.addColorStop(0,'rgba(6,14,32,0)');MINIGR.addColorStop(1,'rgba(6,14,32,.55)');}g.fillStyle=MINIGR;g.fillRect(0,0,256,176);
  g.strokeStyle='rgba(143,216,255,.55)';g.lineWidth=2;g.strokeRect(1,1,254,174);
  MM.label(g,'N',14,14,{size:12,color:'#bfe8ff',weight:700,font:'Oswald, sans-serif'});
  MM.label(g,t(S.zone||'zWin'),128,163,{size:13,color:'#ffe7a8',band:'rgba(8,16,40,.78)'});
@@ -9154,12 +9225,12 @@ function p3Ents(ents){if(!P)return;const near=(x,y)=>Math.abs(x-P.x)<VW&&Math.ab
  for(let i=0;i<4;i++){const p=p3RodXY(i);if(!near(p.x,p.y))continue;const on=!P3.rod[i];ents.push({y:p.y,f:()=>{const x=p.x,y=p.y;R(ctx,x-4,y-2,8,3,'#4a4a52');R(ctx,x-1,y-30,2,29,'#8a8e9a');R(ctx,x,y-30,1,29,'#c8ccd6');
    ctx.fillStyle=on?'#fff27a':'#5a6478';ctx.beginPath();ctx.arc(x,y-32,2.5,0,7);ctx.fill();
    if(on){if((gTime*9+i|0)%3===0){ctx.strokeStyle='rgba(255,242,122,.9)';ctx.beginPath();ctx.moveTo(x,y-32);ctx.lineTo(x+(rand()-.5)*14,y-38-rand()*6);ctx.stroke();}
-    const L=mons.find(m=>m.type==='slord'&&!m.dead);if(L&&p3InT()){ctx.save();ctx.globalAlpha=.18+.1*Math.sin(gTime*6+i);ctx.strokeStyle='#9fd8ff';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y-32);ctx.lineTo(L.x,monY(L)-24);ctx.stroke();ctx.restore();}}
+    const L=monsOf('slord').find(m=>!m.dead);if(L&&p3InT()){ctx.save();ctx.globalAlpha=.18+.1*Math.sin(gTime*6+i);ctx.strokeStyle='#9fd8ff';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y-32);ctx.lineTo(L.x,monY(L)-24);ctx.stroke();ctx.restore();}}
    else{ctx.save();ctx.globalAlpha=.3;ctx.fillStyle='#5ac8ff';ctx.beginPath();ctx.ellipse(x,y,9,3,0,0,7);ctx.fill();ctx.restore();}}});}
  const s=p3S();WYN.eggs.forEach(([tx,ty],i)=>{if(s.egg[i]>Date.now())return;const x=tx*TS+8,y=ty*TS+10;if(!near(x,y))return;ents.push({y,f:()=>{blob(ctx,x,y-4,4,5,'#6a7a3a');blob(ctx,x,y-4,3,4,'#a8b878');R(ctx,x-2,y-7,1,1,'#e8f0c8');R(ctx,x+1,y-4,2,1,'#5a6a2a');R(ctx,x-1,y-1,1,1,'#5a6a2a');}});});
  for(const k of P3.strike)ents.push({y:k.y-1,f:()=>{if(!k.hit){const a=1-k.t;ctx.save();ctx.globalAlpha=.25+a*.4;ctx.strokeStyle='#fff27a';ctx.beginPath();ctx.ellipse(k.x,k.y,20*a+4,(20*a+4)*.45,0,0,7);ctx.stroke();ctx.restore();}
    else{ctx.save();ctx.globalAlpha=Math.min(1,k.ft*6);ctx.strokeStyle='#ffffff';ctx.lineWidth=2;ctx.beginPath();let x=k.x,y=k.y-160;ctx.moveTo(x,y);while(y<k.y){y+=16;x=k.x+(y<k.y?(rand()-.5)*14:0);ctx.lineTo(x,Math.min(y,k.y));}ctx.stroke();ctx.restore();}}});
- const L=mons.find(m=>m.type==='slord'&&!m.dead);if(L&&!p3Grounded()&&near(L.x,L.y))ents.push({y:L.y+2,f:()=>{ctx.save();ctx.globalAlpha=.16+.06*Math.sin(gTime*4);ctx.fillStyle='#7ac8ff';ctx.beginPath();ctx.ellipse(L.x,monY(L)-26,30,40,0,0,7);ctx.fill();ctx.globalAlpha=.5;ctx.strokeStyle='#cfefff';ctx.stroke();ctx.restore();}});
+ const L=monsOf('slord').find(m=>!m.dead);if(L&&!p3Grounded()&&near(L.x,L.y))ents.push({y:L.y+2,f:()=>{ctx.save();ctx.globalAlpha=.16+.06*Math.sin(gTime*4);ctx.fillStyle='#7ac8ff';ctx.beginPath();ctx.ellipse(L.x,monY(L)-26,30,40,0,0,7);ctx.fill();ctx.globalAlpha=.5;ctx.strokeStyle='#cfefff';ctx.stroke();ctx.restore();}});
  if(P3.ch)ents.push({y:P.y+2,f:()=>{const k=1-P3.ch.t/2;ctx.save();ctx.strokeStyle='#fff27a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(P.x,P.y-34,6,-Math.PI/2,-Math.PI/2+k*6.283);ctx.stroke();ctx.restore();}});}
 // the Vampire City is always night: you see only around you, less still in the catacombs
 function p3Dark(){if(!P||!S||mode==='title'||mode==='lang')return;const tx=P.x/TS,ty=P.y/TS;if(!vmcIn(tx,ty))return;const cat=catIn(tx,ty),nt=isNight(),r=cat?78:nt?110:190;   // by day the city is only dim, and its people hide indoors
@@ -9342,9 +9413,9 @@ function p4Tick(dt){if(!S||!P||S.__demo)return;P4.mv=Math.hypot(P.x-(P4.lx??P.x)
  const R=P4.rh;if(R&&!R.end){const now=performance.now()/1000-R.t0;R.n.forEach((n,i)=>{if(R.j[i]==null&&now>n+.16)R.j[i]=0;});if(R.j.length===8&&R.j.every(v=>v!=null))p4SongEnd();}
  const D=P4.dance;if(D&&!D.end){if(D.gap>0)D.gap-=dt;else if((D.t-=dt)<=0){D.res.push(0);SFX.deny();p4DNext();}if(NET)EMO={k:'dance',t:performance.now()};}
  // the Kraken
- const K=mons.find(m=>m.type==='kraken'&&!m.dead),near=!!K&&Math.hypot(P.x-K.x,P.y-K.y)<330;
+ const K=monsOf('kraken').find(m=>!m.dead),near=!!K&&Math.hypot(P.x-K.x,P.y-K.y)<330;
  for(const m of mons)if(m.hx!=null&&(m.type==='kraken'||m.type==='ktent')){m.x=m.hx;m.y=m.hy;}
- if(near&&mode!=='title'){const n=mons.filter(m=>m.type==='ktent'&&m.kr&&!m.dead).length;
+ if(near&&mode!=='title'){const n=monsOf('ktent').filter(m=>m.kr&&!m.dead).length;
   if(P4.kUp>0){if((P4.kUp-=dt)<=0){P4.kUp=0;p4Tents(K);toast(t('krDive'),'warn');}}
   else if(!P4.kSp)p4Tents(K);else if(!n){P4.kUp=15;P4.kSp=0;announce(t('krUp'),1);SFX.legendary();}}
  else if(P4.kSp||P4.kUp){for(const m of mons)if(m.type==='ktent'&&m.kr&&!m.dead){m.dead=true;m.rt=1e9;}P4.kSp=0;P4.kUp=0;}
@@ -9377,7 +9448,7 @@ function p4Ents(ents){if(!P)return;const near=(x,y)=>Math.abs(x-P.x)<VW&&Math.ab
   const x0=STG.x0*TS,y0=STG.y0*TS;ents.push({y:y0,f:()=>{R(ctx,x0-2,y0-14,4,16,'#6a4a2a');R(ctx,x0+(STG.x1-STG.x0+1)*TS-2,y0-14,4,16,'#6a4a2a');R(ctx,x0-2,y0-16,(STG.x1-STG.x0+1)*TS+4,4,'#8a2a3a');
    for(let k=0;k<8;k++)R(ctx,x0+4+k*16,y0-12,6,4+((k*7)%3),k%2?'#e8c860':'#c83a4a');}});}
  for(const m of mons)if(m.type==='ktent'&&!m.dead&&near(m.x,m.y))ents.push({y:m.y-1,f:()=>{ctx.save();ctx.globalAlpha=.5;ctx.strokeStyle='#e8f8ff';ctx.beginPath();ctx.ellipse(m.x,m.y+2,10+Math.sin(gTime*4+m.x)*1.5,3,0,0,7);ctx.stroke();ctx.restore();}});
- const Kr=mons.find(m=>m.type==='kraken'&&!m.dead);if(Kr&&near(Kr.x,Kr.y)&&!(P4.kUp>0)&&P4.kSp)ents.push({y:Kr.y+2,f:()=>{ctx.save();ctx.globalAlpha=.18+.06*Math.sin(gTime*3);ctx.fillStyle='#1a4a8a';ctx.beginPath();ctx.ellipse(Kr.x,Kr.y-10,44,22,0,0,7);ctx.fill();ctx.restore();}});
+ const Kr=monsOf('kraken').find(m=>!m.dead);if(Kr&&near(Kr.x,Kr.y)&&!(P4.kUp>0)&&P4.kSp)ents.push({y:Kr.y+2,f:()=>{ctx.save();ctx.globalAlpha=.18+.06*Math.sin(gTime*3);ctx.fillStyle='#1a4a8a';ctx.beginPath();ctx.ellipse(Kr.x,Kr.y-10,44,22,0,0,7);ctx.fill();ctx.restore();}});
  if(P4.aura)p4Sing(ents,P.x,P.y,P4.aura.k,.05);
  if(NET)for(const r of NET.remotes()){const fs=FXS.get(r.sid),m=fs&&fs.st&&/[ach]/.exec(fs.st);if(m&&near(r.x,r.y))p4Sing(ents,r.x,r.y,m[0],.035);}
  P4.notes=P4.notes.filter(n=>gTime-n.t0<1.8);if(P4.notes.length)ents.push({y:P.y+650,f:()=>{ctx.save();
@@ -9436,7 +9507,7 @@ Object.assign(STR.en,{"krakenN": "Kraken", "ktentN": "Kraken Tentacle", "hbm": "
 const P5={cpT:12,shT:0,swT:0,skT:-9,skL:0,seen:0};
 const P5WB=['dopp'],DPC=['#e8f4ee','#5ac8a0'];
 function p5Spawn(){const r=mulberry32(9511),d=newMon('dopp',MYF.x*TS+8,MYF.y*TS+8,r),u=WS&&WS.wb&&WS.wb.dopp;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
-const p5Copies=D=>mons.filter(m=>m.type==='dpcopy'&&!m.dead&&Math.hypot(m.x-D.x,m.y-D.y)<300);
+const p5Copies=D=>monsOf('dpcopy').filter(m=>!m.dead&&Math.hypot(m.x-D.x,m.y-D.y)<300);
 function p5Atk(m){if(m.type!=='dopp'||!p5Copies(m).length)return 1;if(gTime>P5.shT){P5.shT=gTime+8;toast(t('dpShield'),'warn');}return 1/3;}
 function p5Copy(D,n){for(let i=0;i<n;i++){const a=i/n*6.28+rand(),x=D.x+Math.cos(a)*40,y=D.y+Math.sin(a)*26;if(solidT(x/TS|0,y/TS|0))continue;
  const s=newMon('dpcopy',x,y);s.tmp=1;s.eng=4;s.agg=1;s.life=40;mons.push(s);vfx('spawn',x,y,{color:'#9af0d0'});dissolve(x,y-10,DPC,8);}}
@@ -9448,7 +9519,7 @@ function p5Tick(dt){if(!P||!S||mode==='title')return;const tx=P.x/TS,ty=P.y/TS;
  if(myfIn(tx,ty)){if(!P5.seen){P5.seen=1;toast(t('myfSeen'),'warn');}}else if(Math.hypot(tx-MYF.x,ty-MYF.y)>40)P5.seen=0;
  if(S.qs.dp1&&S.qs.dp1.st===1&&myfClear(tx,ty))qEvent('visit','myfc');
  // the Doppelganger splits into copies while you fight it; a copy fades after 40 s
- const D=mons.find(m=>m.type==='dopp'&&!m.dead);
+ const D=monsOf('dopp').find(m=>!m.dead);
  if(D&&D.eng>0&&Math.hypot(P.x-D.x,P.y-D.y)<320){if((P5.cpT-=dt)<=0){P5.cpT=30;const n=2+Math.min(2,NET?NET.remotes().filter(r=>Math.hypot(r.x-D.x,r.y-D.y)<320).length:0);p5Copy(D,n);toast(t('dpSplit'),'warn');SFX.slam();}}else P5.cpT=12;
  for(const m of mons)if(m.type==='dpcopy'&&!m.dead&&(m.life=(m.life??40)-dt)<=0){m.dead=true;m.rt=1e9;dissolve(m.x,m.y-10,DPC,8);}
  // Randy copies the skill you just used, and swaps places with you when you are about to fall
@@ -12236,7 +12307,7 @@ function huntOf(n){const w=Math.floor((n-LOCK_E)/LOCK_WK),L=HUNT_L.length,x=((w%
 function huntNow(n){const h=huntOf(n);return n>=h.open&&n<h.end?h:null;}
 // is the boss's shared timer (`at`, server time) from a kill before its hunt, which is on now? Then it is set aside
 function huntLift(type,at){const n=wNow(),h=huntOf(n);return h.k===type&&n>=h.at&&n<h.end&&!!MT[type]&&at-MT[type].wb*1000<h.at;}
-const huntLvOf=k=>Math.max(1,(MT[k].lv||[1])[0]-HUNT_LV),huntMon=k=>mons.find(m=>m.type===k&&!m.tmp);
+const huntLvOf=k=>Math.max(1,(MT[k].lv||[1])[0]-HUNT_LV),huntMon=k=>monsOf(k).find(m=>!m.tmp);
 function huntTick(){if(!S||S.__demo||!P||!Satisfy.local.inGame())return;const p=performance.now();if(p-HUNTT<250)return;HUNTT=p;
  const n=wNow(),h=huntOf(n),k=h.k,ok=S.lv>=huntLvOf(k);
  if(n>=h.open&&n<h.at&&!HUNTSAW['s'+h.w]){HUNTSAW['s'+h.w]=1;if(ok)toast(t('huntSoon',{b:t(k+'N'),m:Math.ceil((h.at-n)/60000)}),'warn');}
@@ -12403,12 +12474,12 @@ function mobKilled(m){const h=MOBN.hits.get(m);MOBN.hits.delete(m);if(!h||MOBN.h
    (mobs/{world}/h<host>/{its uid}: "h<life>.<damage>[.<stuns>.<last stun>]", base 36), at most every MOB_HIT ms while it
    fights. Totals, not messages: one lost or merged write loses nothing, the host applies what grew since it last looked.
    And the host's list carries the monster's full health when it isn't the one its level gives. */
-const MOB_HIT=150;
+const MOB_HIT=150,MOB_CUMT=20;
 function mobLife(k){if(MOBN.cum.delete(k))MOBN.dirty=1;MOBN.ep.set(k,(MOBN.ep.get(k)||0)+1);} // follower: a death; the next hits start a new total
 // every damage source on a monster goes through here; true when the hit was handed to another player (local HP kept).
 // ally: a blow from the world's NPCs (the town's defenders in an invasion, the war's allies), which every screen runs: only
 // the host's count, so they don't hit once for each player there (SAT-ONLINE-149)
-const mobCum=k=>{let c=MOBN.cum.get(k);if(!c)MOBN.cum.set(k,c={e:MOBN.ep.get(k)||0,d:0,q:0,s:0,kx:0,ky:0,h:0,wq:0,ws:0,sq:0,ss:0});return c;};
+const mobCum=k=>{let c=MOBN.cum.get(k);if(!c)MOBN.cum.set(k,c={e:MOBN.ep.get(k)||0,d:0,q:0,s:0,kx:0,ky:0,h:0,wq:0,ws:0,sq:0,ss:0});c.t=gTime;return c;}; // t: when it last grew (mobFlush)
 // a monster healing itself off a blow on you (a drain): on a follower the host's copy heals, so every bar rises the same;
 // this copy's bar follows the host's list, as for damage (SAT-ONLINE-149, with the signature moves of v2.04)
 function mobHeal(m,h){h=Math.max(0,Math.round(h));if(!h)return;if(MOBN&&MOBN.host&&MOBN.host!==NET.uid&&m.led&&mobOk(m)){const c=mobCum(mobKey(m));c.h=(c.h||0)+Math.min(1e6,h);MOBN.dirty=1;return;}m.hp=Math.min(m.max,m.hp+h);}
@@ -12464,6 +12535,13 @@ function mobLocal(m,key){const w=m.weak||0,sl=m.slowU||0,st=m.stun||0,W=w>(m.wea
 function mobFlush(z){for(const m of mons)if(m.led&&!m.dead&&mobOk(m))mobLocal(m);const t=performance.now(),mg=!!MOBN.merge&&t<MOBN.mergeT;if(MOBN.merge&&!mg){MOBN.merge=null;MOBN.dirty=1;}
  if(!MOBN.dirty&&!mg||t-MOBN.fT<(mg?MOB_MS:MOB_HIT))return;MOBN.fT=t;MOBN.dirty=0;const o={};let n=0;
  if(mg)for(const m of mons){if(n>=MOB_MAX)break;const k=mobKey(m);if(MOBN.merge.has(k)&&mobOk(m)&&!(k in o)){o[k]=mobEntry(m,false);n++;}}
+ // (SAT-ONLINE-160) a total that hasn't grown for MOB_CUMT s leaves the list: a monster hit once and left (it went home and
+ // healed, or the host stopped listing it) kept its entry all the while, and past MOB_MAX of them a new fight's damage was
+ // never sent (a monster held at 1 HP). Past MOB_MAX the oldest go. A total that goes moves its life count on, so the host
+ // takes the next one as new rather than as less than the last
+ const drop=k=>{MOBN.cum.delete(k);MOBN.ep.set(k,(MOBN.ep.get(k)||0)+1);};
+ for(const [k,c] of MOBN.cum)if(gTime-(c.t??gTime)>MOB_CUMT)drop(k);
+ if(MOBN.cum.size>MOB_MAX-n)for(const [k] of [...MOBN.cum].sort((a,b)=>(b[1].t??0)-(a[1].t??0)).slice(Math.max(0,MOB_MAX-n)))drop(k);
  for(const [k,c] of MOBN.cum){if(n>=MOB_MAX)break;if(k in o)continue;o[k]=mobCumS(c);n++;}
  if(n){NETTR.mobsPut(z,o,NET.uid);MOBN.put=true;}else if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}}
 // host: what its followers' nodes say: damage done since it last looked, and during a merge the monsters they saw
@@ -12480,7 +12558,7 @@ function mobHits(){for(const u in MOBN.all){if(u===NET.uid||u===MOBN.host||!MOBN
 // when this copy is standing about too, away from the host, so nothing jumps on the host's screen
 function mobAdopt(k,v,u){const w=v.split(','),n=w.slice(0,5).map(Number);if(![5,6].includes(w.length)||n.some(x=>!isFinite(x)))return;const [x,y,hp,fl,lv]=n,mx=w.length===6?mobMaxOf(w[5]):0;
  let m=mobByKey(k);const live=!(fl&1),used=fl&2||hp<1000||!live;
- if(!m){if(!live)return;const r=/^([a-z0-9_]{1,16})@(-?\d{1,6}),(-?\d{1,6})$/.exec(k);if(!r||!MT[r[1]]||mons.length>=1500)return;m=newMon(r[1],+r[2],+r[3]);m.ek=1;m.tmp=1;m.nk=k;m.lv=lv;m.max=mx||mobBaseMax(m);m.hp=m.max;mons.push(m);}
+ if(!m){if(!live)return;const r=/^([a-z0-9_]{1,16})@(-?\d{1,6}),(-?\d{1,6})$/.exec(k);if(!r||!MT[r[1]]||mobNkN()>=MOB_NK)return;m=newMon(r[1],+r[2],+r[3]);m.ek=1;m.tmp=1;m.nk=k;m.lv=lv;m.max=mx||mobBaseMax(m);m.hp=m.max;mons.push(m);NKN.n++;}
  const now=!m.dead&&m.prov>gTime&&m.provU===NET.uid;
  if(!used&&(now||m.dead||m.eng>0||m.hp<m.max||Math.hypot(m.x-P.x,m.y-P.y)<320))return;
  if(!live){if(!m.dead){m.dead=true;m.dying=0;m.rt=mobRt(m);}MOBN.fast=1;return;}
@@ -12501,10 +12579,13 @@ function bossScaleTick(rs){const t=performance.now();if(t-bsT<500||!P)return;bsT
 window.__GBSC={of:n=>bossScaleOf(n),tick:rs=>{bsT=0;bossScaleTick(rs);},C:BSC}; // tests
 // follower: a monster on the host's list that this client never spawned (an event wave, a boss's adds, a squad) is made
 // here from its key, "<type>@<spawn x>,<spawn y>", and then follows the host like the others
-let mobMkT=0;function mobMake(){const t=performance.now();if(t-mobMkT<500)return;mobMkT=t;const L=MOBN.all[MOBN.host];if(!L||!L.m)return;
+// copies made from another player's list (here or by mobAdopt) are capped by their own count. The cap was 1,500 monsters in
+// all, which the map already passes (the East Continent alone has ~480), so adopting stopped, and making had none
+const MOB_NK=300;let NKN={t:-1,n:0};const mobNkN=()=>{if(NKN.t!==gTime){let n=0;for(const m of mons)if(m.nk&&m.tmp&&!m.dead)n++;NKN={t:gTime,n};}return NKN.n;};
+let mobMkT=0;function mobMake(){const t=performance.now();if(t-mobMkT<500)return;mobMkT=t;const L=MOBN.all[MOBN.host];if(!L||!L.m)return;if(mobNkN()>=MOB_NK)return;
  const have=new Set();for(const m of mons)if(mobOk(m))have.add(mobKey(m));let n=0;
  for(const k in L.m){if(have.has(k)||n>=12)continue;const r=/^([a-z0-9_]{1,16})@(-?\d{1,6}),(-?\d{1,6})$/.exec(k),v=String(L.m[k]).split(',');if(!r||!MT[r[1]]||v[2]==='0')continue;
-  const m=newMon(r[1],+r[2],+r[3]);m.ek=1;m.tmp=1;m.mkN=1;/* made from the host's list: mkN, not mk (a tracker's mark: +20% damage taken; SAT-ONLINE-149) */m.nk=k;m.x=+v[0]||m.x;m.y=+v[1]||m.y;m.eng=4;m.agg=1;mons.push(m);n++;}}
+  const m=newMon(r[1],+r[2],+r[3]);m.ek=1;m.tmp=1;m.mkN=1;/* made from the host's list: mkN, not mk (a tracker's mark: +20% damage taken; SAT-ONLINE-149) */m.nk=k;m.x=+v[0]||m.x;m.y=+v[1]||m.y;m.eng=4;m.agg=1;mons.push(m);n++;NKN.n++;}}
 function mobList(rs){const o={},pts=[P].concat(rs);let n=0;
  const near=m=>mobOk(m)&&pts.some(p=>Math.abs(p.x-m.x)<MOB_BX&&Math.abs(p.y-m.y)<MOB_BY); // bosses first, so a crowded den never pushes one off the list
  for(const m of mons.filter(m=>MT[m.type].boss&&near(m)).concat(mons.filter(m=>!MT[m.type].boss&&near(m)))){if(n>=MOB_MAX)break;
@@ -12525,7 +12606,7 @@ function mobEntry(m,act){const mx=Math.round(m.max);return Math.round(m.x)+','+M
    player, the way the host's strikes only hurt the host's: so everyone sees the same red zone, and dodging it on your
    screen is dodging it. A new action is sent at once (MOB_FAST), not at the next quarter second. */
 const MOB_FAST=60;
-window.__GM={get host(){return MOBN&&MOBN.host},get group(){return MOBN?MOBN.rs.map(r=>r.uid):[]},get list(){const L=MOBN&&MOBN.all[MOBN.host];return L&&L.m||null},hit:(m,d,a)=>netHit(m,d,a),mx:(mv,m)=>mxOn(mv,m),act:m=>mobActN(m)}; // tests
+window.__GM={get host(){return MOBN&&MOBN.host},get cum(){return MOBN&&MOBN.cum},get group(){return MOBN?MOBN.rs.map(r=>r.uid):[]},get list(){const L=MOBN&&MOBN.all[MOBN.host];return L&&L.m||null},hit:(m,d,a)=>netHit(m,d,a),mx:(mv,m)=>mxOn(mv,m),act:m=>mobActN(m)}; // tests
 const uh=u=>{let h=0x811c9dc5;u=String(u||'');for(let i=0;i<u.length;i++){h^=u.charCodeAt(i);h=Math.imul(h,0x01000193);}return ((h>>>0)&0xfff).toString(16);};
 function mobActN(m){if(!MOBN||MOBN.host!==NET.uid)return;m.actN=((m.actN||0)+1)%1000;MOBN.fast=1;}
 function mobBite(m){if(!MOBN||MOBN.host!==NET.uid)return;mobActN(m);m.biteT=.35;}
@@ -12780,13 +12861,23 @@ for(const id of PMOV){const el=$(id);if(!el)continue;new MutationObserver(()=>{i
  head.addEventListener('pointerup',end);head.addEventListener('pointercancel',end);head.addEventListener('lostpointercapture',end);}
 window.__GPM={place:pmPlace,get P(){return PMP;}}; // tests
 let guiT=0;
-function guiTick(now){if(TOUCH)return;if(!now&&(guiT-=1)>0)return;guiT=15;const hud=$('hud');if(!hud||hud.hidden)return;const hr=hud.getBoundingClientRect();
- for(const id of GUI_IDS){const el=$(id);if(!el)continue;const g=GUI[id]||{},b=guiGrip(id);el.classList.toggle('gcol',!!g.c);
-  if(GCLOSE.has(id)){if(el.hidden&&g.h){g.h=0;guiSave();}el.classList.toggle('gx0',!!g.h);}if(g.x!=null)guiPlace(id);
-  const show=!el.hidden&&(g.c||el.offsetParent!==null)&&getComputedStyle(el).opacity!=='0';b.hidden=!show;if(!show)continue;
-  b.classList.toggle('col',!!g.c);{const f=b.querySelector('.gf'),h=g.c?GICO.max+'<span>'+esc(t('gui_'+id))+'</span>':GICO.min;if(f.dataset.h!==h){f.dataset.h=h;f.innerHTML=h;}f.title=t(g.c?'guiOpen':'guiFold');b.querySelector('.gm').title=t('guiMove');}
-  if(g.c){if(guiDrag&&guiDrag.id===id)continue;const x=g.x!=null?g.x*hr.width:el.getBoundingClientRect().left-hr.left,y=(g.y!=null?g.y*hr.height:el.getBoundingClientRect().top-hr.top)-b.offsetHeight;b.style.left=Math.max(0,Math.min(hr.width-b.offsetWidth,x))+'px';b.style.top=Math.max(0,Math.min(hr.height-b.offsetHeight,y))+'px';}
-  else{const r=el.getBoundingClientRect();b.style.left=Math.max(0,r.left-hr.left)+'px';b.style.top=Math.max(0,r.top-hr.top-b.offsetHeight)+'px';}}}
+// in passes (owner 2026-10-23: frame drops): the writes, then the reads, then the writes again. Each read after a write
+// had the page lay itself out again, once for each panel, every 15 frames
+function guiTick(now){if(TOUCH)return;if(!now&&(guiT-=1)>0)return;guiT=15;const hud=$('hud');if(!hud||hud.hidden)return;
+ const L=[];for(const id of GUI_IDS){const el=$(id);if(!el)continue;const g=GUI[id]||{},b=guiGrip(id);el.classList.toggle('gcol',!!g.c);
+  if(GCLOSE.has(id)){if(el.hidden&&g.h){g.h=0;guiSave();}el.classList.toggle('gx0',!!g.h);}if(g.x!=null&&el.parentNode!==hud)hud.appendChild(el);L.push({id,el,g,b});}
+ // the placed panels (guiPlace, all at once): read every size, then move them
+ const PL=L.filter(o=>o.g.x!=null);if(PL.length){const W=hud.clientWidth,H=hud.clientHeight;for(const o of PL)o.r=o.el.getBoundingClientRect();
+  for(const o of PL){const x=Math.max(0,Math.min(W-Math.min(o.r.width||40,W),o.g.x*W)),y=Math.max(0,Math.min(H-Math.min(o.r.height||20,H),o.g.y*H));
+   Object.assign(o.el.style,{position:'absolute',left:x+'px',top:y+'px',right:'auto',bottom:'auto',insetInlineStart:'auto',insetInlineEnd:'auto',transform:'none',margin:'0'});o.el.style.setProperty('left',x+'px');}}
+ for(const o of L)o.show=!o.el.hidden&&(o.g.c||o.el.offsetParent!==null)&&getComputedStyle(o.el).opacity!=='0';
+ for(const {id,g,b,show} of L){b.hidden=!show;if(!show)continue;
+  b.classList.toggle('col',!!g.c);{const f=b.querySelector('.gf'),h=g.c?GICO.max+'<span>'+esc(t('gui_'+id))+'</span>':GICO.min;if(f.dataset.h!==h){f.dataset.h=h;f.innerHTML=h;}const ft=t(g.c?'guiOpen':'guiFold'),m=b.querySelector('.gm'),mt=t('guiMove');if(f.title!==ft)f.title=ft;if(m.title!==mt)m.title=mt;}}
+ const hr=hud.getBoundingClientRect();
+ for(const o of L){if(!o.show||o.g.c&&guiDrag&&guiDrag.id===o.id)continue;const {el,g,b}=o;o.bh=b.offsetHeight;o.bw=b.offsetWidth;if(!g.c||g.x==null||g.y==null)o.er=el.getBoundingClientRect();}
+ for(const o of L){if(!o.show||o.g.c&&guiDrag&&guiDrag.id===o.id)continue;const {g,b}=o;
+  if(g.c){const x=g.x!=null?g.x*hr.width:o.er.left-hr.left,y=(g.y!=null?g.y*hr.height:o.er.top-hr.top)-o.bh;b.style.left=Math.max(0,Math.min(hr.width-o.bw,x))+'px';b.style.top=Math.max(0,Math.min(hr.height-o.bh,y))+'px';}
+  else{b.style.left=Math.max(0,o.er.left-hr.left)+'px';b.style.top=Math.max(0,o.er.top-hr.top-o.bh)+'px';}}}
 function guiReset(){GUI={};guiSave();try{localStorage.removeItem('satisfy_pmov');}catch(e){}save(true);location.reload();}
 Object.assign(STR.ar,{guiMove:'اسحب عشان تحرّك',guiFold:'صغّر',guiOpen:'افتح',guiReset:'رجّع الواجهة لوضعها الأصلي',gui_sgbar:'الحصار',gui_natbar:'البطولة',gui_tlbar:'حياة المدينة',gui_stats:'الحالة',gui_quest:'الكويستات',gui_mini:'الخريطة',gui_partyW:'الفريق',gui_chatW:'الشات',gui_skillbar:'السكيلات',gui_keys:'الأزرار',gui_evbar:'الحدث',gui_boss:'الزعيم'});
 Object.assign(STR.en,{guiMove:'Drag to move',guiFold:'Fold',guiOpen:'Open',guiReset:'Reset the HUD',gui_sgbar:'Siege',gui_natbar:'Tournament',gui_tlbar:'Town life',gui_stats:'Status',gui_quest:'Quests',gui_mini:'Map',gui_partyW:'Party',gui_chatW:'Chat',gui_skillbar:'Skills',gui_keys:'Keys',gui_evbar:'Event',gui_boss:'Boss'});

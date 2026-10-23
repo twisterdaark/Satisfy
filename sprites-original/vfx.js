@@ -62,15 +62,20 @@ function create(){
   shadow(r,x,y,o){glow(x,y-6,4,20,'#9a6ad8',.45,.6);burst(r,18,x,y-6,{sp0:20,sp1:70,drag:2,l0:.4,l1:.8,ramp:RAMP.shadow,size:3,size1:1});add({x,y:y-6,life:.4,shape:'ring',size:16,size1:3,color:'#c8a0ff',width:2});}
  };
  function spawn(kind,x,y,o={}){const f=PRE[kind];if(!f)return false;f(rng(o.seed),x,y,o);return true;}
- function update(dt){for(let i=P.length-1;i>=0;i--){const p=P[i];p.t+=dt;if(p.t<0)continue;if(p.t>=p.life){P.splice(i,1);continue;}
-  if(p.drag){const k=Math.max(0,1-p.drag*dt);p.vx*=k;p.vy*=k;}p.vx+=p.ax*dt;p.vy+=p.ay*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;}}
+ // update compacts in place (perf, Claude-A 2026-10-23): a splice for each spent particle moved the whole tail, which got slow
+ // with many effects at once. Same order, same numbers.
+ function update(dt){let w=0;for(let i=0;i<P.length;i++){const p=P[i];p.t+=dt;if(p.t>=0){if(p.t>=p.life)continue;
+  if(p.drag){const k=Math.max(0,1-p.drag*dt);p.vx*=k;p.vy*=k;}p.vx+=p.ax*dt;p.vy+=p.ay*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;}P[w++]=p;}P.length=w;}
  function draw(g){const R=(x,y,w,h)=>g.fillRect(Math.round(x),Math.round(y),Math.max(1,Math.round(w)),Math.max(1,Math.round(h)));
+  // the blend and colour are set only when they change (each set is parsed again by the canvas); the pixels are the same
+  let bl=null,cl=null;
   for(const p of P){if(p.t<0)continue;const k=p.t/p.life,col=p.ramp?rampAt(p.ramp,k):p.color,s=p.size1!=null?lerp(p.size,p.size1,k):p.size;
-   g.globalCompositeOperation=p.blend;g.globalAlpha=(p.alpha||1)*(p.shape==='beam'||p.shape==='disc'||p.shape==='glow'?(1-k):Math.min(1,(1-k)*1.6));g.fillStyle=col;g.strokeStyle=col;
+   if(p.blend!==bl){g.globalCompositeOperation=bl=p.blend;}g.globalAlpha=(p.alpha||1)*(p.shape==='beam'||p.shape==='disc'||p.shape==='glow'?(1-k):Math.min(1,(1-k)*1.6));if(col!==cl){g.fillStyle=col;g.strokeStyle=col;cl=col;}
    switch(p.shape){
     case 'px':R(p.x-s/2,p.y-s/2,s,s);break;
     case 'flame':R(p.x-s/2,p.y-s,s,s*1.6);if(s>2){g.fillStyle=rampAt(p.ramp,Math.max(0,k-.25));R(p.x-s/4,p.y-s*.6,s/2,s*.8);}break;
-    case 'glow':{const gr=g.createRadialGradient(p.x,p.y,0,p.x,p.y,s);gr.addColorStop(0,col);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(p.x-s,p.y-s,s*2,s*2);break;}
+    case 'glow':{if(!(s>0)||!Number.isFinite(p.x+p.y))break; // a bad number threw here and lost the whole frame
+     const gr=g.createRadialGradient(p.x,p.y,0,p.x,p.y,s);gr.addColorStop(0,col);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(p.x-s,p.y-s,s*2,s*2);break;}
     case 'streak':{const l=Math.min(6,Math.hypot(p.vx,p.vy)*.04);R(p.x-.5,p.y-.5,2,2);const ux=p.vx/(Math.hypot(p.vx,p.vy)||1),uy=p.vy/(Math.hypot(p.vx,p.vy)||1);for(let j=0;j<=l;j++)R(p.x-ux*j,p.y-uy*j,1,1);break;}
     case 'plus':R(p.x-1,p.y,3,1);R(p.x,p.y-1,1,3);break;
     case 'glint':{const a=Math.round(s+1);R(p.x-a,p.y,a*2+1,1);R(p.x,p.y-a,1,a*2+1);break;}
@@ -82,7 +87,8 @@ function create(){
     case 'bolt':g.lineWidth=p.width||1;g.beginPath();p.pts.forEach(([a,b],j)=>j?g.lineTo(Math.round(a)+.5,Math.round(b)+.5):g.moveTo(Math.round(a)+.5,Math.round(b)+.5));g.stroke();break;
     case 'beam':{const w=p.size*(p.pulse?(.75+.25*Math.sin(p.t*8)):(1-k*.4)),h=p.height;const gr=g.createLinearGradient(0,p.y-h,0,p.y);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,col);g.fillStyle=gr;R(p.x-w/2,p.y-h,w,h);g.fillStyle='#ffffff';R(p.x-Math.max(1,w/4)/2,p.y-h*.8,Math.max(1,w/4),h*.8);break;}
     case 'orbit':{const a=p.phase+p.t*8;R(p.x+Math.cos(a)*p.radius,p.y+Math.sin(a)*p.radius*.4,2,2);break;}
-    case 'wisp':R(p.x+Math.sin(p.t*9)*2,p.y,s,s+1);break;}}
+    case 'wisp':R(p.x+Math.sin(p.t*9)*2,p.y,s,s+1);break;}
+   if(p.shape==='flame'||p.shape==='glow'||p.shape==='beam')cl=null;} // these set their own fill
   g.globalAlpha=1;g.globalCompositeOperation='source-over';}
  return {spawn,update,draw,get count(){return P.length;},clear:()=>{P.length=0;},kinds:Object.keys(PRE)};}
 
