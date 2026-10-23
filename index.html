@@ -1726,10 +1726,11 @@ function genRoom(b,bi,kind,rx,ry,z){const R={id:'r'+bi,bi,b,kind,rx,ry,z,dx:b.x*
   const P0=(k,x,y,w,o)=>{PROPS.push({k,tx:rx+x,ty:ry+y,w:w||1,room:R.id,id:R.id+k+x,...o});for(let j=0;j<(w||1);j++)setT(rx+x+j,ry+y,BL);};
   if(kind==='house'){P0('bed',1,2,2);P0('table',5,4,2);P0('chest',10,2);P0('shelf',4,1,2,{back:1});P0('barrel',10,6);}
   else if(kind==='inn'){P0('counter',3,3,4);P0('bed',9,2,2);P0('bed',9,5,2);P0('table',1,5,2);P0('shelf',3,1,3,{back:1});P0('barrel',1,2);}
+  else if(kind==='salon'){P0('mirror',2,1,1,{back:1});P0('mirror',5,1,1,{back:1});P0('mirror',8,1,1,{back:1});P0('chair',2,2);P0('chair',5,2);P0('chair',8,2);P0('dress',1,4);P0('dress',10,4);P0('plant',1,6);P0('plant',10,6);}   // Layla's salon (owner 2026-10-23)
   else if(kind==='shop'){P0('counter',3,3,6);P0('shelf',2,1,3,{back:1});P0('shelf',6,1,3,{back:1});P0('barrel',1,5);P0('barrel',10,5);P0('chest',10,2);}
   else{P0('counter',3,3,6);P0('rack',1,2);P0('rack',10,2);P0('shelf',4,1,4,{back:1});P0('barrel',10,6);}}
 (function genInteriors(){let i=0;
- buildings.forEach((b,bi)=>{if(!['house','shop','armory','inn'].includes(b.k))return;genRoom(b,bi,bi===3?'inn':b.k,1+i*13,WMH+8,b.y<WH?'zBai':(b.lx??b.x)>=160?'zPat':'zWin');i++;});})();
+ buildings.forEach((b,bi)=>{if(!['house','shop','armory','inn'].includes(b.k))return;genRoom(b,bi,bi===3?'inn':bi===9?'salon':b.k,1+i*13,WMH+8,b.y<WH?'zBai':(b.lx??b.x)>=160?'zPat':'zWin');if(bi===9)PROPS.push({k:'sign',tx:b.x+1,ty:b.y+b.h-1,w:1,id:'salonSign'});i++;});})();
 /* SAT-ONLINE-115 (plan U235): the guild hall, one more room below the map (free tiles past the house interiors) that each
    guild furnishes for itself. While you are in, its id is your hall's ('h' + a hash of the guild id), so presence shows you
    only the players in the same guild's hall; outside it is 'rGH'. Leaving takes you back where you came in from. */
@@ -2429,7 +2430,9 @@ function styBack(){shopD('stylist','sty_hi');}
 let STYDIR=-1;
 function styDraw(cv,sh){const g=cv.getContext('2d');g.clearRect(0,0,16,24);if(!sh)return;const dir=STYDIR>=0?[0,2,1,3][STYDIR]:[0,2,1,3][(gTime*.7|0)%4],r=SA.chars.rect(DIR4[dir],'walk',(gTime*7|0)%4),c=sh.canvas;
  if(r.flip){g.save();g.translate(16,0);g.scale(-1,1);g.drawImage(c,r.sx,r.sy,16,24,0,0,16,24);g.restore();}else g.drawImage(c,r.sx,r.sy,16,24,0,0,16,24);}
-function styThumbs(){let n=0;for(const cv of $('dopts').querySelectorAll('canvas[data-lk]:not([data-ok])')){if(n++>=4)break;cv.dataset.ok=1;const op=DL.opts[+cv.dataset.lk];if(!op||!op.lk)continue;const sh=SA.chars.buildSheet(lookFig(op.lk,0)),r=SA.chars.rect(DIR4[0],'walk',0),g=cv.getContext('2d');g.clearRect(0,0,16,24);g.drawImage(sh.canvas,r.sx,r.sy,16,cv.height,0,0,16,cv.height);}}
+// a thumbnail is one drawn frame, not a whole sheet (owner 2026-10-23: the grid lagged while 74 sheets were built), two a frame
+function styThumbs(){let n=0;for(const cv of $('dopts').querySelectorAll('canvas[data-lk]:not([data-ok])')){if(n++>=2)break;cv.dataset.ok=1;const op=DL.opts[+cv.dataset.lk];if(!op||!op.lk)continue;const f=SA.chars.frame(lookFig(op.lk,0),DIR4[0],'walk',0).c,g=cv.getContext('2d');g.clearRect(0,0,16,24);g.drawImage(f,0,0,16,cv.height,0,0,16,cv.height);}
+ if(DL.pvL&&!DL.pvS&&gTime-DL.pvAt>.15)DL.pvS=SA.chars.buildSheet(gearFig(DL.pvL));}   // the mirror's sheet waits until you rest on a choice
 function styTick(){const on=!!(DL&&DL.who==='stylist'&&S&&!$('dialog').hidden),w=$('styW');if(w.hidden===on){w.hidden=!on;document.body.classList.toggle('styon',on);}if(!on)return;
  styThumbs();const now=SH[pSpr()];styDraw($('styNow'),now);const pv=DL.pvS;styDraw($('styNew'),pv||now);const T=$('styNewT'),txt=t(pv?'styNewT':'styNoNew');if(T.textContent!==txt){T.textContent=txt;T.classList.toggle('diff',!!pv);}}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-sdir]');if(!b)return;e.stopPropagation();const d=+b.dataset.sdir;STYDIR=d===0?-1:((STYDIR<0?0:STYDIR)+d+4)%4;SFX.click();},true);
@@ -5477,7 +5480,7 @@ const FSPAWN=[
  ['hrabbit',184,230,42,62,6],['grabbit',184,230,42,62,1],['slime',350,410,102,118,10],['mimic',350,410,102,118,3],['cbat',350,410,40,60,8],['sscorp',380,530,126,154,8],['gobsc',189,232,105,116,5]];
 // NPCs: stable ids (dialog keys, quest givers), sprite, tile position
 const NPCS=[{id:'smith',spr:'smith',tx:22,ty:18},{id:'grid',spr:'grid',tx:17,ty:18.4,dir:2},{id:'baker',spr:'baker',tx:6,ty:18},{id:'regas',spr:'regas',tx:24.5,ty:19,dir:3},{id:'coach',spr:'coach',tx:4,ty:21.6},
- {id:'khan',spr:'khan',tx:142,ty:73},{id:'tw',spr:'tw',tx:152,ty:77.4},{id:'tk',spr:'knight',tx:899,ty:66.4,ph:1},{id:'tm',spr:'tm',tx:530,ty:84.4,ph:1},{id:'cassus',spr:'priest',tx:795,ty:79.4,clr:1,ph:1},{id:'hood',spr:'outlaw',tx:667,ty:53.4,clr:1,dir:2,ph:1},{id:'nec',spr:'wraith',tx:141.5,ty:56.4,clr:1},{id:'ta',spr:'ta',tx:112,ty:52.4},{id:'coachW',spr:'coach',tx:143,ty:83.4},{id:'stylist',spr:'stylist',tx:138,ty:83.4,dir:2},{id:'board',tx:123,ty:79.6,obj:1},
+ {id:'khan',spr:'khan',tx:142,ty:73},{id:'tw',spr:'tw',tx:152,ty:77.4},{id:'tk',spr:'knight',tx:899,ty:66.4,ph:1},{id:'tm',spr:'tm',tx:530,ty:84.4,ph:1},{id:'cassus',spr:'priest',tx:795,ty:79.4,clr:1,ph:1},{id:'hood',spr:'outlaw',tx:667,ty:53.4,clr:1,dir:2,ph:1},{id:'nec',spr:'wraith',tx:141.5,ty:56.4,clr:1},{id:'ta',spr:'ta',tx:112,ty:52.4},{id:'coachW',spr:'coach',tx:143,ty:83.4},{id:'board',tx:123,ty:79.6,obj:1},
  {id:'ashur',spr:'ashur',tx:190,ty:72.4},{id:'pcap',spr:'pcap',tx:185,ty:80,dir:2},{id:'coachP',spr:'coach',tx:176,ty:83.4},{id:'coachR',spr:'coach',tx:519,ty:82.4,ph:1},{id:'coachRh',spr:'coach',tx:669,ty:83.4,ph:1},{id:'coachRo',spr:'coach',tx:795,ty:87.4,ph:1},{id:'coachT',spr:'coach',tx:865,ty:83.4,ph:1},
  {id:'guardW',spr:'knight',tx:108,ty:80.4,dir:2,clr:1},{id:'hunter',spr:'hunter',tx:151,ty:90.4,clr:1},{id:'farmerP',spr:'baker',tx:183,ty:95.4,clr:1},{id:'hunterP',spr:'recruiter',tx:202,ty:80.4,dir:3,clr:1},
  // a peddler at each waystation, halfway through the belts (ph: already a physical column)
@@ -5514,7 +5517,8 @@ const rmAt=(x,y,dx,dy)=>rmP(buildings.findIndex(b=>b.x===x&&b.y===y),dx,dy);
 for(const [id,x,y,dx] of [['grocerRh',638,58,5.5],['merchantT',864,94,5.5],['innT',873,94,4.5],['merchantR',542,65,5.5],['innR',518,88,4.5],['merchantRh',668,90,5.5],['innRh',677,90,4.5]]){const n=NPCS.find(n=>n.id===id);Object.assign(n,rmAt(x,y,dx,2.5),{reach:16,dir:0});}
 NPCS.push({id:'merchant',spr:'merchant',...rmP(7,5.5,2.5),reach:16},{id:'armorer',spr:'armorer',...rmP(15,5.5,2.5),reach:16},{id:'inn',spr:'inn',...rmP(13,4.5,2.5),reach:16},{id:'innB',spr:'inn',...rmP(3,4.5,2.5),reach:16},{id:'oldw',spr:'oldw',...rmP(5,7,4.4)},
  {id:'merchantP',spr:'merchant',...rmP(18,5.5,2.5),reach:16},
- {id:'armorerP',spr:'armorer',...rmP(20,5.5,2.5),reach:16},{id:'innP',spr:'inn',...rmP(19,4.5,2.5),reach:16});
+ {id:'armorerP',spr:'armorer',...rmP(20,5.5,2.5),reach:16},{id:'innP',spr:'inn',...rmP(19,4.5,2.5),reach:16},
+ {id:'stylist',spr:'stylist',...rmP(9,5.5,3.6)});   // Layla works in her salon now (owner 2026-10-23)
 let camXf=0,camYf=0,camSnap=true,S,P,mons=[],npcs=[],fx=[],nums=[],smoke=[],proj=[],shake=0,mode='lang',hudDirty=true,gTime=0,camX=0,camY=0,MID=0;
 const RC=[
  {id:'jaffa',slot:'x',need:{wood:2,ore:1},unlock:()=>!!S.qs.sm3,diff:.8,strikes:4},
@@ -7169,7 +7173,7 @@ const PRX=/\s*\(\s*([\d,]+)\s*(?:G|دهب|ذهب|gold)\s*\)|\s*·\s*([\d,]+)\s*(
 function optPrice(op){if(op.pr!=null)return [op.l,Number(op.pr).toLocaleString('en')];const m=String(op.l).match(PRX);if(!m)return [op.l,null];return [op.l.replace(m[0],'').trim(),Number((m[1]||m[2]).replace(/,/g,'')).toLocaleString('en')];}
 function selOpt(i){if(!DL)return;DL.sel=i;[...$('dopts').children].forEach((b,j)=>b.classList.toggle('sel',j===i));
  {const o=$('dopts'),b=o.children[i];if(b&&o.scrollHeight>o.clientHeight){if(b.offsetTop<o.scrollTop)o.scrollTop=b.offsetTop;else if(b.offsetTop+b.offsetHeight>o.scrollTop+o.clientHeight)o.scrollTop=b.offsetTop+b.offsetHeight-o.clientHeight;}}
- const op=DL.opts&&DL.opts[i],pv=op&&op.pv||null;DL.pv=pv;DL.pvS=pv&&pv.look?SA.chars.buildSheet(DL.who==='stylist'&&S?gearFig(pv.look):lookFig(pv.look,S&&armorIt()?1:0)):null;const sty=DL.who==='stylist';$('dprev').hidden=!pv||sty;$('dialog').classList.toggle('pv',!!pv&&!sty);}
+ const op=DL.opts&&DL.opts[i],pv=op&&op.pv||null;DL.pv=pv;const sty=DL.who==='stylist';DL.pvL=sty&&S&&pv&&pv.look?pv.look:null;DL.pvAt=gTime;DL.pvS=pv&&pv.look&&!DL.pvL?SA.chars.buildSheet(lookFig(pv.look,S&&armorIt()?1:0)):null;$('dprev').hidden=!pv||sty;$('dialog').classList.toggle('pv',!!pv&&!sty);}
 function drawDPrev(){const g=$('dprev').getContext('2d'),v=DL.pv;g.clearRect(0,0,32,32);
  if(DL.pvS){const dir=[0,2,1,3][(gTime*.7|0)%4],r=SA.chars.rect(DIR4[dir],'walk',(gTime*9|0)%4),c=DL.pvS.canvas;if(r.flip){g.save();g.translate(32,0);g.scale(-1,1);g.drawImage(c,r.sx,r.sy,16,24,8,5,16,24);g.restore();}else g.drawImage(c,r.sx,r.sy,16,24,8,5,16,24);}
  else if(v.pet){g.save();g.translate(16,25);g.scale(1.7,1.7);g.translate(-16,-25);drawPet0({k:v.pet,x:16,y:25,dir:2,t:gTime,mv:1,lv:1},g);g.restore();}else if(v.ride)drawHorse(16,29,2,1+(gTime*10|0)%4,MOUNTS[v.ride],g);}

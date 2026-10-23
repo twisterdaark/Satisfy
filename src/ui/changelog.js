@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23salon', ver: '2.40', d: '2026-10-23',
+      ar: ["ليلى الستايلست بقت شغالة جوا صالون في ونستون: البيت اللي عليه يافطة المقص جنب سايس السباق. جواه مرايات وكراسي تسريح ورفوف فساتين.",
+          "مربعات الستايلست مبقتش بتهنّج اللعبة وهي بتحمّل صور التسريحات.",
+          "في شاشة الحالة جنب نقط الستاتس فيه خانة تكتب فيها العدد اللي عايزه (زي 100)، وبعدين تدوس + جنب أي ستات فيتحطوا مرة واحدة."],
+      en: ["Layla the Stylist now works inside a salon in Winston: the house with the scissors sign by the Race Steward. It has mirrors, styling chairs and racks of dresses.",
+          "The stylist's grid no longer makes the game stutter while the hairstyle pictures load.",
+          "The status window has a box by your stat points: type how many you want (like 100), then press + by a stat to put them all in at once."] },
     { v: '2026-10-23stygrid', ver: '2.39', d: '2026-10-23',
       ar: ["وشوش البنات بقت مدورة وفيها حياة، بعيون أكبر بلونين ونقطة نور، وبلاش ناعم، وبوق صغير. وفي الوش 3 اختيارات مكياج جديدة: جيارو، وجيارو جريء، ورموش دمية.",
           "الشعر بقى فيه تفاصيل أكتر للكل: لمعة على الراس، وخصل في الشعر الطويل، وغرة مقصوصة.",

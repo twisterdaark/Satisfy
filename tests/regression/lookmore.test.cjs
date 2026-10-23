@@ -73,7 +73,7 @@ test("hide a piece's look, keep its stats; the other player sees the same body, 
     await a.eval(() => window.__GLOOK.sty('hair'));
     await a.step(3);
     await a.page.keyboard.press('ArrowDown'); await a.page.keyboard.press('ArrowDown');
-    await a.step(5);
+    await a.step(20);
     const m = await a.eval(() => ({ on: !document.getElementById('styW').hidden, diff: document.getElementById('styNewT').classList.contains('diff'), side: document.body.classList.contains('styon') }));
     assert.deepEqual(m, { on: true, diff: true, side: true });
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
