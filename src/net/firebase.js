@@ -641,12 +641,22 @@
     };
   }
 
-  // SAT-ONLINE-053: ranked arena seasons, arena/{season}/{uid} = {r, w, l, n, t}
+  // SAT-ONLINE-053: ranked arena seasons, arena/{season}/{uid} = {r, w, l, n, t, o}. SAT-ONLINE-153 (plan U040): o is the
+  // opponent of this rating's duel, and arenaPairs/{season}/{uid}/{o} counts the rated duels against it this season (at most
+  // PAIR_MAX), one more in the same update, as the rules require: the same opponent can't be farmed for rating
   function arenaStore(sdk) {
     var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
     return {
+      PAIR_MAX: 5,
       get: function (season, uid) { return D.get(at('arena/' + season + '/' + uid)).then(function (s) { return s.val(); }); },
-      put: function (season, uid, v) { var u = {}; u['arena/' + season + '/' + uid] = { r: v.r, w: v.w, l: v.l, n: String(v.n || '').slice(0, 24), t: D.serverTimestamp() }; return D.update(D.ref(db), u); },
+      /** the rated duels this season of uid against foe (0..PAIR_MAX) */
+      pair: function (season, uid, foe) { return D.get(at('arenaPairs/' + season + '/' + uid + '/' + foe)).then(function (s) { return +s.val() || 0; }); },
+      put: function (season, uid, v, foe, n) {
+        var u = {};
+        u['arena/' + season + '/' + uid] = { r: v.r, w: v.w, l: v.l, n: String(v.n || '').slice(0, 24), t: D.serverTimestamp(), o: String(foe) };
+        u['arenaPairs/' + season + '/' + uid + '/' + foe] = (n | 0) + 1;
+        return D.update(D.ref(db), u);
+      },
       // the top `n` by rating (the fake has no limitToLast: then everything, sorted here)
       top: function (season, n) {
         var ref = at('arena/' + season), q = D.limitToLast && D.orderByChild ? D.query(ref, D.orderByChild('r'), D.limitToLast(n)) : ref;

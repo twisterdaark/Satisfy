@@ -9439,7 +9439,7 @@ function karmaTick(dt){if(!S||S.__demo||mode!=='play'||karma()>=0)return;S.karT=
 function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
   room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo});
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
-  else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);balPvp(true);const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
+  else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);{const f=balPvF.get(e.uid);balPvF.delete(e.uid);balPvp(true,'p',f?gTime-f.f:0);}const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
    if(v&&warOf(v)){gwrKill(v.gd);return;} // a guild war (SAT-ONLINE-086): it counts for the guild, no karma lost
    if(v&&v.ol){S.karma=Math.min(KARMA_MAX,karma()+1);netForce=true;save(true);toast(t('kaJust',{n,k:S.karma}),'good');SFX.quest&&SFX.quest();return;} // an outlaw: justice
    S.karma=Math.max(KARMA_MIN,karma()-1);S.karT=0;const ms=Math.round(Satisfy.pvp.C.OUTLAW_MS*(1+Math.max(0,-S.karma-1)*.5));
@@ -9482,15 +9482,25 @@ function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoo
  for(const r of NET.remotes()){if(!netSees(r,myRoom)||PVP.why(r)||!seeL(P.x,P.y-4,r.x,r.y-4))continue;const dx=r.x-P.x,dy=(r.y-8)-(P.y-6),d=Math.hypot(dx,dy);
   if(ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):(d>30||(dx*ax+dy*ay)/(d*l||1)<-.2))continue;if(d<bd){bd=d;best=r;}}
  if(!best)return;const crit=rand()<.12,pow=(8+rand()*5)*(crit?1.5:1)*Math.min(1.5,mul||1),pm=PVP.hit(best,pow);
- if(pm){num(best.x,best.y-24,'-'+Math.max(1,Math.round(pm/10))+'%',crit?'#ffd24a':'#ffffff',crit);vfx(crit?'crit':'hit',best.x,best.y-10,{angle:Math.atan2(best.y-P.y,best.x-P.x)});}}
+ if(pm){const f=balPvF.get(best.uid);if(!f||gTime-f.l>30)balPvF.set(best.uid,{f:gTime,l:gTime});else f.l=gTime;num(best.x,best.y-24,'-'+Math.max(1,Math.round(pm/10))+'%',crit?'#ffd24a':'#ffffff',crit);vfx(crit?'crit':'hit',best.x,best.y-10,{angle:Math.atan2(best.y-P.y,best.x-P.x)});}}
 // a hit from another player, already checked by pvp.js: a share of our max HP; a dodge's frames avoid it, a raised guard
 // takes a quarter. The lethal one goes back to the attacker as a kill.
+/* PvP gear damage (SAT-ONLINE-152, plan U042 "limited wear and a repair cost, no item dropped; acceptance: no item lost on a
+   crash or a duplicate result"). Dying to a player in open PvP costs every piece you wear (weapon, armour, rings) PVP_WEAR
+   durability, but never takes one below PVP_WEAR_MIN, so PvP alone never breaks gear; the smith repairs it as any wear.
+   Nothing is dropped or taken. It comes with the death itself, once (a dead player takes no more hits), and is saved at
+   once. A duel costs nothing. */
+const PVP_WEAR=5,PVP_WEAR_MIN=10;
+function pvpWear(){let n=0;const seen=new Set();for(const it of [weapon(),...GEAR.map(eqIt)]){if(!it||seen.has(it))continue;seen.add(it);const d=durOf(it);if(d<=PVP_WEAR_MIN)continue;it.dur=Math.max(PVP_WEAR_MIN,d-PVP_WEAR);n++;}if(n)hudDirty=true;return n;}
+Object.assign(STR.ar,{pvpWearT:'معداتك اللي لابسها خسرت {n} من متانتها (PvP).'});
+Object.assign(STR.en,{pvpWearT:'The gear you wear lost {n} durability (PvP).'});
 function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0)return;const n=Satisfy.chat.clean(e.handle,24)||'?',now=performance.now();
  if(!pvpFrom.has(e.uid)||now-pvpFrom.get(e.uid)>15000)toast(t('pvpHit',{n}),'warn');pvpFrom.set(e.uid,now);
  let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}
  P.hp-=d;numP(-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();asMe(()=>vfx('blood',P.x,P.y-10,{}));shake=.12;}hudDirty=true;
  if(P.hp<=0){if(legSave())return;
-  die();PVP.died(e.uid);balPvp(false);bntKilled(e.uid);setTimeout(()=>toast(t('pvpDied',{n}),'warn'),300);}}
+  const R=PVP.recap?PVP.recap():null;if(R)FLOG.pvp={n:e.handle,r:R};
+  die();if(mode==='dead'&&pvpWear()){P.dpen=(P.dpen?P.dpen+' ':'')+t('pvpWearT',{n:PVP_WEAR});save(true);}PVP.died(e.uid);balPvp(false,'p');bntKilled(e.uid);setTimeout(()=>{toast(t('pvpDied',{n}),'warn');if(R&&R.lines.length)toast(t('flPvpT',{h:R.lines.length,s:(R.ms/1000).toFixed(1)}),'warn');},300);}}
 // your own red tag while you are an outlaw, and the notice when it ends
 function pvpEnts(){const ol=outlaw();if(pvpOlWas&&!ol&&S&&!S.__demo){toast(t('pvpOlEnd'),'good');netForce=true;}pvpOlWas=ol;
  if(ol&&mode==='play')TX.push({s:t(olPub()===2?'kaMurderT':'pvpOl'),x:P.x,y:P.y-30,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff3b30'});}
@@ -10005,10 +10015,10 @@ function duelStart(){rnkStart();DUEL=Satisfy.duel.create({presence:NET,uid:NET.u
   else if(e.type==='declined')toast(t('dDeclined',{n}),'warn');
   else if(e.type==='cancelled')toast(t('dCancel'),'warn');
   else if(e.type==='safeHere')toast(t('dSafe'),'warn');
-  else if(e.type==='fight'){toast(t('dFight'),'good');SFX.notice();rnkSnap(DUEL.state().foe);}
+  else if(e.type==='fight'){toast(t('dFight'),'good');SFX.notice();rnkSnap(DUEL.state().foe);balDF=gTime;}
   else if(e.type==='outside')toast(t('dOut'),'warn');
   else if(e.type==='hurt'){numP(-20,'-'+(DUELD||Math.round(e.dmg)),'#ff6a5a',false);SFX.hit();}
-  else if(e.type==='result'){const win=e.result==='win';if(S&&!S.__demo){S.duels=S.duels||{w:0,l:0};S.duels[win?'w':'l']++;balPvp(win);}
+  else if(e.type==='result'){const win=e.result==='win';if(S&&!S.__demo){S.duels=S.duels||{w:0,l:0};S.duels[win?'w':'l']++;balPvp(win,'d',balDF?gTime-balDF:0);balDF=0;}
    toast(t(win?'dWin':'dLose',{n,w:t('dw_'+e.why)}),win?'good':'warn');if(win)SFX.quest();rnkResult(win,e.foe);natDuel(win,e.foe);if(win&&legFoe(e.foe))setTimeout(legWin,600);
    if(S&&S.duels)setTimeout(()=>toast(t('dRec',S.duels)),500);}});}
 /* ranked arena seasons (SAT-ONLINE-053; Claude-B #13 item 23): every duel online moves both players' rating in this
@@ -10021,11 +10031,16 @@ var RNK=null;
 function rnkSeason(){const d=new Date(wNow());return 's'+d.getUTCFullYear()+String(d.getUTCMonth()+1).padStart(2,'0');}
 function rnkStart(){RNK=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.arenaStore))return;RNK=Satisfy.firebase.arenaStore(FB);} // NETTR first: FB is declared below
 // both ratings as the fight starts, so each side counts the duel against the same numbers (the other may write first)
-var RNKS=null;function rnkSnap(foe){RNKS=null;if(!RNK||!NET||!foe)return;const se=rnkSeason(),p=Promise.all([RNK.get(se,NET.uid),RNK.get(se,foe)]).catch(()=>[null,null]);RNKS={foe,se,p};}
+// SAT-ONLINE-153 (plan U040): and how many rated duels this season you've had with this opponent; past PAIR_MAX the duel is
+// still a duel (wins, losses, the competition) but no longer moves the rating, so a friend can't be farmed for it
+var RNKS=null;function rnkSnap(foe){RNKS=null;if(!RNK||!NET||!foe)return;const se=rnkSeason(),p=Promise.all([RNK.get(se,NET.uid),RNK.get(se,foe),RNK.pair?RNK.pair(se,NET.uid,foe):0]).catch(()=>[null,null,0]);RNKS={foe,se,p};}
 function rnkResult(win,foe){if(!RNK||!NET||!S||S.__demo||!foe)return;const sn=RNKS&&RNKS.foe===foe?RNKS:null,se=sn?sn.se:rnkSeason();RNKS=null;
- (sn?sn.p:Promise.all([RNK.get(se,NET.uid),RNK.get(se,foe)])).then(([me,them])=>{const ra=me&&typeof me.r==='number'?me.r:1000,rb=them&&typeof them.r==='number'?them.r:1000;
+ (sn?sn.p:Promise.all([RNK.get(se,NET.uid),RNK.get(se,foe),RNK.pair?RNK.pair(se,NET.uid,foe):0])).then(([me,them,np])=>{const ra=me&&typeof me.r==='number'?me.r:1000,rb=them&&typeof them.r==='number'?them.r:1000;np=+np||0;
+  if(RNK.PAIR_MAX&&np>=RNK.PAIR_MAX){setTimeout(()=>toast(t('rnkCap',{n:RNK.PAIR_MAX}),''),900);return;}
   const r=Math.max(0,Math.min(4000,Math.round(ra+32*((win?1:0)-1/(1+Math.pow(10,(rb-ra)/400))))));
-  return RNK.put(se,NET.uid,{r,w:(me?me.w|0:0)+(win?1:0),l:(me?me.l|0:0)+(win?0:1),n:netId||S.look.n}).then(()=>setTimeout(()=>toast(t('rnkR',{r,d:(r>=ra?'+':'')+(r-ra)}),win?'good':''),900));}).catch(()=>{});}
+  return RNK.put(se,NET.uid,{r,w:(me?me.w|0:0)+(win?1:0),l:(me?me.l|0:0)+(win?0:1),n:netId||S.look.n},foe,np).then(()=>setTimeout(()=>toast(t('rnkR',{r,d:(r>=ra?'+':'')+(r-ra)})+(np+1>=RNK.PAIR_MAX?' · '+t('rnkLast',{n:RNK.PAIR_MAX}):''),win?'good':''),900));}).catch(()=>{});}
+Object.assign(STR.ar,{rnkCap:'المبارزة دي متتحسبش في التقييم: لعبت {n} مبارزات متقيمة مع اللاعب ده الموسم ده',rnkLast:'دي آخر مبارزة متقيمة مع اللاعب ده الموسم ده ({n})'});
+Object.assign(STR.en,{rnkCap:"This duel doesn't count for the rating: you've had {n} rated duels with this player this season",rnkLast:'your last rated duel with this player this season ({n})'});
 function rnkBoard(){if(!RNK||!NET)return;const se=rnkSeason(),d=new Date(wNow()),sn=d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');
  Promise.all([RNK.top(se,10),RNK.get(se,NET.uid)]).then(([top,me])=>{plOpen(false);
   const rows=top.map((x,i)=>t('rnkRow',{i:i+1,n:Satisfy.chat.clean(x.n,24)||'?',r:x.r,w:x.w,l:x.l}));
@@ -10325,21 +10340,49 @@ function balGet(){const wk=lockWeek();if(!BAL||BAL.k!==balKey()){let v=null;try{
 function balSave(){try{localStorage.setItem(balKey(),JSON.stringify(BAL.v));}catch(e){}}
 // a monster we hit died: the time since our first hit (up to 10 min counts)
 function balKill(m){const f=m.fh;m.fh=0;if(!f||m.mobKill||!balOn())return;const d=Math.max(0,gTime-f);if(d>600)return;const v=balGet();v.n++;v.s=Math.round((v.s+d)*10)/10;balSave();}
-function balPvp(win){if(!balOn())return;const v=balGet();v[win?'w':'l']++;balSave();}
+/* SAT-ONLINE-154 (plan U045 "PvP fairness telemetry: p95 latency, survival and time to kill by class and gear band;
+   acceptance: nothing ranked before announced thresholds"). Next to the PvP wins and losses (w, l, as before): duels apart
+   (dw, dl, and ds their seconds), open PvP apart (pk kills, pd deaths, pt the seconds from your first hit on a player to
+   its death), the gear you wear (gb: the average rarity of it, 0 common to 4 legendary) and this page's latency (lp: the
+   95th percentile of the database's answers, ms). /balance shows them by class, and whether BAL_GATE is met. */
+const BAL_GATE={duels:30,lo:40,hi:60,p95:250}; // docs/online/FAIRNESS.md
+let balDF=0;const balPvF=new Map(),balLat=[];
+function balPvp(win,kind,secs){if(!balOn())return;const v=balGet();v[win?'w':'l']++;secs=Math.max(0,Math.min(600,+secs||0));
+ if(kind==='d'){v[win?'dw':'dl']=(+v[win?'dw':'dl']||0)+1;v.ds=Math.round(((+v.ds||0)+secs)*10)/10;}
+ else if(kind==='p'){v[win?'pk':'pd']=(+v[win?'pk':'pd']||0)+1;if(win)v.pt=Math.round(((+v.pt||0)+secs)*10)/10;}
+ balSave();}
+function balGear(){const it=[weapon(),...GEAR.map(eqIt)].filter(Boolean),u=[...new Set(it)];return u.length?Math.max(0,Math.min(9,Math.round(u.reduce((a,i)=>a+(i.r|0),0)/u.length))):0;}
+function balP95(){if(balLat.length<5)return 0;const a=balLat.slice().sort((x,y)=>x-y);return Math.max(0,Math.min(60000,Math.round(a[Math.min(a.length-1,Math.floor(a.length*.95))])));}
 /* SAT-ONLINE-093 (plan U334): the gold that came in and went out this week, from every change of the bag's gold (a new or
    loaded character starts the count again) */
 // signed out, the count forgets where gold was: gold made or spent offline is not counted as one jump at the next sign-in
 // (Claude-B, #128)
 function balGold(){if(!balOn()){balS=null;return;}if(balS!==S){balS=S;balG=S.gold;return;}const d=Math.round(S.gold-balG);if(!d)return;balG=S.gold;const v=balGet();if(d>0)v.gi+=d;else v.go-=d;balDirty=1;}
-function balTick(live,force){balGold();if(!live||!balOn())return;const n=performance.now();if(balDirty&&n-(balTick.sv||0)>5000){balTick.sv=n;balDirty=0;balSave();}if(!force&&balT&&n-balT<300000)return;const v=balGet();if(!(v.n+v.w+v.l+v.gi+v.go))return;
+function balTick(live,force){balGold();if(!live||!balOn())return;const n=performance.now();if(n-(balTick.lt||0)>5000){balTick.lt=n;const ns=NETTR&&NETTR.netStats&&NETTR.netStats(),r=ns&&ns.rtt;if(typeof r==='number'&&r>=0){balLat.push(r);if(balLat.length>120)balLat.shift();}}if(balDirty&&n-(balTick.sv||0)>5000){balTick.sv=n;balDirty=0;balSave();}if(!force&&balT&&n-balT<300000)return;const v=balGet();if(!(v.n+v.w+v.l+v.gi+v.go))return;
  const sig=JSON.stringify([v,S.cls,S.lv|0]);if(sig===balSig)return;balT=n;balSig=sig;const D=FB.m.database,u={};
- u['balance/'+NET.uid]={wk:v.wk,cls:String(S.cls||'novice').slice(0,16),lv:Math.max(1,Math.min(999,S.lv|0)),n:Math.min(1000000,v.n),s:Math.min(100000000,v.s),w:Math.min(1000000,v.w),l:Math.min(1000000,v.l),gi:Math.min(1e11,v.gi),go:Math.min(1e11,v.go),t:D.serverTimestamp()};
+ u['balance/'+NET.uid]={wk:v.wk,cls:String(S.cls||'novice').slice(0,16),lv:Math.max(1,Math.min(999,S.lv|0)),n:Math.min(1000000,v.n),s:Math.min(100000000,v.s),w:Math.min(1000000,v.w),l:Math.min(1000000,v.l),gi:Math.min(1e11,v.gi),go:Math.min(1e11,v.go),
+  dw:Math.min(1e6,v.dw|0),dl:Math.min(1e6,v.dl|0),ds:Math.min(1e8,+v.ds||0),pk:Math.min(1e6,v.pk|0),pd:Math.min(1e6,v.pd|0),pt:Math.min(1e8,+v.pt||0),gb:balGear(),lp:balP95(),t:D.serverTimestamp()};
  D.update(D.ref(FB.db),u).catch(()=>{balSig='';});}
 // the board: this week's numbers by class, most players first
-function balStats(all,wk){const C={};for(const k in (all||{})){const e=all[k];if(!e||e.wk!==wk||typeof e.cls!=='string')continue;const c=C[e.cls]||(C[e.cls]={c:e.cls,p:0,lv:0,n:0,s:0,w:0,l:0});c.p++;c.lv+=+e.lv||0;c.n+=+e.n||0;c.s+=+e.s||0;c.w+=+e.w||0;c.l+=+e.l||0;}
- return Object.values(C).map(c=>({c:c.c,p:c.p,lv:Math.round(c.lv/c.p),n:c.n,ttk:c.n?Math.round(c.s/c.n*10)/10:0,w:c.w,l:c.l,rate:c.w+c.l?Math.round(c.w*100/(c.w+c.l)):null})).sort((a,b)=>b.p-a.p||a.c.localeCompare(b.c));}
-function admBal(st){st.balance().then(all=>{const wk=lockWeek(),L=balStats(all,wk),f=x=>Math.round(x).toLocaleString('en-US');
- dialog('guild',[L.length?t('admBal',{w:wk,n:L.reduce((a,c)=>a+c.p,0)}):t('admBalNone'),...L.slice(0,12).map(c=>t('admBalRow',{c:t('cl_'+c.c),p:c.p,lv:c.lv,k:f(c.n),s:c.ttk,w:c.w,l:c.l,r:c.rate==null?'-':c.rate+'%'}))],null,[{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
+function balStats(all,wk){const C={};for(const k in (all||{})){const e=all[k];if(!e||e.wk!==wk||typeof e.cls!=='string')continue;const c=C[e.cls]||(C[e.cls]={c:e.cls,p:0,lv:0,n:0,s:0,w:0,l:0,dw:0,dl:0,ds:0,pk:0,pd:0,pt:0,gb:0,gn:0,lp:[]});c.p++;c.lv+=+e.lv||0;c.n+=+e.n||0;c.s+=+e.s||0;c.w+=+e.w||0;c.l+=+e.l||0;
+  for(const q of ['dw','dl','ds','pk','pd','pt'])c[q]+=+e[q]||0;if(typeof e.gb==='number'){c.gb+=e.gb;c.gn++;}if(e.lp>0)c.lp.push(e.lp);} // SAT-ONLINE-154
+ const r=(a,b)=>a+b?Math.round(a*100/(a+b)):null,mid=a=>{if(!a.length)return null;const x=a.slice().sort((p,q)=>p-q);return x[x.length>>1];};
+ return Object.values(C).map(c=>({c:c.c,p:c.p,lv:Math.round(c.lv/c.p),n:c.n,ttk:c.n?Math.round(c.s/c.n*10)/10:0,w:c.w,l:c.l,rate:r(c.w,c.l),
+  dw:c.dw,dl:c.dl,drate:r(c.dw,c.dl),dsec:c.dw+c.dl?Math.round(c.ds/(c.dw+c.dl)*10)/10:null,pk:c.pk,pd:c.pd,pttk:c.pk?Math.round(c.pt/c.pk*10)/10:null,gb:c.gn?Math.round(c.gb/c.gn*10)/10:null,lp:mid(c.lp),lps:c.lp})).sort((a,b)=>b.p-a.p||a.c.localeCompare(b.c));}
+// SAT-ONLINE-154: nothing ranked before the thresholds (BAL_GATE, docs/online/FAIRNESS.md): enough duels, every class with
+// enough of them winning within lo..hi %, and the players' p95 latency (the median of them) within p95 ms
+function balGate(L){const why=[],G=BAL_GATE,dn=L.reduce((a,c)=>a+c.dw+c.dl,0)/2,all=L.reduce((a,c)=>a.concat(c.lps),[]).sort((p,q)=>p-q),lp=all.length?all[all.length>>1]:null;
+ if(dn<G.duels)why.push(t('gateDuels',{n:Math.round(dn),m:G.duels}));
+ for(const c of L)if(c.dw+c.dl>=G.duels&&(c.drate<G.lo||c.drate>G.hi))why.push(t('gateRate',{c:t('cl_'+c.c),r:c.drate,lo:G.lo,hi:G.hi}));
+ if(lp==null||lp>G.p95)why.push(t('gateLat',{l:lp==null?'-':lp,m:G.p95}));
+ return {ok:!why.length,why};}
+function admBal(st){st.balance().then(all=>{const wk=lockWeek(),L=balStats(all,wk),f=x=>Math.round(x).toLocaleString('en-US'),g=balGate(L),o=x=>x==null?'-':x;
+ dialog('guild',[L.length?t('admBal',{w:wk,n:L.reduce((a,c)=>a+c.p,0)}):t('admBalNone'),...L.slice(0,12).map(c=>t('admBalRow',{c:t('cl_'+c.c),p:c.p,lv:c.lv,k:f(c.n),s:c.ttk,w:c.w,l:c.l,r:c.rate==null?'-':c.rate+'%'})+' · '+t('admBalPv',{dw:c.dw,dl:c.dl,dr:c.drate==null?'-':c.drate+'%',ds:o(c.dsec),pk:c.pk,pd:c.pd,pt:o(c.pttk),gb:o(c.gb),lp:o(c.lp)})),
+  g.ok?t('gateOk'):t('gateNo',{w:g.why.join(' · ')})],null,[{l:t('oClose')}]);},()=>toast(t('gdFail'),'warn'));}
+Object.assign(STR.ar,{admBalPv:'مبارزات {dw}–{dl} ({dr})، {ds} ث للمبارزة · PvP مفتوح {pk}–{pd}، {pt} ث للقتلة · معدات {gb} · p95 {lp} ms',gateOk:'الترتيب المتقيم: الأرقام كلها في حدودها',gateNo:'الترتيب المتقيم مش جاهز: {w}',
+ gateDuels:'مبارزات قليلة ({n} من {m})',gateRate:'{c} بيكسب {r}% (لازم {lo}–{hi}%)',gateLat:'p95 بتاع الاتصال {l} ms (لازم {m} أو أقل)'});
+Object.assign(STR.en,{admBalPv:'duels {dw}–{dl} ({dr}), {ds} s a duel · open PvP {pk}–{pd}, {pt} s to kill · gear {gb} · p95 {lp} ms',gateOk:'Ranked: every number is within its threshold',gateNo:'Ranked is not ready: {w}',
+ gateDuels:'too few duels ({n} of {m})',gateRate:'{c} wins {r}% (needs {lo}–{hi}%)',gateLat:'connection p95 {l} ms (needs {m} or less)'});
 /* guild seasons (SAT-ONLINE-090, plan U246). A season is a calendar month (UTC). Each week of it (the weeks whose Monday is in
    that month) a guild earns the weekly-goal tier it reached that week (0 to 3, see 081). At the end, the game's owner's
    "/season" (last month) or "/season 2026-10" adds them up and gives every guild that earned enough a trophy: gold from 10
@@ -10376,11 +10419,12 @@ function admCmd(v){let m;
  if(/^\/economy\s*$/i.test(v)){admOnly(admEco);return true;}
  if(/^\/season(\s|$)/i.test(v)){const x=/^\/season(?:\s+(\d{4}-(?:0[1-9]|1[0-2])))?\s*$/i.exec(v);if(!x){toast(t('ssnBad'),'warn');return true;}const ym=x[1]||ssnLast();admOnly(st=>admSeason(st,ym));return true;}
  if(/^\/balance\s*$/i.test(v)){admOnly(admBal);return true;}
+ if(/^\/fightlog\s*$/i.test(v)){flogShow();return true;} // anyone's (SAT-ONLINE-150)
  if(/^\/admin\s*$/i.test(v)){admOnly(()=>toast(t('admHelp')));return true;}
  if((m=/^\/mute\s+(\S+)\s+(\d{1,3})\s*([\s\S]*)$/i.exec(v))){const id=m[1],h=Math.max(1,Math.min(720,+m[2])),why=m[3].trim().slice(0,60);admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}const until=wNow()+h*3600000;return st.mute(u,until,why,NET.uid).then(()=>toast(t('admMuted',{n:id,l:calTime(until)}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  if((m=/^\/unmute\s+(\S+)\s*$/i.exec(v))){const id=m[1];admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}return st.unmute(u).then(()=>toast(t('admUnmuted',{n:id}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  return false;}
-window.__GMOD={get muted(){return MUTED},ssnWeeks:ym=>ssnWeeks(ym),ssnPoints:(w,ym)=>ssnPoints(w,ym),tro:gid=>gtroOf(gid),troClear:()=>GTRO.clear(),appeal:x=>apSend(x),bal:()=>balGet(),flow:(a,w)=>ecoFlow(a,w),balPush:()=>{balT=0;balTick(true,true);},balStats:(a,w)=>balStats(a,w),nw:(p,n)=>nwStats(p,n),cmd:v=>admCmd(v),eco:(g,l)=>ecoStats(g,l),redact:x=>crashRedact(x),crash:(m,s)=>crashSend(m,s),get sent(){return CRN},store:()=>modSt()}; // tests
+window.__GMOD={get muted(){return MUTED},ssnWeeks:ym=>ssnWeeks(ym),ssnPoints:(w,ym)=>ssnPoints(w,ym),tro:gid=>gtroOf(gid),troClear:()=>GTRO.clear(),appeal:x=>apSend(x),bal:()=>balGet(),flow:(a,w)=>ecoFlow(a,w),balPush:()=>{balT=0;balTick(true,true);},balStats:(a,w)=>balStats(a,w),balGate:L=>balGate(L),balPvp:(w,k,s)=>balPvp(w,k,s),gear:()=>balGear(),lat:a=>{balLat.length=0;balLat.push(...a);return balP95();},nw:(p,n)=>nwStats(p,n),cmd:v=>admCmd(v),eco:(g,l)=>ecoStats(g,l),redact:x=>crashRedact(x),crash:(m,s)=>crashSend(m,s),get sent(){return CRN},store:()=>modSt()}; // tests
 /* the event calendar (SAT-ONLINE-077, plan U331). "Calendar" in the player list (O) shows what comes next on the world clock:
    the next three world events (each slot's event is known in advance), the National Competition, the siege of Reidan Castle,
    the town festival, the horse race, and when Trauka and Berith are back. Every time is in your own time zone and in UTC.
@@ -10499,6 +10543,28 @@ function duelKey(c){if(!DUEL)return false;const inv=DUEL.pendingChallenge(),st=D
   const res=DUEL.challenge(r);toast(t({sent:'dSent',busy:'dBusy',safe:'dSafe',far:'dFar'}[res]||'dBusy',{n:r.handle}),res==='sent'?'good':'warn');duelSig='';return true;}
  if((c==='KeyY'||c==='KeyN')&&(inv||st.phase==='ready'||st.phase==='asking')){duelAct(c==='KeyY'?'dAccept':'dDecline');return true;}
  return false;}
+/* fight log (SAT-ONLINE-150, plan U039): the last duel's events, each side's own (src/net/duel.js: what you sent, what you
+   took after your checks, what you turned down, the foe's HP as it reported it), and who hurt you before your last death in
+   open PvP (src/net/pvp.js recap): "/fightlog" in the chat. A duel's summary shows in its window when it ends. */
+let FLOG={pvp:null};
+function flogDuel(){const st=DUEL&&DUEL.state(),L=st&&st.last;return L&&Array.isArray(L.log)&&L.log.length?{L,r:Satisfy.duel.report(L.log)}:null;}
+const flN=x=>String(Math.round((+x||0)*10)/10); // duel HP is a share of 100, a fraction with real damage (owner 2026-10-22)
+function flogSum(){const D=flogDuel();return D&&D.r.ms!=null?t('flSum',{s:(D.r.ms/1000).toFixed(1),o:D.r.hitsOut,i:D.r.hitsIn,b:flN(D.r.biggest)}):'';}
+function flogShow(){const out=[],D=flogDuel(),nm=x=>Satisfy.chat.clean(x||'',24)||'?',sec=ms=>((ms||0)/1000).toFixed(1);
+ if(D){const {L,r}=D,n=nm(L.handle);out.push(t(r.result==='win'?'flDWin':'flDLose',{n,w:t('dw_'+r.why),s:sec(r.ms)}).replace(/ {2,}/g,' '));
+  out.push(t('flDTot',{o:r.hitsOut,d:flN(r.dealt),i:r.hitsIn,k:flN(r.taken),g:r.dodged,j:r.rejected}));
+  for(const l of r.lines.filter(l=>l.e!=='cd').slice(-10))out.push(sec(l.ms)+'s · '+(l.e==='out'?t('flOut',{n}):l.e==='in'?(l.k>0?t('flIn',{n,k:flN(l.k),hp:flN(l.hp)}):t('flDodge',{n})):l.e==='foe'?t('flFoe',{n,hp:flN(l.hp)}):l.e==='rej'?t('flRej',{w:t('flW_'+l.why)}):l.e==='fight'?t('flStart'):t('flEnd')));}
+ if(FLOG.pvp){const R=FLOG.pvp.r;out.push(t('flPvp',{n:nm(FLOG.pvp.n),h:R.lines.length,s:sec(R.ms)}));for(const b of R.by.slice(0,5))out.push(t('flBy',{n:nm(b.handle),h:b.hits,p:Math.round(b.pm/10)}));}
+ if(!out.length)out.push(t('flNone'));dialog('guild',out,null,[{l:t('oClose')}]);}
+window.__GFLOG={show:()=>flogShow(),get pvp(){return FLOG.pvp},sum:()=>flogSum()}; // tests
+Object.assign(STR.ar,{flSum:'{s} ثانية · ضربت {o} مرة، واتضربت {i} · أكبر ضربة {b} · /fightlog',flDWin:'كسبت المبارزة ضد {n} {w} في {s} ثانية',flDLose:'خسرت المبارزة ضد {n} {w} في {s} ثانية',
+ flDTot:'ضرباتك: {o} ({d} من صحته) · ضرباته: {i} ({k} من صحتك) · تفاديت {g} · رفضت {j}',flOut:'ضربت {n}',flIn:'{n} ضربك -{k} (فاضلك {hp})',flDodge:'تفاديت ضربة {n}',flFoe:'{n} بقى {hp}',
+ flRej:'رفضت ضربة ({w})',flW_rate:'أسرع من أي سلاح',flW_range:'من بعيد',flW_jump:'بعد تيليبورت على طول',flW_hp:'قال إن صحته رجعت',flStart:'بدأ القتال',flEnd:'خلص',flPvp:'آخر موتة: {n} قتلك · {h} ضربة في {s} ثانية',flBy:'{n}: {h} ضربة، {p}% من صحتك',
+ flNone:'لسه مفيش قتال تشوفه',flPvpT:'{h} ضربة في {s} ثانية · اكتب /fightlog تشوف مين ضربك'});
+Object.assign(STR.en,{flSum:'{s} s · you hit {o} times, took {i} · biggest {b} · /fightlog',flDWin:'You won the duel against {n} {w} in {s} s',flDLose:'You lost the duel against {n} {w} in {s} s',
+ flDTot:'Your hits: {o} ({d} of their HP) · theirs: {i} ({k} of yours) · dodged {g} · turned down {j}',flOut:'You hit {n}',flIn:'{n} hit you -{k} (you have {hp})',flDodge:'You dodged {n}',flFoe:'{n} is at {hp}',
+ flRej:'Turned down a hit ({w})',flW_rate:'faster than any weapon',flW_range:'from too far',flW_jump:'right after a teleport',flW_hp:'health said to go back up',flStart:'The fight starts',flEnd:'Over',flPvp:'Your last death: {n} killed you · {h} hits in {s} s',flBy:'{n}: {h} hits, {p}% of your health',
+ flNone:'No fight to show yet',flPvpT:'{h} hits in {s} s · type /fightlog to see who hit you'});
 function duelTick(live){DUEL.tick();const st=DUEL.state();
  if(DUEL.locked()&&(mode==='dead'||!live))DUEL.yield(mode==='dead'?'death':'teleport');
  const inv=live?DUEL.pendingChallenge():null,cd=Math.ceil(st.countdown/1000);
@@ -10508,7 +10574,7 @@ function duelTick(live){DUEL.tick();const st=DUEL.state();
  else if(ask){$('duelInvT').textContent=st.meReady?t('dWait',{n:st.handle}):t('dReadyQ',{n:st.handle});$('duelBtnA').textContent=t('dReady');$('duelBtnA').hidden=st.meReady;$('duelBtnB').textContent=t('pDecline');$('duelBtnC').hidden=true;}
  const on=live&&(st.phase==='countdown'||st.phase==='fight'||st.phase==='over');$('duelW').hidden=!on;if(!on)return;
  $('duelT').textContent=t('dTitle',{n:st.handle||'?'});$('duelMeN').textContent=t('dYou')+' '+st.hp;$('duelFoeN').textContent=(st.handle||'?')+' '+st.foeHp;
- $('duelMeB').style.width=st.hp+'%';$('duelFoeB').style.width=st.foeHp+'%';$('duelCd').textContent=st.phase==='countdown'?String(cd||''):'';
+ $('duelMeB').style.width=st.hp+'%';$('duelFoeB').style.width=st.foeHp+'%';$('duelCd').textContent=st.phase==='countdown'?String(cd||''):st.phase==='over'?flogSum():'';
  $('duelYield').textContent=t('dYield');$('duelYield').hidden=st.phase==='over';}
 /* party raid (SAT-ONLINE-009, doc §10 R6): in a party, the leader's copy of a boss is the one that counts. Members'
    hits go to the leader, everyone sees the leader's boss HP, and its death kills every hitter's copy with that
@@ -10721,7 +10787,7 @@ function netStop(){if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(()=>{});}L
 // rankings (055), this and last month's arena rating (053), the weekly lockouts (059), the group finder entry (073). A held legend is freed too.
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
  const nc=Satisfy.natcomp?Satisfy.natcomp.now(wNow()):null,ni=nc?+nc.id.slice(1):-1; /* the National Competition's last two (SAT-ONLINE-069) */
- return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
+ return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'arenaPairs/'+se(y,m)+'/'+uid,'arenaPairs/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
 /* owner 2026-10-21: no "Download my online data" and no manual Upload/Download of characters: a character moves only by
    the automatic sync (cloudAuto while playing, cloudPull on sign-in), so no copy of it can be made by hand. */
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid,lf=erase?Promise.all([legFree(uid),frFree()]):null;netStop();

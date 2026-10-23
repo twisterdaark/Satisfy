@@ -137,3 +137,28 @@ test("a parent's .validate holds a write to one of its children", async () => {
   await no(db(A).ref('lfg/' + A + '/lv').remove(), 'one child removed leaves the entry without it');
   await yes(db(A).ref('lfg/' + A).remove(), 'the whole entry removed is not validated');
 });
+
+test('arena (SAT-ONLINE-153, plan U040): a rating names its opponent and counts one more duel against it; at most 5 a season', async () => {
+  const se = 's202610', r = (w, o) => ({ r: 1000 + w, w, l: 0, n: 'Ahmed', t: SV, o });
+  const both = (w, o, n) => ({ ['arena/' + se + '/' + A]: r(w, o), ['arenaPairs/' + se + '/' + A + '/' + o]: n });
+  await no(db(A).ref('arena/' + se + '/' + A).set(r(1, B)), 'a rating without its count');
+  await yes(db(A).ref().update(both(1, B, 1)), 'the first rated duel with B');
+  await new Promise((res) => setTimeout(res, 20)); // a later write: the rating's t is no longer now
+  await no(db(A).ref('arenaPairs/' + se + '/' + A + '/' + B).set(2), 'a count without a new rating');
+  await no(db(A).ref().update(both(2, B, 3)), 'the count skipping one');
+  for (let i = 2; i <= 5; i++) await yes(db(A).ref().update(both(i, B, i)), 'rated duel ' + i + ' with B');
+  await no(db(A).ref().update(both(6, B, 6)), 'a sixth with B this season');
+  await yes(db(A).ref().update(both(6, 'uidCarim04', 1)), 'a first with someone else');
+  await no(db(B).ref().update({ ['arena/' + se + '/' + A]: r(7, B), ['arenaPairs/' + se + '/' + A + '/' + B]: 1 }), "B can't write A's");
+  await no(db(B).ref('arenaPairs/' + se + '/' + A).once('value'), "nor read A's counts");
+  await yes(db(A).ref('arenaPairs/' + se + '/' + A).once('value'), 'A reads its own');
+});
+
+test('balance (SAT-ONLINE-154, plan U045): the new figures, optional and bounded', async () => {
+  const base = { wk: 'w2900', cls: 'warrior', lv: 12, n: 1, s: 2, w: 1, l: 0, gi: 0, go: 0, t: SV };
+  await yes(db(A).ref('balance/' + A).set(base), 'without them');
+  await yes(db(A).ref('balance/' + A).set(Object.assign({}, base, { dw: 3, dl: 2, ds: 40.5, pk: 1, pd: 0, pt: 6.2, gb: 2, lp: 180 })), 'with them');
+  await no(db(A).ref('balance/' + A).set(Object.assign({}, base, { gb: 10 })), 'a gear band past 9');
+  await no(db(A).ref('balance/' + A).set(Object.assign({}, base, { lp: 70000 })), 'a p95 past a minute');
+  await no(db(B).ref('balance/' + A).set(base), "B can't write A's");
+});

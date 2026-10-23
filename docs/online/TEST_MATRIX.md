@@ -22,7 +22,7 @@ Test paths are under `tests/`. "Fake" = `tests/harness/fake-firebase.js` (it app
 | T13 | Safe town denies attack entry | ✅ | `unit/duel` (no challenge in or into a safe zone; entering one forfeits), `regression/duel` (no challenge in Winston), `regression/party` (every town is safe) |
 | T14 | Projectile from outside hits someone inside a safe zone | ⏳ | Open PvP (R5). Duels can't start or continue in a town. |
 | T15 | Dash across a town edge | ⏳ | R5. In a duel, entering a town forfeits (`unit/duel`). |
-| T16 | Target changes instance after the attack | 🟡 | `unit/duel` (range check against the defender's real position). R5 needs the server check. |
+| T16 | Target changes instance after the attack | 🟡 | `unit/duel` (range check against the defender's real position); `unit/antiexploit` (SAT-ONLINE-151: no hit lands for a second from an attacker who teleported, duel or open PvP). R5 needs the server check. |
 | T17 | Friendly fire in a party | ⏳ | R5 (a party has no damage path at all today). |
 | T18 | Duel refusal and expiry | ✅ | `unit/duel` (decline, expiry, busy, ready-check timeout), `regression/duel` (N declines) |
 | T19 | Duplicate duel result | ✅ | `unit/chaos` (every message duplicated → one result each) |
