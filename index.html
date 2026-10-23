@@ -5753,7 +5753,7 @@ function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='
 const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','lgloves','lboots','cring','ihelm','igloves','iboots','parmor','mring'];
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.55:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.1:.04)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);if(NET&&b.boss&&!m.bh)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else bossChest(m,b);{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.03,.1,1.3)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(S.tl.viscount?.05:0)+(S.tl.pioneer?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)+(S.tl.shero?.05:0)+(S.tl.baron?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.dead=true;if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);pxpKill(m,b);if(NET&&b.boss&&!m.bh)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else bossChest(m,b);{const xg=Math.round(b.xp*(m.xmul||1)*clamp(1+(m.lv-S.lv)*.03,.1,1.3)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(S.tl.veteran?.05:0)+(S.tl.viscount?.05:0)+(S.tl.pioneer?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));gainXP(xg);num(m.x,m.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(S.tl.explorer?.05:0)+(S.tl.dandy?.05:0)+(S.tl.shero?.05:0)+(S.tl.baron?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p*(1+secB('drop')))addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill
  if(!m.bh&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}rbBossDrop(m,b);
@@ -10454,7 +10454,7 @@ function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(inBh(P.x,P
 Object.assign(STR.ar,{netOtherV:'{n} قريب منك بس على نسخة تانية من اللعبة: اعملوا الاتنين ريفريش عشان تشوفوا بعض'});
 Object.assign(STR.en,{netOtherV:'{n} is nearby on a different version of the game: reload both pages to see each other'});
 function netWatch(){const ids=PARTY?PARTY.follow():[],w=ids.join(' ');if(NETTR.wsig!==w){NETTR.wsig=w;NETTR.party(ids);}} // party.follow(): review #55
-function netTick(){faultAt('netTick');NET.tick();const live=netLive();
+function netTick(){faultAt('netTick');NET.tick();pxpSeen();const live=netLive();
  if(PARTY)PARTY.tick();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
@@ -10710,7 +10710,32 @@ function rlHeal(pm){const n=Math.min(maxHP()-P.hp,Math.round(maxHP()*pm/1000));i
 function rlTick(){if(ROLE!=='healer'||!rlOn()||mode!=='play'||P.ghost)return;const n=performance.now();if(n<rlT)return;rlT=n+RL.HEAL_S*1000;
  if(!mons.some(m=>!m.dead&&rlBoss(m)&&Math.hypot(m.x-P.x,m.y-P.y)<RL.FIGHT_R))return;
  rlHeal(RL.HEAL_PM);const raid='h|'+PARTY.id();for(const r of rlMates())if(Math.hypot(r.x-P.x,r.y-P.y)<RL.HEAL_R)NET.send('raid.state',{to:r.uid,raid,k:RL.HEAL_PM});}
+/* shared party XP (SAT-ONLINE-146, plan U056: a contribution radius and an anti-AFK threshold; no XP for someone absent).
+   When a party member kills a monster in their own game, each other member near it (within PXP.R of the kill, in the same
+   room) is told; their game gives them a quarter of that monster's XP for their own level, if they are still near the
+   one who killed it and have moved or fought in the last minute (someone away or idle gets nothing). Bosses are left to the
+   raid (everyone who hit one already gets the kill), and so are arena, tower, event, summoned and caravan monsters. A
+   member who took part in that kill (their own game paid it) gets no share of it, and one kill is shared once. */
+const PXP={SHARE:.25,R:400,ACT_MS:60000,PER_S:6,WAIT_MS:1200,KEEP_MS:20000};
+var pxpActT=-1e9,pxpX=null,pxpY=null,pxpIn=new Map(),pxpKeys=new Map();
+function pxpOk(m,b){return !!b&&!b.boss&&!m.tmp&&!m.arena&&!m.tower&&!m.spar&&!m.car&&!m.bh&&!m.sg&&!m.evt;}
+// each frame online: moving, swinging or being hit counts as being there
+function pxpSeen(){if(!P)return;if(pxpX!=null&&(Math.abs(P.x-pxpX)+Math.abs(P.y-pxpY)>.5||P.acd>0))pxpActT=performance.now();pxpX=P.x;pxpY=P.y;}
+function pxpKill(m,b){const key=mobKey(m),now=performance.now();pxpKeys.set(key,now);
+ if(!NET||!PARTY||!PARTY.id()||!S||S.__demo||m.mobKill||!pxpOk(m,b))return;const pid=PARTY.id(),room=(roomAt(m.x,m.y)||{}).id||null,raid='x|'+key.slice(0,48)+'|'+Math.max(1,Math.min(999,m.lv|0));
+ for(const r of NET.remotes())if(r.uid&&r.party===pid&&(r.room||null)===room&&Math.hypot(r.x-m.x,r.y-m.y)<=PXP.R)NET.send('raid.state',{to:r.uid,raid,k:0});}
+function pxpGot(from,pl){const w=pl.raid.split('|');if(w.length!==3)return;const key=w[1],type=key.split('@')[0],lv=Math.round(+w[2]),b=MT[type];
+ if(!b||b.boss||!(lv>=1&&lv<=999)||!PARTY||!PARTY.id()||from.party!==PARTY.id()||!S||S.__demo)return;
+ const tn=performance.now();for(const [k,at] of pxpKeys)if(tn-at>PXP.KEEP_MS)pxpKeys.delete(k);if(pxpKeys.has(key))return;pxpKeys.set(key,tn); // once a kill, and none for one you took part in
+ const L=(pxpIn.get(from.uid)||[]).filter(x=>tn-x<1000);if(L.length>=PXP.PER_S)return;L.push(tn);pxpIn.set(from.uid,L);
+ // a moment later (the kill of your own copy, if you hit it too, comes first), and only if you are there
+ setTimeout(()=>{if(!S||S.__demo||!NET||mode==='dead'||!PARTY||PARTY.id()!==from.party)return;const r=NET.remotes().find(x=>x.uid===from.uid);if(!r)return;
+  if((r.room||null)!==((roomAt(P.x,P.y)||{}).id||null)||Math.hypot(r.x-P.x,r.y-P.y)>PXP.R+60||performance.now()-pxpActT>PXP.ACT_MS)return;
+  if(pxpKeys.get(key)!==tn)return; // you killed your own copy meanwhile
+  const xg=Math.max(1,Math.round(b.xp*clamp(1+(lv-S.lv)*.03,.1,1.3)*PXP.SHARE));gainXP(xg);num(P.x,P.y-36,'+'+xg.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});hudDirty=true;},PXP.WAIT_MS);}
+window.__GPXP={get act(){return pxpActT;},idle:()=>{pxpActT=-1e9;},C:PXP}; // tests
 function rlStart(){rlIn=new Map();LOOTO=LOOTL=null;NET.on(ev=>{if(ev.type!=='message')return;const env=ev.env,pl=env.payload||{};
+ if(env.type==='raid.state'&&pl.to===NET.uid&&typeof pl.raid==='string'&&pl.raid.slice(0,2)==='x|'){const f=NET.get(ev.sid);if(f&&f.uid&&!isBlocked(f.uid))pxpGot(f,pl);return;} // a party mate's kill near you (SAT-ONLINE-146)
  if(env.type==='raid.state'&&pl.to===NET.uid&&typeof pl.raid==='string'&&/^[kcrw]\|/.test(pl.raid)){const f=NET.get(ev.sid);if(f&&f.uid&&!isBlocked(f.uid)&&rlOn())lootIn(f,pl);return;} // loot rolls (SAT-ONLINE-063)
  if(env.type!=='raid.state'||pl.to!==NET.uid||typeof pl.raid!=='string'||pl.raid.slice(0,2)!=='h|'||!rlOn()||pl.raid!=='h|'+PARTY.id())return;
  const from=NET.get(ev.sid);if(!from||!from.uid||isBlocked(from.uid)||from.party!==PARTY.id()||from.role!=='healer'||Math.hypot(from.x-P.x,from.y-P.y)>RL.HEAL_RX)return;

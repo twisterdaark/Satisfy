@@ -66,9 +66,9 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U053 | Party chat | ✅ | SAT-ONLINE-016: party lines, rate-limited, block list; world chat for everyone (SAT-ONLINE-026), guild chat (SAT-ONLINE-049, #81), world notices as lines (SAT-ONLINE-041); insults shown as stars in every channel unless the player turns it off with `/filter` (SAT-ONLINE-071, #105) |
 | U054 | Party summon | ⏳ | A teleport needs a movement authority |
 | U055 | Party follow | ✅ | SAT-ONLINE-068 (#102): "Follow" on a party mate's card walks after them; any move key stops it (`regression/follow`) |
-| U056 | Shared PvE XP | ⏳ | Needs a combat authority; a party raid pays each member their own rewards (009) |
-| U057 | Personal loot | ✅ | SAT-ONLINE-009: each member's own game pays the boss kill to everyone who hit it, once per encounter (a message twice or a reload pays nothing more: `unit/raid`); monster loot goes straight to each player's own bag, so nobody can take another's. SAT-ONLINE-141: `regression/raid` checks the one who landed the last blow gets the same boss gold as the one who didn't. A server ledger is still D3 |
-| U058 | Need/Greed loot | ✅ | SAT-ONLINE-063 (#96): every raid boss kill rolls one bonus piece among those who fought it, Need/Greed/Pass run by the raid leader, the roll a hash anyone checks; only the winner's game makes it. SAT-ONLINE-141: one result a roll: the result announced again makes nothing more, and the boss reported killed again within the minute starts no second roll (`regression/raidloot`). Server random and a ledger are still D3 (a modified leader picks the roll) |
+| U056 | Shared PvE XP | ✅ | SAT-ONLINE-146 (the owner, 2026-10-22): a party member's kill gives each other member near it (400 px, the same room) a quarter of that monster's XP for their own level, if they are still near and have moved or fought in the last minute; far away, idle or out of the party, nothing. Bosses are left to the raid (009: everyone who hit one gets the kill); arena, tower, event, summoned and caravan monsters aren't shared; one kill is shared once, and not to a member whose own game paid it (`regression/partyxp`). Each game gives its own share (D3: no combat authority) |
+| U057 | Personal loot | 🟡 | SAT-ONLINE-009: each member's own game pays the boss kill once per encounter; no server ledger |
+| U058 | Need/Greed loot | 🟡 | SAT-ONLINE-063 (#96): every raid boss kill rolls one bonus piece among those who fought it, Need/Greed/Pass run by the raid leader, the roll a hash anyone checks; only the winner's game makes it; server random + ledger still D3 |
 | U059 | Friends and follow | ✅ | SAT-ONLINE-067 (#101): ask from the card, accept, online list with level and place, told when they come online; whispers to friends anywhere (070, #104) |
 | U060 | Guild invitations | ✅ | SAT-ONLINE-046/049/050 (#79, #81, #82): guilds in the database (unique names, ranks master/officer/member), invites from the card, remove, disband, the guild under the name, guild chat and the vault. Guild buildings: SAT-ONLINE-065 (#99). SAT-ONLINE-104: the master decides which ranks may invite (the officers by default, the members if allowed), and the rules refuse an invitation from anyone else |
 | U061 | Emotes | ✅ | SAT-ONLINE-022: V (touch: Emote) → wave/dance/point/cheer for 3 s as `PlayerPublic.em` (a fixed list, no text); one per 2 s |
@@ -77,7 +77,7 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U064 | Player inspect | ✅ | SAT-ONLINE-020: the card shows only PlayerPublic (name, level, class, title, party, armour) |
 | U065 | Party reconnect | ✅ | SAT-ONLINE-023: the party lives in the tab's sessionStorage; within 60 s a reloaded member auto-accepts its leader's invite back and a reloaded leader keeps its party. Leaving on purpose is final (`regression/rejoin`) |
 
-**Totals (social):** ✅ 18 · 🟡 0 · ⏳ 2 · ❌ 0.
+**Totals (social):** ✅ 17 · 🟡 2 · ⏳ 1 · ❌ 0.
 
 ## Online since the backlog (owner requests and Claude-B's #13 handoff), not in U001–U065
 
