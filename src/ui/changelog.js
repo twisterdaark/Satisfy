@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23stunnohit', ver: '2.17', d: '2026-10-23',
+      ar: ["أونلاين: الصعق اللي بتعمله على الوحوش من غير ضربة (صرخة الحرب، الدبّة على الأرض) بيصعق الوحش عند الكل، مش عندك إنت بس"],
+      en: ["Online: a stun you give monsters without a hit (the war cry, a stomp) stuns them on everyone's screen, not just yours"] },
     { v: '2026-10-23classpacks', ver: '2.16', d: '2026-10-23', hide: 1,
       ar: ["للمطورين: الكلاسات بقت ممكن تتكتب كبيانات (src/content/classpacks.js): الاسم، واختبار الترقية عند المدرّب، والسكيلات (طعنة، اندفاع، ضربة قدام، دايرة، رمية، تقوية، علاج، وباسيف)، وبتتحط في اللعبة لوحدها"],
       en: ["For developers: classes can be written as data (src/content/classpacks.js): the name, the trial at a trainer, and the skills (thrust, dash, sweep, nova, shot, buff, heal, and passive), installed by the game at load"] },

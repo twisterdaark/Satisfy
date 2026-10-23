@@ -409,3 +409,17 @@ test("a stealthed follower is found by the host's monsters only as close as the 
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+test("a stun B's skill gives without a hit (a war cry, a stomp) stuns the host's copy, so it stands still everywhere", async () => {
+  const { ctx, a, b } = await pair();
+  try {
+    const [k] = await nearest(b, 1);
+    for (const g of [a, b]) await on(g, (k) => { const m = by(k); m.max = m.hp = 1e6; }, k);
+    await frames([a, b], 30);
+    await on(b, (k) => { by(k).stun = 2.5; }, k); // as the war cry does to everything near, no hit
+    let stunned = 0;
+    for (let i = 0; i < 20 && !stunned; i++) { await frames([a, b], 2); if (await on(a, (k) => (by(k).stun || 0) > 1, k)) stunned = 1; }
+    assert.equal(stunned, 1, "the host's copy is stunned");
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
