@@ -12302,14 +12302,18 @@ function cloudAuto(now){const C=cloudApi();if(!C||!S||S.__demo||SAVE_OFF||netRep
 // than the one on this device, or the newest one when this device has none
 function cloudPick(list,L){if(!list.length)return null;const same=L&&list.find(c=>c.pid===L.pid);if(same)return (same.savedAt||0)>L.at+2000?same:null;
  const best=list.slice().sort((a,b)=>(b.lv-a.lv)||((b.savedAt||0)-(a.savedAt||0)))[0];return !L||best.lv>L.lv?best:null;}
+/* plan U018 (SAT-ONLINE-139): another character on this device is not in the account (cloudPick takes another one only
+   when this one has no cloud copy): one played offline. It goes up first as its own character, so nothing of it is lost
+   when the account's further one replaces it here; if it can't go up (too large, offline), it stays and nothing comes down. */
 function cloudPull(){const C=cloudApi();if(!C||cloudPulled)return Promise.resolve(false);cloudPulled=true;
  return C.list().then(list=>{let L=null;try{L=cloudLocal();}catch(e){}const c=cloudPick(list,L);if(!c)return false;
-  return C.download(c.pid).then(raw=>{if(!raw||!STORE.replace(raw,'before-cloud-'+Date.now().toString(36)))return false;cloudUpRaw=raw;toast(t('cloudAutoDown',{n:c.handle,lv:c.lv}),'good');return true;});})
+  const keep=L&&L.pid!==c.pid?C.upload(L.raw).then(()=>toast(t('cloudKept',{n:L.n,lv:L.lv}),'good')):Promise.resolve();
+  return keep.then(()=>C.download(c.pid)).then(raw=>{if(!raw||!STORE.replace(raw,'before-cloud-'+Date.now().toString(36)))return false;cloudUpRaw=raw;toast(t('cloudAutoDown',{n:c.handle,lv:c.lv}),'good');return true;});})
   .catch(e=>{console.warn('cloud restore failed',e&&(e.code||e.message));return false;});}
 addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&cloudLive()&&FB&&netUser){save(true);cloudAuto(true);}});
 addEventListener('pagehide',()=>{if(cloudLive()&&FB&&netUser){save(true);cloudAuto(true);}});
-Object.assign(STR.ar,{cloudAutoDown:'شخصيتك {n} (لفل {lv}) اتحمّلت من حسابك',cloudAutoNote:'الحفظ بيترفع لحسابك لوحده طول ما إنت داخل بجوجل'});
-Object.assign(STR.en,{cloudAutoDown:'Your character {n} (Lv {lv}) was loaded from your account',cloudAutoNote:'Your save goes up to your account by itself while you are signed in with Google'});
+Object.assign(STR.ar,{cloudKept:'شخصيتك {n} (لفل {lv}) اللي على الجهاز ده اتحفظت في حسابك',cloudAutoDown:'شخصيتك {n} (لفل {lv}) اتحمّلت من حسابك',cloudAutoNote:'الحفظ بيترفع لحسابك لوحده طول ما إنت داخل بجوجل'});
+Object.assign(STR.en,{cloudKept:'Your character {n} (Lv {lv}) on this device was kept in your account',cloudAutoDown:'Your character {n} (Lv {lv}) was loaded from your account',cloudAutoNote:'Your save goes up to your account by itself while you are signed in with Google'});
 function cloudProfile(){const C=cloudApi();if(!C||!S||S.__demo)return;cloudProfT=performance.now();C.writeProfile(S,lang).catch(e=>console.warn('profile write failed',e&&e.code));}
 function netFail(e){netSetState('ERROR');netBtn();toast(t('netFail',{e:(e&&e.code)||(e&&e.message)||'?'}),'warn');}
 function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(user.uid);netSetState('JOINING');netBtn();
