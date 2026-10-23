@@ -1148,6 +1148,53 @@
         }
       }
     },
+    "expo": {
+      ".read": "auth != null",
+      "$p": {
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('accountIds').child(auth.uid).exists()",
+          ".validate": "$p.matches(/^[0-9]{1,6}$/) && newData.hasChildren(['p', 'n', 'by', 'ty', 'L', 'W', 'C', 'sl', 'mats', 't']) && newData.child('p').val() === (now - 2419200000 - (now - 2419200000) % 2592000000) / 2592000000",
+          "p": { ".validate": "newData.isNumber()" },
+          "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+          "by": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+          "ty": { ".validate": "newData.isString() && newData.val().matches(/^(gs|sw|sp|bw|st|dg|hm|ar|hl|gl|bt)$/)" },
+          "L": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+          "W": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+          "C": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+          "sl": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 99" },
+          "mats": {
+            "$k": { ".validate": "$k.matches(/^[a-z]{2,8}$/) && newData.isNumber() && newData.val() >= 1 && newData.val() <= 99" }
+          },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "expoVotes": {
+      "$p": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('accountIds').child(auth.uid).exists() && root.child('profiles').child(auth.uid).child('lv').val() >= 10 && root.child('firstSeen').child(auth.uid).isNumber() && (root.child('firstSeen').child(auth.uid).val() < now - (now - 2419200000) % 2592000000 || root.child('firstSeen').child(auth.uid).val() < 1794700800000)",
+          ".validate": "newData.isString() && newData.val() !== auth.uid && root.child('expo').child($p).child(newData.val()).child('p').val() === (now - 2419200000 - (now - 2419200000) % 2592000000) / 2592000000 && newData.parent().parent().parent().child('expoTally').child($p).child(newData.val()).val() === (root.child('expoTally').child($p).child(newData.val()).exists() ? root.child('expoTally').child($p).child(newData.val()).val() : 0) + 1"
+        }
+      }
+    },
+    "expoTally": {
+      ".read": "auth != null",
+      "$p": {
+        "$e": {
+          ".write": "auth != null && !root.child('expoVotes').child($p).child(auth.uid).exists() && newData.parent().parent().parent().child('expoVotes').child($p).child(auth.uid).val() === $e",
+          ".validate": "newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+        }
+      }
+    },
+    "firstSeen": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && !data.exists()",
+        ".validate": "newData.val() === now"
+      }
+    },
     "handles": {
       "$h": {
         ".read": "auth != null",

@@ -40,6 +40,8 @@
     'cg',
     // the heaviest fish of each kind you have caught (SAT-ONLINE-182)
     'fishR',
+    // the Blacksmith expo seasons this character's entry won (SAT-ONLINE-174)
+    'exw',
     // mounts and pets owned/active (SAT-MOUNT), the daily arena lockout (a date, so it must sync)
     'mounts', 'mount', 'pets', 'pet', 'arenaDay',
     // achievements earned (SAT-ACH-001), arena wins and the highest level ever reached (SAT-RANK-001),
