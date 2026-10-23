@@ -290,6 +290,8 @@
        * Shared monsters (SAT-ONLINE-026): mobs/{world}/{zone}/{host uid} = {t, m: {"<type>@<sx>,<sy>": "x,y,hp,flags,lv"}}.
        * The zone's host writes its monsters near players; the others follow them. mobsOn(zone, fn) calls fn with
        * {hostUid: {t, m}} on every change (null zone: stop); mobsPut(zone, m) writes this client's node (null m: remove it).
+       * SAT-ONLINE-149: a follower's node in the same zone carries its damage totals ("h<life>.<damage>...") and, just after
+       * it joins, the monsters it was fighting; the host reads them from the same fn.
        */
       mobsOn: function (zone, fn) {
         if (mobs.offs) mobs.offs.forEach(off);
