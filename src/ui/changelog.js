@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24training', ver: '2.54', d: '2026-10-24',
+      ar: ["ساحة التدريب: جنب محل الدروع في وينستون فيه تلات دمى تدريب. اضرب أي واحدة وعداد بيظهر فوق: الوقت، والدمج، والـ DPS، وعدد الضربات والكريتيكال. العداد بيقف بعد 4 ثواني من آخر ضربة، ولو ضربت 10 ثواني أو أكتر بيتسجل أحسن رقم ليك. الدمى مش بتتحرك ولا بتضرب ولا بتقع، ومش بتديك خبرة ولا فلوس ولا حاجات ولا خبرة سلاح، ومش بتبوظ عدتك"],
+      en: ["The training yard: three training dummies stand by Winston's armory. Hit one and a meter shows at the top: time, damage, DPS, hits and crits. It stops 4 seconds after the last hit, and a run of 10 seconds or more can set your best. The dummies never move, strike or fall, and give no XP, gold, items or weapon mastery, and don't wear your gear"] },
     { v: '2026-10-23monsee', ver: '2.53', d: '2026-10-23',
       ar: ["مصاصين الدماء النبلا، وإيرلات الدم من المدينة 6 لتحت، وماري روز، وفنرير كانوا مختفيين. دلوقتي بيبانوا بشكلهم، واتراجعت كل الوحوش التانية ومفيش حد ناقص.",
           "كويستات \"اقتل وصحتك أقل من 50%\": لو لفلك أعلى من الوحش بـ 20 أو أكتر، شرط الصحة بيتلغى لأنه مستحيل يوصلك ليها، والكويست بيقول كده.",

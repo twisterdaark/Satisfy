@@ -25,7 +25,7 @@
 
   var DURABLE = [
     // identity and progress
-    'look', 'cls', 'lv', 'xp', 'adv', 'title', 'tl', 'hitRec', 'st', 'pts', 'hid', 'sk', 'mast', 'balK', 'playT', 'race', 'bch', 'rsT',
+    'look', 'cls', 'lv', 'xp', 'adv', 'title', 'tl', 'hitRec', 'dpsB', 'st', 'pts', 'hid', 'sk', 'mast', 'balK', 'playT', 'race', 'bch', 'rsT',
     // wallet and inventory
     'gold', 'bread', 'hpot', 'mpot', 'mats', 'arrows', 'arrowsMade', 'sold', 'items', 'eqW', 'eqA',
     // crafting (the Blacksmith's ladder)

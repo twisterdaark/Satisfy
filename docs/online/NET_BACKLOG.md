@@ -247,5 +247,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 |---|---|---|---|
 | U267 | Reduced motion | ✅ | SAT-ONLINE-164: a device setting in the pause menu (`satisfy_rmo`, the system's prefers-reduced-motion when unset): no camera shake, no white flash, the UI's shakes and pulses stop, particles capped (`RMOFX`, `RMOVX`); telegraphs (`drawTele`) untouched; `regression/rmotion` |
 | U269 | Armor pieces (render sprite overlays) | ✅ | SAT-ONLINE-165: helmet, armour, gloves and boots each draw their own look (`GEARL`, 48 ids), for you and the others (`gr:` fx tag); `regression/gearlook` |
+| U299 | Training arena | ✅ | SAT-ONLINE-169: three dummies by Winston's armory (`TDSPOT`, this screen's own, never shared: `mobOk`), a DPS meter (`#tdW`, `TDM`) and a best of runs of 10 s or more (`S.dpsB`); no XP, loot, kill, mastery, wear or one-hit record from them; `regression/training` |
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
