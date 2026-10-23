@@ -331,3 +331,41 @@ test("a boss's wind-up before its blow shows on B's screen too, not only the hos
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+test("a monster B makes from the host's list (one B never spawned) takes B's hits as any other: not marked (+20%)", async () => {
+  const { ctx, a, b } = await pair();
+  try {
+    const k = await on(a, () => { const G = window.__G, m = G.spawnMon('wolf', G.P.x + 40, G.P.y); m.ek = 1; m.evt = 1; m.max = m.hp = 5000; m.agg = 0; m.eng = 0; return key(m); });
+    let made = null;
+    for (let i = 0; i < 40 && !made; i++) { await frames([a, b], 3); made = await on(b, (k) => { const m = by(k); return m ? { mk: m.mk || 0, mkN: m.mkN || 0 } : null; }, k); }
+    assert.ok(made, 'B made it from the list');
+    assert.equal(made.mkN, 1, 'known as made here');
+    assert.equal(made.mk, 0, "not a tracker's mark, which adds 20% to every hit on it");
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+test("a weakness or a slow one player's skill gives a monster is on the host's copy, so it holds for everyone, both ways", async () => {
+  const { ctx, a, b } = await pair();
+  try {
+    const [k] = await nearest(b, 1);
+    for (const g of [a, b]) await on(g, (k) => { const m = by(k); m.max = m.hp = 1e6; m.agg = 0; m.eng = 0; }, k);
+    await frames([a, b], 30);
+    const deb = (g) => on(g, (k) => { const m = by(k), t = window.__GANIM.t() / 1000; return { weak: (m.weak || 0) > 0, slow: (m.slowU || 0) > t }; }, k);
+    assert.deepEqual([await deb(a), await deb(b)], [{ weak: false, slow: false }, { weak: false, slow: false }]);
+    // B's skill (as Sword Saint's irresistible thrust does after its hit: slowed 8 s, weakened 8 s)
+    await on(b, (k) => { const m = by(k); m.slowU = window.__GANIM.t() / 1000 + 8; m.weak = 8; }, k);
+    await frames([a, b], 30);
+    assert.deepEqual(await deb(a), { weak: true, slow: true }, "on the host's copy: A's hits do more, its steps are slower");
+    assert.deepEqual(await deb(b), { weak: true, slow: true }, 'and still on B\'s');
+    // they wear off on the host, so on B too
+    await on(a, (k) => { const m = by(k); m.weak = 0; m.slowU = 0; }, k);
+    await frames([a, b], 30);
+    assert.deepEqual(await deb(b), { weak: false, slow: false });
+    // the other way: the host's weakness reaches B, whose hits then do more as well
+    await on(a, (k) => { by(k).weak = 6; }, k);
+    await frames([a, b], 30);
+    assert.equal((await deb(b)).weak, true);
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});

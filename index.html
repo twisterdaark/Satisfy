@@ -5367,7 +5367,7 @@ function acctStore(uid){if(SLOT||!uid)return;let ls=null;try{ls=localStorage;}ca
 // WS (guilds, territories, legends; SAT-GUILD-001) is saved next to S and P, as on main.
 // P is saved trimmed, at the tower/arena return point while inside one (as on main)
 var SAVE_OFF=false; // set when another tab took the account over (SAT-ONLINE-010): this tab must not write the save any more
-function mrtKeep(){const now=Date.now(),o={};let n=0;for(const m of mons){if(!m.dead||m.tmp||m.evt||m.mk||m.arena||!(m.rt>0)||m.rt>1e8||n>=400)continue;o[mobKey(m)]=Math.round(now+m.rt*1000);n++;}S.mrt=o;}
+function mrtKeep(){const now=Date.now(),o={};let n=0;for(const m of mons){if(!m.dead||m.tmp||m.evt||m.mkN||m.arena||!(m.rt>0)||m.rt>1e8||n>=400)continue;o[mobKey(m)]=Math.round(now+m.rt*1000);n++;}S.mrt=o;}
 function save(quiet){if(!S||S.__demo||SAVE_OFF)return;mrtKeep();const sp=TWR?TWR.ret:ARN?ARN.ret:P;Satisfy.ids.ensure(S);if(STORE.write(S,{x:sp.x,y:sp.y,hp:P.hp,st:P.st,mp:P.mp,food:P.food},{WS})&&!quiet)toast(t('saved'));}
 function hasSave(){return STORE.exists();}
 // Stable ids and domain events (SAT-ONLINE-005, doc §05 R0.4/R0.5; src/core/ids.js, state.js, events.js).
@@ -11209,7 +11209,7 @@ function mobLife(k){if(MOBN.cum.delete(k))MOBN.dirty=1;MOBN.ep.set(k,(MOBN.ep.ge
 // every damage source on a monster goes through here; true when the hit was handed to another player (local HP kept).
 // ally: a blow from the world's NPCs (the town's defenders in an invasion, the war's allies), which every screen runs: only
 // the host's count, so they don't hit once for each player there (SAT-ONLINE-149)
-const mobCum=k=>{let c=MOBN.cum.get(k);if(!c)MOBN.cum.set(k,c={e:MOBN.ep.get(k)||0,d:0,q:0,s:0,kx:0,ky:0,h:0});return c;};
+const mobCum=k=>{let c=MOBN.cum.get(k);if(!c)MOBN.cum.set(k,c={e:MOBN.ep.get(k)||0,d:0,q:0,s:0,kx:0,ky:0,h:0,wq:0,ws:0,sq:0,ss:0});return c;};
 // a monster healing itself off a blow on you (a drain): on a follower the host's copy heals, so every bar rises the same;
 // this copy's bar follows the host's list, as for damage (SAT-ONLINE-149, with the signature moves of v2.04)
 function mobHeal(m,h){h=Math.max(0,Math.round(h));if(!h)return;if(MOBN&&MOBN.host&&MOBN.host!==NET.uid&&m.led&&mobOk(m)){const c=mobCum(mobKey(m));c.h=(c.h||0)+Math.min(1e6,h);MOBN.dirty=1;return;}m.hp=Math.min(m.max,m.hp+h);}
@@ -11239,7 +11239,7 @@ function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!ARN&&!TWR&&!solo(P
  if(z!==MOBN.zone){if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}MOBN.zone=z;MOBN.all={};MOBN.allN++;MOBN.hits.clear();MOBN.cum.clear();MOBN.ep.clear();MOBN.seen.clear();MOBN.merge=null;NETTR.mobsOn(z,a=>{MOBN.all=a;MOBN.allN++;});
   // a new host or none: monsters hidden for the old host come back on their own; copies made from its list go, but not one
   // still alive near you (SAT-ONLINE-149: a fight with a wave the old host had went on when it left)
-  mons=mons.filter(m=>!m.mk||!m.dead&&Math.abs(m.x-P.x)<MOB_BX&&Math.abs(m.y-P.y)<MOB_BY);for(const m of mons){m.mk=0;if(m.hidN){m.hidN=0;m.rt=1;}}
+  mons=mons.filter(m=>!m.mkN||!m.dead&&Math.abs(m.x-P.x)<MOB_BX&&Math.abs(m.y-P.y)<MOB_BY);for(const m of mons){m.mkN=0;if(m.hidN){m.hidN=0;m.rt=1;}}
   // SAT-ONLINE-149 (owner 2026-10-23: the golems disappeared when people came near). When someone else becomes your host,
   // what you see around you goes to the new host first (MOB_MERGE ms), so the monsters you were fighting
   // stay where they are with the health they have, the ones you killed stay dead, and ones the host never had (an event's
@@ -11254,18 +11254,21 @@ function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!ARN&&!TWR&&!solo(P
 const MOB_MERGE=1200,MOB_MINE=10;
 const mobSame=(m,s)=>{const w=s.split(','),x=+w[0],y=+w[1],hp=+w[2],fl=+w[3];return !!(fl&1)===!!m.dead&&(m.dead||Math.hypot(x-m.x,y-m.y)<30&&Math.abs(hp-Math.round(1000*m.hp/m.max))<=25);};
 // follower: its node beside the host's list: the damage totals (always), and during the merge what it sees around it
+// "h<life>.<damage>[.<stuns>.<last stun>[.<knock x>.<knock y>[.<heal>[.<weaknesses>.<last weakness>[.<slows>.<last slow>]]]]]"
+// in base 36, lengths in hundredths of a second; what a follower's hits did to a monster in this life, as totals
+function mobCumS(c){const f=[c.e,c.d,c.q,Math.round(c.s*100),c.kx,c.ky,c.h||0,c.wq||0,Math.round((c.ws||0)*100),c.sq||0,Math.round((c.ss||0)*100)];let n=f.length;while(n>2&&!f[n-1])n--;return 'h'+f.slice(0,n).map(v=>v.toString(36)).join('.');}
 function mobFlush(z){const t=performance.now(),mg=!!MOBN.merge&&t<MOBN.mergeT;if(MOBN.merge&&!mg){MOBN.merge=null;MOBN.dirty=1;}
  if(!MOBN.dirty&&!mg||t-MOBN.fT<(mg?MOB_MS:MOB_HIT))return;MOBN.fT=t;MOBN.dirty=0;const o={};let n=0;
  if(mg)for(const m of mons){if(n>=MOB_MAX)break;const k=mobKey(m);if(MOBN.merge.has(k)&&mobOk(m)&&!(k in o)){o[k]=mobEntry(m,false);n++;}}
- for(const [k,c] of MOBN.cum){if(n>=MOB_MAX)break;if(k in o)continue;o[k]='h'+c.e.toString(36)+'.'+c.d.toString(36)+(c.q||c.kx||c.ky||c.h?'.'+c.q.toString(36)+'.'+Math.round(c.s*100).toString(36):'')+(c.kx||c.ky||c.h?'.'+c.kx.toString(36)+'.'+c.ky.toString(36):'')+(c.h?'.'+c.h.toString(36):'');n++;}
+ for(const [k,c] of MOBN.cum){if(n>=MOB_MAX)break;if(k in o)continue;o[k]=mobCumS(c);n++;}
  if(n){NETTR.mobsPut(z,o,NET.uid);MOBN.put=true;}else if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}}
 // host: what its followers' nodes say: damage done since it last looked, and during a merge the monsters they saw
 function mobHits(){for(const u in MOBN.all){if(u===NET.uid||u===MOBN.host||!MOBN.rs.some(r=>r.uid===u))continue;const L=MOBN.all[u];if(!L||!L.m||typeof L.m!=='object')continue;
   let Sn=MOBN.seen.get(u);if(!Sn)MOBN.seen.set(u,Sn=new Map());
   for(const k in L.m){const v=String(L.m[k]);if(v[0]!=='h'){mobAdopt(k,v,u);continue;}
-   const p=v.slice(1).split('.'),e=parseInt(p[0],36),d=parseInt(p[1],36),q=p[2]?parseInt(p[2],36):0,st=p[3]?parseInt(p[3],36)/100:0,kx=p[4]?parseInt(p[4],36):0,ky=p[5]?parseInt(p[5],36):0,hl=p[6]?parseInt(p[6],36):0;if(!(e>=0)||!(d>=0)||!isFinite(d)||!(q>=0)||!isFinite(kx)||!isFinite(ky)||!(hl>=0)||!isFinite(hl))continue;
-   const o=Sn.get(k),same=o&&o.e===e,dd=same?d-o.d:d,dq=same?q-o.q:q,dx=same?kx-o.kx:kx,dy=same?ky-o.ky:ky,dh=same?hl-(o.h||0):hl;Sn.set(k,{e,d,q,kx,ky,h:hl});if(!(dd>0)&&!(dq>0)&&!dx&&!dy&&!(dh>0))continue;
-   const m=mobByKey(k);if(!m||m.dead)continue;if(dd>0||dq>0||dx||dy)mobGotHit(m,Math.min(1e6,Math.max(0,dd)),u,dq>0?st:0);if(dh>0&&!m.dead)m.hp=Math.min(m.max,m.hp+Math.min(1e6,dh));if((dx||dy)&&!m.dead&&!MT[m.type].boss)move(m,Math.max(-60,Math.min(60,dx)),Math.max(-60,Math.min(60,dy)),Math.max(3,MT[m.type].r-2));}
+   const p=v.slice(1).split('.'),e=parseInt(p[0],36),d=parseInt(p[1],36),q=p[2]?parseInt(p[2],36):0,st=p[3]?parseInt(p[3],36)/100:0,kx=p[4]?parseInt(p[4],36):0,ky=p[5]?parseInt(p[5],36):0,hl=p[6]?parseInt(p[6],36):0,wq=p[7]?parseInt(p[7],36):0,ws=p[8]?parseInt(p[8],36)/100:0,sq=p[9]?parseInt(p[9],36):0,ss=p[10]?parseInt(p[10],36)/100:0;if(!(e>=0)||!(d>=0)||!isFinite(d)||!(q>=0)||!isFinite(kx)||!isFinite(ky)||!(hl>=0)||!isFinite(hl)||!(wq>=0)||!(sq>=0)||!(ws>=0)||!(ss>=0))continue;
+   const o=Sn.get(k),same=o&&o.e===e,dd=same?d-o.d:d,dq=same?q-o.q:q,dx=same?kx-o.kx:kx,dy=same?ky-o.ky:ky,dh=same?hl-(o.h||0):hl,dw=same?wq-(o.wq||0):wq,dl=same?sq-(o.sq||0):sq;Sn.set(k,{e,d,q,kx,ky,h:hl,wq,sq});if(!(dd>0)&&!(dq>0)&&!dx&&!dy&&!(dh>0)&&!(dw>0)&&!(dl>0))continue;
+   const m=mobByKey(k);if(!m||m.dead)continue;if(dd>0||dq>0||dx||dy)mobGotHit(m,Math.min(1e6,Math.max(0,dd)),u,dq>0?st:0);if(dh>0&&!m.dead)m.hp=Math.min(m.max,m.hp+Math.min(1e6,dh));if(dw>0&&!m.dead)m.weak=Math.max(m.weak||0,Math.min(30,ws));if(dl>0&&!m.dead)m.slowU=Math.max(m.slowU||0,gTime+Math.min(30,ss));if((dx||dy)&&!m.dead&&!MT[m.type].boss)move(m,Math.max(-60,Math.min(60,dx)),Math.max(-60,Math.min(60,dy)),Math.max(3,MT[m.type].r-2));}
   for(const k of [...Sn.keys()])if(!(k in L.m))Sn.delete(k);}}
 // host: a monster a player coming into the group saw. Its health is the lower of the two (a fight goes on, whoever was in
 // it: the host coming back to a fight the others carried on included); its place and target are the other player's,
@@ -11297,18 +11300,18 @@ window.__GBSC={of:n=>bossScaleOf(n),tick:rs=>{bsT=0;bossScaleTick(rs);},C:BSC}; 
 let mobMkT=0;function mobMake(){const t=performance.now();if(t-mobMkT<500)return;mobMkT=t;const L=MOBN.all[MOBN.host];if(!L||!L.m)return;
  const have=new Set();for(const m of mons)if(mobOk(m))have.add(mobKey(m));let n=0;
  for(const k in L.m){if(have.has(k)||n>=12)continue;const r=/^([a-z0-9_]{1,16})@(-?\d{1,6}),(-?\d{1,6})$/.exec(k),v=String(L.m[k]).split(',');if(!r||!MT[r[1]]||v[2]==='0')continue;
-  const m=newMon(r[1],+r[2],+r[3]);m.ek=1;m.tmp=1;m.mk=1;m.nk=k;m.x=+v[0]||m.x;m.y=+v[1]||m.y;m.eng=4;m.agg=1;mons.push(m);n++;}}
+  const m=newMon(r[1],+r[2],+r[3]);m.ek=1;m.tmp=1;m.mkN=1;/* made from the host's list: mkN, not mk (a tracker's mark: +20% damage taken; SAT-ONLINE-149) */m.nk=k;m.x=+v[0]||m.x;m.y=+v[1]||m.y;m.eng=4;m.agg=1;mons.push(m);n++;}}
 function mobList(rs){const o={},pts=[P].concat(rs);let n=0;
  const near=m=>mobOk(m)&&pts.some(p=>Math.abs(p.x-m.x)<MOB_BX&&Math.abs(p.y-m.y)<MOB_BY); // bosses first, so a crowded den never pushes one off the list
  for(const m of mons.filter(m=>MT[m.type].boss&&near(m)).concat(mons.filter(m=>!MT[m.type].boss&&near(m)))){if(n>=MOB_MAX)break;
   o[mobKey(m)]=mobEntry(m,true);n++;}
  return o;}
 // "x,y,hp per mille,flags (1 dead, 2 fighting, 4 facing left, 8 stunned, 16 shielded with the share it takes in twentieths
-// from bit 5: SAT-ONLINE-149 with v2.04's ward),level", then the action (SAT-ONLINE-042: 7 more
+// from bit 5: SAT-ONLINE-149 with v2.04's ward, 1024 weakened, 2048 slowed),level", then the action (SAT-ONLINE-042: 7 more
 // fields), then (SAT-ONLINE-149) the full health in base 36 when it isn't the one the level gives: 5, 6, 12 or 13 fields
 function mobBaseMax(m){const b=MT[m.type];return Math.max(1,Math.round(b.hp*(1+((m.lv|0)-b.lv[0])*.03)));}
 const mobMaxOf=s=>{const v=parseInt(s,36);return v>=1&&v<1e13?v:0;};
-function mobEntry(m,act){const mx=Math.round(m.max);return Math.round(m.x)+','+Math.round(m.y)+','+(m.dead?0:Math.max(1,Math.round(1000*m.hp/m.max)))+','+((m.dead?1:0)|(m.eng>0?2:0)|(m.face<0?4:0)|(m.stun>0&&!m.dead?8:0)|(m.wardT>gTime&&!m.dead?16|Math.max(1,Math.min(31,Math.round((m.wardR||.4)*20)))<<5:0))+','+(m.lv|0)+(act?mobActS(m):'')+(mx>=1&&mx<1e13&&mx!==mobBaseMax(m)?','+mx.toString(36):'');}
+function mobEntry(m,act){const mx=Math.round(m.max);return Math.round(m.x)+','+Math.round(m.y)+','+(m.dead?0:Math.max(1,Math.round(1000*m.hp/m.max)))+','+((m.dead?1:0)|(m.eng>0?2:0)|(m.face<0?4:0)|(m.stun>0&&!m.dead?8:0)|(m.wardT>gTime&&!m.dead?16|Math.max(1,Math.min(31,Math.round((m.wardR||.4)*20)))<<5:0)|(m.weak>0&&!m.dead?1024:0)|(m.slowU>gTime&&!m.dead?2048:0))+','+(m.lv|0)+(act?mobActS(m):'')+(mx>=1&&mx<1e13&&mx!==mobBaseMax(m)?','+mx.toString(36):'');}
 /* SAT-ONLINE-042 (owner 2026-10-19: the red attack zone showed for some players and not others; a monster could chase one
    player on one screen and bite another on the other). The host's copy is the only one that thinks; each listed monster now
    also carries what it is doing: ",n,s,i,t,a,l,g" = action number (a new one at every move, slam or bite), state (t
@@ -11340,13 +11343,17 @@ function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))ret
  // an event's monster the host doesn't have (owner 2026-10-22: in the Defense War the golems vanished whenever a party
  // member came near: one who reached the war at a later wave never spawned the earlier waves, and as host hid them from
  // everyone) keeps running here on its own
- if(typeof s!=='string'){if(m.ek&&!m.dead)return false;if(L&&L.m&&(m.mk||Math.abs(P.x-m.x)<MOB_BX*.8&&Math.abs(P.y-m.y)<MOB_BY*.8)){m.led=true;if(!m.dead){m.dead=true;m.dying=0;m.rt=1e9;m.hidN=1;}return true;}return false;}
+ if(typeof s!=='string'){if(m.ek&&!m.dead)return false;if(L&&L.m&&(m.mkN||Math.abs(P.x-m.x)<MOB_BX*.8&&Math.abs(P.y-m.y)<MOB_BY*.8)){m.led=true;if(!m.dead){m.dead=true;m.dying=0;m.rt=1e9;m.hidN=1;}return true;}return false;}
  const w=s.split(','),v=w.slice(0,5).map(Number);if(![5,6,12,13].includes(w.length)||v.some(x=>!isFinite(x)))return false;const [x,y,hp,fl,lv]=v,mx=w.length===6||w.length===13?mobMaxOf(w[w.length-1]):0;m.led=true;
  // SAT-ONLINE-149: dead on the host's list. If you hit it, it's your kill too: from the host's message or from this, whichever
  // comes first (the message alone could be lost); if not, it just dies
  if(fl&1){if(!m.dead){if(m.myHit){m.mobKill=1;m.hp=0;killMon(m);m.mobKill=0;}else{m.dead=true;m.dying=.5;m.rt=mobRt(m);vfx('death',m.x,m.y);}mobLife(key);}return true;}
- if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mk:m.mk,sg:m.sg,nk:m.nk,boss:m.boss,far:m.far},hid=m.hidN;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
- m.lv=lv;m.max=mx||mobBaseMax(m);m.stun=m.stunH=fl&8?.15:0;if(fl&16){m.wardT=gTime+.5;m.wardR=((fl>>5)&31)/20||.4;}else m.wardT=0; // a shield is the host's // the host's full health and stun, not this copy's
+ if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mkN:m.mkN,sg:m.sg,nk:m.nk,boss:m.boss,far:m.far},hid=m.hidN;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
+ m.lv=lv;m.max=mx||mobBaseMax(m);m.stun=m.stunH=fl&8?.15:0;if(fl&16){m.wardT=gTime+.5;m.wardR=((fl>>5)&31)/20||.4;}else m.wardT=0; // a shield is the host's
+ // a weakness or a slow this player's skill gave it (set after the hit): to the host, whose copy every player's hits and
+ // the monster's own steps go by; this copy is weak and slow while the host's is
+ {const w=m.weak||0,sl=m.slowU||0;if(w>(m.weakH||0)+.01||sl>(m.slowUH||0)+.01){const c=mobCum(key);if(w>(m.weakH||0)+.01){c.wq++;c.ws=w;}if(sl>(m.slowUH||0)+.01){c.sq++;c.ss=Math.max(0,sl-gTime);}MOBN.dirty=1;}
+  m.weak=m.weakH=fl&1024?.5:0;m.slowU=m.slowUH=fl&2048?gTime+.5:0;} // the host's full health and stun, not this copy's
  if(b.boss){const ph=hp<330?2:hp<660?1:0;if(hp>=1000)m.ph=0;else if(ph>(m.ph||0)){m.ph=ph;shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='dopp')toast(t('dpSplit'),'warn');else if(m.type!=='belial')toast(t('bossPh'+ph,{b:itN(m.type)}),'warn');}} // SAT-ONLINE-045
  const nh=Math.max(1,Math.round(m.max*hp/1000)),mine=m.pendT&&performance.now()-m.pendT<1500;
  if(nh<m.hp){if(!mine&&m.hp-nh>=1){m.hurt=.12;num(m.x,monY(m)-8,String(m.hp-nh),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});}m.hp=nh;}else if(!mine)m.hp=nh; // another player's hit: its number shows here too
