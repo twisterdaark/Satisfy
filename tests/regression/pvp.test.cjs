@@ -71,10 +71,22 @@ test('outside town a hit takes a capped share of HP; a party or a town stops it;
     await settle(a, b);
     const goldA = await a.eval(() => window.__G.S.gold), itemsA = await a.eval(() => window.__G.S.items.length);
     await b.eval(() => { window.__G.P.hp = 1; window.__G.S.tl = window.__G.S.tl || {}; window.__G.S.tl.legend = false; });
+    // SAT-ONLINE-152 (plan U042): B's worn gear, one piece already worn down near the floor
+    const worn = (g) => g.eval(() => { const G = window.__G, S = G.S, w = S.items.find((i) => i.uid === S.eqW) || S.items[0]; return { n: S.items.length, w: w.dur === undefined ? 100 : w.dur, ids: S.items.map((i) => i.uid) }; });
+    await b.eval(() => { const G = window.__G, S = G.S, ar = G.eqx.mkItem('parmor', 1); ar.dur = 12; S.items.push(ar); S.eqA = ar.uid; }); // armour nearly worn out
+    const before = await worn(b);
     await strike(a, b);
     for (let i = 0; i < 3 && (await b.eval(() => window.__G.mode)) !== 'dead'; i++) await strike(a, b);
     assert.equal(await b.eval(() => window.__G.mode), 'dead');
     assert.ok(await b.eval(() => !!window.__G.P.dpen), 'the normal death penalty');
+    const after = await worn(b);
+    assert.equal(after.w, before.w - 5, 'the weapon lost 5 durability');
+    assert.equal(await b.eval(() => { const S = window.__G.S; return S.items.find((i) => i.uid === S.eqA).dur; }), 10, 'the armour stops at 10: PvP alone never breaks gear');
+    assert.deepEqual([after.n, after.ids], [before.n, before.ids], 'no item dropped or lost');
+    assert.match(await b.eval(() => window.__G.P.dpen), /The gear you wear lost 5 durability \(PvP\)\./);
+    await strike(a, b); await strike(a, b); // more hits on the dead: nothing more
+    assert.equal((await worn(b)).w, after.w, 'once a death');
+    assert.equal(await b.eval(() => { const S = JSON.parse(localStorage.getItem('satisfy_proto_v4@b')).S, w = S.items.find((i) => i.uid === S.eqW) || S.items[0]; return w.dur; }), after.w, 'saved at once');
     await settle(a, b);
     assert.match(await toasts(b), /Grid killed you/);
     // SAT-ONLINE-150 (plan U039): who hit B before it died, and when
