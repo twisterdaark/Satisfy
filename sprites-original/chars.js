@@ -92,6 +92,10 @@ function frame(c,dir,pose,f){
  else{q(4,11,8,6,c.top);q(11,11,1,6,c.top2);q(4,16,8,1,shade(c.top,-.12));if(!U)q(5,11,1,4,shade(c.top,.12));}
  if(c.chest&&!U){if(S_)q(5,11,4,4,c.chest);else{q(5,11,6,4,c.chest);q(10,11,1,4,c.pad2);q(5,13,6,1,c.pad2);q(6,11,2,1,shade(c.chest,.2));}}
  if(c.chest&&!U&&c.fem){if(S_){q(9,12,2,2,c.chest);q(10,12,1,1,shade(c.chest,.22));}else{q(5,12,2,1,shade(c.chest,.24));q(9,12,2,1,shade(c.chest,.24));q(7,12,2,1,shade(c.chest,-.15));q(6,14,4,1,c.chest);}}
+ // a fuller figure (c.bust): a little wider at the chest with a deeper light and shadow, for characters drawn that way
+ if(c.bust&&c.fem&&!U){const B=c.chest||c.top,HI=mixC(B,'#ffffff',.3),SH=mixC(B,'#000000',.42),MD=mixC(B,'#000000',.22);
+  if(S_){q(11,11,1,3,B);q(12,12,1,1,B);q(11,11,1,1,HI);q(12,12,1,1,mixC(B,'#ffffff',.15));q(11,14,2,1,SH);q(10,14,1,1,MD);}
+  else{q(4,12,1,2,B);q(11,12,1,2,B);q(5,11,2,1,HI);q(9,11,2,1,HI);q(5,12,2,1,mixC(B,'#ffffff',.15));q(9,12,2,1,mixC(B,'#ffffff',.15));q(7,12,2,2,MD);q(7,13,2,1,SH);q(5,14,2,1,SH);q(9,14,2,1,SH);q(4,14,1,1,MD);q(11,14,1,1,MD);}}
  if(c.sash&&!U){if(S_){q(6,12,4,1,c.sash);q(7,13,3,1,c.sash);}else for(let i=0;i<5;i++)q(5+i,11+i,2,1,c.sash);}
  if(c.fem)q(S_?6:5,16,S_?5:6,1,c.belt||c.boots);else q(S_?5:4,16,S_?6:8,1,c.belt||c.boots);if(!U&&c.belt)q(S_?8:7,16,2,1,shade(c.belt,.35));
  if(c.cape&&U)q(4,11,8,8,c.cape),q(4,11,8,1,shade(c.cape,.15));
