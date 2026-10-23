@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23stygrid', ver: '2.39', d: '2026-10-23',
+      ar: ["وشوش البنات بقت مدورة وفيها حياة، بعيون أكبر بلونين ونقطة نور، وبلاش ناعم، وبوق صغير. وفي الوش 3 اختيارات مكياج جديدة: جيارو، وجيارو جريء، ورموش دمية.",
+          "الشعر بقى فيه تفاصيل أكتر للكل: لمعة على الراس، وخصل في الشعر الطويل، وغرة مقصوصة.",
+          "اختيارات الستايلست بقت مربعات زي الشنطة: كل اختيار برسمته ورقمه واسمه، ولما تقف عليه بتشوفه في المراية. وكل حاجة بقت في أول قايمة: لون البشرة، والجسم، والعيون، والدقن، والوش، والشفايف، والجيبة، والإكسسوارات."],
+      en: ["Girls' faces are round and lively now, with bigger two-tone eyes and a light in them, a soft blush and a small mouth. The face has three new make-up choices: gyaru, bold gyaru and doll lashes.",
+          "Hair has more detail for everyone: a shine on top, strands in long hair and a ragged fringe.",
+          "The stylist's choices are a grid like the bag: each one shows its picture, number and name, and the mirror shows it as you point at it. Every feature is on the first menu: skin tone, body, eyes, beard, face, lips, skirt and accessories."] },
     { v: '2026-10-23gearlv', ver: '2.38', d: '2026-10-23',
       ar: ["مبقاش ينفع تلبس سلاح أو درع أو أي قطعة لفلها أعلى منك من شباك العتاد (U). وكمان اللي بتصنعه مبقاش يتلبس لوحده لو لفله أعلى منك. وريث باغما لسه بيلبس أي حاجة زي الرواية."],
       en: ["You can no longer wear a weapon, armour or any piece above your level from the equipment window (U), and a fresh craft above your level no longer goes on by itself. Pagma's Successor still wears anything, as in the novel."] },

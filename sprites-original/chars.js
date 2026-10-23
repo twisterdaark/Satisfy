@@ -102,16 +102,25 @@ function frame(c,dir,pose,f){
  if(c.pad){if(S_){q(6,10,4,2,c.pad);q(6,11,4,1,c.pad2);q(6,10,2,1,shade(c.pad,.2));}else{q(2,10,3,2,c.pad);q(11,10,3,2,c.pad);q(2,11,3,1,c.pad2);q(11,11,3,1,c.pad2);q(2,10,1,1,shade(c.pad,.25));q(11,10,1,1,shade(c.pad,.25));}}
  if(c.spike){const K=c.spike;if(S_){q(7,8,1,2,K);q(9,9,1,1,K);}else{q(2,9,1,1,K);q(3,8,1,2,K);q(12,8,1,2,K);q(13,9,1,1,K);}}
  // head + neck
+ if(c.fem){const SB=c.chest||c.top;if(S_)q(5,10,6,1,SB);else q(4,10,8,1,SB);}   // her shoulders sit right under the head (round chibi face, no dark band under the chin)
  if(c.fem)q(7,10,2,1,mixC(c.skin,c.sk2,.45));else q(6,10,4,1,c.sk2);   // her neck slim and soft, not a dark band under the chin (owner 2026-10-23)
  if(c.collar&&!U){if(S_)q(7,10,3,1,c.collar);else{q(5,10,6,1,c.collar);q(5,11,1,1,c.collar);q(10,11,1,1,c.collar);}}
- if(c.fem){if(S_){q(5,2,7,7,c.skin);q(6,9,5,1,c.skin);q(12,7,1,1,c.skin);q(11,3,1,5,c.sk2);}   // a rounder chin and no jaw shadow (owner 2026-10-23: girls had a beard-like line)
-  else{q(4,2,8,7,c.skin);q(6,9,4,1,c.skin);q(11,3,1,6,c.sk2);if(!U)q(5,3,1,4,shade(c.skin,.12));}}
+ if(c.fem){if(S_){q(5,2,7,7,c.skin);q(6,9,5,1,c.skin);q(12,7,1,1,c.skin);q(11,3,1,5,mixC(c.skin,c.sk2,.45));}   // a rounder chin and no jaw shadow (owner 2026-10-23: girls had a beard-like line)
+  else{q(4,2,8,7,c.skin);q(5,9,6,1,c.skin);q(4,9,1,1,mixC(c.skin,c.chest||c.top,.55));q(11,9,1,1,mixC(c.skin,c.chest||c.top,.55));q(11,4,1,5,mixC(c.skin,c.sk2,.4));if(!U)q(5,3,1,4,shade(c.skin,.1));}}
  else if(S_){q(5,2,7,8,c.skin);q(12,7,1,1,c.skin);q(5,9,7,1,c.sk2);q(11,3,1,6,c.sk2);}
  else{q(4,2,8,8,c.skin);q(11,3,1,7,c.sk2);q(5,9,6,1,c.sk2);if(!U)q(5,3,1,4,shade(c.skin,.12));}
  // face: 2px eyes with a catchlight, blink and hurt squint
  if(!U){const EYE=c.eye||A.EYE||'#22181e',lid=c.sk2,CL=c.eye?shade(c.eye,.45):'#4a3c48';
   const LIP=c.lip||mixC(c.skin,'#c8506a',.35);
-  if(S_){if(o.blink||o.hurt)q(10,7,1,1,EYE);else{q(10,6,1,2,EYE);q(10,6,1,1,CL);if(c.fem)q(11,6,1,1,EYE);}if(c.fem)q(10,5,1,1,c.hc);else q(9,5,2,1,c.hc);q(7,6,1,2,c.sk2);if(!o.hurt&&!o.blink)q(11,8,1,1,c.fem?LIP:mixC(c.skin,'#e86a6a',.25));}
+  if(c.fem){const IR=c.eye||'#3e3458',IR2=mixC(IR,'#ffffff',.3),HL='#ffffff',LS=c.mk?'#120c14':'#2a1e2e',BL=mixC(c.skin,c.mk==='gyaru2'?'#ff9a6a':'#ff7a9a',c.mk?.48:.36),ML=c.lip?LIP:mixC(c.skin,LIP,.6),WL=mixC(c.skin,'#ffffff',.6);
+   if(S_){if(o.blink)q(10,7,1,1,LS);else if(o.hurt)q(10,6,2,1,LS);else{q(10,5,2,1,LS);q(10,6,1,1,IR);q(11,6,1,1,HL);q(10,7,1,1,IR2);if(c.mk)q(11,5,1,1,LS);if(c.mk&&c.mk!=='doll')q(10,8,1,1,WL);}q(c.mk&&c.mk!=='doll'?11:10,8,1,1,BL);if(!o.hurt&&!o.blink)q(11,8,1,1,ML);}
+   else{if(o.blink){q(5,7,2,1,LS);q(9,7,2,1,LS);}else if(o.hurt){q(5,7,2,1,LS);q(9,7,2,1,LS);q(6,6,1,1,LS);q(9,6,1,1,LS);}
+    else{q(5,6,2,1,LS);q(9,6,2,1,LS);q(6,6,1,1,HL);q(10,6,1,1,HL);q(5,7,1,1,IR);q(6,7,1,1,IR2);q(9,7,1,1,IR);q(10,7,1,1,IR2);
+     if(c.mk){q(4,6,1,1,LS);q(11,6,1,1,LS);}if(c.mk==='doll'){q(4,5,1,1,LS);q(11,5,1,1,LS);q(5,8,1,1,LS);q(10,8,1,1,LS);}else if(c.mk){q(5,8,2,1,WL);q(9,8,2,1,WL);}}
+    if(c.mk&&c.mk!=='doll'){q(4,7,1,2,BL);q(11,7,1,2,BL);}else{q(4,8,1,1,BL);q(11,8,1,1,BL);if(c.mk!=='doll'){q(5,8,1,1,mixC(c.skin,BL,.45));q(10,8,1,1,mixC(c.skin,BL,.45));}}
+    if(c.mk==='gyaru2'&&!o.hurt)q(11,4,1,1,'#fff6a0');
+    if(o.hurt)q(7,9,2,1,shade(ML,-.2));else{q(7,9,2,1,mixC(c.skin,ML,.45));q(7,9,1,1,ML);}}}
+  else if(S_){if(o.blink||o.hurt)q(10,7,1,1,EYE);else{q(10,6,1,2,EYE);q(10,6,1,1,CL);if(c.fem)q(11,6,1,1,EYE);}if(c.fem)q(10,5,1,1,c.hc);else q(9,5,2,1,c.hc);q(7,6,1,2,c.sk2);if(!o.hurt&&!o.blink)q(11,8,1,1,c.fem?LIP:mixC(c.skin,'#e86a6a',.25));}
   else{const bc=c.hair==='bald'&&c.beard2?c.beard2:c.hc;
    if(o.blink){q(6,7,1,1,lid);q(9,7,1,1,lid);q(6,7,1,1,EYE);q(9,7,1,1,EYE);}
    else if(o.hurt){q(5,6,2,1,EYE);q(9,6,2,1,EYE);}
@@ -245,6 +254,7 @@ function frame(c,dir,pose,f){
   if(U){q(3,0,1,2,Hn);q(2,-1,1,2,Hn);q(12,0,1,2,Hn);q(13,-1,1,2,Hn);}
   else if(S_){q(6,0,2,2,Hn);q(5,-1,2,1,Hn);q(4,-2,2,1,H2);q(3,-2,1,1,H2);}
   else{q(3,1,2,1,Hn);q(2,0,1,1,Hn);q(1,-1,1,1,H2);q(1,-2,1,1,H2);q(11,1,2,1,Hn);q(13,0,1,1,Hn);q(14,-1,1,1,H2);q(14,-2,1,1,H2);}}
+ if(c.hfx&&c.hc&&c.hair!=='bald'&&c.hair!=='helm'&&!c.hood&&!c.hat&&!c.turban)hairFx(g,c,U);
  // accessories (owner 2026-10-23 vanity): glasses, earrings, a flower, cat ears, a halo, a tiara, a scarf
  if(c.gls&&!U){const G=c.gls;if(S_){q(9,6,1,2,G);q(11,6,1,2,G);q(9,5,3,1,G);q(7,6,2,1,G);}else{q(5,5,3,1,G);q(8,5,3,1,G);q(5,6,1,2,G);q(7,6,2,1,G);q(10,6,1,2,G);}}
  if(c.ear&&!U){if(S_)q(7,8,1,1,c.ear);else{q(3,8,1,1,c.ear);q(12,8,1,1,c.ear);}}
@@ -256,6 +266,26 @@ function frame(c,dir,pose,f){
  late.forEach(fn=>fn());
  polish(g);
  return {c:cv,hand};}
+
+// Hair detail (owner 2026-10-23, a player's note: more detail in the hair): a glossy ring across the crown, strand lines
+// down long hair and darker tips, worked on the hair's own pixels after it is drawn. Player looks only (c.hfx).
+function hairFx(g,c,back){
+ const id=g.getImageData(0,0,FW,FH),d=id.data,H=hx(c.hc),HL=hx(c.hl||c.hc),eq=(i,C)=>d[i+3]>0&&d[i]===C[0]&&d[i+1]===C[1]&&d[i+2]===C[2];
+ const isH=(x,y)=>x>=0&&y>=0&&x<FW&&y<FH&&(eq((y*FW+x)*4,H)||eq((y*FW+x)*4,HL));
+ const put=(x,y,C)=>{const i=(y*FW+x)*4;d[i]=C[0];d[i+1]=C[1];d[i+2]=C[2];};
+ const SK=hx(c.skin),isS=(x,y)=>x>=0&&y>=0&&x<FW&&y<FH&&eq((y*FW+x)*4,SK),ST=hx(shade(c.hc,-.24)),TP=hx(shade(c.hc,-.15)),ED=hx(shade(c.hc,-.12)),RG=hx(mixC(c.hl||c.hc,'#ffffff',.18)),GL=hx(mixC(c.hl||c.hc,'#ffffff',.55));
+ const top=[];for(let x=0;x<FW;x++){top[x]=-1;for(let y=0;y<12;y++)if(isH(x,y)){top[x]=y;break;}}
+ const ch=[];let ft=-1;for(let y=0;y<FH;y++)if(eq((y*FW+7)*4,SK)||eq((y*FW+8)*4,SK)){ft=y;break;}
+ for(let y=0;y<FH-3;y++)for(let x=0;x<FW;x++){const i=(y*FW+x)*4;if(!eq(i,H))continue;if(c.beard&&ft>=0&&y>=ft+3&&x>=3&&x<=12)continue;   // leave a beard as it is
+  const t=top[x],up=isH(x,y-1),dn=isH(x,y+1);
+  if(t>=0&&y===t+2&&x>=4&&x<=11&&!back)ch.push([x,y,(x===6||x===7)?GL:(x%2?RG:null)]);
+  else if(t>=0&&y===t+2&&back&&x>=5&&x<=10)ch.push([x,y,x%2?RG:null]);
+  else if(!back&&isS(x,y+1)&&x%2)ch.push([x,y,TP]);   // a ragged fringe over the face
+  else if(!back&&(isS(x-1,y)||isS(x+1,y))&&y>4)ch.push([x,y,ED]);   // locks framing the face
+  else if(!dn&&up&&y>8)ch.push([x,y,TP]);
+  else if(up&&dn&&y>=8&&(x*5+(y>>2))%3===0)ch.push([x,y,ST]);}
+ ch.forEach(([x,y,C])=>{if(C)put(x,y,C);});
+ g.putImageData(id,0,0);}
 
 // Post-pass: rim light on the top edge, then a selective outline (dark tint of the neighbour on
 // top/side edges, near-black on the bottom) so silhouettes read on grass and snow alike.
