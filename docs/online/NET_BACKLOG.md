@@ -228,7 +228,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U378 | Save backward compatibility | ✅ | `regression/golden` and the characterization tests against the R0 baseline |
 | U379 | Localization regressions | ✅ | SAT-ONLINE-092: `unit/i18n` reads every string table in the page: each line in both languages (Arabic feminine forms aside), the same `{placeholders}`, empty in both or neither. Play tests still run in English |
 | U380 | Art provenance audit | 🟡 | `docs/art/ART_CONTRACT.md` (B) |
-| U381 | Security incident drill | ⏳ | Owner (Firebase console) |
+| U381 | Security incident drill | ✅ | SAT-ONLINE-122: [INCIDENT.md](INCIDENT.md), the owner's drill: switch a part off, or lock the whole database (`firebase.lockdown.json`, every read and write refused), take a copy, disable the account, restrict the web key, unlock. There is no server credential to rotate; the web config is public and gives nothing alone (`unit/lockdown`: every rule needs a sign-in) |
 | U382 | Data retention review | ✅ | [DATA_RETENTION.md](DATA_RETENTION.md) (SAT-ONLINE-111): every node, who reads it and when it goes; admins clear crash reports older than 30 days (they piled up for ever) |
 | U383 | Community report resolution | ✅ | SAT-ONLINE-082: each report is resolved with its action (`reportDone/{id}` {a: ok or mute, by, t}), so what was done and by whom is kept |
 | U384 | Version gate report | ✅ | Every PR shows its CI checks (SAT-ONLINE-107) and lists the tests it ran |
@@ -236,6 +236,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 | U386 | Documentation sync | ✅ | This backlog, `OWNER_TEST_GUIDE.md`, the update log on every merge |
 | U387 | Pilot invite-only rollout | ⏳ | Owner |
 
-**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 75 · 🟡 17 · ⏳ 6 · ❌ 6 of 104.
+**Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 76 · 🟡 17 · ⏳ 5 · ❌ 6 of 104.
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
