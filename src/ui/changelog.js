@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23look', ver: '2.36', d: '2026-10-23',
+      ar: ["إنشاء الشخصية: بقيت تختار ولد أو بنت، وشكل البنات بقى أنثوي أكتر. وفيه 21 تسريحة جديدة (طويل مفرود، وغرة، وبوب، وضفيرة، وضفيرتين، وكعكة، وديل حصان، وأفرو، وأندركت، وساموراي وغيرهم)، وألوان شعر وبشرة وهدوم أكتر.",
+          "اختيارات جديدة: لون العيون، والدقن (سكسوكة، ودقن خفيفة، وشنب، ودقن على الفك، وطويلة)، ونمش أو جرح على العين، ولون الشفايف، وجيبة بدل البنطلون، واتنين إكسسوار بلونهم (نضارة، وحلق، ووردة، وباندانة، وكابيشون، وودان قطة، وقرون، وهالة، وتاج، وكوفية، ولثام، وجناحات، وريش). وكلها موجودة كمان عند الستايلست في \"الجسم والوش والإكسسوارات\".",
+          "في شباك العتاد فيه عين جنب الخوذة والدرع والجوانتي والجزمة: بتخفي شكل القطعة وإنت لسه لابسها وبتاخد الستاتس بتاعتها. واللاعبين التانيين بيشوفوك بنفس الشكل اللي إنت مختاره."],
+      en: ["Character creation: choose male or female, and female characters now look more feminine. 21 new hairstyles (long straight, hime cut, bob, braid, twin braids, buns, ponytails, afro, undercut, topknot and more), and more hair, skin and outfit colours.",
+          "New choices: eye colour, beards (goatee, stubble, moustache, chinstrap, long), freckles or a scar, lip colour, a skirt instead of trousers, and two accessories with their colours (glasses, earrings, a flower, headband, hood, cat ears, horns, halo, tiara, scarf, face veil, wings, feathers). All of it is also at the stylist under \"Body, face and accessories\".",
+          "The equipment window has an eye beside the helmet, armour, gloves and boots: it hides how the piece looks while you keep wearing it and keep its stats. Other players see you exactly as you chose."] },
     { v: '2026-10-23boost', ver: '2.35', d: '2026-10-23',
       ar: ["الخبرة من وحش قتله غيرك بقت لأي حد قريب منه وقت موته، حتى لو مضربش. الغنايم بس هي اللي محتاجة إنك تكون شاركت (5% من صحته أو ضربته في آخر 30 ثانية).",
           "الـBoosting رجع زي ما كان قبل آخر تعديل، بس بنص السرعة: لو في البارتي حد أعلى منك بأكتر من 20 لفل، الوحوش اللي أعلى منك بأكتر من 20 لفل بتديك نص الخبرة اللي كانت بتديها. واتشالت قاعدة العُشر وحد الـ3%. لوحدك أو مع ناس في لفلك مفيش تغيير."],

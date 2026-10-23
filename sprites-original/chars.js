@@ -6,6 +6,11 @@
 (function(root){'use strict';
 const A=root.SatArt=root.SatArt||{};
 const FW=16,FH=24;
+// built-up hairstyles for the character creator (owner 2026-10-23): len 0 ear .. 4 waist, a fringe, a tail or bun
+const HAIRP={longS:{len:4,bang:'part'},hime:{len:4,bang:'full'},bob:{len:2,bang:'full'},bobS:{len:2,bang:'side'},braid:{len:1,bang:'part',tail:'braid'},twinB:{len:1,bang:'full',tail:'twinb'},
+ hbun:{len:1,bang:'side',tail:'hbun'},sidep:{len:1,bang:'side',tail:'sidep'},wavy:{len:3,bang:'part',wave:1},shoulder:{len:2,bang:'part'},ponyH:{len:0,bang:'side',tail:'ponyL'},lowTw:{len:1,bang:'part',tail:'low2'},
+ odango:{len:1,bang:'full',tail:'buns2'},emo:{len:1,bang:'emo'},undercut:{len:0,bang:'side',top:'tall',shave:1},slick:{len:0,bang:'none',back:1},topknot:{len:0,bang:'none',tail:'knot',shave:1},afro:{top:'afro'},
+ wolf:{len:1,bang:'side',back:2},spikyL:{len:3,bang:'spiky'},princess:{len:4,bang:'side',tail:'bunS'}};
 // Sheet layout: one row per direction (d=down/front, u=up/back, s=side facing right; left = mirrored s).
 const POSES=[['idle',2],['walk',4],['atk',3],['hurt',1]];
 const COLS=[];POSES.forEach(([p,n])=>{for(let f=0;f<n;f++)COLS.push([p,f]);});
@@ -51,6 +56,8 @@ function frame(c,dir,pose,f){
   p(6,17,1,3-o.legL,lgD);p(10,17,1,3-o.legR,lgD);
   if(pose==='atk'&&f===1){p(4,20,1,2,c.boots);p(11,20,1,2,c.boots);}}
  if(c.shorts){if(S_)p(5,17,6,1,c.shorts);else p(4,17,8,1,c.shorts);}
+ // a skirt over the legs (owner 2026-10-23 customization), in the trousers' colour
+ if(c.skirt){const K=c.skirt,K2=shade(K,-.22),sw=pose==='walk'?(f%2):0;if(S_){p(5,16,6,2,K);p(4-sw,18,8,2,K);p(4-sw,19,8,1,K2);p(10,16,1,3,K2);}else{p(4,16,8,2,K);p(3,18,10,2,K);p(3,19,10,1,K2);p(11,16,1,3,K2);}}
  if(c.robeL){const T=c.top,T2=c.top2,hm=c.trim||T2,sw=pose==='walk'?(f%2):0;if(S_){p(5,16,6,5,T);p(4-sw,19,8,2,T);p(10,16,1,5,T2);p(4-sw,21,8,1,hm);}
   else{p(4,16,8,5,T);p(3,19,10,2,T);p(11,16,1,5,T2);p(3,21,10,1,hm);if(!U)p(7,16,2,5,hm);}}
  if(c.robe){if(S_){p(5,16,6,4,c.top);p(10,16,1,4,c.top2);}else{p(4,16,8,4,c.top);p(11,16,1,4,c.top2);p(4,19,8,1,c.top2);}}
@@ -67,11 +74,13 @@ function frame(c,dir,pose,f){
  const arm=c.armC||(c.sleeves?c.top:c.skin),arm2=c.armC2||(c.sleeves?c.top2:c.sk2);const hnd=c.glove||c.skin;   // gloves recolour the hands
  if(S_&&o.atk<0){const ob=-o.armS;q(6+ob,11,2,4,shade(arm2,-.12));q(6+ob,15,2,1,c.sk2);}
  // torso with soft vertical shading
- if(S_){q(5,11,6,6,c.top);q(10,11,1,6,c.top2);q(5,11,1,5,shade(c.top,.1));}
+ if(c.fem){if(S_){q(5,11,6,3,c.top);q(6,14,5,3,c.top);q(10,11,1,6,c.top2);q(5,11,1,3,shade(c.top,.1));if(!c.chest)q(10,12,1,1,shade(c.top,.14));}   // a narrower waist
+  else{q(4,11,8,3,c.top);q(5,14,6,3,c.top);q(11,11,1,3,c.top2);q(10,14,1,3,c.top2);q(5,16,6,1,shade(c.top,-.12));if(!U){q(5,11,1,3,shade(c.top,.12));if(!c.chest){q(6,12,1,1,shade(c.top,.16));q(9,12,1,1,shade(c.top,.16));}}}}
+ else if(S_){q(5,11,6,6,c.top);q(10,11,1,6,c.top2);q(5,11,1,5,shade(c.top,.1));}
  else{q(4,11,8,6,c.top);q(11,11,1,6,c.top2);q(4,16,8,1,shade(c.top,-.12));if(!U)q(5,11,1,4,shade(c.top,.12));}
  if(c.chest&&!U){if(S_)q(5,11,4,4,c.chest);else{q(5,11,6,4,c.chest);q(10,11,1,4,c.pad2);q(5,13,6,1,c.pad2);q(6,11,2,1,shade(c.chest,.2));}}
  if(c.sash&&!U){if(S_){q(6,12,4,1,c.sash);q(7,13,3,1,c.sash);}else for(let i=0;i<5;i++)q(5+i,11+i,2,1,c.sash);}
- q(S_?5:4,16,S_?6:8,1,c.belt||c.boots);if(!U&&c.belt)q(S_?8:7,16,2,1,shade(c.belt,.35));
+ if(c.fem)q(S_?6:5,16,S_?5:6,1,c.belt||c.boots);else q(S_?5:4,16,S_?6:8,1,c.belt||c.boots);if(!U&&c.belt)q(S_?8:7,16,2,1,shade(c.belt,.35));
  if(c.cape&&U)q(4,11,8,8,c.cape),q(4,11,8,1,shade(c.cape,.15));
  if(c.apron){if(U){q(5,11,1,5,c.apron2);q(10,11,1,5,c.apron2);q(5,15,6,1,c.apron2);}
   else if(S_){q(8,12,3,7,c.apron);q(10,12,1,7,c.apron2);q(8,11,1,1,c.apron2);}
@@ -93,18 +102,49 @@ function frame(c,dir,pose,f){
  // head + neck
  q(6,10,4,1,c.sk2);
  if(c.collar&&!U){if(S_)q(7,10,3,1,c.collar);else{q(5,10,6,1,c.collar);q(5,11,1,1,c.collar);q(10,11,1,1,c.collar);}}
- if(S_){q(5,2,7,8,c.skin);q(12,7,1,1,c.skin);q(5,9,7,1,c.sk2);q(11,3,1,6,c.sk2);}
+ if(c.fem){if(S_){q(5,2,7,7,c.skin);q(6,9,5,1,c.skin);q(12,7,1,1,c.skin);q(11,3,1,5,c.sk2);}   // a rounder chin and no jaw shadow (owner 2026-10-23: girls had a beard-like line)
+  else{q(4,2,8,7,c.skin);q(5,9,6,1,c.skin);q(11,3,1,6,c.sk2);if(!U)q(5,3,1,4,shade(c.skin,.12));}}
+ else if(S_){q(5,2,7,8,c.skin);q(12,7,1,1,c.skin);q(5,9,7,1,c.sk2);q(11,3,1,6,c.sk2);}
  else{q(4,2,8,8,c.skin);q(11,3,1,7,c.sk2);q(5,9,6,1,c.sk2);if(!U)q(5,3,1,4,shade(c.skin,.12));}
  // face: 2px eyes with a catchlight, blink and hurt squint
  if(!U){const EYE=c.eye||A.EYE||'#22181e',lid=c.sk2,CL=c.eye?shade(c.eye,.45):'#4a3c48';
-  if(S_){if(o.blink||o.hurt)q(10,7,1,1,EYE);else{q(10,6,1,2,EYE);q(10,6,1,1,CL);}q(9,5,2,1,c.hc);q(7,6,1,2,c.sk2);if(!o.hurt&&!o.blink)q(11,8,1,1,mixC(c.skin,'#e86a6a',.25));}
+  const LIP=c.lip||mixC(c.skin,'#c8506a',.35);
+  if(S_){if(o.blink||o.hurt)q(10,7,1,1,EYE);else{q(10,6,1,2,EYE);q(10,6,1,1,CL);if(c.fem)q(11,6,1,1,EYE);}if(c.fem)q(10,5,1,1,c.hc);else q(9,5,2,1,c.hc);q(7,6,1,2,c.sk2);if(!o.hurt&&!o.blink)q(11,8,1,1,c.fem?LIP:mixC(c.skin,'#e86a6a',.25));}
   else{const bc=c.hair==='bald'&&c.beard2?c.beard2:c.hc;
    if(o.blink){q(6,7,1,1,lid);q(9,7,1,1,lid);q(6,7,1,1,EYE);q(9,7,1,1,EYE);}
    else if(o.hurt){q(5,6,2,1,EYE);q(9,6,2,1,EYE);}
-   else{q(6,6,1,2,EYE);q(9,6,1,2,EYE);q(6,6,1,1,CL);q(9,6,1,1,CL);q(5,8,1,1,mixC(c.skin,'#e86a6a',.22));q(10,8,1,1,mixC(c.skin,'#e86a6a',.22));}
-   q(5,5,2,1,bc);q(9,5,2,1,bc);q(7,8,2,1,o.hurt?shade(c.sk2,-.2):c.sk2);}}
+   else{q(6,6,1,2,EYE);q(9,6,1,2,EYE);q(6,6,1,1,CL);q(9,6,1,1,CL);q(5,8,1,1,mixC(c.skin,'#e86a6a',c.fem?.32:.22));q(10,8,1,1,mixC(c.skin,'#e86a6a',c.fem?.32:.22));if(c.fem){q(5,6,1,1,EYE);q(10,6,1,1,EYE);}}   // lashes
+   if(c.fem){q(6,5,1,1,bc);q(9,5,1,1,bc);q(7,8,2,1,o.hurt?shade(LIP,-.2):LIP);}else{q(5,5,2,1,bc);q(9,5,2,1,bc);q(7,8,2,1,o.hurt?shade(c.sk2,-.2):c.lip||c.sk2);}}
+  // freckles and a scar
+  if(c.frk){const F=shade(c.skin,-.28);if(S_){q(9,8,1,1,F);q(11,7,1,1,F);}else{q(5,7,1,1,F);q(10,7,1,1,F);q(4,8,1,1,F);q(11,8,1,1,F);}}
+  if(c.scar){const SC=mixC(c.skin,'#8a2a2a',.5);if(S_){q(10,4,1,1,SC);q(11,5,1,1,SC);q(11,7,1,1,SC);}else{q(10,4,1,1,SC);q(10,5,1,1,SC);q(11,7,1,1,SC);}}}
  // hair (same shapes as the legacy renderer, on the upper-body layer)
  const h=c.hc,hl=c.hl;
+ // the creator's built-up styles (owner 2026-10-23): a length, a fringe and a tail or bun, drawn in three views
+ function hairP(H){const L=H.len||0,end=[6,9,12,15,19][L],bk=[9,10,13,16,19][H.back!=null?H.back:L],sw=pose==='walk'?(f%2):0,TIE=H.tie||'#c84a5a';
+  if(H.top==='afro'){if(U){q(2,-1,12,11,h);q(4,0,1,1,hl);q(9,1,1,1,hl);}else if(S_){q(3,-1,10,6,h);q(2,1,4,8,h);q(6,0,1,1,hl);q(9,1,1,1,hl);}else{q(2,-1,12,5,h);q(1,1,2,7,h);q(13,1,2,7,h);q(3,4,1,4,h);q(12,4,1,4,h);q(5,0,1,1,hl);q(9,0,1,1,hl);q(11,2,1,1,hl);}return;}
+  const sd=H.shave?mixC(h,c.skin,.55):h;
+  if(H.top==='tall'){if(S_)q(6,-1,5,2,h);else q(5,-1,6,2,h);}
+  if(U){q(4,1,8,8,h);q(5,0,6,1,h);if(L>=1){q(3,2,1,end-2,h);q(12,2,1,end-2,h);}if(bk>9){const w=L>=3?10:8;q(L>=3?3:4,9,w,bk-9,h);if(H.wave)for(let y=10;y<bk;y+=2){q(2,y,1,1,h);q(13,y+1,1,1,h);}}q(6,2,1,2,hl);q(9,3,1,2,hl);
+   if(H.shave){q(4,6,8,3,sd);q(5,1,6,5,h);}}
+  else if(S_){q(5,1,7,3,h);q(6,0,5,1,h);q(4,2,2,5,sd);if(L>=1)q(4,4,3,end-4,h);else q(5,4,2,3,sd);if(L>=3)q(3,8,2,end-8,h);if(H.wave&&L>=2)for(let y=9;y<end;y+=2)q(2,y,1,1,h);
+   const B=H.bang;if(B==='full')q(9,4,3,2,h);else if(B==='side')q(10,4,2,1,h);else if(B==='part')q(10,4,1,1,h);else if(B==='emo'){q(9,4,3,3,h);}else if(B==='spiky'){q(11,3,2,1,h);q(12,4,1,1,h);q(10,4,1,1,h);}
+   q(6,2,3,1,hl);}
+  else{q(4,1,8,3,h);q(5,0,6,1,h);
+   if(L===0){q(4,4,1,2,sd);q(11,4,1,2,sd);}else{q(3,2,1,end-2,h);q(12,2,1,end-2,h);q(4,4,1,3,h);q(11,4,1,3,h);if(L>=2){q(2,8,1,end-8,h);q(13,8,1,end-8,h);}if(H.wave&&L>=2)for(let y=8;y<end;y+=2){q(1,y,1,1,h);q(14,y+1,1,1,h);}}
+   const B=H.bang;if(B==='full'){q(4,4,8,2,h);q(5,6,1,1,h);q(10,6,1,1,h);}else if(B==='side'){q(4,4,5,1,h);q(4,5,3,1,h);q(10,4,2,1,h);}else if(B==='part'){q(4,4,3,1,h);q(9,4,3,1,h);q(4,5,1,1,h);q(11,5,1,1,h);}
+   else if(B==='emo'){q(4,4,6,1,h);q(4,5,5,1,h);q(5,6,3,2,h);q(10,4,2,1,h);}else if(B==='spiky'){q(4,4,2,1,h);q(7,4,2,1,h);q(10,4,2,1,h);q(4,5,1,1,h);q(11,5,1,1,h);q(3,1,1,2,h);q(12,1,1,2,h);q(2,2,1,1,h);q(13,2,1,1,h);}
+   q(6,1,2,1,hl);q(9,2,2,1,hl);}
+  const T=H.tail;if(!T)return;
+  if(T==='braid'){if(U){for(let i=0;i<5;i++)q(7,9+i*2,2,2,i&1?hl:h);q(7,19,2,1,TIE);}else if(S_){for(let i=0;i<5;i++)q(3,6+i*2,2,2,i&1?hl:h);q(3,16,2,1,TIE);}}
+  else if(T==='twinb'){const B2=(x,y0)=>{for(let i=0;i<5;i++)q(x,y0+i*2,2,2,i&1?hl:h);q(x,y0+10,2,1,TIE);};if(U){B2(2,5);B2(12,5);}else if(S_)B2(3,5);else{B2(1,5);B2(13,5);}}
+  else if(T==='hbun'){if(S_){q(4,-2,4,3,h);q(5,-2,1,1,hl);}else{q(5,-2,6,3,h);q(6,-2,2,1,hl);}}
+  else if(T==='buns2'){if(S_){q(3,0,3,3,h);q(4,0,1,1,hl);}else{q(2,0,3,3,h);q(11,0,3,3,h);q(3,0,1,1,hl);q(12,0,1,1,hl);}}
+  else if(T==='knot'){if(S_){q(4,-2,3,2,h);q(5,-3,1,1,h);q(5,0,2,1,TIE);}else{q(6,-2,4,2,h);q(7,-3,2,1,h);q(6,0,4,1,TIE);}}
+  else if(T==='sidep'){if(U){q(2,4,2,2,h);q(1,6+sw,2,7,h);q(2,4,2,1,TIE);}else if(S_)q(3,5+sw,2,7,h);else{q(12,4,2,2,h);q(13,6+sw,2,7,h);q(12,4,2,1,TIE);}}
+  else if(T==='ponyL'){if(U){q(7,1,2,1,TIE);q(7,2,2,16,h);q(7,4,1,10,hl);}else if(S_){q(3,1,2,2,h);q(2,3+sw,3,3,h);q(1,6+sw,3,9,h);q(3,2,1,1,TIE);}else{q(12,5,2,5,h);q(13,10,1,4,h);}}
+  else if(T==='low2'){if(U){q(3,9,2,8,h);q(11,9,2,8,h);q(3,9,2,1,TIE);q(11,9,2,1,TIE);}else if(S_){q(3,8+sw,2,8,h);q(3,8,2,1,TIE);}else{q(2,8+sw,2,8,h);q(12,8+sw,2,8,h);q(2,8,2,1,TIE);q(12,8,2,1,TIE);}}
+  else if(T==='bunS'){if(U){q(6,3,4,3,h);q(7,3,1,1,hl);}else if(S_){q(3,2,2,3,h);}}}
  if(c.hair==='spiky'){
   if(U){q(4,1,8,9,h);q(5,0,1,1,h);q(7,0,1,1,h);q(10,0,1,1,h);q(3,3,1,3,h);q(12,3,1,3,h);q(5,10,1,1,h);q(8,10,1,1,h);q(10,10,1,1,h);q(6,2,1,2,hl);q(9,3,1,2,hl);}
   else if(S_){q(5,1,7,4,h);q(7,0,1,1,h);q(9,0,2,1,h);q(4,2,1,2,h);q(3,3,1,1,h);q(5,5,3,4,h);q(4,5,1,2,h);q(4,8,1,1,h);q(10,5,2,1,h);q(8,5,1,1,h);q(12,4,1,1,h);q(7,2,2,1,hl);}
@@ -147,6 +187,7 @@ function frame(c,dir,pose,f){
  else if(c.hair==='mitre'){const T=c.trim||'#c8a050';q(4,4,1,3,h);q(11,4,1,3,h);if(U)q(4,4,8,4,h);q(5,-2,6,5,c.hat);q(6,-3,4,1,c.hat);q(7,-4,2,1,c.hat);q(5,2,6,1,T);q(7,-3,2,5,T);q(6,-1,1,2,shade(c.hat,.2));if(!U)q(7,0,2,1,'#d83a3a');}   // a high priest's mitre
  else if(c.hair==='crown'){q(4,2,8,2,h);q(3,3,1,5,h);q(12,3,1,5,h);if(U)q(4,4,8,5,h);q(4,0,8,2,c.hat);q(4,-1,1,1,c.hat);q(7,-1,2,1,c.hat);q(11,-1,1,1,c.hat);q(5,0,6,1,shade(c.hat,.25));q(7,1,2,1,'#d83a3a');}   // a king's crown over long hair
  else if(c.hair==='helm'){if(U)q(4,1,8,9,h);else if(S_){q(5,1,7,6,h);q(4,3,1,4,h);q(9,5,3,1,'#22252c');}else{q(4,1,8,5,h);q(3,3,1,5,h);q(12,3,1,5,h);q(5,5,6,1,'#22252c');q(7,1,2,4,hl);}if(c.plume!==0){const PL=c.plume||'#8a1f2a';q(7,-1,2,2,PL);if(c.plumeL){if(S_){q(4,-1,3,1,PL);q(3,0,2,2,PL);}else q(6,-2,4,1,PL);}}}
+ else if(HAIRP[c.hair])hairP(HAIRP[c.hair]);
  // owner 2026-10-22: more headgear so a kind can come in several designs
  if(c.hood){const Hd=c.hood,H2=shade(Hd,-.38),HL=shade(Hd,.15);
   if(U){q(3,0,10,11,Hd);q(4,0,8,1,HL);q(7,11,2,2,Hd);q(5,2,1,6,HL);}
@@ -160,7 +201,13 @@ function frame(c,dir,pose,f){
  if(c.ahoge){q(7,0,1,1,h);q(8,-1,1,1,h);q(9,-2,2,1,h);q(11,-1,1,1,h);}
  // the Good-looking Sunglasses from the Reputation Store (v0.96): "the large frame is the highlight of the square sunglasses"
  if(c.sg&&!U){const G='#141418',W='#6a7a9a';if(S_){q(9,6,3,2,G);q(6,6,3,1,G);q(10,6,1,1,W);}else{q(4,6,3,2,G);q(9,6,3,2,G);q(7,6,2,1,G);q(4,6,1,1,W);q(9,6,1,1,W);}}
- if(c.beard&&!U){if(c.longBeard){if(S_){q(8,7,4,5,c.beard);q(9,12,3,3,c.beard);q(11,8,1,6,c.beard2);q(10,15,1,1,c.beard2);q(7,7,2,1,c.beard2);}else{q(4,7,8,2,c.beard);q(5,9,6,4,c.beard);q(6,13,4,2,c.beard);q(7,15,2,1,c.beard2);q(10,9,1,4,c.beard2);q(4,8,3,1,c.beard2);q(9,8,3,1,c.beard2);q(7,8,2,1,'#fff');}}
+ // more beards for the creator (owner 2026-10-23): goatee, stubble, moustache, chinstrap
+ if(c.beard&&!U&&c.bst){const BD=c.beard,BS=mixC(c.skin,BD,.45),B=c.bst;
+  if(B==='goatee'){if(S_){q(10,9,2,2,BD);q(10,8,2,1,BD);}else{q(6,8,1,1,BD);q(9,8,1,1,BD);q(7,9,2,2,BD);}}
+  else if(B==='stubble'){if(S_)q(8,8,4,2,BS);else{q(5,8,2,2,BS);q(9,8,2,2,BS);q(7,9,2,1,BS);}}
+  else if(B==='must'){if(S_)q(10,8,2,1,BD);else{q(6,8,4,1,BD);q(5,9,1,1,BD);q(10,9,1,1,BD);}}
+  else if(B==='chin'){if(S_){q(8,6,1,4,BD);q(9,9,3,1,BD);}else{q(4,6,1,3,BD);q(11,6,1,3,BD);q(5,9,6,1,BD);}}}
+ else if(c.beard&&!U){if(c.longBeard){if(S_){q(8,7,4,5,c.beard);q(9,12,3,3,c.beard);q(11,8,1,6,c.beard2);q(10,15,1,1,c.beard2);q(7,7,2,1,c.beard2);}else{q(4,7,8,2,c.beard);q(5,9,6,4,c.beard);q(6,13,4,2,c.beard);q(7,15,2,1,c.beard2);q(10,9,1,4,c.beard2);q(4,8,3,1,c.beard2);q(9,8,3,1,c.beard2);q(7,8,2,1,'#fff');}}
   else if(S_){q(8,7,4,5,c.beard);q(11,8,1,4,c.beard2);q(9,12,2,1,c.beard2);}else{q(4,7,8,2,c.beard);q(5,9,6,3,c.beard);q(6,12,4,1,c.beard);q(10,9,1,3,c.beard2);q(7,13,2,1,c.beard2);q(7,8,2,1,c.beard2);}}
  // reptile head: a snout, yellow eyes and a crest of scales
  if(c.rept){const sn=shade(c.skin,.12),E='#f2d23a';if(U){q(7,0,2,1,c.hl);q(7,3,2,1,c.hl);q(7,6,2,1,c.hl);}
@@ -196,6 +243,14 @@ function frame(c,dir,pose,f){
   if(U){q(3,0,1,2,Hn);q(2,-1,1,2,Hn);q(12,0,1,2,Hn);q(13,-1,1,2,Hn);}
   else if(S_){q(6,0,2,2,Hn);q(5,-1,2,1,Hn);q(4,-2,2,1,H2);q(3,-2,1,1,H2);}
   else{q(3,1,2,1,Hn);q(2,0,1,1,Hn);q(1,-1,1,1,H2);q(1,-2,1,1,H2);q(11,1,2,1,Hn);q(13,0,1,1,Hn);q(14,-1,1,1,H2);q(14,-2,1,1,H2);}}
+ // accessories (owner 2026-10-23 vanity): glasses, earrings, a flower, cat ears, a halo, a tiara, a scarf
+ if(c.gls&&!U){const G=c.gls;if(S_){q(9,6,1,2,G);q(11,6,1,2,G);q(9,5,3,1,G);q(7,6,2,1,G);}else{q(5,5,3,1,G);q(8,5,3,1,G);q(5,6,1,2,G);q(7,6,2,1,G);q(10,6,1,2,G);}}
+ if(c.ear&&!U){if(S_)q(7,8,1,1,c.ear);else{q(3,8,1,1,c.ear);q(12,8,1,1,c.ear);}}
+ if(c.flw){const F=c.flw,F2=shade(F,.35);if(S_){q(5,1,2,2,F);q(5,1,1,1,F2);}else if(U){q(10,2,2,2,F);q(10,2,1,1,F2);}else{q(10,1,2,2,F);q(11,1,1,1,F2);q(12,2,1,1,'#5aa04a');}}
+ if(c.catE){const K=c.catE,P='#e88aa0';if(S_){q(6,-1,2,2,K);q(8,0,1,1,K);q(7,0,1,1,P);}else{q(4,-1,2,2,K);q(10,-1,2,2,K);q(3,0,1,1,K);q(12,0,1,1,K);if(!U){q(4,0,1,1,P);q(11,0,1,1,P);}}}
+ if(c.tiara&&!U){const T=c.tiara;if(S_){q(7,1,4,1,T);q(9,0,1,1,T);}else{q(5,1,6,1,T);q(7,0,2,1,T);q(7,0,1,1,'#ff6a8a');}}
+ if(c.halo){const HA=c.halo;if(S_)q(6,-2,5,1,HA);else{q(5,-2,6,1,HA);q(4,-1,1,1,shade(HA,-.2));q(11,-1,1,1,shade(HA,-.2));}}
+ if(c.scarf){const SF=c.scarf,S2=shade(SF,-.25);if(S_){q(6,10,5,2,SF);q(5,11,2,3,S2);}else if(U){q(4,10,8,2,SF);q(9,12,2,3,S2);}else{q(4,10,8,2,SF);q(10,12,2,3,S2);q(4,11,8,1,S2);}}
  late.forEach(fn=>fn());
  polish(g);
  return {c:cv,hand};}
@@ -220,5 +275,5 @@ function buildSheet(c){const sh=canvas(FW*COLS.length,FH*ROWS.length),g=sh.getCo
 // Frame lookup inside a sheet: returns the source rect for drawImage.
 function rect(dir,pose,f){const d=dir==='l'?'s':dir;const ci=COLS.findIndex(([p,k])=>p===pose&&k===f);return {sx:ci*FW,sy:ROWS.indexOf(d)*FH,sw:FW,sh:FH,flip:dir==='l'};}
 
-A.chars={FW,FH,POSES,COLS,ROWS,TIMING,frame,buildSheet,rect,poseOf,shade,mixC};
+A.chars={FW,FH,POSES,COLS,ROWS,TIMING,frame,buildSheet,rect,poseOf,shade,mixC,HAIRP};
 })(typeof window!=='undefined'?window:globalThis);
