@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23npcleg', ver: '2.12', d: '2026-10-23',
+      ar: ["مرسيدس وكايل بقوا في اللعبة: مرسيدس، الفارس الأسطوري، واقفة في ريدان، وكايل، محارب البرق الأسطوري وأصغر الأعمدة الخمسة، واقف في تيتان",
+        "الفارس الأسطوري زي الرواية: مرسيدس بتدّي الفارس (فارس أو فارس عظيم أو بالادين، لفل 250) كويست \"عزيمة الفارس\": تقتل شيطان عظيم وإنت دمك أقل من 30%. مهاراته أسلوب فاينتز وصد الدرع وعزيمة الفارس وطاقة السيف الطايرة والأجنحة الفضية، والبصيرة النافذة، والدرع التقيل دفاعه +20%",
+        "قوانين الفروسية: في لفل 1 و100 و200 و300 و400 بتكتب قانون فروسية، وكل قانون بيزوّد إحصائياتك 10%. التالت (\"كله واحد قدام العتاد\") بيخليك تلبس أي عتاد من غير شرط اللفل، والخامس بيزوّد هجومك",
+        "محارب البرق الأسطوري زي الرواية: كايل بيدّي المحارب (لفل 250) كويست \"إرادة الآلاف\": تقتل 3,000 من مخلوقات الشياطين، وبعدها ضربة شيطان عظيم القاتلة مش بتموّتك. التيار الكهربي بينقل كل ضربة لعدو تاني، ومعاه كف القوة ورماح البرق وظهور إله البرق وهيمنة إله البرق وتحول سرعة البرق وتحول إله البرق"],
+      en: ["Mercedes and Kyle are in the game: Mercedes, the Legendary Knight, stands in Reidan, and Kyle, the Legendary Lightning Warrior and youngest of the Five Pillars, stands in Titan",
+        "The Legendary Knight as in the novel: Mercedes gives a knight (knight, great knight or paladin, level 250) the quest 'Knight's Resolution': slay a great demon with less than 30% of your health. Vaintz' Swordsmanship, Shield Block, Knight's Resolution, Fly Sword Energy and Silver Wings, Keen Insight, and +20% defence in heavy armour",
+        "Chivalric codes: at levels 1, 100, 200, 300 and 400 you write a code, each raising your stats by 10%. The third ('Everything is equal under items') lets you wear any item without its level limit, and the fifth raises your attack",
+        "The Legendary Lightning Warrior as in the novel: Kyle gives a warrior (level 250) the quest 'The Will of Thousands': kill 3,000 demonic creatures, then a great demon's killing blow does not kill you. The electric current carries every blow to another foe, with Force Palm, Electric Spears, Lightning God Appearance, Lightning God Supremacy, Lightning Speed Transformation and Lightning God Transformation"] },
     { v: '2026-10-23madrafarm', ver: '2.11', d: '2026-10-23',
       ar: ["وريث الملك الذي لا يُهزم (مادرا) زي الرواية: الغمد القديم بيقع نادر من الفرسان الحمر في قصر أسموفيل. لو عمرك ما اتهزمت، الغمد بيفتح الكويست: دمّر 100 فارس أحمر في 22 يوم قبل ما الفارس الأول يوصل، وإنت مرشّح عندك إحساس فائق ومقاومة للحالات الغريبة",
         "لو اتهزمت مرة واحدة أو الأيام خلصت، الكويست بيضيع وبيتغير لكويست مهارة سيف المئة ألف جيش، ودي بتتعلمها أي كلاس. والوريث عنده سيف حصار المئة ألف جيش (كل عدو قدامك متحاصر 3 ثواني)، وسيف المئتين ألف جيش في لفل 200",
