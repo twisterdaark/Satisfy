@@ -245,6 +245,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 ## From other ranges (2026-10-24)
 | U | Update | Status | Where |
 |---|---|---|---|
+| U295 | Guild parade | ✅ | SAT-ONLINE-175: from G, in a town and outdoors, the master (or the `ev` right) starts 5 minutes in which every member in that town marches with the guild's banner (its colour and its emblem from the fixed set), a sash and confetti, and the square gets a stage; it rides in the fx tag `pd:` (the end, server seconds), so nothing is stored or given; others in the town hear who marches; the stage is drawn only, on free ground nearest the square and `PDGAP` from every NPC, the board and the wells; one parade in 30 minutes; `regression/parade` |
 | U267 | Reduced motion | ✅ | SAT-ONLINE-164: a device setting in the pause menu (`satisfy_rmo`, the system's prefers-reduced-motion when unset): no camera shake, no white flash, the UI's shakes and pulses stop, particles capped (`RMOFX`, `RMOVX`); telegraphs (`drawTele`) untouched; `regression/rmotion` |
 | U269 | Armor pieces (render sprite overlays) | ✅ | SAT-ONLINE-165: helmet, armour, gloves and boots each draw their own look (`GEARL`, 48 ids), for you and the others (`gr:` fx tag); `regression/gearlook` |
 

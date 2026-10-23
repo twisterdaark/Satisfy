@@ -6974,6 +6974,7 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
  dialog('guild',[info,perks+(g.online&&GWK?' · '+gwLine():''),g.online?guildNoteLine():'',g.online?gtroLine(g.id):''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
   ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},...(hallSt()?[{l:t('ghHall'),f:hallMenu}]:[]),
    ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),...(galSt()?[{l:t('gdDip')+(galMo()&&Object.keys(GALA).length?' ('+Object.keys(GALA).length+')':''),f:galD}]:[]),...(gwrSt()?[{l:t('gdWar')+(galMo()&&Object.keys(GWRA).length?' ('+Object.keys(GWRA).length+')':''),f:gwrD}]:[]),
+   ...(pdCan()?[{l:t('pdStartL'),f:pdStart}]:[]),
    ...(gCan('emblem')?[{l:t('gdBan'),f:guildBanD},{l:t('gpRights'),f:guildPermD}]:[]),
    ...(gCan('note')?[{l:t('gdNoteW'),f:guildNoteW}]:[]),...(gCan('invite')&&recSt()?[{l:t('gdApps',{n:Object.keys(GAPPS).length}),f:recAppsD},{l:t('gdRecOn'),f:recPost},{l:t('gdRecOff'),f:recStop}]:[]),{l:t('oRank'),f:()=>gRankFresh(()=>dialog('guild',[rankLine()],guildPanel))}]:[]),
   ...(gdwOn()?[]:g.master===pidOf()&&!g.npc?[{l:t('gdwDis'),f:gdwDisband}]:[{l:t('oLeaveG'),f:()=>dialog('guild',['gLeaveSure'],null,[{l:t('gYes'),f:leaveGuild},{l:t('gNo'),f:guildPanel}])}]),{l:t('oClose')}]);}
@@ -11939,7 +11940,7 @@ const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(try
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
 // clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
 function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+vpSt()+nvSt():'';}
-function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));const mr=marPub();if(mr)tags.push(JSON.stringify('mr:'+mr));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
+function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));const mr=marPub();if(mr)tags.push(JSON.stringify('mr:'+mr));const pd=pdPub();if(pd)tags.push(JSON.stringify('pd:'+pd));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
  let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
 function guPub(){if(!P||!P.guard)return null;const a=Math.atan2(P.gy,P.gx);return 1+((Math.round(a/(2*Math.PI)*64)%64+64)%64)+(P.fort>0?64:0)+(P.gT<.22?128:0);}
@@ -11984,11 +11985,13 @@ function netEnts(ents){faultAt('netEnts');const myRoom=(roomAt(P.x,P.y)||{}).id|
   const gi=guildOf(r),gy=gi?12:0; // SAT-ONLINE-046: «guild» under the name, the name and the bar a line higher; the tag clears the head (owner 2026-10-23)
   TX.push({s:(r.handle||'?')+(bntOn(r.uid)?' 💰':''),x:r.x,y:r.y-28-gy,f:F,z:8,c:foe?'#ff8a7a':r.ol===2?'#b0102a':r.ol?'#ff3b30':mate?'#8dff9a':'#9fe0ff'}); // r.ol: an outlaw (SAT-ONLINE-038), 2 a murderer (052)
   if(gi)TX.push({s:'«'+gdEmb(gi.emb)+gi.n+'»'+gtroTag(r.gd)+gstMark(r.gd),x:r.x,y:r.y-28,f:F,z:6,c:gi.col});
+  if(gi)pdRem(ents,r,fs,gi); // SAT-ONLINE-175: a guild parade
   // their health over their head (owner 2026-10-19): presence hp is a percent; party mates get a wider, gold-framed bar
   if(typeof r.hp==='number'&&r.anim!=='dead'){const hp=r.hp/100;txBar(r.x,r.y-37-gy,mate?22:18,hp,mate?HPG:HPC,hpLag(fs,hp,'hl'),foe?'#ff6a5a':mate?'#ffd27a':null);}
   if(near&&r.uid===near.uid&&!foe)TX.push({s:[t('pcHint'),mate?'':t('pInvite'),!mate&&DUEL&&!Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe?t('dHint'):''].filter(Boolean).join(' · '),x:r.x,y:r.y-(typeof r.hp==='number'?46:37)-gy,f:F,z:6,c:'#ffe7a8'});}
  fxRun(seen);for(const sid of FXS.keys())if(!NET.get||!NET.get(sid))FXS.delete(sid);for(const sid of RANIM.keys())if(!NET.get||!NET.get(sid))RANIM.delete(sid);
  duelWatch(ents,myRoom);pingEnts(ents,myRoom,F);pvpEnts();const me=emoNow();if(me)emoBubble(ents,me,P.x,P.y,P.dir);
+ pdEnts(ents);
  const ds=DUEL&&DUEL.state();if(ds&&ds.arena&&!myRoom)ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle=ds.phase==='fight'?'rgba(255,120,90,.7)':'rgba(255,210,74,.7)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);ctx.beginPath();ctx.arc(ds.arena.x,ds.arena.y,ds.arena.r,0,7);ctx.stroke();ctx.restore();}});}
 if(NETQ==='local'&&typeof BroadcastChannel!=='undefined'){
  netStart(Satisfy.presence.create({transport:NETTR=Satisfy.transports.local('satisfy-net-v1'),world:Satisfy.local.world(),now:()=>performance.now()}));netState='ONLINE';
@@ -12703,6 +12706,63 @@ function guildPermD(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!gCan('perm
  dialog('guild',[t('gpH')],null,[...o,{l:t('oBack'),f:guildPanel}]);}
 function guildBanD(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!gCan('emblem'))return guildPanel();const E=Satisfy.guild.C.EMBLEMS;
  dialog('guild',[t('gdBanQ')],null,[...E.map((e,i)=>({l:i?e+' '+st.guild.name:t('gdBanNone'),f:()=>GUILD.setEmblem(i).then(()=>{toast(t('gdBanDone'),'good');guildPanel();},()=>{toast(t('gdFail'),'warn');guildPanel();})})),{l:t('oBack'),f:guildPanel}]);}
+/* ---------------- Guild parade (SAT-ONLINE-175; plan U295: "emblems/costumes original only", checked by "stage occupancy
+   not blocking NPC") ----------------
+   Online, in a town and outdoors, the guild master (or whoever may plan the guild's events, the "ev" right) starts a
+   parade from G. For five minutes every member of the guild in that town marches with the guild's banner on a pole (its
+   colour and its emblem from the fixed set of SAT-ONLINE-084: nothing uploaded, nothing borrowed), a sash in its colour
+   and a little confetti, and the town square gets a parade stage in the same colours.
+   It rides in the fx tag "pd:" (when it ends, in server seconds): a member who sees another member of the guild marching
+   in the town they are in joins until the same end; everyone else there hears who is marching. Nothing is stored and
+   nothing is given (no gold, no damage: the plan's rule for social events). One parade every 30 minutes a character.
+   Leaving the town ends your part; coming back before the end picks it up again.
+   The stage is only drawn: on the free ground nearest the town's square (3 x 3 tiles, none solid), at least PDGAP from
+   every NPC of the town and clear of the board and the wells; it is never solid and never something to use, so it blocks
+   no NPC, no one's way and no one's E. */
+Object.assign(STR.ar,{pdStartL:'🎉 ابدأ موكب الجيلد هنا',pdBegin:'موكب الجيلد بدأ في {z}! كل الأعضاء اللي في المدينة ماشيين بالراية لمدة 5 دقايق.',pdJoin:'موكب الجيلد بدأ في {z}! انت ماشي بالراية.',pdSee:'{g} عاملين موكب في {z}!',pdNoTown:'الموكب بيبدأ جوه مدينة، برا البيوت.',pdWait:'تقدر تعمل موكب تاني بعد {m} دقيقة.'});
+Object.assign(STR.en,{pdStartL:'🎉 Start a guild parade here',pdBegin:'The guild parade has begun in {z}! Every member in town marches with the banner for 5 minutes.',pdJoin:'The guild parade has begun in {z}! You march with the banner.',pdSee:'{g} are holding a parade in {z}!',pdNoTown:'A parade starts in a town, outdoors.',pdWait:'You can hold another parade in {m} min.'});
+const PDUR=300,PDCD=1800,PDGAP=48,PDR=mulberry32(0x9a4ade); // its own random stream: the game's (rand) is Math.random
+let PD={until:0,town:null,cd:0},PDSEEN={},PDST={},PDLIVE={},PDDRAWN={};
+const pdNow=()=>wNow()/1000;
+function pdOn(){return !!PD.town&&PD.until>pdNow()&&!!P&&inTown(P.x,P.y)===PD.town&&!roomAt(P.x,P.y);}
+function pdPub(){return pdOn()?String(Math.floor(PD.until)):'';}
+function pdMine(){const st=GUILD&&GUILD.state();return st&&st.gid&&st.guild?{n:st.guild.name,col:st.guild.col,emb:st.guild.emb|0}:null;}
+function pdCan(){return gCan('ev')&&!!P&&!!inTown(P.x,P.y)&&!roomAt(P.x,P.y);}
+function pdStart(){const T=P&&inTown(P.x,P.y);if(!gCan('ev')||!T||roomAt(P.x,P.y)){toast(t('pdNoTown'),'warn');SFX.deny();return;}
+ const now=pdNow();if(PD.cd>now){toast(t('pdWait',{m:Math.ceil((PD.cd-now)/60)}),'warn');SFX.deny();return;}
+ PD={until:now+PDUR,town:T,cd:now+PDCD};toast(t('pdBegin',{z:t(T.k)}),'good');SFX.legendary();pdBurst(P.x,P.y,(pdMine()||{}).col);}
+function pdBurst(x,y,c){const n=typeof RMO!=='undefined'&&RMO?6:24;for(let i=0;i<n;i++){const a=PDR()*Math.PI*2,v=30+PDR()*50;fx.push({x,y:y-20,vx:Math.cos(a)*v,vy:Math.sin(a)*v-30,t:.8,c:i%2?(c||'#ffd27a'):'#ffe7a8'});}}
+// a remote player: their parade tag (read from the raw fx only when it changes), joining it, hearing of it, their banner
+function pdRem(ents,r,fs,gi){if(fs.pdRaw!==r.fx){fs.pdRaw=r.fx;const m=/"pd:(\d{9,11})"/.exec(r.fx||'');fs.pd=m?+m[1]:0;}
+ const now=pdNow();if(!(fs.pd>now)||r.anim==='dead'||roomAt(r.x,r.y))return;const T=inTown(r.x,r.y);if(!T)return;
+ const st=GUILD&&GUILD.state(),mine=!!(st&&st.gid&&st.gid===r.gd),here=!!P&&inTown(P.x,P.y)===T;
+ if(mine&&here&&PD.until<fs.pd-1){const first=!(PD.until>now&&PD.town===T);PD.until=fs.pd;PD.town=T;if(first){toast(t('pdJoin',{z:t(T.k)}),'good');SFX.notice();}}
+ else if(!mine&&here&&gi.n){const k=r.gd+':'+fs.pd;if(!PDSEEN[k]){PDSEEN[k]=1;toast(t('pdSee',{g:gdEmb(gi.emb)+gi.n,z:t(T.k)}));}}
+ PDLIVE[T.k]={col:gi.col,emb:gi.emb|0,until:fs.pd};
+ ents.push({y:r.y-.5,f:()=>pdDraw(r.x,r.y,gi,r.uid,'pole')},{y:r.y+.5,f:()=>pdDraw(r.x,r.y,gi,r.uid,'sash')});}
+// you, and the stage of every town with a parade on
+function pdEnts(ents){if(pdOn()){const g=pdMine();if(g){PDLIVE[PD.town.k]={col:g.col,emb:g.emb,until:PD.until};ents.push({y:P.y-.5,f:()=>pdDraw(P.x,P.y,g,'me','pole')},{y:P.y+.5,f:()=>pdDraw(P.x,P.y,g,'me','sash')});}}
+ const now=pdNow();for(const k in PDLIVE){const L=PDLIVE[k];if(!(L.until>now)){delete PDLIVE[k];continue;}const T=TOWNS.find(T=>T.k===k),s=T&&pdStage(T);if(s)ents.push({y:s.y+6,f:()=>pdStageDraw(s,L)});}}
+// the stage's place in a town: the free ground nearest its square, clear of every NPC there, the board and the wells
+function pdStage(T){if(T.k in PDST)return PDST[T.k];const cx=Math.floor(T.rx),cy=Math.floor(T.ry),N=npcs.filter(n=>!n.hidden&&inTown(n.x,n.y)===T),U=[BOARD,...WELLS].map(o=>({x:o.tx*TS+8,y:o.ty*TS+8}));let best=null;
+ for(let r=0;r<=12&&!best;r++)for(let dy=-r;dy<=r&&!best;dy++)for(let dx=-r;dx<=r&&!best;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const tx=cx+dx,ty=cy+dy,x=tx*TS+8,y=ty*TS+8;
+  let ok=inTown(x,y)===T;for(let j=-1;j<=1&&ok;j++)for(let i=-1;i<=1&&ok;i++)if(solidT(tx+i,ty+j))ok=false;
+  if(ok&&!N.some(n=>Math.hypot(n.x-x,n.y-y)<PDGAP)&&!U.some(o=>Math.hypot(o.x-x,o.y-y)<32))best={x,y};}
+ return PDST[T.k]=best;}
+function pdDraw(x,y,g,uid,part){const X=Math.round(x),Y=Math.round(y),c=g.col||'#9a9aa6';ctx.save();
+ if(part==='sash'){ctx.strokeStyle=c;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X-4,Y-16);ctx.lineTo(X+4,Y-9);ctx.stroke();ctx.restore();return;}
+ PDDRAWN[uid]=(PDDRAWN[uid]||0)+1;const w=i=>Math.sin(gTime*6+i*.9+X*.07)*1.3;
+ ctx.strokeStyle='#6b4a2a';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X-7,Y-3);ctx.lineTo(X-7,Y-35);ctx.stroke();ctx.fillStyle='#ffd27a';ctx.fillRect(X-8.5,Y-37,3,2);
+ ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(X-7,Y-34);for(let i=1;i<=4;i++)ctx.lineTo(X-7-i*4,Y-34+w(i));for(let i=4;i>=1;i--)ctx.lineTo(X-7-i*4,Y-24+w(i));ctx.lineTo(X-7,Y-24);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1;ctx.stroke();const E=Satisfy.guild.C.EMBLEMS[g.emb|0];if(E){ctx.font='7px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(E,X-15,Y-29+w(2)*.5);}
+ ctx.restore();if(PDR()<(typeof RMO!=='undefined'&&RMO?.005:.03))fx.push({x:X-15+(PDR()-.5)*16,y:Y-36,vx:(PDR()-.5)*16,vy:-10,t:.6,c:PDR()<.5?c:'#ffe7a8'});}
+function pdStageDraw(s,L){const X=Math.round(s.x),Y=Math.round(s.y),c=L.col||'#9a9aa6';ctx.save();
+ ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(X-23,Y+5,46,3);ctx.fillStyle='#7a5532';ctx.fillRect(X-22,Y-6,44,11);ctx.fillStyle='#8a6440';for(let i=-22;i<22;i+=7)ctx.fillRect(X+i,Y-6,1,11);
+ ctx.fillStyle='#5a3d22';ctx.fillRect(X-22,Y+3,44,2);ctx.fillStyle='#6b4a2a';ctx.fillRect(X-22,Y-27,2,21);ctx.fillRect(X+20,Y-27,2,21);
+ ctx.strokeStyle='#e8d8b0';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(X-21,Y-26);ctx.quadraticCurveTo(X,Y-21,X+21,Y-26);ctx.stroke();
+ for(let i=0;i<6;i++){const bx=X-19+i*6.5,by=Y-26+Math.sin((i+.5)/6*Math.PI)*4;ctx.fillStyle=i%2?'#ffe7a8':c;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx+5,by);ctx.lineTo(bx+2.5,by+5);ctx.fill();}
+ ctx.fillStyle=c;ctx.fillRect(X-6,Y-5,12,8);const E=Satisfy.guild.C.EMBLEMS[L.emb|0];if(E){ctx.font='7px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(E,X,Y-1);}ctx.restore();}
+window.__GPD={start:()=>pdStart(),on:()=>pdOn(),pub:()=>pdPub(),can:()=>pdCan(),get PD(){return PD},stage:k=>{const T=TOWNS.find(T=>T.k===k);return T?pdStage(T):null;},towns:()=>TOWNS.map(T=>T.k),npcsOf:k=>{const T=TOWNS.find(T=>T.k===k);return npcs.filter(n=>!n.hidden&&inTown(n.x,n.y)===T).map(n=>({id:n.id,x:n.x,y:n.y}));},solid:(tx,ty)=>solidT(tx,ty),drawn:()=>PDDRAWN,live:()=>PDLIVE,gap:PDGAP,nearest:()=>{const n=nearest(1);return n?{k:n.k,id:n.o&&n.o.id}:null;}}; // tests
 window.__GBAN={set:i=>GUILD.setEmblem(i),of:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);return r?guildOf(r):null;},open:()=>guildBanD(),E:()=>Satisfy.guild.C.EMBLEMS}; // tests
 /* guild alliances and diplomacy (SAT-ONLINE-085, plan U238/U245). The master or an officer proposes an alliance to another
    guild by its name (G -> Diplomacy); that guild's master or officers accept or decline it. Neither can make one alone: the
