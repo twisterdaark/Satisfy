@@ -2581,6 +2581,49 @@ function styOpts(){return [{l:t('styHair',{g:STYC.hair}),f:()=>styList('hair')},
 // body, face and accessories at the stylist (owner 2026-10-23)
 function styMore(){const o=STYX.filter(k=>!(k==='bst'&&S.look.g===1)).map(k=>({l:t('styK_'+k)+' · '+t('rwGold',{n:STYC[k]}),f:()=>styList(k)}));o.push({l:t('oBack'),f:styBack});dialog('stylist',['styMoreHi'],null,o);}
 
+/* ---------------- marriage (owner 2026-10-23: "a Marriage System with benefits between players") ---------------- */
+// Online first: two players marry before a priest of Rebecca (Reinhardt, Rolling, the Great Temple). Standing by the priest
+// with the one you love, you propose (MARG gold, level 20+); they see it and say yes. The vow rides in the fx tag "mr:"
+// ("p<uid>" a proposal to that player, "m<uid>" married to them, "d<uid>" a divorce they haven't seen yet), so no new database
+// field. Each side keeps S.mar {u, n, at}. While the spouse is within MARR px in the same place: +10% XP, +5% damage and +5%
+// max HP, twice with the Wedding Ring on; Couple Recall takes you to your spouse once per 30 minutes (the status window).
+const MARG=10000,MARD=5000,MARCD=30*60000,MARR=400,MARLV=20;let MARP=null,MARQ=null,MARN=false;
+const marOn=()=>!!(S&&S.mar&&S.mar.u);
+const marRing=()=>['k',...RSL].some(sl=>{const i=eqIt(sl);return !!i&&i.id==='wring';});
+const marB=k=>MARN&&(k==='dm'||k==='hpp')?.05*(marRing()?2:1):0;
+function marSpouse(){if(!marOn()||!NET||!netLive())return null;return NET.remotes().find(r=>r.uid===S.mar.u)||null;}
+function marPub(){if(!S||!NET)return '';if(MARP)return 'p'+MARP.u;if(marOn())return 'm'+S.mar.u;if(S.marD&&S.marD.u)return 'd'+S.marD.u;return '';}
+function marTick(){if(!S||!NET||!netLive()||!P){MARN=false;return;}const me=NET.uid,now=performance.now(),myRoom=(roomAt(P.x,P.y)||{}).id||null;let near=false,asked=false;
+ for(const r of NET.remotes()){const fs=fxSt(r.sid);fxIn(r,fs);const mr=fs.mr||'';
+  if(mr==='p'+me&&!marOn()){asked=true;if(!MARQ&&!MARP&&mode==='play'&&Math.hypot(r.x-P.x,r.y-P.y)<120)marAsk(r);}
+  if(MARP&&r.uid===MARP.u&&mr==='m'+me&&!marOn())marWed(r);
+  if(marOn()&&r.uid===S.mar.u){if(mr==='d'+me||mr[0]==='m'&&mr!=='m'+me){const n=S.mar.n;delete S.mar;save(true);toast(t('marGone',{n}),'warn');SFX.deny();}
+   else if(netSees(r,myRoom)&&Math.hypot(r.x-P.x,r.y-P.y)<MARR)near=true;}
+  if(S.marD&&r.uid===S.marD.u&&mr!=='m'+me&&mr!=='p'+me){delete S.marD;save(true);}}
+ if(MARQ&&!asked)MARQ=null;   // the proposal is over (answered, taken back or timed out)
+ if(MARP&&now>MARP.until){S.gold+=MARP.g;MARP=null;hudDirty=true;save(true);toast(t('marNoAns'),'warn');}
+ if(near!==MARN){MARN=near;hudDirty=true;}}
+function marPriest(){let b='priestT',bd=1e9;for(const n of npcs)if(/^priest/.test(n.id)){const d=Math.hypot(n.x-P.x,n.y-P.y);if(d<bd){bd=d;b=n.id;}}return b;}
+function marAsk(r){MARQ={u:r.uid};const n=Satisfy.chat.clean(r.handle,24)||'?';
+ dialog(marPriest(),[t('marAskL',{n})],null,[{l:t('marYes'),f:()=>{if(S.lv<MARLV)return dialog(marPriest(),[t('marLow',{lv:MARLV})]);marWed(r);}},{l:t('marNo'),f:()=>{}}]);}
+function marWed(r){if(marOn())return;S.mar={u:r.uid,n:Satisfy.chat.clean(r.handle,24)||'?',at:Date.now()};MARP=null;MARQ={u:r.uid};delete S.marD;
+ const it=mkItem('wring',2);it.mu=r.uid;S.items.push(it);hudDirty=true;save(true);SFX.legendary();
+ if(P)asMe(()=>{vfx('spawn',P.x,P.y,{color:'#ff8ab8'});vfx('levelup',P.x,P.y);});announce(t('marWedA',{n:S.mar.n}),1);}
+function marOpts(who){if(!NET||!netLive())return [{l:t('marHow'),f:()=>dialog(who,[t('marOffL')])}];
+ if(marOn())return [{l:t('marDiv',{n:S.mar.n,g:MARD.toLocaleString('en')}),f:()=>marDivorce(who)}];
+ const myRoom=(roomAt(P.x,P.y)||{}).id||null;let r=null,bd=90;for(const x of NET.remotes()){if(!netSees(x,myRoom))continue;const d=Math.hypot(x.x-P.x,x.y-P.y);if(d<bd){bd=d;r=x;}}
+ if(!r)return [{l:t('marHow'),f:()=>dialog(who,[t('marHowL',{g:MARG.toLocaleString('en'),lv:MARLV})])}];
+ const n=Satisfy.chat.clean(r.handle,24)||'?';return [{l:t('marProp',{n,g:MARG.toLocaleString('en')}),f:()=>marPropose(who,r)}];}
+function marPropose(who,r){const n=Satisfy.chat.clean(r.handle,24)||'?';if(S.lv<MARLV)return dialog(who,[t('marLow',{lv:MARLV})]);if(MARP)return dialog(who,[t('marWait',{n:MARP.n})]);
+ if(S.gold<MARG){toast(t('noGold'),'warn');SFX.deny();return;}S.gold-=MARG;MARP={u:r.uid,n,until:performance.now()+60000,g:MARG};hudDirty=true;save(true);dialog(who,[t('marWait',{n})]);}
+function marDivorce(who){if(!marOn())return;if(S.gold<MARD){toast(t('noGold'),'warn');SFX.deny();return;}const n=S.mar.n;S.gold-=MARD;S.marD={u:S.mar.u};delete S.mar;MARN=false;hudDirty=true;save(true);dialog(who,[t('marDivL',{n})]);}
+function marGo(){if(!marOn())return;const r=marSpouse();if(!r){toast(t('marFar'),'warn');return;}const left=(S.marCd||0)-Date.now();if(left>0){toast(t('marCdT',{n:Math.ceil(left/60000)}),'warn');return;}
+ if(r.room||inBh(r.x,r.y)||inTw(r.x,r.y)||inBh(P.x,P.y)||inTw(P.x,P.y)||roomAt(P.x,P.y)){toast(t('marNoGo'),'warn');SFX.deny();return;}
+ P.x=r.x;P.y=r.y+6;S.marCd=Date.now()+MARCD;save(true);SFX.legendary();asMe(()=>vfx('spawn',P.x,P.y,{color:'#ff8ab8'}));if(mode==='status')closeStatus&&closeStatus();}
+Object.assign(STR.ar,{marHow:"الجواز",marHowL:"عشان تتجوز، تعالى هنا مع اللي بتحبه وقفوا جنبي، وكل واحد فيكم لفل {lv} على الأقل. الفرح بـ {g} ذهب، وكل واحد بياخد خاتم جواز.",marOffL:"الجواز بيتم أونلاين بين لاعيبة حقيقيين. ادخل أونلاين وتعالى مع اللي بتحبه.",marProp:"اطلب إيد {n} ({g} ذهب)",marLow:"لازم تكون لفل {lv} على الأقل عشان تتجوز.",marWait:"طلبت إيد {n}. مستنيين الرد خلال دقيقة.",marAskL:"{n} طالب إيدك قدام ريبيكا. توافق؟",marYes:"أيوه، أقبل",marNo:"لأ",marNoAns:"مفيش رد. فلوس الفرح رجعتلك.",marWedA:"انت و{n} اتجوزتوا! ريبيكا تبارك جوازكم.",marDiv:"طلاق من {n} ({g} ذهب)",marDivL:"انفصلت عن {n}.",marGone:"{n} انفصل عنك.",marL:"الشريك",marTip:"وانتو قريبين من بعض: خبرة +10%، وضرر +5%، وصحة +5%، والضعف وانت لابس خاتم الجواز.",marGoB:"انتقال للشريك",marCdT:"الانتقال للشريك جاهز بعد {n} دقيقة.",marFar:"شريكك مش أونلاين دلوقتي.",marNoGo:"مش هينفع تنتقل وانت أو شريكك جوه دانجن أو مكان مقفول.",marNearT:"جنب شريكك",wring:"خاتم الجواز"});
+Object.assign(STR.en,{marHow:"Marriage",marHowL:"To marry, come here with the one you love and stand beside me, both of you level {lv} or more. The ceremony costs {g} gold, and each of you gets a wedding ring.",marOffL:"Marriage is between real players online. Go online and come with the one you love.",marProp:"Propose to {n} ({g} gold)",marLow:"You need to be level {lv} or more to marry.",marWait:"You proposed to {n}. Waiting a minute for an answer.",marAskL:"{n} asks for your hand before Rebecca. Do you accept?",marYes:"Yes, I do",marNo:"No",marNoAns:"No answer. The ceremony gold is back with you.",marWedA:"You and {n} are married! May Rebecca bless you.",marDiv:"Divorce {n} ({g} gold)",marDivL:"You and {n} are no longer married.",marGone:"{n} ended your marriage.",marL:"Spouse",marTip:"Near each other: +10% XP, +5% damage and +5% max HP, twice with the Wedding Ring on.",marGoB:"Go to them",marCdT:"Couple Recall is ready in {n} min.",marFar:"Your spouse isn't online now.",marNoGo:"You can't go while you or your spouse are in a dungeon or a closed place.",marNearT:"by your spouse",wring:"Wedding Ring"});
+window.__GMAR={opts:w=>marOpts(w),near:()=>MARN,b:k=>marB(k),go:()=>marGo(),div:w=>marDivorce(w),tick:()=>marTick(),pub:()=>marPub()}; // tests
+
 /* ---------------- tower of trials (SAT-TOWER-001) ---------------- */
 // An endless climb on the arena floor. Floor f is level 5+4f and sends monsters picked from the world near that level;
 // every tenth floor sends a boss with two guards. Past the strongest monsters in the world the same ones come back with
@@ -5705,7 +5748,7 @@ RC.push(
  {id:'tbow',slot:'w',atk:220,spd:.45,fix:3,lvr:150,ip:['larrow'],isk:['pflash'],drop:1,unlock:()=>false},
  {id:'wisdom',slot:'w',atk:330,spd:.4,fix:4,lvr:200,ip:['wisdom'],drop:1,unlock:()=>false},
  {id:'elfin',slot:'k',dm:.05,fix:2,lvr:140,ip:['elfin'],drop:1,unlock:()=>false},
- {id:'vring',slot:'k',dm:.06,fix:3,lvr:180,ip:['vamp'],drop:1,unlock:()=>false},
+ {id:'vring',slot:'k',dm:.06,fix:3,lvr:180,ip:['vamp'],drop:1,unlock:()=>false},{id:'wring',slot:'k',hpp:.02,mpb:20,fix:2,drop:1,unlock:()=>false},
  {id:'doran',slot:'k',hpp:.1,fix:3,lvr:60,ip:['doran'],drop:1,unlock:()=>false},
  {id:'absurd',slot:'k',mpb:40,fix:4,lvr:200,ip:['absurd'],drop:1,unlock:()=>false},
  {id:'bboots',slot:'b',def:14,ms:.1,fix:3,lvr:150,ip:['cdr'],isk:['fly'],drop:1,unlock:()=>false},
@@ -5888,7 +5931,7 @@ function armorIt(){return itemByUid(S.eqA);}
 // server inventory as is. Durability 0 = broken: the item still works at 30%. Enhancement +n adds 6% per level.
 // owner 2026-10-22: rings on all ten fingers as in the novel (Kraugel's and Pauld's "ten rings", Grid's "eight fingers were almost always
 // empty"): the accessory slot plus nine ring slots that take rings only
-const RINGS=new Set(['cring','mring','elfin','jvring','vring','avring','hvring','doran','absurd','ocring','mnring','povt']),RSL=['k1','k2','k3','k4','k5','k6','k7','k8','k9'];
+const RINGS=new Set(['wring','cring','mring','elfin','jvring','vring','avring','hvring','doran','absurd','ocring','mnring','povt']),RSL=['k1','k2','k3','k4','k5','k6','k7','k8','k9'];
 const GEAR=['a','h','g','b','k','n','r','e','u',...RSL];
 // owner 2026-10-23: ten rings at once was overpowered. The accessory slot is always open; the nine ring slots open one by one
 // with your level (a legendary class, which starts again at Lv 1, opens them at half the level)
@@ -5906,7 +5949,7 @@ function equip0(i){const lr=itLvr(i);if(lr&&!lvrOk(lr)){toast(t('needLv',{n:lr})
 const durOf=i=>i.dur===undefined?100:i.dur,durF=i=>durOf(i)<=0?.3:1,enF=i=>1+.06*(i.en||0);
 const iAtk=i=>Math.round((i.atk||0)*enF(i)*durF(i)),iDef=i=>Math.round((i.def||0)*enF(i)*durF(i));
 function gearSum(k){let v=0;for(const sl of GEAR){const i=eqIt(sl);if(i&&i[k])v+=i[k]*durF(i)*enF(i);if(i&&i.gem&&GEMS[i.gem]&&GEMS[i.gem][k])v+=GEMS[i.gem][k];}
- const w=eqIt('w');if(w&&w.gem&&GEMS[w.gem]&&GEMS[w.gem][k])v+=GEMS[w.gem][k];return v+setBon(k)+cosB(k);}
+ const w=eqIt('w');if(w&&w.gem&&GEMS[w.gem]&&GEMS[w.gem][k])v+=GEMS[w.gem][k];return v+setBon(k)+cosB(k)+marB(k);}
 function setCount(sk){const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(i=>i.id);return SETS[sk].it.filter(x=>ids.includes(x)).length;}
 function setTier(sk){const n=setCount(sk);let c=0;for(const k in SETS[sk].b)if(n>=+k)c=+k;return c;}
 // setBon: stat() and gearSum() ask for it many times a frame; the sets worn only change with the gear, so the bonus per stat is
@@ -6262,7 +6305,7 @@ function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR)
 // of a level at 300+ (it was 10-20%); below 100 nothing changes.
 const xpNeed=()=>Math.round((50+S.lv*30+S.lv*S.lv*3.5+S.lv**3*.025)*(1+Math.max(0,S.lv-100)*.02)*(1+.15*Math.floor(Math.max(0,S.lv-1)/100)));
 const PTS_LV=10; // stat points per level-up (canon)
-function gainXP(n){if(xpbOn())n*=1.2;n*=1+secB('xp');S.xp+=Math.round(n);while(S.xp>=xpNeed()){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}),1);flash();SFX.rare();if(P)asMe(()=>vfx('levelup',P.x,P.y));},600);}P.hp=maxHP();if(P)asMe(()=>vfx('levelup',P.x,P.y));toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();checkSkills();}hudDirty=true;}
+function gainXP(n){if(xpbOn())n*=1.2;if(MARN)n*=1.1;n*=1+secB('xp');S.xp+=Math.round(n);while(S.xp>=xpNeed()){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}),1);flash();SFX.rare();if(P)asMe(()=>vfx('levelup',P.x,P.y));},600);}P.hp=maxHP();if(P)asMe(()=>vfx('levelup',P.x,P.y));toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();checkSkills();}hudDirty=true;}
 // loot feed: what you just gained slides in at the side as a system box (+n name icon); the same thing again within a few
 // seconds adds to its box instead of stacking a new one
 const LOOT={};
@@ -6742,7 +6785,7 @@ const NPCT={
  herbW:{hi:'hw_hi',idle:()=>'hw_idle',opts:()=>[...secOpt('herbW'),...rbOpts('herbW')]},
  guildM:{hi:'gm_hi',idle:()=>'gm_idle',opts:()=>guildMOpts()},
  jishuka:{hi:'js_hi',idle:()=>'js_idle',opts:()=>[...compOpt('jishuka'),...(!S.guild&&S.lv>=GLV?[{l:t('oJoinTz'),f:()=>joinGuild('g_tzed')}]:[])]},
- priestRh:{hi:'pr_hi',idle:()=>'pr_idle'},
+ priestRh:{hi:'pr_hi',idle:()=>'pr_idle',opts:()=>marOpts('priestRh')},
  kscout:{hi:'ksc_hi',idle:()=>'ksc_idle'},
  towerK:{hi:'tow_hi',idle:()=>'tow_idle',opts:()=>towerOpts()},
  ranker:{hi:'rk_hi',idle:()=>'rk_idle',opts:()=>rankerOpts()},
@@ -6754,10 +6797,10 @@ const NPCT={
  merchantRh:{idle:()=>'mRh_hi',opts:()=>merchOpts('merchantRh')},
  innRh:{idle:()=>'innRh_hi',opts:()=>[bindOpt('innRh'),...bankOpt('innRh'),restOpt('innRh',50),{l:t('oBuyBread'),qty:1,f:()=>buyBread('innRh')},...potOpts('innRh'),...mapOpt('innRh')]},
  guardRh:{idle:()=>'grh_idle',opts:()=>[...rideOpt('whorse'),...healOpt()]},
- priestRo:{hi:'pro_hi',idle:()=>'pro_idle'},merchantRo:{idle:()=>'mRo_hi',opts:()=>merchOpts('merchantRo')},innRo:{idle:()=>'innRo_hi',opts:()=>[bindOpt('innRo'),...bankOpt('innRo'),restOpt('innRo',60),{l:t('oBuyBread'),qty:1,f:()=>buyBread('innRo')},...potOpts('innRo'),...mapOpt('innRo')]},
+ priestRo:{hi:'pro_hi',idle:()=>'pro_idle',opts:()=>marOpts('priestRo')},merchantRo:{idle:()=>'mRo_hi',opts:()=>merchOpts('merchantRo')},innRo:{idle:()=>'innRo_hi',opts:()=>[bindOpt('innRo'),...bankOpt('innRo'),restOpt('innRo',60),{l:t('oBuyBread'),qty:1,f:()=>buyBread('innRo')},...potOpts('innRo'),...mapOpt('innRo')]},
  guardT:{idle:()=>'gT_idle'},knightT:{idle:()=>'kT_idle'},merchantT:{idle:()=>'mT_hi',opts:()=>merchOpts('merchantT')},innT:{idle:()=>'innT_hi',opts:()=>[bindOpt('innT'),...bankOpt('innT'),restOpt('innT',90),{l:t('oBuyBread'),qty:1,f:()=>buyBread('innT')},...potOpts('innT'),...mapOpt('innT')]},
  smithT:{hi:'sT_hi',idle:()=>'sT_idle',opts:()=>smithMenu('smithT',[['msword',3200],['ssword',820],['spear',160]],[['marmor',3000],['mhelm',1500],['parmor',720],['mring',950]])},
- priestT:{hi:'prT_hi',idle:()=>'prT_idle'},towerT:{hi:'twT_hi',idle:()=>'twT_idle'},baronB:{hi:'bB_hi',idle:()=>'bB_idle'},mutoB:{idle:()=>'muB_hi',opts:()=>merchOpts('mutoB')},innBu:{idle:()=>'innBu_hi',opts:()=>[bindOpt('innBu'),...bankOpt('innBu'),restOpt('innBu',120),{l:t('oBuyBread'),qty:1,f:()=>buyBread('innBu')},...potOpts('innBu'),...mapOpt('innBu')]},
+ priestT:{hi:'prT_hi',idle:()=>'prT_idle',opts:()=>marOpts('priestT')},towerT:{hi:'twT_hi',idle:()=>'twT_idle'},baronB:{hi:'bB_hi',idle:()=>'bB_idle'},mutoB:{idle:()=>'muB_hi',opts:()=>merchOpts('mutoB')},innBu:{idle:()=>'innBu_hi',opts:()=>[bindOpt('innBu'),...bankOpt('innBu'),restOpt('innBu',120),{l:t('oBuyBread'),qty:1,f:()=>buyBread('innBu')},...potOpts('innBu'),...mapOpt('innBu')]},
  wiesbaden:{hi:'wsb_hi',idle:()=>evOn('golemW')?'wsb_war':'wsb_idle'},doranS:{hi:'dor_hi',idle:()=>'dor_idle',opts:()=>ltOpts()},ren:{hi:'ren_hi',idle:()=>evOn('renW')?'ren_war':'ren_idle'},aslan:{idle:()=>'asl_idle'},
  aden:{hi:'adn_hi',idle:()=>'adn_idle',opts:()=>peerOpts()},chucksley:{hi:'chk_hi',idle:()=>'chk_idle'},ferrell:{idle:()=>'frl_idle'},
  marketRh:{idle:()=>'mkt_hi',opts:()=>merchOpts('marketRh')},beggarRh:{idle:()=>'bgr_idle'}, rguard1:{idle:()=>'rgd_idle'},rguard2:{idle:()=>'rgd_idle'},scholarRh:{hi:'sch_hi',idle:()=>'sch_idle'},grocerRh:{idle:()=>'grc_hi',opts:()=>merchOpts('grocerRh')},
@@ -8642,7 +8685,7 @@ function barPlace(k,i){const a=barSkills().slice(0,NSK),j=a.indexOf(k),prev=a[i]
 function closeStatus(){BPICK=null;SFX.close();$('statusW').hidden=true;mode='play';hudDirty=true;}
 let STAB='main';
 function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,tip,btn,extra,id)=>`<div class="srow"${tip?` data-tip="${esc(tip)}"`:''}><span>${k}</span><span>${extra?'<span class="sv">':''}<b${id?` id="sv_${id}"`:''}>${v}</b>${extra?extra+'</span>':''}${btn||''}</span></div>`;
- const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+row(t('cls'),t('cl_'+S.cls))+row(t('raceL'),t('race_'+myRace()),t('raceD_'+myRace()))+(S.cls==='aura'?row(t('auRateL'),t('auR'+auR())):'')+(dvOn()?row(t('dvL'),t('dvRow',{g:t('godN_'+S.dv.g),n:Math.ceil((S.dv.until-Date.now())/60000)})):'')+(patOn()?row(t('lpatL'),t('lpatRow',{n:Math.ceil((S.pat1-Date.now())/60000)})):'')+(S.cls==='smith'&&(!S.sec||S.sec==='smith')?'':row(t('secL'),S.sec?t('sec_'+S.sec):t('none')))+(S.bank?row(t('bankL'),S.bank.toLocaleString('en')):'')+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
+ const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+row(t('cls'),t('cl_'+S.cls))+row(t('raceL'),t('race_'+myRace()),t('raceD_'+myRace()))+(S.cls==='aura'?row(t('auRateL'),t('auR'+auR())):'')+(dvOn()?row(t('dvL'),t('dvRow',{g:t('godN_'+S.dv.g),n:Math.ceil((S.dv.until-Date.now())/60000)})):'')+(patOn()?row(t('lpatL'),t('lpatRow',{n:Math.ceil((S.pat1-Date.now())/60000)})):'')+(S.cls==='smith'&&(!S.sec||S.sec==='smith')?'':row(t('secL'),S.sec?t('sec_'+S.sec):t('none')))+(S.bank?row(t('bankL'),S.bank.toLocaleString('en')):'')+(marOn()?row(t('marL'),esc(S.mar.n)+(MARN?' ♥':''),t('marTip'),` <button data-act="marGo">${t('marGoB')}</button>`):'')+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
  h+=`<div class="ssec">${t('basic')}<span class="sptc${S.pts>0?' on':''}">${t('pts',{n:S.pts})}${S.pts>1?` <input class="stn" id="stAmt" type="number" inputmode="numeric" min="1" max="${S.pts}" value="${STAMT||''}" placeholder="${esc(t('stNumPh'))}" data-tip="${esc(t('stNumTip'))}">`:''}</span></div><div class="sgrid stq">`+['str','sta','agi','int','dex'].map(k=>row(t(k),stat(k),t('t'+k),S.pts>0?`<button data-stat="${k}">+</button>${S.pts>=5?`<button class="p5" data-stat="${k}" data-n="5" data-tip="${esc(t('p5Tip'))}">+5</button>`:''}${TOUCH&&S.pts>5?`<button class="p5" data-stat="${k}" data-n="all">${t('ptsAllB')}</button>`:''}`:'',stat(k)!==S.st[k]?` <em data-tip="${esc(t('stBaseTip'))}">(${t('stBase',{n:S.st[k]})})</em>`:'',k)).join('')+'</div>';
  if(S.respec>0)h+=`<div class="note"><button data-respec="1" data-tip="${esc(t('respecD'))}">${t('respecUse',{n:S.respec})}</button></div>`;
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
@@ -9120,6 +9163,7 @@ function act(a){
  else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
  else if(a==='rmotion'){rmoSet(!RMO);SFX.click();}
+ else if(a==='marGo')marGo();
  else if(a==='menuSize'){const v=[100,120,140],c=mzOf();MZ=v[(v.indexOf(c)+1)%v.length]||100;try{localStorage.setItem('satisfy_mz',String(MZ));}catch(e){}fit();mzUI();}
  else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='guiReset')guiReset();else if(a==='quit'){save(true);fadeTo(toTitle);}
  else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='mgReheat'){reheat();}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='fCre'){creOpen();}else if(a==='fApr'){closeForge();openApr('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeGuildW')closeGuildW();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='photo'){act('resume');setTimeout(photoOn,0);}else if(a==='photoSave')photoShot();else if(a==='photoExit')photoOff();else if(a==='closeMB')closeMB();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qgFollow')qgFollow();else if(a==='qtoggle')toggleQuest();
@@ -11747,7 +11791,7 @@ function netSees(r,myRoom){if((r.room||null)!==myRoom)return false;if(inBh(P.x,P
 Object.assign(STR.ar,{netOtherV:'{n} قريب منك بس على نسخة تانية من اللعبة: اعملوا الاتنين ريفريش عشان تشوفوا بعض'});
 Object.assign(STR.en,{netOtherV:'{n} is nearby on a different version of the game: reload both pages to see each other'});
 function netWatch(){const ids=PARTY?PARTY.follow():[],w=ids.join(' ');if(NETTR.wsig!==w){NETTR.wsig=w;NETTR.party(ids);}} // party.follow(): review #55
-function netTick(){faultAt('netTick');NET.tick();pxpSeen();const live=netLive();
+function netTick(){faultAt('netTick');NET.tick();pxpSeen();marTick();const live=netLive();
  if(PARTY)PARTY.tick();
  if(NETTR&&NETTR.party)netWatch();
  if(DUEL)duelTick(live);
@@ -11841,13 +11885,13 @@ const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(try
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
 // clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
 function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+vpSt()+nvSt():'';}
-function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
+function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));const mr=marPub();if(mr)tags.push(JSON.stringify('mr:'+mr));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
  let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
 function guPub(){if(!P||!P.guard)return null;const a=Math.atan2(P.gy,P.gx);return 1+((Math.round(a/(2*Math.PI)*64)%64+64)%64)+(P.fort>0?64:0)+(P.gT<.22?128:0);}
 function fxSt(sid){let s=FXS.get(sid);if(!s)FXS.set(sid,s={last:-1,off:null,raw:'',sw:null,du:0,tr:[],lt:0});return s;}
-function fxIn(r,s){if(!r.fx){s.pt=null;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
- s.pt=null;s.inT=0;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';for(const ev of a)if(typeof ev==='string'){const grm=/^gr:(\S{7,67})$/.exec(ev);if(grm&&grOf(grm[1]))s.gr=grm[1];const bdm=/^bd:([0-9a-z]{10,16})$/.exec(ev);if(bdm)s.bd=bdm[1];const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}const q=/^st:([A-Za-z]{1,24})$/.exec(ev);/* capitals too: a saint's Q, a vampire's V and X (SAT-ONLINE-155: the whole tag was dropped for them) */if(q)s.st=q[1];const w=/^tl:([a-z0-9.]{1,40})$/.exec(ev);if(w)s.tl=w[1];if(ev==='gl:1')s.gl=1;const lk=/^lk:(\S{5,32})$/.exec(ev);if(lk)s.lk=lk[1];} // pet, mount and when they got to this place ride along in fx (fxPub)
+function fxIn(r,s){if(!r.fx){s.pt=null;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';s.mr='';return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
+ s.pt=null;s.inT=0;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';s.mr='';for(const ev of a)if(typeof ev==='string'){const mrm=/^mr:([pmd][A-Za-z0-9_:.-]{4,64})$/.exec(ev);if(mrm)s.mr=mrm[1];const grm=/^gr:(\S{7,67})$/.exec(ev);if(grm&&grOf(grm[1]))s.gr=grm[1];const bdm=/^bd:([0-9a-z]{10,16})$/.exec(ev);if(bdm)s.bd=bdm[1];const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}const q=/^st:([A-Za-z]{1,24})$/.exec(ev);/* capitals too: a saint's Q, a vampire's V and X (SAT-ONLINE-155: the whole tag was dropped for them) */if(q)s.st=q[1];const w=/^tl:([a-z0-9.]{1,40})$/.exec(ev);if(w)s.tl=w[1];if(ev==='gl:1')s.gl=1;const lk=/^lk:(\S{5,32})$/.exec(ev);if(lk)s.lk=lk[1];} // pet, mount and when they got to this place ride along in fx (fxPub)
  for(const ev of a){if(!Array.isArray(ev)||!(ev[0]>s.last)||typeof ev[1]!=='number')continue;s.last=ev[0];const lat=now-ev[1];
   // the sender's clock: keep the lowest delay seen (creeping up slowly) so steps of one skill keep their spacing
   if(s.off==null||lat<s.off)s.off=lat;else s.off+=(lat-s.off)*.02;FXQ.push({at:ev[1]+s.off,sid:r.sid,ev});}

@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23marriage', ver: '2.51', d: '2026-10-23',
+      ar: ["نظام الجواز بين اللاعيبة: قفوا انتو الاتنين جنب قسيس ريبيكا (رينهارت، ورولينج، والمعبد الكبير)، وواحد يطلب إيد التاني بـ 10,000 ذهب، والتاني يقبل. لازم لفل 20 على الأقل.",
+          "كل واحد بياخد خاتم جواز. وانتو قريبين من بعض: خبرة +10%، وضرر +5%، وصحة +5%، والضعف وانت لابس الخاتم.",
+          "في نافذة الحالة هتلاقي اسم شريكك وزرار الانتقال ليه، مرة كل 30 دقيقة (مش جوه الدانجن). والطلاق عند القسيس بـ 5,000 ذهب، والتاني بيعرف على طول."],
+      en: ["Marriage between players: stand by a priest of Rebecca together (Reinhardt, Rolling, the Great Temple); one proposes for 10,000 gold and the other says yes. Level 20 or more.",
+          "Each of you gets a Wedding Ring. Near each other: +10% XP, +5% damage and +5% max HP, twice with the ring on.",
+          "The status window shows your spouse and a button to go to them, once every 30 minutes (not inside dungeons). A divorce at a priest costs 5,000 gold, and the other side is told."] },
     { v: '2026-10-23stytabs', ver: '2.50', d: '2026-10-23',
       ar: ["عند ليلى بقت شاشة تخصيص واحدة بدل 25 زرار: 5 تبويبات (الشعر، والوش، والجسم، والهدوم، والإكسسوارات)، وتحتها أجزاء التبويب، وتحتهم كل الاختيارات. ولما تشتري حاجة بتفضل في نفس التبويب.",
           "25 زي جديد، فبقوا 48: مدرسة، وهودي، وجاكيت منفوخ، وآيدول، وتشيباو، وهانبوك، وكيمونو، وكاوبوي، وقرصان، وساموراي، وكاهنة المعبد، وبيجامة قطة وغيرهم. الفارس المقدس من لفل 100 والساحرة من لفل 80.",
