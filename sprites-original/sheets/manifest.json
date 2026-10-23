@@ -23374,12 +23374,12 @@
    "golem": {
     "file": "sheets/monsters/golem.png",
     "frame": {
-     "w": 30,
-     "h": 34
+     "w": 35,
+     "h": 38
     },
     "anchor": {
-     "x": 15,
-     "y": 33
+     "x": 17,
+     "y": 37
     },
     "scale": 1
    },
@@ -23483,11 +23483,11 @@
     "file": "sheets/monsters/mgolem.png",
     "frame": {
      "w": 30,
-     "h": 34
+     "h": 37
     },
     "anchor": {
      "x": 15,
-     "y": 33
+     "y": 36
     },
     "scale": 1
    },
@@ -23519,11 +23519,11 @@
     "file": "sheets/monsters/ogolem.png",
     "frame": {
      "w": 30,
-     "h": 34
+     "h": 38
     },
     "anchor": {
      "x": 15,
-     "y": 33
+     "y": 37
     },
     "scale": 1.35
    },
@@ -23590,26 +23590,26 @@
    "sanju2": {
     "file": "sheets/monsters/sanju2.png",
     "frame": {
-     "w": 39,
-     "h": 31
+     "w": 40,
+     "h": 23
     },
     "anchor": {
-     "x": 16,
-     "y": 31
+     "x": 19,
+     "y": 23
     },
-    "scale": 2.5
+    "scale": 3
    },
    "sanju3": {
     "file": "sheets/monsters/sanju3.png",
     "frame": {
      "w": 39,
-     "h": 31
+     "h": 22
     },
     "anchor": {
-     "x": 16,
-     "y": 31
+     "x": 17,
+     "y": 22
     },
-    "scale": 2.6
+    "scale": 3
    },
    "sanju4": {
     "file": "sheets/monsters/sanju4.png",

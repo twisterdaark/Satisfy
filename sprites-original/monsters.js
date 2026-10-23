@@ -18,7 +18,7 @@ function polish(g,W,H,out){const id=g.getImageData(0,0,W,H),d=id.data,OUT=out||'
  rim.forEach(([x,y,c])=>R(g,x,y,1,1,shade(c,.14)));o.forEach(([x,y,c])=>R(g,x,y,1,1,c));}
 
 // PER_CODE snapshot of index.html PAL @ ce29772 (body, dark, light, scale). A test checks drift.
-const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15],hwolf:['#6e6258','#4e443c','#968878',1.05],rboar:['#7a3a2a','#55261a','#a05a40',1.3],cwolf:['#c8d4e0','#8a9cb0','#eef4fa',1.1],cbear:['#d8dce4','#9aa2b0','#f4f6fa',1.6],cboar:['#4a5a3a','#323e26','#6e7e52',1.35],fboar:['#8a6a5a','#5e4a3e','#b08a78',1.2],sanju1:['#8a8a90','#5e5e66','#b4b4bc',2.4],sanju2:['#7a7a82','#52525a','#a4a4ae',2.5],sanju3:['#6a6a74','#46464e','#94949e',2.6],sanju4:['#5a5660','#3a363e','#86828e',2.8],gargoyle:['#7a7a82','#55555e','#a2a2ac',1.25],salamander:['#c8603a','#8a3a22','#e89a6a',1.3],hydra:['#3e6a4a','#264a32','#6a9a6a',1.5],ogolem:['#3e3638','#221c1e','#5e5254',1.35],aweapon:['#8a7a4e','#5a4e2e','#c8b47a',2.7],sellobu:['#3a2e4a','#241a32','#6a5a8a',1.1],foxmouse:['#d8843a','#a85a22','#f4d0a0',.6],hrabbit:['#8a7a6a','#5e5040','#b4a490',1.15,'horn'],grabbit:['#e8c040','#b08a20','#fff0a0',1,'gold'],slime:['#5ac84a','#3a8a2e','#a8f08a',1.25],mslime:['#6ad85a','#3e9a32','#b8f8a0',.75],cbat:['#4a3a5a','#2a1e36','#7a6a8a',1.1],sscorp:['#c89a5a','#8a6a36','#ecc890',1.3],mimic:['#8a5a2e','#5a3a1a','#b07a44',1.2],felem:['#e8581e','#9a200c','#ffc04a',1],ielem:['#7ac8f0','#2a6aa8','#d8f4ff',1],selem:['#5a6a8a','#2a3450','#a8b8d8',1],slord:['#4a5878','#1e2640','#8a9ac0',1.9],vbat:['#6a1a2a','#3a0a14','#a83a4a',1.15],kraken:['#7a3a5a','#4a1e3a','#b86a8a',1.6],ktent:['#7a3a5a','#4a1e3a','#b86a8a',1.2]};
+const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15],hwolf:['#6e6258','#4e443c','#968878',1.05],rboar:['#7a3a2a','#55261a','#a05a40',1.3],cwolf:['#c8d4e0','#8a9cb0','#eef4fa',1.1],cbear:['#d8dce4','#9aa2b0','#f4f6fa',1.6],cboar:['#4a5a3a','#323e26','#6e7e52',1.35],fboar:['#8a6a5a','#5e4a3e','#b08a78',1.2],sanju1:['#8a8a90','#5e5e66','#b4b4bc',2.4,'sanju'],sanju2:['#4a5466','#2e3442','#7a869a',3.0,'sanju'],sanju3:['#5a3e2e','#3a281c','#8a6a50',3.0,'sanju'],sanju4:['#4a3e56','#2c2434','#7a6a8e',2.8,'sanjuh'],gargoyle:['#7a7a82','#55555e','#a2a2ac',1.25],salamander:['#c8603a','#8a3a22','#e89a6a',1.3],hydra:['#3e6a4a','#264a32','#6a9a6a',1.5],ogolem:['#3e3638','#221c1e','#5e5254',1.35],aweapon:['#8a7a4e','#5a4e2e','#c8b47a',2.7],sellobu:['#3a2e4a','#241a32','#6a5a8a',1.1],foxmouse:['#d8843a','#a85a22','#f4d0a0',.6],hrabbit:['#8a7a6a','#5e5040','#b4a490',1.15,'horn'],grabbit:['#e8c040','#b08a20','#fff0a0',1,'gold'],slime:['#5ac84a','#3a8a2e','#a8f08a',1.25],mslime:['#6ad85a','#3e9a32','#b8f8a0',.75],cbat:['#4a3a5a','#2a1e36','#7a6a8a',1.1],sscorp:['#c89a5a','#8a6a36','#ecc890',1.3],mimic:['#8a5a2e','#5a3a1a','#b07a44',1.2],felem:['#e8581e','#9a200c','#ffc04a',1],ielem:['#7ac8f0','#2a6aa8','#d8f4ff',1],selem:['#5a6a8a','#2a3450','#a8b8d8',1],slord:['#4a5878','#1e2640','#8a9ac0',1.9],vbat:['#6a1a2a','#3a0a14','#a83a4a',1.15],kraken:['#7a3a5a','#4a1e3a','#b86a8a',1.6],ktent:['#7a3a5a','#4a1e3a','#b86a8a',1.2]};
 const POSES=[['idle',2],['walk',4],['atk',2],['hurt',1]];
 const TIMING={idle:[.5,.5],walk:[.1,.1,.1,.1],atk:[.12,.16],hurt:[.2]};
 
@@ -43,6 +43,8 @@ function wolf(g,p,pose,f){const [B,D,L]=p,W=36,H=22,AX=15,steps=legSteps(pose,f)
  R(g,hx_-2,hy-5,2,3,D);R(g,hx_+1,hy-5,2,3,D);R(g,hx_-1,hy-4,1,1,shade(D,-.3));
  R(g,hx_+2,hy-1,1,1,pose==='hurt'?'#ffffff':'#e2331f');
  if(pose==='atk'&&f===1){R(g,hx_+4,hy+2,3,1,'#f4f0ea');R(g,hx_+4,hy+3,3,1,'#5a1a1a');}
+ // owner 2026-10-22 (no two monsters alike): the Sanju wolf, a shaggy pale mane, a scar over the eye and fangs
+ if(p[4]==='sanju'){const MN='#d4d8e4';for(let i=0;i<5;i++)R(g,bx+i*2,by-7-(i%2)+(i>3?1:0),2,4,MN);R(g,hx_-3,hy-2,2,5,MN);R(g,hx_+1,hy-3,1,1,'#f0e8e8');R(g,hx_+3,hy-2,1,1,'#f0e8e8');R(g,hx_+2,hy-1,1,1,pose==='hurt'?'#fff':'#ff2a1a');R(g,hx_+5,hy+2,1,2,'#f4f0ea');R(g,hx_+7,hy+2,1,1,'#f4f0ea');R(g,bx-15,by-6-tw,2,1,MN);}
  return {W,H,AX};}
 
 // Boar: bulky, low, tusks and a bristly ridge. 32x20, anchor (16,20).
@@ -53,6 +55,7 @@ function boar(g,p,pose,f){const [B,D,L]=p,W=38,H=20,AX=15,steps=legSteps(pose,f)
  R(g,bx-12,by-2,2,1,D);R(g,bx-13,by-3,1,1,D);
  leg(bx-5,steps[0],D);leg(bx+6,steps[2],D);
  const hx_=bx+10,hy=by-1;ell(g,hx_,hy,4,4,B);R(g,hx_+3,hy,4,3,shade(B,.08));R(g,hx_+6,hy+1,2,2,'#c89a8a');R(g,hx_+6,hy+1,1,1,'#3a2020');
+ if(p[4]==='sanju'){for(let i=0;i<8;i++)R(g,bx-7+i*2,by-8-(i%2)-(i>2&&i<6?1:0),1,3,L);R(g,hx_+4,hy+2,1,2,'#f4f0ea');R(g,hx_+5,hy,1,2,'#f4f0ea');R(g,hx_+6,hy-2,1,2,'#f4f0ea');R(g,hx_+5,hy-3,1,1,'#ffffff');R(g,hx_+1,hy-2,2,1,pose==='hurt'?'#fff':'#ff3a1a');R(g,hx_-2,hy-1,1,3,shade(D,-.3));}
  R(g,hx_+4,hy+3,1,1,'#f4f0ea');R(g,hx_+5,hy+2,1,1,'#f4f0ea');R(g,hx_+2,hy-1,1,1,pose==='hurt'?'#fff':'#1a1420');R(g,hx_-2,hy-5,2,2,D);
  return {W,H,AX};}
 
@@ -60,7 +63,9 @@ function boar(g,p,pose,f){const [B,D,L]=p,W=38,H=20,AX=15,steps=legSteps(pose,f)
 function bear(g,p,pose,f){const [B,D,L]=p,W=42,H=28,AX=17,steps=legSteps(pose,f);const bob=pose==='walk'&&(f%2)?-1:0;
  if(pose==='atk'&&f===0){ // rear up
   const bx=16;R(g,bx-3,H-9,4,8,D);R(g,bx+3,H-9,4,8,D);ell(g,bx+2,H-15,7,9,D);ell(g,bx+2,H-16,6,9,B);ell(g,bx+3,H-14,3,6,L);
-  R(g,bx+7,H-24,5,3,B);R(g,bx+9,H-22,3,5,B);R(g,bx-4,H-23,4,3,B);ell(g,bx+3,H-26,4,3,B);R(g,bx+6,H-26,3,2,B);R(g,bx+8,H-26,1,1,'#1a1420');R(g,bx+1,H-30,2,2,D);R(g,bx+5,H-30,2,2,D);R(g,bx+4,H-27,1,1,'#1a1420');return {W,H,AX};}
+  R(g,bx+7,H-24,5,3,B);R(g,bx+9,H-22,3,5,B);R(g,bx-4,H-23,4,3,B);ell(g,bx+3,H-26,4,3,B);R(g,bx+6,H-26,3,2,B);R(g,bx+8,H-26,1,1,'#1a1420');R(g,bx+1,H-30,2,2,D);R(g,bx+5,H-30,2,2,D);R(g,bx+4,H-27,1,1,'#1a1420');
+  if(p[4]==='sanju'||p[4]==='sanjuh'){R(g,bx+4,H-27,2,1,'#ff2a1a');R(g,bx+11,H-20,1,2,'#f4f0ea');R(g,bx-4,H-21,1,2,'#f4f0ea');if(p[4]==='sanjuh'){R(g,bx,H-28,1,2,'#e8dcc8');R(g,bx+6,H-28,1,2,'#e8dcc8');R(g,bx-1,H-12,1,3,'#c86aff');R(g,bx+3,H-16,1,2,'#c86aff');}}
+  return {W,H,AX};}
  const lean=pose==='atk'?4:pose==='hurt'?-2:0,by=15+bob,bx=16+lean;
  const leg=(x,s,col)=>{R(g,x+s,by+4,4,H-by-5,col);R(g,x+s-1,H-2,5,1,shade(col,-.25));};
  leg(bx-8,steps[1],shade(D,-.15));leg(bx+5,steps[3],shade(D,-.15));
@@ -68,6 +73,11 @@ function bear(g,p,pose,f){const [B,D,L]=p,W=42,H=28,AX=17,steps=legSteps(pose,f)
  leg(bx-6,steps[0],D);leg(bx+7,steps[2],D);
  const hx_=bx+11,hy=by-3;ell(g,hx_,hy,5,4,B);R(g,hx_+4,hy,4,3,shade(B,.1));R(g,hx_+7,hy,1,1,'#1a1420');R(g,hx_+2,hy-1,1,1,pose==='hurt'?'#fff':'#1a1420');
  R(g,hx_-3,hy-5,2,2,D);R(g,hx_+1,hy-5,2,2,D);if(pose==='atk'){R(g,hx_+5,hy+3,3,1,'#f4f0ea');}
+ if(p[4]==='sanju'||p[4]==='sanjuh'){R(g,hx_+2,hy-1,2,1,pose==='hurt'?'#fff':'#ff2a1a');R(g,bx+8+steps[2],H-2,1,1,'#f4f0ea');R(g,bx+10+steps[2],H-2,1,1,'#f4f0ea');R(g,bx-5+steps[0],H-2,1,1,'#f4f0ea');R(g,bx-3+steps[0],H-2,1,1,'#f4f0ea');
+  if(p[4]==='sanju'){R(g,bx+6,by-1,1,4,L);R(g,bx+7,by-2,1,1,L);R(g,bx+5,by+3,2,1,L);}
+  else{const BN='#e8dcc8',RU='#c86aff';for(let i=0;i<5;i++){R(g,bx-9+i*4,by-9-(i===2?1:0),2,2,BN);R(g,bx-8+i*4,by-11-(i===2?1:0),1,2,BN);}
+   R(g,hx_-4,hy-7,1,3,BN);R(g,hx_-5,hy-9,1,2,BN);R(g,hx_-6,hy-10,1,1,shade(BN,-.3));R(g,hx_+2,hy-7,1,3,BN);R(g,hx_+3,hy-9,1,2,BN);R(g,hx_+4,hy-10,1,1,shade(BN,-.3));
+   R(g,bx-5,by-3,1,3,RU);R(g,bx-4,by-1,2,1,RU);R(g,bx+2,by-4,1,2,RU);R(g,bx+3,by-2,1,2,RU);R(g,bx-1,by+1,2,1,RU);}}
  return {W,H,AX};}
 
 // Rabbit: hop cycle. 16x14, anchor (8,14).
@@ -181,6 +191,10 @@ function golem(k){return function(g,p,pose,f){const cr=k==='cgolem',mo=k==='mgol
  R(g,x-13,ty+2+arm,4,12,B);R(g,x-13,ty+2+arm,1,12,shade(B,.12));R(g,x-14,ty+12+arm,6,4,D);R(g,x+9,ty+2+arm,4,12,B);R(g,x+8,ty+12+arm,6,4,D);
  // head
  R(g,x-5,ty-6,10,7,B);R(g,x-5,ty-6,10,1,L);R(g,x+4,ty-6,1,7,D);R(g,x-3,ty-3,2,2,pose==='hurt'?'#fff':E);R(g,x+1,ty-3,2,2,pose==='hurt'?'#fff':E);
+ // owner 2026-10-22 (no two monsters alike): each golem gets its own shape, not just its own colour
+ if(mo){const M='#4e7e2e',M2='#7aae4a';R(g,x-6,ty-8,12,3,M);R(g,x-4,ty-9,5,1,M2);R(g,x+2,ty-9,2,1,M);R(g,x-14,ty+arm,6,3,M);R(g,x+8,ty+arm,6,3,M);R(g,x-12,ty-1+arm,3,1,M2);R(g,x-6,ty+17,1,2+(f%2),D);R(g,x+1,ty+17,1,3-(f%2),D);R(g,x+5,ty+17,1,2,D);R(g,x-13,ty+16+arm,1,2,D);R(g,x+12,ty+16+arm,1,3,D);R(g,x+3,ty-9,1,1,'#e8d84a');}
+ else if(ob){const I='#26262c',RV='#9a9aa4';R(g,x-9,ty+4,18,2,I);R(g,x-9,ty+12,18,2,I);[-7,-1,5].forEach(i=>{R(g,x+i,ty+4,1,1,RV);R(g,x+i,ty+12,1,1,RV);});ell(g,x,ty+8,2,2,E);R(g,x,ty+8,1,1,'#fff0c0');R(g,x-13,ty-1+arm,2,3,RV);R(g,x-12,ty-3+arm,1,2,RV);R(g,x+11,ty-1+arm,2,3,RV);R(g,x+11,ty-3+arm,1,2,RV);R(g,x-5,ty-1,10,2,I);R(g,x-4,ty-1,1,1,RV);R(g,x+3,ty-1,1,1,RV);R(g,x-1,ty-9,2,3,RV);}
+ else if(!cr&&!aw){ell(g,x-11,ty+1+arm,5,4,B);R(g,x-15,ty-2+arm,8,1,L);ell(g,x+11,ty+1+arm,5,4,B);R(g,x+8,ty-2+arm,7,1,L);R(g,x-12,ty+2+arm,2,1,D);R(g,x+11,ty+3+arm,2,1,D);R(g,x-4,ty-6,8,1,shade(L,.1));}
  return {W,H};};}
 
 // Guardian of the Forest (boss). 64x72, anchor (32,72).
@@ -338,7 +352,7 @@ function phoenix(g,p,pose,f){const W=96,H=88,AX=46,B='#e8501e',D='#a82a12',DD='#
  wing(0,B,L);
  return {W,H,AX};}
 
-const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null],trauka:[trauka,null,[230,170]],cwolf:[wolf,'cwolf'],cbear:[bear,'cbear'],cboar:[boar,'cboar'],fboar:[boar,'fboar'],sanju1:[bear,'sanju1'],sanju2:[bear,'sanju2'],sanju3:[bear,'sanju3'],sanju4:[bear,'sanju4'],gargoyle:[gargoyle,'gargoyle'],salamander:[salamander,'salamander'],hydra:[hydra,'hydra',[150,130]],ogolem:[golem('ogolem'),'ogolem'],aweapon:[golem('aweapon'),'aweapon'],sellobu:[spider,'sellobu'],foxmouse:[wolf,'foxmouse'],hrabbit:[rabbit,'hrabbit'],grabbit:[rabbit,'grabbit'],slime:[slime,'slime'],mslime:[slime,'mslime'],cbat:[bat,'cbat'],sscorp:[scorpion,'sscorp'],mimic:[mimic,'mimic'],felem:[elemental('fire'),'felem'],ielem:[elemental('ice'),'ielem'],selem:[elemental('storm'),'selem'],slord:[elemental('storm'),'slord'],vbat:[bat,'vbat'],kraken:[kraken,'kraken',[140,112]],ktent:[ktent,'ktent'],stort:[tortoise,null,[180,130,1.2]],sbird:[phoenix,null,[150,130,1.6]]};
+const KINDS={wolf:[wolf,'wolf'],pwolf:[wolf,'pwolf'],hwolf:[wolf,'hwolf'],boar:[boar,'boar'],rboar:[boar,'rboar'],mgolem:[golem('mgolem'),null],bear:[bear,'bear'],gbear:[bear,'gbear'],rabbit:[rabbit,null],golem:[golem('golem'),null],cgolem:[golem('cgolem'),null],guardian:[guardian,null],trauka:[trauka,null,[230,170]],cwolf:[wolf,'cwolf'],cbear:[bear,'cbear'],cboar:[boar,'cboar'],fboar:[boar,'fboar'],sanju1:[bear,'sanju1'],sanju2:[wolf,'sanju2'],sanju3:[boar,'sanju3'],sanju4:[bear,'sanju4'],gargoyle:[gargoyle,'gargoyle'],salamander:[salamander,'salamander'],hydra:[hydra,'hydra',[150,130]],ogolem:[golem('ogolem'),'ogolem'],aweapon:[golem('aweapon'),'aweapon'],sellobu:[spider,'sellobu'],foxmouse:[wolf,'foxmouse'],hrabbit:[rabbit,'hrabbit'],grabbit:[rabbit,'grabbit'],slime:[slime,'slime'],mslime:[slime,'mslime'],cbat:[bat,'cbat'],sscorp:[scorpion,'sscorp'],mimic:[mimic,'mimic'],felem:[elemental('fire'),'felem'],ielem:[elemental('ice'),'ielem'],selem:[elemental('storm'),'selem'],slord:[elemental('storm'),'slord'],vbat:[bat,'vbat'],kraken:[kraken,'kraken',[140,112]],ktent:[ktent,'ktent'],stort:[tortoise,null,[180,130,1.2]],sbird:[phoenix,null,[150,130,1.6]]};
 
 // Build a sheet: columns = frames of the longest pose, rows = poses. Returns {canvas, W, H, anchor}.
 // Frames are drawn with a margin and cropped to the union of their pixels (+1 for the outline),

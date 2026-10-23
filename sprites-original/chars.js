@@ -51,9 +51,16 @@ function frame(c,dir,pose,f){
   p(6,17,1,3-o.legL,lgD);p(10,17,1,3-o.legR,lgD);
   if(pose==='atk'&&f===1){p(4,20,1,2,c.boots);p(11,20,1,2,c.boots);}}
  if(c.shorts){if(S_)p(5,17,6,1,c.shorts);else p(4,17,8,1,c.shorts);}
+ if(c.robeL){const T=c.top,T2=c.top2,hm=c.trim||T2,sw=pose==='walk'?(f%2):0;if(S_){p(5,16,6,5,T);p(4-sw,19,8,2,T);p(10,16,1,5,T2);p(4-sw,21,8,1,hm);}
+  else{p(4,16,8,5,T);p(3,19,10,2,T);p(11,16,1,5,T2);p(3,21,10,1,hm);if(!U)p(7,16,2,5,hm);}}
  if(c.robe){if(S_){p(5,16,6,4,c.top);p(10,16,1,4,c.top2);}else{p(4,16,8,4,c.top);p(11,16,1,4,c.top2);p(4,19,8,1,c.top2);}}
  // cape behind
  if(c.cape&&!U){const sw=pose==='walk'?(f%2):0;if(S_){q(4-sw,11,2,8,c.cape);q(3-sw,13,1,6,shade(c.cape,-.2));}else{q(3,11,10,1,c.cape);q(3,12,1,6+sw,c.cape);q(12,12,1,6+sw,c.cape);}}
+ // owner 2026-10-22 (no two monsters alike): bat wings behind the body, folded a little on every other walk frame
+ if(c.wings){const W=c.wings,WB=shade(W,.28),WD=shade(W,-.25),fl=pose==='walk'?(f%2):0;
+  if(U){q(0,6+fl,5,7,W);q(11,6+fl,5,7,W);q(1,13+fl,3,1,WD);q(12,13+fl,3,1,WD);q(4,5,1,8,WB);q(11,5,1,8,WB);q(1,7+fl,3,1,WB);q(12,7+fl,3,1,WB);}
+  else if(S_){q(0,7+fl,5,4,W);q(1,6+fl,4,1,W);q(1,11+fl,3,2,WD);q(4,5,1,7,WB);q(1,9+fl,3,1,WB);}
+  else{q(0,8+fl,4,5,W);q(1,7+fl,3,1,W);q(1,13+fl,2,1,WD);q(12,8+fl,4,5,W);q(12,7+fl,3,1,W);q(13,13+fl,2,1,WD);q(3,6,1,7,WB);q(12,6,1,7,WB);}}
  // a reptile tail behind the body (lizardmen)
  if(c.tail){const sw=pose==='walk'?(f%2):0,T=c.skin,T2=c.sk2;if(S_){p(2,15+sw,3,2,T);p(1,17+sw,2,2,T2);p(0,19,2,1,T2);p(3,15,2,1,T2);}else if(U){p(7,16,2,3,T);p(8,19,2,2,T2);p(9,21-sw,2,1,T2);}else{p(12,16,2,2,T);p(13,18,2,2,T2);p(14,19+sw,1,2,T2);}}
  // back arm on the side view (behind torso)
@@ -63,6 +70,7 @@ function frame(c,dir,pose,f){
  if(S_){q(5,11,6,6,c.top);q(10,11,1,6,c.top2);q(5,11,1,5,shade(c.top,.1));}
  else{q(4,11,8,6,c.top);q(11,11,1,6,c.top2);q(4,16,8,1,shade(c.top,-.12));if(!U)q(5,11,1,4,shade(c.top,.12));}
  if(c.chest&&!U){if(S_)q(5,11,4,4,c.chest);else{q(5,11,6,4,c.chest);q(10,11,1,4,c.pad2);q(5,13,6,1,c.pad2);q(6,11,2,1,shade(c.chest,.2));}}
+ if(c.sash&&!U){if(S_){q(6,12,4,1,c.sash);q(7,13,3,1,c.sash);}else for(let i=0;i<5;i++)q(5+i,11+i,2,1,c.sash);}
  q(S_?5:4,16,S_?6:8,1,c.belt||c.boots);if(!U&&c.belt)q(S_?8:7,16,2,1,shade(c.belt,.35));
  if(c.cape&&U)q(4,11,8,8,c.cape),q(4,11,8,1,shade(c.cape,.15));
  if(c.apron){if(U){q(5,11,1,5,c.apron2);q(10,11,1,5,c.apron2);q(5,15,6,1,c.apron2);}
@@ -81,18 +89,19 @@ function frame(c,dir,pose,f){
   else if(o.atk===2){q(12,12,1,4,arm2);q(12,16,1,2,hnd);hand={x:12,y:17+by+OY};}
   else{const r=Math.max(0,o.armR)+hl;q(12,11+r,1,4,arm2);q(12,15+r,1,2,hnd);hand={x:12,y:16+r+by+OY};}}
  if(c.pad){if(S_){q(6,10,4,2,c.pad);q(6,11,4,1,c.pad2);q(6,10,2,1,shade(c.pad,.2));}else{q(2,10,3,2,c.pad);q(11,10,3,2,c.pad);q(2,11,3,1,c.pad2);q(11,11,3,1,c.pad2);q(2,10,1,1,shade(c.pad,.25));q(11,10,1,1,shade(c.pad,.25));}}
+ if(c.spike){const K=c.spike;if(S_){q(7,8,1,2,K);q(9,9,1,1,K);}else{q(2,9,1,1,K);q(3,8,1,2,K);q(12,8,1,2,K);q(13,9,1,1,K);}}
  // head + neck
  q(6,10,4,1,c.sk2);
  if(c.collar&&!U){if(S_)q(7,10,3,1,c.collar);else{q(5,10,6,1,c.collar);q(5,11,1,1,c.collar);q(10,11,1,1,c.collar);}}
  if(S_){q(5,2,7,8,c.skin);q(12,7,1,1,c.skin);q(5,9,7,1,c.sk2);q(11,3,1,6,c.sk2);}
  else{q(4,2,8,8,c.skin);q(11,3,1,7,c.sk2);q(5,9,6,1,c.sk2);if(!U)q(5,3,1,4,shade(c.skin,.12));}
  // face: 2px eyes with a catchlight, blink and hurt squint
- if(!U){const EYE=A.EYE||'#22181e',lid=c.sk2;
-  if(S_){if(o.blink||o.hurt)q(10,7,1,1,EYE);else{q(10,6,1,2,EYE);q(10,6,1,1,'#4a3c48');}q(9,5,2,1,c.hc);q(7,6,1,2,c.sk2);if(!o.hurt&&!o.blink)q(11,8,1,1,mixC(c.skin,'#e86a6a',.25));}
+ if(!U){const EYE=c.eye||A.EYE||'#22181e',lid=c.sk2,CL=c.eye?shade(c.eye,.45):'#4a3c48';
+  if(S_){if(o.blink||o.hurt)q(10,7,1,1,EYE);else{q(10,6,1,2,EYE);q(10,6,1,1,CL);}q(9,5,2,1,c.hc);q(7,6,1,2,c.sk2);if(!o.hurt&&!o.blink)q(11,8,1,1,mixC(c.skin,'#e86a6a',.25));}
   else{const bc=c.hair==='bald'&&c.beard2?c.beard2:c.hc;
    if(o.blink){q(6,7,1,1,lid);q(9,7,1,1,lid);q(6,7,1,1,EYE);q(9,7,1,1,EYE);}
    else if(o.hurt){q(5,6,2,1,EYE);q(9,6,2,1,EYE);}
-   else{q(6,6,1,2,EYE);q(9,6,1,2,EYE);q(6,6,1,1,'#4a3c48');q(9,6,1,1,'#4a3c48');q(5,8,1,1,mixC(c.skin,'#e86a6a',.22));q(10,8,1,1,mixC(c.skin,'#e86a6a',.22));}
+   else{q(6,6,1,2,EYE);q(9,6,1,2,EYE);q(6,6,1,1,CL);q(9,6,1,1,CL);q(5,8,1,1,mixC(c.skin,'#e86a6a',.22));q(10,8,1,1,mixC(c.skin,'#e86a6a',.22));}
    q(5,5,2,1,bc);q(9,5,2,1,bc);q(7,8,2,1,o.hurt?shade(c.sk2,-.2):c.sk2);}}
  // hair (same shapes as the legacy renderer, on the upper-body layer)
  const h=c.hc,hl=c.hl;
@@ -135,8 +144,19 @@ function frame(c,dir,pose,f){
   else{q(3,0,10,4,h);q(2,1,1,7,h);q(13,1,1,7,h);q(3,4,1,4,h);q(12,4,1,4,h);q(4,4,2,1,h);q(7,4,2,1,h);q(10,4,2,1,h);q(4,1,1,1,hl);q(7,0,1,1,hl);q(10,1,1,1,hl);q(12,3,1,1,hl);}}
  else if(c.hair==='cap'){q(4,4,1,3,h);q(11,4,1,3,h);q(3,0,10,3,c.cap);q(4,3,8,1,'#d8d2c4');q(5,0,6,1,'#ffffff');if(U)q(4,4,8,4,h);}
  else if(c.hair==='hat'){q(4,4,1,3,h);q(11,4,1,3,h);if(U)q(4,4,8,4,h);q(2,3,12,1,c.hat);q(5,0,6,3,c.hat);q(5,2,6,1,'#7a2a1a');q(5,0,6,1,shade(c.hat,.18));}
+ else if(c.hair==='mitre'){const T=c.trim||'#c8a050';q(4,4,1,3,h);q(11,4,1,3,h);if(U)q(4,4,8,4,h);q(5,-2,6,5,c.hat);q(6,-3,4,1,c.hat);q(7,-4,2,1,c.hat);q(5,2,6,1,T);q(7,-3,2,5,T);q(6,-1,1,2,shade(c.hat,.2));if(!U)q(7,0,2,1,'#d83a3a');}   // a high priest's mitre
  else if(c.hair==='crown'){q(4,2,8,2,h);q(3,3,1,5,h);q(12,3,1,5,h);if(U)q(4,4,8,5,h);q(4,0,8,2,c.hat);q(4,-1,1,1,c.hat);q(7,-1,2,1,c.hat);q(11,-1,1,1,c.hat);q(5,0,6,1,shade(c.hat,.25));q(7,1,2,1,'#d83a3a');}   // a king's crown over long hair
- else if(c.hair==='helm'){if(U)q(4,1,8,9,h);else if(S_){q(5,1,7,6,h);q(4,3,1,4,h);q(9,5,3,1,'#22252c');}else{q(4,1,8,5,h);q(3,3,1,5,h);q(12,3,1,5,h);q(5,5,6,1,'#22252c');q(7,1,2,4,hl);}q(7,-1,2,2,'#8a1f2a');}
+ else if(c.hair==='helm'){if(U)q(4,1,8,9,h);else if(S_){q(5,1,7,6,h);q(4,3,1,4,h);q(9,5,3,1,'#22252c');}else{q(4,1,8,5,h);q(3,3,1,5,h);q(12,3,1,5,h);q(5,5,6,1,'#22252c');q(7,1,2,4,hl);}if(c.plume!==0){const PL=c.plume||'#8a1f2a';q(7,-1,2,2,PL);if(c.plumeL){if(S_){q(4,-1,3,1,PL);q(3,0,2,2,PL);}else q(6,-2,4,1,PL);}}}
+ // owner 2026-10-22: more headgear so a kind can come in several designs
+ if(c.hood){const Hd=c.hood,H2=shade(Hd,-.38),HL=shade(Hd,.15);
+  if(U){q(3,0,10,11,Hd);q(4,0,8,1,HL);q(7,11,2,2,Hd);q(5,2,1,6,HL);}
+  else if(S_){q(4,0,8,3,Hd);q(5,-1,6,1,Hd);q(3,2,3,9,Hd);q(4,10,6,1,Hd);q(9,3,3,2,H2);q(5,0,4,1,HL);}
+  else{q(3,0,10,3,Hd);q(4,-1,8,1,Hd);q(3,3,2,8,Hd);q(11,3,2,8,Hd);q(3,10,10,1,Hd);q(5,3,6,2,H2);q(5,0,3,1,HL);}}
+ if(c.band){const B=c.band;if(U){q(4,3,8,2,B);q(7,5,2,3,B);}else if(S_){q(5,3,7,2,B);q(3,4,2,1,B);q(2,5,2,2,B);}else{q(4,3,8,2,B);q(12,4,2,1,B);q(13,5,1,2,B);}}
+ if(c.turban){const T=c.turban,T2=shade(T,-.2);if(U)q(3,0,10,5,T);else if(S_){q(4,0,8,4,T);q(5,-1,6,1,T);q(5,2,7,1,T2);}else{q(3,0,10,4,T);q(4,-1,8,1,T);q(4,2,8,1,T2);q(7,0,2,2,'#d83a3a');}}
+ if(c.feath){const F=c.feath,F2=c.feath2||'#e8e0d0';if(U){q(4,1,8,2,F);q(5,-3,1,4,F2);q(10,-3,1,4,F2);}else if(S_){q(5,1,7,2,F);q(4,-2,1,4,F2);q(6,-3,1,4,F);q(8,-2,1,3,F2);}else{q(4,1,8,2,F);q(3,-2,1,3,F2);q(6,-3,1,4,F);q(9,-3,1,4,F2);q(12,-2,1,3,F);}}
+ if(c.ears&&!U){const E=c.skin,E2=c.sk2;if(c.ears==='gob'){if(S_){q(5,4,2,2,E);q(3,3,2,1,E);q(2,2,1,1,E2);}else{q(2,5,2,1,E);q(1,4,2,1,E);q(0,3,1,1,E2);q(12,5,2,1,E);q(13,4,2,1,E);q(15,3,1,1,E2);}}
+  else if(S_){q(5,4,1,2,E);q(4,3,1,1,E2);}else{q(3,5,1,2,E);q(2,4,1,1,E2);q(12,5,1,2,E);q(13,4,1,1,E2);}}
  if(c.ahoge){q(7,0,1,1,h);q(8,-1,1,1,h);q(9,-2,2,1,h);q(11,-1,1,1,h);}
  // the Good-looking Sunglasses from the Reputation Store (v0.96): "the large frame is the highlight of the square sunglasses"
  if(c.sg&&!U){const G='#141418',W='#6a7a9a';if(S_){q(9,6,3,2,G);q(6,6,3,1,G);q(10,6,1,1,W);}else{q(4,6,3,2,G);q(9,6,3,2,G);q(7,6,2,1,G);q(4,6,1,1,W);q(9,6,1,1,W);}}
@@ -164,6 +184,18 @@ function frame(c,dir,pose,f){
  // ogre and troll: tusks; a troll's big hooked nose
  if(c.nose&&!U){if(S_){q(12,6,2,2,c.skin);q(13,8,1,1,c.sk2);}else{q(7,6,2,3,shade(c.skin,.1));q(7,9,2,1,c.sk2);}}
  if(c.tusk&&!U){const T='#f0e8d0';if(S_)q(11,9,1,2,T);else{q(5,9,1,2,T);q(10,9,1,2,T);}}
+ // masks and visors over the face
+ if(c.mask&&!U){const K='#141018',GL=c.eye||'#ff3a2a';
+  if(c.mask==='veil'){const M=c.maskC||'#1a1418';if(S_)q(8,7,4,3,M);else{q(4,7,8,3,M);q(4,7,8,1,shade(M,.18));}}
+  else if(c.mask==='skull'){const BN=c.maskC||'#e4dccb';if(S_){q(8,4,4,6,BN);q(10,5,2,2,K);q(11,6,1,1,GL);q(9,8,3,1,K);q(10,8,1,1,BN);}
+   else{q(5,4,6,6,BN);q(5,5,2,2,K);q(9,5,2,2,K);q(6,6,1,1,GL);q(9,6,1,1,GL);q(7,7,2,1,K);q(6,9,4,1,K);q(7,9,1,1,BN);q(5,4,6,1,shade(BN,.2));}}
+  else if(c.mask==='iron'){const M=c.maskC||c.hc;if(S_){q(8,3,4,7,M);q(9,6,3,1,K);q(10,6,1,1,GL);q(11,8,1,1,shade(M,-.3));}
+   else{q(4,3,8,7,M);q(5,6,6,1,K);q(6,6,1,1,GL);q(9,6,1,1,GL);q(7,8,2,1,shade(M,-.3));q(7,3,2,3,shade(M,.2));q(4,9,8,1,shade(M,-.2));}}}
+ // horns over everything (demons, horned helms)
+ if(c.horns){const Hn=c.horns,H2=shade(Hn,-.3);
+  if(U){q(3,0,1,2,Hn);q(2,-1,1,2,Hn);q(12,0,1,2,Hn);q(13,-1,1,2,Hn);}
+  else if(S_){q(6,0,2,2,Hn);q(5,-1,2,1,Hn);q(4,-2,2,1,H2);q(3,-2,1,1,H2);}
+  else{q(3,1,2,1,Hn);q(2,0,1,1,Hn);q(1,-1,1,1,H2);q(1,-2,1,1,H2);q(11,1,2,1,Hn);q(13,0,1,1,Hn);q(14,-1,1,1,H2);q(14,-2,1,1,H2);}}
  late.forEach(fn=>fn());
  polish(g);
  return {c:cv,hand};}

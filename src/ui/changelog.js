@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23monart', ver: '1.99', d: '2026-10-23',
+      ar: ["مفيش وحشين شبه بعض تاني: كهنة معبد ياتان والشياطين وفرسان الموت الستة والفامباير والعفاريت وفرسان كل مملكة وقطاع الطرق اترسموا من جديد، كل واحد بشكل خاص بيه (أقنعة، قلنسوات، عمايم، قرون، أجنحة، خوذ بريش، عيون بتنور)",
+        "البشر والعفاريت بقى ليهم أكتر من تصميم: 16 نوع كل واحد بـ 3 أشكال مختلفة غير الأصلي (عصابة، قناع جمجمة، قلنسوة، شعر، خوذة)، وكل شكل بسلاحه هو",
+        "زعيم معبد ياتان بقى الكاهن الأكبر بتاج طويل ولحية، مش كاهن عادي كبير. وأسياد الجبل الأربعة (السانجو) بقوا دب أبيض، وذئب بلبدة، وخنزير بأنياب ضخمة، ودب بقرون وشوك ورونات بتنور",
+        "الجولم الحجري ليه أكتاف صخور، وجولم المستنقع عليه طحالب وطين بينقط، والجولم القديم ملفوف بحديد ومسامير وقلبه بينور. و36 سلاح جديد للوحوش (عصيان، خناجر، منجل، شوكة، سيوف ضخمة، رماح، دروع، أقواس)"],
+      en: ["No two monsters look alike any more: Yatan's priests, the demons, the six death knights, the vampires, the goblins, every kingdom's knights and the bandits are redrawn, each with its own look (masks, hoods, turbans, horns, wings, plumed helms, glowing eyes)",
+        "Humans and goblins now come in several designs: 16 kinds with 3 different looks each besides the original (a headband, a skull mask, a hood, hair, a helm), each with its own weapon",
+        "The boss of Yatan's temple is now the high priest with a tall mitre and a beard, not a bigger priest. The four Sanju are a white bear, a maned wolf, a boar with huge tusks and a horned bear with spikes and glowing runes",
+        "The stone golem has boulder shoulders, the bog golem moss and dripping mud, and the old golem iron bands, rivets and a glowing core. And 36 new monster weapons (staffs, daggers, a sickle, a trident, greatswords, lances, shields, bows)"] },
     { v: '2026-10-22dsleg', ver: '1.98', d: '2026-10-22',
       ar: ["كل الأساطير بقوا بيقاوموا الصعق والشلل والتجميد زي الرواية: \"[قاومت.]\"",
         "الأسطورة لا تموت: بقت 5 ثواني من غير ضرر زي الرواية بدل 3",
