@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23fightlog', ver: '2.00', d: '2026-10-23',
+      ar: ["اكتب /fightlog في الشات تشوف آخر مبارزة: كل ضربة ضربتها، وكل ضربة جتلك وصحتك بعدها، واللي رفضته وليه، والوقت من أول القتال لآخره",
+        "ولو اتقتلت في PvP: بتشوف مين ضربك وكام ضربة في كام ثانية. وآخر المبارزة بيظهر ملخصها في شباكها"],
+      en: ["Type /fightlog in the chat to see your last duel: every hit you landed, every hit you took and your health after it, what was turned down and why, and the time from start to end",
+        "Killed in PvP: see who hit you and how many hits in how many seconds. A duel's summary also shows in its window when it ends"] },
     { v: '2026-10-23monart', ver: '1.99', d: '2026-10-23',
       ar: ["مفيش وحشين شبه بعض تاني: كهنة معبد ياتان والشياطين وفرسان الموت الستة والفامباير والعفاريت وفرسان كل مملكة وقطاع الطرق اترسموا من جديد، كل واحد بشكل خاص بيه (أقنعة، قلنسوات، عمايم، قرون، أجنحة، خوذ بريش، عيون بتنور)",
         "البشر والعفاريت بقى ليهم أكتر من تصميم: 16 نوع كل واحد بـ 3 أشكال مختلفة غير الأصلي (عصابة، قناع جمجمة، قلنسوة، شعر، خوذة)، وكل شكل بسلاحه هو",

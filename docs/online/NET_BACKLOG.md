@@ -1,4 +1,4 @@
-# NET/PVP backlog U001–U038 (plan doc §33–§34) — status
+# NET/PVP backlog U001–U045 (plan doc §33–§34) — status
 
 Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (2026-10-21) · ✅ done · 🟡 partly · ⏳ needs a server or an owner decision (Blaze, D3) · ❌ not started
 
@@ -42,8 +42,15 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U036 | Party friendly fire | ✅ | SAT-ONLINE-038: no hits inside a party, checked by the attacker and again by the victim (`unit/pvp`, `regression/pvp`) |
 | U037 | Outlaw flag | ✅ | SAT-ONLINE-038: a kill makes the killer an outlaw for 10 min (`PlayerPublic.ol`, red name for everyone, `S.olT` kept across a reload); the kill counts only from a real, recent hit |
 | U038 | Bounty board | 🟡 | SAT-ONLINE-051 (#84): gold on an outlaw's head from its card, paid once to its PvP killer through the victim's own kill record (`bountyPaid`), taken back from the board; karma (SAT-ONLINE-052, #85): murders cost points and lengthen the red name, -5 is a murderer; gold has no ledger (D3) |
+| U039 | PvP combat log | ✅ | SAT-ONLINE-150: each side of a duel logs the fight it saw, timed: what it sent, what it took after its own checks, what it turned down and why, the foe's HP as the foe reported it, the end. `Satisfy.duel.report(log)` rebuilds the result, the time and the totals from the log alone, and says when a log was changed or cut short (`unit/fightlog`). Open PvP keeps who hurt you in the last 15 s (`pvp.recap()`): a death says how many hits in how long, and `/fightlog` shows the last duel and the last death (`regression/duel`, `regression/pvp`). Each side's own record, not a server's (D3) |
+| U040 | PvP rank season | 🟡 | SAT-ONLINE-053: monthly arena seasons, Elo (K 32) from duels only (open PvP doesn't touch ratings); the rules bound each write (one result at a time, ±64). Left: a cap on the same opponent, and a check on a server (D3) |
+| U041 | PvP CC immunity | 🟡 | No crowd control crosses between players: a duel or open-PvP hit carries only its damage, so nobody can be locked. Diminishing returns are needed once a stun or knockback reaches players |
+| U042 | PvP gear damage | ❌ | An open-PvP death has the normal death penalty (XP, 10% of gold); no durability is lost and no item can be; a duel costs nothing (`regression/pvp`, `regression/duel`) |
+| U043 | PvP guild skirmish | 🟡 | Guild wars (SAT-ONLINE-086): declared and accepted, one hour at a set time, a war kill counts for the guild without karma; towns are safe for everyone, at war or not (`regression/pvp`). Left: a war contract before a capture zone, PvP gated by war |
+| U044 | PvP anti-exploit suite | 🟡 | Forged data turned down: the size of a hit, its rate, its reach against the victim's real position, an unknown or third-party sender, replays and duplicates, the attacker's own teleport in a duel, a kill report from someone who never hit (`unit/pvp`, `unit/duel`, `unit/chaos`, `unit/presence`). Left: a teleport in open PvP, a spoofed `duel.hp`, forged ratings |
+| U045 | PvP fairness telemetry | 🟡 | SAT-ONLINE-088: PvP wins and losses by class on `/balance` (duels and open PvP together). Left: time to kill and survival, duels apart from open PvP, gear bands, latency p95, thresholds before anything ranked |
 
-**Totals:** ✅ 24 · 🟡 9 · ⏳ 3 · ❌ 2.
+**Totals:** ✅ 25 · 🟡 14 · ⏳ 3 · ❌ 3.
 
 ## Social U046–U065 (plan doc §35 [SOC])
 

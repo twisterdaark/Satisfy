@@ -77,6 +77,12 @@ test('outside town a hit takes a capped share of HP; a party or a town stops it;
     assert.ok(await b.eval(() => !!window.__G.P.dpen), 'the normal death penalty');
     await settle(a, b);
     assert.match(await toasts(b), /Grid killed you/);
+    // SAT-ONLINE-150 (plan U039): who hit B before it died, and when
+    assert.match(await toasts(b), /\d+ hits in \d+\.\d s · type \/fightlog to see who hit you/);
+    const rc = await b.eval(() => window.__GFLOG.pvp);
+    assert.equal(rc.n, 'Grid');
+    assert.deepEqual(rc.r.by.map((x) => x.handle), ['Grid'], 'only Grid hit B');
+    assert.ok(rc.r.by[0].hits >= 2 && rc.r.lines.length === rc.r.by[0].hits);
     assert.match(await toasts(a), /You killed Faker: you are an outlaw for 10 minutes/);
     assert.ok(await a.eval(() => window.__G.S.olT > Date.now()));
     assert.equal(await a.eval(() => window.__G.S.gold), goldA, 'no gold changes hands');
