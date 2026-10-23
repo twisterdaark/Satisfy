@@ -247,5 +247,6 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 |---|---|---|---|
 | U267 | Reduced motion | ✅ | SAT-ONLINE-164: a device setting in the pause menu (`satisfy_rmo`, the system's prefers-reduced-motion when unset): no camera shake, no white flash, the UI's shakes and pulses stop, particles capped (`RMOFX`, `RMOVX`); telegraphs (`drawTele`) untouched; `regression/rmotion` |
 | U269 | Armor pieces (render sprite overlays) | ✅ | SAT-ONLINE-165: helmet, armour, gloves and boots each draw their own look (`GEARL`, 48 ids), for you and the others (`gr:` fx tag); `regression/gearlook` |
+| U289 | Inn rest | ✅ | SAT-ONLINE-168: sleep at an inn and log out within 30 min; the time away (30 min to 3 days, by `wNow()`: the server's clock online) fills a rested pool, 5% of a level per 8 h, at most 1.5 levels; kills give double XP until it runs out (`innWake`, `innXP`, `S.inn`/`S.svT`/`S.rx`); a clock gone back gives nothing; `regression/innrest` |
 
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.

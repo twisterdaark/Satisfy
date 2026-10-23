@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24innrest', ver: '2.58', d: '2026-10-24',
+      ar: ["الراحة في النُزل: لو نمت في نُزل وخرجت من اللعبة في خلال 30 دقيقة، الوقت اللي بتغيبه (من 30 دقيقة لـ 3 أيام) بيديك «خبرة راحة»: 5% من الليفل كل 8 ساعات، وبحد أقصى ليفل ونص. ولحد ما تخلص، كل وحش بتقتله بيديك خبرته مرتين. بتشوفها في شباك الحالة، والوقت بيتحسب بساعة السيرفر وانت أونلاين"],
+      en: ["Inn rest: sleep at an inn and log out within 30 minutes, and the time away (30 minutes to 3 days) gives you Rested XP: 5% of a level for each 8 hours, at most 1.5 levels. Until it runs out, each monster you kill gives its XP twice. It shows in the status window, and the time is counted by the server's clock while you're online"] },
     { v: '2026-10-24barrage', ver: '2.57', d: '2026-10-24',
       ar: ["كل الإكسبي اللي بتاخده من الوحوش والكويستات زاد 1.2 مرة.",
           "السكيلات اللي بتضرب كذا ضربة ورا بعض (زي رقصات باجما): كل ضربة ليها إيفيكت لحد آخر واحدة، بدل ما الإيفيكت يخلص والصوت لسه شغال، والسيوف اللي بتنزل من السما بقت سيوف بجد.",
