@@ -112,6 +112,21 @@ test('the emulator switch: only ?emu on a local page; the public site never poin
   assert.equal(JSON.stringify(C).match(/localhost|127\.0\.0\.1|demo-|emulator/i), null, 'nothing local in the shipped config');
 });
 
+// SAT-ONLINE-148 (plan U025): ?combat names a WebSocket relay for duels, PvP and raid hits, the same way and as narrowly
+test('the combat relay switch: only ?combat=ws://… on a local page, to this computer or the local network', () => {
+  assert.equal(configAt('localhost', '?net=online&combat=ws://127.0.0.1:8787').combatRelay, 'ws://127.0.0.1:8787');
+  assert.equal(configAt('127.0.0.1', '?combat=ws://DevBox.local:9000/&net=online').combatRelay, 'ws://devbox.local:9000');
+  assert.equal(configAt('localhost', '?combat=wss://192.168.1.20').combatRelay, 'wss://192.168.1.20');
+  assert.equal(configAt('localhost', '?net=online').combatRelay, null, 'not asked for');
+  for (const h of ['twisterdaark.github.io', 'example.com', 'localhost.evil.com', '']) assert.equal(configAt(h, '?combat=ws://127.0.0.1:8787').combatRelay, null, h || 'file://');
+  for (const q of ['?combat=ws://example.com:8787', '?combat=http://127.0.0.1:8787', '?combat=ws://127.0.0.1:8787/evil', '?combat=ws://8.8.8.8', '?combat=ws://user@127.0.0.1'])
+    assert.equal(configAt('localhost', q).combatRelay, null, q);
+  // a value set before the file loads (a test) is kept
+  const file = path.join(__dirname, '..', '..', 'src/net/firebase-config.js'), prev = globalThis.Satisfy;
+  try { globalThis.Satisfy = { combatRelay: 'ws://127.0.0.1:1' }; vm.runInThisContext(fs.readFileSync(file, 'utf8'), { filename: file }); assert.equal(globalThis.Satisfy.combatRelay, 'ws://127.0.0.1:1'); }
+  finally { if (prev === undefined) delete globalThis.Satisfy; else globalThis.Satisfy = prev; }
+});
+
 test('load() connects to the emulators when the switch says so, and only then', async () => {
   const calls = [];
   const sdkE = () => {

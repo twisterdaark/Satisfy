@@ -729,6 +729,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
  'src/net/contracts.js',
  'src/net/presence.js',
  'src/net/transport-local.js',
+ 'src/net/transport-ws.js',
  'src/net/party.js',
  'src/net/duel.js',
  'src/net/pvp.js',
@@ -12341,8 +12342,16 @@ Object.assign(STR.ar,{cloudKept:'شخصيتك {n} (لفل {lv}) اللي على 
 Object.assign(STR.en,{cloudKept:'Your character {n} (Lv {lv}) on this device was kept in your account',cloudAutoDown:'Your character {n} (Lv {lv}) was loaded from your account',cloudAutoNote:'Your save goes up to your account by itself while you are signed in with Google'});
 function cloudProfile(){const C=cloudApi();if(!C||!S||S.__demo)return;cloudProfT=performance.now();C.writeProfile(S,lang).catch(e=>console.warn('profile write failed',e&&e.code));}
 function netFail(e){netSetState('ERROR');netBtn();toast(t('netFail',{e:(e&&e.code)||(e&&e.message)||'?'}),'warn');}
+/* SAT-ONLINE-148 (plan U025): duels, open PvP and raid hits through the WebSocket relay (backend/ws-relay.cjs) instead of the
+   database when Satisfy.combatRelay names one (src/net/firebase-config.js: ?combat=ws://… on a page served from this computer);
+   presence, parties, chat, trades and the rest stay in the database. The relay knows the account by its ID token. Without
+   one nothing changes, and that is the rollback. */
+function netCombat(fbtr,user){const R=Satisfy.combatRelay;if(!R||!Satisfy.transports.ws)return fbtr;
+ try{return Satisfy.transports.split(fbtr,Satisfy.transports.ws(R.replace(/\/+$/,'')+'/w/'+Satisfy.net.WORLD_ID+'/main',{bind:true,uid:user.uid,token:()=>user.getIdToken?user.getIdToken():null}));}
+ catch(e){console.warn('combat relay',e&&e.message);return fbtr;}}
+window.__GNET={combat:()=>NETTR&&NETTR.combat?NETTR.combat.state():null};
 function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(user.uid);netSetState('JOINING');netBtn();
- const tr=NETTR=Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',interest:NET_INTEREST,onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');if(up)netForce=true;netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)});
+ const tr=NETTR=netCombat(Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',interest:NET_INTEREST,onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');if(up)netForce=true;netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)}),user);
  netStart(Satisfy.presence.create({transport:tr,uid:user.uid,world:Satisfy.local.world(),now:()=>performance.now(),config:{moveHz:5,idleHz:.2,expireMs:30000}})); // cost model: docs/online/COST_MODEL.md
  netLease=Satisfy.firebase.lease(sdk,user.uid,NET.sid,netReplace);
  // the account ID can read empty while the connection is still settling after a reload, so an empty answer is asked again twice
