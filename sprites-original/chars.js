@@ -145,11 +145,11 @@ function frame(c,dir,pose,f){
   if(U){q(4,1,8,8,h);q(5,0,6,1,h);if(L>=1){q(3,2,1,end-2,h);q(12,2,1,end-2,h);}if(bk>9){const w=L>=3?10:8;q(L>=3?3:4,9,w,bk-9,h);if(H.wave)for(let y=10;y<bk;y+=2){q(2,y,1,1,h);q(13,y+1,1,1,h);}}q(6,2,1,2,hl);q(9,3,1,2,hl);
    if(H.shave){q(4,6,8,3,sd);q(5,1,6,5,h);}}
   else if(S_){q(5,1,7,3,h);q(6,0,5,1,h);q(4,2,2,5,sd);if(L>=1)q(4,4,3,end-4,h);else q(5,4,2,3,sd);if(L>=3)q(3,8,2,end-8,h);if(H.wave&&L>=2)for(let y=9;y<end;y+=2)q(2,y,1,1,h);
-   const B=H.bang;if(B==='full')q(9,4,3,2,h);else if(B==='side')q(10,4,2,1,h);else if(B==='part')q(10,4,1,1,h);else if(B==='emo'){q(9,4,3,3,h);}else if(B==='spiky'){q(11,3,2,1,h);q(12,4,1,1,h);q(10,4,1,1,h);}
+   const B=H.bang;if(c.fem&&B==='full')q(9,4,3,1,h);else if(B==='full')q(9,4,3,2,h);else if(B==='side')q(10,4,2,1,h);else if(B==='part')q(10,4,1,1,h);else if(B==='emo'){q(9,4,3,3,h);}else if(B==='spiky'){q(11,3,2,1,h);q(12,4,1,1,h);q(10,4,1,1,h);}
    q(6,2,3,1,hl);}
   else{q(4,1,8,3,h);q(5,0,6,1,h);
    if(L===0){q(4,4,1,2,sd);q(11,4,1,2,sd);}else{q(3,2,1,end-2,h);q(12,2,1,end-2,h);q(4,4,1,3,h);q(11,4,1,3,h);if(L>=2){q(2,8,1,end-8,h);q(13,8,1,end-8,h);}if(H.wave&&L>=2)for(let y=8;y<end;y+=2){q(1,y,1,1,h);q(14,y+1,1,1,h);}}
-   const B=H.bang;if(B==='full'){q(4,4,8,2,h);q(5,6,1,1,h);q(10,6,1,1,h);}else if(B==='side'){q(4,4,5,1,h);q(4,5,3,1,h);q(10,4,2,1,h);}else if(B==='part'){q(4,4,3,1,h);q(9,4,3,1,h);q(4,5,1,1,h);q(11,5,1,1,h);}
+   const B=H.bang;if(c.fem&&B==='full'){q(4,4,8,1,h);q(4,5,1,1,h);q(7,5,2,1,h);q(11,5,1,1,h);}else if(c.fem&&B==='side'){q(4,4,5,1,h);q(4,5,1,1,h);q(7,5,1,1,h);q(10,4,2,1,h);}else if(B==='full'){q(4,4,8,2,h);q(5,6,1,1,h);q(10,6,1,1,h);}else if(B==='side'){q(4,4,5,1,h);q(4,5,3,1,h);q(10,4,2,1,h);}else if(B==='part'){q(4,4,3,1,h);q(9,4,3,1,h);q(4,5,1,1,h);q(11,5,1,1,h);}
    else if(B==='emo'){q(4,4,6,1,h);q(4,5,5,1,h);q(5,6,3,2,h);q(10,4,2,1,h);}else if(B==='spiky'){q(4,4,2,1,h);q(7,4,2,1,h);q(10,4,2,1,h);q(4,5,1,1,h);q(11,5,1,1,h);q(3,1,1,2,h);q(12,1,1,2,h);q(2,2,1,1,h);q(13,2,1,1,h);}
    q(6,1,2,1,hl);q(9,2,2,1,hl);}
   const T=H.tail;if(!T)return;
