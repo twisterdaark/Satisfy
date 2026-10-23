@@ -13004,6 +13004,11 @@ function mobStart(){if(!NETTR||!NETTR.mobsPut)return;MOBN={zone:null,all:{},allN
   const from=NET.get(ev.sid);if(!from||!from.uid||isBlocked(from.uid))return;const m=mobByKey(pl.raid.slice(2));if(!m||m.dead)return;
   if(env.type==='raid.hit'){if(MOBN.host!==NET.uid)return;const k=Math.round(+pl.k);if(!(k>=1&&k<=1e6))return;mobGotHit(m,k,from.uid,0);} // an older page's hit, one message a hit
   else if(from.uid===MOBN.host&&+pl.k===0){m.mobKill=1;m.hp=0;killMon(m);m.mobKill=0;mobLife(mobKey(m));}});}
+// signed out (SAT-ONLINE-143): the shared monsters stop with the network. Left on, every monster's update read NET.uid after
+// NET was gone (a TypeError every frame once you signed out or deleted your data while in the world); the zone's listener
+// stops, the ones hidden for a host come back and the copies made from its list go, as when the host changes
+function mobStop(){if(!MOBN)return;try{if(NETTR&&NETTR.mobsOn)NETTR.mobsOn(null,()=>{});if(MOBN.put&&NETTR&&NET)NETTR.mobsPut(null,null,NET.uid);}catch(e){}MOBN=null;
+ mons=mons.filter(m=>!m.mkN||!m.dead&&Math.abs(m.x-P.x)<MOB_BX&&Math.abs(m.y-P.y)<MOB_BY);for(const m of mons){m.mkN=0;if(m.hidN){m.hidN=0;m.rt=1;}}}
 function mobHitBy(m,uid){let h=MOBN.hits.get(m);if(!h)MOBN.hits.set(m,h=new Set());h.add(uid);}
 const mobRt=m=>{const b=MT[m.type];return m.tmp?1e9:b.wb?b.wb:b.boss?90:25;}; // as killMon sets it
 // host: another player's damage (and stun) on one of its monsters, whatever way it came
@@ -13265,7 +13270,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // Sign out, or (erase) first delete everything the account stored online (doc §29 T35): cloud characters,
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
-function netStop(){if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(()=>{});}LFGK=null;try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
+function netStop(){mobStop();if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(()=>{});}LFGK=null;try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
  if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
 // what the game itself keeps online under the account, for "Delete my online data" (SAT-ONLINE-066): presence, the
 // rankings (055), this and last month's arena rating (053), the weekly lockouts (059), the group finder entry (073). A held legend is freed too.
