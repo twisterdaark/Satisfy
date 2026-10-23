@@ -11018,11 +11018,16 @@ var RNK=null;
 function rnkSeason(){const d=new Date(wNow());return 's'+d.getUTCFullYear()+String(d.getUTCMonth()+1).padStart(2,'0');}
 function rnkStart(){RNK=null;if(!(NETTR&&NETTR.kind==='firebase'&&FB&&Satisfy.firebase.arenaStore))return;RNK=Satisfy.firebase.arenaStore(FB);} // NETTR first: FB is declared below
 // both ratings as the fight starts, so each side counts the duel against the same numbers (the other may write first)
-var RNKS=null;function rnkSnap(foe){RNKS=null;if(!RNK||!NET||!foe)return;const se=rnkSeason(),p=Promise.all([RNK.get(se,NET.uid),RNK.get(se,foe)]).catch(()=>[null,null]);RNKS={foe,se,p};}
+// SAT-ONLINE-153 (plan U040): and how many rated duels this season you've had with this opponent; past PAIR_MAX the duel is
+// still a duel (wins, losses, the competition) but no longer moves the rating, so a friend can't be farmed for it
+var RNKS=null;function rnkSnap(foe){RNKS=null;if(!RNK||!NET||!foe)return;const se=rnkSeason(),p=Promise.all([RNK.get(se,NET.uid),RNK.get(se,foe),RNK.pair?RNK.pair(se,NET.uid,foe):0]).catch(()=>[null,null,0]);RNKS={foe,se,p};}
 function rnkResult(win,foe){if(!RNK||!NET||!S||S.__demo||!foe)return;const sn=RNKS&&RNKS.foe===foe?RNKS:null,se=sn?sn.se:rnkSeason();RNKS=null;
- (sn?sn.p:Promise.all([RNK.get(se,NET.uid),RNK.get(se,foe)])).then(([me,them])=>{const ra=me&&typeof me.r==='number'?me.r:1000,rb=them&&typeof them.r==='number'?them.r:1000;
+ (sn?sn.p:Promise.all([RNK.get(se,NET.uid),RNK.get(se,foe),RNK.pair?RNK.pair(se,NET.uid,foe):0])).then(([me,them,np])=>{const ra=me&&typeof me.r==='number'?me.r:1000,rb=them&&typeof them.r==='number'?them.r:1000;np=+np||0;
+  if(RNK.PAIR_MAX&&np>=RNK.PAIR_MAX){setTimeout(()=>toast(t('rnkCap',{n:RNK.PAIR_MAX}),''),900);return;}
   const r=Math.max(0,Math.min(4000,Math.round(ra+32*((win?1:0)-1/(1+Math.pow(10,(rb-ra)/400))))));
-  return RNK.put(se,NET.uid,{r,w:(me?me.w|0:0)+(win?1:0),l:(me?me.l|0:0)+(win?0:1),n:netId||S.look.n}).then(()=>setTimeout(()=>toast(t('rnkR',{r,d:(r>=ra?'+':'')+(r-ra)}),win?'good':''),900));}).catch(()=>{});}
+  return RNK.put(se,NET.uid,{r,w:(me?me.w|0:0)+(win?1:0),l:(me?me.l|0:0)+(win?0:1),n:netId||S.look.n},foe,np).then(()=>setTimeout(()=>toast(t('rnkR',{r,d:(r>=ra?'+':'')+(r-ra)})+(np+1>=RNK.PAIR_MAX?' · '+t('rnkLast',{n:RNK.PAIR_MAX}):''),win?'good':''),900));}).catch(()=>{});}
+Object.assign(STR.ar,{rnkCap:'المبارزة دي متتحسبش في التقييم: لعبت {n} مبارزات متقيمة مع اللاعب ده الموسم ده',rnkLast:'دي آخر مبارزة متقيمة مع اللاعب ده الموسم ده ({n})'});
+Object.assign(STR.en,{rnkCap:"This duel doesn't count for the rating: you've had {n} rated duels with this player this season",rnkLast:'your last rated duel with this player this season ({n})'});
 function rnkBoard(){if(!RNK||!NET)return;const se=rnkSeason(),d=new Date(wNow()),sn=d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');
  Promise.all([RNK.top(se,10),RNK.get(se,NET.uid)]).then(([top,me])=>{plOpen(false);
   const rows=top.map((x,i)=>t('rnkRow',{i:i+1,n:Satisfy.chat.clean(x.n,24)||'?',r:x.r,w:x.w,l:x.l}));
@@ -11828,7 +11833,7 @@ function netStop(){if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(()=>{});}L
 // rankings (055), this and last month's arena rating (053), the weekly lockouts (059), the group finder entry (073). A held legend is freed too.
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
  const nc=Satisfy.natcomp?Satisfy.natcomp.now(wNow()):null,ni=nc?+nc.id.slice(1):-1; /* the National Competition's last two (SAT-ONLINE-069) */
- return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
+ return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'arenaPairs/'+se(y,m)+'/'+uid,'arenaPairs/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
 /* owner 2026-10-21: no "Download my online data" and no manual Upload/Download of characters: a character moves only by
    the automatic sync (cloudAuto while playing, cloudPull on sign-in), so no copy of it can be made by hand. */
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid,lf=erase?Promise.all([legFree(uid),frFree()]):null;netStop();

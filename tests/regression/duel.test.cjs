@@ -116,6 +116,32 @@ for (const mode of ['local', 'online']) {
   });
 }
 
+// SAT-ONLINE-153 (plan U040): the same opponent can't be farmed for rating
+test("[online] after 5 rated duels with the same opponent this season, a duel still counts but doesn't move the rating", async () => {
+  const { ctx, a, b } = await pair('online');
+  try {
+    const ua = await a.eval(() => Satisfy.local.net().uid), ub = await b.eval(() => Satisfy.local.net().uid);
+    for (const [g, me, foe] of [[a, ua, ub], [b, ub, ua]]) {
+      await g.eval(([me, foe]) => {
+        window.__fakeRTDB.data.set('arenaPairs/' + window.__GR.season() + '/' + me + '/' + foe, 5);
+        window.__toastLog = []; new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.textContent) window.__toastLog.push(n.textContent); }).observe(document.getElementById('toasts'), { childList: true });
+      }, [me, foe]);
+    }
+    await startFight(a, b);
+    await b.eval(() => document.getElementById('duelYield').click());
+    await settle(a, b);
+    await until(a, () => (Satisfy.local.net().duel.last || {}).why === 'yield');
+    for (let i = 0; i < 20; i++) await settle(a, b); // the rating's notice comes a little after the result
+    for (const g of [a, b]) {
+      assert.match(await g.eval(() => window.__toastLog.join(' | ')), /This duel doesn't count for the rating: you've had 5 rated duels with this player this season/);
+      assert.equal(await g.eval(() => window.__GR.mine()), null, 'no rating written');
+      assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
+    }
+    assert.deepEqual([await a.eval(() => window.__G.S.duels), await b.eval(() => window.__G.S.duels)], [{ w: 1, l: 0 }, { w: 0, l: 1 }], 'still a win and a loss');
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
 test('N declines; Yield ends the fight; no challenges inside a town', async () => {
   const { ctx, a, b } = await pair('local');
   try {

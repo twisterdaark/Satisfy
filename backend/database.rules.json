@@ -524,13 +524,26 @@
         ".validate": "$season.matches(/^s20[0-9]{4}$/)",
         "$uid": {
           ".write": "auth != null && auth.uid === $uid",
-          ".validate": "newData.hasChildren(['r', 'w', 'l', 'n', 't']) && ((!data.exists() && newData.child('w').val() + newData.child('l').val() <= 1 && newData.child('r').val() >= 936 && newData.child('r').val() <= 1064) || (data.exists() && ((newData.child('w').val() === data.child('w').val() + 1 && newData.child('l').val() === data.child('l').val()) || (newData.child('l').val() === data.child('l').val() + 1 && newData.child('w').val() === data.child('w').val())) && newData.child('r').val() >= data.child('r').val() - 64 && newData.child('r').val() <= data.child('r').val() + 64))",
+          ".validate": "newData.hasChildren(['r', 'w', 'l', 'n', 't', 'o']) && ((!data.exists() && newData.child('w').val() + newData.child('l').val() <= 1 && newData.child('r').val() >= 936 && newData.child('r').val() <= 1064) || (data.exists() && ((newData.child('w').val() === data.child('w').val() + 1 && newData.child('l').val() === data.child('l').val()) || (newData.child('l').val() === data.child('l').val() + 1 && newData.child('w').val() === data.child('w').val())) && newData.child('r').val() >= data.child('r').val() - 64 && newData.child('r').val() <= data.child('r').val() + 64)) && ((!root.child('arenaPairs').child($season).child($uid).child(newData.child('o').val()).exists() && newData.parent().parent().parent().child('arenaPairs').child($season).child($uid).child(newData.child('o').val()).val() === 1) || newData.parent().parent().parent().child('arenaPairs').child($season).child($uid).child(newData.child('o').val()).val() === root.child('arenaPairs').child($season).child($uid).child(newData.child('o').val()).val() + 1)",
           "r": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 4000 && newData.val() % 1 === 0" },
           "w": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0" },
           "l": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0" },
           "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
           "t": { ".validate": "newData.val() === now" },
+          "o": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128 && newData.val() !== $uid" },
           "$other": { ".validate": false }
+        }
+      }
+    },
+    "arenaPairs": {
+      "$season": {
+        ".validate": "$season.matches(/^s20[0-9]{4}$/)",
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid",
+          "$foe": {
+            ".validate": "$foe !== $uid && $foe.length <= 128 && newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 5 && ((!data.exists() && newData.val() === 1) || newData.val() === data.val() + 1) && newData.parent().parent().parent().parent().child('arena').child($season).child($uid).child('o').val() === $foe && newData.parent().parent().parent().parent().child('arena').child($season).child($uid).child('t').val() === now"
+          }
         }
       }
     },
