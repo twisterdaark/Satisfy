@@ -111,12 +111,27 @@ function frame(c,dir,pose,f){
  // face: 2px eyes with a catchlight, blink and hurt squint
  if(!U){const EYE=c.eye||A.EYE||'#22181e',lid=c.sk2,CL=c.eye?shade(c.eye,.45):'#4a3c48';
   const LIP=c.lip||mixC(c.skin,'#c8506a',.35);
+  // girls (owner 2026-10-23, after a player's notes): a round, lively face in the style of anime pixel art: big two-tone
+  // eyes with a light in them, a soft blush, a small mouth; a gyaru look (c.gy) adds bold lashes and glossy lips
+  if(c.fem){const IR=c.eye||mixC(EYE,'#5a78d8',.55),IL=mixC(IR,'#ffffff',.35),DK=mixC(IR,'#140e1c',.72),HL='#ffffff',BL=mixC(c.skin,'#ff5a7a',c.gy?.5:.38),
+    LP=c.gy?(c.lip||'#ff6a9a'):LIP,bc=c.hc;
+   if(S_){if(o.blink)q(10,7,2,1,DK);else if(o.hurt){q(10,6,1,1,DK);q(11,7,1,1,DK);}
+     else{q(10,5,2,1,DK);q(10,6,2,1,IR);q(10,7,2,1,IL);q(10,6,1,1,HL);if(c.gy)q(12,5,1,1,DK);}
+     q(7,6,1,2,c.sk2);q(9,8,1,1,BL);if(!o.hurt&&!o.blink)q(11,8,1,1,LP);}
+   else{if(o.blink){q(5,7,2,1,DK);q(9,7,2,1,DK);}
+     else if(o.hurt){q(5,6,1,1,DK);q(6,7,1,1,DK);q(10,6,1,1,DK);q(9,7,1,1,DK);}
+     else{q(5,5,2,1,DK);q(9,5,2,1,DK);q(5,6,2,1,IR);q(9,6,2,1,IR);q(5,7,2,1,IL);q(9,7,2,1,IL);q(6,6,1,1,HL);q(9,6,1,1,HL);q(5,7,1,1,mixC(IL,DK,.35));q(10,7,1,1,mixC(IL,DK,.35));
+      q(4,5,1,1,DK);q(11,5,1,1,DK);if(c.gy){q(4,6,1,1,DK);q(11,6,1,1,DK);q(4,4,1,1,DK);q(11,4,1,1,DK);}}
+     q(4,8,2,1,BL);q(10,8,2,1,BL);
+     if(o.hurt)q(7,8,2,1,shade(LP,-.2));else{q(7,8,2,1,mixC(c.skin,LP,.5));if(c.gy){q(7,8,2,1,LP);q(8,8,1,1,mixC(LP,'#ffffff',.45));}}}}
+  else{
   if(S_){if(o.blink||o.hurt)q(10,7,1,1,EYE);else{q(10,6,1,2,EYE);q(10,6,1,1,CL);if(c.fem)q(11,6,1,1,EYE);}if(c.fem)q(10,5,1,1,c.hc);else q(9,5,2,1,c.hc);q(7,6,1,2,c.sk2);if(!o.hurt&&!o.blink)q(11,8,1,1,c.fem?LIP:mixC(c.skin,'#e86a6a',.25));}
   else{const bc=c.hair==='bald'&&c.beard2?c.beard2:c.hc;
    if(o.blink){q(6,7,1,1,lid);q(9,7,1,1,lid);q(6,7,1,1,EYE);q(9,7,1,1,EYE);}
    else if(o.hurt){q(5,6,2,1,EYE);q(9,6,2,1,EYE);}
    else{q(6,6,1,2,EYE);q(9,6,1,2,EYE);q(6,6,1,1,CL);q(9,6,1,1,CL);q(5,8,1,1,mixC(c.skin,'#e86a6a',c.fem?.32:.22));q(10,8,1,1,mixC(c.skin,'#e86a6a',c.fem?.32:.22));if(c.fem){q(5,6,1,1,EYE);q(10,6,1,1,EYE);}}   // lashes
    if(c.fem){q(6,5,1,1,bc);q(9,5,1,1,bc);q(7,8,2,1,o.hurt?shade(LIP,-.2):LIP);}else{q(5,5,2,1,bc);q(9,5,2,1,bc);q(7,8,2,1,o.hurt?shade(c.sk2,-.2):c.lip||c.sk2);}}
+  }
   // freckles and a scar
   if(c.frk){const F=shade(c.skin,-.28);if(S_){q(9,8,1,1,F);q(11,7,1,1,F);}else{q(5,7,1,1,F);q(10,7,1,1,F);q(4,8,1,1,F);q(11,8,1,1,F);}}
   if(c.scar){const SC=mixC(c.skin,'#8a2a2a',.5);if(S_){q(10,4,1,1,SC);q(11,5,1,1,SC);q(11,7,1,1,SC);}else{q(10,4,1,1,SC);q(10,5,1,1,SC);q(11,7,1,1,SC);}}}
