@@ -111,7 +111,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 ### Raids, online parts (plan §40)
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
-| U184 | Raid weekly lockouts | ✅ | SAT-ONLINE-059 (#92): `lockouts/{uid}/{week}/{boss}` once per account and UTC week, so changing the time zone resets nothing |
+| U184 | Raid weekly lockouts | ✅ | SAT-ONLINE-059 (#92): `lockouts/{uid}/{week}/{boss}` once per account, so changing the time zone resets nothing. Since v2.01 (owner) a boss's chest is daily: the key is the boss and the day of the UTC week (`bchKey`), and one taken on another of the account's devices says "today" (SAT-ONLINE-157, `regression/lockouts`) |
 | U185 | Raid party finder | ✅ | SAT-ONLINE-073 (#106): the group finder; stopping, signing out or dropping removes your entry |
 | U186 | Raid replay | ❌ | Needs an event log of the fight |
 | U187 | Boss encyclopedia | ✅ | B's monster encyclopedia (v1.21): a page per monster opens on the first kill, drops after 10 kills (1 for a boss), mastery after 100 |

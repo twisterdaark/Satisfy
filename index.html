@@ -1648,8 +1648,8 @@ function lockTake(b){if(!lockOnline())return Promise.resolve(true);if(LOCKS&&LOC
 const bchKey=b=>b.slice(0,13)+'_'+(Math.floor((wNow()-LOCK_E)/86400000)%7);
 function bchUsed(b){return !!(S.bch&&S.bch[b]===today());}
 function openBChest(g){if(g.open){toast(t('chestE'));SFX.deny();return;}if(g.wait)return;if(bchUsed(g.b)){g.open=1;toast(t('bcToday',{b:itN(g.b)}),'warn');SFX.deny();return;}
- if(lockOnline()){g.wait=1;lockTake(bchKey(g.b)).then(ok=>{g.wait=0;if(ok)bChestGive(g);else{g.open=1;toast(t('lockT',{b:itN(g.b),d:lockLeft()}),'warn');SFX.deny();}});return;}bChestGive(g);}
-window.__GL2={week:lockWeek,get locks(){return LOCKS},fb:()=>FB}; // tests
+ if(lockOnline()){g.wait=1;lockTake(bchKey(g.b)).then(ok=>{g.wait=0;if(ok)bChestGive(g);else{g.open=1;(S.bch||(S.bch={}))[g.b]=today();toast(t('bcToday',{b:itN(g.b)}),'warn');SFX.deny();}});return;}bChestGive(g);} /* taken today by another of the account's characters or devices: the daily chest's own words (SAT-ONLINE-157; the weekly lockT said "this week") */
+window.__GL2={week:lockWeek,key:b=>bchKey(b),get locks(){return LOCKS},fb:()=>FB}; // tests
 function bChestGive(g){g.open=1;const b=MT[g.b];(S.bch||(S.bch={}))[g.b]=today();const gd=Math.round((b.gold||100)*3*(1+gGoldB()));S.gold+=gd;loot('coin',gd,t('lootGold'),{cls:'gd'});
  addMat('mstone',2+(rand()*3|0));addMat(['ore','leather','wood'][rand()*3|0],3+(rand()*4|0));if(rand()<.5)addMat('blue',1);
  for(const [k,p] of (b.drop||[]))if(p>=1)addMat(k,Math.round(p));else if(rand()<Math.min(1,p*3))addMat(k,1);   // all its materials, in full
