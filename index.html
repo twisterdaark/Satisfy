@@ -1250,6 +1250,35 @@ const COS={
  demon:{g:0,r:4,drop:1,req:()=>false,st:{dm:.05},f:{top:'#2a0a1e',top2:'#1a0614',horns:'#3a3a44',wings:'#4a1a2a',cape:'#5a1a2a',collar:'#a8283a'}}};
 // which bosses leave which outfit, and how often (each player who kills one rolls for themselves)
 const CODROP={vamp:[/^(vlord|vb\d+|vtira|vlatina|vcray|vyet|vruson|vnoll|vmrose|vfenrir|velfin)$/,.05],dragon:[/^(trauka|wqueen|hydra)$/,.08],angel:[/^(sdrag|stiger|sbird|stort)$/,.05],demon:[/^(belial|asmo|furfu|dbus|berith)$/,.06]};
+// 25 more outfits (owner 2026-10-24: "15 outfits aren't enough, add 25"): everyday, festival, from around the world, the
+// classes' looks, and five rare ones that drop from bosses. Same rules: a rating, light stats while worn, sk: a skirt
+Object.assign(COS,{
+ school:{g:6000,r:1,st:{mpb:10},sk:1,f:{top:'#2a3a6a',top2:'#1a2850',collar:'#f4f2f8',sash:'#c82a3a',pants:'#5a4a6a',boots:'#2a2a34'}},
+ hoodie:{g:3000,r:0,st:{ms:.01},f:{top:'#b8a8e8',top2:'#9080c8',hood:'#b8a8e8',pants:'#2a2a34',boots:'#f4f2ec',sleeves:true}},
+ puffer:{g:9000,r:1,st:{hpp:.02,def:2},f:{top:'#e8f0f8',top2:'#9ab8d8',collar:'#9ab8d8',pad:'#e8f0f8',pad2:'#9ab8d8',pants:'#2a2a34',boots:'#7ad0e8'}},
+ idol:{g:20000,r:2,st:{mpb:20},sk:1,f:{top:'#ff8ab8',top2:'#e0609a',collar:'#ffffff',sash:'#ffe070',pants:'#ff8ab8',boots:'#ffffff',belt:'#ffe070'}},
+ gyaru:{g:7000,r:1,st:{as:.02},sk:1,f:{top:'#ffffff',top2:'#d8d0d8',sleeves:false,collar:'#ff6a9a',pants:'#c83a5a',boots:'#f2c14e',belt:'#f2c14e'}},
+ qipao:{g:18000,r:2,st:{dm:.01},f:{top:'#c8202a',top2:'#8a141e',robeL:true,trim:'#f2c14e',collar:'#f2c14e',sleeves:false}},
+ hanbok:{g:18000,r:2,st:{hpp:.02,mpb:10},f:{top:'#f8e070',top2:'#d8b850',robeL:true,trim:'#e85a8a',sash:'#e85a8a',sleeves:true}},
+ kimono:{g:16000,r:2,st:{mpb:15},f:{top:'#6a3a8a',top2:'#4a2a68',robeL:true,trim:'#f8c8e0',belt:'#f2c14e',sleeves:true}},
+ cowboy:{g:8000,r:1,st:{as:.02},f:{top:'#c8a878',top2:'#a08458',chest:'#6a4a2a',pad2:'#4a3018',scarf:'#c83a2a',belt:'#4a3018',pants:'#3a5a8a',boots:'#6a4a2a'}},
+ pirate:{g:10000,r:1,st:{dm:.01},f:{top:'#f4f0e4',top2:'#c8c0b0',sash:'#c8202a',cape:'#1a1a22',band:'#c8202a',pants:'#1a1a22',boots:'#2a1a10',belt:'#2a1a10'}},
+ samurai:{g:22000,r:2,st:{def:5},f:{top:'#1a2a5a',top2:'#101a3a',robe:true,pad:'#5a5a64',pad2:'#3a3a44',sash:'#c8202a',pants:'#1a1a22',boots:'#2a2a30'}},
+ paladin:{g:35000,r:2,req:()=>S.lv>=100,st:{def:6,hpp:.02},f:{top:'#f4f2ec',top2:'#c8c4bc',pad:'#f2c14e',pad2:'#b8902a',chest:'#e8e4dc',cape:'#2a4aa8',collar:'#f2c14e',boots:'#c8c4bc',belt:'#f2c14e'}},
+ miko:{g:16000,r:2,st:{mpb:20},sk:1,f:{top:'#ffffff',top2:'#d8d4cc',sash:'#c8202a',pants:'#c8202a',boots:'#f4f2ec',collar:'#c8202a',sleeves:true}},
+ witch:{g:28000,r:2,req:()=>S.lv>=80,st:{mpb:25,dm:.01},f:{top:'#1a1a22',top2:'#0e0e14',robeL:true,trim:'#9a5ad8',cape:'#2a1a3a',collar:'#9a5ad8'}},
+ pajama:{g:2500,r:0,st:{hpp:.01},f:{top:'#f8c8e0',top2:'#e0a0c0',pants:'#f8c8e0',boots:'#ffffff',catE:'#f8c8e0',sleeves:true}},
+ summer:{g:3000,r:0,st:{ms:.02},f:{top:'#f8e070',top2:'#d8c050',sleeves:false,shorts:'#3a7aca',pants:'#3a7aca',boots:'#f4f2ec'}},
+ punk:{g:9000,r:1,st:{dm:.01},f:{top:'#1a1a22',top2:'#0e0e14',collar:'#c8202a',spike:'#c8c8d0',belt:'#c8c8d0',pants:'#3a2a3a',boots:'#1a1a22',sleeves:false}},
+ scholar:{g:8000,r:1,st:{mpb:15},f:{top:'#f4f4f8',top2:'#c8c8d0',robe:true,collar:'#3a5a8a',belt:'#3a5a8a',pants:'#3a3a44',boots:'#2a2a30'}},
+ chef:{g:3000,r:0,st:{hpp:.01},f:{top:'#ffffff',top2:'#d8d8dc',apron:'#f4f2ec',apron2:'#c8c4bc',collar:'#c8202a',pants:'#2a2a34',boots:'#2a2a30'}},
+ soldier:{g:10000,r:1,st:{def:3},f:{top:'#5a6a3a',top2:'#3e4a28',pad:'#4a5a2a',pad2:'#344020',belt:'#3a2a1a',pants:'#4a5a2a',boots:'#2a2018'}},
+ healer:{g:12000,r:1,st:{hpp:.03,mpb:10},f:{top:'#ffffff',top2:'#e0dce4',robe:true,collar:'#e85a7a',sash:'#e85a7a',boots:'#f4f2ec'}},
+ frost:{g:0,r:3,drop:1,req:()=>false,st:{mpb:30,def:6},f:{top:'#a8d8f8',top2:'#6aa8d8',robeL:true,trim:'#ffffff',cape:'#d8f0ff',collar:'#ffffff',tiara:'#d8f0ff'}},
+ shadow:{g:0,r:3,drop:1,req:()=>false,st:{ms:.03,dm:.02},f:{top:'#1a1428',top2:'#0e0a18',hood:'#2a1a3a',mask:'veil',maskC:'#1a1428',sash:'#8a4ad8',pants:'#141018',boots:'#1a1428'}},
+ royal:{g:0,r:3,drop:1,req:()=>false,st:{hpp:.03,def:5},f:{top:'#5a2a8a',top2:'#3e1a68',robeL:true,trim:'#f2c14e',cape:'#c8202a',collar:'#ffffff',tiara:'#f2c14e'}},
+ emperor:{g:0,r:4,drop:1,req:()=>false,st:{dm:.04,hpp:.04},f:{top:'#f2c14e',top2:'#b8902a',pad:'#f8e070',pad2:'#b8902a',cape:'#a8141e',collar:'#ffffff',horns:'#f8e070',boots:'#5a3a10',belt:'#a8141e'}}});
+Object.assign(CODROP,{frost:[/^(yetima|vyet|wqueen)$/,.05],shadow:[/^(vtira|vlatina|vcray)$/,.04],royal:[/^(gwar|kking|bknight)$/,.04],emperor:[/^(belial|asmo|berith)$/,.03]});
 const cosB=k=>{const c=S&&S.look&&S.look.cos&&COS[S.look.cos];return c&&c.st&&c.st[k]||0;};   // the outfit you wear counts
 function cosDrop(m,b){if(!b.boss||m.tmp||m.bh)return;const own=S.cos||(S.cos={});for(const k in CODROP){const [re,p]=CODROP[k];if(own[k]||!re.test(m.type)||rand()>=p)continue;own[k]=1;SFX.legendary();vfx('loot',m.x,m.y,{rarity:COS[k].r});setTimeout(()=>toast(t('cosDrop',{c:t('cos_'+k)}),'good'),700);save(true);}}
 window.__GCOS={COS,CODROP,drop:(m,b)=>cosDrop(m,b),menu:()=>cosMenu(),pick:k=>cosPick(k),b:k=>cosB(k)}; // tests
@@ -11032,7 +11061,7 @@ Object.assign(STR.en,{"cl_madra": "Undefeated King's Descendant", "mdsheath": "U
 LGB.madra='warrior';LGN.madra='warrior';
 if(!LEGCL.includes('madra'))LEGCL.push('madra');LEGK.madra='madra';CROOT.madra='warrior';if(!P2NOT.includes('madra'))P2NOT.push('madra');
 Object.assign(SKD,{mdarmy:{cls:'madra',lv:1,mp:40,cd:30,col:'#c83a2a'},mdarmy2:{cls:'madra',lv:200,mp:60,cd:30,col:'#ff5a3a'},mdsense:{cls:'madra',lv:1,pas:1,col:'#ffe08a'}});
-SKSND.mdarmy=SKSND.mdarmy2='power';Object.assign(STR.ar,{stNumPh:'كام نقطة؟',stNumTip:'اكتب عدد النقط هنا، وبعدين دوس + جنب أي ستات يتحطوا فيه مرة واحدة'});Object.assign(STR.en,{stNumPh:'how many?',stNumTip:'Type how many points, then press + by a stat to put them all in at once'});Object.assign(STR.ar,{qNeedLv:'محتاج لفل {lv}'});Object.assign(STR.en,{qNeedLv:'Needs level {lv}'});Object.assign(STR.ar,{tstLogT:'كل الرسايل اللي فاتت (L)'});Object.assign(STR.en,{tstLogT:'Every message so far (L)'});Object.assign(STR.ar,{cdLeft:'فاضل {s}'});Object.assign(STR.en,{cdLeft:'{s} left'});
+SKSND.mdarmy=SKSND.mdarmy2='power';Object.assign(STR.ar,{stNumPh:'كام نقطة؟',stNumTip:'اكتب عدد النقط هنا، وبعدين دوس + جنب أي ستات يتحطوا فيه مرة واحدة'});Object.assign(STR.en,{stNumPh:'how many?',stNumTip:'Type how many points, then press + by a stat to put them all in at once'});Object.assign(STR.ar,{cos_school:"زي مدرسة",cos_hoodie:"هودي واسع",cos_puffer:"جاكيت منفوخ",cos_idol:"زي آيدول",cos_gyaru:"لبس جيارو",cos_qipao:"تشيباو",cos_hanbok:"هانبوك",cos_kimono:"كيمونو",cos_cowboy:"زي كاوبوي",cos_pirate:"زي قرصان",cos_samurai:"زي ساموراي",cos_paladin:"زي فارس مقدس",cos_miko:"زي كاهنة المعبد",cos_witch:"زي ساحرة",cos_pajama:"بيجامة قطة",cos_summer:"لبس صيفي",cos_punk:"لبس بانك",cos_scholar:"معطف العالِم",cos_chef:"زي طباخ",cos_soldier:"زي عسكري",cos_healer:"زي معالج",cos_frost:"زي ملكة الصقيع",cos_shadow:"زي قاتل الظل",cos_royal:"الزي الملكي",cos_emperor:"الزي الذهبي للإمبراطور"});Object.assign(STR.en,{cos_school:"School Uniform",cos_hoodie:"Oversized Hoodie",cos_puffer:"Puffer Jacket",cos_idol:"Idol Outfit",cos_gyaru:"Gyaru Outfit",cos_qipao:"Qipao",cos_hanbok:"Hanbok",cos_kimono:"Kimono",cos_cowboy:"Cowboy Outfit",cos_pirate:"Pirate Outfit",cos_samurai:"Samurai Garb",cos_paladin:"Paladin Attire",cos_miko:"Shrine Maiden Outfit",cos_witch:"Witch Robe",cos_pajama:"Cat Pajamas",cos_summer:"Summer Clothes",cos_punk:"Punk Outfit",cos_scholar:"Scholar Coat",cos_chef:"Chef Uniform",cos_soldier:"Soldier Uniform",cos_healer:"Healer Robe",cos_frost:"Frost Queen Gown",cos_shadow:"Shadow Assassin Garb",cos_royal:"Royal Attire",cos_emperor:"Golden Emperor Regalia"});Object.assign(STR.ar,{qNeedLv:'محتاج لفل {lv}'});Object.assign(STR.en,{qNeedLv:'Needs level {lv}'});Object.assign(STR.ar,{tstLogT:'كل الرسايل اللي فاتت (L)'});Object.assign(STR.en,{tstLogT:'Every message so far (L)'});Object.assign(STR.ar,{cdLeft:'فاضل {s}'});Object.assign(STR.en,{cdLeft:'{s} left'});
 const MDN=100,MDD=22; // Red Knights to destroy, days before the First Knight arrives
 const mdCand=()=>!!S&&!!S.mdq&&S.mdq.st===1;
 function mdUse(){if(!(S.mats.mdsheath>0))return;if(S.cls==='madra')return toast(t('rbAlready'),'warn');const own=lgOwn('madra');if(own)return toast(t('lgTaken',{n:own.n}),'warn');
