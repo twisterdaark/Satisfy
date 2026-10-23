@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24polls', ver: '2.68', d: '2026-10-24',
+      ar: ["استفتاءات المجتمع: لما يكون فيه سؤال عن حفلة أو حدث جاي، في لوحة أي مدينة (وانت أونلاين) بتلاقي «📊 استفتاء المجتمع» بالإجابات وعدد الأصوات لحد دلوقتي. كل حساب يصوّت مرة واحدة، ومحدش يقدر يعرف مين صوّت لإيه: الأرقام بس اللي بتبان"],
+      en: ["Community polls: when there's a question about a coming festival or event, every town's board (online) shows \"📊 Community poll\" with the answers and the votes so far. Each account votes once, and nobody can see who voted for what: only the counts show"] },
     { v: '2026-10-24nearby', ver: '2.67', d: '2026-10-24',
       ar: ["قايمة اللاعيبة (O) بقت مترتبة بالأقرب: انت الأول، وبعدين اللي على نفس الخريطة ومعاك في نفس المكان من الأقرب للأبعد وجنب كل واحد بُعده بالمربعات، وبعدين الباقيين بالاسم."],
       en: ["The players list (O) puts the nearest first: you, then the players on your map and in the same place, closest first with how far each one is in tiles, then everyone else by name."] },

@@ -724,6 +724,29 @@
   // SAT-ONLINE-079: announcements from the game's owner. admins/{uid} = true is set by the owner in the Firebase console
   // (the rules let nobody write it); announce/{id} = {k: 'msg' | 'maint', ar, en, at? (maintenance time), by, t}, written only
   // by an admin, read by every signed-in player
+  // SAT-ONLINE-173 (plan U306): community polls. polls/{id} = {q: {ar, en}, o: {0..3: {ar, en}}, end, by, t}, written by an
+  // admin; pollVotes/{id}/{uid} = the option ('0' to '3'), written once by that account and read by it alone; pollTally/{id}/{option}
+  // = the count, raised by one in the same write as a vote (the rules check both), read by everyone. Nobody else sees
+  // who voted for what.
+  function pollStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    var on = function (ref, cb) { var off = null; try { off = D.onValue(ref, function (s) { cb(s.val() || {}); }, function () { cb({}); }); } catch (e) { cb({}); } return function () { try { if (off) off(); } catch (e) { /* ignore */ } }; };
+    return {
+      watch: function (cb) { var ref = at('polls'); return on(D.limitToLast ? D.query(ref, D.limitToLast(3)) : ref, cb); },
+      tally: function (id, cb) { return on(at('pollTally/' + id), cb); },
+      mine: function (id, uid) { return D.get(at('pollVotes/' + id + '/' + uid)).then(function (s) { var v = s.val(); return v === null || v === undefined ? null : v; }, function () { return null; }); },
+      // the vote and the count go together: if someone voted in between, the count is read again and it is tried again
+      vote: function (id, uid, i) {
+        var go = function (n) { return D.get(at('pollTally/' + id + '/' + i)).then(function (s) { var u = {}; u['pollVotes/' + id + '/' + uid] = String(i); u['pollTally/' + id + '/' + i] = (s.val() | 0) + 1; return D.update(D.ref(db), u).catch(function (e) { if (n > 0) return go(n - 1); throw e; }); }); };
+        return go(3);
+      },
+      post: function (v) {
+        var o = {}; v.o.forEach(function (x, i) { o[i] = { ar: String(x).slice(0, 60), en: String(x).slice(0, 60) }; });
+        return D.push(at('polls'), { q: { ar: String(v.q).slice(0, 120), en: String(v.q).slice(0, 120) }, o: o, end: v.end, by: v.by, t: D.serverTimestamp() });
+      },
+    };
+  }
+
   function announceStore(sdk) {
     var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
     return {
@@ -873,6 +896,7 @@
     fishFestStore: fishFestStore,
     repairStore: repairStore,
     announceStore: announceStore,
+    pollStore: pollStore,
     modStore: modStore,
     natStore: natStore,
     SDK_VERSION: SDK_VERSION,
