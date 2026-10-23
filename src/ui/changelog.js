@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24class2', ver: '2.54', d: '2026-10-24',
+      ar: ["الكلاس التاني، زي هوروي في الرواية، ونادر جدًا جدًا: خمس كلاسات تانية بس، وكل واحدة منهم ليها صاحب واحد بس في العالم كله، وكل شخصية تاخد واحدة بس. كل واحدة مستخبية ورا شرط محدش بيتقاله عليه",
+          "الكلاس التاني مش بيشيل كلاسك الأولاني: سكيلاتك فاضلة، والكلاس التاني بيزود سكيلين وميزة، و+2 نقطة ستات كل ليفل (12 بدل 10 زي الرواية)، وبيظهر في شباك الحالة «الأولاني (التاني)»",
+          "شريك رسول العدالة (بتاع هوروي)، والبابا (بتاع داميان)، وتلميذ ملك الظلال (بتاع فيكر)، والقاذف اللي مبيرحمش (بتاعة يوفيمينا)، والمزارع الحديدي. وأول واحد في العالم ياخد كلاس تاني بياخد تايتل «أول واحد يحصل على كلاس تاني»، والعالم كله بيسمع إن حد مجهول خده"],
+      en: ["The Second Class, as Huroi had in the novel, and very, very rare: only five second classes, each held by one character in the whole world, and one a character. Each hides behind a condition nobody is told",
+          "A second class doesn't take your first one away: your skills stay, and the second adds two skills and a bonus, plus 2 stat points every level (12 instead of 10, as in the novel). The status window shows \"First (Second)\"",
+          "Apostle of Justice's Partner (Huroi's), Pope (Damian's), One Who Learns from the Shadow King (Faker's), Merciless Bomber (Euphemina's) and Steel Farmer. The first character in the world with a second class gets the title First to Obtain a Second Class, and the world hears that someone unknown got one"] },
     { v: '2026-10-23monsee', ver: '2.53', d: '2026-10-23',
       ar: ["مصاصين الدماء النبلا، وإيرلات الدم من المدينة 6 لتحت، وماري روز، وفنرير كانوا مختفيين. دلوقتي بيبانوا بشكلهم، واتراجعت كل الوحوش التانية ومفيش حد ناقص.",
           "كويستات \"اقتل وصحتك أقل من 50%\": لو لفلك أعلى من الوحش بـ 20 أو أكتر، شرط الصحة بيتلغى لأنه مستحيل يوصلك ليها، والكويست بيقول كده.",
