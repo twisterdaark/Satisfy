@@ -10741,7 +10741,7 @@ function lootStart(type){if(!PARTY||!PARTY.isLeader()||LOOTL||!MT[type])return;c
 function lootOffer(o){lootSeen=lootSeen||{};lootSeen[o.id]={it:o.it,r:o.r};if(performance.now()-lootFought>LROLL.FOUGHT_MS)return;LOOTO=o;lootUI();SFX.notice();}
 function lootAnswer(c){if(!LOOTO)return;const o=LOOTO;LOOTO=null;lootUI();if(o.from===NET.uid){if(LOOTL&&LOOTL.id===o.id)LOOTL.ch.set(NET.uid,c);}else if(NET)NET.send('raid.state',{to:o.from,raid:'c|'+o.id,k:c});}
 function lootUI(){const W=$('lootW');if(!W)return;W.hidden=!LOOTO;if(LOOTO)$('lootT').textContent=t('lootQ',{it:lootName(LOOTO.it,LOOTO.r),s:Math.max(0,Math.ceil((LOOTO.until-performance.now())/1000))});}
-function lootWon(id,best){const o=lootSeen&&lootSeen[id];if(!o)return;const it=lootName(o.it,o.r);
+function lootWon(id,best){const o=lootSeen&&lootSeen[id];if(!o)return;delete lootSeen[id];/* one result a roll, however often it is announced (plan U058) */const it=lootName(o.it,o.r);
  if(!best){toast(t('lootNone',{it}));return;}const a={it,c:t('lootC'+best.c),v:best.v};
  if(best.uid===NET.uid&&S&&!S.__demo){const x=mkItem(o.it,o.r);S.items.push(x);loot('it'+x.uid,1,inm(x),{ic:x.id,r:o.r});SFX.legendary();toast(t('lootWin',a),'good');hudDirty=true;save(true);}
  else toast(t('lootGot',{...a,n:lootWho(best.uid)}),'good');}
