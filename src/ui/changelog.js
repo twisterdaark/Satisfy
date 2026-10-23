@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23vanity', ver: '2.46', d: '2026-10-23',
+      ar: ["15 زي جديد عند ليلى الستايلست بيتلبسوا فوق الأرمور: كاجوال، بحّار، خادمة، صياد، صحرا، شتوي، يوكاتا، فستان سهرة، بدلة سهرة، عباية ساحر، نينجا، وأربعة نادرين.",
+          "كل زي ليه ندرة وستاتس خفيفة (سرعة، مانا، HP%، دفاع، ضرر، سرعة ضرب) بتشتغل وانت لابسه بس.",
+          "الأزياء النادرة مش بتتباع، بتوقع من البوسات: زي سيد مصاصي الدماء من أسياد مدنهم، وزي قاتل التنانين من تراوكا وملكة الوايفرن والهيدرا، وزي الملاك من الحيوانات الأربعة المقدسة في الشرق، وزي الشيطان من الشياطين الكبار."],
+      en: ["15 new outfits at Layla the stylist, worn over your armour: casual, sailor, maid, hunter, desert, winter, yukata, evening gown, tuxedo, mage robe, ninja, and four rare ones.",
+          "Every outfit has a rarity and light stats (speed, mana, HP%, defence, damage, attack speed) that count only while you wear it.",
+          "The rare outfits are not sold; they drop from bosses: the Vampire Lord Attire from the masters of the vampire cities, the Dragon Slayer Garb from Trauka, the Wyvern Queen and the Hydra, the Angel Attire from the four sacred beasts of the East, and the Demon Attire from the great demons."] },
     { v: '2026-10-23earring', ver: '2.45', d: '2026-10-23',
       ar: ["حلق بستاتس: خانة جديدة للحلق في شاشة الإكويبمنت (U)، وكل حلق ليه تقييم وستاتس زي الخواتم والعقود.",
           "حلق حديد (مانا + HP%) بيتباع عند الأرمورر في ونستون وسلاحجي باتريان، وبتصنعه على السندان بعد مهمة خان. حلق ميثريل (مانا + ضرر) من مستوى حدادة 5.",
