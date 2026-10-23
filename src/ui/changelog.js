@@ -7,6 +7,23 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23passives', ver: '2.29', d: '2026-10-23',
+      ar: ["كل الباسيفز بقت بتعلى لفل: مع كل وحش تقتله (البوس بـ6) وكل مرة الباسيف يشتغل. كل لفل بيزوّد تأثيره 5% (×1.45 في لفل 10)، واللي تأثيره قاعدة ثابتة (زي إنك تشوف الشياطين أو تمسك أي سلاح) كل لفل بيديك +1% ضرر و+1% دفاع.",
+          "وصف كل باسيف بقى بيقول إنه شغال لوحده من غير ما تدوس عليه، وبيعلى إزاي، وكل لفل بيزوّد إيه ودلوقتي وصل لكام.",
+          "تأمل السحر (براهام) زي الرواية: السحر اللي جاي عليك بيتكسر بفرصة 50% مرة كل 3 ثواني، و4% بيرتد على اللي رماه، وتعويذاتك 30% تطلع أقوى. النسب بتزيد مع اللفل، وبتطلعلك كلمة لما يشتغل.",
+          "ترتيب الثروة بقى بيحسب فلوس المخزن مع اللي معاك، أوفلاين وأونلاين.",
+          "ترتيب الأساطير بقى فيه كل الكلاسات الأسطورية، مين خد كل واحدة، وفاضل كام محدش خدها.",
+          "عند بيت النمل تختار تنزل المدينة 15 أو أي مدينة خلصتها أو المدينة اللي عليها الدور. وفي كل مدينة خلصتها فيه حجر رجوع أحمر جنب طريق الطلوع بيطلعك فوق أو يوديك لمدينة تانية خلصتها. وبيت النمل بقى بيظهر على الخريطة بعد أول مرة.",
+          "زرار 📜 بقى بنفس مقاس زرار التصغير بالظبط، وبينهم مسافة صغيرة.",
+          "مهارات مادرا بقت تستاهل: Massacre Sword بقت 30 ضربة بـ1500% في المجموع كل 30 ثانية، وBlockade Sword بـ300% مع الحصار كل دقيقة ونص، وCrushing Sword 3 موجات كل واحدة 600% كل دقيقة ونص. وكلهم على كل الأعداء اللي شايفهم حواليك. ومهارات كلاس وريث مادرا بقت 500% و800%."],
+      en: ["Every passive levels up now: with each monster you kill (a boss counts 6) and each time it fires. A level adds 5% to its effect (x1.45 at Lv 10); one whose effect is a fixed rule (seeing demons, any weapon) gives +1% damage and +1% defence a level instead.",
+          "Each passive's description says it works by itself with nothing to press, how it levels, what each level adds and where it is now.",
+          "Magic Contemplation (Braham) as in the novel: a spell flying at you is broken half the time, at most once every 3 s, 4% of the time it flies back at its caster, and your spells have a 30% chance to come out stronger. The chances grow with its level, and a word shows when it fires.",
+          "The wealth ranking counts the gold in your bank with what you carry, offline and online.",
+          "The legends ranking lists every legendary class, who holds each, and how many are still unclaimed.",
+          "At the ant hill you choose City 15, any city you cleared, or the next one still held. In every city you cleared a red return stone beside the way up takes you to the surface or to another cleared city. The ant hill shows on your map after your first visit.",
+          "The 📜 button is exactly the size of the minimise button, with a small gap between them.",
+          "Madra's skills are worth using: the Massacre Sword is 30 blows for 1500% in all every 30 s, the Blockade Sword 300% with its blockade every 90 s, the Crushing Sword three waves of 600% each every 90 s, all on every enemy in sight around you. Madra's Descendant's own skills now hit for 500% and 800%."] },
     { v: '2026-10-23mana', ver: '2.28', d: '2026-10-23',
       ar: ["المانا بقت زي الرواية: كل نقطة ذكاء بـ3 مانا، ومن لفل 200 (الصحوة التانية) بـ6. يعني 2500 ذكاء بقوا حوالي 15,000 مانا بدل 7,500، غير العتاد.",
           "تكلفة السكيل مبقتش نسبة من المانا بتاعتك، بقت على قد لفلك (زي ما Linked Kill Wave بتاخد 2,000 من 70,000 عند جريد)، فالذكاء الزيادة بيديك ضربات أكتر. السكيل اللي كانت بتاخد 6,500 بقت حوالي 4,300 في لفل 450.",
