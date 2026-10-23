@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23hairgloss', ver: '2.44', d: '2026-10-23',
+      ar: ["لمعة الشعر فوق الراس بقت درجة أفتح من لون الشعر بدل أبيض، فعلى الشعر الأشقر والفاتح مبقتش باينة كأنها صلعة، وأطراف الشعر الفاتح بتغمق سنة بدل ما تصفر."],
+      en: ["The shine on top of the hair is now a lighter shade of the hair instead of near white, so it no longer looks like a bald patch on blonde or light hair, and light hair's tips go a touch darker instead of yellow."] },
     { v: '2026-10-23hairgap', ver: '2.43', d: '2026-10-23',
       ar: ["مفيش صلعة في الشعر تاني: الفتحات الصغيرة اللي كانت في الغرة تحت التاج اتقفلت في كل التسريحات، والفرق في النص بقى خط أغمق في الشعر مش جلد.",
           "المنظر الجانبي: الشعر بقى مغطي ورا الراس وفوق الودن بدل شريط رفيع، فالوش من الجنب مبقاش باين كأنه أصلع."],

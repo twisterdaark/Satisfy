@@ -317,7 +317,7 @@ function hairFx(g,c,back,HT){
  const id=g.getImageData(0,0,FW,FH),d=id.data,H=hx(c.hc),HL=hx(c.hl||c.hc),eq=(i,C)=>d[i+3]>0&&d[i]===C[0]&&d[i+1]===C[1]&&d[i+2]===C[2];
  const isH=(x,y)=>x>=0&&y>=0&&x<FW&&y<FH&&(eq((y*FW+x)*4,H)||eq((y*FW+x)*4,HL));
  const put=(x,y,C)=>{const i=(y*FW+x)*4;d[i]=C[0];d[i+1]=C[1];d[i+2]=C[2];};
- const SK=hx(c.skin),isS=(x,y)=>x>=0&&y>=0&&x<FW&&y<FH&&eq((y*FW+x)*4,SK),ST=hx(shade(c.hc,-.24)),TP=hx(shade(c.hc,-.15)),ED=hx(shade(c.hc,-.12)),RG=hx(mixC(c.hl||c.hc,'#ffffff',.18)),GL=hx(mixC(c.hl||c.hc,'#ffffff',.55));
+ const SK=hx(c.skin),isS=(x,y)=>x>=0&&y>=0&&x<FW&&y<FH&&eq((y*FW+x)*4,SK),ST=hx(shade(c.hc,-.24)),TP=hx(shade(c.hc,-.15)),ED=hx(shade(c.hc,-.12)),RG=hx(mixC(c.hl||c.hc,'#ffffff',.18)),GL=hx(mixC(c.hl||c.hc,'#ffffff',.28));   // the gloss stays a lighter hair colour (near white read as scalp on blonde)
  const top=[];for(let x=0;x<FW;x++){top[x]=-1;for(let y=0;y<12;y++)if(isH(x,y)){top[x]=y;break;}}
  const ch=[];let ft=-1;for(let y=0;y<FH;y++)if(eq((y*FW+7)*4,SK)||eq((y*FW+8)*4,SK)){ft=y;break;}
  for(let y=0;y<FH-3;y++)for(let x=0;x<FW;x++){const i=(y*FW+x)*4;if(!eq(i,H))continue;if(c.beard&&ft>=0&&y>=ft+3&&x>=3&&x<=12)continue;   // leave a beard as it is
@@ -329,7 +329,7 @@ function hairFx(g,c,back,HT){
   else if(!dn&&up&&y>8)ch.push([x,y,TP]);
   else if(up&&dn&&y>=8&&(x*5+(y>>2))%3===0)ch.push([x,y,ST]);}
  ch.forEach(([x,y,C])=>{if(C)put(x,y,C);});
- if(HT&&HT.tip){const TC=hx(mixC(c.hl||c.hc,'#fff4e0',.45));for(let y=0;y<FH;y++)for(let x=0;x<FW;x++){const t=top[x];if(t>=0&&y>=t+(back?10:9)&&eq((y*FW+x)*4,H))put(x,y,TC);}}   // lighter ends
+ if(HT&&HT.tip){const [r0,g0,b0]=hx(c.hc),lt=(r0*.3+g0*.59+b0*.11)>165,TC=hx(lt?shade(c.hc,-.1):mixC(c.hl||c.hc,'#ffffff',.3));for(let y=0;y<FH;y++)for(let x=0;x<FW;x++){const t=top[x];if(t>=0&&y>=t+(back?10:9)&&eq((y*FW+x)*4,H))put(x,y,TC);}}   // lighter ends
  g.putImageData(id,0,0);}
 
 // Post-pass: rim light on the top edge, then a selective outline (dark tint of the neighbour on
