@@ -5744,7 +5744,7 @@ const itLvr=i=>((rcById(i.id)||{}).lvr||i.lvr||0);
 const lvrOk=n=>!n||S.lv>=n||S.cls==='pagma'||lkGear();
 function gearFit(){if(!S||!S.items)return;const ok=i=>lvrOk(itLvr(i));const w=S.items.find(i=>i.uid===S.eqW);if(w&&!ok(w)){const b=S.items.filter(i=>i.slot==='w'&&ok(i)).sort((a,b)=>(b.atk||0)-(a.atk||0))[0];S.eqW=b?b.uid:0;}
  const a=S.items.find(i=>i.uid===S.eqA);if(a&&!ok(a))S.eqA=0;for(const k in S.eq||{}){const i=S.items.find(i=>i.uid===S.eq[k]);if(i&&!ok(i)||!ringOpen(k))delete S.eq[k];}}
-function equip0(i){const rc=rcById(i.id);if(rc&&rc.lvr&&!lvrOk(rc.lvr)){toast(t('needLv',{n:rc.lvr}),'warn');SFX.deny();return false;}if(i.slot==='w')S.eqW=i.uid;else if(i.slot==='a')S.eqA=i.uid;else{S.eq=S.eq||{};if(Object.values(S.eq).includes(i.uid))return;let sl=i.slot;if(sl==='k'&&S.eq.k&&RINGS.has(i.id)){const f=RSL.find(k=>!S.eq[k]&&ringOpen(k));if(f)sl=f;}S.eq[sl]=i.uid;}}
+function equip0(i){const lr=itLvr(i);if(lr&&!lvrOk(lr)){toast(t('needLv',{n:lr}),'warn');SFX.deny();return false;}if(i.slot==='w')S.eqW=i.uid;else if(i.slot==='a')S.eqA=i.uid;else{S.eq=S.eq||{};if(Object.values(S.eq).includes(i.uid))return;let sl=i.slot;if(sl==='k'&&S.eq.k&&RINGS.has(i.id)){const f=RSL.find(k=>!S.eq[k]&&ringOpen(k));if(f)sl=f;}S.eq[sl]=i.uid;}}
 const durOf=i=>i.dur===undefined?100:i.dur,durF=i=>durOf(i)<=0?.3:1,enF=i=>1+.06*(i.en||0);
 const iAtk=i=>Math.round((i.atk||0)*enF(i)*durF(i)),iDef=i=>Math.round((i.def||0)*enF(i)*durF(i));
 function gearSum(k){let v=0;for(const sl of GEAR){const i=eqIt(sl);if(i&&i[k])v+=i[k]*durF(i)*enF(i);if(i&&i.gem&&GEMS[i.gem]&&GEMS[i.gem][k])v+=GEMS[i.gem][k];}
@@ -7298,7 +7298,7 @@ function finishMG(){const rc=MG.rc;
  let it=null;
  if(rc.slot==='x'){S.arrows[r]++;S.arrowsMade++;}
  else{it=mkItem(rc.id,r,1);if(rc.cre)creApply(it,rc.cre,r);breathFeat(it);if(pasOn('focus'))skUse('focus');if(pasOn('scraft'))skUse('scraft');if(pasOn('stemp'))skUse('stemp',1);if(P){vfx('forge',P.x,P.y-8);vfx('loot',P.x,P.y,{rarity:r});}
-  S.items.push(it);if(rc.slot==='w'&&it.atk>weapon().atk&&(WSH[it.id]||{}).k===weapKind())S.eqW=it.uid;if(rc.slot==='a'&&(!armorIt()||it.def>armorIt().def))S.eqA=it.uid;if(GEAR.includes(rc.slot)&&rc.slot!=='a'&&!eqIt(rc.slot))equip(it);}
+  S.items.push(it);const lvOkIt=lvrOk(itLvr(it));if(lvOkIt&&rc.slot==='w'&&it.atk>weapon().atk&&(WSH[it.id]||{}).k===weapKind())S.eqW=it.uid;if(lvOkIt&&rc.slot==='a'&&(!armorIt()||it.def>armorIt().def))S.eqA=it.uid;if(lvOkIt&&GEAR.includes(rc.slot)&&rc.slot!=='a'&&!eqIt(rc.slot))equip(it);}
  S.made[rc.id]=(S.made[rc.id]||0)+1;undCraft(rc);qEvent('craft',rc.id,r,rc.slot);
  if(isSm()&&rc.slot!=='x'&&CREPC[r])setTimeout(()=>crepAdd(CREPC[r]),1200);
  let bonus='';const gk=rc.id+r;if(isSm()&&rc.slot!=='x'&&STATB[r]&&!S.got[gk]){S.got[gk]=1;S.bonus+=STATB[r];bonus=t('bonusGot',{n:STATB[r]});}
@@ -8890,7 +8890,7 @@ UI.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  if(b.dataset.town){if(mode==='dead')respawn(b.dataset.town);return;}
  if(b.dataset.inv!==undefined){if(INVDR&&INVDR.moved)return;invClick(+b.dataset.inv,e.shiftKey);return;}if(b.id==='invTrash'){INVX=INVX==='trash'?null:'trash';SFX.click();renderInv();return;}if(b.dataset.pot){drink(b.dataset.pot);return;}
  if(b.dataset.eq){openPick(b.dataset.eq);$('tip').classList.remove('on');return;}
- if(b.dataset.pick!==undefined){const sl=$('eqPick').dataset.sl,u=+b.dataset.pick;if(sl==='w'&&u)S.eqW=u;else if(sl==='a')S.eqA=u;else if(sl!=='w'){S.eq=S.eq||{};for(const k in S.eq)if(S.eq[k]===u&&k!==sl)delete S.eq[k];S.eq[sl]=u;}SFX.click();$('eqPick').hidden=true;renderEquip();hudDirty=true;$('tip').classList.remove('on');return;}
+ if(b.dataset.pick!==undefined){const sl=$('eqPick').dataset.sl,u=+b.dataset.pick,pi=u&&S.items.find(i=>i.uid===u);if(pi&&!lvrOk(itLvr(pi))){toast(t('needLv',{n:itLvr(pi)}),'warn');SFX.deny();return;}if(sl==='w'&&u)S.eqW=u;else if(sl==='a')S.eqA=u;else if(sl!=='w'){S.eq=S.eq||{};for(const k in S.eq)if(S.eq[k]===u&&k!==sl)delete S.eq[k];S.eq[sl]=u;}SFX.click();$('eqPick').hidden=true;renderEquip();hudDirty=true;$('tip').classList.remove('on');return;}
  if(b.dataset.sk!==undefined){if(mode==='play')useSlot(+b.dataset.sk);return;}
  if(b.dataset.isk!==undefined){if(mode==='play')useISlot(+b.dataset.isk);return;}
  if(b.dataset.rb!==undefined){REB=b.dataset.rb;RBQ=null;SFX.click();renderRebind();return;}
