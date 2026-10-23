@@ -25,7 +25,7 @@ body{color:var(--ink)}
 .head{font-family:var(--head);font-weight:400;color:#dff6ff;line-height:1.2;text-shadow:0 0 calc(var(--u)*.6) rgba(143,216,255,.55)}
 [hidden]{display:none!important}
 button{font:inherit;color:var(--ink);background:linear-gradient(180deg,rgba(40,90,160,.55),rgba(20,50,100,.55));border:1px solid var(--line);border-radius:2px;padding:calc(var(--u)*.5) calc(var(--u)*1.4);cursor:pointer;pointer-events:auto;transition:transform .14s cubic-bezier(.3,1.6,.5,1),box-shadow .14s,background .14s}
-button:hover,button:focus-visible{background:linear-gradient(180deg,rgba(90,160,240,.7),rgba(40,90,170,.7));outline:none;box-shadow:0 0 calc(var(--u)*1) rgba(143,216,255,.75);transform:translateY(-1px) scale(1.04)}
+button:hover,button:focus-visible{background:linear-gradient(180deg,rgba(90,160,240,.7),rgba(40,90,170,.7));outline:none;box-shadow:0 0 calc(var(--u)*1) rgba(143,216,255,.75);filter:brightness(1.12)}
 button:active{transform:scale(.96)}
 button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,70,.5)}
 /* HUD */
@@ -669,18 +669,26 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
       <div class="logo"><div class="l2" data-i18n="paused"></div></div>
       <div class="menu">
         <button data-act="resume" data-i18n="resume"></button>
-        <button data-act="unstuck" data-i18n="unstuck"></button>
-        <button data-act="photo" data-i18n="photoB"></button>
-        <button data-act="guiReset" data-i18n="guiReset"></button>
-        <button data-act="controls" data-i18n="controls"></button>
+        <button data-act="settings" data-i18n="setB"></button>
         <button data-act="updLog" data-i18n="updLogB"></button>
+        <button data-act="unstuck" data-i18n="unstuck"></button>
+        <button data-act="quit" data-i18n="saveQuit"></button>
+      </div>
+    </div>
+    <!-- owner 2026-10-24: Settings, out of the pause menu -->
+    <div id="setScreen" class="screen" hidden>
+      <div class="logo"><div class="l2" data-i18n="setB"></div></div>
+      <div class="menu">
+        <button data-act="controls" data-i18n="controls"></button>
+        <button data-act="sound" data-i18n="soundB"></button>
         <button data-act="swapLang" data-i18n="langSwap"></button>
         <button data-act="menuSize" id="mzB"></button>
         <button data-act="rmotion" id="rmB"></button>
-        <button data-act="sound" data-i18n="soundB"></button>
+        <button data-act="guiReset" data-i18n="guiReset"></button>
+        <button data-act="photo" data-i18n="photoB"></button>
         <button data-act="tLay" class="tOnly" data-i18n="kLay"></button>
         <button data-act="fullscr" class="fsBtn" data-i18n="fullB" hidden></button>
-        <button data-act="quit" data-i18n="saveQuit"></button>
+        <button data-act="setBack" data-i18n="back"></button>
       </div>
     </div>
 
@@ -6149,7 +6157,7 @@ function onKey(c){if(c==="Escape"&&!$("updLog").hidden){updLogClose();return;}
  else if(mode==='qd'){if(c==='Escape'||c==='Tab')closeQD();}
  else if(mode==='status'){if(c==='Escape'||c==='KeyC')closeStatus();}
  else if(mode==='guild'){if(c==='Escape'||c==='KeyG')closeGuildW();}
- else if(mode==='pause'){if(c==='Escape')resume();}
+ else if(mode==='pause'){if(c==='Escape'){if(SETON)act('setBack');else resume();}}
  else if(mode==='controls'){if(c==='Escape')act('back');}
  else if(mode==='sound'){if(c==='Escape')act('sndBack');}
 }
@@ -6304,7 +6312,7 @@ Object.assign(STR.en,{legNoDie:"A legend doesn't die easily. The life force is f
 // every legend resists status conditions (novel ch 182, 297, 778): stuns, paralysis and chills do not take
 function legResist(){if(!isLeg()&&!saImm()&&!mdCand())return false;if(gTime>(P.resT||0)){P.resT=gTime+1.5;num(P.x,P.y-30,t('legResist'),'#ffe08a',false);}return true;}
 Object.assign(STR.ar,{legResist:'[قاومت.]'});Object.assign(STR.en,{legResist:'[You have resisted.]'});
-function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;mdDie();if(BHR)bhDied();['inv','statusW','eqW','logW','mapW','qdW','forge','pauseScreen','soundScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
+function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;mdDie();if(BHR)bhDied();['inv','statusW','eqW','logW','mapW','qdW','forge','pauseScreen','setScreen','soundScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});SETON=0;mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
 // owner 2026-10-22: 1 to 172 took an hour, then 50 hours to 100 was far too long: now about 10 hours of own-level hunting to 100 and 14 to 200, before quests and bonuses (no per-kill cap)
 // owner 2026-10-23 ("I kill a Lv 340 at 339 and take 20% of a level; make it slower"): past level 100 each level asks 2% more
 // for every level above 100, and each advancement passed (101, 201...) another 15%. A foe of your level now gives about 2-3%
@@ -8770,7 +8778,7 @@ function respawn(k){if(BHR&&BHR.dead)return bhRespawn();const bn=!k&&bindNpc(),b
  mons.forEach(m=>{if(MT[m.type].boss&&!m.dead&&!(MOBN&&MOBN.host&&mobOk(m))){m.hp=m.max;m.x=m.sx;m.y=m.sy;}});if(S.raid){S.raid=0;allies=[];}hudDirty=true;}
 
 /* ---------------- menus ---------------- */
-function showOnly(id){['langScreen','titleScreen','pauseScreen','soundScreen','controlsScreen','end','create'].forEach(s=>$(s).hidden=s!==id);if(id!=='titleScreen'&&id!=='pauseScreen')$('updLog').hidden=true;else if(id==='titleScreen')updLogAuto();}
+function showOnly(id){['langScreen','titleScreen','pauseScreen','setScreen','soundScreen','controlsScreen','end','create'].forEach(s=>$(s).hidden=s!==id);if(id!=='titleScreen'&&id!=='pauseScreen')$('updLog').hidden=true;else if(id==='titleScreen')updLogAuto();}
 // update log (owner request): src/ui/changelog.js; opens by itself once after an update, newest entry first
 const UPDL=Satisfy.CHANGELOG||[];
 // the version on the title screen (owner 2026-10-19: raise it with every update) is the newest entry's `ver` in the log
@@ -9183,13 +9191,15 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  const up=()=>{MV.drag=null;c.style.cursor='';};c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);
  c.addEventListener('dblclick',e=>{const [x,y]=pos(e);mapZoom(2,x,y);});})();
 function openPause(){mode='pause';showOnly('pauseScreen');$('hint').hidden=true;setTimeout(()=>$('pauseScreen').querySelector('button').focus(),0);}
-function resume(){showOnly(null);mode='play';stage.focus();}
+function resume(){SETON=0;showOnly(null);mode='play';stage.focus();}
 function act(a){
  if(a==='new')startGame(false);else if(a==='cont')startGame(true);
- else if(a==='controls'){ctrlBack=mode==='pause'?'pauseScreen':'titleScreen';mode='controls';REB=null;renderRebind();showOnly('controlsScreen');}
- else if(a==='back'){showOnly(ctrlBack);mode=ctrlBack==='pauseScreen'?'pause':'title';}
+ else if(a==='controls'){ctrlBack=mode==='pause'?(SETON?'setScreen':'pauseScreen'):'titleScreen';mode='controls';REB=null;renderRebind();showOnly('controlsScreen');}
+ else if(a==='back'){showOnly(ctrlBack);mode=ctrlBack==='pauseScreen'||ctrlBack==='setScreen'?'pause':'title';}
+ else if(a==='settings'){SETON=1;showOnly('setScreen');}
+ else if(a==='setBack'){SETON=0;showOnly('pauseScreen');mode='pause';}
  else if(a==='sound'){mode='sound';showOnly('soundScreen');volUI();setTimeout(()=>{const r=$('vol_sfx');if(r)r.focus();},0);}
- else if(a==='sndBack'){showOnly('pauseScreen');mode='pause';}
+ else if(a==='sndBack'){showOnly(SETON?'setScreen':'pauseScreen');mode='pause';}
  else if(a==='lang'){mode='lang';showOnly('langScreen');}
  else if(a==='fullscr')goFull(true);
  else if(a==='tLay'){resume();tLayOpen();} // owner 2026-10-21: arranging the buttons also lives in the pause menu
@@ -9323,7 +9333,7 @@ function update(dt){
  // ~30 passes over mons a frame walked them all). The arena, the tower, the archipelago and the tournament clear their own.
  if((MSWT-=dt)<=0){MSWT=2;let w=0;for(let i=0;i<mons.length;i++){const m=mons[i];if(m.dead&&!(m.dying>0)&&m.rt>1e8&&(m.tmp||m.mkN)&&!m.hidN&&!m.arena&&!m.tower&&!m.bh&&m.tw!==1&&!m.nat){if(MOBN)MOBN.hits.delete(m);continue;}mons[w++]=m;}mons.length=w;}
  // the world keeps running behind menus and windows (inventory, status, map, dialog, the Esc menu...); only the player's input stops
- const LIVE=mode==='play'||['inv','status','equip','log','map','qd','dialog','pause','sound','forge','mb','au','gname','enhfx','song','dance'].includes(mode)||(mode==='controls'&&ctrlBack==='pauseScreen');
+ const LIVE=mode==='play'||['inv','status','equip','log','map','qd','dialog','pause','sound','forge','mb','au','gname','enhfx','song','dance'].includes(mode)||(mode==='controls'&&(ctrlBack==='pauseScreen'||ctrlBack==='setScreen'));
  if(!LIVE||!S||S.__demo&&mode!=='play')return;const inp=mode==='play';
  // player
  const mh=maxHP(),pain=P.hp/mh<.25;
@@ -11236,7 +11246,7 @@ Object.assign(STR.en,{"cl_madra": "Undefeated King's Descendant", "mdsheath": "U
 LGB.madra='warrior';LGN.madra='warrior';
 if(!LEGCL.includes('madra'))LEGCL.push('madra');LEGK.madra='madra';CROOT.madra='warrior';if(!P2NOT.includes('madra'))P2NOT.push('madra');
 Object.assign(SKD,{mdarmy:{cls:'madra',lv:1,mp:40,cd:30,col:'#c83a2a'},mdarmy2:{cls:'madra',lv:200,mp:60,cd:30,col:'#ff5a3a'},mdsense:{cls:'madra',lv:1,pas:1,col:'#ffe08a'}});
-SKSND.mdarmy=SKSND.mdarmy2='power';Object.assign(STR.ar,{stNumPh:'كام نقطة؟',stNumTip:'اكتب عدد النقط هنا، وبعدين دوس + جنب أي ستات يتحطوا فيه مرة واحدة'});Object.assign(STR.en,{stNumPh:'how many?',stNumTip:'Type how many points, then press + by a stat to put them all in at once'});Object.assign(STR.ar,{cos_school:"زي مدرسة",cos_hoodie:"هودي واسع",cos_puffer:"جاكيت منفوخ",cos_idol:"زي آيدول",cos_gyaru:"لبس جيارو",cos_qipao:"تشيباو",cos_hanbok:"هانبوك",cos_kimono:"كيمونو",cos_cowboy:"زي كاوبوي",cos_pirate:"زي قرصان",cos_samurai:"زي ساموراي",cos_paladin:"زي فارس مقدس",cos_miko:"زي كاهنة المعبد",cos_witch:"زي ساحرة",cos_pajama:"بيجامة قطة",cos_summer:"لبس صيفي",cos_punk:"لبس بانك",cos_scholar:"معطف العالِم",cos_chef:"زي طباخ",cos_soldier:"زي عسكري",cos_healer:"زي معالج",cos_frost:"زي ملكة الصقيع",cos_shadow:"زي قاتل الظل",cos_royal:"الزي الملكي",cos_emperor:"الزي الذهبي للإمبراطور"});Object.assign(STR.en,{cos_school:"School Uniform",cos_hoodie:"Oversized Hoodie",cos_puffer:"Puffer Jacket",cos_idol:"Idol Outfit",cos_gyaru:"Gyaru Outfit",cos_qipao:"Qipao",cos_hanbok:"Hanbok",cos_kimono:"Kimono",cos_cowboy:"Cowboy Outfit",cos_pirate:"Pirate Outfit",cos_samurai:"Samurai Garb",cos_paladin:"Paladin Attire",cos_miko:"Shrine Maiden Outfit",cos_witch:"Witch Robe",cos_pajama:"Cat Pajamas",cos_summer:"Summer Clothes",cos_punk:"Punk Outfit",cos_scholar:"Scholar Coat",cos_chef:"Chef Uniform",cos_soldier:"Soldier Uniform",cos_healer:"Healer Robe",cos_frost:"Frost Queen Gown",cos_shadow:"Shadow Assassin Garb",cos_royal:"Royal Attire",cos_emperor:"Golden Emperor Regalia"});Object.assign(STR.ar,{qNeedLv:'محتاج لفل {lv}'});Object.assign(STR.en,{qNeedLv:'Needs level {lv}'});Object.assign(STR.ar,{tstLogT:'كل الرسايل اللي فاتت (L)'});Object.assign(STR.en,{tstLogT:'Every message so far (L)'});Object.assign(STR.ar,{cdLeft:'فاضل {s}'});Object.assign(STR.en,{cdLeft:'{s} left'});Object.assign(STR.ar,{styK_hair:'التسريحة',styK_hc:'لون الشعر',styK_top:'لون القميص',styK_cape:'لون العباية',styK_pants:'لون البنطلون'});Object.assign(STR.en,{styK_hair:'Hairstyle',styK_hc:'Hair colour',styK_top:'Shirt colour',styK_cape:'Cape colour',styK_pants:'Trouser colour'});Object.assign(STR.ar,{styOpen:'غيّر شكلك',styG_hair:'الشعر',styG_face:'الوش',styG_body:'الجسم',styG_clothes:'الهدوم',styG_acc:'الإكسسوارات'});Object.assign(STR.en,{styOpen:'Change your look',styG_hair:'Hair',styG_face:'Face',styG_body:'Body',styG_clothes:'Clothes',styG_acc:'Accessories'});Object.assign(STR.ar,{qNeedLv:'محتاج لفل {lv}'});Object.assign(STR.en,{qNeedLv:'Needs level {lv}'});Object.assign(STR.ar,{tstLogT:'كل الرسايل اللي فاتت (L)'});Object.assign(STR.en,{tstLogT:'Every message so far (L)'});Object.assign(STR.ar,{cdLeft:'فاضل {s}'});Object.assign(STR.en,{cdLeft:'{s} left'});
+SKSND.mdarmy=SKSND.mdarmy2='power';Object.assign(STR.ar,{stNumPh:'كام نقطة؟',stNumTip:'اكتب عدد النقط هنا، وبعدين دوس + جنب أي ستات يتحطوا فيه مرة واحدة'});Object.assign(STR.en,{stNumPh:'how many?',stNumTip:'Type how many points, then press + by a stat to put them all in at once'});Object.assign(STR.ar,{cos_school:"زي مدرسة",cos_hoodie:"هودي واسع",cos_puffer:"جاكيت منفوخ",cos_idol:"زي آيدول",cos_gyaru:"لبس جيارو",cos_qipao:"تشيباو",cos_hanbok:"هانبوك",cos_kimono:"كيمونو",cos_cowboy:"زي كاوبوي",cos_pirate:"زي قرصان",cos_samurai:"زي ساموراي",cos_paladin:"زي فارس مقدس",cos_miko:"زي كاهنة المعبد",cos_witch:"زي ساحرة",cos_pajama:"بيجامة قطة",cos_summer:"لبس صيفي",cos_punk:"لبس بانك",cos_scholar:"معطف العالِم",cos_chef:"زي طباخ",cos_soldier:"زي عسكري",cos_healer:"زي معالج",cos_frost:"زي ملكة الصقيع",cos_shadow:"زي قاتل الظل",cos_royal:"الزي الملكي",cos_emperor:"الزي الذهبي للإمبراطور"});Object.assign(STR.en,{cos_school:"School Uniform",cos_hoodie:"Oversized Hoodie",cos_puffer:"Puffer Jacket",cos_idol:"Idol Outfit",cos_gyaru:"Gyaru Outfit",cos_qipao:"Qipao",cos_hanbok:"Hanbok",cos_kimono:"Kimono",cos_cowboy:"Cowboy Outfit",cos_pirate:"Pirate Outfit",cos_samurai:"Samurai Garb",cos_paladin:"Paladin Attire",cos_miko:"Shrine Maiden Outfit",cos_witch:"Witch Robe",cos_pajama:"Cat Pajamas",cos_summer:"Summer Clothes",cos_punk:"Punk Outfit",cos_scholar:"Scholar Coat",cos_chef:"Chef Uniform",cos_soldier:"Soldier Uniform",cos_healer:"Healer Robe",cos_frost:"Frost Queen Gown",cos_shadow:"Shadow Assassin Garb",cos_royal:"Royal Attire",cos_emperor:"Golden Emperor Regalia"});var SETON=0;Object.assign(STR.ar,{setB:'الإعدادات'});Object.assign(STR.en,{setB:'Settings'});Object.assign(STR.ar,{qNeedLv:'محتاج لفل {lv}'});Object.assign(STR.en,{qNeedLv:'Needs level {lv}'});Object.assign(STR.ar,{tstLogT:'كل الرسايل اللي فاتت (L)'});Object.assign(STR.en,{tstLogT:'Every message so far (L)'});Object.assign(STR.ar,{cdLeft:'فاضل {s}'});Object.assign(STR.en,{cdLeft:'{s} left'});Object.assign(STR.ar,{styK_hair:'التسريحة',styK_hc:'لون الشعر',styK_top:'لون القميص',styK_cape:'لون العباية',styK_pants:'لون البنطلون'});Object.assign(STR.en,{styK_hair:'Hairstyle',styK_hc:'Hair colour',styK_top:'Shirt colour',styK_cape:'Cape colour',styK_pants:'Trouser colour'});Object.assign(STR.ar,{styOpen:'غيّر شكلك',styG_hair:'الشعر',styG_face:'الوش',styG_body:'الجسم',styG_clothes:'الهدوم',styG_acc:'الإكسسوارات'});Object.assign(STR.en,{styOpen:'Change your look',styG_hair:'Hair',styG_face:'Face',styG_body:'Body',styG_clothes:'Clothes',styG_acc:'Accessories'});Object.assign(STR.ar,{qNeedLv:'محتاج لفل {lv}'});Object.assign(STR.en,{qNeedLv:'Needs level {lv}'});Object.assign(STR.ar,{tstLogT:'كل الرسايل اللي فاتت (L)'});Object.assign(STR.en,{tstLogT:'Every message so far (L)'});Object.assign(STR.ar,{cdLeft:'فاضل {s}'});Object.assign(STR.en,{cdLeft:'{s} left'});
 const MDN=100,MDD=22; // Red Knights to destroy, days before the First Knight arrives
 const mdCand=()=>!!S&&!!S.mdq&&S.mdq.st===1;
 function mdUse(){if(!(S.mats.mdsheath>0))return;if(S.cls==='madra')return toast(t('rbAlready'),'warn');const own=lgOwn('madra');if(own)return toast(t('lgTaken',{n:own.n}),'warn');

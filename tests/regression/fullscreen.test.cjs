@@ -40,21 +40,21 @@ test('a computer never sees the button', async () => {
   } finally { await g.close(); }
 });
 
-test('on a phone the pause menu also opens Arrange buttons; a computer does not show it', async () => {
+test('on a phone Settings also opens Arrange buttons; a computer does not show it', async () => {
   const ctx = await H.newContext({ device: PHONE });
   const g = await H.openGame({ ctx });
   try {
     await H.newGame(g, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
-    await g.eval(() => { window.__G.mode = 'pause'; document.getElementById('pauseScreen').hidden = false; });
-    const b = await g.eval(() => { const e = document.querySelector('#pauseScreen [data-act="tLay"]'); return [e.offsetParent !== null, e.textContent]; });
+    await g.eval(() => { window.__G.mode = 'pause'; document.getElementById('setScreen').hidden = false; });
+    const b = await g.eval(() => { const e = document.querySelector('#setScreen [data-act="tLay"]'); return [e.offsetParent !== null, e.textContent]; });
     assert.deepEqual(b, [true, 'Arrange buttons']);
-    await g.eval(() => document.querySelector('#pauseScreen [data-act="tLay"]').click());
+    await g.eval(() => document.querySelector('#setScreen [data-act="tLay"]').click());
     await g.step(2);
     assert.equal(await g.eval(() => window.__G.mode), 'play');
     assert.equal(await g.eval(() => document.body.classList.contains('tLay')), true, 'the arrange mode is on');
   } finally { await g.close(); }
   const pc = await H.openGame();
   try {
-    assert.equal(await pc.eval(() => document.querySelector('#pauseScreen [data-act="tLay"]').offsetParent), null);
+    assert.equal(await pc.eval(() => document.querySelector('#setScreen [data-act="tLay"]').offsetParent), null);
   } finally { await pc.close(); }
 });

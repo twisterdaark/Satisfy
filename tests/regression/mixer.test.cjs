@@ -19,7 +19,8 @@ test('mixer: game sounds, music, the world and other players each turn down and 
     // Escape, then "Sound": the four channels; Escape goes back to the pause menu, and again to the game
     await g.page.keyboard.press('Escape'); await g.step(2);
     assert.equal(await g.mode(), 'pause');
-    await g.eval(() => document.querySelector('#pauseScreen [data-act="sound"]').click()); await g.step(2);
+    await g.eval(() => document.querySelector('#pauseScreen [data-act="settings"]').click()); await g.step(2);   // Sound is under Settings (2026-10-24)
+    await g.eval(() => document.querySelector('#setScreen [data-act="sound"]').click()); await g.step(2);
     assert.equal(await g.mode(), 'sound');
     assert.deepEqual(await g.eval(() => [...document.querySelectorAll('#soundScreen label.vol span')].map((x) => x.textContent)), ['Game sounds', 'Music', 'World sounds', 'Other players']);
     assert.equal(await g.eval(() => document.querySelector('#pauseScreen label.vol')), null, 'the pause menu has one Sound row instead');
@@ -29,6 +30,7 @@ test('mixer: game sounds, music, the world and other players each turn down and 
     assert.ok(await g.eval(() => { const r = document.querySelector('#soundScreen [data-act="sndBack"]').getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; }), 'Back in view');
     await g.page.keyboard.press('Escape'); await g.step(2);
     assert.equal(await g.mode(), 'pause');
+    await g.page.keyboard.press('Escape'); await g.step(2);   // Settings, then the pause menu
     assert.ok(await g.eval(() => { const b = [...document.querySelectorAll('#pauseScreen .menu > *')]; const a = b[0].getBoundingClientRect(), z = b[b.length - 1].getBoundingClientRect(); return a.top >= 0 && z.bottom <= innerHeight; }), 'the whole pause menu in view');
     await g.page.setViewportSize({ width: 1280, height: 720 });
     await g.page.keyboard.press('Escape'); await g.step(2);
