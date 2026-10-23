@@ -413,6 +413,7 @@ button{background:linear-gradient(180deg,rgba(36,52,108,.85),rgba(22,32,74,.85))
 #tip{background:linear-gradient(180deg,rgba(44,62,128,.8),rgba(26,38,90,.84));margin-top:calc(var(--u)*1.6);padding:calc(var(--u)*.9) calc(var(--u)*1.2);min-width:calc(var(--u)*14)}
 #tip::before{top:calc(var(--u)*-2.3);height:calc(var(--u)*2.6);background:var(--orn) 14% top/auto calc(var(--u)*2.3) no-repeat,var(--bar) center bottom/100% calc(var(--u)*.3) no-repeat;box-shadow:none;filter:drop-shadow(0 0 calc(var(--u)*.4) rgba(170,220,255,.8))}
 @media (prefers-reduced-motion:reduce){.toast,.panel,.pop,#forge.hit,#rays,.key.glow kbd{animation:none}}
+body.rmo .toast,body.rmo .panel,body.rmo .pop,body.rmo #forge.hit,body.rmo #rays,body.rmo .key.glow kbd,body.rmo .ef-card.hit,body.rmo .ef-card.lose .ef-res{animation:none}body.rmo #flash{display:none}
 /* patch 4: see-through windows, crest pinned to the border, hidden bars ignore the mouse */
 .sys{background:linear-gradient(180deg,rgba(34,46,98,.7),rgba(20,28,66,.76));backdrop-filter:blur(2px)}
 .panel:not(#dialog),#controls,.cbox,#create>.cbox{background:radial-gradient(ellipse at 50% 30%,rgba(116,144,192,.8),rgba(76,102,150,.82) 75%);backdrop-filter:blur(2px)}
@@ -674,6 +675,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
         <button data-act="updLog" data-i18n="updLogB"></button>
         <button data-act="swapLang" data-i18n="langSwap"></button>
         <button data-act="menuSize" id="mzB"></button>
+        <button data-act="rmotion" id="rmB"></button>
         <button data-act="sound" data-i18n="soundB"></button>
         <button data-act="tLay" class="tOnly" data-i18n="kLay"></button>
         <button data-act="fullscr" class="fsBtn" data-i18n="fullB" hidden></button>
@@ -815,7 +817,16 @@ function chG(a){if(SFXCH==='amb'){if(!ambG){ambG=a.createGain();ambG.gain.value=
  if(SFXCH==='soc'){if(!socG){socG=a.createGain();socG.gain.value=socV/100;socG.connect(master);}return socG;}return sfxG;}
 // f's sounds on channel ch
 function sfxOn(ch,f){const c0=SFXCH;SFXCH=ch;try{return f();}finally{SFXCH=c0;}}
-function mzUI(){const b=document.getElementById('mzB');if(b)b.textContent=t('mzB',{n:mzOf()});}
+/* U267 Reduced motion (plan: "disable shake/flash and heavy particles; combat telegraphs still discernible"): a setting of this
+   device (localStorage satisfy_rmo, '1' or '0'; unset: the system's prefers-reduced-motion). On, the camera doesn't shake, the
+   screen doesn't flash white, the UI's shakes and pulses stop, and at most RMOFX loose particles and RMOVX effect particles
+   are kept at once (rings, bolts and arcs stay). A monster's wind-up (drawTele), its "!" and the boss markers are untouched.
+   Only what this screen draws: the others see their own setting. */
+let RMO=false;const RMOFX=90,RMOVX=70,RMOS=[0,0];
+function rmoSet(v,keep){RMO=!!v;if(!keep)try{localStorage.setItem('satisfy_rmo',RMO?'1':'0');}catch(e){}if(document.body)document.body.classList.toggle('rmo',RMO);rmUI();}
+function rmUI(){const b=document.getElementById('rmB');if(b)b.textContent=t('rmB',{s:t(RMO?'rmOn':'rmOff')});}
+{let v=null;try{v=localStorage.getItem('satisfy_rmo');}catch(e){}let sys=false;try{sys=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);}catch(e){}RMO=v==='1'||v==null&&sys;if(document.body)document.body.classList.toggle('rmo',RMO);}
+function mzUI(){const b=document.getElementById('mzB');if(b)b.textContent=t('mzB',{n:mzOf()});rmUI();}
 function volUI(){mzUI();for(const k of ['sfx','mus','amb','soc']){const r=document.getElementById('vol_'+k),o=document.getElementById('volv_'+k),v={sfx:sfxV,mus:musV,amb:ambV,soc:socV}[k];if(r){r.value=v;r.style.setProperty('--p',v+'%');}if(o)o.textContent=v?v+'%':t('volOff');}}
 function audio(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=.5;master.connect(ac.destination);sfxG=ac.createGain();sfxG.gain.value=sfxV/100;sfxG.connect(master);}catch(e){return null;}}if(ac.state==='suspended')ac.resume();return ac;}
 let SFXV=1; // SAT-ONLINE-047: the volume of a sound another player makes, by distance (1 for your own)
@@ -1176,7 +1187,7 @@ const OUT='#120f18',EYE='#22181e';
 
 // character sheets from sprites-original/chars.js: idle with blink, walk 4, attack 3, hurt; left mirrors the side row
 // cosmetic effects (sprites-original/vfx.js); seeded per spawn so they never consume the game's Math.random
-const VX=window.SatArt.vfx.create();let VXn=0;var FXME=0,FXREC=null;const vfx=(k,x,y,o={})=>{o.seed=o.rs!=null?o.rs:(++VXn*2654435761)>>>0;if(FXME&&FXREC)FXREC(k,x,y,o);VX.spawn(k,x,y,o);}; // rs: a replayed effect keeps its sender's seed (net 1:1 effects)
+const VX=window.SatArt.vfx.create();let VXn=0;var FXME=0,FXREC=null;const vfx=(k,x,y,o={})=>{o.seed=o.rs!=null?o.rs:(++VXn*2654435761)>>>0;if(FXME&&FXREC)FXREC(k,x,y,o);if(RMO&&VX.count>RMOVX)return;VX.spawn(k,x,y,o);}; // rs: a replayed effect keeps its sender's seed (net 1:1 effects)
 const SA=window.SatArt,SH={};
 // a figure's sheet is painted the first time it is drawn (owner 2026-10-21: painting every NPC and monster look at start was
 // a big part of the black screen on phones); the key is there from the start, so the name lists stay the same
@@ -3788,6 +3799,7 @@ Object.assign(STR.ar,{"farmHowT": "دوس على مربع عشان تحفر · �
 Object.assign(STR.en,{"farmHowT": "Tap a square to dig · digs left: {n}", "kLog": "Log", "reheatB": "Reheat", "bqT": "Amount:", "bqMax": "Max", "sellAllB": "Sell all", "sellOneB": "Sell one", "ptsAllB": "All", "tQuitT": "Leave"});
 Object.assign(STR.ar,{"barTap": "دوس على مهارة وبعدين على خانة من الخانات الخمسة فوق، أو دوس الزرار. دوس على خانة فيها مهارة عشان تنقلها لخانة تانية.", "barPickT": "اختار خانة لـ{sk}", "barRowT": "شريط المهارات", "mzB": "حجم القوايم: {n}%"});
 Object.assign(STR.en,{"barTap": "Tap a skill, then one of the five slots above, or use the button. Tap a slot that has a skill to move it to another slot.", "barPickT": "Pick a slot for {sk}", "barRowT": "Skill bar", "mzB": "Menu size: {n}%"});
+Object.assign(STR.ar,{rmB:'حركة أقل: {s}',rmOn:'شغالة',rmOff:'مقفولة'});Object.assign(STR.en,{rmB:'Reduced motion: {s}',rmOn:'On',rmOff:'Off'});
 Object.assign(STR.ar,{"kLay": "رتّب الأزرار"});
 Object.assign(STR.en,{"kLay": "Arrange buttons"});
 Object.assign(STR.ar,{"coachR": "عربجي ريدان", "coachRh": "عربجي رينهارت", "coachRo": "عربجي رولينج", "coachT": "عربجي تيتان", "coachHi2": "العربيات بتلف على المدن الكبيرة. واللي لسه ملوش كلاس بيركب ببلاش، أكيد رايح لمدرّبه.", "oCoachTo": "سافر لـ{z} ({g} دهب)", "oCoachFree": "سافر لـ{z} (ببلاش، لسه ملكش كلاس)", "oWhereTr": "المدربين فين؟", "whereTr": "مدرب المحاربين ومدربة الرماة هنا في وينستون، والنكرومانسر في معبد ياتان على أطراف البلد. معلم السحر في برج السحر في ريدان، ومدرب الفرسان مع الفرسان الحُمر في تيتان، وكاسوس في كنيسة ريبيكا في رولينج، والراجل المقنّع في حواري رينهارت. وعربياتي بتوصلك لكل دول."});
@@ -7571,7 +7583,8 @@ function updateHUD(){if(PHOTO&&mode!=='play')photoOff();const mh=maxHP();P.hp=Ma
 
 /* ---------------- fx helpers, keybinds, status window ---------------- */
 function fadeTo(fn){const f=$('fade');f.classList.add('on');setTimeout(()=>{fn();f.classList.remove('on');},300);}
-function flash(){const f=$('flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');}
+function flash(){if(RMO)return;const f=$('flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');}
+window.__GRMO={on:()=>RMO,set:v=>rmoSet(v),shake:()=>RMOS.slice(),FX:RMOFX,VXC:RMOVX,vx:()=>VX.count,fx:()=>fx.length,push:o=>fx.push(o),vfx:(k,x,y)=>vfx(k,x,y),tele:m=>drawTele(m),flash:()=>flash(),get ctx(){return ctx},setShake:v=>{shake=v;}}; // tests
 function pressKey(id){const k=$(id);if(!k)return;k.classList.add('press');setTimeout(()=>k.classList.remove('press'),110);}
 function dissolve(x,y,cols,n){for(let i=0;i<n;i++)fx.push({x:x+(rand()-.5)*12,y:y+(rand()-.5)*16,vx:(rand()-.5)*24,vy:-15-rand()*45,t:.7+rand()*.9,c:cols[i%cols.length],fl:1});}
 // Skills are data (SKD); the bar holds up to five class skills plus the worn title's skill in slot 6. Keys are rebindable per device.
@@ -9006,6 +9019,7 @@ function act(a){
  else if(/^tr[A-Z]/.test(a))tradeAct(a);
  else if(a==='dAccept'||a==='dDecline'||a==='dYield')duelAct(a);
  else if(a==='swapLang'){lang=lang==='ar'?'en':'ar';applyLang();}
+ else if(a==='rmotion'){rmoSet(!RMO);SFX.click();}
  else if(a==='menuSize'){const v=[100,120,140],c=mzOf();MZ=v[(v.indexOf(c)+1)%v.length]||100;try{localStorage.setItem('satisfy_mz',String(MZ));}catch(e){}fit();mzUI();}
  else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='guiReset')guiReset();else if(a==='quit'){save(true);fadeTo(toTitle);}
  else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='mgReheat'){reheat();}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='fCre'){creOpen();}else if(a==='fApr'){closeForge();openApr('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeGuildW')closeGuildW();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='photo'){act('resume');setTimeout(photoOn,0);}else if(a==='photoSave')photoShot();else if(a==='photoExit')photoOff();else if(a==='closeMB')closeMB();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qgFollow')qgFollow();else if(a==='qtoggle')toggleQuest();
@@ -9104,6 +9118,7 @@ function update(dt){
  FURNS.forEach(F=>{const r=F.x>=EX*TS?smokeR:rand;if(r()<dt*2.5)smoke.push({x:F.cx+(r()-.5)*4,y:F.cy,t:0});});
  smoke.forEach(s=>{s.t+=dt;s.y-=12*dt;s.x+=4*dt;});smoke=smoke.filter(s=>s.t<3);
  VX.update(dt);fx.forEach(f=>{f.t-=dt;if(f.ring||f.bolt||f.arc)return;if(f.dl>0)f.dl-=dt;else if(f.home&&P){const dx=P.x-f.x,dy=P.y-12-f.y,d=Math.hypot(dx,dy)||1;f.vx=f.vx*.9+dx/d*28;f.vy=f.vy*.9+dy/d*28;f.x+=f.vx*dt;f.y+=f.vy*dt;if(d<5)f.t=0;return;}f.x+=f.vx*dt;f.y+=f.vy*dt;f.vy+=(f.fl?-12:220)*dt;});fx=fx.filter(f=>f.t>0);
+ if(RMO&&fx.length>RMOFX){let n=fx.length-RMOFX;fx=fx.filter(f=>f.ring||f.bolt||f.arc||!(n>0&&n--));}
  nums.forEach(n=>{n.t-=dt;n.y-=22*dt;});nums=nums.filter(n=>n.t>0);
  if(shake>0)shake-=dt;
  if(mode==='dead'&&P&&P.deadT>0){P.deadT-=dt;$('deadP').innerHTML=`<div>${esc(P.dpen||'')}</div><div>${t('deadIn',{n:Math.max(1,Math.ceil(P.deadT))})}</div>`;if(P.deadT<=0)deadChoice();}
@@ -9433,7 +9448,7 @@ dk_madra:()=>{R(ctx,6,-30,3,26,'#2a2430');R(ctx,7,-30,1,26,'#8a1a2a');R(ctx,4,-5
 function drawNode(x,y,n){if(n.kind==='herb'||n.kind==='bherb')return drawHerb(x,y,n);if(n.dep>0){R(ctx,x-5,y-3,10,3,'#6a6560');R(ctx,x-3,y-4,4,2,'#7f7a76');return;}ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(x-7,y-1,14,2);blob(ctx,x,y-5,7,5,'#55504c');blob(ctx,x,y-6,6,4,'#7f7a76');R(ctx,x-3,y-9,4,2,'#9a958f');
  const mi=n.kind==='mith',a=mi?'#9fd8ff':'#c8743a',b=mi?'#e8f6ff':'#d9894a';R(ctx,x-3,y-6,2,2,a);R(ctx,x+2,y-7,2,2,b);R(ctx,x,y-4,2,1,a);if(mi&&(gTime*2+x)%3<.4)R(ctx,x+1,y-8,1,1,'#ffffff');}
 function render(dt){DRAWN=0;netDrawn=0;
- const sx=shake>0?(rand()-.5)*4:0,sy=shake>0?(rand()-.5)*4:0;
+ const sx=shake>0&&!RMO?(rand()-.5)*4:0,sy=shake>0&&!RMO?(rand()-.5)*4:0;RMOS[0]=sx;RMOS[1]=sy;
  const titleCam=mode==='lang'||mode==='title'||(mode==='controls'&&ctrlBack==='titleScreen');
  let tx,ty;const RM=!titleCam&&P&&roomAt(P.x,P.y);if(titleCam){tx=8*TS+Math.sin(gTime*.08)*120+120;ty=14*TS;}else if(RM){tx=(RM.rx+6)*TS-W/2;ty=(RM.ry+4)*TS-H/2;}else{tx=P.x-W/2;ty=P.y-H/2-8;}
  // a house room (12x8 tiles) is smaller than the screen: the view centres on it (Twister: the Reidan merchant sat under the HUD)

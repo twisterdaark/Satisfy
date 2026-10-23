@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24rmotion', ver: '2.48', d: '2026-10-24',
+      ar: ["في قايمة الإيقاف بقى فيه «حركة أقل»: الكاميرا مش بتتهز، والشاشة مش بتنور أبيض، والمؤثرات والجزيئات بتقل، وحركات القوايم بتقف. وضربات الوحوش اللي بتتحضر لسه بتبان زي ما هي. الإعداد ده على الجهاز بتاعك بس، ولو جهازك مظبوط على «تقليل الحركة» بيشتغل لوحده"],
+      en: ["The pause menu has Reduced motion: the camera doesn't shake, the screen doesn't flash white, there are fewer effects and particles, and the menus stop moving. A monster's wind-up still shows as before. It's a setting of this device, and on if your system asks for reduced motion"] },
     { v: '2026-10-23mergeA3', ver: '2.47', d: '2026-10-23',
       ar: ["دخلت تحديثات جديدة: ألقاب أكتر من الرواية بمهارات، وخريطة العالم بتعرض قارتك بس ومن فوق الأرض بس."],
       en: ["New updates are in: more titles from the novel with skills, and the world map shows only your continent and only above the ground."] },

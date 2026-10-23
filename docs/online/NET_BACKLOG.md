@@ -242,4 +242,9 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 
 **Totals (U184–U189, U210–U246, U308–U348, U368–U387):** ✅ 82 · 🟡 11 · ⏳ 5 · ❌ 6 of 104.
 
+## From other ranges, claimed on #13 (2026-10-23)
+| U | Update | Status | Where |
+|---|---|---|---|
+| U267 | Reduced motion | ✅ | SAT-ONLINE-164: a device setting in the pause menu (`satisfy_rmo`, the system's prefers-reduced-motion when unset): no camera shake, no white flash, the UI's shakes and pulses stop, particles capped (`RMOFX`, `RMOVX`); telegraphs (`drawTele`) untouched; `regression/rmotion` |
+
 Not cheat-proof yet (the owner knows): trades, drops, the vault, PvP hits, bounties, ratings, competition scores, raid heals and rolls trust each client; a game server (D3) closes that.
