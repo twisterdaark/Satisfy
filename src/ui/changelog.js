@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23crem', ver: '2.34', d: '2026-10-23',
+      ar: ["إبداع الحداد الأسطوري: بقيت تختار لحد 4 خامات من الشنطة مع بعض وتحدد كمية كل واحدة (حديد، أحجار، جواهر، جواهر العناصر، حراشف التنين، أنفاس الوحوش الأربعة، دروب بيليال وغيرهم). الأقوى بتحدد القوة والباقي يضيف خصايصه، والكمية بتفرق لحد الضعف. أنفاس الوحوش الأربعة بتعمل سلاح في مستوى إياروغت أو أعلى، وكل نفس بيدّي خاصية (نزيف، سرعة متزايدة، امتصاص حياة، صحة). والخامات اللي معاكش منها بتبان رمادي وتقدر تشوف بتدّي إيه، وفيه معاينة بتقارن بسلاحك.",
+          "دعوة البارتي: أي عضو يقدر يدعو على طول من غير القائد. اللي اتدعى بيشوف \"فلان بيدعوك لبارتي القائد\"، ولما يقبل بيدخل حتى لو تاب القائد في الخلفية.",
+          "الـBoosting أبطأ: في البارتي، الوحش اللي أعلى منك بأكتر من 20 لفل بيدّي خبرة أقل بالتدريج (لحد الخمس عند +60)، والقتلة اللي ضربك فيها أقل من عُشر صحة الوحش بتدّي نصيب البارتي بس، وأقصى قتلة واحدة 3% من لفلك. لوحدك مفيش تغيير.",
+          "عشان تاخد خبرة وغنايم من وحش قتله غيرك (وحش مشترك أو زعيم ريد) لازم تكون جنبه وقت موته وتكون شاركت بجد (5% من صحته أو ضربته في آخر 30 ثانية). ولو مت في القتال وإنت جنبه حقك محفوظ.",
+          "اسم الجيلد فوق راس اللاعبين بقى فوق الراس مش عليها."],
+      en: ["Legendary Blacksmith's Creation: pick up to 4 materials from your bag together and set how much of each (ore, stones, gems, elemental essences, dragon scales, the four divine beasts' breaths, Belial's drops and more). The strongest sets the power and the rest add their traits; the amount counts up to twice the full amount. A divine breath makes a weapon at Iyarugt's level or above, and each breath adds a passive (bleed, rising attack speed, life drain, health). Materials you lack show greyed out with what they give, and a preview compares it with your weapon.",
+          "Party invites: any member invites straight away, no leader needed. The player sees \"X invites you to the leader's party\", and joins on accepting even while the leader's tab is in the background.",
+          "Boosting is slower: in a party, a monster more than 20 levels above you gives less and less XP (down to a fifth at +60), a kill where you did under a tenth of its health pays only the party share, and one kill gives at most 3% of your level. Alone nothing changes.",
+          "XP and loot from a monster someone else killed (a shared monster or a raid boss) need you by it when it dies and a real part in the fight (5% of its health or a hit in the last 30 s). Dying in the fight next to it still counts.",
+          "Guild names over players now sit above their heads, not on them."] },
     { v: '2026-10-23zwin', ver: '2.33', d: '2026-10-23',
       ar: ["الشنطة والحالة والعتاد والجيلد وكل الشبابيك والحوارات بقت بتطلع فوق شرايط السكيلات ولوحات الشاشة. ولما تسحب حاجة للشريط والشباك مغطيه، الشريط بيطلع فوق لحد ما تحطها.",
           "زرار دعوة لاعب بقى ظاهر على طول في شباك الجيلد. ولو الجيلد اتعمل وإنت أوفلاين (موجود على جهازك بس)، بيقولك كده ويديك زرار تخليه أونلاين بنفس الاسم واللفل والأراضي ومن غير ما تدفع تاني. ولو الاسم مأخوذ أونلاين بيطلب منك اسم تاني. وتبويب المعلومات بيقول الجيلد أونلاين ولا على جهازك بس."],

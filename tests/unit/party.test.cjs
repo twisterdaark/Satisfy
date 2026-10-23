@@ -59,23 +59,40 @@ test('decline and invite expiry', () => {
   assert.equal(c.party.accept('p_u0'), false);
 });
 
-test('a member asks the leader, who sends the invite (owner 2026-10-23); a member cannot invite on its own', () => {
-  const w = world(4), [a, b, c, d] = w.players;
-  const ev = []; a.party.on((e) => ev.push(e));
+test('a member invites directly: the player sees who invited, the leader takes the accept, even late (owner 2026-10-23)', () => {
+  const w = world(5), [a, b, c, d, e] = w.players;
+  const ev = []; a.party.on((x) => ev.push(x));
   a.party.invite(w.remote(a, b)); b.party.accept('p_u0'); w.sync();
-  // a forged invite naming someone else's party is ignored
+  // a forged invite naming someone else's party is ignored, so is a "member" invite from someone not in that party
   b.pres.send('party.invite', { to: 'u2', party: 'p_u0' });
+  d.pres.send('party.invite', { to: 'u2', party: 'p_u0', k: 5 });
   assert.equal(c.party.pendingInvite(), null);
-  // a stranger asking the leader is ignored
-  d.pres.send('party.invite', { to: 'u0', party: 'p_u2', k: 4 });
-  assert.equal(c.party.pendingInvite(), null);
-  assert.equal(b.party.invite(w.remote(b, c)), 'asked');
+  // a stranger's note to the leader is ignored
+  d.pres.send('party.invite', { to: 'u0', party: 'p_u4', k: 6 });
+  e.pres.send('party.accept', { to: 'u0', party: 'p_u0', k: 5 });
+  w.advance(SN.party.ACC_MS + 10);
+  assert.ok(!a.party.members().some((m) => m.uid === 'u4'), 'an accept nobody invited never gets in');
+  assert.equal(b.party.invite(w.remote(b, c)), 'sent');
   const inv = c.party.pendingInvite();
-  assert.equal(inv && inv.party, 'p_u0', "the invite is the leader's own");
-  const e = ev.find((x) => x.type === 'askInvite');
-  assert.equal(e.handle, 'P1'); assert.equal(e.who, 'P2'); assert.equal(e.res, 'sent');
+  assert.equal(inv.party, 'p_u0'); assert.equal(inv.by, 'P1'); assert.equal(inv.handle, 'P0');
   c.party.accept(inv.party); w.sync();
   assert.deepEqual(a.party.members().map((m) => m.uid).sort(), ['u0', 'u1', 'u2']);
+  assert.equal(c.party.id(), 'p_u0');
+  const j = ev.find((x) => x.type === 'joined' && x.uid === 'u2');
+  assert.equal(j.by, 'P1');
+  // the accept reaches the leader before the member's note: it waits for it
+  b.pres.send('party.accept', { to: 'u0', party: 'p_u0', k: 5 }); // (b is already in: ignored)
+  d.pres.send('party.accept', { to: 'u0', party: 'p_u0', k: 5 });
+  b.pres.send('party.invite', { to: 'u0', party: 'p_u3', k: 6 });
+  assert.ok(ev.some((x) => x.type === 'joined' && x.uid === 'u3'));
+  assert.deepEqual(a.party.roster().split(' '), ['u1', 'u2', 'u3']);
+});
+
+test("an older member's ask still makes the leader send the invite", () => {
+  const w = world(3), [a, b, c] = w.players;
+  a.party.invite(w.remote(a, b)); b.party.accept('p_u0'); w.sync();
+  b.pres.send('party.invite', { to: 'u0', party: 'p_u2', k: 4 });
+  assert.equal(c.party.pendingInvite().party, 'p_u0');
 });
 
 test('make leader: the party moves to the new leader at once and everyone stays in it (owner 2026-10-23)', () => {

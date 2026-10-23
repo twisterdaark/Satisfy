@@ -150,3 +150,36 @@ test('every town is a safe zone, and Patrian shows the tag', async () => {
     assert.deepEqual(a.errors, []);
   } finally { await ctx.close(); }
 });
+
+test('[online] a member invites a third player directly; the leader takes them in without doing anything (owner 2026-10-23)', async () => {
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  const gs = [];
+  try {
+    for (const s of ['a', 'b', 'c']) gs.push(await H.openGame({ ctx, query: `?net=online&slot=${s}` }));
+    const [a, b, c] = gs;
+    for (const [g, n] of [[a, 'Ahmed'], [b, 'Bassem'], [c, 'Eslam']]) {
+      await g.eval((name) => { window.__fakeRTDB.nextName = name; document.getElementById('onlineBtn').click(); }, n);
+      await until(g, () => !!Satisfy.local.net());
+    }
+    await H.newGame(a, LOOK_A); await H.newGame(b, LOOK_B); await H.newGame(c, { n: 'Eslam', hair: 2, hc: 1, skin: 0, top: 2 });
+    await b.eval(() => { window.__G.P.x += 20; });
+    await c.eval(() => { window.__G.P.x += 32; });
+    await settle(a, b, c);
+    await a.page.keyboard.press('KeyP'); await settle(a, b, c);
+    await until(b, () => !document.getElementById('partyInv').hidden);
+    await b.page.keyboard.press('KeyY'); await settle(a, b, c);
+    for (const g of [a, b]) await until(g, () => ((Satisfy.local.net().party || {}).members || []).length === 2);
+    // the member (Faker) invites Eslam; the leader's frames don't run meanwhile (a tab in the background)
+    await b.page.keyboard.press('KeyP');
+    for (let i = 0; i < 6; i++) { await b.step(5); await c.step(5); }
+    await until(c, () => !document.getElementById('partyInv').hidden);
+    assert.equal(await text(c, 'partyInvT'), "Faker invites you to Grid's party");
+    await c.page.keyboard.press('KeyY');
+    for (let i = 0; i < 6; i++) { await b.step(5); await c.step(5); }
+    await settle(a, b, c);
+    for (const g of [a, b, c]) await until(g, () => ((Satisfy.local.net().party || {}).members || []).length === 3, 8000);
+    const pa = await party(a), pc = await party(c);
+    assert.equal(pc.id, pa.id);
+    for (const g of gs) { assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []); assert.deepEqual(g.errors, []); }
+  } finally { await ctx.close(); }
+});

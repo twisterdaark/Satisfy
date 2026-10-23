@@ -730,9 +730,9 @@
     const pk = Object.keys(v.payload).sort().join(',');
     if (v.payload.to !== seg[1]) return 'inbox payload';
     if (v.type.startsWith('party.')) {
-      // kick k: 1 a kick (SAT-ONLINE-037), 2 too late (126), 3 the lead handed over; invite k: 4 a member's ask (owner 2026-10-23).
-      // The rules check k as a number (0..1e9) like every payload k
-      const ok = v.type === 'party.ping' ? ['k,n,party,to'] : v.type === 'party.kick' || v.type === 'party.invite' ? ['party,to', 'k,party,to'] : ['party,to'];
+      // kick k: 1 a kick (SAT-ONLINE-037), 2 too late (126), 3 the lead handed over; invite k: 4 a member's ask, 5 a member's
+      // invite, 6 its note to the leader; accept k: 5 (owner 2026-10-23). The rules check k as a number (0..1e9) like every payload k
+      const ok = v.type === 'party.ping' ? ['k,n,party,to'] : v.type === 'party.kick' || v.type === 'party.invite' || v.type === 'party.accept' ? ['party,to', 'k,party,to'] : ['party,to'];
       if (!ok.includes(pk)) return 'inbox payload ' + pk;
       if ('k' in v.payload && !(typeof v.payload.k === 'number' && v.payload.k >= 0 && v.payload.k <= 1000000000)) return 'inbox k';
       if (v.type === 'party.ping' && !(v.payload.k >= 0 && v.payload.k <= 1000000000 && v.payload.n >= -4096 && v.payload.n <= 1000000000)) return 'inbox ping';

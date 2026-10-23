@@ -37,7 +37,7 @@ async function arena(a, b, dxB = 30) {
 // B moves a little each step (someone playing, not away from the keyboard)
 const busy = (b) => b.eval(() => { window.__G.P.x += 1; });
 async function killAndWait(a, b, active = true) {
-  await a.eval(() => { const m = window.__pm; m.hp = 0; window.__GB2.kill(m); });
+  await a.eval(() => { const m = window.__pm; m.myd = m.max; m.hp = 0; window.__GB2.kill(m); });
   for (let i = 0; i < 6; i++) { if (active) await busy(b); await settle(a, b); }
   await b.page.waitForTimeout(1500);
   for (let i = 0; i < 2; i++) { if (active) await busy(b); await settle(a, b); }
@@ -70,6 +70,13 @@ test('party XP: a quarter to a member near the kill and playing; nothing far awa
     assert.equal(a1.lv, a0.lv); assert.equal(b1.lv, b0.lv);
     assert.ok(ga > 0, 'A got the kill: ' + ga);
     assert.ok(gb > 0 && Math.abs(gb - ga / 4) <= 1, 'B got a quarter: ' + gb + ' of ' + ga);
+
+    // boosting slower (owner 2026-10-23): far above you it pays less, a kill you barely hit pays the share, and at most 3% a kill
+    const bo = await b.eval(() => { const X = window.__GPXP, S = window.__G.S, need = window.__G.xpNeed ? window.__G.xpNeed() : null;
+      return { g: [10, 20, 40, 60, 100].map((d) => +X.gap(d).toFixed(2)), hit: X.kf({ lv: S.lv + 5, max: 100, myd: 50 }), low: X.kf({ lv: S.lv + 5, max: 100, myd: 5 }), far: X.kf({ lv: S.lv + 60, max: 100, myd: 50 }), cap: X.cap(1e9, S.lv + 30), near: X.cap(1e9, S.lv + 10) }; });
+    assert.deepEqual(bo.g, [1.3, 1.3, 0.75, 0.2, 0.2]);
+    assert.ok(Math.abs(bo.hit - 1.15) < 1e-9 && Math.abs(bo.low - 1.15 / 4) < 1e-9 && Math.abs(bo.far - 0.2) < 1e-9, JSON.stringify(bo));
+    assert.ok(bo.cap < 1e9 && bo.cap > 0, 'capped: ' + bo.cap); assert.equal(bo.near, 1e9);
 
     // far away (out of the radius): nothing
     await arena(a, b, 900);

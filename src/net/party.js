@@ -33,8 +33,12 @@
  * - the leader hands the party to a member with party.kick {party: the new leader's party id, k: 3} to every member; each
  *   moves to that id at once (no election wait), the new leader takes the rest as its accepted members. A leader who
  *   leaves with two or more members hands the party to the one who joined first, then leaves as a member would.
- * - a member asks the leader with party.invite {party: the invitee's would-be party id, k: 4}; the leader sends the
- *   invite as if it were its own (the cap and the checks stay the leader's) and is told who asked.
+ * - a member invites directly (owner 2026-10-23, second ask): party.invite {to: the player, party: the leader's id, k: 5}
+ *   to the player, who takes it only when the sender's presence is in that party, and party.invite {to: the leader,
+ *   party: the player's would-be id, k: 6} to the leader, who expects that player's accept (the cap stays the leader's).
+ *   The player's accept goes to the leader with k: 5; one that arrives before the leader saw the member's note waits
+ *   ACC_MS for it. The leader's tab may be in the background: messages still arrive there.
+ *   An older member's ask (k: 4) still makes the leader send the invite itself.
  *
  * Exposes `Satisfy.party.create({ presence, uid, now?, max?, blocked?, store?, wall?, gap? })`; gap: a tick this many ms after
  * the last one is this client's own pause (a hidden window), and the time it slept doesn't count against the others.
@@ -48,6 +52,7 @@
   var GRACE_MS = 10000;   // presence may lag; a member/leader missing this long has left (a closed tab leaves presence at once)
   var PING_MS = 1500;     // pings: at most one per member this often (sent and received)
   var REJOIN_MS = 60000;  // a dropped member or a reloaded tab can come back this long (wall clock)
+  var ACC_MS = 8000;      // a member-invited player's accept waits this long for that member's note to reach the leader
   var LEAD_MS = 15000;    // a leader gone this long (longer than a reload) is replaced by the remaining members
   var KEY = 'satisfy_party';
 
@@ -74,6 +79,8 @@
     var names = new Map();  // uid -> last handle seen, so a member who drops out is still named (not "?")
     var raid = false;       // leader: the party is a raid (up to RAID_MAX)
     var raidSeen = false;   // member: the leader's presence says it is a raid
+    var early = new Map();  // leader: uid -> {t, handle}: accepts of member invites waiting for the member's note
+    var via = new Map();    // leader: uid -> the member who invited them
     function cap() { return raid ? RAID_MAX : max; }
     function save() {
       if (!store || !id) return;
@@ -98,8 +105,15 @@
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function byUid(uid) { var hit = null; P.remotes().forEach(function (r) { if (r.uid === uid) hit = r; if (r.uid && r.handle) names.set(r.uid, r.handle); }); return hit; }
-    function clear() { id = null; leader = null; accepted.clear(); outgoing.clear(); recent.clear(); leaderOk = 0; savedSig = ''; mates = []; mateSeen.clear(); raid = false; raidSeen = false; }
+    function clear() { id = null; leader = null; accepted.clear(); outgoing.clear(); early.clear(); via.clear(); recent.clear(); leaderOk = 0; savedSig = ''; mates = []; mateSeen.clear(); raid = false; raidSeen = false; }
     function send(type, to) { P.send(type, { to: to, party: id }); }
+    function admit(uid, handle) { // leader: an accept to an invite we (or a member) sent
+      outgoing.delete(uid);
+      var by = via.get(uid); via.delete(uid);
+      if (accepted.size + 1 >= cap()) { P.send('party.kick', { to: uid, party: id, k: 2 }); emit({ type: 'full', handle: handle }); return; }
+      accepted.set(uid, now());
+      emit({ type: 'joined', uid: uid, handle: handle, by: by || null });
+    }
 
     P.on(function (ev) {
       if (ev.type !== 'message') return;
@@ -115,9 +129,30 @@
             emit({ type: 'askInvite', handle: from.handle, who: tr ? tr.handle : '', res: tres });
             return;
           }
+          if (pl.k === 6) { // a member invited someone directly: expect their accept
+            if (!id || leader !== self || !accepted.has(from.uid) || pl.party.slice(0, 2) !== 'p_') return;
+            var tu = pl.party.slice(2);
+            if (accepted.has(tu) || tu === self) return;
+            via.set(tu, from.handle || '');
+            if (accepted.size + 1 + outgoing.size >= cap() && !outgoing.has(tu)) { var e6 = early.get(tu); early.delete(tu); if (e6) P.send('party.kick', { to: tu, party: id, k: 2 }); emit({ type: 'full', handle: e6 ? e6.handle : '' }); return; }
+            outgoing.set(tu, now());
+            if (early.has(tu)) { var e7 = early.get(tu); early.delete(tu); admit(tu, e7.handle); }
+            return;
+          }
+          if (pl.k === 5) { // a member of that party invites us: its presence must say it is in that party
+            if (pl.party.slice(0, 2) !== 'p_' || from.party !== pl.party) return;
+            var lu = pl.party.slice(2);
+            if (lu === self || blocked(from.uid) || blocked(lu)) return;
+            if (id) { if (id !== pl.party) P.send('party.decline', { to: lu, party: pl.party }); return; }
+            var L5 = byUid(lu);
+            invites.set(pl.party, { party: pl.party, from: lu, sid: L5 ? L5.sid : null, handle: L5 ? L5.handle : names.get(lu) || '', by: from.handle, byUid: from.uid, t: now() });
+            emit({ type: 'invite', party: pl.party, handle: L5 ? L5.handle : '', by: from.handle });
+            return;
+          }
           if (pl.party !== idFor(from.uid)) return;           // only a leader invites, and only to its own party
           if (blocked(from.uid)) return;                       // no answer: their invite just expires
           if (id) { P.send('party.decline', { to: from.uid, party: pl.party }); return; }
+          if (invites.has(pl.party) && invites.get(pl.party).by) { invites.get(pl.party).t = now(); return; } // a member already invited us there
           invites.set(pl.party, { party: pl.party, from: from.uid, sid: ev.sid, handle: from.handle, t: now() });
           if (memo && memo.id === pl.party && memo.leader === from.uid && wall() - memo.t < REJOIN_MS && !(memo.sid && memo.sid === ev.sid)) {
             memo = null; api.accept(pl.party, true); emit({ type: 'rejoined', handle: from.handle }); return; // our party, back after a reload
@@ -129,11 +164,9 @@
           // its cap however many accept at once. An accept it can't take (the invite ran out on its side first, or the party
           // is full or gone) is answered at once with k = 2, so that player isn't left believing it joined.
           if (pl.party !== idFor(self) || accepted.has(from.uid)) return;
+          if (pl.k === 5 && id && leader === self && pl.party === id && !outgoing.has(from.uid)) { early.set(from.uid, { t: now(), handle: from.handle }); return; } // the member's note is on its way
           if (!id || leader !== self || pl.party !== id || !outgoing.has(from.uid)) { P.send('party.kick', { to: from.uid, party: pl.party, k: 2 }); return; }
-          outgoing.delete(from.uid);
-          if (accepted.size + 1 >= cap()) { P.send('party.kick', { to: from.uid, party: id, k: 2 }); emit({ type: 'full', handle: from.handle }); return; }
-          accepted.set(from.uid, now());
-          emit({ type: 'joined', uid: from.uid, handle: from.handle });
+          admit(from.uid, from.handle);
           break;
         case 'party.decline':
           if (outgoing.delete(from.uid)) emit({ type: 'declined', handle: from.handle });
@@ -209,10 +242,11 @@
       invite: function (remote) {
         if (!remote || !remote.uid || remote.uid === self) return 'bad';
         if (remote.party && remote.party === id) return 'already';
-        if (id && leader !== self) {
+        if (id && leader !== self) { // a member invites directly and tells the leader to expect them
           if (remote.party) return 'busy';
-          P.send('party.invite', { to: leader, party: idFor(remote.uid), k: 4 });
-          return 'asked';
+          P.send('party.invite', { to: leader, party: idFor(remote.uid), k: 6 });
+          P.send('party.invite', { to: remote.uid, party: id, k: 5 });
+          return 'sent';
         }
         if (remote.party) return 'busy';
         if (id && accepted.size + 1 + outgoing.size >= cap()) return 'full';
@@ -232,7 +266,7 @@
         if (!inv || id) return false;
         invites.clear();
         id = pid; leader = inv.from; leaderOk = now(); memo = null; leaderSid = inv.sid || null;
-        send('party.accept', inv.from);
+        if (inv.by) P.send('party.accept', { to: inv.from, party: id, k: 5 }); else send('party.accept', inv.from);
         save();
         if (!quiet) emit({ type: 'youJoined', handle: inv.handle });
         return true;
@@ -310,7 +344,8 @@
         }
         lastTick = t;
         invites.forEach(function (v, k) { if (t - v.t > INVITE_MS) invites.delete(k); });
-        outgoing.forEach(function (v, k) { if (t - v > INVITE_MS) outgoing.delete(k); });
+        outgoing.forEach(function (v, k) { if (t - v > INVITE_MS) { outgoing.delete(k); via.delete(k); } });
+        early.forEach(function (v, k) { if (t - v.t > ACC_MS) { early.delete(k); if (id && leader === self) P.send('party.kick', { to: k, party: id, k: 2 }); } });
         if (!id) return;
         if (leader === self) {
           accepted.forEach(function (seen, uid) {
@@ -381,5 +416,5 @@
   }
 
   var ns = root.Satisfy = root.Satisfy || {};
-  ns.party = Object.freeze({ create: create, idFor: idFor, MAX: MAX, RAID_MAX: RAID_MAX, INVITE_MS: INVITE_MS, GRACE_MS: GRACE_MS, PING_MS: PING_MS, REJOIN_MS: REJOIN_MS, LEAD_MS: LEAD_MS, KEY: KEY });
+  ns.party = Object.freeze({ create: create, idFor: idFor, MAX: MAX, RAID_MAX: RAID_MAX, INVITE_MS: INVITE_MS, GRACE_MS: GRACE_MS, PING_MS: PING_MS, REJOIN_MS: REJOIN_MS, LEAD_MS: LEAD_MS, ACC_MS: ACC_MS, KEY: KEY });
 })(typeof window !== 'undefined' ? window : globalThis);
