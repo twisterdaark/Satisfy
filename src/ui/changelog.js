@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23newleg', ver: '2.10', d: '2026-10-23',
+      ar: ["أساطير جديدة من الرواية، كل واحدة لواحد بس في العالم، وبتبدأ من لفل 1: لانتير، قديس القوس، وريث تزودان، ووريث مومود",
+        "لانتير: دوران بيدّي أي حرامي من لفل 150 تقنيات دوران وكاسيم، وبعدين تبارز باين لانتير الحالي وتغلبه. مهاراته: لدغة القمر، سم لانتير، تقنية الضل، جنود الضل، والجشع اللي بيخلّص على أي عدو تحت 15% من دمه",
+        "قديس القوس: الرامي في لفل 150 بيجيله عرض إنه يتخطّى الرامي الأسطوري بوفيا، وبعدها تكسب معركة قدام أسطورة (فارس موت في بيهين أو مبارزة مع أسطورة). السهم كاسر الشر، المظلة، التثبيت اللي بيلفّ السهم على العدو، والاستبصار اللي بتطوّل المدى",
+        "وريث تزودان: محارب لفل 150 يقتل شيطان كبير، يروح أرض العمالقة وياخد المذكرات. الخمس خطوات بتخلّي الضربة ضعف، ولو متتالية بتعدّي فرق اللفل، وتقنية سلاح تزودان بتخلّي ضربك أقوى وأسرع. ووريث مومود: كتاب مومود بيقع نادر من الهياكل والأشباح للساحر، تقراه وتحرّر الليتش بتاعه في جبال الفوضى. سحر مومود الميه وبلا عنصر، شجرة السحر، سحب المانا، وإعادة التفسير"],
+      en: ["New legends from the novel, each one for a single player per world, starting again at level 1: Lantier, the Bow Saint, Tzudan's Successor and Mumud's Successor",
+        "Lantier: Doran teaches any thief of level 150 the techniques of Doran and Kasim, then you duel Bain, the Lantier of the day, and win. Skills: Moon Sting, Lantier's Poison, Shadow Technique, Shadow Soldiers, and Greed, which finishes any enemy under 15% health",
+        "Bow Saint: at level 150 an archer is offered to surpass the legendary archer Povia, then wins a battle against a legend (a death knight in Behen or a duel with a legend). Breaking Evil Arrow, Umbrella, Lock-on that bends arrows onto the enemy, and Clairvoyance that extends their range",
+        "Tzudan's Successor: a level 150 warrior slays a great demon, goes to the Giants' Land and takes the diary. Five Steps make the blow double, and in a row it ignores the level gap; Tzudan's Weapon Technique strikes harder and faster. Mumud's Successor: Mumud's spellbook rarely drops from skeletons and wraiths for a mage; read it and free his lich in the Chaos Mountains. Mumud's Water and No Attribute magic, the Magic Tree, Mana Drain and Re-interpretation"] },
     { v: '2026-10-23legkits', ver: '2.09', d: '2026-10-23',
       ar: ["رقصات سيف باجما زي الرواية: الربط سيل ضربات على عدو واحد، والقتل ضربة بتنزّف وبتوقّع في اليأس وبتاكل نص طاقتك، والموجة بتطلع حواليك وبتبطّأ وموجاتها بتروح للبعيد، والقيد محدش يقرب منك 3 ثواني غير الأموات، والتجاوز هجومك الضعف وضرباتك بتطير 30 ثانية، والدوران بيرجّع أي ضربة في نص الثانية الجاية، والقمة ضربة بتتجاهل 60% من الدروع",
         "كل الرقصات والدمج على مقياس واحد من الرواية (الضرر ×0.4 والكولداون ÷20). ونَفَس الحداد الأسطوري والصبر والإبداع والتصليح بييجوا مع الكلاس من لفل 1 زي الرواية",
@@ -1140,7 +1149,7 @@
         'الجزر 29 و40 و50 و60 نقط حفظ: لو مت بترجع لآخر نقطة، ولو مفيش بتطلع برا على الجسر',
         'جزيرة الضباب بتظهر صدفة وفيها عربية القرع: إكسير +10 لأي ستات بـ 250 نقطة، إتقان الأسلحة بـ 6000، وإتقان السحر بـ 5000',
         'الجزيرة 25: الحكيم ستيكس عيان. اعمله الدوا من جوز الهند الأزرق وورق شجرة العالم',
-        'الجزر 61 لـ 66: فرسان الموت بتوع باجما، لانتيير وأليكس وكروجر وجيس وبوفيا ومادرا، كل واحد بمهاراته، وبيسيبوا أدواتهم',
+        'الجزر 61 لـ 66: فرسان الموت بتوع باجما، لانتير وأليكس وكروجر وجيس وبوفيا ومادرا، كل واحد بمهاراته، وبيسيبوا أدواتهم',
         'لما تهزم مادرا الأرخبيل بيتطهر، وقاعة المشاهير بتفتح بتماثيلها (بركة يومين كل 3 أيام)، وستيكس بيديك لقب الملك البطل'],
       en: ['The Behen Archipelago: a bridge off the south coast leads to the gate of the first island. A dungeon for one, 66 islands one after another, and online everyone plays their own copy',
         'Every island has a mission: survive the sellobus, find the keys to the golden boxes, catch the fox mice, put out the fire, the blizzard, the poison island, the lightning room, the lizardwoman, the hell moon, the 30th island\'s nightmare, the great demon Furfu, yourself on the 41st, the golden crowns, the maze and the hell',
