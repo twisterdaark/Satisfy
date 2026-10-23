@@ -11257,7 +11257,12 @@ const mobSame=(m,s)=>{const w=s.split(','),x=+w[0],y=+w[1],hp=+w[2],fl=+w[3];ret
 // "h<life>.<damage>[.<stuns>.<last stun>[.<knock x>.<knock y>[.<heal>[.<weaknesses>.<last weakness>[.<slows>.<last slow>]]]]]"
 // in base 36, lengths in hundredths of a second; what a follower's hits did to a monster in this life, as totals
 function mobCumS(c){const f=[c.e,c.d,c.q,Math.round(c.s*100),c.kx,c.ky,c.h||0,c.wq||0,Math.round((c.ws||0)*100),c.sq||0,Math.round((c.ss||0)*100)];let n=f.length;while(n>2&&!f[n-1])n--;return 'h'+f.slice(0,n).map(v=>v.toString(36)).join('.');}
-function mobFlush(z){const t=performance.now(),mg=!!MOBN.merge&&t<MOBN.mergeT;if(MOBN.merge&&!mg){MOBN.merge=null;MOBN.dirty=1;}
+// follower: a weakness, a slow or a stun this player's skill gave a led copy outside a hit (a war cry, a slow after the
+// blow) goes to the host, whose copy every player's hits and the monster's own steps go by; this copy then is as the host's
+// (checked as mobDrive takes the host's state for the copy, before that state overwrites it, and at each flush)
+function mobLocal(m,key){const w=m.weak||0,sl=m.slowU||0,st=m.stun||0,W=w>(m.weakH||0)+.01,L=sl>(m.slowUH||0)+.01,T=st>(m.stunH||0)+.01;if(!W&&!L&&!T)return;
+ const c=mobCum(key||mobKey(m));if(W){c.wq++;c.ws=w;m.weak=m.weakH||0;}if(L){c.sq++;c.ss=Math.max(0,sl-gTime);m.slowU=m.slowUH||0;}if(T){c.q++;c.s=st;m.stun=m.stunH||0;}MOBN.dirty=1;}
+function mobFlush(z){for(const m of mons)if(m.led&&!m.dead&&mobOk(m))mobLocal(m);const t=performance.now(),mg=!!MOBN.merge&&t<MOBN.mergeT;if(MOBN.merge&&!mg){MOBN.merge=null;MOBN.dirty=1;}
  if(!MOBN.dirty&&!mg||t-MOBN.fT<(mg?MOB_MS:MOB_HIT))return;MOBN.fT=t;MOBN.dirty=0;const o={};let n=0;
  if(mg)for(const m of mons){if(n>=MOB_MAX)break;const k=mobKey(m);if(MOBN.merge.has(k)&&mobOk(m)&&!(k in o)){o[k]=mobEntry(m,false);n++;}}
  for(const [k,c] of MOBN.cum){if(n>=MOB_MAX)break;if(k in o)continue;o[k]=mobCumS(c);n++;}
@@ -11353,11 +11358,8 @@ function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))ret
  // comes first (the message alone could be lost); if not, it just dies
  if(fl&1){if(!m.dead){if(m.myHit){m.mobKill=1;m.hp=0;killMon(m);m.mobKill=0;}else{m.dead=true;m.dying=.5;m.rt=mobRt(m);vfx('death',m.x,m.y);}mobLife(key);}return true;}
  if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mkN:m.mkN,sg:m.sg,nk:m.nk,boss:m.boss,far:m.far},hid=m.hidN;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
- m.lv=lv;m.max=mx||mobBaseMax(m);m.stun=m.stunH=fl&8?.15:0;if(fl&16){m.wardT=gTime+.5;m.wardR=((fl>>5)&31)/20||.4;}else m.wardT=0; // a shield is the host's
- // a weakness or a slow this player's skill gave it (set after the hit): to the host, whose copy every player's hits and
- // the monster's own steps go by; this copy is weak and slow while the host's is
- {const w=m.weak||0,sl=m.slowU||0;if(w>(m.weakH||0)+.01||sl>(m.slowUH||0)+.01){const c=mobCum(key);if(w>(m.weakH||0)+.01){c.wq++;c.ws=w;}if(sl>(m.slowUH||0)+.01){c.sq++;c.ss=Math.max(0,sl-gTime);}MOBN.dirty=1;}
-  m.weak=m.weakH=fl&1024?.5:0;m.slowU=m.slowUH=fl&2048?gTime+.5:0;} // the host's full health and stun, not this copy's
+ mobLocal(m,key); /* anything this player's skill gave it since: to the host first */m.lv=lv;m.max=mx||mobBaseMax(m);m.stun=m.stunH=fl&8?.15:0;if(fl&16){m.wardT=gTime+.5;m.wardR=((fl>>5)&31)/20||.4;}else m.wardT=0; // a shield is the host's
+ m.weak=m.weakH=fl&1024?.5:0;m.slowU=m.slowUH=fl&2048?gTime+.5:0; // weak and slow while the host's copy is // the host's full health and stun, not this copy's
  if(b.boss){const ph=hp<330?2:hp<660?1:0;if(hp>=1000)m.ph=0;else if(ph>(m.ph||0)){m.ph=ph;shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='dopp')toast(t('dpSplit'),'warn');else if(m.type!=='belial')toast(t('bossPh'+ph,{b:itN(m.type)}),'warn');}} // SAT-ONLINE-045
  const nh=Math.max(1,Math.round(m.max*hp/1000)),mine=m.pendT&&performance.now()-m.pendT<1500;
  if(nh<m.hp){if(!mine&&m.hp-nh>=1){m.hurt=.12;num(m.x,monY(m)-8,String(m.hp-nh),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});}m.hp=nh;}else if(!mine)m.hp=nh; // another player's hit: its number shows here too
