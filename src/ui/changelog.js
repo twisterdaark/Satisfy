@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23looks', ver: '2.17', d: '2026-10-23',
+      ar: ["أونلاين: اللي إنت لابسه بيبان للناس زي ما بيبانلك بالظبط: الكوستيوم، ولون الكاب والبنطلون، والخوذة والجوانتي والبوت. قبل كده الباقيين كانوا بيشوفوا الشعر واللون والهدوم الأساسية بس",
+        "القديسة ومصاص الدما: الطيران والتخفي والأشكال اللي عليهم بقت بتوصل للباقيين، وهالة القديسة بتقوي اللي جنبها من صحابها أونلاين"],
+      en: ["Online: what you wear looks the same on everyone's screen as on yours: your costume, your dyed cape and trousers, your helmet, gloves and boots. Before, the others saw only your hair, skin and starting clothes",
+        "A saint's or a vampire's flight, stealth and forms now show to the others, and the saint's aura strengthens the friends beside her online"] },
     { v: '2026-10-23classpacks', ver: '2.16', d: '2026-10-23', hide: 1,
       ar: ["للمطورين: الكلاسات بقت ممكن تتكتب كبيانات (src/content/classpacks.js): الاسم، واختبار الترقية عند المدرّب، والسكيلات (طعنة، اندفاع، ضربة قدام، دايرة، رمية، تقوية، علاج، وباسيف)، وبتتحط في اللعبة لوحدها"],
       en: ["For developers: classes can be written as data (src/content/classpacks.js): the name, the trial at a trainer, and the skills (thrust, dash, sweep, nova, shot, buff, heal, and passive), installed by the game at load"] },
@@ -67,11 +72,6 @@
         "All dances and fusions on one scale from the novel (damage x0.4, cooldowns /20). The Legendary Blacksmith's Breath, Patience, Creation and Repair come with the class at level 1, as in the novel",
         "Braham's Successor has Braham's spells from the novel: Shield, Fire, Teleport, Weapon Enchant, Detect Force, Wind Cutter, Lightning, Grease, Mana Drain, Giga Lightning, Magic Contemplation and Assimilation. Magic Missile is three missiles at one enemy, and Absolute Zero (Bondre's spell) became Frozen Tempest",
         "The Saintess as in the novel: Hope, Discipline, Benevolent Light, Upright Heart (no abnormal condition takes hold) and Sacrifice from the class change, then Holy Weapon, Holy Impact, and Sanctuary Declaration at level 380. Second Life is gone since it is not in the novel"] },
-    { v: '2026-10-23looks', ver: '2.09', d: '2026-10-23',
-      ar: ["أونلاين: اللي إنت لابسه بيبان للناس زي ما بيبانلك بالظبط: الكوستيوم، ولون الكاب والبنطلون، والخوذة والجوانتي والبوت. قبل كده الباقيين كانوا بيشوفوا الشعر واللون والهدوم الأساسية بس",
-        "القديسة ومصاص الدما: الطيران والتخفي والأشكال اللي عليهم بقت بتوصل للباقيين، وهالة القديسة بتقوي اللي جنبها من صحابها أونلاين"],
-      en: ["Online: what you wear looks the same on everyone's screen as on yours: your costume, your dyed cape and trousers, your helmet, gloves and boots. Before, the others saw only your hair, skin and starting clothes",
-        "A saint's or a vampire's flight, stealth and forms now show to the others, and the saint's aura strengthens the friends beside her online"] },
     { v: '2026-10-23rbooks', ver: '2.08', d: '2026-10-23',
       ar: ["الوصفات بقت كتب لكل الحِرف: الطبخ والكيميا والخياطة والحدادة. بتشتريها من ناس الحرفة، أو بتقع من الوحوش والزعما، أو بتبدّلها وتبيعها في المزاد. دوس على الكتاب في الشنطة عشان تتعلم الوصفة",
         "الوصفة اللي لسه متعرفهاش بتظهر ??? ومكتوب جنبها مين بيبيع كتابها أو مين بيوقعه",
