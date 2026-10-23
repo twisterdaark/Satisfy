@@ -56,3 +56,21 @@ test("a costume, dyes, helmet, gloves and boots: the other player's screen draws
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+test("what a player's state shows (flight, stealth, a form, auras) reaches the others also for a saint or a vampire", async () => {
+  const ctx = await H.newContext();
+  try {
+    const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
+    const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    const ub = await b.eval(() => Satisfy.local.net().uid);
+    // a saint in stealth: "Qs" (the saint's party aura reads the Q)
+    await b.eval(() => { const G = window.__G; G.S.cls = 'saint'; G.P.stl = 60; });
+    await settle(a, b);
+    const mine = await b.eval(() => window.__GLK.mySt());
+    assert.match(mine, /Q/); assert.match(mine, /s/);
+    assert.equal(await a.eval((u) => window.__GLK.st(u), ub), mine, 'A reads it as B sends it');
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
