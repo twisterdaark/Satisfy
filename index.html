@@ -4661,6 +4661,7 @@ function meetTick(dt){if(!S||!P||ARN||TWR)return;if(S.comp)S.comp=null;const slo
  if(!MEET&&meetDone!==slot){const bs=meetBosses();if(!bs.length)return;const ids=['vantner','faker','jishuka'];const m=bs[slot%bs.length];MEET={slot,id:ids[slot%ids.length],m,joined:false};}
  const M=MEET;if(!M)return;const d=Math.hypot(P.x-M.m.x,P.y-M.m.y);
  if(M.m.hp<M.m.max&&d<300)M.joined=true;}
+window.__GMEET={get M(){return MEET},stop:()=>{MEET=null;COMPO=null;meetDone=Math.floor(Date.now()/MEETS);}}; // tests: no hero met this slot
 function setComp(id){const old=S.comp;S.comp=id||null;COMPO=null;if(id){toast(t(gk(id,'compOn'),{n:t(id)}),'good');SFX.quest();dialog(id,['cpGo_'+id]);}else if(old)toast(t(gk(old,'compOff'),{n:t(old)}));hudDirty=true;save(true);}
 function compHit(m,mul,crit){if(!m||m.dead)return;const my=monY(m),d=Math.max(1,Math.round(atkV()*mul*lvF(m.lv)*(.9+rand()*.2)*(crit?2:1)));m.hp-=d;netHit(m,d);m.hurt=.12;m.agg=1;m.eng=4;
  num(m.x+(rand()-.5)*8,my-8,String(d),crit?'#ffd24a':'#9fe39a',crit);vfx(crit?'crit':'hit',m.x,my,{});if(m.hp<=0)killMon(m);}
