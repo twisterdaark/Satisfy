@@ -546,7 +546,11 @@
       if (v === null) return null;
       const n6 = (x) => isInt(x, 0) && x <= 1000000;
       const ks = Object.keys(v).sort().join(','), g11 = (x) => isInt(x, 0) && x <= 1e11; // gi, go: gold in and out (SAT-ONLINE-093)
-      return (ks === 'cls,l,lv,n,s,t,w,wk' || (ks === 'cls,gi,go,l,lv,n,s,t,w,wk' && g11(v.gi) && g11(v.go))) && typeof v.wk === 'string' && /^w[0-9]{1,6}$/.test(v.wk) && typeof v.cls === 'string' && v.cls.length >= 1 && v.cls.length <= 16 && isInt(v.lv, 1) && v.lv <= 999 && n6(v.n) && typeof v.s === 'number' && v.s >= 0 && v.s <= 100000000 && n6(v.w) && n6(v.l) && isSV(v.t) ? null : 'balance values';
+      // SAT-ONLINE-154 (plan U045): duels and open PvP apart, their seconds, the gear band and the latency p95, each optional
+      const opt = { dw: n6, dl: n6, pk: n6, pd: n6, ds: (x) => typeof x === 'number' && x >= 0 && x <= 1e8, pt: (x) => typeof x === 'number' && x >= 0 && x <= 1e8, gb: (x) => isInt(x, 0) && x <= 9, lp: (x) => isInt(x, 0) && x <= 60000 };
+      for (const k in opt) if (k in v && !opt[k](v[k])) return 'balance values';
+      const ks0 = Object.keys(v).filter((k) => !(k in opt)).sort().join(',');
+      return (ks0 === 'cls,l,lv,n,s,t,w,wk' || (ks0 === 'cls,gi,go,l,lv,n,s,t,w,wk' && g11(v.gi) && g11(v.go))) && typeof v.wk === 'string' && /^w[0-9]{1,6}$/.test(v.wk) && typeof v.cls === 'string' && v.cls.length >= 1 && v.cls.length <= 16 && isInt(v.lv, 1) && v.lv <= 999 && n6(v.n) && typeof v.s === 'number' && v.s >= 0 && v.s <= 100000000 && n6(v.w) && n6(v.l) && isSV(v.t) ? null : 'balance values';
     }
     if (seg[0] === 'guildTrophy') { // SAT-ONLINE-090: a season's trophy, written by admins
       if (!user || seg.length !== 3 || data.get('admins/' + user.uid) !== true) return 'PERMISSION_DENIED: guildTrophy ' + p;

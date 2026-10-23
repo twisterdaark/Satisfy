@@ -114,11 +114,24 @@ test('balance figures: each class\'s kills, time to kill and PvP record this wee
     await until([own], () => /Balance \(w\d+, 2 players\)/.test(document.getElementById('dialog').textContent));
     const P = await pages(own);
     assert.equal(P[0], 'Balance (' + vb.wk + ', 2 players)');
-    assert.match(P[1], /^Magician: 1 players \(Lv \d+\) · 2 kills, 2(\.\d)? s each · PvP 0–1 \(0%\)$/);
-    assert.match(P[2], /^Warrior: 1 players \(Lv \d+\) · 1 kills, 2(\.\d)? s each · PvP 1–0 \(100%\)$/);
+    // SAT-ONLINE-154 (plan U045): duels and open PvP apart, the seconds to kill a player, the gear band, the latency p95
+    assert.match(P[1], /^Magician: 1 players \(Lv \d+\) · 2 kills, 2(\.\d)? s each · PvP 0–1 \(0%\) · duels 0–0 \(-\), - s a duel · open PvP 0–1, - s to kill · gear 0 · p95 (-|\d+) ms$/);
+    assert.match(P[2], /^Warrior: 1 players \(Lv \d+\) · 1 kills, 2(\.\d)? s each · PvP 1–0 \(100%\) · duels 0–0 \(-\), - s a duel · open PvP 1–0, \d+(\.\d)? s to kill · gear 0 · p95 (-|\d+) ms$/);
+    assert.match(P[3], /^Ranked is not ready: too few duels \(0 of 30\)( · connection p95 (-|\d+) ms \(needs 250 or less\))?$/);
+    const pv = await b.eval(() => window.__GMOD.bal());
+    assert.equal(pv.pk, 1); assert.ok(pv.pt > 0 && pv.pt < 60, 'from the first hit to the kill: ' + pv.pt);
+    assert.equal(await c.eval(() => window.__GMOD.bal().pd), 1);
+    assert.deepEqual(await own.eval(() => { const v = window.__fakeRTDB.data.get('balance/gBaB2'); return [v.pk, v.pd, v.dw, v.dl, v.gb]; }), [1, 0, 0, 0, 0], 'written with the rest');
+    // the thresholds (docs/online/FAIRNESS.md): enough duels, every class with enough winning 40-60%, p95 within 250 ms
+    const gate = (L) => own.eval((L) => window.__GMOD.balGate(L), L);
+    const cls = (c, dw, dl, lp) => ({ c, dw, dl, drate: dw + dl ? Math.round(dw * 100 / (dw + dl)) : null, lps: lp ? [lp] : [] });
+    assert.equal((await gate([cls('warrior', 20, 18, 120), cls('mage', 18, 20, 180)])).ok, true);
+    assert.deepEqual((await gate([cls('warrior', 30, 8, 120), cls('mage', 8, 30, 180)])).why, ['Warrior wins 79% (needs 40–60%)', 'Magician wins 21% (needs 40–60%)']);
+    assert.deepEqual((await gate([cls('warrior', 20, 18, 400), cls('mage', 18, 20, 420)])).why, ['connection p95 420 ms (needs 250 or less)']);
+    assert.equal(await b.eval(() => window.__GMOD.lat([50, 60, 70, 80, 90, 100, 110, 120, 130, 900])), 900, 'the 95th percentile');
     // the sums: last week's numbers don't count; no PvP is "-"
     assert.deepEqual(await own.eval(() => window.__GMOD.balStats({ a: { wk: 'w9', cls: 'mage', lv: 10, n: 10, s: 30, w: 1, l: 1 }, b: { wk: 'w9', cls: 'mage', lv: 20, n: 0, s: 0, w: 2, l: 0 }, c: { wk: 'w8', cls: 'mage', lv: 50, n: 99, s: 1, w: 0, l: 9 }, d: { wk: 'w9', cls: 'archer', lv: 5, n: 4, s: 10, w: 0, l: 0 } }, 'w9')),
-      [{ c: 'mage', p: 2, lv: 15, n: 10, ttk: 3, w: 3, l: 1, rate: 75 }, { c: 'archer', p: 1, lv: 5, n: 4, ttk: 2.5, w: 0, l: 0, rate: null }]);
+      [{ c: 'mage', p: 2, lv: 15, n: 10, ttk: 3, w: 3, l: 1, rate: 75, dw: 0, dl: 0, drate: null, dsec: null, pk: 0, pd: 0, pttk: null, gb: null, lp: null, lps: [] }, { c: 'archer', p: 1, lv: 5, n: 4, ttk: 2.5, w: 0, l: 0, rate: null, dw: 0, dl: 0, drate: null, dsec: null, pk: 0, pd: 0, pttk: null, gb: null, lp: null, lps: [] }]);
     // SAT-ONLINE-093: gold in and out this week, from every change of the bag's gold; "/economy" sums it and warns
     await shut(own);
     const g0 = await b.eval(() => Object.assign({}, window.__GMOD.bal()));
