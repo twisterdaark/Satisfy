@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23statin', ver: '2.40', d: '2026-10-23',
+      ar: ["في شباك الحالة بقى فيه مربع جنب كل ستات: اكتب عدد النقط اللي عايز تحطها ودوس Enter أو ✓. ولو كتبت أكتر من اللي معاك، بيتحط كل اللي معاك"],
+      en: ["The status window has a box by each stat: type how many points to put in it, then press Enter or ✓. More than you have puts in all you have"] },
     { v: '2026-10-23stygrid', ver: '2.39', d: '2026-10-23',
       ar: ["وشوش البنات بقت مدورة وفيها حياة، بعيون أكبر بلونين ونقطة نور، وبلاش ناعم، وبوق صغير. وفي الوش 3 اختيارات مكياج جديدة: جيارو، وجيارو جريء، ورموش دمية.",
           "الشعر بقى فيه تفاصيل أكتر للكل: لمعة على الراس، وخصل في الشعر الطويل، وغرة مقصوصة.",
