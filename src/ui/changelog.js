@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23qtrack', ver: '2.27', d: '2026-10-23',
+      ar: ["كل الكويستات بقى ليها تتبع: الوحش اللي مش جنبك أو ميت أو جاي في حدث (زي دارك باس وسيد المدينة 13 وجنود المملكة الخالدة والسلاح القديم والجولمات) السهم بيوديك لمكانه.",
+          "اللي تحت الأرض أو في دانجن أو جزر بيهين، السهم بيوديك للمدخل الأول، وجوه بيوديك للوحش نفسه أو لطريق الخروج.",
+          "كويستات الجمع بتشاور على أقرب شجرة أو عشب أو خام أو الصياد، واختبارات الكلاسات على أقرب وحش أو شخص، والصلاة على القسيس.",
+          "سطر الفصل الجاي في القصة بقى ليه 📍 بيوديك للي هيديك الكويست، وتفاصيله بتقول لو لفلك لسه مش كفاية."],
+      en: ["Every quest can be tracked now: a monster that isn't near, is dead or comes with an event (Dark Bass, the City 13 lord, the Immortal Kingdom's soldiers, the ancient weapon, the golems) gets the arrow to where it lives.",
+          "Under the world, in a dungeon or on the Behen islands the arrow takes you to the way in first, and inside to the monster itself or the way out.",
+          "Gathering quests point to the nearest tree, herb, ore or the fisherman; class trials to the nearest monster or person; the prayer to the priest.",
+          "The story's next chapter line has a 📍 to whoever gives it, and its details say if your level isn't enough yet."] },
     { v: '2026-10-23toasts', ver: '2.26', d: '2026-10-23',
       ar: ["الإشعارات بتقعد على قد طول الكلام (من 4 لـ12 ثانية)، والمهمة منها (الأخضر والتحذيرات) 8 ثواني على الأقل، والإعلانات 10 ثواني.",
           "لو الماوس واقف على إشعار مبيختفيش، ولو دوست عليه بيقفل. ولما تيجي رسايل كتير مع بعض، العادية هي اللي بتمشي الأول مش المهمة.",
