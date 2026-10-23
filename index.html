@@ -11209,7 +11209,7 @@ function mobLife(k){if(MOBN.cum.delete(k))MOBN.dirty=1;MOBN.ep.set(k,(MOBN.ep.ge
 // every damage source on a monster goes through here; true when the hit was handed to another player (local HP kept).
 // ally: a blow from the world's NPCs (the town's defenders in an invasion, the war's allies), which every screen runs: only
 // the host's count, so they don't hit once for each player there (SAT-ONLINE-149)
-function netHit(m,dmg,ally){if(PRAID&&praidHit(m,dmg))return true;if(!MOBN||!mobOk(m))return false;if(!ally)m.myHit=1;if(!MOBN.host)return false;
+function netHit(m,dmg,ally){if(PRAID&&praidHit(m,dmg))return true;if(!MOBN||!mobOk(m))return false;if(!ally){m.myHit=1;m.myHitT=gTime;}if(!MOBN.host)return false;
  if(MOBN.host===NET.uid){if(!ally)mobHitBy(m,NET.uid);return false;}
  if(!m.led)return false;if(ally){m.hp+=dmg;return true;}const k=mobKey(m);let c=MOBN.cum.get(k);if(!c)MOBN.cum.set(k,c={e:MOBN.ep.get(k)||0,d:0,q:0,s:0,kx:0,ky:0});
  c.d+=Math.max(1,Math.min(1e6,Math.round(dmg)));if((m.stun||0)>(m.stunH||0)+.01){c.q++;c.s=m.stun;m.stun=m.stunH||0;} // a stun this hit gave: the host's copy is the one stunned
@@ -11240,13 +11240,14 @@ function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!ARN&&!TWR&&!solo(P
   // what you see around you goes to the new host first (MOB_MERGE ms), so the monsters you were fighting
   // stay where they are with the health they have, the ones you killed stay dead, and ones the host never had (an event's
   // wave it missed) are made on its side, instead of all taking the host's copies or vanishing
-  // (only the ones in use: fighting, hurt, dead by your hand, or an event's; one just standing about takes the host's copy)
+  // (only the ones you were in: hit, or killed, by you in the last MOB_MINE s, and an event's; the rest take the host's copy,
+  // as a stale one you only saw would take the host's back for a moment)
   // (at every change of host: a new group, the host left, or an old host back and hosting again)
-  if(MOBN.host&&MOBN.host!==NET.uid){MOBN.merge=new Set();for(const m of mons)if(mobOk(m)&&Math.abs(m.x-P.x)<MOB_BX&&Math.abs(m.y-P.y)<MOB_BY&&(m.dead?m.rt<1e8&&!m.hidN:m.eng>0||m.hp<m.max||m.ek))MOBN.merge.add(mobKey(m));MOBN.mergeT=performance.now()+MOB_MERGE;MOBN.dirty=1;}}
+  if(MOBN.host&&MOBN.host!==NET.uid){MOBN.merge=new Set();for(const m of mons)if(mobOk(m)&&Math.abs(m.x-P.x)<MOB_BX&&Math.abs(m.y-P.y)<MOB_BY&&(m.dead?m.rt<1e8&&!m.hidN&&gTime-(m.myHitT??-1e9)<MOB_MINE:m.ek||gTime-(m.myHitT??-1e9)<MOB_MINE))MOBN.merge.add(mobKey(m));MOBN.mergeT=performance.now()+MOB_MERGE;MOBN.dirty=1;}}
  if(!z)return;
  if(MOBN.host===NET.uid){const t=performance.now();for(const m of mons)if(m.biteT>0)m.biteT-=1/60;if(MOBN.allD!==MOBN.allN){MOBN.allD=MOBN.allN;mobHits();}if(t-MOBN.sent>=(MOBN.fast?MOB_FAST:MOB_MS)){MOBN.sent=t;MOBN.fast=0;NETTR.mobsPut(z,mobList(rs),NET.uid);MOBN.put=true;}}
  else{mobMake();mobFlush(z);}}
-const MOB_MERGE=2000;
+const MOB_MERGE=1200,MOB_MINE=10;
 const mobSame=(m,s)=>{const w=s.split(','),x=+w[0],y=+w[1],hp=+w[2],fl=+w[3];return !!(fl&1)===!!m.dead&&(m.dead||Math.hypot(x-m.x,y-m.y)<30&&Math.abs(hp-Math.round(1000*m.hp/m.max))<=25);};
 // follower: its node beside the host's list: the damage totals (always), and during the merge what it sees around it
 function mobFlush(z){const t=performance.now(),mg=!!MOBN.merge&&t<MOBN.mergeT;if(MOBN.merge&&!mg){MOBN.merge=null;MOBN.dirty=1;}
