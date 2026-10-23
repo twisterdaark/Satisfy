@@ -11,7 +11,9 @@
 //   - B's share of a kill when the host's "it died" message is lost: B still gets it, once;
 //   - the host leaves in the middle of a fight: B goes on with the same monster as it was;
 //   - the world's NPC allies (a town's defenders, the war's allies), run on every screen, hit once (the host's), while your
-//     own (a companion, Regas's knights) hit as you do.
+//     own (a companion, Regas's knights) hit as you do;
+//   - a monster draining B (v2.04's signature moves) heals on the host, so both bars rise the same; a shield (ward) is the
+//     host's; a boss's wind-up shows on every screen.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -198,9 +200,11 @@ test('the host leaves in the middle of a fight: B goes on with the same monster,
     await frames([a, b], 30);
     const s0 = await state(b, k);
     assert.ok(Math.abs(s0.pm - 500) <= 20, 'B sees the host\'s half: ' + s0.pm);
+    await on(b, (k) => { by(k).cd = 5; }, k);
     await a.close();
     let prev = s0, jump = 0, top = 0;
-    for (let i = 0; i < 40; i++) { await frames([b], 6); const s = await state(b, k); if (!s || s.dead) break; jump = Math.max(jump, Math.hypot(s.x - prev.x, s.y - prev.y)); top = Math.max(top, s.pm); prev = s; }
+    // once B runs it on its own, its own moves (v2.04: a wolf's leap, a potion) are the game, not a jump: none here (Claude-B, #187)
+    for (let i = 0; i < 40; i++) { await on(b, (k) => { const m = by(k); if (m) m.cd = Math.max(m.cd || 0, 5); }, k); await frames([b], 6); const s = await state(b, k); if (!s || s.dead) break; jump = Math.max(jump, Math.hypot(s.x - prev.x, s.y - prev.y)); top = Math.max(top, s.pm); prev = s; }
     assert.equal(await hostOf(b), null, 'B on its own');
     assert.ok(jump <= 50, 'no jump: ' + Math.round(jump));
     assert.ok(top <= 520, 'its health as it was: ' + top);
@@ -272,6 +276,58 @@ test('the host goes away, the others fight on, the host comes back: the monster 
     assert.ok(top <= s1.pm + 30, "B's monster never went back to A's old health: " + top + '‰ (was ' + s1.pm + '‰)');
     const sa = await state(a, k);
     assert.ok(Math.abs(sa.pm - s1.pm) <= 40, 'A has it as B left it: ' + sa.pm + '‰');
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+test('a monster draining B heals itself on the host, so both bars rise the same and B\'s doesn\'t jump', async () => {
+  const { ctx, a, b } = await pair();
+  try {
+    const [k] = await nearest(b, 1);
+    for (const g of [a, b]) await on(g, (k) => { const m = by(k); m.max = 1e6; m.hp = 5e5; m.agg = 0; m.eng = 0; }, k);
+    await on(a, (k) => { by(k).stun = 30; }, k);
+    await frames([a, b], 40);
+    assert.deepEqual([(await state(a, k)).pm, (await state(b, k)).pm], [500, 500]);
+    await on(b, (k) => window.__GM.mx({ k: 'arc', drain: 0.1 }, by(k)), k); // its blow on B drains a tenth of its health back
+    let hi = 0;
+    for (let i = 0; i < 30; i++) { await frames([a, b], 2); hi = Math.max(hi, (await state(b, k)).pm); }
+    assert.equal((await state(a, k)).pm, 600, "healed on the host's copy");
+    assert.equal((await state(b, k)).pm, 600, "and so on B's");
+    assert.ok(hi <= 600, "B's bar never above the host's: " + hi);
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+test("a shield (v2.04's ward) is the host's: B's copy has it while the host's has it, with the same share, and loses it with it", async () => {
+  const { ctx, a, b } = await pair();
+  try {
+    const [k] = await nearest(b, 1);
+    for (const g of [a, b]) await on(g, (k) => { const m = by(k); m.max = m.hp = 1e6; m.agg = 0; m.eng = 0; }, k);
+    await on(a, (k) => { const m = by(k); m.stun = 30; m.wardT = window.__GANIM.t() / 1000 + 30; m.wardR = 0.45; }, k);
+    await frames([a, b], 30);
+    const w = (g) => on(g, (k) => { const m = by(k); return { on: m.wardT > window.__GANIM.t() / 1000, r: m.wardR }; }, k);
+    assert.deepEqual(await w(b), { on: true, r: 0.45 }, 'shielded on B too');
+    // a shield only B's copy got (its own replay picked another monster): not B's to keep
+    const [k2] = (await nearest(b, 2)).filter((x) => x !== k);
+    if (k2) { await on(b, (k) => { by(k).wardT = window.__GANIM.t() / 1000 + 30; }, k2); await frames([a, b], 20); assert.equal((await on(b, (k) => by(k).wardT > window.__GANIM.t() / 1000, k2)), false, "not shielded where the host's isn't"); }
+    await on(a, (k) => { by(k).wardT = 0; }, k);
+    await frames([a, b], 30);
+    assert.equal((await w(b)).on, false, 'and loses it with the host');
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+test("a boss's wind-up before its blow shows on B's screen too, not only the host's", async () => {
+  const { ctx, a, b } = await pair();
+  try {
+    const [k] = await nearest(b, 1);
+    for (const g of [a, b]) await on(g, (k) => { const m = by(k); m.max = m.hp = 1e6; m.agg = 0; m.eng = 0; }, k);
+    await on(a, (k) => { by(k).stun = 30; }, k);
+    await frames([a, b], 30);
+    await on(a, (k) => { const m = by(k); m.bw = 0.5; window.__GM.act(m); }, k); // as the boss AI winds up
+    let seen = 0;
+    for (let i = 0; i < 20 && !seen; i++) { await frames([a, b], 2); if (await on(b, (k) => by(k).bw > 0, k)) seen = 1; }
+    assert.equal(seen, 1, 'B saw it wind up');
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });

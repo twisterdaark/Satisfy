@@ -8166,7 +8166,7 @@ function update(dt){
    // owner 2026-10-23: no more one slam for every boss. A boss fights with its own moves (each phase opens more of them) and
    // between moves still winds up its blow at anyone standing in reach
    if(RKMV[m.type]&&!BOSSX.has(m.type)){if(m.bw>0){m.bw-=dt;m.face=dx>0?1:-1;if(m.bw<=0){m.mcd=1.4;if(d<b.r+10&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);mobBite(m);}}}
-    else{const ox=m.x;monAct(m,b,'boss',dx,dy,d,mr,dt);monTurn(m,b,ox,dt);m.mcd=(m.mcd||0)-dt;if(!m.st&&d<b.r+6&&m.mcd<=0&&seeP(m)){m.bw=.5;num(m.x,m.y-(b.oy||22)*(b.sc||1)-6,'!','#ff5a4a',true);fx.push({ring:true,x:m.x,y:m.y-4,t:.35});}}
+    else{const ox=m.x;monAct(m,b,'boss',dx,dy,d,mr,dt);monTurn(m,b,ox,dt);m.mcd=(m.mcd||0)-dt;if(!m.st&&d<b.r+6&&m.mcd<=0&&seeP(m)){m.bw=.5;mobActN(m);num(m.x,m.y-(b.oy||22)*(b.sc||1)-6,'!','#ff5a4a',true);fx.push({ring:true,x:m.x,y:m.y-4,t:.35});}}
     continue;}
    if(m.tele>0){m.tele-=dt;if(m.tele<=0){shake=.4;SFX.slam();if(d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}if(m.type==='guardian')slamAllies(m);for(let i=0;i<24;i++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:m.type==='berith'?(rand()<.5?'#ffd24a':'#c8a050'):'#8a8f99'});}m.scd=(enr?1.7:2.6)-(m.ph||0)*.25;
     if(m.ph>=2)for(let i=0;i<10;i++){const a=i/10*6.283;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*120,vy:Math.sin(a)*120,t:1.4,m,mv:{mul:.35},sp:'rock',a});}}}
@@ -9123,7 +9123,7 @@ const MXK={
  rain(m,b,mv,d,dx,dy,rep){for(const [x,y,dl] of rainPts(m,mv))ezone.push({x,y,r:mv.zr||16,t:(mv.fall||.8)+dl,T:(mv.fall||.8)+dl,lin:mv.lin||0,m,mv});SFX.notice();},
  heal(m,b,mv,d,dx,dy,rep){vfx('heal',m.x,m.y);num(m.x,m.y-40,t(mv.pot?'mxPot':'mxRegen'),'#9fe39a',false);if(rep)return;const h=Math.round(m.max*(mv.pct||.2));m.hp=Math.min(m.max,m.hp+h);num(m.x,m.y-30,'+'+h.toLocaleString('en'),'#7ae07a',false);},
  mend(m,b,mv,d,dx,dy,rep){const o=mxHurt(m,mv.rng||150,.95);if(!o)return;mxBeam(m,o,'#9fe39a');vfx('heal',o.x,o.y);if(rep)return;const h=Math.round(o.max*(mv.pct||.2));o.hp=Math.min(o.max,o.hp+h);num(o.x,o.y-30,'+'+h.toLocaleString('en'),'#7ae07a',false);},
- ward(m,b,mv,d,dx,dy,rep){const o=mv.ally&&mxHurt(m,mv.rng||150,1.01)||m;if(o!==m)mxBeam(m,o,'#9fd8ff');o.wardT=gTime+(mv.t||5);o.wardR=mv.red||.45;SFX.clang();},
+ ward(m,b,mv,d,dx,dy,rep){const o=mv.ally&&mxHurt(m,mv.rng||150,1.01)||m;if(o!==m)mxBeam(m,o,'#9fd8ff');if(!rep){o.wardT=gTime+(mv.t||5);o.wardR=mv.red||.45;}SFX.clang();},
  call(m,b,mv,d,dx,dy,rep){vfx('rage',m.x,m.y);SFX.notice();num(m.x,m.y-40,t('mxCall'),'#ffb04a',false);if(rep)return;for(const o of mons)if(o!==m&&!o.dead&&(mv.kin?mv.kin.includes(o.type):o.type===m.type)&&Math.hypot(o.x-m.x,o.y-m.y)<(mv.rng||300)){o.eng=4;o.agg=1;o.sprT=2.5;o.tired=0;o.prov=gTime+8;}},
  cry(m,b,mv,d,dx,dy,rep){vfx('rage',m.x,m.y);SFX.notice();shake=Math.max(shake,.12);fx.push({ring:true,x:m.x,y:m.y-4,t:.45});num(m.x,m.y-40,t('mxCry'),'#ff8a4a',false);
   for(const o of mons)if(!o.dead&&(o===m||Math.hypot(o.x-m.x,o.y-m.y)<(mv.rng||150))){o.fury=gTime+(mv.t||6);if(!rep&&o!==m){o.sprT=2;o.cd=Math.min(o.cd,.4);}}}};
@@ -9133,7 +9133,7 @@ function mxOn(mv,m){if(!mv||!P)return;
  if(mv.slow){if(!((P.slowT||0)>gTime))numP(-34,t('mxSlow'),'#9fd8ff',false);P.slowT=Math.max(P.slowT||0,gTime+mv.slow);}
  if(mv.root&&!((P.rootI||0)>gTime)&&!legResist()){P.rootT=gTime+mv.root;P.rootI=P.rootT+1.5;numP(-34,t('mxRoot'),'#c8a050',false);SFX.clang();}
  if(!m||m.dead)return;
- if(mv.drain){const h=Math.round(m.max*mv.drain);m.hp=Math.min(m.max,m.hp+h);num(m.x,m.y-26,'+'+h.toLocaleString('en'),'#ff5a7a',false);mxBeam(P,m,'#d8283a');}
+ if(mv.drain){const h=Math.round(m.max*mv.drain);mobHeal(m,h);num(m.x,m.y-26,'+'+h.toLocaleString('en'),'#ff5a7a',false);mxBeam(P,m,'#d8283a');}
  if(mv.hook&&!(P.dash>0)){const hx=m.x-P.x,hy=m.y-P.y,hl=Math.hypot(hx,hy)||1,s=Math.max(0,Math.min(mv.hook,hl-16));move(P,hx/hl*s,hy/hl*s,4);}
  if(mv.focus||mv.root)for(const o of mons)if(o!==m&&!o.dead&&o.eng>0&&Math.hypot(o.x-m.x,o.y-m.y)<170){o.cd=Math.min(o.cd,.05);o.sprT=1.6;o.tired=0;}}
 function mxTick(dt){if(!P||mode==='dead')return;
@@ -11209,9 +11209,13 @@ function mobLife(k){if(MOBN.cum.delete(k))MOBN.dirty=1;MOBN.ep.set(k,(MOBN.ep.ge
 // every damage source on a monster goes through here; true when the hit was handed to another player (local HP kept).
 // ally: a blow from the world's NPCs (the town's defenders in an invasion, the war's allies), which every screen runs: only
 // the host's count, so they don't hit once for each player there (SAT-ONLINE-149)
+const mobCum=k=>{let c=MOBN.cum.get(k);if(!c)MOBN.cum.set(k,c={e:MOBN.ep.get(k)||0,d:0,q:0,s:0,kx:0,ky:0,h:0});return c;};
+// a monster healing itself off a blow on you (a drain): on a follower the host's copy heals, so every bar rises the same;
+// this copy's bar follows the host's list, as for damage (SAT-ONLINE-149, with the signature moves of v2.04)
+function mobHeal(m,h){h=Math.max(0,Math.round(h));if(!h)return;if(MOBN&&MOBN.host&&MOBN.host!==NET.uid&&m.led&&mobOk(m)){const c=mobCum(mobKey(m));c.h=(c.h||0)+Math.min(1e6,h);MOBN.dirty=1;return;}m.hp=Math.min(m.max,m.hp+h);}
 function netHit(m,dmg,ally){if(PRAID&&praidHit(m,dmg))return true;if(!MOBN||!mobOk(m))return false;if(!ally){m.myHit=1;m.myHitT=gTime;}if(!MOBN.host)return false;
  if(MOBN.host===NET.uid){if(!ally)mobHitBy(m,NET.uid);return false;}
- if(!m.led)return false;if(ally){m.hp+=dmg;return true;}const k=mobKey(m);let c=MOBN.cum.get(k);if(!c)MOBN.cum.set(k,c={e:MOBN.ep.get(k)||0,d:0,q:0,s:0,kx:0,ky:0});
+ if(!m.led)return false;if(ally){m.hp+=dmg;return true;}const k=mobKey(m);const c=mobCum(k);
  c.d+=Math.max(1,Math.min(1e6,Math.round(dmg)));if((m.stun||0)>(m.stunH||0)+.01){c.q++;c.s=m.stun;m.stun=m.stunH||0;} // a stun this hit gave: the host's copy is the one stunned
  if(m.dvx!==undefined){const kx=m.x-m.dvx,ky=m.y-m.dvy;if(Math.abs(kx)+Math.abs(ky)>=1){c.kx+=Math.round(kx);c.ky+=Math.round(ky);m.dvx=m.x;m.dvy=m.y;m.pendK=performance.now();}} // and the knockback: it moves the host's copy
  MOBN.dirty=1;m.hp=Math.max(1,m.hp);m.pendT=performance.now();return true;} // the hit shows at once here; the kill comes from the host
@@ -11253,15 +11257,15 @@ const mobSame=(m,s)=>{const w=s.split(','),x=+w[0],y=+w[1],hp=+w[2],fl=+w[3];ret
 function mobFlush(z){const t=performance.now(),mg=!!MOBN.merge&&t<MOBN.mergeT;if(MOBN.merge&&!mg){MOBN.merge=null;MOBN.dirty=1;}
  if(!MOBN.dirty&&!mg||t-MOBN.fT<(mg?MOB_MS:MOB_HIT))return;MOBN.fT=t;MOBN.dirty=0;const o={};let n=0;
  if(mg)for(const m of mons){if(n>=MOB_MAX)break;const k=mobKey(m);if(MOBN.merge.has(k)&&mobOk(m)&&!(k in o)){o[k]=mobEntry(m,false);n++;}}
- for(const [k,c] of MOBN.cum){if(n>=MOB_MAX)break;if(k in o)continue;o[k]='h'+c.e.toString(36)+'.'+c.d.toString(36)+(c.q||c.kx||c.ky?'.'+c.q.toString(36)+'.'+Math.round(c.s*100).toString(36):'')+(c.kx||c.ky?'.'+c.kx.toString(36)+'.'+c.ky.toString(36):'');n++;}
+ for(const [k,c] of MOBN.cum){if(n>=MOB_MAX)break;if(k in o)continue;o[k]='h'+c.e.toString(36)+'.'+c.d.toString(36)+(c.q||c.kx||c.ky||c.h?'.'+c.q.toString(36)+'.'+Math.round(c.s*100).toString(36):'')+(c.kx||c.ky||c.h?'.'+c.kx.toString(36)+'.'+c.ky.toString(36):'')+(c.h?'.'+c.h.toString(36):'');n++;}
  if(n){NETTR.mobsPut(z,o,NET.uid);MOBN.put=true;}else if(MOBN.put){NETTR.mobsPut(null,null,NET.uid);MOBN.put=false;}}
 // host: what its followers' nodes say: damage done since it last looked, and during a merge the monsters they saw
 function mobHits(){for(const u in MOBN.all){if(u===NET.uid||u===MOBN.host||!MOBN.rs.some(r=>r.uid===u))continue;const L=MOBN.all[u];if(!L||!L.m||typeof L.m!=='object')continue;
   let Sn=MOBN.seen.get(u);if(!Sn)MOBN.seen.set(u,Sn=new Map());
   for(const k in L.m){const v=String(L.m[k]);if(v[0]!=='h'){mobAdopt(k,v,u);continue;}
-   const p=v.slice(1).split('.'),e=parseInt(p[0],36),d=parseInt(p[1],36),q=p[2]?parseInt(p[2],36):0,st=p[3]?parseInt(p[3],36)/100:0,kx=p[4]?parseInt(p[4],36):0,ky=p[5]?parseInt(p[5],36):0;if(!(e>=0)||!(d>=0)||!isFinite(d)||!(q>=0)||!isFinite(kx)||!isFinite(ky))continue;
-   const o=Sn.get(k),same=o&&o.e===e,dd=same?d-o.d:d,dq=same?q-o.q:q,dx=same?kx-o.kx:kx,dy=same?ky-o.ky:ky;Sn.set(k,{e,d,q,kx,ky});if(!(dd>0)&&!(dq>0)&&!dx&&!dy)continue;
-   const m=mobByKey(k);if(!m||m.dead)continue;mobGotHit(m,Math.min(1e6,Math.max(0,dd)),u,dq>0?st:0);if((dx||dy)&&!m.dead&&!MT[m.type].boss)move(m,Math.max(-60,Math.min(60,dx)),Math.max(-60,Math.min(60,dy)),Math.max(3,MT[m.type].r-2));}
+   const p=v.slice(1).split('.'),e=parseInt(p[0],36),d=parseInt(p[1],36),q=p[2]?parseInt(p[2],36):0,st=p[3]?parseInt(p[3],36)/100:0,kx=p[4]?parseInt(p[4],36):0,ky=p[5]?parseInt(p[5],36):0,hl=p[6]?parseInt(p[6],36):0;if(!(e>=0)||!(d>=0)||!isFinite(d)||!(q>=0)||!isFinite(kx)||!isFinite(ky)||!(hl>=0)||!isFinite(hl))continue;
+   const o=Sn.get(k),same=o&&o.e===e,dd=same?d-o.d:d,dq=same?q-o.q:q,dx=same?kx-o.kx:kx,dy=same?ky-o.ky:ky,dh=same?hl-(o.h||0):hl;Sn.set(k,{e,d,q,kx,ky,h:hl});if(!(dd>0)&&!(dq>0)&&!dx&&!dy&&!(dh>0))continue;
+   const m=mobByKey(k);if(!m||m.dead)continue;if(dd>0||dq>0||dx||dy)mobGotHit(m,Math.min(1e6,Math.max(0,dd)),u,dq>0?st:0);if(dh>0&&!m.dead)m.hp=Math.min(m.max,m.hp+Math.min(1e6,dh));if((dx||dy)&&!m.dead&&!MT[m.type].boss)move(m,Math.max(-60,Math.min(60,dx)),Math.max(-60,Math.min(60,dy)),Math.max(3,MT[m.type].r-2));}
   for(const k of [...Sn.keys()])if(!(k in L.m))Sn.delete(k);}}
 // host: a monster a player coming into the group saw. Its health is the lower of the two (a fight goes on, whoever was in
 // it: the host coming back to a fight the others carried on included); its place and target are the other player's,
@@ -11299,11 +11303,12 @@ function mobList(rs){const o={},pts=[P].concat(rs);let n=0;
  for(const m of mons.filter(m=>MT[m.type].boss&&near(m)).concat(mons.filter(m=>!MT[m.type].boss&&near(m)))){if(n>=MOB_MAX)break;
   o[mobKey(m)]=mobEntry(m,true);n++;}
  return o;}
-// "x,y,hp per mille,flags (1 dead, 2 fighting, 4 facing left, 8 stunned),level", then the action (SAT-ONLINE-042: 7 more
+// "x,y,hp per mille,flags (1 dead, 2 fighting, 4 facing left, 8 stunned, 16 shielded with the share it takes in twentieths
+// from bit 5: SAT-ONLINE-149 with v2.04's ward),level", then the action (SAT-ONLINE-042: 7 more
 // fields), then (SAT-ONLINE-149) the full health in base 36 when it isn't the one the level gives: 5, 6, 12 or 13 fields
 function mobBaseMax(m){const b=MT[m.type];return Math.max(1,Math.round(b.hp*(1+((m.lv|0)-b.lv[0])*.03)));}
 const mobMaxOf=s=>{const v=parseInt(s,36);return v>=1&&v<1e13?v:0;};
-function mobEntry(m,act){const mx=Math.round(m.max);return Math.round(m.x)+','+Math.round(m.y)+','+(m.dead?0:Math.max(1,Math.round(1000*m.hp/m.max)))+','+((m.dead?1:0)|(m.eng>0?2:0)|(m.face<0?4:0)|(m.stun>0&&!m.dead?8:0))+','+(m.lv|0)+(act?mobActS(m):'')+(mx>=1&&mx<1e13&&mx!==mobBaseMax(m)?','+mx.toString(36):'');}
+function mobEntry(m,act){const mx=Math.round(m.max);return Math.round(m.x)+','+Math.round(m.y)+','+(m.dead?0:Math.max(1,Math.round(1000*m.hp/m.max)))+','+((m.dead?1:0)|(m.eng>0?2:0)|(m.face<0?4:0)|(m.stun>0&&!m.dead?8:0)|(m.wardT>gTime&&!m.dead?16|Math.max(1,Math.min(31,Math.round((m.wardR||.4)*20)))<<5:0))+','+(m.lv|0)+(act?mobActS(m):'')+(mx>=1&&mx<1e13&&mx!==mobBaseMax(m)?','+mx.toString(36):'');}
 /* SAT-ONLINE-042 (owner 2026-10-19: the red attack zone showed for some players and not others; a monster could chase one
    player on one screen and bite another on the other). The host's copy is the only one that thinks; each listed monster now
    also carries what it is doing: ",n,s,i,t,a,l,g" = action number (a new one at every move, slam or bite), state (t
@@ -11313,12 +11318,12 @@ function mobEntry(m,act){const mx=Math.round(m.max);return Math.round(m.x)+','+M
    player, the way the host's strikes only hurt the host's: so everyone sees the same red zone, and dodging it on your
    screen is dodging it. A new action is sent at once (MOB_FAST), not at the next quarter second. */
 const MOB_FAST=60;
-window.__GM={get host(){return MOBN&&MOBN.host},get group(){return MOBN?MOBN.rs.map(r=>r.uid):[]},get list(){const L=MOBN&&MOBN.all[MOBN.host];return L&&L.m||null},hit:(m,d,a)=>netHit(m,d,a)}; // tests
+window.__GM={get host(){return MOBN&&MOBN.host},get group(){return MOBN?MOBN.rs.map(r=>r.uid):[]},get list(){const L=MOBN&&MOBN.all[MOBN.host];return L&&L.m||null},hit:(m,d,a)=>netHit(m,d,a),mx:(mv,m)=>mxOn(mv,m),act:m=>mobActN(m)}; // tests
 const uh=u=>{let h=0x811c9dc5;u=String(u||'');for(let i=0;i<u.length;i++){h^=u.charCodeAt(i);h=Math.imul(h,0x01000193);}return ((h>>>0)&0xfff).toString(16);};
 function mobActN(m){if(!MOBN||MOBN.host!==NET.uid)return;m.actN=((m.actN||0)+1)%1000;MOBN.fast=1;}
 function mobBite(m){if(!MOBN||MOBN.host!==NET.uid)return;mobActN(m);m.biteT=.35;}
-function mobActS(m){if(!m.actN||m.dead)return '';const st=m.br>0?'f':m.biteT>0?'b':m.st==='tele'?'t':m.st==='dash'?'d':m.st==='rec'?'r':MT[m.type].boss&&m.tele>0?'s':'0';
- const mv=m.mv,L=mv&&!mv.blk?movesOf(m).indexOf(mv):-1,i=mv&&mv.blk?99:Math.max(0,L),tl=st==='f'?m.br:st==='s'?m.tele:st==='b'?m.biteT:m.stT||0,an=st==='f'?m.ba:Math.atan2(m.ay||0,m.ax||1);
+function mobActS(m){if(!m.actN||m.dead)return '';const st=m.br>0?'f':m.biteT>0?'b':m.bw>0?'w':m.st==='tele'?'t':m.st==='dash'?'d':m.st==='rec'?'r':MT[m.type].boss&&m.tele>0?'s':'0';
+ const mv=m.mv,L=mv&&!mv.blk?movesOf(m).indexOf(mv):-1,i=mv&&mv.blk?99:Math.max(0,L),tl=st==='f'?m.br:st==='s'?m.tele:st==='b'?m.biteT:st==='w'?m.bw:m.stT||0,an=st==='f'?m.ba:Math.atan2(m.ay||0,m.ax||1);
  return ','+m.actN+','+st+','+i+','+Math.max(0,Math.round(tl*100))+','+Math.round(an*100)+','+(m.lL|0)+','+uh(m.tgU);}
 // host: the nearest player this monster could be after, as a stand-in that takes no damage here (inv), or null for you
 function mobTarget(m){if(!mobOk(m)||m.dead)return null;const dP=P.ghost||mode==='dead'?1e9:Math.hypot(P.x-m.x,P.y-m.y);
@@ -11341,7 +11346,7 @@ function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))ret
  // comes first (the message alone could be lost); if not, it just dies
  if(fl&1){if(!m.dead){if(m.myHit){m.mobKill=1;m.hp=0;killMon(m);m.mobKill=0;}else{m.dead=true;m.dying=.5;m.rt=mobRt(m);vfx('death',m.x,m.y);}mobLife(key);}return true;}
  if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mk:m.mk,sg:m.sg,nk:m.nk,boss:m.boss,far:m.far},hid=m.hidN;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
- m.lv=lv;m.max=mx||mobBaseMax(m);m.stun=m.stunH=fl&8?.15:0; // the host's full health and stun, not this copy's
+ m.lv=lv;m.max=mx||mobBaseMax(m);m.stun=m.stunH=fl&8?.15:0;if(fl&16){m.wardT=gTime+.5;m.wardR=((fl>>5)&31)/20||.4;}else m.wardT=0; // a shield is the host's // the host's full health and stun, not this copy's
  if(b.boss){const ph=hp<330?2:hp<660?1:0;if(hp>=1000)m.ph=0;else if(ph>(m.ph||0)){m.ph=ph;shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='dopp')toast(t('dpSplit'),'warn');else if(m.type!=='belial')toast(t('bossPh'+ph,{b:itN(m.type)}),'warn');}} // SAT-ONLINE-045
  const nh=Math.max(1,Math.round(m.max*hp/1000)),mine=m.pendT&&performance.now()-m.pendT<1500;
  if(nh<m.hp){if(!mine&&m.hp-nh>=1){m.hurt=.12;num(m.x,monY(m)-8,String(m.hp-nh),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});}m.hp=nh;}else if(!mine)m.hp=nh; // another player's hit: its number shows here too
@@ -11357,12 +11362,13 @@ function mobAct(m,b,w,safe){const n=+w[5],sc=w[6],i=+w[7],tl=Math.max(0,+w[8]||0
  m.rN=n;m.ax=Math.cos(ang);m.ay=Math.sin(ang);m.lL=+w[10]||m.lL;
  if(sc==='b'){m.st=null;m.tele=0;if(me&&(!safe||m.evt)&&mode!=='dead'&&Math.hypot(P.x-m.x,P.y-m.y)<b.r+14&&seeP(m))hurtPlayer(b.dmg,m.lv,m);return;}
  if(sc==='s'){m.st=null;m.tele=tl;m.rSlam=1;return;}
+ if(sc==='w'){m.st=null;m.tele=0;m.bw=tl;num(m.x,m.y-(b.oy||22)*(b.sc||1)-6,'!','#ff5a4a',true);fx.push({ring:true,x:m.x,y:m.y-4,t:.35});return;} // the blow comes as 'b', to whoever it is for
  if(sc==='f'){m.st=null;m.tele=0;if(m.type==='trauka'){m.br=tl;m.ba=ang;dragonBreathFx(m);}else if(BEAST[m.type]){m.br=tl;m.ba=ang;beastFx(m);}else if(m.type==='belial'){m.br=tl;m.ba=ang;blStart(m);}return;}
  const mv=i===99?{k:'arc',tele:.16,reach:26,arc:1.3,mul:.8,rec:.4,cd:1.3,blk:1}:(AIK[m.type]||RKMV[m.type])?movesOf(m)[i]:null;
  if(!mv||!(sc==='t'||sc==='d'||sc==='r')){m.st=null;m.tele=0;return;}
  m.mv=mv;if(mv.k==='rain')m.rsd=n;m.st=sc==='t'?'tele':sc==='d'?'dash':'rec';m.stT=tl;m.tele=sc==='t'?tl:0;m.hitDone=0;if(sc==='d')m.dsp=mv.k==='leap'?(m.lL||40)/(mv.dashT||.3):mv.dash||120;}
 // follower: run the telegraph, dash and strike the host started, against your own player only
-function mobReplay(m,b,dt,safe){const hurt=(!safe||m.evt)&&mode!=='dead',dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=Math.max(3,b.r-3);
+function mobReplay(m,b,dt,safe){if(m.bw>0)m.bw-=dt;const hurt=(!safe||m.evt)&&mode!=='dead',dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=Math.max(3,b.r-3);
  if(m.rSlam&&m.tele>0){m.tele-=dt;if(m.tele<=0){m.tele=0;m.rSlam=0;shake=Math.max(shake,.3);SFX.slam();if(hurt&&d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}for(let k=0;k<16;k++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:m.type==='berith'?(rand()<.5?'#ffd24a':'#c8a050'):'#8a8f99'});}
   if(m.ph>=2)for(let k=0;k<10;k++){const a=k/10*6.283;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*120,vy:Math.sin(a)*120,t:1.4,m,mv:{mul:.35},sp:'rock',a,rep:1});}}return;}
  const mv=m.mv;if(!mv||!m.st)return;
