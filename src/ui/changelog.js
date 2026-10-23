@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-23perf', ver: '2.28', d: '2026-10-23',
+      ar: ["اللعبة أخف: الوحوش اللي بعيدة عن كل اللاعبين أكتر من 900 بكسل بتنام لحد ما حد يقرب منها، والوحوش والناس والأعشاب بيترسموا بس لو على الشاشة. والأسامي والأرقام اللي فوق الروس بتترسم مرة واحدة وبعد كده بتتطبع زي ما هي",
+          "اللاج اللي كان بيزيد كل ما تلعب: الوحوش اللي بتموت ومبترجعش (موجات الغزو، والأتباع اللي البوس بيطلّعهم، والنسخ في الأونلاين) كانت بتفضل محسوبة طول ما انت بتلعب. دلوقتي بتتشال. وضربة واحدة بتقتل كتير بتعمل حفظ واحد بس",
+          "أونلاين: لو ضربت وحوش كتير وسبتها، ضرباتك الجديدة كان ممكن متوصلش للّاعب اللي ماسك الوحوش، فالوحش يفضل عندك على 1 HP. اتصلحت"],
+      en: ["The game is lighter: monsters more than 900 px from every player sleep until someone comes near, and monsters, people and herbs are drawn only when they're on screen. Names and numbers over heads are drawn once, then stamped as they are",
+          "The lag that grew the longer you played: dead monsters that never come back (invasion waves, a boss's adds, online copies) stayed counted all session; now they go. A blow that kills many saves once",
+          "Online: after you hit many monsters and left them, your new hits could stop reaching the player who holds the monsters, so a monster sat at 1 HP on your screen. Fixed"] },
     { v: '2026-10-23qtrack', ver: '2.27', d: '2026-10-23',
       ar: ["كل الكويستات بقى ليها تتبع: الوحش اللي مش جنبك أو ميت أو جاي في حدث (زي دارك باس وسيد المدينة 13 وجنود المملكة الخالدة والسلاح القديم والجولمات) السهم بيوديك لمكانه.",
           "اللي تحت الأرض أو في دانجن أو جزر بيهين، السهم بيوديك للمدخل الأول، وجوه بيوديك للوحش نفسه أو لطريق الخروج.",
