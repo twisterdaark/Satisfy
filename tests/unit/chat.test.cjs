@@ -182,3 +182,17 @@ test('the filter option masks other players\' lines only', () => {
   assert.equal(chat.say('my own shit stays', 'all'), 'sent');
   assert.deepEqual(chat.log().map((l) => l.text), ['★★★★ game', 'shit game', 'my own shit stays']);
 });
+
+// SAT-ONLINE-199: badName keeps each name's answer (the other players' names are checked about 15 times a frame online);
+// the answers are the same, the first time, again, and after the store of 512 names starts over
+test('badName: the same answer every time, past the 512 names it keeps', () => {
+  const names = ['Grid', 'Twister', 'Nitro_Gamer', 'لاعب مصري', 'fuckface', 'Big Bitch', 'sh1tlord', 'Ass hole', 'Peace'];
+  const first = names.map((n) => CH.badName(n));
+  assert.deepEqual(first, [false, false, false, false, true, true, CH.badName('sh1tlord'), CH.badName('Ass hole'), false]);
+  assert.equal(first[4], true);
+  for (let i = 0; i < 700; i++) CH.badName('Filler' + i); // past 512: the store starts over
+  assert.deepEqual(names.map((n) => CH.badName(n)), first, 'the same after the store starts over');
+  assert.deepEqual(names.map((n) => CH.badName(n)), first, 'and again');
+  assert.equal(CH.name('fuckface', 'abcdef123').startsWith('Player'), true, 'an insult still shows as Player and a number');
+  assert.equal(CH.name('Grid', 'abcdef123'), 'Grid');
+});

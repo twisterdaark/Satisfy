@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24badname', ver: '2.65', d: '2026-10-24',
+      ar: ["أونلاين واللاعيبة حواليك كتير: اللعبة كانت بتفحص اسم كل لاعب (هل فيه شتيمة) حوالي 15 مرة كل فريم. دلوقتي بتفحصه مرة واحدة وتفتكر النتيجة، فالفريم أخف."],
+      en: ["Online with many players around: the game checked each player's name for insults about 15 times a frame. Now it checks a name once and remembers, so each frame is lighter."] },
     { v: '2026-10-24warmstart', ver: '2.64', d: '2026-10-24',
       ar: ["اللعبة مبقتش بتهنج أول ما تدخل: الأرض والناس والوحوش اللي حواليك بيترسموا وشاشة البداية لسه ظاهرة."],
       en: ["The game no longer stalls as you start: the ground, the people and the monsters around you are painted while the title screen still shows."] },
