@@ -169,6 +169,8 @@
         return out;
       },
       get: function (id) { var r = remotes.get(id); return r ? r.pp : null; },
+      /** How long ago (ms) remote session id was last heard from, or -1 if unknown (SAT-ONLINE-203: the party panel). */
+      age: function (id) { var r = remotes.get(id); return r ? Math.max(0, now() - r.seen) : -1; },
       /** When remote session id last jumped (teleported, went through a door), or 0. */
       jumped: function (id) { var r = remotes.get(id); return r && r.jumpT || 0; },
       count: function () { return remotes.size; },

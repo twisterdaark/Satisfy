@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24partyhud', ver: '2.67', d: '2026-10-24',
+      ar: ["لوحة الفريق (أونلاين): تحت اسم كل واحد في فريقك بقى مكتوب كلاسه والمكان اللي هو فيه. ولو اللعبة مسمعتش منه بقالها أكتر من ثانيتين ونص، سطره بيبهت ويقولك من كام ثانية (يعني ممكن النت عنده فصل)."],
+      en: ["The party panel (online): under each mate's name you now see their class and where they are. When the game hasn't heard from one for over 2.5 seconds, their row fades and says how many seconds ago (their connection may have dropped)."] },
     { v: '2026-10-24chunkwarm', ver: '2.66', d: '2026-10-24',
       ar: ["بعد كام دقيقة لعب، كل حتة أرض جديدة كانت بتظهر قدامك وانت ماشي بتوقف اللعبة شوية لحد ما تترسم. ده كان باظ لما اللعبة تشيل 36 حتة: بقت ترسمهم كلهم مرة واحدة ساعة ما يظهروا. دلوقتي بتجهزهم في وقت الفراغ قبل ما توصلهم زي أول ما بدأت."],
       en: ["After a few minutes of play, each new stretch of ground that came into view as you walked stopped the game for a moment while it was painted. That broke once the game held 36 of them: from then on it painted each one in one go as it appeared. Now they are prepared in idle time before you reach them, as at the start."] },

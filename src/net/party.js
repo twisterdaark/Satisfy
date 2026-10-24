@@ -327,7 +327,8 @@
         P.remotes().forEach(function (r) {
           if (r.party !== id) return;
           if (leader === self ? !accepted.has(r.uid) : false) return;
-          out.push({ uid: r.uid, handle: r.handle, lv: r.lv, leader: r.uid === leader, hp: typeof r.hp === 'number' ? r.hp : null, role: r.role || null });
+          out.push({ uid: r.uid, handle: r.handle, lv: r.lv, leader: r.uid === leader, hp: typeof r.hp === 'number' ? r.hp : null, role: r.role || null,
+            cls: r.cls || '', zone: r.zone || '', age: P.age ? Math.max(0, P.age(r.sid)) : 0 }); // SAT-ONLINE-203: class, place, how fresh
         });
         return out;
       },
