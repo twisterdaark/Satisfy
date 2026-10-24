@@ -36,6 +36,8 @@
     'eq', 'bar', 'xbar', 'croot', 'aff', 'stash', 'rep', 'guild', 'comp', 'life',
     // repair orders posted to player smiths and not answered yet (SAT-ONLINE-096)
     'rord',
+    // Three Crowns at the inns: games won and played (SAT-ONLINE-181)
+    'cg',
     // mounts and pets owned/active (SAT-MOUNT), the daily arena lockout (a date, so it must sync)
     'mounts', 'mount', 'pets', 'pet', 'arenaDay',
     // achievements earned (SAT-ACH-001), arena wins and the highest level ever reached (SAT-RANK-001),
