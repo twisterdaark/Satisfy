@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24fishing', ver: '2.62', d: '2026-10-24',
+      ar: ["الصيد بقى أحلى: دواير بتطلع حوالين العوامة وانت مستني، والمية بتطرطش لما السمكة تشد، ولما تصطادها بتنط من المية لحد عندك",
+          "كل سمكة ليها وزن (التقيلة نادرة، وبتزيد مع مستوى الصيد)، واللعبة بتفتكر أتقل سمكة اصطدتها من كل نوع، ولو كسرت رقمك بيطلعلك «رقم قياسي جديد!»"],
+      en: ["Fishing feels better: rings spread around the float while you wait, the water splashes at the bite, and a catch leaps out of the water to you",
+          "Every fish weighs something (the heavy ones are rare, and grow with your Fishing level), the game keeps your heaviest of each kind, and beating it cheers a \"New record!\""] },
     { v: '2026-10-24tower1', ver: '2.61', d: '2026-10-24',
       ar: ["الدور الأول في برج الحكمة بقى واضح: أول ما تدخل بتطلعلك رسالة بتقولك تمشي يمين ناحية النور من غير ما تقف، والنور بقى باين في نص الشاشة بعمود نور بدل ما كان مستخبي ورا شريط السكيلات.",
           "أسهم في الأرض بتشاورلك على الطريق وبتحمر لو وقفت، وسطر الكويست بيقولك النور على بعد كام وسرعتك، وفيه شرار وراك وأنت بتجري.",
