@@ -245,6 +245,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 ## From other ranges (2026-10-24)
 | U | Update | Status | Where |
 |---|---|---|---|
+| U307 | Seasonal town decorations | ✅ | SAT-ONLINE-179: a season's look is a pack of its own (`src/ui/season-hallow.js`, `season-winter.js`), fetched only while its dates are on (`decNow`, the server's clock online): Harvest Night 20 Oct to 3 Nov (pumpkins lit from dusk, orange and violet lights, bats at night), Winter Lights 15 Dec to 2 Jan (wreaths, coloured lights, snowmen); drawn from the buildings and towns as entities (`decEnts`, its own boundary), nothing solid or in the state; a world notice once a season a device; `regression/seasons` |
 | U267 | Reduced motion | ✅ | SAT-ONLINE-164: a device setting in the pause menu (`satisfy_rmo`, the system's prefers-reduced-motion when unset): no camera shake, no white flash, the UI's shakes and pulses stop, particles capped (`RMOFX`, `RMOVX`); telegraphs (`drawTele`) untouched; `regression/rmotion` |
 | U269 | Armor pieces (render sprite overlays) | ✅ | SAT-ONLINE-165: helmet, armour, gloves and boots each draw their own look (`GEARL`, 48 ids), for you and the others (`gr:` fx tag); `regression/gearlook` |
 

@@ -9801,6 +9801,7 @@ function render(dt){DRAWN=0;netDrawn=0;
   // SAT-ONLINE-117 (plan U324): each part that adds to the scene is its own boundary, the other players' part (netEnts) above
   // all: a bad message or a bug in one part costs that part this frame, never the whole world
   if(BHR)entsOf(bhEnts,ents);if(S&&S.wis)entsOf(twEnts,ents);if(S){entsOf(c2Ents,ents);entsOf(p2Ents,ents);entsOf(p3Ents,ents);entsOf(p4Ents,ents);entsOf(phEnts,ents);entsOf(necEnts,ents);entsOf(hcEnts,ents);entsOf(fbEnts,ents);entsOf(brEnts,ents);entsOf(blEnts,ents);entsOf(nvEnts,ents);}if(SKA)entsOf(tAimEnts,ents);if(S)entsOf(tlEnts,ents);if(NET&&!titleCam)entsOf(netEnts,ents);}
+ entsOf(decEnts,ents); // SAT-ONLINE-179: the season's decorations
  // one broken drawing (a stale sprite file after an update) must not hide the player and everything after it
  ents.sort((a,b)=>a.y-b.y).forEach(e=>{try{e.f();DRAWN++;}catch(err){ctx.globalAlpha=1;gameErr(err);}});
  drawGDrop();drawEProj();proj.forEach(p=>{if(p.kind==='arrow'){const l=Math.hypot(p.vx,p.vy)||1,ux=p.vx/l,uy=p.vy/l;ctx.strokeStyle='#e8e0d0';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x-ux*7,p.y-uy*7);ctx.lineTo(p.x,p.y);ctx.stroke();R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}else if(p.kind==='wave'){const a=Math.atan2(p.vy,p.vx);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.globalAlpha=.85;ctx.strokeStyle='#ffe08a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(-6,0,12,-1.1,1.1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(-5,0,12,-.9,.9);ctx.stroke();ctx.restore();}else{const f=p.kind==='fire';R(ctx,p.x-2,p.y-2,f?5:4,f?5:4,f?'#ff8a1e':'#9fd8ff');R(ctx,p.x-1,p.y-1,2,2,'#ffffff');}});
@@ -12791,6 +12792,24 @@ window.__GDW={on:()=>gdwOn(),tab:k=>gdwShow(k),lines:()=>[...$('gwB').children].
 $('guildW').addEventListener('click',e=>{const tb=e.target.closest('[data-gwtab]');if(tb){SFX.click();return gdwShow(tb.dataset.gwtab);}
  const f=e.target.closest('[data-gwf]');if(f){SFX.click();return gdwAct(f.dataset.gwf);}
  const m=e.target.closest('[data-gwmem]');if(m){SFX.click();const u=m.dataset.gwmem,M=gdwMine();if(M&&M.on)return guildMemberD(u);}});
+/* ---------------- seasonal town decorations (SAT-ONLINE-179; plan U307: "asset pack lazy load behind event") ----------------
+   A season's look is a pack of its own (src/ui/season-<id>.js), loaded only while its dates are on, on the server's clock
+   online: Harvest Night (20 October to 3 November: carved pumpkins, orange and violet lights, bats at night) and Winter
+   Lights (15 December to 2 January: wreaths, coloured lights, snowmen). The rest of the year no pack is fetched. A pack
+   adds entities to the scene (decEnts, its own boundary, so a broken pack costs only itself), drawn from the buildings
+   and towns the game already has: nothing solid, nothing to use, nothing in the state. It is on the title screen's world
+   too. The first time a device sees a season that year, everyone's world notice says it has come. */
+const DECS=[{id:'hallow',a:[10,20],b:[11,3]},{id:'winter',a:[12,15],b:[1,2]}];
+let DECP=null,DECL=null,DECT=0,DECN=0,DECG=0;
+function decNow(n){const d=new Date(n==null?wNow():n),v=(d.getUTCMonth()+1)*100+d.getUTCDate();
+ for(const s of DECS){const a=s.a[0]*100+s.a[1],b=s.b[0]*100+s.b[1];if(a<=b?v>=a&&v<=b:v>=a||v<=b)return s.id;}return null;}
+function decTick(){if(DECT&&gTime-DECT<5)return;DECT=gTime||1e-3;const id=decNow();if(!id){DECP=null;return;}
+ const pk=Satisfy.seasonPack;if(pk&&pk.id===id){DECP=pk;if(!DECG&&S&&!S.__demo){DECG=1;decGreet(pk);}return;}
+ if(DECL===id)return;DECL=id;const e=document.createElement('script');e.src='src/ui/season-'+id+'.js?b='+(Date.parse(document.lastModified)||0);e.onload=()=>{DECT=0;};e.onerror=()=>{};document.head.appendChild(e);}
+function decGreet(pk){if(!pk.greet)return;const d=new Date(wNow()),v=pk.id+(d.getUTCFullYear()-(d.getUTCMonth()===0?1:0));let seen='';try{seen=localStorage.getItem('satisfy_sgr')||'';}catch(e){}
+ if(seen===v)return;try{localStorage.setItem('satisfy_sgr',v);}catch(e){}setTimeout(()=>{if(S&&!S.__demo){announce(pk.greet[lang]||pk.greet.en);SFX.notice();}},1500);}
+function decEnts(ents){decTick();if(!DECP||!S||!P||P.y>=WMH*TS)return;const n=ents.length;DECP.ents({ctx,camX,camY,VW,VH,TS,gTime,dark:dnDark(),RMO,P,buildings,inTown},ents);DECN=ents.length-n;}
+window.__GDEC={now:n=>decNow(n),get pack(){return DECP&&DECP.id},get loading(){return DECL},get n(){return DECN},tick:()=>{DECT=0;decTick();}}; // tests
 /* guild banners (SAT-ONLINE-084, plan U231). The master picks the guild's emblem in G -> Guild banner from a fixed set of
    symbols (no uploaded pictures, so nothing to moderate and nothing large); it shows before the guild's name under every
    member's name for everyone, and in G. */
