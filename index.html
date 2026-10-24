@@ -4977,6 +4977,45 @@ function updateComp(dt){if(!S||!P)return;meetTick(dt);const c=MEET?COMPS[MEET.id
  else if(c.kind==='blade'){a.cd=.95;vfx('slash',tg.x,monY(tg),{angle:a.x<tg.x?0:Math.PI,rarity:2});compHit(tg,.7,rand()<.3);}
  else{a.cd=1;const l=td||1;fx.push({x:a.x,y:a.y-10,vx:(tg.x-a.x)/l*600,vy:(monY(tg)-a.y+10)/l*600,t:Math.min(.25,l/600),c:'#e8e0d0'});noise(.06,.1,3000,0,.6);setTimeout(()=>compHit(tg,.75,rand()<.15),Math.min(250,l/600*1000));}}
 
+/* ---------------- ambient life (SAT-ONLINE-178; the owner, 2026-10-24: "improve the visuals, make the game more fun") ----------------
+   The open world moves a little on its own, around you and only where you can see:
+   - fireflies blink over grass and flowers at night (not in the rain);
+   - butterflies flutter over flower beds by day, and flit away when you come close;
+   - leaves come off the trees and drift with the wind (wxWind when the weather has it);
+   - water glints in the sun;
+   - now and then a flock of birds crosses the sky, their shadows running over the ground.
+   Only drawn: its own random stream (AMR), nothing in the state, nothing for the other players to sync (each screen has
+   its own). Not indoors, in rooms or underground. Reduced motion: half as many, no blinking, no birds. */
+const AMR=mulberry32(0xa3b1e7),AMMAX=26;let AM=[],AMT=null,AMB=null,AMBT=25,AMS=0;
+const amWind=()=>typeof wxWind==='function'?wxWind():Math.sin(gTime*.23)*.6;
+function amOn(){return !!(S&&P&&!S.__demo&&mode!=='title'&&mode!=='lang'&&outdoors()&&!roomAt(P.x,P.y));}
+// a tile in view of one of these kinds, or null after a few tries
+function amTile(ks){for(let i=0;i<6;i++){const tx=Math.floor((camX+AMR()*VW)/TS),ty=Math.floor((camY+AMR()*VH)/TS);if(ks.includes(at(tx,ty)))return [tx,ty];}return null;}
+function amSpawn(){const dk=dnDark(),w=typeof wxHere==='function'?wxHere():'clear',wet=w==='rain'||w==='storm'||w==='snow',r=AMR();
+ if(dk>.55&&!wet){const p=amTile([GR,FL]);if(p)AM.push({k:'fly',x:p[0]*TS+AMR()*TS,y:p[1]*TS+AMR()*TS,t:0,l:6+AMR()*6,ph:AMR()*7,vx:0,vy:0});return;}
+ if(wet||dk>.3)return;
+ if(r<.45){const p=amTile([FL]);if(p){const c=['#ffe07a','#ffffff','#9fd8ff','#ffb0d0','#c8a0ff'][AMR()*5|0];AM.push({k:'bfly',x:p[0]*TS+8,y:p[1]*TS+4,t:0,l:10+AMR()*10,ph:AMR()*7,c,hx:p[0]*TS+8,hy:p[1]*TS+4,fl:0});}}
+ else if(r<.8){const p=amTile([TR]);if(p){AM.push({k:'leaf',x:p[0]*TS+AMR()*TS,y:p[1]*TS-10-AMR()*8,t:0,l:3+AMR()*2.5,ph:AMR()*7,c:AMR()<.25?'#d8a040':AMR()<.5?'#7ab04a':'#5a9a3a'});}}
+ else if(w==='clear'){const p=amTile([WA]);if(p)AM.push({k:'glint',x:p[0]*TS+AMR()*TS,y:p[1]*TS+AMR()*TS,t:0,l:.5+AMR()*.4});}}
+function amStep(dt){const wd=amWind();if(AM.length<(RMO?AMMAX/2:AMMAX)&&(AMS-=dt)<=0){AMS=.18+AMR()*.25;amSpawn();}
+ for(const a of AM){a.t+=dt;a.ph+=dt;
+  if(a.k==='fly'){a.vx+=(AMR()-.5)*30*dt;a.vy+=(AMR()-.5)*30*dt;a.vx*=.97;a.vy*=.97;a.x+=a.vx*dt;a.y+=a.vy*dt;}
+  else if(a.k==='bfly'){const d=Math.hypot(P.x-a.x,P.y-8-a.y);if(d<26)a.fl=1;if(a.fl){a.y-=26*dt;a.x+=(a.x>P.x?1:-1)*22*dt;a.l=Math.min(a.l,a.t+1.2);}
+   else{a.x=a.hx+Math.sin(a.ph*1.3)*10+Math.sin(a.ph*.37)*6;a.y=a.hy+Math.sin(a.ph*2.1)*4-Math.abs(Math.sin(a.ph*.8))*6;}}
+  else if(a.k==='leaf'){a.x+=(8+wd*16)*dt+Math.sin(a.ph*3)*6*dt;a.y+=(11+Math.sin(a.ph*2.4)*5)*dt;}}
+ AM=AM.filter(a=>a.t<a.l&&Math.abs(a.x-P.x)<VW&&Math.abs(a.y-P.y)<VH);
+ if(RMO)AMB=null;else if(dnDark()<.3&&(typeof wxHere!=='function'||wxHere()==='clear')){if(!AMB&&(AMBT-=dt)<=0){AMBT=30+AMR()*40;const n=3+(AMR()*3|0),dir=AMR()<.5?1:-1;AMB={x:dir>0?camX-30:camX+VW+30,y:camY+VH*(.15+AMR()*.4),dir,t:0,b:[...Array(n)].map((_,i)=>({dx:-dir*i*9-AMR()*4,dy:(i%2?1:-1)*i*4+AMR()*3}))};}}
+ if(AMB){AMB.t+=dt;AMB.x+=AMB.dir*70*dt;if(AMB.t>12||(AMB.dir>0?AMB.x>camX+VW+80:AMB.x<camX-80))AMB=null;}}
+function amDraw(){if(!amOn()){AM.length=0;AMB=null;AMT=null;return;}const now=performance.now(),dt=AMT==null?1/60:Math.min(.1,(now-AMT)/1000);AMT=now;amStep(dt);
+ for(const a of AM){const f=Math.min(1,a.t/.6,(a.l-a.t)/.6);
+  if(a.k==='fly'){const b=RMO?.8:.5+.5*Math.sin(a.ph*4.3);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=f*b*.55;const g=ctx.createRadialGradient(a.x,a.y,0,a.x,a.y,6);g.addColorStop(0,'#d8ff7a');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(a.x-6,a.y-6,12,12);
+   ctx.globalAlpha=f*b;ctx.fillStyle='#f4ffb0';ctx.fillRect(Math.round(a.x),Math.round(a.y),1,1);ctx.restore();}
+  else if(a.k==='bfly'){const open=Math.sin(a.ph*(RMO?6:18))>0,x=Math.round(a.x),y=Math.round(a.y);ctx.globalAlpha=f;ctx.fillStyle=a.c;if(open){ctx.fillRect(x-2,y-1,2,2);ctx.fillRect(x+1,y-1,2,2);}else{ctx.fillRect(x-1,y-2,1,2);ctx.fillRect(x+1,y-2,1,2);}ctx.fillStyle='#3a2a2a';ctx.fillRect(x,y-1,1,2);ctx.globalAlpha=1;}
+  else if(a.k==='leaf'){ctx.globalAlpha=f;ctx.fillStyle=a.c;const s=Math.sin(a.ph*5);ctx.fillRect(Math.round(a.x),Math.round(a.y),s>0?2:1,s>0?1:2);ctx.globalAlpha=1;}
+  else if(a.k==='glint'){const k=Math.sin(a.t/a.l*Math.PI),x=Math.round(a.x),y=Math.round(a.y);ctx.globalAlpha=.9*k;ctx.fillStyle='#ffffff';ctx.fillRect(x-1,y,3,1);if(k>.6)ctx.fillRect(x,y-1,1,3);ctx.globalAlpha=1;}}
+ if(AMB)for(const b of AMB.b){const x=AMB.x+b.dx,y=AMB.y+b.dy,w=Math.sin(AMB.t*9+b.dx)>0;ctx.fillStyle='rgba(20,24,30,.85)';ctx.fillRect(Math.round(x)-2,Math.round(y)-(w?1:0),2,1);ctx.fillRect(Math.round(x)+1,Math.round(y)-(w?1:0),2,1);ctx.fillRect(Math.round(x),Math.round(y),1,1);
+  ctx.fillStyle='rgba(0,0,0,.16)';ctx.beginPath();ctx.ellipse(Math.round(x+18),Math.round(y+46),3,1.2,0,0,7);ctx.fill();}}
+window.__GAM={get list(){return AM.map(a=>({k:a.k,x:a.x,y:a.y,fl:a.fl||0}))},get birds(){return AMB?AMB.b.length:0},on:()=>amOn(),spawn:()=>amSpawn(),step:dt=>amStep(dt),bird:()=>{AMBT=0;},MAX:AMMAX}; // tests
 /* ---------------- weather (SAT-WEATHER-001) ---------------- */
 // Shared weather on the world clock: every 20 minutes a new slot picks clear, rain, storm or fog from its index, so every
 // player (and the server) sees the same sky with no message. Snow zones turn rain into snowfall; caves and houses stay
@@ -9816,6 +9855,7 @@ function render(dt){DRAWN=0;netDrawn=0;
   if(mk){const x=Math.round(n.x),y=Math.round(top-8+b);ctx.fillStyle='#000';if(mk[0]==='!'){R(ctx,x-2,y-1,5,8,'#000');R(ctx,x-2,y+8,5,4,'#000');R(ctx,x-1,y,3,6,mk[1]);R(ctx,x-1,y+9,3,2,mk[1]);}else{R(ctx,x-3,y-1,7,13,'#000');R(ctx,x-2,y,5,2,mk[1]);R(ctx,x+1,y+1,2,3,mk[1]);R(ctx,x-1,y+3,2,3,mk[1]);R(ctx,x-1,y+9,2,2,mk[1]);}}
   if(Math.hypot(n.x-P.x,n.y-P.y)<70)TX.push({s:t(n.id),x:n.x,y:top+(mk?-12:0),f:F,z:9,c:'#ffe7a8'});});}
  if(mode==='play'&&S){const tg=nearest();if(tg){const b=Math.round(Math.sin(gTime*6)*1.5),mx=Math.round(tg.x),my=Math.round(tg.y-(tg.k==='tree'?36:tg.k==='npc'?36:tg.k==='book'?44:tg.k==='anvil'?22:20))+b,cd=tg.k==='tree'&&(chopped.get(tg.o.k)||0)>gTime;ctx.fillStyle='#000';ctx.fillRect(mx-3,my-1,7,5);ctx.fillStyle=cd?'#ff8a7a':'#ffffff';ctx.fillRect(mx-2,my,5,1);ctx.fillRect(mx-1,my+1,3,1);ctx.fillRect(mx,my+2,1,1);}}
+ amDraw(); // SAT-ONLINE-178: fireflies, butterflies, leaves, glints, birds
  smoke.forEach(s=>{ctx.globalAlpha=Math.max(0,.45-s.t*.15);ctx.fillStyle='#c8c8c8';const r=2+s.t*2.5;ctx.fillRect(Math.round(s.x-r),Math.round(s.y-r),Math.round(r*2),Math.round(r*2));});ctx.globalAlpha=1;
  ctx.globalCompositeOperation='lighter';FURNS.forEach(FURN=>{const gl=ctx.createRadialGradient(FURN.x+11,FURN.y+12,2,FURN.x+11,FURN.y+12,40);gl.addColorStop(0,`rgba(255,120,30,${.32+fl*.1})`);gl.addColorStop(1,'rgba(255,80,10,0)');ctx.fillStyle=gl;ctx.fillRect(FURN.x-30,FURN.y-28,82,82);});ctx.globalCompositeOperation='source-over';
  fx.forEach(f=>{if(f.ring){const k=1-f.t/(f.big?.5:.25),rr=f.big?70:16;ctx.strokeStyle=`rgba(200,240,255,${Math.min(1,f.t*4)})`;ctx.lineWidth=f.big?2:1;ctx.beginPath();ctx.ellipse(f.x,f.y,Math.max(1,4+k*rr),Math.max(1,2+k*rr/2),0,0,7);ctx.stroke();ctx.lineWidth=1;return;}

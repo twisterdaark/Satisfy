@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24ambient', ver: '2.57', d: '2026-10-24',
+      ar: ["العالم بقى فيه حياة: بالليل فيه يراعات بتنوّر وتطفي فوق الحشيش والورد، وبالنهار فراشات فوق الورد بتطير لما تقرّب منها، وورق بيقع من الشجر ويطير مع الريح، ولمعة على المية في الشمس، وكل شوية سرب عصافير بيعدّي ودِلّه على الأرض"],
+      en: ["The world feels alive: fireflies blink over the grass and flowers at night; by day butterflies flutter over flower beds and flit away when you come close, leaves drift off the trees with the wind, the water glints in the sun, and now and then a flock of birds crosses with its shadows on the ground"] },
     { v: '2026-10-24ctlsword', ver: '2.56', d: '2026-10-24',
       ar: ["شكل السكيلات اتغيّر: كل سكيل بقى ليه إيفيكت من اسمه وسلاحه ولونه (هلال، طعنة، قطع على شكل X، سيوف بتنزل من السما وسيوف طايرة، ورد، تنين، عمود نور، دوامة، برق بيتنقل من عدو للتاني، انفجار، هزة في الأرض، هالة...)، وسيف الفضاء بقى بيفتح شق في الفضاء بدل ما يبقى سلاش أكبر.",
           "سيف التحكم (Sword Saint) اتعمل من جديد زي الرواية: سيوف بتطلع من الشنطة وبتحارب بإرادتك 10 ثواني، 4 في الأول وسيف زيادة كل لفلين للسكيل لحد 10. كل سيف بيطير على عدو قريب ويقطعه ويرجع، واللي جنبك بيصد عنك الضربة ويطير على اللي ضربك.",
