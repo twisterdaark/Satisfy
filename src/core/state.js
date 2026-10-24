@@ -87,6 +87,8 @@
     'skx', 'skv',
     // when each monster you killed comes back, so a save and quit does not respawn them (owner 2026-10-19)
     'mrt',
+    // the cargo you carry (SAT-ONLINE-192): {f, to, n, t0, min, cost, pay, risk, amb}; cargos delivered
+    'car', 'cvN',
     // kingdom contribution from royal quests and the Defense War's golems (major #3)
     'kc',
     // the Behen Archipelago (major #4): island, save point, best island, Challenger Points, masteries, statue worship

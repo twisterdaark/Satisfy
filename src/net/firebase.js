@@ -22,6 +22,16 @@
   var SDK_VERSION = '12.19.0';
   var cache = null;
 
+  // SAT-ONLINE-192 (plan U220): a caravan's contract, caravans/{uid} = {f, to, min, n, t (the server's time)}, and its
+  // delivery, caravanDone/{uid}/{n} = {t}: the rules take a delivery only once min has passed since the contract
+  function caravanStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    return {
+      start: function (uid, c) { return D.set(at('caravans/' + uid), { f: c.f, to: c.to, min: c.min, n: c.n, t: D.serverTimestamp() }); },
+      done: function (uid, n) { return D.set(at('caravanDone/' + uid + '/' + n), { t: D.serverTimestamp() }); },
+    };
+  }
+
   function defaultLoader(ver) {
     var base = 'https://www.gstatic.com/firebasejs/' + ver + '/';
     return Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-database.js')])
@@ -850,6 +860,7 @@
   ns.firebase = Object.freeze({
     hallStore: hallStore,
     tradeStore: tradeStore,
+    caravanStore: caravanStore,
     guildStore: guildStore,
     dropStore: dropStore,
     bountyStore: bountyStore,

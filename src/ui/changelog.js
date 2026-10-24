@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24caravans', ver: '2.62', d: '2026-10-24',
+      ar: ["قوافل التجار: صاحب أي نُزل بيديك بضاعة لأقرب ٣ بلاد في قارتك. بتدفع تمنها وتوصّلها لصاحب نُزل البلد التانية وياخدها منك بأكتر: الطريق الآمن بمكسب النص، والطريق الخطر بأكتر من الضعف بس قطاع الطرق بيطلعولك برا البلاد.",
+          "لو وقعت والبضاعة معاك بتضيع، ولو طوّلت بتبوظ. والتسليم مبيتقبلش قبل ما وقت الطريق يعدي (والأونلاين السيرفر هو اللي بيتأكد)، فالسكرول أو أي نقل سريع مبيحسبش رحلة. ٢٠ تسليمة تديك لقب \"تاجر القوافل\"."],
+      en: ["Merchant caravans: any innkeeper hands you cargo for the three nearest towns on your continent. You pay for it, carry it to that town's innkeeper and get more: half again on the safe road, more than double on the risky one, where bandits come for it outside the towns.",
+          "Fall with it and it's lost; take too long and it spoils. A delivery isn't taken before the road's time has passed (online the server checks it), so a scroll or a quick jump isn't a trip. Twenty deliveries give the title Caravan Trader."] },
     { v: '2026-10-24tower1', ver: '2.61', d: '2026-10-24',
       ar: ["الدور الأول في برج الحكمة بقى واضح: أول ما تدخل بتطلعلك رسالة بتقولك تمشي يمين ناحية النور من غير ما تقف، والنور بقى باين في نص الشاشة بعمود نور بدل ما كان مستخبي ورا شريط السكيلات.",
           "أسهم في الأرض بتشاورلك على الطريق وبتحمر لو وقفت، وسطر الكويست بيقولك النور على بعد كام وسرعتك، وفيه شرار وراك وأنت بتجري.",

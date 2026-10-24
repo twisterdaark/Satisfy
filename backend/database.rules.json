@@ -903,6 +903,30 @@
         }
       }
     },
+    "caravans": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && root.child('accountIds').child(auth.uid).exists()",
+        ".validate": "!newData.exists() || newData.hasChildren(['f', 'to', 'min', 'n', 't'])",
+        "f": { ".validate": "newData.isString() && newData.val().matches(/^z[A-Za-z]{2,14}$/)" },
+        "to": { ".validate": "newData.isString() && newData.val().matches(/^z[A-Za-z]{2,14}$/) && newData.val() !== newData.parent().child('f').val()" },
+        "min": { ".validate": "newData.isNumber() && newData.val() >= 20000 && newData.val() <= 3600000" },
+        "n": { ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9]{6,12}$/)" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "caravanDone": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$n": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.exists() && root.child('caravans').child($uid).child('n').val() === $n && now - root.child('caravans').child($uid).child('t').val() >= root.child('caravans').child($uid).child('min').val()",
+          ".validate": "newData.hasChildren(['t'])",
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",

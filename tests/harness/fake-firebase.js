@@ -506,6 +506,18 @@
   }
   function rules(p, v, existing) {
     const seg = p.split('/');
+    if (seg[0] === 'caravans' || seg[0] === 'caravanDone') { // SAT-ONLINE-192: your contract; its delivery once its road's time has passed
+      const now = Date.now();
+      if (!user || seg[1] !== user.uid || !data.has('accountIds/' + user.uid)) return 'PERMISSION_DENIED: ' + seg[0];
+      if (seg[0] === 'caravans') {
+        const town = /^z[A-Za-z]{2,14}$/;
+        if (seg.length !== 2 || !v) return 'caravans path';
+        return Object.keys(v).sort().join(',') === 'f,min,n,t,to' && town.test(v.f) && town.test(v.to) && v.f !== v.to && typeof v.min === 'number' && v.min >= 20000 && v.min <= 3600000 && /^[a-z0-9]{6,12}$/.test(v.n) && isSV(v.t) ? null : 'caravans fields';
+      }
+      const c = data.get('caravans/' + user.uid);
+      if (seg.length !== 3 || data.has(p) || !v || !c || c.n !== seg[2] || now - c.t < c.min) return 'PERMISSION_DENIED: caravanDone';
+      return Object.keys(v).join(',') === 't' && isSV(v.t) ? null : 'caravanDone fields';
+    }
     if (seg[0] === 'friends' || seg[0] === 'friendReq') return friendRules(seg, v);
     if (seg[0] === 'whisper') { // SAT-ONLINE-070: only from a friend; the one it is for deletes it
       if (!user || seg.length !== 3) return 'PERMISSION_DENIED: whisper ' + p;

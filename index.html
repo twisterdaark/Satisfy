@@ -6331,7 +6331,7 @@ Object.assign(STR.en,{legNoDie:"A legend doesn't die easily. The life force is f
 // every legend resists status conditions (novel ch 182, 297, 778): stuns, paralysis and chills do not take
 function legResist(){if(!isLeg()&&!saImm()&&!mdCand())return false;if(gTime>(P.resT||0)){P.resT=gTime+1.5;num(P.x,P.y-30,t('legResist'),'#ffe08a',false);}return true;}
 Object.assign(STR.ar,{legResist:'[قاومت.]'});Object.assign(STR.en,{legResist:'[You have resisted.]'});
-function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;mdDie();if(BHR)bhDied();['inv','statusW','eqW','logW','mapW','qdW','forge','pauseScreen','settingsScreen','soundScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
+function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;mdDie();cvDie();if(BHR)bhDied();['inv','statusW','eqW','logW','mapW','qdW','forge','pauseScreen','settingsScreen','soundScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
 // owner 2026-10-22: 1 to 172 took an hour, then 50 hours to 100 was far too long: now about 10 hours of own-level hunting to 100 and 14 to 200, before quests and bonuses (no per-kill cap)
 // owner 2026-10-23 ("I kill a Lv 340 at 339 and take 20% of a level; make it slower"): past level 100 each level asks 2% more
 // for every level above 100, and each advancement passed (101, 201...) another 15%. A foe of your level now gives about 2-3%
@@ -6931,7 +6931,7 @@ function nextLvLine(id,key){const av=Object.keys(QD).filter(q=>QD[q].by===id&&qA
 function trLine(id){const av=Object.keys(QD).filter(q=>QD[q].by===id&&qAvail(q));if(av.length){const lv=Math.min(...av.map(q=>QD[q].lv||1));if(S.lv<lv)return t(id+'_hi',{lv});}
  if(S.cls==='novice'&&Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1))return 'trOther';return S.cls==='novice'?'trDone':'clsTaken';}
 function npcMark(id){const mine=Object.keys(QD).filter(q=>QD[q].by===id);if(mine.some(qReady))return['?','#ffd23a'];if(mine.some(q=>qAvail(q)&&S.lv>=(QD[q].lv||1)))return['!','#ffd23a'];if(mine.some(q=>S.qs[q]&&S.qs[q].st===1))return['?','#8aa0c0'];return null;}
-function shopD(who,line){const n=NPCT[who];if(!n)return;const o=[...(n.opts?n.opts():[]),...(n.noGift||!(GOK.has(who)||GREF.has(who))?[]:[{l:t(gk(who,'oGift')),ic:'bread',st:affTxt(who),f:()=>giftMenu(who)}])];dialog(who,[line],null,o.length?[...o,{l:t('oLeave')}]:null);}
+function shopD(who,line){const n=NPCT[who];if(!n)return;const o=[...(n.opts?n.opts():[]),...cvOpts(who),...(n.noGift||!(GOK.has(who)||GREF.has(who))?[]:[{l:t(gk(who,'oGift')),ic:'bread',st:affTxt(who),f:()=>giftMenu(who)}])];dialog(who,[line],null,o.length?[...o,{l:t('oLeave')}]:null);}
 function talkNPC(id){if(id==='board')return openBoard();if(id==='auction'&&!npcKO(id))return openAu();if(npcKO(id)){toast(t(gk(id,'npcKOt'),{n:t(id)}),'warn');SFX.deny();return;}
  for(const q in S.qs){const s=S.qs[q],o=QD[q]&&QD[q].obj;if(o&&o.t==='deliver'&&o.it===id&&s.st===1&&!s.c){s.c=1;addAff(id,6);SFX.quest();toast(t('retTo',{w:t(QD[q].by)}),'good');hudDirty=true;save(true);return dialog(id,[QD[q].adq?'adq_dl':q+'_dl']);}}
  {const eq=Object.keys(S.qs).find(q=>QD[q]&&QD[q].by===id&&QD[q].obj.t==='escort'&&S.qs[q].st===1);if(eq&&(!ESC||ESC.q!==eq))return dialog(id,[qLn(eq,'_w')],()=>startEscort(eq));}
@@ -8905,6 +8905,51 @@ Object.assign(STR.en,{rscroll:'Return Scroll',rscrollD:'Takes you to the inn you
 const nearTown=()=>{const sd=eaSide(outPos().x),L=TOWNS.filter(T=>eaT(T.rx)===!!sd);return (L.length?L:TOWNS).reduce((a,T)=>Math.hypot(T.rx*TS-P.x,T.ry*TS-P.y)<Math.hypot(a.rx*TS-P.x,a.ry*TS-P.y)?T:a);};
 const bindNpc=()=>{const n=S.bind&&npcOf(S.bind);return n&&eaSide(n.x)===eaSide(outPos().x)?n:null;};
 // your respawn point is the inn you last registered at (S.bind); without one you wake in the nearest town
+/* ---------------- merchant caravans (SAT-ONLINE-192; plan U220 "Region merchant caravans": "market inter-region logistics and
+   opt-in risks", checked by "route reward requires server proof") ----------------
+   An innkeeper hands you a town's cargo for one of the three nearest towns on your continent: you pay for it, carry it there
+   and its innkeeper pays more. The safe road pays half again; the risky one (opt-in) more than double, and bandits (the
+   road's own monsters) come for it now and then outside the towns. Die with it and it's lost; carry it too long and it
+   spoils. One cargo at a time. A delivery can't come sooner than the road allows: offline this device's clock says so;
+   online the contract goes to caravans/{uid} with the server's time and the delivery to caravanDone/{uid}/{n}, which the
+   rules take only once the road's time has passed since the contract (a scroll or a teleport doesn't make a trip). */
+Object.assign(STR.ar,{cvO:'🐫 بضاعة قافلة',cvOSt:'وصّل بضاعة لبلد تانية بمكسب',cvRoute:'{to} ({d} مربع): التمن {c} · الطريق الآمن {p} · الخطر {r}',cvSafe:'الطريق الآمن',cvRisk:'الطريق الخطر (قطاع طرق)',cvPick:'ودّي بضاعة لـ{to}؟ بتدفع {c} دلوقتي وتاخد {p} هناك.',
+ cvGo:'البضاعة معاك: وصّلها لصاحب نُزل {to} قبل ما تبوظ',cvNo:'معاك بضاعة لـ{to} بالفعل',cvDeliver:'سلّم البضاعة (+{p})',cvFast:'الورق بيقول إنك لسه طالع من {f}… الطريق ده مبيخلصش في الوقت ده',cvPaid:'سلّمت البضاعة وخدت {p} دهب (مكسب {g})',
+ cvLost:'البضاعة ضاعت لما وقعت',cvSpoil:'البضاعة بازت في الطريق',cvAmb:'قطاع طرق طمعانين في البضاعة!',cvNet:'مقدرتش أسجّل العقد، رجعتلك فلوسك',cvNetD:'مقدرتش أأكد التسليم، جرّب تاني',cvHave:'معاك بضاعة لـ{to} (فاضل {m} دقيقة قبل ما تبوظ)',
+ tl_carav:'تاجر القوافل',tl_caravD:'وصّلت ٢٠ بضاعة. لقب للشكل بس.'});
+Object.assign(STR.en,{cvO:'🐫 Caravan cargo',cvOSt:'Carry cargo to another town for a profit',cvRoute:'{to} ({d} tiles): costs {c} · safe road {p} · risky {r}',cvSafe:'The safe road',cvRisk:'The risky road (bandits)',cvPick:'Carry cargo to {to}? You pay {c} now and get {p} there.',
+ cvGo:"The cargo is yours: take it to {to}'s innkeeper before it spoils",cvNo:'You already carry cargo for {to}',cvDeliver:'Hand over the cargo (+{p})',cvFast:"The papers say you just left {f}... that road doesn't take so little time",cvPaid:'Cargo delivered: {p} gold (a profit of {g})',
+ cvLost:'The cargo was lost when you fell',cvSpoil:'The cargo spoiled on the road',cvAmb:'Bandits are after your cargo!',cvNet:"Couldn't register the contract; your gold is back",cvNetD:"Couldn't confirm the delivery; try again",cvHave:'You carry cargo for {to} ({m} min before it spoils)',
+ tl_carav:'Caravan Trader',tl_caravD:'You delivered 20 cargos. A title to show only.'});
+TTOWN.push('carav');   // (the status window lists them)
+const CVTS=TS;let CVBUSY=0;
+const cvT=k=>TOWNS.find(T=>T.k===k),cvD=(a,b)=>Math.round(Math.hypot(a.rx-b.rx,a.ry-b.ry));
+const cvSt=()=>NETTR&&NETTR.kind==='firebase'&&FB&&NET&&netId&&Satisfy.firebase.caravanStore?Satisfy.firebase.caravanStore(FB):null;
+// the three nearest towns on this one's continent, what a cargo costs and pays
+function cvRoutes(T){return TOWNS.filter(o=>o!==T&&eaT(o.rx)===eaT(T.rx)).map(o=>({T:o,d:cvD(T,o)})).sort((a,b)=>a.d-b.d).slice(0,3).map(({T:o,d})=>{const c=Math.max(30,Math.round((40+S.lv*8)*d/60));
+  return {to:o.k,d,c,p:Math.round(c*1.5),r:Math.round(c*2.2),min:Math.max(20000,Math.round(d*CVTS/150*800))};});}
+// the innkeeper's options: the cargo you carry (to hand over here), or the routes
+function cvOpts(who){if(!S||!/^inn/.test(who)||S.__demo)return [];const z=townOfNpc(who),T=z&&cvT(z);if(!T)return [];const C=S.car;
+ if(C){if(C.to===z)return [{l:t('cvDeliver',{p:C.pay}),f:()=>cvDeliver(who)}];return [{l:t('cvO'),st:t('cvHave',{to:t(C.to),m:Math.max(1,Math.ceil((C.t0+cvMax(C)-wNow())/60000))}),f:()=>{SFX.deny();toast(t('cvNo',{to:t(C.to)}),'warn');}}];}
+ return [{l:t('cvO'),st:t('cvOSt'),f:()=>dialog(who,[t('cvOSt')],null,[...cvRoutes(T).map(R=>({l:t('cvRoute',{to:t(R.to),d:R.d,c:R.c,p:R.p,r:R.r}),pr:R.c,poor:S.gold<R.c,f:()=>cvPick(who,z,R)})),{l:t('oLeave')}])}];}
+function cvPick(who,z,R){dialog(who,[t('cvPick',{to:t(R.to),c:R.c,p:R.p})],null,[{l:t('cvSafe'),st:'+'+R.p,f:()=>cvTake(who,z,R,0)},{l:t('cvRisk'),st:'+'+R.r,f:()=>cvTake(who,z,R,1)},{l:t('oLeave')}]);}
+const cvMax=C=>C.min*6+600000;
+function cvTake(who,z,R,risk){if(S.car||CVBUSY)return;if(S.gold<R.c){SFX.deny();toast(t('noGold'),'warn');return;}S.gold-=R.c;
+ const C={f:z,to:R.to,n:(wNow().toString(36)+((rand()*1e6)|0).toString(36)).slice(-12),t0:wNow(),min:R.min,cost:R.c,pay:risk?R.r:R.p,risk,amb:20};
+ const ok=()=>{S.car=C;SFX.quest();toast(t('cvGo',{to:t(R.to)}),'good');hudDirty=true;save(true);},st=cvSt();
+ if(!st)return ok();CVBUSY=1;st.start(NET.uid,{f:C.f,to:C.to,min:C.min,n:C.n}).then(ok,()=>{S.gold+=R.c;toast(t('cvNet'),'warn');hudDirty=true;}).finally(()=>{CVBUSY=0;});}
+function cvDeliver(who){const C=S.car;if(!C||CVBUSY)return;const z=townOfNpc(who);if(C.to!==z)return;
+ if(wNow()-C.t0<C.min){SFX.deny();dialog(who,[t('cvFast',{f:t(C.f)})]);return;}
+ const pay=()=>{if(S.car!==C)return;S.car=null;S.gold+=C.pay;S.cvN=(S.cvN||0)+1;if(S.cvN>=20)giveTitle('carav');SFX.coin();numP(-26,'+'+C.pay+'G','#f2c14e',false);toast(t('cvPaid',{p:C.pay,g:C.pay-C.cost}),'good');hudDirty=true;save(true);},st=cvSt();
+ if(!st)return pay();CVBUSY=1;st.done(NET.uid,C.n).then(pay,()=>{toast(t('cvNetD'),'warn');}).finally(()=>{CVBUSY=0;});}
+// on the road: bandits for a risky cargo (the road's own monsters, now and then outside the towns), and spoiling
+function cvTick(dt){const C=S&&S.car;if(!C||S.__demo)return;if(wNow()-C.t0>cvMax(C)){S.car=null;toast(t('cvSpoil'),'warn');hudDirty=true;save(true);return;}
+ if(!C.risk||mode!=='play'||!P||P.ghost||P.y>=WMH*TS||inTown(P.x,P.y))return;if((C.amb-=dt)>0)return;C.amb=35+rand()*25;if(rand()>=.45)return;
+ let src=null,bd=600*600;for(let i=0;i<mons.length;i++){const m=mons[i];if(m.dead||m.tmp||MT[m.type].boss)continue;const d=(m.x-P.x)**2+(m.y-P.y)**2;if(d<bd){bd=d;src=m;}}if(!src)return;
+ const n=2+(rand()<.4?1:0);for(let i=0;i<n;i++){const a=rand()*6.283,m=newMon(src.type,P.x+Math.cos(a)*90,P.y+Math.sin(a)*70);m.tmp=1;m.eng=4;m.agg=1;mons.push(m);vfx('spawn',m.x,m.y,{color:'#ffb04a'});}
+ toast(t('cvAmb'),'warn');SFX.notice();}
+function cvDie(){if(S&&S.car){S.car=null;setTimeout(()=>toast(t('cvLost'),'warn'),800);}}
+window.__GCV={routes:k=>cvRoutes(cvT(k)),opts:w=>cvOpts(w),take:(w,z,R,r)=>cvTake(w,z,R,r),deliver:w=>cvDeliver(w),tick:dt=>cvTick(dt),max:C=>cvMax(C)}; // tests
 function bindOpt(id){return {l:t(S.bind===id?'oBound':'oBind'),f:()=>{S.bind=id;const z=townOfNpc(id);toast(t('bindSet',{z:t(z||'zWin')}),'good');SFX.quest();save(true);shopD(id,NPCT[id].idle());}};}
 function deadChoice(){return respawn();}
 /* spawn protection (owner 2026-10-23, after a spawn kill on loading in): nothing hurts you after you load in or come back to
@@ -9566,7 +9611,7 @@ function update(dt){
     if((dx||dy)&&Math.hypot(m.x-x0,m.y-y0)<Math.hypot(dx,dy)*.2){m.wx=0;m.wy=0;m.wt=Math.min(m.wt,.4+rand()*.6);m.blk=(m.blk|0)+1;}else if(dx||dy)m.blk=0;}}
  }catch(err){gameErr(err,m);}finally{if(MOBP){P=MOBP;MOBP=null;}}}
  if(P.rmv>0)P.rmv-=dt;else if(P.rsp)P.rsp=Math.max(0,P.rsp-dt*2);horseRegen(dt);if(P.ride&&!(RCR&&RCR.in)&&noRideAt(P.x,P.y)){dismount();toast(t('rideOffHere'));} // walked into a no-ride place: off the horse at once
- updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);karmaTick(dt);updateEvents(dt);updateSiege(dt);achTick(dt);ttTick(dt);updateWeather(dt);fogTick(dt);updateComp(dt);updateItemFx(dt);updateGDrop();updatePet(dt);updateArena(dt);updateTower(dt);updateBehen(dt);updateTowerW(dt);updateDragon(dt);updateBeasts(dt);mpTick(dt);dsTick(dt);updateBelial(dt);updateAuction(dt);
+ updateEProj(dt);updateAllies(dt);updateEscort(dt);cvTick(dt);updateTerr(dt);updateLife(dt);karmaTick(dt);updateEvents(dt);updateSiege(dt);achTick(dt);ttTick(dt);updateWeather(dt);fogTick(dt);updateComp(dt);updateItemFx(dt);updateGDrop();updatePet(dt);updateArena(dt);updateTower(dt);updateBehen(dt);updateTowerW(dt);updateDragon(dt);updateBeasts(dt);mpTick(dt);dsTick(dt);updateBelial(dt);updateAuction(dt);
 }
 
 /* ---------------- monster AI ---------------- */
