@@ -7739,7 +7739,42 @@ function smithMenu(who,W,A,svc=true){const back={l:t('oBack'),f:()=>shopD(who,'a
 // repair and enhancement are smith work (Khan, Smith, the Reidan and Reinhardt smiths) or done yourself at an anvil;
 // setting gems needs a master (Khan, the Reinhardt smith) or your own anvil. Armorers are only traders.
 const GEMSM=new Set(['khan','smithRh']);
-function svcOpts(who){const rc=repairCost(who);return [...(GEMSM.has(who)?[{l:t('oGem',{g:GEMC}),ic:'ruby',f:()=>gemMenu(who)}]:[]),{l:rc?t('oRepair',{g:rc}):t('oRepair0'),ic:'hammer',poor:S.gold<rc,f:()=>repairAll(who)},{l:t('oEnh'),ic:'mstone',f:()=>enhMenu(who)},...(S.items.some(i=>i.id==='tbow')?[{l:t('oTbow'),ic:'tbow',f:()=>tbowBreak(who)}]:[]),{l:t('oSalv'),ic:'hammer',f:()=>openSalv(who)},...(repOn()?[{l:t('oRepOrd',{n:(S.rord||[]).length}),ic:'hammer',f:()=>repD(who)}]:[])];}
+/* limited reroll (SAT-ONLINE-201; plan U286 "Limited reroll": "affix rerolls with escalating sinks", checked by "rates
+   disclosed and audit logged"). A smith reforges one of a weapon's passives (◆; a ★ found by appraisal stays as it is). The
+   new one is drawn as the forge draws them: any passive the weapon doesn't already have (the old one's kind may come back),
+   each as likely, its strength random in the range the weapon's grade allows; the list, the odds and the ranges are shown
+   before you pay. It costs gold and magic stones that double each time, at most 5 times a weapon. The weapon keeps its count
+   (a trade carries it) and its last 5 reforges: what went, what came, when. */
+Object.assign(STR.ar,{oRr:'⚒ إعادة تشكيل خاصية',rrPick:'أنهي سلاح؟ (كل سلاح يتشكّل {m} مرات بالكتير، والتمن بيتضاعف كل مرة)',rrLine:'أنهي خاصية تتغير؟',rrOdds:'الخاصية الجديدة واحدة من دول ({n})، كل واحدة فرصتها {p}%، وقوتها عشوائية في مداها:\n{l}',
+ rrGo:'غيّر «{a}» ({g} دهب + {s} حجر سحري)',rrMax:'السلاح ده اتشكّل {m} مرات، مينفعش تاني',rrNone:'مفيش سلاح معاك ليه خاصية تتغير',rrDone:'«{a}» بقت «{b}»',rrCnt:'اتشكّل {n} من {m}',rrLast:'آخر تشكيل: {a} ← {b}',rrNoMs:'محتاج {s} حجر سحري'});
+Object.assign(STR.en,{oRr:'⚒ Reforge a passive',rrPick:'Which weapon? (each one can be reforged {m} times; the price doubles each time)',rrLine:'Which passive changes?',rrOdds:'The new passive is one of these {n}, each {p}% likely, its strength random in its range:\n{l}',
+ rrGo:'Change "{a}" ({g} gold + {s} magic stone)',rrMax:'This weapon was reforged {m} times; it can\'t be again',rrNone:'No weapon of yours has a passive to reforge',rrDone:'"{a}" became "{b}"',rrCnt:'reforged {n} of {m}',rrLast:'Last reforge: {a} → {b}',rrNoMs:'You need {s} magic stones'});
+const RRM=5;
+const rrCost=i=>({g:Math.round(250*(1+(i.r||0))*2**(i.rr||0)),s:1+(i.rr||0)});
+const rrList=()=>{const w=weapon();return S.items.filter(i=>i&&i.slot==='w'&&(i.wp||[]).some(p=>!p.h)).sort((a,b)=>(b===w)-(a===w)||b.r-a.r);};
+// what the forge could draw for line n: wpOne's kinds and its strength range at this grade (q = rand*.8 + r*.05, at most 1)
+function rrKinds(i,n){const not=(i.wp||[]).filter((p,j)=>j!==n).map(p=>p.k),r=Math.max(2,i.r||0),q0=Math.min(1,r*.05),q1=Math.min(1,.8+r*.05);
+ return Object.keys(WPK).filter(k=>!not.includes(k)&&(k!=='shock'||wpThunder(i))).map(k=>{const [a,b]=WPK[k],f=q=>k==='mpr'?Math.round(a+(b-a)*q):Math.round((a+(b-a)*q)*100);
+  return {k,lo:f(q0),hi:f(q1)};});}
+const rrTxt=x=>t('wp_'+x.k,{v:x.lo===x.hi?x.lo:x.lo+'–'+x.hi,n:'1+',j:'1+',s:'0.2–0.5'});
+function rrMenu(who){const L=rrList();if(!L.length)return dialog(who,[t('rrNone')],()=>svcBack(who));
+ const cell=i=>{const c=rrCost(i),n=i.rr||0,last=(i.rrl||[]).slice(-1)[0];return {cell:1,ic:i.id,r:i.r,eq:i===weapon(),badge:n?n+'/'+RRM:'',l:inm(i),poor:n>=RRM||S.gold<c.g||(S.mats.mstone||0)<c.s,
+  tip:itemTip(i)+wpTip(i)+'<br><small>'+t('rrCnt',{n,m:RRM})+(n<RRM?' · '+c.g.toLocaleString('en')+' '+t('goldW')+' · '+c.s+' '+t('mstone'):'')+(last?'<br>'+esc(t('rrLast',{a:last.a,b:last.b})):'')+'</small>',f:()=>rrLines(i,who)};};
+ dialog(who,[t('rrPick',{m:RRM})],null,[...L.slice(0,24).map(cell),{l:t('oBack'),f:()=>svcBack(who)}]);}
+function rrLines(i,who){if((i.rr||0)>=RRM){SFX.deny();return dialog(who,[t('rrMax',{m:RRM})],()=>rrMenu(who));}const c=rrCost(i),o=[];
+ (i.wp||[]).forEach((p,n)=>{if(p.h)return;const K=rrKinds(i,n);o.push({l:t('rrGo',{a:wpTxt(p),g:c.g.toLocaleString('en'),s:c.s}),poor:S.gold<c.g||(S.mats.mstone||0)<c.s,
+  st:t('rrOdds',{n:K.length,p:Math.round(1000/K.length)/10,l:''}).split('\n')[0],f:()=>rrOdds(i,n,who)});});
+ dialog(who,[t('rrLine')+'\n'+t('rrCnt',{n:i.rr||0,m:RRM})],null,[...o,{l:t('oBack'),f:()=>rrMenu(who)}]);}
+// the odds shown in full before the stones and gold go
+function rrOdds(i,n,who){const K=rrKinds(i,n),c=rrCost(i);dialog(who,[t('rrOdds',{n:K.length,p:Math.round(1000/K.length)/10,l:K.map(x=>'· '+rrTxt(x)).join('\n')})],null,
+ [{l:t('rrGo',{a:wpTxt(i.wp[n]),g:c.g.toLocaleString('en'),s:c.s}),poor:S.gold<c.g||(S.mats.mstone||0)<c.s,f:()=>rrDo(i,n,who)},{l:t('oBack'),f:()=>rrLines(i,who)}]);}
+function rrDo(i,n,who){const p=i.wp&&i.wp[n];if(!p||p.h||!S.items.includes(i))return rrMenu(who);if((i.rr||0)>=RRM){SFX.deny();return dialog(who,[t('rrMax',{m:RRM})],()=>rrMenu(who));}
+ const c=rrCost(i);if(S.gold<c.g){SFX.deny();return dialog(who,['arNo'],()=>rrLines(i,who));}if((S.mats.mstone||0)<c.s){SFX.deny();return dialog(who,[t('rrNoMs',{s:c.s})],()=>rrLines(i,who));}
+ S.gold-=c.g;S.mats.mstone-=c.s;const not=i.wp.filter((q,j)=>j!==n).map(q=>q.k),q=wpOne(Math.max(2,i.r||0),not,i),a=wpTxt(p),b=wpTxt(q);i.wp[n]=q;
+ i.rr=(i.rr||0)+1;i.rrl=[...(i.rrl||[]),{t:wNow(),a,b,g:c.g,s:c.s}].slice(-5);   // the audit: what went, what came, when, for what
+ SFX.forge&&SFX.forge();SFX.coin();toast(t('rrDone',{a,b}),'good');hudDirty=true;save(true);rrLines(i,who);}
+window.__GRR={list:()=>rrList(),kinds:(i,n)=>rrKinds(i,n),cost:i=>rrCost(i),menu:w=>rrMenu(w),lines:(i,w)=>rrLines(i,w),odds:(i,n,w)=>rrOdds(i,n,w),go:(i,n,w)=>rrDo(i,n,w),M:RRM}; // tests
+function svcOpts(who){const rc=repairCost(who);return [...(GEMSM.has(who)?[{l:t('oGem',{g:GEMC}),ic:'ruby',f:()=>gemMenu(who)}]:[]),{l:rc?t('oRepair',{g:rc}):t('oRepair0'),ic:'hammer',poor:S.gold<rc,f:()=>repairAll(who)},{l:t('oEnh'),ic:'mstone',f:()=>enhMenu(who)},...(S.items.some(i=>i.id==='tbow')?[{l:t('oTbow'),ic:'tbow',f:()=>tbowBreak(who)}]:[]),{l:t('oSalv'),ic:'hammer',f:()=>openSalv(who)},...(rrList().length?[{l:t('oRr'),ic:'hammer',f:()=>rrMenu(who)}]:[]),...(repOn()?[{l:t('oRepOrd',{n:(S.rord||[]).length}),ic:'hammer',f:()=>repD(who)}]:[])];}
 /* repair orders for player smiths (SAT-ONLINE-096, plan U225). Online, at any smith's services, a player posts an order to
    mend a worn piece for a fee they choose (half to all of what the smith there asks); the fee leaves the bag and comes back
    if the order is taken off. A player smith (the Blacksmith class) sees every order there and mends one in a single write
