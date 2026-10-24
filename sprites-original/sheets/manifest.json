@@ -27043,6 +27043,30 @@
     },
     "scale": 1.4
    },
+   "ecyclops": {
+    "file": "sheets/monsters/ecyclops.png",
+    "frame": {
+     "w": 37,
+     "h": 39
+    },
+    "anchor": {
+     "x": 13,
+     "y": 38
+    },
+    "scale": 1.6
+   },
+   "ekobold": {
+    "file": "sheets/monsters/ekobold.png",
+    "frame": {
+     "w": 25,
+     "h": 26
+    },
+    "anchor": {
+     "x": 10,
+     "y": 25
+    },
+    "scale": 1.35
+   },
    "erat": {
     "file": "sheets/monsters/erat.png",
     "frame": {
@@ -27247,6 +27271,42 @@
     },
     "scale": 1
    },
+   "ilizard": {
+    "file": "sheets/monsters/ilizard.png",
+    "frame": {
+     "w": 38,
+     "h": 28
+    },
+    "anchor": {
+     "x": 13,
+     "y": 27
+    },
+    "scale": 1.4
+   },
+   "kking": {
+    "file": "sheets/monsters/kking.png",
+    "frame": {
+     "w": 25,
+     "h": 29
+    },
+    "anchor": {
+     "x": 10,
+     "y": 28
+    },
+    "scale": 1.55
+   },
+   "kobold": {
+    "file": "sheets/monsters/kobold.png",
+    "frame": {
+     "w": 25,
+     "h": 26
+    },
+    "anchor": {
+     "x": 10,
+     "y": 25
+    },
+    "scale": 1.3
+   },
    "kraken": {
     "file": "sheets/monsters/kraken.png",
     "frame": {
@@ -27270,6 +27330,18 @@
      "y": 43
     },
     "scale": 1.2
+   },
+   "lizard": {
+    "file": "sheets/monsters/lizard.png",
+    "frame": {
+     "w": 38,
+     "h": 28
+    },
+    "anchor": {
+     "x": 13,
+     "y": 27
+    },
+    "scale": 1.35
    },
    "mgolem": {
     "file": "sheets/monsters/mgolem.png",
@@ -27316,6 +27388,18 @@
     "anchor": {
      "x": 15,
      "y": 37
+    },
+    "scale": 1.35
+   },
+   "ogre": {
+    "file": "sheets/monsters/ogre.png",
+    "frame": {
+     "w": 39,
+     "h": 39
+    },
+    "anchor": {
+     "x": 14,
+     "y": 38
     },
     "scale": 1.35
    },
@@ -27522,6 +27606,18 @@
      "y": 121
     },
     "scale": 1
+   },
+   "troll": {
+    "file": "sheets/monsters/troll.png",
+    "frame": {
+     "w": 35,
+     "h": 36
+    },
+    "anchor": {
+     "x": 12,
+     "y": 35
+    },
+    "scale": 1.3
    },
    "vbat": {
     "file": "sheets/monsters/vbat.png",
