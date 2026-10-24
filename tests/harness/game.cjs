@@ -197,7 +197,7 @@ async function continueGame(g) {
 }
 
 // Durable state minus clocks that depend on how many frames ran.
-const VOLATILE_S = ['playT', 'bqT', 'immT', 'fog', 'mrt', 'wv']; // fog: map cells seen, grows with every step (and baselines before it have none); mrt: wall-clock respawn times of killed monsters; wv: map layout version (4 since the map doubled, the baseline has 3)
+const VOLATILE_S = ['playT', 'bqT', 'immT', 'fog', 'mrt', 'wv', 'svT']; // fog: map cells seen, grows with every step (and baselines before it have none); mrt: wall-clock respawn times of killed monsters; wv: map layout version (4 since the map doubled, the baseline has 3); svT: the wall-clock time of the last save (the inn's rest, U289)
 // Random per character (SAT-ONLINE-005): S.pid and the item ids derived from it. Baseline builds only
 // make a pid on a guild join, so golden/rollback comparisons drop them; tests/regression/ids.test.cjs checks them.
 const IDENTITY_S = ['pid'];
