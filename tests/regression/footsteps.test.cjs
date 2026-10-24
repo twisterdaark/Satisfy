@@ -50,3 +50,22 @@ test('footsteps with Reduced motion: prints, no dust', async () => {
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// Claude-B's notes on #227 (SAT-ONLINE-196): prints fade by the frame's own time (a 30 fps or a 144 Hz screen fades them in
+// the same seconds), and walkers who left are forgotten
+test('footsteps fade by time, not by frames; walkers who left are forgotten', async () => {
+  const g = await H.openGame({});
+  try {
+    await H.newGame(g);
+    const T = await find(g);
+    assert.ok((await walk(g, T.snow, 40)).prints >= 1);
+    await g.step(240, 1000 / 30); // eight seconds at 30 fps: 240 frames (at a fixed 1/60 that was four seconds)
+    assert.equal(await g.eval(() => window.__GFT.prints), 0, 'gone after seven seconds at 30 fps');
+    const n0 = await g.eval(() => window.__GFT.walkers);
+    await g.eval(() => { for (let i = 0; i < 30; i++) window.__GFT.walk('rgone' + i, 100 + i, 100); });
+    assert.equal(await g.eval(() => window.__GFT.walkers), n0 + 30);
+    await g.step(1100); // 18 s: past ten seconds unseen, and a sweep
+    assert.equal(await g.eval(() => window.__GFT.walkers), n0, 'the 30 who left are forgotten; you stay');
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});

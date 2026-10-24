@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24ftfix', ver: '2.65', d: '2026-10-24',
+      ar: ["أثر الرجلين في التلج وتراب الخطوات بيختفوا في نفس الوقت على أي شاشة (على شاشة 120 أو 144 هرتز كانوا بيختفوا أسرع بالضعف)."],
+      en: ["Footprints in the snow and the dust of footsteps fade in the same time on any screen (on a 120 or 144 Hz screen they faded twice as fast)."] },
     { v: '2026-10-24warmstart', ver: '2.64', d: '2026-10-24',
       ar: ["اللعبة مبقتش بتهنج أول ما تدخل: الأرض والناس والوحوش اللي حواليك بيترسموا وشاشة البداية لسه ظاهرة."],
       en: ["The game no longer stalls as you start: the ground, the people and the monsters around you are painted while the title screen still shows."] },
