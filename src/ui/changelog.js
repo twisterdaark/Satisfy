@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24pixart', ver: '2.73', d: '2026-10-24',
+      ar: ["الإيموجي اللي في الشبابيك والشرايط بقت رسومات بيكسل صغيرة بستايل اللعبة.",
+          "بنات العالم (مرسيدس، إليزابيث، جيشوكا، بيتي، جيسيكا، ليلى، مدربة الرماة، هيرا، بنت هان وغيرهم) بقوا بيترسموا برسم البنات الجديد بدل جسم الولاد القديم.",
+          "وحوش اترسمت من جديد عشان تبقى شبه أساميها: نمر البوابات ونمر الجبل والنمر الأبيض بقوا نمور، وفار الأبراج وملكة الفيران والفار الثعلبي بقوا فيران، والفراشة المقطّعة بقت فراشة، والصدفة السودا بقت سلحفاة بصدفة شوك.",
+          "الكاهن الطاوي الشرير كان واقف في البحر فمؤشر مهمته كان بيوديك هناك، دلوقتي واقف في الصحرا. وراجعت مؤشرات كل المهمات من عند اللي بيديها، ومفيش ولا واحد بيشاور على البحر.",
+          "الخريطة: أي حتة المتصفح يرميها من الذاكرة بتترسم تاني بدل ما تفضل سودا."],
+      en: ["Emoji in the windows and the lines at the top are now small pixel drawings in the game's style.",
+          "The women of the world (Mercedes, Elizabeth, Jishuka, Betty, Jessica, Layla, the archery trainer, Hera, Han's daughter and others) now wear the new girls' drawing instead of the old boys' body.",
+          "Monsters redrawn to look like their names: the gateway, mountain and white tigers are tigers, the zodiac rat, the rat queen and the fox mouse are rats, the torn butterfly is a butterfly, and the black shell is a spiked turtle.",
+          "The evil Daoist priest stood in the sea, so his quest arrow led there; he stands in the desert now. Every quest's arrow was checked from its giver, and none points to the sea.",
+          "The map: any piece the browser drops from memory is painted again instead of staying dark."] },
     { v: '2026-10-24gates', ver: '2.72', d: '2026-10-24',
       ar: ["بوابات بانجيا الشمالية بقى ليها حراس زي الرواية: وانت واخد المهمة، كل بوابة واقف قدامها حارس، ومحدش بيعدّي قبل ما يغلبه. لما تكسر التالتة بعد ما تغلب التلاتة، الحجر بيقول إنك أول غريب يعدّيها.",
           "فيه سندان جنب وايت الحداد في بانجيا، ومؤشر مسابقة الحدادين بقى بيوديك عنده بدل البحر. أي مهمة صنع بقت بتشاور على سندان صاحب المهمة أو أقرب سندان في قارتك، ومهمات الخام على أقرب خام ليك."],
