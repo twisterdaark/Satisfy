@@ -1987,6 +1987,8 @@ function chunkLayer(base,nm){const CS=512,CX=Math.ceil(MW*TS/CS),Y0=-NR*TS,CY=Ma
   // copy the world rectangle (sx,sy,sw,sh) to (dx,dy) on ctx; then warm one missing chunk next to the view
   blit(ctx,sx,sy,sw,sh,dx,dy){tick++;each(sx,sy,sw,sh,(k,i,j)=>{const e=get(i,j),x0=Math.max(sx,e.ox),y0=Math.max(sy,e.oy),x1=Math.min(sx+sw,e.ox+CS),y1=Math.min(sy+sh,e.oy+CS);if(x1>x0&&y1>y0)ctx.drawImage(e.c,x0-e.ox,y0-e.oy,x1-x0,y1-y0,dx+x0-sx,dy+y0-sy,x1-x0,y1-y0);});
    let w=false;each(sx-CS/2,sy-CS/2,sw+CS,sh+CS,(k,i,j)=>{if(!w&&!live.has(k)&&!part.has(k)&&live.size+part.size<LIM&&part.size<3){w=true;warm(k,i,j);}});},
+  // painted ahead in idle time: the chunks over a world rectangle (where you'll start, while the title shows)
+  warmAt(x,y,w,h){each(x,y,w,h,(k,i,j)=>{if(!live.has(k)&&!part.has(k)&&live.size+part.size<LIM)warm(k,i,j);});},
   stats:()=>({live:live.size,part:part.size,pool:pool.length,ops:[...ops.values()].reduce((a,v)=>a+v.size,0),lim:LIM}),
   // tests (SAT-ONLINE-135): is the chunk under world pixel (x,y) drawn now; the hash of its pixels (drawing it if it isn't)
   has(x,y){let r=false;each(x,y,1,1,k=>{r=live.has(k);});return r;},
@@ -10541,7 +10543,16 @@ const lowJob=()=>LOWQ.length?{step:lowStep}:null;
 pjAdd('low',2,lowJob);
 // while the title shows: the HUD map's pieces where you'll start (your save, and a new character's spot)
 pjAdd('start',.5,()=>({step(){const at=[[wX(126)*TS+8,84*TS+10]];try{const r=STORE.read();if(r.status==='ok'&&r.data&&r.data.P)at.unshift([+r.data.P.x,+r.data.P.y]);}catch(e){}
- for(const [x,y] of at)if(isFinite(x)&&isFinite(y)&&y<WMH*TS)miniAhead(x/TS-32,y/TS-22+NR);return true;}}));
+ for(const [x,y] of at)if(isFinite(x)&&isFinite(y)&&y<WMH*TS){miniAhead(x/TS-32,y/TS-22+NR);startAhead(x,y);}return true;}}));
+// (2026-10-24, the owner's lag) the first frame of play painted the ground round you and every figure in sight at once, a second
+// and more on a slow machine: now the ground, the people's and the monsters' looks where you'll start are painted while the
+// title shows (the same pixels; the frame then finds them done)
+function startAhead(x,y){const R=700;for(const L of [gg,og])L.warmAt(x-VW/2-200,y-VH/2-200,VW+400,VH+400);
+ const near=o=>o&&Math.abs(o.x-x)<R&&Math.abs(o.y-y)<R;
+ for(const n of npcs)if(near(n)&&!n.hidden&&shTodo(n.spr))pjAdd('s'+n.spr,1.05,shJob(n.spr));
+ for(const m of mons)if(near(m)&&m.fig&&!m.dead&&shTodo(m.fig))pjAdd('s'+m.fig,1.05,shJob(m.fig));
+ pjAdd('tf',1.06,()=>({step(){if(!TF&&GM0)tfBuild();return true;}}));   // the townspeople (their own seeded dice, not the game's; the world must be laid out first)
+ pjAdd('tfs'+x+','+y,1.07,()=>{let i=0;return {step(){if(!TF)return true;for(;i<TF.length;i++){const f=TF[i];if(f.look&&Math.abs(f.x-x)<1200&&Math.abs(f.y-y)<1000){remoteSpr(f.look,0);i++;return i>=TF.length;}}return true;}};});}
 // the 8 px copy in 1024 px pieces, painted when the map first shows them, 8 rows a strip (the map shows them filling in); the
 // last 30 seen are kept, enough for a 4K screen (4 MB each: browsing the whole map kept them all)
 const BTL=new Map();
