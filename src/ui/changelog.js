@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24smooth', ver: '2.62', d: '2026-10-24',
+      ar: ["اللعبة بقت أنعم بكتير: الخريطة الصغيرة وخريطة العالم كانوا بيترسموا حتت كبيرة مرة واحدة، وده كان بيوقف اللعبة نص ثانية كل شوية في أول نص دقيقة لعب وكل ما تمشي لحتة جديدة. دلوقتي بيترسموا شرايح صغيرة في وقت فراغ الجهاز، والحتة اللي جاية بتجهز قبل ما توصلها.",
+          "خريطة العالم بتفتح على طول وبتكمل رسم نفسها قدامك بدل ما تعلّق.",
+          "الأرض اللي جنبك وشكل الناس والوحوش اللي قربوا بيتجهزوا في وقت الفراغ قبل ما يظهروا، بدل ما يترسموا مرة واحدة وأنت ماشي.",
+          "اللعبة مبقتش بتتقل كل ما تلعب أكتر: كل وحش بيرجع بعد ما يموت كان بيبقى أبطأ في الحساب من الأول، وده اتصلح.",
+          "كل فريم بقى بيستهلك ذاكرة أقل من النص، فوقفات تنضيف الذاكرة الصغيرة بقت أقل."],
+      en: ["The game runs much smoother: the minimap and the world map were painted in big pieces at once, which froze the game for half a second again and again in the first half-minute of play and whenever you walked somewhere new. Now they are painted in thin strips while the device is idle, and the next piece is ready before you reach it.",
+          "The world map opens at once and finishes painting itself in front of you instead of freezing.",
+          "The ground next to you and the looks of the people and monsters coming near are prepared in idle time before they show, instead of being painted all at once as you walk.",
+          "The game no longer gets heavier the longer you play: every monster that came back after dying was slower to work out than before; fixed.",
+          "Each frame uses less than half the memory it did, so the small pauses for cleaning memory come less often."] },
     { v: '2026-10-24tower1', ver: '2.61', d: '2026-10-24',
       ar: ["الدور الأول في برج الحكمة بقى واضح: أول ما تدخل بتطلعلك رسالة بتقولك تمشي يمين ناحية النور من غير ما تقف، والنور بقى باين في نص الشاشة بعمود نور بدل ما كان مستخبي ورا شريط السكيلات.",
           "أسهم في الأرض بتشاورلك على الطريق وبتحمر لو وقفت، وسطر الكويست بيقولك النور على بعد كام وسرعتك، وفيه شرار وراك وأنت بتجري.",
