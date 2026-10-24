@@ -486,6 +486,9 @@ body.rmo .toast,body.rmo .panel,body.rmo .pop,body.rmo #forge.hit,body.rmo #rays
 .panel:not(#dialog),#controls,.cbox,#create>.cbox{background:radial-gradient(ellipse at 50% 30%,rgba(116,144,192,.8),rgba(76,102,150,.82) 75%);backdrop-filter:blur(2px)}
 #sysm,#announce{background:linear-gradient(180deg,rgba(40,54,112,.78),rgba(24,32,76,.82))}
 #tip{background:linear-gradient(180deg,rgba(44,62,128,.68),rgba(26,38,90,.74));backdrop-filter:blur(2px)}
+/* (owner 2026-10-24, the lag) the HUD's panels over the moving world: no blur behind them. A blur behind a panel is painted
+   again every frame the world moves, a pass for each of the dozen panels on screen; the menus keep theirs */
+#hud .sys{backdrop-filter:none}
 .toast{background:rgba(22,30,70,.78)}
 #loot{position:absolute;inset-inline-start:calc(var(--u)*7.5);top:34%;display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--u)*.35);pointer-events:none;z-index:4}
 .lt{direction:ltr;display:flex;align-items:center;gap:calc(var(--u)*.55);background:rgba(22,30,70,.88);border-top:2px solid #a6d6f6;border-bottom:2px solid #a6d6f6;padding:calc(var(--u)*.2) calc(var(--u)*.9);font-weight:700;color:#fff;text-shadow:1px 1px 0 #000;animation:ltin .22s ease-out;transition:opacity .35s,transform .35s}
@@ -1007,10 +1010,15 @@ function voxPlay(m,b,k,soft){if(!P)return;const d=Math.hypot(m.x-P.x,m.y-P.y);if
  const p=pm*clamp(7/(b.r||7),.45,1.35)*(b.boss?.85:1)*(.95+monHash(m)*.1);if(window.__GS&&__GS.vox&&__GS.vox.length<80)__GS.vox.push(m.type+':'+c+':'+k);
  SFXV=Math.max(.06,(1-d/SFXR)*(b.boss?1:.8)*(soft?.5:1));try{sfxOn('amb',()=>f(p));}finally{SFXV=1;}}
 // watches each monster for the moments it should be heard (state from the last frame in m.vx)
+// another player of a shared world within 900 px of a monster (apart from the loop over the monsters: a closure there made a
+// scope for each of the 2,000 every frame)
+function mobNearR(m){const R=MOBN.rs;for(let i=0;i<R.length;i++){const r=R[i];if((r.x-m.x)**2+(r.y-m.y)**2<810000)return true;}return false;}
+let VXF=0;   // the frame monVox last saw each monster (v.f): one it didn't see last frame catches up first, so nothing plays late
 function monVox(m,b,dt){if(ambV<=0||!P||mode==='title'||m.hidN)return;const v=m.vx,e=m.eng>0;
- // out of earshot: only keep up with its state, so nothing plays late when you come near
- if(v&&Math.abs(m.x-P.x)>SFXR+60||v&&Math.abs(m.y-P.y)>SFXR+60){v.d=m.dead;v.hp=m.hp;v.e=e;v.st=m.st;v.tl=m.tele>0;v.cd=m.cd;return;}
- if(!v){m.vx={st:m.st,hp:m.hp,e,d:m.dead,tl:m.tele>0,cd:m.cd,h:-9,a:-9,w:-9,i:3+monHash(m)*12};return;}
+ // out of earshot (or not watched last frame): only keep up with its state, so nothing plays late when you come near
+ if(v&&(v.f!==VXF-1||Math.abs(m.x-P.x)>SFXR+60||Math.abs(m.y-P.y)>SFXR+60)){v.f=VXF;v.d=m.dead;v.hp=m.hp;v.e=e;v.st=m.st;v.tl=m.tele>0;v.cd=m.cd;return;}
+ if(!v){m.vx={st:m.st,hp:m.hp,e,d:m.dead,tl:m.tele>0,cd:m.cd,h:-9,a:-9,w:-9,i:3+monHash(m)*12,f:VXF};return;}
+ v.f=VXF;
  const now=performance.now()/1000;
  if(m.dead!==v.d){v.d=m.dead;if(m.dead&&!m.vhid)voxPlay(m,b,'d');}
  if(m.dead)return;
@@ -1956,29 +1964,37 @@ const doorOf=b=>({x:b.x*TS+b.w*8,y:(b.y+b.h)*TS+2});
 // that touches it. Only the chunks near the camera are kept. gg and og keep the small canvas API the world painters
 // use (fillStyle, fillRect, drawImage(canvas,x,y), putImageData), in world pixels.
 const TENV={at,snowAt,WMH,TS};
-function chunkLayer(base){const CS=512,CX=Math.ceil(MW*TS/CS),Y0=-NR*TS,CY=Math.ceil((MH+NR)*TS/CS),LIM=36,ops=new Map(),live=new Map(),pool=[];let fs='#000',tick=0;
+function chunkLayer(base,nm){const CS=512,CX=Math.ceil(MW*TS/CS),Y0=-NR*TS,CY=Math.ceil((MH+NR)*TS/CS),LIM=36,ops=new Map(),live=new Map(),pool=[];let fs='#000',tick=0;
  const each=(x,y,w,h,f)=>{const i0=Math.max(0,Math.floor(x/CS)),i1=Math.min(CX-1,Math.floor((x+w-1)/CS)),j0=Math.max(0,Math.floor((y-Y0)/CS)),j1=Math.min(CY-1,Math.floor((y+h-1-Y0)/CS));for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++)f(j*CX+i,i,j);};
  const run=(e,o)=>{const g=e.g;if(o[0]===0){g.fillStyle=o[5];g.fillRect(o[1],o[2],o[3],o[4]);}else if(o[0]===1)g.drawImage(o[3],o[1],o[2]);else g.putImageData(o[3],o[1]-e.ox,o[2]-e.oy);};
  // a chunk's ops in order. A putImageData over the very rectangle of an earlier one replaces it (it overwrites every pixel),
  // so painting the same tiles again and again (the archipelago's bridges, each tree uprooted) doesn't grow the list each
  // time a chunk is made again (owner 2026-10-23: the game got slower the longer it ran)
  let oid=0;const rec=(o,w,h)=>{if(!(w>0&&h>0))return;const ok=o[0]===2?'p'+o[1]+','+o[2]+','+w+','+h:++oid;each(o[1],o[2],w,h,k=>{let a=ops.get(k);if(!a)ops.set(k,a=new Map());a.delete(ok);a.set(ok,o);const e=live.get(k);if(e)run(e,o);});};
- function make(k,i,j){const c=pool.pop()||mk(CS,CS,()=>{}),g=c.getContext('2d'),ox=i*CS,oy=Y0+j*CS,e={c,g,ox,oy,t:tick};
-  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,CS,CS);base(g,ox,oy,CS);g.setTransform(1,0,0,1,-ox,-oy);{const a=ops.get(k);if(a)for(const o of a.values())run(e,o);}live.set(k,e);
+ // a chunk is painted in strips of tile rows, then its recorded calls replayed: the ones next to the view 8 rows at a time in
+ // idle time (owner 2026-10-24, the lag: a whole chunk took several frames' time, one after another as you walked), one the
+ // view needs now in one go. The same pixels either way.
+ const part=new Map(),N=CS/TS;
+ const begin=(k,i,j)=>{const c=pool.pop()||mk(CS,CS,()=>{}),g=c.getContext('2d'),P={k,e:{c,g,ox:i*CS,oy:Y0+j*CS,t:tick-1},y:0};g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,CS,CS);part.set(k,P);return P;};
+ const strip=(P,n)=>{const e=P.e,y1=Math.min(N,P.y+n);e.g.setTransform(1,0,0,1,0,0);base(e.g,e.ox,e.oy,CS,P.y,y1);P.y=y1;return y1>=N;};
+ function finish(P){const e=P.e,k=P.k;part.delete(k);e.g.setTransform(1,0,0,1,-e.ox,-e.oy);{const a=ops.get(k);if(a)for(const o of a.values())run(e,o);}live.set(k,e);
   while(live.size>LIM){let ok=null,ot=Infinity;for(const [kk,v] of live)if(v.t<ot){ot=v.t;ok=kk;}if(ok==null||live.get(ok).t>=tick)break;pool.push(live.get(ok).c);live.delete(ok);}return e;}
+ function make(k,i,j){const P=part.get(k)||begin(k,i,j);strip(P,N);return finish(P);}
+ const warm=(k,i,j)=>pjAdd(nm+k,1,()=>{const P=begin(k,i,j);return {step:()=>part.get(k)!==P||(strip(P,8)&&(finish(P),true)),rest(){if(part.get(k)===P){strip(P,N);finish(P);}}};});
  const get=(i,j)=>{const k=j*CX+i,e=live.get(k)||make(k,i,j);e.t=tick;return e;};
  return {get fillStyle(){return fs;},set fillStyle(v){fs=v;},
   fillRect(x,y,w,h){rec([0,x,y,w,h,fs],w,h);},drawImage(c,x,y){rec([1,x,y,c],c.width,c.height);},putImageData(d,x,y){rec([2,x,y,d],d.width,d.height);},
   // copy the world rectangle (sx,sy,sw,sh) to (dx,dy) on ctx; then warm one missing chunk next to the view
   blit(ctx,sx,sy,sw,sh,dx,dy){tick++;each(sx,sy,sw,sh,(k,i,j)=>{const e=get(i,j),x0=Math.max(sx,e.ox),y0=Math.max(sy,e.oy),x1=Math.min(sx+sw,e.ox+CS),y1=Math.min(sy+sh,e.oy+CS);if(x1>x0&&y1>y0)ctx.drawImage(e.c,x0-e.ox,y0-e.oy,x1-x0,y1-y0,dx+x0-sx,dy+y0-sy,x1-x0,y1-y0);});
-   let warm=false;each(sx-CS/2,sy-CS/2,sw+CS,sh+CS,(k,i,j)=>{if(!warm&&!live.has(k)&&live.size<LIM){warm=true;get(i,j).t=tick-1;}});},
-  stats:()=>({live:live.size,pool:pool.length,ops:[...ops.values()].reduce((a,v)=>a+v.size,0),lim:LIM}),
+   let w=false;each(sx-CS/2,sy-CS/2,sw+CS,sh+CS,(k,i,j)=>{if(!w&&!live.has(k)&&!part.has(k)&&live.size+part.size<LIM&&part.size<3){w=true;warm(k,i,j);}});},
+  stats:()=>({live:live.size,part:part.size,pool:pool.length,ops:[...ops.values()].reduce((a,v)=>a+v.size,0),lim:LIM}),
   // tests (SAT-ONLINE-135): is the chunk under world pixel (x,y) drawn now; the hash of its pixels (drawing it if it isn't)
   has(x,y){let r=false;each(x,y,1,1,k=>{r=live.has(k);});return r;},
   hash(x,y){let h=0x811c9dc5;each(x,y,1,1,(k,i,j)=>{const e=get(i,j),d=e.g.getImageData(0,0,CS,CS).data;for(let q=0;q<d.length;q+=4)h=Math.imul(h^(d[q]|d[q+1]<<8|d[q+2]<<16|d[q+3]<<24),16777619)>>>0;});return h;}};}
-const gg=chunkLayer((g,ox,oy,cs)=>{const n=cs/TS,tx0=ox/TS,ty0=oy/TS,img=g.createImageData(cs,cs),D=img.data,row=cs*4;
-  for(let y=0;y<n;y++)for(let x=0;x<n;x++){const d=SA.tiles.ground(TENV,tx0+x,ty0+y,0);for(let j=0;j<16;j++)D.set(d.subarray(j*64,j*64+64),(y*16+j)*row+x*64);}g.putImageData(img,0,0);}),
- og=chunkLayer((g,ox,oy,cs)=>{const n=cs/TS,tx0=ox/TS,ty0=oy/TS;for(let y=-1;y<=n;y++)for(let x=0;x<n;x++)for(const [a,b,w,h,c] of SA.tiles.overlay(TENV,tx0+x,ty0+y)){g.fillStyle=c;g.fillRect(x*16+a,y*16+b,w,h);}});
+// (both paint tile rows y0..y1-1 of the chunk; the overlay's first strip starts a row above, its last ends a row below, as it did)
+const gg=chunkLayer((g,ox,oy,cs,y0,y1)=>{const n=cs/TS,tx0=ox/TS,ty0=oy/TS;if(y1<=y0)return;const img=g.createImageData(cs,(y1-y0)*16),D=img.data,row=cs*4;
+  for(let y=y0;y<y1;y++)for(let x=0;x<n;x++){const d=SA.tiles.ground(TENV,tx0+x,ty0+y,0);for(let j=0;j<16;j++)D.set(d.subarray(j*64,j*64+64),((y-y0)*16+j)*row+x*64);}g.putImageData(img,0,y0*16);},'gg'),
+ og=chunkLayer((g,ox,oy,cs,y0,y1)=>{const n=cs/TS,tx0=ox/TS,ty0=oy/TS;for(let y=y0?y0:-1,ye=y1>=n?n+1:y1;y<ye;y++)for(let x=0;x<n;x++)for(const [a,b,w,h,c] of SA.tiles.overlay(TENV,tx0+x,ty0+y)){g.fillStyle=c;g.fillRect(x*16+a,y*16+b,w,h);}},'og');
 function blob(g,cx,cy,rx,ry,col){g.fillStyle=col;for(let yy=-ry;yy<=ry;yy++){const hw=Math.round(rx*Math.sqrt(Math.max(0,1-(yy*yy)/(ry*ry))));g.fillRect(Math.round(cx-hw),Math.round(cy+yy),hw*2,1);}}
 
 // choppable village trees are drawn live so they can show a stump while regrowing
@@ -3596,10 +3612,11 @@ const HCSK={
  ospite:()=>{const [m]=hcFront(70);if(!m){toast(t('hcNoTgt'),'warn');return;}hitMon(m,2,{skill:1});if(!m.dead){m.spt=10;m.stun=Math.max(m.stun||0,MT[m.type].boss?.3:.8);}
   num(m.x,monY(m)-22,'#*&!$@','#ff6a5a',true);vfx('xcut',m.x,monY(m),{raw:1,color:'#ff5a4a',big:1.2});vfx('shock',m.x,monY(m)+4,{raw:1,radius:22,color:'#ff8a6a'});for(let i=0;i<8;i++)fx.push({x:P.x+(m.x-P.x)*i/8,y:P.y-12+(monY(m)-P.y)*i/8,vx:0,vy:-8,t:.35,c:'#ff8a6a',fl:1});},
  oelo:()=>{P.elo=20*skDur('oelo');for(let i=0;i<12;i++)fx.push({x:P.x+(rand()-.5)*30,y:P.y-6,vx:0,vy:-22-rand()*12,t:.8,c:'#ffd24a',fl:1});fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});toast(t(NET&&PARTY&&PARTY.id()?'eloOn':'eloSolo'),'good');}};
-function hcTick(dt){if(!S||!P)return;for(const k of ['aleg','agrd','sens','elo','bmDv','bmH'])if(P[k]>0)P[k]-=dt;
+const HCK=['aleg','agrd','sens','elo','bmDv','bmH'];   // (counting down, each frame: indexed loops, as in the other per-frame passes over the monsters, make no garbage)
+function hcTick(dt){if(!S||!P)return;for(let i=0;i<HCK.length;i++){const k=HCK[i];if(P[k]>0)P[k]-=dt;}
  if(P.bmH>0){if(!clsIs('beast')||P.hp<=0)P.bmH=0;else{if(P.hp<maxHP())P.hp=Math.min(maxHP(),P.hp+maxHP()*.02*dt);if(rand()<dt*6)fx.push({x:P.x+(rand()-.5)*8,y:P.y-14,vx:0,vy:-14,t:.4,c:rand()<.5?'#c83a3a':'#a8acb4',fl:1});}}
  if(P.bmf&&(!clsIs('beast')||P.ride||P.hp<=0))P.bmf=null;bmBleed(dt);
- for(const m of mons)if(m.spt>0)m.spt-=dt;
+ for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++)if(m.spt>0)m.spt-=dt;
  HC.ghosts=HC.ghosts.filter(g=>(g.t-=dt)>0);if(HC.lh&&(HC.lh.t-=dt)<=0)HC.lh=null;
  if(mode==='play'&&!DL){HC.chk=(HC.chk||0)-dt;if(HC.chk<=0){HC.chk=1;const done=HCQ.find(id=>QD[id]&&qReady(id));if(done)completeQ(done);else{const k=hcOfferK();if(k)hcOffer(k);}}}
  if(auOn()&&rand()<dt*6){const c=AUC[auR()];fx.push({x:P.x+(P.dir===3?-6:5),y:P.y-8,vx:(rand()-.5)*8,vy:-14,t:.4,c,fl:1});}}
@@ -4245,7 +4262,7 @@ const BLL={x:480,y:-160,aura:200,burn:90,mir:[.85,.6,.35],mirT:6,succ:[.75,.5,.2
 // monsOf: the monsters of one type, in the order of mons. The bosses' ticks looked them up with mons.find over ~1,400
 // monsters several times a frame (owner 2026-10-23: frame drops); the index is made again each frame or when mons changes
 var MIX=null,MIX0=[];
-function monsOf(ty){if(!MIX||MIX.t!==gTime||MIX.a!==mons||MIX.n!==mons.length){const m=new Map();for(const x of mons){const l=m.get(x.type);if(l)l.push(x);else m.set(x.type,[x]);}MIX={t:gTime,a:mons,n:mons.length,m};}return MIX.m.get(ty)||MIX0;}
+function monsOf(ty){if(!MIX||MIX.t!==gTime||MIX.a!==mons||MIX.n!==mons.length){const m=new Map();for(let mI=0,mA=mons,x;mI<mA.length&&(x=mA[mI],1);mI++){const l=m.get(x.type);if(l)l.push(x);else m.set(x.type,[x]);}MIX={t:gTime,a:mons,n:mons.length,m};}return MIX.m.get(ty)||MIX0;}
 const blOf=()=>monsOf('belial')[0];
 function blNear(){if(!P)return false;const m=blOf();return !!(m&&!m.dead&&m.eng>0&&Math.hypot(m.x-P.x,m.y-P.y)<BLL.aura);}
 const blMir=m=>m.type==='belial'&&(m.blMir||0)>gTime;
@@ -4610,8 +4627,11 @@ function dslTick(dt){if(DSH.f&&(DSH.f.t-=dt)<=0)DSH.f=null;if(DSH.lp&&((DSH.lp.t
  if(dsHell()&&P.hp>0&&!hellDeb()){P.hp=Math.min(maxHP(),P.hp+maxHP()*.004*dt);P.mp=Math.min(maxMP(),P.mp+maxMP()*.004*dt);}
  if(S.cls==='dslayer'&&pasOn('dsint')&&(DSH.it-=dt)<=0){DSH.it=3;const m=mons.find(m=>!m.dead&&DEMK.has(m.type)&&Math.hypot(m.x-P.x,m.y-P.y)<420);if(m&&!m.dsSeen){m.dsSeen=1;toast(t('dsIntT'),'warn');SFX.notice();}}}
 function dsEnts(ents){if(DSH.f){const f=DSH.f;ents.push({y:f.y-200,f:()=>{ctx.save();ctx.globalAlpha=.16+Math.sin(gTime*3)*.05;ctx.fillStyle='#c81a2a';ctx.beginPath();ctx.ellipse(f.x,f.y,150,90,0,0,7);ctx.fill();ctx.globalAlpha=.5;ctx.strokeStyle='#ff6a3a';ctx.stroke();ctx.restore();if(rand()<.3)fx.push({x:f.x+(rand()-.5)*260,y:f.y+(rand()-.5)*150,vx:0,vy:-24,t:.7,c:'#ff6a3a',fl:1});}});}
- if(S.cls==='dslayer'&&pasOn('dsint'))for(const m of mons)if(!m.dead&&DEMK.has(m.type)&&Math.hypot(m.x-P.x,m.y-P.y)<420)ents.push({y:m.y+2,f:()=>{if((gTime*3|0)%2)return;const y=Math.round(monY(m)-(MT[m.type].oy||16)-14);R(ctx,Math.round(m.x)-1,y,2,5,'#ff4a2a');R(ctx,Math.round(m.x)-1,y+6,2,2,'#ff4a2a');}});
- for(const m of mons)if(m.lod>0&&!m.dead)ents.push({y:m.y+1,f:()=>{if((gTime*4|0)%2)R(ctx,Math.round(m.x)-3,Math.round(monY(m))-20,6,1,'#ffd24a');}});}
+ if(S.cls==='dslayer'&&pasOn('dsint'))for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++)if(!m.dead&&DEMK.has(m.type)&&Math.hypot(m.x-P.x,m.y-P.y)<420)ents.push(dsMark(m));
+ for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++)if(m.lod>0&&!m.dead)ents.push(dsLod(m));}
+// (made apart from the loops above, so the loops over every monster make no closure scope each)
+const dsMark=m=>({y:m.y+2,f:()=>{if((gTime*3|0)%2)return;const y=Math.round(monY(m)-(MT[m.type].oy||16)-14);R(ctx,Math.round(m.x)-1,y,2,5,'#ff4a2a');R(ctx,Math.round(m.x)-1,y+6,2,2,'#ff4a2a');}}),
+ dsLod=m=>({y:m.y+1,f:()=>{if((gTime*4|0)%2)R(ctx,Math.round(m.x)-3,Math.round(monY(m))-20,6,1,'#ffd24a');}});
 Object.assign(STR.ar,{dsMis:'الطلقة فشلت',dsLodT:'فقد قوته',dsNoDem:'نور الدمار بيشتغل على الشياطين بس',dsSumOn:'الأرض حواليك بقت جحيم 40 ثانية',dsLeapOn:'قفزت للجحيم! هترجع بعد 15 ثانية (أو استعملها تاني)',dsLeapBack:'رجعت من الجحيم',dsIntT:'حدس صياد الشياطين: فيه طاقة شيطانية قريبة',
  dsAmo1:'نار بيضا قدامك على مذبح قديم: روح الشيطان الأعظم أموراكت، الخادم الأول.\n"صيادة جريئة. اركعي، وهخليكي نص شيطانة، وقوتك هتبقى ملهاش آخر."',dsAmo2:'رفضت.\n[رفضت مكافأة الكويست. اتفتحت مكافأة مخفية.]',annDslayer:'{n} بقى صياد شياطين أسطوري! الشياطين في ساتيسفاي هتخاف.',
  sk_dsweap:'إتقان الأسلحة',skd_dsweap:'تقدر تستعمل أي سلاح، ومهاراتك شغالة بأي سلاح في إيدك. ضررك +10%.',sk_dsbul:'طلقة الإبادة',skd_dsbul:'المانا بتتصفى لطلقة واحدة بتطير بعيد وبتضرب 260%. ساعات بتفشل (10%).',sk_dsvind:'سيف الانتقام',skd_dsvind:'خط مستقيم من طاقة سيف بيضا، 340% لكل اللي في طريقه.',
@@ -6251,6 +6271,10 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
  for(const id of ['hayate','fronz','radwolf','betty','jurene','ken','abellio','jessica'])npcs.push({id,spr:id,tx:0,ty:0,x:0,y:0,dir:0,hidden:true}); // the Tower of Wisdom (twNpcVis places them)
  npcs.push({id:'sticks',spr:'sticks',tx:0,ty:0,x:0,y:0,dir:0,hidden:true}); // the Behen Archipelago's sage (bhNpcVis places him)
 }
+// a monster made new in place (it keeps its identity: quests, targets and the shared-monster maps hold it): its old fields go
+// to undefined instead of being deleted (owner 2026-10-24, the lag: delete left each monster that came back in V8's slow
+// "dictionary" mode for good, so every pass over the monsters got slower the longer you played)
+function monFresh(m,nm){for(const k in m)if(!(k in nm))m[k]=undefined;return Object.assign(m,nm);}
 function newMon(type,x,y,rg=rand){const b=MT[type];const vr=VARY[type]!==undefined?(MID+1)%4:0;const lv=b.lv[0]+(rg()*(b.lv[1]-b.lv[0]+1)|0),hp=Math.round(b.hp*(1+(lv-b.lv[0])*.03));return{id:'m'+(++MID),type,lv,x,y,sx:x,sy:y,hp,max:hp,vr,dead:false,rt:0,cd:0,face:1,t:rg()*6,hurt:0,wt:0,wx:0,wy:0,tele:0,scd:2};}
 
 /* ---------------- save ---------------- */
@@ -6657,7 +6681,25 @@ function nearTree(){if(inRace(P.x,P.y))return null;const v=[[0,1],[0,-1],[1,0],[
 // prop and gate of the world: once a frame is enough (interact asks afresh)
 let NRM=null;
 function nearest(fresh){if(!fresh&&NRM&&NRM.t===gTime&&NRM.x===P.x&&NRM.y===P.y&&NRM.m===mode)return NRM.r;const r=nearest0();NRM={t:gTime,x:P.x,y:P.y,m:mode,r};return r;}
-function nearest0(){let best=null,bd=26;const cand=[...npcs.filter(n=>!n.hidden).map(n=>({k:'npc',o:n,x:n.x,y:n.y})),...ANVILS.map(a=>({k:'anvil',o:a,x:a.tx*TS+8,y:a.ty*TS+8})),...nodes.filter(n=>!(n.dep>0&&(n.kind==='herb'||n.kind==='bherb'))).map(n=>({k:'node',o:n,x:n.x,y:n.y,hint:n.kind==='herb'||n.kind==='bherb'?(n.dep>0?'hPicked':'hHerb'):undefined})),...CAMPS.map(c=>({k:'camp',o:c,x:c.x,y:c.y,hint:'hCamp'})),...ROOMS.filter(R=>R.b).map(R=>{const d=doorOf(R.b);return{k:'door',o:R,x:d.x,y:d.y,hint:'hEnter'};}),...PROPS.filter(p=>p.k==='chest'||p.k==='shelf'||p.k==='bed'||dcTab(p)).map(p=>({k:'prop',o:p,x:p.tx*TS+p.w*8,y:p.ty*TS+(p.back?22:10),hint:{chest:'hChest',shelf:'hShelf',bed:'hBed',table:'hDice'}[p.k]})),{k:'grave',o:GRAVE,x:GRAVE.tx*TS+8,y:GRAVE.ty*TS+16,hint:'hGrave'},...lmList().map(l=>({k:'lm',o:l,x:l.x,y:l.y,hint:'hRead'})),...thNear().map(c=>({k:'treasure',o:c,x:c.x,y:c.y,hint:'hThDig'})),...exNear().map(c=>({k:'cache',o:c,x:c.x,y:c.y,hint:'hCache'})),...tfNear().map(f=>({k:'folk',o:f,x:f.x,y:f.y,hint:'hTalk'})),...DGATES.filter(g=>!(g.hide&&g.bh!=='key'&&!(g.tw&&Math.hypot(g.x-P.x,g.y-P.y)<22))&&!g.got&&!g.out&&!g.gone&&!(g.tw==='enter'&&!(S.wis&&S.wis.map))).map(g=>({k:'gate',o:g,x:g.x,y:g.y,hint:g.hint})),...TERR.map(T=>({k:'banner',o:T,x:T.x,y:T.y-4,hint:'hBanner'})),...SHRINES.filter(epVis).map(o=>({k:'shrine',o,x:o.x,y:o.y,hint:o.hint})),...(COMPO?[{k:'npc',o:COMPO,x:COMPO.x,y:COMPO.y}]:[])];for(const c of cand){const d=Math.hypot(c.x-P.x,c.y-P.y)-(c.o&&c.o.reach||0);if(d<bd){bd=d;best=c;}}const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
+// (owner 2026-10-24, the lag) it made an object for every person, node, prop and gate of the world, twice a frame; now only
+// the nearest is made: the same lists, filters and order, so the same one wins (NH: no hint key, as before)
+const NH={},NHINT={chest:'hChest',shelf:'hShelf',bed:'hBed',table:'hDice'};
+function nearest0(){let best=null,bd=26;const px=P.x,py=P.y,c=(k,o,x,y,h)=>{const d=Math.hypot(x-px,y-py)-(o&&o.reach||0);if(d<bd){bd=d;best=h===NH?{k,o,x,y}:{k,o,x,y,hint:h};}};
+ for(const n of npcs)if(!n.hidden)c('npc',n,n.x,n.y,NH);
+ for(const a of ANVILS)c('anvil',a,a.tx*TS+8,a.ty*TS+8,NH);
+ for(const n of nodes){const hb=n.kind==='herb'||n.kind==='bherb';if(!(n.dep>0&&hb))c('node',n,n.x,n.y,hb?(n.dep>0?'hPicked':'hHerb'):undefined);}
+ for(const o of CAMPS)c('camp',o,o.x,o.y,'hCamp');
+ for(const R of ROOMS)if(R.b){const d=doorOf(R.b);c('door',R,d.x,d.y,'hEnter');}
+ for(const p of PROPS)if(p.k==='chest'||p.k==='shelf'||p.k==='bed'||dcTab(p))c('prop',p,p.tx*TS+p.w*8,p.ty*TS+(p.back?22:10),NHINT[p.k]);
+ c('grave',GRAVE,GRAVE.tx*TS+8,GRAVE.ty*TS+16,'hGrave');
+ for(const l of lmList())c('lm',l,l.x,l.y,'hRead');
+ for(const o of thNear())c('treasure',o,o.x,o.y,'hThDig');
+ for(const o of exNear())c('cache',o,o.x,o.y,'hCache');
+ for(const f of tfNear())c('folk',f,f.x,f.y,'hTalk');
+ for(const g of DGATES)if(!(g.hide&&g.bh!=='key'&&!(g.tw&&Math.hypot(g.x-px,g.y-py)<22))&&!g.got&&!g.out&&!g.gone&&!(g.tw==='enter'&&!(S.wis&&S.wis.map)))c('gate',g,g.x,g.y,g.hint);
+ for(const T of TERR)c('banner',T,T.x,T.y-4,'hBanner');
+ for(const o of SHRINES)if(epVis(o))c('shrine',o,o.x,o.y,o.hint);
+ if(COMPO)c('npc',COMPO,COMPO.x,COMPO.y,NH);const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
  if(!best||best.k==='tree'){const w=nearWater();if(w)best={k:'water',o:w,x:w.x,y:w.y,hint:FISH?'hReel':'hFish'};}return best;}
 function interact(){if(FISH){fishAct();return;}const n=nearest(1);if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='treasure')thDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
 let roomFade=false;
@@ -8920,7 +8962,7 @@ function ipHurt(d){if(d>0&&P.hp>0&&ipOn('doran')&&(P.doT||0)<=S.playT){P.doT=S.p
 function updateItemFx(dt){if(!P)return;if(P.qm>0)P.qm-=dt;
  if(P.icb>0){P.icb-=dt;if(P.icb<=0){if(skLv('icomb')<10)[weapon(),armorIt()].forEach(i=>{if(i)i.dur=Math.max(0,durOf(i)-10);});toast(t('icombEnd'),'warn');}}if(P.galeT>0){P.galeT-=dt;if(P.galeT<=0)P.gale=0;}
  if(P.fly>0){P.fly-=dt;P.mp=Math.max(0,P.mp-2*dt);if(rand()<dt*14)fx.push({x:P.x+(rand()-.5)*14,y:P.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});if(P.fly<=0||P.mp<=0){P.fly=0;if(hitBox(P.x,P.y,4)){const f=freeNear(P.x,P.y,4);if(f){P.x=f.x;P.y=f.y;}}vfx('dust',P.x,P.y,{n:8});}}
- for(const m of mons){if(m.cboT>0)m.cboT-=dt;if(!m.bl||m.dead)continue;m.bl.t-=dt;if(m.bl.t<=3-(m.bl.n+1)*.5){m.bl.n++;hitMon(m,.22,{skill:1,dot:1});fx.push({x:m.x,y:monY(m),vx:0,vy:30,t:.4,c:'#c8282a',fl:1});}if(m.bl&&m.bl.t<=0)m.bl=null;}}
+ for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++){if(m.cboT>0)m.cboT-=dt;if(!m.bl||m.dead)continue;m.bl.t-=dt;if(m.bl.t<=3-(m.bl.n+1)*.5){m.bl.n++;hitMon(m,.22,{skill:1,dot:1});fx.push({x:m.x,y:monY(m),vx:0,vy:30,t:.4,c:'#c8282a',fl:1});}if(m.bl&&m.bl.t<=0)m.bl=null;}}
 function itemSkillTip(i){const rc=rcById(i.id);if(i.cr&&i.ip)return featTip(i)+i.ip.map(k=>`<br><small style="color:#bfe0ff">• ${t('ipd_'+k)}</small>`).join('');if(!rc||!rc.isk&&!rc.ip)return featTip(i);let h=featTip(i);
  if(rc.lvr)h+=`<br><small style="color:${S.lv<rc.lvr?'#ff8a7a':'#9fb4c8'}">${t('needLvT',{n:rc.lvr})}</small>`;
  for(const k of rc.isk||[])h+=`<br><small style="color:#ffe7a8">${t('iskL',{s:t('sk_'+k)})}: ${t('skd_'+k)}</small>`;
@@ -9748,11 +9790,11 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  mapClamp(c);const g=c.getContext('2d'),sc=mapFit(c)*MV.z,X=x=>(x-MV.cx)*sc+c.width/2,Y=y=>(y-MV.cy)*sc+c.height/2,u=dpr*Math.min(1.8,.9+MV.z*.25),F=lang==='ar'?'Tajawal, sans-serif':'Oswald, sans-serif';
  g.fillStyle='#0a1220';g.fillRect(0,0,c.width,c.height);g.imageSmoothingEnabled=sc<8;g.imageSmoothingQuality='high';
  // only the part of the land on screen, from the copy nearest the zoom (the full 8 px copy is 27 million pixels)
- {const B=sc>=7?'8':sc>=3.5?'4':lowBase(),bp=B==='8'?8:B==='4'?4:2,x0=Math.max(MV.a,Math.floor(MV.cx-c.width/2/sc)-1),x1=Math.min(MV.b,Math.ceil(MV.cx+c.width/2/sc)+1),y0=Math.max(-NR,Math.floor(MV.cy-c.height/2/sc)-1),y1=Math.min(WMH,Math.ceil(MV.cy+c.height/2/sc)+1);
+ {const B=sc>=7?'8':sc>=3.5?'4':LOWB,bp=B==='8'?8:B==='4'?4:2,x0=Math.max(MV.a,Math.floor(MV.cx-c.width/2/sc)-1),x1=Math.min(MV.b,Math.ceil(MV.cx+c.width/2/sc)+1),y0=Math.max(-NR,Math.floor(MV.cy-c.height/2/sc)-1),y1=Math.min(WMH,Math.ceil(MV.cy+c.height/2/sc)+1);
   g.imageSmoothingQuality=bp>sc?'high':'low';   // scaling a copy up needs no mipmaps (downscaling the 8 px copy rebuilt them every frame)
-  if(B==='8'){for(let j=Math.floor((y0+NR)/128);j*128<y1+NR;j++)for(let i=Math.floor(x0/128);i*128<x1;i++)g.drawImage(baseTile(i,j),Math.floor(X(i*128)),Math.floor(Y(j*128-NR)),Math.ceil(128*sc)+1,Math.ceil(128*sc)+1);}
-  else if(B==='4'){if(x1>x0&&y1>y0)miniDraw(g,x0,y0+NR,x1-x0,y1-y0,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc);}
-  else if(x1>x0&&y1>y0)g.drawImage(B,x0*bp,(y0+NR)*bp,(x1-x0)*bp,(y1-y0)*bp,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc);g.imageSmoothingQuality='high';}
+  if(B==='8'){for(let j=Math.floor((y0+NR)/128);j*128<y1+NR;j++)for(let i=Math.floor(x0/128);i*128<x1;i++)g.drawImage(baseTileQ(i,j,drawMap),Math.floor(X(i*128)),Math.floor(Y(j*128-NR)),Math.ceil(128*sc)+1,Math.ceil(128*sc)+1);}
+  else if(B==='4'){if(x1>x0&&y1>y0)miniDraw(g,x0,y0+NR,x1-x0,y1-y0,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc,drawMap);}
+  else if(x1>x0&&y1>y0){const J=PJ.get('low');if(J){J.pri=0;J.tick=J.after=drawMap;}g.drawImage(B,x0*bp,(y0+NR)*bp,(x1-x0)*bp,(y1-y0)*bp,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc);}g.imageSmoothingQuality='high';}
  const onS=(x,y,m=60*dpr)=>x>-m&&y>-m&&x<c.width+m&&y<c.height+m;
  // what this map shows (owner 2026-10-23: "move everything of the other continent to its own map, and hide the vampires and
  // anything under the ground from the map"): this continent only, and the surface only. A wide or tall screen showed
@@ -9913,11 +9955,66 @@ const ZT={};
 // WASD/arrows move you; attacks, E and skills still need the window closed so clicks in it never become swings
 const WALKM=['inv','status','equip','log','qd','map','mb','guild'];
 var MSWT=2;
+// one monster's frame, out of update (2026-10-24, the owner's lag): in the one big function every new case sent it back to
+// slow code for a while, where the 2,000 monsters' sums made garbage each frame; a small function stays fast
+// every monster's frame; the ones asleep (no one within 900 px, not fighting: monTick would do nothing for them) aren't even
+// called, so this loop over 2,000 stays small and fast
+function monsTick(dt,safe){VXF++;const on=!!MOBN;for(let i=0;i<mons.length;i++){const m=mons[i];if(!on&&!m.dead&&!(m.eng>0)&&(m.x-P.x)**2+(m.y-P.y)**2>810000)continue;monTick(m,dt,safe);}}
+function monTick(m,dt,safe){try{
+  const b=MT[m.type];if(m.tdum){m.lv=S.lv;m.hp=m.max;m.stun=0;m.st=null;m.tele=0;m.face=P.x>m.x?1:-1;m.nm=t('tdummy');return;}if(Math.abs(m.x-P.x)<SFXR+300&&Math.abs(m.y-P.y)<SFXR+300)monVox(m,b,dt); // (2026-10-24, the lag) only those near enough to be heard soon: the other 2,000 took 90 KB of memory a frame
+  if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))return; // shared monsters: another player's copy leads this one
+  if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy,fa=m.far;monFresh(m,newMon(ty,ox,oy));if(fa)m.far=1;vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}return;}
+  // a monster sleeps while nobody is within 900 px (owner 2026-10-23: frames dropped with many monsters). The far north and
+  // south did this first; now the whole map does, so ~1,300 monsters out of sight no longer roll dice and walk each frame
+  if(!(m.eng>0)&&(m.x-P.x)**2+(m.y-P.y)**2>810000&&!(MOBN&&MOBN.rs&&mobNearR(m)))return;
+  if(m.mvd)m.at=(m.at||0)+dt;m.mvd=0;m.t+=dt;if(m.grdT>0)m.grdT-=dt;m.cd-=dt;if(m.hurt>0)m.hurt-=dt;if(m.weak>0)m.weak-=dt;if(m.stun>0){m.stun-=dt;return;}
+  if(MOBN&&MOBN.host===NET.uid&&MOBN.rs&&MOBN.rs.length){const tg=mobTarget(m);if(tg){MOBP=P;P=tg;}} // host: it may be after another player, a boss too (SAT-ONLINE-045: a boss chased and leashed by the host alone walked home and healed while someone else fought it)
+  if(MOBN&&MOBN.host===NET.uid)m.tgU=P.remote||NET.uid; // SAT-ONLINE-042: the player it is after goes out with each action
+  const dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=m.type==='guardian'?10:Math.max(3,b.r-3);
+  if(b.boss){
+   // (owner 2026-10-21) a boss shot from beyond its leash came nowhere and healed: for 10 s after a hit (m.prov) the leash
+   // reaches 280 px further, so it comes for the shooter, and only goes home when you get well away
+   if(Math.hypot(P.x-m.sx,P.y-m.sy)>b.leash+(m.prov>gTime?280:0)){const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);if(hd>2)move(m,hx/hd*30*dt,hy/hd*30*dt,mr);m.hp=Math.min(m.max,m.hp+m.max*.006*dt);m.tele=0;m.st=null;return;}
+   // phases: at 66% and 33% health a boss roars, calls its adds and grows faster; in the last phase every slam also
+   // throws a ring of shards. Healing back to full (after a leash) resets it.
+   if(m.hp>=m.max)m.ph=0;{const ph=m.hp<m.max*.33?2:m.hp<m.max*.66?1:0;if(ph>(m.ph||0)){m.ph=ph;bossPhase(m,b,ph);}}
+   const enr=m.hp<m.max/2,sp=b.spd*(enr?1.3:.9)*(1+(m.ph||0)*.08);
+   // owner 2026-10-23: no more one slam for every boss. A boss fights with its own moves (each phase opens more of them) and
+   // between moves still winds up its blow at anyone standing in reach
+   if(m.mir===1){mirTick(m,b,dx,dy,d,mr,dt);return;}   // the clone fights with your own bar (mirTick)
+   if(RKMV[m.type]&&!BOSSX.has(m.type)){if(m.bw>0){m.bw-=dt;m.face=dx>0?1:-1;if(m.bw<=0){m.mcd=1.4;if(d<b.r+10&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);mobBite(m);}}}
+    else{const ox=m.x;monAct(m,b,'boss',dx,dy,d,mr,dt);monTurn(m,b,ox,dt);m.mcd=(m.mcd||0)-dt;if(!m.st&&d<b.r+6&&m.mcd<=0&&seeP(m)){m.bw=.5;mobActN(m);num(m.x,m.y-(b.oy||22)*(b.sc||1)-6,'!','#ff5a4a',true);fx.push({ring:true,x:m.x,y:m.y-4,t:.35});}}
+    return;}
+   if(m.tele>0){m.tele-=dt;if(m.tele<=0){shake=.4;SFX.slam();if(d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}if(m.type==='guardian')slamAllies(m);for(let i=0;i<24;i++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:m.type==='berith'?(rand()<.5?'#ffd24a':'#c8a050'):'#8a8f99'});}m.scd=(enr?1.7:2.6)-(m.ph||0)*.25;
+    if(m.ph>=2)for(let i=0;i<10;i++){const a=i/10*6.283;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*120,vy:Math.sin(a)*120,t:1.4,m,mv:{mul:.35},sp:'rock',a});}}}
+   else{if(d>14)chase(m,dx,dy,d,sp,mr,dt);m.scd-=dt;if(m.scd<=0&&d<b.slamR*1.5&&seeP(m)){m.tele=.9;mobActN(m);}}
+   // owner 2026-10-22: the Guardian killed on touch. A boss's blow now winds up for half a second (a red flash and a "!"),
+   // so a dodge or a step back beats it; only a player still in reach when it lands is hit
+   if(m.bw>0){m.bw-=dt;if(m.bw<=0){m.cd=1.4;if(d<b.r+10&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);mobBite(m);}}}
+   else if(d<b.r+6&&m.cd<=0&&!(m.tele>0)&&seeP(m)){m.bw=.5;num(m.x,m.y-(b.oy||22)*(b.sc||1)-6,'!','#ff5a4a',true);fx.push({ring:true,x:m.x,y:m.y-4,t:.35});}
+   m.face=dx>0?1:-1;return;}
+  if(m.dorm!==undefined&&mpDorm(m,d))return;
+  if(b.regen&&m.hp<m.max)m.hp=Math.min(m.max,m.hp+m.max*b.regen*dt);   // trolls and the hydra close their wounds
+  const ag=(m.type==='forc'&&foCmd()?0:1)*(b.aggro||(m.agg?80:0))*wxAg*(P.stl>0?.12:1)*(P.bmf==='eagle'?.3:1),AI=AIK[m.type];
+  if(m.evt&&m.goal){if(m.ret){m.ret=0;m.retT=0;m.path=null;}if(!(d<ag&&!P.ghost)&&!(m.eng>0&&d<ag*2.4)){m.eng=Math.max(0,m.eng-dt);m.st=null;m.tele=0;invMarch(m,b,mr,dt);return;}}
+  // leash: a monster dragged far from its spawn walks home and heals instead of following forever
+  if(m.ret){const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);m.st=null;m.tele=0;m.retT=(m.retT||0)+dt;if(hd>4){const ox=m.x,oy=m.y;chase(m,hx,hy,hd,b.spd*1.2,mr,dt);m.stuckN=0;m.ret=1;if(Math.hypot(m.x-ox,m.y-oy)>.01)m.rsT=0;else m.rsT=(m.rsT||0)+dt;if(m.rsT>2||m.retT>12){m.x=m.sx;m.y=m.sy;m.path=null;m.rsT=0;}}m.hp=Math.min(m.max,m.hp+m.max*.08*dt);if(hd<=4||hd<20&&m.hp>=m.max){m.ret=0;m.retT=0;m.path=null;}return;}
+  // a monster walking round a wall toward you (m.fl) stays on you while its way round is short enough, even though that
+  // takes it further from you and from its spawn for a while
+  const eng=ag&&(!safe||m.evt||m.spar)&&(m.bh&&m.agg||d<ag||m.prov>gTime&&d<560||(m.eng>0&&(d<ag*2.4||m.fl&&m.fd>0&&m.fd<=MFAR)));
+  if(eng){m.eng=4;if(!m.goal&&!m.bh&&Math.hypot(m.x-m.sx,m.y-m.sy)>(m.fl?MFAR*TS:m.prov>gTime?520:AI?260:200)){m.ret=1;m.eng=0;m.fl=0;return;}
+   if(AI){packTick(m,AI,dt);const ox=m.x;monAct(m,b,AI,dx,dy,d,mr,dt);monTurn(m,b,ox,dt);}else{if(d>6)chase(m,dx,dy,d,b.spd,mr,dt);m.face=dx>0?1:-1;if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;mobBite(m);}}}
+  else{m.eng-=dt;m.st=null;m.tele=0;m.wt-=dt;if(m.wt<=0){m.wt=1+rand()*2.5;if((m.blk|0)>3){m.sx=m.x;m.sy=m.y;m.blk=0;}const back=Math.hypot(m.sx-m.x,m.sy-m.y)>50&&!(m.blk&1);if(back){const l=Math.hypot(m.sx-m.x,m.sy-m.y);m.wx=(m.sx-m.x)/l;m.wy=(m.sy-m.y)/l;}else if(rand()<.5){m.wx=0;m.wy=0;}else{const a=rand()*6.28;m.wx=Math.cos(a);m.wy=Math.sin(a);}}
+   {const x0=m.x,y0=m.y,dx=m.wx*b.spd*.25*dt,dy=m.wy*b.spd*.25*dt;move(m,dx,dy,mr);if(m.wx)m.face=m.wx>0?1:-1;
+    // owner 2026-10-22: a wanderer walking into water or a tree stood there with its legs going. Blocked, it stops, tries
+    // another way next time, and after a few tries makes where it stands its home
+    if((dx||dy)&&Math.hypot(m.x-x0,m.y-y0)<Math.hypot(dx,dy)*.2){m.wx=0;m.wy=0;m.wt=Math.min(m.wt,.4+rand()*.6);m.blk=(m.blk|0)+1;}else if(dx||dy)m.blk=0;}}
+ }catch(err){gameErr(err,m);}finally{if(MOBP){P=MOBP;MOBP=null;}}}
 function update(dt){
  gTime+=dt;spwTick(dt);ssTick(dt);bufTick(dt);
  if(INVX&&INVX.stash&&P&&Math.hypot(P.x-INVX.x,P.y-INVX.y)>140)closeInv(); // walked away from the inn's chest
  for(let i=DGATES.length-1;i>=0;i--)if(DGATES[i].tmp&&gTime>DGATES[i].til)DGATES.splice(i,1);
- for(const n of nodes)if(n.dep>0){n.dep-=dt;if(n.dep<=0&&(n.kind==='herb'||n.kind==='bherb'))herbSpot(n);}
+ for(let mI=0,mA=nodes,n;mI<mA.length&&(n=mA[mI],1);mI++)if(n.dep>0){n.dep-=dt;if(n.dep<=0&&(n.kind==='herb'||n.kind==='bherb'))herbSpot(n);}
  if(annT>0){annT-=dt;if(annT<=0)$('announce').hidden=true;}
  if(mode==='forge')updateMG(dt);
  movers=movers.filter(m=>{const dx=m.x-m.e.x,dy=m.y-m.e.y,d=Math.hypot(dx,dy);if(d<1.5){m.e.x=m.x;m.e.y=m.y;m.e.frame=0;m.r();return false;}const s=Math.min(d,m.sp*dt);m.e.x+=dx/d*s;m.e.y+=dy/d*s;m.e.at=(m.e.at||0)+dt;m.e.frame=(m.e.at*7|0)%2;m.e.dir=Math.abs(dx)>Math.abs(dy)?(dx>0?2:3):(dy>0?0:1);return true;});
@@ -9931,7 +10028,7 @@ function update(dt){
  if(shake>0)shake-=dt;
  if(mode==='dead'&&P&&P.deadT>0){P.deadT-=dt;$('deadP').innerHTML=`<div>${esc(P.dpen||'')}</div><div>${t('deadIn',{n:Math.max(1,Math.ceil(P.deadT))})}</div>`;if(P.deadT<=0)deadChoice();}
  if(P){P.trail.forEach(a=>a.t-=dt);P.trail=P.trail.filter(a=>a.t>0);}
- for(const m of mons)if(m.dead&&m.dying>0)m.dying-=dt;
+ for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++)if(m.dead&&m.dying>0)m.dying-=dt;
   tdTick(dt);
   thUI(dt);
  // dead monsters that never come back (an invasion's, a boss's adds, a copy made from the host's list: rt 1e9) leave mons
@@ -9978,56 +10075,7 @@ function update(dt){
  if(pain&&!P.painT){P.painT=true;toast(t('pain'),'warn');}if(!pain)P.painT=false;
  // monsters
  tfTick(dt);tlTick(dt);c2Tick(dt);p2Tick(dt);p3Tick(dt);p4Tick(dt);p5Tick(dt);eaTick(dt);p6Tick(dt);phTick(dt);rgTick(dt);necTick(dt);hcTick(dt);fbTick(dt);dvTick(dt);lpTick(dt);eyTick(dt);brTick(dt);epTick();const safe=!!inTown(P.x,P.y);
- for(const m of mons){try{
-  const b=MT[m.type];if(m.tdum){m.lv=S.lv;m.hp=m.max;m.stun=0;m.st=null;m.tele=0;m.face=P.x>m.x?1:-1;m.nm=t('tdummy');continue;}monVox(m,b,dt);
-  if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))continue; // shared monsters: another player's copy leads this one
-  if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy,fa=m.far;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));if(fa)m.far=1;vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}continue;}
-  // a monster sleeps while nobody is within 900 px (owner 2026-10-23: frames dropped with many monsters). The far north and
-  // south did this first; now the whole map does, so ~1,300 monsters out of sight no longer roll dice and walk each frame
-  if(!(m.eng>0)&&(m.x-P.x)**2+(m.y-P.y)**2>810000&&!(MOBN&&MOBN.rs&&MOBN.rs.some(r=>(r.x-m.x)**2+(r.y-m.y)**2<810000)))continue;
-  if(m.mvd)m.at=(m.at||0)+dt;m.mvd=0;m.t+=dt;if(m.grdT>0)m.grdT-=dt;m.cd-=dt;if(m.hurt>0)m.hurt-=dt;if(m.weak>0)m.weak-=dt;if(m.stun>0){m.stun-=dt;continue;}
-  if(MOBN&&MOBN.host===NET.uid&&MOBN.rs&&MOBN.rs.length){const tg=mobTarget(m);if(tg){MOBP=P;P=tg;}} // host: it may be after another player, a boss too (SAT-ONLINE-045: a boss chased and leashed by the host alone walked home and healed while someone else fought it)
-  if(MOBN&&MOBN.host===NET.uid)m.tgU=P.remote||NET.uid; // SAT-ONLINE-042: the player it is after goes out with each action
-  const dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=m.type==='guardian'?10:Math.max(3,b.r-3);
-  if(b.boss){
-   // (owner 2026-10-21) a boss shot from beyond its leash came nowhere and healed: for 10 s after a hit (m.prov) the leash
-   // reaches 280 px further, so it comes for the shooter, and only goes home when you get well away
-   if(Math.hypot(P.x-m.sx,P.y-m.sy)>b.leash+(m.prov>gTime?280:0)){const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);if(hd>2)move(m,hx/hd*30*dt,hy/hd*30*dt,mr);m.hp=Math.min(m.max,m.hp+m.max*.006*dt);m.tele=0;m.st=null;continue;}
-   // phases: at 66% and 33% health a boss roars, calls its adds and grows faster; in the last phase every slam also
-   // throws a ring of shards. Healing back to full (after a leash) resets it.
-   if(m.hp>=m.max)m.ph=0;{const ph=m.hp<m.max*.33?2:m.hp<m.max*.66?1:0;if(ph>(m.ph||0)){m.ph=ph;bossPhase(m,b,ph);}}
-   const enr=m.hp<m.max/2,sp=b.spd*(enr?1.3:.9)*(1+(m.ph||0)*.08);
-   // owner 2026-10-23: no more one slam for every boss. A boss fights with its own moves (each phase opens more of them) and
-   // between moves still winds up its blow at anyone standing in reach
-   if(m.mir===1){mirTick(m,b,dx,dy,d,mr,dt);continue;}   // the clone fights with your own bar (mirTick)
-   if(RKMV[m.type]&&!BOSSX.has(m.type)){if(m.bw>0){m.bw-=dt;m.face=dx>0?1:-1;if(m.bw<=0){m.mcd=1.4;if(d<b.r+10&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);mobBite(m);}}}
-    else{const ox=m.x;monAct(m,b,'boss',dx,dy,d,mr,dt);monTurn(m,b,ox,dt);m.mcd=(m.mcd||0)-dt;if(!m.st&&d<b.r+6&&m.mcd<=0&&seeP(m)){m.bw=.5;mobActN(m);num(m.x,m.y-(b.oy||22)*(b.sc||1)-6,'!','#ff5a4a',true);fx.push({ring:true,x:m.x,y:m.y-4,t:.35});}}
-    continue;}
-   if(m.tele>0){m.tele-=dt;if(m.tele<=0){shake=.4;SFX.slam();if(d<b.slamR&&seeP(m)){m.hv=1;hurtPlayer(b.slam,m.lv,m);m.hv=0;}if(m.type==='guardian')slamAllies(m);for(let i=0;i<24;i++){const a=rand()*6.28;fx.push({x:m.x+Math.cos(a)*b.slamR*.6,y:m.y+Math.sin(a)*b.slamR*.36,vx:Math.cos(a)*40,vy:-rand()*60,t:.5,c:m.type==='berith'?(rand()<.5?'#ffd24a':'#c8a050'):'#8a8f99'});}m.scd=(enr?1.7:2.6)-(m.ph||0)*.25;
-    if(m.ph>=2)for(let i=0;i<10;i++){const a=i/10*6.283;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*120,vy:Math.sin(a)*120,t:1.4,m,mv:{mul:.35},sp:'rock',a});}}}
-   else{if(d>14)chase(m,dx,dy,d,sp,mr,dt);m.scd-=dt;if(m.scd<=0&&d<b.slamR*1.5&&seeP(m)){m.tele=.9;mobActN(m);}}
-   // owner 2026-10-22: the Guardian killed on touch. A boss's blow now winds up for half a second (a red flash and a "!"),
-   // so a dodge or a step back beats it; only a player still in reach when it lands is hit
-   if(m.bw>0){m.bw-=dt;if(m.bw<=0){m.cd=1.4;if(d<b.r+10&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);mobBite(m);}}}
-   else if(d<b.r+6&&m.cd<=0&&!(m.tele>0)&&seeP(m)){m.bw=.5;num(m.x,m.y-(b.oy||22)*(b.sc||1)-6,'!','#ff5a4a',true);fx.push({ring:true,x:m.x,y:m.y-4,t:.35});}
-   m.face=dx>0?1:-1;continue;}
-  if(m.dorm!==undefined&&mpDorm(m,d))continue;
-  if(b.regen&&m.hp<m.max)m.hp=Math.min(m.max,m.hp+m.max*b.regen*dt);   // trolls and the hydra close their wounds
-  const ag=(m.type==='forc'&&foCmd()?0:1)*(b.aggro||(m.agg?80:0))*wxAg*(P.stl>0?.12:1)*(P.bmf==='eagle'?.3:1),AI=AIK[m.type];
-  if(m.evt&&m.goal){if(m.ret){m.ret=0;m.retT=0;m.path=null;}if(!(d<ag&&!P.ghost)&&!(m.eng>0&&d<ag*2.4)){m.eng=Math.max(0,m.eng-dt);m.st=null;m.tele=0;invMarch(m,b,mr,dt);continue;}}
-  // leash: a monster dragged far from its spawn walks home and heals instead of following forever
-  if(m.ret){const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);m.st=null;m.tele=0;m.retT=(m.retT||0)+dt;if(hd>4){const ox=m.x,oy=m.y;chase(m,hx,hy,hd,b.spd*1.2,mr,dt);m.stuckN=0;m.ret=1;if(Math.hypot(m.x-ox,m.y-oy)>.01)m.rsT=0;else m.rsT=(m.rsT||0)+dt;if(m.rsT>2||m.retT>12){m.x=m.sx;m.y=m.sy;m.path=null;m.rsT=0;}}m.hp=Math.min(m.max,m.hp+m.max*.08*dt);if(hd<=4||hd<20&&m.hp>=m.max){m.ret=0;m.retT=0;m.path=null;}continue;}
-  // a monster walking round a wall toward you (m.fl) stays on you while its way round is short enough, even though that
-  // takes it further from you and from its spawn for a while
-  const eng=ag&&(!safe||m.evt||m.spar)&&(m.bh&&m.agg||d<ag||m.prov>gTime&&d<560||(m.eng>0&&(d<ag*2.4||m.fl&&m.fd>0&&m.fd<=MFAR)));
-  if(eng){m.eng=4;if(!m.goal&&!m.bh&&Math.hypot(m.x-m.sx,m.y-m.sy)>(m.fl?MFAR*TS:m.prov>gTime?520:AI?260:200)){m.ret=1;m.eng=0;m.fl=0;continue;}
-   if(AI){packTick(m,AI,dt);const ox=m.x;monAct(m,b,AI,dx,dy,d,mr,dt);monTurn(m,b,ox,dt);}else{if(d>6)chase(m,dx,dy,d,b.spd,mr,dt);m.face=dx>0?1:-1;if(d<b.r+6&&m.cd<=0&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);m.cd=1;mobBite(m);}}}
-  else{m.eng-=dt;m.st=null;m.tele=0;m.wt-=dt;if(m.wt<=0){m.wt=1+rand()*2.5;if((m.blk|0)>3){m.sx=m.x;m.sy=m.y;m.blk=0;}const back=Math.hypot(m.sx-m.x,m.sy-m.y)>50&&!(m.blk&1);if(back){const l=Math.hypot(m.sx-m.x,m.sy-m.y);m.wx=(m.sx-m.x)/l;m.wy=(m.sy-m.y)/l;}else if(rand()<.5){m.wx=0;m.wy=0;}else{const a=rand()*6.28;m.wx=Math.cos(a);m.wy=Math.sin(a);}}
-   {const x0=m.x,y0=m.y,dx=m.wx*b.spd*.25*dt,dy=m.wy*b.spd*.25*dt;move(m,dx,dy,mr);if(m.wx)m.face=m.wx>0?1:-1;
-    // owner 2026-10-22: a wanderer walking into water or a tree stood there with its legs going. Blocked, it stops, tries
-    // another way next time, and after a few tries makes where it stands its home
-    if((dx||dy)&&Math.hypot(m.x-x0,m.y-y0)<Math.hypot(dx,dy)*.2){m.wx=0;m.wy=0;m.wt=Math.min(m.wt,.4+rand()*.6);m.blk=(m.blk|0)+1;}else if(dx||dy)m.blk=0;}}
- }catch(err){gameErr(err,m);}finally{if(MOBP){P=MOBP;MOBP=null;}}}
+ monsTick(dt,safe);
  if(P.rmv>0)P.rmv-=dt;else if(P.rsp)P.rsp=Math.max(0,P.rsp-dt*2);horseRegen(dt);if(P.ride&&!(RCR&&RCR.in)&&noRideAt(P.x,P.y)){dismount();toast(t('rideOffHere'));} // walked into a no-ride place: off the horse at once
  updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);karmaTick(dt);updateEvents(dt);updateSiege(dt);achTick(dt);ttTick(dt);sc2Tick(dt);updateWeather(dt);fogTick(dt);updateComp(dt);updateItemFx(dt);updateGDrop();updatePet(dt);updateArena(dt);updateTower(dt);updateBehen(dt);updateTowerW(dt);updateDragon(dt);updateBeasts(dt);mpTick(dt);dsTick(dt);updateBelial(dt);updateAuction(dt);
 }
@@ -10304,14 +10352,17 @@ function render(dt){DRAWN=0;netDrawn=0;
   npcs.forEach(n=>{if(n.hidden||n.obj||offV(n.x,n.y,0))return;ents.push({y:n.y,f:()=>{const ko=npcKO(n.id);if(ko)ctx.globalAlpha=.38;if(n.hitT>0)n.hitT-=1/60;drawChar(n.spr,n.x,n.y,n.dir,n.frame||0,n.hitT>0,0,n);ctx.globalAlpha=1;
    if(!ko&&n.nhp<NPCHP)txBar(n.x,n.y-28,16,n.nhp/NPCHP,HPC,hpLag(n,n.nhp/NPCHP,'hl'));}});});
   const MWP=MSX==null?null:(()=>{const r=stage.getBoundingClientRect();return [(MSX-r.left)/SC+camXf,(MSY-r.top)/SC+camYf];})();
-  mons.forEach(m=>{if(m.dead&&!(m.dying>0)||offV(m.x,m.y,MT[m.type].boss?260:0))return;drawTele(m);if(m.wardT>gTime&&!m.dead)drawWard(m);if(MT[m.type].boss&&!m.dead&&m.tele>0&&!m.st){const k=1-m.tele/.9,SR=MT[m.type].slamR;ctx.fillStyle=`rgba(255,60,40,${.15+k*.25})`;ctx.beginPath();ctx.ellipse(m.x,m.y,Math.max(1,SR*k+4),Math.max(1,SR*.58*k+3),0,0,7);ctx.fill();ctx.strokeStyle='rgba(255,120,90,.9)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(m.x,m.y,SR,SR*.58,0,0,7);ctx.stroke();}
+  // (2026-10-24, the lag) the test first, then the drawing for the ones on screen: the drawing's closures cost each of the
+  // 2,000 monsters a bit of memory every frame while it was all one function
+  const monEnt=m=>{drawTele(m);if(m.wardT>gTime&&!m.dead)drawWard(m);if(MT[m.type].boss&&!m.dead&&m.tele>0&&!m.st){const k=1-m.tele/.9,SR=MT[m.type].slamR;ctx.fillStyle=`rgba(255,60,40,${.15+k*.25})`;ctx.beginPath();ctx.ellipse(m.x,m.y,Math.max(1,SR*k+4),Math.max(1,SR*.58*k+3),0,0,7);ctx.fill();ctx.strokeStyle='rgba(255,120,90,.9)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(m.x,m.y,SR,SR*.58,0,0,7);ctx.stroke();}
    ents.push({y:m.y,f:()=>{if(m.dead)ctx.globalAlpha=Math.max(0,m.dying/.5);if(m.stun>0){const a=gTime*8;R(ctx,m.x+Math.cos(a)*6,m.y-22+Math.sin(a)*2,2,2,'#ffe07a');R(ctx,m.x-Math.cos(a)*6,m.y-22-Math.sin(a)*2,2,2,'#ffe07a');}drawMon(m);ctx.globalAlpha=1;if(m.dead)return;
     const oy=MT[m.type].oy,hf=m.hp/m.max,hl=hpLag(m,hf,'hl');if(!MT[m.type].boss&&(hf<1||hl>hf))txBar(m.x,m.y-oy+2,16,hf,HPC,hl);
     // owner 2026-10-20: the name with the level, always together (close by or under the mouse): "name" over "Lv n",
     // coloured by how dangerous it is for you (grey far weaker, white even, orange stronger, red deadly)
     const md=Math.hypot(m.x-P.x,m.y-P.y),hov=MWP&&Math.abs(MWP[0]-m.x)<14&&MWP[1]>m.y-oy-6&&MWP[1]<m.y+6;
     if((md<140||hov||m.trk>0)&&monLit(m)&&!m.dorm){const dl=m.lv-S.lv,c=dl>8?'#ff6a5a':dl>3?'#ffb04a':dl<-8?'#a8b0b8':'#ffe07a';TX.push({s:'Lv'+m.lv,x:m.x,y:m.y-oy-3,f:'{s}px "Press Start 2P", monospace',z:6,c});
-     TX.push({s:m.nm||t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),x:m.x,y:m.y-oy-12,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:dl>8?'#ff8a7a':dl>3?'#ffc070':dl<-8?'#b8c0c8':'#f2f2f2'});}}});});
+     TX.push({s:m.nm||t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),x:m.x,y:m.y-oy-12,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:dl>8?'#ff8a7a':dl>3?'#ffc070':dl<-8?'#b8c0c8':'#f2f2f2'});}}});};
+  for(let mI=0;mI<mons.length;mI++){const m=mons[mI];if(!(m.dead&&!(m.dying>0)||offV(m.x,m.y,MT[m.type].boss?260:0)))monEnt(m);};
   if(!titleCam&&mode!=='dead'&&!P.ghost)if(PET)ents.push({y:PET.y,f:()=>drawPet(PET)});
   ents.push({y:P.y,f:()=>{if(P.spw)spwDraw();P.trail.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;const am=a.r&&MOUNTS[a.r];if(am){drawHorse(a.x,a.y,a.dir,2,am);drawRider(a.x,a.y,a.dir,2,P);drawHorse(a.x,a.y,a.dir,2,am,ctx,'head');}else drawChar(pSpr(),a.x,a.y,a.dir,a.frame,false);});ctx.globalAlpha=1;const rd=P.ride&&MOUNTS[myMt()];const hf=rd&&P.rmv>0?1+((P.rgT||0)*10|0)%4:0,blk=P.inv>0&&((gTime*20|0)%2===0)&&P.dash<=0;if(rd)drawHorse(P.x,P.y,P.dir,hf,rd);const wen=(weapon()||{}).en||0;if(wen>=7)drawEnh(P.x,P.y-(rd?9:0),wen,0);if(rd){if(!blk)drawRider(P.x,P.y,P.dir,hf,P);drawHorse(P.x,P.y,P.dir,hf,rd,ctx,'head');const hm=rhpMax(S.mount),hh=rhp(S.mount);if(hh<hm&&!(RCR&&RCR.in)){R(ctx,P.x-9,P.y-37,18,3,'#000');R(ctx,P.x-8,P.y-36,16*hh/hm,1,'#e8a060');}}else{if(P.stl>0)ctx.globalAlpha=.35;if(P.boat&&!P.bmf)boatSit(pSpr(),P.x,P.y,P.dir,blk,P);else if(!bmDraw(P.bmf,'me',P.x,P.y,P.dir,P.rmv>0,blk,!!P.slash)){drawChar(pSpr(),P.x,P.y,P.dir,P.frame,blk,0,P);if(P.bmH>0&&!blk)bmHalfDraw(P.x,P.y,P.dir);if(NV.eye>0&&!blk)nvEyes(P.x,P.y,P.dir);}ctx.globalAlpha=1;}if(wen>=4)drawEnh(P.x,P.y-(rd?9:0),wen,1);
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(hcHand(hx,hy,P.dir,P.slash)){}else if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,w.id,w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
@@ -10429,22 +10480,78 @@ let miniT=0,miniOff=false;try{miniOff=localStorage.getItem('satisfy_mini')==='1'
 const MM=SA.minimap,MMENV={at:(x,y)=>at(x,y-NR),snowAt:(x,y)=>snowAt(x,y-NR),WMH:WMH+NR},MMO=o=>MM.buildBase(MMENV,Object.assign({W:MW,H:WMH+NR,buildings:buildings.map(b=>({...b,y:b.y+NR})),px:8,noiseRow:NR-ON},o));
 // the map's 4 px copy (the HUD map, the world map at mid zoom) in 128-tile pieces, each painted the first time it shows
 // (owner 2026-10-23: with the East Continent one 4 px canvas of the whole world would be 58 million pixels' worth of memory)
+// (owner 2026-10-24: "a lot more lag than before, many frame drops, many things freeze the game") a piece took a quarter of a
+// second to paint, all at once, the moment the HUD map reached it, and the 2 px world copy took half a second a band, back to
+// back, for the first half-minute of play (it doubled with the East Continent). Now every copy is painted in thin strips in
+// the browser's idle time (PJ): the HUD map's next pieces before you reach them, then the 2 px copy; the world map draws what
+// is ready and fills in as the rest comes. The strips join exactly, so a piece is the same pixels it was in one go; only a
+// piece the HUD needs this very frame that isn't done yet is still finished at once.
+const PNOW=Date.now.bind(Date);   // the real clock for the painting's time budget (a recording's Date.now stands still within a step)
+const PJ=new Map();let pjOn=0;   // jobs by key: {pri (0 on screen now, 1 the HUD map's next pieces, 2 the 2 px copy), step() paints one strip and says whether it's done, after()}
+function pjAdd(k,pri,make){let J=PJ.get(k);if(J){if(pri<J.pri)J.pri=pri;return J;}J=make();if(!J)return null;J.k=k;J.pri=pri;PJ.set(k,J);pjKick();return J;}
+function pjDone(J){PJ.delete(J.k);if(J.after)try{J.after();}catch(e){}}
+function pjFinish(k){const J=PJ.get(k);if(!J)return;if(J.rest)J.rest();else while(!J.step());pjDone(J);}   // rest: what's left in one go (strips cost more)
+function pjKick(){if(pjOn||!PJ.size)return;pjOn=1;const go=dl=>{pjOn=0;pjRun(dl);};if(window.requestIdleCallback)requestIdleCallback(go,{timeout:700});else window.setTimeout(()=>go(null),40);}
+// a slice of idle time: strips, most wanted first, while the frame has time left (6 ms; 14 with the world map open, which waits for them)
+// right after a key, a click or a window opening, painting waits a moment (a strip running then would hold up the answer
+// and the window's animation); only what the screen needs now goes on
+let pjMode='',pjHold=0;for(const ev of ['keydown','pointerdown','wheel'])window.addEventListener(ev,()=>{pjHold=PNOW()+400;},{capture:true,passive:true});
+function pjRun(dl){if(mode!==pjMode){pjMode=mode;pjHold=Math.max(pjHold,PNOW()+300);}
+ if(PNOW()<pjHold&&![...PJ.values()].some(J=>J.pri<=0)){window.setTimeout(pjKick,pjHold-PNOW()+10);return;}
+ const t0=PNOW(),bud=mode==='map'?14:6;
+ for(let n=0;n<40&&PJ.size;n++){let J=null;for(const v of PJ.values())if(!J||v.pri<J.pri)J=v;if(J.step())pjDone(J);else if(J.tick)J.tick();
+  const used=PNOW()-t0;if(used>=bud||(dl&&!dl.didTimeout&&dl.timeRemaining()<3)||(n>=2&&used<=0))break;}   // (a clock that stands still: three strips at most)
+ pjKick();}
+// the map's 4 px copy (the HUD map, the world map at mid zoom) in 128-tile pieces
+// (owner 2026-10-23: with the East Continent one 4 px canvas of the whole world would be 58 million pixels' worth of memory)
 const MINP={};
-function miniP(i,j){const k=i+','+j;let c=MINP[k];if(c)return c;const H=WMH+NR,cw=Math.min(128,MW-i*128),rh=Math.min(128,H-j*128);if(cw<=0||rh<=0)return null;
- // painted with two tiles of the neighbours round it, so the edges come out as they did on one canvas of the whole map
- const xa=Math.max(0,i*128-2),xb=Math.min(MW,i*128+cw+2),ya=Math.max(0,j*128-2),yb=Math.min(H,j*128+rh+2);
- return MINP[k]=mk(cw*4,rh*4,g=>{g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(MMO({x0:xa,cols:xb-xa,y0:ya,rows:yb-ya}),(xa-i*128)*4,(ya-j*128)*4,(xb-xa)*4,(yb-ya)*4);});}
-// the 4 px copy of tiles x..x+w, y..y+h (rows from -NR) drawn into dw x dh at dx,dy
-function miniDraw(g,x,y,w,h,dx,dy,dw,dh){const kx=dw/w,ky=dh/h;for(let j=Math.max(0,Math.floor(y/128));j*128<y+h;j++)for(let i=Math.max(0,Math.floor(x/128));i*128<x+w;i++){const c=miniP(i,j);if(!c)continue;
+function miniJob(i,j){const H=WMH+NR,cw=Math.min(128,MW-i*128),rh=Math.min(128,H-j*128);if(cw<=0||rh<=0)return null;
+ // painted with two tiles of the neighbours round it, so the edges come out as they did on one canvas of the whole map;
+ // at 8 px, 8 rows a strip, then made 4 px in one go (as it was)
+ const xa=Math.max(0,i*128-2),xb=Math.min(MW,i*128+cw+2),ya=Math.max(0,j*128-2),yb=Math.min(H,j*128+rh+2);let big=null,r=ya;
+ const J={step(n=8){n=Math.min(n,yb-r);const p=MMO({x0:xa,cols:xb-xa,y0:r,rows:n});if(!big){if(r===ya&&n===yb-ya)big=p;else{big=document.createElement('canvas');big.width=(xb-xa)*8;big.height=(yb-ya)*8;}}
+  if(big!==p)big.getContext('2d').drawImage(p,0,(r-ya)*8);r+=n;if(r<yb)return false;
+  MINP[i+','+j]=mk(cw*4,rh*4,g=>{g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(big,(xa-i*128)*4,(ya-j*128)*4,(xb-xa)*4,(yb-ya)*4);});big.width=big.height=0;big=null;return true;},
+  rest:()=>J.step(1e9)};return J;}
+// a piece now (the HUD map): done, or finished at once
+function miniP(i,j){const k=i+','+j;if(MINP[k])return MINP[k];if(!PJ.has('m'+k)&&!pjAdd('m'+k,0,()=>miniJob(i,j)))return null;pjFinish('m'+k);return MINP[k]||null;}
+// a piece if it's done; if not, it's painted next and `then` runs when it is (the world map)
+function miniQ(i,j,then){const k=i+','+j;if(MINP[k])return MINP[k];const J=pjAdd('m'+k,0,()=>miniJob(i,j));if(J&&then)J.after=then;return null;}
+// the HUD map's pieces within 48 tiles of what it shows, painted ahead, the nearest first
+function miniAhead(ox,oy){const L=PJ.get('low');if(L&&L.pri<2){L.pri=2;L.tick=L.after=null;}   // (back from the world map: the 2 px copy waits again)
+ for(let j=Math.max(0,Math.floor((oy-48)/128));j*128<oy+44+48;j++)for(let i=Math.max(0,Math.floor((ox-48)/128));i*128<ox+64+48;i++)if(!MINP[i+','+j]){
+  const d=Math.max(0,i*128-ox-64,ox-i*128-128)+Math.max(0,j*128-oy-44,oy-j*128-128);pjAdd('m'+i+','+j,1.1+d/1e3,()=>miniJob(i,j));}}
+// the figures' sheets ahead: one painted the first time it showed cost that frame 25-40 ms (more on a phone); now the people
+// and monsters within 1,200 px get theirs in idle time first (the sheets take no random numbers, so nothing else changes)
+const shTodo=k=>{const d=k&&Object.getOwnPropertyDescriptor(SH,k);return !!(d&&d.get);},shJob=k=>()=>({step(){void SH[k];return true;}});
+function sheetAhead(){if(!P||!S||mode==='title')return;const R=1200,x=P.x,y=P.y;
+ for(let i=0;i<mons.length;i++){const m=mons[i];if(m.fig&&!m.dead&&Math.abs(m.x-x)<R&&Math.abs(m.y-y)<R&&shTodo(m.fig))pjAdd('s'+m.fig,1.05,shJob(m.fig));}
+ for(let i=0;i<npcs.length;i++){const n=npcs[i];if(n.spr&&!n.hidden&&Math.abs(n.x-x)<R&&Math.abs(n.y-y)<R&&shTodo(n.spr))pjAdd('s'+n.spr,1.05,shJob(n.spr));}}
+// the 4 px copy of tiles x..x+w, y..y+h (rows from -NR) drawn into dw x dh at dx,dy; q: the world map's (what isn't done yet comes later)
+function miniDraw(g,x,y,w,h,dx,dy,dw,dh,q){const kx=dw/w,ky=dh/h;for(let j=Math.max(0,Math.floor(y/128));j*128<y+h;j++)for(let i=Math.max(0,Math.floor(x/128));i*128<x+w;i++){const c=q?miniQ(i,j,q):miniP(i,j);if(!c)continue;
  const ox=i*128,oy=j*128,ax=Math.max(x,ox),ay=Math.max(y,oy),bx=Math.min(x+w,ox+c.width/4),by=Math.min(y+h,oy+c.height/4);if(bx<=ax||by<=ay)continue;g.drawImage(c,(ax-ox)*4,(ay-oy)*4,(bx-ax)*4,(by-ay)*4,dx+(ax-x)*kx,dy+(ay-y)*ky,(bx-ax)*kx,(by-ay)*ky);}}
-// the 2 px copy of the whole world for the world map zoomed out, painted in bands while the game is idle
-const LOWB=mk(MW*2,(WMH+NR)*2,g=>{g.fillStyle='#0a1220';g.fillRect(0,0,MW*2,(WMH+NR)*2);});let miniY=0;
-function miniBand(){const R=16,y0=miniY,H=WMH+NR;if(y0>=H)return false;const a=Math.max(0,y0-2),b=Math.min(H,y0+R+2),piece=MMO({x0:0,cols:MW,y0:a,rows:b-a}),g=LOWB.getContext('2d');
- g.save();g.beginPath();g.rect(0,y0*2,MW*2,Math.min(R,H-y0)*2);g.clip();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(piece,0,a*2,MW*2,(b-a)*2);g.restore();miniY=y0+R;return miniY<H;}
-setTimeout(function miniIdle(){if(miniBand())setTimeout(miniIdle,mode==='play'?0:30);},0);
-const BTL=new Map(),baseTile=(i,j)=>{const k=i+','+j;let c=BTL.get(k);if(c){BTL.delete(k);BTL.set(k,c);return c;} // the last 30 pieces seen are kept, enough for a 4K screen (4 MB each: browsing the whole map kept them all)
-  c=mk(1024,1024,g=>{const H=WMH+NR,c=Math.min(128,MW-i*128),r=Math.min(128,H-j*128);if(c>0&&r>0)g.drawImage(MMO({x0:i*128,cols:c,y0:j*128,rows:r}),0,0);});BTL.set(k,c);while(BTL.size>30)BTL.delete(BTL.keys().next().value);return c;};   // the 8 px copy in 1024 px pieces, painted when the map first shows them
-const lowBase=()=>{while(miniBand());return LOWB;};   // both start at world row -NR
+// the 2 px copy of the whole world for the world map zoomed out, in 128 x 16 tile pieces while the game is idle; painted at
+// 4 px and made 2 (at 8 px it was four times the work for the same look at that size)
+const LOWB=mk(MW*2,(WMH+NR)*2,g=>{g.fillStyle='#0a1220';g.fillRect(0,0,MW*2,(WMH+NR)*2);});
+const LOWQ=[];{const H=WMH+NR;for(const [a,b] of [[0,WMW],[WMW,MW]])for(let y=0;y<H;y+=16)for(let x=a;x<b;x+=128)LOWQ.push([x,y,Math.min(128,b-x)]);}
+function lowStep(){const q=LOWQ.shift();if(!q)return true;const [x0,y0,w]=q,R=16,H=WMH+NR,a=Math.max(0,y0-2),b=Math.min(H,y0+R+2),xa=Math.max(0,x0-2),xb=Math.min(MW,x0+w+2),
+  piece=MMO({x0:xa,cols:xb-xa,y0:a,rows:b-a,px:4}),g=LOWB.getContext('2d');
+ g.save();g.beginPath();g.rect(x0*2,y0*2,w*2,Math.min(R,H-y0)*2);g.clip();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(piece,xa*2,a*2,(xb-xa)*2,(b-a)*2);g.restore();return !LOWQ.length;}
+const lowJob=()=>LOWQ.length?{step:lowStep}:null;
+pjAdd('low',2,lowJob);
+// while the title shows: the HUD map's pieces where you'll start (your save, and a new character's spot)
+pjAdd('start',.5,()=>({step(){const at=[[wX(126)*TS+8,84*TS+10]];try{const r=STORE.read();if(r.status==='ok'&&r.data&&r.data.P)at.unshift([+r.data.P.x,+r.data.P.y]);}catch(e){}
+ for(const [x,y] of at)if(isFinite(x)&&isFinite(y)&&y<WMH*TS)miniAhead(x/TS-32,y/TS-22+NR);return true;}}));
+// the 8 px copy in 1024 px pieces, painted when the map first shows them, 8 rows a strip (the map shows them filling in); the
+// last 30 seen are kept, enough for a 4K screen (4 MB each: browsing the whole map kept them all)
+const BTL=new Map();
+function btJob(c,i,j){const H=WMH+NR,cw=Math.min(128,MW-i*128),rh=Math.min(128,H-j*128);let r=0;if(cw<=0||rh<=0)return {step:()=>true};
+ const J={step(n=8){n=Math.min(n,rh-r);c.getContext('2d').drawImage(MMO({x0:i*128,cols:cw,y0:j*128+r,rows:n}),0,r*8);r+=n;return r>=rh;},rest:()=>J.step(1e9)};return J;}
+function baseTileQ(i,j,then){const k=i+','+j;let c=BTL.get(k);
+ if(c){BTL.delete(k);BTL.set(k,c);}else{c=mk(1024,1024,()=>{});BTL.set(k,c);pjAdd('b'+k,0,()=>btJob(c,i,j));while(BTL.size>30){const o=BTL.keys().next().value;BTL.delete(o);PJ.delete('b'+o);}}
+ const J=PJ.get('b'+k);if(J&&then)J.tick=J.after=then;return c;}
+const baseTile=(i,j)=>{const c=baseTileQ(i,j);pjFinish('b'+i+','+j);return c;};
+const lowBase=()=>{pjFinish('low');return LOWB;};   // both start at world row -NR
 // where the player is on the world map (outside position while indoors)
 const outPos=()=>{if(ARN)return ARN.ret;if(TWR)return TWR.ret;if(inBh(P.x,P.y))return {x:BHPIER.gx,y:BHPIER.gy};if(inTw(P.x,P.y)){const g=twSpot();return {x:g.x,y:g.y+14};}const R=roomAt(P.x,P.y);if(R)return {x:R.dx,y:R.dy};let D=dunAt(P.x,P.y);for(let i=0;D&&i<8;i++){const g=DGATES.find(g=>g.to&&g.hint==='hUp'&&dunAt(g.x,g.y)===D);if(!g)break;if(g.to.y<WMH*TS)return g.to;D=dunAt(g.to.x,g.to.y);}return P;};// below ground the map shows the cave mouth you came down
 function toggleMini(){miniOff=!miniOff;try{localStorage.setItem('satisfy_mini',miniOff?'1':'0');}catch(e){}SFX.click();drawMini();}
@@ -10457,7 +10564,7 @@ function invMark(g,fx,fy,u,sc,fs,F){if(!EV||!EV.e.tw)return;const T=TOWNS.find(T
 let MINIGR=null; // the HUD map's edge shade, made once
 function drawMini(){const c=$('mini');const show=!miniOff&&S&&!$('hud').hidden;c.hidden=!show;if(!show)return;if(c.width!==256){c.width=256;c.height=176;}
  const g=c.getContext('2d'),u=1.6;g.imageSmoothingEnabled=false;const pp=outPos(),ox=eaSide(pp.x)?clamp(pp.x/TS-32,CSPL,MW-64):clamp(pp.x/TS-32,0,CSPL-64),oy=clamp(pp.y/TS-22,-NR,WMH-44);
- g.fillStyle='#0a1220';g.fillRect(0,0,256,176);miniDraw(g,Math.round(ox*4)/4,Math.round((oy+NR)*4)/4,64,44,0,0,256,176);
+ g.fillStyle='#0a1220';g.fillRect(0,0,256,176);miniDraw(g,Math.round(ox*4)/4,Math.round((oy+NR)*4)/4,64,44,0,0,256,176);miniAhead(ox,oy+NR);
  const sx=x=>(x/TS-ox)*4,sy=y=>(y/TS-oy)*4,on=(x,y,k)=>x>-k&&x<256+k&&y>-k&&y<176+k; // on: only what lands on the 256x176 piece (it drew every monster and person of the world, 5 times a second)
  ANVILS.forEach(a=>MM.marker(g,'anvil',(a.tx+.5-ox)*4,(a.ty+.5-oy)*4,u*.8));
  mons.forEach(m=>{if(m.dead||m.tdum)return;const x=sx(m.x),y=sy(m.y);if(!on(x,y,16))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',x,y,b.boss?u*.7:u);});
@@ -10752,11 +10859,11 @@ function p4Tick(dt){if(!S||!P||S.__demo)return;P4.mv=Math.hypot(P.x-(P4.lx??P.x)
  const D=P4.dance;if(D&&!D.end){if(D.gap>0)D.gap-=dt;else if((D.t-=dt)<=0){D.res.push(0);SFX.deny();p4DNext();}if(NET)EMO={k:'dance',t:performance.now()};}
  // the Kraken
  const K=monsOf('kraken').find(m=>!m.dead),near=!!K&&Math.hypot(P.x-K.x,P.y-K.y)<330;
- for(const m of mons)if(m.hx!=null&&(m.type==='kraken'||m.type==='ktent')){m.x=m.hx;m.y=m.hy;}
+ for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++)if(m.hx!=null&&(m.type==='kraken'||m.type==='ktent')){m.x=m.hx;m.y=m.hy;}
  if(near&&mode!=='title'){const n=monsOf('ktent').filter(m=>m.kr&&!m.dead).length;
   if(P4.kUp>0){if((P4.kUp-=dt)<=0){P4.kUp=0;p4Tents(K);toast(t('krDive'),'warn');}}
   else if(!P4.kSp)p4Tents(K);else if(!n){P4.kUp=15;P4.kSp=0;announce(t('krUp'),1);SFX.legendary();}}
- else if(P4.kSp||P4.kUp){for(const m of mons)if(m.type==='ktent'&&m.kr&&!m.dead){m.dead=true;m.rt=1e9;}P4.kSp=0;P4.kUp=0;}
+ else if(P4.kSp||P4.kUp){for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++)if(m.type==='ktent'&&m.kr&&!m.dead){m.dead=true;m.rt=1e9;}P4.kSp=0;P4.kUp=0;}
  // the music pads sing when anyone steps on one
  if(Math.abs(P.x/TS-STG.cx)<40&&Math.abs(P.y/TS-STG.cy)<30){const who=[[P.x,P.y],...(NET?NET.remotes().map(r=>[r.x,r.y]):[])];
   for(let i=0;i<8;i++){const x0=(STG.x0+i)*TS,y0=STG.y1*TS,on=who.some(([x,y])=>x>=x0&&x<x0+TS&&y>=y0&&y<y0+TS);if(on&&!P4.padOn[i]){const d=Math.hypot(x0+8-P.x,y0+8-P.y);if(d<200){SFXV=.2+.6*(1-d/200);try{tone([262,294,330,349,392,440,494,523][i],.35,'triangle',.12);}finally{SFXV=1;}}}P4.padOn[i]=on;}}}
@@ -10770,6 +10877,7 @@ function p4Boat2(ents,x,y,mv){ents.push({y:y-1,f:()=>{blob(ctx,x,y-1,12,4,'#4a2e
  ents.push({y:y+1,f:()=>{const o=Math.round(Math.sin(gTime*3)*1);ctx.save();ctx.beginPath();ctx.rect(x-14,y-1,28,10);ctx.clip();blob(ctx,x,y-1+o,12,5,'#5a3a1e');blob(ctx,x,y-2+o,11,3,'#8a5e34');R(ctx,x-11,y-1+o,22,1,'#c89a5a');ctx.restore();
   ctx.save();ctx.globalAlpha=.35;ctx.strokeStyle='#e8f8ff';ctx.beginPath();ctx.ellipse(x,y+4,15+Math.sin(gTime*2)*1.5,4,0,0,7);ctx.stroke();ctx.restore();
   if(mv){const a=Math.sin(gTime*9)*.6;ctx.strokeStyle='#6a4a2a';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x-6,y-6);ctx.lineTo(x-13,y+2+a*3);ctx.moveTo(x+6,y-6);ctx.lineTo(x+13,y+2-a*3);ctx.stroke();}}});}
+const p4Ring=m=>({y:m.y-1,f:()=>{ctx.save();ctx.globalAlpha=.5;ctx.strokeStyle='#e8f8ff';ctx.beginPath();ctx.ellipse(m.x,m.y+2,10+Math.sin(gTime*4+m.x)*1.5,3,0,0,7);ctx.stroke();ctx.restore();}});   // a tentacle's ring (apart from the loop over the monsters)
 function p4Ents(ents){if(!P)return;const near=(x,y)=>Math.abs(x-P.x)<VW&&Math.abs(y-P.y)<VH;
  if(P.boat)p4Boat2(ents,P.x,P.y,P4.mv);
  if(NET)for(const r of NET.remotes())if(near(r.x,r.y)&&p4Sea(Math.floor(r.x/TS),Math.floor(r.y/TS)))p4Boat2(ents,r.x,r.y,0);
@@ -10785,7 +10893,7 @@ function p4Ents(ents){if(!P)return;const near=(x,y)=>Math.abs(x-P.x)<VW&&Math.ab
     ctx.save();ctx.globalAlpha=on?.95:.45;R(ctx,x+2,y+3,12,10,c);ctx.globalAlpha=on?.6:.2;R(ctx,x+4,y+5,8,6,'#ffffff');ctx.restore();}});}
   const x0=STG.x0*TS,y0=STG.y0*TS;ents.push({y:y0,f:()=>{R(ctx,x0-2,y0-14,4,16,'#6a4a2a');R(ctx,x0+(STG.x1-STG.x0+1)*TS-2,y0-14,4,16,'#6a4a2a');R(ctx,x0-2,y0-16,(STG.x1-STG.x0+1)*TS+4,4,'#8a2a3a');
    for(let k=0;k<8;k++)R(ctx,x0+4+k*16,y0-12,6,4+((k*7)%3),k%2?'#e8c860':'#c83a4a');}});}
- for(const m of mons)if(m.type==='ktent'&&!m.dead&&near(m.x,m.y))ents.push({y:m.y-1,f:()=>{ctx.save();ctx.globalAlpha=.5;ctx.strokeStyle='#e8f8ff';ctx.beginPath();ctx.ellipse(m.x,m.y+2,10+Math.sin(gTime*4+m.x)*1.5,3,0,0,7);ctx.stroke();ctx.restore();}});
+ for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++)if(m.type==='ktent'&&!m.dead&&near(m.x,m.y))ents.push(p4Ring(m));
  const Kr=monsOf('kraken').find(m=>!m.dead);if(Kr&&near(Kr.x,Kr.y)&&!(P4.kUp>0)&&P4.kSp)ents.push({y:Kr.y+2,f:()=>{ctx.save();ctx.globalAlpha=.18+.06*Math.sin(gTime*3);ctx.fillStyle='#1a4a8a';ctx.beginPath();ctx.ellipse(Kr.x,Kr.y-10,44,22,0,0,7);ctx.fill();ctx.restore();}});
  if(P4.aura)p4Sing(ents,P.x,P.y,P4.aura.k,.05);
  if(NET)for(const r of NET.remotes()){const fs=FXS.get(r.sid),m=fs&&fs.st&&/[ach]/.exec(fs.st);if(m&&near(r.x,r.y))p4Sing(ents,r.x,r.y,m[0],.035);}
@@ -11128,10 +11236,10 @@ function p5Tick(dt){if(!P||!S||mode==='title')return;const tx=P.x/TS,ty=P.y/TS;
  // the Doppelganger splits into copies while you fight it; a copy fades after 40 s
  const D=monsOf('dopp').find(m=>!m.dead);
  if(D&&D.eng>0&&Math.hypot(P.x-D.x,P.y-D.y)<320){if((P5.cpT-=dt)<=0){P5.cpT=30;const n=2+Math.min(2,NET?NET.remotes().filter(r=>Math.hypot(r.x-D.x,r.y-D.y)<320).length:0);p5Copy(D,n);toast(t('dpSplit'),'warn');SFX.slam();}}else P5.cpT=12;
- for(const m of mons)if(m.type==='dpcopy'&&!m.dead&&(m.life=(m.life??40)-dt)<=0){m.dead=true;m.rt=1e9;dissolve(m.x,m.y-10,DPC,8);}
+ for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++)if(m.type==='dpcopy'&&!m.dead&&(m.life=(m.life??40)-dt)<=0){m.dead=true;m.rt=1e9;dissolve(m.x,m.y-10,DPC,8);}
  // Randy copies the skill you just used, and swaps places with you when you are about to fall
  if(S.pet!=='randy'||!PET||PET.k!=='randy'||P.hp<=0)return;const pl=petLv('randy');
- if(SKC&&SKC.t!==P5.skL&&gTime-SKC.t<.2){P5.skL=SKC.t;let best=null,bd=110;if(gTime>P5.skT)for(const m of mons){if(m.dead||!(m.eng>0))continue;const d=Math.hypot(m.x-PET.x,m.y-PET.y);if(d<bd){bd=d;best=m;}}
+ if(SKC&&SKC.t!==P5.skL&&gTime-SKC.t<.2){P5.skL=SKC.t;let best=null,bd=110;if(gTime>P5.skT)for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++){if(m.dead||!(m.eng>0))continue;const d=Math.hypot(m.x-PET.x,m.y-PET.y);if(d<bd){bd=d;best=m;}}
   if(best){P5.skT=gTime+4;num(PET.x,PET.y-20,t('rdCopy',{s:t('sk_'+SKC.k)}),'#ffb060',false);vfx('slash',best.x,monY(best),{angle:rand()*6.28,rarity:3});compHit(best,.3+pl*.02,false);}}
  if(P.hp<maxHP()*.3&&gTime>P5.swT&&!hitBox(PET.x,PET.y,4)&&mons.some(m=>!m.dead&&m.eng>0&&Math.hypot(m.x-P.x,m.y-P.y)<120)){P5.swT=gTime+(pl>=10?60:90);
   const x=P.x,y=P.y;P.x=PET.x;P.y=PET.y;PET.x=x;PET.y=y;P.inv=Math.max(P.inv,1.5);vfx('spawn',P.x,P.y,{color:'#ffb060'});vfx('spawn',x,y,{color:'#ffb060'});toast(t('rdSwap'),'good');SFX.notice();}}
@@ -12313,7 +12421,7 @@ function loopRest(dt){PF.w1=pfNow();if(NET)try{netTick();}catch(e){gameErr(e);}t
  if(mode==='play'){updateKeys();holdAtk();}else if(mode==='inv'||mode==='equip'||mode==='status')updateSkillbar();   // owner 2026-10-23: the bar shows a drop at once with the bag open
  if(mode==='create')drawPrev();if(DL&&DL.pv)drawDPrev();styTick();
  if(mode==='map'&&(gTime*2|0)!==(Math.max(0,gTime-dt)*2|0))drawMap();
- musicTick();miniT-=dt;if(miniT<=0){miniT=.2;try{faultAt('mini');drawMini();}catch(e){gameErr(e);}}
+ musicTick();miniT-=dt;if(miniT<=0){miniT=.2;try{faultAt('mini');drawMini();}catch(e){gameErr(e);}try{sheetAhead();}catch(e){gameErr(e);}}
  if(mode==='play'||mode==='forge'||mode==='inv'||mode==='au'||mode==='dialog'||mode==='status'||mode==='dead'||mode==='cut'||mode==='equip'||mode==='log'||mode==='map'){hudT-=dt;if(hudT<=0||hudDirty){updateHUD();hudT=.1;hudDirty=false;}saveT+=dt;if(saveT>20&&mode==='play'){saveT=0;save(true);}}
 }
 requestAnimationFrame(loop);{const b=document.getElementById('boot');if(b)b.remove();}   // the loading screen goes with the first frame
@@ -12921,7 +13029,7 @@ function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig
  else if(a==='pcBlock'){if(isBlocked(r.uid)){BLK.remove(r.uid);toast(t('pcUnblocked',{n:r.handle||'?'}));}else blockUid(r.uid,r.handle);}
  pctxSig='';}
 window.__G.toScreen=(x,y)=>{const b=stage.getBoundingClientRect();return {x:b.left+(x-camXf)*SC,y:b.top+(y-camYf)*SC};}; // tests: click a world position
-window.__G.maxHP=()=>maxHP();window.__G.xpNeed=()=>xpNeed();window.__G.mapBase=()=>lowBase();window.__G.miniP=(i,j)=>miniP(i,j);window.__G.baseTile=(i,j)=>baseTile(i,j);window.__G.mmo=o=>MMO(o);window.__G.miniLeft=()=>Math.max(0,WMH+NR-miniY);window.__G.MV=MV;window.__G.mapDraw=()=>drawMapNow();window.__G.world=()=>({TENTS,buildings,TOWNS,WELLS,ANVILS,BOARD});window.__G.skProg=skProg;window.__G.skUse=skUse;window.__G.monNames=()=>Object.keys(MT).map(k=>[k,t(k==="guardian"?"guardian":NAMEK[k]||k)]);window.__G.vox=k=>VOX[voxOf(k)[0]];window.__G.spawnMon=(ty,x,y)=>{const m=newMon(ty,x,y);m.tmp=1;mons.push(m);return m;};
+window.__G.maxHP=()=>maxHP();window.__G.xpNeed=()=>xpNeed();window.__G.mapBase=()=>lowBase();window.__G.miniP=(i,j)=>miniP(i,j);window.__G.baseTile=(i,j)=>baseTile(i,j);window.__G.mmo=o=>MMO(o);window.__G.miniLeft=()=>LOWQ.length;window.__G.pj=()=>[...PJ.values()].map(J=>[J.k,J.pri]);window.__G.miniHas=(i,j)=>!!MINP[i+','+j];window.__G.miniQ=(i,j)=>{miniQ(i,j);};window.__G.MV=MV;window.__G.mapDraw=()=>drawMapNow();window.__G.world=()=>({TENTS,buildings,TOWNS,WELLS,ANVILS,BOARD});window.__G.skProg=skProg;window.__G.skUse=skUse;window.__G.monNames=()=>Object.keys(MT).map(k=>[k,t(k==="guardian"?"guardian":NAMEK[k]||k)]);window.__G.vox=k=>VOX[voxOf(k)[0]];window.__G.spawnMon=(ty,x,y)=>{const m=newMon(ty,x,y);m.tmp=1;mons.push(m);return m;};
 window.__G.isk={mkItem,equip,itemSkills,useISlot,ipOn,itemTip,mpC,MT,rs:()=>{sbSig='';},checkSkills:()=>checkSkills(),pasOn:k=>pasOn(k)};
 addEventListener('keydown',e=>{if(e.code!=='Escape'||mode!=='play'||(e.target&&e.target.tagName==='INPUT'))return;
  if(!$('emoW').hidden){$('emoW').hidden=true;e.stopImmediatePropagation();}else if(PCTX){PCTX=null;pctxSig='';e.stopImmediatePropagation();}},true);
@@ -14376,7 +14484,7 @@ function mobAdopt(k,v,u){const w=v.split(','),n=w.slice(0,5).map(Number);if(![5,
  const now=!m.dead&&m.prov>gTime&&m.provU===NET.uid;
  if(!used&&(now||m.dead||m.eng>0||m.hp<m.max||Math.hypot(m.x-P.x,m.y-P.y)<320))return;
  if(!live){if(!m.dead){m.dead=true;m.dying=0;m.rt=mobRt(m);}MOBN.fast=1;return;}
- let fresh=false;if(m.dead){fresh=true;const keep={ek:m.ek,tmp:m.tmp,evt:m.evt,sg:m.sg,nk:m.nk,far:m.far},ty=m.type,ox=m.sx,oy=m.sy;for(const q in m)delete m[q];Object.assign(m,newMon(ty,ox,oy));for(const q in keep)if(keep[q]!==undefined)m[q]=keep[q];m.lv=lv;m.max=mx||mobBaseMax(m);}
+ let fresh=false;if(m.dead){fresh=true;const keep={ek:m.ek,tmp:m.tmp,evt:m.evt,sg:m.sg,nk:m.nk,far:m.far},ty=m.type,ox=m.sx,oy=m.sy;monFresh(m,newMon(ty,ox,oy));for(const q in keep)if(keep[q]!==undefined)m[q]=keep[q];m.lv=lv;m.max=mx||mobBaseMax(m);}
  const nh=Math.max(1,Math.round(m.max*hp/1000));m.hp=fresh?nh:Math.min(m.hp,nh);
  if(!now){m.x=x;m.y=y;m.face=fl&4?-1:1;if(fl&2){m.eng=4;m.agg=1;m.prov=gTime+10;m.provU=u;}}
  if(hp<1000)mobHitBy(m,u);MOBN.fast=1;}
@@ -14451,7 +14559,7 @@ function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))ret
  // SAT-ONLINE-149: dead on the host's list. If you hit it, it's your kill too: from the host's message or from this, whichever
  // comes first (the message alone could be lost); if not, it just dies
  if(fl&1){if(!m.dead){if(m.myHit&&mobEarn(m)){m.mobKill=1;m.hp=0;killMon(m);m.mobKill=0;m.noLoot=0;}else if(m.dead){}else{m.dead=true;m.dying=.5;m.rt=mobRt(m);vfx('death',m.x,m.y);}mobLife(key);}return true;}
- if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mkN:m.mkN,sg:m.sg,nk:m.nk,boss:m.boss,far:m.far},hid=m.hidN;for(const k in m)delete m[k];Object.assign(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
+ if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mkN:m.mkN,sg:m.sg,nk:m.nk,boss:m.boss,far:m.far},hid=m.hidN;monFresh(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
  mobLocal(m,key); /* anything this player's skill gave it since: to the host first */m.lv=lv;m.max=mx||mobBaseMax(m);m.stun=m.stunH=fl&8?.15:0;if(fl&16){m.wardT=gTime+.5;m.wardR=((fl>>5)&31)/20||.4;}else m.wardT=0; // a shield is the host's
  m.weak=m.weakH=fl&1024?.5:0;m.slowU=m.slowUH=fl&2048?gTime+.5:0; // weak and slow while the host's copy is // the host's full health and stun, not this copy's
  if(b.boss){const ph=hp<330?2:hp<660?1:0;if(hp>=1000)m.ph=0;else if(ph>(m.ph||0)){m.ph=ph;shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='dopp')toast(t('dpSplit'),'warn');else if(m.type!=='belial')toast(t('bossPh'+ph,{b:itN(m.type)}),'warn');}} // SAT-ONLINE-045

@@ -26,25 +26,32 @@ function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,doc=root.document,NY=o.noi
  const mkc=(w,h)=>{const c=doc?doc.createElement('canvas'):A.makeCanvas(w,h);c.width=w;c.height=h;return c;};
  const cv=mkc(cw,ch),g=cv.getContext('2d');
  const img=g.createImageData(cw,ch),D=img.data,kind=new Int8Array(cw*ch);
- const at=(x,y)=>x<0||y<0||x>=W||y>=H?-9:env.at(x,y);
+ // the window's tiles and two round it, read once (2026-10-24, the owner's lag: on water it read each tile up to 50 times a pixel)
+ const gx0=tx0-2,gy0=ty0-2,gw=Math.max(0,tx1-tx0+4),gh=Math.max(0,ty1-ty0+4),GT=new Int8Array(gw*gh);
+ for(let y=0;y<gh;y++)for(let x=0;x<gw;x++){const X=gx0+x,Y=gy0+y;GT[y*gw+x]=X<0||Y<0||X>=W||Y>=H?-9:env.at(X,Y);}
+ const at=(x,y)=>{const i=x-gx0,j=y-gy0;return i>=0&&j>=0&&i<gw&&j<gh?GT[j*gw+i]:x<0||y<0||x>=W||y>=H?-9:env.at(x,y);};
  // ground under trees, props and fences = the most common open neighbour (same idea as tiles.js baseAt)
  const base=(x,y)=>{const v=at(x,y),k=groundKind(v);if(k!==-1)return k;const n={};let best=GR,bc=0;
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const q=groundKind(at(x+dx,y+dy));if(q<0||q===-9||q===WA||q===WL||q===RK||q===CW)continue;n[q]=(n[q]||0)+1;}
   for(const k2 in n)if(n[k2]>bc){bc=n[k2];best=+k2;}return best===GR&&env.snowAt(x,y)?SN:best;};
  const put=(px,py,c,k)=>{const i=(py*cw+px)*4;D[i]=c[0];D[i+1]=c[1];D[i+2]=c[2];D[i+3]=255;if(k!==undefined)kind[py*cw+px]=k;};
  const tri=(r,v)=>v<.36?r[0]:v<.64?r[1]:r[2];
+ const NB=[],DEEP=mix(C.water[2],C.water[0],1);   // DEEP: open water, no shore within two tiles (what d=9 gave)
  for(let ty=ty0;ty<ty1;ty++)for(let tx=tx0;tx<tx1;tx++){const k=base(tx,ty),raw=at(tx,ty);
-  for(let j=0;j<s;j++)for(let i=0;i<s;i++){const wx=tx*s+i,wy=ty*s+j,ny=wy-NY*s,fx=wx/s,fy=wy/s,n=vn(fx*1.6,(ty-NY+j/s)*1.6,1,301)*.7+hash(wx,ny,302)*.3;let c;
+  // water: the shore tiles within two, once a tile (the same ones, in the same order, as it read for every pixel)
+  let nb=0;if(k===WA){for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const v=at(tx+dx,ty+dy);if(v===WA||v===-9)continue;NB[nb++]=tx+dx+.5;NB[nb++]=ty+dy+.5;}}
+  for(let j=0;j<s;j++)for(let i=0;i<s;i++){const wx=tx*s+i,wy=ty*s+j,ny=wy-NY*s,fx=wx/s,fy=wy/s;let c;
    if(k===WA){// depth: distance to the nearest non-water tile, sampled per pixel
-    let d=9;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){if(at(tx+dx,ty+dy)===WA||at(tx+dx,ty+dy)===-9)continue;const ex=Math.max(0,Math.abs(fx-(tx+dx+.5))-.5),ey=Math.max(0,Math.abs(fy-(ty+dy+.5))-.5);d=Math.min(d,Math.hypot(ex,ey));}
-    c=d<.12?C.sand:d<.3?C.water[3]:mix(C.water[2],C.water[0],Math.min(1,(d-.3)/1.6));if(d>.4&&hash(wx>>1,ny,303+(ny>>2))<.025)c=C.water[3];}
-   else if(k===SN)c=tri(C.snow,n);
+    let d=9;for(let q=0;q<nb;q+=2){const ex=Math.max(0,Math.abs(fx-NB[q])-.5),ey=Math.max(0,Math.abs(fy-NB[q+1])-.5);d=Math.min(d,Math.hypot(ex,ey));}
+    const q=Math.min(1,(d-.3)/1.6);c=d<.12?C.sand:d<.3?C.water[3]:q===1?DEEP:mix(C.water[2],C.water[0],q);if(d>.4&&hash(wx>>1,ny,303+(ny>>2))<.025)c=C.water[3];}
+   else{const n=k===WL||k===CW?0:vn(fx*1.6,(ty-NY+j/s)*1.6,1,301)*.7+hash(wx,ny,302)*.3;   // (walls and cave walls have no texture)
+   if(k===SN)c=tri(C.snow,n);
    else if(k===PA)c=tri(C.path,n);
    else if(k===DR)c=tri(C.dirt,n);
    else if(k===RK){c=C.rock[1+((n*2.4)|0)%3];if(((wx+ny)%5)===0)c=C.rock[0];}
    else if(k===WL){c=C.wall[1];if(i===0||j===0)c=C.wall[2];if(i===s-1||j===s-1)c=C.wall[0];}
    else if(k===CW)c=C.cave[0];else if(k===CF)c=tri(C.cave,n);
-   else c=tri(C.grass,n);
+   else c=tri(C.grass,n);}
    if(raw===FL&&hash(wx,ny,304)<.035)c=C.flower[(hash(wx,ny,305)*4)|0];
    put(wx-ox*s,wy-oy*s,c,k);}}
  // ink: a darker 1px line where one terrain meets another (lower/right side), so regions read as a drawn map
