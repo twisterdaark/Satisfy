@@ -170,6 +170,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 ### Engine (plan §47)
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
+| U299 | Training arena | ✅ | SAT-ONLINE-169: three dummies by Winston's armory (`TDSPOT`, this screen's own, never shared: `mobOk`), a DPS meter (`#tdW`, `TDM`) and a best of runs of 10 s or more (`S.dpsB`); no XP, loot, kill, mastery, wear or one-hit record from them; `regression/training` |
 | U308 | Extract state store | 🟡 | `src/core/state.js`: durable, volatile and UI keys (ADR-002); the game still writes `S` directly |
 | U309 | Extract world generator | 🟡 | Seeded spawns (`mulberry32`), the same tiles on every client (`regression/worldparity`); still inside `index.html` |
 | U310 | Renderer batching | ✅ | The ground and the overlay are drawn per visible 512 px chunk, each replaying the draw calls recorded on its layer (`chunkLayer`, B, v0.60). SAT-ONLINE-135: a chunk dropped and drawn again has exactly the same pixels (`regression/chunks`, with `regression/render`'s hashes) |
