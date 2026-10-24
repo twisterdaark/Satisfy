@@ -9322,7 +9322,7 @@ function breathFeat(it){if(!pasOn('focus')||it.r<2||rand()>=.05+(skLv('focus')-1
 // Doran's Ring: "50% of the damage received will instantly be recovered" (once every 3 minutes here)
 function ipHurt(d){if(d>0&&P.hp>0&&ipOn('doran')&&(P.doT||0)<=S.playT){P.doT=S.playT+180;const h=Math.round(d*.5);P.hp=Math.min(maxHP(),P.hp+h);numPK(-30,'ipDoran','#7ae07a',false,h);vfx('heal',P.x,P.y);}}
 // per frame: bleeding (6 ticks over 3 s), buff timers, Gale Spear's speed stacks, landing from Fly
-function updateItemFx(dt){if(!P)return;if(P.qm>0)P.qm-=dt;
+function updateItemFx(dt){if(!P)return;alarmTick(dt);if(P.qm>0)P.qm-=dt;
  if(P.icb>0){P.icb-=dt;if(P.icb<=0){if(skLv('icomb')<10)[weapon(),armorIt()].forEach(i=>{if(i)i.dur=Math.max(0,durOf(i)-10);});toast(t('icombEnd'),'warn');}}if(P.galeT>0){P.galeT-=dt;if(P.galeT<=0)P.gale=0;}
  if(P.fly>0){P.fly-=dt;P.mp=Math.max(0,P.mp-2*dt);if(rand()<dt*14)fx.push({x:P.x+(rand()-.5)*14,y:P.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});if(P.fly<=0||P.mp<=0){P.fly=0;if(hitBox(P.x,P.y,4)){const f=freeNear(P.x,P.y,4);if(f){P.x=f.x;P.y=f.y;}}vfx('dust',P.x,P.y,{n:8});}}
  for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++){if(m.cboT>0)m.cboT-=dt;if(!m.bl||m.dead)continue;m.bl.t-=dt;if(m.bl.t<=3-(m.bl.n+1)*.5){m.bl.n++;hitMon(m,.22,{skill:1,dot:1});fx.push({x:m.x,y:monY(m),vx:0,vy:30,t:.4,c:'#c8282a',fl:1});}if(m.bl&&m.bl.t<=0)m.bl=null;}}
@@ -9383,7 +9383,7 @@ function namedDrop(m){const L=NDROP[m.type];if(!L||m.tmp)return;for(const [id,p]
 // small procedural skill icons
 // owner 2026-10-23: the skills that had no picture of their own (they all showed "!") each get one, drawn for what they do;
 // a Pagma fusion shows the small signs of its dances, its frame more golden the more dances it holds
-const SKICO={
+const SKICO={balarm:p=>{for(let i=0;i<12;i++){const a=i/12*6.283;p(8+Math.cos(a)*6|0,9+Math.sin(a)*4|0,1,1);}p(6,3,4,4,'#fff4c0');p(7,2,2,1);p(5,7,6,1);p(7,8,2,1,'#ffffff');},
 blion:(p,c)=>{for(let y=1;y<16;y++)for(let x=0;x<16;x++){const dx=x-7.5,dy=y-8.5,d=dx*dx+dy*dy;if(d<46)p(x,y,1,1,((x+y)%3==0&&d>30)?'#a8742a':c);if(d<15)p(x,y,1,1,'#f4dca8');}p(5,7,2,1,'#101a33');p(9,7,2,1,'#101a33');p(7,9,2,2,'#7a5634');p(6,11,4,1,'#7a5634');p(7,12,2,1,'#ff6a5a');p(4,0,8,2,'#ffd24a');p(4,0,1,1,'#101a33');p(6,0,1,1,'#101a33');p(9,0,1,1,'#101a33');p(11,0,1,1,'#101a33');p(7,1,2,1,'#ff6a5a');},
 broar:(p,c)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const dx=x-4,dy=y-8,d=dx*dx+dy*dy;if(d<17&&x<8)p(x,y,1,1,'#a8742a');if(d<9)p(x,y,1,1,c);}p(5,6,1,1,'#101a33');p(5,8,3,3,'#101a33');p(5,8,1,1,'#fff');p(7,8,1,1,'#fff');p(6,10,1,1,'#ff6a5a');for(let r=4;r<=10;r+=3)for(let a=-0.9;a<=0.9;a+=0.12)p((7+Math.cos(a)*r)|0,(9+Math.sin(a)*r)|0,1,1,r==7?'#fff':c);},
 btiger:(p,c)=>{const k='#2a1808';p(3,2,3,3);p(10,2,3,3);p(4,3,1,1,'#ff9a9a');p(11,3,1,1,'#ff9a9a');p(3,4,10,9);p(2,6,12,5);p(4,13,8,1);p(7,4,2,2,k);p(6,4,1,1,k);p(9,4,1,1,k);p(4,5,2,1,k);p(10,5,2,1,k);p(2,8,2,1,k);p(12,8,2,1,k);p(2,10,2,1,k);p(12,10,2,1,k);p(5,7,2,1,'#c8ff6a');p(9,7,2,1,'#c8ff6a');p(5,10,6,3,'#fff');p(7,9,2,2,'#ff6a5a');p(7,12,2,1,k);},
@@ -9571,6 +9571,18 @@ tldpkw:(p,c)=>{p(0,0,16,1,'#ffd24a');p(0,15,16,1,'#ffd24a');p(0,1,1,14,'#ffd24a'
 mablock:(p,c)=>{p(1,5,2,5);p(1,4,1,1,'#fff');p(1,5,1,4,'#fff');p(4,4,2,6);p(4,3,1,1,'#fff');p(4,4,1,5,'#fff');p(7,2,2,8);p(7,1,1,1,'#fff');p(7,2,1,7,'#fff');p(10,4,2,6);p(10,3,1,1,'#fff');p(10,4,1,5,'#fff');p(13,5,2,5);p(13,4,1,1,'#fff');p(13,5,1,4,'#fff');p(0,10,16,1,'#c8a070');p(1,11,2,2,'#7a5634');p(4,11,2,2,'#7a5634');p(7,11,2,2,'#7a5634');p(10,11,2,2,'#7a5634');p(13,11,2,2,'#7a5634');p(0,13,16,1,'#7a2a26');p(2,14,12,1,'#7a2a26');},
 macrush:(p,c)=>{p(1,1,1,6,'#c8ccd6');p(1,0,1,1,'#fff');p(3,1,1,6,'#c8ccd6');p(3,0,1,1,'#fff');p(6,1,1,6,'#c8ccd6');p(6,0,1,1,'#fff');p(9,1,1,6,'#c8ccd6');p(9,0,1,1,'#fff');p(11,1,1,6,'#c8ccd6');p(11,0,1,1,'#fff');p(14,1,1,6,'#c8ccd6');p(14,0,1,1,'#fff');p(0,6,16,1,'#c8a070');p(1,5,2,7);p(1,4,1,1,'#fff');p(1,5,1,6,'#fff');p(5,5,2,7);p(5,4,1,1,'#fff');p(5,5,1,6,'#fff');p(9,5,2,7);p(9,4,1,1,'#fff');p(9,5,1,6,'#fff');p(13,5,2,7);p(13,4,1,1,'#fff');p(13,5,1,6,'#fff');p(0,11,16,1,'#ffd24a');p(1,12,2,2,'#7a5634');p(5,12,2,2,'#7a5634');p(9,12,2,2,'#7a5634');p(13,12,2,2,'#7a5634');p(0,14,16,1,'#7a2a26');},
 mamass:(p,c)=>{for(let i=0;i<10;i++){const a=i*.628,x=8+Math.cos(a)*5|0,y=8+Math.sin(a)*5|0;p(x,y,1,1,"#ffffff");p(8+Math.cos(a)*7|0,8+Math.sin(a)*7|0,1,1);}p(7,3,2,8,"#c8ccd6");p(5,11,6,1,"#c8a070");p(7,12,2,2,"#7a5634");p(7,3,1,6,"#ffffff");}};
+Object.assign(SKD,{balarm:{cls:'braham',lv:150,mp:30,cd:24,need:'staff',col:'#ffe07a'}});
+let ALARMS=[];
+Object.assign(SKF,{balarm:()=>{if(ALARMS.length>=2)ALARMS.shift();ALARMS.push({x:P.x,y:P.y,t:60,r:110,hit:new Set(),pt:0});SFX.notice();fx.push({ring:true,big:1,x:P.x,y:P.y-2,t:.6});
+ for(let i=0;i<16;i++){const a=i/16*6.283;fx.push({x:P.x+Math.cos(a)*110,y:P.y+Math.sin(a)*60,vx:0,vy:-12,t:.8,c:i%2?'#ffe07a':'#fff4c0',fl:1});}}});
+// the circles' life: a pulse on the ground each second, and the alarm for each foe that crosses one the first time
+function alarmTick(dt){if(!ALARMS.length)return;for(let i=ALARMS.length-1;i>=0;i--){const A=ALARMS[i];A.t-=dt;if(A.t<=0||mode==='title'){ALARMS.splice(i,1);continue;}
+ if((A.pt-=dt)<=0){A.pt=1;for(let k=0;k<12;k++){const a=k/12*6.283+gTime;fx.push({x:A.x+Math.cos(a)*A.r,y:A.y+Math.sin(a)*A.r*.55,vx:0,vy:-6,t:.6,c:'#ffe07a',fl:1});}}
+ for(const m of mons){if(m.dead||m.tdum||m.spar||A.hit.has(m))continue;const dx=m.x-A.x,dy=(m.y-A.y)/.55;if(dx*dx+dy*dy>A.r*A.r)continue;A.hit.add(m);
+  m.stun=Math.max(m.stun||0,.8);m.slowU=gTime+3;m.inv=0;m.hid=0;num(m.x,monY(m)-26,'!','#ffe07a',true);vfx('pillar',m.x,monY(m)+6,{raw:1,color:'#ffe07a',h:44,w:5});hitMon(m,1.5,{skill:1});sfxAt(m.x,m.y,()=>SFX.notice(),.6);}}}
+Object.assign(STR.ar,{sk_balarm:'سحر براهام: تعويذة الإنذار',skd_balarm:'دايرة إنذار سحرية مكانك لمدة 60 ثانية. أول ما أي عدو يدخلها: بيتكشف ويتشل 0.8 ثانية، وبيبطّأ 3 ثواني، وبياخد 150%. لحد دايرتين في نفس الوقت.'});
+Object.assign(STR.en,{sk_balarm:"Braham's Magic: Alarm Spell",skd_balarm:'A circle of warning magic where you stand for 60 s. The first time any foe crosses it: revealed and held 0.8 s, slowed 3 s, and struck for 150%. Up to two circles at once.'});
+window.__GBAL={get A(){return ALARMS},tick:dt=>alarmTick(dt)}; // tests
 function skIcon(k){const id='sk_'+k;if(ICN[id])return ICN[id];const c=SKD[k].col;ICN[id]=mk(16,16,g=>{const p=(x,y,w,h,cc)=>R(g,x,y,w,h,cc||c);R(g,0,0,16,16,'#101a33');
  if(SKICO[k])SKICO[k](p,c);else if(P4ICO&&P4ICO[k])P4ICO[k](p);else if(P2ICO[k])P2ICO[k](p);else if(C2ICO[k])C2ICO[k](p);else if(PHICO[k])PHICO[k](p);else if(RGICO[k])RGICO[k](p);else if(NEICO[k])NEICO[k](p);else if(HCICO[k])HCICO[k](p);else if(FBICO[k])FBICO[k](p);else if(k==='strike'){for(let i=0;i<10;i++)p(3+i,12-i,2,2);p(11,2,3,1,'#fff');}
  else if(k==='bash'){p(4,3,8,9,'#5a6a8a');p(5,4,6,7);p(7,5,2,5,'#fff');p(5,12,6,1,'#5a6a8a');p(6,13,4,1,'#5a6a8a');p(12,7,3,1,'#fff');p(13,5,1,1,'#fff');p(13,9,1,1,'#fff');}
