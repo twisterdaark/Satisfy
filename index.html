@@ -7404,7 +7404,7 @@ let THUI='',THT=0;function thUI(dt){THT-=dt;if(THT>0)return;THT=.25;const w=$('t
 window.__GTH={week:()=>thWeek(),spot:w=>thSpot(w||thWeek()),take:()=>thTake(),dig:c=>thDig(c),on:()=>thOn(),near:()=>thNear(),ui:()=>{THT=0;thUI(0);return $('thW').textContent;}}; // tests
 function openBoard(){topBoard();const D=dlyS(),L=dailyList(),dn=L.filter(x=>D.done[x.k]).length,dr=L.some(x=>!D.done[x.k]&&(D.c[x.k]||0)>=x.n),
   br=Object.keys(S.qs).some(id=>QD[id]&&QD[id].by==='board'&&qReady(id));
- dialog('board',['bdMenu'],null,[{l:t('bMenuD',{n:dn,m:L.length})+(dr?' ❗':''),f:openDaily},{l:t('bMenuB',{n:S.bq.length})+(br?' ❗':''),f:openBQ},{l:thLbl(),f:thTake},...(pollOpen()?[{l:t('pollMenuL')+(POLLM[pollOpen()]==null?' ❗':''),f:pollMenu}]:[]),...(exSt()?[{l:t('exMenuL'),f:exMenu}]:[]),{l:t('oLeave')}]);}
+ dialog('board',['bdMenu'],null,[{l:t('bMenuD',{n:dn,m:L.length})+(dr?' ❗':''),f:openDaily},{l:t('bMenuB',{n:S.bq.length})+(br?' ❗':''),f:openBQ},{l:thLbl(),f:thTake},...(pollOpen()?[{l:t('pollMenuL')+(POLLM[pollOpen()]==null?' ❗':''),f:pollMenu}]:[]),...(exSt()?[{l:t('exMenuL'),f:exMenu}]:[]),...(ntcList().length?[{l:t('ntcMenu',{n:ntcList().length}),f:ntcOpen}]:[]),{l:t('oLeave')}]);}
 function openDaily(){dialog('board',[dailyLines()],null,[...dailyOpts(),{l:t('oBack'),f:openBoard}]);}
 function openBQ(){topBoard();const opts=[];
  Object.keys(S.qs).forEach(id=>{if(QD[id]&&QD[id].by==='board'&&qReady(id))opts.push({l:t('bTurn',{q:qName(id)}),f:()=>{completeQ(id);if(QD[id]&&QD[id].gen){delete S.bqa[id];delete QD[id];}openBQ();}});});
@@ -14306,6 +14306,21 @@ window.__GRP={ask:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);rptAsk(r
    refuse it, whatever a page does. */
 Object.assign(STR.ar,{annOwner:'من صاحب اللعبة',annMaint:'صيانة للسيرفر الساعة {l} (بعد {d}): {s}',annMaintSoon:'الصيانة بعد {m} دقيقة. خلّص اللي في إيدك',annMaintNow:'الصيانة بدأت. تقدمك اتحفظ، ارجع بعد شوية',annNotAdmin:'صاحب اللعبة بس اللي يقدر يعمل كده',annSent:'الإعلان اتبعت للكل',annBad:'اكتب: /maint الدقايق الرسالة'});
 Object.assign(STR.en,{annOwner:"From the game's owner",annMaint:'Server maintenance at {l} (in {d}): {s}',annMaintSoon:'Maintenance in {m} min. Finish what you are doing',annMaintNow:'Maintenance has started. Your progress is saved; come back in a little while',annNotAdmin:"Only the game's owner can do that",annSent:'The announcement went out to everyone',annBad:'Type: /maint minutes message'});
+/* the town notice board (SAT-ONLINE-200; plan U297 "Town notice board": "approved event announcements", checked by "no
+   phishing external links"). Online, every town board lists the game owner's announcements of the last 14 days, newest
+   first, each on its own page with its day and time: the same ones "/announce" sends (the last five), so a player who was
+   away reads them there. Only the owner can post one (the rules, SAT-ONLINE-079). A web address in one shows as [link] on
+   the board: nobody can be sent anywhere from it. */
+Object.assign(STR.ar,{ntcMenu:'📜 إعلانات ({n})',ntcNone:'مفيش إعلانات دلوقتي.',ntcLink:'[لينك]'});
+Object.assign(STR.en,{ntcMenu:'📜 Notices ({n})',ntcNone:'No notices right now.',ntcLink:'[link]'});
+let NTC=[];   // {id, t, s}: the owner's messages as the announcement watch last gave them
+const NTCURL=/(?:\b(?:https?|ftp):\/\/|\bwww\.)\S+|\b[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)*\.(?:com|net|org|gg|io|me|ly|co|xyz|app|link|ru|tk|info|biz|site|online|top|shop|club|eg)\b(?:\/\S*)?/gi;
+const ntcList=()=>{const now=wNow();return NTC.filter(e=>now-e.t<14*864e5).sort((a,b)=>b.t-a.t);};
+const ntcCut=x=>x.replace(NTCURL,m=>{const p=/[.,;:!?)\]'"]+$/.exec(m);return t('ntcLink')+(p?p[0]:'');});   // (the punctuation after an address stays)
+const ntcText=e=>ntcCut(e.s);
+const ntcDay=ms=>{let d='';try{d=new Date(ms).toLocaleDateString(lang==='ar'?'ar-EG':'en-GB',{day:'numeric',month:'short'});}catch(e){}return d+' '+calTime(ms);};
+function ntcOpen(){const L=ntcList();dialog('board',L.length?L.map(e=>ntcDay(e.t)+' · '+ntcText(e)):[t('ntcNone')],null,[{l:t('oBack'),f:openBoard},{l:t('oLeave')}]);}
+window.__GNTC={list:()=>ntcList().map(e=>ntcText(e)),open:()=>ntcOpen(),board:()=>openBoard(),text:s=>ntcCut(s)}; // tests
 var ANNOFF=null,ANNADM=false,ANNM=null,ANNSEEN=null,ANNQ=[];
 function annSt(){return NETTR&&NETTR.kind==='firebase'&&FB&&NET&&Satisfy.firebase.announceStore?Satisfy.firebase.announceStore(FB):null;}
 // the ones this account has seen on this device (per account: two accounts on one device each see them)
@@ -14317,10 +14332,11 @@ function annText(e){return Satisfy.chat.clean(lang==='ar'?e.ar:e.en,200)||Satisf
 function annShow(msg){if(!Satisfy.local.inGame()||!S||S.__demo){ANNQ.push(msg);return;}announce(msg);$('announce').querySelector('.head').textContent=t('annOwner');SFX.notice&&SFX.notice();}
 function annStart(){if(!(NETTR&&NETTR.kind==='firebase'))return;annStop();const st=annSt();if(!st)return;
  ANNOFF=st.watch(v=>{const now=wNow(),L=Object.keys(v||{}).map(id=>Object.assign({id},v[id])).filter(e=>e&&(e.k==='msg'||e.k==='maint')&&typeof e.t==='number').sort((a,b)=>a.t-b.t);
+  NTC=L.filter(e=>e.k==='msg').map(e=>({id:e.id,t:e.t,s:annText(e)})).filter(e=>e.s);   // SAT-ONLINE-200: the town boards'
   for(const e of L){if(annSeen().includes(e.id))continue;annMark(e.id);const s=annText(e);if(!s)continue;
    if(e.k==='maint'){if(!(+e.at>now))continue;ANNM={at:+e.at,s,w:{}};annShow(t('annMaint',{l:calTime(ANNM.at),d:calIn(ANNM.at-now),s}));}
    else if(now-e.t<600000)annShow(s);}});}
-function annStop(){if(ANNOFF){ANNOFF();ANNOFF=null;}pollStop();POLLS={};POLLT={};POLLM={};ANNADM=false;ANNQ=[];swStop();}
+function annStop(){if(ANNOFF){ANNOFF();ANNOFF=null;}NTC=[];pollStop();POLLS={};POLLT={};POLLM={};ANNADM=false;ANNQ=[];swStop();}
 /* SAT-ONLINE-121 live switches. The game's owner can turn world chat, trading or duels off for everyone, at once and without
    a release ("/switch chat off spam wave", "/switch chat on", "/switch" lists them): flags/{chat|trade|duel}. The rules then
    refuse new world lines, new trades and new duel challenges from every page, old ones included; this page also says so
