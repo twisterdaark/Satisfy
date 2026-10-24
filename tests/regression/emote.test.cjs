@@ -35,7 +35,7 @@ for (const mode of ['local', 'online']) {
       await a.page.keyboard.press('KeyV');
       await a.step(1);
       assert.equal(await a.eval(() => document.getElementById('emoW').hidden), false);
-      assert.deepEqual(await a.eval(() => [...document.querySelectorAll('#emoW button')].map((x) => x.textContent)), ['Wave', 'Dance', 'Point', 'Cheer']);
+      assert.deepEqual(await a.eval(() => [...document.querySelectorAll('#emoW button')].map((x) => x.textContent)), ['Wave', 'Dance', 'Point', 'Cheer', 'Sit']); // Sit: the tavern's stool (SAT-ONLINE-193)
       await a.eval(() => document.querySelector('#emoW [data-emo="dance"]').click());
       await a.step(2);
       assert.equal(await a.eval(() => document.getElementById('emoW').hidden), true, 'picking closes the list');
