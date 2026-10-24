@@ -93,6 +93,8 @@
     'bh',
     // the Tower of Wisdom (major #5): map, Tower's Mission, basic tests, members' tests, Dragon Pills, Matchless Heart, 10th Seat
     'wis',
+    // today's fish and produce sold to the market (SAT-ONLINE-190): {d: world day, n: {kind: count}}
+    'mkt',
   ];
   var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk', 'natJ'];
   var META = ['v', 'wv', 'uid', 'pid'];

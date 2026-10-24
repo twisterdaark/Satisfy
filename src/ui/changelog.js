@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24market', ver: '2.62', d: '2026-10-24',
+      ar: ["سوق السمك والخضار: التجار بيشتروا السمك والمحاصيل بسعر نوعها لحد كمية معينة كل يوم (مثلًا ١٦ بطيخة، ٤٠ سمكة). بعد كده السوق بيتملا والسعر بيقل، ولو بعت خمس أضعاف الكمية محدش بيشتري تاني من النوع ده لحد بكرة.",
+          "السعر اللي باين في الشنطة هو سعر الحتة الجاية، واليوم هو يوم العالم (نفسه لكل اللاعيبة) ومتسجل في الحفظ."],
+      en: ["The fish and produce market: merchants buy fish and crops at their kind's price up to a daily amount (16 watermelons, 40 fish and so on). Past it the market fills and the price drops, and at five times that amount nobody buys more of that kind until tomorrow.",
+          "The price shown in the bag is the next one's; the day is the world's (the same for every player) and is kept in your save."] },
     { v: '2026-10-24tower1', ver: '2.61', d: '2026-10-24',
       ar: ["الدور الأول في برج الحكمة بقى واضح: أول ما تدخل بتطلعلك رسالة بتقولك تمشي يمين ناحية النور من غير ما تقف، والنور بقى باين في نص الشاشة بعمود نور بدل ما كان مستخبي ورا شريط السكيلات.",
           "أسهم في الأرض بتشاورلك على الطريق وبتحمر لو وقفت، وسطر الكويست بيقولك النور على بعد كام وسرعتك، وفيه شرار وراك وأنت بتجري.",
