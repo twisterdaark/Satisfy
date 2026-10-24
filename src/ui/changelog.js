@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24pcard', ver: '2.68', d: '2026-10-24',
+      ar: ["كارت اللاعب (أونلاين) بقى فيه شكله زي ما الكل شايفه في العالم (شعره ولبسه ودرعه)، وتقييمه في الأرينا الموسم ده بعدد مرات الفوز والخسارة، أو إنه ملوش مبارزات أرينا لسه. ومفيش أي حاجة خاصة زي الدهب."],
+      en: ["A player's card (online) now shows them as everyone sees them in the world (hair, clothes, armour) and their arena rating this season with wins and losses, or that they have no arena duels yet. Still nothing private, such as gold."] },
     { v: '2026-10-24nearby', ver: '2.67', d: '2026-10-24',
       ar: ["قايمة اللاعيبة (O) بقت مترتبة بالأقرب: انت الأول، وبعدين اللي على نفس الخريطة ومعاك في نفس المكان من الأقرب للأبعد وجنب كل واحد بُعده بالمربعات، وبعدين الباقيين بالاسم."],
       en: ["The players list (O) puts the nearest first: you, then the players on your map and in the same place, closest first with how far each one is in tiles, then everyone else by name."] },
