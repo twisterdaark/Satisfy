@@ -7,6 +7,14 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24dummylang', ver: '2.76', d: '2026-10-24',
+      ar: ["دمية التدريب بقت ثابتة مكانها: الضربات اللي بتزق والسحب مبيحركوهاش.",
+          "أسامي السكيلات والكلام اللي بيطلع فوق لاعب تاني (زي \"صد\" و\"تفادي\") بقت بتتكتب بلغتك انت، مش بلغة اللاعب اللي عملها.",
+          "اختبار تشغيل اللعب المحلي اتضاف من شغل Claude-A (#249)."],
+      en: ["The training dummy stays on its post: knockback and pulls don't move it.",
+          "Skill names and words that show over another player (like \"Parry\" and \"Evade\") are now in your own language, not the language of the player who did it.",
+          "The local play boot test was added from Claude-A's work (#249)."],
+      hide: [2] },
     { v: '2026-10-24brutes', ver: '2.75', d: '2026-10-24',
       ar: ["وحوش اترسمت من جديد بحركات (واقف وماشي وبيضرب): كوبولد المنجم براس كلب وكاب بشمعة، وملك الكوبولد بتاج وعباية حمرا، وكوبولد الشرق، والترول الأخضر بأنياب ونبوت، والأوجر بقرن ونبوت عضم، والسايكلوبس بعين واحدة، والرجل السحلية وسحلية إيران بديل وعرف ورمح.",
           "مؤشر المهمة عمره ما بيقف في مية أو صخر: لو المكان في بحيرة (زي مهمات الحوريات) بيشاور على أقرب أرض.",

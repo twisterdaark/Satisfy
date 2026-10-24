@@ -3508,7 +3508,7 @@ const RG={kAsn:false};
 const rgEvd=()=>!!S&&pasOn('tevade')&&clsIs('thief');
 function rgStl(t){P.stl=t;for(const m of mons)if(!m.dead&&!MT[m.type].boss){m.eng=0;m.st=null;m.tele=0;}}
 // a blow from a monster: Evasion, and any blow ends stealth
-function rgEvade(src){if(!src||!src.type||src.spar){if(src)P.stl=0;return false;}if(rgEvd()&&rand()<.12*pasM('tevade')){skUse('tevade',1);numP(-14,t('evade'),'#c8e0ff',false);SFX.dodge();return true;}P.stl=0;return false;}
+function rgEvade(src){if(!src||!src.type||src.spar){if(src)P.stl=0;return false;}if(rgEvd()&&rand()<.12*pasM('tevade')){skUse('tevade',1);numPK(-14,'evade','#c8e0ff',false);SFX.dodge();return true;}P.stl=0;return false;}
 // a blow on a monster: from stealth it lands double (and marks the kill as an assassination); from behind is for Assassinate
 const rgBehind=m=>(P.x-m.x)*(m.face||1)<-2;
 function rgAtk(m){if(m.spar)return 1;let k=1;if(P.stl>0){k*=2;m.asn=1;}if(m.psnT>0)k*=1.05;return k;}
@@ -3666,7 +3666,7 @@ function hcAtk(m,o){if(m.spar)return 1;let k=1;if(P.bmf==='bear')k*=1.15;else if
  if(bmHalf())k*=1.3;if(P.elo>0||phNear('o',120))k*=1.15;if(m.spt>0)k*=1.2;return k;}
 function hcHit(m,o){if(P.bmf&&!m.spar&&!m.tdum&&!o.dot&&!o.skill&&!o.chain)bmFormHit(m,o);if(!o.aura||m.spar||m.tdum||S.cls!=='aura')return;const H=hcS();H.ax++;const up=H.ar===0&&H.ax>=1500&&S.lv>=40?1:H.ar===1&&H.ax>=6000&&S.lv>=80?2:0;
  if(up){H.ar=up;SFX.legendary();flash();sysMsg('auUp'+up,2600);hudDirty=true;save(true);}}
-function hcEvade(src){if(P.bmf==='leopard'&&src&&src.type&&!src.spar&&rand()<.2){numP(-20,lang==='ar'?'تفادي':'EVADE','#e8eef8',false);return true;}if(!src||!src.type||src.spar||!(P.sens>0))return false;if(Math.hypot(src.x-P.x,src.y-P.y)>160)return false;numP(-20,t('auRead'),AUC[auR()],false);P.inv=Math.max(P.inv,.3);return true;}
+function hcEvade(src){if(P.bmf==='leopard'&&src&&src.type&&!src.spar&&rand()<.2){numP(-20,lang==='ar'?'تفادي':'EVADE','#e8eef8',false);return true;}if(!src||!src.type||src.spar||!(P.sens>0))return false;if(Math.hypot(src.x-P.x,src.y-P.y)>160)return false;numPK(-20,'auRead',AUC[auR()],false);P.inv=Math.max(P.inv,.3);return true;}
 function hcHurt(d,src){if(!src||!src.type||src.spar)return d;if(P.bmf==='bear')d*=.6;else if(P.bmf==='lion')d*=.8;else if(P.bmf==='tiger')d*=.9;else if(P.bmf==='eagle')d*=1.25;if(bmHalf())d*=.8;if(P.agrd>0)d*=.5;if(P.elo>0||phNear('o',120))d*=.9;if(src.spt>0)d*=.7;return Math.max(1,Math.round(d));}
 const hcSpd=()=>(P.aleg>0?1.5:1)*(P.bmf==='bear'?.8:P.bmf==='lion'?1.1:P.bmf==='tiger'?1.2:P.bmf==='leopard'?1.35:P.bmf==='wolf'?1.25:P.bmf==='eagle'?1.45:1);
 // owner 2026-10-22, "the forms differ only in looks": each form fights its own way. The wolf bites fast and every bite
@@ -6745,7 +6745,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,m
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
  if(o.skill&&!o.dot&&SKC&&gTime-SKC.t<2.5){if((SKC.h=(SKC.h||0)+1)<=3&&!m.tdum)skUse(SKC.k,1);const L=skLv(SKC.k);if(skKind(SKC.k)==='atk'){dmg*=skDm(SKC.k);if(L>=5&&!crit&&rand()<.1){crit=true;dmg*=1.8;}if(L>=10&&!m.bl)m.bl={t:3,n:0};}}
- dmg=ipHit(m,dmg,crit,o);if(o.skill&&tlOn('duke'))dmg*=1.15;if(o.skill&&S.cls2==='bomb')dmg*=1.15;sc2Hit(m,o);if(o.skill&&S.cls==='braham'&&S.sk.bcont&&rand()<Math.min(.75,.3+.05*(skLv('bcont')-1))){dmg*=1.3;if(!o.dot&&rand()<.3)numP(-30,t('bcAmp'),'#d8c0ff',false);}dmg*=1+pasGen();if(P.shwU>gTime)dmg*=saEvil(m)?1.5:1.2;dmg=tzHit(m,dmg,o);if(!o.dot)kyArc(m);if(o.skill&&S.cls==='mumud'&&pasOn('mmreint'))dmg*=1+.15*pasM('mmreint');if(m.tw===1)twHit(m,crit,o);if(m.type==='gcrown'&&m.bh&&!crit&&!o.skill)dmg=1;if(o.skill&&S.bh&&S.bh.mm)dmg*=1.03;if(tlOn('hking')&&HKV.has(m.type))dmg*=1.15;dmg=ttHit(m,dmg,crit);
+ dmg=ipHit(m,dmg,crit,o);if(o.skill&&tlOn('duke'))dmg*=1.15;if(o.skill&&S.cls2==='bomb')dmg*=1.15;sc2Hit(m,o);if(o.skill&&S.cls==='braham'&&S.sk.bcont&&rand()<Math.min(.75,.3+.05*(skLv('bcont')-1))){dmg*=1.3;if(!o.dot&&rand()<.3)numPK(-30,'bcAmp','#d8c0ff',false);}dmg*=1+pasGen();if(P.shwU>gTime)dmg*=saEvil(m)?1.5:1.2;dmg=tzHit(m,dmg,o);if(!o.dot)kyArc(m);if(o.skill&&S.cls==='mumud'&&pasOn('mmreint'))dmg*=1+.15*pasM('mmreint');if(m.tw===1)twHit(m,crit,o);if(m.type==='gcrown'&&m.bh&&!crit&&!o.skill)dmg=1;if(o.skill&&S.bh&&S.bh.mm)dmg*=1.03;if(tlOn('hking')&&HKV.has(m.type))dmg*=1.15;dmg=ttHit(m,dmg,crit);
  let mblk=false;if(AIK[m.type]==='soldier'&&!m.tdum&&!o.skill&&!o.aura&&!(P.bdetU>gTime)&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
   mblk=true;dmg*=.2;crit=false;burn=false;m.grdT=.6;m.cd=Math.min(m.cd,.15);vfx('block',m.x+m.face*7,my-2,{angle:m.face>0?Math.PI:0});num(m.x,my-20,t('mBlock'),'#9fc8ff',false);SFX.hit();}
  dmg+=cpErode(m,o);dmg=Math.max(1,Math.round(dmg));dmg=blRefl(m,dmg);if(!m.tdum)ttRec(dmg);m.hp-=dmg;if(m.tdum)tdHit(m,dmg,crit);m.myd=(m.myd||0)+dmg;m.myT=gTime;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;if(!m.tdum)trainMast();if(!o.chain&&wearT!==gTime&&!m.tdum){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
@@ -6835,17 +6835,17 @@ function hurtPlayer(d,ml,src){const r=asMe(()=>hurtPlayer0(d,ml,src));if(r)gpRum
 var TFK=null,TFM=1;
 function threatFloor(d,ml,src){if(!TFK||!S)return d;const mlv=ml||S.lv;if(mlv<S.lv-15)return d;const near=clamp(1-(S.lv-mlv)/15,.35,1),mh=maxHP();
  const pct={heavy:.11,zone:.12,proj:.05,light:.025,tick:.015}[TFK]||0,cap={heavy:.4,zone:.4,proj:.15,light:.1,tick:.05}[TFK]||.1,boss=src&&src.type&&MT[src.type]&&MT[src.type].boss?1.5:1;
- const f=Math.min(mh*cap,mh*pct*near*boss*Math.min(2,TFM||1));if((TFK==='heavy'||TFK==='zone')&&f>=mh*.06){if(!((P.woundT||0)>gTime))numP(-34,t('woundT'),'#ff7a6a',false);P.woundT=gTime+3;}return Math.max(d,Math.round(f));}
+ const f=Math.min(mh*cap,mh*pct*near*boss*Math.min(2,TFM||1));if((TFK==='heavy'||TFK==='zone')&&f>=mh*.06){if(!((P.woundT||0)>gTime))numPK(-34,'woundT','#ff7a6a',false);P.woundT=gTime+3;}return Math.max(d,Math.round(f));}
 // life steal heals at most 4% of your health a second (a budget that refills), 40% of it while wounded
 function lsCap(h){const mh=maxHP(),cap=mh*.04;P.lsB=Math.min(cap,(P.lsB??cap)+(gTime-(P.lsT??gTime))*cap);P.lsT=gTime;if((P.woundT||0)>gTime)h*=.4;h=Math.max(0,Math.min(h,P.lsB));P.lsB-=h;return Math.round(h);}
 function hurtPlayer0(d,ml,src){P.hitT=gTime;if(P.spw)return 0;if(P.rvU>gTime){pgRevolve(d,src);return 0;}if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(rgEvade(src)||hcEvade(src)||mdEvade(src)||cpEvade()||nvBlock(src))return 0;d=bzShield(d);d=ttShield(d,src);if(d<=0)return 0;d/=1+pasGen();if(P.lkBU>gTime)d*=.3;if(src&&src.type&&lkSee())d*=1-.15*pasM('lkinsight');if(P.kyTU>gTime&&src&&src.type&&!src.dead){d*=.7;hitMon(src,.3,{skill:1,dot:1});}if(src&&src.type&&S.cls==='saintess'&&pasOn('sagrace')&&saEvil(src))d*=1-.2*pasM('sagrace');if(src&&src.dmul)d*=src.dmul;if(src&&src.fury>gTime)d*=1.25;if(src&&src.type)P.lastSrc=src.type;if(tlOn('hking')&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
- if(P.qm>0&&rand()<.3){numP(-20,t('ipEvade'),'#9fe39a',false);P.inv=.3;return 0;}
+ if(P.qm>0&&rand()<.3){numPK(-20,'ipEvade','#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
  d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,3.2)*150/(150+defV())*rlDef(src)));d=p3Hurt(p2Hurt(c2Hurt(d,src),src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=nvHurt(d,src);d=bthHurt(d,src);{const cr=gearSum('cold');if(cr&&P.y<0)d=Math.max(1,Math.round(d*(1-cr)));}d=dmHurt(d,src);d=mbHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
  d=threatFloor(d,ml,src);
  if(P.guard&&src){const sx=src.x-P.x,sy=src.y-P.y,sl=Math.hypot(sx,sy)||1;
   const GK=S.cls==='gknight';if(P.fort>0||(sx*P.gx+sy*P.gy)/sl>-.15){const ang=Math.atan2(sy,sx),bx=P.x+sx/sl*10,by=P.y-8+sy/sl*10;vfx('block',bx,by,{angle:ang});
-   if(!src.hv&&P.gT<(GK?.18:.12)*clamp(1-((ml||S.lv)-S.lv)*.015,.6,1)){vfx('crit',bx,by);hcParry();qEvent('block','guard');numP(-24,t('parry'),'#9fe3ff',false);SFX.crit();P.inv=.35;P.gd=Math.min(100,P.gd+15);
+   if(!src.hv&&P.gT<(GK?.18:.12)*clamp(1-((ml||S.lv)-S.lv)*.015,.6,1)){vfx('crit',bx,by);hcParry();qEvent('block','guard');numPK(-24,'parry','#9fe3ff',false);SFX.crit();P.inv=.35;P.gd=Math.min(100,P.gd+15);
     const mb=src.type&&MT[src.type];if(mb&&!src.dead){src.st=null;src.tele=0;src.combo=0;src.stun=mb.boss?.5:1.3;src.cd=Math.max(src.cd||0,1);vfx('stun',src.x,src.y-(mb.oy||16),{life:src.stun});}return 0;}
    P.gd-=P.fort>0?0:(18+70*d/maxHP())*(GK?.6:1);qEvent('block','guard');
    if(P.gd<=0){P.gd=0;P.guard=0;P.gdT=1.6;d=Math.round(d*.6);P.stun=1;vfx('stun',P.x,P.y-24,{life:1});toast(t('guardBreak'),'warn');}
@@ -8503,6 +8503,8 @@ function num(x,y,s,c,big){if(typeof s==='number')s=Math.round(s);else if(typeof 
 // SAT-ONLINE-043 (owner 2026-10-19: when someone takes damage, the others don't see the number): a number over your own player
 // (damage taken, a heal, a parry, a skill's name; not gold) also goes out with your effects and shows over you on every screen
 function numP(dy,s,c,big){num(P.x,P.y+dy,s,c,big);if(NET&&typeof fxR==='function'&&mode!=='title')try{fxR(['n',String(s).slice(0,16),String(c||'#ffffff').slice(0,7),big?1:0,dy]);}catch(e){}}
+// a word from the string table goes as its key, so each player reads it in their own language (owner 2026-10-24: a skill's name came in Arabic to someone playing in English)
+function numPK(dy,k,c,big){num(P.x,P.y+dy,t(k),c,big);if(NET&&typeof fxR==='function'&&mode!=='title')try{fxR(['nk',String(k).slice(0,40),String(c||'#ffffff').slice(0,7),big?1:0,dy]);}catch(e){}}
 // the effects of being hit or healed are your own too: record them like the ones your actions make (meRun)
 function asMe(fn){if(!NET||FXME||!FXREC)return fn();FXME=1;try{return fn();}finally{FXME=0;}}
 let qLast='';const SBL={}; // the pale trail on each bar: holds 0.45 s where the bar was, then slides down at 50% a second
@@ -8581,7 +8583,7 @@ function jOrbDraw(f){const a=Math.min(1,f.t*2);ctx.save();ctx.globalCompositeOpe
  ctx.globalAlpha=a;ctx.fillStyle='#ffffff';ctx.fillRect(Math.round(f.x)-1,Math.round(f.y)-1,2,2);ctx.restore();}
 window.__GJ={boss:g=>jBoss(g),hurt:d=>jHurt(d),get lb(){const e=$('jlb');return !!e&&e.classList.contains('on')},get hit(){const e=$('jhit');return !!e&&e.classList.contains('on')},get st(){return JST},ban:()=>{const e=$('jban');return e?{on:e.classList.contains('on'),k:e.className,t:e.querySelector('b').textContent,s:e.querySelector('small').textContent}:null;},low:()=>JLOW,gold:()=>JGD,orbs:()=>fx.filter(f=>f.orb).length,nums:()=>nums.map(n=>({s:n.s,x:n.x,y:n.y,z:jPop(n),a0:n.a0}))}; // tests
 function flash(){if(RMO)return;const f=$('flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');}
-window.__GHCM={on:()=>HCM,set:v=>hcSet(v),num:(s,big)=>{num(0,0,s,'#fff',big);return nums.pop().s;},tele:m=>drawTele(m),get ctx(){return ctx}}; // tests
+window.__GHCM={on:()=>HCM,set:v=>hcSet(v),num:(s,big)=>{num(0,0,s,'#fff',big);return nums.pop().s;},numPK:(k,dy)=>numPK(dy||-34,k,'#fff',false),nums:()=>nums.map(q=>q.s),tele:m=>drawTele(m),get ctx(){return ctx}}; // tests
 window.__GRMO={on:()=>RMO,set:v=>rmoSet(v),shake:()=>RMOS.slice(),FX:RMOFX,VXC:RMOVX,vx:()=>VX.count,fx:()=>fx.length,push:o=>fx.push(o),vfx:(k,x,y)=>vfx(k,x,y),tele:m=>drawTele(m),flash:()=>flash(),get ctx(){return ctx},setShake:v=>{shake=v;}}; // tests
 function pressKey(id){const k=$(id);if(!k)return;k.classList.add('press');setTimeout(()=>k.classList.remove('press'),110);}
 function dissolve(x,y,cols,n){for(let i=0;i<n;i++)fx.push({x:x+(rand()-.5)*12,y:y+(rand()-.5)*16,vx:(rand()-.5)*24,vy:-15-rand()*45,t:.7+rand()*.9,c:cols[i%cols.length],fl:1});}
@@ -9080,7 +9082,7 @@ function castSk(k,el){if(brSeal()){toast(t('brSealT'),'warn');SFX.deny();return;
  if((P.cd[k]||0)>0||P.dash>0){SFX.deny();return;}
  const wk=weapKind();if((d.need==='bow'&&wk!=='bow')||(d.need==='staff'&&wk!=='staff')||(d.need==='melee'&&(wk==='bow'||wk==='staff'))||(d.need==='spear'&&wk!=='spear')){toast(t(d.need==='bow'?'needBow':d.need==='staff'?'needStaff':d.need==='spear'?'needSpear':'needMelee'),'warn');SFX.deny();return;}
  if(P.mp<mpC(k)){toast(t('noMP'),'warn');SFX.deny();return;}
- const FK=fusTry(k);P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k)*dsCdM(k)*skCdM(k);SKC={k,t:gTime};SKH.push(SKC);if(SKH.length>6)SKH.shift();skUse(k);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}if(FK){fusLearn(FK);hudDirty=true;return;}{const h0=P.hp;CURSK=k;CURSKN=0;CURSKD=0;try{skCarry(k,()=>SKF[k]());}finally{CURSK=null;}skHealUp(k,h0);}skSnd(k);skVfx(k);if(!CURSKN&&!skVfxHas(k))skSig(k);numP(-34,t('sk_'+k),d.col,false);hudDirty=true;}
+ const FK=fusTry(k);P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k)*dsCdM(k)*skCdM(k);SKC={k,t:gTime};SKH.push(SKC);if(SKH.length>6)SKH.shift();skUse(k);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}if(FK){fusLearn(FK);hudDirty=true;return;}{const h0=P.hp;CURSK=k;CURSKN=0;CURSKD=0;try{skCarry(k,()=>SKF[k]());}finally{CURSK=null;}skHealUp(k,h0);}skSnd(k);skVfx(k);if(!CURSKN&&!skVfxHas(k))skSig(k);numPK(-34,'sk_'+k,d.col,false);hudDirty=true;}
 /* skill looks (owner 2026-10-24: "almost every skill and hit looks alike; fix the effects and hitboxes so each skill feels
    different; Space Sword is literally a bigger slash"). Each skill gets a look from its name and element: a wide crescent, a
    thrust, a cross cut, a cut in space, falling swords, flying blades, petals, a dragon, a pillar of light, a vortex, lightning
@@ -9240,7 +9242,7 @@ function itemSkills(){const a=[];for(const i of eqAll()){const rc=rcById(i.id);i
 function useISlot(j){if(TOW&&TOW.seal){toast(t('twSeal'),'warn');SFX.deny();return;}const k=itemSkills()[j];if(!k){SFX.deny();toast(t('iskNone'),'warn');return;}const d=SKD[k];
  if((P.cd[k]||0)>0||P.dash>0){SFX.deny();return;}if(P.mp<mpC(k)){toast(t('noMP'),'warn');SFX.deny();return;}
  if(k==='fly'&&(roomAt(P.x,P.y)||dunAt(P.x,P.y)||ARN||TWR)){toast(t('flyNo'),'warn');SFX.deny();return;}
- P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k)*dsCdM(k)*skCdM(k);SKC={k,t:gTime};skUse(k);const el=$('isk'+j);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}{const h0=P.hp;SKF[k]();skHealUp(k,h0);}numP(-34,t('sk_'+k),d.col,false);hudDirty=true;}
+ P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k)*dsCdM(k)*skCdM(k);SKC={k,t:gTime};skUse(k);const el=$('isk'+j);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}{const h0=P.hp;SKF[k]();skHealUp(k,h0);}numPK(-34,'sk_'+k,d.col,false);hudDirty=true;}
 Object.assign(SKF,{
  // Ideal Dagger: "Shoots a blade-like wind in front of you"; "Increases evasion rate by 30% and doubles agility for 1 minute"
  wblast:()=>{const v=fdir();P.acd=0;shoot('wave',v[0],v[1],1.8,{pierce:1,range:.7});SFX.swing();vfx('slash',P.x+v[0]*10,P.y-7+v[1]*10,{angle:Math.atan2(v[1],v[0]),rarity:3});},
@@ -9304,9 +9306,9 @@ function ipHit(m,dmg,crit,o){if(o.dot)return dmg;dmg=wpHit(m,dmg,crit,o);const b
  if(m.cboT>0&&gTime-m.icL<1)dmg*=3;
  if(ipOn('bleed')&&crit||ipOn('cut')&&rand()<.25){if(!m.bl)num(m.x,monY(m)-16,t('ipBleed'),'#ff4a3a',false);m.bl={t:3,n:0};}
  if(ipOn('fear')&&!b.boss&&m.lv<=S.lv-20&&rand()<.15){m.stun=Math.max(m.stun||0,.8);if(AIK[m.type])m.flee=1.5;num(m.x,monY(m)-24,t('ipFear'),'#c89aff',false);}
- if(!skill&&ipOn('jnt5')&&rand()<.08&&!o.jnt){numP(-30,t('ipJnt5'),'#ffd24a',true);for(let i=1;i<5;i++)setTimeout(()=>{if(mode!=='play'||m.dead)return;vfx('slash',m.x,monY(m),{angle:rand()*6.28,rarity:3});SFX.swing();hitMon(m,.5,{jnt:1});},i*90);}
+ if(!skill&&ipOn('jnt5')&&rand()<.08&&!o.jnt){numPK(-30,'ipJnt5','#ffd24a',true);for(let i=1;i<5;i++)setTimeout(()=>{if(mode!=='play'||m.dead)return;vfx('slash',m.x,monY(m),{angle:rand()*6.28,rarity:3});SFX.swing();hitMon(m,.5,{jnt:1});},i*90);}
  if(!skill&&ipOn('gale')){P.gale=Math.min(30,(P.gale||0)+1);P.galeT=3;}
- if(!skill&&ipOn('wisdom')&&rand()<.05){const ks=Object.keys(P.cd).filter(k=>P.cd[k]>0);if(ks.length){const k=ks.sort((a,c)=>P.cd[c]-P.cd[a])[0];P.cd[k]=0;numP(-30,t('ipWisdom'),'#9fd8ff',false);vfx('mana',P.x,P.y-8);}}
+ if(!skill&&ipOn('wisdom')&&rand()<.05){const ks=Object.keys(P.cd).filter(k=>P.cd[k]>0);if(ks.length){const k=ks.sort((a,c)=>P.cd[c]-P.cd[a])[0];P.cd[k]=0;numPK(-30,'ipWisdom','#9fd8ff',false);vfx('mana',P.x,P.y-8);}}
  // the number shown is what you really got back, and the health bar redraws at once (owner 2026-10-22, twice: a mage or
  // any ranged fighter saw the lifesteal number and the health never rose: the bar waited for something else to redraw it)
  const heal=(p,cd,key)=>{if((P[key]||0)>gTime||P.hp<=0||P.hp>=maxHP())return;P[key]=gTime+cd;const h=Math.max(1,Math.min(Math.round(maxHP()-P.hp),Math.round(dmg*p)));P.hp=Math.min(maxHP(),Math.round(P.hp+h));numP(-26,'+'+h,'#ff7a9a',false);hudDirty=true;};
@@ -10333,7 +10335,7 @@ var MSWT=2;
 // called, so this loop over 2,000 stays small and fast
 function monsTick(dt,safe){VXF++;const on=!!MOBN;for(let i=0;i<mons.length;i++){const m=mons[i];if(!on&&!m.dead&&!(m.eng>0)&&(m.x-P.x)**2+(m.y-P.y)**2>810000)continue;monTick(m,dt,safe);}}
 function monTick(m,dt,safe){try{
-  const b=MT[m.type];if(m.tdum){m.lv=S.lv;m.hp=m.max;m.stun=0;m.st=null;m.tele=0;m.face=P.x>m.x?1:-1;m.nm=t('tdummy');return;}if(Math.abs(m.x-P.x)<SFXR+300&&Math.abs(m.y-P.y)<SFXR+300)monVox(m,b,dt); // (2026-10-24, the lag) only those near enough to be heard soon: the other 2,000 took 90 KB of memory a frame
+  const b=MT[m.type];if(m.tdum){m.x=m.sx;m.y=m.sy;m.vx=0;m.vy=0;m.lv=S.lv;m.hp=m.max;m.stun=0;m.st=null;m.tele=0;m.face=P.x>m.x?1:-1;m.nm=t('tdummy');return;}if(Math.abs(m.x-P.x)<SFXR+300&&Math.abs(m.y-P.y)<SFXR+300)monVox(m,b,dt); // (2026-10-24, the lag) only those near enough to be heard soon: the other 2,000 took 90 KB of memory a frame
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))return; // shared monsters: another player's copy leads this one
   if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy,fa=m.far;monFresh(m,newMon(ty,ox,oy));if(fa)m.far=1;vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}return;}
   // a monster sleeps while nobody is within 900 px (owner 2026-10-23: frames dropped with many monsters). The far north and
@@ -10563,7 +10565,7 @@ function monAct(m,b,AI,dx,dy,d,mr,dt){m.atkT=Math.max(0,(m.atkT||0)-dt);
 // Magic Contemplation (Braham, novel ch 938): a spell flying at you is broken half the time (+5% a level), at most once in 3 s;
 // now and then (4%, +0.5% a level) it is read so well it flies back at its caster
 function bcBreak(p){if(!S||S.cls!=='braham'||!S.sk.bcont||!pasOn('bcont')||(P.bcT||0)>gTime||P.inv>0)return false;const L=skLv('bcont');if(rand()>=Math.min(.95,.5+.05*(L-1)))return false;
- P.bcT=gTime+3;skUse('bcont',1);vfx('mana',p.x,p.y);if(p.m&&!p.m.dead&&rand()<.04+.005*(L-1)){hitMon(p.m,1.5,{skill:1});numP(-30,t('bcRefl'),'#d8c0ff',false);}else numP(-30,t('bcBrk'),'#d8c0ff',false);return true;}
+ P.bcT=gTime+3;skUse('bcont',1);vfx('mana',p.x,p.y);if(p.m&&!p.m.dead&&rand()<.04+.005*(L-1)){hitMon(p.m,1.5,{skill:1});numPK(-30,'bcRefl','#d8c0ff',false);}else numPK(-30,'bcBrk','#d8c0ff',false);return true;}
 function updateEProj(dt){eproj=eproj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.t<=0||p4PSolid(p.x/TS|0,(p.y+8)/TS|0)){vfx('dust',p.x,p.y+6,{n:3});return false;}
  if(mode!=='dead'&&Math.hypot(P.x-p.x,P.y-8-p.y)<8){if(bcBreak(p))return false;TFK='proj';TFM=p.mv.mul||1;let r;try{r=hurtPlayer(MT[p.m.type].dmg*p.mv.mul,p.m.lv,{x:p.x,y:p.y+8,dmul:p.m.dmul,fury:p.m.fury,type:p.m.type});}finally{TFK=null;TFM=1;}if(r){p3PHit(p);p4PHit(p);}if(r===2)mxOn(p.mv,p.m);return false;}return true;});ezTick(dt);}
 // gates: a dark cave mouth with a rock rim outdoors; glowing stairs inside (down) or a pale shaft of light (up)
@@ -11874,9 +11876,9 @@ const MXK={
   for(const o of mons)if(!o.dead&&(o===m||Math.hypot(o.x-m.x,o.y-m.y)<(mv.rng||150))){o.fury=gTime+(mv.t||6);if(!rep&&o!==m){o.sprT=2;o.cd=Math.min(o.cd,.4);}}}};
 // what a blow, a bolt or a pool leaves on you
 function mxOn(mv,m){if(!mv||!P)return;
- if(mv.dot&&!((P.dotT||0)>gTime&&(P.dotP||0)>mv.dot[0])){const k=mv.dot[2]||'pois';if(!((P.dotT||0)>gTime))numP(-34,t('mxDot_'+k),MXC[k]||'#7ad04a',false);P.dotT=gTime+mv.dot[1];P.dotP=mv.dot[0];P.dotC=k;}
- if(mv.slow){if(!((P.slowT||0)>gTime))numP(-34,t('mxSlow'),'#9fd8ff',false);P.slowT=Math.max(P.slowT||0,gTime+mv.slow);}
- if(mv.root&&!((P.rootI||0)>gTime)&&!legResist()){P.rootT=gTime+mv.root;P.rootI=P.rootT+1.5;numP(-34,t('mxRoot'),'#c8a050',false);SFX.clang();}
+ if(mv.dot&&!((P.dotT||0)>gTime&&(P.dotP||0)>mv.dot[0])){const k=mv.dot[2]||'pois';if(!((P.dotT||0)>gTime))numPK(-34,'mxDot_'+k,MXC[k]||'#7ad04a',false);P.dotT=gTime+mv.dot[1];P.dotP=mv.dot[0];P.dotC=k;}
+ if(mv.slow){if(!((P.slowT||0)>gTime))numPK(-34,'mxSlow','#9fd8ff',false);P.slowT=Math.max(P.slowT||0,gTime+mv.slow);}
+ if(mv.root&&!((P.rootI||0)>gTime)&&!legResist()){P.rootT=gTime+mv.root;P.rootI=P.rootT+1.5;numPK(-34,'mxRoot','#c8a050',false);SFX.clang();}
  if(!m||m.dead)return;
  if(mv.drain){const h=Math.round(m.max*mv.drain);mobHeal(m,h);num(m.x,m.y-26,'+'+h.toLocaleString('en'),'#ff5a7a',false);mxBeam(P,m,'#d8283a');}
  if(mv.hook&&!(P.dash>0)){const hx=m.x-P.x,hy=m.y-P.y,hl=Math.hypot(hx,hy)||1,s=Math.max(0,Math.min(mv.hook,hl-16));move(P,hx/hl*s,hy/hl*s,4);}
@@ -12285,7 +12287,7 @@ function pgTick(dt){if(!P)return;
   if(rand()<.4)fx.push({x:P.x+(rand()-.5)*80,y:P.y-6+(rand()-.5)*60,vx:0,vy:0,t:.3,c:'#bfe8ff',fl:1});}
  if(P.trcU>gTime&&rand()<.5)fx.push({x:P.x+(rand()-.5)*14,y:P.y-4-rand()*16,vx:0,vy:-20,t:.4,c:'#fff4c0',fl:1});}
 // Revolve: the blow is turned back on the one who struck, at full strength
-function pgRevolve(d,src){fx.push({ring:true,x:P.x,y:P.y-6,t:.25});SFX.clang();numP(-20,t('pgRevT'),'#ffb85a',false);
+function pgRevolve(d,src){fx.push({ring:true,x:P.x,y:P.y-6,t:.25});SFX.clang();numPK(-20,'pgRevT','#ffb85a',false);
  if(src&&!src.dead&&src.hp>0&&mons.includes(src)){const y=monY(src);vfx('slash',src.x,y,{angle:Math.atan2(y-P.y,src.x-P.x),rarity:4});hitMon(src,d/(Math.max(1,atkV())*(lvF(src.lv)||1)),{skill:1,dot:1});}}
 // ignoring 60% of the armour: only 40% of the level gap's cut is left
 const pgPen=m=>{const f=lvF(m.lv);return f<1?Math.pow(f,-.6):1;};
@@ -12415,7 +12417,7 @@ function lgTick(dt){if(!P||!S)return;if(gTime>lgT){lgT=gTime+1;bsOffer();tzCheck
  if(MMT&&gTime<MMT.u&&gTime>=MMT.n){MMT.n=gTime+.5;for(const m of mons.filter(m=>!m.dead&&Math.hypot(m.x-MMT.x,m.y-MMT.y)<60).slice(0,3)){fx.push({bolt:[[MMT.x,MMT.y-20],[m.x,monY(m)]],t:.15,c:'#7ad8a0'});hitMon(m,.6,{skill:1});}}
  // Five Steps: every 12 px walked is a step; five make the next blow double (the footprints of light, in nvTick, make it true damage)
  if(S.cls==='tzudan'&&pasOn('tzfive')){if(tzLast){const d=Math.hypot(P.x-tzLast.x,P.y-tzLast.y);P.tzD=(P.tzD||0)+d;if(P.tzD>=12){P.tzD=0;if(gTime-(P.tzT||0)>2)P.tzN=0;P.tzT=gTime;P.tzN=Math.min(5,(P.tzN||0)+1);
-   fx.push({x:P.x,y:P.y,vx:0,vy:0,t:.8,c:P.tzN>=5?'#ffd24a':'#bfe0ff',fl:1});if(P.tzN===5&&!P.tz5){P.tz5=1;numP(-22,t('tzReady'),'#ffd24a',false);}if(P.tzN===1)P.tz0=gTime;}}tzLast={x:P.x,y:P.y};}}
+   fx.push({x:P.x,y:P.y,vx:0,vy:0,t:.8,c:P.tzN>=5?'#ffd24a':'#bfe0ff',fl:1});if(P.tzN===5&&!P.tz5){P.tz5=1;numPK(-22,'tzReady','#ffd24a',false);}if(P.tzN===1)P.tz0=gTime;}}tzLast={x:P.x,y:P.y};}}
 let MMT=null; // Mumud's Magic Tree
 // Bow Saint's Lock-on: his arrows bend toward the nearest foe ahead of them
 function bsSteer(p,dt){if(!S||S.cls!=='bowsaint'||!pasOn('bslock'))return;let b=null,bd=90;for(const m of mons){if(m.dead||p.hit&&p.hit.has(m))continue;const d=Math.hypot(m.x-p.x,monY(m)-p.y);if(d<bd){bd=d;b=m;}}
@@ -12459,7 +12461,7 @@ function mdUse(){if(!(S.mats.mdsheath>0))return;if(S.cls==='madra')return toast(
 function mdDie(){S.dth=(S.dth||0)+1;if(mdCand())mdLose('mdLost');}
 function mdLose(why){S.mdq={st:3,k:0};S.mdMsg=why;save(true);}
 // super sensitivity: the candidate and the Descendant feel a blow coming and slip it
-const mdEvade=src=>!!src&&!!src.type&&!src.spar&&(S.cls==='madra'&&pasOn('mdsense')||mdCand())&&rand()<.15*(pasOn('mdsense')?pasM('mdsense'):1)&&(pasOn('mdsense')&&skUse('mdsense',1),numP(-14,t('mdSense'),'#ffe08a',false),SFX.dodge(),true);
+const mdEvade=src=>!!src&&!!src.type&&!src.spar&&(S.cls==='madra'&&pasOn('mdsense')||mdCand())&&rand()<.15*(pasOn('mdsense')?pasM('mdsense'):1)&&(pasOn('mdsense')&&skUse('mdsense',1),numPK(-14,'mdSense','#ffe08a',false),SFX.dodge(),true);
 function mdKill(m){if(!S||m.type!=='redk')return;const q=S.mdq;
  if(!q&&clsFam('warrior')&&S.cls!=='madra'&&!(S.mats.mdsheath>0)&&rand()<.02){addMat('mdsheath',1);setTimeout(()=>toast(t('rbDrop',{it:t('mdsheath')}),'good'),600);}
  if(!q||(q.st!==1&&q.st!==3))return;q.k++;numP(-26,q.k+'/'+MDN,'#ff7a5a',false);
@@ -12661,7 +12663,7 @@ Object.assign(SKSND,{mmis:'magic',bsfrenzy:'power',gkthrow:'guardup',gkpow:'guar
 const nvGs=()=>!!(WSH[weapon().id]||{}).w;
 function nvPillar(x,y){NV.pil.push({x,y,t:1});for(let i=0;i<16;i++)fx.push({x:x+(rand()-.5)*14,y:y-rand()*40,vx:(rand()-.5)*20,vy:-30-rand()*40,t:.8,c:rand()<.5?'#ffe08a':'#fff8d8',fl:1});}
 // one more step for Five Steps (a blow of Tzudan's Greatsword counts as one)
-function nvStep(){P.tzN=Math.min(5,(P.tzN||0)+1);if(P.tzN===5&&!P.tz5){P.tz5=1;numP(-22,t('tzReady'),'#ffd24a',false);}}
+function nvStep(){P.tzN=Math.min(5,(P.tzN||0)+1);if(P.tzN===5&&!P.tz5){P.tz5=1;numPK(-22,'tzReady','#ffd24a',false);}}
 // the dead in the party near you rise (players only); returns how many
 function nvRezCast(pm){const pid=NET&&PARTY&&PARTY.id();if(!pid)return 0;let n=0;
  for(const m of NET.remotes()){if(m.party!==pid||m.anim!=='dead'||Math.hypot(m.x-P.x,m.y-P.y)>150)continue;NET.send('raid.state',{to:m.uid,raid:'n|'+pid,k:pm,n:1});nvPillar(m.x,m.y);n++;}return n;}
@@ -12678,9 +12680,9 @@ const nvSt=()=>P.gaL>gTime?'G':'';
 // Guardian's Power and Goddess' Protection: the next blow does nothing
 function nvBlock(src){if(!src||src.spar)return false;
  if(P.gkp>gTime){P.gkp=0;if(src.type&&!src.dead&&!(MT[src.type]||{}).boss){src.stun=Math.max(src.stun||0,.8);vfx('stun',src.x,src.y-(MT[src.type].oy||16),{life:.8});}
-  fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.4});vfx('block',P.x,P.y-8,{});numP(-22,t('sk_gkpow'),'#7aff9a',false);SFX.clang();return true;}
+  fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.4});vfx('block',P.x,P.y-8,{});numPK(-22,'sk_gkpow','#7aff9a',false);SFX.clang();return true;}
  if(P.gash>gTime){P.gash=0;for(let i=0;i<14;i++){const a=i/14*6.283;fx.push({x:P.x+Math.cos(a)*10,y:P.y-8+Math.sin(a)*10,vx:Math.cos(a)*70,vy:Math.sin(a)*70,t:.4,c:'#ffe08a',fl:1});}
-  numP(-22,t('gashHit'),'#ffe08a',false);SFX.clang();return true;}return false;}
+  numPK(-22,'gashHit','#ffe08a',false);SFX.clang();return true;}return false;}
 function nvHurt(d,src){if(!src||!src.type||src.spar)return d;if(S.cls==='gknight'&&pasOn('gkrdr'))d*=1-Math.min(.15,.08+.01*(skLv('gkrdr')-1));if(P.fort>0)d*=.7;return Math.max(1,Math.round(d));}
 Object.assign(SKF,{
  // Magic Missile: a small violet bolt that seeks the nearest foe ahead
@@ -12716,7 +12718,7 @@ function nvTick(dt){if(!P||!S)return;if(NV.eye>0)NV.eye-=dt;if(NV.ice&&(NV.ice.t
  if(S.cls==='tzudan'&&pasOn('tzfive')&&mode==='play'){const F=NV.tzF;
   if(!F||gTime-F.t>6){if(F&&gTime-NV.tzL>3)NV.tzC=0;for(let k=0;k<10;k++){const a=rand()*6.283,r=30+rand()*50,x=P.x+Math.cos(a)*r,y=P.y+Math.sin(a)*r;if(!hitBox(x,y,4)){NV.tzF={x,y,t:gTime,a};break;}}}
   else if(Math.hypot(P.x-F.x,P.y-F.y)<8){if(gTime-NV.tzL>3)NV.tzC=0;NV.tzC++;NV.tzL=gTime;NV.tzF=null;for(let i=0;i<8;i++)fx.push({x:F.x,y:F.y,vx:(rand()-.5)*40,vy:-20-rand()*30,t:.5,c:'#ffd24a',fl:1});SFX.coin&&SFX.coin();
-   if(NV.tzC>=5){NV.tzC=0;P.tz5=2;numP(-22,t('tzTrueR'),'#ffd24a',true);SFX.legendary();}else num(P.x,P.y-24,NV.tzC+'/5','#ffe08a',false);}}
+   if(NV.tzC>=5){NV.tzC=0;P.tz5=2;numPK(-22,'tzTrueR','#ffd24a',true);SFX.legendary();}else num(P.x,P.y-24,NV.tzC+'/5','#ffe08a',false);}}
  else NV.tzF=null;}
 function nvEnts(ents){if(NV.ice)ents.push({y:NV.ice.y-30,f:()=>{const c=NV.ice;ctx.save();ctx.globalAlpha=Math.min(.45,c.t*.4);ctx.fillStyle='#cfefff';ctx.beginPath();ctx.ellipse(c.x,c.y,56,28,0,0,7);ctx.fill();ctx.globalAlpha*=.8;ctx.strokeStyle='#ffffff';ctx.lineWidth=1;
   for(let i=0;i<6;i++){const a=i/6*6.283;ctx.beginPath();ctx.moveTo(c.x,c.y);ctx.lineTo(c.x+Math.cos(a)*48,c.y+Math.sin(a)*24);ctx.stroke();}ctx.restore();}});
@@ -12798,7 +12800,7 @@ function mirPick(m,d){const ok=[];for(const s of m.msk){if((m.mcd[s.k]||0)>0)con
   if(s.near&&d<60||s.far&&d<220&&d>=40||s.mob&&d>90)ok.push(s,s);}
  return ok.length?ok[(rand()*ok.length)|0]:null;}
 function mirCast(m,s){const k=s.k,d=SKD[k];m.mcd[k]=Math.max(1.2,(d.cd||1)*skCdM(k)*skCostM(k));
- const R=mirRun(m,()=>{SKF[k]();skSnd(k);skVfx(k);numP(-34,t('sk_'+k),d.col,false);},{k});if(!R)return;
+ const R=mirRun(m,()=>{SKF[k]();skSnd(k);skVfx(k);numPK(-34,'sk_'+k,d.col,false);},{k});if(!R)return;
  if(s.buff&&!R.mul&&!R.shot)m.mbuf=gTime+10;mirHurt(m,R,k);}
 function mirTick(m,b,dx,dy,d,mr,dt){if(!m.msk)mirLearn(m);m.face=dx>0?1:-1;
  m.mgap=(m.mgap??.8)-dt;m.macd=(m.macd||0)-dt;for(const k in m.mcd)m.mcd[k]-=dt;
@@ -13233,6 +13235,7 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
  else if(ty==='j'&&['arrow','magic','fire','wave'].includes(ev[3]))proj.push({kind:ev[3],x:x+n(ev[4]),y:y+n(ev[5]),vx:n(ev[6]),vy:n(ev[7]),t:Math.min(2,n(ev[8])/100),ghost:1,hit:new Set()});
  else if(ty==='w')s.sw={a:n(ev[3]),t:performance.now()};
  else if(ty==='d')s.du=performance.now()+Math.min(600,n(ev[3])*10);
+ else if(ty==='nk'&&typeof ev[3]==='string'&&/^[A-Za-z0-9_]{1,40}$/.test(ev[3])&&STR.en[ev[3]]!=null){const c=/^#[0-9a-fA-F]{6}$/.test(ev[4])?ev[4]:'#ffffff';num(x,y+Math.max(-60,Math.min(0,n(ev[6]))),t(ev[3]).slice(0,32),c,!!ev[5]);}
  else if(ty==='n'&&typeof ev[3]==='string'){const c=/^#[0-9a-fA-F]{6}$/.test(ev[4])?ev[4]:'#ffffff';num(x,y+Math.max(-60,Math.min(0,n(ev[6]))),ev[3].slice(0,16),c,!!ev[5]);}
  else if(ty==='s'&&SFXNET.includes(ev[3])&&P){const d=Math.hypot(x-P.x,y-P.y),R=ev[3]==='level'||ev[3]==='legendary'?SFXRW:SFXRP;if(d<R){SFXV=.05+.5*(1-d/R)**2;try{sfxOn('soc',()=>SFX[ev[3]](n(ev[4])||undefined));if(__GS.heard.length<40)__GS.heard.push(ev[3]);}finally{SFXV=1;}}}}
 // due replays, at where each player is drawn now; players off screen or out of sight just drop theirs
