@@ -44,6 +44,9 @@ function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,doc=root.document,NY=o.noi
  const tri=(r,v)=>v<.36?r[0]:v<.64?r[1]:r[2];
  const NB=[],DEEP=mix(C.water[2],C.water[0],1);   // DEEP: open water, no shore within two tiles (what d=9 gave)
  for(let ty=ty0;ty<ty1;ty++)for(let tx=tx0;tx<tx1;tx++){const k=base(tx,ty),raw=at(tx,ty);
+  // a tile of the two round a window: only its kind (the ink line along the window's edge reads it); its colours are cut
+  // away with it (2026-10-24: a strip of 4 rows painted 8, the HUD map's piece in strips cost twice one piece at once)
+  if(win&&(tx<X0||tx>=X0+CO||ty<Y0||ty>=Y0+RO)){for(let j=0;j<s;j++){const p0=(ty*s+j-oy*s)*cw+tx*s-ox*s;kind.fill(k,p0,p0+s);}continue;}
   // water: the shore tiles within two, once a tile (the same ones, in the same order, as it read for every pixel)
   let nb=0;if(k===WA){for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const v=at(tx+dx,ty+dy);if(v===WA||v===-9)continue;NB[nb++]=tx+dx+.5;NB[nb++]=ty+dy+.5;}}
   for(let j=0;j<s;j++)for(let i=0;i<s;i++){const wx=tx*s+i,wy=ty*s+j,ny=wy-NY*s,fx=wx/s,fy=wy/s;let c;
@@ -61,17 +64,21 @@ function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,doc=root.document,NY=o.noi
    if(raw===FL&&hash(wx,ny,304)<.035)c=C.flower[(hash(wx,ny,305)*4)|0];
    {const p=(wy-oy*s)*cw+wx-ox*s,i=p*4;D[i]=c[0];D[i+1]=c[1];D[i+2]=c[2];D[i+3]=255;kind[p]=k;}}}
  // ink: a darker 1px line where one terrain meets another (lower/right side), so regions read as a drawn map
- for(let y=Math.max(1,(ty0-oy)*s+(ty0?0:1)),ye=(ty1-oy)*s;y<ye;y++)for(let x=Math.max(1,(tx0-ox)*s+(tx0?0:1)),xe=(tx1-ox)*s;x<xe;x++){const k=kind[y*cw+x],u=kind[(y-1)*cw+x],l=kind[y*cw+x-1];if(k===u&&k===l)continue;
+ // (a window: only its own pixels, which read the kinds round it; the rest is cut away)
+ const iy0=Math.max(1,(ty0-oy)*s+(ty0?0:1),win?M*s:0),iy1=Math.min((ty1-oy)*s,win?(M+RO)*s:1e9),ix0=Math.max(1,(tx0-ox)*s+(tx0?0:1),win?M*s:0),ix1=Math.min((tx1-ox)*s,win?(M+CO)*s:1e9);
+ for(let y=iy0;y<iy1;y++)for(let x=ix0;x<ix1;x++){const k=kind[y*cw+x],u=kind[(y-1)*cw+x],l=kind[y*cw+x-1];if(k===u&&k===l)continue;
   const i=(y*cw+x)*4;if(k===WA||u===WA||l===WA)continue;const c=mix([D[i],D[i+1],D[i+2]],C.ink,.32);D[i]=c[0];D[i+1]=c[1];D[i+2]=c[2];}
  g.putImageData(img,0,0);g.translate(-ox*s,-oy*s);
  // forests: a canopy blob per tree tile, back to front, with a soft shadow; snowy trees get white tops
- for(let ty=ty0;ty<ty1;ty++)for(let tx=tx0;tx<tx1;tx++){if(at(tx,ty)!==TR)continue;const sn=env.snowAt(tx,ty),L=sn?C.snowLeaf:C.leaf,r=s*.62,cx=tx*s+s/2+(hash(tx,ty-NY,310)-.5)*s*.3,cy=ty*s+s/2+(hash(tx,ty-NY,311)-.5)*s*.3;
+ // (a window: the trees within a tile of it; a canopy, its jitter and its shadow reach less than a tile past their own)
+ const wy0=win?Math.max(ty0,Y0-1):ty0,wy1=win?Math.min(ty1,Y0+RO+1):ty1,wx0=win?Math.max(tx0,X0-1):tx0,wx1=win?Math.min(tx1,X0+CO+1):tx1;
+ for(let ty=wy0;ty<wy1;ty++)for(let tx=wx0;tx<wx1;tx++){if(at(tx,ty)!==TR)continue;const sn=env.snowAt(tx,ty),L=sn?C.snowLeaf:C.leaf,r=s*.62,cx=tx*s+s/2+(hash(tx,ty-NY,310)-.5)*s*.3,cy=ty*s+s/2+(hash(tx,ty-NY,311)-.5)*s*.3;
   g.fillStyle='rgba(10,20,10,.35)';g.beginPath();g.ellipse(cx+s*.12,cy+s*.22,r,r*.8,0,0,7);g.fill();
   const rgb=c=>`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;g.fillStyle=rgb(L[0]);g.beginPath();g.arc(cx,cy,r,0,7);g.fill();
   g.fillStyle=rgb(L[1]);g.beginPath();g.arc(cx-r*.1,cy-r*.12,r*.8,0,7);g.fill();g.fillStyle=rgb(L[2]);g.beginPath();g.arc(cx-r*.28,cy-r*.3,r*.42,0,7);g.fill();
   if(s>=6){g.fillStyle=rgb(L[3]);g.fillRect(Math.round(cx-r*.4),Math.round(cy-r*.45),Math.max(1,s/8|0),Math.max(1,s/8|0));}}
- // fences: dotted posts along PL tiles
- for(let ty=ty0;ty<ty1;ty++)for(let tx=tx0;tx<tx1;tx++){if(at(tx,ty)!==PL)continue;g.fillStyle='#6e4828';const hor=at(tx-1,ty)===PL||at(tx+1,ty)===PL;
+ // fences: dotted posts along PL tiles (a window: its own tiles; the posts stay in their tile)
+ for(let ty=win?Math.max(ty0,Y0):ty0,te=win?Math.min(ty1,Y0+RO):ty1;ty<te;ty++)for(let tx=win?Math.max(tx0,X0):tx0,xe=win?Math.min(tx1,X0+CO):tx1;tx<xe;tx++){if(at(tx,ty)!==PL)continue;g.fillStyle='#6e4828';const hor=at(tx-1,ty)===PL||at(tx+1,ty)===PL;
   if(hor)g.fillRect(tx*s,ty*s+s/2-1,s,Math.max(1,s/6|0));else g.fillRect(tx*s+s/2-1,ty*s,Math.max(1,s/6|0),s);}
  // buildings: roof with ridge, outline and a drop shadow to the lower right
  const BY=o.buildingsY||0;   // (buildingsY: added to every building's y, so a caller with rows above needs no copy of the list)
@@ -79,6 +86,8 @@ function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,doc=root.document,NY=o.noi
   g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x+sh,y+sh,w,h);g.fillStyle=R[1];g.fillRect(x,y,w,h);g.fillStyle=R[0];g.fillRect(x+1,y+1,w-2,h/2-1);
   g.fillStyle=R[2];g.fillRect(x+1,y+h/2-1,w-2,Math.max(1,s/5));g.fillStyle='#1a1018';g.fillRect(x+w/2-s*.35,y+h-s*.6,s*.7,s*.6);
   g.strokeStyle='#1a1018';g.lineWidth=1;g.strokeRect(x+.5,y+.5,w-1,h-1);}
+ // into {g,dx,dy}: the window is drawn straight into that canvas (a strip into its piece) instead of a canvas of its own
+ if(o.into){o.into.g.drawImage(cv,M*s,M*s,CO*s,RO*s,o.into.dx,o.into.dy,CO*s,RO*s);return null;}
  if(!M)return cv;const out=mkc(CO*s,RO*s);out.getContext('2d').drawImage(cv,-M*s,-M*s);return out;}
 
 // ---- markers (screen pixels; size = base unit, about 1 css px * zoom) ----
