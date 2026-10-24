@@ -7,6 +7,21 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24wkinds', ver: '2.82', d: '2026-10-24',
+      ar: ["أسلحة لكل التخصصات، مش سيوف بس:",
+          "16 سلاح جديد بيقعوا من البوسات من لفل 80 لـ 420: 4 عصيان، و3 أقواس، و3 خناجر، و3 رماح، و3 مطارق. كل واحد بيقع من بوس قريب من لفله، وبعضهم عليه نزيف أو امتصاص دم أو خوف أو كومبو.",
+          "الحداد بقى يعمل عصا وقوس ورمح وخنجر ومطرقة ميثريل (حدادة 5)، والنسخة الكمّية من جريد لكل نوع (حدادة 6، لفل 200)، وبتتحسب في طقم جريد زي السيف.",
+          "حداد تيتان بيبيع أسلحة الميثريل كلها.",
+          "من شغل جريد في الرواية: قوس الإطلاق السريع الحلزوني (ملحمي، لفل 300، سرعة الضرب بتزيد مع كل سهم لحد 50%) ومطرقة التنين (فريد، لفل 260). الحداد بيفتحهم بعد ما يعمل 3 من النوع.",
+          "الدروب العشوائي من البوسات بقى على قد لفل البوس: من لفل 120 أسلحة ميثريل من كل الأنواع، ومن 220 أسلحة جريد.",
+          "كل سلاح جديد ليه شكله في الإيد وأيقونته."],
+      en: ["Weapons for every kind of fighter, not just swords:",
+          "16 new boss drops from level 80 to 420: 4 staffs, 3 bows, 3 daggers, 3 spears and 3 hammers. Each drops from a boss near its level, and some carry bleeding, life drain, fear or combo.",
+          "Smiths now make a Mithril Staff, Bow, Spear, Dagger and Hammer (smithing 5), and a mass-produced Grid version of each (smithing 6, level 200) that counts toward the Grid set like the sword.",
+          "The Titan smith sells all the mithril weapons.",
+          "From Grid's work in the novel: the Spiral Quick Fire Bow (Epic, level 300, firing speed grows with every arrow up to 50%) and the Dragon Hammer (Unique, level 260). A blacksmith unlocks them after making 3 of the kind.",
+          "A boss's random gear drop now follows its level: mithril weapons of every kind from level 120, Grid weapons from 220.",
+          "Every new weapon has its own look in the hand and its own icon."] },
     { v: '2026-10-24bzrest', ver: '2.81', d: '2026-10-24',
       ar: ["خليفة براهام اتعلم باقي سحر براهام اللي في الرواية، 11 تعويذة جديدة بأيقوناتها:",
           "كشف السحر (لفل 15): بيكشف اللي حواليك وأقواهم، واللي اتكشف بياخد منك ضرر أكتر 20%. القاطع المظلم (70): نصل ظلام بيعدّي من كل اللي قدامه ومعاه كرة نار.",

@@ -6419,7 +6419,7 @@ function dmgMult(){return (1+cpStat('atk'))*(1+ttB('dmg'))*(1+achB('dmg'))*(1+st
 // slightly faster attacks with that kind (level 1 at 15 hits, 10 at 1500, capped at 50)
 const mastLv=k=>Math.min(50,Math.floor(Math.sqrt(((S.mast||{})[k]||0)/15)));
 function trainMast(){const k=weapKind();S.mast=S.mast||{};const was=mastLv(k);S.mast[k]=(S.mast[k]||0)+1;const now=mastLv(k);if(now>was){toast(t('mastUp',{w:t('wk_'+k),n:now}),'good');SFX.level();}}
-function atkCD(){return (blNear()?1.25:1)*(auOn()?.3:weapon().spd)*hcAcd()*(1-Math.min(.35,stat('agi')*.0012))*(P.rage>0?.75:1)*(1-mastLv(weapKind())*.003)*(1-Math.min(.25,gearSum('as')))*(1-(P.gale||0)*.01)*(P.qm>0?.85:1)*(S.bh&&S.bh.wm?.99:1)*(S.cls==='tzudan'&&pasOn('tzweap')?.85:1)*(P&&P.kyGU>gTime?.67:1)/(1+bzkK()[1]);}
+function atkCD(){return (blNear()?1.25:1)*(auOn()?.3:weapon().spd)*hcAcd()*(1-Math.min(.35,stat('agi')*.0012))*(P.rage>0?.75:1)*(1-mastLv(weapKind())*.003)*(1-Math.min(.25,gearSum('as')))*(1-(P.gale||0)*.01)*(1-(P.qf||0)*.005)*(P.qm>0?.85:1)*(S.bh&&S.bh.wm?.99:1)*(S.cls==='tzudan'&&pasOn('tzweap')?.85:1)*(P&&P.kyGU>gTime?.67:1)/(1+bzkK()[1]);}
 // damage vs a higher-level monster falls off with the gap but never below 12%, so a big gap is a slow fight, not an immune wall
 // owner 2026-10-22: a Lv 1 killed a Lv 130 monster. Up to 50 levels above you, you still do at least 35%; past that the
 // floor falls fast, to 2% at 100 levels and more
@@ -6454,12 +6454,14 @@ const durOf=i=>i.dur===undefined?100:i.dur,durF=i=>durOf(i)<=0?.3:1,enF=i=>1+.06
 const iAtk=i=>Math.round((i.atk||0)*enF(i)*durF(i)),iDef=i=>Math.round((i.def||0)*enF(i)*durF(i));
 function gearSum(k){let v=0;for(const sl of GEAR){const i=eqIt(sl);if(i&&i[k])v+=i[k]*durF(i)*enF(i);if(i&&i.gem&&GEMS[i.gem]&&GEMS[i.gem][k])v+=GEMS[i.gem][k];}
  const w=eqIt('w');if(w&&w.gem&&GEMS[w.gem]&&GEMS[w.gem][k])v+=GEMS[w.gem][k];return v+setBon(k)+cosB(k)+marB(k);}
-function setCount(sk){const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(i=>i.id);return SETS[sk].it.filter(x=>ids.includes(x)).length;}
+// the mass-produced Grid staff, bow, spear, dagger and hammer take the Grid sword's place in its set
+const MGW=['mgstaff','mgbow','mgspear','mgdagger','mghammer'],setId=id=>MGW.includes(id)?'mgsword':id;
+function setCount(sk){const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(i=>setId(i.id));return SETS[sk].it.filter(x=>ids.includes(x)).length;}
 function setTier(sk){const n=setCount(sk);let c=0;for(const k in SETS[sk].b)if(n>=+k)c=+k;return c;}
 // setBon: stat() and gearSum() ask for it many times a frame; the sets worn only change with the gear, so the bonus per stat is
 // kept for the same pieces (by id)
 let SBM={k:null,v:null};
-function setBon(k){const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(i=>i.id),key=ids.join('\u0001');if(SBM.k!==key)SBM={k:key,v:Object.create(null)};let v=SBM.v[k];
+function setBon(k){const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(i=>setId(i.id)),key=ids.join('\u0001');if(SBM.k!==key)SBM={k:key,v:Object.create(null)};let v=SBM.v[k];
  if(v===undefined){v=0;for(const sk in SETS){const B=SETS[sk].b,n=SETS[sk].it.filter(x=>ids.includes(x)).length;let c=0;for(const q in B)if(n>=+q)c=+q;if(c&&B[c][k])v+=B[c][k];}SBM.v[k]=v;}return v+hidBon(k);}
 // the Frostlight Orc Chief's five pieces: "It is possible to command the frostlight orcs" (they leave you be); checked once a frame
 let focT=-1,focV=false;const foCmd=()=>{if(focT!==gTime){focT=gTime;focV=setTier('fo')>=5;}return focV;};
@@ -6915,7 +6917,11 @@ function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);let n=0;
  if(m.type==='dopp')toast(t('dpSplit'),'warn');else if(m.type!=='belial')toast(t('bossPh'+ph+(ph===1&&!n?'n':''),{b:itN(m.type)}),'warn');}
 // rare drops: bosses have a 40% chance of a Rare (sometimes Epic) piece of gear, dungeon monsters 3%; rolled per player
 const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','lgloves','lboots','cring','ihelm','igloves','iboots','parmor','mring','iear','mear'];
-function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.55:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.1:.04)?3:2,it=mkItem(id,r);S.items.push(it);
+// a boss's random gear drop follows its level (owner 2026-10-24, a player: "bosses drop only swords"): every weapon kind of the
+// mithril tier from Lv 120, of the mass-produced Grid tier from Lv 220
+const DROPM=['msword','mstaff','mbow','mspear','mdagger','mhammer','marmor','mhelm','mear'],DROPMG=['mgsword','mgstaff','mgbow','mgspear','mgdagger','mghammer','mgarmor','mghelm','mggloves','mgboots'],DROPA=[...DROPG,...DROPM,...DROPMG];
+const dropTier=k=>{const lv=MT[k]&&MT[k].lv?MT[k].lv[0]:0;return lv>=220?DROPMG:lv>=120?DROPM:DROPG;};
+function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.55:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const L=b.boss?dropTier(m.type):DROPG,id=L[rand()*L.length|0],r=rand()<(b.boss?.1:.04)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
 function killMon(m){const b=MT[m.type];m.dead=true;lpSrc(m);if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}pasKill(m);balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh&&!m.noLoot)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);pxpKill(m,b);eaKill(m);if(NET&&b.boss&&!m.bh&&!m.noLoot)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!m.noLoot&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh&&!m.noLoot){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else if(!m.noLoot)bossChest(m,b);{let xg=Math.round(b.xp*(m.xmul||1)*pxpKF(m)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(tlOn('veteran')?.05:0)+ttB('xp')+(tlOn('viscount')?.05:0)+(tlOn('pioneer')?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));xg=innXP(xg);gainXP(xg);jKill(m,xg);twKill(m);num(m.x,m.y-36,'+'+Math.round(xg*XPMUL).toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh&&!m.noLoot){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(tlOn('explorer')?.05:0)+ttB('gold')+(tlOn('dandy')?.05:0)+(tlOn('shero')?.05:0)+(tlOn('baron')?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
@@ -7430,7 +7436,7 @@ const NPCT={
  guardRh:{idle:()=>'grh_idle',opts:()=>[...rideOpt('whorse'),...healOpt()]},
  priestRo:{hi:'pro_hi',idle:()=>'pro_idle',opts:()=>marOpts('priestRo')},merchantRo:{idle:()=>'mRo_hi',opts:()=>merchOpts('merchantRo')},innRo:{idle:()=>'innRo_hi',opts:()=>[bindOpt('innRo'),...bankOpt('innRo'),restOpt('innRo',60),{l:t('oBuyBread'),qty:1,f:()=>buyBread('innRo')},...potOpts('innRo'),...mapOpt('innRo')]},
  guardT:{idle:()=>'gT_idle'},knightT:{idle:()=>'kT_idle'},merchantT:{idle:()=>'mT_hi',opts:()=>merchOpts('merchantT')},innT:{idle:()=>'innT_hi',opts:()=>[bindOpt('innT'),...bankOpt('innT'),restOpt('innT',90),{l:t('oBuyBread'),qty:1,f:()=>buyBread('innT')},...potOpts('innT'),...mapOpt('innT')]},
- smithT:{hi:'sT_hi',idle:()=>'sT_idle',opts:()=>smithMenu('smithT',[['msword',3200],['ssword',820],['spear',160]],[['marmor',3000],['mhelm',1500],['parmor',720],['mring',950]])},
+ smithT:{hi:'sT_hi',idle:()=>'sT_idle',opts:()=>smithMenu('smithT',[['msword',3200],['mstaff',3100],['mbow',3000],['mspear',3200],['mdagger',2800],['mhammer',3300],['ssword',820],['spear',160]],[['marmor',3000],['mhelm',1500],['parmor',720],['mring',950]])},
  priestT:{hi:'prT_hi',idle:()=>'prT_idle',opts:()=>marOpts('priestT')},towerT:{hi:'twT_hi',idle:()=>'twT_idle'},baronB:{hi:'bB_hi',idle:()=>'bB_idle'},mutoB:{idle:()=>'muB_hi',opts:()=>merchOpts('mutoB')},innBu:{idle:()=>'innBu_hi',opts:()=>[bindOpt('innBu'),...bankOpt('innBu'),restOpt('innBu',120),{l:t('oBuyBread'),qty:1,f:()=>buyBread('innBu')},...potOpts('innBu'),...mapOpt('innBu')]},
  wiesbaden:{hi:'wsb_hi',idle:()=>evOn('golemW')?'wsb_war':'wsb_idle'},doranS:{hi:'dor_hi',idle:()=>'dor_idle',opts:()=>ltOpts()},ren:{hi:'ren_hi',idle:()=>evOn('renW')?'ren_war':'ren_idle'},aslan:{idle:()=>'asl_idle'},
  aden:{hi:'adn_hi',idle:()=>'adn_idle',opts:()=>peerOpts()},chucksley:{hi:'chk_hi',idle:()=>'chk_idle'},ferrell:{idle:()=>'frl_idle'},
@@ -8307,7 +8313,7 @@ function closeInv(){SFX.close();$('inv').hidden=true;$('invQ').value='';$('cfmW'
 // one line of an item's numbers (rc = a recipe, i.e. the base values, when cur is not given)
 function statShort(i){const a=[];if(i.atk)a.push(`${t('atk')} ${i.uid?iAtk(i):i.atk}`);if(i.def)a.push(`${t('def')} ${i.uid?iDef(i):i.def}`);
  if(i.as)a.push(`${t('gAs')} +${Math.round(i.as*enF(i)*100)}%`);if(i.ms)a.push(`${t('gMs')} +${Math.round(i.ms*enF(i)*100)}%`);if(i.dm)a.push(`${t('gDm')} +${Math.round(i.dm*enF(i)*100)}%`);if(i.mpb)a.push(`${t('gMp')} +${Math.round(i.mpb*enF(i))}`);if(i.hpp)a.push(`${t('gHp')} +${Math.round(i.hpp*enF(i)*100)}%`);if(i.agi)a.push(`${t('agi')} +${i.agi}`);if(i.agp)a.push(`${t('agi')} ${Math.round(i.agp*100)}%`);if(i.cold)a.push(t('gCold',{n:Math.round(i.cold*100)}));if(i.dsh)a.push(t('gDsh',{n:Math.round(i.dsh*100)}));if(i.gem)a.push(t('gemIn',{g:t(i.gem)}));return a.join(' · ');}
-function setTip(i){const sk=Object.keys(SETS).find(k=>SETS[k].it.includes(i.id));if(!sk)return '';const n=setCount(sk),c=setTier(sk);
+function setTip(i){const sk=Object.keys(SETS).find(k=>SETS[k].it.includes(setId(i.id)));if(!sk)return '';const n=setCount(sk),c=setTier(sk);
  return `<br><small style="color:#9fe39a">${t('set_'+sk)} (${n}/${SETS[sk].it.length})</small>`+Object.keys(SETS[sk].b).map(k=>`<br><small style="color:${+k===c?'#9fe39a':'#8a96a8'}">${t('setPc',{n:k})}: ${t('setD_'+sk+k)}</small>`).join('');}
 function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:''}${itLvr(i)?`<small style="color:${lvrOk(itLvr(i))?'#9fb4c8':'#ff8a7a'}">${t('needLvT',{n:itLvr(i)})}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+hidTip(i)+wpTip(i)+setTip(i)+itemSkillTip(i);}
 function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>${t('bread')}</b><br><small>${t('clickEat')}</small>`});['hpot','mpot'].forEach(k=>{if(S[k])a.push({k,n:S[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickDrink',{k:keyName(POT[k].key)})}</small>`});});
@@ -8337,7 +8343,8 @@ function slotOut(s,all){const n=all?s.n:1;if(s.it){const i=S.items.indexOf(s.it)
 function slotIn(o){if(o.it)S.items.push(o.it);else if(o.k==='bread')S.bread+=o.n;else if(POT[o.k])S[o.k]=(S[o.k]||0)+o.n;else if(o.k==='arrows')S.arrows[o.r]+=o.n;else S.mats[o.k]=(S.mats[o.k]||0)+o.n;hudDirty=true;}
 // what a shop sells, at its lowest list price: the sell window pays about 30% of it (owner 2026-10-20: sell prices)
 const SHOPG={isword:150,bow:140,staff:140,hammer:150,spear:150,dagger:130,larmor:80,lhelm:60,lgloves:45,lboots:50,ssword:780,sbow:760,sstaff:760,shammer:800,
- parmor:680,ihelm:400,igloves:340,iboots:360,cring:300,mring:900,msword:3200,marmor:3000,mhelm:1500,mgsword:4500,mgarmor:4200,mghelm:2200,mggloves:1800,mgboots:1800,iear:260,mear:1400},SHOPM={ore:8,bread:5,blue:150};
+ parmor:680,ihelm:400,igloves:340,iboots:360,cring:300,mring:900,msword:3200,marmor:3000,mhelm:1500,mgsword:4500,mgarmor:4200,mghelm:2200,mggloves:1800,mgboots:1800,iear:260,mear:1400,
+ mstaff:3100,mbow:3000,mspear:3200,mdagger:2800,mhammer:3300,mgstaff:4400,mgbow:4300,mgspear:4500,mgdagger:4000,mghammer:4600},SHOPM={ore:8,bread:5,blue:150};
 // gear: recipe worth (or level), times rarity and enhancement, halved when broken; a shop piece is capped at half its
 // price before the common x0.6, so a plain one sells for 30% of what it cost and a rarer copy for more
 /* ---------------- the fish and produce market (SAT-ONLINE-190; plan U222 "Fish market": "prices based on species and supply
@@ -9309,7 +9316,7 @@ function ipHit(m,dmg,crit,o){if(o.dot)return dmg;dmg=wpHit(m,dmg,crit,o);const b
  if(ipOn('bleed')&&crit||ipOn('cut')&&rand()<.25){if(!m.bl)num(m.x,monY(m)-16,t('ipBleed'),'#ff4a3a',false);m.bl={t:3,n:0};}
  if(ipOn('fear')&&!b.boss&&m.lv<=S.lv-20&&rand()<.15){m.stun=Math.max(m.stun||0,.8);if(AIK[m.type])m.flee=1.5;num(m.x,monY(m)-24,t('ipFear'),'#c89aff',false);}
  if(!skill&&ipOn('jnt5')&&rand()<.08&&!o.jnt){numPK(-30,'ipJnt5','#ffd24a',true);for(let i=1;i<5;i++)setTimeout(()=>{if(mode!=='play'||m.dead)return;vfx('slash',m.x,monY(m),{angle:rand()*6.28,rarity:3});SFX.swing();hitMon(m,.5,{jnt:1});},i*90);}
- if(!skill&&ipOn('gale')){P.gale=Math.min(30,(P.gale||0)+1);P.galeT=3;}
+ if(!skill&&ipOn('gale')){P.gale=Math.min(30,(P.gale||0)+1);P.galeT=3;}if(!skill&&ipOn('qfire')){P.qf=Math.min(100,(P.qf||0)+1);P.qfT=3;}
  if(!skill&&ipOn('wisdom')&&rand()<.05){const ks=Object.keys(P.cd).filter(k=>P.cd[k]>0);if(ks.length){const k=ks.sort((a,c)=>P.cd[c]-P.cd[a])[0];P.cd[k]=0;numPK(-30,'ipWisdom','#9fd8ff',false);vfx('mana',P.x,P.y-8);}}
  // the number shown is what you really got back, and the health bar redraws at once (owner 2026-10-22, twice: a mage or
  // any ranged fighter saw the lifesteal number and the health never rose: the bar waited for something else to redraw it)
@@ -9324,13 +9331,13 @@ function breathFeat(it){if(!pasOn('focus')||it.r<2||rand()>=.05+(skLv('focus')-1
 function ipHurt(d){if(d>0&&P.hp>0&&ipOn('doran')&&(P.doT||0)<=S.playT){P.doT=S.playT+180;const h=Math.round(d*.5);P.hp=Math.min(maxHP(),P.hp+h);numPK(-30,'ipDoran','#7ae07a',false,h);vfx('heal',P.x,P.y);}}
 // per frame: bleeding (6 ticks over 3 s), buff timers, Gale Spear's speed stacks, landing from Fly
 function updateItemFx(dt){if(!P)return;if(P.qm>0)P.qm-=dt;
- if(P.icb>0){P.icb-=dt;if(P.icb<=0){if(skLv('icomb')<10)[weapon(),armorIt()].forEach(i=>{if(i)i.dur=Math.max(0,durOf(i)-10);});toast(t('icombEnd'),'warn');}}if(P.galeT>0){P.galeT-=dt;if(P.galeT<=0)P.gale=0;}
+ if(P.icb>0){P.icb-=dt;if(P.icb<=0){if(skLv('icomb')<10)[weapon(),armorIt()].forEach(i=>{if(i)i.dur=Math.max(0,durOf(i)-10);});toast(t('icombEnd'),'warn');}}if(P.galeT>0){P.galeT-=dt;if(P.galeT<=0)P.gale=0;}if(P.qfT>0){P.qfT-=dt;if(P.qfT<=0)P.qf=0;}
  if(P.fly>0){P.fly-=dt;P.mp=Math.max(0,P.mp-2*dt);if(rand()<dt*14)fx.push({x:P.x+(rand()-.5)*14,y:P.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});if(P.fly<=0||P.mp<=0){P.fly=0;if(hitBox(P.x,P.y,4)){const f=freeNear(P.x,P.y,4);if(f){P.x=f.x;P.y=f.y;}}vfx('dust',P.x,P.y,{n:8});}}
  for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++){if(m.cboT>0)m.cboT-=dt;if(!m.bl||m.dead)continue;m.bl.t-=dt;if(m.bl.t<=3-(m.bl.n+1)*.5){m.bl.n++;hitMon(m,.22,{skill:1,dot:1});fx.push({x:m.x,y:monY(m),vx:0,vy:30,t:.4,c:'#c8282a',fl:1});}if(m.bl&&m.bl.t<=0)m.bl=null;}}
 function itemSkillTip(i){const rc=rcById(i.id);if(i.cr&&i.ip)return featTip(i)+i.ip.map(k=>`<br><small style="color:#bfe0ff">• ${t('ipd_'+k)}</small>`).join('');if(!rc||!rc.isk&&!rc.ip)return featTip(i);let h=featTip(i);
  for(const k of rc.isk||[])h+=`<br><small style="color:#ffe7a8">${t('iskL',{s:t('sk_'+k)})}: ${t('skd_'+k)}</small>`;
  for(const k of rc.ip||[])h+=`<br><small style="color:#bfe0ff">• ${t('ipd_'+k)}</small>`;
- return h+`<br><small style="color:#8a96a8"><i>${t('nq_'+i.id)}</i></small>`;}
+ return h+(STR.en['nq_'+i.id]?`<br><small style="color:#8a96a8"><i>${t('nq_'+i.id)}</i></small>`:'');}
 const featTip=i=>i.ft?`<br><small style="color:#ffd27a">✦ ${t('featL')}: ${t('ft_'+i.ft)}</small>`:'';
 Object.assign(STR.ar,{failure:'فشل (Failure)',ideal:'الخنجر المثالي',gale:'رمح العاصفة',iyarugt:'إياروغت',dains:'داينسليف (نسخة مُعادة)',tbow:'قوس الرعد',wisdom:'سيف الحكمة',elfin:'خاتم إلفين ستون',vring:'خاتم مصاص الدماء المتوسط',doran:'خاتم دوران',absurd:'خاتم العبث',bboots:'جزمة براهام',ochelm:'خوذة زعيم أوركات ضوء الصقيع',
  sk_wblast:'نفخة الريح',skd_wblast:'بيطلق ريح زي النصل قدامك وبتعدي في كل اللي في طريقها',sk_qmove:'حركات سريعة',skd_qmove:'لمدة 20 ثانية: 30% فرصة تفادي، ومشي وضرب أسرع',
@@ -12158,6 +12165,32 @@ RC.push({id:'oakst',slot:'w',atk:150,spd:0.52,mpb:40,fix:3,lvr:80,drop:1,unlock:
 Object.assign(WSH,{oakst:{l:12,c:'#7ac87a',k:'staff'},frstaff:{l:12,c:'#9fe0ff',k:'staff'},stormst:{l:12,c:'#b08aff',k:'staff'},abyssst:{l:12,c:'#5a1a8a',k:'staff'},hunbow:{l:10,c:'#a8743f',k:'bow'},wyvbow:{l:10,c:'#d8d0b8',k:'bow'},moonbow:{l:10,c:'#c8d8ff',k:'bow'},vipdag:{l:6,c:'#7ac83a',k:'dagger'},shdag:{l:6,c:'#4a3a6a',k:'dagger'},bldag:{l:6,c:'#c8282a',k:'dagger'},knspear:{l:12,c:'#c4c8d0',k:'spear'},trident:{l:12,c:'#5ac8c8',k:'spear'},skyspear:{l:12,c:'#ffd23a',k:'spear'},warhm:{l:7,c:'#7a7a86',k:'hammer'},thhm:{l:7,c:'#4a6ab0',k:'hammer'},giantm:{l:7,c:'#5a4a3a',k:'hammer'}});
 NDROP.dcapt=(NDROP.dcapt||[]).concat([['oakst',0.22]]);NDROP.mshade=(NDROP.mshade||[]).concat([['frstaff',0.22]]);NDROP.kbandit=(NDROP.kbandit||[]).concat([['frstaff',0.15]]);NDROP.asmo=(NDROP.asmo||[]).concat([['stormst',0.22]]);NDROP.slord=(NDROP.slord||[]).concat([['stormst',0.12],['shdag',0.2]]);NDROP.vruson=(NDROP.vruson||[]).concat([['abyssst',0.2]]);NDROP.vnoll=(NDROP.vnoll||[]).concat([['abyssst',0.15]]);NDROP.kking=(NDROP.kking||[]).concat([['hunbow',0.22]]);NDROP.wqueen=(NDROP.wqueen||[]).concat([['wyvbow',0.25]]);NDROP.dk_lant=(NDROP.dk_lant||[]).concat([['moonbow',0.2]]);NDROP.vb6=(NDROP.vb6||[]).concat([['moonbow',0.15]]);NDROP.scmd=(NDROP.scmd||[]).concat([['vipdag',0.2]]);NDROP.trauka=(NDROP.trauka||[]).concat([['shdag',0.1]]);NDROP.vlord=(NDROP.vlord||[]).concat([['bldag',0.22]]);NDROP.vb12=(NDROP.vb12||[]).concat([['bldag',0.15]]);NDROP.fgiant=(NDROP.fgiant||[]).concat([['knspear',0.22]]);NDROP.ypriest=(NDROP.ypriest||[]).concat([['knspear',0.12]]);NDROP.kraken=(NDROP.kraken||[]).concat([['trident',0.25]]);NDROP.dk_krug=(NDROP.dk_krug||[]).concat([['skyspear',0.2]]);NDROP.vb4=(NDROP.vb4||[]).concat([['skyspear',0.15]]);NDROP.fochief=(NDROP.fochief||[]).concat([['warhm',0.22]]);NDROP.warlord=(NDROP.warlord||[]).concat([['warhm',0.15]]);NDROP.sanju1=(NDROP.sanju1||[]).concat([['thhm',0.22]]);NDROP.dbus=(NDROP.dbus||[]).concat([['thhm',0.15]]);NDROP.sanju2=(NDROP.sanju2||[]).concat([['giantm',0.2]]);NDROP.furfu=(NDROP.furfu||[]).concat([['giantm',0.15]]);
 Object.assign(STR.ar,{oakst:'عصاية البلوط العتيق',frstaff:'عصاية الليتش المتجمد',stormst:'عصاية حكيم العاصفة',abyssst:'عصاية كبير سحرة الهاوية',hunbow:'قوس الحارس الطويل',wyvbow:'قوس عضم الوايفرن',moonbow:'قوس ضي القمر',vipdag:'ناب الأفعى',shdag:'خنجر الظل',bldag:'خنجر عطش الدم',knspear:'رمح الفارس',trident:'شوكة ملك البحر',skyspear:'الرمح السماوي',warhm:'مطرقة الأقزام الحربية',thhm:'مطرقة الرعد',giantm:'مطرقة العملاق'});Object.assign(STR.en,{oakst:"Elder Oak Staff",frstaff:"Frost Lich Staff",stormst:"Storm Sage Staff",abyssst:"Abyss Archmage Staff",hunbow:"Ranger's Longbow",wyvbow:"Wyvern Bone Bow",moonbow:"Moonlight Bow",vipdag:"Viper Fang",shdag:"Shadow Kris",bldag:"Bloodthirst Dagger",knspear:"Knight's Lance",trident:"Sea King's Trident",skyspear:"Heavenly Spear",warhm:"Dwarven Warhammer",thhm:"Thunder Maul",giantm:"Giant's Maul"});
+// crafted weapons of every kind (owner 2026-10-24): a mithril tier (smithing 5, like the mithril sword) and a mass-produced Grid tier
+// (smithing 6, Lv 200, part of the Grid set like its sword); and two of Grid's own works from the novel, for a blacksmith who has made
+// three of the kind: the Spiral Quick Fire Bow ("Rating: Epic ... Firing Speed: +17% ... Every time you shoot an arrow, the firing
+// speed will increase by 0.5%. This effect will only be applied up to 50%.") and the Dragon Hammer ("Rating: Unique ... A hammer made
+// by the legendary blacksmith Grid. It is designed to hit the 'Dragon Harpoon Pillars.' It is very big and heavy")
+RC.push(
+ {id:'mstaff',slot:'w',atk:230,spd:.53,mpb:40,need:{mith:3,wood:3,mstone:2},unlock:()=>S.smith>=5&&qDone('fo2'),diff:1.4,strikes:8},
+ {id:'mbow',slot:'w',atk:210,spd:.47,need:{mith:2,wood:4,leather:2},unlock:()=>S.smith>=5&&qDone('fo2'),diff:1.4,strikes:8},
+ {id:'mspear',slot:'w',atk:250,spd:.43,need:{mith:3,wood:2,ore:2},unlock:()=>S.smith>=5&&qDone('fo2'),diff:1.4,strikes:8},
+ {id:'mdagger',slot:'w',atk:170,spd:.23,need:{mith:2,ore:2,leather:1},unlock:()=>S.smith>=5&&qDone('fo2'),diff:1.4,strikes:8},
+ {id:'mhammer',slot:'w',atk:260,spd:.42,need:{mith:4,ore:4,wood:1},unlock:()=>S.smith>=5&&qDone('fo2'),diff:1.4,strikes:8},
+ {id:'mgstaff',slot:'w',atk:290,spd:.53,mpb:60,lvr:200,need:{mith:4,wood:4,blue:1},unlock:()=>S.smith>=6&&qDone('fo2'),diff:1.45,strikes:8},
+ {id:'mgbow',slot:'w',atk:270,spd:.47,lvr:200,need:{mith:3,wood:5,blue:1},unlock:()=>S.smith>=6&&qDone('fo2'),diff:1.45,strikes:8},
+ {id:'mgspear',slot:'w',atk:310,spd:.43,lvr:200,need:{mith:4,wood:3,blue:1},unlock:()=>S.smith>=6&&qDone('fo2'),diff:1.45,strikes:8},
+ {id:'mgdagger',slot:'w',atk:220,spd:.23,lvr:200,need:{mith:3,ore:3,blue:1},unlock:()=>S.smith>=6&&qDone('fo2'),diff:1.45,strikes:8},
+ {id:'mghammer',slot:'w',atk:330,spd:.42,lvr:200,need:{mith:5,ore:5,blue:1},unlock:()=>S.smith>=6&&qDone('fo2'),diff:1.45,strikes:8},
+ {id:'sqfbow',slot:'w',atk:420,spd:.3,fix:2,lvr:300,ip:['qfire'],need:{mith:6,wood:6,blue:2,leather:2},unlock:()=>isSm()&&S.smith>=7&&(S.made.mbow||0)+(S.made.mgbow||0)>=3,diff:1.55,strikes:9},
+ {id:'dhammer',slot:'w',atk:420,spd:.52,fix:3,lvr:260,need:{mith:8,ore:8,blue:2},unlock:()=>isSm()&&S.smith>=7&&(S.made.mhammer||0)+(S.made.mghammer||0)>=3,diff:1.6,strikes:9});
+Object.assign(WSH,{mstaff:{l:12,c:'#c8e8f4',k:'staff'},mbow:{l:10,c:'#7aa0b8',k:'bow'},mspear:{l:12,c:'#c8e8f4',k:'spear'},mdagger:{l:6,c:'#c8e8f4',k:'dagger'},mhammer:{l:7,c:'#c8e8f4',k:'hammer'},
+ mgstaff:{l:12,c:'#e0e4ec',k:'staff'},mgbow:{l:10,c:'#e0e4ec',k:'bow'},mgspear:{l:12,c:'#e0e4ec',k:'spear'},mgdagger:{l:6,c:'#e0e4ec',k:'dagger'},mghammer:{l:7,c:'#e0e4ec',k:'hammer'},sqfbow:{l:10,c:'#c87a2a',k:'bow'},dhammer:{l:8,c:'#8a1a1a',k:'hammer'}});
+Object.assign(STR.ar,{mstaff:'عصا ميثريل',mbow:'قوس ميثريل',mspear:'رمح ميثريل',mdagger:'خنجر ميثريل',mhammer:'مطرقة ميثريل',mgstaff:'عصا جريد (إنتاج كمّي)',mgbow:'قوس جريد (إنتاج كمّي)',mgspear:'رمح جريد (إنتاج كمّي)',mgdagger:'خنجر جريد (إنتاج كمّي)',mghammer:'مطرقة جريد (إنتاج كمّي)',
+ sqfbow:'قوس الإطلاق السريع الحلزوني',dhammer:'مطرقة التنين',ipd_qfire:'كل سهم بيصيب بيزوّد سرعة الضرب 0.5% (لحد 50%)، وبتتصفّر لو وقفت 3 ثواني',
+ nq_sqfbow:'"قوس صنعه الحداد الأسطوري جريد. تركيب القوس والسهم غريب، وصعب تتوقع السهم هيروح فين."',nq_dhammer:'"مطرقة صنعها الحداد الأسطوري جريد. معمولة عشان تضرب أعمدة رمح التنين. كبيرة جدًا وتقيلة وقوتها ممتازة. ينفع تبقى سلاح، بس مش سهل تتمرجح بيها."'});
+Object.assign(STR.en,{mstaff:'Mithril Staff',mbow:'Mithril Bow',mspear:'Mithril Spear',mdagger:'Mithril Dagger',mhammer:'Mithril Hammer',mgstaff:'Mass-produced Grid Staff',mgbow:'Mass-produced Grid Bow',mgspear:'Mass-produced Grid Spear',mgdagger:'Mass-produced Grid Dagger',mghammer:'Mass-produced Grid Hammer',
+ sqfbow:'Spiral Quick Fire Bow',dhammer:'Dragon Hammer',ipd_qfire:'Every arrow that hits raises firing speed by 0.5% (up to 50%); it resets after 3 s without a hit',
+ nq_sqfbow:'"A bow made by the legendary blacksmith Grid. The structure of the bow and arrow is unusual. It is difficult to predict the trajectory of an arrow."',nq_dhammer:'"A hammer made by the legendary blacksmith Grid. It is designed to hit the \'Dragon Harpoon Pillars.\' It is very big and heavy and the attack power is excellent. It can be used as a weapon, but it isn\'t easy to swing."'});
 Object.assign(SETS,{vwolf:{it:['vwarmor','vwhelm','vwgloves','vwboots'],b:{2:{ms:.05,hpp:.05},4:{ms:.05,hpp:.05,dm:.06,as:.06}}},velfin:{it:['iyarugt','elfin'],b:{2:{dm:.08}}},
  vrings:{it:['jvring','vring','avring','hvring'],b:{2:{hpp:.06},4:{hpp:.06,dm:.1}}},tira:{it:['tirbelt','tirsh'],b:{2:{hpp:.12,def:40}}},lat:{it:['latneck','vpaj'],b:{2:{dm:.08,ms:.05}}},earls:{it:['craybr','yetgs'],b:{2:{dm:.1,as:.08}}}});
 Object.assign(MATP,{vwleath:700});AUK.push('vwleath');
@@ -13544,7 +13577,7 @@ function lootWho(uid){if(uid===NET.uid)return netId||S.look.n;const r=NET.remote
 function lootKilled(m){if(!rlOn()||!rlBoss(m)||m.tmp||m.arena||m.evt||m.sg)return;lootFought=performance.now();
  if(PARTY.isLeader())lootStart(m.type);else NET.send('raid.state',{to:PARTY.leader(),raid:'k|'+String(m.type).slice(0,16),k:0});}
 function lootStart(type){if(!PARTY||!PARTY.isLeader()||LOOTL||!MT[type])return;const now=performance.now();lootLast=lootLast||{};if(lootLast[type]&&now-lootLast[type]<LROLL.AGAIN_MS)return;lootLast[type]=now;
- const id=(Date.now().toString(36)+(++lootSeq).toString(36)).slice(-10),it=DROPG[rand()*DROPG.length|0],r=rand()<.08?3:2;
+ const id=(Date.now().toString(36)+(++lootSeq).toString(36)).slice(-10),it=(L=>L[rand()*L.length|0])(dropTier(type)),r=rand()<.08?3:2;
  LOOTL={id,it,r,until:now+LROLL.S*1000,ch:new Map()};const raid='r|'+id+'|'+it+':'+r;
  for(const m of PARTY.members())if(!m.self)NET.send('raid.state',{to:m.uid,raid,k:LROLL.S});
  lootOffer({id,it,r,until:LOOTL.until,from:NET.uid});}
@@ -13562,7 +13595,7 @@ function lootTick(){const now=performance.now();if(LOOTO){if(now>LOOTO.until)loo
 function lootIn(from,pl){const w=pl.raid.split('|'),k=Math.round(+pl.k)||0;if(!PARTY||!PARTY.id()||from.party!==PARTY.id())return;
  if(w[0]==='k'&&PARTY.isLeader()&&w[1])lootStart(w[1]);
  else if(w[0]==='c'&&LOOTL&&LOOTL.id===w[1]&&performance.now()<=LOOTL.until)LOOTL.ch.set(from.uid,k===2?2:k===1?1:0);
- else if(w[0]==='r'&&from.uid===PARTY.leader()&&w.length===3){const q=/^([a-z0-9_]{1,16}):([0-4])$/.exec(w[2]);if(!q||!DROPG.includes(q[1]))return;lootOffer({id:w[1],it:q[1],r:+q[2],until:performance.now()+Math.max(1,Math.min(30,k))*1000,from:from.uid});}
+ else if(w[0]==='r'&&from.uid===PARTY.leader()&&w.length===3){const q=/^([a-z0-9_]{1,16}):([0-4])$/.exec(w[2]);if(!q||!DROPA.includes(q[1]))return;lootOffer({id:w[1],it:q[1],r:+q[2],until:performance.now()+Math.max(1,Math.min(30,k))*1000,from:from.uid});}
  else if(w[0]==='w'&&from.uid===PARTY.leader()&&w.length===3){const uid=w[2];if(uid==='-'){lootWon(w[1],null);return;}if(k!==lootRoll(w[1],uid))return;lootWon(w[1],{uid,c:Math.round(+pl.n)===2?2:1,v:k});}}
 window.__GRL={got:()=>rlGot,loot:()=>({o:LOOTO&&{...LOOTO},l:LOOTL&&{id:LOOTL.id,it:LOOTL.it,r:LOOTL.r,ch:[...LOOTL.ch]}}),roll:(id,u)=>lootRoll(id,u),role:r=>{ROLE=r||null;partySig='';netForce=true;},def:src=>rlDef(src),atk:m=>rlAtk(m),on:()=>rlOn(),target:m=>mobTarget(m)}; // tests
 /* emotes (SAT-ONLINE-022, doc §35 U061): V (touch: Emote) opens four emotes; the one picked plays for 3 s and is
@@ -13688,7 +13721,7 @@ function pctxAct(a){const r=pctxRemote();if(a==='pcClose'||!r){PCTX=null;pctxSig
  pctxSig='';}
 window.__G.toScreen=(x,y)=>{const b=stage.getBoundingClientRect();return {x:b.left+(x-camXf)*SC,y:b.top+(y-camYf)*SC};}; // tests: click a world position
 window.__G.maxHP=()=>maxHP();window.__G.xpNeed=()=>xpNeed();window.__G.mapBase=()=>lowBase();window.__G.miniP=(i,j)=>miniP(i,j);window.__G.baseTile=(i,j)=>baseTile(i,j);window.__G.mmo=o=>MMO(o);window.__G.miniLeft=()=>LOWQ.length;window.__G.pj=()=>[...PJ.values()].map(J=>[J.k,J.pri]);window.__G.miniHas=(i,j)=>!!MINP[i+','+j];window.__G.miniQ=(i,j)=>{miniQ(i,j);};window.__G.MV=MV;window.__G.mapDraw=()=>drawMapNow();window.__G.world=()=>({TENTS,buildings,TOWNS,WELLS,ANVILS,BOARD});window.__G.skProg=skProg;window.__G.skUse=skUse;window.__G.monNames=()=>Object.keys(MT).map(k=>[k,t(k==="guardian"?"guardian":NAMEK[k]||k)]);window.__G.vox=k=>VOX[voxOf(k)[0]];window.__G.spawnMon=(ty,x,y)=>{const m=newMon(ty,x,y);m.tmp=1;mons.push(m);return m;};
-window.__G.isk={mkItem,equip,itemSkills,useISlot,ipOn,itemTip,mpC,MT,rs:()=>{sbSig='';},checkSkills:()=>checkSkills(),pasOn:k=>pasOn(k)};
+window.__G.isk={mkItem,equip,itemSkills,useISlot,ipOn,itemTip,mpC,MT,dropTier,rs:()=>{sbSig='';},checkSkills:()=>checkSkills(),pasOn:k=>pasOn(k)};
 addEventListener('keydown',e=>{if(e.code!=='Escape'||mode!=='play'||(e.target&&e.target.tagName==='INPUT'))return;
  if(!$('emoW').hidden){$('emoW').hidden=true;e.stopImmediatePropagation();}else if(PCTX){PCTX=null;pctxSig='';e.stopImmediatePropagation();}},true);
 /* open PvP outside towns (SAT-ONLINE-038, owner 2026-10-19): the same as a duel without the challenge. A hit is a share of
