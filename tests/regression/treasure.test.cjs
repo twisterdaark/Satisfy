@@ -37,6 +37,10 @@ test('the treasure hunt: one spot a week for all, the board, the line, the dig o
     const before = await g.eval((s) => { const G = window.__G, S = G.S, P = G.P; P.x = s.x; P.y = s.y + 4; P.inv = 1e9; return { gold: S.gold, blue: S.mats.blue || 0, ms: S.mats.mstone || 0 }; }, sa.s);
     await g.step(3);
     assert.match(await g.eval(() => window.__GTH.ui()), /Here! Press E to dig/);
+    // the ✕ on the line stops the hunt; the line goes
+    assert.equal(await g.eval(() => window.__GTH.stop()), false);
+    assert.equal(await g.eval(() => window.__GTH.ui()), '');
+    await g.eval(() => { window.__G.S.th.on = window.__GTH.week(); });
     assert.equal(await g.eval(() => window.__GTH.near().length), 1);
     await g.page.keyboard.press('e'); await g.step(3);
     const after = await g.eval(() => { const S = window.__G.S; return { gold: S.gold, blue: S.mats.blue || 0, ms: S.mats.mstone || 0, th: S.th, on: window.__GTH.on(), legend: !!(window.__G.WS && (window.__G.WS.legends || {})['th_' + window.__GTH.week()]) }; });

@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24herald', ver: '2.70', d: '2026-10-24',
+      ar: ["منادي البطولة بقى بيجيب أعلى 4 لفلات في اللعبة كلها، لاعبين حقيقيين وأبطال الرواية مع بعض، وبتحاربهم من الأضعف للأقوى. نسخة اللاعب طالعة باسمه ولفله وشكله وسلاحه وبتلعب بمهاراته هو، وصحتها وضربها على قد فرق قوته عنك.",
+          "في الغزو، الحراس والقادة والمدربين والحدادين بيطلعوا يحاربوا الوحوش بمهاراتهم لحد ما الغزو يخلص أو يقعوا، والناس العادية والعيال بيجروا يستخبوا في البيوت والمحلات لحد ما يخلص.",
+          "تماثيل قاعة المشاهير رجعت في كل زيارة بعد تطهير الأرخبيل، وستيكس اللي على رصيف بيهين بقى بيديك لفيفة القارة الشرقية الهدية لو طهّرت الأرخبيل.",
+          "الزعيم اللي مابيستدعيش حد مابقاش يقول «بينادي على رجالته»، بقى يقول إنه بيهجم أشرس.",
+          "شريط كنز الأسبوع اللي فوق بقى جنبه ✕ يوقّف الدور، وترجعله من لوحة المهام وقت ما تحب.",
+          "ملاحظة للمطوّر: الأونلاين المحلي كان بيقع وهو بيفتح بسبب الاستطلاعات والأدوار (POLLOFF و ROLE)، واتصلح."],
+      en: ["The tournament herald now brings the 4 highest levels in the whole game, real players and the novel's heroes together, and you fight them from the weakest to the strongest. A player's copy has their name, level, look and weapon and fights with their own skills, its health and blows scaled to how much stronger they are than you.",
+          "In an invasion, guards, captains, trainers and smiths walk out and fight the monsters with their own skills until the invasion ends or they fall, while townsfolk and children run to hide in the houses and shops until it is over.",
+          "The Hall of Fame statues are back on every visit after the archipelago is purified, and Sticks on Behen's pier now gives a purifier the free East Continent scroll.",
+          "A boss that summons no one no longer \"calls his warriors\"; it fights harder instead.",
+          "The weekly treasure line at the top has an ✕ that stops the hunt; the quest board offers it again whenever you like.",
+          "Developer note: local online play broke at startup because of the polls and party roles (POLLOFF, ROLE); fixed."], hide: [5] },
     { v: '2026-10-24gcchurn', d: '2026-10-24',
       ar: ["اللعبة بقت أنعم وانت ماشي أو بتحارب: وهي بترسم الأرض والخريطة الصغيرة كانت بتستخدم ذاكرة جديدة كل شوية وترميها، فالمتصفح كان بيقف عشان ينضّفها حوالي مرتين في الثانية (15 لـ20 ملي ثانية كل مرة). دلوقتي بتستخدم نفس الذاكرة تاني، فالوقفات دي قلت للنص أو أقل، والرسم زي ما هو بالظبط."],
       en: ["The game is smoother while you walk or fight: painting the ground and the minimap kept taking fresh memory and throwing it away, so the browser stopped to clean it up about twice a second (15-20 ms each time). Now it reuses that memory, so those stops take half the time or less, and everything looks exactly the same."] },

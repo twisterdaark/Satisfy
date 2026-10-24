@@ -42,6 +42,13 @@ test('banners, hydra exit, the East scroll after the islands, the Tower duty', a
     assert.ok(ec.o1.some((l) => /store|المتجر/.test(l)), JSON.stringify(ec.o1));
     assert.deepEqual([ec.scroll, ec.cp], [1, 4000]);
 
+    // the Hall of Fame keeps its ten statues on every visit after the purification
+    await g.eval(() => { const b = window.__GBH.s(); b.pur = 1; b.dk = b.dk || {}; b.dk[66] = 1; window.__GBH.enter(66); });
+    for (let i = 0; i < 20 && !(await g.eval(() => window.__GBH.R && window.__GBH.R.gates.length)); i++) { await g.step(10); await g.page.waitForTimeout(100); }
+    const hall = await g.eval(() => { const R = window.__GBH.R; const n = R.gates.filter((x) => x.bh === 'statue').length; window.__GBH.leave(); return n; });
+    assert.equal(hall, 10);
+    await g.step(60);
+
     // the Tower after its tests: a daily test pays marks once a day; the week's watch counts kills near your level
     const tw = await g.eval(() => { const G = window.__G, S = G.S, T = window.__GTWD; S.lv = 420; S.wis = { done: { ken: 1, jessica: 1 }, pill: 2, basic: 1, map: 1 };
       T.day('ken'); T.day('ken'); const wm1 = S.wis.wm; T.day('jessica');

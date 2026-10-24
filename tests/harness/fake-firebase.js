@@ -60,7 +60,7 @@
     // F.dropIn (a regexp source): writes from other pages to matching paths never reach this one, as a message lost on the way
     if (F.dropIn && m && typeof m.p === 'string' && new RegExp(F.dropIn).test(m.p)) return;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|cloudIndex|cloudSaves|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|guildHall|guildHallGuest|hallInv|flags|announce|admins|polls|pollVotes|pollTally|expo|expoVotes|expoTally|firstSeen|fishFest|guildTrophy|repairOrders|repairDone|repairPaid|tradeLog|tradeRep|trades|tradeSides|tradeDone|tradedItems|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|cloudIndex|cloudSaves|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|guildHall|guildHallGuest|hallInv|flags|announce|admins|polls|pollVotes|pollTally|expo|expoVotes|expoTally|firstSeen|fishFest|guildTrophy|repairOrders|repairDone|repairPaid|tradeLog|tradeRep|trades|tradeSides|tradeDone|tradedItems|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|arenaCard|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -651,6 +651,7 @@
     if (seg[0] === 'world' && seg[2] === 'wb') return wbRules(seg, v);
     if (seg[0] === 'world') return worldRules(seg, v);
     if (seg[0] === 'ranks') return rankRules(seg, v);
+    if (seg[0] === 'arenaCard') return !user || seg.length !== 2 || seg[1] !== user.uid ? 'PERMISSION_DENIED: ' + seg.join('/') : v === null || (typeof v === 'string' && v.length <= 1500) ? null : 'arenaCard fields'; // the tournament's battle cards (owner 2026-10-24)
     if (['guilds', 'guildNames', 'guildMembers', 'guildInv', 'guildChat', 'guildVault', 'guildVaultTaken', 'guildBank', 'guildBuild', 'guildLog', 'guildNote', 'guildRecruit', 'guildApply', 'guildRej', 'guildEvents', 'guildEventSign', 'guildWeek', 'guildWeekPaid', 'guildAllyAsk', 'guildAlly', 'guildAllyCd', 'guildDiplo', 'guildWarAsk', 'guildWar', 'guildWarKill'].includes(seg[0])) return guildRules(seg, v);
     if (seg[0] === 'guildHall' || seg[0] === 'guildHallGuest' || seg[0] === 'hallInv') return hallRules(seg, v);
     if (seg[0] === 'flags') return flagRules(seg, v);
