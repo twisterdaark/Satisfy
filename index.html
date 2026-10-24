@@ -10668,8 +10668,9 @@ function miniJob(i,j){const H=WMH+NR,cw=Math.min(128,MW-i*128),rh=Math.min(128,H
  // painted with two tiles of the neighbours round it, so the edges come out as they did on one canvas of the whole map;
  // at 8 px, 4 rows a strip, then made 4 px in one go (as it was)
  const xa=Math.max(0,i*128-2),xb=Math.min(MW,i*128+cw+2),ya=Math.max(0,j*128-2),yb=Math.min(H,j*128+rh+2);let big=null,r=ya;
- const J={step(n=4){n=Math.min(n,yb-r);const p=MMO({x0:xa,cols:xb-xa,y0:r,rows:n});if(!big){if(r===ya&&n===yb-ya)big=p;else{big=document.createElement('canvas');big.width=(xb-xa)*8;big.height=(yb-ya)*8;}}
-  if(big!==p)big.getContext('2d').drawImage(p,0,(r-ya)*8);r+=n;if(r<yb)return false;
+ const J={step(n=4){n=Math.min(n,yb-r);if(!big&&r===ya&&n===yb-ya)big=MMO({x0:xa,cols:xb-xa,y0:r,rows:n});   // (all of it at once: its own canvas)
+  else{if(!big){big=document.createElement('canvas');big.width=(xb-xa)*8;big.height=(yb-ya)*8;}MMO({x0:xa,cols:xb-xa,y0:r,rows:n,into:{g:big.getContext('2d'),dx:0,dy:(r-ya)*8}});}
+  r+=n;if(r<yb)return false;
   MINP[i+','+j]=mk(cw*4,rh*4,g=>{g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(big,(xa-i*128)*4,(ya-j*128)*4,(xb-xa)*4,(yb-ya)*4);});big.width=big.height=0;big=null;return true;},
   rest:()=>J.step(1e9),peek:()=>big&&r>ya?{c:big,xa,xb,ya,r}:null};return J;}   // peek: the 8 px rows done so far
 // a piece now (the tests, the 2 px copy's checks): done, or finished at once
@@ -10725,7 +10726,7 @@ function startAhead(x,y){const R=700;for(const L of [gg,og])L.warmAt(x-VW/2-200,
 // last 30 seen are kept, enough for a 4K screen (4 MB each: browsing the whole map kept them all)
 const BTL=new Map();
 function btJob(c,i,j){const H=WMH+NR,cw=Math.min(128,MW-i*128),rh=Math.min(128,H-j*128);let r=0;if(cw<=0||rh<=0)return {step:()=>true};
- const J={step(n=8){n=Math.min(n,rh-r);c.getContext('2d').drawImage(MMO({x0:i*128,cols:cw,y0:j*128+r,rows:n}),0,r*8);r+=n;return r>=rh;},rest:()=>J.step(1e9)};return J;}
+ const J={step(n=8){n=Math.min(n,rh-r);MMO({x0:i*128,cols:cw,y0:j*128+r,rows:n,into:{g:c.getContext('2d'),dx:0,dy:r*8}});r+=n;return r>=rh;},rest:()=>J.step(1e9)};return J;}
 function baseTileQ(i,j,then){const k=i+','+j;let c=BTL.get(k);
  if(c){BTL.delete(k);BTL.set(k,c);}else{c=mk(1024,1024,()=>{});BTL.set(k,c);pjAdd('b'+k,0,()=>btJob(c,i,j));while(BTL.size>30){const o=BTL.keys().next().value;BTL.delete(o);PJ.delete('b'+o);}}
  const J=PJ.get('b'+k);if(J&&then)J.tick=J.after=then;return c;}

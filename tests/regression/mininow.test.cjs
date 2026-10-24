@@ -26,6 +26,16 @@ test('a HUD map piece is painted over the next frames, not at once', async () =>
     // the next frames paint it: done within 60 frames (one strip a frame at the least)
     const done = await g.eval((want) => { const G = window.__G; for (let n = 1; n <= 80; n++) { window.__step(1); if (want.every((k) => { const [i, j] = k.split(',').map(Number); return G.miniHas(i, j); })) return n; } return -1; }, r.now);
     assert.ok(done > 0 && done <= 80, 'painted over the next frames: ' + done);
+    // the same pixels as the piece in one go
+    const diff = await g.eval((want) => { const G = window.__G, out = [];
+      for (const k of want) { const [i, j] = k.split(',').map(Number), q = G.miniP(i, j), cw = q.width / 4, rh = q.height / 4;
+        const xa = Math.max(0, i * 128 - 2), xb = i * 128 + cw + (cw < 128 ? 0 : 2), ya = Math.max(0, j * 128 - 2), yb = j * 128 + rh + (rh < 128 ? 0 : 2);
+        const one = document.createElement('canvas'); one.width = cw * 4; one.height = rh * 4; const og = one.getContext('2d'); og.imageSmoothingEnabled = true; og.imageSmoothingQuality = 'high';
+        og.drawImage(G.mmo({ x0: xa, cols: xb - xa, y0: ya, rows: yb - ya }), (xa - i * 128) * 4, (ya - j * 128) * 4, (xb - xa) * 4, (yb - ya) * 4);
+        const A = q.getContext('2d').getImageData(0, 0, q.width, q.height).data, B = og.getImageData(0, 0, one.width, one.height).data;
+        let d = 0; for (let n = 0; n < A.length; n++) if (A[n] !== B[n]) d++; out.push(d); }
+      return out; }, r.now);
+    assert.ok(diff.every((d) => d === 0), 'the same pixels as one go: ' + JSON.stringify(diff));
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
