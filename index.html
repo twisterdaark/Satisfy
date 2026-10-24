@@ -6841,7 +6841,7 @@ function threatFloor(d,ml,src){if(!TFK||!S)return d;const mlv=ml||S.lv;if(mlv<S.
  const pct={heavy:.11,zone:.12,proj:.05,light:.025,tick:.015}[TFK]||0,cap={heavy:.4,zone:.4,proj:.15,light:.1,tick:.05}[TFK]||.1,boss=src&&src.type&&MT[src.type]&&MT[src.type].boss?1.5:1;
  const f=Math.min(mh*cap,mh*pct*near*boss*Math.min(2,TFM||1));if((TFK==='heavy'||TFK==='zone')&&f>=mh*.06){if(!((P.woundT||0)>gTime))numPK(-34,'woundT','#ff7a6a',false);P.woundT=gTime+3;}return Math.max(d,Math.round(f));}
 // life steal heals at most 4% of your health a second (a budget that refills), 40% of it while wounded
-function lsCap(h){const mh=maxHP(),cap=mh*.04;P.lsB=Math.min(cap,(P.lsB??cap)+(gTime-(P.lsT??gTime))*cap);P.lsT=gTime;if((P.woundT||0)>gTime)h*=.4;h=Math.max(0,Math.min(h,P.lsB));P.lsB-=h;return Math.round(h);}
+function lsCap(h){const mh=maxHP(),cap=mh*.04;h=+h;if(!isFinite(h))h=0;if(!isFinite(P.lsB))P.lsB=cap;if(!isFinite(P.lsT))P.lsT=gTime;P.lsB=Math.min(cap,(P.lsB??cap)+(gTime-(P.lsT??gTime))*cap);P.lsT=gTime;if((P.woundT||0)>gTime)h*=.4;h=Math.max(0,Math.min(h,P.lsB));P.lsB-=h;return Math.round(h);}
 function hurtPlayer0(d,ml,src){P.hitT=gTime;if(P.spw)return 0;if(P.rvU>gTime){pgRevolve(d,src);return 0;}if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(rgEvade(src)||hcEvade(src)||mdEvade(src)||cpEvade()||nvBlock(src))return 0;d=bzShield(d);d=ttShield(d,src);if(d<=0)return 0;d/=1+pasGen();if(P.lkBU>gTime)d*=.3;if(src&&src.type&&lkSee())d*=1-.15*pasM('lkinsight');if(P.kyTU>gTime&&src&&src.type&&!src.dead){d*=.7;hitMon(src,.3,{skill:1,dot:1});}if(src&&src.type&&S.cls==='saintess'&&pasOn('sagrace')&&saEvil(src))d*=1-.2*pasM('sagrace');if(src&&src.dmul)d*=src.dmul;if(src&&src.fury>gTime)d*=1.25;if(src&&src.type)P.lastSrc=src.type;if(tlOn('hking')&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
  if(P.qm>0&&rand()<.3){numPK(-20,'ipEvade','#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
@@ -8597,7 +8597,7 @@ window.__GRMO={on:()=>RMO,set:v=>rmoSet(v),shake:()=>RMOS.slice(),FX:RMOFX,VXC:R
 function pressKey(id){const k=$(id);if(!k)return;k.classList.add('press');setTimeout(()=>k.classList.remove('press'),110);}
 function dissolve(x,y,cols,n){for(let i=0;i<n;i++)fx.push({x:x+(rand()-.5)*12,y:y+(rand()-.5)*16,vx:(rand()-.5)*24,vy:-15-rand()*45,t:.7+rand()*.9,c:cols[i%cols.length],fl:1});}
 // Skills are data (SKD); the bar holds up to five class skills plus the worn title's skill in slot 6. Keys are rebindable per device.
-const mpC=k=>Math.round((SKD[k].mpf?maxMP()*SKD[k].mpf:Math.max(SKD[k].mp*1.5,(S?mpRef():0)*SKD[k].mp/100))*(S&&ipOn('absurd')?.5:1)*(S?skCostM(k)*skMpM(k):1));
+const mpC=k=>SKD[k]&&SKD[k].pas?0:Math.round((SKD[k].mpf?maxMP()*SKD[k].mpf:Math.max(SKD[k].mp*1.5,(S?mpRef():0)*SKD[k].mp/100))*(S&&ipOn('absurd')?.5:1)*(S?skCostM(k)*skMpM(k):1));
 window.__GPS={list:()=>Object.keys(SKD).filter(k=>SKD[k].pas),m:k=>pasM(k),gen:()=>pasGen(),kill:m=>pasKill(m),scaled:k=>pasScaled(k),txt:k=>skLvTxt(k),bc:p=>bcBreak(p),cls:k=>SKD[k].cls,on:()=>pasSkills()}; // tests
 Object.assign(STR.ar,{pasHow:'باسيف: شغال لوحده على طول، مش محتاج تدوس عليه ولا تحطه في البار.',pasLvHow:'بيعلى لفله مع كل وحش تقتله (البوس بـ6)، وكل مرة يشتغل فيها.',pasPerS:'كل لفل: +5% لتأثيره (دلوقتي ×{m}).',pasPerG:'كل لفل: +1% ضرر و+1% دفاع (دلوقتي +{n}%).',bcAmp:'تأمل!',bcBrk:'السحر اتكسر',bcRefl:'السحر ارتد!'});
 Object.assign(STR.en,{pasHow:'Passive: always on by itself, nothing to press or put on the bar.',pasLvHow:'It levels up with every monster you kill (a boss counts 6) and each time it fires.',pasPerS:'Each level: +5% to its effect (now ×{m}).',pasPerG:'Each level: +1% damage and +1% defence (now +{n}%).',bcAmp:'Contemplation!',bcBrk:'Spell broken',bcRefl:'Spell reflected!'});window.__GMP={max:()=>maxMP(),ref:()=>mpRef(),cost:k=>mpC(k),per:()=>mpPer(),cap:()=>POTCAP}; // tests
@@ -9330,7 +9330,12 @@ function breathFeat(it){if(!pasOn('focus')||it.r<2||rand()>=.05+(skLv('focus')-1
 // Doran's Ring: "50% of the damage received will instantly be recovered" (once every 3 minutes here)
 function ipHurt(d){if(d>0&&P.hp>0&&ipOn('doran')&&(P.doT||0)<=S.playT){P.doT=S.playT+180;const h=Math.round(d*.5);P.hp=Math.min(maxHP(),P.hp+h);numPK(-30,'ipDoran','#7ae07a',false,h);vfx('heal',P.x,P.y);}}
 // per frame: bleeding (6 ticks over 3 s), buff timers, Gale Spear's speed stacks, landing from Fly
-function updateItemFx(dt){if(!P)return;if(P.qm>0)P.qm-=dt;
+// health, mana and stamina never take a value that isn't a number (owner 2026-10-24: a Sword Saint's health turned into NaN every so
+// often, and stayed so): a bad write keeps the last good value, and where it came from goes to window.__NANLOG (the first ten)
+function guardP(){if(!P||P.__g)return;for(const k of ['hp','mp','st','food']){let v=+P[k];if(!isFinite(v))v=k==='hp'?maxHP():k==='mp'?maxMP():k==='st'?maxST():50;
+  Object.defineProperty(P,k,{enumerable:true,configurable:true,get:()=>v,set:n=>{if(typeof n==='number'&&isFinite(n)){v=n;return;}const L=window.__NANLOG||(window.__NANLOG=[]);if(L.length<10)L.push(k+' <- '+n+' '+String(new Error().stack||'').split(String.fromCharCode(10)).slice(2,5).join(' | '));}});}
+ Object.defineProperty(P,'__g',{value:1,enumerable:false});}
+function updateItemFx(dt){if(!P)return;guardP();if(P.qm>0)P.qm-=dt;
  if(P.icb>0){P.icb-=dt;if(P.icb<=0){if(skLv('icomb')<10)[weapon(),armorIt()].forEach(i=>{if(i)i.dur=Math.max(0,durOf(i)-10);});toast(t('icombEnd'),'warn');}}if(P.galeT>0){P.galeT-=dt;if(P.galeT<=0)P.gale=0;}if(P.qfT>0){P.qfT-=dt;if(P.qfT<=0)P.qf=0;}
  if(P.fly>0){P.fly-=dt;P.mp=Math.max(0,P.mp-2*dt);if(rand()<dt*14)fx.push({x:P.x+(rand()-.5)*14,y:P.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});if(P.fly<=0||P.mp<=0){P.fly=0;if(hitBox(P.x,P.y,4)){const f=freeNear(P.x,P.y,4);if(f){P.x=f.x;P.y=f.y;}}vfx('dust',P.x,P.y,{n:8});}}
  for(let mI=0,mA=mons,m;mI<mA.length&&(m=mA[mI],1);mI++){if(m.cboT>0)m.cboT-=dt;if(!m.bl||m.dead)continue;m.bl.t-=dt;if(m.bl.t<=3-(m.bl.n+1)*.5){m.bl.n++;hitMon(m,.22,{skill:1,dot:1});fx.push({x:m.x,y:monY(m),vx:0,vy:30,t:.4,c:'#c8282a',fl:1});}if(m.bl&&m.bl.t<=0)m.bl=null;}}
