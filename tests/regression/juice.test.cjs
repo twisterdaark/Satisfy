@@ -36,7 +36,8 @@ test('game feel: numbers, orbs, the streak, the banners, the low-health edge, th
     assert.equal(k1.n, 1);
     await g.step(30);
     const k2 = await g.eval(() => { const G = window.__G, P = G.P, m = G.spawnMon('wolf', P.x + 30, P.y); m.hp = 1; window.__GWP.hit(m, 5); const e = document.getElementById('jstk'); return { n: window.__GJ.st.n, on: e.classList.contains('on'), t: e.textContent }; });
-    assert.deepEqual(k2, { n: 2, on: true, t: '🔥 2 STREAK' });
+    // the streak still counts, its counter at the side is gone (owner 2026-10-24: 'remove this in a row')
+    assert.deepEqual(k2, { n: 2, on: false, t: '' });
     // the orbs reach you and go
     await g.step(200);
     assert.equal(await g.eval(() => window.__GJ.orbs()), 0, 'the orbs arrived');
