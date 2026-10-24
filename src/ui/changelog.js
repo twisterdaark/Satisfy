@@ -7,7 +7,18 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
-    { v: '2026-10-24notices', ver: '2.68', d: '2026-10-24',
+    { v: '2026-10-24smithfix', ver: '2.68', d: '2026-10-24',
+      ar: ["إبداع الحداد الأسطوري بقى بيحترم الخامات: قوة الخامات بتكبر بسرعة كل ما تعلى، فخامات الإند جيم (بيليال، التنين، أنفاس الوحوش الإلهية) بتطلع سلاح أقوى من أسلحة نفس المستوى اللي بتقع من الوحوش. الإبداعات اللي عملتها قبل كده قوتها بتتحسب من جديد أول ما تدخل اللعبة.",
+          "كل سيف بقى ليه شكله في الإيد وفي الأيقونة، وكل إبداع شكله بيطلع من المخطط والخامات (الطول والعرض والانحناء ولون أقوى خامة)، واللاعيبة التانيين بيشوفوه.",
+          "الكلام اللي بيظهر في نص الشاشة (لفل أب، الكويست خلص، البوس، القتلات) بقى بفونت اللعبة، وأصغر، وفوق بعيد عن نص الشاشة. وعداد القتلات بقى رقم بس من غير \"ورا بعض\".",
+          "الهايدرا لما تموت بتسيب صندوق وبوابة تطلعك من الهاوية على طول.",
+          "بعد ما تطهّر أرخبيل بيهين، كل جزيرة بيبقى فيها متجر المتحدّين جنب مكان النزول، فتقدر تشتري لفيفة بوابة القارة الشرقية بنقطك. ودايرة السحر في راينهارت بقت بتعدّيك للقارة الشرقية حتى لو معدّتش البحر قبل كده."],
+      en: ["The Legendary Blacksmith's Creation respects its materials now: their power climbs fast as they get rarer, so endgame materials (Belial, dragons, the divine beasts' breaths) make a weapon stronger than the drops of the same level. Creations you made before are worked out again when you log in.",
+          "Every sword has its own shape in the hand and in its icon, and every creation's look comes from its blueprint and materials (length, width, curve and the colour of its strongest material); other players see it too.",
+          "The text that pops up in the middle of the screen (level up, quest complete, bosses, kill counts) uses the game's font now, smaller, and higher up, away from the centre. The kill counter is just the number, without \"in a row\".",
+          "The hydra leaves a chest and a gate straight out of the Abyss when it dies.",
+          "Once you purify the Behen Archipelago, every island has the challengers' store beside the landing, so your points still buy the East Continent Portal Scroll. Reinhardt's magic circle also takes you to the East Continent even if you never crossed before."] },
+    { v: '2026-10-24notices', d: '2026-10-24',
       ar: ["لوحة الإعلانات (أونلاين): لوحة كل بلد بقى فيها «📜 إعلانات» بالإعلانات الرسمية بتاعة آخر أسبوعين، الأحدث الأول وكل واحد بيومه وساعته، عشان اللي كان مش موجود ساعتها يقراها. أي لينك في إعلان بيظهر [لينك] بس."],
       en: ["The notice board (online): every town's board has \"📜 Notices\", the official announcements of the last two weeks, newest first, each with its day and time, so whoever was away reads them there. A web address in one shows only as [link]."] },
     { v: '2026-10-24expo', d: '2026-10-24',
