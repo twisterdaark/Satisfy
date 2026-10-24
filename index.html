@@ -2639,20 +2639,30 @@ const today=()=>{let n;try{n=wNow();}catch(e){n=Date.now();}return new Date(n).t
 // its monsters"): the arena, the trial tower, the Tower of Wisdom and the competition grounds share the space under the
 // world, so entering one sweeps out what the others left
 const instSweep=()=>{mons=mons.filter(m=>!(m.arena||m.tower||m.nat||m.tw===1));}; // m.tw 1: the Tower of Wisdom (a string is an invading army's town)
-function startArena(){if(ARN||TWR)return;instSweep();S.arenaDay=today();if(P.ride)dismount();if(S.comp)S.comp=null;const A=DUN[8];ARN={r:0,ret:{x:P.x,y:P.y},wait:3,m:null};save(true);
+// the bracket: the four highest levels among the real players (their cards) and the canon rankers, weakest first
+function arenaList(real){const canon=RKN.filter(([k])=>MT[k]).map(([k,lv])=>({k,lv,n:t(k+'N')})),all=[...(real||[]).map(c=>({card:c,lv:c.lv,n:c.n})),...canon].sort((a,b)=>b.lv-a.lv).slice(0,4);return all.reverse();}
+function arenaReal(){if(!rkOnline())return Promise.resolve([]);const D=FB.m.database;
+ return rankTop('lv').then(top=>Promise.all(top.filter(r=>r.pid!==pidOf()&&/^u:/.test(r.pid)).map(r=>D.get(D.ref(FB.db,'arenaCard/'+r.pid.slice(2))).then(x=>arCardOf(x.val()),()=>null)))).then(L=>L.filter(Boolean),()=>[]);}
+let ARNW=0;
+function startArena(){if(ARN||TWR||ARNW)return;ARNW=1;toast(t('arnFind'));const go=real=>{ARNW=0;if(ARN||TWR)return;arenaGo(arenaList(real));};arenaReal().then(go,()=>go([]));}
+function arenaGo(list){instSweep();S.arenaDay=today();if(P.ride)dismount();if(S.comp)S.comp=null;const A=DUN[8];ARN={r:0,ret:{x:P.x,y:P.y},wait:3,m:null,list};save(true);
  fadeTo(()=>{P.x=(A.x0+4)*TS+8;P.y=(WMH+11)*TS+10;P.dir=2;P.hp=maxHP();P.mp=maxMP();P.cd={};camSnap=true;hudDirty=true;toast(t('arnStart'),'good');SFX.notice();});}
-function arenaSpawn(){const k=ARNK[ARN.r],A=DUN[8];
- const m=newMon(k,(A.x1-4)*TS+8,(WMH+11)*TS+10);m.tmp=1;m.agg=1;m.eng=99;m.arena=1;mons.push(m);ARN.m=m;
- vfx('spawn',m.x,m.y,{color:'#f2c14e'});announce(t('arnRound',{n:ARN.r+1,who:t(k+'N')}),1);SFX.notice();}
+function arenaSpawn(){const e=(ARN.list||ARNK.map(k=>({k,n:t(k+'N')})))[ARN.r],A=DUN[8],x=(A.x1-4)*TS+8,y=(WMH+11)*TS+10;let m;
+ if(e.card){const c=e.card,me=Math.max(1,atkV()*lvF(S.lv)/atkCD()),r=clamp(Math.sqrt(c.dps*c.hp/(me*maxHP())),.4,3);m=newMon('bhclone',x,y);m.mir=1;m.card=c;m.lv=c.lv;m.nm=c.n;
+  m.hp=m.max=Math.round(me*45*r);m.dmul=Math.max(1,.075*maxHP()*(150+defV())/(1.5*150))*r;m.xmul=0;}
+ else m=newMon(e.k,x,y);
+ m.tmp=1;m.agg=1;m.eng=99;m.arena=1;mons.push(m);ARN.m=m;
+ vfx('spawn',m.x,m.y,{color:'#f2c14e'});announce(t(e.card?'arnRoundP':'arnRound',{n:ARN.r+1,who:e.n,lv:e.lv,hp:e.card?fmtN(e.card.hp):''}),1);SFX.notice();}
 function updateArena(dt){if(!ARN||mode==='dead')return;
  if(ARN.wait>0){ARN.wait-=dt;if(ARN.wait<=0)arenaSpawn();return;}const m=ARN.m;if(!m)return;
  if(!m.dead){m.eng=99;m.agg=1;return;}
  ARN.r++;ARN.m=null;const g=Math.round(400*ARN.r*(1+S.lv/40));S.gold+=g;toast(t('arnWon',{n:ARN.r,g}),'good');SFX.quest();
- if(ARN.r>=ARNK.length)return arenaWin();P.hp=maxHP();P.mp=maxMP();ARN.wait=3;}
+ if(ARN.r>=(ARN.list||ARNK).length)return arenaWin();P.hp=maxHP();P.mp=maxMP();ARN.wait=3;}
 function arenaWin(){giveTitle('champ');S.arW=(S.arW||0)+1;gainXP(Math.round(S.lv*S.lv*4));WS.arena={day:today(),pid:pidOf(),n:S.look.n};annW('arnChamp');SFX.legendary();flash();leaveArena(3.5);}
 function arenaLose(){const r=ARN.r;P.hp=Math.max(1,Math.round(maxHP()*.3));if(ARN.m)ARN.m.dead=true;toast(t('arnLose',{n:r}),'warn');SFX.deny();leaveArena(1.2);}
 function leaveArena(delay){const A=ARN;A.wait=99;if(A.m)A.m.dead=true;setTimeout(()=>{mons=mons.filter(m=>!m.arena);ARN=null;fadeTo(()=>{P.x=A.ret.x;P.y=A.ret.y;camSnap=true;hudDirty=true;});save(true);},delay*1000);}
 
+Object.assign(STR.ar,{arnFind:'المنادي بيجمع أعلى لفلات في العالم...',arnRoundP:'الجولة {n}: {who} (لفل {lv} · صحة {hp}) · نسخة منه بكل مهاراته'});Object.assign(STR.en,{arnFind:'The herald gathers the highest levels in the world...',arnRoundP:'Round {n}: {who} (Lv {lv} · HP {hp}) · a copy with all their skills'});
 Object.assign(STR.ar,{"cEx": "تعبير الوش", "styK_ex": "تعبير الوش", "ex_none": "عادي", "ex_smile": "ابتسامة", "ex_calm": "هادي", "ex_frown": "مكشّر", "ex_sleepy": "نعسان", "ex_wink": "غمزة", "ex_surp": "متفاجئ", "ex_tongue": "مطلّع لسانه", "ex_blush": "مكسوف", "cBody": "الجسم", "cBody0": "ولد", "cBody1": "بنت", "cEye": "لون العيون", "cBeard": "الدقن", "cFace": "الوش", "cLip": "لون الشفايف", "cBottom": "تحت", "cSk0": "بنطلون", "cSk1": "جيبة", "cAcc": "إكسسوار", "cAcc2": "إكسسوار تاني", "cAccC": "لونه", "bst_none": "من غير", "bst_full": "دقن كاملة", "bst_long": "دقن طويلة", "bst_goatee": "سكسوكة", "bst_stubble": "دقن خفيفة", "bst_must": "شنب", "bst_chin": "دقن على الفك", "face_none": "عادي", "face_frk": "نمش", "face_scar": "جرح على العين", "face_both": "نمش وجرح", "face_gyaru": "مكياج جيارو", "face_gyaru2": "جيارو جريء", "face_doll": "رموش دمية", "acc_none": "من غير", "acc_gls": "نضارة", "acc_ear": "حلق", "acc_flw": "وردة في الشعر", "acc_band": "باندانة", "acc_hood": "كابيشون", "acc_cat": "ودان قطة", "acc_horns": "قرون", "acc_halo": "هالة", "acc_tiara": "تاج صغير", "acc_scarf": "كوفية", "acc_veil": "لثام", "acc_wings": "جناحات", "acc_feath": "ريش", "vhHide": "اخفي شكل القطعة دي (الستاتس فاضلة)", "vhShow": "شكلها مخفي: دوس عشان يظهر تاني", "styMore": "الجسم والوش والإكسسوارات", "styMoreHi": "عايز تغيّر إيه في شكلك؟", "styK_skin": "لون البشرة", "styK_g": "ولد أو بنت", "styK_eye": "لون العيون", "styK_bst": "الدقن", "styK_face": "الوش", "styK_lip": "لون الشفايف", "styK_sk": "بنطلون أو جيبة", "styK_acc": "إكسسوار", "styK_acol": "لون الإكسسوار", "styK_acc2": "إكسسوار تاني", "styK_acol2": "لون الإكسسوار التاني", "skn": "لون {n}", "h_longS": "طويل مفرود", "h_hime": "طويل بغرة", "h_bob": "بوب بغرة", "h_bobS": "بوب جانبي", "h_braid": "ضفيرة", "h_twinB": "ضفيرتين", "h_hbun": "كعكة عالية", "h_sidep": "ديل حصان جانبي", "h_wavy": "مموّج طويل", "h_shoulder": "لحد الكتف", "h_ponyH": "ديل حصان عالي", "h_lowTw": "ديلين واطيين", "h_odango": "كعكتين", "h_emo": "غرة على عين", "h_undercut": "أندركت", "h_slick": "لورا", "h_topknot": "ساموراي", "h_afro": "أفرو", "h_wolf": "وولف كت", "h_spikyL": "منكوش طويل", "h_princess": "طويل بنص كعكة", "eye0": "الافتراضي", "eye1": "أزرق", "eye2": "أخضر", "eye3": "عسلي", "eye4": "بنفسجي", "eye5": "أحمر", "eye6": "سماوي", "eye7": "دهبي", "eye8": "رمادي", "eye9": "وردي", "eye10": "تلجي", "eye11": "أسود", "lip0": "طبيعي", "lip1": "وردي", "lip2": "أحمر غامق", "lip3": "وردي فاتح", "lip4": "توتي", "lip5": "مرجاني", "lip6": "نبيتي", "lip7": "نود", "acn0": "دهبي", "acn1": "فضي", "acn2": "أسود", "acn3": "أحمر", "acn4": "أزرق", "acn5": "أخضر", "acn6": "وردي", "acn7": "بنفسجي", "acn8": "برتقالي", "acn9": "سماوي", "acn10": "بني", "acn11": "أبيض", "hc10": "أسود فاحم", "hc11": "بني فاتح", "hc12": "بلاتيني", "hc13": "رمادي فضي", "hc14": "أزرق سماوي", "hc15": "أخضر", "hc16": "دهبي", "hc17": "نبيتي", "hc18": "لافندر", "hc19": "مرجاني", "top10": "أبيض", "top11": "كحلي", "top12": "أصفر", "top13": "وردي", "top14": "بني", "top15": "سماوي", "top16": "عنابي", "top17": "ليلكي"});
 Object.assign(STR.en,{"cEx": "Expression", "styK_ex": "Expression", "ex_none": "Neutral", "ex_smile": "Smile", "ex_calm": "Calm", "ex_frown": "Frown", "ex_sleepy": "Sleepy", "ex_wink": "Wink", "ex_surp": "Surprised", "ex_tongue": "Tongue out", "ex_blush": "Blush", "cBody": "Body", "cBody0": "Male", "cBody1": "Female", "cEye": "Eye colour", "cBeard": "Beard", "cFace": "Face", "cLip": "Lip colour", "cBottom": "Bottom", "cSk0": "Trousers", "cSk1": "Skirt", "cAcc": "Accessory", "cAcc2": "Second accessory", "cAccC": "Its colour", "bst_none": "None", "bst_full": "Full beard", "bst_long": "Long beard", "bst_goatee": "Goatee", "bst_stubble": "Stubble", "bst_must": "Moustache", "bst_chin": "Chinstrap", "face_none": "Plain", "face_frk": "Freckles", "face_scar": "Scar over the eye", "face_both": "Freckles and scar", "face_gyaru": "Gyaru make-up", "face_gyaru2": "Bold gyaru", "face_doll": "Doll lashes", "acc_none": "None", "acc_gls": "Glasses", "acc_ear": "Earrings", "acc_flw": "Hair flower", "acc_band": "Headband", "acc_hood": "Hood", "acc_cat": "Cat ears", "acc_horns": "Horns", "acc_halo": "Halo", "acc_tiara": "Tiara", "acc_scarf": "Scarf", "acc_veil": "Face veil", "acc_wings": "Wings", "acc_feath": "Feathers", "vhHide": "Hide how this piece looks (its stats stay)", "vhShow": "Hidden: click to show it again", "styMore": "Body, face and accessories", "styMoreHi": "What would you like to change?", "styK_skin": "Skin tone", "styK_g": "Male or female", "styK_eye": "Eye colour", "styK_bst": "Beard", "styK_face": "Face", "styK_lip": "Lip colour", "styK_sk": "Trousers or skirt", "styK_acc": "Accessory", "styK_acol": "Accessory colour", "styK_acc2": "Second accessory", "styK_acol2": "Second accessory colour", "skn": "Tone {n}", "h_longS": "Long straight", "h_hime": "Hime cut", "h_bob": "Bob with bangs", "h_bobS": "Side bob", "h_braid": "Braid", "h_twinB": "Twin braids", "h_hbun": "High bun", "h_sidep": "Side ponytail", "h_wavy": "Long wavy", "h_shoulder": "Shoulder length", "h_ponyH": "High ponytail", "h_lowTw": "Low twin tails", "h_odango": "Double buns", "h_emo": "Fringe over one eye", "h_undercut": "Undercut", "h_slick": "Slicked back", "h_topknot": "Topknot", "h_afro": "Afro", "h_wolf": "Wolf cut", "h_spikyL": "Long spiky", "h_princess": "Long half-up bun", "eye0": "Default", "eye1": "Blue", "eye2": "Green", "eye3": "Hazel", "eye4": "Violet", "eye5": "Red", "eye6": "Cyan", "eye7": "Gold", "eye8": "Grey", "eye9": "Pink", "eye10": "Ice", "eye11": "Black", "lip0": "Natural", "lip1": "Rose", "lip2": "Deep red", "lip3": "Light pink", "lip4": "Berry", "lip5": "Coral", "lip6": "Wine", "lip7": "Nude", "acn0": "Gold", "acn1": "Silver", "acn2": "Black", "acn3": "Red", "acn4": "Blue", "acn5": "Green", "acn6": "Pink", "acn7": "Purple", "acn8": "Orange", "acn9": "Cyan", "acn10": "Brown", "acn11": "White", "hc10": "Jet black", "hc11": "Light brown", "hc12": "Platinum", "hc13": "Silver grey", "hc14": "Sky blue", "hc15": "Green", "hc16": "Gold", "hc17": "Wine", "hc18": "Lavender", "hc19": "Coral", "top10": "White", "top11": "Navy", "top12": "Yellow", "top13": "Pink", "top14": "Brown", "top15": "Sky", "top16": "Maroon", "top17": "Lilac"});
 Object.assign(STR.ar,{"h_crew": "قصة كرو", "h_fringeS": "قصير بغرة", "h_curtain": "مفروق من النص", "h_spikyS": "منكوش قصير", "h_mop": "شعر كثيف", "h_sideS": "جانبي قصير", "h_midS": "متوسط جانبي", "h_longP": "طويل مفروق", "h_longF": "طويل بغرة كاملة", "h_longSd": "طويل جانبي", "h_waist": "لحد الوسط", "h_wavyF": "مموّج بغرة", "h_wavyL": "مموّج طويل جانبي", "h_curlsS": "كيرلي لحد الكتف", "h_bobP": "بوب مفروق", "h_bobE": "بوب بغرة على عين", "h_emoL": "طويل بغرة على عين", "h_braidL": "طويل بضفيرة", "h_braidF": "ضفيرة بغرة", "h_twinBs": "ضفيرتين جانبي", "h_twinS": "ديلين بغرة", "h_hbunF": "كعكة بغرة", "h_hbunL": "كعكة وشعر طويل", "h_ponyF": "ديل حصان بغرة", "h_ponyP": "ديل حصان مفروق", "h_sidepF": "ديل جانبي بغرة", "h_sidepL": "ديل جانبي طويل", "h_odangoL": "كعكتين وشعر طويل", "h_odangoS": "كعكتين قصير", "h_knotL": "كعكة محارب", "h_knotF": "كعكة صغيرة", "h_princessF": "أميرة بغرة", "h_halfUp": "نص كعكة", "h_undercutL": "أندركت طويل", "h_pompadour": "بومبادور", "h_faux": "فوهوك", "h_wolfL": "وولف طويل", "h_mullet": "ماليت", "h_shag": "شاج", "h_lionM": "لبدة أسد", "h_slickL": "لورا طويل", "h_bangsW": "مموّج بغرة طويل", "styMirror": "المراية", "styNowT": "دلوقتي", "styNewT": "بعد التغيير", "styNoNew": "قف على اختيار تشوفه", "styAuto": "لف"});
@@ -2927,7 +2937,7 @@ function bhRespawn(){const R=BHR,b=bhS();P.hp=Math.round(maxHP()*.5);P.inv=2;cvs
  toast(t('bhFail'),'warn');if(b.sv&&R&&b.sv<=R.n){toast(t('bhToSave',{n:bhOrd(b.sv)}));bhEnter(b.sv);}else{toast(t('bhOut',{n:bhOrd(R?R.n:1)}));bhLeave();}hudDirty=true;}
 // the gate on the bridge off the south coast
 // the gate goes on from the first island not cleared yet (owner 2026-10-22: "take me back to the last island I reached")
-function bhAsk(){const b=bhS();const nx=Math.min(66,b.best+1),o=[...(b.best>0&&b.best<66?[{l:t('bhGoNx',{n:bhOrd(nx)}),f:()=>bhEnter(nx)}]:[]),{l:t('bhGo1'),f:()=>bhEnter(1)}];if(b.sv)o.push({l:t('bhGoSv',{n:bhOrd(b.sv)}),f:()=>bhEnter(b.sv)});if(b.pur)o.push({l:t('bhGoHall'),f:()=>bhHall()});o.push({l:t('bhNo')});
+function bhAsk(){const b=bhS();const nx=Math.min(66,b.best+1),o=[...(b.best>0&&b.best<66?[{l:t('bhGoNx',{n:bhOrd(nx)}),f:()=>bhEnter(nx)}]:[]),{l:t('bhGo1'),f:()=>bhEnter(1)}];if(b.sv)o.push({l:t('bhGoSv',{n:bhOrd(b.sv)}),f:()=>bhEnter(b.sv)});if(b.pur)o.push({l:t('bhGoHall'),f:()=>bhHall()});o.push(...stEcGift());o.push({l:t('bhNo')});
  dialog('bhSys',[bhSys('bhAsk1'),bhSys('bhAsk2'),t('bhMyRec',{f:b.best,c:b.cp.toLocaleString('en')})],null,o);}
 function bhUse(g){if(g.bh==='enter')return bhAsk();const R=BHR;if(!R)return;
  if(g.bh==='next')return bhNext();
@@ -2959,7 +2969,7 @@ function sticksOpts(){const b=bhS(),R=BHR;if(!R)return [];
  if(R.o.k==='sticks'&&!b.st){if(!b.sq)return [{l:t('bhSqTake'),f:()=>dialog('bhSys',[t('bhSq1'),t('bhSq2'),t('bhSq3')],null,[{l:t('bhYes'),f:()=>{b.sq=1;addMat('wtleaf',6);toast(t('bhSqRec'),'good');SFX.quest();save(true);}},{l:t('bhNo')}])}];
   return [{l:t('bhSqGive'),f:()=>{if(!(S.mats.bcoco>=1&&S.mats.wtleaf>=1)){toast(t('bhSqNeed'),'warn');SFX.deny();return;}S.mats.bcoco--;S.mats.wtleaf--;b.st=1;addAff('sticks',100);
    dialog('sticks',[bhSys('bhSqMade'),bhSys('bhSqOk'),bhSys('bhSqAff'),t('bhSt1'),t('bhSt2'),t('bhSt3')],()=>{toast(t(isLeg()?'bhHofL':'bhHof'),'good');SFX.rare();if(BHR===R)bhClear();});save(true);}}];}
- const o=[{l:t('bhStLore'),f:()=>dialog('sticks',[t('bhSt4'),t('bhSt5'),t('bhSt6')],()=>shopD('sticks','bhStHi'))},...sticksScroll()];
+ const o=[{l:t('bhStLore'),f:()=>dialog('sticks',[t('bhSt4'),t('bhSt5'),t('bhSt6')],()=>shopD('sticks','bhStHi'))},...sticksScroll(),...stEcGift()];
  if(b.pur&&!S.tl.hking)o.push({l:t('bhStKing'),f:()=>{dialog('sticks',[bhSys('bhKing1'),t('bhKing2')],()=>giveTitle('hking'));}});
  if(R.o.k==='save'&&b.best<66)o.push({l:t('bhStOut'),f:()=>dialog('sticks',[t('bhStOutL')],null,[{l:t('bhYes'),f:bhLeave},{l:t('bhNo')}])});
  return o;}
@@ -3067,7 +3077,9 @@ function bhHud(){const R=BHR;if(!R||R.ph!=='go'&&!(R.ph==='rest'&&R.t>0))return 
 function bhNpcVis(){const n=npcs.find(n=>n.id==='sticks');if(!n)return;const R=BHR,on=!!R&&R.B.k==='palm'&&(R.o.k==='sticks'||R.o.k==='save'&&!!bhS().st);
  if(on){const p=bhPx(R.B.x0+29,BHCY+2);n.x=p.x;n.y=p.y+2;}n.hidden=!on;}
 // the 41st island's double: your own look, darkened, with your own weapon
-function drawClone(m){const x=Math.round(m.x),y=Math.round(m.y),d=m.face>0?2:3;ctx.save();ctx.fillStyle='rgba(40,0,60,.35)';ctx.beginPath();ctx.ellipse(x,y,9,3,0,0,7);ctx.fill();ctx.filter='brightness(.55) saturate(.6)';
+function drawClone(m){const x=Math.round(m.x),y=Math.round(m.y),d=m.face>0?2:3;if(m.card){const c=m.card;ctx.save();ctx.fillStyle='rgba(242,193,78,.25)';ctx.beginPath();ctx.ellipse(x,y,9,3,0,0,7);ctx.fill();
+  try{drawChar(remoteSpr(c.L,c.arm,null,c.lk,c.bd,c.gr),x,y,d,m.mvd?((m.at||0)*6|0)%2:0,m.hurt>0,0);if(c.w)weapPix(ctx,x+(d===3?-6:5),y-7,c.w,d);}catch(e){}ctx.restore();return;}
+ ctx.save();ctx.fillStyle='rgba(40,0,60,.35)';ctx.beginPath();ctx.ellipse(x,y,9,3,0,0,7);ctx.fill();ctx.filter='brightness(.55) saturate(.6)';
  try{drawChar(pSpr(),x,y,d,m.mvd?((m.at||0)*6|0)%2:0,m.hurt>0,0);weapPix(ctx,x+(d===3?-6:5),y-7,weapon(),d);}catch(e){}ctx.restore();}
 // the Hero King title: great demons and dragons
 const HKV=new Set(['furfu','trauka']);
@@ -5382,8 +5394,14 @@ var RNKD=null,rkT=-1e9,rkPutT=-1e9,rkLast='';
 function rkOnline(){return !!(FB&&netUser&&NET&&NETTR&&NETTR.kind==='firebase');}
 function rankTick(live){if(!live||!rkOnline()||!S||S.__demo)return;const now=performance.now();
  if(now-rkPutT>120000){rkPutT=now;const sig=(S.lv|0)+'|'+rkWealth();if(sig!==rkLast){rkLast=sig;const D=FB.m.database,u={},n=String(netId||S.look.n||'?').slice(0,24);
-  u['ranks/lv/'+NET.uid]={v:S.lv|0,n,t:D.serverTimestamp()};u['ranks/gold/'+NET.uid]={v:rkWealth(),n,t:D.serverTimestamp()};D.update(D.ref(FB.db),u).catch(()=>{rkLast='';});}}
+  u['ranks/lv/'+NET.uid]={v:S.lv|0,n,t:D.serverTimestamp()};u['ranks/gold/'+NET.uid]={v:rkWealth(),n,t:D.serverTimestamp()};D.update(D.ref(FB.db),u).catch(()=>{rkLast='';});try{D.set(D.ref(FB.db,'arenaCard/'+NET.uid),arCard(n)).catch(()=>{});}catch(e){}}}
  if(now-rkT>90000){rkT=now;Promise.all([rankTop('lv'),rankTop('gold')]).then(([lv,gold])=>{RNKD={lv:rankMix('lv',lv),gold:rankMix('gold',gold)};}).catch(()=>{});}}
+// a player's battle card for the tournament (owner 2026-10-24): what a copy of them needs, a string the rules bound
+function arCard(n){const w=weapon(),sk=barSkills().filter(k=>k&&SKF[k]&&SKD[k]&&!SKD[k].pas).slice(0,8),L=S.look||{};
+ return JSON.stringify({v:1,n:String(n).slice(0,24),lv:S.lv|0,cls:String(S.cls||'novice').slice(0,16),hp:maxHP()|0,dps:Math.round(atkV()*lvF(S.lv)/atkCD()),cd:+atkCD().toFixed(3),sk,
+  w:w&&WSH[w.id]?{id:w.id,r:w.r|0,cw:w.cw||''}:null,L:{hair:(L.hair|0)&31,hc:L.hc|0,skin:L.skin|0,top:L.top|0},arm:armorIt()&&!vhOn('a')?1:0,lk:lkPub()||'',bd:bdPub()||'',gr:grPub()||''}).slice(0,1500);}
+function arCardOf(v){try{const c=JSON.parse(v);if(!c||c.v!==1||!(c.lv>0)||!Array.isArray(c.sk))return null;c.n=Satisfy.chat.clean(c.n,24)||'?';c.sk=c.sk.filter(k=>typeof k==='string'&&SKF[k]&&SKD[k]&&!SKD[k].pas&&!MIRX.has(k)).slice(0,8);
+ if(c.w&&!WSH[c.w.id])c.w=null;c.dps=Math.max(1,+c.dps||1);c.hp=Math.max(1,+c.hp||1);c.cd=Math.min(3,Math.max(.2,+c.cd||1));return c;}catch(e){return null;}}
 function rankTop(k){const D=FB.m.database,ref=D.ref(FB.db,'ranks/'+k),q=D.limitToLast&&D.orderByChild?D.query(ref,D.orderByChild('v'),D.limitToLast(10)):ref;
  return D.get(q).then(s=>{const v=s.val()||{},a=[];for(const u in v)if(v[u]&&typeof v[u].v==='number')a.push({pid:u===NET.uid?pidOf():'u:'+u,n:Satisfy.chat.clean(v[u].n,24)||'?',v:v[u].v});return a.sort((x,y)=>y.v-x.v).slice(0,10);});}
 function rankMix(kind,real){return [...real,...RKN.map(([k,lv,g])=>({n:t('rk_'+k),v:kind==='lv'?lv:g}))];}
@@ -5522,12 +5540,33 @@ function npcHit(n,m){if(p6Ally(n.id)){vfx('hit',n.x,n.y-10,{angle:m.face>0?0:Mat
 // townsfolk fight back: guards and trainers strike invaders from a few steps away, everyone else hits whatever is beating
 // on them. A monster struck by an NPC turns on them, and NPCs can finish monsters off (no reward for you then)
 const NPCF=/^(guard|pcap|coach|tk|ta|tw|tm|regas|khan|smith|armorer)/;
-function npcFight(dt){if(!EV||!EV.e.tw)return;const T=TOWNS.find(T=>T.k===EV.e.tw);if(!T)return;const live=EV.mons.filter(m=>!m.dead);if(!live.length)return;
- for(const n of npcs){if(n.hidden||n.obj||n.y>=WMH*TS||npcKO(n.id)||Math.hypot(n.x-T.rx*TS,n.y-T.ry*TS)>(T.x1-T.x0)*TS)continue;n.acd=(n.acd||0)-dt;if(n.acd>0)continue;
-  const ft=NPCF.test(n.id),reach=ft?80:28;let tg=null,bd=reach;for(const m of live){const d=Math.hypot(m.x-n.x,m.y-n.y);if(d<bd){bd=d;tg=m;}}if(!tg)continue;
-  n.acd=ft?1.1:1.7;n.dir=Math.abs(tg.x-n.x)>Math.abs(tg.y-n.y)?(tg.x>n.x?2:3):(tg.y>n.y?0:1);const d=Math.round(tg.max*(ft?.09:.04)*(.85+rand()*.3));tg.hp-=d;if(MT[tg.type])netHit(tg,d,1);tg.hurt=.12;tg.nt=n;tg.ntT=3;
-  vfx(ft&&bd>30?'hit':'slash',tg.x,monY(tg),{angle:Math.atan2(tg.y-n.y,tg.x-n.x),rarity:1});num(tg.x+(rand()-.5)*8,monY(tg)-12,String(d),'#9fd8ff',false);
-  if(tg.hp<=0){tg.dead=true;tg.rt=1e9;dissolve(tg.x,tg.y-8,['#fff','#ff7a5a'],12);}}}
+// a step toward (gx,gy) that slides along walls; true while still on the way
+function npcStep(n,gx,gy,sp,dt){const dx=gx-n.x,dy=gy-n.y,dd=Math.hypot(dx,dy);if(dd<1.5)return false;const k=Math.min(dd,sp*dt)/dd,nx=n.x+dx*k,ny=n.y+dy*k;
+ if(!solidT(nx/TS|0,ny/TS|0)){n.x=nx;n.y=ny;}else if(!solidT(nx/TS|0,n.y/TS|0))n.x=nx;else if(!solidT(n.x/TS|0,ny/TS|0))n.y=ny;
+ n.at=(n.at||0)+dt;n.dir=Math.abs(dx)>Math.abs(dy)?(dx>0?2:3):(dy>0?0:1);return true;}
+function npcDmg(n,tg,p){const d=Math.max(1,Math.round(tg.max*p*(tg.cap?.35:1)*(.85+rand()*.3)));tg.hp-=d;if(MT[tg.type])netHit(tg,d,1);tg.hurt=.12;if(n.id)tg.nt=n;tg.ntT=3;
+ num(tg.x+(rand()-.5)*8,monY(tg)-12,String(d),'#9fd8ff',false);if(tg.hp<=0){tg.dead=true;tg.rt=1e9;dissolve(tg.x,tg.y-8,['#fff','#ff7a5a'],12);}}
+// a fighter's skill: which one is theirs follows their name, so each guard fights the same way every time
+const NPSK=['whirl','dash','volley','quake'];
+function npcSkill(n,tg,live){const k=NPSK[strH(String(n.id))%NPSK.length],a=Math.atan2(tg.y-n.y,tg.x-n.x);num(n.x,n.y-30,t('nsk_'+k),'#ffe07a',false);sfxAt(n.x,n.y,()=>SFX.swing(),.6);
+ if(k==='whirl'){vfx('crescent',n.x,n.y-6,{raw:1,angle:a,big:1.3,color:'#cfe8ff'});vfx('shock',n.x,n.y,{raw:1,radius:40,color:'#bfe0ff'});for(const m of live)if(!m.dead&&Math.hypot(m.x-n.x,m.y-n.y)<44)npcDmg(n,m,.1);}
+ else if(k==='dash'){const ox=n.x,oy=n.y;npcStep(n,tg.x-Math.cos(a)*12,tg.y-Math.sin(a)*6,900,.06);fx.push({bolt:[[ox,oy-10],[n.x,n.y-10]],t:.15});vfx('xcut',tg.x,monY(tg),{raw:1,color:'#ffe0a0',big:1});npcDmg(n,tg,.16);}
+ else if(k==='volley'){const ts=live.filter(m=>!m.dead&&Math.hypot(m.x-n.x,m.y-n.y)<120).slice(0,4);vfx('flyBlades',n.x,n.y-10,{raw:1,pts:ts.map(m=>[m.x,monY(m)]),color:'#d8e8ff'});for(const m of ts)npcDmg(n,m,.08);}
+ else{vfx('shock',n.x,n.y+2,{raw:1,radius:56,color:'#e8c890'});vfx('dust',n.x,n.y,{n:10});for(const m of live)if(!m.dead&&Math.hypot(m.x-n.x,m.y-n.y)<58){npcDmg(n,m,.07);m.stun=Math.max(m.stun||0,.6);}}}
+function npcFight(dt){const T=EV&&EV.e.tw?TOWNS.find(T=>T.k===EV.e.tw):null,live=T?EV.mons.filter(m=>!m.dead):[];
+ for(const n of npcs){if(n.hidden||n.obj||n.y>=WMH*TS||p6Ally(n.id)||npcKO(n.id))continue;   // a knocked-out one lies where it fell
+  const atWar=T&&Math.hypot((n.hx??n.x)-T.rx*TS,(n.hy??n.y)-T.ry*TS)<=(T.x1-T.x0)*TS;
+  if(!atWar){if(n.hx!=null&&!npcStep(n,n.hx,n.hy,40,dt)){n.x=n.hx;n.y=n.hy;n.hx=n.hy=null;}continue;}   // the invasion is over (or not here): back to their post
+  if(n.hx==null){n.hx=n.x;n.hy=n.y;}n.acd=(n.acd||0)-dt;n.skT=(n.skT??(2+rand()*4))-dt;
+  const ft=NPCF.test(n.id);let tg=null,bd=ft?240:90;for(const m of live){const d=Math.hypot(m.x-n.x,m.y-n.y);if(d<bd&&(!ft||Math.hypot(m.x-n.hx,m.y-n.hy)<320)){bd=d;tg=m;}}
+  if(!tg){npcStep(n,n.hx,n.hy,40,dt);continue;}
+  if(!ft){if(bd<70)npcStep(n,n.x-(tg.x-n.x)*3,n.y-(tg.y-n.y)*3,48,dt);if(bd>28||n.acd>0)continue;n.acd=1.7;npcDmg(n,tg,.04);vfx('slash',tg.x,monY(tg),{angle:Math.atan2(tg.y-n.y,tg.x-n.x),rarity:1});continue;}   // can't fight: back away, hit what beats on them
+  if(bd>20)npcStep(n,tg.x,tg.y+2,62,dt);
+  if(n.skT<=0&&bd<60){n.skT=5+rand()*3;npcSkill(n,tg,live);continue;}
+  if(bd>26||n.acd>0)continue;n.acd=1.1;n.dir=Math.abs(tg.x-n.x)>Math.abs(tg.y-n.y)?(tg.x>n.x?2:3):(tg.y>n.y?0:1);npcDmg(n,tg,.09);vfx('slash',tg.x,monY(tg),{angle:Math.atan2(tg.y-n.y,tg.x-n.x),rarity:1});}}
+Object.assign(STR.ar,{nsk_whirl:'ضربة دوّارة!',nsk_dash:'اندفاع!',nsk_volley:'وابل نصال!',nsk_quake:'زلزلة!'});
+Object.assign(STR.en,{nsk_whirl:'Whirling Cut!',nsk_dash:'Dash!',nsk_volley:'Blade Volley!',nsk_quake:'Quake!'});
+window.__GNW={fight:dt=>npcFight(dt)}; // tests
 // where to go (Nitro's feedback: 'how do I get there?'): an arrow toward the event and how far, or a line for events that
 // happen everywhere. Distance in tiles, the unit of the big map
 function evArrow(tx,ty){if(!P)return '';const dx=tx*TS+8-P.x,dy=ty*TS+8-P.y,d=Math.round(Math.hypot(dx,dy)/TS);if(d<4)return ' · '+esc(t('evHere'));
@@ -5563,7 +5602,7 @@ function evWinIn(m){const E=EV,f=m.p&&m.p.f;if(!E||typeof E.slot!=='number'||EVT
 function updateEvents(dt){if(!S||!P)return;if(EV&&EV.demo&&!S.__demo){mons=mons.filter(m=>!(m.evt&&EV.mons.includes(m)));EV=null;}const n=evNow();
  if(EV&&(!n||n.slot!==EV.slot))endEvent();if(!EV&&n&&n.slot!==evDone)startEvent(n);
  if((evT-=dt)<=0){evT=1;const b=$('evbar');if(!EV){b.hidden=true;}else{const left=Math.max(0,EV.end-(typeof EV.slot==='number'?wNow():Date.now())),mm=Math.floor(left/60000),ss=String(Math.floor(left/1000)%60).padStart(2,'0');b.hidden=false;b.innerHTML=`<b>${esc(t('evN_'+EV.e.k))}</b> · ${mm}:${ss}`+evWhere(EV.e)+(EV.e.tw?` · ${esc(t('evWaveN',{n:EV.wave,m:EVW}))}`:'')+(EV.e.mob||EV.e.k==='fboss'?` · ${esc(t('evKills',{n:EV.kills}))}`:'');}}
- if(!EV)return;const e=EV.e;npcFight(dt);
+ npcFight(dt);if(!EV)return;const e=EV.e;
  if(e.mob){const T=TOWNS.find(T=>T.k===e.tw);if(T&&Math.hypot(P.x-(T.rx*TS+8),P.y-(T.ry*TS+8))<760){EV.wt=(EV.wt||0)-dt;const alive=EV.mons.filter(m=>!m.dead).length;
   if(EV.wave>=EVW&&!alive&&EV.mons.length){EV.won=1;announce(t('evWon',{z:t(T.k)}));if(e.k==='renW')setTimeout(()=>announce(t('renSpare')),1800);SFX.legendary();evWinSay(EV);endEvent();return;}
   // waves run on world time (one every EVWG from the event's start) and spawn from a seed of the event and the wave, so
@@ -9823,8 +9862,14 @@ function tfAt(f,s){const tau=((s+f.off)%f.len+f.len)%f.len;for(const L of f.legs
   return {x:(L.a.x+dx*u)*TS+8,y:(L.a.y+dy*u)*TS+8,mv:u<1?1:0,dir:Math.abs(dx)>Math.abs(dy)?(dx>0?2:3):(dy>0?0:1)};}const L=f.legs[0];return {x:L.a.x*TS+8,y:L.a.y*TS+8,mv:0,dir:0};}
 const tfSays=(f,s)=>((Math.floor((s+f.ln)/16)+f.ln)%3===0)&&((s+f.ln)%16<4.5)?(Math.floor((s+f.ln)/16)+f.ln)%(f.role==='kid'?5:f.role==='spar'?4:8):-1;
 function tfPlayers(){const L=P&&!P.ghost&&!roomAt(P.x,P.y)?[{x:P.x,y:P.y}]:[];if(NET)for(const r of NET.remotes())if(!r.room&&r.anim!=='dead')L.push({x:r.x,y:r.y});return L;}
+// a townsperson in an invaded town: the sparring partners fight like the guards, the rest run to the nearest door and hide
+function tfWar(f,dt){const T=TOWNS.find(T=>T.k===f.T);if(!EV||EV.e.tw!==f.T||!T){if(f.hid){f.hid=0;f.door=null;}return false;}const live=EV.mons.filter(m=>!m.dead);
+ if(f.role==='spar'){if(f.busy)return false;let tg=null,bd=240;for(const m of live){const d=Math.hypot(m.x-f.x,m.y-f.y);if(d<bd){bd=d;tg=m;}}if(!tg)return false;f.mv=0;
+  if(bd>20){npcStep(f,tg.x,tg.y+2,60,dt);f.mv=1;}f.acd=(f.acd||0)-dt;f.skT=(f.skT??(3+rand()*3))-dt;if(f.skT<=0&&bd<60){f.skT=6+rand()*3;npcSkill(f,tg,live);}else if(bd<=26&&f.acd<=0){f.acd=1.2;npcDmg(f,tg,.07);vfx('slash',tg.x,monY(tg),{angle:Math.atan2(tg.y-f.y,tg.x-f.x),rarity:1});}return true;}
+ if(f.hid)return true;if(!f.door){let bd=1e9;for(const R of ROOMS){if(!['house','inn','shop','lodge'].includes(R.kind)||!inTown(R.dx,R.dy)||inTown(R.dx,R.dy).k!==f.T)continue;const d=Math.hypot(R.dx-f.x,R.dy-f.y);if(d<bd){bd=d;f.door=R;}}if(!f.door)return false;}
+ f.mv=1;if(!npcStep(f,f.door.dx,f.door.dy-2,f.role==='kid'?70:55,dt)||Math.hypot(f.door.dx-f.x,f.door.dy-f.y)<6){f.hid=1;dissolve(f.x,f.y-8,['#fff'],4);}return true;}
 function tfTick(dt){if(!TF)tfBuild();if(!P)return;const s=tfNow(),pl=tfPlayers();
- for(const f of TF){if(Math.abs(f.x-P.x)>1200||Math.abs(f.y-P.y)>900){const q=tfAt(f,s);f.x=q.x;f.y=q.y;continue;}
+ for(const f of TF){if(tfWar(f,dt))continue;if(Math.abs(f.x-P.x)>1200||Math.abs(f.y-P.y)>900){const q=tfAt(f,s);f.x=q.x;f.y=q.y;continue;}
   const q=tfAt(f,s);let tx=q.x,ty=q.y;f.dir=q.dir;f.mv=q.mv;
   if(f.role==='kid'){let best=null,bd=70;for(const p of pl){const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<bd){bd=d;best=p;}}
    if(best){const a=s*2.2+f.ln;tx=best.x+Math.cos(a)*22;ty=best.y+Math.sin(a)*12;const dx=tx-f.x;f.mv=1;f.dir=Math.abs(dx)>Math.abs(ty-f.y)?(dx>0?2:3):(ty>f.y?0:1);}}
@@ -9834,11 +9879,11 @@ function tfTick(dt){if(!TF)tfBuild();if(!P)return;const s=tfNow(),pl=tfPlayers()
  for(const m of TFB){const st=TFS.get(m)||{};TFS.set(m,st);const e=m.eng>0&&!m.dead;if(e&&!st.e&&(st.at||0)<gTime-12){st.at=gTime;st.n=(st.n||0)+1;st.s=t('bdSay'+((monHash(m)*4+st.n)%4|0));st.t=gTime+2.6;}st.e=e;}
  if(SPAR){const m=SPAR.m;SPAR.t+=dt;if(m.dead||mode==='dead'||P.hp<maxHP()*.25||SPAR.t>90||Math.hypot(P.x-m.x,P.y-m.y)>300)sparEnd(!m.dead&&m.hp<=m.max*.25||m.dead&&SPAR.won);else if(m.hp<=m.max*.25)sparEnd(true);}}
 window.__GFX={pmKnown:w=>pmKnown(w),map:w=>mapOpt(w).length,turn:(m,b,ox,dt)=>monTurn(m,b,ox,dt),tf:()=>TF,tick:dt=>tfTick(dt)}; // tests (owner fixes v1.05)
-function tfVis(){return TF?TF.filter(f=>!f.busy&&f.x>camX-20&&f.x<camX+VW+20&&f.y>camY-10&&f.y<camY+VH+40):[];}
+function tfVis(){return TF?TF.filter(f=>!f.busy&&!f.hid&&f.x>camX-20&&f.x<camX+VW+20&&f.y>camY-10&&f.y<camY+VH+40):[];}
 function tfDraw(f){drawChar(remoteSpr(f.look,0),f.x,f.y,f.dir,f.mv,false,f.sc);}
 function tfText(f){const s=tfNow(),i=tfSays(f,s),F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';if(i>=0)TX.push({s:t('tfL_'+f.role+i),x:f.x,y:f.y-30*f.sc,f:F,z:7,c:'#fff3d6'});
  if(Math.hypot(f.x-P.x,f.y-P.y)<60)TX.push({s:t('tfN_'+f.role),x:f.x,y:f.y-(i>=0?40:30)*f.sc,f:F,z:6,c:f.role==='spar'?'#ffc070':'#bfe8ff'});}
-function tfNear(){return TF&&P?TF.filter(f=>!f.busy&&f.role!=='kid'&&Math.abs(f.x-P.x)<40&&Math.abs(f.y-P.y)<40):[];}
+function tfNear(){return TF&&P?TF.filter(f=>!f.busy&&!f.hid&&f.role!=='kid'&&Math.abs(f.x-P.x)<40&&Math.abs(f.y-P.y)<40):[];}
 function tfTalk(f){const L=['tfL_'+f.role+((tfNow()/7+f.ln)%(f.role==='spar'?4:8)|0)];
  if(f.role==='spar'&&!SPAR)dialog('tfN_spar',[...L,'tfSparQ'],null,[{l:t('tfSparY'),f:()=>sparStart(f)},{l:t('oClose')}]);else dialog('tfN_'+f.role,L);}
 function sparStart(f){if(SPAR||!P)return;const m=newMon('outlaw',f.x,f.y);Object.assign(m,{spar:1,tmp:1,look:f.look,nm:t('tfN_spar'),lv:S.lv,eng:4,agg:1,face:P.x>f.x?1:-1});
@@ -11286,7 +11331,11 @@ function eaAct(o){const A=EAS();
  if(o.k==='phxseal'){if(!(S.qs.ea5&&S.qs.ea5.st===1)){return dialog('bhSys',['eaPs0']);}A.ps=A.ps||{};if(A.ps[o.i]){toast(t('eaPsDone'));return;}A.ps[o.i]=1;qEvent('visit','phxseal');vfx('fire',o.x,o.y-6);SFX.legendary();toast(t('eaPsBreak',{n:Object.keys(A.ps).length}),'good');save(true);return;}
  if(o.k==='btshrine'){if(S.qs.ea7&&S.qs.ea7.st===1&&!qReady('ea7')){qEvent('visit','btshrine');SFX.legendary();vfx('levelup',o.x,o.y);return dialog('bhSys',[bhSys('eaBt1'),bhSys('eaBt2')]);}return dialog('bhSys',['eaBt0']);}}
 // the two circles: "the magic circle" takes you across for a fee once you have crossed by the scroll
-function eaCircle(east){const A=EAS();if(!A.v&&!(S.bh&&S.bh.pur))return dialog('bhSys',['eaCirc0']);   // (a purifier of Behen may cross by it first: owner 2026-10-24)
+// Sticks's gift to the one who purified the archipelago: an East Continent Portal Scroll, free, once
+function stEcGift(){const b=bhS();if(!b.pur||b.ecf)return [];return [{l:t('bhStEc'),f:()=>{if(b.ecf)return;b.ecf=1;addMat('ecscr',1);SFX.legendary();dialog('sticks',[t('bhStEc1'),t('bhStEc2')],()=>toast(t('bhEcsOk'),'good'));save(true);}}];}
+Object.assign(STR.ar,{bhStEc:'ستيكس: هدية للي طهّر الأرخبيل',bhStEc1:'إنت اللي رجعت الجزر دي للحياة. خد دي، لفافة بوابة القارة الشرقية. مش هتحتاج تدفع حاجة.',bhStEc2:'بعد ما توصل هناك مرة، دايرة السحر في راينهارت هترجعك وتوديك وقت ما تحب.'});
+Object.assign(STR.en,{bhStEc:"Sticks: a gift for the archipelago's purifier",bhStEc1:'You brought these islands back to life. Take this, an East Continent Portal Scroll. It costs you nothing.',bhStEc2:"Once you've been there, the magic circle in Reinhardt will take you back and forth whenever you like."});
+function eaCircle(east){const A=EAS();if(!A.v)return dialog('bhSys',['eaCirc0']);   // only once you have been there (owner 2026-10-24; the first crossing is by the scroll, Sticks gives one)
  const g=ECFEE;
  dialog('bhSys',[east?'eaCircE':'eaCircW'],null,[{l:t('eaCircGo',{g:fmtN(g)}),poor:S.gold<g,f:()=>{if(S.gold<g){SFX.deny();return toast(t('noGold'),'warn');}if(scrollBlock()){SFX.deny();return toast(t('rsNo'),'warn');}S.gold-=g;SFX.coin();eaCross(!east);}},{l:t('oLeave')}]);}
 // crossing the Red Sea: by the scroll or a circle; to the East you land in the White Tree Forest, to the West at your inn there
@@ -12629,10 +12678,10 @@ function mirHurt(m,R,k){if(!R||R.err||mode==='dead')return;
 // the skills the clone can use: those on your bar that you could cast now with the weapon you hold. MIRX: the few that leave
 // something behind on the field (a rot, a trap, a thrown shield, a tree...) that would turn on the clone itself; it leaves those out
 const MIRX=new Set(['bgblade','wlrot','dsvind','dsdest','salife','cry','gkthrow','eswave','trap','mmtree','lfsow','lfprov','lkvaintz','lkwings']);
-function mirSkills(){const wk=weapKind();return barSkills().filter(k=>k&&SKF[k]&&SKD[k]&&!SKD[k].pas&&!MIRX.has(k)&&skOK(k)&&!((SKD[k].need==='bow'&&wk!=='bow')||(SKD[k].need==='staff'&&wk!=='staff')||(SKD[k].need==='melee'&&(wk==='bow'||wk==='staff'))||(SKD[k].need==='spear'&&wk!=='spear')));}
-function mirLearn(m){m.msk=[];m.mcd={};const wk=weapKind();m.mfar=(wk==='bow'||wk==='staff')&&!hcMelee();
+function mirSkills(m){const c=m&&m.card;if(c)return c.sk.filter(k=>SKF[k]&&SKD[k]&&!SKD[k].pas&&!MIRX.has(k));const wk=weapKind();return barSkills().filter(k=>k&&SKF[k]&&SKD[k]&&!SKD[k].pas&&!MIRX.has(k)&&skOK(k)&&!((SKD[k].need==='bow'&&wk!=='bow')||(SKD[k].need==='staff'&&wk!=='staff')||(SKD[k].need==='melee'&&(wk==='bow'||wk==='staff'))||(SKD[k].need==='spear'&&wk!=='spear')));}
+function mirLearn(m){m.msk=[];m.mcd={};const c=m.card,wk=c?(c.w&&WSH[c.w.id]?WSH[c.w.id].k:'sword'):weapKind();m.mfar=c?wk==='bow'||wk==='staff':(wk==='bow'||wk==='staff')&&!hcMelee();
  const dx=P.x-m.x,dy=P.y-m.y,l=Math.hypot(dx,dy)||1,ux=dx/l,uy=dy/l;
- for(const k of mirSkills()){const a=mirRun(m,()=>SKF[k](),{dry:1,at:[m.x+ux*22,m.y+uy*22]}),b=mirRun(m,()=>SKF[k](),{dry:1,at:[m.x+ux*140,m.y+uy*140]});if(!a||!b||a.err||b.err)continue;
+ for(const k of mirSkills(m)){const a=mirRun(m,()=>SKF[k](),{dry:1,at:[m.x+ux*22,m.y+uy*22]}),b=mirRun(m,()=>SKF[k](),{dry:1,at:[m.x+ux*140,m.y+uy*140]});if(!a||!b||a.err||b.err)continue;
   const near=a.mul>0||a.shot>0||a.later>0,far=b.mul>0||b.shot>0,mob=!!(a.dash||a.moved),heal=a.heal>0&&!near;
   m.msk.push({k,near,far,mob,heal,buff:!near&&!far&&!mob&&!heal});}
  return m.msk;}
@@ -12651,12 +12700,12 @@ function mirTick(m,b,dx,dy,d,mr,dt){if(!m.msk)mirLearn(m);m.face=dx>0?1:-1;
  if(m.mgap<=0){const s=mirPick(m,d);if(s){mirCast(m,s);m.mgap=1+rand()*.7;return;}}
  const want=m.mfar?110:14;
  if(d>want+6)chase(m,dx,dy,d,b.spd*1.1,mr,dt);else if(m.mfar&&d<60){const l=d||1;move(m,-dx/l*b.spd*dt,-dy/l*b.spd*dt,mr);m.mvd=1;}
- if(m.macd<=0&&d<(m.mfar?190:28)&&seeP(m)){m.macd=atkCD()*1.2;const l=d||1,R=mirRun(m,()=>tryAttack(dx/l,dy/l));mirHurt(m,R,null);}}
+ if(m.macd<=0&&d<(m.mfar?190:28)&&seeP(m)){m.macd=(m.card?m.card.cd:atkCD())*1.2;const l=d||1,R=mirRun(m,()=>tryAttack(dx/l,dy/l));mirHurt(m,R,null);}}
 // a shot the clone loosed flies at you, not at the monsters
 function mirProj(p){if(p.t<=0||hitTrees(p.x,p.y,10)||p4PSolid(Math.floor(p.x/TS),Math.floor((p.y+8)/TS)))return false;
  if(mode!=='dead'&&!(p.hitP)&&Math.hypot(P.x-p.x,P.y-8-p.y)<9){p.hitP=1;const r=hurtPlayer(mirPow(p.mir)*(p.mul||1),p.mir.lv,p.mir);if(r&&p.stun)P.stun=Math.max(P.stun||0,Math.min(1.5,p.stun));return !!p.pierce;}
  return true;}
-window.__GMIR={learn:mirLearn,skills:mirSkills,pick:mirPick,cast:mirCast,run:mirRun,tick:mirTick};
+window.__GMIR={card:n=>arCard(n),cardOf:v=>arCardOf(v),list:r=>arenaList(r),go:l=>arenaGo(l),learn:mirLearn,skills:mirSkills,pick:mirPick,cast:mirCast,run:mirRun,tick:mirTick};
 // ---- every fusion of Pagma's sword dances in the novel (owner 2026-10-23: "make sure there are no more Pagma combinations like
 // Linked Kill Wave; I remember him fusing three other dances more than once; make sure you added everything he has").
 // Notes in project files legends/pagma-fusions.md. The dances of Grid's own swordsmanship join the seven (Flower, Chop, Drop,
@@ -15042,7 +15091,7 @@ function netStop(){mobStop();if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(
 // rankings (055), this and last month's arena rating (053), the weekly lockouts (059), the group finder entry (073). A held legend is freed too.
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
  const nc=Satisfy.natcomp?Satisfy.natcomp.now(wNow()):null,ni=nc?+nc.id.slice(1):-1; /* the National Competition's last two (SAT-ONLINE-069) */
- return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
+ return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arenaCard/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
 /* owner 2026-10-21: no "Download my online data" and no manual Upload/Download of characters: a character moves only by
    the automatic sync (cloudAuto while playing, cloudPull on sign-in), so no copy of it can be made by hand. */
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid,lf=erase?Promise.all([legFree(uid),frFree()]):null;netStop();
