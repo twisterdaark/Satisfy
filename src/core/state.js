@@ -38,6 +38,8 @@
     'rord',
     // Three Crowns at the inns: games won and played (SAT-ONLINE-181)
     'cg',
+    // the heaviest fish of each kind you have caught (SAT-ONLINE-182)
+    'fishR',
     // mounts and pets owned/active (SAT-MOUNT), the daily arena lockout (a date, so it must sync)
     'mounts', 'mount', 'pets', 'pet', 'arenaDay',
     // achievements earned (SAT-ACH-001), arena wins and the highest level ever reached (SAT-RANK-001),

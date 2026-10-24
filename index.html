@@ -5447,10 +5447,36 @@ const LIFE=['fish','herb','cook','alch','sew','farm','bard'],LIFEM=['fish','sfis
 const lifeLv=k=>Math.max(1,LXP.filter(x=>((S&&S.life||{})[k]||0)>=x).length);
 function lifeXP(k,n){if(S.pet==='cat')n=Math.round(n*(1+petB('cat')));S.life=S.life||{};const l0=lifeLv(k);S.life[k]=(S.life[k]||0)+n;if(lifeLv(k)>l0){toast(t('lifeUp',{s:t('life_'+k),n:lifeLv(k)}),'good');SFX.level();}}
 // fishing: stand by the water and press E to cast, wait for the bite, press E again before it gets away
+/* ---------------- fishing feel (SAT-ONLINE-182; the owner, 2026-10-24: "improve the visuals and effects; make the game more
+   fun") ----------------
+   Rings spread from the float while you wait; at the bite the water splashes; a catch leaps out of the water in an arc
+   to you, and weighs something (by kind and your Fishing level: the heavy ones are rare), with your heaviest of each kind
+   kept (S.fishR) and a new record cheered; a fish that gets away splashes off. The weight and the drawing use their own
+   random stream (FSR), so the game's (rand) moves exactly as before: what you catch and how often are unchanged. */
+Object.assign(STR.ar,{fKg:'{w} كيلو',fRec:'رقم قياسي جديد! {it} وزنها {w} كيلو',fCaught:'اصطدت {it} وزنها {w} كيلو'});
+Object.assign(STR.en,{fKg:'{w} kg',fRec:'New record! A {w} kg {it}',fCaught:'You caught a {w} kg {it}'});
+const FSW={fish:[.4,2.6,'#8aa8c8','#5a7898'],sfish:[.6,3.4,'#e8f4ff','#9ab8d8'],gfish:[1.2,5.5,'#ffd23a','#c8901a']},FSR=mulberry32(0xf15a);
+let FLEAP=[];
+function fsWeight(k,lv){const W0=FSW[k]||FSW.fish,r=FSR();return Math.round((W0[0]+(W0[1]-W0[0])*Math.pow(r,1.6))*(1+lv*.02)*10)/10;}
+function fsSplash(x,y,n){for(let i=0;i<n;i++){const a=-Math.PI*(.15+FSR()*.7);fx.push({x:x+(FSR()-.5)*4,y:y-1,vx:Math.cos(a)*(20+FSR()*40),vy:Math.sin(a)*(40+FSR()*50),t:.45,c:FSR()<.5?'#cfeaff':'#ffffff'});}}
+function fsBite(F){fsSplash(F.x,F.y,RMO?3:9);}
+function fsMiss(F){fsSplash(F.x,F.y,RMO?2:6);}
+function fsCatch(F,k){const lv=lifeLv('fish'),w=fsWeight(k,lv),R=S.fishR||(S.fishR={}),prev=R[k],rec=prev!=null&&w>prev;if(prev==null||w>prev)R[k]=w;
+ FLEAP.push({k,x0:F.x,y0:F.y,t:0,w,rec});fsSplash(F.x,F.y,RMO?3:12);
+ setTimeout(()=>{num(P.x,P.y-30,t('fKg',{w:w.toFixed(1)}),rec?'#ffe07a':'#cfeaff',rec);if(rec){toast(t('fRec',{it:t(k),w:w.toFixed(1)}),'good');SFX.rare();vfx('loot',P.x,P.y,{rarity:3,life:1.4});}else toast(t('fCaught',{it:t(k),w:w.toFixed(1)}));},520);}
+function fsFish(x,y,k,dir,s){const C=FSW[k]||FSW.fish,X=Math.round(x),Y=Math.round(y),d=dir<0?-1:1;
+ ctx.fillStyle=C[3];ctx.fillRect(X-3*d-(d<0?1:0),Y-1,2,3);ctx.fillRect(X-4*d-(d<0?1:0),Y-2,1,5); // the tail
+ ctx.fillStyle=C[2];ctx.fillRect(X-2,Y-2,5,4);ctx.fillRect(X-1,Y-3,3,1);ctx.fillRect(X-1,Y+2,3,1);
+ ctx.fillStyle='#1a1a22';ctx.fillRect(X+(d>0?1:-1),Y-1,1,1);if(k==='gfish'&&s){ctx.fillStyle='#ffffff';ctx.fillRect(X,Y-3,1,1);}}
+// the leaps: from the water to you in an arc, then a sparkle where they land
+function fsDraw(){const now=1/60;for(const L of FLEAP){L.t+=now;const k=Math.min(1,L.t/.5),x=L.x0+(P.x-L.x0)*k,y=L.y0+(P.y-14-L.y0)*k-Math.sin(k*Math.PI)*(RMO?10:26);fsFish(x,y,L.k,P.x>=L.x0?1:-1,(L.t*10|0)%2);
+  if(k>=1&&!L.done){L.done=1;if(L.k==='gfish'||L.rec)vfx('crit',P.x,P.y-14);else vfx('hit',P.x,P.y-14);}}FLEAP=FLEAP.filter(L=>L.t<.6);}
+window.__GFS={weight:(k,lv)=>fsWeight(k,lv),get leaps(){return FLEAP.length},rec:()=>S.fishR||{},catch:(k)=>{fsCatch({x:P.x+20,y:P.y,t:0},k||'fish');},get F(){return FISH},start:()=>{const w=nearWater();if(w)startFish(w);return !!w;},act:()=>fishAct(),
+ water:()=>{const cx=P.x/TS|0,cy=P.y/TS|0;for(let r=1;r<90;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=cx+dx,y=cy+dy;if(at(x,y)===WA&&!solidT(x,y-1)&&at(x,y-1)!==WA)return [x*TS+8,(y-1)*TS+8];}return null;}}; // tests
 let FISH=null;
 function nearWater(){if(!P||P.y>=WMH*TS)return null;const tx=P.x/TS|0,ty=P.y/TS|0;for(const [dx,dy] of [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]])if(at(tx+dx,ty+dy)===WA)return {x:(tx+dx)*TS+8,y:(ty+dy)*TS+8};return null;}
 function startFish(w){const lv=lifeLv('fish');FISH={x:w.x,y:w.y,t:0,bite:Math.max(1.2,2+rand()*3-lv*.12),win:.5+lv*.05,px:P.x,py:P.y};P.dir=Math.abs(w.x-P.x)>Math.abs(w.y-P.y)?(w.x>P.x?2:3):(w.y>P.y?0:1);SFX.swing();toast(t('fCast'));}
-function fishAct(){const F=FISH;FISH=null;if(F.t>=F.bite&&F.t<F.bite+F.win){const lv=lifeLv('fish'),k=rand()<(.02+lv*.008)*(1+secB('fish'))*(evOn('fishf')?3:1)*(wxHere()==='rain'?1.5:1)?'gfish':snowAt(F.x/TS|0,F.y/TS|0)?'sfish':'fish';addMat(k,1);lifeXP('fish',k==='gfish'?25:6);vfx('mana',F.x,F.y);SFX.coin();if(k==='gfish')toast(t('fGold'),'good');}else{toast(t('fEarly'),'warn');SFX.deny();}hudDirty=true;}
+function fishAct(){const F=FISH;FISH=null;if(F.t>=F.bite&&F.t<F.bite+F.win){const lv=lifeLv('fish'),k=rand()<(.02+lv*.008)*(1+secB('fish'))*(evOn('fishf')?3:1)*(wxHere()==='rain'?1.5:1)?'gfish':snowAt(F.x/TS|0,F.y/TS|0)?'sfish':'fish';addMat(k,1);fsCatch(F,k);lifeXP('fish',k==='gfish'?25:6);vfx('mana',F.x,F.y);SFX.coin();if(k==='gfish')toast(t('fGold'),'good');}else{toast(t('fEarly'),'warn');SFX.deny();fsMiss(F);}hudDirty=true;}
 function pickHerb(n){if(n.dep>0){toast(t('hPicked'));SFX.deny();return;}if(!labor(4))return;const lv=lifeLv('herb');addMat(n.kind,1+(rand()<lv*.06?1:0));if(rand()<.04+lv*.004)addMat('vherb',1);lifeXP('herb',n.kind==='bherb'?8:4);n.dep=n.kind==='bherb'?120:70;SFX.chop();for(let i=0;i<8;i++)fx.push({x:n.x,y:n.y-4,vx:(rand()-.5)*50,vy:-rand()*50,t:.4,c:n.kind==='bherb'?'#7ab8ff':'#5aa83a'});hudDirty=true;}
 // cooking and brewing at a campfire; a better cook burns less
 const COOK={cfish:{need:{fish:1},alt:'sfish',xp:6},stew:{need:{fish:2,herb:2},xp:12},feast:{need:{gfish:1,herb:1,bherb:1},xp:25},ppie:{need:{pumpk:1,wheat:2},xp:20},sjam:{need:{straw:2,wheat:1},xp:16}},BREW={hpot:{need:{herb:3},xp:6},mpot:{need:{bherb:2,herb:1},xp:8}};
@@ -5614,9 +5640,9 @@ function campMenu(){dialog('camp',['campHi'],null,[...Object.keys(COOK).map(k=>r
  ...Object.keys(BREW).map(k=>rbGate(k)?rbLock(k,campMenu):({l:t('oBrew',{it:t(k),n:needTxt(BREW[k])}),ic:k,poor:!canMake(BREW[k]),f:()=>makeLife(k,true)})),{l:t('oLeave')}]);}
 function eatDish(k){const d=DISH[k];if(!(S.mats[k]>0))return;S.mats[k]--;if(!d.pot)vowBreak('fast');P.food=Math.min(100,P.food+d.food);if(d.hp)P.hp=Math.min(maxHP(),P.hp+maxHP()*d.hp);if(d.buf)P.buf={k:d.buf,t:d.bt};vfx('heal',P.x,P.y);toast(t('ateD',{it:t(k)}),'good');SFX.eat();hudDirty=true;}
 function updateLife(dt){if(!P)return;if(P.buf){P.buf.t-=dt;if(P.buf.k==='regen'&&P.hp>0&&!P.ghost&&!hellDeb())P.hp=Math.min(maxHP(),P.hp+maxHP()*.015*dt);if(P.buf.t<=0){P.buf=null;toast(t('bufEnd'));}}
- if(FISH){const F=FISH;F.t+=dt;if(Math.hypot(P.x-F.px,P.y-F.py)>3||mode==='dead'){FISH=null;return;}if(F.t>=F.bite&&!F.shown){F.shown=1;SFX.notice();}if(F.t>F.bite+F.win){FISH=null;toast(t('fGone'),'warn');}}}
+ if(FISH){const F=FISH;F.t+=dt;if(Math.hypot(P.x-F.px,P.y-F.py)>3||mode==='dead'){FISH=null;return;}if(F.t>=F.bite&&!F.shown){F.shown=1;SFX.notice();fsBite(F);}if(F.t>F.bite+F.win){FISH=null;toast(t('fGone'),'warn');fsMiss(F);}}}
 function drawFish(){const F=FISH;if(!F)return;const bite=F.t>=F.bite,bx=F.x,by=F.y-2+(bite?2+Math.sin(gTime*30):Math.sin(gTime*3));ctx.strokeStyle='rgba(230,230,220,.8)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P.x+(P.dir===3?-8:8),P.y-20);ctx.quadraticCurveTo((P.x+bx)/2,Math.min(P.y,by)-14,bx,by);ctx.stroke();
- R(ctx,bx-1,by-2,3,2,'#e83a3a');R(ctx,bx-1,by,3,1,'#ffffff');if(bite){ctx.globalAlpha=.6;ctx.strokeStyle='#bfe8ff';ctx.beginPath();ctx.ellipse(bx,by+1,5+Math.sin(gTime*20)*2,2,0,0,7);ctx.stroke();ctx.globalAlpha=1;TX.push({s:'!',x:P.x,y:P.y-38,f:'{s}px "Press Start 2P", monospace',z:10,c:'#ffe07a'});}}
+ if(!bite&&!RMO){const q=(F.t%1.3)/1.3;ctx.globalAlpha=.45*(1-q);ctx.strokeStyle='#cfeaff';ctx.beginPath();ctx.ellipse(bx,by+2,2+q*9,1+q*3,0,0,7);ctx.stroke();ctx.globalAlpha=1;}R(ctx,bx-1,by-2,3,2,'#e83a3a');R(ctx,bx-1,by,3,1,'#ffffff');if(bite){ctx.globalAlpha=.6;ctx.strokeStyle='#bfe8ff';ctx.beginPath();ctx.ellipse(bx,by+1,5+Math.sin(gTime*20)*2,2,0,0,7);ctx.stroke();ctx.globalAlpha=1;TX.push({s:'!',x:P.x,y:P.y-38,f:'{s}px "Press Start 2P", monospace',z:10,c:'#ffe07a'});}}
 function drawHerb(x,y,n){const bl=n.kind==='bherb',c=bl?'#4a90ff':'#d83a3a',c2=bl?'#bfe8ff':'#ff7a6a';ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(x-5,y-1,10,2);
  if(n.dep>0)return;if(0){R(ctx,x-1,y-4,1,4,'#4a6a2a');R(ctx,x+2,y-3,1,3,'#4a6a2a');return;}R(ctx,x,y-9,1,9,'#3a7a2a');R(ctx,x-3,y-6,1,6,'#3a7a2a');R(ctx,x+3,y-5,1,5,'#3a7a2a');R(ctx,x-2,y-4,2,1,'#5aa83a');R(ctx,x+1,y-3,2,1,'#5aa83a');
  R(ctx,x-1,y-11,3,3,c);R(ctx,x,y-10,1,1,c2);R(ctx,x-4,y-8,2,2,c);R(ctx,x+3,y-7,2,2,c);if(bl&&(gTime*2+x)%3<1.5){ctx.globalAlpha=.3;ctx.fillStyle='#7ab8ff';ctx.beginPath();ctx.ellipse(x,y-8,6,4,0,0,7);ctx.fill();ctx.globalAlpha=1;}}
@@ -10266,6 +10292,7 @@ function render(dt){DRAWN=0;netDrawn=0;
   for(const g of DGATES){if(g.hide||g.bhg&&!['next','exit','goal','box'].includes(g.bh)||g.tw&&!['up','down','exit'].includes(g.tw))continue;if(g.x<camX-30||g.x>camX+VW+30||g.y<camY-30||g.y>camY+VH+30)continue;ents.push({y:g.y-14,f:()=>drawGate(g)});}
   for(const c of CAMPS){if(c.x<camX-30||c.x>camX+VW+30||c.y<camY-30||c.y>camY+VH+40)continue;ents.push({y:c.y-2,f:()=>drawCamp(c)});}
   if(FISH)ents.push({y:P.y+1,f:drawFish});
+  if(FLEAP.length)ents.push({y:P.y+2,f:fsDraw}); // SAT-ONLINE-182: a catch leaps to you
   if(gTime<(P.legU||0))ents.push({y:P.y+1,f:()=>{ctx.save();ctx.strokeStyle=`rgba(255,214,90,${.55+Math.sin(gTime*12)*.3})`;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(P.x,P.y-11,13,19,0,0,7);ctx.stroke();ctx.restore();}}); // a legend's 3 seconds
   for(const o of SHRINES){if(!epVis(o)||o.p3||o.p4)continue;if(o.x<camX-40||o.x>camX+VW+40||o.y<camY-20||o.y>camY+VH+60)continue;ents.push({y:o.y,f:()=>drawShrine(o)});}
   if(WS)for(const T of TERR){if(T.x<camX-40||T.x>camX+VW+40||T.y<camY-20||T.y>camY+VH+60)continue;ents.push({y:T.y,f:()=>drawBanner(T)});}
