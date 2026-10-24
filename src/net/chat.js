@@ -68,9 +68,38 @@
     for (var i = 0; i < ROOTS.length; i++) if (f.indexOf(ROOTS[i]) === 0 || g.indexOf(ROOTS[i]) === 0) return true;
     return false;
   }
+  // slurs and insults that are caught anywhere inside a word or a name, even glued to another word ("xxnigger",
+  // "jewnigger"), with letters doubled or spelled with digits (owner 2026-10-24). Only long or unambiguous ones, so real
+  // names that merely contain a short sequence (Dickens, Khawla, Zubaida, Peacock, Therapist, Torpedo) stay as they are.
+  var SEVERE = ['nigger', 'nigga', 'niggr', 'nigr', 'faggot', 'fagot', 'kike', 'chink', 'retard', 'hitler', 'nazi', 'pedophile', 'porn', 'penis', 'vagina', 'fuck', 'shit', 'cunt', 'bitch', 'whore', 'slut', 'asshole', 'motherf', 'pussy', 'dildo', 'jizz', 'twat',
+    'كسمك', 'كسامك', 'كسختك', 'كسام', 'شرموط', 'متناك', 'منيوك', 'منيك', 'معرص', 'عرص', 'قحب', 'لبوه', 'انيك', 'نيكني', 'يلعن', 'زبر', 'خولات'];
+  var SEVF = SEVERE.map(fold);
+  /** edge: only a slur at the start or end of the word counts (chat, so Scunthorpe stays); names check anywhere. */
+  function severe(s, edge) {
+    var f = fold(s), g = f.replace(/(.)\1+/g, '$1');
+    for (var i = 0; i < SEVF.length; i++) {
+      var w = SEVF[i];
+      if (edge ? [f, g].some(function (x) { return x.slice(0, w.length) === w || x.slice(-w.length) === w; }) : (f.indexOf(w) >= 0 || g.indexOf(w) >= 0)) return true;
+    }
+    return false;
+  }
+  /** A name nobody should carry: an insult as a word of it, or a slur anywhere inside it. */
+  function badName(h) {
+    var s = String(h == null ? '' : h);
+    if (severe(s.replace(/[\s_.-]+/g, ''))) return true;
+    return s.split(/[\s_.\-]+|(?=[A-Z][a-z])/).some(function (w) { return w && bad(w); });
+  }
+  /** The name to show for another player: theirs, or "Player" and a few letters of their account when it is an insult. */
+  function name(h, id) {
+    var s = clean(h, 24);
+    if (!s || !badName(s)) return s;
+    var k = String(id || s), n = 0;
+    for (var i = 0; i < k.length; i++) n = (n * 31 + k.charCodeAt(i)) >>> 0;
+    return 'Player' + (1000 + n % 9000);
+  }
   /** The text with the listed insults as stars (the rest untouched). */
   function mask(text) {
-    return String(text).replace(/[^\s.,!?؟،:;"'()\[\]{}<>\/\\|*~-]+/g, function (w) { return bad(w) ? new Array(Array.from(w).length + 1).join('★') : w; });
+    return String(text).replace(/[^\s.,!?؟،:;"'()\[\]{}<>\/\\|*~-]+/g, function (w) { return bad(w) || severe(w, 1) ? new Array(Array.from(w).length + 1).join('★') : w; });
   }
 
   function create(o) {
@@ -101,21 +130,21 @@
       if (!m || typeof m.from !== 'string' || m.from === self || blocked(m.from)) return;
       var text = clean(m.text);
       if (!text) return;
-      push({ type: 'line', ch: 'all', from: m.from, handle: clean(m.h, 24) || '?', text: seen(text), t: now(), self: false, n: ++seq });
+      push({ type: 'line', ch: 'all', from: m.from, handle: name(m.h, m.from) || '?', text: seen(text), t: now(), self: false, n: ++seq });
     });
 
     if (whisper && whisper.lines) whisper.lines(function (m) {
       if (!m || typeof m.from !== 'string' || m.from === self || blocked(m.from)) return;
       var text = clean(m.text);
       if (!text) return;
-      push({ type: 'line', ch: 'w', from: m.from, handle: clean(m.h, 24) || '?', text: text, t: now(), self: false, n: ++seq });
+      push({ type: 'line', ch: 'w', from: m.from, handle: name(m.h, m.from) || '?', text: text, t: now(), self: false, n: ++seq });
     });
 
     if (guild && guild.guildLines) guild.guildLines(function (m) {
       if (!m || typeof m.from !== 'string' || m.from === self || blocked(m.from)) return;
       var text = clean(m.text);
       if (!text) return;
-      push({ type: 'line', ch: 'guild', from: m.from, handle: clean(m.h, 24) || '?', text: seen(text), t: now(), self: false, n: ++seq });
+      push({ type: 'line', ch: 'guild', from: m.from, handle: name(m.h, m.from) || '?', text: seen(text), t: now(), self: false, n: ++seq });
     });
 
     return {
@@ -179,5 +208,5 @@
   }
 
   var ns = root.Satisfy = root.Satisfy || {};
-  ns.chat = Object.freeze({ create: create, blocklist: blocklist, clean: clean, mask: mask, C: C, TYPES: Object.freeze(TYPES.slice()), KEY: KEY });
+  ns.chat = Object.freeze({ create: create, blocklist: blocklist, clean: clean, mask: mask, badName: badName, name: name, C: C, TYPES: Object.freeze(TYPES.slice()), KEY: KEY });
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -161,6 +161,9 @@
           var p = sample(r.buf, t, cfg.snapPx), o = {};
           for (var f in r.pp) o[f] = r.pp[f];
           o.x = p.x; o.y = p.y;
+          // a name that is an insult shows as "Player" and a number (owner 2026-10-24)
+          var CH = root.Satisfy && root.Satisfy.chat;
+          if (CH && CH.badName && typeof o.handle === 'string' && CH.badName(o.handle)) o.handle = CH.name(o.handle, o.uid || o.sid);
           out.push(o);
         });
         return out;

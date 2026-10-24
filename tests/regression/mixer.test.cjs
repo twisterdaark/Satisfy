@@ -19,7 +19,8 @@ test('mixer: game sounds, music, the world and other players each turn down and 
     // Escape, then "Sound": the four channels; Escape goes back to the pause menu, and again to the game
     await g.page.keyboard.press('Escape'); await g.step(2);
     assert.equal(await g.mode(), 'pause');
-    await g.eval(() => document.querySelector('#pauseScreen [data-act="sound"]').click()); await g.step(2);
+    await g.eval(() => document.querySelector('#pauseScreen [data-act="settings"]').click()); await g.step(2);
+    await g.eval(() => document.querySelector('#settingsScreen [data-act="sound"]').click()); await g.step(2);
     assert.equal(await g.mode(), 'sound');
     assert.deepEqual(await g.eval(() => [...document.querySelectorAll('#soundScreen label.vol span')].map((x) => x.textContent)), ['Game sounds', 'Music', 'World sounds', 'Other players']);
     assert.equal(await g.eval(() => document.querySelector('#pauseScreen label.vol')), null, 'the pause menu has one Sound row instead');
@@ -30,6 +31,9 @@ test('mixer: game sounds, music, the world and other players each turn down and 
     await g.page.keyboard.press('Escape'); await g.step(2);
     assert.equal(await g.mode(), 'pause');
     assert.ok(await g.eval(() => { const b = [...document.querySelectorAll('#pauseScreen .menu > *')]; const a = b[0].getBoundingClientRect(), z = b[b.length - 1].getBoundingClientRect(); return a.top >= 0 && z.bottom <= innerHeight; }), 'the whole pause menu in view');
+    assert.equal(await g.eval(() => !document.getElementById('settingsScreen').hidden), true, 'back in Settings');
+    await g.page.keyboard.press('Escape'); await g.step(2);
+    assert.ok(await g.eval(() => { const b = [...document.querySelectorAll('#pauseScreen .menu > *')]; const a = b[0].getBoundingClientRect(), z = b[b.length - 1].getBoundingClientRect(); return a.height > 0 && a.top >= 0 && z.bottom <= innerHeight; }), 'the whole pause menu in view');
     await g.page.setViewportSize({ width: 1280, height: 720 });
     await g.page.keyboard.press('Escape'); await g.step(2);
     assert.equal(await g.mode(), 'play');

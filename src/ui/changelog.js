@@ -7,6 +7,21 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24settings', ver: '2.55', d: '2026-10-24',
+      ar: ["قايمة الإيقاف بقى فيها الأساسي بس (كمّل، اطلع من الزنقة، وضع التصوير، سجل التحديثات، احفظ واخرج)، وزرار \"الإعدادات\" جواه الباقي: التحكم، والصوت، واللغة، وحجم القوايم، وتقليل الحركة، وترتيب الواجهة.",
+          "تذكرة تغيير الاسم: التاجر اللي بيبيع لفافة العودة بيبيعها بـ 50,000 دهب، وبتستعملها من الشنطة أو من الإعدادات > غيّر اسمك.",
+          "فلتر للأسامي والشات: أي اسم فيه شتيمة بيظهر للناس \"Player\" ورقم، وصاحبه مش هيقدر يكمّل لعب لحد ما يختار اسم نضيف (ببلاش)، والشتايم في الشات بتبان نجوم حتى لو لازقة في كلمة تانية.",
+          "التايتلز اللي بتدّي سكيل بقت أول القايمة، ولو وقفت بالماوس على اسم السكيل بتشوف تفاصيله.",
+          "أصوات اللاعبين التانيين (ضربهم وجوايزهم) بقت بتتسمع من قريب بس.",
+          "الزراير بقت بتنوّر بس لما الماوس يقف عليها، من غير ما تكبر أو تتحرك، فمابقاش في رعشة على حافتها.",
+          "اللفل المقترح بقى فوق اسم المدينة في الخريطة، بعيد عن أسامي الناس."],
+      en: ["The pause menu keeps the essentials (Resume, Get unstuck, Photo mode, Update log, Save & Quit); a Settings button holds the rest: controls, sound, language, menu size, reduced motion and the HUD reset.",
+          "Name Change Ticket: the merchants who sell the Return Scroll sell it for 50,000 gold; use it from the bag or from Settings > Change name.",
+          "A name and chat filter: a name with an insult shows to others as \"Player\" and a number and its owner cannot play on until they pick a clean one (for free), and insults in chat show as stars even when glued to another word.",
+          "Titles that give a skill come first in the list, and resting the mouse on the skill's name shows its details.",
+          "Other players' sounds (their hits and rewards) are heard from close by only.",
+          "Buttons only glow under the mouse now, without growing or moving, so they no longer flicker at their edge.",
+          "A town's recommended level sits above its name on the map, away from the townsfolk's names."] },
     { v: '2026-10-23townlv', ver: '2.54', d: '2026-10-23',
       ar: ["كل مدينة بقى ليها لفل مقترح: بيظهر تحت اسمها في الخريطة، وبيتكتب لما تدخلها.",
           "ماري روز اترسمت من جديد زي المانهوا.",

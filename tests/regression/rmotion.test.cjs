@@ -25,6 +25,7 @@ test('reduced motion: from the pause menu, kept; no shake, no flash, fewer parti
 
     // the pause menu's button turns it on
     await g.page.keyboard.press('Escape'); await g.step(2);
+    await g.page.locator('#pauseScreen [data-act="settings"]').click(); await g.step(1);
     const b = g.page.locator('#rmB');
     assert.equal(await b.textContent(), 'Reduced motion: Off');
     await b.click(); await g.step(1);
