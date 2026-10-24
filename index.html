@@ -271,22 +271,22 @@ body.touch #keys .key{cursor:pointer}
 /* game feel (SAT-ONLINE-176): the low-health edge, the centre banner, the kill streak, the XP bar and gold flashes */
 #jlow{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;background:radial-gradient(ellipse at center,transparent 52%,rgba(190,16,16,.42) 100%)}
 #jlow.on{opacity:1;animation:jbeat 1.15s ease-in-out infinite}@keyframes jbeat{0%,100%{opacity:.7}14%{opacity:1}28%{opacity:.78}42%{opacity:.95}}
-#jban{position:absolute;left:50%;top:31%;transform:translateX(-50%);pointer-events:none;text-align:center;opacity:0;white-space:nowrap;z-index:60}
-#jban b{display:block;font:700 calc(var(--u)*4.4)/1.05 var(--head,var(--en-head));letter-spacing:.05em;color:#fff2a0;text-shadow:0 0 calc(var(--u)*1.3) rgba(255,196,50,.9),0 calc(var(--u)*.28) 0 #7a4a00,0 0 2px #000}
-#jban small{display:block;margin-top:calc(var(--u)*.5);font:600 calc(var(--u)*1.8)/1.2 var(--body,var(--en-body));color:#ffe7a8;text-shadow:0 0 4px #000,0 1px 0 #000}
+#jban{position:absolute;left:50%;top:15%;transform:translateX(-50%);pointer-events:none;text-align:center;opacity:0;white-space:nowrap;z-index:60}
+#jban b{display:block;font:700 calc(var(--u)*2.8)/1.15 var(--body,var(--en-body));letter-spacing:.02em;color:#fff2a0;text-shadow:0 0 calc(var(--u)*1.3) rgba(255,196,50,.9),0 calc(var(--u)*.28) 0 #7a4a00,0 0 2px #000}
+#jban small{display:block;margin-top:calc(var(--u)*.3);font:600 calc(var(--u)*1.4)/1.2 var(--body,var(--en-body));color:#ffe7a8;text-shadow:0 0 4px #000,0 1px 0 #000}
 #jban.q b{color:#d2ffb8;text-shadow:0 0 calc(var(--u)*1.3) rgba(110,230,80,.85),0 calc(var(--u)*.28) 0 #1f5a10,0 0 2px #000}
 #jban.s b{color:#ffc27a;text-shadow:0 0 calc(var(--u)*1.3) rgba(255,110,30,.95),0 calc(var(--u)*.28) 0 #6a2000,0 0 2px #000}
 #jban.on{animation:jbIn 2.2s ease-out forwards}
 @keyframes jbIn{0%{opacity:0;transform:translateX(-50%) scale(.3)}10%{opacity:1;transform:translateX(-50%) scale(1.2)}18%{transform:translateX(-50%) scale(.95)}25%{transform:translateX(-50%) scale(1)}80%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(calc(var(--u)*-1.6)) scale(1)}}
 @keyframes jbFade{0%,80%{opacity:1}100%{opacity:0}}
-#jban.b b{color:#ffb0a0;font-size:calc(var(--u)*4.8);text-shadow:0 0 calc(var(--u)*1.4) rgba(255,60,40,.9),0 calc(var(--u)*.3) 0 #5a0a0a,0 0 2px #000}
+#jban.b b{color:#ffb0a0;font-size:calc(var(--u)*3.1);text-shadow:0 0 calc(var(--u)*1.4) rgba(255,60,40,.9),0 calc(var(--u)*.3) 0 #5a0a0a,0 0 2px #000}
 #jban.b small{color:#ffd0c0;letter-spacing:.08em}
 #jlb{position:absolute;inset:0;pointer-events:none;z-index:59}#jlb::before,#jlb::after{content:'';position:absolute;left:0;right:0;height:0;background:#000;transition:height .35s ease-out}
 #jlb::before{top:0}#jlb::after{bottom:0}#jlb.on::before,#jlb.on::after{height:9%}
 #jhit{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(255,30,20,.55) 100%)}
 #jhit.on{animation:jhitA .35s ease-out}@keyframes jhitA{0%{opacity:1}100%{opacity:0}}
 body.rmo #jlb::before,body.rmo #jlb::after{transition:none}body.rmo #jhit{display:none}
-#jstk{position:absolute;right:calc(var(--u)*2.2);top:44%;pointer-events:none;font:700 calc(var(--u)*2.7)/1 var(--head,var(--en-head));color:#fff;text-shadow:0 0 calc(var(--u)*.7) rgba(255,130,30,.95),0 2px 0 #000;opacity:0;transition:opacity .6s;transform-origin:right center}
+#jstk{position:absolute;right:calc(var(--u)*2.2);top:44%;pointer-events:none;font:700 calc(var(--u)*2.2)/1 var(--body,var(--en-body));color:#fff;text-shadow:0 0 calc(var(--u)*.7) rgba(255,130,30,.95),0 2px 0 #000;opacity:0;transition:opacity .6s;transform-origin:right center}
 #jstk.on{opacity:1}#jstk.pop{animation:jpop .28s ease-out}@keyframes jpop{0%{transform:scale(1.7)}100%{transform:scale(1)}}
 .bar.xp.jp{animation:jxp .55s ease-out}@keyframes jxp{0%{filter:brightness(2.4) saturate(1.4);box-shadow:0 0 calc(var(--u)*1.1) #b7a6ff}100%{filter:none;box-shadow:none}}
 #goldt.jp{animation:jgold .4s ease-out}@keyframes jgold{0%{color:#fff8c8;text-shadow:0 0 calc(var(--u)*.8) #ffd23a}100%{}}
@@ -1906,7 +1906,7 @@ const TWF=['f1','f2','f3','f4','f7','f10'],twX0=i=>4+i*38,TWX1=232,TWMZ={y:0};
 }}})();
 // a dungeon boss leaves a chest and a way straight out where it fell, so you do not walk back up every floor. Both fade
 // after two minutes; online the chest is per player (each one who helped opens their own)
-const DBK=new Set(['gwar','kking','bknight']);
+const DBK=new Set(['gwar','kking','bknight','hydra']);   // (owner 2026-10-24: the hydra's chamber at the bottom of the Abyss too)
 function dunOut(x,y){let D=dunAt(x,y);for(let i=0;D&&i<8;i++){const g=DGATES.find(g=>g.to&&g.hint==='hUp'&&dunAt(g.x,g.y)===D);if(!g)break;if(g.to.y<WMH*TS)return g.to;D=dunAt(g.to.x,g.to.y);}return null;}
 function dunBossDown(m){const out=dunOut(m.x,m.y);if(!out)return;const til=gTime+120;
  for(let i=DGATES.length-1;i>=0;i--)if(DGATES[i].tmp)DGATES.splice(i,1);
@@ -2855,7 +2855,9 @@ function bhStart(){const R=BHR,o=R.o,B=R.B,b=bhS();
    dialog('bhSys',[bhSys('bhSaveQ')],null,[{l:t('bhYes'),f:()=>{b.sv=R.n;toast(t('bhSaveOk',{n:bhOrd(R.n)}),'good');SFX.quest();save(true);}},{l:t('bhNo')}]);},700);return;}
  if(o.k==='fog'||o.k==='tres'){R.t=o.k==='tres'?180:300;bhG({...bhPx(B.x0+26,BHCY-2),bh:'shop',hint:'hBhShop'});bhOpen(1);
   setTimeout(()=>{if(BHR===R)dialog('bhSys',o.k==='tres'?[bhSys('bhTres'),bhSys('bhTres2'),bhSys('bhFogHaunt')]:[bhSys('bhFogLuck',{n:bhOrd(R.n)})]);},500);return;}
- if(o.pure){bhOpen(1);toast(t(o.done?'bhDoneI':'bhPure',{n:bhOrd(R.n)}));return;}
+ // once the archipelago is purified nothing spawns, so (owner 2026-10-24: "I can't reach the shop or the East") every island
+ // keeps the challengers' store beside the landing: the points it filled buy the portal scroll there
+ if(o.pure){bhOpen(1);toast(t(o.done?'bhDoneI':'bhPure',{n:bhOrd(R.n)}));if(b.pur){const c=[[0,-3],[3,-2],[-3,-2],[0,3]].map(([dx,dy])=>[B.sx+dx,B.sy+dy]).find(([x,y])=>!SOLID[at(x,y)])||[B.sx,B.sy-1];bhG({...bhPx(c[0],c[1]),bh:'shop',hint:'hBhShop'});setTimeout(()=>{if(BHR===R)toast(t('bhPurShop'),'good');},900);}return;}
  if(o.k==='sticks'&&b.st){bhOpen(1);return;}
  const lines=[bhSys('bhMis'),t('bhM_'+o.k,{n:bhGoal(o)})];if(o.k==='dk')lines.push(t('bhDK_'+o.dk));if(R.n>=20&&!b.bini){b.bini=1;lines.push(['bini',t('bhBini1')],['bini',t('bhBini2')]);}else if(R.n>=20&&t('bhTip_'+o.k)!=='bhTip_'+o.k)lines.push(['bini',t('bhTip_'+o.k)]);
  dialog('bhSys',lines,()=>{if(BHR===R){toast(t('bhMisGo',{n:bhOrd(R.n)}),'warn');SFX.notice();}});}
@@ -8399,8 +8401,8 @@ function fadeTo(fn){const f=$('fade');f.classList.add('on');setTimeout(()=>{fn()
    - an item dropped on the ground glows in its rarity's colour, with a beam from epic up (jDrop);
    - under 30% health the screen's edge beats red (jLow);
    - a crit kicks the camera a little; the gold count rolls up to what you have (jGold, in jTick). */
-Object.assign(STR.ar,{jBossS:'زعيم · لفل {lv}',jLv:'لفل أب!',jLvS:'لفل {n} · +{p} نقط إحصائيات',jQ:'الكويست خلص!',jStk:'🔥 {n} ورا بعض',jStkB:'{n} قتلة ورا بعض!',jStkS:'كمّل كده!'});
-Object.assign(STR.en,{jBossS:'BOSS · Lv {lv}',jLv:'LEVEL UP!',jLvS:'Level {n} · +{p} stat points',jQ:'QUEST COMPLETE!',jStk:'🔥 {n} STREAK',jStkB:'{n} KILL STREAK!',jStkS:'Keep it going!'});
+Object.assign(STR.ar,{jBossS:'زعيم · لفل {lv}',jLv:'لفل أب!',jLvS:'لفل {n} · +{p} نقط إحصائيات',jQ:'الكويست خلص!',jStk:'🔥 {n}',jStkB:'{n} قتلة!',jStkS:'كمّل كده!'});
+Object.assign(STR.en,{jBossS:'BOSS · Lv {lv}',jLv:'LEVEL UP!',jLvS:'Level {n} · +{p} stat points',jQ:'QUEST COMPLETE!',jStk:'🔥 {n}',jStkB:'{n} KILLS!',jStkS:'Keep it going!'});
 const JSTW=4,JSTM=[10,25,50,100],JR=mulberry32(0x51a7f1);
 let JST={n:0,t:-9},JBT=null,JBQ=[],JBC='',JBCT=-9,JGD=null,JGS=null,JGT=-9,JLOW=false;
 const jRe=(e,c)=>{if(!e)return;e.classList.remove(c);void e.offsetWidth;e.classList.add(c);};
@@ -11276,7 +11278,8 @@ function eaAct(o){const A=EAS();
  if(o.k==='phxseal'){if(!(S.qs.ea5&&S.qs.ea5.st===1)){return dialog('bhSys',['eaPs0']);}A.ps=A.ps||{};if(A.ps[o.i]){toast(t('eaPsDone'));return;}A.ps[o.i]=1;qEvent('visit','phxseal');vfx('fire',o.x,o.y-6);SFX.legendary();toast(t('eaPsBreak',{n:Object.keys(A.ps).length}),'good');save(true);return;}
  if(o.k==='btshrine'){if(S.qs.ea7&&S.qs.ea7.st===1&&!qReady('ea7')){qEvent('visit','btshrine');SFX.legendary();vfx('levelup',o.x,o.y);return dialog('bhSys',[bhSys('eaBt1'),bhSys('eaBt2')]);}return dialog('bhSys',['eaBt0']);}}
 // the two circles: "the magic circle" takes you across for a fee once you have crossed by the scroll
-function eaCircle(east){const A=EAS();if(!A.v)return dialog('bhSys',['eaCirc0']);const g=ECFEE;
+function eaCircle(east){const A=EAS();if(!A.v&&!(S.bh&&S.bh.pur))return dialog('bhSys',['eaCirc0']);   // (a purifier of Behen may cross by it first: owner 2026-10-24)
+ const g=ECFEE;
  dialog('bhSys',[east?'eaCircE':'eaCircW'],null,[{l:t('eaCircGo',{g:fmtN(g)}),poor:S.gold<g,f:()=>{if(S.gold<g){SFX.deny();return toast(t('noGold'),'warn');}if(scrollBlock()){SFX.deny();return toast(t('rsNo'),'warn');}S.gold-=g;SFX.coin();eaCross(!east);}},{l:t('oLeave')}]);}
 // crossing the Red Sea: by the scroll or a circle; to the East you land in the White Tree Forest, to the West at your inn there
 // (or Reinhardt's circle)
@@ -11285,6 +11288,7 @@ function eaCross(toEast){if(P.ride)dismount();P.boat=0;P.fly=0;const A=EAS(),fir
   P.inv=1.5;camSnap=true;hudDirty=true;sbSig='';vfx('spawn',P.x,P.y);SFX.quest();save(true);
   if(first)setTimeout(()=>{SFX.legendary();dialog('bhSys',[bhSys('eaArr1'),bhSys('eaArr2'),'eaArr3']);},500);else toast(t(toEast?'eaArrE':'eaArrW'),'good');if(toEast)setTimeout(()=>toast(t('eaGrav'),'warn'),first?0:1500);});}
 // the Behen store's portal scroll (ch 402: "after the elixirs and skill books, I used the remaining points to buy a portal scroll")
+Object.assign(STR.ar,{bhPurShop:'متجر المتحدّين جنبك: نقطك بتشتري لفيفة بوابة القارة الشرقية. ودايرة السحر في راينهارت بتعدّيك كمان.'});Object.assign(STR.en,{bhPurShop:"The challengers' store is beside you: your points buy the East Continent Portal Scroll. Reinhardt's magic circle takes you across too."});
 function ecShopOpt(o){o.push({l:t('bhEcs',{p:fmtN(ECCP)}),f:()=>bhBuy(ECCP,()=>{addMat('ecscr',1);toast(t('bhEcsOk'),'good');})});}
 // the people of the East
 // named conditions for QD[id].need (the quest tables stay data)

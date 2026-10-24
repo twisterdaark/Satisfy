@@ -2,7 +2,7 @@
 // SAT-ONLINE-176 game feel (owner 2026-10-24: "improve the visuals, animations and effects; add dopamine"). Only what is
 // seen and heard:
 //   - a damage number pops in (drawn bigger for a moment) and drifts sideways; a crit jumps up first;
-//   - a kill sends orbs of experience to you; kills in a row count up at the side (🔥 2 STREAK ...), and break after 4 s;
+//   - a kill sends orbs of experience to you; kills in a row count up at the side (🔥 2 ...), and break after 4 s;
 //   - level up and quest complete show the centre banner;
 //   - under 30% health the screen's edge beats red, and stops above it;
 //   - the gold count rolls up to what you have;
@@ -36,7 +36,7 @@ test('game feel: numbers, orbs, the streak, the banners, the low-health edge, th
     assert.equal(k1.n, 1);
     await g.step(30);
     const k2 = await g.eval(() => { const G = window.__G, P = G.P, m = G.spawnMon('wolf', P.x + 30, P.y); m.hp = 1; window.__GWP.hit(m, 5); const e = document.getElementById('jstk'); return { n: window.__GJ.st.n, on: e.classList.contains('on'), t: e.textContent }; });
-    assert.deepEqual(k2, { n: 2, on: true, t: '🔥 2 STREAK' });
+    assert.deepEqual(k2, { n: 2, on: true, t: '🔥 2' });
     // the orbs reach you and go
     await g.step(200);
     assert.equal(await g.eval(() => window.__GJ.orbs()), 0, 'the orbs arrived');
