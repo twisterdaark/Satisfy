@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24forestarrow', ver: '2.77', d: '2026-10-24',
+      ar: ["مؤشر مهمة الناسك (الوصول للفسحة في الغابة) ومهمة المقبرة رجعوا يشاوروا على مكانهم بدل ما يرجعوك للي اداك المهمة. ده كان غلط اتعمل في 2.72."],
+      en: ["The hermit's quest arrow (reach the clearing in the forest) and the graveyard quest's point to their place again instead of back to the giver. This was a mistake made in 2.72."] },
     { v: '2026-10-24dummylang', ver: '2.76', d: '2026-10-24',
       ar: ["دمية التدريب بقت ثابتة مكانها: الضربات اللي بتزق والسحب مبيحركوهاش.",
           "أسامي السكيلات والكلام اللي بيطلع فوق لاعب تاني (زي \"صد\" و\"تفادي\") بقت بتتكتب بلغتك انت، مش بلغة اللاعب اللي عملها.",
