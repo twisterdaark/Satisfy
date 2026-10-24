@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24tower1', ver: '2.61', d: '2026-10-24',
+      ar: ["الدور الأول في برج الحكمة بقى واضح: أول ما تدخل بتطلعلك رسالة بتقولك تمشي يمين ناحية النور من غير ما تقف، والنور بقى باين في نص الشاشة بعمود نور بدل ما كان مستخبي ورا شريط السكيلات.",
+          "أسهم في الأرض بتشاورلك على الطريق وبتحمر لو وقفت، وسطر الكويست بيقولك النور على بعد كام وسرعتك، وفيه شرار وراك وأنت بتجري.",
+          "أول زيارة للبرج مكانتش بتبدأ الاختبار ساعات لأن رسالة لقب الرائد كانت بتلغيه: اتصلحت."],
+      en: ["The Tower of Wisdom's first floor is clear now: on entering a message tells you to walk right toward the light without stopping, and the light stands mid-screen in a column instead of hiding under the skill bars.",
+          "Arrows on the ground point the way and turn red when you stop, the quest line tells how far the light is and your pace, and sparks trail you as you run.",
+          "A first visit to the tower sometimes never started the test because the Pioneer title message replaced it: fixed."] },
     { v: '2026-10-24skillfx2', ver: '2.60', d: '2026-10-24',
       ar: ["سكيلات كانت باهتة بقى ليها شكل: الدوامة بتلف بهلالين حواليك، العفن بيمسك في الوحش بسحابة بنفسجي، امتصاص الروح بيشد خيوط من الوحوش اللي بتعفن، وامتصاص الحياة بيرجعلك في خيط بنفسجي.",
           "استدعاء هيكل بيطلع في عمود نور، وانفجار الجثة بقى انفجار بجد بموجة في الأرض.",
