@@ -245,6 +245,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 ## From other ranges (2026-10-24)
 | U | Update | Status | Where |
 |---|---|---|---|
+| U296 | Card minigame | ✅ | SAT-ONLINE-181: Three Crowns at every inn (the innkeeper's option): 15 cards (1-5 in Sword, Shield, Magic; each beats the next and the beaten card loses 3), five each, three rounds, two crowns win; the innkeeper chooses before seeing yours; nothing staked or paid, the wins count (`S.cg`) and 10 and 50 wins give titles with no effect (`cardsh`, `cardk`); its own window (`#cgW`, mode `cards`, 1-5 and Esc); `regression/cards` |
 | U267 | Reduced motion | ✅ | SAT-ONLINE-164: a device setting in the pause menu (`satisfy_rmo`, the system's prefers-reduced-motion when unset): no camera shake, no white flash, the UI's shakes and pulses stop, particles capped (`RMOFX`, `RMOVX`); telegraphs (`drawTele`) untouched; `regression/rmotion` |
 | U269 | Armor pieces (render sprite overlays) | ✅ | SAT-ONLINE-165: helmet, armour, gloves and boots each draw their own look (`GEARL`, 48 ids), for you and the others (`gr:` fx tag); `regression/gearlook` |
 

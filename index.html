@@ -303,7 +303,31 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 #inv.sell{background:linear-gradient(180deg,rgba(40,34,12,.92),rgba(14,22,40,.95))}#inv.sell .itrash{display:none}
 #auW{width:calc(var(--u)*92);max-width:96vw;max-height:88%;overflow:auto;background:var(--sys2)}#auW .aub{display:grid;grid-template-columns:1fr 1.3fr;gap:calc(var(--u)*1.6)}#auW .auh{opacity:.8;margin-bottom:calc(var(--u)*.4)}#auBag .slotb.sel{outline:2px solid #ffd24a;box-shadow:0 0 calc(var(--u)*.8) rgba(255,210,74,.6)}#auW .igrid{grid-template-columns:repeat(6,1fr);max-height:34vh;overflow-y:auto}#auF{margin-top:calc(var(--u)*.8);padding-top:calc(var(--u)*.8);border-top:1px solid rgba(127,180,255,.25);display:grid;gap:calc(var(--u)*.5)}#auF label{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*.8)}#auW input{width:calc(var(--u)*12);font:inherit;color:#fff;background:rgba(0,0,0,.35);border:1px solid rgba(143,216,255,.45);padding:calc(var(--u)*.3) calc(var(--u)*.6)}#auQ{width:100%!important;box-sizing:border-box;margin:calc(var(--u)*.5) 0}#auF small,#auL small{opacity:.75}.autabs{display:flex;gap:calc(var(--u)*.5)}.autabs button{width:auto;flex:1}.autabs button.on{background:rgba(143,216,255,.3);box-shadow:inset 0 -2px 0 #8fd8ff}#auL{max-height:44vh;overflow-y:auto}.aurow{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:calc(var(--u)*.8);padding:calc(var(--u)*.35) 0;border-bottom:1px solid rgba(143,216,255,.14)}.aurow img{width:calc(var(--u)*2.6);height:calc(var(--u)*2.6);image-rendering:pixelated}.aurow button,#auF button,#auC button{width:auto;padding:0 calc(var(--u)*1)}.aurow .pr{color:#f2c14e}.aurow.poor .pr{color:#ff8a7a}#auL .none{opacity:.7;padding:calc(var(--u)*1) 0;text-align:center}
 .inote{margin-top:calc(var(--u)*.6);color:var(--muted);font-size:calc(var(--u)*.9);text-align:center;min-height:1em}
-#creW{z-index:70;width:calc(var(--u)*46);max-height:92%;overflow:auto;text-align:center}#creW .cgrid{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.6);justify-content:center;margin:calc(var(--u)*.8) 0}#creW .cmats button{font-size:calc(var(--u)*.95)}#creW .cmats button.on{border-color:var(--gold);box-shadow:0 0 calc(var(--u)*.5) rgba(242,193,78,.5)}#creW .cmats button.none{opacity:.45;filter:grayscale(1)}#creW .cpick{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.4) calc(var(--u)*1.2);justify-content:center;margin:calc(var(--u)*.4) 0}#creW .cpick>div{display:flex;align-items:center;gap:calc(var(--u)*.35)}#creW .cpick button{min-width:calc(var(--u)*1.8);padding:0 calc(var(--u)*.3)}#creW .cpick b.ok{color:#9fe39a}#creW .cpick b.no{color:#ff8a7a}#creW .cst small{color:#bfe8ff}#creW canvas{display:block;margin:calc(var(--u)*.6) auto;width:100%;max-width:calc(var(--u)*40);background:#0e1a3a;border:1px solid rgba(143,216,255,.4)}#creW label{display:flex;align-items:center;gap:calc(var(--u)*.8);justify-content:space-between;margin:calc(var(--u)*.3) 0}#creW label input{flex:1;min-width:0}#creW .cst{color:#ffe7a8;margin:calc(var(--u)*.6) 0}
+#creW{z-index:70;width:calc(var(--u)*46);max-height:92%;overflow:auto;text-align:center}
+/* Three Crowns, the inn's card game (SAT-ONLINE-181) */
+#cgW{z-index:70;width:calc(var(--u)*52);text-align:center;padding:calc(var(--u)*1.2) calc(var(--u)*1.6)}
+#cgW .cgsc{display:flex;justify-content:space-between;align-items:center;margin:calc(var(--u)*.4) 0;font-weight:700}
+#cgW .cgsc b{color:var(--gold);font-size:calc(var(--u)*1.7)}
+#cgW .cgrow{display:flex;justify-content:center;gap:calc(var(--u)*.7);min-height:calc(var(--u)*9.6);align-items:center}
+#cgW .cgmid{display:flex;justify-content:center;gap:calc(var(--u)*3);min-height:calc(var(--u)*10.6);align-items:center;margin:calc(var(--u)*.6) 0;position:relative}
+#cgW .cgmsg{min-height:calc(var(--u)*2.2);font-weight:700;font-size:calc(var(--u)*1.5)}
+#cgW .cgmsg.w{color:#a8ffa0}#cgW .cgmsg.l{color:#ff9a8a}
+.cgc{width:calc(var(--u)*6.4);height:calc(var(--u)*9);border-radius:calc(var(--u)*.6);border:2px solid #e8dcc0;background:linear-gradient(160deg,#fff8e8,#e8dcc0);color:#2a2030;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;box-shadow:0 calc(var(--u)*.3) calc(var(--u)*.6) rgba(0,0,0,.45);font-family:"Press Start 2P",monospace;transition:transform .18s,box-shadow .18s;padding:0}
+.cgc .v{font-size:calc(var(--u)*2.6)}.cgc .s{font-size:calc(var(--u)*2.2);margin-top:calc(var(--u)*.5);font-family:system-ui,sans-serif}
+.cgc .k{position:absolute;top:calc(var(--u)*.3);inset-inline-start:calc(var(--u)*.4);font-size:calc(var(--u)*.8);opacity:.6}
+.cgc.sw{border-color:#d84a3a;color:#a02a1a}.cgc.sh{border-color:#3a7ad8;color:#1a4aa0}.cgc.mg{border-color:#9a5ad8;color:#6a2aa8}
+button.cgc{cursor:pointer}button.cgc:hover,button.cgc.sel{transform:translateY(calc(var(--u)*-.8));box-shadow:0 calc(var(--u)*.8) calc(var(--u)*1) rgba(0,0,0,.5),0 0 calc(var(--u)*.8) rgba(255,224,122,.7)}
+.cgc.back{background:repeating-linear-gradient(45deg,#3a2a5a 0 6px,#2a1e44 6px 12px);border-color:#c8a0ff}
+.cgc.back::after{content:'👑';font-size:calc(var(--u)*2.2);filter:grayscale(.3)}
+.cgc.ghost{background:rgba(255,255,255,.06);border:2px dashed rgba(232,220,192,.35);box-shadow:none}
+.cgc.flip{animation:cgFlip .4s ease-out}@keyframes cgFlip{0%{transform:rotateY(90deg) scale(.9)}100%{transform:rotateY(0) scale(1)}}
+.cgc.win{box-shadow:0 0 calc(var(--u)*1.4) rgba(255,224,122,.95),0 calc(var(--u)*.3) calc(var(--u)*.6) rgba(0,0,0,.45);transform:scale(1.08)}
+.cgc.lose{opacity:.55;filter:grayscale(.5)}
+#cgW .cgcr{font-size:calc(var(--u)*1.6);letter-spacing:.1em}#cgW .cgcr .on{animation:cgPop .35s ease-out}@keyframes cgPop{0%{transform:scale(2)}100%{transform:scale(1)}}
+#cgW .cgcr span{display:inline-block}
+#cgW .cghelp{font-size:calc(var(--u)*1.1);color:var(--muted);margin-top:calc(var(--u)*.4)}
+body.rmo .cgc.flip,body.rmo #cgW .cgcr .on{animation:none}@media (prefers-reduced-motion:reduce){.cgc.flip,#cgW .cgcr .on{animation:none}}
+#creW .cgrid{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.6);justify-content:center;margin:calc(var(--u)*.8) 0}#creW .cmats button{font-size:calc(var(--u)*.95)}#creW .cmats button.on{border-color:var(--gold);box-shadow:0 0 calc(var(--u)*.5) rgba(242,193,78,.5)}#creW .cmats button.none{opacity:.45;filter:grayscale(1)}#creW .cpick{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.4) calc(var(--u)*1.2);justify-content:center;margin:calc(var(--u)*.4) 0}#creW .cpick>div{display:flex;align-items:center;gap:calc(var(--u)*.35)}#creW .cpick button{min-width:calc(var(--u)*1.8);padding:0 calc(var(--u)*.3)}#creW .cpick b.ok{color:#9fe39a}#creW .cpick b.no{color:#ff8a7a}#creW .cst small{color:#bfe8ff}#creW canvas{display:block;margin:calc(var(--u)*.6) auto;width:100%;max-width:calc(var(--u)*40);background:#0e1a3a;border:1px solid rgba(143,216,255,.4)}#creW label{display:flex;align-items:center;gap:calc(var(--u)*.8);justify-content:space-between;margin:calc(var(--u)*.3) 0}#creW label input{flex:1;min-width:0}#creW .cst{color:#ffe7a8;margin:calc(var(--u)*.6) 0}
 #cfmW{z-index:80;width:calc(var(--u)*30);text-align:center}#cfmB{margin:calc(var(--u)*.8) 0;line-height:1.6}.cfmbtns{display:flex;gap:calc(var(--u)*1);justify-content:center}#cfmY{color:#ffd0c0;border-color:rgba(255,120,100,.7)}
 .gdrag-img{position:fixed;z-index:90;width:calc(var(--u)*3);height:calc(var(--u)*3);pointer-events:none;image-rendering:pixelated;filter:drop-shadow(0 0 4px #000);transform:translate(-50%,-50%);opacity:.85;margin:0}
 .igold{color:var(--gold);font-weight:700;margin-inline-start:auto}
@@ -594,6 +618,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
     </div>
 
     <div id="creW" class="sys panel center" hidden></div>
+    <div id="cgW" class="sys panel center" hidden></div>
     <div id="cfmW" class="sys panel center" hidden>
       <div class="ptitle"><span class="head" id="cfmT"></span></div>
       <div id="cfmB"></div>
@@ -4733,6 +4758,46 @@ function honOpts(who){const z=townOfNpc(who),rk=repRank(z),D=dlyS(),h=(D.hon||{}
 function honBuy(who,k){const z=townOfNpc(who),H=HONS[k],D=dlyS(),g=price(who,H.g);D.hon=D.hon||{};const h=D.hon[z]=D.hon[z]||{};
  if((h[k]||0)>=H.n){SFX.deny();return shopD(who,t('honOut'));}if(S.gold<g){SFX.deny();return shopD(who,t('noGold'));}
  S.gold-=g;h[k]=(h[k]||0)+1;addMat(k,1);boughtFx(k,1,g);save(true);shopD(who,t('honThanks'));}
+/* ---------------- Three Crowns, the inn's card game (SAT-ONLINE-181; plan U296 "Card minigame": "non-real-money fixed local
+   rewards", checked by "age-appropriate, no gambling currency") ----------------
+   At any inn, ask the innkeeper for a game. Fifteen cards: 1 to 5 in Sword ⚔, Shield 🛡 and Magic ✦; each side draws five.
+   Three rounds: you lay a card, the innkeeper lays one, and the higher wins the round's crown 👑. Sword beats Magic, Magic
+   beats Shield, Shield beats Sword: the beaten suit loses 3. Two crowns win the game. Nothing is staked and nothing is
+   paid: no gold, no items. Wins count (S.cg), and 10 and 50 wins give a title to show (Card Sharp, King of Crowns).
+   The innkeeper plays fair: it chooses before seeing yours, a little smarter as you win more. */
+Object.assign(STR.ar,{cgB:'🃏 العب «تلات تيجان»',cgT:'تلات تيجان',cgHelp:'كل واحد معاه 5 كروت. في كل جولة كل واحد يحط كارت، والأعلى ياخد التاج 👑. السيف ⚔ بيغلب السحر ✦، والسحر بيغلب الدرع 🛡، والدرع بيغلب السيف: الكارت المغلوب بيخسر 3. اللي ياخد تاجين يكسب. مفيش رهان ولا فلوس.',cgYou:'انت',cgThem:'صاحب اللوكاندة',cgPick:'اختار كارت (أو دوس 1 لـ 5)',cgRw:'الجولة ليك! 👑',cgRl:'الجولة لصاحب اللوكاندة',cgRt:'تعادل في الجولة',cgW:'كسبت اللعبة! 🎉',cgL:'خسرت المرة دي',cgD:'تعادل!',cgAgain:'العب تاني',cgLeave:'خلاص كفاية',cgWins:'مكسب: {n}',cgRound:'الجولة {n} من 3',tl_cardsh:'حريف الكوتشينة',tl_cardshD:'كسبت 10 مرات في «تلات تيجان». لقب للشكل بس.',tl_cardk:'ملك التيجان',tl_cardkD:'كسبت 50 مرة في «تلات تيجان». لقب للشكل بس.',cgs_sw:'سيف',cgs_sh:'درع',cgs_mg:'سحر'});
+Object.assign(STR.en,{cgB:'🃏 Play Three Crowns',cgT:'Three Crowns',cgHelp:'Each side has 5 cards. Each round you both lay one, and the higher takes the crown 👑. Sword ⚔ beats Magic ✦, Magic beats Shield 🛡, Shield beats Sword: the beaten card loses 3. Two crowns win. Nothing is staked.',cgYou:'You',cgThem:'Innkeeper',cgPick:'Pick a card (or press 1 to 5)',cgRw:'Your round! 👑',cgRl:"The innkeeper's round",cgRt:'A tied round',cgW:'You win the game! 🎉',cgL:'You lost this one',cgD:'A draw!',cgAgain:'Play again',cgLeave:"That's enough",cgWins:'Wins: {n}',cgRound:'Round {n} of 3',tl_cardsh:'Card Sharp',tl_cardshD:'You won Three Crowns 10 times. A title to show only.',tl_cardk:'King of Crowns',tl_cardkD:'You won Three Crowns 50 times. A title to show only.',cgs_sw:'Sword',cgs_sh:'Shield',cgs_mg:'Magic'});
+const CGS=['sw','sh','mg'],CGI={sw:'⚔',sh:'🛡',mg:'✦'},CGB={sw:'mg',mg:'sh',sh:'sw'}; // CGB: the suit each one beats
+let CG=null;
+const cgSt=()=>S.cg||(S.cg={w:0,p:0});
+function cgScore(a,b){return a.v-(CGB[b.s]===a.s?3:0);}
+function cgNew(){const d=[];for(const s of CGS)for(let v=1;v<=5;v++)d.push({s,v});for(let i=d.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[d[i],d[j]]=[d[j],d[i]];}
+ CG={me:d.slice(0,5),them:d.slice(5,10),r:0,cm:0,ct:0,lay:null,res:'',over:false,busy:false};}
+function cgOpen(){if(!S||S.__demo)return;cgNew();mode='cards';$('cgW').hidden=false;$('hint').hidden=true;SFX.open();cgDraw();}
+function cgClose(){CG=null;$('cgW').hidden=true;if(mode==='cards')mode='play';SFX.close();}
+// the innkeeper's card: random among its own, leaning to the high ones the more you have won
+function cgAI(){const H=CG.them,k=Math.min(.6,cgSt().w*.02),srt=H.map((c,i)=>[c.v+rand()*3+(rand()<k?2:0),i]).sort((a,b)=>b[0]-a[0]);return srt[rand()<.5+k?0:Math.min(srt.length-1,1+Math.floor(rand()*(srt.length-1)))][1];}
+function cgPlay(i){if(!CG||CG.over||CG.busy)return;const a=CG.me[i];if(!a)return;const j=cgAI(),b=CG.them[j];CG.me.splice(i,1);CG.them.splice(j,1);CG.busy=true;CG.r++;
+ const x=cgScore(a,b),y=cgScore(b,a),res=x>y?'w':x<y?'l':'t';if(res==='w')CG.cm++;else if(res==='l')CG.ct++;CG.lay={a,b,res};CG.res=res;SFX.click();
+ cgDraw();setTimeout(()=>{if(!CG)return;res==='w'?SFX.coin():res==='l'?SFX.deny():SFX.tick();
+  if(CG.cm>=2||CG.ct>=2||CG.r>=3){CG.over=true;cgEnd();}CG.busy=false;cgDraw();},550);}
+function cgEnd(){const st=cgSt();st.p++;const r=CG.cm>CG.ct?'w':CG.cm<CG.ct?'l':'d';CG.fin=r;
+ if(r==='w'){st.w++;SFX.level();if(st.w===10)giveTitle('cardsh');if(st.w===50)giveTitle('cardk');}hudDirty=true;save(true);}
+function cgCard(c,cls,attr){return `<${attr?'button':'div'} class="cgc ${c?c.s:''} ${cls||''}"${attr||''}>${c?`<span class="v">${c.v}</span><span class="s">${CGI[c.s]}</span>`:''}</${attr?'button':'div'}>`;}
+function cgDraw(){const w=$('cgW');if(!w||!CG)return;const L=CG.lay,st=cgSt(),cr=(n,on)=>[0,1].map(i=>`<span class="${i<n?'on':''}">${i<n?'👑':'·'}</span>`).join('');
+ const msg=CG.over?t(CG.fin==='w'?'cgW':CG.fin==='l'?'cgL':'cgD'):L&&CG.busy===false&&CG.r?t(L.res==='w'?'cgRw':L.res==='l'?'cgRl':'cgRt'):t('cgPick');
+ w.innerHTML=`<div class="head">${esc(t('cgT'))}</div><div class="cgsc"><span>${esc(t('cgThem'))} <span class="cgcr">${cr(CG.ct)}</span></span><small>${esc(t('cgRound',{n:Math.min(3,CG.r+(CG.over?0:1))}))} · ${esc(t('cgWins',{n:st.w}))}</small></div>`+
+  `<div class="cgrow">${CG.them.map(()=>cgCard(null,'back')).join('')}</div>`+
+  `<div class="cgmid">${L?cgCard(L.b,'flip '+(CG.busy?'':L.res==='l'?'win':L.res==='w'?'lose':'')):cgCard(null,'ghost')}${L?cgCard(L.a,(CG.busy?'':L.res==='w'?'win':L.res==='l'?'lose':'')):cgCard(null,'ghost')}</div>`+
+  `<div class="cgmsg ${CG.over?(CG.fin==='w'?'w':CG.fin==='l'?'l':''):''}">${esc(msg)}</div>`+
+  `<div class="cgrow">${CG.over?'':CG.me.map((c,i)=>cgCard(c,'',` data-cgp="${i}" title="${esc(t('cgs_'+c.s))} ${c.v}"`)).join('')}</div>`+
+  `<div class="cgsc"><span>${esc(t('cgYou'))} <span class="cgcr">${cr(CG.cm)}</span></span><span>${CG.over?`<button data-cga="again">${esc(t('cgAgain'))}</button> `:''}<button data-cga="leave">${esc(t('cgLeave'))}</button></span></div>`+
+  `<div class="cghelp">${esc(t('cgHelp'))}</div>`;}
+function cgKey(c){if(c==='Escape')return cgClose();const m=/^(?:Digit|Numpad)([1-5])$/.exec(c);if(m)return cgPlay(+m[1]-1);if(CG&&CG.over&&(c==='Enter'||c==='Space'))return cgAgain();}
+function cgAgain(){if(!CG)return;cgNew();SFX.open();cgDraw();}
+document.addEventListener('click',e=>{const w=e.target.closest&&e.target.closest('#cgW');if(!w||!CG)return;const p=e.target.closest('[data-cgp]');if(p)return cgPlay(+p.dataset.cgp);
+ const a=e.target.closest('[data-cga]');if(a){SFX.click();if(a.dataset.cga==='again')cgAgain();else cgClose();}});
+window.__GCG={open:()=>cgOpen(),play:i=>cgPlay(i),close:()=>cgClose(),again:()=>cgAgain(),score:(a,b)=>cgScore(a,b),get G(){return CG},st:()=>cgSt(),set:(me,them)=>{if(CG){CG.me=me;CG.them=them;}}}; // tests
 function restOpt(who,g){const free=repRank(townOfNpc(who))>=4,p=free?0:price(who,g);return {l:free?t('oRestFree'):t('oRest',{g:p}),f:()=>rest(who,p)};}
 // what each rank of the town gives (status window)
 const repPerk=r=>t('repP'+r);
@@ -6149,6 +6214,7 @@ function onKey(c){if(c==="Escape"&&!$("updLog").hidden){updLogClose();return;}
  else if(mode==='cook'){if(c==='KeyE'||c==='Space'||c==='Enter')cookHit();else if(c==='Escape')cookQuit();}
  else if(mode==='sew'){if(c==='KeyE'||c==='Space'||c==='Enter')sewHit();else if(c==='Escape')sewEnd(true);}
  else if(mode==='mix'){if(c==='Escape')mixEnd(0);}
+ else if(mode==='cards')cgKey(c);
  else if(mode==='song'||mode==='dance')p4Key(c);
  else if(mode==='farm'){if(c==='Escape')farmEnd(0);else if(c==='KeyE'||c==='Space'||c==='Enter')farmDig();else farmMove(c);}
  else if(mode==='forge'){if(MG&&!MG.done){if(c==='Space')strike();else if(c==='KeyR')reheat();}else if(c==='Escape')closeForge();else if(c==='Enter'&&$('nameIn'))$('nameOk')&&$('nameOk').click();}
@@ -6795,7 +6861,7 @@ const NPCT={
  ashur:{hi:'as_hi',low:()=>nextLvLine('ashur','as_low'),idle:()=>'as_idle'},
  pcap:{hi:'pc_hi',low:()=>nextLvLine('pcap','pc_low'),idle:()=>'pc_idle'},
  coachP:{idle:()=>'coachHi',opts:()=>[...rideOpt('horse'),...stableOpts('coachP'),{l:t('oTravelW',{g:fare()}),f:()=>travel(1,'coachP')},{l:t('oTravelB',{g:fare()+80}),f:()=>travel(0,'coachP')},...cOpts('coachP')]},
- inn:{idle:()=>'innHi',opts:()=>[bindOpt('inn'),...bankOpt('inn'),restOpt('inn',20),{l:t('oBuyBread'),qty:1,f:()=>buyBread('inn')},...potOpts('inn'),...mapOpt('inn')]},
+ inn:{idle:()=>'innHi',opts:()=>[{l:t('cgB'),f:cgOpen},bindOpt('inn'),...bankOpt('inn'),restOpt('inn',20),{l:t('oBuyBread'),qty:1,f:()=>buyBread('inn')},...potOpts('inn'),...mapOpt('inn')]},
  innB:{idle:()=>'innBHi',opts:()=>[bindOpt('innB'),...bankOpt('innB'),restOpt('innB',20),{l:t('oBuyBread'),qty:1,f:()=>buyBread('innB')},...potOpts('innB'),...mapOpt('innB')]},
  oldw:{hi:'ow_hi',idle:()=>'ow_idle'},
  piaro:{hi:'pi_hi',idle:()=>'pi_idle',opts:()=>[{l:t('oPiaro'),f:()=>dialog('piaro',['pi_t1','pi_t2','pi_t3',balanced()?'pi_good':'pi_off'])},...secOpt('piaro'),...(S.sec==='farmer'?[{l:t('oFarm'),st:t('farmD'),f:farmStart}]:[]),...ssqOpts(),...lfOpts(),...p4PiaroOpts()]},
@@ -8804,7 +8870,7 @@ function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,ti
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
  h+=`<div class="ssec">${t('special')}</div><div class="sgrid">`+['comp','indom','dign','insi',...(S.hid.pers?['pers']:[])].map(k=>row(t(k),S.hid[k],t('t'+k)+'<br><small>'+t('noDist')+'</small>')).join('')+'</div>';
  h+=`<div class="pts" id="ptsT">${t('pts',{n:S.pts})}</div>`+(S.pts>0?`<div class="note">${t('ptsHint')}</div>`:'');
- h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot',...TTOWN].filter(id=>S.tl[id]);
+ h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk',...TTOWN].filter(id=>S.tl[id]);
  const tlSk=id=>Object.keys(SKD).filter(k=>SKD[k].title===id||TLS[id]===k).filter((k,i,a)=>a.indexOf(k)===i);own.sort((x,y)=>(tlSk(y).length>0)-(tlSk(x).length>0));   // owner 2026-10-24: titles that give a skill come first
  const skTipT=k=>{const d=SKD[k]||{};return esc(`<b>${t('sk_'+k)}</b><br>${t('skd_'+k)}<br><small>${t('skCost',{mp:mpC(k),cd:Math.round((d.cd||0)*skCostM(k))})}</small>`);};
  h+=`<div class="ssec">${t('titlesH')}</div>`+(own.length?own.map(id=>`<div class="tl${S.title===id?' worn':''}"><div><b>${t('tl_'+id)}</b><small>${t('tl_'+id+'D')}</small>${tlSk(id).length?`<em>${tlSk(id).map(k=>`<span class="tlsk" data-tip="${skTipT(k)}">${t('iskL',{s:t('sk_'+k)})}</span>`).join(' · ')}</em>`:STR.en['tl_'+id+'S']?`<em>${t('tl_'+id+'S')}</em>`:''}</div><button data-title="${id}" ${S.title===id?'disabled':''}>${t(S.title===id?'tlWorn':'tlWear')}</button></div>`).join('')+`<div class="note">${t('tlNote')}</div>`:`<div class="note">${t('noTitles')}</div>`);
