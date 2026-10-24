@@ -6373,11 +6373,12 @@ function doApr(it,w){if(!canApr()||!aprNeed(it))return null;const g=aprFee(it,w)
  if(has){SFX.quest();toast(t('aprHas'),'good');setTimeout(()=>toast(t('aprUpd',{it:inm(it)})+' '+hidTxt(it.hid),'good'),350);}else{SFX.click();toast(t('aprNone'));}
  // owner 2026-10-23: every appraisal teaches the Successor something: smithing experience by rarity (double when it finds a hidden
  // option) and a little experience; once per item, since an appraised item can't be appraised again
- {const sx=Math.round((8+(it.r||0)*10)*(has?2:1)*(1+dvB('smith')));S.sxp+=sx;let up='';while(S.sxp>=50*S.smith){S.sxp-=50*S.smith;S.smith++;up=t('smithUp',{n:S.smith});}gainXP(3+(it.r||0)*3);numP(-40,'+'+sx+' '+t('aprSx'),'#f2c14e',false);if(up)setTimeout(()=>toast(up,'good'),1100);}
+ {const sx=Math.round((8+(it.r||0)*10)*(has?2:1)*(1+dvB('smith')));S.sxp+=sx;let up='';while(S.sxp>=50*S.smith){S.sxp-=50*S.smith;S.smith++;up=t('smithUp',{n:S.smith});}gainXP(3+(it.r||0)*3);numPK(-40,'aprSxN','#f2c14e',false,sx);if(up)setTimeout(()=>toast(up,'good'),1100);}
  if(aprSelf(w)&&salvUnd(it)&&undOf(it.id)<100){S.und=S.und||{};const u=Math.min(100,undOf(it.id)+(S.cls==='pagma'?17:10));S.und[it.id]=u;
   setTimeout(()=>{toast(t(u>=100?'undDone':'undUp',{it:it.nm||t(it.id),n:u}),'good');if(u>=100){SFX.legendary();rcLearn();}},800);}
  hudDirty=true;if(!$('inv').hidden)renderInv();save(true);return has;}
 window.__GAP={need:it=>aprNeed(it),chance:it=>aprChance(it),roll:it=>hidRoll(it),bon:k=>hidBon(k),fee:(it,w)=>aprFee(it,w),doApr:(it,w)=>doApr(it,w),open:w=>openApr(w),tip:i=>itemTip(i),tin:j=>tradeItemIn(j)}; // tests
+Object.assign(STR.ar,{aprSxN:"+{n} خبرة حدادة"});Object.assign(STR.en,{aprSxN:"+{n} smithing XP"});
 Object.assign(STR.ar,{"ringLock": "خانة خاتم مقفولة: بتتفتح في لفل {n}", "aprSx": "خبرة حدادة", "aprPg": "فحص القطع لوريث باجما بس", "oApr": "افحص قطعة", "fAprB": "فحص", "aprT": "فحص القطع", "aprNote": "دوس على قطعة عشان تفحصها وتكشف لو فيها خاصية مخفية.", "aprClick": "دوس عشان تفحصها", "aprNo": "القطعة دي مفيهاش حاجة تتفحص.", "aprDone": "القطعة دي اتفحصت قبل كده.", "aprUn": "لسه متفحصتش", "aprNone": "[مفيش خاصية مخفية.]", "aprHas": "[القطعة دي فيها خاصية مخفية.]", "aprUpd": "[معلومات {it} اتحدّثت.]", "hidL": "خاصية مخفية"});
 Object.assign(STR.en,{"ringLock": "Locked ring slot: opens at Lv {n}", "aprSx": "smithing XP", "aprPg": "Only Pagma's Successor can appraise items", "oApr": "Appraise an item", "fAprB": "Appraise", "aprT": "Appraise items", "aprNote": "Click a piece of gear to appraise it and find out whether it hides a function.", "aprClick": "Click to appraise", "aprNo": "There is nothing to appraise on this item.", "aprDone": "This item has already been appraised.", "aprUn": "Unappraised", "aprNone": "[A hidden function doesn't exist.]", "aprHas": "[This item has a hidden function.]", "aprUpd": "[The information of {it} has been updated.]", "hidL": "Hidden function"});
 Object.assign(STR.ar,{"oSalv": "فكّ قطعة", "fSalvB": "فكّ قطعة", "salvT": "فكّ القطع", "salvNote": "دوس على قطعة عشان تفكّها وتاخد جزء من خاماتها.", "salvGet": "بتطلّع: {m}", "salvNothing": "مفيش حاجة تطلع من القطعة دي.", "salvFeeT": "الأجرة {g} دهب", "salvNo": "الحاجات اللي بتتفك هي المعدات بس.", "salvQ": "تفكّ {it}؟ هتطلع منها: {m}.", "salvY": "فكّها", "salvRisk": "فرصة الفشل {n}% (القطعة بتتخدش بس)", "salvPoor": "الأجرة {g} دهب، ومعاكش.", "salvFail": "[الفك فشل.]", "salvDone": "{it} اتفكّت: {m}", "undL": "الفهم: {n}%", "undUp": "فهمك لـ{it} وصل {n}%.", "undDone": "فهمك لـ{it} وصل 100%. اتعلمت طريقة صنعها!", "rcHu": "فكّ القطعة دي على السندان لحد ما تفهمها 100%"});
@@ -6728,7 +6729,7 @@ const monY=m=>m.y-(m.type==='guardian'?18:m.type==='gchief'?10:4);
    crits), which stops TDIDLE s after the last hit; a run of at least TDMIN s can set your best (S.dpsB). From a dummy
    there is no XP, no loot, no kill, no quest or achievement count, no weapon mastery, no wear and no one-hit record. */
 const TDSPOT=[[219.5,97.6],[221.75,97.6],[224,97.6]],TDR=200,TDIDLE=4,TDMIN=10;let TDM=null;
-function tdTick(dt){if(!P||!S||mode==='title')return;for(const [tx,ty] of TDSPOT){const x=tx*TS,y=ty*TS,d=Math.hypot(P.x-x,P.y-y),m=mons.find(q=>q.tdum&&q.sx===x&&q.sy===y);
+function tdTick(dt){if(!P||!S||mode==='title')return;for(const [tx,ty] of TDSPOT){const x=tx*TS,y=ty*TS,d=Math.hypot(P.x-x,P.y-y),m=mons.find(q=>q.tdum&&q.sx===x&&q.sy===y);if(m){m.x=x;m.y=y;m.face=-1;m.mds=null;m.st=null;m.tele=0;}   /* it stands where it was put (owner 2026-10-24: the dummies moved when hit) */
   if(d<TDR&&!m&&!roomAt(P.x,P.y)){const n=newMon('outlaw',x,y,()=>0);Object.assign(n,{tdum:1,tmp:1,eng:0,agg:0,lv:S.lv,face:-1,nm:t('tdummy'),noLoot:1});n.max=n.hp=1e12;mons.push(n);}
   else if(m&&d>TDR*1.6){const i=mons.indexOf(m);if(i>=0)mons.splice(i,1);}}
  if(TDM&&gTime-TDM.last>TDIDLE)tdEnd();tdUI();}
@@ -8504,7 +8505,7 @@ function num(x,y,s,c,big){if(typeof s==='number')s=Math.round(s);else if(typeof 
 // (damage taken, a heal, a parry, a skill's name; not gold) also goes out with your effects and shows over you on every screen
 function numP(dy,s,c,big){num(P.x,P.y+dy,s,c,big);if(NET&&typeof fxR==='function'&&mode!=='title')try{fxR(['n',String(s).slice(0,16),String(c||'#ffffff').slice(0,7),big?1:0,dy]);}catch(e){}}
 // a word from the string table goes as its key, so each player reads it in their own language (owner 2026-10-24: a skill's name came in Arabic to someone playing in English)
-function numPK(dy,k,c,big){num(P.x,P.y+dy,t(k),c,big);if(NET&&typeof fxR==='function'&&mode!=='title')try{fxR(['nk',String(k).slice(0,40),String(c||'#ffffff').slice(0,7),big?1:0,dy]);}catch(e){}}
+function numPK(dy,k,c,big,n){const a=typeof n==='number'?{n}:undefined;num(P.x,P.y+dy,t(k,a),c,big);if(NET&&typeof fxR==='function'&&mode!=='title')try{fxR(['nk',String(k).slice(0,40),String(c||'#ffffff').slice(0,7),big?1:0,dy].concat(a?[Math.round(n)]:[]));}catch(e){}}   // n: a number the line carries ({n})
 // the effects of being hit or healed are your own too: record them like the ones your actions make (meRun)
 function asMe(fn){if(!NET||FXME||!FXREC)return fn();FXME=1;try{return fn();}finally{FXME=0;}}
 let qLast='';const SBL={}; // the pale trail on each bar: holds 0.45 s where the bar was, then slides down at 50% a second
@@ -9319,7 +9320,7 @@ function ipHit(m,dmg,crit,o){if(o.dot)return dmg;dmg=wpHit(m,dmg,crit,o);const b
 const FEATS=[['as',.04],['ms',.04],['dm',.05],['hpp',.05]];
 function breathFeat(it){if(!pasOn('focus')||it.r<2||rand()>=.05+(skLv('focus')-1)*.005*(skLv('focus')>=10?2:1))return;const [k,v]=FEATS[rand()*FEATS.length|0];it[k]=+((it[k]||0)+v).toFixed(3);it.ft=k;setTimeout(()=>{toast(t('featGot',{f:t('ft_'+k)}),'good');SFX.rare();},600);}
 // Doran's Ring: "50% of the damage received will instantly be recovered" (once every 3 minutes here)
-function ipHurt(d){if(d>0&&P.hp>0&&ipOn('doran')&&(P.doT||0)<=S.playT){P.doT=S.playT+180;const h=Math.round(d*.5);P.hp=Math.min(maxHP(),P.hp+h);numP(-30,t('ipDoran',{n:h}),'#7ae07a',false);vfx('heal',P.x,P.y);}}
+function ipHurt(d){if(d>0&&P.hp>0&&ipOn('doran')&&(P.doT||0)<=S.playT){P.doT=S.playT+180;const h=Math.round(d*.5);P.hp=Math.min(maxHP(),P.hp+h);numPK(-30,'ipDoran','#7ae07a',false,h);vfx('heal',P.x,P.y);}}
 // per frame: bleeding (6 ticks over 3 s), buff timers, Gale Spear's speed stacks, landing from Fly
 function updateItemFx(dt){if(!P)return;if(P.qm>0)P.qm-=dt;
  if(P.icb>0){P.icb-=dt;if(P.icb<=0){if(skLv('icomb')<10)[weapon(),armorIt()].forEach(i=>{if(i)i.dur=Math.max(0,durOf(i)-10);});toast(t('icombEnd'),'warn');}}if(P.galeT>0){P.galeT-=dt;if(P.galeT<=0)P.gale=0;}
@@ -13236,7 +13237,7 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
  else if(ty==='j'&&['arrow','magic','fire','wave'].includes(ev[3]))proj.push({kind:ev[3],x:x+n(ev[4]),y:y+n(ev[5]),vx:n(ev[6]),vy:n(ev[7]),t:Math.min(2,n(ev[8])/100),ghost:1,hit:new Set()});
  else if(ty==='w')s.sw={a:n(ev[3]),t:performance.now()};
  else if(ty==='d')s.du=performance.now()+Math.min(600,n(ev[3])*10);
- else if(ty==='nk'&&typeof ev[3]==='string'&&/^[A-Za-z0-9_]{1,40}$/.test(ev[3])&&STR.en[ev[3]]!=null){const c=/^#[0-9a-fA-F]{6}$/.test(ev[4])?ev[4]:'#ffffff';num(x,y+Math.max(-60,Math.min(0,n(ev[6]))),t(ev[3]).slice(0,32),c,!!ev[5]);}
+ else if(ty==='nk'&&typeof ev[3]==='string'&&/^[A-Za-z0-9_]{1,40}$/.test(ev[3])&&STR.en[ev[3]]!=null){const c=/^#[0-9a-fA-F]{6}$/.test(ev[4])?ev[4]:'#ffffff';num(x,y+Math.max(-60,Math.min(0,n(ev[6]))),t(ev[3],typeof ev[7]==='number'&&isFinite(ev[7])?{n:Math.round(ev[7])}:undefined).slice(0,32),c,!!ev[5]);}
  else if(ty==='n'&&typeof ev[3]==='string'){const c=/^#[0-9a-fA-F]{6}$/.test(ev[4])?ev[4]:'#ffffff';num(x,y+Math.max(-60,Math.min(0,n(ev[6]))),ev[3].slice(0,16),c,!!ev[5]);}
  else if(ty==='s'&&SFXNET.includes(ev[3])&&P){const d=Math.hypot(x-P.x,y-P.y),R=ev[3]==='level'||ev[3]==='legendary'?SFXRW:SFXRP;if(d<R){SFXV=.05+.5*(1-d/R)**2;try{sfxOn('soc',()=>SFX[ev[3]](n(ev[4])||undefined));if(__GS.heard.length<40)__GS.heard.push(ev[3]);}finally{SFXV=1;}}}}
 // due replays, at where each player is drawn now; players off screen or out of sight just drop theirs
