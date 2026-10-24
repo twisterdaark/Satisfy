@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24doranlang', ver: '2.79', d: '2026-10-24',
+      ar: ["شفا خاتم دوران وخبرة الحدادة من الفحص بقوا بيظهروا للاعبين التانيين بلغتهم هما.",
+          "دمية التدريب بقت بتقف كمان أي اندفاع أو زقة عليها في نفس الفريم."],
+      en: ["The Doran ring's heal and the smithing XP from appraising now show to other players in their own language.",
+          "The training dummy also stops any dash or push on it in the same frame."] },
     { v: '2026-10-24erasecard', ver: '2.78', d: '2026-10-24',
       ar: ["\"امسح بياناتي الأونلاين\" بقت بتمسح كارت البطولة كمان.",
           "الإيموجي اللي بقت رسومات بيكسل محفوظة كنص مخفي جنب الصورة، عشان النسخ والبحث يفضلوا شغالين.",
