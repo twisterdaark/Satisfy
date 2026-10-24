@@ -1,7 +1,7 @@
 // Map art v2 (SAT-ART-001, Claude-B): painted terrain base for the HUD minimap and the world map (M),
 // plus the markers both draw on top. Cosmetic only; reads the tile grid through env.at like tiles.js.
 //   const base=SatArt.minimap.buildBase(env,{W,H,buildings,px:8});   // canvas, px pixels per tile
-//   SatArt.minimap.marker(g,'npc',x,y,size)  // npc | quest | ret | mon | elite | boss | anvil | ally
+//   SatArt.minimap.marker(g,'npc',x,y,size)  // npc | quest | ret | mon | elite | boss | anvil | ally | guild | gally | foe
 //   SatArt.minimap.player(g,x,y,angle,size,t) // arrow + pulse ring
 //   SatArt.minimap.label(g,text,x,y,{size,color,font,band})
 (function(root){'use strict';const A=root.SatArt=root.SatArt||{};
@@ -98,6 +98,9 @@ function marker(g,kind,x,y,u){u=u||1;g.save();g.lineJoin='round';
   g.fillStyle='rgba(255,255,255,.7)';poly(g,[[x,y-r*.62],[x+r*.38,y-r*.24],[x,y+r*.1],[x-r*.38,y-r*.24]]);g.fill();}
  else if(kind==='mon'||kind==='elite'){const r=(kind==='elite'?2.4:1.9)*u;g.beginPath();g.arc(x,y,r,0,7);g.fillStyle=kind==='elite'?'#e2493a':'#ffb04a';g.fill();g.lineWidth=1*u;g.strokeStyle='#1a0a0a';g.stroke();}
  else if(kind==='ally'){g.beginPath();g.arc(x,y,2*u,0,7);g.fillStyle='#5ad06a';g.fill();g.lineWidth=1*u;g.strokeStyle='#0a1a0a';g.stroke();}
+ // other players (SAT-ONLINE-207): your guild blue, an allied guild's pale blue, a foe (an outlaw, a guild at war with yours) a red diamond
+ else if(kind==='guild'||kind==='gally'){g.beginPath();g.arc(x,y,2*u,0,7);g.fillStyle=kind==='guild'?'#4f8dff':'#a8dcff';g.fill();g.lineWidth=1*u;g.strokeStyle='#08142a';g.stroke();}
+ else if(kind==='foe'){const r=2.8*u;poly(g,[[x,y-r],[x+r,y],[x,y+r],[x-r,y]]);g.fillStyle='#ff3b30';g.fill();g.lineWidth=1.1*u;g.strokeStyle='#2a0604';g.stroke();}
  else if(kind==='boss'){const r=5*u;g.beginPath();g.arc(x,y,r+2*u,0,7);g.fillStyle='rgba(192,80,255,.28)';g.fill();g.beginPath();g.arc(x,y,r,0,7);g.fillStyle='#c050ff';g.fill();g.lineWidth=1.4*u;g.strokeStyle='#1a0a24';g.stroke();
   g.fillStyle='#fff';g.fillRect(x-r*.45,y-r*.25,r*.3,r*.3);g.fillRect(x+r*.15,y-r*.25,r*.3,r*.3);g.fillRect(x-r*.3,y+r*.3,r*.6,r*.18);}
  else if(kind==='anvil'){const w=7*u,h=4*u;g.fillStyle='#bfe8ff';g.strokeStyle='#0a0f1e';g.lineWidth=1.2*u;poly(g,[[x-w/2,y-h/2],[x+w/2,y-h/2],[x+w*.25,y],[x+w*.2,y+h/2],[x-w*.2,y+h/2],[x-w*.25,y]]);g.fill();g.stroke();}

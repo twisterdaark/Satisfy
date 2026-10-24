@@ -10105,7 +10105,8 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
   if(p.area){g.save();g.globalAlpha=.18;g.fillStyle=col;g.beginPath();g.arc(x,y,5*sc,0,7);g.fill();g.globalAlpha=.6;g.setLineDash([4*dpr,3*dpr]);g.strokeStyle=col;g.lineWidth=dpr;g.stroke();g.restore();}
   MM.marker(g,p.ret?'ret':'quest',x,y,u*1.1);MM.label(g,(p.ret?'? ':'')+qName(id),x,y-13*u,{size:Math.round(11*dpr),color:col,font:F,band:'rgba(8,16,40,.82)'});});
  // party members on the big map (SAT-ONLINE-026, owner feedback 17), however far: the party query keeps them in view
- if(NET&&PARTY&&PARTY.id())for(const r of NET.remotes())if(r.party===PARTY.id()&&!r.room&&r.mv===mapV()&&inM(r.x/TS,r.y/TS)){const x=X(r.x/TS),y=Y(r.y/TS);MM.marker(g,'ally',x,y,u*1.4);MM.label(g,r.handle||'?',x,y-12*u,{size:Math.round(11*dpr),color:'#8dff9a',font:F,band:'rgba(8,40,16,.82)'});}
+ if(NET){const pid=PARTY&&PARTY.id();for(const r of NET.remotes()){const k=netDotKind(r,pid);if(!k||!inM(r.x/TS,r.y/TS))continue;const x=X(r.x/TS),y=Y(r.y/TS);MM.marker(g,k,x,y,u*1.4);
+  if(k==='ally')MM.label(g,r.handle||'?',x,y-12*u,{size:Math.round(11*dpr),color:'#8dff9a',font:F,band:'rgba(8,40,16,.82)'});}} // SAT-ONLINE-207: the other dots without names
  {const cl=lifeLv('carto');if(cl>=3&&MV.z>=1.5)for(const q of exCaches()){if(cl<6&&!(S.exc&&S.exc[q.z]))continue;const wx=q.x/TS,wy=q.y/TS;if(!inM(wx,wy)||!fogSeen(wx,wy))continue;const x=X(wx),y=Y(wy);if(!onS(x,y))continue; // explorer caches, from Cartography 3
   const r=3*u;g.strokeStyle=exHid(q)?'#ffd23a':'rgba(160,170,190,.55)';g.lineWidth=2*dpr;g.beginPath();g.moveTo(x-r,y-r);g.lineTo(x+r,y+r);g.moveTo(x+r,y-r);g.lineTo(x-r,y+r);g.stroke();}}
  if(FOG)fogDraw(g,X,Y,sc);
@@ -13350,8 +13351,17 @@ function pingAdd(e){PINGS.push({x:e.x,y:e.y,t:performance.now(),handle:e.handle,
 function pingEnts(ents,myRoom,F){if(myRoom)return;const now=performance.now();PINGS=PINGS.filter(p=>now-p.t<3000);
  for(const p of PINGS){const k=(now-p.t)/3000;ents.push({y:-1e9,f:()=>{ctx.save();ctx.strokeStyle=`rgba(255,220,90,${(1-k).toFixed(2)})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,6+14*k,0,7);ctx.stroke();ctx.restore();}});
   if(!p.self)TX.push({s:p.handle||'?',x:p.x,y:p.y-18,f:F,z:6,c:'#ffe07a'});}}
+/* SAT-ONLINE-207 (plan U253 MiniMap player dots: "interest-filtered teammate/enemy/ally dots", checked by "no hidden player is
+   shown without a reveal"): the HUD map and the world map mark, among the players presence brings (those near you, on
+   your map version, outdoors), your party (green, as before), your guild (blue), an allied guild (pale blue) and foes:
+   an outlaw or a member of a guild at war with yours right now (a red diamond). Nobody else gets a dot. A player hidden
+   by stealth gets none unless they are in your party (they are faint on screen too). */
+function netDotKind(r,pid){if(!r||r.room||r.mv!==mapV())return null;if(pid&&r.party===pid)return 'ally';
+ const st=(FXS.get(r.sid)||{}).st||'';if(st.indexOf('s')>=0)return null;
+ const my=guildPub();if(my&&r.gd===my)return 'guild';if(r.ol||warOf(r))return 'foe';if(r.gd&&galOf(r.gd)&&guildOf(r))return 'gally';return null;}
+window.__GDOT={kind:r=>netDotKind(r,PARTY&&PARTY.id())}; // tests
 function netMini(g,sx,sy,u){const now=performance.now(),id=PARTY&&PARTY.id();
- if(id)for(const r of NET.remotes())if(r.party===id&&!r.room&&r.mv===mapV())MM.marker(g,'ally',sx(r.x),sy(r.y),u);
+ for(const r of NET.remotes()){const k=netDotKind(r,id);if(k)MM.marker(g,k,sx(r.x),sy(r.y),u);}
  for(const p of PINGS){const k=(now-p.t)/3000;if(k>=1)continue;g.strokeStyle=`rgba(255,220,90,${(1-k).toFixed(2)})`;g.lineWidth=2;g.beginPath();g.arc(sx(p.x),sy(p.y),4+10*k,0,7);g.stroke();}}
 /* player menu (SAT-ONLINE-020, doc §35 U046 nearby player context + U064 inspect): click or tap another player's name to see
    their public card (name, level, class, title, party, armour) and invite, challenge or block exactly that player:
