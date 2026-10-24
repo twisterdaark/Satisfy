@@ -14419,7 +14419,7 @@ function annTick(){if(ANNQ.length&&Satisfy.local.inGame()&&S&&!S.__demo)annShow(
    account votes once (an account ID needed: a fresh guest can't). The rules keep each vote readable by its own account
    alone and let a count rise only by one, with its vote, in the same write; so nobody sees who voted for what, and no
    account votes twice. */
-let POLLS={},POLLT={},POLLM={},POLLOFF=null,POLLTO=null,POLLTID=null;
+var POLLS={},POLLT={},POLLM={},POLLOFF=null,POLLTO=null,POLLTID=null; // var: ?net=local starts the net during load (netStart → pollStart), before this line runs (a let here threw, and the rest of the script never ran)
 function pollSt(){return NETTR&&NETTR.kind==='firebase'&&FB&&NET&&Satisfy.firebase.pollStore?Satisfy.firebase.pollStore(FB):null;}
 function pollOpen(){let best=null;for(const id in POLLS){const p=POLLS[id];if(!p||!p.q||!p.o||!(+p.end>wNow()))continue;if(!best||(+p.t||0)>(+POLLS[best].t||0))best=id;}return best;}
 function pollStart(){pollStop();const st=pollSt();if(!st)return;POLLOFF=st.watch(v=>{POLLS=v&&typeof v==='object'?v:{};pollFollow();});}
