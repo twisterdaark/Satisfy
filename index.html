@@ -10286,6 +10286,26 @@ function drawTele(m){const b=MT[m.type],mv=m.mv;if(!mv||m.dead||m.st!=='tele')re
  else{ctx.beginPath();ctx.moveTo(m.x,m.y-4);ctx.arc(m.x,m.y-4,mv.reach,a-mv.arc,a+mv.arc);ctx.closePath();ctx.fill();ctx.stroke();}
  ctx.restore();}
 
+/* footsteps (SAT-ONLINE-189; owner 2026-10-24: "improve the visuals ... add dopamine"): walking leaves a trace that fits the
+   ground. In snow, footprints, left and right, that fade over seven seconds; on dirt, paths and cave floors, a puff of dust
+   at each step, a bigger one riding or dashing; grass, water and floors take none. You and the players near you (online).
+   Only drawn, with its own random stream (FTR): nothing in the state, nothing from the game's dice. Reduced motion: the
+   prints stay, the dust doesn't. */
+const FTR=mulberry32(0xf007),FT=[],FTD=[],FTW=new Map();   // prints, dust, each walker's last spot {x,y,a (walked since the last step),s (left/right)}
+function ftStep(x,y,dir,big){if(y>=WMH*TS)return;const tx=Math.floor(x/TS),ty=Math.floor(y/TS),v=at(tx,ty),snow=v===SN||(v===GR||v===FL)&&snowAt(tx,ty);
+ if(snow){const w=FTW.get('s')||{s:0};w.s^=1;FTW.set('s',w);const side=w.s?1:-1,hz=dir===2||dir===3;FT.push({x:Math.round(x+(hz?0:side*2)),y:Math.round(y-1+(hz?side:0)),t:7,hz});
+  if(FT.length>(RMO?24:70))FT.shift();return;}
+ if(RMO||!(v===PA||v===DR||v===CF))return;const n=big?4:2,c=v===CF?'#7a7088':'#cdb084';
+ for(let i=0;i<n;i++)FTD.push({x:x+(FTR()-.5)*(big?9:5),y:y-1,vx:(FTR()-.5)*(big?26:14),vy:-5-FTR()*(big?10:5),t:.3+FTR()*.25,t0:.55,c,z:FTR()<(big?.7:.4)?2:1});if(FTD.length>48)FTD.splice(0,FTD.length-48);}
+function ftWalk(k,x,y,dir,big){let w=FTW.get(k);if(!w){FTW.set(k,{x,y,a:0});return;}const d=Math.hypot(x-w.x,y-w.y);w.x=x;w.y=y;if(!(d>0)||d>40)return;w.a+=d;if(w.a>=(big?17:11)){w.a=0;ftStep(x,y,dir,big);}}
+function ftDraw(){if(!S||!P||mode==='title')return;
+ if(!P.ghost)ftWalk('me',P.x,P.y,P.dir,!!P.ride||P.dash>0);
+ if(NET&&NET.remotes)for(const r of NET.remotes())if(Math.abs(r.x-P.x)<400&&Math.abs(r.y-P.y)<300)ftWalk('r'+r.sid,r.x,r.y,r.dir|0,!!r.ride);
+ const dt=1/60;
+ if(FT.length){for(const f of FT){f.t-=dt;if(f.t<=0)continue;ctx.globalAlpha=Math.min(1,f.t/2.5)*.5;R(ctx,f.x,f.y,f.hz?3:2,2,'#5f7494');}ctx.globalAlpha=1;while(FT.length&&FT[0].t<=0)FT.shift();}
+ if(FTD.length){for(const p of FTD){p.t-=dt;if(p.t<=0)continue;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.9;p.vy*=.9;ctx.globalAlpha=Math.min(1,p.t/p.t0*1.6)*.75;R(ctx,Math.round(p.x),Math.round(p.y),p.z,p.z,p.c);}ctx.globalAlpha=1;
+  for(let i=FTD.length-1;i>=0;i--)if(FTD[i].t<=0)FTD.splice(i,1);}}
+window.__GFT={get prints(){return FT.length},get dust(){return FTD.length},step:(x,y,d,b)=>ftStep(x,y,d,b),tile:(tx,ty)=>at(tx,ty),snow:(tx,ty)=>!!snowAt(tx,ty)}; // tests
 /* ---------------- render ---------------- */
 const darkC=mk(VW,VH,()=>{}),dg=darkC.getContext('2d');
 const PAL={gbear:['#7a5030','#553620','#9a7050',1.5],wolf:['#7a7a86','#55555f','#a8a8b4',1],bear:['#6a4a30','#4a321e','#8a6a48',1.5],pwolf:['#a08a5a','#7a6640','#c8b07a',1],boar:['#5a4030','#3e2c20','#7a5a40',1.15],hwolf:['#6e6258','#4e443c','#968878',1.05],rboar:['#7a3a2a','#55261a','#a05a40',1.3],cwolf:['#c8d4e0','#8a9cb0','#eef4fa',1.1],cbear:['#d8dce4','#9aa2b0','#f4f6fa',1.6],cboar:['#4a5a3a','#323e26','#6e7e52',1.35],fboar:['#8a6a5a','#5e4a3e','#b08a78',1.2],sanju1:['#8a8a90','#5e5e66','#b4b4bc',2.4,'sanju'],sanju2:['#4a5466','#2e3442','#7a869a',3.0,'sanju'],sanju3:['#5a3e2e','#3a281c','#8a6a50',3.0,'sanju'],sanju4:['#4a3e56','#2c2434','#7a6a8e',2.8,'sanjuh'],gargoyle:['#7a7a82','#55555e','#a2a2ac',1.25],salamander:['#c8603a','#8a3a22','#e89a6a',1.3],hydra:['#3e6a4a','#264a32','#6a9a6a',1.5],ogolem:['#3e3638','#221c1e','#5e5254',1.35],aweapon:['#8a7a4e','#5a4e2e','#c8b47a',2.7],sellobu:['#3a2e4a','#241a32','#6a5a8a',1.1],foxmouse:['#d8843a','#a85a22','#f4d0a0',.6],hrabbit:['#8a7a6a','#5e5040','#b4a490',1.15,'horn'],grabbit:['#e8c040','#b08a20','#fff0a0',1,'gold'],slime:['#5ac84a','#3a8a2e','#a8f08a',1.25],mslime:['#6ad85a','#3e9a32','#b8f8a0',.75],cbat:['#4a3a5a','#2a1e36','#7a6a8a',1.1],sscorp:['#c89a5a','#8a6a36','#ecc890',1.3],mimic:['#8a5a2e','#5a3a1a','#b07a44',1.2],felem:['#e8581e','#9a200c','#ffc04a',1],ielem:['#7ac8f0','#2a6aa8','#d8f4ff',1],selem:['#5a6a8a','#2a3450','#a8b8d8',1],slord:['#4a5878','#1e2640','#8a9ac0',1.9],vbat:['#6a1a2a','#3a0a14','#a83a4a',1.15],kraken:['#7a3a5a','#4a1e3a','#b86a8a',1.6],ktent:['#7a3a5a','#4a1e3a','#b86a8a',1.2]};
@@ -10367,6 +10387,7 @@ function render(dt){DRAWN=0;netDrawn=0;
  cvs.style.transform=`translate(${(-(fxp-camX)*SC).toFixed(2)}px,${(-(fyp-camY)*SC).toFixed(2)}px)`;
  gg.blit(ctx,camX,camY,VW,VH,0,0);
  ctx.save();ctx.translate(-camX,-camY);
+ try{ftDraw();}catch(e){gameErr(e);} // SAT-ONLINE-189: footsteps, under everything that stands
  vtView(tr=>{const px=tr.tx*TS,py=tr.ty*TS;const left=(chopped.get(tr.k)||0)-gTime;if(left>0){R(ctx,px+2,py+12,12,3,'rgba(0,0,0,.25)');R(ctx,px+5,py+10,6,5,'#6b4428');R(ctx,px+5,py+10,6,2,'#c49a62');R(ctx,px+7,py+10,2,1,'#8a5a32');if(left<12){R(ctx,px+11,py+7,1,3,'#58a65a');R(ctx,px+10,py+7,3,1,'#3f8a44');}}else ctx.drawImage(tr.tr,px,py);});
  const fl=.5+.5*Math.sin(gTime*9)*Math.sin(gTime*3.7);
  FURNS.forEach(FURN=>{R(ctx,FURN.x+2,FURN.y+4,18,14,fl>.5?'#ff8a1e':'#ffa83a');R(ctx,FURN.x+6,FURN.y+9,10,9,'#ffe07a');for(let i=0;i<5;i++)R(ctx,FURN.x+3+i*3,FURN.y+10-((Math.sin(gTime*10+i*2)*3+3)|0),3,8,'#ff7a1a');});
