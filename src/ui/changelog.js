@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24skillfx2', ver: '2.60', d: '2026-10-24',
+      ar: ["سكيلات كانت باهتة بقى ليها شكل: الدوامة بتلف بهلالين حواليك، العفن بيمسك في الوحش بسحابة بنفسجي، امتصاص الروح بيشد خيوط من الوحوش اللي بتعفن، وامتصاص الحياة بيرجعلك في خيط بنفسجي.",
+          "استدعاء هيكل بيطلع في عمود نور، وانفجار الجثة بقى انفجار بجد بموجة في الأرض.",
+          "برق براهام بينزل بعمود نور وصدمة، وكل صاروخ سحري بيفرقع لما يخبط.",
+          "نور النهاية بقى عمود دهبي ضخم، الدوران بتاع باغما بيلف بأنصاص قمر دهبي حواليك، واللسان الحاقد بيعلّم على الوحش بضربة X حمرا."],
+      en: ["Skills that looked faint have a look now: Whirlwind spins two crescents round you, Rot clings to the monster in a purple cloud, Soul Siphon draws threads from your rotting monsters, and Life Drain comes back to you along a purple thread.",
+          "Summon Skeleton rises in a pillar of light, and Corpse Explosion is a real blast with a shock along the ground.",
+          "Braham's Lightning lands with a pillar of light and a shock, and every Magic Missile bursts where it hits.",
+          "Light of the End is a huge golden pillar, Pagma's Revolve turns golden crescents round you, and Spiteful Tongue marks the monster with a red X."] },
     { v: '2026-10-24saintfx', ver: '2.59', d: '2026-10-24',
       ar: ["سكيلات السورد ساينت بقت شكلها أقوى: \"تجسيد الإرادة\" بينزّل سيوف شبح على كل وحش وبعدها عمود نور بيطلع من الأرض، \"سيف القلب\" بيطلع هلال ضخم وضربة X وموجة في الأرض، و\"سيف الجنون\" بقى طعنات نور جاية من كل ناحية."],
       en: ["The Sword Saint's skills look stronger: Manifestation of Will drops ghost swords on every monster and a pillar of light rises after, Heart Sword throws an enormous crescent, an X cut and a ground shock, and Frenzy Sword is thrusts of light from every side."] },
