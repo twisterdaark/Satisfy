@@ -10,7 +10,7 @@
     { v: '2026-10-24nearby', ver: '2.67', d: '2026-10-24',
       ar: ["قايمة اللاعيبة (O) بقت مترتبة بالأقرب: انت الأول، وبعدين اللي على نفس الخريطة ومعاك في نفس المكان من الأقرب للأبعد وجنب كل واحد بُعده بالمربعات، وبعدين الباقيين بالاسم."],
       en: ["The players list (O) puts the nearest first: you, then the players on your map and in the same place, closest first with how far each one is in tiles, then everyone else by name."] },
-    { v: '2026-10-24partyhud', ver: '2.67', d: '2026-10-24',
+    { v: '2026-10-24partyhud', d: '2026-10-24',
       ar: ["لوحة الفريق (أونلاين): تحت اسم كل واحد في فريقك بقى مكتوب كلاسه والمكان اللي هو فيه. ولو اللعبة مسمعتش منه بقالها أكتر من ثانيتين ونص، سطره بيبهت ويقولك من كام ثانية (يعني ممكن النت عنده فصل)."],
       en: ["The party panel (online): under each mate's name you now see their class and where they are. When the game hasn't heard from one for over 2.5 seconds, their row fades and says how many seconds ago (their connection may have dropped)."] },
     { v: '2026-10-24chunkwarm', ver: '2.66', d: '2026-10-24',
