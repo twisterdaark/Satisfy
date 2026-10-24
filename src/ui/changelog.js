@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24weather', ver: '2.56', d: '2026-10-24',
+      ar: ["الجو والتوقعات: الساعة اللي فوق بقت بتبيّن الجو اللي انت فيه (🌧 ⛈ 🌫 ❄)، ولو وقفت عليها تعرف الجو هيبقى إيه بعد كام دقيقة وبعدها إيه. نفس الساعة عند كل اللاعيبة، فالكل شايف نفس العاصفة",
+          "السما بقت أحلى: المطر طبقتين ومايل مع الريح وبيطرطش على الأرض، والعاصفة السما فيها بتنوّر كل شوية، والشبورة بقت سحاب بيتحرك مع الريح، والتلج بأحجام مختلفة وبيتمايل"],
+      en: ["Weather and forecast: the clock at the top shows the weather where you are (🌧 ⛈ 🌫 ❄), and hovering it tells you what comes next, in how many minutes, and after that. It is the same clock for every player, so everyone sees the same storm",
+          "A livelier sky: rain falls in two layers, slants with the wind and splashes on the ground; a storm's sky flickers now and then; fog drifts in banks with the wind; snow falls in three sizes and sways"] },
     { v: '2026-10-24settings', ver: '2.55', d: '2026-10-24',
       ar: ["قايمة الإيقاف بقى فيها الأساسي بس (كمّل، اطلع من الزنقة، وضع التصوير، سجل التحديثات، احفظ واخرج)، وزرار \"الإعدادات\" جواه الباقي: التحكم، والصوت، واللغة، وحجم القوايم، وتقليل الحركة، وترتيب الواجهة.",
           "تذكرة تغيير الاسم: التاجر اللي بيبيع لفافة العودة بيبيعها بـ 50,000 دهب، وبتستعملها من الشنطة أو من الإعدادات > غيّر اسمك.",

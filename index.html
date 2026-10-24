@@ -4985,7 +4985,20 @@ function updateComp(dt){if(!S||!P)return;meetTick(dt);const c=MEET?COMPS[MEET.id
 const WXS=20*60*1000,WXT=['clear','clear','rain','clear','fog','rain','storm','clear','clear','rain'];
 let WXF=null,wxP=[],wxBolt=4,wxFlash=0,wxAg=1,wxLast=null;
 function wxNow(){if(WXF)return WXF;const sl=Math.floor(wNow()/WXS); // SAT-ONLINE-044: the server's clock online, so the weather is the same for everyone
-return WXT[((sl*40503)>>>0)%WXT.length];}
+return wxAt(sl);}
+function wxAt(sl){return WXT[((sl*40503)>>>0)%WXT.length];}
+/* U304 Daily weather (SAT-ONLINE-177; plan: "coordinated climate display per region", checked by "all players see same storm
+   clock"). The sky was already one clock for everyone; now the HUD clock shows it, for where you are (snow in the north,
+   the blizzard on the Chaos Mountains, dry under a roof), with the forecast in its tip: what comes next and in how many
+   minutes, and after that. The next slots come from the same clock, so every player reads the same forecast. */
+Object.assign(STR.ar,{wxN_clear:'صحو',wxN_rain:'مطر',wxN_storm:'عاصفة',wxN_fog:'شبورة',wxN_snow:'تلج',wxN_in:'جوه، من غير مطر',wxTip:'الجو: {a} · بعد {m} دقيقة: {b}، وبعدها: {c}'});
+Object.assign(STR.en,{wxN_clear:'Clear',wxN_rain:'Rain',wxN_storm:'Storm',wxN_fog:'Fog',wxN_snow:'Snow',wxN_in:'Indoors, dry',wxTip:'Weather: {a} · in {m} min: {b}, then: {c}'});
+const WXI={clear:'',rain:'🌧',storm:'⛈',fog:'🌫',snow:'❄'};
+function wxLoc(w){if(!P)return w;if(P.y<NWALL*TS)return 'snow';if((w==='rain'||w==='storm')&&snowAt(P.x/TS|0,P.y/TS|0))return 'snow';return w;}
+function wxFore(){const n=wNow(),sl=Math.floor(n/WXS),now=WXF||wxAt(sl);if(WXF)return {now,next:now,m:0,then:now};
+ let j=sl+1;while(j<sl+24&&wxAt(j)===now)j++;const next=wxAt(j);let k=j+1;while(k<j+24&&wxAt(k)===next)k++;
+ return {now,next,m:Math.max(1,Math.ceil((j*WXS-n)/60000)),then:wxAt(k)};}
+function wxTip(){const F=wxFore(),L=x=>t('wxN_'+wxLoc(x));return F.m?t('wxTip',{a:outdoors()?t('wxN_'+wxHere()):t('wxN_in'),b:L(F.next),m:F.m,c:L(F.then)}):t('wxN_'+wxHere());}
 const outdoors=()=>!!(P&&P.y<WMH*TS);
 // owner 2026-10-22: a day and a night on the world clock (the server's clock online, so every player has the same sky).
 // A day is 40 minutes: dusk from 18:00, full night 20:00 to 04:00, dawn until 06:00. Vampires count it as night from 19:00 to 05:00.
@@ -5002,13 +5015,28 @@ function updateWeather(dt){if(!S||!P)return;const w=wxHere();wxAg=w==='fog'?.6:1
  if(w==='storm'&&mode==='play'&&(wxBolt-=dt)<=0){wxBolt=18+rand()*14;const a=rand()*6.28,r=60+rand()*140,x=P.x+Math.cos(a)*r,y=P.y+Math.sin(a)*r*.7;fx.push({ring:true,x,y,t:.8});
   setTimeout(()=>{if(mode!=='play'||wxHere()!=='storm')return;const pts=[];for(let i=0;i<=8;i++)pts.push([x+(i%8?(rand()-.5)*14:0),y-160+i*20]);fx.push({bolt:pts,t:.3});wxFlash=.2;noise(.4,.12,700);shake=.15;
    for(const m of mons)if(!m.dead&&Math.hypot(m.x-x,m.y-y)<22)hitMon(m,3,{skill:1});if(Math.hypot(P.x-x,P.y-y)<20)hurtPlayer(Math.round(maxHP()*.08),S.lv,null);},800);}}
-function drawWeather(){if(!S||!P||mode==='title'||mode==='lang')return;ctx.globalCompositeOperation='source-over';const w=wxHere();
- if(w==='clear'){wxP.length=0;if(wxFlash>0){ctx.fillStyle=`rgba(230,240,255,${wxFlash*1.6})`;ctx.fillRect(0,0,VW,VH);}return;}
- const n=w==='storm'?160:w==='rain'?110:w==='snow'?90:0;while(wxP.length<n)wxP.push({x:rand()*VW,y:rand()*VH,s:.6+rand()*.6});wxP.length=Math.min(wxP.length,n);
- if(w==='storm'){ctx.fillStyle='rgba(10,14,30,.28)';ctx.fillRect(0,0,VW,VH);}else if(w==='rain'){ctx.fillStyle='rgba(20,30,50,.12)';ctx.fillRect(0,0,VW,VH);}
- if(w==='rain'||w==='storm'){ctx.strokeStyle='rgba(190,215,255,.45)';ctx.lineWidth=1;ctx.beginPath();for(const d of wxP){d.y+=7*d.s;d.x-=2*d.s;if(d.y>VH){d.y=-8;d.x=rand()*(VW+40);}ctx.moveTo(d.x,d.y);ctx.lineTo(d.x+2,d.y-7);}ctx.stroke();}
- else if(w==='snow'){ctx.fillStyle='rgba(255,255,255,.85)';for(const d of wxP){d.y+=.6*d.s;d.x+=Math.sin(gTime*1.5+d.s*9)*.3;if(d.y>VH){d.y=-4;d.x=rand()*VW;}ctx.fillRect(d.x|0,d.y|0,d.s>1?2:1,d.s>1?2:1);}}
- else if(w==='fog'){ctx.fillStyle='rgba(210,218,226,.1)';ctx.fillRect(0,0,VW,VH);}
+// SAT-ONLINE-177: a livelier sky (only drawn: its own random stream, WXR, so the game's stays as it was). Rain at two depths,
+// slanting with slow gusts (wxWind) and splashing where it lands; a storm's sky flickers now and then (sheet lightning:
+// no bolt, no damage); fog in banks that drift with the wind; snow at three depths, swaying. Reduced motion: no splashes,
+// no flicker.
+const WXR=mulberry32(0x77e47e);let wxSp=[],wxFB=[],wxSh=0,wxShT=6,wxShN=0;
+const wxWind=()=>Math.sin(gTime*.23)*.6+Math.sin(gTime*.071+1.3)*.4;
+function drawWeather(){if(!S||!P||mode==='title'||mode==='lang')return;ctx.globalCompositeOperation='source-over';const w=wxHere(),R=WXR,wd=wxWind();
+ if(w==='clear'){wxP.length=0;wxSp.length=0;if(wxFlash>0){ctx.fillStyle=`rgba(230,240,255,${wxFlash*1.6})`;ctx.fillRect(0,0,VW,VH);}return;}
+ const n=w==='storm'?210:w==='rain'?150:w==='snow'?130:0;while(wxP.length<n)wxP.push({x:R()*VW,y:R()*VH,s:.5+R()*.8});wxP.length=Math.min(wxP.length,n);
+ if(w==='storm'){ctx.fillStyle='rgba(10,14,30,.3)';ctx.fillRect(0,0,VW,VH);}else if(w==='rain'){ctx.fillStyle='rgba(20,30,50,.13)';ctx.fillRect(0,0,VW,VH);}
+ if(w==='rain'||w==='storm'){const k=w==='storm'?1.35:1;ctx.lineWidth=1;
+  for(const far of [true,false]){ctx.strokeStyle=far?'rgba(165,190,235,.3)':'rgba(205,225,255,.58)';ctx.beginPath();
+   for(const d of wxP){if((d.s<.9)!==far)continue;const vy=(far?5.5:8.5)*d.s*k,vx=-(1.6+wd*1.8)*d.s*k,L=far?4:8,m=Math.hypot(vx,vy)||1;d.y+=vy;d.x+=vx;
+    if(d.y>VH){if(!far&&!RMO&&wxSp.length<48&&R()<.55)wxSp.push({x:d.x,y:VH*(.3+R()*.68),t:0});d.y=-10;d.x=R()*(VW+60)-30;}
+    if(d.x<-30)d.x+=VW+60;else if(d.x>VW+30)d.x-=VW+60;ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-vx/m*L,d.y-vy/m*L);}
+   ctx.stroke();}
+  ctx.strokeStyle='rgba(215,232,255,.5)';for(let i=wxSp.length-1;i>=0;i--){const s=wxSp[i];s.t+=1/60;if(s.t>=.28){wxSp.splice(i,1);continue;}const q=s.t/.28;ctx.globalAlpha=.7*(1-q);ctx.beginPath();ctx.ellipse(s.x,s.y,1+q*4,.5+q*1.6,0,0,7);ctx.stroke();}ctx.globalAlpha=1;
+  if(w==='storm'&&!RMO){if((wxShT-=1/60)<=0){wxShT=5+R()*9;wxSh=.18;wxShN++;}if(wxSh>0){ctx.fillStyle=`rgba(200,215,255,${wxSh*.55})`;ctx.fillRect(0,0,VW,VH);wxSh-=1/60;}}}
+ else if(w==='snow'){for(const d of wxP){d.y+=(.35+.45*d.s)*(d.s>1.1?1.25:1);d.x+=(Math.sin(gTime*1.5+d.s*9)*.3+wd*.45)*d.s;if(d.y>VH){d.y=-4;d.x=R()*VW;}if(d.x<-4)d.x+=VW+8;else if(d.x>VW+4)d.x-=VW+8;
+   const z=d.s>1.1?2:d.s>.75?1.5:1;ctx.fillStyle=d.s>.75?'rgba(255,255,255,.92)':'rgba(235,242,255,.6)';ctx.fillRect(d.x|0,d.y|0,Math.ceil(z),Math.ceil(z));}}
+ else if(w==='fog'){ctx.fillStyle='rgba(210,218,226,.07)';ctx.fillRect(0,0,VW,VH);while(wxFB.length<6)wxFB.push({x:R()*VW,y:R()*VH,r:70+R()*90,v:.08+R()*.18});
+  for(const f of wxFB){f.x+=f.v*(1+wd*.6);if(f.x-f.r>VW){f.x=-f.r;f.y=R()*VH;}const g=ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,f.r);g.addColorStop(0,'rgba(220,226,234,.2)');g.addColorStop(1,'rgba(220,226,234,0)');ctx.fillStyle=g;ctx.fillRect(f.x-f.r,f.y-f.r,f.r*2,f.r*2);}}
  if(wxFlash>0){ctx.fillStyle=`rgba(230,240,255,${wxFlash*1.6})`;ctx.fillRect(0,0,VW,VH);}}
 
 /* ---------------- daily bounties (SAT-DAILY-001) ---------------- */
@@ -9992,8 +10020,8 @@ function sunFx(e){fx.push({x:e.x+(rand()-.5)*14,y:e.y-6-rand()*18,vx:(rand()-.5)
  if(rand()<.3)fx.push({x:e.x+(rand()-.5)*10,y:e.y-24,vx:(rand()-.5)*6,vy:-14,t:.8,c:'#5a5058'});}
 function vpTick(dt){
  // the HUD clock
- const h=dnHour(),hh=Math.floor(h),mm=Math.floor((h-hh)*60/5)*5,lbl=(isNight()?'☾ ':'☀ ')+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
- if(lbl!==DNS.hud){DNS.hud=lbl;const el=$('dnClk');if(el){el.textContent=lbl;el.dataset.tip=t(isNight()?'dnTipN':'dnTipD');}}
+ const h=dnHour(),hh=Math.floor(h),mm=Math.floor((h-hh)*60/5)*5,wi=WXI[wxHere()]||'',lbl=(isNight()?'☾ ':'☀ ')+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+(wi?' '+wi:''),tip=t(isNight()?'dnTipN':'dnTipD')+'\n'+wxTip();
+ if(lbl+tip!==DNS.hud){DNS.hud=lbl+tip;const el=$('dnClk');if(el){el.textContent=lbl;el.dataset.tip=esc(tip).replace(/\n/g,'<br>');}}
  const nt=isNight();if(DNS.last!==null&&nt!==DNS.last&&outdoors()&&mode==='play')toast(t(nt?'dnNight':'dnDay'),nt?'warn':'good');DNS.last=nt;
  // vampire monsters go indoors by day (outside the catacombs) and come out at nightfall: hidden, not killed
  if((VPS.hide-=dt)<=0){VPS.hide=.5;if(nt){for(const m of mons)if(m.vhid&&m.dead&&m.rt<=0){m.dead=false;m.vhid=0;m.hp=m.max;if(Math.abs(m.x-P.x)<VW&&Math.abs(m.y-P.y)<VH)vfx('dust',m.x,m.y,{n:8});}}else for(const m of mons){if(m.dead||!P3VAMP.has(m.type)||m.type==='vlord'||m.tmp)continue;if(catIn((m.sx||m.x)/TS,(m.sy||m.y)/TS)||(m.sy||m.y)>=WMH*TS)continue;
@@ -10027,6 +10055,7 @@ function vprCovPick(){const s=p3S(),no={l:t('vpDec'),f:()=>dialog('vprince',['vp
 function vprEmbrace(){if(!p3S().cov||isVamp())return;if(S.lv<EMBLV)return dialog('vprince',[t('vpeLow',{n:EMBLV})]);
  S.race='vampire';VPS.sun=0;SFX.legendary();announce(t('embDone'),1);for(let i=0;i<24;i++)fx.push({x:P.x+(rand()-.5)*30,y:P.y-rand()*30,vx:(rand()-.5)*30,vy:-20-rand()*20,t:.9,c:i%3?'#a81a2a':'#2a0a14',fl:1});hudDirty=true;save(true);}
 function vprCure(){if(!isVamp())return;if(S.gold<CUREG){SFX.deny();return dialog('vprince',[t('noGold')]);}S.gold-=CUREG;S.race='human';VPS.sun=0;SFX.quest();toast(t('cureDone'),'good');hudDirty=true;save(true);}
+window.__GWX={fore:()=>wxFore(),at:sl=>wxAt(sl),tip:()=>wxTip(),loc:w=>wxLoc(w),here:()=>wxHere(),get sp(){return wxSp.length},get fb(){return wxFB.length},get sheet(){return wxShN},clk:()=>{const e=$('dnClk');return e?{l:e.textContent,tip:e.dataset.tip}:null;},WXS}; // tests
 window.__GVP={force:h=>{DNF.h=h;DNS.hud='';VPS.hide=0;if(h!=null&&isNight())for(const m of mons)if(m.vhid)m.rt=0;},hour:()=>dnHour(),night:()=>isNight(),dark:()=>dnDark(),race:()=>myRace(),shade:()=>vpShade(),burning:()=>vpBurning(),atk:()=>vpAtk(),spd:()=>vpSpd(),st:()=>vpSt(),opts:()=>vprOpts(),
  cov:()=>vprCovPick(),embrace:()=>vprEmbrace(),cure:()=>vprCure(),tick:dt=>vpTick(dt),VPS};
 Object.assign(STR.ar,{"vprince": "ولي عهد مصاصي الدماء", "vpr_hi": "أنا ولي عهد مصاصي الدماء. البشر نادرا ما بينزلوا لحد هنا تحت الرملة وهم عايشين.", "vpr_idle": "الشمس عدوتنا من أول الزمان. علشان كده المدينة بتنام بالنهار وبتصحى بالليل.", "vpr_idleN": "الليل جميل، صح؟ ده الوقت اللي شعبي بيعيش فيه.", "oCovWhat": "إيه هو العهد؟", "oEmbrace": "الدم الأبدي (تبقى مصاص دماء)", "embSt": "لعضو العهد، من لفل {n}", "oCure": "رجّعني بشري", "vpAcc": "أقبل", "vpDec": "أرفض", "vpOk": "فهمت", "vpCureY": "رجّعني بشري", "vpc1": "العهد هو حلف الدم بين شعبي وبين البشر اللي يثبتوا إنهم يستاهلوا. اللي يدخله بيبقى صديق المدينة، مش عبد ليها.", "vpc2": "المميزات: 3% من الضرر اللي بتعمله بيرجعلك صحة، ومصاصين الدماء بيضربوك أضعف 15%، وتقدر تطلب مني الدم الأبدي وتبقى واحد مننا.", "vpc3": "العيوب: العبيد والفرسان لسه بيهاجموك لو قربت منهم وبيتعالجوا من ضرباتهم فيك، وبالليل بيبقوا أقوى. والعهد مش ببلاش: لازم تثبت نفسك لمبعوثي الأول.", "vpc4": "تقدر تسيب العهد وترجعله عند مبعوثي في أي وقت. ها، تقبل؟", "vpcGo": "كويس. روح لمبعوثي اللي جنب البوابة، هو اللي هيختبرك.", "vpcLow": "لسه ضعيف على العهد. ارجع لما توصل لفل {n}.", "vpcNo": "زي ما تحب. البوابة هتفضل هنا.", "vpe1": "الدم الأبدي بيخليك مصاص دماء زيي. ده مش عهد تسيبه وترجعله، ده عرق جديد.", "vpe2": "المميزات: بالليل ضربك أقوى 20% وسرعتك أعلى 10%، و5% من ضربك بيرجعلك صحة.", "vpe3": "العيوب: الشمس بتحرقك. بالنهار برا لازم تكون في ضل: بيت، كهف أو دانجن، مدن مصاصي الدماء تحت الأرض، أو سما فيها مطر أو ضباب. غير كده هتتحرق لحد ما تموت. وبالنهار ضربك أضعف 10%.", "vpe4": "ولو ندمت، أقدر أرجعك بشري تاني، بس بتمن غالي ({g} دهب). تقبل؟", "vpeNo": "الحكمة إنك تفكر. لما تقرر، أنا هنا.", "vpeLow": "الدم الأبدي محتاج جسم قوي. ارجع لما توصل لفل {n}.", "embDone": "بقيت مصاص دماء! بالليل إنت أقوى، وبالنهار خليك في الضل.", "vpcu1": "هرجعلك دمك البشري. هتخسر قوة الليل، والشمس هتبطل تحرقك.", "cureDone": "رجعت بشري تاني.", "sunWarn": "الشمس بتحرقك! ادخل أي ضل بسرعة (بيت، كهف، دانجن).", "sunDie": "الشمس حرقتك.", "dnNight": "الليل نزل.", "dnDay": "النهار طلع.", "dnTipD": "ساعة العالم. اليوم 40 دقيقة، والليل من 8 بالليل لـ 4 الفجر.", "dnTipN": "ساعة العالم. الليل لحد 4 الفجر، ومصاصين الدماء صاحيين.", "raceL": "العرق", "race_human": "بشري", "race_vampire": "مصاص دماء", "raceD_human": "العرق اللي كل اللاعبين بيبدأوا بيه. مفيش مميزات ولا عيوب خاصة.", "raceD_vampire": "بالليل: ضرر +20%، سرعة +10%، و5% من ضربك صحة. بالنهار: ضرر -10%، والشمس بتحرقك برا الضل."});

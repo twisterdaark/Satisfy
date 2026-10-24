@@ -245,6 +245,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 ## From other ranges (2026-10-24)
 | U | Update | Status | Where |
 |---|---|---|---|
+| U304 | Daily weather | ✅ | SAT-ONLINE-177: the weather was already one clock for everyone (SAT-WEATHER-001, the server's clock online); the HUD clock now shows it for where you are (`wxLoc`: snow in the north and on the Chaos Mountains) with an icon, and its tip the forecast from the same clock (`wxFore`: the next change, in how many minutes, and the one after), so every player reads the same; the sky drawn livelier (two rain layers slanting with `wxWind`, splashes, a storm's sheet lightning, drifting fog banks, snow at three depths) on its own random stream; `regression/weather2` |
 | U267 | Reduced motion | ✅ | SAT-ONLINE-164: a device setting in the pause menu (`satisfy_rmo`, the system's prefers-reduced-motion when unset): no camera shake, no white flash, the UI's shakes and pulses stop, particles capped (`RMOFX`, `RMOVX`); telegraphs (`drawTele`) untouched; `regression/rmotion` |
 | U269 | Armor pieces (render sprite overlays) | ✅ | SAT-ONLINE-165: helmet, armour, gloves and boots each draw their own look (`GEARL`, 48 ids), for you and the others (`gr:` fx tag); `regression/gearlook` |
 
