@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24codex', ver: '2.62', d: '2026-10-24',
+      ar: ["كتاب الوحوش بقى فيه تبويب \"الحكايات\": كل لوحة معلم وكل كتاب على الرفوف قريته بيتحفظ فيه بكلامه ومكانه. اللي لسه مقريتهوش بيفضل ??? من غير اسم ولا كلام، والبحث بيدور في اللي لقيته بس.",
+          "لو قريت كل المعالم وكل كتب الرفوف تاخد لقب \"حافظ الحكايات\" (للشكل بس)."],
+      en: ["The Monster Book has a Lore tab: every landmark's plaque and every book on the shelves you have read is kept there, word for word, with where it stands. What you haven't read stays ??? with no name or words, and the search looks only through what you have found.",
+          "Read every landmark and every shelf book for the title Keeper of Lore (to show only)."] },
     { v: '2026-10-24tower1', ver: '2.61', d: '2026-10-24',
       ar: ["الدور الأول في برج الحكمة بقى واضح: أول ما تدخل بتطلعلك رسالة بتقولك تمشي يمين ناحية النور من غير ما تقف، والنور بقى باين في نص الشاشة بعمود نور بدل ما كان مستخبي ورا شريط السكيلات.",
           "أسهم في الأرض بتشاورلك على الطريق وبتحمر لو وقفت، وسطر الكويست بيقولك النور على بعد كام وسرعتك، وفيه شرار وراك وأنت بتجري.",
