@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24fishing', ver: '2.58', d: '2026-10-24',
+      ar: ["الصيد بقى أحلى: دواير بتطلع حوالين العوامة وانت مستني، والمية بتطرطش لما السمكة تشد، ولما تصطادها بتنط من المية لحد عندك",
+          "كل سمكة ليها وزن (التقيلة نادرة، وبتزيد مع مستوى الصيد)، واللعبة بتفتكر أتقل سمكة اصطدتها من كل نوع، ولو كسرت رقمك بيطلعلك «رقم قياسي جديد!»"],
+      en: ["Fishing feels better: rings spread around the float while you wait, the water splashes at the bite, and a catch leaps out of the water to you",
+          "Every fish weighs something (the heavy ones are rare, and grow with your Fishing level), the game keeps your heaviest of each kind, and beating it cheers a \"New record!\""] },
     { v: '2026-10-24barrage', ver: '2.57', d: '2026-10-24',
       ar: ["كل الإكسبي اللي بتاخده من الوحوش والكويستات زاد 1.2 مرة.",
           "السكيلات اللي بتضرب كذا ضربة ورا بعض (زي رقصات باجما): كل ضربة ليها إيفيكت لحد آخر واحدة، بدل ما الإيفيكت يخلص والصوت لسه شغال، والسيوف اللي بتنزل من السما بقت سيوف بجد.",
