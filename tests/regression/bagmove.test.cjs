@@ -16,7 +16,9 @@ test('drag the bag by its title; it stays there when opened again', async () => 
     const r1 = await g.eval(() => { const b = document.getElementById('inv').getBoundingClientRect(); return { x: b.left, y: b.top }; });
     assert.ok(Math.abs(r1.x - (r0.x - 150)) < 3 && Math.abs(r1.y - (r0.y + 60)) < 3, JSON.stringify([r0, r1]));
     assert.equal(await g.eval(() => window.__G.mode), 'inv', 'still open');
-    await g.page.keyboard.press('KeyI'); await g.step(3); await g.page.keyboard.press('KeyI'); await g.step(3); await g.page.waitForTimeout(100);
+    await g.page.keyboard.press('KeyI'); await g.step(3); await g.page.keyboard.press('KeyI'); await g.step(3);
+    // its opening animation (pin, .25 s on real time) has ended: a busy moment can start it a little late
+    await g.page.waitForFunction(() => document.getElementById('inv').getAnimations().every((a) => a.playState === 'finished'), null, { timeout: 3000 }).catch(() => {}); await g.page.waitForTimeout(50);
     const r2 = await g.eval(() => { const b = document.getElementById('inv').getBoundingClientRect(); return { x: b.left, y: b.top }; });
     assert.ok(Math.abs(r2.x - r1.x) < 3 && Math.abs(r2.y - r1.y) < 3, 'opens where it was left: ' + JSON.stringify([r1, r2]));
     assert.deepEqual(g.errors, []);
