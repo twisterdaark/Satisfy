@@ -32,6 +32,7 @@
     MIN_HIT: 30, MAX_HIT: 90, HITS_PER_S: 4, HIT_RANGE: 200, KILL_MS: 8000, OUTLAW_MS: 10 * 60 * 1000,
     RECAP_MS: 15000, RECAP_MAX: 60, // SAT-ONLINE-150: the hits a death recap shows
     JUMP_MS: 1000, // SAT-ONLINE-151 (plan U044): no hit lands from an attacker who jumped (a teleport) this long ago
+    COMBAT_MS: 10000, // SAT-ONLINE-204 (plan U250): "in combat" this long after the last hit we sent or took
   });
   var TYPES = ['pvp.hit', 'pvp.kill'];
 
@@ -45,6 +46,7 @@
     var listeners = [], hitsIn = new Map(), hitsOut = [], hitN = 0;
     var struck = new Map(); // uid -> last time we hit them (a kill report only counts for those)
     var taken = []; // SAT-ONLINE-150 (plan U039): the hits we took, after our checks: {at, uid, handle, pm}
+    var fought = -1e15; // SAT-ONLINE-204: when we last sent or took a hit (now() units)
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function noFight(z) { var p = policy(z) || {}; return !!p.safe || p.known === false; }
@@ -83,6 +85,7 @@
         k = Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(k)));
         taken.push({ at: t, uid: from.uid, handle: from.handle || '', pm: k });
         if (taken.length > C.RECAP_MAX) taken.shift();
+        fought = t;
         emit({ type: 'hurt', pm: k, uid: from.uid, handle: from.handle || '' });
       } else if (env.type === 'pvp.kill') {
         var at = struck.get(from.uid);
@@ -103,7 +106,7 @@
         if (hitsOut.length >= C.HITS_PER_S) return 0;
         hitsOut.push(t);
         var k = Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(pow * 4)));
-        struck.set(r.uid, t);
+        struck.set(r.uid, t); fought = t;
         P.send('pvp.hit', { to: r.uid, k: k, n: ++hitN });
         return k;
       },
@@ -118,6 +121,8 @@
         out.sort(function (x, y) { return y.hits - x.hits || y.pm - x.pm || y.last - x.last; });
         return { pm: pm, ms: L.length ? L[L.length - 1].at - L[0].at : 0, by: out, lines: L.map(function (e) { return { ms: e.at - L[0].at, uid: e.uid, handle: e.handle, pm: e.pm }; }) };
       },
+      /** SAT-ONLINE-204 (plan U250): ms of the combat flag left (COMBAT_MS after the last hit we sent or took), 0 when out of combat. */
+      combat: function () { return Math.max(0, fought + C.COMBAT_MS - now()); },
       /** The local player died to a hit from uid: tell them (they turn outlaw). */
       died: function (uid) { if (uid && uid !== self) P.send('pvp.kill', { to: uid, k: 0 }); },
       on: function (fn) { listeners.push(fn); },

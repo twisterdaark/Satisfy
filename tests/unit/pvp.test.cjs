@@ -179,3 +179,27 @@ test('U041: a hit carries only its damage; stun, root, slow or knockback added b
   assert.equal(hd.length, 1);
   assert.deepEqual(Object.keys(hd[0]).sort(), ['dmg', 'hp', 'type'], JSON.stringify(hd[0]));
 });
+
+test('U250: the combat flag lasts COMBAT_MS after a hit sent or taken; a hit that does not land sets nothing', () => {
+  const w = world(3), [a, b, c] = w.players;
+  assert.equal(a.pvp.combat(), 0, 'out of combat at first');
+  // a refused hit (B in a town) sets no flag on either side
+  b.zone = 'zWin'; w.advance(300);
+  assert.equal(a.pvp.hit(w.remote(a, b), 10), 0);
+  assert.equal(a.pvp.combat(), 0); assert.equal(b.pvp.combat(), 0);
+  b.zone = 'zPlains'; w.advance(300);
+  a.pvp.hit(w.remote(a, b), 10);
+  assert.equal(a.pvp.combat(), C.COMBAT_MS, 'the attacker');
+  assert.equal(b.pvp.combat(), C.COMBAT_MS, 'the victim');
+  assert.equal(c.pvp.combat(), 0, 'a bystander');
+  w.advance(4000);
+  assert.equal(a.pvp.combat(), C.COMBAT_MS - 4000);
+  b.pvp.hit(w.remote(b, a), 10); // a hit back starts it again on both
+  assert.equal(a.pvp.combat(), C.COMBAT_MS); assert.equal(b.pvp.combat(), C.COMBAT_MS);
+  w.advance(C.COMBAT_MS);
+  assert.equal(a.pvp.combat(), 0); assert.equal(b.pvp.combat(), 0);
+  // a hit the victim rejects (too far) leaves the victim out of combat
+  b.x += C.HIT_RANGE * 3; w.advance(300);
+  a.pvp.hit(w.remote(a, b), 10);
+  assert.equal(b.pvp.combat(), 0, 'rejected: not in combat');
+});

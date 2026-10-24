@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24pvphud', ver: '2.68', d: '2026-10-24',
+      ar: ["أونلاين، الشريط اللي فوق بقى يقولك حالتك في القتال بين اللاعيبة: «منطقة آمنة» جوه المدن، و«قتال مفتوح» برّه (يعني اللاعيبة يقدروا يهاجموك)، وده بيظهر أول ما تخرج من المدينة قبل أي ضربة، والشريط بينوّر ويقولك إنك خرجت من المنطقة الآمنة.",
+          "لو ضربت لاعب أو حد ضربك بيظهر «في قتال» بعدّاد 10 ثواني، ولو بقيت خارج عن القانون (أو قاتل) بيظهر الوقت اللي فاضل للعلامة دي."],
+      en: ["Online, the bar at the top now shows your PvP status: \"Safe zone\" in towns and \"Open PvP\" outside them (other players can attack you there). It shows the moment you leave a town, before any hit, and the bar flashes and tells you that you left the safe zone.",
+          "When you hit a player or one hits you, \"In combat\" shows with a 10-second count, and while you're an outlaw (or a murderer) it shows how long the mark has left."] },
     { v: '2026-10-24nearby', ver: '2.67', d: '2026-10-24',
       ar: ["قايمة اللاعيبة (O) بقت مترتبة بالأقرب: انت الأول، وبعدين اللي على نفس الخريطة ومعاك في نفس المكان من الأقرب للأبعد وجنب كل واحد بُعده بالمربعات، وبعدين الباقيين بالاسم."],
       en: ["The players list (O) puts the nearest first: you, then the players on your map and in the same place, closest first with how far each one is in tiles, then everyone else by name."] },
