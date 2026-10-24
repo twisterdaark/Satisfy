@@ -13379,11 +13379,11 @@ function pdStart(){const T=P&&inTown(P.x,P.y);if(!gCan('ev')||!T||roomAt(P.x,P.y
  PD={until:now+PDUR,town:T,cd:now+PDCD};try{localStorage.setItem('satisfy_pdcd',String(PD.cd));}catch(e){}toast(t('pdBegin',{z:t(T.k)}),'good');SFX.legendary();pdBurst(P.x,P.y,(pdMine()||{}).col);}
 function pdBurst(x,y,c){const n=typeof RMO!=='undefined'&&RMO?6:24;for(let i=0;i<n;i++){const a=PDR()*Math.PI*2,v=30+PDR()*50;fx.push({x,y:y-20,vx:Math.cos(a)*v,vy:Math.sin(a)*v-30,t:.8,c:i%2?(c||'#ffd27a'):'#ffe7a8'});}}
 // a remote player: their parade tag (read from the raw fx only when it changes), joining it, hearing of it, their banner
-function pdRem(ents,r,fs,gi){if(fs.pdRaw!==r.fx){fs.pdRaw=r.fx;const m=/"pd:(\d{9,11})"/.exec(r.fx||'');fs.pd=m?Math.min(+m[1],pdNow()+PDUR+5):0;}
+function pdRem(ents,r,fs,gi){if(fs.pdRaw!==r.fx){fs.pdRaw=r.fx;const m=/"pd:(\d{9,11})"/.exec(r.fx||'');fs.pd=m&&+m[1]<=pdNow()+2*PDUR+60?+m[1]:0;} // an end far past one parade is bogus; kept whole otherwise, so the toast key stays put
  const now=pdNow();if(!(fs.pd>now)||r.anim==='dead'||roomAt(r.x,r.y))return;const T=inTown(r.x,r.y);if(!T)return;
  const st=GUILD&&GUILD.state(),mine=!!(st&&st.gid&&st.gid===r.gd),here=!!P&&inTown(P.x,P.y)===T;
  if(mine&&here&&PD.until<fs.pd-1){const first=!(PD.until>now&&PD.town===T);PD.until=fs.pd;PD.town=T;if(first){toast(t('pdJoin',{z:t(T.k)}),'good');SFX.notice();}}
- else if(!mine&&here&&gi.n){const k=r.gd+':'+fs.pd;if(!PDSEEN[k]){PDSEEN[k]=1;toast(t('pdSee',{g:gdEmb(gi.emb)+gi.n,z:t(T.k)}));}}
+ else if(!mine&&here&&gi.n){const k=r.gd+':'+T.k;if(!(PDSEEN[k]>now)){PDSEEN[k]=fs.pd;toast(t('pdSee',{g:gdEmb(gi.emb)+gi.n,z:t(T.k)}));}}
  PDLIVE[T.k]={col:gi.col,emb:gi.emb|0,until:fs.pd};
  ents.push({y:r.y-.5,f:()=>pdDraw(r.x,r.y,gi,r.uid,'pole')},{y:r.y+.5,f:()=>pdDraw(r.x,r.y,gi,r.uid,'sash')});}
 // you, and the stage of every town with a parade on

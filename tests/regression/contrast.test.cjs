@@ -16,7 +16,7 @@ test('high contrast: from Settings, kept; a crit reads "!", wind-ups and bars fr
     let g = await H.openGame({ ctx });
     await H.newGame(g);
     await g.step(3);
-    const kinds = () => g.eval(() => { const C = window.__GHC; const n = (s, b) => String(C.num(s, b)); return { hit: n(1234, false), crit: n(1234, true), taken: n('-45', false), gain: n('+30', false), big: n('+120G', true), word: n('EVADE', true) }; });
+    const kinds = () => g.eval(() => { const C = window.__GHCM; const n = (s, b) => String(C.num(s, b)); return { hit: n(1234, false), crit: n(1234, true), taken: n('-45', false), gain: n('+30', false), big: n('+120G', true), word: n('EVADE', true) }; });
     assert.equal(await g.eval(() => window.__GHCM.on()), false, 'off unless asked');
     const off = await kinds();
     assert.equal(off.hit, off.crit, 'off: a hit and a crit differ only in colour and size, as before');
@@ -44,7 +44,7 @@ test('high contrast: from Settings, kept; a crit reads "!", wind-ups and bars fr
 
     // a wind-up: a white outline, 2 px
     const tele = await g.eval(() => {
-      const C = window.__GHC, G = window.__G, V = window.__GMV, P = G.P, c = C.ctx;
+      const C = window.__GHCM, G = window.__G, V = window.__GMV, P = G.P, c = C.ctx;
       const m = G.spawnMon('outlaw', P.x + 30, P.y); m.mv = V.RKMV.outlaw[0]; m.st = 'tele'; m.stT = m.mv.tele / 2;
       const seen = []; const st = c.stroke; c.stroke = function (...a) { seen.push([c.strokeStyle, c.lineWidth]); return st.apply(this, a); };
       try { C.tele(m); } finally { c.stroke = st; }

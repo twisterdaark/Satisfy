@@ -23,7 +23,7 @@ test('never defeated: the sheath opens the quest, 100 Red Knights make the Desce
       out.res = G.legResist ? G.legResist() : null; return out; });
     assert.equal(c.cand, true); assert.equal(c.left, 22); assert.equal(c.sheath, 0);
     await g.eval(() => { const G = window.__G, D = window.__GMD; for (let i = 0; i < D.N; i++) D.kill({ type: 'redk' }); });
-    await wait(900);
+    for (let i = 0; i < 30 && !(await g.eval(() => window.__G.DL.opts.some((o) => /^(Use|Yes)/.test(o.l)))); i++) await wait(300); // a hundred kills take a while to land
     assert.equal(await pick(g, /^(Use|Yes)/), 'ok');
     await shut(g);
     const m = await g.eval(() => { const G = window.__G, S = G.S, P = G.P, A = window.__GSKF; G.isk.checkSkills();
@@ -35,7 +35,7 @@ test('never defeated: the sheath opens the quest, 100 Red Knights make the Desce
       P.mp = 1e6; A.cast('mdarmy'); window.__ab = [a, b]; return out; });
     assert.deepEqual([m.cls, m.lv, m.sk], ['madra', 1, ['mdarmy', 'mdsense']]);
     assert.ok(m.war, 'keeps the warrior skills');
-    await wait(400);
+    for (let i = 0; i < 20 && !(await g.eval(() => window.__ab.every((x) => x.hp < 1e7))); i++) await wait(200);
     const h = await g.eval(() => window.__ab.map((x) => [x.hp < 1e7, x.stun >= 2]));
     assert.deepEqual(h, [[true, true], [true, true]]);
     assert.deepEqual(g.errors, []);

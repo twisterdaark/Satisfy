@@ -26,7 +26,7 @@ async function until(games, fn, ms = 10000, arg) {
     await games[0].page.waitForTimeout(30);
   }
 }
-const keepToasts = (g) => g.eval(() => { window.__toastSeen = ''; const box = document.getElementById('toasts'); new MutationObserver(() => { window.__toastSeen += '|' + box.textContent; }).observe(box, { childList: true, subtree: true, characterData: true }); });
+const keepToasts = (g) => g.eval(() => { window.__toastSeen = ''; const box = document.getElementById('toasts'); new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) window.__toastSeen += '|' + n.textContent; }).observe(box, { childList: true }); }); // each toast once, as it arrives
 async function signIn(ctx, k, uid, name, look) {
   const g = await H.openGame({ ctx, query: '?net=online&slot=' + k });
   await g.eval(([u, n]) => { window.__fakeRTDB.data.set('accountIds/' + u, n); window.__fakeRTDB.nextName = n; window.__fakeRTDB.nextUid = u; document.getElementById('onlineBtn').click(); }, [uid, name]);
@@ -80,6 +80,7 @@ test('a guild parade: the master starts it, members march, others see it, the st
     for (let i = 0; i < 40 && !(await c.eval(() => /Dragons are holding a parade in Winston/.test(window.__toastSeen))); i++) await settle(a, b, c);
     assert.match(await c.eval(() => window.__toastSeen), /🐉 Dragons are holding a parade in Winston!/);
     assert.equal((await c.eval(() => window.__toastSeen)).match(/holding a parade/g).length, 1, 'once');
+    await until([a, b, c], () => window.__GPD.on() || ((window.__GPD.drawn().gPdA1 || 0) > 0 && !!window.__GPD.live().zWin), 10000);
     assert.ok(await c.eval(() => (window.__GPD.drawn().gPdA1 || 0) > 0 && !!window.__GPD.live().zWin));
     assert.equal(await c.eval(() => window.__GPD.on()), false, 'not in the guild: no banner of its own');
 

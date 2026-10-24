@@ -52,7 +52,7 @@ test('game feel: numbers, orbs, the streak, the banners, the low-health edge, th
     // quest complete: the banner, green
     const q = await g.eval(() => {
       const G = window.__G, QD = G.QD, id = Object.keys(QD).find((k) => { const q = QD[k]; return q.obj && q.obj.t === 'kill' && q.gold > 0 && !q.rep && !q.item && !q.cls && !q.title && !q.pts; });
-      G.acceptQ(id); G.S.qs[id].c = QD[id].obj.n; G.completeQ(id); return window.__GJ.ban(); });
+      G.S.lv = Math.max(G.S.lv, 300); G.S.xp = 0; G.acceptQ(id); G.S.qs[id].c = QD[id].obj.n; /* no level-up from the reward (XP x1.2) */ G.completeQ(id); return window.__GJ.ban(); });
     // (after the level's banner: one at a time)
     for (let i = 0; i < 20 && (await g.eval(() => window.__GJ.ban().t)) !== 'QUEST COMPLETE!'; i++) await g.step(20);
     Object.assign(q, await g.eval(() => window.__GJ.ban()));
