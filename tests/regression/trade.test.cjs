@@ -112,7 +112,7 @@ test('online: offer, any change resets the accepts, Accept + Confirm swap once; 
     for (const g of [a, b]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
     // B's card on A's screen: one trade with one player; "/trades" lists A's
     await openCard(a, 'gTradeB2');
-    await until([a], () => /🤝 1 trades with 1 players/.test(document.getElementById('pctxI').textContent));
+    await until([a], () => /1 trades with 1 players/.test(document.getElementById('pctxI').textContent));
     await click(a, '#pctx [data-act="pcClose"]'); await a.step(2);
     await a.page.keyboard.press('Enter'); await a.step(1); await a.page.keyboard.type('/trades'); await a.page.keyboard.press('Enter'); await a.step(2);
     await until([a], () => /Your trades \(1\)/.test(document.getElementById('dialog').textContent));
@@ -152,5 +152,50 @@ test('online: offer, any change resets the accepts, Accept + Confirm swap once; 
     assert.equal(await w(a, { ['tradeLog/gTradeA1/' + tid]: { o: 'gTradeX9', on: 'Bassem', gg: 100, gi: 50, ig: 1, ii: 0 } }), 'no', 'not another partner');
     assert.equal(await a.eval(async () => { const F = window.__GLD.fb(), D = F.m.database; try { await D.get(D.ref(F.db, 'tradeLog/gTradeB2')); return 'ok'; } catch (e) { return 'no'; } }), 'no', "B's record is B's");
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+// owner 2026-10-24: any bag stack can be given too (a legendary class book, materials), by the amount in the box
+test('online: a book and part of a stack go in a trade', async () => {
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  try {
+    const pages = {};
+    for (const [k, uid, name] of [['a', 'gTradeA3', 'Ahmed'], ['b', 'gTradeB4', 'Bassem']]) {
+      const g = pages[k] = await H.openGame({ ctx, query: '?net=online&slot=' + k });
+      await g.eval(([u, n]) => { window.__fakeRTDB.data.set('accountIds/' + u, n); window.__fakeRTDB.nextName = n; window.__fakeRTDB.nextUid = u; document.getElementById('onlineBtn').click(); }, [uid, name]);
+      await until([g], () => !!Satisfy.local.net() && Satisfy.local.net().state === 'ONLINE', 15000);
+    }
+    const { a, b } = pages;
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    await b.eval(() => { window.__G.P.x += 20; });
+    for (const g of [a, b]) await keepToasts(g);
+    await a.eval(() => { const S = window.__G.S; S.mats.tzbook = 1; S.mats.ore = 50; });
+    await b.eval(() => { const S = window.__G.S; S.mats.tzbook = 0; S.mats.ore = 0; });
+    await settle(a, b); await settle(a, b);
+    await openCard(a, 'gTradeB4');
+    await click(a, '#pctx [data-act="pcTrade"]');
+    await until([b], () => !document.getElementById('tradeInv').hidden);
+    await click(b, '#tradeInv [data-act="trYes"]');
+    await until([a, b], () => !document.getElementById('tradeW').hidden);
+    await a.step(3);
+    // the book (one), then 20 of the 50 ore
+    const cells = await a.eval(() => [...document.querySelectorAll('#trBag button')].map((x) => [x.dataset.iid, x.querySelector('img') && x.dataset.tip]));
+    const iidOf = (re) => (cells.find((c) => re.test(c[1] || '')) || [])[0];
+    const book = iidOf(/Tzudan/), ore = iidOf(/Iron Ore/);
+    assert.ok(book && ore, 'the book and the ore are offered: ' + JSON.stringify(cells.map((c) => c[1]).slice(0, 8)));
+    await a.eval((iid) => document.querySelector('#trBag button[data-iid="' + iid + '"]').click(), book);
+    await a.eval(() => { document.getElementById('trN').value = '20'; });
+    await a.eval((iid) => document.querySelector('#trBag button[data-iid="' + iid + '"]').click(), ore);
+    await settle(a, b);
+    await until([b], (x) => !!document.querySelector('#trTh span[data-iid="' + x[0] + '"]') && !!document.querySelector('#trTh span[data-iid="' + x[1] + '"]'), 8000, [book, ore]);
+    await click(a, '#trOk'); await click(b, '#trOk'); await settle(a, b);
+    await until([a, b], () => !document.getElementById('trConf').disabled);
+    await click(a, '#trConf'); await click(b, '#trConf');
+    await until([a, b], () => document.getElementById('tradeW').hidden, 15000);
+    await settle(a, b);
+    assert.deepEqual(await a.eval(() => [window.__G.S.mats.tzbook | 0, window.__G.S.mats.ore | 0]), [0, 30], 'A gave the book and 20 ore');
+    assert.deepEqual(await b.eval(() => [window.__G.S.mats.tzbook | 0, window.__G.S.mats.ore | 0]), [1, 20], 'B got them');
+    for (const g of [a, b]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
   } finally { await ctx.close(); }
 });

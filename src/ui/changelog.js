@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24mattrade', ver: '2.74', d: '2026-10-24',
+      ar: ["التريد: الكتب والخامات وأي حاجة في الشنطة بقت تتحط في التريد. فيه تبويب جديد \"خامات وكتب\" وخانة \"الكمية\" تحدد بيها هتدي كام من الكومة.",
+          "\"صنع\" على القطع اللي ابتكرتها بقى بيكتب اسم شخصيتك الحالي، ولو غيرت اسمك بيتغير على طرق الصنع وعلى القطع اللي في شنطتك.",
+          "رسالة الفهم لما تفك قطعة ابتكرتها بقت بتكتب الاسم اللي سميتهولها.",
+          "وصف القطعة بقى بيكتب اللفل المطلوب للبسها. القطع المبتكرة ليها لفل على قد قوة خاماتها (الأوريكالكوم الأزرق 120، الميثريل 160، الأنفاس 400)، ووريث باجما بيلبس أي حاجة زي الأول."],
+      en: ["Trading: books, materials and anything else in the bag can go in a trade now. A new \"Materials & books\" tab, and an \"Amount\" box sets how many of a stack you give.",
+          "\"Made by\" on the pieces you created shows your character's current name, and a rename changes it on your recipes and on the pieces in your bag.",
+          "The understanding message when you take apart a piece you created now uses the name you gave it.",
+          "An item's tip now shows the level needed to wear it. Created pieces have a level set by their materials' power (Blue Orichalcum 120, mithril 160, breaths 400), and Pagma's Successor still wears anything."] },
     { v: '2026-10-24pixart', ver: '2.73', d: '2026-10-24',
       ar: ["الإيموجي اللي في الشبابيك والشرايط بقت رسومات بيكسل صغيرة بستايل اللعبة.",
           "بنات العالم (مرسيدس، إليزابيث، جيشوكا، بيتي، جيسيكا، ليلى، مدربة الرماة، هيرا، بنت هان وغيرهم) بقوا بيترسموا برسم البنات الجديد بدل جسم الولاد القديم.",

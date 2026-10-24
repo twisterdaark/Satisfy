@@ -50,6 +50,12 @@ test('create a greatsword of Blue Orichalcum on the blueprint, then forge it', a
     assert.equal(it.it.by, 'Grid');
     assert.equal(it.it.atk, Math.round(s1.atk * it.mult));
     assert.equal(it.spent, 2);
+    // the level to wear it rises with the material, and the tip says so (owner 2026-10-24): Blue Orichalcum is level 120
+    assert.equal(it.it.lvr, 120);
+    assert.match(await g.eval(() => window.__G.isk.itemTip(window.__G.S.items[window.__G.S.items.length - 1])), /Level required: 120/);
+    // a renamed character: "Made by" follows the new name on the recipe and on the forged piece (owner 2026-10-24)
+    const rn = await g.eval(() => { const S = window.__G.S; window.__GNM.rename('Kraugel'); return [S.cre[0].by, S.items[S.items.length - 1].by]; });
+    assert.deepEqual(rn, ['Kraugel', 'Kraugel']);
     // an older creation with one material still works the way it did
     // the materials' power to 1.34 (owner 2026-10-24): Blue Orichalcum (2) makes 2^1.34 x 100
     assert.equal(await g.eval(() => window.__GCR.stats({ ty: 'gs', mat: 'blue', L: 50, W: 50, C: 0, sl: 1 }).atk), 253);
