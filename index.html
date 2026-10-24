@@ -482,12 +482,13 @@ button{background:linear-gradient(180deg,rgba(36,52,108,.85),rgba(22,32,74,.85))
 body.hc .bar{outline:1px solid #fff;outline-offset:0}body.hc .bar span{text-shadow:0 0 2px #000,0 0 2px #000,1px 1px 0 #000,-1px -1px 0 #000}body.hc .toast{background:#000;border:1px solid #fff}
 body.rmo .toast,body.rmo .panel,body.rmo .pop,body.rmo #forge.hit,body.rmo #rays,body.rmo .key.glow kbd,body.rmo .ef-card.hit,body.rmo .ef-card.lose .ef-res{animation:none}body.rmo #flash{display:none}
 /* patch 4: see-through windows, crest pinned to the border, hidden bars ignore the mouse */
-.sys{background:linear-gradient(180deg,rgba(34,46,98,.7),rgba(20,28,66,.76));backdrop-filter:blur(2px)}
-.panel:not(#dialog),#controls,.cbox,#create>.cbox{background:radial-gradient(ellipse at 50% 30%,rgba(116,144,192,.8),rgba(76,102,150,.82) 75%);backdrop-filter:blur(2px)}
+.sys{background:linear-gradient(180deg,rgba(34,46,98,.78),rgba(20,28,66,.84))}
+.panel:not(#dialog),#controls,.cbox,#create>.cbox{background:radial-gradient(ellipse at 50% 30%,rgba(116,144,192,.87),rgba(76,102,150,.89) 75%)}
 #sysm,#announce{background:linear-gradient(180deg,rgba(40,54,112,.78),rgba(24,32,76,.82))}
-#tip{background:linear-gradient(180deg,rgba(44,62,128,.68),rgba(26,38,90,.74));backdrop-filter:blur(2px)}
-/* (owner 2026-10-24, the lag) the HUD's panels over the moving world: no blur behind them. A blur behind a panel is painted
-   again every frame the world moves, a pass for each of the dozen panels on screen; the menus keep theirs */
+#tip{background:linear-gradient(180deg,rgba(44,62,128,.76),rgba(26,38,90,.82))}
+/* (owner 2026-10-24, the lag) no blur behind any window: a blur behind a panel is painted again every frame the world
+   behind it moves (the HUD's dozen panels, then every menu: the bag, the status, the map, the Monster Book). The windows are
+   a little less see-through instead, so they read as before (SAT-ONLINE-195) */
 #hud .sys{backdrop-filter:none}
 .toast{background:rgba(22,30,70,.78)}
 #loot{position:absolute;inset-inline-start:calc(var(--u)*7.5);top:34%;display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--u)*.35);pointer-events:none;z-index:4}
