@@ -569,6 +569,20 @@ test('repair orders (SAT-ONLINE-096): your own order; mended by someone else, wh
   assert.ok(P['.write'].endsWith("|| (data.exists() && !newData.exists()))"), 'a fee collected once (Claude-B, #131)');
 });
 
+test('the auction board (SAT-ONLINE-094): your own listing; taken off only by its seller or a buyer who pays its price', () => {
+  const A = rules.auction, P = rules.auctionPaid.$uid;
+  assert.equal(A['.read'], 'auth != null');
+  assert.equal(A.$lid['.write'], "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid) || (data.exists() && !newData.exists() && (data.child('by').val() === auth.uid || (data.child('t').val() > now - 1209600000 && newData.parent().parent().child('auctionPaid').child(data.child('by').val()).child($lid).child('by').val() === auth.uid))))");
+  assert.equal(P['.read'], 'auth != null && auth.uid === $uid', "the seller's gold is the seller's");
+  assert.ok(P.$lid['.write'].includes("root.child('auction').child($lid).child('by').val() === $uid && $uid !== auth.uid && !newData.parent().parent().parent().child('auction').child($lid).exists()"), 'paid to its seller, by someone else, with the listing gone in the same write');
+  for (const k of ['price', 'it', 'q']) assert.equal(P.$lid[k === 'price' ? 'g' : k]['.validate'], "newData.val() === root.child('auction').child($lid).child('" + k + "').val()", k);
+  assert.equal(A.$lid.price['.validate'], 'newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 1000000000');
+  // Claude-B's review: bought only for 14 days, eight slots a seller, collected once
+  assert.ok(A.$lid['.write'].includes("data.child('t').val() > now - 1209600000"), 'a buyer only within 14 days');
+  assert.ok(A.$lid['.validate'].startsWith("$lid.matches(/^a_[A-Za-z0-9_-]{1,60}_[0-7]$/) && $lid.beginsWith('a_' + newData.child('by').val() + '_') && $lid.length === newData.child('by').val().length + 4"), "the seller's own eight slots");
+  assert.ok(P.$lid['.write'].endsWith("(auth.uid === $uid && data.exists() && !newData.exists()))"), 'collected once');
+});
+
 test('no key appears twice in one object of the rules file', () => {
   assert.deepEqual(dupKeys('{"a":{"b":1,"c":{"b":2},"b":3},"d":["x",{"e":1,"e":2}],"f":"\\"g\\""}'), ['/a/b', '/d[1]/e'], 'the scan itself');
   assert.deepEqual(dupKeys(fs.readFileSync(path.join(ROOT, 'backend/database.rules.json'), 'utf8')), []);

@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22auction', ver: '2.68', d: '2026-10-24',
+      ar: ["المزاد بقى أونلاين: وإنت داخل بحسابك، كل اللي اللاعيبة بيعرضوه في المزاد بيظهر للكل في نفس اللوحة، مترتب من الأرخص، وتقدر تدور بالاسم",
+        "البيعة بتحصل مرة واحدة: لو اتنين داسوا شرا في نفس اللحظة واحد بس بياخدها. البايع بيتبلغ إن حاجته اتباعت وبيستلم فلوسه من المزاد (ناقص 5%)",
+        "عروض التجار ميتغيروش، واللي عرضته وإنت أوفلاين بيفضل على جهازك زي ما هو"],
+      en: ["The auction house is online: signed in, everything players list is on one board for everyone, cheapest first, and you can search it by name",
+        "A sale happens once: if two players buy at the same moment, only one gets it. The seller is told and collects the gold at the auction house (less 5%)",
+        "The merchants' listings stay as they were, and what you listed offline stays on your device"] },
     { v: '2026-10-24nearby', ver: '2.67', d: '2026-10-24',
       ar: ["قايمة اللاعيبة (O) بقت مترتبة بالأقرب: انت الأول، وبعدين اللي على نفس الخريطة ومعاك في نفس المكان من الأقرب للأبعد وجنب كل واحد بُعده بالمربعات، وبعدين الباقيين بالاسم."],
       en: ["The players list (O) puts the nearest first: you, then the players on your map and in the same place, closest first with how far each one is in tiles, then everyone else by name."] },
