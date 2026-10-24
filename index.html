@@ -14723,13 +14723,34 @@ Object.assign(STR.en,{lfgBoard:'Group finder',lfgH:'Looking for a group ({n})',l
 var LFGK=null,LFG_MS=1800000,LFG_KS=['raid','party','dungeon','duel'];
 function lfgSt(){return NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&Satisfy.firebase.lfgStore?Satisfy.firebase.lfgStore(FB):null;}
 function lfgBoard(){const L=lfgSt();if(!L){toast(t('lfgFail'),'warn');return;}const now=wNow();
- L.list().then(v=>{plOpen(false);const rows=[];for(const k in v){const e=v[k];if(!e||typeof e!=='object'||!LFG_KS.includes(e.k)||!(now-(+e.t||0)<LFG_MS))continue;rows.push({uid:k,t:+e.t||0,s:t('lfgRow',{n:Satisfy.chat.clean(e.n,24)||'?',lv:lvTxt(e.lv|0),c:pctxName('cl_'+e.cls),r:ROLE_B[e.r]?' · '+ROLE_B[e.r]+' '+t('role_'+e.r):'',k:t('lfgK_'+e.k),z:pctxName(String(e.z||''))})});}
-  rows.sort((a,b)=>b.t-a.t);const mine=v[NET.uid]&&now-(+v[NET.uid].t||0)<LFG_MS;
-  const o=LFG_KS.map(k=>({l:t('lfgPost',{k:t('lfgK_'+k)}),f:()=>lfgPut(k)}));if(mine)o.push({l:t('lfgOff'),f:lfgStop});
-  dialog('guild',[t('lfgH',{n:rows.length}),rows.length?rows.slice(0,12).map(r=>(r.uid===NET.uid?'★ ':'')+r.s).join(' · '):t('lfgNone')],null,[...o,{l:t('oClose')}]);},()=>toast(t('lfgFail'),'warn'));}
+ L.list().then(v=>{plOpen(false);const rows=[];let all=0;for(const k in v){const e=v[k];if(!e||typeof e!=='object'||!LFG_KS.includes(e.k)||!(now-(+e.t||0)<LFG_MS))continue;all++;if(k!==NET.uid&&!lfgPass(e))continue; // SAT-ONLINE-208: the filters (your own line always shows)
+   rows.push({uid:k,t:+e.t||0,s:t('lfgRow',{n:Satisfy.chat.clean(e.n,24)||'?',lv:lvTxt(e.lv|0),c:pctxName('cl_'+e.cls),r:ROLE_B[e.r]?' · '+ROLE_B[e.r]+' '+t('role_'+e.r):'',k:t('lfgK_'+e.k),z:pctxName(String(e.z||''))})});}
+  rows.sort((a,b)=>b.t-a.t);const mine=v[NET.uid]&&now-(+v[NET.uid].t||0)<LFG_MS,fs=lfgFSum();
+  const o=LFG_KS.map(k=>({l:t('lfgPost',{k:t('lfgK_'+k)}),f:()=>lfgPut(k)}));if(mine)o.push({l:t('lfgOff'),f:lfgStop});o.push({l:t('lfgFB'),f:lfgFilters});
+  dialog('guild',[fs?t('lfgHFl',{n:rows.length,m:all,f:fs}):t('lfgH',{n:rows.length}),rows.length?rows.slice(0,12).map(r=>(r.uid===NET.uid?'★ ':'')+r.s).join(' · '):t(all?'lfgNoneFl':'lfgNone')],null,[...o,{l:t('oClose')}]);},()=>toast(t('lfgFail'),'warn'));}
+/* SAT-ONLINE-208 (plan U259 Party finder panel: "filters range/role/region/level", checked by "matching never corrupts a
+   party"): the board can show only one kind (raid, party, dungeon group, duel), players within 10 levels of yours, those in
+   the area you are in, or one party role. The filters only choose which lines you read: nobody is invited, joined or told
+   anything by them (an invitation still goes from a player's card, the party's leader deciding as before). They stay
+   for this visit; your own line always shows. */
+Object.assign(STR.ar,{lfgFB:'🔎 فلترة',lfgHFl:'بيدوروا على فريق ({n} من {m}) · {f}',lfgNoneFl:'محدش على الفلترة دي',lfgFH:'تشوف مين على اللوحة؟',lfgF_k:'النوع: {v}',lfgF_lv:'اللفل: {v}',lfgF_z:'المكان: {v}',lfgF_r:'الدور: {v}',lfgFAll:'الكل',lfgFNear:'قريب من لفلك (±10)',lfgFAny:'أي لفل',lfgFHere:'المنطقة اللي انت فيها',lfgFAnyW:'في أي حتة',lfgFDone:'تمام',lfgFClear:'شيل الفلترة'});
+Object.assign(STR.en,{lfgFB:'🔎 Filters',lfgHFl:'Looking for a group ({n} of {m}) · {f}',lfgNoneFl:'Nobody matches these filters',lfgFH:'Who do you want to see on the board?',lfgF_k:'What: {v}',lfgF_lv:'Level: {v}',lfgF_z:'Where: {v}',lfgF_r:'Role: {v}',lfgFAll:'all',lfgFNear:'near yours (±10)',lfgFAny:'any',lfgFHere:'the area you are in',lfgFAnyW:'anywhere',lfgFDone:'Done',lfgFClear:'Clear the filters'});
+var LFGF={k:'',lv:0,z:0,r:''};const LFG_NEAR=10,LFG_RS=['','tank','healer','damage','support'];
+function lfgPass(e){const F=LFGF;if(F.k&&e.k!==F.k)return false;if(F.r&&e.r!==F.r)return false;
+ if(F.lv&&!(S&&(e.lv|0)>0&&Math.abs((e.lv|0)-S.lv)<=LFG_NEAR))return false; // a hidden level (0) isn't "near"
+ if(F.z&&!(P&&String(e.z||'')===zoneAt(P.x,P.y)))return false;return true;}
+function lfgFSum(){const F=LFGF,a=[];if(F.k)a.push(t('lfgK_'+F.k));if(F.lv)a.push(t('lfgFNear'));if(F.z)a.push(t('lfgFHere'));if(F.r)a.push(ROLE_B[F.r]+' '+t('role_'+F.r));return a.join(', ');}
+function lfgFilters(){const F=LFGF,nx=(L,v)=>L[(L.indexOf(v)+1)%L.length],again=()=>lfgFilters();
+ dialog('guild',[t('lfgFH')],null,[
+  {l:t('lfgF_k',{v:F.k?t('lfgK_'+F.k):t('lfgFAll')}),f:()=>{F.k=nx(['',...LFG_KS],F.k);again();}},
+  {l:t('lfgF_lv',{v:F.lv?t('lfgFNear'):t('lfgFAny')}),f:()=>{F.lv=F.lv?0:1;again();}},
+  {l:t('lfgF_z',{v:F.z?t('lfgFHere'):t('lfgFAnyW')}),f:()=>{F.z=F.z?0:1;again();}},
+  {l:t('lfgF_r',{v:F.r?ROLE_B[F.r]+' '+t('role_'+F.r):t('lfgFAll')}),f:()=>{F.r=nx(LFG_RS,F.r);again();}},
+  ...(lfgFSum()?[{l:t('lfgFClear'),f:()=>{LFGF={k:'',lv:0,z:0,r:''};lfgBoard();}}]:[]),
+  {l:t('lfgFDone'),f:()=>lfgBoard()}]);}
 function lfgPut(k){const L=lfgSt();if(!L||!S)return;L.put(NET.uid,{n:netId||S.look.n,lv:HIDELV?0:S.lv,cls:S.cls||'',r:ROLE||'',k,z:zoneAt(P.x,P.y)}).then(()=>{LFGK=k;toast(t('lfgOn',{k:t('lfgK_'+k)}),'good');},()=>toast(t('lfgFail'),'warn'));}
 function lfgStop(){const L=lfgSt();if(!L)return;L.off(NET.uid).then(()=>{LFGK=null;toast(t('lfgOffT'));},()=>toast(t('lfgFail'),'warn'));}
-window.__GLF={board:()=>lfgBoard(),put:k=>lfgPut(k),stop:()=>lfgStop(),out:()=>netSignOut(false),fb:()=>FB,get k(){return LFGK}}; // tests
+window.__GLF={get F(){return LFGF},filters:()=>lfgFilters(),board:()=>lfgBoard(),put:k=>lfgPut(k),stop:()=>lfgStop(),out:()=>netSignOut(false),fb:()=>FB,get k(){return LFGK}}; // tests
 window.__GR={season:()=>rnkSeason(),mine:()=>RNK?RNK.get(rnkSeason(),NET.uid):null,top:()=>RNK?RNK.top(rnkSeason(),10):[]}; // test hook
 // The local attack reaches the opponent: melee within reach, bow/staff along the aim. Power is a normalized roll.
 function duelSwing(ax,ay,mul,k){if(DUEL.state().phase!=='fight')return;const f=DUEL.foe();if(!f)return;
