@@ -68,12 +68,17 @@ function hammer(h,silver){const I=Img(10,16);I.vline(4,4,14,'#7a5634');I.vline(4
 
 // swords drawn from their shape (icons.js A.blade): each its own length, width, line, guard and grip (owner 2026-10-24)
 function fromBlade(sp){const B=A.blade.bladeHeld(sp),I=Img(B.w,B.h);for(const [x,y,c] of B.px)I.set(x,y,c);return {I,gx:B.gx,gy:B.gy};}
-const BLADED=['rusty','isword','ssword','gsword','msword','failure','dains','iyarugt','wisdom','yetgs','dpgs','mgsword','lantd','ideal','ttthorn','dagger'];
+const BLADED=['vipdag','shdag','bldag','rusty','isword','ssword','gsword','msword','failure','dains','iyarugt','wisdom','yetgs','dpgs','mgsword','lantd','ideal','ttthorn','dagger'];
 // a creation (cw|ty.L.W.C.m1.m2): a sword from its blueprint, or a spear, bow, staff or hammer in its materials' colours
 function cwDef(k){const B=A.blade,o=B&&B.cwParse(k);if(!o)return null;const P=B.MATP[o.m1][0],Q=o.m2?B.MATP[o.m2][0]:P,L=o.L/100;
  if(o.ty==='gs'||o.ty==='sw'||o.ty==='dg')return fromBlade(B.cwSpec(o));
  if(o.ty==='bw')return bow([P[0],P[1],Q[2]],Q[2]);if(o.ty==='st')return staff([Q[1],Q[0],Q[2]],P[1],B.MATP[o.m1]&&o.L>60);if(o.ty==='hm')return hammer(P,o.W>60);
  const h=20+Math.round(L*6),I=Img(7,h+1);I.vline(3,5,h,P[1]);I.vline(3,12,13,Q[2]);I.set(3,0,P[2]);I.rect(2,1,3,3,P[0]);I.vline(3,1,3,P[2]);I.set(4,3,P[1]);I.set(3,4,Q[0]);if(o.W>50){I.set(1,3,P[0]);I.set(5,3,P[0]);}return {I,gx:3,gy:15};}
+// spears for the new weapons: shaft, head, light, trim; 0 a lance, 1 a trident, 2 a winged spear
+function spearS(c,kind){const I=Img(9,24);I.vline(4,6,23,c[0]);I.vline(4,13,14,c[3]);if(kind===1){for(const x of [2,4,6])I.vline(x,0,4,c[1]);I.rect(2,4,5,1,c[1]);I.set(2,0,c[2]);I.set(4,0,c[2]);I.set(6,0,c[2]);}
+ else{I.set(4,0,c[2]);I.rect(3,1,3,4,c[1]);I.vline(4,1,4,c[2]);I.set(5,4,shadeHex(c[1]));if(kind===2){I.set(1,5,c[3]);I.set(7,5,c[3]);I.set(2,4,c[3]);I.set(6,4,c[3]);I.rect(2,5,5,1,c[3]);}else I.rect(3,5,3,1,c[3]);}return {I,gx:4,gy:16};}
+const shadeHex=c=>'#'+hex(c).map(v=>Math.max(0,v-60).toString(16).padStart(2,'0')).join('');
+Object.assign(DEF,{oakst:()=>staff(['#3a7a3a','#7ac87a','#d8ffd8'],'#6a4a2a'),frstaff:()=>staff(['#2a5ab0','#9fe0ff','#ffffff'],'#c8d8e8',1),stormst:()=>staff(['#4a2a9a','#b08aff','#fff07a'],'#3a3a5a',1),abyssst:()=>staff(['#120814','#5a1a8a','#c86aff'],'#1a0a1a',1),hunbow:()=>bow(['#6a4a2a','#4a3018','#a8743f'],'#d0d4dc'),wyvbow:()=>bow(['#d8d0b8','#8a7a5a','#ffffff'],'#c8282a'),moonbow:()=>bow(['#c8d8ff','#5a6ab0','#ffffff'],'#fff4c0'),knspear:()=>spearS(['#7a5634','#c4c8d0','#eef0f4','#c8a050'],0),trident:()=>spearS(['#2a4a6a','#5ac8c8','#e8ffff','#3a8aa8'],1),skyspear:()=>spearS(['#e8e4d8','#ffd23a','#fff8c0','#ffffff'],2),warhm:()=>hammer(['#7a7a86','#4a4a56','#b8b8c4'],true),thhm:()=>hammer(['#4a6ab0','#2a3a70','#fff07a'],true),giantm:()=>hammer(['#5a4a3a','#3a2a1a','#9a8a6a'])});
 const CACHE={};
 // sprite(id, rarity) -> {canvas, gx, gy, w, h}; null for an unknown id
 function sprite(id,r){const k=id+'|'+(r||0);if(CACHE[k])return CACHE[k];const f=String(id).startsWith('cw|')?()=>cwDef(id):A.blade&&BLADED.includes(id)?()=>fromBlade(A.blade.BSPEC[id]):DEF[id];if(!f)return null;const o=f();if(!o)return null;const {I,gx,gy}=o;
