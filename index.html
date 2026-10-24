@@ -105,7 +105,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #guildInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*24);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto}#guildInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
 #tradeInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*16);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto}#tradeInv .row,#tradeW .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
 #tradeW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*6);padding:calc(var(--u)*.8) calc(var(--u)*1.4);width:calc(var(--u)*52);max-width:96vw;font-size:calc(var(--u)*1.5);pointer-events:auto}#tradeW .cols{display:flex;gap:calc(var(--u)*1.4)}#tradeW .col{flex:1;min-width:0}#tradeW .sub{color:#ffe7a8;margin-bottom:calc(var(--u)*.4)}#tradeW .st{min-height:1.3em;margin-top:calc(var(--u)*.4);color:#8dff9a}#tradeW #trGold{width:calc(var(--u)*10)}#trBag .slotb{opacity:.75}#trBag .slotb.on{opacity:1}#trTh .tg{grid-column:1/-1;color:#ffe7a8;direction:inherit}
-#netB{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*.6);padding:calc(var(--u)*.3) calc(var(--u)*1.2);font-size:calc(var(--u)*1.5);color:#9fe0ff;white-space:nowrap;pointer-events:auto;cursor:pointer}
+#netB{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*.6);padding:calc(var(--u)*.3) calc(var(--u)*1.2);font-size:calc(var(--u)*1.5);color:#9fe0ff;white-space:nowrap;pointer-events:auto;cursor:pointer}#netB .pz.safe{color:#8ef0a0}#netB .pz.safe::before{content:'\1F6E1\FE0F  '}#netB .pz.pvp{color:#ffb35c;font-weight:700}#netB .pz.pvp::before{content:'\2694\FE0F  '}#netB .pc{color:#ff7a66;font-weight:700}#netB .po{color:#ff3b30;font-weight:700}#netB.flash{animation:pvpFl 1.4s ease-out}@keyframes pvpFl{0%,35%{box-shadow:0 0 0 2px #ffb35c,0 0 calc(var(--u)*1.6) #ff8a3a}100%{box-shadow:none}}body.rmo #netB.flash{animation:none}
 #plW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*4.4);padding:calc(var(--u)*.8) calc(var(--u)*1.4);width:calc(var(--u)*34);max-height:calc(var(--u)*30);overflow-y:auto;font-size:calc(var(--u)*1.5);pointer-events:auto;z-index:45}
 #plL div{padding:calc(var(--u)*.25) 0;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:calc(var(--u)*.8)}#plL div.me{color:#ffe7a8}#plL .pm{width:auto;min-width:calc(var(--u)*3);padding:0 calc(var(--u)*.8);line-height:1.2;flex:none}
 #plW .row{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*.5);margin-top:calc(var(--u)*.6)}#plW .row #plHide{grid-column:1/-1}#plW .row button{width:auto;margin:0;padding:calc(var(--u)*.2) calc(var(--u)*.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -12966,8 +12966,11 @@ function netTick(){faultAt('netTick');NET.tick();pxpSeen();marTick();const live=
  if(live){NET.publish(Satisfy.local.playerPublic({uid:NET.uid,sid:NET.sid,anim:netAnim(),arm:armorIt()&&!vhOn('a')?1:0,party:PARTY?PARTY.id():null,rs:PARTY?PARTY.roster():null,rd:PARTY&&PARTY.isLeader()&&PARTY.isRaid()?1:0,duel:duelPublic(),ol:olPub(),gd:guildPub()}),netForce);netForce=false;}
  partyUI(live);chatUI(live);pctxUI(live);tradeUI(live);guildUI(live);gdwTick();
  netPrev=P?{x:P.x,y:P.y}:null;
- const netSafe=live&&Satisfy.net.zonePolicy(netZone(P.x,P.y)).safe,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+netSafe;netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
-  b.textContent=(NETQ==='local'?t('netOn',{n:NET.count()+1}):netState==='ONLINE'?t('netOnline',{n:NET.count()+1}):t(netState==='RECONNECTING'?'netRe':'netJoin'))+(netSafe?' · '+t('safeZone'):'')+(FB&&FB.emulator?' · '+t('netEmu'):'');}} // SAT-ONLINE-120: on the local emulators
+ const pz=live?pvpChips():null,b=$('netB'),sig=live+':'+NET.count()+':'+lang+':'+netState+':'+(pz?pz.sig:'');netLinkT-=1;if(netLinkT<=0){netLinkT=60;b.title=netLinkText();}if(sig!==netSig){netSig=sig;b.hidden=!live;
+  b.textContent=NETQ==='local'?t('netOn',{n:NET.count()+1}):netState==='ONLINE'?t('netOnline',{n:NET.count()+1}):t(netState==='RECONNECTING'?'netRe':'netJoin');
+  if(pz)for(const [c,s] of pz.L){b.append(' · ');const e=document.createElement('span');e.className=c;e.textContent=s;b.append(e);} // SAT-ONLINE-204 (U250): the PvP status chips
+  if(FB&&FB.emulator)b.append(' · '+t('netEmu'));}
+ if(live&&pz)pvpZoneTell(pz.z);} // SAT-ONLINE-120: on the local emulators
 // remote looks are validated (0..31) but may index past LOOK; fall back to the first option
 /* SAT-ONLINE-155 (owner 2026-10-23: "1:1 for everyone"): what you wear shows on the others' screens as on yours. Presence
    has always carried the hair, its colour, the skin and the shirt; the cape and trouser dyes, the costume and the helmet,
@@ -13414,6 +13417,27 @@ addEventListener('keydown',e=>{if(e.code!=='Escape'||mode!=='play'||(e.target&&e
 Object.assign(STR.ar,{kaJust:'قتلت الخارج عن القانون {n}: عدالة (الكارما {k})',kaMurder:'قتلت {n}: بقيت قاتل {m} دقيقة (الكارما {k})',kaMurderT:'قاتل',kaBack:'الكارما رجعت {k}',kaS:'الكارما: {k}',pvpHit:'{n} بيهاجمك!',pvpDied:'{n} قتلك',pvpKill:'قتلت {n}: بقيت خارج عن القانون {m} دقيقة',pvpOl:'خارج عن القانون',pvpOlEnd:'مبقتش خارج عن القانون',pcOl:'خارج عن القانون'});
 Object.assign(STR.en,{kaJust:'You killed the outlaw {n}: justice (karma {k})',kaMurder:'You killed {n}: you are a murderer for {m} minutes (karma {k})',kaMurderT:'Murderer',kaBack:'Karma back to {k}',kaS:'Karma: {k}',pvpHit:'{n} is attacking you!',pvpDied:'{n} killed you',pvpKill:'You killed {n}: you are an outlaw for {m} minutes',pvpOl:'Outlaw',pvpOlEnd:'You are no longer an outlaw',pcOl:'Outlaw'});
 var pvpFrom=new Map(),pvpOlWas=false; // uid -> when they last hit us (the "is attacking you" toast once a while)
+/* SAT-ONLINE-204 (plan U250 PvP HUD: "combat flag, criminal timer, safe-zone badge", checked by "the status comes before the
+   first hit"): the online badge at the top (netB) carries the PvP status, worked out every frame from the same zone policy
+   pvp.js checks before taking a hit (so it shows before any hit can land):
+     - "Safe zone" in a town (no hit is taken there), "Open PvP" in a known place outside (players can hit you), nothing
+       in a place the world doesn't define (no hit there either) or while in a duel (it has its own window);
+     - "In combat 7s" for 10 s after a hit you sent or took (pvp.combat());
+     - "Outlaw 9:41" / "Murderer 9:41" while the outlaw mark lasts (S.olT);
+   stepping out of a town into open PvP makes the badge flash and says so (once in 3 minutes at most). */
+Object.assign(STR.ar,{pvpZ:'قتال مفتوح',pvpC:'في قتال {s}ث',pvpZT:'خرجت من المنطقة الآمنة: اللاعيبة التانيين يقدروا يهاجموك هنا'});
+Object.assign(STR.en,{pvpZ:'Open PvP',pvpC:'In combat {s}s',pvpZT:'You left the safe zone: other players can attack you here'});
+var pvpZWas='',pvpZToldT=-1e15;
+function pvpChips(){if(!P||!S||S.__demo)return null;const pol=Satisfy.net.zonePolicy(netZone(P.x,P.y)),L=[];
+ const duel=!!(DUEL&&DUEL.locked&&DUEL.locked()); // in a duel open PvP doesn't apply (pvp.js busy)
+ const z=pol.safe?'safe':pol.known&&!duel?'pvp':'';
+ if(z==='safe')L.push(['pz safe',t('safeZone')]);else if(z==='pvp')L.push(['pz pvp',t('pvpZ')]);
+ const cm=PVP&&PVP.combat?PVP.combat():0;if(cm>0&&!duel)L.push(['pc',t('pvpC',{s:Math.ceil(cm/1000)})]);
+ if(outlaw()){const s=Math.max(0,Math.ceil((S.olT-Date.now())/1000));L.push(['po',t(olPub()===2?'kaMurderT':'pvpOl')+' '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0')]);}
+ return {z,L,sig:L.map(x=>x[1]).join('|')};}
+function pvpZoneTell(z){if(z===pvpZWas)return;const was=pvpZWas;pvpZWas=z;if(z!=='pvp'||was!=='safe')return;
+ const b=$('netB');b.classList.remove('flash');void b.offsetWidth;b.classList.add('flash');b.onanimationend=()=>b.classList.remove('flash');
+ const n=performance.now();if(n-pvpZToldT>180000){pvpZToldT=n;toast(t('pvpZT'),'warn');}}
 function outlaw(){return !!(S&&!S.__demo&&S.olT&&Date.now()<S.olT);}
 /* karma (SAT-ONLINE-052; Claude-B #13 item 23): -10..10. Killing a player who is not an outlaw costs a point and makes
    you an outlaw for longer the lower your karma goes (OUTLAW_MS, and half of it more for each point below -1); at -5 or lower you
