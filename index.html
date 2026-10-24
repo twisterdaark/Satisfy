@@ -11403,7 +11403,7 @@ function eaActOk(o){return !o.k||o.k!=='phxseal'||!(EAS().ps&&EAS().ps[o.i]);}
 function eaAct(o){const A=EAS();
  if(o.k==='eacirc'||o.k==='eacircW')return eaCircle(o.k==='eacirc');
  if(o.k==='eaheaven')return dialog('bhSys',['eaHeav1','eaHeav2']);
- if(o.k==='eagate'){if(S.qs.ea0&&S.qs.ea0.st===1&&!qReady('ea0')){qEvent('visit','eagate');SFX.legendary();return dialog('bhSys',[bhSys('eaGt1'),bhSys('eaGt2')]);}return dialog('bhSys',['eaGt0']);}
+ if(o.k==='eagate'){if(S.qs.ea0&&S.qs.ea0.st===1&&!qReady('ea0')){if((EAS().gk|0)!==7)return dialog('bhSys',[bhSys('egkLeft')]);qEvent('visit','eagate');SFX.legendary();return dialog('bhSys',[bhSys('eaGt1'),bhSys('eaGt2')]);}return dialog('bhSys',['eaGt0']);}
  if(o.k==='phxseal'){if(!(S.qs.ea5&&S.qs.ea5.st===1)){return dialog('bhSys',['eaPs0']);}A.ps=A.ps||{};if(A.ps[o.i]){toast(t('eaPsDone'));return;}A.ps[o.i]=1;qEvent('visit','phxseal');vfx('fire',o.x,o.y-6);SFX.legendary();toast(t('eaPsBreak',{n:Object.keys(A.ps).length}),'good');save(true);return;}
  if(o.k==='btshrine'){if(S.qs.ea7&&S.qs.ea7.st===1&&!qReady('ea7')){qEvent('visit','btshrine');SFX.legendary();vfx('levelup',o.x,o.y);return dialog('bhSys',[bhSys('eaBt1'),bhSys('eaBt2')]);}return dialog('bhSys',['eaBt0']);}}
 // the two circles: "the magic circle" takes you across for a fee once you have crossed by the scroll
@@ -11434,7 +11434,20 @@ function eaDone(id){if(id==='ea2')setTimeout(()=>dialog('hanS',['ea2_ch'],null,e
  if(id==='ea3'||id==='ea2')setTimeout(eaNpcVis,600);if(id==='ea4'){eaNpcVis();S.aff=S.aff||{};S.aff.hanS=100;S.aff.hanD=100;}
  if(id==='ea5'){addMat('brphx',1);setTimeout(()=>annW('eaPhxAnn'),700);}if(id==='ea7')setTimeout(()=>annW('eaBtAnn'),700);}
 function eaKill(m){if(m.type==='ewarden'&&S.qs.ea4&&S.qs.ea4.st===1&&!S.qs.ea4.c){S.qs.ea4.c=1;toast(t('retTo',{w:t('whiteS')}),'good');SFX.quest();save(true);}}
-let eaVT=0;function eaTick(dt){if((eaVT-=dt)>0)return;eaVT=1;eaNpcVis();}
+let eaVT=0;function eaTick(dt){egkTick();if((eaVT-=dt)>0)return;eaVT=1;eaNpcVis();}
+// the three northern gateways are held by their keepers while "Pangea's three gateways" is on (owner 2026-10-24: "I just
+// walked through, it was open, and then it said it was broken"): each keeper stands south of its gate, and nobody passes a
+// gate before its keeper falls (S.ea.gk: bits of the keepers beaten). Breaking the third is the quest, as in ch 1161.
+const EGK=[null,null,null];
+function egkOn(){return !!(S&&S.qs&&S.qs.ea0&&S.qs.ea0.st===1&&!qReady('ea0'));}
+function egkTick(){if(!P||!S||!egkOn())return;const G=EGATE,A=EAS(),tx=P.x/TS,ty=P.y/TS;if(tx<G.x0-6||tx>G.x1+6||ty<G.y0-2||ty>G.y1+4)return;
+ for(let i=0;i<3;i++){const gy=G.g[i];if((A.gk|0)&1<<i)continue;let m=EGK[i];
+  if(m&&m.dead){A.gk=(A.gk|0)|1<<i;EGK[i]=null;toast(t('egkDown',{n:i+1}),'good');SFX.quest();save(true);continue;}
+  if(!m||!mons.includes(m)){if(Math.abs(ty-gy)<14){m=newMon('etiger',(EPG.gx+.5)*TS+8,(gy+3)*TS+8);const k=1+i*.6;m.lv=330+i*15;m.max=m.hp=Math.round(m.hp*4*k);m.dmg=Math.round((m.dmg||0)*k)||m.dmg;m.gk=i+1;m.agg=1;m.tmp=1;m.nm=t('egkN',{n:i+1});mons.push(m);EGK[i]=m;vfx('spawn',m.x,m.y,{color:'#ffb04a'});toast(t('egkSeen',{n:i+1}),'warn');}}
+  if(ty<gy+.2){P.y=(gy+2.6)*TS;P.vy=0;if(!egkTick.t||gTime-egkTick.t>2){egkTick.t=gTime;toast(t('egkBlock',{n:i+1}),'warn');SFX.deny();}}
+  break;}}
+Object.assign(STR.ar,{egkN:'حارس البوابة {n}',egkSeen:'حارس البوابة {n} واقف قدامك. محدش بيعدّي من غير ما يغلبه.',egkBlock:'حارس البوابة {n} مش هيسيبك تعدّي. اغلبه الأول.',egkDown:'غلبت حارس البوابة {n}! البوابة اتفتحت قدامك.',egkLeft:'لسه فيه حراس بوابات محدش غلبهم.'});
+Object.assign(STR.en,{egkN:'Gatekeeper {n}',egkSeen:'Gatekeeper {n} stands before you. Nobody passes without beating it.',egkBlock:"Gatekeeper {n} won't let you through. Beat it first.",egkDown:'You beat Gatekeeper {n}! The gate opens before you.',egkLeft:'Some gatekeepers are still unbeaten.'});
 // the quests
 // the East's looks: old Korean dress (hanbok, the gat hat), Cho's red, Xing's black, Kaya's sand, Pa's white
 Object.assign(FIG,{
@@ -11537,7 +11550,7 @@ function nmIcon(){const b=SA.icons.iconCanvas('rscroll'),c=document.createElemen
  const k=c.width/16;g.fillStyle='#2a3a7a';for(let i=0;i<5;i++)g.fillRect((5+i)*k,(10-i)*k,k,k);g.fillStyle='#ffffff';g.fillRect(10*k,4*k,2*k,2*k);return c;}
 function ecIcon(){const b=SA.icons.iconCanvas('rscroll'),c=document.createElement('canvas');c.width=b.width;c.height=b.height;const g=c.getContext('2d');g.filter='hue-rotate(150deg) saturate(1.6)';g.drawImage(b,0,0);g.filter='none';
  const k=c.width/16;g.fillStyle='#c8281e';g.fillRect(6*k,6*k,4*k,4*k);g.fillStyle='#ffd24a';g.fillRect(7*k,7*k,2*k,2*k);return c;}
-window.__GEA={EAC,EPG,EKARS,EXING,EKAYA,EPA,EFARM,EGATE,ETIG,ELAVA,EMUR,EBT,EBD,EWT,EPH,EAPORT,EACIRC,ECW,EAB,EAPT,eaReg,eaLand,eaSide,cross:e=>eaCross(e),act:o=>eaAct(o),s:()=>EAS(),pen:k=>eaPen(k),jail:()=>eaJail(),vis:()=>eaNpcVis(),shop:()=>{const o=[];ecShopOpt(o);return o;},arube:()=>eaArubeOpts(),
+window.__GEA={gk:()=>egkTick(),EAC,EPG,EKARS,EXING,EKAYA,EPA,EFARM,EGATE,ETIG,ELAVA,EMUR,EBT,EBD,EWT,EPH,EAPORT,EACIRC,ECW,EAB,EAPT,eaReg,eaLand,eaSide,cross:e=>eaCross(e),act:o=>eaAct(o),s:()=>EAS(),pen:k=>eaPen(k),jail:()=>eaJail(),vis:()=>eaNpcVis(),shop:()=>{const o=[];ecShopOpt(o);return o;},arube:()=>eaArubeOpts(),
  pt:k=>EAPT.filter(o=>o.k===k),stat:k=>stat(k),str:(l,k)=>STR[l][k],mv:(dx,dy)=>move(P,dx,dy,4),split:CSPL,view:()=>[camX,camX+VW],circle:e=>eaCircle(e),
  ready:id=>qReady(id),avail:id=>qAvail(id),kill:type=>eaKill({type}),fogReload:()=>{fogLoad();FOG.sid=S;},fogSeen:(x,y)=>fogSeen(x,y)}; // tests
 Object.assign(STR.ar,{
@@ -11554,7 +11567,7 @@ Object.assign(STR.ar,{
  "eaCirc0":"[دايرة السحر باردة. مبتردّش غير على حد عدّى البحر الأحمر قبل كده.]","eaCircE":"[دايرة سحر بين القارات. تقدر تعدّيك البحر الأحمر للقارة الغربية.]","eaCircW":"[دايرة سحر بين القارات. تقدر تعدّيك البحر الأحمر لبانجيا في القارة الشرقية.]","eaCircGo":"اعدّي البحر الأحمر ({g} دهب)",
  "hEaCirc":"E: دايرة السحر","hPhxSeal":"E: حجر الختم","hBtShrine":"E: مزار السلحفاة السودا","hEaGate":"E: حجر البوابة","hEaHeaven":"E: طريق الشجر الأبيض",
  "eaHeav1":"[من قلب غابة الخوخ طالع طريق على جنبيه شجر فسفور أبيض بيطرح مرة كل ألف سنة.]","eaHeav2":"[الطريق لمملكة هوان، بيت اليانجبان، مقفول قدامك.]",
- "eaGt0":"[حجر قديم عند البوابة التالتة. الكلام اللي عليه اتمسح.]","eaGt1":"البوابة التالتة في شمال بانجيا اتكسرت لأول مرة.","eaGt2":"ده بفضل إن حاكم مجتمع النمور اللي من غير سنان، \"النمر الأزرق\"، بيحبك.",
+ "eaGt0":"[حجر قديم عند البوابة التالتة. الكلام اللي عليه اتمسح.]","eaGt1":"البوابة التالتة في شمال بانجيا اتكسرت لأول مرة! إنت أول غريب يغلب حراسها التلاتة ويعدّي.","eaGt2":"ده بفضل إن حاكم مجتمع النمور اللي من غير سنان، \"النمر الأزرق\"، بيحبك.",
  "eaPs0":"[حجر من الختم اللي حطّوه الآلهة المطرودين. نار جواه متكتّفة.]","eaPsDone":"الختم ده مكسور خلاص","eaPsBreak":"ختم اتكسر ({n}/3)",
  "eaBt0":"[مزار السلحفاة السودا. المية اللي فيه ساكتة وسودا.]","eaBt1":"السلحفاة السودا بتاعة الموت والسلحفاة السودا بتاعة المية اتجمعوا تاني.","eaBt2":"حماية السلحفاة السودا هتغطي كل حاجة في الشمال.",
  "eaPhxAnn":"{n} كسر الأختام اللي على العنقاء الحمرا، حارسة جنوب القارة الشرقية! مطر نار نازل على الجنوب.","eaBtAnn":"{n} رجّع السلحفاة السودا واحدة! حمايتها غطت شمال القارة الشرقية.",
@@ -11609,7 +11622,7 @@ Object.assign(STR.en,{
  "eaCirc0":"[The magic circle is cold. It answers only someone who has crossed the Red Sea before.]","eaCircE":"[An intercontinental magic circle. It can carry you across the Red Sea to the West Continent.]","eaCircW":"[An intercontinental magic circle. It can carry you across the Red Sea to Pangea on the East Continent.]","eaCircGo":"Cross the Red Sea ({g} gold)",
  "hEaCirc":"E: The magic circle","hPhxSeal":"E: The seal stone","hBtShrine":"E: The Black Tortoise's shrine","hEaGate":"E: The gateway stone","hEaHeaven":"E: The path of white trees",
  "eaHeav1":"[From the heart of the peach forest a path rises, lined with white phosphorus trees that bloom once in a thousand years.]","eaHeav2":"[The way to the Hwan Kingdom, home of the yangbans, is closed to you.]",
- "eaGt0":"[An old stone at the third gateway. Its words have worn away.]","eaGt1":"The third gateway in the north of Pangea has been broken through for the first time.","eaGt2":"It is thanks to the ruler of the toothless tiger community, 'Blue Tiger,' favoring you.",
+ "eaGt0":"[An old stone at the third gateway. Its words have worn away.]","eaGt1":"The third gateway in the north of Pangea has been broken through for the first time! You are the first outsider to beat its three keepers and pass.","eaGt2":"It is thanks to the ruler of the toothless tiger community, 'Blue Tiger,' favoring you.",
  "eaPs0":"[A stone of the seal laid by the expelled gods. A fire is chained inside it.]","eaPsDone":"This seal is already broken","eaPsBreak":"A seal breaks ({n}/3)",
  "eaBt0":"[The Black Tortoise's shrine. Its water is still and black.]","eaBt1":"The black tortoise of death and the black tortoise of water have been reunited.","eaBt2":"The protection of the black tortoise will cover all things in the north.",
  "eaPhxAnn":"{n} broke the seals on the Red Phoenix, guardian of the south of the East Continent! A rain of fire falls on the south.","eaBtAnn":"{n} reunited the Black Tortoise! Its protection covers the north of the East Continent.",
