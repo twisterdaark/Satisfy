@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24bzrest', ver: '2.81', d: '2026-10-24',
+      ar: ["خليفة براهام اتعلم باقي سحر براهام اللي في الرواية، 11 تعويذة جديدة بأيقوناتها:",
+          "كشف السحر (لفل 15): بيكشف اللي حواليك وأقواهم، واللي اتكشف بياخد منك ضرر أكتر 20%. القاطع المظلم (70): نصل ظلام بيعدّي من كل اللي قدامه ومعاه كرة نار.",
+          "الطُعم (90): طير أحمر بيلف حواليك 10 ثواني والوحوش بتجري وراه بدالك. تشويش المانا (110): المقذوفات بتقع والوحوش بيتقطع تحضيرهم ويقفوا.",
+          "رمح التلج (120): 400% وبيجمّد، والمتجمد بياخد الضعف من الرمح التاني. حاجز المانا (130): الضرر بيتدفع من المانا. الطيران (140).",
+          "الكريستالة المتجمدة (190): تلج محدش يكسره بيحميك 3 ثواني. الانتقال الجماعي (210): بيرجعك مدينتك من غير لفافة.",
+          "تكثيف المانا (230): التعويذة الجاية أقوى 3 أضعاف. رش المانا (240): التعويذة الجاية بتتقسم على 9 أعداء تانيين."],
+      en: ["Braham's Successor learns the rest of Braham's magic from the novel, 11 new spells with their own icons:",
+          "Magic Detection (level 15): finds what is around and the strongest of them, and what it finds takes 20% more damage from you. Dark Cutter (70): a blade of darkness through everything ahead, with a Fireball.",
+          "Decoy (90): a red bird circles you for 10 seconds and monsters chase it instead of you. Mana Jamming (110): shots fall and monsters lose their wind-up and stand.",
+          "Ice Spear (120): 400% and freezes; a frozen target takes double from the next spear. Mana Barrier (130): damage is paid with mana. Fly (140).",
+          "Frozen Crystal (190): unbreakable ice shields you for 3 seconds. Mass Teleport (210): takes you to your town without a scroll.",
+          "Magic Power Cohesion (230): the next spell is three times as strong. Magic Spray (240): the next spell splits onto 9 more enemies."] },
     { v: '2026-10-24balarm', ver: '2.80', d: '2026-10-24',
       ar: ["خليفة براهام اتعلم سحر جديد من لفل 45: سحر براهام: الإنذار. بتحط إنذار قدامك بيرن بعد 2.5 ثانية: الوحوش اللي جنبه بتلف على الصوت وتقف ثانية، وبيطلع منه لحد 4 صواريخ سحرية على أقرب الأعداء، زي ما جريد كان بيخبي الصواريخ في الإنذار في الرواية. لحد 3 إنذارات في نفس الوقت."],
       en: ["Braham's Successor learns a new spell at level 45: Braham's Magic: Alarm. You set an alarm ahead that rings after 2.5 seconds: the monsters by it turn to the sound and stand still a moment, and up to 4 Magic Missiles packed in it fly at the nearest foes, the way Grid hid missiles in his alarms in the novel. Up to 3 alarms at once."] },
