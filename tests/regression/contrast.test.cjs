@@ -17,7 +17,7 @@ test('high contrast: from Settings, kept; a crit reads "!", wind-ups and bars fr
     await H.newGame(g);
     await g.step(3);
     const kinds = () => g.eval(() => { const C = window.__GHC; const n = (s, b) => String(C.num(s, b)); return { hit: n(1234, false), crit: n(1234, true), taken: n('-45', false), gain: n('+30', false), big: n('+120G', true), word: n('EVADE', true) }; });
-    assert.equal(await g.eval(() => window.__GHC.on()), false, 'off unless asked');
+    assert.equal(await g.eval(() => window.__GHCM.on()), false, 'off unless asked');
     const off = await kinds();
     assert.equal(off.hit, off.crit, 'off: a hit and a crit differ only in colour and size, as before');
 
@@ -29,7 +29,7 @@ test('high contrast: from Settings, kept; a crit reads "!", wind-ups and bars fr
     assert.equal(await g.page.textContent('#rmB'), 'Reduced motion: Off');
     await g.page.click('#hcB'); await g.step(1);
     assert.equal(await g.page.textContent('#hcB'), 'High contrast: On');
-    assert.deepEqual(await g.eval(() => [window.__GHC.on(), localStorage.getItem('satisfy_hc'), document.body.classList.contains('hc')]), [true, '1', true]);
+    assert.deepEqual(await g.eval(() => [window.__GHCM.on(), localStorage.getItem('satisfy_hc'), document.body.classList.contains('hc')]), [true, '1', true]);
     await g.page.keyboard.press('Escape'); await g.step(2);
     assert.deepEqual(await g.eval(() => [window.__G.mode, document.getElementById('pauseScreen').hidden]), ['pause', false], 'Esc: back to the pause menu');
     await g.page.keyboard.press('Escape'); await g.step(2);
@@ -57,7 +57,7 @@ test('high contrast: from Settings, kept; a crit reads "!", wind-ups and bars fr
     // kept on this device
     g = await H.openGame({ ctx });
     await H.newGame(g);
-    assert.equal(await g.eval(() => window.__GHC.on()), true, 'still on after a reload');
+    assert.equal(await g.eval(() => window.__GHCM.on()), true, 'still on after a reload');
     assert.deepEqual(g.errors, []);
     await g.close();
   } finally { await ctx.close(); }

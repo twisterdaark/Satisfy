@@ -83,7 +83,7 @@
     var base = 'presence/' + o.world + '/' + o.shard;
     var mine = D.ref(db, base + '/' + o.uid), list = D.ref(db, base);
     var inbox = D.ref(db, 'inbox/' + o.uid);
-    var handler = null, offs = [], lastSeq = {}, closed = false, offset = 0;
+    var handler = null, offs = [], lastSeq = {}, closed = false, offset = 0, offOk = false;
     var MOB_FULL_MS = 5000;
     var mobs = { offs: null, all: {}, zone: null, last: null, fullT: 0 }; // shared monsters (SAT-ONLINE-026)
     // The node as the server last stored it, or null when it must be written in full (first send,
@@ -203,7 +203,7 @@
       });
     }
     if (!R) listen(0); // whole shard, as before
-    offs.push(D.onValue(D.ref(db, '.info/serverTimeOffset'), function (s) { offset = +s.val() || 0; }));
+    offs.push(D.onValue(D.ref(db, '.info/serverTimeOffset'), function (s) { offset = +s.val() || 0; offOk = true; }));
     offs.push(D.onChildAdded(inbox, function (s) {
       var m = s.val();
       D.remove(D.ref(db, 'inbox/' + o.uid + '/' + s.key)).catch(function () { /* ignore */ });
@@ -260,6 +260,8 @@
        */
       /** Server time minus this device's clock (ms), from .info/serverTimeOffset: world events use it so every client agrees. */
       serverOffset: function () { return offset; },
+      /** True once the server's offset has arrived (until then serverOffset() is 0, the device's own clock). */
+      offsetOk: function () { return offOk; },
       interest: function () { return { radius: R, centre: cx, party: pq.ids[0] || null, parties: pq.ids.slice(), watched: Object.keys(pq.keys) }; },
       /** Follow everyone whose presence is in party `id` (or any of an array of ids; null or []: stop), on top of the range query. */
       party: partyQuery,
