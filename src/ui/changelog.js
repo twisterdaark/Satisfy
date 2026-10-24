@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24ctlsword', ver: '2.56', d: '2026-10-24',
+      ar: ["شكل السكيلات اتغيّر: كل سكيل بقى ليه إيفيكت من اسمه وسلاحه ولونه (هلال، طعنة، قطع على شكل X، سيوف بتنزل من السما وسيوف طايرة، ورد، تنين، عمود نور، دوامة، برق بيتنقل من عدو للتاني، انفجار، هزة في الأرض، هالة...)، وسيف الفضاء بقى بيفتح شق في الفضاء بدل ما يبقى سلاش أكبر.",
+          "سيف التحكم (Sword Saint) اتعمل من جديد زي الرواية: سيوف بتطلع من الشنطة وبتحارب بإرادتك 10 ثواني، 4 في الأول وسيف زيادة كل لفلين للسكيل لحد 10. كل سيف بيطير على عدو قريب ويقطعه ويرجع، واللي جنبك بيصد عنك الضربة ويطير على اللي ضربك.",
+          "تذكرة تغيير الاسم بقت بتغيّر اسم الشخصية بس، واليوزر آي دي بتاعك بيفضل زي ما هو."],
+      en: ["Skills look different now: each one has an effect from its name, weapon and colour (a crescent, a thrust, a cross cut, falling and flying swords, petals, a dragon, a pillar of light, a vortex, lightning from foe to foe, a blast, a shock in the ground, an aura...), and Space Sword opens a rift in space instead of a bigger slash.",
+          "Control Sword (Sword Saint) is remade like the novel: swords leave your bag and fight by your will for 10 s, 4 at first and one more every two skill levels up to 10. Each flies at a foe near you, cuts and comes back; one at your side catches a blow and flies at whoever struck.",
+          "The Name Change Ticket changes your character's name only; your user ID stays as it is."] },
     { v: '2026-10-24settings', ver: '2.55', d: '2026-10-24',
       ar: ["قايمة الإيقاف بقى فيها الأساسي بس (كمّل، اطلع من الزنقة، وضع التصوير، سجل التحديثات، احفظ واخرج)، وزرار \"الإعدادات\" جواه الباقي: التحكم، والصوت، واللغة، وحجم القوايم، وتقليل الحركة، وترتيب الواجهة.",
           "تذكرة تغيير الاسم: التاجر اللي بيبيع لفافة العودة بيبيعها بـ 50,000 دهب، وبتستعملها من الشنطة أو من الإعدادات > غيّر اسمك.",

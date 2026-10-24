@@ -3245,7 +3245,7 @@ function vowBreak(kind){const s=S&&S.qs.cp;if(!s||s.st!==1)return;const had=s.c>
 function phMates(r){if(!NET||!PARTY||!PARTY.id())return [];const pid=PARTY.id();return NET.remotes().filter(m=>m.party===pid&&m.anim!=='dead'&&Math.hypot(m.x-P.x,m.y-P.y)<r);}
 function phNear(ch,r){for(const m of phMates(r)){const s=FXS.get(m.sid);if(s&&s.st&&s.st.indexOf(ch)>=0)return true;}return false;}
 // a blow from a monster and a blow on one
-function phHurt(d,src){if(!src||!src.type||src.spar)return d;if(P.ctlU>gTime){d*=.5;if(!src.dead&&Math.hypot(src.x-P.x,src.y-P.y)<70&&gTime>(P.ctlH||0)){P.ctlH=gTime+.4;hitMon(src,1.5,{skill:1});vfx('slash',src.x,monY(src),{angle:rand()*6.283,rarity:3});}}if(P.bls>0||phNear('b',120))d*=.9;if(P.jud>0||phNear('j',120))d*=.85;if(P.pdv>0)d*=.6;if(phNear('G',150))d*=.55;return Math.max(1,Math.round(d));}
+function phHurt(d,src){if(!src||!src.type||src.spar)return d;if(P.ctlU>gTime&&P.ctlS){const s=P.ctlS.find(o=>o.st===0);if(s){d*=.6;if(!src.dead&&!src.ally){s.m=src;s.st=1;}}}if(P.bls>0||phNear('b',120))d*=.9;if(P.jud>0||phNear('j',120))d*=.85;if(P.pdv>0)d*=.6;if(phNear('G',150))d*=.55;return Math.max(1,Math.round(d));}
 function phAtk(m){if(m.spar)return 1;return (S.cls==='saint'||phNear('Q',60)?1.3:phNear('Q',150)?1.1:1)*(P.bls>0||phNear('b',120)?1.1:1)*(P.jud>0||phNear('j',120)?1.1:1)*(P.dom>0?1.25:1)*(phNear('G',150)?1.8:1);}
 function phHeal(pm){const n=rlHeal(pm);p2Heal(n,phMates(150).length);if(P.stun>0)P.stun=0;for(const m of phMates(150))NET.send('raid.state',{to:m.uid,raid:'p|'+PARTY.id(),k:pm});return n;}
 function phRing(c){fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*20,y:P.y-4,vx:(rand()-.5)*14,vy:-26-rand()*16,t:.7,c,fl:1});}
@@ -7191,9 +7191,9 @@ Object.assign(STR.ar,{oSsq:'كويست سيد السيف (SSS)',ssq1:'"عايز 
  msNoSaint:'السيف مش بيتحرك. صوت واطي: "السيف ده لسيد السيف بس. روح لبيارو المزارع، هو يعرف الطريق."',
  msOffer:'"خد فن القلب اللي ملوش مثيل، أساس سيفي كله."\n[لو اتعلمته: مهارة بترجع نص المانا مرة كل ساعة.]\n[لو رفضته زي كراوجل: القوة +30 والرشاقة +30 والإرادة +200، وتمشي بسيفك إنت.]',
  msLearn:'اتعلمه',msRefuse:'ارفض: هعدّي مولر بسيفي أنا',msLearned:'[اتعلمت فن القلب اللي ملوش مثيل.]',msRefused:'"عايز تعدّيني؟ يبقى ده سيفك إنت." [القوة +30، الرشاقة +30، الإرادة +200]',
- ssIrr:'ضرر لا يتصلح',ssNoT:'مفيش أعداء قريبين',ssCtlOn:'سيفك بيتحرك لوحده 8 ثواني',
+ ssIrr:'ضرر لا يتصلح',ssNoT:'مفيش أعداء قريبين',ssCtlOn:'{n} سيوف بتحارب معاك 10 ثواني',
  sk_ssaura:'هالة سيد السيف',skd_ssaura:'إنت والفريق جنبك ضربكم +30%، ولحد مسافة أبعد +10%. شغالة طول ما إنت في فريق.',
- sk_sctl:'سيف التحكم',skd_sctl:'سيفك بيتحرك من غير إيدك 8 ثواني: الضربات اللي بتاخدها بالنص، والسيف بيرد على اللي ضربك 150%.',
+ sk_sctl:'سيف التحكم',skd_sctl:'سيوف بتطلع من شنطتك وبتحارب بإرادتك 10 ثواني: 4 في الأول، وسيف زيادة كل لفلين للسكيل لحد 10. كل سيف بيطير على أقرب عدو حواليك، يقطعه 60% ويرجع. والسيف اللي جنبك بيصد الضربة عنك (أقل 40%) ويطير على اللي ضربك.',
  sk_scloud:'السحاب الحقيقي',skd_scloud:'سحاب أزرق من طاقة السيف حواليك بيسرق حواس الأعداء: 100% ووقفة ثانية ونص (الزعيم أقل).',
  sk_mheart:'فن القلب اللي ملوش مثيل',skd_mheart:'دورة طاقة السيف بتاعة مولر: بترجعلك نص المانا مرة واحدة. مرة كل ساعة.'});
 Object.assign(STR.en,{oSsq:'Sword Saint quest (SSS)',ssq1:'"You want to be the Sword Saint? Muller used to say a sword that never beat a legend is no sword."',
@@ -7204,16 +7204,35 @@ Object.assign(STR.en,{oSsq:'Sword Saint quest (SSS)',ssq1:'"You want to be the S
  msNoSaint:'The sword does not move. A low voice: "This sword is for the Sword Saint alone. Go to Piaro the farmer, he knows the way."',
  msOffer:'"Take the Matchless Heart Technique, the root of all my swordsmanship."\n[Learn it: a skill that gives back half your mana once an hour.]\n[Refuse it, like Kraugel: STR +30, AGI +30, Willpower +200, and you walk with your own sword.]',
  msLearn:'Learn it',msRefuse:'Refuse: I will surpass Muller with my own sword',msLearned:'[You have learned the Matchless Heart Technique.]',msRefused:'"You want to surpass me? Then this is your own sword." [STR +30, AGI +30, Willpower +200]',
- ssIrr:'Irreparable',ssNoT:'No enemy near',ssCtlOn:'Your sword moves on its own for 8 s',
+ ssIrr:'Irreparable',ssNoT:'No enemy near',ssCtlOn:'{n} swords fight beside you for 10 s',
  sk_ssaura:"Sword Saint's Aura",skd_ssaura:'You and your party beside you deal 30% more, 10% a little farther out. Works as long as you are in a party.',
- sk_sctl:'Control Sword',skd_sctl:'Your sword moves without your hands for 8 s: hits you take are halved, and the sword answers whoever hit you for 150%.',
+ sk_sctl:'Control Sword',skd_sctl:'Swords leave your bag and fight by your will for 10 s: 4 at first, one more every two skill levels up to 10. Each flies at a foe near you, cuts for 60% and comes back; a sword at your side catches a blow (40% less) and flies at whoever struck.',
  sk_scloud:'True Clouds',skd_scloud:'Blue clouds of sword energy around you steal your foes\' senses: 100% and held for 1.5 s (bosses less).',
  sk_mheart:'Matchless Heart Technique',skd_mheart:"Muller's sword-energy circulation: half your mana back at once. Once an hour."});
 function legWin(){if(!S||!S.ssq||S.cls==='saint'||!clsFam('warrior'))return;const own=(WS.legends||{}).muller;if(own&&own.pid!==pidOf())return toast(t('msTaken',{n:own.n}),'warn');
  S.ssqW=1;save(true);dialog('sysN',['ssqWon','ssqGot','msConfirm'],null,[{l:t('useY'),f:becomeSaint},{l:t('useN'),f:()=>toast(t('ssqLater'),'')}]);}
 // Control Sword: the floating sword circles the Sword Saint while it guards
-function ssEnts(ents){if(!(P&&P.ctlU>gTime))return;const a=gTime*5,x=P.x+Math.cos(a)*14,y=P.y-10+Math.sin(a)*7;
- ents.push({y:P.y+(Math.sin(a)>0?1:-1),f:()=>{ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.rotate(a+Math.PI/2);ctx.fillStyle='#e8f4ff';ctx.fillRect(-1,-9,2,12);ctx.fillStyle='#c8a070';ctx.fillRect(-3,3,6,2);ctx.fillStyle='#7a5634';ctx.fillRect(-1,5,2,3);ctx.restore();}});}
+/* Control Sword (owner 2026-10-24, from a player: "I thought it would go out and attack; it just floats near you"). In the novel a
+   Sword Saint fires swords from his bag and moves up to ten of them by will (ch 1168), they fly every way so the foe cannot dodge,
+   and they catch the God Hands' blows. Here: 4 swords, one more every two skill levels up to 10, for 10 s. Each flies at a foe
+   near you, cuts and comes back; a sword at your side catches a blow (40% less) and flies at whoever struck. */
+const SCTLT=10,SCTLR=150,SCTLM=.6;
+const sctlN=()=>Math.min(10,4+Math.floor((skLv('sctl')-1)/2));
+function sctlOn(){const n=sctlN();P.ctlU=gTime+SCTLT*skDur('sctl');P.ctlS=[];for(let i=0;i<n;i++)P.ctlS.push({x:P.x,y:P.y-10,st:0,cd:.15+i*.1,m:null,a:0});toast(t('ssCtlOn',{n}),'good');}
+// the nearest foe in reach, spreading the swords over several foes
+function sctlPick(){let best=null,bd=1e9;for(const m of mons){if(m.dead||m.ally)continue;const d=Math.hypot(m.x-P.x,m.y-P.y);if(d>SCTLR)continue;const k=d+P.ctlS.filter(o=>o.m===m).length*70;if(k<bd){bd=k;best=m;}}return best;}
+function sctlHit(m,s){const f=FXME;FXME=1;try{vfx('slash',m.x,monY(m),{angle:s.a-Math.PI/2,rarity:3});}finally{FXME=f;}hitMon(m,SCTLM,{skill:1});}
+function ssTick(dt){if(!P||!P.ctlS)return;if(!(P.ctlU>gTime)){P.ctlS=null;return;}if(mode!=='play')return;const L=P.ctlS,n=L.length;
+ L.forEach((s,i)=>{const oa=gTime*3+i*6.283/n,ox=P.x+Math.cos(oa)*18,oy=P.y-10+Math.sin(oa)*9;
+  if(s.st===0){const k=Math.min(1,dt*12);s.x+=(ox-s.x)*k;s.y+=(oy-s.y)*k;s.a=oa+Math.PI;s.cd-=dt;if(s.cd<=0){const m=sctlPick();if(m){s.m=m;s.st=1;}else s.cd=.2;}return;}
+  if(s.st===1){const m=s.m;if(!m||m.dead||Math.hypot(m.x-P.x,m.y-P.y)>SCTLR+60){s.st=2;return;}
+   const dx=m.x-s.x,dy=monY(m)-s.y,d=Math.hypot(dx,dy),sp=460*dt;s.a=Math.atan2(dy,dx)+Math.PI/2;
+   if(d<=sp+4){s.x=m.x;s.y=monY(m);s.st=2;sctlHit(m,s);}else{s.x+=dx/d*sp;s.y+=dy/d*sp;}return;}
+  const dx=ox-s.x,dy=oy-s.y,d=Math.hypot(dx,dy),sp=380*dt;if(d<=sp+2){s.st=0;s.cd=.45;s.m=null;}else{s.x+=dx/d*sp;s.y+=dy/d*sp;}});}
+function ssEnts(ents){if(!(P&&P.ctlU>gTime&&P.ctlS))return;
+ for(const s of P.ctlS)ents.push({y:s.st?s.y+10:P.y+(s.y<P.y-10?-1:1),f:()=>{ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));ctx.rotate(s.a);ctx.scale(1.4,1.4);ctx.fillStyle='rgba(120,190,255,.45)';ctx.fillRect(-2,-10,4,14);
+  if(s.st===1){ctx.fillStyle='rgba(191,224,255,.35)';ctx.fillRect(-1,3,2,12);}
+  ctx.fillStyle='#e8f4ff';ctx.fillRect(-1,-9,2,12);ctx.fillStyle='#ffffff';ctx.fillRect(0,-9,1,10);ctx.fillStyle='#c8a070';ctx.fillRect(-3,3,6,2);ctx.fillStyle='#7a5634';ctx.fillRect(-1,5,2,3);ctx.restore();}});}
 window.__GSS={legWin,ssqOpts,msEnd,wilV,legFoe,get SPAR(){return SPAR}}; // tests
 
 // one Sword Saint per world, like Pagma and Braham: WS.legends.muller is the shared record
@@ -8074,8 +8093,8 @@ const SKF={
   for(let i=0;i<15;i++)fx.push({x:sx+v[0]*i*10,y:sy-7+v[1]*i*10,vx:-v[1]*(i%2?20:-20),vy:v[0]*(i%2?20:-20),t:.3+i*.015,c:i%3?'#bfe0ff':'#ffffff',fl:1});
   for(const m of mons){if(m.dead)continue;const dx=m.x-sx,dy=m.y-sy,q=dx*v[0]+dy*v[1];if(q<-8||q>150||Math.abs(dx*v[1]-dy*v[0])>=16)continue;
    if(hitMon(m,5,{skill:1})){m.slowU=gTime+8;m.weak=Math.max(m.weak||0,8);num(m.x,monY(m)-18,t('ssIrr'),'#bfe0ff',false);}}},
- // Control Sword (ch 766, 1168): the sword moves without his hands and guards him; hits taken are halved and answered
- sctl:()=>{P.ctlU=gTime+8;fx.push({ring:true,x:P.x,y:P.y-8,t:.4});for(let i=0;i<10;i++)fx.push({x:P.x+Math.cos(i*.63)*16,y:P.y-8+Math.sin(i*.63)*10,vx:0,vy:-20,t:.4,c:'#e8f4ff',fl:1});toast(t('ssCtlOn'),'good');},
+ // Control Sword (ch 766, 1168, 1300): swords leave the bag and fight by his will (see sctlOn)
+ sctl:()=>{sctlOn();fx.push({ring:true,x:P.x,y:P.y-8,t:.4});for(let i=0;i<10;i++)fx.push({x:P.x+Math.cos(i*.63)*16,y:P.y-8+Math.sin(i*.63)*10,vx:0,vy:-20,t:.4,c:'#e8f4ff',fl:1});},
  // Manifestation of Will (ch 1005): intangible copies of his weapon; damage from Willpower and strength, defence ignored. Cooldown 1 minute
  mheaven:()=>{const T=mons.filter(m=>!m.dead&&Math.hypot(m.x-P.x,m.y-P.y)<170).sort((a,b)=>Math.hypot(a.x-P.x,a.y-P.y)-Math.hypot(b.x-P.x,b.y-P.y)).slice(0,6);
   if(!T.length)return toast(t('ssNoT'),'');const mul=2+wilV()/150;SFX.notice();flash();
@@ -8901,8 +8920,8 @@ let TRL=null;function townLv(k){const T0=TOWNS.find(T=>T.k===k);if(!T0)return 0;
   const L=mons.filter(m=>MT[m.type]&&!MT[m.type].boss&&m.sx!=null&&!(typeof TFB!=='undefined'&&TFB.includes(m))).map(m=>[Math.hypot(m.sx/TS-cx,m.sy/TS-cy),MT[m.type].lv[0]]).filter(a=>a[0]<hw+60).sort((a,b)=>a[0]-b[0]).slice(0,30).map(a=>a[1]).sort((a,b)=>a-b);
   if(L.length>=5)TRL[T.k]=Math.max(1,Math.round(L[L.length>>1]/5)*5);}}return TRL&&TRL[k]||0;}
 Object.assign(STR.ar,{townLv:'لفل مقترح {n}+'});Object.assign(STR.en,{townLv:'Recommended Lv {n}+'});
-Object.assign(STR.ar,{setB:'الإعدادات',nmB:'غيّر اسمك',nmH:'اسم جديد',nmT:'من 2 لـ12 حرف.',nmDone:'اسمك بقى {n}',nameNo:'الاسم ده مش مسموح، اختار اسم تاني',nameForced:'اسمك فيه كلام مش مسموح بيه، لازم تغيّره عشان تكمل.',nmNeed:'محتاج تذكرة تغيير الاسم، بيبيعها التاجر بـ{g} دهب',oBuyNm:'تذكرة تغيير الاسم ({g} دهب)',nmGot:'اشتريت تذكرة تغيير الاسم',nmtick:'تذكرة تغيير الاسم',nmtickD:'بتغيّر اسمك مرة واحدة. استعملها من الشنطة أو من الإعدادات.\nلو اسمك فيه كلام مش مسموح بيه، التغيير ببلاش.'});
-Object.assign(STR.en,{setB:'Settings',nmB:'Change name',nmH:'A new name',nmT:'2 to 12 letters.',nmDone:'Your name is now {n}',nameNo:'That name is not allowed, pick another',nameForced:'Your name has words that are not allowed; change it to keep playing.',nmNeed:'You need a Name Change Ticket; merchants sell it for {g} gold',oBuyNm:'Name Change Ticket ({g} gold)',nmGot:'Bought a Name Change Ticket',nmtick:'Name Change Ticket',nmtickD:'Changes your name once. Use it from the bag or from Settings.\nIf your name has words that are not allowed, the change is free.'});
+Object.assign(STR.ar,{setB:'الإعدادات',nmB:'غيّر اسم الشخصية',nmH:'اسم جديد للشخصية',nmT:'من 2 لـ12 حرف.',nmDone:'اسمك بقى {n}',nameNo:'الاسم ده مش مسموح، اختار اسم تاني',nameForced:'اسمك فيه كلام مش مسموح بيه، لازم تغيّره عشان تكمل.',nmNeed:'محتاج تذكرة تغيير الاسم، بيبيعها التاجر بـ{g} دهب',oBuyNm:'تذكرة تغيير الاسم ({g} دهب)',nmGot:'اشتريت تذكرة تغيير الاسم',nmtick:'تذكرة تغيير الاسم',nmtickD:'بتغيّر اسم شخصيتك مرة واحدة (اليوزر آي دي زي ما هو). استعملها من الشنطة أو من الإعدادات.\nلو اسمك فيه كلام مش مسموح بيه، التغيير ببلاش.'});
+Object.assign(STR.en,{setB:'Settings',nmB:'Change character name',nmH:'A new character name',nmT:'2 to 12 letters.',nmDone:'Your name is now {n}',nameNo:'That name is not allowed, pick another',nameForced:'Your name has words that are not allowed; change it to keep playing.',nmNeed:'You need a Name Change Ticket; merchants sell it for {g} gold',oBuyNm:'Name Change Ticket ({g} gold)',nmGot:'Bought a Name Change Ticket',nmtick:'Name Change Ticket',nmtickD:"Changes your character's name once (your user ID stays). Use it from the bag or from Settings.\nIf your name has words that are not allowed, the change is free."});
 const ZL=[['zBai',14,30],['zQuarry',21,4],['zGrey',38,30],['zGuard',56,16],['zOut',32,66],['zPlains',82,50],['zSnow',145,8],['zOrc',112,24],['zWin',126,70],['zGrave',128,47],['zLake',92,90],['zHide',69,97],['zCanyon',131,106],['zFields',152,58],['zPat',190,70],['zHigh',192,49],['zMarsh',192,110],['zRuin',216,69]];
 // the Saharan Empire's regions (major #2)
 function sahZone(tx,ty){const T=TITAN,B=BUTIN,R=ROLL,A=ABYSS;
@@ -9387,7 +9406,7 @@ const ZT={};
 const WALKM=['inv','status','equip','log','qd','map','mb','guild'];
 var MSWT=2;
 function update(dt){
- gTime+=dt;spwTick(dt);
+ gTime+=dt;spwTick(dt);ssTick(dt);
  if(INVX&&INVX.stash&&P&&Math.hypot(P.x-INVX.x,P.y-INVX.y)>140)closeInv(); // walked away from the inn's chest
  for(let i=DGATES.length-1;i>=0;i--)if(DGATES[i].tmp&&gTime>DGATES[i].til)DGATES.splice(i,1);
  for(const n of nodes)if(n.dep>0){n.dep-=dt;if(n.dep<=0&&(n.kind==='herb'||n.kind==='bherb'))herbSpot(n);}
@@ -13910,9 +13929,10 @@ function nmTry(){if(!(S&&S.mats&&S.mats.nmtick>0)){SFX.deny();return toast(t('nm
 function nmPaid(){if(S&&S.mats&&S.mats.nmtick>0){S.mats.nmtick--;hudDirty=true;save(true);}}
 addEventListener('keydown',e=>{if(IDW.forced&&!$('idW').hidden&&!(e.target&&e.target.id==='idIn')){e.preventDefault();e.stopImmediatePropagation();$('idIn').focus();}},true); // nothing plays on until the name is fixed
 window.__GNM={shop:w=>nmShopOpt(w),check:()=>nmCheck(),idw:()=>IDW,price:NMPRICE}; // tests
-function nmOpen(forced){IDW=NETQ==='online'&&netUser&&netId?{rename:1,forced}:{local:1,forced};$('idIn').maxLength=IDW.local?12:16;idOpen();$('idIn').value=forced?'':IDW.local?(S&&S.look&&S.look.n)||'':netId||'';}
+function nmOpen(forced){IDW={local:1,forced}; // the character's name (owner 2026-10-24: the user ID stays)
+ $('idIn').maxLength=IDW.local?12:16;idOpen();$('idIn').value=forced?'':IDW.local?(S&&S.look&&S.look.n)||'':netId||'';}
 function nmLocalOk(v){const e=$('idErr');if(v.length<2||v.length>12){e.textContent=t('cNameErr');return;}if(Satisfy.chat.badName(v)){e.textContent=t('nameNo');return;}if(!S||!S.look)return;S.look.n=v;if(!IDW.forced)nmPaid();IDW={};$('idW').hidden=true;$('idBlk').hidden=true;$('idIn').maxLength=16;sbSig='';hudDirty=true;if(typeof buildMe==='function')buildMe(S.look);save(true);toast(t('nmDone',{n:v}),'good');}
-function nmCheck(){if(S&&S.look&&S.look.n&&Satisfy.chat.badName(S.look.n)&&!(NETQ==='online'&&netId))setTimeout(()=>nmOpen(1),600);}
+function nmCheck(){if(S&&S.look&&S.look.n&&Satisfy.chat.badName(S.look.n))setTimeout(()=>nmOpen(1),600);}
 function netPlay(){if(NETQ!=='online')return;if(!netUser){netPending=true;return netSignIn();}if(!netId)return netIdLoad().then(v=>v?netPlay():idOpen(),netFail);if(netPulling)return;netPulling=true;cloudPull().then(()=>{netPulling=false;startGame(hasSave());});}
 let netPulling=false;
 function netBtn(){const b=$('onlineBtn');if(!b)return;b.hidden=NETQ!=='online';b.disabled=netState==='AUTHENTICATING'||netState==='JOINING';
