@@ -1978,7 +1978,7 @@ function chunkLayer(base,nm){const CS=512,CX=Math.ceil(MW*TS/CS),Y0=-NR*TS,CY=Ma
  // a chunk is painted in strips of tile rows, then its recorded calls replayed: the ones next to the view 8 rows at a time in
  // idle time (owner 2026-10-24, the lag: a whole chunk took several frames' time, one after another as you walked), one the
  // view needs now in one go. The same pixels either way.
- const part=new Map(),N=CS/TS;
+ const part=new Map(),N=CS/TS;let nMk=0,nWm=0;   // (tests: chunks the view needed that weren't painted yet, chunks warmed ahead)
  const begin=(k,i,j)=>{const c=pool.pop()||mk(CS,CS,()=>{}),g=c.getContext('2d'),P={k,e:{c,g,ox:i*CS,oy:Y0+j*CS,t:tick-1},y:0};g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,CS,CS);part.set(k,P);return P;};
  const strip=(P,n)=>{const e=P.e,y1=Math.min(N,P.y+n);e.g.setTransform(1,0,0,1,0,0);base(e.g,e.ox,e.oy,CS,P.y,y1);P.y=y1;return y1>=N;};
  function finish(P){const e=P.e,k=P.k;part.delete(k);e.g.setTransform(1,0,0,1,-e.ox,-e.oy);{const a=ops.get(k);if(a)for(const o of a.values())run(e,o);}live.set(k,e);
@@ -1989,11 +1989,15 @@ function chunkLayer(base,nm){const CS=512,CX=Math.ceil(MW*TS/CS),Y0=-NR*TS,CY=Ma
  return {get fillStyle(){return fs;},set fillStyle(v){fs=v;},
   fillRect(x,y,w,h){rec([0,x,y,w,h,fs],w,h);},drawImage(c,x,y){rec([1,x,y,c],c.width,c.height);},putImageData(d,x,y){rec([2,x,y,d],d.width,d.height);},
   // copy the world rectangle (sx,sy,sw,sh) to (dx,dy) on ctx; then warm one missing chunk next to the view
-  blit(ctx,sx,sy,sw,sh,dx,dy){tick++;each(sx,sy,sw,sh,(k,i,j)=>{const e=get(i,j),x0=Math.max(sx,e.ox),y0=Math.max(sy,e.oy),x1=Math.min(sx+sw,e.ox+CS),y1=Math.min(sy+sh,e.oy+CS);if(x1>x0&&y1>y0)ctx.drawImage(e.c,x0-e.ox,y0-e.oy,x1-x0,y1-y0,dx+x0-sx,dy+y0-sy,x1-x0,y1-y0);});
-   let w=false;each(sx-CS/2,sy-CS/2,sw+CS,sh+CS,(k,i,j)=>{if(!w&&!live.has(k)&&!part.has(k)&&live.size+part.size<LIM&&part.size<3){w=true;warm(k,i,j);}});},
+  blit(ctx,sx,sy,sw,sh,dx,dy){tick++;each(sx,sy,sw,sh,(k,i,j)=>{if(!live.has(k))nMk++;const e=get(i,j),x0=Math.max(sx,e.ox),y0=Math.max(sy,e.oy),x1=Math.min(sx+sw,e.ox+CS),y1=Math.min(sy+sh,e.oy+CS);if(x1>x0&&y1>y0)ctx.drawImage(e.c,x0-e.ox,y0-e.oy,x1-x0,y1-y0,dx+x0-sx,dy+y0-sy,x1-x0,y1-y0);});
+   // (with 36 live it still warms, when one of them is out of sight to make room for it: before, once 36 chunks were live
+   // none was ever warmed again, so after a few minutes of walking every chunk that came into view was painted in one go,
+   // 30-75 ms a frame; finish() lets the least recently seen one go)
+   let room=live.size+part.size<LIM;if(!room&&part.size<3){let ot=Infinity;for(const v of live.values())if(v.t<ot)ot=v.t;room=ot<tick-2;}
+   let w=false;if(room)each(sx-CS/2,sy-CS/2,sw+CS,sh+CS,(k,i,j)=>{if(!w&&!live.has(k)&&!part.has(k)&&part.size<3){w=true;nWm++;warm(k,i,j);}});},
   // painted ahead in idle time: the chunks over a world rectangle (where you'll start, while the title shows)
   warmAt(x,y,w,h){each(x,y,w,h,(k,i,j)=>{if(!live.has(k)&&!part.has(k)&&live.size+part.size<LIM)warm(k,i,j);});},
-  stats:()=>({live:live.size,part:part.size,pool:pool.length,ops:[...ops.values()].reduce((a,v)=>a+v.size,0),lim:LIM}),
+  stats:()=>({live:live.size,part:part.size,pool:pool.length,made:nMk,warmed:nWm,ops:[...ops.values()].reduce((a,v)=>a+v.size,0),lim:LIM}),
   // tests (SAT-ONLINE-135): is the chunk under world pixel (x,y) drawn now; the hash of its pixels (drawing it if it isn't)
   has(x,y){let r=false;each(x,y,1,1,k=>{r=live.has(k);});return r;},
   hash(x,y){let h=0x811c9dc5;each(x,y,1,1,(k,i,j)=>{const e=get(i,j),d=e.g.getImageData(0,0,CS,CS).data;for(let q=0;q<d.length;q+=4)h=Math.imul(h^(d[q]|d[q+1]<<8|d[q+2]<<16|d[q+3]<<24),16777619)>>>0;});return h;}};}
