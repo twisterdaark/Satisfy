@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24lootpop', ver: '2.62', d: '2026-10-24',
+      ar: ["اللي بيقع من الوحش بقى بيتنطط منه: كل خامة وكل قطعة بتطير لفوق بأيقونتها وتخبط في الأرض وبعدين تطير عليك، والنادرة بتسيب وراها شرار بلون ندرتها."],
+      en: ["What a monster drops jumps out of it now: each material and item flies up as its icon, bounces once and then flies into you, and the rare ones trail sparkles in their rarity's colour."] },
     { v: '2026-10-24tower1', ver: '2.61', d: '2026-10-24',
       ar: ["الدور الأول في برج الحكمة بقى واضح: أول ما تدخل بتطلعلك رسالة بتقولك تمشي يمين ناحية النور من غير ما تقف، والنور بقى باين في نص الشاشة بعمود نور بدل ما كان مستخبي ورا شريط السكيلات.",
           "أسهم في الأرض بتشاورلك على الطريق وبتحمر لو وقفت، وسطر الكويست بيقولك النور على بعد كام وسرعتك، وفيه شرار وراك وأنت بتجري.",
