@@ -6602,7 +6602,7 @@ Object.assign(STR.en,{legNoDie:"A legend doesn't die easily. The life force is f
 // every legend resists status conditions (novel ch 182, 297, 778): stuns, paralysis and chills do not take
 function legResist(){if(!isLeg()&&!saImm()&&!mdCand())return false;if(gTime>(P.resT||0)){P.resT=gTime+1.5;num(P.x,P.y-30,t('legResist'),'#ffe08a',false);}return true;}
 Object.assign(STR.ar,{legResist:'[قاومت.]'});Object.assign(STR.en,{legResist:'[You have resisted.]'});
-function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;mdDie();if(BHR)bhDied();['inv','statusW','eqW','logW','mapW','qdW','forge','pauseScreen','settingsScreen','soundScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
+function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;mdDie();if(S.car&&S.car.r)carLose('carLost');/* the risky road's load is lost in a fall (SAT-ONLINE-110) */if(BHR)bhDied();['inv','statusW','eqW','logW','mapW','qdW','forge','pauseScreen','settingsScreen','soundScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
 // owner 2026-10-22: 1 to 172 took an hour, then 50 hours to 100 was far too long: now about 10 hours of own-level hunting to 100 and 14 to 200, before quests and bonuses (no per-kill cap)
 // owner 2026-10-23 ("I kill a Lv 340 at 339 and take 20% of a level; make it slower"): past level 100 each level asks 2% more
 // for every level above 100, and each advancement passed (101, 201...) another 15%. A foe of your level now gives about 2-3%
@@ -7174,7 +7174,62 @@ function stashHead(){$('invH').textContent=t('stT');$('invNote').innerHTML=`<div
 window.__GBANK={menu:who=>bankMenu(who)}; // tests
 Object.assign(STR.ar,{oBank:'البنك',bankD:'الفلوس اللي في البنك مبتضيعش لما تموت',bankHi:'رصيدك في البنك: {b} دهب · معاك: {g} دهب',bankDepAll:'حط كل فلوسك ({n})',bankDepHalf:'حط النص ({n})',bankWdAll:'اسحب الكل ({n})',bankWd:'اسحب {n}',bankIn:'حطيت {n} دهب في البنك',bankOut:'سحبت {n} دهب من البنك',bankL:'البنك'});
 Object.assign(STR.en,{oBank:'Bank',bankD:"Gold in the bank isn't lost when you die",bankHi:'In the bank: {b} gold · on you: {g} gold',bankDepAll:'Deposit all ({n})',bankDepHalf:'Deposit half ({n})',bankWdAll:'Withdraw all ({n})',bankWd:'Withdraw {n}',bankIn:'Deposited {n} gold',bankOut:'Withdrew {n} gold',bankL:'Bank'});
-function merchOpts(who){return [...potOpts(who),...honOpts(who),...respecOpt(who),{l:t('oBuyBread'),qty:1,f:()=>buyBread(who)},{l:t('oSellW'),f:()=>openSell(who)}];}   // owner 2026-10-20: selling only through the sell window
+/* merchant caravans (SAT-ONLINE-110, plan U220). At a town's merchant you buy a load of goods for another town's merchant
+   and carry it there: the farther, the dearer and the longer it must be on the road. The safe road pays 30% on top and the
+   goods survive if you fall; the risky road pays 80% but outlaws ambush you outside towns and a fall loses the load. One
+   load at a time. Online the server stamps when it left (caravans/{uid}) and takes the delivery (caravanDone/{uid}/{id})
+   only after its time on the road and within two hours, for the same route and goods: the reward's proof. The outlaws are
+   level 35, or yours if higher, and pay a quarter of the experience and no gold or loot (noLoot), so the road is no farm. */
+Object.assign(STR.ar,{oCar:'قافلة تجارة',carH:'اشتري بضاعة لتاجر مدينة تانية ووصّلها. الطريق الآمن بيكسب 30% والبضاعة مبتضيعش لو وقعت؛ الطريق الخطر بيكسب 80% بس فيه قطاع طرق ولو وقعت البضاعة بتضيع',carTo:'لـ{z}: {g} دهب',carRisk:'إزاي هتروح {z}؟',carSafe:'الطريق الآمن: بتاخد {p}',carRiskB:'الطريق الخطر: بتاخد {p}',carGo:'البضاعة معاك. وصّلها لتاجر {z} (بعد {m} على الأقل)',carOn:'معاك بضاعة لتاجر {z} ({p} دهب)',carHere:'سلّم البضاعة ({p} دهب)',carDrop:'سيب البضاعة',carDone:'سلّمت البضاعة وخدت {p} دهب',carEarly:'البضاعة لسه محتاجة وقت على الطريق ({m})',carLost:'البضاعة ضاعت',carLate:'البضاعة اتأخرت أكتر من ساعتين وباظت',carAmb:'قطاع طرق بيهاجموا القافلة!',carOne:'معاك بضاعة بالفعل',carFail:'الطلب مااتسجلش، جرّب تاني',carNet:'البضاعة دي طلعت وإنت أونلاين: سجّل دخول أونلاين عشان تسلّمها',carGone:'سجل البضاعة دي مش موجود على السيرفر (يمكن شخصية تانية على حسابك بدأت قافلة): رجعلك تمنها ({g} دهب)'});
+Object.assign(STR.en,{oCar:'Merchant caravan',carH:"Buy goods for another town's merchant and carry them there. The safe road pays 30% more and the goods survive a fall; the risky road pays 80% more, but outlaws lie in wait and a fall loses the load",carTo:'To {z}: {g} gold',carRisk:'Which road to {z}?',carSafe:'The safe road: you get {p}',carRiskB:'The risky road: you get {p}',carGo:"The goods are yours to carry. Take them to {z}'s merchant (at least {m} on the road)",carOn:"You carry goods for {z}'s merchant ({p} gold)",carHere:'Hand over the goods ({p} gold)',carDrop:'Leave the goods',carDone:'You delivered the goods and got {p} gold',carEarly:'The goods need more time on the road ({m})',carLost:'The goods were lost',carLate:'The goods were more than two hours on the road and spoiled',carAmb:'Outlaws ambush the caravan!',carOne:'You are carrying goods already',carFail:'That did not go through; try again',carNet:'These goods left while you were online: sign in online to hand them over',carGone:"The server has no record of this load (another character on your account may have started one): its price is back ({g} gold)"});
+const CAR_M=['merchant','merchantP','merchantR','merchantRh','merchantRo','merchantT'],CAR_LATE=7200000;
+const carTown=who=>townOfNpc(who);
+const carT=x=>Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0');
+function carTowns(){const o={};for(const m of CAR_M){const z=carTown(m),T=TOWNS.find(T=>T.k===z);if(z&&T&&!o[z])o[z]={z,m,x:T.rx,y:T.ry};}return o;}
+// a route: what it costs, what it pays, how long it must be on the road
+function carRoute(f,to){const A=carTowns(),a=A[f],b=A[to];if(!a||!b)return null;const d=Math.hypot(a.x-b.x,a.y-b.y);return {d,g:Math.round(200+d*10),md:Math.round(Math.max(60,Math.min(3600,d*1.2)))*1000};}
+const carPay=c=>Math.round(c.g*(c.r?1.8:1.3));
+function carOn(){return !!(FB&&netUser&&NET&&S&&!S.__demo&&NETTR&&NETTR.kind==='firebase');}
+function carOpts(who){return [{l:t('oCar'),ic:'coin',f:()=>carD(who)}];}
+function carD(who){const here=carTown(who),C=S.car;
+ if(C){const o=[];if(C.to===here)o.push({l:t('carHere',{p:carPay(C)}),f:()=>carDeliver(who)});o.push({l:t('carDrop'),f:()=>{carLose('carLost');shopD(who,'mHi');}},{l:t('oBack'),f:()=>svcBack(who)});
+  return dialog(who,[t('carOn',{z:t(C.to),p:carPay(C)})],null,o);}
+ const A=carTowns(),L=Object.keys(A).filter(z=>z!==here).map(z=>({z,R:carRoute(here,z)})).filter(x=>x.R).sort((a,b)=>a.R.d-b.R.d);
+ dialog(who,[t('carH')],null,[...L.map(({z,R})=>({l:t('carTo',{z:t(z),g:R.g.toLocaleString()}),poor:S.gold<R.g,f:()=>dialog(who,[t('carRisk',{z:t(z)})],null,[
+  {l:t('carSafe',{p:carPay({g:R.g,r:0}).toLocaleString()}),f:()=>carStart(who,z,0)},{l:t('carRiskB',{p:carPay({g:R.g,r:1}).toLocaleString()}),f:()=>carStart(who,z,1)},{l:t('oBack'),f:()=>carD(who)}])})),{l:t('oBack'),f:()=>svcBack(who)}]);}
+function carStart(who,to,r){if(S.car)return toast(t('carOne'),'warn');const f=carTown(who),R=carRoute(f,to);if(!R)return;if(S.gold<R.g){SFX.deny();return dialog(who,[t('noGold')]);}
+ const id='v_'+Date.now().toString(36)+(rand()*1e6|0).toString(36),C={id,f,to,g:R.g,r:r?1:0,md:R.md,t:Date.now(),on:carOn()?1:0};S.gold-=R.g;S.car=C;hudDirty=true;save(true);SFX.coin();
+ const go=()=>dialog(who,[t('carGo',{z:t(to),m:carT(R.md/1000)})]);
+ if(!C.on)return go();const D=FB.m.database;
+ const ref=D.ref(FB.db,'caravans/'+netUser.uid),put=()=>D.set(ref,{id,f,to,g:C.g,r:C.r,md:C.md,t:D.serverTimestamp()}),
+  back=()=>{if(S.car===C){S.car=null;S.gold+=C.g;hudDirty=true;save(true);}toast(t('carFail'),'warn');};
+ // a start the rules refuse while nothing was carried: an old one left behind (a delivery or a loss that never reached the
+ // server, or another character on this account). It goes, and this one is sent again, once (Claude-B's review of #144).
+ put().catch(()=>D.get(ref).then(s=>{const v=s.val();if(!v||v.id===id||S.car!==C)throw 0;return D.remove(ref).then(put);})).then(()=>D.get(ref).then(s=>{const v=s.val();if(v&&S.car===C&&+v.t)C.t=+v.t;}),back);go();}
+function carDeliver(who){const C=S.car;if(!C||C.to!==carTown(who))return;const now=Date.now(),left=C.t+C.md-now;
+ if(left>0){SFX.deny();return dialog(who,[t('carEarly',{m:carT(left/1000)})]);}
+ const pay=()=>{if(S.car!==C)return;S.car=null;const p=carPay(C);S.gold+=p;if(C.on)S.carLast=C.id;SFX.coin();toast(t('carDone',{p:p.toLocaleString()}),'good');hudDirty=true;save(true);svcBack(who);};
+ if(now>C.t+CAR_LATE)return carLose('carLate');
+ if(!C.on)return pay();
+ if(!carOn()){SFX.deny();return dialog(who,[t('carNet')]);} // an online load is paid only through the server's proof (Claude-B's review of #144)
+ const D=FB.m.database,u={},ref=D.ref(FB.db,'caravans/'+netUser.uid);
+ u['caravans/'+netUser.uid]=null;u['caravanDone/'+netUser.uid+'/'+C.id]={f:C.f,to:C.to,g:C.g,r:C.r,t:D.serverTimestamp()};
+ if(S.carLast&&S.carLast!==C.id)u['caravanDone/'+netUser.uid+'/'+S.carLast]=null; // only the last delivery is kept
+ D.update(D.ref(FB.db),u).then(pay,()=>D.get(ref).then(s=>{const v=s.val();if(S.car!==C)return;
+  if(!v||v.id!==C.id){S.car=null;S.gold+=C.g;hudDirty=true;save(true);toast(t('carGone',{g:C.g.toLocaleString()}),'warn');return svcBack(who);} // its start is gone: the price back, no reward
+  SFX.deny();dialog(who,[t('carEarly',{m:'…'})]);},()=>{SFX.deny();dialog(who,[t('carFail')]);}));}
+// the load lost (a fall on the risky road, left behind, or too late): online its start goes too
+function carLose(k){const C=S.car;if(!C)return;S.car=null;toast(t(k),'warn');hudDirty=true;save(true);if(C.on&&carOn()){const D=FB.m.database;D.remove(D.ref(FB.db,'caravans/'+netUser.uid)).catch(()=>{});}} // one left behind goes on the next start, or after two hours
+// the risky road: outlaws now and then outside towns; they leave when the load is gone or after a minute
+var carAmbT=45;
+function carTick(dt){if(!S||!P||S.__demo)return;const C=S.car;
+ for(let i=mons.length-1;i>=0;i--){const m=mons[i];if(m.car&&(m.dead?(m.carT=(m.carT||0)+dt)>3:(!S.car||(m.carT=(m.carT||0)+dt)>60||Math.hypot(m.x-P.x,m.y-P.y)>900)))mons.splice(i,1);}
+ if(!C)return;if(Date.now()>C.t+CAR_LATE)return carLose('carLate');if(!C.r||mode!=='play')return;
+ const town=TOWNS.some(T=>T.k===zoneAt(P.x,P.y))||roomAt(P.x,P.y);if(town||(carAmbT-=dt)>0)return;carAmbT=45;if(rand()>=.35)return;
+ const b=MT.outlaw;if(!b)return;toast(t('carAmb'),'warn');SFX.notice&&SFX.notice();
+ for(let i=0;i<2;i++){const a=rand()*6.28,x=P.x+Math.cos(a)*90,y=P.y+Math.sin(a)*60,m=newMon('outlaw',x,y);m.lv=Math.max(b.lv[0],S.lv);m.hp=m.max=Math.round(b.hp*(1+(m.lv-b.lv[0])*.04));m.tmp=1;m.agg=1;m.eng=99;m.car=1;m.noLoot=1;m.xmul=.25;mons.push(m);vfx('spawn',x,y,{color:'#c04a3a'});}}
+window.__GCAR={towns:()=>carTowns(),route:(f,to)=>carRoute(f,to),get car(){return S&&S.car},start:(w,to,r)=>carStart(w,to,r),deliver:w=>carDeliver(w),lose:k=>carLose(k),tick:dt=>carTick(dt),get amb(){return carAmbT},set amb(v){carAmbT=v;},open:w=>carD(w),pay:c=>carPay(c)}; // tests
+function merchOpts(who){return [...carOpts(who),...potOpts(who),...honOpts(who),...respecOpt(who),{l:t('oBuyBread'),qty:1,f:()=>buyBread(who)},{l:t('oSellW'),f:()=>openSell(who)}];}   // owner 2026-10-20: selling only through the sell window
 
 function haggle(who){S.hag=rand()<.35+S.hid.dign*.01+S.hid.insi*.01?1:0;SFX.click();shopD(who,S.hag?'hagOk':'hagNo');}
 // generated board tasks live in S.bq (offers) and S.bqa (accepted), and are registered into QD so the normal quest code tracks them
@@ -9914,7 +9969,7 @@ const ZT={};
 const WALKM=['inv','status','equip','log','qd','map','mb','guild'];
 var MSWT=2;
 function update(dt){
- gTime+=dt;spwTick(dt);ssTick(dt);bufTick(dt);
+ gTime+=dt;try{carTick(dt);}catch(e){gameErr(e);}spwTick(dt);ssTick(dt);bufTick(dt);
  if(INVX&&INVX.stash&&P&&Math.hypot(P.x-INVX.x,P.y-INVX.y)>140)closeInv(); // walked away from the inn's chest
  for(let i=DGATES.length-1;i>=0;i--)if(DGATES[i].tmp&&gTime>DGATES[i].til)DGATES.splice(i,1);
  for(const n of nodes)if(n.dep>0){n.dep-=dt;if(n.dep<=0&&(n.kind==='herb'||n.kind==='bherb'))herbSpot(n);}
@@ -14554,7 +14609,7 @@ function netStop(){mobStop();if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(
 // rankings (055), this and last month's arena rating (053), the weekly lockouts (059), the group finder entry (073). A held legend is freed too.
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
  const nc=Satisfy.natcomp?Satisfy.natcomp.now(wNow()):null,ni=nc?+nc.id.slice(1):-1; /* the National Competition's last two (SAT-ONLINE-069) */
- return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
+ return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid,'caravans/'+uid,'caravanDone/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
 /* owner 2026-10-21: no "Download my online data" and no manual Upload/Download of characters: a character moves only by
    the automatic sync (cloudAuto while playing, cloudPull on sign-in), so no copy of it can be made by hand. */
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid,lf=erase?Promise.all([legFree(uid),frFree()]):null;netStop();

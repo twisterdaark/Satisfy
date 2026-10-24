@@ -60,7 +60,7 @@
     // F.dropIn (a regexp source): writes from other pages to matching paths never reach this one, as a message lost on the way
     if (F.dropIn && m && typeof m.p === 'string' && new RegExp(F.dropIn).test(m.p)) return;
     // durable records (account IDs, handles: SAT-ONLINE-026) outlive the page that wrote them, as on the server
-    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|cloudIndex|cloudSaves|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|guildHall|guildHallGuest|hallInv|flags|announce|admins|guildTrophy|repairOrders|repairDone|repairPaid|tradeLog|tradeRep|trades|tradeSides|tradeDone|tradedItems|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
+    if (m.op === 'hello') { for (const [p, v] of data) if (mine.has(p) || /^(accountIds|handles|cloudIndex|cloudSaves|guilds|guildNames|guildMembers|guildInv|guildVault|guildVaultTaken|guildBank|guildBuild|guildLog|guildNote|guildRecruit|guildEvents|guildEventSign|guildWeek|guildWeekPaid|guildAllyAsk|guildAlly|guildAllyCd|guildDiplo|guildWarAsk|guildWar|guildWarKill|guildHall|guildHallGuest|hallInv|flags|announce|admins|guildTrophy|repairOrders|repairDone|repairPaid|caravans|caravanDone|tradeLog|tradeRep|trades|tradeSides|tradeDone|tradedItems|mutes|reports|drops|dropClaims|kills|bounties|bountyPaid|arena|friends|friendReq|lfg|nat|natPaid|ranks|lockouts|world\/satisfy\/(legends|wb))\//.test(p)) ch.postMessage({ op: 'set', p, v }); return; }
     // A hello reply carries the replier's copy, which may be older than what this page has just written (a page
     // that reloads and claims sessions/{uid} at once). The real database orders writes, so keep the newest.
     const cur = data.get(m.p);
@@ -504,9 +504,29 @@
     const asked = me === a ? data.has('friendReq/' + a + '/' + b) : me === b ? data.has('friendReq/' + b + '/' + a) : false;
     return asked && okV(v) ? null : 'PERMISSION_DENIED: friends';
   }
+  // SAT-ONLINE-110: a merchant caravan, caravans/{uid} {id, f, to, g, r, md, t}, started once and stamped by the server;
+  // delivered by caravanDone/{uid}/{id} with the same route and goods, written with the caravan gone, at least md after
+  // it left and within two hours
+  function caravanRules(seg, v) {
+    if (!user || seg[1] !== user.uid) return 'PERMISSION_DENIED: ' + seg.join('/');
+    const path = seg.join('/'), old = data.get(path), now = Date.now(), town = (x) => typeof x === 'string' && /^z[A-Za-z]{2,12}$/.test(x);
+    if (seg[0] === 'caravans') {
+      if (seg.length !== 2) return 'PERMISSION_DENIED: caravans ' + path;
+      if (v === null) return null;
+      if (old && !(now > old.t + 7200000)) return 'PERMISSION_DENIED: caravans one at a time'; // a start left behind goes after two hours
+      return Object.keys(v).sort().join(',') === 'f,g,id,md,r,t,to' && typeof v.id === 'string' && /^v_[A-Za-z0-9_-]{1,60}$/.test(v.id) && town(v.f) && town(v.to) && v.f !== v.to && isInt(v.g, 100) && v.g <= 1e6 && (v.r === 0 || v.r === 1) && typeof v.md === 'number' && v.md >= 60000 && v.md <= 3600000 && isSV(v.t) ? null : 'caravans values';
+    }
+    if (seg.length === 2 && v === null) return null; // all of your own at once ("Delete my online data")
+    if (seg.length !== 3) return 'PERMISSION_DENIED: caravanDone ' + path;
+    if (v === null) return null;
+    const c = data.get('caravans/' + user.uid);
+    if (old || !c || after('caravans/' + user.uid) || now < c.t + c.md || now > c.t + 7200000 || seg[2] !== c.id) return 'PERMISSION_DENIED: caravanDone';
+    return Object.keys(v).sort().join(',') === 'f,g,r,t,to' && v.f === c.f && v.to === c.to && v.g === c.g && v.r === c.r && isSV(v.t) ? null : 'caravanDone values';
+  }
   function rules(p, v, existing) {
     const seg = p.split('/');
     if (seg[0] === 'friends' || seg[0] === 'friendReq') return friendRules(seg, v);
+    if (seg[0] === 'caravans' || seg[0] === 'caravanDone') return caravanRules(seg, v);
     if (seg[0] === 'whisper') { // SAT-ONLINE-070: only from a friend; the one it is for deletes it
       if (!user || seg.length !== 3) return 'PERMISSION_DENIED: whisper ' + p;
       const old = data.get(p);
@@ -854,7 +874,7 @@
       if (wait > 0) return new Promise((res) => setTimeout(res, wait)).then(() => database.get(r));
       const seg = r.path.split('/');
       const tm = ['trades', 'tradeSides', 'tradeDone'].includes(seg[0]) && tradeMeta(seg[1]);
-      const readable = ['flags', 'profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat', 'lfg', 'guildRecruit', 'guildAlly', 'guildAllyCd', 'guildWar', 'guildWarKill', 'tradeRep', 'guildTrophy', 'repairOrders'].includes(seg[0]) ? !!user : seg[0] === 'guildWeek' && seg.length === 1 ? !!user && data.get('admins/' + user.uid) === true : (seg[0] === 'repairDone' || seg[0] === 'repairPaid') ? !!user && seg[1] === user.uid : seg[0] === 'tradeLog' ? !!user && seg[1] === user.uid : seg[0] === 'guildAllyAsk' ? !!user && seg.length === 3 && ['m', 'o'].includes(rkOf(seg[2], user.uid)) : seg[0] === 'guildWeekPaid' ? !!user && seg.length === 4 && seg[3] === user.uid : (seg[0] === 'guildApply' || seg[0] === 'guildRej') ? !!user && (seg.length === 3 ? seg[2] === user.uid : rightOf(seg[1], user.uid, 'inv')) : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : seg[0] === 'guildHallGuest' ? !!user && (data.has('guildMembers/' + seg[1] + '/' + user.uid) || (seg.length === 3 && seg[2] === user.uid)) : seg[0] === 'hallInv' ? !!user && seg[1] === user.uid : seg[0] === 'guildHall' ? !!user && seg.length === 2 && (data.has('guildMembers/' + seg[1] + '/' + user.uid) || data.has('guildHallGuest/' + seg[1] + '/' + user.uid)) : ['guildBank', 'guildBuild', 'guildLog', 'guildNote'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts', 'friends', 'friendReq', 'whisper', 'admins'].includes(seg[0]) && user && seg[1] === user.uid || ['crashes', 'reports', 'reportDone', 'balance'].includes(seg[0]) && !!user && data.get('admins/' + user.uid) === true || ['appeals', 'appealDone'].includes(seg[0]) && !!user && (data.get('admins/' + user.uid) === true || (seg.length === 2 && seg[1] === user.uid)) || seg[0] === 'mutes' && !!user || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
+      const readable = ['caravans', 'caravanDone', 'flags', 'profiles', 'accountIds', 'handles', 'chat', 'news', 'presence', 'mobs', 'tradedItems', 'kills', 'bounties', 'bountyPaid', 'drops', 'dropClaims', 'guilds', 'guildNames', 'guildMembers', 'arena', 'ranks', 'nat', 'lfg', 'guildRecruit', 'guildAlly', 'guildAllyCd', 'guildWar', 'guildWarKill', 'tradeRep', 'guildTrophy', 'repairOrders'].includes(seg[0]) ? !!user : seg[0] === 'guildWeek' && seg.length === 1 ? !!user && data.get('admins/' + user.uid) === true : (seg[0] === 'repairDone' || seg[0] === 'repairPaid') ? !!user && seg[1] === user.uid : seg[0] === 'tradeLog' ? !!user && seg[1] === user.uid : seg[0] === 'guildAllyAsk' ? !!user && seg.length === 3 && ['m', 'o'].includes(rkOf(seg[2], user.uid)) : seg[0] === 'guildWeekPaid' ? !!user && seg.length === 4 && seg[3] === user.uid : (seg[0] === 'guildApply' || seg[0] === 'guildRej') ? !!user && (seg.length === 3 ? seg[2] === user.uid : rightOf(seg[1], user.uid, 'inv')) : seg[0] === 'guildInv' ? !!user && seg[1] === user.uid : seg[0] === 'guildHallGuest' ? !!user && (data.has('guildMembers/' + seg[1] + '/' + user.uid) || (seg.length === 3 && seg[2] === user.uid)) : seg[0] === 'hallInv' ? !!user && seg[1] === user.uid : seg[0] === 'guildHall' ? !!user && seg.length === 2 && (data.has('guildMembers/' + seg[1] + '/' + user.uid) || data.has('guildHallGuest/' + seg[1] + '/' + user.uid)) : ['guildBank', 'guildBuild', 'guildLog', 'guildNote'].includes(seg[0]) ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : ['cloudIndex', 'cloudSaves', 'inbox', 'sessions', 'lockouts', 'friends', 'friendReq', 'whisper', 'admins'].includes(seg[0]) && user && seg[1] === user.uid || ['crashes', 'reports', 'reportDone', 'balance'].includes(seg[0]) && !!user && data.get('admins/' + user.uid) === true || ['appeals', 'appealDone'].includes(seg[0]) && !!user && (data.get('admins/' + user.uid) === true || (seg.length === 2 && seg[1] === user.uid)) || seg[0] === 'mutes' && !!user || seg[0] === 'natPaid' && !!user && seg[2] === user.uid;
       F.log.push({ op: 'get', path: r.path });
       if (!readable) return Promise.reject(Object.assign(new Error('PERMISSION_DENIED: read ' + r.path), { code: 'PERMISSION_DENIED' }));
       return Promise.resolve(snap(r.path, nodeVal(r.path))); // the node as the server holds it, nested (SAT-ONLINE-090: guildWeek)

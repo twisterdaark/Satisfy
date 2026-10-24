@@ -58,6 +58,8 @@
     // Sword Saint (novel pass 2026-10-22): Piaro's quest taken / a legend beaten, the class quest at Muller's sword
     // (shade beaten as the Sword Saint, 1 learned or 2 refused Muller's technique, learned skill), bonus Willpower
     'ssq', 'ssqW', 'mtr2', 'mq', 'mheart', 'wilB',
+    // the merchant caravan being carried (SAT-ONLINE-110): {id, f, to, g, r, md, t, on}; the last one delivered online
+    'car', 'carLast',
     // duel record (SAT-ONLINE-006): {w, l}; party-raid encounters already paid (SAT-ONLINE-009);
     // outlaw until (wall-clock ms) after killing a player in open PvP (SAT-ONLINE-038), kept across a reload;
     // the online guild's id (SAT-ONLINE-046): the guild itself lives in the database

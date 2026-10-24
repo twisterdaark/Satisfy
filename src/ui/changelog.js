@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-22caravan', ver: '2.63', d: '2026-10-22',
+      ar: ["قوافل التجار: من تاجر أي مدينة اشتري بضاعة لتاجر مدينة تانية ووصّلها بنفسك. كل ما المدينة أبعد البضاعة أغلى ولازم تقعد على الطريق وقت أطول. الطريق الآمن بيكسب 30% والبضاعة مبتضيعش لو وقعت، والطريق الخطر بيكسب 80% بس قطاع طرق بيهجموا عليك برّه المدن ولو وقعت البضاعة بتضيع"],
+      en: ["Merchant caravans: at any town's merchant buy goods for another town's merchant and carry them there yourself. The farther the town, the dearer the goods and the longer they must be on the road. The safe road pays 30% more and the goods survive a fall; the risky road pays 80% more, but outlaws ambush you outside towns and a fall loses the load"] },
     { v: '2026-10-24class2', ver: '2.62', d: '2026-10-24',
       ar: ["الكلاس التاني، زي هوروي في الرواية، ونادر جدًا جدًا: خمس كلاسات تانية بس، وكل واحدة منهم ليها صاحب واحد بس في العالم كله، وكل شخصية تاخد واحدة بس. كل واحدة مستخبية ورا شرط محدش بيتقاله عليه",
           "الكلاس التاني مش بيشيل كلاسك الأولاني: سكيلاتك فاضلة، والكلاس التاني بيزود سكيلين وميزة، و+2 نقطة ستات كل ليفل (12 بدل 10 زي الرواية)، وبيظهر في شباك الحالة «الأولاني (التاني)»",
