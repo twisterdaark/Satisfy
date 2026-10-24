@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24reroll', ver: '2.65', d: '2026-10-24',
+      ar: ["إعادة تشكيل الخواص عند الحداد: تقدر تغيّر خاصية واحدة (◆) من خواص سلاحك. قبل ما تدفع، الحداد بيوريك كل خاصية ممكن تطلع ونسبة كل واحدة ومداها على درجة سلاحك. التمن دهب وأحجار سحرية بيتضاعفوا كل مرة، وكل سلاح يتشكّل 5 مرات بالكتير. الخاصية اللي ظهرت بالتثمين (★) مبتتغيرش.",
+          "السلاح بيفتكر عدد مرات تشكيله (حتى لو اتبادل) وآخر 5 تشكيلات: إيه راح وإيه جه وإمتى."],
+      en: ["Reforging at the smith: you can change one of your weapon's passives (◆). Before you pay, the smith shows every passive it can become, each one's odds and its range at your weapon's grade. It costs gold and magic stones that double each time, at most 5 times a weapon. A passive found by appraisal (★) never changes.",
+          "A weapon remembers how many times it was reforged (even after a trade) and its last 5 reforges: what went, what came and when."] },
     { v: '2026-10-24warmstart', ver: '2.64', d: '2026-10-24',
       ar: ["اللعبة مبقتش بتهنج أول ما تدخل: الأرض والناس والوحوش اللي حواليك بيترسموا وشاشة البداية لسه ظاهرة."],
       en: ["The game no longer stalls as you start: the ground, the people and the monsters around you are painted while the title screen still shows."] },
