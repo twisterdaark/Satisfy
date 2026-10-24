@@ -51,7 +51,8 @@ test('create a greatsword of Blue Orichalcum on the blueprint, then forge it', a
     assert.equal(it.it.atk, Math.round(s1.atk * it.mult));
     assert.equal(it.spent, 2);
     // an older creation with one material still works the way it did
-    assert.equal(await g.eval(() => window.__GCR.stats({ ty: 'gs', mat: 'blue', L: 50, W: 50, C: 0, sl: 1 }).atk), 200);
+    // the materials' power to 1.34 (owner 2026-10-24): Blue Orichalcum (2) makes 2^1.34 x 100
+    assert.equal(await g.eval(() => window.__GCR.stats({ ty: 'gs', mat: 'blue', L: 50, W: 50, C: 0, sl: 1 }).atk), 253);
     await g.page.waitForTimeout(1500);
     // the slots: three at smithing level 1
     const full = await g.eval(() => { const S = window.__G.S; S.cre.push({ id: 'x1', ty: 'sw', mat: 'ore', L: 50, W: 50, C: 0, sl: 1, nm: 'A', by: 'Grid' }, { id: 'x2', ty: 'sw', mat: 'ore', L: 50, W: 50, C: 0, sl: 1, nm: 'B', by: 'Grid' }); window.__GCR.open(); return window.__GCR.max(); });
@@ -72,7 +73,7 @@ test('mix bag materials: breaths and scales make an endgame weapon with their pa
       return { ore: st({ ore: 6 }), tig: st({ brtig: 1 }), mix: st({ brtig: 1, mith: 4, ruby: 1 }), half: st({ mith: 2 }), full: st({ mith: 4 }), more: st({ mith: 8 }) };
     });
     assert.ok(r.ore.atk < 100, JSON.stringify(r.ore));
-    assert.ok(r.tig.atk >= 350, 'a divine breath sword is in Iyarugt\'s range: ' + r.tig.atk);
+    assert.ok(r.tig.atk >= 600, 'a divine breath sword out-makes the vampire earls drops (600): ' + r.tig.atk);
     assert.deepEqual(r.tig.ip, ['bleed']);
     assert.ok(r.mix.atk > r.tig.atk && r.mix.as > 0 && r.mix.dm > r.tig.dm, JSON.stringify(r.mix));
     assert.ok(r.half.atk < r.full.atk && r.full.atk < r.more.atk && r.more.atk < r.full.atk * 1.1, 'the amount counts, up to a point');

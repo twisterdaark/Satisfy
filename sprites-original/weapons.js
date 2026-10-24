@@ -66,9 +66,17 @@ function staff(orb,wood,prong){const I=Img(9,20);I.vline(4,5,18,wood);I.vline(5,
 function hammer(h,silver){const I=Img(10,16);I.vline(4,4,14,'#7a5634');I.vline(4,9,9,'#5a3a20');I.set(4,15,'#5a3a20');
  I.rect(1,1,8,4,h[0]);I.rect(1,1,8,1,h[2]);I.rect(1,4,8,1,h[1]);I.rect(8,1,1,4,h[1]);if(silver){I.set(3,2,'#ffffff');I.rect(1,1,1,4,'#d8b04a');}return {I,gx:4,gy:11};}
 
+// swords drawn from their shape (icons.js A.blade): each its own length, width, line, guard and grip (owner 2026-10-24)
+function fromBlade(sp){const B=A.blade.bladeHeld(sp),I=Img(B.w,B.h);for(const [x,y,c] of B.px)I.set(x,y,c);return {I,gx:B.gx,gy:B.gy};}
+const BLADED=['rusty','isword','ssword','gsword','msword','failure','dains','iyarugt','wisdom','yetgs','dpgs','mgsword','lantd','ideal','ttthorn','dagger'];
+// a creation (cw|ty.L.W.C.m1.m2): a sword from its blueprint, or a spear, bow, staff or hammer in its materials' colours
+function cwDef(k){const B=A.blade,o=B&&B.cwParse(k);if(!o)return null;const P=B.MATP[o.m1][0],Q=o.m2?B.MATP[o.m2][0]:P,L=o.L/100;
+ if(o.ty==='gs'||o.ty==='sw'||o.ty==='dg')return fromBlade(B.cwSpec(o));
+ if(o.ty==='bw')return bow([P[0],P[1],Q[2]],Q[2]);if(o.ty==='st')return staff([Q[1],Q[0],Q[2]],P[1],B.MATP[o.m1]&&o.L>60);if(o.ty==='hm')return hammer(P,o.W>60);
+ const h=20+Math.round(L*6),I=Img(7,h+1);I.vline(3,5,h,P[1]);I.vline(3,12,13,Q[2]);I.set(3,0,P[2]);I.rect(2,1,3,3,P[0]);I.vline(3,1,3,P[2]);I.set(4,3,P[1]);I.set(3,4,Q[0]);if(o.W>50){I.set(1,3,P[0]);I.set(5,3,P[0]);}return {I,gx:3,gy:15};}
 const CACHE={};
 // sprite(id, rarity) -> {canvas, gx, gy, w, h}; null for an unknown id
-function sprite(id,r){const k=id+'|'+(r||0);if(CACHE[k])return CACHE[k];const f=DEF[id];if(!f)return null;const {I,gx,gy}=f();
+function sprite(id,r){const k=id+'|'+(r||0);if(CACHE[k])return CACHE[k];const f=String(id).startsWith('cw|')?()=>cwDef(id):A.blade&&BLADED.includes(id)?()=>fromBlade(A.blade.BSPEC[id]):DEF[id];if(!f)return null;const o=f();if(!o)return null;const {I,gx,gy}=o;
  r=r||0;if(r>=2){let ty=0;for(let y=0;y<I.h&&!ty;y++)for(let x=0;x<I.w;x++)if(I.d[(y*I.w+x)*4+3]){ty=y;I.set(x,y,RAR[r]);break;}}
  outline(I);
  if(r>=3){const d=I.d,c=hex(RAR[r]);for(let i=0;i<d.length;i+=4)if(d[i+3]===230&&d[i]===OUT[0]&&d[i+1]===OUT[1]){d[i]=c[0]*.55|0;d[i+1]=c[1]*.55|0;d[i+2]=c[2]*.55|0;}}
