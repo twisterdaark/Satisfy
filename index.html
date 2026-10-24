@@ -58,7 +58,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 .gold{margin-top:calc(var(--u)*.4);color:var(--gold);font-weight:700;font-size:calc(var(--u)*1.2)}#stats .dnclk{position:absolute;inset-inline-end:calc(var(--u)*1.2);bottom:calc(var(--u)*.9);margin:0;color:#cfe0ff;font-size:calc(var(--u)*1.1)}
 #quest{position:absolute;inset-inline-end:calc(var(--u)*1);top:calc(var(--u)*1);width:calc(var(--u)*26)}
 #quest .head{font-size:calc(var(--u)*1.6);margin-bottom:calc(var(--u)*.2)}
-#qtext.ret{color:var(--gold)}
+#qtext.ret{color:var(--gold)}#qtext i.qsh{font-style:normal;margin-inline-start:.35em;opacity:.85;cursor:help}
 #belt{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*1);display:flex;gap:calc(var(--u)*.6);align-items:center;padding:calc(var(--u)*.5) calc(var(--u)*.8)}
 .slot{min-width:calc(var(--u)*5);text-align:center;font-size:calc(var(--u)*1.1);white-space:nowrap}
 .slot b{display:block;font-size:calc(var(--u)*.85);color:var(--muted);font-weight:500}
@@ -7231,6 +7231,18 @@ const lowWaive=k=>!!(S&&MT[k])&&S.lv-(MT[k].lv[1]||1)>=20,lowNear=k=>!!(S&&MT[k]
 function qObjText(id){const o=QD[id].obj;return t(QD[id].ot||(o.t==='craftR'?(o.r===0?'o_craftA':'o_craftR'):'o_'+o.t),{it:o.t==='deliver'?t(o.it):o.t==='escort'?t('escN_'+o.it):itN(o.it),c:Math.min(qCount(id),o.n),n:o.n})+(o.low?' '+t(o.t==='kill'&&lowWaive(o.it)?'oLowW':'oLow',{p:Math.round(o.low*100)}):'')+(o.wk?' '+t('oWk',{w:wkN(o.wk)}):'')+(o.stl?' '+t('oStl'):'')+(QD[id].lim&&epAct(id)&&!qReady(id)?' · ⏳ '+epClock(epLeft(id)):'');}
 function qEvent(type,key,r,slot){domainEv(type,key,r,slot);natEv(type,key,r);if(type==='kill'&&typeof gwKill==='function')gwKill(key);for(const id in S.qs){const s=S.qs[id],q=QD[id];if(!q||s.st!==1)continue;const o=q.obj,was=qReady(id);
   if((o.t===type&&(o.it===key||o.low&&type==='kill'&&lowWaive(o.it)&&lowNear(key))&&(!o.wk||weapKind()===o.wk)&&(!o.low||P.hp<maxHP()*o.low)&&(!o.stl||RG.kAsn))||(type==='craft'&&o.t==='craftR'&&r>=(o.r??1)&&slot!=='x')){s.c=(s.c||0)+1;if(!was&&qReady(id)&&!q.hid){toast(t('retTo',{w:t(q.by)}),'good');SFX.quest();}}}hudDirty=true;}
+/* SAT-ONLINE-205 (plan U249 Quest tracker: "active + shared objectives and pin", checked by "progress doesn't vanish offline"):
+   a party kill shared with you (the same one that gives you a quarter of its XP: near the kill, in the same room, playing)
+   also counts once for your active quests that only ask you to kill that monster. Not for a quest that asks how (a weapon
+   kind, low health, unseen), a class or promotion quest, or a hidden one: those stay your own deeds. The count is your own
+   quest's (S.qs, saved with the character), so it stays offline. The quest panel marks such objectives with 👥 while you are
+   in a party. */
+const qShareOk=q=>!!q&&q.obj.t==='kill'&&!q.obj.wk&&!q.obj.low&&!q.obj.stl&&!q.cls&&!q.promo&&!q.hid;
+function qShareKill(type){if(!S||S.__demo)return 0;let n=0;for(const id in S.qs){const s=S.qs[id],q=QD[id];if(!q||s.st!==1||!qShareOk(q)||q.obj.it!==type)continue;const was=qReady(id);s.c=(s.c||0)+1;n++;
+  if(!was&&qReady(id)){toast(t('retTo',{w:t(q.by)}),'good');SFX.quest();}}if(n)hudDirty=true;return n;}
+Object.assign(STR.ar,{qShTip:'فريقك بيشاركك: كل وحش يموّته حد من فريقك جنبك بيتحسب لك هنا'});Object.assign(STR.en,{qShTip:'Shared with your party: each one a party member kills near you counts here too'});
+const qShareOn=()=>!!(NET&&PARTY&&PARTY.id()&&PARTY.members().length>1);
+window.__GQS={kill:k=>qShareKill(k),ok:id=>qShareOk(QD[id]),boss:k=>!!(MT[k]&&MT[k].boss)}; // tests
 function acceptQ(id){S.qs[id]={st:1,c:0};epAccept(id);if(QD[id].obj.t==='escort')setTimeout(()=>startEscort(id),300);toast(t('qNew',{q:qName(id)}),'good');SFX.quest();hudDirty=true;checkSkills();save(true);}
 function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]);S.arrows[r]-=k;n-=k;}}
 function mkItem(id,r,made){const rc=rcById(id);if(rc.fix!=null&&!(made&&rc.fix<4))r=rc.fix;   // made: your own craft keeps the rating it came out at (owner 2026-10-22: a rare craft showed up unique); a breath piece is always legendary
@@ -8427,7 +8439,7 @@ function updateHUD(){if(PHOTO&&mode!=='play')photoOff();const mh=maxHP();P.hp=Ma
  jLow(P.hp>0&&P.hp<mh*.3);sbW('hp',P.hp/mh*100);stx($('hpt'),`${Math.ceil(P.hp)} / ${mh}`);$('hpW').classList.toggle('low',P.hp>0&&P.hp<mh*.3);
  sbW('mp',P.mp/maxMP()*100);stx($('mpt'),`${Math.floor(P.mp)} / ${maxMP()}`);sbW('st',P.st/maxST()*100);stx($('stt'),`${Math.round(P.st)} / ${maxST()}`);sbW('fd',P.food);stx($('fdt'),`${Math.round(P.food)}%`);stx($('fdk'),t('food'));
  $('xpb').style.width=(S.xp/xpNeed()*100)+'%';stx($('goldt'),jGold());
- const [qs,qfH]=qFilt(Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1)),qh=qfH+(qs.length?(qPage=Math.min(qPage,Math.ceil(qs.length/3)-1),qs.slice(qPage*3,qPage*3+3)).map(id=>{const r=qReady(id);const on=QGC.g&&QGC.g.id===id,sp=!!qSpot(id);return `<div class="qi${r?' ret':''}" data-qd="${id}" data-tip="${esc(t('qdHint'))}"><button class="x qtk${on?' on':''}" data-qtk="${id}"${sp?'':' disabled'} data-tip="${esc(t(sp?(on?'qgHide':'qgFollow'):'qgNo'))}">📍</button><b>${esc(qName(id))}</b><span>${esc(r?t('retTo',{w:t(QD[id].by)}):qObjText(id))}</span></div>`;}).join('')+(qs.length>3?`<div class="qn qpg"><button class="x" data-qp="-1">‹</button><span>${qPage+1} / ${Math.ceil(qs.length/3)}</span><button class="x" data-qp="1">›</button></div>`:''):`<div class="qn">${esc(t('noQuest'))}</div>`);{const bq=BHR?bhHud():TOW?twHud():'',qx=msHud()+(bq?`<div class="qi ret"><b>${esc(bq)}</b></div>`+qh:qh);if(qx!==qLast){qLast=qx;$('qtext').innerHTML=qx;}}
+ const qsh=qShareOn(),[qs,qfH]=qFilt(Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1)),qh=qfH+(qs.length?(qPage=Math.min(qPage,Math.ceil(qs.length/3)-1),qs.slice(qPage*3,qPage*3+3)).map(id=>{const r=qReady(id);const on=QGC.g&&QGC.g.id===id,sp=!!qSpot(id);return `<div class="qi${r?' ret':''}" data-qd="${id}" data-tip="${esc(t('qdHint'))}"><button class="x qtk${on?' on':''}" data-qtk="${id}"${sp?'':' disabled'} data-tip="${esc(t(sp?(on?'qgHide':'qgFollow'):'qgNo'))}">📍</button><b>${esc(qName(id))}</b><span>${esc(r?t('retTo',{w:t(QD[id].by)}):qObjText(id))}${!r&&qsh&&qShareOk(QD[id])?`<i class="qsh" data-tip="${esc(t('qShTip'))}">👥</i>`:''}</span></div>`;}).join('')+(qs.length>3?`<div class="qn qpg"><button class="x" data-qp="-1">‹</button><span>${qPage+1} / ${Math.ceil(qs.length/3)}</span><button class="x" data-qp="1">›</button></div>`:''):`<div class="qn">${esc(t('noQuest'))}</div>`);{const bq=BHR?bhHud():TOW?twHud():'',qx=msHud()+(bq?`<div class="qi ret"><b>${esc(bq)}</b></div>`+qh:qh);if(qx!==qLast){qLast=qx;$('qtext').innerHTML=qx;}}
  stx($('stats').querySelector('.nm span'),t('pname'));
  const g=mons.find(m=>MT[m.type].boss&&!m.dead&&Math.hypot(P.x-m.sx,P.y-m.sy)<MT[m.type].leash+(m.prov>gTime?280:0)&&Math.hypot(m.x-P.x,m.y-P.y)<(m.prov>gTime?360:220));shd($('boss'),!g);if(g){jBoss(g);stx($('boss').querySelector('.head'),t(g.type==='guardian'?'guardian':NAMEK[g.type]||g.type));{const gf=blGauge(g);$('bossb').style.width=(gf*100)+'%';stx($('bosst'),`${Math.ceil(gf*g.max)}/${g.max}`);}}
  if(mode==='play'){const n=nearest();const h=$('hint');if(n){shd(h,false);stx(h,n.hint?t(n.hint):n.k==='npc'?t(n.o.obj?'hRead':'hTalk'):n.k==='anvil'?t('hAnvil'):n.k==='tree'?((chopped.get(n.o.k)||0)>gTime?t(treeBound(n.o.tx,n.o.ty)?'hChopW':'hUproot'):t('hChop')):(n.o.dep>0?t('hEmpty'):t('hMine')));}else shd(h,true);}}
@@ -13263,7 +13275,7 @@ function pxpGot(from,pl){const w=pl.raid.split('|');if(w.length!==3)return;const
  setTimeout(()=>{if(!S||S.__demo||!NET||mode==='dead'||!PARTY||PARTY.id()!==from.party)return;const r=NET.remotes().find(x=>x.uid===from.uid);if(!r)return;
   if((r.room||null)!==((roomAt(P.x,P.y)||{}).id||null)||Math.hypot(r.x-P.x,r.y-P.y)>PXP.R+60||performance.now()-pxpActT>PXP.ACT_MS)return;
   if(pxpKeys.get(key)!==tn)return; // you killed your own copy meanwhile
-  const xg=Math.max(1,Math.round(b.xp*pxpGap(lv-S.lv)*PXP.SHARE));gainXP(xg);num(P.x,P.y-36,'+'+Math.round(xg*XPMUL).toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});hudDirty=true;},PXP.WAIT_MS);}
+  const xg=Math.max(1,Math.round(b.xp*pxpGap(lv-S.lv)*PXP.SHARE));gainXP(xg);num(P.x,P.y-36,'+'+Math.round(xg*XPMUL).toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});qShareKill(type);hudDirty=true;},PXP.WAIT_MS);}
 window.__GPXP={get act(){return pxpActT;},idle:()=>{pxpActT=-1e9;},C:PXP,gap:pxpGap,kf:m=>pxpKF(m),earn:m=>mobEarn(m)}; // tests
 function rlStart(){rlIn=new Map();LOOTO=LOOTL=null;NET.on(ev=>{if(ev.type!=='message')return;const env=ev.env,pl=env.payload||{};
  if(env.type==='raid.state'&&pl.to===NET.uid&&typeof pl.raid==='string'&&pl.raid.slice(0,2)==='x|'){const f=NET.get(ev.sid);if(f&&f.uid&&!isBlocked(f.uid))pxpGot(f,pl);return;} // a party mate's kill near you (SAT-ONLINE-146)
