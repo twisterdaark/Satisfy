@@ -7,6 +7,16 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24brutes', ver: '2.75', d: '2026-10-24',
+      ar: ["وحوش اترسمت من جديد بحركات (واقف وماشي وبيضرب): كوبولد المنجم براس كلب وكاب بشمعة، وملك الكوبولد بتاج وعباية حمرا، وكوبولد الشرق، والترول الأخضر بأنياب ونبوت، والأوجر بقرن ونبوت عضم، والسايكلوبس بعين واحدة، والرجل السحلية وسحلية إيران بديل وعرف ورمح.",
+          "مؤشر المهمة عمره ما بيقف في مية أو صخر: لو المكان في بحيرة (زي مهمات الحوريات) بيشاور على أقرب أرض.",
+          "زعما القارة الشرقية بيدوروا على أرض لحد 60 خطوة عشان محدش فيهم يقف في المية.",
+          "اختبار سطور المهمات بقى بيقرا سطور مهمات تغيير الكلاس من اللعبة وهي شغالة."],
+      en: ["Monsters redrawn with their own moves (standing, walking, striking): the mine kobold with a dog's head and a candle cap, the kobold king with a crown and red cape, the East kobold, the green troll with tusks and a club, the ogre with a horn and a bone club, the one-eyed cyclops, and the lizardmen of the swamp and of Iran with tail, crest and spear.",
+          "A quest arrow never ends in water or rock: a spot in a lake (like the mermaid quests) points to the nearest land.",
+          "The East's bosses look up to 60 steps for land, so none stands in the water.",
+          "The quest lines test reads the class change quests' lines from the running game."],
+      hide: [3] },
     { v: '2026-10-24mattrade', ver: '2.74', d: '2026-10-24',
       ar: ["التريد: الكتب والخامات وأي حاجة في الشنطة بقت تتحط في التريد. فيه تبويب جديد \"خامات وكتب\" وخانة \"الكمية\" تحدد بيها هتدي كام من الكومة.",
           "\"صنع\" على القطع اللي ابتكرتها بقى بيكتب اسم شخصيتك الحالي، ولو غيرت اسمك بيتغير على طرق الصنع وعلى القطع اللي في شنطتك.",

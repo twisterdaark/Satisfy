@@ -34,7 +34,10 @@ test('every written quest has its lines in both languages', async () => {
   try {
     await H.newGame(g);
     const qd = await g.eval(() => Object.entries(window.__G.QD).filter(([, q]) => !q.gen).map(([id, q]) => [id, q.by, q.obj && q.obj.t]));
+    // class packs (src/content/classpacks.js) write their quests' lines at load, so those come from the running game
+    const live = await g.eval(() => { const o = { ar: {}, en: {} }, L = window.__G.lines(); for (const k of ['ar', 'en']) for (const id in L[k]) if (/^cp/.test(id)) o[k][id] = 1; return o; });
     const T = tables(SRC), miss = [];
+    for (const L of ['ar', 'en']) Object.assign(T[L], live[L]);
     for (const [id, by, ot] of qd) {
       const need = ['_o'];
       if (by !== 'sys') need.push('_d'); // a hidden class's own trial: the system speaks, no one waits
