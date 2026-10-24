@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24lfgfilter', ver: '2.68', d: '2026-10-24',
+      ar: ["لوحة «دوّر على فريق» بقى فيها 🔎 فلترة: تشوف نوع واحد بس (ريد، فريق، دانجون، مبارزة)، أو اللي لفلهم قريب من لفلك (±10)، أو اللي في نفس المنطقة اللي انت فيها، أو دور واحد (دفاع، علاج، ضرب، دعم). العنوان بيقولك بتشوف كام من كام، وسطرك انت بيفضل ظاهر."],
+      en: ["The group finder's board has 🔎 Filters now: show one kind only (raid, party, dungeon group, duel), players within 10 levels of yours, those in the area you're in, or one party role (tank, healer, damage, support). The heading says how many of how many you're seeing, and your own line always shows."] },
     { v: '2026-10-24nearby', ver: '2.67', d: '2026-10-24',
       ar: ["قايمة اللاعيبة (O) بقت مترتبة بالأقرب: انت الأول، وبعدين اللي على نفس الخريطة ومعاك في نفس المكان من الأقرب للأبعد وجنب كل واحد بُعده بالمربعات، وبعدين الباقيين بالاسم."],
       en: ["The players list (O) puts the nearest first: you, then the players on your map and in the same place, closest first with how far each one is in tiles, then everyone else by name."] },

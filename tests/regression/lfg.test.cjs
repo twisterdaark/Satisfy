@@ -54,7 +54,7 @@ test('group finder: post, see, stop; others cannot write your entry; old entries
     let r = await board(a);
     assert.equal(r.head, 'Looking for a group (0)');
     assert.equal(r.list, 'Nobody is looking right now');
-    assert.deepEqual(r.opts, ['Look for a raid', 'Look for a party', 'Look for a dungeon group', 'Look for a duel', 'Close']);
+    assert.deepEqual(r.opts, ['Look for a raid', 'Look for a party', 'Look for a dungeon group', 'Look for a duel', '🔎 Filters', 'Close']);
     await pick(a, 'Look for a raid');
     await until([a], () => window.__GLF.k === 'raid');
     assert.match(await a.eval(() => document.getElementById('toasts').textContent), /You are looking for a raid \(for half an hour\)/);
