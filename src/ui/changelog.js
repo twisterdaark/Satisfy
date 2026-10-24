@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24badname', ver: '2.66', d: '2026-10-24',
+      ar: ["أونلاين واللاعيبة حواليك كتير: اللعبة كانت بتفحص اسم كل لاعب (هل فيه شتيمة) حوالي 15 مرة كل فريم. دلوقتي بتفحصه مرة واحدة وتفتكر النتيجة، فالفريم أخف."],
+      en: ["Online with many players around: the game checked each player's name for insults about 15 times a frame. Now it checks a name once and remembers, so each frame is lighter."] },
     { v: '2026-10-24mininow', ver: '2.65', d: '2026-10-24',
       ar: ["الخريطة الصغيرة مبقتش بتوقف اللعبة لما توصل لحتة من العالم لسه مترسمتش (كانت بتوقف ربع ثانية، ونص ثانية أول ما تدخل اللعب): الحتة دي بتترسم في الفريمات اللي بعدها وبتظهر وهي بتتملي."],
       en: ["The minimap no longer stops the game when it reaches a part of the world it hasn't painted yet (a quarter of a second, half a second as you start playing): that part is painted over the next frames and fills in as you watch."] },
