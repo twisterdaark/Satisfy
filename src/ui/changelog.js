@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24nearby', ver: '2.67', d: '2026-10-24',
+      ar: ["قايمة اللاعيبة (O) بقت مترتبة بالأقرب: انت الأول، وبعدين اللي على نفس الخريطة ومعاك في نفس المكان من الأقرب للأبعد وجنب كل واحد بُعده بالمربعات، وبعدين الباقيين بالاسم."],
+      en: ["The players list (O) puts the nearest first: you, then the players on your map and in the same place, closest first with how far each one is in tiles, then everyone else by name."] },
     { v: '2026-10-24chunkwarm', ver: '2.66', d: '2026-10-24',
       ar: ["بعد كام دقيقة لعب، كل حتة أرض جديدة كانت بتظهر قدامك وانت ماشي بتوقف اللعبة شوية لحد ما تترسم. ده كان باظ لما اللعبة تشيل 36 حتة: بقت ترسمهم كلهم مرة واحدة ساعة ما يظهروا. دلوقتي بتجهزهم في وقت الفراغ قبل ما توصلهم زي أول ما بدأت."],
       en: ["After a few minutes of play, each new stretch of ground that came into view as you walked stopped the game for a moment while it was painted. That broke once the game held 36 of them: from then on it painted each one in one go as it appeared. Now they are prepared in idle time before you reach them, as at the start."] },

@@ -26,11 +26,12 @@ async function cardFromList(g, uid) {
   await g.eval((u) => document.querySelector('#plL button.pm[data-uid="' + u + '"]').click(), uid);
   await g.step(2);
 }
-// the strings drawn on the game canvas during one frame
+// the strings over heads and things during one frame (they are stamped from cached sprites since SAT-ONLINE-160, so a
+// fillText spy misses the ones drawn before: the game lists a frame's strings for tests in __GTX.seen)
 async function drawn(g) {
-  await g.eval(() => { const T = window.__drawn = []; const f = CanvasRenderingContext2D.prototype.fillText; if (!f.__spy) { CanvasRenderingContext2D.prototype.fillText = function (s, ...r) { (window.__drawn || []).push(String(s)); return f.call(this, s, ...r); }; CanvasRenderingContext2D.prototype.fillText.__spy = 1; } T.length = 0; });
+  await g.eval(() => { window.__GTX = window.__GTX || {}; window.__GTX.seen = []; });
   await g.step(1);
-  return g.eval(() => window.__drawn.slice());
+  return g.eval(() => { const L = window.__GTX.seen.slice(); window.__GTX.seen = null; return L; });
 }
 
 test('the card opens from ⋯ or T, never from a click; invite/duel/block go to that uid even with a twin name', async () => {

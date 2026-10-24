@@ -10636,7 +10636,7 @@ function drawTX(cx,cy){const g=txg,k=TXS;g.clearRect(0,0,g.canvas.width,g.canvas
   const f=o.f.replace('{s}',(o.z*k*(HCM?1.15:1)).toFixed(1)),x=Math.round((o.x-cx)*k),y=Math.round((o.y-cy)*k),e=!late&&txSpr(f,String(o.s),o.c,lw);
   if(e){g.drawImage(e.cv,x-e.ox,y-e.oy);continue;}
   if(f!==fz){g.font=fz=f;}g.lineWidth=lw;g.strokeStyle='rgba(0,0,0,.9)';g.strokeText(o.s,x,y);g.fillStyle=o.c;g.fillText(o.s,x,y);}
- g.globalAlpha=1;TX.length=0;}
+ g.globalAlpha=1;if(window.__GTX&&window.__GTX.seen)for(const o of TX)if(o.s!=null)window.__GTX.seen.push(String(o.s));TX.length=0;}   // (tests: the strings of a frame, drawn or stamped)
 
 /* ---------------- cutscene helpers ---------------- */
 let movers=[],spot=0,spotK=0,SM=null,CARD=null,allies=[];
@@ -13234,23 +13234,31 @@ Object.assign(STR.en,{pcHint:'[T] Options',pcOpt:'Options',pcFar:'Far away: come
    world with their ID, level and place. "Hide my level" publishes level 0, which everyone, the party too, sees as "?". */
 let HIDELV=(()=>{try{return localStorage.getItem('satisfy_hidelv')==='1';}catch(e){return false;}})();
 Object.assign(STR.ar,{plH:'اللاعيبة أونلاين ({n})',plHideLv:'اخفي اللفل بتاعي',plShowLv:'اظهر اللفل بتاعي',plHidden:'اللفل بتاعك مخفي عن الكل',plShown:'اللفل بتاعك ظاهر للناس'});
+Object.assign(STR.ar,{plDist:'على بعد {n} مربع',plHere:'جنبك'});Object.assign(STR.en,{plDist:'{n} tiles away',plHere:'right here'});
 Object.assign(STR.en,{plH:'Players online ({n})',plHideLv:'Hide my level',plShowLv:'Show my level',plHidden:'Your level is hidden from everyone',plShown:'Your level is visible again'});
 function lvTxt(n){return n>0?String(n):'?';}
 function plOpen(on){const w=$('plW');if(on===undefined)on=w.hidden;if(!NET||!Satisfy.local.inGame())on=false;w.hidden=!on;if(on)plFill();}
 function plHideT(){HIDELV=!HIDELV;try{localStorage.setItem('satisfy_hidelv',HIDELV?'1':'0');}catch(e){}netForce=true;partySig='';toast(t(HIDELV?'plHidden':'plShown'));plFill();}
+// nearest first (SAT-ONLINE-202; plan U247 "Nearby list": "sorting by in-game distance and visibility", checked by "the press
+// opens the right UID"): the players on your map and in your room by distance, with it; then the rest (inside a house,
+// another map version, too far to have a position) by name. Each row's ⋯ still opens that very uid's card.
+function plSort(arr){const myRoom=(roomAt(P.x,P.y)||{}).id||null,mv=mapV();
+ const d=r=>r.self?-1:typeof r.x==='number'&&typeof r.y==='number'&&isFinite(r.x)&&isFinite(r.y)&&(!r.mv||r.mv===mv)&&(r.room||null)===myRoom?Math.hypot(r.x-P.x,r.y-P.y):Infinity;
+ return arr.map(r=>[d(r),r]).sort((a,b)=>a[0]-b[0]||String(a[1].handle||'').localeCompare(String(b[1].handle||''))).map(([dd,r])=>{if(isFinite(dd)&&!r.self)r.dist=dd;return r;});}
+const plDist=d=>d<48?t('plHere'):t('plDist',{n:Math.round(d/TS)});
 function plFill(){const box=$('plL');$('plHide').textContent=t(HIDELV?'plShowLv':'plHideLv');
  const me={self:true,handle:netId||S.look.n,lv:HIDELV?0:S.lv,zone:netZone(P.x,P.y)};
- const show=arr=>{$('plH').textContent=t('plH',{n:arr.length});box.textContent='';for(const r of arr){const d=document.createElement('div');if(r.self)d.className='me';
-  const s=document.createElement('span');s.textContent=[r.handle||'?',t('lv',{n:lvTxt(r.lv)}),pctxName(r.zone||'')].filter(Boolean).join(' · ');d.appendChild(s);
+ const show=arr=>{arr=plSort(arr);$('plH').textContent=t('plH',{n:arr.length});box.textContent='';for(const r of arr){const d=document.createElement('div');if(r.self)d.className='me';
+  const s=document.createElement('span');s.textContent=[r.handle||'?',t('lv',{n:lvTxt(r.lv)}),pctxName(r.zone||''),r.dist!=null?plDist(r.dist):''].filter(Boolean).join(' · ');d.appendChild(s);
   if(!r.self&&r.uid){const b=document.createElement('button');b.className='pm';b.dataset.uid=r.uid;b.textContent='⋯';b.dataset.tip=t('pcOpt');b.setAttribute('aria-label',t('pcOpt')+': '+(r.handle||'?'));
    b.addEventListener('click',()=>{const live=NET&&NET.remotes().find(x=>x.uid===r.uid);if(pctxOpen(live||r,!live))plOpen(false);});d.appendChild(b);}
   box.appendChild(d);}};
- const near=()=>NET.remotes().map(r=>({uid:r.uid,sid:r.sid,handle:r.handle,lv:r.lv,zone:r.zone,cls:r.cls,title:r.title,party:r.party,arm:r.arm}));
+ const near=()=>NET.remotes().map(r=>({uid:r.uid,sid:r.sid,handle:r.handle,lv:r.lv,zone:r.zone,cls:r.cls,title:r.title,party:r.party,arm:r.arm,x:r.x,y:r.y,mv:r.mv,room:r.room}));
  if(!(FB&&NETTR&&NETTR.kind==='firebase'))return show([me].concat(near()));
  // the range query only covers nearby players, so the list reads the whole shard once when it opens
  show([me].concat(near()));const D=FB.m.database;D.get(D.ref(FB.db,'presence/'+Satisfy.net.WORLD_ID+'/main')).then(s=>{const v=s.val()||{};
   show([me].concat(Object.keys(v).filter(k=>k!==NET.uid&&v[k]&&typeof v[k]==='object'&&v[k].uid===k).map(k=>{const o=v[k],str=x=>typeof x==='string'?x:'';
-   return {uid:k,sid:str(o.sid),handle:str(o.handle),lv:+o.lv||0,zone:str(o.zone),cls:str(o.cls),title:str(o.title),party:str(o.party)||null,arm:o.arm?1:0};})));},()=>{});}
+   return {uid:k,sid:str(o.sid),handle:str(o.handle),lv:+o.lv||0,zone:str(o.zone),cls:str(o.cls),title:str(o.title),party:str(o.party)||null,arm:o.arm?1:0,x:+o.x,y:+o.y,mv:str(o.mv),room:str(o.room)||null};})));},()=>{});}
 $('netB').addEventListener('click',()=>plOpen());
 function pctxRemote(){return PCTX&&NET?NET.remotes().find(r=>r.uid===PCTX.uid)||PCTX.snap||null:null;}
 // SAT-ONLINE-036 (owner 2026-10-19): the card opens from a button only, never from a click in the world (a click attacks):

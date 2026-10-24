@@ -254,6 +254,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 ## From other ranges (2026-10-24)
 | U | Update | Status | Where |
 |---|---|---|---|
+| U247 | Nearby list | ✅ | SAT-ONLINE-202: the players list (O, SAT-ONLINE-026) puts you first, then the players on your map version and in your room by distance, with it (tiles), then the rest by name; each row's ⋯ opens that very uid's card (twin names) (`regression/nearby`) |
 | U264 | Damage accessibility | ✅ | SAT-ONLINE-167: High contrast in the pause menu's Accessibility screen (`satisfy_hc`, the system's prefers-contrast when unset): a crit ends in "!", thicker number outlines, white frames on head bars and wind-ups, framed HUD bars; `regression/contrast` |
 | U266 | Controller support | ✅ | SAT-ONLINE-172: a standard gamepad through the Gamepad API (`gpTick` in the loop): the left stick walks (analog), A/B/X/Y attack, dodge, use, guard, the four shoulders the skill slots, the sticks' clicks the potions, the right stick the windows; in menus the D-pad and A/B send the arrow keys, Enter and Esc (`gpKey`, `KSYN`); a hit rumbles (`gpRumble`, off with `satisfy_gpvib`); nothing runs with no pad; `regression/gamepad` |
 | U267 | Reduced motion | ✅ | SAT-ONLINE-164: a device setting in the pause menu (Accessibility since SAT-ONLINE-167) (`satisfy_rmo`, the system's prefers-reduced-motion when unset): no camera shake, no white flash, the UI's shakes and pulses stop, particles capped (`RMOFX`, `RMOVX`); telegraphs (`drawTele`) untouched; `regression/rmotion` |
