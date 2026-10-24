@@ -744,6 +744,17 @@
     };
   }
 
+  // SAT-ONLINE-183 (plan U291): the fishing festival's board, fishFest/{slot}/{uid} = {s, w (tenths of a kg), k, n, t}: your
+  // heaviest catch of that festival; the rules take it only during its slot, only heavier, at most every 15 s
+  function fishFestStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    return {
+      post: function (s, uid, e) { var o = { s: e.s, w: e.w, k: e.k, n: e.n, t: D.serverTimestamp() }; return D.set(at('fishFest/' + s + '/' + uid), o); },
+      watch: function (s, cb) { var off = null; try { off = D.onValue(at('fishFest/' + s), function (v) { cb(v.val() || {}); }, function () { cb({}); }); } catch (e) { cb({}); } return function () { try { if (off) off(); } catch (e) { /* ignore */ } }; },
+      read: function (s) { return D.get(at('fishFest/' + s)).then(function (v) { return v.val() || {}; }, function () { return {}; }); },
+    };
+  }
+
   // SAT-ONLINE-082 moderation and crash reports: crashes/{id} {m, s, v, z?, by, t} (anyone signed in writes one, admins read);
   // reports (071) readable by admins; reportDone/{id} {a: 'ok' | 'mute', by, t}; mutes/{uid} {until, why?, by, t}: written by an
   // admin, read by everyone; the rules keep a muted player out of the world chat until `until`
@@ -859,6 +870,7 @@
     friendStore: friendStore,
     reportStore: reportStore,
     lfgStore: lfgStore,
+    fishFestStore: fishFestStore,
     repairStore: repairStore,
     announceStore: announceStore,
     modStore: modStore,
