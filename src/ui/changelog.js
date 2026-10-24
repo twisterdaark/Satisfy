@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24chunkwarm', ver: '2.65', d: '2026-10-24',
+      ar: ["بعد كام دقيقة لعب، كل حتة أرض جديدة كانت بتظهر قدامك وانت ماشي بتوقف اللعبة شوية لحد ما تترسم. ده كان باظ لما اللعبة تشيل 36 حتة: بقت ترسمهم كلهم مرة واحدة ساعة ما يظهروا. دلوقتي بتجهزهم في وقت الفراغ قبل ما توصلهم زي أول ما بدأت."],
+      en: ["After a few minutes of play, each new stretch of ground that came into view as you walked stopped the game for a moment while it was painted. That broke once the game held 36 of them: from then on it painted each one in one go as it appeared. Now they are prepared in idle time before you reach them, as at the start."] },
     { v: '2026-10-24warmstart', ver: '2.64', d: '2026-10-24',
       ar: ["اللعبة مبقتش بتهنج أول ما تدخل: الأرض والناس والوحوش اللي حواليك بيترسموا وشاشة البداية لسه ظاهرة."],
       en: ["The game no longer stalls as you start: the ground, the people and the monsters around you are painted while the title screen still shows."] },
