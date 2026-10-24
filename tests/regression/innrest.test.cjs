@@ -57,7 +57,7 @@ test('the whole way: sleep at the inn, save, 16 hours away in the save, Continue
     let g = await H.openGame({ ctx });
     await H.newGame(g);
     await g.eval(() => { const S = window.__G.S; S.lv = 40; S.gold = 1e6; window.__GINN.rest('inn', 0); });
-    await g.step(90); // the fade, then the save
+    await g.page.waitForTimeout(400); await g.step(90); // the fade runs on a real 300 ms timer (a step runs no timers), then the save
     const saved = await g.eval(() => { const S = window.__G.S; window.__GINN.save(); return { inn: S.inn, svT: S.svT }; });
     assert.ok(saved.inn > 0 && saved.svT >= saved.inn, JSON.stringify(saved));
     // 16 hours pass: the save's clocks move back by that much

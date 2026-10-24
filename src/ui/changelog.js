@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24style', ver: '2.65', d: '2026-10-24',
+      ar: ["اللعبة بقت أخف تاني: كل ما رقم يتغير في الواجهة (عدد الجرعات والسكيلات، والصحة والمانا) المتصفح كان بيعيد حساب شكل الواجهة كلها من الأول، وده كان بيحصل كل فريم. دلوقتي بيعيد الحتة اللي اتغيرت بس، فالفريمات بقت أنعم والتقطيع قل كتير، وفتح الشبابيك بقى أخف.",
+          "الخريطة الصغيرة وخريطة العالم بيترسموا في وقت الفراغ أسرع من الأول بالربع وفي حتت أصغر، وكل حتة بتستنى لحد ما يبقى فيه وقت يكفيها قبل الفريم الجاي بدل ما تأخره."],
+      en: ["The game is lighter again: whenever a number on the screen changed (potion and skill counts, health and mana), the browser worked out the look of the whole interface again, and that happened every frame. Now it redoes only the part that changed, so frames are smoother, the stutter is mostly gone and windows open more lightly.",
+          "The minimap and the world map are painted in idle time about a quarter faster and in smaller pieces, and each piece waits until there is time for it before the next frame instead of holding that frame up."] },
     { v: '2026-10-24warmstart', ver: '2.64', d: '2026-10-24',
       ar: ["اللعبة مبقتش بتهنج أول ما تدخل: الأرض والناس والوحوش اللي حواليك بيترسموا وشاشة البداية لسه ظاهرة."],
       en: ["The game no longer stalls as you start: the ground, the people and the monsters around you are painted while the title screen still shows."] },

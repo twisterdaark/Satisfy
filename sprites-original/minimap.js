@@ -34,7 +34,13 @@ function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,doc=root.document,NY=o.noi
  const base=(x,y)=>{const v=at(x,y),k=groundKind(v);if(k!==-1)return k;const n={};let best=GR,bc=0;
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const q=groundKind(at(x+dx,y+dy));if(q<0||q===-9||q===WA||q===WL||q===RK||q===CW)continue;n[q]=(n[q]||0)+1;}
   for(const k2 in n)if(n[k2]>bc){bc=n[k2];best=+k2;}return best===GR&&env.snowAt(x,y)?SN:best;};
- const put=(px,py,c,k)=>{const i=(py*cw+px)*4;D[i]=c[0];D[i+1]=c[1];D[i+2]=c[2];D[i+3]=255;if(k!==undefined)kind[py*cw+px]=k;};
+ // the land's texture noise (tiles.js vnoise at scale 1, seed 301) with its four corner hashes kept while a pixel row stays
+ // in one noise cell (5 pixels at 8 px): the same numbers, a quarter of the hashing (2026-10-24, the owner's lag: the map's
+ // pieces painted in idle time took 14 ms a strip)
+ let vX=NaN,vY=NaN,va=0,vb=0,vc=0,vd=0;
+ const vn1=(x,y)=>{const ix=Math.floor(x),iy=Math.floor(y),tx=x-ix,ty=y-iy,u=tx*tx*(3-2*tx),v=ty*ty*(3-2*ty);
+  if(ix!==vX||iy!==vY){vX=ix;vY=iy;va=hash(ix,iy,301);vb=hash(ix+1,iy,301);vc=hash(ix,iy+1,301);vd=hash(ix+1,iy+1,301);}
+  return va+(vb-va)*u+(vc-va)*v+(va-vb-vc+vd)*u*v;};
  const tri=(r,v)=>v<.36?r[0]:v<.64?r[1]:r[2];
  const NB=[],DEEP=mix(C.water[2],C.water[0],1);   // DEEP: open water, no shore within two tiles (what d=9 gave)
  for(let ty=ty0;ty<ty1;ty++)for(let tx=tx0;tx<tx1;tx++){const k=base(tx,ty),raw=at(tx,ty);
@@ -42,9 +48,9 @@ function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,doc=root.document,NY=o.noi
   let nb=0;if(k===WA){for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const v=at(tx+dx,ty+dy);if(v===WA||v===-9)continue;NB[nb++]=tx+dx+.5;NB[nb++]=ty+dy+.5;}}
   for(let j=0;j<s;j++)for(let i=0;i<s;i++){const wx=tx*s+i,wy=ty*s+j,ny=wy-NY*s,fx=wx/s,fy=wy/s;let c;
    if(k===WA){// depth: distance to the nearest non-water tile, sampled per pixel
-    let d=9;for(let q=0;q<nb;q+=2){const ex=Math.max(0,Math.abs(fx-NB[q])-.5),ey=Math.max(0,Math.abs(fy-NB[q+1])-.5);d=Math.min(d,Math.hypot(ex,ey));}
+    let d2=81;for(let q=0;q<nb;q+=2){const ex=Math.max(0,Math.abs(fx-NB[q])-.5),ey=Math.max(0,Math.abs(fy-NB[q+1])-.5),e2=ex*ex+ey*ey;if(e2<d2)d2=e2;}const d=Math.sqrt(d2);   // (the nearest one's distance: one root, not one a shore tile)
     const q=Math.min(1,(d-.3)/1.6);c=d<.12?C.sand:d<.3?C.water[3]:q===1?DEEP:mix(C.water[2],C.water[0],q);if(d>.4&&hash(wx>>1,ny,303+(ny>>2))<.025)c=C.water[3];}
-   else{const n=k===WL||k===CW?0:vn(fx*1.6,(ty-NY+j/s)*1.6,1,301)*.7+hash(wx,ny,302)*.3;   // (walls and cave walls have no texture)
+   else{const n=k===WL||k===CW?0:vn1(fx*1.6,(ty-NY+j/s)*1.6)*.7+hash(wx,ny,302)*.3;   // (walls and cave walls have no texture)
    if(k===SN)c=tri(C.snow,n);
    else if(k===PA)c=tri(C.path,n);
    else if(k===DR)c=tri(C.dirt,n);
@@ -53,7 +59,7 @@ function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,doc=root.document,NY=o.noi
    else if(k===CW)c=C.cave[0];else if(k===CF)c=tri(C.cave,n);
    else c=tri(C.grass,n);}
    if(raw===FL&&hash(wx,ny,304)<.035)c=C.flower[(hash(wx,ny,305)*4)|0];
-   put(wx-ox*s,wy-oy*s,c,k);}}
+   {const p=(wy-oy*s)*cw+wx-ox*s,i=p*4;D[i]=c[0];D[i+1]=c[1];D[i+2]=c[2];D[i+3]=255;kind[p]=k;}}}
  // ink: a darker 1px line where one terrain meets another (lower/right side), so regions read as a drawn map
  for(let y=Math.max(1,(ty0-oy)*s+(ty0?0:1)),ye=(ty1-oy)*s;y<ye;y++)for(let x=Math.max(1,(tx0-ox)*s+(tx0?0:1)),xe=(tx1-ox)*s;x<xe;x++){const k=kind[y*cw+x],u=kind[(y-1)*cw+x],l=kind[y*cw+x-1];if(k===u&&k===l)continue;
   const i=(y*cw+x)*4;if(k===WA||u===WA||l===WA)continue;const c=mix([D[i],D[i+1],D[i+2]],C.ink,.32);D[i]=c[0];D[i+1]=c[1];D[i+2]=c[2];}
@@ -68,7 +74,8 @@ function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,doc=root.document,NY=o.noi
  for(let ty=ty0;ty<ty1;ty++)for(let tx=tx0;tx<tx1;tx++){if(at(tx,ty)!==PL)continue;g.fillStyle='#6e4828';const hor=at(tx-1,ty)===PL||at(tx+1,ty)===PL;
   if(hor)g.fillRect(tx*s,ty*s+s/2-1,s,Math.max(1,s/6|0));else g.fillRect(tx*s+s/2-1,ty*s,Math.max(1,s/6|0),s);}
  // buildings: roof with ridge, outline and a drop shadow to the lower right
- for(const b of o.buildings||[]){if(b.x+b.w<tx0-1||b.x>tx1||b.y+b.h<ty0-1||b.y>ty1)continue;const R=(ROOF[b.k]||ROOF.house),x=b.x*s,y=b.y*s,w=b.w*s,h=b.h*s,sh=Math.max(1,s*.35);
+ const BY=o.buildingsY||0;   // (buildingsY: added to every building's y, so a caller with rows above needs no copy of the list)
+ for(const b of o.buildings||[]){const bY=b.y+BY;if(b.x+b.w<tx0-1||b.x>tx1||bY+b.h<ty0-1||bY>ty1)continue;const R=(ROOF[b.k]||ROOF.house),x=b.x*s,y=bY*s,w=b.w*s,h=b.h*s,sh=Math.max(1,s*.35);
   g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x+sh,y+sh,w,h);g.fillStyle=R[1];g.fillRect(x,y,w,h);g.fillStyle=R[0];g.fillRect(x+1,y+1,w-2,h/2-1);
   g.fillStyle=R[2];g.fillRect(x+1,y+h/2-1,w-2,Math.max(1,s/5));g.fillStyle='#1a1018';g.fillRect(x+w/2-s*.35,y+h-s*.6,s*.7,s*.6);
   g.strokeStyle='#1a1018';g.lineWidth=1;g.strokeRect(x+.5,y+.5,w-1,h-1);}
