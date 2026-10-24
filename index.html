@@ -2960,6 +2960,8 @@ function sticksOpts(){const b=bhS(),R=BHR;if(!R)return [];
   return [{l:t('bhSqGive'),f:()=>{if(!(S.mats.bcoco>=1&&S.mats.wtleaf>=1)){toast(t('bhSqNeed'),'warn');SFX.deny();return;}S.mats.bcoco--;S.mats.wtleaf--;b.st=1;addAff('sticks',100);
    dialog('sticks',[bhSys('bhSqMade'),bhSys('bhSqOk'),bhSys('bhSqAff'),t('bhSt1'),t('bhSt2'),t('bhSt3')],()=>{toast(t(isLeg()?'bhHofL':'bhHof'),'good');SFX.rare();if(BHR===R)bhClear();});save(true);}}];}
  const o=[{l:t('bhStLore'),f:()=>dialog('sticks',[t('bhSt4'),t('bhSt5'),t('bhSt6')],()=>shopD('sticks','bhStHi'))},...sticksScroll()];
+ // owner 2026-10-24: once the archipelago is purified Sticks gives the East Continent Portal Scroll for nothing (once)
+ if(b.pur&&!b.ecFree)o.push({l:t('bhStEc'),f:()=>{b.ecFree=1;addMat('ecscr',1);dialog('sticks',[t('bhStEc1')],()=>toast(t('bhEcsOk'),'good'));SFX.quest();save(true);}});
  if(b.pur&&!S.tl.hking)o.push({l:t('bhStKing'),f:()=>{dialog('sticks',[bhSys('bhKing1'),t('bhKing2')],()=>giveTitle('hking'));}});
  if(R.o.k==='save'&&b.best<66)o.push({l:t('bhStOut'),f:()=>dialog('sticks',[t('bhStOutL')],null,[{l:t('bhYes'),f:bhLeave},{l:t('bhNo')}])});
  return o;}
@@ -11286,8 +11288,7 @@ function eaAct(o){const A=EAS();
  if(o.k==='phxseal'){if(!(S.qs.ea5&&S.qs.ea5.st===1)){return dialog('bhSys',['eaPs0']);}A.ps=A.ps||{};if(A.ps[o.i]){toast(t('eaPsDone'));return;}A.ps[o.i]=1;qEvent('visit','phxseal');vfx('fire',o.x,o.y-6);SFX.legendary();toast(t('eaPsBreak',{n:Object.keys(A.ps).length}),'good');save(true);return;}
  if(o.k==='btshrine'){if(S.qs.ea7&&S.qs.ea7.st===1&&!qReady('ea7')){qEvent('visit','btshrine');SFX.legendary();vfx('levelup',o.x,o.y);return dialog('bhSys',[bhSys('eaBt1'),bhSys('eaBt2')]);}return dialog('bhSys',['eaBt0']);}}
 // the two circles: "the magic circle" takes you across for a fee once you have crossed by the scroll
-function eaCircle(east){const A=EAS();if(!A.v&&!(S.bh&&S.bh.pur))return dialog('bhSys',['eaCirc0']);   // (a purifier of Behen may cross by it first: owner 2026-10-24)
- const g=ECFEE;
+function eaCircle(east){const A=EAS();if(!A.v)return dialog('bhSys',['eaCirc0']);const g=ECFEE;
  dialog('bhSys',[east?'eaCircE':'eaCircW'],null,[{l:t('eaCircGo',{g:fmtN(g)}),poor:S.gold<g,f:()=>{if(S.gold<g){SFX.deny();return toast(t('noGold'),'warn');}if(scrollBlock()){SFX.deny();return toast(t('rsNo'),'warn');}S.gold-=g;SFX.coin();eaCross(!east);}},{l:t('oLeave')}]);}
 // crossing the Red Sea: by the scroll or a circle; to the East you land in the White Tree Forest, to the West at your inn there
 // (or Reinhardt's circle)
@@ -11296,7 +11297,7 @@ function eaCross(toEast){if(P.ride)dismount();P.boat=0;P.fly=0;const A=EAS(),fir
   P.inv=1.5;camSnap=true;hudDirty=true;sbSig='';vfx('spawn',P.x,P.y);SFX.quest();save(true);
   if(first)setTimeout(()=>{SFX.legendary();dialog('bhSys',[bhSys('eaArr1'),bhSys('eaArr2'),'eaArr3']);},500);else toast(t(toEast?'eaArrE':'eaArrW'),'good');if(toEast)setTimeout(()=>toast(t('eaGrav'),'warn'),first?0:1500);});}
 // the Behen store's portal scroll (ch 402: "after the elixirs and skill books, I used the remaining points to buy a portal scroll")
-Object.assign(STR.ar,{bhPurShop:'متجر المتحدّين جنبك: نقطك بتشتري لفيفة بوابة القارة الشرقية. ودايرة السحر في راينهارت بتعدّيك كمان.'});Object.assign(STR.en,{bhPurShop:"The challengers' store is beside you: your points buy the East Continent Portal Scroll. Reinhardt's magic circle takes you across too."});
+Object.assign(STR.ar,{bhPurShop:'متجر المتحدّين جنبك: نقطك بتشتري لفيفة بوابة القارة الشرقية. وستيكس عنده لفيفة ليك ببلاش.',bhStEc:'🌀 عايز أروح القارة الشرقية',bhStEc1:'القارة اللي ورا البحر الأحمر؟ خد اللفيفة دي، دي هدية على اللي عملته في الأرخبيل. اقراها في أي حتة وهتنزل في غابة الشجر الأبيض.'});Object.assign(STR.en,{bhPurShop:"The challengers' store is beside you: your points buy the East Continent Portal Scroll. Sticks has one for you for free, too.",bhStEc:'🌀 I want to go to the East Continent',bhStEc1:'The continent beyond the Red Sea? Take this scroll, a gift for what you did in the archipelago. Read it anywhere and you will land in the White Tree Forest.'});
 function ecShopOpt(o){o.push({l:t('bhEcs',{p:fmtN(ECCP)}),f:()=>bhBuy(ECCP,()=>{addMat('ecscr',1);toast(t('bhEcsOk'),'good');})});}
 // the people of the East
 // named conditions for QD[id].need (the quest tables stay data)
