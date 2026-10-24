@@ -245,6 +245,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 ## From other ranges (2026-10-24)
 | U | Update | Status | Where |
 |---|---|---|---|
+| U265 | Arabic RTL audit | ✅ | SAT-ONLINE-184: the main screens checked in Arabic (title, HUD, bag, status, equipment, log, map, bestiary, pause, settings, guild, board); fixed: the bag and the equipment's ring row fill from the reading side (they were forced left to right), the log's time keeps its gap from an Arabic line, the bag's scroll gap on the reading end; `regression/rtl` (both languages) |
 | U267 | Reduced motion | ✅ | SAT-ONLINE-164: a device setting in the pause menu (`satisfy_rmo`, the system's prefers-reduced-motion when unset): no camera shake, no white flash, the UI's shakes and pulses stop, particles capped (`RMOFX`, `RMOVX`); telegraphs (`drawTele`) untouched; `regression/rmotion` |
 | U269 | Armor pieces (render sprite overlays) | ✅ | SAT-ONLINE-165: helmet, armour, gloves and boots each draw their own look (`GEARL`, 48 ids), for you and the others (`gr:` fx tag); `regression/gearlook` |
 
