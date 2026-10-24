@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24juice', ver: '2.58', d: '2026-10-24',
+      ar: ["إحساس الضرب واللعب بقى أحلى: أرقام الضربات بتنط وتتفرق بدل ما تطلع على خط واحد، والكريتيكال بينط لفوق ويرجع والكاميرا بتتهز هزة صغيرة",
+          "لما تموّت وحش بتطلع كور خبرة بتطير ناحيتك وبار الخبرة بينوّر لما توصل. ولو موّت ورا بعض (كل واحد في خلال 4 ثواني من اللي قبله) بيطلع عداد «🔥 ورا بعض» بصوت بيعلى، وعند 10 و25 و50 و100 بيطلع إعلان كبير",
+          "اللفل أب والكويست لما يخلص بيطلعوا في نص الشاشة بخط كبير، والدهب بيعدّ لحد الرقم الجديد، ولما صحتك تقل عن 30% أطراف الشاشة بتنبض أحمر، والحاجات اللي على الأرض بتنوّر بلون ندرتها",
+          "ولما زعيم يظهرلك الشاشة بتتقفل من فوق وتحت زي السينما واسمه بيطلع كبير، والضربة التقيلة بتنوّر أطراف الشاشة أحمر",
+          "كل ده بيهدى لو مشغّل «حركة أقل»"],
+      en: ["Hits feel better: damage numbers pop and fan out instead of rising in one line, a critical hit jumps up and falls back, and the camera gives a small kick",
+          "A kill sends orbs of experience flying to you, and the XP bar lights up as they land. Kills in a row (each within 4 seconds of the last) show a \"🔥 STREAK\" counter with a rising note, and 10, 25, 50 and 100 get a big banner",
+          "Level up and quest complete show in the middle of the screen in big letters, gold counts up to its new number, under 30% health the edges of the screen beat red, and things on the ground glow in their rarity's colour",
+          "When a boss comes for you the screen letterboxes like a film and its name comes up big, and a heavy hit flashes the edges red",
+          "All of it calms down with Reduced motion"] },
     { v: '2026-10-24barrage', ver: '2.57', d: '2026-10-24',
       ar: ["كل الإكسبي اللي بتاخده من الوحوش والكويستات زاد 1.2 مرة.",
           "السكيلات اللي بتضرب كذا ضربة ورا بعض (زي رقصات باجما): كل ضربة ليها إيفيكت لحد آخر واحدة، بدل ما الإيفيكت يخلص والصوت لسه شغال، والسيوف اللي بتنزل من السما بقت سيوف بجد.",
