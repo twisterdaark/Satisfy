@@ -194,6 +194,19 @@ body.photo #ui>*:not(#photoBar){visibility:hidden!important}body.photo #photoBar
 .logo .l1{font-family:"Press Start 2P",monospace;font-size:calc(var(--u)*5.2);color:var(--gold);letter-spacing:.06em;text-shadow:0 calc(var(--u)*.4) 0 #7a4a10,0 0 calc(var(--u)*2.5) rgba(242,193,78,.45)}
 .logo .l2{font-family:var(--head);font-size:calc(var(--u)*2.8);color:#eaf2ff;margin-top:calc(var(--u)*1.4)}
 .logo .l3{font-family:"Press Start 2P",monospace;font-size:calc(var(--u)*.9);color:var(--line);margin-top:calc(var(--u)*1);letter-spacing:.2em}
+/* the title (SAT-ONLINE-180): the logo floats and a light runs across it, embers drift up, the menu's buttons come in one by one */
+#titleScreen .logo{animation:lgFloat 6s ease-in-out infinite}@keyframes lgFloat{50%{transform:translateY(calc(var(--u)*-.45))}}
+#titleScreen .logo .l1{position:relative}
+#titleScreen .logo .l1::after{content:'SATISFY';position:absolute;inset:0;color:transparent;text-shadow:none;background:linear-gradient(100deg,transparent 42%,rgba(255,250,225,.9) 50%,transparent 58%);background-size:320% 100%;background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;animation:lgShine 5.5s ease-in-out infinite}
+@keyframes lgShine{0%{background-position:130% 0}55%,100%{background-position:-30% 0}}
+#titleScreen .embers{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+#titleScreen .embers i{position:absolute;left:var(--x);bottom:calc(var(--u)*-1);width:calc(var(--u)*.32*var(--z));height:calc(var(--u)*.32*var(--z));border-radius:50%;background:#ffd27a;box-shadow:0 0 calc(var(--u)*.6) calc(var(--u)*.2) rgba(255,170,50,.55);opacity:0;animation:ember var(--t) linear var(--d) infinite}
+@keyframes ember{0%{transform:translate(0,0);opacity:0}12%{opacity:.85}70%{opacity:.6}100%{transform:translate(calc(var(--u)*var(--dx)*2),calc(var(--u)*-62));opacity:0}}
+#titleScreen:not([hidden]) .menu button{animation:btIn .45s ease-out backwards}
+#titleScreen .menu button:nth-child(2){animation-delay:.05s}#titleScreen .menu button:nth-child(3){animation-delay:.1s}#titleScreen .menu button:nth-child(4){animation-delay:.15s}#titleScreen .menu button:nth-child(5){animation-delay:.2s}#titleScreen .menu button:nth-child(6){animation-delay:.25s}#titleScreen .menu button:nth-child(7){animation-delay:.3s}#titleScreen .menu button:nth-child(8){animation-delay:.35s}#titleScreen .menu button:nth-child(9){animation-delay:.4s}
+@keyframes btIn{0%{opacity:0;transform:translateY(calc(var(--u)*.8))}100%{opacity:1;transform:none}}
+body.rmo #titleScreen .logo,body.rmo #titleScreen .logo .l1::after,body.rmo #titleScreen .menu button{animation:none}body.rmo #titleScreen .embers{display:none}
+@media (prefers-reduced-motion:reduce){#titleScreen .logo,#titleScreen .logo .l1::after,#titleScreen .menu button{animation:none}#titleScreen .embers{display:none}}
 .menu{display:grid;gap:calc(var(--u)*.7);width:calc(var(--u)*26)}
 .menu button{font-size:calc(var(--u)*1.7);padding:calc(var(--u)*.6)}
 .langs{display:flex;gap:calc(var(--u)*2)}
@@ -679,7 +692,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
     </div>
 
     <div id="titleScreen" class="screen" hidden>
-      <div class="logo"><div class="l1">SATISFY</div><div class="l2" data-i18n="subtitle"></div><div class="l3 gver">ALPHA v0.30</div></div>
+      <div class="embers" aria-hidden="true"><i style="--x:6%;--d:0.0s;--t:9.5s;--dx:3;--z:1.0"></i><i style="--x:14%;--d:3.1s;--t:11.0s;--dx:-2;--z:0.7"></i><i style="--x:22%;--d:6.2s;--t:8.6s;--dx:2;--z:1.2"></i><i style="--x:31%;--d:1.4s;--t:10.2s;--dx:-3;--z:0.8"></i><i style="--x:39%;--d:4.8s;--t:9.1s;--dx:2;--z:1.0"></i><i style="--x:47%;--d:7.5s;--t:12.0s;--dx:-1;--z:0.6"></i><i style="--x:55%;--d:2.2s;--t:8.9s;--dx:3;--z:1.1"></i><i style="--x:63%;--d:5.6s;--t:10.6s;--dx:-2;--z:0.8"></i><i style="--x:71%;--d:0.8s;--t:9.8s;--dx:2;--z:1.3"></i><i style="--x:79%;--d:3.9s;--t:11.5s;--dx:-3;--z:0.7"></i><i style="--x:87%;--d:6.8s;--t:9.2s;--dx:1;--z:1.0"></i><i style="--x:94%;--d:2.7s;--t:10.9s;--dx:-2;--z:0.9"></i><i style="--x:18%;--d:8.4s;--t:9.7s;--dx:2;--z:0.6"></i><i style="--x:58%;--d:9.1s;--t:10.1s;--dx:-1;--z:1.0"></i></div><div class="logo"><div class="l1">SATISFY</div><div class="l2" data-i18n="subtitle"></div><div class="l3 gver">ALPHA v0.30</div></div>
       <div class="menu">
         <button data-act="cont" id="contBtn" data-i18n="cont"></button>
         <button data-act="new" id="newBtn" data-i18n="newGame"></button>
