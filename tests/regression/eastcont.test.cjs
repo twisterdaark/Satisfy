@@ -132,6 +132,8 @@ test('the novel\'s quests: the gateways, Arube captured or killed, Han Seokbong 
       G.acceptQ('ea0'); E.act(E.pt('eagate')[0]); o.early = E.ready('ea0');
       P.x = (E.EPG.gx + .5) * 16 + 8; P.y = (E.EGATE.g[0] - 1) * 16; E.gk(); o.back = P.y > E.EGATE.g[0] * 16; const k = G.mons().find((m) => m.gk === 1); o.keeper = !!k;
       if (k) { k.hp = 1; window.__GBH.kill(k); } E.gk(); o.bit = S.ea.gk;
+      // the smiths' contest points to the anvil beside Wyatt, not across the sea
+      { const w = G.npcs.find((n) => n.id === 'whiteS'); S.qs.ea1 = { st: 1, c: 0 }; const sp = window.__GTRK.spot('ea1'); delete S.qs.ea1; o.anvil = sp ? Math.round(Math.hypot(sp.x - w.x / 16, sp.y - w.y / 16)) : -1; }
       S.ea.gk = 7; E.act(E.pt('eagate')[0]); o.gate = E.ready('ea0'); G.completeQ('ea0'); o.star = !!S.tl.pgstar;
       // Arube: capture opens the daoist priest's quest; kill gives two levels and ends it (ch 543)
       S.qs.ea1 = { st: 2 }; G.acceptQ('ea2'); S.qs.ea2.c = 1; G.completeQ('ea2'); o.ea3a = E.avail('ea3');
@@ -148,6 +150,7 @@ test('the novel\'s quests: the gateways, Arube captured or killed, Han Seokbong 
       return o; });
     assert.ok(r.gate && r.star, 'the gateway and the title');
     assert.deepEqual([r.early, r.back, r.keeper, r.bit], [false, true, true, 1], 'the keepers hold the gates');
+    assert.ok(r.anvil >= 0 && r.anvil < 8, 'an anvil beside Wyatt: ' + r.anvil);
     assert.equal(r.ea3a, false, 'nothing before you choose');
     assert.equal(r.capXp, 30); assert.equal(r.ar, 'cap'); assert.equal(r.ea3, true); assert.equal(r.ea4a, false, 'Han Seokbong is still free');
     assert.ok(r.bow, 'the Red Phoenix Bow comes back'); assert.ok(r.jail);

@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24gates', ver: '2.72', d: '2026-10-24',
+      ar: ["بوابات بانجيا الشمالية بقى ليها حراس زي الرواية: وانت واخد المهمة، كل بوابة واقف قدامها حارس، ومحدش بيعدّي قبل ما يغلبه. لما تكسر التالتة بعد ما تغلب التلاتة، الحجر بيقول إنك أول غريب يعدّيها.",
+          "فيه سندان جنب وايت الحداد في بانجيا، ومؤشر مسابقة الحدادين بقى بيوديك عنده بدل البحر. أي مهمة صنع بقت بتشاور على سندان صاحب المهمة أو أقرب سندان في قارتك، ومهمات الخام على أقرب خام ليك."],
+      en: ["Pangea's northern gateways have keepers, as in the novel: while the quest is on, a keeper stands before each gate and nobody passes until it falls. Break the third after beating all three and the stone names you the first outsider through.",
+          "There's an anvil beside White the Blacksmith in Pangea, and the smiths' contest marker now leads there instead of out to sea. Any crafting quest points to its giver's anvil or the nearest one on your continent, and ore quests to the nearest ore."] },
     { v: '2026-10-24salvmap', ver: '2.71', d: '2026-10-24',
       ar: ["لما تفك قطعة صنعتها بالحداد الأسطوري بترجعلك خاماتها هي: النادرة (جوهرة وقرن بيليال، حراشف التنين، الأنفاس...) كاملة، والعادية بنسبة الفك العادية.",
           "كل ما ندرة القطعة تعلى، فرصة إن فيها خاصية مخفية بتزيد، في المصنوع (من 15% لحد 82%) وفي اللي بيقع من الوحوش (من 46% لحد 90%).",

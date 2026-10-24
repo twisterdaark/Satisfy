@@ -2481,6 +2481,10 @@ const eaSnow=(x,y)=>eaEl(x,y,EPG.wf)||eaIn2(x,y,EKAYA)||y+Math.sin(x*.05)*6+Math
  // the East's inns and shops have their own rooms under the map (the rows below the open world past the Red Sea)
  {let j=0;for(const b of buildings)if(b.ea&&(b.k==='shop'||b.k==='inn')){const T=TOWNS.find(T=>b.x>=T.x0&&b.x<=T.x1&&b.y>=T.y0&&b.y<=T.y1);genRoom(b,buildings.indexOf(b),b.k,EAX+4+(j%60)*13,WMH+3+(j/60|0)*10,T?T.k:'zEaPangea');j++;}}})();
 // the East's names on the world map
+// an anvil beside Wyatt (whiteS, 1155,120) in Pangea (owner 2026-10-24): the East had none, and "make a rare piece" for
+// the smiths' contest pointed back across the Red Sea; a free tile two or three to his right, not on the road
+{const at0=(x,y)=>GM[(y+YO)*GW+x];let best=null;for(let r=2;r<6&&!best;r++)for(const [dx,dy] of [[r,0],[r,-1],[r,1],[-r,0],[-r,-1],[-r,1],[0,r],[0,-r]]){const x=1155+dx,y=120+dy;if(!SOLID[at0(x,y)]&&at0(x,y)!==PA&&!SOLID[at0(x,y+1)]&&!SOLID[at0(x,y-1)]){best=[x,y];break;}}
+ if(best){ANVILS.push({id:'anvE',tx:best[0],ty:best[1],own:'whiteS',free:1});setT(best[0],best[1],BL);}}
 const EAL=[['zEaPangea',EPG.gx,EPG.y0-3],['zEaDesert',1200,190],['zEaGate',EGATE.x1+16,60],['zEaTiger',ETIG.x,ETIG.y-ETIG.ry-3],['zEaPa',1200,-110],['zEaPaC',EPA.gx,EPA.y0-3],['zEaWTig',EWT.x+8,EWT.y-24],
  ['zEaXing',1400,-80],['zEaXingC',EXING.gx,EXING.y0-3],['zEaTort',EBT.x,EBT.y-EBT.ry-4],['zEaBarb',1890,-110],['zEaKaya',1830,170],['zEaKayaC',EKAYA.gx,EKAYA.y0-3],['zEaDrag',EBD.x-12,EBD.y-22],
  ['zEaCho',1640,160],['zEaKars',EKARS.gx,EKARS.y0-3],['zEaFarm',EFARM.gx,EFARM.y0-3],['zEaLava',ELAVA.x,ELAVA.y-ELAVA.ry-4],['zEaPhx',EPH.x,EPH.y-14],['zEaMur',EMUR.x,EMUR.y-EMUR.ry-4],['zEaMurS',1380,40]];
@@ -10040,8 +10044,9 @@ window.__GTRK={road:()=>roadSp(),at:(x,y)=>at(x,y),tile:(x,y)=>wTile(x,y),spot:i
 function qSpot0(id){const q=QD[id],o=q.obj;if(qReady(id)||!S.qs[id]){const n=npcs.find(n=>n.id===q.by);return n?{...wTile(n.x,n.y),ret:1}:null;}
  const bs=BOSSES.find(b=>b[0]===o.it);if(o.t==='kill'&&bs)return{x:bs[1],y:bs[2]};
  const src={leather:'rabbit'}[o.it]||o.it,sp=SPAWN.find(s=>s[0]===src);if((o.t==='kill'||o.t==='have')&&sp)return{x:wX((sp[1]+sp[2])/2),y:(sp[3]+sp[4])/2,area:1};
- if(o.it==='ore'&&nodes.length)return wTile(nodes[0].x,nodes[0].y);if(o.t==='visit'&&o.it==='grave')return{x:GRAVE.tx+.5,y:GRAVE.ty+.5};if(o.t==='visit'&&o.it==='myfc')return{x:MYF.x+.5,y:MYF.y+.5};
- if(o.t==='craft'||o.t==='craftR'){const a=ANVILS.find(a=>a.own===q.by)||ANVILS[1];return{x:a.tx+.5,y:a.ty+.5};}
+ if(o.it==='ore'&&nodes.length){const me=outPos();let b=nodes[0],bd=1e18;for(const n of nodes){if(n.k&&n.k!=='ore')continue;const d=(n.x-me.x)**2+(n.y-me.y)**2;if(d<bd){bd=d;b=n;}}return wTile(b.x,b.y);}   // the nearest ore (it was the first in the world, by the beginners' village)if(o.t==='visit'&&o.it==='grave')return{x:GRAVE.tx+.5,y:GRAVE.ty+.5};if(o.t==='visit'&&o.it==='myfc')return{x:MYF.x+.5,y:MYF.y+.5};
+ if(o.t==='craft'||o.t==='craftR'){const me=outPos(),side=eaT(me.x/TS|0),d=a=>(a.tx*TS-me.x)**2+(a.ty*TS-me.y)**2;   // the quest-giver's anvil, else the nearest on your own continent (the sea in between pointed nowhere)
+  const a=ANVILS.find(a=>a.own===q.by)||ANVILS.filter(a=>eaT(a.tx)===side).sort((x,y)=>d(x)-d(y))[0]||ANVILS[1];return{x:a.tx+.5,y:a.ty+.5};}
  if(o.t==='deliver'){const n=npcs.find(n=>n.id===o.it);return n?wTile(n.x,n.y):null;}if(o.t==='escort')return{x:wX(o.to[0])+.5,y:o.to[1]+.5};
  if(o.t==='visit'||o.t==='pray'){const s=SHRINES.find(s=>s.k===o.it);if(s)return wTile(s.x,s.y);}
  if(o.t==='kill'&&MT[o.it])return qNear([o.it])||monHome(o.it);
