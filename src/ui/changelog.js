@@ -7,6 +7,14 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24erasecard', ver: '2.78', d: '2026-10-24',
+      ar: ["\"امسح بياناتي الأونلاين\" بقت بتمسح كارت البطولة كمان.",
+          "الإيموجي اللي بقت رسومات بيكسل محفوظة كنص مخفي جنب الصورة، عشان النسخ والبحث يفضلوا شغالين.",
+          "من فرع fixes9: أخدت مسح كارت البطولة والنص المخفي بس، والباقي كان نازل في 2.74 و2.75."],
+      en: ["\"Delete my online data\" now erases the tournament card too.",
+          "Emoji that became pixel drawings are kept as hidden text beside the picture, so copying and searching still work.",
+          "From the fixes9 branch: only the tournament card erase and the hidden text were taken; the rest shipped in 2.74 and 2.75."],
+      hide: [2] },
     { v: '2026-10-24forestarrow', ver: '2.77', d: '2026-10-24',
       ar: ["مؤشر مهمة الناسك (الوصول للفسحة في الغابة) ومهمة المقبرة رجعوا يشاوروا على مكانهم بدل ما يرجعوك للي اداك المهمة. ده كان غلط اتعمل في 2.72."],
       en: ["The hermit's quest arrow (reach the clearing in the forest) and the graveyard quest's point to their place again instead of back to the giver. This was a mistake made in 2.72."] },
