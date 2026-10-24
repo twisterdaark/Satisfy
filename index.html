@@ -8043,17 +8043,40 @@ const SHOPG={isword:150,bow:140,staff:140,hammer:150,spear:150,dagger:130,larmor
  parmor:680,ihelm:400,igloves:340,iboots:360,cring:300,mring:900,msword:3200,marmor:3000,mhelm:1500,mgsword:4500,mgarmor:4200,mghelm:2200,mggloves:1800,mgboots:1800,iear:260,mear:1400},SHOPM={ore:8,bread:5,blue:150};
 // gear: recipe worth (or level), times rarity and enhancement, halved when broken; a shop piece is capped at half its
 // price before the common x0.6, so a plain one sells for 30% of what it cost and a rarer copy for more
+/* ---------------- the fish and produce market (SAT-ONLINE-190; plan U222 "Fish market": "prices based on species and supply
+   quotas", checked by "players can't sell non-existent fish"; U223 "Crop wholesale market": "limit oversupply and crop
+   spoilage", checked by "farming cannot print infinite Gold") ----------------
+   The merchants buy fish and produce at its species' price up to a day's quota of each kind. Past it the market is full:
+   each one sells for less (the quota over how many you have sold, down to a tenth), and at five quotas they buy no more of
+   that kind that day. The day is the world's, the same for everyone, and today's counts are in the save, so leaving and
+   coming back doesn't reset them. Only what is in your bag can be sold, as before. */
+Object.assign(STR.ar,{mkLow:'السوق مليان {it} النهارده: {g} دهب للواحدة',mkFull:'محدش بيشتري {it} تاني النهارده. السوق مليان، تعالى بكرة',mkPart:' (اشتروا {n} بس، السوق اتملا)'});
+Object.assign(STR.en,{mkLow:'The market is full of {it} today: {g} gold each',mkFull:'Nobody buys more {it} today. The market is full; come back tomorrow',mkPart:' (they took only {n}: the market is full)'});
+const MKQ={fish:40,sfish:15,gfish:5,wheat:40,straw:30,melon:16,pumpk:16,fcab:16},MKD=86400000;
+const mkDay=()=>Math.floor(wNow()/MKD),mkS=()=>S.mkt&&S.mkt.d===mkDay()?S.mkt:(S.mkt={d:mkDay(),n:{}});
+const mkF=(k,i)=>{const Q=MKQ[k];return i<Q?1:i>=Q*5?0:Math.max(.1,Q/(i+1));};   // what the i-th of a kind sold today fetches, of its price
+// n of a kind sold now: the sum of what each fetches and how many they take
+function mkTake(k,n){const s=mkS().n[k]||0;let f=0,c=0;for(let i=0;i<n;i++){const v=mkF(k,s+i);if(!v)break;f+=v;c++;}return {f,c};}
+window.__GMK={Q:MKQ,day:()=>mkDay(),get S(){return mkS()},f:(k,i)=>mkF(k,i),take:(k,n)=>mkTake(k,n)}; // tests
 function itemVal(i){const rc=rcById(i.id);let b=0;if(rc&&rc.need)for(const m in rc.need)b+=(MATP[m]||5)*rc.need[m];if(!b)b=100+((rc&&rc.lvr)||40)*20;const sp=Math.min(i.bp||1e9,SHOPG[i.id]||1e9);if(sp<1e9)b=Math.min(b,sp*.5);return Math.max(1,Math.round(b*[.6,1,1.6,3,8][Math.min(4,i.r||0)]*(1+.1*(i.en||0))*(durOf(i)<=0?.5:1)));}
-const unitVal=s=>s.it?itemVal(s.it):s.k==='arrows'?ARROWG[s.r]:POT[s.k]?Math.round(POT[s.k].price*.3):SHOPM[s.k]?Math.max(1,Math.round(SHOPM[s.k]*.3)):DISH[s.k]?12:(MATP[s.k]||2);
+const unitVal=s=>s.it?itemVal(s.it):s.k==='arrows'?ARROWG[s.r]:POT[s.k]?Math.round(POT[s.k].price*.3):SHOPM[s.k]?Math.max(1,Math.round(SHOPM[s.k]*.3)):DISH[s.k]?12:MKQ[s.k]&&S?Math.round((MATP[s.k]||2)*mkF(s.k,mkS().n[s.k]||0)):(MATP[s.k]||2);
 function cfm(title,body,yes,f){const w=$('cfmW');$('cfmT').textContent=title;$('cfmB').innerHTML=body;$('cfmY').textContent=yes;$('cfmN').textContent=t('cfmNo');w.hidden=false;SFX.notice();
  $('cfmY').onclick=e=>{e.stopPropagation();w.hidden=true;f();};$('cfmN').onclick=e=>{e.stopPropagation();w.hidden=true;SFX.close();};}
 function invTrash(s){if(ivLocked(s))return;if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
  cfm(t('delT'),t('delQ',{it:`<b class="rt rt${s.r||0}">${esc(sName(s))}</b>${s.n>1?' ×'+s.n:''}`}),t('delY'),()=>{if(!slotOut(s,true))return;SFX.deny();toast(t('delDone',{it:sName(s)}),'warn');INVX=null;renderInv();save(true);});}
 function invDrop(s){if(ivLocked(s))return;if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
  cfm(t('dropT'),t('dropQ',{it:`<b class="rt rt${s.r||0}">${esc(sName(s))}</b>${s.n>1?' ×'+s.n:''}`}),t('dropY'),()=>{const o=slotOut(s,true);if(!o)return;const d={x:P.x+(rand()-.5)*12,y:P.y+10,o,t:gTime+60,lock:gTime+2};dropPut(d);GDROP.push(d);SFX.swing();toast(t('dropDone',{it:sName(s)}));renderInv();save(true);});}
-function invSell(s,all){if(ivLocked(s))return;if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}const n=all?s.n:1,g=Math.round(unitVal(s)*n*(1+secB('sell')));
+function invSell(s,all){if(ivLocked(s))return;if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
+ if(!s.it&&MKQ[s.k])return mkSell(s,all); // SAT-ONLINE-190: fish and produce go by the day's market
+ const n=all?s.n:1,g=Math.round(unitVal(s)*n*(1+secB('sell')));
  const go=()=>{if(!slotOut(s,all))return;S.gold+=g;SFX.coin();numP(-26,'+'+g+'G','#f2c14e',false);toast(t('soldIt',{it:sName(s)+(n>1?' ×'+n:''),g}),'good');renderInv();save(true);};
  if(s.it&&(s.r||0)>=2)cfm(t('sellT'),t('sellQ',{it:`<b class="rt rt${s.r}">${esc(sName(s))}</b>`,g}),t('sellY'),go);else go();}
+// selling fish or produce: as many as the market takes today, each at what it fetches
+function mkSell(s,all){const want=all?s.n:1,{f,c}=mkTake(s.k,want);if(!c){SFX.deny();toast(t('mkFull',{it:t(s.k)}),'warn');return;}
+ const g=Math.round((MATP[s.k]||2)*f*(1+secB('sell')));if(!slotOut({k:s.k,n:c,r:s.r},true))return;const M=mkS();M.n[s.k]=(M.n[s.k]||0)+c;
+ S.gold+=g;SFX.coin();numP(-26,'+'+g+'G','#f2c14e',false);const nx=mkF(s.k,M.n[s.k]);
+ toast(t('soldIt',{it:sName(s)+(c>1?' ×'+c:''),g})+(c<want?t('mkPart',{n:c}):''),'good');if(nx<1&&nx>0)setTimeout(()=>toast(t('mkLow',{it:t(s.k),g:Math.max(1,Math.round((MATP[s.k]||2)*nx))})),400);
+ renderInv();save(true);}
 function openSell(who){INVX={who};SFX.open();mode='inv';$('inv').hidden=false;$('hint').hidden=true;renderInv();}
 // drag a bag slot: onto the bin = destroy, out of the bag = drop on the ground
 $('invQ').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'||e.key==='Enter')e.target.blur();});$('invQ').addEventListener('keyup',e=>e.stopPropagation());$('invQ').addEventListener('input',()=>renderInv());
