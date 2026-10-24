@@ -8130,12 +8130,12 @@ const SKF={
  // Manifestation of Will (ch 1005): intangible copies of his weapon; damage from Willpower and strength, defence ignored. Cooldown 1 minute
  mheaven:()=>{const T=mons.filter(m=>!m.dead&&Math.hypot(m.x-P.x,m.y-P.y)<170).sort((a,b)=>Math.hypot(a.x-P.x,a.y-P.y)-Math.hypot(b.x-P.x,b.y-P.y)).slice(0,6);
   if(!T.length)return toast(t('ssNoT'),'');const mul=2+wilV()/150;SFX.notice();flash();
-  T.forEach((m,i)=>{for(let k=0;k<6;k++)fx.push({x:P.x+(m.x-P.x)*k/6,y:P.y-34+(m.y-P.y+26)*k/6,vx:0,vy:0,t:.2+k*.04+i*.08,c:k%2?'#e8f4ff':'#9fd8ff',fl:1});
-   setTimeout(()=>{if(mode!=='play'||m.dead)return;if(hitMon(m,mul,{skill:1}))vfx('slash',m.x,monY(m),{angle:rand()*6.283,rarity:4});SFX.hit();},150+i*90);});},
+  vfx('aura',P.x,P.y,{raw:1,color:'#cfe8ff'});T.forEach((m,i)=>{setTimeout(()=>{if(mode!=='play'||m.dead)return;vfx('swordRain',m.x,monY(m),{raw:1,pts:[[m.x,monY(m)]],color:'#e8f4ff'});},i*90);
+   setTimeout(()=>{if(mode!=='play'||m.dead)return;if(hitMon(m,mul,{skill:1}))vfx('pillar',m.x,monY(m)+6,{raw:1,color:'#cfe8ff',h:60,w:8});SFX.hit();},150+i*90);});},
  // Heart Sword (ch 1050): an imperfect touch of the highest realm, one cut that took Berith's shoulder
  mwind:()=>{const v=fdir();let best=null,bd=80;for(const m of mons){if(m.dead)continue;const dx=m.x-P.x,dy=m.y-P.y,d=Math.hypot(dx,dy);if(d<bd&&dx*v[0]+dy*v[1]>-6){bd=d;best=m;}}
   P.acd=0;SFX.slam();shake=.35;const an=Math.atan2(v[1],v[0]),cx=best?best.x:P.x+v[0]*30,cy=best?monY(best):P.y-7+v[1]*30;
-  vfx('slash',cx,cy,{angle:an+.5,rarity:4});vfx('slash',cx,cy,{angle:an-.5,rarity:4});fx.push({ring:true,big:1,x:cx,y:cy,t:.5});for(let i=0;i<12;i++)fx.push({x:cx,y:cy,vx:Math.cos(i*.52)*90,vy:Math.sin(i*.52)*60,t:.35,c:i%2?'#ff9a9a':'#ffffff',fl:1});
+  flash();vfx('crescent',cx-v[0]*14,cy-v[1]*14,{raw:1,angle:an,big:2.6,color:'#ffb0b0'});vfx('xcut',cx,cy,{raw:1,color:'#ffd0d0',big:1.4});vfx('shock',cx,cy+6,{raw:1,radius:44,color:'#ffc0c0'});fx.push({ring:true,big:1,x:cx,y:cy,t:.5});for(let i=0;i<12;i++)fx.push({x:cx,y:cy,vx:Math.cos(i*.52)*90,vy:Math.sin(i*.52)*60,t:.35,c:i%2?'#ff9a9a':'#ffffff',fl:1});
   if(best)hitMon(best,12,{skill:1});},
  // True Clouds (ch 1254): blue clouds of sword energy that steal the senses of those inside
  scloud:()=>{SFX.magic();for(let i=0;i<40;i++){const a=rand()*6.283,r=rand()*80;fx.push({x:P.x+Math.cos(a)*r,y:P.y-6+Math.sin(a)*r*.6,vx:(rand()-.5)*20,vy:-10-rand()*10,t:1+rand()*.6,c:rand()<.5?'#5ab8ff':'#bfe0ff',fl:1});}
@@ -8143,7 +8143,7 @@ const SKF={
  // Frenzy Sword (ch 1376): lightning-fast stabs from every side, each one a chained explosion
  mflash:()=>{const T=mons.filter(m=>!m.dead&&Math.hypot(m.x-P.x,m.y-P.y)<130);if(!T.length)return toast(t('ssNoT'),'');P.inv=Math.max(P.inv,1.2);SFX.dodge();
   for(let i=0;i<8;i++)setTimeout(()=>{if(mode!=='play')return;const L=T.filter(m=>!m.dead);if(!L.length)return;const m=L[i%L.length],an=rand()*6.283,x=m.x+Math.cos(an)*16,y=m.y-8+Math.sin(an)*10;
-   for(let k=0;k<5;k++)fx.push({x:x+(m.x-x)*k/5,y:y+(m.y-8-y)*k/5,vx:0,vy:0,t:.18,c:k%2?'#fff8a0':'#ffffff',fl:1});hitMon(m,2.2,{skill:1});fx.push({ring:true,x:m.x,y:m.y-6,t:.3});
+   vfx('thrust',m.x-Math.cos(an)*30,m.y-8-Math.sin(an)*20,{raw:1,angle:Math.atan2(20*Math.sin(an),30*Math.cos(an)),len:32,color:'#fff8a0'});hitMon(m,2.2,{skill:1});fx.push({ring:true,x:m.x,y:m.y-6,t:.3});
    if(aoe(m.x,m.y-6,26,1,{skill:1}))SFX.hit();tone(880-i*40,.05,'square',.05);},i*70);},
  // Matchless Heart Technique (ch 1130, 1254): Muller's sword-energy circulation; half your mana back at once. Once an hour
  mheart:()=>{P.mp=Math.min(maxMP(),P.mp+maxMP()*.5);fx.push({ring:true,big:1,x:P.x,y:P.y-8,t:.6});for(let i=0;i<16;i++)fx.push({x:P.x+(rand()-.5)*30,y:P.y,vx:0,vy:-40-rand()*30,t:.7,c:'#ffd24a',fl:1});hudDirty=true;},

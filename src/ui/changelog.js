@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24saintfx', ver: '2.59', d: '2026-10-24',
+      ar: ["سكيلات السورد ساينت بقت شكلها أقوى: \"تجسيد الإرادة\" بينزّل سيوف شبح على كل وحش وبعدها عمود نور بيطلع من الأرض، \"سيف القلب\" بيطلع هلال ضخم وضربة X وموجة في الأرض، و\"سيف الجنون\" بقى طعنات نور جاية من كل ناحية."],
+      en: ["The Sword Saint's skills look stronger: Manifestation of Will drops ghost swords on every monster and a pillar of light rises after, Heart Sword throws an enormous crescent, an X cut and a ground shock, and Frenzy Sword is thrusts of light from every side."] },
     { v: '2026-10-24threat', ver: '2.58', d: '2026-10-24',
       ar: ["الوحوش بقت محتاجة تفكير: ضربة الوحش القريب من لفلك بتاخد نسبة من صحتك (لحد 11-12% للضربات اللي ليها تحذير زي الخبطة والجري والنطة والدواير، 5% للطلقات، 2.5% للضربة العادية، والبوس مرة ونص)، والنسبة دي بتقل وتختفي لو الوحش أقل منك بـ15 لفل.",
           "الضربة التقيلة بتعملك \"جريح\": امتصاص الحياة بيشتغل 40% بس لمدة 3 ثواني، وامتصاص الحياة أقصاه 4% من صحتك في الثانية.",
