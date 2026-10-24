@@ -60,12 +60,23 @@
       .replace(/(.)\1{2,}/g, '$1$1').replace(/[^a-z\u0621-\u064a]/g, '');
   }
   var BADF = BAD.map(fold);
+  var SEVF = ['nigger', 'nigga', 'faggot', 'fuck', 'cunt', 'whore', 'slut', 'bitch', 'retard', 'shit', 'شرموط', 'متناك', 'منيوك', 'معرص', 'كسمك', 'كسامك', 'كسختك'].map(fold);
   function bad(w) {
     var f = fold(w), g = f.replace(/(.)\1+/g, '$1');
     if (!f) return false;
     if (BADF.indexOf(f) >= 0 || BADF.indexOf(g) >= 0) return true;
     if (/^(ال|و|يا|ف)/.test(f) && f.length > 3) { var s = f.replace(/^(ال|و|يا|ف)/, ''); if (BADF.indexOf(s) >= 0) return true; } // Arabic: and-, the-, O-
     for (var i = 0; i < ROOTS.length; i++) if (f.indexOf(ROOTS[i]) === 0 || g.indexOf(ROOTS[i]) === 0) return true;
+    return false;
+  }
+  /** A name with an insult anywhere in it, glued words included: the folded name holds a listed word of four letters or more or
+   *  an English root, or one of its words is a listed word (owner 2026-10-24: names are filtered too). */
+  function nameBad(name) {
+    var raw = String(name || ''), f = fold(raw), g = f.replace(/(.)\1+/g, '$1');
+    if (!f) return false;
+    for (var i = 0; i < SEVF.length; i++) if (f.indexOf(SEVF[i]) >= 0 || g.indexOf(SEVF[i]) >= 0) return true;   // the worst words, even inside a name (not 'dick': Dickson)
+    var words = raw.split(/[\s_\-.]+|(?=[A-Z][a-z])/);
+    for (var k = 0; k < words.length; k++) if (words[k] && bad(words[k])) return true;
     return false;
   }
   /** The text with the listed insults as stars (the rest untouched). */
@@ -179,5 +190,5 @@
   }
 
   var ns = root.Satisfy = root.Satisfy || {};
-  ns.chat = Object.freeze({ create: create, blocklist: blocklist, clean: clean, mask: mask, C: C, TYPES: Object.freeze(TYPES.slice()), KEY: KEY });
+  ns.chat = Object.freeze({ create: create, blocklist: blocklist, clean: clean, mask: mask, nameBad: nameBad, C: C, TYPES: Object.freeze(TYPES.slice()), KEY: KEY });
 })(typeof window !== 'undefined' ? window : globalThis);
