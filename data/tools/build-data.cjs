@@ -38,7 +38,7 @@ function build(T,sourceVersion){
   const quests={...meta(['QD']),quests:{}};
   for(const [id,q] of Object.entries(T.QD)){
     const all=[{not:{questTaken:id}}];if(q.pre)all.push({questDone:q.pre});if(q.cl2)all.push({cls:q.cl2});if(q.from)all.push({cls:q.from},{not:{promoQuestActive:true}},{mastery:{k:q.mst[0],gte:q.mst[1]}});
-    if(q.cls)all.push({cls:'novice'},{not:{classQuestActive:true}});if(q.hid)all.push({hiddenCondition:q.cond});all.push({lv:{gte:q.lv||1}});
+    if(q.cls&&!q.sw)all.push({cls:'novice'},{not:{classQuestActive:true}});if(q.hid)all.push({hiddenCondition:q.cond});all.push({lv:{gte:q.lv||1}});
     quests.quests[id]={id,...q,offer:{all},_srcFn:'qAvail(id)&&S.lv>=(QD[id].lv||1)',src:SRC};}
 
   const recipes={...meta(['RC']),recipes:{}};
@@ -60,7 +60,7 @@ function build(T,sourceVersion){
   // class path: one class quest per class at Lv5 (QD entries with cls), skills from SKD by cls
   const classes={...meta(['QD(cls)','SKD']),start:'novice',sharedSkills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls==='any'),classes:{
     novice:{id:'novice',start:true,skills:[],src:SRC}}};
-  for(const [qid,q] of Object.entries(T.QD))if(q.cls)classes.classes[q.cls]={id:q.cls,quest:qid,trainer:q.by,lv:q.lv,...(q.pre?{pre:q.pre}:{}),item:q.item,
+  for(const [qid,q] of Object.entries(T.QD))if(q.cls&&!q.sw)classes.classes[q.cls]={id:q.cls,quest:qid,trainer:q.by,lv:q.lv,...(q.pre?{pre:q.pre}:{}),item:q.item,
     skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls===q.cls),src:SRC};
   // legendary classes come from an item, not a trainer, and exist once per world (SAT-PAGMA-001)
   if(Object.values(T.SKD).some(d=>d.cls==='pagma'))classes.classes.pagma={id:'pagma',legendary:true,source:'pbook',unique:'world',skills:Object.keys(T.SKD).filter(k=>T.SKD[k].cls==='pagma'),src:SRC};

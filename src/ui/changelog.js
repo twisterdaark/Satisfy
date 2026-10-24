@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24necro', ver: '2.84', d: '2026-10-24', hide: [3],
+      ar: ["الصحة والمانا مبقتش بتبوظ وتبقى NaN (اللي كانت بتبان في السورد سينت): أي ضربة أو علاج حسابه بايظ بيتلغي بدل ما يبوّظ الصحة، وامتصاص الحياة بقى محمي.",
+          "عربجي وينستون عنده \"وريني طريق مدرّب النيكرومانسر\": سهم المهمات بيوديك للراجل الشاحب عند معبد ياتان شمال البلد.",
+          "الساحر (من غير ترقية) يقدر يغيّر لنيكرومانسر: الراجل الشاحب بيدّيله اختبار الضبع من لفل 20، ولما يخلّصه يبقى نيكرومانسر.",
+          "لو الصحة بانت NaN تاني، اكتب window.__NANLOG في الكونسول وابعتلنا اللي يطلع."],
+      en: ["Health and mana no longer break into NaN (seen on the Sword Saint): a hit or heal with a broken value is dropped instead of breaking your health, and life steal is guarded.",
+          "The Winston coachman has \"Show me the way to the necromancer trainer\": the quest arrow leads you to the Pale Robed Man at the Yatan temple north of town.",
+          "A Mage (not promoted) can change to Necromancer: the Pale Robed Man gives the Hyena trial from level 20, and finishing it makes you a Necromancer.",
+          "If health shows NaN again, type window.__NANLOG in the console and send us what it prints."] },
     { v: '2026-10-24titlefix', ver: '2.83', d: '2026-10-24',
       ar: ["لوحة الحفظ السحابي بقت بتظهر فوق زراير شاشة البداية مش تحتها.",
           "لما تدوس بلاي، الزراير بتختفي على طول بدل ما تفضل ظاهرة والشاشة بتسود.",

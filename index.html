@@ -3556,7 +3556,8 @@ Object.assign(STR.en,{"hood": "Hooded Man", "hood_hi": "Shh. Nobody saw you come
    heals you by part of what it deals. Ch 543: necromancers are "as weak as a child" (10% less health). Online the
    skeletons are yours alone; others see a few of them walk behind you (fx "st:" tag 'k'). Monsters only. */
 const NEC={min:[],corpses:[],lock:0};
-const necOn=()=>!!S&&(clsIs('necro')||!!(S.qs.cn&&S.qs.cn.st===1));
+const necQ=()=>!!S&&['cn','cnm'].some(k=>S.qs[k]&&S.qs[k].st===1); // the Hyena trial: a novice's (cn) or a Mage's switch (cnm)
+const necOn=()=>!!S&&(clsIs('necro')||necQ());
 const necCap=()=>Math.min(6,2+Math.floor(S.lv/15)+Math.floor(stat('int')/60));
 const necPow=()=>(pasOn('nenh')&&clsIs('necro')?1+.3*pasM('nenh'):1);
 function necCorpse(m){if(!necOn()||m.spar||MT[m.type].boss)return;NEC.corpses.push({x:m.x,y:m.y,t:15});if(NEC.corpses.length>12)NEC.corpses.shift();}
@@ -3576,7 +3577,7 @@ const NESK={
   const n=Math.min(maxHP()-P.hp,Math.max(1,Math.round(Math.min(maxHP()*.12,got*.3))));if(n>0&&mode==='play'){P.hp+=n;numP(-14,'+'+n,'#b07aff',false);hudDirty=true;}}};
 function necTick(dt){if(!S||!P)return;if(NEC.lock>0)NEC.lock-=dt;
  for(let i=NEC.corpses.length-1;i>=0;i--){const c=NEC.corpses[i];if((c.t-=dt)<=0){NEC.corpses.splice(i,1);continue;}
-  if(S.qs.cn&&S.qs.cn.st===1&&Math.hypot(c.x-P.x,c.y-P.y)<10){NEC.corpses.splice(i,1);qEvent('corpse','corpse');dissolve(c.x,c.y-4,['#6a5a8a','#d8d4c4'],10);SFX.quest();}}
+  if(necQ()&&Math.hypot(c.x-P.x,c.y-P.y)<10){NEC.corpses.splice(i,1);qEvent('corpse','corpse');dissolve(c.x,c.y-4,['#6a5a8a','#d8d4c4'],10);SFX.quest();}}
  if(!clsIs('necro')&&NEC.min.length)NEC.min=[];
  for(let i=NEC.min.length-1;i>=0;i--){const s=NEC.min[i];s.t-=dt;if(s.t<=0||s.hp<=0||P.hp<=0||Math.hypot(s.x-P.x,s.y-P.y)>600){dissolve(s.x,s.y-8,['#d8d4c4','#6a5a8a'],12);NEC.min.splice(i,1);continue;}
   let tgt=null,td=150;for(const m of mons){if(m.dead||m.spar)continue;const d=Math.hypot(m.x-P.x,m.y-P.y);if(d<td){td=d;tgt=m;}}
@@ -3601,6 +3602,8 @@ const NEICO={
 window.__GNE={NEC,tick:dt=>necTick(dt),sk:k=>SKF[k](),cap:()=>necCap(),corpse:m=>necCorpse(m)};
 Object.assign(STR.ar,{"nec": "الراجل الشاحب", "nec_hi": "الناس بتسمينا ضباع. عشان بندور على الجثث في ساحة القتال. ميهمنيش.", "nec_idle": "الموتى مبيتكلموش كتير. بحبهم كده.", "cl_necro": "نيكرومانسر", "q_cn": "الضبع", "cn_o": "النيكرومانسر بيحرك جثث غيره. وريني إنك تعرف تلاقيها: لما تقتل وحش جسمه هيفضل 15 ثانية، امشي عليه وخده. هات 8 جثث طازة.", "cn_w": "لسه. الجثث مبتستناش كتير.", "cn_d": "عندك عين ضبع. من النهارده إنت نيكرومانسر. جسمك ضعيف زي العيل، فخلي الهياكل تاخد الضرب عنك.", "o_corpse": "لم جثث طازة: {c}/{n}", "necLock": "الانفجار لسه مخلّص على الهيكل: استنى {n} ثانية قبل ما تستدعي تاني", "necNoBody": "مفيش جثة قريبة. اقتل وحش الأول", "necNoMin": "مفيش هيكل عندك تفجره", "necNoTgt": "مفيش وحش قدامك", "sk_nskel": "استدعاء هيكل", "skd_nskel": "بتقوّم هيكل عظمي بسيف قديم من جثة قريبة. بيعيش 60 ثانية وبيحارب الوحوش اللي جنبك. عددهم بيزيد مع اللفل والذكاء.", "sk_nenh": "تقوية الهياكل", "skd_nenh": "الهياكل بتاعتك أقوى 30% في الضرب والصحة.", "sk_nexpl": "انفجار الجثة", "skd_nexpl": "بتفجر أقرب هيكل ليك 350% في كل اللي حواليه. بعدها مينفعش تستدعي 6 ثواني.", "sk_ndrain": "امتصاص الحياة", "skd_ndrain": "140% على الوحش اللي قدامك، وبترجع جزء من الضرر صحة ليك."});
 Object.assign(STR.en,{"nec": "Pale Robed Man", "nec_hi": "People call us hyenas, because we look for dead bodies on the battlefield. I do not mind.", "nec_idle": "The dead do not talk much. I like them that way.", "cl_necro": "Necromancer", "q_cn": "The Hyena", "cn_o": "A necromancer moves the corpses of others. Show me you can find them: when you kill a monster its body stays for 15 seconds; walk onto it to take it. Bring me 8 fresh corpses.", "cn_w": "Not yet. Corpses do not wait long.", "cn_d": "You have a hyena's eye. From today you are a Necromancer. Your body is as weak as a child, so let the skeletons take the blows for you.", "o_corpse": "Gather fresh corpses: {c}/{n}", "necLock": "The explosion just spent a skeleton: wait {n} s before summoning again", "necNoBody": "There is no body nearby. Kill a monster first", "necNoMin": "You have no skeleton to explode", "necNoTgt": "There is no monster in front of you", "sk_nskel": "Summon Skeleton", "skd_nskel": "Raise a skeleton with an old longsword from a body nearby. It lasts 60 s and fights the monsters near you. How many you can keep grows with level and Intelligence.", "sk_nenh": "Skeleton Enhancement", "skd_nenh": "Your skeletons have 30% more damage and health.", "sk_nexpl": "Corpse Explosion", "skd_nexpl": "Blow up your nearest skeleton for 350% on everything around it. No summoning for 6 s after.", "sk_ndrain": "Life Drain", "skd_ndrain": "140% on the monster in front of you, and part of it comes back to you as health."});
+Object.assign(STR.ar,{q_cnm:'الضبع (تغيير من ساحر)',cnm_o:'ساحر عايز يسيب برج السحر ويمشي ورا الموتى؟ ماشي. نفس الاختبار: لما تقتل وحش جسمه بيفضل 15 ثانية، امشي عليه وخده. هات 8 جثث طازة. لو خلّصت هتبقى نيكرومانسر، ومش هتقدر تبقى ساحر قتالي أو ساحر أسود بعدها.',cnm_w:'لسه. الجثث مبتستناش كتير.',cnm_d:'سحرك هيخدم الموتى من النهارده. إنت نيكرومانسر. خلّي الهياكل تاخد الضرب عنك.',oNecWay:'📍 وريني طريق مدرّب النيكرومانسر',necWayOn:'السهم بيدلّك على الراجل الشاحب، مدرّب النيكرومانسر عند معبد ياتان شمال وينستون',necWayAt:'الراجل الشاحب، مدرّب النيكرومانسر، واقف عند معبد ياتان شمال وينستون. اختباره للي ملوش كلاس أو للساحر من لفل 20'});
+Object.assign(STR.en,{q_cnm:'The Hyena (a Mage changing)',cnm_o:'A mage who wants to leave the magic tower and follow the dead? Fine. The same trial: when you kill a monster its body stays for 15 seconds; walk onto it to take it. Bring me 8 fresh corpses. Once done you are a Necromancer, and you can no longer become a Battlemage or a Warlock.',cnm_w:'Not yet. Corpses do not wait long.',cnm_d:'From today your magic serves the dead. You are a Necromancer. Let the skeletons take the blows for you.',oNecWay:'📍 Show me the way to the necromancer trainer',necWayOn:'The arrow points to the Pale Robed Man, the necromancer trainer at the Yatan temple north of Winston',necWayAt:'The Pale Robed Man, the necromancer trainer, stands at the Yatan temple north of Winston. His trial is for those with no class, or a Mage, from level 20'});
 /* Hidden classes (major 10; plan doc ch 81 "AURA MASTER/Hurents [ACCEPT PRECISION]", "ORATOR/Huroi [ACCEPT QUEST
    DIALOGUE]", C228-243 hidden classes ACCEPT ADAPTED). No trainer gives them. Canon ch 131: "A hidden class was obtained
    once every condition was met, and it could change depending on luck and coincidences." So each one waits behind a
@@ -6391,7 +6394,7 @@ const maxRating=()=>Math.min(4,(S.smith<4?2:S.smith<6?3:4)+(isSm()?1:0));
 // everything that must persist lives in S (plain JSON), so it can be saved locally now and synced to a server later
 function freshState(){
  S={v:5,wv:4,wpfix:1,wpfix2:1,rcK:{},rcN:{},look:{...DEFLOOK},cls:'novice',lv:1,xp:0,gold:20,bread:3,hpot:2,mpot:0,tl:{},title:'',qs:{},kills:{},met:{},ev:{},playT:0,sk:{},firstLeg:0,raid:0,mats:{ore:0,wood:0,leather:0,blue:0,mstone:0,mith:0},arrows:[0,0,0,0,0],arrowsMade:0,sold:0,items:[{uid:1,id:'rusty',slot:'w',r:0,atk:25,spd:.4}],eqW:1,eqA:0,eq:{},aff:{},rep:{},giftT:{},uid:1,made:{},smith:1,sxp:0,patience:0,guardDown:false,hits:0,st:{str:10,sta:10,agi:10,int:10,dex:10},pts:0,bonus:0,got:{},hid:{comp:10,indom:10,dign:10,insi:10},immT:0,zone:'',vis:{zWin:1},bq:[],bqa:{},bqT:0};
- P={x:wX(126)*TS+8,y:84*TS+10,dir:0,frame:0,at:0,hp:200,st:100,mp:30,food:80,scd:0,cd:{},rage:0,cc:0,ghost:false,acd:0,inv:0,dash:0,dcd:0,dx:0,dy:0,slash:null,trail:[],painT:false,hungryT:false,starveT:false};spwOn();
+ P={x:wX(126)*TS+8,y:84*TS+10,dir:0,frame:0,at:0,hp:200,st:100,mp:30,food:80,scd:0,cd:{},rage:0,cc:0,ghost:false,acd:0,inv:0,dash:0,dcd:0,dx:0,dy:0,slash:null,trail:[],painT:false,hungryT:false,starveT:false};hpGuardOn(P);spwOn();
  WS=freshWS();
 }
 // Advancements (SAT-CLASS-002): every 100 levels the body breaks through a limit. Each one adds +10 to every stat and
@@ -6423,7 +6426,8 @@ function atkCD(){return (blNear()?1.25:1)*(auOn()?.3:weapon().spd)*hcAcd()*(1-Ma
 // damage vs a higher-level monster falls off with the gap but never below 12%, so a big gap is a slow fight, not an immune wall
 // owner 2026-10-22: a Lv 1 killed a Lv 130 monster. Up to 50 levels above you, you still do at least 35%; past that the
 // floor falls fast, to 2% at 100 levels and more
-const lvF=ml=>{const g=ml-S.lv;return g<=0?1+Math.min(.3,-g*.02):Math.max(g<=50?.35:Math.max(.02,.35-(g-50)*.0066),1/(1+Math.pow(g/10,1.4)));};
+const lvF=ml=>{const g=(Number.isFinite(ml)?ml:S.lv)-S.lv;   // (a target with no level counts as your own: NaN made the hit, and any life steal on it, NaN)
+return g<=0?1+Math.min(.3,-g*.02):Math.max(g<=50?.35:Math.max(.02,.35-(g-50)*.0066),1/(1+Math.pow(g/10,1.4)));};
 // itemByUid: what's worn is looked up many times a frame (stat, gearSum, maxHP...), each a find over the whole bag; an index
 // by uid answers it, checked against the bag on each use and made again when the bag changes (SAT-ONLINE-160)
 let ITM={a:null,n:-1,m:null};
@@ -6752,7 +6756,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,m
  dmg=ipHit(m,dmg,crit,o);if(o.skill&&tlOn('duke'))dmg*=1.15;if(o.skill&&S.cls2==='bomb')dmg*=1.15;sc2Hit(m,o);if(o.skill&&S.cls==='braham'&&S.sk.bcont&&rand()<Math.min(.75,.3+.05*(skLv('bcont')-1))){dmg*=1.3;if(!o.dot&&rand()<.3)numPK(-30,'bcAmp','#d8c0ff',false);}dmg*=1+pasGen();if(P.shwU>gTime)dmg*=saEvil(m)?1.5:1.2;dmg=tzHit(m,dmg,o);if(!o.dot)kyArc(m);if(o.skill&&S.cls==='mumud'&&pasOn('mmreint'))dmg*=1+.15*pasM('mmreint');if(m.tw===1)twHit(m,crit,o);if(m.type==='gcrown'&&m.bh&&!crit&&!o.skill)dmg=1;if(o.skill&&S.bh&&S.bh.mm)dmg*=1.03;if(tlOn('hking')&&HKV.has(m.type))dmg*=1.15;dmg=ttHit(m,dmg,crit);
  let mblk=false;if(AIK[m.type]==='soldier'&&!m.tdum&&!o.skill&&!o.aura&&!(P.bdetU>gTime)&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
   mblk=true;dmg*=.2;crit=false;burn=false;m.grdT=.6;m.cd=Math.min(m.cd,.15);vfx('block',m.x+m.face*7,my-2,{angle:m.face>0?Math.PI:0});num(m.x,my-20,t('mBlock'),'#9fc8ff',false);SFX.hit();}
- dmg+=cpErode(m,o);dmg=Math.max(1,Math.round(dmg));dmg=blRefl(m,dmg);if(!m.tdum)ttRec(dmg);m.hp-=dmg;if(m.tdum)tdHit(m,dmg,crit);m.myd=(m.myd||0)+dmg;m.myT=gTime;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;if(!m.tdum)trainMast();if(!o.chain&&wearT!==gTime&&!m.tdum){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
+ dmg+=cpErode(m,o);dmg=Math.max(1,Math.round(dmg));if(!Number.isFinite(dmg))dmg=1;dmg=blRefl(m,dmg);if(!m.tdum)ttRec(dmg);m.hp-=dmg;if(m.tdum)tdHit(m,dmg,crit);m.myd=(m.myd||0)+dmg;m.myT=gTime;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;if(!m.tdum)trainMast();if(!o.chain&&wearT!==gTime&&!m.tdum){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
  num(m.x,my-8,String(dmg),crit||burn?'#ffd24a':'#ffffff',crit||burn);
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(crit&&!RMO)shake=Math.max(shake,.07);if(burn)vfx('fire',m.x,my);if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
@@ -6841,7 +6845,15 @@ function threatFloor(d,ml,src){if(!TFK||!S)return d;const mlv=ml||S.lv;if(mlv<S.
  const pct={heavy:.11,zone:.12,proj:.05,light:.025,tick:.015}[TFK]||0,cap={heavy:.4,zone:.4,proj:.15,light:.1,tick:.05}[TFK]||.1,boss=src&&src.type&&MT[src.type]&&MT[src.type].boss?1.5:1;
  const f=Math.min(mh*cap,mh*pct*near*boss*Math.min(2,TFM||1));if((TFK==='heavy'||TFK==='zone')&&f>=mh*.06){if(!((P.woundT||0)>gTime))numPK(-34,'woundT','#ff7a6a',false);P.woundT=gTime+3;}return Math.max(d,Math.round(f));}
 // life steal heals at most 4% of your health a second (a budget that refills), 40% of it while wounded
-function lsCap(h){const mh=maxHP(),cap=mh*.04;P.lsB=Math.min(cap,(P.lsB??cap)+(gTime-(P.lsT??gTime))*cap);P.lsT=gTime;if((P.woundT||0)>gTime)h*=.4;h=Math.max(0,Math.min(h,P.lsB));P.lsB-=h;return Math.round(h);}
+function lsCap(h){const mh=maxHP(),cap=mh*.04;h=+h;if(!isFinite(h))h=0;if(!isFinite(P.lsB))P.lsB=cap;if(!isFinite(P.lsT))P.lsT=gTime;P.lsB=Math.min(cap,(P.lsB??cap)+(gTime-(P.lsT??gTime))*cap);P.lsT=gTime;if((P.woundT||0)>gTime)h*=.4;h=Math.max(0,Math.min(h,P.lsB));P.lsB-=h;return Math.round(h);}
+// owner 2026-10-24 ("a Sword Saint's health keeps going infinite": the bar read NaN / 16795, and NaN health never reaches 0):
+// health, mana, stamina or food that isn't a number is never kept; the last good value stays (or full on a fresh one), and the first few
+// causes go to the console with where they came from (window.__NANLOG); with a spoilt life-steal budget mended
+// and passives costing no mana (from the nanfix branch)
+const HPBAD=window.__NANLOG=[];
+function hpGuardOn(o){for(const k of ['hp','mp','st','food']){let v=o[k];Object.defineProperty(o,k,{enumerable:true,configurable:true,get(){return v;},set(x){if(typeof x==='number'&&isFinite(x)){v=x;return;}
+ if(HPBAD.length<8){HPBAD.push(k+'='+x+' '+String(new Error().stack||'').split('\n').slice(2,6).join(' | '));console.warn('P.'+k+' was set to',x,HPBAD[HPBAD.length-1]);}
+ if(typeof v!=='number'||!isFinite(v))v=k==='hp'?maxHP():k==='mp'?maxMP():k==='st'?maxST():50;}});}}
 function hurtPlayer0(d,ml,src){P.hitT=gTime;if(P.spw)return 0;if(P.rvU>gTime){pgRevolve(d,src);return 0;}if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(rgEvade(src)||hcEvade(src)||mdEvade(src)||cpEvade()||nvBlock(src))return 0;d=bzShield(d);d=ttShield(d,src);if(d<=0)return 0;d/=1+pasGen();if(P.lkBU>gTime)d*=.3;if(src&&src.type&&lkSee())d*=1-.15*pasM('lkinsight');if(P.kyTU>gTime&&src&&src.type&&!src.dead){d*=.7;hitMon(src,.3,{skill:1,dot:1});}if(src&&src.type&&S.cls==='saintess'&&pasOn('sagrace')&&saEvil(src))d*=1-.2*pasM('sagrace');if(src&&src.dmul)d*=src.dmul;if(src&&src.fury>gTime)d*=1.25;if(src&&src.type)P.lastSrc=src.type;if(tlOn('hking')&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
  if(P.qm>0&&rand()<.3){numPK(-20,'ipEvade','#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
@@ -6855,7 +6867,7 @@ function hurtPlayer0(d,ml,src){P.hitT=gTime;if(P.spw)return 0;if(P.rvU>gTime){pg
    if(P.gd<=0){P.gd=0;P.guard=0;P.gdT=1.6;d=Math.round(d*.6);P.stun=1;vfx('stun',P.x,P.y-24,{life:1});toast(t('guardBreak'),'warn');}
    else{P.gdT=.8;d=Math.max(1,Math.round(d*(P.fort>0?.1:GK?.15:.25)));blk=1;}}}
  if(P.prov>0)d=Math.max(1,Math.round(d*.8));
- if(P.ride&&S.mount)d=horseHit(d);P.hp-=d;jHurt(d);ipHurt(d);ttHurt(d);if(P.rcast){P.rcast=0;toast(t('rsCancel'),'warn');SFX.deny();}if(wpV('abs'))P.absB=Math.min(maxHP()*.5,(P.absB||0)+d*wpV('abs'));P.inv=blk?.35:.7;{const gs=GEAR.map(eqIt).filter(Boolean);if(gs.length)wear(gs[rand()*gs.length|0],.07);}
+ if(!Number.isFinite(d))d=1;if(P.ride&&S.mount)d=horseHit(d);P.hp-=d;jHurt(d);ipHurt(d);ttHurt(d);if(P.rcast){P.rcast=0;toast(t('rsCancel'),'warn');SFX.deny();}if(wpV('abs'))P.absB=Math.min(maxHP()*.5,(P.absB||0)+d*wpV('abs'));P.inv=blk?.35:.7;{const gs=GEAR.map(eqIt).filter(Boolean);if(gs.length)wear(gs[rand()*gs.length|0],.07);}
  if(!blk){shake=.18;vfx('blood',P.x,P.y-10,{});if(d>=maxHP()*.4&&P.hp>0&&!(P.sImm>0)&&!legResist()){P.stun=1;P.sImm=3;vfx('stun',P.x,P.y-24,{life:1});toast(t('stunned'),'warn');}SFX.hurt();}else SFX.hit();
  numP(-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);
  if(P.hp<1&&P.lst>0)P.hp=1;
@@ -7154,6 +7166,8 @@ const QD={
  c2a:{by:'hood',lv:30,from:['thief'],mst:['dagger',3],obj:{t:'kill',it:'deserter',n:8,stl:1},xp:15000,gold:600,promo:'assassin'},
  // necromancers (major 9): gather fresh corpses (a kill leaves its body for 15 s)
  cn:{by:'nec',lv:20,obj:{t:'corpse',it:'corpse',n:8},xp:2500,cls:'necro',item:'staff'},
+ // owner 2026-10-24: a Mage who wants to change may take the same trial and become a Necromancer (sw: no novice needed)
+ cnm:{by:'nec',lv:20,sw:1,need:'necSw',obj:{t:'corpse',it:'corpse',n:8},xp:2500,cls:'necro'},
  // hidden classes (major 10): no trainer; the system offers each when its hidden condition is met
  hau:{by:'sys',lv:20,hid:1,cond:'parry',obj:{t:'over',it:'over',n:15},xp:4000,hcls:'aura'},
  hbm:{by:'sys',lv:25,hid:1,cond:'beast',obj:{t:'beast',it:'beast',n:20,wk:'dagger'},xp:5000,hcls:'beast'},
@@ -7299,7 +7313,7 @@ const qDone=id=>!!S.qs[id]&&S.qs[id].st===2;
 const arrowN=()=>S.arrows.reduce((a,b)=>a+b,0);
 function qCount(id){const o=QD[id].obj,s=S.qs[id];if(!s)return 0;if(o.t==='have')return S.mats[o.it]||0;return s.c||0;}
 const qReady=id=>{const s=S.qs[id];return !!s&&s.st===1&&qCount(id)>=QD[id].obj.n;};
-function qAvail(id){const q=QD[id];return !S.qs[id]&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2||q.cl2==='smith'&&S.cls==='pagma')&&(!q.sec||S.sec===q.sec)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)))&&(!q.need||!!(QNEED[q.need]&&QNEED[q.need]()));}
+function qAvail(id){const q=QD[id];return !S.qs[id]&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2||q.cl2==='smith'&&S.cls==='pagma')&&(!q.sec||S.sec===q.sec)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||q.sw||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)))&&(!q.need||!!(QNEED[q.need]&&QNEED[q.need]()));}
 // owner 2026-10-23: a "kill it below 50% health" task can't be done when the monster is far under your level (it can't bring
 // your health down), so 20+ levels above it the health condition is waived and the task says so
 // a below-X%-health kill on a monster 20+ levels under you (owner 2026-10-24): any monster near your level counts instead
@@ -7446,7 +7460,7 @@ const NPCT={
  regas:{idle:()=>S.raid?'rRaidOn':S.comp==='regas'?'cpIdle_regas':'rg_hi',opts:()=>{const o=[...compOpt('regas'),...sellOpt('regas')];if(!S.mats.blue)o.push({l:t('oBlue'),f:buyBlue});const g=monsOf('guardian')[0];if(!S.raid)o.push({l:t('oRaid'),f:()=>S.lv<90?dialog('regas',[t('rRaidNo',{lv:S.lv})]):!g||g.dead?dialog('regas',['rRaidWait']):startRaid()});else o.push({l:t('oRaidEnd'),f:endRaid});return o;}},
  coach:{idle:()=>'coachHi',opts:()=>[...stableOpts('coach'),{l:t('oTravelW',{g:fare()}),f:()=>travel(1,'coach')},...(S.hag===undefined?[{l:t('oHaggle'),f:()=>haggle('coach')}]:[])]},
  coachR:{idle:()=>'coachHi2',opts:()=>[...stableOpts('coachR'),...cOpts('coachR')]},coachRh:{idle:()=>'coachHi2',opts:()=>[...stableOpts('coachRh'),...cOpts('coachRh')]},coachRo:{idle:()=>'coachHi2',opts:()=>[...stableOpts('coachRo'),...cOpts('coachRo')]},coachT:{idle:()=>'coachHi2',opts:()=>[...stableOpts('coachT'),...cOpts('coachT')]},
- coachW:{idle:()=>'coachHi',opts:()=>[...rideOpt('horse'),...stableOpts('coachW'),{l:t('oTravelB',{g:fare()}),f:()=>travel(0,'coachW')},{l:t('oTravelP',{g:fare()+80}),f:()=>travel(2,'coachW')},...cOpts('coachW'),{l:t('oWhereTr'),f:()=>dialog('coachW',['whereTr'])},...(S.hag===undefined?[{l:t('oHaggle'),f:()=>haggle('coachW')}]:[])]},
+ coachW:{idle:()=>'coachHi',opts:()=>[...rideOpt('horse'),...stableOpts('coachW'),{l:t('oTravelB',{g:fare()}),f:()=>travel(0,'coachW')},{l:t('oTravelP',{g:fare()+80}),f:()=>travel(2,'coachW')},...cOpts('coachW'),{l:t('oWhereTr'),f:()=>dialog('coachW',['whereTr'],null,[{l:t('oNecWay'),f:necWay},{l:t('oLeave')}])},{l:t('oNecWay'),f:necWay},...(S.hag===undefined?[{l:t('oHaggle'),f:()=>haggle('coachW')}]:[])]},
  // the East Continent (SAT-ONLINE-159)
  hanS:{hi:'hanS_hi',idle:()=>EAS().ar&&!qDone('ea4')&&!S.qs.ea4?'hanS_i2':'hanS_idle',opts:()=>qDone('ea2')&&!EAS().ar?eaArubeOpts():[]},
  hanD:{hi:'hanD_hi',idle:()=>'hanD_idle'},whiteS:{hi:'white_hi',idle:()=>qDone('ea1')?'white_i2':'white_idle'},
@@ -7465,6 +7479,11 @@ const fare=()=>S.hag?178:200;
 // so a coach in each runs to the others. A novice with no class yet rides free, on the way to a trainer.
 const CTOWN={coachW:'zWin',coachP:'zPat',coachR:'zReid',coachRh:'zRein',coachRo:'zRolling',coachT:'zTitan'};
 function cFare(a,b){if(S.cls==='novice')return 0;const A=npcOf(a),B=npcOf(b);return fare()+Math.round(Math.hypot(A.x-B.x,A.y-B.y)/TS/4);}
+/* owner 2026-10-24: "many cannot find the necromancer trainer, make his way easier": the coachman points the quest arrow
+   to the pale man (through the Hyena trial you can take: as a novice, or as a Mage who wants to change); anyone else is told where he stands */
+function necWay(){if(!S)return;const q=['cn','cnm'].find(k=>S.qs[k]&&S.qs[k].st===1)||['cn','cnm'].find(k=>qAvail(k));
+ if(!q){toast(t('necWayAt'));return;}S.qTrk=q;S.qGOff=0;S.mbTrk=null;QGC.t=0;qLast='';hudDirty=true;SFX.click();toast(t('necWayOn'),'good');}
+window.__GNW=Object.assign(()=>necWay(),{npc:()=>{const n=npcs.find(n=>n.id==='nec');return n&&wTile(n.x,n.y);}}); // tests
 function cOpts(who){return Object.keys(CTOWN).filter(k=>k!==who&&!(who==='coachW'&&k==='coachP')&&!(who==='coachP'&&k==='coachW')).map(k=>{const g=cFare(who,k);return {l:t(g?'oCoachTo':'oCoachFree',{z:t(CTOWN[k]),g}),f:()=>cGo(k,who)};});}
 function cGo(dest,who){const g=cFare(who,dest);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;if(g)SFX.coin();
  fadeTo(()=>{const c=npcOf(dest);P.x=c.x+18;P.y=c.y-2;camSnap=true;vfx('spawn',P.x,P.y);allies=[];S.raid=0;hudDirty=true;toast(t('arrived',{z:t(CTOWN[dest])}),'good');save(true);});}
@@ -8597,7 +8616,7 @@ window.__GRMO={on:()=>RMO,set:v=>rmoSet(v),shake:()=>RMOS.slice(),FX:RMOFX,VXC:R
 function pressKey(id){const k=$(id);if(!k)return;k.classList.add('press');setTimeout(()=>k.classList.remove('press'),110);}
 function dissolve(x,y,cols,n){for(let i=0;i<n;i++)fx.push({x:x+(rand()-.5)*12,y:y+(rand()-.5)*16,vx:(rand()-.5)*24,vy:-15-rand()*45,t:.7+rand()*.9,c:cols[i%cols.length],fl:1});}
 // Skills are data (SKD); the bar holds up to five class skills plus the worn title's skill in slot 6. Keys are rebindable per device.
-const mpC=k=>Math.round((SKD[k].mpf?maxMP()*SKD[k].mpf:Math.max(SKD[k].mp*1.5,(S?mpRef():0)*SKD[k].mp/100))*(S&&ipOn('absurd')?.5:1)*(S?skCostM(k)*skMpM(k):1));
+const mpC=k=>SKD[k]&&SKD[k].pas?0:Math.round((SKD[k].mpf?maxMP()*SKD[k].mpf:Math.max(SKD[k].mp*1.5,(S?mpRef():0)*SKD[k].mp/100))*(S&&ipOn('absurd')?.5:1)*(S?skCostM(k)*skMpM(k):1));
 window.__GPS={list:()=>Object.keys(SKD).filter(k=>SKD[k].pas),m:k=>pasM(k),gen:()=>pasGen(),kill:m=>pasKill(m),scaled:k=>pasScaled(k),txt:k=>skLvTxt(k),bc:p=>bcBreak(p),cls:k=>SKD[k].cls,on:()=>pasSkills()}; // tests
 Object.assign(STR.ar,{pasHow:'باسيف: شغال لوحده على طول، مش محتاج تدوس عليه ولا تحطه في البار.',pasLvHow:'بيعلى لفله مع كل وحش تقتله (البوس بـ6)، وكل مرة يشتغل فيها.',pasPerS:'كل لفل: +5% لتأثيره (دلوقتي ×{m}).',pasPerG:'كل لفل: +1% ضرر و+1% دفاع (دلوقتي +{n}%).',bcAmp:'تأمل!',bcBrk:'السحر اتكسر',bcRefl:'السحر ارتد!'});
 Object.assign(STR.en,{pasHow:'Passive: always on by itself, nothing to press or put on the bar.',pasLvHow:'It levels up with every monster you kill (a boss counts 6) and each time it fires.',pasPerS:'Each level: +5% to its effect (now ×{m}).',pasPerG:'Each level: +1% damage and +1% defence (now +{n}%).',bcAmp:'Contemplation!',bcBrk:'Spell broken',bcRefl:'Spell reflected!'});window.__GMP={max:()=>maxMP(),ref:()=>mpRef(),cost:k=>mpC(k),per:()=>mpPer(),cap:()=>POTCAP}; // tests
@@ -10165,7 +10184,7 @@ function qgToggle(){if(!S)return;S.qGOff=S.qGOff?0:1;toast(t(S.qGOff?'qgOff2':'q
 /* the recommended quest (owner 2026-10-23, from a player's "Recommended quest" button): of the quests you can take now on
    your continent, the story first, then the one nearest your level (at most 15 under it), then the nearest giver. The
    arrow then leads to its giver. With none, the board's daily tasks are suggested. */
-function qRec(){if(!S||!P)return null;const ok=q=>{const d=QD[q];if(!d||d.gen||d.gr||!qAvail(q)||(d.lv||1)>S.lv||S.lv-(d.lv||1)>15&&!d.ms)return false;const n=npcs.find(n=>n.id===d.by&&!n.hidden);return !!n&&(n.x/TS>=EAX)===(P.x/TS>=EAX)&&n.y/TS<WMH;};
+function qRec(){if(!S||!P)return null;const ok=q=>{const d=QD[q];if(!d||d.gen||d.gr||d.sw||!qAvail(q)||(d.lv||1)>S.lv||S.lv-(d.lv||1)>15&&!d.ms)return false;const n=npcs.find(n=>n.id===d.by&&!n.hidden);return !!n&&(n.x/TS>=EAX)===(P.x/TS>=EAX)&&n.y/TS<WMH;};
  const dist=q=>{const n=npcs.find(n=>n.id===QD[q].by);return Math.hypot(n.x-P.x,n.y-P.y);};
  return Object.keys(QD).filter(ok).sort((a,b)=>(QD[a].ms?0:1)-(QD[b].ms?0:1)||(S.lv-(QD[a].lv||1))-(S.lv-(QD[b].lv||1))||dist(a)-dist(b))[0]||null;}
 function qRecGo(){SFX.click();const q=qRec();if(!q){toast(t('qRecNo'),'warn');return;}S.qTrk=q;S.qGOff=0;S.mbTrk=null;QGC.t=0;qLast='';hudDirty=true;
@@ -11482,7 +11501,7 @@ function ecShopOpt(o){o.push({l:t('bhEcs',{p:fmtN(ECCP)}),f:()=>bhBuy(ECCP,()=>{
 Object.assign(STR.ar,{bhGoShop:'عربية المتجر (متجر الأرخبيل)'});Object.assign(STR.en,{bhGoShop:'The carriage store (the Archipelago shop)'});
 // the people of the East
 // named conditions for QD[id].need (the quest tables stay data)
-var QNEED={eaCap:()=>EAS().ar==='cap',eaJail:()=>eaJail()};
+var QNEED={eaCap:()=>EAS().ar==='cap',eaJail:()=>eaJail(),necSw:()=>S.cls==='mage'&&!Object.keys(S.qs).some(k=>QD[k]&&(QD[k].promo||QD[k].cls)&&S.qs[k].st===1)};
 // Han Seokbong is taken to the Lava Prison for hiding you (ch 633) once Arube's story is over, until you free him
 const eaJail=()=>!!EAS().ar&&(EAS().ar==='kill'||qDone('ea3'))&&!qDone('ea4');
 function eaNpcVis(){if(!npcs.length)return;const j=eaJail();for(const n of npcs){if(n.id==='hanS'||n.id==='hanD')n.hidden=j;else if(n.id==='hanS2'||n.id==='hanD2')n.hidden=!j;}}
