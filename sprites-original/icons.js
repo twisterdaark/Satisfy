@@ -17,9 +17,76 @@ function finish(I,ghost){const d=I.d,src=d.slice();
   if(!up||!left){d[i]=Math.min(255,d[i]+40);d[i+1]=Math.min(255,d[i+1]+40);d[i+2]=Math.min(255,d[i+2]+40);}}
  return d;}
 
+// Blade shapes (owner 2026-10-24: "every weapon its own picture and the look it shows on the character"): one description
+// per sword draws both the held sprite (weapons.js, pointing up) and the bag icon (here, on the diagonal), so the two always
+// match. len: blade length (held px), w: blade width (px), p: profile (str straight, taper, leaf, cleaver, wave flamberge,
+// saw teeth on the back, kat curved single edge), cv: curve, c: [mid, dark edge, light edge], f: fuller, rn: rune dots,
+// g: guard [type bar|cross|wing|disc, colour], gm: gem in the guard, gr: grip colours, pm: pommel, gl: grip length.
+const BSPEC={
+ rusty:{len:8,w:2,p:'saw',c:['#9b8b78','#6e6052','#c4b4a0'],g:['bar','#8a6a3a'],gr:['#6b4428','#8a5a32'],pm:'#8a6a3a',gl:3},
+ isword:{len:10,w:2,p:'str',c:['#c4c8d0','#7a808c','#eef0f4'],g:['bar','#9a9aa6'],gr:['#6b4428','#8a5a32'],pm:'#9a9aa6',gl:3},
+ ssword:{len:11,w:3,p:'taper',c:['#dfe6ee','#8a94a4','#ffffff'],f:'#b8c4d4',g:['cross','#d8b04a'],gr:['#3a2a5a','#5a4a7a'],pm:'#d8b04a',gl:3},
+ gsword:{len:14,w:3,p:'str',c:['#6ab0ff','#2a5ab0','#d0e8ff'],f:'#9fd0ff',g:['wing','#c8a050'],gm:'#2a5ab0',gr:['#5a3a18','#8a5a32'],pm:'#c8a050',gl:4},
+ msword:{len:11,w:3,p:'leaf',c:['#c8e8f4','#7aa0b8','#ffffff'],f:'#e8f8ff',g:['disc','#4a90c0'],gr:['#2a4a6a','#4a6a8a'],pm:'#4a90c0',gl:3},
+ failure:{len:13,w:3,p:'saw',c:['#5a6a7a','#2e3a48','#a8b8c8'],g:['bar','#3a4450'],gr:['#2a2a32','#4a4a52'],pm:'#3a4450',gl:4},
+ dains:{len:12,w:3,p:'taper',c:['#e8c050','#9a7418','#fff4c0'],rn:'#fff4c0',g:['wing','#6a4a18'],gm:'#c8282a',gr:['#3a2410','#6a4a18'],pm:'#e8c050',gl:3},
+ iyarugt:{len:12,w:2,p:'kat',cv:1,c:['#c8282a','#6a0a0e','#ff7a6a'],rn:'#ff3a2a',g:['disc','#2a0a0e'],gr:['#2a0a0e','#5a1a1e'],pm:'#c8282a',gl:4},
+ wisdom:{len:11,w:3,p:'str',c:['#e8f4ff','#7a9ab8','#ffffff'],rn:'#4a90ff',g:['wing','#d8b04a'],gm:'#4a90ff',gr:['#e8e4d8','#c8c0a8'],pm:'#d8b04a',gl:3},
+ yetgs:{len:14,w:4,p:'cleaver',c:['#9aa0ac','#4a4e58','#e8eef8'],f:'#6a0a1a',g:['wing','#5a0a1a'],gm:'#ff2a3a',gr:['#1a1018','#3a1a28'],pm:'#8a0a1a',gl:4},
+ dpgs:{len:14,w:3,p:'wave',c:['#5ac8a0','#1e6a50','#d8fff0'],f:'#d8fff0',g:['cross','#2a4a40'],gm:'#d8fff0',gr:['#1a2a24','#2a4a40'],pm:'#5ac8a0',gl:4},
+ mgsword:{len:10,w:2,p:'str',c:['#e0e4ec','#2a3a6a','#ffffff'],g:['bar','#2a3a6a'],gr:['#2a3a6a','#3a4a7a'],pm:'#2a3a6a',gl:3},
+ lantd:{len:6,w:2,p:'taper',c:['#e8eef8','#8a94a4','#ffffff'],g:['cross','#a81a1a'],gr:['#2a1a1a','#4a2a2a'],pm:'#a81a1a',gl:2},
+ ideal:{len:6,w:2,p:'leaf',c:['#bfe8ff','#5a8ab0','#ffffff'],g:['bar','#4a90c0'],gr:['#2a4a6a','#4a6a8a'],pm:'#bfe8ff',gl:2},
+ ttthorn:{len:6,w:2,p:'saw',c:['#3a5a6a','#1a2a3a','#5ad8c8'],g:['disc','#1a3a3a'],gr:['#1a2a2a','#2a4a4a'],pm:'#5ad8c8',gl:2},
+ dagger:{len:5,w:2,p:'taper',c:['#c4c8d0','#7a808c','#eef0f4'],g:['bar','#9a9aa6'],gr:['#6b4428','#8a5a32'],pm:'#9a9aa6',gl:2}};
+// the materials a creation is made of give it its colours and its line (owner 2026-10-24, the Legendary Smith's creations)
+const MATP={ore:[['#c4c8d0','#7a808c','#eef0f4'],'str'],wood:[['#a8743f','#6b4428','#c8945a'],'str'],leather:[['#8a5a32','#5a3a20','#b07a46'],'str'],
+ mstone:[['#4a90ff','#2a5ab0','#bfe8ff'],'taper'],estone:[['#9fe3c8','#3a8a6a','#e8fff4'],'leaf'],pstone:[['#e8d070','#9a8030','#fff4c0'],'str'],bstone:[['#c8a0ff','#6a4ab0','#efe0ff'],'taper'],
+ ruby:[['#e83a4a','#8a0a1a','#ff9aa0'],'taper'],topaz:[['#f2c14e','#9a7418','#fff3b0'],'leaf'],emer:[['#3ac87a','#1a6a3a','#a8f0c8'],'leaf'],sapph:[['#3a6ae8','#1a2a8a','#a8c0ff'],'taper'],
+ bvial:[['#a81a2a','#5a0a12','#ff6a6a'],'saw'],blue:[['#6ab0ff','#2a5ab0','#d0e8ff'],'str'],vwleath:[['#6a3a2a','#3a1a12','#a86a4a'],'saw'],kpearl:[['#f0e8f8','#a898c0','#ffffff'],'leaf'],
+ kink:[['#3a2a5a','#1a1030','#8a6ac8'],'wave'],diam:[['#e8f8ff','#8ab8d0','#ffffff'],'taper'],mith:[['#dfe8f0','#8a9ab0','#ffffff'],'leaf'],tstone:[['#ffe060','#5a6a8a','#fff8c0'],'wave'],
+ fess:[['#ff7a3a','#a8281a','#ffd0a0'],'wave'],iess:[['#9fe0ff','#3a7ab0','#e8faff'],'taper'],sess:[['#b08aff','#4a2a9a','#e8d8ff'],'wave'],wegg:[['#d8c8a8','#8a7858','#fff4e0'],'leaf'],
+ dscale:[['#c83a2a','#6a1a12','#ff9a6a'],'saw'],bljewel:[['#2a1a2e','#120814','#a05aff'],'cleaver'],blhorn:[['#3a1a1a','#1a0808','#ff4a3a'],'cleaver'],brphx:[['#ff8a2a','#b8280a','#fff07a'],'wave'],
+ brdrg:[['#5ac8ff','#1a5ab0','#e8f8ff'],'leaf'],brtig:[['#f2f2f8','#8a8aa0','#ffffff'],'saw'],brtor:[['#2a5a6a','#0e2a34','#5ad8c8'],'cleaver']};
+const MATM={brphx:4,brdrg:4,brtig:4,brtor:4,bljewel:3.8,blhorn:3.8,dscale:3.4,wegg:3,fess:2.8,iess:2.8,sess:2.8,tstone:2.6,mith:2.4,diam:2.2,kpearl:2.1,kink:2.1,blue:2,vwleath:2};
+// "cw|gs.L.W.C.m1[.m2]": a creation's kind, its blueprint (length, width, curve 0-100) and its two leading materials
+function cwParse(k){const m=/^cw\|([a-z]{2})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.([a-z]{2,8})(?:\.([a-z]{2,8}))?$/.exec(k||'');if(!m)return null;
+ return {ty:m[1],L:Math.min(100,+m[2]),W:Math.min(100,+m[3]),C:Math.min(100,+m[4]),m1:MATP[m[5]]?m[5]:'ore',m2:MATP[m[6]]?m[6]:null};}
+function cwSpec(o){const P=MATP[o.m1],A=o.m2?MATP[o.m2][0]:null,top=MATM[o.m1]||1,L=o.L/100,W=o.W/100,C=o.C/100;
+ const gt=C>.45?'disc':top>=3?'wing':top>=2?'cross':'bar',gc=top>=3?'#e8c050':top>=2?'#c8ccd6':P[0][1];
+ const s={c:P[0],p:C>.45?'kat':P[1],cv:C>.45?C:0,g:[gt,gc],gr:[P[0][1],'#3a2a20'],pm:A?A[2]:gc,gm:A?A[0]:null,rn:A&&top>=2.8?A[2]:null,f:!A&&top<2.8?P[0][2]:null};
+ if(o.ty==='gs')Object.assign(s,{len:11+Math.round(L*5),w:3+Math.round(W*2),gl:4});
+ else if(o.ty==='dg')Object.assign(s,{len:4+Math.round(L*3),w:2+Math.round(W),gl:2});
+ else Object.assign(s,{len:8+Math.round(L*4),w:2+Math.round(W*2),gl:3});
+ return s;}
+// the blade's points as (t along it, u across it, colour): t 0 is the first blade pixel above the guard
+function bladePts(s,ic){const P=[],put=(t,u,c)=>{if(c)P.push([t,u,c]);},len=ic?Math.max(3,Math.min(9,Math.round(s.len*.62)+1)):s.len,W=ic?Math.min(5,s.w+1):s.w,
+ lo=-Math.floor((W-1)/2),hi=Math.ceil((W-1)/2),gl=ic?(s.gl>=3?2:1):s.gl;
+ for(let t=0;t<len;t++){const q=t/len;let a=lo,b=hi,off=0;
+  if(s.p==='taper'&&q>.6)b=Math.max(a,b-1);if(s.p==='leaf'&&q>.3&&q<.75)a--;if(s.p==='cleaver'&&q>.3)b++;
+  if(s.p==='wave')off=[0,0,1,1][t%4];if(s.p==='kat')off=Math.round((s.cv||1)*q*q*(ic?2:3));
+  const tip=t>=len-1&&s.p!=='cleaver',tip2=t===len-2&&s.p!=='cleaver'&&W>2;
+  if(tip){put(t,lo+off+(s.p==='kat'?1:0),s.c[2]);continue;}if(tip2){a=Math.max(a,lo);b=Math.min(b,hi-1);}
+  for(let u=a;u<=b;u++){let c=u===a?s.c[2]:u===b?s.c[1]:s.c[0];if(s.f&&u===0&&a<0&&b>0&&t>1&&t<len-2)c=s.f;if(s.rn&&u===Math.round((a+b)/2)&&t%3===1&&t<len-2)c=s.rn;put(t,u+off,c);}
+  if(s.p==='saw'&&t%2===0&&t<len-2&&t>0)put(t,b+1+off,s.c[1]);}
+ const g=s.g||['bar','#9a9aa6'],gw=ic?3:2,gc=g[1];
+ if(g[0]==='bar')for(let u=-gw;u<=gw;u++)put(-1,u,gc);
+ if(g[0]==='cross'){for(let u=-gw;u<=gw;u++)put(-1,u,gc);put(0,-gw,gc);put(0,gw,gc);}
+ if(g[0]==='wing'){for(let u=-gw-1;u<=gw+1;u++)put(-1,u,gc);put(0,-gw-1,gc);put(0,gw+1,gc);put(1,-gw-1,gc);put(1,gw+1,gc);}
+ if(g[0]==='disc')for(const t of [-1,-2])for(let u=-1;u<=1;u++)put(t,u,gc);
+ if(s.gm)put(-1,0,s.gm);
+ const gr=s.gr||['#6b4428','#8a5a32'],g0=g[0]==='disc'?-3:-2;for(let i=0;i<gl;i++)put(g0-i,0,gr[i%2]);put(g0-gl,0,s.pm||gc);
+ return P;}
+const bOff=u=>u>0?[Math.ceil(u/2),Math.floor(u/2)]:[-Math.floor(-u/2),-Math.ceil(-u/2)];
+// a sword's bag icon from its shape: the blade runs up and to the right, the grip down to the bottom left
+function bladeIcon(I,s){for(const [t,u,c] of bladePts(s,true)){const [ox,oy]=bOff(u);I.set(6+t+ox,9-t+oy,c);}}
+// the held sprite's pixels, pointing up, with the grip point where the hand holds it
+function bladeHeld(s){const P=bladePts(s,false);let t0=1e9,t1=-1e9,u0=1e9,u1=-1e9;for(const [t,u] of P){t0=Math.min(t0,t);t1=Math.max(t1,t);u0=Math.min(u0,u);u1=Math.max(u1,u);}
+ const px=[];for(const [t,u,c] of P)px.push([1+u-u0,1+t1-t,c]);const g0=(s.g&&s.g[0]==='disc')?-3:-2;return {w:u1-u0+3,h:t1-t0+3,px,gx:1-u0,gy:2+t1-g0};}
+A.blade={BSPEC,MATP,cwParse,cwSpec,bladePts,bladeHeld,bladeIcon};
 // PER_CODE: weapon colors and the great sword's blue edge from WSH
 const BLADE={yetgs:['#9aa0ac','#4a4e58','#e8eef8'],mgsword:['#e0e4ec','#2a3a6a','#ffffff'],failure:['#5a6a7a','#2e3a48','#a8b8c8'],iyarugt:['#c8282a','#6a0a0e','#ff7a6a'],dpgs:['#5ac8a0','#1e6a50','#d8fff0'],dains:['#e8c050','#9a7418','#fff4c0'],wisdom:['#e8f4ff','#7a9ab8','#ffffff'],rusty:['#9b8b78','#6e6052','#c4b4a0'],isword:['#c4c8d0','#7a808c','#eef0f4'],ssword:['#dfe6ee','#8a94a4','#ffffff'],gsword:['#6ab0ff','#2a5ab0','#d0e8ff'],msword:['#c8e8f4','#7aa0b8','#ffffff']};
-function sword(I,k){const [b,dk,lt]=BLADE[k]||BLADE.rusty,long=k==='gsword'||k==='yetgs'||k==='failure'||k==='dains'||k==='dpgs';const tx=long?14:13,ty=long?1:2;
+function sword(I,k){if(BSPEC[k])return bladeIcon(I,BSPEC[k]);const [b,dk,lt]=BLADE[k]||BLADE.rusty,long=k==='gsword'||k==='yetgs'||k==='failure'||k==='dains'||k==='dpgs';const tx=long?14:13,ty=long?1:2;
  for(let i=0;i<=tx-5;i++){I.set(5+i,10-i,b);I.set(6+i,10-i,dk);I.set(5+i,9-i,lt);}I.set(tx,ty,lt);
  if(long)for(let i=1;i<tx-5;i+=2)I.set(6+i,10-i,'#9fd0ff');
  if(k==='rusty'){I.set(8,7,'#7a5a3a');I.set(10,5,'#7a5a3a');I.set(11,4,dk);}
@@ -31,7 +98,8 @@ function bow(I,k){const wood=BOWC[k]||(k==='sbow'?['#5a3a22','#3e2616','#7a5230'
 const STAFFC={blstaff:['#2a0614','#8a1a4a','#ff8ac8']};
 function staff(I,k){const orb=STAFFC[k]||(k==='sstaff'?['#7a4ab0','#b07aff','#e8d0ff']:['#2a5ab0','#4a90ff','#bfe8ff']);
  I.line(3,14,10,7,'#7a5634');I.line(4,14,11,7,'#5a3a20');I.ell(11.5,4.5,3,3,orb[0]);I.ell(11,4,2,2,orb[1]);I.set(10,3,orb[2]);I.set(11,3,orb[2]);I.set(9,7,'#c8a050');I.set(10,8,'#c8a050');}
-function hammer(I,k){const h=k==='shammer'?['#c8ccd6','#8a909a','#ffffff']:['#9aa0aa','#6a707a','#d0d4dc'];
+const HAMC={};
+function hammer(I,k){const h=HAMC[k]||(k==='shammer'?['#c8ccd6','#8a909a','#ffffff']:['#9aa0aa','#6a707a','#d0d4dc']);
  I.line(3,14,9,8,'#7a5634');I.line(4,14,10,8,'#5a3a20');I.rect(8,2,6,5,h[0]);I.rect(8,2,6,1,h[2]);I.rect(13,3,1,4,h[1]);I.rect(8,6,6,1,h[1]);I.set(10,4,h[1]);}
 const ARMC={tirsh:['#1a2034','#8a0a1a','#c8a050'],vpaj:['#24142e','#5a3a6a','#a05aff'],vwarmor:['#3a3036','#5a4a52','#8a0a1a'],rparmor:['#c82a1a','#ff7a3a','#ffd24a'],tgarmor:['#e8e4d8','#ffffff','#2a2a2a'],dgarmor:['#2a6ab8','#5ac8ff','#c8e8ff'],ttshell:['#1a2a3a','#3a5a6a','#5ad8c8']};
 function armor(I,k){const a=ARMC[k]||(k==='larmor'?['#8a5a32','#a8743f','#5a3a20']:k==='parmor'?['#9aa4b4','#c8d0dc','#5a6474']:k==='marmor'?['#a8d0e4','#e0f2fa','#4a7890']:k==='ocarmor'?['#d8dce4','#ffffff','#7a8494']:k==='emarmor'?['#3a3e4a','#6a7080','#c8a050']:k==='mgarmor'?['#c8d0dc','#eef2f8','#2a3a6a']:['#dfe2ea','#f2f4f8','#7a3a2c']);
@@ -205,7 +273,14 @@ DRAW.jaffa=DRAW.arrows;
 const SLOT={slotW:I=>{for(let i=0;i<8;i++)I.set(5+i,10-i,'#bfe0ff');I.line(3,10,5,12,'#bfe0ff');I.set(3,12,'#bfe0ff');},slotA:I=>{I.rect(4,3,8,10,'#bfe0ff');I.rect(2,3,3,4,'#bfe0ff');I.rect(11,3,3,4,'#bfe0ff');},
  slotH:I=>{I.rect(4,4,8,7,'#bfe0ff');I.rect(3,8,10,2,'#bfe0ff');},slotG:I=>{I.rect(4,5,7,8,'#bfe0ff');I.rect(11,7,2,3,'#bfe0ff');},slotB:I=>{I.rect(5,3,4,9,'#bfe0ff');I.rect(5,10,8,3,'#bfe0ff');},slotX:I=>{I.rect(6,3,4,4,'#bfe0ff');I.rect(7,7,2,6,'#bfe0ff');}};
 
-function iconRGBA(k){const I=Img();
+// a creation's icon: its blade drawn from its blueprint, or its kind in the colours of its materials
+function cwIcon(I,k){const o=cwParse(k);if(!o)return sword(I,'rusty');const P=MATP[o.m1][0],A=o.m2?MATP[o.m2][0]:P;
+ if(o.ty==='gs'||o.ty==='sw'||o.ty==='dg')return bladeIcon(I,cwSpec(o));
+ if(o.ty==='bw'){BOWC[k]=[P[0],P[1],A[2]];return bow(I,k);}
+ if(o.ty==='st'){STAFFC[k]=[A[1],A[0],A[2]];return staff(I,k);}
+ if(o.ty==='hm'){HAMC[k]=P;return hammer(I,k);}
+ const n=2+Math.round(o.L/50);I.line(2,14,11-n,5+n,P[1]);I.line(3,14,12-n,5+n,'#5a3a20');I.set(6,10,A[2]);I.rect(11-n,3+n,2+n,2,P[0]);I.line(12-n,2+n,14,1,P[2]);I.set(12,2,P[0]);I.set(13,3,P[1]);}
+function iconRGBA(k){const I=Img();if(typeof k==='string'&&k.startsWith('cw|')){cwIcon(I,k);return finish(I,false);}
  if(SLOT[k]){SLOT[k](I);for(let i=3;i<I.d.length;i+=4)if(I.d[i])I.d[i]=64;return finish(I,true);}
  if(DRAW[k])DRAW[k](I);else if(k==='bow'||k==='sbow')bow(I,k);else if(k==='staff'||k==='sstaff')staff(I,k);else if(k==='hammer'||k==='shammer')hammer(I,k);
  else if(k==='larmor'||k==='parmor'||k==='marmor'||k==='warmor'||k==='ocarmor'||k==='emarmor'||k==='mgarmor'||ARMC[k])armor(I,k);else sword(I,k);
