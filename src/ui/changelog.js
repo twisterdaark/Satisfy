@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24chunkwarm', ver: '2.66', d: '2026-10-24',
+      ar: ["بعد كام دقيقة لعب، كل حتة أرض جديدة كانت بتظهر قدامك وانت ماشي بتوقف اللعبة شوية لحد ما تترسم. ده كان باظ لما اللعبة تشيل 36 حتة: بقت ترسمهم كلهم مرة واحدة ساعة ما يظهروا. دلوقتي بتجهزهم في وقت الفراغ قبل ما توصلهم زي أول ما بدأت."],
+      en: ["After a few minutes of play, each new stretch of ground that came into view as you walked stopped the game for a moment while it was painted. That broke once the game held 36 of them: from then on it painted each one in one go as it appeared. Now they are prepared in idle time before you reach them, as at the start."] },
     { v: '2026-10-24mininow', ver: '2.65', d: '2026-10-24',
       ar: ["الخريطة الصغيرة مبقتش بتوقف اللعبة لما توصل لحتة من العالم لسه مترسمتش (كانت بتوقف ربع ثانية، ونص ثانية أول ما تدخل اللعب): الحتة دي بتترسم في الفريمات اللي بعدها وبتظهر وهي بتتملي."],
       en: ["The minimap no longer stops the game when it reaches a part of the world it hasn't painted yet (a quarter of a second, half a second as you start playing): that part is painted over the next frames and fills in as you watch."] },

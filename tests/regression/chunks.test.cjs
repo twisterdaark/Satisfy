@@ -48,3 +48,27 @@ test('world chunks: drawn when needed, at most 36 a layer, the same pixels when 
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// SAT-ONLINE-198 (owner 2026-10-24: "many things freeze the game"): with 36 chunks live, the ones next to the view are still
+// warmed in idle time (before, none was warmed again once 36 were live: after a few minutes of walking each chunk that
+// came into view was painted in one go, 30-75 ms a frame)
+test('world chunks: still warmed ahead after 36 are live', async () => {
+  const g = await H.openGame({});
+  try {
+    await H.newGame(g);
+    await g.eval(() => { const P = window.__G.P; P.inv = 1e9; P.x = 130 * 16; P.y = 60 * 16; });
+    await g.step(5);
+    const walk = async (n) => { for (let i = 0; i < n; i++) { await g.eval(() => { window.__G.P.x += 96; }); await g.step(6); await g.page.waitForTimeout(60); } };
+    // east until both layers hold 36
+    for (let k = 0; k < 40 && (await g.eval(() => window.__G.chunks().g.live)) < 36; k++) await walk(6);
+    const a = await g.eval(() => window.__G.chunks());
+    assert.equal(a.g.live, 36, 'the ground holds 36: ' + JSON.stringify(a.g));
+    await walk(60); // about 11 chunks further east
+    const b = await g.eval(() => window.__G.chunks());
+    const made = b.g.made - a.g.made, warmed = b.g.warmed - a.g.warmed;
+    assert.ok(warmed >= 8, 'chunks warmed ahead after 36: ' + JSON.stringify({ made, warmed }));
+    assert.ok(made <= warmed / 2, 'few painted in one go: ' + JSON.stringify({ made, warmed }));
+    assert.ok(b.g.live <= b.g.lim && b.o.live <= b.o.lim, 'still at most 36: ' + JSON.stringify(b));
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});
