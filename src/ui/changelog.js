@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24fishfest', ver: '2.69', d: '2026-10-24',
+      ar: ["مهرجان الصيد بقى مسابقة (أونلاين): وقت المهرجان بيطلع فوق لوحة فيها أتقل سمكة ليك وأتقل 3 عند الكل. أتقل سمكة لما المهرجان يخلص صاحبها بياخد لقب «صياد المهرجان» والكل بيسمع الخبر، والباقيين بيعرفوا ترتيبهم"],
+      en: ["The fishing festival is a contest now (online): while it's on, a board at the top shows your heaviest fish and the three heaviest of everyone. When it ends, the heaviest fish's angler gets the title Festival Angler and everyone hears it; the others are told where they placed"] },
     { v: '2026-10-24notices', ver: '2.68', d: '2026-10-24',
       ar: ["لوحة الإعلانات (أونلاين): لوحة كل بلد بقى فيها «📜 إعلانات» بالإعلانات الرسمية بتاعة آخر أسبوعين، الأحدث الأول وكل واحد بيومه وساعته، عشان اللي كان مش موجود ساعتها يقراها. أي لينك في إعلان بيظهر [لينك] بس."],
       en: ["The notice board (online): every town's board has \"📜 Notices\", the official announcements of the last two weeks, newest first, each with its day and time, so whoever was away reads them there. A web address in one shows only as [link]."] },

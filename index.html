@@ -366,6 +366,8 @@ button.cgc{cursor:pointer}button.cgc:hover,button.cgc.sel{transform:translateY(c
 #cgW .cgcr span{display:inline-block}
 #cgW .cghelp{font-size:calc(var(--u)*1.1);color:var(--muted);margin-top:calc(var(--u)*.4)}
 body.rmo .cgc.flip,body.rmo #cgW .cgcr .on{animation:none}@media (prefers-reduced-motion:reduce){.cgc.flip,#cgW .cgcr .on{animation:none}}
+#ffW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*11.5);z-index:20;padding:calc(var(--u)*.4) calc(var(--u)*1.2);font-size:calc(var(--u)*1.25);text-align:center;pointer-events:auto;white-space:nowrap}
+#ffW b{color:var(--gold)}#ffW small{display:block;color:var(--muted);font-size:calc(var(--u)*1.05)}
 #creW .cgrid{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.6);justify-content:center;margin:calc(var(--u)*.8) 0}#creW .cmats button{font-size:calc(var(--u)*.95)}#creW .cmats button.on{border-color:var(--gold);box-shadow:0 0 calc(var(--u)*.5) rgba(242,193,78,.5)}#creW .cmats button.none{opacity:.45;filter:grayscale(1)}#creW .cpick{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.4) calc(var(--u)*1.2);justify-content:center;margin:calc(var(--u)*.4) 0}#creW .cpick>div{display:flex;align-items:center;gap:calc(var(--u)*.35)}#creW .cpick button{min-width:calc(var(--u)*1.8);padding:0 calc(var(--u)*.3)}#creW .cpick b.ok{color:#9fe39a}#creW .cpick b.no{color:#ff8a7a}#creW .cst small{color:#bfe8ff}#creW canvas{display:block;margin:calc(var(--u)*.6) auto;width:100%;max-width:calc(var(--u)*40);background:#0e1a3a;border:1px solid rgba(143,216,255,.4)}#creW label{display:flex;align-items:center;gap:calc(var(--u)*.8);justify-content:space-between;margin:calc(var(--u)*.3) 0}#creW label input{flex:1;min-width:0}#creW .cst{color:#ffe7a8;margin:calc(var(--u)*.6) 0}
 #cfmW{z-index:80;width:calc(var(--u)*30);text-align:center}#cfmB{margin:calc(var(--u)*.8) 0;line-height:1.6}.cfmbtns{display:flex;gap:calc(var(--u)*1);justify-content:center}#cfmY{color:#ffd0c0;border-color:rgba(255,120,100,.7)}
 .gdrag-img{position:fixed;z-index:90;width:calc(var(--u)*3);height:calc(var(--u)*3);pointer-events:none;image-rendering:pixelated;filter:drop-shadow(0 0 4px #000);transform:translate(-50%,-50%);opacity:.85;margin:0}
@@ -665,6 +667,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
 
     <div id="creW" class="sys panel center" hidden></div>
     <div id="cgW" class="sys panel center" hidden></div>
+    <div id="ffW" class="sys" hidden></div>
     <div id="cfmW" class="sys panel center" hidden>
       <div class="ptitle"><span class="head" id="cfmT"></span></div>
       <div id="cfmB"></div>
@@ -5574,11 +5577,38 @@ Object.assign(STR.ar,{fKg:'{w} كيلو',fRec:'رقم قياسي جديد! {it} 
 Object.assign(STR.en,{fKg:'{w} kg',fRec:'New record! A {w} kg {it}',fCaught:'You caught a {w} kg {it}'});
 const FSW={fish:[.4,2.6,'#8aa8c8','#5a7898'],sfish:[.6,3.4,'#e8f4ff','#9ab8d8'],gfish:[1.2,5.5,'#ffd23a','#c8901a']},FSR=mulberry32(0xf15a);
 let FLEAP=[];
+/* ---------------- the fishing festival's board (SAT-ONLINE-183; plan U291 "Fishing festival": "species/weight competition and
+   seasonal cosmetics", checked by "fish catch evidence server validated") ----------------
+   During a Fishing festival (the world event, ten minutes, the same for everyone online), your heaviest catch goes on the
+   festival's board (fishFest/{slot}/{uid}); everyone fishing sees it at the top: your best, and the three heaviest. The
+   rules take an entry only during its slot, only heavier than before, at most every 15 seconds, and never past what that
+   kind can weigh (SAT-ONLINE-182's top weight at the highest Fishing level). When the festival ends, the heaviest catch
+   wins: its angler gets the title Festival Angler (no effect) and the news, and the rest hear who won. */
+Object.assign(STR.ar,{ffT:'🎣 مهرجان الصيد',ffMine:'أتقل سمكة ليك: {w} كيلو',ffNone:'لسه مصطدتش في المهرجان',ffTop:'{i}. {n}: {w} كيلو',ffWon:'كسبت مهرجان الصيد! سمكتك {w} كيلو كانت الأتقل 🏆',ffEnd:'المهرجان خلص: الأول {n} بسمكة {w} كيلو',ffYou:' · انت رقم {r}',ffWinN:'{n} كسب مهرجان الصيد!',tl_angler:'صياد المهرجان',tl_anglerD:'اصطدت أتقل سمكة في مهرجان صيد. لقب للشكل بس.'});
+Object.assign(STR.en,{ffT:'🎣 Fishing festival',ffMine:'Your heaviest: {w} kg',ffNone:"You haven't caught one yet this festival",ffTop:'{i}. {n}: {w} kg',ffWon:'You won the fishing festival! Your {w} kg fish was the heaviest 🏆',ffEnd:'The festival is over: first, {n} with a {w} kg fish',ffYou:' · you were #{r}',ffWinN:'{n} won the fishing festival!',tl_angler:'Festival Angler',tl_anglerD:'You caught the heaviest fish of a fishing festival. A title to show only.'});
+let FF={s:null,b:{},mine:0,want:null,last:-1e9,off:null},FFSIG='';
+const ffSt=()=>NETTR&&NETTR.kind==='firebase'&&FB&&NET&&netId&&Satisfy.firebase.fishFestStore?Satisfy.firebase.fishFestStore(FB):null;
+function ffRank(b){return Object.entries(b||{}).filter(([u,e])=>e&&e.w>0).map(([u,e])=>({u,w:+e.w,k:e.k,n:Satisfy.chat.clean(e.n,24)||'?',t:+e.t||0})).sort((a,b)=>b.w-a.w||a.t-b.t||(a.u<b.u?-1:1));}
+function ffStop(){if(FF.off)FF.off();FF.off=null;}
+function ffTick(){if(!S||S.__demo)return;if(!NEWS.includes('ffWinN'))NEWS.push('ffWinN'); // (NEWS is declared further down)
+ const st=ffSt(),on=!!st&&evOn('fishf')&&typeof EV.slot==='number';
+ if(on&&FF.s!==EV.slot){ffStop();const s=EV.slot;FF={s,b:{},mine:0,want:null,last:-1e9,off:st.watch(s,v=>{if(FF.s===s)FF.b=v||{};})};}
+ if(!on&&FF.s!=null){const s=FF.s,b=FF.b,took=FF.mine>0;ffStop();FF={s:null,b:{},mine:0,want:null,last:-1e9,off:null};ffEnd(s,b,took);}
+ if(FF.s!=null&&FF.want&&wNow()-FF.last>=15500){const W0=FF.want;FF.want=null;FF.last=wNow();st.post(FF.s,NET.uid,{s:FF.s,w:W0.w,k:W0.k,n:String(netId).slice(0,24)}).catch(()=>{if(FF.s!=null&&!FF.want)FF.want=W0;});}
+ ffUI();}
+// a catch during the festival: your heaviest goes up (a second one inside 15 s waits its turn)
+function ffCatch(k,w){if(FF.s==null)return;const w10=Math.round(w*10);if(w10<=FF.mine)return;FF.mine=w10;FF.want={k,w:w10};}
+function ffUI(){const e=$('ffW');if(!e)return;const on=FF.s!=null;let sig='';if(on){const r=ffRank(FF.b).slice(0,3);sig=lang+FF.mine+'|'+r.map(x=>x.n+x.w).join(',');}if(sig===FFSIG&&e.hidden===!on)return;FFSIG=sig;e.hidden=!on;if(!on)return;
+ const r=ffRank(FF.b).slice(0,3);e.innerHTML=`<b>${esc(t('ffT'))}</b> · ${esc(FF.mine?t('ffMine',{w:(FF.mine/10).toFixed(1)}):t('ffNone'))}`+(r.length?`<small>${r.map((x,i)=>esc(t('ffTop',{i:i+1,n:x.n,w:(x.w/10).toFixed(1)}))).join(' · ')}</small>`:'');}
+function ffEnd(s,b,took){const r=ffRank(b);if(!r.length)return;const top=r[0],me=NET&&r.findIndex(x=>x.u===NET.uid);
+ if(NET&&top.u===NET.uid){const L=S.ffw||(S.ffw=[]);if(L.includes(s))return;L.push(s);if(L.length>20)L.splice(0,L.length-20);giveTitle('angler');toast(t('ffWon',{w:(top.w/10).toFixed(1)}),'good');SFX.legendary();annW('ffWinN');save(true);return;}
+ if(took||me>=0)toast(t('ffEnd',{n:top.n,w:(top.w/10).toFixed(1)})+(me>=0?t('ffYou',{r:me+1}):''));}
+window.__GFF={get F(){return FF},rank:b=>ffRank(b),tick:()=>ffTick(),catch:(k,w)=>ffCatch(k,w)}; // tests
 function fsWeight(k,lv){const W0=FSW[k]||FSW.fish,r=FSR();return Math.round((W0[0]+(W0[1]-W0[0])*Math.pow(r,1.6))*(1+lv*.02)*10)/10;}
 function fsSplash(x,y,n){for(let i=0;i<n;i++){const a=-Math.PI*(.15+FSR()*.7);fx.push({x:x+(FSR()-.5)*4,y:y-1,vx:Math.cos(a)*(20+FSR()*40),vy:Math.sin(a)*(40+FSR()*50),t:.45,c:FSR()<.5?'#cfeaff':'#ffffff'});}}
 function fsBite(F){fsSplash(F.x,F.y,RMO?3:9);}
 function fsMiss(F){fsSplash(F.x,F.y,RMO?2:6);}
-function fsCatch(F,k){const lv=lifeLv('fish'),w=fsWeight(k,lv),R=S.fishR||(S.fishR={}),prev=R[k],rec=prev!=null&&w>prev;if(prev==null||w>prev)R[k]=w;
+function fsCatch(F,k){const lv=lifeLv('fish'),w=fsWeight(k,lv),R=S.fishR||(S.fishR={}),prev=R[k],rec=prev!=null&&w>prev;if(prev==null||w>prev)R[k]=w;ffCatch(k,w);
  FLEAP.push({k,x0:F.x,y0:F.y,t:0,w,rec});fsSplash(F.x,F.y,RMO?3:12);
  setTimeout(()=>{num(P.x,P.y-30,t('fKg',{w:w.toFixed(1)}),rec?'#ffe07a':'#cfeaff',rec);if(rec){toast(t('fRec',{it:t(k),w:w.toFixed(1)}),'good');SFX.rare();vfx('loot',P.x,P.y,{rarity:3,life:1.4});}else toast(t('fCaught',{it:t(k),w:w.toFixed(1)}));},520);}
 function fsFish(x,y,k,dir,s){const C=FSW[k]||FSW.fish,X=Math.round(x),Y=Math.round(y),d=dir<0?-1:1;
@@ -9509,7 +9539,7 @@ function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,ti
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
  h+=`<div class="ssec">${t('special')}</div><div class="sgrid">`+['comp','indom','dign','insi',...(S.hid.pers?['pers']:[])].map(k=>row(t(k),S.hid[k],t('t'+k)+'<br><small>'+t('noDist')+'</small>')).join('')+'</div>';
  h+=`<div class="pts" id="ptsT">${t('pts',{n:S.pts})}</div>`+(S.pts>0?`<div class="note">${t('ptsHint')}</div>`:'');
- h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk','expoc',...TTOWN].filter(id=>S.tl[id]);
+ h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk','expoc','angler',...TTOWN].filter(id=>S.tl[id]);
  const tlSk=id=>Object.keys(SKD).filter(k=>SKD[k].title===id||TLS[id]===k).filter((k,i,a)=>a.indexOf(k)===i);own.sort((x,y)=>(tlSk(y).length>0)-(tlSk(x).length>0));   // owner 2026-10-24: titles that give a skill come first
  const skTipT=k=>{const d=SKD[k]||{};return esc(`<b>${t('sk_'+k)}</b><br>${t('skd_'+k)}<br><small>${t('skCost',{mp:mpC(k),cd:Math.round((d.cd||0)*skCostM(k))})}</small>`);};
  h+=`<div class="ssec">${t('titlesH')}</div>`+(own.length?own.map(id=>`<div class="tl${S.title===id?' worn':''}"><div><b>${t('tl_'+id)}</b><small>${t('tl_'+id+'D')}</small>${tlSk(id).length?`<em>${tlSk(id).map(k=>`<span class="tlsk" data-tip="${skTipT(k)}">${t('iskL',{s:t('sk_'+k)})}</span>`).join(' · ')}</em>`:STR.en['tl_'+id+'S']?`<em>${t('tl_'+id+'S')}</em>`:''}</div><button data-title="${id}" ${S.title===id?'disabled':''}>${t(S.title===id?'tlWorn':'tlWear')}</button></div>`).join('')+`<div class="note">${t('tlNote')}</div>`:`<div class="note">${t('noTitles')}</div>`);
@@ -12828,6 +12858,7 @@ function netTick(){faultAt('netTick');NET.tick();pxpSeen();marTick();const live=
  rlTick();
  lootTick();
  legTick();
+ ffTick(); // SAT-ONLINE-183: the fishing festival's board
  rankTick(live);
  arnTick();
  wbTick();
