@@ -1200,7 +1200,7 @@ const OUT='#120f18',EYE='#22181e';
 
 // character sheets from sprites-original/chars.js: idle with blink, walk 4, attack 3, hurt; left mirrors the side row
 // cosmetic effects (sprites-original/vfx.js); seeded per spawn so they never consume the game's Math.random
-const VX=window.SatArt.vfx.create();let VXn=0;var FXME=0,FXREC=null;const vfx=(k,x,y,o={})=>{if(CURSK){CURSKN++;if(k==='slash'&&!o.raw&&skSlashFx(CURSK,x,y,o))return;}o.seed=o.rs!=null?o.rs:(++VXn*2654435761)>>>0;if(FXME&&FXREC)FXREC(k,x,y,o);if(RMO&&VX.count>RMOVX)return;VX.spawn(k,x,y,o);}; // rs: a replayed effect keeps its sender's seed (net 1:1 effects)
+const VX=window.SatArt.vfx.create();let VXn=0;var FXME=0,FXREC=null;const vfx=(k,x,y,o={})=>{if(CURSK){CURSKN++;if(CURSKT&&!o.raw&&(k==='hit'||k==='slash'||k==='crit'))skTickFx(CURSK,x,y,o);else if(k==='slash'&&!o.raw&&skSlashFx(CURSK,x,y,o))return;}o.seed=o.rs!=null?o.rs:(++VXn*2654435761)>>>0;if(FXME&&FXREC)FXREC(k,x,y,o);if(RMO&&VX.count>RMOVX)return;VX.spawn(k,x,y,o);}; // rs: a replayed effect keeps its sender's seed (net 1:1 effects)
 const SA=window.SatArt,SH={};
 // a figure's sheet is painted the first time it is drawn (owner 2026-10-21: painting every NPC and monster look at start was
 // a big part of the black screen on phones); the key is there from the start, so the name lists stay the same
@@ -6324,7 +6324,8 @@ function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR)
 // of a level at 300+ (it was 10-20%); below 100 nothing changes.
 const xpNeed=()=>Math.round((50+S.lv*30+S.lv*S.lv*3.5+S.lv**3*.025)*(1+Math.max(0,S.lv-100)*.02)*(1+.15*Math.floor(Math.max(0,S.lv-1)/100)));
 const PTS_LV=10; // stat points per level-up (canon)
-function gainXP(n){if(xpbOn())n*=1.2;if(MARN)n*=1.1;n*=1+secB('xp');S.xp+=Math.round(n);while(S.xp>=xpNeed()){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}),1);flash();SFX.rare();if(P)asMe(()=>vfx('levelup',P.x,P.y));},600);}P.hp=maxHP();if(P)asMe(()=>vfx('levelup',P.x,P.y));toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();checkSkills();}hudDirty=true;}
+const XPBOOST=1.3;window.__XPB=XPBOOST;   // a player's request passed on by the owner (2026-10-24): experience 1.3x for everyone
+function gainXP(n){n*=XPBOOST;if(xpbOn())n*=1.2;if(MARN)n*=1.1;n*=1+secB('xp');S.xp+=Math.round(n);while(S.xp>=xpNeed()){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}),1);flash();SFX.rare();if(P)asMe(()=>vfx('levelup',P.x,P.y));},600);}P.hp=maxHP();if(P)asMe(()=>vfx('levelup',P.x,P.y));toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();checkSkills();}hudDirty=true;}
 // loot feed: what you just gained slides in at the side as a system box (+n name icon); the same thing again within a few
 // seconds adds to its box instead of stacking a new one
 const LOOT={};
@@ -8098,12 +8099,12 @@ const SKF={
  // Manifestation of Will (ch 1005): intangible copies of his weapon; damage from Willpower and strength, defence ignored. Cooldown 1 minute
  mheaven:()=>{const T=mons.filter(m=>!m.dead&&Math.hypot(m.x-P.x,m.y-P.y)<170).sort((a,b)=>Math.hypot(a.x-P.x,a.y-P.y)-Math.hypot(b.x-P.x,b.y-P.y)).slice(0,6);
   if(!T.length)return toast(t('ssNoT'),'');const mul=2+wilV()/150;SFX.notice();flash();
-  T.forEach((m,i)=>{for(let k=0;k<6;k++)fx.push({x:P.x+(m.x-P.x)*k/6,y:P.y-34+(m.y-P.y+26)*k/6,vx:0,vy:0,t:.2+k*.04+i*.08,c:k%2?'#e8f4ff':'#9fd8ff',fl:1});
-   setTimeout(()=>{if(mode!=='play'||m.dead)return;if(hitMon(m,mul,{skill:1}))vfx('slash',m.x,monY(m),{angle:rand()*6.283,rarity:4});SFX.hit();},150+i*90);});},
+  vfx('aura',P.x,P.y,{raw:1,color:'#cfe8ff'});T.forEach((m,i)=>{setTimeout(()=>{if(mode!=='play'||m.dead)return;vfx('swordRain',m.x,monY(m),{raw:1,pts:[[m.x,monY(m)]],color:'#e8f4ff'});},i*90);
+   setTimeout(()=>{if(mode!=='play'||m.dead)return;if(hitMon(m,mul,{skill:1}))vfx('pillar',m.x,monY(m)+6,{raw:1,color:'#cfe8ff',h:60,w:8});SFX.hit();},150+i*90);});},
  // Heart Sword (ch 1050): an imperfect touch of the highest realm, one cut that took Berith's shoulder
  mwind:()=>{const v=fdir();let best=null,bd=80;for(const m of mons){if(m.dead)continue;const dx=m.x-P.x,dy=m.y-P.y,d=Math.hypot(dx,dy);if(d<bd&&dx*v[0]+dy*v[1]>-6){bd=d;best=m;}}
   P.acd=0;SFX.slam();shake=.35;const an=Math.atan2(v[1],v[0]),cx=best?best.x:P.x+v[0]*30,cy=best?monY(best):P.y-7+v[1]*30;
-  vfx('slash',cx,cy,{angle:an+.5,rarity:4});vfx('slash',cx,cy,{angle:an-.5,rarity:4});fx.push({ring:true,big:1,x:cx,y:cy,t:.5});for(let i=0;i<12;i++)fx.push({x:cx,y:cy,vx:Math.cos(i*.52)*90,vy:Math.sin(i*.52)*60,t:.35,c:i%2?'#ff9a9a':'#ffffff',fl:1});
+  flash();vfx('crescent',cx-v[0]*14,cy-v[1]*14,{raw:1,angle:an,big:2.6,color:'#ffb0b0'});vfx('xcut',cx,cy,{raw:1,color:'#ffd0d0',big:1.4});vfx('shock',cx,cy+6,{raw:1,radius:44,color:'#ffc0c0'});fx.push({ring:true,big:1,x:cx,y:cy,t:.5});for(let i=0;i<12;i++)fx.push({x:cx,y:cy,vx:Math.cos(i*.52)*90,vy:Math.sin(i*.52)*60,t:.35,c:i%2?'#ff9a9a':'#ffffff',fl:1});
   if(best)hitMon(best,12,{skill:1});},
  // True Clouds (ch 1254): blue clouds of sword energy that steal the senses of those inside
  scloud:()=>{SFX.magic();for(let i=0;i<40;i++){const a=rand()*6.283,r=rand()*80;fx.push({x:P.x+Math.cos(a)*r,y:P.y-6+Math.sin(a)*r*.6,vx:(rand()-.5)*20,vy:-10-rand()*10,t:1+rand()*.6,c:rand()<.5?'#5ab8ff':'#bfe0ff',fl:1});}
@@ -8111,7 +8112,7 @@ const SKF={
  // Frenzy Sword (ch 1376): lightning-fast stabs from every side, each one a chained explosion
  mflash:()=>{const T=mons.filter(m=>!m.dead&&Math.hypot(m.x-P.x,m.y-P.y)<130);if(!T.length)return toast(t('ssNoT'),'');P.inv=Math.max(P.inv,1.2);SFX.dodge();
   for(let i=0;i<8;i++)setTimeout(()=>{if(mode!=='play')return;const L=T.filter(m=>!m.dead);if(!L.length)return;const m=L[i%L.length],an=rand()*6.283,x=m.x+Math.cos(an)*16,y=m.y-8+Math.sin(an)*10;
-   for(let k=0;k<5;k++)fx.push({x:x+(m.x-x)*k/5,y:y+(m.y-8-y)*k/5,vx:0,vy:0,t:.18,c:k%2?'#fff8a0':'#ffffff',fl:1});hitMon(m,2.2,{skill:1});fx.push({ring:true,x:m.x,y:m.y-6,t:.3});
+   vfx('thrust',m.x-Math.cos(an)*30,m.y-8-Math.sin(an)*20,{raw:1,angle:Math.atan2(20*Math.sin(an),30*Math.cos(an)),len:32,color:'#fff8a0'});hitMon(m,2.2,{skill:1});fx.push({ring:true,x:m.x,y:m.y-6,t:.3});
    if(aoe(m.x,m.y-6,26,1,{skill:1}))SFX.hit();tone(880-i*40,.05,'square',.05);},i*70);},
  // Matchless Heart Technique (ch 1130, 1254): Muller's sword-energy circulation; half your mana back at once. Once an hour
  mheart:()=>{P.mp=Math.min(maxMP(),P.mp+maxMP()*.5);fx.push({ring:true,big:1,x:P.x,y:P.y-8,t:.6});for(let i=0;i<16;i++)fx.push({x:P.x+(rand()-.5)*30,y:P.y,vx:0,vy:-40-rand()*30,t:.7,c:'#ffd24a',fl:1});hudDirty=true;},
@@ -8193,7 +8194,7 @@ function castSk(k,el){if(brSeal()){toast(t('brSealT'),'warn');SFX.deny();return;
  if((P.cd[k]||0)>0||P.dash>0){SFX.deny();return;}
  const wk=weapKind();if((d.need==='bow'&&wk!=='bow')||(d.need==='staff'&&wk!=='staff')||(d.need==='melee'&&(wk==='bow'||wk==='staff'))||(d.need==='spear'&&wk!=='spear')){toast(t(d.need==='bow'?'needBow':d.need==='staff'?'needStaff':d.need==='spear'?'needSpear':'needMelee'),'warn');SFX.deny();return;}
  if(P.mp<mpC(k)){toast(t('noMP'),'warn');SFX.deny();return;}
- const FK=fusTry(k);P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k)*dsCdM(k)*skCdM(k);SKC={k,t:gTime};SKH.push(SKC);if(SKH.length>6)SKH.shift();skUse(k);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}if(FK){fusLearn(FK);hudDirty=true;return;}{const h0=P.hp;CURSK=k;CURSKN=0;CURSKD=0;try{SKF[k]();}finally{CURSK=null;}skHealUp(k,h0);}skSnd(k);skVfx(k);if(!CURSKN&&!skVfxHas(k))skSig(k);numP(-34,t('sk_'+k),d.col,false);hudDirty=true;}
+ const FK=fusTry(k);P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k)*dsCdM(k)*skCdM(k);SKC={k,t:gTime};SKH.push(SKC);if(SKH.length>6)SKH.shift();skUse(k);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}if(FK){fusLearn(FK);hudDirty=true;return;}{const h0=P.hp;CURSK=k;CURSKN=0;CURSKD=0;const ST0=window.setTimeout;window.setTimeout=skTimer(k,ST0,gTime+6);try{SKF[k]();}finally{CURSK=null;window.setTimeout=ST0;}skHealUp(k,h0);}skSnd(k);skVfx(k);if(!CURSKN&&!skVfxHas(k))skSig(k);numP(-34,t('sk_'+k),d.col,false);hudDirty=true;}
 /* skill looks (owner 2026-10-24: "almost every skill and hit looks alike; fix the effects and hitboxes so each skill feels
    different; Space Sword is literally a bigger slash"). Each skill gets a look from its name and element: a wide crescent, a
    thrust, a cross cut, a cut in space, falling swords, flying blades, petals, a dragon, a pillar of light, a vortex, lightning
@@ -8221,6 +8222,21 @@ function skLookBy(k){const d=SKD[k]||{},kd=typeof skKind==='function'?skKind(k):
 const skCol=k=>{const c=SKD[k]&&SKD[k].col||'#cfe8ff';return SA.chars.mixC(c,'#ffffff',.15);};
 // up to n live foes in front of you, nearest first
 function skFoes(R,n,cone){const v=fdir(),out=[];for(const m of mons){if(m.dead||m.ally)continue;const dx=m.x-P.x,dy=monY(m)-(P.y-6),d=Math.hypot(dx,dy);if(d>R)continue;if(cone&&d>8&&(dx*v[0]+dy*v[1])/d<cone)continue;out.push([d,m.x,monY(m)]);}return out.sort((a,b)=>a[0]-b[0]).slice(0,n).map(([,x,y])=>[x,y]);}
+// a timer started by a skill runs its callback as that skill's (and passes the same on to the timers it starts), for 6 s
+var CURSKT=0;
+function skTimer(k,ST0,until){const w=(fn,ms,...a)=>ST0(()=>{if(typeof fn!=='function')return;const c=CURSK,d=CURSKD,tk=CURSKT,s0=window.setTimeout,live=gTime<until;if(live){CURSK=k;CURSKD=1;CURSKT=1;window.setTimeout=w;}
+ try{fn(...a);}finally{if(live){CURSK=c;CURSKD=d;CURSKT=tk;window.setTimeout=s0;}}},ms);return w;}
+// one blow of a barrage: a small piece of the skill's look where it lands
+function skTickFx(k,x,y,o){const L=skLook(k),c=skCol(k),R={raw:1},a=Math.atan2(y-(P.y-7),x-P.x);
+ switch(L){case 'kill':case 'lkill':case 'shadow':vfx('xcut',x,y,{...R,color:L==='shadow'?'#9a6ad8':'#ff3a4a',big:.7});return;
+  case 'link':case 'transcend':vfx('flyBlades',P.x,P.y-7,{...R,pts:[[x,y]],color:L==='transcend'?'#c8b0ff':'#cfe0ff'});return;
+  case 'flower':case 'petalsG':vfx('petals',x,y,{...R,radius:14,n:10,leaf:L==='petalsG'});return;
+  case 'bolt':vfx('chain',P.x,P.y-7,{...R,pts:[[x,y]],color:'#9ac0ff'});return;
+  case 'fire':vfx('explode',x,y,{...R,radius:14});return;
+  case 'holy':case 'pinnacle':case 'sky':vfx('pillar',x,y+6,{...R,color:'#fff2a0',h:50,w:6});return;
+  case 'rain':case 'drop':vfx('swordRain',x,y,{...R,pts:[[x,y]],color:c});return;
+  case 'army':vfx('crescent',x,y,{...R,angle:a,big:.9,color:'#ff3a3a'});return;
+  default:vfx('crescent',x,y,{...R,angle:a,big:.8,color:c,dir:(k.length+Math.round(gTime*10))%2?1:-1});}}
 function skLookFx(L,k,x,y,a){const c=skCol(k),v=[Math.cos(a),Math.sin(a)],h=[...k].reduce((s,ch)=>s+ch.charCodeAt(0),0),o={raw:1};
  const at=(d)=>[x+v[0]*d,y+v[1]*d],foes=(R,n)=>{const f=skFoes(R,n,.2);return f.length?f:[at(40)];};
  switch(L){

@@ -144,7 +144,7 @@ test('the novel\'s quests: the gateways, Arube captured or killed, Han Seokbong 
       return o; });
     assert.ok(r.gate && r.star, 'the gateway and the title');
     assert.equal(r.ea3a, false, 'nothing before you choose');
-    assert.equal(r.capXp, 30); assert.equal(r.ar, 'cap'); assert.equal(r.ea3, true); assert.equal(r.ea4a, false, 'Han Seokbong is still free');
+    assert.equal(r.capXp, Math.round(30 * (await g.eval(() => window.__XPB || 1))));   // experience x1.3 (2026-10-24) assert.equal(r.ar, 'cap'); assert.equal(r.ea3, true); assert.equal(r.ea4a, false, 'Han Seokbong is still free');
     assert.ok(r.bow, 'the Red Phoenix Bow comes back'); assert.ok(r.jail);
     assert.deepEqual(r.vis1, [true, false], 'Han Seokbong is in the Lava Prison'); assert.ok(r.ea4);
     assert.ok(r.ready4, 'the warden\'s fall frees them'); assert.deepEqual(r.vis2, [false, true], 'back in Pangea'); assert.equal(r.aff, 100);

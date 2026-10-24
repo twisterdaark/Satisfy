@@ -25,7 +25,7 @@ test('production specializations: offered by their trainers, learned one at a ti
         let n = 0; for (const s of X.keys()) { S.sec = s; if (X.b(k) > 0) n++; } out['k_' + k] = n; }
       return out; });
     assert.equal(r.sec, 'scholar'); assert.equal(r.gold, 5000, 'the first one is free');
-    assert.ok(r.xp >= 1049 && r.xp <= 1300, 'scholar +5% experience: ' + r.xp);
+    { const B = await g.eval(() => window.__XPB || 1); assert.ok(r.xp >= 1049 * B && r.xp <= 1300 * B, 'scholar +5% experience: ' + r.xp); }   // experience x1.3 (2026-10-24)
     assert.equal(r.sec2, 'miner'); assert.equal(r.gold2, 3000, 'switching costs 2000'); assert.equal(r.ore, 1);
     for (const k of Object.keys(r).filter((x) => x.startsWith('k_'))) assert.ok(r[k] >= 1, k + ' has a class');
     assert.deepEqual(g.errors, []);
