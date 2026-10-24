@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24balarm', ver: '2.80', d: '2026-10-24',
+      ar: ["خليفة براهام اتعلم سحر جديد من لفل 45: سحر براهام: الإنذار. بتحط إنذار قدامك بيرن بعد 2.5 ثانية: الوحوش اللي جنبه بتلف على الصوت وتقف ثانية، وبيطلع منه لحد 4 صواريخ سحرية على أقرب الأعداء، زي ما جريد كان بيخبي الصواريخ في الإنذار في الرواية. لحد 3 إنذارات في نفس الوقت."],
+      en: ["Braham's Successor learns a new spell at level 45: Braham's Magic: Alarm. You set an alarm ahead that rings after 2.5 seconds: the monsters by it turn to the sound and stand still a moment, and up to 4 Magic Missiles packed in it fly at the nearest foes, the way Grid hid missiles in his alarms in the novel. Up to 3 alarms at once."] },
     { v: '2026-10-24doranlang', ver: '2.79', d: '2026-10-24',
       ar: ["شفا خاتم دوران وخبرة الحدادة من الفحص بقوا بيظهروا للاعبين التانيين بلغتهم هما.",
           "دمية التدريب بقت بتقف كمان أي اندفاع أو زقة عليها في نفس الفريم."],
