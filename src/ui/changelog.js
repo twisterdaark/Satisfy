@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24qshare', ver: '2.68', d: '2026-10-24',
+      ar: ["مهمات الفريق (أونلاين): لو حد من فريقك موّت وحش جنبك وانت بتلعب، الوحش ده بيتحسب لك كمان في مهماتك اللي بتطلب تموّت النوع ده بس (مش المهمات اللي بتطلب طريقة معينة زي سلاح معين، ولا مهمات الكلاسات). المهمات دي عليها 👥 في لوحة المهمات وانت في فريق، والعدد بتاعك بيفضل حتى لو النت فصل."],
+      en: ["Party quests (online): when a party member kills a monster near you while you're playing, it also counts for your quests that only ask you to kill that kind (not quests that ask how, such as with a certain weapon, nor class quests). Those quests carry 👥 on the quest panel while you're in a party, and your count stays even if the connection drops."] },
     { v: '2026-10-24nearby', ver: '2.67', d: '2026-10-24',
       ar: ["قايمة اللاعيبة (O) بقت مترتبة بالأقرب: انت الأول، وبعدين اللي على نفس الخريطة ومعاك في نفس المكان من الأقرب للأبعد وجنب كل واحد بُعده بالمربعات، وبعدين الباقيين بالاسم."],
       en: ["The players list (O) puts the nearest first: you, then the players on your map and in the same place, closest first with how far each one is in tiles, then everyone else by name."] },
