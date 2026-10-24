@@ -416,6 +416,7 @@ button{background:linear-gradient(180deg,rgba(36,52,108,.85),rgba(22,32,74,.85))
 #tip{background:linear-gradient(180deg,rgba(44,62,128,.8),rgba(26,38,90,.84));margin-top:calc(var(--u)*1.6);padding:calc(var(--u)*.9) calc(var(--u)*1.2);min-width:calc(var(--u)*14)}
 #tip::before{top:calc(var(--u)*-2.3);height:calc(var(--u)*2.6);background:var(--orn) 14% top/auto calc(var(--u)*2.3) no-repeat,var(--bar) center bottom/100% calc(var(--u)*.3) no-repeat;box-shadow:none;filter:drop-shadow(0 0 calc(var(--u)*.4) rgba(170,220,255,.8))}
 @media (prefers-reduced-motion:reduce){.toast,.panel,.pop,#forge.hit,#rays,.key.glow kbd{animation:none}}
+body.hc .bar{outline:1px solid #fff;outline-offset:0}body.hc .bar span{text-shadow:0 0 2px #000,0 0 2px #000,1px 1px 0 #000,-1px -1px 0 #000}body.hc .toast{background:#000;border:1px solid #fff}
 body.rmo .toast,body.rmo .panel,body.rmo .pop,body.rmo #forge.hit,body.rmo #rays,body.rmo .key.glow kbd,body.rmo .ef-card.hit,body.rmo .ef-card.lose .ef-res{animation:none}body.rmo #flash{display:none}
 /* patch 4: see-through windows, crest pinned to the border, hidden bars ignore the mouse */
 .sys{background:linear-gradient(180deg,rgba(34,46,98,.7),rgba(20,28,66,.76));backdrop-filter:blur(2px)}
@@ -688,6 +689,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
         <button data-act="swapLang" data-i18n="langSwap"></button>
         <button data-act="menuSize" id="mzB"></button>
         <button data-act="rmotion" id="rmB"></button>
+        <button data-act="hcon" id="hcB"></button>
         <button data-act="guiReset" data-i18n="guiReset"></button>
         <button data-act="rename" data-i18n="nmB"></button>
         <button data-act="tLay" class="tOnly" data-i18n="kLay"></button>
@@ -836,10 +838,19 @@ function sfxOn(ch,f){const c0=SFXCH;SFXCH=ch;try{return f();}finally{SFXCH=c0;}}
    are kept at once (rings, bolts and arcs stay). A monster's wind-up (drawTele), its "!" and the boss markers are untouched.
    Only what this screen draws: the others see their own setting. */
 let RMO=false;const RMOFX=90,RMOVX=70,RMOS=[0,0];
-function rmoSet(v,keep){RMO=!!v;if(!keep)try{localStorage.setItem('satisfy_rmo',RMO?'1':'0');}catch(e){}if(document.body)document.body.classList.toggle('rmo',RMO);rmUI();}
+function rmoSet(v,keep){RMO=!!v;if(!keep)try{localStorage.setItem('satisfy_rmo',RMO?'1':'0');}catch(e){}if(document.body)document.body.classList.toggle('rmo',RMO);rmUI();hcUI();}
 function rmUI(){const b=document.getElementById('rmB');if(b)b.textContent=t('rmB',{s:t(RMO?'rmOn':'rmOff')});}
+/* U264 Damage accessibility (plan: "contrast mode and color-neutral cues", checked by "status readable with low
+   saturation"): a setting of this device too (satisfy_hc; unset: the system's prefers-contrast: more). On: a critical hit's
+   number ends in "!" (what was only yellow and bigger), the floating numbers get a thicker outline and a size up, the
+   health bars over heads a white frame, a monster's wind-up a white outline, and the HUD's bars and toasts a solid frame.
+   Damage taken already reads "-" and gains "+", so every kind reads without its colour. */
+let HCM=false;
+function hcSet(v,keep){HCM=!!v;if(!keep)try{localStorage.setItem('satisfy_hc',HCM?'1':'0');}catch(e){}if(document.body)document.body.classList.toggle('hc',HCM);hcUI();}
+function hcUI(){const b=document.getElementById('hcB');if(b)b.textContent=t('hcB',{s:t(HCM?'rmOn':'rmOff')});}
+{let v=null;try{v=localStorage.getItem('satisfy_hc');}catch(e){}let sys=false;try{sys=!!(window.matchMedia&&matchMedia('(prefers-contrast: more)').matches);}catch(e){}HCM=v==='1'||v==null&&sys;if(document.body)document.body.classList.toggle('hc',HCM);}
 {let v=null;try{v=localStorage.getItem('satisfy_rmo');}catch(e){}let sys=false;try{sys=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);}catch(e){}RMO=v==='1'||v==null&&sys;if(document.body)document.body.classList.toggle('rmo',RMO);}
-function mzUI(){const b=document.getElementById('mzB');if(b)b.textContent=t('mzB',{n:mzOf()});rmUI();}
+function mzUI(){const b=document.getElementById('mzB');if(b)b.textContent=t('mzB',{n:mzOf()});rmUI();hcUI();}
 function volUI(){mzUI();for(const k of ['sfx','mus','amb','soc']){const r=document.getElementById('vol_'+k),o=document.getElementById('volv_'+k),v={sfx:sfxV,mus:musV,amb:ambV,soc:socV}[k];if(r){r.value=v;r.style.setProperty('--p',v+'%');}if(o)o.textContent=v?v+'%':t('volOff');}}
 function audio(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=.5;master.connect(ac.destination);sfxG=ac.createGain();sfxG.gain.value=sfxV/100;sfxG.connect(master);}catch(e){return null;}}if(ac.state==='suspended')ac.resume();return ac;}
 let SFXV=1; // SAT-ONLINE-047: the volume of a sound another player makes, by distance (1 for your own)
@@ -3954,7 +3965,7 @@ Object.assign(STR.ar,{"farmHowT": "دوس على مربع عشان تحفر · �
 Object.assign(STR.en,{"farmHowT": "Tap a square to dig · digs left: {n}", "kLog": "Log", "reheatB": "Reheat", "bqT": "Amount:", "bqMax": "Max", "sellAllB": "Sell all", "sellOneB": "Sell one", "ptsAllB": "All", "tQuitT": "Leave"});
 Object.assign(STR.ar,{"barTap": "دوس على مهارة وبعدين على خانة من الخانات الخمسة فوق، أو دوس الزرار. دوس على خانة فيها مهارة عشان تنقلها لخانة تانية.", "barPickT": "اختار خانة لـ{sk}", "barRowT": "شريط المهارات", "mzB": "حجم القوايم: {n}%"});
 Object.assign(STR.en,{"barTap": "Tap a skill, then one of the five slots above, or use the button. Tap a slot that has a skill to move it to another slot.", "barPickT": "Pick a slot for {sk}", "barRowT": "Skill bar", "mzB": "Menu size: {n}%"});
-Object.assign(STR.ar,{rmB:'حركة أقل: {s}',rmOn:'شغالة',rmOff:'مقفولة'});Object.assign(STR.en,{rmB:'Reduced motion: {s}',rmOn:'On',rmOff:'Off'});
+Object.assign(STR.ar,{rmB:'حركة أقل: {s}',rmOn:'شغالة',rmOff:'مقفولة',hcB:'تباين عالي: {s}'});Object.assign(STR.en,{rmB:'Reduced motion: {s}',rmOn:'On',rmOff:'Off',hcB:'High contrast: {s}'});
 Object.assign(STR.ar,{"kLay": "رتّب الأزرار"});
 Object.assign(STR.en,{"kLay": "Arrange buttons"});
 Object.assign(STR.ar,{"coachR": "عربجي ريدان", "coachRh": "عربجي رينهارت", "coachRo": "عربجي رولينج", "coachT": "عربجي تيتان", "coachHi2": "العربيات بتلف على المدن الكبيرة. واللي لسه ملوش كلاس بيركب ببلاش، أكيد رايح لمدرّبه.", "oCoachTo": "سافر لـ{z} ({g} دهب)", "oCoachFree": "سافر لـ{z} (ببلاش، لسه ملكش كلاس)", "oWhereTr": "المدربين فين؟", "whereTr": "مدرب المحاربين ومدربة الرماة هنا في وينستون، والنكرومانسر في معبد ياتان على أطراف البلد. معلم السحر في برج السحر في ريدان، ومدرب الفرسان مع الفرسان الحُمر في تيتان، وكاسوس في كنيسة ريبيكا في رولينج، والراجل المقنّع في حواري رينهارت. وعربياتي بتوصلك لكل دول."});
@@ -7787,7 +7798,7 @@ function newsIn(m){if(!m||!NEWS.includes(m.k)||!NET||m.from===NET.uid||isBlocked
  if(m.k==='evCap'){evCapIn(m);return;}
  if(m.k==='terrNews'||m.k==='castNews'){const T=TERR[m.p&&m.p.f|0];announce(t(m.k,{n:Satisfy.chat.name(m.h,m.from)||'?',t:T?t(T.k):''}));sfxOn('soc',SFX.notice);return;}
  const p={};for(const f of ['lv','f','rk'])if(m.p&&typeof m.p[f]==='number')p[f]=m.p[f];announce(t(m.k,annArgs(p,Satisfy.chat.name(m.h,m.from)||'?')));sfxOn('soc',SFX.notice);}
-function num(x,y,s,c,big){if(typeof s==='number')s=Math.round(s);else if(typeof s==='string'&&/\d\.\d/.test(s))s=s.replace(/(\d+)\.\d+/g,(a,b)=>String(Math.round(+a)));nums.push({x,y,s,c,big,t:.9});}
+function num(x,y,s,c,big){if(typeof s==='number')s=Math.round(s);else if(typeof s==='string'&&/\d\.\d/.test(s))s=s.replace(/(\d+)\.\d+/g,(a,b)=>String(Math.round(+a)));if(HCM&&big&&/^\d[\d,]*$/.test(String(s)))s=s+'!';nums.push({x,y,s,c,big,t:.9});}
 // SAT-ONLINE-043 (owner 2026-10-19: when someone takes damage, the others don't see the number): a number over your own player
 // (damage taken, a heal, a parry, a skill's name; not gold) also goes out with your effects and shows over you on every screen
 function numP(dy,s,c,big){num(P.x,P.y+dy,s,c,big);if(NET&&typeof fxR==='function'&&mode!=='title')try{fxR(['n',String(s).slice(0,16),String(c||'#ffffff').slice(0,7),big?1:0,dy]);}catch(e){}}
@@ -7807,6 +7818,7 @@ function updateHUD(){if(PHOTO&&mode!=='play')photoOff();const mh=maxHP();P.hp=Ma
 /* ---------------- fx helpers, keybinds, status window ---------------- */
 function fadeTo(fn){const f=$('fade');f.classList.add('on');setTimeout(()=>{fn();f.classList.remove('on');},300);}
 function flash(){if(RMO)return;const f=$('flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');}
+window.__GHC={on:()=>HCM,set:v=>hcSet(v),num:(s,big)=>{num(0,0,s,'#fff',big);return nums.pop().s;},tele:m=>drawTele(m),get ctx(){return ctx}}; // tests
 window.__GRMO={on:()=>RMO,set:v=>rmoSet(v),shake:()=>RMOS.slice(),FX:RMOFX,VXC:RMOVX,vx:()=>VX.count,fx:()=>fx.length,push:o=>fx.push(o),vfx:(k,x,y)=>vfx(k,x,y),tele:m=>drawTele(m),flash:()=>flash(),get ctx(){return ctx},setShake:v=>{shake=v;}}; // tests
 function pressKey(id){const k=$(id);if(!k)return;k.classList.add('press');setTimeout(()=>k.classList.remove('press'),110);}
 function dissolve(x,y,cols,n){for(let i=0;i<n;i++)fx.push({x:x+(rand()-.5)*12,y:y+(rand()-.5)*16,vx:(rand()-.5)*24,vy:-15-rand()*45,t:.7+rand()*.9,c:cols[i%cols.length],fl:1});}
@@ -9367,6 +9379,7 @@ function act(a){
  else if(a==='rmotion'){rmoSet(!RMO);SFX.click();}
  else if(a==='marGo')marGo();
  else if(a==='qRec')qRecGo();
+ else if(a==='hcon'){hcSet(!HCM);SFX.click();}
  else if(a==='menuSize'){const v=[100,120,140],c=mzOf();MZ=v[(v.indexOf(c)+1)%v.length]||100;try{localStorage.setItem('satisfy_mz',String(MZ));}catch(e){}fit();mzUI();}
  else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='guiReset')guiReset();else if(a==='quit'){save(true);fadeTo(toTitle);}
  else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='mgReheat'){reheat();}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='fCre'){creOpen();}else if(a==='fApr'){closeForge();openApr('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeGuildW')closeGuildW();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='photo'){act('resume');setTimeout(photoOn,0);}else if(a==='photoSave')photoShot();else if(a==='photoExit')photoOff();else if(a==='closeMB')closeMB();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qgFollow')qgFollow();else if(a==='qtoggle')toggleQuest();
@@ -9721,7 +9734,7 @@ function drawEProj(){ezDraw();for(const p of eproj){if(p.sp==='rock'){blob(ctx,p
 // telegraphs drawn on the ground under the monster
 const monLit=m=>{const D=dunAt(P.x,P.y);if(D&&dunAt(m.x,m.y)!==D)return false;const r=roomAt(P.x,P.y);if(r&&roomAt(m.x,m.y)!==r)return false;return seeP(m)||Math.hypot(m.x-P.x,m.y-P.y)<40;};
 function drawTele(m){const b=MT[m.type],mv=m.mv;if(!mv||m.dead||m.st!=='tele')return;const k=clamp(1-Math.max(0,m.stT)/mv.tele,0,1),al=.18+k*.32;
- ctx.save();ctx.fillStyle=`rgba(255,60,40,${al})`;ctx.strokeStyle=`rgba(255,140,110,${.5+k*.4})`;ctx.lineWidth=1;const a=Math.atan2(m.ay,m.ax);
+ ctx.save();ctx.fillStyle=`rgba(255,60,40,${al})`;ctx.strokeStyle=`rgba(255,140,110,${.5+k*.4})`;ctx.lineWidth=1;if(HCM){ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=2;}const a=Math.atan2(m.ay,m.ax);
  if(mv.k==='ring'){ctx.beginPath();ctx.ellipse(m.x,m.y,mv.reach*k+3,mv.reach*.58*k+2,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(m.x,m.y,mv.reach,mv.reach*.58,0,0,7);ctx.stroke();}
  else if(mv.k==='leap'||mv.k==='line'){const L=mv.k==='line'?mv.dash*mv.dashT:mv.back?mv.max:(m.lL||40),w=mv.k==='line'?b.r+4:b.r+2;ctx.translate(m.x,m.y-2);ctx.rotate(mv.back?a+Math.PI:a);ctx.fillRect(0,-w,L*Math.min(1,k*1.4),w*2);ctx.strokeRect(0,-w,L,w*2);}
  else if(mv.k==='shot'){ctx.translate(m.x,m.y-8);ctx.rotate(a);ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(6,0);ctx.lineTo(mv.max*Math.min(1,k*1.3),0);ctx.stroke();}
@@ -9888,7 +9901,7 @@ function txBar(x,y,w,p,col,lag,fr){p=Math.max(0,Math.min(1,p));TX.push({bar:p,la
 function hpLag(o,p,k){const l=o[k];o[k]=l==null||l<p?p:Math.max(p,l-.012);return l==null?p:l;}
 const TXBG=new Map(); // a bar's gradient by colours and height (it was made new for every bar each frame)
 function drawTXBar(g,o,x,y,k){const w=Math.round(o.w*k),h=Math.max(3,Math.round(2.4*k)),x0=x-(w>>1),y0=y-h;
- g.fillStyle='rgba(0,0,0,.85)';g.fillRect(x0-1,y0-1,w+2,h+2);g.fillStyle='#160c12';g.fillRect(x0,y0,w,h);
+ g.fillStyle=HCM?'#ffffff':'rgba(0,0,0,.85)';g.fillRect(x0-1,y0-1,w+2,h+2);g.fillStyle='#160c12';g.fillRect(x0,y0,w,h);
  if(o.lag>o.bar){g.fillStyle='rgba(255,236,214,.75)';g.fillRect(x0,y0,Math.round(w*o.lag),h);}
  const fw=Math.round(w*o.bar);if(fw>0){const gk=o.col[0]+o.col[1]+o.col[2]+h;let gr=TXBG.get(gk);if(!gr){gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,o.col[1]);gr.addColorStop(.5,o.col[0]);gr.addColorStop(1,o.col[2]);if(TXBG.size>64)TXBG.clear();TXBG.set(gk,gr);}g.fillStyle=gr;g.translate(0,y0);g.fillRect(x0,0,fw,h);g.translate(0,-y0);g.fillStyle='rgba(255,255,255,.4)';g.fillRect(x0,y0,fw,Math.max(1,Math.round(h*.3)));}
  g.fillStyle='rgba(0,0,0,.45)';for(let i=1;i<4;i++)g.fillRect(x0+Math.round(w*i/4),y0,1,h);
@@ -9912,9 +9925,9 @@ function txSpr(f,s,c,lw){const key=f+'\u0001'+lw+'\u0001'+c+'\u0001'+s;let e=TXC
  const g=cv.getContext('2d');g.font=f;g.textAlign='center';g.lineJoin='round';g.lineWidth=lw;g.strokeStyle='rgba(0,0,0,.9)';g.strokeText(s,ox,oy);g.fillStyle=c;g.fillText(s,ox,oy);
  e={cv,ox,oy};TXC.set(key,e);return e;}
 function drawTX(cx,cy){const g=txg,k=TXS;g.clearRect(0,0,g.canvas.width,g.canvas.height);g.textAlign='center';g.lineJoin='round';
- const lw=Math.max(2,k*1.5),late=document.fonts&&document.fonts.status==='loading';let fz=null;
+ const lw=HCM?Math.max(3,k*2.4):Math.max(2,k*1.5),late=document.fonts&&document.fonts.status==='loading';let fz=null;
  for(const o of TX){g.globalAlpha=o.arw?1:o.a??1;if(o.arw){drawTXArrow(g,o,(o.x-cx)*k,(o.y-cy)*k,k);continue;}if(o.bar!=null){drawTXBar(g,o,Math.round((o.x-cx)*k),Math.round((o.y-cy)*k),k);continue;}
-  const f=o.f.replace('{s}',(o.z*k).toFixed(1)),x=Math.round((o.x-cx)*k),y=Math.round((o.y-cy)*k),e=!late&&txSpr(f,String(o.s),o.c,lw);
+  const f=o.f.replace('{s}',(o.z*k*(HCM?1.15:1)).toFixed(1)),x=Math.round((o.x-cx)*k),y=Math.round((o.y-cy)*k),e=!late&&txSpr(f,String(o.s),o.c,lw);
   if(e){g.drawImage(e.cv,x-e.ox,y-e.oy);continue;}
   if(f!==fz){g.font=fz=f;}g.lineWidth=lw;g.strokeStyle='rgba(0,0,0,.9)';g.strokeText(o.s,x,y);g.fillStyle=o.c;g.fillText(o.s,x,y);}
  g.globalAlpha=1;TX.length=0;}
