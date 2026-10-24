@@ -7,6 +7,21 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24salvmap', ver: '2.71', d: '2026-10-24',
+      ar: ["لما تفك قطعة صنعتها بالحداد الأسطوري بترجعلك خاماتها هي: النادرة (جوهرة وقرن بيليال، حراشف التنين، الأنفاس...) كاملة، والعادية بنسبة الفك العادية.",
+          "كل ما ندرة القطعة تعلى، فرصة إن فيها خاصية مخفية بتزيد، في المصنوع (من 15% لحد 82%) وفي اللي بيقع من الوحوش (من 46% لحد 90%).",
+          "الزعيم بيقول «بينادي على رجالته» بس لو فعلا جه حد منهم، ورجالة سانجو بقوا بيلاقوا مكان يطلعوا فيه على الحرف الضيقة.",
+          "اختبار جورين بقى عند الترابيزة المدورة في الدور العاشر، بدل ما ينزلك الدور التاني.",
+          "الخريطة بقت بترسم اللي ظاهر قدامك كامل مرة واحدة وتحفظه، فمش هتتعاد ولا تسوّد وانت بتلف فيها.",
+          "جبال الفوضى فيها ممرات أكتر بكتير بين السلاسل: ممر كل 60 لـ 120 خطوة.",
+          "شريط مهرجان الصيد بقى جنبه ✕ يخفيه لحد المهرجان الجاي."],
+      en: ["Taking apart a piece you made with the Legendary Blacksmith gives back its own materials: the rare ones (Belial's jewel and horn, dragon scales, the breaths...) in full, the common ones at the usual salvage share.",
+          "The rarer a piece, the likelier it hides an option, for crafted pieces (15% up to 82%) and for drops (46% up to 90%).",
+          "A boss says it \"calls his warriors\" only when one actually comes, and Sanjo's warriors now find room to come on the narrow ridges.",
+          "Jurene's test is now at the round table on the tenth floor instead of taking you down to the second.",
+          "The world map paints what is in front of you whole, once, and keeps it, so it no longer repaints or goes dark as you look around.",
+          "The Chaos Mountains have many more passes between the crests: one every 60 to 120 steps.",
+          "The fishing festival line has an ✕ that hides it until the next festival."] },
     { v: '2026-10-24herald', ver: '2.70', d: '2026-10-24',
       ar: ["منادي البطولة بقى بيجيب أعلى 4 لفلات في اللعبة كلها، لاعبين حقيقيين وأبطال الرواية مع بعض، وبتحاربهم من الأضعف للأقوى. نسخة اللاعب طالعة باسمه ولفله وشكله وسلاحه وبتلعب بمهاراته هو، وصحتها وضربها على قد فرق قوته عنك.",
           "في الغزو، الحراس والقادة والمدربين والحدادين بيطلعوا يحاربوا الوحوش بمهاراتهم لحد ما الغزو يخلص أو يقعوا، والناس العادية والعيال بيجروا يستخبوا في البيوت والمحلات لحد ما يخلص.",
