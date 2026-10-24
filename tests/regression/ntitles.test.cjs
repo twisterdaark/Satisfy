@@ -42,7 +42,7 @@ test('the new titles: listed in both languages; what each gives counts while you
       return { miss, d: Object.fromEntries(Object.keys(st0).map((k) => [k, st1[k] - st0[k]])), flat, none, same, hp10, hp10w, n: T.own().length };
     });
     assert.deepEqual(r.miss, [], 'titles without both names and lines');
-    assert.equal(r.n, 23); // 22 of SAT-ONLINE-161 and First to Obtain a Second Class (SAT-ONLINE-171)
+    assert.equal(r.n, 26); // 22 of SAT-ONLINE-161, First to Obtain a Second Class (SAT-ONLINE-171), the harvest fair's two and Keeper of Lore
     const z = { str: 0, sta: 0, agi: 0, int: 0, dex: 0, hp: 0 }, w = (o) => ({ ...z, ...o });
     assert.deepEqual(r.flat, {
       apjus: w({ str: 10, sta: 10, agi: 10, int: 10, dex: 10 }), kslay: w({ sta: 100, str: 30 }), fuim: w({ dex: 200 }), flim: w({ dex: 350 }),

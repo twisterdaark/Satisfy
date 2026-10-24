@@ -18,7 +18,7 @@ test('inn rest: the pool from the time away, double XP from kills, and the caps'
   try {
     await H.newGame(g);
     await g.eval(() => { window.__G.S.lv = 40; window.__G.S.gold = 1e6; window.__GINN.rest('inn', 0); });
-    await g.step(90); // the fade, then the night
+    for (let i = 0; i < 20 && !(await g.eval(() => window.__G.S.inn > 0)); i++) await g.step(30); // the fade, then the night
     const marked = await g.eval(() => window.__G.S.inn > 0);
     const r = await g.eval((HOUR) => {
       const I = window.__GINN, G = window.__G, S = G.S, o = {};

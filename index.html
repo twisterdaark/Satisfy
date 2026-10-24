@@ -2547,7 +2547,7 @@ function auSellMenu(){const ks=AUK.filter(k=>auHave(k)>0).slice(0,8);if(!ks.leng
 function auQty(k){const h=auHave(k),qs=[...new Set([1,5,h].filter(q=>q<=h))];dialog('auction',[t('auQtyL',{it:t(k)})],null,[...qs.map(q=>({l:t('auQty',{q}),f:()=>auPrice(k,q)})),{l:t('oLeave')}]);}
 function auPrice(k,q){const m=auMarket(k)*q;dialog('auction',[t('auPriceL',{g:m})],null,[[.9,'auCheap'],[1.2,'auFair'],[1.8,'auHigh']].map(([f,lb])=>({l:t(lb,{g:Math.round(m*f)}),f:()=>auList(k,q,Math.round(m*f))})).concat([{l:t('oLeave')}]));}
 function auList(k,q,price){if(auHave(k)<q)return;const A=auWS(),mine=A.list.filter(l=>l.pid===pidOf()).length;if(mine>=8){SFX.deny();toast(t('auFull'),'warn');return false;}
- auTake(k,q);const now=Date.now(),ratio=price/(auMarket(k)*q),wait=ratio>2.5?1e12:(60+540*clamp((ratio-.6)/1.4,0,1))*1000*(.7+rand()*.6);
+ auTake(k,q);const now=Date.now(),ratio=price/(auMarket(k)*q),wait=ratio>2.5||MKQ[k]?1e12:(60+540*clamp((ratio-.6)/1.4,0,1))*1000*(.7+rand()*.6); // fish and crops: their market has a daily quota
  A.list.push({id:++A.id,pid:pidOf(),n:S.look.n||t('pname'),it:k,q,price,t:now,sell:now+wait});SFX.coin();toast(t('auListed',{q,it:t(k),g:price}),'good');hudDirty=true;save(true);return true;}
 function auMine(){const A=auWS(),L=A.list.filter(l=>l.pid===pidOf());if(!L.length)return dialog('auction',['auNoMine']);
  dialog('auction',['auMineL'],null,[...L.map(l=>({l:t('auMineRow',{q:l.q,it:t(l.it),g:l.price}),ic:l.it,f:()=>{A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));save(true);auMine();}})),{l:t('oLeave')}]);}
@@ -4400,7 +4400,7 @@ Object.assign(STR.en,{mbF_lore:'📜 Lore',cdxSum:'Lore found: {n} of {m}',cdxLm
 const MBFS=['all','seen','boss','ms','lore'];let CDXS=null;
 function cdxList(){return [...lmList().map(l=>({id:'lm_'+l.k,n:t(l.k),tx:[t(l.k+'1'),t(l.k+'2')],z:zoneAt(l.x,l.y),k:'cdxLm'})),...BOOKS.map((b,i)=>({id:b,n:t('cdxBook',{n:i+1}),tx:[t(b)],k:'cdxBk'}))];}
 const cdxGot=e=>!!(S&&S.books&&S.books[e.id]);
-function cdxDraw(){const L=cdxList(),q=($('mbQ').value||'').trim().toLowerCase(),got=L.filter(cdxGot),vis=L.filter(e=>!q||cdxGot(e)&&(e.n+' '+e.tx.join(' ')).toLowerCase().includes(q));
+function cdxDraw(){cdxCheck();const L=cdxList(),q=($('mbQ').value||'').trim().toLowerCase(),got=L.filter(cdxGot),vis=L.filter(e=>!q||cdxGot(e)&&(e.n+' '+e.tx.join(' ')).toLowerCase().includes(q));
  if(!CDXS||!vis.some(e=>e.id===CDXS&&cdxGot(e)))CDXS=(vis.find(cdxGot)||{}).id||null;
  $('mbSum').textContent=t('cdxSum',{n:got.length,m:L.length});
  $('mbF').innerHTML=MBFS.map(x=>`<button data-mbf="${x}" class="${x===MBF?'on':''}">${t('mbF_'+x)}</button>`).join('');
@@ -6672,7 +6672,8 @@ function lpSrc(m){LPS=m?{x:m.x,y:m.y-10,t:gTime,n:0}:null;}
 function lpAdd(key,o){if(!LPS||gTime-LPS.t>.05||!P||!S||S.__demo||key==='xp'||key==='coin'||o.ic===null)return;const max=RMO?2:8;if(LPS.n>=max||LP.length>=24)return;
  let img=null;try{img=iconC(o.ic||key);}catch(e){return;}if(!img)return;LPS.n++;const a=-Math.PI/2+(LPR()-.5)*1.6,v=70+LPR()*50;
  LP.push({img,x:LPS.x,y:LPS.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,t:0,dl:.45+LPR()*.2+LPS.n*.04,r:o.r|0});}
-function lpDraw(){const dt=1/60;for(const p of LP){p.t+=dt;if(p.t<p.dl){p.vy+=260*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.y>LPS0(p)&&p.vy>0){p.vy*=-.45;p.vx*=.6;}}
+let LPDT=1/60;
+function lpDraw(){const dt=Math.min(.05,LPDT||1/60);for(const p of LP){p.t+=dt;if(p.t<p.dl){p.vy+=260*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.y>LPS0(p)&&p.vy>0){p.vy*=-.45;p.vx*=.6;}}
   else{const dx=P.x-p.x,dy=P.y-12-p.y,d=Math.hypot(dx,dy)||1,s=Math.min(d,(160+(p.t-p.dl)*600)*dt);p.x+=dx/d*s;p.y+=dy/d*s;if(d<6)p.done=1;}
   const z=10,x=Math.round(p.x-z/2),y=Math.round(p.y-z/2);ctx.drawImage(p.img,x,y,z,z);
   if(p.r>=2&&!RMO&&LPR()<.35)fx.push({x:p.x+(LPR()-.5)*6,y:p.y+(LPR()-.5)*6,vx:0,vy:-10,t:.35,c:['','#4aa8ff','#b46aff','#ffd23a','#ff8a1e'][Math.min(4,p.r)],fl:1});}
@@ -8053,7 +8054,7 @@ const SHOPG={isword:150,bow:140,staff:140,hammer:150,spear:150,dagger:130,larmor
 Object.assign(STR.ar,{mkLow:'السوق مليان {it} النهارده: {g} دهب للواحدة',mkFull:'محدش بيشتري {it} تاني النهارده. السوق مليان، تعالى بكرة',mkPart:' (اشتروا {n} بس، السوق اتملا)'});
 Object.assign(STR.en,{mkLow:'The market is full of {it} today: {g} gold each',mkFull:'Nobody buys more {it} today. The market is full; come back tomorrow',mkPart:' (they took only {n}: the market is full)'});
 const MKQ={fish:40,sfish:15,gfish:5,wheat:40,straw:30,melon:16,pumpk:16,fcab:16},MKD=86400000;
-const mkDay=()=>Math.floor(wNow()/MKD),mkS=()=>S.mkt&&S.mkt.d===mkDay()?S.mkt:(S.mkt={d:mkDay(),n:{}});
+const mkDay=()=>Math.floor(wNow()/MKD),mkS=()=>S.mkt&&S.mkt.d>=mkDay()?S.mkt:(S.mkt={d:mkDay(),n:{}}); // a day back (a clock set back) keeps the quota
 const mkF=(k,i)=>{const Q=MKQ[k];return i<Q?1:i>=Q*5?0:Math.max(.1,Q/(i+1));};   // what the i-th of a kind sold today fetches, of its price
 // n of a kind sold now: the sum of what each fetches and how many they take
 function mkTake(k,n){const s=mkS().n[k]||0;let f=0,c=0;for(let i=0;i<n;i++){const v=mkF(k,s+i);if(!v)break;f+=v;c++;}return {f,c};}
@@ -10449,7 +10450,7 @@ function render(dt){DRAWN=0;netDrawn=0;
      TX.push({s:m.nm||t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),x:m.x,y:m.y-oy-12,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:dl>8?'#ff8a7a':dl>3?'#ffc070':dl<-8?'#b8c0c8':'#f2f2f2'});}}});};
   for(let mI=0;mI<mons.length;mI++){const m=mons[mI];if(!(m.dead&&!(m.dying>0)||offV(m.x,m.y,MT[m.type].boss?260:0)))monEnt(m);};
   if(!titleCam&&mode!=='dead'&&!P.ghost)if(PET)ents.push({y:PET.y,f:()=>drawPet(PET)});
-  if(LP.length)ents.push({y:P.y+999,f:lpDraw}); // SAT-ONLINE-185: loot pops, over the scene
+  if(LP.length){LPDT=dt;ents.push({y:P.y+999,f:lpDraw});} // SAT-ONLINE-185: loot pops, over the scene
   ents.push({y:P.y,f:()=>{if(P.spw)spwDraw();P.trail.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;const am=a.r&&MOUNTS[a.r];if(am){drawHorse(a.x,a.y,a.dir,2,am);drawRider(a.x,a.y,a.dir,2,P);drawHorse(a.x,a.y,a.dir,2,am,ctx,'head');}else drawChar(pSpr(),a.x,a.y,a.dir,a.frame,false);});ctx.globalAlpha=1;const rd=P.ride&&MOUNTS[myMt()];const hf=rd&&P.rmv>0?1+((P.rgT||0)*10|0)%4:0,blk=P.inv>0&&((gTime*20|0)%2===0)&&P.dash<=0;if(rd)drawHorse(P.x,P.y,P.dir,hf,rd);const wen=(weapon()||{}).en||0;if(wen>=7)drawEnh(P.x,P.y-(rd?9:0),wen,0);if(rd){if(!blk)drawRider(P.x,P.y,P.dir,hf,P);drawHorse(P.x,P.y,P.dir,hf,rd,ctx,'head');const hm=rhpMax(S.mount),hh=rhp(S.mount);if(hh<hm&&!(RCR&&RCR.in)){R(ctx,P.x-9,P.y-37,18,3,'#000');R(ctx,P.x-8,P.y-36,16*hh/hm,1,'#e8a060');}}else{if(P.stl>0)ctx.globalAlpha=.35;if(P.boat&&!P.bmf)boatSit(pSpr(),P.x,P.y,P.dir,blk,P);else if(!bmDraw(P.bmf,'me',P.x,P.y,P.dir,P.rmv>0,blk,!!P.slash)){drawChar(pSpr(),P.x,P.y,P.dir,P.frame,blk,0,P);if(P.bmH>0&&!blk)bmHalfDraw(P.x,P.y,P.dir);if(NV.eye>0&&!blk)nvEyes(P.x,P.y,P.dir);}ctx.globalAlpha=1;}if(wen>=4)drawEnh(P.x,P.y-(rd?9:0),wen,1);
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(hcHand(hx,hy,P.dir,P.slash)){}else if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,w.id,w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
   // SAT-ONLINE-117 (plan U324): each part that adds to the scene is its own boundary, the other players' part (netEnts) above
@@ -10581,7 +10582,7 @@ function pjKick(){if(pjOn||!PJ.size)return;pjOn=1;const go=dl=>{pjOn=0;pjRun(dl)
 // a slice of idle time: strips, most wanted first, while the frame has time left (6 ms; 14 with the world map open, which waits for them)
 // right after a key, a click or a window opening, painting waits a moment (a strip running then would hold up the answer
 // and the window's animation); only what the screen needs now goes on
-let pjMode='',pjHold=0;for(const ev of ['keydown','pointerdown','wheel'])window.addEventListener(ev,()=>{pjHold=PNOW()+400;},{capture:true,passive:true});
+let pjMode='',pjHold=0;for(const ev of ['keydown','pointerdown','wheel'])window.addEventListener(ev,e=>{if(!e.repeat)pjHold=PNOW()+400;},{capture:true,passive:true});
 function pjRun(dl){if(mode!==pjMode){pjMode=mode;pjHold=Math.max(pjHold,PNOW()+300);}
  if(PNOW()<pjHold&&![...PJ.values()].some(J=>J.pri<=0)){window.setTimeout(pjKick,pjHold-PNOW()+10);return;}
  const t0=PNOW(),bud=mode==='map'?14:6;
