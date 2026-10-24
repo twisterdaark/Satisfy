@@ -9,7 +9,8 @@ const H = require('../harness/game.cjs');
 
 test.after(() => H.closeBrowser());
 
-const toasts = (g) => g.eval(() => [...document.querySelectorAll('#toasts > *')].map((e) => e.textContent).join(' | '));
+// the live toasts and the last lines of the message log (a level-up toast can push a quieter one out of a full row)
+const toasts = (g) => g.eval(() => [...document.querySelectorAll('#toasts > *')].map((e) => e.textContent).concat(window.__GLOG ? window.__GLOG().slice(-40).map((o) => o.m) : []).join(' | '));
 
 test('chapter one: the page from the novel, the story before other quests, Khan’s windows, and the next chapter', async () => {
   const g = await H.openGame();
@@ -39,7 +40,7 @@ test('chapter one: the page from the novel, the story before other quests, Khan�
     assert.equal(r.st, 2); assert.equal(r.aff, 100); assert.equal(r.page2, 1);
     // the production game: a rare or better item wins it; the chapter ends and points to the next
     await g.eval(() => { const G = window.__G; G.acceptQ('gj2'); G.S.qs.gj2.c = 1; document.getElementById('toasts').innerHTML = ''; G.completeQ('gj2'); });
-    await g.page.waitForTimeout(2800);
+    await g.page.waitForTimeout(4500);
     const t1 = await toasts(g);
     assert.match(t1, /chapter 1, Khan’s Smithy, is complete/); assert.match(t1, /Chapter 2, The Guardian of the Forest, begins at level 95/);
     assert.deepEqual(await g.eval(() => [window.__GMS.cur(), window.__GMS.s().d.msc1]), [1, 1]);
@@ -66,7 +67,7 @@ test('the whole chain: every story quest is reachable in order for any class, an
     assert.deepEqual(r.order, ['gj1', 'gj2', 'gj3', 'gj4', 'gj5', 'gj6', 'gj7', 'gj8', 'gj9', 'asm', 'gj10', 'gj11', 'gj12', 'gj13', 'gj14', 'gj15', 'gj16', 'gj17']);
     assert.equal(r.cur, -1); assert.equal(r.hud, '');
     assert.deepEqual(r.done, ['msc1', 'msc2', 'msc3', 'msc4', 'msc5', 'msc6', 'msc7', 'msc8', 'msc9']);
-    await g.page.waitForTimeout(2800);
+    await g.page.waitForTimeout(4500);
     assert.match(await toasts(g), /The story continues in a coming update/);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
@@ -104,7 +105,7 @@ test('chapters 5 to 7: Dark Bus and Asmophel, the Behen death knights, Berith at
     assert.equal(await g.eval(() => window.__G.S.qs.gj9.st), 2);
     // the SS quest on Asmophel ends the chapter
     await g.eval(() => { const G = window.__G; G.acceptQ('asm'); G.S.qs.asm.c = 1; document.getElementById('toasts').innerHTML = ''; G.completeQ('asm'); });
-    await g.page.waitForTimeout(2800);
+    await g.page.waitForTimeout(4500);
     const t5 = await toasts(g);
     assert.match(t5, /chapter 5, The Seventh Servant, is complete/); assert.match(t5, /Chapter 6, The Behen Archipelago, begins at level 400/);
     // Sticks waits on the landing at the end of the Behen pier, on open ground
@@ -121,7 +122,7 @@ test('chapters 5 to 7: Dark Bus and Asmophel, the Behen death knights, Berith at
     await g.step(2);
     const r6 = await g.eval(() => { const G = window.__G, S = G.S; S.qs.gj10.c = 1; G.completeQ('gj10'); S.lv = 440; G.acceptQ('gj11'); S.qs.gj11.c = 1; document.getElementById('toasts').innerHTML = ''; G.completeQ('gj11'); return [S.qs.gj10.st, S.qs.gj11.st]; });
     assert.deepEqual(r6, [2, 2]);
-    await g.page.waitForTimeout(2800);
+    await g.page.waitForTimeout(4500);
     assert.match(await toasts(g), /Chapter 7, The 22nd Great Demon, begins at level 445/);
     // the earl at Fort Taleren
     await g.eval(() => { const G = window.__G; G.S.lv = 450; G.gainXP(1); G.DL = null; G.talkNPC('flenit'); });

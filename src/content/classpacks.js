@@ -14,7 +14,7 @@
   // The classes of the novel's players and NPCs that the game lacked (legends/wiki-combat-classes.md). What the novel names
   // (chapter in the comment) is kept; where it names nothing, the skill fits the class's description. Hidden Sword is
   // Peak Sword's class under its other name, so it is the Quick Draw Swordsman's.
-  var sk = function (id, en, ar, den, dar, lv, kind, o) { var s = { id: id, n: { en: en, ar: ar }, d: { en: den, ar: dar }, lv: lv, kind: kind }; for (var k in o) s[k] = o[k]; return s; };
+  var sk = function (id, en, ar, den, dar, lv, kind, o) { var s = { id: id, n: { en: en, ar: ar }, d: { en: den, ar: dar }, lv: lv, kind: kind }; for (var k in o) s[k === 'n' ? 'cnt' : k] = o[k]; return s; }; // n is the name, so a count is cnt
   var q = function (n, o, w, d) { return { n: { en: n[0], ar: n[1] }, o: { en: o[0], ar: o[1] }, w: { en: w[0], ar: w[1] }, d: { en: d[0], ar: d[1] } }; };
   L.push(
     // Regas (ch10, 171, 229): Force Palm, the lightning-wrapped kicks, and the Asura's Sura Charge

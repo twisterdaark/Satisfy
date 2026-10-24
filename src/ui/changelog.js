@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24barrage', ver: '2.57', d: '2026-10-24',
+      ar: ["كل الإكسبي اللي بتاخده من الوحوش والكويستات زاد 1.2 مرة.",
+          "السكيلات اللي بتضرب كذا ضربة ورا بعض (زي رقصات باجما): كل ضربة ليها إيفيكت لحد آخر واحدة، بدل ما الإيفيكت يخلص والصوت لسه شغال، والسيوف اللي بتنزل من السما بقت سيوف بجد.",
+          "البافات وأنت شغّالها بقت باينة عليك: التحول للبرق بيطلّع شرار، الغضب بيولّع، الحماية بتلف حواليك، والبركات بتطلع بلونها.",
+          "صرخة الزعيم بقت بترعب الوحوش بجد: بيهربوا منك 3 ثواني ودفاعهم بيقل.",
+          "أسهم النار والكور المتفجرة والأسهم الراقصة رجعلهم أساميهم، وضربة البرق بقت بتكبر مع لفل السكيل."],
+      en: ["All XP from monsters and quests is 1.2 times higher.",
+          "Barrage skills (like Pagma's dances): every hit has its effect to the very last one, instead of the effect ending while the sound goes on, and the swords that fall from the sky are real blades now.",
+          "Running buffs show on you: a lightning transformation crackles, a rage burns, a guard circles you, and blessings rise in their colour.",
+          "Chief's Cry really terrifies now: monsters flee from you for 3 s with their defence lowered.",
+          "Fire Arrows, Exploding Balls and Dancing Arrows have their names back, and Lightning Bolt grows with its skill level."] },
     { v: '2026-10-24ctlsword', ver: '2.56', d: '2026-10-24',
       ar: ["شكل السكيلات اتغيّر: كل سكيل بقى ليه إيفيكت من اسمه وسلاحه ولونه (هلال، طعنة، قطع على شكل X، سيوف بتنزل من السما وسيوف طايرة، ورد، تنين، عمود نور، دوامة، برق بيتنقل من عدو للتاني، انفجار، هزة في الأرض، هالة...)، وسيف الفضاء بقى بيفتح شق في الفضاء بدل ما يبقى سلاش أكبر.",
           "سيف التحكم (Sword Saint) اتعمل من جديد زي الرواية: سيوف بتطلع من الشنطة وبتحارب بإرادتك 10 ثواني، 4 في الأول وسيف زيادة كل لفلين للسكيل لحد 10. كل سيف بيطير على عدو قريب ويقطعه ويرجع، واللي جنبك بيصد عنك الضربة ويطير على اللي ضربك.",
