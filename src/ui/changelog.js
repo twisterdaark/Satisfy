@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24harvestfair', ver: '2.62', d: '2026-10-24',
+      ar: ["معرض الحصاد عند بيارو: كل حصدة بيتوزن أحسن حتة فيها (الحظ، والسماد، والموسم، وإيد الفلاح بيفرقوا)، وأتقل محصول ليك من كل نوع في الأسبوع بيدخل المعرض قصاد ٣ فلاحين.",
+          "لما الأسبوع يخلص بيارو بيحكم: كل محصول غلبت فيه التلاتة تاخد عليه شريطة زرقا. أول شريطة تديك لقب \"بطل المعرض\" وعشرة تديك \"الحصاد الدهبي\" (ألقاب للشكل بس، المعرض مبيديش دهب ولا حاجات)."],
+      en: ["The harvest fair at Piaro's: every harvest weighs its best piece (luck, compost, the season and a farmer's hand all count), and your heaviest of each crop this week is your entry against three farmers.",
+          "When the week is over Piaro judges: each crop where you beat all three is a blue ribbon. The first gives the title Fair Champion and ten give Golden Harvest (titles to show only: the fair gives no gold or items)."] },
     { v: '2026-10-24tower1', ver: '2.61', d: '2026-10-24',
       ar: ["الدور الأول في برج الحكمة بقى واضح: أول ما تدخل بتطلعلك رسالة بتقولك تمشي يمين ناحية النور من غير ما تقف، والنور بقى باين في نص الشاشة بعمود نور بدل ما كان مستخبي ورا شريط السكيلات.",
           "أسهم في الأرض بتشاورلك على الطريق وبتحمر لو وقفت، وسطر الكويست بيقولك النور على بعد كام وسرعتك، وفيه شرار وراك وأنت بتجري.",

@@ -10199,14 +10199,47 @@ function p4PlotAct(i){const p=p4S().pl[i];
 function p4Plant(i,c){const C=CROPS[c],s=p4S();if(s.pl[i])return;if(S.gold<C.seed){SFX.deny();toast(t('noGold'),'warn');return;}const cmp=(S.mats.compost||0)>0;S.gold-=C.seed;if(cmp)S.mats.compost--;
  const p=s.pl[i]={c,t0:wNow(),d:p4Grow(c,cmp),n:p4Yield(c,cmp),cmp:cmp?1:0};SFX.click();toast(t(cmp?'plantedC':'planted',{c:t(c),m:Math.ceil(p.d/60000)}),'good');
  const o=SHRINES.find(q=>q.k==='p4plot'&&q.i===i);if(o)for(let k=0;k<5;k++)fx.push({x:o.x+(rand()-.5)*10,y:o.y-4,vx:(rand()-.5)*16,vy:-8-rand()*8,t:.4,c:'#8a6a3a',fl:1});hudDirty=true;save(true);}
-function p4Harvest(i){const s=p4S(),p=s.pl[i];if(!p4Ready(p))return;s.pl[i]=null;addMat(p.c,p.n);lifeXP('farm',6+p.n*3);SFX.quest();s.kinds[p.c]=1;
+function p4Harvest(i){const s=p4S(),p=s.pl[i];if(!p4Ready(p))return;s.pl[i]=null;addMat(p.c,p.n);lifeXP('farm',6+p.n*3);SFX.quest();s.kinds[p.c]=1;frEnter(p); // SAT-ONLINE-187: its best piece is weighed for the fair
  const o=SHRINES.find(q=>q.k==='p4plot'&&q.i===i);if(o)vfx('loot',o.x,o.y,{rarity:1});
  if(S.qs.lfa1&&S.qs.lfa1.st===1&&!s.lfk[p.c]){s.lfk[p.c]=1;qEvent('visit','lfk');}hudDirty=true;save(true);}
 function p4Compost(){if((S.mats.herb||0)<3){SFX.deny();toast(t('binNeed'),'warn');return;}S.mats.herb-=3;addMat('compost',1);lifeXP('farm',2);SFX.click();vfx('dust',FARM2.bin[0]*TS+8,FARM2.bin[1]*TS+8,{n:6});hudDirty=true;save(true);}
 // Piaro: the season, and the Legendary Field for a farmer on his trial (four digs, no level bonus)
 function p4PiaroOpts(){const o=[{l:t('oSeason'),f:()=>{const left=Math.ceil((172800000-wNow()%172800000)/3600000);dialog('piaro',[t('seaNow',{s:t('sea_'+SEAS[p4Season()]),h:left}),'pi_crops']);}}];
- if(S.qs.lfa2&&S.qs.lfa2.st===1&&!qReady('lfa2'))o.push({l:t('oLField'),st:t('lfieldD'),f:p4LField});return o;}
+ if(S.qs.lfa2&&S.qs.lfa2.st===1&&!qReady('lfa2'))o.push({l:t('oLField'),st:t('lfieldD'),f:p4LField});o.push({l:t('hfO'),st:t('hfOSt'),f:()=>frShow()});return o;}
 function p4LField(){farmCD=0;farmStart();if(FARMG){FARMG.left=4;FARMG.lf=1;toast(t('lfieldGo'),'warn');}}
+/* ---------------- the harvest fair (SAT-ONLINE-187; plan U292 "Harvest fair": "farm yield challenge with categories", checked by
+   "no infinite repeating plot exploit") ----------------
+   Every harvest's best piece is weighed (by the crop, luck, compost, the season, a farmer's hand). Each world week Piaro's
+   fair has one category a crop, and three rival farmers whose entries that week are the same for everyone (seeded by the
+   week). Your heaviest of each crop that week is your entry; when the week is over Piaro judges it: a crop where you beat
+   all three is a blue ribbon. The first ribbon gives the title Fair Champion, ten give Golden Harvest (titles to show only:
+   the fair gives no gold, no items, no XP). Only a real harvest makes an entry, a plot grows once per planting, and only
+   the heaviest of each crop a week counts, so harvesting again and again can't stack anything. */
+Object.assign(STR.ar,{hfO:'🌾 معرض الحصاد',hfOSt:'أتقل محصول ليك الأسبوع ده قصاد ٣ فلاحين',hfHead:'معرض الحصاد · الأسبوع ده (فاضل {d})',hfLine:'{c}: بتاعك {y} · اللي لازم تغلبه {r} ({n})',hfNone:'لسه',hfWin:'🎀',hfJudge:'نتيجة المعرض اللي فات: كسبت {n} شريطة زرقا من {m}',hfJudge0:'نتيجة المعرض اللي فات: مكسبتش شرايط المرة دي. الأسبوع ده فرصة تانية!',hfJWin:'{c}: {y} غلبت {r} 🎀',hfJLose:'{c}: {y} قصاد {r}',hfRb:'شرايطك الزرقا: {n}',hfW:'أحسن {c} في الحصدة دي: {w}',hfRec:' · رقم قياسي ليك!',hfBest:' · أتقل من المطلوب في المعرض 🎀',hfKg:'{w} كيلو',hfG:'{w} جرام',hfDays:'{d} يوم و{h} ساعة',hfHours:'{h} ساعة',
+ hfN0:'عم طارق',hfN1:'الست صبا',hfN2:'فارس الصغير',tl_fairc:'بطل المعرض',tl_faircD:'غلبت فلاحين معرض الحصاد في محصول. لقب للشكل بس.',tl_fairg:'الحصاد الدهبي',tl_fairgD:'عشر شرايط زرقا من معرض الحصاد. لقب للشكل بس.'});
+Object.assign(STR.en,{hfO:'🌾 Harvest fair',hfOSt:'Your heaviest crops this week against three farmers',hfHead:'Harvest fair · this week ({d} left)',hfLine:'{c}: yours {y} · to beat {r} ({n})',hfNone:'none yet',hfWin:'🎀',hfJudge:"Last fair's results: you won {n} blue ribbons of {m}",hfJudge0:"Last fair's results: no ribbons this time. This week is another chance!",hfJWin:'{c}: {y} beat {r} 🎀',hfJLose:'{c}: {y} against {r}',hfRb:'Your blue ribbons: {n}',hfW:'Best {c} of this harvest: {w}',hfRec:' · a record of yours!',hfBest:" · heavier than the fair's best 🎀",hfKg:'{w} kg',hfG:'{w} g',hfDays:'{d} d {h} h',hfHours:'{h} h',
+ hfN0:'Old Tarek',hfN1:'Mistress Saba',hfN2:'Young Faris',tl_fairc:'Fair Champion',tl_faircD:"You beat the harvest fair's farmers in a crop. A title to show only.",tl_fairg:'Golden Harvest',tl_fairgD:'Ten blue ribbons from the harvest fair. A title to show only.'});
+TTOWN.push('fairc','fairg');   // (the status window lists them)
+const FRB={wheat:1500,straw:40,melon:6000,pumpk:12000,fcab:2500},FRWK=604800000;   // a fair piece's base weight, grams; a world week
+const frWk=()=>Math.floor(wNow()/FRWK),frF=()=>{const s=p4S();return s.fr||(s.fr={w:{},j:[],rb:0,cr:{}});};
+const frFmt=g=>g>=1000?t('hfKg',{w:(g/1000).toFixed(1)}):t('hfG',{w:Math.round(g)});
+// the three rivals' entries of a week in a crop: the same for everyone, from the week and the crop (never the game's dice)
+function frRival(wk,c){let h=7;for(const ch of 'fair'+wk+c)h=Math.imul(h,31)+ch.charCodeAt(0)|0;const r=mulberry32(h>>>0),B=FRB[c];
+ return [0,1,2].map(i=>({i,g:Math.round(B*(.95+.45*r()))})).sort((a,b)=>b.g-a.g);}
+// a harvest's best piece: luck, then compost, the season, a farmer, the Legendary Farmer's title
+function frWeigh(p){const B=FRB[p.c];if(!B)return 0;const r=rand();return Math.round(B*(.6+.9*r*r)*(p.cmp?1.12:1)*(p4InSeason(p.c)?1:.8)*(S.sec==='farmer'?1.08:1)*(tlOn('lfarm')?1.1:1));}
+function frEnter(p){const g=frWeigh(p);if(!g)return;const F=frF(),wk=frWk(),E=F.w[wk]||(F.w[wk]={});const rec=g>(F.cr[p.c]||0);if(rec)F.cr[p.c]=g;if(g>(E[p.c]||0))E[p.c]=g;
+ for(const k in F.w)if(+k<wk-6)delete F.w[k];   // a few weeks are kept
+ toast(t('hfW',{c:t(p.c),w:frFmt(g)})+(rec&&Object.keys(F.cr).length>1?t('hfRec'):'')+(g>frRival(wk,p.c)[0].g?t('hfBest'):''),'good');}
+// the weeks that are over and not judged yet: a ribbon for each crop where you beat all three
+function frJudge(){const F=frF(),wk=frWk(),out=[];for(const k of Object.keys(F.w).map(Number).sort((a,b)=>a-b)){if(k>=wk||F.j.includes(k))continue;F.j.push(k);if(F.j.length>30)F.j.splice(0,F.j.length-30);
+  const E=F.w[k],lines=[];let n=0;for(const c in E){const top=frRival(k,c)[0],win=E[c]>top.g;if(win)n++;lines.push(t(win?'hfJWin':'hfJLose',{c:t(c),y:frFmt(E[c]),r:frFmt(top.g)}));}
+  if(!lines.length)continue;F.rb+=n;out.push((n?t('hfJudge',{n,m:lines.length}):t('hfJudge0'))+'\n'+lines.join('\n'));}
+ if(out.length){if(F.rb>0)giveTitle('fairc');if(F.rb>=10)giveTitle('fairg');save(true);}return out;}
+function frShow(){const res=frJudge(),F=frF(),wk=frWk(),E=F.w[wk]||{},left=FRWK-wNow()%FRWK,d=Math.floor(left/86400000),h=Math.ceil(left%86400000/3600000);
+ const board=t('hfHead',{d:d?t('hfDays',{d,h}):t('hfHours',{h})})+'\n'+Object.keys(FRB).map(c=>{const top=frRival(wk,c)[0];return t('hfLine',{c:t(c),y:E[c]?frFmt(E[c])+(E[c]>top.g?' '+t('hfWin'):''):t('hfNone'),r:frFmt(top.g),n:t('hfN'+top.i)});}).join('\n')+(F.rb?'\n'+t('hfRb',{n:F.rb}):'');
+ dialog('piaro',[...res,board]);}
+window.__GHF={get F(){return frF()},wk:()=>frWk(),rival:(wk,c)=>frRival(wk,c),weigh:p=>frWeigh(p),judge:()=>frJudge(),show:()=>frShow(),harvest:i=>p4Harvest(i)}; // tests
 // Pedro Harbor: the ferry and the boats
 const FERRY=300,BOATP=150;
 function p4HarborOpts(at){return [{l:t(at?'oFerryBack':'oFerry'),pr:FERRY,poor:S.gold<FERRY,f:()=>p4Ferry(at)},{l:t('oBoat'),pr:BOATP,poor:S.gold<BOATP,st:t('boatD'),f:()=>p4Boat(at)}];}
