@@ -170,6 +170,7 @@ The plan document has 387 updates. Claude-B takes the content ones (classes, cra
 ### Engine (plan §47)
 | ID | Item | Status | Where / what's left |
 |---|---|---|---|
+| U295 | Guild parade | ✅ | SAT-ONLINE-175: from G, in a town and outdoors, the master (or the `ev` right) starts 5 minutes in which every member in that town marches with the guild's banner (its colour and its emblem from the fixed set), a sash and confetti, and the square gets a stage; it rides in the fx tag `pd:` (the end, server seconds), so nothing is stored or given; others in the town hear who marches; the stage is drawn only, on free ground nearest the square and `PDGAP` from every NPC, the board and the wells; one parade in 30 minutes; `regression/parade` |
 | U299 | Training arena | ✅ | SAT-ONLINE-169: three dummies by Winston's armory (`TDSPOT`, this screen's own, never shared: `mobOk`), a DPS meter (`#tdW`, `TDM`) and a best of runs of 10 s or more (`S.dpsB`); no XP, loot, kill, mastery, wear or one-hit record from them; `regression/training` |
 | U302 | Treasure hunts | ✅ | SAT-ONLINE-170: one treasure a week, the same spot for everyone (`thSpot`: the explorers' cache spots of the West, seeded by `lockWeek()`), from Winston's board; a compass line (`#thW`) and E to dig; once a week each (`S.th.got`); the world's first finder (legends `th_<week>`) gets a second share and the news `thFirstN`; no gold; `regression/treasure` |
 | U308 | Extract state store | 🟡 | `src/core/state.js`: durable, volatile and UI keys (ADR-002); the game still writes `S` directly |
