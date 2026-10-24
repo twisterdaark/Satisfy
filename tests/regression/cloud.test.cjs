@@ -51,13 +51,17 @@ test('the cloud window: the save went up by itself, no manual upload or download
     assert.deepEqual((await rows(a)).map((r) => r.pid), [mine.pid]);
     assert.match((await rows(a))[0].text, /Grid · Lv \d+ .*\(same character\)/);
     assert.deepEqual(await a.eval(() => [...document.querySelectorAll('#cloudL .cr button')].map((b) => b.textContent)), ['Delete'], 'no Download');
-    assert.deepEqual(await a.eval(() => [...document.querySelectorAll('#cloudA button')].map((b) => b.textContent)), ['Sign out', 'Delete my online data']);
+    assert.deepEqual(await a.eval(() => [...document.querySelectorAll('#cloudA button')].map((b) => b.textContent)), ['Sign out', 'Delete my account']);
     // T36: another account's cloud saves can't be read (the fake applies the owner-only rule)
     const other = await a.eval(async () => {
       const sdk = await window.__SATISFY_FIREBASE_LOADER__();
       try { await sdk.database.get({ path: 'cloudSaves/gSomeoneElse' }); return 'read'; } catch (e) { return e.code; }
     });
     assert.equal(other, 'PERMISSION_DENIED');
+    // owner 2026-10-24: deleting the character that is also on this device deletes it here too (the sync put it back)
+    await click(a, '#cloudL .cr button'); await click(a, '#cloudL .cr button');
+    await until(a, ([u, p]) => !window.__fakeRTDB.data.has('cloudSaves/' + u + '/' + p) && /No characters/.test(document.getElementById('cloudL').textContent), 5000, [UID, mine.pid]);
+    assert.equal(await a.eval(() => localStorage.getItem('satisfy_proto_v4@a')), null);
     assert.deepEqual(await a.eval(() => window.__fakeRTDB.rejected), []);
     assert.deepEqual(a.errors, []);
   } finally { await ctx.close(); }

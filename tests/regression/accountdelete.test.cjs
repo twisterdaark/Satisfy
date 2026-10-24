@@ -1,7 +1,7 @@
 'use strict';
 // SAT-ONLINE-143 (plan U346 "data export/delete: the user can request account delete", with a request made twice, a
 // connection lost part-way and someone who isn't the owner). The owner took the data export out (2026-10-21), so the
-// request is "Delete my online data" (two clicks in Cloud saves): every record of the account goes, its account ID
+// request is "Delete my account" (was "Delete my online data") (two clicks in Cloud saves): every record of the account goes, its account ID
 // and name are freed, the save on the device stays. Someone else can't delete any of it. A delete cut off part-way
 // leaves no character entry pointing at a deleted save and finishes when asked again; asked again with nothing left,
 // it still works. Over the fake Firebase with the rules' checks.
@@ -29,13 +29,13 @@ async function openCloud(g) {
   await click(g, '#cloudBtn');
   await until(g, () => !document.getElementById('cloudW').hidden && !/Loading/.test(document.getElementById('cloudL').textContent));
 }
-// "Delete my online data" asks for a second click
+// "Delete my account" asks for a second click
 async function erase(g) { await openCloud(g); await g.eval(() => { const b = document.querySelector('#cloudA button:nth-child(2)'); b.click(); b.click(); }); }
 const keepToasts = (g) => g.eval(() => { window.__toastLog = []; new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.textContent) window.__toastLog.push(n.textContent); }).observe(document.getElementById('toasts'), { childList: true }); });
 const toastLog = (g) => g.eval(() => window.__toastLog.join(' | '));
 const removeAs = (g, p) => g.eval(async (path) => { const F = window.__GLD.fb(), D = F.m.database; try { await D.remove(D.ref(F.db, path)); return 'ok'; } catch (e) { return 'no'; } }, p);
 
-test('Delete my online data: never by someone else, finished after a failure part-way, and again with nothing left', async () => {
+test('Delete my account: never by someone else, finished after a failure part-way, and again with nothing left', async () => {
   const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
   try {
     const b = await H.openGame({ ctx, query: '?net=online&slot=b' });
@@ -66,23 +66,25 @@ test('Delete my online data: never by someone else, finished after a failure par
     assert.ok(!left.some((k) => /^cloud(Index|Saves)\//.test(k)), 'no character entry and no save left: ' + left);
     assert.ok(await a.eval(() => !!Satisfy.local.net()), 'still signed in');
 
-    // asked again: the rest goes, the account ID and its name are freed
+    // asked again: the rest goes, the account ID and its name are freed (firstSeen stays: write-once, SAT-ONLINE-174, so a
+    // deleted and remade account can't vote in the expo again)
     await a.eval(() => { window.__fakeRTDB.failRemove = null; });
     await erase(a);
-    await until(a, () => /Your online data is deleted/.test(window.__toastLog.join(' ')), 8000);
-    await until(a, (u) => ![...window.__fakeRTDB.data.keys()].some((k) => k.split('/').includes(u) || window.__fakeRTDB.data.get(k) === u), 8000, UID);
+    await until(a, () => /Your account is deleted/.test(window.__toastLog.join(' ')), 8000);
+    await until(a, (u) => ![...window.__fakeRTDB.data.keys()].some((k) => !/^firstSeen\//.test(k) && (k.split('/').includes(u) || window.__fakeRTDB.data.get(k) === u)), 8000, UID);
     assert.equal(await a.eval(() => window.__fakeRTDB.data.has('handles/ahmed')), false, 'the name is free for anyone');
 
     // and again, signed in afresh with nothing left online: it works and leaves nothing
     await signIn(a, 'Ahmed', UID);
-    await a.waitMode('play', 15000); // signed in, the game goes on with the character on this device
+    await a.waitMode('create', 15000); // signed in: the character went with the account (owner 2026-10-24), so a new one is made
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
     await until(a, (u) => window.__fakeRTDB.data.has('sessions/' + u), 8000, UID);
     await erase(a);
     await until(a, () => document.getElementById('cloudBtn').hidden && Satisfy.local.net() === null, 8000); // done: signed out (the same notice as before isn't shown twice)
     // still in the world, signed out: the game plays on offline (the shared monsters stop with the network)
     assert.equal(await a.mode(), 'play');
     await a.step(60);
-    await until(a, (u) => ![...window.__fakeRTDB.data.keys()].some((k) => k.split('/').includes(u) || window.__fakeRTDB.data.get(k) === u), 8000, UID);
+    await until(a, (u) => ![...window.__fakeRTDB.data.keys()].some((k) => !/^firstSeen\//.test(k) && (k.split('/').includes(u) || window.__fakeRTDB.data.get(k) === u)), 8000, UID);
 
     // the other account untouched
     assert.deepEqual((await keysOf(b, OTHER)).filter((k) => !/^presence\//.test(k)), bKeys.filter((k) => !/^presence\//.test(k)));

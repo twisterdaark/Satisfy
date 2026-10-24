@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24titlefix', ver: '2.83', d: '2026-10-24',
+      ar: ["لوحة الحفظ السحابي بقت بتظهر فوق زراير شاشة البداية مش تحتها.",
+          "لما تدوس بلاي، الزراير بتختفي على طول بدل ما تفضل ظاهرة والشاشة بتسود.",
+          "أول مرة تفتح الخريطة مبقتش بتعلّق اللعبة: بيظهر \"بنرسم الخريطة\" بنسبة لحد ما تخلص، وبعدها الخريطة بتظهر كاملة مرة واحدة. والجزء اللي حواليك بيترسم من بدري وانت بتلعب.",
+          "\"امسح بياناتي أونلاين\" بقت \"امسح حسابي\": بتمسح كل حاجة أونلاين والشخصية اللي على الجهاز كمان، عشان الحفظ التلقائي ميرجّعهاش تاني.",
+          "مسح شخصية من الحفظ السحابي وهي نفس اللي على الجهاز بيمسحها من الجهاز كمان، للسبب ده."],
+      en: ["The Cloud saves panel now shows above the title screen's buttons, not under them.",
+          "Pressing Play hides the buttons at once instead of leaving them up while the screen goes dark.",
+          "Opening the map the first time no longer freezes the game: \"Drawing the map\" shows with how far it is, then the whole map appears at once. The part around you is drawn ahead while you play.",
+          "\"Delete my online data\" is now \"Delete my account\": it deletes everything online and the character on this device too, so the automatic sync can't bring it back.",
+          "Deleting a cloud character that is the same one as on this device deletes it from this device too, for the same reason."] },
     { v: '2026-10-24wkinds', ver: '2.82', d: '2026-10-24',
       ar: ["أسلحة لكل التخصصات، مش سيوف بس:",
           "16 سلاح جديد بيقعوا من البوسات من لفل 80 لـ 420: 4 عصيان، و3 أقواس، و3 خناجر، و3 رماح، و3 مطارق. كل واحد بيقع من بوس قريب من لفله، وبعضهم عليه نزيف أو امتصاص دم أو خوف أو كومبو.",

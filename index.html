@@ -89,7 +89,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 #netRepW{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);padding:calc(var(--u)*1.4) calc(var(--u)*2);text-align:center;font-size:calc(var(--u)*1.8);pointer-events:auto;border-color:var(--gold);z-index:5}#netRepW .row{display:flex;justify-content:center;margin-top:calc(var(--u)*1)}
 #duelInv{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*15);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto;border-color:#ff8a6a}#duelInv .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}
 #duelW{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*3.4);width:calc(var(--u)*40);padding:calc(var(--u)*.6) calc(var(--u)*1.2);text-align:center;font-size:calc(var(--u)*1.5);pointer-events:auto;border-color:#ff8a6a}#duelW .bars{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*1);margin:calc(var(--u)*.5) 0}#duelW .bar{height:calc(var(--u)*1.2)}#duelW .bar i{background:linear-gradient(90deg,#ff5a4a,#ffb04a)}#duelW .x{font-size:calc(var(--u)*1.3);width:auto;padding:0 calc(var(--u)*.8)}#duelCd{font-size:calc(var(--u)*4);color:var(--gold)}
-#cloudW{left:50%;top:50%;transform:translate(-50%,-50%);width:calc(var(--u)*50);max-height:calc(var(--u)*34);overflow:auto;padding:calc(var(--u)*1.4);font-size:calc(var(--u)*1.6)}#cloudW .x{position:absolute;top:calc(var(--u)*.6);inset-inline-end:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}#cloudN{color:var(--muted,#c8d0e0);margin:calc(var(--u)*.6) 0}
+#cloudW{z-index:5;left:50%;top:50%;transform:translate(-50%,-50%);width:calc(var(--u)*50);max-height:calc(var(--u)*34);overflow:auto;padding:calc(var(--u)*1.4);font-size:calc(var(--u)*1.6)}#cloudW .x{position:absolute;top:calc(var(--u)*.6);inset-inline-end:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}#cloudN{color:var(--muted,#c8d0e0);margin:calc(var(--u)*.6) 0}
 #idW{left:50%;top:50%;transform:translate(-50%,-50%);width:calc(var(--u)*44);padding:calc(var(--u)*1.4);font-size:calc(var(--u)*1.6)}
 #idW .x{position:absolute;top:calc(var(--u)*.6);inset-inline-end:calc(var(--u)*.8);width:auto;padding:0 calc(var(--u)*.6)}
 #idT{color:var(--muted,#c8d0e0);margin:calc(var(--u)*.6) 0;font-size:calc(var(--u)*1.4)}
@@ -225,7 +225,7 @@ kbd{font-family:"Press Start 2P",monospace;font-size:calc(var(--u)*.85);backgrou
 /* patch 1 */
 #game.dead{filter:grayscale(1) brightness(.75);transition:filter .8s}#game{transition:filter .5s}
 #deathW{position:absolute;min-width:calc(var(--u)*34);text-align:center;border-color:#ff8a7a;box-shadow:0 0 calc(var(--u)*2) rgba(255,90,70,.4)}
-#fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .3s ease}#fade.on{opacity:1}
+#fade{position:absolute;inset:0;z-index:40;background:#000;opacity:0;pointer-events:none;transition:opacity .3s ease}#fade.on{opacity:1}
 #tip{position:absolute;z-index:200;max-width:calc(var(--u)*26);pointer-events:none;opacity:0;transform:translateY(4px) scale(.96);transition:opacity .12s,transform .12s;font-size:calc(var(--u)*1.15)}#tip.on{opacity:1;transform:none}
 #touch{position:absolute;inset:0;pointer-events:none;z-index:5}#tQuit{position:absolute;bottom:calc(var(--u)*2);left:calc(var(--u)*2);z-index:6;width:calc(var(--u)*6);height:calc(var(--u)*6);border-radius:50%;font-size:calc(var(--u)*2.6);background:rgba(160,40,30,.55);color:#fff;border:2px solid rgba(255,220,200,.7)}
 .qrow{display:flex;gap:calc(var(--u)*.6);align-items:center;justify-content:center;margin-top:calc(var(--u)*.6);font-size:calc(var(--u)*1.5)}.qrow button{min-width:calc(var(--u)*6);padding:calc(var(--u)*.5) calc(var(--u)*1)}.qrow button.on{background:rgba(255,220,120,.45)}#mgReheat{margin-left:calc(var(--u)*1)}#touch button,#tStick{pointer-events:auto;touch-action:none;-webkit-user-select:none;user-select:none}
@@ -9804,7 +9804,9 @@ function respawn(k){if(BHR&&BHR.dead)return bhRespawn();const bn=!k&&bindNpc(),b
  mons.forEach(m=>{if(MT[m.type].boss&&!m.dead&&!(MOBN&&MOBN.host&&mobOk(m))){m.hp=m.max;m.x=m.sx;m.y=m.sy;}});if(S.raid){S.raid=0;allies=[];}hudDirty=true;}
 
 /* ---------------- menus ---------------- */
-function showOnly(id){['langScreen','titleScreen','pauseScreen','settingsScreen','soundScreen','controlsScreen','end','create'].forEach(s=>$(s).hidden=s!==id);if(id!=='titleScreen'&&id!=='pauseScreen')$('updLog').hidden=true;else if(id==='titleScreen')updLogAuto();}
+// the title's buttons go the moment you press Play (owner 2026-10-24: 'the screen darkens a while and the buttons stay'), and come back with the title
+const tMenu=on=>{const m=document.querySelector('#titleScreen .menu');if(m)m.style.visibility=on?'':'hidden';};
+function showOnly(id){if(id==='titleScreen')tMenu(1);['langScreen','titleScreen','pauseScreen','settingsScreen','soundScreen','controlsScreen','end','create'].forEach(s=>$(s).hidden=s!==id);if(id!=='titleScreen'&&id!=='pauseScreen')$('updLog').hidden=true;else if(id==='titleScreen')updLogAuto();}
 // update log (owner request): src/ui/changelog.js; opens by itself once after an update, newest entry first
 const UPDL=Satisfy.CHANGELOG||[];
 // the version on the title screen (owner 2026-10-19: raise it with every update) is the newest entry's `ver` in the log
@@ -9817,7 +9819,7 @@ function updLogAuto(){const V=UPDV();if(!V[0])return;let seen=null;try{seen=loca
 Object.assign(STR.ar,{updLogB:'سجل التحديثات',updLogNew:'الجديد'});Object.assign(STR.en,{updLogB:'Update log',updLogNew:'New'});
 let ctrlBack='titleScreen';
 function toTitle(){if(RPLQ&&!RPL&&!SIM)setTimeout(rplStart,400);if(REC){recKeep();REC=null;}mode='title';showOnly('titleScreen');$('hud').hidden=true;$('contBtn').disabled=!hasSave();setTimeout(()=>$('titleScreen').querySelector('button:not(:disabled)').focus(),0);}
-function startGame(cont){if(!cont||!hasSave())return openCreate();const rs=recSave();fadeTo(()=>{simBegin(rs);if(!load())freshState();innWakeSafe();creFix();S.raid=0;allies=[];proj=[];spawnWorld();showOnly(null);$('hud').hidden=false;mode='play';camSnap=true;hudDirty=true;sbSig='';applyLang();stage.focus();nmCheck();setTimeout(checkSkills,1500);});}
+function startGame(cont){if(!cont||!hasSave())return openCreate();const rs=recSave();tMenu(0);fadeTo(()=>{simBegin(rs);if(!load())freshState();innWakeSafe();creFix();S.raid=0;allies=[];proj=[];spawnWorld();showOnly(null);$('hud').hidden=false;mode='play';camSnap=true;hudDirty=true;sbSig='';applyLang();stage.focus();nmCheck();setTimeout(checkSkills,1500);});}
 // character creation: name + look; the look is stored in S.look so another client could draw the same character
 let CL=null;
 function openCreate(){CL={...DEFLOOK,n:''};mode='create';showOnly('create');$('cname').value='';$('cerr').textContent='';renderCreate();setTimeout(()=>$('cname').focus(),60);}
@@ -10181,6 +10183,9 @@ function mapZoom(f,px,py){const c=$('mapC'),sc0=mapFit(c)*MV.z;px=px??c.width/2;
 function mapCenter(){const pp=outPos();MV.cx=pp.x/TS;MV.cy=pp.y/TS;if(MV.z<2)MV.z=2.5;mapClamp($('mapC'));drawMap();}
 // redraws from dragging and the wheel are folded into one per frame (a mouse sends 100+ moves a second)
 let mapRAF=0;function drawMap(){if(mapRAF)return;mapRAF=requestAnimationFrame(()=>{mapRAF=0;if(mode!=='map')return;const m0=Math.random,r0=rand;if(SIM){Math.random=VRAND;rand=VRAND;}try{drawMapNow();}finally{Math.random=m0;rand=r0;}});} // drawn between steps: not with the world's random numbers (SAT-ONLINE-100)
+let MAPLD=false;
+function mapLoading(g,c,dpr,F,f){const w=Math.min(c.width*.5,320*dpr),h=8*dpr,x=(c.width-w)/2,y=c.height/2+10*dpr;g.textAlign='center';g.textBaseline='bottom';g.fillStyle='#cfe0ff';g.font=`${Math.round(16*dpr)}px ${F}`;
+ g.fillText(t('mapLd',{n:Math.floor(f*100)}),c.width/2,y-6*dpr);g.fillStyle='rgba(120,160,220,.25)';g.fillRect(x,y,w,h);g.fillStyle='#6ab0ff';g.fillRect(x,y,w*Math.max(0,Math.min(1,f)),h);g.strokeStyle='rgba(160,200,255,.6)';g.lineWidth=dpr;g.strokeRect(x,y,w,h);}
 function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=$('mapC'),dpr=Math.min(2,window.devicePixelRatio||1),cw=Math.round(c.clientWidth*dpr),chh=Math.round(c.clientHeight*dpr);if(cw&&(c.width!==cw||c.height!==chh)){c.width=cw;c.height=chh;}
  mapClamp(c);const g=c.getContext('2d'),sc=mapFit(c)*MV.z,X=x=>(x-MV.cx)*sc+c.width/2,Y=y=>(y-MV.cy)*sc+c.height/2,u=dpr*Math.min(1.8,.9+MV.z*.25),F=lang==='ar'?'Tajawal, sans-serif':'Oswald, sans-serif';
  g.fillStyle='#0a1220';g.fillRect(0,0,c.width,c.height);g.imageSmoothingEnabled=sc<8;g.imageSmoothingQuality='high';
@@ -10188,9 +10193,16 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  {const B=sc>=14?'8':sc>=3.5?'4':LOWB,bp=B==='8'?8:B==='4'?4:2,x0=Math.max(MV.a,Math.floor(MV.cx-c.width/2/sc)-1),x1=Math.min(MV.b,Math.ceil(MV.cx+c.width/2/sc)+1),y0=Math.max(-NR,Math.floor(MV.cy-c.height/2/sc)-1),y1=Math.min(WMH,Math.ceil(MV.cy+c.height/2/sc)+1);
   g.imageSmoothingQuality=bp>sc?'high':'low';   // scaling a copy up needs no mipmaps (downscaling the 8 px copy rebuilt them every frame)
   // what is on screen is painted whole before it shows, once (owner 2026-10-24: 'the map draws itself again from the start for some reason, draw it once')
+  // (owner 2026-10-24: 'the first time I open the map the game hangs about 5 s until it draws it; draw it once, but no hanging')
+  // what isn't painted yet is painted in strips between frames, the game going on, while 'drawing the map' and how far it is
+  // show; the map then appears whole, at once
+  let todo=0,tot=0;
+  if(B==='4'&&x1>x0&&y1>y0){for(let j=Math.max(0,Math.floor((y0+NR)/128));j*128<y1+NR;j++)for(let i=Math.max(0,Math.floor(x0/128));i*128<x1;i++){tot++;if(!miniQ(i,j,drawMap)&&PJ.has('m'+i+','+j))todo++;}}
+  else if(B!=='8'){const L=PJ.get('low');if(L){L.pri=0;L.after=L.tick=drawMap;todo=LOWQ.length;tot=LOWN;}}
+  MAPLD=todo>0;if(MAPLD){mapLoading(g,c,dpr,F,1-todo/Math.max(1,tot));return;}
   if(B==='8'){for(let j=Math.floor((y0+NR)/128);j*128<y1+NR;j++)for(let i=Math.floor(x0/128);i*128<x1;i++)g.drawImage(baseTile(i,j),Math.floor(X(i*128)),Math.floor(Y(j*128-NR)),Math.ceil(128*sc)+1,Math.ceil(128*sc)+1);}
-  else if(B==='4'){if(x1>x0&&y1>y0){for(let j=Math.max(0,Math.floor((y0+NR)/128));j*128<y1+NR;j++)for(let i=Math.max(0,Math.floor(x0/128));i*128<x1;i++)if(!MINP[i+','+j]){miniQ(i,j,null);pjFinish('m'+i+','+j);}}if(x1>x0&&y1>y0)miniDraw(g,x0,y0+NR,x1-x0,y1-y0,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc,drawMap);}
-  else if(x1>x0&&y1>y0){if(PJ.get('low'))pjFinish('low');g.drawImage(B,x0*bp,(y0+NR)*bp,(x1-x0)*bp,(y1-y0)*bp,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc);}g.imageSmoothingQuality='high';}
+  else if(B==='4'){if(x1>x0&&y1>y0)miniDraw(g,x0,y0+NR,x1-x0,y1-y0,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc,drawMap);}
+  else if(x1>x0&&y1>y0){g.drawImage(B,x0*bp,(y0+NR)*bp,(x1-x0)*bp,(y1-y0)*bp,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc);}g.imageSmoothingQuality='high';}
  const onS=(x,y,m=60*dpr)=>x>-m&&y>-m&&x<c.width+m&&y<c.height+m;
  // what this map shows (owner 2026-10-23: "move everything of the other continent to its own map, and hide the vampires and
  // anything under the ground from the map"): this continent only, and the surface only. A wide or tall screen showed
@@ -10921,7 +10933,7 @@ function pjKick(){if(pjOn||!PJ.size)return;pjOn=1;const go=dl=>{pjOn=0;pjRun(dl)
 let pjMode='',pjHold=0;for(const ev of ['keydown','pointerdown','wheel'])window.addEventListener(ev,e=>{if(!e.repeat)pjHold=PNOW()+400;},{capture:true,passive:true});
 function pjRun(dl){if(mode!==pjMode){pjMode=mode;pjHold=Math.max(pjHold,PNOW()+300);}
  if(PNOW()<pjHold&&![...PJ.values()].some(J=>J.pri<=0)){window.setTimeout(pjKick,pjHold-PNOW()+10);return;}
- const t0=PNOW(),bud=mode==='map'?14:6;
+ const t0=PNOW(),bud=mode==='map'?(MAPLD?40:14):6;
  for(let n=0;n<40&&PJ.size;n++){let J=null;for(const v of PJ.values())if(!J||v.pri<J.pri)J=v;
   if(J.ms&&J.pri>0&&dl&&!dl.didTimeout&&dl.timeRemaining()<J.ms+1&&PNOW()-(J.wt||(J.wt=PNOW()))<150)break;   // (it wouldn't fit before the next frame: the next idle time, or 150 ms on)
   const s0=PNOW(),fin=J.step();J.ms=Math.max(1,PNOW()-s0);J.wt=0;if(fin)pjDone(J);else if(J.tick)J.tick();
@@ -10960,7 +10972,9 @@ function miniQ(i,j,then){const k=i+','+j;if(MINP[k])return MINP[k];const J=pjAdd
 // the HUD map's pieces within 48 tiles of what it shows, painted ahead, the nearest first
 function miniAhead(ox,oy){const L=PJ.get('low');if(L&&L.pri<2){L.pri=2;L.tick=L.after=null;}   // (back from the world map: the 2 px copy waits again)
  for(let j=Math.max(0,Math.floor((oy-48)/128));j*128<oy+44+48;j++)for(let i=Math.max(0,Math.floor((ox-48)/128));i*128<ox+64+48;i++)if(!MINP[i+','+j]){
-  const d=Math.max(0,i*128-ox-64,ox-i*128-128)+Math.max(0,j*128-oy-44,oy-j*128-128);pjAdd('m'+i+','+j,1.1+d/1e3,()=>miniJob(i,j));}}
+  const d=Math.max(0,i*128-ox-64,ox-i*128-128)+Math.max(0,j*128-oy-44,oy-j*128-128);pjAdd('m'+i+','+j,1.1+d/1e3,()=>miniJob(i,j));}
+ // then the world map's first view round you (it opens at zoom 4, about 220 x 120 tiles), so it is ready when you open it
+ const px=ox+32,py=oy+22;for(let j=Math.max(0,Math.floor((py-64)/128));j*128<py+64;j++)for(let i=Math.max(0,Math.floor((px-120)/128));i*128<px+120;i++)if(!MINP[i+','+j])pjAdd('m'+i+','+j,1.5,()=>miniJob(i,j));}
 // the figures' sheets ahead: one painted the first time it showed cost that frame 25-40 ms (more on a phone); now the people
 // and monsters within 1,200 px get theirs in idle time first (the sheets take no random numbers, so nothing else changes)
 const shTodo=k=>{const d=k&&Object.getOwnPropertyDescriptor(SH,k);return !!(d&&d.get);},shJob=k=>()=>({step(){void SH[k];return true;}});
@@ -10975,6 +10989,7 @@ function miniDraw(g,x,y,w,h,dx,dy,dw,dh,q){const kx=dw/w,ky=dh/h;for(let j=Math.
 const LOWB=mk(MW*2,(WMH+NR)*2,g=>{g.fillStyle='#0a1220';g.fillRect(0,0,MW*2,(WMH+NR)*2);});
 cvLost(LOWB,()=>{});LOWB.addEventListener&&LOWB.addEventListener('contextrestored',()=>{LOWQ.length=0;{const H=WMH+NR;for(const [a,b] of [[0,WMW],[WMW,MW]])for(let y=0;y<H;y+=8)for(let x=a;x<b;x+=128)LOWQ.push([x,y,Math.min(128,b-x)]);}pjAdd('low',2,lowJob);});   // taken back: painted again
 const LOWQ=[];{const H=WMH+NR;for(const [a,b] of [[0,WMW],[WMW,MW]])for(let y=0;y<H;y+=8)for(let x=a;x<b;x+=128)LOWQ.push([x,y,Math.min(128,b-x)]);}
+const LOWN=LOWQ.length;
 function lowStep(){const q=LOWQ.shift();if(!q)return true;const [x0,y0,w]=q,R=8,H=WMH+NR,a=Math.max(0,y0-2),b=Math.min(H,y0+R+2),xa=Math.max(0,x0-2),xb=Math.min(MW,x0+w+2),
   piece=MMO({x0:xa,cols:xb-xa,y0:a,rows:b-a,px:4}),g=LOWB.getContext('2d');
  g.save();g.beginPath();g.rect(x0*2,y0*2,w*2,Math.min(R,H-y0)*2);g.clip();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(piece,xa*2,a*2,(xb-xa)*2,(b-a)*2);g.restore();return !LOWQ.length;}
@@ -12185,6 +12200,7 @@ RC.push(
  {id:'dhammer',slot:'w',atk:420,spd:.52,fix:3,lvr:260,need:{mith:8,ore:8,blue:2},unlock:()=>isSm()&&S.smith>=7&&(S.made.mhammer||0)+(S.made.mghammer||0)>=3,diff:1.6,strikes:9});
 Object.assign(WSH,{mstaff:{l:12,c:'#c8e8f4',k:'staff'},mbow:{l:10,c:'#7aa0b8',k:'bow'},mspear:{l:12,c:'#c8e8f4',k:'spear'},mdagger:{l:6,c:'#c8e8f4',k:'dagger'},mhammer:{l:7,c:'#c8e8f4',k:'hammer'},
  mgstaff:{l:12,c:'#e0e4ec',k:'staff'},mgbow:{l:10,c:'#e0e4ec',k:'bow'},mgspear:{l:12,c:'#e0e4ec',k:'spear'},mgdagger:{l:6,c:'#e0e4ec',k:'dagger'},mghammer:{l:7,c:'#e0e4ec',k:'hammer'},sqfbow:{l:10,c:'#c87a2a',k:'bow'},dhammer:{l:8,c:'#8a1a1a',k:'hammer'}});
+Object.assign(STR.ar,{mapLd:'بنرسم الخريطة... {n}%'});Object.assign(STR.en,{mapLd:'Drawing the map... {n}%'});
 Object.assign(STR.ar,{mstaff:'عصا ميثريل',mbow:'قوس ميثريل',mspear:'رمح ميثريل',mdagger:'خنجر ميثريل',mhammer:'مطرقة ميثريل',mgstaff:'عصا جريد (إنتاج كمّي)',mgbow:'قوس جريد (إنتاج كمّي)',mgspear:'رمح جريد (إنتاج كمّي)',mgdagger:'خنجر جريد (إنتاج كمّي)',mghammer:'مطرقة جريد (إنتاج كمّي)',
  sqfbow:'قوس الإطلاق السريع الحلزوني',dhammer:'مطرقة التنين',ipd_qfire:'كل سهم بيصيب بيزوّد سرعة الضرب 0.5% (لحد 50%)، وبتتصفّر لو وقفت 3 ثواني',
  nq_sqfbow:'"قوس صنعه الحداد الأسطوري جريد. تركيب القوس والسهم غريب، وصعب تتوقع السهم هيروح فين."',nq_dhammer:'"مطرقة صنعها الحداد الأسطوري جريد. معمولة عشان تضرب أعمدة رمح التنين. كبيرة جدًا وتقيلة وقوتها ممتازة. ينفع تبقى سلاح، بس مش سهل تتمرجح بيها."'});
@@ -15426,7 +15442,7 @@ function nmOpen(forced){IDW={local:1,forced}; // the character's name (owner 202
  $('idIn').maxLength=IDW.local?12:16;idOpen();$('idIn').value=forced?'':IDW.local?(S&&S.look&&S.look.n)||'':netId||'';}
 function nmLocalOk(v){const e=$('idErr');if(v.length<2||v.length>12){e.textContent=t('cNameErr');return;}if(Satisfy.chat.badName(v)){e.textContent=t('nameNo');return;}if(!S||!S.look)return;S.look.n=v;if(!IDW.forced)nmPaid();IDW={};$('idW').hidden=true;$('idBlk').hidden=true;$('idIn').maxLength=16;sbSig='';hudDirty=true;if(typeof buildMe==='function')buildMe(S.look);creFix();save(true);toast(t('nmDone',{n:v}),'good');}
 function nmCheck(){if(S&&S.look&&S.look.n&&Satisfy.chat.badName(S.look.n))setTimeout(()=>nmOpen(1),600);}
-function netPlay(){if(NETQ!=='online')return;if(!netUser){netPending=true;return netSignIn();}if(!netId)return netIdLoad().then(v=>v?netPlay():idOpen(),netFail);if(netPulling)return;netPulling=true;cloudPull().then(()=>{netPulling=false;startGame(hasSave());});}
+function netPlay(){if(NETQ!=='online')return;if(!netUser){netPending=true;return netSignIn();}if(!netId)return netIdLoad().then(v=>v?netPlay():idOpen(),netFail);if(netPulling)return;netPulling=true;tMenu(0);cloudPull().then(()=>{netPulling=false;startGame(hasSave());});}
 let netPulling=false;
 function netBtn(){const b=$('onlineBtn');if(!b)return;b.hidden=NETQ!=='online';b.disabled=netState==='AUTHENTICATING'||netState==='JOINING';
  if(NETQ==='online'){$('newBtn').hidden=true;$('contBtn').hidden=true;}
@@ -15437,8 +15453,8 @@ function netBtn(){const b=$('onlineBtn');if(!b)return;b.hidden=NETQ!=='online';b
    delete needs a second click to confirm; a download keeps the replaced local save as a backup. The public profile
    (profiles/{uid}) is refreshed on connect and once a minute while playing. */
 Object.assign(STR.ar,{switchAcc:'العب بحساب جوجل تاني'});Object.assign(STR.en,{switchAcc:'Play with another Google account'});
-Object.assign(STR.ar,{cloudBtn:'حفظ سحابي',cloudH:'الحفظ السحابي (حساب جوجل)',cloudLocal:'على الجهاز ده: {n} · مستوى {lv}',cloudNoLocal:'مفيش شخصية محفوظة على الجهاز ده',cloudNone:'مفيش شخصيات على السحابة لسه',cloudUp:'ارفع',cloudDown:'نزّل',cloudDel:'امسح',cloudSure:'متأكد؟ دوس تاني',cloudLoading:'جاري التحميل…',cloudUpOk:'{n} اترفع على حسابك',cloudDownOk:'{n} نزل على الجهاز ده (القديم محفوظ نسخة احتياطي)',cloudDelOk:'{n} اتمسح من السحابة',cloudErr:'الحفظ السحابي فشل: {e}',cloudSame:'(نفس الشخصية)',cloudOut:'خروج من الحساب',cloudOutOk:'خرجت من الحساب',cloudErase:'امسح بياناتي أونلاين',cloudExport:'نزّل نسخة من بياناتي أونلاين',cloudExOk:'نزلت نسخة من بياناتك أونلاين ({n} سجل)',cloudEraseOk:'بياناتك أونلاين اتمسحت ({n} سجل). الحفظ اللي على الجهاز ده زي ما هو.'});
-Object.assign(STR.en,{cloudBtn:'Cloud saves',cloudH:'Cloud saves (Google account)',cloudLocal:'On this device: {n} · Lv {lv}',cloudNoLocal:'No saved character on this device',cloudNone:'No characters in the cloud yet',cloudUp:'Upload',cloudDown:'Download',cloudDel:'Delete',cloudSure:'Sure? Click again',cloudLoading:'Loading…',cloudUpOk:'{n} uploaded to your account',cloudDownOk:'{n} is on this device now (the old save is kept as a backup)',cloudDelOk:'{n} deleted from the cloud',cloudErr:'Cloud save failed: {e}',cloudSame:'(same character)',cloudOut:'Sign out',cloudOutOk:'Signed out',cloudErase:'Delete my online data',cloudExport:'Download my online data',cloudExOk:'Your online data is downloaded ({n} records)',cloudEraseOk:'Your online data is deleted ({n} records). The save on this device is untouched.'});
+Object.assign(STR.ar,{cloudBtn:'حفظ سحابي',cloudH:'الحفظ السحابي (حساب جوجل)',cloudLocal:'على الجهاز ده: {n} · مستوى {lv}',cloudNoLocal:'مفيش شخصية محفوظة على الجهاز ده',cloudNone:'مفيش شخصيات على السحابة لسه',cloudUp:'ارفع',cloudDown:'نزّل',cloudDel:'امسح',cloudSure:'متأكد؟ دوس تاني',cloudLoading:'جاري التحميل…',cloudUpOk:'{n} اترفع على حسابك',cloudDownOk:'{n} نزل على الجهاز ده (القديم محفوظ نسخة احتياطي)',cloudDelOk:'{n} اتمسح من السحابة',cloudErr:'الحفظ السحابي فشل: {e}',cloudSame:'(نفس الشخصية)',cloudOut:'خروج من الحساب',cloudOutOk:'خرجت من الحساب',cloudErase:'امسح حسابي',cloudExport:'نزّل نسخة من بياناتي أونلاين',cloudExOk:'نزلت نسخة من بياناتك أونلاين ({n} سجل)',cloudEraseOk:'حسابك اتمسح: {n} سجل أونلاين والشخصية اللي على الجهاز ده.',cloudDelOkL:'{n} اتمسح من السحابة ومن الجهاز ده'});
+Object.assign(STR.en,{cloudBtn:'Cloud saves',cloudH:'Cloud saves (Google account)',cloudLocal:'On this device: {n} · Lv {lv}',cloudNoLocal:'No saved character on this device',cloudNone:'No characters in the cloud yet',cloudUp:'Upload',cloudDown:'Download',cloudDel:'Delete',cloudSure:'Sure? Click again',cloudLoading:'Loading…',cloudUpOk:'{n} uploaded to your account',cloudDownOk:'{n} is on this device now (the old save is kept as a backup)',cloudDelOk:'{n} deleted from the cloud',cloudErr:'Cloud save failed: {e}',cloudSame:'(same character)',cloudOut:'Sign out',cloudOutOk:'Signed out',cloudErase:'Delete my account',cloudExport:'Download my online data',cloudExOk:'Your online data is downloaded ({n} records)',cloudEraseOk:'Your account is deleted: {n} online records and the character on this device.',cloudDelOkL:'{n} deleted from the cloud and from this device'});
 let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // Sign out, or (erase) first delete everything the account stored online (doc §29 T35): cloud characters,
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
@@ -15452,8 +15468,12 @@ function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1)
  return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arenaCard/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
 /* owner 2026-10-21: no "Download my online data" and no manual Upload/Download of characters: a character moves only by
    the automatic sync (cloudAuto while playing, cloudPull on sign-in), so no copy of it can be made by hand. */
+// deleting the account (owner 2026-10-24, a player: "delete doesn't work, I'm still online with my ID"): the character on this
+// device goes too, or the automatic sync would put it back in the cloud the next time you play (and the device's old save
+// this account took over on its first sign-in)
+function localErase(uid){STORE.erase();try{if(localStorage.getItem('satisfy_owner')===uid){STORE0.erase();localStorage.removeItem('satisfy_owner');}}catch(e){}cloudUpRaw='';}
 function netSignOut(erase){const C=cloudApi();if(!C)return;const uid=netUser.uid,lf=erase?Promise.all([legFree(uid),frFree()]):null;netStop();
- (erase?lf.then(()=>C.eraseAll(netErasePaths(uid))):Promise.resolve(0))
+ (erase?lf.then(()=>C.eraseAll(netErasePaths(uid))).then(n=>{localErase(uid);return n;}):Promise.resolve(0))
   .then(n=>Satisfy.firebase.signOut(FB).then(()=>{netUser=null;netId=null;CLOUD=null;netSetState('DISCONNECTED');netBtn();$('cloudW').hidden=true;toast(erase?t('cloudEraseOk',{n}):t('cloudOutOk'),'good');}))
   .catch(e=>{cloudErr(e);if(netUser&&!NET)netConnect(FB,netUser);cloudOpen();});}
 function cloudApi(){if(!FB||!netUser)return null;if(!CLOUD||CLOUD.uid!==netUser.uid)CLOUD=Satisfy.cloud.create(FB,{uid:netUser.uid});return CLOUD;}
@@ -15471,7 +15491,7 @@ function cloudOpen(){const C=cloudApi();if(!C)return;$('cloudW').hidden=false;$(
  box.textContent=t('cloudLoading');
  C.list().then(list=>{box.textContent=list.length?'':t('cloudNone');for(const c of list){const row=document.createElement('div');row.className='cr';row.dataset.pid=c.pid;
    const lab=document.createElement('span');lab.textContent=`${c.handle} · ${t('lv',{n:c.lv})} · ${t('cl_'+c.cls)} · ${new Date(c.savedAt||c.rev).toLocaleString(lang==='ar'?'ar-EG':'en-GB')}`+(L&&L.pid===c.pid?' '+t('cloudSame'):'');row.appendChild(lab);
-   row.appendChild(armBtn(t('cloudDel'),()=>C.remove(c.pid).then(()=>{toast(t('cloudDelOk',{n:c.handle}));cloudOpen();},e=>{cloudErr(e);cloudOpen();})));box.appendChild(row);}},e=>{box.textContent='';cloudErr(e);});}
+   const same=L&&L.pid===c.pid;row.appendChild(armBtn(t('cloudDel'),()=>C.remove(c.pid).then(()=>{if(same)localErase(netUser.uid);toast(t(same?'cloudDelOkL':'cloudDelOk',{n:c.handle}));cloudOpen();},e=>{cloudErr(e);cloudOpen();})));box.appendChild(row);}},e=>{box.textContent='';cloudErr(e);});}
 /* owner 2026-10-20 ("on the phone there was no cloud save and no account"): signed in, the character follows the Google
    account by itself. While you play, the save goes up when it changed (every 30 s, and when the page is hidden or closed);
    on sign-in, a newer copy of this character in the cloud, or a further one on a device that has a newer or no character, comes
