@@ -1679,7 +1679,7 @@ const taleIn=(tx,ty)=>tx>=TALE.x0&&tx<TALE.x1+1&&Math.abs(ty-sRoad(tx|0))<=11;
 // with a gate at each northern pass; beyond it the Chaos Mountains climb in four ridges, each crest a wall of rock
 // with a few saddles, each ridge harder than the last. Blizzards, frozen lakes, poison swamps and thorn thickets;
 // a sanju keeps a lair on every ridge.
-const NWALL=-67,CREST=(i,x)=>-94-26*i+Math.round(Math.sin(x*.03+i*1.7)*3+Math.sin(x*.011+i)*2),CPASS=[[90,250,410,560,690],[160,380,610],[260,520]];
+const NWALL=-67,CREST=(i,x)=>-94-26*i+Math.round(Math.sin(x*.03+i*1.7)*3+Math.sin(x*.011+i)*2),CPASS=[[50,90,170,250,330,410,490,560,630,690],[60,160,270,380,490,610,680],[80,170,260,390,520,640]];   // a saddle every 60-120 tiles (owner 2026-10-24: one way through each crest, a long walk to anything)
 const SLAIR=[[180,-81],[430,-107],[600,-133],[360,-158]],CSW=[],FCAMP=[[450,-74]];
 const ridgeAt=(x,ty)=>ty>=NWALL?-1:ty>CREST(0,x)?0:ty>CREST(1,x)?1:ty>CREST(2,x)?2:3;   // which ridge a tile is on (-1 inside the wall)
 (function genFarNorth(){const r=mulberry32(8484),E=(n,f)=>Array.from({length:n},f),y0=-NR,y1=-ON-1;
@@ -3205,7 +3205,8 @@ function twOpts(id){const w=wisS(),o=[];if(!TOW)return o;
   if(w.basic)twDuty('hayate',o);
   o.push({l:t('twLore'),f:()=>dialog('hayate',[t('twHaL1'),t('twHaL2'),t('twHaL3')],()=>shopD('hayate','twHaIdle'))});return o;}
  if(!w.basic)return o;const T=TOW.test;if(T)return o;
- const go={biban:()=>twTest('duel'),abellio:()=>twTest('abel',{need:30}),radwolf:()=>twTest('machines'),jurene:()=>{twEnter('f2','down');setTimeout(()=>{if(TOW&&TOW.f==='f2')twTest('beasts');},900);},
+ const go={biban:()=>twTest('duel'),abellio:()=>twTest('abel',{need:30}),radwolf:()=>twTest('machines'),jurene:()=>twTest('beasts'),   // at the round table, where she is (owner 2026-10-24: it took you down to 2F, by Biban, and you climbed back up floor by floor)
+ 
   ken:()=>twTest('find'),jessica:()=>twEcho(),betty:()=>twQuiz('betty'),fronz:()=>twQuiz('fronz')}[id];
  const rp=w.done[id]&&(w.dly||{})[id]!==today();
  if(go&&(!w.done[id]||id==='biban'&&w.pill<2||id==='abellio'||rp))o.push({l:t(w.done[id]?'twAgainO':'twTestO'),st:w.done[id]?(rp?t('twDayT',{n:TWDM}):t('twDoneT')):t('twNewT'),f:go});
@@ -6304,7 +6305,12 @@ const undOf=id=>(S&&S.und&&S.und[id])||0;
 // the named items the bosses drop: learnable by understanding, with a production method by their rating
 for(const rc of RC)if(rc.drop){rc.need=rc.need||{...UNDN[rc.fix||3]};rc.diff=rc.diff||1.6;rc.strikes=rc.strikes||9;rc.unlock=()=>isSm()&&undOf(rc.id)>=100;}
 const salvSelf=w=>!w||w==='anvil';
+// a creation gives back what it was made of (owner 2026-10-24: "if I take it apart give me back the jewel and the horn, or
+// taking it apart is pointless"): its rare materials (power 2.5 and up) whole, the rest as much as a recipe's would
+function creSalv(it,w,o){const c=(S.cre||[]).find(x=>x.id===it.cr);let need=c?creNeed(c):null;if(!need&&it.cw){const p=it.cw.split('.');need={};for(const k of p.slice(4))if(CREM[k])need[k]=CREM[k].q;}if(!need)return false;
+ const f=Math.min(.95,(salvSelf(w)?Math.min(.8,.4+(S.smith||1)*.03):.3)+(it.r||0)*.1);for(const k in need){const n=CREM[k]&&CREM[k].m>=2.5?need[k]:Math.max(1,Math.floor(need[k]*f));if(n>0)o[k]=(o[k]||0)+n;}return true;}
 function salvYield(it,w){const rc=rcById(it.id),o={};if(SALVX[it.id])Object.assign(o,SALVX[it.id]);
+ else if((it.cr||it.cw)&&creSalv(it,w,o)){}
  else if(rc&&rc.need&&!rc.drop){const f=Math.min(.95,(salvSelf(w)?Math.min(.8,.4+(S.smith||1)*.03):.3)+(it.r||0)*.1);let top='',tn=0;
   for(const k in rc.need){const n=Math.floor(rc.need[k]*f);if(n>0)o[k]=n;if(rc.need[k]>tn){tn=rc.need[k];top=k;}}if(top&&!o[top])o[top]=1;}
  else if((it.r||0)>0||rc&&rc.drop)Object.assign(o,SALVR[it.r||0]);
@@ -6336,7 +6342,8 @@ window.__GSV={yield:(it,w)=>salvYield(it,w),fee:(it,w)=>salvFee(it,w),doSalv:(it
    function is found when it is appraised and works only once it is known. Each player's own items; nothing shared. */
 const HIDK=['str','agi','sta','int','dex','def','hpp','as'];
 const aprNeed=it=>!!(it&&it.slot&&!it.apr&&((it.r||0)>0||(rcById(it.id)||{}).drop));
-const aprChance=it=>(rcById(it.id)||{}).drop?.6:[0,.15,.25,.4,.55][it.r||0];
+// the rarer the piece, the likelier it hides something (owner 2026-10-24), drops a little above made pieces of their rarity
+const APRC=[0,.15,.28,.45,.65,.82],aprChance=it=>{const r=Math.min(5,it.r||0);return (rcById(it.id)||{}).drop?Math.min(.9,.35+r*.11):APRC[r];};
 function hidRoll(it){const r=it.r||0,k=HIDK[Math.floor(rand()*HIDK.length)],q=.6+rand()*.8;
  return {k,v:k==='hpp'?+((.02+r*.015)*q).toFixed(3):k==='as'?+((.02+r*.01)*q).toFixed(3):Math.max(1,Math.round((k==='def'?5+r*10:4+r*6)*q))};}
 const hidTxt=h=>(h.k==='hpp'?t('gHp'):h.k==='as'?t('gAs'):t(h.k))+' +'+(h.k==='hpp'||h.k==='as'?Math.round(h.v*100)+'%':h.v);
@@ -6886,8 +6893,11 @@ function loot(key,n,nm,o={}){lpAdd(key,o);const box=$('loot');if(!box)return;let
  e.el.className='lt'+(o.cls?' '+o.cls:'')+(o.r?' r'+o.r:'');e.el.innerHTML=`<b>+${Math.round(e.n).toLocaleString('en')}</b><span>${esc(nm)}</span>${o.ic===null?'':`<img src="${icon(o.ic||key)}">`}`;
  clearTimeout(e.t);e.t=setTimeout(()=>{e.el.classList.add('out');setTimeout(()=>e.el.remove(),380);},2600);}
 function addMat(k,n){S.mats[k]=(S.mats[k]||0)+n;loot(k,n,t(k));}
-function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='dopp')toast(t('dpSplit'),'warn');else if(m.type!=='belial')toast(t(ph===1&&!b.adds?'bossPh1n':'bossPh'+ph,{b:itN(m.type)}),'warn');
- if(b.adds)for(let i=0;i<1+ph;i++){const a=rand()*6.28,x=m.x+Math.cos(a)*36,y=m.y+Math.sin(a)*24;if(solidT(x/TS|0,y/TS|0))continue;const s=newMon(b.adds,x,y);s.tmp=1;s.eng=4;s.agg=1;mons.push(s);vfx('spawn',x,y,{color:'#ff7a5a'});}}
+// its warriors come where there is room round it (up to eight tries each); it calls them only when one came (owner 2026-10-24:
+// a boss alone on a narrow ridge 'called his men' and nobody came)
+function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);let n=0;
+ if(b.adds)for(let i=0;i<1+ph;i++)for(let k=0;k<8;k++){const a=rand()*6.28,r=28+k*5,x=m.x+Math.cos(a)*r,y=m.y+Math.sin(a)*r*.7;if(solidT(x/TS|0,y/TS|0))continue;const s=newMon(b.adds,x,y);s.tmp=1;s.eng=4;s.agg=1;mons.push(s);vfx('spawn',x,y,{color:'#ff7a5a'});n++;break;}
+ if(m.type==='dopp')toast(t('dpSplit'),'warn');else if(m.type!=='belial')toast(t('bossPh'+ph+(ph===1&&!n?'n':''),{b:itN(m.type)}),'warn');}
 // rare drops: bosses have a 40% chance of a Rare (sometimes Epic) piece of gear, dungeon monsters 3%; rolled per player
 const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','lgloves','lboots','cring','ihelm','igloves','iboots','parmor','mring','iear','mear'];
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.55:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.1:.04)?3:2,it=mkItem(id,r);S.items.push(it);
@@ -10133,11 +10143,12 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  mapClamp(c);const g=c.getContext('2d'),sc=mapFit(c)*MV.z,X=x=>(x-MV.cx)*sc+c.width/2,Y=y=>(y-MV.cy)*sc+c.height/2,u=dpr*Math.min(1.8,.9+MV.z*.25),F=lang==='ar'?'Tajawal, sans-serif':'Oswald, sans-serif';
  g.fillStyle='#0a1220';g.fillRect(0,0,c.width,c.height);g.imageSmoothingEnabled=sc<8;g.imageSmoothingQuality='high';
  // only the part of the land on screen, from the copy nearest the zoom (the full 8 px copy is 27 million pixels)
- {const B=sc>=7?'8':sc>=3.5?'4':LOWB,bp=B==='8'?8:B==='4'?4:2,x0=Math.max(MV.a,Math.floor(MV.cx-c.width/2/sc)-1),x1=Math.min(MV.b,Math.ceil(MV.cx+c.width/2/sc)+1),y0=Math.max(-NR,Math.floor(MV.cy-c.height/2/sc)-1),y1=Math.min(WMH,Math.ceil(MV.cy+c.height/2/sc)+1);
+ {const B=sc>=10?'8':sc>=3.5?'4':LOWB,bp=B==='8'?8:B==='4'?4:2,x0=Math.max(MV.a,Math.floor(MV.cx-c.width/2/sc)-1),x1=Math.min(MV.b,Math.ceil(MV.cx+c.width/2/sc)+1),y0=Math.max(-NR,Math.floor(MV.cy-c.height/2/sc)-1),y1=Math.min(WMH,Math.ceil(MV.cy+c.height/2/sc)+1);
   g.imageSmoothingQuality=bp>sc?'high':'low';   // scaling a copy up needs no mipmaps (downscaling the 8 px copy rebuilt them every frame)
-  if(B==='8'){for(let j=Math.floor((y0+NR)/128);j*128<y1+NR;j++)for(let i=Math.floor(x0/128);i*128<x1;i++)g.drawImage(baseTileQ(i,j,drawMap),Math.floor(X(i*128)),Math.floor(Y(j*128-NR)),Math.ceil(128*sc)+1,Math.ceil(128*sc)+1);}
-  else if(B==='4'){if(x1>x0&&y1>y0)miniDraw(g,x0,y0+NR,x1-x0,y1-y0,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc,drawMap);}
-  else if(x1>x0&&y1>y0){const J=PJ.get('low');if(J){J.pri=0;J.tick=J.after=drawMap;}g.drawImage(B,x0*bp,(y0+NR)*bp,(x1-x0)*bp,(y1-y0)*bp,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc);}g.imageSmoothingQuality='high';}
+  // what is on screen is painted whole before it shows, once (owner 2026-10-24: 'the map draws itself again from the start for some reason, draw it once')
+  if(B==='8'){for(let j=Math.floor((y0+NR)/128);j*128<y1+NR;j++)for(let i=Math.floor(x0/128);i*128<x1;i++)g.drawImage(baseTile(i,j),Math.floor(X(i*128)),Math.floor(Y(j*128-NR)),Math.ceil(128*sc)+1,Math.ceil(128*sc)+1);}
+  else if(B==='4'){if(x1>x0&&y1>y0){for(let j=Math.max(0,Math.floor((y0+NR)/128));j*128<y1+NR;j++)for(let i=Math.max(0,Math.floor(x0/128));i*128<x1;i++)if(!MINP[i+','+j]){miniQ(i,j,null);pjFinish('m'+i+','+j);}}if(x1>x0&&y1>y0)miniDraw(g,x0,y0+NR,x1-x0,y1-y0,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc,drawMap);}
+  else if(x1>x0&&y1>y0){if(PJ.get('low'))pjFinish('low');g.drawImage(B,x0*bp,(y0+NR)*bp,(x1-x0)*bp,(y1-y0)*bp,X(x0),Y(y0),(x1-x0)*sc,(y1-y0)*sc);}g.imageSmoothingQuality='high';}
  const onS=(x,y,m=60*dpr)=>x>-m&&y>-m&&x<c.width+m&&y<c.height+m;
  // what this map shows (owner 2026-10-23: "move everything of the other continent to its own map, and hide the vampires and
  // anything under the ground from the map"): this continent only, and the surface only. A wide or tall screen showed
@@ -10940,7 +10951,7 @@ const BTL=new Map();
 function btJob(c,i,j){const H=WMH+NR,cw=Math.min(128,MW-i*128),rh=Math.min(128,H-j*128);let r=0;if(cw<=0||rh<=0)return {step:()=>true};
  const J={step(n=8){n=Math.min(n,rh-r);MMO({x0:i*128,cols:cw,y0:j*128+r,rows:n,into:{g:c.getContext('2d'),dx:0,dy:r*8}});r+=n;return r>=rh;},rest:()=>J.step(1e9)};return J;}
 function baseTileQ(i,j,then){const k=i+','+j;let c=BTL.get(k);
- if(c){BTL.delete(k);BTL.set(k,c);}else{c=mk(1024,1024,()=>{});BTL.set(k,c);pjAdd('b'+k,0,()=>btJob(c,i,j));while(BTL.size>30){const o=BTL.keys().next().value;BTL.delete(o);PJ.delete('b'+o);}}
+ if(c){BTL.delete(k);BTL.set(k,c);}else{c=mk(1024,1024,()=>{});BTL.set(k,c);pjAdd('b'+k,0,()=>btJob(c,i,j));while(BTL.size>60){const o=BTL.keys().next().value;BTL.delete(o);PJ.delete('b'+o);}}
  const J=PJ.get('b'+k);if(J&&then)J.tick=J.after=then;return c;}
 const baseTile=(i,j)=>{const c=baseTileQ(i,j);pjFinish('b'+i+','+j);return c;};
 const lowBase=()=>{pjFinish('low');return LOWB;};   // both start at world row -NR
@@ -15123,7 +15134,7 @@ function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))ret
  if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mkN:m.mkN,sg:m.sg,nk:m.nk,boss:m.boss,far:m.far},hid=m.hidN;monFresh(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
  mobLocal(m,key); /* anything this player's skill gave it since: to the host first */m.lv=lv;m.max=mx||mobBaseMax(m);m.stun=m.stunH=fl&8?.15:0;if(fl&16){m.wardT=gTime+.5;m.wardR=((fl>>5)&31)/20||.4;}else m.wardT=0; // a shield is the host's
  m.weak=m.weakH=fl&1024?.5:0;m.slowU=m.slowUH=fl&2048?gTime+.5:0; // weak and slow while the host's copy is // the host's full health and stun, not this copy's
- if(b.boss){const ph=hp<330?2:hp<660?1:0;if(hp>=1000)m.ph=0;else if(ph>(m.ph||0)){m.ph=ph;shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='dopp')toast(t('dpSplit'),'warn');else if(m.type!=='belial')toast(t(ph===1&&!b.adds?'bossPh1n':'bossPh'+ph,{b:itN(m.type)}),'warn');}} // SAT-ONLINE-045
+ if(b.boss){const ph=hp<330?2:hp<660?1:0;if(hp>=1000)m.ph=0;else if(ph>(m.ph||0)){m.ph=ph;shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='dopp')toast(t('dpSplit'),'warn');else if(m.type!=='belial')toast(t('bossPh'+ph+(ph===1&&!(MT[m.type]||{}).adds?'n':''),{b:itN(m.type)}),'warn');}} // SAT-ONLINE-045
  const nh=Math.max(1,Math.round(m.max*hp/1000)),mine=m.pendT&&performance.now()-m.pendT<1500;
  if(nh<m.hp){if(!mine&&m.hp-nh>=1){m.hurt=.12;num(m.x,monY(m)-8,String(m.hp-nh),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});}m.hp=nh;}else if(!mine)m.hp=nh; // another player's hit: its number shows here too
  const dx=x-m.x,dy=y-m.y,dd=Math.hypot(dx,dy);if(dd>80){m.x=x;m.y=y;}else if(dd>.5&&m.st!=='dash'&&!(m.pendK&&performance.now()-m.pendK<600)){ // a replayed dash moves this copy itself, then it settles on the host's spot (one you just knocked back waits for the host to move it too)
