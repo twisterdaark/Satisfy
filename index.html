@@ -11918,7 +11918,7 @@ function meRun(fn,self,args){if(FXME||!NET||!P||mode!=='play')return fn.apply(se
  try{const r=fn.apply(self,args);ok=true;return r;}finally{window.setTimeout=st;FXME=0;if(ok&&P)try{fxGrab(f0,p0,d0);}catch(e){}}}
 // SAT-ONLINE-047 (owner via Claude-B, #13): the sounds of your own actions (swings, hits, dodges, being hurt, slams,
 // level-ups) ride along with their effects (meRun/asMe record them) and play for the players near you, softer with distance
-const SFXNET=['swing','hit','crit','hurt','dodge','chop','mine','clang','miss','slam','level','legendary','bow','magic','fire','zap','frost','holy','cast','power','guardup','buff'],SFXR=360;
+const SFXNET=['swing','hit','crit','hurt','dodge','chop','mine','clang','miss','slam','bow','magic','fire','zap','frost','holy','cast','power','guardup','buff'],SFXR=190;
 for(const k of SFXNET){const f=SFX[k];SFX[k]=function(...a){if(FXME&&NET&&P&&mode!=='title')try{fxR(['s',k,typeof a[0]==='number'?Math.round(a[0]*100)/100:0]);}catch(e){}return f.apply(this,a);};}
 window.__GS={heard:[],vox:[]}; // test hook: the other players' sounds played here
 /* owner 2026-10-22: sounds heard from far away and the same sound piling up (a dozen monsters biting in one frame came out
@@ -11928,7 +11928,7 @@ const SFXT={last:{},burst:[]}; // tests clear it
 {const UI=new Set(['hover','click','open','close','deny','coin','level','quest','notice','rare','legendary','tick']),last=SFXT.last,burst=SFXT.burst;
  for(const k of Object.keys(SFX)){const f=SFX[k];SFX[k]=function(...a){const n=performance.now(),lk=SFXCH+k;if(n-(last[lk]??-1e9)<80)return;
   while(burst.length&&n-burst[0]>120)burst.shift();if(burst.length>=6&&!UI.has(k))return;last[lk]=n;burst.push(n);if(window.__GS.played&&__GS.played.length<400)__GS.played.push(k);return f.apply(this,a);};}}
-function sfxAt(x,y,f,v=1){if(!P||mode==='title')return;const d=Math.hypot(x-P.x,y-P.y);if(d>=SFXR)return;const s0=SFXV;SFXV=Math.max(.05,(1-d/SFXR)*v);try{sfxOn('amb',f);}finally{SFXV=s0;}}
+function sfxAt(x,y,f,v=1){if(!P||mode==='title')return;const d=Math.hypot(x-P.x,y-P.y);if(d>=SFXR)return;const s0=SFXV;SFXV=Math.max(.03,Math.pow(1-d/SFXR,2)*v*.7);try{sfxOn('amb',f);}finally{SFXV=s0;}}
 /* SAT-ONLINE-058 (owner, via Claude-B on #13): a player near you dying or coming back is heard too, the sounds yours make,
    softer with distance; from their presence turning to 'dead' and back (none for one already dead when first seen) */
 function remLife(r,fs){const a=r.anim==='dead'?1:0;if(fs.lf===undefined){fs.lf=a;return;}if(fs.lf===a)return;fs.lf=a;if(!P||mode==='title')return;
