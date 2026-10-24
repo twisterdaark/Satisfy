@@ -1112,6 +1112,21 @@
         ".validate": "$h.matches(/^[a-z0-9_]{3,16}$/)"
       }
     },
+    "fishFest": {
+      ".read": "auth != null",
+      "$s": {
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid && root.child('accountIds').child(auth.uid).exists() && (!data.exists() || data.child('t').val() < now - 15000)",
+          ".validate": "$s.matches(/^[0-9]{1,9}$/) && newData.hasChildren(['s', 'w', 'k', 'n', 't']) && newData.child('s').val() === (now - now % 900000) / 900000 && now % 900000 < 660000 && (!data.exists() || newData.child('w').val() > data.child('w').val())",
+          "s": { ".validate": "newData.isNumber()" },
+          "w": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() % 1 === 0 && newData.val() <= (newData.parent().child('k').val() === 'gfish' ? 66 : newData.parent().child('k').val() === 'sfish' ? 41 : 32)" },
+          "k": { ".validate": "newData.val() === 'fish' || newData.val() === 'sfish' || newData.val() === 'gfish'" },
+          "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "accountIds": {
       "$uid": {
         ".read": "auth != null",
