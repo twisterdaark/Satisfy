@@ -31,7 +31,7 @@ function vnoise(x,y,sc,s){const fx=x/sc,fy=y/sc,ix=Math.floor(fx),iy=Math.floor(
 function step(ramp,wx,wy,base,amp,s){const n=vnoise(wx,wy,22,s)*.55+vnoise(wx,wy,6,s+7)*.3+hash(wx,wy,s+3)*.15;
  const t=base+(n-.5)*amp*2+BAYER[(wy&3)*4+(wx&3)]-.5;return ramp[Math.max(0,Math.min(ramp.length-1,Math.round(t)))];}
 
-function Buf(){const d=new Uint8ClampedArray(16*16*4);return {d,set(x,y,c){if(x<0||y<0||x>15||y>15)return;const i=(y*16+x)*4;d[i]=c[0];d[i+1]=c[1];d[i+2]=c[2];d[i+3]=255;},
+function Buf(o){const d=o||new Uint8ClampedArray(16*16*4);return {d,set(x,y,c){if(x<0||y<0||x>15||y>15)return;const i=(y*16+x)*4;d[i]=c[0];d[i+1]=c[1];d[i+2]=c[2];d[i+3]=255;},
  get(x,y){const i=(y*16+x)*4;return [d[i],d[i+1],d[i+2]];},rect(x,y,w,h,c){for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)this.set(i,j,c);}};}
 const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
 
@@ -60,8 +60,10 @@ function baseAt(env,x,y){const v=env.at(x,y);if(!HOLDER.has(v)||(v===BL&&y>=env.
  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const q=env.at(x+dx,y+dy);if(!OPEN.has(q))continue;const k=q===FL?GR:q;n[k]=(n[k]||0)+(dx&&dy?1:2);}
  for(const k in n)if(n[k]>bc||(n[k]===bc&&+k===GR)){bc=n[k];best=+k;}
  return best<0?v:best;}
-function ground(env,x,y,frame){
- const {snowAt,WMH}=env,at=(a,c)=>baseAt(env,a,c),X=x*16,Y=y*16,b=Buf();let v=at(x,y);const snowy=snowAt(x,y);
+// out (optional): a 16x16 RGBA buffer to paint into (cleared first) instead of a new one; the caller copies it out before the
+// next call (SAT-ONLINE-211: a new 1 KB buffer a tile, ~1,000 a chunk, kept the garbage collector busy while walking)
+function ground(env,x,y,frame,out){
+ const {snowAt,WMH}=env,at=(a,c)=>baseAt(env,a,c),X=x*16,Y=y*16,b=Buf(out&&out.length===1024?out.fill(0):null);let v=at(x,y);const snowy=snowAt(x,y);
  if(v===BL&&y>=WMH)v=FW;
  if(v===GR||v===FL||((v===TR||v===BL)&&!snowy))grassFill(b,X,Y,v===FL);
  else if(v===SN||((v===TR||v===BL)&&snowy))snowFill(b,X,Y);
