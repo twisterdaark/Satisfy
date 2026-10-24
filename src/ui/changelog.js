@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24noblur', ver: '2.65', d: '2026-10-24',
+      ar: ["الشبابيك (الشنطة، والحالة، والخريطة، وكتاب الوحوش، والقايمة) مبقتش بتعمل blur للي وراها، وبقت أقل شفافية سنة. الـ blur كان بيتحسب من جديد كل فريم واللعبة بتتحرك وراه، فكان بيقطّع وأنت فاتح شباك."],
+      en: ["Windows (the bag, the status, the map, the Monster Book, the menu) no longer blur what is behind them; they are a touch less see-through instead. The blur was worked out again every frame with the game moving behind it, so a window open made the game stutter."] },
     { v: '2026-10-24warmstart', ver: '2.64', d: '2026-10-24',
       ar: ["اللعبة مبقتش بتهنج أول ما تدخل: الأرض والناس والوحوش اللي حواليك بيترسموا وشاشة البداية لسه ظاهرة."],
       en: ["The game no longer stalls as you start: the ground, the people and the monsters around you are painted while the title screen still shows."] },
