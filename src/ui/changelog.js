@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24minidots', ver: '2.68', d: '2026-10-24',
+      ar: ["الخريطة الصغيرة وخريطة العالم (أونلاين): غير فريقك (أخضر)، بقى عليهم نقط لأعضاء نقابتك (أزرق)، والنقابة المتحالفة معاك (أزرق فاتح)، والأعداء: الخارج عن القانون أو عضو نقابة في حرب معاك دلوقتي (معيّن أحمر). باقي اللاعيبة ملهمش نقط، واللي مستخبي (تخفّي) ملوش نقطة إلا لو في فريقك."],
+      en: ["The minimap and the world map (online): besides your party (green), they now mark your guild's members (blue), an allied guild's (pale blue) and foes: an outlaw, or a member of a guild at war with yours right now (a red diamond). Other players get no dot, and a player in stealth gets none unless they're in your party."] },
     { v: '2026-10-24nearby', ver: '2.67', d: '2026-10-24',
       ar: ["قايمة اللاعيبة (O) بقت مترتبة بالأقرب: انت الأول، وبعدين اللي على نفس الخريطة ومعاك في نفس المكان من الأقرب للأبعد وجنب كل واحد بُعده بالمربعات، وبعدين الباقيين بالاسم."],
       en: ["The players list (O) puts the nearest first: you, then the players on your map and in the same place, closest first with how far each one is in tiles, then everyone else by name."] },
