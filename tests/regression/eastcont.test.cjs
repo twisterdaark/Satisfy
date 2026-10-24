@@ -128,7 +128,7 @@ test('the novel\'s quests: the gateways, Arube captured or killed, Han Seokbong 
     await H.newGame(g, LOOK);
     const r = await g.eval(() => { const G = window.__G, S = G.S, P = G.P, E = window.__GEA, o = {}; S.lv = 380; S.ea = { v: 1 }; P.x = E.EAPORT.x; P.y = E.EAPORT.y;
       // the third gateway (ch 1161) gives "Pangea's New Star"
-      G.acceptQ('ea0'); E.act(E.pt('eagate')[0]); o.gate = E.ready('ea0'); G.completeQ('ea0'); o.star = !!S.tl.pgstar;
+      G.acceptQ('ea0'); E.act(E.pt('eagate')[0]); o.gate0 = E.ready('ea0'); if (G.DL && G.DL.done) { const d = G.DL.done; G.DL.done = null; d(); } o.keepers = E.gk().length; for (const m of E.gk()) window.__GBH.kill(m); o.gate = !o.gate0 && o.keepers === 5 && E.ready('ea0'); /* the third gateway is broken by beating its keepers (owner 2026-10-24) */ G.completeQ('ea0'); o.star = !!S.tl.pgstar;
       // Arube: capture opens the daoist priest's quest; kill gives two levels and ends it (ch 543)
       S.qs.ea1 = { st: 2 }; G.acceptQ('ea2'); S.qs.ea2.c = 1; G.completeQ('ea2'); o.ea3a = E.avail('ea3');
       const xp0 = S.xp, need = G.xpNeed(); E.arube()[0].f(); o.capXp = Math.round((S.xp - xp0) / need * 100); o.ar = S.ea.ar; o.ea3 = E.avail('ea3'); o.ea4a = E.avail('ea4');
@@ -142,7 +142,7 @@ test('the novel\'s quests: the gateways, Arube captured or killed, Han Seokbong 
       G.acceptQ('ea6'); S.qs.ea6.c = 1; G.completeQ('ea6'); G.acceptQ('ea7'); E.act(E.pt('btshrine')[0]); o.ready7 = E.ready('ea7'); G.completeQ('ea7');
       o.bt = [!!S.tl.btprot, S.items.some((i) => i.id === 'ttshell')];
       return o; });
-    assert.ok(r.gate && r.star, 'the gateway and the title');
+    assert.ok(r.gate && r.star, 'the gateway and the title ' + JSON.stringify([r.gate0, r.keepers, r.gate, r.star]));
     assert.equal(r.ea3a, false, 'nothing before you choose');
     assert.equal(r.capXp, 30); assert.equal(r.ar, 'cap'); assert.equal(r.ea3, true); assert.equal(r.ea4a, false, 'Han Seokbong is still free');
     assert.ok(r.bow, 'the Red Phoenix Bow comes back'); assert.ok(r.jail);
