@@ -20,12 +20,19 @@ const groundKind=v=>v===FL?GR:v===BL||v===TR||v===PL?-1:v;
 
 // o.x0/o.y0/o.cols/o.rows paint only that window of tiles (owner 2026-10-21: the whole 8 px world is 27 million pixels,
 // too much memory and time for a phone at start): it is painted with 2 tiles of margin and cut, so the pieces join exactly
+// SAT-ONLINE-211 (the lag: the garbage collector ran twice a second while walking): a window that doesn't leave buildBase
+// (drawn into a piece, or cut out of its margin) is painted on a scratch canvas, ImageData and kind map kept for its size
+const SCR=new Map();
+function scratch(w,h,mkc){const k=w*65536+h;let e=SCR.get(k);
+ if(!e){const c=mkc(w,h),g=c.getContext('2d');e={c,g,img:g.createImageData(w,h),kind:new Int8Array(w*h)};if(SCR.size>=8)SCR.clear();SCR.set(k,e);}
+ else{const g=e.g;if(g.setTransform)g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';e.img.data.fill(0);e.kind.fill(0);}
+ return e;}
 function buildBase(env,o){const W=o.W,H=o.H,s=o.px||8,doc=root.document,NY=o.noiseRow||0;   // noiseRow: the tile row the texture noise is anchored to, so rows added above keep the old land's look
  const win=o.cols!=null||o.rows!=null,M=win?2:0,X0=o.x0||0,Y0=o.y0||0,CO=o.cols!=null?o.cols:W,RO=o.rows!=null?o.rows:H,ox=X0-M,oy=Y0-M;
  const tx0=Math.max(0,ox),tx1=Math.min(W,X0+CO+M),ty0=Math.max(0,oy),ty1=Math.min(H,Y0+RO+M),cw=(CO+2*M)*s,ch=(RO+2*M)*s;
  const mkc=(w,h)=>{const c=doc?doc.createElement('canvas'):A.makeCanvas(w,h);c.width=w;c.height=h;return c;};
- const cv=mkc(cw,ch),g=cv.getContext('2d');
- const img=g.createImageData(cw,ch),D=img.data,kind=new Int8Array(cw*ch);
+ const sc=o.into||M?scratch(cw,ch,mkc):null,cv=sc?sc.c:mkc(cw,ch),g=sc?sc.g:cv.getContext('2d');
+ const img=sc?sc.img:g.createImageData(cw,ch),D=img.data,kind=sc?sc.kind:new Int8Array(cw*ch);
  // the window's tiles and two round it, read once (2026-10-24, the owner's lag: on water it read each tile up to 50 times a pixel)
  const gx0=tx0-2,gy0=ty0-2,gw=Math.max(0,tx1-tx0+4),gh=Math.max(0,ty1-ty0+4),GT=new Int8Array(gw*gh);
  for(let y=0;y<gh;y++)for(let x=0;x<gw;x++){const X=gx0+x,Y=gy0+y;GT[y*gw+x]=X<0||Y<0||X>=W||Y>=H?-9:env.at(X,Y);}
