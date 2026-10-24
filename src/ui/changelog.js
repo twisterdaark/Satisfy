@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24threat', ver: '2.58', d: '2026-10-24',
+      ar: ["الوحوش بقت محتاجة تفكير: ضربة الوحش القريب من لفلك بتاخد نسبة من صحتك (لحد 11-12% للضربات اللي ليها تحذير زي الخبطة والجري والنطة والدواير، 5% للطلقات، 2.5% للضربة العادية، والبوس مرة ونص)، والنسبة دي بتقل وتختفي لو الوحش أقل منك بـ15 لفل.",
+          "الضربة التقيلة بتعملك \"جريح\": امتصاص الحياة بيشتغل 40% بس لمدة 3 ثواني، وامتصاص الحياة أقصاه 4% من صحتك في الثانية.",
+          "كل وحش من لفل 30 ممكن ينزّل دواير حمرا في الأرض مكانك: اتحرك منها. الصد والباري والداش بيلغوا الضرر زي ما هما.",
+          "على الكمبيوتر الشاشة العريضة بقت بتتملي كلها من غير شرايط سودا على الجناب.",
+          "كل الشبابيك بقت تتحرك، وليها مقبض في الركن تكبّرها وتصغّرها بيه، والحجم بيتحفظ. دبل كليك على المقبض بيرجّعها لحجمها."],
+      en: ["Monsters need thinking now: a blow from a monster near your level takes a share of your health (up to 11-12% for telegraphed slams, charges, leaps and circles, 5% for bolts, 2.5% for a plain swipe, a boss half again), fading out 15 levels under you.",
+          "A heavy blow wounds you: life steal works at 40% for 3 s, and life steal heals at most 4% of your health a second.",
+          "Every monster from level 30 can call red circles down where you stand: step out. Guard, parry and dash still stop the damage.",
+          "On a computer a wide window is filled, with no black bars at the sides.",
+          "Every window can be moved, and a grip in its corner resizes it; the size is kept. A double click on the grip gives its own size back."] },
     { v: '2026-10-24barrage', ver: '2.57', d: '2026-10-24',
       ar: ["كل الإكسبي اللي بتاخده من الوحوش والكويستات زاد 1.2 مرة.",
           "السكيلات اللي بتضرب كذا ضربة ورا بعض (زي رقصات باجما): كل ضربة ليها إيفيكت لحد آخر واحدة، بدل ما الإيفيكت يخلص والصوت لسه شغال، والسيوف اللي بتنزل من السما بقت سيوف بجد.",
