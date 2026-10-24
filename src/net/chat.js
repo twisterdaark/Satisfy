@@ -84,10 +84,16 @@
     return false;
   }
   /** A name nobody should carry: an insult as a word of it, or a slur anywhere inside it. */
+  // a name's answer is kept (the list is fixed): the other players' names are checked on every list of them, about 15
+  // times a frame online, ~6 microseconds a name (2026-10-24, the owner's lag: 2 ms a frame with 20 players around)
+  var BADN = new Map();
   function badName(h) {
-    var s = String(h == null ? '' : h);
-    if (severe(s.replace(/[\s_.-]+/g, ''))) return true;
-    return s.split(/[\s_.\-]+|(?=[A-Z][a-z])/).some(function (w) { return w && bad(w); });
+    var s = String(h == null ? '' : h), v = BADN.get(s);
+    if (v !== undefined) return v;
+    v = !!severe(s.replace(/[\s_.-]+/g, '')) || s.split(/[\s_.\-]+|(?=[A-Z][a-z])/).some(function (w) { return w && bad(w); });
+    if (BADN.size >= 512) BADN.clear();
+    BADN.set(s, v);
+    return v;
   }
   /** The name to show for another player: theirs, or "Player" and a few letters of their account when it is an insult. */
   function name(h, id) {
