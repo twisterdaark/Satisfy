@@ -504,6 +504,7 @@ body.rmo .toast,body.rmo .panel,body.rmo .pop,body.rmo #forge.hit,body.rmo #rays
 body.skdrag #ui #skillbar{opacity:1!important;pointer-events:auto!important;z-index:51}body.skdrag #ui #skillbar *{pointer-events:auto!important}#skillbar .sk.dropon{box-shadow:0 0 0 2px var(--gold),0 0 calc(var(--u)*.8) var(--gold)}.tl.skd{cursor:grab}.tl.skd .ski{width:calc(var(--u)*2.6);height:calc(var(--u)*2.6);image-rendering:pixelated;flex:none}
 #ui.uhP2 #skillbar *,#ui.uhP #keys *,#ui.uhSy #skillbar *,#ui.uhSy #keys *{pointer-events:none!important}
 .slotb.eq,#eqPick .pk.eq{box-shadow:inset 0 0 0 2px var(--gold),inset 0 0 calc(var(--u)*.6) rgba(0,0,0,.6)}
+#eqPick .pk.eqo{opacity:.6}#eqPick .pk.eqo small{color:var(--gold)}
 .slotb.eq::after{content:"E";position:absolute;left:calc(var(--u)*.25);top:calc(var(--u)*.1);font-family:"Press Start 2P",monospace;font-size:calc(var(--u)*.7);color:var(--gold);text-shadow:0 0 2px #000}
 .dtowns{display:flex;gap:calc(var(--u)*.8);justify-content:center;margin-top:calc(var(--u)*.8)}
 #txt{position:absolute;left:0;top:0;pointer-events:none}
@@ -1068,7 +1069,7 @@ ar:{pname:"لاعب",subtitle:"عالم ساتيسفاي",newGame:'لعبة جد
  r0:'عادي',r1:'نادر',r2:'ملحمي',r3:'فريد',r4:'أسطوري',
  rusty:'سيف صدي',jaffa:'أسهم جافا',isword:'سيف حديد',ssword:'سيف فولاذ',sbow:'قوس مقوّى',sstaff:'عصا الجوهرة',shammer:'مطرقة فولاذ',parmor:'درع صفائح',larmor:'درع جلد',spear:'رمح حديد',dagger:'خنجر حديد',lhelm:'خوذة جلد',ihelm:'خوذة حديد',lgloves:'جوانتي جلد',igloves:'جوانتي حديد',lboots:'جزمة جلد',iboots:'جزمة حديد',cring:'خاتم نحاس',mring:'خاتم الجوهرة',gsword:'السيف العظيم الأزرق',
  ore:'خام حديد',wood:'خشب',leather:'جلد',blue:'أوريكالكوم أزرق',bread:'عيش',arrows:'أسهم جافا',
- atk:'هجوم',def:'دفاع',spd:'سرعة',equip:'البس',equipped:'لابسه',bagT:'الشنطة',gear:'المعدات',mats:'الخامات',charT:'الشخصية',
+ atk:'هجوم',def:'دفاع',spd:'سرعة',equip:'البس',equipped:'لابسه',eqElse:'لابسه في خانة تانية',bagT:'الشنطة',gear:'المعدات',mats:'الخامات',charT:'الشخصية',
  cls:'الكلاس',clsV:"وريث باغما",title:'التايتل',noTitle:'مفيش',titleV:'الحداد الأسطوري',smith:'الحدادة',none:'مفيش',
  levelUp:"لفل جديد! بقيت لفل {n} (+{p} نقط ستات، دوس C)",got:'+{n} {item}',hungry:"إنت جعان! افتح الشنطة (I) وكُل عيش",starving:'إنت بتموت من الجوع! صحتك بتقل',pain:'ألم شديد! حركتك بقت أبطأ',
  died:'صحيت في {z} وخسرت {g} دهب',noBread:'معاكش عيش. الخباز في القرية بيبيع',ate:'أكلت عيش',full:'إنت شبعان',saved:'اتحفظت اللعبة',netOn:'أونلاين محلي · اللاعبين: {n}',netSignIn:'العب أونلاين (Google)',netSignedIn:'أونلاين باسم {n}',netOnline:'أونلاين · اللاعبين: {n}',netEmu:'محاكي (بيانات تجربة)',netJoin:'بيتصل…',netRe:'بيعيد الاتصال…',netFail:'الأونلاين مش متاح ({e}). تقدر تكمل أوفلاين.',pInvite:'[P] دعوة للفريق',pInvSent:'اتبعتت دعوة لـ{n}',pInvFrom:'{n} بيدعوك لفريقه',pAccept:'قبول (Y)',pDecline:'رفض (N)',pJoined:'{n} انضم للفريق',pYouJoined:'انضميت لفريق {n}',pDeclined:'{n} رفض الدعوة',pLeft:'سبت الفريق',pMemberLeft:'{n} ساب الفريق',pKicked:'{n} شالك من الفريق',pDissolved:'الفريق اتفكك',pFull:'الفريق مليان',pBusy:'{n} في فريق تاني',pNotLeader:'القائد بس اللي يقدر يدعي',pTitle:'الفريق',pLeave:'مغادرة',pNone:'مفيش حد قريب تدعيه',safeZone:'منطقة آمنة',tired:'طاقتك خلصت',
@@ -1105,7 +1106,7 @@ en:{pname:"Player",subtitle:"World of Satisfy",newGame:'New Game',cont:'Continue
  r0:'Normal',r1:'Rare',r2:'Epic',r3:'Unique',r4:'Legendary',
  rusty:'Rusty Sword',jaffa:'Jaffa Arrows',isword:'Iron Sword',ssword:'Steel Sword',sbow:'Reinforced Bow',sstaff:'Gem Staff',shammer:'Steel Hammer',parmor:'Plate Armor',larmor:'Leather Armor',spear:'Iron Spear',dagger:'Iron Dagger',lhelm:'Leather Helmet',ihelm:'Iron Helmet',lgloves:'Leather Gloves',igloves:'Iron Gauntlets',lboots:'Leather Boots',iboots:'Iron Boots',cring:'Copper Ring',mring:'Gem Ring',gsword:'Blue Orichalcum Greatsword',
  ore:'Iron Ore',wood:'Wood',leather:'Leather',blue:'Blue Orichalcum',bread:'Bread',arrows:'Jaffa Arrows',
- atk:'ATK',def:'DEF',spd:'Speed',equip:'Equip',equipped:'Equipped',bagT:'Inventory',gear:'Equipment',mats:'Materials',charT:'Character',
+ atk:'ATK',def:'DEF',spd:'Speed',equip:'Equip',equipped:'Equipped',eqElse:'Worn in another slot',bagT:'Inventory',gear:'Equipment',mats:'Materials',charT:'Character',
  cls:'Class',clsV:"Pagma's Successor",title:'Title',noTitle:'None',titleV:'Legendary Blacksmith',smith:'Blacksmithing',none:'None',
  levelUp:"Level up! You are now level {n} (+{p} stat points, press C)",got:'+{n} {item}',hungry:"You're hungry! Open your bag (I) and eat bread",starving:"You're starving! Losing HP",pain:'Severe pain! You move slower',
  died:'You woke up in {z} and lost {g} gold',noBread:'No bread. The baker in the village sells some',ate:'You ate bread',full:"You're full",saved:'Game saved',netOn:'Local online · players: {n}',netSignIn:'Play online (Google)',netSignedIn:'Online as {n}',netOnline:'Online · players: {n}',netEmu:'EMULATOR (test data)',netJoin:'Connecting…',netRe:'Reconnecting…',netFail:'Online is unavailable ({e}). You can keep playing offline.',pInvite:'[P] Invite to party',pInvSent:'Party invite sent to {n}',pInvFrom:'{n} invites you to a party',pAccept:'Accept (Y)',pDecline:'Decline (N)',pJoined:'{n} joined the party',pYouJoined:"You joined {n}'s party",pDeclined:'{n} declined',pLeft:'You left the party',pMemberLeft:'{n} left the party',pKicked:'{n} removed you from the party',pDissolved:'The party broke up',pFull:'The party is full',pBusy:'{n} is in another party',pNotLeader:'Only the leader can invite',pTitle:'Party',pLeave:'Leave',pNone:'Nobody nearby to invite',safeZone:'Safe zone',tired:'Out of stamina',
@@ -2927,7 +2928,7 @@ function bhRespawn(){const R=BHR,b=bhS();P.hp=Math.round(maxHP()*.5);P.inv=2;cvs
  toast(t('bhFail'),'warn');if(b.sv&&R&&b.sv<=R.n){toast(t('bhToSave',{n:bhOrd(b.sv)}));bhEnter(b.sv);}else{toast(t('bhOut',{n:bhOrd(R?R.n:1)}));bhLeave();}hudDirty=true;}
 // the gate on the bridge off the south coast
 // the gate goes on from the first island not cleared yet (owner 2026-10-22: "take me back to the last island I reached")
-function bhAsk(){const b=bhS();const nx=Math.min(66,b.best+1),o=[...(b.best>0&&b.best<66?[{l:t('bhGoNx',{n:bhOrd(nx)}),f:()=>bhEnter(nx)}]:[]),{l:t('bhGo1'),f:()=>bhEnter(1)}];if(b.sv)o.push({l:t('bhGoSv',{n:bhOrd(b.sv)}),f:()=>bhEnter(b.sv)});if(b.pur)o.push({l:t('bhGoHall'),f:()=>bhHall()});o.push({l:t('bhNo')});
+function bhAsk(){const b=bhS();const nx=Math.min(66,b.best+1),o=[...(b.best>0&&b.best<66?[{l:t('bhGoNx',{n:bhOrd(nx)}),f:()=>bhEnter(nx)}]:[]),{l:t('bhGo1'),f:()=>bhEnter(1)}];if(b.sv)o.push({l:t('bhGoSv',{n:bhOrd(b.sv)}),f:()=>bhEnter(b.sv)});if(b.pur)o.push({l:t('bhGoHall'),f:()=>bhHall()});if(b.best>0||b.pur||b.cp>0)o.push({l:t('bhGoShop'),f:()=>bhShop()});o.push({l:t('bhNo')});
  dialog('bhSys',[bhSys('bhAsk1'),bhSys('bhAsk2'),t('bhMyRec',{f:b.best,c:b.cp.toLocaleString('en')})],null,o);}
 function bhUse(g){if(g.bh==='enter')return bhAsk();const R=BHR;if(!R)return;
  if(g.bh==='next')return bhNext();
@@ -3143,13 +3144,13 @@ function twPass(){const T=TOW&&TOW.test;if(!T||T.end)return;T.end=1;const k=T.k,
  mons.forEach(m=>{if(m.tw&&!m.dead){m.dead=true;m.dying=.5;vfx('death',m.x,m.y);}});
  if(k==='plain'){TOW.fast=T.t<60;toast(bhSys('twPlainOk'),'good');twGate({...bhPx(Math.min(B.x1-3,(P.x/TS|0)+3),P.y/TS|0),tw:'up'});}
  else if(k==='clean'){dialog('biban',[t('twClean3')]);twGate({...bhPx(B.x1-2,BHCY),tw:'up'});}
- else if(k==='abel'){const ex=T.sc>=30;dialog('abellio',[t(ex?'twAbEx':'twAbOk',{n:T.sc})],()=>{if(ex&&!w.done.abellio){w.done.abellio=1;giveTitle('paint');toast(bhSys('twPaint'),'good');}twAfter();});
+ else if(k==='abel'){const ex=T.sc>=30;dialog('abellio',[t(ex?'twAbEx':'twAbOk',{n:T.sc})],()=>{if(ex&&!w.done.abellio){w.done.abellio=1;giveTitle('paint');toast(bhSys('twPaint'),'good');}else if(ex)twDay('abellio');twAfter();});
   if(TOW.run&&!w.basic)twGate({...bhPx(B.x1-2,BHCY),tw:'up'});}
  else if(k==='maze')twGate({...bhPx(B.x0+34,TWMZ.y),tw:'up'});
  else if(k==='duel')twDuelEnd(true);
- else if(k==='machines'){if(!w.done.radwolf){w.done.radwolf=1;const it=mkItem('mnring',0);S.items.push(it);loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});}dialog('radwolf',[t('twMach2'),bhSys('twMach3')],twAfter);}
- else if(k==='beasts'){if(!w.done.jurene){w.done.jurene=1;giveTitle('beastf');}dialog('jurene',[t('twBeast2')],twAfter);}
- else if(k==='find'){if(!w.done.ken){w.done.ken=1;giveTitle('senses');}dialog('ken',[t('twKen2')],twAfter);}
+ else if(k==='machines'){if(!w.done.radwolf){w.done.radwolf=1;const it=mkItem('mnring',0);S.items.push(it);loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});}else twDay('radwolf');dialog('radwolf',[t('twMach2'),bhSys('twMach3')],twAfter);}
+ else if(k==='beasts'){if(!w.done.jurene){w.done.jurene=1;giveTitle('beastf');}else twDay('jurene');dialog('jurene',[t('twBeast2')],twAfter);}
+ else if(k==='find'){if(!w.done.ken){w.done.ken=1;giveTitle('senses');}else twDay('ken');dialog('ken',[t('twKen2')],twAfter);}
  TOW.test=null;save(true);}
 function twFail(why){const T=TOW&&TOW.test;if(!T||T.end)return;T.end=1;TOW.seal=0;TOW.st300=0;sbSig='';hudDirty=true;SFX.deny();mons=mons.filter(m=>!m.tw);TOW.ms=[];
  toast(bhSys(why||'twFail'),'warn');if(T.k==='duel'){twDuelEnd(false);return;}TOW.test=null;
@@ -3159,7 +3160,7 @@ function twFail(why){const T=TOW&&TOW.test;if(!T||T.end)return;T.end=1;TOW.seal=
 function twDuelEnd(full){const T=TOW.test,w=wisS(),s=Math.floor(T.t),first=!w.map,lines=[t('twDuelT',{n:s})];TOW.test=null;mons=mons.filter(m=>m.tw!==1);P.hp=Math.max(P.hp,Math.round(maxHP()*.3));
  if(s>=10&&w.pill<2){w.pill++;lines.push(bhSys('twPill'));}
  if(s>=30&&!w.mht){w.mht=1;lines.push(bhSys('twMht'),bhSys('twMht2'));}
- if(full&&!w.done.biban){w.done.biban=1;giveTitle('bibanF');lines.push(t('twDuelFull'));}
+ if(full&&!w.done.biban){w.done.biban=1;giveTitle('bibanF');lines.push(t('twDuelFull'));}else if(s>=30&&w.done.biban)twDay('biban');
  if(s>=10&&first){w.map=1;w.mis=1;lines.push(t('twMis1'),bhSys('twMis2'),bhSys('twMis3'),bhSys('twMap'));}else if(s<10)lines.push(t('twDuelLow'));
  dialog('biban',lines,()=>{if(TOW&&TOW.ret&&!w.basic)twLeave();else twAfter();});sbSig='';save(true);}
 function twAfter(){const w=wisS();if(TWM.every(k=>w.done[k])&&!w.b10)setTimeout(()=>toast(t('twAllDone'),'good'),600);}
@@ -3169,10 +3170,10 @@ function twHit(m,crit,o){const T=TOW&&TOW.test;if(!T||T.k!=='abel'||T.end)return
 const TWQ={betty:[['twBq1',['twBa1a','twBa1b','twBa1c']],['twBq2',['twBa2a','twBa2b','twBa2c']],['twBq3',['twBa3a','twBa3b','twBa3c']]],
  fronz:[['twFq1',['twFa1a','twFa1b','twFa1c']],['twFq2',['twFa2a','twFa2b','twFa2c']],['twFq3',['twFa3a','twFa3b','twFa3c']]]};
 function twQuiz(who,i=0,ok=0){const Q=TWQ[who];if(i>=Q.length){const w=wisS(),pass=ok===Q.length;
-  if(pass&&!w.done[who]){w.done[who]=1;giveTitle(who==='betty'?'duke':'oath');save(true);}dialog(who,[t(pass?(who==='betty'?'twBetOk':'twFroOk'):(who==='betty'?'twBetNo':'twFroNo'))],twAfter);return;}
+  if(pass&&!w.done[who]){w.done[who]=1;giveTitle(who==='betty'?'duke':'oath');save(true);}else if(pass)twDay(who);dialog(who,[t(pass?(who==='betty'?'twBetOk':'twFroOk'):(who==='betty'?'twBetNo':'twFroNo'))],twAfter);return;}
  const [q,a]=Q[i],ord=[0,1,2].sort(()=>rand()-.5);dialog(who,[t(q)],null,ord.map(j=>({l:t(a[j]),f:()=>twQuiz(who,i+1,ok+(j===0?1:0))})));}
 const TWRUNE=['twR1','twR2','twR3','twR4'];
-function twEcho(round=0){if(round>=3){const w=wisS();if(!w.done.jessica){w.done.jessica=1;giveTitle('echo');save(true);}dialog('jessica',[t('twEchoOk')],twAfter);return;}
+function twEcho(round=0){if(round>=3){const w=wisS();if(!w.done.jessica){w.done.jessica=1;giveTitle('echo');save(true);}else twDay('jessica');dialog('jessica',[t('twEchoOk')],twAfter);return;}
  const seq=Array.from({length:3+round},()=>rand()*4|0);dialog('jessica',[t('twEcho',{n:round+1}),'« '+seq.map(i=>t(TWRUNE[i])).join(' · ')+' »'],()=>twEchoAsk(seq,0,round));}
 function twEchoAsk(seq,i,round){if(i>=seq.length){toast(t('twEchoR',{n:round+1}),'good');SFX.notice();twEcho(round+1);return;}
  dialog('jessica',[t('twEchoQ',{n:i+1})],null,TWRUNE.map((r,j)=>({l:t(r),f:()=>{if(j===seq[i])twEchoAsk(seq,i+1,round);else dialog('jessica',[t('twEchoNo')],twAfter);}})));}
@@ -3183,12 +3184,47 @@ function twOpts(id){const w=wisS(),o=[];if(!TOW)return o;
    dialog('hayate',[t('twHa1'),bhSys('twMisOk'),bhSys('twBox'),t('twHa2')],()=>{twClean();twStairs(TOW.B);});save(true);}});
   o.push({l:t('twRadarO'),f:()=>dialog('hayate',[twRadar()],()=>shopD('hayate','twHaIdle'))});
   if(TWM.every(k=>w.done[k])&&!w.b10)o.push({l:t('twTenthO'),f:()=>{w.b10=1;giveTitle('tenth');dialog('hayate',[t('twHa3'),bhSys('twTenth1'),bhSys('twTenth2')]);save(true);}});
+  if(w.basic)twDuty('hayate',o);
   o.push({l:t('twLore'),f:()=>dialog('hayate',[t('twHaL1'),t('twHaL2'),t('twHaL3')],()=>shopD('hayate','twHaIdle'))});return o;}
  if(!w.basic)return o;const T=TOW.test;if(T)return o;
  const go={biban:()=>twTest('duel'),abellio:()=>twTest('abel',{need:30}),radwolf:()=>twTest('machines'),jurene:()=>{twEnter('f2','down');setTimeout(()=>{if(TOW&&TOW.f==='f2')twTest('beasts');},900);},
   ken:()=>twTest('find'),jessica:()=>twEcho(),betty:()=>twQuiz('betty'),fronz:()=>twQuiz('fronz')}[id];
- if(go&&(!w.done[id]||id==='biban'&&w.pill<2||id==='abellio'))o.push({l:t('twTestO'),st:t(w.done[id]?'twDoneT':'twNewT'),f:go});
- return o;}
+ const rp=w.done[id]&&(w.dly||{})[id]!==today();
+ if(go&&(!w.done[id]||id==='biban'&&w.pill<2||id==='abellio'||rp))o.push({l:t(w.done[id]?'twAgainO':'twTestO'),st:w.done[id]?(rp?t('twDayT',{n:TWDM}):t('twDoneT')):t('twNewT'),f:go});
+ twDuty(id,o);return o;}
+// the Tower's duty after its tests: Wisdom Marks (w.wm) from the daily tests and the week's watch, spent in Jessica's library
+// and Radwolf's workshop (w.dly {member: day}, w.wk {k week, n kills, need, lv, done}, w.lib {stat: tomes})
+const TWDM=3,TWWN=60,TWLIB=10,TWLC=8,TWSHOP=[['xpot',1,6],['hpot',10,2],['mpot',10,2],['dscale',1,5],['estone',5,4],['rscroll',3,3]];
+function twMarks(n){const w=wisS();w.wm=(w.wm||0)+n;toast(t('twWmGot',{n,m:w.wm}),'good');SFX.coin();hudDirty=true;}
+function twDay(id){const w=wisS(),d=today();w.dly=w.dly||{};if(w.dly[id]===d)return;w.dly[id]=d;twMarks(TWDM);gainXP(Math.round(xpNeed()*.02));save(true);}
+function twWeek(){const w=wisS(),k=lockWeek();if(!w.wk||w.wk.k!==k)w.wk={k,n:0,need:TWWN,lv:Math.max(1,S.lv-15),done:0,on:0};return w.wk;}
+// a kill anywhere counts for the week's watch when it is a real monster near your level
+function twKill(m){if(!S||!S.wis||!S.wis.wk||!m||m.tmp||m.tw||m.bh||m.arena||m.fake||m.spar)return;const W=S.wis.wk;if(W.k!==lockWeek()||!W.on||W.done||W.n>=W.need)return;
+ if((m.lv||1)<W.lv)return;W.n++;if(W.n===W.need)setTimeout(()=>toast(t('twWkFull'),'good'),300);else if(W.n%10===0)toast(t('twWkN',{n:W.n,m:W.need}));}
+function twDuty(id,o){const w=wisS();if(!w.basic)return;
+ if(id==='hayate'){const W=twWeek();
+  if(!W.on)o.push({l:t('twWkO'),st:t('twWkSt',{n:W.need,lv:W.lv}),f:()=>{W.on=1;dialog('hayate',[t('twWk1',{n:W.need,lv:W.lv}),t('twWk2')]);save(true);}});
+  else if(!W.done&&W.n>=W.need)o.push({l:t('twWkR'),f:()=>{W.done=1;twMarks(25);const g=200000;S.gold+=g;coinFx(P,g);gainXP(Math.round(xpNeed()*.25));dialog('hayate',[t('twWk3'),t('twWk4')]);save(true);}});
+  else if(!W.done)o.push({l:t('twWkO'),st:t('twWkN',{n:W.n,m:W.need}),f:()=>dialog('hayate',[t('twWk1',{n:W.need,lv:W.lv}),t('twWkN',{n:W.n,m:W.need})])});
+  else o.push({l:t('twWkO'),st:t('twDoneT'),f:()=>dialog('hayate',[t('twWkDone')])});}
+ if(id==='jessica')o.push({l:t('twLibO'),st:t('twWmSt',{m:w.wm||0}),f:()=>twLib()});
+ if(id==='radwolf')o.push({l:t('twShopO'),st:t('twWmSt',{m:w.wm||0}),f:()=>twShop()});}
+function twLib(){const w=wisS();w.lib=w.lib||{};const o=['str','sta','agi','int','dex'].map(k=>{const n=w.lib[k]||0;return {l:t('twLibT',{s:t(k),n,m:TWLIB,c:TWLC}),dis:n>=TWLIB,f:()=>{if(n>=TWLIB)return;if((w.wm||0)<TWLC){toast(t('twWmNo',{n:TWLC}),'warn');SFX.deny();return;}
+  w.wm-=TWLC;w.lib[k]=n+1;S.st[k]=(S.st[k]||0)+3;toast(t('twLibOk',{s:t(k)}),'good');SFX.quest();hudDirty=true;sbSig='';save(true);setTimeout(twLib,60);}};});
+ o.push({l:t('oLeave')});dialog('jessica',[t('twLib1'),t('twWmSt',{m:w.wm||0})],null,o);}
+function twShop(){const w=wisS(),o=TWSHOP.map(([k,n,c])=>({l:t('twShopT',{n,it:t(k),c}),f:()=>{if((w.wm||0)<c){toast(t('twWmNo',{n:c}),'warn');SFX.deny();return;}w.wm-=c;addMat(k,n);SFX.coin();hudDirty=true;save(true);setTimeout(twShop,60);}}));
+ o.push({l:t('oLeave')});dialog('radwolf',[t('twShop1'),t('twWmSt',{m:w.wm||0})],null,o);}
+Object.assign(STR.ar,{twAgainO:'اختبارك تاني (يومي)',twDayT:'+{n} علامة حكمة النهارده',twWmGot:'+{n} علامة حكمة (معاك {m})',twWmSt:'علامات الحكمة: {m}',twWmNo:'محتاج {n} علامة حكمة',
+ twWkO:'مراقبة الأسبوع',twWkSt:'{n} وحش لفل {lv}+',twWk1:'مهمة البرج إننا نراقب العالم. الأسبوع ده: اقتل {n} وحش لفل {lv} أو أعلى في أي حتة، وارجعلي.',twWk2:'البرج مش بيحارب عشان المجد. بيحارب عشان العالم يفضل موجود.',
+ twWkN:'المراقبة: {n}/{m}',twWkFull:'مراقبة الأسبوع خلصت! ارجع لهاياتي في البرج.',twWkR:'بلّغ عن مراقبة الأسبوع',twWk3:'شغل نضيف. العالم أهدى بسببك الأسبوع ده.',twWk4:'خد دول. وارجع الأسبوع الجاي.',twWkDone:'خلصت مراقبة الأسبوع ده. استنى الأسبوع الجاي.',
+ twLibO:'مكتبة البرج',twLib1:'المكتبة دي فيها اللي البرج اتعلمه في مئات السنين. كل كتاب بيتقرا مرة بس، بس اللي بتتعلمه بيفضل معاك.',twLibT:'كتاب {s}: +3 {s} للأبد ({n}/{m}) · {c} علامة',twLibOk:'قريت الكتاب: +3 {s}',
+ twShopO:'ورشة رادولف',twShop1:'الكيميا مش سحر. هي صبر. خد اللي محتاجه.',twShopT:'{n}× {it} · {c} علامة'});
+Object.assign(STR.en,{twAgainO:'Your test again (daily)',twDayT:'+{n} Wisdom Marks today',twWmGot:'+{n} Wisdom Marks ({m} now)',twWmSt:'Wisdom Marks: {m}',twWmNo:'You need {n} Wisdom Marks',
+ twWkO:"The week's watch",twWkSt:'{n} monsters Lv {lv}+',twWk1:"The Tower's mission is to watch the world. This week: slay {n} monsters of level {lv} or higher, anywhere, and come back to me.",twWk2:'The Tower does not fight for glory. It fights so the world goes on.',
+ twWkN:'Watch: {n}/{m}',twWkFull:"The week's watch is done! Report to Hayate in the Tower.",twWkR:"Report the week's watch",twWk3:'Clean work. The world is quieter this week because of you.',twWk4:'Take these. Come back next week.',twWkDone:"This week's watch is done. Wait for next week.",
+ twLibO:"The Tower's library",twLib1:'This library holds what the Tower learned over hundreds of years. Each tome is read once, but what you learn stays.',twLibT:'Tome of {s}: +3 {s} for good ({n}/{m}) · {c} marks',twLibOk:'You read the tome: +3 {s}',
+ twShopO:"Radwolf's workshop",twShop1:'Alchemy is not magic. It is patience. Take what you need.',twShopT:'{n}× {it} · {c} marks'});
+window.__GTWD={day:id=>twDay(id),kill:m=>twKill(m),wk:()=>twWeek(),opts:id=>twOpts(id),lib:()=>twLib(),shop:()=>twShop()}; // tests
 // Biban on the wall: the 9th's Test, the week's site, and the way in for the 10th Seat
 function bibanOpts(){const w=wisS(),o=[];if(TOW)return twOpts('biban');
  if(S.lv<400)return o;
@@ -6811,7 +6847,7 @@ function bossPhase(m,b,ph){shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='
 const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','lgloves','lboots','cring','ihelm','igloves','iboots','parmor','mring','iear','mear'];
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.55:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const id=DROPG[rand()*DROPG.length|0],r=rand()<(b.boss?.1:.04)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.dead=true;lpSrc(m);if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}pasKill(m);balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh&&!m.noLoot)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);pxpKill(m,b);eaKill(m);if(NET&&b.boss&&!m.bh&&!m.noLoot)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!m.noLoot&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh&&!m.noLoot){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else if(!m.noLoot)bossChest(m,b);{let xg=Math.round(b.xp*(m.xmul||1)*pxpKF(m)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(tlOn('veteran')?.05:0)+ttB('xp')+(tlOn('viscount')?.05:0)+(tlOn('pioneer')?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));xg=innXP(xg);gainXP(xg);jKill(m,xg);num(m.x,m.y-36,'+'+Math.round(xg*XPMUL).toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh&&!m.noLoot){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(tlOn('explorer')?.05:0)+ttB('gold')+(tlOn('dandy')?.05:0)+(tlOn('shero')?.05:0)+(tlOn('baron')?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.dead=true;lpSrc(m);if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}pasKill(m);balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh&&!m.noLoot)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);pxpKill(m,b);eaKill(m);if(NET&&b.boss&&!m.bh&&!m.noLoot)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!m.noLoot&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh&&!m.noLoot){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else if(!m.noLoot)bossChest(m,b);{let xg=Math.round(b.xp*(m.xmul||1)*pxpKF(m)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(tlOn('veteran')?.05:0)+ttB('xp')+(tlOn('viscount')?.05:0)+(tlOn('pioneer')?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));xg=innXP(xg);gainXP(xg);jKill(m,xg);twKill(m);num(m.x,m.y-36,'+'+Math.round(xg*XPMUL).toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh&&!m.noLoot){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(tlOn('explorer')?.05:0)+ttB('gold')+(tlOn('dandy')?.05:0)+(tlOn('shero')?.05:0)+(tlOn('baron')?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh&&!m.noLoot)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,RCKEY.includes(k)?1:p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p*(1+secB('drop')))addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill (a divine beast's breath is one)
  if(!m.bh&&!m.noLoot&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}if(!m.noLoot){rbBossDrop(m,b);cosDrop(m,b);}
@@ -8316,9 +8352,9 @@ function renderEquip(){const w=weapon(),a=armorIt(),wi=w&&WSH[w.id]?w:null;
  $('eqInfo').innerHTML=`<div class="eqstats"><span>${t('atk')}<b>${atkV()}</b></span><span>${t('def')}<b>${defV()}</b></span><span>${t('cls')}<b>${t('cl_'+S.cls)}</b></span></div><div class="note">${t('wk_'+weapKind())}</div>`;}
 // clicking a gear slot opens a picker of what in the bag fits it
 const SLN={w:'weapon',a:'armor',h:'helm',g:'gloves',b:'bootsS',k:'acc',n:'neckS',r:'braceS',e:'earS',u:'underS'};for(const k of RSL)SLN[k]='ringS';
-function openPick(sl){const box=$('eqPick'),cur=eqIt(sl),pw=i=>(i.atk?iAtk(i):0)+(i.def?iDef(i):0)+(i.r||0)*.01,list=S.items.filter(i=>(RSL.includes(sl)?i.slot==='k'&&RINGS.has(i.id):i.slot===sl)&&(sl!=='w'||WSH[i.id])).sort((a,b)=>(b===cur)-(a===cur)||pw(b)-pw(a));SFX.open();
+function openPick(sl){const box=$('eqPick'),cur=eqIt(sl),pw=i=>(i.atk?iAtk(i):0)+(i.def?iDef(i):0)+(i.r||0)*.01,list=S.items.filter(i=>(RSL.includes(sl)?i.slot==='k'&&RINGS.has(i.id):i.slot===sl)&&(sl!=='w'||WSH[i.id])).sort((a,b)=>(b===cur)-(a===cur)||(a!==cur&&isEq(a))-(b!==cur&&isEq(b))||pw(b)-pw(a));SFX.open();
  let h=`<div class="ptitle"><span class="head" style="font-size:calc(var(--u)*1.7)">${t('pickT',{s:t(SLN[sl])})}</span><button class="x" data-act="closePick">✕</button></div>`;
-h+='<div class="pkl">';h+=list.length?list.map(i=>`<button class="pk${i===cur?' eq':''}" data-pick="${i.uid}" data-tip="${esc(itemTip(i))}"><img src="${iIco(i)}"><span class="rt rt${i.r}">${esc(inm(i))}</span><small>${statShort(i)}${durOf(i)<=0?' · '+t('broken'):''}${i===cur?' · '+t('equipped'):''}</small></button>`).join(''):`<div class="note">${t('nothingFit')}</div>`;
+h+='<div class="pkl">';h+=list.length?list.map(i=>`<button class="pk${i===cur?' eq':isEq(i)?' eqo':''}" data-pick="${i.uid}" data-tip="${esc(itemTip(i))}"><img src="${iIco(i)}"><span class="rt rt${i.r}">${esc(inm(i))}</span><small>${statShort(i)}${durOf(i)<=0?' · '+t('broken'):''}${i===cur?' · '+t('equipped'):isEq(i)?' · '+t('eqElse'):''}</small></button>`).join(''):`<div class="note">${t('nothingFit')}</div>`;
  if(sl!=='w'&&cur)h+=`<button class="pk" data-pick="0">✕ ${t('unequip')}</button>`;
  h+='</div>';box.innerHTML=h;box.dataset.sl=sl;box.hidden=false;}
 function pSpr(){if(!S||!S.items)return 'me';const sg=!!(S.rsh&&S.rsh.g&&S.rsh.w),k='me~'+gearSig()+(sg?'g':'');if(!SH[k]){const c=gearFig(S.look||DEFLOOK);if(sg)c.sg=1;SH[k]=SA.chars.buildSheet(c);}return k;}
@@ -8417,9 +8453,10 @@ const JSTW=4,JSTM=[10,25,50,100],JR=mulberry32(0x51a7f1);
 let JST={n:0,t:-9},JBT=null,JBQ=[],JBC='',JBCT=-9,JGD=null,JGS=null,JGT=-9,JLOW=false;
 const jRe=(e,c)=>{if(!e)return;e.classList.remove(c);void e.offsetWidth;e.classList.add(c);};
 // one banner at a time: the next waits its turn (a quest's reward levelling you up shows both), at most three waiting
-// (a tag merges the same kind in a row: several levels at once show one banner, with the last level)
+// (a tag merges the same kind in a row: several levels at once show one banner, with the last level; a level while the
+// last one's banner still shows updates it and keeps it up)
 function jBan(a,b,k,tag){if(!S||S.__demo)return;const L=JBQ[JBQ.length-1],e=$('jban');
- if(tag&&L&&L[3]===tag){L[0]=a;L[1]=b||'';return;}if(tag&&!JBQ.length&&JBC===tag&&gTime-JBCT<.6&&e){e.querySelector('b').textContent=a;e.querySelector('small').textContent=b||'';return;}
+ if(tag&&L&&L[3]===tag){L[0]=a;L[1]=b||'';return;}if(tag&&!JBQ.length&&JBC===tag&&JBT&&e){e.querySelector('b').textContent=a;e.querySelector('small').textContent=b||'';if(gTime-JBCT>=.6){clearTimeout(JBT);JBT=setTimeout(jBanNext,2300);}return;}
  JBQ.push([a,b||'',k||'',tag||'']);if(JBQ.length>3)JBQ.splice(0,JBQ.length-3);if(!JBT)jBanNext();}
 function jBanNext(){const e=$('jban'),x=JBQ.shift();if(!e||!x){JBT=null;JBC='';if(e)e.className='';return;}e.querySelector('b').textContent=x[0];e.querySelector('small').textContent=x[1];JBC=x[3];JBCT=gTime;
  e.className='';void e.offsetWidth;e.className='on'+(x[2]?' '+x[2]:'');JBT=setTimeout(jBanNext,JBQ.length?1500:2300);}
@@ -11299,6 +11336,7 @@ function eaCross(toEast){if(P.ride)dismount();P.boat=0;P.fly=0;const A=EAS(),fir
 // the Behen store's portal scroll (ch 402: "after the elixirs and skill books, I used the remaining points to buy a portal scroll")
 Object.assign(STR.ar,{bhPurShop:'متجر المتحدّين جنبك: نقطك بتشتري لفيفة بوابة القارة الشرقية. وستيكس عنده لفيفة ليك ببلاش.',bhStEc:'🌀 عايز أروح القارة الشرقية',bhStEc1:'القارة اللي ورا البحر الأحمر؟ خد اللفيفة دي، دي هدية على اللي عملته في الأرخبيل. اقراها في أي حتة وهتنزل في غابة الشجر الأبيض.'});Object.assign(STR.en,{bhPurShop:"The challengers' store is beside you: your points buy the East Continent Portal Scroll. Sticks has one for you for free, too.",bhStEc:'🌀 I want to go to the East Continent',bhStEc1:'The continent beyond the Red Sea? Take this scroll, a gift for what you did in the archipelago. Read it anywhere and you will land in the White Tree Forest.'});
 function ecShopOpt(o){o.push({l:t('bhEcs',{p:fmtN(ECCP)}),f:()=>bhBuy(ECCP,()=>{addMat('ecscr',1);toast(t('bhEcsOk'),'good');})});}
+Object.assign(STR.ar,{bhGoShop:'عربية المتجر (متجر الأرخبيل)'});Object.assign(STR.en,{bhGoShop:'The carriage store (the Archipelago shop)'});
 // the people of the East
 // named conditions for QD[id].need (the quest tables stay data)
 var QNEED={eaCap:()=>EAS().ar==='cap',eaJail:()=>eaJail()};

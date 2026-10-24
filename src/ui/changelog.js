@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-24twduty', ver: '2.69', d: '2026-10-24',
+      ar: ["برج الحكمة بقى ليه شغل بعد الاختبارات، زي الرواية: البرج جمعية ليها مهمة. كل عضو تقدر تعيد اختباره مرة كل يوم وتاخد 3 علامات حكمة وشوية خبرة. وهاياتي بيدّيك «مراقبة الأسبوع»: اقتل 60 وحش لفلهم قريب من لفلك في أي حتة، وارجع بلّغ: 25 علامة و200 ألف دهب وربع لفل خبرة.",
+          "علامات الحكمة بتتصرف في مكتبة جيسيكا (كل كتاب +3 لإحصائية للأبد، لحد 10 كتب لكل واحدة) وفي ورشة رادولف (جرعات خبرة وصحة ومانا، وحرشفة تنين، وأحجار تقوية، ولفافات رجوع).",
+          "بعد ما تطهّر أرخبيل بيهين، ستيكس بيدّيك لفيفة بوابة القارة الشرقية ببلاش مرة واحدة، ومتجر الأرخبيل بيتفتح من الرصيف كمان. ودايرة السحر في راينهارت رجعت تشتغل بس للي عدّى البحر الأحمر قبل كده.",
+          "في قايمة اختيار الخاتم (وأي قطعة)، اللي لابسه في خانة تانية مكتوب جنبه «لابسه في خانة تانية» وباهت وفي آخر القايمة، عشان ماتختاروش تاني.",
+          "لو لفلت تاني ولافتة «لفل جديد» لسه ظاهرة، بتتحدّث بآخر لفل بدل ما تفضل على القديم."],
+      en: ["The Tower of Wisdom has work after its tests, as in the novel: the tower is a society with a mission. You can retake each member's test once a day for 3 Wisdom Marks and some XP, and Hayate gives you \"the week's watch\": slay 60 monsters near your level anywhere and report back for 25 marks, 200,000 gold and a quarter of a level.",
+          "Wisdom Marks are spent in Jessica's library (each tome +3 to a stat for good, up to 10 per stat) and Radwolf's workshop (XP, health and mana potions, dragon scales, enhancement stones and return scrolls).",
+          "Once you purify the Behen Archipelago, Sticks gives you an East Continent Portal Scroll for free, once, and the Archipelago's store opens from the pier too. Reinhardt's magic circle again only works for someone who has crossed the Red Sea before.",
+          "In the ring picker (and every gear picker), a piece you already wear in another slot says \"Worn in another slot\", is dimmed and sits at the bottom, so you don't pick it again.",
+          "Levelling again while the LEVEL UP banner still shows updates it to the newest level instead of keeping the old one."] },
     { v: '2026-10-24smithfix', ver: '2.68', d: '2026-10-24',
       ar: ["إبداع الحداد الأسطوري بقى بيحترم الخامات: قوة الخامات بتكبر بسرعة كل ما تعلى، فخامات الإند جيم (بيليال، التنين، أنفاس الوحوش الإلهية) بتطلع سلاح أقوى من أسلحة نفس المستوى اللي بتقع من الوحوش. الإبداعات اللي عملتها قبل كده قوتها بتتحسب من جديد أول ما تدخل اللعبة.",
           "كل سيف بقى ليه شكله في الإيد وفي الأيقونة، وكل إبداع شكله بيطلع من المخطط والخامات (الطول والعرض والانحناء ولون أقوى خامة)، واللاعيبة التانيين بيشوفوه.",

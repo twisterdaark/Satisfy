@@ -48,13 +48,13 @@ test('game feel: numbers, orbs, the streak, the banners, the low-health edge, th
     assert.ok(lv.now > lv.l);
     assert.equal(lv.ban.on, true);
     assert.equal(lv.ban.t, 'LEVEL UP!');
-    assert.match(lv.ban.s, new RegExp('Level ' + lv.now));
+    assert.match(lv.ban.s, new RegExp('Level ' + lv.now), JSON.stringify(lv));
     // quest complete: the banner, green
     const q = await g.eval(() => {
       const G = window.__G, QD = G.QD, id = Object.keys(QD).find((k) => { const q = QD[k]; return q.obj && q.obj.t === 'kill' && q.gold > 0 && !q.rep && !q.item && !q.cls && !q.title && !q.pts; });
       G.S.lv = Math.max(G.S.lv, 300); G.S.xp = 0; G.acceptQ(id); G.S.qs[id].c = QD[id].obj.n; /* no level-up from the reward (XP x1.2) */ G.completeQ(id); return window.__GJ.ban(); });
     // (after the level's banner: one at a time)
-    for (let i = 0; i < 20 && (await g.eval(() => window.__GJ.ban().t)) !== 'QUEST COMPLETE!'; i++) await g.step(20);
+    for (let i = 0; i < 30 && (await g.eval(() => window.__GJ.ban().t)) !== 'QUEST COMPLETE!'; i++) { await g.step(20); await g.page.waitForTimeout(150); }
     Object.assign(q, await g.eval(() => window.__GJ.ban()));
     assert.equal(q.t, 'QUEST COMPLETE!');
     assert.match(q.k, /\bq\b/);
