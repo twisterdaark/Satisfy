@@ -65,6 +65,22 @@ model. Real play is slower (travel, rests, deaths, repairs, bag trips) and faste
 it 2 to 4 h without lowering rewards that are under them, which the request rules out. At 500 the problem is the
 opposite: nothing normal stands above 470 (see v2.89, the Fourth Ridge).
 
+### v2.89: the Fourth Ridge (normal monsters for 480 to 510)
+
+GAME_ORIGINAL normal monsters on the Chaos Mountains' Fourth Ridge (where Belial and the fourth Sanju are): the Ridge
+Revenant (480-495, a tenth of every blow while its Soul Lantern burns), the Soul Lantern (485, 8,000 XP: not worth
+hunting for itself) and the Cinder Strider (495-510, burning ground). Same model:
+
+| Level | before (best normal) | after (best normal) |
+|---|---|---|
+| 480 | Immortal Ghost (470), 1.19 h solo, 1.02 h party | the same (1.05 h, 0.94 h) |
+| 490 | Immortal Ghost (470), 0.3% a kill | the same, 2.04 h solo, 1.81 h party (the revenant, shield aside, is close: about 2.3 h) |
+| 500 | Immortal Ghost (470), 7.2 h solo, 6.9 h party | Cinder Strider (500), 0.79% a kill, 3.31 h solo, 2.13 h party |
+| 510 | Immortal Ghost (470), 0.06% a kill, 8 h or more | Cinder Strider (510), 0.67% a kill, 4.14 h solo, 2.65 h party |
+
+The model counts basic attacks only and no shield time for the revenant (it is cheaper in time to put out the lantern
+first than to hit through it).
+
 ### Bosses: one kill, the first time and again
 
 | Player Lv | Boss (its Lv) | before: first / again | after: first / again |
