@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25xpcap', ver: '2.87', d: '2026-10-25',
+      ar: ["من لفل 100 لفوق، الـXP من وحش عادي واحد ليه سقف كنسبة من اللفل اللي انت فيه: 2% (100 لـ199)، 1.5% (200 لـ299)، 1.1% (300 لـ399)، 0.9% (400 لـ479)، 0.8% (480 وفوق). تحت 100 مفيش أي تغيير، والوحش اللي كان بيدي أقل من السقف بيدي زي ما هو بالظبط.",
+        "الوحش الإيليت (زي السلاح القديم وقادة الغزو) من لفل 100 لحد حوالي 3 أضعاف سقف الوحش العادي، يعني 2.5% عند 480. عند 480 كمان: البوس أول مرة تكسبه لحد 10% وبعد كده 1.5%، المهام اللي بتتكرر لحد 2% ومهام القصة والمهام السرية لحد 8%، ومراقبة البرج الأسبوعية لحد 12%. من 400 لـ480 السقف ده بيقرب واحدة واحدة (عند 400 لحد لفل كامل)، فمفيش حيطة فجأة عند 480.",
+        "نفس البوس لو اتحسب مرتين في 45 ثانية (فصلت ورجعت، أو عملت ريفريش) مبيديش XP تاني. وراحة الإن مش بتضيع على قتلة وصلت للسقف. التمرين مع أهل البلد بقى زي قتلة وحش عادي، ومن لفل 100 بيدي XP في أول 5 جولات بس في اليوم (الدهب في كل جولة).",
+        "لفلك والـXP اللي معاك وعدتك ونقطك زي ما هم، محدش لمسهم."],
+      en: ["From level 100 the XP of one normal monster has a cap, a share of the level you are on: 2% (100 to 199), 1.5% (200 to 299), 1.1% (300 to 399), 0.9% (400 to 479), 0.8% (480 and up). Below 100 nothing changes, and a monster that gave less than its cap gives exactly what it did.",
+        "An elite (the Ancient Weapon, an invasion's captains) from level 100 at most about three times a normal monster's cap: 2.5% at 480. Also at 480: a boss the first time you beat it at most 10% and after that 1.5%, repeatable quests at most 2%, story and secret quests at most 8%, the Tower's weekly watch 12%. From 400 to 480 these caps come in a little at a time (a whole level at most at 400), so there is no wall at 480.",
+        "The same boss counted twice within 45 seconds (a disconnect and back, or a reload) gives no XP the second time. The inn's rest is not spent on a kill that reached its cap. A bout with a townsperson is like a normal kill, and from level 100 only the first five bouts a day give XP (the gold comes every time).",
+        "Your level, the XP you have, your gear and your points are as they were."] },
     { v: '2026-10-25mobcap', ver: '2.86', d: '2026-10-25',
       ar: ["الوحوش والبوسات اللي كانت بتقف على 1 هيلث عندك وعند الباقي هيلثها أعلى (الشياطين، مدينة مصاصين الدماء، أغلب البوسات): ضربتك كانت بتوصل للاعب التاني اللي ماسك الوحوش لحد مليون بس في الضربة وفي ربع الثانية، فلما ضربتك تبقى بملايين كانت بتنزل الوحش عندك لـ1 وعنده بالكاد. دلوقتي ضربتك بتوصل كاملة (لحد هيلث الوحش كله)، فالهيلث بقى واحد عند الكل وتقدر تموّته."],
       en: ["Monsters and bosses that stayed at 1 health for you while the others saw more (the demons, the vampire city, most bosses): your hits reached the player who runs the monsters capped at a million a hit and a quarter second, so hits of several millions took the monster to 1 on your screen and barely touched it on theirs. Now your whole hit gets there (up to the monster's whole health), so everyone sees the same health and you can kill it."] },

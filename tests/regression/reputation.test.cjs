@@ -104,7 +104,7 @@ test('the Reputation Store: the golden carriage falls, Sweet Candy (+30% all sta
     await g.eval(() => { window.__G.S.mats.xpot = 1; window.__GRS.rsUse('xpot'); });
     assert.equal(await g.eval(() => window.__GRS.xpbOn()), true);
     const xp = await g.eval(() => { const S = window.__G.S; S.xp = 0; window.__G.gainXP(10); return S.xp; });
-    assert.equal(xp, 12);
+    assert.equal(xp, 14, 'x1.2 (every XP, v2.80) and x1.2 (the potion)');
     // the hairpin: a woman is delighted (double)
     const aff = await g.eval(() => { const G = window.__G, S = G.S; S.mats.hairpin = 2; const a0 = (S.aff || {}).stylist || 0; G.eqx.giveGift('stylist', 'hairpin'); return ((S.aff || {}).stylist || 0) - a0; });
     assert.equal(aff, 24);
