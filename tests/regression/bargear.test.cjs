@@ -14,7 +14,8 @@ test('main bar: gear on and off with the old piece back, a potion used, worn fra
     const r = await g.eval(() => { const G = window.__G, S = G.S, E = G.eqx;
       const a = E.mkItem('cring', 0), b = E.mkItem('mring', 1); S.items.push(a, b); E.equip(a);
       S.bar = [null, null, null, null, null]; S.bar[1] = 'g:' + b.uid; S.bar[2] = 'hpot'; S.hpot = 3;
-      // fill the nine ring slots so the new ring must replace the accessory one
+      // fill the nine ring slots so the new ring must replace the accessory one (all nine open from level 450)
+      S.lv = 450;
       for (let i = 0; i < 9; i++) { const x = E.mkItem('cring', 0); S.items.push(x); E.equip(x); }
       const kept = S.bar.slice(); G.useSlot(1); const on = [S.eq.k === b.uid, Object.values(S.eq).includes(a.uid)];
       G.useSlot(1); const off = [Object.values(S.eq).includes(b.uid), S.eq.k === a.uid];

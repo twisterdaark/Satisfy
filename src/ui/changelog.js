@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26qa', ver: '3.08', d: '2026-10-26',
+      ar: ["مهمة «إيد خفيفة» (اختبار الحرامي) كانت بتطلب منك تسرق من 5 وحوش ومش بتديك سكيل السرقة. دلوقتي أول ما تقبلها، الراجل المقنّع بيوريك إزاي: سكيل «سرقة» بيتحط على شريطك طول ما المهمة معاك، ولما تبقى حرامي بيفضل معاك. ولو كنت واخدها من قبل كده، هتلاقيه على الشريط أول ما تفتح اللعبة.",
+        "راجعنا كل المهمات اللي بتطلب حاجة مش معاك: اختبار الراهب (صلّي 8 مرات) مكانش فيه طريقة تصلّي بيها، دلوقتي بتصلّي جنب كاسوس. ومهمتين الصنعة (خوذة الحارس ورمح الصياد) بقوا يظهروا بعد ما خان يعلّمك الدرع الجلد والسيف، ومهمة سيف الميثريل بعد لفل حدادة 5 زي الوصفة بتاعته، عشان محدش يطلب منك حاجة لسه متعرفش تعملها.",
+        "الإشعارات اللي فوق في النص مبقتش بتغطي لوحة المهمات ولا لوحة الحالة: الإشعار الطويل بينزل على كذا سطر بدل ما يغطي مهمة كنت عايز تدوس عليها، ولو حرّكت اللوحة تحت الإشعارات الدوسة بتعدّي للوحة.",
+        "قايمة «حط» في خزنة الجيلد كانت بتعرض كل خامة مرتين، وسطر منهم مكانش بيعمل حاجة: دلوقتي كل خامة بتظهر مرة واحدة وبتدخل.",
+        "عند تاجر وينستون، السنانير والطُعم بقوا في سطر واحد «🎣 عدة الصيد»، فقايمته بقت أقصر على الموبايل، وصف ×1/×10/الكل بقى أول حاجة فوق القايمة فبيفضل باين."],
+      en: ["A Light Hand (the thief's trial) asked you to steal from 5 monsters without giving you the Steal skill. Now the hooded man shows you as you accept it: Steal is on your bar while the trial is yours, and you keep it once you are a thief. If you took it before, Steal is on your bar as soon as you load.",
+        "Every quest that asks for something you might not have was checked: the Monk's trial (pray eight times) had no way to pray; now you pray at Cassus's side. And the two craft-for quests (the guard's helmet, the hunter's spear) come once Khan has taught you leather armour and the sword, and the mithril sword quest at Smithing 5 like its recipe, so none asks for what you can't make yet.",
+        "The notices at the top centre no longer cover the quest list or the status panel: a long one wraps onto more lines instead of covering a quest you wanted to click, and if you moved a panel under them, a click goes through to the panel.",
+        "The guild vault's Put list showed each material twice, and one of the two lines did nothing: now each shows once and goes in.",
+        "At Winston's merchant the rods and bait are one line, 🎣 Fishing gear, so his menu is shorter on a phone, and the ×1/×10/Max row comes first, above the list, where you can see it."] },
     { v: '2026-10-25endurance', ver: '3.07', d: '2026-10-25',
       ar: ["طلب Suki: كل سلاح ليه «صمود» من لفل 0 لـ10. كل ما تصلّح السلاح صموده بيزيد على قد اللي رجع (نقطة لكل 25% متانة)، حتى بمهارات التصليح.",
         "عند أي حداد أو سندان فيه «قوّي»: بجوهرة و1,000 دهب السلاح بياخد 10 نقط صمود، والألماس وحجر الرعد 20.",

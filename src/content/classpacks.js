@@ -30,8 +30,8 @@
       ] },
     // Med (ch171): the temple of Boris; Reverse Origin and Origin Opportunity; a club and cloth
     { id: 'monk', n: { en: 'Monk', ar: 'راهب' }, root: 'priest', from: ['priest'], by: 'cassus', lv: 40, mst: ['melee', 2], col: '#e8c890',
-      obj: { t: 'pray', it: 'altar', n: 8 }, xp: 20000, gold: 800,
-      q: q(['The Temple of Boris', 'معبد بوريس'], ['A small god, Boris, has a ruined temple no one tends. Pray at eight altars and his way will open to you.', 'فيه إله صغير اسمه بوريس معبده خربان ومحدش بيخدمه. صلّي عند تمن مذابح وطريقه هيتفتحلك.'], ['The road of suffering is long.', 'طريق المعاناة طويل.'], ['Boris accepts you. You are a Monk: no heavy armour, no swordsmanship, only the body.', 'بوريس قبلك. انت دلوقتي راهب: لا دروع تقيلة ولا مبارزة، جسمك وبس.']),
+      obj: { t: 'pray', it: 'altar', n: 8 }, ot: 'o_prayM', xp: 20000, gold: 800,
+      q: q(['The Temple of Boris', 'معبد بوريس'], ['A small god, Boris, has a ruined temple no one tends. Pray eight times at my side (Pray, and stay still) and his way will open to you.', 'فيه إله صغير اسمه بوريس معبده خربان ومحدش بيخدمه. صلّي جنبي تمن مرات (صلّي واثبت مكانك) وطريقه هيتفتحلك.'], ['The road of suffering is long.', 'طريق المعاناة طويل.'], ['Boris accepts you. You are a Monk: no heavy armour, no swordsmanship, only the body.', 'بوريس قبلك. انت دلوقتي راهب: لا دروع تقيلة ولا مبارزة، جسمك وبس.']),
       skills: [
         sk('mkstrike', 'Club Strike', 'ضربة العصا', 'A heavy blow with the club.', 'ضربة تقيلة بالعصا.', 40, 'line', { r: 45, mul: 2, mp: 10, cd: 4 }),
         sk('mkrev', 'Reverse Origin', 'عكس الأصل', 'The body returns to its origin: health fully restored.', 'الجسم بيرجع لأصله: الصحة بترجع كاملة.', 40, 'heal', { pct: 1, mp: 40, cd: 120 }),

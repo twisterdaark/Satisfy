@@ -28,7 +28,8 @@ test('the East is its own land past the Red Sea, as big as the West or bigger; t
       o.towns = W.towns.filter((k) => /^zEa/.test(k));
       o.safe = o.towns.filter((k) => !Satisfy.net.zonePolicy(k).safe);
       // every zone, every monster and every person of the East has a name in both languages
-      const npcs = G.npcs.filter((n) => n.x >= 992 * 16).map((n) => n.id), mt = [...new Set(G.mons().filter((m) => m.x >= 992 * 16).map((m) => m.type))];
+      const UY = window.__GTRK.WMH * 16; // the East is on the surface: under the map, x 960-1400 is the West's band (Zebra's cellar, the glacier, the Sirens, the Beware Dogs mine)
+      const npcs = G.npcs.filter((n) => n.x >= 992 * 16 && n.y < UY).map((n) => n.id), mt = [...new Set(G.mons().filter((m) => m.x >= 992 * 16 && m.y < UY).map((m) => m.type))];
       o.missing = [];
       for (const k of [...ZONES, ...npcs, ...mt.filter((k) => !['sdrag', 'stiger', 'sbird', 'stort'].includes(k)).map((k) => k + 'N'), 'ecscr', 'ecscrD', 'tl_pgstar', 'tl_phxg', 'tl_btprot'])
         for (const L of ['en', 'ar']) if (typeof E.str(L, k) !== 'string') o.missing.push(L + ':' + k);

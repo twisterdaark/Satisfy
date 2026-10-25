@@ -61,6 +61,7 @@ test('Bow Saint, Tzudan and Mumud: the offer, the diary and the spellbook each l
     assert.equal(tz.cls, 'tzudan'); assert.ok(tz.five); assert.equal(tz.book, 0);
     assert.ok(tz.mul > 200, 'five steps in a row make the blow double and true: ' + tz.mul); assert.equal(tz.after, 100);
     // Mumud: a mage reads the spellbook, frees the lich, and becomes Mumud's Successor
+    for (let i = 0; i < 6 && await g.eval(() => window.__G.mode) === 'dialog'; i++) { await g.page.keyboard.press('Escape'); await g.step(2); }   // Tzudan's lines are still open
     await g.eval(() => { const S = window.__G.S; delete window.__G.WS; S.cls = 'mage'; S.lv = 200; S.mmq = 0; S.mats.mumbk = 1; window.__GLG.mmUse(); });
     const q = await g.eval(() => window.__G.S.mmq);
     assert.equal(q, 1);
