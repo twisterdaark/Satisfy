@@ -1,4 +1,4 @@
-# NPC life, first discoveries and the field's secret quest (v2.88, v2.90-v2.95; 2026-10-25)
+# NPC life, first discoveries and the field's secret quest (v2.88, v2.90-v2.96; 2026-10-25)
 
 Owner's request (2026-10-25, encyclopedia §93-§95; the player Suki: "some NPCs are boring and say little, add secret
 quests and a reward for meeting people and exploring"): depth for people who already exist, through the systems that
@@ -188,7 +188,31 @@ status window for their owners).
   their own line there.
 - **Skunk**: takes gifts; his topics, the grave, the order (the first three swords' ways), a year and four months.
 
+## v2.96: the Siren Kingdom
+
+- **Canon** (ch 137): "When the coastal waters of Brinichi experienced a low tide, a secret path would be revealed"; "Once
+  every four months, two full moons would overlap in one night"; "a glittering path ... The mysterious and calm purple path
+  continued into the depths of the sea"; "[You have played Laurelia's Flute. You can breathe underwater for 25 minutes.]";
+  "[You are the first discoverer of the Siren Kingdom!] It is a place passed down in legends."
+- **The night of the two moons** (`dmoonAt`, `dmoonNext`): day 5 of every 8 of the world's clock (`DAYL`), 20:00 to 4:00 (the
+  game's "every four months"); on the calendar (`calDm`).
+- **The way down**: Brinichi's shore (tile 578, 255, its label and landmark at the south coast); the gate (`sir`) shows on that
+  night only, with the shore's purple path drawn into the sea, and opens only with the flute. No tile on the surface changed.
+- **Laurelia's Flute** (`S.books.lflute`): from the fisherman's errand `sir1` (Lv 200, ten fish taken; 150,000 XP, 4,000
+  gold), given with the quest in its own save. Playing it at the gate gives 25 minutes of breath (`S.books.lfB`); warnings
+  at 5 and 1; then the sea puts you back on the shore (after a dialog or a scene, a window closed first). No Couple Recall
+  into the kingdom without breath. Below level 200 the fisherman says to come back at 200.
+- **The kingdom** (`zSiren`, under the map, x 1100-1170): the sea floor (sand, rocks), the lit path, fish, the Sirens' hall;
+  a blue light over it. `DUN` and its way back up (`hUp`).
+- **People** (ORIGINAL_SIDE_STORY): the Old Fisherman of Brinichi (the legend, its rumour for the shore's discovery; the
+  flute; the sea); the Siren Elder (the kingdom, the path) and a Siren Guard, who take no gifts. No title.
+- **First discoveries**: Brinichi Coast (after the legend), the Siren Kingdom (at the flute's first play).
+
 ## Tests
+
+`tests/regression/siren.test.cjs` (3, v2.96): the night of the two moons (every 8th world day, 20:00 to 4:00) and its
+calendar entry; the gate hidden off the night, shut without the flute, the flute from the fisherman's errand (ten fish
+taken), its 25 minutes, the first discovery once, the warning, then the shore; the legend's rumour and the shore's discovery.
 
 `tests/regression/swordgrave.test.cjs` (2, v2.95): the puzzle in order, a wrong turn setting all back, out of order
 nothing, solved once and the grave open; the gate sealed before, the glacier's cold, Pagma's Late Work once, Skunk's hints.
