@@ -6763,7 +6763,7 @@ function setNote(b){for(const k in SETS){const c=setTier(k);if(c>(b[k]||0)){toas
 let durRemT=0;
 let wearT=-1;const WEARR=[1,.85,.7,.55,.4];
 /* durability (owner 2026-10-22, slower): rarer gear wears slower; hits made in the same frame (AoE skills) roll once */
-function wear(i,p){p*=1-secB('wear');if(i)p*=WEARR[i.r|0]??.4;if(pasOn('stemp'))p*=skLv('stemp')>=10?.5:skLv('stemp')>=5?.7:.85;if(!i||rand()>=p)return;const d=durOf(i);if(d<=0)return;i.dur=d-1;
+function wear(i,p){p*=1-secB('wear');if(i&&i.slot==='w')p*=1-.05*edrLv(i);   /* v3.07: endurance */if(i)p*=WEARR[i.r|0]??.4;if(pasOn('stemp'))p*=skLv('stemp')>=10?.5:skLv('stemp')>=5?.7:.85;if(!i||rand()>=p)return;const d=durOf(i);if(d<=0)return;i.dur=d-1;if(i.dur===0&&i.slot==='w'&&edrLv(i)>=7&&rand()<.15*(edrLv(i)-6)){i.dur=25;toast(t('edrHeld',{it:inm(i)}),'good');SFX.level();hudDirty=true;return;}
  if(i.dur===0){announce(t('brokeT',{it:inm(i)}),1);SFX.deny();shake=.15;hudDirty=true;}
  else if(i.dur===40)toast(t('durNote',{it:inm(i),n:40}));else if(i.dur===20){toast(t('lowDur',{it:inm(i),n:20}),'warn');SFX.notice();}
  else if(i.dur===10||i.dur===5){announce(t('durCrit',{it:inm(i),n:i.dur}),1);SFX.deny();}
@@ -8338,7 +8338,7 @@ function rrDo(i,n,who){const p=i.wp&&i.wp[n];if(!p||p.h||!S.items.includes(i))re
  i.rr=(i.rr||0)+1;i.rrl=[...(i.rrl||[]),{t:wNow(),a,b,g:c.g,s:c.s}].slice(-5);   // the audit: what went, what came, when, for what
  SFX.forge&&SFX.forge();SFX.coin();toast(t('rrDone',{a,b}),'good');hudDirty=true;save(true);rrLines(i,who);}
 window.__GRR={list:()=>rrList(),kinds:(i,n)=>rrKinds(i,n),cost:i=>rrCost(i),menu:w=>rrMenu(w),lines:(i,w)=>rrLines(i,w),odds:(i,n,w)=>rrOdds(i,n,w),go:(i,n,w)=>rrDo(i,n,w),M:RRM}; // tests
-function svcOpts(who){const rc=repairCost(who);return [...(GEMSM.has(who)?[{l:t('oGem',{g:GEMC}),ic:'ruby',f:()=>gemMenu(who)}]:[]),{l:rc?t('oRepair',{g:rc}):t('oRepair0'),ic:'hammer',poor:S.gold<rc,f:()=>repairAll(who)},{l:t('oEnh'),ic:'mstone',f:()=>enhMenu(who)},...(S.items.some(i=>i.id==='tbow')?[{l:t('oTbow'),ic:'tbow',f:()=>tbowBreak(who)}]:[]),{l:t('oSalv'),ic:'hammer',f:()=>openSalv(who)},...(rrList().length?[{l:t('oRr'),ic:'hammer',f:()=>rrMenu(who)}]:[]),...(repOn()?[{l:t('oRepOrd',{n:(S.rord||[]).length}),ic:'hammer',f:()=>repD(who)}]:[])];}
+function svcOpts(who){const rc=repairCost(who);return [...(GEMSM.has(who)?[{l:t('oGem',{g:GEMC}),ic:'ruby',f:()=>gemMenu(who)}]:[]),{l:rc?t('oRepair',{g:rc}):t('oRepair0'),ic:'hammer',poor:S.gold<rc,f:()=>repairAll(who)},{l:t('oEnh'),ic:'mstone',f:()=>enhMenu(who)},{l:t('oStr'),ic:'diam',f:()=>edrMenu(who)},...(S.items.some(i=>i.id==='tbow')?[{l:t('oTbow'),ic:'tbow',f:()=>tbowBreak(who)}]:[]),{l:t('oSalv'),ic:'hammer',f:()=>openSalv(who)},...(rrList().length?[{l:t('oRr'),ic:'hammer',f:()=>rrMenu(who)}]:[]),...(repOn()?[{l:t('oRepOrd',{n:(S.rord||[]).length}),ic:'hammer',f:()=>repD(who)}]:[])];}
 /* repair orders for player smiths (SAT-ONLINE-096, plan U225). Online, at any smith's services, a player posts an order to
    mend a worn piece for a fee they choose (half to all of what the smith there asks); the fee leaves the bag and comes back
    if the order is taken off. A player smith (the Blacksmith class) sees every order there and mends one in a single write
@@ -8360,7 +8360,7 @@ function repAcct(){if(repFor===NET.uid)return;if(repDOff)repDOff();if(repPOff)re
 // nobody is waiting for it, and it goes
 function repTick(){if(!repOn())return;repAcct();if(repDOff||!(S.rord&&S.rord.length))return;const st=repSt(),uid=NET.uid;
  repDOff=st.watchDone(uid,v=>{for(const k in (v||{})){const e=v[k];if(!e||typeof e!=='object')continue;const o=(S.rord||[]).find(x=>x.oid===k);
-  if(!o){if(+e.t<Date.now()-30*864e5)st.took(uid,k).catch(()=>{});continue;}st.took(uid,k).catch(()=>{});S.rord=S.rord.filter(x=>x!==o);const i=S.items.find(x=>x.iid===e.iid);if(i)i.dur=100;
+  if(!o){if(+e.t<Date.now()-30*864e5)st.took(uid,k).catch(()=>{});continue;}st.took(uid,k).catch(()=>{});S.rord=S.rord.filter(x=>x!==o);const i=S.items.find(x=>x.iid===e.iid);if(i){edrRep(i,100-durOf(i));i.dur=100;}
   toast(t('repDoneMine',{n:Satisfy.chat.clean(e.sn,24)||'?',it:i?inm(i):o.it}),'good');SFX.coin&&SFX.coin();hudDirty=true;save(true);}});}
 function repPaidWatch(){const st=repSt();if(!st)return;repAcct();if(repPOff)return;repPOff=st.watchPaid(NET.uid,v=>{const o={};for(const k in (v||{})){const e=v[k];if(e&&+e.g>0)o[k]=+e.g|0;}REPP=o;});}
 function repD(who){const st=repSt();if(!st)return svcBack(who);repPaidWatch();const back=()=>repD(who);
@@ -8390,8 +8390,39 @@ function repCollect(who){const st=repSt();if(!st||repBusy)return;const ks=Object
 window.__GREP={get orders(){return REPO},get paid(){return REPP},get busy(){return repBusy},open:who=>repD(who),store:()=>repSt(),tick:()=>repTick()}; // tests
 const svcBack=who=>NPCT[who]&&NPCT[who].opts?shopD(who,'svcMore'):null;
 function repairCost(who){let g=0;for(const i of S.items){const d=durOf(i);if(d<100&&i.slot!=='x')g+=Math.ceil((100-d)*.4*(1+i.r));}return g?price(who,Math.max(1,Math.round(g*(1-secB('rep'))))):0;}
+/* ---------------- a weapon's Endurance (v3.07; the player Suki through the owner 2026-10-25: "Each weapon now has a new stat
+   attached to it called: Endurance. The more you repair a weapon the higher endurance it gains. Endurance reduces the rate at
+   which a weapon breaks down and you have to repair it again. To level endurance you can repair it to gain some endurance and
+   you can also with a new option called "strengthen" use gemstones to make the weapon have overall more endurance. Endurance
+   may also prevent your weapon from breaking if at high levels and restore 25% of it's durability.") ----------------
+   Each weapon keeps its endurance (i.edr, in durability given back: EDRU of it is a point) and so its level (EDRT, 0 to 10):
+   - every repair counts the durability it gives back (a smith's, the anvil's, a player smith's order, the repair skills), so
+     ten small repairs are worth one big one;
+   - Strengthen (at any anvil or smith): a gem and gold for 10 points, a diamond or a thunderstone for 20;
+   - each level makes it wear 5% slower (half at 10);
+   - from level 7, when it would break it may hold instead (15% a level past 6) and come back to 25 durability. */
+const EDRT=[0,5,15,30,50,80,120,170,230,300,380],EDRU=25,EDRMAX=380*25,EDRG=1000,EDRBIG=new Set(['diam','thund']);
+const edrP=i=>Math.floor(((i&&i.edr)||0)/EDRU),edrLv=i=>{const p=edrP(i);let l=0;while(l<10&&p>=EDRT[l+1])l++;return l;};
+// a repair of d durability: d toward the next point
+function edrRep(i,d){if(!i||i.slot!=='w'||!(d>0)||(i.edr||0)>=EDRMAX)return 0;const l0=edrLv(i);i.edr=Math.min(EDRMAX,Math.round((i.edr||0)+d));if(edrLv(i)>l0)setTimeout(()=>toast(t('edrUp',{it:inm(i),n:edrLv(i)}),'good'),500);return d;}
+const edrTip=i=>{if(i.slot!=='w'||!i.uid)return '';const l=edrLv(i),p=edrP(i);return `<br><small style="color:#c8b4ff">${t('edrL',{n:l})}${l<10?` <em>(${p}/${EDRT[l+1]})</em>`:''}${l?' · '+t('edrWear',{n:l*5}):''}${l>=7?' · '+t('edrSave',{n:(l-6)*15}):''}</small>`;};
+// Strengthen: pick a weapon (the one in your hand first), then a gem
+function edrMenu(who){const w=weapon(),L=[...(w&&w.uid&&w.slot==='w'&&S.items.includes(w)?[w]:[]),...S.items.filter(i=>i.slot==='w'&&i!==w)].filter(i=>i&&i.uid);if(!L.length)return dialog(who,['edrNoW'],()=>svcBack(who));
+ dialog(who,['edrHi'],null,[...L.slice(0,12).map(i=>({l:`${inm(i)} · ${t('edrL',{n:edrLv(i)})}`,ic:i.id,poor:edrLv(i)>=10,f:()=>edrPick(i,who)})),{l:t('oBack'),f:()=>svcBack(who)}]);}
+function edrPick(i,who){if(edrLv(i)>=10)return dialog(who,['edrMax'],()=>edrMenu(who));const own=GEMK.filter(g=>S.mats[g]>0),g0=price(who,EDRG);if(!own.length)return dialog(who,['edrNone'],()=>edrMenu(who));
+ dialog(who,[t('edrPickL',{it:inm(i),n:edrLv(i)})],null,[...own.map(g=>({l:t('oEdrGem',{g:t(g),n:S.mats[g],p:EDRBIG.has(g)?20:10,c:g0}),ic:g,poor:S.gold<g0,f:()=>edrDo(i,g,who)})),{l:t('oBack'),f:()=>edrMenu(who)}]);}
+function edrDo(i,g,who){if(!i||i.slot!=='w'||!S.items.includes(i))return edrMenu(who);const g0=price(who,EDRG);if(!(S.mats[g]>0))return edrPick(i,who);if(S.gold<g0){SFX.deny();return dialog(who,['arNo']);}if(edrLv(i)>=10)return edrPick(i,who);
+ S.gold-=g0;S.mats[g]--;const l0=edrLv(i);i.edr=Math.min(EDRMAX,(i.edr||0)+(EDRBIG.has(g)?20:10)*EDRU);SFX.level();if(P)vfx('forge',P.x,P.y-8);num(P.x,P.y-26,'-'+g0+'G','#f2c14e',false);
+ toast(t(edrLv(i)>l0?'edrUp':'edrGot',{it:inm(i),n:edrLv(i)}),'good');hudDirty=true;save(true);edrPick(i,who);}
+Object.assign(STR.ar,{edrL:'الصمود لفل {n}',edrWear:'بيتآكل أبطأ {n}%',edrSave:'{n}% فرصة يصمد ومايتكسرش',edrUp:'{it}: الصمود بقى لفل {n}',edrGot:'{it} بقى أقوى (الصمود لفل {n})',
+ edrHeld:'{it} صمد ومااتكسرش، ورجعله 25% 💪',oStr:'💎 قوّي السلاح (الصمود)',edrHi:'هنقوّي أنهي سلاح؟ كل جوهرة بتزوّد صموده.',edrPickL:'{it} · الصمود لفل {n}. هتقوّيه بأنهي جوهرة؟',
+ oEdrGem:'{g} (معاك {n}): +{p} صمود ({c} دهب)',edrNone:'معاكش جواهر تقوّي بيها.',edrMax:'السلاح ده صموده في آخر لفل.',fStrB:'💎 قوّي',edrNoW:'معاكش سلاح نقوّيه.'});
+Object.assign(STR.en,{edrL:'Endurance Lv {n}',edrWear:'wears {n}% slower',edrSave:'{n}% chance to hold',edrUp:'{it}: Endurance is now Lv {n}',edrGot:'{it} is stronger (Endurance Lv {n})',
+ edrHeld:'{it} held and did not break, and is back at 25% 💪',oStr:'💎 Strengthen a weapon (Endurance)',edrHi:'Which weapon shall we strengthen? Every gem adds to its endurance.',edrPickL:'{it} · Endurance Lv {n}. Which gem will you strengthen it with?',
+ oEdrGem:'{g} (you have {n}): +{p} endurance ({c} gold)',edrNone:'You have no gems to strengthen it with.',edrNoW:'You have no weapon to strengthen.',edrMax:'This weapon\'s endurance is at its highest level.',fStrB:'💎 Strengthen'});
+window.__GEDR={U:EDRU,pts:i=>edrP(i),T:EDRT,lv:i=>edrLv(i),rep:(i,d)=>edrRep(i,d),menu:w=>edrMenu(w||'khan'),pick:(i,w)=>edrPick(i,w||'khan'),do:(i,g,w)=>edrDo(i,g,w||'khan'),tip:i=>edrTip(i),wear:(i,p)=>wear(i,p),svc:w=>svcOpts(w||'khan').map(o=>o.l)}; // tests
 function repairAll(who){const g=repairCost(who);if(!g)return dialog(who,['arNoRep'],()=>svcBack(who));if(S.gold<g){SFX.deny();return dialog(who,['arNo']);}
- S.gold-=g;S.items.forEach(i=>{if(i.slot!=='x')i.dur=100;});SFX.coin();vfx('forge',P.x,P.y-8);num(P.x,P.y-26,'-'+g+'G','#f2c14e',false);toast(t('repDone'),'good');hudDirty=true;svcBack(who);}
+ S.gold-=g;S.items.forEach(i=>{if(i.slot!=='x'){const d=100-durOf(i);i.dur=100;edrRep(i,d);}});SFX.coin();vfx('forge',P.x,P.y-8);num(P.x,P.y-26,'-'+g+'G','#f2c14e',false);toast(t('repDone'),'good');hudDirty=true;svcBack(who);}
 // Gems (SAT-GEM-001): rare drops from monsters of level 60 and up (bosses drop one a third of the time). Any smith sets one
 // gem in a piece of gear for GEMC gold; setting a new one breaks the old. Gem stats ignore durability and enhancement.
 function gemDrop(m,b){if(!b||b.lv[0]<60||m.tmp&&!b.boss||rand()>=(b.boss?.3:.004))return;const g=rand()<.1?'diam':rand()<.12?'thund':GEMK[(rand()*4)|0];addMat(g,1);toast(t('gemDrop',{g:t(g)}),'good');SFX.rare();}
@@ -8503,8 +8534,8 @@ function rcLearn(quiet){if(!S)return;S.rcK=S.rcK||{};S.rcN=S.rcN||{};for(const r
 setInterval(()=>{if(S&&mode==='play')rcLearn();},2000);
 function rcHint(rc){const f=String(rc.unlock),h=[];let m;const re=/(?:qDone\('|S\.qs\.)(\w+)/g;while((m=re.exec(f)))if(QD[m[1]])h.push(t('rcHq',{q:qName(m[1])}));
  if((m=/S\.smith>=(\d+)/.exec(f)))h.push(t('rcHs',{n:m[1]}));if(/isSm\(\)/.test(f))h.push(t('rcHc'));if(/undOf/.test(f))h.push(t('rcHu'));if((m=/rbKn\('(\w+)'\)/.exec(f)))h.push(rbHint(m[1]));if(Object.keys(rc.need||{}).some(k=>/^br(phx|drg|tig|tor)$/.test(k)))h.push(t('rcHb'));return h.join(' · ');}
-function renderRecipes(){const el=$('rlist');el.innerHTML='';rcLearn();{const sv=document.createElement('div');sv.className='recipe';const rc=repairCost('anvil');
- sv.innerHTML=`<button data-act="fRepair">${rc?t('oRepair',{g:rc}):t('oRepair0')}</button><button data-act="fEnh">${t('oEnh')}</button><button data-act="fGem">${t('oGemA')}</button><button data-act="fSalv">${t('fSalvB')}</button>${canApr()?`<button data-act="fApr">${t('fAprB')}</button>`:''}${creOK()?`<button data-act="fCre">${t('fCreB',{a:creList().length,b:creMax()})}</button>`:''}`;el.appendChild(sv);}
+function renderRecipes(){const el=$('rlist');el.innerHTML='';rcLearn();{const sv=document.createElement('div');sv.className='recipe';sv.style.flexWrap='wrap';const rc=repairCost('anvil');
+ sv.innerHTML=`<button data-act="fRepair">${rc?t('oRepair',{g:rc}):t('oRepair0')}</button><button data-act="fEnh">${t('oEnh')}</button><button data-act="fStr">${t('fStrB')}</button><button data-act="fGem">${t('oGemA')}</button><button data-act="fSalv">${t('fSalvB')}</button>${canApr()?`<button data-act="fApr">${t('fAprB')}</button>`:''}${creOK()?`<button data-act="fCre">${t('fCreB',{a:creList().length,b:creMax()})}</button>`:''}`;el.appendChild(sv);}
  const tb=document.createElement('div');tb.className='stabs rtabs';tb.innerHTML=Object.keys(RCAT).map(k=>`<button data-rtab="${k}" class="${RTAB===k?'on':''}">${t('rc_'+k)}</button>`).join('');
  tb.onclick=e=>{const b=e.target.closest('[data-rtab]');if(!b)return;SFX.click();RTAB=b.dataset.rtab;tb.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));rcRows();};el.appendChild(tb);
  const q=document.createElement('input');q.id='rsearch';q.placeholder=t('rcSearch');q.value=RQ;q.oninput=()=>{RQ=q.value;rcRows();};q.onkeydown=e=>{if(e.code==='Escape'){e.stopPropagation();q.blur();}};el.appendChild(q);
@@ -8649,7 +8680,7 @@ function statShort(i){const a=[];if(i.atk)a.push(`${t('atk')} ${i.uid?iAtk(i):i.
  if(i.as)a.push(`${t('gAs')} +${Math.round(i.as*enF(i)*100)}%`);if(i.ms)a.push(`${t('gMs')} +${Math.round(i.ms*enF(i)*100)}%`);if(i.dm)a.push(`${t('gDm')} +${Math.round(i.dm*enF(i)*100)}%`);if(i.mpb)a.push(`${t('gMp')} +${Math.round(i.mpb*enF(i))}`);if(i.hpp)a.push(`${t('gHp')} +${Math.round(i.hpp*enF(i)*100)}%`);if(i.agi)a.push(`${t('agi')} +${i.agi}`);if(i.agp)a.push(`${t('agi')} ${Math.round(i.agp*100)}%`);if(i.cold)a.push(t('gCold',{n:Math.round(i.cold*100)}));if(i.dsh)a.push(t('gDsh',{n:Math.round(i.dsh*100)}));if(i.gem)a.push(t('gemIn',{g:t(i.gem)}));return a.join(' · ');}
 function setTip(i){const sk=Object.keys(SETS).find(k=>SETS[k].it.includes(setId(i.id)));if(!sk)return '';const n=setCount(sk),c=setTier(sk);
  return `<br><small style="color:#9fe39a">${t('set_'+sk)} (${n}/${SETS[sk].it.length})</small>`+Object.keys(SETS[sk].b).map(k=>`<br><small style="color:${+k===c?'#9fe39a':'#8a96a8'}">${t('setPc',{n:k})}: ${t('setD_'+sk+k)}</small>`).join('');}
-function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:''}${itLvr(i)?`<small style="color:${lvrOk(itLvr(i))?'#9fb4c8':'#ff8a7a'}">${t('needLvT',{n:itLvr(i)})}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+(i.sh?`<br><small style="color:#ffe7a8">${t('shGear')}</small>`:'')+hidTip(i)+wpTip(i)+setTip(i)+itemSkillTip(i);}
+function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:''}${itLvr(i)?`<small style="color:${lvrOk(itLvr(i))?'#9fb4c8':'#ff8a7a'}">${t('needLvT',{n:itLvr(i)})}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+(i.sh?`<br><small style="color:#ffe7a8">${t('shGear')}</small>`:'')+edrTip(i)+hidTip(i)+wpTip(i)+setTip(i)+itemSkillTip(i);}
 function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>${t('bread')}</b><br><small>${t('clickEat')}</small>`});['hpot','mpot'].forEach(k=>{if(S[k])a.push({k,n:S[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickDrink',{k:keyName(POT[k].key)})}</small>`});});
  LIFEM.forEach(k=>{if(S.mats[k]>0)a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${TKF.includes(SHK[k]||k)?tkTip(SHK[k]||k):t('lifeMD')}</small>`+(SHK[k]?`<br><small style="color:#ffe7a8">${t('shTip')}</small>`:'')});});
  if(S.mats.pstove>0)a.push({k:'pstove',n:1,hook:!!CKST,tip:`<b>${t('pstove')}</b><br>${t('pstoveD')}<br><small>${t(CKST?'ckOnT':'ckUseT')}</small>`});   // v3.04
@@ -9351,8 +9382,8 @@ const SKF={
  bzero:()=>{SFX.slam();flash();fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.6});vfx('frost',P.x,P.y-6);for(let i=0;i<30;i++)fx.push({x:P.x,y:P.y-6,vx:(rand()-.5)*200,vy:(rand()-.5)*200,t:.6,c:rand()<.5?'#9feaff':'#ffffff'});
   mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-P.x,m.y-P.y)<90){hitMon(m,3,{skill:1});m.stun=Math.max(m.stun||0,MT[m.type].boss?1:3);}});},
  smash:()=>{const v=fdir();P.acd=0;tryAttack(v[0],v[1],2.2);mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-(P.x+v[0]*12),monY(m)-(P.y-6+v[1]*12))<20)m.stun=Math.max(m.stun||0,1.2);});SFX.slam();shake=.2;},
- srep:()=>{const L=skLv('srep'),f=L>=10?50:10+L*3;let n=0;for(const i of eqAll()){const d=durOf(i);if(d<100){i.dur=Math.min(100,d+f);n++;}}vfx('forge',P.x,P.y-8);SFX.quest();toast(t(n?'lrepOn':'lrepNone',{n}),n?'good':'warn');hudDirty=true;},
- lrep:()=>{const L=skLv('lrep'),f=L>=10?100:25+L*5,its=L>=5?S.items.filter(i=>i.dur!==undefined):eqAll();let n=0;for(const i of its){const d=durOf(i);if(d<100){i.dur=Math.min(100,d+f);n++;}}vfx('forge',P.x,P.y-8);SFX.quest();toast(t(n?'lrepOn':'lrepNone',{n}),n?'good':'warn');hudDirty=true;},
+ srep:()=>{const L=skLv('srep'),f=L>=10?50:10+L*3;let n=0;for(const i of eqAll()){const d=durOf(i);if(d<100){i.dur=Math.min(100,d+f);edrRep(i,i.dur-d);n++;}}vfx('forge',P.x,P.y-8);SFX.quest();toast(t(n?'lrepOn':'lrepNone',{n}),n?'good':'warn');hudDirty=true;},
+ lrep:()=>{const L=skLv('lrep'),f=L>=10?100:25+L*5,its=L>=5?S.items.filter(i=>i.dur!==undefined):eqAll();let n=0;for(const i of its){const d=durOf(i);if(d<100){i.dur=Math.min(100,d+f);edrRep(i,i.dur-d);n++;}}vfx('forge',P.x,P.y-8);SFX.quest();toast(t(n?'lrepOn':'lrepNone',{n}),n?'good':'warn');hudDirty=true;},
  icomb:()=>{P.icb=30*skDur('icomb');vfx('forge',P.x,P.y-8);SFX.legendary();flash();toast(t('icombOn'),'good');},
  rage:()=>{P.rage=10;toast(t('rageOn'),'good');SFX.level();for(let i=0;i<20;i++)fx.push({x:P.x,y:P.y-8,vx:(rand()-.5)*90,vy:(rand()-.5)*90,t:.5,c:'#ff5a3a'});},
  roar:()=>{toast(t('roarOn'),'good');SFX.slam();shake=.25;fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-P.x,m.y-P.y)<80)m.stun=2.5;});},
@@ -10623,7 +10654,7 @@ function act(a){
  else if(a==='menuSize'){const v=[100,120,140],c=mzOf();MZ=v[(v.indexOf(c)+1)%v.length]||100;try{localStorage.setItem('satisfy_mz',String(MZ));}catch(e){}fit();mzUI();}
  else if(a==='gpVib'){gpVibSet(!GPV);SFX.click();}
  else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='guiReset')guiReset();else if(a==='quit'){save(true);fadeTo(toTitle);}
- else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='mgReheat'){reheat();}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='fCre'){creOpen();}else if(a==='fApr'){closeForge();openApr('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeGuildW')closeGuildW();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='photo'){act('resume');setTimeout(photoOn,0);}else if(a==='photoSave')photoShot();else if(a==='photoExit')photoOff();else if(a==='closeMB')closeMB();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qgFollow')qgFollow();else if(a==='qtoggle')toggleQuest();
+ else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fStr'){closeForge();edrMenu('anvil');}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='mgReheat'){reheat();}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='fCre'){creOpen();}else if(a==='fApr'){closeForge();openApr('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeGuildW')closeGuildW();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='photo'){act('resume');setTimeout(photoOn,0);}else if(a==='photoSave')photoShot();else if(a==='photoExit')photoOff();else if(a==='closeMB')closeMB();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qgFollow')qgFollow();else if(a==='qtoggle')toggleQuest();
  else if(a==='cardNext'){if(CARD)CARD('next');}else if(a==='cardSkip'){if(CARD)CARD('skip');}
  else if(a==='cRand'){CL.hair=rand()*LOOK.hair.length|0;CL.hc=rand()*LOOK.hc.length|0;CL.skin=rand()*LOOK.skin.length|0;CL.top=rand()*LOOK.top.length|0;CL.eye=rand()*EYEC.length|0;if(CL.g===1)CL.lip=rand()*LIPC.length|0;else CL.bst=rand()<.4?rand()*BST.length|0:0;CL.acc=rand()<.5?rand()*ACCK.length|0:0;CL.acol=rand()*ACCC.length|0;lookFit(CL);renderCreate();}
  else if(a==='cStart'){const n=$('cname').value.trim();if(n.length<2||n.length>12){$('cerr').textContent=t('cNameErr');SFX.deny();$('cname').focus();return;}if(Satisfy.chat.badName(n)){$('cerr').textContent=t('nameNo');SFX.deny();$('cname').focus();return;}CL.n=n;newGame(CL);}
@@ -15358,6 +15389,7 @@ function tradeItemIn(json){let o;try{o=JSON.parse(json);}catch(e){return null;}i
  const it={};for(const k in o){const v=o[k];if(k==='uid'||k==='iid'||k==='__proto__')continue;if((typeof v==='number'&&isFinite(v))||(typeof v==='string'&&v.length<=40)||typeof v==='boolean')it[k]=v;}
  it.id=o.id;it.slot=rc.slot;it.r=Math.max(0,Math.min(4,it.r|0));it.dur=Math.max(0,Math.min(100,typeof it.dur==='number'?it.dur:100));if(it.gem&&!(typeof GEMS!=='undefined'&&GEMS[it.gem]))delete it.gem;
  const h=o.hid;if(h&&typeof h==='object'&&HIDK.includes(h.k)&&typeof h.v==='number'&&isFinite(h.v))it.hid={k:h.k,v:Math.max(0,Math.min(h.k==='hpp'?.12:h.k==='as'?.09:63,h.v))}; // a known hidden function goes with the item (v1.03)
+ if('edr' in it)it.edr=Math.max(0,Math.min(EDRMAX,Math.round(it.edr)||0));   // v3.07
  if(Array.isArray(o.wp))it.wp=o.wp.filter(p=>p&&WPK[p.k]&&typeof p.v==='number'&&isFinite(p.v)).slice(0,4).map(p=>({k:p.k,v:Math.max(0,Math.min(WPK[p.k][1],p.v)),...(p.h?{h:1}:{})}));
  it.uid=++S.uid;return it;}
 function tradeName(json){try{const o=JSON.parse(json);return o&&o.mat?t(o.id)+(o.n>1?' ×'+(o.n|0):''):o&&o.id?inm(o):'?';}catch(e){return '?';}}
@@ -17290,6 +17322,8 @@ function ixRcD(x){const rc=x.rc,q=x.q,ch=[q.bs?t('ixBs'):t('ixAny'),q.sm?t('ixSm
 // a boss's chest (once a day: bChestGive), the stones it holds, the return scroll, the recipe books bosses drop (rbBossDrop)
 function ixXtra(){const st=['estone','pstone','bstone'].filter(ixHas),rb=(typeof RB!=='undefined'?RB:[]).filter(r=>r.boss&&ixHas(r.id));
  return `<h3>${t('ixXtra')}</h3><ul class="ixl"><li>${t('ixX1')}</li><li>${t('ixX2',{s:st.map(k=>esc(t(k))).join(t('ixAnd'))})}</li><li>${t('ixX3',{it:esc(t('rscroll'))})}</li>`+(rb.length?`<li>${t('ixX4')}<br><small>${rb.map(r=>esc(t(r.id))+' '+ixPc(r.boss)).join(' · ')}</small></li>`:'')+'</ul>';}
+Object.assign(STR.ar,{ixEdr:'كل سلاح ليه صمود من لفل 0 لـ10: كل تصليحة بتزوّده على قد اللي رجع، و«قوّي» عند أي سندان أو حداد بجوهرة و{g} دهب. كل لفل بيخليه يتآكل أبطأ 5%، ومن لفل 7 ساعات بيصمد ومايتكسرش ويرجعله 25%.'});
+Object.assign(STR.en,{ixEdr:'Every weapon has an Endurance from Lv 0 to 10: every repair adds to it by what it gives back, and so does Strengthen at any anvil or smith, with a gem and {g} gold. Each level makes it wear 5% slower, and from Lv 7 it sometimes holds instead of breaking and comes back to 25%.'});
 Object.assign(STR.ar,{ixShF:'✨ ساعات السمكة بتطلع بتلمع (والطُعم المنوّر بيخليها ضعف). اللمّاعة بتتباع بأربع أضعاف، وأي أكلة تدخل فيها بتطلع بتلمع: أكل وعلاج أكتر بالنص، والمفعول ضعف المدة.',
  ixShS:'✨ ساعات الخام أو الميثريل بيطلع بيلمع من العرق. لو دخل في قطعة على السندان، القطعة بتطلع بتلمع: +10% هجوم أو دفاع. والقطعة الأسطورية ساعات بتطلع بتلمع لوحدها.'});
 Object.assign(STR.en,{ixShF:'✨ Now and then a fish comes out shiny (glow bait doubles it). A shiny one sells for four times as much, and any dish it goes into comes out shiny: half again the food and the healing, its effect twice as long.',
@@ -17308,7 +17342,7 @@ Object.assign(STR.en,{ixTab_fish:'🎣 Fishing',ixFiG:'Fishing',ixFi1:'Stand by 
 function ixGuide(v){const L=k=>`<li>${k}</li>`,cb=QD.cb||{},cm=QD.cm||{};
  if(v==='smith')return `<h3>${t('ixSmG')}</h3><ul class="ixl">`+[t('ixSm1',{n:ixNpc(cb.by||'khan'),l:cb.lv||5,q:cb.pre&&ixHas('q_'+cb.pre)?esc(t('q_'+cb.pre)):'—'}),t('ixSm2'),t('ixSm3',{h:esc(t('hHam'))}),t('ixSm4'),t('ixSm5'),
   t('ixSm6',{m:esc(t('mstone')),e:esc(t('estone')),a:Math.round(ENHP[0]*100),b:Math.round(ENHP[ENHP.length-1]*100)}),
-  t('ixShS'),t('ixSm7',{n:ixNpc('khan'),l:CKH.slice(1).map((H,i)=>esc(t('ckHam'+(i+1)))+' (+'+ckPct(H.f)+'%)').join(t('ixAnd'))})].map(L).join('')+'</ul>';
+  t('ixEdr',{g:EDRG.toLocaleString('en')}),t('ixShS'),t('ixSm7',{n:ixNpc('khan'),l:CKH.slice(1).map((H,i)=>esc(t('ckHam'+(i+1)))+' (+'+ckPct(H.f)+'%)').join(t('ixAnd'))})].map(L).join('')+'</ul>';
  if(v==='gem')return `<h3>${t('ixGemG')}</h3><ul class="ixl">`+[t('ixGem1',{a:ixNpc('khan'),b:ixNpc('smithRh'),g:GEMC.toLocaleString('en')}),t('ixGem2'),t('ixGem3',{p:'0.4',b:30}),t('ixGem4',{d:esc(t('diam')),h:esc(t('thund'))})].map(L).join('')+'</ul>';
  if(v==='mag')return `<h3>${t('ixMagG')}</h3><ul class="ixl">`+[t('ixMag1',{s:esc(t('sapph'))}),t('ixMag2',{k:esc(keyName(actKey('mpot')))}),t('ixMag3'),t('ixMag4',{n:ixNpc(cm.by||'tm'),l:cm.lv||5}),t('ixMag5')].map(L).join('')+'</ul>'+
   `<p class="ixh">${t('ixEls')}</p><ul class="ixl">${Object.keys(BTHK).map(el=>`<li><b>${esc(t('mbEl_'+el))}</b> · <img class="ixi" src="${icon(BTHK[el])}"> ${esc(t(BTHK[el]))}<br><small>${(L=>L.filter(ixMet).map(k=>esc(mbName(k))).concat(L.some(k=>!ixMet(k))?[t('ixUnk',{n:L.filter(k=>!ixMet(k)).length})]:[]).join(' · '))(Object.keys(BEL).filter(k=>BEL[k]===el&&MT[k]))}</small></li>`).join('')}</ul>`;

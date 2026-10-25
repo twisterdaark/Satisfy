@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25endurance', ver: '3.07', d: '2026-10-25',
+      ar: ["طلب Suki: كل سلاح ليه «صمود» من لفل 0 لـ10. كل ما تصلّح السلاح صموده بيزيد على قد اللي رجع (نقطة لكل 25% متانة)، حتى بمهارات التصليح.",
+        "عند أي حداد أو سندان فيه «قوّي»: بجوهرة و1,000 دهب السلاح بياخد 10 نقط صمود، والألماس وحجر الرعد 20.",
+        "كل لفل صمود بيخلي السلاح يتآكل أبطأ 5% (النص في لفل 10). ومن لفل 7، لما السلاح يكون هيتكسر، ساعات بيصمد ويرجعله 25% (15% لكل لفل بعد 6). الصمود باين في وصف السلاح."],
+      en: ["Suki's request: every weapon has an Endurance from Lv 0 to 10. Every repair adds to it by what it gives back (a point for every 25 durability), the repair skills too.",
+        "Any smith or anvil has Strengthen: a gem and 1,000 gold give a weapon 10 points of endurance, a diamond or a thunderstone 20.",
+        "Each level of endurance makes a weapon wear 5% slower (half at Lv 10). From Lv 7, when it is about to break it sometimes holds and comes back to 25% (15% for every level past 6). A weapon's tooltip shows its endurance."] },
     { v: '2026-10-25cats', ver: '3.06', d: '2026-10-25',
       ar: ["طلب Suki: القطة اترسمت من جديد: قطة برتقاني مخططة ليها خط غامق حواليها، فبقت باينة على الزرع والحجر، والقطة الصغيرة بقت أكبر. والقطة اللي اتطورت سودا وبنفسجي بخط فاتح حواليها.",
         "تقدر تدلّعها: لو واقف والقطة جنبك ومفيش حاجة تانية تستعملها، دوس E. عينيها بتغمّض، وقلب بيطلع فوقها، وبتاخد شوية خبرة مرة كل 3 دقايق."],
