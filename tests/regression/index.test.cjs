@@ -25,6 +25,9 @@ test('N opens and closes it; the trainers, the classes with their skills, hidden
     const r = await g.eval(() => {
       const G = window.__G, X = window.__GIX, o = {};
       X.open(); o.ask = X.ask();
+      // the Monster Book is its monsters' page (owner 2026-10-25)
+      X.tab('mon'); o.mon = [document.getElementById('mbW').hidden, document.getElementById('ixG').hidden, document.getElementById('mbSum').textContent.length > 0];
+      X.tab('tr'); o.mon2 = [document.getElementById('mbW').hidden, document.getElementById('ixG').hidden];
       X.tab('tr'); o.tr = X.cards();
       const D = X.data(); o.trCls = D.T.flatMap((t) => t.cls.map((c) => c.k)); o.sys = D.T.some((t) => t.id === 'sys');
       X.tab('cls'); o.cls = X.cards();
@@ -37,6 +40,7 @@ test('N opens and closes it; the trainers, the classes with their skills, hidden
       return o;
     });
     assert.equal(r.ask, false);
+    assert.deepEqual(r.mon, [false, true, true], 'the monsters page'); assert.deepEqual(r.mon2, [true, false]);
     for (const id of ['khan', 'tw', 'tk', 'ta', 'tm', 'cassus', 'hood', 'nec', 'fisher', 'eliz']) assert.ok(r.tr.includes(id), 'trainer ' + id);
     assert.equal(r.sys, false, 'no hidden offer as a trainer'); assert.ok(r.trCls.length > 20 && r.trCls.every((k) => k === 'base' || k === 'adv'), 'trainers teach base and advanced classes only');
     for (const id of ['smith', 'warrior', 'mage', 'knight', 'bmage', 'lock_hid', 'lock_leg']) assert.ok(r.cls.includes(id), 'class card ' + id);

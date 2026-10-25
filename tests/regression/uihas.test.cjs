@@ -12,7 +12,7 @@ test.after(() => H.closeBrowser());
 
 const HAS = {
   uhD: '#dialog:not([hidden])', uhSy: '#sysm:not([hidden])', uhSt: '#statusW:not([hidden])', uhI: '#inv:not([hidden])',
-  uhE: '#equipW:not([hidden])', uhF: '#forge:not([hidden])', uhL: '#logW:not([hidden])', uhM: '#mbW:not([hidden])',
+  uhE: '#equipW:not([hidden])', uhF: '#forge:not([hidden])', uhL: '#logW:not([hidden])', uhM: '#ixW:not([hidden])',
   uhP: '.panel:not([hidden])', uhP1: '.panel:not([hidden]):not(#partyW):not(#chatW)', uhP2: '.panel:not([hidden]):not(#inv):not(#equipW):not(#statusW)',
 };
 
@@ -31,7 +31,7 @@ test('the open-window classes match what :has() said, for any mix of windows, at
       // open and close a random mix (the classes follow before the next frame: no step here)
       await g.eval((round) => {
         let a = (round + 1) * 2654435761 >>> 0; const rnd = () => { a = (a ^ (a << 13)) >>> 0; a = (a ^ (a >>> 17)) >>> 0; a = (a ^ (a << 5)) >>> 0; return a / 4294967296; };
-        const ui = document.getElementById('ui'), ids = ['dialog', 'sysm', 'statusW', 'inv', 'equipW', 'forge', 'logW', 'mbW', 'partyW', 'chatW'];
+        const ui = document.getElementById('ui'), ids = ['dialog', 'sysm', 'statusW', 'inv', 'equipW', 'forge', 'logW', 'ixW', 'partyW', 'chatW'];
         window.__uh0 = window.__uh0 || [...ui.getElementsByClassName('panel')].concat(ids.map((i) => document.getElementById(i))).filter(Boolean).map((e) => [e, e.hidden]);
         for (const [e] of window.__uh0) e.hidden = rnd() < 0.75;
       }, round);
