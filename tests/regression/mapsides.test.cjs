@@ -13,7 +13,8 @@ test.after(() => H.closeBrowser());
 const labels = (g) => g.eval(() => {
   const G = window.__G, MM = window.SatArt.minimap, out = [], l0 = MM.label;
   MM.label = function (g2, text, x, y, o) { out.push(String(text)); return l0.apply(this, arguments); };
-  try { G.MV.z = 1; G.mapDraw(); } finally { MM.label = l0; }
+  // the map is built in pieces since v2.83 (drawn without freezing) and shows a loading bar until they are in: finish them
+  try { G.mapBase(); G.MV.z = 1; G.mapDraw(); } finally { MM.label = l0; }
   return out;
 });
 
