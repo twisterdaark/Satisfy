@@ -563,6 +563,13 @@
         }
       }
     },
+    "arenaCard": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.isString() && newData.val().length <= 1500"
+      }
+    },
     "lockouts": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
@@ -1403,8 +1410,8 @@
           ".write": "auth != null && auth.uid === $uid && root.child('accountIds').child(auth.uid).exists() && (!data.exists() || data.child('t').val() < now - 15000)",
           ".validate": "$s.matches(/^[0-9]{1,9}$/) && newData.hasChildren(['s', 'w', 'k', 'n', 't']) && newData.child('s').val() === (now - now % 900000) / 900000 && now % 900000 < 660000 && (!data.exists() || newData.child('w').val() > data.child('w').val())",
           "s": { ".validate": "newData.isNumber()" },
-          "w": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() % 1 === 0 && newData.val() <= (newData.parent().child('k').val() === 'gfish' ? 66 : newData.parent().child('k').val() === 'sfish' ? 41 : 32)" },
-          "k": { ".validate": "newData.val() === 'fish' || newData.val() === 'sfish' || newData.val() === 'gfish'" },
+          "w": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() % 1 === 0 && newData.val() <= (newData.parent().child('k').val() === 'sfish' ? 41 : newData.parent().child('k').val() === 'gfish' ? 66 : newData.parent().child('k').val() === 'mackerel' ? 34 : newData.parent().child('k').val() === 'catfish' ? 48 : newData.parent().child('k').val() === 'ecarp' ? 39 : newData.parent().child('k').val() === 'rtrout' ? 51 : newData.parent().child('k').val() === 'icepike' ? 72 : newData.parent().child('k').val() === 'snapper' ? 60 : newData.parent().child('k').val() === 'bogeel' ? 56 : newData.parent().child('k').val() === 'jadekoi' ? 63 : 32)" },
+          "k": { ".validate": "newData.val() === 'fish' || newData.val() === 'sfish' || newData.val() === 'gfish' || newData.val() === 'mackerel' || newData.val() === 'catfish' || newData.val() === 'ecarp' || newData.val() === 'rtrout' || newData.val() === 'icepike' || newData.val() === 'snapper' || newData.val() === 'bogeel' || newData.val() === 'jadekoi'" },
           "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
           "t": { ".validate": "newData.val() === now" },
           "$other": { ".validate": false }
