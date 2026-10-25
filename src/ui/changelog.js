@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25gradnan', ver: '2.85', d: '2026-10-25',
+      ar: ["اتصلحت رسالة «An error was caught ... createLinearGradient» اللي كانت بتظهر في ساحة المسابقة الوطنية: حاجة كان رقمها بايظ كانت بتوقف رسم الفريم، دلوقتي بتترسم عادي واللعبة بتسجل مكانها عشان تتصلح من الأساس."],
+      en: ["Fixed the \"An error was caught ... createLinearGradient\" message on the National Competition grounds: one thing with a broken number stopped the frame's drawing. Now the frame is drawn anyway, and the game notes where it came from so the cause can be fixed."] },
     { v: '2026-10-24necro', ver: '2.84', d: '2026-10-24', hide: [3],
       ar: ["الصحة والمانا مبقتش بتبوظ وتبقى NaN (اللي كانت بتبان في السورد سينت): أي ضربة أو علاج حسابه بايظ بيتلغي بدل ما يبوّظ الصحة، وامتصاص الحياة بقى محمي.",
           "عربجي وينستون عنده \"وريني طريق مدرّب النيكرومانسر\": سهم المهمات بيوديك للراجل الشاحب عند معبد ياتان شمال البلد.",
