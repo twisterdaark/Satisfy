@@ -116,7 +116,7 @@ test('a region of its own: Reidan\'s recommended level and its invasion\'s stren
     const r = await g.eval(() => {
       const G = window.__G, O = window.__GOG, WS = window.__GWS, MT = G.isk.MT, out = {};
       out.lv = window.__GTLV.lv('zReid'); out.ref = WS.ref('zReid').lv;
-      out.way = G.mons().filter((m) => m.wsz && (Math.hypot(m.sx / 16 - 489, m.sy / 16 - 76) < 12 || Math.hypot(m.sx / 16 - 494, m.sy / 16 - 73) < 12)).length;
+      out.way = G.mons().filter((m) => ['gworm', 'dtoad', 'gwnest'].includes(m.type) && (Math.hypot(m.sx / 16 - 489, m.sy / 16 - 76) < 12 || Math.hypot(m.sx / 16 - 494, m.sy / 16 - 73) < 12)).length;
       // a worm dragged 300 px from home, someone 60 px from it, under the sand: home it goes, not fighting
       const w = G.mons().find((m) => m.type === 'gworm' && !m.dead); const sx = w.sx, sy = w.sy; w.x = sx + 300; w.y = sy; w.eng = 4; w.hp = w.max * .5;
       const phase = (lo, hi) => { for (let i = 0; i < 4000; i++) { w.sx = sx + i; w.x = w.sx + 300; const p = WS.ph(w); if (p >= lo && p < hi) return true; } return false; };

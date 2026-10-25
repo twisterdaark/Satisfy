@@ -1,4 +1,4 @@
-# NPC life, first discoveries and the field's secret quest (v2.88, v2.90-v2.93; 2026-10-25)
+# NPC life, first discoveries and the field's secret quest (v2.88, v2.90-v2.94; 2026-10-25)
 
 Owner's request (2026-10-25, encyclopedia §93-§95; the player Suki: "some NPCs are boring and say little, add secret
 quests and a reward for meeting people and exploring"): depth for people who already exist, through the systems that
@@ -27,6 +27,10 @@ affinity, tiers 30/60/90), `S.rep` (the town's ranks), `S.qs`, `S.books` (the di
 | Reidan's Western Sands: the land west of Reidan, turned to desert by the giant worms ten years ago ("this large territory suddenly became a desert"); "the desert city of Reidan"; the Hebend River through Reidan, the villages on its southern basin (in Rabbit's words) | ch 216, 217, 228, 360 | the place CANON (v2.93); its edge and size GAME_BALANCE |
 | Giant worms ("the giant worms ravaging the land were so strong that they couldn't be subjugated"); "a small nest of giant worms below the mountain"; "dozens of desert toads" chasing | ch 217, 230 | the creatures and the nest CANON; how they fight, their levels and drops GAME_ORIGINAL / GAME_BALANCE |
 | Rabbit's quests Restoring the West and The Nest below the Mountain | after ch 228 ("What if he destroyed the giant worms and restored the west?") | ORIGINAL_SIDE_STORY |
+| Earl Zebra's castle and territory on the way from Reidan to Titan ("Lauel told me to stop here and get the Slaughterer's Eye Patch"; "Earl Zebra's castle"; "This is a bad place.") | ch 243 | the place and the person CANON (v2.94); where it stands (south of Titan by the western road) GAME_BALANCE; every line ORIGINAL_SIDE_STORY |
+| The Slaughterer of Earl Zebra's underground ("a half human, half beast species he raised. But it was impossible to control"); the Slaughterer's Eye Patch ("just a black eye patch made of leather", Unique, "the skill 'Vital Spot Detection' will be generated") | ch 243-244 | CANON; its fight, level and the skill's +8% GAME_ORIGINAL / GAME_BALANCE |
+| The Black Arrows ("the assassination ability of those who served Earl Zebra's family for generations was unmatched"; "dozens of daggers") | ch 245-246 | CANON; how they fight, their levels GAME_ORIGINAL / GAME_BALANCE |
+| Lauel's errand The Slaughterer's Eye Patch | after ch 243 | ORIGINAL_SIDE_STORY |
 
 No person's line is taken from a translation of the novel. The landmarks quote a sentence or two of their chapters, as
 the game's landmarks always have (Kesan Canyon's, and since v2.93 the Western Sands' and the nest's).
@@ -101,6 +105,8 @@ Paid once per character, kept in `S.books['fd_'+id]`, never again after a reload
 | Giant Worm (v2.93) | 154-160 | Reidan's Western Sands | a 7 s round on the world clock: 4.2 s under the sand (unhurt, it goes after you as a ridge of sand), 0.84 s of the sand heaving in a ring round it, then up: its bite on whoever is in the ring (its reach as every screen has it), 1.96 s of fighting (bites, spat sand); too far from home (260 px, 520 when the nest called it) it goes back under the sand; never under a town |
 | Desert Toad (v2.93) | 148-154 | Reidan's Western Sands | hops; when one is fighting, every toad within 200 px not fighting yet comes too |
 | Giant Worm Nest (v2.93) | 160 | below the rocks at the sands' north-west | rooted, does not fight; someone within 140 px wakes every worm within 320 px (every 3 s); while a worm lives within 220 px it takes half; back after 5 minutes |
+| Black Arrow Assassin (v2.94) | 205-212 | Earl Zebra's court | comes from behind you (a blink behind), cuts twice, throws five daggers at once |
+| The Slaughterer (v2.94, boss) | 215 | Earl Zebra's underground | tears (three cuts), charges; from its second phase a ring and a leap; in its last, a roar and a frenzy of cuts |
 
 Online: what a screen shows is worked out from shared things (the world clock, where it spawned, its health); in a
 group the host's copy leads (`m.led`), and every blow goes out as the game's usual bite so a follower is hurt by the same
@@ -149,7 +155,26 @@ status window for their owners).
 - **First discoveries** (once, after his word): the sands (`lmWSand`, 0.6% of the level and 5 mana stones) and the nest
   (`lmWNest`, 0.6% and 8 ore). The two landmarks quote ch 217, 228 and 230.
 
+## v2.94: Earl Zebra's castle
+
+- **The place**: tiles x 856-884, y 148-163 in the Saharan Empire's farmland south of Titan, below the western road (a zone
+  of its own, `zZebra`, Lv 200+): walls with corner towers, a gate to the road, the keep (drawn as a lord's residence); the
+  keep's door goes down to **Earl Zebra's underground** (`zZebraU`, an under-map cellar with its cells). Painted after the
+  herbs are placed; no spawn's dice cover these tiles; the court's herbs go south of it. Its monsters (by kind, `APART`, with the
+  Western Sands') set no town's recommended level and no invasion's strength. The Black Arrows keep to the court's south,
+  away from the road.
+- **Earl Zebra** before his keep: no gifts; his lines by night and day, while Lauel's errand is yours and after it; his
+  topics, his pet and the Black Arrows.
+- **Lauel's errand**, The Slaughterer's Eye Patch (Lv 205): defeat the Slaughterer; 700,000 XP, 20,000 gold and the
+  **Slaughterer's Eye Patch** (an accessory, Unique, Lv 200 to wear: damage +3%, +4% at its Unique rating; Vital Spot Detection: critical
+  chance +8%), once. The quest arrow follows the Slaughterer (the keep's door from outside). No title.
+- **First discovery** (once, with the errand): the castle's landmark (ch 243's lines).
+
 ## Tests
+
+`tests/regression/zebra.test.cjs` (2, v2.94): the castle (zones, walls, gate, keep), the way down and up, the Black Arrows
+and the Slaughterer where they live, Earl Zebra; their moves; the eye patch from Lauel's errand once and its Vital Spot
+Detection; the first discovery; Earl Zebra's word.
 
 `tests/regression/wsands.test.cjs` (4, v2.93): the sands (tiles, the road, the zone), their creatures where they live and
 not in a town, the road's beasts moved off; the worm under the sand and up, its ring, the nest's guard and its waking, the
