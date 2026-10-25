@@ -1764,7 +1764,8 @@ const SETS={gd:{it:['gdneck','gdbrace'],b:{2:{def:100}}},ez:{it:['ezneck','ezbra
 const GEMS={ruby:{dm:.06},topaz:{as:.08},emer:{ms:.06},sapph:{mpb:30},diam:{dm:.03,as:.04,ms:.03},thund:{}},GEMK=Object.keys(GEMS),GEMC=500;
 const REID={x0:514,x1:561,y0:62,y1:102,mx:556,my:69},PEAK={x:628,y:17,rx:22,ry:11},YATAN={x0:452,x1:478,y0:8,y1:30},KESAN={x0:416,x1:470,y0:96,y1:118,mx:443},CAST={x0:522,x1:553,y0:30,y1:56},MULL={x:584,y:24,rx:11,ry:8},WSAND={x0:472,x1:512,y0:56,y1:95,nx:478,ny:64},
  ZEB={x0:856,x1:884,y0:148,y1:163,gx:870,keep:{x:867,y:155,h:5},pit:{x0:1000,x1:1032,y0:WMH+13,y1:WMH+24,cy:WMH+18}},   // ZEB: Earl Zebra's castle (v2.94) and its underground
- SWG={x0:520,x1:556,y0:-24,y1:-8,cx:538,cy:-16,camp:{x:514,y:-14},gl:{x0:1040,x1:1090,y0:WMH+13,y1:WMH+24,cy:WMH+18}};   // SWG: the Sword Grave (v2.95) among the Glacier Lakes, its glacier under the map
+ SWG={x0:520,x1:556,y0:-24,y1:-8,cx:538,cy:-16,camp:{x:514,y:-14},gl:{x0:1040,x1:1090,y0:WMH+13,y1:WMH+24,cy:WMH+18}},   // SWG: the Sword Grave (v2.95) among the Glacier Lakes, its glacier under the map
+ SIREN={gx:578,gy:255,in:{x0:1100,x1:1170,y0:WMH+13,y1:WMH+24,cy:WMH+18}};   // SIREN: Brinichi's shore (v2.96) and the Siren Kingdom under the map
 // the kinds of a region of its own (the Western Sands, Earl Zebra's castle): they set no town's recommended level and no invasion's strength
 var APART=new Set(['gworm','dtoad','gwnest','bkarrow','slaught']);   // WSAND: Reidan's Western Sands (v2.93), the nest below the rocks at its north-west
 const DSPAWN=[['cgob',236,284,WMH+4,WMH+19,12],['cgob',294,342,WMH+4,WMH+19,7],['gshaman',294,342,WMH+4,WMH+19,6],['gshaman',352,384,WMH+4,WMH+19,4],['kobold',414,462,WMH+4,WMH+19,12],['kobold',472,500,WMH+4,WMH+19,6],['golem',530,572,WMH+4,WMH+19,8],['cgolem',550,572,WMH+4,WMH+19,3],['cgolem',588,630,WMH+4,WMH+19,6],['skel',646,690,WMH+4,WMH+19,8],['wraith',662,690,WMH+4,WMH+19,5]],DBOSS=[['gwar',394,WMH+11],['kking',512,WMH+11],['bknight',682,WMH+11]],
@@ -1954,7 +1955,7 @@ function bChestGive(g){g.open=1;const b=MT[g.b];(S.bch||(S.bch={}))[g.b]=today()
 function bossChest(m,b){if(!b.boss||m.tmp||m.arena||m.evt||m.sg||m.bh||m.spar||m.fake||m.mob||ARN||TWR||bchUsed(m.type))return;const til=gTime+120;
  DGATES.push({x:m.x-14,y:m.y+4,to:{x:m.x,y:m.y},hint:'hBChest',tmp:1,chest:1,til,b:m.type,lv:0});setTimeout(()=>toast(t('bcHas',{b:itN(m.type)}),'good'),800);}
 Object.assign(STR.ar,{"bcToday": "صندوق {b} اتفتح النهارده. بيرجع بكرة، والدروب العادي بينزل كل مرة.", "bcHas": "{b} ساب صندوقه اليومي! افتحه قبل ما يختفي.", "mbChest": "صندوق الزعيم (مرة في اليوم): قطعة مضمونة بتقييم أعلى، وخاماته كاملة، وأحجار تقوية وأحجار نادرة", "mbNorm": "الدروب العادي (كل مرة):"});Object.assign(STR.en,{"bcToday": "You opened {b}'s chest today. It comes back tomorrow; the normal drops fall every time.", "bcHas": "{b} left its daily chest! Open it before it fades.", "mbChest": "Boss chest (once a day): a guaranteed item of a higher rating, all its materials, enhancement and rare stones", "mbNorm": "Normal drops (every kill):"});
-function useGate(g){if(g.swg&&!swgDone()){toast(t('swgSealed'),'warn');return;}if(g.bh)return bhUse(g);if(g.tw)return twUse(g);if(g.chest)return openBChest(g);if(roomFade)return;if(g.vc&&!vcGate(g))return;if(P.ride)dismount();if(g.lv&&!g.ant&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
+function useGate(g){if(g.swg&&!swgDone()){toast(t('swgSealed'),'warn');return;}if(g.sir&&(roomFade||!sirGate(g)))return;if(g.bh)return bhUse(g);if(g.tw)return twUse(g);if(g.chest)return openBChest(g);if(roomFade)return;if(g.vc&&!vcGate(g))return;if(P.ride)dismount();if(g.lv&&!g.ant&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
 const ROOMS=[],PROPS=[];
 function genRoom(b,bi,kind,rx,ry,z){const R={id:'r'+bi,bi,b,kind,rx,ry,z,dx:b.x*TS+b.w*8,dy:(b.y+b.h)*TS+8};ROOMS.push(R);
   for(let y=ry;y<ry+8;y++)for(let x=rx;x<rx+12;x++)setT(x,y,(y<ry+2||y===ry+7||x===rx||x===rx+11)?IW:FW);
@@ -2568,6 +2569,18 @@ let herbSpot=null;
  DGATES.push({...px(SWG.cx,SWG.cy+2),to:px(G.x0+4,G.cy),hint:'hSwgDown',lv:300,swg:1,hide:1});
  DGATES.push({...px(G.x0+1,G.cy),to:px(SWG.cx,SWG.cy+4),hint:'hUp'});
  CAMPS.push({x:(SWG.camp.x-2)*TS+8,y:(SWG.camp.y+1)*TS+12});})();
+// The Siren Kingdom (v2.96; ch 137: "When the coastal waters of Brinichi experienced a low tide, a secret path would be
+// revealed"; "Once every four months, two full moons would overlap in one night"; "The bottom of the sea showed a glittering
+// path ... The mysterious and calm purple path continued into the depths of the sea"; "she swam along the lit up path and
+// reached the secret kingdom at the end"): the way from Brinichi's shore is a gate that shows only on the night of the two
+// moons; the kingdom is under the map, a sea floor with its lit path to the Sirens' hall.
+(function genSiren(){const K=SIREN.in,r=mulberry32(2610);
+ for(let y=K.y0;y<=K.y1;y++)for(let x=K.x0;x<=K.x1;x++){const e=Math.min(x-K.x0,K.x1-x,y-K.y0,K.y1-y),lane=Math.abs(y-K.cy)<=1;setT(x,y,e<1?CW:(!lane&&e>1&&r()<.06?RK:DR));}
+ for(let y=K.cy-3;y<=K.cy+3;y++)for(let x=K.x1-7;x<=K.x1-2;x++)if(Math.abs(y-K.cy)>1)setT(x,y,BL);   // the Sirens' hall
+ DUN.push({k:'zSiren',x0:K.x0,x1:K.x1,y0:K.y0,y1:K.y1});
+ const px=(x,y)=>({x:x*TS+8,y:y*TS+10});
+ DGATES.push({...px(SIREN.gx,SIREN.gy),to:px(K.x0+4,K.cy),hint:'hSiren',lv:200,sir:1,hide:1});
+ DGATES.push({...px(K.x0+1,K.cy),to:px(SIREN.gx,SIREN.gy-2),hint:'hUp'});})();
 // Haalrune Swamp: a murky wash over the ground, with reeds
 {const r=mulberry32(3131);for(const [cx,cy,rx,ry] of SWAMP){for(const k of [1.08,.96,.84])blob(gg,cx*TS+8,cy*TS+8,rx*TS*k,ry*TS*k,'rgba(46,66,38,.2)');for(let i=0;i<rx*ry*2;i++){const a=r()*6.28,d=Math.sqrt(r()),x=(cx+Math.cos(a)*rx*d)*TS,y=(cy+Math.sin(a)*ry*d)*TS;if(at(x/TS|0,y/TS|0)===WA)continue;R(gg,x,y-5,1,6,'#6a8a3a');R(gg,x+2,y-3,1,4,'#4e6e2c');R(gg,x,y-6,1,1,'#8a6a3a');}}}
 // the poison swamps of the Chaos Mountains: a sickly violet wash, dead reeds
@@ -2838,7 +2851,7 @@ function marPropose(who,r){const n=Satisfy.chat.clean(r.handle,24)||'?';if(S.lv<
  if(S.gold<MARG){toast(t('noGold'),'warn');SFX.deny();return;}S.gold-=MARG;MARP={u:r.uid,n,until:performance.now()+60000,g:MARG};hudDirty=true;save(true);dialog(who,[t('marWait',{n})]);}
 function marDivorce(who){if(!marOn())return;if(S.gold<MARD){toast(t('noGold'),'warn');SFX.deny();return;}const n=S.mar.n;S.gold-=MARD;S.marD={u:S.mar.u};delete S.mar;MARN=false;hudDirty=true;save(true);dialog(who,[t('marDivL',{n})]);}
 function marGo(){if(!marOn())return;const r=marSpouse();if(!r){toast(t('marFar'),'warn');return;}const left=(S.marCd||0)-Date.now();if(left>0){toast(t('marCdT',{n:Math.ceil(left/60000)}),'warn');return;}
- if(r.room||inBh(r.x,r.y)||inTw(r.x,r.y)||inBh(P.x,P.y)||inTw(P.x,P.y)||roomAt(P.x,P.y)){toast(t('marNoGo'),'warn');SFX.deny();return;}
+ if(r.room||inBh(r.x,r.y)||inTw(r.x,r.y)||inBh(P.x,P.y)||inTw(P.x,P.y)||roomAt(P.x,P.y)||zoneAt(r.x,r.y)==='zSiren'&&!(((S.books||{}).lfB||0)>Date.now())){toast(t('marNoGo'),'warn');SFX.deny();return;}
  P.x=r.x;P.y=r.y+6;S.marCd=Date.now()+MARCD;save(true);SFX.legendary();asMe(()=>vfx('spawn',P.x,P.y,{color:'#ff8ab8'}));if(mode==='status')closeStatus&&closeStatus();}
 Object.assign(STR.ar,{oLowW:"(وصحتك تحت {p}%. الوحش ضعيف عليك، فأي وحش قريب من لفلك بيتحسب)"});Object.assign(STR.en,{oLowW:"(below {p}% health; it is too weak for you, so any monster near your level counts)"});
 Object.assign(STR.ar,{qRecB:"الكويست المقترح لمستواك",qRecT:"المقترح: {q} (لفل {lv}) من {w}. السهم هيوديك.",qRecNo:"مفيش كويستات على قد لفلك دلوقتي. جرّب لوحة المهام في البلد."});Object.assign(STR.en,{qRecB:"Recommended quest for your level",qRecT:"Recommended: {q} (Lv {lv}) from {w}. The arrow will lead you.",qRecNo:"No quests for your level right now. Try the town's quest board."});
@@ -6303,7 +6316,8 @@ NPCS.push({id:'merchant',spr:'merchant',...rmP(7,5.5,2.5),reach:16},{id:'armorer
  {id:'steim',spr:'steim',...rmP(6,6,1.5),dir:2},{id:'irene',spr:'irene',...rmP(6,8.5,4.6),dir:2,hidden:1},   // Winston Castle (ch 116-117); Irene home after her rescue
  {id:'admRabbit',spr:'admRabbit',tx:548.5,ty:84.4,ph:1,dir:3},
  {id:'zebra',spr:'zebra',tx:866.5,ty:161.4,ph:1,dir:2},
- {id:'skunk',spr:'skunk',tx:515.5,ty:-13.6,ph:1,dir:3});   // Skunk of Skunk's Expedition Group at the Sword Grave (ch 931, 937)   // Earl Zebra before his keep (ch 243-245)   // Reidan's administrator (ch 221-228, 856)   // Layla works in her salon now (owner 2026-10-23)
+ {id:'skunk',spr:'skunk',tx:515.5,ty:-13.6,ph:1,dir:3},
+ {id:'brfish',spr:'brfish',tx:570.5,ty:251.4,ph:1,dir:2},{id:'sirenE',spr:'sirenE',tx:1165.5,ty:289.4,ph:1,dir:3},{id:'sirenG',spr:'sirenG',tx:1158.5,ty:292.4,ph:1,dir:3});   // Brinichi's fisherman; the Sirens (v2.96)   // Skunk of Skunk's Expedition Group at the Sword Grave (ch 931, 937)   // Earl Zebra before his keep (ch 243-245)   // Reidan's administrator (ch 221-228, 856)   // Layla works in her salon now (owner 2026-10-23)
 let camXf=0,camYf=0,camSnap=true,S,P,mons=[],npcs=[],fx=[],nums=[],smoke=[],proj=[],shake=0,mode='lang',hudDirty=true,gTime=0,camX=0,camY=0,MID=0;
 const RC=[
  {id:'jaffa',slot:'x',need:{wood:2,ore:1},unlock:()=>!!S.qs.sm3,diff:.8,strikes:4},
@@ -7138,7 +7152,7 @@ Object.assign(STR.en,{graveT2:'"At a small hill north of Winston. There were aro
    system-window glint, not a world object. First read raises Insight by 1 (like the books on shelves).
    [key, x, y, abs]: abs=0 means original-map columns (wX), abs=1 means world tiles. Moved to the nearest open tile. */
 const LMD=[['lmNEnd',179,10,1],['lmOut',40,64,0],['lmMine',21,9,0],['lmGrey',45,25,0],['lmSnow',160,18,0],['lmOrc',112,24,0],
- ['lmCanyon',131,104,0],['lmLoran',127,113,0],['lmKesan',443,98,1],['lmWSand',496,72,1],['lmZebra',864,145,1],['lmSwordG',518,-20,1],['lmWNest',475,66,1],['lmYatan',465,28,1],
+ ['lmCanyon',131,104,0],['lmLoran',127,113,0],['lmKesan',443,98,1],['lmWSand',496,72,1],['lmZebra',864,145,1],['lmSwordG',518,-20,1],['lmBrin',566,250,1],['lmWNest',475,66,1],['lmYatan',465,28,1],
  ['lmChaos',303,-70,1],['lmSanju',180,-73,1],['lmRidge4',265,-149,1],['lmPedro',122,184,1],['lmGauss',396,184,1],['lmCork',640,246,1],
  ['lmSuaz',742,74,1],['lmRolling',788,79,1],['lmDran',DRAN(118)-4,118,1],['lmTatur',820,30,1],['lmTitan',884,86,1],['lmTemple',875,72,1],['lmBMine',931,54,1],['lmTower',936,75,1],['lmAbyss',ABYSS.x+4,ABYSS.y+ABYSS.ry+2,1],['lmButin',913,186,1],
  ['lmRCity',697,86,1],['lmRPalace',689,55,1],['lmRTrain',670,55,1],['lmRFame',693,65,1],['lmRWest',649,64,1],['lmRTemple',660,53,1],['lmRWall',639,85,1]];
@@ -7466,7 +7480,7 @@ function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]
 function mkItem(id,r,made){const rc=rcById(id);if(rc.fix!=null&&!(made&&rc.fix<4))r=rc.fix;   // made: your own craft keeps the rating it came out at (owner 2026-10-22: a rare craft showed up unique); a breath piece is always legendary
 const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.hpp)it.hpp=rc.hpp;if(rc.slot==='w'){it.atk=Math.round(rc.atk*MULT[r]);it.spd=rc.spd;}else if(rc.def)it.def=Math.round(rc.def*MULT[r]);
  for(const k of ['as','ms','dm'])if(rc[k])it[k]=+(rc[k]*(1+(MULT[r]-1)*.5)).toFixed(3);if(rc.mpb)it.mpb=Math.round(rc.mpb*MULT[r]);for(const k of ['agi','agp','cold','dsh'])if(rc[k])it[k]=rc[k];if(rc.slot==='w'&&r>=2)it.wp=wpRoll(r,it);return it;}
-function completeQ(id){if(!claimQ(id))return;if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else S.mats[o.it]-=o.n;}if(o.give)giveItem(o.it);
+function completeQ(id){if(!claimQ(id))return;if(id==='sir1')sirFlute(1);if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else S.mats[o.it]-=o.n;}if(o.give)giveItem(o.it);
  S.qs[id].st=2;if(q.rep)delete S.qs[id];
  toast(t('qDone',{q:qName(id)}),'good');SFX.quest();jQuest(id);
  if(q.gold){S.gold+=pasOn('opers')?Math.round(q.gold*1.15):q.gold;coinFx(npcOf(q.by),q.gold);}if(q.kc)kcGain(q.kc);if(q.mat)addMat(q.mat[0],q.mat[1]);
@@ -7520,7 +7534,7 @@ function updateEscort(dt){escHide();if(!ESC)return;const s=S.qs[ESC.q],q=QD[ESC.
  const D=escDest(q.obj);if(Math.hypot(E.x-D.x,E.y-D.y)<40){s.c=1;num(E.x,E.y-26,t('escThanks'),'#9fe39a',false);vfx('spawn',E.x,E.y);ESC=null;addAff(q.by,6);completeQ(E.q);}}
 // who says what: hi = first meeting, low = a quest exists but your level is too low, idle = nothing to do; opts = shop choices
 const NPCT={
- steim:{hi:'nst_hi'},irene:{hi:'nir_hi'},admRabbit:{hi:'nrb_hi'},zebra:{hi:'nzb_hi',noGift:1},skunk:{hi:'nsk_hi'},   // Winston Castle and Reidan's administrator (v2.92): their lines and options are set with NLD's further down
+ steim:{hi:'nst_hi'},irene:{hi:'nir_hi'},admRabbit:{hi:'nrb_hi'},zebra:{hi:'nzb_hi',noGift:1},skunk:{hi:'nsk_hi'},brfish:{hi:'nbf_hi',low:'nbf_low'},sirenE:{hi:'nse_hi',noGift:1},sirenG:{hi:'nsg_hi',noGift:1},   // Winston Castle and Reidan's administrator (v2.92): their lines and options are set with NLD's further down
  biban:{hi:'twBbHi',idle:()=>TOW?'twId_biban':S.lv<400?'twBbLow':'twBbIdle',opts:()=>bibanOpts(),noGift:1},
  hayate:{hi:'twHaHi',idle:()=>'twHaIdle',opts:()=>twOpts('hayate'),noGift:1},
  fronz:{hi:'twHi_fronz',idle:()=>'twId_fronz',opts:()=>twOpts('fronz'),noGift:1},
@@ -10362,7 +10376,7 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  // danger regions: red wash with a dashed edge
  g.save();g.setLineDash([6*dpr,4*dpr]);g.lineWidth=1.2*dpr;g.strokeStyle='rgba(226,73,58,.7)';g.fillStyle='rgba(140,10,10,.16)';[[28,2,34,40],[2,44,62,42]].forEach(([x,y,w,h])=>{g.fillRect(X(x),Y(y),w*sc,h*sc);g.strokeRect(X(x),Y(y),w*sc,h*sc);});g.restore();
  if(MV.z>=2.5){g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=1;for(let x=MV.a;x<=MV.b;x+=10){g.beginPath();g.moveTo(X(x),Y(-NR));g.lineTo(X(x),Y(WMH));g.stroke();}for(let y=-NR;y<=WMH;y+=10){g.beginPath();g.moveTo(X(MV.a),Y(y));g.lineTo(X(MV.b),Y(y));g.stroke();}}
- [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zWSand',492,66],['zZebra',870,150],['zSwordG',538,-26],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAsmo',ASMO.gx,ASMO.y0-2],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3],...EAL].forEach(([k,x,y])=>{if(!(inM(x,y)&&onS(X(x),Y(y),240*dpr)))return;MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`});
+ [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zWSand',492,66],['zZebra',870,150],['zSwordG',538,-26],['zBrin',575,247],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAsmo',ASMO.gx,ASMO.y0-2],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3],...EAL].forEach(([k,x,y])=>{if(!(inM(x,y)&&onS(X(x),Y(y),240*dpr)))return;MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`});
   const tl=townLv(k);if(tl)MM.label(g,t('townLv',{n:tl}),X(x),Y(y)-(13+MV.z*2.4)*dpr,{size:Math.round((9+MV.z)*dpr),color:tl>S.lv+10?'#ff9a8a':'#9fe0ff',font:F,weight:600});});   // the town's recommended level above its name (under it, it sat on the townsfolk's names)
  ANVILS.forEach(a=>{if(inM(a.tx,a.ty)&&onS(X(a.tx+.5),Y(a.ty+.5)))MM.marker(g,'anvil',X(a.tx+.5),Y(a.ty+.5),u*1.2);});
  mons.forEach(m=>{if(m.dead||m.tdum||!inM(m.x/TS,m.y/TS)||!onS(X(m.x/TS),Y(m.y/TS))||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
@@ -10619,7 +10633,7 @@ function update(dt){
  if(P.sw>0){P.sw-=dt;P.hp=Math.min(mh,P.hp+mh*.03*dt);if(rand()<dt*6)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*14,vx:0,vy:-24,t:.5,c:'#7ae07a',fl:1});}
  // hunger only drops while you do something (Twister 2026-10-19): walking, riding, attacking, dodging or guarding
  {const busy=Math.abs(P.x-(P.fqx??P.x))+Math.abs(P.y-(P.fqy??P.y))>.01||P.acd>0||P.dash>0||P.guard;P.fqx=P.x;P.fqy=P.y;if(busy)P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));}
- updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);wcTick();swgTick(dt);o48Tick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
+ updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);wcTick();swgTick(dt);sirTick();o48Tick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
@@ -10921,7 +10935,7 @@ function render(dt){DRAWN=0;netDrawn=0;
   for(const m of TFB){const st=TFS.get(m);if(st&&st.t>gTime&&!m.dead)TX.push({s:st.s,x:m.x,y:m.y-(MT[m.type].oy||16)-24,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff9a8a'});}
   for(const c of exNear()){ents.push({y:c.y-6,f:()=>drawCache(c)});ents.push({y:c.y+400,f:()=>drawCacheG(c)});}
   for(const l of lmList())if(l.x>camX-20&&l.x<camX+VW+20&&l.y>camY-10&&l.y<camY+VH+40)ents.push({y:l.y,f:()=>drawLm(l)});
-  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});if(rm===HALL)hallEnts(ents);swgEnts(ents);}
+  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});if(rm===HALL)hallEnts(ents);swgEnts(ents);sirEnts(ents);}
   if(COMPO){const a=COMPO;ents.push({y:a.y,f:()=>{if(a.hide>0)return;drawChar(a.spr,a.x,a.y,a.dir,a.frame||0,false,0,a);}});}
   allies.forEach(a=>{if(a.dead||a.go)return;ents.push({y:a.y,f:()=>{drawChar(a.id,a.x,a.y,a.dir,a.frame||0,false,0,a);R(ctx,a.x-7,a.y-30,14,2,'#000');R(ctx,a.x-7,a.y-30,14*a.hp/a.max,2,'#5ad06a');}});});
   for(const g of DGATES){if(g.hide||g.bhg&&!['next','exit','goal','box'].includes(g.bh)||g.tw&&!['up','down','exit'].includes(g.tw))continue;if(g.x<camX-30||g.x>camX+VW+30||g.y<camY-30||g.y>camY+VH+30)continue;ents.push({y:g.y-14,f:()=>drawGate(g)});}
@@ -12985,6 +12999,58 @@ Object.assign(FD,{sgrave:{lm:'lmSwordG',need:()=>!!nlM('skunk','rumor_sgrave'),p
 // Pagma's Late Work: one of the swords along the glacier's walls (Legendary)
 RC.push({id:'pgwork',slot:'w',atk:560,spd:.45,fix:4,lvr:320,drop:1,unlock:()=>false});
 Object.assign(WSH,{pgwork:{l:14,c:'#d8e0f0',w:1,k:'sword'}});
+// ---- The Siren Kingdom (v2.96; the owner 2026-10-25: "add any place or region of the novel that has an effect"). ch 137:
+// Brinichi's low tide on the night two full moons overlap, the purple path into the depths, "[You have played Laurelia's Flute.
+// You can breathe underwater for 25 minutes.]", "[You are the first discoverer of the Siren Kingdom!] It is a place passed down
+// in legends". The night of the two moons comes every eighth day of the world's clock (the game's count of "every four
+// months"); the flute is the fisherman of Brinichi's; the kingdom's people and every line are ORIGINAL_SIDE_STORY.
+const DMOONP=8,DMOOND=5;   // every 8th world day, the night of day 5 of the 8 (20:00 to 4:00 of the world's clock)
+function dmoonAt(s){const d=Math.floor(s/DAYL),h=(s-d*DAYL)/DAYL*24;return h>=20?((d%DMOONP)+DMOONP)%DMOONP===DMOOND:h<4?(((d-1)%DMOONP)+DMOONP)%DMOONP===DMOOND:false;}
+const dmoonNight=()=>dmoonAt(wNow()/1000);
+function dmoonNext(n){const s=n/1000,d0=Math.floor(s/DAYL);for(let k=-1;k<=DMOONP+1;k++){const d=d0+k;if(((d%DMOONP)+DMOONP)%DMOONP!==DMOOND)continue;const at=(d*DAYL+DAYL*20/24)*1000,end=at+DAYL*8/24*1000;if(end>n)return {at,len:end-at};}return null;}
+const SIRB=25*60000,sirFl=()=>!!(S&&(S.books&&S.books.lflute||qDone('sir1'))),sirOpen=()=>dmoonNight()&&sirFl();
+let SIRG=null,SIRW=0;
+function sirIn(){return !!P&&P.y>=WMH*TS&&zoneAt(P.x,P.y)==='zSiren';}
+// the gate shows on the night of the two moons; inside, the flute's 25 minutes
+function sirTick(){if(!SIRG)SIRG=DGATES.find(g=>g.sir);if(SIRG)SIRG.hide=!dmoonNight();if(!S||!P)return;
+ if(!sirIn()){SIRW=0;return;}S.books=S.books||{};const left=(S.books.lfB||0)-Date.now();
+ if(left<=0){if(mode==='dialog'||mode==='cut'||mode==='dead')return;if(WCLOSE[mode])WCLOSE[mode]();const u=DGATES.find(g=>g.hint==='hUp'&&dunAt(g.x,g.y)&&dunAt(g.x,g.y).k==='zSiren');if(u){P.x=u.to.x;P.y=u.to.y;camSnap=true;}toast(t(S.books.lfB?'sirOut':'sirNoFl'),'warn');return;}
+ const m=Math.ceil(left/60000);if((m===5||m===1)&&SIRW!==m){SIRW=m;toast(t('sirLeft'+m),'warn');}}
+function sirGate(g){if(!dmoonNight()){toast(t('sirShut'),'warn');return false;}if(!sirFl()){toast(t('sirNoFl'),'warn');return false;}
+ S.books=S.books||{};S.books.lfB=Date.now()+SIRB;toast(t('sirPlay'),'good');setTimeout(()=>{if(fdClaim('siren'))toast(t('sirFirst'),'good');},600);save(true);return true;}
+// the flute: the fisherman's, for the fish of his errand
+function sirFlute(q){S.books=S.books||{};if(S.books.lflute)return;S.books.lflute=Date.now();const f=()=>{toast(t('sirGotFl'),'good');SFX.rare&&SFX.rare();hudDirty=true;};
+ if(q)setTimeout(f,300);else{f();save(true);}}   // q: from completeQ, which saves it with the quest
+// the shore's purple path on the night of the moons; under the sea a blue light, the lit path, the fish, the hall
+const SIRF=[];{const r=mulberry32(2611),K=SIREN.in;for(let i=0;i<16;i++)SIRF.push({y:(K.y0+1.5+r()*(K.y1-K.y0-3))*TS,sp:14+r()*22,ph:r()*1000,c:['#ffb04a','#5ad0ff','#ff6aa0','#c8f05a'][i%4],s:r()<.3?2:1});}
+function sirEnts(ents){if(!P)return;const K=SIREN.in;
+ if(P.y<WMH*TS){if(!dmoonNight()||Math.abs(P.x-SIREN.gx*TS)>500||Math.abs(P.y-SIREN.gy*TS)>400)return;const x=SIREN.gx*TS+8,y0=(SIREN.gy+1)*TS;
+  ents.push({y:y0-40,f:()=>{for(let i=0;i<14;i++){const y=y0+i*TS,w=10+Math.sin(i*1.3)*3,a=.35+.25*Math.sin(gTime*2+i);ctx.fillStyle=`rgba(170,110,255,${a.toFixed(2)})`;ctx.fillRect(Math.round(x-w/2+Math.sin(i*.7)*6),y,Math.round(w),TS);
+    if((gTime*3+i)%4<.2)R(ctx,Math.round(x+Math.sin(i)*5),y+6,2,2,'#f0e0ff');}}});return;}
+ if(!sirIn())return;
+ ents.push({y:-1e9,f:()=>{for(let x=K.x0+3;x<K.x1-7;x++){const a=.18+.1*Math.sin(gTime*1.5+x*.4);ctx.fillStyle=`rgba(170,110,255,${a.toFixed(2)})`;ctx.fillRect(x*TS,(K.cy-1)*TS+4,TS,TS*3-8);}}});
+ for(const f of SIRF){const w=(K.x1-K.x0-2)*TS,x=(K.x0+1)*TS+(((gTime*f.sp+f.ph)%w)+w)%w,y=f.y+Math.sin(gTime*1.3+f.ph)*6;ents.push({y,f:()=>{ctx.fillStyle=f.c;ctx.beginPath();ctx.ellipse(x,y,3*f.s,1.6*f.s,0,0,7);ctx.fill();R(ctx,Math.round(x-4*f.s),Math.round(y-1),2,2,f.c);R(ctx,Math.round(x+2*f.s),Math.round(y-1),1,1,'#101820');}});}
+ ents.push({y:1e9,f:sirTint});
+ const hx=(K.x1-4.5)*TS,hy=K.cy*TS;ents.push({y:hy-30,f:()=>{for(const dy of [-3,3]){R(ctx,hx-44,hy+dy*TS-10,88,12,'#5a8aa8');R(ctx,hx-44,hy+dy*TS-10,88,2,'#bfe6ff');}for(const dx of [-40,-16,16,40])R(ctx,Math.round(hx+dx-3),hy-3*TS,6,6*TS,'#8ab8d0');}});}
+// under the sea: a blue light over all, and bubbles
+function sirTint(){if(!sirIn())return;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='rgba(30,80,150,.18)';ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);ctx.restore();
+ if(rand()<.2)fx.push({x:P.x+(rand()-.5)*200,y:P.y+80,vx:0,vy:-30,t:2,c:'#cfeaff'});}
+// the people: the fisherman of Brinichi on the beach; the Sirens' elder and their guard in the kingdom
+Object.assign(FIG,{brfish:{hair:'hat',hat:'#c8b070',hc:'#9a9aa2',hl:'#c8c8d0',skin:'#c8946a',sk2:'#a87450',beard:'#b8b8c0',beard2:'#8a8a94',top:'#3a5a7a',top2:'#2a4058',sleeves:true,belt:'#5a4230',pants:'#4a4a40',boots:'#3a3028'},
+ sirenE:{hair:'long',hc:'#5ac8b0',hl:'#a8f0e0',skin:'#c8e4ec',sk2:'#a0c4d0',eye:'#2a6aa8',top:'#2a7a9a',top2:'#1a5a74',sleeves:true,belt:'#e8d890',pants:'#2a7a9a',boots:'#1a5a74',tiara:'#f0e0a0'},
+ sirenG:{hair:'long',hc:'#3a8aa8',hl:'#7ac8e0',skin:'#c0dce6',sk2:'#98bccc',eye:'#1a4a78',top:'#4a6a8a',top2:'#2a4a6a',sleeves:true,chest:'#a8c8d8',belt:'#c8a050',pants:'#2a4a6a',boots:'#1a3048'}});
+for(const k of ['brfish','sirenE','sirenG'])if(!SH[k])shLazy(k,()=>SA.chars.buildSheet(FIG[k]));GOK.add('brfish');
+Object.assign(NLD,{
+ brfish:{town:null,src:'the fisherman of Brinichi (ORIGINAL), telling ch 137',
+  ctx:[['nbf_c1',()=>isNight()&&!dmoonNight()],['nbf_c2',()=>!isNight()],['nbf_c3',()=>dmoonNight()],['nbf_c4',()=>sirFl()]],q:{sir1:'nbf_q1'},rep:null,mem:[],
+  topics:[{id:'legend',tier:0,say:['nbf_l1','nbf_l2','nbf_l3'],rumor:'brin'},{id:'flute',tier:0,say:()=>sirFl()?['nbf_f1','nbf_f3']:['nbf_f1','nbf_f2']},{id:'sea',tier:1,say:['nbf_s1','nbf_s2'],aff:1}]},
+ sirenE:{town:null,src:'an elder of the Sirens (ORIGINAL)',ctx:[['nse_c1',()=>true],['nse_c2',()=>true]],q:{},rep:null,mem:[],
+  topics:[{id:'kingdom',tier:0,say:['nse_k1','nse_k2']},{id:'path',tier:0,say:['nse_p1','nse_p2']}]},
+ sirenG:{town:null,src:'a guard of the Sirens (ORIGINAL)',ctx:[['nsg_c1',()=>true],['nsg_c2',()=>true]],q:{},rep:null,mem:[],topics:[]}});
+for(const who of ['brfish','sirenE','sirenG']){const n=NPCT[who];if(n){n.idle=()=>nlIdle(who);n.opts=()=>nlOpts(who);}}
+Object.assign(QD,{sir1:{by:'brfish',lv:200,obj:{t:'have',it:'fish',n:10,take:1},spot:[575,253],xp:150000,gold:4000}});
+Object.assign(FD,{brin:{lm:'lmBrin',need:()=>!!nlM('brfish','rumor_brin'),p:.006,mat:['fish',10]},siren:{need:()=>true,p:.02,mat:['mstone',8]}});
+window.__GSIR={K:SIREN,dmAt:s=>dmoonAt(s),next:n=>dmoonNext(n),night:()=>dmoonNight(),open:()=>sirOpen(),gate:()=>SIRG||(SIRG=DGATES.find(g=>g.sir)),use:g=>sirGate(g),tick:()=>sirTick(),inside:()=>sirIn(),flute:()=>sirFlute()}; // tests
 // ---- Agriculture Development (ch 856): the Patrian farmer's field work, once a day: put down five Field Burrowers in his
 // rows; a rainbow potato and his trust (+3). Devoted (90) to him, a day's work may (one in four) bring his word about Piaro's field.
 function fdwS(){const D=dlyS();D.fw=D.fw||{n:0,done:0,on:0};return D.fw;}
@@ -13127,7 +13193,33 @@ Object.assign(STR.ar,{nlTalk:"اتكلم",nlAsk:"عايز تتكلم في إيه
  nsk_g1:"آخر أعمال باغما ومقبرة براهام، الاتنين في مكان واحد. لو ده مش قلب العالم ده، يبقى مش عارف إيه هو.",nsk_g2:"لف الغلط والتل يغطس في السهل تاني. عملناها آلاف المرات.",
  nsk_gA:"اسأله هيعمل إيه لما تتفتح.",nsk_gA2:"أبيع الخريطة، وأكتب الكتاب، وعمري ما أبص لسيف تاني.",nsk_mg1:"لسه المقبرة؟ دايمًا المقبرة.",
  nsk_o1:"الأرقام اللي على المقابض ماشية بالترتيب. الأول أقرب واحد لمعسكرنا، والباقيين أبعد فأبعد.",nsk_o2:"اللي متأكدين منه: الأول بيلف {a}، والتاني {b}، والتالت {c}. بعد كده بنتخانق.",
- nsk_y1:"سنة عشان نلاقيها، وأربع شهور واحنا بنفشل فيها. ناسي عايزين يروّحوا. بقولهم: بكرة.",nsk_y2:"لقينا معبد ياتان الرئيسي فاتعملنا اسم. دي هتعملنا ثروة.",fd_cork:"جزيرة كورك",fd_kesan:"وادي كيسان",tl_pguest:"ضيف بانجيا",tl_pguestD:"هان سوكبونج بيعتبرك ضيف بانجيا، مش غريب.",tl_dshadow:"معروف عند رجالة الضل",tl_dshadowD:"دوران، ضل الإيرل شتايم، بيعدّك من أصحاب رجالة الضل.",steim:"الإيرل شتايم",irene:"إيرين",admRabbit:"المسؤول رابيت",
+ nsk_y1:"سنة عشان نلاقيها، وأربع شهور واحنا بنفشل فيها. ناسي عايزين يروّحوا. بقولهم: بكرة.",nsk_y2:"لقينا معبد ياتان الرئيسي فاتعملنا اسم. دي هتعملنا ثروة.",zSiren:"مملكة السايرين",zBrin:"ساحل برينيتشي",hSiren:"E: امشي في الطريق البنفسجي",calDm:"ليلة القمرين (برينيتشي)",
+ sirShut:"المية عالية. الطريق مستخبي تحت البحر الليلة دي.",sirNoFl:"الطريق نازل للأعماق. من غير حاجة تخليك تتنفس، هتغرق.",
+ sirPlay:"[عزفت على فلوت لوريليا. تقدر تتنفس تحت المية 25 دقيقة.]",sirFirst:"[إنت أول واحد يكتشف مملكة السايرين!] مكان اتحكى عنه في الأساطير.",
+ sirLeft5:"فلوت لوريليا: فاضلك 5 دقايق نَفَس.",sirLeft1:"فلوت لوريليا: فاضلك دقيقة واحدة نَفَس!",sirOut:"نفسك خلص. البحر رجّعك لشط برينيتشي.",sirGotFl:"معاك فلوت لوريليا.",
+ lmBrin:"ساحل برينيتشي",lmBrin1:'"لما المية على ساحل برينيتشي تنزل في الجَزر، بيظهر طريق سري."',lmBrin2:'"مرة كل أربع شهور، قمرين كاملين بيتطابقوا في ليلة واحدة."',
+ fd_brin:"ساحل برينيتشي",fd_siren:"مملكة السايرين",
+ brfish:"صياد برينيتشي العجوز",nbf_hi:"خلي بالك من الشباك. قليل اللي بينزلوا برينيتشي ومش عايزين سمك.",
+ nbf_c1:"قمر واحد بس الليلة دي. البحر بيخبّي أسراره في ليالي زي دي.",nbf_c2:"جَزر على المغرب، ومد على الصبح. البحر بيتنفس، زي أي حاجة تانية.",
+ nbf_c3:"قمرين. بص على المية. ...روح، لو معاك الفلوت. أنا كبرت على الكلام ده.",nbf_c4:"فلوت لوريليا لايق عليك. جدتي كانت هتحب كده.",
+ nbf_q1:"الفلوت بقى بتاعك. ماتوقعهوش في البحر بالذات.",nbf_low:"إنت لسه صغير على البحر ده. ارجعلي لما تبقى لفل 200، ونتكلم في الفلوت.",
+ nlT_brfish_legend:"الأسطورة",nlT_brfish_flute:"فلوت لوريليا",nlT_brfish_sea:"البحر",
+ nbf_l1:"مرة كل أربع شهور، قمرين كاملين بيتطابقوا في ليلة واحدة. مش كل شهر: القمر ليه تقويمه هو.",
+ nbf_l2:"ولما المية على ساحل برينيتشي تنزل في الجَزر الليلة دي، بيظهر طريق سري، بنفسجي وبيلمع، نازل للأعماق.",
+ nbf_l3:"وفي آخره، بيقولوا، فيه مملكة. مملكة السايرين. اتحكى عنها في الأساطير، وفي عيلتي.",
+ nbf_f1:"جدتي كان عندها فلوت. فلوت لوريليا، كانت بتسميه كده. اللي يعزف عليه يقدر يتنفس تحت المية شوية.",
+ nbf_f2:"هديهولك، بس مش ببلاش. عشر سمكات، عشا لراجل عجوز. صفقة عادلة قصاد أسطورة.",
+ nbf_f3:"بقى بتاعك. خمسة وعشرين دقيقة نفس، مش أكتر. عدّهم.",
+ nbf_s1:"البحر بيدي وبياخد. غالبًا بياخد، بس بيدي سمك.",nbf_s2:"ستين سنة على الشط ده، وعمري ما مشيت في الطريق. فيه أساطير الأحسن تفضل أساطير.",
+ q_sir1:"فلوت لوريليا",sir1_o:"هاتلي عشر سمكات، وفلوت جدتي يبقى بتاعك: فلوت لوريليا، اللي بيخليك تتنفس تحت المية.",
+ sir1_w:"عشر سمكات. من أي نهر أو بحر. أنا مش بدقق في السن ده.",sir1_d:"عشر سمكات. صفقة عادلة. اتفضل: فلوت لوريليا. اعزف عليه لما الطريق يظهر، وخلّي بالك من الوقت.",
+ sirenE:"حكيمة السايرين",nse_hi:"واحد من اللي ماشيين على السطح، على الطريق البنفسجي. بقالنا كتير ماشفناش حد من فوق. أهلًا بيك في مملكة السايرين.",
+ nse_c1:"النور اللي مشيت وراه ده نور القمر، البحر نزّله لتحت.",nse_c2:"نفسك سلف. اصرفه كويس.",
+ nlT_sirenE_kingdom:"المملكة",nlT_sirenE_path:"الطريق",
+ nse_k1:"إحنا أقدم من الممالك اللي فوق. السطح بينسانا، وإحنا مبسوطين كده.",nse_k2:"الأسطورة باب، مابيتفتحش غير للي مصدقها كفاية إنه يمشي.",
+ nse_p1:"الطريق موجود كل ليلة. بس الجَزر والقمرين هما اللي بيورّوهولك.",nse_p2:"لما نفسك يخلص، البحر هيرجّعك بيتك. دايمًا بيعمل كده، للي جه بسلام.",
+ sirenG:"حارس السايرين",nsg_hi:"استنى. ...معاه الفلوت. اتفضل عدّي، وخلي سلاحك في جرابه.",
+ nsg_c1:"القاعة في آخر الطريق المنوّر. ماتتوهش في الضلمة.",nsg_c2:"عمري ما شفت واحد من السطح. إنت أصغر من الحكايات.",fd_cork:"جزيرة كورك",fd_kesan:"وادي كيسان",tl_pguest:"ضيف بانجيا",tl_pguestD:"هان سوكبونج بيعتبرك ضيف بانجيا، مش غريب.",tl_dshadow:"معروف عند رجالة الضل",tl_dshadowD:"دوران، ضل الإيرل شتايم، بيعدّك من أصحاب رجالة الضل.",steim:"الإيرل شتايم",irene:"إيرين",admRabbit:"المسؤول رابيت",
  nst_hi:"أهلًا بيك في قلعة وينستون. أنا شتايم، إيرل الشمال. وينستون والأرض اللي حواليها في عهدتي.",
  nst_c1:"القلعة دي عمرها ما بتنام. تمانين خدام، وكل واحد فيهم فاكر إن الشمع شغلة حد تاني.",nst_c2:"الشمال هادي النهارده. وأنا مابثقش في شمال هادي.",
  nst_c3:"بنتي اتخطفت. دوران راح وراها. لو إنت كمان رايح، روح دلوقتي.",nst_c4:"رجّعتلي بنتي. أبواب قلعة وينستون مفتوحالك على طول.",
@@ -13286,7 +13378,33 @@ Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTr
  nsk_g1:"Pagma's late works and Braham's grave, both in one place. If that isn't the heart of this world, I don't know what is.",nsk_g2:"Turn the wrong one and the hill sinks back into the plain. We've done it thousands of times.",
  nsk_gA:"Ask what he'll do when it opens.",nsk_gA2:"Sell the map, write the book, and never look at a sword again.",nsk_mg1:"Still the grave? It's always the grave.",
  nsk_o1:"The numbers on the hilts go in order. The first stands nearest our camp; the rest, farther and farther.",nsk_o2:"What we're sure of: the first turns {a}, the second {b}, the third {c}. After that, we argue.",
- nsk_y1:"A year to find it, four months to fail at it. My people want to go home. I tell them: tomorrow.",nsk_y2:"Finding the main Yatan temple made our name. This one would make our fortune.",fd_cork:"Cork Island",fd_kesan:"Kesan Canyon",tl_pguest:"Guest of Pangea",tl_pguestD:"Han Seokbong counts you as Pangea's guest, not a stranger.",tl_dshadow:"Known to the Shadows",tl_dshadowD:"Doran, Earl Steim's shadow, counts you among the shadows' friends.",steim:"Earl Steim",irene:"Irene",admRabbit:"Administrator Rabbit",
+ nsk_y1:"A year to find it, four months to fail at it. My people want to go home. I tell them: tomorrow.",nsk_y2:"Finding the main Yatan temple made our name. This one would make our fortune.",zSiren:"The Siren Kingdom",zBrin:"Brinichi Coast",hSiren:"E: Walk the purple path",calDm:"The night of the two moons (Brinichi)",
+ sirShut:"The tide is high. The path is under the sea tonight.",sirNoFl:"The path goes down into the depths. Without a way to breathe, you would drown.",
+ sirPlay:"[You have played Laurelia's Flute. You can breathe underwater for 25 minutes.]",sirFirst:"[You are the first discoverer of the Siren Kingdom!] It is a place passed down in legends.",
+ sirLeft5:"Laurelia's Flute: 5 minutes of breath left.",sirLeft1:"Laurelia's Flute: 1 minute of breath left!",sirOut:"Your breath runs out. The sea carries you back to Brinichi's shore.",sirGotFl:"You have Laurelia's Flute.",
+ lmBrin:"Brinichi Coast",lmBrin1:'"When the coastal waters of Brinichi experienced a low tide, a secret path would be revealed."',lmBrin2:'"Once every four months, two full moons would overlap in one night."',
+ fd_brin:"Brinichi Coast",fd_siren:"The Siren Kingdom",
+ brfish:"Old Fisherman of Brinichi",nbf_hi:"Mind the nets. Not many come down to Brinichi who aren't after fish.",
+ nbf_c1:"One moon tonight. The sea keeps its secrets on nights like this.",nbf_c2:"Low tide at dusk, high by morning. The sea breathes, like everything else.",
+ nbf_c3:"Two moons. Look at the water. ...Go on, if you have the flute. I'm too old.",nbf_c4:"Laurelia's Flute suits you. My grandmother would have liked that.",
+ nbf_q1:"The flute is yours now. Don't drop it in the sea, of all places.",nbf_low:"You're too green for this sea. Come back at level 200 and we'll talk about the flute.",
+ nlT_brfish_legend:"The legend",nlT_brfish_flute:"Laurelia's Flute",nlT_brfish_sea:"The sea",
+ nbf_l1:"Once every four months, two full moons overlap in one night. Not every month: the moon keeps its own calendar.",
+ nbf_l2:"When the coastal waters of Brinichi experience a low tide that night, a secret path is revealed, purple, glittering, down into the depths.",
+ nbf_l3:"At its end, they say, is a kingdom. The Sirens'. Passed down in legends, and in my family.",
+ nbf_f1:"My grandmother had a flute. Laurelia's, she called it. Whoever plays it can breathe under the water for a while.",
+ nbf_f2:"I'll part with it, but not for nothing. Ten fish, for an old man's supper. Fair trade for a legend.",
+ nbf_f3:"It's yours now. Twenty-five minutes of breath, no more. Count them.",
+ nbf_s1:"The sea gives and takes. Mostly it takes, but it gives fish.",nbf_s2:"Sixty years on this beach, and I never walked the path. Some legends are better kept.",
+ q_sir1:"Laurelia's Flute",sir1_o:"Bring me ten fish, and my grandmother's flute is yours: Laurelia's Flute, that lets you breathe under the water.",
+ sir1_w:"Ten fish. Any river, any sea. I'm not fussy at my age.",sir1_d:"Ten fish. A fair trade. Here: Laurelia's Flute. Play it when the path shows, and count your breath.",
+ sirenE:"Siren Elder",nse_hi:"A surface-walker, on the purple path. It has been a long time. Welcome to the Sirens' kingdom.",
+ nse_c1:"The light you followed is the moon's, carried down by the sea.",nse_c2:"Your breath is borrowed. Spend it well.",
+ nlT_sirenE_kingdom:"The kingdom",nlT_sirenE_path:"The path",
+ nse_k1:"We are older than the kingdoms above. The surface forgets us, and we prefer it.",nse_k2:"A legend is a door that only opens for those who believe it enough to walk.",
+ nse_p1:"The path is there every night. Only the tide and the two moons show it to you.",nse_p2:"When your breath runs out, the sea will carry you home. It always does, for those who came in peace.",
+ sirenG:"Siren Guard",nsg_hi:"Halt. ...A flute-bearer. Pass, then, and keep your blade sheathed.",
+ nsg_c1:"The hall is at the end of the lit path. Do not stray into the dark.",nsg_c2:"I have not seen a surface-walker in my lifetime. You are smaller than the stories.",fd_cork:"Cork Island",fd_kesan:"Kesan Canyon",tl_pguest:"Guest of Pangea",tl_pguestD:"Han Seokbong counts you as Pangea's guest, not a stranger.",tl_dshadow:"Known to the Shadows",tl_dshadowD:"Doran, Earl Steim's shadow, counts you among the shadows' friends.",steim:"Earl Steim",irene:"Irene",admRabbit:"Administrator Rabbit",
  nst_hi:"Welcome to Winston Castle. I am Steim, Earl of the north. Winston and the land round it are in my keeping.",
  nst_c1:"The castle never sleeps. Eighty servants, and every one of them thinks the candles are someone else's work.",nst_c2:"The north is quiet today. I distrust a quiet north.",
  nst_c3:"My daughter has been taken. Doran has gone after her. If you are going too, go now.",nst_c4:"You brought my daughter home. Winston Castle's doors are open to you, always.",
@@ -15956,6 +16074,7 @@ function calList(n){const out=[],add=(k,at,len)=>out.push({k,at,end:at+len});
  {const H=3600000;for(let h=Math.floor(n/H);;h++)if(new Date(h*H).getUTCHours()%3===1&&n<h*H+60*60000){add('calFs',h*H+35*60000,25*60000);break;}}
  {const sl=Math.floor(n/RCS),st=sl*RCS+RCGO;add('calRace',n<sl*RCS+RCEND?st:st+RCS,RCEND-RCGO);}
  {const h0=huntOf(n),h=n<h0.end?h0:huntOf(h0.at+LOCK_WK);out.push({k:'huntN',l:t('huntCal',{b:t(h.k+'N'),s:h.season,i:h.i}),at:h.at,end:h.end,b:h.k});}
+ {const d=dmoonNext(n);if(d)add('calDm',d.at,d.len);}   // the night of the two moons (v2.96)
  return out;}
 function calTime(ms,utc){const d=new Date(ms),h=utc?d.getUTCHours():d.getHours(),m=utc?d.getUTCMinutes():d.getMinutes();return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}
 function calIn(ms){const m=Math.max(1,Math.ceil(ms/60000));return m<60?t('calMin',{m}):t('calHr',{h:Math.floor(m/60),m:m%60});}

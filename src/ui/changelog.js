@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25siren', ver: '2.96', d: '2026-10-25',
+      ar: ["مكان جديد من الرواية: مملكة السايرين تحت البحر (فصل 137). \"مرة كل أربع شهور، قمرين كاملين بيتطابقوا في ليلة واحدة\"، ولما المية على ساحل برينيتشي تنزل في الليلة دي بيظهر طريق بنفسجي نازل للأعماق.",
+        "في اللعبة ليلة القمرين بتيجي كل تامن يوم في ساعة العالم، من 8 بالليل لـ4 الصبح، ومكتوبة في التقويم. على شط برينيتشي في جنوب العالم الطريق البنفسجي بيلمع الليلة دي بس.",
+        "صياد برينيتشي العجوز على الشط: بيحكيلك الأسطورة، وعنده مهمة (لفل 200): عشر سمكات قصاد فلوت لوريليا بتاع جدته.",
+        "بالفلوت تقدر تنزل الطريق: \"[عزفت على فلوت لوريليا. تقدر تتنفس تحت المية 25 دقيقة.]\". تحت هتلاقي قاع البحر وطريقه المنوّر والسمك وقاعة السايرين. فاضل 5 دقايق ودقيقة بيجيلك تنبيه، ولما نفسك يخلص البحر بيرجّعك للشط.",
+        "حكيمة السايرين وحارسهم في المملكة، بكلام عن المملكة والطريق. اكتشافين جداد مرة واحدة: ساحل برينيتشي (بعد ما الصياد يحكيلك الأسطورة) ومملكة السايرين (\"[إنت أول واحد يكتشف مملكة السايرين!]\")."],
+      en: ["A new place from the novel: the Siren Kingdom under the sea (ch 137). \"Once every four months, two full moons would overlap in one night\", and when Brinichi's coastal waters ebb that night a purple path shows, down into the depths.",
+        "In the game the night of the two moons comes every eighth day of the world's clock, from 20:00 to 4:00, and it is on the calendar. On Brinichi's shore in the south of the world the purple path glows that night only.",
+        "The Old Fisherman of Brinichi on the beach tells the legend and has an errand (Lv 200): ten fish for his grandmother's Laurelia's Flute.",
+        "With the flute you can walk the path: \"[You have played Laurelia's Flute. You can breathe underwater for 25 minutes.]\" Below are the sea floor, its lit path, its fish and the Sirens' hall. You are warned at 5 minutes and at 1, and when your breath runs out the sea carries you back to the shore.",
+        "The Siren Elder and a Siren Guard in the kingdom, with words on the kingdom and the path. Two new first discoveries, once: Brinichi Coast (after the fisherman's legend) and the Siren Kingdom (\"[You are the first discoverer of the Siren Kingdom!]\")."] },
     { v: '2026-10-25swordgrave', ver: '2.95', d: '2026-10-25',
       ar: ["مكان جديد من الرواية: مقبرة السيوف، سهل تلج في بحيرات الجليد مليان سيوف مغروزة في الأرض (\"سهل مفتوح فيه 4,179 سيف\"، فصل 931). فيها الشغل اللي باغما عمله في آخر سنينه، وهي كمان مقبرة براهام (فصل 937).",
         "اللغز: 12 سيف بس هما اللي يفرقوا، وعلى مقبض كل واحد رقمه. لازم تلفهم بالترتيب، كل واحد شمال أو يمين. لو لفيت واحد غلط، كل السيوف اللي قبله بترجع مكانها والتل بيغطس في السهل تاني، زي ما حصل في الرواية. ولما يخلصوا، السهل بيبقى تل والمقبرة بتتفتح ليك.",
