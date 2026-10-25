@@ -68,7 +68,7 @@ function hammer(h,silver){const I=Img(10,16);I.vline(4,4,14,'#7a5634');I.vline(4
 
 // swords drawn from their shape (icons.js A.blade): each its own length, width, line, guard and grip (owner 2026-10-24)
 function fromBlade(sp){const B=A.blade.bladeHeld(sp),I=Img(B.w,B.h);for(const [x,y,c] of B.px)I.set(x,y,c);return {I,gx:B.gx,gy:B.gy};}
-const BLADED=['vipdag','shdag','bldag','mdagger','mgdagger','rusty','isword','ssword','gsword','msword','failure','dains','iyarugt','wisdom','yetgs','dpgs','mgsword','lantd','ideal','ttthorn','dagger'];
+const BLADED=['vipdag','shdag','bldag','mdagger','mgdagger','rusty','isword','ssword','gsword','msword','failure','dains','iyarugt','wisdom','yetgs','dpgs','mgsword','lantd','ideal','ttthorn','dagger','pgwork'];
 // a creation (cw|ty.L.W.C.m1.m2): a sword from its blueprint, or a spear, bow, staff or hammer in its materials' colours
 function cwDef(k){const B=A.blade,o=B&&B.cwParse(k);if(!o)return null;const P=B.MATP[o.m1][0],Q=o.m2?B.MATP[o.m2][0]:P,L=o.L/100;
  if(o.ty==='gs'||o.ty==='sw'||o.ty==='dg')return fromBlade(B.cwSpec(o));

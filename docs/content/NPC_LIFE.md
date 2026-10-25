@@ -1,4 +1,4 @@
-# NPC life, first discoveries and the field's secret quest (v2.88, v2.90-v2.94; 2026-10-25)
+# NPC life, first discoveries and the field's secret quest (v2.88, v2.90-v2.95; 2026-10-25)
 
 Owner's request (2026-10-25, encyclopedia §93-§95; the player Suki: "some NPCs are boring and say little, add secret
 quests and a reward for meeting people and exploring"): depth for people who already exist, through the systems that
@@ -31,6 +31,8 @@ affinity, tiers 30/60/90), `S.rep` (the town's ranks), `S.qs`, `S.books` (the di
 | The Slaughterer of Earl Zebra's underground ("a half human, half beast species he raised. But it was impossible to control"); the Slaughterer's Eye Patch ("just a black eye patch made of leather", Unique, "the skill 'Vital Spot Detection' will be generated") | ch 243-244 | CANON; its fight, level and the skill's +8% GAME_ORIGINAL / GAME_BALANCE |
 | The Black Arrows ("the assassination ability of those who served Earl Zebra's family for generations was unmatched"; "dozens of daggers") | ch 245-246 | CANON; how they fight, their levels GAME_ORIGINAL / GAME_BALANCE |
 | Lauel's errand The Slaughterer's Eye Patch | after ch 243 | ORIGINAL_SIDE_STORY |
+| The Sword Grave: "an open plains area with 4,179 swords stabbed into the ground"; 599 significant swords that "rotated to the left or right"; a wrong turn resetting the earlier ones; "the plains turned into a hill"; Pagma's late works and Braham's grave in a glacier that "didn't tolerate any living thing" | ch 931, 937, 940 | the place and the puzzle's way CANON (v2.95); twelve swords, their order and directions, where it lies (the Glacier Lakes) and the rewards GAME_BALANCE |
+| Skunk of Skunk's Expedition Group, a year and four months at the grave; the expedition made its name with the main Yatan temple | ch 931, 937 | the person CANON; every line ORIGINAL_SIDE_STORY |
 
 No person's line is taken from a translation of the novel. The landmarks quote a sentence or two of their chapters, as
 the game's landmarks always have (Kesan Canyon's, and since v2.93 the Western Sands' and the nest's).
@@ -170,7 +172,26 @@ status window for their owners).
   chance +8%), once. The quest arrow follows the Slaughterer (the keep's door from outside). No title.
 - **First discovery** (once, with the errand): the castle's landmark (ch 243's lines).
 
+## v2.95: the Sword Grave
+
+- **The place**: a snow plain among the Glacier Lakes (tiles x 520-556, y -24 to -8; `zSwordG`), its swords drawn on it (420
+  of them, and the twelve that matter, larger and pale-ringed, their numbers shown near); no tile changed, so no dice move.
+  Skunk's camp (a campfire) at its west.
+- **The puzzle** (`S.books.swgp`, `swgd`): turn the swords in order (the first nearest the camp), each left or right: the
+  right turn raises the plain a step; the wrong one sets every sword back (the hill sinks); out of order nothing moves.
+  Solved, the plain is a hill with a door: the gate (`swg`) shows and opens for you only; a first discovery (2% of the level,
+  4 mithril).
+- **The glacier** (`zSwordGU`, Lv 300+): 1.2% of your health each second (not through invulnerability, nor while a dialog
+  is open); whoever is there without having solved it (a recall to someone inside) is put back on the surface, and the
+  coffin gives nothing to them. Dying anywhere under the map now wakes you in the town nearest its way out. The coffin of ice at its end: Braham's body and
+  Pagma's late works; **Pagma's Late Work** (a Legendary sword, Lv 320) once. Braham's Successor and Pagma's Successor have
+  their own line there.
+- **Skunk**: takes gifts; his topics, the grave, the order (the first three swords' ways), a year and four months.
+
 ## Tests
+
+`tests/regression/swordgrave.test.cjs` (2, v2.95): the puzzle in order, a wrong turn setting all back, out of order
+nothing, solved once and the grave open; the gate sealed before, the glacier's cold, Pagma's Late Work once, Skunk's hints.
 
 `tests/regression/zebra.test.cjs` (2, v2.94): the castle (zones, walls, gate, keep), the way down and up, the Black Arrows
 and the Slaughterer where they live, Earl Zebra; their moves; the eye patch from Lauel's errand once and its Vital Spot
