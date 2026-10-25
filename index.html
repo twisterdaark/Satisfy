@@ -7426,7 +7426,7 @@ function addAff(id,n){if(!NPCT[id]||!n||NOAFF.has(id))return;S.aff=S.aff||{};con
 function addRep(k,n){if(!k||!n)return;if(tlOn('helper')&&n>0)n=Math.ceil(n*1.05);S.rep=S.rep||{};const was=repRank(k);S.rep[k]=repOf(k)+n;const now=repRank(k);if(now>was){toast(t('repUp',{z:t(k),r:t('rep'+now)}),'good');SFX.notice();crepAdd(now*100);}}
 // gifts: once every 5 minutes of play per person; what someone likes counts double
 const GIFTS={bread:3,hpot:4,mpot:4,wood:1,ore:1,leather:1,mstone:6,hairpin:12}; // hairpin: the Reputation Store's, double for a woman
-const GLIKE={khan:'ore',smith:'ore',armorer:'ore',armorerP:'ore',baker:'wood',inn:'bread',innB:'bread',innP:'bread',hunter:'leather',hunterP:'leather',oldw:'bread',merchant:'mstone',merchantP:'mstone',guardW:'hpot',farmerP:'wood',pedW:'mpot',pedE:'mpot',regas:'hpot'};
+const GLIKE={khan:'ore',smith:'ore',armorer:'ore',armorerP:'ore',baker:'wood',inn:'bread',innB:'bread',innP:'bread',hunter:'leather',hunterP:'leather',oldw:'bread',merchant:'mstone',merchantP:'mstone',guardW:'hpot',farmerP:'wood',pedW:'mpot',pedE:'mpot',regas:'hpot',doranS:'hpot'};
 // only people you have a reason to give things to take gifts; guards, officials and priests see a gift as a bribe
 const GOK=new Set([...Object.keys(GLIKE),'jishuka','fisher','herbW','stylist','piaro','vantner','faker','foreman','innR','innRh']),GREF=new Set(['guardW','guardRh','pcap','priestRh','herald','coach','coachW','coachP','coachR','coachRh','coachRo','coachT']);
 const haveG=k=>k==='bread'||k==='hpot'||k==='mpot'?S[k]||0:S.mats[k]||0;
@@ -9808,7 +9808,7 @@ function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,ti
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
  h+=`<div class="ssec">${t('special')}</div><div class="sgrid">`+['comp','indom','dign','insi',...(S.hid.pers?['pers']:[])].map(k=>row(t(k),S.hid[k],t('t'+k)+'<br><small>'+t('noDist')+'</small>')).join('')+'</div>';
  h+=`<div class="pts" id="ptsT">${t('pts',{n:S.pts})}</div>`+(S.pts>0?`<div class="note">${t('ptsHint')}</div>`:'');
- h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk','expoc','angler','kheir','ffield',...TTOWN].filter(id=>S.tl[id]);
+ h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk','expoc','angler','kheir','ffield','pguest','dshadow',...TTOWN].filter(id=>S.tl[id]);
  const tlSk=id=>Object.keys(SKD).filter(k=>SKD[k].title===id||TLS[id]===k).filter((k,i,a)=>a.indexOf(k)===i);own.sort((x,y)=>(tlSk(y).length>0)-(tlSk(x).length>0));   // owner 2026-10-24: titles that give a skill come first
  const skTipT=k=>{const d=SKD[k]||{};return esc(`<b>${t('sk_'+k)}</b><br>${t('skd_'+k)}<br><small>${t('skCost',{mp:mpC(k),cd:Math.round((d.cd||0)*skCostM(k))})}</small>`);};
  h+=`<div class="ssec">${t('titlesH')}</div>`+(own.length?own.map(id=>`<div class="tl${S.title===id?' worn':''}"><div><b>${t('tl_'+id)}</b><small>${t('tl_'+id+'D')}</small>${tlSk(id).length?`<em>${tlSk(id).map(k=>`<span class="tlsk" data-tip="${skTipT(k)}">${t('iskL',{s:t('sk_'+k)})}</span>`).join(' · ')}</em>`:STR.en['tl_'+id+'S']?`<em>${t('tl_'+id+'S')}</em>`:''}</div><button data-title="${id}" ${S.title===id?'disabled':''}>${t(S.title===id?'tlWorn':'tlWear')}</button></div>`).join('')+`<div class="note">${t('tlNote')}</div>`:`<div class="note">${t('noTitles')}</div>`);
@@ -12566,14 +12566,15 @@ const NLD={
    {id:'anvil',tier:1,say:['nkh_a1','nkh_a2'],aff:1},
    {id:'vein',tier:2,say:()=>S.books&&S.books.fd_kvein?['nkh_v3']:['nkh_v1','nkh_v2'],rumor:'kvein',aff:()=>S.books&&S.books.fd_kvein?3:0},
    {id:'dream',tier:3,say:['nkh_d1','nkh_d2'],ch:[{k:'nkh_dA',to:'nkh_dA2',mem:1,f:()=>giveTitle('kheir')},{k:'nkh_dB',to:'nkh_dB2',mem:2}]}]},
- ashur:{town:'zPat',src:'ch 1-60 (Earl Ashur of Patrian; his daughter Irene)',
+ ashur:{town:'zPat',repTrust:1,src:'ch 212-213 (Earl Ashur, the great magician at the Gauss border); Irene is Earl Steim\'s daughter (ch 117, the Irene quest), only spoken of',
   ctx:[['nas_c1',()=>!isNight()],['nas_c2',()=>isNight()],['nas_c3',()=>qDone('pt6')],['nas_c4',()=>qDone('irn')],['nas_c5',()=>S.lv>=100],['as_idle',()=>true]],
   q:{pt3:'nas_q3',pt5:'nas_q5',pt6:'nas_q6'},rep:['nas_r0','nas_r1','nas_r2','nas_r3','nas_r4'],
   mem:[['border',2,'nas_mb2'],['irene',2,'nas_mi2']],
   topics:[
    {id:'border',tier:0,say:['nas_b1'],ch:[{k:'nas_bA',to:'nas_bA2',aff:1,mem:1},{k:'nas_bB',to:'nas_bB2',mem:2}]},
    {id:'north',tier:1,say:()=>S.books&&S.books.fd_nend?['nas_n3']:['nas_n1','nas_n2'],rumor:'nend',aff:()=>S.books&&S.books.fd_nend?2:0},
-   {id:'irene',tier:2,when:()=>qDone('irn'),say:['nas_i1'],ch:[{k:'nas_iA',to:'nas_iA2',aff:2,mem:1},{k:'nas_iB',to:'nas_iB2',mem:2}]},
+   {id:'ireneS',tier:2,when:()=>qDone('irn')&&!!(S.tl||{}).sonlaw,say:['nas_i1s'],aff:2},
+   {id:'irene',tier:2,when:()=>qDone('irn')&&!(S.tl||{}).sonlaw,say:['nas_i1'],ch:[{k:'nas_iA',to:'nas_iA2',aff:2,mem:1},{k:'nas_iB',to:'nas_iB2',mem:2}]},
    {id:'legacy',tier:3,say:['nas_l1','nas_l2'],f:()=>{addRep('zPat',50);S.gold+=5000;toast(t('nlGold',{n:5000}),'good');}}]},
  piaro:{town:null,src:'Piaro, the farmer who once held a sword; ch 856 (the farmers)',
   ctx:[['npi_c1',()=>isNight()],['npi_c2',()=>!isNight()],['npi_c3',()=>qDone('fq1')],['npi_c4',()=>S.sec==='farmer'],['npi_c5',()=>(nlM('piaro','fqfail')|0)>0&&!qDone('fq1')],['pi_idle',()=>true]],
@@ -12586,17 +12587,39 @@ const NLD={
  farmerP:{town:'zPat',src:'ch 856 (Agriculture Development: field work, the farmers\' affinity)',
   ctx:[['nfp_c1',()=>!isNight()],['nfp_c2',()=>isNight()],['nfp_c3',()=>qDone('fq1')],['fp_idle',()=>true]],
   q:{fp1:'nfp_q1',fp2:'nfp_q2'},rep:['nfp_r0','nfp_r1','nfp_r2','nfp_r3','nfp_r4'],mem:[],topics:[]}};
+Object.assign(NLD,{
+ hanS:{town:'zEaPangea',src:'Han Seokbong, lord of Pangea under the Cho Kingdom (the East Continent quests ea0-ea4)',
+  lead:()=>EAS().ar&&!qDone('ea4')&&!S.qs.ea4?'hanS_i2':null,   // while the king may learn he hid you, that comes first
+  ctx:[['nhs_c1',()=>isNight()],['nhs_c2',()=>!isNight()],['nhs_c3',()=>EAS().ar==='cap'],['nhs_c4',()=>EAS().ar==='kill'],['nhs_c5',()=>S.lv>=400],['nhs_q3',()=>qDone('ea3')&&qDone('ea4')],['hanS_idle',()=>true]],
+  q:{ea0:'nhs_q0',ea4:'nhs_q4'},rep:['nhs_r0','nhs_r1','nhs_r2','nhs_r3','nhs_r4'],
+  mem:[['port',1,'nhs_mp1'],['port',2,'nhs_mp2'],['king',2,'nhs_mk2']],
+  topics:[
+   {id:'port',tier:0,say:['nhs_p1'],ch:[{k:'nhs_pA',to:'nhs_pA2',aff:1,mem:1},{k:'nhs_pB',to:'nhs_pB2',mem:2}]},
+   {id:'sea',tier:1,say:()=>S.books&&S.books.fd_cork?['nhs_s3']:['nhs_s1','nhs_s2'],rumor:'cork',aff:()=>S.books&&S.books.fd_cork?2:0},
+   {id:'king',tier:2,when:()=>qDone('ea2'),say:['nhs_k1'],ch:[{k:'nhs_kA',to:'nhs_kA2',aff:2,mem:1},{k:'nhs_kB',to:'nhs_kB2',mem:2}]},
+   {id:'guest',tier:3,say:['nhs_g1','nhs_g2'],f:()=>{addRep('zEaPangea',50);giveTitle('pguest');}}]},
+ doranS:{town:null,src:'Doran, the shadow who secretly protects Earl Steim (the Irene quest)',
+  ctx:[['ndo_c1',()=>isNight()],['ndo_c2',()=>qDone('irn')],['ndo_c3',()=>S.lv>=200],['ndo_c4',()=>!!S.qs.irn&&S.qs.irn.st===1],['ndo_c5',()=>!!S.qs.irn&&S.qs.irn.st===3],['dor_idle',()=>true]],
+  q:{irn:'ndo_q1'},rep:null,mem:[['earl',2,'ndo_me2'],['lady',1,'ndo_ml1']],
+  topics:[
+   {id:'earl',tier:0,say:['ndo_e1'],ch:[{k:'ndo_eA',to:'ndo_eA2',aff:1,mem:1},{k:'ndo_eB',to:'ndo_eB2',mem:2}]},
+   {id:'ladyS',tier:1,when:()=>qDone('irn')&&!!(S.tl||{}).sonlaw,say:['ndo_l1s'],aff:2},
+   {id:'lady',tier:1,when:()=>qDone('irn')&&!(S.tl||{}).sonlaw,say:['ndo_l1'],ch:[{k:'ndo_lA',to:'ndo_lA2',aff:2,mem:1},{k:'ndo_lB',to:'ndo_lB2',mem:2}]},
+   {id:'kesan',tier:2,say:()=>S.books&&S.books.fd_kesan?['ndo_k3']:['ndo_k1','ndo_k2'],rumor:'kesan',aff:()=>S.books&&S.books.fd_kesan?2:0},
+   {id:'shadow',tier:3,say:['ndo_s1','ndo_s2'],f:()=>giveTitle('dshadow')}]}});
 // what they say when you walk up: a quest of theirs just done (once), your name in their town grown (once a rank), a memory
 // of what you chose, or a line for the moment that is not the last one you heard
 function nlIdle(who){const D=NLD[who];if(!D||!S)return 'oLeave';
  for(const q in D.q||{})if(qDone(q)&&!nlM(who,'q_'+q)){nlSet(who,'q_'+q);return D.q[q];}
  if(D.rep&&D.town){const r=repRank(D.town);if(r>(nlM(who,'rk')|0)&&r>0){nlSet(who,'rk',r);return D.rep[Math.min(r,D.rep.length-1)];}}
+ if(D.lead){const k=D.lead();if(k&&k!==nlM(who,'i')){nlSet(who,'i',k);return k;}}
  const L=[];for(const [k,f] of D.ctx)if(f())L.push(k);for(const [tp,v,k] of D.mem||[])if(nlM(who,tp)===v)L.push(k);
  const last=nlM(who,'i'),pool=L.length>1?L.filter(k=>k!==last):L,k=pool[(rand()*pool.length)|0]||'oLeave';nlSet(who,'i',k);return k;}
 // the topics you can raise; one you have heard is marked, one they trust you too little for shows how much more they need
-function nlTopics(who){const D=NLD[who],tr=affTier(who),o=[];
+// an official takes no gifts: his trust also follows your name in his town (D.repTrust: ranks 2 / 3 / 4 open 30 / 60 / 90)
+function nlTopics(who){const D=NLD[who],rt=D.repTrust&&D.town?[0,0,1,2,3][repRank(D.town)]:0,tr=Math.max(affTier(who),rt),o=[];
  for(const tp of D.topics){if(tp.when&&!tp.when())continue;const heard=!!nlM(who,'h_'+tp.id);
-  if(tr<tp.tier){o.push({l:'🔒 '+t('nlTrust',{n:AFFT[tp.tier-1]}),st:affTxt(who),f:()=>dialog(who,['nlLocked'],()=>nlTopics(who))});continue;}
+  if(tr<tp.tier){o.push({l:'🔒 '+(D.repTrust&&D.town?t('nlTrustR',{n:AFFT[tp.tier-1],r:t('rep'+(tp.tier+1)),z:t(D.town)}):t('nlTrust',{n:AFFT[tp.tier-1]})),st:affTxt(who),f:()=>dialog(who,['nlLocked'],()=>nlTopics(who))});continue;}
   o.push({l:(heard?'· ':'💬 ')+t('nlT_'+who+'_'+tp.id),f:()=>nlTopic(who,tp)});}
  o.push({l:t('oBack'),f:()=>shopD(who,nlIdle(who))});dialog(who,['nlAsk'],null,o);}
 function nlTopic(who,tp){const say=typeof tp.say==='function'?tp.say():tp.say,first=!nlM(who,'h_'+tp.id);nlSet(who,'h_'+tp.id);
@@ -12609,10 +12632,11 @@ function nlTopic(who,tp){const say=typeof tp.say==='function'?tp.say():tp.say,fi
   dialog(who,[typeof c.to==='function'?c.to():c.to],c.nx||(()=>nlTopics(who)));}})));}
 const nlOpts=who=>(NLD[who].topics||[]).length?[{l:'💬 '+t('nlTalk'),f:()=>nlTopics(who)}]:[];
 // the people's lines and topics into the NPC table (their quests and shops stay as they were)
-for(const who of ['khan','ashur','piaro','farmerP']){const n=NPCT[who];if(!n)continue;const o0=n.opts;n.idle=()=>nlIdle(who);n.opts=()=>[...nlOpts(who),...(who==='farmerP'?fdwOpts():[]),...(o0?o0():[])];}
+for(const who of ['khan','ashur','piaro','farmerP','hanS','doranS']){const n=NPCT[who];if(!n)continue;const o0=n.opts;n.idle=()=>nlIdle(who);n.opts=()=>[...nlOpts(who),...(who==='farmerP'?fdwOpts():[]),...(o0?o0():[])];}
 // ---- discoveries: the first time you find what a rumour spoke of (or the trace of the secret quest)
 const FD={kvein:{lm:'lmMine',need:()=>!!nlM('khan','rumor_kvein'),p:.004,mat:['ore',6]},nend:{lm:'lmNEnd',need:()=>!!nlM('ashur','rumor_nend'),p:.005,mat:['mstone',3]},
- burrow:{need:()=>!!nlM('farmerP','hint'),p:.01,mat:['rpotato',1]}};
+ burrow:{need:()=>!!nlM('farmerP','hint'),p:.01,mat:['rpotato',1]},
+ cork:{lm:'lmCork',need:()=>!!nlM('hanS','rumor_cork'),p:.005,mat:['fish',8]},kesan:{lm:'lmKesan',need:()=>!!nlM('doranS','rumor_kesan'),p:.005,mat:['mstone',4]}};
 function fdClaim(id){const d=FD[id];if(!d||!S||S.__demo)return false;S.books=S.books||{};if(S.books['fd_'+id]||!d.need())return false;S.books['fd_'+id]=Date.now();
  const xg=Math.round(xpNeed()*d.p);gainXP(xg,1);if(d.mat)addMat(d.mat[0],d.mat[1]);S.hid.insi=(S.hid.insi|0)+1;SFX.rare();
  setTimeout(()=>toast(t('fdGot',{n:t('fd_'+id),x:xg.toLocaleString('en')}),'good'),400);hudDirty=true;save(true);return true;}
@@ -12647,7 +12671,7 @@ function nlAct(o){if(o.k!=='fqhole')return;const first=!nlM('piaro','trace');nlS
 function nlDraw(o){const x=Math.round(o.x),y=Math.round(o.y);ctx.fillStyle='rgba(30,20,10,.45)';ctx.beginPath();ctx.ellipse(x,y,9,4,0,0,7);ctx.fill();ctx.fillStyle='#120a04';ctx.beginPath();ctx.ellipse(x,y-1,6,3,0,0,7);ctx.fill();
  R(ctx,x-10,y-3,3,2,'#7a5634');R(ctx,x+8,y-2,3,2,'#7a5634');R(ctx,x-4,y-6,2,2,'#8a6a3a');for(let i=0;i<3;i++)R(ctx,x-6+i*5,y+3,1,2,'#3a2a14');}
 window.__GNPC={NLD,FD,FWF,PIF,FQM,rnd:f=>{NLR=f;},pool:w=>{const D=NLD[w],L=[];for(const [k,f] of D.ctx)if(f())L.push(k);for(const [tp,v,k] of D.mem||[])if(nlM(w,tp)===v)L.push(k);return L;},idle:w=>nlIdle(w),topics:w=>nlTopics(w),topic:(w,id)=>nlTopic(w,NLD[w].topics.find(x=>x.id===id)),m:(w,k)=>nlM(w,k),set:(w,k,v)=>nlSet(w,k,v),fd:id=>fdClaim(id),fdLm:k=>fdLm(k),fw:()=>fdwS(),fwOpts:()=>fdwOpts(),fqTick:dt=>fqTick(dt),act:o=>nlAct(o),hole:()=>SHRINES.find(o=>o.k==='fqhole')}; // tests
-Object.assign(STR.ar,{nlTalk:"اتكلم",nlAsk:"عايز تتكلم في إيه؟",nlTrust:"لسه مش واثق فيك كفاية (المودة {n})",nlLocked:"\"مرة تانية. لما أعرفك أكتر.\"",nlGold:"+{n} دهب",
+Object.assign(STR.ar,{nlTalk:"اتكلم",nlAsk:"عايز تتكلم في إيه؟",nlTrust:"لسه مش واثق فيك كفاية (المودة {n})",nlTrustR:"لسه مش واثق فيك كفاية (المودة {n}، أو {r} في {z})",nlLocked:"\"مرة تانية. لما أعرفك أكتر.\"",nlGold:"+{n} دهب",
  nlT_khan_work:"شغله",nlT_khan_trav:"سفرياتك",nlT_khan_anvil:"السندان القديم",nlT_khan_vein:"منجم الجبل",nlT_khan_dream:"الحاجة اللي كان نفسه يعملها",
  nkh_c1:"بقينا بالليل؟ الفحم بيفضل أحمر أكتر من النور. والحدادين العواجيز كمان.",nkh_c2:"شايل سيف مش انت اللي عامله. مفيش مشكلة. حد عمله، وحد كان مهتم.",
  nkh_c3:"وريني إيديك. ...الكالو في الأماكن الصح. ماتخليهاش تطرى.",nkh_c4:"بيقولوا عدّيت بايران. الحديد هناك أنشف. والناس كمان.",
@@ -12667,14 +12691,14 @@ Object.assign(STR.ar,{nlTalk:"اتكلم",nlAsk:"عايز تتكلم في إيه
  nkh_dA:"هعملها. علشانكم انتو الاتنين.",nkh_dA2:"...يبقى اعملها كويس. وحط اسمه في حتة صغيرة، محدش يشوفها غيرك.",nkh_dB:"في حاجات لازم تفضل أحلام.",nkh_dB2:"يمكن. بس الحلم هو الحاجة الوحيدة اللي الحداد مايقدرش يبيعها. خلي حلمك معاك.",nkh_md1:"بدأت فيها؟ الحاجة اللي هتعيش بعدنا؟",
  nlT_ashur_border:"الحدود",nlT_ashur_north:"الشمال",nlT_ashur_irene:"إيرين",nlT_ashur_legacy:"بيت آشور",
  nas_c1:"طريق الشمال تاني. كل تقرير بقراه آخره جنازة.",nas_c2:"برا بالليل؟ أسوار باتريان واطية. خليك مكان المشاعل.",nas_c3:"رسول العدالة في قاعتي. الحرس بيقفوا مفرودين لما بتعدي.",
- nas_c4:"بنتي بتضحك تاني. أنا مديون لك بأكتر ما إيرل يقدر يدفع.",nas_c5:"اللي في قوتك عادة بيروحوا راينهارت. ليه فاضل في بلد على الحدود؟",
+ nas_c4:"بيقولوا بنت الإيرل شتايم رجعت بيتها وبتضحك تاني. والشمال كله عارف مين اللي رجّعها.",nas_c5:"اللي في قوتك عادة بيروحوا راينهارت. ليه فاضل في بلد على الحدود؟",
  nas_q3:"الجلد راح لبيادات الحرس. بقوا بيمشوا أبعد.",nas_q5:"ست جولمات. عمال المناجم بيشكروك، ومعاهم شكوى من الدوشة.",nas_q6:"قائد الفارين مات. باتريان هتنام الليلة.",
  nas_r0:"مسافر. قول عايز إيه.",nas_r1:"انت كنت مفيد لباتريان.",nas_r2:"قائد الحرس بيسأل عليك بالاسم.",nas_r3:"بيسموك درع باتريان في السوق.",nas_r4:"لو عندي لقب فارس أديه لحد، كان هيبقى ليك.",
  nas_b1:"المرتفعات بتبعت حرامية، وحقول التلج بتبعت البرد، والعاصمة بتبعت جوابات.",nas_bA:"اعرض تساعد الحرس.",nas_bA2:"القائد هيلاقيلك شغل. قوله إني اللي بعتك.",
  nas_bB:"اسأله ليه العاصمة مابتساعدش.",nas_bB2:"راينهارت بتعد العساكر زي الفلوس. وباتريان عملة صغيرة.",nas_mb2:"لسه بتفكر في راينهارت؟ وأنا كمان.",
  nas_n1:"المسافرين بيتكلموا عن كهف في آخر الشمال، بعد أوركات ضوء الصقيع. بيرجعوا يحكوا عن دروع متكومة زي التل.",nas_n2:"مش مصدق نصهم. لو رحت، هتعرف أنهي نص.",
  nas_n3:"لقيت الكهف؟ ...يبقى الحكايات كانت حقيقية. خليها في سرك، وإلا كل أهبل في الشمال هيروح يحفر.",
- nas_i1:"إيرين بتسأل عليك. بقولها إنك مشغول بتنقذ بنات الناس التانيين.",nas_iA:"قولها إني كويس.",nas_iA2:"هتفرح. هي بتقلق على اللي بيبقوا طيبين معاها.",nas_iB:"ماتقولش حاجة.",nas_iB2:"...زي ما تحب. الراجل العاقل مابيوعدش بنت إيرل.",nas_mi2:"إيرين سألت تاني. ماقلتش حاجة، زي ما طلبت.",
+ nas_i1:"الإيرل شتايم بيبعتلي جوابات. بنته إيرين بتسأل على اللي فكّها. بقولها إنك مشغول بتنقذ بنات الناس التانيين.",nas_iA:"قولها إني كويس.",nas_iA2:"هكتبهاله في جوابي لشتايم. هي بتقلق على اللي بيبقوا طيبين معاها.",nas_iB:"ماتقولش حاجة.",nas_iB2:"...زي ما تحب. الراجل العاقل مابيوعدش بنت إيرل.",nas_mi2:"جوابات شتايم لسه بتسأل عليك. وأنا ماقلتش حاجة، زي ما طلبت.",
  nas_l1:"بيت آشور حمى الحدود دي أجيال. جدي حارب هنا. وجده كمان.",nas_l2:"لما أمشي، عايزها في إيد حد اختارها، مش حد ورثها. خد دي، علشان خاطر الحرس.",
  nlT_piaro_soil:"الأرض",nlT_piaro_sword:"السيف اللي كان شايله",nlT_piaro_burrow:"الجحر اللي في غيطه",
  npi_c1:"القمر طلع. الفلاح المفروض يبقى نايم. عادات قديمة.",npi_c2:"الأرض دافية النهارده. حلو للجذور، وحلو للركب العجوزة.",npi_c3:"الغيط هادي دلوقتي. البطاطس طلعت بكل الألوان السنة دي.",npi_c4:"فلاح زيي! إيديك ريحتها طين. كويس.",npi_c5:"رجعت تحت الأرض مع الفجر. المرة الجاية هنبقى مستنيينها.",
@@ -12697,8 +12721,27 @@ Object.assign(STR.ar,{nlTalk:"اتكلم",nlAsk:"عايز تتكلم في إيه
  fd_kvein:"العرق اللي بيغني",fd_nend:"الكهف اللي في آخر الشمال",fd_burrow:"الجحر اللي تحت غيط بيارو",fdGot:"اكتشاف: {n}! (+{x} خبرة)",
  fburrowN:"حفّار الغيطان",crevnN:"عائد السلسلة",clantN:"فانوس الأرواح",cstridN:"عدّاء الجمر",o48Sh:"الفانوس!",o48Tip:"فانوس الأرواح اللي ورا العائد حاميه: طول ما هو منوّر ضربتك بعُشرها. طفّي الفانوس الأول.",fbqueenN:"ملكة الجحور",bscoutN:"كشّاف قطاع طرق",bswarmN:"سرب خفافيش الصدى",msnapN:"السلحفاة الطحلبية",
  ogFlare:"كشّاف قطاع الطرق ضرب شعلة! ({n} جايين جري)",ogUnder:"تحت الأرض!",ogMiss:"فشل",ogShell:"القوقعة!",
- tl_kheir:"وريث خان",tl_kheirD:"وعدت خان تعمل اللي ماقدرش يعمله.",tl_ffield:"حارس الغيطان",tl_ffieldD:"وقفت في غيط بيارو بالليل وموّت ملكة الجحور."});
-Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTrust:"They don't trust you enough yet (affinity {n})",nlLocked:"\"Some other time. When I know you better.\"",nlGold:"+{n} gold",
+ nlT_hanS_port:"بانجيا",nlT_hanS_sea:"طريق البحر",nlT_hanS_king:"الملك",nlT_hanS_guest:"ضيف بانجيا",
+ nhs_c1:"الفوانيس اللي على الأرصفة عشان المراكب. اللي في شباكي عشان الجوابات اللي لسه مارديتش عليها.",nhs_c2:"تلات مراكب وصلوا الصبح. اتنين منهم هيرجعوا بلدهم بأقل من اللي جابوه.",
+ nhs_c3:"رجّعت أروبي عايش. رجالة الملك لسه بيتخانقوا هل دي كانت رحمة ولا لأ.",nhs_c4:"أروبي خلاص راح. السوق فتح تاني تاني يوم الصبح كأن مفيش حاجة حصلت. دي بانجيا.",
+ nhs_c5:"الغرب اللي في قوتك عادةً مابيقعدوش كتير في بلد ميناء. الشرق بيشدهم لجوه أكتر.",
+ nhs_q0:"البوابة التالتة كسرها واحد من الغرب. الشيالين بتوعي لسه بيتخانقوا إزاي عملتها.",nhs_q3:"الطاوي خلصنا منه. الكتبة بتوعي رجعوا يناموا على مكاتبهم، وده اللي بيعرّفني إنهم حاسين بأمان.",nhs_q4:"أنا وبنتي رجعنا من سجن الحمم عشان واحد من الغرب راح لحد باب الملك بنفسه. بانجيا مابتنساش ده.",
+ nhs_r0:"مركب تانية، وغريب تاني.",nhs_r1:"أهلًا، الغربي اللي بيساعد على الأرصفة.",nhs_r2:"الشيالين بقوا بيقولوا اسمك. وبالخير غالبًا.",nhs_r3:"صاحب بانجيا اللي جاي من الغرب. اقعد، الشاي سخن.",nhs_r4:"لو بانجيا عندها بوابة شرف، كان اسمك اتكتب عليها.",
+ nhs_p1:"كل مركب جاية من الغرب بتربط على أرصفتي الأول. عايز تعرف إيه عن بانجيا؟",nhs_pA:"اسأله الغرب بيتاجروا في إيه.",nhs_pA2:"حديد وقماش وحكايات. الحكايات أكتر حاجة بتتباع، ومملكة تشو مابتاخدش عليها ضريبة.",
+ nhs_pB:"اسأله ليه أغلبهم بيرجعوا بسرعة.",nhs_pB2:"الشرق قديم وفخور. وأغلبكم صغيرين وصوتكم عالي. فيه ناس بتتعلم تسكت. ودول بيقعدوا.",nhs_mp1:"جبت حاجة تتاجر فيها غير الحكايات؟",nhs_mp2:"لسه هنا. يبقى بتتعلم تسكت.",
+ nhs_s1:"البحارة بيقولوا إن مراكب الغرب بتستنى الريح عند جزيرة في بحركم الجنوبي. بيسموها كورك.",nhs_s2:"عمري ما شفتها. لو ركبت البحر من هناك، اقرا الجزيرة بتقول إيه عن نفسها، وقولي البحارة بيكدبوا ولا لأ.",nhs_s3:"يبقى كورك موجودة بجد. البحارة هيبقوا مايتطاقوش لما يعرفوا إني صدقتهم.",
+ nhs_k1:"لما رجعت من عند أروبي، خبيتك عن رجالة الملك. سيد بانجيا مابيعملش كده بسهولة.",nhs_kA:"اشكره.",nhs_kA2:"بانجيا وفية. للملك ولضيوفها. وأغلب الأيام دول نفس الحاجة.",
+ nhs_kB:"اسأله لو هيعملها تاني.",nhs_kB2:"اسألني تاني لما الملك مايبقاش سامع. ...هو دايمًا سامع.",nhs_mk2:"الملك سامع النهارده؟ يبقى ماعنديش حاجة أقولها.",
+ nhs_g1:"رجعت لأرصفتي مرات أكتر من اللي أغلب الغرب بيجوا فيها للشرق أصلًا.",nhs_g2:"من النهارده بانجيا بتعتبرك ضيفها، مش غريب. والشيالين هيعرفوا ده قبل المغرب.",
+ nlT_doranS_earl:"الإيرل شتايم",nlT_doranS_lady:"الآنسة إيرين",nlT_doranS_kesan:"وادي كيسان",nlT_doranS_shadow:"شغل الضل",
+ ndo_c1:"الليل ده وقت شغلي. اتكلم بالراحة.",ndo_c2:"الآنسة رجعت بيتها. والإيرل بقى ينام تاني، وأنا كمان، لأول مرة.",ndo_c3:"إنت ماشي زي حد اتطارد قبل كده. كويس. ده اللي بيخليك عايش.",
+ ndo_c4:"كل ساعة هي تحت فيها ساعة زيادة.",ndo_c5:"اتأخرت، وإنت كمان اتأخرت. أنا مابتكلمش عن البدروم ده.",ndo_l1s:"الآنسة بتسأل عليك كل يوم. إنت بقيت من أهل البيت؛ وأنا لسه بحرس بابه. وأقرب كمان.",nlT_doranS_ladyS:"الآنسة إيرين",nlT_ashur_ireneS:"إيرين",nas_i1s:"الإيرل شتايم بيكتبلي إن بنته مابتتكلمش غير عنك. باتريان بتباركلك، وأنا كمان.",ndo_q1:"غبت يومين وبنت الإيرل اتخطفت. إنت دخلت، وهي رجعت بيتها. مش هاخد إجازة تاني.",
+ ndo_e1:"الإيرل مايعرفش شكلي. وده الصح.",ndo_eA:"اسأله ليه بيحرسه في السر.",ndo_eA2:"الحارس اللي بيتشاف، حد بيعمل حسابه.",ndo_eB:"اسأله الإيرل راجل كويس ولا لأ.",ndo_eB2:"هو أب. وده كفاية بالنسبالي.",ndo_me2:"لسه أب. ولسه ده كفاية.",
+ ndo_l1:"الآنسة إيرين سألتني مين اللي طلّعها من البدروم ده. قلتلها: مسافر إيده تقيلة.",ndo_lA:"قوله إنك مبسوط إنها بخير.",ndo_lA2:"هتعرف. عن طريق رجالة الضل المناسبين.",ndo_lB:"قوله إنها كانت حاجة بسيطة.",ndo_lB2:"ماكانتش حاجة بسيطة. بس هقولها إنك قلت كده.",ndo_ml1:"الآنسة فرحت لما عرفت. قالتها مرتين، ودي بالنسبالها خطبة.",
+ ndo_k1:"وادي كيسان واحد من الأماكن المحرمة في المملكة الخالدة. دخلته مرة، في مشوار مش هقول هو إيه.",ndo_k2:"لو رحت، اقرا اللي الوادي بيقوله عند مدخله. وبعدين تعالى قولي إنك طلعت.",ndo_k3:"دخلت وطلعت. يبقى التحذيرات صح، وإنت كمان.",
+ ndo_s1:"شغل الضل إنه يبقى في المكان اللي محدش بيبص فيه، قبل المشكلة بخطوة.",ndo_s2:"رجليك تنفع للشغلانة دي، حتى لو صبرك لأ. من النهارده رجالة الضل هيعتبروك واحد من أصحابهم.",
+ fd_cork:"جزيرة كورك",fd_kesan:"وادي كيسان",tl_pguest:"ضيف بانجيا",tl_pguestD:"هان سوكبونج بيعتبرك ضيف بانجيا، مش غريب.",tl_dshadow:"معروف عند رجالة الضل",tl_dshadowD:"دوران، ضل الإيرل شتايم، بيعدّك من أصحاب رجالة الضل.",tl_kheir:"وريث خان",tl_kheirD:"وعدت خان تعمل اللي ماقدرش يعمله.",tl_ffield:"حارس الغيطان",tl_ffieldD:"وقفت في غيط بيارو بالليل وموّت ملكة الجحور."});
+Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTrust:"They don't trust you enough yet (affinity {n})",nlTrustR:"They don't trust you enough yet (affinity {n}, or {r} in {z})",nlLocked:"\"Some other time. When I know you better.\"",nlGold:"+{n} gold",
  nlT_khan_work:"His work",nlT_khan_trav:"Your travels",nlT_khan_anvil:"The old anvil",nlT_khan_vein:"The mountain mine",nlT_khan_dream:"What he wanted to make",
  nkh_c1:"Night already? The coals stay red longer than the light. So do old smiths.",nkh_c2:"You carry a sword you didn't make. That's all right. Someone made it, and someone cared.",
  nkh_c3:"Show me your hands. ...Calluses in the right places. Don't let them go soft.",nkh_c4:"They say you went past Bairan. The iron up there is harder. So are the people.",
@@ -12718,14 +12761,14 @@ Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTr
  nkh_dA:"I'll make it. For both of you.",nkh_dA2:"...Then make it well. And put his name somewhere small, where only you will see it.",nkh_dB:"Some things should stay dreams.",nkh_dB2:"Maybe. But a dream is the only thing a smith can't sell. Keep yours.",nkh_md1:"Have you started it yet? The thing that will outlast us?",
  nlT_ashur_border:"The border",nlT_ashur_north:"The north",nlT_ashur_irene:"Irene",nlT_ashur_legacy:"The house of Ashur",
  nas_c1:"The north road again. Every report I read ends in a funeral.",nas_c2:"Out at night? Patrian's walls are low. Stay where the torches are.",nas_c3:"The Apostle of Justice in my hall. The guards stand straighter when you pass.",
- nas_c4:"My daughter laughs again. I owe you more than an earl can pay.",nas_c5:"Fighters your strength usually go to Reinhardt. Why stay in a border town?",
+ nas_c4:"Earl Steim's daughter is home, I hear, and laughs again. The north knows who brought her back.",nas_c5:"Fighters your strength usually go to Reinhardt. Why stay in a border town?",
  nas_q3:"The leather went to the guards' boots. They march further now.",nas_q5:"Six golems. The miners send their thanks, and a complaint about the noise.",nas_q6:"The deserter captain is dead. Patrian sleeps tonight.",
  nas_r0:"A traveller. State your business.",nas_r1:"You've been of use to Patrian.",nas_r2:"The guard captain asks for you by name.",nas_r3:"Patrian's shield, they call you in the market.",nas_r4:"If I had a knighthood to give, it would be yours.",
  nas_b1:"The highlands send raiders, the snowfields send the cold, and the capital sends letters.",nas_bA:"Offer to help the guards.",nas_bA2:"The captain will have work for you. Tell him I sent you.",
  nas_bB:"Ask why the capital doesn't help.",nas_bB2:"Reinhardt counts soldiers like coins. Patrian is a small coin.",nas_mb2:"Still wondering about Reinhardt? So am I.",
  nas_n1:"Travellers speak of a cave at the northern end, past the frost orcs. They come back with stories of armour piled up like a hill.",nas_n2:"I don't believe half of them. If you go, you'll know which half.",
  nas_n3:"You found the cave? ...Then the stories were true. Keep that to yourself, or every fool in the north will go digging.",
- nas_i1:"Irene asks about you. I tell her you're busy saving other people's daughters.",nas_iA:"Tell her I'm well.",nas_iA2:"She'll be glad. She worries about people who are kind to her.",nas_iB:"Say nothing.",nas_iB2:"...As you like. A wise man doesn't make promises to an earl's daughter.",nas_mi2:"Irene asked again. I said nothing, as you wished.",
+ nas_i1:"Earl Steim writes to me. His daughter Irene asks after the one who freed her. I tell her you're busy saving other people's daughters.",nas_iA:"Tell her I'm well.",nas_iA2:"I'll put it in my letter to Steim. She worries about people who are kind to her.",nas_iB:"Say nothing.",nas_iB2:"...As you like. A wise man doesn't make promises to an earl's daughter.",nas_mi2:"Steim's letters still ask after you. I say nothing, as you wished.",
  nas_l1:"The house of Ashur has held this border for generations. My grandfather fought here. His grandfather too.",nas_l2:"When I am gone I want it held by someone who chose it, not someone who inherited it. Take this, for the guards' sake.",
  nlT_piaro_soil:"The soil",nlT_piaro_sword:"The sword he once held",nlT_piaro_burrow:"The burrow in his field",
  npi_c1:"The moon's up. A farmer should be asleep. Old habits.",npi_c2:"The soil's warm today. Good for roots, good for old knees.",npi_c3:"The field is quiet now. The potatoes came up in every colour this year.",npi_c4:"A fellow farmer! Your hands smell of earth. Good.",npi_c5:"She went back under at dawn. Next time, we'll be waiting.",
@@ -12748,7 +12791,26 @@ Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTr
  fd_kvein:"The singing vein",fd_nend:"The cave at the northern end",fd_burrow:"The burrow under Piaro's field",fdGot:"Discovery: {n}! (+{x} XP)",
  fburrowN:"Field Burrower",crevnN:"Ridge Revenant",clantN:"Soul Lantern",cstridN:"Cinder Strider",o48Sh:"Lantern!",o48Tip:"The Soul Lantern behind the revenant shields it: while it burns your blows do a tenth. Put out the lantern first.",fbqueenN:"Burrow Queen",bscoutN:"Bandit Scout",bswarmN:"Echo Bat Swarm",msnapN:"Mossback Snapper",
  ogFlare:"A bandit scout fires a flare! ({n} come running)",ogUnder:"Underground!",ogMiss:"Miss",ogShell:"The shell!",
- tl_kheir:"Khan's Heir",tl_kheirD:"Promised Khan to make what he never could.",tl_ffield:"Guardian of the Fields",tl_ffieldD:"Stood in Piaro's field at night and put down the Burrow Queen."});
+ nlT_hanS_port:"Pangea",nlT_hanS_sea:"The sea road",nlT_hanS_king:"The king",nlT_hanS_guest:"A guest of Pangea",
+ nhs_c1:"The lamps on the piers are for the ships. The one in my window is for the letters I haven't answered.",nhs_c2:"Three ships in this morning. Two will sail home with less than they brought.",
+ nhs_c3:"You brought Arube back alive. The king's men still argue about whether that was mercy.",nhs_c4:"Arube is gone. The markets opened again the next morning, as if nothing had happened. That is Pangea.",
+ nhs_c5:"Westerners as strong as you don't usually stay long in a port town. The East pulls them further in.",
+ nhs_q0:"The third gateway, broken by a westerner. My dockhands still argue about how you did it.",nhs_q3:"The Daoist is dealt with. My clerks sleep at their desks again, which is how I know they feel safe.",nhs_q4:"My daughter and I are home from the Lava Prison because a westerner went to the king's own door. Pangea does not forget that.",
+ nhs_r0:"Another ship, another stranger.",nhs_r1:"Ah, the westerner who helps on the piers.",nhs_r2:"The dockhands say your name now. Mostly kindly.",nhs_r3:"Pangea's friend from the West. Sit, the tea is hot.",nhs_r4:"If Pangea had a gate of honour, your name would be on it.",
+ nhs_p1:"Every ship from the West ties up at my piers first. What do you want to know about Pangea?",nhs_pA:"Ask what the westerners trade.",nhs_pA2:"Iron, cloth and stories. The stories sell best, and the Cho Kingdom taxes none of them.",
+ nhs_pB:"Ask why most of them go home soon.",nhs_pB2:"The East is old and proud. Most of you are young and loud. Some learn to be quiet. Those stay.",nhs_mp1:"Brought anything to trade, besides stories?",nhs_mp2:"Still here. Learning to be quiet, then.",
+ nhs_s1:"The sailors say the western ships wait for the wind at an island in your South Sea. Cork, they call it.",nhs_s2:"I have never seen it. If you sail that way, read what the island says of itself, and tell me if the sailors lie.",nhs_s3:"So Cork is real. The sailors will be unbearable when they hear I believe them.",
+ nhs_k1:"When you came back from Arube, I hid you from the king's men. A lord of Pangea does not do that lightly.",nhs_kA:"Thank him.",nhs_kA2:"Pangea is loyal. To the king, and to its guests. Most days those are the same thing.",
+ nhs_kB:"Ask if he would do it again.",nhs_kB2:"Ask me again when the king is not listening. ...He is always listening.",nhs_mk2:"Is the king listening today? Then I have nothing to say.",
+ nhs_g1:"You have come back to my piers more times than most westerners come to the East at all.",nhs_g2:"From today Pangea counts you as its guest, not a stranger. The dockhands will know it by evening.",
+ nlT_doranS_earl:"Earl Steim",nlT_doranS_lady:"The lady Irene",nlT_doranS_kesan:"Kesan Canyon",nlT_doranS_shadow:"A shadow's work",
+ ndo_c1:"Night is my working hour. Speak quietly.",ndo_c2:"The lady is home. The Earl sleeps again, and so, for once, do I.",ndo_c3:"You walk like someone who has been hunted. Good. It keeps you alive.",
+ ndo_c4:"Every hour she is down there is an hour too many.",ndo_c5:"I was too late, and so were you. I don't speak of that basement.",ndo_l1s:"The lady asks after you every day. You are family to the house now; I watch its door all the same. Closer, if anything.",nlT_doranS_ladyS:"The lady Irene",nlT_ashur_ireneS:"Irene",nas_i1s:"Earl Steim writes that his daughter speaks of no one but you. Patrian sends its congratulations, and so do I.",ndo_q1:"Two days away and the Earl's daughter was taken. You went in, and she is home. I won't take a holiday again.",
+ ndo_e1:"The Earl does not know my face. That is how it should be.",ndo_eA:"Ask why he guards in secret.",ndo_eA2:"A guard you can see is a guard someone plans around.",ndo_eB:"Ask whether the Earl is a good man.",ndo_eB2:"He is a father. That is enough for me.",ndo_me2:"A father, still. That is still enough.",
+ ndo_l1:"The lady Irene asked me who brought her out of that basement. I told her: a traveller with a heavy hand.",ndo_lA:"Tell her I'm glad she's safe.",ndo_lA2:"She will hear it. Through the proper shadows.",ndo_lB:"Say it was nothing.",ndo_lB2:"It was not nothing. But I will tell her you said so.",ndo_ml1:"The lady was glad to hear it. She said so twice, which for her is a speech.",
+ ndo_k1:"Kesan Canyon is one of the Eternal Kingdom's forbidden zones. I went in once, on an errand I won't name.",ndo_k2:"If you go, read what the canyon has to say at its mouth. Then come and tell me you came out.",ndo_k3:"You went in and came out. Then the warnings are true, and so are you.",
+ ndo_s1:"A shadow's work is to be where no one looks, one step before the trouble.",ndo_s2:"You have the feet for it, if not the patience. From now on the shadows will count you among their friends.",
+ fd_cork:"Cork Island",fd_kesan:"Kesan Canyon",tl_pguest:"Guest of Pangea",tl_pguestD:"Han Seokbong counts you as Pangea's guest, not a stranger.",tl_dshadow:"Known to the Shadows",tl_dshadowD:"Doran, Earl Steim's shadow, counts you among the shadows' friends.",tl_kheir:"Khan's Heir",tl_kheirD:"Promised Khan to make what he never could.",tl_ffield:"Guardian of the Fields",tl_ffieldD:"Stood in Piaro's field at night and put down the Burrow Queen."});
 /* ---- Pagma's sword dances as in the novel (owner: "1:1 with the novel"; audit legends/legend-audit.md §1). One scale for
    all of them: the novel's damage x0.4 and its cooldowns /20. Link is a flurry on one target, Kill one blow that bleeds and
    brings despair for half your stamina, Wave rings out around you and slows, its waves homing on those further off,

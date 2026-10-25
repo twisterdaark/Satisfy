@@ -1,4 +1,4 @@
-# NPC life, first discoveries and the field's secret quest (v2.88, 2026-10-25)
+# NPC life, first discoveries and the field's secret quest (v2.88, v2.90; 2026-10-25)
 
 Owner's request (2026-10-25, encyclopedia §93-§95; the player Suki: "some NPCs are boring and say little, add secret
 quests and a reward for meeting people and exploring"): depth for people who already exist, through the systems that
@@ -10,7 +10,10 @@ affinity, tiers 30/60/90), `S.rep` (the town's ranks), `S.qs`, `S.books` (the di
 | What | Source | Label |
 |---|---|---|
 | Khan, the Winston blacksmith | ch 1-30 | the person CANON; every line ORIGINAL_SIDE_STORY |
-| Earl Ashur of Patrian, his daughter Irene | ch 1-60 | the person CANON; every line ORIGINAL_SIDE_STORY |
+| Earl Ashur ("the great magician Ashur", at the Gauss border) | ch 212-213 | the person CANON; every line ORIGINAL_SIDE_STORY |
+| Irene, Earl Steim's daughter (only spoken of, by Ashur and Doran) | ch 117; the game's Irene quest (`irn`) | CANON. v2.88 had Ashur call her his own daughter; v2.90 corrects it |
+| Doran, the shadow who secretly protects Earl Steim | the game's Irene quest | the person as the quest has him; every line ORIGINAL_SIDE_STORY |
+| Han Seokbong, lord of Pangea under the Cho Kingdom | the game's East Continent quests (ea0-ea4) | the person as the quests have him; every line ORIGINAL_SIDE_STORY |
 | Piaro, the farmer who once held a sword | the novel's Piaro | the person CANON; every line ORIGINAL_SIDE_STORY |
 | The farmers' field work and their affinity opening a hidden quest of a special character with low odds | ch 856 (Agriculture Development) | the mechanic CANON |
 | The Field at Night (the Burrow Queen in Piaro's field) | written for the game | ORIGINAL_SIDE_STORY |
@@ -23,7 +26,7 @@ No line is taken from a translation of the novel.
 
 ## The people (`NLD` in index.html)
 
-Each of Khan, Ashur, Piaro and the Patrian farmer has:
+Each of Khan, Ashur, Piaro, the Patrian farmer (v2.88), Han Seokbong and Doran (v2.90) has:
 - **lines for the moment**: night or day, your level, your class, the quests you did for them, your rank in their town.
   Never the same line twice running (`nlIdle`).
 - **a word once** after each of their quests, and once for each new rank of your name in their town. A word kept for once
@@ -43,6 +46,23 @@ Paid once per character, kept in `S.books['fd_'+id]`, never again after a reload
 | The singing vein (the mountain mine's walls) | Khan's topic at affinity 60 | 0.4% of the level, 6 ore, Insight +1 |
 | The cave at the northern end | Earl Ashur's topic at affinity 30 | 0.5% of the level, 3 mana stones, Insight +1 |
 | The burrow under Piaro's field | the farmer's word (affinity 90) | 1% of the level, a rainbow potato, Insight +1 |
+| Cork Island (v2.90) | Han Seokbong's sea road (affinity 30): the sailors' word | 0.5% of the level, 8 fish, Insight +1 |
+| Kesan Canyon (v2.90) | Doran's errand (affinity 60) | 0.5% of the level, 4 mana stones, Insight +1 |
+
+## v2.90: the second circle
+
+- **Han Seokbong** (Pangea): his warning while the king may learn he hid you (after Arube, until the king's delivery)
+  comes before the lines for the moment (after his once-words), never twice running; a word once after the third gateway (ea0) and once he is home from the Lava Prison (ea4); the Daoist (ea3) a line for the moment; Pangea's ranks; topics: Pangea
+  (what the westerners trade, why they go home), the sea road (the rumour of Cork Island), the king (after Arube: what
+  he risked), and at 90 Pangea's guest (the title Guest of Pangea, Pangea +50, once).
+- **Doran** (Earl Steim's shadow): takes gifts (likes a healing potion); a word once when the lady is home, another line if the rescue failed; topics: the Earl, the lady Irene (only after the
+  rescue), Kesan Canyon (the rumour), and at 90 a shadow's work (the title Known to the Shadows, once).
+- **Irene** is not a person you can talk to yet (she is in the game only in her quest, tied in the temple): her home,
+  Earl Steim's house, isn't in the world, and placing her anywhere else would make up where she lives. Ashur and Doran
+  speak of her, as they would to Earl Steim's son-in-law when that is you (the quest's 10%).
+- **Earl Ashur** takes no gifts (an official sees one as a bribe), so his trust also follows your name in Patrian
+  (`repTrust`): Respected opens his 30s, Honoured his 60s, Town Hero his 90. Before, his 60 and 90 topics were out of reach
+  (three quests of his: 36).
 
 ## The secret quest loop (ch 856's mechanic)
 
@@ -74,6 +94,10 @@ blow. A companion's blow goes through the same rules as yours. Spawned last, eac
 monsters keep their ids and places.
 
 ## Tests
+
+`tests/regression/npclife2.test.cjs` (4, v2.90): Han Seokbong's lines, his warning, his words once, Pangea's ranks; the
+sea road to Cork Island and the guest title once; Doran's lady topic, his word, Kesan Canyon, the shadow title; Ashur's
+Irene lines as Earl Steim's daughter.
 
 `tests/regression/npclife.test.cjs` (7): Khan's lines and his words once; a word kept until it is said; topics, choices
 remembered, affinity once, trust locks, gifts not spammable; a rumour then the place, a discovery once and kept through
