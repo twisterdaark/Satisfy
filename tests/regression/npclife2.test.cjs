@@ -55,7 +55,7 @@ test('the sea road: Han Seokbong\'s word on Cork Island, then the island, a disc
     assert.match(await say(g), /Cork is real/, 'and he remembers'); await closeD(g);
     // at 90: Pangea's guest, a title and its name in the town, once
     const gst = await g.eval(() => { const G = window.__G, S = G.S, N = window.__GNPC; S.aff.hanS = 90; const r0 = (S.rep || {}).zEaPangea | 0; N.topic('hanS', 'guest'); const r1 = S.rep.zEaPangea | 0; G.advance(); G.advance(); N.topic('hanS', 'guest'); return { tl: !!S.tl.pguest, rep: r1 - r0, again: (S.rep.zEaPangea | 0) - r1 }; });
-    assert.deepEqual(gst, { tl: true, rep: 50, again: 0 });
+    assert.deepEqual(gst, { tl: false, rep: 50, again: 0 });   // Pangea's honour, no title (owner 2026-10-25: fewer titles)
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
@@ -80,8 +80,8 @@ test('Doran: the lady\'s topic only after she is home, his word once, Kesan Cany
     const k = await g.eval(() => { const G = window.__G, S = G.S, N = window.__GNPC; S.xp = 0; N.fdLm('lmKesan'); const pre = !!(S.books || {}).fd_kesan; S.aff.doranS = 60; N.topic('doranS', 'kesan'); G.advance(); G.advance();
       const x0 = S.xp; N.fdLm('lmKesan'); return { pre, got: !!S.books.fd_kesan, xp: S.xp - x0, need: G.xpNeed() }; });
     assert.equal(k.pre, false); assert.equal(k.got, true); assert.equal(k.xp, Math.round(k.need * .005));
-    const s = await g.eval(() => { const S = window.__G.S; S.aff.doranS = 90; window.__GNPC.topic('doranS', 'shadow'); return !!S.tl.dshadow; });
-    assert.equal(s, true);
+    const s = await g.eval(() => { const S = window.__G.S; S.aff.doranS = 90; window.__GNPC.topic('doranS', 'shadow'); return { tl: !!S.tl.dshadow, said: !!S.met['doranS#h_shadow'] }; });
+    assert.deepEqual(s, { tl: false, said: true }, 'his word, no title (owner 2026-10-25: fewer titles)');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });

@@ -7,6 +7,21 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25wsands', ver: '2.93', d: '2026-10-25',
+      ar: ["منطقة جديدة من الرواية: رمال غرب ريدان (لفل 145+). الأرض اللي غرب سور ريدان بقت صحرا زي ما في الرواية، لأن الدود العملاق ظهر من 10 سنين وخرّب ريدان (فصل 217 و228). طريق باتريان لسه بيعدي من وسطها.",
+        "الدودة العملاقة (لفل 154 لـ160): تحت الرمل مفيش حاجة بتأذيها، وبتمشي وراك كتل رمل. لما الرمل يتهز حواليها في دايرة اخرج منها بسرعة، لأنها بتطلع تعض اللي جوه الدايرة، وبعدها بتحارب شوية وترجع تغطس.",
+        "ضفدع الصحرا (لفل 148 لـ154): لما واحد يحاربك، كل الضفادع اللي جنبه بتيجي معاه (\"عشرات من ضفادع الصحرا بيجروا ورانا\"، فصل 230).",
+        "عش الدود العملاق تحت الصخور في شمال غرب الرمال (\"عش صغير للدود العملاق تحت الجبل\"، فصل 230): لو قربت منه بيصحّي الدود اللي حواليه، وطول ما فيه دودة جنبه بياخد نص الضرب. بيرجع بعد 5 دقايق.",
+        "مهمتين من المسؤول رابيت (لفل 150 و155): \"نرجّع الغرب\" (اقتل 12 دودة عملاقة) وبعدها \"العش اللي تحت الجبل\" (دمّر العش). ورابيت بقى بيتكلم عن الغرب ونهر هيبند.",
+        "اكتشافين جداد مرة واحدة بس: رمال غرب ريدان والعش اللي تحت الجبل، بعد كلام رابيت عنهم.",
+        "ألقاب أقل: كلام الشخصيات وهي عند علاقة 90 (خان، هان سوكبونج، دوران، الإيرل شتايم، إيرين، رابيت) بقى من غير لقب. بيدي اللي ليه معنى (سمعة في المدينة أو دهب) أو كلمة وبس، ومهمات رابيت الجديدة من غير لقب. اللي خد لقب منهم قبل كده هيفضل معاه."],
+      en: ["A new region from the novel: Reidan's Western Sands (Lv 145+). The land west of Reidan's wall is a desert now, as in the novel, since the giant worms appeared 10 years ago and ruined Reidan (ch 217, 228). The road from Patrian still crosses it.",
+        "The Giant Worm (154 to 160): under the sand nothing hurts it, and it comes after you as a ridge of sand. When the sand heaves round it in a ring, get out: it bursts up biting whoever is in the ring, fights a little, then dives again.",
+        "The Desert Toad (148 to 154): when one fights you, every toad near it comes too (\"Dozens of desert toads are chasing us\", ch 230).",
+        "The Giant Worm Nest below the rocks at the north-west of the sands (\"a small nest of giant worms below the mountain\", ch 230): come near and it wakes the worms round it, and while a worm is by it, it takes half. It comes back after 5 minutes.",
+        "Two quests from Administrator Rabbit (level 150 and 155): Restoring the West (put down 12 giant worms), then The Nest below the Mountain (destroy the nest). Rabbit talks about the west and the Hebend River now.",
+        "Two new first discoveries, once only: Reidan's Western Sands and the nest below the mountain, after Rabbit's word about them.",
+        "Fewer titles: the people's topics at affinity 90 (Khan, Han Seokbong, Doran, Earl Steim, Irene, Rabbit) give no title now, only what means something there (reputation or gold) or their word, and Rabbit's new quests give none. Whoever already got one of those titles keeps it."] },
     { v: '2026-10-25wcastle', ver: '2.92', d: '2026-10-25',
       ar: ["قلعة وينستون: القاعة اللي جنب حدادة خان بقت قلعة الإيرل شتايم زي ما في الرواية، وليها أوضة تدخلها.",
         "الإيرل شتايم، إيرل الشمال، جوه قلعته: كلامه بيتغير بالليل والنهار، وبيقول كلمة مرة واحدة بعد ما ترجّع بنته وبعد ما خان يغلب شركة ميرو. مواضيعه: الشمال، وشركة ميرو، وإيرين بعد ما ترجع (وبيكلمك كجوز بنته لو انت كده). مابياخدش هدايا، فثقته بتمشي مع اسمك في وينستون، ولما تبقى بطل المدينة بيديك قسم القلعة (لقب جديد و+50 سمعة في وينستون، مرة واحدة).",

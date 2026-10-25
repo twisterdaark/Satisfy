@@ -1762,7 +1762,7 @@ const SETS={gd:{it:['gdneck','gdbrace'],b:{2:{def:100}}},ez:{it:['ezneck','ezbra
  rp:{it:['rpbow','rparmor','rphelm','rpboots'],b:{2:{hrg:.2},4:{hrg:.4}}},tg:{it:['tgarmor','tghelm','tggloves','tgboots'],b:{3:{hpp:.1,dfp:.1},4:{hpp:.15,dfp:.15}}},
  dg:{it:['dgspear','dggaunt','dgarmor','dghelm'],b:{2:{dm:.06},4:{dm:.12,as:.06}}},tt:{it:['ttthorn','ttshell','tthelm','ttboots'],b:{3:{as:.1,stc:.15},4:{as:.12,stc:.2,def:30}}}};
 const GEMS={ruby:{dm:.06},topaz:{as:.08},emer:{ms:.06},sapph:{mpb:30},diam:{dm:.03,as:.04,ms:.03},thund:{}},GEMK=Object.keys(GEMS),GEMC=500;
-const REID={x0:514,x1:561,y0:62,y1:102,mx:556,my:69},PEAK={x:628,y:17,rx:22,ry:11},YATAN={x0:452,x1:478,y0:8,y1:30},KESAN={x0:416,x1:470,y0:96,y1:118,mx:443},CAST={x0:522,x1:553,y0:30,y1:56},MULL={x:584,y:24,rx:11,ry:8};
+const REID={x0:514,x1:561,y0:62,y1:102,mx:556,my:69},PEAK={x:628,y:17,rx:22,ry:11},YATAN={x0:452,x1:478,y0:8,y1:30},KESAN={x0:416,x1:470,y0:96,y1:118,mx:443},CAST={x0:522,x1:553,y0:30,y1:56},MULL={x:584,y:24,rx:11,ry:8},WSAND={x0:472,x1:512,y0:56,y1:95,nx:478,ny:64};   // WSAND: Reidan's Western Sands (v2.93), the nest below the rocks at its north-west
 const DSPAWN=[['cgob',236,284,WMH+4,WMH+19,12],['cgob',294,342,WMH+4,WMH+19,7],['gshaman',294,342,WMH+4,WMH+19,6],['gshaman',352,384,WMH+4,WMH+19,4],['kobold',414,462,WMH+4,WMH+19,12],['kobold',472,500,WMH+4,WMH+19,6],['golem',530,572,WMH+4,WMH+19,8],['cgolem',550,572,WMH+4,WMH+19,3],['cgolem',588,630,WMH+4,WMH+19,6],['skel',646,690,WMH+4,WMH+19,8],['wraith',662,690,WMH+4,WMH+19,5]],DBOSS=[['gwar',394,WMH+11],['kking',512,WMH+11],['bknight',682,WMH+11]],
  // the Saharan Empire's Abyss floors, spawned last from their own seed so every older spot keeps its monsters
  SDSPAWN=[['pguard',788,836,WMH+4,WMH+19,10],['aprison',846,894,WMH+4,WMH+19,9],['pguard',846,894,WMH+4,WMH+19,5]],SDBOSS=[['hydra',934,WMH+11]];
@@ -2521,6 +2521,17 @@ let herbSpot=null;
  herbSpot=n=>{for(let k=0;k<300;k++){const x=n.tx+Math.round((Math.random()-.5)*60),y=n.ty+Math.round((Math.random()-.5)*40);if((n.ty<0?y<-NR+4||y>-3:n.ty>=OWH?y<OWH+3||y>=WMH-3:y<4||y>=OWH-2)||x<2||x>=MW-2||!ok(x,y)||inTownT(x,y)||swampAt(x*TS,y*TS)||(n.kind==='bherb')!==(wetNear(x,y)||snowAt(x,y))&&n.ty>=0&&n.ty<OWH||nodes.some(o=>o!==n&&Math.abs(o.tx-x)+Math.abs(o.ty-y)<6))continue;n.tx=x;n.ty=y;n.x=x*TS+8;n.y=y*TS+12;return;}};
  const fire=(x,y)=>CAMPS.push({x:x*TS+8,y:y*TS+12});fire(wX(128),86);fire(8,19);fire(wX(190),86);fire(534,86);fire(694,86);NCAMP.forEach(([x,y])=>fire(x,y+1));SCAMP.forEach(([x,y])=>fire(x,y+1));FCAMP.forEach(([x,y])=>fire(x,y+1));FSCAMP.forEach(([x,y])=>fire(x,y+1));
  let off=0;GAPS.forEach(([g,w])=>{const cx=Math.round(g+off+w/2);off+=w;fire(cx-1,76);});})();
+// Reidan's Western Sands (v2.93; ch 217: "everything changed 10 years ago when the giant worms appeared"; ch 228: "this
+// large territory suddenly became a desert"; ch 360: "the desert city of Reidan"): the land west of Reidan's wall is sand.
+// Painted after the herbs and the trees are placed, and with the same tiles solid as before (grass and flowers to sand,
+// trees to rocks: "the mountain" of the nest is the old wood at its north-west), so no dice of the spawns or the herbs
+// anywhere move. Its trees are taken off, its herbs move to the grass west of it, and its edge is ragged.
+(function genWSand(){const W=WSAND,r=mulberry32(2170),inW=(x,y)=>x>=W.x0&&x<=W.x1&&y>=W.y0&&y<=W.y1;
+ for(let y=W.y0-3;y<=W.y1+3;y++)for(let x=W.x0-4;x<=W.x1;x++){const v=at(x,y),edge=Math.max(W.x0-x,W.y0-y,y-W.y1,0),go=inW(x,y)||r()<.62-edge*.17;
+  if(!go||v===PA)continue;if(v===GR||v===FL)setT(x,y,DR);else if(v===TR&&inW(x,y))setT(x,y,RK);}
+ for(let i=VT.length-1;i>=0;i--){const tr=VT[i];if(at(tr.tx,tr.ty)!==TR){VT.splice(i,1);VTM.delete(tr.k);VTN.delete(vtK(tr.tx,tr.ty));}}
+ for(const n of nodes){if(!(n.kind==='herb'||n.kind==='bherb')||at(n.tx,n.ty)!==DR)continue;
+  for(let x=W.x0-6;x>W.x0-40;x--){const v=at(x,n.ty);if((v===GR||v===FL)&&!SOLID[at(x-1,n.ty)]&&!SOLID[at(x+1,n.ty)]){n.tx=x;n.x=x*TS+8;break;}}}})();
 // Haalrune Swamp: a murky wash over the ground, with reeds
 {const r=mulberry32(3131);for(const [cx,cy,rx,ry] of SWAMP){for(const k of [1.08,.96,.84])blob(gg,cx*TS+8,cy*TS+8,rx*TS*k,ry*TS*k,'rgba(46,66,38,.2)');for(let i=0;i<rx*ry*2;i++){const a=r()*6.28,d=Math.sqrt(r()),x=(cx+Math.cos(a)*rx*d)*TS,y=(cy+Math.sin(a)*ry*d)*TS;if(at(x/TS|0,y/TS|0)===WA)continue;R(gg,x,y-5,1,6,'#6a8a3a');R(gg,x+2,y-3,1,4,'#4e6e2c');R(gg,x,y-6,1,1,'#8a6a3a');}}}
 // the poison swamps of the Chaos Mountains: a sickly violet wash, dead reeds
@@ -5583,7 +5594,7 @@ function evSpawn(type,x,y,gen){const so=gen?sol0:solidT;if(so(x/TS|0,y/TS|0)){le
 // the last and every third one brings a captain. A knocked-out NPC lies there until the invasion ends; online this is
 // shared state (WS.nko), so everyone sees the same town fall or hold.
 const NPCHP=100,npcKO=id=>!!(WS&&WS.nko&&WS.nko[id]>wNow()); // the server clock, as EV.end is (SAT-ONLINE-044: a device whose clock was off saw them stand up)
-function evRef(T){const cx=T.rx*TS+8,cy=T.ry*TS+8,ms=mons.filter(m=>!m.tmp&&!m.evt&&!MT[m.type].boss&&Math.hypot(m.x-cx,m.y-cy)<760).sort((a,b)=>a.lv-b.lv);
+function evRef(T){const cx=T.rx*TS+8,cy=T.ry*TS+8,ms=mons.filter(m=>!m.tmp&&!m.evt&&!m.wsz&&!MT[m.type].boss&&Math.hypot(m.x-cx,m.y-cy)<760).sort((a,b)=>a.lv-b.lv);
  if(!ms.length)return {lv:10,hp:600,dmg:60,xp:50};const med=ms[ms.length>>1].lv,near=ms.filter(m=>Math.abs(m.lv-med)<=Math.max(6,med*.3)),av=f=>near.reduce((a,m)=>a+f(m),0)/near.length;
  return {lv:Math.round(med),hp:av(m=>m.max),dmg:av(m=>MT[m.type].dmg),xp:av(m=>MT[m.type].xp)};}
 // only sides whose wall has an opening where the march goes in (owner report: invaders stuck under Reidan's closed south wall)
@@ -6175,6 +6186,11 @@ Object.assign(MT,{ksap:{lv:[74,80],hp:7000,dmg:420,spd:58,xp:700,gold:18,aggro:1
  edune:{lv:[302,310],hp:2200000,dmg:9800,spd:46,xp:80000,gold:330,aggro:130,r:8,oy:18,drop:[['mstone',.4],['ore',.6]]},
  tsap:{lv:[100,106],hp:30000,dmg:1500,spd:0,xp:3600,gold:30,aggro:170,r:7,oy:20,drop:[['wood',2],['herb',.5]]},
  ssent:{lv:[104,110],hp:70000,dmg:2400,spd:28,xp:5200,gold:60,aggro:60,r:9,oy:32,drop:[['ore',1.2],['mstone',.5]]}});
+// Reidan's Western Sands (v2.93): the giant worms (ch 217, 228, 230), the desert toads (ch 230) and the worms' nest below the
+// mountain (ch 230). The places and the creatures are the novel's; how they fight and their levels are the game's.
+Object.assign(MT,{gworm:{lv:[154,160],hp:260000,dmg:3400,spd:40,xp:13000,gold:170,aggro:150,r:10,oy:40,drop:[['ore',.8],['mstone',.6]]},
+ dtoad:{lv:[148,154],hp:120000,dmg:2500,spd:52,xp:8000,gold:100,aggro:130,r:7,oy:18,drop:[['leather',.6],['mstone',.3]]},
+ gwnest:{lv:[160,160],hp:1600000,dmg:1,spd:0,xp:50000,gold:2500,aggro:140,r:16,oy:26,drop:[['mstone',1],['ore',1],['mith',.3]]}});
 // the Patrian farmer's rows and Piaro's field (tiles), for the burrowers and the secret quest (var: read when the first world is built)
 var FWF={x:373,y:96},PIF={x:290,y:68},O48L={dx:20,dy:-10},O48S=[],O48R=[],O48P=new Map();
 const SPAWN=[['rabbit',104,150,42,62,14],['rabbit',147,157,62,100,6],['boar',147,157,64,104,8],['boar',100,118,44,62,5],['goblin',109,152,105,116,14],['merman',80,106,88,112,12],['pwolf',64,100,42,90,12],
@@ -6559,7 +6575,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   // the 32nd Great Demon Belial at the gate of hell (major 7), after them for the same reason
   {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
-  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();}
+  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();wsSpawn();}
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
  {const now=Date.now(),D=(S&&S.mrt)||{};for(const m of mons){const u=D[mobKey(m)];if(u>now){m.dead=true;m.dying=0;m.rt=(u-now)/1000;}}}
@@ -7010,7 +7026,7 @@ function killMon(m){const b=MT[m.type];m.dead=true;lpSrc(m);if(m.spar){if(SPAR&&
  if(!m.bh&&!m.noLoot)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,RCKEY.includes(k)?1:p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p*(1+secB('drop')))addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill (a divine beast's breath is one)
  if(!m.bh&&!m.noLoot&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}if(!m.noLoot){rbBossDrop(m,b);cosDrop(m,b);}
  if(m.lv>=20&&!m.tmp&&!m.noLoot){if(b.boss){addMat('estone',1+(m.lv/50|0));if(rand()<.12)addMat('pstone',1);if(rand()<.25)addMat('bstone',1);}else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
- crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;sc2Kill(m);mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);p4Kill(m);p5Kill(m);fdwKill(m);rbcKill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
+ crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;sc2Kill(m);mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);p4Kill(m);p5Kill(m);fdwKill(m);rbcKill(m);wsKill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
  if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;annW('annGuard',{lv:S.lv});}giveTitle('forest');S.raid=0;}
  if(m.type==='gchief'){shake=.3;giveTitle('chief');}
  if((S.kills.rabbit||0)+(S.kills.goblin||0)>=40)giveTitle('hunter');
@@ -7080,7 +7096,7 @@ Object.assign(STR.en,{graveT2:'"At a small hill north of Winston. There were aro
    system-window glint, not a world object. First read raises Insight by 1 (like the books on shelves).
    [key, x, y, abs]: abs=0 means original-map columns (wX), abs=1 means world tiles. Moved to the nearest open tile. */
 const LMD=[['lmNEnd',179,10,1],['lmOut',40,64,0],['lmMine',21,9,0],['lmGrey',45,25,0],['lmSnow',160,18,0],['lmOrc',112,24,0],
- ['lmCanyon',131,104,0],['lmLoran',127,113,0],['lmKesan',443,98,1],['lmYatan',465,28,1],
+ ['lmCanyon',131,104,0],['lmLoran',127,113,0],['lmKesan',443,98,1],['lmWSand',496,72,1],['lmWNest',475,66,1],['lmYatan',465,28,1],
  ['lmChaos',303,-70,1],['lmSanju',180,-73,1],['lmRidge4',265,-149,1],['lmPedro',122,184,1],['lmGauss',396,184,1],['lmCork',640,246,1],
  ['lmSuaz',742,74,1],['lmRolling',788,79,1],['lmDran',DRAN(118)-4,118,1],['lmTatur',820,30,1],['lmTitan',884,86,1],['lmTemple',875,72,1],['lmBMine',931,54,1],['lmTower',936,75,1],['lmAbyss',ABYSS.x+4,ABYSS.y+ABYSS.ry+2,1],['lmButin',913,186,1],
  ['lmRCity',697,86,1],['lmRPalace',689,55,1],['lmRTrain',670,55,1],['lmRFame',693,65,1],['lmRWest',649,64,1],['lmRTemple',660,53,1],['lmRWall',639,85,1]];
@@ -9940,7 +9956,7 @@ const ZR=[['zPat',172,64,208,100],['zRuin',209,68,223,98],['zHigh',158,39,223,63
 // each town's recommended level (owner 2026-10-24, a player's idea): the middle level of the 30 monsters nearest it,
 // worked out once the world has its monsters
 let TRL=null;function townLv(k){const T0=TOWNS.find(T=>T.k===k);if(!T0)return 0;if(!TRL&&mons&&mons.length>50){TRL={};for(const T of TOWNS){const cx=(T.x0+T.x1)/2,cy=(T.y0+T.y1)/2,hw=(T.x1-T.x0)/2;
-  const L=mons.filter(m=>MT[m.type]&&!MT[m.type].boss&&m.sx!=null&&!(typeof TFB!=='undefined'&&TFB.includes(m))).map(m=>[Math.hypot(m.sx/TS-cx,m.sy/TS-cy),MT[m.type].lv[0]]).filter(a=>a[0]<hw+60).sort((a,b)=>a[0]-b[0]).slice(0,30).map(a=>a[1]).sort((a,b)=>a-b);
+  const L=mons.filter(m=>MT[m.type]&&!MT[m.type].boss&&m.sx!=null&&!m.wsz&&!(typeof TFB!=='undefined'&&TFB.includes(m))).map(m=>[Math.hypot(m.sx/TS-cx,m.sy/TS-cy),MT[m.type].lv[0]]).filter(a=>a[0]<hw+60).sort((a,b)=>a[0]-b[0]).slice(0,30).map(a=>a[1]).sort((a,b)=>a-b);
   if(L.length>=5)TRL[T.k]=Math.max(1,Math.round(L[L.length>>1]/5)*5);}}return TRL&&TRL[k]||0;}
 Object.assign(STR.ar,{townLv:'لفل مقترح {n}+'});Object.assign(STR.en,{townLv:'Recommended Lv {n}+'});
 Object.assign(STR.ar,{setB:'الإعدادات',nmB:'غيّر اسم الشخصية',nmH:'اسم جديد للشخصية',nmT:'من 2 لـ12 حرف.',nmDone:'اسمك بقى {n}',nameNo:'الاسم ده مش مسموح، اختار اسم تاني',nameForced:'اسمك فيه كلام مش مسموح بيه، لازم تغيّره عشان تكمل.',nmNeed:'محتاج تذكرة تغيير الاسم، بيبيعها التاجر بـ{g} دهب',oBuyNm:'تذكرة تغيير الاسم ({g} دهب)',nmGot:'اشتريت تذكرة تغيير الاسم',nmtick:'تذكرة تغيير الاسم',nmtickD:'بتغيّر اسم شخصيتك مرة واحدة (اليوزر آي دي زي ما هو). استعملها من الشنطة أو من الإعدادات.\nلو اسمك فيه كلام مش مسموح بيه، التغيير ببلاش.'});
@@ -9957,7 +9973,7 @@ function sahZone(tx,ty){const T=TITAN,B=BUTIN,R=ROLL,A=ABYSS;
  if(ty>96&&tx<854)return 'zDran';
  if(asmoIn(tx,ty))return 'zAsmo';if(ty<T.y0-2&&tx>=846)return 'zSahHills';
  return tx<856&&ty<=78?'zTatur':'zSahFarm';}
-function zoneAt(x,y){if(y>=VCY0*TS){const C=vcAt(x/TS,y/TS);return C?'zVc'+C.n:'void';}if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;if(inRace(x,y))return 'zRace';return (roomAt(x,y)||{}).z||'zWin';}if(x>=WMW*TS)return eaReg(x/TS|0,y/TS|0);if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS,pz=p3Zone(tx,y/TS)||p4Zone(tx,y/TS)||p5Zone(tx,y/TS);if(pz)return pz;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
+function zoneAt(x,y){if(y>=VCY0*TS){const C=vcAt(x/TS,y/TS);return C?'zVc'+C.n:'void';}if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;if(inRace(x,y))return 'zRace';return (roomAt(x,y)||{}).z||'zWin';}if(x>=WMW*TS)return eaReg(x/TS|0,y/TS|0);if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS,pz=p3Zone(tx,y/TS)||p4Zone(tx,y/TS)||p5Zone(tx,y/TS);if(pz)return pz;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=WSAND.x0*TS&&x<(WSAND.x1+1)*TS&&y>=WSAND.y0*TS&&y<(WSAND.y1+1)*TS)return 'zWSand';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
 /* fog of war (Nitro's feedback): the map shows only what you have seen, in cells of FOGC tiles, saved in S.fog. A paper map
    (sold at inns) draws the whole land in sepia, but no monsters, people or quests where you haven't been yourself. */
 const FOGC=8,FOGW=Math.ceil(MW/FOGC),FOGH=Math.ceil((WMH+NR)/FOGC);let FOG=null,fogT=0,fogV=0;
@@ -10303,7 +10319,7 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  // danger regions: red wash with a dashed edge
  g.save();g.setLineDash([6*dpr,4*dpr]);g.lineWidth=1.2*dpr;g.strokeStyle='rgba(226,73,58,.7)';g.fillStyle='rgba(140,10,10,.16)';[[28,2,34,40],[2,44,62,42]].forEach(([x,y,w,h])=>{g.fillRect(X(x),Y(y),w*sc,h*sc);g.strokeRect(X(x),Y(y),w*sc,h*sc);});g.restore();
  if(MV.z>=2.5){g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=1;for(let x=MV.a;x<=MV.b;x+=10){g.beginPath();g.moveTo(X(x),Y(-NR));g.lineTo(X(x),Y(WMH));g.stroke();}for(let y=-NR;y<=WMH;y+=10){g.beginPath();g.moveTo(X(MV.a),Y(y));g.lineTo(X(MV.b),Y(y));g.stroke();}}
- [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAsmo',ASMO.gx,ASMO.y0-2],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3],...EAL].forEach(([k,x,y])=>{if(!(inM(x,y)&&onS(X(x),Y(y),240*dpr)))return;MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`});
+ [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zWSand',492,66],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAsmo',ASMO.gx,ASMO.y0-2],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3],...EAL].forEach(([k,x,y])=>{if(!(inM(x,y)&&onS(X(x),Y(y),240*dpr)))return;MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`});
   const tl=townLv(k);if(tl)MM.label(g,t('townLv',{n:tl}),X(x),Y(y)-(13+MV.z*2.4)*dpr,{size:Math.round((9+MV.z)*dpr),color:tl>S.lv+10?'#ff9a8a':'#9fe0ff',font:F,weight:600});});   // the town's recommended level above its name (under it, it sat on the townsfolk's names)
  ANVILS.forEach(a=>{if(inM(a.tx,a.ty)&&onS(X(a.tx+.5),Y(a.ty+.5)))MM.marker(g,'anvil',X(a.tx+.5),Y(a.ty+.5),u*1.2);});
  mons.forEach(m=>{if(m.dead||m.tdum||!inM(m.x/TS,m.y/TS)||!onS(X(m.x/TS),Y(m.y/TS))||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
@@ -10564,7 +10580,7 @@ function update(dt){
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
-  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)})+(townLv(z)?' · '+t('townLv',{n:townLv(z)}):''));ZT[z]=gTime;}S.zone=z;exZone(z);dtEnter(z);if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold'||z==='zPedro'||z==='zGauss'||z==='zSSea')&&S.lv<160||/^zChaos/.test(z)&&S.lv<220||z==='zSuaz'&&S.lv<150||z==='zDran'&&S.lv<180||z==='zAsmo'&&S.lv<250||(/^zAbyss/.test(z)||z==='zTaleren')&&S.lv<360||/^zEa/.test(z)&&!TOWNS.some(T=>T.k===z)&&S.lv<(z==='zEaMur'?440:300))&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
+  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)})+(townLv(z)?' · '+t('townLv',{n:townLv(z)}):''));ZT[z]=gTime;}S.zone=z;exZone(z);dtEnter(z);if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold'||z==='zPedro'||z==='zGauss'||z==='zSSea')&&S.lv<160||/^zChaos/.test(z)&&S.lv<220||z==='zSuaz'&&S.lv<150||z==='zWSand'&&S.lv<145||z==='zDran'&&S.lv<180||z==='zAsmo'&&S.lv<250||(/^zAbyss/.test(z)||z==='zTaleren')&&S.lv<360||/^zEa/.test(z)&&!TOWNS.some(T=>T.k===z)&&S.lv<(z==='zEaMur'?440:300))&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
  // the Chaos Mountains past the first ridge: the blizzard cuts the flesh, 1/2/3 % of max health every 4 s (never the last
  // point); a campfire keeps it off
  if(P.y<NWALL*TS&&!P.ghost){const k=ridgeAt(P.x/TS,P.y/TS);if(k>0&&(P.chT=(P.chT??4)-dt)<=0){P.chT=4;if(!CAMPS.some(c=>Math.hypot(c.x-P.x,c.y-P.y)<64)){const d=Math.max(1,Math.round(maxHP()*.01*k));P.hp=Math.max(1,P.hp-d);numP(-26,'-'+d,'#bfe6ff');hudDirty=true;}}}
@@ -12474,10 +12490,10 @@ var OGB={
  msnap:(m,b,dx,dy,d,mr,dt)=>{if(m.led){m.ogF=0;return false;}m.ogT=(m.ogT||0)-dt;if(m.ogT<=0||!m.ogF){m.ogT=1.5;m.ogF=Math.sign(dx)||1;}return false;},
 };OGB.fbqueen=OGB.fburrow;
 // a blow that cannot land: a burrower underground; a single blow on the swarm misses one time in three
-function ogImm(m,o){const k=m.type;if(k==='ssent')return og2Imm(m);if((k==='fburrow'||k==='fbqueen')&&ogBur(m)!=='up'){num(m.x,monY(m)-14,t('ogUnder'),'#c8a070',false);return true;}
+function ogImm(m,o){const k=m.type;if(k==='ssent')return og2Imm(m);if(k==='gworm')return wsImm(m);if((k==='fburrow'||k==='fbqueen')&&ogBur(m)!=='up'){num(m.x,monY(m)-14,t('ogUnder'),'#c8a070',false);return true;}
  if(k==='bswarm'&&!o.skill&&!o.aura&&!o.dot&&rand()<.33){num(m.x,monY(m)-14,t('ogMiss'),'#cfe8ff',false);SFX.miss&&SFX.miss();return true;}return false;}
 // what a blow does: one blow kills one bat (a skill hits them all); the shell from the front takes a tenth
-function ogDmg(m,dmg,o){const k=m.type;if(k==='edune'||k==='tsap')return og2Dmg(m,dmg,o);if(k==='crevn')return o48Dmg(m,dmg,o);if(k==='bswarm'&&!o.skill&&!o.aura)return Math.min(dmg,Math.ceil(m.max/6));
+function ogDmg(m,dmg,o){const k=m.type;if(k==='edune'||k==='tsap')return og2Dmg(m,dmg,o);if(k==='gwnest')return wsDmg(m,dmg,o);if(k==='crevn')return o48Dmg(m,dmg,o);if(k==='bswarm'&&!o.skill&&!o.aura)return Math.min(dmg,Math.ceil(m.max/6));
  if(k==='msnap'&&Math.sign(P.x-m.x)===(!m.led&&m.ogF||m.face)&&Math.abs(P.y-m.y)<22){if(!o.dot){num(m.x,monY(m)-18,t('ogShell'),'#9fc8ff',false);SFX.clang&&SFX.clang();}return Math.max(1,Math.round(dmg*.1));}return dmg;}
 // the pictures: a moving mound and the ground cracking; the swarm's bats, one fewer for every sixth of its health; the shell facing its way
 var OGD={fburrow:m=>{const st=ogBur(m);if(st==='up')return false;const x=Math.round(m.x),y=Math.round(m.y),q=m.type==='fbqueen'?1.7:1;
@@ -12623,7 +12639,7 @@ const NLD={
    {id:'trav',tier:0,say:['nkh_t1'],ch:[{k:'nkh_tA',to:()=>nlCharted()>=5?'nkh_tA2':'nkh_tA1',aff:1,mem:1},{k:'nkh_tB',to:'nkh_tB2',mem:2,rumor:'fields'}]},
    {id:'anvil',tier:1,say:['nkh_a1','nkh_a2'],aff:1},
    {id:'vein',tier:2,say:()=>S.books&&S.books.fd_kvein?['nkh_v3']:['nkh_v1','nkh_v2'],rumor:'kvein',aff:()=>S.books&&S.books.fd_kvein?3:0},
-   {id:'dream',tier:3,say:['nkh_d1','nkh_d2'],ch:[{k:'nkh_dA',to:'nkh_dA2',mem:1,f:()=>giveTitle('kheir')},{k:'nkh_dB',to:'nkh_dB2',mem:2}]}]},
+   {id:'dream',tier:3,say:['nkh_d1','nkh_d2'],ch:[{k:'nkh_dA',to:'nkh_dA2',mem:1},{k:'nkh_dB',to:'nkh_dB2',mem:2}]}]},
  ashur:{town:'zPat',repTrust:1,src:'ch 212-213 (Earl Ashur, the great magician at the Gauss border); Irene is Earl Steim\'s daughter (ch 117, the Irene quest), only spoken of',
   ctx:[['nas_c1',()=>!isNight()],['nas_c2',()=>isNight()],['nas_c3',()=>qDone('pt6')],['nas_c4',()=>qDone('irn')],['nas_c5',()=>S.lv>=100],['as_idle',()=>true]],
   q:{pt3:'nas_q3',pt5:'nas_q5',pt6:'nas_q6'},rep:['nas_r0','nas_r1','nas_r2','nas_r3','nas_r4'],
@@ -12655,7 +12671,7 @@ Object.assign(NLD,{
    {id:'port',tier:0,say:['nhs_p1'],ch:[{k:'nhs_pA',to:'nhs_pA2',aff:1,mem:1},{k:'nhs_pB',to:'nhs_pB2',mem:2}]},
    {id:'sea',tier:1,say:()=>S.books&&S.books.fd_cork?['nhs_s3']:['nhs_s1','nhs_s2'],rumor:'cork',aff:()=>S.books&&S.books.fd_cork?2:0},
    {id:'king',tier:2,when:()=>qDone('ea2'),say:['nhs_k1'],ch:[{k:'nhs_kA',to:'nhs_kA2',aff:2,mem:1},{k:'nhs_kB',to:'nhs_kB2',mem:2}]},
-   {id:'guest',tier:3,say:['nhs_g1','nhs_g2'],f:()=>{addRep('zEaPangea',50);giveTitle('pguest');}}]},
+   {id:'guest',tier:3,say:['nhs_g1','nhs_g2'],f:()=>addRep('zEaPangea',50)}]},
  doranS:{town:null,src:'Doran, the shadow who secretly protects Earl Steim (the Irene quest)',
   ctx:[['ndo_c1',()=>isNight()],['ndo_c2',()=>qDone('irn')],['ndo_c3',()=>S.lv>=200],['ndo_c4',()=>!!S.qs.irn&&S.qs.irn.st===1],['ndo_c5',()=>!!S.qs.irn&&S.qs.irn.st===3],['dor_idle',()=>true]],
   q:{irn:'ndo_q1'},rep:null,mem:[['earl',2,'ndo_me2'],['lady',1,'ndo_ml1']],
@@ -12664,7 +12680,7 @@ Object.assign(NLD,{
    {id:'ladyS',tier:1,when:()=>qDone('irn')&&!!(S.tl||{}).sonlaw,say:['ndo_l1s'],aff:2},
    {id:'lady',tier:1,when:()=>qDone('irn')&&!(S.tl||{}).sonlaw,say:['ndo_l1'],ch:[{k:'ndo_lA',to:'ndo_lA2',aff:2,mem:1},{k:'ndo_lB',to:'ndo_lB2',mem:2}]},
    {id:'kesan',tier:2,say:()=>S.books&&S.books.fd_kesan?['ndo_k3']:['ndo_k1','ndo_k2'],rumor:'kesan',aff:()=>S.books&&S.books.fd_kesan?2:0},
-   {id:'shadow',tier:3,say:['ndo_s1','ndo_s2'],f:()=>giveTitle('dshadow')}]}});
+   {id:'shadow',tier:3,say:['ndo_s1','ndo_s2']}]}});
 // what they say when you walk up: a quest of theirs just done (once), your name in their town grown (once a rank), a memory
 // of what you chose, or a line for the moment that is not the last one you heard
 function nlIdle(who){const D=NLD[who];if(!D||!S)return 'oLeave';
@@ -12708,7 +12724,7 @@ Object.assign(NLD,{
    {id:'north',tier:0,say:['nst_n1'],ch:[{k:'nst_nA',to:'nst_nA2',aff:1,mem:1},{k:'nst_nB',to:'nst_nB2',mem:2}]},
    {id:'mero',tier:1,say:()=>qDone('gj2')?['nst_m1','nst_m3']:['nst_m1','nst_m2']},
    {id:'daughter',tier:1,when:()=>qDone('irn'),say:()=>(S.tl||{}).sonlaw?['nst_d1s']:['nst_d1','nst_d2'],aff:2},
-   {id:'oath',tier:3,say:['nst_o1','nst_o2'],f:()=>{addRep('zWin',50);giveTitle('wcastle');}}]},
+   {id:'oath',tier:3,say:['nst_o1','nst_o2'],f:()=>addRep('zWin',50)}]},
  irene:{town:'zWin',src:'Irene, Earl Steim\'s only daughter (ch 116-117; the Irene quest)',
   ctx:[['nir_c1',()=>isNight()],['nir_c2',()=>!isNight()],['nir_c3',()=>!!(S.tl||{}).sonlaw],['nir_c4',()=>S.lv>=200]],
   q:{},rep:null,mem:[['temple',1,'nir_mt1'],['temple',2,'nir_mt2']],
@@ -12716,16 +12732,17 @@ Object.assign(NLD,{
    {id:'temple',tier:0,say:['nir_t1'],ch:[{k:'nir_tA',to:'nir_tA2',aff:2,mem:1},{k:'nir_tB',to:'nir_tB2',aff:1,mem:2}]},
    {id:'father',tier:0,say:['nir_f1']},
    {id:'ian',tier:1,say:['nir_i1','nir_i2'],aff:1},
-   {id:'thanks',tier:3,say:()=>(S.tl||{}).sonlaw?['nir_g1s']:['nir_g1','nir_g2'],f:()=>giveTitle('ifriend')}]},
+   {id:'thanks',tier:3,say:()=>(S.tl||{}).sonlaw?['nir_g1s']:['nir_g1','nir_g2'],f:()=>addRep('zWin',30)}]},
  admRabbit:{town:'zReid',repTrust:1,src:'Rabbit: the Mero Company man in Winston (ch 28-50), Reidan\'s administrator (ch 221-228), the daily call (ch 856)',
-  ctx:[['nrb_c1',()=>isNight()],['nrb_c2',()=>!isNight()],['nrb_c3',()=>evOn('renW')],['nrb_c4',()=>qDone('gj2')],['nrb_c5',()=>S.lv>=300]],
+  ctx:[['nrb_c1',()=>isNight()],['nrb_c2',()=>!isNight()],['nrb_c3',()=>evOn('renW')],['nrb_c4',()=>qDone('gj2')],['nrb_c5',()=>S.lv>=300],['nrb_c6',()=>qDone('wsq2')]],
   q:{},rep:['nrb_r0','nrb_r1','nrb_r2','nrb_r3','nrb_r4'],mem:[['mero',1,'nrb_mm1']],
   topics:[
    {id:'mero',tier:0,say:['nrb_m1'],ch:[{k:'nrb_mA',to:()=>qDone('gj2')?'nrb_mA3':'nrb_mA2',aff:1,mem:1},{k:'nrb_mB',to:'nrb_mB2',mem:2}]},
-   {id:'reidan',tier:0,say:['nrb_e1','nrb_e2']},
+   {id:'reidan',tier:0,say:['nrb_e1','nrb_e2','nrb_e3'],rumor:'wsand'},
+   {id:'west',tier:0,when:()=>!!S.qs.wsq1,say:()=>qDone('wsq2')?['nrb_w1','nrb_w3']:['nrb_w1','nrb_w2'],rumor:'wnest'},
    {id:'prison',tier:1,say:['nrb_p1','nrb_p2','nrb_p3']},
    {id:'profit',tier:2,say:['nrb_h1'],aff:1},
-   {id:'ledger',tier:3,say:['nrb_l1','nrb_l2'],f:()=>{const g=20000;S.gold+=g;toast(t('nlGold',{n:g}),'good');giveTitle('rclerk');}}]}});
+   {id:'ledger',tier:3,say:['nrb_l1','nrb_l2'],f:()=>{const g=20000;S.gold+=g;toast(t('nlGold',{n:g}),'good');}}]}});
 for(const who of ['steim','irene','admRabbit']){const n=NPCT[who],o0=n.opts;n.idle=()=>nlIdle(who);n.opts=()=>[...nlOpts(who),...(who==='admRabbit'?rbcOpts():[]),...(o0?o0():[])];}
 // Irene is in the castle once she is home (her rescue done); before that the hall has only her father
 let WCI=null;function wcTick(){if(!WCI||!npcs.includes(WCI))WCI=npcs.find(n=>n.id==='irene');if(WCI)WCI.hidden=!(S&&qDone('irn'));}   // spawnWorld makes new npcs at every start
@@ -12759,6 +12776,67 @@ function fdClaim(id){const d=FD[id];if(!d||!S||S.__demo)return false;S.books=S.b
  const xg=Math.round(xpNeed()*d.p);gainXP(xg,1);if(d.mat)addMat(d.mat[0],d.mat[1]);S.hid.insi=(S.hid.insi|0)+1;SFX.rare();
  setTimeout(()=>toast(t('fdGot',{n:t('fd_'+id),x:xg.toLocaleString('en')}),'good'),400);hudDirty=true;save(true);return true;}
 function fdLm(k){for(const id in FD)if(FD[id].lm===k)fdClaim(id);}
+// ---- Reidan's Western Sands (v2.93; the owner 2026-10-25: "add any place or region of the novel that has an effect"):
+// the giant worms that ruined Reidan ten years ago (ch 217), the west that "suddenly became a desert" round the Hebend River
+// (ch 228), "a small nest of giant worms below the mountain" and the desert toads that chase in dozens (ch 230). Rabbit's
+// two quests are after ch 228's "What if he destroyed the giant worms and restored the west?". How they fight, their levels
+// and the rewards are the game's; every line ORIGINAL_SIDE_STORY.
+Object.assign(AIK,{gworm:'brute',dtoad:'hop'});
+Object.assign(XMOVES,{gworm:[{k:'shot',w:2,min:40,max:160,tele:.5,spd:170,mul:1,rec:.45,cd:2.6,sp:'rock'}],dtoad:[{k:'shot',w:2,min:30,max:120,tele:.35,spd:210,mul:.8,rec:.3,cd:2.2,sp:'pois'}]});
+Object.assign(NAMEK,{gworm:'gwormN',dtoad:'dtoadN',gwnest:'gwnestN'});
+Object.assign(P3D,{gworm:{base:'ktent',f:'sepia(1) saturate(1.3) hue-rotate(-15deg) brightness(.95)',sc:1.25},dtoad:{base:'salamander',f:'sepia(.9) saturate(1.4) hue-rotate(-10deg) brightness(.9)',sc:.55},
+ gwnest:{base:'eshell',f:'sepia(1) brightness(.7)',sc:1.6}});
+// a giant worm: a 7 s round on the world clock (so every screen agrees): under the sand for 4.2 s, where nothing hurts it and
+// it goes after you as a ridge of sand; 0.84 s of the sand heaving round it (step out of the ring!); then it bursts up, biting
+// whoever is in the ring, and fights for 1.96 s (bites, and spits sand). From afar and unwoken it stays under.
+const wsPh=m=>((wNow()+ogSeed(m)%7000)%7000)/7000;
+const wsSt=m=>{const b=MT[m.type];if(!m.led&&!(m.eng>0)&&Math.hypot(P.x-m.x,P.y-m.y)>b.aggro*1.6)return 'under';const p=wsPh(m);return p<.6?'under':p<.72?'heave':'up';};
+const wsRing=b=>b.r+14;   // the reach of a monster's bite as a follower replays it ('b')
+Object.assign(OGB,{
+ gworm:(m,b,dx,dy,d,mr,dt,safe)=>{const st=wsSt(m);if(safe){if(m.st||m.tele>0)mobActN(m);m.eng=0;m.wsW=1;m.st=null;m.tele=0;return true;}   // you are in a town: it stays under
+  if(st==='up'){if(m.wsW){m.wsW=0;vfx('dust',m.x,m.y,{n:16});if(d<wsRing(b)&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);mobBite(m);if(!P.remote)shake=Math.max(shake,.2);}}return false;}
+  if(m.st||m.tele>0)mobActN(m);m.wsW=1;m.st=null;m.tele=0;if(m.led)return true;const hx=m.sx-m.x,hy=m.sy-m.y,hd=Math.hypot(hx,hy);
+  if(m.ret||hd>(m.prov>gTime?520:260)){m.ret=1;m.eng=0;if(hd>4)chase(m,hx,hy,hd,b.spd*1.8,mr,dt);else m.ret=0;m.hp=Math.min(m.max,m.hp+m.max*.08*dt);return true;}
+  if(st==='under'&&(m.eng>0||d<ogAg(b))&&d>6){m.eng=4;chase(m,dx,dy,d,b.spd*1.8,mr,dt);}else if(!(d<ogAg(b)*2.4))m.eng=Math.max(0,(m.eng||0)-dt);return true;},
+ // a desert toad: when one is fighting, every toad within 200 px not fighting yet comes too ("dozens of desert toads")
+ dtoad:(m,b,dx,dy,d,mr,dt,safe)=>{if(!(m.eng>0)){m.wsC=0;return false;}if(!safe&&!m.wsC){m.wsC=1;for(const o of mons)if(!o.dead&&o!==m&&o.type==='dtoad'&&!(o.eng>0)&&Math.hypot(o.x-m.x,o.y-m.y)<=200){o.prov=gTime+10;o.provU=P.remote||(NET?NET.uid:null);o.agg=1;o.eng=4;}}return false;},
+ // the nest: rooted, it does not fight; someone near it (140 px) wakes every worm within 320 px, every 3 s
+ gwnest:(m,b,dx,dy,d,mr,dt,safe)=>{m.st=null;m.tele=0;m.x=m.sx;m.y=m.sy;m.wsN=(m.wsN||0)-dt;if(!(d<140))m.eng=Math.max(0,(m.eng||0)-dt);
+  if(!safe&&d<140&&seeP(m)&&m.wsN<=0){m.wsN=3;m.eng=4;let n=0;for(const o of mons)if(!o.dead&&o.type==='gworm'&&Math.hypot(o.x-m.x,o.y-m.y)<320){o.prov=gTime+10;o.provU=P.remote||(NET?NET.uid:null);o.agg=1;o.eng=4;n++;}
+   if(n&&!P.remote&&!(m.wsTT>gTime)){m.wsTT=gTime+30;toast(t('wsWake'),'warn');}}return true;}});
+// under the sand or heaving, a worm cannot be hit; while a worm lives within 220 px of the nest, the nest takes half
+function wsImm(m){if(wsSt(m)!=='up'){num(m.x,monY(m)-14,t('wsUnder'),'#d8b878',false);return true;}return false;}
+const wsGuarded=m=>mons.some(o=>!o.dead&&o.type==='gworm'&&Math.hypot(o.x-m.x,o.y-m.y)<220);
+function wsDmg(m,dmg,o){if(wsGuarded(m)){if(!o.dot)num(m.x,monY(m)-20,t('wsGuard'),'#e8c890',false);return Math.max(1,Math.round(dmg*.5));}return dmg;}
+// the nest comes back after five minutes, not the 25 s of a normal monster
+function wsKill(m){if(m.type==='gwnest'&&!m.tmp)m.rt=300;}
+Object.assign(OGD,{
+ gworm:m=>{if(m.mbPic||m.dead)return false;const st=wsSt(m);if(st==='up')return false;const x=Math.round(m.x),y=Math.round(m.y),s=ogSeed(m)%628/100;
+  ctx.fillStyle='rgba(0,0,0,.18)';ctx.beginPath();ctx.ellipse(x,y+2,16,5,0,0,7);ctx.fill();
+  ctx.fillStyle='#c8a868';ctx.beginPath();ctx.ellipse(x,y,14,5,0,Math.PI,0);ctx.fill();ctx.fillStyle='#e0c890';ctx.beginPath();ctx.ellipse(x-3,y-2,7,2.4,0,Math.PI,0);ctx.fill();
+  for(let i=0;i<4;i++){const a=gTime*3+i*1.7+s;R(ctx,Math.round(x+Math.cos(a)*12),Math.round(y-1+Math.sin(a)*2),2,2,'#b89858');}
+  if(st==='heave'){const r=wsRing(MT.gworm),p=.5+.5*Math.sin(gTime*14);ctx.strokeStyle=`rgba(255,${120+p*60|0},60,${(.5+p*.3).toFixed(2)})`;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,y,r,r*.45,0,0,7);ctx.stroke();}
+  return true;},
+ gwnest:m=>{if(m.dead&&!(m.dying>0))return false;const x=Math.round(m.x),y=Math.round(m.y),h=m.hurt>0;
+  ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x,y+2,26,8,0,0,7);ctx.fill();
+  ctx.fillStyle=h?'#e8d0a0':'#a88a58';ctx.beginPath();ctx.ellipse(x,y-4,24,11,0,0,7);ctx.fill();ctx.fillStyle=h?'#f0dcb0':'#c0a070';ctx.beginPath();ctx.ellipse(x-4,y-8,14,6,0,0,7);ctx.fill();
+  for(const [hx,hy,r] of [[-12,-4,4],[2,-9,5],[13,-2,4],[-3,1,3]]){ctx.fillStyle='#2a1a0e';ctx.beginPath();ctx.ellipse(x+hx,y+hy,r,r*.6,0,0,7);ctx.fill();ctx.fillStyle='#5a3a1e';ctx.beginPath();ctx.ellipse(x+hx,y+hy-1,r*.7,r*.3,0,0,7);ctx.fill();}
+  if(!m.mbPic){const w=Math.round(Math.sin(gTime*2.4+ogSeed(m))*2);R(ctx,x+1,y-15+w,3,6,'#d8b8a0');R(ctx,x+1,y-15+w,3,1,'#f0d8c0');}   // a worm's tip in the middle hole
+  return true;}});
+// where: the toads all over the sands, the worms on the sand and three by the nest, the nest below the rocks at the
+// north-west (m.wsz: a region of its own, Lv 145+, so it does not set Reidan's recommended level); the beasts of the road the old dice put on the sand go to the grass west of it (no dice: every screen the same)
+function wsSpawn(){const W=WSAND,inW=(x,y)=>x>=W.x0&&x<=W.x1&&y>=W.y0&&y<=W.y1;
+ for(const m of mons){if(m.type!=='rboar'&&m.type!=='hwolf'&&m.type!=='gbear')continue;const tx=m.sx/TS|0,ty=m.sy/TS|0;if(!inW(tx,ty))continue;
+  for(let nx=Math.min(2*W.x0-tx-3,W.x0-5);nx>W.x0-40;nx--)if(!sol0(nx,ty)&&!sol0(nx+1,ty)&&at0(nx,ty)!==PA&&at0(nx,ty)!==DR){m.x=m.sx=nx*TS+8;break;}}
+ const put=(type,n,x0,x1,y0,y1)=>{const r=mulberry32(2170+type.charCodeAt(0)*13+type.length);let c=0,tr=0;while(c<n&&tr<4000){tr++;const x=x0+(r()*(x1-x0)|0),y=y0+(r()*(y1-y0)|0);
+  if(zoneAt(x*TS+8,y*TS+8)!=='zWSand'||inTown(x*TS+8,y*TS+8)||sol0(x,y)||sol0(x+1,y)||at0(x,y)===PA||Math.hypot(x-489,y-76)<12||Math.hypot(x-494,y-73)<12)continue;const m=newMon(type,x*TS+8,y*TS+8,r);m.wsz=1;mons.push(m);c++;}};
+ put('dtoad',12,W.x0+2,W.x1-2,W.y0+10,W.y1-1);put('gworm',6,W.x0+12,W.x1-4,W.y0+6,W.y1-2);
+ {const m=newMon('gwnest',W.nx*TS+8,W.ny*TS+8,mulberry32(2177));m.wsz=1;mons.push(m);}put('gworm',3,W.nx-3,W.nx+10,W.ny-2,W.ny+8);}
+// Administrator Rabbit's two quests: thin the worms out, then the nest
+Object.assign(QD,{wsq1:{by:'admRabbit',lv:150,spot:[494,76],obj:{t:'kill',it:'gworm',n:12},xp:260000,gold:8000},
+ wsq2:{by:'admRabbit',lv:155,pre:'wsq1',spot:[WSAND.nx,WSAND.ny+2],obj:{t:'kill',it:'gwnest',n:1},xp:420000,gold:15000,mat:['mstone',10]}});
+Object.assign(FD,{wsand:{lm:'lmWSand',need:()=>!!nlM('admRabbit','rumor_wsand'),p:.006,mat:['mstone',5]},wnest:{lm:'lmWNest',need:()=>!!nlM('admRabbit','rumor_wnest'),p:.006,mat:['ore',8]}});
+window.__GWS={W:WSAND,st:m=>wsSt(m),ph:m=>wsPh(m),ring:()=>wsRing(MT.gworm),guarded:m=>wsGuarded(m),ref:k=>evRef(TOWNS.find(T=>T.k===k))}; // tests
 // ---- Agriculture Development (ch 856): the Patrian farmer's field work, once a day: put down five Field Burrowers in his
 // rows; a rainbow potato and his trust (+3). Devoted (90) to him, a day's work may (one in four) bring his word about Piaro's field.
 function fdwS(){const D=dlyS();D.fw=D.fw||{n:0,done:0,on:0};return D.fw;}
@@ -12858,6 +12936,20 @@ Object.assign(STR.ar,{nlTalk:"اتكلم",nlAsk:"عايز تتكلم في إيه
  ndo_l1:"الآنسة إيرين سألتني مين اللي طلّعها من البدروم ده. قلتلها: مسافر إيده تقيلة.",ndo_lA:"قوله إنك مبسوط إنها بخير.",ndo_lA2:"هتعرف. عن طريق رجالة الضل المناسبين.",ndo_lB:"قوله إنها كانت حاجة بسيطة.",ndo_lB2:"ماكانتش حاجة بسيطة. بس هقولها إنك قلت كده.",ndo_ml1:"الآنسة فرحت لما عرفت. قالتها مرتين، ودي بالنسبالها خطبة.",
  ndo_k1:"وادي كيسان واحد من الأماكن المحرمة في المملكة الخالدة. دخلته مرة، في مشوار مش هقول هو إيه.",ndo_k2:"لو رحت، اقرا اللي الوادي بيقوله عند مدخله. وبعدين تعالى قولي إنك طلعت.",ndo_k3:"دخلت وطلعت. يبقى التحذيرات صح، وإنت كمان.",
  ndo_s1:"شغل الضل إنه يبقى في المكان اللي محدش بيبص فيه، قبل المشكلة بخطوة.",ndo_s2:"رجليك تنفع للشغلانة دي، حتى لو صبرك لأ. من النهارده رجالة الضل هيعتبروك واحد من أصحابهم.",
+ zWSand:"رمال غرب ريدان (لفل 145+)",gwormN:"الدودة العملاقة",dtoadN:"ضفدع الصحرا",gwnestN:"عش الدود العملاق",wsUnder:"تحت الرمل!",wsGuard:"محمي!",wsWake:"العش اتحرك: الدود جاي!",
+ lmWSand:"رمال غرب ريدان",lmWSand1:'"زمان كانت أغنى مدينة في المملكة، لكن كل حاجة اتغيرت من 10 سنين لما الدود العملاق ظهر."',lmWSand2:'"بس الأرض الواسعة دي فجأة بقت صحرا."',
+ lmWNest:"تحت الجبل",lmWNest1:'"فيه عش صغير للدود العملاق تحت الجبل..."',lmWNest2:'"عشرات من ضفادع الصحرا بيجروا ورانا على بعد 800 متر!"',
+ fd_wsand:"رمال غرب ريدان",fd_wnest:"عش الدود العملاق",
+ nrb_e3:"من عشر سنين الدود العملاق جه، وكل اللي غرب السور بقى رمل. روح بص بنفسك، لو مش مصدق واحد ماسك دفتر.",
+ nlT_admRabbit_west:"الغرب",nrb_w1:"رسمتها على الخريطة ميت مرة: نهر هيبند بيعدي من ريدان، والقرى عايشة على حوضه الجنوبي. الغرب كان غيطان زمان.",
+ nrb_w2:"الدود بيتكاثر في عش صغير تحت الصخور اللي في شمال غرب الرمال. طول ما هو موجود، الدود هيفضل يرجع.",nrb_w3:"مفيش عش، يبقى دود أقل. الرمل مش هيرجع غيطان في يوم، بس بقى ليه فرصة.",
+ nrb_c6:"الغرب بقى أهدى. القوافل رجعت تعدي الرمال، وبتوصل للناحية التانية.",
+ q_wsq1:"نرجّع الغرب",wsq1_o:"الدود العملاق خرّب ريدان، وبعد عشر سنين لسه كله رمل برا. لو حد قلّل عددهم، الغرب ممكن يعيش تاني. اقتل 12 دودة عملاقة في الرمال اللي غرب السور.",
+ wsq1_w:"رمال الغرب، برا بوابة ريدان الغربية على طول. بيطلعوا من تحتك: لما الرمل يتهز، اخرج برا الدايرة.",
+ wsq1_d:"اتناشر. القوافل بتقول من دلوقتي إن الطريق بقى أهدى. ...بس هما جايين من حتة.",
+ q_wsq2:"العش اللي تحت الجبل",wsq2_o:"فيه عش صغير للدود العملاق تحت الصخور اللي في شمال غرب الرمال. طول ما هو عايش، الدود هيرجع. دمّره.",
+ wsq2_w:"تحت الصخور اللي في شمال غرب الرمال. اقتل الدود اللي حواليه الأول: طول ما هما عايشين، مش بيحس بالضرب تقريبًا.",
+ wsq2_d:"العش راح. هكتبها في الدفتر في العمود الكويس، وهحط تحتها خط. ريدان مديونالك بغربها.",
  fd_cork:"جزيرة كورك",fd_kesan:"وادي كيسان",tl_pguest:"ضيف بانجيا",tl_pguestD:"هان سوكبونج بيعتبرك ضيف بانجيا، مش غريب.",tl_dshadow:"معروف عند رجالة الضل",tl_dshadowD:"دوران، ضل الإيرل شتايم، بيعدّك من أصحاب رجالة الضل.",steim:"الإيرل شتايم",irene:"إيرين",admRabbit:"المسؤول رابيت",
  nst_hi:"أهلًا بيك في قلعة وينستون. أنا شتايم، إيرل الشمال. وينستون والأرض اللي حواليها في عهدتي.",
  nst_c1:"القلعة دي عمرها ما بتنام. تمانين خدام، وكل واحد فيهم فاكر إن الشمع شغلة حد تاني.",nst_c2:"الشمال هادي النهارده. وأنا مابثقش في شمال هادي.",
@@ -12884,8 +12976,8 @@ Object.assign(STR.ar,{nlTalk:"اتكلم",nlAsk:"عايز تتكلم في إيه
  nir_mt1:"خلص. بقيت أقولها لنفسي بصوتك.",nir_mt2:"في يوم هحكيلك. مش النهارده.",
  nir_f1:"بابا بيقلق أكتر من اللازم وبيبيّن أقل من اللازم. هو سيد كويس. وأب أحسن من اللي هو فاكره.",
  nir_i1:"إيان، بلاند دي إيان، وأنا كبرنا مع بعض. بيبعت جوابات مليانة نصايح محدش طلبها.",nir_i2:"أظن إنه هيحبك. أو هيتحداك في حاجة. ومع إيان الاتنين نفس الحاجة.",
- nir_g1:"كنت عايزة أديك حاجة، وكل اللي عندي بتاع بابا. فدي حاجة بتاعتي أنا.",nir_g2:"صاحب إيرين. مش لقب كبير، بس أنا قاصدة كل كلمة فيه.",
- nir_g1s:"إنت مش محتاج لقب مني. بس خد ده برضه، عشان أنا عايزاك تاخده.",
+ nir_g1:"كنت عايزة أديك حاجة، وكل اللي عندي بتاع بابا. فهديك اللي بتاعي أنا: كلمتي. وينستون كلها هتعرف إنت عملت إيه.",nir_g2:"ناس بابا بيسمعوا كلامي أكتر ما هو فاكر.",
+ nir_g1s:"إنت من العيلة. ووينستون لازم تعرف ده كويس.",
  nrb_hi:"رابيت. مسؤول إدارة ريدان. لو جاي عشان الضرايب، الطابور بيبدأ برة.",
  nrb_c1:"الليل. الساعات الوحيدة اللي الخزنة مابتردش فيها عليا.",nrb_c2:"تلات طلبات أسوار، واتنين طرق، وواحد تمثال. احزر الأسياد عايزين أنهي.",
  nrb_c3:"الحرب أغلى حاجة ممكن مدينة تعملها. لاويل بيعمل الخطط، وأنا بعمل الحسابات.",nrb_c4:"مسابقة خان. كنت هناك راجل شركة ميرو. شفت حداد لفل 21 وقلت: هو ده. وطلع عندي حق.",
@@ -12974,6 +13066,20 @@ Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTr
  ndo_l1:"The lady Irene asked me who brought her out of that basement. I told her: a traveller with a heavy hand.",ndo_lA:"Tell her I'm glad she's safe.",ndo_lA2:"She will hear it. Through the proper shadows.",ndo_lB:"Say it was nothing.",ndo_lB2:"It was not nothing. But I will tell her you said so.",ndo_ml1:"The lady was glad to hear it. She said so twice, which for her is a speech.",
  ndo_k1:"Kesan Canyon is one of the Eternal Kingdom's forbidden zones. I went in once, on an errand I won't name.",ndo_k2:"If you go, read what the canyon has to say at its mouth. Then come and tell me you came out.",ndo_k3:"You went in and came out. Then the warnings are true, and so are you.",
  ndo_s1:"A shadow's work is to be where no one looks, one step before the trouble.",ndo_s2:"You have the feet for it, if not the patience. From now on the shadows will count you among their friends.",
+ zWSand:"Reidan's Western Sands (Lv 145+)",gwormN:"Giant Worm",dtoadN:"Desert Toad",gwnestN:"Giant Worm Nest",wsUnder:"Under the sand!",wsGuard:"Guarded!",wsWake:"The nest stirs: the worms are coming!",
+ lmWSand:"Reidan's Western Sands",lmWSand1:'"In the past, it was the richest city in the kingdom; however, everything changed 10 years ago when the giant worms appeared."',lmWSand2:'"But this large territory suddenly became a desert."',
+ lmWNest:"Below the Mountain",lmWNest1:'"There is a small nest of giant worms below the mountain..."',lmWNest2:'"Dozens of desert toads are chasing us 800m in the rear!"',
+ fd_wsand:"Reidan's Western Sands",fd_wnest:"The Giant Worms' Nest",
+ nrb_e3:"Ten years ago the giant worms came, and everything west of the wall is sand now. Go and look, if you don't believe a man with a ledger.",
+ nlT_admRabbit_west:"The west",nrb_w1:"I've drawn it on the map a hundred times: the Hebend River runs through Reidan, and the villages live on its southern basin. The west was fields once.",
+ nrb_w2:"The worms breed in a small nest below the rocks at the north-west of the sands. While it's there, they keep coming.",nrb_w3:"No nest, fewer worms. The sand won't turn back into fields in a day, but it has a chance now.",
+ nrb_c6:"The west is quieter. The caravans cross the sands again, and come out the other side.",
+ q_wsq1:"Restoring the West",wsq1_o:"The giant worms ruined Reidan, and ten years later it's still sand out there. If someone thinned them out, the west could live again. Put down 12 giant worms in the sands west of the wall.",
+ wsq1_w:"The Western Sands, just outside Reidan's west gate. They come up under you: when the sand heaves, step out of the ring.",
+ wsq1_d:"Twelve. The caravans already say the road is quieter. ...But they come from somewhere.",
+ q_wsq2:"The Nest below the Mountain",wsq2_o:"There is a small nest of giant worms below the rocks at the north-west of the sands. While it lives, the worms come back. Destroy it.",
+ wsq2_w:"Below the rocks at the north-west of the sands. Put down the worms round it first: while they live, it hardly feels a blow.",
+ wsq2_d:"The nest is gone. I'll write it in the ledger in the good column, and underline it. Reidan owes you its west.",
  fd_cork:"Cork Island",fd_kesan:"Kesan Canyon",tl_pguest:"Guest of Pangea",tl_pguestD:"Han Seokbong counts you as Pangea's guest, not a stranger.",tl_dshadow:"Known to the Shadows",tl_dshadowD:"Doran, Earl Steim's shadow, counts you among the shadows' friends.",steim:"Earl Steim",irene:"Irene",admRabbit:"Administrator Rabbit",
  nst_hi:"Welcome to Winston Castle. I am Steim, Earl of the north. Winston and the land round it are in my keeping.",
  nst_c1:"The castle never sleeps. Eighty servants, and every one of them thinks the candles are someone else's work.",nst_c2:"The north is quiet today. I distrust a quiet north.",
@@ -13000,8 +13106,8 @@ Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTr
  nir_mt1:"It's over. I tell myself that now, in your voice.",nir_mt2:"One day I'll tell you about it. Not today.",
  nir_f1:"Father worries too much and shows it too little. He's a good lord. He's a better father than he thinks.",
  nir_i1:"Ian, Bland de Ian, and I grew up together. He sends letters full of advice nobody asked for.",nir_i2:"He'd like you, I think. Or he'd challenge you to something. With Ian it's the same thing.",
- nir_g1:"I wanted to give you something, and everything I have is Father's. So: this is mine.",nir_g2:"Irene's friend. Not much of a title, but I mean every word of it.",
- nir_g1s:"You don't need a title from me. But here's one anyway, because I want you to have it.",
+ nir_g1:"I wanted to give you something, and everything I have is Father's. So I'll give you what is mine: my word. All of Winston will hear what you did.",nir_g2:"Father's people listen to me more than he thinks.",
+ nir_g1s:"You're family. Winston should know it properly.",
  nrb_hi:"Rabbit. Administrator of Reidan. If you're here about taxes, the queue starts outside.",
  nrb_c1:"Night. The only hours the treasury doesn't talk back.",nrb_c2:"Three requests for walls, two for roads, one for a statue. Guess which one the lords want.",
  nrb_c3:"A war is the most expensive thing a city can do. Lauel does the plans; I do the sums.",nrb_c4:"Khan's contest. I was the Mero Company's man there. I watched a level 21 blacksmith and thought: that one. I was right.",
