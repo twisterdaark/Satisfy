@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25zorder', ver: '2.98', d: '2026-10-25',
+      ar: ["شاشة «اختار ID ليك» كانت بتطلع ورا زراير القايمة في أول اللعبة. دلوقتي بتطلع فوقها، وفوق شاشة الحفظ السحابي وسجل التحديثات كمان.",
+        "الشاشات اللي بتظهر لوحدها بقت فوق أي شاشة إنت فاتحها: دعوة البارتي، ودعوة النقابة، ودعوة التبادل، وتحدي المبارزة، وقرعة غنايم الغارة، وشاشة الموت، و«حسابك شغال على جهاز تاني». قبل كده كانت بتستخبى ورا الشنطة أو الخريطة أو غيرهم. ولما التبادل يبدأ، الشاشة اللي كانت مفتوحة بتتقفل عشان ماتستخباش وراها.",
+        "ولما تموت، الشاشات اللي كانت مفتوحة بتتقفل، ومعاهم شاشة الإبداع واسم النقابة. شاشة العدة كانت بتفضل مفتوحة. ولو مُت وإنت بتطوّر حاجة، شاشة الموت مابقتش بتعلّق."],
+      en: ["The \"Choose your ID\" window showed behind the title menu's buttons. It is in front of them now, and in front of the cloud save window and the update log too.",
+        "Windows that come up on their own are now in front of any window you have open: a party invitation, a guild invitation, a trade invitation, a duel challenge, a raid loot roll, the death screen, and \"Your account is playing on another device\". They used to hide behind the bag, the map and others. When a trade starts, the window you had open closes so the trade doesn't open behind it.",
+        "When you die, the windows you had open close, the Creation and a guild name being typed too. The equipment window used to stay open. Dying during an enhancement no longer leaves the death screen stuck."] },
     { v: '2026-10-25index', ver: '2.97', d: '2026-10-25',
       ar: ["الفهرس الجديد (زرار N، أو من مربع الزراير على الموبايل)، فكرة اللاعب Suki: مكان واحد تشوف فيه كل اللي محتاجه عن اللعبة.",
         "👥 المدربين: كل مدرب في اللعبة ومكانه، والكلاسات اللي بيعلّمها (اللفل والكلاس اللي لازم تكونه والماستري)، والتخصصات اللي بيعلّمها.",
