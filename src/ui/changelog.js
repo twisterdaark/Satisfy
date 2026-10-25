@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25spectab', ver: '3.01', d: '2026-10-25',
+      ar: ["طلب Suki: في نافذة الحالة (C) فيه تاب جديد 🛠 التخصصات. فيه كل تخصص في اللعبة: بيعمل إيه، ومين بيعلّمه وفين، وتخصصك متعلّم عليه.",
+        "وفي تاب الحالة، لو وقفت على سطر التخصص، بيقولك تخصصك بيعمل إيه. تخصص واحد بس في نفس الوقت: أول مرة ببلاش وتغييره بـ2,000 دهب، والحداد مابياخدش تخصص."],
+      en: ["Suki's request: the status window (C) has a new 🛠 Specializations tab. It lists every specialization in the game, what it does and who teaches it where, with yours marked.",
+        "On the Status tab, the specialization line's tooltip says what yours does. One specialization at a time: the first is free and changing costs 2,000 gold; a Blacksmith takes none."] },
     { v: '2026-10-25mbindex', ver: '3.00', d: '2026-10-25',
       ar: ["كتاب الوحوش بقى تاب جوه الفهرس: 👹 الوحوش. فيه كل اللي كان فيه: الوحوش اللي قابلتها، والقتلات والماستري، والتتبع، والفلاتر، والبحث، وتاب الحكايات.",
         "شاشة كتاب الوحوش لوحدها اتشالت، ومعاها زرار «الوحوش» من مربع الزراير. زرار B لسه شغال: بيفتح الفهرس على تاب الوحوش على طول، ولو دوست عليه تاني بيقفله."],
