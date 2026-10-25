@@ -5837,7 +5837,7 @@ window.__GFS={weight:(k,lv)=>fsWeight(k,lv),get leaps(){return FLEAP.length},rec
 let FISH=null;
 function nearWater(){if(!P||P.y>=WMH*TS)return null;const tx=P.x/TS|0,ty=P.y/TS|0;for(const [dx,dy] of [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,1],[1,-1],[-1,-1]])if(at(tx+dx,ty+dy)===WA)return {x:(tx+dx)*TS+8,y:(ty+dy)*TS+8};return null;}
 function startFish(w){const lv=lifeLv('fish'),b=tkCast(),B=b?TKB[b]:null;FISH={x:w.x,y:w.y,t:0,bite:tkBite(rand(),lv,b),win:(.5+lv*.05)*tkRod().w,px:P.x,py:P.y,b,reg:tkReg(w.x,w.y)};P.dir=Math.abs(w.x-P.x)>Math.abs(w.y-P.y)?(w.x>P.x?2:3):(w.y>P.y?0:1);SFX.swing();toast(b?t('tkCastB',{it:t(b)}):t('fCast'));}
-function fishAct(){const F=FISH;FISH=null;if(F.t>=F.bite&&F.t<F.bite+F.win){const k=tkPick(F),ra=TKRA.includes(k);addMat(k,1);fsCatch(F,k);lifeXP('fish',k==='gfish'?25:ra?12:6);vfx('mana',F.x,F.y);SFX.coin();if(k==='gfish')toast(t('fGold'),'good');else if(ra)toast(t('tkRare',{it:t(k)}),'good');}else{toast(t('fEarly'),'warn');SFX.deny();fsMiss(F);}hudDirty=true;}
+function fishAct(){const F=FISH;FISH=null;if(F.t>=F.bite&&F.t<F.bite+F.win){const k=tkPick(F),ra=TKRA.includes(k);shAdd(k,1,F.b==='bglow'?2:1);fsCatch(F,k);lifeXP('fish',k==='gfish'?25:ra?12:6);vfx('mana',F.x,F.y);SFX.coin();if(k==='gfish')toast(t('fGold'),'good');else if(ra)toast(t('tkRare',{it:t(k)}),'good');}else{toast(t('fEarly'),'warn');SFX.deny();fsMiss(F);}hudDirty=true;}
 /* ---------------- fishing: the waters, the rods, the bait (v3.03; the player Suki through the owner 2026-10-25: "Add new
    sprites to multiple fishes, more fish species. Different fishing rods that can be sold by a vendor in winston… Add
    different bait type's for fishermen and each one with different benefits. Redistribute fish species across the entire
@@ -5882,7 +5882,7 @@ function tkBuyRod(i){const R=TKR[i],g=price('merchant',R.g);if((S.rod|0)>=i)retu
 // the bag's line for a fish: where it lives, common or rare
 function tkTip(k){if(k==='gfish')return t('tkTipG');const z=Object.keys(TKZ).find(r=>TKZ[r].includes(k));return z?t(TKZ[z][0]===k?'tkTipC':'tkTipR',{z:t('tkZin_'+z)}):t('lifeMD');}
 Object.assign(STR.ar,{mackerel:'سمكة ماكريل',catfish:'قرموط المستنقع',ecarp:'شبّوط الشرق',rtrout:'تراوت قوس قزح',icepike:'كراكي الثلج',snapper:'نهّاش أحمر',bogeel:'حنكليس المستنقع',jadekoi:'كوي اليشم',
- bworm:'دود',bshrimp:'جمبري',bglow:'طُعم منوّر',bwormD:'طُعم: السمك بيشد أسرع (بتستنى أقل 40%).',bshrimpD:'طُعم: السمك النادر بيشد أكتر 50%.',bglowD:'طُعم: السمكة الدهبية بتشد الضعف، والنادر أكتر 20%.',
+ bworm:'دود',bshrimp:'جمبري',bglow:'طُعم منوّر',bwormD:'طُعم: السمك بيشد أسرع (بتستنى أقل 40%).',bshrimpD:'طُعم: السمك النادر بيشد أكتر 50%.',bglowD:'طُعم: السمكة الدهبية بتشد الضعف، والنادر أكتر 20%، واللمعان ضعف.',
  tkZ_fresh:'البحيرات والأنهار',tkZ_snow:'الثلج والجليد',tkZ_sea:'البحر',tkZ_swamp:'المستنقعات',tkZ_east:'القارة الشرقية',
  tkZD_fresh:'أي بحيرة أو نهر أو بركة في الغرب، زي البحيرة اللي جنب وينستون.',tkZD_snow:'المية اللي في الثلج: حقول الثلج الشمالية، وسهول الصقيع، وبحيرات الجليد، والجبال.',tkZD_sea:'البحر في الجنوب والشرق، زي برينيتشي وجزيرة كورك، والبحر الأحمر وبحر القارة الشرقية.',tkZD_swamp:'مستنقع هالرون، ومستنقع آشور، والمستنقع الغارق.',tkZD_east:'المية اللي جوه القارة الشرقية: أنهارها وبحيراتها (بحرها بحر).',
  tkTipC:'سمك عادي من {z}. ينفع في الطبخ ولأي حد عايز سمك.',tkTipR:'سمكة نادرة من {z}. بتتباع كويس.',tkZin_fresh:'البحيرات والأنهار',tkZin_snow:'الثلج والجليد',tkZin_sea:'البحر',tkZin_swamp:'المستنقعات',tkZin_east:'القارة الشرقية',tkTipG:'السمكة الدهبية: نادرة جدًا، وبتشد في أي مية.',
@@ -5891,7 +5891,7 @@ Object.assign(STR.ar,{mackerel:'سمكة ماكريل',catfish:'قرموط ال�
  tkOn:'حطيت {it} في السنارة: واحدة كل رمية',tkOff:'شلت الطُعم من السنارة',tkOut:'مفيش {it} تاني معاك',tkLast:'دي كانت آخر حتة {it}: السنارة من غير طُعم دلوقتي',tkUseT:'دوس: حطه في السنارة (واحدة كل رمية)',tkOnT:'متحط في السنارة (دوس عشان تشيله)',
  tkRare:'سمكة نادرة: {it}!',tkRodL:'السنارة',tkBaitL:'الطُعم',tkNone:'مفيش',tkCastB:'رميت السنارة بـ{it}... استنى لما تشد.'});
 Object.assign(STR.en,{mackerel:'Mackerel',catfish:'Swamp Catfish',ecarp:'Eastern Carp',rtrout:'Rainbow Trout',icepike:'Ice Pike',snapper:'Red Snapper',bogeel:'Bog Eel',jadekoi:'Jade Koi',
- bworm:'Worms',bshrimp:'Shrimp',bglow:'Glow Bait',bwormD:'Bait: the fish bite sooner (40% less waiting).',bshrimpD:'Bait: rare fish bite 50% more often.',bglowD:'Bait: Golden Fish bite twice as often, rare fish 20% more.',
+ bworm:'Worms',bshrimp:'Shrimp',bglow:'Glow Bait',bwormD:'Bait: the fish bite sooner (40% less waiting).',bshrimpD:'Bait: rare fish bite 50% more often.',bglowD:'Bait: Golden Fish bite twice as often, rare fish 20% more, and shiny ones twice as often.',
  tkZ_fresh:'Lakes and rivers',tkZ_snow:'Snow and ice',tkZ_sea:'The sea',tkZ_swamp:'Swamps',tkZ_east:'The East Continent',
  tkZD_fresh:'Any lake, river or pond in the west, like the Lake by Winston.',tkZD_snow:'The water in the snow: the Northern Snowfields, the Frost Plains, the Glacier Lakes and the mountains.',tkZD_sea:'The sea in the south and east, like Brinichi and Cork Island, the Red Sea and the East Continent\'s open sea.',tkZD_swamp:'Haalrune Swamp, Ashur Marsh and the Sunken Fen.',tkZD_east:"The water inside the East Continent: its rivers and lakes (its open sea is the sea).",
  tkTipC:'A common fish of {z}. Good for cooking and for anyone who wants fish.',tkTipR:'A rare fish of {z}. It sells well.',tkZin_fresh:'lakes and rivers',tkZin_snow:'the snow and ice',tkZin_sea:'the sea',tkZin_swamp:'the swamps',tkZin_east:'the East Continent',tkTipG:'The Golden Fish: very rare, and it bites in any water.',
@@ -5967,15 +5967,15 @@ Object.assign(STR.en,{ckHam0:"The anvil's hammer",ckHam1:'Iron Forge Hammer',ckH
  oCkHam:'Buy the {it} ({g} gold)',oCkSpt:'Buy the {it} ({g} gold)',oCkStove:'Buy a {it} ({g} gold)',ckNeedSm:'needs Smithing {n}',ckNeedCk:'needs Cooking {n}',ckLowSm:'Not yet: the {it} needs Smithing {n}.',ckLowCk:'Not yet: the {it} needs Cooking {n}.',
  ckGot:'You now work with the {it}',ckStGot:'A portable stove, in your bag',ckBuyL:'Here you go.',oCkTools:'🍳 Cooking tools',oCkToolsSt:'Spatulas and a portable stove',ckToolsHi:'We have spatulas for cooking, and a portable stove to take with you.',ckHi:"The stove is hot. What will you cook?",ckFoe:'Not now: there is a monster close by',ckHamL:'Forge hammer',ckSptL:'Spatula',ckOnT:'Set down (click to pick it up)',ckUseT:'Click: set it down here'});
 window.__GCK={aggr:k=>!!(MT[k]&&MT[k].aggro>0),innOpt:w=>ckInnOpt(w),foe:()=>ckFoe(),hasStove:()=>ckHasStove(),trOk:k=>trMatOk(k),H:CKH,S:CKS,get ST(){return CKST},set ST(v){CKST=v;},ham:w=>ckHamOpts(w||'khan'),inn:w=>ckInnOpts(w||'innP'),buy:(w,k,i)=>ckBuy(w,k,i),stove:()=>ckStove(),why:(x,y)=>ckWhy(x,y),tick:()=>ckTick(),zone:()=>{const m=MG;MG=m||{heat:100};const z=zoneW();MG=m;return z;},cook:k=>{const G0=COOKG,m0=mode;cookStart(k||'cfish');const r={w:COOKG.w,dur:COOKG.dur};COOKG=G0;mode=m0;return r;}}; // tests
-function pickHerb(n){if(n.dep>0){toast(t('hPicked'));SFX.deny();return;}if(!labor(4))return;const lv=lifeLv('herb');addMat(n.kind,1+(rand()<lv*.06?1:0));if(rand()<.04+lv*.004)addMat('vherb',1);lifeXP('herb',n.kind==='bherb'?8:4);n.dep=n.kind==='bherb'?120:70;SFX.chop();for(let i=0;i<8;i++)fx.push({x:n.x,y:n.y-4,vx:(rand()-.5)*50,vy:-rand()*50,t:.4,c:n.kind==='bherb'?'#7ab8ff':'#5aa83a'});hudDirty=true;}
+function pickHerb(n){if(n.dep>0){toast(t('hPicked'));SFX.deny();return;}if(!labor(4))return;const lv=lifeLv('herb');shAdd(n.kind,1+(rand()<lv*.06?1:0));if(rand()<.04+lv*.004)addMat('vherb',1);lifeXP('herb',n.kind==='bherb'?8:4);n.dep=n.kind==='bherb'?120:70;SFX.chop();for(let i=0;i<8;i++)fx.push({x:n.x,y:n.y-4,vx:(rand()-.5)*50,vy:-rand()*50,t:.4,c:n.kind==='bherb'?'#7ab8ff':'#5aa83a'});hudDirty=true;}
 // cooking and brewing at a campfire; a better cook burns less
 const COOK={cfish:{need:{fish:1},alt:'sfish',xp:6},stew:{need:{fish:2,herb:2},xp:12},feast:{need:{gfish:1,herb:1,bherb:1},xp:25},ppie:{need:{pumpk:1,wheat:2},xp:20},sjam:{need:{straw:2,wheat:1},xp:16}},BREW={hpot:{need:{herb:3},xp:6},mpot:{need:{bherb:2,herb:1},xp:8}};
 const DISH={ppie:{food:80,hp:.3,buf:'regen',bt:240},sjam:{food:50,hp:.2,buf:'might',bt:180},cfish:{food:35,hp:.2},stew:{food:60,buf:'regen',bt:120},feast:{food:100,buf:'might',bt:300},dskewer:{food:100,hp:1,buf:'might',bt:600},choco:{food:30,hp:.5,buf:'regen',bt:180},rpotato:{food:45,hp:.25}}; // dskewer, choco: from the Reputation Store's drawing machine
-const canMake=r=>Object.entries(r.need).every(([k,n])=>(k==='fish'?tkN():S.mats[k]||0)>=n);   // v3.03: any common fish (TKC)
+const canMake=r=>Object.entries(r.need).every(([k,n])=>shHave(k)>=n);   // v3.05: shiny ones count too (and any common fish for 'fish')   // v3.03: any common fish (TKC)
 const needTxt=r=>Object.entries(r.need).map(([k,n])=>`${n} ${t(k==='fish'?'fishAny':k)}`).join(' + ');
 function makeLife(k,brew){const r=(brew?BREW:COOK)[k];if(!canMake(r)){SFX.deny();return campMenu();}
- for(const [m,n] of Object.entries(r.need)){if(m==='fish')tkTake(n);else S.mats[m]-=n;}
- cookStart(k,brew);}
+ let sh=0;for(const [m,n] of Object.entries(r.need))sh+=shTake(m,n,!brew&&!sh);   // v3.05: one shiny for a dish (one is enough), none for a potion
+ cookStart(k,brew);if(COOKG&&!brew)COOKG.sh=sh>0;}
 /* cooking minigame (owner: 'cooking will be a minigame'; Nitro's campfire): the pot heats from raw to burnt; press E, Space or
    click while the bar is in the golden part. A better cook gets a wider golden part; harder dishes heat faster. Right in the
    middle is perfect: one more dish and double life EXP. Too early or too late: the ingredients are lost, a little EXP. */
@@ -5984,7 +5984,7 @@ function cookStart(k,brew){if(brew)return mixStart(k);const sk=brew?'alch':'cook
  COOKG={k,brew,sk,r,p:0,dur:({cfish:1.7,stew:1.4,feast:1.05,hpot:1.6,mpot:1.3}[k]||1.5)*Sp.d,c:.62,w,t:performance.now(),end:0};mode='cook';SFX.click();}
 function cookHit(){const G=COOKG;if(!G||G.end)return;const d=Math.abs(G.p-G.c),ok=d<=G.w/2,perfect=d<=G.w*.12;G.end=performance.now();G.res=perfect?2:ok?1:0;
  const {k,brew,sk,r}=G;
- if(ok){const n=perfect?(S.sec==='chef'?3:2):1;if(brew&&!DISH[k])S[k]=(S[k]||0)+n;else S.mats[k]=(S.mats[k]||0)+n;lifeXP(sk,r.xp*(perfect?2:1));toast(perfect?t('cookPerfect',{it:t(k)}):t(brew?'brewOk':'cookOk',{it:t(k)}),'good');perfect?SFX.legendary():SFX.quest();}
+ if(ok){const n=perfect?(S.sec==='chef'?3:2):1,kk=!brew&&DISH[shn(k)]&&(G.sh||perfect&&rand()<SHPP)?shn(k):k;if(brew&&!DISH[k])S[k]=(S[k]||0)+n;else S.mats[kk]=(S.mats[kk]||0)+n;lifeXP(sk,r.xp*(perfect?2:1));toast(perfect?t('cookPerfect',{it:t(kk)}):t(brew?'brewOk':'cookOk',{it:t(kk)}),'good');if(kk!==k)setTimeout(()=>{toast(t('shMade'),'good');SFX.rare();},300);perfect?SFX.legendary():SFX.quest();}
  else{lifeXP(sk,Math.ceil(r.xp/3));toast(t(G.p<G.c?(brew?'brewRaw':'cookRaw'):(brew?'brewFail':'cookFail')),'warn');SFX.deny();}
  hudDirty=true;setTimeout(()=>{if(COOKG!==G)return;COOKG=null;if(mode==='cook'){mode='play';campMenu();}},650);}
 function cookQuit(){if(!COOKG)return;if(!COOKG.end){COOKG.p=1;cookHit();}}
@@ -6019,7 +6019,7 @@ const rcById=id=>RC.find(x=>x.id===id)||TRC.find(x=>x.id===id);
 function undFirst(it){if(it.slot!=='u'||it.r<3)return;S.undf=S.undf||{};if(S.undf[it.id])return;S.undf[it.id]=1;S.undfN=(S.undfN||0)+2;crepAdd(30);setTimeout(()=>toast(t('undFirst',{it:t(it.id)}),'good'),500);SFX.legendary();}
 window.__GUND={first:it=>undFirst(it),stat:k=>stat(k),hurt:(d,ml)=>hurtPlayer(d,ml,null),dodge:()=>dodge(),get P(){return P},get NDROP(){return NDROP},sewOk:()=>NPCT.stylist.opts().some(o=>o.l===t('oSew'))};
 function sewMenu(){dialog('stylist',['sewHi'],null,[...TRC.map(r=>rbGate(r.id)?rbLock(r.id,sewMenu):({l:t('oSewIt',{it:t(r.id),n:needTxt(r)}),poor:!canMake(r),f:()=>{if(!canMake(r)){SFX.deny();return sewMenu();}
-  for(const [m,n] of Object.entries(r.need))S.mats[m]-=n;sewStart(r);}})),{l:t('oLeave'),f:()=>{}}]);}
+  for(const [m,n] of Object.entries(r.need))shTake(m,n,0);sewStart(r);}})),{l:t('oLeave'),f:()=>{}}]);}
 /* sewing minigame: the needle runs along a seam of stitch marks; press E, Space or click as it crosses each one. A better
    tailor gets a wider mark. Accuracy sets the grade (common to epic; unique from sewing level 5); a seam under half right tears. */
 let SEWG=null;
@@ -6725,7 +6725,7 @@ function gearFit(){if(!S||!S.items)return;const ok=i=>lvrOk(itLvr(i));const w=S.
  const a=S.items.find(i=>i.uid===S.eqA);if(a&&!ok(a))S.eqA=0;for(const k in S.eq||{}){const i=S.items.find(i=>i.uid===S.eq[k]);if(i&&!ok(i)||!ringOpen(k))delete S.eq[k];}}
 function equip0(i){const lr=itLvr(i);if(lr&&!lvrOk(lr)){toast(t('needLv',{n:lr}),'warn');SFX.deny();return false;}if(i.slot==='w')S.eqW=i.uid;else if(i.slot==='a')S.eqA=i.uid;else{S.eq=S.eq||{};if(Object.values(S.eq).includes(i.uid))return;let sl=i.slot;if(sl==='k'&&S.eq.k&&RINGS.has(i.id)){const f=RSL.find(k=>!S.eq[k]&&ringOpen(k));if(f)sl=f;}S.eq[sl]=i.uid;}}
 const durOf=i=>i.dur===undefined?100:i.dur,durF=i=>durOf(i)<=0?.3:1,enF=i=>1+.06*(i.en||0);
-const iAtk=i=>Math.round((i.atk||0)*enF(i)*durF(i)),iDef=i=>Math.round((i.def||0)*enF(i)*durF(i));
+const iAtk=i=>Math.round((i.atk||0)*enF(i)*durF(i)*(i.sh?1.1:1)),iDef=i=>Math.round((i.def||0)*enF(i)*durF(i)*(i.sh?1.1:1));   // v3.05: shiny +10%
 function gearSum(k){let v=0;for(const sl of GEAR){const i=eqIt(sl);if(i&&i[k])v+=i[k]*durF(i)*enF(i);if(i&&i.gem&&GEMS[i.gem]&&GEMS[i.gem][k])v+=GEMS[i.gem][k];}
  const w=eqIt('w');if(w&&w.gem&&GEMS[w.gem]&&GEMS[w.gem][k])v+=GEMS[w.gem][k];return v+setBon(k)+cosB(k)+marB(k);}
 // the mass-produced Grid staff, bow, spear, dagger and hammer take the Grid sword's place in its set
@@ -7231,7 +7231,7 @@ const DROPM=['msword','mstaff','mbow','mspear','mdagger','mhammer','marmor','mhe
 const dropTier=k=>{const lv=MT[k]&&MT[k].lv?MT[k].lv[0]:0;return lv>=220?DROPMG:lv>=120?DROPM:DROPG;};
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.55:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const L=b.boss?dropTier(m.type):DROPG,id=L[rand()*L.length|0],r=rand()<(b.boss?.1:.04)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.dead=true;lpSrc(m);if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}pasKill(m);balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh&&!m.noLoot)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);pxpKill(m,b);eaKill(m);if(NET&&b.boss&&!m.bh&&!m.noLoot)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!m.noLoot&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh&&!m.noLoot){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else if(!m.noLoot)bossChest(m,b);{let xg=Math.round(b.xp*(m.xmul||1)*pxpKF(m)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(tlOn('veteran')?.05:0)+ttB('xp')+(tlOn('viscount')?.05:0)+(tlOn('pioneer')?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));const xs=xpSrcOf(m,1),got=xs===null?0:gainXP(xg,0,xs,1);jKill(m,got);twKill(m);if(got>0){num(m.x,m.y-36,'+'+got.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',got,t('lootXP'),{ic:null,cls:'xp'});}}if(b.gold&&!m.bh&&!m.noLoot){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(tlOn('explorer')?.05:0)+ttB('gold')+(tlOn('dandy')?.05:0)+(tlOn('shero')?.05:0)+(tlOn('baron')?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.dead=true;lpSrc(m);if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}pasKill(m);balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh&&!m.noLoot)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);pxpKill(m,b);eaKill(m);if(NET&&b.boss&&!m.bh&&!m.noLoot)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!m.noLoot&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh&&!m.noLoot){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else if(!m.noLoot)bossChest(m,b);{let xg=Math.round(b.xp*(m.xmul||1)*pxpKF(m)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(P.buf&&P.buf.k==='sage'?.25:0)+(evOn('gold')?.5:0)+petB('owl')+(tlOn('veteran')?.05:0)+ttB('xp')+(tlOn('viscount')?.05:0)+(tlOn('pioneer')?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));const xs=xpSrcOf(m,1),got=xs===null?0:gainXP(xg,0,xs,1);jKill(m,got);twKill(m);if(got>0){num(m.x,m.y-36,'+'+got.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',got,t('lootXP'),{ic:null,cls:'xp'});}}if(b.gold&&!m.bh&&!m.noLoot){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(tlOn('explorer')?.05:0)+ttB('gold')+(tlOn('dandy')?.05:0)+(tlOn('shero')?.05:0)+(tlOn('baron')?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh&&!m.noLoot)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,RCKEY.includes(k)?1:p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p*(1+secB('drop')))addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill (a divine beast's breath is one)
  if(!m.bh&&!m.noLoot&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}if(!m.noLoot){rbBossDrop(m,b);cosDrop(m,b);}
@@ -7418,7 +7418,7 @@ function chop(tr){{const st=(chopped.get(tr.k)||0)>gTime;if(!(st&&treeBound(tr.t
  fx.push({img:tr.cn,x:tr.tx*TS-6,y:tr.ty*TS-11,vx:0,vy:22,t:.7,fl:1});
  for(let i=0;i<16;i++)fx.push({x:tr.x+(rand()-.5)*14,y:tr.y-14-rand()*10,vx:(rand()-.5)*80,vy:-rand()*60,t:.6,c:rand()<.5?'#3f8a44':'#58a65a'});
  for(let i=0;i<8;i++)fx.push({x:tr.x,y:tr.y-6,vx:(rand()-.5)*70,vy:-rand()*70,t:.45,c:rand()<.5?'#8a5a32':'#c49a62'});hudDirty=true;}
-function mine(n){if(n.kind==='herb'||n.kind==='bherb')return pickHerb(n);if(n.dep>0){toast(t('hEmpty'));SFX.deny();return;}if(!labor(n.kind==='mith'?18:14))return;if(n.kind==='mith'){addMat('mith',ownsT('tMine')?2:1);if(rand()<.5)addMat('ore',1);n.dep=40;}else{const c=1+(rand()<.45?1:0)+secB('ore');addMat('ore',c);n.dep=n.village?15:25;}SFX.mine();shake=.06;for(let i=0;i<10;i++)fx.push({x:n.x,y:n.y-4,vx:(rand()-.5)*70,vy:-rand()*70,t:.4,c:rand()<.5?'#c8743a':'#8f8a86'});hudDirty=true;}
+function mine(n){if(n.kind==='herb'||n.kind==='bherb')return pickHerb(n);if(n.dep>0){toast(t('hEmpty'));SFX.deny();return;}if(!labor(n.kind==='mith'?18:14))return;if(n.kind==='mith'){shAdd('mith',ownsT('tMine')?2:1);if(rand()<.5)shAdd('ore',1);n.dep=40;}else{const c=1+(rand()<.45?1:0)+secB('ore');shAdd('ore',c);n.dep=n.village?15:25;}SFX.mine();shake=.06;for(let i=0;i<10;i++)fx.push({x:n.x,y:n.y-4,vx:(rand()-.5)*70,vy:-rand()*70,t:.4,c:rand()<.5?'#c8743a':'#8f8a86'});hudDirty=true;}
 const npcOf=id=>npcs.find(n=>n.id===id)||P;
 function coinFx(src,g){const n=Math.min(16,4+Math.round(g/8));for(let i=0;i<n;i++)fx.push({x:src.x+(rand()-.5)*6,y:src.y-14,vx:(rand()-.5)*110,vy:-50-rand()*90,t:2,c:rand()<.3?'#fff3b0':'#f2c14e',home:1,dl:.25+rand()*.2,coin:1});
  for(let i=0;i<Math.min(7,n);i++)setTimeout(()=>tone(1100+i*90,.06,'square',.05),300+i*70);setTimeout(SFX.coin,300);
@@ -7610,7 +7610,7 @@ const qName=id=>{const q=QD[id];return q&&q.nm?t(q.nm,q.nv&&q.obj&&q.obj.it?{...
 function qRewards(id){const q=QD[id],o=[];if(q.xp){const c=xpCap(q.rep||q.gen?'rquest':'squest');o.push(t('rwXP',{n:Math.round(c?Math.min(q.xp*XPMUL,c):q.xp*XPMUL)}));}if(q.gold)o.push(t('rwGold',{n:q.gold}));if(q.item)o.push(t(q.item));if(q.mat)o.push(t('got',{n:q.mat[1],item:t(q.mat[0])}));if(q.title||q.tl)o.push(t('tl_'+(q.title||q.tl)));if(q.cls)o.push(t('rwCls',{c:t('cl_'+q.cls)}));if(q.promo)o.push(t('rwCls',{c:t('cl_'+q.promo)}));if(q.hcls)o.push(t('rwCls',{c:t('cl_'+q.hcls)}));if(q.rx)q.rx.forEach(k=>o.push(t(k)));return o;}
 const qDone=id=>!!S.qs[id]&&S.qs[id].st===2;
 const arrowN=()=>S.arrows.reduce((a,b)=>a+b,0);
-function qCount(id){const o=QD[id].obj,s=S.qs[id];if(!s)return 0;if(o.t==='have')return o.it==='fish'?tkN():S.mats[o.it]||0;return s.c||0;}
+function qCount(id){const o=QD[id].obj,s=S.qs[id];if(!s)return 0;if(o.t==='have')return shHave(o.it);return s.c||0;}
 const qReady=id=>{const s=S.qs[id];return !!s&&s.st===1&&qCount(id)>=QD[id].obj.n;};
 function qAvail(id){const q=QD[id];return !S.qs[id]&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2||q.cl2==='smith'&&S.cls==='pagma')&&(!q.sec||S.sec===q.sec)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||q.sw||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)))&&(!q.need||!!(QNEED[q.need]&&QNEED[q.need]()));}
 // owner 2026-10-23: a "kill it below 50% health" task can't be done when the monster is far under your level (it can't bring
@@ -7637,7 +7637,7 @@ function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]
 function mkItem(id,r,made){const rc=rcById(id);if(rc.fix!=null&&!(made&&rc.fix<4))r=rc.fix;   // made: your own craft keeps the rating it came out at (owner 2026-10-22: a rare craft showed up unique); a breath piece is always legendary
 const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.hpp)it.hpp=rc.hpp;if(rc.slot==='w'){it.atk=Math.round(rc.atk*MULT[r]);it.spd=rc.spd;}else if(rc.def)it.def=Math.round(rc.def*MULT[r]);
  for(const k of ['as','ms','dm'])if(rc[k])it[k]=+(rc[k]*(1+(MULT[r]-1)*.5)).toFixed(3);if(rc.mpb)it.mpb=Math.round(rc.mpb*MULT[r]);for(const k of ['agi','agp','cold','dsh'])if(rc[k])it[k]=rc[k];if(rc.slot==='w'&&r>=2)it.wp=wpRoll(r,it);return it;}
-function completeQ(id){if(!claimQ(id))return;if(id==='sir1')sirFlute(1);if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else if(o.it==='fish')tkTake(o.n);else S.mats[o.it]-=o.n;}if(o.give)giveItem(o.it);
+function completeQ(id){if(!claimQ(id))return;if(id==='sir1')sirFlute(1);if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else shTake(o.it,o.n,0);}if(o.give)giveItem(o.it);
  S.qs[id].st=2;if(q.rep)delete S.qs[id];
  toast(t('qDone',{q:qName(id)}),'good');SFX.quest();jQuest(id);
  if(q.gold){S.gold+=pasOn('opers')?Math.round(q.gold*1.15):q.gold;coinFx(npcOf(q.by),q.gold);}if(q.kc)kcGain(q.kc);if(q.mat)addMat(q.mat[0],q.mat[1]);
@@ -8471,7 +8471,7 @@ function advance(){if(twDone())return;if(!DL||DL.optOn)return;DL.i++;if(DL.i>=DL
 
 /* ---------------- forge ---------------- */
 let MG=null;
-const has=need=>Object.keys(need).every(k=>(S.mats[k]||0)>=need[k]);
+const has=need=>Object.keys(need).every(k=>shHave(k)>=need[k]);
 function openForge(){SFX.open();mode='forge';MG=null;$('forge').hidden=false;$('mg').hidden=true;$('res').hidden=true;$('rlist').hidden=false;$('hint').hidden=true;renderRecipes();}
 function closeForge(){if(MG&&!MG.done)return;$('creW').hidden=true;CRE=null;for(const k in S.rcN||{})delete S.rcN[k];SFX.close();$('rays').classList.remove('on');$('forge').hidden=true;mode='play';MG=null;}
 // Recipes (Twister 2026-10-19): you only see the ones you have discovered. A recipe is learned the moment its condition
@@ -8497,10 +8497,10 @@ function renderRecipes(){const el=$('rlist');el.innerHTML='';rcLearn();{const sv
 function rcRows(){const el=$('rrows');if(!el)return;el.innerHTML='';const cat=RCAT[RTAB],qq=RQ.trim().toLowerCase(),inCat=rc=>!cat||cat.includes(rc.slot);
  const known=RC.filter(rc=>S.rcK[rc.id]&&inCat(rc)&&(!qq||t(rc.id).toLowerCase().includes(qq)||rc.id.includes(qq))),unk=qq?[]:RC.filter(rc=>!S.rcK[rc.id]&&inCat(rc));
  const hd=document.createElement('div');hd.className='rcount';hd.textContent=t('rcCount',{a:RC.filter(rc=>S.rcK[rc.id]).length,b:RC.length});el.appendChild(hd);
- if(creOK())for(const c of creList()){const rc=creRc(c);if(!inCat(rc)||qq&&!c.nm.toLowerCase().includes(qq))continue;const row=document.createElement('div');row.className='recipe cre';const req=Object.keys(rc.need).map(k=>`<span class="${(S.mats[k]||0)>=rc.need[k]?'ok':'no'}">${t(k)} ${Math.min(S.mats[k]||0,rc.need[k])}/${rc.need[k]}</span>`).join(' · ');
+ if(creOK())for(const c of creList()){const rc=creRc(c);if(!inCat(rc)||qq&&!c.nm.toLowerCase().includes(qq))continue;const row=document.createElement('div');row.className='recipe cre';const req=Object.keys(rc.need).map(k=>`<span class="${shHave(k)>=rc.need[k]?'ok':'no'}">${t(k)} ${Math.min(shHave(k),rc.need[k])}/${rc.need[k]}</span>`).join(' · ');
   row.innerHTML=`<div><div class="rn"><img class="ric" src="${icon('cw|'+creCw(c))}">${esc(c.nm)} <small style="color:#ffe7a8">${t('creTag')}</small> <small style="color:var(--muted)">(${statShort(rc)})</small></div><div class="req">${t('req')}: ${req}</div></div>`;
   const b=document.createElement('button');b.textContent=t('forgeBtn');b.disabled=!has(rc.need);b.onclick=()=>startMG(rc);row.appendChild(b);el.appendChild(row);}
- known.forEach(rc=>{const row=document.createElement('div');row.className='recipe';const req=Object.keys(rc.need).map(k=>`<span class="${(S.mats[k]||0)>=rc.need[k]?'ok':'no'}">${t(k)} ${Math.min(S.mats[k]||0,rc.need[k])}/${rc.need[k]}</span>`).join(' · ');
+ known.forEach(rc=>{const row=document.createElement('div');row.className='recipe';const req=Object.keys(rc.need).map(k=>`<span class="${shHave(k)>=rc.need[k]?'ok':'no'}">${t(k)} ${Math.min(shHave(k),rc.need[k])}/${rc.need[k]}</span>`).join(' · ');
   const st=rc.slot==='x'?`${ARROWG[0]}-${ARROWG[4]}G`:statShort(rc);
   row.innerHTML=`<div><div class="rn"><img class="ric" src="${icon(rc.id)}">${t(rc.id)}${S.rcN[rc.id]?` <span class="rnew">${t('rcNewB')}</span>`:''} <small style="color:var(--muted)">(${st})</small>${undOf(rc.id)&&!rc.drop?` <small style="color:#bfe0ff">${t('undL',{n:undOf(rc.id)})}</small>`:''}</div><div class="req">${t('req')}: ${req}</div></div>`;
   const b=document.createElement('button');b.textContent=t('forgeBtn');b.disabled=!has(rc.need);b.onclick=()=>{delete S.rcN[rc.id];startMG(rc);};row.appendChild(b);el.appendChild(row);});
@@ -8508,7 +8508,7 @@ function rcRows(){const el=$('rrows');if(!el)return;el.innerHTML='';const cat=RC
  unk.forEach(rc=>{const row=document.createElement('div');row.className='recipe unk';row.innerHTML=`<div><div class="rn">${t('rcUnk')}</div><div class="req">${t('rcHint',{h:rcHint(rc)||'?'})}</div></div>`;el.appendChild(row);});
  const bt=el.querySelector('.recipe button:not(:disabled)');if(bt&&document.activeElement!==$('rsearch'))bt.focus();}
 // Forging runs in three stages: heat the metal, hammer it into shape, quench it. Each stage is scored; the item takes shape in the preview.
-function startMG(rc){SFX.click();for(const k in rc.need)S.mats[k]-=rc.need[k];MG={rc,stage:0,p:0,dir:1,center:.5,heat:100,reh:0,res:[],sc:[],fbT:0,done:false,combo:0,lock:false,hold:false,sq:0,steam:[]};$('combo').textContent='';$('rlist').hidden=true;$('mg').hidden=false;$('mgname').textContent=rc.cre?rc.cre.nm:t(rc.id);stage.focus();setupStage();}
+function startMG(rc){SFX.click();let sh=0;for(const k in rc.need)sh+=shTake(k,rc.need[k],shCan(rc)&&!sh);MG={sh:sh>0&&shCan(rc),rc,stage:0,p:0,dir:1,center:.5,heat:100,reh:0,res:[],sc:[],fbT:0,done:false,combo:0,lock:false,hold:false,sq:0,steam:[]};$('combo').textContent='';$('rlist').hidden=true;$('mg').hidden=false;$('mgname').textContent=rc.cre?rc.cre.nm:t(rc.id);stage.focus();setupStage();}
 function setupStage(){const st0=MG.stage;if(st0===0)setTimeout(()=>{if(MG&&MG.stage===0)$('mghint').textContent=t('hHeat')+' · '+t(MG.rc.id==='jaffa'?'tJaffa':MG.rc.id==='gsword'?'tBlue':/bow|staff/.test(MG.rc.id)?'tWood':'tIron');},0);const st=MG.stage,b=1+stat('dex')*.002+(S.smith-1)*.04;MG.p=0;MG.dir=1;MG.hold=false;
  if(st===0){MG.T=.1;MG.vel=0;MG.prog=0;MG.acc=0;MG.tt=0;MG.ent=0;MG.tAll=0;MG.zk='';MG.c0=.55+rand()*.12;MG.ph=rand()*6;MG.center=MG.c0;MG.zp=Math.min(.14,.07*b);MG.zg=.2;MG.pump=0;}else if(st===1){newZone();}else{MG.center=.5+rand()*.3;MG.zp=.09*b;MG.zg=.24;}
  [...$('stg').children].forEach((e,i)=>{e.className=i<st?'ok':i===st?'on':'';});document.querySelector('.mgbar').hidden=st!==1;$('mghint').textContent=t(['hHeat','hHam','hQuench'][st]);$('hamrow').hidden=st!==1;$('fb').textContent='';$('combo').textContent='';renderDots();}
@@ -8597,7 +8597,7 @@ function finishMG(){const rc=MG.rc;
  const q=undB(rc)+mgScore()+.025*(S.smith-1)+S.patience+(patOn()?(skLv('lpat')>=10?.08:.04):0)+(pasOn('focus')?(skLv('focus')>=5?.06:.04):0)+(pasOn('scraft')?(skLv('scraft')>=5?.03:.02):0)+gbB('q')+secB('q')+(rc.slot==='r'||rc.slot==='n'||rc.slot==='k'||rc.slot==='e'?secB('acc'):0)+(rand()-.5)*.08;let r=Math.min(craftRate(q),maxRating());if(rc.fix>=4)r=rc.fix;if(r>=3)setTimeout(()=>annW('craftLeg',{rk:r}),300);
  let it=null;
  if(rc.slot==='x'){S.arrows[r]++;S.arrowsMade++;}
- else{it=mkItem(rc.id,r,1);if(rc.cre)creApply(it,rc.cre,r);breathFeat(it);if(pasOn('focus'))skUse('focus');if(pasOn('scraft'))skUse('scraft');if(pasOn('stemp'))skUse('stemp',1);if(P){vfx('forge',P.x,P.y-8);vfx('loot',P.x,P.y,{rarity:r});}
+ else{it=mkItem(rc.id,r,1);if(MG.sh||r>=4&&shCan(rc)&&rand()<.1){it.sh=1;setTimeout(()=>{toast(t('shMade'),'good');SFX.rare();},700);}if(rc.cre)creApply(it,rc.cre,r);breathFeat(it);if(pasOn('focus'))skUse('focus');if(pasOn('scraft'))skUse('scraft');if(pasOn('stemp'))skUse('stemp',1);if(P){vfx('forge',P.x,P.y-8);vfx('loot',P.x,P.y,{rarity:r});}
   S.items.push(it);const lvOkIt=lvrOk(itLvr(it));if(lvOkIt&&rc.slot==='w'&&it.atk>weapon().atk&&(WSH[it.id]||{}).k===weapKind())S.eqW=it.uid;if(lvOkIt&&rc.slot==='a'&&(!armorIt()||it.def>armorIt().def))S.eqA=it.uid;if(lvOkIt&&GEAR.includes(rc.slot)&&rc.slot!=='a'&&!eqIt(rc.slot))equip(it);}
  S.made[rc.id]=(S.made[rc.id]||0)+1;undCraft(rc);if(it&&rc.slot!=='x'&&r>=3){giveTitle('fuim');if(r>=4)giveTitle('flim');} /* SAT-ONLINE-161: the first unique and legendary items */qEvent('craft',rc.id,r,rc.slot);
  if(isSm()&&rc.slot!=='x'&&CREPC[r])setTimeout(()=>crepAdd(CREPC[r]),1200);
@@ -8621,7 +8621,7 @@ function finishMG(){const rc=MG.rc;
  hudDirty=true;save(true);}
 // Legendary Blacksmith's Creation: name the unique/legendary item yourself
 function askName(it){const box=document.createElement('div');box.id='nameBox';box.innerHTML=`<div class="rt rt${it.r}">${t('creation')}</div>`;const inp=document.createElement('input');inp.id='nameIn';inp.maxLength=24;inp.value=t(it.id);const b=document.createElement('button');b.id='nameOk';b.textContent=t('nameOk');b.onclick=()=>{const v=inp.value.trim();if(v){it.nm=v;const nm=$('rname');if(nm)nm.textContent=v;}SFX.notice();box.remove();save(true);};box.append(inp,' ',b);$('rextra').prepend(box);setTimeout(()=>{inp.focus();inp.select();},50);inp.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')b.click();});}
-const inm=i=>(i.nm||t(i.id))+(i.en?' \u202a+'+i.en+'\u202c':'');
+const inm=i=>(i.sh?'✨ ':'')+(i.nm||t(i.id))+(i.en?' \u202a+'+i.en+'\u202c':'');
 function afterCraft(rc){checkSkills();}
 
 /* ---------------- inventory ---------------- */
@@ -8634,15 +8634,15 @@ function statShort(i){const a=[];if(i.atk)a.push(`${t('atk')} ${i.uid?iAtk(i):i.
  if(i.as)a.push(`${t('gAs')} +${Math.round(i.as*enF(i)*100)}%`);if(i.ms)a.push(`${t('gMs')} +${Math.round(i.ms*enF(i)*100)}%`);if(i.dm)a.push(`${t('gDm')} +${Math.round(i.dm*enF(i)*100)}%`);if(i.mpb)a.push(`${t('gMp')} +${Math.round(i.mpb*enF(i))}`);if(i.hpp)a.push(`${t('gHp')} +${Math.round(i.hpp*enF(i)*100)}%`);if(i.agi)a.push(`${t('agi')} +${i.agi}`);if(i.agp)a.push(`${t('agi')} ${Math.round(i.agp*100)}%`);if(i.cold)a.push(t('gCold',{n:Math.round(i.cold*100)}));if(i.dsh)a.push(t('gDsh',{n:Math.round(i.dsh*100)}));if(i.gem)a.push(t('gemIn',{g:t(i.gem)}));return a.join(' · ');}
 function setTip(i){const sk=Object.keys(SETS).find(k=>SETS[k].it.includes(setId(i.id)));if(!sk)return '';const n=setCount(sk),c=setTier(sk);
  return `<br><small style="color:#9fe39a">${t('set_'+sk)} (${n}/${SETS[sk].it.length})</small>`+Object.keys(SETS[sk].b).map(k=>`<br><small style="color:${+k===c?'#9fe39a':'#8a96a8'}">${t('setPc',{n:k})}: ${t('setD_'+sk+k)}</small>`).join('');}
-function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:''}${itLvr(i)?`<small style="color:${lvrOk(itLvr(i))?'#9fb4c8':'#ff8a7a'}">${t('needLvT',{n:itLvr(i)})}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+hidTip(i)+wpTip(i)+setTip(i)+itemSkillTip(i);}
+function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:''}${itLvr(i)?`<small style="color:${lvrOk(itLvr(i))?'#9fb4c8':'#ff8a7a'}">${t('needLvT',{n:itLvr(i)})}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+(i.sh?`<br><small style="color:#ffe7a8">${t('shGear')}</small>`:'')+hidTip(i)+wpTip(i)+setTip(i)+itemSkillTip(i);}
 function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>${t('bread')}</b><br><small>${t('clickEat')}</small>`});['hpot','mpot'].forEach(k=>{if(S[k])a.push({k,n:S[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickDrink',{k:keyName(POT[k].key)})}</small>`});});
- LIFEM.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${TKF.includes(k)?tkTip(k):t('lifeMD')}</small>`});});
+ LIFEM.forEach(k=>{if(S.mats[k]>0)a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${TKF.includes(SHK[k]||k)?tkTip(SHK[k]||k):t('lifeMD')}</small>`+(SHK[k]?`<br><small style="color:#ffe7a8">${t('shTip')}</small>`:'')});});
  if(S.mats.pstove>0)a.push({k:'pstove',n:1,hook:!!CKST,tip:`<b>${t('pstove')}</b><br>${t('pstoveD')}<br><small>${t(CKST?'ckOnT':'ckUseT')}</small>`});   // v3.04
  Object.keys(TKB).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],hook:S.bait===k,tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t(S.bait===k?'tkOnT':'tkUseT')}</small>`});});
- Object.keys(DISH).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickEat')}</small>`});});
+ Object.keys(DISH).forEach(k=>{if(S.mats[k]>0)a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}`+(DISH[k].sh?`<br><small style="color:#ffe7a8">${t('shDish')}</small>`:'')+`<br><small>${t('clickEat')}</small>`});});
  RSUSE.filter(k=>!DISH[k]).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickUse')}</small>`});});
  if(S.rsh&&S.rsh.g)a.push({k:'sgl',n:1,tip:`<b>${t('sgl')}</b><br>${t('rsGlassD')}<br><small>${t(S.rsh.w?'sglOffT':'sglOnT')}</small>`}); // the glasses come off and on from the bag (owner 2026-10-22)
- ['wood','ore','leather','mstone','estone','pstone','bstone','mith','dscale','blue','tstone','brphx','brdrg','brtig','brtor','bljewel','blhorn','fess','iess','sess','bvial','vwleath','wegg','wheat','straw','melon','pumpk','fcab','compost','kink','kpearl','ndiron','ndstone'].forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(STR.en[k+'D']?k+'D':'matD')}</small>`});});
+ ['wood','ore','leather','mstone','estone','pstone','bstone','mith','dscale','blue','tstone','brphx','brdrg','brtig','brtor','bljewel','blhorn','fess','iess','sess','bvial','vwleath','wegg','wheat','straw','melon','pumpk','fcab','compost','kink','kpearl','ndiron','ndstone',...SHMAT].forEach(k=>{if(S.mats[k]>0)a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(STR.en[k+'D']?k+'D':'matD')}</small>`+(SHK[k]?`<br><small style="color:#ffe7a8">${t('shTip')}</small>`:'')});});
  GEMK.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(k+'D')}</small>`});});
  S.arrows.forEach((n,r)=>{if(n)a.push({k:'arrows',n,r,tip:`<b class="rt rt${r}">${t('arrows')}</b><br>${t('r'+r)} · ${ARROWG[r]}G`});});
  S.items.forEach(i=>{if(WSH[i.id]||(i.slot!=='w'&&i.slot!=='x')){const on=isEq(i);a.push({k:i.id,n:1,r:i.r,it:i,eq:on,tip:itemTip(i)+cmpTip(i)+(i.fav?`<br><small style="color:#f2c14e">★ ${t('ivFavT')}</small>`:'')+(i.lock?`<br><small style="color:#9fd8ff">🔒 ${t('ivLockT')}</small>`:'')+`<br><small>${on?t('eqMark'):t('clickEquip')}</small>`});}});
@@ -11572,7 +11572,7 @@ function p4PlotAct(i){const p=p4S().pl[i];
 function p4Plant(i,c){const C=CROPS[c],s=p4S();if(s.pl[i])return;if(S.gold<C.seed){SFX.deny();toast(t('noGold'),'warn');return;}const cmp=(S.mats.compost||0)>0;S.gold-=C.seed;if(cmp)S.mats.compost--;
  const p=s.pl[i]={c,t0:wNow(),d:p4Grow(c,cmp),n:p4Yield(c,cmp),cmp:cmp?1:0};SFX.click();toast(t(cmp?'plantedC':'planted',{c:t(c),m:Math.ceil(p.d/60000)}),'good');
  const o=SHRINES.find(q=>q.k==='p4plot'&&q.i===i);if(o)for(let k=0;k<5;k++)fx.push({x:o.x+(rand()-.5)*10,y:o.y-4,vx:(rand()-.5)*16,vy:-8-rand()*8,t:.4,c:'#8a6a3a',fl:1});hudDirty=true;save(true);}
-function p4Harvest(i){const s=p4S(),p=s.pl[i];if(!p4Ready(p))return;s.pl[i]=null;addMat(p.c,p.n*(S.cls2==='sfarm'?2:1));lifeXP('farm',6+p.n*3);SFX.quest();s.kinds[p.c]=1;frEnter(p); // SAT-ONLINE-187: its best piece is weighed for the fair
+function p4Harvest(i){const s=p4S(),p=s.pl[i];if(!p4Ready(p))return;s.pl[i]=null;shAdd(p.c,p.n*(S.cls2==='sfarm'?2:1));lifeXP('farm',6+p.n*3);SFX.quest();s.kinds[p.c]=1;frEnter(p); // SAT-ONLINE-187: its best piece is weighed for the fair
  const o=SHRINES.find(q=>q.k==='p4plot'&&q.i===i);if(o)vfx('loot',o.x,o.y,{rarity:1});
  if(S.qs.lfa1&&S.qs.lfa1.st===1&&!s.lfk[p.c]){s.lfk[p.c]=1;qEvent('visit','lfk');}hudDirty=true;save(true);}
 function p4Compost(){if((S.mats.herb||0)<3){SFX.deny();toast(t('binNeed'),'warn');return;}S.mats.herb-=3;addMat('compost',1);lifeXP('farm',2);SFX.click();vfx('dust',FARM2.bin[0]*TS+8,FARM2.bin[1]*TS+8,{n:6});hudDirty=true;save(true);}
@@ -12652,6 +12652,52 @@ Object.assign(DISH,{herbtea:{food:20,hp:.25,buf:'regen',bt:150},fishpie:{food:70
  mightp:{food:0,buf:'might',bt:300,pot:1},regenp:{food:0,hp:.2,buf:'regen',bt:300,pot:1}});
 Object.assign(MATP,{herbtea:20,fishpie:60,gfeast:400,mightp:150,regenp:200});
 for(const b of RB){RSUSE.push(b.id);AUK.push(b.id);MATP[b.id]=Math.round((b.g||8000)/4);for(const [m,p] of b.mon||[])if(MT[m])MT[m].drop.push([b.id,p]);}
+/* ---------------- shiny things and food that teaches (v3.05; the player Suki through the owner 2026-10-25: "Add different shiny
+   variants of fish and ores. Same with food, like golden apples. Each item cooked/crafted/smith/caught being shiny grants
+   special modifiers to your food armor or weapons… The addition of exp boosting food will also be appreciated") ----------------
+   Now and then (SHP) a catch, a vein's ore or mithril, a herb or a harvest comes out shiny: 'shn' + its key (the auction's
+   keys stay lowercase letters), ✨ before its name, four times its price. It cooks and forges as its plain kind, and goes in
+   first: whatever it goes into comes out shiny. A perfect pot (SHPP) or a Legendary piece at the anvil can be shiny on
+   its own too.
+   - A shiny dish: half again the food and the healing, its buff twice as long.
+   - A shiny piece of gear: +10% ATK or DEF (i.sh), ✨ before its name.
+   - The Scholar's Stew (sstew, at any campfire): +25% experience from monsters for ten minutes (the 'sage' buff, in place of
+     another dish's); a shiny one for twenty. */
+const SHB=[...TKF,'ore','mith','herb','bherb','wheat','straw','melon','pumpk','fcab'],SHP=.03,SHPP=.12,
+ SHK=Object.fromEntries(SHB.map(k=>['shn'+k,k])),shn=k=>'shn'+k;   // (the dishes join SHK below)
+// the Scholar's Stew
+Object.assign(COOK,{sstew:{need:{fish:1,bherb:2,wheat:1},xp:22}});Object.assign(DISH,{sstew:{food:40,hp:.1,buf:'sage',bt:600}});
+// the shiny dishes, from every dish the campfire makes
+const SHD=Object.keys(COOK).filter(k=>DISH[k]);
+for(const k of SHD){const d=DISH[k];DISH[shn(k)]=Object.assign({},d,{food:Math.min(100,Math.round(d.food*1.5)),hp:d.hp?Math.min(1,+(d.hp*1.5).toFixed(2)):d.hp,bt:d.bt?d.bt*2:d.bt,sh:1});}
+const SHALL=[...SHB,...SHD];for(const k of SHD)SHK[shn(k)]=k;   // a quest asking for a dish counts its shiny ones
+for(const k of SHALL){MATP[shn(k)]=Math.max(4,(MATP[k]||4)*4);if(MKQ[k])MKQ[shn(k)]=3;}
+AUK.push(...SHB.map(shn));LIFEM.push(...[...TKF,'herb','bherb'].map(shn));
+const SHMAT=['ore','mith','wheat','straw','melon','pumpk','fcab'].map(shn);
+// names: ✨ and the plain one's name (no adjective: Arabic would need its gender)
+for(const L of ['ar','en'])for(const k of SHALL){STR[L][shn(k)]='✨ '+(STR[L][k]||k);if(STR[L][k+'D'])STR[L][shn(k)+'D']=STR[L][k+'D'];}
+// what you have of a kind, shiny or not (any common fish for 'fish'; a dish counts its shiny ones too); what it takes:
+// one shiny first when the result can come out shiny (one is enough), else the plain ones first; it says how many shiny went in
+const shKinds=k=>k==='fish'?TKC.flatMap(c=>[shn(c),c]):SHK[shn(k)]?[shn(k),k]:[k];
+const shHave=k=>shKinds(k).reduce((a,c)=>a+Math.max(0,S.mats[c]||0),0);
+function shTake(k,n,one){const L=shKinds(k),sh=L.filter(c=>SHK[c]),pl=L.filter(c=>!SHK[c]);let used=0;
+ const take=(c,m)=>{const d=Math.min(m,Math.max(0,S.mats[c]||0));if(d){S.mats[c]-=d;if(SHK[c])used+=d;}return d;};
+ if(one)for(const c of sh)if(n>0&&take(c,1)){n--;break;}
+ for(const c of [...pl,...sh]){if(n<=0)break;n-=take(c,n);}return used;}
+// can what a recipe makes come out shiny: a dish, or a piece with ATK or DEF
+const shCan=rc=>!!rc&&rc.slot!=='x'&&!!(rc.atk||rc.def);
+// a gathering's n of kind k: each one shiny now and then (x: more often, as with glow bait)
+function shAdd(k,n,x=1){if(!SHK[shn(k)]||!(n>0))return addMat(k,n);let s=0;for(let i=0;i<n;i++)if(rand()<SHP*x)s++;if(n-s)addMat(k,n-s);
+ if(s){addMat(shn(k),s);toast(t('shGot',{it:t(k)}),'good');SFX.rare();if(P)vfx('loot',P.x,P.y,{rarity:3,life:1});}}
+const shTip=k=>SHK[k]?t('shTip'):'';
+Object.assign(STR.ar,{shGot:'✨ حظ حلو! {it} من النوع اللي بيلمع',shTip:'✨ اللي بيلمع بيتطبخ ويتصنع زي العادي، وواحد منه بيدخل الأول، واللي يدخل فيه بيطلع بيلمع. وبيتباع بأربع أضعاف.',
+ shDish:'✨ بتلمع: أكل وعلاج أكتر بالنص، والمفعول ضعف المدة.',shGear:'✨ بتلمع: +10% هجوم أو دفاع',shMade:'✨ طلعت بتلمع!',
+ sstew:'شوربة العالِم',sstewD:'شبع +40، وصحة +10%، و+25% خبرة من الوحوش لمدة 10 دقايق (مكان أي أكلة تانية).'});
+Object.assign(STR.en,{shGot:'✨ Shiny! Your {it} came out shining',shTip:'✨ Shiny: it cooks and forges as the plain kind, one goes in first, and what it goes into comes out shiny. It sells for four times as much.',
+ shDish:'✨ Shiny: half again the food and the healing, the effect twice as long.',shGear:'✨ Shiny: +10% ATK or DEF',shMade:'✨ It came out shiny!',
+ sstew:"Scholar's Stew",sstewD:'Food +40, health +10% and +25% experience from monsters for 10 minutes (in place of another dish).'});
+for(const L of ['ar','en'])STR[L][shn('sstew')+'D']=STR[L].sstewD;
+window.__GSH={B:SHB,D:SHD,K:SHK,P:SHP,add:(k,n,x)=>shAdd(k,n,x),have:k=>shHave(k),take:(k,n,f)=>shTake(k,n,f),shn,get COOKG(){return COOKG},hit:()=>{COOKG.p=COOKG.c;cookHit();},forge:id=>{const rc=rcById(id),m0=mode;startMG(rc);const sh=MG.sh;MG=null;mode=m0;return sh;},AUK,MKQ,iAtk:i=>iAtk(i),inm:i=>inm(i),mk:(id,r)=>mkItem(id,r)}; // tests
 // how a book is had: who sells it, who drops it; always tradeable
 function rbHint(k,short){const b=RBK[k]||RB.find(x=>x.id===k);if(!b)return '';const w=[];if(b.shop)w.push(t('rbShop',{n:t(b.shop),g:fmtN(b.g)}));
  if(b.mon)w.push(t('rbMon',{m:b.mon.map(([m])=>t(NAMEK[m]||m+'N')).join(', ')}));if(b.boss)w.push(t('rbBoss'));if(short)return w.join(' · ');w.push(t('rbTrade'));return t('rbHow',{b:t(b.id)})+' '+w.join(' · ');}
@@ -17229,6 +17275,10 @@ function ixRcD(x){const rc=x.rc,q=x.q,ch=[q.bs?t('ixBs'):t('ixAny'),q.sm?t('ixSm
 // a boss's chest (once a day: bChestGive), the stones it holds, the return scroll, the recipe books bosses drop (rbBossDrop)
 function ixXtra(){const st=['estone','pstone','bstone'].filter(ixHas),rb=(typeof RB!=='undefined'?RB:[]).filter(r=>r.boss&&ixHas(r.id));
  return `<h3>${t('ixXtra')}</h3><ul class="ixl"><li>${t('ixX1')}</li><li>${t('ixX2',{s:st.map(k=>esc(t(k))).join(t('ixAnd'))})}</li><li>${t('ixX3',{it:esc(t('rscroll'))})}</li>`+(rb.length?`<li>${t('ixX4')}<br><small>${rb.map(r=>esc(t(r.id))+' '+ixPc(r.boss)).join(' · ')}</small></li>`:'')+'</ul>';}
+Object.assign(STR.ar,{ixShF:'✨ ساعات السمكة بتطلع بتلمع (والطُعم المنوّر بيخليها ضعف). اللمّاعة بتتباع بأربع أضعاف، وأي أكلة تدخل فيها بتطلع بتلمع: أكل وعلاج أكتر بالنص، والمفعول ضعف المدة.',
+ ixShS:'✨ ساعات الخام أو الميثريل بيطلع بيلمع من العرق. لو دخل في قطعة على السندان، القطعة بتطلع بتلمع: +10% هجوم أو دفاع. والقطعة الأسطورية ساعات بتطلع بتلمع لوحدها.'});
+Object.assign(STR.en,{ixShF:'✨ Now and then a fish comes out shiny (glow bait doubles it). A shiny one sells for four times as much, and any dish it goes into comes out shiny: half again the food and the healing, its effect twice as long.',
+ ixShS:'✨ Now and then ore or mithril comes out of the vein shiny. If it goes into a piece at the anvil, the piece comes out shiny: +10% ATK or DEF. A Legendary piece is sometimes shiny on its own.'});
 Object.assign(STR.ar,{ixSm7:'{n} بيبيع شواكيش حدادة لأي حد خد دروسه ولأي حداد: {l}. كل واحد بيوسّع الحتة الكويسة والمثالية على السندان.'});
 Object.assign(STR.en,{ixSm7:"{n} sells forge hammers to anyone who has had his lessons, and to any Blacksmith: {l}. Each one widens the anvil's good and perfect parts."});
 Object.assign(STR.ar,{ixTab_fish:'🎣 الصيد',ixFiG:'الصيد',ixFi1:'اقف جنب المية ودوس {k}: السنارة تنزل. لما العوامة ترشّ دوس {k} تاني؛ لو دوست بدري السمكة بتهرب.',ixFi2:'كل مية ليها سمكها: واحدة عادية وواحدة نادرة. والسمكة الدهبية بتشد في أي مية.',
@@ -17243,11 +17293,11 @@ Object.assign(STR.en,{ixTab_fish:'🎣 Fishing',ixFiG:'Fishing',ixFi1:'Stand by 
 function ixGuide(v){const L=k=>`<li>${k}</li>`,cb=QD.cb||{},cm=QD.cm||{};
  if(v==='smith')return `<h3>${t('ixSmG')}</h3><ul class="ixl">`+[t('ixSm1',{n:ixNpc(cb.by||'khan'),l:cb.lv||5,q:cb.pre&&ixHas('q_'+cb.pre)?esc(t('q_'+cb.pre)):'—'}),t('ixSm2'),t('ixSm3',{h:esc(t('hHam'))}),t('ixSm4'),t('ixSm5'),
   t('ixSm6',{m:esc(t('mstone')),e:esc(t('estone')),a:Math.round(ENHP[0]*100),b:Math.round(ENHP[ENHP.length-1]*100)}),
-  t('ixSm7',{n:ixNpc('khan'),l:CKH.slice(1).map((H,i)=>esc(t('ckHam'+(i+1)))+' (+'+ckPct(H.f)+'%)').join(t('ixAnd'))})].map(L).join('')+'</ul>';
+  t('ixShS'),t('ixSm7',{n:ixNpc('khan'),l:CKH.slice(1).map((H,i)=>esc(t('ckHam'+(i+1)))+' (+'+ckPct(H.f)+'%)').join(t('ixAnd'))})].map(L).join('')+'</ul>';
  if(v==='gem')return `<h3>${t('ixGemG')}</h3><ul class="ixl">`+[t('ixGem1',{a:ixNpc('khan'),b:ixNpc('smithRh'),g:GEMC.toLocaleString('en')}),t('ixGem2'),t('ixGem3',{p:'0.4',b:30}),t('ixGem4',{d:esc(t('diam')),h:esc(t('thund'))})].map(L).join('')+'</ul>';
  if(v==='mag')return `<h3>${t('ixMagG')}</h3><ul class="ixl">`+[t('ixMag1',{s:esc(t('sapph'))}),t('ixMag2',{k:esc(keyName(actKey('mpot')))}),t('ixMag3'),t('ixMag4',{n:ixNpc(cm.by||'tm'),l:cm.lv||5}),t('ixMag5')].map(L).join('')+'</ul>'+
   `<p class="ixh">${t('ixEls')}</p><ul class="ixl">${Object.keys(BTHK).map(el=>`<li><b>${esc(t('mbEl_'+el))}</b> · <img class="ixi" src="${icon(BTHK[el])}"> ${esc(t(BTHK[el]))}<br><small>${(L=>L.filter(ixMet).map(k=>esc(mbName(k))).concat(L.some(k=>!ixMet(k))?[t('ixUnk',{n:L.filter(k=>!ixMet(k)).length})]:[]).join(' · '))(Object.keys(BEL).filter(k=>BEL[k]===el&&MT[k]))}</small></li>`).join('')}</ul>`;
- if(v==='fish'){const k=esc(keyName(actKey('use')));return `<h3>${t('ixFiG')}</h3><ul class="ixl">`+[t('ixFi1',{k}),t('ixFi2'),t('ixFi3'),t('ixFi4'),t('ixFi5',{n:ixNpc('merchant')}),t('ixFi6')].map(L).join('')+'</ul>';}
+ if(v==='fish'){const k=esc(keyName(actKey('use')));return `<h3>${t('ixFiG')}</h3><ul class="ixl">`+[t('ixFi1',{k}),t('ixFi2'),t('ixFi3'),t('ixFi4'),t('ixFi5',{n:ixNpc('merchant')}),t('ixFi6'),t('ixShF')].map(L).join('')+'</ul>';}
  return '';}
 // fishing (v3.03): a water's two fish (a rare one you haven't caught is ???), the rods, the bait
 const tkSeen=k=>(S.fishR&&S.fishR[k]!=null)||(S.mats[k]||0)>0;

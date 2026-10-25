@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25shiny', ver: '3.05', d: '2026-10-25',
+      ar: ["طلب Suki: ✨ حاجات بتلمع. ساعات السمكة اللي بتصطادها، والخام والميثريل اللي بتعدّنه، والعشب، والمحصول بيطلعوا بيلمعوا. اللي بيلمع بيتباع بأربع أضعاف، وبيتطبخ ويتصنع زي العادي، وواحد منه بيدخل الأول.",
+        "أي أكلة تدخل فيها حاجة بتلمع بتطلع بتلمع: أكل وعلاج أكتر بالنص، ومفعولها ضعف المدة. والضربة الممتازة في الحلة ساعات بتطلّعها بتلمع لوحدها.",
+        "وأي قطعة على السندان يدخل فيها خام أو ميثريل بيلمع بتطلع بتلمع: +10% هجوم أو دفاع، وجنب اسمها ✨. والقطعة الأسطورية ساعات بتطلع بتلمع لوحدها.",
+        "أكلة جديدة عند أي نار: شوربة العالِم (سمكة، و2 زهرة القمر، وقمح): +25% خبرة من الوحوش لمدة 10 دقايق، واللي بتلمع 20."],
+      en: ["Suki's request: ✨ shiny things. Now and then a fish you catch, the ore or mithril you mine, a herb or a harvest comes out shiny. A shiny one sells for four times as much, cooks and forges as the plain kind, and one goes in first.",
+        "Any dish a shiny ingredient goes into comes out shiny: half again the food and the healing, its effect twice as long. A perfect strike at the pot sometimes makes it shiny on its own.",
+        "Any piece at the anvil that takes shiny ore or mithril comes out shiny: +10% ATK or DEF, with ✨ before its name. A Legendary piece is sometimes shiny on its own.",
+        "A new dish at any campfire: the Scholar's Stew (a fish, 2 moonflowers and wheat): +25% experience from monsters for 10 minutes, a shiny one for 20."] },
     { v: '2026-10-25tools', ver: '3.04', d: '2026-10-25',
       ar: ["طلب Suki: خان بيبيع شواكيش حدادة لأي حد خد دروسه: الحديد، والصلب (من لفل حدادة 4)، والميثريل (من لفل حدادة 7). كل واحد بيوسّع الحتة الكويسة والمثالية على السندان.",
         "أي لوكاندة بتبيع أدوات الطبخ (🍳): سباتيولات الخشب، والنحاس (من لفل طبخ 4)، والميثريل (من لفل طبخ 7). كل واحدة بتوسّع الجزء الدهبي في الحلة وبتخليها تسخن أبطأ.",
