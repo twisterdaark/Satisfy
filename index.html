@@ -4104,7 +4104,7 @@ function epDone(id){const q=QD[id];if(!q||!q.gr)return;crepAdd(q.gr==='SS'?3000:
  setTimeout(()=>{announce(t('epClrN',{n:t('pname'),g:q.gr,q:qName(id)}));if(!NET||!NETTR||!NETTR.feedSay||!S||S.__demo||!netId)return;NETTR.feedSay('news',{from:NET.uid,h:netId||S.look.n,k:'epClrN',p:{f:EPQ.indexOf(id)}});},2400);}
 function epNewsIn(m){const id=EPQ[m.p&&m.p.f|0];if(!id)return;announce(t('epClrN',{n:Satisfy.chat.name(m.h,m.from)||'?',g:QD[id].gr,q:qName(id)}));sfxOn('soc',SFX.notice);}
 // Irene, by the altar of Yatan's ruins: seen only by a player on the quest
-const epVis=o=>o.p4?p4Vis(o):o.p3?p3Vis(o):o.qv?epAct(o.qv)&&!qReady(o.qv):true;
+const epVis=o=>o.nl?nlVis(o):o.p4?p4Vis(o):o.p3?p3Vis(o):o.qv?epAct(o.qv)&&!qReady(o.qv):true;
 function epInit(){if(SHRINES.some(o=>o.k==='irene'))return;const mx=(YATAN.x0+YATAN.x1)>>1,ty=YATAN.y0+3;let spot=null;
  for(let r=0;r<=4&&!spot;r++)for(const dx of [3+r,-3-r])if(!solidT(mx+dx,ty)&&!solidT(mx+dx,ty-1)){spot={x:(mx+dx)*TS+8,y:ty*TS+10};break;}
  SHRINES.push({k:'irene',qv:'irn',...(spot||{x:(mx+3)*TS+8,y:ty*TS+10}),hint:'hIrene'});}
@@ -5288,7 +5288,7 @@ function meetTick(dt){if(!S||!P||ARN||TWR)return;if(S.comp)S.comp=null;const slo
  if(M.m.hp<M.m.max&&d<300)M.joined=true;}
 window.__GMEET={get M(){return MEET},stop:()=>{MEET=null;COMPO=null;meetDone=Math.floor(Date.now()/MEETS);}}; // tests: no hero met this slot
 function setComp(id){const old=S.comp;S.comp=id||null;COMPO=null;if(id){toast(t(gk(id,'compOn'),{n:t(id)}),'good');SFX.quest();dialog(id,['cpGo_'+id]);}else if(old)toast(t(gk(old,'compOff'),{n:t(old)}));hudDirty=true;save(true);}
-function compHit(m,mul,crit){if(!m||m.dead)return;const my=monY(m),d=Math.max(1,Math.round(atkV()*mul*lvF(m.lv)*(.9+rand()*.2)*(crit?2:1)));m.hp-=d;netHit(m,d);m.hurt=.12;m.agg=1;m.eng=4;
+function compHit(m,mul,crit){if(!m||m.dead)return;if(OGB&&OGB[m.type]&&ogImm(m,{}))return;const my=monY(m);let d=Math.max(1,Math.round(atkV()*mul*lvF(m.lv)*(.9+rand()*.2)*(crit?2:1)));if(OGB&&OGB[m.type])d=ogDmg(m,d,{});m.hp-=d;netHit(m,d);m.hurt=.12;m.agg=1;m.eng=4;
  num(m.x+(rand()-.5)*8,my-8,String(d),crit?'#ffd24a':'#9fe39a',crit);vfx(crit?'crit':'hit',m.x,my,{});if(m.hp<=0)killMon(m);}
 function updateComp(dt){if(!S||!P)return;meetTick(dt);const c=MEET?COMPS[MEET.id]:null;
  if(!c){COMPO=null;}else if(!COMPO||COMPO.id!==MEET.id)COMPO={id:MEET.id,spr:c.spr,x:MEET.m.x+26,y:MEET.m.y+4,dir:3,frame:0,at:0,cd:1,sk:5};
@@ -5751,7 +5751,7 @@ function fishAct(){const F=FISH;FISH=null;if(F.t>=F.bite&&F.t<F.bite+F.win){cons
 function pickHerb(n){if(n.dep>0){toast(t('hPicked'));SFX.deny();return;}if(!labor(4))return;const lv=lifeLv('herb');addMat(n.kind,1+(rand()<lv*.06?1:0));if(rand()<.04+lv*.004)addMat('vherb',1);lifeXP('herb',n.kind==='bherb'?8:4);n.dep=n.kind==='bherb'?120:70;SFX.chop();for(let i=0;i<8;i++)fx.push({x:n.x,y:n.y-4,vx:(rand()-.5)*50,vy:-rand()*50,t:.4,c:n.kind==='bherb'?'#7ab8ff':'#5aa83a'});hudDirty=true;}
 // cooking and brewing at a campfire; a better cook burns less
 const COOK={cfish:{need:{fish:1},alt:'sfish',xp:6},stew:{need:{fish:2,herb:2},xp:12},feast:{need:{gfish:1,herb:1,bherb:1},xp:25},ppie:{need:{pumpk:1,wheat:2},xp:20},sjam:{need:{straw:2,wheat:1},xp:16}},BREW={hpot:{need:{herb:3},xp:6},mpot:{need:{bherb:2,herb:1},xp:8}};
-const DISH={ppie:{food:80,hp:.3,buf:'regen',bt:240},sjam:{food:50,hp:.2,buf:'might',bt:180},cfish:{food:35,hp:.2},stew:{food:60,buf:'regen',bt:120},feast:{food:100,buf:'might',bt:300},dskewer:{food:100,hp:1,buf:'might',bt:600},choco:{food:30,hp:.5,buf:'regen',bt:180}}; // dskewer, choco: from the Reputation Store's drawing machine
+const DISH={ppie:{food:80,hp:.3,buf:'regen',bt:240},sjam:{food:50,hp:.2,buf:'might',bt:180},cfish:{food:35,hp:.2},stew:{food:60,buf:'regen',bt:120},feast:{food:100,buf:'might',bt:300},dskewer:{food:100,hp:1,buf:'might',bt:600},choco:{food:30,hp:.5,buf:'regen',bt:180},rpotato:{food:45,hp:.25}}; // dskewer, choco: from the Reputation Store's drawing machine
 const canMake=r=>Object.entries(r.need).every(([k,n])=>(S.mats[k]||0)>=n||(r.alt&&k==='fish'&&(S.mats[r.alt]||0)>=n));
 const needTxt=r=>Object.entries(r.need).map(([k,n])=>`${n} ${t(r.alt&&k==='fish'?'fishAny':k)}`).join(' + ');
 function makeLife(k,brew){const r=(brew?BREW:COOK)[k];if(!canMake(r)){SFX.deny();return campMenu();}
@@ -6144,6 +6144,18 @@ const MT={
  gildong:{lv:[380,380],hp:60000000,dmg:17000,spd:66,xp:9000000,gold:120000,aggro:240,r:6,oy:30,boss:1,leash:280,slam:22000,slamR:60,adds:'egclone',drop:[['mith',16],['diam',2],['mstone',16],['blue',1]]},
  egclone:{lv:[370,370],hp:3000000,dmg:12000,spd:66,xp:20000,gold:0,aggro:300,r:6,oy:30,drop:[]}
 };
+// new monsters made for the game (owner 2026-10-25, encyclopedia §93/§95: GAME_ORIGINAL, never said to be the novel's; their
+// levels are game balance), each fighting in a way none of the others does (ogSpawn, OGB, ogDmg): the Field Burrower digs
+// under the ground and comes up beneath you; the Burrow Queen, its mother (the secret quest's); the Bandit Scout keeps its
+// distance and fires a flare that calls every monster near; the Echo Bat Swarm is six bats that one blow only thins; the
+// Mossback Snapper's shell turns back what hits it from the front, and it turns slowly
+Object.assign(MT,{fburrow:{lv:[46,52],hp:3600,dmg:210,spd:54,xp:260,gold:6,aggro:100,r:6,oy:14,drop:[['wheat',.35],['herb',.2]]},
+ fbqueen:{lv:[55,55],hp:30000,dmg:320,spd:50,xp:2600,gold:120,aggro:160,r:9,oy:18,drop:[['wheat',3],['leather',1]]},
+ bscout:{lv:[38,42],hp:1800,dmg:120,spd:64,xp:200,gold:30,aggro:170,r:6,oy:28,drop:[['herb',.3],['ore',.2]]},
+ bswarm:{lv:[100,106],hp:30000,dmg:400,spd:70,xp:3200,gold:30,aggro:120,r:10,oy:26,drop:[['leather',.5],['mstone',.25]]},
+ msnap:{lv:[18,24],hp:1400,dmg:110,spd:30,xp:80,gold:5,aggro:70,r:8,oy:16,drop:[['leather',.5],['fish',.3]]}});
+// the Patrian farmer's rows and Piaro's field (tiles), for the burrowers and the secret quest (var: read when the first world is built)
+var FWF={x:373,y:96},PIF={x:290,y:68};
 const SPAWN=[['rabbit',104,150,42,62,14],['rabbit',147,157,62,100,6],['boar',147,157,64,104,8],['boar',100,118,44,62,5],['goblin',109,152,105,116,14],['merman',80,106,88,112,12],['pwolf',64,100,42,90,12],
  ['outlaw',58,80,99,116,10],['forc',80,150,4,24,16],['gbear',66,156,26,37,12],['wolf',3,62,46,84,14],['bear',3,62,46,84,6],['golem',29,49,3,41,10],['cgolem',50,61,12,22,4],
  ['hwolf',160,221,40,62,14],['rboar',160,221,42,62,8],['deserter',160,221,103,118,12],['mgolem',160,221,104,118,6],['gbear',160,221,26,37,8]];
@@ -6524,7 +6536,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   // the 32nd Great Demon Belial at the gate of hell (major 7), after them for the same reason
   {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
-  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();}
+  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();}
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
  {const now=Date.now(),D=(S&&S.mrt)||{};for(const m of mons){const u=D[mobKey(m)];if(u>now){m.dead=true;m.dying=0;m.rt=(u-now)/1000;}}}
@@ -6754,7 +6766,7 @@ function tdEnd(){const d=tdDur(),v=tdDps();if(d>=TDMIN&&v>(S.dpsB||0)){S.dpsB=v;
 let TDUI='';function tdUI(){const w=$('tdW');if(!w)return;const on=!!TDM&&mode!=='title';const h=on?`${t('tdummy')} · ${tdDur().toFixed(1)} s · ${t('tdDmg')} <b>${TDM.dmg.toLocaleString('en')}</b> · DPS <b>${tdDps().toLocaleString('en')}</b> · ${t('tdHits',{n:TDM.hits,c:TDM.crits})}${S.dpsB?` <small>· ${t('tdBestL',{n:S.dpsB.toLocaleString('en')})}</small>`:''}`:'';
  if(h!==TDUI){TDUI=h;w.innerHTML=h;w.hidden=!on;}}
 window.__GTD={tick:dt=>tdTick(dt),hit:(m,d,c)=>tdHit(m,d,c),end:()=>tdEnd(),get M(){return TDM},dps:()=>tdDps(),dur:()=>tdDur(),TDSPOT,TDR,TDIDLE,TDMIN,ui:()=>$('tdW').textContent,shared:m=>mobOk(m),solid:(x,y)=>solidT(x,y)}; // tests
-function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}
+function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}if(OGB&&OGB[m.type]&&ogImm(m,o))return 0;
  if(m.type==='kraugel'&&!m.st&&!(P.bdetU>gTime)&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
  if(o.skill&&!o.spr&&P.sprW>gTime)bzSpray(m,mul); // Braham's Magic Spray
  let dmg=(o.aura?auAtkV():atkV())*mul*(o.skill&&P.cohW>gTime?3:1)*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*eaAtk()*(m.wardT>gTime?m.wardR||.4:1),crit=rand()<Math.min(.5,.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8*ttCdm();dmg*=rlAtk(m);let burn=false;const w=weapon();
@@ -6765,7 +6777,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,m
  dmg=ipHit(m,dmg,crit,o);if(o.skill&&tlOn('duke'))dmg*=1.15;if(o.skill&&S.cls2==='bomb')dmg*=1.15;sc2Hit(m,o);if(o.skill&&S.cls==='braham'&&S.sk.bcont&&rand()<Math.min(.75,.3+.05*(skLv('bcont')-1))){dmg*=1.3;if(!o.dot&&rand()<.3)numPK(-30,'bcAmp','#d8c0ff',false);}dmg*=1+pasGen();if(P.shwU>gTime)dmg*=saEvil(m)?1.5:1.2;dmg=tzHit(m,dmg,o);if(!o.dot)kyArc(m);if(o.skill&&S.cls==='mumud'&&pasOn('mmreint'))dmg*=1+.15*pasM('mmreint');if(m.tw===1)twHit(m,crit,o);if(m.type==='gcrown'&&m.bh&&!crit&&!o.skill)dmg=1;if(o.skill&&S.bh&&S.bh.mm)dmg*=1.03;if(tlOn('hking')&&HKV.has(m.type))dmg*=1.15;dmg=ttHit(m,dmg,crit);
  let mblk=false;if(AIK[m.type]==='soldier'&&!m.tdum&&!o.skill&&!o.aura&&!(P.bdetU>gTime)&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
   mblk=true;dmg*=.2;crit=false;burn=false;m.grdT=.6;m.cd=Math.min(m.cd,.15);vfx('block',m.x+m.face*7,my-2,{angle:m.face>0?Math.PI:0});num(m.x,my-20,t('mBlock'),'#9fc8ff',false);SFX.hit();}
- dmg+=cpErode(m,o);dmg=Math.max(1,Math.round(dmg));if(!Number.isFinite(dmg))dmg=1;dmg=blRefl(m,dmg);if(!m.tdum)ttRec(dmg);m.hp-=dmg;if(m.tdum)tdHit(m,dmg,crit);m.myd=(m.myd||0)+dmg;m.myT=gTime;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;if(!m.tdum)trainMast();if(!o.chain&&wearT!==gTime&&!m.tdum){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
+ dmg+=cpErode(m,o);dmg=Math.max(1,Math.round(dmg));if(!Number.isFinite(dmg))dmg=1;dmg=blRefl(m,dmg);if(OGB&&OGB[m.type])dmg=ogDmg(m,dmg,o);if(!m.tdum)ttRec(dmg);m.hp-=dmg;if(m.tdum)tdHit(m,dmg,crit);m.myd=(m.myd||0)+dmg;m.myT=gTime;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;if(!m.tdum)trainMast();if(!o.chain&&wearT!==gTime&&!m.tdum){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
  num(m.x,my-8,String(dmg),crit||burn?'#ffd24a':'#ffffff',crit||burn);
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(crit&&!RMO)shake=Math.max(shake,.07);if(burn)vfx('fire',m.x,my);if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
@@ -6975,7 +6987,7 @@ function killMon(m){const b=MT[m.type];m.dead=true;lpSrc(m);if(m.spar){if(SPAR&&
  if(!m.bh&&!m.noLoot)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,RCKEY.includes(k)?1:p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p*(1+secB('drop')))addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill (a divine beast's breath is one)
  if(!m.bh&&!m.noLoot&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}if(!m.noLoot){rbBossDrop(m,b);cosDrop(m,b);}
  if(m.lv>=20&&!m.tmp&&!m.noLoot){if(b.boss){addMat('estone',1+(m.lv/50|0));if(rand()<.12)addMat('pstone',1);if(rand()<.25)addMat('bstone',1);}else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
- crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;sc2Kill(m);mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);p4Kill(m);p5Kill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
+ crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;sc2Kill(m);mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);p4Kill(m);p5Kill(m);fdwKill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
  if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;annW('annGuard',{lv:S.lv});}giveTitle('forest');S.raid=0;}
  if(m.type==='gchief'){shake=.3;giveTitle('chief');}
  if((S.kills.rabbit||0)+(S.kills.goblin||0)>=40)giveTitle('hunter');
@@ -7099,7 +7111,7 @@ let LMS=null;
 function lmList(){if(LMS)return LMS;LMS=[];for(const [k,lx,ly,abs] of LMD){const x0=abs?lx:wX(lx);let best=null;
   for(let r=0;r<8&&!best;r++)for(let j=-r;j<=r&&!best;j++)for(let i=-r;i<=r;i++){const x=x0+i,y=ly+j,a=at(x,y);if(a===undefined||SOLID[a]||a===WA||at(x,y+1)===WA)continue;best={x,y};break;}
   if(best)LMS.push({k,x:best.x*TS+8,y:best.y*TS+12});}return LMS;}
-function lmRead(l){const lines=[l.k+'1',l.k+'2'];dialog(l.k,lines,()=>{S.books=S.books||{};if(!S.books['lm_'+l.k]){S.books['lm_'+l.k]=1;S.hid.insi++;toast(t('insiUp'),'good');cdxCheck();save(true);}});}
+function lmRead(l){const lines=[l.k+'1',l.k+'2'];dialog(l.k,lines,()=>{S.books=S.books||{};if(!S.books['lm_'+l.k]){S.books['lm_'+l.k]=1;S.hid.insi++;toast(t('insiUp'),'good');cdxCheck();save(true);}fdLm(l.k);});}
 function drawLm(l){const x=Math.round(l.x),y=Math.round(l.y),b=Math.sin(gTime*3)*1.5,yy=Math.round(y-12+b),seen=(S.books||{})['lm_'+l.k];
  ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(x-4,y-1,8,2);ctx.globalAlpha=seen?.55:1;
  R(ctx,x-1,yy-5,2,10,'#1b2a4a');R(ctx,x-3,yy-3,6,6,'#1b2a4a');R(ctx,x-5,yy-1,10,2,'#1b2a4a');
@@ -7376,7 +7388,7 @@ const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.hpp)it.hpp=rc.hpp;if(rc.s
 function completeQ(id){if(!claimQ(id))return;if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else S.mats[o.it]-=o.n;}if(o.give)giveItem(o.it);
  S.qs[id].st=2;if(q.rep)delete S.qs[id];
  toast(t('qDone',{q:qName(id)}),'good');SFX.quest();jQuest(id);
- if(q.gold){S.gold+=pasOn('opers')?Math.round(q.gold*1.15):q.gold;coinFx(npcOf(q.by),q.gold);}if(q.kc)kcGain(q.kc);
+ if(q.gold){S.gold+=pasOn('opers')?Math.round(q.gold*1.15):q.gold;coinFx(npcOf(q.by),q.gold);}if(q.kc)kcGain(q.kc);if(q.mat)addMat(q.mat[0],q.mat[1]);
  if(q.item){const it=mkItem(q.item,1);S.items.push(it);if(q.cls)S.eqW=it.uid;loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});}
  if(q.promo){promoDone(q);phDone(q);}if(q.hcls)hcDone(q);
  if(q.cls){S.cls=q.cls;sbSig='';SFX.legendary();flash();setTimeout(()=>toast(t('clsGot',{c:t('cl_'+q.cls)}),'good'),400);checkSkills();}
@@ -7644,7 +7656,7 @@ function talkNPC(id){if(id==='board')return openBoard();if(id==='auction'&&!npcK
  if(av&&n.opts&&(S.qOff=S.qOff||{})[av]){const line=n.idle?n.idle():'oLeave',o=n.opts();return dialog(id,[line],null,[{l:t('oQuestAsk',{q:qName(av)}),f:()=>offerQ(id,av)},...o,{l:t('oLeave')}]);}
  if(av){if(n.opts)S.qOff[av]=1;return offerQ(id,av);}
  const ac=mine.find(q=>S.qs[q]&&S.qs[q].st===1);if(ac&&!n.opts)return dialog(id,[qLn(ac,'_w')]);
- let line=mine.some(qAvail)&&n.low?(typeof n.low==='function'?n.low():n.low):n.idle?n.idle():'oLeave';if(n.hi&&!S.met[id]){S.met[id]=1;line=n.hi;}
+ let line;if(n.hi&&!S.met[id]){S.met[id]=1;line=n.hi;}else if(!ac)line=mine.some(qAvail)&&n.low?(typeof n.low==='function'?n.low():n.low):n.idle?n.idle():'oLeave';   // an idle line only when it is the one shown
  shopD(id,ac?qLn(ac,'_w'):line);}
 // a generated quest (Earl Aden's royal tasks) has no lines of its own: a shared one with its name and progress (owner 2026-10-22)
 const qLn=(q,s)=>QD[q]&&QD[q].gen?t('genQ'+s,{q:qName(q),p:qObjText(q)}):q+s;
@@ -7873,7 +7885,7 @@ Object.assign(STR.en,{pstone:'Protection Stone',pstoneD:'If an enhancement fails
  fusHow_tlink:'Made by using Transcend and Link back to back (Link must be level 2)',fusHow_lkill:'Made by using Kill and Link back to back',fusHow_lkwave:'Made by using Link and Kill, then Wave, back to back, once you know Linked Kill',fusHow_pkill:'Made by using Pinnacle and Kill back to back',
  sk_tlink:"Pagma's Swordsmanship: Transcended Link",skd_tlink:"20 energy swords fall on those around you, 60% each, and every hit stiffens the target for 0.1 s.",sk_lkill:"Pagma's Swordsmanship: Linked Kill",skd_lkill:'Three to seven cuts of 600% each. If all seven come, your stamina runs out.',sk_lkwave:"Pagma's Swordsmanship: Linked Kill Wave",skd_lkwave:'Eight Kills in a row that chase everything around you, 600% each, and halve their speed.',sk_pkill:"Pagma's Swordsmanship: Pinnacle Kill",skd_pkill:'One cut of 800% that changes course mid-swing. Costs a sixth of your health.',stBase:'base {n}',stBaseTip:'Big number = base + smithing, advancement and title bonuses, times advancement percentages. The buttons raise the base only.',p5Tip:'+5 to the base. The total can rise by 6 or more from advancement percentages.',pgLearn:"[ You learned Pagma's Swordsmanship: {s} ]",skMural:'Learned at the mural behind Loran Falls'});
 window.__GPG={mural:()=>muralAct(),scene:()=>PGSC}; // tests
-function shrineAct(o){if(o.ea)return eaAct(o);if(o.p4)return p4Act(o);if(o.p3)return p3Act(o);if(o.k==='god')return godAct(o);if(o.k==='irene')return ireneAct(o);if(o.k==='msword')return mswordAct();if(o.k==='sthrone')return throneAct();if(o.k==='bsoul')return soulAct();if(o.k==='yaltar')return altarAct();if(o.k==='mural')return muralAct();
+function shrineAct(o){if(o.nl)return nlAct(o);if(o.ea)return eaAct(o);if(o.p4)return p4Act(o);if(o.p3)return p3Act(o);if(o.k==='god')return godAct(o);if(o.k==='irene')return ireneAct(o);if(o.k==='msword')return mswordAct();if(o.k==='sthrone')return throneAct();if(o.k==='bsoul')return soulAct();if(o.k==='yaltar')return altarAct();if(o.k==='mural')return muralAct();
  const L=WS.legends||(WS.legends={}),own=L.pagma;
  if(S.cls==='pagma')return dialog('pbookN',['pbDone']);
  if(own&&own.pid!==pidOf())return dialog('pbookN',[t('pbTaken',{n:own.n})]);
@@ -7998,7 +8010,7 @@ function becomeBraham(){const L=WS.legends||(WS.legends={});if(L.braham&&L.braha
 function becomePagma(){const L=WS.legends||(WS.legends={});if(L.pagma&&L.pagma.pid!==pidOf())return;L.pagma={pid:pidOf(),n:S.look.n};
  S.cls='pagma';S.bar=null;legendReset();sbSig='';SFX.legendary();flash();hudDirty=true;save(true);
  dialog('pbookN',['pgS1','pgS2','legReset','pgPerk'],()=>{annW('annPagma');checkSkills();});}
-function drawShrine(o){if(o.ea)return eaDrawShrine(o);if(o.k==='god')return drawGod(o);if(o.k==='irene')return drawIrene(o);const x=Math.round(o.x),y=Math.round(o.y),pul=.5+Math.sin(gTime*3)*.5;
+function drawShrine(o){if(o.nl)return nlDraw(o);if(o.ea)return eaDrawShrine(o);if(o.k==='god')return drawGod(o);if(o.k==='irene')return drawIrene(o);const x=Math.round(o.x),y=Math.round(o.y),pul=.5+Math.sin(gTime*3)*.5;
  if(o.k==='msword'){const has=!(WS&&WS.legends&&WS.legends.muller);ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(x-11,y-1,22,2);R(ctx,x-10,y-7,20,7,'#6a6e78');R(ctx,x-10,y-7,20,1,'#8a909a');R(ctx,x-7,y-10,14,3,'#7a808a');
   if(has){ctx.globalAlpha=.2+pul*.25;ctx.fillStyle='#bfe0ff';ctx.beginPath();ctx.ellipse(x,y-22,8,16,0,0,7);ctx.fill();ctx.globalAlpha=1;R(ctx,x-1,y-34,3,24,'#dfe8f2');R(ctx,x,y-34,1,24,'#ffffff');R(ctx,x-5,y-36,11,2,'#c8a050');R(ctx,x-1,y-42,3,6,'#6a4a2a');R(ctx,x-1,y-43,3,1,'#c8a050');if(rand()<.2)fx.push({x:x+(rand()-.5)*10,y:y-30,vx:0,vy:-12,t:.6,c:'#bfe0ff',fl:1});}
   else R(ctx,x-2,y-12,4,2,'#3a3e48');return;}
@@ -9788,7 +9800,7 @@ function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,ti
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
  h+=`<div class="ssec">${t('special')}</div><div class="sgrid">`+['comp','indom','dign','insi',...(S.hid.pers?['pers']:[])].map(k=>row(t(k),S.hid[k],t('t'+k)+'<br><small>'+t('noDist')+'</small>')).join('')+'</div>';
  h+=`<div class="pts" id="ptsT">${t('pts',{n:S.pts})}</div>`+(S.pts>0?`<div class="note">${t('ptsHint')}</div>`:'');
- h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk','expoc','angler',...TTOWN].filter(id=>S.tl[id]);
+ h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk','expoc','angler','kheir','ffield',...TTOWN].filter(id=>S.tl[id]);
  const tlSk=id=>Object.keys(SKD).filter(k=>SKD[k].title===id||TLS[id]===k).filter((k,i,a)=>a.indexOf(k)===i);own.sort((x,y)=>(tlSk(y).length>0)-(tlSk(x).length>0));   // owner 2026-10-24: titles that give a skill come first
  const skTipT=k=>{const d=SKD[k]||{};return esc(`<b>${t('sk_'+k)}</b><br>${t('skd_'+k)}<br><small>${t('skCost',{mp:mpC(k),cd:Math.round((d.cd||0)*skCostM(k))})}</small>`);};
  h+=`<div class="ssec">${t('titlesH')}</div>`+(own.length?own.map(id=>`<div class="tl${S.title===id?' worn':''}"><div><b>${t('tl_'+id)}</b><small>${t('tl_'+id+'D')}</small>${tlSk(id).length?`<em>${tlSk(id).map(k=>`<span class="tlsk" data-tip="${skTipT(k)}">${t('iskL',{s:t('sk_'+k)})}</span>`).join(' · ')}</em>`:STR.en['tl_'+id+'S']?`<em>${t('tl_'+id+'S')}</em>`:''}</div><button data-title="${id}" ${S.title===id?'disabled':''}>${t(S.title===id?'tlWorn':'tlWear')}</button></div>`).join('')+`<div class="note">${t('tlNote')}</div>`:`<div class="note">${t('noTitles')}</div>`);
@@ -10132,6 +10144,7 @@ function qLand(p){if(!p||p.y>=WMH)return p;const tx=Math.floor(p.x),ty=Math.floo
 function qSpot(id){return qLand(tSurf(qSpot0(id)));}
 window.__GTRK={road:()=>roadSp(),at:(x,y)=>at(x,y),tile:(x,y)=>wTile(x,y),spot:id=>qSpot(id),mb:k=>mbSpot(k),mons:()=>mons,towns:()=>TOWNS,gates:()=>DGATES,WMH,TS}; // tests
 function qSpot0(id){const q=QD[id],o=q.obj;if(qReady(id)||!S.qs[id]){const n=npcs.find(n=>n.id===q.by);return n?{...wTile(n.x,n.y),ret:1}:null;}
+ if(q.spot)return{x:q.spot[0]+.5,y:q.spot[1]+.5};   // a quest that names its place (the night quest's burrow: its monsters are only there at night)
  const bs=BOSSES.find(b=>b[0]===o.it);if(o.t==='kill'&&bs)return{x:bs[1],y:bs[2]};
  const src={leather:'rabbit'}[o.it]||o.it,sp=SPAWN.find(s=>s[0]===src);if((o.t==='kill'||o.t==='have')&&sp)return{x:wX((sp[1]+sp[2])/2),y:(sp[3]+sp[4])/2,area:1};
  if(o.it==='ore'&&nodes.length){const me=outPos();let b=nodes[0],bd=1e18;for(const n of nodes){if(n.k&&n.k!=='ore')continue;const d=(n.x-me.x)**2+(n.y-me.y)**2;if(d<bd){bd=d;b=n;}}return wTile(b.x,b.y);}   // the nearest ore (it was the first in the world, by the beginners' village)
@@ -10460,6 +10473,7 @@ function monTick(m,dt,safe){try{
    m.face=dx>0?1:-1;return;}
   if(m.dorm!==undefined&&mpDorm(m,d))return;
   if(b.regen&&m.hp<m.max)m.hp=Math.min(m.max,m.hp+m.max*b.regen*dt);   // trolls and the hydra close their wounds
+  if(OGB&&OGB[m.type]&&OGB[m.type](m,b,dx,dy,d,mr,dt,safe))return; // the new monsters' own ways (ogSpawn)
   const ag=(m.type==='forc'&&foCmd()?0:1)*(b.aggro||(m.agg?80:0))*wxAg*(P.stl>0?.12:1)*(P.bmf==='eagle'?.3:1),AI=AIK[m.type];
   if(m.evt&&m.goal){if(m.ret){m.ret=0;m.retT=0;m.path=null;}if(!(d<ag&&!P.ghost)&&!(m.eng>0&&d<ag*2.4)){m.eng=Math.max(0,m.eng-dt);m.st=null;m.tele=0;invMarch(m,b,mr,dt);return;}}
   // leash: a monster dragged far from its spawn walks home and heals instead of following forever
@@ -10522,7 +10536,7 @@ function update(dt){
  if(P.sw>0){P.sw-=dt;P.hp=Math.min(mh,P.hp+mh*.03*dt);if(rand()<dt*6)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*14,vx:0,vy:-24,t:.5,c:'#7ae07a',fl:1});}
  // hunger only drops while you do something (Twister 2026-10-19): walking, riding, attacking, dodging or guarding
  {const busy=Math.abs(P.x-(P.fqx??P.x))+Math.abs(P.y-(P.fqy??P.y))>.01||P.acd>0||P.dash>0||P.guard;P.fqx=P.x;P.fqy=P.y;if(busy)P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));}
- updateProj(dt);mxTick(dt);vcTick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
+ updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
@@ -10750,7 +10764,7 @@ function drawDummy(m){const x=Math.round(m.x),y=Math.round(m.y),h=m.hurt>0?1:0;
  R(ctx,x-5+h,y-20,10,11,'#d8b860');R(ctx,x-5+h,y-20,1,11,'#b8943a');R(ctx,x+4+h,y-20,1,11,'#b8943a');R(ctx,x-5+h,y-15,10,1,'#a8843a');
  R(ctx,x-3+h,y-18,6,6,'#e8e4dc');R(ctx,x-2+h,y-17,4,4,'#c83a2a');R(ctx,x-1+h,y-16,2,2,'#e8e4dc');
  R(ctx,x-4+h,y-28,8,8,'#d8b860');R(ctx,x-4+h,y-28,8,1,'#e8c870');R(ctx,x-2+h,y-25,1,1,'#5a3a20');R(ctx,x+1+h,y-25,1,1,'#5a3a20');R(ctx,x-3+h,y-21,6,1,'#8a6a3a');}
-function drawMon(m){if(m.tdum)return drawDummy(m);if(m.fake&&!m.fk){m.fk=1;ctx.save();ctx.globalAlpha*=.55;try{drawMon(m);}finally{ctx.restore();m.fk=0;}return;}if(m.type==='trauka')return drawDragon(m);if(m.type==='berith')return drawBerith(m);if(BEAST[m.type])return drawBeast(m);if(m.dorm&&m.type==='sscorp')return drawMound(m);if(m.type==='belial')return drawBelial(m);if(m.type==='bhclone')return drawClone(m);if(m.fig)return drawChar(m.fig,m.x,m.y,m.face>0?2:3,m.mvd?((m.at||0)*6|0)%2:0,false,1,m);if(m.look)return drawChar(remoteSpr(m.look,0),m.x,m.y,m.face>0?2:3,m.mvd?((m.at||0)*6|0)%2:0,false,1,m);const x=Math.round(m.x),hop=m.st==='dash'?m.hop||0:m.type==='rabbit'&&m.mvd?Math.abs(Math.sin((m.at||0)*9))*3:0,y=Math.round(m.y-hop),b=MT[m.type];if(m.grdT>0){ctx.save();ctx.strokeStyle='rgba(190,230,255,.85)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y-10,11,(m.face>0?0:Math.PI)-.9,(m.face>0?0:Math.PI)+.9);ctx.stroke();ctx.restore();}if(hop>1){ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x,Math.round(m.y),b.r+1,2.5,0,0,7);ctx.fill();}if(P3D[m.type]&&!MSH[m.type])p3Sheet(m.type);if(MSH[m.type])drawMonSheet(x,y,m);
+function drawMon(m){if(m.tdum)return drawDummy(m);if(OGD&&OGD[m.type]&&OGD[m.type](m))return;if(m.fake&&!m.fk){m.fk=1;ctx.save();ctx.globalAlpha*=.55;try{drawMon(m);}finally{ctx.restore();m.fk=0;}return;}if(m.type==='trauka')return drawDragon(m);if(m.type==='berith')return drawBerith(m);if(BEAST[m.type])return drawBeast(m);if(m.dorm&&m.type==='sscorp')return drawMound(m);if(m.type==='belial')return drawBelial(m);if(m.type==='bhclone')return drawClone(m);if(m.fig)return drawChar(m.fig,m.x,m.y,m.face>0?2:3,m.mvd?((m.at||0)*6|0)%2:0,false,1,m);if(m.look)return drawChar(remoteSpr(m.look,0),m.x,m.y,m.face>0?2:3,m.mvd?((m.at||0)*6|0)%2:0,false,1,m);const x=Math.round(m.x),hop=m.st==='dash'?m.hop||0:m.type==='rabbit'&&m.mvd?Math.abs(Math.sin((m.at||0)*9))*3:0,y=Math.round(m.y-hop),b=MT[m.type];if(m.grdT>0){ctx.save();ctx.strokeStyle='rgba(190,230,255,.85)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y-10,11,(m.face>0?0:Math.PI)-.9,(m.face>0?0:Math.PI)+.9);ctx.stroke();ctx.restore();}if(hop>1){ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x,Math.round(m.y),b.r+1,2.5,0,0,7);ctx.fill();}if(P3D[m.type]&&!MSH[m.type])p3Sheet(m.type);if(MSH[m.type])drawMonSheet(x,y,m);
  else{const sc=b.sc||0,h=Math.round(22*(sc||1));drawChar(m.vr?m.type+'~'+m.vr:m.type,x,y,m.face>0?2:3,m.mvd?((m.at||0)*6|0)%2:0,false,sc,m);if(m.type==='merman'||m.type==='smerman'){const hx=x+(m.face>0?6:-7);R(ctx,hx,y-20,1,18,'#c8b070');R(ctx,hx-2,y-22,5,1,'#e8d890');R(ctx,hx-2,y-24,1,2,'#e8d890');R(ctx,hx+2,y-24,1,2,'#e8d890');R(ctx,hx,y-25,1,3,'#e8d890');}
   const wp=MWPN[m.vr?m.type+'~'+m.vr:m.type]||MWPN[m.type];if(wp){ctx.save();ctx.translate(x,y);ctx.scale((m.face>0?1:-1)*(sc||1),sc||1);wp();ctx.restore();}}}
 // every monster has a picture (owner 2026-10-23: some, like the Blood Earl, drew nothing): the types drawMon can't draw
@@ -12402,6 +12416,271 @@ const undB=rc=>!rc.drop&&!rc.cre&&isSm()?undOf(rc.id)*.0006:0;
 window.__GRB={RB,RBK,kn:rbKn,gate:rbGate,use:rbUse,opts:rbOpts,hint:rbHint,boss:rbBossDrop,undGain,undCraft,undB,camp:()=>campMenu(),sew:()=>sewMenu(),make:(k,b)=>makeLife(k,b),cookOk:()=>{COOKG.p=COOKG.c;cookHit();},mixOk:()=>mixEnd(2)}; // tests
 Object.assign(STR.ar,{"pgRevT": "دوران!", "pgDesp": "يأس", "pgTrcOn": "تجاوز: هجومك الضعف وضرباتك بتطير، لمدة 30 ثانية"});
 Object.assign(STR.en,{"pgRevT": "REVOLVE!", "pgDesp": "Despair", "pgTrcOn": "Transcend: double attack and your cuts fly, for 30 seconds"});
+// ---- the new monsters' ways of fighting (GAME_ORIGINAL; their table is right after MT). Everything that decides what a
+// screen shows is worked out from shared things (the clock of the world, where it spawned, its health), so every player sees
+// the same burrower underground and the same number of bats.
+Object.assign(AIK,{fburrow:'lunge',fbqueen:'brute',bscout:'archer',bswarm:'flyer',msnap:'charge'});
+Object.assign(RKMV,{bscout:[{k:'shot',w:3,min:40,max:180,tele:.45,spd:230,mul:.9,rec:.35,cd:2,sp:'knife'},{k:'arc',w:1,max:24,tele:.3,reach:22,arc:.9,mul:.7,rec:.3,cd:1.4}],
+ bswarm:[{k:'arc',w:3,max:26,tele:.25,reach:24,arc:1.2,mul:.6,rec:.3,cd:1}]});
+Object.assign(NAMEK,{fburrow:'fburrowN',fbqueen:'fbqueenN',bscout:'bscoutN',bswarm:'bswarmN',msnap:'msnapN'});
+Object.assign(P3D,{fburrow:{base:'foxmouse',f:'sepia(.85) saturate(1.5) hue-rotate(-12deg) brightness(.72)',sc:1.35},fbqueen:{base:'foxmouse',f:'sepia(1) saturate(1.8) hue-rotate(-20deg) brightness(.5)',sc:2.3},
+ bswarm:{base:'cbat',f:'hue-rotate(190deg) saturate(.7) brightness(.85)',sc:.62},msnap:{base:'eshell',f:'sepia(.7) hue-rotate(45deg) saturate(1.6) brightness(.85)',sc:.75}});
+Object.assign(FIG,{bscout:{hair:'short',hc:'#3a2a1a',hl:'#5a4a3a',hood:'#4a3a24',skin:'#d8b090',sk2:'#b08868',eye:'#2a1a10',scarf:'#a8281a',top:'#5a4a30',top2:'#3a2e1c',sleeves:true,belt:'#2a1e12',pants:'#3a3022',boots:'#2a2018'}});
+if(!SH.bscout)shLazy('bscout',()=>SA.chars.buildSheet(FIG.bscout));
+const ogSeed=m=>(((m.sx|0)*73856093)^((m.sy|0)*19349663))>>>0;
+// a burrower: underground (it cannot be hit) until something is near; then 3 s under, 0.6 s of the ground cracking where it
+// will come up (step away!), 2.4 s up to fight; it comes up under you. They live in the fields outside Patrian's wall and
+// never follow anyone into a town. In a group the host's copy leads (m.led): its phase is the world clock's, as on the host.
+const ogAg=b=>b.aggro*(P.stl>0?.12:1)*(P.bmf==='eagle'?.3:1);   // as every monster sees you: a stealthed one at 12%, the eagle at 30%
+const ogBur=m=>{const b=MT[m.type];if(!m.led&&!(m.eng>0)&&Math.hypot(P.x-m.x,P.y-m.y)>b.aggro*1.6)return 'under';const ph=((wNow()+ogSeed(m)%6000)%6000)/6000;return ph<.5?'under':ph<.6?'crack':'up';};
+var OGB={
+ fburrow:(m,b,dx,dy,d,mr,dt,safe)=>{const st=ogBur(m);if(safe){m.eng=0;m.burW=1;m.st=null;m.tele=0;return true;}   // you are in a town: it stays under
+  if(st==='up'){if(m.burW){m.burW=0;vfx('dust',m.x,m.y,{n:10});shake=Math.max(shake,.12);if(d<b.r+14&&seeP(m)){hurtPlayer(b.dmg,m.lv,m);mobBite(m);}
+   if(m.type==='fbqueen')for(const o of mons)if(!o.dead&&o.type==='fburrow'&&Math.hypot(o.x-m.x,o.y-m.y)<200)o.eng=4;}return false;}
+  m.burW=1;m.st=null;m.tele=0;if((m.eng>0||d<ogAg(b))&&d>4&&st==='under'){m.eng=4;chase(m,dx,dy,d,b.spd*1.5,mr,dt);}return true;},
+ // a scout: the first time it sees you it fires a flare; the six nearest monsters not already fighting come. Hurt badly, it runs.
+ bscout:(m,b,dx,dy,d,mr,dt,safe)=>{if(!safe&&!m.flr&&d<ogAg(b)&&seeP(m)){m.flr=1;m.eng=4;const near=mons.filter(o=>!o.dead&&o!==m&&!MT[o.type].boss&&!(o.eng>0)&&Math.hypot(o.x-m.x,o.y-m.y)<=320).sort((p,q)=>Math.hypot(p.x-m.x,p.y-m.y)-Math.hypot(q.x-m.x,q.y-m.y)).slice(0,6),n=near.length;for(const o of near){o.prov=gTime+12;o.provU=P.remote||(NET?NET.uid:null);o.agg=1;o.eng=4;}
+   for(let i=0;i<14;i++)fx.push({x:m.x,y:m.y-30-i*4,vx:(rand()-.5)*20,vy:-40,t:.8,c:i%2?'#ff4a2a':'#ffd24a',fl:1});fx.push({ring:true,big:1,x:m.x,y:m.y-60,t:.5});SFX.notice();if(d<420)toast(t('ogFlare',{n}),'warn');}
+  if(m.hp<m.max*.35&&!m.fled){m.fled=1;m.flee=4;}return false;},
+ // a swarm: it does not chase in a line; it circles you and bites while it is round you. Not into a town, and not past
+ // 300 px from where it lives (then it goes home as any monster)
+ bswarm:(m,b,dx,dy,d,mr,dt,safe)=>{if(safe||Math.hypot(m.x-m.sx,m.y-m.sy)>300){m.eng=0;return false;}if(!(m.eng>0)&&d>ogAg(b))return false;m.eng=4;m.st=null;m.tele=0;const a=gTime*2.2+ogSeed(m)%7,tx=P.x+Math.cos(a)*16-m.x,ty=P.y-6+Math.sin(a)*10-m.y,td=Math.hypot(tx,ty);
+  if(td>2)chase(m,tx,ty,td,b.spd*(d>60?1.2:.9),mr,dt);m.face=dx>0?1:-1;m.bsT=(m.bsT||0)-dt;if(m.bsT<=0&&d<b.r+14&&seeP(m)){m.bsT=.7;hurtPlayer(b.dmg,m.lv,m);mobBite(m);}return true;},
+ // a snapper turns slowly: its shell faces where you were a moment ago
+ msnap:(m,b,dx,dy,d,mr,dt)=>{if(m.led){m.ogF=0;return false;}m.ogT=(m.ogT||0)-dt;if(m.ogT<=0||!m.ogF){m.ogT=1.5;m.ogF=Math.sign(dx)||1;}return false;},
+};OGB.fbqueen=OGB.fburrow;
+// a blow that cannot land: a burrower underground; a single blow on the swarm misses one time in three
+function ogImm(m,o){const k=m.type;if((k==='fburrow'||k==='fbqueen')&&ogBur(m)!=='up'){num(m.x,monY(m)-14,t('ogUnder'),'#c8a070',false);return true;}
+ if(k==='bswarm'&&!o.skill&&!o.aura&&!o.dot&&rand()<.33){num(m.x,monY(m)-14,t('ogMiss'),'#cfe8ff',false);SFX.miss&&SFX.miss();return true;}return false;}
+// what a blow does: one blow kills one bat (a skill hits them all); the shell from the front takes a tenth
+function ogDmg(m,dmg,o){const k=m.type;if(k==='bswarm'&&!o.skill&&!o.aura)return Math.min(dmg,Math.ceil(m.max/6));
+ if(k==='msnap'&&Math.sign(P.x-m.x)===(!m.led&&m.ogF||m.face)&&Math.abs(P.y-m.y)<22){if(!o.dot){num(m.x,monY(m)-18,t('ogShell'),'#9fc8ff',false);SFX.clang&&SFX.clang();}return Math.max(1,Math.round(dmg*.1));}return dmg;}
+// the pictures: a moving mound and the ground cracking; the swarm's bats, one fewer for every sixth of its health; the shell facing its way
+var OGD={fburrow:m=>{const st=ogBur(m);if(st==='up')return false;const x=Math.round(m.x),y=Math.round(m.y),q=m.type==='fbqueen'?1.7:1;
+  ctx.fillStyle='rgba(30,18,8,.35)';ctx.beginPath();ctx.ellipse(x,y+1,9*q,3.5*q,0,0,7);ctx.fill();ctx.fillStyle='#6a4a2a';ctx.beginPath();ctx.ellipse(x,y-1,7*q,4*q,0,Math.PI,0);ctx.fill();ctx.fillStyle='#8a6a3a';ctx.beginPath();ctx.ellipse(x-1,y-2,4*q,2.5*q,0,Math.PI,0);ctx.fill();
+  if(m.mvd&&rand()<.4)fx.push({x:x+(rand()-.5)*10,y:y-2,vx:(rand()-.5)*20,vy:-20,t:.3,c:'#7a5634'});
+  if(st==='crack'){const k=.6+Math.sin(gTime*30)*.4;ctx.strokeStyle='rgba(120,40,20,'+k+')';ctx.lineWidth=1.5;ctx.beginPath();for(let i=0;i<6;i++){const a=i/6*6.283;ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(a)*14*q,y+Math.sin(a)*6*q);}ctx.stroke();R(ctx,x-1,y-18,2,6,'#ff5a4a');R(ctx,x-1,y-10,2,2,'#ff5a4a');}return true;},
+ bswarm:m=>{if(!MSH.bswarm)p3Sheet('bswarm');if(!MSH.bswarm)return false;const n=Math.max(1,Math.ceil(m.hp/(m.max/6))),x=m.x,y=m.y;for(let i=0;i<n;i++){const a=i/n*6.283+gTime*3,r=7+(i%2)*4;drawMonSheet(Math.round(x+Math.cos(a)*r),Math.round(y+Math.sin(a)*r*.6-(i%3)*2),m);}return true;},
+ msnap:m=>{if(m.ogF&&!m.led)m.face=m.ogF;return false;}};OGD.fbqueen=OGD.fburrow;
+// where they live: the burrowers in the fields south of Patrian's wall (the farmer's rows), the scouts with the outlaws on
+// the eastern road, the swarm in the mine east of Bairan, the snappers on the lake shore; none inside a town. Spawned last
+// with their own dice, each kind its own (moving one moves no other; older ids stay)
+function ogSpawn(){if(FQM)FQM.length=0;let r;const put=(type,n,cx,cy,rx,ry,z)=>{r=mulberry32(7301+type.charCodeAt(1)*31+type.length);let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=Math.round(cx+(r()*2-1)*rx),y=Math.round(cy+(r()*2-1)*ry);
+  if(z&&zoneAt(x*TS+8,y*TS+8)!==z||inTown(x*TS+8,y*TS+8)||sol0(x,y)||sol0(x+1,y)||at0(x,y)===WA||at0(x,y+1)===WA||NPCS.some(n=>Math.abs(n.tx-x)<3&&Math.abs(n.ty-y)<3))continue;const m=newMon(type,x*TS+8,y*TS+8,r);mons.push(m);c++;}};
+ const mid=k=>{const L=SPAWN.filter(s=>s[0]===k);if(!L.length)return null;const s=L[0];return [wX((s[1]+s[2])/2),(s[3]+s[4])/2,Math.max(4,(s[2]-s[1])/2),Math.max(3,(s[4]-s[3])/2)];};
+ put('fburrow',10,FWF.x,FWF.y+9,13,4);
+ {const o=mid('outlaw');if(o)put('bscout',5,o[0],o[1],o[2],o[3]);}
+ put('bswarm',6,52,17,6,5);   // with the cave golems east of Bairan, in the mine (the quarry itself is inside the town)
+ {const o=mid('merman');if(o)put('msnap',8,o[0],o[1],o[2],o[3]);}}
+window.__GOG={OGB,OGD,town:(x,y)=>inTown(x,y),comp:m=>compHit(m,1,false),bur:m=>ogBur(m),imm:(m,o)=>ogImm(m,o),dmg:(m,d,o)=>ogDmg(m,d,o)}; // tests
+/* ---- NPC life (owner 2026-10-25, encyclopedia §93-95; the player Suki: "some NPCs are boring and say little"): three people
+   who were here already, Khan, Earl Ashur and Piaro (with the Patrian farmer), talk like people now. Each has lines for the
+   moment (the time of day, what you are, what you have done; never the one you just heard), says something once after a
+   quest of theirs, greets you by your name in their town (S.rep), has topics you choose and answers that remember what you
+   chose (S.met['who#topic'], the same S.met that keeps whom you have met, so nothing new is saved), and tells you more the
+   more they trust you: their affinity (S.aff, the same 30/60/90 the gifts and quests raise). A topic's affinity counts once.
+   Rumours lead to places that are already in the world; the first time you find what a rumour spoke of you get a discovery
+   (S.books['fd_'+id], once a character, never again on a reload or in a party): about 0.4-1% of a level, an item, Insight.
+   Provenance: every line here is ORIGINAL_SIDE_STORY (written for the game, in its own words), after the chapter named in
+   src; the farmers' affinity opening a hidden quest of a special character is the novel's (ch 856, Agriculture
+   Development), the quest itself (the Burrow Queen in Piaro's field) is ORIGINAL_SIDE_STORY. */
+const nlM=(w,k)=>(S.met||{})[w+'#'+k],nlSet=(w,k,v)=>{S.met=S.met||{};S.met[w+'#'+k]=v===undefined?1:v;};
+const nlCrafted=()=>Object.values(S.made||{}).reduce((a,b)=>a+(b|0),0),nlCharted=()=>Object.keys(S.exc||{}).length;
+// topics: {id, tier (affinity tier it needs), when, say: [line keys] or a function, ch: [{k: choice key, to: answer key or function, aff, mem, f}], rumor, fd}
+const NLD={
+ khan:{town:'zWin',src:'ch 1-30 (Khan, the Winston blacksmith)',
+  ctx:[['nkh_c1',()=>isNight()],['nkh_c2',()=>!isSm()],['nkh_c3',()=>isSm()&&(S.smith|0)>=3],['nkh_c4',()=>S.lv>=100],['nkh_c5',()=>nlCrafted()>=10],['kh_s1',()=>isSm()],['kh_grid',()=>!!(S.ev&&S.ev.grid)],['nkh_c6',()=>true]],
+  q:{kh2:'nkh_q2',kh5:'nkh_q5',kh6:'nkh_q6'},rep:['nkh_r0','nkh_r1','nkh_r2','nkh_r3','nkh_r4'],
+  mem:[['work',1,'nkh_mw1'],['work',2,'nkh_mw2'],['dream',1,'nkh_md1']],
+  topics:[
+   {id:'work',tier:0,say:['nkh_w1'],ch:[{k:'nkh_wA',to:'nkh_wA2',aff:2,mem:1},{k:'nkh_wB',to:'nkh_wB2',mem:2}]},
+   {id:'trav',tier:0,say:['nkh_t1'],ch:[{k:'nkh_tA',to:()=>nlCharted()>=5?'nkh_tA2':'nkh_tA1',aff:1,mem:1},{k:'nkh_tB',to:'nkh_tB2',mem:2,rumor:'fields'}]},
+   {id:'anvil',tier:1,say:['nkh_a1','nkh_a2'],aff:1},
+   {id:'vein',tier:2,say:()=>S.books&&S.books.fd_kvein?['nkh_v3']:['nkh_v1','nkh_v2'],rumor:'kvein',aff:()=>S.books&&S.books.fd_kvein?3:0},
+   {id:'dream',tier:3,say:['nkh_d1','nkh_d2'],ch:[{k:'nkh_dA',to:'nkh_dA2',mem:1,f:()=>giveTitle('kheir')},{k:'nkh_dB',to:'nkh_dB2',mem:2}]}]},
+ ashur:{town:'zPat',src:'ch 1-60 (Earl Ashur of Patrian; his daughter Irene)',
+  ctx:[['nas_c1',()=>!isNight()],['nas_c2',()=>isNight()],['nas_c3',()=>qDone('pt6')],['nas_c4',()=>qDone('irn')],['nas_c5',()=>S.lv>=100],['as_idle',()=>true]],
+  q:{pt3:'nas_q3',pt5:'nas_q5',pt6:'nas_q6'},rep:['nas_r0','nas_r1','nas_r2','nas_r3','nas_r4'],
+  mem:[['border',2,'nas_mb2'],['irene',2,'nas_mi2']],
+  topics:[
+   {id:'border',tier:0,say:['nas_b1'],ch:[{k:'nas_bA',to:'nas_bA2',aff:1,mem:1},{k:'nas_bB',to:'nas_bB2',mem:2}]},
+   {id:'north',tier:1,say:()=>S.books&&S.books.fd_nend?['nas_n3']:['nas_n1','nas_n2'],rumor:'nend',aff:()=>S.books&&S.books.fd_nend?2:0},
+   {id:'irene',tier:2,when:()=>qDone('irn'),say:['nas_i1'],ch:[{k:'nas_iA',to:'nas_iA2',aff:2,mem:1},{k:'nas_iB',to:'nas_iB2',mem:2}]},
+   {id:'legacy',tier:3,say:['nas_l1','nas_l2'],f:()=>{addRep('zPat',50);S.gold+=5000;toast(t('nlGold',{n:5000}),'good');}}]},
+ piaro:{town:null,src:'Piaro, the farmer who once held a sword; ch 856 (the farmers)',
+  ctx:[['npi_c1',()=>isNight()],['npi_c2',()=>!isNight()],['npi_c3',()=>qDone('fq1')],['npi_c4',()=>S.sec==='farmer'],['npi_c5',()=>(nlM('piaro','fqfail')|0)>0&&!qDone('fq1')],['pi_idle',()=>true]],
+  q:{fq1:'npi_q1'},rep:null,mem:[['burrow',2,'npi_mb2']],
+  topics:[
+   {id:'soil',tier:0,say:['npi_s1'],ch:[{k:'npi_sA',to:'npi_sA2',aff:1,mem:1},{k:'npi_sB',to:'npi_sB2',mem:2}]},
+   {id:'sword',tier:1,say:['npi_w1','npi_w2'],aff:1},
+   {id:'burrow',tier:0,when:()=>!!nlM('piaro','trace')&&!qDone('fq1')&&!S.qs.fq1,say:()=>nlM('piaro','burrow')===2?['npi_b3']:['npi_b1','npi_b2'],
+    ch:[{k:'npi_bA',to:'npi_bA2',mem:1,f:()=>nlSet('piaro','fq'),nx:()=>{if(qAvail('fq1')&&S.lv>=(QD.fq1.lv||1))offerQ('piaro','fq1');else nlTopics('piaro');}},{k:'npi_bB',to:'npi_bB2',mem:2}]}]},
+ farmerP:{town:'zPat',src:'ch 856 (Agriculture Development: field work, the farmers\' affinity)',
+  ctx:[['nfp_c1',()=>!isNight()],['nfp_c2',()=>isNight()],['nfp_c3',()=>qDone('fq1')],['fp_idle',()=>true]],
+  q:{fp1:'nfp_q1',fp2:'nfp_q2'},rep:['nfp_r0','nfp_r1','nfp_r2','nfp_r3','nfp_r4'],mem:[],topics:[]}};
+// what they say when you walk up: a quest of theirs just done (once), your name in their town grown (once a rank), a memory
+// of what you chose, or a line for the moment that is not the last one you heard
+function nlIdle(who){const D=NLD[who];if(!D||!S)return 'oLeave';
+ for(const q in D.q||{})if(qDone(q)&&!nlM(who,'q_'+q)){nlSet(who,'q_'+q);return D.q[q];}
+ if(D.rep&&D.town){const r=repRank(D.town);if(r>(nlM(who,'rk')|0)&&r>0){nlSet(who,'rk',r);return D.rep[Math.min(r,D.rep.length-1)];}}
+ const L=[];for(const [k,f] of D.ctx)if(f())L.push(k);for(const [tp,v,k] of D.mem||[])if(nlM(who,tp)===v)L.push(k);
+ const last=nlM(who,'i'),pool=L.length>1?L.filter(k=>k!==last):L,k=pool[(rand()*pool.length)|0]||'oLeave';nlSet(who,'i',k);return k;}
+// the topics you can raise; one you have heard is marked, one they trust you too little for shows how much more they need
+function nlTopics(who){const D=NLD[who],tr=affTier(who),o=[];
+ for(const tp of D.topics){if(tp.when&&!tp.when())continue;const heard=!!nlM(who,'h_'+tp.id);
+  if(tr<tp.tier){o.push({l:'🔒 '+t('nlTrust',{n:AFFT[tp.tier-1]}),st:affTxt(who),f:()=>dialog(who,['nlLocked'],()=>nlTopics(who))});continue;}
+  o.push({l:(heard?'· ':'💬 ')+t('nlT_'+who+'_'+tp.id),f:()=>nlTopic(who,tp)});}
+ o.push({l:t('oBack'),f:()=>shopD(who,nlIdle(who))});dialog(who,['nlAsk'],null,o);}
+function nlTopic(who,tp){const say=typeof tp.say==='function'?tp.say():tp.say,first=!nlM(who,'h_'+tp.id);nlSet(who,'h_'+tp.id);
+ if(tp.rumor)nlSet(who,'rumor_'+tp.rumor);
+ const a=typeof tp.aff==='function'?tp.aff():tp.aff;if(a&&!nlM(who,'a_'+tp.id+(typeof tp.aff==='function'?'2':''))){nlSet(who,'a_'+tp.id+(typeof tp.aff==='function'?'2':''));addAff(who,a);}
+ if(first&&tp.f)tp.f();
+ if(!tp.ch)return dialog(who,say,()=>nlTopics(who));
+ dialog(who,say,null,tp.ch.map(c=>({l:t(c.k),f:()=>{const was=nlM(who,tp.id);nlSet(who,tp.id,c.mem);if(c.rumor)nlSet(who,'rumor_'+c.rumor);
+  if(c.aff&&!nlM(who,'a_'+tp.id+'_'+c.mem)){nlSet(who,'a_'+tp.id+'_'+c.mem);addAff(who,c.aff);}if(c.f&&was!==c.mem)c.f();save(true);
+  dialog(who,[typeof c.to==='function'?c.to():c.to],c.nx||(()=>nlTopics(who)));}})));}
+const nlOpts=who=>(NLD[who].topics||[]).length?[{l:'💬 '+t('nlTalk'),f:()=>nlTopics(who)}]:[];
+// the people's lines and topics into the NPC table (their quests and shops stay as they were)
+for(const who of ['khan','ashur','piaro','farmerP']){const n=NPCT[who];if(!n)continue;const o0=n.opts;n.idle=()=>nlIdle(who);n.opts=()=>[...nlOpts(who),...(who==='farmerP'?fdwOpts():[]),...(o0?o0():[])];}
+// ---- discoveries: the first time you find what a rumour spoke of (or the trace of the secret quest)
+const FD={kvein:{lm:'lmMine',need:()=>!!nlM('khan','rumor_kvein'),p:.004,mat:['ore',6]},nend:{lm:'lmNEnd',need:()=>!!nlM('ashur','rumor_nend'),p:.005,mat:['mstone',3]},
+ burrow:{need:()=>!!nlM('farmerP','hint'),p:.01,mat:['rpotato',1]}};
+function fdClaim(id){const d=FD[id];if(!d||!S||S.__demo)return false;S.books=S.books||{};if(S.books['fd_'+id]||!d.need())return false;S.books['fd_'+id]=Date.now();
+ const xg=Math.round(xpNeed()*d.p);gainXP(xg,1);if(d.mat)addMat(d.mat[0],d.mat[1]);S.hid.insi=(S.hid.insi|0)+1;SFX.rare();
+ setTimeout(()=>toast(t('fdGot',{n:t('fd_'+id),x:xg.toLocaleString('en')}),'good'),400);hudDirty=true;save(true);return true;}
+function fdLm(k){for(const id in FD)if(FD[id].lm===k)fdClaim(id);}
+// ---- Agriculture Development (ch 856): the Patrian farmer's field work, once a day: put down five Field Burrowers in his
+// rows; a rainbow potato and his trust (+3). Devoted (90) to him, a day's work may (one in four) bring his word about Piaro's field.
+function fdwS(){const D=dlyS();D.fw=D.fw||{n:0,done:0,on:0};return D.fw;}
+function fdwOpts(){if(!S||S.lv<40)return [];const w=fdwS();if(w.done)return [{l:'🌾 '+t('fwDone'),f:()=>shopD('farmerP','fwDoneL')}];
+ if(!w.on)return [{l:'🌾 '+t('fwAsk'),st:t('fwD'),f:()=>{w.on=1;w.n=0;save(true);dialog('farmerP',['fwGo'],()=>shopD('farmerP',nlIdle('farmerP')));}}];
+ if(w.n<5)return [{l:'🌾 '+t('fwProg',{n:w.n}),f:()=>shopD('farmerP','fwWait')}];
+ return [{l:'🌾 '+t('fwTurn'),f:()=>{w.done=1;w.on=0;addMat('rpotato',1);addAff('farmerP',3);SFX.quest();toast(t('fwGot'),'good');
+  const hint=affOf('farmerP')>=90&&!nlM('farmerP','hint')&&!qDone('fq1')&&(NLR||rand)()<.25;if(hint)nlSet('farmerP','hint');save(true);
+  dialog('farmerP',hint?['fwThanks','nfp_h1','nfp_h2']:['fwThanks'],()=>shopD('farmerP',nlIdle('farmerP')));}}];}
+function fdwKill(m){if(m.type!=='fburrow'||!S)return;const w=fdwS();if(w.on&&!w.done&&w.n<5&&Math.hypot(m.x-FWF.x*TS,m.y-FWF.y*TS)<30*TS){w.n++;if(w.n===5)toast(t('fwReady'),'good');}}
+// the secret quest: the farmer's word, the burrow in Piaro's field (a trace you inspect), Piaro's answer; on a night while
+// it is yours the Burrow Queen comes up there with her brood; at dawn she goes back under (try the next night)
+var FQM=[],FQN=0,NLR=null; // NLR: the tests' dice for the farmer's word
+QNEED.fqOpen=()=>!!nlM('piaro','fq');
+Object.assign(QD,{fq1:{by:'piaro',lv:45,need:'fqOpen',spot:[PIF.x,PIF.y+2],obj:{t:'kill',it:'fbqueen',n:1},xp:600,gold:1500,mat:['rpotato',3],title:'ffield'}});
+function fqTick(dt){if(!S||S.__demo||!P)return;const on=S.qs.fq1&&S.qs.fq1.st===1,nt=isNight(),near=Math.hypot(P.x-PIF.x*TS,P.y-PIF.y*TS)<26*TS;
+ if(on&&nt&&near&&!FQM.length&&!qReady('fq1')){const r=mulberry32(5600+(FQN++));
+  const free=(x,y)=>{for(let k=0;k<6;k++)for(const [ox,oy] of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const tx=Math.round(x)+ox*k,ty=Math.round(y)+oy*k;if(!sol0(tx,ty)&&!sol0(tx+1,ty)&&at0(tx,ty)!==WA)return [tx*TS+8,ty*TS+8];}return [Math.round(x)*TS+8,Math.round(y)*TS+8];};
+  const mk=(ty,x,y)=>{const [px,py]=free(x,y),m=newMon(ty,px,py,r);m.tmp=1;m.ek=1;m.fq=1;m.eng=4;mons.push(m);FQM.push(m);return m;};
+  mk('fbqueen',PIF.x,PIF.y+2);for(let i=0;i<4;i++){const a=i/4*6.283;mk('fburrow',PIF.x+Math.cos(a)*5,PIF.y+2+Math.sin(a)*3);}
+  toast(t('fqRise'),'warn');SFX.notice();}
+ if(FQM.length&&(!nt||!on)){const left=FQM.some(m=>m.type==='fbqueen'&&!m.dead),gone=new Set(FQM);mons=mons.filter(m=>!gone.has(m));FQM.length=0;
+  if(on&&left&&!nt){nlSet('piaro','fqfail',(nlM('piaro','fqfail')|0)+1);toast(t('fqDawn'),'warn');}}}
+// the burrow in Piaro's field: seen once the farmer has spoken of it
+SHRINES.push({k:'fqhole',nl:1,x:(PIF.x+3)*TS+8,y:(PIF.y+3)*TS+10,hint:'hBurrow'});
+const nlVis=o=>o.k==='fqhole'?!!S&&!!nlM('farmerP','hint'):true;
+function nlAct(o){if(o.k!=='fqhole')return;const first=!nlM('piaro','trace');nlSet('piaro','trace');fdClaim('burrow');dialog('sysN',[first?'fqHole1':'fqHole2']);if(first)save(true);}
+function nlDraw(o){const x=Math.round(o.x),y=Math.round(o.y);ctx.fillStyle='rgba(30,20,10,.45)';ctx.beginPath();ctx.ellipse(x,y,9,4,0,0,7);ctx.fill();ctx.fillStyle='#120a04';ctx.beginPath();ctx.ellipse(x,y-1,6,3,0,0,7);ctx.fill();
+ R(ctx,x-10,y-3,3,2,'#7a5634');R(ctx,x+8,y-2,3,2,'#7a5634');R(ctx,x-4,y-6,2,2,'#8a6a3a');for(let i=0;i<3;i++)R(ctx,x-6+i*5,y+3,1,2,'#3a2a14');}
+window.__GNPC={NLD,FD,FWF,PIF,FQM,rnd:f=>{NLR=f;},pool:w=>{const D=NLD[w],L=[];for(const [k,f] of D.ctx)if(f())L.push(k);for(const [tp,v,k] of D.mem||[])if(nlM(w,tp)===v)L.push(k);return L;},idle:w=>nlIdle(w),topics:w=>nlTopics(w),topic:(w,id)=>nlTopic(w,NLD[w].topics.find(x=>x.id===id)),m:(w,k)=>nlM(w,k),set:(w,k,v)=>nlSet(w,k,v),fd:id=>fdClaim(id),fdLm:k=>fdLm(k),fw:()=>fdwS(),fwOpts:()=>fdwOpts(),fqTick:dt=>fqTick(dt),act:o=>nlAct(o),hole:()=>SHRINES.find(o=>o.k==='fqhole')}; // tests
+Object.assign(STR.ar,{nlTalk:"اتكلم",nlAsk:"عايز تتكلم في إيه؟",nlTrust:"لسه مش واثق فيك كفاية (المودة {n})",nlLocked:"\"مرة تانية. لما أعرفك أكتر.\"",nlGold:"+{n} دهب",
+ nlT_khan_work:"شغله",nlT_khan_trav:"سفرياتك",nlT_khan_anvil:"السندان القديم",nlT_khan_vein:"منجم الجبل",nlT_khan_dream:"الحاجة اللي كان نفسه يعملها",
+ nkh_c1:"بقينا بالليل؟ الفحم بيفضل أحمر أكتر من النور. والحدادين العواجيز كمان.",nkh_c2:"شايل سيف مش انت اللي عامله. مفيش مشكلة. حد عمله، وحد كان مهتم.",
+ nkh_c3:"وريني إيديك. ...الكالو في الأماكن الصح. ماتخليهاش تطرى.",nkh_c4:"بيقولوا عدّيت بايران. الحديد هناك أنشف. والناس كمان.",
+ nkh_c5:"عشر حتت وأكتر طلعوا من على سندانك. فاكر أول واحدة؟ أنا فاكر أول واحدة ليّا. كانت وحشة.",nkh_c6:"شاكوش وماشة ونار. الباقي كلام.",
+ nkh_q2:"الخام اللي جبتهولي اتعمل سلاح محراث. فلاح جنب باتريان بيستعمله. شغلك موجود في غيط في حتة دلوقتي.",
+ nkh_q5:"طلعت التل. ...شكرًا. قليلين اللي بيطلعوه عشان ابن حد تاني.",nkh_q6:"رجالة براجا مش هيضايقوا الطرق تاني. دراع حداد اتعمل بيه حاجة كويسة.",
+ nkh_r0:"همم. مسافر تاني.",nkh_r1:"آه، انت. اللي بيساعد في وينستون.",nkh_r2:"البلد بتتكلم عنك. أغلبه حلو. أغلبه.",nkh_r3:"صاحب وينستون. ادخل، السندان دافي.",nkh_r4:"وينستون كانت هتعملك تمثال لو سبتهم ياخدوا البرونز بتاعي.",
+ nkh_w1:"بتسأل عن شغلي؟ أغلب الناس بيسألوا عن السعر بس.",nkh_wA:"عايز أتعلم إزاي بتختار الحديد.",nkh_wA2:"بص على اللون مكان ما بيتكسر، مش مكان ما بيلمع. اللمعة دي للزباين.",
+ nkh_wB:"أنا بتفرج بس.",nkh_wB2:"يبقى اتفرج بعينك، مش بإيدك.",nkh_mw1:"افتكر: اللون مكان ما بيتكسر.",nkh_mw2:"لسه بتتفرج بس؟",
+ nkh_t1:"كنت فين؟ ريحتك ريحة مكان مش وينستون.",nkh_tA:"احكيله عن الطريق.",nkh_tA1:"يبقى روح أبعد. الحداد اللي مابيخرجش من بلده بيعمل نفس السيف طول عمره.",
+ nkh_tA2:"لحد هناك؟ هاتلي حجر من كل مكان تروحه. هقولك أنهي واحد يمسك حد.",nkh_tB:"اسأله سمع إيه الأيام دي.",
+ nkh_tB2:"إيرل باتريان قلقان على الحدود. والفلاحين في الشرق بيقولوا إن في حاجة بتحفر في غيطانهم بالليل.",
+ nkh_a1:"السندان ده كان بتاع أبويا. ضرب الخبطة اللي في الركن دي يوم ما اتولدت. كان بيقول الحداد لازم يعلّم على أيامه الحلوة.",nkh_a2:"لما يجيلك يوم حلو، علّم على حاجة. مش على وشك.",
+ nkh_v1:"في منجم فوق الجبل بعد بايران. جدي كان بيشتغل في عرق هناك محدش لقاه غيره. كان بيحلف إن الحديد بيغني لما تضربه.",
+ nkh_v2:"لو طلعت هناك، اقرا اللي فاضل على الحيطان. وبعدين تعالى قولي لسه بيغني ولا لأ.",nkh_v3:"لسه بيغني؟ ...يبقى مكانش بيكدب. شكرًا إنك رحت.",
+ nkh_d1:"ابني كان هيبقى أحسن مني. قلتلك ده على التل.",nkh_d2:"كان نفسي أعمل حاجة واحدة في حياتي تعيش أكتر من اسمي. أنا كبرت دلوقتي. يمكن انت لأ.",
+ nkh_dA:"هعملها. علشانكم انتو الاتنين.",nkh_dA2:"...يبقى اعملها كويس. وحط اسمه في حتة صغيرة، محدش يشوفها غيرك.",nkh_dB:"في حاجات لازم تفضل أحلام.",nkh_dB2:"يمكن. بس الحلم هو الحاجة الوحيدة اللي الحداد مايقدرش يبيعها. خلي حلمك معاك.",nkh_md1:"بدأت فيها؟ الحاجة اللي هتعيش بعدنا؟",
+ nlT_ashur_border:"الحدود",nlT_ashur_north:"الشمال",nlT_ashur_irene:"إيرين",nlT_ashur_legacy:"بيت آشور",
+ nas_c1:"طريق الشمال تاني. كل تقرير بقراه آخره جنازة.",nas_c2:"برا بالليل؟ أسوار باتريان واطية. خليك مكان المشاعل.",nas_c3:"رسول العدالة في قاعتي. الحرس بيقفوا مفرودين لما بتعدي.",
+ nas_c4:"بنتي بتضحك تاني. أنا مديون لك بأكتر ما إيرل يقدر يدفع.",nas_c5:"اللي في قوتك عادة بيروحوا راينهارت. ليه فاضل في بلد على الحدود؟",
+ nas_q3:"الجلد راح لبيادات الحرس. بقوا بيمشوا أبعد.",nas_q5:"ست جولمات. عمال المناجم بيشكروك، ومعاهم شكوى من الدوشة.",nas_q6:"قائد الفارين مات. باتريان هتنام الليلة.",
+ nas_r0:"مسافر. قول عايز إيه.",nas_r1:"انت كنت مفيد لباتريان.",nas_r2:"قائد الحرس بيسأل عليك بالاسم.",nas_r3:"بيسموك درع باتريان في السوق.",nas_r4:"لو عندي لقب فارس أديه لحد، كان هيبقى ليك.",
+ nas_b1:"المرتفعات بتبعت حرامية، وحقول التلج بتبعت البرد، والعاصمة بتبعت جوابات.",nas_bA:"اعرض تساعد الحرس.",nas_bA2:"القائد هيلاقيلك شغل. قوله إني اللي بعتك.",
+ nas_bB:"اسأله ليه العاصمة مابتساعدش.",nas_bB2:"راينهارت بتعد العساكر زي الفلوس. وباتريان عملة صغيرة.",nas_mb2:"لسه بتفكر في راينهارت؟ وأنا كمان.",
+ nas_n1:"المسافرين بيتكلموا عن كهف في آخر الشمال، بعد أوركات ضوء الصقيع. بيرجعوا يحكوا عن دروع متكومة زي التل.",nas_n2:"مش مصدق نصهم. لو رحت، هتعرف أنهي نص.",
+ nas_n3:"لقيت الكهف؟ ...يبقى الحكايات كانت حقيقية. خليها في سرك، وإلا كل أهبل في الشمال هيروح يحفر.",
+ nas_i1:"إيرين بتسأل عليك. بقولها إنك مشغول بتنقذ بنات الناس التانيين.",nas_iA:"قولها إني كويس.",nas_iA2:"هتفرح. هي بتقلق على اللي بيبقوا طيبين معاها.",nas_iB:"ماتقولش حاجة.",nas_iB2:"...زي ما تحب. الراجل العاقل مابيوعدش بنت إيرل.",nas_mi2:"إيرين سألت تاني. ماقلتش حاجة، زي ما طلبت.",
+ nas_l1:"بيت آشور حمى الحدود دي أجيال. جدي حارب هنا. وجده كمان.",nas_l2:"لما أمشي، عايزها في إيد حد اختارها، مش حد ورثها. خد دي، علشان خاطر الحرس.",
+ nlT_piaro_soil:"الأرض",nlT_piaro_sword:"السيف اللي كان شايله",nlT_piaro_burrow:"الجحر اللي في غيطه",
+ npi_c1:"القمر طلع. الفلاح المفروض يبقى نايم. عادات قديمة.",npi_c2:"الأرض دافية النهارده. حلو للجذور، وحلو للركب العجوزة.",npi_c3:"الغيط هادي دلوقتي. البطاطس طلعت بكل الألوان السنة دي.",npi_c4:"فلاح زيي! إيديك ريحتها طين. كويس.",npi_c5:"رجعت تحت الأرض مع الفجر. المرة الجاية هنبقى مستنيينها.",
+ npi_q1:"وقفت في غيطي ومجريتش. من زمان ماحاربتش جنب حد.",npi_mb2:"الجحر لسه موجود. وسؤالي كمان.",
+ npi_s1:"الكل بيسأل عن السيوف. محدش بيسأل عن الأرض.",npi_sA:"اسأله إزاي بيعرف الأرض الكويسة.",npi_sA2:"امسكها. لو اتلمت وبعدين اتفكت بسهولة، تبقى كويسة. زي المحارب الكويس: ثابت، عمره ما يبقى ناشف.",
+ npi_sB:"قوله إنك بتحب السيوف أكتر.",npi_sB2:"ها. وأنا كمان، زمان.",npi_w1:"شلت سيف سنين كتير. كنت شاطر فيه. شاطر زيادة يمكن.",npi_w2:"السيف بيقطع حاجة واحدة كل مرة. الفاس بتأكّل قرية. أنا اخترت الفاس.",
+ npi_b1:"يبقى لقيته. كنت بتمنى محدش يلاقيه.",npi_b2:"في حاجة عاملة عش تحت الخطوط. في الليالي اللي مافيهاش قمر ملكتهم بتطلع مع ولادها. ماكنتش عايز أشيل سلاح تاني... تقف في الغيط مع راجل عجوز الليلة؟",
+ npi_b3:"غيرت رأيك بخصوص الغيط؟",npi_bA:"هحرس الغيط.",npi_bA2:"يبقى تعالى لما الدنيا تضلم. اقف جنب الجحر واستنى.",npi_bB:"مش شغلي.",npi_bB2:"...لأ. مش شغلك. انسى إني سألت.",
+ q_fq1:"الغيط بالليل (سرية)",fq1_o:"ملكة الجحور بتطلع من تحت غيط بيارو بالليل مع ولادها. اقف جنب الجحر بعد الضلمة وموّتها. لو الفجر جه الأول هترجع تحت الأرض؛ جرّب الليلة اللي بعدها.\nشرط إتمام المهمة: اهزم ملكة الجحور",fq1_w:"لسه ماطلعتش. استنى الضلمة جنب الجحر.",fq1_d:"خلصت. ...شكرًا. خد دول؛ طلعوا مكان ما كانت بتحفر.",
+ fqRise:"أرض الغيط بتتهز. ملكة الجحور طالعة مع ولادها!",fqDawn:"الفجر: ملكة الجحور رجعت تحت الأرض. ارجع بعد الضلمة.",
+ hBurrow:"E: بص على الجحر",fqHole1:"حفرة قد البرميل، نصها مستخبي بين الخطوط. علامات مخالب أعرض من إيدك، نازلة لتحت. في حاجة كبيرة عاملة عش تحت غيط بيارو.\n(يمكن بيارو يعرف أكتر.)",fqHole2:"الجحر. لسه في حاجة بتتحرك تحت.",
+ nfp_c1:"جو حلو للتعشيب. وجو وحش لضهري.",nfp_c2:"بالليل بيطلعوا من بين الخطوط. تقدر تسمعهم بياكلوا.",nfp_c3:"من ساعة ما كنت في غيط بيارو، خطوطي هديت هي كمان.",
+ nfp_q1:"الخنازير مش هتحفر في خطوطي تاني. شكرًا.",nfp_q2:"الجلد بقى سور. الوحوش غالبًا بتحترمه.",
+ nfp_r0:"انت مش من هنا.",nfp_r1:"ساعدت القرية. أنا فاكر الوشوش.",nfp_r2:"فلاحين باتريان بقوا عارفين اسمك.",nfp_r3:"العيال بيسموك حارس الغيطان.",nfp_r4:"نص محصولي موجود بسببك.",
+ nfp_h1:"في حاجة كمان. ماكنتش عايز أقولها...",nfp_h2:"في حاجة كبيرة بتحفر تحت غيط الفلاح العجوز على الطريق الشرقي. بيارو مش عايز يتكلم عنها. بيقعد جنب خطوطه بالليل والفاس على ركبه.",
+ fwAsk:"ساعد في شغل الغيط (يومي)",fwD:"موّت 5 حفّارين في الغيطان اللي ورا سور البلد. بطاطس قوس قزح وثقته.",fwGo:"الحفّارين طالعين في كل خطوطي. موّتلي خمسة منهم، ممكن؟",
+ fwProg:"شغل الغيط: {n}/5 حفّارين",fwWait:"لسه في منهم في الخطوط.",fwTurn:"شغل الغيط خلص",fwThanks:"ده شغل يوم. خد، دي من الخط البعيد. كل الألوان مع بعض، بص.",fwGot:"بطاطس قوس قزح وثقة الفلاح (+3)",
+ fwReady:"خمس حفّارين: ارجع للفلاح.",fwDone:"شغل الغيط النهارده خلص",fwDoneL:"كفاية كده النهارده. تعالى بكره.",
+ rpotato:"بطاطس قوس قزح",rpotatoD:"بطاطساية بكل الألوان مع بعض، من غيطان باتريان. شبع +45 وصحة +25%.",
+ fd_kvein:"العرق اللي بيغني",fd_nend:"الكهف اللي في آخر الشمال",fd_burrow:"الجحر اللي تحت غيط بيارو",fdGot:"اكتشاف: {n}! (+{x} خبرة)",
+ fburrowN:"حفّار الغيطان",fbqueenN:"ملكة الجحور",bscoutN:"كشّاف قطاع طرق",bswarmN:"سرب خفافيش الصدى",msnapN:"السلحفاة الطحلبية",
+ ogFlare:"كشّاف قطاع الطرق ضرب شعلة! ({n} جايين جري)",ogUnder:"تحت الأرض!",ogMiss:"فشل",ogShell:"القوقعة!",
+ tl_kheir:"وريث خان",tl_kheirD:"وعدت خان تعمل اللي ماقدرش يعمله.",tl_ffield:"حارس الغيطان",tl_ffieldD:"وقفت في غيط بيارو بالليل وموّت ملكة الجحور."});
+Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTrust:"They don't trust you enough yet (affinity {n})",nlLocked:"\"Some other time. When I know you better.\"",nlGold:"+{n} gold",
+ nlT_khan_work:"His work",nlT_khan_trav:"Your travels",nlT_khan_anvil:"The old anvil",nlT_khan_vein:"The mountain mine",nlT_khan_dream:"What he wanted to make",
+ nkh_c1:"Night already? The coals stay red longer than the light. So do old smiths.",nkh_c2:"You carry a sword you didn't make. That's all right. Someone made it, and someone cared.",
+ nkh_c3:"Show me your hands. ...Calluses in the right places. Don't let them go soft.",nkh_c4:"They say you went past Bairan. The iron up there is harder. So are the people.",
+ nkh_c5:"Ten pieces and more off your anvil. Do you remember the first? I remember mine. It was ugly.",nkh_c6:"Hammer, tongs, fire. The rest is talk.",
+ nkh_q2:"The ore you dug for me went into a plough blade. A farmer near Patrian uses it. Your work is in a field somewhere now.",
+ nkh_q5:"You went up the hill. ...Thank you. Few people climb it for someone else's son.",nkh_q6:"Praga's men won't trouble the roads now. A smith's arm, used for something good.",
+ nkh_r0:"Hm. Another traveller.",nkh_r1:"Ah, you. The one who helps around Winston.",nkh_r2:"The town talks about you. Mostly good. Mostly.",nkh_r3:"Winston's friend. Come in, the anvil's warm.",nkh_r4:"Winston would cast a statue of you if I let them have my bronze.",
+ nkh_w1:"Ask about my work? Most people only ask about the price.",nkh_wA:"I want to learn how you choose your iron.",nkh_wA2:"Look at the colour where it breaks, not where it shines. Shine is for customers.",
+ nkh_wB:"I'm just looking around.",nkh_wB2:"Then look with your eyes, not your hands.",nkh_mw1:"Remember: the colour where it breaks.",nkh_mw2:"Still just looking around?",
+ nkh_t1:"Where have you been? You smell of somewhere that isn't Winston.",nkh_tA:"Tell him about the road.",nkh_tA1:"Then go further. A smith who never leaves town makes the same sword forever.",
+ nkh_tA2:"That far? Bring me a stone from every place you go. I'll tell you which ones would hold an edge.",nkh_tB:"Ask what he has heard lately.",
+ nkh_tB2:"Patrian's earl worries about the border. And the farmers out east say something digs up their rows at night.",
+ nkh_a1:"This anvil was my father's. He beat that dent into the corner the day I was born. He said a smith should mark his good days.",nkh_a2:"When you have a good day, mark something. Not your face.",
+ nkh_v1:"There's a mine up the mountain past Bairan. My grandfather worked a vein there nobody else ever found. He swore the iron sang when you struck it.",
+ nkh_v2:"If you go up there, read what is left on the walls. Then come and tell me if it still sings.",nkh_v3:"It still sings? ...Then he wasn't lying. Thank you for going.",
+ nkh_d1:"My son would have been better than me. I told you that on the hill.",nkh_d2:"I wanted to make one thing in my life that would outlast my name. I'm too old now. Maybe you aren't.",
+ nkh_dA:"I'll make it. For both of you.",nkh_dA2:"...Then make it well. And put his name somewhere small, where only you will see it.",nkh_dB:"Some things should stay dreams.",nkh_dB2:"Maybe. But a dream is the only thing a smith can't sell. Keep yours.",nkh_md1:"Have you started it yet? The thing that will outlast us?",
+ nlT_ashur_border:"The border",nlT_ashur_north:"The north",nlT_ashur_irene:"Irene",nlT_ashur_legacy:"The house of Ashur",
+ nas_c1:"The north road again. Every report I read ends in a funeral.",nas_c2:"Out at night? Patrian's walls are low. Stay where the torches are.",nas_c3:"The Apostle of Justice in my hall. The guards stand straighter when you pass.",
+ nas_c4:"My daughter laughs again. I owe you more than an earl can pay.",nas_c5:"Fighters your strength usually go to Reinhardt. Why stay in a border town?",
+ nas_q3:"The leather went to the guards' boots. They march further now.",nas_q5:"Six golems. The miners send their thanks, and a complaint about the noise.",nas_q6:"The deserter captain is dead. Patrian sleeps tonight.",
+ nas_r0:"A traveller. State your business.",nas_r1:"You've been of use to Patrian.",nas_r2:"The guard captain asks for you by name.",nas_r3:"Patrian's shield, they call you in the market.",nas_r4:"If I had a knighthood to give, it would be yours.",
+ nas_b1:"The highlands send raiders, the snowfields send the cold, and the capital sends letters.",nas_bA:"Offer to help the guards.",nas_bA2:"The captain will have work for you. Tell him I sent you.",
+ nas_bB:"Ask why the capital doesn't help.",nas_bB2:"Reinhardt counts soldiers like coins. Patrian is a small coin.",nas_mb2:"Still wondering about Reinhardt? So am I.",
+ nas_n1:"Travellers speak of a cave at the northern end, past the frost orcs. They come back with stories of armour piled up like a hill.",nas_n2:"I don't believe half of them. If you go, you'll know which half.",
+ nas_n3:"You found the cave? ...Then the stories were true. Keep that to yourself, or every fool in the north will go digging.",
+ nas_i1:"Irene asks about you. I tell her you're busy saving other people's daughters.",nas_iA:"Tell her I'm well.",nas_iA2:"She'll be glad. She worries about people who are kind to her.",nas_iB:"Say nothing.",nas_iB2:"...As you like. A wise man doesn't make promises to an earl's daughter.",nas_mi2:"Irene asked again. I said nothing, as you wished.",
+ nas_l1:"The house of Ashur has held this border for generations. My grandfather fought here. His grandfather too.",nas_l2:"When I am gone I want it held by someone who chose it, not someone who inherited it. Take this, for the guards' sake.",
+ nlT_piaro_soil:"The soil",nlT_piaro_sword:"The sword he once held",nlT_piaro_burrow:"The burrow in his field",
+ npi_c1:"The moon's up. A farmer should be asleep. Old habits.",npi_c2:"The soil's warm today. Good for roots, good for old knees.",npi_c3:"The field is quiet now. The potatoes came up in every colour this year.",npi_c4:"A fellow farmer! Your hands smell of earth. Good.",npi_c5:"She went back under at dawn. Next time, we'll be waiting.",
+ npi_q1:"You stood in my field and didn't run. It's been a long time since I fought beside someone.",npi_mb2:"The burrow is still there. So is my question.",
+ npi_s1:"Everyone asks about swords. Nobody asks about soil.",npi_sA:"Ask how he knows good soil.",npi_sA2:"Pick it up. If it holds together and then breaks easily, it's good. Like a good fighter: firm, never stiff.",
+ npi_sB:"Say you prefer swords.",npi_sB2:"Ha. So did I, once.",npi_w1:"I held a sword for many years. I was good with it. Too good, maybe.",npi_w2:"A sword cuts one thing at a time. A hoe feeds a village. I chose the hoe.",
+ npi_b1:"So you found it. I hoped no one would.",npi_b2:"Something nests under the rows. On moonless nights its queen comes up with her brood. I didn't want to lift a blade again... Will you stand in the field with an old man tonight?",
+ npi_b3:"Changed your mind about the field?",npi_bA:"I'll guard the field.",npi_bA2:"Then come when it's dark. Stand by the burrow and wait.",npi_bB:"It's not my business.",npi_bB2:"...No. It isn't. Forget I asked.",
+ q_fq1:"The Field at Night (Secret)",fq1_o:"The Burrow Queen comes up from under Piaro's field at night with her brood. Stand by the burrow after dark and put her down. If dawn comes first she goes back under; try again the next night.\nQuest condition: defeat the Burrow Queen",fq1_w:"She hasn't come up yet. Wait for the dark, by the burrow.",fq1_d:"It's done. ...Thank you. Take these; they grew where she dug.",
+ fqRise:"The ground of the field heaves. The Burrow Queen comes up with her brood!",fqDawn:"Dawn: the Burrow Queen goes back under. Come back after dark.",
+ hBurrow:"E: Look at the burrow",fqHole1:"A hole as wide as a barrel, half hidden in the rows. Claw marks wider than your hand, going down. Something big is nesting under Piaro's field.\n(Piaro may know more.)",fqHole2:"The burrow. Something still moves down there.",
+ nfp_c1:"Good weather for weeding. Bad weather for my back.",nfp_c2:"At night they come up through the rows. You can hear them chewing.",nfp_c3:"Since you were at Piaro's field, my rows are quiet too.",
+ nfp_q1:"The boars won't dig my rows now. Thank you.",nfp_q2:"The leather's become a fence. The beasts mostly respect it.",
+ nfp_r0:"You're not from around here.",nfp_r1:"You helped the village. I remember faces.",nfp_r2:"Patrian's farmers know your name now.",nfp_r3:"The children call you the field guard.",nfp_r4:"Half my harvest exists because of you.",
+ nfp_h1:"There's one more thing. I didn't want to say it...",nfp_h2:"Something big digs under the old farmer's field on the eastern road. Piaro won't talk about it. He just sits by his rows at night with a hoe across his knees.",
+ fwAsk:"Help with the field work (daily)",fwD:"Put down 5 Field Burrowers in the fields outside the town wall. A rainbow potato and his trust.",fwGo:"The burrowers come up all over my rows. Put down five of them for me, would you?",
+ fwProg:"Field work: {n}/5 burrowers",fwWait:"Still some of them in the rows.",fwTurn:"The field work is done",fwThanks:"That's a day's work. Here, it's from the far row. Every colour at once, look.",fwGot:"Rainbow potato and the farmer's trust (+3)",
+ fwReady:"Five burrowers: go back to the farmer.",fwDone:"Today's field work is done",fwDoneL:"That's enough for today. Come back tomorrow.",
+ rpotato:"Rainbow Potato",rpotatoD:"A potato in every colour at once, from the Patrian fields. Food +45 and health +25%.",
+ fd_kvein:"The singing vein",fd_nend:"The cave at the northern end",fd_burrow:"The burrow under Piaro's field",fdGot:"Discovery: {n}! (+{x} XP)",
+ fburrowN:"Field Burrower",fbqueenN:"Burrow Queen",bscoutN:"Bandit Scout",bswarmN:"Echo Bat Swarm",msnapN:"Mossback Snapper",
+ ogFlare:"A bandit scout fires a flare! ({n} come running)",ogUnder:"Underground!",ogMiss:"Miss",ogShell:"The shell!",
+ tl_kheir:"Khan's Heir",tl_kheirD:"Promised Khan to make what he never could.",tl_ffield:"Guardian of the Fields",tl_ffieldD:"Stood in Piaro's field at night and put down the Burrow Queen."});
 /* ---- Pagma's sword dances as in the novel (owner: "1:1 with the novel"; audit legends/legend-audit.md §1). One scale for
    all of them: the novel's damage x0.4 and its cooldowns /20. Link is a flurry on one target, Kill one blow that bleeds and
    brings despair for half your stamina, Wave rings out around you and slows, its waves homing on those further off,
