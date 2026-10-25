@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25cats', ver: '3.06', d: '2026-10-25',
+      ar: ["طلب Suki: القطة اترسمت من جديد: قطة برتقاني مخططة ليها خط غامق حواليها، فبقت باينة على الزرع والحجر، والقطة الصغيرة بقت أكبر. والقطة اللي اتطورت سودا وبنفسجي بخط فاتح حواليها.",
+        "تقدر تدلّعها: لو واقف والقطة جنبك ومفيش حاجة تانية تستعملها، دوس E. عينيها بتغمّض، وقلب بيطلع فوقها، وبتاخد شوية خبرة مرة كل 3 دقايق."],
+      en: ["Suki's request: the cat is redrawn: an orange tabby with an outline, so it stands out on grass and stone, and a kitten is bigger now. An evolved cat is black and violet with a light rim.",
+        "You can pet it: standing still with your cat at your feet and nothing else to use, press E. Its eyes close, a heart rises over it, and once every 3 minutes it gets a little experience."] },
     { v: '2026-10-25shiny', ver: '3.05', d: '2026-10-25',
       ar: ["طلب Suki: ✨ حاجات بتلمع. ساعات السمكة اللي بتصطادها، والخام والميثريل اللي بتعدّنه، والعشب، والمحصول بيطلعوا بيلمعوا. اللي بيلمع بيتباع بأربع أضعاف، وبيتطبخ ويتصنع زي العادي، وواحد منه بيدخل الأول.",
         "أي أكلة تدخل فيها حاجة بتلمع بتطلع بتلمع: أكل وعلاج أكتر بالنص، ومفعولها ضعف المدة. والضربة الممتازة في الحلة ساعات بتطلّعها بتلمع لوحدها.",

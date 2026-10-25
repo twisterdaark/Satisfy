@@ -104,7 +104,7 @@
     // today's fish and produce sold to the market (SAT-ONLINE-190): {d: world day, n: {kind: count}}
     'mkt',
   ];
-  var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk', 'natJ'];
+  var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'ctPet', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk', 'natJ'];
   var META = ['v', 'wv', 'uid', 'pid'];
   // Never saved: set on the title-screen demo state only.
   var TRANSIENT = ['__demo'];
