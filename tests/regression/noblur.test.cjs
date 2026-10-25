@@ -16,7 +16,7 @@ test('no window blurs the world behind it', async () => {
     assert.deepEqual(await blurred(g), [], 'on the title screen');
     await H.newGame(g);
     assert.deepEqual(await blurred(g), [], 'in play');
-    for (const [k, mode] of [['i', 'inv'], ['c', 'status'], ['m', 'map'], ['b', 'mb'], ['Escape', 'pause']]) {
+    for (const [k, mode] of [['i', 'inv'], ['c', 'status'], ['m', 'map'], ['b', 'idx'], ['Escape', 'pause']]) {
       await g.page.keyboard.press(k); await g.step(3);
       assert.equal(await g.mode(), mode, 'opened with ' + k);
       assert.deepEqual(await blurred(g), [], 'with ' + mode + ' open');

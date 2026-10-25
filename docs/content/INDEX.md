@@ -1,4 +1,4 @@
-# The Index (v2.97; 2026-10-25)
+# The Index (v2.97, v3.00; 2026-10-25)
 
 The player Suki, through the owner: "Create a tab that opens with the N keybind, call this tab the index, include all
 trainers in the game except legendary ones (those are for players to find), this index also include player classes..
@@ -28,6 +28,11 @@ mage."
     its unlock: smithing level, the Blacksmith class or specialization, a quest, the pieces made first and how many,
     understanding, a recipe book) and **Magic**
     (mana, staffs, the magic trainer's paths, the elements in `BEL` and the breaths in `BTHK`).
+- **👹 Monsters** (v3.00; owner 2026-10-25 20:42: "put the monsters' encyclopedia inside the Index and remove the
+  encyclopedia"): the Monster Book is the Index's page `mon`. Its own parts keep their ids (`#mbW` now a part of `#ixW`, with
+  `#mbSum`, `#mbQ`, `#mbF`, `#mbD`, `#mbG`, and the Lore filter), so `mbDraw`, its search, filters, tracking and portraits
+  are as before; the Index hides its own search, detail and grid there. The separate window and its HUD key are gone; B opens
+  the Index on this page (`openMB`), and B there closes it.
 - Search by name on every page. Arabic and English.
 
 Test: `tests/regression/index.test.cjs` (2).

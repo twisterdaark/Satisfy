@@ -38,7 +38,7 @@ test('what comes on its own is above the windows you open; death closes them', a
     await g.page.setViewportSize({ width: 1280, height: 720 });
     await H.newGame(g); await g.step(10);
     const r = await g.eval((src) => { const onTop = eval(src), $ = (id) => document.getElementById(id), o = {};
-      for (const b of ['inv', 'equipW', 'statusW', 'mapW', 'mbW', 'guildW', 'auW', 'qdW', 'logW', 'forge']) { $(b).hidden = false;
+      for (const b of ['inv', 'equipW', 'statusW', 'mapW', 'ixW', 'guildW', 'auW', 'qdW', 'logW', 'forge']) { $(b).hidden = false;
         for (const p of ['partyInv', 'guildInv', 'tradeInv', 'duelInv', 'lootW', 'deathW', 'netRepW']) { $(p).hidden = false; const v = onTop([p])[0]; if (v < 100) o[b + '>' + p] = v; $(p).hidden = true; }
         $(b).hidden = true; }
       // a trade beside the windows you open: the bag and the Esc menu stay above it; a duel's bars stay below the toasts

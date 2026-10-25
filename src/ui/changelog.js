@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25mbindex', ver: '3.00', d: '2026-10-25',
+      ar: ["كتاب الوحوش بقى تاب جوه الفهرس: 👹 الوحوش. فيه كل اللي كان فيه: الوحوش اللي قابلتها، والقتلات والماستري، والتتبع، والفلاتر، والبحث، وتاب الحكايات.",
+        "شاشة كتاب الوحوش لوحدها اتشالت، ومعاها زرار «الوحوش» من مربع الزراير. زرار B لسه شغال: بيفتح الفهرس على تاب الوحوش على طول، ولو دوست عليه تاني بيقفله."],
+      en: ["The Monster Book is a page of the Index now: 👹 Monsters. Everything it had is there: the monsters you've met, kills and mastery, tracking, the filters, the search and the Lore tab.",
+        "The separate Monster Book window is gone, and so is the \"Monsters\" key from the keys box. B still works: it opens the Index straight on its Monsters page, and pressing it again closes it."] },
     { v: '2026-10-25bdog', ver: '2.99', d: '2026-10-25',
       ar: ["مكان جديد من الرواية: زنزانة «احترس من الكلاب» في جبال درافيان، على الصخور اللي شمال تيتان. كانت منجم، والتنين المجنون نيفارتان خلاه عشه وغطى الحيطان والسقف بالطوب، وبعدها الكرنفال الدموي خلاه قاعدته (فصل 612 و613). دلوقتي شكله زي أطلال بعد حرب.",
         "جوه فيه عشر عروق على الحيطان: لازم تشيل الطوب الأول، وبعدين تقلع المعدن (\"لازم تشيل الطوب الأول، وبعدين المعادن\"). فيها حديد التنين المجنون وحجر التنين المجنون، نصهم ده ونصهم ده. الشغل فيها من لفل 250.",
