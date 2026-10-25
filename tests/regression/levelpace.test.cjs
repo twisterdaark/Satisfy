@@ -8,14 +8,18 @@ const H = require('../harness/game.cjs');
 
 test.after(() => H.closeBrowser());
 
-test('no per-kill cap: a far higher monster gives 1.3 times its XP; level 100 needs about 63 thousand', async () => {
+// owner 2026-10-25 (the encyclopedia §96): from level 100 one kill gives at most a share of the level (2% to 199,
+// regression/xpcap); below 100 there is still no cap
+test('no per-kill cap below 100: a far higher monster gives 1.3 times its XP; from 100 at most 2%; level 100 needs about 63 thousand', async () => {
   const g = await H.openGame();
   try {
     await H.newGame(g, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
-    const r = await g.eval(() => { const G = window.__G, S = G.S, U = window.__GU; S.lv = 100; S.xp = 0;
-      const xp = G.isk.MT.lizard.xp, m = G.spawnMon('lizard', G.P.x + 30, G.P.y); m.tmp = 0; m.lv = 140; const x0 = S.xp, l0 = S.lv; U.killMon(m);
-      const got = S.xp - x0 + (S.lv > l0 ? 1e12 : 0); S.lv = 100; S.xp = 0; return { xp, got, need: G.xpNeed() }; });
-    assert.ok(r.got >= Math.round(r.xp * 1.3), 'a level-140 kill at level 100 gave ' + r.got + ' of ' + r.xp);
+    const r = await g.eval(() => { const G = window.__G, S = G.S, U = window.__GU; const one = (L) => { S.lv = L; S.xp = 0;
+      const m = G.spawnMon('lizard', G.P.x + 30, G.P.y); m.tmp = 0; m.lv = L + 40; const x0 = S.xp, l0 = S.lv; U.killMon(m);
+      const got = S.xp - x0 + (S.lv > l0 ? 1e12 : 0), need = G.xpNeed(); S.xp = 0; return { got, need }; };
+      const a = one(90), b = one(100); S.lv = 100; return { xp: G.isk.MT.lizard.xp, got: a.got, got100: b.got, need: b.need }; });
+    assert.ok(r.got >= Math.round(r.xp * 1.3), 'a kill 40 levels up at level 90 gave ' + r.got + ' of ' + r.xp);
+    assert.equal(r.got100, Math.round(r.need * .02), 'at level 100: the 2% cap');
     assert.ok(r.need > 55000 && r.need < 70000, 'level 100 needs ' + r.need);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
