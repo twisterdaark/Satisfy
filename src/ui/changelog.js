@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25zebra', ver: '2.94', d: '2026-10-25',
+      ar: ["مكان جديد من الرواية: قلعة الإيرل زيبرا (لفل 200+)، جنوب تيتان جنب الطريق الغربي، على الطريق من ريدان لتيتان (فصل 243). قلعة بسور وبوابة وبرج، وتحتها مكان تحت الأرض.",
+        "الإيرل زيبرا واقف قدام برجه: قاسي ومبسوط بنفسه. هوايته التعذيب، ومواضيعه: حيوانه الأليف والأسهم السودا. مابياخدش هدايا.",
+        "قتلة الأسهم السودا (لفل 205 لـ212) في ساحة القلعة: بيطلعولك من ورا، بيضربوا مرتين، وبيرموا 5 خناجر مرة واحدة (فصل 245 و246).",
+        "السفّاح (زعيم لفل 215) تحت الأرض: نص إنسان ونص وحش، الإيرل رباه بالتعذيب ومحدش قدر يتحكم فيه (فصل 243). بيقطّع وبيهجم، ولما صحته تقل عن التلت بيزعق ويتجنن.",
+        "مهمة من لاويل (لفل 205): رقعة عين السفّاح. اقتل السفّاح وخد رقعة العين، وهي آيتم Unique بمهارة كشف النقط الحيوية (+8% فرصة ضربة قاضية، فصل 244). مرة واحدة بس، من غير لقب.",
+        "اكتشاف جديد مرة واحدة: قلعة الإيرل زيبرا، بعد ما تاخد مهمة لاويل."],
+      en: ["A new place from the novel: Earl Zebra's Castle (Lv 200+), south of Titan by the western road, on the way from Reidan to Titan (ch 243). A walled court with its gate and keep, and an underground beneath.",
+        "Earl Zebra stands before his keep: cruel, and pleased with himself. His hobby is torture; his topics, his pet and the Black Arrows. He takes no gifts.",
+        "The Black Arrow Assassins (205 to 212) in the court: they come at you from behind, cut twice, and throw five daggers at once (ch 245, 246).",
+        "The Slaughterer (a Lv 215 boss) in the underground: half man, half beast, raised by the earl with torture and never controlled (ch 243). It tears and charges, and below a third of its health it roars and goes wild.",
+        "A quest from Lauel (level 205): the Slaughterer's Eye Patch. Defeat the Slaughterer and take its eye patch, a Unique item with Vital Spot Detection (+8% critical chance, ch 244). Once only, and no title.",
+        "A new first discovery, once: Earl Zebra's Castle, after you take Lauel's errand."] },
     { v: '2026-10-25wsands', ver: '2.93', d: '2026-10-25',
       ar: ["منطقة جديدة من الرواية: رمال غرب ريدان (لفل 145+). الأرض اللي غرب سور ريدان بقت صحرا زي ما في الرواية، لأن الدود العملاق ظهر من 10 سنين وخرّب ريدان (فصل 217 و228). طريق باتريان لسه بيعدي من وسطها.",
         "الدودة العملاقة (لفل 154 لـ160): تحت الرمل مفيش حاجة بتأذيها، وبتمشي وراك كتل رمل. لما الرمل يتهز حواليها في دايرة اخرج منها بسرعة، لأنها بتطلع تعض اللي جوه الدايرة، وبعدها بتحارب شوية وترجع تغطس.",

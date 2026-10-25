@@ -1762,7 +1762,10 @@ const SETS={gd:{it:['gdneck','gdbrace'],b:{2:{def:100}}},ez:{it:['ezneck','ezbra
  rp:{it:['rpbow','rparmor','rphelm','rpboots'],b:{2:{hrg:.2},4:{hrg:.4}}},tg:{it:['tgarmor','tghelm','tggloves','tgboots'],b:{3:{hpp:.1,dfp:.1},4:{hpp:.15,dfp:.15}}},
  dg:{it:['dgspear','dggaunt','dgarmor','dghelm'],b:{2:{dm:.06},4:{dm:.12,as:.06}}},tt:{it:['ttthorn','ttshell','tthelm','ttboots'],b:{3:{as:.1,stc:.15},4:{as:.12,stc:.2,def:30}}}};
 const GEMS={ruby:{dm:.06},topaz:{as:.08},emer:{ms:.06},sapph:{mpb:30},diam:{dm:.03,as:.04,ms:.03},thund:{}},GEMK=Object.keys(GEMS),GEMC=500;
-const REID={x0:514,x1:561,y0:62,y1:102,mx:556,my:69},PEAK={x:628,y:17,rx:22,ry:11},YATAN={x0:452,x1:478,y0:8,y1:30},KESAN={x0:416,x1:470,y0:96,y1:118,mx:443},CAST={x0:522,x1:553,y0:30,y1:56},MULL={x:584,y:24,rx:11,ry:8},WSAND={x0:472,x1:512,y0:56,y1:95,nx:478,ny:64};   // WSAND: Reidan's Western Sands (v2.93), the nest below the rocks at its north-west
+const REID={x0:514,x1:561,y0:62,y1:102,mx:556,my:69},PEAK={x:628,y:17,rx:22,ry:11},YATAN={x0:452,x1:478,y0:8,y1:30},KESAN={x0:416,x1:470,y0:96,y1:118,mx:443},CAST={x0:522,x1:553,y0:30,y1:56},MULL={x:584,y:24,rx:11,ry:8},WSAND={x0:472,x1:512,y0:56,y1:95,nx:478,ny:64},
+ ZEB={x0:856,x1:884,y0:148,y1:163,gx:870,keep:{x:867,y:155,h:5},pit:{x0:1000,x1:1032,y0:WMH+13,y1:WMH+24,cy:WMH+18}};   // ZEB: Earl Zebra's castle (v2.94) and its underground
+// the kinds of a region of its own (the Western Sands, Earl Zebra's castle): they set no town's recommended level and no invasion's strength
+var APART=new Set(['gworm','dtoad','gwnest','bkarrow','slaught']);   // WSAND: Reidan's Western Sands (v2.93), the nest below the rocks at its north-west
 const DSPAWN=[['cgob',236,284,WMH+4,WMH+19,12],['cgob',294,342,WMH+4,WMH+19,7],['gshaman',294,342,WMH+4,WMH+19,6],['gshaman',352,384,WMH+4,WMH+19,4],['kobold',414,462,WMH+4,WMH+19,12],['kobold',472,500,WMH+4,WMH+19,6],['golem',530,572,WMH+4,WMH+19,8],['cgolem',550,572,WMH+4,WMH+19,3],['cgolem',588,630,WMH+4,WMH+19,6],['skel',646,690,WMH+4,WMH+19,8],['wraith',662,690,WMH+4,WMH+19,5]],DBOSS=[['gwar',394,WMH+11],['kking',512,WMH+11],['bknight',682,WMH+11]],
  // the Saharan Empire's Abyss floors, spawned last from their own seed so every older spot keeps its monsters
  SDSPAWN=[['pguard',788,836,WMH+4,WMH+19,10],['aprison',846,894,WMH+4,WMH+19,9],['pguard',846,894,WMH+4,WMH+19,5]],SDBOSS=[['hydra',934,WMH+11]];
@@ -2532,6 +2535,26 @@ let herbSpot=null;
  for(let i=VT.length-1;i>=0;i--){const tr=VT[i];if(at(tr.tx,tr.ty)!==TR){VT.splice(i,1);VTM.delete(tr.k);VTN.delete(vtK(tr.tx,tr.ty));}}
  for(const n of nodes){if(!(n.kind==='herb'||n.kind==='bherb')||at(n.tx,n.ty)!==DR)continue;
   for(let x=W.x0-6;x>W.x0-40;x--){const v=at(x,n.ty);if((v===GR||v===FL)&&!SOLID[at(x-1,n.ty)]&&!SOLID[at(x+1,n.ty)]){n.tx=x;n.x=x*TS+8;break;}}}})();
+// Earl Zebra's castle (v2.94; ch 243: "Earl Zebra's castle", on the way from Reidan to Titan; "This is a bad place."): a walled
+// court in the Saharan Empire's farmland south of Titan, by the western road, with its keep; under it the earl's underground
+// (ch 243: "the Slaughterer was an inhabitant of Earl Zebra's underground area"). Painted after the herbs are placed, so their
+// dice do not move; no spawn's dice cover these tiles. The keep's door goes down to the underground.
+(function genZebra(){const Z=ZEB,K=Z.keep,U=Z.pit,inZ=(x,y)=>x>=Z.x0&&x<=Z.x1&&y>=Z.y0&&y<=Z.y1;
+ for(let y=Z.y0;y<=Z.y1;y++)for(let x=Z.x0;x<=Z.x1;x++){const edge=x===Z.x0||x===Z.x1||y===Z.y0||y===Z.y1,gate=y===Z.y0&&Math.abs(x-Z.gx)<=1;
+  if(edge&&!gate)setT(x,y,WL);else if(at(x,y)===TR||at(x,y)===WA)setT(x,y,GR);}
+ for(let y=Z.y0-2;y<=Z.y0+5;y++)setT(Z.gx,y,PA);   // from the road to the court
+ for(const [cx,cy,sx,sy] of [[Z.x0,Z.y0,1,1],[Z.x1,Z.y0,-1,1],[Z.x0,Z.y1,1,-1],[Z.x1,Z.y1,-1,-1]])for(let j=0;j<=1;j++)for(let i=0;i<=1;i++)setT(cx+i*sx,cy+j*sy,WL);   // the towers, inside the walls
+ const b={x:K.x,y:K.y,w:6,h:5,k:'palace',lx:K.x,zebra:1};buildings.push(b);for(let y=b.y+2;y<b.y+b.h;y++)for(let x=b.x;x<b.x+b.w;x++)setT(x,y,BL);
+ for(let i=VT.length-1;i>=0;i--){const tr=VT[i];if(at(tr.tx,tr.ty)!==TR){VT.splice(i,1);VTM.delete(tr.k);VTN.delete(vtK(tr.tx,tr.ty));}}
+ for(const n of nodes){if(!(n.kind==='herb'||n.kind==='bherb')||!inZ(n.tx,n.ty)&&!(Math.abs(n.tx-Z.gx)<=1&&n.ty>=Z.y0-2&&n.ty<Z.y0))continue;   // herbs out of the court and off its path
+  for(let y=Z.y1+3;y<Z.y1+12;y++){const v=at(n.tx,y);if((v===GR||v===FL)&&!SOLID[at(n.tx-1,y)]&&!SOLID[at(n.tx+1,y)]){n.ty=y;n.y=y*TS+12;break;}}}
+ // the underground: a long cellar of rock, its cells along the walls
+ const r=mulberry32(2430);for(let y=U.y0;y<=U.y1;y++)for(let x=U.x0;x<=U.x1;x++){const e=Math.min(x-U.x0,U.x1-x,y-U.y0,U.y1-y);setT(x,y,e<1?CW:(e>2&&r()<.04?RK:DR));}
+ for(let x=U.x0+6;x<=U.x1-6;x+=5)for(const [y0,y1] of [[U.y0+1,U.y0+3],[U.y1-3,U.y1-1]])for(let y=y0;y<=y1;y++)setT(x,y,WL);   // the cells' walls
+ DUN.push({k:'zZebraU',x0:U.x0,x1:U.x1,y0:U.y0,y1:U.y1});
+ const px=(x,y)=>({x:x*TS+8,y:y*TS+10});
+ DGATES.push({...px(K.x+3,K.y+K.h),to:px(U.x0+4,U.cy),hint:'hZebra',lv:200});
+ DGATES.push({...px(U.x0+1,U.cy),to:px(K.x+3,K.y+K.h+2),hint:'hUp'});})();
 // Haalrune Swamp: a murky wash over the ground, with reeds
 {const r=mulberry32(3131);for(const [cx,cy,rx,ry] of SWAMP){for(const k of [1.08,.96,.84])blob(gg,cx*TS+8,cy*TS+8,rx*TS*k,ry*TS*k,'rgba(46,66,38,.2)');for(let i=0;i<rx*ry*2;i++){const a=r()*6.28,d=Math.sqrt(r()),x=(cx+Math.cos(a)*rx*d)*TS,y=(cy+Math.sin(a)*ry*d)*TS;if(at(x/TS|0,y/TS|0)===WA)continue;R(gg,x,y-5,1,6,'#6a8a3a');R(gg,x+2,y-3,1,4,'#4e6e2c');R(gg,x,y-6,1,1,'#8a6a3a');}}}
 // the poison swamps of the Chaos Mountains: a sickly violet wash, dead reeds
@@ -5594,7 +5617,7 @@ function evSpawn(type,x,y,gen){const so=gen?sol0:solidT;if(so(x/TS|0,y/TS|0)){le
 // the last and every third one brings a captain. A knocked-out NPC lies there until the invasion ends; online this is
 // shared state (WS.nko), so everyone sees the same town fall or hold.
 const NPCHP=100,npcKO=id=>!!(WS&&WS.nko&&WS.nko[id]>wNow()); // the server clock, as EV.end is (SAT-ONLINE-044: a device whose clock was off saw them stand up)
-function evRef(T){const cx=T.rx*TS+8,cy=T.ry*TS+8,ms=mons.filter(m=>!m.tmp&&!m.evt&&!m.wsz&&!MT[m.type].boss&&Math.hypot(m.x-cx,m.y-cy)<760).sort((a,b)=>a.lv-b.lv);
+function evRef(T){const cx=T.rx*TS+8,cy=T.ry*TS+8,ms=mons.filter(m=>!m.tmp&&!m.evt&&!APART.has(m.type)&&!MT[m.type].boss&&Math.hypot(m.x-cx,m.y-cy)<760).sort((a,b)=>a.lv-b.lv);
  if(!ms.length)return {lv:10,hp:600,dmg:60,xp:50};const med=ms[ms.length>>1].lv,near=ms.filter(m=>Math.abs(m.lv-med)<=Math.max(6,med*.3)),av=f=>near.reduce((a,m)=>a+f(m),0)/near.length;
  return {lv:Math.round(med),hp:av(m=>m.max),dmg:av(m=>MT[m.type].dmg),xp:av(m=>MT[m.type].xp)};}
 // only sides whose wall has an opening where the march goes in (owner report: invaders stuck under Reidan's closed south wall)
@@ -6191,6 +6214,9 @@ Object.assign(MT,{ksap:{lv:[74,80],hp:7000,dmg:420,spd:58,xp:700,gold:18,aggro:1
 Object.assign(MT,{gworm:{lv:[154,160],hp:260000,dmg:3400,spd:40,xp:13000,gold:170,aggro:150,r:10,oy:40,drop:[['ore',.8],['mstone',.6]]},
  dtoad:{lv:[148,154],hp:120000,dmg:2500,spd:52,xp:8000,gold:100,aggro:130,r:7,oy:18,drop:[['leather',.6],['mstone',.3]]},
  gwnest:{lv:[160,160],hp:1600000,dmg:1,spd:0,xp:50000,gold:2500,aggro:140,r:16,oy:26,drop:[['mstone',1],['ore',1],['mith',.3]]}});
+// Earl Zebra's castle (v2.94): the Black Arrows (ch 245-246) and the Slaughterer of his underground (ch 243-244); levels the game's
+Object.assign(MT,{bkarrow:{lv:[205,212],hp:420000,dmg:5200,spd:58,xp:30000,gold:200,aggro:140,r:6,oy:28,drop:[['ore',.5],['mstone',.5]]},
+ slaught:{lv:[215,215],hp:9000000,dmg:7000,spd:48,xp:1000000,gold:30000,aggro:170,r:12,oy:54,boss:1,leash:240,slam:10000,slamR:56,sc:1.9,drop:[['mith',10],['mstone',12]]}});
 // the Patrian farmer's rows and Piaro's field (tiles), for the burrowers and the secret quest (var: read when the first world is built)
 var FWF={x:373,y:96},PIF={x:290,y:68},O48L={dx:20,dy:-10},O48S=[],O48R=[],O48P=new Map();
 const SPAWN=[['rabbit',104,150,42,62,14],['rabbit',147,157,62,100,6],['boar',147,157,64,104,8],['boar',100,118,44,62,5],['goblin',109,152,105,116,14],['merman',80,106,88,112,12],['pwolf',64,100,42,90,12],
@@ -6262,7 +6288,8 @@ NPCS.push({id:'merchant',spr:'merchant',...rmP(7,5.5,2.5),reach:16},{id:'armorer
  {id:'armorerP',spr:'armorer',...rmP(20,5.5,2.5),reach:16},{id:'innP',spr:'inn',...rmP(19,4.5,2.5),reach:16},
  {id:'stylist',spr:'stylist',...rmP(9,5.5,3.6)},
  {id:'steim',spr:'steim',...rmP(6,6,1.5),dir:2},{id:'irene',spr:'irene',...rmP(6,8.5,4.6),dir:2,hidden:1},   // Winston Castle (ch 116-117); Irene home after her rescue
- {id:'admRabbit',spr:'admRabbit',tx:548.5,ty:84.4,ph:1,dir:3});   // Reidan's administrator (ch 221-228, 856)   // Layla works in her salon now (owner 2026-10-23)
+ {id:'admRabbit',spr:'admRabbit',tx:548.5,ty:84.4,ph:1,dir:3},
+ {id:'zebra',spr:'zebra',tx:866.5,ty:161.4,ph:1,dir:2});   // Earl Zebra before his keep (ch 243-245)   // Reidan's administrator (ch 221-228, 856)   // Layla works in her salon now (owner 2026-10-23)
 let camXf=0,camYf=0,camSnap=true,S,P,mons=[],npcs=[],fx=[],nums=[],smoke=[],proj=[],shake=0,mode='lang',hudDirty=true,gTime=0,camX=0,camY=0,MID=0;
 const RC=[
  {id:'jaffa',slot:'x',need:{wood:2,ore:1},unlock:()=>!!S.qs.sm3,diff:.8,strikes:4},
@@ -6575,7 +6602,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   // the 32nd Great Demon Belial at the gate of hell (major 7), after them for the same reason
   {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
-  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();wsSpawn();}
+  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();wsSpawn();zbSpawn();}
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
  {const now=Date.now(),D=(S&&S.mrt)||{};for(const m of mons){const u=D[mobKey(m)];if(u>now){m.dead=true;m.dying=0;m.rt=(u-now)/1000;}}}
@@ -6808,7 +6835,7 @@ window.__GTD={tick:dt=>tdTick(dt),hit:(m,d,c)=>tdHit(m,d,c),end:()=>tdEnd(),get 
 function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}if(OGB&&OGB[m.type]&&ogImm(m,o))return 0;
  if(m.type==='kraugel'&&!m.st&&!(P.bdetU>gTime)&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
  if(o.skill&&!o.spr&&P.sprW>gTime)bzSpray(m,mul); // Braham's Magic Spray
- let dmg=(o.aura?auAtkV():atkV())*mul*(o.skill&&P.cohW>gTime?3:1)*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*eaAtk()*(m.wardT>gTime?m.wardR||.4:1),crit=rand()<Math.min(.5,.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8*ttCdm();dmg*=rlAtk(m);let burn=false;const w=weapon();
+ let dmg=(o.aura?auAtkV():atkV())*mul*(o.skill&&P.cohW>gTime?3:1)*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*eaAtk()*(m.wardT>gTime?m.wardR||.4:1),crit=rand()<Math.min(.5,.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8*ttCdm();dmg*=rlAtk(m);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -7096,7 +7123,7 @@ Object.assign(STR.en,{graveT2:'"At a small hill north of Winston. There were aro
    system-window glint, not a world object. First read raises Insight by 1 (like the books on shelves).
    [key, x, y, abs]: abs=0 means original-map columns (wX), abs=1 means world tiles. Moved to the nearest open tile. */
 const LMD=[['lmNEnd',179,10,1],['lmOut',40,64,0],['lmMine',21,9,0],['lmGrey',45,25,0],['lmSnow',160,18,0],['lmOrc',112,24,0],
- ['lmCanyon',131,104,0],['lmLoran',127,113,0],['lmKesan',443,98,1],['lmWSand',496,72,1],['lmWNest',475,66,1],['lmYatan',465,28,1],
+ ['lmCanyon',131,104,0],['lmLoran',127,113,0],['lmKesan',443,98,1],['lmWSand',496,72,1],['lmZebra',864,145,1],['lmWNest',475,66,1],['lmYatan',465,28,1],
  ['lmChaos',303,-70,1],['lmSanju',180,-73,1],['lmRidge4',265,-149,1],['lmPedro',122,184,1],['lmGauss',396,184,1],['lmCork',640,246,1],
  ['lmSuaz',742,74,1],['lmRolling',788,79,1],['lmDran',DRAN(118)-4,118,1],['lmTatur',820,30,1],['lmTitan',884,86,1],['lmTemple',875,72,1],['lmBMine',931,54,1],['lmTower',936,75,1],['lmAbyss',ABYSS.x+4,ABYSS.y+ABYSS.ry+2,1],['lmButin',913,186,1],
  ['lmRCity',697,86,1],['lmRPalace',689,55,1],['lmRTrain',670,55,1],['lmRFame',693,65,1],['lmRWest',649,64,1],['lmRTemple',660,53,1],['lmRWall',639,85,1]];
@@ -7478,7 +7505,7 @@ function updateEscort(dt){escHide();if(!ESC)return;const s=S.qs[ESC.q],q=QD[ESC.
  const D=escDest(q.obj);if(Math.hypot(E.x-D.x,E.y-D.y)<40){s.c=1;num(E.x,E.y-26,t('escThanks'),'#9fe39a',false);vfx('spawn',E.x,E.y);ESC=null;addAff(q.by,6);completeQ(E.q);}}
 // who says what: hi = first meeting, low = a quest exists but your level is too low, idle = nothing to do; opts = shop choices
 const NPCT={
- steim:{hi:'nst_hi'},irene:{hi:'nir_hi'},admRabbit:{hi:'nrb_hi'},   // Winston Castle and Reidan's administrator (v2.92): their lines and options are set with NLD's further down
+ steim:{hi:'nst_hi'},irene:{hi:'nir_hi'},admRabbit:{hi:'nrb_hi'},zebra:{hi:'nzb_hi',noGift:1},   // Winston Castle and Reidan's administrator (v2.92): their lines and options are set with NLD's further down
  biban:{hi:'twBbHi',idle:()=>TOW?'twId_biban':S.lv<400?'twBbLow':'twBbIdle',opts:()=>bibanOpts(),noGift:1},
  hayate:{hi:'twHaHi',idle:()=>'twHaIdle',opts:()=>twOpts('hayate'),noGift:1},
  fronz:{hi:'twHi_fronz',idle:()=>'twId_fronz',opts:()=>twOpts('fronz'),noGift:1},
@@ -9956,7 +9983,7 @@ const ZR=[['zPat',172,64,208,100],['zRuin',209,68,223,98],['zHigh',158,39,223,63
 // each town's recommended level (owner 2026-10-24, a player's idea): the middle level of the 30 monsters nearest it,
 // worked out once the world has its monsters
 let TRL=null;function townLv(k){const T0=TOWNS.find(T=>T.k===k);if(!T0)return 0;if(!TRL&&mons&&mons.length>50){TRL={};for(const T of TOWNS){const cx=(T.x0+T.x1)/2,cy=(T.y0+T.y1)/2,hw=(T.x1-T.x0)/2;
-  const L=mons.filter(m=>MT[m.type]&&!MT[m.type].boss&&m.sx!=null&&!m.wsz&&!(typeof TFB!=='undefined'&&TFB.includes(m))).map(m=>[Math.hypot(m.sx/TS-cx,m.sy/TS-cy),MT[m.type].lv[0]]).filter(a=>a[0]<hw+60).sort((a,b)=>a[0]-b[0]).slice(0,30).map(a=>a[1]).sort((a,b)=>a-b);
+  const L=mons.filter(m=>MT[m.type]&&!MT[m.type].boss&&m.sx!=null&&!APART.has(m.type)&&!(typeof TFB!=='undefined'&&TFB.includes(m))).map(m=>[Math.hypot(m.sx/TS-cx,m.sy/TS-cy),MT[m.type].lv[0]]).filter(a=>a[0]<hw+60).sort((a,b)=>a[0]-b[0]).slice(0,30).map(a=>a[1]).sort((a,b)=>a-b);
   if(L.length>=5)TRL[T.k]=Math.max(1,Math.round(L[L.length>>1]/5)*5);}}return TRL&&TRL[k]||0;}
 Object.assign(STR.ar,{townLv:'لفل مقترح {n}+'});Object.assign(STR.en,{townLv:'Recommended Lv {n}+'});
 Object.assign(STR.ar,{setB:'الإعدادات',nmB:'غيّر اسم الشخصية',nmH:'اسم جديد للشخصية',nmT:'من 2 لـ12 حرف.',nmDone:'اسمك بقى {n}',nameNo:'الاسم ده مش مسموح، اختار اسم تاني',nameForced:'اسمك فيه كلام مش مسموح بيه، لازم تغيّره عشان تكمل.',nmNeed:'محتاج تذكرة تغيير الاسم، بيبيعها التاجر بـ{g} دهب',oBuyNm:'تذكرة تغيير الاسم ({g} دهب)',nmGot:'اشتريت تذكرة تغيير الاسم',nmtick:'تذكرة تغيير الاسم',nmtickD:'بتغيّر اسم شخصيتك مرة واحدة (اليوزر آي دي زي ما هو). استعملها من الشنطة أو من الإعدادات.\nلو اسمك فيه كلام مش مسموح بيه، التغيير ببلاش.'});
@@ -9967,6 +9994,7 @@ function sahZone(tx,ty){const T=TITAN,B=BUTIN,R=ROLL,A=ABYSS;
  if(tx>=ECO(ty|0)-1||ty>=COAST(tx|0)-1)return 'zESea';
  if(tx>=T.x0&&tx<T.x1+1&&ty>=T.y0&&ty<T.y1+1)return 'zTitan';
  if(tx>=B.x0&&tx<B.x1+1&&ty>=B.y0&&ty<B.y1+1)return 'zButin';
+ if(tx>=ZEB.x0&&tx<ZEB.x1+1&&ty>=ZEB.y0&&ty<ZEB.y1+1)return 'zZebra';
  if(tx<SUAZ.x1+1)return 'zSuaz';
  if(tx>=R.x0&&tx<R.x1+1&&ty>=R.y0&&ty<R.y1+1)return 'zRolling';
  if(Math.hypot((tx-A.x)/A.rx,(ty-A.y)/A.ry)<1.3)return 'zAbyss';
@@ -10319,7 +10347,7 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  // danger regions: red wash with a dashed edge
  g.save();g.setLineDash([6*dpr,4*dpr]);g.lineWidth=1.2*dpr;g.strokeStyle='rgba(226,73,58,.7)';g.fillStyle='rgba(140,10,10,.16)';[[28,2,34,40],[2,44,62,42]].forEach(([x,y,w,h])=>{g.fillRect(X(x),Y(y),w*sc,h*sc);g.strokeRect(X(x),Y(y),w*sc,h*sc);});g.restore();
  if(MV.z>=2.5){g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=1;for(let x=MV.a;x<=MV.b;x+=10){g.beginPath();g.moveTo(X(x),Y(-NR));g.lineTo(X(x),Y(WMH));g.stroke();}for(let y=-NR;y<=WMH;y+=10){g.beginPath();g.moveTo(X(MV.a),Y(y));g.lineTo(X(MV.b),Y(y));g.stroke();}}
- [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zWSand',492,66],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAsmo',ASMO.gx,ASMO.y0-2],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3],...EAL].forEach(([k,x,y])=>{if(!(inM(x,y)&&onS(X(x),Y(y),240*dpr)))return;MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`});
+ [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zWSand',492,66],['zZebra',870,150],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAsmo',ASMO.gx,ASMO.y0-2],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3],...EAL].forEach(([k,x,y])=>{if(!(inM(x,y)&&onS(X(x),Y(y),240*dpr)))return;MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`});
   const tl=townLv(k);if(tl)MM.label(g,t('townLv',{n:tl}),X(x),Y(y)-(13+MV.z*2.4)*dpr,{size:Math.round((9+MV.z)*dpr),color:tl>S.lv+10?'#ff9a8a':'#9fe0ff',font:F,weight:600});});   // the town's recommended level above its name (under it, it sat on the townsfolk's names)
  ANVILS.forEach(a=>{if(inM(a.tx,a.ty)&&onS(X(a.tx+.5),Y(a.ty+.5)))MM.marker(g,'anvil',X(a.tx+.5),Y(a.ty+.5),u*1.2);});
  mons.forEach(m=>{if(m.dead||m.tdum||!inM(m.x/TS,m.y/TS)||!onS(X(m.x/TS),Y(m.y/TS))||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
@@ -10580,7 +10608,7 @@ function update(dt){
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
-  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)})+(townLv(z)?' · '+t('townLv',{n:townLv(z)}):''));ZT[z]=gTime;}S.zone=z;exZone(z);dtEnter(z);if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold'||z==='zPedro'||z==='zGauss'||z==='zSSea')&&S.lv<160||/^zChaos/.test(z)&&S.lv<220||z==='zSuaz'&&S.lv<150||z==='zWSand'&&S.lv<145||z==='zDran'&&S.lv<180||z==='zAsmo'&&S.lv<250||(/^zAbyss/.test(z)||z==='zTaleren')&&S.lv<360||/^zEa/.test(z)&&!TOWNS.some(T=>T.k===z)&&S.lv<(z==='zEaMur'?440:300))&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
+  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)})+(townLv(z)?' · '+t('townLv',{n:townLv(z)}):''));ZT[z]=gTime;}S.zone=z;exZone(z);dtEnter(z);if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold'||z==='zPedro'||z==='zGauss'||z==='zSSea')&&S.lv<160||/^zChaos/.test(z)&&S.lv<220||z==='zSuaz'&&S.lv<150||z==='zWSand'&&S.lv<145||(z==='zZebra'||z==='zZebraU')&&S.lv<200||z==='zDran'&&S.lv<180||z==='zAsmo'&&S.lv<250||(/^zAbyss/.test(z)||z==='zTaleren')&&S.lv<360||/^zEa/.test(z)&&!TOWNS.some(T=>T.k===z)&&S.lv<(z==='zEaMur'?440:300))&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
  // the Chaos Mountains past the first ridge: the blizzard cuts the flesh, 1/2/3 % of max health every 4 s (never the last
  // point); a campfire keeps it off
  if(P.y<NWALL*TS&&!P.ghost){const k=ridgeAt(P.x/TS,P.y/TS);if(k>0&&(P.chT=(P.chT??4)-dt)<=0){P.chT=4;if(!CAMPS.some(c=>Math.hypot(c.x-P.x,c.y-P.y)<64)){const d=Math.max(1,Math.round(maxHP()*.01*k));P.hp=Math.max(1,P.hp-d);numP(-26,'-'+d,'#bfe6ff');hudDirty=true;}}}
@@ -12824,19 +12852,56 @@ Object.assign(OGD,{
   if(!m.mbPic){const w=Math.round(Math.sin(gTime*2.4+ogSeed(m))*2);R(ctx,x+1,y-15+w,3,6,'#d8b8a0');R(ctx,x+1,y-15+w,3,1,'#f0d8c0');}   // a worm's tip in the middle hole
   return true;}});
 // where: the toads all over the sands, the worms on the sand and three by the nest, the nest below the rocks at the
-// north-west (m.wsz: a region of its own, Lv 145+, so it does not set Reidan's recommended level); the beasts of the road the old dice put on the sand go to the grass west of it (no dice: every screen the same)
+// north-west (a region of its own, Lv 145+: APART, so it does not set Reidan's recommended level); the beasts of the road the old dice put on the sand go to the grass west of it (no dice: every screen the same)
 function wsSpawn(){const W=WSAND,inW=(x,y)=>x>=W.x0&&x<=W.x1&&y>=W.y0&&y<=W.y1;
  for(const m of mons){if(m.type!=='rboar'&&m.type!=='hwolf'&&m.type!=='gbear')continue;const tx=m.sx/TS|0,ty=m.sy/TS|0;if(!inW(tx,ty))continue;
   for(let nx=Math.min(2*W.x0-tx-3,W.x0-5);nx>W.x0-40;nx--)if(!sol0(nx,ty)&&!sol0(nx+1,ty)&&at0(nx,ty)!==PA&&at0(nx,ty)!==DR){m.x=m.sx=nx*TS+8;break;}}
  const put=(type,n,x0,x1,y0,y1)=>{const r=mulberry32(2170+type.charCodeAt(0)*13+type.length);let c=0,tr=0;while(c<n&&tr<4000){tr++;const x=x0+(r()*(x1-x0)|0),y=y0+(r()*(y1-y0)|0);
-  if(zoneAt(x*TS+8,y*TS+8)!=='zWSand'||inTown(x*TS+8,y*TS+8)||sol0(x,y)||sol0(x+1,y)||at0(x,y)===PA||Math.hypot(x-489,y-76)<12||Math.hypot(x-494,y-73)<12)continue;const m=newMon(type,x*TS+8,y*TS+8,r);m.wsz=1;mons.push(m);c++;}};
+  if(zoneAt(x*TS+8,y*TS+8)!=='zWSand'||inTown(x*TS+8,y*TS+8)||sol0(x,y)||sol0(x+1,y)||at0(x,y)===PA||Math.hypot(x-489,y-76)<12||Math.hypot(x-494,y-73)<12)continue;mons.push(newMon(type,x*TS+8,y*TS+8,r));c++;}};
  put('dtoad',12,W.x0+2,W.x1-2,W.y0+10,W.y1-1);put('gworm',6,W.x0+12,W.x1-4,W.y0+6,W.y1-2);
- {const m=newMon('gwnest',W.nx*TS+8,W.ny*TS+8,mulberry32(2177));m.wsz=1;mons.push(m);}put('gworm',3,W.nx-3,W.nx+10,W.ny-2,W.ny+8);}
+ mons.push(newMon('gwnest',W.nx*TS+8,W.ny*TS+8,mulberry32(2177)));put('gworm',3,W.nx-3,W.nx+10,W.ny-2,W.ny+8);}
 // Administrator Rabbit's two quests: thin the worms out, then the nest
 Object.assign(QD,{wsq1:{by:'admRabbit',lv:150,spot:[494,76],obj:{t:'kill',it:'gworm',n:12},xp:260000,gold:8000},
  wsq2:{by:'admRabbit',lv:155,pre:'wsq1',spot:[WSAND.nx,WSAND.ny+2],obj:{t:'kill',it:'gwnest',n:1},xp:420000,gold:15000,mat:['mstone',10]}});
 Object.assign(FD,{wsand:{lm:'lmWSand',need:()=>!!nlM('admRabbit','rumor_wsand'),p:.006,mat:['mstone',5]},wnest:{lm:'lmWNest',need:()=>!!nlM('admRabbit','rumor_wnest'),p:.006,mat:['ore',8]}});
 window.__GWS={W:WSAND,st:m=>wsSt(m),ph:m=>wsPh(m),ring:()=>wsRing(MT.gworm),guarded:m=>wsGuarded(m),ref:k=>evRef(TOWNS.find(T=>T.k===k))}; // tests
+// ---- Earl Zebra's castle (v2.94; the owner 2026-10-25: "add any place or region of the novel that has an effect"). ch 243:
+// on the way from Reidan to Titan, "Lauel told me to stop here and get the Slaughterer's Eye Patch"; "the Slaughterer was an
+// inhabitant of Earl Zebra's underground area. Earl Zebra's hobby was torture and gruesome killing, so it was a half human,
+// half beast species he raised. But it was impossible to control." ch 244: the eye patch, "just a black eye patch made of
+// leather", Unique, and "the skill 'Vital Spot Detection' will be generated". ch 245-246: the Black Arrows, "the assassination
+// ability of those who served Earl Zebra's family for generations was unmatched", and "dozens of daggers". How they fight,
+// levels and numbers are the game's; every line ORIGINAL_SIDE_STORY.
+Object.assign(FIG,{zebra:{hair:'side',hc:'#2a2a30',hl:'#4a4a52',skin:'#e4c0a0',sk2:'#c49c7a',eye:'#5a1a1a',top:'#3a0e1a',top2:'#24060e',collar:'#c8a050',sleeves:true,cape:'#141418',belt:'#c8a050',pants:'#1a1418',boots:'#101014'},
+ bkarrow:{hair:'short',hc:'#141418',hl:'#2a2a30',hood:'#16161c',skin:'#d8b090',sk2:'#b08868',eye:'#c82a2a',scarf:'#101014',top:'#1c1c24',top2:'#101016',sleeves:true,belt:'#5a1a1a',pants:'#16161c',boots:'#0c0c10'}});
+for(const k of ['zebra','bkarrow'])if(!SH[k])shLazy(k,()=>SA.chars.buildSheet(FIG[k]));
+Object.assign(P3D,{slaught:{base:'troll',f:'hue-rotate(-95deg) saturate(1.6) brightness(.62) contrast(1.1)',sc:1.3}});
+Object.assign(NAMEK,{bkarrow:'bkarrowN',slaught:'slaughtN'});
+Object.assign(AIK,{bkarrow:'lunge'});
+// the Black Arrows: they come from behind you, cut twice, and throw their daggers five at a time
+Object.assign(RKMV,{bkarrow:[{k:'blink',w:2,min:40,max:170,tele:.3,mul:1.3,rec:.35,cd:4,behind:1},{k:'arc',w:3,max:24,tele:.24,reach:22,arc:.9,mul:.9,rec:.25,cd:1,combo:2},
+  {k:'fan',w:2,min:30,max:150,tele:.5,spd:230,mul:.6,rec:.35,cd:3,n:5,sprd:.9,sp:'knife'}],
+ // the Slaughterer: tortured and uncontrolled; it tears, charges, and under half its health it roars and goes wild
+ slaught:[{k:'arc',w:3,max:34,tele:.36,reach:32,arc:1.3,mul:1.15,rec:.3,cd:1.3,combo:3},{k:'line',w:2,min:40,max:160,tele:.5,dash:300,dashT:.35,mul:1.6,rec:.5,cd:3.2},
+  {k:'ring',w:2,max:46,tele:.7,reach:48,mul:1.5,rec:.6,cd:4,ph:1},{k:'leap',w:2,min:40,max:170,tele:.45,dashT:.3,mul:1.7,rec:.5,cd:3.5,ph:1},
+  {k:'cry',w:2,max:200,tele:.6,rec:.3,cd:1,once:14,t:6,ph:2},{k:'arc',w:3,max:36,tele:.26,reach:34,arc:2.4,mul:1.05,rec:.2,cd:.9,combo:4,ph:2}]});
+// the Slaughterer's Eye Patch (Unique): Vital Spot Detection, the eye that finds where a blow hurts most (+8% critical chance)
+RC.push({id:'speye',slot:'k',dm:.03,fix:3,lvr:200,ip:['vspot'],drop:1,unlock:()=>false});
+// where: the Black Arrows in the court (never on its walls, its path or the keep), the Slaughterer at the far end of the
+// underground; each its own dice
+function zbSpawn(){const Z=ZEB,U=Z.pit,r=mulberry32(2431);let c=0,tr=0;while(c<7&&tr<3000){tr++;const x=Z.x0+2+(r()*(Z.x1-Z.x0-4)|0),y=Z.y0+6+(r()*(Z.y1-Z.y0-8)|0);
+  if(sol0(x,y)||sol0(x+1,y)||at0(x,y)===PA||Math.abs(x-(Z.keep.x+3))<4&&y>=Z.keep.y+Z.keep.h-1)continue;mons.push(newMon('bkarrow',x*TS+8,y*TS+8,r));c++;}
+ mons.push(newMon('slaught',(U.x1-6)*TS+8,U.cy*TS+8,mulberry32(2432)));}
+// Earl Zebra, in front of his keep: cruel, and pleased with himself
+Object.assign(NLD,{zebra:{town:null,src:'Earl Zebra (ch 243-246)',
+ ctx:[['nzb_c1',()=>isNight()],['nzb_c2',()=>!isNight()],['nzb_c3',()=>!!S.qs.zeb1&&S.qs.zeb1.st===1],['nzb_c4',()=>qDone('zeb1')]],
+ q:{},rep:null,mem:[],
+ topics:[{id:'pet',tier:0,say:()=>qDone('zeb1')?['nzb_p1','nzb_p3']:['nzb_p1','nzb_p2']},{id:'arrows',tier:0,say:['nzb_a1','nzb_a2']}]}});
+{const n=NPCT.zebra;if(n){n.idle=()=>nlIdle('zebra');n.opts=()=>nlOpts('zebra');}}
+// Lauel's errand (ch 243): the Slaughterer's Eye Patch
+Object.assign(QD,{zeb1:{by:'lauel',lv:205,obj:{t:'kill',it:'slaught',n:1},xp:700000,gold:20000,item:'speye'}});
+Object.assign(FD,{zebra:{lm:'lmZebra',need:()=>!!S.qs.zeb1,p:.006,mat:['mstone',6]}});
+window.__GZB={Z:ZEB,apart:k=>APART.has(k),gates:()=>DGATES.filter(d=>d.hint==='hZebra'||d.hint==='hUp'&&(d.x/TS|0)===ZEB.pit.x0+1).map(d=>[d.hint,d.x/TS|0,d.y/TS|0,d.to.x/TS|0,d.to.y/TS|0])}; // tests
 // ---- Agriculture Development (ch 856): the Patrian farmer's field work, once a day: put down five Field Burrowers in his
 // rows; a rainbow potato and his trust (+3). Devoted (90) to him, a day's work may (one in four) bring his word about Piaro's field.
 function fdwS(){const D=dlyS();D.fw=D.fw||{n:0,done:0,on:0};return D.fw;}
@@ -12950,7 +13015,19 @@ Object.assign(STR.ar,{nlTalk:"اتكلم",nlAsk:"عايز تتكلم في إيه
  q_wsq2:"العش اللي تحت الجبل",wsq2_o:"فيه عش صغير للدود العملاق تحت الصخور اللي في شمال غرب الرمال. طول ما هو عايش، الدود هيرجع. دمّره.",
  wsq2_w:"تحت الصخور اللي في شمال غرب الرمال. اقتل الدود اللي حواليه الأول: طول ما هما عايشين، مش بيحس بالضرب تقريبًا.",
  wsq2_d:"العش راح. هكتبها في الدفتر في العمود الكويس، وهحط تحتها خط. ريدان مديونالك بغربها.",
- fd_cork:"جزيرة كورك",fd_kesan:"وادي كيسان",tl_pguest:"ضيف بانجيا",tl_pguestD:"هان سوكبونج بيعتبرك ضيف بانجيا، مش غريب.",tl_dshadow:"معروف عند رجالة الضل",tl_dshadowD:"دوران، ضل الإيرل شتايم، بيعدّك من أصحاب رجالة الضل.",steim:"الإيرل شتايم",irene:"إيرين",admRabbit:"المسؤول رابيت",
+ zZebra:"قلعة الإيرل زيبرا (لفل 200+)",zZebraU:"تحت أرض الإيرل زيبرا",hZebra:"E: انزل تحت الأرض",bkarrowN:"قاتل من الأسهم السودا",slaughtN:"السفّاح",
+ zebra:"الإيرل زيبرا",nzb_hi:"زيارة. حاجة نادرة. أنا زيبرا، إيرل الأراضي دي. حاول ماتنزفش على أرضيتي.",
+ nzb_c1:"اسمع. بالليل بتسمعه تحت. حيواني الأليف عمره ما بينام.",nzb_c2:"الفلاحين بيدفعوا ضرايبهم في ميعادها. الخوف أشطر وكيل.",
+ nzb_c3:"عايز تنزل؟ اتفضل. هخلي حد يكنس اللي هيفضل منك.",nzb_c4:"قتلت حيواني الأليف. ...هفتكر وشك. والأسهم السودا فاكرينه من دلوقتي.",
+ nlT_zebra_pet:"حيوانه الأليف",nlT_zebra_arrows:"الأسهم السودا",
+ nzb_p1:"نص إنسان ونص وحش. ربيته بإيدي، بصبر وسكاكين كتير أوي.",nzb_p2:"مستحيل حد يتحكم فيه. وده اللي مخليه جميل.",nzb_p3:"رجع تاني على فكرة. دايمًا بيرجعوا. أنا اتأكدت من كده.",
+ nzb_a1:"الأسهم السودا بيخدموا عيلتي من أجيال. محدش بيشوفهم وهما جايين.",nzb_a2:"لو سألت نفسك في يوم إذا كان واحد منهم وراك: أيوه.",
+ speye:"رقعة عين السفّاح",ipd_vspot:"كشف النقط الحيوية: +8% فرصة ضربة قاضية",
+ q_zeb1:"رقعة عين السفّاح",zeb1_o:"وإنت رايح تيتان، خد الطريق اللي بيعدي من أراضي الإيرل زيبرا. تحت قلعته عايش السفّاح، نص وحش رباه وعمره ما قدر يتحكم فيه. عنده رقعة عين تستاهل اللفة. هاتها.",
+ zeb1_w:"قلعة الإيرل زيبرا، جنوب تيتان جنب الطريق الغربي. النزول من باب البرج. وخلي بالك من الأسهم السودا اللي في الساحة.",
+ zeb1_d:"أهي. رقعة عين جلد سودا، ومهارة ناس قليلين في القارة عندهم. قلتلك تستاهل اللفة.",
+ lmZebra:"قلعة الإيرل زيبرا",lmZebra1:'"هواية الإيرل زيبرا كانت التعذيب والقتل البشع، وعشان كده ربى فصيلة نصها إنسان ونصها وحش."',lmZebra2:'"ده مكان وحش."',
+ fd_zebra:"قلعة الإيرل زيبرا",fd_cork:"جزيرة كورك",fd_kesan:"وادي كيسان",tl_pguest:"ضيف بانجيا",tl_pguestD:"هان سوكبونج بيعتبرك ضيف بانجيا، مش غريب.",tl_dshadow:"معروف عند رجالة الضل",tl_dshadowD:"دوران، ضل الإيرل شتايم، بيعدّك من أصحاب رجالة الضل.",steim:"الإيرل شتايم",irene:"إيرين",admRabbit:"المسؤول رابيت",
  nst_hi:"أهلًا بيك في قلعة وينستون. أنا شتايم، إيرل الشمال. وينستون والأرض اللي حواليها في عهدتي.",
  nst_c1:"القلعة دي عمرها ما بتنام. تمانين خدام، وكل واحد فيهم فاكر إن الشمع شغلة حد تاني.",nst_c2:"الشمال هادي النهارده. وأنا مابثقش في شمال هادي.",
  nst_c3:"بنتي اتخطفت. دوران راح وراها. لو إنت كمان رايح، روح دلوقتي.",nst_c4:"رجّعتلي بنتي. أبواب قلعة وينستون مفتوحالك على طول.",
@@ -13080,7 +13157,19 @@ Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTr
  q_wsq2:"The Nest below the Mountain",wsq2_o:"There is a small nest of giant worms below the rocks at the north-west of the sands. While it lives, the worms come back. Destroy it.",
  wsq2_w:"Below the rocks at the north-west of the sands. Put down the worms round it first: while they live, it hardly feels a blow.",
  wsq2_d:"The nest is gone. I'll write it in the ledger in the good column, and underline it. Reidan owes you its west.",
- fd_cork:"Cork Island",fd_kesan:"Kesan Canyon",tl_pguest:"Guest of Pangea",tl_pguestD:"Han Seokbong counts you as Pangea's guest, not a stranger.",tl_dshadow:"Known to the Shadows",tl_dshadowD:"Doran, Earl Steim's shadow, counts you among the shadows' friends.",steim:"Earl Steim",irene:"Irene",admRabbit:"Administrator Rabbit",
+ zZebra:"Earl Zebra's Castle (Lv 200+)",zZebraU:"Earl Zebra's Underground",hZebra:"E: Go down to the underground",bkarrowN:"Black Arrow Assassin",slaughtN:"The Slaughterer",
+ zebra:"Earl Zebra",nzb_hi:"A visitor. How rare. I am Zebra, earl of these lands. Do try not to bleed on my floors.",
+ nzb_c1:"Listen. You can hear it down there at night. My pet never sleeps.",nzb_c2:"The farmers pay their taxes on time. Fear is a very efficient steward.",
+ nzb_c3:"You want to go down? By all means. I'll have someone sweep up what's left.",nzb_c4:"You killed my pet. ...I will remember your face. My Black Arrows already do.",
+ nlT_zebra_pet:"His pet",nlT_zebra_arrows:"The Black Arrows",
+ nzb_p1:"Half man, half beast. I raised it myself, with patience and a great many knives.",nzb_p2:"It cannot be controlled. That is what makes it beautiful.",nzb_p3:"It came back, you know. They always do. I made sure of that.",
+ nzb_a1:"The Black Arrows have served my family for generations. Nobody sees them arrive.",nzb_a2:"If you ever wonder whether one of them is behind you: yes.",
+ speye:"Slaughterer's Eye Patch",ipd_vspot:"Vital Spot Detection: +8% critical chance",
+ q_zeb1:"The Slaughterer's Eye Patch",zeb1_o:"On your way to Titan, take the road through Earl Zebra's territory. Under his castle lives the Slaughterer, a half-beast he raised and could never control. It has an eye patch worth more than the detour. Bring it back.",
+ zeb1_w:"Earl Zebra's castle, south of Titan by the western road. The way down is the keep's door. Mind the Black Arrows in the court.",
+ zeb1_d:"There. A black leather eye patch, and a skill few on the continent have. I told you it was worth the detour.",
+ lmZebra:"Earl Zebra's Castle",lmZebra1:'"Earl Zebra\'s hobby was torture and gruesome killing, so it was a half human, half beast species he raised."',lmZebra2:'"This is a bad place."',
+ fd_zebra:"Earl Zebra's Castle",fd_cork:"Cork Island",fd_kesan:"Kesan Canyon",tl_pguest:"Guest of Pangea",tl_pguestD:"Han Seokbong counts you as Pangea's guest, not a stranger.",tl_dshadow:"Known to the Shadows",tl_dshadowD:"Doran, Earl Steim's shadow, counts you among the shadows' friends.",steim:"Earl Steim",irene:"Irene",admRabbit:"Administrator Rabbit",
  nst_hi:"Welcome to Winston Castle. I am Steim, Earl of the north. Winston and the land round it are in my keeping.",
  nst_c1:"The castle never sleeps. Eighty servants, and every one of them thinks the candles are someone else's work.",nst_c2:"The north is quiet today. I distrust a quiet north.",
  nst_c3:"My daughter has been taken. Doran has gone after her. If you are going too, go now.",nst_c4:"You brought my daughter home. Winston Castle's doors are open to you, always.",
