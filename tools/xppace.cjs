@@ -12,7 +12,7 @@ const args = process.argv.slice(2), jsonAt = args.indexOf('--json'), out = jsonA
 const html = args.find((a, i) => !a.startsWith('--') && (jsonAt < 0 || i !== jsonAt + 1)) || process.env.SATISFY_HTML || path.join(__dirname, '..', 'index.html');
 process.env.SATISFY_HTML = path.resolve(html);
 const H = require('../tests/harness/game.cjs');
-const LEVELS = [150, 250, 300, 400, 450, 479, 480, 500], OVERHEAD = 4, PARTY = 4;
+const LEVELS = [150, 250, 300, 400, 450, 479, 480, 490, 500, 510], OVERHEAD = 4, PARTY = 4;
 // the gear a character of the level would wear: the strongest piece for each slot it may wear (by the item tables' text)
 const src = fs.readFileSync(process.env.SATISFY_HTML, 'utf8');
 const RC = [...src.matchAll(/\{id:'(\w+)',slot:'([waxhgbknr])'([^}]*)\}/g)].map(([, id, slot, rest]) => {

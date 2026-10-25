@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25ridge480', ver: '2.89', d: '2026-10-25',
+      ar: ["للفل 480 وفوق: وحوش جديدة معمولة للعبة (مش من الرواية) في السلسلة الرابعة من جبال الفوضى، المكان اللي فيه بيليال والسانجو الرابع. قبل كده مكانش فيه ولا وحش عادي فوق 470.",
+        "عائد السلسلة (480 لـ495): طول ما فانوس الأرواح اللي وراه منوّر ضربتك بتنزل بعُشرها بس. الفانوس بيستخبى ورا العائد، فلازم تلف عليه وتطفّيه الأول.",
+        "عدّاء الجمر (495 لـ510): أي حتة بيجري فيها وهو بيحارب بتولّع نار 4 ثواني، واللي يقف فيها بيتحرق. القتلة الواحدة لحد سقف الوحش العادي (0.8% من اللفل)."],
+      en: ["For level 480 and up: new monsters made for the game (not from the novel) on the Fourth Ridge of the Chaos Mountains, where Belial and the fourth Sanju are. Before this nothing normal stood above 470.",
+        "The Ridge Revenant (480 to 495): while the Soul Lantern behind it burns, your blows do a tenth. The lantern hides behind the revenant, so go round and put it out first.",
+        "The Cinder Strider (495 to 510): wherever it runs while it fights, the ground burns for 4 seconds, and standing in it hurts. One kill gives up to a normal monster's cap (0.8% of the level)."] },
     { v: '2026-10-25npclife', ver: '2.88', d: '2026-10-25',
       ar: ["خان والإيرل آشور وبيارو وفلاح باتريان بقوا بيتكلموا بجد: كلامهم بيتغير بالليل والنهار، وبلفلك، وبالمهام اللي عملتها ليهم، وبسمعتك في البلد، ومبيعيدوش نفس الجملة مرتين ورا بعض. فيه اختيار جديد \"اتكلم\" بمواضيع، واللي بتختاره بيفتكروه بعدين، والمواضيع الأعمق بتفتح لما علاقتك بيهم توصل 30 و60 و90.",
         "الإشاعات بتوديك أماكن حقيقية: عرق جد خان في المنجم اللي في الجبل ورا بايران، الكهف اللي في آخر الشمال (الإيرل آشور)، والجحر اللي تحت غيط بيارو. أول مرة تلاقي كل واحد فيهم بتاخد XP ومواد وبصيرة +1، مرة واحدة بس، ومش بتتكرر لو عملت ريفريش.",
