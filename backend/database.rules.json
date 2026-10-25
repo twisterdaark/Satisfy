@@ -994,7 +994,7 @@
         ".validate": "$lid.matches(/^a_[A-Za-z0-9_-]{1,60}_[0-7]$/) && $lid.beginsWith('a_' + newData.child('by').val() + '_') && $lid.length === newData.child('by').val().length + 4 && newData.hasChildren(['by', 'n', 'it', 'q', 'price', 't'])",
         "by": { ".validate": "newData.isString()" },
         "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
-        "it": { ".validate": "newData.isString() && newData.val().matches(/^[a-z]{2,12}$/)" },
+        "it": { ".validate": "newData.isString() && newData.val().matches(/^[a-zA-Z0-9_]{2,16}$/)" },
         "q": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 999" },
         "price": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 1000000000" },
         "t": { ".validate": "newData.val() === now" },
