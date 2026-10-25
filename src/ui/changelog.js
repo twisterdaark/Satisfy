@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25index', ver: '2.97', d: '2026-10-25',
+      ar: ["الفهرس الجديد (زرار N، أو من مربع الزراير على الموبايل)، فكرة اللاعب Suki: مكان واحد تشوف فيه كل اللي محتاجه عن اللعبة.",
+        "👥 المدربين: كل مدرب في اللعبة ومكانه، والكلاسات اللي بيعلّمها (اللفل والكلاس اللي لازم تكونه والماستري)، والتخصصات اللي بيعلّمها.",
+        "⚔️ الكلاسات: كل كلاس، تاخده إزاي، سلاحه، وكل مهاراته (اللفل والمانا ووقت الاستنى). الكلاسات المخفية والأسطورية مقفولة، إنت اللي تلاقيهم. لو بقيت صاحب كلاس أسطوري هتشوف الأسطوريين التانيين، ولو بقيت صاحب كلاس مخفي هتشوف المخفيين.",
+        "💎 الدروبس: العدة اللي بتوقع والخامات المهمة، من غير الحاجات العادية زي البوشن والخشب. لكل حاجة: بتوقع من مين ولفله وفين، والنسبة، وبتدخل في إيه.",
+        "💍 الجواهر و🔨 الحدادة و✨ السحر: بيشتغلوا إزاي، وكل وصفة حدادة بخاماتها واللي محتاجه عشان تعملها، وعناصر الوحوش واللي بيحميك منها. فيه كمان خانة بحث بالاسم."],
+      en: ["The new Index (key N, or from the keys box on a phone), the player Suki's idea: one place to look up what you need about the game.",
+        "👥 Trainers: every trainer in the game and where they are, the classes they teach (the level, the class you must be, the mastery) and the specializations they teach.",
+        "⚔️ Classes: every class, how to get it, its weapon and all its skills (level, MP, cooldown). Hidden and legendary classes stay locked: they are for you to find. Hold a legendary class and you see the other legendary ones; hold a hidden class and you see the hidden ones.",
+        "💎 Drops: the gear that drops and the materials that matter, without plain things like potions or wood. For each: who drops it, at what level and where, the odds, and what it goes into.",
+        "💍 Gems, 🔨 Smithing and ✨ Magic: how they work, every smithing recipe with its materials and what you need to make it, and the monsters' elements and what guards against them. There is a search by name too."] },
     { v: '2026-10-25siren', ver: '2.96', d: '2026-10-25',
       ar: ["مكان جديد من الرواية: مملكة السايرين تحت البحر (فصل 137). \"مرة كل أربع شهور، قمرين كاملين بيتطابقوا في ليلة واحدة\"، ولما المية على ساحل برينيتشي تنزل في الليلة دي بيظهر طريق بنفسجي نازل للأعماق.",
         "في اللعبة ليلة القمرين بتيجي كل تامن يوم في ساعة العالم، من 8 بالليل لـ4 الصبح، ومكتوبة في التقويم. على شط برينيتشي في جنوب العالم الطريق البنفسجي بيلمع الليلة دي بس.",
