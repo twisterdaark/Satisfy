@@ -64,12 +64,12 @@ test('Earl Steim: his word once after the rescue, the son-in-law spoken to as on
     assert.ok(o.some((x) => /or Town Hero in Winston/.test(x)), 'the oath locked, saying how: ' + o);
     await closeD(g);
     const oath = await g.eval(() => { const S = window.__G.S, N = window.__GNPC; S.rep.zWin = 700; const r0 = S.rep.zWin; N.topic('steim', 'oath'); const r1 = S.rep.zWin; window.__G.advance(); window.__G.advance(); N.topic('steim', 'oath'); return { tl: !!S.tl.wcastle, rep: r1 - r0, again: S.rep.zWin - r1 }; });
-    assert.deepEqual(oath, { tl: true, rep: 50, again: 0 });
+    assert.deepEqual(oath, { tl: false, rep: 50, again: 0 });   // Winston's honour, no title (owner 2026-10-25: fewer titles)
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
 
-test('Irene: her thanks, her topics, a hairpin she likes, her own title at 90', async () => {
+test('Irene: her thanks, her topics, a hairpin she likes, her word in Winston at 90, no title', async () => {
   const g = await H.openGame();
   try {
     await H.newGame(g, LOOK);
@@ -78,8 +78,8 @@ test('Irene: her thanks, her topics, a hairpin she likes, her own title at 90', 
     await closeD(g);
     const gift = await g.eval(() => { const G = window.__G, S = G.S; S.mats.hairpin = 2; const a0 = S.aff.irene | 0; G.eqx.giveGift('irene', 'hairpin'); return (S.aff.irene | 0) - a0; });
     assert.equal(gift, 24, 'a hairpin, which she likes: 12 twice');
-    const r = await g.eval(() => { const S = window.__G.S, N = window.__GNPC; S.aff.irene = 90; N.topic('irene', 'thanks'); return !!S.tl.ifriend; });
-    assert.equal(r, true);
+    const r = await g.eval(() => { const S = window.__G.S, N = window.__GNPC; S.aff.irene = 90; S.rep = S.rep || {}; const r0 = S.rep.zWin | 0; N.topic('irene', 'thanks'); window.__G.advance(); window.__G.advance(); N.topic('irene', 'thanks'); return { tl: !!S.tl.ifriend, rep: (S.rep.zWin | 0) - r0 }; });
+    assert.deepEqual(r, { tl: false, rep: 30 }, 'her word in Winston, once; no title');
     await g.eval(() => window.__GNPC.topic('irene', 'ian')); await g.step(5);
     assert.match(await say(g), /Bland de Ian/);
     assert.deepEqual(g.errors, []);

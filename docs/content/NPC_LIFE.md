@@ -1,4 +1,4 @@
-# NPC life, first discoveries and the field's secret quest (v2.88, v2.90-v2.92; 2026-10-25)
+# NPC life, first discoveries and the field's secret quest (v2.88, v2.90-v2.93; 2026-10-25)
 
 Owner's request (2026-10-25, encyclopedia §93-§95; the player Suki: "some NPCs are boring and say little, add secret
 quests and a reward for meeting people and exploring"): depth for people who already exist, through the systems that
@@ -24,8 +24,12 @@ affinity, tiers 30/60/90), `S.rep` (the town's ranks), `S.qs`, `S.books` (the di
 | Administrator Rabbit's Call (ch 856) | ch 856 | built in v2.92 (see Winston Castle above) |
 | Khan's grandfather's vein, the cave at the northern end | landmarks already in the world (`lmMine`, `lmNEnd`) | the places existing; the stories ORIGINAL_SIDE_STORY |
 | Field Burrower, Burrow Queen, Bandit Scout, Echo Bat Swarm, Mossback Snapper; Kobold Sapper, Dune Shellback, Thornback Sapling, Stone Sentinel (v2.91) | written for the game | GAME_ORIGINAL (levels are game balance) |
+| Reidan's Western Sands: the land west of Reidan, turned to desert by the giant worms ten years ago ("this large territory suddenly became a desert"); "the desert city of Reidan"; the Hebend River through Reidan, the villages on its southern basin (in Rabbit's words) | ch 216, 217, 228, 360 | the place CANON (v2.93); its edge and size GAME_BALANCE |
+| Giant worms ("the giant worms ravaging the land were so strong that they couldn't be subjugated"); "a small nest of giant worms below the mountain"; "dozens of desert toads" chasing | ch 217, 230 | the creatures and the nest CANON; how they fight, their levels and drops GAME_ORIGINAL / GAME_BALANCE |
+| Rabbit's quests Restoring the West and The Nest below the Mountain | after ch 228 ("What if he destroyed the giant worms and restored the west?") | ORIGINAL_SIDE_STORY |
 
-No line is taken from a translation of the novel.
+No person's line is taken from a translation of the novel. The landmarks quote a sentence or two of their chapters, as
+the game's landmarks always have (Kesan Canyon's, and since v2.93 the Western Sands' and the nest's).
 
 ## The people (`NLD` in index.html)
 
@@ -57,9 +61,9 @@ Paid once per character, kept in `S.books['fd_'+id]`, never again after a reload
 - **Han Seokbong** (Pangea): his warning while the king may learn he hid you (after Arube, until the king's delivery)
   comes before the lines for the moment (after his once-words), never twice running; a word once after the third gateway (ea0) and once he is home from the Lava Prison (ea4); the Daoist (ea3) a line for the moment; Pangea's ranks; topics: Pangea
   (what the westerners trade, why they go home), the sea road (the rumour of Cork Island), the king (after Arube: what
-  he risked), and at 90 Pangea's guest (the title Guest of Pangea, Pangea +50, once).
+  he risked), and at 90 Pangea's guest (Pangea +50, once; the title Guest of Pangea until v2.93).
 - **Doran** (Earl Steim's shadow): takes gifts (likes a healing potion); a word once when the lady is home, another line if the rescue failed; topics: the Earl, the lady Irene (only after the
-  rescue), Kesan Canyon (the rumour), and at 90 a shadow's work (the title Known to the Shadows, once).
+  rescue), Kesan Canyon (the rumour), and at 90 a shadow's work (his word; the title Known to the Shadows until v2.93).
 - **Irene** (v2.92) is in Winston Castle once she is home. Before v2.92 she was only in her quest; Ashur and Doran speak of
   her, as they would to Earl Steim's son-in-law when that is you (the quest's 10%).
 
@@ -94,6 +98,9 @@ Paid once per character, kept in `S.books['fd_'+id]`, never again after a reload
 | Dune Shellback (v2.91) | 302-310 | the dunes round Pangea | runs round you sideways, then stops to pinch; from above or below its shell takes a quarter |
 | Thornback Sapling (v2.91) | 100-106 | the Grey Forest | rooted; thorns from afar and a rain of thorns; close by it curls up and takes half |
 | Stone Sentinel (v2.91) | 104-110 | the Grey Forest | stone (unhurt) until someone stands within 50 px; awake 12 s, then 4 s of stone that won't wake |
+| Giant Worm (v2.93) | 154-160 | Reidan's Western Sands | a 7 s round on the world clock: 4.2 s under the sand (unhurt, it goes after you as a ridge of sand), 0.84 s of the sand heaving in a ring round it, then up: its bite on whoever is in the ring (its reach as every screen has it), 1.96 s of fighting (bites, spat sand); too far from home (260 px, 520 when the nest called it) it goes back under the sand; never under a town |
+| Desert Toad (v2.93) | 148-154 | Reidan's Western Sands | hops; when one is fighting, every toad within 200 px not fighting yet comes too |
+| Giant Worm Nest (v2.93) | 160 | below the rocks at the sands' north-west | rooted, does not fight; someone within 140 px wakes every worm within 320 px (every 3 s); while a worm lives within 220 px it takes half; back after 5 minutes |
 
 Online: what a screen shows is worked out from shared things (the world clock, where it spawned, its health); in a
 group the host's copy leads (`m.led`), and every blow goes out as the game's usual bite so a follower is hurt by the same
@@ -106,24 +113,56 @@ monsters keep their ids and places.
   room of its own made apart from every other interior so none of them moves.
 - **Earl Steim**: an official (no gifts), so his trust follows Winston's honour too; his word once after the rescue and
   after Khan's Mero Company fight (gj1); the Mero Company topic changes after Khan's contest (gj2); Irene's topic as he
-  would say it to her rescuer or to his son-in-law; at 90 the castle's oath (a title, Winston +50, once).
+  would say it to her rescuer or to his son-in-law; at 90 the castle's oath (Winston +50, once).
 - **Irene**: there once she is home; takes gifts (a hairpin above all); her topics: the temple (gently, she chooses how
-  much), her father, Bland de Ian; at 90 her own thanks (a title).
+  much), her father, Bland de Ian; at 90 her own thanks (her word in Winston: Winston +30, once).
 - **Administrator Rabbit** (Reidan, by Lauel; thin-rimmed glasses): his Mero Company past (the contest at Khan's
   smithy, as it ended for you; Valmont), Reidan (the ruin it was), prison and Winston calling him a hero, profit; an official, so Reidan's honour opens him; **Administrator Rabbit's
   Call** (ch 856), daily from level 150: by the day, securing the city's resources (20 wood or 20 ore or 12 leather),
   the city's security (8 monsters within 60 tiles of Reidan) or his ledger to Lauel and back; gold (1,500 + 60 a level),
   his trust +2, once a day.
 
+## Fewer titles (v2.93)
+
+The owner (2026-10-25): "fewer of the titles you hand out like sweets". From v2.93 the people's topics at 90 give no title:
+Khan's dream (his word), Han Seokbong's guest (Pangea +50), Doran's shadow (his word), Earl Steim's oath (Winston +50),
+Irene's thanks (Winston +30), Rabbit's ledger (20,000 gold); and the new quests give none. A title stays for what a title is
+for: the secret quest of the field (Guardian of the Fields). Whoever already has one of the six keeps it (they stay in the
+status window for their owners).
+
+## v2.93: Reidan's Western Sands
+
+- **The place**: tiles x 472-512, y 56-95, west of Reidan's wall (a zone of its own, `zWSand`, Lv 145+). The road from
+  Patrian keeps its tiles; its grass and flowers are sand, its trees rocks (the old wood at its north-west is "the mountain"
+  of the nest), and its edge is ragged. It is painted after the herbs and the trees are placed and keeps every tile as
+  solid as it was, so no dice of the spawns or the herbs anywhere move; the trees standing on it are taken off, its herbs go
+  to the grass west of it, and the boars, wolves and bears of the road that the old dice put on it go to the grass west of it
+  (no dice).
+- **Its creatures**: 12 desert toads, 9 giant worms (3 of them by the nest) and the nest, with their own dice; none in a
+  town, none within 12 tiles of the road's waystation (its fire and its tents) and its guild banner; normal monsters for the
+  XP caps. A region of its own (Lv 145+, with the warning for those below it): they do not count for Reidan's recommended
+  level, nor for the strength of the invasion of Reidan.
+- **Administrator Rabbit**: his Reidan topic now tells of the giant worms (the rumour for the first discovery of the sands);
+  a topic of the west once you take his quest (the Hebend River, the nest: the rumour for the second); his word once the
+  nest is gone. **Restoring the West** (Lv 150): 12 giant worms, 260,000 XP and 8,000 gold. **The Nest below the
+  Mountain** (Lv 155, after it): the nest, 420,000 XP, 15,000 gold and 10 mana stones.
+- **First discoveries** (once, after his word): the sands (`lmWSand`, 0.6% of the level and 5 mana stones) and the nest
+  (`lmWNest`, 0.6% and 8 ore). The two landmarks quote ch 217, 228 and 230.
+
 ## Tests
 
+`tests/regression/wsands.test.cjs` (4, v2.93): the sands (tiles, the road, the zone), their creatures where they live and
+not in a town, the road's beasts moved off; the worm under the sand and up, its ring, the nest's guard and its waking, the
+toads; Rabbit's two rumours and discoveries once, his two quests (no title), his word after. A region of its own: Reidan's recommended level and
+its invasion's strength stay Reidan's, the waystation is clear, a worm too far from home goes back, the nest calms down.
+
 `tests/regression/wcastle.test.cjs` (4, v2.92): the castle and its room (no other room moved), Irene there only once
-home; Steim's words, his son-in-law, Winston's honour, the oath once; Irene's thanks, gifts, title; Rabbit's call in its
+home; Steim's words, his son-in-law, Winston's honour, the oath once (no title); Irene's thanks once (no title), gifts; Rabbit's call in its
 three kinds once a day (every errand and material comes up over two months), his past; Irene still right after
 Continue; Lauel talks as before unless he has the ledger.
 
 `tests/regression/npclife2.test.cjs` (4, v2.90): Han Seokbong's lines, his warning, his words once, Pangea's ranks; the
-sea road to Cork Island and the guest title once; Doran's lady topic, his word, Kesan Canyon, the shadow title; Ashur's
+sea road to Cork Island and the guest's honour once (no title); Doran's lady topic, his word, Kesan Canyon, the shadow's word (no title); Ashur's
 Irene lines as Earl Steim's daughter.
 
 `tests/regression/npclife.test.cjs` (7): Khan's lines and his words once; a word kept until it is said; topics, choices
