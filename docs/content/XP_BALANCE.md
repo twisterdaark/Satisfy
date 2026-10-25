@@ -138,3 +138,22 @@ boss kill per type, for the 45 s rule).
 `tests/regression/xpcap.test.cjs` (the bands, the first and repeat boss, the 45 s rule across a reload, the inn's rest,
 quests and dailies, exact grants, the 480 save), `levelpace`, `partyxp`, `raid`, `raidloot`, `save`, `bosssync`,
 `nanguard`, `gradnan`, `reputation`, `balance`, `innrest`, `dailyweek`, `bossscale`, `worldboss`, `belial`, `berith`.
+
+## Side work (v3.02)
+
+The player Suki, through the owner (2026-10-25): "Make crafting, smithing, cooking any sort of side activity give exp
+proportional to your level so making multiple ways of leveling possible."
+
+- **Rate** (`SDXP`, GAME_BALANCE): every point a life skill gains through `lifeXP` (fishing, herbs, cooking, alchemy,
+  tailoring, farming, songs, cartography) and every smithing point from forging a piece at the anvil (20 + 12 per grade;
+  appraisal gives none) gives `0.00015 × xpNeed()` experience. For example, a plain fish (6 points) gives 0.09% of a level, a
+  golden fish 0.375%, a Unique piece (grade 3, 56 points) 0.84%, a Legendary piece (grade 4, 68 points) about 1%.
+- **Daily cap** (`SDXC`): 30% of a level a day from all of them together, in the day's state (`S.dly.sdx`). Past it, the
+  crafts still gain their own points without experience. The status window shows the day's share.
+- The experience goes through `gainXP(n, 1, 'side')`: the XP potion, marriage and the Scholar specialization apply, the
+  permanent ×1.2 (`XPMUL`) and the per-source caps do not. The day's share counts the experience after those three, so the
+  30% is what you really get (the review found 37.8% with the potion and the Scholar). The fractions of small grants carry
+  over in `S.dly.sdxR`, so at a low level they add up instead of rounding to nothing.
+- Mining, woodcutting and gathering at nodes don't go through `lifeXP` and give no side experience.
+- At Lv 480 (xpNeed 49,338,544) the day's cap is about 14.8M XP, roughly 22 minutes of own-level hunting.
+

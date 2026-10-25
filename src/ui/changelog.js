@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25sidexp', ver: '3.02', d: '2026-10-25',
+      ar: ["طلب Suki: الحرف بقت طريق تاني للفل. الحدادة والخياطة والطبخ والكيميا والصيد والأعشاب والزراعة والأغاني والخرايط بيدّوك خبرة على حسب لفلك: كل نقطة بتاخدها في الحرفة بتديك 0.015% من لفلك (مثلًا سمكة عادية 0.09%، وقطعة أسطورية على السندان حوالي 1%).",
+        "لحد 30% من اللفل في اليوم من الحرف كلها مع بعض (بجرعة الخبرة وغيرها)، وبعدها الحرف بتكبر عادي من غير خبرة لحد تاني يوم. نافذة الحالة (C) بتقولك خدت قد إيه النهارده."],
+      en: ["Suki's request: side work is another way to level now. Smithing, tailoring, cooking, alchemy, fishing, herbs, farming, songs and maps give experience as a share of your level: each point your craft gains gives 0.015% of your level (a plain fish 0.09%, a legendary piece at the anvil about 1%).",
+        "Up to 30% of a level a day from all of them together, XP potion and all; after that your crafts still grow, without experience, until the next day. The status window (C) shows how much you've had today."] },
     { v: '2026-10-25spectab', ver: '3.01', d: '2026-10-25',
       ar: ["طلب Suki: في نافذة الحالة (C) فيه تاب جديد 🛠 التخصصات. فيه كل تخصص في اللعبة: بيعمل إيه، ومين بيعلّمه وفين، وتخصصك متعلّم عليه.",
         "وفي تاب الحالة، لو وقفت على سطر التخصص، بيقولك تخصصك بيعمل إيه. تخصص واحد بس في نفس الوقت: أول مرة ببلاش وتغييره بـ2,000 دهب، والحداد مابياخدش تخصص."],
