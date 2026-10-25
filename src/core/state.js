@@ -38,8 +38,8 @@
     'rord',
     // Three Crowns at the inns: games won and played (SAT-ONLINE-181)
     'cg',
-    // the heaviest fish of each kind you have caught (SAT-ONLINE-182)
-    'fishR',
+    // the heaviest fish of each kind you have caught (SAT-ONLINE-182); your fishing rod and the bait on your hook (v3.03)
+    'fishR', 'rod', 'bait',
     // the Blacksmith expo seasons this character's entry won (SAT-ONLINE-174)
     'exw',
     // the fishing festivals this character won (SAT-ONLINE-183)
