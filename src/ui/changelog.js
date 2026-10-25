@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25tools', ver: '3.04', d: '2026-10-25',
+      ar: ["طلب Suki: خان بيبيع شواكيش حدادة لأي حد خد دروسه: الحديد، والصلب (من لفل حدادة 4)، والميثريل (من لفل حدادة 7). كل واحد بيوسّع الحتة الكويسة والمثالية على السندان.",
+        "أي لوكاندة بتبيع أدوات الطبخ (🍳): سباتيولات الخشب، والنحاس (من لفل طبخ 4)، والميثريل (من لفل طبخ 7). كل واحدة بتوسّع الجزء الدهبي في الحلة وبتخليها تسخن أبطأ.",
+        "وبوتاجاز سفري: دوس عليه في الشنطة عشان تحطه مكانك برّه، واطبخ أو حضّر جرعات عليه بـE زي النار، طول ما مفيش وحش قريب. لو بعدت عنه أو مُت بيرجع الشنطة. مينفعش في الدانجن، ولا جوه البيوت، ولا جنب زعيم، ولا في أماكن القصة."],
+      en: ["Suki's request: Khan sells forge hammers to anyone who has had his lessons: Iron, Steel (from Smithing 4) and Mithril (from Smithing 7). Each widens the anvil's good and perfect parts.",
+        "Every inn sells cooking tools (🍳): Wooden, Copper (from Cooking 4) and Mithril (from Cooking 7) spatulas. Each widens the pot's golden part and makes it heat slower.",
+        "And a portable stove: click it in your bag to set it down outdoors where you stand, then cook or brew at it with E as at a campfire, as long as no monster is close by. Walk away or die and it comes back to your bag. Not in dungeons, indoors, beside a boss or in the story's places."] },
     { v: '2026-10-25fishing', ver: '3.03', d: '2026-10-25',
       ar: ["طلب Suki: كل مية ليها سمكها دلوقتي، واحدة عادية وواحدة نادرة: البحيرات والأنهار (سمكة وتراوت قوس قزح)، والثلج (سلمون الثلج وكراكي الثلج)، والبحر (ماكريل ونهّاش أحمر)، والمستنقعات (قرموط وحنكليس)، وأنهار القارة الشرقية (شبّوط وكوي اليشم). والسمكة الدهبية بتشد في أي مية. كل سمكة ليها شكلها ورسمتها.",
         "تاجر وينستون بيبيع سنانير: البلوط، والصلب (من صيد 4)، والميثريل (من صيد 7). كل واحدة بتطوّل الوقت اللي تسحب فيه وبتكتّر السمك النادر.",
