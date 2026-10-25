@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25fishing', ver: '3.03', d: '2026-10-25',
+      ar: ["طلب Suki: كل مية ليها سمكها دلوقتي، واحدة عادية وواحدة نادرة: البحيرات والأنهار (سمكة وتراوت قوس قزح)، والثلج (سلمون الثلج وكراكي الثلج)، والبحر (ماكريل ونهّاش أحمر)، والمستنقعات (قرموط وحنكليس)، وأنهار القارة الشرقية (شبّوط وكوي اليشم). والسمكة الدهبية بتشد في أي مية. كل سمكة ليها شكلها ورسمتها.",
+        "تاجر وينستون بيبيع سنانير: البلوط، والصلب (من صيد 4)، والميثريل (من صيد 7). كل واحدة بتطوّل الوقت اللي تسحب فيه وبتكتّر السمك النادر.",
+        "وبيبيع طُعم: الدود (السمك بيشد أسرع)، والجمبري (النادر أكتر)، والطُعم المنوّر (الدهبية الضعف). دوس على الطُعم في الشنطة عشان تحطه في السنارة؛ كل رمية بتاخد واحدة.",
+        "أي سمك عادي ينفع في الطبخ ولأي صياد عايز سمك. وفي الفهرس (N) صفحة جديدة 🎣 الصيد: كل مية وسمكها، والسنانير والطُعم."],
+      en: ["Suki's request: each water has its own fish now, one common and one rare: lakes and rivers (Fish, Rainbow Trout), the snow (Snow Trout, Ice Pike), the sea (Mackerel, Red Snapper), the swamps (Swamp Catfish, Bog Eel) and the East Continent's rivers and lakes (Eastern Carp, Jade Koi). The Golden Fish bites in any water. Every fish has its own look.",
+        "Winston's merchant sells rods: Oak, Steel (from Fishing 4) and Mithril (from Fishing 7). Each gives you longer to reel in and more rare fish.",
+        "He sells bait too: worms (a sooner bite), shrimp (more rare fish) and glow bait (twice the Golden Fish). Click a bait in your bag to put it on your hook; each cast uses one.",
+        "Any common fish is good for cooking and for the fishermen who ask for fish. The Index (N) has a new 🎣 Fishing page: every water and its fish, the rods and the bait."] },
     { v: '2026-10-25sidexp', ver: '3.02', d: '2026-10-25',
       ar: ["طلب Suki: الحرف بقت طريق تاني للفل. الحدادة والخياطة والطبخ والكيميا والصيد والأعشاب والزراعة والأغاني والخرايط بيدّوك خبرة على حسب لفلك: كل نقطة بتاخدها في الحرفة بتديك 0.015% من لفلك (مثلًا سمكة عادية 0.09%، وقطعة أسطورية على السندان حوالي 1%).",
         "لحد 30% من اللفل في اليوم من الحرف كلها مع بعض (بجرعة الخبرة وغيرها)، وبعدها الحرف بتكبر عادي من غير خبرة لحد تاني يوم. نافذة الحالة (C) بتقولك خدت قد إيه النهارده."],

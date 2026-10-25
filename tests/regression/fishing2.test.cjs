@@ -35,7 +35,7 @@ test('fishing: weights by kind, a real cast that leaps to you, the records', asy
     assert.equal(await g.eval(() => window.__GFS.leaps), 1, 'it leaps to you');
     await g.step(40); await g.page.waitForTimeout(600); await g.step(5);
     const after = await g.eval(() => ({ mats: Object.assign({}, window.__G.S.mats), rec: window.__GFS.rec(), leaps: window.__GFS.leaps, t: window.__toastSeen }));
-    const kind = ['fish', 'sfish', 'gfish'].find((k) => (after.mats[k] || 0) > (before[k] || 0));
+    const kind = ['fish', 'sfish', 'gfish', 'rtrout', 'mackerel', 'snapper', 'icepike', 'catfish', 'bogeel', 'ecarp', 'jadekoi'].find((k) => (after.mats[k] || 0) > (before[k] || 0)); // v3.03: each water its own fish
     assert.ok(kind, 'a fish in the bag');
     assert.ok(after.rec[kind] > 0, 'its weight kept: ' + JSON.stringify(after.rec));
     assert.equal(after.leaps, 0);

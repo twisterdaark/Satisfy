@@ -3,7 +3,8 @@
 //   - your heaviest catch of the festival, as yourself with an account ID, only into the 15-minute slot that is running
 //     and only while its ten minutes (and one more) last;
 //   - a weight only goes up, at most every 15 seconds, and never past what that kind can weigh (Fish 3.2 kg, Snow Fish
-//     4.1, Golden Fish 6.6, in tenths), in whole tenths;
+//     4.1, Golden Fish 6.6, and v3.03's eight: Mackerel 3.4, Swamp Catfish 4.8, Eastern Carp 3.9, Rainbow Trout 5.1, Ice Pike 7.2,
+//     Red Snapper 6.0, Bog Eel 5.6, Jade Koi 6.3, in tenths), in whole tenths;
 //   - everyone signed in reads the board.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -31,7 +32,12 @@ test('the fishing festival board: yours, this slot, heavier only, no faster than
   assert.equal(w('ann', p('ann'), e({ w: 60, k: 'gfish' }), T0 + 20000), 'ok', 'a 6.0 kg Golden Fish');
   assert.equal(w('ann', p('ann'), e({ w: 67, k: 'gfish' }), T0 + 40000), 'no', 'a Golden Fish past 6.6 kg');
   assert.equal(w('bob', p('bob'), e({ w: 41, k: 'sfish', n: 'Bob' })), 'ok', 'a 4.1 kg Snow Fish');
-  assert.equal(st.fishFest[String(SLOT)].ann.w, 60);
+  // v3.03: each water's fish, each with its own top weight
+  assert.equal(w('bob', p('bob'), e({ w: 73, k: 'icepike', n: 'Bob' }), T0 + 20000), 'no', 'an Ice Pike past 7.2 kg');
+  assert.equal(w('bob', p('bob'), e({ w: 72, k: 'icepike', n: 'Bob' }), T0 + 20000), 'ok', 'a 7.2 kg Ice Pike');
+  assert.equal(w('ann', p('ann'), e({ w: 64, k: 'jadekoi' }), T0 + 40000), 'no', 'a Jade Koi past 6.3 kg');
+  assert.equal(w('ann', p('ann'), e({ w: 63, k: 'jadekoi' }), T0 + 40000), 'ok', 'a 6.3 kg Jade Koi');
+  assert.equal(st.fishFest[String(SLOT)].ann.w, 63);
   const r = (uid, path) => E.read(R, st, path, { auth: uid ? { uid } : null, now: T0 }) ? 'ok' : 'no';
   assert.equal(r('bob', 'fishFest/' + SLOT), 'ok');
   assert.equal(r(null, 'fishFest/' + SLOT), 'no', 'signed out');

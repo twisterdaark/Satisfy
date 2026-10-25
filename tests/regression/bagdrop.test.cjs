@@ -21,8 +21,10 @@ test('drag a ring from the bag to the bar with the mouse; a window moves from it
     const a = await center(g, `#igrid [data-inv="${at}"]`), b = await center(g, '#skillbar [data-sk="5"]');
     await g.page.mouse.move(a.x, a.y); await g.page.mouse.down(); await g.page.mouse.move(a.x + 30, a.y + 10, { steps: 4 });
     const img = await g.eval(() => { const i = document.querySelector('.gdrag-img'); const r = i && i.getBoundingClientRect(); return i ? { w: r.width, h: r.height } : null; });
-    const cell = await g.eval((at) => { const r = document.querySelector(`#igrid [data-inv="${at}"]`).getBoundingClientRect(); return { w: r.width, h: r.height }; }, at);
-    assert.ok(img && Math.abs(img.w - cell.w) < 2 && Math.abs(img.h - cell.h) < 2, 'the drag picture is the slot: ' + JSON.stringify([img, cell]));
+    // the slot's own size (offsetWidth), since the hovered slot grows 8% and the picture takes the size it had when the drag began
+    const cell = await g.eval((at) => { const e = document.querySelector(`#igrid [data-inv="${at}"]`); return { w: e.offsetWidth, h: e.offsetHeight }; }, at);
+    const near = (a, b) => Math.abs(a - b) < 2 || Math.abs(a - b * 1.08) < 2;
+    assert.ok(img && near(img.w, cell.w) && near(img.h, cell.h), 'the drag picture is the slot: ' + JSON.stringify([img, cell]));
     await g.page.mouse.move(b.x, b.y, { steps: 8 }); await g.page.mouse.up(); await g.step(3);
     const r = await g.eval(() => ({ dlg: !document.getElementById('dialog').hidden, bar: window.__G.S.bar && window.__G.S.bar[5], still: window.__G.S.items.some((i) => i.uid === window.__uid) }));
     assert.equal(r.bar, 'g:' + await g.eval(() => window.__uid), 'the ring is on the bar');
