@@ -1763,7 +1763,8 @@ const SETS={gd:{it:['gdneck','gdbrace'],b:{2:{def:100}}},ez:{it:['ezneck','ezbra
  dg:{it:['dgspear','dggaunt','dgarmor','dghelm'],b:{2:{dm:.06},4:{dm:.12,as:.06}}},tt:{it:['ttthorn','ttshell','tthelm','ttboots'],b:{3:{as:.1,stc:.15},4:{as:.12,stc:.2,def:30}}}};
 const GEMS={ruby:{dm:.06},topaz:{as:.08},emer:{ms:.06},sapph:{mpb:30},diam:{dm:.03,as:.04,ms:.03},thund:{}},GEMK=Object.keys(GEMS),GEMC=500;
 const REID={x0:514,x1:561,y0:62,y1:102,mx:556,my:69},PEAK={x:628,y:17,rx:22,ry:11},YATAN={x0:452,x1:478,y0:8,y1:30},KESAN={x0:416,x1:470,y0:96,y1:118,mx:443},CAST={x0:522,x1:553,y0:30,y1:56},MULL={x:584,y:24,rx:11,ry:8},WSAND={x0:472,x1:512,y0:56,y1:95,nx:478,ny:64},
- ZEB={x0:856,x1:884,y0:148,y1:163,gx:870,keep:{x:867,y:155,h:5},pit:{x0:1000,x1:1032,y0:WMH+13,y1:WMH+24,cy:WMH+18}};   // ZEB: Earl Zebra's castle (v2.94) and its underground
+ ZEB={x0:856,x1:884,y0:148,y1:163,gx:870,keep:{x:867,y:155,h:5},pit:{x0:1000,x1:1032,y0:WMH+13,y1:WMH+24,cy:WMH+18}},   // ZEB: Earl Zebra's castle (v2.94) and its underground
+ SWG={x0:520,x1:556,y0:-24,y1:-8,cx:538,cy:-16,camp:{x:514,y:-14},gl:{x0:1040,x1:1090,y0:WMH+13,y1:WMH+24,cy:WMH+18}};   // SWG: the Sword Grave (v2.95) among the Glacier Lakes, its glacier under the map
 // the kinds of a region of its own (the Western Sands, Earl Zebra's castle): they set no town's recommended level and no invasion's strength
 var APART=new Set(['gworm','dtoad','gwnest','bkarrow','slaught']);   // WSAND: Reidan's Western Sands (v2.93), the nest below the rocks at its north-west
 const DSPAWN=[['cgob',236,284,WMH+4,WMH+19,12],['cgob',294,342,WMH+4,WMH+19,7],['gshaman',294,342,WMH+4,WMH+19,6],['gshaman',352,384,WMH+4,WMH+19,4],['kobold',414,462,WMH+4,WMH+19,12],['kobold',472,500,WMH+4,WMH+19,6],['golem',530,572,WMH+4,WMH+19,8],['cgolem',550,572,WMH+4,WMH+19,3],['cgolem',588,630,WMH+4,WMH+19,6],['skel',646,690,WMH+4,WMH+19,8],['wraith',662,690,WMH+4,WMH+19,5]],DBOSS=[['gwar',394,WMH+11],['kking',512,WMH+11],['bknight',682,WMH+11]],
@@ -1953,7 +1954,7 @@ function bChestGive(g){g.open=1;const b=MT[g.b];(S.bch||(S.bch={}))[g.b]=today()
 function bossChest(m,b){if(!b.boss||m.tmp||m.arena||m.evt||m.sg||m.bh||m.spar||m.fake||m.mob||ARN||TWR||bchUsed(m.type))return;const til=gTime+120;
  DGATES.push({x:m.x-14,y:m.y+4,to:{x:m.x,y:m.y},hint:'hBChest',tmp:1,chest:1,til,b:m.type,lv:0});setTimeout(()=>toast(t('bcHas',{b:itN(m.type)}),'good'),800);}
 Object.assign(STR.ar,{"bcToday": "صندوق {b} اتفتح النهارده. بيرجع بكرة، والدروب العادي بينزل كل مرة.", "bcHas": "{b} ساب صندوقه اليومي! افتحه قبل ما يختفي.", "mbChest": "صندوق الزعيم (مرة في اليوم): قطعة مضمونة بتقييم أعلى، وخاماته كاملة، وأحجار تقوية وأحجار نادرة", "mbNorm": "الدروب العادي (كل مرة):"});Object.assign(STR.en,{"bcToday": "You opened {b}'s chest today. It comes back tomorrow; the normal drops fall every time.", "bcHas": "{b} left its daily chest! Open it before it fades.", "mbChest": "Boss chest (once a day): a guaranteed item of a higher rating, all its materials, enhancement and rare stones", "mbNorm": "Normal drops (every kill):"});
-function useGate(g){if(g.bh)return bhUse(g);if(g.tw)return twUse(g);if(g.chest)return openBChest(g);if(roomFade)return;if(g.vc&&!vcGate(g))return;if(P.ride)dismount();if(g.lv&&!g.ant&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
+function useGate(g){if(g.swg&&!swgDone()){toast(t('swgSealed'),'warn');return;}if(g.bh)return bhUse(g);if(g.tw)return twUse(g);if(g.chest)return openBChest(g);if(roomFade)return;if(g.vc&&!vcGate(g))return;if(P.ride)dismount();if(g.lv&&!g.ant&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
 const ROOMS=[],PROPS=[];
 function genRoom(b,bi,kind,rx,ry,z){const R={id:'r'+bi,bi,b,kind,rx,ry,z,dx:b.x*TS+b.w*8,dy:(b.y+b.h)*TS+8};ROOMS.push(R);
   for(let y=ry;y<ry+8;y++)for(let x=rx;x<rx+12;x++)setT(x,y,(y<ry+2||y===ry+7||x===rx||x===rx+11)?IW:FW);
@@ -2555,6 +2556,18 @@ let herbSpot=null;
  const px=(x,y)=>({x:x*TS+8,y:y*TS+10});
  DGATES.push({...px(K.x+3,K.y+K.h),to:px(U.x0+4,U.cy),hint:'hZebra',lv:200});
  DGATES.push({...px(U.x0+1,U.cy),to:px(K.x+3,K.y+K.h+2),hint:'hUp'});})();
+// The Sword Grave (v2.95; ch 931: "The Sword Grave was an open plains area with 4,179 swords stabbed into the ground";
+// ch 937: "It contained the works which Pagma had produced in his later years, and it was also Braham's grave"; ch 940: "The
+// glacier dungeon, which resealed as soon as Grid entered, didn't tolerate any living thing"): a snow plain among the Glacier
+// Lakes, its swords drawn on it (no tile changes, so no dice move), Skunk's Expedition Group's camp at its west, and under it
+// the glacier where Braham's body lies with Pagma's late works.
+(function genSwordGrave(){const G=SWG.gl,r=mulberry32(2510);
+ for(let y=G.y0;y<=G.y1;y++)for(let x=G.x0;x<=G.x1;x++){const e=Math.min(x-G.x0,G.x1-x,y-G.y0,G.y1-y);setT(x,y,e<1?CW:(e>2&&r()<.05?RK:SN));}
+ DUN.push({k:'zSwordGU',x0:G.x0,x1:G.x1,y0:G.y0,y1:G.y1});
+ const px=(x,y)=>({x:x*TS+8,y:y*TS+10});
+ DGATES.push({...px(SWG.cx,SWG.cy+2),to:px(G.x0+4,G.cy),hint:'hSwgDown',lv:300,swg:1,hide:1});
+ DGATES.push({...px(G.x0+1,G.cy),to:px(SWG.cx,SWG.cy+4),hint:'hUp'});
+ CAMPS.push({x:(SWG.camp.x-2)*TS+8,y:(SWG.camp.y+1)*TS+12});})();
 // Haalrune Swamp: a murky wash over the ground, with reeds
 {const r=mulberry32(3131);for(const [cx,cy,rx,ry] of SWAMP){for(const k of [1.08,.96,.84])blob(gg,cx*TS+8,cy*TS+8,rx*TS*k,ry*TS*k,'rgba(46,66,38,.2)');for(let i=0;i<rx*ry*2;i++){const a=r()*6.28,d=Math.sqrt(r()),x=(cx+Math.cos(a)*rx*d)*TS,y=(cy+Math.sin(a)*ry*d)*TS;if(at(x/TS|0,y/TS|0)===WA)continue;R(gg,x,y-5,1,6,'#6a8a3a');R(gg,x+2,y-3,1,4,'#4e6e2c');R(gg,x,y-6,1,1,'#8a6a3a');}}}
 // the poison swamps of the Chaos Mountains: a sickly violet wash, dead reeds
@@ -6289,7 +6302,8 @@ NPCS.push({id:'merchant',spr:'merchant',...rmP(7,5.5,2.5),reach:16},{id:'armorer
  {id:'stylist',spr:'stylist',...rmP(9,5.5,3.6)},
  {id:'steim',spr:'steim',...rmP(6,6,1.5),dir:2},{id:'irene',spr:'irene',...rmP(6,8.5,4.6),dir:2,hidden:1},   // Winston Castle (ch 116-117); Irene home after her rescue
  {id:'admRabbit',spr:'admRabbit',tx:548.5,ty:84.4,ph:1,dir:3},
- {id:'zebra',spr:'zebra',tx:866.5,ty:161.4,ph:1,dir:2});   // Earl Zebra before his keep (ch 243-245)   // Reidan's administrator (ch 221-228, 856)   // Layla works in her salon now (owner 2026-10-23)
+ {id:'zebra',spr:'zebra',tx:866.5,ty:161.4,ph:1,dir:2},
+ {id:'skunk',spr:'skunk',tx:515.5,ty:-13.6,ph:1,dir:3});   // Skunk of Skunk's Expedition Group at the Sword Grave (ch 931, 937)   // Earl Zebra before his keep (ch 243-245)   // Reidan's administrator (ch 221-228, 856)   // Layla works in her salon now (owner 2026-10-23)
 let camXf=0,camYf=0,camSnap=true,S,P,mons=[],npcs=[],fx=[],nums=[],smoke=[],proj=[],shake=0,mode='lang',hudDirty=true,gTime=0,camX=0,camY=0,MID=0;
 const RC=[
  {id:'jaffa',slot:'x',need:{wood:2,ore:1},unlock:()=>!!S.qs.sm3,diff:.8,strikes:4},
@@ -7093,13 +7107,14 @@ function nearest0(){let best=null,bd=26;const px=P.x,py=P.y,c=(k,o,x,y,h)=>{cons
  for(const l of lmList())c('lm',l,l.x,l.y,'hRead');
  for(const o of thNear())c('treasure',o,o.x,o.y,'hThDig');
  for(const o of exNear())c('cache',o,o.x,o.y,'hCache');
+ for(const q of swgNear())c(q.k,q.o,q.o.x,q.o.y,q.k==='swgs'?'hSwgTurn':'hSwgCoffin');
  for(const f of tfNear())c('folk',f,f.x,f.y,'hTalk');
  for(const g of DGATES)if(!(g.hide&&g.bh!=='key'&&!(g.tw&&Math.hypot(g.x-px,g.y-py)<22))&&!g.got&&!g.out&&!g.gone&&!(g.tw==='enter'&&!(S.wis&&S.wis.map)))c('gate',g,g.x,g.y,g.hint);
  for(const T of TERR)c('banner',T,T.x,T.y-4,'hBanner');
  for(const o of SHRINES)if(epVis(o))c('shrine',o,o.x,o.y,o.hint);
- if(COMPO)c('npc',COMPO,COMPO.x,COMPO.y,NH);const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
+ if(COMPO)c('npc',COMPO,COMPO.x,COMPO.y,NH);const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache'&&best.k!=='swgs')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
  if(!best||best.k==='tree'){const w=nearWater();if(w)best={k:'water',o:w,x:w.x,y:w.y,hint:FISH?'hReel':'hFish'};}return best;}
-function interact(){if(FISH){fishAct();return;}const n=nearest(1);if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='treasure')thDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
+function interact(){if(FISH){fishAct();return;}const n=nearest(1);if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='swgs')swgTurn(n.o);else if(n.k==='swgc')swgCoffin();else if(n.k==='treasure')thDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
 let roomFade=false;
 function enterRoom(Rm){if(roomFade)return;if(P.ride)dismount();roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=(Rm.rx+6)*TS+8;P.y=(Rm.ry+6)*TS+10;P.dir=1;camSnap=true;hudDirty=true;});}
 // "get unstuck" in the Esc menu: walks you out of a house, or takes you back to the nearest town square (once a minute)
@@ -7123,7 +7138,7 @@ Object.assign(STR.en,{graveT2:'"At a small hill north of Winston. There were aro
    system-window glint, not a world object. First read raises Insight by 1 (like the books on shelves).
    [key, x, y, abs]: abs=0 means original-map columns (wX), abs=1 means world tiles. Moved to the nearest open tile. */
 const LMD=[['lmNEnd',179,10,1],['lmOut',40,64,0],['lmMine',21,9,0],['lmGrey',45,25,0],['lmSnow',160,18,0],['lmOrc',112,24,0],
- ['lmCanyon',131,104,0],['lmLoran',127,113,0],['lmKesan',443,98,1],['lmWSand',496,72,1],['lmZebra',864,145,1],['lmWNest',475,66,1],['lmYatan',465,28,1],
+ ['lmCanyon',131,104,0],['lmLoran',127,113,0],['lmKesan',443,98,1],['lmWSand',496,72,1],['lmZebra',864,145,1],['lmSwordG',518,-20,1],['lmWNest',475,66,1],['lmYatan',465,28,1],
  ['lmChaos',303,-70,1],['lmSanju',180,-73,1],['lmRidge4',265,-149,1],['lmPedro',122,184,1],['lmGauss',396,184,1],['lmCork',640,246,1],
  ['lmSuaz',742,74,1],['lmRolling',788,79,1],['lmDran',DRAN(118)-4,118,1],['lmTatur',820,30,1],['lmTitan',884,86,1],['lmTemple',875,72,1],['lmBMine',931,54,1],['lmTower',936,75,1],['lmAbyss',ABYSS.x+4,ABYSS.y+ABYSS.ry+2,1],['lmButin',913,186,1],
  ['lmRCity',697,86,1],['lmRPalace',689,55,1],['lmRTrain',670,55,1],['lmRFame',693,65,1],['lmRWest',649,64,1],['lmRTemple',660,53,1],['lmRWall',639,85,1]];
@@ -7505,7 +7520,7 @@ function updateEscort(dt){escHide();if(!ESC)return;const s=S.qs[ESC.q],q=QD[ESC.
  const D=escDest(q.obj);if(Math.hypot(E.x-D.x,E.y-D.y)<40){s.c=1;num(E.x,E.y-26,t('escThanks'),'#9fe39a',false);vfx('spawn',E.x,E.y);ESC=null;addAff(q.by,6);completeQ(E.q);}}
 // who says what: hi = first meeting, low = a quest exists but your level is too low, idle = nothing to do; opts = shop choices
 const NPCT={
- steim:{hi:'nst_hi'},irene:{hi:'nir_hi'},admRabbit:{hi:'nrb_hi'},zebra:{hi:'nzb_hi',noGift:1},   // Winston Castle and Reidan's administrator (v2.92): their lines and options are set with NLD's further down
+ steim:{hi:'nst_hi'},irene:{hi:'nir_hi'},admRabbit:{hi:'nrb_hi'},zebra:{hi:'nzb_hi',noGift:1},skunk:{hi:'nsk_hi'},   // Winston Castle and Reidan's administrator (v2.92): their lines and options are set with NLD's further down
  biban:{hi:'twBbHi',idle:()=>TOW?'twId_biban':S.lv<400?'twBbLow':'twBbIdle',opts:()=>bibanOpts(),noGift:1},
  hayate:{hi:'twHaHi',idle:()=>'twHaIdle',opts:()=>twOpts('hayate'),noGift:1},
  fronz:{hi:'twHi_fronz',idle:()=>'twId_fronz',opts:()=>twOpts('fronz'),noGift:1},
@@ -9919,7 +9934,7 @@ Object.assign(STR.en,{rscroll:'Return Scroll',rscrollD:'Takes you to the inn you
  bhStRs:'Anything for the road?',bhStRs0:'I gave you one today, friend. Come back tomorrow.',bhStRs1:'Take this. A Return Scroll the sea left on the beach. If you get stuck, read it and go home.',bhStRs2:'Nothing today. The sea brought nothing.',rsGotS:'Sticks gave you a Return Scroll'});
 // the nearest town on the continent you are on (owner 2026-10-23: the East is another land; dying there or reading a Return
 // Scroll there never takes you home across the Red Sea), and the inn you registered at only when it is on that continent too
-const nearTown=()=>{const sd=eaSide(outPos().x),L=TOWNS.filter(T=>eaT(T.rx)===!!sd);return (L.length?L:TOWNS).reduce((a,T)=>Math.hypot(T.rx*TS-P.x,T.ry*TS-P.y)<Math.hypot(a.rx*TS-P.x,a.ry*TS-P.y)?T:a);};
+const nearTown=()=>{const o=outPos(),sd=eaSide(o.x),L=TOWNS.filter(T=>eaT(T.rx)===!!sd);return (L.length?L:TOWNS).reduce((a,T)=>Math.hypot(T.rx*TS-o.x,T.ry*TS-o.y)<Math.hypot(a.rx*TS-o.x,a.ry*TS-o.y)?T:a);};   // from outdoors (v2.95: dying in the Sword Grave's glacier woke you at Butin)
 const bindNpc=()=>{const n=S.bind&&npcOf(S.bind);return n&&eaSide(n.x)===eaSide(outPos().x)?n:null;};
 // your respawn point is the inn you last registered at (S.bind); without one you wake in the nearest town
 function bindOpt(id){return {l:t(S.bind===id?'oBound':'oBind'),f:()=>{S.bind=id;const z=townOfNpc(id);toast(t('bindSet',{z:t(z||'zWin')}),'good');SFX.quest();save(true);shopD(id,NPCT[id].idle());}};}
@@ -10001,7 +10016,7 @@ function sahZone(tx,ty){const T=TITAN,B=BUTIN,R=ROLL,A=ABYSS;
  if(ty>96&&tx<854)return 'zDran';
  if(asmoIn(tx,ty))return 'zAsmo';if(ty<T.y0-2&&tx>=846)return 'zSahHills';
  return tx<856&&ty<=78?'zTatur':'zSahFarm';}
-function zoneAt(x,y){if(y>=VCY0*TS){const C=vcAt(x/TS,y/TS);return C?'zVc'+C.n:'void';}if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;if(inRace(x,y))return 'zRace';return (roomAt(x,y)||{}).z||'zWin';}if(x>=WMW*TS)return eaReg(x/TS|0,y/TS|0);if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS,pz=p3Zone(tx,y/TS)||p4Zone(tx,y/TS)||p5Zone(tx,y/TS);if(pz)return pz;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=WSAND.x0*TS&&x<(WSAND.x1+1)*TS&&y>=WSAND.y0*TS&&y<(WSAND.y1+1)*TS)return 'zWSand';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
+function zoneAt(x,y){if(y>=VCY0*TS){const C=vcAt(x/TS,y/TS);return C?'zVc'+C.n:'void';}if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;if(inRace(x,y))return 'zRace';return (roomAt(x,y)||{}).z||'zWin';}if(x>=WMW*TS)return eaReg(x/TS|0,y/TS|0);if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS,pz=p3Zone(tx,y/TS)||p4Zone(tx,y/TS)||p5Zone(tx,y/TS);if(pz)return pz;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';if(tx>=SWG.x0&&tx<SWG.x1+1&&ty>=SWG.y0&&ty<SWG.y1+1)return 'zSwordG';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=WSAND.x0*TS&&x<(WSAND.x1+1)*TS&&y>=WSAND.y0*TS&&y<(WSAND.y1+1)*TS)return 'zWSand';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
 /* fog of war (Nitro's feedback): the map shows only what you have seen, in cells of FOGC tiles, saved in S.fog. A paper map
    (sold at inns) draws the whole land in sepia, but no monsters, people or quests where you haven't been yourself. */
 const FOGC=8,FOGW=Math.ceil(MW/FOGC),FOGH=Math.ceil((WMH+NR)/FOGC);let FOG=null,fogT=0,fogV=0;
@@ -10347,7 +10362,7 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  // danger regions: red wash with a dashed edge
  g.save();g.setLineDash([6*dpr,4*dpr]);g.lineWidth=1.2*dpr;g.strokeStyle='rgba(226,73,58,.7)';g.fillStyle='rgba(140,10,10,.16)';[[28,2,34,40],[2,44,62,42]].forEach(([x,y,w,h])=>{g.fillRect(X(x),Y(y),w*sc,h*sc);g.strokeRect(X(x),Y(y),w*sc,h*sc);});g.restore();
  if(MV.z>=2.5){g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=1;for(let x=MV.a;x<=MV.b;x+=10){g.beginPath();g.moveTo(X(x),Y(-NR));g.lineTo(X(x),Y(WMH));g.stroke();}for(let y=-NR;y<=WMH;y+=10){g.beginPath();g.moveTo(X(MV.a),Y(y));g.lineTo(X(MV.b),Y(y));g.stroke();}}
- [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zWSand',492,66],['zZebra',870,150],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAsmo',ASMO.gx,ASMO.y0-2],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3],...EAL].forEach(([k,x,y])=>{if(!(inM(x,y)&&onS(X(x),Y(y),240*dpr)))return;MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`});
+ [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zWSand',492,66],['zZebra',870,150],['zSwordG',538,-26],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAsmo',ASMO.gx,ASMO.y0-2],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3],...EAL].forEach(([k,x,y])=>{if(!(inM(x,y)&&onS(X(x),Y(y),240*dpr)))return;MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`});
   const tl=townLv(k);if(tl)MM.label(g,t('townLv',{n:tl}),X(x),Y(y)-(13+MV.z*2.4)*dpr,{size:Math.round((9+MV.z)*dpr),color:tl>S.lv+10?'#ff9a8a':'#9fe0ff',font:F,weight:600});});   // the town's recommended level above its name (under it, it sat on the townsfolk's names)
  ANVILS.forEach(a=>{if(inM(a.tx,a.ty)&&onS(X(a.tx+.5),Y(a.ty+.5)))MM.marker(g,'anvil',X(a.tx+.5),Y(a.ty+.5),u*1.2);});
  mons.forEach(m=>{if(m.dead||m.tdum||!inM(m.x/TS,m.y/TS)||!onS(X(m.x/TS),Y(m.y/TS))||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
@@ -10604,11 +10619,11 @@ function update(dt){
  if(P.sw>0){P.sw-=dt;P.hp=Math.min(mh,P.hp+mh*.03*dt);if(rand()<dt*6)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*14,vx:0,vy:-24,t:.5,c:'#7ae07a',fl:1});}
  // hunger only drops while you do something (Twister 2026-10-19): walking, riding, attacking, dodging or guarding
  {const busy=Math.abs(P.x-(P.fqx??P.x))+Math.abs(P.y-(P.fqy??P.y))>.01||P.acd>0||P.dash>0||P.guard;P.fqx=P.x;P.fqy=P.y;if(busy)P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));}
- updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);wcTick();o48Tick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
+ updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);wcTick();swgTick(dt);o48Tick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
-  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)})+(townLv(z)?' · '+t('townLv',{n:townLv(z)}):''));ZT[z]=gTime;}S.zone=z;exZone(z);dtEnter(z);if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold'||z==='zPedro'||z==='zGauss'||z==='zSSea')&&S.lv<160||/^zChaos/.test(z)&&S.lv<220||z==='zSuaz'&&S.lv<150||z==='zWSand'&&S.lv<145||(z==='zZebra'||z==='zZebraU')&&S.lv<200||z==='zDran'&&S.lv<180||z==='zAsmo'&&S.lv<250||(/^zAbyss/.test(z)||z==='zTaleren')&&S.lv<360||/^zEa/.test(z)&&!TOWNS.some(T=>T.k===z)&&S.lv<(z==='zEaMur'?440:300))&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
+  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh){toast(t('enterZ',{z:t(z)})+(townLv(z)?' · '+t('townLv',{n:townLv(z)}):''));ZT[z]=gTime;}S.zone=z;exZone(z);dtEnter(z);if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold'||z==='zPedro'||z==='zGauss'||z==='zSSea')&&S.lv<160||/^zChaos/.test(z)&&S.lv<220||z==='zSuaz'&&S.lv<150||z==='zWSand'&&S.lv<145||(z==='zZebra'||z==='zZebraU')&&S.lv<200||z==='zSwordGU'&&S.lv<300||z==='zDran'&&S.lv<180||z==='zAsmo'&&S.lv<250||(/^zAbyss/.test(z)||z==='zTaleren')&&S.lv<360||/^zEa/.test(z)&&!TOWNS.some(T=>T.k===z)&&S.lv<(z==='zEaMur'?440:300))&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
  // the Chaos Mountains past the first ridge: the blizzard cuts the flesh, 1/2/3 % of max health every 4 s (never the last
  // point); a campfire keeps it off
  if(P.y<NWALL*TS&&!P.ghost){const k=ridgeAt(P.x/TS,P.y/TS);if(k>0&&(P.chT=(P.chT??4)-dt)<=0){P.chT=4;if(!CAMPS.some(c=>Math.hypot(c.x-P.x,c.y-P.y)<64)){const d=Math.max(1,Math.round(maxHP()*.01*k));P.hp=Math.max(1,P.hp-d);numP(-26,'-'+d,'#bfe6ff');hudDirty=true;}}}
@@ -10906,7 +10921,7 @@ function render(dt){DRAWN=0;netDrawn=0;
   for(const m of TFB){const st=TFS.get(m);if(st&&st.t>gTime&&!m.dead)TX.push({s:st.s,x:m.x,y:m.y-(MT[m.type].oy||16)-24,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff9a8a'});}
   for(const c of exNear()){ents.push({y:c.y-6,f:()=>drawCache(c)});ents.push({y:c.y+400,f:()=>drawCacheG(c)});}
   for(const l of lmList())if(l.x>camX-20&&l.x<camX+VW+20&&l.y>camY-10&&l.y<camY+VH+40)ents.push({y:l.y,f:()=>drawLm(l)});
-  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});if(rm===HALL)hallEnts(ents);}
+  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});if(rm===HALL)hallEnts(ents);swgEnts(ents);}
   if(COMPO){const a=COMPO;ents.push({y:a.y,f:()=>{if(a.hide>0)return;drawChar(a.spr,a.x,a.y,a.dir,a.frame||0,false,0,a);}});}
   allies.forEach(a=>{if(a.dead||a.go)return;ents.push({y:a.y,f:()=>{drawChar(a.id,a.x,a.y,a.dir,a.frame||0,false,0,a);R(ctx,a.x-7,a.y-30,14,2,'#000');R(ctx,a.x-7,a.y-30,14*a.hp/a.max,2,'#5ad06a');}});});
   for(const g of DGATES){if(g.hide||g.bhg&&!['next','exit','goal','box'].includes(g.bh)||g.tw&&!['up','down','exit'].includes(g.tw))continue;if(g.x<camX-30||g.x>camX+VW+30||g.y<camY-30||g.y>camY+VH+30)continue;ents.push({y:g.y-14,f:()=>drawGate(g)});}
@@ -12902,6 +12917,74 @@ Object.assign(NLD,{zebra:{town:null,src:'Earl Zebra (ch 243-246)',
 Object.assign(QD,{zeb1:{by:'lauel',lv:205,obj:{t:'kill',it:'slaught',n:1},xp:700000,gold:20000,item:'speye'}});
 Object.assign(FD,{zebra:{lm:'lmZebra',need:()=>!!S.qs.zeb1,p:.006,mat:['mstone',6]}});
 window.__GZB={Z:ZEB,apart:k=>APART.has(k),gates:()=>DGATES.filter(d=>d.hint==='hZebra'||d.hint==='hUp'&&(d.x/TS|0)===ZEB.pit.x0+1).map(d=>[d.hint,d.x/TS|0,d.y/TS|0,d.to.x/TS|0,d.to.y/TS|0])}; // tests
+// ---- The Sword Grave (v2.95; the owner 2026-10-25: "add any place or region of the novel that has an effect"). ch 931: "an
+// open plains area with 4,179 swords stabbed into the ground. Of these swords, 3,580 were insignificant while 599 were
+// significant. The 599 swords rotated to the left or right, changing the orientation and slope of the plains"; "They turned
+// the 423rd sword to the left, and the positions of the 1st-422nd swords were reset"; "As the puzzle progressed, the plains
+// turned into a hill which was the appropriate form for a so-called 'grave'"; Skunk's Expedition Group "had been
+// investigating the Sword Grave for one year and four months". ch 937, 940: Pagma's late works and Braham's body in a glacier
+// that "didn't tolerate any living thing". Here twelve swords matter, numbered on their hilts, each to turn left or right in
+// its order; a wrong turn sets every sword back. How many, the order and the rewards are the game's; every line
+// ORIGINAL_SIDE_STORY.
+const SWGN=12,SWGS=[],SWGF=[];
+{const r=mulberry32(2511),W=SWG;let tr=0;while(SWGS.length<SWGN&&tr<4000){tr++;const x=W.x0+2+(r()*(W.x1-W.x0-4)|0),y=W.y0+2+(r()*(W.y1-W.y0-4)|0);
+  if(SOLID[at(x,y)]||Math.hypot(x-W.cx,y-W.cy)<5||SWGS.some(s=>Math.hypot(s.tx-x,s.ty-y)<5))continue;SWGS.push({i:SWGS.length+1,tx:x,ty:y,x:x*TS+8,y:y*TS+12,d:r()<.5?0:1});}
+ // the first one nearest the camp, the rest in the order they lie (the expedition's numbers on the hilts)
+ SWGS.sort((a,b)=>Math.hypot(a.tx-W.camp.x,a.ty-W.camp.y)-Math.hypot(b.tx-W.camp.x,b.ty-W.camp.y));SWGS.forEach((s,k)=>s.i=k+1);
+ const r2=mulberry32(2512);for(let k=0;k<420;k++){const x=W.x0+r2()*(W.x1-W.x0+1),y=W.y0+r2()*(W.y1-W.y0+1);if(SOLID[at(x|0,y|0)])continue;SWGF.push({x:x*TS,y:y*TS+8,a:(r2()-.5)*.5,l:7+r2()*5|0,c:r2()<.5?'#a8b0bc':'#8a929e'});}}
+const swgP=()=>S&&S.books?S.books.swgp|0:0,swgDone=()=>!!(S&&S.books&&S.books.swgd);
+function swgNear(){if(!S||!P)return [];if(P.y>=WMH*TS)return zoneAt(P.x,P.y)==='zSwordGU'&&Math.hypot(SWGC.x-P.x,SWGC.y-P.y)<60?[{k:'swgc',o:SWGC}]:[];
+ if(P.y>0||Math.abs(P.x-SWG.cx*TS)>700)return [];return SWGS.filter(s=>Math.hypot(s.x-P.x,s.y-P.y)<40).map(s=>({k:'swgs',o:s}));}
+function swgTurn(s){if(swgDone())return dialog('swgS',[t('swgSet')]);
+ dialog('swgS',[t('swgAsk',{n:s.i})],null,[{l:t('swgL'),f:()=>swgGo(s,0)},{l:t('swgR'),f:()=>swgGo(s,1)},{l:t('oLeave')}]);}
+function swgGo(s,d){S.books=S.books||{};if(swgDone())return dialog('swgS',[t('swgSet')]);const p=swgP();
+ if(s.i>p+1){SFX.deny();return dialog('swgS',[t('swgWait')]);}
+ if(s.i<=p&&d===s.d)return dialog('swgS',[t('swgSet')]);
+ if(d!==s.d){const had=p;S.books.swgp=0;shake=Math.max(shake,.25);SFX.deny();save(true);return dialog('swgS',[t(had?'swgReset':'swgNot')]);}
+ S.books.swgp=p+1;vfx('dust',s.x,s.y,{n:8});shake=Math.max(shake,.12);SFX.quest();
+ if(S.books.swgp>=SWGN){S.books.swgd=Date.now();save(true);SFX.legendary&&SFX.legendary();fdClaim('sgopen');return dialog('swgS',[t('swgOpen')]);}
+ save(true);dialog('swgS',[t('swgUp',{p:S.books.swgp,n:SWGN})]);}
+// the grave's door shows only to whom the swords opened it; the glacier's cold: 1.2% of your health a second, no living thing
+let SWGG=null,SWGCT=0,SWGCW=0;
+function swgTick(dt){if(!SWGG)SWGG=DGATES.find(g=>g.swg);if(SWGG)SWGG.hide=!swgDone();if(!S||!P||mode==='dead')return;
+ const inG=P.y>=WMH*TS&&zoneAt(P.x,P.y)==='zSwordGU';if(!inG){SWGCT=0;return;}
+ if(!swgDone()){const u=DGATES.find(g=>g.hint==='hUp'&&dunAt(g.x,g.y)&&dunAt(g.x,g.y).k==='zSwordGU');if(u){P.x=u.to.x;P.y=u.to.y;camSnap=true;toast(t('swgSealed'),'warn');}return;}   // (a recall to someone inside)
+ if(mode==='dialog'||P.inv>0)return;
+ if(gTime>SWGCW){SWGCW=gTime+30;toast(t('swgCold'),'warn');}
+ SWGCT+=dt;if(SWGCT<1)return;SWGCT-=1;const d=Math.max(1,Math.round(maxHP()*.012));P.hp-=d;numP(-20,'-'+d,'#bfe6ff',false);if(P.hp<=0){P.hp=0;P.lastSrc=null;die();}}
+// the coffin of ice at the glacier's far end: Braham's body, Pagma's late works along the walls; one of the swords, once
+const SWGC={x:(SWG.gl.x1-4)*TS+8,y:SWG.gl.cy*TS+10};
+function swgCoffin(){if(!swgDone())return dialog('swgS',[t('swgSealed')]);S.books=S.books||{};const L=['sgc1','sgc2'];if(S.cls==='braham')L.push('sgcB');if(S.cls==='pagma')L.push('sgcP');
+ dialog('swgS',L.map(k=>t(k)),()=>{if(S.books.swgr)return;S.books.swgr=Date.now();const it=mkItem('pgwork',4);S.items.push(it);toast(t('sgcGot'),'good');SFX.legendary&&SFX.legendary();save(true);hudDirty=true;});}
+function swgEnts(ents){if(!P)return;if(P.y<0&&Math.abs(P.x-SWG.cx*TS)<900){
+  for(const f of SWGF){if(f.x<camX-20||f.x>camX+VW+20||f.y<camY-20||f.y>camY+VH+30)continue;ents.push({y:f.y,f:()=>swgSword(f.x,f.y,f.a,f.l,f.c,0)});}
+  const p=swgP(),done=swgDone();for(const s of SWGS){if(s.x<camX-30||s.x>camX+VW+30||s.y<camY-30||s.y>camY+VH+40)continue;const set=done||s.i<=p;
+   ents.push({y:s.y,f:()=>{swgSword(s.x,s.y,set?(s.d?.55:-.55):0,15,set?'#e8e0b0':'#c8d0dc',1);if(Math.hypot(s.x-P.x,s.y-P.y)<90){ctx.font='bold 8px sans-serif';ctx.textAlign='center';ctx.fillStyle='rgba(10,14,30,.75)';ctx.fillRect(s.x-6,s.y-30,12,10);ctx.fillStyle=set?'#ffe08a':'#e8f0ff';ctx.fillText(String(s.i),s.x,s.y-22);}}});}
+  const H=done?1:p/SWGN,cx=SWG.cx*TS+8,cy=SWG.cy*TS+8;if(cx>camX-80&&cx<camX+VW+80&&cy>camY-80&&cy<camY+VH+80)ents.push({y:cy+6,f:()=>swgHill(cx,cy,H,done)});}
+ else if(P.y>=WMH*TS&&zoneAt(P.x,P.y)==='zSwordGU')ents.push({y:SWGC.y,f:swgCoffinDraw});}
+function swgSword(x,y,a,l,c,big){if(big){ctx.fillStyle='rgba(190,215,255,.22)';ctx.beginPath();ctx.ellipse(Math.round(x),Math.round(y)+1,7,2.5,0,0,7);ctx.fill();}ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.rotate(a);R(ctx,-1,-l,2,l,c);R(ctx,-1,-l,1,l,'#f0f4fa');R(ctx,-3,-l-1,6,big?2:1,'#5a4a3a');R(ctx,-1,-l-4,2,3,'#3a2a1e');if(big)R(ctx,-1,-l-5,2,1,'#c8a050');ctx.restore();
+ ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(Math.round(x)-3,Math.round(y),6,1);}
+function swgHill(x,y,h,open){const rx=34+h*26,ry=8+h*14;ctx.fillStyle='rgba(0,0,0,.15)';ctx.beginPath();ctx.ellipse(x,y+4,rx+4,ry*.6+4,0,0,7);ctx.fill();
+ if(h>0){ctx.fillStyle='#dfe7f0';ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,Math.PI,0);ctx.fill();ctx.fillStyle='#f4f8fc';ctx.beginPath();ctx.ellipse(x-rx*.25,y-ry*.4,rx*.45,ry*.35,0,Math.PI,0);ctx.fill();}
+ if(open){R(ctx,x-8,y-14,16,14,'#3a4048');R(ctx,x-6,y-12,12,12,'#0c1014');R(ctx,x-9,y-15,18,2,'#8a929e');}}
+function swgCoffinDraw(){const x=SWGC.x,y=SWGC.y;ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(x-14,y+2,28,4);R(ctx,x-12,y-10,24,12,'#a8d8f0');R(ctx,x-11,y-9,22,10,'#d8f0fc');R(ctx,x-7,y-7,14,6,'#7a8a98');
+ for(let i=-3;i<=3;i++)if(i)swgSword(x+i*9+(i>0?20:-20),y-2,i>0?.08:-.08,16,'#e8e0b0',1);}
+window.__GSG={use:()=>useGate(SWGG||(SWGG=DGATES.find(g=>g.swg))),S:SWGS,N:SWGN,go:(i,d)=>swgGo(SWGS[i-1],d),p:()=>swgP(),done:()=>swgDone(),coffin:()=>swgCoffin(),tick:dt=>swgTick(dt),gate:()=>SWGG||(SWGG=DGATES.find(g=>g.swg))}; // tests
+// Skunk, of Skunk's Expedition Group, at the camp west of the swords
+Object.assign(FIG,{skunk:{hair:'hat',hat:'#6a5034',hc:'#5a4a30',hl:'#7a6a48',skin:'#e0b48c',sk2:'#c09068',eye:'#2a1a10',scarf:'#8a5a2a',top:'#6a5a3a',top2:'#4a3e26',sleeves:true,belt:'#3a2a1a',pants:'#4a4030',boots:'#2a2018'}});
+if(!SH.skunk)shLazy('skunk',()=>SA.chars.buildSheet(FIG.skunk));GOK.add('skunk');
+const swgDir=i=>t(SWGS[i]&&SWGS[i].d?'swgRw':'swgLw');
+Object.assign(NLD,{skunk:{town:null,src:"Skunk of Skunk's Expedition Group (ch 931, 937)",
+ ctx:[['nsk_c1',()=>isNight()],['nsk_c2',()=>!isNight()],['nsk_c3',()=>swgP()>0&&!swgDone()],['nsk_c4',()=>swgDone()]],
+ q:{},rep:null,mem:[['grave',1,'nsk_mg1']],
+ topics:[{id:'grave',tier:0,say:['nsk_g1','nsk_g2'],rumor:'sgrave',ch:[{k:'nsk_gA',to:'nsk_gA2',aff:1,mem:1}]},
+  {id:'order',tier:0,say:()=>['nsk_o1',t('nsk_o2',{a:swgDir(0),b:swgDir(1),c:swgDir(2)})],aff:1},
+  {id:'year',tier:1,say:['nsk_y1','nsk_y2']}]}});
+{const n=NPCT.skunk;if(n){n.idle=()=>nlIdle('skunk');n.opts=()=>nlOpts('skunk');}}
+Object.assign(FD,{sgrave:{lm:'lmSwordG',need:()=>!!nlM('skunk','rumor_sgrave'),p:.006,mat:['mstone',6]},sgopen:{need:()=>true,p:.02,mat:['mith',4]}});
+// Pagma's Late Work: one of the swords along the glacier's walls (Legendary)
+RC.push({id:'pgwork',slot:'w',atk:560,spd:.45,fix:4,lvr:320,drop:1,unlock:()=>false});
+Object.assign(WSH,{pgwork:{l:14,c:'#d8e0f0',w:1,k:'sword'}});
 // ---- Agriculture Development (ch 856): the Patrian farmer's field work, once a day: put down five Field Burrowers in his
 // rows; a rainbow potato and his trust (+3). Devoted (90) to him, a day's work may (one in four) bring his word about Piaro's field.
 function fdwS(){const D=dlyS();D.fw=D.fw||{n:0,done:0,on:0};return D.fw;}
@@ -13027,7 +13110,24 @@ Object.assign(STR.ar,{nlTalk:"اتكلم",nlAsk:"عايز تتكلم في إيه
  zeb1_w:"قلعة الإيرل زيبرا، جنوب تيتان جنب الطريق الغربي. النزول من باب البرج. وخلي بالك من الأسهم السودا اللي في الساحة.",
  zeb1_d:"أهي. رقعة عين جلد سودا، ومهارة ناس قليلين في القارة عندهم. قلتلك تستاهل اللفة.",
  lmZebra:"قلعة الإيرل زيبرا",lmZebra1:'"هواية الإيرل زيبرا كانت التعذيب والقتل البشع، وعشان كده ربى فصيلة نصها إنسان ونصها وحش."',lmZebra2:'"ده مكان وحش."',
- fd_zebra:"قلعة الإيرل زيبرا",fd_cork:"جزيرة كورك",fd_kesan:"وادي كيسان",tl_pguest:"ضيف بانجيا",tl_pguestD:"هان سوكبونج بيعتبرك ضيف بانجيا، مش غريب.",tl_dshadow:"معروف عند رجالة الضل",tl_dshadowD:"دوران، ضل الإيرل شتايم، بيعدّك من أصحاب رجالة الضل.",steim:"الإيرل شتايم",irene:"إيرين",admRabbit:"المسؤول رابيت",
+ fd_zebra:"قلعة الإيرل زيبرا",zSwordG:"مقبرة السيوف",zSwordGU:"مقبرة السيوف: الجليد (لفل 300+)",hSwgTurn:"E: لِف السيف",hSwgCoffin:"E: بص على تابوت التلج",hSwgDown:"E: انزل المقبرة",swgS:"مقبرة السيوف",
+ swgAsk:"السيف رقم {n}، بالرقم اللي على مقبضه. ممكن يلف شوية، لأي ناحية.",swgL:"لفه شمال",swgR:"لفه يمين",swgLw:"شمال",swgRw:"يمين",
+ swgUp:"السهل بيميل، والأرض بتعلى شوية. ({p}/{n})",swgReset:"السيوف اللي لفيتها رجعت مكانها. والتل غطس في السهل تاني.",swgNot:"لف، ومحصلش حاجة. مش الناحية دي.",
+ swgWait:"مش راضي يتحرك. لازم واحد تاني الأول.",swgSet:"لقى مكانه خلاص.",swgOpen:"السهل بقى تل: المقبرة اتفتحت.",swgSealed:"المقبرة مقفولة. السيوف لسه مالقتش أماكنها.",
+ swgCold:"برد الجليد بيعض: المكان ده مابيستحملش أي كائن حي.",
+ sgc1:"تابوت من التلج، وجواه جسم الزمن ماقربش منه.",sgc2:"على الحيطان سيوف: عشرات منها، شغل حداد في آخر سنينه.",
+ sgcB:"الروح اللي جواك هديت. جسمها في أمان. ارتاحت، ولسه بتكره اللي عمل المكان ده.",sgcP:"إيديك عارفة السيوف دي قبل ما تلمسها.",
+ sgcGot:"خدت سيف منهم: آخر أعمال باغما.",pgwork:"آخر أعمال باغما",
+ lmSwordG:"مقبرة السيوف",lmSwordG1:'"مقبرة السيوف كانت سهل مفتوح فيه 4,179 سيف مغروزين في الأرض."',lmSwordG2:'"كان فيها الشغل اللي باغما عمله في آخر سنينه، وكانت كمان مقبرة براهام."',
+ fd_sgrave:"مقبرة السيوف",fd_sgopen:"مقبرة السيوف، مفتوحة",
+ skunk:"سكانك",nsk_hi:"سكانك، من بعثة سكانك. لو جاي عشان السيوف، اقف في الطابور. إحنا هنا من سنة وأربع شهور.",
+ nsk_c1:"بالليل السيوف بترن لما الريح تلف. بنكتب كل حاجة. ومفيش حاجة منها بتفيد.",nsk_c2:"أربع آلاف ومية تسعة وسبعين سيف، وشوية بس منهم اللي يفرقوا. عارف عدّهم خد قد إيه؟",
+ nsk_c3:"بدأت تلفهم. خلي بالك: لفة غلط واحدة وكل السيوف اللي قبلها بترجع مكانها.",nsk_c4:"فتحتها. ...سنة وأربع شهور. ماشي. اكتب اسمك في دفترنا على الأقل.",
+ nlT_skunk_grave:"المقبرة",nlT_skunk_order:"الترتيب",nlT_skunk_year:"سنة وأربع شهور",
+ nsk_g1:"آخر أعمال باغما ومقبرة براهام، الاتنين في مكان واحد. لو ده مش قلب العالم ده، يبقى مش عارف إيه هو.",nsk_g2:"لف الغلط والتل يغطس في السهل تاني. عملناها آلاف المرات.",
+ nsk_gA:"اسأله هيعمل إيه لما تتفتح.",nsk_gA2:"أبيع الخريطة، وأكتب الكتاب، وعمري ما أبص لسيف تاني.",nsk_mg1:"لسه المقبرة؟ دايمًا المقبرة.",
+ nsk_o1:"الأرقام اللي على المقابض ماشية بالترتيب. الأول أقرب واحد لمعسكرنا، والباقيين أبعد فأبعد.",nsk_o2:"اللي متأكدين منه: الأول بيلف {a}، والتاني {b}، والتالت {c}. بعد كده بنتخانق.",
+ nsk_y1:"سنة عشان نلاقيها، وأربع شهور واحنا بنفشل فيها. ناسي عايزين يروّحوا. بقولهم: بكرة.",nsk_y2:"لقينا معبد ياتان الرئيسي فاتعملنا اسم. دي هتعملنا ثروة.",fd_cork:"جزيرة كورك",fd_kesan:"وادي كيسان",tl_pguest:"ضيف بانجيا",tl_pguestD:"هان سوكبونج بيعتبرك ضيف بانجيا، مش غريب.",tl_dshadow:"معروف عند رجالة الضل",tl_dshadowD:"دوران، ضل الإيرل شتايم، بيعدّك من أصحاب رجالة الضل.",steim:"الإيرل شتايم",irene:"إيرين",admRabbit:"المسؤول رابيت",
  nst_hi:"أهلًا بيك في قلعة وينستون. أنا شتايم، إيرل الشمال. وينستون والأرض اللي حواليها في عهدتي.",
  nst_c1:"القلعة دي عمرها ما بتنام. تمانين خدام، وكل واحد فيهم فاكر إن الشمع شغلة حد تاني.",nst_c2:"الشمال هادي النهارده. وأنا مابثقش في شمال هادي.",
  nst_c3:"بنتي اتخطفت. دوران راح وراها. لو إنت كمان رايح، روح دلوقتي.",nst_c4:"رجّعتلي بنتي. أبواب قلعة وينستون مفتوحالك على طول.",
@@ -13169,7 +13269,24 @@ Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTr
  zeb1_w:"Earl Zebra's castle, south of Titan by the western road. The way down is the keep's door. Mind the Black Arrows in the court.",
  zeb1_d:"There. A black leather eye patch, and a skill few on the continent have. I told you it was worth the detour.",
  lmZebra:"Earl Zebra's Castle",lmZebra1:'"Earl Zebra\'s hobby was torture and gruesome killing, so it was a half human, half beast species he raised."',lmZebra2:'"This is a bad place."',
- fd_zebra:"Earl Zebra's Castle",fd_cork:"Cork Island",fd_kesan:"Kesan Canyon",tl_pguest:"Guest of Pangea",tl_pguestD:"Han Seokbong counts you as Pangea's guest, not a stranger.",tl_dshadow:"Known to the Shadows",tl_dshadowD:"Doran, Earl Steim's shadow, counts you among the shadows' friends.",steim:"Earl Steim",irene:"Irene",admRabbit:"Administrator Rabbit",
+ fd_zebra:"Earl Zebra's Castle",zSwordG:"The Sword Grave",zSwordGU:"The Sword Grave: the Glacier (Lv 300+)",hSwgTurn:"E: Turn the sword",hSwgCoffin:"E: Look at the coffin of ice",hSwgDown:"E: Go down into the grave",swgS:"The Sword Grave",
+ swgAsk:"Sword {n}, by the number on its hilt. It would turn, a little, either way.",swgL:"Turn it to the left",swgR:"Turn it to the right",swgLw:"left",swgRw:"right",
+ swgUp:"The plain tilts, and the ground rises a little. ({p}/{n})",swgReset:"The swords you had turned spring back. The hill sinks into the plain again.",swgNot:"It turns, and nothing happens. Not that way.",
+ swgWait:"It won't move. Another must come first.",swgSet:"It has already found its place.",swgOpen:"The plains have turned into a hill: the grave is open.",swgSealed:"The grave is shut. The swords have not found their places.",
+ swgCold:"The glacier's cold bites: this place tolerates no living thing.",
+ sgc1:"A coffin of ice, and a body in it, untouched by time.",sgc2:"Along the walls, swords: dozens of them, the works of a smith's last years.",
+ sgcB:"The soul in you goes still. Its body is safe. It is relieved, and it still hates the one who made this place.",sgcP:"Your hands know these swords before you touch them.",
+ sgcGot:"You take one of the swords: Pagma's Late Work.",pgwork:"Pagma's Late Work",
+ lmSwordG:"The Sword Grave",lmSwordG1:'"The Sword Grave was an open plains area with 4,179 swords stabbed into the ground."',lmSwordG2:'"It contained the works which Pagma had produced in his later years, and it was also Braham\'s grave."',
+ fd_sgrave:"The Sword Grave",fd_sgopen:"The Sword Grave, opened",
+ skunk:"Skunk",nsk_hi:"Skunk, of Skunk's Expedition Group. If you're here for the swords, get in line. We've been at it a year and four months.",
+ nsk_c1:"At night the swords ring when the wind turns. We write it all down. None of it helps.",nsk_c2:"Four thousand one hundred and seventy-nine swords, and only some of them matter. Do you know how long it took to count?",
+ nsk_c3:"You've started turning them. Careful: one wrong turn and every sword before it springs back.",nsk_c4:"You opened it. ...A year and four months. Well. Write your name in our book, at least.",
+ nlT_skunk_grave:"The grave",nlT_skunk_order:"The order",nlT_skunk_year:"A year and four months",
+ nsk_g1:"Pagma's late works and Braham's grave, both in one place. If that isn't the heart of this world, I don't know what is.",nsk_g2:"Turn the wrong one and the hill sinks back into the plain. We've done it thousands of times.",
+ nsk_gA:"Ask what he'll do when it opens.",nsk_gA2:"Sell the map, write the book, and never look at a sword again.",nsk_mg1:"Still the grave? It's always the grave.",
+ nsk_o1:"The numbers on the hilts go in order. The first stands nearest our camp; the rest, farther and farther.",nsk_o2:"What we're sure of: the first turns {a}, the second {b}, the third {c}. After that, we argue.",
+ nsk_y1:"A year to find it, four months to fail at it. My people want to go home. I tell them: tomorrow.",nsk_y2:"Finding the main Yatan temple made our name. This one would make our fortune.",fd_cork:"Cork Island",fd_kesan:"Kesan Canyon",tl_pguest:"Guest of Pangea",tl_pguestD:"Han Seokbong counts you as Pangea's guest, not a stranger.",tl_dshadow:"Known to the Shadows",tl_dshadowD:"Doran, Earl Steim's shadow, counts you among the shadows' friends.",steim:"Earl Steim",irene:"Irene",admRabbit:"Administrator Rabbit",
  nst_hi:"Welcome to Winston Castle. I am Steim, Earl of the north. Winston and the land round it are in my keeping.",
  nst_c1:"The castle never sleeps. Eighty servants, and every one of them thinks the candles are someone else's work.",nst_c2:"The north is quiet today. I distrust a quiet north.",
  nst_c3:"My daughter has been taken. Doran has gone after her. If you are going too, go now.",nst_c4:"You brought my daughter home. Winston Castle's doors are open to you, always.",

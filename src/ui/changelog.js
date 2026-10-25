@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25swordgrave', ver: '2.95', d: '2026-10-25',
+      ar: ["مكان جديد من الرواية: مقبرة السيوف، سهل تلج في بحيرات الجليد مليان سيوف مغروزة في الأرض (\"سهل مفتوح فيه 4,179 سيف\"، فصل 931). فيها الشغل اللي باغما عمله في آخر سنينه، وهي كمان مقبرة براهام (فصل 937).",
+        "اللغز: 12 سيف بس هما اللي يفرقوا، وعلى مقبض كل واحد رقمه. لازم تلفهم بالترتيب، كل واحد شمال أو يمين. لو لفيت واحد غلط، كل السيوف اللي قبله بترجع مكانها والتل بيغطس في السهل تاني، زي ما حصل في الرواية. ولما يخلصوا، السهل بيبقى تل والمقبرة بتتفتح ليك.",
+        "تحت المقبرة الجليد (لفل 300+): مابيستحملش أي كائن حي، وبرده بياخد من صحتك كل ثانية. في آخره تابوت التلج اللي فيه جسم براهام وسيوف باغما على الحيطان، وبتاخد منهم آخر أعمال باغما، سيف Legendary مرة واحدة بس.",
+        "سكانك من بعثة سكانك في معسكر جنب السيوف: بقاله سنة وأربع شهور بيحاول (فصل 931). بيقولك اتجاه أول 3 سيوف، وبياخد هدايا. ولو إنت وريث براهام أو وريث باغما، الكلام اللي جوه التابوت مختلف.",
+        "اكتشافين جداد مرة واحدة: مقبرة السيوف (بعد كلام سكانك)، ومقبرة السيوف مفتوحة (لما تحل اللغز)."],
+      en: ["A new place from the novel: the Sword Grave, a snow plain among the Glacier Lakes full of swords stabbed into the ground (\"an open plains area with 4,179 swords\", ch 931). It holds the works of Pagma's last years and it is Braham's grave (ch 937).",
+        "The puzzle: twelve swords matter, numbered on their hilts. Turn them in order, each to the left or to the right. One wrong turn and every sword before it springs back, and the hill sinks into the plain again, as in the novel. When all are set, the plain becomes a hill and the grave opens for you.",
+        "Under it the glacier (Lv 300+): it tolerates no living thing, and its cold takes some of your health every second. At its end, the coffin of ice with Braham's body, Pagma's swords along the walls, and one of them for you, once: Pagma's Late Work, a Legendary sword.",
+        "Skunk of Skunk's Expedition Group at the camp beside the swords: a year and four months at it (ch 931). He tells you which way the first three swords turn, and he takes gifts. Braham's and Pagma's Successors hear something more at the coffin.",
+        "Two new first discoveries, once: the Sword Grave (after Skunk's word) and the Sword Grave opened (when you solve it)."] },
     { v: '2026-10-25zebra', ver: '2.94', d: '2026-10-25',
       ar: ["مكان جديد من الرواية: قلعة الإيرل زيبرا (لفل 200+)، جنوب تيتان جنب الطريق الغربي، على الطريق من ريدان لتيتان (فصل 243). قلعة بسور وبوابة وبرج، وتحتها مكان تحت الأرض.",
         "الإيرل زيبرا واقف قدام برجه: قاسي ومبسوط بنفسه. هوايته التعذيب، ومواضيعه: حيوانه الأليف والأسهم السودا. مابياخدش هدايا.",

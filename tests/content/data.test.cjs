@@ -30,7 +30,7 @@ test('counts match the audited baseline',()=>{
   const n=o=>Array.isArray(o)?o.length:Object.keys(o).length;
   assert.deepStrictEqual({MT:n(D.monsters.types),BOSSES:n(D.monsters.bosses),SPAWN:n(D.monsters.spawns),QD:n(D.quests.quests),RC:n(D.recipes.recipes),
     SKD:n(D.skills.skills),NPC:n(D.npcs.npcs),interior:Object.values(D.npcs.npcs).filter(x=>x.interior).length,ZR:n(D.zones.regions),TOWNS:n(D.zones.towns),classes:n(D.classes.classes)},
-    {MT: 178,BOSSES:5,SPAWN:19,QD:151,RC:27,SKD:145,NPC:136,interior:11,ZR:17,TOWNS:3,classes:29});});   // SAT-ONLINE-159: the East Continent's 22 monsters, 11 quests and 32 people; the 6th to 1st vampire cities' 7 (owner 2026-10-23); the Mage's switch to Necromancer (owner 2026-10-24) Winston Castle (v2.92): Earl Steim and Irene inside, Administrator Rabbit in Reidan; Earl Zebra before his keep (v2.94).
+    {MT: 178,BOSSES:5,SPAWN:19,QD:151,RC:27,SKD:145,NPC:137,interior:11,ZR:17,TOWNS:3,classes:29});});   // SAT-ONLINE-159: the East Continent's 22 monsters, 11 quests and 32 people; the 6th to 1st vampire cities' 7 (owner 2026-10-23); the Mage's switch to Necromancer (owner 2026-10-24) Winston Castle (v2.92): Earl Steim and Irene inside, Administrator Rabbit in Reidan; Earl Zebra before his keep (v2.94); Skunk at the Sword Grave (v2.95).
 
 // condition vocabulary (docs/content/CONTENT_SCHEMA.md)
 function checkCond(c,where){assert.ok(c&&typeof c==='object'&&!Array.isArray(c),where+': condition must be an object');
