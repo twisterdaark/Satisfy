@@ -15,7 +15,7 @@ most a share of the XP the player's current level needs (`XPC` in index.html, `x
 | Source | Below 100 | 100-199 | 200-299 | 300-399 | 400-479 | 480+ |
 |---|---|---|---|---|---|---|
 | Normal monster (`mob`), a spar | none | 2.0% | 1.5% | 1.1% | 0.9% | 0.8% |
-| Elite (`elite`) | none | none | none | none | eased | 2.5% |
+| Elite (`elite`): 3.125 times the normal cap | none | 6.25% | 4.69% | 3.44% | 2.81% | 2.5% |
 | Boss, first win (`boss1`) | none | none | none | none | eased | 10% |
 | Boss again (`bossR`) | none | none | none | none | eased | 1.5% |
 | Repeatable quests, dailies, the Tower's daily test, the arena, an event's reward (`rquest`) | none | none | none | none | eased | 2% |
@@ -23,14 +23,17 @@ most a share of the XP the player's current level needs (`XPC` in index.html, `x
 | The Tower's weekly watch (`weekly`) | none | none | none | none | eased | 12% |
 | Charting a zone the first time (`disc`) | none | none | none | none | eased | 1.5% |
 
-"Eased": from level 400 the cap comes in a little at a time, from 70% of a level at 400 down to the 480 value
-(`v * (0.7 / v) ^ ((480 - L) / 80)`), so there is no wall at 480. At 440 a story quest is at most 23.7% of the level, at
-460 13.8%, at 470 10.5%.
+"Eased": from level 400 the cap comes in a little at a time, from a whole level at 400 down to the 480 value
+(`v * (1 / v) ^ ((480 - L) / 80)`), so there is no wall at 480 (and at 400 a boss of level 500 gives a level, where it
+gave two). At 440 a story quest is at most 28.3% of the level, at 460 15.0%, at 470 11.0%.
 
 A reward under its cap is exactly what it was (nothing is raised). Below level 100 nothing changed at all.
 
 - **Elite**: a non-boss worth five times or more the median XP of the other monsters within 15 levels of it (with fewer
-  than three of those, 3% or more of its own level's need, from level 200).
+  than three of those, 3% or more of its own level's need, from level 200), and an invasion's elite or captain. Seven
+  types are elites, all of level 280 to 340: the Soul Doll, Lexi, the Ancient Weapon, Ferrell, Chucksley and the two of
+  the ninth vampire city. They were uncapped: the Ancient Weapon of the golem invasion gave a level 250 player 156% of a
+  level a kill, every wave; now 4.7%.
 - **Boss, first win**: the first kill of that boss type on this character (`S.bfc`, and any earlier kill in `S.kills`
   counts as the first already). A second kill of the same boss within 45 s (`S.bkt`, kept in the save) is the same kill
   and gives no XP: a disconnect and reconnect, or a reload, cannot claim it twice. Drops and quest credit are unchanged.
@@ -85,9 +88,9 @@ first than to hit through it).
 
 | Player Lv | Boss (its Lv) | before: first / again | after: first / again |
 |---|---|---|---|
-| 400 | True Blood Earl, city 6 (400) | 70.8% / 70.8% | 70% / 70% |
-| 400 | Hydra (480), Belial (480), Fenrir (490), Marie Rose (470), the city 3 earl (445), Berith (450) | a level or more each time | 70% / 70% |
-| 400 | fourth Sanju (500) | two levels each time | 70% / 70% |
+| 400 | True Blood Earl, city 6 (400) | 70.8% / 70.8% | the same (under the cap) |
+| 400 | Hydra (480), Belial (480), Fenrir (490), Marie Rose (470), the city 3 earl (445), Berith (450) | a level or more each time | a level |
+| 400 | fourth Sanju (500) | two levels each time | a level |
 | 480 | True Blood Earl, city 6 (400) | 3.16% / 3.16% | 3.16% / 1.5% |
 | 480 | True Blood Earl, city 3 (445) | 4.38% / 4.38% | 4.38% / 1.5% |
 | 480 | Berith (450) | 4.86% / 4.86% | 4.86% / 1.5% |
@@ -104,11 +107,11 @@ The bosses' levels, health, drops and quest credit are unchanged.
 | Quest | Lv | before | after |
 |---|---|---|---|
 | East Continent chain ea0-ea10 | 300-360 | 55-147% of a level | the same (no quest cap below 400) |
-| gj10 (main story) | 400 | 65.3% | 65.3% (under the eased 70%) |
-| gj11 | 440 | 68.2% | 23.7% |
-| gj13 | 450 | 93.7% | 18.0% |
-| gj15, ti4 | 460 | 91.8%, 86.1% | 13.8% |
-| gj16 | 470 | 89.7% | 10.5% |
+| gj10 (main story) | 400 | 65.3% | 65.3% (under the cap) |
+| gj11 | 440 | 68.2% | 28.3% |
+| gj13 | 450 | 93.7% | 20.6% |
+| gj15, ti4 | 460 | 91.8%, 86.1% | 15.0% |
+| gj16 | 470 | 89.7% | 11.0% |
 | gj17 (main story, Belial) | 480 | 121.6% | 8% (3,947,084) |
 | a daily at 480 | 480 | its table XP | at most 2% |
 
@@ -116,7 +119,7 @@ The bosses' levels, health, drops and quest credit are unchanged.
 
 | Source | before | after |
 |---|---|---|
-| Sparring a townsperson (repeatable) | 3.6% a win | 0.8% (a fight: the normal cap) |
+| Sparring a townsperson (repeatable) | 3.6% a win, no limit | 0.8% (a fight: the normal cap), XP for five bouts a day from level 100 |
 | The Tower's daily test | 2.4% | 2% |
 | The Tower's weekly watch | 30% | 12% |
 | Arena champion | 2.2% | 2% |
