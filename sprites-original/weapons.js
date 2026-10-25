@@ -68,7 +68,7 @@ function hammer(h,silver){const I=Img(10,16);I.vline(4,4,14,'#7a5634');I.vline(4
 
 // swords drawn from their shape (icons.js A.blade): each its own length, width, line, guard and grip (owner 2026-10-24)
 function fromBlade(sp){const B=A.blade.bladeHeld(sp),I=Img(B.w,B.h);for(const [x,y,c] of B.px)I.set(x,y,c);return {I,gx:B.gx,gy:B.gy};}
-const BLADED=['vipdag','shdag','bldag','mdagger','mgdagger','rusty','isword','ssword','gsword','msword','failure','dains','iyarugt','wisdom','yetgs','dpgs','mgsword','lantd','ideal','ttthorn','dagger'];
+const BLADED=['vipdag','shdag','bldag','mdagger','mgdagger','rusty','isword','ssword','gsword','msword','failure','dains','iyarugt','wisdom','yetgs','dpgs','mgsword','lantd','ideal','ttthorn','dagger','mjudg','fgreat','sfang'];
 // a creation (cw|ty.L.W.C.m1.m2): a sword from its blueprint, or a spear, bow, staff or hammer in its materials' colours
 function cwDef(k){const B=A.blade,o=B&&B.cwParse(k);if(!o)return null;const P=B.MATP[o.m1][0],Q=o.m2?B.MATP[o.m2][0]:P,L=o.L/100;
  if(o.ty==='gs'||o.ty==='sw'||o.ty==='dg')return fromBlade(B.cwSpec(o));
@@ -82,6 +82,10 @@ Object.assign(DEF,{oakst:()=>staff(['#3a7a3a','#7ac87a','#d8ffd8'],'#6a4a2a'),fr
 // the crafted mithril and mass-produced Grid tiers, the Spiral Quick Fire Bow and the Dragon Hammer
 Object.assign(DEF,{mstaff:()=>staff(['#4a90c0','#c8e8f4','#ffffff'],'#7aa0b8',1),mgstaff:()=>staff(['#2a3a6a','#e0e4ec','#ffffff'],'#3a4a7a',1),mbow:()=>bow(['#7aa0b8','#4a7890','#c8e8f4'],'#ffffff'),mgbow:()=>bow(['#e0e4ec','#2a3a6a','#ffffff'],'#2a3a6a'),sqfbow:()=>bow(['#c87a2a','#7a3a10','#ffd27a'],'#ff8a3a'),
  mhammer:()=>hammer(['#c8e8f4','#7aa0b8','#ffffff'],true),mghammer:()=>hammer(['#e0e4ec','#2a3a6a','#ffffff'],true),dhammer:()=>hammer(['#8a1a1a','#4a0a0a','#e8c050'],true),mspear:()=>spearS(['#4a6a8a','#c8e8f4','#ffffff','#4a90c0'],0),mgspear:()=>spearS(['#2a3a6a','#e0e4ec','#ffffff','#5a6a9a'],0)});
+// the realms past level 480 (owner 2026-10-25): Raphael's staff of mercy, the Yatan crozier, Baal's staff and maul, the Dawnbow, the Rift Wing Bow, the Lance of the Thrones, the Inquisitor's maul
+Object.assign(DEF,{rgrace:()=>staff(['#3a8a5a','#a8f0c8','#ffffff'],'#e8e4d8',1),yblack:()=>staff(['#120814','#3a0a4a','#b04aff'],'#1a0a1a',1),baalst:()=>staff(['#2a0404','#8a0a0a','#ff6a3a'],'#1a0606',1),
+ sdawn:()=>bow(['#fff4d0','#c8a050','#ffffff'],'#ffe27a'),rwbow:()=>bow(['#2a2430','#14101a','#c8283a'],'#ff2a3a'),tlance:()=>spearS(['#e8e4d8','#ffe27a','#ffffff','#ffd24a'],2),
+ yinqa:()=>hammer(['#3a2a2e','#1a1014','#a81a2a'],true),baalm:()=>hammer(['#2a0a0a','#120404','#ff5a2a'],true)});
 const CACHE={};
 // sprite(id, rarity) -> {canvas, gx, gy, w, h}; null for an unknown id
 function sprite(id,r){const k=id+'|'+(r||0);if(CACHE[k])return CACHE[k];const f=String(id).startsWith('cw|')?()=>cwDef(id):A.blade&&BLADED.includes(id)?()=>fromBlade(A.blade.BSPEC[id]):DEF[id];if(!f)return null;const o=f();if(!o)return null;const {I,gx,gy}=o;

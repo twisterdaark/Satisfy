@@ -1950,7 +1950,7 @@ function bChestGive(g){g.open=1;const b=MT[g.b];(S.bch||(S.bch={}))[g.b]=today()
 function bossChest(m,b){if(!b.boss||m.tmp||m.arena||m.evt||m.sg||m.bh||m.spar||m.fake||m.mob||ARN||TWR||bchUsed(m.type))return;const til=gTime+120;
  DGATES.push({x:m.x-14,y:m.y+4,to:{x:m.x,y:m.y},hint:'hBChest',tmp:1,chest:1,til,b:m.type,lv:0});setTimeout(()=>toast(t('bcHas',{b:itN(m.type)}),'good'),800);}
 Object.assign(STR.ar,{"bcToday": "صندوق {b} اتفتح النهارده. بيرجع بكرة، والدروب العادي بينزل كل مرة.", "bcHas": "{b} ساب صندوقه اليومي! افتحه قبل ما يختفي.", "mbChest": "صندوق الزعيم (مرة في اليوم): قطعة مضمونة بتقييم أعلى، وخاماته كاملة، وأحجار تقوية وأحجار نادرة", "mbNorm": "الدروب العادي (كل مرة):"});Object.assign(STR.en,{"bcToday": "You opened {b}'s chest today. It comes back tomorrow; the normal drops fall every time.", "bcHas": "{b} left its daily chest! Open it before it fades.", "mbChest": "Boss chest (once a day): a guaranteed item of a higher rating, all its materials, enhancement and rare stones", "mbNorm": "Normal drops (every kill):"});
-function useGate(g){if(g.bh)return bhUse(g);if(g.tw)return twUse(g);if(g.chest)return openBChest(g);if(roomFade)return;if(g.vc&&!vcGate(g))return;if(P.ride)dismount();if(g.lv&&!g.ant&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
+function useGate(g){if(g.bh)return bhUse(g);if(g.tw)return twUse(g);if(g.chest)return openBChest(g);if(roomFade)return;if(g.vc&&!vcGate(g))return;if(g.hv&&!hvGate(g))return;if(P.ride)dismount();if(g.lv&&!g.ant&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
 const ROOMS=[],PROPS=[];
 function genRoom(b,bi,kind,rx,ry,z){const R={id:'r'+bi,bi,b,kind,rx,ry,z,dx:b.x*TS+b.w*8,dy:(b.y+b.h)*TS+8};ROOMS.push(R);
   for(let y=ry;y<ry+8;y++)for(let x=rx;x<rx+12;x++)setT(x,y,(y<ry+2||y===ry+7||x===rx||x===rx+11)?IW:FW);
@@ -2279,6 +2279,82 @@ const VCB={vb15:15,vb14:14,velfin:13,vb12:12,vb11:11,vb10:10,vtira:9,vlatina:8,v
   G([C.x1-3,C.ym],dn?[dn.x0+5,dn.ym]:[C.x1-5,C.ym],'hVcDown',{vc:C.n,vdown:1});
   for(let y=C.ym+3;y<=C.ym+5;y++)for(let x=C.x0+3;x<=C.x0+5;x++)setT(x,y,DR);
   G([C.x0+4,C.ym+4],[ah[0],ah[1]+2],'hVcStone',{vc:C.n,vstone:1});});})();
+// The realms past level 480 (owner 2026-10-25: "I'm level 480 and there is nothing left to do"; the Angel Hierarchy): east of the
+// vampire cities in the band under the world, three places of their own. Asgard, the realm of Rebecca, the goddess of light: its
+// Outer Courts, the Wall of Judgement and the Inner Sanctum behind it (Lv 520), Archangel Raphael's court and Archangel Michael's
+// throne at the far end. The Yatan Cathedral, under the ruins of Yatan's temple, where the black magicians of the Yatan Church
+// chant. And the Fallen Rift (Lv 550), where the angels cast out of Asgard fell: Sariel, the fallen archangel who became a Great
+// Demon, and the Great Demon Baal on his throne. Each realm is a box of tiles (var: read at load before this part runs elsewhere).
+var HVR={asg:{x0:962,x1:1330,y0:330,y1:393,ym:361,wall:1151,hall:1294},ycat:{x0:1342,x1:1580,y0:334,y1:389,ym:361,alt:1560},rift:{x0:1594,x1:1960,y0:330,y1:393,ym:361,cr:1780,th:1920}};
+var HVSTAIR={x:797,y:73},HVYAT={x:456,y:27},HVCANDLE=[],HVPROP=[];
+var HVBK={raphael:'asg',michael:'asg',yarch:'ycat',sariel:'rift',baal:'rift'},HVB=[],HVZ=null,HVSIN=0,HVST=0;
+function hvIn(R,tx,ty){return tx>=R.x0&&tx<=R.x1+.99&&ty>=R.y0&&ty<=R.y1+.99;}
+// the realm a tile is in, and the part of it (the Inner Sanctum is behind a sealed wall; Michael's hall and Baal's throne have names of their own)
+function hvRealm(tx,ty){if(ty<VCY0)return null;for(const k in HVR)if(hvIn(HVR[k],tx,ty))return k;return null;}
+function hvZone(tx,ty){const k=hvRealm(tx,ty),R=HVR[k];if(!k)return null;
+ if(k==='asg')return tx>=R.hall?'zAsgT':tx>=R.wall?'zAsg2':'zAsg1';if(k==='ycat')return 'zYatC';return tx>=R.th-2?'zBaal':'zRift';}
+function hvArea(tx,ty){const k=hvRealm(tx,ty);return !k?null:k==='asg'?(tx>=HVR.asg.wall?'asg2':'asg1'):k;}
+(function genHV(){const r=mulberry32(4801),R=HVR;
+ // ---- Asgard: a floor of cloud (snow), golden roads (sand), pillars and walls of white marble (ice wall), white temples, pools of light
+ {const A=R.asg,{x0,x1,y0,y1,ym,wall,hall}=A;
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)setT(x,y,SN);
+  for(let x=x0;x<=x1;x++)for(let y=ym-1;y<=ym+1;y++)setT(x,y,DR);
+  for(const cx of [1000,1040,1080,1120,1185,1225,1265])for(let y=y0+1;y<y1;y++)for(let x=cx;x<cx+2;x++)setT(x,y,DR);
+  // the plaza: gardens and a pool, the Herald waits here
+  for(const [a,b] of [[ym-8,ym-3],[ym+3,ym+8]])for(const [c,d] of [[x0+3,x0+8],[x0+16,x0+21]])for(let y=a;y<=b;y++)for(let x=c;x<=d;x++)setT(x,y,FL);
+  for(let y=ym-7;y<=ym-5;y++)for(let x=x0+11;x<=x0+14;x++)setT(x,y,WA);
+  // pillars along the road, a white temple or palace in each block
+  for(let x=x0+24;x<x1-40;x+=7)for(const y of [ym-3,ym+3])if(at(x,y)===SN||at(x,y)===DR)setT(x,y,IW);
+  const temple=(x,y,w,h,k)=>{const b={x,y,w,h,k,hv:1};b.lx=b.x;buildings.push(b);for(let yy=y+2;yy<y+h;yy++)for(let xx=x;xx<x+w;xx++)setT(xx,yy,BL);};
+  const blocks=[[x0+24,999],[1003,1039],[1043,1079],[1083,1119],[1123,1147],[wall+4,1184],[1188,1224],[1228,1264],[1268,hall-3]];
+  for(const [bx0,bx1] of blocks)for(const [by0,by1] of [[y0+2,ym-5],[ym+5,y1-2]]){let x=bx0;while(bx1-x+1>=7){const w=Math.min(bx1-x+1,7+(r()*3|0)),h=Math.min(by1-by0+1,6+(r()*3|0));
+    if(r()<.42)temple(x,by0+(r()*Math.max(1,by1-by0-h+2)|0),w,h,r()<.7?'temple':'palace');x+=w+4;}}
+  // the Wall of Judgement: marble from cloud to cloud; the way through is sealed by light below level 520
+  for(let y=y0;y<=y1;y++)for(let x=wall;x<=wall+2;x++)setT(x,y,IW);
+  // Michael's hall: a walled throne room at the east end, open to the road
+  for(let y=y0+4;y<=y1-4;y++)for(let x=hall;x<=x1;x++){const e=x===hall||x===x1||y===y0+4||y===y1-4,g=x===hall&&Math.abs(y-ym)<=1;setT(x,y,e&&!g?IW:FW);}
+  for(let y=y0+8;y<=y1-8;y+=5)for(const x of [hall+6,hall+14,hall+22])if(Math.abs(y-ym)>2)setT(x,y,IW);
+  HVPROP.push({k:'pool',x:x0+12.5,y:ym-6},{k:'throne',x:x1-4,y:ym},{k:'astat',x:x0+19,y:ym-3},{k:'astat',x:x0+19,y:ym+3},{k:'judge',x:wall+1,y:ym-3},{k:'raph',x:1240,y:ym-7});}
+ // ---- the Yatan Cathedral: a nave of flagstones between rows of black pillars, pews of dark wood, an altar of black flame
+ {const C=R.ycat,{x0,x1,y0,y1,ym,alt}=C;
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const e=x===x0||x===x1||y===y0||y===y1;setT(x,y,e?WL:CF);}
+  for(let x=x0+14;x<alt-4;x+=6)for(const y of [ym-6,ym+6,y0+6,y1-6])setT(x,y,WL);
+  for(let x=x0+18;x<alt-10;x+=6)for(const [a,b] of [[ym-12,ym-8],[ym+8,ym+12]])for(let y=a;y<=b;y++)for(let k=0;k<3;k++)if(r()<.92)setT(x+k,y,FW);
+  // side chapels off the aisles, walled with one door each
+  for(let x=x0+30;x<alt-30;x+=44)for(const [a,b,dy] of [[y0+1,y0+11,y0+11],[y1-11,y1-1,y1-11]])for(let y=a;y<=b;y++)for(let k=0;k<=18;k++){const e=k===0||k===18||y===dy;setT(x+k,y,e&&!(y===dy&&Math.abs(k-9)<=1)?WL:CF);}
+  for(let y=ym-2;y<=ym+2;y++)setT(alt+8,y,BL);
+  for(let x=x0+16;x<alt;x+=12)for(const y of [ym-5,ym+5])HVCANDLE.push({x:x+.5,y:y+.2});
+  HVCANDLE.push({x:alt+6.5,y:ym-3.5},{x:alt+6.5,y:ym+3.5},{x:x0+4.5,y:ym-3},{x:x0+4.5,y:ym+3});
+  HVPROP.push({k:'altar',x:alt+8.5,y:ym},...HVCANDLE.map(o=>({k:'candle',x:o.x,y:o.y})));}
+ // ---- the Fallen Rift: scorched earth and broken rock, a crater where Sariel fell, the Great Demon's throne at the end
+ {const F=R.rift,{x0,x1,y0,y1,ym,cr,th}=F;
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)setT(x,y,r()<.05&&Math.abs(y-ym)>2&&x>x0+6?RK:DR);
+  for(let k=0;k<70;k++){const cx=x0+12+(r()*(th-x0-20)|0),cy=y0+2+(r()*(y1-y0-4)|0),rr=1+(r()*3|0);if(Math.abs(cy-ym)<4)continue;for(let y=cy-rr;y<=cy+rr;y++)for(let x=cx-rr;x<=cx+rr;x++)if((x-cx)**2+(y-cy)**2<=rr*rr)setT(x,y,RK);}
+  for(let x=x0;x<=x1;x++)for(let y=ym-1;y<=ym+1;y++)setT(x,y,CF);
+  for(let y=ym-17;y<=ym+17;y++)for(let x=cr-26;x<=cr+26;x++){const e=((x-cr)/24)**2+((y-ym)/15)**2;if(e<=1)setT(x,y,CF);else if(e<=1.25&&Math.abs(y-ym)>2)setT(x,y,RK);}
+  for(let y=y0;y<=y1;y++)for(let x=th;x<=x1;x++){const e=x===th&&Math.abs(y-ym)>2||y===y0||y===y1||x===x1;setT(x,y,e?RK:CF);}
+  HVPROP.push({k:'halo',x:cr+.5,y:ym-1},{k:'bthrone',x:x1-6,y:ym});}
+ // ---- the ways in and out: a Stairway of Light by Rebecca's church in Rolling, a stair down in the ruins of Yatan, and gates between
+ const near=(x0,y0)=>{for(let rr=0;rr<16;rr++)for(let dy=-rr;dy<=rr;dy++)for(let dx=-rr;dx<=rr;dx++){const x=x0+dx,y=y0+dy;let free=1;for(let j=-1;j<=2;j++)for(let i=-1;i<=1;i++)if(SOLID[at(x+i,y+j)])free=0;if(free)return [x,y];}return [x0,y0];};
+ {const s=near(HVSTAIR.x,HVSTAIR.y);HVSTAIR.x=s[0];HVSTAIR.y=s[1];const y=near(HVYAT.x,HVYAT.y);HVYAT.x=y[0];HVYAT.y=y[1];}
+ const px=(x,y)=>({x:x*TS+8,y:y*TS+10}),G=(a,to,hint,o)=>DGATES.push({...px(...a),to:px(...to),hint,hv:1,...o});
+ const A=R.asg,C=R.ycat,F=R.rift;
+ G([HVSTAIR.x,HVSTAIR.y],[A.x0+4,A.ym],'hHvStair',{lv:480,hk:'stair'});
+ G([A.x0+1,A.ym],[HVSTAIR.x,HVSTAIR.y+2],'hHvDown',{hk:'down'});
+ G([A.wall-2,A.ym],[A.wall+5,A.ym],'hHvWall',{lv:520,hard:1,hk:'wall'});
+ G([A.wall+4,A.ym-3],[A.wall-3,A.ym-3],'hHvWallB',{hk:'wallb'});
+ G([A.x1-2,A.ym+6],[F.x0+5,F.ym-12],'hHvFall',{lv:550,hard:1,hk:'fall'});
+ G([F.x0+2,F.ym-12],[A.x1-4,A.ym+6],'hHvUpA',{hk:'upa'});
+ G([HVYAT.x,HVYAT.y],[C.x0+5,C.ym],'hHvYat',{lv:500,hk:'yat'});
+ G([C.x0+2,C.ym],[HVYAT.x,HVYAT.y+2],'hHvUpY',{hk:'upy'});
+ G([C.x1-3,C.ym],[F.x0+5,F.ym+12],'hHvDeep',{lv:550,hard:1,hk:'deep'});
+ G([F.x0+2,F.ym+12],[C.x1-5,C.ym],'hHvUpC',{hk:'upc'});
+ // nothing solid where a gate stands or where it puts you (the realm's own floor there)
+ const fl=(x,y)=>{const k=hvRealm(x,y);return k==='asg'?SN:k==='ycat'?CF:k==='rift'?DR:PA;};
+ for(const g of DGATES.filter(g=>g.hv)){const tx=g.to.x/TS|0,ty=g.to.y/TS|0;for(let y=ty-1;y<=ty+2;y++)for(let x=tx-1;x<=tx+1;x++)if(SOLID[at(x,y)]&&y>=VCY0)setT(x,y,fl(x,y));
+  const gx=g.x/TS|0,gy=g.y/TS|0;if(gy>=VCY0)for(let y=gy-1;y<=gy+1;y++)for(let x=gx-1;x<=gx+1;x++)if(SOLID[at(x,y)])setT(x,y,fl(x,y));}
+ // Asgard's free-standing marble pillars rise above their tile (hvProp 'pcol')
+ {const {x0,x1,y0,y1}=A;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(at(x,y)===IW&&at(x,y-1)!==IW&&at(x,y+1)!==IW&&at(x-1,y)!==IW&&at(x+1,y)!==IW)HVPROP.push({k:'pcol',x:x+.5,y:y+.5});}})();
 // The third batch, patch 4 (plan U091-U093, U113, U137, U165, U293, U294): Piaro's new field east of his house, Pedro
 // Harbor on the South Sea with a pier on Cork Island, the Kraken's waters east of the island, and a stage on Patrian's
 // square. Physical columns.
@@ -6144,6 +6220,28 @@ const MT={
  gildong:{lv:[380,380],hp:60000000,dmg:17000,spd:66,xp:9000000,gold:120000,aggro:240,r:6,oy:30,boss:1,leash:280,slam:22000,slamR:60,adds:'egclone',drop:[['mith',16],['diam',2],['mstone',16],['blue',1]]},
  egclone:{lv:[370,370],hp:3000000,dmg:12000,spd:66,xp:20000,gold:0,aggro:300,r:6,oy:30,drop:[]}
 };
+// the monsters of the realms past level 480 (genHV, hvSpawn; owner 2026-10-25), here so the first world built at load has them
+Object.assign(MT,{
+ asent:{lv:[480,492],hp:8200000,dmg:26000,spd:62,xp:440000,gold:1000,aggro:170,r:6,oy:30,sc:1.08,drop:[['afeath',.5],['mith',.6]]},
+ aseraph:{lv:[490,505],hp:7400000,dmg:30000,spd:58,xp:500000,gold:1100,aggro:180,r:6,oy:30,drop:[['afeath',.7],['mstone',1]]},
+ athrone:{lv:[505,512],hp:33000000,dmg:36000,spd:50,xp:2400000,gold:6000,aggro:170,r:9,oy:40,sc:1.4,drop:[['afeath',2],['hshard',.15],['mith',2]]},
+ adomin:{lv:[515,530],hp:12600000,dmg:32000,spd:64,xp:710000,gold:1400,aggro:180,r:6,oy:30,sc:1.1,drop:[['afeath',.8],['hshard',.03],['mith',.7]]},
+ apower:{lv:[525,540],hp:11400000,dmg:37000,spd:60,xp:815000,gold:1500,aggro:190,r:6,oy:30,sc:1.1,drop:[['afeath',.9],['hshard',.04]]},
+ acherub:{lv:[540,550],hp:51000000,dmg:43000,spd:60,xp:4000000,gold:9000,aggro:190,r:12,oy:40,drop:[['afeath',3],['hshard',.3],['diam',.2]]},
+ raphael:{lv:[535,535],hp:420000000,dmg:40000,spd:60,xp:45000000,gold:450000,aggro:260,r:8,oy:42,boss:1,leash:320,slam:55000,slamR:72,sc:1.45,adds:'aseraph',drop:[['afeath',30],['hshard',6],['mith',30],['diam',5],['blue',4]]},
+ michael:{lv:[565,565],hp:650000000,dmg:47000,spd:64,xp:70000000,gold:600000,aggro:280,r:8,oy:44,boss:1,leash:340,slam:68000,slamR:76,sc:1.55,adds:'aseraph',drop:[['afeath',40],['hshard',10],['mith',40],['diam',6],['emer',4]]},
+ ybmag:{lv:[500,515],hp:6300000,dmg:41000,spd:54,xp:580000,gold:1300,aggro:200,r:6,oy:30,drop:[['yseal',.5],['mstone',1]]},
+ yinq:{lv:[510,525],hp:11800000,dmg:31000,spd:62,xp:660000,gold:1300,aggro:180,r:6,oy:30,sc:1.08,drop:[['yseal',.6],['mith',.6]]},
+ ypact:{lv:[520,535],hp:10600000,dmg:36000,spd:56,xp:760000,gold:1400,aggro:190,r:6,oy:30,drop:[['yseal',.7],['dcore',.01]]},
+ ychor:{lv:[515,530],hp:8800000,dmg:32000,spd:72,xp:710000,gold:1200,aggro:200,r:6,oy:30,drop:[['yseal',.5],['mstone',1.2]]},
+ yarch:{lv:[545,545],hp:460000000,dmg:43000,spd:52,xp:50000000,gold:480000,aggro:260,r:9,oy:46,boss:1,leash:300,slam:60000,slamR:70,sc:1.55,adds:'ypact',drop:[['yseal',30],['mith',30],['diam',5],['sapph',4],['dcore',2]]},
+ fangel:{lv:[550,565],hp:19000000,dmg:39500,spd:66,xp:1150000,gold:1700,aggro:190,r:6,oy:30,sc:1.08,drop:[['ffeath',.6],['mith',.8]]},
+ rhound:{lv:[555,570],hp:16000000,dmg:40500,spd:84,xp:1230000,gold:1500,aggro:220,r:9,oy:22,drop:[['ffeath',.3],['dcore',.02],['leather',1.5]]},
+ bseraph:{lv:[565,580],hp:18000000,dmg:50000,spd:58,xp:1420000,gold:1900,aggro:200,r:6,oy:30,drop:[['ffeath',.9],['dcore',.03]]},
+ gdherald:{lv:[580,595],hp:80000000,dmg:55000,spd:50,xp:6900000,gold:14000,aggro:200,r:10,oy:46,sc:1.5,drop:[['dcore',.5],['ffeath',2],['diam',.3]]},
+ rdrake:{lv:[585,595],hp:85000000,dmg:56000,spd:56,xp:7200000,gold:15000,aggro:210,r:18,oy:40,drop:[['dcore',.6],['dscale',1],['diam',.3]]},
+ sariel:{lv:[580,580],hp:720000000,dmg:52000,spd:66,xp:85000000,gold:700000,aggro:300,r:8,oy:44,boss:1,leash:340,slam:75000,slamR:76,sc:1.5,adds:'fangel',drop:[['ffeath',40],['dcore',8],['mith',40],['diam',7],['blue',5]]},
+ baal:{lv:[600,600],hp:1100000000,dmg:60000,spd:50,xp:140000000,gold:1200000,aggro:320,r:14,oy:64,boss:1,leash:360,slam:90000,slamR:96,wb:7200,sc:2.1,adds:'fangel',regen:.002,drop:[['dcore',14],['ffeath',30],['mith',50],['diam',10],['ruby',6]]}});
 const SPAWN=[['rabbit',104,150,42,62,14],['rabbit',147,157,62,100,6],['boar',147,157,64,104,8],['boar',100,118,44,62,5],['goblin',109,152,105,116,14],['merman',80,106,88,112,12],['pwolf',64,100,42,90,12],
  ['outlaw',58,80,99,116,10],['forc',80,150,4,24,16],['gbear',66,156,26,37,12],['wolf',3,62,46,84,14],['bear',3,62,46,84,6],['golem',29,49,3,41,10],['cgolem',50,61,12,22,4],
  ['hwolf',160,221,40,62,14],['rboar',160,221,42,62,8],['deserter',160,221,103,118,12],['mgolem',160,221,104,118,6],['gbear',160,221,26,37,8]];
@@ -6212,6 +6310,8 @@ NPCS.push({id:'merchant',spr:'merchant',...rmP(7,5.5,2.5),reach:16},{id:'armorer
  {id:'merchantP',spr:'merchant',...rmP(18,5.5,2.5),reach:16},
  {id:'armorerP',spr:'armorer',...rmP(20,5.5,2.5),reach:16},{id:'innP',spr:'inn',...rmP(19,4.5,2.5),reach:16},
  {id:'stylist',spr:'stylist',...rmP(9,5.5,3.6)});   // Layla works in her salon now (owner 2026-10-23)
+// the people of the realms past level 480 (owner 2026-10-25): the Herald of Asgard, the Apostate at the Cathedral door, the Watcher where the fallen landed
+NPCS.push({id:'hvher',spr:'hvher',tx:HVR.asg.x0+8,ty:HVR.asg.ym-3.6,ph:1,dir:2},{id:'ycapo',spr:'ycapo',tx:HVR.ycat.x0+7,ty:HVR.ycat.ym-3.6,ph:1,dir:3},{id:'hvwatch',spr:'hvwatch',tx:HVR.rift.x0+9,ty:HVR.rift.ym-3.6,ph:1,dir:3});
 let camXf=0,camYf=0,camSnap=true,S,P,mons=[],npcs=[],fx=[],nums=[],smoke=[],proj=[],shake=0,mode='lang',hudDirty=true,gTime=0,camX=0,camY=0,MID=0;
 const RC=[
  {id:'jaffa',slot:'x',need:{wood:2,ore:1},unlock:()=>!!S.qs.sm3,diff:.8,strikes:4},
@@ -6524,7 +6624,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   // the 32nd Great Demon Belial at the gate of hell (major 7), after them for the same reason
   {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
-  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();}
+  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();hvSpawn();}
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
  {const now=Date.now(),D=(S&&S.mrt)||{};for(const m of mons){const u=D[mobKey(m)];if(u>now){m.dead=true;m.dying=0;m.rt=(u-now)/1000;}}}
@@ -6941,7 +7041,7 @@ const DROPG=['isword','bow','staff','hammer','spear','dagger','larmor','lhelm','
 // a boss's random gear drop follows its level (owner 2026-10-24, a player: "bosses drop only swords"): every weapon kind of the
 // mithril tier from Lv 120, of the mass-produced Grid tier from Lv 220
 const DROPM=['msword','mstaff','mbow','mspear','mdagger','mhammer','marmor','mhelm','mear'],DROPMG=['mgsword','mgstaff','mgbow','mgspear','mgdagger','mghammer','mgarmor','mghelm','mggloves','mgboots'],DROPA=[...DROPG,...DROPM,...DROPMG];
-const dropTier=k=>{const lv=MT[k]&&MT[k].lv?MT[k].lv[0]:0;return lv>=220?DROPMG:lv>=120?DROPM:DROPG;};
+const dropTier=k=>{const lv=MT[k]&&MT[k].lv?MT[k].lv[0]:0;return lv>=550?DROPHV2:lv>=480?DROPHV:lv>=220?DROPMG:lv>=120?DROPM:DROPG;};
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.55:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const L=b.boss?dropTier(m.type):DROPG,id=L[rand()*L.length|0],r=rand()<(b.boss?.1:.04)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
 function killMon(m){const b=MT[m.type];m.dead=true;lpSrc(m);if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}pasKill(m);balKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh&&!m.noLoot)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);pxpKill(m,b);eaKill(m);if(NET&&b.boss&&!m.bh&&!m.noLoot)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!m.noLoot&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh&&!m.noLoot){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else if(!m.noLoot)bossChest(m,b);{let xg=Math.round(b.xp*(m.xmul||1)*pxpKF(m)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(evOn('gold')?.5:0)+petB('owl')+(tlOn('veteran')?.05:0)+ttB('xp')+(tlOn('viscount')?.05:0)+(tlOn('pioneer')?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));xg=innXP(xg);gainXP(xg);jKill(m,xg);twKill(m);num(m.x,m.y-36,'+'+Math.round(xg*XPMUL).toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',xg,t('lootXP'),{ic:null,cls:'xp'});}if(b.gold&&!m.bh&&!m.noLoot){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(tlOn('explorer')?.05:0)+ttB('gold')+(tlOn('dandy')?.05:0)+(tlOn('shero')?.05:0)+(tlOn('baron')?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
@@ -6949,7 +7049,7 @@ function killMon(m){const b=MT[m.type];m.dead=true;lpSrc(m);if(m.spar){if(SPAR&&
  if(!m.bh&&!m.noLoot)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,RCKEY.includes(k)?1:p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p*(1+secB('drop')))addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill (a divine beast's breath is one)
  if(!m.bh&&!m.noLoot&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}if(!m.noLoot){rbBossDrop(m,b);cosDrop(m,b);}
  if(m.lv>=20&&!m.tmp&&!m.noLoot){if(b.boss){addMat('estone',1+(m.lv/50|0));if(rand()<.12)addMat('pstone',1);if(rand()<.25)addMat('bstone',1);}else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
- crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;sc2Kill(m);mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);p4Kill(m);p5Kill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
+ crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;sc2Kill(m);mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);p4Kill(m);p5Kill(m);hvKill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
  if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;annW('annGuard',{lv:S.lv});}giveTitle('forest');S.raid=0;}
  if(m.type==='gchief'){shake=.3;giveTitle('chief');}
  if((S.kills.rabbit||0)+(S.kills.goblin||0)>=40)giveTitle('hunter');
@@ -8349,7 +8449,7 @@ function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>$
  Object.keys(DISH).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickEat')}</small>`});});
  RSUSE.filter(k=>!DISH[k]).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickUse')}</small>`});});
  if(S.rsh&&S.rsh.g)a.push({k:'sgl',n:1,tip:`<b>${t('sgl')}</b><br>${t('rsGlassD')}<br><small>${t(S.rsh.w?'sglOffT':'sglOnT')}</small>`}); // the glasses come off and on from the bag (owner 2026-10-22)
- ['wood','ore','leather','mstone','estone','pstone','bstone','mith','dscale','blue','tstone','brphx','brdrg','brtig','brtor','bljewel','blhorn','fess','iess','sess','bvial','vwleath','wegg','wheat','straw','melon','pumpk','fcab','compost','kink','kpearl'].forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(STR.en[k+'D']?k+'D':'matD')}</small>`});});
+ ['wood','ore','leather','mstone','estone','pstone','bstone','mith','dscale','blue','tstone','brphx','brdrg','brtig','brtor','bljewel','blhorn','fess','iess','sess','bvial','vwleath','afeath','hshard','yseal','ffeath','dcore','wegg','wheat','straw','melon','pumpk','fcab','compost','kink','kpearl'].forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(STR.en[k+'D']?k+'D':'matD')}</small>`});});
  GEMK.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${t(k+'D')}</small>`});});
  S.arrows.forEach((n,r)=>{if(n)a.push({k:'arrows',n,r,tip:`<b class="rt rt${r}">${t('arrows')}</b><br>${t('r'+r)} · ${ARROWG[r]}G`});});
  S.items.forEach(i=>{if(WSH[i.id]||(i.slot!=='w'&&i.slot!=='x')){const on=isEq(i);a.push({k:i.id,n:1,r:i.r,it:i,eq:on,tip:itemTip(i)+cmpTip(i)+(i.fav?`<br><small style="color:#f2c14e">★ ${t('ivFavT')}</small>`:'')+(i.lock?`<br><small style="color:#9fd8ff">🔒 ${t('ivLockT')}</small>`:'')+`<br><small>${on?t('eqMark'):t('clickEquip')}</small>`});}});
@@ -9762,7 +9862,7 @@ function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,ti
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
  h+=`<div class="ssec">${t('special')}</div><div class="sgrid">`+['comp','indom','dign','insi',...(S.hid.pers?['pers']:[])].map(k=>row(t(k),S.hid[k],t('t'+k)+'<br><small>'+t('noDist')+'</small>')).join('')+'</div>';
  h+=`<div class="pts" id="ptsT">${t('pts',{n:S.pts})}</div>`+(S.pts>0?`<div class="note">${t('ptsHint')}</div>`:'');
- h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk','expoc','angler',...TTOWN].filter(id=>S.tl[id]);
+ h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk','expoc','angler','aslay','fbane','gdslay',...TTOWN].filter(id=>S.tl[id]);
  const tlSk=id=>Object.keys(SKD).filter(k=>SKD[k].title===id||TLS[id]===k).filter((k,i,a)=>a.indexOf(k)===i);own.sort((x,y)=>(tlSk(y).length>0)-(tlSk(x).length>0));   // owner 2026-10-24: titles that give a skill come first
  const skTipT=k=>{const d=SKD[k]||{};return esc(`<b>${t('sk_'+k)}</b><br>${t('skd_'+k)}<br><small>${t('skCost',{mp:mpC(k),cd:Math.round((d.cd||0)*skCostM(k))})}</small>`);};
  h+=`<div class="ssec">${t('titlesH')}</div>`+(own.length?own.map(id=>`<div class="tl${S.title===id?' worn':''}"><div><b>${t('tl_'+id)}</b><small>${t('tl_'+id+'D')}</small>${tlSk(id).length?`<em>${tlSk(id).map(k=>`<span class="tlsk" data-tip="${skTipT(k)}">${t('iskL',{s:t('sk_'+k)})}</span>`).join(' · ')}</em>`:STR.en['tl_'+id+'S']?`<em>${t('tl_'+id+'S')}</em>`:''}</div><button data-title="${id}" ${S.title===id?'disabled':''}>${t(S.title===id?'tlWorn':'tlWear')}</button></div>`).join('')+`<div class="note">${t('tlNote')}</div>`:`<div class="note">${t('noTitles')}</div>`);
@@ -9895,7 +9995,7 @@ function sahZone(tx,ty){const T=TITAN,B=BUTIN,R=ROLL,A=ABYSS;
  if(ty>96&&tx<854)return 'zDran';
  if(asmoIn(tx,ty))return 'zAsmo';if(ty<T.y0-2&&tx>=846)return 'zSahHills';
  return tx<856&&ty<=78?'zTatur':'zSahFarm';}
-function zoneAt(x,y){if(y>=VCY0*TS){const C=vcAt(x/TS,y/TS);return C?'zVc'+C.n:'void';}if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;if(inRace(x,y))return 'zRace';return (roomAt(x,y)||{}).z||'zWin';}if(x>=WMW*TS)return eaReg(x/TS|0,y/TS|0);if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS,pz=p3Zone(tx,y/TS)||p4Zone(tx,y/TS)||p5Zone(tx,y/TS);if(pz)return pz;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
+function zoneAt(x,y){if(y>=VCY0*TS){const C=vcAt(x/TS,y/TS);return C?'zVc'+C.n:(hvZone(x/TS,y/TS)||'void');}if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;if(inRace(x,y))return 'zRace';return (roomAt(x,y)||{}).z||'zWin';}if(x>=WMW*TS)return eaReg(x/TS|0,y/TS|0);if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS,pz=p3Zone(tx,y/TS)||p4Zone(tx,y/TS)||p5Zone(tx,y/TS);if(pz)return pz;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
 /* fog of war (Nitro's feedback): the map shows only what you have seen, in cells of FOGC tiles, saved in S.fog. A paper map
    (sold at inns) draws the whole land in sepia, but no monsters, people or quests where you haven't been yourself. */
 const FOGC=8,FOGW=Math.ceil(MW/FOGC),FOGH=Math.ceil((WMH+NR)/FOGC);let FOG=null,fogT=0,fogV=0;
@@ -10087,7 +10187,7 @@ function closeMap(){SFX.close();$('mapW').hidden=true;mode='play';}
 // gate stands in, until one stands where you are or on the surface; with several ways in, the one nearest you
 // owner 2026-10-23 ("the City 13 lord takes me to the sea"): each vampire city is a place of its own too, reached by the
 // ant hill and the ways down from the city before it
-const ugArea=(x,y)=>{if(y<WMH*TS)return 'w';const r=dunAt(x,y)||roomAt(x,y);if(r)return r;const C=vcAt(Math.floor(x/TS),Math.floor(y/TS));return C?'vc'+C.n:null;};
+const ugArea=(x,y)=>{if(y<WMH*TS)return 'w';const r=dunAt(x,y)||roomAt(x,y);if(r)return r;const C=vcAt(Math.floor(x/TS),Math.floor(y/TS));if(C)return 'vc'+C.n;const h=hvArea(x/TS,y/TS);return h?'hv'+h:null;};
 function wSurf(x,y){if(y<WMH*TS)return {x,y};const pa=ugArea(P.x,P.y),a=ugArea(x,y);if(a&&a===pa||!a&&pa!=='w'&&Math.hypot(x-P.x,y-P.y)<40*TS)return {x,y};
  // back from the place along the gates into it, fewest steps first, until a gate stands where you are
  const GS=DGATES.filter(g=>g.to&&!g.exit&&!g.tmp),seen=new Set([a]),dP=g=>Math.hypot(g.x-P.x,g.y-P.y);let lv=a?GS.filter(g=>ugArea(g.to.x,g.to.y)===a):GS.filter(g=>Math.hypot(g.to.x-x,g.to.y-y)<60*TS),top=null;
@@ -10495,7 +10595,7 @@ function update(dt){
  if(P.sw>0){P.sw-=dt;P.hp=Math.min(mh,P.hp+mh*.03*dt);if(rand()<dt*6)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*14,vx:0,vy:-24,t:.5,c:'#7ae07a',fl:1});}
  // hunger only drops while you do something (Twister 2026-10-19): walking, riding, attacking, dodging or guarding
  {const busy=Math.abs(P.x-(P.fqx??P.x))+Math.abs(P.y-(P.fqy??P.y))>.01||P.acd>0||P.dash>0||P.guard;P.fqx=P.x;P.fqy=P.y;if(busy)P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));}
- updateProj(dt);mxTick(dt);vcTick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
+ updateProj(dt);mxTick(dt);vcTick(dt);hvTick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
@@ -10641,7 +10741,7 @@ function drawEnh(x,y,en,front,dir){const c=ENHC[Math.min(4,Math.max(0,en-6))],d=
  if(rand()<(en>=9?.12:en>=7?.05:.02))fx.push({x:hx+(rand()-.5)*6,y:hy+(rand()-.5)*8,vx:(rand()-.5)*6,vy:-10-rand()*12,t:.22,c:en>=7?c:'#ffffff'});
  if(en>=10){ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<2;i++){const a=gTime*1.8+i*3.142,ox=x+Math.cos(a)*11,oy=y-11+Math.sin(a)*5;ctx.fillStyle=c;ctx.globalAlpha=.55;ctx.fillRect(ox-1,oy-1,2,2);}
   ctx.restore();}}
-function drawGate(g){const x=Math.round(g.x),y=Math.round(g.y),pul=.5+Math.sin(gTime*3)*.5;if(g.vc&&vcDrawGate(g,x,y))return;
+function drawGate(g){const x=Math.round(g.x),y=Math.round(g.y),pul=.5+Math.sin(gTime*3)*.5;if(g.vc&&vcDrawGate(g,x,y))return;if(g.hv&&hvDrawGate(g,x,y))return;
  if(g.mz){ctx.save();const c=g.mz===1?'#ffd24a':'#6ad8ff';ctx.globalAlpha=.18+pul*.12;R(ctx,x-5,y-90,10,86,c);ctx.globalAlpha=1;
   ctx.fillStyle='#2a2018';ctx.beginPath();ctx.ellipse(x,y-8,13,12,0,Math.PI,0);ctx.fill();R(ctx,x-13,y-8,26,8,'#2a2018');
   ctx.fillStyle='#050404';ctx.beginPath();ctx.ellipse(x,y-6,9,9,0,Math.PI,0);ctx.fill();R(ctx,x-9,y-6,18,6,'#050404');
@@ -10831,7 +10931,7 @@ function render(dt){DRAWN=0;netDrawn=0;
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(hcHand(hx,hy,P.dir,P.slash)){}else if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,wKey(w),w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
   // SAT-ONLINE-117 (plan U324): each part that adds to the scene is its own boundary, the other players' part (netEnts) above
   // all: a bad message or a bug in one part costs that part this frame, never the whole world
-  if(BHR)entsOf(bhEnts,ents);if(S&&S.wis)entsOf(twEnts,ents);if(S){entsOf(c2Ents,ents);entsOf(p2Ents,ents);entsOf(p3Ents,ents);entsOf(p4Ents,ents);entsOf(phEnts,ents);entsOf(necEnts,ents);entsOf(hcEnts,ents);entsOf(fbEnts,ents);entsOf(brEnts,ents);entsOf(blEnts,ents);entsOf(nvEnts,ents);}if(SKA)entsOf(tAimEnts,ents);if(S)entsOf(tlEnts,ents);if(NET&&!titleCam)entsOf(netEnts,ents);}
+  if(BHR)entsOf(bhEnts,ents);if(S&&S.wis)entsOf(twEnts,ents);if(S){entsOf(c2Ents,ents);entsOf(p2Ents,ents);entsOf(p3Ents,ents);entsOf(p4Ents,ents);entsOf(phEnts,ents);entsOf(necEnts,ents);entsOf(hcEnts,ents);entsOf(fbEnts,ents);entsOf(brEnts,ents);entsOf(blEnts,ents);entsOf(nvEnts,ents);entsOf(hvEnts,ents);}if(SKA)entsOf(tAimEnts,ents);if(S)entsOf(tlEnts,ents);if(NET&&!titleCam)entsOf(netEnts,ents);}
  entsOf(decEnts,ents); // SAT-ONLINE-179: the season's decorations
  // one broken drawing (a stale sprite file after an update) must not hide the player and everything after it
  ents.sort((a,b)=>a.y-b.y).forEach(e=>{try{e.f();DRAWN++;}catch(err){ctx.globalAlpha=1;gameErr(err);}});
@@ -10859,7 +10959,7 @@ function render(dt){DRAWN=0;netDrawn=0;
   if(f.coin){R(ctx,f.x-1,f.y-1,3,3,'#8a6418');R(ctx,f.x-1,f.y-1,2,2,f.c);return;}if(f.fl)ctx.globalAlpha=Math.min(1,f.t*1.5)*(.6+.4*Math.sin(f.t*40));R(ctx,f.x,f.y,f.t>.2?2:1,f.t>.2?2:1,f.c);ctx.globalAlpha=1;});
  nums.forEach(n=>TX.push({s:n.s,x:n.x,y:n.y,f:'{s}px "Press Start 2P", monospace',z:(n.big?9:7)*jPop(n),c:n.c,a:Math.min(1,n.t*2)}));
  if(COOKG&&P)drawCook();if(SEWG&&P)drawSew();if(MIXG&&P)drawMix();if(FARMG&&P)drawFarm();if((P4.rh||P4.dance)&&P)p4DrawGame();
- ctx.restore();drawWeather();dnDraw();p3Dark();p4Dark();p5Dark();vcDark();pgScene();qGuide();
+ ctx.restore();drawWeather();dnDraw();p3Dark();p4Dark();p5Dark();vcDark();hvDark();pgScene();qGuide();
  if(P&&S&&mode!=='title'&&mode!=='lang'){const k=P.y<WH*TS&&P.x<BW*TS?clamp((P.x-49*TS)/40,0,1):0;if(k>0){dg.globalCompositeOperation='source-over';dg.clearRect(0,0,VW,VH);dg.fillStyle=`rgba(3,12,6,${.62*k})`;dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='destination-out';const px=P.x-camX,py=P.y-8-camY,g=dg.createRadialGradient(px,py,10,px,py,95);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(0,0,VW,VH);ctx.drawImage(darkC,0,0);}
   const hole=(x,y,r)=>{const g=dg.createRadialGradient(x-camX,y-camY,r*.15,x-camX,y-camY,r);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(x-camX-r,y-camY-r,r*2,r*2);};
   if(P.cc>0){ctx.globalCompositeOperation='lighter';const px=P.x-camX,py=P.y-10-camY,gl=ctx.createRadialGradient(px,py,2,px,py,50);gl.addColorStop(0,'rgba(190,230,255,.75)');gl.addColorStop(1,'rgba(90,160,255,0)');ctx.fillStyle=gl;ctx.fillRect(px-50,py-50,100,100);ctx.globalCompositeOperation='source-over';}
@@ -12375,6 +12475,340 @@ const undB=rc=>!rc.drop&&!rc.cre&&isSm()?undOf(rc.id)*.0006:0;
 window.__GRB={RB,RBK,kn:rbKn,gate:rbGate,use:rbUse,opts:rbOpts,hint:rbHint,boss:rbBossDrop,undGain,undCraft,undB,camp:()=>campMenu(),sew:()=>sewMenu(),make:(k,b)=>makeLife(k,b),cookOk:()=>{COOKG.p=COOKG.c;cookHit();},mixOk:()=>mixEnd(2)}; // tests
 Object.assign(STR.ar,{"pgRevT": "دوران!", "pgDesp": "يأس", "pgTrcOn": "تجاوز: هجومك الضعف وضرباتك بتطير، لمدة 30 ثانية"});
 Object.assign(STR.en,{"pgRevT": "REVOLVE!", "pgDesp": "Despair", "pgTrcOn": "Transcend: double attack and your cuts fly, for 30 seconds"});
+/* ---- The realms past level 480 (owner 2026-10-25: "I'm level 480 and there are no monsters left and nothing to do"; the Angel
+   Hierarchy: "the Gods of the Beginning, Rebecca and Yatan ... angels and demons are a separate cosmic safeguard species that can
+   never hold true divinity ... the Angels of Asgard, Raphael and Michael, emotionless executors of Rebecca's will; high-tier
+   Archangels as strong as the Great Demons ... Fallen Angels become Great Demons (Sariel)"). The places are carved in genHV:
+   Asgard (Lv 480-570): the Outer Courts, the Wall of Judgement (sealed below Lv 520), the Inner Sanctum with Archangel Raphael,
+     and Archangel Michael's throne. In by the Stairway of Light beside Rebecca's church in Rolling.
+   The Yatan Cathedral (Lv 500-545): the black magicians, inquisitors and pact priests of the Yatan Church, the god of darkness;
+     the Archbishop of Yatan signs a Great Demon Contract when he is half dead. In by the stair in the ruins of Yatan's temple.
+   The Fallen Rift (Lv 550-600, sealed below Lv 550): the angels cast out of Asgard; Sariel the Fallen, who becomes a Great
+     Demon at half health, and the Great Demon Baal, a world boss with two hours' rest (WS.wb). In from Michael's hall or from
+     under the Cathedral's altar.
+   Asgard's light weighs on a sinner (an outlaw, or bad karma): 2% of your health a second, never the last point.
+   New: 15 monsters and 5 bosses, 5 materials, 10 weapons, 2 armour sets (dropped, or forged by a blacksmith of level 9 with
+   their recipe book), a ring and a necklace, 3 people with 16 quests (5 of them daily), 3 titles.
+   Online: the monsters are shared like the rest, Baal's rest is the world's; the quests, kills and titles are each player's. */
+Object.assign(P3D,{acherub:{base:'sbird',f:'grayscale(.7) brightness(1.55) sepia(.35) saturate(1.4)',sc:.62},rhound:{base:'hwolf',f:'brightness(.45) sepia(1) hue-rotate(-45deg) saturate(4.5)',sc:1.8},
+ rdrake:{base:'trauka',f:'brightness(.42) saturate(1.7) hue-rotate(-18deg)',sc:.52}});
+Object.assign(BEL,{rdrake:'fire',baal:'fire'});
+(()=>{const A=o=>({k:'arc',w:3,max:28,tele:.3,reach:26,arc:1.05,mul:1,rec:.3,cd:1.2,...o}),L=o=>({k:'leap',w:3,min:30,max:110,tele:.42,dashT:.3,mul:1.2,rec:.5,cd:2,...o}),
+ N=o=>({k:'line',w:3,min:30,max:120,tele:.5,dash:230,dashT:.5,mul:1.4,rec:.5,cd:2.4,...o}),G=o=>({k:'ring',w:2,max:40,tele:.7,reach:38,mul:1.3,rec:.5,cd:3,...o}),
+ S=o=>({k:'shot',w:3,min:40,max:160,tele:.5,spd:170,mul:.9,rec:.35,cd:2,sp:'holy',...o}),F=o=>({k:'fan',w:2,min:30,max:170,tele:.6,spd:200,mul:.7,rec:.4,cd:3,n:3,sprd:.8,sp:'holy',...o}),
+ U=o=>({k:'burst',w:2,max:100,tele:.8,spd:140,mul:.6,rec:.5,cd:5,n:10,sp:'holy',...o}),Rn=o=>({k:'rain',w:2,min:0,max:190,tele:.6,mul:1,rec:.4,cd:5,n:5,zr:16,fall:.8,pat:'around',sp:'holy',...o}),
+ H=o=>({k:'heal',w:4,max:999,tele:.8,rec:.3,cd:1,hpb:.4,pct:.2,once:30,...o}),M=o=>({k:'mend',w:4,max:999,tele:.7,rec:.3,cd:3,pct:.1,rng:200,...o}),
+ W=o=>({k:'ward',w:2,max:999,tele:.5,rec:.25,cd:7,t:4,red:.45,...o}),C=o=>({k:'call',w:3,max:999,tele:.6,rec:.3,cd:1,once:20,...o}),
+ Y=o=>({k:'cry',w:2,max:220,tele:.6,rec:.3,cd:1,once:14,t:6,...o}),B=o=>({k:'blink',w:2,min:40,max:170,tele:.28,mul:1.2,rec:.35,cd:3,...o}),
+ FI=[.012,3,'fire'],DK=[.012,4,'dark'],BL=[.01,4,'blood'];
+ Object.assign(AIK,{asent:'soldier',aseraph:'caster',athrone:'brute',adomin:'soldier',apower:'charge',acherub:'lunge',ybmag:'caster',yinq:'soldier',ypact:'caster',ychor:'lunge',
+  fangel:'soldier',rhound:'lunge',bseraph:'caster',gdherald:'brute',rdrake:'charge',raphael:'caster',yarch:'caster'});
+ Object.assign(RKMV,{
+  // ---- Asgard: light that judges; the angels feel nothing as they strike
+  asent:[A({max:32,tele:.3,reach:30,arc:1.2,mul:1.15,combo:2}),N({min:30,max:130,tele:.45,dash:270,dashT:.35,mul:1.4}),W({t:4,red:.4,cd:9}),S({min:40,max:180,tele:.5,spd:240,sp:'hlance',mul:1,cd:3.2})],
+  aseraph:[S({min:40,max:200,tele:.45,spd:230,mul:1,cd:2}),F({min:30,max:190,n:5,sprd:.9,spd:220,mul:.75,cd:3.4}),M({pct:.08,rng:220,cd:5}),Rn({min:0,max:200,n:5,zr:16,cd:6})],
+  athrone:[G({max:64,tele:.85,reach:60,mul:1.4,stun:.5,cd:5}),A({max:40,tele:.42,reach:38,arc:1.4,mul:1.4,kb:28,cd:1.6}),U({max:120,n:12,spd:150,sp:'hfire',mul:.6,dot:FI,cd:6}),N({min:40,max:150,tele:.6,dash:220,dashT:.55,mul:1.6,wall:1,cd:4})],
+  adomin:[A({max:34,tele:.28,reach:32,arc:1.3,mul:1.2,combo:3}),N({min:30,max:150,tele:.42,dash:300,dashT:.32,mul:1.5}),Y({once:16,t:6}),S({min:40,max:190,tele:.45,spd:260,sp:'hlance',mul:1.1,cd:3})],
+  apower:[N({min:30,max:170,tele:.4,dash:330,dashT:.3,mul:1.6,combo:2}),S({min:40,max:220,tele:.4,spd:300,sp:'hlance',mul:1.2,cd:2.4}),A({max:36,tele:.3,reach:36,mul:1.25,cd:1.4}),Rn({min:20,max:200,pat:'line',n:6,zr:14,up:1,sp:'hlance',mul:1,cd:6})],
+  acherub:[L({min:40,max:170,tele:.42,dashT:.32,mul:1.5,cd:2.4}),F({min:30,max:220,n:7,sprd:1.1,spd:230,sp:'hfire',mul:.7,dot:FI,cd:3.6}),G({max:80,tele:.8,reach:72,mul:1.2,kb:40,cd:5}),Rn({min:20,max:230,n:7,zr:16,sp:'hfire',mul:1,cd:6})],
+  // Raphael heals what the light has hurt, and judges what it has not; Michael's sword is the fire of judgement
+  raphael:[S({min:40,max:240,tele:.42,spd:260,mul:1.15,cd:2.2}),M({pct:.12,rng:260,cd:5}),Rn({min:0,max:240,n:8,zr:18,pat:'ring',mul:1,cd:6}),W({ally:1,rng:260,t:5,red:.5,cd:10}),
+   G({max:120,tele:.95,reach:110,mul:1.2,pull:50,cd:7,ph:1}),U({max:140,n:18,spd:170,mul:.65,cd:6,ph:1}),H({hpb:.3,pct:.12,once:60,ph:2}),C({kin:['aseraph'],once:24,ph:2})],
+  michael:[A({max:40,tele:.3,reach:38,arc:1.5,mul:1.4,combo:3,dot:FI}),N({min:40,max:180,tele:.4,dash:340,dashT:.32,mul:1.7}),S({min:40,max:260,tele:.38,spd:320,sp:'hlance',mul:1.35,cd:2.4}),
+   Rn({min:0,max:260,n:9,zr:18,pat:'around',sp:'hfire',mul:1.1,dot:FI,cd:6,ph:1}),G({max:130,tele:1,reach:118,mul:1.3,stun:.6,cd:7,ph:1}),L({min:40,max:200,tele:.42,dashT:.34,mul:1.8,cd:3,ph:2}),U({max:150,n:20,spd:180,sp:'hfire',mul:.7,cd:6,ph:2}),Y({once:30,t:10,ph:2})],
+  // ---- the Yatan Cathedral: long chants, then black magic that breaks bodies (owner: "long chants ... strong dark magic ... decay, confusion, berserk")
+  ybmag:[S({min:40,max:230,tele:1.2,spd:220,sp:'bflame',mul:1.6,dot:DK,cd:3}),Rn({min:20,max:220,n:6,zr:18,tele:1.5,sp:'bflame',mul:1.3,dot:DK,cd:7}),S({min:40,max:200,tele:.9,spd:180,sp:'dark',mul:.5,slow:3,cd:6}),B({min:0,max:70,tele:.2,away:100,rec:.2,cd:5})],
+  yinq:[A({max:34,tele:.3,reach:32,arc:1.3,mul:1.2,combo:3}),N({min:30,max:140,tele:.45,dash:270,dashT:.35,mul:1.45}),S({min:40,max:180,tele:.5,spd:220,sp:'dark',mul:.5,root:1.4,cd:5}),W({t:4,red:.4,cd:9})],
+  ypact:[S({min:40,max:210,tele:.6,spd:200,sp:'bflame',mul:1.1,dot:DK,cd:2.4}),C({kin:['hdemon'],once:20}),A({max:30,tele:.3,reach:28,mul:1,drain:.05,cd:1.4}),Rn({min:20,max:210,n:5,zr:16,sp:'dark',mul:1,dot:DK,cd:6})],
+  ychor:[L({min:30,max:140,tele:.36,dashT:.28,mul:1.3,cd:2.2}),A({max:30,tele:.24,reach:28,mul:1.1,combo:3,dot:DK}),Y({once:14,t:6}),B({min:40,max:160,tele:.26,behind:1,mul:1.3,cd:3.4})],
+  yarch:[S({min:40,max:240,tele:.9,spd:240,sp:'bflame',mul:1.5,dot:DK,cd:2.6}),Rn({min:0,max:240,n:8,zr:18,pat:'ring',tele:1.2,sp:'bflame',mul:1.2,dot:DK,cd:6}),W({t:5,red:.5,cd:10}),C({kin:['ypact','ychor'],once:20}),
+   U({max:150,n:18,spd:170,sp:'bflame',mul:.7,dot:DK,cd:6,ph:1}),G({max:120,tele:1,reach:110,mul:1.2,pull:60,cd:7,ph:1}),A({max:36,tele:.3,reach:34,mul:1.3,drain:.06,cd:1.6,ph:2}),Rn({min:0,max:260,n:12,zr:20,pat:'cross',lin:5,tele:1.4,sp:'bflame',mul:1.4,dot:DK,cd:8,ph:2})],
+  // ---- the Fallen Rift: what the light cast down
+  fangel:[A({max:34,tele:.28,reach:32,arc:1.3,mul:1.25,combo:3,dot:DK}),N({min:30,max:150,tele:.42,dash:300,dashT:.32,mul:1.5}),S({min:40,max:200,tele:.45,spd:260,sp:'bflame',mul:1.1,dot:DK,cd:3}),B({min:40,max:170,tele:.26,mul:1.3,cd:4})],
+  rhound:[L({min:30,max:140,tele:.36,dashT:.28,mul:1.35,dot:FI}),A({max:30,tele:.24,reach:28,mul:1.1,combo:2,dot:FI}),F({min:30,max:150,n:3,sprd:.6,spd:220,sp:'fire',mul:.8,dot:FI,cd:4}),C({kin:['rhound'],once:30,rng:260})],
+  bseraph:[S({min:40,max:230,tele:.42,spd:260,sp:'bflame',mul:1.2,dot:DK,cd:2.2}),F({min:30,max:210,n:6,sprd:1,spd:240,sp:'bflame',mul:.75,cd:3.4}),W({ally:1,rng:220,t:5,red:.5,cd:9}),Rn({min:0,max:220,n:7,zr:18,sp:'dark',mul:1.1,dot:DK,cd:6})],
+  gdherald:[A({max:42,tele:.42,reach:40,arc:1.4,mul:1.45,kb:30,cd:1.6,combo:2}),G({max:72,tele:.85,reach:66,mul:1.4,stun:.6,cd:5}),Rn({min:20,max:220,n:7,zr:18,sp:'fire',mul:1.2,dot:FI,cd:6}),Y({once:16,t:8})],
+  rdrake:[F({min:30,max:230,n:5,sprd:.9,spd:240,sp:'fire',mul:.85,dot:FI,cd:3.4}),N({min:40,max:160,tele:.5,dash:280,dashT:.45,mul:1.6}),G({max:72,tele:.85,reach:66,mul:1.2,kb:44,cd:5}),Rn({min:20,max:240,n:7,zr:16,sp:'fire',mul:1.1,cd:6})],
+  // Sariel: an archangel's sword until half health, then the Great Demon's (hvTick turns her); Baal: the first of the Great Demons
+  sariel:[A({max:38,tele:.28,reach:36,arc:1.4,mul:1.4,combo:3}),S({min:40,max:250,tele:.38,spd:300,sp:'hlance',mul:1.3,cd:2.4}),B({min:40,max:200,tele:.24,mul:1.45,cd:3,behind:1}),F({min:30,max:230,n:6,sprd:1,spd:250,sp:'bflame',mul:.85,dot:DK,cd:3.4,ph:1}),
+   Rn({min:0,max:250,n:9,zr:18,pat:'ring',sp:'bflame',mul:1.15,dot:DK,cd:6,ph:1}),U({max:160,n:22,spd:180,sp:'bflame',mul:.7,dot:DK,cd:6,ph:2}),N({min:40,max:190,tele:.36,dash:360,dashT:.3,mul:1.8,combo:2,ph:2}),H({hpb:.25,pct:.1,once:60,ph:2})],
+  baal:[A({max:52,tele:.4,reach:50,arc:1.5,mul:1.4,kb:36,cd:1.6,combo:2}),Rn({min:0,max:280,n:10,zr:22,pat:'around',sp:'fire',mul:1.25,dot:FI,cd:5}),G({max:110,tele:1,reach:100,mul:1.4,stun:.8,cd:6}),S({min:50,max:280,tele:.6,spd:260,sp:'bflame',mul:1.4,dot:DK,cd:3}),
+   U({max:170,n:24,spd:190,sp:'bflame',mul:.7,dot:DK,cd:6,ph:1}),C({kin:['rhound','fangel'],once:30,ph:1}),N({min:40,max:200,tele:.6,dash:260,dashT:.55,mul:1.9,wall:1,ph:2}),Rn({min:0,max:300,n:14,zr:22,pat:'cross',lin:6,sp:'fire',mul:1.4,dot:FI,cd:8,ph:2}),Y({once:40,t:12,ph:2})]});
+})();
+// what they look like: the angels in white and gold with feathered wings and halos, the fallen in black with broken grey halos,
+// the Yatan Church in black robes and purple fire; Sariel's second sheet is her Great Demon form
+Object.assign(FIG,{asent:{hair:'helm',hc:'#e8e8f0',hl:'#ffffff',plume:'#ffe27a',skin:'#f4e8dc',sk2:'#d8c8b8',eye:'#ffe27a',top:'#e8e8f0',top2:'#b8bcc8',sleeves:true,armC:'#d8dce8',armC2:'#9aa0b0',chest:'#f4d070',pad:'#c8a040',pad2:'#8a6a20',cape:'#f4f4ff',aw:'#f4f6ff',halo:'#ffe27a',pants:'#c8ccd8',boots:'#a8a080'},
+ aseraph:{fem:1,hair:'long',hc:'#f2dc90',hl:'#fff8d0',skin:'#f8ece2',sk2:'#dcc8bc',eye:'#ffd27a',lip:'#e8a0a0',top:'#ffffff',top2:'#dce0ec',sleeves:true,robeL:1,trim:'#e8c050',collar:'#e8c050',belt:'#e8c050',aw:'#fffaf0',halo:'#ffe27a',pants:'#dce0ec',boots:'#e8c050'},
+ athrone:{hair:'helm',hc:'#e8c050',hl:'#fff0a0',plume:'#ffffff',skin:'#f4e8dc',sk2:'#d8c8b8',eye:'#ffffff',top:'#e8c050',top2:'#a87a20',sleeves:true,armC:'#e8c050',armC2:'#a87a20',chest:'#fff4c0',pad:'#ffffff',pad2:'#c8ccd8',cape:'#ffffff',aw:'#fff4d0',halo:'#ffffff',pants:'#a87a20',boots:'#7a5a18'},
+ adomin:{hair:'helm',hc:'#c8d4f0',hl:'#ffffff',plume:'#6ab0ff',skin:'#f4e8dc',sk2:'#d8c8b8',eye:'#9fd8ff',top:'#c8d4f0',top2:'#7a88a8',sleeves:true,armC:'#c8d4f0',armC2:'#7a88a8',chest:'#e8eef8',pad:'#6ab0ff',pad2:'#2a5ab0',cape:'#2a5ab0',aw:'#e8f0ff',halo:'#bfe0ff',pants:'#7a88a8',boots:'#4a5468'},
+ apower:{hair:'short',hc:'#c8a050',hl:'#f2d27a',skin:'#f4e8dc',sk2:'#d8c8b8',eye:'#ffe27a',top:'#b8902a',top2:'#7a5a18',sleeves:true,armC:'#c8a050',armC2:'#7a5a18',chest:'#e8c050',pad:'#a81a1a',pad2:'#6a0a0a',cape:'#a81a1a',aw:'#fff4e0',halo:'#ffe27a',pants:'#7a5a18',boots:'#4a3010'},
+ raphael:{hair:'long',hc:'#e8e8f4',hl:'#ffffff',skin:'#f8ece2',sk2:'#dcc8bc',eye:'#7af0a8',top:'#ffffff',top2:'#d8e8dc',sleeves:true,robeL:1,trim:'#3ac87a',collar:'#e8c050',sash:'#3ac87a',belt:'#e8c050',cape:'#e8fff0',aw:'#ffffff',halo:'#fff4a0',pants:'#d8e8dc',boots:'#e8c050'},
+ michael:{hair:'short',hc:'#e8a040',hl:'#ffe27a',skin:'#f4e4d4',sk2:'#d8c4b0',eye:'#ffe27a',top:'#e8c050',top2:'#a8741a',sleeves:true,armC:'#f2d27a',armC2:'#a8741a',chest:'#ffffff',pad:'#ff7a2a',pad2:'#a8280a',cape:'#c8281a',aw:'#ffffff',halo:'#ffe27a',pants:'#a8741a',boots:'#6a4a10'},
+ ybmag:{hair:'long',hc:'#1a1a1a',hl:'#3a2a4a',hood:'#141018',skin:'#c8b0b8',sk2:'#a08890',eye:'#c86aff',top:'#141018',top2:'#0a080c',sleeves:true,robeL:1,trim:'#7a2aa8',collar:'#7a2aa8',belt:'#7a2aa8',pants:'#0a080c',boots:'#08060a'},
+ yinq:{hair:'short',hc:'#2a1a1a',hl:'#4a2a2a',mask:'iron',maskC:'#4a4048',skin:'#c8a890',sk2:'#a88870',eye:'#ff3a2a',top:'#3a1018',top2:'#200810',sleeves:true,armC:'#4a4048',armC2:'#2a2228',chest:'#5a1020',pad:'#2a2228',pad2:'#141014',cape:'#200810',pants:'#200810',boots:'#141014'},
+ ypact:{hair:'bald',hc:'#2a1a1a',hl:'#3a2a2a',horns:'#4a2a2a',skin:'#b89a90',sk2:'#947870',eye:'#ff6a1a',top:'#4a0a1a',top2:'#2a0610',sleeves:true,robeL:1,trim:'#c8a050',sash:'#ff6a1a',belt:'#c8a050',cape:'#1a0408',pants:'#2a0610',boots:'#140408'},
+ ychor:{hair:'long',hc:'#4a4a54',hl:'#6a6a74',hood:'#3a3a44',mask:'skull',maskC:'#d8d0c0',eye:'#9a6aff',skin:'#8a8a94',sk2:'#6a6a74',top:'#3a3a44',top2:'#22222a',sleeves:true,robeL:1,trim:'#5a5a64',pants:'#22222a',boots:'#141418'},
+ yarch:{hair:'mitre',hc:'#0a0a0a',hl:'#2a2a2a',hat:'#2a0a3a',trim:'#c8a050',horns:'#3a2a2a',skin:'#b8a0a8',sk2:'#94808a',eye:'#c86aff',beard:'#1a1a1a',beard2:'#0a0a0a',longBeard:1,top:'#2a0a3a',top2:'#14061e',sleeves:true,robeL:1,collar:'#c8a050',sash:'#7a2aa8',belt:'#c8a050',cape:'#14061e',pants:'#14061e',boots:'#0a040e'},
+ fangel:{hair:'messy',hc:'#1a1a22',hl:'#3a3a44',skin:'#d8ccd4',sk2:'#b4a6b0',eye:'#ff2a3a',top:'#24202c',top2:'#141018',sleeves:true,armC:'#3a3444',armC2:'#1a1620',chest:'#2a2430',pad:'#5a0a14',pad2:'#2a0408',cape:'#1a1620',aw:'#22202a',halo:'#5a5a64',pants:'#141018',boots:'#0a080c'},
+ bseraph:{fem:1,hair:'long',hc:'#1a1420',hl:'#3a2a44',skin:'#e4d8e0',sk2:'#c0b0bc',eye:'#ff2a3a',lip:'#8a1a2a',top:'#1a1420',top2:'#0e0a12',sleeves:true,robeL:1,trim:'#8a1a2a',collar:'#8a1a2a',belt:'#8a1a2a',aw:'#1a1620',halo:'#6a3a44',pants:'#0e0a12',boots:'#0a060a'},
+ gdherald:{hair:'spiky',hc:'#0e0606',hl:'#3a1010',skin:'#6a1a1a',sk2:'#4a0e0e',horns:'#e8e0d0',wings:'#1a0806',eye:'#ffd24a',spike:'#c8c0b0',top:'#1a0806',top2:'#0e0404',sleeves:false,pad:'#3a1010',pad2:'#1a0806',pants:'#1a0806',boots:'#3a0e0e',cape:'#0a0303'},
+ sariel:{fem:1,hair:'long',hc:'#2a2a34',hl:'#5a5a6a',skin:'#ece2ea',sk2:'#c8bac6',eye:'#c8c8ff',lip:'#a87a8a',top:'#3a3a48',top2:'#1e1e28',sleeves:true,armC:'#8a8a9a',armC2:'#4a4a58',chest:'#c8c8d8',pad:'#4a4a58',pad2:'#24242e',cape:'#24242e',aw:'#8a8a98',halo:'#9a9aa8',pants:'#1e1e28',boots:'#14141a'},
+ sarield:{fem:1,hair:'long',hc:'#0a0a0e',hl:'#3a0a14',skin:'#d8c0c8',sk2:'#a8909a',eye:'#ff1a2a',lip:'#5a0a14',horns:'#e8e0d0',top:'#14080c',top2:'#0a0406',sleeves:true,armC:'#2a1418',armC2:'#14080c',chest:'#5a0a14',pad:'#3a0a10',pad2:'#1a0408',cape:'#3a0408',aw:'#120a0e',pants:'#0a0406',boots:'#0a0406'},
+ baal:{hair:'spiky',hc:'#0a0404',hl:'#3a0a0a',skin:'#7a1414',sk2:'#4a0a0a',horns:'#1a1414',wings:'#140404',eye:'#ffe24a',spike:'#e8d8c0',beard:'#140404',beard2:'#0a0202',top:'#1a0a0a',top2:'#0e0404',sleeves:false,armC:'#2a1010',armC2:'#140808',chest:'#3a0e0e',pad:'#5a1010',pad2:'#2a0808',cape:'#3a0404',pants:'#140808',boots:'#2a0a0a'},
+ // the people of the realms: the Herald of Asgard, the Apostate (once a priest of Yatan) and the Watcher, who fell and regrets it
+ hvher:{fem:1,hair:'long',hc:'#f2e4b0',hl:'#ffffff',skin:'#f8ece2',sk2:'#dcc8bc',eye:'#9fd8ff',lip:'#e8a0a0',top:'#ffffff',top2:'#dce0ec',sleeves:true,robeL:1,trim:'#e8c050',collar:'#e8c050',belt:'#e8c050',aw:'#ffffff',halo:'#ffe27a',pants:'#dce0ec',boots:'#e8c050'},
+ ycapo:{hair:'short',hc:'#5a5a5a',hl:'#7a7a7a',skin:'#c8a890',sk2:'#a88870',eye:'#3a2a2a',beard:'#5a5a5a',beard2:'#3a3a3a',top:'#3a3040',top2:'#221c28',sleeves:true,robeL:1,trim:'#6a6070',belt:'#6a6070',pants:'#221c28',boots:'#141018'},
+ hvwatch:{hair:'side',hc:'#6a6a74',hl:'#9a9aa4',skin:'#e0d6dc',sk2:'#bcb0b8',eye:'#c8c8ff',top:'#2a2a34',top2:'#18181f',sleeves:true,cape:'#2a2a34',aw:'#5a5a64',halo:'#6a6a74',pants:'#18181f',boots:'#0e0e12'}});
+for(const n of ['asent','aseraph','athrone','adomin','apower','raphael','michael','ybmag','yinq','ypact','ychor','yarch','fangel','bseraph','gdherald','sariel','baal','hvher','ycapo','hvwatch'])if(!SH[n])shLazy(n,()=>SA.chars.buildSheet(FIG[n]));
+shLazy('sariel~1',()=>SA.chars.buildSheet(FIG.sarield));
+Object.assign(NAMEK,{asent:'asentN',aseraph:'aseraphN',athrone:'athroneN',adomin:'adominN',apower:'apowerN',acherub:'acherubN',raphael:'raphaelN',michael:'michaelN',ybmag:'ybmagN',yinq:'yinqN',ypact:'ypactN',ychor:'ychorN',yarch:'yarchN',
+ fangel:'fangelN',rhound:'rhoundN',bseraph:'bseraphN',gdherald:'gdheraldN',rdrake:'rdrakeN',sariel:'sarielN',baal:'baalN'});
+Object.assign(MWPN,{asent:()=>{R(ctx,6,-24,1,22,'#c8a050');R(ctx,5,-27,3,3,'#fff4c0');R(ctx,6,-29,1,2,'#ffffff');},
+ adomin:()=>{R(ctx,6,-20,1,18,'#e8eef8');R(ctx,7,-19,1,16,'#9aa4b4');R(ctx,4,-3,5,1,'#6ab0ff');R(ctx,6,-2,1,3,'#2a3a5a');},
+ apower:()=>{R(ctx,6,-26,1,24,'#7a5a18');R(ctx,5,-30,3,4,'#ffe27a');R(ctx,6,-31,1,1,'#ffffff');R(ctx,4,-27,1,2,'#ffe27a');R(ctx,8,-27,1,2,'#ffe27a');},
+ athrone:()=>{R(ctx,5,-24,3,22,'#e8c050');R(ctx,6,-23,1,20,'#fff4c0');R(ctx,3,-3,7,2,'#ffffff');R(ctx,5,-1,3,3,'#7a5a18');},
+ michael:()=>{R(ctx,5,-26,2,24,'#ffd27a');R(ctx,6,-25,1,22,'#fff8d8');R(ctx,3,-3,6,1,'#e8c050');R(ctx,5,-2,2,3,'#7a1a0a');const k=(gTime*12|0)%3;R(ctx,4,-27-k,1,3,'#ff8a2a');R(ctx,7,-23+k,1,3,'#ff5a1a');R(ctx,5,-29,2,2,'#ffb02a');},
+ raphael:()=>{R(ctx,6,-24,1,22,'#e8e4d8');R(ctx,5,-28,3,4,'#7af0a8');R(ctx,6,-27,1,1,'#ffffff');},
+ yarch:()=>{R(ctx,6,-26,1,24,'#2a1a2a');R(ctx,5,-29,4,1,'#c8a050');R(ctx,8,-31,1,3,'#c8a050');R(ctx,6,-32,2,1,'#c8a050');R(ctx,6,-30,2,1,'#b04aff');},
+ yinq:()=>{R(ctx,6,-16,1,14,'#3a2a2a');R(ctx,4,-19,5,4,'#4a4048');R(ctx,4,-19,5,1,'#8a8090');},
+ fangel:()=>{R(ctx,6,-22,1,20,'#3a3444');R(ctx,7,-21,1,18,'#8a7a9a');R(ctx,4,-3,5,1,'#5a0a14');R(ctx,6,-2,1,3,'#1a0e14');},
+ sariel:()=>{R(ctx,6,-26,1,24,'#4a4a58');R(ctx,7,-26,4,1,'#c8c8d8');R(ctx,10,-25,2,1,'#c8c8d8');R(ctx,11,-24,1,2,'#8a8a9a');},
+ baal:()=>{R(ctx,4,-30,4,28,'#1a0a0a');R(ctx,5,-29,2,26,'#5a0a0a');R(ctx,2,-3,8,2,'#3a0a0a');R(ctx,4,-1,4,3,'#140404');R(ctx,5,-24,2,1,'#ff5a2a');R(ctx,5,-16,2,1,'#ff5a2a');}});
+// the new projectiles: a lance of light, a ball of holy fire, a black flame
+Object.assign(P3SP,{hlance:p=>{ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a||0);R(ctx,-8,-1,12,2,'#fff4c0');R(ctx,-5,0,9,1,'#ffffff');R(ctx,3,-2,3,4,'#ffe27a');ctx.restore();if(rand()<.35)fx.push({x:p.x,y:p.y,vx:0,vy:-6,t:.25,c:'#fff4c0',fl:1});},
+ hfire:p=>{blob(ctx,p.x,p.y,3,3,'#ffb02a');R(ctx,p.x-1,p.y-1,2,2,'#fff8d8');if(rand()<.5)fx.push({x:p.x,y:p.y,vx:0,vy:-12,t:.3,c:'#ffd27a',fl:1});},
+ bflame:p=>{blob(ctx,p.x,p.y,3,3,'#1a0820');R(ctx,p.x-1,p.y-2,2,2,'#7a2aa8');R(ctx,p.x,p.y-1,1,1,'#e8b0ff');if(rand()<.5)fx.push({x:p.x,y:p.y,vx:0,vy:-10,t:.35,c:rand()<.5?'#5a1a8a':'#140818',fl:1});}});
+// what they drop: named pieces at the bosses (and a little at the elites), the two sets, a ring and a necklace
+RC.push({id:'rgrace',slot:'w',atk:700,spd:.5,mpb:150,fix:4,lvr:530,ip:['absurd'],drop:1,unlock:()=>false},
+ {id:'mjudg',slot:'w',atk:790,spd:.5,fix:4,lvr:565,ip:['dpgs'],drop:1,unlock:()=>false},
+ {id:'sdawn',slot:'w',atk:690,spd:.3,fix:4,lvr:520,ip:['qfire'],drop:1,unlock:()=>false},
+ {id:'tlance',slot:'w',atk:750,spd:.43,fix:4,lvr:540,ip:['gale'],drop:1,unlock:()=>false},
+ {id:'yblack',slot:'w',atk:680,spd:.5,mpb:140,fix:4,lvr:545,ip:['cdr'],drop:1,unlock:()=>false},
+ {id:'yinqa',slot:'w',atk:640,spd:.42,fix:3,lvr:520,ip:['crowd'],drop:1,unlock:()=>false},
+ {id:'sfang',slot:'w',atk:610,spd:.23,fix:4,lvr:575,ip:['bleed'],drop:1,unlock:()=>false},
+ {id:'fgreat',slot:'w',atk:830,spd:.5,fix:4,lvr:580,ip:['vamp'],drop:1,unlock:()=>false},
+ {id:'rwbow',slot:'w',atk:720,spd:.3,fix:4,lvr:585,ip:['combo'],drop:1,unlock:()=>false},
+ {id:'baalm',slot:'w',atk:920,spd:.42,fix:4,lvr:600,ip:['crowd'],drop:1,unlock:()=>false},
+ {id:'baalst',slot:'w',atk:760,spd:.5,mpb:170,fix:4,lvr:600,ip:['absurd'],drop:1,unlock:()=>false},
+ {id:'halor',slot:'k',dm:.12,hpp:.06,fix:4,lvr:530,drop:1,unlock:()=>false},
+ {id:'dcneck',slot:'n',dm:.12,mpb:90,fix:4,lvr:580,drop:1,unlock:()=>false},
+ {id:'seraa',slot:'a',def:125,hpp:.08,fix:3,lvr:510,need:{afeath:12,hshard:2,mith:12,diam:2},unlock:()=>isSm()&&S.smith>=9&&rbKn('rb_m_seraph'),diff:1.65,strikes:10},
+ {id:'serah',slot:'h',def:46,fix:3,lvr:510,need:{afeath:6,hshard:1,mith:8},unlock:()=>isSm()&&S.smith>=9&&rbKn('rb_m_seraph'),diff:1.6,strikes:9},
+ {id:'serag',slot:'g',def:27,as:.06,fix:3,lvr:510,need:{afeath:6,hshard:1,mith:6},unlock:()=>isSm()&&S.smith>=9&&rbKn('rb_m_seraph'),diff:1.6,strikes:9},
+ {id:'serab',slot:'b',def:25,ms:.06,fix:3,lvr:510,need:{afeath:6,hshard:1,mith:6},unlock:()=>isSm()&&S.smith>=9&&rbKn('rb_m_seraph'),diff:1.6,strikes:9},
+ {id:'falla',slot:'a',def:142,hpp:.1,dm:.03,fix:3,lvr:560,need:{ffeath:12,dcore:2,mith:14,diam:3},unlock:()=>isSm()&&S.smith>=9&&rbKn('rb_m_fallen'),diff:1.75,strikes:10},
+ {id:'fallh',slot:'h',def:52,fix:3,lvr:560,need:{ffeath:6,dcore:1,mith:9},unlock:()=>isSm()&&S.smith>=9&&rbKn('rb_m_fallen'),diff:1.7,strikes:10},
+ {id:'fallg',slot:'g',def:30,as:.08,fix:3,lvr:560,need:{ffeath:6,dcore:1,mith:7},unlock:()=>isSm()&&S.smith>=9&&rbKn('rb_m_fallen'),diff:1.7,strikes:10},
+ {id:'fallb',slot:'b',def:28,ms:.08,fix:3,lvr:560,need:{ffeath:6,dcore:1,mith:7},unlock:()=>isSm()&&S.smith>=9&&rbKn('rb_m_fallen'),diff:1.7,strikes:10});
+Object.assign(WSH,{rgrace:{l:12,c:'#a8f0c8',k:'staff'},mjudg:{l:14,c:'#ffd27a',w:1,k:'sword'},sdawn:{l:10,c:'#fff4d0',k:'bow'},tlance:{l:12,c:'#ffe27a',k:'spear'},yblack:{l:12,c:'#b04aff',k:'staff'},yinqa:{l:7,c:'#3a2a2e',k:'hammer'},
+ sfang:{l:6,c:'#4a4a5a',k:'dagger'},fgreat:{l:15,c:'#3a3440',w:1,k:'sword'},rwbow:{l:10,c:'#2a2430',k:'bow'},baalm:{l:8,c:'#2a0a0a',k:'hammer'},baalst:{l:12,c:'#ff6a3a',k:'staff'}});
+Object.assign(SETS,{seraph:{it:['seraa','serah','serag','serab'],b:{2:{hpp:.08,def:30},4:{hpp:.08,def:30,dm:.1,as:.06}}},fallen:{it:['falla','fallh','fallg','fallb'],b:{2:{dm:.08},4:{dm:.14,as:.08,hpp:.08}}},
+ archa:{it:['halor','mjudg'],b:{2:{dm:.1,as:.06}}},gdemon:{it:['dcneck','baalm'],b:{2:{dm:.12,hpp:.08}}}});
+Object.assign(NDROP,{raphael:[['rgrace',.22],['halor',.2],['tlance',.12]],michael:[['mjudg',.22],['halor',.2],['sdawn',.12]],yarch:[['yblack',.25],['yinqa',.15]],sariel:[['sfang',.22],['fgreat',.2],['dcneck',.12]],
+ baal:[['baalm',.2],['baalst',.15],['dcneck',.25],['rwbow',.1]],athrone:[['sdawn',.01]],acherub:[['tlance',.012]],yinq:[['yinqa',.003]],gdherald:[['fgreat',.008]],rdrake:[['rwbow',.015]],bseraph:[['rwbow',.004]]});
+Object.assign(MATP,{afeath:900,hshard:6000,yseal:1200,ffeath:1500,dcore:9000});AUK.push('afeath','hshard','yseal','ffeath','dcore');
+// a boss of level 480 or more drops the new armour and the Halo Ring as its random piece; of 550 or more, the Fallen set and the necklace too
+var DROPHV=['seraa','serah','serag','serab','halor'],DROPHV2=['seraa','serah','serag','serab','halor','falla','fallh','fallg','fallb','dcneck'];
+// the recipe books of the two sets: from the archangels and the fallen (traded and sold at the auction like the rest)
+RB.push({id:'rb_m_seraph',c:'smith',k:['seraa','serah','serag','serab'],g:80000,mon:[['raphael',.3],['michael',.35],['athrone',.004]]},{id:'rb_m_fallen',c:'smith',k:['falla','fallh','fallg','fallb'],g:100000,mon:[['sariel',.3],['baal',.4],['gdherald',.004]]});
+for(const b of RB.slice(-2)){for(const k of b.k)RBK[k]=b;RSUSE.push(b.id);AUK.push(b.id);MATP[b.id]=Math.round(b.g/4);for(const [m,p] of b.mon)MT[m].drop.push([b.id,p]);}
+// what the people of the realms say (they stand in NPCS: the Herald in the plaza, the Apostate at the Cathedral door, the Watcher where the fallen landed)
+Object.assign(NPCT,{hvher:{hi:'hvher_hi',idle:()=>['hvher_i1','hvher_i2','hvher_i3'][Math.floor(rand()*3)],low:'hvher_low',noGift:1},ycapo:{hi:'ycapo_hi',idle:()=>['ycapo_i1','ycapo_i2'][Math.floor(rand()*2)],low:'ycapo_low',noGift:1},
+ hvwatch:{hi:'hvwatch_hi',idle:()=>['hvwatch_i1','hvwatch_i2'][Math.floor(rand()*2)],low:'hvwatch_low',noGift:1}});
+Object.assign(QD,{hv1:{by:'hvher',lv:480,obj:{t:'kill',it:'asent',n:25},xp:25000000,gold:150000},
+ hv2:{by:'hvher',pre:'hv1',lv:485,obj:{t:'have',it:'afeath',n:20,take:1},xp:30000000,gold:180000},
+ hv3:{by:'hvher',pre:'hv2',lv:505,obj:{t:'kill',it:'athrone',n:10},xp:45000000,gold:220000},
+ hv4:{by:'hvher',pre:'hv3',lv:520,obj:{t:'kill',it:'raphael',n:1},xp:120000000,gold:500000},
+ hv5:{by:'hvher',pre:'hv4',lv:550,obj:{t:'kill',it:'michael',n:1},xp:200000000,gold:800000},
+ hvd1:{by:'hvher',pre:'hv1',lv:490,rep:1,obj:{t:'kill',it:'aseraph',n:40},xp:35000000,gold:100000},
+ hvd2:{by:'hvher',pre:'hv3',lv:520,rep:1,obj:{t:'kill',it:'adomin',n:30},xp:50000000,gold:120000},
+ yc1:{by:'ycapo',lv:500,obj:{t:'kill',it:'ybmag',n:30},xp:35000000,gold:160000},
+ yc2:{by:'ycapo',pre:'yc1',lv:505,obj:{t:'have',it:'yseal',n:15,take:1},xp:40000000,gold:180000},
+ yc3:{by:'ycapo',pre:'yc2',lv:530,obj:{t:'kill',it:'yarch',n:1},xp:130000000,gold:550000},
+ ycd:{by:'ycapo',pre:'yc1',lv:510,rep:1,obj:{t:'kill',it:'yinq',n:35},xp:45000000,gold:110000},
+ rf1:{by:'hvwatch',lv:550,obj:{t:'kill',it:'fangel',n:30},xp:60000000,gold:250000},
+ rf2:{by:'hvwatch',pre:'rf1',lv:555,obj:{t:'have',it:'ffeath',n:20,take:1},xp:70000000,gold:280000},
+ rf3:{by:'hvwatch',pre:'rf2',lv:570,obj:{t:'kill',it:'sariel',n:1},xp:250000000,gold:900000},
+ rf4:{by:'hvwatch',pre:'rf3',lv:590,obj:{t:'kill',it:'baal',n:1},xp:400000000,gold:1500000},
+ rfd:{by:'hvwatch',pre:'rf1',lv:560,rep:1,obj:{t:'kill',it:'rhound',n:40},xp:70000000,gold:150000}});
+NEWS.push('baalDn');
+// the monsters, spawned last with their own dice so every older one keeps its id and spot
+function hvSpawn(){const r=mulberry32(4802),R=HVR;HVB.length=0;
+ const gates=DGATES.filter(g=>g.hv).flatMap(g=>[[g.x/TS,g.y/TS],[g.to.x/TS,g.to.y/TS]]);
+ const put=(k,type,n,x0,x1,y0,y1)=>{let c=0,tr=0;while(c<n&&tr<5000){tr++;const x=x0+(r()*(x1-x0)|0),y=y0+(r()*(y1-y0)|0);if(sol0(x,y)||sol0(x+1,y)||sol0(x,y+1)||gates.some(([gx,gy])=>Math.hypot(gx-x,gy-y)<8))continue;const m=newMon(type,x*TS+8,y*TS+8,r);m.far=1;mons.push(m);c++;}};
+ const boss=(type,x,y)=>{const m=newMon(type,x*TS+8,y*TS+8,r);m.far=1;const u=MT[type].wb&&WS&&WS.wb&&WS.wb[type];if(u&&u>Date.now()){m.dead=true;m.rt=(u-Date.now())/1000;}mons.push(m);HVB.push({m,k:HVBK[type]});return m;};
+ const A=R.asg,C=R.ycat,F=R.rift;
+ for(const [k,n] of [['asent',26],['aseraph',18],['athrone',8]])put('asg',k,n,A.x0+26,A.wall-3,A.y0+1,A.y1);
+ for(const [k,n] of [['adomin',22],['apower',16],['acherub',6]])put('asg',k,n,A.wall+8,A.hall-3,A.y0+1,A.y1);
+ for(const [k,n] of [['acherub',2]])put('asg',k,n,A.hall+3,A.hall+12,A.ym-8,A.ym+8);
+ for(const [k,n] of [['ybmag',22],['yinq',20],['ypact',12],['ychor',14]])put('ycat',k,n,C.x0+14,C.alt-4,C.y0+1,C.y1);
+ for(const [k,n] of [['fangel',26],['rhound',22],['bseraph',16],['gdherald',8],['rdrake',4]])put('rift',k,n,F.x0+14,F.th-4,F.y0+1,F.y1);
+ boss('raphael',1240,A.ym);boss('michael',A.x1-12,A.ym);boss('yarch',C.alt+3,C.ym);boss('sariel',F.cr,F.ym);boss('baal',F.x1-14,F.ym);}
+// a sealed way: the light of the Wall of Judgement turns back anyone below level 520; the Rift's ways open at 550
+function hvGate(g){if(g.hard&&S.lv<g.lv){SFX.deny();toast(t(g.hk==='wall'?'hvWallNo':'hvRiftNo',{n:g.lv}),'warn');return false;}return true;}
+function hvS(){return S.hv||(S.hv={k:{}});}
+function hvKill(m){const k=m.type;if(!HVBK[k]||m.tmp)return;const s=hvS();s.k[k]=(s.k[k]||0)+1;
+ if(s.k[k]===1)setTimeout(()=>toast(t('hvFirst',{b:t(NAMEK[k])}),'good'),700);
+ if(k==='michael')giveTitle('aslay');if(k==='sariel')giveTitle('fbane');
+ if(k==='baal'){giveTitle('gdslay');WS.wb=WS.wb||{};WS.wb.baal=Date.now()+MT.baal.wb*1000;wbPut('baal');setTimeout(()=>annW('baalDn'),400);}save(true);}
+function hvTick(dt){if(!P||!S)return;const k=hvRealm(P.x/TS,P.y/TS);
+ if(k!==HVZ){HVZ=k;HVSIN=0;if(k){toast(t('hvIn_'+k),'warn');const s=hvS();if(!s['in_'+k]){s['in_'+k]=1;setTimeout(()=>toast(t('hvLore_'+k)),1600);}}}
+ for(const o of HVB){const m=o.m;
+  if(m.dead){m.hvSeen=0;m.gdc=0;if(m.type==='sariel')m.vr=0;continue;}
+  if(o.k===k&&!m.hvSeen&&Math.hypot(m.x-P.x,m.y-P.y)<300){m.hvSeen=1;toast(t('hvBoss_'+m.type),'warn');SFX.notice();}
+  // the Archbishop's Great Demon Contract: half dead, he gives his life force for a Great Demon's power (stronger, and it eats him)
+  if(m.type==='yarch'){if(!m.gdc&&m.hp<m.max*.5){m.gdc=1;m.fury=gTime+1e6;m.dmul=(m.dmul||1)*1.2;vfx('rage',m.x,m.y);if(o.k===k)toast(t('hvContract'),'warn');}
+   if(m.gdc&&!m.led&&m.hp>m.max*.2)m.hp=Math.max(m.max*.2,m.hp-m.max*.003*dt);}
+  // Sariel at half health: the fallen archangel becomes a Great Demon (her second sheet, fury)
+  if(m.type==='sariel'){if(!m.vr&&m.hp<m.max*.5){m.vr=1;m.fury=gTime+1e6;vfx('rage',m.x,m.y);shake=.6;if(o.k===k)toast(t('hvSariel'),'warn');}else if(m.vr&&m.hp>=m.max*.98){m.vr=0;m.fury=0;}}}
+ // Asgard's light weighs on a sinner: an outlaw, or one with bad karma (2% of your health a second, never the last point)
+ if(k==='asg'&&mode==='play'&&P.hp>1&&((S.olT||0)>Date.now()||(S.karma||0)<0)){HVST+=dt;if(HVST>=1){HVST=0;P.hp=Math.max(1,P.hp-Math.ceil(maxHP()*.02));hudDirty=true;if(!HVSIN){HVSIN=1;toast(t('hvSin'),'warn');}}}else HVST=0;}
+// the sky round Asgard and its light; the Cathedral's dark and its candles; the Rift's red dark and its embers
+function hvDark(){if(!P||!S||mode==='title'||mode==='lang'||!HVZ)return;const R=HVR[HVZ],L=R.x0*TS-camX,T=R.y0*TS-camY,Rt=(R.x1+1)*TS-camX,B=(R.y1+1)*TS-camY;
+ if(HVZ==='asg'){ctx.save();ctx.beginPath();ctx.rect(0,0,VW,VH);ctx.rect(L,T,Rt-L,B-T);ctx.clip('evenodd');
+  const g=ctx.createLinearGradient(0,0,0,VH);g.addColorStop(0,'#8fbfec');g.addColorStop(1,'#e2eefb');ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH);
+  ctx.fillStyle='rgba(255,255,255,.85)';for(let i=0;i<14;i++){const wx=((i*397+gTime*(6+i%3*3))%(R.x1-R.x0+80))+R.x0-40,wy=R.y0-6+((i*53)%(R.y1-R.y0+12)),sx=wx*TS-camX,sy=wy*TS-camY;if(sx<-80||sx>VW+80||sy<-40||sy>VH+40)continue;
+   ctx.beginPath();ctx.ellipse(sx,sy,30+i%4*8,9+i%3*3,0,0,7);ctx.ellipse(sx+18,sy-5,18,8,0,0,7);ctx.ellipse(sx-16,sy-3,16,7,0,0,7);ctx.fill();}
+  ctx.restore();ctx.fillStyle='rgba(255,240,200,.08)';ctx.fillRect(0,0,VW,VH);
+  for(let i=0;i<22;i++){const x=(i*71+gTime*9*(1+i%3))%VW,y=VH-((i*113+gTime*14*(1+i%2))%(VH+20));ctx.globalAlpha=.35+.3*Math.sin(gTime*2+i);ctx.fillStyle=i%3?'#fff4c0':'#ffffff';ctx.fillRect(x|0,y|0,2,2);}ctx.globalAlpha=1;return;}
+ const cat=HVZ==='ycat';dg.globalCompositeOperation='source-over';dg.clearRect(0,0,VW,VH);dg.fillStyle=cat?'rgba(8,4,14,.8)':'rgba(16,2,4,.72)';dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='destination-out';
+ const hole=(x,y,r0,r1)=>{const g=dg.createRadialGradient(x,y,r0,x,y,r1);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(x-r1,y-r1,r1*2,r1*2);};
+ hole(P.x-camX,P.y-8-camY,12,cat?112:128);
+ if(cat)for(const c of HVCANDLE){const x=c.x*TS-camX,y=c.y*TS-12-camY;if(x>-60&&x<VW+60&&y>-60&&y<VH+60)hole(x,y,4,40+Math.sin(gTime*7+c.x)*3);}
+ else{const x=HVR.rift.cr*TS-camX,y=HVR.rift.ym*TS-camY;if(x>-200&&x<VW+200&&y>-200&&y<VH+200)hole(x,y,20,150);}
+ dg.globalCompositeOperation='source-over';ctx.drawImage(darkC,0,0);ctx.fillStyle=cat?'rgba(90,30,140,.07)':'rgba(150,20,10,.08)';ctx.fillRect(0,0,VW,VH);
+ if(!cat)for(let i=0;i<26;i++){const x=(i*89+Math.sin(gTime*.7+i)*20+VW*10)%VW,y=VH-((i*131+gTime*(18+i%4*6))%(VH+30));ctx.globalAlpha=.5+.4*Math.sin(gTime*3+i);ctx.fillStyle=i%2?'#ff7a2a':'#ffb04a';ctx.fillRect(x|0,y|0,i%3?1:2,i%3?1:2);}ctx.globalAlpha=1;}
+// the gates: the Stairway of Light, the way down from the clouds, the Wall of Judgement (barred below 520), the rift's tears (barred below 550)
+function hvDrawGate(g,x,y){const k=g.hk,pul=.5+Math.sin(gTime*3)*.5,shut=g.hard&&S&&S.lv<g.lv;ctx.save();
+ if(k==='stair'||k==='upa'||k==='upy'||k==='upc'){const c=k==='upy'||k==='upc'?'#c8a0ff':'#ffe27a';ctx.globalAlpha=.16+pul*.12;R(ctx,x-7,y-110,14,108,c);ctx.globalAlpha=.3+pul*.2;R(ctx,x-3,y-110,6,108,'#ffffff');ctx.globalAlpha=1;
+  for(let i=0;i<5;i++){R(ctx,x-9+i,y-2-i*3,18-i*2,2,i%2?'#f4f0e4':'#dcd6c8');R(ctx,x-9+i,y-i*3,18-i*2,1,'#a8a294');}if(rand()<.3)fx.push({x:x+(rand()-.5)*12,y:y-8,vx:0,vy:-30,t:.6,c,fl:1});}
+ else if(k==='down'){ctx.fillStyle='rgba(120,170,230,.55)';ctx.beginPath();ctx.ellipse(x,y-2,13,6,0,0,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,.7)';ctx.beginPath();ctx.ellipse(x,y-2,9,3.5,0,0,7);ctx.fill();ctx.globalAlpha=.3+pul*.3;ctx.strokeStyle='#ffe27a';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(x,y-2,14,7,0,0,7);ctx.stroke();}
+ else if(k==='wall'||k==='wallb'){R(ctx,x-9,y-22,18,22,'#f2efe6');R(ctx,x-7,y-20,14,20,'#c8c0a8');ctx.fillStyle='#fff4c0';ctx.globalAlpha=.4+pul*.4;R(ctx,x-6,y-19,12,19,'#fff4c0');ctx.globalAlpha=1;R(ctx,x-1,y-30,2,8,'#e8c050');R(ctx,x-4,y-27,8,2,'#e8c050');
+  if(shut&&k==='wall')for(let i=0;i<4;i++)R(ctx,x-7+i*4,y-20,2,20,'#ffffff');}
+ else{ctx.fillStyle='#050205';ctx.beginPath();ctx.ellipse(x,y-10,9,13,0,0,7);ctx.fill();ctx.globalAlpha=.5+pul*.4;ctx.strokeStyle=k==='yat'||k==='deep'?'#a05aff':'#ff3a2a';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(x,y-10,10,14,0,0,7);ctx.stroke();ctx.globalAlpha=1;
+  if(k==='yat')for(let i=0;i<4;i++)R(ctx,x-6+i,y-4-i*3,12-i*2,2,'#2a2230');
+  if(shut)for(let i=0;i<3;i++)R(ctx,x-6+i*5,y-23,2,26,'#8a1020');if(rand()<.25)fx.push({x:x+(rand()-.5)*10,y:y-10,vx:0,vy:-14,t:.5,c:k==='yat'||k==='deep'?'#7a2aa8':'#ff5a2a',fl:1});}
+ ctx.restore();return true;}
+// the ground of the realms, painted into the map's ground like any tile (so a boss's warning on the floor still shows over it):
+// Asgard's roads are golden flagstones (its sand), its walls and pillars white marble (its plaster walls), Michael's hall a marble
+// floor with gold lines (its planks); the Cathedral is dark flagstone with a red carpet down the nave
+function hvTint(d,x,y){if(y<VCY0)return;const k=hvRealm(x,y);if(!k||k==='rift')return;const v=at(x,y);if(k==='asg'?v!==DR&&v!==FW&&v!==IW:v!==CF)return;
+ const hh=(a,b)=>{let n=(a*374761393+b*668265263)|0;n=Math.imul(n^n>>>13,1274126177);return ((n^n>>>16)>>>0)/4294967296;},C=HVR.ycat;
+ const carpet=k==='ycat'&&y>=C.ym-2&&y<=C.ym+2&&x>=C.x0+2&&x<=C.alt+6,up=at(x,y-1)===IW,dn=at(x,y+1)===IW;
+ for(let py=0;py<16;py++)for(let px=0;px<16;px++){const gx=x*16+px,gy=y*16+py,i=(py*16+px)*4;let c;
+  if(k==='asg'&&v===DR){const row=gy>>3,off=row&1?6:0,sx=(gx+off)/12|0;c=gy%8===0||(gx+off)%12===0?[201,184,128]:hh(gx,gy)<.06?[250,244,222]:[[236,224,180],[230,216,166],[242,232,196]][hh(sx,row)*3|0];}
+  else if(k==='asg'&&v===FW){c=gx%32===0||gy%32===0?[232,200,96]:hh(gx>>1,gy>>1)<.05?[210,206,196]:((gx>>3)+(gy>>3))&1?[236,233,226]:[226,222,212];}
+  else if(k==='asg'){const row=gy>>3,off=row&1?8:0;c=!up&&py<2?[252,250,246]:!dn&&py>13?[196,192,184]:gy%8===7||(gx+off)%16===15?[208,204,196]:hh(gx,gy)<.06?[222,218,210]:[238,236,230];}
+  else if(carpet){const e=y===C.ym-2&&py<2||y===C.ym+2&&py>13,b=y===C.ym-2&&py===3||y===C.ym+2&&py===12,m=y===C.ym&&(gx%48<4)&&py>5&&py<10;c=e?[200,160,80]:b||m?[200,160,80]:hh(gx,gy)<.05?[90,10,26]:[106,14,34];}
+  else{const row=gy>>3,off=row&1?6:0,sx=(gx+off)/12|0;c=gy%8===0||(gx+off)%12===0?[26,22,30]:[[58,52,64],[52,46,58],[64,58,70]][hh(sx,row)*3|0];}
+  d[i]=c[0];d[i+1]=c[1];d[i+2]=c[2];d[i+3]=255;}}
+{const g0=SA.tiles.ground;SA.tiles.ground=function(env,x,y){const d=g0.apply(this,arguments);if(env===TENV&&y>=VCY0)hvTint(d,x,y);return d;};}
+// the props: a pool of light, angel statues, Michael's throne, the black altar and its candles, the broken halo, Baal's throne
+function hvEnts(ents){if(!P||!HVZ)return;for(const o of HVPROP){const x=o.x*TS,y=o.y*TS+8;if(Math.abs(x-P.x)>VW||Math.abs(y-P.y)>VH)continue;ents.push({y,f:()=>hvProp(o,Math.round(x),Math.round(y))});}}
+function hvProp(o,x,y){const k=o.k,pul=.5+Math.sin(gTime*3+x)*.5;
+ if(k==='pcol'){const X=x-8,Y=y-16;R(ctx,X+1,Y-24,14,24,'#eceae4');R(ctx,X+3,Y-24,2,24,'#f8f6f0');R(ctx,X+7,Y-24,1,24,'#dedad2');R(ctx,X+11,Y-24,2,24,'#d2cec6');R(ctx,X,Y-28,16,4,'#f4f2ec');R(ctx,X,Y-28,16,1,'#e8c050');R(ctx,X,Y-25,16,1,'#d8d4cc');return;}
+ if(k==='pool'){ctx.globalAlpha=.2+pul*.15;R(ctx,x-3,y-60,6,52,'#fff4c0');ctx.globalAlpha=1;if(rand()<.3)fx.push({x:x+(rand()-.5)*20,y:y-10,vx:0,vy:-20,t:.7,c:'#ffffff',fl:1});}
+ else if(k==='astat'){R(ctx,x-8,y-6,16,6,'#a8a49a');R(ctx,x-8,y-6,16,1,'#c8c4ba');R(ctx,x-6,y-8,12,2,'#bcb8ae');   // an angel in white stone, wings raised, a gilded halo
+  for(let i=0;i<9;i++){const w=1+(i>>1);R(ctx,x-4-w-(i>5?1:0),y-30+i*2,w+1,2,i%2?'#d0ccc2':'#e8e4da');R(ctx,x+3+(i>5?1:0),y-30+i*2,w+1,2,i%2?'#d0ccc2':'#e8e4da');}
+  R(ctx,x-3,y-22,6,14,'#ece8de');R(ctx,x-2,y-22,1,14,'#f8f4ea');R(ctx,x+2,y-22,1,14,'#cfcbc1');R(ctx,x-4,y-10,8,2,'#dcd8ce');R(ctx,x-2,y-27,4,5,'#f2eee4');R(ctx,x-1,y-26,1,1,'#bcb8ae');
+  ctx.globalAlpha=.7+pul*.3;R(ctx,x-3,y-30,6,1,'#e8c050');R(ctx,x-4,y-29,1,1,'#e8c050');R(ctx,x+3,y-29,1,1,'#e8c050');ctx.globalAlpha=1;}
+
+ else if(k==='throne'){R(ctx,x-10,y-4,20,4,'#a87a20');R(ctx,x-8,y-30,16,26,'#e8c050');R(ctx,x-6,y-28,12,16,'#c8281a');R(ctx,x-10,y-36,4,32,'#f2d27a');R(ctx,x+6,y-36,4,32,'#f2d27a');R(ctx,x-2,y-40,4,4,'#ffffff');ctx.globalAlpha=.15+pul*.1;R(ctx,x-12,y-42,24,40,'#ffe27a');ctx.globalAlpha=1;}
+ else if(k==='judge'){ctx.globalAlpha=.4+pul*.4;R(ctx,x-1,y-28,2,10,'#ffe27a');R(ctx,x-5,y-24,10,2,'#ffe27a');ctx.globalAlpha=1;}
+ else if(k==='raph'){ctx.globalAlpha=.25+pul*.15;ctx.fillStyle='#7af0a8';ctx.beginPath();ctx.ellipse(x,y-2,14,5,0,0,7);ctx.fill();ctx.globalAlpha=1;if(rand()<.2)fx.push({x:x+(rand()-.5)*20,y,vx:0,vy:-16,t:.8,c:'#a8f0c8',fl:1});}
+ else if(k==='altar'){R(ctx,x-10,y-14,20,14,'#1a1420');R(ctx,x-10,y-14,20,2,'#3a2a44');R(ctx,x-8,y-10,16,1,'#c8a050');const f=(gTime*10|0)%3;R(ctx,x-3,y-22-f,6,8+f,'#3a0a5a');R(ctx,x-2,y-24-f,4,9,'#7a2aa8');R(ctx,x-1,y-21,2,5,'#e8b0ff');}
+ else if(k==='candle'){R(ctx,x-3,y-2,6,2,'#3a3040');R(ctx,x-1,y-14,2,12,'#6a6070');R(ctx,x-4,y-14,8,1,'#6a6070');for(const dx of [-4,0,3]){R(ctx,dx+x,y-17,1,3,'#e8e0d0');R(ctx,dx+x,y-19-((gTime*8+dx)|0)%2,1,2,'#c86aff');}}
+ else if(k==='halo'){ctx.save();ctx.strokeStyle='#6a6a74';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(x,y-14,26,10,0,.4,Math.PI*1.7);ctx.stroke();ctx.strokeStyle='#9a9aa8';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(x,y-15,26,10,0,.4,Math.PI*1.7);ctx.stroke();ctx.restore();ctx.globalAlpha=.15+pul*.12;ctx.fillStyle='#ff3a2a';ctx.beginPath();ctx.ellipse(x,y,40,12,0,0,7);ctx.fill();ctx.globalAlpha=1;}
+ else if(k==='bthrone'){R(ctx,x-14,y-6,28,6,'#2a0a0a');R(ctx,x-11,y-38,22,32,'#1a0606');R(ctx,x-8,y-34,16,20,'#5a0a0a');for(const dx of [-14,10])R(ctx,x+dx,y-46,4,40,'#e8d8c0');R(ctx,x-14,y-48,4,3,'#ffffff');R(ctx,x+10,y-48,4,3,'#ffffff');ctx.globalAlpha=.2+pul*.15;R(ctx,x-16,y-50,32,50,'#ff3a1a');ctx.globalAlpha=1;}}
+window.__GHV={HVR,HVB,HVBK,HVPROP,HVCANDLE,stair:HVSTAIR,yat:HVYAT,realm:hvRealm,zone:hvZone,area:hvArea,gate:hvGate,tick:hvTick,s:hvS,kill:m=>hvKill(m),z:()=>HVZ,drop:k=>dropTier(k),zat:(x,y)=>zoneAt(x*TS+8,y*TS+8),ug:(x,y)=>ugArea(x*TS+8,y*TS+8),go:(x,y)=>{P.x=x*TS+8;P.y=y*TS+10;camSnap=true;},sheet:k=>!!SH[k],wb:k=>WS&&WS.wb&&WS.wb[k]||0}; // tests
+Object.assign(STR.ar,{zAsg1:"أسجارد: الساحات الخارجية (لفل 480+)",zAsg2:"أسجارد: الحرم الداخلي (لفل 520+)",zAsgT:"أسجارد: عرش ميخائيل (لفل 560+)",zYatC:"كاتدرائية ياتان (لفل 500+)",zRift:"الشق الساقط (لفل 550+)",zBaal:"عرش بعل (لفل 600)",
+ hHvStair:"E: اطلع سلّم النور لأسجارد",hHvDown:"E: انزل للعالم",hHvWall:"E: عدّي من سور الحساب",hHvWallB:"E: ارجع للساحات الخارجية",hHvFall:"E: انزل في الشق (حافة السقوط)",hHvUpA:"E: اطلع لأسجارد",hHvYat:"E: انزل لكاتدرائية ياتان",hHvUpY:"E: اطلع لأطلال ياتان",hHvDeep:"E: انزل تحت المذبح للشق",hHvUpC:"E: اطلع للكاتدرائية",
+ hvWallNo:"نور سور الحساب ردّك. محدش يعدّي قبل لفل {n}.",hvRiftNo:"الشق بيرفضك. مش هتقدر تنزل قبل لفل {n}.",hvFirst:"أول مرة تهزم {b}.",
+ hvIn_asg:"دخلت أسجارد، مملكة ريبيكا إلهة النور.",hvIn_ycat:"دخلت كاتدرائية ياتان. الترانيم السودا مالية المكان.",hvIn_rift:"دخلت الشق الساقط، المكان اللي وقعوا فيه الملايكة المطرودين.",
+ hvLore_asg:"الملايكة مش آلهة. هما جنس اتخلق يحمي الكون، ومش ممكن يمتلكوا ألوهية حقيقية. بينفّذوا إرادة ريبيكا من غير أي مشاعر.",
+ hvLore_ycat:"ريبيكا وياتان: آلهة البداية. اللي بيعبدوا ياتان بيسحبوا قوة السحر الأسود، عكس القوة الإلهية بالظبط.",
+ hvLore_rift:"الملاك اللي بيسقط بيتطرد من أسجارد. واللي بيعيش هنا كفاية ممكن يبقى شيطان عظيم، زي ساريال.",
+ hvBoss_raphael:"رئيس الملايكة رافائيل بيبصّلك. مافيش في عينه رحمة ولا غضب.",hvBoss_michael:"رئيس الملايكة ميخائيل قام من على عرشه. سيف نار الحساب في إيده.",hvBoss_yarch:"كبير أساقفة ياتان بيرتّل. الضلمة بتتجمّع حواليه.",
+ hvBoss_sariel:"ساريال الساقطة. كانت رئيسة ملايكة، ودلوقتي...",hvBoss_baal:"الشيطان العظيم بعل، الأول بين الشياطين العظام، فتح عينيه.",
+ hvContract:"كبير الأساقفة مضى عقد الشيطان العظيم! ضحّى بقوة حياته عشان قوة كارثية.",hvSariel:"ساريال اتحولت لشيطان عظيم!",hvSin:"نور أسجارد بيحرق الخاطيين. صحتك بتقل طول ما انت هنا.",
+ baalDn:"{n} هزم الشيطان العظيم بعل في الشق الساقط! هيرجع بعد ساعتين.",
+ asentN:"حارس أسجارد",aseraphN:"سيراف",athroneN:"عرش (ملاك)",adominN:"فارس السيادة",apowerN:"ملاك القوات",acherubN:"كروب حارس",raphaelN:"رئيس الملايكة رافائيل",michaelN:"رئيس الملايكة ميخائيل",
+ ybmagN:"ساحر ياتان الأسود",yinqN:"محقق كنيسة ياتان",ypactN:"كاهن العهد الشيطاني",ychorN:"جوقة الفراغ",yarchN:"كبير أساقفة ياتان",
+ fangelN:"ملاك ساقط",rhoundN:"كلب الشق الجهنمي",bseraphN:"سيراف أسود",gdheraldN:"رسول الشيطان العظيم",rdrakeN:"دريك الهاوية",sarielN:"ساريال الساقطة",baalN:"الشيطان العظيم بعل",
+ hvher:"رسولة أسجارد",ycapo:"المرتد",hvwatch:"الحارس الساقط",
+ hvher_hi:"[رسولة أسجارد] إنسان طلع سلّم النور. ريبيكا شايفاك. لو عايز تثبت إنك تستاهل، الحراس في الساحات مستنيين.",hvher_i1:"الملايكة مابيحسّوش. إحنا بننفّذ وبس.",hvher_i2:"ورا سور الحساب الحرم الداخلي. رافائيل هناك.",hvher_i3:"ميخائيل مابيقومش من على عرشه غير للحساب.",hvher_low:"لسه ضعيف على اللي جاي. ارجع لما تقوى.",
+ ycapo_hi:"[المرتد] كنت كاهن هنا. شفت اللي بيعملوه بالسحر الأسود، وهربت. ساعدني أوقفهم.",ycapo_i1:"الساحر الأسود بيرتّل كتير قبل ما يضرب. اضربه وهو بيرتّل.",ycapo_i2:"كبير الأساقفة هيمضي عقد مع شيطان عظيم لو حس إنه خسران.",ycapo_low:"الكاتدرائية دي هتاكلك. ارجع بعدين.",
+ hvwatch_hi:"[الحارس الساقط] أنا كمان وقعت من أسجارد. الشق ده بيغيّر اللي يفضل فيه. ساريال كانت زينا.",hvwatch_i1:"بعل الأول بين الشياطين العظام. ماحدش هزمه لوحده.",hvwatch_i2:"لو جناحاتك اسودّت، يبقى خلاص.",hvwatch_low:"الشق مش مكانك لسه.",
+ q_hv1:"اختبار النور",hv1_o:"حراس الساحات بيمتحنوا أي حد يطلع. اغلبهم.\nشرط إتمام المهمة: اقتل 25 حارس أسجارد",hv1_w:"الحراس لسه واقفين.",hv1_d:"ريبيكا شافت. كمّل.",
+ q_hv2:"ريش الملايكة",hv2_o:"هات 20 ريشة ملاك. الريش ده بيشيل النور.\nشرط إتمام المهمة: هات 20 ريشة ملاك",hv2_w:"الريش لسه ناقص.",hv2_d:"النور اللي فيهم لسه دافي.",
+ q_hv3:"العروش",hv3_o:"العروش أقوى الحراس في الساحات. اقتل 10 منهم، وسور الحساب هيعرف اسمك.\nشرط إتمام المهمة: اقتل 10 عروش",hv3_w:"العروش لسه بتلف.",hv3_d:"دلوقتي السور هيفتحلك لما توصل لفل 520.",
+ q_hv4:"حساب رافائيل",hv4_o:"رئيس الملايكة رافائيل في الحرم الداخلي. هو بيشفي، وبيحكم. اهزمه.\nشرط إتمام المهمة: اهزم رئيس الملايكة رافائيل",hv4_w:"رافائيل لسه بيحكم.",hv4_d:"... ماحدش عمل كده قبلك.",
+ q_hv5:"سيف الحساب",hv5_o:"ميخائيل على عرشه في آخر أسجارد. قوته قد قوة الشياطين العظام.\nشرط إتمام المهمة: اهزم رئيس الملايكة ميخائيل",hv5_w:"ميخائيل لسه على عرشه.",hv5_d:"إنسان هزم رئيس ملايكة. ريبيكا هتفتكر الاسم ده.",
+ q_hvd1:"صلاة السيرافيم (يومي)",hvd1_o:"السيرافيم بيعيدوا اللي بتقتله. اقتل 40 منهم النهارده.\nشرط إتمام المهمة: اقتل 40 سيراف",hvd1_w:"السيرافيم لسه بيرتّلوا.",hvd1_d:"خد دول. ارجع بكره.",
+ q_hvd2:"فرسان السيادة (يومي)",hvd2_o:"فرسان السيادة بيحرسوا الحرم. اقتل 30 منهم النهارده.\nشرط إتمام المهمة: اقتل 30 فارس سيادة",hvd2_w:"الفرسان لسه بيحرسوا.",hvd2_d:"كويس. بكره تاني.",
+ q_yc1:"ترانيم سودا",yc1_o:"السحرة السود بيرتّلوا ليل ونهار. اسكتهم.\nشرط إتمام المهمة: اقتل 30 ساحر ياتان أسود",yc1_w:"الترانيم لسه شغالة.",yc1_d:"الصوت قلّ. شكرًا.",
+ q_yc2:"أختام ياتان",yc2_o:"هات 15 ختم ياتان، عشان أعرف هما ناويين على إيه.\nشرط إتمام المهمة: هات 15 ختم ياتان",yc2_w:"الأختام لسه ناقصة.",yc2_d:"دي عقود... مع شياطين عظام.",
+ q_yc3:"كبير الأساقفة",yc3_o:"كبير الأساقفة عند المذبح. لو حس إنه خسران هيمضي عقد الشيطان العظيم. اهزمه.\nشرط إتمام المهمة: اهزم كبير أساقفة ياتان",yc3_w:"لسه بيرتّل.",yc3_d:"العقد اتكسر معاه. المذبح وراه بيودّي للشق الساقط.",
+ q_ycd:"المحققين (يومي)",ycd_o:"المحققين بيدوّروا عليّا. اقتل 35 منهم النهارده.\nشرط إتمام المهمة: اقتل 35 محقق",ycd_w:"لسه بيدوّروا.",ycd_d:"كده ممكن أنام الليلة.",
+ q_rf1:"الملايكة الساقطين",rf1_o:"الساقطين مابقوش ملايكة ولا شياطين. ريّحهم.\nشرط إتمام المهمة: اقتل 30 ملاك ساقط",rf1_w:"لسه بيتوجّعوا.",rf1_d:"... شكرًا.",
+ q_rf2:"ريش أسود",rf2_o:"هات 20 ريشة ساقطة. أنا عايز أفتكر شكل جناحاتي.\nشرط إتمام المهمة: هات 20 ريشة ساقطة",rf2_w:"لسه ناقص.",rf2_d:"كانت بيضا زمان.",
+ q_rf3:"ساريال",rf3_o:"ساريال كانت رئيسة ملايكة. لما بتتوجع بتبقى شيطان عظيم. اهزمها.\nشرط إتمام المهمة: اهزم ساريال الساقطة",rf3_w:"ساريال لسه في الحفرة.",rf3_d:"يمكن ترتاح دلوقتي.",
+ q_rf4:"الأول بين الشياطين",rf4_o:"بعل قاعد على عرشه في آخر الشق. محتاج حلفاء. اهزمه.\nشرط إتمام المهمة: اهزم الشيطان العظيم بعل",rf4_w:"بعل لسه على عرشه.",rf4_d:"إنسان... هزم بعل. الكون ده اتغيّر.",
+ q_rfd:"كلاب الشق (يومي)",rfd_o:"الكلاب الجهنمية بتتكاثر. اقتل 40 منهم النهارده.\nشرط إتمام المهمة: اقتل 40 كلب جهنمي",rfd_w:"لسه بيعوّوا.",rfd_d:"بكره هيبقوا أكتر. ارجع.",
+ afeath:"ريشة ملاك",afeathD:"بتقع من ملايكة أسجارد. فيها نور ريبيكا. الحداد (لفل 9) بيعمل منها طقم السيرافيم بوصفته.",hshard:"شظية هالة",hshardD:"حتة من هالة ملاك. نادرة.",yseal:"ختم ياتان",ysealD:"ختم من عقود كنيسة ياتان.",ffeath:"ريشة ساقطة",ffeathD:"ريشة ملاك اسودّت في الشق. الحداد (لفل 9) بيعمل منها طقم الساقطين بوصفته.",dcore:"قلب شيطاني",dcoreD:"قلب شيطان عظيم لسه بيدق. نادر جدًا.",
+ rgrace:"عصاية رحمة رافائيل",mjudg:"سيف حساب ميخائيل",sdawn:"قوس فجر السيرافيم",tlance:"رمح العروش",yblack:"عصا كبير أساقفة ياتان السودا",yinqa:"مطرقة المحقق",sfang:"ناب ساريال الساقطة",fgreat:"السيف الكبير الساقط",rwbow:"قوس جناح الشق",baalm:"خراب بعل",baalst:"عصاية هاوية بعل",
+ halor:"خاتم الهالة",dcneck:"عقد القلب الشيطاني",seraa:"درع السيرافيم",serah:"خوذة السيرافيم",serag:"جوانتي السيرافيم",serab:"بوت السيرافيم",falla:"درع الساقطين",fallh:"خوذة الساقطين",fallg:"جوانتي الساقطين",fallb:"بوت الساقطين",
+ nq_mjudg:"\"نار الحساب. ميخائيل مابيرفعهوش غير لما ريبيكا تحكم.\"",nq_rgrace:"\"اللي بيشفي هو نفسه اللي بيحكم.\"",nq_baalm:"\"الأول بين الشياطين العظام ماكانش محتاج غير ده.\"",nq_sfang:"\"كانت ريشة بيضا مرة.\"",
+ set_seraph:"طقم السيرافيم",set_fallen:"طقم الساقطين",set_archa:"عتاد رئيس الملايكة",set_gdemon:"عتاد الشيطان العظيم",
+ setD_seraph2:"+8% أقصى صحة و+30 دفاع",setD_seraph4:"+8% أقصى صحة و+30 دفاع و+10% ضرر و+6% سرعة هجوم",setD_fallen2:"+8% ضرر",setD_fallen4:"+14% ضرر و+8% سرعة هجوم و+8% أقصى صحة",setD_archa2:"+10% ضرر و+6% سرعة هجوم",setD_gdemon2:"+12% ضرر و+8% أقصى صحة",
+ rb_m_seraph:"وصفة: طقم السيرافيم",rb_m_fallen:"وصفة: طقم الساقطين",
+rb_m_seraphD:"بتعلّمك تعمل درع وخوذة وجوانتي وبوت السيرافيم (الحدادة، لفل 9). دوس عليها في الشنطة عشان تتعلمها.\nممكن تبدّلها أو تبيعها في المزاد.",
+ rb_m_fallenD:"بتعلّمك تعمل درع وخوذة وجوانتي وبوت الساقطين (الحدادة، لفل 9). دوس عليها في الشنطة عشان تتعلمها.\nممكن تبدّلها أو تبيعها في المزاد.",
+ tl_aslay:"قاهر رئيس الملايكة",tl_fbane:"لعنة الساقطين",tl_gdslay:"قاتل الشيطان العظيم",tl_aslayD:"هزمت رئيس الملايكة ميخائيل على عرشه في أسجارد.",tl_fbaneD:"هزمت ساريال الساقطة في الشق الساقط.",tl_gdslayD:"هزمت الشيطان العظيم بعل، الأول بين الشياطين العظام."});
+Object.assign(STR.en,{zAsg1:"Asgard: the Outer Courts (Lv 480+)",zAsg2:"Asgard: the Inner Sanctum (Lv 520+)",zAsgT:"Asgard: Michael's Throne (Lv 560+)",zYatC:"The Yatan Cathedral (Lv 500+)",zRift:"The Fallen Rift (Lv 550+)",zBaal:"Baal's Throne (Lv 600)",
+ hHvStair:"E: Climb the Stairway of Light to Asgard",hHvDown:"E: Go down to the world",hHvWall:"E: Pass the Wall of Judgement",hHvWallB:"E: Back to the Outer Courts",hHvFall:"E: Go down into the Rift (the Edge of the Fall)",hHvUpA:"E: Climb up to Asgard",hHvYat:"E: Go down to the Yatan Cathedral",hHvUpY:"E: Up to the ruins of Yatan",hHvDeep:"E: Go down under the altar into the Rift",hHvUpC:"E: Up to the Cathedral",
+ hvWallNo:"The light of the Wall of Judgement turns you back. None pass before level {n}.",hvRiftNo:"The Rift will not take you. You cannot go down before level {n}.",hvFirst:"You have defeated {b} for the first time.",
+ hvIn_asg:"You have entered Asgard, the realm of Rebecca, the goddess of light.",hvIn_ycat:"You have entered the Yatan Cathedral. Black chants fill the air.",hvIn_rift:"You have entered the Fallen Rift, where the angels cast out of Asgard fell.",
+ hvLore_asg:"Angels are not gods. They are a species made to safeguard the universe, and they can never hold true divinity. They carry out Rebecca's will without feeling.",
+ hvLore_ycat:"Rebecca and Yatan: the Gods of the Beginning. Those who worship Yatan draw on Black Magic Power, the very opposite of Divine Power.",
+ hvLore_rift:"An angel who falls is cast out of Asgard. One who lingers here long enough can become a Great Demon, as Sariel did.",
+ hvBoss_raphael:"Archangel Raphael looks at you. There is neither mercy nor anger in his eyes.",hvBoss_michael:"Archangel Michael rises from his throne, the flaming sword of judgement in his hand.",hvBoss_yarch:"The Archbishop of Yatan chants. The darkness gathers around him.",
+ hvBoss_sariel:"Sariel the Fallen. Once an archangel, and now...",hvBoss_baal:"The Great Demon Baal, the first of the Great Demons, opens his eyes.",
+ hvContract:"The Archbishop signs a Great Demon Contract! He sacrifices his life force for catastrophic power.",hvSariel:"Sariel has become a Great Demon!",hvSin:"The light of Asgard burns the sinful. Your health falls while you stay here.",
+ baalDn:"{n} defeated the Great Demon Baal in the Fallen Rift! He returns in two hours.",
+ asentN:"Asgard Sentinel",aseraphN:"Seraph",athroneN:"Throne",adominN:"Dominion Knight",apowerN:"Power",acherubN:"Cherub Warden",raphaelN:"Archangel Raphael",michaelN:"Archangel Michael",
+ ybmagN:"Yatan Black Magician",yinqN:"Yatan Inquisitor",ypactN:"Demon-pact Priest",ychorN:"Hollow Choir",yarchN:"Archbishop of Yatan",
+ fangelN:"Fallen Angel",rhoundN:"Rift Hellhound",bseraphN:"Black Seraph",gdheraldN:"Herald of the Great Demon",rdrakeN:"Abyssal Drake",sarielN:"Sariel the Fallen",baalN:"Great Demon Baal",
+ hvher:"Herald of Asgard",ycapo:"The Apostate",hvwatch:"The Fallen Watcher",
+ hvher_hi:"[Herald of Asgard] A human climbed the Stairway of Light. Rebecca sees you. If you would prove yourself worthy, the sentinels in the courts are waiting.",hvher_i1:"Angels do not feel. We carry out, and that is all.",hvher_i2:"Behind the Wall of Judgement lies the Inner Sanctum. Raphael is there.",hvher_i3:"Michael rises from his throne only to judge.",hvher_low:"You are too weak for what comes next. Come back when you are stronger.",
+ ycapo_hi:"[The Apostate] I was a priest here. I saw what they do with black magic, and I ran. Help me stop them.",ycapo_i1:"A black magician chants for a long time before he strikes. Hit him while he chants.",ycapo_i2:"The Archbishop will sign a contract with a Great Demon if he feels he is losing.",ycapo_low:"This cathedral would eat you. Come back later.",
+ hvwatch_hi:"[The Fallen Watcher] I fell from Asgard too. This rift changes those who stay. Sariel was one of us.",hvwatch_i1:"Baal is the first of the Great Demons. No one has beaten him alone.",hvwatch_i2:"If your wings turn black, it is over.",hvwatch_low:"The Rift is not your place yet.",
+ q_hv1:"The Test of Light",hv1_o:"The sentinels of the courts test everyone who climbs. Overcome them.\nQuest condition: kill 25 Asgard Sentinels",hv1_w:"The sentinels still stand.",hv1_d:"Rebecca saw. Go on.",
+ q_hv2:"Angel Feathers",hv2_o:"Bring 20 angel feathers. They hold the light.\nQuest condition: bring 20 Angel Feathers",hv2_w:"The feathers are still short.",hv2_d:"The light in them is still warm.",
+ q_hv3:"The Thrones",hv3_o:"The Thrones are the strongest guardians of the courts. Kill 10 of them, and the Wall of Judgement will know your name.\nQuest condition: kill 10 Thrones",hv3_w:"The Thrones still turn.",hv3_d:"Now the wall will open for you when you reach level 520.",
+ q_hv4:"Raphael's Judgement",hv4_o:"Archangel Raphael is in the Inner Sanctum. He heals, and he judges. Defeat him.\nQuest condition: defeat Archangel Raphael",hv4_w:"Raphael still judges.",hv4_d:"... No one has done this before you.",
+ q_hv5:"The Sword of Judgement",hv5_o:"Michael sits on his throne at the end of Asgard. His power is that of the Great Demons.\nQuest condition: defeat Archangel Michael",hv5_w:"Michael is still on his throne.",hv5_d:"A human defeated an archangel. Rebecca will remember this name.",
+ q_hvd1:"The Seraphs' Hymn (daily)",hvd1_o:"The seraphs mend what you kill. Kill 40 of them today.\nQuest condition: kill 40 Seraphs",hvd1_w:"The seraphs still sing.",hvd1_d:"Take this. Come back tomorrow.",
+ q_hvd2:"The Dominion Knights (daily)",hvd2_o:"The Dominion Knights guard the sanctum. Kill 30 of them today.\nQuest condition: kill 30 Dominion Knights",hvd2_w:"The knights still guard.",hvd2_d:"Good. Again tomorrow.",
+ q_yc1:"Black Chants",yc1_o:"The black magicians chant day and night. Silence them.\nQuest condition: kill 30 Yatan Black Magicians",yc1_w:"The chants go on.",yc1_d:"It's quieter. Thank you.",
+ q_yc2:"The Seals of Yatan",yc2_o:"Bring 15 Yatan seals, so I can learn what they intend.\nQuest condition: bring 15 Yatan Seals",yc2_w:"The seals are still short.",yc2_d:"These are contracts... with Great Demons.",
+ q_yc3:"The Archbishop",yc3_o:"The Archbishop is at the altar. If he feels he is losing he will sign the Great Demon Contract. Defeat him.\nQuest condition: defeat the Archbishop of Yatan",yc3_w:"He still chants.",yc3_d:"The contract broke with him. The altar behind him leads down to the Fallen Rift.",
+ q_ycd:"The Inquisitors (daily)",ycd_o:"The inquisitors are looking for me. Kill 35 of them today.\nQuest condition: kill 35 Inquisitors",ycd_w:"They still search.",ycd_d:"Now I can sleep tonight.",
+ q_rf1:"The Fallen",rf1_o:"The fallen are neither angels nor demons now. Give them rest.\nQuest condition: kill 30 Fallen Angels",rf1_w:"They still suffer.",rf1_d:"... Thank you.",
+ q_rf2:"Black Feathers",rf2_o:"Bring 20 fallen feathers. I want to remember what my wings looked like.\nQuest condition: bring 20 Fallen Feathers",rf2_w:"Still short.",rf2_d:"They were white, once.",
+ q_rf3:"Sariel",rf3_o:"Sariel was an archangel. When she is hurt she becomes a Great Demon. Defeat her.\nQuest condition: defeat Sariel the Fallen",rf3_w:"Sariel is still in the crater.",rf3_d:"Perhaps she can rest now.",
+ q_rf4:"The First of the Demons",rf4_o:"Baal sits on his throne at the end of the Rift. You will need allies. Defeat him.\nQuest condition: defeat the Great Demon Baal",rf4_w:"Baal is still on his throne.",rf4_d:"A human... defeated Baal. This universe has changed.",
+ q_rfd:"The Rift Hounds (daily)",rfd_o:"The hellhounds keep breeding. Kill 40 of them today.\nQuest condition: kill 40 Rift Hellhounds",rfd_w:"They still howl.",rfd_d:"Tomorrow there will be more. Come back.",
+ afeath:"Angel Feather",afeathD:"Dropped by the angels of Asgard; Rebecca's light is in it. A blacksmith (Lv 9) makes the Seraphic set from it with its recipe.",hshard:"Halo Shard",hshardD:"A piece of an angel's halo. Rare.",yseal:"Yatan Seal",ysealD:"A seal from the Yatan Church's contracts.",ffeath:"Fallen Feather",ffeathD:"An angel's feather turned black in the Rift. A blacksmith (Lv 9) makes the Fallen set from it with its recipe.",dcore:"Demon Core",dcoreD:"The still-beating core of a Great Demon. Very rare.",
+ rgrace:"Raphael's Staff of Mercy",mjudg:"Michael's Sword of Judgement",sdawn:"Seraph's Dawnbow",tlance:"Lance of the Thrones",yblack:"Black Crozier of the Archbishop",yinqa:"Inquisitor's Maul",sfang:"Sariel's Fallen Fang",fgreat:"Fallen Greatsword",rwbow:"Rift Wing Bow",baalm:"Baal's Ruin",baalst:"Baal's Abyss Staff",
+ halor:"Halo Ring",dcneck:"Demon Core Necklace",seraa:"Seraphic Armor",serah:"Seraphic Helmet",serag:"Seraphic Gloves",serab:"Seraphic Boots",falla:"Fallen Armor",fallh:"Fallen Helmet",fallg:"Fallen Gloves",fallb:"Fallen Boots",
+ nq_mjudg:"\"The fire of judgement. Michael raises it only when Rebecca judges.\"",nq_rgrace:"\"The one who heals is the one who judges.\"",nq_baalm:"\"The first of the Great Demons needed nothing more than this.\"",nq_sfang:"\"It was a white feather, once.\"",
+ set_seraph:"Seraphic Set",set_fallen:"Fallen Set",set_archa:"The Archangel's Arms",set_gdemon:"The Great Demon's Arms",
+ setD_seraph2:"+8% max health and +30 defense",setD_seraph4:"+8% max health, +30 defense, +10% damage and +6% attack speed",setD_fallen2:"+8% damage",setD_fallen4:"+14% damage, +8% attack speed and +8% max health",setD_archa2:"+10% damage and +6% attack speed",setD_gdemon2:"+12% damage and +8% max health",
+ rb_m_seraph:"Recipe: Seraphic Set",rb_m_fallen:"Recipe: Fallen Set",
+rb_m_seraphD:"Teaches you to make the Seraphic Armor, Helmet, Gloves and Boots (smithing, Lv 9). Click it in the bag to learn it.\nIt can be traded or sold at the auction.",
+ rb_m_fallenD:"Teaches you to make the Fallen Armor, Helmet, Gloves and Boots (smithing, Lv 9). Click it in the bag to learn it.\nIt can be traded or sold at the auction.",
+ tl_aslay:"Archangel Slayer",tl_fbane:"Bane of the Fallen",tl_gdslay:"Great Demon Slayer",tl_aslayD:"Defeated Archangel Michael on his throne in Asgard.",tl_fbaneD:"Defeated Sariel the Fallen in the Fallen Rift.",tl_gdslayD:"Defeated the Great Demon Baal, the first of the Great Demons."});
 /* ---- Pagma's sword dances as in the novel (owner: "1:1 with the novel"; audit legends/legend-audit.md §1). One scale for
    all of them: the novel's damage x0.4 and its cooldowns /20. Link is a flurry on one target, Kill one blow that bleeds and
    brings despair for half your stamina, Wave rings out around you and slows, its waves homing on those further off,

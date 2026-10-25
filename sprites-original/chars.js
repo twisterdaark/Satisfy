@@ -80,6 +80,13 @@ function frame(c,dir,pose,f){
   if(U){q(0,6+fl,5,7,W);q(11,6+fl,5,7,W);q(1,13+fl,3,1,WD);q(12,13+fl,3,1,WD);q(4,5,1,8,WB);q(11,5,1,8,WB);q(1,7+fl,3,1,WB);q(12,7+fl,3,1,WB);}
   else if(S_){q(0,7+fl,5,4,W);q(1,6+fl,4,1,W);q(1,11+fl,3,2,WD);q(4,5,1,7,WB);q(1,9+fl,3,1,WB);}
   else{q(0,8+fl,4,5,W);q(1,7+fl,3,1,W);q(1,13+fl,2,1,WD);q(12,8+fl,4,5,W);q(12,7+fl,3,1,W);q(13,13+fl,2,1,WD);q(3,6,1,7,WB);q(12,6,1,7,WB);}}
+ // feathered wings (owner 2026-10-25, the angels of Asgard and the fallen): taller than bat wings, rounded at the top,
+ // three bands of feathers (coverts light, flight feathers mid, tips dark) with a scalloped lower edge; they lift on a step
+ if(c.aw){const W=c.aw,WL=shade(W,.3),WD=shade(W,-.22),WT=shade(W,-.4),fl=pose==='walk'?(f%2):0;
+  const wing=(m,rows)=>{for(const [x,y,w,col] of rows){const X=m?16-x-w:x;q(X,y-fl,w,1,col);}};
+  const L=[[2,4,3,WL],[1,5,4,WL],[0,6,5,W],[0,7,5,W],[0,8,4,W],[4,8,1,WD],[0,9,4,W],[0,10,4,WD],[1,10,1,W],[3,10,1,W],[0,11,3,W],[0,12,3,W],[1,12,1,WD],[0,13,2,W],[0,14,2,WD],[0,15,1,WT],[2,13,1,WT]];
+  if(S_){for(const [x,y,w,col] of L)q(x+1,y-fl,w,1,col);q(5,5,1,6,WD);}
+  else{wing(0,L);wing(1,L);if(!U){q(4,6,1,5,WD);q(11,6,1,5,WD);}}}
  // a reptile tail behind the body (lizardmen)
  if(c.tail){const sw=pose==='walk'?(f%2):0,T=c.skin,T2=c.sk2;if(S_){p(2,15+sw,3,2,T);p(1,17+sw,2,2,T2);p(0,19,2,1,T2);p(3,15,2,1,T2);}else if(U){p(7,16,2,3,T);p(8,19,2,2,T2);p(9,21-sw,2,1,T2);}else{p(12,16,2,2,T);p(13,18,2,2,T2);p(14,19+sw,1,2,T2);}}
  // back arm on the side view (behind torso)
