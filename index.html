@@ -1211,7 +1211,7 @@ chuckB:{hair:'helm',hc:'#d8dce4',hl:'#ffffff',skin:'#e0aa7a',sk2:'#bf8758',top:'
  belial:{hair:'long',hc:'#1a0612',hl:'#5a1a3a',skin:'#c89aa8',sk2:'#a07888',top:'#2a0614',top2:'#5a0a2a',sleeves:false,belt:'#c8a050',cape:'#14020a',pants:'#2a0614',boots:'#140208'},
  succ:{hair:'long',hc:'#4a0a2a',hl:'#8a2a5a',skin:'#d8a0b0',sk2:'#b07888',top:'#5a0a2a',top2:'#3a0618',sleeves:false,pants:'#3a0618',boots:'#2a0410'},
  doranS:{hair:'short',hc:'#1a1a1e',hl:'#34343a',skin:'#e8b88a',sk2:'#c8946a',top:'#26262c',top2:'#18181c',sleeves:true,belt:'#4a3a2a',cape:'#121216',pants:'#1c1c22',boots:'#101014'},
- irene:{hair:'long',hc:'#e8c870',hl:'#f8e4a8',skin:'#f8dcc4',sk2:'#e0b898',top:'#f4f0e8',top2:'#d8d0c0',sleeves:true,belt:'#c8a050',pants:'#e8e0d0',boots:'#c8b890'},
+ irene:{hair:'long',hc:'#c8ccd8',hl:'#f0f2f8',skin:'#f8dcc4',sk2:'#e0b898',top:'#f4f0e8',top2:'#d8d0c0',sleeves:true,belt:'#c8a050',pants:'#e8e0d0',boots:'#c8b890'},
  redk:{hair:'helm',hc:'#8a1a1a',hl:'#c83a3a',skin:'#f1c193',sk2:'#d3a070',top:'#a01a1a',top2:'#6a0e0e',sleeves:true,pad:'#c83a3a',pad2:'#8a1a1a',belt:'#2a2a2a',cape:'#6a0e0e',pants:'#5a0a0a',boots:'#2a1a1a'},
  dbus:{hair:'messy',hc:'#2a2a2a',hl:'#4a4a4a',hood:'#141414',mask:'skull',maskC:'#b8b0a0',eye:'#ff4a2a',horns:'#8a8a8a',skin:'#c8a890',sk2:'#a88870',top:'#1a1a24',top2:'#101018',sleeves:true,robeL:1,trim:'#8a1a1a',sash:'#8a1a1a',belt:'#8a1a1a',cape:'#3a0a0a',pants:'#1a1a24',boots:'#101010'},
  asmo:{hair:'short',hc:'#c8b080',hl:'#e8d4a8',skin:'#f1c7a0',sk2:'#d39f78',top:'#d8d0c0',top2:'#a89880',sleeves:true,belt:'#c8a050',cape:'#8a1a1a',pants:'#3a3a44',boots:'#2a2a30'},
@@ -1531,7 +1531,7 @@ const solidT=(tx,ty)=>SOLID[at(tx,ty)]===1||!!(HALLB&&HALLB.has(tx*1000+ty)); //
 // the two continents (owner 2026-10-23): the East lies past the Red Sea, out of sight, and only a scroll crosses (eaSide 1)
 const eaSide=x=>x>=CSPL*TS?1:0,eaIn=(x,y)=>x>=CSPL*TS&&y<WMH*TS,eaT=tx=>tx>=CSPL;
 const buildings=[{x:3,y:12,w:6,h:5,k:'house'},{x:17,y:12,w:7,h:5,k:'forge'},{x:3,y:24,w:6,h:5,k:'house'},{x:20,y:24,w:6,h:5,k:'house'},
- {x:137,y:66,w:7,h:5,k:'forge'},{x:118,y:66,w:6,h:5,k:'house'},{x:129,y:66,w:6,h:5,k:'hall'},{x:109,y:67,w:6,h:5,k:'shop'},{x:110,y:76,w:6,h:5,k:'house'},{x:138,y:76,w:6,h:5,k:'house'},
+ {x:137,y:66,w:7,h:5,k:'forge'},{x:118,y:66,w:6,h:5,k:'house'},{x:129,y:66,w:6,h:5,k:'palace',castle:1},{x:109,y:67,w:6,h:5,k:'shop'},{x:110,y:76,w:6,h:5,k:'house'},{x:138,y:76,w:6,h:5,k:'house'},
  {x:109,y:86,w:6,h:5,k:'tower'},{x:117,y:86,w:6,h:5,k:'house'},{x:130,y:86,w:6,h:5,k:'lodge'},{x:138,y:86,w:7,h:5,k:'inn'},{x:109,y:94,w:6,h:5,k:'house'},{x:117,y:94,w:6,h:5,k:'armory'},{x:130,y:94,w:6,h:5,k:'house'},
  // Patrian (SAT-CONTENT-002): Earl Ashur's manor, shop, inn, armory, barracks, two houses
  {x:186,y:66,w:8,h:5,k:'hall'},{x:175,y:68,w:6,h:5,k:'shop'},{x:198,y:68,w:7,h:5,k:'inn'},{x:175,y:86,w:6,h:5,k:'armory'},{x:198,y:86,w:6,h:5,k:'tower'},{x:175,y:93,w:6,h:5,k:'house'},{x:198,y:93,w:6,h:5,k:'house'}];
@@ -1959,10 +1959,15 @@ function genRoom(b,bi,kind,rx,ry,z){const R={id:'r'+bi,bi,b,kind,rx,ry,z,dx:b.x*
   if(kind==='house'){P0('bed',1,2,2);P0('table',5,4,2);P0('chest',10,2);P0('shelf',4,1,2,{back:1});P0('barrel',10,6);}
   else if(kind==='inn'){P0('counter',3,3,4);P0('bed',9,2,2);P0('bed',9,5,2);P0('table',1,5,2);P0('shelf',3,1,3,{back:1});P0('barrel',1,2);}
   else if(kind==='salon'){P0('mirror',2,1,1,{back:1});P0('mirror',5,1,1,{back:1});P0('mirror',8,1,1,{back:1});P0('chair',2,2);P0('chair',5,2);P0('chair',8,2);P0('dress',1,4);P0('dress',10,4);P0('plant',1,6);P0('plant',10,6);}   // Layla's salon (owner 2026-10-23)
+  else if(kind==='castle'){P0('table',4,3,4);P0('rack',1,4);P0('rack',10,4);P0('shelf',1,1,3,{back:1});P0('shelf',8,1,3,{back:1});P0('chest',10,2);P0('plant',1,6);P0('plant',10,6);}   // Winston Castle's hall
   else if(kind==='shop'){P0('counter',3,3,6);P0('shelf',2,1,3,{back:1});P0('shelf',6,1,3,{back:1});P0('barrel',1,5);P0('barrel',10,5);P0('chest',10,2);}
   else{P0('counter',3,3,6);P0('rack',1,2);P0('rack',10,2);P0('shelf',4,1,4,{back:1});P0('barrel',10,6);}}
 (function genInteriors(){let i=0;
- buildings.forEach((b,bi)=>{if(!['house','shop','armory','inn'].includes(b.k))return;genRoom(b,bi,bi===3?'inn':bi===9?'salon':b.k,1+i*13,WMH+8,b.y<WH?'zBai':(b.lx??b.x)>=160?'zPat':'zWin');if(bi===9)PROPS.push({k:'sign',tx:b.x+1,ty:b.y+b.h-1,w:1,id:'salonSign'});i++;});})();
+ buildings.forEach((b,bi)=>{if(!['house','shop','armory','inn'].includes(b.k))return;genRoom(b,bi,bi===3?'inn':bi===9?'salon':b.k,1+i*13,WMH+8,b.y<WH?'zBai':(b.lx??b.x)>=160?'zPat':'zWin');if(bi===9)PROPS.push({k:'sign',tx:b.x+1,ty:b.y+b.h-1,w:1,id:'salonSign'});i++;});
+ // Winston Castle (ch 116), Earl Steim's seat: the hall beside Khan's smithy (building 6); its room apart from the others,
+ // so none of them moves
+ // in the cave rock left of the guild hall's room (218), clear of every other room and of the first dungeon (233+)
+ {const b=buildings[6];if(b&&b.castle)genRoom(b,6,'castle',205,WMH+16,'zWin');}})();
 /* SAT-ONLINE-115 (plan U235): the guild hall, one more room below the map (free tiles past the house interiors) that each
    guild furnishes for itself. While you are in, its id is your hall's ('h' + a hash of the guild id), so presence shows you
    only the players in the same guild's hall; outside it is 'rGH'. Leaving takes you back where you came in from. */
@@ -6239,7 +6244,9 @@ for(const [id,x,y,dx] of [['grocerRh',638,58,5.5],['merchantT',864,94,5.5],['inn
 NPCS.push({id:'merchant',spr:'merchant',...rmP(7,5.5,2.5),reach:16},{id:'armorer',spr:'armorer',...rmP(15,5.5,2.5),reach:16},{id:'inn',spr:'inn',...rmP(13,4.5,2.5),reach:16},{id:'innB',spr:'inn',...rmP(3,4.5,2.5),reach:16},{id:'oldw',spr:'oldw',...rmP(5,7,4.4)},
  {id:'merchantP',spr:'merchant',...rmP(18,5.5,2.5),reach:16},
  {id:'armorerP',spr:'armorer',...rmP(20,5.5,2.5),reach:16},{id:'innP',spr:'inn',...rmP(19,4.5,2.5),reach:16},
- {id:'stylist',spr:'stylist',...rmP(9,5.5,3.6)});   // Layla works in her salon now (owner 2026-10-23)
+ {id:'stylist',spr:'stylist',...rmP(9,5.5,3.6)},
+ {id:'steim',spr:'steim',...rmP(6,6,1.5),dir:2},{id:'irene',spr:'irene',...rmP(6,8.5,4.6),dir:2,hidden:1},   // Winston Castle (ch 116-117); Irene home after her rescue
+ {id:'admRabbit',spr:'admRabbit',tx:548.5,ty:84.4,ph:1,dir:3});   // Reidan's administrator (ch 221-228, 856)   // Layla works in her salon now (owner 2026-10-23)
 let camXf=0,camYf=0,camSnap=true,S,P,mons=[],npcs=[],fx=[],nums=[],smoke=[],proj=[],shake=0,mode='lang',hudDirty=true,gTime=0,camX=0,camY=0,MID=0;
 const RC=[
  {id:'jaffa',slot:'x',need:{wood:2,ore:1},unlock:()=>!!S.qs.sm3,diff:.8,strikes:4},
@@ -7003,7 +7010,7 @@ function killMon(m){const b=MT[m.type];m.dead=true;lpSrc(m);if(m.spar){if(SPAR&&
  if(!m.bh&&!m.noLoot)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,RCKEY.includes(k)?1:p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p*(1+secB('drop')))addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill (a divine beast's breath is one)
  if(!m.bh&&!m.noLoot&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}if(!m.noLoot){rbBossDrop(m,b);cosDrop(m,b);}
  if(m.lv>=20&&!m.tmp&&!m.noLoot){if(b.boss){addMat('estone',1+(m.lv/50|0));if(rand()<.12)addMat('pstone',1);if(rand()<.25)addMat('bstone',1);}else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
- crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;sc2Kill(m);mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);p4Kill(m);p5Kill(m);fdwKill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
+ crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;sc2Kill(m);mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);p4Kill(m);p5Kill(m);fdwKill(m);rbcKill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
  if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;annW('annGuard',{lv:S.lv});}giveTitle('forest');S.raid=0;}
  if(m.type==='gchief'){shake=.3;giveTitle('chief');}
  if((S.kills.rabbit||0)+(S.kills.goblin||0)>=40)giveTitle('hunter');
@@ -7455,6 +7462,7 @@ function updateEscort(dt){escHide();if(!ESC)return;const s=S.qs[ESC.q],q=QD[ESC.
  const D=escDest(q.obj);if(Math.hypot(E.x-D.x,E.y-D.y)<40){s.c=1;num(E.x,E.y-26,t('escThanks'),'#9fe39a',false);vfx('spawn',E.x,E.y);ESC=null;addAff(q.by,6);completeQ(E.q);}}
 // who says what: hi = first meeting, low = a quest exists but your level is too low, idle = nothing to do; opts = shop choices
 const NPCT={
+ steim:{hi:'nst_hi'},irene:{hi:'nir_hi'},admRabbit:{hi:'nrb_hi'},   // Winston Castle and Reidan's administrator (v2.92): their lines and options are set with NLD's further down
  biban:{hi:'twBbHi',idle:()=>TOW?'twId_biban':S.lv<400?'twBbLow':'twBbIdle',opts:()=>bibanOpts(),noGift:1},
  hayate:{hi:'twHaHi',idle:()=>'twHaIdle',opts:()=>twOpts('hayate'),noGift:1},
  fronz:{hi:'twHi_fronz',idle:()=>'twId_fronz',opts:()=>twOpts('fronz'),noGift:1},
@@ -9816,7 +9824,7 @@ function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,ti
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
  h+=`<div class="ssec">${t('special')}</div><div class="sgrid">`+['comp','indom','dign','insi',...(S.hid.pers?['pers']:[])].map(k=>row(t(k),S.hid[k],t('t'+k)+'<br><small>'+t('noDist')+'</small>')).join('')+'</div>';
  h+=`<div class="pts" id="ptsT">${t('pts',{n:S.pts})}</div>`+(S.pts>0?`<div class="note">${t('ptsHint')}</div>`:'');
- h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk','expoc','angler','kheir','ffield','pguest','dshadow',...TTOWN].filter(id=>S.tl[id]);
+ h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk','expoc','angler','kheir','ffield','pguest','dshadow','wcastle','ifriend','rclerk',...TTOWN].filter(id=>S.tl[id]);
  const tlSk=id=>Object.keys(SKD).filter(k=>SKD[k].title===id||TLS[id]===k).filter((k,i,a)=>a.indexOf(k)===i);own.sort((x,y)=>(tlSk(y).length>0)-(tlSk(x).length>0));   // owner 2026-10-24: titles that give a skill come first
  const skTipT=k=>{const d=SKD[k]||{};return esc(`<b>${t('sk_'+k)}</b><br>${t('skd_'+k)}<br><small>${t('skCost',{mp:mpC(k),cd:Math.round((d.cd||0)*skCostM(k))})}</small>`);};
  h+=`<div class="ssec">${t('titlesH')}</div>`+(own.length?own.map(id=>`<div class="tl${S.title===id?' worn':''}"><div><b>${t('tl_'+id)}</b><small>${t('tl_'+id+'D')}</small>${tlSk(id).length?`<em>${tlSk(id).map(k=>`<span class="tlsk" data-tip="${skTipT(k)}">${t('iskL',{s:t('sk_'+k)})}</span>`).join(' · ')}</em>`:STR.en['tl_'+id+'S']?`<em>${t('tl_'+id+'S')}</em>`:''}</div><button data-title="${id}" ${S.title===id?'disabled':''}>${t(S.title===id?'tlWorn':'tlWear')}</button></div>`).join('')+`<div class="note">${t('tlNote')}</div>`:`<div class="note">${t('noTitles')}</div>`);
@@ -10552,7 +10560,7 @@ function update(dt){
  if(P.sw>0){P.sw-=dt;P.hp=Math.min(mh,P.hp+mh*.03*dt);if(rand()<dt*6)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*14,vx:0,vy:-24,t:.5,c:'#7ae07a',fl:1});}
  // hunger only drops while you do something (Twister 2026-10-19): walking, riding, attacking, dodging or guarding
  {const busy=Math.abs(P.x-(P.fqx??P.x))+Math.abs(P.y-(P.fqy??P.y))>.01||P.acd>0||P.dash>0||P.guard;P.fqx=P.x;P.fqy=P.y;if(busy)P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));}
- updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);o48Tick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
+ updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);wcTick();o48Tick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
@@ -12683,6 +12691,66 @@ function nlTopic(who,tp){const say=typeof tp.say==='function'?tp.say():tp.say,fi
 const nlOpts=who=>(NLD[who].topics||[]).length?[{l:'💬 '+t('nlTalk'),f:()=>nlTopics(who)}]:[];
 // the people's lines and topics into the NPC table (their quests and shops stay as they were)
 for(const who of ['khan','ashur','piaro','farmerP','hanS','doranS']){const n=NPCT[who];if(!n)continue;const o0=n.opts;n.idle=()=>nlIdle(who);n.opts=()=>[...nlOpts(who),...(who==='farmerP'?fdwOpts():[]),...(o0?o0():[])];}
+// ---- Winston Castle (owner 2026-10-25: "add her father's house and Irene"): Earl Steim, the lord of the north, in his castle
+// (ch 116); Irene, his only daughter, there once she is home (ch 116-117; the game's Irene quest); and Administrator Rabbit in
+// Reidan (ch 38-41: the Mero Company's merchant at the smiths' contest in Winston, the first to see the level 21 Grid's talent and
+// offer a partnership; ch 221: out of a long prison stay, thin-rimmed glasses, Winston calling him a hero; ch 221-228: Reidan's executive administrator; ch 856: the Overgeared Kingdom's official whose daily call pays
+// gold). Every line ORIGINAL_SIDE_STORY, after those chapters.
+Object.assign(FIG,{steim:{hair:'short',hc:'#b8b8c0',hl:'#e0e0e8',skin:'#e8b890',sk2:'#c8946a',beard:'#b0b0b8',beard2:'#8a8a94',top:'#1e2a5a',top2:'#121a3e',collar:'#d8b04a',sleeves:true,cape:'#7a1a1a',belt:'#d8b04a',pants:'#1a1a2a',boots:'#141418'},
+ admRabbit:{hair:'side',hc:'#6a4a2a',hl:'#8a6a4a',gls:'#2a2a30',skin:'#f0c8a0',sk2:'#d0a47c',top:'#4a4a52',top2:'#34343a',collar:'#d8d8e0',sleeves:true,belt:'#2a2a30',pants:'#2a2a30',boots:'#1a1a1e'}});
+for(const k of ['steim','admRabbit'])if(!SH[k])shLazy(k,()=>SA.chars.buildSheet(FIG[k]));
+GOK.add('irene');FEM.add('irene');   // Irene takes a gift (a hairpin above all, as every lady)
+Object.assign(NLD,{
+ steim:{town:'zWin',repTrust:1,src:'Earl Steim, lord of the north, in Winston Castle (ch 116-117)',
+  ctx:[['nst_c1',()=>isNight()],['nst_c2',()=>!isNight()],['nst_c3',()=>!!S.qs.irn&&S.qs.irn.st===1],['nst_c4',()=>qDone('irn')&&!(S.tl||{}).sonlaw],['nst_c5',()=>!!(S.tl||{}).sonlaw],['nst_c6',()=>qDone('gj2')],['nst_c7',()=>S.lv>=200]],
+  q:{irn:'nst_q1',gj1:'nst_q2'},rep:['nst_r0','nst_r1','nst_r2','nst_r3','nst_r4'],mem:[['north',1,'nst_mn1'],['north',2,'nst_mn2']],
+  topics:[
+   {id:'north',tier:0,say:['nst_n1'],ch:[{k:'nst_nA',to:'nst_nA2',aff:1,mem:1},{k:'nst_nB',to:'nst_nB2',mem:2}]},
+   {id:'mero',tier:1,say:()=>qDone('gj2')?['nst_m1','nst_m3']:['nst_m1','nst_m2']},
+   {id:'daughter',tier:1,when:()=>qDone('irn'),say:()=>(S.tl||{}).sonlaw?['nst_d1s']:['nst_d1','nst_d2'],aff:2},
+   {id:'oath',tier:3,say:['nst_o1','nst_o2'],f:()=>{addRep('zWin',50);giveTitle('wcastle');}}]},
+ irene:{town:'zWin',src:'Irene, Earl Steim\'s only daughter (ch 116-117; the Irene quest)',
+  ctx:[['nir_c1',()=>isNight()],['nir_c2',()=>!isNight()],['nir_c3',()=>!!(S.tl||{}).sonlaw],['nir_c4',()=>S.lv>=200]],
+  q:{},rep:null,mem:[['temple',1,'nir_mt1'],['temple',2,'nir_mt2']],
+  topics:[
+   {id:'temple',tier:0,say:['nir_t1'],ch:[{k:'nir_tA',to:'nir_tA2',aff:2,mem:1},{k:'nir_tB',to:'nir_tB2',aff:1,mem:2}]},
+   {id:'father',tier:0,say:['nir_f1']},
+   {id:'ian',tier:1,say:['nir_i1','nir_i2'],aff:1},
+   {id:'thanks',tier:3,say:()=>(S.tl||{}).sonlaw?['nir_g1s']:['nir_g1','nir_g2'],f:()=>giveTitle('ifriend')}]},
+ admRabbit:{town:'zReid',repTrust:1,src:'Rabbit: the Mero Company man in Winston (ch 28-50), Reidan\'s administrator (ch 221-228), the daily call (ch 856)',
+  ctx:[['nrb_c1',()=>isNight()],['nrb_c2',()=>!isNight()],['nrb_c3',()=>evOn('renW')],['nrb_c4',()=>qDone('gj2')],['nrb_c5',()=>S.lv>=300]],
+  q:{},rep:['nrb_r0','nrb_r1','nrb_r2','nrb_r3','nrb_r4'],mem:[['mero',1,'nrb_mm1']],
+  topics:[
+   {id:'mero',tier:0,say:['nrb_m1'],ch:[{k:'nrb_mA',to:()=>qDone('gj2')?'nrb_mA3':'nrb_mA2',aff:1,mem:1},{k:'nrb_mB',to:'nrb_mB2',mem:2}]},
+   {id:'reidan',tier:0,say:['nrb_e1','nrb_e2']},
+   {id:'prison',tier:1,say:['nrb_p1','nrb_p2','nrb_p3']},
+   {id:'profit',tier:2,say:['nrb_h1'],aff:1},
+   {id:'ledger',tier:3,say:['nrb_l1','nrb_l2'],f:()=>{const g=20000;S.gold+=g;toast(t('nlGold',{n:g}),'good');giveTitle('rclerk');}}]}});
+for(const who of ['steim','irene','admRabbit']){const n=NPCT[who],o0=n.opts;n.idle=()=>nlIdle(who);n.opts=()=>[...nlOpts(who),...(who==='admRabbit'?rbcOpts():[]),...(o0?o0():[])];}
+// Irene is in the castle once she is home (her rescue done); before that the hall has only her father
+let WCI=null;function wcTick(){if(!WCI||!npcs.includes(WCI))WCI=npcs.find(n=>n.id==='irene');if(WCI)WCI.hidden=!(S&&qDone('irn'));}   // spawnWorld makes new npcs at every start
+// ---- Administrator Rabbit's Call (ch 856, a daily of the Overgeared Kingdom's official, paid in gold): one errand a day, by
+// the day: the city's resources (materials for Reidan's works), the city's security (put down monsters round Reidan), or
+// his ledger to Lauel and back. From level 150; once a day; gold, his trust (+2).
+const RBCK=['res','sec','led'],RBCRES=[['wood',20],['ore',20],['leather',12]];
+function rbcPick(day){let h=0;for(const c of day)h=(h*31+c.charCodeAt(0))|0;h=Math.abs(h);return {k:RBCK[h%3],m:((h/3)|0)%RBCRES.length};}   // the errand from one part of the day's hash, the material from another
+function rbcS(){const D=dlyS();if(!D.rbc){const p=rbcPick(D.day||today());D.rbc={k:p.k,m:p.m,on:0,n:0,done:0,led:0};}return D.rbc;}
+const rbcGold=()=>Math.round(1500+S.lv*60);
+function rbcOpts(){if(!S||S.lv<150)return [];const c=rbcS();if(c.done)return [{l:'📜 '+t('rbcDone'),f:()=>shopD('admRabbit','rbcDoneL')}];
+ const [mk,mn]=RBCRES[c.m],tx={res:t('rbcRes',{n:mn,it:t(mk)}),sec:t('rbcSec',{n:8}),led:t('rbcLed')}[c.k];
+ if(!c.on)return [{l:'📜 '+t('rbcAsk'),st:tx,f:()=>{c.on=1;save(true);dialog('admRabbit',['rbcGo_'+c.k],()=>shopD('admRabbit',nlIdle('admRabbit')));}}];
+ const ready=c.k==='res'?(S.mats[mk]||0)>=mn:c.k==='sec'?c.n>=8:c.led===1;
+ if(!ready)return [{l:'📜 '+t('rbcProg_'+c.k,{n:c.n,m:8,it:t(mk),c:mn}),f:()=>shopD('admRabbit','rbcWait')}];
+ return [{l:'📜 '+t('rbcTurn'),f:()=>{if(c.k==='res')S.mats[mk]-=mn;c.done=1;c.on=0;const g=rbcGold();S.gold+=g;coinFx(P,g);addAff('admRabbit',2);SFX.quest();toast(t('rbcGot',{g}),'good');save(true);
+  dialog('admRabbit',['rbcThanks'],()=>shopD('admRabbit',nlIdle('admRabbit')));}}];}
+// the city's security: a normal monster put down within 60 tiles of Reidan's centre counts
+function rbcKill(m){if(!S)return;const D=S.dly;if(!D||!D.rbc||!D.rbc.on||D.rbc.k!=='sec'||D.rbc.done||D.rbc.n>=8)return;const b=MT[m.type];if(!b||b.boss||m.tmp)return;
+ const T=TOWNS.find(T=>T.k==='zReid');if(!T||Math.hypot(m.x-T.rx*TS,m.y-T.ry*TS)>60*TS)return;D.rbc.n++;if(D.rbc.n===8)toast(t('rbcSecOk'),'good');}
+// his ledger: Lauel signs it
+function rbcLauelOpts(){const D=S&&S.dly;if(!D||!D.rbc||!D.rbc.on||D.rbc.k!=='led'||D.rbc.done||D.rbc.led)return [];return [{l:'📜 '+t('rbcLauel'),f:()=>{D.rbc.led=1;save(true);dialog('lauel',['rbcLauel2']);}}];}
+{const L=NPCT.lauel;if(L){let o0=L.opts;Object.defineProperty(L,'opts',{configurable:true,enumerable:true,set(v){o0=v;},
+ get(){return rbcLauelOpts().length?()=>[...rbcLauelOpts(),...(o0?o0():[])]:o0;}});}}   // only while the ledger waits for him, so his quests are offered as before
+window.__GWC={pick:d=>rbcPick(d),lauelN:()=>NPCT.lauel,rc:()=>rbcS(),rcOpts:()=>rbcOpts(),rcKill:m=>rbcKill(m),lauel:()=>rbcLauelOpts(),gold:()=>rbcGold()}; // tests
 // ---- discoveries: the first time you find what a rumour spoke of (or the trace of the secret quest)
 const FD={kvein:{lm:'lmMine',need:()=>!!nlM('khan','rumor_kvein'),p:.004,mat:['ore',6]},nend:{lm:'lmNEnd',need:()=>!!nlM('ashur','rumor_nend'),p:.005,mat:['mstone',3]},
  burrow:{need:()=>!!nlM('farmerP','hint'),p:.01,mat:['rpotato',1]},
@@ -12790,7 +12858,53 @@ Object.assign(STR.ar,{nlTalk:"اتكلم",nlAsk:"عايز تتكلم في إيه
  ndo_l1:"الآنسة إيرين سألتني مين اللي طلّعها من البدروم ده. قلتلها: مسافر إيده تقيلة.",ndo_lA:"قوله إنك مبسوط إنها بخير.",ndo_lA2:"هتعرف. عن طريق رجالة الضل المناسبين.",ndo_lB:"قوله إنها كانت حاجة بسيطة.",ndo_lB2:"ماكانتش حاجة بسيطة. بس هقولها إنك قلت كده.",ndo_ml1:"الآنسة فرحت لما عرفت. قالتها مرتين، ودي بالنسبالها خطبة.",
  ndo_k1:"وادي كيسان واحد من الأماكن المحرمة في المملكة الخالدة. دخلته مرة، في مشوار مش هقول هو إيه.",ndo_k2:"لو رحت، اقرا اللي الوادي بيقوله عند مدخله. وبعدين تعالى قولي إنك طلعت.",ndo_k3:"دخلت وطلعت. يبقى التحذيرات صح، وإنت كمان.",
  ndo_s1:"شغل الضل إنه يبقى في المكان اللي محدش بيبص فيه، قبل المشكلة بخطوة.",ndo_s2:"رجليك تنفع للشغلانة دي، حتى لو صبرك لأ. من النهارده رجالة الضل هيعتبروك واحد من أصحابهم.",
- fd_cork:"جزيرة كورك",fd_kesan:"وادي كيسان",tl_pguest:"ضيف بانجيا",tl_pguestD:"هان سوكبونج بيعتبرك ضيف بانجيا، مش غريب.",tl_dshadow:"معروف عند رجالة الضل",tl_dshadowD:"دوران، ضل الإيرل شتايم، بيعدّك من أصحاب رجالة الضل.",tl_kheir:"وريث خان",tl_kheirD:"وعدت خان تعمل اللي ماقدرش يعمله.",tl_ffield:"حارس الغيطان",tl_ffieldD:"وقفت في غيط بيارو بالليل وموّت ملكة الجحور."});
+ fd_cork:"جزيرة كورك",fd_kesan:"وادي كيسان",tl_pguest:"ضيف بانجيا",tl_pguestD:"هان سوكبونج بيعتبرك ضيف بانجيا، مش غريب.",tl_dshadow:"معروف عند رجالة الضل",tl_dshadowD:"دوران، ضل الإيرل شتايم، بيعدّك من أصحاب رجالة الضل.",steim:"الإيرل شتايم",irene:"إيرين",admRabbit:"المسؤول رابيت",
+ nst_hi:"أهلًا بيك في قلعة وينستون. أنا شتايم، إيرل الشمال. وينستون والأرض اللي حواليها في عهدتي.",
+ nst_c1:"القلعة دي عمرها ما بتنام. تمانين خدام، وكل واحد فيهم فاكر إن الشمع شغلة حد تاني.",nst_c2:"الشمال هادي النهارده. وأنا مابثقش في شمال هادي.",
+ nst_c3:"بنتي اتخطفت. دوران راح وراها. لو إنت كمان رايح، روح دلوقتي.",nst_c4:"رجّعتلي بنتي. أبواب قلعة وينستون مفتوحالك على طول.",
+ nst_c5:"جوز بنتي. الكلمة لسه بتفاجئني، وكل مرة بقولها بتفرّحني أكتر.",nst_c6:"رجالة شركة ميرو بقوا يمشوا في وينستون بالراحة من ساعة مسابقة خان. كويس.",
+ nst_c7:"القوة اللي زي قوتك بتشد عيون العاصمة. خلي بالك عيون مين.",
+ nst_q1:"إيرين رجعت البيت. اطلب مني أي حاجة في إيدي أديهالك. وأنا بتكلم جد.",nst_q2:"حدادة خان لسه واقفة، وبلطجية شركة ميرو مشيوا من على بابها. وينستون مديونالك.",
+ nst_r0:"مسافر في القاعة بتاعتي.",nst_r1:"إنت اللي أهل وينستون بيتكلموا عنه.",nst_r2:"وينستون بتتكلم عنك كويس. والوكلا بتوعي كمان.",nst_r3:"صاحب وينستون. اقعد، القلعة فيها نبيذ.",nst_r4:"بطل وينستون تحت سقفي. أبويا كان هيحب يشوف ده.",
+ nlT_steim_north:"الشمال",nlT_steim_mero:"شركة ميرو",nlT_steim_daughter:"إيرين",nlT_steim_oath:"قسم وينستون",
+ nst_n1:"الشمال تلج وأوركات وطرق قديمة، ووينستون في قلبه. عايز تعرف إيه؟",
+ nst_nA:"اسأله بيمسكه إزاي.",nst_nA2:"بعساكر أقل من اللي العاصمة فاكرة إني محتاجهم، وبصبر أكتر من اللي فاكرة إن عندي.",
+ nst_nB:"اسأله إيه أكتر حاجة بتهدده.",nst_nB2:"مش الأوركات. الناس اللي فاكرين إن المدينة دفتر حسابات. شركة ميرو علمتني ده.",nst_mn1:"لسه بتسأل الشمال بيتمسك إزاي؟ بالصبر.",nst_mn2:"دفاتر حسابات تاني. دايمًا دفاتر حسابات.",
+ nst_m1:"شركة ميرو كانت ماسكة تجارة الشمال سنين. وأسياد وينستون نفسهم كانوا بيبصوا الناحية التانية.",nst_m2:"هما عايزين حدادة خان. خلي عينك عليهم.",
+ nst_m3:"وبعدين خان غلبهم في مسابقتهم هما، واللي كانوا بيبصوا الناحية التانية اتحاسبوا قدامي. وأشطر تاجر عندهم كمان بقى في صفنا.",
+ nst_d1:"إيرين بتضحك تاني. بقت تقعد في الجنينة بالليل، وده عمرها ما عملته قبل كده.",nst_d2:"بتسأل على اللي شالها وطلع بيها. بقولها: ضيف القلعة دي، في أي وقت يحبه.",
+ nst_d1s:"إيرين مبسوطة. ده التقرير الوحيد اللي بقراه مرتين.",
+ nst_o1:"قلعة وينستون عندها قسم مابتديهوش غير لقليلين: اللي يهددك، يهدد الشمال.",nst_o2:"خده. وينستون هتعرف قبل الصبح.",
+ nir_hi:"إنت... اللي نزل البدروم ده. أنا إيرين. شكرًا. عمري ما قلتهالك صح.",
+ nir_c1:"بابا بقى يسيب الشمع منوّر طول الليل. مش فارقة معايا. أنا مابقتش بحب الضلمة.",nir_c2:"الجنينة فيها ورد تاني. بابا بيقول أزرع اللي أنا عايزاه.",
+ nir_c3:"إنت هنا! بابا بيعمل نفسه مش مستنيك. وهو مستنيك.",nir_c4:"الناس بتقول إنك بقيت قوي أوي. خلي بالك من نفسك برضه.",
+ nlT_irene_temple:"المعبد",nlT_irene_father:"أبوها",nlT_irene_ian:"صاحب قديم",nlT_irene_thanks:"شكر",
+ nir_t1:"ساعات لسه بسمع ترانيم الشيوخ. وبعدين أفتكر الحبال وهي بتتفك، وأفتكرك.",
+ nir_tA:"قولها إن ده خلص.",nir_tA2:"خلص. إنت بتقولها زي حد مصدقها. وده بيساعد.",nir_tB:"اسألها لو عايزة تتكلم عنه.",nir_tB2:"لسه. بس شكرًا إنك سألت بدل ما تقول.",
+ nir_mt1:"خلص. بقيت أقولها لنفسي بصوتك.",nir_mt2:"في يوم هحكيلك. مش النهارده.",
+ nir_f1:"بابا بيقلق أكتر من اللازم وبيبيّن أقل من اللازم. هو سيد كويس. وأب أحسن من اللي هو فاكره.",
+ nir_i1:"إيان، بلاند دي إيان، وأنا كبرنا مع بعض. بيبعت جوابات مليانة نصايح محدش طلبها.",nir_i2:"أظن إنه هيحبك. أو هيتحداك في حاجة. ومع إيان الاتنين نفس الحاجة.",
+ nir_g1:"كنت عايزة أديك حاجة، وكل اللي عندي بتاع بابا. فدي حاجة بتاعتي أنا.",nir_g2:"صاحب إيرين. مش لقب كبير، بس أنا قاصدة كل كلمة فيه.",
+ nir_g1s:"إنت مش محتاج لقب مني. بس خد ده برضه، عشان أنا عايزاك تاخده.",
+ nrb_hi:"رابيت. مسؤول إدارة ريدان. لو جاي عشان الضرايب، الطابور بيبدأ برة.",
+ nrb_c1:"الليل. الساعات الوحيدة اللي الخزنة مابتردش فيها عليا.",nrb_c2:"تلات طلبات أسوار، واتنين طرق، وواحد تمثال. احزر الأسياد عايزين أنهي.",
+ nrb_c3:"الحرب أغلى حاجة ممكن مدينة تعملها. لاويل بيعمل الخطط، وأنا بعمل الحسابات.",nrb_c4:"مسابقة خان. كنت هناك راجل شركة ميرو. شفت حداد لفل 21 وقلت: هو ده. وطلع عندي حق.",
+ nrb_c5:"حد في قوتك المفروض يدفع ضرايب أكتر. بهزر. غالبًا.",
+ nrb_r0:"زائر تاني. املا استمارة.",nrb_r1:"أهلًا، اللي بيساعد في ريدان. مش محتاج استمارة.",nrb_r2:"ريدان بتتكلم عنك كويس. ومكتب الضرايب كمان، وده عمره ما بيحصل.",nrb_r3:"صاحب ريدان. كنت هقولك اقعد، بس الكراسي كلها سلف.",nrb_r4:"بطل ريدان. لو احتجت أي حاجة تتختم، تعالالي على طول.",
+ nlT_admRabbit_mero:"شركة ميرو",nlT_admRabbit_reidan:"ريدان",nlT_admRabbit_prison:"السجن",nlT_admRabbit_profit:"المكسب",nlT_admRabbit_ledger:"الدفتر",
+ nrb_m1:"اشتغلت في شركة ميرو زمان. في وينستون، من زمان أوي. ومش فخور بكل حاجة فيها.",
+ nrb_mA:"اسأله كان بيعمل إيه هناك.",nrb_mA2:"شركة ميرو كانت عايزة حدادة خان، وأنا كنت هناك عشان المكسب زي كل مرة. لحد ما شفت شغل حداد صغير ونسيت المكسب شوية.",nrb_mA3:"كانوا عايزين حدادة خان، وإنت غلبتهم في المسابقة. أنا شفت موهبتك قبل أي حد وعرضت عليك شراكة. أحسن رهان راهنته في حياتي.",
+ nrb_mB:"اسأله ليه سابهم.",nrb_mB2:"فالمونت عمل اللي أي رئيس لشركة ميرو كان هيعمله. وأنا كمان زمان كنت هعمل زيه. بس اليوم ده الموضوع ماكانش مريحني.",nrb_mm1:"شركة ميرو لسه بتبعتلي جوابات. بحطها في ملف اسمه 'لأ'.",
+ nrb_e1:"لما جينا، ريدان كانت شبه خرابة أكتر من إنها مدينة.",nrb_e2:"دلوقتي فيها أسوار وطرق ومكتب ضرايب. والناس بتشتكي من التلاتة. وده اللي بيعرّفك إن المدينة عايشة.",
+ nrb_p1:"بعد وينستون قعدت في السجن مدة طويلة. وكنت أستاهل.",nrb_p2:"السجن حلو أوي للتفكير في الأرقام. طلعت منه ومعايا خطة لمدينة.",nrb_p3:"الغريبة إن أهل وينستون بقوا بيعتبروني بطل، والإيرل سهّل عليا حاجات كتير عشان كده.",
+ nrb_h1:"طول عمري مابتحركش غير عشان المكسب. ريدان بتديني أقل من شركة ميرو، وعمري ما كنت أغنى من كده. افهمها انت بقى.",
+ nrb_l1:"ده دفتر ريدان. كل اللي علينا، وكل اللي لينا، وعند مين.",nrb_l2:"اسمك بقى في العمود التاني. ده العمود الكويس. هنا المدينة بتسد ديونها.",
+ rbcAsk:"نداء المسؤول رابيت (يومي)",rbcRes:"تأمين موارد المدينة: هات {n} {it}",rbcSec:"أمن المدينة: موّت {n} وحوش حوالين ريدان",rbcLed:"الدفتر: وديه للاويل ورجّعه",
+ rbcGo_res:"الشغل محتاج خامات، والتجار عايزين الضعف. إنت بقى اللي بثق إنك تجيبهم.",rbcGo_sec:"الطرق اللي حوالين ريدان مش أمان. نضّف حتة منها، ممكن؟ أنا هعد.",rbcGo_led:"لازم لاويل يمضي على ده. هو مش هيجيلي، يبقى لازم يروحله.",
+ rbcProg_res:"نداء رابيت: {c} {it} للشغل",rbcProg_sec:"نداء رابيت: {n}/{m} حوالين ريدان",rbcProg_led:"نداء رابيت: الدفتر للاويل",rbcWait:"لسه. أنا بعرف أعد على فكرة.",
+ rbcTurn:"نداء رابيت: بلّغ",rbcGot:"+{g} دهب، من خزنة ريدان",rbcThanks:"كويس. الخزنة بتشكرك. وأنا كمان، ودي أندر.",rbcDone:"نداء رابيت خلص النهارده",rbcDoneL:"تعالى بكرة. المدينة هتكون لقت حاجة جديدة محتاجاها.",
+ rbcSecOk:"حوالين ريدان: كفاية لعدّ رابيت. بلّغه.",rbcLauel:"ادّي لاويل دفتر رابيت",rbcLauel2:"حسابات رابيت تاني. ...اتمضى. قوله العمود التالت غلط. هو مش غلط، بس قوله.",
+ tl_wcastle:"حالف لقلعة وينستون",tl_wcastleD:"الإيرل شتايم اداك قسم قلعة وينستون.",tl_ifriend:"صاحب إيرين",tl_ifriendD:"إيرين اديتك شكرها هي بنفسها.",tl_rclerk:"في دفتر ريدان",tl_rclerkD:"المسؤول رابيت كتب اسمك في العمود الكويس.",tl_kheir:"وريث خان",tl_kheirD:"وعدت خان تعمل اللي ماقدرش يعمله.",tl_ffield:"حارس الغيطان",tl_ffieldD:"وقفت في غيط بيارو بالليل وموّت ملكة الجحور."});
 Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTrust:"They don't trust you enough yet (affinity {n})",nlTrustR:"They don't trust you enough yet (affinity {n}, or {r} in {z})",nlLocked:"\"Some other time. When I know you better.\"",nlGold:"+{n} gold",
  nlT_khan_work:"His work",nlT_khan_trav:"Your travels",nlT_khan_anvil:"The old anvil",nlT_khan_vein:"The mountain mine",nlT_khan_dream:"What he wanted to make",
  nkh_c1:"Night already? The coals stay red longer than the light. So do old smiths.",nkh_c2:"You carry a sword you didn't make. That's all right. Someone made it, and someone cared.",
@@ -12860,7 +12974,53 @@ Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTr
  ndo_l1:"The lady Irene asked me who brought her out of that basement. I told her: a traveller with a heavy hand.",ndo_lA:"Tell her I'm glad she's safe.",ndo_lA2:"She will hear it. Through the proper shadows.",ndo_lB:"Say it was nothing.",ndo_lB2:"It was not nothing. But I will tell her you said so.",ndo_ml1:"The lady was glad to hear it. She said so twice, which for her is a speech.",
  ndo_k1:"Kesan Canyon is one of the Eternal Kingdom's forbidden zones. I went in once, on an errand I won't name.",ndo_k2:"If you go, read what the canyon has to say at its mouth. Then come and tell me you came out.",ndo_k3:"You went in and came out. Then the warnings are true, and so are you.",
  ndo_s1:"A shadow's work is to be where no one looks, one step before the trouble.",ndo_s2:"You have the feet for it, if not the patience. From now on the shadows will count you among their friends.",
- fd_cork:"Cork Island",fd_kesan:"Kesan Canyon",tl_pguest:"Guest of Pangea",tl_pguestD:"Han Seokbong counts you as Pangea's guest, not a stranger.",tl_dshadow:"Known to the Shadows",tl_dshadowD:"Doran, Earl Steim's shadow, counts you among the shadows' friends.",tl_kheir:"Khan's Heir",tl_kheirD:"Promised Khan to make what he never could.",tl_ffield:"Guardian of the Fields",tl_ffieldD:"Stood in Piaro's field at night and put down the Burrow Queen."});
+ fd_cork:"Cork Island",fd_kesan:"Kesan Canyon",tl_pguest:"Guest of Pangea",tl_pguestD:"Han Seokbong counts you as Pangea's guest, not a stranger.",tl_dshadow:"Known to the Shadows",tl_dshadowD:"Doran, Earl Steim's shadow, counts you among the shadows' friends.",steim:"Earl Steim",irene:"Irene",admRabbit:"Administrator Rabbit",
+ nst_hi:"Welcome to Winston Castle. I am Steim, Earl of the north. Winston and the land round it are in my keeping.",
+ nst_c1:"The castle never sleeps. Eighty servants, and every one of them thinks the candles are someone else's work.",nst_c2:"The north is quiet today. I distrust a quiet north.",
+ nst_c3:"My daughter has been taken. Doran has gone after her. If you are going too, go now.",nst_c4:"You brought my daughter home. Winston Castle's doors are open to you, always.",
+ nst_c5:"Son-in-law. The word still surprises me, and pleases me more each time I say it.",nst_c6:"The Mero Company's men walk more quietly in Winston since Khan's contest. Good.",
+ nst_c7:"Strength like yours draws eyes from the capital. Be careful whose eyes.",
+ nst_q1:"Irene is home. Ask me for anything that is in my power to give. I mean it.",nst_q2:"Khan's smithy still stands, and the Mero Company's thugs are gone from its door. Winston owes you.",
+ nst_r0:"A traveller in my hall.",nst_r1:"You are the one Winston's people talk about.",nst_r2:"Winston speaks well of you. So do my stewards.",nst_r3:"Winston's friend. Sit; the castle has wine.",nst_r4:"Winston's hero, under my roof. My father would have liked to see this.",
+ nlT_steim_north:"The north",nlT_steim_mero:"The Mero Company",nlT_steim_daughter:"Irene",nlT_steim_oath:"Winston's oath",
+ nst_n1:"The north is snow, orcs and old roads, and Winston at the heart of it. What do you want to know?",
+ nst_nA:"Ask how he keeps it.",nst_nA2:"With fewer soldiers than the capital thinks I need, and more patience than it thinks I have.",
+ nst_nB:"Ask what threatens it most.",nst_nB2:"Not the orcs. Men who think a city is a ledger. The Mero Company taught me that.",nst_mn1:"Still asking how the north is kept? Patiently.",nst_mn2:"Ledgers again. Always ledgers.",
+ nst_m1:"The Mero Company ruled the north's trade for years. Winston's own lords looked the other way.",nst_m2:"They want Khan's smithy. Watch them.",
+ nst_m3:"Then Khan beat them at their own contest, and the men who had looked away answered to me. Their cleverest merchant even came over to our side.",
+ nst_d1:"Irene smiles again. She sits in the garden in the evenings, which she never did before.",nst_d2:"She asks about the one who carried her out. I tell her: a guest of this castle, whenever they like.",
+ nst_d1s:"Irene is happy. That is the only report I read twice.",
+ nst_o1:"Winston Castle has an oath it gives to few: what threatens you, threatens the north.",nst_o2:"You have it. Winston will know by morning.",
+ nir_hi:"You're... the one who came down into that basement. I'm Irene. Thank you. I never said it properly.",
+ nir_c1:"Father keeps the candles lit all night now. I don't mind. I don't like the dark any more.",nir_c2:"The garden has roses again. Father says I may plant whatever I like.",
+ nir_c3:"You're here! Father pretends he doesn't wait for you. He does.",nir_c4:"People say you've grown very strong. Be careful, all the same.",
+ nlT_irene_temple:"The temple",nlT_irene_father:"Her father",nlT_irene_ian:"An old friend",nlT_irene_thanks:"A thank-you",
+ nir_t1:"Sometimes I still hear the elders' chanting. Then I remember the ropes coming loose, and you.",
+ nir_tA:"Tell her it's over.",nir_tA2:"It is. You say it like someone who means it. That helps.",nir_tB:"Ask if she wants to talk about it.",nir_tB2:"Not yet. But thank you for asking instead of telling.",
+ nir_mt1:"It's over. I tell myself that now, in your voice.",nir_mt2:"One day I'll tell you about it. Not today.",
+ nir_f1:"Father worries too much and shows it too little. He's a good lord. He's a better father than he thinks.",
+ nir_i1:"Ian, Bland de Ian, and I grew up together. He sends letters full of advice nobody asked for.",nir_i2:"He'd like you, I think. Or he'd challenge you to something. With Ian it's the same thing.",
+ nir_g1:"I wanted to give you something, and everything I have is Father's. So: this is mine.",nir_g2:"Irene's friend. Not much of a title, but I mean every word of it.",
+ nir_g1s:"You don't need a title from me. But here's one anyway, because I want you to have it.",
+ nrb_hi:"Rabbit. Administrator of Reidan. If you're here about taxes, the queue starts outside.",
+ nrb_c1:"Night. The only hours the treasury doesn't talk back.",nrb_c2:"Three requests for walls, two for roads, one for a statue. Guess which one the lords want.",
+ nrb_c3:"A war is the most expensive thing a city can do. Lauel does the plans; I do the sums.",nrb_c4:"Khan's contest. I was the Mero Company's man there. I watched a level 21 blacksmith and thought: that one. I was right.",
+ nrb_c5:"Someone of your strength should be paying more tax. I'm joking. Mostly.",
+ nrb_r0:"Another visitor. Fill in a form.",nrb_r1:"Ah, the one who helps around Reidan. No form needed.",nrb_r2:"Reidan speaks well of you. The tax office too, which never happens.",nrb_r3:"Reidan's friend. I'd offer you a chair, but they're all on loan.",nrb_r4:"Reidan's hero. If you ever need anything stamped, come straight to me.",
+ nlT_admRabbit_mero:"The Mero Company",nlT_admRabbit_reidan:"Reidan",nlT_admRabbit_prison:"Prison",nlT_admRabbit_profit:"Profit",nlT_admRabbit_ledger:"The ledger",
+ nrb_m1:"I worked for the Mero Company once. In Winston, a long time ago. I'm not proud of all of it.",
+ nrb_mA:"Ask what he did there.",nrb_mA2:"The Mero Company wanted Khan's smithy, and I was there for the profit, as always. Then I saw a young blacksmith's work and forgot the profit for a moment.",nrb_mA3:"They wanted Khan's smithy, and you beat them at the contest. I saw your talent before anyone and offered you a partnership. Best bet I ever made.",
+ nrb_mB:"Ask why he left.",nrb_mB2:"Valmont did what any head of the Mero Company would. Once I'd have done the same. That day it sat wrong with me.",nrb_mm1:"The Mero Company still sends me letters. I file them under 'no'.",
+ nrb_e1:"When we came, Reidan looked more like a ruin than a city.",nrb_e2:"Now it has walls, roads and a tax office. People complain about all three. That's how you know a city is alive.",
+ nrb_p1:"After Winston I spent a long time in prison. I'd earned it.",nrb_p2:"Prison is very good for thinking about numbers. I came out with a plan for a city.",nrb_p3:"Odd thing: Winston calls me a hero now, and the Earl made things easy for me because of it.",
+ nrb_h1:"I only ever moved for profit. Reidan pays me less than the Mero Company did, and I've never been richer. Work that out.",
+ nrb_l1:"This is Reidan's ledger. Everything we owe, everything we're owed, and who.",nrb_l2:"Your name is in the second column now. That's the good column. Here, the city pays its debts.",
+ rbcAsk:"Administrator Rabbit's Call (daily)",rbcRes:"Securing City Resources: bring {n} {it}",rbcSec:"City Security: put down {n} monsters round Reidan",rbcLed:"The ledger: take it to Lauel and back",
+ rbcGo_res:"The works need materials, and the merchants want twice the price. You, I trust to bring them.",rbcGo_sec:"The roads round Reidan aren't safe. Clear some of them, would you? I'll count.",rbcGo_led:"Lauel has to sign this. He won't come to me, so it has to go to him.",
+ rbcProg_res:"Rabbit's Call: {c} {it} for the works",rbcProg_sec:"Rabbit's Call: {n}/{m} round Reidan",rbcProg_led:"Rabbit's Call: the ledger to Lauel",rbcWait:"Not yet. I can count, you know.",
+ rbcTurn:"Rabbit's Call: report",rbcGot:"+{g} gold, from Reidan's treasury",rbcThanks:"Good. The treasury thanks you. So do I, which is rarer.",rbcDone:"Rabbit's Call is done for today",rbcDoneL:"Come back tomorrow. The city will have found something new to need.",
+ rbcSecOk:"Round Reidan: enough for Rabbit's count. Report to him.",rbcLauel:"Give Lauel Rabbit's ledger",rbcLauel2:"Rabbit's sums again. ...Signed. Tell him the third column is wrong. It isn't, but tell him.",
+ tl_wcastle:"Sworn to Winston Castle",tl_wcastleD:"Earl Steim gave you the oath of Winston Castle.",tl_ifriend:"Irene's Friend",tl_ifriendD:"Irene gave you her own thanks.",tl_rclerk:"In Reidan's Ledger",tl_rclerkD:"Administrator Rabbit wrote your name in the good column.",tl_kheir:"Khan's Heir",tl_kheirD:"Promised Khan to make what he never could.",tl_ffield:"Guardian of the Fields",tl_ffieldD:"Stood in Piaro's field at night and put down the Burrow Queen."});
 /* ---- Pagma's sword dances as in the novel (owner: "1:1 with the novel"; audit legends/legend-audit.md §1). One scale for
    all of them: the novel's damage x0.4 and its cooldowns /20. Link is a flurry on one target, Kill one blow that bleeds and
    brings despair for half your stamina, Wave rings out around you and slows, its waves homing on those further off,

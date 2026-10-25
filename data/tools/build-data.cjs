@@ -50,7 +50,7 @@ function build(T,sourceVersion){
   const npcs={...meta(['NPCS','NPCS.push','NPCT']),npcs:{}};
   const dlg=id=>{const d=T.NPCT[id];if(!d)return undefined;const o={};for(const [k,v] of Object.entries(d))o[k]=dialogField(v);return o;};
   for(const n of T.NPCS)npcs.npcs[n.id]={...n,interior:false,dialog:dlg(n.id),src:SRC};
-  for(const n of T.NPCS_INTERIOR)npcs.npcs[n.id]={...n,interior:true,_srcFn:`rmP(${n.room.bi},${n.room.dx},${n.room.dy})`,dialog:dlg(n.id),src:SRC};
+  for(const n of T.NPCS_INTERIOR)npcs.npcs[n.id]=n.room?{...n,interior:true,_srcFn:`rmP(${n.room.bi},${n.room.dx},${n.room.dy})`,dialog:dlg(n.id),src:SRC}:{...n,interior:false,dialog:dlg(n.id),src:SRC};   // NPCS.push may also add one outdoors (Administrator Rabbit, v2.92)
 
   const zones={...meta(['TOWNS','ZR','ZL']),world:{...T.WORLD},fallback:'zPlains',interiorZone:'room.z (zBai or zWin), from the building the room belongs to',
     towns:T.TOWNS.map(({k,...r})=>({id:k,...r,src:SRC})),

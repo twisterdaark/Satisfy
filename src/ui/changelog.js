@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25wcastle', ver: '2.92', d: '2026-10-25',
+      ar: ["قلعة وينستون: القاعة اللي جنب حدادة خان بقت قلعة الإيرل شتايم زي ما في الرواية، وليها أوضة تدخلها.",
+        "الإيرل شتايم، إيرل الشمال، جوه قلعته: كلامه بيتغير بالليل والنهار، وبيقول كلمة مرة واحدة بعد ما ترجّع بنته وبعد ما خان يغلب شركة ميرو. مواضيعه: الشمال، وشركة ميرو، وإيرين بعد ما ترجع (وبيكلمك كجوز بنته لو انت كده). مابياخدش هدايا، فثقته بتمشي مع اسمك في وينستون، ولما تبقى بطل المدينة بيديك قسم القلعة (لقب جديد و+50 سمعة في وينستون، مرة واحدة).",
+        "إيرين: بعد ما ترجّعها بتلاقيها في القلعة مع أبوها. بتاخد هدايا (بتحب دبوس الشعر). وشعرها بقى فضي لامع زي ما في الرواية. مواضيعها: المعبد (على قد ما هي عايزة تحكي)، وأبوها، وصاحب طفولتها بلاند دي إيان، وعند علاقة 90 بتشكرك بطريقتها (لقب جديد).",
+        "المسؤول رابيت في ريدان جنب لاويل، بنضارته الرفيعة: كان تاجر شركة ميرو في مسابقة الحدادة في وينستون، وأول واحد شاف موهبة حداد لفل 21 وعرض عليه شراكة، وبعدها قعد في السجن مدة طويلة. مواضيعه: شركة ميرو (وفالمونت)، وريدان، والسجن، والمكسب. اسمك في ريدان بيفتح مواضيعه، ولما تبقى بطل المدينة بيكتب اسمك في دفتر ريدان (20,000 ذهب ولقب جديد، مرة واحدة).",
+        "نداء المسؤول رابيت، مهمة يومية من لفل 150: كل يوم مهمة واحدة، يا تجيب موارد للمدينة (20 خشب أو 20 خام أو 12 جلد)، يا تأمّن المدينة (8 وحوش حوالين ريدان)، يا توصّل دفتره للاويل وترجع. المكافأة ذهب (1,500 + 60 لكل لفل)، مرة في اليوم."],
+      en: ["Winston Castle: the hall beside Khan's smithy is Earl Steim's castle now, as in the novel, with a room you can walk into.",
+        "Earl Steim, Earl of the north, in his castle: what he says changes with night and day, and he says a word once after you bring his daughter home and once after Khan beats the Mero Company. His topics: the north, the Mero Company, Irene once she is home (spoken to you as his son-in-law, if you are). He takes no gifts, so his trust follows your name in Winston, and as Winston's Town Hero he gives you the castle's oath (a new title and +50 Winston reputation, once).",
+        "Irene: once you have brought her home she is in the castle with her father. She takes gifts (she likes a hairpin). Her hair is shiny silver now, as in the novel. Her topics: the temple (as much as she wants to say), her father, her childhood friend Bland de Ian, and at affinity 90 her own thanks (a new title).",
+        "Administrator Rabbit in Reidan, by Lauel, in his thin-rimmed glasses: the Mero Company's merchant at the smiths' contest in Winston, the first to see a level 21 blacksmith's talent and offer a partnership, then a long time in prison. His topics: the Mero Company (and Valmont), Reidan, prison, profit. Your name in Reidan opens him, and as Reidan's Town Hero he writes you into Reidan's ledger (20,000 gold and a new title, once).",
+        "Administrator Rabbit's Call, a daily from level 150: one errand a day, either the city's resources (20 wood, 20 ore or 12 leather), the city's security (8 monsters round Reidan), or his ledger to Lauel and back. Gold (1,500 + 60 a level), once a day."] },
     { v: '2026-10-25monsters4', ver: '2.91', d: '2026-10-25',
       ar: ["4 وحوش جديدة معمولة للعبة (مش من الرواية)، كل واحد بيحارب بطريقة مختلفة، ومفيش ولا واحد جوه بلد:",
         "كوبولد لغّام (لفل 74 لـ80، في مناجم الكوبولد): بيزرع عبوة متولّعة مكان ما انت واقف وبيبعد، ولما يتعوّر جامد بيهرب.",
