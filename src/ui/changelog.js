@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25bdog', ver: '2.99', d: '2026-10-25',
+      ar: ["مكان جديد من الرواية: زنزانة «احترس من الكلاب» في جبال درافيان، على الصخور اللي شمال تيتان. كانت منجم، والتنين المجنون نيفارتان خلاه عشه وغطى الحيطان والسقف بالطوب، وبعدها الكرنفال الدموي خلاه قاعدته (فصل 612 و613). دلوقتي شكله زي أطلال بعد حرب.",
+        "جوه فيه عشر عروق على الحيطان: لازم تشيل الطوب الأول، وبعدين تقلع المعدن (\"لازم تشيل الطوب الأول، وبعدين المعادن\"). فيها حديد التنين المجنون وحجر التنين المجنون، نصهم ده ونصهم ده. الشغل فيها من لفل 250.",
+        "\"صعب تشتغل هنا إلا لو عبقري\": أي حد بيطلّع المعدن مرتين من خمسة، وعامل المنجم (تخصص من رئيس عمال المنجم في ريدان) مابيغلطش أبدًا. العروق بترجع تتملا كل يوم.",
+        "ماينور من نقابة أوفرجيرد واقف على باب المنجم، وعنده كلام عن المنجم والطوب والحديد والكرنفال الدموي. ولو معاك حديد أو حجر، خان بيقولك: \"عشان تستعمله صح، محتاج قده بالظبط من حجر التنين المجنون\" (فصل 623).",
+        "الحداد (لفل حدادة 8) يقدر يعمل مطرقة التنين المجنون: 5 حديد و5 حجر و10 ميثريل، وإبداع الحداد الأسطوري بياخدهم كمان. واكتشاف جديد مرة واحدة: الزنزانة نفسها."],
+      en: ["A new place from the novel: the Beware Dogs dungeon in the Dravian Mountains, on the rocks north of Titan. It was a mine until the insane dragon Nevartan made it his nest and covered its walls and ceiling in bricks; then the Blood Carnival made it their base (ch 612, 613). Now it looks like ruins after a war.",
+        "Inside, ten veins along the walls: dig up the bricks first, then mine the mineral (\"You have to dig up the bricks and then the minerals\"). They hold insane dragon iron and insane dragon stone, half and half. Mining them takes level 250.",
+        "\"It's difficult to mine here unless you're a genius\": anyone finds the mineral two times in five, and a Miner (the specialization from Reidan's mine foreman) never misses. The veins fill again every day.",
+        "Minor of the Overgeared Guild stands at the mine's mouth with words on the mine, the bricks, the iron and the Blood Carnival. Carry some iron or stone and Khan tells you: \"To use it properly you need just as much insane dragon stone\" (ch 623).",
+        "A Blacksmith at smithing 8 can make the Insane Dragon Hammer: 5 iron, 5 stone and 10 mithril; the Legendary Blacksmith's Creation takes them too. One new first discovery: the dungeon itself."] },
     { v: '2026-10-25zorder', ver: '2.98', d: '2026-10-25',
       ar: ["شاشة «اختار ID ليك» كانت بتطلع ورا زراير القايمة في أول اللعبة. دلوقتي بتطلع فوقها، وفوق شاشة الحفظ السحابي وسجل التحديثات كمان.",
         "الشاشات اللي بتظهر لوحدها بقت فوق أي شاشة إنت فاتحها: دعوة البارتي، ودعوة النقابة، ودعوة التبادل، وتحدي المبارزة، وقرعة غنايم الغارة، وشاشة الموت، و«حسابك شغال على جهاز تاني». قبل كده كانت بتستخبى ورا الشنطة أو الخريطة أو غيرهم. ولما التبادل يبدأ، الشاشة اللي كانت مفتوحة بتتقفل عشان ماتستخباش وراها.",

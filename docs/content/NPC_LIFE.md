@@ -1,4 +1,4 @@
-# NPC life, first discoveries and the field's secret quest (v2.88, v2.90-v2.96; 2026-10-25)
+# NPC life, first discoveries and the field's secret quest (v2.88, v2.90-v2.99; 2026-10-25)
 
 Owner's request (2026-10-25, encyclopedia §93-§95; the player Suki: "some NPCs are boring and say little, add secret
 quests and a reward for meeting people and exploring"): depth for people who already exist, through the systems that
@@ -208,7 +208,26 @@ status window for their owners).
   flute; the sea); the Siren Elder (the kingdom, the path) and a Siren Guard, who take no gifts. No title.
 - **First discoveries**: Brinichi Coast (after the legend), the Siren Kingdom (at the flute's first play).
 
+## v2.99: the Beware Dogs Dungeon
+
+- **Canon:**
+  - ch 612: the Blood Carnival's base "in the Dravian Mountains" was "the nest of the insane dragon Nevartan".
+  - ch 613: "[You have entered the Beware Dogs dungeon.]"; "It was originally a mine, and he decorated it to make it his nest. Some crazy bastard had bricks all over the walls and ceilings"; "The mine was devastated ... just like ruins after a war". Minor: "it's difficult to mine here unless you're a genius. You have to dig up the bricks and then the minerals".
+  - ch 623, Khan: "In order to use the insane dragon iron properly, it's necessary to secure the same amount of insane dragon stone".
+  - ch 624: "Insane Dragon Hammers".
+- **The game's own parts:** where the Dravian Mountains stand (the rocks of `zSahHills` north of Titan), the veins, their odds and the hammer's numbers.
+- **The place:** the mine's mouth is a gate at (934, -8) at the foot of the rocks, drawn with a board. No surface tile changed. The mine itself is `zBdog`, under the map at x 1180-1240: brick walls, rubble and fallen bricks, and no monsters (the war is over). There is a map label and a landmark.
+- **The veins** (`BDV`, per player, once a day in `S.dly.bdv`): ten along the walls, five iron (`ndiron`) and five stone (`ndstone`). E digs up the bricks, then E mines. Mining asks level 250 (`BDLV`). Anyone finds the mineral at 40%; a Miner (`S.sec==='miner'`) always does. They sell at 500 each (`MATP`, a dragon scale's 600) and the Legendary Blacksmith's Creation takes them (`CREM`, power 3.2).
+- **The hammer:** `ndhammer` (Unique, Lv 290, ATK 460) at the anvil: 5 iron, 5 stone and 10 mithril, for a Blacksmith at smithing 8.
+- **People** (ORIGINAL_SIDE_STORY lines):
+  - Minor at the mouth: the mine, the bricks, the iron, and the Blood Carnival (tier 1).
+  - Khan's topic on the iron, once you carry some.
+- **First discovery:** the dungeon. No title.
+
 ## Tests
+
+`tests/regression/bdog.test.cjs` (2, v2.99): the way in and up, the discovery once, the veins (bricks then mineral, the odds, a
+Miner never misses, half iron half stone, once a day); Minor, Khan's word on the iron, the hammer's recipe.
 
 `tests/regression/siren.test.cjs` (3, v2.96): the night of the two moons (every 8th world day, 20:00 to 4:00) and its
 calendar entry; the gate hidden off the night, shut without the flute, the flute from the fisherman's errand (ten fish
