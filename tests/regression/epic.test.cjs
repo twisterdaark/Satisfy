@@ -49,7 +49,7 @@ test('failing a graded quest: the hour runs out or it is given up; levels go and
     const r = await g.eval(() => {
       const G = window.__G, E = window.__GEP, S = G.S, o = {};
       S.lv = 160; G.gainXP(1); G.acceptQ('irn'); S.qs.irn.t0 = Date.now() - 61 * 60000; E.tick();
-      o.time = [S.qs.irn.st, S.lv]; G.talkNPC('doranS'); o.offered = !!(G.DL && G.DL.opts && G.DL.opts.length); G.DL && G.pickOpt && G.DL.opts && G.pickOpt(G.DL.opts.length - 1);
+      o.time = [S.qs.irn.st, S.lv]; G.talkNPC('doranS'); o.offered = !!(G.DL && G.DL.opts && G.DL.opts.some((x) => /Accept/.test(x.l || ''))); // (Doran has Talk now, v2.90: the quest's offer is what must be gone) G.DL && G.pickOpt && G.DL.opts && G.pickOpt(G.DL.opts.length - 1);
       // giving up Defense War II is failing it (no levels: its price is the kingdom's)
       S.lv = 240; G.gainXP(1); G.acceptQ('dw2'); G.openQD('dw2'); const c = () => document.getElementById('qdCancel').click(); c(); c();
       o.quit = [S.qs.dw2.st, S.lv];

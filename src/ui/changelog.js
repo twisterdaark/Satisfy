@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25npclife2', ver: '2.90', d: '2026-10-25',
+      ar: ["هان سوكبونج، سيد بانجيا، بقى بيتكلم زي خان وبيارو: كلامه بيتغير بالليل والنهار، وبيفتكر اللي عملته مع أروبي، وبيقول كلمة مرة واحدة بعد مهامه، وبانجيا بتعرف اسمك. مواضيعه: بانجيا، وطريق البحر، والملك، وعند علاقة 90 بيعتبرك ضيف بانجيا (لقب جديد).",
+        "دوران، الضل اللي بيحمي الإيرل شتايم في السر، بقى ليه كلام ومواضيع: الإيرل، والآنسة إيرين بعد ما ترجعها، ووادي كيسان، وعند 90 بيعتبرك من أصحاب رجالة الضل (لقب جديد). ودوران بقى بياخد هدايا (بيحب جرعة الشفا).",
+        "اكتشافين جداد مرة واحدة بس: جزيرة كورك بعد كلام هان سوكبونج عن البحارة، ووادي كيسان بعد كلام دوران.",
+        "تصحيح: إيرين بنت الإيرل شتايم زي ما في الرواية، مش بنت الإيرل آشور. كلام آشور عنها اتصلّح، واللي بقى جوز بنت الإيرل بيسمع كلام على قده. والإيرل آشور مابياخدش هدايا، فثقته بقت كمان بتمشي مع اسمك في باتريان: محترم بيفتح مواضيع الـ30، ومكرّم بيفتح الـ60، وبطل المدينة بيفتح الـ90."],
+      en: ["Han Seokbong, lord of Pangea, talks now like Khan and Piaro: what he says changes with night and day, he remembers what you did with Arube, says a word once after his quests, and Pangea knows your name. His topics: Pangea, the sea road, the king, and at affinity 90 he counts you as Pangea's guest (a new title).",
+        "Doran, the shadow who secretly protects Earl Steim, has his lines and topics: the Earl, the lady Irene once she is home, Kesan Canyon, and at 90 he counts you among the shadows' friends (a new title). Doran takes gifts now (he likes a healing potion).",
+        "Two new first discoveries, once only: Cork Island after Han Seokbong's word about the sailors, Kesan Canyon after Doran's.",
+        "A correction: Irene is Earl Steim's daughter, as in the novel, not Earl Ashur's. What Ashur says of her is fixed, and the earl's son-in-law hears it as it is for him. Earl Ashur takes no gifts, so his trust now also follows your name in Patrian: Respected there opens his 30 topics, Honoured his 60, Town Hero his 90."] },
     { v: '2026-10-25ridge480', ver: '2.89', d: '2026-10-25',
       ar: ["للفل 480 وفوق: وحوش جديدة معمولة للعبة (مش من الرواية) في السلسلة الرابعة من جبال الفوضى، المكان اللي فيه بيليال والسانجو الرابع. قبل كده مكانش فيه ولا وحش عادي فوق 470.",
         "عائد السلسلة (480 لـ495): طول ما فانوس الأرواح اللي وراه منوّر ضربتك بتنزل بعُشرها بس. الفانوس بيستخبى ورا العائد، فلازم تلف عليه وتطفّيه الأول.",
