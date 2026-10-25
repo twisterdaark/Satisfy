@@ -15186,6 +15186,12 @@ function praidHit(m,dmg){if(!praidShared(m))return false;if(PRAID.hit(praidKey(m
    moves between players. Bosses are shared the same way (the party raid only keeps a boss's health when party members are too far apart to be one
    group); event monsters are shared when every client spawns them alike (m.ek); temporary ones and those indoors stay local. */
 var MOBN,MOBP,MOB_MS=250,MOB_MAX=100,MOB_BX=700,MOB_BY=450; // the host lists monsters within MOB_BX x MOB_BY of any player in the group (more than a screen) // no initial values: ?net=local starts the network above this line
+/* (owner 2026-10-25: "monsters stay at 1 HP for me and higher for the others, so you can't kill them: the demons, the
+   vampire city, most bosses") a follower's damage reached the host capped at 1,000,000 a hit and 1,000,000 a read (4 reads
+   a second), so a player who hits for millions (Lv 400+ against bosses of 60,000,000) took them to 1 on their own screen
+   while the host's copy, the one everyone sees, lost a fraction of it. Now the cap is the monster's whole health (at least
+   1,000,000): a hit can do at most what kills it. SAT-ONLINE-214 */
+function mobCap(m){return Math.max(1e6,Math.round((m&&m.max)||0));}
 function mobKey(m){return m.nk||(m.nk=m.type+'@'+(m.sx|0)+','+(m.sy|0));}
 // bosses too (Twister 2026-10-19: a boss stood in one place for one player and elsewhere for the friends who arrived): the
 // group's host moves and fights every outdoor boss, world and event ones included, and the others follow its copy. Adds, arena,
@@ -15197,7 +15203,7 @@ function mobByKey(k){for(const m of mons)if(mobOk(m)&&mobKey(m)===k)return m;ret
 function mobStart(){if(!NETTR||!NETTR.mobsPut)return;MOBN={zone:null,all:{},allN:0,allD:0,host:null,rs:[],sent:0,put:false,seq:0,hits:new Map(),cum:new Map(),ep:new Map(),dirty:0,fT:0,seen:new Map(),merge:null,mergeT:0};
  NET.on(ev=>{if(ev.type!=='message'||!MOBN)return;const env=ev.env,pl=env.payload||{};if((env.type!=='raid.hit'&&env.type!=='raid.state')||pl.to!==NET.uid||typeof pl.raid!=='string'||pl.raid.slice(0,2)!=='m|')return;
   const from=NET.get(ev.sid);if(!from||!from.uid||isBlocked(from.uid))return;const m=mobByKey(pl.raid.slice(2));if(!m||m.dead)return;
-  if(env.type==='raid.hit'){if(MOBN.host!==NET.uid)return;const k=Math.round(+pl.k);if(!(k>=1&&k<=1e6))return;mobGotHit(m,k,from.uid,0);} // an older page's hit, one message a hit
+  if(env.type==='raid.hit'){if(MOBN.host!==NET.uid)return;const k=Math.round(+pl.k);if(!(k>=1&&k<=mobCap(m)))return;mobGotHit(m,k,from.uid,0);} // an older page's hit, one message a hit
   else if(from.uid===MOBN.host&&+pl.k===0){if(mobEarn(m)){m.mobKill=1;m.hp=0;killMon(m);m.mobKill=0;m.noLoot=0;}mobLife(mobKey(m));}});}
 // signed out (SAT-ONLINE-143): the shared monsters stop with the network. Left on, every monster's update read NET.uid after
 // NET was gone (a TypeError every frame once you signed out or deleted your data while in the world); the zone's listener
@@ -15239,7 +15245,7 @@ function mobHeal(m,h){h=Math.max(0,Math.round(h));if(!h)return;if(MOBN&&MOBN.hos
 function netHit(m,dmg,ally){if(PRAID&&praidHit(m,dmg))return true;if(!MOBN||!mobOk(m))return false;if(!ally){m.myHit=1;m.myHitT=gTime;}if(!MOBN.host)return false;
  if(MOBN.host===NET.uid){if(!ally)mobHitBy(m,NET.uid);return false;}
  if(!m.led)return false;if(ally){m.hp+=dmg;return true;}const k=mobKey(m);const c=mobCum(k);
- c.d+=Math.max(1,Math.min(1e6,Math.round(dmg)));if((m.stun||0)>(m.stunH||0)+.01){c.q++;c.s=m.stun;m.stun=m.stunH||0;} // a stun this hit gave: the host's copy is the one stunned
+ c.d+=Math.max(1,Math.min(mobCap(m),Math.round(dmg)));if((m.stun||0)>(m.stunH||0)+.01){c.q++;c.s=m.stun;m.stun=m.stunH||0;} // a stun this hit gave: the host's copy is the one stunned
  if(m.dvx!==undefined){const kx=m.x-m.dvx,ky=m.y-m.dvy;if(Math.abs(kx)+Math.abs(ky)>=1){c.kx+=Math.round(kx);c.ky+=Math.round(ky);m.dvx=m.x;m.dvy=m.y;m.pendK=performance.now();}} // and the knockback: it moves the host's copy
  MOBN.dirty=1;m.hp=Math.max(1,m.hp);m.pendT=performance.now();return true;} // the hit shows at once here; the kill comes from the host
 /* groups, not zones (owner report: two players a step apart across a zone border each ran their own monsters): everyone
@@ -15303,7 +15309,7 @@ function mobHits(){for(const u in MOBN.all){if(u===NET.uid||u===MOBN.host||!MOBN
   for(const k in L.m){const v=String(L.m[k]);if(v[0]!=='h'){mobAdopt(k,v,u);continue;}
    const p=v.slice(1).split('.'),e=parseInt(p[0],36),d=parseInt(p[1],36),q=p[2]?parseInt(p[2],36):0,st=p[3]?parseInt(p[3],36)/100:0,kx=p[4]?parseInt(p[4],36):0,ky=p[5]?parseInt(p[5],36):0,hl=p[6]?parseInt(p[6],36):0,wq=p[7]?parseInt(p[7],36):0,ws=p[8]?parseInt(p[8],36)/100:0,sq=p[9]?parseInt(p[9],36):0,ss=p[10]?parseInt(p[10],36)/100:0;if(!(e>=0)||!(d>=0)||!isFinite(d)||!(q>=0)||!isFinite(kx)||!isFinite(ky)||!(hl>=0)||!isFinite(hl)||!(wq>=0)||!(sq>=0)||!(ws>=0)||!(ss>=0))continue;
    const o=Sn.get(k),same=o&&o.e===e,dd=same?d-o.d:d,dq=same?q-o.q:q,dx=same?kx-o.kx:kx,dy=same?ky-o.ky:ky,dh=same?hl-(o.h||0):hl,dw=same?wq-(o.wq||0):wq,dl=same?sq-(o.sq||0):sq;Sn.set(k,{e,d,q,kx,ky,h:hl,wq,sq});if(!(dd>0)&&!(dq>0)&&!dx&&!dy&&!(dh>0)&&!(dw>0)&&!(dl>0))continue;
-   const m=mobByKey(k);if(!m||m.dead)continue;if(dd>0||dq>0||dx||dy)mobGotHit(m,Math.min(1e6,Math.max(0,dd)),u,dq>0?st:0);if(dh>0&&!m.dead)m.hp=Math.min(m.max,m.hp+Math.min(1e6,dh));if(dw>0&&!m.dead)m.weak=Math.max(m.weak||0,Math.min(30,ws));if(dl>0&&!m.dead)m.slowU=Math.max(m.slowU||0,gTime+Math.min(30,ss));if((dx||dy)&&!m.dead&&!MT[m.type].boss)move(m,Math.max(-60,Math.min(60,dx)),Math.max(-60,Math.min(60,dy)),Math.max(3,MT[m.type].r-2));}
+   const m=mobByKey(k);if(!m||m.dead)continue;if(dd>0||dq>0||dx||dy)mobGotHit(m,Math.min(mobCap(m),Math.max(0,dd)),u,dq>0?st:0);if(dh>0&&!m.dead)m.hp=Math.min(m.max,m.hp+Math.min(1e6,dh));if(dw>0&&!m.dead)m.weak=Math.max(m.weak||0,Math.min(30,ws));if(dl>0&&!m.dead)m.slowU=Math.max(m.slowU||0,gTime+Math.min(30,ss));if((dx||dy)&&!m.dead&&!MT[m.type].boss)move(m,Math.max(-60,Math.min(60,dx)),Math.max(-60,Math.min(60,dy)),Math.max(3,MT[m.type].r-2));}
   for(const k of [...Sn.keys()])if(!(k in L.m))Sn.delete(k);}}
 // host: a monster a player coming into the group saw. Its health is the lower of the two (a fight goes on, whoever was in
 // it: the host coming back to a fight the others carried on included); its place and target are the other player's,

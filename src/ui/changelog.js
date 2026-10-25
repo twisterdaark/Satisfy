@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25mobcap', ver: '2.86', d: '2026-10-25',
+      ar: ["الوحوش والبوسات اللي كانت بتقف على 1 هيلث عندك وعند الباقي هيلثها أعلى (الشياطين، مدينة مصاصين الدماء، أغلب البوسات): ضربتك كانت بتوصل للاعب التاني اللي ماسك الوحوش لحد مليون بس في الضربة وفي ربع الثانية، فلما ضربتك تبقى بملايين كانت بتنزل الوحش عندك لـ1 وعنده بالكاد. دلوقتي ضربتك بتوصل كاملة (لحد هيلث الوحش كله)، فالهيلث بقى واحد عند الكل وتقدر تموّته."],
+      en: ["Monsters and bosses that stayed at 1 health for you while the others saw more (the demons, the vampire city, most bosses): your hits reached the player who runs the monsters capped at a million a hit and a quarter second, so hits of several millions took the monster to 1 on your screen and barely touched it on theirs. Now your whole hit gets there (up to the monster's whole health), so everyone sees the same health and you can kill it."] },
     { v: '2026-10-25gradnan', ver: '2.85', d: '2026-10-25',
       ar: ["اتصلحت رسالة «An error was caught ... createLinearGradient» اللي كانت بتظهر في ساحة المسابقة الوطنية: حاجة كان رقمها بايظ كانت بتوقف رسم الفريم، دلوقتي بتترسم عادي واللعبة بتسجل مكانها عشان تتصلح من الأساس."],
       en: ["Fixed the \"An error was caught ... createLinearGradient\" message on the National Competition grounds: one thing with a broken number stopped the frame's drawing. Now the frame is drawn anyway, and the game notes where it came from so the cause can be fixed."] },

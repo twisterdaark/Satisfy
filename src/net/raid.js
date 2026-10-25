@@ -27,7 +27,7 @@
 
   // HIT_MAX: late-game hits pass 5000 (review of #29). CONFIRM_MS: a member hands its hits to the host only while the host
   // has sent raid.state for that boss this recently, i.e. it has that boss alive (SAT-ONLINE-032)
-  var C = Object.freeze({ STATE_MS: 250, HIT_MAX: 1000000, ENC_TTL_MS: 300000, CONFIRM_MS: 1500 });
+  var C = Object.freeze({ STATE_MS: 250, HIT_MAX: 1e12, ENC_TTL_MS: 300000, CONFIRM_MS: 1500 }); // SAT-ONLINE-214: late-game hits pass 1,000,000 (bosses of 60,000,000 HP)
   var TYPES = ['raid.hit', 'raid.state', 'raid.kill'];
 
   function create(o) {
