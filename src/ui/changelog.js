@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-25monsters4', ver: '2.91', d: '2026-10-25',
+      ar: ["4 وحوش جديدة معمولة للعبة (مش من الرواية)، كل واحد بيحارب بطريقة مختلفة، ومفيش ولا واحد جوه بلد:",
+        "كوبولد لغّام (لفل 74 لـ80، في مناجم الكوبولد): بيزرع عبوة متولّعة مكان ما انت واقف وبيبعد، ولما يتعوّر جامد بيهرب.",
+        "أبو صدفة الكثبان (302 لـ310، في الصحرا حوالين بانجيا): بيلف حواليك بالجنب، وصدفته بتاخد ربع الضربة لو ضربته من فوق أو من تحت. اضربه من الجنب.",
+        "شتلة الشوك (100 لـ106، في الغابة الرمادية): مابتتحركش خالص، بترمي شوك من بعيد، ولو قربت منها بتتكوّر وتاخد نص الضربة.",
+        "الحارس الحجري (104 لـ110، في الغابة الرمادية): حجر مفيش حاجة بتأذيه لحد ما تقف جنبه. بعدها بيصحى 12 ثانية، ويرجع حجر 4 ثواني مابيصحاش فيهم."],
+      en: ["4 new monsters made for the game (not from the novel), each fighting its own way, none inside a town:",
+        "The Kobold Sapper (74 to 80, in the kobolds' mines): plants a burning charge where you stand and backs off; badly hurt, it runs.",
+        "The Dune Shellback (302 to 310, in the dunes round Pangea): runs round you sideways, and its shell takes a quarter of a blow from above or below. Hit it from the side.",
+        "The Thornback Sapling (100 to 106, in the Grey Forest): never moves, shoots thorns from afar, and curls up when you are close, taking half.",
+        "The Stone Sentinel (104 to 110, in the Grey Forest): stone that nothing hurts until you stand right by it. Then it is awake for 12 seconds, then stone again for 4 in which it will not wake."] },
     { v: '2026-10-25npclife2', ver: '2.90', d: '2026-10-25',
       ar: ["هان سوكبونج، سيد بانجيا، بقى بيتكلم زي خان وبيارو: كلامه بيتغير بالليل والنهار، وبيفتكر اللي عملته مع أروبي، وبيقول كلمة مرة واحدة بعد مهامه، وبانجيا بتعرف اسمك. مواضيعه: بانجيا، وطريق البحر، والملك، وعند علاقة 90 بيعتبرك ضيف بانجيا (لقب جديد).",
         "دوران، الضل اللي بيحمي الإيرل شتايم في السر، بقى ليه كلام ومواضيع: الإيرل، والآنسة إيرين بعد ما ترجعها، ووادي كيسان، وعند 90 بيعتبرك من أصحاب رجالة الضل (لقب جديد). ودوران بقى بياخد هدايا (بيحب جرعة الشفا).",

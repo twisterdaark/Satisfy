@@ -20,7 +20,7 @@ affinity, tiers 30/60/90), `S.rep` (the town's ranks), `S.qs`, `S.books` (the di
 | Huroi's secret quest (ch 32-33: the orator, Apostle of Justice, Unbreakable Justice) | ch 32-33 | already in the game (`apjus`), not built again |
 | Administrator Rabbit's Call (ch 856) | ch 856 | not built: no Rabbit in the game yet |
 | Khan's grandfather's vein, the cave at the northern end | landmarks already in the world (`lmMine`, `lmNEnd`) | the places existing; the stories ORIGINAL_SIDE_STORY |
-| Field Burrower, Burrow Queen, Bandit Scout, Echo Bat Swarm, Mossback Snapper | written for the game | GAME_ORIGINAL (levels are game balance) |
+| Field Burrower, Burrow Queen, Bandit Scout, Echo Bat Swarm, Mossback Snapper; Kobold Sapper, Dune Shellback, Thornback Sapling, Stone Sentinel (v2.91) | written for the game | GAME_ORIGINAL (levels are game balance) |
 
 No line is taken from a translation of the novel.
 
@@ -87,6 +87,10 @@ Paid once per character, kept in `S.books['fd_'+id]`, never again after a reload
 | Bandit Scout | 38-42 | with the outlaws on the eastern road | keeps its distance; the first time it sees you it fires a flare and the 6 nearest monsters not already fighting come; badly hurt, it runs |
 | Echo Bat Swarm | 100-106 | with the cave golems east of Bairan | six bats: one blow (not a skill) kills at most one, a third of single blows miss; it circles you and bites; it goes home past 300 px and never into a town |
 | Mossback Snapper | 18-24 | the lake shore | its shell turns slowly; a blow from the front does a tenth |
+| Kobold Sapper (v2.91) | 74-80 | the kobolds' mines | keeps away; plants a burning charge where you stand (a marked spot that bursts); badly hurt, it runs |
+| Dune Shellback (v2.91) | 302-310 | the dunes round Pangea | runs round you sideways, then stops to pinch; from above or below its shell takes a quarter |
+| Thornback Sapling (v2.91) | 100-106 | the Grey Forest | rooted; thorns from afar and a rain of thorns; close by it curls up and takes half |
+| Stone Sentinel (v2.91) | 104-110 | the Grey Forest | stone (unhurt) until someone stands within 50 px; awake 12 s, then 4 s of stone that won't wake |
 
 Online: what a screen shows is worked out from shared things (the world clock, where it spawned, its health); in a
 group the host's copy leads (`m.led`), and every blow goes out as the game's usual bite so a follower is hurt by the same

@@ -6162,6 +6162,14 @@ Object.assign(MT,{fburrow:{lv:[46,52],hp:3600,dmg:210,spd:54,xp:260,gold:6,aggro
 Object.assign(MT,{crevn:{lv:[480,495],hp:24000000,dmg:26000,spd:52,xp:300000,gold:1100,aggro:170,r:7,oy:30,drop:[['mstone',1.4],['blue',.07]]},
  clant:{lv:[485,485],hp:2500000,dmg:1,spd:62,xp:8000,gold:200,aggro:170,r:5,oy:22,drop:[['mstone',.6]]},
  cstrid:{lv:[495,510],hp:40000000,dmg:30000,spd:60,xp:380000,gold:1400,aggro:180,r:9,oy:20,drop:[['mith',.3],['mstone',1.2],['blue',.06]]}});
+// four more, each fighting its own way (encyclopedia §95: grow the game's own monsters where there is real variety):
+// the Kobold Sapper plants a fused charge where you stand and runs; the Dune Shellback scuttles sideways and its shell
+// turns blows from above and below; the Thornback Sapling never moves, shoots thorns and curls up when you are close;
+// the Stone Sentinel is stone (nothing hurts it) until you come right up to it, then fights for 12 s and turns to stone again
+Object.assign(MT,{ksap:{lv:[74,80],hp:7000,dmg:420,spd:58,xp:700,gold:18,aggro:140,r:6,oy:26,drop:[['ore',.6],['mith',.2]]},
+ edune:{lv:[302,310],hp:2200000,dmg:9800,spd:46,xp:80000,gold:330,aggro:130,r:8,oy:18,drop:[['mstone',.4],['ore',.6]]},
+ tsap:{lv:[100,106],hp:30000,dmg:1500,spd:0,xp:3600,gold:30,aggro:170,r:7,oy:20,drop:[['wood',2],['herb',.5]]},
+ ssent:{lv:[104,110],hp:70000,dmg:2400,spd:28,xp:5200,gold:60,aggro:60,r:9,oy:32,drop:[['ore',1.2],['mstone',.5]]}});
 // the Patrian farmer's rows and Piaro's field (tiles), for the burrowers and the secret quest (var: read when the first world is built)
 var FWF={x:373,y:96},PIF={x:290,y:68},O48L={dx:20,dy:-10},O48S=[],O48R=[],O48P=new Map();
 const SPAWN=[['rabbit',104,150,42,62,14],['rabbit',147,157,62,100,6],['boar',147,157,64,104,8],['boar',100,118,44,62,5],['goblin',109,152,105,116,14],['merman',80,106,88,112,12],['pwolf',64,100,42,90,12],
@@ -6544,7 +6552,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   // the 32nd Great Demon Belial at the gate of hell (major 7), after them for the same reason
   {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
-  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();}
+  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();}
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
  {const now=Date.now(),D=(S&&S.mrt)||{};for(const m of mons){const u=D[mobKey(m)];if(u>now){m.dead=true;m.dying=0;m.rt=(u-now)/1000;}}}
@@ -12458,10 +12466,10 @@ var OGB={
  msnap:(m,b,dx,dy,d,mr,dt)=>{if(m.led){m.ogF=0;return false;}m.ogT=(m.ogT||0)-dt;if(m.ogT<=0||!m.ogF){m.ogT=1.5;m.ogF=Math.sign(dx)||1;}return false;},
 };OGB.fbqueen=OGB.fburrow;
 // a blow that cannot land: a burrower underground; a single blow on the swarm misses one time in three
-function ogImm(m,o){const k=m.type;if((k==='fburrow'||k==='fbqueen')&&ogBur(m)!=='up'){num(m.x,monY(m)-14,t('ogUnder'),'#c8a070',false);return true;}
+function ogImm(m,o){const k=m.type;if(k==='ssent')return og2Imm(m);if((k==='fburrow'||k==='fbqueen')&&ogBur(m)!=='up'){num(m.x,monY(m)-14,t('ogUnder'),'#c8a070',false);return true;}
  if(k==='bswarm'&&!o.skill&&!o.aura&&!o.dot&&rand()<.33){num(m.x,monY(m)-14,t('ogMiss'),'#cfe8ff',false);SFX.miss&&SFX.miss();return true;}return false;}
 // what a blow does: one blow kills one bat (a skill hits them all); the shell from the front takes a tenth
-function ogDmg(m,dmg,o){const k=m.type;if(k==='crevn')return o48Dmg(m,dmg,o);if(k==='bswarm'&&!o.skill&&!o.aura)return Math.min(dmg,Math.ceil(m.max/6));
+function ogDmg(m,dmg,o){const k=m.type;if(k==='edune'||k==='tsap')return og2Dmg(m,dmg,o);if(k==='crevn')return o48Dmg(m,dmg,o);if(k==='bswarm'&&!o.skill&&!o.aura)return Math.min(dmg,Math.ceil(m.max/6));
  if(k==='msnap'&&Math.sign(P.x-m.x)===(!m.led&&m.ogF||m.face)&&Math.abs(P.y-m.y)<22){if(!o.dot){num(m.x,monY(m)-18,t('ogShell'),'#9fc8ff',false);SFX.clang&&SFX.clang();}return Math.max(1,Math.round(dmg*.1));}return dmg;}
 // the pictures: a moving mound and the ground cracking; the swarm's bats, one fewer for every sixth of its health; the shell facing its way
 var OGD={fburrow:m=>{const st=ogBur(m);if(st==='up')return false;const x=Math.round(m.x),y=Math.round(m.y),q=m.type==='fbqueen'?1.7:1;
@@ -12540,7 +12548,49 @@ function o48Spawn(){O48S.length=0;O48R.length=0;O48P.clear();const r=mulberry32(
  put('crevn',12,(x,y)=>!sol0(x+1,y-1)&&!sol0(x+2,y-1),m=>{const l=newMon('clant',m.sx+O48L.dx,m.sy+O48L.dy,r);l.far=1;mons.push(l);O48P.set(m,l);O48P.set(l,m);O48R.push(m);});
  put('cstrid',10,null,m=>O48S.push(m));}
 window.__G48={S:O48S,R:O48R,tick:dt=>o48Tick(dt),lan:m=>o48Lan(m),rev:l=>o48Rev(l),shield:m=>o48Shield(m),dmg:(m,d,o)=>o48Dmg(m,d,o)}; // tests
-window.__GOG={OGB,OGD,town:(x,y)=>inTown(x,y),comp:m=>compHit(m,1,false),bur:m=>ogBur(m),imm:(m,o)=>ogImm(m,o),dmg:(m,d,o)=>ogDmg(m,d,o)}; // tests
+// ---- the four (GAME_ORIGINAL, their table is right after MT). Online, as the others: the group's host runs their ways,
+// their blows go out as the game's usual bites and moves, and what decides a blow (where the hitter stands, whether the
+// sentinel is awake: m.eng, which followers have from the host) is shared.
+Object.assign(AIK,{ksap:'archer',edune:'lunge',tsap:'caster',ssent:'slam'});
+Object.assign(RKMV,{ksap:[{k:'rain',w:3,min:30,max:150,tele:.85,n:1,zr:22,fall:1.1,mul:1.6,rec:.5,cd:3.4,pat:'on',sp:'fire'},{k:'arc',w:1,max:22,tele:.3,reach:20,arc:.9,mul:.6,rec:.3,cd:1.4}],
+ tsap:[{k:'shot',w:3,min:10,max:170,tele:.5,spd:170,mul:.8,rec:.4,cd:2,sp:'pois'},{k:'rain',w:1,min:40,max:170,tele:.7,n:3,zr:14,fall:.9,mul:.9,rec:.5,cd:5,pat:'around',sp:'pois'}]});
+Object.assign(XMOVES,{edune:[{k:'arc',w:2,max:26,tele:.35,reach:24,arc:1.1,mul:1.2,rec:.4,cd:1.8}],ssent:[{k:'arc',w:2,max:36,tele:.65,reach:32,arc:2.4,mul:1.4,rec:.6,cd:2.6}]});
+Object.assign(NAMEK,{ksap:'ksapN',edune:'eduneN',tsap:'tsapN',ssent:'ssentN'});
+Object.assign(P3D,{ksap:{base:'kobold',f:'hue-rotate(-35deg) saturate(1.5) brightness(.85)',sc:.9},edune:{base:'sscorp',f:'sepia(.8) hue-rotate(-15deg) saturate(1.6) brightness(.95)',sc:1.1},
+ tsap:{base:'felem',f:'hue-rotate(80deg) saturate(.9) brightness(.8)',sc:.8},ssent:{base:'golem',f:'grayscale(.5) brightness(.95) contrast(1.1)',sc:1.05}});
+Object.assign(OGB,{
+ // the sapper: a charge on the ground where you stand (its move), a jab up close; badly hurt it runs
+ ksap:(m,b,dx,dy,d,mr,dt,safe)=>{if(m.hp<m.max*.4&&!m.fled){m.fled=1;m.flee=5;}return false;},
+ // the shellback: when it is near you it runs round you sideways a moment, then stops to pinch (its moves)
+ edune:(m,b,dx,dy,d,mr,dt,safe)=>{if(safe||!(m.eng>0)||d>80)return false;m.o2T=(m.o2T||0)+dt;const ph=m.o2T%2;if(ph<1.2&&d>14){const s=(ogSeed(m)&1)?1:-1,ux=-dy/d*s,uy=dx/d*s;move(m,ux*b.spd*1.3*dt,uy*b.spd*1.3*dt,mr);m.face=dx>0?1:-1;if(m.st||m.tele>0)mobActN(m);m.st=null;m.tele=0;return true;}return false;},
+ // the sapling: rooted where it grew; it only shoots and rains thorns (its moves)
+ tsap:(m,b)=>{m.x=m.sx;m.y=m.sy;return false;},
+ // the sentinel: stone (nothing moves it, nothing hurts it) until someone stands right by it; then 12 s awake, then 4 s
+ // of stone that will not wake
+ ssent:(m,b,dx,dy,d,mr,dt,safe)=>{if(m.eng>0&&m.o2A>gTime)return false;
+  if(m.o2A&&m.o2A<=gTime){m.o2A=0;m.o2D=gTime+4;vfx('dust',m.x,m.y,{n:10});m.x=m.sx;m.y=m.sy;vfx('dust',m.x,m.y,{n:10});}
+  if(!safe&&!(m.o2D>gTime)&&d<50*(P.stl>0?.3:1)&&seeP(m)){m.eng=4;m.o2A=gTime+12;vfx('rage',m.x,m.y);if(!P.remote){shake=Math.max(shake,.15);SFX.slam&&SFX.slam();}return false;}
+  if(m.st||m.tele>0)mobActN(m);m.eng=0;m.st=null;m.tele=0;m.x=m.sx;m.y=m.sy;m.flee=0;return true;}});
+// the rules of a blow: the sentinel asleep cannot be hurt; the shellback's shell from above or below takes a quarter;
+// the sapling, from close by, curls up and takes half
+const og2Awake=m=>m.led?m.eng>0:m.eng>0&&m.o2A>gTime;   // a follower has it from the host's flags; the host and a solo player from its 12 s
+function og2Imm(m){if(m.type==='ssent'&&!og2Awake(m)){num(m.x,monY(m)-14,t('og2Stone'),'#c8c8d0',false);return true;}return false;}
+function og2Dmg(m,dmg,o){const k=m.type;if(k==='edune'&&Math.abs(P.y-m.y)>Math.abs(P.x-m.x)){if(!o.dot)num(m.x,monY(m)-18,t('ogShell'),'#e8c890',false);return Math.max(1,Math.round(dmg*.25));}
+ if(k==='tsap'&&Math.hypot(P.x-m.x,P.y-m.y)<26){if(!o.dot)num(m.x,monY(m)-18,t('og2Curl'),'#9fe39a',false);return Math.max(1,Math.round(dmg*.5));}return dmg;}
+// the sentinel asleep is drawn as stone; the sapling is a thorn bush (its book picture is its sheet)
+Object.assign(OGD,{ssent:m=>{if(og2Awake(m)||m.dead&&!(m.dying>0))return false;if(!MSH.ssent)p3Sheet('ssent');if(!MSH.ssent)return false;ctx.save();ctx.filter='grayscale(1) brightness(.72)';drawMonSheet(Math.round(m.x),Math.round(m.y),m);ctx.restore();return true;},
+ tsap:m=>{if(m.dead&&!(m.dying>0))return false;const x=Math.round(m.x),y=Math.round(m.y),w=m.hurt>0?'#e8f8d0':'#3a6a2a',sw=Math.sin(gTime*2+ogSeed(m))*1.2;
+  ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x,y+1,10,3.5,0,0,7);ctx.fill();R(ctx,x-2,y-10,4,10,'#5a3a1e');
+  ctx.fillStyle=w;ctx.beginPath();ctx.ellipse(x+sw,y-16,11,9,0,0,7);ctx.fill();ctx.fillStyle='#4a8a34';ctx.beginPath();ctx.ellipse(x-3+sw,y-19,6,5,0,0,7);ctx.fill();
+  ctx.strokeStyle='#d8e8a0';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<9;i++){const a=i/9*6.283,ox=x+sw+Math.cos(a)*11,oy=y-16+Math.sin(a)*9;ctx.moveTo(ox,oy);ctx.lineTo(ox+Math.cos(a)*4,oy+Math.sin(a)*4);}ctx.stroke();return true;}});
+// where: the saplings and the sentinels in the Grey Forest with its golems, the sappers in the kobolds' mines, the
+// shellbacks in the dunes round Pangea; never in a town; each kind its own dice
+function og2Spawn(){const put=(type,n,x0,x1,y0,y1,z)=>{const r=mulberry32(9100+type.charCodeAt(0)*17+type.length);let c=0,tr=0;while(c<n&&tr<4000){tr++;const x=x0+(r()*(x1-x0)|0),y=y0+(r()*(y1-y0)|0);
+  if(z&&zoneAt(x*TS+8,y*TS+8)!==z||inTown(x*TS+8,y*TS+8)||sol0(x,y)||sol0(x+1,y)||at0(x,y)===WA||at0(x,y)===PA)continue;const m=newMon(type,x*TS+8,y*TS+8,r);mons.push(m);c++;}};
+ put('tsap',8,29,64,35,42,'zGrey');put('ssent',6,29,64,35,42,'zGrey');   // the forest's south, out of the title screen's view (y 14-31)
+ put('ksap',6,414,500,WMH+4,WMH+19);
+ put('edune',10,1040,1100,60,100,'zEaDesert');}
+window.__GOG={OGB,OGD,imm2:m=>og2Imm(m),dmg2:(m,d,o)=>og2Dmg(m,d,o),town:(x,y)=>inTown(x,y),comp:m=>compHit(m,1,false),bur:m=>ogBur(m),imm:(m,o)=>ogImm(m,o),dmg:(m,d,o)=>ogDmg(m,d,o)}; // tests
 /* ---- NPC life (owner 2026-10-25, encyclopedia §93-95; the player Suki: "some NPCs are boring and say little"): three people
    who were here already, Khan, Earl Ashur and Piaro (with the Patrian farmer), talk like people now. Each has lines for the
    moment (the time of day, what you are, what you have done; never the one you just heard), says something once after a
@@ -12719,7 +12769,7 @@ Object.assign(STR.ar,{nlTalk:"اتكلم",nlAsk:"عايز تتكلم في إيه
  fwReady:"خمس حفّارين: ارجع للفلاح.",fwDone:"شغل الغيط النهارده خلص",fwDoneL:"كفاية كده النهارده. تعالى بكره.",
  rpotato:"بطاطس قوس قزح",rpotatoD:"بطاطساية بكل الألوان مع بعض، من غيطان باتريان. شبع +45 وصحة +25%.",
  fd_kvein:"العرق اللي بيغني",fd_nend:"الكهف اللي في آخر الشمال",fd_burrow:"الجحر اللي تحت غيط بيارو",fdGot:"اكتشاف: {n}! (+{x} خبرة)",
- fburrowN:"حفّار الغيطان",crevnN:"عائد السلسلة",clantN:"فانوس الأرواح",cstridN:"عدّاء الجمر",o48Sh:"الفانوس!",o48Tip:"فانوس الأرواح اللي ورا العائد حاميه: طول ما هو منوّر ضربتك بعُشرها. طفّي الفانوس الأول.",fbqueenN:"ملكة الجحور",bscoutN:"كشّاف قطاع طرق",bswarmN:"سرب خفافيش الصدى",msnapN:"السلحفاة الطحلبية",
+ fburrowN:"حفّار الغيطان",ksapN:"كوبولد لغّام",eduneN:"أبو صدفة الكثبان",tsapN:"شتلة الشوك",ssentN:"الحارس الحجري",og2Stone:"حجر!",og2Curl:"اتكوّرت!",crevnN:"عائد السلسلة",clantN:"فانوس الأرواح",cstridN:"عدّاء الجمر",o48Sh:"الفانوس!",o48Tip:"فانوس الأرواح اللي ورا العائد حاميه: طول ما هو منوّر ضربتك بعُشرها. طفّي الفانوس الأول.",fbqueenN:"ملكة الجحور",bscoutN:"كشّاف قطاع طرق",bswarmN:"سرب خفافيش الصدى",msnapN:"السلحفاة الطحلبية",
  ogFlare:"كشّاف قطاع الطرق ضرب شعلة! ({n} جايين جري)",ogUnder:"تحت الأرض!",ogMiss:"فشل",ogShell:"القوقعة!",
  nlT_hanS_port:"بانجيا",nlT_hanS_sea:"طريق البحر",nlT_hanS_king:"الملك",nlT_hanS_guest:"ضيف بانجيا",
  nhs_c1:"الفوانيس اللي على الأرصفة عشان المراكب. اللي في شباكي عشان الجوابات اللي لسه مارديتش عليها.",nhs_c2:"تلات مراكب وصلوا الصبح. اتنين منهم هيرجعوا بلدهم بأقل من اللي جابوه.",
@@ -12789,7 +12839,7 @@ Object.assign(STR.en,{nlTalk:"Talk",nlAsk:"What do you want to talk about?",nlTr
  fwReady:"Five burrowers: go back to the farmer.",fwDone:"Today's field work is done",fwDoneL:"That's enough for today. Come back tomorrow.",
  rpotato:"Rainbow Potato",rpotatoD:"A potato in every colour at once, from the Patrian fields. Food +45 and health +25%.",
  fd_kvein:"The singing vein",fd_nend:"The cave at the northern end",fd_burrow:"The burrow under Piaro's field",fdGot:"Discovery: {n}! (+{x} XP)",
- fburrowN:"Field Burrower",crevnN:"Ridge Revenant",clantN:"Soul Lantern",cstridN:"Cinder Strider",o48Sh:"Lantern!",o48Tip:"The Soul Lantern behind the revenant shields it: while it burns your blows do a tenth. Put out the lantern first.",fbqueenN:"Burrow Queen",bscoutN:"Bandit Scout",bswarmN:"Echo Bat Swarm",msnapN:"Mossback Snapper",
+ fburrowN:"Field Burrower",ksapN:"Kobold Sapper",eduneN:"Dune Shellback",tsapN:"Thornback Sapling",ssentN:"Stone Sentinel",og2Stone:"Stone!",og2Curl:"Curled!",crevnN:"Ridge Revenant",clantN:"Soul Lantern",cstridN:"Cinder Strider",o48Sh:"Lantern!",o48Tip:"The Soul Lantern behind the revenant shields it: while it burns your blows do a tenth. Put out the lantern first.",fbqueenN:"Burrow Queen",bscoutN:"Bandit Scout",bswarmN:"Echo Bat Swarm",msnapN:"Mossback Snapper",
  ogFlare:"A bandit scout fires a flare! ({n} come running)",ogUnder:"Underground!",ogMiss:"Miss",ogShell:"The shell!",
  nlT_hanS_port:"Pangea",nlT_hanS_sea:"The sea road",nlT_hanS_king:"The king",nlT_hanS_guest:"A guest of Pangea",
  nhs_c1:"The lamps on the piers are for the ships. The one in my window is for the letters I haven't answered.",nhs_c2:"Three ships in this morning. Two will sail home with less than they brought.",
@@ -13000,7 +13050,7 @@ RSUSE.push('tzbook','mumbk','mdsheath',...BHBK);AUK.push(...BHBK);Object.assign(
 const LTP=[]; // Lantier's Poison on its targets
 let lgT=0,tzLast=null;
 function lgTick(dt){if(!P||!S)return;if(gTime>lgT){lgT=gTime+1;bsOffer();tzCheck();mmCheck();}
- for(let i=LTP.length-1;i>=0;i--){const p=LTP[i];if(p.m.dead||gTime>p.u){LTP.splice(i,1);continue;}if(gTime>=p.n){p.n=gTime+.5;let d=Math.max(1,Math.round(atkV()*.3));if(OGB&&OGB[p.m.type])d=ogDmg(p.m,d,{dot:1});p.m.hp-=d;num(p.m.x,monY(p.m)-10,String(d),'#7ad84a',false);
+ for(let i=LTP.length-1;i>=0;i--){const p=LTP[i];if(p.m.dead||gTime>p.u){LTP.splice(i,1);continue;}if(gTime>=p.n){p.n=gTime+.5;let d=Math.max(1,Math.round(atkV()*.3));if(OGB&&OGB[p.m.type]){if(ogImm(p.m,{dot:1}))continue;d=ogDmg(p.m,d,{dot:1});}p.m.hp-=d;num(p.m.x,monY(p.m)-10,String(d),'#7ad84a',false);
    fx.push({x:p.m.x+(rand()-.5)*8,y:monY(p.m),vx:0,vy:-20,t:.4,c:'#7ad84a',fl:1});if(!netHit(p.m,d)&&p.m.hp<=0)killMon(p.m);}}
  if(MMT&&gTime<MMT.u&&gTime>=MMT.n){MMT.n=gTime+.5;for(const m of mons.filter(m=>!m.dead&&Math.hypot(m.x-MMT.x,m.y-MMT.y)<60).slice(0,3)){fx.push({bolt:[[MMT.x,MMT.y-20],[m.x,monY(m)]],t:.15,c:'#7ad8a0'});hitMon(m,.6,{skill:1});}}
  // Five Steps: every 12 px walked is a step; five make the next blow double (the footprints of light, in nvTick, make it true damage)
