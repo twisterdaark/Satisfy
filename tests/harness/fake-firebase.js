@@ -460,9 +460,9 @@
     if (v === null) return old ? null : 'PERMISSION_DENIED: legend remove';
     return Object.keys(v).sort().join(',') === 'n,t,uid' && v.uid === user.uid && typeof v.n === 'string' && v.n.length >= 1 && v.n.length <= 24 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'legend fields';
   }
-  // SAT-ONLINE-055 rankings: ranks/{lv|gold}/{uid} {v, n, t}, each player its own
+  // SAT-ONLINE-055 rankings: ranks/{lv|gold|angel}/{uid} {v, n, t}, each player its own (angel: the Angel Rankings, v2.88)
   function rankRules(seg, v) {
-    if (!user || seg.length !== 3 || !['lv', 'gold'].includes(seg[1]) || seg[2] !== user.uid) return 'PERMISSION_DENIED: ' + seg.join('/');
+    if (!user || seg.length !== 3 || !['lv', 'gold', 'angel'].includes(seg[1]) || seg[2] !== user.uid) return 'PERMISSION_DENIED: ' + seg.join('/');
     if (v === null) return null;
     return Object.keys(v).sort().join(',') === 'n,t,v' && isInt(v.v, 0) && v.v <= 1e12 && typeof v.n === 'string' && v.n.length >= 1 && v.n.length <= 24 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'ranks fields';
   }

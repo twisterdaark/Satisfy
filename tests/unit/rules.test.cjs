@@ -261,9 +261,9 @@ test('legends (SAT-ONLINE-054): a legend is taken once, then only its holder cha
   assert.equal(k.$other['.validate'], false);
 });
 
-test('rankings (SAT-ONLINE-055): each player writes only its own level and gold; the lists are indexed on v', () => {
+test('rankings (SAT-ONLINE-055): each player writes only its own level, gold and alignment (the Angel Rankings); the lists are indexed on v', () => {
   const r = rules.ranks.$kind;
-  assert.equal(r['.validate'], "$kind === 'lv' || $kind === 'gold'");
+  assert.equal(r['.validate'], "$kind === 'lv' || $kind === 'gold' || $kind === 'angel'");
   assert.deepEqual(r['.indexOn'], ['v']);
   assert.equal(r.$uid['.write'], 'auth != null && auth.uid === $uid');
   assert.equal(r.$uid.$other['.validate'], false);

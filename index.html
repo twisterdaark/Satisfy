@@ -55,7 +55,7 @@ button:disabled{opacity:.4;cursor:default;box-shadow:none;background:rgba(40,50,
 .sb.hp.low .bt{animation:hpLow 1s ease-in-out infinite}.sb.hp.low em{animation:hpLow 1s ease-in-out infinite}
 @keyframes hpLow{50%{box-shadow:inset 0 0 calc(var(--u)*.7) #ff2a1a,0 0 calc(var(--u)*.7) #ff3a2a}}
 #stats .bar.xp{height:calc(var(--u)*.55);background:linear-gradient(180deg,#04060c,#141a2a);border:1px solid rgba(220,236,255,.22);border-radius:calc(var(--u)*.2)}#stats .bar.xp i{background:linear-gradient(180deg,#c8b8ff,var(--xp) 55%,#3a2a9a)!important}
-.gold{margin-top:calc(var(--u)*.4);color:var(--gold);font-weight:700;font-size:calc(var(--u)*1.2)}#stats .dnclk{position:absolute;inset-inline-end:calc(var(--u)*1.2);bottom:calc(var(--u)*.9);margin:0;color:#cfe0ff;font-size:calc(var(--u)*1.1)}
+.gold{margin-top:calc(var(--u)*.4);color:var(--gold);font-weight:700;font-size:calc(var(--u)*1.2)}#stats .pwk{position:absolute;inset-inline-start:calc(var(--u)*9.5);bottom:calc(var(--u)*.9);margin:0;color:#ffe9a0;font-size:calc(var(--u)*1.1)}.pwk.bm{color:#c89aff}.dnclk{position:absolute;inset-inline-end:calc(var(--u)*1.2);bottom:calc(var(--u)*.9);margin:0;color:#cfe0ff;font-size:calc(var(--u)*1.1)}
 #quest{position:absolute;inset-inline-end:calc(var(--u)*1);top:calc(var(--u)*1);width:calc(var(--u)*26)}
 #quest .head{font-size:calc(var(--u)*1.6);margin-bottom:calc(var(--u)*.2)}
 #qtext.ret{color:var(--gold)}#qtext i.qsh{font-style:normal;margin-inline-start:.35em;opacity:.85;cursor:help}
@@ -578,7 +578,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
         <div class="sb st"><em>SP</em><div class="bt"><b id="stl"></b><i id="stb"></i><span id="stt"></span></div></div>
         <div class="sb fd"><em id="fdk"></em><div class="bt"><b id="fdl"></b><i id="fdb"></i><span id="fdt"></span></div></div>
         <div class="bar xp"><i id="xpb" style="background:var(--xp)"></i></div>
-        <div class="gold" id="goldt"></div><div class="gold dnclk" id="dnClk"></div>
+        <div class="gold" id="goldt"></div><div class="gold pwk" id="pwK" hidden></div><div class="gold dnclk" id="dnClk"></div>
       </div>
       <div id="rcol"><div id="quest" class="sys"><div class="qhead"><span class="head" data-i18n="questH"></span><span class="qhb"><button class="x qrec" data-act="qRec" id="qRecB">⭐</button><button class="x" id="toastLog"><span>📜</span></button><button class="x qtog" data-act="qtoggle" title="Tab">▾</button></span></div><div id="qtext"></div></div>
       <canvas id="mini" class="sys" width="128" height="88" data-tip=""></canvas>
@@ -4024,7 +4024,7 @@ function godAct(o){const s=dvS(),g=o.g,lines=['god_'+g];
  if(dvIs(g))return dialog('godN_'+g,[...lines,t('dvStill',{n:Math.ceil((S.dv.until-Date.now())/60000)})]);
  if(s.pr.includes(g))return dialog('godN_'+g,[...lines,'dvToday']);
  dialog('godN_'+g,[...lines,'dvD_'+g],null,[{l:t('dvPray'),f:()=>dvPray(g,o)},{l:t('oLeave')}]);}
-function dvPray(g,o){const s=dvS();s.g=g;s.until=Date.now()+DVD;s.pr.push(g);SFX.legendary();hudDirty=true;save(true);
+function dvPray(g,o){alPray(g);const s=dvS();s.g=g;s.until=Date.now()+DVD;s.pr.push(g);SFX.legendary();hudDirty=true;save(true);
  for(let i=0;i<18;i++)fx.push({x:P.x+(rand()-.5)*20,y:P.y-2,vx:(rand()-.5)*10,vy:-30-rand()*20,t:1,c:o.c,fl:1});fx.push({ring:true,big:1,x:o.x,y:o.y-14,t:.6});
  toast(t('dvGot',{g:t('godN_'+g),m:DVD/60000}),'good');}
 function dvTick(dt){if(!S||!P)return;if(!DVI)dvInit();
@@ -4784,11 +4784,11 @@ function p2Atk(m,o){if(m.spar)return 1;let k=1;const wk=weapKind();
  if(S.cls==='bowmaster'&&wk==='bow'&&pasOn('bmcombo')&&P.bmM===m&&P.bmT>0)k*=1+.04*pasM('bmcombo')*(P.bmc||0);
  if(m.wlc>0)k*=1.15;
  if(S.cls==='dslayer'){if(DEMK.has(m.type)){let d=(pasOn('dsbane')?1.2:1)*(m.dss>0?1.2:1)*(o&&o.dem||1);k*=Math.min(1.6,d);}if(pasOn('dsweap'))k*=1.1;if(dsHell())k*=1.2;}
- return k;}
+ return k*alAtk(m,o);}
 function p2Hit(m,o){if(S.cls==='bowmaster'&&weapKind()==='bow'&&!o.dot){if(P.bmM===m&&P.bmT>0)P.bmc=Math.min(5,(P.bmc||0)+1);else P.bmc=1;P.bmM=m;P.bmT=2;}}
 function p2Hurt(d,src){if(P.snc){P.snc=null;toast(t('snInt'),'warn');SFX.deny();}
- if(P.bga>0)d*=.8;if(src&&src.wlc>0)d*=.8;if(src&&S.cls==='dslayer'&&pasOn('dsbane')&&DEMK.has(src.type))d*=1-.25*pasM('dsbane');if(src&&src.lod>0)d*=.5;return Math.max(1,Math.round(d));}
-function p2Kill(m){if(!S||m.spar)return;if(DEMK.has(m.type)){const H=hcS();H.dm=(H.dm||0)+1;qEvent('demon','demon');}}
+ if(P.bga>0)d*=.8;if(src&&src.wlc>0)d*=.8;if(src&&S.cls==='dslayer'&&pasOn('dsbane')&&DEMK.has(src.type))d*=1-.25*pasM('dsbane');if(src&&src.lod>0)d*=.5;return Math.max(1,Math.round(alHurt(d,src)));}
+function p2Kill(m){if(!S||m.spar)return;alKill(m);if(DEMK.has(m.type)){const H=hcS();H.dm=(H.dm||0)+1;qEvent('demon','demon');}}
 function p2Heal(n,mates){if(!S||!(n>0||mates))return;const H=hcS();H.hl=(H.hl||0)+1+(mates?1:0);qEvent('saheal','saheal');if(mates)qEvent('saheal','saheal');}
 // hidden offers (from hcOfferK): any class but the legendary and hidden ones, not already on a hidden trial
 function p2OfferK(){if(!S||P2NOT.includes(S.cls)||HCQ.some(id=>S.qs[id]))return null;const H=hcS(),Lg=WS&&WS.legends&&WS.legends.alex,dsFree=!(Lg&&Lg.pid!==pidOf());
@@ -5538,7 +5538,7 @@ function rkOnline(){return !!(FB&&netUser&&NET&&NETTR&&NETTR.kind==='firebase');
 function rankTick(live){if(!live||!rkOnline()||!S||S.__demo)return;const now=performance.now();
  if(now-rkPutT>120000){rkPutT=now;const sig=(S.lv|0)+'|'+rkWealth();if(sig!==rkLast){rkLast=sig;const D=FB.m.database,u={},n=String(netId||S.look.n||'?').slice(0,24);
   u['ranks/lv/'+NET.uid]={v:S.lv|0,n,t:D.serverTimestamp()};u['ranks/gold/'+NET.uid]={v:rkWealth(),n,t:D.serverTimestamp()};D.update(D.ref(FB.db),u).catch(()=>{rkLast='';});try{D.set(D.ref(FB.db,'arenaCard/'+NET.uid),arCard(n)).catch(()=>{});}catch(e){}}}
- if(now-rkT>90000){rkT=now;Promise.all([rankTop('lv'),rankTop('gold')]).then(([lv,gold])=>{RNKD={lv:rankMix('lv',lv),gold:rankMix('gold',gold)};}).catch(()=>{});}}
+ if(now-rkT>90000){rkT=now;alTop();Promise.all([rankTop('lv'),rankTop('gold')]).then(([lv,gold])=>{RNKD={lv:rankMix('lv',lv),gold:rankMix('gold',gold)};}).catch(()=>{});}}
 // a player's battle card for the tournament (owner 2026-10-24): what a copy of them needs, a string the rules bound
 function arCard(n){const w=weapon(),sk=barSkills().filter(k=>k&&SKF[k]&&SKD[k]&&!SKD[k].pas).slice(0,8),L=S.look||{};
  return JSON.stringify({v:1,n:String(n).slice(0,24),lv:S.lv|0,cls:String(S.cls||'novice').slice(0,16),hp:maxHP()|0,dps:Math.round(atkV()*lvF(S.lv)/atkCD()),cd:+atkCD().toFixed(3),sk,
@@ -5555,7 +5555,7 @@ function legendLines(){const L=WS.legends||{},ks=Object.keys(LEGK),n=ks.filter(k
  for(let i=0;i<ls.length;i+=8)out.push((i?'':t('lgLeft',{n:ks.length-n,a:ks.length})+'\n')+ls.slice(i,i+8).join('\n'));return out;}
 // each ranking opens straight on its list, titled "Rankings Clerk: Wealth" and so on
 function rankerOpts(){const back=()=>shopD('ranker','rk_hi'),hd=k=>t(k).replace(/^\[|\]$/g,'').split(/:\s*/).pop(),D=(k,...ls)=>dialog('ranker',ls.map(l=>[t('ranker')+': '+hd(k),l]),back);return [
- {l:t('rkLv'),f:()=>D('rkLvH',rankList('lv'))},{l:t('rkGold'),f:()=>D('rkGoldH',rankList('gold'))},
+ {l:t('rkLv'),f:()=>D('rkLvH',rankList('lv'))},{l:t('rkGold'),f:()=>D('rkGoldH',rankList('gold'))},{l:t('oAngelRk'),f:()=>angelBoard('ranker',back)},
  {l:t('rkGuild'),f:()=>gRankFresh(()=>D('rkGuild',rankLine()))},{l:t('rkLeg'),f:()=>D('rkLeg',...legendLines())},
  {l:t('rkArena'),f:()=>D('rkArena',WS.arena&&WS.arena.day===today()?t('rkArToday',{n:WS.arena.n}):t('rkArNone'),t('rkArMe',{n:S.arW||0}))},
  {l:t('rkTower'),f:()=>D('rkTower',WS.tower?t('twrRecW',{n:WS.tower.n,f:WS.tower.f}):t('twrRecNone'),t('twrRecMe',{n:S.twB||0}))}];}
@@ -7447,7 +7447,7 @@ function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]
 function mkItem(id,r,made){const rc=rcById(id);if(rc.fix!=null&&!(made&&rc.fix<4))r=rc.fix;   // made: your own craft keeps the rating it came out at (owner 2026-10-22: a rare craft showed up unique); a breath piece is always legendary
 const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.hpp)it.hpp=rc.hpp;if(rc.slot==='w'){it.atk=Math.round(rc.atk*MULT[r]);it.spd=rc.spd;}else if(rc.def)it.def=Math.round(rc.def*MULT[r]);
  for(const k of ['as','ms','dm'])if(rc[k])it[k]=+(rc[k]*(1+(MULT[r]-1)*.5)).toFixed(3);if(rc.mpb)it.mpb=Math.round(rc.mpb*MULT[r]);for(const k of ['agi','agp','cold','dsh'])if(rc[k])it[k]=rc[k];if(rc.slot==='w'&&r>=2)it.wp=wpRoll(r,it);return it;}
-function completeQ(id){if(!claimQ(id))return;if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else S.mats[o.it]-=o.n;}if(o.give)giveItem(o.it);
+function completeQ(id){if(!claimQ(id))return;alQuest(id);if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else S.mats[o.it]-=o.n;}if(o.give)giveItem(o.it);
  S.qs[id].st=2;if(q.rep)delete S.qs[id];
  toast(t('qDone',{q:qName(id)}),'good');SFX.quest();jQuest(id);
  if(q.gold){S.gold+=pasOn('opers')?Math.round(q.gold*1.15):q.gold;coinFx(npcOf(q.by),q.gold);}if(q.kc)kcGain(q.kc);
@@ -8648,7 +8648,7 @@ let qLast='';const SBL={}; // the pale trail on each bar: holds 0.45 s where the
 function updateHUD(){if(PHOTO&&mode!=='play')photoOff();const mh=maxHP();P.hp=Math.min(P.hp,mh);
  stx($('lv'),t('lv',{n:S.lv}));const now=performance.now(),sbW=(k,f)=>{f=Math.max(0,Math.min(100,f));const L=SBL[k]=SBL[k]||{v:f,t:now,u:now};if(f>=L.v){L.v=f;L.t=now;}else{if(f<(L.f??f)-.05)L.t=now;if(now-L.t>450)L.v=Math.max(f,L.v-(now-L.u)*.05);}L.u=now;L.f=f;$(k+'b').style.width=f+'%';$(k+'l').style.width=L.v+'%';};
  jLow(P.hp>0&&P.hp<mh*.3);sbW('hp',P.hp/mh*100);stx($('hpt'),`${Math.ceil(P.hp)} / ${mh}`);$('hpW').classList.toggle('low',P.hp>0&&P.hp<mh*.3);
- sbW('mp',P.mp/maxMP()*100);stx($('mpt'),`${Math.floor(P.mp)} / ${maxMP()}`);sbW('st',P.st/maxST()*100);stx($('stt'),`${Math.round(P.st)} / ${maxST()}`);sbW('fd',P.food);stx($('fdt'),`${Math.round(P.food)}%`);stx($('fdk'),t('food'));
+ sbW('mp',P.mp/maxMP()*100);stx($('mpt'),`${Math.floor(P.mp)} / ${maxMP()}`);sbW('st',P.st/maxST()*100);stx($('stt'),`${Math.round(P.st)} / ${maxST()}`);sbW('fd',P.food);stx($('fdt'),`${Math.round(P.food)}%`);stx($('fdk'),t('food'));pwHud();
  $('xpb').style.width=(S.xp/xpNeed()*100)+'%';stx($('goldt'),jGold());
  const qsh=qShareOn(),[qs,qfH]=qFilt(Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1)),qh=qfH+(qs.length?(qPage=Math.min(qPage,Math.ceil(qs.length/3)-1),qs.slice(qPage*3,qPage*3+3)).map(id=>{const r=qReady(id);const on=QGC.g&&QGC.g.id===id,sp=!!qSpot(id);return `<div class="qi${r?' ret':''}" data-qd="${id}" data-tip="${esc(t('qdHint'))}"><button class="x qtk${on?' on':''}" data-qtk="${id}"${sp?'':' disabled'} data-tip="${esc(t(sp?(on?'qgHide':'qgFollow'):'qgNo'))}">📍</button><b>${esc(qName(id))}</b><span>${esc(r?t('retTo',{w:t(QD[id].by)}):qObjText(id))}${!r&&qsh&&qShareOk(QD[id])?`<i class="qsh" data-tip="${esc(t('qShTip'))}">👥</i>`:''}</span></div>`;}).join('')+(qs.length>3?`<div class="qn qpg"><button class="x" data-qp="-1">‹</button><span>${qPage+1} / ${Math.ceil(qs.length/3)}</span><button class="x" data-qp="1">›</button></div>`:''):`<div class="qn">${esc(t('noQuest'))}</div>`);{const bq=BHR?bhHud():TOW?twHud():'',qx=msHud()+(bq?`<div class="qi ret"><b>${esc(bq)}</b></div>`+qh:qh);if(qx!==qLast){qLast=qx;$('qtext').innerHTML=qx;}}
  stx($('stats').querySelector('.nm span'),t('pname'));
@@ -9219,7 +9219,7 @@ function castSk(k,el){if(brSeal()){toast(t('brSealT'),'warn');SFX.deny();return;
  if((P.cd[k]||0)>0||P.dash>0){SFX.deny();return;}
  const wk=weapKind();if((d.need==='bow'&&wk!=='bow')||(d.need==='staff'&&wk!=='staff')||(d.need==='melee'&&(wk==='bow'||wk==='staff'))||(d.need==='spear'&&wk!=='spear')){toast(t(d.need==='bow'?'needBow':d.need==='staff'?'needStaff':d.need==='spear'?'needSpear':'needMelee'),'warn');SFX.deny();return;}
  if(P.mp<mpC(k)){toast(t('noMP'),'warn');SFX.deny();return;}
- const FK=fusTry(k);P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k)*dsCdM(k)*skCdM(k);SKC={k,t:gTime};SKH.push(SKC);if((P.cohR||P.sprR)&&k!=='bcoh'&&k!=='bspray'&&d.need==='staff'&&!d.pas){if(P.cohR){P.cohR=0;P.cohW=gTime+2;}if(P.sprR){P.sprR=0;P.sprW=gTime+2;}}if(SKH.length>6)SKH.shift();skUse(k);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}if(FK){fusLearn(FK);hudDirty=true;return;}{const h0=P.hp;CURSK=k;CURSKN=0;CURSKD=0;try{skCarry(k,()=>SKF[k]());}finally{CURSK=null;}skHealUp(k,h0);}skSnd(k);skVfx(k);if(!CURSKN&&!skVfxHas(k))skSig(k);numPK(-34,'sk_'+k,d.col,false);hudDirty=true;}
+ const FK=fusTry(k);P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k)*dsCdM(k)*skCdM(k);SKC={k,t:gTime};SKH.push(SKC);alSkill(k);if((P.cohR||P.sprR)&&k!=='bcoh'&&k!=='bspray'&&d.need==='staff'&&!d.pas){if(P.cohR){P.cohR=0;P.cohW=gTime+2;}if(P.sprR){P.sprR=0;P.sprW=gTime+2;}}if(SKH.length>6)SKH.shift();skUse(k);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}if(FK){fusLearn(FK);hudDirty=true;return;}{const h0=P.hp;CURSK=k;CURSKN=0;CURSKD=0;try{skCarry(k,()=>SKF[k]());}finally{CURSK=null;}skHealUp(k,h0);}skSnd(k);skVfx(k);if(!CURSKN&&!skVfxHas(k))skSig(k);numPK(-34,'sk_'+k,d.col,false);hudDirty=true;}
 /* skill looks (owner 2026-10-24: "almost every skill and hit looks alike; fix the effects and hitboxes so each skill feels
    different; Space Sword is literally a bigger slash"). Each skill gets a look from its name and element: a wide crescent, a
    thrust, a cross cut, a cut in space, falling swords, flying blades, petals, a dragon, a pillar of light, a vortex, lightning
@@ -9865,7 +9865,7 @@ function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,ti
  h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk','expoc','angler','aslay','fbane','gdslay',...TTOWN].filter(id=>S.tl[id]);
  const tlSk=id=>Object.keys(SKD).filter(k=>SKD[k].title===id||TLS[id]===k).filter((k,i,a)=>a.indexOf(k)===i);own.sort((x,y)=>(tlSk(y).length>0)-(tlSk(x).length>0));   // owner 2026-10-24: titles that give a skill come first
  const skTipT=k=>{const d=SKD[k]||{};return esc(`<b>${t('sk_'+k)}</b><br>${t('skd_'+k)}<br><small>${t('skCost',{mp:mpC(k),cd:Math.round((d.cd||0)*skCostM(k))})}</small>`);};
- h+=`<div class="ssec">${t('titlesH')}</div>`+(own.length?own.map(id=>`<div class="tl${S.title===id?' worn':''}"><div><b>${t('tl_'+id)}</b><small>${t('tl_'+id+'D')}</small>${tlSk(id).length?`<em>${tlSk(id).map(k=>`<span class="tlsk" data-tip="${skTipT(k)}">${t('iskL',{s:t('sk_'+k)})}</span>`).join(' · ')}</em>`:STR.en['tl_'+id+'S']?`<em>${t('tl_'+id+'S')}</em>`:''}</div><button data-title="${id}" ${S.title===id?'disabled':''}>${t(S.title===id?'tlWorn':'tlWear')}</button></div>`).join('')+`<div class="note">${t('tlNote')}</div>`:`<div class="note">${t('noTitles')}</div>`);
+ h+=alPanel();h+=`<div class="ssec">${t('titlesH')}</div>`+(own.length?own.map(id=>`<div class="tl${S.title===id?' worn':''}"><div><b>${t('tl_'+id)}</b><small>${t('tl_'+id+'D')}</small>${tlSk(id).length?`<em>${tlSk(id).map(k=>`<span class="tlsk" data-tip="${skTipT(k)}">${t('iskL',{s:t('sk_'+k)})}</span>`).join(' · ')}</em>`:STR.en['tl_'+id+'S']?`<em>${t('tl_'+id+'S')}</em>`:''}</div><button data-title="${id}" ${S.title===id?'disabled':''}>${t(S.title===id?'tlWorn':'tlWear')}</button></div>`).join('')+`<div class="note">${t('tlNote')}</div>`:`<div class="note">${t('noTitles')}</div>`);
  {const cs=clsSkills().filter(skOK),bar=barSkills();h+=`<div class="ssec">${t('skillsH')} · ${t('cl_'+S.cls)}</div>`+`<div class="barrow${BPICK?' pick':''}"><span>${BPICK?t('barPickT',{sk:t('sk_'+BPICK)}):t('barRowT')}</span>${[...Array(NSK).keys()].map(i=>`<button class="bslot${BPICK&&bar[i]===BPICK?' on':''}" data-bslot="${i}">${bar[i]?`<img src="${barIco(bar[i])}">`:''}<kbd>${keyName(KB[i])}</kbd></button>`).join('')}</div>`+cs.map(k=>{const d=SKD[k],bi=bar.indexOf(k),xo=bi<0&&xOn(k);return `<div class="tl skd${bi>=0||xo?' worn':''}${BPICK===k?' pick':''}" draggable="true" data-dsk="${k}"><img class="ski" src="${skIcon(k)}"><div><b>${t('sk_'+k)}</b><small>${t('skd_'+k)}${skLvTxt(k)}</small><em>${t('skCost',{mp:mpC(k),cd:Math.round(d.cd*skCostM(k))})}</em></div><button data-bar="${k}">${bi>=0?t('barOff',{k:keyName(KB[bi])}):xo?t('barOff',{k:keyName(XKB[xo[0]][xo[1]])||'—'}):t('barOn')}</button></div>`;}).join('')+`<div class="note">${t(TOUCH?'barTap':'barDrag')}</div>`;
   const ps=pasSkills(),lg=isLeg();if(ps.length||lg)h+=`<div class="ssec">${t('pasH')}</div>`+(lg?`<div class="tl skd worn"><img class="ski" src="${icon('book')}"><div><b>${t('legNoDieN')}</b><small>${t('legNoDieD',{c:LEG_CD})}</small><em>${S.immT>0?t('legNoDieW',{s:Math.ceil(S.immT)}):t('pasOnT')}</em></div></div>`:'')+ps.map(k=>`<div class="tl skd worn"><img class="ski" src="${skIcon(k)}"><div><b>${t('sk_'+k)}</b><small>${t('skd_'+k)}${skLvTxt(k)}</small><em>${t('pasOnT')}</em></div></div>`).join('');}
  {const mo=Object.keys(MOUNTS).filter(k=>(S.mounts||{})[k]),pe=Object.keys(PETS).filter(k=>(S.pets||{})[k]);if(mo.length||pe.length)h+=`<div class="ssec">${t('rideH')}</div>`+mo.map(k=>`<div class="tl${S.mount===k?' worn':''}"><div><b>${t('mt_'+k)}</b><small>${t('rideSp',{n:Math.round((mtSp(k)-1)*100)})} · ${t('mtLvT',{n:mtLv(k)})}${(([x,nx])=>nx?` <em>(${x}/${nx})</em>`:'')(mtRest(k))}</small></div><button data-mount="${k}" ${S.mount===k?'disabled':''}>${t(S.mount===k?'rideSel':'rideUse')}</button></div>`).join('')+pe.map(k=>{const [x,nx]=petRest(k);return `<div class="tl${S.pet===k?' worn':''}"><div><b>${t('pt_'+k)}${pEvo(k)?' ★ '+t('peEv'):''} · ${t('petLvT',{n:petLv(k)})}</b><small>${petDead(k)?`<em>${t('petDeadT',{s:Math.ceil((S.pdead[k]-Date.now())/1000)})}</em> `:S.php&&S.php[k]!=null?`<em>${t('petHpT',{h:Math.round(petHp(k)).toLocaleString('en'),m:petHpMax(k).toLocaleString('en')})}</em> `:''}${t(pEvo(k)?'ptE_'+k:'ptD_'+k)} ${t('petNow',{n:Math.round(PETS[k].b*(pEvo(k)?2:1)*(1+(petLv(k)-1)*.1)*100)})}${nx?` <em>(${x}/${nx})</em>`:''}</small></div><button data-pet="${S.pet===k?'':k}">${t(S.pet===k?'petOff':'petOn')}</button>${S.pet===k?(PETX[k]?`<small>${t('petHow_'+k)}</small>`:`<button data-feed="${k}">${t('petFeedB')}</button>`):''}${pEvoOk(k)?`<button data-pevo="${k}" data-tip="${esc(t('peTip',{m:pEvoNeed(k)}))}">${t('peB')}</button>`:''}</div>`;}).join('')+(mo.length?`<div class="note">${t('rideNote')} ${t('mtTip')}</div>`:'');}
@@ -10595,7 +10595,7 @@ function update(dt){
  if(P.sw>0){P.sw-=dt;P.hp=Math.min(mh,P.hp+mh*.03*dt);if(rand()<dt*6)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*14,vx:0,vy:-24,t:.5,c:'#7ae07a',fl:1});}
  // hunger only drops while you do something (Twister 2026-10-19): walking, riding, attacking, dodging or guarding
  {const busy=Math.abs(P.x-(P.fqx??P.x))+Math.abs(P.y-(P.fqy??P.y))>.01||P.acd>0||P.dash>0||P.guard;P.fqx=P.x;P.fqy=P.y;if(busy)P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));}
- updateProj(dt);mxTick(dt);vcTick(dt);hvTick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
+ updateProj(dt);mxTick(dt);vcTick(dt);hvTick(dt);alTick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
@@ -12613,7 +12613,7 @@ var DROPHV=['seraa','serah','serag','serab','halor'],DROPHV2=['seraa','serah','s
 RB.push({id:'rb_m_seraph',c:'smith',k:['seraa','serah','serag','serab'],g:80000,mon:[['raphael',.3],['michael',.35],['athrone',.004]]},{id:'rb_m_fallen',c:'smith',k:['falla','fallh','fallg','fallb'],g:100000,mon:[['sariel',.3],['baal',.4],['gdherald',.004]]});
 for(const b of RB.slice(-2)){for(const k of b.k)RBK[k]=b;RSUSE.push(b.id);AUK.push(b.id);MATP[b.id]=Math.round(b.g/4);for(const [m,p] of b.mon)MT[m].drop.push([b.id,p]);}
 // what the people of the realms say (they stand in NPCS: the Herald in the plaza, the Apostate at the Cathedral door, the Watcher where the fallen landed)
-Object.assign(NPCT,{hvher:{hi:'hvher_hi',idle:()=>['hvher_i1','hvher_i2','hvher_i3'][Math.floor(rand()*3)],low:'hvher_low',noGift:1},ycapo:{hi:'ycapo_hi',idle:()=>['ycapo_i1','ycapo_i2'][Math.floor(rand()*2)],low:'ycapo_low',noGift:1},
+Object.assign(NPCT,{hvher:{hi:'hvher_hi',idle:()=>['hvher_i1','hvher_i2','hvher_i3'][Math.floor(rand()*3)],low:'hvher_low',opts:()=>[{l:t('oAngelRk'),f:()=>angelBoard('hvher')}],noGift:1},ycapo:{hi:'ycapo_hi',idle:()=>['ycapo_i1','ycapo_i2'][Math.floor(rand()*2)],low:'ycapo_low',noGift:1},
  hvwatch:{hi:'hvwatch_hi',idle:()=>['hvwatch_i1','hvwatch_i2'][Math.floor(rand()*2)],low:'hvwatch_low',noGift:1}});
 Object.assign(QD,{hv1:{by:'hvher',lv:480,obj:{t:'kill',it:'asent',n:25},xp:25000000,gold:150000},
  hv2:{by:'hvher',pre:'hv1',lv:485,obj:{t:'have',it:'afeath',n:20,take:1},xp:30000000,gold:180000},
@@ -12662,7 +12662,7 @@ function hvTick(dt){if(!P||!S)return;const k=hvRealm(P.x/TS,P.y/TS);
   // Sariel at half health: the fallen archangel becomes a Great Demon (her second sheet, fury)
   if(m.type==='sariel'){if(!m.vr&&m.hp<m.max*.5){m.vr=1;m.fury=gTime+1e6;vfx('rage',m.x,m.y);shake=.6;if(o.k===k)toast(t('hvSariel'),'warn');}else if(m.vr&&m.hp>=m.max*.98){m.vr=0;m.fury=0;}}}
  // Asgard's light weighs on a sinner: an outlaw, or one with bad karma (2% of your health a second, never the last point)
- if(k==='asg'&&mode==='play'&&P.hp>1&&((S.olT||0)>Date.now()||(S.karma||0)<0)){HVST+=dt;if(HVST>=1){HVST=0;P.hp=Math.max(1,P.hp-Math.ceil(maxHP()*.02));hudDirty=true;if(!HVSIN){HVSIN=1;toast(t('hvSin'),'warn');}}}else HVST=0;}
+ if(k==='asg'&&mode==='play'&&P.hp>1&&((S.olT||0)>Date.now()||(S.karma||0)<0||alV()<=-ALD[0])){HVST+=dt;if(HVST>=1){HVST=0;P.hp=Math.max(1,P.hp-Math.ceil(maxHP()*.02));hudDirty=true;if(!HVSIN){HVSIN=1;toast(t('hvSin'),'warn');}}}else HVST=0;}
 // the sky round Asgard and its light; the Cathedral's dark and its candles; the Rift's red dark and its embers
 function hvDark(){if(!P||!S||mode==='title'||mode==='lang'||!HVZ)return;const R=HVR[HVZ],L=R.x0*TS-camX,T=R.y0*TS-camY,Rt=(R.x1+1)*TS-camX,B=(R.y1+1)*TS-camY;
  if(HVZ==='asg'){ctx.save();ctx.beginPath();ctx.rect(0,0,VW,VH);ctx.rect(L,T,Rt-L,B-T);ctx.clip('evenodd');
@@ -12809,6 +12809,90 @@ Object.assign(STR.en,{zAsg1:"Asgard: the Outer Courts (Lv 480+)",zAsg2:"Asgard: 
 rb_m_seraphD:"Teaches you to make the Seraphic Armor, Helmet, Gloves and Boots (smithing, Lv 9). Click it in the bag to learn it.\nIt can be traded or sold at the auction.",
  rb_m_fallenD:"Teaches you to make the Fallen Armor, Helmet, Gloves and Boots (smithing, Lv 9). Click it in the bag to learn it.\nIt can be traded or sold at the auction.",
  tl_aslay:"Archangel Slayer",tl_fbane:"Bane of the Fallen",tl_gdslay:"Great Demon Slayer",tl_aslayD:"Defeated Archangel Michael on his throne in Asgard.",tl_fbaneD:"Defeated Sariel the Fallen in the Fallen Rift.",tl_gdslayD:"Defeated the Great Demon Baal, the first of the Great Demons."});
+/* ---- Light and darkness (owner 2026-10-25, the Angel Hierarchy and Dark Magic): every character has an alignment, S.al,
+   from -50000 (the dark) to +50000 (the light), and the highest it ever reached, S.alMax.
+   The light grows by fighting the darkness: +1 for a demon, a Yatan cultist, a vampire or a fallen angel, +5 for an elite,
+   +50 for one of their bosses (the Archbishop 100, Sariel 150, Baal 300); +25 for praying at Rebecca's statue; +50 for each
+   quest of Asgard, the Cathedral and the Rift. Sins darken it: -100 for murdering a player who was no outlaw (and the
+   contracts with the Great Demons, the Rune of Darkness).
+   Angel Rankings: from +100 a light character holds an angel's rank (Novice of Light, Angel, Guardian Angel, Principality,
+   Power, Dominion, Archangel Candidate) and does 3% more damage to the darkness and takes 2% less from it for each rank.
+   The dark ranks (Heretic, Black Disciple, Demon-sworn, Herald of the Demon Lord, Great Demon Candidate) do 3% more to the
+   angels for each rank, and Asgard's light burns them. A character who was an Angel (+500) and falls below 0 is cast out of
+   Asgard: a Fallen Angel, whose dark ranks are the fallen ones up to a Great Demon (as Sariel became; +10% damage). Only
+   Rebecca can take a Fallen Angel back: pray at her statue with +3000.
+   Divine Power (the light classes, or a light rank) and Black Magic Power (the Black Magician, or a dark rank): 0 to 100,
+   filled by kills (and a Black Magician's spells), fading out of a fight; each point is 0.2% more damage, Divine Power to
+   the darkness, Black Magic Power to skills. Shown beside the gold on the HUD.
+   Online the light characters' alignment goes to ranks/angel/{uid} (the Angel Rankings at the rankings clerk and the Herald);
+   all else is each player's own. */
+var ALL=[100,500,1500,4000,8000,15000,30000],ALD=[100,1000,4000,10000,20000],ALMAX=50000,ALBOSS={yarch:100,sariel:150,baal:300};
+var ALDK=new Set(['cultist','ypriest','dbus','ybmag','yinq','ypact','ychor','yarch','fangel','rhound','bseraph','gdherald','rdrake','sariel','baal']),ALAN=new Set(['asent','aseraph','athrone','adomin','apower','acherub','raphael','michael']);
+for(const k of ['gdherald','baal','sariel','rhound'])DEMK.add(k);
+const alDark=ty=>DEMK.has(ty)||ALDK.has(ty)||/^v(wolf|jun|int|true|guard|skel|high|b\d+|elfin|ran|mount|tira|latina|cray|yet|ruson|noll|noble|mrose|fenrir|thrall|knight|lord|bat)$/.test(ty);
+const alV=()=>S&&!S.__demo?Math.max(-ALMAX,Math.min(ALMAX,S.al|0)):0;
+// the rank: {side 'l' or 'd', r 1.., k its name key}; a Fallen Angel holds no light rank
+function alRank(v){v=v===undefined?alV():v;if(v>0&&!(S&&S.fallen)){const r=ALL.filter(x=>v>=x).length;return r?{side:'l',r,k:'alL'+r}:null;}
+ if(v<0){const r=ALD.filter(x=>-v>=x).length;return r?{side:'d',r,k:(S&&S.fallen?'alF':'alD')+r}:null;}return null;}
+const alName=v=>{const R=alRank(v);return R?t(R.k):t(v<0?'alNoneD':'alNone');};
+function alAdd(n,why){if(!S||S.__demo||!n)return;const r0=alRank(),v=Math.max(-ALMAX,Math.min(ALMAX,alV()+Math.round(n)));S.al=v;S.alMax=Math.max(S.alMax|0,v);
+ // cast out: an Angel who falls into the dark
+ if(!S.fallen&&(S.alMax|0)>=ALL[1]&&v<0){S.fallen=1;setTimeout(()=>{toast(t('alCast'),'warn');SFX.slam();},300);}
+ const r1=alRank();if(r1&&(!r0||r0.k!==r1.k)&&(!r0||r0.side!==r1.side||r1.r>r0.r)){setTimeout(()=>{toast(t(r1.side==='l'?'alUpL':'alUpD',{r:t(r1.k)}),r1.side==='l'?'good':'warn');SFX.notice();},500);
+  if(S.fallen&&r1.side==='d'&&r1.r===ALD.length)setTimeout(()=>toast(t('alGreat'),'warn'),1400);}
+ alPut();hudDirty=true;}
+// what the rank does: to the darkness (light) or to the angels (dark); a fallen Great Demon hits everything harder
+function alAtk(m,o){const R=alRank();let k=1;if(!R||!m||m.spar)return pwAtk(m,o);
+ if(R.side==='l'&&alDark(m.type))k*=1+.03*R.r;if(R.side==='d'&&ALAN.has(m.type))k*=1+.03*R.r;if(R.side==='d'&&S.fallen&&R.r===ALD.length)k*=1.1;return k*pwAtk(m,o);}
+function alHurt(d,src){const R=alRank();if(!R||R.side!=='l'||!src||!src.type||!MT[src.type]||!alDark(src.type))return d;return d*(1-.02*R.r);}
+// Divine Power and Black Magic Power
+const PWL=new Set(['priest','paladin','saintess','saint']),PWD=new Set(['warlock']);
+function pwKind(){if(!S||S.__demo)return null;const v=alV();if(PWD.has(S.cls)||v<=-ALD[0])return 'bm';if(PWL.has(S.cls)||v>=ALL[0]&&!S.fallen)return 'dp';return null;}
+function pwAdd(n){const k=pwKind();if(!k)return;const f=k==='dp'?'dvp':'bmp';S[f]=Math.max(0,Math.min(100,(S[f]||0)+n));P.pwT=gTime;}
+function pwAtk(m,o){const k=pwKind();if(k==='dp'&&m&&alDark(m.type))return 1+(S.dvp||0)*.002;if(k==='bm'&&o&&o.skill)return 1+(S.bmp||0)*.002;return 1;}
+function alKill(m){if(!S||S.__demo||m.tmp&&!MT[m.type].boss)return;const b=MT[m.type];
+ if(alDark(m.type))alAdd(b.boss?ALBOSS[m.type]||50:b.hp>=3e7&&!b.boss&&b.lv[0]>=480?5:1,'kill');
+ pwAdd(pwKind()==='dp'?(alDark(m.type)?4:1):2);}
+function alSkill(k){if(S&&PWD.has(S.cls)&&SKD[k]&&!SKD[k].pas)pwAdd(4);}
+const ALQ=/^(hv[1-5]|hvd[12]|yc[1-3]|ycd|rf[1-4]|rfd)$/;
+function alQuest(id){if(ALQ.test(id))alAdd(50,'quest');}
+// fading out of a fight: a point every 4 s after 6 s without a kill
+function alTick(dt){if(!S||S.__demo||!P)return;alPut();for(const f of ['dvp','bmp'])if(S[f]>0&&gTime-(P.pwT||0)>6){P.pwF=(P.pwF||0)+dt;if(P.pwF>=4){P.pwF=0;S[f]=Math.max(0,S[f]-1);hudDirty=true;}}}
+function pwHud(){const k=pwKind(),el=$('pwK');if(!el)return;el.hidden=!k;if(!k)return;el.classList.toggle('bm',k==='bm');stx(el,(k==='dp'?'✦ ':'☾ ')+t(k==='dp'?'pwDP':'pwBM')+' '+Math.round(S[k==='dp'?'dvp':'bmp']||0));}
+// the C panel: alignment, rank, the next one, the power
+function alPanel(){const v=alV(),R=alRank(),nx=v>=0&&!S.fallen?ALL.find(x=>x>v):ALD.find(x=>x>-v),pk=pwKind();
+ return `<div class="ssec">${t('alH')}</div><div class="note">${t('alLine',{v:(v>0?'+':'')+v,r:alName(v)})}${S.fallen?' · '+t('alFallenTag'):''}${nx?'<br>'+t(v>=0&&!S.fallen?'alNextL':'alNextD',{n:nx,r:t((v>=0&&!S.fallen?'alL':S.fallen?'alF':'alD')+((R?R.r:0)+1))}):''}${R?'<br><small>'+t(R.side==='l'?'alBonL':'alBonD',{p:3*R.r,q:2*R.r})+'</small>':''}${pk?'<br><small>'+t(pk==='dp'?'pwDPD':'pwBMD',{n:Math.round(S[pk==='dp'?'dvp':'bmp']||0)})+'</small>':''}</div>`;}
+// Rebecca takes a Fallen Angel back (+3000 at her statue)
+function alPray(g){if(g!=='rebecca'||!S)return;alAdd(25,'pray');if(S.fallen&&alV()>=3000){S.fallen=0;setTimeout(()=>{toast(t('alRedeem'),'good');SFX.legendary();},700);alPut();}}
+// the Angel Rankings: online the light characters' alignment, ranks/angel/{uid} {v, n, t} (written on its own, so a world
+// whose rules are older still takes the level and gold), the top 10 every 90 s with the other rankings
+var ALRK=null,alPutT=-1e9,alLast='';
+function alPut(){if(!rkOnline()||!S||S.__demo)return;const v=!S.fallen&&alV()>0?alV():0,sig=String(v),now=performance.now();if(sig===alLast||now-alPutT<30000)return;alPutT=now;alLast=sig;if(!v&&!((S.alMax|0)>0))return;
+ const D=FB.m.database,u={};u['ranks/angel/'+NET.uid]=v?{v,n:String(netId||S.look.n||'?').slice(0,24),t:D.serverTimestamp()}:null;D.update(D.ref(FB.db),u).catch(()=>{alLast='';});}
+function alTop(){if(!rkOnline())return;rankTop('angel').then(L=>{ALRK=L;}).catch(()=>{});}
+function angelList(){const fmt=v=>`${alName(v)} · ${v.toLocaleString()}`,v0=alV(),me={n:S.look.n||t('pname'),me:1,v:!S.fallen&&v0>0?v0:0};
+ const L=(ALRK||[]).filter(x=>x.pid!==pidOf()&&x.v>0),all=[...L,...(me.v>0?[me]:[])].sort((a,b)=>b.v-a.v),i=all.indexOf(me);
+ const out=all.slice(0,10).map((x,j)=>`${j+1}. ${x.me?'★ ':''}${x.n} · ${fmt(x.v)}`);if(i>=10)out.push(`... ${i+1}. ★ ${me.n} · ${fmt(me.v)}`);
+ if(!out.length)out.push(t('alRkNone'));if(me.v<=0)out.push(t(S.fallen?'alRkFallen':'alRkMe',{v:(v0>0?'+':'')+v0,r:alName(v0)}));return out.join('\n');}
+function angelBoard(who,back){alTop();dialog(who,[[t(who)+': '+t('alRkT'),angelList()]],back||null);}
+window.__GAL={v:()=>alV(),add:(n,w)=>alAdd(n,w),rank:v=>alRank(v),name:v=>alName(v),atk:(m,o)=>alAtk(m,o),hurt:(d,s)=>alHurt(d,s),pw:()=>pwKind(),pwAdd:n=>pwAdd(n),tick:dt=>alTick(dt),
+ list:()=>angelList(),board:w=>angelBoard(w),panel:()=>alPanel(),top:()=>alTop(),put:()=>{alPutT=-1e9;alLast='';alPut();},data:()=>ALRK,dark:ty=>alDark(ty)}; // tests
+Object.assign(STR.ar,{alH:"النور والضلمة",alLine:"الانحياز: {v} · {r}",alNone:"محايد",alNoneD:"محايد (ميّال للضلمة)",alFallenTag:"ملاك ساقط",
+ alNextL:"الرتبة الجاية ({r}) عند +{n}",alNextD:"الرتبة الجاية ({r}) عند -{n}",alBonL:"+{p}% ضرر على الضلمة (الشياطين، ياتان، مصاصي الدماء، الساقطين) و-{q}% ضرر منها",alBonD:"+{p}% ضرر على الملايكة، ونور أسجارد بيحرقك",
+ alL1:"مبتدئ النور",alL2:"ملاك",alL3:"ملاك حارس",alL4:"رئاسة",alL5:"قوة",alL6:"سيادة",alL7:"مرشّح رئيس ملايكة",
+ alD1:"مهرطق",alD2:"تلميذ أسود",alD3:"مُبايع الشياطين",alD4:"رسول سيد الشياطين",alD5:"مرشّح شيطان عظيم",
+ alF1:"ملاك ساقط",alF2:"قوة ساقطة",alF3:"سيادة ساقطة",alF4:"رئيس ملايكة ساقط",alF5:"شيطان عظيم (ساقط)",
+ alUpL:"رتبة ملاك جديدة: {r}",alUpD:"الضلمة بتاخدك: {r}",alCast:"اتطردت من أسجارد. انت دلوقتي ملاك ساقط.",alGreat:"زي ساريال، بقيت شيطان عظيم.",alRedeem:"ريبيكا قبلتك تاني. انت مبقيتش ساقط.",
+ pwDP:"قوة إلهية",pwBM:"قوة سحر أسود",pwDPD:"القوة الإلهية {n}/100: كل نقطة +0.2% ضرر على الضلمة. القتل بيملاها، وبتفضى برا القتال.",pwBMD:"قوة السحر الأسود {n}/100: كل نقطة +0.2% ضرر المهارات. القتل والتعاويذ بيملوها، وبتفضى برا القتال.",
+ alRkT:"تصنيف الملايكة",alRkH:"تصنيف الملايكة (الرتبة · الانحياز)",alRkNone:"لسه مافيش حد في التصنيف.",alRkMe:"انت: {v} ({r}). من +100 بتدخل التصنيف.",alRkFallen:"الساقطين مالهمش مكان في تصنيف الملايكة.",oAngelRk:"تصنيف الملايكة"});
+Object.assign(STR.en,{alH:"Light and darkness",alLine:"Alignment: {v} · {r}",alNone:"Neutral",alNoneD:"Neutral (leaning dark)",alFallenTag:"Fallen Angel",
+ alNextL:"Next rank ({r}) at +{n}",alNextD:"Next rank ({r}) at -{n}",alBonL:"+{p}% damage to the darkness (demons, Yatan, vampires, the fallen) and -{q}% damage from it",alBonD:"+{p}% damage to angels, and the light of Asgard burns you",
+ alL1:"Novice of Light",alL2:"Angel",alL3:"Guardian Angel",alL4:"Principality",alL5:"Power",alL6:"Dominion",alL7:"Archangel Candidate",
+ alD1:"Heretic",alD2:"Black Disciple",alD3:"Demon-sworn",alD4:"Herald of the Demon Lord",alD5:"Great Demon Candidate",
+ alF1:"Fallen Angel",alF2:"Fallen Power",alF3:"Fallen Dominion",alF4:"Fallen Archangel",alF5:"Great Demon (Fallen)",
+ alUpL:"A new angel's rank: {r}",alUpD:"The darkness takes you: {r}",alCast:"You have been cast out of Asgard. You are a Fallen Angel now.",alGreat:"Like Sariel, you have become a Great Demon.",alRedeem:"Rebecca has taken you back. You are no longer fallen.",
+ pwDP:"Divine Power",pwBM:"Black Magic Power",pwDPD:"Divine Power {n}/100: +0.2% damage to the darkness for each point. Kills fill it; it fades out of a fight.",pwBMD:"Black Magic Power {n}/100: +0.2% skill damage for each point. Kills and spells fill it; it fades out of a fight.",
+ alRkT:"Angel Rankings",alRkH:"Angel Rankings (rank · alignment)",alRkNone:"No one is ranked yet.",alRkMe:"You: {v} ({r}). From +100 you are ranked.",alRkFallen:"The fallen have no place in the Angel Rankings.",oAngelRk:"Angel Rankings"});
 /* ---- Pagma's sword dances as in the novel (owner: "1:1 with the novel"; audit legends/legend-audit.md §1). One scale for
    all of them: the novel's damage x0.4 and its cooldowns /20. Link is a flurry on one target, Kill one blow that bleeds and
    brings despair for half your stamina, Wave rings out around you and slows, its waves homing on those further off,
@@ -14245,7 +14329,7 @@ function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>per
   else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);balPvp(true);const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
    if(v&&warOf(v)){gwrKill(v.gd);return;} // a guild war (SAT-ONLINE-086): it counts for the guild, no karma lost
    if(v&&v.ol){S.karma=Math.min(KARMA_MAX,karma()+1);netForce=true;save(true);toast(t('kaJust',{n,k:S.karma}),'good');SFX.quest&&SFX.quest();return;} // an outlaw: justice
-   S.karma=Math.max(KARMA_MIN,karma()-1);S.karT=0;const ms=Math.round(Satisfy.pvp.C.OUTLAW_MS*(1+Math.max(0,-S.karma-1)*.5));
+   S.karma=Math.max(KARMA_MIN,karma()-1);S.karT=0;alAdd(-100,'pk');const ms=Math.round(Satisfy.pvp.C.OUTLAW_MS*(1+Math.max(0,-S.karma-1)*.5));
    S.olT=Math.max(S.olT||0,Date.now()+ms);netForce=true;save(true);toast(t(S.karma<=MURDER?'kaMurder':'pvpKill',{n,m:Math.round(ms/60000),k:S.karma}),'warn');SFX.slam&&SFX.slam();}});}
 /* bounties (SAT-ONLINE-051; Claude-B #13 item 23, U038): a price on an outlaw's head. From the card of a player with a
    red name, Bounty puts gold on it (bounties/{bid}; the gold leaves your bag, and comes back when you take the bounty
@@ -15933,7 +16017,7 @@ function netStop(){mobStop();if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(
 // rankings (055), this and last month's arena rating (053), the weekly lockouts (059), the group finder entry (073). A held legend is freed too.
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
  const nc=Satisfy.natcomp?Satisfy.natcomp.now(wNow()):null,ni=nc?+nc.id.slice(1):-1; /* the National Competition's last two (SAT-ONLINE-069) */
- return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'arenaCard/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
+ return ['presence/'+Satisfy.net.WORLD_ID+'/main/'+uid,'ranks/lv/'+uid,'ranks/gold/'+uid,'ranks/angel/'+uid,'arenaCard/'+uid,'arena/'+se(y,m)+'/'+uid,'arena/'+(m?se(y,m-1):se(y-1,11))+'/'+uid,'lockouts/'+uid,'lfg/'+uid,'friends/'+uid,'friendReq/'+uid].concat(ni>=0?['nat/n'+ni+'/'+uid,'nat/n'+(ni-1)+'/'+uid]:[]);}
 /* owner 2026-10-21: no "Download my online data" and no manual Upload/Download of characters: a character moves only by
    the automatic sync (cloudAuto while playing, cloudPull on sign-in), so no copy of it can be made by hand. */
 // deleting the account (owner 2026-10-24, a player: "delete doesn't work, I'm still online with my ID"): the character on this
