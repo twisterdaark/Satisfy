@@ -21,9 +21,9 @@ test('drag a ring from the bag to the bar with the mouse; a window moves from it
     const a = await center(g, `#igrid [data-inv="${at}"]`), b = await center(g, '#skillbar [data-sk="5"]');
     await g.page.mouse.move(a.x, a.y); await g.page.mouse.down(); await g.page.mouse.move(a.x + 30, a.y + 10, { steps: 4 });
     const img = await g.eval(() => { const i = document.querySelector('.gdrag-img'); const r = i && i.getBoundingClientRect(); return i ? { w: r.width, h: r.height } : null; });
-    // the slot's own size (offsetWidth), since the hovered slot grows 8% and the picture takes the size it had when the drag began
+    // the slot's own size (offsetWidth): the hovered slot grows 8% over a moment, and the picture takes the size it had when the drag began
     const cell = await g.eval((at) => { const e = document.querySelector(`#igrid [data-inv="${at}"]`); return { w: e.offsetWidth, h: e.offsetHeight }; }, at);
-    const near = (a, b) => Math.abs(a - b) < 2 || Math.abs(a - b * 1.08) < 2;
+    const near = (a, b) => a >= b - 2 && a <= b * 1.08 + 2; // anywhere along the hover's growth
     assert.ok(img && near(img.w, cell.w) && near(img.h, cell.h), 'the drag picture is the slot: ' + JSON.stringify([img, cell]));
     await g.page.mouse.move(b.x, b.y, { steps: 8 }); await g.page.mouse.up(); await g.step(3);
     const r = await g.eval(() => ({ dlg: !document.getElementById('dialog').hidden, bar: window.__G.S.bar && window.__G.S.bar[5], still: window.__G.S.items.some((i) => i.uid === window.__uid) }));

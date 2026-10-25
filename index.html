@@ -4698,7 +4698,7 @@ Object.assign(STR.ar,{fullB:'ملء الشاشة',fullNo:'المتصفح رفض 
 Object.assign(STR.en,{fullB:'Full screen',fullNo:'The browser refused full screen: in Chrome\'s menu (⋮) pick "Add to Home screen" and open the game from its icon'});
 /* ---------------- bag tabs, quest filters, photo mode (owner 2026-10-21: plan U255, U208, U303) ---------------- */
 let BTAB='all',QFLT='all',PHOTO=false;
-const bagCat=s=>s.it?'gear':s.k==='sgl'||['bread','hpot','mpot','arrows'].includes(s.k)||DISH[s.k]||RSUSE.includes(s.k)||TKB[s.k]?'use':'mat';
+const bagCat=s=>s.it?'gear':s.k==='sgl'||['bread','hpot','mpot','arrows'].includes(s.k)||DISH[s.k]||RSUSE.includes(s.k)||TKB[s.k]||s.k==='pstove'?'use':'mat';
 // owner 2026-10-23 (the bag): filters by slot and rarity, a sort, a favourite star and a lock (a locked piece can't be sold,
 // destroyed, dropped or salvaged by mistake), and each piece compared with what you wear in its slot
 const IVS={slot:'all',r:'all',sort:'bag'},IVSL=['w','a','h','g','b','k','n','r','e','u'];
@@ -5900,6 +5900,73 @@ Object.assign(STR.en,{mackerel:'Mackerel',catfish:'Swamp Catfish',ecarp:'Eastern
  tkOn:'{it} on your hook: one per cast',tkOff:'No bait on your hook',tkOut:'You have no {it} left',tkLast:'That was your last {it}: your hook is bare now',tkUseT:'Click: put it on your hook (one per cast)',tkOnT:'On your hook (click to take it off)',
  tkRare:'A rare fish: {it}!',tkRodL:'Fishing rod',tkBaitL:'Bait',tkNone:'none',tkCastB:'You cast the line with {it}... wait for a bite.'});
 window.__GTK={Z:TKZ,C:TKC,RA:TKRA,R:TKR,B:TKB,reg:(x,y)=>tkReg(x,y),pick:(F,R)=>tkPick(F,R),n:()=>tkN(),take:n=>tkTake(n),bait:k=>tkBait(k),opts:()=>tkOpts(),buy:i=>tkBuyRod(i),tip:k=>tkTip(k),bite:(r,lv,b)=>tkBite(r,lv,b),W:FSW,can:k=>canMake(COOK[k]),make:k=>makeLife(k),qc:id=>qCount(id),qdone:id=>completeQ(id),cast:()=>tkCast()}; // tests
+/* ---------------- the crafts' tools (v3.04; the player Suki through the owner 2026-10-25: "make smith's be able to buy hammers,
+   each one helps you smith better, same principal with spatulas for cooking. You can now buy a new item "portable stove" from
+   any town inn. Allows you to place down a stove and cook wherever you may be (Except dungeons or important quest areas)") ----------------
+   Khan sells forge hammers to whoever has had his lessons (CKH, S.smh): the anvil's good and perfect parts wider. Every inn
+   sells spatulas (CKS, S.spt: the pot's golden part wider, the pot slower to heat) and the portable stove (pstove, one in the
+   bag): click it to set it down where you stand, and it cooks and brews like a campfire until you pick it up or walk away.
+   Never under the map (the dungeons, mines, kingdoms, cities and rooms), near a living boss, or in the story's places (CKNO);
+   it is yours alone (no one else sees it) and it doesn't warm you on the Chaos Mountains as a campfire does. */
+const CKH=[{f:1},{g:800,sl:1,f:1.1},{g:6000,sl:4,f:1.2},{g:30000,sl:7,f:1.3}],
+ CKS=[{w:1,d:1},{g:200,cl:1,w:1.1,d:1.05},{g:2000,cl:4,w:1.2,d:1.1},{g:12000,cl:7,w:1.3,d:1.15}],CKSTOVE=1500,
+ CKNO=new Set(['zSwordG','zGHold']);
+let CKST=null;   // the stove you set down: {x,y}
+const ckHam=()=>CKH[S&&S.smh|0]||CKH[0],ckSpt=()=>CKS[S&&S.spt|0]||CKS[0];
+const ckPct=x=>Math.round((x-1)*100);
+const ckHamD=i=>i?t('ckHamD',{n:ckPct(CKH[i].f)}):t('ckHam0D');
+const ckSptD=i=>i?t('ckSptD',{w:ckPct(CKS[i].w),d:ckPct(CKS[i].d)}):t('ckSpt0D');
+// Khan: the hammers above yours
+function ckHamOpts(who){if(!(qDone('kh1')||isSm()))return [];const cur=S.smh|0,o=[];
+ for(let i=cur+1;i<CKH.length;i++){const H=CKH[i],g=price(who,H.g),lo=(S.smith|0)<H.sl;o.push({l:t('oCkHam',{it:t('ckHam'+i),g:g.toLocaleString('en')}),ic:'ckham'+i,st:ckHamD(i)+(H.sl>1?' · '+t('ckNeedSm',{n:H.sl}):''),poor:lo||S.gold<g,f:()=>ckBuy(who,'smh',i)});}
+ return o;}
+// an inn: one line for its cooking tools, opening the spatulas above yours and a stove if you have none
+const ckInnOpt=who=>ckInnOpts(who).length?[{l:t('oCkTools'),ic:'ckspt'+Math.min(3,(S.spt|0)+1),st:t('oCkToolsSt'),f:()=>ckInnMenu(who)}]:[];
+function ckInnMenu(who){const o=ckInnOpts(who);if(!o.length)return shopD(who,'ckBuyL');dialog(who,['ckToolsHi'],null,[...o,{l:t('oBack'),f:()=>shopD(who,NPCT[who].idle?NPCT[who].idle():'oLeave')},{l:t('oLeave')}]);}
+function ckInnOpts(who){const cur=S.spt|0,o=[],cl=lifeLv('cook');
+ for(let i=cur+1;i<CKS.length;i++){const K=CKS[i],g=price(who,K.g),lo=cl<K.cl;o.push({l:t('oCkSpt',{it:t('ckSpt'+i),g:g.toLocaleString('en')}),ic:'ckspt'+i,st:ckSptD(i)+(K.cl>1?' · '+t('ckNeedCk',{n:K.cl}):''),poor:lo||S.gold<g,f:()=>ckBuy(who,'spt',i)});}
+ if(!ckHasStove()){const g=price(who,CKSTOVE);o.push({l:t('oCkStove',{it:t('pstove'),g:g.toLocaleString('en')}),ic:'pstove',st:t('pstoveD'),poor:S.gold<g,f:()=>ckBuy(who,'stove')});}
+ return o;}
+const ckHasStove=()=>(S.mats.pstove||0)>0||stashArr().some(o=>o.k==='pstove'&&o.n>0);   // one stove: in the bag or the stash
+const ckBack=who=>/^inn/.test(who)?ckInnMenu(who):shopD(who,'ckBuyL');
+function ckBuy(who,kind,i){const T=kind==='smh'?CKH[i]:kind==='spt'?CKS[i]:null,g=price(who,T?T.g:CKSTOVE);
+ if(kind==='stove'?ckHasStove():(S[kind]|0)>=i)return ckBack(who);
+ if(kind==='smh'&&(S.smith|0)<T.sl){SFX.deny();return dialog(who,[t('ckLowSm',{n:T.sl,it:t('ckHam'+i)})]);}
+ if(kind==='spt'&&lifeLv('cook')<T.cl){SFX.deny();return dialog(who,[t('ckLowCk',{n:T.cl,it:t('ckSpt'+i)})]);}
+ if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}
+ S.gold-=g;SFX.coin();num(P.x,P.y-26,'-'+g+'G','#f2c14e',false);hudDirty=true;
+ if(kind==='stove'){S.mats.pstove=1;toast(t('ckStGot'),'good');}else{S[kind]=i;toast(t('ckGot',{it:t((kind==='smh'?'ckHam':'ckSpt')+i)}),'good');}
+ save(true);ckBack(who);}
+// where a stove may go: on open ground, above the map, 15 tiles from a living boss, outside the story's places
+function ckWhy(x,y){if(y>=WMH*TS||x<0)return 'ckNoHere';if(CKNO.has(zoneAt(x,y)))return 'ckNoHere';const tx=x/TS|0,ty=y/TS|0;if(at(tx,ty)===WA||solidT(tx,ty))return 'ckNoTile';
+ if(mons.some(m=>!m.dead&&m.hp>0&&MT[m.type]&&MT[m.type].boss&&Math.hypot(m.x-x,m.y-y)<240))return 'ckNoBoss';return null;}
+// cooking at the stove: not with a monster that fights back within 12 tiles (cooking stops the world, so it would be a pause)
+const ckFoe=()=>mons.some(m=>!m.dead&&m.hp>0&&MT[m.type]&&(MT[m.type].aggro>0||MT[m.type].boss)&&Math.hypot(m.x-P.x,m.y-P.y)<192);
+function ckCook(){if(ckFoe()){SFX.deny();toast(t('ckFoe'),'warn');return;}campMenu(1);}
+// the bag's stove: set it down here, or pick it up
+function ckStove(){if(!(S.mats.pstove>0))return;if(CKST){CKST=null;toast(t('ckUp'));SFX.click();return;}
+ const y=P.y+6,why=ckWhy(P.x,y);if(why){SFX.deny();toast(t(why),'warn');return;}CKST={x:Math.round(P.x),y:Math.round(y)};toast(t('ckDown',{k:keyName(actKey('use'))}),'good');SFX.place?SFX.place():SFX.click();}
+// it comes back to the bag when you walk off (25 tiles), go under the map, die or sell it
+function ckTick(){if(!CKST)return;if(!S||!(S.mats.pstove>0)||!P||P.hp<=0||P.y>=WMH*TS||Math.hypot(P.x-CKST.x,P.y-CKST.y)>400){const far=S&&S.mats.pstove>0&&P&&P.hp>0;CKST=null;if(far)toast(t('ckAway'));}}
+function ckEnts(ents){if(CKST&&CKST.x>camX-30&&CKST.x<camX+VW+30&&CKST.y>camY-30&&CKST.y<camY+VH+40)ents.push({y:CKST.y-2,f:()=>ckDraw(CKST)});}
+// a small iron stove: its legs, its door glowing, a pot on top and a flame that flickers
+function ckDraw(c){const x=Math.round(c.x),y=Math.round(c.y),f=gTime*12;ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(x-7,y,14,2);
+ R(ctx,x-6,y-9,12,8,'#3a3a44');R(ctx,x-6,y-9,12,1,'#5a5a66');R(ctx,x-5,y-1,2,2,'#2a2a30');R(ctx,x+3,y-1,2,2,'#2a2a30');
+ R(ctx,x-3,y-7,6,4,'#1a1a20');R(ctx,x-2,y-6,4,2,Math.sin(f)>0?'#ff9a3a':'#ffc85a');
+ R(ctx,x-4,y-13,8,4,'#8a8a96');R(ctx,x-5,y-13,10,1,'#aaaab6');R(ctx,x-1,y-15-(Math.sin(f*.7)>0?1:0),2,2,'rgba(230,230,240,.55)');}
+Object.assign(STR.ar,{ckHam0:'شاكوش السندان',ckHam1:'شاكوش حدادة حديد',ckHam2:'شاكوش حدادة صلب',ckHam3:'شاكوش حدادة ميثريل',ckHam0D:'الشاكوش اللي على كل سندان.',ckHamD:'الحتة الكويسة والمثالية على السندان أوسع {n}%',
+ ckSpt0:'المعلقة القديمة',ckSpt1:'سباتيولا خشب',ckSpt2:'سباتيولا نحاس',ckSpt3:'سباتيولا ميثريل',ckSpt0D:'المعلقة اللي معاك من الأول.',ckSptD:'الجزء الدهبي في الحلة أوسع {w}% · والحلة بتسخن أبطأ {d}%',
+ pstove:'بوتاجاز سفري',pstoveD:'حطه في أي حتة برّه واطبخ عليه، إلا في الدانجن وجوه البيوت وأماكن القصة. دوس عليه في الشنطة عشان تحطه أو تشيله.',hStove:'E: البوتاجاز (طبخ وتحضير جرعات)',
+ ckDown:'حطيت البوتاجاز: اطبخ عليه بـ{k}',ckUp:'شلت البوتاجاز',ckAway:'بعدت عن البوتاجاز، فرجع الشنطة',ckNoHere:'مش هنا: مفيش بوتاجاز في الدانجن ولا جوه البيوت ولا في أماكن القصة',ckNoTile:'دوّر على أرض فاضية تحطه عليها',ckNoBoss:'مش والزعيم قريب كده',
+ oCkHam:'اشتري {it} ({g} دهب)',oCkSpt:'اشتري {it} ({g} دهب)',oCkStove:'اشتري {it} ({g} دهب)',ckNeedSm:'محتاج لفل حدادة {n}',ckNeedCk:'محتاجة لفل طبخ {n}',ckLowSm:'لسه بدري عليك: {it} محتاج لفل حدادة {n}.',ckLowCk:'لسه بدري عليك: {it} محتاجة لفل طبخ {n}.',
+ ckGot:'بقيت بتشتغل بـ{it}',ckStGot:'البوتاجاز السفري في الشنطة',ckBuyL:'اتفضل.',oCkTools:'🍳 أدوات الطبخ',oCkToolsSt:'سباتيولات وبوتاجاز سفري',ckToolsHi:'عندنا سباتيولات للطبخ، وبوتاجاز سفري تاخده معاك.',ckHi:'البوتاجاز سخن. تحب تطبخ إيه؟',ckFoe:'مش وقته: فيه وحش قريب',ckHamL:'شاكوش الحدادة',ckSptL:'السباتيولا',ckOnT:'متحط على الأرض (دوس عشان تشيله)',ckUseT:'دوس: حطه هنا'});
+Object.assign(STR.en,{ckHam0:"The anvil's hammer",ckHam1:'Iron Forge Hammer',ckHam2:'Steel Forge Hammer',ckHam3:'Mithril Forge Hammer',ckHam0D:'The hammer at every anvil.',ckHamD:"the anvil's good and perfect parts +{n}%",
+ ckSpt0:'Your old spoon',ckSpt1:'Wooden Spatula',ckSpt2:'Copper Spatula',ckSpt3:'Mithril Spatula',ckSpt0D:'The spoon you started with.',ckSptD:"the pot's golden part +{w}% · the pot heats {d}% slower",
+ pstove:'Portable Stove',pstoveD:"Set it down outdoors and cook wherever you are, except in dungeons, indoors and the story's places. Click it in the bag to set it down or pick it up.",hStove:'E: Your stove (cook and brew)',
+ ckDown:'Your stove is down: cook at it with {k}',ckUp:'You picked up your stove',ckAway:'You walked away: your stove is back in your bag',ckNoHere:"Not here: no stove in dungeons, indoors or in the story's places",ckNoTile:'Find open ground for it',ckNoBoss:'Not with a boss this close',
+ oCkHam:'Buy the {it} ({g} gold)',oCkSpt:'Buy the {it} ({g} gold)',oCkStove:'Buy a {it} ({g} gold)',ckNeedSm:'needs Smithing {n}',ckNeedCk:'needs Cooking {n}',ckLowSm:'Not yet: the {it} needs Smithing {n}.',ckLowCk:'Not yet: the {it} needs Cooking {n}.',
+ ckGot:'You now work with the {it}',ckStGot:'A portable stove, in your bag',ckBuyL:'Here you go.',oCkTools:'🍳 Cooking tools',oCkToolsSt:'Spatulas and a portable stove',ckToolsHi:'We have spatulas for cooking, and a portable stove to take with you.',ckHi:"The stove is hot. What will you cook?",ckFoe:'Not now: there is a monster close by',ckHamL:'Forge hammer',ckSptL:'Spatula',ckOnT:'Set down (click to pick it up)',ckUseT:'Click: set it down here'});
+window.__GCK={aggr:k=>!!(MT[k]&&MT[k].aggro>0),innOpt:w=>ckInnOpt(w),foe:()=>ckFoe(),hasStove:()=>ckHasStove(),trOk:k=>trMatOk(k),H:CKH,S:CKS,get ST(){return CKST},set ST(v){CKST=v;},ham:w=>ckHamOpts(w||'khan'),inn:w=>ckInnOpts(w||'innP'),buy:(w,k,i)=>ckBuy(w,k,i),stove:()=>ckStove(),why:(x,y)=>ckWhy(x,y),tick:()=>ckTick(),zone:()=>{const m=MG;MG=m||{heat:100};const z=zoneW();MG=m;return z;},cook:k=>{const G0=COOKG,m0=mode;cookStart(k||'cfish');const r={w:COOKG.w,dur:COOKG.dur};COOKG=G0;mode=m0;return r;}}; // tests
 function pickHerb(n){if(n.dep>0){toast(t('hPicked'));SFX.deny();return;}if(!labor(4))return;const lv=lifeLv('herb');addMat(n.kind,1+(rand()<lv*.06?1:0));if(rand()<.04+lv*.004)addMat('vherb',1);lifeXP('herb',n.kind==='bherb'?8:4);n.dep=n.kind==='bherb'?120:70;SFX.chop();for(let i=0;i<8;i++)fx.push({x:n.x,y:n.y-4,vx:(rand()-.5)*50,vy:-rand()*50,t:.4,c:n.kind==='bherb'?'#7ab8ff':'#5aa83a'});hudDirty=true;}
 // cooking and brewing at a campfire; a better cook burns less
 const COOK={cfish:{need:{fish:1},alt:'sfish',xp:6},stew:{need:{fish:2,herb:2},xp:12},feast:{need:{gfish:1,herb:1,bherb:1},xp:25},ppie:{need:{pumpk:1,wheat:2},xp:20},sjam:{need:{straw:2,wheat:1},xp:16}},BREW={hpot:{need:{herb:3},xp:6},mpot:{need:{bherb:2,herb:1},xp:8}};
@@ -5913,8 +5980,8 @@ function makeLife(k,brew){const r=(brew?BREW:COOK)[k];if(!canMake(r)){SFX.deny()
    click while the bar is in the golden part. A better cook gets a wider golden part; harder dishes heat faster. Right in the
    middle is perfect: one more dish and double life EXP. Too early or too late: the ingredients are lost, a little EXP. */
 let COOKG=null;
-function cookStart(k,brew){if(brew)return mixStart(k);const sk=brew?'alch':'cook',r=(brew?BREW:COOK)[k],w=Math.min(S.sec==='chef'?.45:.34,(.16+lifeLv(sk)*.012)*(S.sec==='chef'?1.4:1));
- COOKG={k,brew,sk,r,p:0,dur:{cfish:1.7,stew:1.4,feast:1.05,hpot:1.6,mpot:1.3}[k]||1.5,c:.62,w,t:performance.now(),end:0};mode='cook';SFX.click();}
+function cookStart(k,brew){if(brew)return mixStart(k);const sk=brew?'alch':'cook',r=(brew?BREW:COOK)[k],Sp=ckSpt(),w=Math.min((S.sec==='chef'?.45:.34)*Sp.w,(.16+lifeLv(sk)*.012)*(S.sec==='chef'?1.4:1)*Sp.w);   // v3.04: the spatula
+ COOKG={k,brew,sk,r,p:0,dur:({cfish:1.7,stew:1.4,feast:1.05,hpot:1.6,mpot:1.3}[k]||1.5)*Sp.d,c:.62,w,t:performance.now(),end:0};mode='cook';SFX.click();}
 function cookHit(){const G=COOKG;if(!G||G.end)return;const d=Math.abs(G.p-G.c),ok=d<=G.w/2,perfect=d<=G.w*.12;G.end=performance.now();G.res=perfect?2:ok?1:0;
  const {k,brew,sk,r}=G;
  if(ok){const n=perfect?(S.sec==='chef'?3:2):1;if(brew&&!DISH[k])S[k]=(S[k]||0)+n;else S.mats[k]=(S.mats[k]||0)+n;lifeXP(sk,r.xp*(perfect?2:1));toast(perfect?t('cookPerfect',{it:t(k)}):t(brew?'brewOk':'cookOk',{it:t(k)}),'good');perfect?SFX.legendary():SFX.quest();}
@@ -6059,7 +6126,8 @@ function drawCook(){const G=COOKG;if(!G)return;const now=performance.now();if(!G
  if(!G.end&&rand()<.4)fx.push({x:P.x+(rand()-.5)*10,y:P.y-14,vx:(rand()-.5)*8,vy:-14-rand()*10,t:.5,c:G.p>g1?'#5a5a5a':'#e8e8e8',fl:1});}
 Object.assign(STR.ar,{cookHow:'اضغط لما يبقى دهبي',brewHow:'اضغط لما يبقى دهبي',cookPerf:'مظبوط بالظبط!',cookGood:'تمام',cookBad:'باظت',cookPerfect:'طبخة مظبوطة: اتنين {it}!',cookRaw:'لسه نيّة... راحت عليك',brewRaw:'الجرعة لسه ماغلتش... باظت'});
 Object.assign(STR.en,{cookHow:'Press E when it turns golden',brewHow:'Press E when it turns golden',cookPerf:'Perfect!',cookGood:'Good',cookBad:'Ruined',cookPerfect:'Perfect cooking: two {it}!',cookRaw:'Still raw... it fell apart',brewRaw:"It never came to a boil... ruined"});
-function campMenu(){dialog('camp',['campHi'],null,[...Object.keys(COOK).map(k=>rbGate(k)?rbLock(k,campMenu):({l:t('oCook',{it:t(k),n:needTxt(COOK[k])}),ic:k,poor:!canMake(COOK[k]),st:t(k+'D'),f:()=>makeLife(k,false)})),
+let CKAT=0;   // v3.04: the menu is the stove's (its name and line), kept across the dishes cooked at it
+function campMenu(st){if(st!==undefined)CKAT=st?1:0;if(CKAT&&!CKST)CKAT=0;dialog(CKAT?'pstove':'camp',[CKAT?'ckHi':'campHi'],null,[...Object.keys(COOK).map(k=>rbGate(k)?rbLock(k,campMenu):({l:t('oCook',{it:t(k),n:needTxt(COOK[k])}),ic:k,poor:!canMake(COOK[k]),st:t(k+'D'),f:()=>makeLife(k,false)})),
  ...Object.keys(BREW).map(k=>rbGate(k)?rbLock(k,campMenu):({l:t('oBrew',{it:t(k),n:needTxt(BREW[k])}),ic:k,poor:!canMake(BREW[k]),f:()=>makeLife(k,true)})),{l:t('oLeave')}]);}
 function eatDish(k){const d=DISH[k];if(!(S.mats[k]>0))return;S.mats[k]--;if(!d.pot)vowBreak('fast');P.food=Math.min(100,P.food+d.food);if(d.hp)P.hp=Math.min(maxHP(),P.hp+maxHP()*d.hp);if(d.buf)P.buf={k:d.buf,t:d.bt};vfx('heal',P.x,P.y);toast(t('ateD',{it:t(k)}),'good');SFX.eat();hudDirty=true;}
 function updateLife(dt){if(!P)return;if(P.buf){P.buf.t-=dt;if(P.buf.k==='regen'&&P.hp>0&&!P.ghost&&!hellDeb())P.hp=Math.min(maxHP(),P.hp+maxHP()*.015*dt);if(P.buf.t<=0){P.buf=null;toast(t('bufEnd'));}}
@@ -7089,7 +7157,7 @@ Object.assign(STR.en,{legNoDie:"A legend doesn't die easily. The life force is f
 // every legend resists status conditions (novel ch 182, 297, 778): stuns, paralysis and chills do not take
 function legResist(){if(!isLeg()&&!saImm()&&!mdCand())return false;if(gTime>(P.resT||0)){P.resT=gTime+1.5;num(P.x,P.y-30,t('legResist'),'#ffe08a',false);}return true;}
 Object.assign(STR.ar,{legResist:'[قاومت.]'});Object.assign(STR.en,{legResist:'[You have resisted.]'});
-function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;mdDie();if(BHR)bhDied();if(WCLOSE[mode])WCLOSE[mode]();['inv','statusW','equipW','eqPick','logW','mapW','qdW','mbW','guildW','auW','ixW','updLog','creW','cfmW','forge','pauseScreen','settingsScreen','soundScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});CRE=null;{const gb=$('gnBox');if(gb)gb.remove();}mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
+function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;CKST=null;mdDie();if(BHR)bhDied();if(WCLOSE[mode])WCLOSE[mode]();['inv','statusW','equipW','eqPick','logW','mapW','qdW','mbW','guildW','auW','ixW','updLog','creW','cfmW','forge','pauseScreen','settingsScreen','soundScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});CRE=null;{const gb=$('gnBox');if(gb)gb.remove();}mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
 // owner 2026-10-22: 1 to 172 took an hour, then 50 hours to 100 was far too long: now about 10 hours of own-level hunting to 100 and 14 to 200, before quests and bonuses (no per-kill cap)
 // owner 2026-10-23 ("I kill a Lv 340 at 339 and take 20% of a level; make it slower"): past level 100 each level asks 2% more
 // for every level above 100, and each advancement passed (101, 201...) another 15%. A foe of your level now gives about 2-3%
@@ -7215,8 +7283,9 @@ function nearest0(){let best=null,bd=26;const px=P.x,py=P.y,c=(k,o,x,y,h)=>{cons
  for(const T of TERR)c('banner',T,T.x,T.y-4,'hBanner');
  for(const o of SHRINES)if(epVis(o))c('shrine',o,o.x,o.y,o.hint);
  if(COMPO)c('npc',COMPO,COMPO.x,COMPO.y,NH);const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache'&&best.k!=='swgs')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
+ if(!best&&CKST)c('stove',CKST,CKST.x,CKST.y,'hStove');   // v3.04: your portable stove, when nothing else is in reach
  if(!best||best.k==='tree'){const w=nearWater();if(w)best={k:'water',o:w,x:w.x,y:w.y,hint:FISH?'hReel':'hFish'};}return best;}
-function interact(){if(FISH){fishAct();return;}const n=nearest(1);if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='swgs')swgTurn(n.o);else if(n.k==='swgc')swgCoffin();else if(n.k==='bdv')bdVein(n.o);else if(n.k==='treasure')thDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
+function interact(){if(FISH){fishAct();return;}const n=nearest(1);if(!n){SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu(0);return;}if(n.k==='stove'){ckCook();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='swgs')swgTurn(n.o);else if(n.k==='swgc')swgCoffin();else if(n.k==='bdv')bdVein(n.o);else if(n.k==='treasure')thDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
 let roomFade=false;
 function enterRoom(Rm){if(roomFade)return;if(P.ride)dismount();roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=(Rm.rx+6)*TS+8;P.y=(Rm.ry+6)*TS+10;P.dir=1;camSnap=true;hudDirty=true;});}
 // "get unstuck" in the Esc menu: walks you out of a house, or takes you back to the nearest town square (once a minute)
@@ -7634,7 +7703,7 @@ const NPCT={
  jessica:{hi:'twHi_jessica',idle:()=>'twId_jessica',opts:()=>twOpts('jessica'),noGift:1},
  sticks:{hi:'bhSt0',idle:()=>'bhStHi',opts:()=>sticksOpts(),noGift:1},
  stickp:{hi:'stp_hi',idle:()=>'stp_idle',noGift:1,opts:()=>stEcGift()},flenit:{hi:'flen_hi',idle:()=>'flen_idle',noGift:1},eliz:{hi:'ez_hi',idle:()=>['ez_i1','ez_i2','ez_i3'][Math.floor(rand()*3)],opts:()=>ezOpts(),noGift:1},vcenv:{hi:'vce_hi',idle:()=>'vce_idle',opts:()=>p3EnvOpts(),noGift:1},vprince:{hi:'vpr_hi',idle:()=>isNight()?'vpr_idleN':'vpr_idle',opts:()=>vprOpts(),noGift:1},mercedes:{hi:'merc_hi',idle:()=>'merc_idle',opts:()=>mercOpts(),noGift:1},kyle:{hi:'kyle_hi',idle:()=>'kyle_idle',opts:()=>kyleOpts(),noGift:1},hbm:{hi:'hb_hi',idle:()=>'hb_idle',opts:()=>p4HarborOpts(0),noGift:1},hbm2:{hi:'hb2_hi',idle:()=>'hb_idle',opts:()=>p4HarborOpts(1),noGift:1},laden:{hi:'lad_hi',idle:()=>evOn('renW')?'lad_war':'lad_idle',noGift:1},lauel:{hi:'lau_hi',idle:()=>evOn('renW')?'lau_war':'lau_idle',noGift:1},piaroR:{hi:'pir_hi',idle:()=>'pir_idle',noGift:1},mfher:{hi:'mf_hi',idle:()=>'mf_idle',noGift:1},minst:{hi:'mi_hi',idle:()=>'mi_idle',opts:()=>[...secOpt('minst'),...(S.sec==='bard'?[{l:t('oSongs'),f:()=>dialog('minst',['mi_songs'])}]:[])],noGift:1},
- khan:{hi:'kh_hi',idle:()=>isSm()?(rand()<.5?'kh_s1':'kh_s2'):S.ev.grid&&rand()<.5?'kh_grid':'kh_idle',opts:()=>[...secOpt('khan'),...(isSm()?[{l:t('oBuyOre'),qty:1,f:()=>buyMat('khan','ore',8)}]:[]),...svcOpts('khan')]},
+ khan:{hi:'kh_hi',idle:()=>isSm()?(rand()<.5?'kh_s1':'kh_s2'):S.ev.grid&&rand()<.5?'kh_grid':'kh_idle',opts:()=>[...secOpt('khan'),...(isSm()?[{l:t('oBuyOre'),qty:1,f:()=>buyMat('khan','ore',8)}]:[]),...ckHamOpts('khan'),...svcOpts('khan')]},   // v3.04: the forge hammers
  smith:{hi:'sm_hi',idle:()=>isSm()?'sm_s1':'sm_idle',opts:()=>[...secOpt('smith'),...(isSm()?[{l:t('oBuyOre'),qty:1,f:()=>buyMat('smith','ore',8)}]:[]),...svcOpts('smith')]},
  tw:{low:()=>trLine('tw'),idle:()=>trLine('tw')},
  cassus:{hi:'cas_hi',idle:()=>'cas_idle',opts:()=>casOpts()},
@@ -7846,7 +7915,7 @@ function talkNPC(id){if(id==='board')return openBoard();if(id==='auction'&&!npcK
 const qLn=(q,s)=>QD[q]&&QD[q].gen?t('genQ'+s,{q:qName(q),p:qObjText(q)}):q+s;
 function offerQ(id,av){const n=NPCT[id]||{},lines=[];if(n.hi&&!S.met[id])lines.push(n.hi);S.met[id]=1;lines.push((QD[av].gr?epLines(av)+'\n':'')+t(av+'_o')+'\n'+t('rwLine',{r:qRewards(av).join(' · ')}));return dialog(id,lines,null,[{l:t('qAccept'),f:()=>acceptQ(av)},{l:t('qDecline')}]);}
 function buyMat(who,k,g){const n=buyCount(99,g);if(!n){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g*n;S.mats[k]=(S.mats[k]||0)+n;boughtFx(k,n,g*n);shopD(who,isSm()&&who!=='merchant'?'kh_s3':'mHi');}
-const MATP={mackerel:5,catfish:6,ecarp:7,rtrout:25,icepike:35,snapper:30,bogeel:30,jadekoi:45,bworm:1,bshrimp:2,bglow:12,tstone:600,thund:400,ruby:200,topaz:200,emer:200,sapph:200,diam:800,wood:2,ore:3,leather:4,mstone:12,estone:150,pstone:3000,bstone:800,mith:30,dscale:600,brphx:5000,brdrg:5000,brtig:5000,brtor:5000,bljewel:3000,blhorn:8000,fess:900,iess:900,sess:1200,bvial:400,wegg:20000,wheat:25,straw:80,melon:160,pumpk:170,fcab:150,compost:30,kink:1500,kpearl:60000,fish:4,sfish:6,gfish:45,herb:3,bherb:7};
+const MATP={mackerel:5,catfish:6,ecarp:7,rtrout:25,icepike:35,snapper:30,bogeel:30,jadekoi:45,bworm:1,bshrimp:2,bglow:12,pstove:300,tstone:600,thund:400,ruby:200,topaz:200,emer:200,sapph:200,diam:800,wood:2,ore:3,leather:4,mstone:12,estone:150,pstone:3000,bstone:800,mith:30,dscale:600,brphx:5000,brdrg:5000,brtig:5000,brtor:5000,bljewel:3000,blhorn:8000,fess:900,iess:900,sess:1200,bvial:400,wegg:20000,wheat:25,straw:80,melon:160,pumpk:170,fcab:150,compost:30,kink:1500,kpearl:60000,fish:4,sfish:6,gfish:45,herb:3,bherb:7};
 function gearCmp(id){const rc=rcById(id),cv=(d,f)=>{d=+d.toFixed(f||0);return d?`<span class="${d>0?'cup':'cdn'}">${d>0?'▲':'▼'}${Math.abs(d)}</span>`:'<span class="ceq">=</span>';};
  if(rc.slot==='w'){const w=weapon(),k=WSH[id].k,as=1/rc.spd;return `${t('atk')} ${rc.atk} ${cv(rc.atk-w.atk)} · ${t('spd')} <bdi>${as.toFixed(1)}${t('perS')}</bdi> ${cv(as-1/w.spd,1)} · ${t('wk_'+k)}<br>${t('vsEq')}: <b class="rt rt${w.r}">${esc(inm(w))}</b> (${t('atk')} ${w.atk})`;}
  const a=eqIt(rc.slot);if(!rc.def)return `${statShort(rc)}<br>${t('vsEq')}: ${a?`<b class="rt rt${a.r}">${esc(inm(a))}</b> (${statShort(a)})`:t('noneEq')}`;const d=a?iDef(a):0;return `${statShort(rc)} ${cv(rc.def-d)}<br>${t('vsEq')}: ${a?`<b class="rt rt${a.r}">${esc(inm(a))}</b> (${t('def')} ${d})`:t('noneEq')}`;}
@@ -8450,7 +8519,7 @@ function lockNext(){MG.lock=true;setTimeout(()=>{if(!MG)return;MG.lock=false;MG.
 function qStart(){if(MG.hold||MG.lock)return;MG.hold=true;noise(1.4,.09,4200,0,.6);}
 function qRelease(){if(MG&&MG.stage===0){MG.hold=false;return;}if(!MG||MG.stage!==2||!MG.hold||MG.lock)return;MG.hold=false;const s=MG.p>=1?.12:scoreAt();MG.sc[2]=s;noise(.7,.28,5200,0,.4);noise(.9,.12,900,.1);for(let i=0;i<14;i++)MG.steam.push({x:56+rand()*20,y:46,vy:-10-rand()*20,vx:(rand()-.5)*14,t:1.2});fbShow(s===1?'perfect':s>.5?'good':'miss',s===1?'':s>.5?'g':'m');if(s===1)SFX.rare();lockNext();}
 function mgScore(){const a=MG.res.length?MG.res.reduce((x,y)=>x+y,0)/MG.res.length:.5;return (MG.sc[0]??.5)*.2+a*.6+(MG.sc[2]??.5)*.2;}
-function zoneW(){const hot=MG.heat<30?.6:1,f=pasOn('focus')?1.25+.02*(skLv('focus')-1):pasOn('scraft')?1.1+.01*(skLv('scraft')-1)+(skLv('scraft')>=10?.05:0):1;return{p:Math.min(.16,.075+.006*(S.smith-1)+stat('dex')*.0004)*hot*f,g:.22*hot*f};}
+function zoneW(){/* v3.04: the forge hammer widens both parts */const hot=MG.heat<30?.6:1,f=(pasOn('focus')?1.25+.02*(skLv('focus')-1):pasOn('scraft')?1.1+.01*(skLv('scraft')-1)+(skLv('scraft')>=10?.05:0):1)*ckHam().f;return{p:Math.min(.22,Math.min(.16,.075+.006*(S.smith-1)+stat('dex')*.0004)*hot*f),g:Math.min(.34,.22*hot*f)};}   // never wider than the bar can draw
 function newZone(){MG.center=.18+rand()*.64;}
 function renderDots(){const d=$('dots');d.innerHTML='';for(let i=0;i<MG.rc.strikes;i++){const r=MG.res[i];const e=document.createElement('i');if(r!==undefined)e.className=r===1?'p':r>.5?'g':'m';d.appendChild(e);}}
 const RCOL=['#d9d9d9','#5aa2ff','#b07bff','#ff9a3d','#ffc21a'];
@@ -8568,6 +8637,7 @@ function setTip(i){const sk=Object.keys(SETS).find(k=>SETS[k].it.includes(setId(
 function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:''}${itLvr(i)?`<small style="color:${lvrOk(itLvr(i))?'#9fb4c8':'#ff8a7a'}">${t('needLvT',{n:itLvr(i)})}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+hidTip(i)+wpTip(i)+setTip(i)+itemSkillTip(i);}
 function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>${t('bread')}</b><br><small>${t('clickEat')}</small>`});['hpot','mpot'].forEach(k=>{if(S[k])a.push({k,n:S[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickDrink',{k:keyName(POT[k].key)})}</small>`});});
  LIFEM.forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${TKF.includes(k)?tkTip(k):t('lifeMD')}</small>`});});
+ if(S.mats.pstove>0)a.push({k:'pstove',n:1,hook:!!CKST,tip:`<b>${t('pstove')}</b><br>${t('pstoveD')}<br><small>${t(CKST?'ckOnT':'ckUseT')}</small>`});   // v3.04
  Object.keys(TKB).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],hook:S.bait===k,tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t(S.bait===k?'tkOnT':'tkUseT')}</small>`});});
  Object.keys(DISH).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickEat')}</small>`});});
  RSUSE.filter(k=>!DISH[k]).forEach(k=>{if(S.mats[k])a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickUse')}</small>`});});
@@ -8583,7 +8653,7 @@ function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>$
  $('igrid').innerHTML=h;$('invGold').textContent=t('gold',{n:S.gold});$('invQ').placeholder=t('bagQ');}
 function qRow(){const r=document.createElement('div');r.className='qrow';r.innerHTML=`<span>${t('bqT')}</span>`+[[1,'×1'],[10,'×10'],[999,t('bqMax')]].map(([n,l])=>`<button data-bq="${n}" class="${TBQ===n?'on':''}">${l}</button>`).join('');
  r.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-bq]');if(!b)return;e.stopPropagation();TBQ=+b.dataset.bq;SFX.click();r.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));},true);return r;}
-function invClick(i,all){if(TOUCH&&INVX&&INVX.who&&TBQ>1)all=true;const s=INVS[i];if(!s)return;if(INVX&&INVX.stash){stashClick(s,all);return;}if(s.k==='sgl'){if(!INVX)sglToggle();return;}if(INVX==='fav'||INVX==='lock'){ivMark(s,INVX);renderInv();return;}if(INVX==='trash'){invTrash(s);return;}if(INVX&&INVX.salv){invSalv(s);return;}if(INVX&&INVX.apr){invApr(s);return;}if(INVX&&INVX.who){invSell(s,all);return;}if(s.k==='bread')eat();else if(DISH[s.k])eatDish(s.k);else if(RSUSE.includes(s.k))rsUse(s.k);else if(TKB[s.k])tkBait(s.k);else if(POT[s.k])drink(s.k);else if(s.it){if(equip(s.it)!==false){SFX.click();toast(t('equipped')+': '+inm(s.it));}hudDirty=true;sbSig='';}renderInv();$('tip').classList.remove('on');}
+function invClick(i,all){if(TOUCH&&INVX&&INVX.who&&TBQ>1)all=true;const s=INVS[i];if(!s)return;if(INVX&&INVX.stash){stashClick(s,all);return;}if(s.k==='sgl'){if(!INVX)sglToggle();return;}if(INVX==='fav'||INVX==='lock'){ivMark(s,INVX);renderInv();return;}if(INVX==='trash'){invTrash(s);return;}if(INVX&&INVX.salv){invSalv(s);return;}if(INVX&&INVX.apr){invApr(s);return;}if(INVX&&INVX.who){invSell(s,all);return;}if(s.k==='bread')eat();else if(DISH[s.k])eatDish(s.k);else if(RSUSE.includes(s.k))rsUse(s.k);else if(TKB[s.k])tkBait(s.k);else if(s.k==='pstove')ckStove();else if(POT[s.k])drink(s.k);else if(s.it){if(equip(s.it)!==false){SFX.click();toast(t('equipped')+': '+inm(s.it));}hudDirty=true;sbSig='';}renderInv();$('tip').classList.remove('on');}
 /* bag actions (owner 2026-10-19): destroy a thing (arm the bin in the bag's title, or drag the thing onto it), drop it on
    the ground by dragging it out of the bag (it lies there for a minute for anyone to pick up, then it is gone), and sell
    anything in the bag to a merchant from a window like the bag instead of one dialog line per material. Each asks first. */
@@ -9138,7 +9208,7 @@ function thingUse(k,el){
  if(XGEAR(k)){const it=xGear(k),PV=P.eqPrev||(P.eqPrev={});
   if(isEq(it)){const sl=unequipIt(it);if(!sl)return;const pv=PV[it.uid]&&S.items.find(i=>i.uid===PV[it.uid]);delete PV[it.uid];if(pv&&!isEq(pv))equip(pv);SFX.click();toast(t('xbOff',{it:inm(it)}));sbSig='';hudDirty=true;renderXbars.sig='';return;}
   const before=['w',...GEAR].map(eqIt).filter(Boolean);if(equip(it)!==false){const gone=before.find(i=>!isEq(i));if(gone)PV[it.uid]=gone.uid;SFX.click();toast(t('equipped')+': '+inm(it));}sbSig='';hudDirty=true;renderXbars.sig='';return;}
- if(k==='hpot'||k==='mpot')drink(k);else if(k==='bread')eat();else if(DISH[k])eatDish(k);else if(k==='sgl')sglToggle();else if(RSUSE.includes(k))rsUse(k);else if(TKB[k])tkBait(k);else{toast(t(k)+' ×'+xCount(k));SFX.click();}hudDirty=true;}
+ if(k==='hpot'||k==='mpot')drink(k);else if(k==='bread')eat();else if(DISH[k])eatDish(k);else if(k==='sgl')sglToggle();else if(RSUSE.includes(k))rsUse(k);else if(TKB[k])tkBait(k);else if(k==='pstove')ckStove();else{toast(t(k)+' ×'+xCount(k));SFX.click();}hudDirty=true;}
 function renderXbars(){const R=xRows(),sig=JSON.stringify(R)+R.flat().map(k=>XGEAR(k)&&xGear(k)&&isEq(xGear(k))?1:0).join('')+JSON.stringify(XLAY)+XKB.join()+XBN+lang+S.lv+(TOUCH?1:0)+S.items.length;for(let b=0;b<XMAX;b++)shd($('xbar'+b),TOUCH||b>=XBN);if(sig===renderXbars.sig)return;renderXbars.sig=sig;
  for(let b=0;b<XMAX;b++){const L=XLAY[b],el=$('xbar'+b);[1,2,3].forEach(o=>el.classList.toggle('xo'+o,L.o===o));el.style.setProperty('--xs',L.s);
  el.innerHTML=R[b].map((k,i)=>xSlot(b,i,k)).join('')+`<span class="xtool"><button data-xrot="${b}" data-tip="${esc(t('xbRot'))}">⟳</button><button data-xrst="${b}"${L.o||L.s!==1?'':' disabled'} data-tip="${esc(t('xbRst'))}">↺</button></span><b class="xrs" data-xrs="${b}" data-tip="${esc(t('xbSize'))}"></b>`;
@@ -9993,7 +10063,7 @@ function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,ti
   const ps=pasSkills(),lg=isLeg();if(ps.length||lg)h+=`<div class="ssec">${t('pasH')}</div>`+(lg?`<div class="tl skd worn"><img class="ski" src="${icon('book')}"><div><b>${t('legNoDieN')}</b><small>${t('legNoDieD',{c:LEG_CD})}</small><em>${S.immT>0?t('legNoDieW',{s:Math.ceil(S.immT)}):t('pasOnT')}</em></div></div>`:'')+ps.map(k=>`<div class="tl skd worn"><img class="ski" src="${skIcon(k)}"><div><b>${t('sk_'+k)}</b><small>${t('skd_'+k)}${skLvTxt(k)}</small><em>${t('pasOnT')}</em></div></div>`).join('');}
  {const mo=Object.keys(MOUNTS).filter(k=>(S.mounts||{})[k]),pe=Object.keys(PETS).filter(k=>(S.pets||{})[k]);if(mo.length||pe.length)h+=`<div class="ssec">${t('rideH')}</div>`+mo.map(k=>`<div class="tl${S.mount===k?' worn':''}"><div><b>${t('mt_'+k)}</b><small>${t('rideSp',{n:Math.round((mtSp(k)-1)*100)})} · ${t('mtLvT',{n:mtLv(k)})}${(([x,nx])=>nx?` <em>(${x}/${nx})</em>`:'')(mtRest(k))}</small></div><button data-mount="${k}" ${S.mount===k?'disabled':''}>${t(S.mount===k?'rideSel':'rideUse')}</button></div>`).join('')+pe.map(k=>{const [x,nx]=petRest(k);return `<div class="tl${S.pet===k?' worn':''}"><div><b>${t('pt_'+k)}${pEvo(k)?' ★ '+t('peEv'):''} · ${t('petLvT',{n:petLv(k)})}</b><small>${petDead(k)?`<em>${t('petDeadT',{s:Math.ceil((S.pdead[k]-Date.now())/1000)})}</em> `:S.php&&S.php[k]!=null?`<em>${t('petHpT',{h:Math.round(petHp(k)).toLocaleString('en'),m:petHpMax(k).toLocaleString('en')})}</em> `:''}${t(pEvo(k)?'ptE_'+k:'ptD_'+k)} ${t('petNow',{n:Math.round(PETS[k].b*(pEvo(k)?2:1)*(1+(petLv(k)-1)*.1)*100)})}${nx?` <em>(${x}/${nx})</em>`:''}</small></div><button data-pet="${S.pet===k?'':k}">${t(S.pet===k?'petOff':'petOn')}</button>${S.pet===k?(PETX[k]?`<small>${t('petHow_'+k)}</small>`:`<button data-feed="${k}">${t('petFeedB')}</button>`):''}${pEvoOk(k)?`<button data-pevo="${k}" data-tip="${esc(t('peTip',{m:pEvoNeed(k)}))}">${t('peB')}</button>`:''}</div>`;}).join('')+(mo.length?`<div class="note">${t('rideNote')} ${t('mtTip')}</div>`:'');}
  h+=`<div class="ssec">${t('lifeH')}</div><div class="sgrid">`+LIFE.map(k=>{const l=lifeLv(k),nx=LXP[l];return row(t('life_'+k),t('lifeLvT',{n:l}),t('lifeD_'+k),'',nx?` <em>(${(S.life||{})[k]||0}/${nx})</em>`:'');}).join('')+
-  row(t('tkRodL'),t('tkRod'+(S.rod|0)),tkRodD(S.rod|0))+row(t('tkBaitL'),S.bait?`${t(S.bait)} (${S.mats[S.bait]||0})`:t('tkNone'),S.bait?t(S.bait+'D'):'')+'</div>';
+  row(t('tkRodL'),t('tkRod'+(S.rod|0)),tkRodD(S.rod|0))+row(t('ckHamL'),t('ckHam'+(S.smh|0)),ckHamD(S.smh|0))+row(t('ckSptL'),t('ckSpt'+(S.spt|0)),ckSptD(S.spt|0))+row(t('tkBaitL'),S.bait?`${t(S.bait)} (${S.mats[S.bait]||0})`:t('tkNone'),S.bait?t(S.bait+'D'):'')+'</div>';
  h+='</div></div>';$('sbody').innerHTML=stabs()+h;
  if(pop){const e=$('sv_'+pop);if(e)e.classList.add('pop');}}
 function stabs(){const A=S.ach||{},n=ACH.filter(a=>A[a.k]).length;return `<div class="stabs">${[['main',t('tabMain')],['rel',t('affH')],['sec',t('secTab')],['ach',`${t('achH')} (${n}/${ACH.length})`]].map(([k,l])=>`<button data-stab="${k}" class="${STAB===k?'on':''}">${l}</button>`).join('')}</div>`;}
@@ -10725,7 +10795,7 @@ function update(dt){
  if(P.sw>0){P.sw-=dt;P.hp=Math.min(mh,P.hp+mh*.03*dt);if(rand()<dt*6)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*14,vx:0,vy:-24,t:.5,c:'#7ae07a',fl:1});}
  // hunger only drops while you do something (Twister 2026-10-19): walking, riding, attacking, dodging or guarding
  {const busy=Math.abs(P.x-(P.fqx??P.x))+Math.abs(P.y-(P.fqy??P.y))>.01||P.acd>0||P.dash>0||P.guard;P.fqx=P.x;P.fqy=P.y;if(busy)P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));}
- updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);wcTick();swgTick(dt);sirTick();bdTick();o48Tick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
+ updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);wcTick();swgTick(dt);sirTick();bdTick();ckTick();o48Tick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
@@ -11027,7 +11097,7 @@ function render(dt){DRAWN=0;netDrawn=0;
   for(const m of TFB){const st=TFS.get(m);if(st&&st.t>gTime&&!m.dead)TX.push({s:st.s,x:m.x,y:m.y-(MT[m.type].oy||16)-24,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff9a8a'});}
   for(const c of exNear()){ents.push({y:c.y-6,f:()=>drawCache(c)});ents.push({y:c.y+400,f:()=>drawCacheG(c)});}
   for(const l of lmList())if(l.x>camX-20&&l.x<camX+VW+20&&l.y>camY-10&&l.y<camY+VH+40)ents.push({y:l.y,f:()=>drawLm(l)});
-  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});if(rm===HALL)hallEnts(ents);swgEnts(ents);sirEnts(ents);bdEnts(ents);}
+  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});if(rm===HALL)hallEnts(ents);swgEnts(ents);sirEnts(ents);bdEnts(ents);ckEnts(ents);}
   if(COMPO){const a=COMPO;ents.push({y:a.y,f:()=>{if(a.hide>0)return;drawChar(a.spr,a.x,a.y,a.dir,a.frame||0,false,0,a);}});}
   allies.forEach(a=>{if(a.dead||a.go)return;ents.push({y:a.y,f:()=>{drawChar(a.id,a.x,a.y,a.dir,a.frame||0,false,0,a);R(ctx,a.x-7,a.y-30,14,2,'#000');R(ctx,a.x-7,a.y-30,14*a.hp/a.max,2,'#5ad06a');}});});
   for(const g of DGATES){if(g.hide||g.bhg&&!['next','exit','goal','box'].includes(g.bh)||g.tw&&!['up','down','exit'].includes(g.tw))continue;if(g.x<camX-30||g.x>camX+VW+30||g.y<camY-30||g.y>camY+VH+30)continue;ents.push({y:g.y-14,f:()=>drawGate(g)});}
@@ -13140,6 +13210,7 @@ Object.assign(NLD,{
   topics:[{id:'kingdom',tier:0,say:['nse_k1','nse_k2']},{id:'path',tier:0,say:['nse_p1','nse_p2']}]},
  sirenG:{town:null,src:'a guard of the Sirens (ORIGINAL)',ctx:[['nsg_c1',()=>true],['nsg_c2',()=>true]],q:{},rep:null,mem:[],topics:[]}});
 for(const who of ['brfish','sirenE','sirenG']){const n=NPCT[who];if(n){n.idle=()=>nlIdle(who);n.opts=()=>nlOpts(who);}}
+for(const k of Object.keys(NPCT))if(/^inn/.test(k)&&NPCT[k].opts){const o0=NPCT[k].opts;NPCT[k].opts=()=>[...o0(),...ckInnOpt(k)];}   // v3.04: every inn's cooking tools
 Object.assign(QD,{sir1:{by:'brfish',lv:200,obj:{t:'have',it:'fish',n:10,take:1},spot:[575,253],xp:150000,gold:4000}});
 Object.assign(FD,{brin:{lm:'lmBrin',need:()=>!!nlM('brfish','rumor_brin'),p:.006,mat:['fish',10]},siren:{need:()=>true,p:.02,mat:['mstone',8]}});
 window.__GSIR={K:SIREN,dmAt:s=>dmoonAt(s),next:n=>dmoonNext(n),night:()=>dmoonNight(),open:()=>sirOpen(),gate:()=>SIRG||(SIRG=DGATES.find(g=>g.sir)),use:g=>sirGate(g),tick:()=>sirTick(),inside:()=>sirIn(),flute:()=>sirFlute()}; // tests
@@ -15217,7 +15288,7 @@ function tradeBag(){if(!S||S.__demo)return [];const w=weapon();return S.items.fi
 // owner 2026-10-24 ("any item in the bag can be given in a trade; I can't give this book"): the bag's stacks (books,
 // materials, potions) go too. A stack offered gets an item id of its own for this trade (it_<pid>_<new uid>, as the
 // trade and its rules expect), and the amount set in the box beside the search when it was picked (TRMN)
-let TRM={},TRMN={};const trMatOk=k=>typeof k==='string'&&/^[a-z][a-z0-9_]{0,23}$/.test(k)&&k!=='arrows'&&STR.en[k]!=null;
+let TRM={},TRMN={};const trMatOk=k=>typeof k==='string'&&/^[a-z][a-z0-9_]{0,23}$/.test(k)&&k!=='arrows'&&k!=='pstove'&&STR.en[k]!=null;   // v3.04: one stove a player
 function trMatBag(){if(!S||!S.mats||!S.pid)return [];const out=[];for(const k in S.mats){const c=S.mats[k]|0;if(c<1||!trMatOk(k))continue;const iid=TRM[k]||(TRM[k]='it_'+S.pid+'_'+(++S.uid));
   const n=Math.min(c,TRMN[iid]||Math.max(1,Math.min(c,+($('trN')&&$('trN').value)||1)));out.push({iid,json:JSON.stringify({id:k,mat:1,n}),it:{id:k,mat:1,n,r:0}});}return out;}
 function trMatIn(o){if(!o||!o.mat||!trMatOk(o.id))return 0;const n=Math.max(0,Math.min(1e7,o.n|0));if(n)addMat(o.id,n);return n;}
@@ -17158,6 +17229,8 @@ function ixRcD(x){const rc=x.rc,q=x.q,ch=[q.bs?t('ixBs'):t('ixAny'),q.sm?t('ixSm
 // a boss's chest (once a day: bChestGive), the stones it holds, the return scroll, the recipe books bosses drop (rbBossDrop)
 function ixXtra(){const st=['estone','pstone','bstone'].filter(ixHas),rb=(typeof RB!=='undefined'?RB:[]).filter(r=>r.boss&&ixHas(r.id));
  return `<h3>${t('ixXtra')}</h3><ul class="ixl"><li>${t('ixX1')}</li><li>${t('ixX2',{s:st.map(k=>esc(t(k))).join(t('ixAnd'))})}</li><li>${t('ixX3',{it:esc(t('rscroll'))})}</li>`+(rb.length?`<li>${t('ixX4')}<br><small>${rb.map(r=>esc(t(r.id))+' '+ixPc(r.boss)).join(' · ')}</small></li>`:'')+'</ul>';}
+Object.assign(STR.ar,{ixSm7:'{n} بيبيع شواكيش حدادة لأي حد خد دروسه ولأي حداد: {l}. كل واحد بيوسّع الحتة الكويسة والمثالية على السندان.'});
+Object.assign(STR.en,{ixSm7:"{n} sells forge hammers to anyone who has had his lessons, and to any Blacksmith: {l}. Each one widens the anvil's good and perfect parts."});
 Object.assign(STR.ar,{ixTab_fish:'🎣 الصيد',ixFiG:'الصيد',ixFi1:'اقف جنب المية ودوس {k}: السنارة تنزل. لما العوامة ترشّ دوس {k} تاني؛ لو دوست بدري السمكة بتهرب.',ixFi2:'كل مية ليها سمكها: واحدة عادية وواحدة نادرة. والسمكة الدهبية بتشد في أي مية.',
  ixFi3:'أي سمك عادي ينفع في الطبخ، ولأي صياد عايز سمك.',ixFi4:'كل ما لفل الصيد يعلى، الوقت اللي تسحب فيه بيطوّل والسمك النادر بيكتر. والمطرة بتساعد، ومهرجان الصيد بيخلي السمكة الدهبية تلات أضعاف.',
  ixFi5:'{n} بيبيع سنانير أحسن وطُعم.',ixFi6:'أتقل سمكة من كل نوع بتتسجل ليك، وفي المهرجان الأتقل بيكسب.',ixFiCom:'السمك العادي',ixFiRar:'السمك النادر',ixFiUnk:'لسه مصطدتهاش.',ixFiGold:'والسمكة الدهبية بتشد هنا كمان.',
@@ -17169,7 +17242,8 @@ Object.assign(STR.en,{ixTab_fish:'🎣 Fishing',ixFiG:'Fishing',ixFi1:'Stand by 
 // the guides: smithing, gems, magic (their numbers from the game's own constants)
 function ixGuide(v){const L=k=>`<li>${k}</li>`,cb=QD.cb||{},cm=QD.cm||{};
  if(v==='smith')return `<h3>${t('ixSmG')}</h3><ul class="ixl">`+[t('ixSm1',{n:ixNpc(cb.by||'khan'),l:cb.lv||5,q:cb.pre&&ixHas('q_'+cb.pre)?esc(t('q_'+cb.pre)):'—'}),t('ixSm2'),t('ixSm3',{h:esc(t('hHam'))}),t('ixSm4'),t('ixSm5'),
-  t('ixSm6',{m:esc(t('mstone')),e:esc(t('estone')),a:Math.round(ENHP[0]*100),b:Math.round(ENHP[ENHP.length-1]*100)})].map(L).join('')+'</ul>';
+  t('ixSm6',{m:esc(t('mstone')),e:esc(t('estone')),a:Math.round(ENHP[0]*100),b:Math.round(ENHP[ENHP.length-1]*100)}),
+  t('ixSm7',{n:ixNpc('khan'),l:CKH.slice(1).map((H,i)=>esc(t('ckHam'+(i+1)))+' (+'+ckPct(H.f)+'%)').join(t('ixAnd'))})].map(L).join('')+'</ul>';
  if(v==='gem')return `<h3>${t('ixGemG')}</h3><ul class="ixl">`+[t('ixGem1',{a:ixNpc('khan'),b:ixNpc('smithRh'),g:GEMC.toLocaleString('en')}),t('ixGem2'),t('ixGem3',{p:'0.4',b:30}),t('ixGem4',{d:esc(t('diam')),h:esc(t('thund'))})].map(L).join('')+'</ul>';
  if(v==='mag')return `<h3>${t('ixMagG')}</h3><ul class="ixl">`+[t('ixMag1',{s:esc(t('sapph'))}),t('ixMag2',{k:esc(keyName(actKey('mpot')))}),t('ixMag3'),t('ixMag4',{n:ixNpc(cm.by||'tm'),l:cm.lv||5}),t('ixMag5')].map(L).join('')+'</ul>'+
   `<p class="ixh">${t('ixEls')}</p><ul class="ixl">${Object.keys(BTHK).map(el=>`<li><b>${esc(t('mbEl_'+el))}</b> · <img class="ixi" src="${icon(BTHK[el])}"> ${esc(t(BTHK[el]))}<br><small>${(L=>L.filter(ixMet).map(k=>esc(mbName(k))).concat(L.some(k=>!ixMet(k))?[t('ixUnk',{n:L.filter(k=>!ixMet(k)).length})]:[]).join(' · '))(Object.keys(BEL).filter(k=>BEL[k]===el&&MT[k]))}</small></li>`).join('')}</ul>`;
