@@ -461,6 +461,18 @@
     if (v === null) return old ? null : 'PERMISSION_DENIED: legend remove';
     return Object.keys(v).sort().join(',') === 'n,t,uid' && v.uid === user.uid && typeof v.n === 'string' && v.n.length >= 1 && v.n.length <= 24 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'legend fields';
   }
+  // U365 (v3.24): world/satisfy/rw/{uid} {n, t}: your own count, only up, at most 300 a write and every 20 s (the fake keeps
+  // stored timestamps as written, so it remembers when each one was written itself)
+  const rwAt = new Map();
+  function rwRules(seg, v) {
+    if (!user || seg.length !== 4 || seg[1] !== 'satisfy' || seg[3] !== user.uid) return 'PERMISSION_DENIED: ' + seg.join('/');
+    const k = seg.join('/'), old = data.get(k), now = Date.now();
+    if (v === null) return 'PERMISSION_DENIED: rw remove';
+    if (old && rwAt.has(k) && now - rwAt.get(k) < 20000) return 'PERMISSION_DENIED: rw too soon';
+    if (!v || Object.keys(v).sort().join(',') !== 'n,t' || !isInt(v.n, 0) || v.n > 1e6 || JSON.stringify(v.t) !== JSON.stringify(SV)) return 'rw fields';
+    if (!(old ? v.n >= old.n && v.n <= old.n + 300 : v.n <= 300)) return 'rw step';
+    rwAt.set(k, now); return null;
+  }
   // SAT-ONLINE-055 rankings: ranks/{lv|gold}/{uid} {v, n, t}, each player its own
   function rankRules(seg, v) {
     if (!user || seg.length !== 3 || !['lv', 'gold'].includes(seg[1]) || seg[2] !== user.uid) return 'PERMISSION_DENIED: ' + seg.join('/');
@@ -667,6 +679,7 @@
     if (seg[0] === 'nat' || seg[0] === 'natPaid') return natRules(seg, v);
     if (seg[0] === 'arena') return arenaRules(seg, v);
     if (seg[0] === 'world' && seg[2] === 'wb') return wbRules(seg, v);
+    if (seg[0] === 'world' && seg[2] === 'rw') return rwRules(seg, v);
     if (seg[0] === 'world') return worldRules(seg, v);
     if (seg[0] === 'ranks') return rankRules(seg, v);
     if (seg[0] === 'arenaCard') return !user || seg.length !== 2 || seg[1] !== user.uid ? 'PERMISSION_DENIED: ' + seg.join('/') : v === null || (typeof v === 'string' && v.length <= 1500) ? null : 'arenaCard fields'; // the tournament's battle cards (owner 2026-10-24)
@@ -937,7 +950,7 @@
         const seg = r.path.split('/');
         const tm = (seg[0] === 'tradeSides' && seg.length === 3) || (seg[0] === 'tradeDone' && seg.length === 2) ? tradeMeta(seg[1]) : null;
         const gl = (seg[0] === 'guilds' || seg[0] === 'guildMembers') && seg.length === 2 ? !!user : ['guildVault', 'guildBank', 'guildBuild', 'guildLog', 'guildNote', 'guildEvents', 'guildEventSign', 'guildDiplo'].includes(seg[0]) && seg.length === 2 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildHall' && seg.length === 2 ? !!user && (data.has('guildMembers/' + seg[1] + '/' + user.uid) || data.has('guildHallGuest/' + seg[1] + '/' + user.uid)) : (seg[0] === 'guildAlly' || seg[0] === 'guildWar') && seg.length === 2 ? !!user : seg[0] === 'guildWarKill' && seg.length === 3 ? !!user : (seg[0] === 'guildAllyAsk' || seg[0] === 'guildWarAsk') && seg.length === 2 ? !!user && ['m', 'o'].includes(rkOf(seg[1], user.uid)) : seg[0] === 'guildWeek' && seg.length === 3 ? !!user && data.has('guildMembers/' + seg[1] + '/' + user.uid) : seg[0] === 'guildApply' && seg.length === 2 ? !!user && rightOf(seg[1], user.uid, 'inv') : seg[0] === 'guildInv' && seg.length === 2 ? !!user && seg[1] === user.uid : null;
-        const ok = gl !== null ? gl : r.path === 'bounties' || r.path === 'lfg' || seg[0] === 'fishFest' && seg.length === 2 || r.path === 'announce' || r.path === 'polls' || seg[0] === 'pollTally' && seg.length === 2 || r.path === 'flags' || r.path === 'auction' || seg[0] === 'mutes' && seg.length === 2 ? !!user : seg[0] === 'appealDone' && seg.length === 2 ? !!user && seg[1] === user.uid : seg[0] === 'sessions' || seg[0] === 'lockouts' || seg[0] === 'friends' || seg[0] === 'friendReq' || ((seg[0] === 'repairDone' || seg[0] === 'repairPaid' || seg[0] === 'auctionPaid') && seg.length === 2) ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb') && !!user;
+        const ok = gl !== null ? gl : r.path === 'bounties' || r.path === 'lfg' || seg[0] === 'fishFest' && seg.length === 2 || r.path === 'announce' || r.path === 'polls' || seg[0] === 'pollTally' && seg.length === 2 || r.path === 'flags' || r.path === 'auction' || seg[0] === 'mutes' && seg.length === 2 ? !!user : seg[0] === 'appealDone' && seg.length === 2 ? !!user && seg[1] === user.uid : seg[0] === 'sessions' || seg[0] === 'lockouts' || seg[0] === 'friends' || seg[0] === 'friendReq' || ((seg[0] === 'repairDone' || seg[0] === 'repairPaid' || seg[0] === 'auctionPaid') && seg.length === 2) ? user && seg[1] === user.uid : tm ? !!user && (tm.a === user.uid || tm.b === user.uid) : (seg[0] === 'presence' && seg.length === 4 || r.path === 'world/satisfy/own' || r.path === 'world/satisfy/legends' || r.path === 'world/satisfy/wb' || r.path === 'world/satisfy/rw') && !!user;
         if (!ok) throw new Error('fake onValue: unsupported path ' + r.path);
         F.listens.push({ path: r.path, type: 'value', q: null });
         if (!valueCbs.has(r.path)) valueCbs.set(r.path, []);
