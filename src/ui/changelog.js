@@ -7,6 +7,16 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26legbuff4', ver: '3.43', d: '2026-10-26',
+      ar: ["وريث مومود بقى أقوى: الميه والتلج 290%، وشعاع المانا 340%، وشجرة المانا فروعها بتضرب أقوى، وسحب المانا 160%.",
+        "وريث الملك الذي لا يُهزم (مادرا): الحصار 650%، والحصار الأبعد 1,040%.",
+        "الفلاح الأسطوري: الأساليب كلها أقوى حوالي 30%، والهاون 260% في كل دقة (1,040% في المجموع). ضربة الفناء فضلت 3,000% زي الرواية.",
+        "اختبار جديد للأرقام دي."],
+      en: ["Mumud's Successor is stronger: water and ice 290%, the mana ray 340%, the mana tree's branches hit harder, and Mana Drain 160%.",
+        "The Undefeated King's Successor (Madra): the blockade 650%, the wider blockade 1,040%.",
+        "The Legendary Farmer: every style about 30% stronger, and the mortar 260% a pounding (1,040% in all). Perish stays the novel's 3,000%.",
+        "A new test for these numbers."],
+      hide: [3] },
     { v: '2026-10-26legbuff3', ver: '3.42', d: '2026-10-26',
       ar: ["الفارسة الأسطورية (مرسيدس) بقت أقوى: الأسلوب الأول 310%، والعاصفة الفضية 80% كل لفة، والأجنحة الفضية 360%، والسيفين 195% كل قطعة، والبصيرة الحادة بقت 20% في الاتجاهين.",
         "مهارة جديدة للفارسة الأسطورية في لفل 300: فن السيف الأعلى، الأسلوب الرابع. لمدة 0.8 ثانية أول ضربة تيجي عليك بتمسكها بإيدك ومبتعملش حاجة، وبترد 400% وتشلّ اللي ضربك ثانية.",

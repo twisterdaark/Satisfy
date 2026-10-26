@@ -71,3 +71,15 @@ test('the Legendary Knight: the 4th Style catches a blow and answers it; Keen In
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// Mumud's, Madra's and the Legendary Farmer's skills say their new numbers (about 30% more); Piaro's Perish stays the novel's 3,000%.
+test("Mumud, Madra and the Legendary Farmer: the new numbers", async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g);
+    const d = await g.eval(() => ['mmwater', 'mmnull', 'mmdrain', 'mdarmy', 'mdarmy2', 'lfmortar', 'lfperish'].map((k) => window.__GSKF.info(k).desc));
+    assert.match(d[0], /290%/); assert.match(d[1], /340%/); assert.match(d[2], /160%/); assert.match(d[3], /650%/); assert.match(d[4], /1,040%/);
+    assert.match(d[5], /260% a pounding \(1,040% in all\)/); assert.match(d[6], /3,000%/);
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});
