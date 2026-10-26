@@ -31,7 +31,7 @@ number is taken from memory. [F chN] a fetched chapter; [S] the search index onl
 - Hell Leap is a fast combat move in the novel (ch 754, 1536, 1683); ours is a 15 s trip to the Fourth Ridge.
 - Hell Regulation halves a great demon's magic power (ch 573) and is a field for allies (ch 1490).
 - The Demon Slayer's Demonic Essence (ch 574) and buff removal (ch 947).
-- Condemnation Sword: "attack power equivalent to 100% of the target's defense" (ch 772): our monsters have no defence stat.
+- Condemnation Sword (ch 772): done in v3.16 with a monster defence (`monDef`, docs/content/ELEMENTS.md).
 - Sanctuary Declaration takes an hour to build in the novel (ch 1461, 1463).
 - Pagma's Successor wears any gear in the novel but "there is a penalty depending on the rating" (ch 3, 16): ours has no penalty.
 - Holy Weapon in the novel is +500 divine damage a hit (ch 495): ours stays a share (+20%, +50% on corrupt beings), since a flat 500 means little at level 300.
