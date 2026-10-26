@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26hotfix', ver: '3.09', d: '2026-10-26',
+      ar: ["خريطة العالم (M) مبقتش تفضل على «بترسم الخريطة» دقايق: وهي مفتوحة بترسم بأقصى سرعة، والحتة اللي باينة الأول، ومبتستناش القارة التانية. (كانت بترسم في الوقت الفاضي بس، واللعبة الشغالة مبتسيبش وقت فاضي كتير، خصوصًا على الموبايل.)",
+        "فتح الشات مبقاش بيبوّظ الشاشة: المتصفح كان بيزحزح الصفحة عشان يبيّن خانة الكتابة، والصفحة كانت بتفضل متزحزحة لحد ما تعمل ريفريش. دلوقتي أول ما تسيب الخانة كل حاجة بترجع مكانها.",
+        "الفامبيرز في المدن اللي تحت الأرض بقوا بيهجموا عليك تاني: اللعبة كانت فاكرة المدن دي جوه وينستون (مكان آمن)، فكانوا بيتفرجوا عليك بس."],
+      en: ["The world map (M) no longer sits on 'Drawing the map' for minutes: while it is open it paints flat out, what you see first, and it doesn't wait for the other continent. (It painted only in spare time, and a running game leaves little of that, a phone least of all.)",
+        "Opening the chat no longer breaks the screen: the browser shifted the page to show the text field, and it stayed shifted until a refresh. Now everything is put back as soon as you leave the field.",
+        "The vampires of the underground cities attack you again: the game took those cities for part of Winston (a safe place), so they only watched."] },
     { v: '2026-10-26qa', ver: '3.08', d: '2026-10-26',
       ar: ["مهمة «إيد خفيفة» (اختبار الحرامي) كانت بتطلب منك تسرق من 5 وحوش ومش بتديك سكيل السرقة. دلوقتي أول ما تقبلها، الراجل المقنّع بيوريك إزاي: سكيل «سرقة» بيتحط على شريطك طول ما المهمة معاك، ولما تبقى حرامي بيفضل معاك. ولو كنت واخدها من قبل كده، هتلاقيه على الشريط أول ما تفتح اللعبة.",
         "راجعنا كل المهمات اللي بتطلب حاجة مش معاك: اختبار الراهب (صلّي 8 مرات) مكانش فيه طريقة تصلّي بيها، دلوقتي بتصلّي جنب كاسوس. ومهمتين الصنعة (خوذة الحارس ورمح الصياد) بقوا يظهروا بعد ما خان يعلّمك الدرع الجلد والسيف، ومهمة سيف الميثريل بعد لفل حدادة 5 زي الوصفة بتاعته، عشان محدش يطلب منك حاجة لسه متعرفش تعملها.",
