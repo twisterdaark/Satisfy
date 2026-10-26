@@ -18,9 +18,14 @@ test('the Archmage: spells for mages by level, tomes cut cooldowns', async () =>
       S.cls = 'warlock'; S.lv = 100; M.learn('mtspark'); M.learn('mtward'); M.learn('mtrain'); M.learn('mtchain');
       const known = M.L.filter((k) => M.known(k)), shown = M.skills().filter((k) => M.L.includes(k));
       const gold = S.gold; S.cls = 'knight'; const asKnight = M.skills().filter((k) => M.L.includes(k)); S.cls = 'warlock';
-      return { n, knight, known, shown, spent: 1e7 - gold, asKnight, sk: !!S.sk.mtspark }; });
+      // Braham's Successor is a mage legend: its class change keeps no root, and it learns them all the same
+      const keep = { cls: S.cls, cbase: S.cbase, croot: S.croot, mgt: S.mgt };
+      S.cls = 'braham'; S.cbase = null; S.croot = null; S.mgt = {}; S.lv = 100; M.learn('mtspark'); const braham = M.known('mtspark') && M.skills().includes('mtspark');
+      Object.assign(S, keep);
+      return { n, knight, known, shown, spent: 1e7 - gold, asKnight, sk: !!S.sk.mtspark, braham }; });
     assert.deepEqual(a.n && [a.n.solid, a.n.reid], [false, true], JSON.stringify(a.n));
     assert.equal(a.knight, false, 'a knight cannot learn them');
+    assert.equal(a.braham, true, "Braham's Successor learns them");
     assert.deepEqual(a.known, ['mtspark', 'mtward', 'mtrain'], 'Chain Spark waits for level 120');
     assert.deepEqual(a.shown, ['mtspark', 'mtward', 'mtrain']);
     assert.deepEqual(a.asKnight, [], 'they hide while the class is not a mage');
