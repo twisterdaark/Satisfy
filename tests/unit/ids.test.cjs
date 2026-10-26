@@ -58,3 +58,16 @@ test('ensure keeps an existing pid, including one a guild join already made', ()
     assert.equal(S.items[0].iid, 'it_' + pid + '_2');
   }
 });
+
+test('entity ids (plan U311): one scheme for monsters, NPCs and players, and back', () => {
+  assert.equal(I.entity('m', 'golem@1592,840'), 'm:golem@1592,840');
+  assert.equal(I.entity('m', 'redk@14008,392~2'), 'm:redk@14008,392~2');
+  assert.equal(I.entity('m', 'snowr@120,-56'), 'm:snowr@120,-56', 'the north has negative rows');
+  assert.equal(I.entity('n', 'khan'), 'n:khan');
+  assert.equal(I.entity('p', 'u_3Fq9-zz'), 'p:u_3Fq9-zz');
+  assert.deepEqual(I.parseEntity('m:forc@wb0'), { kind: 'm', key: 'forc@wb0' });
+  assert.deepEqual(I.parseEntity('p:me'), { kind: 'p', key: 'me' });
+  for (const bad of ['x:khan', 'm:', 'n:has space', 'p:a/b', 12, null]) assert.equal(I.parseEntity(bad), null, String(bad));
+  assert.throws(() => I.entity('q', 'khan'));
+  assert.throws(() => I.entity('n', 'bad/key'));
+});
