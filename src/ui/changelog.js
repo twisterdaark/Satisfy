@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26plan9', ver: '3.36', d: '2026-10-26',
+      ar: ["في نُزل رولينج فيه جواب لساعي مات: يا توديه لإيرل آدن في راينهارت، يا تبيعه لفرسان تيتان. اللي تختاره بيشكرك (+60 سمعة) والتاني مش بينسى (−60).",
+        "على الحدود بين المملكة والإمبراطورية بقى فيه نقطة تفتيش من كل ناحية: لو سمعتك تحت الصفر عند اللي داخل عليه، بيوقفوك (ماشي أو راكب أو بالعربية) إلا لو دفعت غرامة لتصريح يوم. الباقي بيعدّي عادي."],
+      en: ["At Rolling's inn, a dead courier's letter: take it to Earl Aden in Reinhardt, or sell it to Titan's knights. The side you choose thanks you (+60 reputation), and the other remembers (−60).",
+        "The border between the Kingdom and the Empire now has a post on each side: with a reputation below zero on the side you're entering, you're stopped (on foot, mounted or by coach) unless you pay a fine for a day's pass. Everyone else passes as before."] },
     { v: '2026-10-26plan8', ver: '3.35', d: '2026-10-26',
       ar: ["حواليين عرين حارس الغابة بقى فيه حلقة متفرجين من حجارة بيضا: اللي واقف فيها الحارس مش بيروحله ومش بيضربه، وهو كمان مش بيقدر يضرب الحارس من هناك.",
         "كل قطعة بقت فاكرة جت منين: وقعت من مين، أو من صندوق زعيم، أو اتشرت من مين، أو مكافأة مهمة، أو غنايم غارة. بتبان تحت المواصفات وبتفضل معاها في التبادل.",
