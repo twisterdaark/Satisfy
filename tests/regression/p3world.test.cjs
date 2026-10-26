@@ -24,7 +24,7 @@ test('the three places are on the map with their monsters and bosses, and the ne
     assert.deepEqual(r.z, ['zStorm', 'zWyvern', null, null, null]); // v2.07: the Vampire City went under the sand (vcity.test)
     for (const k of ['felem', 'ielem', 'selem', 'wyvern', 'drake', 'vthrall', 'vknight']) assert.ok(r.n[k] >= 8, k + ' ' + r.n[k]);
     for (const k of ['slord', 'wqueen', 'vlord']) assert.equal(r.n[k], 1, k);
-    assert.deepEqual(r.sh, [0.42, 1.69, 0.68]);
+    assert.deepEqual(r.sh, [0.42, 0.46, 0.68]);   // the drake is a small red dragon now (atlas 2026-10-26), not a big salamander
     assert.ok(r.envoy);
     // a walk through each place draws without errors
     for (const [x, y] of [[88, 214], [240, 208], [642, 212], [12, 340]]) { await at(g, x, y); await g.step(20); }
