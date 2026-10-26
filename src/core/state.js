@@ -103,6 +103,8 @@
     'wis',
     // today's fish and produce sold to the market (SAT-ONLINE-190): {d: world day, n: {kind: count}}
     'mkt',
+    // auto production on or off (v3.10)
+    'autoP',
   ];
   var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'ctPet', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk', 'natJ'];
   var META = ['v', 'wv', 'uid', 'pid'];
