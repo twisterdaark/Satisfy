@@ -19,6 +19,7 @@ test('the courier\'s letter: one side or the other, and the other remembers; the
       const G = window.__G, S = G.S, X = window.__GPB9, o = {};
       S.lv = 160;
       o.offer = [X.avail('fcA'), X.avail('fcB')];
+      X.npcTalk('innRo'); for (let i = 0; i < 4 && !(G.DL && G.DL.opts); i++) G.advance(); o.opts = G.DL && G.DL.opts ? G.DL.opts.map((x) => x.l) : [];
       X.accept('fcA'); o.other = X.avail('fcB');
       X.npcTalk('aden'); o.dl = S.qs.fcA.c;
       const r0 = X.repOf('zRein'); X.complete('fcA'); o.rep = [X.repOf('zRein') - r0 >= 60, X.repOf('zTitan')];
@@ -26,6 +27,7 @@ test('the courier\'s letter: one side or the other, and the other remembers; the
       return o;
     });
     assert.deepEqual(r.offer, [true, true], 'both sides are offered');
+    assert.deepEqual(r.opts, ['Accept', "No, I'll take it to Titan's knights", 'Decline'], 'the innkeeper offers both sides');
     assert.equal(r.other, false, 'taking one closes the other');
     assert.equal(r.dl, 1, 'the letter delivered to Earl Aden');
     assert.deepEqual(r.rep, [true, -60], 'the Kingdom thanks you, the Empire remembers');
@@ -53,13 +55,17 @@ test('the courier\'s letter: one side or the other, and the other remembers; the
       // no pass and a bad name: a teleport over the line isn't a crossing
       delete S.bpass.zTitan; P.x = L - 10; X.bcTick(0.016); P.x = L + 400; X.bcTick(0.016); o.tele = P.x > L;
       // a coach across the line asks the post first
-      P.x = L - 900; X.bcTick(0.016); X.cGo('coachRo', 'coachRh'); o.coach = G.mode === 'dialog' && /^Pay the fine/.test((G.DL.opts[0] || {}).l || '');
+      // a blink over the line is a crossing; so is walking with the bag open
+      P.x = L - 70; X.bcTick(0.016); P.x = L + 80; X.bcTick(0.016); o.blink = P.x < L;
+      G.mode = 'inv'; P.x = L - 10; X.bcTick(0.016); P.x = L + 5; X.bcTick(0.016); o.bag = P.x < L; G.mode = 'play';
+      P.x = L - 900; X.bcTick(0.016); S.gold = 0; X.cGo('coachRo', 'coachRh'); o.coach = G.mode === 'dialog' && /^Pay the fine/.test((G.DL.opts[0] || {}).l || '');
       return o;
     });
     assert.equal(c.through, true, 'with a pass, through');
     assert.equal(c.west, true, 'no stop going west with Reinhardt\'s good will');
     assert.equal(c.tele, true, 'a teleport isn\'t stopped');
-    assert.equal(c.coach, true, 'the coach to Rolling stops at the post');
+    assert.equal(c.blink, true, 'a blink is stopped'); assert.equal(c.bag, true, 'with the bag open too');
+    assert.equal(c.coach, true, 'the coach to Rolling stops at the post, before the fare');
     await closeDialogs(g);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
