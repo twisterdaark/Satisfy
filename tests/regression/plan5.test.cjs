@@ -43,3 +43,22 @@ test('U124: a golem leaves a vein where it falls, mined once, gone in 3 minutes'
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+test("U141: the marsh's trapped chests and the mimic's tell", async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g);
+    await g.step(3);
+    const r = await g.eval(() => { const G = window.__G, S = G.S, P = G.P, X = window.__GMCH; const L = X.list(); const o = { n: L.length, same: JSON.stringify(L.map((c) => [c.tx, c.ty])) };
+      P.x = L[0].x; P.y = L[0].y + 14; P.inv = 0; S.gold = 0; P.hp = G.maxHP(); X.loot(L[0], 0); o.gold = S.gold; o.ready = X.ready(L[0]); return o; });
+    assert.equal(r.n, 3, 'three real chests'); assert.ok(r.gold >= 250, 'gold from it'); assert.equal(r.ready, false, 'then empty for a while');
+    // the trap: forced open, the venom takes
+    const f = await g.eval(() => { const G = window.__G, S = G.S, P = G.P, X = window.__GMCH; const c = X.list()[1]; P.dotT = 0; P.apoU = 0; S.mats.antherb = 0; const h0 = P.hp; X.force(c); return { venom: P.dotT > window.__GLG3.now(), hurt: P.hp < h0, ready: X.ready(c) }; });
+    assert.deepEqual(f, { venom: true, hurt: true, ready: false });
+    // the same spots on another load
+    const g2 = await H.openGame();
+    try { await H.newGame(g2); await g2.step(3); assert.equal(await g2.eval(() => JSON.stringify(window.__GMCH.list().map((c) => [c.tx, c.ty]))), r.same, 'the same spots on every screen'); }
+    finally { await g2.close(); }
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});

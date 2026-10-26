@@ -120,6 +120,8 @@
     'gbT',
     // Regas's lesson before the Guardian (v3.24): done once
     'les',
+    // the marsh's trapped chests (v3.25): when each fills again
+    'mch',
   ];
   var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'ctPet', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk', 'natJ'];
   var META = ['v', 'wv', 'uid', 'pid'];
