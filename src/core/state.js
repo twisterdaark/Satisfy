@@ -118,7 +118,7 @@
     // the Vatican (v3.11): Goddess Rebecca's blessing, from Help the Rebecca Church!
     'vatB',
   ];
-  var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'ctPet', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk', 'natJ'];
+  var SESSION = ['hpk', 'raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'ctPet', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk', 'natJ'];
   var META = ['v', 'wv', 'uid', 'pid'];
   // Never saved: set on the title-screen demo state only.
   var TRANSIENT = ['__demo'];
