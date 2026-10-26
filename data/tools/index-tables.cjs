@@ -22,6 +22,11 @@ function readTables(html){
   for(const [k,m] of Object.entries(TABLES))out[k]=vm.runInContext('('+sliceLiteral(html,m)+')',ctx,{filename:'index.html#'+k});
   // interior NPCs are appended right after the outdoor list
   const push=sliceLiteral(html,'NPCS.push');out.NPCS_INTERIOR=vm.runInContext('['+push.slice(1,-1)+']',ctx,{filename:'index.html#NPCS.push'});
+  // later single pushes in their own modules (the Hermit of Oblivion, the Archmage, the Stable Master, v3.26-v3.28): each literal one
+  for(let i=html.indexOf('NPCS.push(')+1;(i=html.indexOf('NPCS.push(',i))>0;i++){try{const more=vm.runInContext('['+sliceLiteral(html.slice(i),'NPCS.push').slice(1,-1)+']',ctx,{filename:'index.html#NPCS.push+'});
+    for(const n of more)if(n&&n.id&&!out.NPCS_INTERIOR.some(x=>x.id===n.id))out.NPCS_INTERIOR.push(n);}catch(e){}}
+  // and their dialogs, set one by one (NPCT.oblv={...})
+  for(const m of html.matchAll(/\nNPCT\.(\w+)=\{/g)){if(out.NPCT[m[1]])continue;try{out.NPCT[m[1]]=vm.runInContext('('+sliceLiteral(html.slice(m.index),'NPCT.'+m[1]+'=')+')',ctx,{filename:'index.html#NPCT.'+m[1]});}catch(e){}}
   // tables keep logical columns (LW wide); the physical map inserts the GAPS wilderness belts (SAT-WORLD-002)
   const w=/const W=.*?,H=\d+,TS=(\d+),LW=(\d+),GAPS=(\[\[[\d,\[\]]*\]\]),(?:EX=.*?,EW=(\d+),)?(?:WMW=.*?,RSW=(\d+),EAX=.*?,EAW=(\d+),)?MW=.*?,(?:CSPL=.*?,)?MH=(\d+),WH=(\d+),BW=(\d+),WMH=(\d+)/.exec(html);if(!w)throw new Error('world constants not found');
   const GAPS=JSON.parse(w[3]),EX=+w[2]+GAPS.reduce((a,g)=>a+g[1],0),EW=+(w[4]||0),RSW=+(w[5]||0),EAW=+(w[6]||0);   // EX..WMW-1: the Saharan Empire, east of the logical map
