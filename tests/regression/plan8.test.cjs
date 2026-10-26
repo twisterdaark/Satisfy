@@ -50,13 +50,14 @@ test('where a piece came from: bought, dropped, read back from a trade only in i
       const gd = X.mons().find((m) => m.type === 'guardian'); let n0 = S.items.length;
       for (let i = 0; i < 400 && S.items.length === n0; i++) X.namedDrop(gd);
       o.drop = S.items.length > n0 ? S.items[S.items.length - 1].src : 'none';
-      o.text = X.srcTxt(o.drop);
+      o.text = X.srcTxt(o.drop); o.odd = ['d:constructor', 'd', 'q:__proto__', 's:nobody'].map((x) => X.srcTxt(x));
       const a = X.tradeIn(JSON.stringify({ id: 'isword', r: 1, dur: 90, src: 'd:gchief' })), b = X.tradeIn(JSON.stringify({ id: 'isword', r: 1, dur: 90, src: '<img>' }));
       o.trade = [a.src, 'src' in b];
       return o;
     });
     assert.equal(r.bought, 's:armorer'); assert.equal(r.tip, true);
     assert.equal(r.drop, 'd:guardian'); assert.equal(r.text, 'Dropped by Guardian of the Forest');
+    assert.deepEqual(r.odd, ['', '', '', ''], 'an origin that names nothing known shows nothing');
     assert.deepEqual(r.trade, ['d:gchief', false], 'a traded piece keeps its origin; a bad one is dropped');
     await closeDialogs(g);
     assert.deepEqual(g.errors, []);
@@ -72,7 +73,7 @@ test('the alchemist: Stoneskin and Swiftness potions from their books; fresh her
       S.rbk = Object.assign(S.rbk || {}, { rb_a_stonep: 1, rb_a_swiftp: 1 }); S.mats.herb = 20; S.mats.ore = 20; S.mats.bherb = 5; S.mats.straw = 10;
       const brew = (k) => { const n0 = S.mats[k] || 0; Y.make(k, true); const fr = Y.MIXG && Y.MIXG.fresh; Y.mixEnd(2); return [(S.mats[k] || 0) - n0, fr]; };
       S.hpk = 0; o.stale = brew('stonep');
-      S.hpk = Date.now(); o.fresh = brew('stonep'); o.swift = brew('swiftp');
+      S.hpk = Date.now(); S.hpkN = 3; o.fresh = brew('stonep'); o.swift = brew('swiftp'); o.spent = brew('swiftp');
       o.used = [S.mats.herb, S.mats.ore, S.mats.bherb, S.mats.straw];
       // the Stoneskin Potion: a blow does 15% less
       G.P.buf = null; G.P.inv = 0; G.P.hp = 1e6; let h = G.P.hp; Y.hurt(1000, null); const plain = h - G.P.hp;
@@ -82,7 +83,8 @@ test('the alchemist: Stoneskin and Swiftness potions from their books; fresh her
     assert.deepEqual(r.stale, [2, 0], 'a perfect brew: two');
     assert.deepEqual(r.fresh, [3, 1], 'with fresh herbs: one more');
     assert.deepEqual(r.swift, [3, 1]);
-    assert.deepEqual(r.used, [20 - 4 - 0, 20 - 6, 5 - 1, 10 - 3]);
+    assert.deepEqual(r.spent, [2, 0], 'the fresh herbs were used up: no more bonus');
+    assert.deepEqual(r.used, [20 - 4, 20 - 6, 5 - 2, 10 - 6]);
     assert.equal(r.buf, 'stone');
     assert.ok(Math.abs(r.ratio - 0.85) <= 0.02, '15% less: ' + r.ratio);
     // the Swiftness Potion: farther in the same time
@@ -115,12 +117,14 @@ test('the Legendary Farmer\'s trial: twenty wheat for Patrian before the Legenda
       o.before = [Y.avail('lfa1h'), Y.avail('lfa2')];
       Y.accept('lfa1h'); S.mats.wheat = 12; o.short = Y.ready('lfa1h'); S.mats.wheat = 25; o.ready = Y.ready('lfa1h');
       Y.complete('lfa1h'); o.left = S.mats.wheat; o.after = Y.avail('lfa2');
+      delete S.qs.lfa1h; S.qs.lfa2 = { st: 2 }; o.old = Y.avail('lfa1h');
       return o;
     });
     assert.deepEqual(r.before, [true, false], 'the helping step comes first');
     assert.equal(r.short, false); assert.equal(r.ready, true);
     assert.equal(r.left, 5, 'twenty wheat given');
     assert.equal(r.after, true, 'then the Legendary Field');
+    assert.equal(r.old, false, 'not offered to whoever finished the trial before this step existed');
     await closeDialogs(g);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
