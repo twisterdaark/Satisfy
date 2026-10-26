@@ -7,6 +7,14 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26u293', ver: '3.60', d: '2026-10-26',
+      ar: ["الرقص سوا على مسرح باتريان: اللي بيطلعوا المسرح في نفس اللحظة تقريبًا (نفس الـ8 ثواني) بيرقصوا نفس العشر أسهم، وكل واحد بيقف جنب التاني.",
+        "كل شريك رقص جنبك بيخلّي الجمهور يرمي 20% دهب زيادة (لحد 3 شركا).",
+        "اختبار جديد لده."],
+      en: ["Dancing together on Patrian's stage: players who step on the stage at about the same moment (the same 8 seconds) dance the same ten arrows, side by side.",
+        "Each partner who danced beside you makes the crowd throw 20% more gold (three partners at most).",
+        "A new test for this."],
+      hide: [2] },
     { v: '2026-10-26u179', ver: '3.59', d: '2026-10-26',
       ar: ["أعمدة البرق في معبد العاصفة بقت مشتركة: العمود اللي لاعب تاني في المعبد أرّضه بيتحسب ليك كمان، فممكن تأرّضوا الأربعة سوا وكل واحد ياخد عمود.",
         "العمود بيرجع يتشحن لما اللي أرّضه يمشي من المعبد، أو لما سيد العاصفة يموت.",

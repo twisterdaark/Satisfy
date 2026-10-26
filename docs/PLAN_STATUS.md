@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.59) |
+| | At the count | Now (v3.60) |
 |---|---|---|
-| Done | 233 | 290 |
-| Partly there (something left) | 92 | 40 |
+| Done | 233 | 291 |
+| Partly there (something left) | 92 | 39 |
 | Not started | 11 | 6 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **46** (40 + 6) |
+| **Left to build** | **103** (92 + 11) | **45** (39 + 6) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -41,6 +41,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.57 (Claude-B): U070 (the Order reaches the party, party auras capped, Guard Link needs a live partner).
 - v3.58 (Claude-B): hotfix: Braham's Successor learns the Archmage's spells (CROOT braham/saint).
 - v3.59 (Claude-B): U179 (the Storm Temple's rods shared by every player there).
+- v3.60 (Claude-B): U293 (dancing together on Patrian's stage).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -267,7 +268,7 @@ Checked against main `8a2e4f1e` (v3.15, 2026-10-26). Asgard is on a branch (HOLD
 | U | Item | Status | Evidence (where in the code: function/feature/test) / what's left |
 |---|---|---|---|
 | U292 | Harvest fair | done | SAT-ONLINE-187 (v2.62, 4147e61b). Piaro's fair board: each harvest weighs its best piece, and the week's heaviest of each crop goes up against three seeded rivals. It is judged once; ribbons lead to the titles Fair Champion and Golden Harvest. No gold or items. An emptied plot gives no entry (`regression/harvestfair`) |
-| U293 | Dancing minigame | part | Patrian's stage (`p4DanceStart`/`p4Step`): ten arrows, the window shrinking from 0.9 to 0.45 s. The timing runs on the dancer's own screen and nothing is sent, so latency doesn't matter. Others see the dance emote (`EMO k:'dance'`) (`regression/p4world` "the stage"). Missing: the cooperative part, several players dancing one sequence together. It also pays gold (40 an arrow, ×2 for 10/10, once per 5 min), against §46's "social actions give no gold" |
+| U293 | Dancing minigame | done (v3.60) | Patrian's stage (`p4DanceStart`/`p4Step`): ten arrows, the window shrinking from 0.9 to 0.45 s. The timing runs on the dancer's own screen and nothing is sent, so latency doesn't matter. Others see the dance emote (`EMO k:'dance'`) (`regression/p4world` "the stage"). Missing: the cooperative part, several players dancing one sequence together. It also pays gold (40 an arrow, ×2 for 10/10, once per 5 min), against §46's "social actions give no gold" v3.60: dancing together: the arrows come from the world clock's 8-second window, so players who step on the stage in the same window dance the same ten; a dancer shows 'd' in the fx "st:" tag, a partner steps in beside you, and each partner adds 20% to the crowd's coins (three at most; `p4DMates`, `regression/u293`). The gold against §46 stays the owner's call. |
 | U294 | Bard stage | done | The stage's 8 music pads ring under any player's feet, yours or another player's, quieter with distance (`P4.padOn`, `SFXV`). The Bard has three songs (`regression/p4world`). Each visitor turns the volume down or off on their own device under Sound (U321, `regression/mixer`). Note: the pads play in "game sounds", not in "other players" |
 | U298 | Library codex | done | SAT-ONLINE-188 (fea9d916): the Index's Lore tab keeps every plaque and shelf book you have read. Unread pages stay ??? (no name, no words, no search hit). Reading all of them gives Keeper of Lore (`regression/codex`) |
 | U300 | Housing rooms | done (v3.46) | The guild hall (U235, SAT-ONLINE-115) is a room of its own with 8 places. The master and officers furnish it and let guests in by account ID, and the rules check every edit (`guildHall`, `regression/guildhall`). Missing: a room of a player's own (searched `S.house`, `S.home`, "your house"/"your room": none) v3.46: any inn on the continent rents a room of your own once (5,000 gold); every inn there then opens its door to it, and its door brings you back to the inn you came from. Its eight places take the guild hall's house props (800 gold a piece), the furniture blocks the way, and a bed lets you sleep the day off once in 20 minutes; an inn's night is still the one that leaves you rested (`HOME`, `homeOpt`, `homeAct`, `S.home`). Nobody else is seen in yours, it has no shared monster host (`solo`), and a drop there stays off the network (`dropNet`); visits need rules and are left (`regression/plan10`). |
