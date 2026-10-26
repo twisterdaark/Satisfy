@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.40) |
+| | At the count | Now (v3.41) |
 |---|---|---|
-| Done | 233 | 273 |
-| Partly there (something left) | 92 | 55 |
+| Done | 233 | 275 |
+| Partly there (something left) | 92 | 53 |
 | Not started | 11 | 8 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **63** (55 + 8) |
+| **Left to build** | **103** (92 + 11) | **61** (53 + 8) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -28,6 +28,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.35 (batch 6, PR #288, merged by Claude-B after batch 5b): U090 (plowing and watering), U115 (the scouts' rounds); U207 part (the weekly contracts; guild supply orders left). U280 is main's (plan-gear); the contracts pay one of its blueprint fragments.
 - v3.36 (batch 7, PR #289, merged by Claude-B after batch 6): U054 (a party summon), U119 (the Guardian's pillars), U121 (the orcs' shield wall and warband), U156 (fifty players within the frame budget).
 - v3.40 (batch 8, PR #290, merged by Claude-B after batch 7 and main's v3.37-v3.39): U151 (the spectators' ring), U098 (new brews, fresh herbs); U093 part (the helping step; Blaze left), U268 part (where a piece came from; the Myth rating left).
+- v3.41 (batch 9, PR #291, merged by Claude-B after batch 8): U203 (the courier's letter, a side and its cost), U158 (the border posts).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -151,7 +152,7 @@ Checked against `/home/claude/satisfy-aud` at 8a2e4f1e (v3.15). The test files b
 | U155 | Reidan desert | done (v3.22) | The desert is there: the Western Sands (v2.93, `wsands`) and the vampire cities beneath it; horses ride there. Left: a sandstorm (weather has only rain, storm, fog and snow: `WXI`). Server-held position bounds wait on D3 |
 | U156 | Reinhardt capital | done (v3.36) | Reinhardt: walls and gates, the palace and the Royal Knights' barracks, roads; guild halls (`guildhall`). Presence keeps up to 64 remotes (`presence.js` `maxRemotes`), and 100 clients' traffic is checked (`unit/load100`). Left: a test that 50 avatars drawn in one place stay within the frame budget (the profiler exists, U325) v3.36: `regression/crowd50` puts fifty sessions on the local network around the player and times the frames with the wall clock: p95 within the profiler's 20 ms. |
 | U157 | Patrian outpost | done | The Patrian Guard Captain's quests (pt1–pt3: wolves, boars, deserters). Spawn protection after loading in or reviving (`spawnshield`). Patrian is a safe zone. The training dummies are in Winston |
-| U158 | Empire frontier | part | Borders exist (the Suaz range of the Saharan Empire, the Gauss border wall), and so does reputation (by town, by continent, kingdom contribution). Nothing forces a faction on you: the Covenant asks, the Prince can make you human again, and churches are a choice. Left: checkpoints gated by reputation |
+| U158 | Empire frontier | done (v3.41) | Borders exist (the Suaz range of the Saharan Empire, the Gauss border wall), and so does reputation (by town, by continent, kingdom contribution). Nothing forces a faction on you: the Covenant asks, the Prince can make you human again, and churches are a choice. Left: checkpoints gated by reputation v3.41: a border post on each side of the Kingdom–Empire line (column EX): a reputation below zero with the side you're entering stops you on foot, mounted or by coach unless you pay a fine for a day's pass (`bcTick`, `bcAsk`, `S.bpass`); everyone else passes, and teleports aren't stopped (`regression/plan9`). |
 | U159 | Pangea market | reject | REJECT_DUPLICATE (§90): Pangea already has its market, White the Blacksmith's anvil and the gateway keepers (SAT-ONLINE-159, `eastcont`) |
 | U160 | Vampire City | reject | REJECT_DUPLICATE (§90): the 15 underground cities (`vcity`); the way down stays sealed until the city's master dies (`vcGate`), so no step can be skipped |
 | U161 | Cursed Canyon | reject | An invented region (§82). Already there: dark mines and caves (the Reidan mines, Beware Dogs), Goblin Canyon Depths, wave defence (town invasions, the Defense War, Ren's War), respawn at your bind point |
@@ -209,7 +210,7 @@ Checked 2026-10-26 against `/home/claude/satisfy-aud` (main @ 8a2e4f1e, v3.15). 
 | U200 | Saintess rescue | done (v3.21) | The Saintess's Road (`hsa`: a priest of Lv 40, both escorts home, then 40 heals) gives the Saintess (`regression/saintess`); the raid healer role (`regression/raidroles`). Missing: healing is not a "part in the fight". A healer who only heals gets a boss's XP but not its loot (`mobEarn`: 5% of its health or a hit in the last 30 s) |
 | U201 | Explorer's atlas | done | A first visit to a region pays XP and Cartography, seeing most of a region charts it, and explorer caches dig up once each (`regression/explore`). First discoveries are given once (`regression/npclife`, `npclife2`), plus the six exploring achievements |
 | U202 | NPC affinity | done | `S.aff` 0–100 with tiers at 30/60/90 (`addAff`). Gifts once per 5 min of play, affinity per quest done, topics whose choices are remembered (`S.met`). Lines change with affinity (`regression/npclife`, `npclife2`) |
-| U203 | Faction consequences | part | Choices with their cost stated: the hidden-class warning `hcWarn` before it replaces your class; the Covenant explained with Accept/Decline, and the envoy lets you leave (`regression/vampire`, `p3world`); the refusals of Muller's technique and Amoract; town reputation `S.rep`. Missing: quests that branch between sides with a reputation cost |
+| U203 | Faction consequences | done (v3.41) | Choices with their cost stated: the hidden-class warning `hcWarn` before it replaces your class; the Covenant explained with Accept/Decline, and the envoy lets you leave (`regression/vampire`, `p3world`); the refusals of Muller's technique and Amoract; town reputation `S.rep`. Missing: quests that branch between sides with a reputation cost v3.41: a courier's letter at Rolling's inn goes to Earl Aden in Reinhardt (`fcA`) or to Titan's knights (`fcB`); taking one closes the other, and the offer states the cost: +60 with the side you serve, −60 with the other (`rg`/`rc`, a toast says so) (`regression/plan9`). |
 | U204 | Party expedition storyline | part | A party kill counts once for each member's kill quests (`qShareOk`, `regression/qshare`); a raid boss pays each fighter once (`regression/raid`) and its roll is made once (`regression/raidloot`). Missing: a party story with shared flags. The storyline itself would be invented (§82) |
 | U205 | World event quest | done | World events run on the server clock (`EVT`, `wNow`). The event bar `#evbar` shows the name, time left, waves and kills; the contribution is paid at the end, and nothing is left after it ends. Story quests also target event monsters (gj7/gj8, Defense War II) |
 | U206 | Daily missions | done | Three daily bounties seeded by the UTC date (`dailyList`, `today()` on `wNow`, documented in ENGINE_API "api 1, fix" SAT-ONLINE-130), with a bonus counted over 7 days (`regression/dailyweek`). Earl Aden's tasks vary, at most 4 a day (`regression/royal`). Repeatable XP is capped (v2.87) |
