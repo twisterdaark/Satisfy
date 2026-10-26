@@ -79,7 +79,7 @@ test('the Guardian\'s pillars: four stand by him; each turns away 15% of his dam
     await H.newGame(g);
     const r = await g.eval(() => {
       const G = window.__G, S = G.S, X = window.__GPB7, ps = X.gps(), gd = X.mons().find((m) => m.type === 'guardian'), o = {};
-      o.n = ps.length; o.near = ps.every((p) => Math.hypot(p.x - gd.x, p.y - gd.y) < 280); o.ids = ps.map((p) => p.nk);
+      o.n = ps.length; o.near = ps.every((p) => Math.hypot(p.x - gd.x, p.y - gd.y) < 280); o.ids = ps.map((p) => p.nk || (p.type + '@' + (p.sx | 0) + ',' + (p.sy | 0)));
       o.cut = [X.gpAtk(gd)];
       G.P.x = gd.x + 60; G.P.y = gd.y;
       const hp0 = gd.hp; X.hitMon(gd, 1000, { pure: 1 }); const d4 = hp0 - gd.hp;
@@ -89,7 +89,7 @@ test('the Guardian\'s pillars: four stand by him; each turns away 15% of his dam
       const p = { ...ps[0] }; for (const q of ps) { q.dead = false; q.hp = q.max; } X.monTick(ps[0], 1); o.still = ps[0].x === ps[0].sx && ps[0].y === ps[0].sy && !(ps[0].eng > 0);
       return o;
     });
-    assert.equal(r.n, 4); assert.equal(r.near, true); assert.deepEqual(r.ids, ['gpillar@0', 'gpillar@1', 'gpillar@2', 'gpillar@3']);
+    assert.equal(r.n, 4); assert.equal(r.near, true); assert.ok(r.ids.every((k) => /^gpillar@\d+,\d+$/.test(k)) && new Set(r.ids).size === 4, 'fixed keys of the rules\' shape (their spots): ' + r.ids);
     assert.deepEqual(r.cut, [0.4, 0.7, 1]);
     assert.ok(Math.abs(r.ratio - 0.4) <= 0.02, 'his blow with four pillars up, against none: ' + r.ratio);
     assert.deepEqual(r.free, [0, 0, 90, 0], 'no experience, no gold, no kill on the books, back in 90 s');
@@ -127,7 +127,7 @@ test('orcs lock shields together; the Frostlight warband marches post to post, w
     assert.equal(r.wall, true);
     assert.deepEqual(r.warded, [0.6, 0.6, 0], 'the one beside him locks shields; one far off doesn\'t');
     assert.equal(r.again, false, 'not called again while he holds his shield');
-    assert.equal(r.n, 5); assert.deepEqual(r.ids, ['forc@wb0', 'forc@wb1', 'forc@wb2', 'forc@wb3', 'forc@wb4']);
+    assert.equal(r.n, 5); assert.deepEqual(r.ids, ['forc@-1,-1', 'forc@-1,-2', 'forc@-1,-3', 'forc@-1,-4', 'forc@-1,-5'], 'the band\'s fixed keys, of the rules\' shape');
     assert.ok(r.pts >= 4, 'posts: ' + r.pts);
     assert.ok(r.moved >= 170 && r.moved <= 185, '18 px a second for 10 s: ' + r.moved);
     assert.equal(r.waited, true, 'the march waits while one of them fights');

@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26mobkeys', ver: '3.50', d: '2026-10-26',
+      ar: ["أونلاين: جنب أعمدة حارس الغابة وفرقة الأورك، وفي حرب رين، مشاركة الوحوش كانت بتقف للبارتي كلها (قاعدة البيانات كانت بترفض أساميهم). اتصلحت."],
+      en: ["Online: by the Guardian of the Forest's pillars, the orc warband and in Ren's War, monster sharing stopped for the whole party (the database refused their names). Fixed."] },
     { v: '2026-10-26bossdmg', ver: '3.49', d: '2026-10-26',
       ar: ["عداد ضرر الزعيم: تحت شريط صحة أي زعيم بتشوف كل واحد ضرب كام % من الضرر، وعلامة ✓ لو ضرب كفاية ياخد الـ credit (5% من صحة الزعيم) أو ✗ لو لسه.",
         "مكافأة التعاون: الزعيم اللي بيتحارب مع ناس تانية (حد تاني ضربه معاك) بيدي +10% خبرة.",
