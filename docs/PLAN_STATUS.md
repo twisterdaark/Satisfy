@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.50) |
+| | At the count | Now (v3.51) |
 |---|---|---|
-| Done | 233 | 282 |
-| Partly there (something left) | 92 | 48 |
+| Done | 233 | 283 |
+| Partly there (something left) | 92 | 47 |
 | Not started | 11 | 6 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **54** (48 + 6) |
+| **Left to build** | **103** (92 + 11) | **53** (47 + 6) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -33,6 +33,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.47 (batch 11, PR #293, merged by Claude-B after main's v3.45-v3.46): U124 (a golem's rubble), U186 (the boss fight log and replay); U040 part (three rated duels a day per opponent; D3 left), U220 part and U105 part (caravan commissions; D3 and buy/sell contracts left).
 - v3.49 (batch 12, PR #294, on the hotfix #295 and main v3.47; for Claude-B's review): U141 (the mimic's tell and the trapped chests), U105 (buy and sell contracts); U176 part (the Vampire Lord's branching fight; D3 left).
 - v3.50 (batch 13, stacked on batch 12 (#294); for Claude-B's review): U311 (every monster's network key its own, one entity id scheme).
+- v3.51 (batch 14, stacked on batch 13 (#296); for Claude-B's review): U078 (the balance board checks the hybrid against the strongest pure class).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -58,7 +59,7 @@ this plan's earlier copy (header comments "plan U072…" over the new class path
 | U075 | Beast Hunter | reject | Not a novel class. Monster-tag bonuses exist: Demon Slayer vs demons capped at +60% (`p2Atk`), holy vs undead and demons (`HOLYX`, Smite, Holy Light), the Ranger's mark +20% |
 | U076 | Elementalist | reject | Not a novel class; the novel's elemental ones are in (Fire Magician and Ice Mystic packs, Lightning Swordsman, Explosion Sorcerer). Weather changes no spell (it touches fishing and vampires' sun only); weather combos would be invented |
 | U077 | Arcanist | reject | Not a novel class. Runes and circles: the Explosion Sorcerer's Delayed Blast (`esrune`), Braham's spells (v2.09) |
-| U078 | Battlemage | part | Magic Swordsman (`bmage`, `c2g`): Mana Blade 230% and +3 MP a monster (9 at most), Arcane Armor −20% damage while MP drains instead of refilling, Spell Slam. `regression/classes3` "Battlemage". Left: the acceptance's check that it stays under the strongest pure class: nothing compares class damage (the owner's `/balance` board, SAT-ONLINE-088, has weekly kill times by class to use) |
+| U078 | Battlemage | done (v3.51) | Magic Swordsman (`bmage`, `c2g`): Mana Blade 230% and +3 MP a monster (9 at most), Arcane Armor −20% damage while MP drains instead of refilling, Spell Slam. `regression/classes3` "Battlemage". Left: the acceptance's check that it stays under the strongest pure class: nothing compares class damage (the owner's `/balance` board, SAT-ONLINE-088, has weekly kill times by class to use) v3.51: the owner's `/balance` board checks it each week: against the classes of a like level (within 20 on average) with at least 30 kills, a line says whether the Magic Swordsman still kills slower than the fastest of them, or warns by how much faster it is (`balHyb`; `regression/plan14`). |
 | U079 | Warlock | done | Black Magician (`c2w`): Curse (+15% taken, −20% dealt, 10 s), Rot (8 s DoT), Soul Siphon; a boss's new phase shakes them off; a rot ends in a town (`p2Tick`). `regression/classes3` "Warlock"; v3.15 Dark Storm, fear bind, Diamond Barrier |
 | U080 | Summoner | reject | Duplicate of the Necromancer (U085): summon cap 2–6 (`necCap`), minions gone with the owner's death, distance or class (`necTick`) |
 | U081 | Priest | done (v3.22) | `cp` at Cassus (prayers; chat or food resets them). Heal mends the party within 150 px (`phHeal`, `raid.state` "p\|"), Blessing, Holy Light, a hired priest. A heal grants no XP (`rlHeal`/`p2Heal`; it only counts toward the Saintess trial). `regression/churches` (online heal too). Left: threat: healing draws no monster (monsters are provoked only by hits, `m.prov` in `hitMon`) |

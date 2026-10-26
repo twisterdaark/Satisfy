@@ -7,6 +7,10 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27plan14', ver: '3.51', d: '2026-10-27',
+      ar: ["لوحة التوازن بتاعة صاحب اللعبة بتراجع كل أسبوع إن السيّاف السحري (كلاس هجين) لسه أبطأ في القتل من أقوى كلاس صافي في نفس اللفل."],
+      en: ["The game owner's balance board now checks each week that the Magic Swordsman (a hybrid) still kills slower than the strongest pure class of a like level."],
+      hide: 1 },
     { v: '2026-10-26plan13', ver: '3.50', d: '2026-10-27',
       ar: ["أونلاين: كان فيه 5 أزواج وحوش من نفس النوع واقفين على نفس المكان، وكانوا عند أعضاء البارتي وحش واحد (التاني واقف زي الخيال). دلوقتي كل وحش ليه اسمه على الشبكة."],
       en: ["Online: five pairs of monsters of one kind stood on the same spot and were one monster on party members' screens (the other stood still like a ghost). Every monster now has a name of its own on the network."] },
