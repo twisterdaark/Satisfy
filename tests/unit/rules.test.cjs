@@ -261,6 +261,18 @@ test('legends (SAT-ONLINE-054): a legend is taken once, then only its holder cha
   assert.equal(k.$other['.validate'], false);
 });
 
+test('legend books (owner 2026-10-26): one copy, taken once; whoever receives it keeps its g; only its holder frees it', () => {
+  const B = rules.world.$world.books, k = B.$k;
+  assert.equal(B['.read'], 'auth != null');
+  // a write puts yourself as the holder; over an existing copy only with that copy's g (a second drop can't replace it)
+  assert.equal(k['.write'], "auth != null && (newData.exists() ? newData.child('uid').val() === auth.uid && (!data.exists() || newData.child('g').val() === data.child('g').val()) : data.child('uid').val() === auth.uid)");
+  assert.match(k['.validate'], /newData\.hasChildren\(\['uid', 'p', 'g', 't'\]\)/);
+  assert.equal(k.uid['.validate'], 'newData.val() === auth.uid');
+  assert.match(k.p['.validate'], /\^\[a-z0-9_\]\{4,40\}\$/);
+  assert.equal(k.t['.validate'], 'newData.val() === now');
+  assert.equal(k.$other['.validate'], false);
+});
+
 test('rankings (SAT-ONLINE-055): each player writes only its own level and gold; the lists are indexed on v', () => {
   const r = rules.ranks.$kind;
   assert.equal(r['.validate'], "$kind === 'lv' || $kind === 'gold'");

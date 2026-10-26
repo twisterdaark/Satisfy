@@ -1386,6 +1386,18 @@
             "$other": { ".validate": false }
           }
         },
+        "books": {
+          ".read": "auth != null",
+          "$k": {
+            ".write": "auth != null && (newData.exists() ? newData.child('uid').val() === auth.uid && (!data.exists() || newData.child('g').val() === data.child('g').val()) : data.child('uid').val() === auth.uid)",
+            ".validate": "$k.matches(/^[a-z0-9_]{1,16}$/) && newData.hasChildren(['uid', 'p', 'g', 't'])",
+            "uid": { ".validate": "newData.val() === auth.uid" },
+            "p": { ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9_]{4,40}$/)" },
+            "g": { ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9]{6,16}$/)" },
+            "t": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        },
         "wb": {
           ".read": "auth != null",
           "$type": {
