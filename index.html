@@ -11389,7 +11389,7 @@ Object.assign(STR.en,{gdIn:"You're in the spectators' ring: the Guardian won't c
 const GPCUT=.15,GPR=280;let GPS=[];
 function gpSpawn(){GPS=[];const g=BOSSES.find(b=>b[0]==='guardian');if(!g)return;const r=mulberry32(119);
  for(const [dx,dy] of [[-5,-3],[5,-3],[-5,3],[5,3]]){let x=g[1]+dx,y=g[2]+dy;for(let k=0;k<40&&(solW(x,y)||solW(x+1,y));k++){x=g[1]+dx+((r()*5)|0)-2;y=g[2]+dy+((r()*3)|0)-1;}
-  if(solW(x,y))continue;const m=newMon('gpillar',x*TS+8,y*TS+8,r);m.nk='gpillar@'+GPS.length;GPS.push(m);mons.push(m);}}
+  if(solW(x,y))continue;const m=newMon('gpillar',x*TS+8,y*TS+8,r);GPS.push(m);mons.push(m);}}
 const gpUp=g=>GPS.filter(p=>!p.dead&&Math.hypot(p.x-g.x,p.y-g.y)<GPR).length;
 function gpAtk(m){return m.type==='guardian'&&GPS.length?Math.max(.4,1-GPCUT*gpUp(m)):1;}
 function gpFall(m){if(m.type!=='gpillar')return;vfx('dust',m.x,m.y-10,{n:12});SFX.slam();shake=Math.max(shake,.2);num(m.x,m.y-46,t('gpFallT'),'#9fe39a',true);}
@@ -11415,8 +11415,9 @@ function owbSpawn(){OWB=null;const r=mulberry32(121),R=OWBR,ok=(x,y)=>!solW(x,y)
   for(let i=bi;i>=0;i=F[i].pv)pts.unshift(N[i]);
   for(let i=0;i+2<pts.length;)if(walk(pts[i],pts[i+2]))pts.splice(i+1,1);else i++;}   /* a post it can walk straight past is dropped */
  if(pts.length<2)return;OWB={pts,i:1,dir:1,x:pts[0].x,y:pts[0].y,ms:[],seen:0,wait:0};
- for(let i=0;i<OWBN;i++){const [ox,oy]=owOff(i),m=newMon('forc',OWB.x+ox,OWB.y+oy,r);m.band=1;m.bi=i;m.nk='forc@wb'+i;OWB.ms.push(m);mons.push(m);}}
-function owbTick(dt){if(!OWB||!P)return;OWB.ms.forEach((m,i)=>{m.band=1;m.bi=i;m.nk='forc@wb'+i;});const live=OWB.ms.filter(m=>!m.dead),lead=!(MOBN&&MOBN.host&&NET&&MOBN.host!==NET.uid),fight=live.some(m=>m.eng>0||m.ret);
+ for(let i=0;i<OWBN;i++){const [ox,oy]=owOff(i),m=newMon('forc',OWB.x+ox,OWB.y+oy,r);m.band=1;m.bi=i;m.nk=owbKey(i);OWB.ms.push(m);mons.push(m);}}
+function owbKey(i){return 'forc@-1,-'+(i+1);}   /* the band's keys: the rules' shape (type@x,y) on x -1, where no monster spawns, so they never move with the band */
+function owbTick(dt){if(!OWB||!P)return;OWB.ms.forEach((m,i)=>{m.band=1;m.bi=i;m.nk=owbKey(i);});const live=OWB.ms.filter(m=>!m.dead),lead=!(MOBN&&MOBN.host&&NET&&MOBN.host!==NET.uid),fight=live.some(m=>m.eng>0||m.ret);
  if(!fight&&live.length&&!live.every(m=>Math.hypot(m.x-m.sx,m.y-m.sy)<90)){OWB.wait+=dt;if(lead&&OWB.wait>20)for(const m of live){m.x=m.sx;m.y=m.sy;m.path=null;OWB.wait=0;}}else OWB.wait=0;   /* one stuck on a rock for 20 s is put back in line */
  if(live.length&&!fight&&live.every(m=>Math.hypot(m.x-m.sx,m.y-m.sy)<90)){const p=OWB.pts[OWB.i],dx=p.x-OWB.x,dy=p.y-OWB.y,d=Math.hypot(dx,dy),st=OWBSPD*dt;
   if(d<=st){OWB.x=p.x;OWB.y=p.y;if(OWB.i+OWB.dir<0||OWB.i+OWB.dir>=OWB.pts.length)OWB.dir=-OWB.dir;OWB.i+=OWB.dir;}else{OWB.x+=dx/d*st;OWB.y+=dy/d*st;}}
@@ -16870,10 +16871,12 @@ Object.assign(STR.en,{bflDone:'Fight with {n} logged ({s} s) · click here or /r
    red knights, vampire guards and highborn, tree saps, fire elementals). Online the pair was one monster on a follower's
    screen: the host's moves and health went to one of them, the other stood as a ghost, and a kill claimed the key both
    shared. The world's build is the same on every screen, so after it the second of a key (the third...) is renamed in
-   build order, key~2, key~3. A respawn is the same monster back (monFresh keeps its key), so no two live monsters ever
+   build order, a pixel lower (kind@x,y+1, y+2...: the shape the database rules take, and no real spawn's, which stand on a
+   tile's centre), kept unique against every key. A respawn is the same monster back (monFresh keeps its key), so no two live monsters ever
    share one, and the local ids ('m' + MID) only grow. entId gives the id of anything standing in the world. */
-function mobKeyDedupe(){const seen=new Map();for(const m of mons){if(m.tmp)continue;const k=mobKey(m),n=(seen.get(k)||0)+1;seen.set(k,n);if(n>1)m.nk=k+'~'+n;}}
-function entId(e){const I=Satisfy.ids;if(!e)return null;if(e===P)return I.entity('p',NET&&NET.uid||'me');if(e.type&&MT[e.type]&&!e.real)return I.entity('m',mobKey(e));if(e.uid)return I.entity('p',e.uid);if(e.id&&npcs.includes(e))return I.entity('n',e.id);return null;}
+function mobKeyDedupe(){const all=new Set(),seen=new Set();for(const m of mons)if(!m.tmp)all.add(mobKey(m));
+ for(const m of mons){if(m.tmp)continue;const k=mobKey(m);if(!seen.has(k)){seen.add(k);continue;}let dy=1,nk;do nk=m.type.toLowerCase()+'@'+(m.sx|0)+','+((m.sy|0)+dy++);while(all.has(nk));all.add(nk);seen.add(nk);m.nk=nk;}}
+function entId(e){const I=Satisfy.ids;if(!e)return null;if(e===P)return I.entity('p',NET&&NET.uid||'me');if(e.type&&MT[e.type]){return e.real||e.tmp?null:I.entity('m',mobKey(e));}if(e.uid)return I.entity('p',e.uid);if(e.id&&npcs.includes(e))return I.entity('n',e.id);return null;}
 /* Plan U141 (2026-10-26): the marsh's chests. A mimic gives itself away if you watch it: every few seconds (MIMP) its lid
    lifts a crack on a row of teeth and it drools; on the minimap and the map it's no monster. Three real chests stand among them, drawn
    the same, each with a needle trap: E starts the needle's sweep, and E again while it's in the green disarms the trap and
@@ -18966,7 +18969,7 @@ var MOBN,MOBP,MOB_MS=250,MOB_MAX=100,MOB_BX=700,MOB_BY=450; // the host lists mo
    while the host's copy, the one everyone sees, lost a fraction of it. Now the cap is the monster's whole health (at least
    1,000,000): a hit can do at most what kills it. SAT-ONLINE-214 */
 function mobCap(m){return Math.max(1e6,Math.round((m&&m.max)||0));}
-function mobKey(m){return m.nk||(m.nk=m.type+'@'+(m.sx|0)+','+(m.sy|0));}
+function mobKey(m){return m.nk||(m.nk=m.type.toLowerCase()+'@'+(m.sx|0)+','+(m.sy|0));}   // the rules take [a-z0-9_]{1,16}@x,y only (mobs/…/m/$k): Ren's War's ferB/chuckB in lower case
 // bosses too (Twister 2026-10-19: a boss stood in one place for one player and elsewhere for the friends who arrived): the
 // group's host moves and fights every outdoor boss, world and event ones included, and the others follow its copy. Adds, arena,
 // siege and trial monsters stay on one client.

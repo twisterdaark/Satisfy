@@ -8,8 +8,10 @@
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
     { v: '2026-10-26plan13', ver: '3.46', d: '2026-10-27',
-      ar: ["أونلاين: كان فيه 5 أزواج وحوش من نفس النوع واقفين على نفس المكان، وكانوا عند أعضاء البارتي وحش واحد (التاني واقف زي الخيال). دلوقتي كل وحش ليه اسمه على الشبكة."],
-      en: ["Online: five pairs of monsters of one kind stood on the same spot and were one monster on party members' screens (the other stood still like a ghost). Every monster now has a name of its own on the network."] },
+      ar: ["أونلاين: كان فيه 5 أزواج وحوش من نفس النوع واقفين على نفس المكان، وكانوا عند أعضاء البارتي وحش واحد (التاني واقف زي الخيال). دلوقتي كل وحش ليه اسمه على الشبكة.",
+        "أونلاين: جنب أعمدة حارس الغابة وفرقة الأورك، وفي حرب رين، مشاركة الوحوش كانت بتقف للبارتي كلها (قاعدة البيانات كانت بترفض أساميهم). اتصلحت."],
+      en: ["Online: five pairs of monsters of one kind stood on the same spot and were one monster on party members' screens (the other stood still like a ghost). Every monster now has a name of its own on the network.",
+        "Online: by the Guardian of the Forest's pillars, the orc warband and in Ren's War, monster sharing stopped for the whole party (the database refused their names). Fixed."] },
     { v: '2026-10-26plan12', ver: '3.45', d: '2026-10-26',
       ar: ["صناديق المستنقع: الميميك بيفضح نفسه لو بصيت كويس، كل كام ثانية غطاه بيتفتح شوية على سنانه وبيريّل. وفيه 3 صناديق حقيقية وسطهم، كل واحد فيه فخ إبرة: دوس E وبعدين E تاني والإبرة في الأخضر تفتحه (دهب وساعات جوهرة)، غير كده الإبرة تسمّك. بيتملي تاني كل 20 دقيقة.",
         "سيد مصاصين الدماء: أول ما يزأر بياخد طريق من اتنين حسب الساعة: بالليل خفافيش الضعف وأسرع، وبالنهار درع دم وعضّته بترجعله صحة أكتر.",

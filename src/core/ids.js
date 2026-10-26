@@ -87,14 +87,15 @@
   }
 
   /* Entity ids (plan U311): one scheme for what stands in the world.
-   *   'm:' + the monster's network key (mobKey: kind@spawnX,spawnY, made unique at the world's build; a band's or an
-   *          event's own keys), the same on every screen and kept through respawns
+   *   'm:' + the monster's network key (mobKey: kind@x,y, the shape the database rules take, made unique at the
+   *          world's build), the same on every screen and kept through respawns
    *   'n:' + the NPC's id
    *   'p:' + the player's network uid ('p:me' offline)
    * entity(kind, key) builds one and throws on a bad kind or key; parseEntity(id) gives {kind, key} back, or null. */
-  var ENT_RE = /^[mnp]:[A-Za-z0-9_@,.~#:-]{1,96}$/;
+  var ENT_RE = /^[mnp]:[A-Za-z0-9_@,:-]{1,96}$/;   // NPC ids and Firebase uids carry upper case; monster keys '@', ',' and '-'
   function entity(kind, key) {
     if (kind !== 'm' && kind !== 'n' && kind !== 'p') throw new Error('bad entity kind: ' + kind);
+    if (key == null || key === '') throw new Error('no entity key');
     var id = kind + ':' + String(key);
     if (!ENT_RE.test(id)) throw new Error('bad entity key: ' + key);
     return id;
