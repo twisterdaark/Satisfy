@@ -5,7 +5,7 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.61) |
+| | At the count | Now (v3.62) |
 |---|---|---|
 | Done | 233 | 292 |
 | Partly there (something left) | 92 | 38 |
@@ -43,6 +43,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.59 (Claude-B): U179 (the Storm Temple's rods shared by every player there).
 - v3.60 (Claude-B): U293 (dancing together on Patrian's stage).
 - v3.61 (Claude-B): U192 (Regas's parry and dodge drill).
+- v3.62 (Claude-B): U180 bind rule (stolen wyvern eggs bound to the thief).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -207,7 +208,7 @@ Checked 2026-10-26 against `/home/claude/satisfy-aud` (main @ 8a2e4f1e, v3.15). 
 | U177 | Orc encampment raid | reject | The scouts/barracks/alarm raid is invented (§82/§90). The Frostlight Orc camp of ch 3 (zOrc, `fochief`, story gj5/gj6, `regression/sets`) is already in, and monster flares and war cries exist (Bandit Scout flare, `mv` war cry) |
 | U178 | Golem vault | reject | Invented dungeon (§82/§90). The golems of the Grey Forest (gj3) and the Golem War (golemW, gj7/gj8, Defense War II) are in. The Storm Lord's rods already cover a shield break (`p3Atk`) |
 | U179 | Storm temple | done (v3.59) | The Storm Temple (`STT`, v1.30, `regression/p3world`, which names U179): lightning where you stand, the Storm Lord takes 1/10 until four rods are grounded (E, 2 s still). Missing: the rods are each player's own (the P3 comment says "rods, eggs and the covenant are each player's own, so nothing new is published"), so there is no single shared switch state and no team effort v3.59: the rods are the whole temple's: a rod another player in or near the temple holds grounded counts for you too (published in the fx "st:" tag as I J K Y), so players can ground the four together; it charges again when they leave or the Storm Lord falls (`p3RemRods`, `regression/u179`). |
-| U180 | Wyvern nest | part | The wyvern nest (`WYN`), the Wyvern Queen, drakes; stealing an egg (`p3egg`) sets the nest on you (`regression/p3world`, which names U180). Missing: eggs are per player and come back 10 min after each spot (`p3S().egg`), with no per-world limit and no bind rule (they sell as `wegg`) |
+| U180 | Wyvern nest | part | The wyvern nest (`WYN`), the Wyvern Queen, drakes; stealing an egg (`p3egg`) sets the nest on you (`regression/p3world`, which names U180). Missing: eggs are per player and come back 10 min after each spot (`p3S().egg`), with no per-world limit and no bind rule (they sell as `wegg`) v3.62 (owner's card: eggs only): a stolen egg is bound to the thief (`S.p3.eggB`, never more than held): merchants and crafts take it, the players' auction and the guild vault only the free ones (`matFree`, `regression/u180`). Left: a per-world limit (rules or D3). |
 | U181 | Hell gauntlet | reject | Duplicate. Behen's 66 islands send you back to the last island reached and a finished island never respawns (`regression/behengo`). The Tower of Trials has "Continue from floor {n}". The Tower of Wisdom and the Abyss floors (zAbyss1–3) are in too. A new "hell" copy would be invented |
 | U182 | Great Demon trial | done | The great demons as raids. Berith: invulnerable 75/50/25%, the distorted reality at 60/35%, +20% at 30%, the hell, pay by your part (`regression/berith`). Belial: the hell field, the Mirror Shield, the fake gauge, her final form, meteors (`regression/belial`). No network one-shot: a follower is hurt only by attacks it replays and can dodge (`regression/mobsync`), and big hits reach the host whole (`regression/mobbighit`) |
 | U183 | Dragon siege | reject | Duplicates U189: the Saturday world-boss hunt with Trauka's week, on the calendar, announced 10 min before, opt-in transport, one title and hunt mark per killer (`regression/hunt`), and one shared world-boss timer (`regression/worldboss`) |

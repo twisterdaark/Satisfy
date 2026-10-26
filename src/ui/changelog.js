@@ -7,6 +7,14 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26u180', ver: '3.62', d: '2026-10-26',
+      ar: ["بيض الوايفرن المسروق من العش بقى مربوط باللي سرقه: يتباع للتجار ويدخل في الصناعة، بس مايتحطش في المزاد ولا خزنة النقابة.",
+        "البيض اللي بيقع من ملكة الوايفرن يفضل حر زي ما هو.",
+        "اختبار جديد لده."],
+      en: ["A wyvern egg stolen from the nest is now bound to the thief: it sells to merchants and goes into crafts, but not to the auction or the guild vault.",
+        "Eggs the Wyvern Queen drops stay free as before.",
+        "A new test for this."],
+      hide: [2] },
     { v: '2026-10-26u192', ver: '3.61', d: '2026-10-26',
       ar: ["مهمة جديدة من ريجاس بعد مسابقة شركة ميرو: «تمرين ريجاس». بيتمرّن معاك وهو ماسك إيده، وضرباته باينة قبلها.",
         "عشان تخلّصها: اتفادى 4 من ضرباته وصد 4 بالجارد في آخر لحظة. المهمة اختيارية ومش بتوقف قصة الجولمات.",
