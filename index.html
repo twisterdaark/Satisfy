@@ -5873,10 +5873,19 @@ function npcSkill(n,tg,live){const k=NPSK[strH(String(n.id))%NPSK.length],a=Math
  else if(k==='dash'){const ox=n.x,oy=n.y;npcStep(n,tg.x-Math.cos(a)*12,tg.y-Math.sin(a)*6,900,.06);fx.push({bolt:[[ox,oy-10],[n.x,n.y-10]],t:.15});vfx('xcut',tg.x,monY(tg),{raw:1,color:'#ffe0a0',big:1});npcDmg(n,tg,.16);}
  else if(k==='volley'){const ts=live.filter(m=>!m.dead&&Math.hypot(m.x-n.x,m.y-n.y)<120).slice(0,4);vfx('flyBlades',n.x,n.y-10,{raw:1,pts:ts.map(m=>[m.x,monY(m)]),color:'#d8e8ff'});for(const m of ts)npcDmg(n,m,.08);}
  else{vfx('shock',n.x,n.y+2,{raw:1,radius:56,color:'#e8c890'});vfx('dust',n.x,n.y,{n:10});for(const m of live)if(!m.dead&&Math.hypot(m.x-n.x,m.y-n.y)<58){npcDmg(n,m,.07);m.stun=Math.max(m.stun||0,.6);}}}
+/* (plan U305) day and night places on the world clock: at night the guards walk a short beat with a lantern, and the
+   shopkeepers shutter their counters and light a lamp, still selling through the hatch (one with room behind steps back a
+   tile and answers from that much further off). Quest givers, priests and innkeepers keep their places. Every screen online agrees: it is the clock */
+const NGRD=/^(guard|rguard|gateK)/,NSHOP=/^(merchant|armorer|grocer|market)/,NBEAT=1.6;
+const npcNight=n=>dnDark()>=.5&&!n.hidden&&n.y<WMH*TS&&(NGRD.test(n.id)||NSHOP.test(n.id));
+function npcSched(n,dt){const g=NGRD.test(n.id);if(!g&&!NSHOP.test(n.id))return;if(n.bx!=null&&Math.hypot(n.x-n.bx,n.y-n.by)>TS*4)n.bx=null;   /* moved by a story: that is the new post */
+ if(n.bx==null){n.bx=n.x;n.by=n.y;n.dir0=n.dir||0;n.rch0=n.reach||0;let h=0;for(const c of n.id)h=(h*31+c.charCodeAt(0))>>>0;n.bh=h%628/100;}
+ const nt=dnDark()>=.5;let tx=n.bx,ty=n.by;if(nt&&g)tx=n.bx+Math.sin(wNow()/5200+n.bh)*TS*NBEAT;else if(nt&&!solidT(n.bx/TS|0,(n.by-TS)/TS|0))ty=n.by-TS;
+ n.shut=nt&&!g;n.sy=ty!==n.by?n.by:n.by+7;n.reach=n.rch0+(ty!==n.by?16:0);   /* against a wall: the shutter is drawn at their feet, a counter */if(!npcStep(n,tx,ty,30,dt)&&!(nt&&g)){n.x=tx;n.y=ty;if(n.dir!==n.dir0){n.dir=n.dir0;n.at=0;}}}
 function npcFight(dt){const T=EV&&EV.e.tw?TOWNS.find(T=>T.k===EV.e.tw):null,live=T?EV.mons.filter(m=>!m.dead):[];
  for(const n of npcs){if(n.hidden||n.obj||n.y>=WMH*TS||p6Ally(n.id)||npcKO(n.id))continue;   // a knocked-out one lies where it fell
   const atWar=T&&Math.hypot((n.hx??n.x)-T.rx*TS,(n.hy??n.y)-T.ry*TS)<=(T.x1-T.x0)*TS;
-  if(!atWar){if(n.hx!=null&&!npcStep(n,n.hx,n.hy,40,dt)){n.x=n.hx;n.y=n.hy;n.hx=n.hy=null;}continue;}   // the invasion is over (or not here): back to their post
+  if(!atWar){if(n.hx!=null){if(!npcStep(n,n.hx,n.hy,40,dt)){n.x=n.hx;n.y=n.hy;n.hx=n.hy=null;}}else npcSched(n,dt);continue;}   // the invasion is over (or not here): back to their post
   if(n.hx==null){n.hx=n.x;n.hy=n.y;}n.acd=(n.acd||0)-dt;n.skT=(n.skT??(2+rand()*4))-dt;
   const ft=NPCF.test(n.id);let tg=null,bd=ft?240:90;for(const m of live){const d=Math.hypot(m.x-n.x,m.y-n.y);if(d<bd&&(!ft||Math.hypot(m.x-n.hx,m.y-n.hy)<320)){bd=d;tg=m;}}
   if(!tg){npcStep(n,n.hx,n.hy,40,dt);continue;}
@@ -5886,7 +5895,7 @@ function npcFight(dt){const T=EV&&EV.e.tw?TOWNS.find(T=>T.k===EV.e.tw):null,live
   if(bd>26||n.acd>0)continue;n.acd=1.1;n.dir=Math.abs(tg.x-n.x)>Math.abs(tg.y-n.y)?(tg.x>n.x?2:3):(tg.y>n.y?0:1);npcDmg(n,tg,.09);vfx('slash',tg.x,monY(tg),{angle:Math.atan2(tg.y-n.y,tg.x-n.x),rarity:1});}}
 Object.assign(STR.ar,{nsk_whirl:'ضربة دوّارة!',nsk_dash:'اندفاع!',nsk_volley:'وابل نصال!',nsk_quake:'زلزلة!'});
 Object.assign(STR.en,{nsk_whirl:'Whirling Cut!',nsk_dash:'Dash!',nsk_volley:'Blade Volley!',nsk_quake:'Quake!'});
-window.__GNW={fight:dt=>npcFight(dt)}; // tests
+window.__GNW={fight:dt=>npcFight(dt),sched:(n,dt)=>npcSched(n,dt),night:n=>npcNight(n)}; // tests
 // where to go (Nitro's feedback: 'how do I get there?'): an arrow toward the event and how far, or a line for events that
 // happen everywhere. Distance in tiles, the unit of the big map
 function evArrow(tx,ty){if(!P)return '';const dx=tx*TS+8-P.x,dy=ty*TS+8-P.y,d=Math.round(Math.hypot(dx,dy)/TS);if(d<4)return ' · '+esc(t('evHere'));
@@ -11905,7 +11914,7 @@ function p3EnvOpts(){if(!qDone('vc2'))return [];const s=p3S();return [{l:t(s.cov
 const P3SP={ice:p=>{ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);R(ctx,-5,-1,8,3,'#7ac8f0');R(ctx,-3,0,6,1,'#e8f8ff');R(ctx,3,-1,2,3,'#d8f4ff');ctx.restore();if(rand()<.3)fx.push({x:p.x,y:p.y,vx:0,vy:6,t:.3,c:'#bfe8ff'});},
  bolt:p=>{ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.strokeStyle='#fff27a';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-8,0);ctx.lineTo(-4,-3);ctx.lineTo(-1,2);ctx.lineTo(3,-2);ctx.lineTo(6,0);ctx.stroke();R(ctx,5,-1,2,2,'#ffffff');ctx.restore();},
  blood:p=>{blob(ctx,p.x,p.y,3,3,'#8a0a1a');R(ctx,p.x-1,p.y-1,2,2,'#e84a5a');if(rand()<.4)fx.push({x:p.x,y:p.y,vx:0,vy:10,t:.3,c:'#a81a2a'});}};
-function p3Ents(ents){if(!P)return;const near=(x,y)=>Math.abs(x-P.x)<VW&&Math.abs(y-P.y)<VH;vpEnts(ents,near);
+function p3Ents(ents){if(!P)return;const near=(x,y)=>Math.abs(x-P.x)<VW&&Math.abs(y-P.y)<VH;vpEnts(ents,near);shutEnts(ents,near);
  for(let i=0;i<4;i++){const p=p3RodXY(i);if(!near(p.x,p.y))continue;const on=!P3.rod[i];ents.push({y:p.y,f:()=>{const x=p.x,y=p.y;R(ctx,x-4,y-2,8,3,'#4a4a52');R(ctx,x-1,y-30,2,29,'#8a8e9a');R(ctx,x,y-30,1,29,'#c8ccd6');
    ctx.fillStyle=on?'#fff27a':'#5a6478';ctx.beginPath();ctx.arc(x,y-32,2.5,0,7);ctx.fill();
    if(on){if((gTime*9+i|0)%3===0){ctx.strokeStyle='rgba(255,242,122,.9)';ctx.beginPath();ctx.moveTo(x,y-32);ctx.lineTo(x+(rand()-.5)*14,y-38-rand()*6);ctx.stroke();}
@@ -11963,8 +11972,13 @@ function dnDraw(){if(!P||!S||mode==='title'||mode==='lang'||!outdoors())return;i
  if(h>=16.5&&h<19){ctx.fillStyle=`rgba(255,120,40,${(.07*Math.min(1,(h-16.5)/1.5,(19-h)/.8)).toFixed(3)})`;ctx.fillRect(0,0,VW,VH);}
  if(h>=4&&h<6.5){ctx.fillStyle=`rgba(255,170,190,${(.05*Math.min(1,(h-4)/.8,(6.5-h)/1)).toFixed(3)})`;ctx.fillRect(0,0,VW,VH);}
  if(k<=0)return;dg.globalCompositeOperation='source-over';dg.clearRect(0,0,VW,VH);dg.fillStyle=`rgba(6,10,34,${(.55*k).toFixed(3)})`;dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='destination-out';
- const px=P.x-camX,py=P.y-8-camY,g=dg.createRadialGradient(px,py,14,px,py,150);g.addColorStop(0,'rgba(0,0,0,.85)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(0,0,VW,VH);dg.globalCompositeOperation='source-over';
- ctx.drawImage(darkC,0,0);}
+ const px=P.x-camX,py=P.y-8-camY,g=dg.createRadialGradient(px,py,14,px,py,150);g.addColorStop(0,'rgba(0,0,0,.85)');g.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=g;dg.fillRect(0,0,VW,VH);
+ const LT=[];for(const n of npcs){if(!npcNight(n))continue;const x=n.x-camX,y=n.y-12-camY;if(x<-70||y<-70||x>VW+70||y>VH+70)continue;LT.push([x,y]);const q=dg.createRadialGradient(x,y,3,x,y,60);q.addColorStop(0,'rgba(0,0,0,.7)');q.addColorStop(1,'rgba(0,0,0,0)');dg.fillStyle=q;dg.fillRect(x-60,y-60,120,120);}   /* (plan U305) the guards' lanterns, the shopkeepers' lamps */
+ dg.globalCompositeOperation='source-over';
+ ctx.drawImage(darkC,0,0);for(const [x,y] of LT){ctx.fillStyle='rgba(255,200,110,.9)';ctx.fillRect(Math.round(x)+5,Math.round(y)+3,2,3);}}
+// (plan U305) a shopkeeper's counter shuttered for the night, a hatch left open
+function shutEnts(ents,near){for(const n of npcs){if(!n.shut||n.hidden||n.bx==null||!near(n.bx,n.by))continue;const x=Math.round(n.bx),y=Math.round(n.sy);
+ ents.push({y:y+2,f:()=>{R(ctx,x-9,y-13,18,12,'#5a3a22');for(let i=0;i<4;i++)R(ctx,x-9,y-12+i*3,18,1,'#7a5232');R(ctx,x-3,y-11,6,4,'#1a120a');R(ctx,x-9,y-13,18,1,'#2a1a0e');R(ctx,x-9,y-2,18,1,'#2a1a0e');}});}}
 // the envoy and the prince keep out of the sun under black parasols
 function vpEnts(ents,near){if(isNight())return;for(const n of npcs){if(n.id!=='vcenv'&&n.id!=='vprince'||n.hidden||n.y>=WMH*TS||!near(n.x,n.y))continue;
  ents.push({y:n.y+1,f:()=>{const x=Math.round(n.x),y=Math.round(n.y);ctx.save();ctx.globalAlpha=.22;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(x,y,13,4,0,0,7);ctx.fill();ctx.restore();
