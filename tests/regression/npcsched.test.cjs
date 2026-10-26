@@ -18,7 +18,9 @@ test('guards walk a night beat, shopkeepers shutter their counters, and all are 
     const day = await at();
     await g.eval(() => window.__GVP.force(23));
     const xs = new Set();
-    for (let i = 0; i < 12; i++) { await g.step(40); xs.add((await at()).g[0]); }
+    // the beat follows the world clock (wNow), the real one in the harness: move it on by hand, so the machine's speed doesn't matter
+    await g.eval(() => { const t0 = Date.now(); window.__dnK = 0; Date.now = () => t0 + window.__dnK; });
+    for (let i = 0; i < 12; i++) { await g.eval((k) => { window.__dnK = k * 900; }, i + 1); await g.step(40); xs.add((await at()).g[0]); }
     const night = await at();
     assert.ok(xs.size > 3, 'the guard walks: ' + [...xs].join(','));
     assert.ok([...xs].every((x) => Math.abs(x - day.g[0]) <= 27), 'a short beat, 1.6 tiles each way');

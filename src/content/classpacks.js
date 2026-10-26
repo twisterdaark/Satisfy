@@ -90,7 +90,7 @@
         sk('wcinsight', 'Insight', 'البصيرة', 'The commander sees the field: +8% critical chance.', 'القائد شايف الميدان: +8% فرصة كريتيكال.', 120, 'pas', { stat: 'crit', pct: 0.08 }),
         sk('wcarmy', 'Army Capacity', 'سعة الجيش', '+15% health.', '+15% صحة.', 120, 'pas', { stat: 'hp', pct: 0.15 }),
         sk('wcsweep', 'Commander\'s Sweep', 'كنسة القائد', 'A wide cut in front.', 'ضربة عريضة قدامك.', 130, 'cone', { r: 65, mul: 2.2, mp: 18, cd: 7 }),
-        sk('wchold', 'Hold the Line', 'اثبتوا', '+30% defence for 15 s, to you and your party within 10 m.', '+30% دفاع لمدة 15 ثانية، ليك ولفريقك اللي في حدود 10 متر.', 150, 'buff', { stat: 'def', pct: 0.3, dur: 15, mp: 24, cd: 40, party: 'N' })
+        sk('wchold', 'Hold the Line', 'اثبتوا', '+30% defence for 15 s, to you and your party within 10 m.', '+30% دفاع لمدة 15 ثانية، ليك ولفريقك اللي في حدود 10 متر.', 150, 'buff', { stat: 'def', pct: 0.3, dur: 15, mp: 24, cd: 40, party: 'Y' })
       ] },
     // Katz (ch181, 421, 470): the epic Blood Warrior; Blood-Sucking, Blood of One Thousand People, more blood more power
     { id: 'bloodw', n: { en: 'Blood Warrior', ar: 'محارب الدم' }, root: 'warrior', from: ['warrior', 'berserker', 'knight'], by: 'tw', lv: 150, mst: ['sword', 6], col: '#b0102a',

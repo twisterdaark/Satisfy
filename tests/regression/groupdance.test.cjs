@@ -1,7 +1,7 @@
 'use strict';
 // v3.24 (plan U293) A group dance on Patrian's stage: a dance starts on the world clock's next 6 s beat with that beat's arrows,
 // so two players who step on for the same beat dance the same sequence, see each other's steps, and score as a troupe; a
-// good troupe earns a title, not gold.
+// good troupe is told so (no title: the owner keeps titles few), not paid.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -13,7 +13,7 @@ async function settle(...games) {
 }
 const KEY = { L: 'ArrowLeft', U: 'ArrowUp', R: 'ArrowRight', D: 'ArrowDown' };
 
-test('two dancers on one beat: the same arrows, each other in the count, and the troupe title', async () => {
+test('two dancers on one beat: the same arrows, each other in the count, and the troupe\'s score', async () => {
   const ctx = await H.newContext();
   const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
   const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
@@ -36,9 +36,9 @@ test('two dancers on one beat: the same arrows, each other in the count, and the
     }
     await a.page.waitForTimeout(1500); await settle(a, b);
     for (const g of [a, b]) {
-      assert.equal(await g.eval(() => !!(window.__G.S.tl && window.__G.S.tl.troupe)), true, "Patrian's Stage Troupe");
+      assert.equal(await g.eval(() => !!(window.__G.S.tl && window.__G.S.tl.troupe)), false, 'no title');
       const ts = await g.eval(() => [...document.querySelectorAll('#toasts > *')].map((e) => e.textContent).join(' | '));
-      assert.match(ts, /A group dance: 2 dancers, 20 of 20 steps right together/);
+      assert.match(ts, /A group dance: 2 dancers, 20 of 20 steps right together\. A fine troupe!/);
     }
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }

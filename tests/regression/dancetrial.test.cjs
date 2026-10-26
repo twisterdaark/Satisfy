@@ -29,7 +29,7 @@ test('the sword dance trial: a new fusion, a wrong dance, a late one', async () 
     await g.eval(() => { const T = window.__GTRL; T.start(T.list().find((x) => x.f === 'lkill')); });
     await g.step(150);
     assert.equal(await g.eval(() => window.__GTRL.R), null, 'more than 2 s: the trial is lost');
-    const ts = await g.eval(() => [...document.querySelectorAll('#toasts > *')].map((e) => e.textContent).join(' | '));
+    const ts = await g.eval(() => window.__GDB.log());   // the message log: the toasts on screen are a handful, and the skills learned push these off
     assert.match(ts, /Wrong dance: the mural called/); assert.match(ts, /came too late/);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }

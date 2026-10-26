@@ -1,5 +1,5 @@
 'use strict';
-// v3.24 (plan U070) The War Commander's Order and Hold the Line reach the party within 10 m (status 'O' and 'N' in the
+// v3.24 (plan U070) The War Commander's Order and Hold the Line reach the party within 10 m (status 'O' and 'Y' in the
 // presence); party buffs stack to twice the damage at most and to 40% of the damage taken at least; Guard Link isn't given
 // by a fallen knight.
 const test = require('node:test');
@@ -39,7 +39,7 @@ test("the commander's Order and Hold the Line on a party mate, and the caps", as
     assert.ok(ord[1] < base[1] * 0.9, 'and less taken: ' + ord[1]);
     await a.eval(() => { const P = window.__G.P; P.mp = 1e6; P.cd = {}; window.__GSS2.cast('wchold'); });
     await settle(a, b);
-    await until([b], () => window.__GPWC.near('N', 160));
+    await until([b], () => window.__GPWC.near('Y', 160));
     const both = await b.eval(() => window.__GPWC.hurt(1000));
     assert.ok(both < ord[1], 'Hold the Line on top: ' + both);
     // the caps: every damage aura at once is at most twice; every guard at once leaves at least 40%

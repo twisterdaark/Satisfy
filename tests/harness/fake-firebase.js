@@ -471,16 +471,16 @@
     if (v === null) return old ? null : 'PERMISSION_DENIED: legend remove';
     return Object.keys(v).sort().join(',') === 'n,t,uid' && v.uid === user.uid && typeof v.n === 'string' && v.n.length >= 1 && v.n.length <= 24 && JSON.stringify(v.t) === JSON.stringify(SV) ? null : 'legend fields';
   }
-  // U365 (v3.24): world/satisfy/rw/{uid} {n, t}: your own count, only up, at most 300 a write and every 20 s (the fake keeps
+  // U365 (v3.24): world/satisfy/rw/{uid} {n, t}: your own count, only up, at most 50 a write and every 30 s (the fake keeps
   // stored timestamps as written, so it remembers when each one was written itself)
   const rwAt = new Map();
   function rwRules(seg, v) {
     if (!user || seg.length !== 4 || seg[1] !== 'satisfy' || seg[3] !== user.uid) return 'PERMISSION_DENIED: ' + seg.join('/');
     const k = seg.join('/'), old = data.get(k), now = Date.now();
     if (v === null) return 'PERMISSION_DENIED: rw remove';
-    if (old && rwAt.has(k) && now - rwAt.get(k) < 20000) return 'PERMISSION_DENIED: rw too soon';
+    if (old && rwAt.has(k) && now - rwAt.get(k) < 30000) return 'PERMISSION_DENIED: rw too soon';
     if (!v || Object.keys(v).sort().join(',') !== 'n,t' || !isInt(v.n, 0) || v.n > 1e6 || JSON.stringify(v.t) !== JSON.stringify(SV)) return 'rw fields';
-    if (!(old ? v.n >= old.n && v.n <= old.n + 300 : v.n <= 300)) return 'rw step';
+    if (!(old ? v.n >= old.n && v.n <= old.n + 50 : v.n <= 50)) return 'rw step';
     rwAt.set(k, now); return null;
   }
   // SAT-ONLINE-055 rankings: ranks/{lv|gold}/{uid} {v, n, t}, each player its own
