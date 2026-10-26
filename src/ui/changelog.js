@@ -7,6 +7,14 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26u179', ver: '3.59', d: '2026-10-26',
+      ar: ["أعمدة البرق في معبد العاصفة بقت مشتركة: العمود اللي لاعب تاني في المعبد أرّضه بيتحسب ليك كمان، فممكن تأرّضوا الأربعة سوا وكل واحد ياخد عمود.",
+        "العمود بيرجع يتشحن لما اللي أرّضه يمشي من المعبد، أو لما سيد العاصفة يموت.",
+        "اختبار جديد لده."],
+      en: ["The Storm Temple's lightning rods are now shared: a rod another player in the temple grounded counts for you too, so you can ground the four together, one each.",
+        "A rod charges again when the player who grounded it leaves the temple, or when the Storm Lord falls.",
+        "A new test for this."],
+      hide: [2] },
     { v: '2026-10-26braham', ver: '3.58', d: '2026-10-26',
       ar: ["إصلاح: وريث براهام بقى يقدر يتعلم تعاويذ الأرشميج في برج السحرة ويستخدم كتبه، زي أي ساحر.",
         "وكمان وريث مولر (قديس السيف) بقى محسوب من عيلة المحارب في الكويستات والحاجات اللي بتطلب محارب.",

@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.57) |
+| | At the count | Now (v3.59) |
 |---|---|---|
-| Done | 233 | 289 |
-| Partly there (something left) | 92 | 41 |
+| Done | 233 | 290 |
+| Partly there (something left) | 92 | 40 |
 | Not started | 11 | 6 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **47** (41 + 6) |
+| **Left to build** | **103** (92 + 11) | **46** (40 + 6) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -39,6 +39,8 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.55 (Claude-B): U135 (cultists raise skeletons).
 - v3.56 (Claude-B): U127 (the Storm Elemental conducts in the rain, weaker while moving).
 - v3.57 (Claude-B): U070 (the Order reaches the party, party auras capped, Guard Link needs a live partner).
+- v3.58 (Claude-B): hotfix: Braham's Successor learns the Archmage's spells (CROOT braham/saint).
+- v3.59 (Claude-B): U179 (the Storm Temple's rods shared by every player there).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -202,7 +204,7 @@ Checked 2026-10-26 against `/home/claude/satisfy-aud` (main @ 8a2e4f1e, v3.15). 
 | U176 | Vampire catacombs | part | The Vampire Catacombs (zCata, Lv 280+) are under the Vampire City. Light only near you (`p3Dark`); thralls, knights and the Vampire Lord heal on what they hit (`regression/p3world`, which names U176); monsters are shared through the host. Missing: a branching boss. The test "damage and healing server based" needs a server (D3) v3.48: the Vampire Lord's fight branches at his first roar, by the world's clock (the same on every screen): by night twice the bats at each roar and 15% faster; by day a blood shield (15% less damage) and half again the health his bites drink; healed back to full he chooses again (`vlBranch`; `regression/plan12`). Left: the server check of damage and healing (D3). |
 | U177 | Orc encampment raid | reject | The scouts/barracks/alarm raid is invented (§82/§90). The Frostlight Orc camp of ch 3 (zOrc, `fochief`, story gj5/gj6, `regression/sets`) is already in, and monster flares and war cries exist (Bandit Scout flare, `mv` war cry) |
 | U178 | Golem vault | reject | Invented dungeon (§82/§90). The golems of the Grey Forest (gj3) and the Golem War (golemW, gj7/gj8, Defense War II) are in. The Storm Lord's rods already cover a shield break (`p3Atk`) |
-| U179 | Storm temple | part | The Storm Temple (`STT`, v1.30, `regression/p3world`, which names U179): lightning where you stand, the Storm Lord takes 1/10 until four rods are grounded (E, 2 s still). Missing: the rods are each player's own (the P3 comment says "rods, eggs and the covenant are each player's own, so nothing new is published"), so there is no single shared switch state and no team effort |
+| U179 | Storm temple | done (v3.59) | The Storm Temple (`STT`, v1.30, `regression/p3world`, which names U179): lightning where you stand, the Storm Lord takes 1/10 until four rods are grounded (E, 2 s still). Missing: the rods are each player's own (the P3 comment says "rods, eggs and the covenant are each player's own, so nothing new is published"), so there is no single shared switch state and no team effort v3.59: the rods are the whole temple's: a rod another player in or near the temple holds grounded counts for you too (published in the fx "st:" tag as I J K Y), so players can ground the four together; it charges again when they leave or the Storm Lord falls (`p3RemRods`, `regression/u179`). |
 | U180 | Wyvern nest | part | The wyvern nest (`WYN`), the Wyvern Queen, drakes; stealing an egg (`p3egg`) sets the nest on you (`regression/p3world`, which names U180). Missing: eggs are per player and come back 10 min after each spot (`p3S().egg`), with no per-world limit and no bind rule (they sell as `wegg`) |
 | U181 | Hell gauntlet | reject | Duplicate. Behen's 66 islands send you back to the last island reached and a finished island never respawns (`regression/behengo`). The Tower of Trials has "Continue from floor {n}". The Tower of Wisdom and the Abyss floors (zAbyss1–3) are in too. A new "hell" copy would be invented |
 | U182 | Great Demon trial | done | The great demons as raids. Berith: invulnerable 75/50/25%, the distorted reality at 60/35%, +20% at 30%, the hell, pay by your part (`regression/berith`). Belial: the hell field, the Mirror Shield, the fake gauge, her final form, meteors (`regression/belial`). No network one-shot: a follower is hurt only by attacks it replays and can dodge (`regression/mobsync`), and big hits reach the host whole (`regression/mobbighit`) |
