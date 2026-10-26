@@ -7,7 +7,7 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
-    { v: '2026-10-26plan8', ver: '3.37', d: '2026-10-26',
+    { v: '2026-10-26plan8', ver: '3.38', d: '2026-10-26',
       ar: ["حواليين عرين حارس الغابة بقى فيه حلقة متفرجين من حجارة بيضا: اللي واقف فيها الحارس مش بيروحله ومش بيضربه، وهو كمان مش بيقدر يضرب الحارس من هناك.",
         "كل قطعة بقت فاكرة جت منين: وقعت من مين، أو من صندوق زعيم، أو اتشرت من مين، أو مكافأة مهمة، أو غنايم غارة. بتبان تحت المواصفات وبتفضل معاها في التبادل.",
         "جرعتين جداد عند عشّاب وينستون (كتبهم): جرعة جلد الحجر (أعشاب وحديد: ضرب أقل 15%) وجرعة السرعة (عشب أزرق وفراولة: مشي أسرع 12%). والأعشاب الطازة (متقطفة من أقل من 10 دقايق) بتطلّع جرعة زيادة.",
@@ -16,6 +16,16 @@
         "Every piece now remembers where it came from: dropped by, a boss's chest, bought from, a quest's reward or raid loot. It shows under its stats and stays with it through trades.",
         "Two new potions from their books at Winston's herbalist: the Stoneskin Potion (herbs and iron: 15% less damage) and the Swiftness Potion (a blue herb and strawberries: 12% faster on foot). Herbs picked in the last 10 minutes brew one more potion.",
         "The Legendary Farmer's trial has a step before the Legendary Field: Bread for Others (20 wheat for Patrian's families)."] },
+    { v: '2026-10-26bzbuff1', ver: '3.37', d: '2026-10-26',
+      ar: ["براهام بقى أقوى: تعاويذه بتضرب حوالي 30% أكتر (4 صواريخ سحرية بدل 3، والنيزك 650%، والبرق المتسلسل بينط لـ8 وحوش، والعاصفة المتجمدة 400%، والنار والبرق ورمح التلج ونصل الريح والظلام والصواعق وسحب المانا كلهم أقوى)، ودرع براهام بقى 30% من صحتك و5 لكل نقطة ذكاء.",
+        "تأمل السحر: كل تعويذة ليك فيها 40% تطلع أقوى بـ40% (كان 30% و30%).",
+        "مهارة جديدة في لفل 300: سحر براهام المعزَّز. لمدة 15 ثانية تعاويذ براهام مبتاخدش مانا ووقت انتظارها بيبقى النص (غير الاستيعاب والانتقال الجماعي).",
+        "اختبار جديد لتقوية براهام، واختبار الباسيف بقى عارف إن مهارات باجما الحرفية بتعلى بالاستعمال مش بالقتل."],
+      en: ["Braham is stronger: his spells hit about 30% harder (four Magic Missiles instead of three, Meteor 650%, Chain Lightning leaps to 8 monsters, Frozen Tempest 400%, and Fire, Lightning, Ice Spear, Wind Cutter, Dark Cutter, Giga Lightning and Mana Drain all stronger), and Braham's Shield holds 30% of your health plus 5 per point of intelligence.",
+        "Magic Contemplation: each of your spells has a 40% chance to come out 40% stronger (was 30% and 30%).",
+        "New at level 300: Braham's Enhanced Magic. For 15 seconds Braham's spells cost no mana and their cooldowns are halved (not Assimilation or Mass Teleport).",
+        "A new test for Braham's buff, and the passives test knows Pagma's craft passives level by use, not kills."],
+      hide: [3] },
     { v: '2026-10-26plan7', ver: '3.36', d: '2026-10-26',
       ar: ["استدعاء البارتي: من لوحة البارتي (⇲) تقدر تطلب إن حد من البارتي ييجي لعندك. هو بيشوف مين وفين ويوافق بـY، والتمن بيتدفع منه بس لما يوافق. مفيش استدعاء من أو لمكان لفافة العودة متنفعش فيه (الأرينا، البرج، السباق، المبارزة...)، ولا لجوه دانجن أو أوضة، ولا من قارة للتانية.",
         "حارس الغابة بقى حواليه 4 أعمدة قديمة: كل عمود واقف بيقلل الضرب اللي بياخده الحارس 15%. كسّر الأعمدة الأول (مش بتضرب) أو اضرب من خلالها. العمود بيرجع بعد دقيقة ونص.",
