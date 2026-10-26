@@ -25,11 +25,13 @@ test('the rating penalty, Craftsmanship, Appraisal and Disassembly', async () =>
       S.lv = 40; const rare = G.isk.mkItem('failure', 1, 1); o.rare = +L.pen(rare).toFixed(2);
       S.cls = 'knight'; o.other = L.pen(it);
       S.cls = 'pagma'; o.craft = +L.craft().toFixed(4);
+      S.lv = 40; S.und[it.id] = 0; o.iatk = L.iatk(it) / (it.atk * 1); S.lv = 95; o.iatk2 = L.iatk(it) / (it.atk * 1);
       return o;
     });
     assert.deepEqual(r.sk, [true, true, true]);
     assert.equal(r.pen0, 0.5, 'a legendary piece below its level: half'); assert.equal(r.pen50, 0.75, 'half understood: a quarter'); assert.equal(r.pen100, 1, 'understood: none');
     assert.equal(r.over, 1, 'at its level: none'); assert.equal(r.rare, 0.8, 'a rare piece: 20%'); assert.equal(r.other, 1, 'only Pagma\'s Successor');
+    assert.ok(r.iatk < r.iatk2 * 0.6, 'the penalty is in the weapon\'s real attack: ' + r.iatk + ' vs ' + r.iatk2);
     assert.equal(r.craft, 0.1067, 'Craftsmanship Lv 1 (12% at Lv 2, 20% at Lv 8)');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }

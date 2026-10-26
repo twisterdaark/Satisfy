@@ -38,6 +38,12 @@ test('the plan, batch 1', async () => {
     const b0 = await g.eval(() => window.__tr.hp); await g.step(30); const b1 = await g.eval(() => window.__tr.hp);
     await g.eval(() => { const tr = window.__tr; tr.rgOffU = 0; tr.stun = 99; }); const c0 = await g.eval(() => window.__tr.hp); await g.step(30); const c1 = await g.eval(() => window.__tr.hp);
     assert.ok(a > 5e6, 'a troll closes its wounds: ' + a); assert.equal(b1, b0, 'not while it burns'); assert.equal(c1, c0, 'nor while it is stunned');
+    // (review) a real fire hit stops the regeneration; a ring hits inside its drawn ellipse; a rename follows the maker's mark
+    const rv = await g.eval(() => { const G = window.__G, S = G.S, P = G.P, L = window.__GLG3, tr = window.__tr; tr.rgOffU = 0; tr.stun = 0; window.__GU.hitMon(tr, 1, { el: 'fire' }); const burn = tr.rgOffU > L.now();
+      const m = { x: P.x, y: P.y }; const x0 = P.x, y0 = P.y; P.y = y0 + 40; const below = L.ringIn(m, 48); P.y = y0; P.x = x0 + 40; const side = L.ringIn(m, 48); P.x = x0;
+      const it = G.isk.mkItem('failure', 1, 1); it.by = 'Old'; it.byId = S.pid; S.items.push(it); const n0 = S.look.n; S.look.n = 'NewMaker'; window.__GCR.fix(); const by = it.by; S.look.n = n0; S.items.pop();
+      return { burn, below, side, by }; });
+    assert.deepEqual(rv, { burn: true, below: false, side: true, by: 'NewMaker' }, 'U122 fire, U123 the ellipse, U282 the rename');
     // U208: the journal tab
     const j = await g.eval(() => { const G = window.__G, S = G.S; const id = Object.keys(G.defs().QD || {})[0]; if (!id) return null; S.qs[id] = { st: 2, c: 1 };
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'n', code: 'KeyN', bubbles: true }));
