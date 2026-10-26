@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.23) |
+| | At the count | Now (v3.27) |
 |---|---|---|
-| Done | 233 | 255 |
-| Partly there (something left) | 92 | 70 |
+| Done | 233 | 263 |
+| Partly there (something left) | 92 | 62 |
 | Not started | 11 | 11 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **81** (70 + 11) |
+| **Left to build** | **103** (92 + 11) | **73** (62 + 11) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -24,6 +24,8 @@ Released since the count (the rows below say "done (v…)"; their text is still 
     one player's fire is seared on their screen and the host's, not on a third player's. A herb is shared only while it
     stands on the same tile on both screens (a regrown herb moves at random on each). The ready check rides in the party
     chat, so a member's client trusts the leader's line as the chat does.
+- v3.26 (batch 5b, PR for Claude-B's review; after main's v3.25, Pagma's creations; beside batch 5 on `claude-a/sat-online-256-plan5`, which has U285, U124, U141): U254 (the map's circles), U257 (the forge's odds), U262 (the auction's filters), U190 (Khan's steps), U380 (art provenance); U276 part (moving a gem).
+- v3.27 (batch 6, stacked on batch 5b; PR for Claude-B's review): U090 (plowing and watering), U115 (the scouts' rounds), U280 (torn recipe pages); U207 part (the weekly contracts; guild supply orders left).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -192,7 +194,7 @@ Checked 2026-10-26 against `/home/claude/satisfy-aud` (main @ 8a2e4f1e, v3.15). 
 | U181 | Hell gauntlet | reject | Duplicate. Behen's 66 islands send you back to the last island reached and a finished island never respawns (`regression/behengo`). The Tower of Trials has "Continue from floor {n}". The Tower of Wisdom and the Abyss floors (zAbyss1–3) are in too. A new "hell" copy would be invented |
 | U182 | Great Demon trial | done | The great demons as raids. Berith: invulnerable 75/50/25%, the distorted reality at 60/35%, +20% at 30%, the hell, pay by your part (`regression/berith`). Belial: the hell field, the Mirror Shield, the fake gauge, her final form, meteors (`regression/belial`). No network one-shot: a follower is hurt only by attacks it replays and can dodge (`regression/mobsync`), and big hits reach the host whole (`regression/mobbighit`) |
 | U183 | Dragon siege | reject | Duplicates U189: the Saturday world-boss hunt with Trauka's week, on the calendar, announced 10 min before, opt-in transport, one title and hunt mark per killer (`regression/hunt`), and one shared world-boss timer (`regression/worldboss`) |
-| U190 | Starter onboarding quests | part | Khan's chapter-one chain (q0–q8, kh1–kh4): walk to Khan, wood, quarry ore, Jaffa arrows at the anvil, selling to the hunting party, a sword, wolves, the greatsword. All of it works offline. Missing: a party step (and an explicit controls/dodge step) |
+| U190 | Starter onboarding quests | done (v3.26) | Khan's chapter-one chain (q0–q8, kh1–kh4): walk to Khan, wood, quarry ore, Jaffa arrows at the anvil, selling to the hunting party, a sword, wolves, the greatsword. All of it works offline. Missing: a party step (and an explicit controls/dodge step) v3.26: Khan's optional steps beside the chain: `khd` dodge three times (after kh1, the `dodge` event) and `khp` join a party (after kh3, online only: `QNEED.online`, the `party` event) (`regression/plan5b`). |
 | U191 | Khan crafting continuation | done | Khan's quests go on after kh4: cb (craft rare), kh5 North Hill, kh6 Praga, story gj1–gj2/gj5–gj6, pg1 Pagma's mural (`QD` by:'khan'). Known recipes are kept in the save (`S.rcK`), so nothing old is lost |
 | U192 | Regas hunting squad | part | Regas's story: gj3 (12 golems) and gj4 (the Guardian). The raid is an option (`oRaid`), and the kill counts however it is done; the hunters lead and he can call it off (v1.72/1.73). Missing: the parry/dodge training the item asks for (only the wind-up telegraphs teach it) |
 | U193 | Caravan rescue | done | Escort quests es1 (travelling merchant) and es2 (old pilgrim): `startEscort`/`updateEscort`. Monsters that reach the traveller wear it down; if it falls, you start again from the giver. The reward comes only on arrival (`QD` obj t:'escort') |
@@ -219,7 +221,7 @@ Checked 2026-10-26 against `/home/claude/satisfy-aud` (main @ 8a2e4f1e, v3.15). 
 | U273 | Armor dyes | part | Layla dyes clothes, the cape and trousers (`STYC`), and everyone sees it (`regression/looks`). There is no admin colour a dye could fake. Missing: dyes for the armour pieces (their `GEARL` looks are fixed) and palette unlocks |
 | U274 | Named creation | done (v3.21) | The Creation's name field (`creNm`, maxlength 24, `Satisfy.chat.clean`) is shown escaped (`esc` in `itemTip`), so no HTML gets in (`regression/creation`). Missing: the insult filter (`Satisfy.chat.badName`) is not applied to item names, and there is no uniqueness check |
 | U275 | Set bonuses | done | The Frostlight Orc, Emous and mass-produced Grid sets (`regression/sets`), the divine beasts' sets (`dsets`), the jewelry pairs, effects described (`setdesc`). The tier comes from the pieces worn (`__GSET.tier`), so a set is lost when a piece comes off (computed on the client) |
-| U276 | Socket gems | part | One gem per piece. Setting one takes exactly one gem and 500 gold; a gem set over another destroys the old one; nothing is taken when something is short (`regression/upgradeinputs`). Strengthen with gems (`regression/endurance`). Missing: random socket counts, and moving a gem from one piece to another |
+| U276 | Socket gems | part | One gem per piece. Setting one takes exactly one gem and 500 gold; a gem set over another destroys the old one; nothing is taken when something is short (`regression/upgradeinputs`). Strengthen with gems (`regression/endurance`). Missing: random socket counts, and moving a gem from one piece to another v3.26: a gem moves from one worn piece to another for the setting's fee, breaking one already there (`gemMvFrom`, `gemMove`; `regression/plan5b`). Left: random socket counts (an economy change for the owner). |
 | U277 | Enchanting | done | Enhancement to +10 (`enhance`, `enhCost`): the odds are shown, and the price is taken exactly once whether it works or not (`regression/upgradeinputs`). A failure drops only one level, and only from +6 (`enhRisk`); protection and blessing stones |
 | U278 | Equipment repair | done | Durability (`wear`, `durOf`): never below 0, and clamped on load and on trade. Repair at the smiths, player repair orders (`regression/repair`), slower wear on better gear (`durslow`), endurance from repairs (`regression/endurance`) |
 | U279 | Forge mastery books | part | Recipe books (`regression/rbooks`), recipes opened by smithing level (`rc.unlock`), hidden recipes from making enough, understanding from taking apart (`regression/salvage`). Missing: known recipes live in the save, not on a server (D3) |
@@ -319,11 +321,11 @@ Four rows were set to ✅ by their own PRs (SAT-ONLINE-138: U026/U027; SAT-ONLIN
 | U237 | Guild research tree | 🟡 | part | client+rules | Unchanged since SAT-ONLINE-065/069 (three buildings, three levels). Left: nodes with prerequisites unlocking buffs, paid from the treasury, with costs the rules keep ≥ 0 |
 | U240 | Territory objectives | 🟡 | part | client+rules | Capture time is the server's (`world/satisfy/own` `t === now`), so the plan's "capture timestamp trusted" holds. Left: the weekly limit on captures per guild |
 | U251 | Duel UI | 🟡 | part | D3 | Unchanged; only a referee server is left |
-| U254 | World map atlas | 🟡 | part | client | The ledger's "there are no teleports" is stale: the magic circles of Reinhardt and Pangea exist (SAT-ONLINE-159, `eacirc`/`eacircW`) and aren't marked on the map. Left: draw them (and the East portal's landing) on the world map |
+| U254 | World map atlas | 🟡 | done (v3.26) | client | The ledger's "there are no teleports" is stale: the magic circles of Reinhardt and Pangea exist (SAT-ONLINE-159, `eacirc`/`eacircW`) and aren't marked on the map. Left: draw them (and the East portal's landing) on the world map v3.26: the circles (`ECW`, `EACIRC`) and the portal's landing (`EAPORT`) are marked and labelled on their continent's map once the place is seen (`fogSeen`; markers `circle`/`port` in `sprites-original/minimap.js`; `regression/plan5b`). |
 | U256 | Forge codex | 🟡 | done | – | The Index's 🔨 Smithing page (v2.97): every recipe from the `RC` registry (`ixData` R, `ixRcD`) with its grade, kind, level, stats, materials and what you need, plus a search; 🧱 Materials (v3.12) (`regression/index`) |
-| U257 | Craft preview | 🟡 | part | client | Unchanged. Left: the chance of each rating from the forge's three stages, shown before forging |
+| U257 | Craft preview | 🟡 | done (v3.26) | client | Unchanged. Left: the chance of each rating from the forge's three stages, shown before forging v3.26: the Forge button's tip shows each rating's chance for all-perfect, perfect-hammering and all-good forging (`rateOdds`, `oddsTip`), from the same score finishMG uses (`forgeB`); 40,000 rolls agree within 1.2% (`regression/plan5b`). |
 | U258 | Skill tree UI | 🟡 | done | – | The Index's ⚔️ Classes (v2.97, `ixClsD`): every class's skills with their gates (level, quest, passive, MP, cooldown), hidden and legendary ones locked; nothing can be bought (`regression/index`). Skill levels come from use (`skLvUp`). No graphic tree, but the plan's "preview unlock gates" holds |
-| U262 | Market search UI | 🟡 | part | client | Unchanged in main (auction name search only, names escaped). Left: filters by rarity, price and item type in the auction window; the online market is U213's branch |
+| U262 | Market search UI | 🟡 | done (v3.26) | client | Unchanged in main (auction name search only, names escaped). Left: filters by rarity, price and item type in the auction window; the online market is U213's branch v3.26: the auction filters by kind (`auKind`) and a top price each, and sorts by cheapest each, cheapest in all or newest (`auShown`). Rarity doesn't apply: the auction holds materials, books and potions only (`regression/plan5b`). |
 | U308 | Extract state store | 🟡 | part | client | `src/core/state.js` only gains key lists (v3.13–v3.15). Left: route the `S` writes through the store a part at a time |
 | U309 | Extract world generator | 🟡 | part | client | Still inside `index.html` (`regression/worldparity` holds). Left: move it to `src/` |
 | U311 | Entity registry | 🟡 | part | client | `src/core/ids.js` unchanged since 2026-10-20. Left: one id scheme for monsters, NPCs and players, and a test that a respawn never reuses a live id |
@@ -333,7 +335,7 @@ Four rows were set to ✅ by their own PRs (SAT-ONLINE-138: U026/U027; SAT-ONLIN
 | U342 | A/B testing ethics | ⏳ | wait | owner | No tests on players |
 | U347 | Disaster recovery | ⏳ | wait | Blaze | Manual Export/Import JSON steps in `ROLLBACK.md`; automatic backups need Blaze |
 | U348 | Shard scale-out | 🟡 | part | client+rules, billing | Unchanged; needs more than one shard (U012) and a hosted relay |
-| U380 | Art provenance audit | 🟡 | part | client | All art is drawn in code (`sprites-original/*.js`, `icons/` has only the app icons; the only outside load is Google Fonts). Left: a license manifest per file and a test that the shipped build loads no other image |
+| U380 | Art provenance audit | 🟡 | done (v3.26) | client | All art is drawn in code (`sprites-original/*.js`, `icons/` has only the app icons; the only outside load is Google Fonts). Left: a license manifest per file and a test that the shipped build loads no other image v3.26: `docs/art/provenance.json` lists every art file's origin and licence, and the fonts', SDK's and database's hosts; `unit/provenance` fails on an unlisted file, an outside image or an unlisted host. The app icons' generator isn't in the repo (to confirm with the owner). |
 | U381 | Security incident drill | ⏳ | wait | owner | The drill is a console step. The plan's check already holds: admin rights come only from `admins/{uid}`, set in the console; the client config grants nothing |
 | U387 | Pilot invite-only rollout | ⏳ | wait | owner | |
 
