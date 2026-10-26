@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.55) |
+| | At the count | Now (v3.56) |
 |---|---|---|
-| Done | 233 | 287 |
-| Partly there (something left) | 92 | 43 |
+| Done | 233 | 288 |
+| Partly there (something left) | 92 | 42 |
 | Not started | 11 | 6 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **49** (43 + 6) |
+| **Left to build** | **103** (92 + 11) | **48** (42 + 6) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -37,6 +37,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.53 (batch 13, PR #296, merged by Claude-B after main's v3.50-v3.52): U311 (every monster's network key its own, one entity id scheme).
 - v3.54 (batch 14, PR #297, merged by Claude-B after main's v3.53): U078 (the balance board checks the hybrid against the strongest pure class).
 - v3.55 (Claude-B): U135 (cultists raise skeletons).
+- v3.56 (Claude-B): U127 (the Storm Elemental conducts in the rain, weaker while moving).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -129,7 +130,7 @@ Checked against `/home/claude/satisfy-aud` at 8a2e4f1e (v3.15). The test files b
 | U124 | Stone Golem | done (v3.47) | The golems (Golem, Crystal Golem with its crystal-armour ward, Bog Golem, Braham's golems, the Stone Sentinel that can't be hurt until you're close) drop ore from one drop table per kill. Left: an ore node left where one falls (nodes are fixed when the world is built) v3.47: a golem that falls leaves its rubble where it fell, a vein of ore that whoever earned the kill digs once within 90 s; it's each screen's own, like the kill's loot, and never put on the network (`golRubble`, `golTick`; `regression/plan11`). |
 | U125 | Fire Elemental | done | Fire Elemental `felem` (Dran Valley): fire bolts and burning-ground rain with a fire DOT (3 s; it never takes the last HP: `mxTick`). The Red Phoenix breath takes 30% off its fire (`BEL.felem='fire'`, `bthHurt`). Purification clears the DOT (`cls2Clean`), and the 5 s death screen outlasts it. `p3world` |
 | U126 | Ice Elemental | done | Ice Elemental `ielem`: ice bolts slow you, and every hit chills (speed ×0.7 for 1.5 s, `p3Hurt`). Its slam stuns 0.4 s, then 2 s of stun immunity (`hitBy` `sImm`); roots have their own 1.5 s immunity (`mxOn` `rootI`); legends resist. Nothing freezes for good. `p3world` |
-| U127 | Storm Elemental | part | Storm Elemental `selem` around the Storm Temple: blinks, bolt fans, and a bolt stuns 0.25 s with immunity (`p3PHit`). In the temple, lightning strikes where you stand, and the Storm Lord's four rods shield it. Weather comes from the shared clock, so rain costs no bandwidth (`weather2`). Left: conductivity (rain or water making lightning worse) and a weakness when it moves |
+| U127 | Storm Elemental | done (v3.56) | Storm Elemental `selem` around the Storm Temple: blinks, bolt fans, and a bolt stuns 0.25 s with immunity (`p3PHit`). In the temple, lightning strikes where you stand, and the Storm Lord's four rods shield it. Weather comes from the shared clock, so rain costs no bandwidth (`weather2`). Left: conductivity (rain or water making lightning worse) and a weakness when it moves v3.56: in rain or a storm (`wxNow`, the world's weather) its blows hit 30% harder, and while it walks or blinks it takes 25% more (`selWet`, `p3Atk`; `regression/u127`). |
 | U128 | Wyvern | done (v3.23) | Wyverns at the nest (flyer: weaves, telegraphed dive, poison fan), the Wyvern Queen, eggs to steal (`p3Act`). Left: landing windows and an arrow weakness (flying changes nothing about who can hit it) |
 | U129 | Drake | done (v3.23) | Drake: wall charge, fire bolt, ring. It drops dragon scales (`dscale` .06). Left: a breath cone (its fire is one bolt you can dodge) |
 | U130 | Hydra | done (v3.23) | Hydra (Lv 480, the Abyss): regenerates 0.4% a second, a three-headed poison fan, poison pools, a heal at 30%, a chest and an exit gate when it dies. Left: heads you cut, or a cut threshold |

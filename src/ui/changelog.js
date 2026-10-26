@@ -7,6 +7,12 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26u127', ver: '3.56', d: '2026-10-26',
+      ar: ["عنصر العاصفة: برقه بيضرب أقوى 30% في المطر أو العاصفة (طقس العالم، واحد عند الكل)، وهو بيتحرك أو بينطّ بياخد ضرب أكتر 25%.",
+        "اختبار جديد لده."],
+      en: ["The Storm Elemental: its lightning hits 30% harder in rain or a storm (the world's weather, the same for everyone), and while it moves or blinks it takes 25% more.",
+        "A new test for this."],
+      hide: [1] },
     { v: '2026-10-26u135', ver: '3.55', d: '2026-10-26',
       ar: ["كهنة ياتان بقوا بيصحّوا الموتى: في القتال الكاهن بيقوّم هيكل عظمي كل 14 ثانية (اتنين بالكتير). الهيكل اللي اتصحّى بيدي ربع الخبرة ومبيوقّعش حاجة، وبيقع لما الكاهن يموت أو القتال يخلص.",
         "اختبار جديد لده."],

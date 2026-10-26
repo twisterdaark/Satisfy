@@ -12199,12 +12199,13 @@ function hyTick(m){if(m.dead||m.type!=='hydra')return;if(m.hd==null||m.hp>=m.max
  while(m.hp<m.max*(m.hcut-HYCUT)){m.hcut-=HYCUT;if(m.hd>1){m.hd--;m.hst++;m.hsU=gTime+HYGROW;num(m.x,monY(m)-44,t('hyCut',{s:HYGROW}),'#9fe39a',false);vfx('blood',m.x,monY(m)-20);SFX.slam();}}
  if(m.hst>0&&gTime>m.hsU){m.hd=Math.min(HYMAX,m.hd+2*m.hst);m.hst=0;num(m.x,monY(m)-44,t('hyGrow'),'#ff8a4a',false);vfx('rage',m.x,m.y);SFX.notice();}}
 function hyBurn(m){m.hst=0;num(m.x,monY(m)-50,t('hyBurn'),'#ffb04a',false);vfx('fire',m.x,monY(m)-20);}
-function p3Atk(m){if(m.type==='vlord'&&m.vlb==='b')return .85;if(m.type==='slord'&&!p3Grounded()){if(gTime>P3.shT){P3.shT=gTime+8;toast(t('slShield'),'warn');}return .1;}return 1;}
+function p3Atk(m){if(m.type==='selem'&&(m.mvd||m.st==='dash'))return SELC.MOVE;if(m.type==='vlord'&&m.vlb==='b')return .85;if(m.type==='slord'&&!p3Grounded()){if(gTime>P3.shT){P3.shT=gTime+8;toast(t('slShield'),'warn');}return .1;}return 1;}
 // the covenant's blood pact: 3% of what you deal comes back as health (at most 2% of your health a hit, 6% a second)
 function p3Hit(m,dmg){const k=(S.p3&&S.p3.cov?.03:0)+(vpNight()?.05:0);if(!k||!(dmg>0))return;const mh=maxHP(),h=Math.min(dmg*k,mh*.02,mh*.06-P3.ls);if(h<1)return;P3.ls+=h;P.hp=Math.min(mh,P.hp+h);}
 function p3Hurt(d,src){if(d>0&&P3.ch){P3.ch=null;toast(t('rodInt'),'warn');}if(!src||!src.type)return d;
  if(P3VAMP.has(src.type)){if(isNight())d=Math.round(d*1.15);if(S.p3&&S.p3.cov)d=Math.max(1,Math.round(d*.85));if(!src.dead&&src.hp>0){const k=src.type==='vlord'?(src.hp<src.max*.5?4:2)*(src.vlb==='b'?1.5:1):1,h=Math.round(d*k);src.hp=Math.min(src.max,src.hp+h);num(src.x,monY(src)-22,'+'+h,'#7ad04a',false);}}
- if(src.type==='ielem'&&!isLeg())P3.chill=Math.max(P3.chill,1.5);return d;}
+ if(src.type==='ielem'&&!isLeg())P3.chill=Math.max(P3.chill,1.5);
+ if(src.type==='selem'&&selWet()){d=Math.round(d*SELC.WET);if(!SELC.hint){SELC.hint=1;toast(t('selWet'),'warn');}}return d;}
 function p3PHit(p){if(p.sp==='ice'){if(!legResist())P3.chill=2;}else if(p.sp==='bolt'&&!(P.sImm>0)&&!legResist()){P.stun=Math.max(P.stun||0,.25);P.sImm=2.25;}}
 const p3Spd=()=>P3.chill>0?.7:1;
 function p3Kill(m){const k=m.type;if(P3WB.includes(k)&&!m.tmp){WS.wb=WS.wb||{};WS.wb[k]=Date.now()+MT[k].wb*1000;wbPut(k);setTimeout(()=>annW(k+'Dn'),400);save(true);}if(k==='slord')P3.rod=[0,0,0,0];}
@@ -13539,6 +13540,13 @@ function cultRaise(m,dt){m.raT=(m.raT??5)-dt;if(m.raT>0)return;m.raT=CULR.CD;m.r
  const k=spawnMonX('skel',f.x,f.y);k.cult=m;k.noLoot=1;k.xmul=.25;k.agg=1;k.eng=4;m.rz.push(k);vfx('spawn',k.x,k.y,{color:'#a05aff'});num(m.x,monY(m)-18,t('cultRaise'),'#a05aff',false);}
 Object.assign(STR.ar,{cultRaise:'بيصحّي ميت!'});Object.assign(STR.en,{cultRaise:'Raises the dead!'});
 window.__GU135={raise:(m,dt)=>cultRaise(m,dt),C:CULR}; // tests
+/* Plan U127 (2026-10-26): the Storm Elemental's lightning conducts in the rain: in rain or a storm (the world's weather,
+   wxNow, the same on every screen) its blows hit 30% harder; and moving breaks its charge: while it walks or blinks it
+   takes 25% more. */
+const SELC={WET:1.3,MOVE:1.25,hint:0};
+const selWet=()=>{const w=wxNow();return w==='rain'||w==='storm';};
+Object.assign(STR.ar,{selWet:'إنت مبلول: برق عنصر العاصفة بيضرب أقوى في المطر.'});Object.assign(STR.en,{selWet:"You're wet: the Storm Elemental's lightning hits harder in the rain."});
+window.__GU127={wet:()=>selWet(),C:SELC}; // tests
 window.__GU114={spawn:()=>u114Spawn(),zone:(x,y)=>zoneAt(x,y),eat:k=>eatDish(k),drops:k=>MT[k].drop,res:(k,el)=>monResK(k,el),gt:()=>gTime,price:k=>MATP[k],book:k=>RBK[k]&&RBK[k].shop}; // tests
 Object.assign(DISH,{herbtea:{food:20,hp:.25,buf:'regen',bt:150},fishpie:{food:70,hp:.25,buf:'might',bt:200},gfeast:{food:100,hp:.5,buf:'might',bt:600},
  mightp:{food:0,buf:'might',bt:300,pot:1},regenp:{food:0,hp:.2,buf:'regen',bt:300,pot:1}});
