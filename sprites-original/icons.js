@@ -315,6 +315,10 @@ function cwIcon(I,k){const o=cwParse(k);if(!o)return sword(I,'rusty');const P=MA
  if(o.ty==='bw'){BOWC[k]=[P[0],P[1],A[2]];return bow(I,k);}
  if(o.ty==='st'){STAFFC[k]=[A[1],A[0],A[2]];return staff(I,k);}
  if(o.ty==='hm'){HAMC[k]=P;return hammer(I,k);}
+ // armour, helmet, gloves and boots in their materials' colours (owner 2026-10-26: they drew as a spear); the second
+ // material trims it, a thick blueprint closes a helmet's visor and studs the plate
+ const C=[P[0],P[2],A[1]];if(o.ty==='ar'){ARMC[k]=C;armor(I,k);if(o.L>=60){I.set(5,6,A[2]);I.set(10,6,A[2]);}if(o.W>=60){I.set(2,3,A[2]);I.set(13,3,A[2]);}return;}
+ if(o.ty==='hl'){helm(I,C,o.L>=60);if(o.m2)I.set(8,2,A[2]);return;}if(o.ty==='gl')return glove(I,C);if(o.ty==='bt')return boot(I,C);
  const n=2+Math.round(o.L/50);I.line(2,14,11-n,5+n,P[1]);I.line(3,14,12-n,5+n,'#5a3a20');I.set(6,10,A[2]);I.rect(11-n,3+n,2+n,2,P[0]);I.line(12-n,2+n,14,1,P[2]);I.set(12,2,P[0]);I.set(13,3,P[1]);}
 // the new weapons' icons (owner 2026-10-24: a weapon for every kind of fighter)
 const NWI={oakst:['st',['#3a7a3a','#7ac87a','#d8ffd8']],frstaff:['st',['#2a5ab0','#9fe0ff','#ffffff']],stormst:['st',['#4a2a9a','#b08aff','#fff07a']],abyssst:['st',['#120814','#5a1a8a','#c86aff']],

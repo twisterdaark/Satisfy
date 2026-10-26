@@ -1488,14 +1488,28 @@ const GEARL={
  lboots:{boots:'#5a3a20'},tBoots:{boots:'#a8845a'},iboots:{boots:'#7a828e',bootH:1,bootT:'#b8c0ca'},bboots:{boots:'#2a2a34',bootH:1,bootT:'#9a7cff'},
  ocboots:{boots:'#d8dce4',bootH:1,bootT:'#ffffff'},mgboots:{boots:'#c8d0dc',bootH:1,bootT:'#2a3a6a'},emboots:{boots:'#3a3e4a'},
  rpboots:{boots:'#c82a1a'},tgboots:{boots:'#e8e4d8',bootH:1,bootT:'#2a2a2a'},ttboots:{boots:'#1a2a3a',bootH:1,bootT:'#5ad8c8'},
- vwboots:{boots:'#3a3036',bootH:1,bootT:'#5a4a52'}};
+ vwboots:{boots:'#3a3036',bootH:1,bootT:'#5a4a52'},
+ // Franz's Holy Light pieces wore as leather and an iron helmet (no entry); white and gold like their icons (2026-10-26)
+ flarmor:{top:'#e8e4d8',top2:'#a89878',armC:'#f4f0e8',armC2:'#c8c0a8',chest:'#ffffff',pad:'#d8b04a',pad2:'#8a6a2a',collar:'#d8b04a',belt:'#d8b04a',cape:'#f4f0e8'},
+ flcrown:{hair:'crown',hat:'#d8b04a'},flgloves:{glove:'#f4f0e8',cuff:'#d8b04a'}};
+/* a Blacksmith's Creation worn (owner 2026-10-26: created armour drew as a plain iron piece, or a spear in the bag): it shows
+   in its own materials' colours. Its token "cw" + the leading material's index (2 base-36 digits) + the second's ("--" when
+   none) + its blueprint (1: thick, 2: wide) rides the gear string like any id, without dots. */
+const CWMK=Object.keys(SA.blade.MATP),cwTok=it=>{const o=SA.blade.cwParse('cw|'+it.cw);if(!o)return it.id;const ix=k=>k?CWMK.indexOf(k).toString(36).padStart(2,'0'):'--';
+ return 'cw'+ix(o.m1)+ix(o.m2)+((o.L>=60?1:0)+(o.W>=60?2:0));};
+function cwLk(sl,tk){const m=/^cw([0-9a-z]{2})([0-9a-z]{2}|--)([0-3])$/.exec(tk);if(!m)return null;const M=SA.blade.MATP,k1=CWMK[parseInt(m[1],36)],k2=m[2]==='--'?null:CWMK[parseInt(m[2],36)];
+ if(!M[k1])return null;const P=M[k1][0],Q=k2&&M[k2]?M[k2][0]:P,f=+m[3],sh=SA.chars.shade;
+ if(sl==='a')return Object.assign({top:P[1],top2:sh(P[1],-.25),armC:P[0],armC2:P[1],chest:P[2],pad:P[0],pad2:P[1],belt:Q[1]},f&1?{collar:Q[2]}:{},f&2?{spike:Q[2],cape:Q[0]}:{});
+ if(sl==='h')return {hair:'helm',hc:P[0],hl:P[2],plume:k2?Q[0]:0,plumeL:f&1?1:0};
+ if(sl==='g')return {glove:P[0],cuff:Q[1]};
+ return Object.assign({boots:P[1]},f&1?{bootH:1,bootT:Q[2]}:{});}
 const GEARS=['a','b','g','h']; // the order they go on: armour, then boots, gloves and the helmet last (it sets the hair)
 // a worn piece's look: its own, or for an id with none the tier of before
-function gearLk(sl,id){if(!id)return null;const e=GEARL[id];if(e)return e;if(sl==='a')return GEARL.larmor;const T=GLK[id[0]]||GLK.i;
+function gearLk(sl,id){if(!id)return null;const e=GEARL[id];if(e)return e;if(/^cw/.test(id))return cwLk(sl,id)||GEARL.larmor;if(sl==='a')return GEARL.larmor;const T=GLK[id[0]]||GLK.i;
  return sl==='h'?(T.cap?{hair:T.hair,cap:T.cap}:{hair:T.hair,hc:T.hc,hl:T.hl}):sl==='g'?{glove:T.glove}:{boots:T.boots};}
 function gearPut(c,ids){for(const sl of GEARS){const e=gearLk(sl,ids[sl]);if(e)Object.assign(c,e);}if(c.robe||c.robeL)delete c.skirt;return c;}
 // the ids you show: what you wear, less a piece whose look you hide (the eye in the equipment window)
-const gearIds=()=>{const o={};for(const sl of GEARS){const i=eqIt(sl);o[sl]=i&&!vhOn(sl)?i.id:null;}return o;};
+const gearIds=()=>{const o={};for(const sl of GEARS){const i=eqIt(sl);o[sl]=i&&!vhOn(sl)?(i.cw?cwTok(i):i.id):null;}return o;};
 // the worn earrings (v2.45) show over everything, a costume too; they are in the sheet's key
 const earOn=c=>{const e=eqIt('e');if(e&&EARC[e.id]&&!vhOn('e'))c.ear=EARC[e.id];return c;};
 const gearSig=()=>{const o=gearIds(),e=eqIt('e');return GEARS.map(sl=>o[sl]||'-').join('.')+'.'+(e&&EARC[e.id]&&!vhOn('e')?e.id:'-');};
@@ -6918,13 +6932,13 @@ const iAtk=i=>Math.round((i.atk||0)*enF(i)*durF(i)*(i.sh?1.1:1)*pgPenF(i)),iDef=
 function gearSum(k){let v=0;for(const sl of GEAR){const i=eqIt(sl);if(i&&i[k])v+=i[k]*durF(i)*enF(i);if(i&&i.gem&&GEMS[i.gem]&&GEMS[i.gem][k])v+=GEMS[i.gem][k];}
  const w=eqIt('w');if(w&&w.gem&&GEMS[w.gem]&&GEMS[w.gem][k])v+=GEMS[w.gem][k];return v+setBon(k)+cosB(k)+marB(k);}
 // the mass-produced Grid staff, bow, spear, dagger and hammer take the Grid sword's place in its set
-const MGW=['mgstaff','mgbow','mgspear','mgdagger','mghammer'],setId=id=>MGW.includes(id)?'mgsword':id;
-function setCount(sk){const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(i=>setId(i.id));return SETS[sk].it.filter(x=>ids.includes(x)).length;}
+const MGW=['mgstaff','mgbow','mgspear','mgdagger','mghammer'],setId=id=>MGW.includes(id)?'mgsword':id,setOf=i=>i.cr?null:setId(i.id); // a creation is a piece of its own, in no set (owner 2026-10-26)
+function setCount(sk){const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(setOf);return SETS[sk].it.filter(x=>ids.includes(x)).length;}
 function setTier(sk){const n=setCount(sk);let c=0;for(const k in SETS[sk].b)if(n>=+k)c=+k;return c;}
 // setBon: stat() and gearSum() ask for it many times a frame; the sets worn only change with the gear, so the bonus per stat is
 // kept for the same pieces (by id)
 let SBM={k:null,v:null};
-function setBon(k){const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(i=>setId(i.id)),key=ids.join('\u0001');if(SBM.k!==key)SBM={k:key,v:Object.create(null)};let v=SBM.v[k];
+function setBon(k){const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(setOf),key=ids.join('\u0001');if(SBM.k!==key)SBM={k:key,v:Object.create(null)};let v=SBM.v[k];
  if(v===undefined){v=0;for(const sk in SETS){const B=SETS[sk].b,n=SETS[sk].it.filter(x=>ids.includes(x)).length;let c=0;for(const q in B)if(n>=+q)c=+q;if(c&&B[c][k])v+=B[c][k];}SBM.v[k]=v;}return v+hidBon(k);}
 // the Frostlight Orc Chief's five pieces: "It is possible to command the frostlight orcs" (they leave you be); checked once a frame
 let focT=-1,focV=false;const foCmd=()=>{if(focT!==gTime){focT=gTime;focV=setTier('fo')>=5;}return focV;};
@@ -9018,7 +9032,7 @@ function closeInv(){SFX.close();$('inv').hidden=true;$('invQ').value='';$('cfmW'
 // one line of an item's numbers (rc = a recipe, i.e. the base values, when cur is not given)
 function statShort(i){const a=[];if(i.atk)a.push(`${t('atk')} ${i.uid?iAtk(i):i.atk}`);if(i.def)a.push(`${t('def')} ${i.uid?iDef(i):i.def}`);
  if(i.as)a.push(`${t('gAs')} +${Math.round(i.as*enF(i)*100)}%`);if(i.ms)a.push(`${t('gMs')} +${Math.round(i.ms*enF(i)*100)}%`);if(i.dm)a.push(`${t('gDm')} +${Math.round(i.dm*enF(i)*100)}%`);if(i.mpb)a.push(`${t('gMp')} +${Math.round(i.mpb*enF(i))}`);if(i.hpp)a.push(`${t('gHp')} +${Math.round(i.hpp*enF(i)*100)}%`);if(i.agi)a.push(`${t('agi')} +${i.agi}`);if(i.agp)a.push(`${t('agi')} ${Math.round(i.agp*100)}%`);if(i.cold)a.push(t('gCold',{n:Math.round(i.cold*100)}));if(i.dsh)a.push(t('gDsh',{n:Math.round(i.dsh*100)}));if(i.gem)a.push(t('gemIn',{g:t(i.gem)}));return a.join(' · ');}
-function setTip(i){const sk=Object.keys(SETS).find(k=>SETS[k].it.includes(setId(i.id)));if(!sk)return '';const n=setCount(sk),c=setTier(sk);
+function setTip(i){const sk=Object.keys(SETS).find(k=>SETS[k].it.includes(setOf(i)));if(!sk)return '';const n=setCount(sk),c=setTier(sk);
  return `<br><small style="color:#9fe39a">${t('set_'+sk)} (${n}/${SETS[sk].it.length})</small>`+Object.keys(SETS[sk].b).map(k=>`<br><small style="color:${+k===c?'#9fe39a':'#8a96a8'}">${t('setPc',{n:k})}: ${t('setD_'+sk+k)}</small>`).join('');}
 function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:''}${itLvr(i)?`<small style="color:${lvrOk(itLvr(i))?'#9fb4c8':'#ff8a7a'}">${t('needLvT',{n:itLvr(i)})}</small><br>`:''}${Array.isArray(i.hist)&&i.hist.length?`<small style="color:#9fb4c8">${esc(t('itHist',{h:i.hist.join(' → ')}))}</small><br>`:''}${pgPenF(i)<1?`<small style="color:#ffb04a">${t('pgPenT',{p:Math.round((1-pgPenF(i))*100),u:undOf(i.id)})}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+(i.sh?`<br><small style="color:#ffe7a8">${t('shGear')}</small>`:'')+edrTip(i)+vtTip(i)+hidTip(i)+wpTip(i)+setTip(i)+itemSkillTip(i);}
 function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>${t('bread')}</b><br><small>${t('clickEat')}</small>`});['hpot','mpot'].forEach(k=>{if(S[k])a.push({k,n:S[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickDrink',{k:keyName(POT[k].key)})}</small>`});});

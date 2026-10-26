@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26crearmor', ver: '3.25', d: '2026-10-26',
+      ar: ["الدروع والخوذ والجوانتيات والبوتات اللي بيخلقها وريث باغما (مهارة الخلق) بقت ليها صورة مرسومة بألوان خاماتها زي الأسلحة، بدل ما كانت بتظهر كأنها رمح. ولما تلبسها شكلها على الشخصية بيبقى بألوان خاماتها بدل الحديد العادي، والتانيين بيشوفوها زيك.",
+        "المعدات المخلوقة بقت قطعة لوحدها: مبقتش بتتحسب في أي طقم (سِت) ولا بيظهر عليها تأثير الطقم.",
+        "درع وتاج وجوانتي النور المقدس (كنوز فرانز) بقى ليهم شكل أبيض ودهبي على الشخصية، ومطرقة التنين المجنون بقت بتظهر في الإيد."],
+      en: ["Armour, helmets, gloves and boots made with Pagma's Successor's Creation skill now have their own picture in their materials' colours, like the weapons (they showed as a spear). Worn, they dress the character in those colours instead of plain iron, and the others see the same.",
+        "Created gear is a piece of its own: it counts toward no set and shows no set effect.",
+        "The Holy Light armour, crown and gloves (Franz's treasures) now look white and gold on the character, and the Insane Dragon Hammer shows in the hand."] },
     { v: '2026-10-26books', ver: '3.24', d: '2026-10-26',
       ar: ["كتب الأساطير (كتاب سحر مومود، ويوميات المقاتل الأسطوري تزودان، والغمد القديم للملك الذي لا يُهزم) بقى من كل واحد نسخة واحدة بس في العالم كله. طول ما النسخة مع حد (في شنطته أو المخزن، أو قراها وشغال في الكويست، أو بقى الأسطورة) مفيش كتاب تاني بيوقع لأي حد.",
         "النسخة دي بتتبدّل أو تتحط في المزاد بين اللعيبة (أونلاين) أو تتقري بس. مبقتش تتباع لتاجر ولا تترمي ولا توقع على الأرض. وأي نسخة تانية مش نسخة العالم (من قبل التحديث ده) مبتتقريش ولا بتتبدّل، بس التاجر بيشتريها.",
