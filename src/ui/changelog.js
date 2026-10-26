@@ -7,6 +7,21 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26plan5', ver: '3.25', d: '2026-10-26',
+      ar: ["القطعة اللي جاتلك من لاعب تاني (تبادل، أو خزنة الجيلد، أو لقيتها على الأرض) مبتتفكش، ووصفها بيقول كده.",
+        "خريطة العالم بقت بتعلّم الدواير السحرية (رينهارت وغابة الشجرة البيضا) والمكان اللي لفافة البوابة بتنزلك فيه، أول ما تشوف المكان.",
+        "زرار التشكيل عند السندان بيوريك فرصة كل تقييم حسب شغلك: كله ممتاز، والطرق ممتاز، وكله كويس.",
+        "المزاد بقى فيه فلتر بالنوع (أحجار، معادن، خامات وحوش، صيد وأعشاب وزرع، كتب، جرعات) وأقصى سعر للواحدة، وترتيب: الأرخص للواحدة، أو الأرخص في المجموع، أو الأحدث.",
+        "الحدادين بقوا بينقلوا الحجر من قطعة لابسها لقطعة تانية (500 دهب)، ولو فيها حجر بيتكسر.",
+        "الجولم لما يقع بيسيب عرق خام مكانه 3 دقايق، تحفر فيه مرة.",
+        "خان بيعلّمك خطوتين اختياريين: التفادي (بعد الخشب)، ولو بتلعب أونلاين تدخل بارتي (بعد السيف)."],
+      en: ["A piece that came to you from another player (a trade, the guild vault, or picked up from the ground) can't be taken apart, and its description says so.",
+        "The world map marks the magic circles (Reinhardt's and the White Tree Forest's) and where the portal scroll sets you down, once you've seen the place.",
+        "The Forge button at the anvil shows the chance of each rating by how you forge: all perfect, perfect hammering, all good.",
+        "The auction filters by kind (gems, metals, beast materials, fish/herbs/crops, books, potions) and a top price each, and sorts by cheapest each, cheapest in all or newest.",
+        "Smiths move a gem from one piece you wear to another (500 gold); a gem already there breaks.",
+        "A golem leaves an ore vein where it falls, for three minutes: one dig.",
+        "Khan teaches two optional steps: dodging (after the wood) and, when you play online, finding a party (after the sword)."] },
     { v: '2026-10-26books', ver: '3.24', d: '2026-10-26',
       ar: ["كتب الأساطير (كتاب سحر مومود، ويوميات المقاتل الأسطوري تزودان، والغمد القديم للملك الذي لا يُهزم) بقى من كل واحد نسخة واحدة بس في العالم كله. طول ما النسخة مع حد (في شنطته أو المخزن، أو قراها وشغال في الكويست، أو بقى الأسطورة) مفيش كتاب تاني بيوقع لأي حد.",
         "النسخة دي بتتبدّل أو تتحط في المزاد بين اللعيبة (أونلاين) أو تتقري بس. مبقتش تتباع لتاجر ولا تترمي ولا توقع على الأرض. وأي نسخة تانية مش نسخة العالم (من قبل التحديث ده) مبتتقريش ولا بتتبدّل، بس التاجر بيشتريها.",
