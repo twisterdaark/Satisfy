@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26plan5b', ver: '3.33', d: '2026-10-26',
+      ar: ["خريطة العالم بقت بتعلّم الدواير السحرية (رينهارت وغابة الشجرة البيضا) والمكان اللي لفافة البوابة بتنزلك فيه، أول ما تشوف المكان.",
+        "زرار التشكيل عند السندان بيوريك فرصة كل تقييم حسب شغلك: كله ممتاز، والطرق ممتاز، وكله كويس.",
+        "المزاد بقى فيه فلتر بالنوع (أحجار، معادن، خامات وحوش، صيد وأعشاب وزرع، كتب، جرعات) وأقصى سعر للواحدة، وترتيب: الأرخص للواحدة، أو الأرخص في المجموع، أو الأحدث.",
+        "خان بيعلّمك خطوتين اختياريين: التفادي (بعد الخشب)، ولو بتلعب أونلاين تدخل بارتي (بعد السيف)."],
+      en: ["The world map marks the magic circles (Reinhardt's and the White Tree Forest's) and where the portal scroll sets you down, once you've seen the place.",
+        "The Forge button at the anvil shows the chance of each rating by how you forge: all perfect, perfect hammering, all good.",
+        "The auction filters by kind (gems, metals, beast materials, fish/herbs/crops, books, potions) and a top price each, and sorts by cheapest each, cheapest in all or newest.",
+        "Khan teaches two optional steps: dodging (after the wood) and, when you play online, finding a party (after the sword)."] },
     { v: '2026-10-26hell1', ver: '3.31', d: '2026-10-26', hide: [7],
       ar: ["زنزانة جزيرة كورك: مدخلها على الجزيرة (اركب المعدّاوي من ميناء بيدرو)، و4 أدوار تحت الأرض. في الدور الرابع بيطلع هيل جاو، سيد نار الجحيم (لفل 310)، زي الرواية بالظبط: زئير بيخوّف ويضعّف، بحر نار حواليه، أعمدة نار، ونار الجحيم السودا اللي بتلزق في جسمك. لو ضربته ضربة كريتيكال وهو بيحضّر تعويذة بتقطع معصم، والمعصمين مع بعض بيقللوا ضربه وسرعته جدًا. بيرجع كل ساعتين لكل اللاعبين مع بعض.",
           "أحجار النار: معدن جديد بيطلع في حيطان عرين هيل جاو بس وهو موجود (كل عرق مرة واحدة كل ظهور)، واللي مطلعش بينفجر لما يختفي. بيدخل في الخلق وبيتباع في المزاد.",
