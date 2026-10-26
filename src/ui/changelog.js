@@ -7,6 +7,14 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26u192', ver: '3.61', d: '2026-10-26',
+      ar: ["مهمة جديدة من ريجاس بعد مسابقة شركة ميرو: «تمرين ريجاس». بيتمرّن معاك وهو ماسك إيده، وضرباته باينة قبلها.",
+        "عشان تخلّصها: اتفادى 4 من ضرباته وصد 4 بالجارد في آخر لحظة. المهمة اختيارية ومش بتوقف قصة الجولمات.",
+        "اختبار جديد لده."],
+      en: ["A new quest from Regas after the Mero Company contest: \"Regas's Drill\". He spars with you with his fists pulled, and you can see each blow coming.",
+        "To finish it, dodge 4 of his blows and parry 4 with your guard raised at the last moment. It's optional and doesn't hold up the golems.",
+        "A new test for this."],
+      hide: [2] },
     { v: '2026-10-26u293', ver: '3.60', d: '2026-10-26',
       ar: ["الرقص سوا على مسرح باتريان: اللي بيطلعوا المسرح في نفس اللحظة تقريبًا (نفس الـ8 ثواني) بيرقصوا نفس العشر أسهم، وكل واحد بيقف جنب التاني.",
         "كل شريك رقص جنبك بيخلّي الجمهور يرمي 20% دهب زيادة (لحد 3 شركا).",

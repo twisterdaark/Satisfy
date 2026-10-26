@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.60) |
+| | At the count | Now (v3.61) |
 |---|---|---|
-| Done | 233 | 291 |
-| Partly there (something left) | 92 | 39 |
+| Done | 233 | 292 |
+| Partly there (something left) | 92 | 38 |
 | Not started | 11 | 6 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **45** (39 + 6) |
+| **Left to build** | **103** (92 + 11) | **44** (38 + 6) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -42,6 +42,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.58 (Claude-B): hotfix: Braham's Successor learns the Archmage's spells (CROOT braham/saint).
 - v3.59 (Claude-B): U179 (the Storm Temple's rods shared by every player there).
 - v3.60 (Claude-B): U293 (dancing together on Patrian's stage).
+- v3.61 (Claude-B): U192 (Regas's parry and dodge drill).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -212,7 +213,7 @@ Checked 2026-10-26 against `/home/claude/satisfy-aud` (main @ 8a2e4f1e, v3.15). 
 | U183 | Dragon siege | reject | Duplicates U189: the Saturday world-boss hunt with Trauka's week, on the calendar, announced 10 min before, opt-in transport, one title and hunt mark per killer (`regression/hunt`), and one shared world-boss timer (`regression/worldboss`) |
 | U190 | Starter onboarding quests | done (v3.34) | Khan's chapter-one chain (q0–q8, kh1–kh4): walk to Khan, wood, quarry ore, Jaffa arrows at the anvil, selling to the hunting party, a sword, wolves, the greatsword. All of it works offline. Missing: a party step (and an explicit controls/dodge step) v3.32: Khan's optional steps beside the chain: `khd` dodge three times (after kh1, the `dodge` event) and `khp` join a party (after kh3, online only: `QNEED.online`, the `party` event) (`regression/plan5b`). |
 | U191 | Khan crafting continuation | done | Khan's quests go on after kh4: cb (craft rare), kh5 North Hill, kh6 Praga, story gj1–gj2/gj5–gj6, pg1 Pagma's mural (`QD` by:'khan'). Known recipes are kept in the save (`S.rcK`), so nothing old is lost |
-| U192 | Regas hunting squad | part | Regas's story: gj3 (12 golems) and gj4 (the Guardian). The raid is an option (`oRaid`), and the kill counts however it is done; the hunters lead and he can call it off (v1.72/1.73). Missing: the parry/dodge training the item asks for (only the wind-up telegraphs teach it) |
+| U192 | Regas hunting squad | done (v3.61) | Regas's story: gj3 (12 golems) and gj4 (the Guardian). The raid is an option (`oRaid`), and the kill counts however it is done; the hunters lead and he can call it off (v1.72/1.73). Missing: the parry/dodge training the item asks for (only the wind-up telegraphs teach it) v3.61: Regas's drill (`gjd`, after gj2, optional): he spars with his fists pulled and telegraphed blows; four dodges and four parries against him, counted from his blows only, finish it (`rgdCount`, `regression/u192`). |
 | U193 | Caravan rescue | done | Escort quests es1 (travelling merchant) and es2 (old pilgrim): `startEscort`/`updateEscort`. Monsters that reach the traveller wear it down; if it falls, you start again from the giver. The reward comes only on arrival (`QD` obj t:'escort') |
 | U194 | Reidan agriculture plot | done | Piaro's Field (8 plots, seasons, compost, v1.38), The Farmer's Path and The Legendary Field, the Legendary Farmer (`regression/lfarmer`), the Patrian farmer's daily (`regression/npclife`), the harvest fair (`regression/harvestfair`), the produce market (`regression/market`). None of it needs PvP. It is on the Patrian road, not in Reidan, and a Reidan copy would be REJECT_DUPLICATE |
 | U195 | Lost blueprint hunt | reject | Invented quest stages (§82/§90). Recipes already come as books from sellers and drops (`regression/rbooks`), hidden recipes from making enough (v0.32), and the divine-beast sets only after the beast's breath (v1.67) |
