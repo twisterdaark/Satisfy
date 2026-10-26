@@ -1,7 +1,7 @@
 'use strict';
 // Plan batch 5b (owner 2026-10-26 19:41: "continue the document's updates"): U254 the magic circles and the portal's
-// landing on the world map; U257 the forge's odds before forging; U262 the auction's kinds, price cap and sort; U190
-// Khan's dodge and party steps. (U276's gem moving is main's, from the plan-gear branch.)
+// landing on the world map; U257 the forge's odds before forging; U262 the auction's kinds, price cap and sort;
+// U190 Khan's dodge and party steps (U276's gem move gave way to main's sockets, plan-gear).
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
