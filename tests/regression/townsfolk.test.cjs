@@ -27,7 +27,7 @@ test('every town has townsfolk at the same spots on two pages, and highwaymen ou
     for (const k of A.towns0) assert.ok((A.towns[k] || 0) >= 4, k + ' has townsfolk');
     assert.deepEqual(A.at, B.at, 'same positions for the same world time');
     // the West's towns; outside the East's (SAT-ONLINE-159) Hwang Gildong's robbers stand instead, from the East's own spawns
-    assert.equal(A.bandits.length, A.towns0.filter((k) => !/^zEa/.test(k)).length * 3);
+    assert.equal(A.bandits.length, A.towns0.filter((k) => !/^zEa/.test(k) && k !== 'zVatican').length * 3);   // v3.11: the Holy See has no ring of its own (its paladins keep it);
     assert.deepEqual(A.bandits, B.bandits, 'same highwaymen everywhere');
   } finally { await a.close(); await b.close(); }
 });

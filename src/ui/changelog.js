@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26vatican', ver: '3.11', d: '2026-10-26',
+      ar: ["مكان جديد من الرواية: الفاتيكان، الكرسي المقدس لكنيسة ريبيكا، نص يوم جنوب رولينج في وادي دران شرق النهر. مدينة بسور وأبراج، وبوابة وطريق للطريق الجنوبي، والكاتدرائية الكبيرة، والحوش اللي وراها، وساحة فيها تمثالين للإلهة (الصلاة ليهم زي رولينج). وهي مدينة آمنة.",
+        "بنات ريبيكا (فصل 118 و123): إيزابيل بتعيّط في الحوش، ولونا بدرع إيفرييل واقفة على باب الكاتدرائية، ورين بتتحاكم في قاعة البابا تحت. وداميان في القاعة، وكاهن الفاتيكان على الساحة.",
+        "مهمة من إيزابيل (لفل 195): «ساعد كنيسة ريبيكا!» (فصل 123): اقتل البابا دريفيجو. في قاعة البابا بيطلعلك هو وفارسين مقدسين ليك لوحدك. بيرد على السيف بالنور، ولما صحته تقل بيعالج نفسه مرة بـ«نَفَس الإلهة» (فصل 125 و126)، وداميان بيربط رجلين الفرسان (فصل 127).",
+        "الجايزة: «بركة الإلهة ريبيكا» على طول: +10% ضرر على الكائنات الفاسدة (الشياطين والأموات ومصاصين الدماء)، وبركة تماثيلها أقوى بالنص. وكنوز فرانز، البابا الخامس (فصل 128): تاج ودرع وجوانتي النور المقدس، Unique لفل 195، وطقم ليهم. من غير لقب.",
+        "كاهن الفاتيكان بيبارك سلاحك: +15% ضرر على الكائنات الفاسدة على طول. التبرع 100,000 دهب بقرار البابا، ولما الكنيسة تتصلّح (بعد المهمة) بيرجع 8,000.",
+        "طقم جوهرة بيليال السودا (العقد والأسورة الأسطوري) عند إليزابيث بقى أغلى وأصعب: 1,200,000 دهب للقطعة (كان 400,000)، وجوهرتين من جواهر بيليال السودا و4 ألماس و40 ميثريل و10 أحجار تعزيز."],
+      en: ["A new place from the novel: the Vatican, the Holy See of the Rebecca Church, half a day south of Rolling in Dran Valley, east of the river. A walled city with towers, a gate and a lane to the southern road, the great cathedral, the backyard behind it, and a square with two statues of the goddess (you pray to them as at Rolling). It is a safe town.",
+        "Rebecca's Daughters (ch 118, 123): Isabel cries in the backyard, Luna with Everiel's Shield keeps the cathedral's door, and Rin is judged in the papal hall below. Damian waits in the hall, and a priest of the Vatican on the square.",
+        "A quest from Isabel (level 195): Help the Rebecca Church! (ch 123): kill Pope Drevigo. In the papal hall he and two paladins appear for you alone. He answers a blade with light, and when he is low he heals once with Goddess' Breath (ch 125, 126); Damian binds the paladins' feet (ch 127).",
+        "The reward: Goddess Rebecca's blessing, for good: +10% damage to corrupt beings (demons, the undead, vampires), and her statues bless you half again as much. And Franz's treasures, the fifth pope's (ch 128): the Holy Light Crown, Armor and Gloves, Unique, level 195, a set. No title.",
+        "The Vatican's priest blesses a weapon: +15% damage to corrupt beings, for good. The donation is 100,000 gold by the pope's decree, and 8,000 once the church is set right (after the quest).",
+        "Elizabeth's Belial's Black Jewel set (the Legendary necklace and bracelet) is pricier and harder now: 1,200,000 gold a piece (it was 400,000), two of Belial's Black Jewels, 4 diamonds, 40 mithril and 10 enhancement stones."] },
     { v: '2026-10-26auto', ver: '3.10', d: '2026-10-26',
       ar: ["طلب Suki: «الإنتاج الأوتوماتيك» زي الرواية. زرار واحد عند السندان، وسطر قبل «مع السلامة» في قايمة النار والموقد وعند الخياطة: «⚙ الإنتاج الأوتوماتيك: مقفول / شغّال».",
         "وهو شغّال، اختار الوصفة واقف مكانك: بتتعمل لوحدها من غير ميني جيم، واحدة ورا التانية طول ما الخامات موجودة، وفيه شريط فوق راسك. لو اتحركت أو اتضربت أو فتحت كلام بيقف، ومفيش حاجة بتضيع.",

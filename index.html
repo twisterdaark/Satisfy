@@ -1778,6 +1778,8 @@ const REID={x0:514,x1:561,y0:62,y1:102,mx:556,my:69},PEAK={x:628,y:17,rx:22,ry:1
  SWG={x0:520,x1:556,y0:-24,y1:-8,cx:538,cy:-16,camp:{x:514,y:-14},gl:{x0:1040,x1:1090,y0:WMH+13,y1:WMH+24,cy:WMH+18}},   // SWG: the Sword Grave (v2.95) among the Glacier Lakes, its glacier under the map
  SIREN={gx:578,gy:255,in:{x0:1100,x1:1170,y0:WMH+13,y1:WMH+24,cy:WMH+18}},   // SIREN: Brinichi's shore (v2.96) and the Siren Kingdom under the map
  BDOG={gx:934,gy:-8,in:{x0:1180,x1:1240,y0:WMH+13,y1:WMH+24,cy:WMH+18}};   // BDOG: the Beware Dogs mine (v2.99), its mouth in the Dravian Mountains' rocks
+// VAT: the Vatican (v3.11), half a day south of Rolling across Dran Valley; k0: the first row of its lane from the road; the papal hall under the map
+const VAT={x0:817,x1:851,y0:196,y1:228,gx:822,k0:188,cat:{x:829,y:203,w:16,h:9},hall:{x0:1252,x1:1292,y0:WMH+11,y1:WMH+25,cy:WMH+18}};
 // the kinds of a region of its own (the Western Sands, Earl Zebra's castle): they set no town's recommended level and no invasion's strength
 var APART=new Set(['gworm','dtoad','gwnest','bkarrow','slaught']);   // WSAND: Reidan's Western Sands (v2.93), the nest below the rocks at its north-west
 const DSPAWN=[['cgob',236,284,WMH+4,WMH+19,12],['cgob',294,342,WMH+4,WMH+19,7],['gshaman',294,342,WMH+4,WMH+19,6],['gshaman',352,384,WMH+4,WMH+19,4],['kobold',414,462,WMH+4,WMH+19,12],['kobold',472,500,WMH+4,WMH+19,6],['golem',530,572,WMH+4,WMH+19,8],['cgolem',550,572,WMH+4,WMH+19,3],['cgolem',588,630,WMH+4,WMH+19,6],['skel',646,690,WMH+4,WMH+19,8],['wraith',662,690,WMH+4,WMH+19,5]],DBOSS=[['gwar',394,WMH+11],['kking',512,WMH+11],['bknight',682,WMH+11]],
@@ -1967,7 +1969,7 @@ function bChestGive(g){g.open=1;const b=MT[g.b];(S.bch||(S.bch={}))[g.b]=today()
 function bossChest(m,b){if(!b.boss||m.tmp||m.arena||m.evt||m.sg||m.bh||m.spar||m.fake||m.mob||ARN||TWR||bchUsed(m.type))return;const til=gTime+120;
  DGATES.push({x:m.x-14,y:m.y+4,to:{x:m.x,y:m.y},hint:'hBChest',tmp:1,chest:1,til,b:m.type,lv:0});setTimeout(()=>toast(t('bcHas',{b:itN(m.type)}),'good'),800);}
 Object.assign(STR.ar,{"bcToday": "صندوق {b} اتفتح النهارده. بيرجع بكرة، والدروب العادي بينزل كل مرة.", "bcHas": "{b} ساب صندوقه اليومي! افتحه قبل ما يختفي.", "mbChest": "صندوق الزعيم (مرة في اليوم): قطعة مضمونة بتقييم أعلى، وخاماته كاملة، وأحجار تقوية وأحجار نادرة", "mbNorm": "الدروب العادي (كل مرة):"});Object.assign(STR.en,{"bcToday": "You opened {b}'s chest today. It comes back tomorrow; the normal drops fall every time.", "bcHas": "{b} left its daily chest! Open it before it fades.", "mbChest": "Boss chest (once a day): a guaranteed item of a higher rating, all its materials, enhancement and rare stones", "mbNorm": "Normal drops (every kill):"});
-function useGate(g){if(g.swg&&!swgDone()){toast(t('swgSealed'),'warn');return;}if(g.sir&&(roomFade||!sirGate(g)))return;if(g.bh)return bhUse(g);if(g.tw)return twUse(g);if(g.chest)return openBChest(g);if(roomFade)return;if(g.vc&&!vcGate(g))return;if(P.ride)dismount();if(g.lv&&!g.ant&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
+function useGate(g){if(g.swg&&!swgDone()){toast(t('swgSealed'),'warn');return;}if(g.sir&&(roomFade||!sirGate(g)))return;if(g.bh)return bhUse(g);if(g.tw)return twUse(g);if(g.chest)return openBChest(g);if(roomFade)return;if(g.vc&&!vcGate(g))return;if(g.vat&&!vtGate(g))return;if(P.ride)dismount();if(g.lv&&!g.ant&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
 const ROOMS=[],PROPS=[];
 function genRoom(b,bi,kind,rx,ry,z){const R={id:'r'+bi,bi,b,kind,rx,ry,z,dx:b.x*TS+b.w*8,dy:(b.y+b.h)*TS+8};ROOMS.push(R);
   for(let y=ry;y<ry+8;y++)for(let x=rx;x<rx+12;x++)setT(x,y,(y<ry+2||y===ry+7||x===rx||x===rx+11)?IW:FW);
@@ -2569,6 +2571,40 @@ let herbSpot=null;
  const px=(x,y)=>({x:x*TS+8,y:y*TS+10});
  DGATES.push({...px(K.x+3,K.y+K.h),to:px(U.x0+4,U.cy),hint:'hZebra',lv:200});
  DGATES.push({...px(U.x0+1,U.cy),to:px(K.x+3,K.y+K.h+2),hint:'hUp'});})();
+// The Vatican (v3.11; Rolling's landmark: half a day south of Rolling; ch 123: its backyard, its front door): the Holy See of
+// the Rebecca Church across Dran Valley, east of the river. Walls with corner towers, a gate to the road, the back garden, the
+// great cathedral and the square before it with the goddess's statues and two priests' houses; the cathedral's door goes down
+// to the papal hall. Painted after the herbs and the trees; the ground it covers (and its lane) is kept as it was in VAT0, so
+// the shared spawn dice test the same tiles as before, and a beast they put inside the walls is moved out past the east wall.
+var VAT0=null;
+(function genVatican(){const V=VAT,C=V.cat,H=V.hall,inV=(x,y)=>x>=V.x0&&x<=V.x1&&y>=V.y0&&y<=V.y1,K=V.k0;
+ VAT0=new Uint8Array((V.x1-V.x0+1)*(V.y1-K+1));for(let y=K;y<=V.y1;y++)for(let x=V.x0;x<=V.x1;x++)VAT0[(y-K)*(V.x1-V.x0+1)+x-V.x0]=at(x,y);
+ const r=mulberry32(3091);
+ for(let y=V.y0;y<=V.y1;y++)for(let x=V.x0;x<=V.x1;x++){const e=Math.min(x-V.x0,V.x1-x,y-V.y0,V.y1-y),cor=Math.min(x-V.x0,V.x1-x)<4&&Math.min(y-V.y0,V.y1-y)<4;
+  setT(x,y,e<2||cor?WL:r()<.05?FL:GR);}
+ // the lane from the road down to the gate in the north wall, and the street inside it to the square
+ for(let y=K;y<V.y0+2;y++)for(let x=V.gx-1;x<=V.gx+2;x++){if(x===V.gx||x===V.gx+1)setT(x,y,PA);else if(y<V.y0){const v=at(x,y);if(v===TR||v===WA||v===RK)setT(x,y,GR);}}
+ for(let y=V.y0+2;y<=C.y+C.h+1;y++)for(const x of [V.gx,V.gx+1])setT(x,y,PA);
+ // the back garden behind the cathedral, and the path to it
+ for(let y=V.y0+2;y<C.y;y++)for(let x=C.x;x<C.x+C.w;x++)setT(x,y,r()<.45?FL:GR);
+ for(let x=V.gx+2;x<C.x;x++)for(const y of [V.y0+4,V.y0+5])setT(x,y,PA);
+ // the square before the cathedral
+ for(let y=C.y+C.h;y<=V.y1-2;y++)for(let x=V.x0+2;x<=V.x1-2;x++)if(ell(x,y,C.x+C.w/2-.5,(C.y+C.h+V.y1-2)/2,12,6.5)||y<=C.y+C.h+1&&x>=V.gx&&x<C.x+C.w)setT(x,y,PA);
+ // the cathedral and the priests' houses
+ for(const b of [{x:C.x,y:C.y,w:C.w,h:C.h,k:'temple',vat:1},{x:V.x0+3,y:V.y1-9,w:6,h:5,k:'house'},{x:V.x1-9,y:V.y1-9,w:6,h:5,k:'house'}]){b.lx=b.x;buildings.push(b);for(let y=b.y+2;y<b.y+b.h;y++)for(let x=b.x;x<b.x+b.w;x++)setT(x,y,BL);}
+ WELLS.push({tx:C.x+C.w/2,ty:V.y1-5,ph:1});setT(C.x+C.w/2,V.y1-5,BL);
+ for(let i=VT.length-1;i>=0;i--){const tr=VT[i];if(at(tr.tx,tr.ty)!==TR){VT.splice(i,1);VTM.delete(tr.k);VTN.delete(vtK(tr.tx,tr.ty));}}
+ for(const n of nodes){if(!(n.kind==='herb'||n.kind==='bherb')||!inV(n.tx,n.ty)&&!(n.tx>=V.gx&&n.tx<=V.gx+1&&n.ty>=K&&n.ty<V.y0))continue;   // herbs out of the walls and off the lane
+  for(let x=V.x1+3;x<V.x1+20;x++){const v=at(x,n.ty);if((v===GR||v===FL)&&!SOLID[at(x-1,n.ty)]&&!SOLID[at(x+1,n.ty)]){n.tx=x;n.x=x*TS+8;break;}}}
+ TOWNS.push({k:'zVatican',x0:V.x0,x1:V.x1,y0:V.y0,y1:V.y1,rx:C.x+C.w/2,ry:C.y+C.h+4});
+ // the papal hall: a long hall of pillars, a red carpet to the throne
+ for(let y=H.y0;y<=H.y1;y++)for(let x=H.x0;x<=H.x1;x++){const e=Math.min(x-H.x0,H.x1-x,y-H.y0,H.y1-y);setT(x,y,e<1?IW:FW);}
+ for(let x=H.x0+8;x<=H.x1-8;x+=6)for(const y of [H.cy-4,H.cy+4])setT(x,y,WL);
+ DUN.push({k:'zVatH',x0:H.x0,x1:H.x1,y0:H.y0,y1:H.y1});
+ R(gg,(H.x0+2)*TS,(H.cy-1)*TS+2,(H.x1-H.x0-3)*TS,2*TS+12,'#7a1620');R(gg,(H.x0+2)*TS,(H.cy-1)*TS+2,(H.x1-H.x0-3)*TS,2,'#d8b04a');R(gg,(H.x0+2)*TS,(H.cy+1)*TS+12,(H.x1-H.x0-3)*TS,2,'#d8b04a');
+ const px=(x,y)=>({x:x*TS+8,y:y*TS+10}),dx=(C.x+C.w/2)*TS;
+ DGATES.push({x:dx,y:(C.y+C.h)*TS+10,to:px(H.x0+4,H.cy),hint:'hVatIn',vat:1,lv:195});
+ DGATES.push({...px(H.x0+1,H.cy),to:{x:dx,y:(C.y+C.h+2)*TS+8},hint:'hUp'});})();
 // The Sword Grave (v2.95; ch 931: "The Sword Grave was an open plains area with 4,179 swords stabbed into the ground";
 // ch 937: "It contained the works which Pagma had produced in his later years, and it was also Braham's grave"; ch 940: "The
 // glacier dungeon, which resealed as soon as Grid entered, didn't tolerate any living thing"): a snow plain among the Glacier
@@ -4019,7 +4055,7 @@ let DVI=false;
 function dvS(){const g=S.dv||(S.dv={});if(g.day!==today()){g.day=today();g.pr=[];}g.pr=g.pr||[];return g;}
 const dvOn=()=>!!(S&&S.dv&&S.dv.g&&S.dv.until>Date.now());
 const dvIs=g=>dvOn()&&S.dv.g===g;
-const dvK=g=>S.church===g||g==='rebecca'&&S.cls==='priest'?1.5:1;
+const dvK=g=>S.church===g||g==='rebecca'&&(S.cls==='priest'||!!S.vatB)?1.5:1;   // v3.11: Goddess Rebecca's blessing from the Vatican
 // the bonus a blessing adds to a sum of bonuses (xp, gold, smith)
 function dvB(k){return k==='xp'&&dvIs('judar')?.1*dvK('judar'):k==='gold'&&dvIs('venice')?.1:k==='smith'&&dvIs('hexetia')?.15:0;}
 function dvAtk(m){if(m.spar||!dvOn())return 1;return dvIs('dominion')?1+.08*dvK('dominion'):dvIs('debirion')&&BEASTX.test(m.type)?1.15:1;}
@@ -4594,10 +4630,11 @@ Object.assign(STR.en,{"msc8": "The Divine Beasts’ Breaths", "msc9": "The 32nd 
    Every monster you kill fills its page: the first kill shows its name, level and strength, more kills show what it
    drops, and enough kills master it (+3% damage to it, -3% damage from it). Kills are your own save's S.kills, so it
    works the same online and offline. B opens it. */
-const MBX=new Set(['bhclone']),MBP={};let MBF='all',MBS=null;
+const MBX=new Set(['bhclone']),MBP={};   // MT[k].mb1: a quest's boss met once (the pope, v3.11): one kill masters it, and it has no boss chest
+let MBF='all',MBS=null;
 const mbList=()=>Object.keys(MT).filter(k=>!MBX.has(k)).sort((a,b)=>MT[a].lv[0]-MT[b].lv[0]||(a<b?-1:1));
 const mbK=k=>(S&&S.kills&&S.kills[k])||0;
-const mbNeed=k=>MT[k].wb?1:MT[k].boss?3:100,mbDropN=k=>MT[k].boss?1:10;
+const mbNeed=k=>MT[k].wb||MT[k].mb1?1:MT[k].boss?3:100,mbDropN=k=>MT[k].boss?1:10;
 const mbMs=k=>!!MT[k]&&!MBX.has(k)&&mbK(k)>=mbNeed(k);
 const mbSeen=()=>mbList().filter(k=>mbK(k)>0).length,mbMast=()=>mbList().filter(mbMs).length;
 const mbB=()=>tlOn('mbook')?.06:.03;
@@ -4633,7 +4670,7 @@ Object.assign(STR.en,{mbMoves:'Fights',mvCombo:'combos',mvKnock:'knock-back blow
 function mbDrops(k){const o=[];for(const [it] of (MT[k].drop||[]))if(!o.includes(it))o.push(it);for(const [it] of ((typeof NDROP!=='undefined'&&NDROP[k])||[]))if(!o.includes(it))o.push(it);return o;}
 function mbDetail(k){const b=MT[k],n=mbK(k),need=mbNeed(k);if(!n)return `<div class="mbd">${mbPicH(k,'mbpb un')}<div><b>???</b><small>${t('mbUnk')}</small></div></div>`;
  const lv=b.lv[0]===b.lv[1]?b.lv[0]:b.lv[0]+'–'+b.lv[1],el=typeof BEL!=='undefined'&&BEL[k],tags=[b.wb?t('mbWb'):b.boss?t('mbBoss'):'',el?t('mbEl_'+el):''].filter(Boolean).join(' · ');
- const dr=n>=mbDropN(k)?(b.boss?`<small>${t('mbNorm')}</small>`:'')+(mbDrops(k).map(it=>`<span class="mbi"><img src="${icon(it)}">${esc(t(it))}</span>`).join('')||`<small>${t('mbNoDrop')}</small>`)+(b.boss&&!b.wb?`<small class="mbch">${t('mbChest')}</small>`:''):`<small>${t('mbDropAt',{n:mbDropN(k)})}</small>`;
+ const dr=n>=mbDropN(k)?(b.boss?`<small>${t('mbNorm')}</small>`:'')+(mbDrops(k).map(it=>`<span class="mbi"><img src="${icon(it)}">${esc(t(it))}</span>`).join('')||`<small>${t('mbNoDrop')}</small>`)+(b.boss&&!b.wb&&!b.mb1?`<small class="mbch">${t('mbChest')}</small>`:''):`<small>${t('mbDropAt',{n:mbDropN(k)})}</small>`;
  const pc=Math.min(100,n/need*100);
  return `<div class="mbd">${mbPicH(k,'mbpb')}<div><b>${esc(mbName(k))}</b> <button class="mbtrk${S.mbTrk===k?' on':''}" data-mbt="${k}">${t(S.mbTrk===k?'mbTrkOff':'mbTrk')}</button><small>${t('mbLv',{l:lv})}${tags?' · '+tags:''}</small><small>${t('mbStats',{h:b.hp.toLocaleString('en'),d:b.dmg.toLocaleString('en')})}</small><small class="mbmv">${t('mbMoves')}: ${esc(mbMoves(k))}</small>`+
   `<div class="mbbar"><i style="width:${pc}%"></i><span>${mbMs(k)?t('mbMsT',{p:Math.round(mbB()*100)}):t('mbKills',{n:n.toLocaleString('en'),m:need})}</span></div><div class="mbdr">${dr}</div></div></div>`;}
@@ -4680,8 +4717,11 @@ Object.assign(STR.en,{"kMb": "Monsters", "mbT": "The Index's Monsters", "mbSumT"
 /* ---------------- Elizabeth's jewelry (owner 2026-10-21: Elizabeth's jewelry) ----------------
    Elizabeth, a craftsman level accessories maker (Eat Spicy Jokbal's niece), keeps a workshop in Winston. Two new gear
    slots, necklace (n) and bracelet (r), take what she makes: three two-piece sets (the Guardian's set gives +100
-   defense, as in the novel), paid with jewels, mithril and gold. Only she makes them; a smith cannot forge them. */
-const EZC={gdneck:30000,gdbrace:30000,rbear:120000,saear:140000,ezneck:150000,ezbrace:150000,bjneck:400000,bjbrace:400000,flneck:200000,frbrace:200000,stbrace:220000,kneck:300000};
+   defense, as in the novel), paid with jewels, mithril and gold. Only she makes them; a smith cannot forge them.
+   v3.11 (the owner 2026-10-26: Legendary crafting is Pagma's Successor's alone; "leave her, but make it pricier and harder"):
+   her two Legendary pieces, Belial's Black Jewel set, cost three times the gold and twice the materials, and ten
+   enhancement stones each. */
+const EZC={gdneck:30000,gdbrace:30000,rbear:120000,saear:140000,ezneck:150000,ezbrace:150000,bjneck:1200000,bjbrace:1200000,flneck:200000,frbrace:200000,stbrace:220000,kneck:300000};
 const ezHas=id=>Object.entries(rcById(id).need).every(([k,n])=>((S.mats||{})[k]||0)>=n)&&S.gold>=EZC[id];
 function ezSt(id){const rc=rcById(id),it=mkItem(id,rc.fix);S.uid--;return statShort(it)+' · '+t('mbLv',{l:rc.lvr})+'<br>'+Object.entries(rc.need).map(([k,n])=>`${esc(t(k))} ${((S.mats||{})[k]||0)}/${n}`).join(' · ');}
 function ezOpts(){return Object.keys(EZC).map(id=>({l:t('oEzMake',{it:t(id)})+' · '+t('r'+rcById(id).fix),pr:EZC[id],ic:id,poor:!ezHas(id),st:ezSt(id),f:()=>ezMake(id)}));}
@@ -6499,7 +6539,9 @@ NPCS.push({id:'merchant',spr:'merchant',...rmP(7,5.5,2.5),reach:16},{id:'armorer
  {id:'admRabbit',spr:'admRabbit',tx:548.5,ty:84.4,ph:1,dir:3},
  {id:'zebra',spr:'zebra',tx:866.5,ty:161.4,ph:1,dir:2},
  {id:'skunk',spr:'skunk',tx:515.5,ty:-13.6,ph:1,dir:3},
- {id:'brfish',spr:'brfish',tx:570.5,ty:251.4,ph:1,dir:2},{id:'sirenE',spr:'sirenE',tx:1165.5,ty:289.4,ph:1,dir:3},{id:'sirenG',spr:'sirenG',tx:1158.5,ty:292.4,ph:1,dir:3},{id:'minor',spr:'minor',tx:931.5,ty:-10.4,ph:1,dir:2});   // Brinichi's fisherman; the Sirens (v2.96); Minor at the Beware Dogs mine (v2.99)   // Skunk of Skunk's Expedition Group at the Sword Grave (ch 931, 937)   // Earl Zebra before his keep (ch 243-245)   // Reidan's administrator (ch 221-228, 856)   // Layla works in her salon now (owner 2026-10-23)
+ {id:'brfish',spr:'brfish',tx:570.5,ty:251.4,ph:1,dir:2},{id:'sirenE',spr:'sirenE',tx:1165.5,ty:289.4,ph:1,dir:3},{id:'sirenG',spr:'sirenG',tx:1158.5,ty:292.4,ph:1,dir:3},{id:'minor',spr:'minor',tx:931.5,ty:-10.4,ph:1,dir:2},
+ {id:'isabel',spr:'isabel',tx:836.5,ty:199.4,ph:1,dir:0},{id:'luna',spr:'luna',tx:839.5,ty:212.6,ph:1,dir:0},{id:'vpriest',spr:'priest',tx:834.5,ty:217.4,ph:1,dir:0},
+ {id:'rin',spr:'rin',tx:1286.5,ty:293.4,ph:1,dir:2},{id:'damian',spr:'damian',tx:1258.5,ty:287.4,ph:1,dir:2});   // Brinichi's fisherman; the Sirens (v2.96); Minor at the Beware Dogs mine (v2.99)   // Skunk of Skunk's Expedition Group at the Sword Grave (ch 931, 937)   // Earl Zebra before his keep (ch 243-245)   // Reidan's administrator (ch 221-228, 856)   // Layla works in her salon now (owner 2026-10-23)
 let camXf=0,camYf=0,camSnap=true,S,P,mons=[],npcs=[],fx=[],nums=[],smoke=[],proj=[],shake=0,mode='lang',hudDirty=true,gTime=0,camX=0,camY=0,MID=0;
 const RC=[
  {id:'jaffa',slot:'x',need:{wood:2,ore:1},unlock:()=>!!S.qs.sm3,diff:.8,strikes:4},
@@ -6554,7 +6596,7 @@ RC.push(
  {id:'ocboots',slot:'b',def:9,ms:.06,fix:3,lvr:140,drop:1,unlock:()=>false},{id:'ocring',slot:'k',dm:.05,hpp:.04,fix:3,lvr:140,drop:1,unlock:()=>false},
  {id:'gdneck',slot:'n',def:8,hpp:.03,fix:2,lvr:100,need:{mith:3,topaz:1},jw:1,unlock:()=>false},{id:'gdbrace',slot:'r',def:8,ms:.03,fix:2,lvr:100,need:{mith:3,topaz:1},jw:1,unlock:()=>false},
  {id:'ezneck',slot:'n',dm:.04,hpp:.04,fix:3,lvr:300,need:{sapph:3,diam:1,mith:10},jw:1,unlock:()=>false},{id:'ezbrace',slot:'r',as:.05,mpb:40,fix:3,lvr:300,need:{sapph:3,diam:1,mith:10},jw:1,unlock:()=>false},
- {id:'bjneck',slot:'n',dm:.08,hpp:.06,fix:4,lvr:450,need:{bljewel:1,diam:2,mith:20},jw:1,unlock:()=>false},{id:'bjbrace',slot:'r',dm:.05,as:.07,fix:4,lvr:450,need:{bljewel:1,diam:2,mith:20},jw:1,unlock:()=>false},
+ {id:'bjneck',slot:'n',dm:.08,hpp:.06,fix:4,lvr:450,need:{bljewel:2,diam:4,mith:40,estone:10},jw:1,unlock:()=>false},{id:'bjbrace',slot:'r',dm:.05,as:.07,fix:4,lvr:450,need:{bljewel:2,diam:4,mith:40,estone:10},jw:1,unlock:()=>false},
  {id:'flneck',slot:'n',dm:.06,hpp:.03,fix:3,lvr:220,need:{fess:8,ruby:2,mith:10},jw:1,unlock:()=>false},{id:'frbrace',slot:'r',def:16,hpp:.06,fix:3,lvr:220,need:{iess:8,sapph:2,mith:10},jw:1,unlock:()=>false},{id:'rbear',slot:'e',dm:.05,hpp:.04,fix:3,lvr:220,need:{ruby:2,mith:6},jw:1,unlock:()=>false},{id:'saear',slot:'e',mpb:60,as:.03,fix:3,lvr:260,need:{sapph:2,mith:6},jw:1,unlock:()=>false},{id:'stbrace',slot:'r',as:.07,ms:.03,fix:3,lvr:230,need:{sess:8,topaz:2,mith:10},jw:1,unlock:()=>false},{id:'kneck',slot:'n',dm:.07,hpp:.05,fix:3,lvr:280,need:{kpearl:1,kink:6,mith:12},jw:1,unlock:()=>false},
  // the death knights of the Behen Archipelago (islands 61-65) leave the gear of the old legends
  {id:'lantd',slot:'w',atk:420,spd:.2,fix:3,lvr:350,ip:['bleed'],drop:1,unlock:()=>false},
@@ -6788,6 +6830,10 @@ function defV(){let d=setBon('def')+cosB('def');for(const sl of GEAR){const i=eq
 // spawns read the world as generated (GM0), not this player's copy with its chopped trees and stumps, so every
 // client places the same monsters at the same spots and shared monsters line up (owner report: half stayed local)
 let GM0=null;const at0=(x,y)=>(x<0||y<-YO||x>=GW||y>=MH)?CW:GM0[(y+YO)*GW+x],sol0=(x,y)=>SOLID[at0(x,y)]===1;
+// v3.11: the ground before the Vatican (VAT0), so the spawn dice that fell there test the same tiles as before; a beast they put
+// inside its walls is moved out past the east wall, each to a tile of its own (a monster's online key is its type and spawn tile)
+const atV0=(x,y)=>!!VAT0&&x>=VAT.x0&&x<=VAT.x1&&y>=VAT.k0&&y<=VAT.y1?VAT0[(y-VAT.k0)*(VAT.x1-VAT.x0+1)+x-VAT.x0]:at0(x,y),solV0=(x,y)=>SOLID[atV0(x,y)]===1,VOUT=new Set();
+function vatOut(m,x,y){const V=VAT;if(!(x+1>=V.x0&&x<=V.x1&&y>=V.y0&&y<=V.y1))return;let ox=V.x1+2;while(ox<V.x1+40&&(sol0(ox,y)||sol0(ox+1,y)||VOUT.has(m.type+'@'+ox+','+y)))ox++;VOUT.add(m.type+'@'+ox+','+y);m.vo=m.sx;m.x=m.sx=ox*TS+8;m.nk=null;}   // m.vo: where the dice put it (the bandit rings' level reads that)
 // wild spawns test the ground as it was before major #3 widened Reinhardt (RE0), so the shared spawn sequence and every spot
 // outside the city stay as they were; a monster that falls inside the new walls is moved out past the west wall
 const inRein=(x,y)=>x>=REIN.x0&&x<=REIN.x1&&y>=REIN.y0&&y<=REIN.y1,atW=(x,y)=>inRein(x,y)?RE0[(y-REIN.y0)*(REIN.x1-REIN.x0+1)+x-REIN.x0]:at0(x,y),solW=(x,y)=>SOLID[atW(x,y)]===1;
@@ -6801,7 +6847,8 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
  mons.push(newMon('fgiant',GHOLD.bx*TS+8,GHOLD.by*TS+8));
  mons.push(newMon('ypriest',(((YATAN.x0+YATAN.x1)>>1))*TS+8,(YATAN.y0+6)*TS+8));
  {const d=newMon('trauka',PEAK.x*TS+8,(PEAK.y-3)*TS+8),u=WS&&WS.wb&&WS.wb.trauka;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
- {const rf=mulberry32(77);for(const [type,x0,x1,y0,y1,n] of FSPAWN){let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=x0+(rf()*(x1-x0)|0),y=y0+(rf()*(y1-y0)|0);if(!sol0(x,y)&&!sol0(x+1,y)&&at0(x,y)!==PA){const m=newMon(type,x*TS+8,y*TS+8,rf);m.far=1;mons.push(m);c++;}}}
+ {const rf=mulberry32(77);VOUT.clear();   // atV0/solV0: the ground before the Vatican, so no dice move
+  for(const [type,x0,x1,y0,y1,n] of FSPAWN){let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=x0+(rf()*(x1-x0)|0),y=y0+(rf()*(y1-y0)|0);if(!solV0(x,y)&&!solV0(x+1,y)&&atV0(x,y)!==PA){const m=newMon(type,x*TS+8,y*TS+8,rf);m.far=1;vatOut(m,x,y);mons.push(m);c++;}}}
   banditSpawn();
   SLAIR.forEach(([x,y],i)=>{const m=newMon('sanju'+(i+1),x*TS+8,(y-1)*TS+8,rf);m.far=1;mons.push(m);});
   for(const [type,x0,x1,y0,y1,n] of SDSPAWN){let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=x0+(rf()*(x1-x0)|0),y=y0+(rf()*(y1-y0)|0);if(!sol0(x,y)&&!sol0(x+1,y)){const m=newMon(type,x*TS+8,y*TS+8,rf);m.far=1;mons.push(m);c++;}}}
@@ -7048,7 +7095,7 @@ window.__GTD={tick:dt=>tdTick(dt),hit:(m,d,c)=>tdHit(m,d,c),end:()=>tdEnd(),get 
 function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}if(OGB&&OGB[m.type]&&ogImm(m,o))return 0;
  if(m.type==='kraugel'&&!m.st&&!(P.bdetU>gTime)&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
  if(o.skill&&!o.spr&&P.sprW>gTime)bzSpray(m,mul); // Braham's Magic Spray
- let dmg=(o.aura?auAtkV():atkV())*mul*(o.skill&&P.cohW>gTime?3:1)*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*eaAtk()*(m.wardT>gTime?m.wardR||.4:1),crit=rand()<Math.min(.5,.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8*ttCdm();dmg*=rlAtk(m);let burn=false;const w=weapon();
+ let dmg=(o.aura?auAtkV():atkV())*mul*(o.skill&&P.cohW>gTime?3:1)*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*eaAtk()*vtAtk(m)*(m.wardT>gTime?m.wardR||.4:1),crit=rand()<Math.min(.5,.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8*ttCdm();dmg*=rlAtk(m);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -7339,7 +7386,7 @@ Object.assign(STR.en,{graveT2:'"At a small hill north of Winston. There were aro
    system-window glint, not a world object. First read raises Insight by 1 (like the books on shelves).
    [key, x, y, abs]: abs=0 means original-map columns (wX), abs=1 means world tiles. Moved to the nearest open tile. */
 const LMD=[['lmNEnd',179,10,1],['lmOut',40,64,0],['lmMine',21,9,0],['lmGrey',45,25,0],['lmSnow',160,18,0],['lmOrc',112,24,0],
- ['lmCanyon',131,104,0],['lmLoran',127,113,0],['lmKesan',443,98,1],['lmWSand',496,72,1],['lmZebra',864,145,1],['lmSwordG',518,-20,1],['lmBrin',566,250,1],['lmDrav',928,-10,1],['lmWNest',475,66,1],['lmYatan',465,28,1],
+ ['lmCanyon',131,104,0],['lmLoran',127,113,0],['lmKesan',443,98,1],['lmWSand',496,72,1],['lmZebra',864,145,1],['lmVatican',VAT.gx+4,VAT.y0-2,1],['lmSwordG',518,-20,1],['lmBrin',566,250,1],['lmDrav',928,-10,1],['lmWNest',475,66,1],['lmYatan',465,28,1],
  ['lmChaos',303,-70,1],['lmSanju',180,-73,1],['lmRidge4',265,-149,1],['lmPedro',122,184,1],['lmGauss',396,184,1],['lmCork',640,246,1],
  ['lmSuaz',742,74,1],['lmRolling',788,79,1],['lmDran',DRAN(118)-4,118,1],['lmTatur',820,30,1],['lmTitan',884,86,1],['lmTemple',875,72,1],['lmBMine',931,54,1],['lmTower',936,75,1],['lmAbyss',ABYSS.x+4,ABYSS.y+ABYSS.ry+2,1],['lmButin',913,186,1],
  ['lmRCity',697,86,1],['lmRPalace',689,55,1],['lmRTrain',670,55,1],['lmRFame',693,65,1],['lmRWest',649,64,1],['lmRTemple',660,53,1],['lmRWall',639,85,1]];
@@ -7675,7 +7722,7 @@ function completeQ(id){if(!claimQ(id))return;if(id==='sir1')sirFlute(1);if(id===
  if(q.item){const it=mkItem(q.item,1);S.items.push(it);if(q.cls)S.eqW=it.uid;loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});}
  if(q.promo){promoDone(q);phDone(q);}if(q.hcls)hcDone(q);
  if(q.cls&&(S.cls==='novice'||q.sw)){S.cls=q.cls;sbSig='';SFX.legendary();flash();setTimeout(()=>toast(t('clsGot',{c:t('cl_'+q.cls)}),'good'),400);checkSkills();}
- if(q.title||q.tl)giveTitle(q.title||q.tl);epDone(id);msDone(id);p5Done(id);eaDone(id);
+ if(q.title||q.tl)giveTitle(q.title||q.tl);epDone(id);msDone(id);p5Done(id);eaDone(id);vtDone(id);
  addAff(q.by,12);{const rn=10+Math.min(15,Math.floor((q.xp||0)/200));addRep(townOfNpc(q.by),rn);crepAdd(rn*3);}
  if(q.xp&&!(q.hcls&&isLeg(q.hcls))){gainXP(pasOn('opers')?q.xp*1.15:q.xp,0,q.rep||q.gen?'rquest':'squest');gContrib(q.xp*.1);}if(q.adq)adqFin(id);else if(q.rep&&!q.gen){const D=dlyS();D.rq=D.rq||{};D.rq[id]=(D.rq[id]||0)+1;}checkSkills();hudDirty=true;save(true);}
 // craft-for quests hand over one crafted piece: the least valuable unequipped one (an equipped one is taken off first)
@@ -7722,7 +7769,7 @@ function updateEscort(dt){escHide();if(!ESC)return;const s=S.qs[ESC.q],q=QD[ESC.
  const D=escDest(q.obj);if(Math.hypot(E.x-D.x,E.y-D.y)<40){s.c=1;num(E.x,E.y-26,t('escThanks'),'#9fe39a',false);vfx('spawn',E.x,E.y);ESC=null;addAff(q.by,6);completeQ(E.q);}}
 // who says what: hi = first meeting, low = a quest exists but your level is too low, idle = nothing to do; opts = shop choices
 const NPCT={
- steim:{hi:'nst_hi'},irene:{hi:'nir_hi'},admRabbit:{hi:'nrb_hi'},zebra:{hi:'nzb_hi',noGift:1},skunk:{hi:'nsk_hi'},brfish:{hi:'nbf_hi',low:'nbf_low'},minor:{hi:'nmn_hi'},sirenE:{hi:'nse_hi',noGift:1},sirenG:{hi:'nsg_hi',noGift:1},   // Winston Castle and Reidan's administrator (v2.92): their lines and options are set with NLD's further down
+ steim:{hi:'nst_hi'},irene:{hi:'nir_hi'},admRabbit:{hi:'nrb_hi'},zebra:{hi:'nzb_hi',noGift:1},skunk:{hi:'nsk_hi'},brfish:{hi:'nbf_hi',low:'nbf_low'},minor:{hi:'nmn_hi'},isabel:{hi:'nis_hi'},luna:{hi:'nlu_hi',noGift:1},rin:{hi:'nrn_hi'},damian:{hi:'ndm_hi'},vpriest:{hi:'nvp_hi'},sirenE:{hi:'nse_hi',noGift:1},sirenG:{hi:'nsg_hi',noGift:1},   // Winston Castle and Reidan's administrator (v2.92): their lines and options are set with NLD's further down
  biban:{hi:'twBbHi',idle:()=>TOW?'twId_biban':S.lv<400?'twBbLow':'twBbIdle',opts:()=>bibanOpts(),noGift:1},
  hayate:{hi:'twHaHi',idle:()=>'twHaIdle',opts:()=>twOpts('hayate'),noGift:1},
  fronz:{hi:'twHi_fronz',idle:()=>'twId_fronz',opts:()=>twOpts('fronz'),noGift:1},
@@ -8696,7 +8743,7 @@ function statShort(i){const a=[];if(i.atk)a.push(`${t('atk')} ${i.uid?iAtk(i):i.
  if(i.as)a.push(`${t('gAs')} +${Math.round(i.as*enF(i)*100)}%`);if(i.ms)a.push(`${t('gMs')} +${Math.round(i.ms*enF(i)*100)}%`);if(i.dm)a.push(`${t('gDm')} +${Math.round(i.dm*enF(i)*100)}%`);if(i.mpb)a.push(`${t('gMp')} +${Math.round(i.mpb*enF(i))}`);if(i.hpp)a.push(`${t('gHp')} +${Math.round(i.hpp*enF(i)*100)}%`);if(i.agi)a.push(`${t('agi')} +${i.agi}`);if(i.agp)a.push(`${t('agi')} ${Math.round(i.agp*100)}%`);if(i.cold)a.push(t('gCold',{n:Math.round(i.cold*100)}));if(i.dsh)a.push(t('gDsh',{n:Math.round(i.dsh*100)}));if(i.gem)a.push(t('gemIn',{g:t(i.gem)}));return a.join(' · ');}
 function setTip(i){const sk=Object.keys(SETS).find(k=>SETS[k].it.includes(setId(i.id)));if(!sk)return '';const n=setCount(sk),c=setTier(sk);
  return `<br><small style="color:#9fe39a">${t('set_'+sk)} (${n}/${SETS[sk].it.length})</small>`+Object.keys(SETS[sk].b).map(k=>`<br><small style="color:${+k===c?'#9fe39a':'#8a96a8'}">${t('setPc',{n:k})}: ${t('setD_'+sk+k)}</small>`).join('');}
-function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:''}${itLvr(i)?`<small style="color:${lvrOk(itLvr(i))?'#9fb4c8':'#ff8a7a'}">${t('needLvT',{n:itLvr(i)})}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+(i.sh?`<br><small style="color:#ffe7a8">${t('shGear')}</small>`:'')+edrTip(i)+hidTip(i)+wpTip(i)+setTip(i)+itemSkillTip(i);}
+function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:''}${itLvr(i)?`<small style="color:${lvrOk(itLvr(i))?'#9fb4c8':'#ff8a7a'}">${t('needLvT',{n:itLvr(i)})}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+(i.sh?`<br><small style="color:#ffe7a8">${t('shGear')}</small>`:'')+edrTip(i)+vtTip(i)+hidTip(i)+wpTip(i)+setTip(i)+itemSkillTip(i);}
 function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>${t('bread')}</b><br><small>${t('clickEat')}</small>`});['hpot','mpot'].forEach(k=>{if(S[k])a.push({k,n:S[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickDrink',{k:keyName(POT[k].key)})}</small>`});});
  LIFEM.forEach(k=>{if(S.mats[k]>0)a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${TKF.includes(SHK[k]||k)?tkTip(SHK[k]||k):t('lifeMD')}</small>`+(SHK[k]?`<br><small style="color:#ffe7a8">${t('shTip')}</small>`:'')});});
  if(S.mats.pstove>0)a.push({k:'pstove',n:1,hook:!!CKST,tip:`<b>${t('pstove')}</b><br>${t('pstoveD')}<br><small>${t(CKST?'ckOnT':'ckUseT')}</small>`});   // v3.04
@@ -10121,7 +10168,7 @@ function barPlace(k,i){const a=barSkills().slice(0,NSK),j=a.indexOf(k),prev=a[i]
 function closeStatus(){BPICK=null;SFX.close();$('statusW').hidden=true;mode='play';hudDirty=true;}
 let STAB='main';
 function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,tip,btn,extra,id)=>`<div class="srow"${tip?` data-tip="${esc(tip)}"`:''}><span>${k}</span><span>${extra?'<span class="sv">':''}<b${id?` id="sv_${id}"`:''}>${v}</b>${extra?extra+'</span>':''}${btn||''}</span></div>`;
- const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+(S.__demo?'':row(t('sdxL'),t('sdxV',{p:Math.round(((S.dly&&S.dly.day===today()?S.dly.sdx:0)||0)*1000+1e-6)/10,c:Math.round(SDXC*100)}),t('sdxD',{c:Math.round(SDXC*100)})))+row(t('cls'),t('cl_'+S.cls)+(S.cls2?` (${t('sc2_'+S.cls2)})`:''),S.cls2?t('sc2D_'+S.cls2):'')+row(t('raceL'),t('race_'+myRace()),t('raceD_'+myRace()))+(S.cls==='aura'?row(t('auRateL'),t('auR'+auR())):'')+(dvOn()?row(t('dvL'),t('dvRow',{g:t('godN_'+S.dv.g),n:Math.ceil((S.dv.until-Date.now())/60000)})):'')+(patOn()?row(t('lpatL'),t('lpatRow',{n:Math.ceil((S.pat1-Date.now())/60000)})):'')+(S.cls==='smith'&&(!S.sec||S.sec==='smith')?'':row(t('secL'),S.sec?t('sec_'+S.sec):t('none'),S.sec?t('sec_'+S.sec+'D'):t('secTabD',{g:SEC_SWAP.toLocaleString('en')})))+(S.bank?row(t('bankL'),S.bank.toLocaleString('en')):'')+(marOn()?row(t('marL'),esc(S.mar.n)+(MARN?' ♥':''),t('marTip'),` <button data-act="marGo">${t('marGoB')}</button>`):'')+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+(S.rx>0?row(t('innRxL'),S.rx.toLocaleString('en'),t('innRxD')):'')+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
+ const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+(S.__demo?'':row(t('sdxL'),t('sdxV',{p:Math.round(((S.dly&&S.dly.day===today()?S.dly.sdx:0)||0)*1000+1e-6)/10,c:Math.round(SDXC*100)}),t('sdxD',{c:Math.round(SDXC*100)})))+row(t('cls'),t('cl_'+S.cls)+(S.cls2?` (${t('sc2_'+S.cls2)})`:''),S.cls2?t('sc2D_'+S.cls2):'')+row(t('raceL'),t('race_'+myRace()),t('raceD_'+myRace()))+(S.cls==='aura'?row(t('auRateL'),t('auR'+auR())):'')+(S.vatB?row(t('vtBL'),t('vtBV'),t('vtBD')):'')+(dvOn()?row(t('dvL'),t('dvRow',{g:t('godN_'+S.dv.g),n:Math.ceil((S.dv.until-Date.now())/60000)})):'')+(patOn()?row(t('lpatL'),t('lpatRow',{n:Math.ceil((S.pat1-Date.now())/60000)})):'')+(S.cls==='smith'&&(!S.sec||S.sec==='smith')?'':row(t('secL'),S.sec?t('sec_'+S.sec):t('none'),S.sec?t('sec_'+S.sec+'D'):t('secTabD',{g:SEC_SWAP.toLocaleString('en')})))+(S.bank?row(t('bankL'),S.bank.toLocaleString('en')):'')+(marOn()?row(t('marL'),esc(S.mar.n)+(MARN?' ♥':''),t('marTip'),` <button data-act="marGo">${t('marGoB')}</button>`):'')+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+(S.rx>0?row(t('innRxL'),S.rx.toLocaleString('en'),t('innRxD')):'')+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
  h+=`<div class="ssec">${t('basic')}<span class="sptc${S.pts>0?' on':''}">${t('pts',{n:S.pts})}${S.pts>1?` <input class="stn" id="stAmt" type="number" inputmode="numeric" min="1" max="${S.pts}" value="${STAMT||''}" placeholder="${esc(t('stNumPh'))}" data-tip="${esc(t('stNumTip'))}">`:''}</span></div><div class="sgrid stq">`+['str','sta','agi','int','dex'].map(k=>row(t(k),stat(k),t('t'+k),S.pts>0?`<button data-stat="${k}">+</button>${S.pts>=5?`<button class="p5" data-stat="${k}" data-n="5" data-tip="${esc(t('p5Tip'))}">+5</button>`:''}${TOUCH&&S.pts>5?`<button class="p5" data-stat="${k}" data-n="all">${t('ptsAllB')}</button>`:''}`:'',stat(k)!==S.st[k]?` <em data-tip="${esc(t('stBaseTip'))}">(${t('stBase',{n:S.st[k]})})</em>`:'',k)).join('')+'</div>';
  if(S.respec>0)h+=`<div class="note"><button data-respec="1" data-tip="${esc(t('respecD'))}">${t('respecUse',{n:S.respec})}</button></div>`;
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
@@ -10258,6 +10305,7 @@ function sahZone(tx,ty){const T=TITAN,B=BUTIN,R=ROLL,A=ABYSS;
  if(tx>=T.x0&&tx<T.x1+1&&ty>=T.y0&&ty<T.y1+1)return 'zTitan';
  if(tx>=B.x0&&tx<B.x1+1&&ty>=B.y0&&ty<B.y1+1)return 'zButin';
  if(tx>=ZEB.x0&&tx<ZEB.x1+1&&ty>=ZEB.y0&&ty<ZEB.y1+1)return 'zZebra';
+ if(tx>=VAT.x0&&tx<VAT.x1+1&&ty>=VAT.y0&&ty<VAT.y1+1)return 'zVatican';
  if(tx<SUAZ.x1+1)return 'zSuaz';
  if(tx>=R.x0&&tx<R.x1+1&&ty>=R.y0&&ty<R.y1+1)return 'zRolling';
  if(Math.hypot((tx-A.x)/A.rx,(ty-A.y)/A.ry)<1.3)return 'zAbyss';
@@ -10401,8 +10449,8 @@ function sparEnd(won){const{m,f}=SPAR;if(won&&m.ssq)setTimeout(legWin,600);if(wo
 // nearest the town (own RNG, so the shared spawn sequence stays as it was)
 function banditSpawn(){TFB.length=0;const rf=mulberry32(55),kinds=['outlaw','gsold','deserter','sknight','kraider','gscout','cultist','gknight','huroi','pguard'];
  for(const T of TOWNS){const cx=(T.x0+T.x1)/2,cy=(T.y0+T.y1)/2,hw=(T.x1-T.x0)/2,hh=(T.y1-T.y0)/2;
-  const L=mons.filter(m=>!MT[m.type].boss&&!TFB.includes(m)).map(m=>[Math.hypot(m.sx/TS-cx,m.sy/TS-cy),MT[m.type].lv[0]]).filter(a=>a[0]<hw+60).sort((a,b)=>a[0]-b[0]).slice(0,30).map(a=>a[1]).sort((a,b)=>a-b),lv=L.length>=5?L[L.length>>1]:170; // the Saharan towns stand in late land with few spawns near
-  if(eaT(T.rx))continue;   // the East's towns have no bandit ring (their robbers are Hwang Gildong's, out in Pa); the ring's fights would also take the world's dice
+  const L=mons.filter(m=>!MT[m.type].boss&&!TFB.includes(m)).map(m=>[Math.hypot((m.vo||m.sx)/TS-cx,m.sy/TS-cy),MT[m.type].lv[0]]).filter(a=>a[0]<hw+60).sort((a,b)=>a[0]-b[0]).slice(0,30).map(a=>a[1]).sort((a,b)=>a-b),lv=L.length>=5?L[L.length>>1]:170; // the Saharan towns stand in late land with few spawns near
+  if(eaT(T.rx)||T.k==='zVatican')continue;   // (v3.11) nor the Holy See, which its paladins keep; the East's towns have no bandit ring (their robbers are Hwang Gildong's, out in Pa); the ring's fights would also take the world's dice
   const ty=kinds.reduce((a,k)=>Math.abs(MT[k].lv[0]-lv)<Math.abs(MT[a].lv[0]-lv)?k:a);
   for(let n=0,tr=0;n<3&&tr<200;tr++){const a=rf()*6.283,r=1+(10+rf()*8)/Math.max(hw,hh),x=Math.round(cx+Math.cos(a)*hw*r),y=Math.round(cy+Math.sin(a)*hh*r);
    if(x<1||x>=GW-1||y<-NR+1||y>=WMH-1||sol0(x,y)||sol0(x+1,y)||at0(x,y)===WA||at0(x,y)===PA||TOWNS.some(o=>x>=o.x0-2&&x<=o.x1+2&&y>=o.y0-2&&y<=o.y1+2))continue;
@@ -10611,7 +10659,7 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  // danger regions: red wash with a dashed edge
  g.save();g.setLineDash([6*dpr,4*dpr]);g.lineWidth=1.2*dpr;g.strokeStyle='rgba(226,73,58,.7)';g.fillStyle='rgba(140,10,10,.16)';[[28,2,34,40],[2,44,62,42]].forEach(([x,y,w,h])=>{g.fillRect(X(x),Y(y),w*sc,h*sc);g.strokeRect(X(x),Y(y),w*sc,h*sc);});g.restore();
  if(MV.z>=2.5){g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=1;for(let x=MV.a;x<=MV.b;x+=10){g.beginPath();g.moveTo(X(x),Y(-NR));g.lineTo(X(x),Y(WMH));g.stroke();}for(let y=-NR;y<=WMH;y+=10){g.beginPath();g.moveTo(X(MV.a),Y(y));g.lineTo(X(MV.b),Y(y));g.stroke();}}
- [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zWSand',492,66],['zZebra',870,150],['zSwordG',538,-26],['zBrin',575,247],['zDrav',932,-14],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAsmo',ASMO.gx,ASMO.y0-2],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3],...EAL].forEach(([k,x,y])=>{if(!(inM(x,y)&&onS(X(x),Y(y),240*dpr)))return;MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`});
+ [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zWSand',492,66],['zZebra',870,150],['zVatican',VAT.cat.x+VAT.cat.w/2,VAT.y0-3],['zSwordG',538,-26],['zBrin',575,247],['zDrav',932,-14],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAsmo',ASMO.gx,ASMO.y0-2],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3],...EAL].forEach(([k,x,y])=>{if(!(inM(x,y)&&onS(X(x),Y(y),240*dpr)))return;MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`});
   const tl=townLv(k);if(tl)MM.label(g,t('townLv',{n:tl}),X(x),Y(y)-(13+MV.z*2.4)*dpr,{size:Math.round((9+MV.z)*dpr),color:tl>S.lv+10?'#ff9a8a':'#9fe0ff',font:F,weight:600});});   // the town's recommended level above its name (under it, it sat on the townsfolk's names)
  ANVILS.forEach(a=>{if(inM(a.tx,a.ty)&&onS(X(a.tx+.5),Y(a.ty+.5)))MM.marker(g,'anvil',X(a.tx+.5),Y(a.ty+.5),u*1.2);});
  mons.forEach(m=>{if(m.dead||m.tdum||!inM(m.x/TS,m.y/TS)||!onS(X(m.x/TS),Y(m.y/TS))||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
@@ -10868,11 +10916,11 @@ function update(dt){
  if(P.sw>0){P.sw-=dt;P.hp=Math.min(mh,P.hp+mh*.03*dt);if(rand()<dt*6)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*14,vx:0,vy:-24,t:.5,c:'#7ae07a',fl:1});}
  // hunger only drops while you do something (Twister 2026-10-19): walking, riding, attacking, dodging or guarding
  {const busy=Math.abs(P.x-(P.fqx??P.x))+Math.abs(P.y-(P.fqy??P.y))>.01||P.acd>0||P.dash>0||P.guard;P.fqx=P.x;P.fqy=P.y;if(busy)P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));}
- updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);wcTick();swgTick(dt);sirTick();bdTick();ckTick();autoTick(dt);o48Tick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
+ updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);wcTick();swgTick(dt);sirTick();bdTick();vtTick(dt);ckTick();autoTick(dt);o48Tick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
-  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh&&z!=='zBdog'){toast(t('enterZ',{z:t(z)})+(townLv(z)?' · '+t('townLv',{n:townLv(z)}):''));ZT[z]=gTime;}S.zone=z;exZone(z);dtEnter(z);if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold'||z==='zPedro'||z==='zGauss'||z==='zSSea')&&S.lv<160||/^zChaos/.test(z)&&S.lv<220||z==='zSuaz'&&S.lv<150||z==='zWSand'&&S.lv<145||(z==='zZebra'||z==='zZebraU')&&S.lv<200||z==='zSwordGU'&&S.lv<300||z==='zDran'&&S.lv<180||z==='zAsmo'&&S.lv<250||(/^zAbyss/.test(z)||z==='zTaleren')&&S.lv<360||/^zEa/.test(z)&&!TOWNS.some(T=>T.k===z)&&S.lv<(z==='zEaMur'?440:300))&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
+  if(z!==S.zone&&P.zt>1.2){const fresh=(ZT[z]??-99)<gTime-45;if(S.zone&&fresh&&z!=='zBdog'){toast(t('enterZ',{z:t(z)})+(townLv(z)?' · '+t('townLv',{n:townLv(z)}):''));ZT[z]=gTime;}S.zone=z;exZone(z);dtEnter(z);if(TOWNS.some(T=>T.k===z))S.vis[z]=1;if(((z==='zGrey'||z==='zOut'||z==='zSDes'||z==='zSFen')&&S.lv<90||(z==='zYatan'||z==='zPeak'||z==='zKesan'||z==='zGlac'||z==='zGiantL'||z==='zGHold'||z==='zPedro'||z==='zGauss'||z==='zSSea')&&S.lv<160||/^zChaos/.test(z)&&S.lv<220||z==='zSuaz'&&S.lv<150||z==='zWSand'&&S.lv<145||(z==='zZebra'||z==='zZebraU')&&S.lv<200||z==='zVatH'&&S.lv<190||z==='zSwordGU'&&S.lv<300||z==='zDran'&&S.lv<180||z==='zAsmo'&&S.lv<250||(/^zAbyss/.test(z)||z==='zTaleren')&&S.lv<360||/^zEa/.test(z)&&!TOWNS.some(T=>T.k===z)&&S.lv<(z==='zEaMur'?440:300))&&fresh)setTimeout(()=>toast(t('oneShot'),'warn'),300);}}
  // the Chaos Mountains past the first ridge: the blizzard cuts the flesh, 1/2/3 % of max health every 4 s (never the last
  // point); a campfire keeps it off
  if(P.y<NWALL*TS&&!P.ghost){const k=ridgeAt(P.x/TS,P.y/TS);if(k>0&&(P.chT=(P.chT??4)-dt)<=0){P.chT=4;if(!CAMPS.some(c=>Math.hypot(c.x-P.x,c.y-P.y)<64)){const d=Math.max(1,Math.round(maxHP()*.01*k));P.hp=Math.max(1,P.hp-d);numP(-26,'-'+d,'#bfe6ff');hudDirty=true;}}}
@@ -11170,7 +11218,7 @@ function render(dt){DRAWN=0;netDrawn=0;
   for(const m of TFB){const st=TFS.get(m);if(st&&st.t>gTime&&!m.dead)TX.push({s:st.s,x:m.x,y:m.y-(MT[m.type].oy||16)-24,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff9a8a'});}
   for(const c of exNear()){ents.push({y:c.y-6,f:()=>drawCache(c)});ents.push({y:c.y+400,f:()=>drawCacheG(c)});}
   for(const l of lmList())if(l.x>camX-20&&l.x<camX+VW+20&&l.y>camY-10&&l.y<camY+VH+40)ents.push({y:l.y,f:()=>drawLm(l)});
-  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});if(rm===HALL)hallEnts(ents);swgEnts(ents);sirEnts(ents);bdEnts(ents);ckEnts(ents);}
+  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});if(rm===HALL)hallEnts(ents);swgEnts(ents);sirEnts(ents);bdEnts(ents);vtEnts(ents);ckEnts(ents);}
   if(COMPO){const a=COMPO;ents.push({y:a.y,f:()=>{if(a.hide>0)return;drawChar(a.spr,a.x,a.y,a.dir,a.frame||0,false,0,a);}});}
   allies.forEach(a=>{if(a.dead||a.go)return;ents.push({y:a.y,f:()=>{drawChar(a.id,a.x,a.y,a.dir,a.frame||0,false,0,a);R(ctx,a.x-7,a.y-30,14,2,'#000');R(ctx,a.x-7,a.y-30,14*a.hp/a.max,2,'#5ad06a');}});});
   for(const g of DGATES){if(g.hide||g.bhg&&!['next','exit','goal','box'].includes(g.bh)||g.tw&&!['up','down','exit'].includes(g.tw))continue;if(g.x<camX-30||g.x>camX+VW+30||g.y<camY-30||g.y>camY+VH+30)continue;ents.push({y:g.y-14,f:()=>drawGate(g)});}
@@ -11489,7 +11537,7 @@ function p3Storm(){if(!P)return false;const tx=P.x/TS,ty=P.y/TS;return tx>STT.x0
 const p3Grounded=()=>P3.rod.every(Boolean);
 const p3RodXY=i=>({x:STT.rods[i][0]*TS+8,y:STT.rods[i][1]*TS+14});
 // the new monsters, spawned last with their own dice so every older monster keeps its id and spot
-function p3Spawn(){const r=mulberry32(8803),put=(type,x0,x1,y0,y1,n,ok)=>{let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=x0+(r()*(x1-x0)|0),y=y0+(r()*(y1-y0)|0);if(sol0(x,y)||sol0(x+1,y)||ok&&!ok(x,y))continue;const m=newMon(type,x*TS+8,y*TS+8,r);m.far=1;mons.push(m);c++;}};
+function p3Spawn(){const r=mulberry32(8803),put=(type,x0,x1,y0,y1,n,ok)=>{let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=x0+(r()*(x1-x0)|0),y=y0+(r()*(y1-y0)|0);if(solV0(x,y)||solV0(x+1,y)||ok&&!ok(x,y))continue;const m=newMon(type,x*TS+8,y*TS+8,r);m.far=1;vatOut(m,x,y);mons.push(m);c++;}};
  put('ielem',430,590,-50,-12,12);put('felem',782,848,150,236,12);put('selem',STT.x0-12,STT.x1+12,STT.y0-10,STT.y1+10,14);
  put('wyvern',WYN.cx-34,WYN.cx+34,WYN.cy-20,WYN.cy+22,12);put('drake',WYN.cx-50,WYN.cx+50,WYN.cy-26,WYN.cy+24,8,(x,y)=>!wynIn(x,y));
  for(const [k,x,y] of [['slord',STT.cx,STT.gy],['wqueen',WYN.cx,WYN.cy-2],['vlord',vcCity(13).x0+54,vcCity(13).y1-2]]){const d=newMon(k,x*TS+8,y*TS+8,r),u=WS&&WS.wb&&WS.wb[k];d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}}
@@ -12321,7 +12369,7 @@ const MXK={
  fan(m,b,mv,d,dx,dy,rep){const n=mv.n||3,a0=Math.atan2(m.ay||0,m.ax||1),w=mv.sprd||.9;for(let i=0;i<n;i++){const a=a0+(n>1?(i-(n-1)/2)*w/(n-1):0);eproj.push({x:m.x+Math.cos(a)*8,y:m.y-10+Math.sin(a)*8,vx:Math.cos(a)*mv.spd,vy:Math.sin(a)*mv.spd,t:mv.max/mv.spd+.3,m,mv,sp:mv.sp,a,rep});}SFX.dodge();},
  burst(m,b,mv,d,dx,dy,rep){const n=mv.n||8,o=(m.rsd||0)*.37;shake=Math.max(shake,.15);for(let i=0;i<n;i++){const a=o+i/n*6.283;eproj.push({x:m.x,y:m.y-8,vx:Math.cos(a)*mv.spd,vy:Math.sin(a)*mv.spd*.8,t:mv.max/mv.spd+.2,m,mv,sp:mv.sp,a,rep});}SFX.slam();},
  rain(m,b,mv,d,dx,dy,rep){for(const [x,y,dl] of rainPts(m,mv))ezone.push({x,y,r:mv.zr||16,t:(mv.fall||.8)+dl,T:(mv.fall||.8)+dl,lin:mv.lin||0,m,mv});SFX.notice();},
- heal(m,b,mv,d,dx,dy,rep){vfx('heal',m.x,m.y);num(m.x,m.y-40,t(mv.pot?'mxPot':'mxRegen'),'#9fe39a',false);if(rep)return;const h=Math.round(m.max*(mv.pct||.2));m.hp=Math.min(m.max,m.hp+h);num(m.x,m.y-30,'+'+h.toLocaleString('en'),'#7ae07a',false);},
+ heal(m,b,mv,d,dx,dy,rep){vfx('heal',m.x,m.y);num(m.x,m.y-40,t(mv.say||(mv.pot?'mxPot':'mxRegen')),'#9fe39a',false);if(rep)return;const h=Math.round(m.max*(mv.pct||.2));m.hp=Math.min(m.max,m.hp+h);num(m.x,m.y-30,'+'+h.toLocaleString('en'),'#7ae07a',false);},
  mend(m,b,mv,d,dx,dy,rep){const o=mxHurt(m,mv.rng||150,.95);if(!o)return;mxBeam(m,o,'#9fe39a');vfx('heal',o.x,o.y);if(rep)return;const h=Math.round(o.max*(mv.pct||.2));o.hp=Math.min(o.max,o.hp+h);num(o.x,o.y-30,'+'+h.toLocaleString('en'),'#7ae07a',false);},
  ward(m,b,mv,d,dx,dy,rep){const o=mv.ally&&mxHurt(m,mv.rng||150,1.01)||m;if(o!==m)mxBeam(m,o,'#9fd8ff');if(!rep){o.wardT=gTime+(mv.t||5);o.wardR=mv.red||.45;}SFX.clang();},
  call(m,b,mv,d,dx,dy,rep){vfx('rage',m.x,m.y);SFX.notice();num(m.x,m.y-40,t('mxCall'),'#ffb04a',false);if(rep)return;for(const o of mons)if(o!==m&&!o.dead&&(mv.kin?mv.kin.includes(o.type):o.type===m.type)&&Math.hypot(o.x-m.x,o.y-m.y)<(mv.rng||300)){o.eng=4;o.agg=1;o.sprT=2.5;o.tired=0;o.prov=gTime+8;}},
@@ -13448,6 +13496,158 @@ Object.assign(STR.en,{autoOffL:'⚙ Auto production: off',autoOnL:'⚙ Auto prod
  autoNoL:'⚙ Auto production',autoNoSt:'Not for Pagma\'s Successor',autoPagma:'Pagma\'s Successor cannot make items automatically. It is the class\'s penalty.',autoNoMat:'You don\'t have the materials.',
  autoGo:'⚙ Making {it} automatically... stand still',autoDone:'⚙ Out of materials: {n} {it} made',autoStop:'⚙ Auto production stopped ({n} made)',autoFB:'⚙ Auto',autoFBT:'Auto production: no hammering, Normal or Rare only, half the experience. It goes on while you have the materials.'});
 window.__GAUTO={dur:k=>autoDur(k),start:(k,o)=>autoStart(k,o),tick:dt=>autoTick(dt),stop:w=>autoStop(w),get A(){return AUTO;},set:v=>autoSet(v),on:()=>autoOn(),opt:k=>autoOpt(k,()=>{}),make:A=>autoMake(A),rc:id=>rcById(id)}; // tests
+// ---- The Vatican (v3.11; the owner 2026-10-25: "add any place or region of the novel that has an effect"). Rolling's landmark:
+// "if he headed south for half a day, he would finally arrive at the Vatican". ch 118: Rebecca's priests are mostly NPCs whom
+// parties hire for donations; Drevigo, the 13th pope, nearly 60, corrupt; the paladins include "Rebecca's Daughters". ch 122:
+// "The Vatican. Dozens of senior paladins and priests watched as one of Rebecca's Daughters, Rin was questioned"; those who
+// spoke out were demoted to remote temples; "Reform was needed." ch 123: the backyard where Isabel cries (17, platinum hair,
+// master of Lifael's Spear), the front door, Luna (14, purple hair, Everiel's Shield, "It is impossible to break Everiel's
+// Shield"), Rin (19); the quest [Help the Rebecca Church!], "Kill Pope Drevigo!", its reward Goddess Rebecca's blessing. ch 125:
+// "I am Pope Drevigo!" and he answers a blade with light; ch 126: "Goddess' Breath!" heals him; ch 127: Damian ties up the
+// paladins' feet so the pope can be fought alone; ch 128: the Daughters let the one who killed him keep Franz's treasures (the
+// 5th Pope Franz's Holy Light Crown, Armor and Gloves). Where it stands, how it looks, the fight's numbers, how strong the
+// blessings are and the priests' service are the game's; every person's line is ORIGINAL_SIDE_STORY.
+Object.assign(FIG,{
+ isabel:{fem:1,hair:'long',hc:'#ece6d6',hl:'#ffffff',skin:'#f8dcc4',sk2:'#e0b898',eye:'#4a6a9a',top:'#e8e8f0',top2:'#a8a8b8',pad:'#f6f6fc',pad2:'#c8a050',sleeves:true,skirt:'#d8d8e4',belt:'#c8a050',cape:'#f4f0e0',pants:'#d0d0dc',boots:'#8a8a98'},
+ luna:{fem:1,hair:'twin',hc:'#8a5ac8',hl:'#b88ae8',skin:'#f8dcc4',sk2:'#e0b898',eye:'#6a3a9a',top:'#e8e8f0',top2:'#a8a8b8',pad:'#f6f6fc',pad2:'#8a5ac8',sleeves:true,skirt:'#d8d8e4',belt:'#c8a050',pants:'#d0d0dc',boots:'#8a8a98'},
+ rin:{fem:1,hair:'pony',hc:'#5a3a2a',hl:'#7a5a44',skin:'#f4d4b8',sk2:'#d8b090',eye:'#3a5a3a',top:'#e8e8f0',top2:'#a8a8b8',pad:'#f6f6fc',pad2:'#c8a050',sleeves:true,skirt:'#d8d8e4',belt:'#c8a050',pants:'#d0d0dc',boots:'#8a8a98'},
+ damian:{hair:'short',hc:'#d8c070',hl:'#f0dc98',skin:'#f1c193',sk2:'#d3a070',top:'#f4f0e8',top2:'#d0c8b8',sleeves:true,robeL:1,collar:'#d8b04a',sash:'#4a7ac8',belt:'#d8b04a',pants:'#e8e0d0',boots:'#a89878'},
+ drevigo:{hair:'mitre',hc:'#c8c8c8',hl:'#e8e8e8',hat:'#f4f0e8',trim:'#d8b04a',skin:'#e8c0a0',sk2:'#c89c7a',eye:'#3a2a1a',beard:'#d0d0d0',beard2:'#a0a0a0',longBeard:1,top:'#f4f0e8',top2:'#d8d0c0',sleeves:true,robeL:1,collar:'#d8b04a',sash:'#c8a050',belt:'#d8b04a',cape:'#e8c870',pants:'#e8e0d0',boots:'#c8b890'},
+ vpal:{hair:'helm',hc:'#e0e0ea',hl:'#ffffff',plume:'#d8b04a',skin:'#f1c193',sk2:'#d3a070',top:'#e0e0ea',top2:'#a8a8b8',pad:'#f0f0f8',pad2:'#c8a050',sleeves:true,cape:'#f4f0e0',belt:'#c8a050',pants:'#c8c8d4',boots:'#8a8a98'}});
+for(const k of ['isabel','luna','rin','damian','drevigo','vpal'])if(!SH[k])shLazy(k,()=>SA.chars.buildSheet(FIG[k]));
+for(const k of ['isabel','rin','damian'])GOK.add(k);GREF.add('vpriest');   // a priest of the Holy See takes a gift for a bribe
+// the pope and his paladins, in the papal hall only, and only for the one whose quest it is (tmp: never shared, never back)
+Object.assign(MT,{vpal:{lv:[200,204],hp:520000,dmg:5000,spd:52,xp:28000,gold:200,aggro:200,r:6,oy:28,leash:720,drop:[['ore',.5],['mstone',.5]]},
+ drevigo:{lv:[205,205],hp:8000000,dmg:5800,spd:44,xp:900000,gold:25000,aggro:240,r:8,oy:30,boss:1,mb1:1,leash:720,sc:1.25,drop:[['mith',8],['mstone',12],['blue',1]]}});
+APART.add('vpal');APART.add('drevigo');
+Object.assign(NAMEK,{vpal:'vpalN',drevigo:'drevigoN'});
+Object.assign(AIK,{vpal:'soldier',drevigo:'caster'});
+Object.assign(RKMV,{
+ // the paladins: a sword, a charge behind the shield, the shield raised
+ vpal:[{k:'arc',w:3,max:26,tele:.3,reach:24,arc:1,mul:1,rec:.3,cd:1.2,combo:2},{k:'line',w:2,min:40,max:150,tele:.5,dash:280,dashT:.3,mul:1.3,rec:.45,cd:3.5},
+  {k:'ward',w:1,max:999,tele:.4,rec:.25,cd:9,t:4,red:.5}],
+ // the pope answers a blade with light (ch 125): bolts, a ring of light, pillars falling round you; Goddess' Breath once (ch 126)
+ drevigo:[{k:'shot',w:3,min:30,max:230,tele:.55,spd:240,mul:1,rec:.35,cd:1.6,sp:'holy'},{k:'burst',w:2,max:120,tele:.8,spd:150,mul:.7,rec:.5,cd:5,n:10,sp:'holy'},
+  {k:'rain',w:2,min:0,max:210,tele:.7,mul:1.2,rec:.45,cd:5.5,n:5,zr:18,fall:.9,pat:'around',sp:'holy'},{k:'heal',w:9,max:999,tele:1,rec:.4,cd:1,hpb:.35,pct:.25,once:9999,say:'vtBreath'}]});
+// Franz's treasures (ch 128): the 5th pope's Holy Light Crown, Armor and Gloves; Unique; the set is the game's
+RC.push({id:'flcrown',slot:'h',def:22,hpp:.06,fix:3,lvr:195,drop:1,unlock:()=>false},{id:'flarmor',slot:'a',def:50,hpp:.06,fix:3,lvr:195,drop:1,unlock:()=>false},
+ {id:'flgloves',slot:'g',def:14,as:.06,fix:3,lvr:195,drop:1,unlock:()=>false});
+SETS.franz={it:['flcrown','flarmor','flgloves'],b:{2:{hrg:.1},3:{hpp:.08,dm:.05}}};
+// Isabel's quest: [Help the Rebecca Church!] (ch 123)
+Object.assign(QD,{vat1:{by:'isabel',lv:195,spot:[VAT.hall.x1-5,VAT.hall.cy],obj:{t:'kill',it:'drevigo',n:1},xp:650000,gold:18000}});
+Object.assign(FD,{vatican:{lm:'lmVatican',need:()=>true,p:.008,mat:['mstone',6]}});
+// the judgment in the papal hall: the pope and two paladins appear for you while the quest is yours; Damian binds the
+// paladins' feet when the pope turns on you, and again every 25 seconds; leave the hall or fall and it starts over
+let VTF=null;
+const vtIn=()=>!!P&&P.y>=WMH*TS&&zoneAt(P.x,P.y)==='zVatH',vtAct=()=>!!S&&!!S.qs.vat1&&S.qs.vat1.st===1&&!qReady('vat1');
+function vtGate(g){if(qDone('vat1')||S.qs.vat1&&S.qs.vat1.st===1)return true;SFX.deny();dialog('luna',['nlu_no']);return false;}
+function vtStart(){const H=VAT.hall,mk=(k,x,y)=>{const m=newMon(k,x*TS+8,y*TS+8);m.tmp=1;m.vat=1;m.agg=1;m.eng=0;mons.push(m);return m;};
+ VTF={m:mk('drevigo',H.x1-5,H.cy),pals:[mk('vpal',H.x1-10,H.cy-3),mk('vpal',H.x1-10,H.cy+3)],t:0,on:0,bind:0,nb:0,won:0,s:S};}
+function vtEnd(){if(!VTF)return;for(const m of [VTF.m,...VTF.pals]){m.dead=true;m.rt=1e9;const i=mons.indexOf(m);if(i>=0)mons.splice(i,1);}VTF=null;}
+function vtBind(){const F=VTF;if(!F)return;let n=0;for(const m of F.pals)if(!m.dead){m.stun=Math.max(m.stun||0,F.nb?5:8);fx.push({ring:true,x:m.x,y:m.y-2,t:.7});vfx('heal',m.x,m.y);n++;}F.nb++;F.bind=gTime;if(n)toast(t('vtBind'),'good');}
+function vtTick(dt){if(!S||!P)return;if(VTF&&(VTF.s!==S||!mons.includes(VTF.m)))VTF=null;   // another character, or a new world's monsters
+ if(!vtIn()||mode==='dead'){vtEnd();return;}
+ if(!VTF&&vtAct())vtStart();const F=VTF;if(!F)return;F.t+=dt;
+ if(!F.on&&Math.hypot(F.m.x-P.x,F.m.y-P.y)<280){F.on=1;for(const m of [F.m,...F.pals])if(!m.dead){m.eng=99;m.agg=1;}num(F.m.x,F.m.y-50,t('vtPope1'),'#fff3b0',false);SFX.notice();vtBind();}
+ if(F.on&&!F.won&&gTime-F.bind>25)vtBind();
+ if(F.m.dead&&!F.won){if(!qReady('vat1')){vtEnd();return;}F.won=1;for(const m of F.pals)if(!m.dead){m.dead=true;m.dying=.5;m.noLoot=1;vfx('spawn',m.x,m.y,{color:'#fff3b0'});}
+  setTimeout(()=>{if(mode==='play')dialog('rin',['vtWon1','vtWon2']);},900);}}
+// Goddess Rebecca's blessing (ch 123, the quest's reward): +10% damage to corrupt beings, and her statues bless you half again
+// as much; a weapon the Vatican's priests blessed: +15% to corrupt beings
+const vtBl=()=>!!(S&&S.vatB);
+function vtAtk(m){if(!S||m.spar||!saEvil(m))return 1;let k=vtBl()?1.1:1;const w=weapon();if(w&&w.bls)k*=1.15;return k;}
+const vtTip=i=>i&&i.slot==='w'&&i.bls?`<br><small style="color:#fff3b0">${t('vtBlT')}</small>`:'';
+function vtDone(id){if(id!=='vat1')return;S.vatB=1;for(const k of ['flcrown','flarmor','flgloves']){const it=mkItem(k,3);S.items.push(it);loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});}
+ setTimeout(()=>{SFX.legendary();flash();toast(t('vtBlGot'),'good');},700);}
+// the priests' service on the square: the goddess's blessing on a weapon, at the donation the pope decreed until the church is
+// set right, and a fair one after
+const VBG0=100000,VBG1=8000,vtBlG=()=>price('vpriest',qDone('vat1')?VBG1:VBG0);
+function vtBlMenu(){const w=weapon(),L=[...(w&&w.uid?[w]:[]),...S.items.filter(i=>i.slot==='w'&&i!==w)].filter(i=>i&&i.uid&&!i.bls),g=vtBlG();
+ if(!L.length)return dialog('vpriest',['vtBlNone'],()=>shopD('vpriest',nlIdle('vpriest')));
+ dialog('vpriest',[qDone('vat1')?'vtBlHi1':t('vtBlHi0',{g:g.toLocaleString('en')})],null,[...L.slice(0,12).map(i=>({l:t('oVtBlW',{it:inm(i),g:g.toLocaleString('en')}),ic:i.id,poor:S.gold<g,f:()=>vtBless(i)})),{l:t('oBack'),f:()=>shopD('vpriest',nlIdle('vpriest'))}]);}
+function vtBless(i){const g=vtBlG();if(i.bls||!S.items.includes(i))return vtBlMenu();if(S.gold<g){SFX.deny();return dialog('vpriest',[t('noGold')],()=>vtBlMenu());}
+ S.gold-=g;i.bls=1;SFX.legendary();if(P){vfx('heal',P.x,P.y);num(P.x,P.y-26,'-'+g.toLocaleString('en')+'G','#f2c14e',false);}toast(t('vtBlDone',{it:inm(i)}),'good');hudDirty=true;save(true);vtBlMenu();}
+// the people
+Object.assign(NLD,{
+ isabel:{town:'zVatican',src:'Isabel, one of Rebecca\'s Daughters (ch 118, 123-124; lines ORIGINAL)',
+  ctx:[['nis_c1',()=>!S.qs.vat1],['nis_c2',()=>!!S.qs.vat1&&S.qs.vat1.st===1],['nis_c3',()=>qDone('vat1')],['nis_c4',()=>qDone('vat1')]],q:{},rep:null,mem:[],
+  topics:[{id:'daughters',tier:0,say:['nis_d1','nis_d2']},{id:'spear',tier:0,say:['nis_s1','nis_s2']},{id:'pope',tier:0,say:()=>qDone('vat1')?['nis_p1','nis_p3']:['nis_p1','nis_p2']}]},
+ luna:{town:'zVatican',src:'Luna, the youngest of Rebecca\'s Daughters (ch 123; lines ORIGINAL)',
+  ctx:[['nlu_c1',()=>!S.qs.vat1],['nlu_c2',()=>!!S.qs.vat1&&S.qs.vat1.st===1],['nlu_c3',()=>qDone('vat1')]],q:{},rep:null,mem:[],
+  topics:[{id:'shield',tier:0,say:['nlu_s1','nlu_s2']}]},
+ rin:{town:null,src:'Rin, one of Rebecca\'s Daughters (ch 118, 122-123; lines ORIGINAL)',
+  ctx:[['nrn_c1',()=>!qDone('vat1')],['nrn_c2',()=>!qDone('vat1')],['nrn_c3',()=>qDone('vat1')]],q:{},rep:null,mem:[],
+  topics:[{id:'church',tier:0,say:['nrn_k1','nrn_k2']}]},
+ damian:{town:null,src:'Damian, a priest of Rebecca (ch 127; lines ORIGINAL)',
+  ctx:[['ndm_c1',()=>!S.qs.vat1],['ndm_c2',()=>!!S.qs.vat1&&S.qs.vat1.st===1],['ndm_c3',()=>qDone('vat1')]],q:{},rep:null,mem:[],topics:[]},
+ vpriest:{town:'zVatican',src:'a priest of the Vatican (ch 118: priests hired for donations; lines ORIGINAL)',
+  ctx:[['nvp_c1',()=>!qDone('vat1')],['nvp_c2',()=>qDone('vat1')]],q:{},rep:null,mem:[],
+  topics:[{id:'vatican',tier:0,say:['nvp_v1','nvp_v2']}]}});
+for(const who of ['isabel','luna','rin','damian']){const n=NPCT[who];if(n){n.idle=()=>nlIdle(who);n.opts=()=>nlOpts(who);}}
+{const n=NPCT.vpriest;if(n){n.idle=()=>nlIdle('vpriest');n.opts=()=>[{l:t('oVtBl'),ic:'staff',st:t('oVtBlSt'),f:()=>vtBlMenu()},...nlOpts('vpriest')];}}
+// the statues of the goddess on the square, the throne and the carpet of the papal hall
+for(const dx of [2,VAT.cat.w-3])SHRINES.push({k:'god',g:'rebecca',vat:1,c:'#fff3b0',x:(VAT.cat.x+dx)*TS+8,y:(VAT.cat.y+VAT.cat.h+3)*TS+10,hint:'hGod_rebecca'});
+function vtEnts(ents){if(!P||!(P.y>=WMH*TS)||zoneAt(P.x,P.y)!=='zVatH')return;const H=VAT.hall,x=(H.x1-2)*TS,y=H.cy*TS+8;
+ ents.push({y:y-10,f:()=>{R(ctx,x-14,y-30,28,30,'#6a1018');R(ctx,x-12,y-28,24,26,'#8a1a24');R(ctx,x-14,y-34,28,4,'#d8b04a');R(ctx,x-2,y-44,4,10,'#d8b04a');R(ctx,x-5,y-41,10,3,'#d8b04a');
+  R(ctx,x-16,y-2,32,4,'#c8a050');R(ctx,x-16,y+2,32,1,'#8a6a2a');}});}
+Object.assign(STR.ar,{zVatican:"الفاتيكان",zVatH:"قاعة البابا",hVatIn:"E: ادخل الكاتدرائية",vpalN:"فارس مقدس",drevigoN:"البابا دريفيجو",
+ isabel:"إيزابيل",luna:"لونا",rin:"رين",damian:"داميان",vpriest:"كاهن الفاتيكان",
+ nis_hi:"...آسفة. لقيتني بعيّط في الحوش اللي ورا الفاتيكان من كل الأماكن. أنا إيزابيل، واحدة من بنات ريبيكا.",
+ nis_c1:"رين جوه. قداسته جمع الكهنة الكبار عشان يقرروا هيعملوا فيها إيه، ومرضيش يخليني أتفرج.",nis_c2:"باب الكاتدرائية قدامك. لونا مش هتوقفك طول ما أنا ضامناك. أرجوك... طلّع رين.",
+ nis_c3:"رين بقت حرة. أنا سمعت الإلهة على فكرة. قالتلي أصدّقك.",nis_c4:"الكنيسة محتاجة تتصلّح. يمكن ده كان أول يوم.",
+ nlT_isabel_daughters:"بنات ريبيكا",nlT_isabel_spear:"رمح ليفاييل",nlT_isabel_pope:"البابا دريفيجو",
+ nis_d1:"إحنا تلاتة: رين ولونا وأنا. من برّه إحنا مقدسين.",nis_d2:"من جوه، إحنا سلاح. ولما الكنيسة تاخد اللي عايزاه من السلاح، بتجيب غيره.",
+ nis_s1:"رمح ليفاييل، واحد من التلات قطع المقدسة بتاعة الكنيسة.",nis_s2:"بيقولوا حداد عظيم هو اللي عمله من زمان. ماتلمسوش لو سمحت.",
+ nis_p1:"البابا التالت عشر، دريفيجو. اللي اتكلموا ضده من الكهنة الكبار اتنقلوا لمعابد بعيدة.",nis_p2:"وأنا خايفة أرفض له أمر. هو ده اللي مخليني أعيّط.",nis_p3:"خلاص. محدش هيتنقل لمعبد بعيد عشان قال الحق تاني.",
+ q_vat1:"ساعد كنيسة ريبيكا!",vat1_o:"قداسته جمع الكهنة الكبار عشان يحاكموا رين. ممكن تخسر كل حاجة، ويمكن حياتها. كسر قوانين الإلهة عشان نفسه، واللي اتكلموا اتنفوا. أنا مقدرش أرفع رمحي عليه. إنت تقدر؟ ادخل من باب الكاتدرائية.",
+ vat1_w:"باب الكاتدرائية، على الساحة. رين في قاعة البابا تحت.",
+ vat1_d:"رين خرجت. والإلهة... سمعتها. خد دول: كنوز فرانز، البابا الخامس. اللي حاربته كان حاطّهم لنفسه، وإحنا التلاتة متفقين إنهم من حقك.",
+ nlu_hi:"استنى. أنا لونا. محدش بيعدي من الباب ده وقداسته بيحكم.",nlu_no:"قداسته منع ده. ومستحيل حد يكسر درع إيفرييل.",
+ nlu_c1:"قداسته بيتكلم باسم الإلهة. وأنا بعمل اللي بيقوله.",nlu_c2:"إيزابيل ضامناك؟ ...خلاص ادخل. الإلهة هي اللي هتحكم مين فيكم صح.",nlu_c3:"...أنا كنت ماشية وراه من غير ما أسأل. لازم أتعلم أسأل.",
+ nlT_luna_shield:"درع إيفرييل",nlu_s1:"درع إيفرييل. مفيش حاجة بتعدي منه.",nlu_s2:"عمري ما شيلته عن الباب ده. لحد النهارده.",
+ nrn_hi:"مكانكش هنا. لو شافك... امشي قبل ما يشوفك.",nrn_c1:"بيقولوا عليّا خاينة عشان قلت إن الكنيسة بتعفن.",nrn_c2:"إيزابيل اللي جابتك؟ ...المسكينة.",
+ nrn_c3:"أنا لسه بنت من بنات ريبيكا. يمكن دلوقتي ده يرجع يبقى ليه معنى.",nlT_rin_church:"الكنيسة",
+ nrn_k1:"كنيسة ريبيكا زي الأم لكنيسة جودار وكنيسة دومينيون.",nrn_k2:"والأم المفروض تبقى قدوة. مش كده؟",
+ ndm_hi:"داميان، كاهن لريبيكا. جيت لنفس السبب اللي إنت جاي عشانه.",ndm_c1:"الأبواب مقفولة. اللي بيحصل في القاعة دي بيحصل من غير شهود.",
+ ndm_c2:"لما تروحله، أنا هربط رجلين الفرسان المقدسين. البابا عليك.",ndm_c3:"عقاب الإلهة، وإنت كنت إيدها.",
+ nvp_hi:"أهلًا بيك في الفاتيكان، الكرسي المقدس للإلهة ريبيكا.",nvp_c1:"قداسته بنفسه اللي حدد التبرعات للبركة.",nvp_c2:"التبرعات رجعت زي ما كانت أيام فرانز.",
+ nlT_vpriest_vatican:"الفاتيكان",nvp_v1:"تمثال الإلهة على الساحة بيبارك أي حد يصلّيله بإخلاص.",nvp_v2:"الكهنة هنا بيروحوا مع الناس اللي محتاجاهم، بتبرع. ده كان العرف من زمان.",
+ oVtBl:"✨ بركة الإلهة على سلاح",oVtBlSt:"+15% ضرر على الكائنات الفاسدة",vtBlHi0:"بركة الإلهة على سلاحك: {g} دهب تبرعات. ده قرار قداسته.",vtBlHi1:"بركة الإلهة على سلاحك. التبرع رجع عادل.",
+ oVtBlW:"بارك {it} ({g} دهب)",vtBlDone:"{it} اتبارك: +15% ضرر على الكائنات الفاسدة",vtBlNone:"معاكش سلاح من غير بركة الإلهة.",vtBlT:"✨ بركة ريبيكا: +15% ضرر على الكائنات الفاسدة",
+ vtPope1:"أنا البابا دريفيجو!",vtBreath:"نَفَس الإلهة!",vtBind:"داميان ربط رجلين الفرسان المقدسين!",vtWon1:"...إنت جيت عشاني؟",vtWon2:"إيزابيل مستنياك في الحوش. قولها إني كويسة.",
+ vtBlGot:"بركة الإلهة ريبيكا: +10% ضرر على الكائنات الفاسدة، وبركة تماثيلها بقت أقوى بالنص",vtBL:"بركة ريبيكا",vtBV:"+10% على الكائنات الفاسدة",vtBD:"من مهمة «ساعد كنيسة ريبيكا!»: +10% ضرر على الشياطين والأموات ومصاصين الدماء، وبركة تمثال ريبيكا أقوى بالنص.",
+ flcrown:"تاج النور المقدس",flarmor:"درع النور المقدس",flgloves:"جوانتي النور المقدس",set_franz:"كنوز فرانز",setD_franz2:"تجديد الصحة +10%",setD_franz3:"الصحة +8% والضرر +5%",
+ lmVatican:"الفاتيكان",lmVatican1:'"الفاتيكان. عشرات من كبار الفرسان المقدسين والكهنة كانوا بيتفرجوا ورين، واحدة من بنات ريبيكا، بتتحاكم."',lmVatican2:'"الإصلاح كان لازم."',fd_vatican:"الفاتيكان"});
+Object.assign(STR.en,{zVatican:"The Vatican",zVatH:"The Papal Hall",hVatIn:"E: Enter the cathedral",vpalN:"Paladin",drevigoN:"Pope Drevigo",
+ isabel:"Isabel",luna:"Luna",rin:"Rin",damian:"Damian",vpriest:"Priest of the Vatican",
+ nis_hi:"...Sorry. You found me crying in the backyard of the Vatican, of all places. I'm Isabel, one of Rebecca's Daughters.",
+ nis_c1:"Rin is inside. His Holiness gathered the high priests to decide what to do with her, and he wouldn't let me watch.",nis_c2:"The cathedral's door is right there. Luna won't stop you while I stand for you. Please... bring Rin out.",
+ nis_c3:"Rin is free. I heard the goddess, you know. She told me to believe in you.",nis_c4:"The church needs setting right. Maybe that was the first day.",
+ nlT_isabel_daughters:"Rebecca's Daughters",nlT_isabel_spear:"Lifael's Spear",nlT_isabel_pope:"Pope Drevigo",
+ nis_d1:"There are three of us: Rin, Luna and me. On the outside, we are sacred.",nis_d2:"On the inside, we are weapons. And when the church has what it wanted from a weapon, it finds another.",
+ nis_s1:"Lifael's Spear, one of the church's three divine artifacts.",nis_s2:"They say a great smith made it, long ago. Please don't touch it.",
+ nis_p1:"The thirteenth pope, Drevigo. The high priests who spoke against him were sent to far-off temples.",nis_p2:"And I'm afraid to refuse him anything. That's why I'm crying.",nis_p3:"It's over. No one will be sent to a far-off temple for telling the truth again.",
+ q_vat1:"Help the Rebecca Church!",vat1_o:"His Holiness has gathered the high priests to judge Rin. She could lose everything, maybe her life. He has broken the goddess's laws for himself, and the ones who spoke up were sent away. I can't raise my spear against him. Can you? Go in through the cathedral's front door.",
+ vat1_w:"The cathedral's door, on the square. Rin is in the papal hall below.",
+ vat1_d:"Rin is out. And the goddess... I heard her. Take these: the treasures of Franz, the fifth pope. The one you fought kept them for himself, and the three of us agree they are yours by right.",
+ nlu_hi:"Stop. I am Luna. No one passes this door while His Holiness judges.",nlu_no:"His Holiness has forbidden it. And it is impossible to break Everiel's Shield.",
+ nlu_c1:"His Holiness speaks for the goddess. I do what he says.",nlu_c2:"Isabel stands for you? ...Then go in. The goddess will judge which of you is right.",nlu_c3:"...I followed him without asking. I will have to learn to ask.",
+ nlT_luna_shield:"Everiel's Shield",nlu_s1:"Everiel's Shield. Nothing gets through it.",nlu_s2:"I never lowered it from this door. Until today.",
+ nrn_hi:"You shouldn't be here. If he sees you... go, before he does.",nrn_c1:"They call me a traitor because I said the church was rotting.",nrn_c2:"Isabel sent you? ...Poor thing.",
+ nrn_c3:"I'm still one of Rebecca's Daughters. Maybe now that means something again.",nlT_rin_church:"The church",
+ nrn_k1:"The Rebecca Church is like a parent to the Judar and Dominion churches.",nrn_k2:"And a parent is supposed to set an example. Isn't that so?",
+ ndm_hi:"Damian, a priest of Rebecca. I came for the same reason you did.",ndm_c1:"The doors are shut. Whatever happens in this hall happens without witnesses.",
+ ndm_c2:"When you go for him, I'll bind the paladins' feet. The pope is yours.",ndm_c3:"The goddess's punishment, and you were her hand.",
+ nvp_hi:"Welcome to the Vatican, the Holy See of the goddess Rebecca.",nvp_c1:"His Holiness set the donations for a blessing himself.",nvp_c2:"The donations are what they were in Franz's day again.",
+ nlT_vpriest_vatican:"The Vatican",nvp_v1:"The goddess's statues on the square bless anyone who prays to them in earnest.",nvp_v2:"The priests here go with the people who need them, for a donation. That has always been the custom.",
+ oVtBl:"✨ The goddess's blessing on a weapon",oVtBlSt:"+15% damage to corrupt beings",vtBlHi0:"The goddess's blessing on your weapon: {g} gold in donations. His Holiness's decree.",vtBlHi1:"The goddess's blessing on your weapon. The donation is a fair one again.",
+ oVtBlW:"Bless {it} ({g} gold)",vtBlDone:"{it} is blessed: +15% damage to corrupt beings",vtBlNone:"You have no weapon without the goddess's blessing.",vtBlT:"✨ Rebecca's blessing: +15% damage to corrupt beings",
+ vtPope1:"I am Pope Drevigo!",vtBreath:"Goddess' Breath!",vtBind:"Damian binds the paladins' feet!",vtWon1:"...You came for me?",vtWon2:"Isabel is waiting in the backyard. Tell her I'm all right.",
+ vtBlGot:"Goddess Rebecca's blessing: +10% damage to corrupt beings, and her statues bless you half again as much",vtBL:"Rebecca's blessing",vtBV:"+10% to corrupt beings",vtBD:"From Help the Rebecca Church!: +10% damage to demons, the undead and vampires, and Rebecca's statue blesses you half again as much.",
+ flcrown:"Holy Light Crown",flarmor:"Holy Light Armor",flgloves:"Holy Light Gloves",set_franz:"Franz's treasures",setD_franz2:"Health regeneration +10%",setD_franz3:"Health +8% and damage +5%",
+ lmVatican:"The Vatican",lmVatican1:'"The Vatican. Dozens of senior paladins and priests watched as one of Rebecca\'s Daughters, Rin was questioned."',lmVatican2:'"Reform was needed."',fd_vatican:"The Vatican"});
+window.__GVT={V:VAT,in:()=>vtIn(),act:()=>vtAct(),gate:g=>vtGate(g||DGATES.find(d=>d.vat)),door:()=>DGATES.find(d=>d.vat),up:()=>DGATES.find(d=>d.hint==='hUp'&&dunAt(d.x,d.y)&&dunAt(d.x,d.y).k==='zVatH'),
+ tick:dt=>vtTick(dt),F:()=>VTF,atk:m=>vtAtk(m),tip:i=>vtTip(i),menu:()=>vtBlMenu(),bless:i=>vtBless(i),price:()=>vtBlG(),done:id=>vtDone(id),bl:()=>vtBl()}; // tests
 // ---- Agriculture Development (ch 856): the Patrian farmer's field work, once a day: put down five Field Burrowers in his
 // rows; a rainbow potato and his trust (+3). Devoted (90) to him, a day's work may (one in four) bring his word about Piaro's field.
 function fdwS(){const D=dlyS();D.fw=D.fw||{n:0,done:0,on:0};return D.fw;}
@@ -14082,7 +14282,7 @@ const SAK={sahope:{lv:1,mpf:.1,cd:9,col:'#ffe8a0',snd:'holy'},sadisc:{lv:1,mp:20
  sahi:{lv:150,mp:25,cd:12,col:'#fff3b0',snd:'holy'},sasanc:{lv:380,mp:50,cd:900,col:'#ffffff',snd:'holy'}};
 for(const k in SAK){const b=SAK[k];SKD[k]={cls:'saintess',lv:b.lv,col:b.col,cd:b.cd,...(b.mpf?{mp:10,mpf:b.mpf}:{mp:b.mp})};SKSND[k]=b.snd;}
 SKSND.salife=SKSND.salife||'holy';
-const saEvil=m=>HOLYX.has(m.type)||DEMK.has(m.type)||/^v/.test(m.type)||PGUND.test(m.type);
+const saEvil=m=>HOLYX.has(m.type)||DEMK.has(m.type)||/^v/.test(m.type)&&m.type!=='vpal'||PGUND.test(m.type);   // vpal: the Vatican's paladins, not vampires
 let SANC=null; // the sanctuary she declared
 const saIn=()=>!!SANC&&SANC.u>gTime&&Math.hypot(P.x-SANC.x,P.y-SANC.y)<90;
 // Upright Heart, Discipline and the sanctuary: no abnormal condition takes hold
@@ -15484,6 +15684,7 @@ function tradeItemIn(json){let o;try{o=JSON.parse(json);}catch(e){return null;}i
  const it={};for(const k in o){const v=o[k];if(k==='uid'||k==='iid'||k==='__proto__')continue;if((typeof v==='number'&&isFinite(v))||(typeof v==='string'&&v.length<=40)||typeof v==='boolean')it[k]=v;}
  it.id=o.id;it.slot=rc.slot;it.r=Math.max(0,Math.min(4,it.r|0));it.dur=Math.max(0,Math.min(100,typeof it.dur==='number'?it.dur:100));if(it.gem&&!(typeof GEMS!=='undefined'&&GEMS[it.gem]))delete it.gem;
  const h=o.hid;if(h&&typeof h==='object'&&HIDK.includes(h.k)&&typeof h.v==='number'&&isFinite(h.v))it.hid={k:h.k,v:Math.max(0,Math.min(h.k==='hpp'?.12:h.k==='as'?.09:63,h.v))}; // a known hidden function goes with the item (v1.03)
+ if('bls' in it){if(it.slot==='w'&&it.bls)it.bls=1;else delete it.bls;}   // v3.11: the Vatican's blessing on a weapon
  if('edr' in it)it.edr=Math.max(0,Math.min(EDRMAX,Math.round(it.edr)||0));   // v3.07
  if(Array.isArray(o.wp))it.wp=o.wp.filter(p=>p&&WPK[p.k]&&typeof p.v==='number'&&isFinite(p.v)).slice(0,4).map(p=>({k:p.k,v:Math.max(0,Math.min(WPK[p.k][1],p.v)),...(p.h?{h:1}:{})}));
  it.uid=++S.uid;return it;}
@@ -16789,7 +16990,7 @@ function mobKey(m){return m.nk||(m.nk=m.type+'@'+(m.sx|0)+','+(m.sy|0));}
 // siege and trial monsters stay on one client.
 // every outdoor monster, summoned and event ones included (owner report: one player saw monsters the other didn't): the
 // host's list is the truth, a follower makes the ones it lacks from their keys and hides its own that the host doesn't list
-function mobOk(m){const b=MT[m.type];return !!b&&!m.arena&&!m.tower&&!m.spar&&!m.tdum;}
+function mobOk(m){const b=MT[m.type];return !!b&&!m.arena&&!m.tower&&!m.spar&&!m.tdum&&!m.vat;}   // m.vat: the papal hall's judgment is one player's (v3.11)
 function mobByKey(k){for(const m of mons)if(mobOk(m)&&mobKey(m)===k)return m;return null;}
 function mobStart(){if(!NETTR||!NETTR.mobsPut)return;MOBN={zone:null,all:{},allN:0,allD:0,host:null,rs:[],sent:0,put:false,seq:0,hits:new Map(),cum:new Map(),ep:new Map(),dirty:0,fT:0,seen:new Map(),merge:null,mergeT:0};
  NET.on(ev=>{if(ev.type!=='message'||!MOBN)return;const env=ev.env,pl=env.payload||{};if((env.type!=='raid.hit'&&env.type!=='raid.state')||pl.to!==NET.uid||typeof pl.raid!=='string'||pl.raid.slice(0,2)!=='m|')return;

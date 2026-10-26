@@ -28,12 +28,16 @@ test('defs(): content tables as plain JSON, functions replaced by {$fn}', async 
   const g = await H.openGame();
   try {
     const d = await g.eval(() => window.__G.defs());
-    assert.equal(Object.keys(d.MT).length, Object.keys(DATA.monsters.types).length);
+    // data/monsters.js holds the literal MT table; kinds added later with Object.assign(MT, ...) (the East, the Vatican...) live
+    // only in the engine, so every data kind must be in the engine rather than the counts matching
+    for (const k of Object.keys(DATA.monsters.types)) assert.ok(k in d.MT, 'engine has monster ' + k);
     assert.equal(d.BOSSES.length, DATA.monsters.bosses.length);
     assert.equal(d.SPAWN.length, DATA.monsters.spawns.length);
     // the class packs' trials are made at load from src/content/classpacks.js, not from the data tables
     const pk = await g.eval(() => window.__GCP.packs());
-    assert.equal(Object.keys(d.QD).filter((k) => !pk.includes(d.QD[k].promo)).length, Object.keys(DATA.quests.quests).length);
+    // and quests added later with Object.assign(QD, ...) live only in the engine: every data quest must be there
+    assert.ok(Object.keys(d.QD).filter((k) => !pk.includes(d.QD[k].promo)).length >= Object.keys(DATA.quests.quests).length);
+    for (const k of Object.keys(DATA.quests.quests)) assert.ok(k in d.QD, 'engine has quest ' + k);
     // data/recipes.js holds the base RC table; the named items added later with RC.push live only in the engine
     for (const id of Object.keys(DATA.recipes.recipes)) assert.ok(d.RC.some((r) => r.id === id), 'engine has recipe ' + id);
     // the same for skills: Object.assign(SKD, ...) adds item and class skills after the base table
