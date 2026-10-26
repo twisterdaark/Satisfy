@@ -7,6 +7,16 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26plan7', ver: '3.28', d: '2026-10-26',
+      ar: ["استدعاء البارتي: من لوحة البارتي (⇲) تقدر تطلب إن حد من البارتي ييجي لعندك. هو بيشوف مين وفين ويوافق بـY، والتمن بيتدفع منه بس لما يوافق. مفيش استدعاء من أو لمكان لفافة العودة متنفعش فيه (الأرينا، البرج، السباق، المبارزة...)، ولا لجوه دانجن أو أوضة، ولا من قارة للتانية.",
+        "حارس الغابة بقى حواليه 4 أعمدة قديمة: كل عمود واقف بيقلل الضرب اللي بياخده الحارس 15%. كسّر الأعمدة الأول (مش بتضرب) أو اضرب من خلالها. العمود بيرجع بعد دقيقة ونص.",
+        "أورك فروستلايت بقوا بيعملوا حيطة دروع مع اللي جنبهم، وفيه فرقة حرب من 5 أورك ماشية من نقطة لنقطة في أرض الأورك ورايحة جاية.",
+        "اختبار جديد إن 50 لعيب واقفين في مكان واحد مبيخلوش اللعبة تهنّج."],
+      en: ["Party summon: ⇲ in the party panel asks a member to come to you. They see who and where and accept with Y, and the fee is taken from them only when they accept. Nobody is summoned from or to where a Return Scroll can't go (the arena, a tower, a race, a duel...), into a dungeon or a room, or across to the other continent.",
+        "Four ancient pillars now stand around the Guardian of the Forest: each one still standing takes 15% off every blow he takes. Break them first (they don't fight back) or fight through them. A broken pillar rises again after a minute and a half.",
+        "Frostlight orcs now lock shields with the orcs beside them, and a warband of five orcs marches from post to post across the orcs' land and back.",
+        "A new test makes sure fifty players standing in one place keep the game within its frame budget."],
+      hide: [3] },
     { v: '2026-10-26plan6', ver: '3.27', d: '2026-10-26',
       ar: ["أرض بيارو: تقدر تحرت الأرض قبل ما تزرع (محصول زيادة من الزرعة دي)، وتسقي الزرعة وهي بتكبر مرة واحدة من برميل بيارو (بتطلع أسرع). الأرض المحروتة والمتسقية بتبان على الحتة.",
         "ورق الوصفات المقطوع: بيقع من الزعما (أكتر لما تبقى في بارتي)، وكل مهمة زعيم بتديك ورقة. 4 ورقات مع بعض (دوس عليهم في الشنطة) بيعملوا كتاب وصفة نادر مش بيتباع في أي محل، واحد لسه متعرفوش.",
