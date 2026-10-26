@@ -7,8 +7,11 @@ const H = require('../harness/game.cjs');
 
 test.after(() => H.closeBrowser());
 
-const closeDialogs = async (g) => {
-  for (let i = 0; i < 10 && await g.eval(() => window.__G.mode) === 'dialog'; i++) { await g.eval(() => window.__G.advance()); await g.step(2); }
+const closeDialogs = async (g) => {   // a menu is left with Escape, a line by going on
+  for (let i = 0; i < 10 && await g.eval(() => window.__G.mode) === 'dialog'; i++) {
+    if (await g.eval(() => { const D = window.__G.DL; return !!(D && D.opts && D.opts.length); })) await g.page.keyboard.press('Escape'); else await g.eval(() => window.__G.advance());
+    await g.step(2);
+  }
 };
 
 test('the courier\'s letter: one side or the other, and the other remembers; then its border post stops you', async () => {
@@ -27,7 +30,7 @@ test('the courier\'s letter: one side or the other, and the other remembers; the
       return o;
     });
     assert.deepEqual(r.offer, [true, true], 'both sides are offered');
-    assert.deepEqual(r.opts, ['Accept', "No, I'll take it to Titan's knights", 'Decline'], 'the innkeeper offers both sides');
+    assert.deepEqual(r.opts, ['Accept', "No, I'll take it to Titan's knights", 'Not now'], 'the innkeeper offers both sides');
     assert.equal(r.other, false, 'taking one closes the other');
     assert.equal(r.dl, 1, 'the letter delivered to Earl Aden');
     assert.deepEqual(r.rep, [true, -60], 'the Kingdom thanks you, the Empire remembers');
@@ -48,7 +51,7 @@ test('the courier\'s letter: one side or the other, and the other remembers; the
     assert.equal(b.paid, true); assert.equal(b.pass, true);
     await closeDialogs(g);
     const c = await g.eval(() => {
-      const G = window.__G, S = G.S, X = window.__GPB9, P = G.P, L = X.EX * 16, o = {};
+      const G = window.__G, S = G.S, X = window.__GPB9, P = G.P, L = X.EX * 16, o = { mode: G.mode };
       P.x = L - 10; X.bcTick(0.016); P.x = L + 5; X.bcTick(0.016); o.through = P.x > L;
       // west into the Kingdom: Reinhardt likes you, so the post lets you by
       P.x = L - 5; X.bcTick(0.016); o.west = P.x < L;
@@ -61,6 +64,7 @@ test('the courier\'s letter: one side or the other, and the other remembers; the
       P.x = L - 900; X.bcTick(0.016); S.gold = 0; X.cGo('coachRo', 'coachRh'); o.coach = G.mode === 'dialog' && /^Pay the fine/.test((G.DL.opts[0] || {}).l || '');
       return o;
     });
+    assert.equal(c.mode, 'play', 'the post\'s dialog was closed');
     assert.equal(c.through, true, 'with a pass, through');
     assert.equal(c.west, true, 'no stop going west with Reinhardt\'s good will');
     assert.equal(c.tele, true, 'a teleport isn\'t stopped');
