@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26plan6', ver: '3.35', d: '2026-10-26',
+      ar: ["أرض بيارو: تقدر تحرت الأرض قبل ما تزرع (محصول زيادة من الزرعة دي)، وتسقي الزرعة وهي بتكبر مرة واحدة من برميل بيارو (بتطلع أسرع). الأرض المحروتة والمتسقية بتبان على الحتة.",
+        "العقود الأسبوعية في لوحة المهام: عقد كل أسبوع لكل صنعة (الحدادة، والطبخ، والجرعات، والخياطة، والزراعة). اللي تعمله بعد ما تاخده بيتحسب، وكل قطعة مرة واحدة. بيدفع دهب وخبرة وجزء بلوبرنت.",
+        "كشافين الجوبلن بقوا بيلفوا على أربع نقط حوالين معسكرهم بدل ما يتمشوا على أي حتة."],
+      en: ["Piaro's Field: plow a plot before you sow it for one more crop, and water a growing crop once from Piaro's barrel to have it sooner. Plowed and watered plots show it.",
+        "Weekly contracts at the quest board: one a week for each craft (smithing, cooking, brewing, tailoring, farming). What you make after taking one counts, each piece once. Each pays gold, experience and a blueprint fragment.",
+        "Goblin scouts now walk a round of four posts around their camp instead of wandering anywhere."] },
     { v: '2026-10-26plan5b', ver: '3.34', d: '2026-10-26',
       ar: ["خريطة العالم بقت بتعلّم الدواير السحرية (رينهارت وغابة الشجرة البيضا) والمكان اللي لفافة البوابة بتنزلك فيه، أول ما تشوف المكان.",
         "زرار التشكيل عند السندان بيوريك فرصة كل تقييم حسب شغلك: كله ممتاز، والطرق ممتاز، وكله كويس.",

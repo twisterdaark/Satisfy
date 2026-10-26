@@ -31,7 +31,7 @@
     // crafting (the Blacksmith's ladder)
     'made', 'smith', 'sxp', 'patience', 'bonus', 'got', 'firstLeg',
     // quests, NPC memory, world flags, discovery
-    'qs', 'bqa', 'adqa', 'adqO', 'adqT', 'adqK', 'exd', 'exc', 'exf','cbase','church','hc','dv','dt','ms','rc','dcb','crep','rsh','cdy','xpb','pevo','mxp','und','pat1','patD','eyes','cre','adyes','crs', 'qOff', 'p3', 'p4', 'vc', 'ea', 'bkt', 'bfc', 'rbk', 'undA', 'undf', 'undfN', 'mar', 'marD', 'marCd', 'king', 'ltq', 'bsq', 'bsqL', 'tzq', 'mmq', 'bkfp', 'bkgp', 'bkrx', 'lantierW', 'bowsaintW', 'mumudW', 'mdq', 'dth', 'mdsk', 'madraW', 'mdMsg', 'lfq', 'lfarmerW', 'lkq', 'lknightW', 'kyq', 'lwarriorW', 'lkC', 'kills', 'met', 'ev', 'guardDown', 'vis', 'books', 'chest', 'chops', 'hag', 'burnSeen',
+    'qs', 'bqa', 'adqa', 'adqO', 'adqT', 'adqK', 'wc', 'exd', 'exc', 'exf','cbase','church','hc','dv','dt','ms','rc','dcb','crep','rsh','cdy','xpb','pevo','mxp','und','pat1','patD','eyes','cre','adyes','crs', 'qOff', 'p3', 'p4', 'vc', 'ea', 'bkt', 'bfc', 'rbk', 'undA', 'undf', 'undfN', 'mar', 'marD', 'marCd', 'king', 'ltq', 'bsq', 'bsqL', 'tzq', 'mmq', 'bkfp', 'bkgp', 'bkrx', 'lantierW', 'bowsaintW', 'mumudW', 'mdq', 'dth', 'mdsk', 'madraW', 'mdMsg', 'lfq', 'lfarmerW', 'lkq', 'lknightW', 'kyq', 'lwarriorW', 'lkC', 'kills', 'met', 'ev', 'guardDown', 'vis', 'books', 'chest', 'chops', 'hag', 'burnSeen',
     // equipment slots, skill bar, NPC affinity and town reputation, guild membership, companion, life skills
     'eq', 'bar', 'xbar', 'croot', 'aff', 'stash', 'rep', 'guild', 'comp', 'life',
     // repair orders posted to player smiths and not answered yet (SAT-ONLINE-096)
