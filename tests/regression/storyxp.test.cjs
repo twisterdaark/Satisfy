@@ -19,7 +19,7 @@ test('story XP doubled; a legend replays story and side quests', async () => {
     // gj1 gives 5000 base: doubled = 10000 x XPMUL 1.2 = 12000 (level 200 is under any quest cap)
     assert.ok(a.gj1 >= 12000 && a.gj1 < 13500 && a.cn >= 3000 && a.cn < 3400, JSON.stringify(a)); // cn (2500, not story) stays x1.2
     const b = await g.eval(() => { const G = window.__G, C = window.__GC2, S = G.S;
-      const before = C.avail('gj1'); S.cls = 'saint'; const legA = C.avail('gj1'), legCls = C.avail('cn');
+      const before = C.avail('gj1'); S.cls = 'saint'; S.lrd = { c: 'saint', q: {} }; const legA = C.avail('gj1'), legCls = C.avail('cn');   // the replay comes with the reset to level 1 (legendReset)
       C.accept('gj1'); const rp = !!S.qs.gj1.rp, stillDone = window.__GMS.cur() !== 0 || true; const gj2ok = C.avail('gj2');
       S.qs.gj1.c = 99; C.complete('gj1'); const after = { st: S.qs.gj1.st, rp: !!S.qs.gj1.rp };
       return { before, legA, legCls, rp, gj2ok, after }; });

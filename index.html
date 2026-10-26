@@ -554,6 +554,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
 
 .sk.eqd{box-shadow:inset 0 0 0 2px #9fe39a,0 0 calc(var(--u)*.6) rgba(159,227,154,.6)}
 .ptitle.pmov{cursor:move;touch-action:none}
+#qmW{width:calc(var(--u)*60);max-width:96%;height:84%;display:flex;flex-direction:column;overflow:hidden}#qmTabs{display:flex;gap:calc(var(--u)*.5);justify-content:center;flex-wrap:wrap;margin:calc(var(--u)*.4) 0}#qmTabs button{padding:calc(var(--u)*.4) calc(var(--u)*1.1);font-size:calc(var(--u)*1.3)}#qmTabs button.on{background:rgba(120,190,255,.35);border-color:#9fd8ff}#qmQ{display:block;width:60%;margin:calc(var(--u)*.3) auto calc(var(--u)*.5);padding:calc(var(--u)*.4) calc(var(--u)*.8);font:inherit;font-size:calc(var(--u)*1.2);color:#eaf4ff;background:rgba(6,14,32,.6);border:1px solid rgba(160,210,255,.35);border-radius:4px;outline:none}#qmL{flex:1;overflow-y:auto;padding-inline-end:calc(var(--u)*.3)}#qmL .ssec:first-child{margin-top:0;border-top:0}.qmr{display:flex;align-items:center;gap:calc(var(--u)*.8);padding:calc(var(--u)*.5) calc(var(--u)*.7);margin:calc(var(--u)*.3) 0;border:1px solid rgba(160,210,255,.22);background:rgba(8,20,44,.82);cursor:pointer}.qmr:hover{border-color:#9fd8ff}.qmr>div{flex:1;min-width:0}.qmr b{font-size:calc(var(--u)*1.35);color:#ffe9a8}.qmr small{display:block;font-size:calc(var(--u)*1.15);opacity:.85;margin-top:calc(var(--u)*.2)}.qmr button.on{background:rgba(255,210,74,.3);border-color:#ffd24a}.qmr button{flex:none;padding:calc(var(--u)*.35) calc(var(--u)*1);font-size:calc(var(--u)*1.2)}.qmup{opacity:.7}.qmtag{display:inline-block;margin-inline-start:calc(var(--u)*.5);padding:0 calc(var(--u)*.45);font-size:calc(var(--u)*1);border-radius:3px;background:rgba(120,190,255,.2);color:#bfe8ff;vertical-align:middle}.qm-ms{background:rgba(255,200,80,.22);color:#ffd27a}.qm-rep{background:rgba(120,230,140,.2);color:#9ff0a8}.qm-done{background:rgba(180,180,190,.18);color:#c8ccd4}.qm-s{background:rgba(220,120,255,.22);color:#e8b8ff}.qmnone{opacity:.7;text-align:center;font-size:calc(var(--u)*1.2)}
 </style>
 
 <div id="rotW"><b>📱</b><span id="rotT">لف الموبايل بالعرض عشان تلعب<br>Turn your phone sideways to play</span></div>
@@ -585,7 +586,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
         <div class="bar xp"><i id="xpb" style="background:var(--xp)"></i></div>
         <div class="gold" id="goldt"></div><div class="gold dnclk" id="dnClk"></div>
       </div>
-      <div id="rcol"><div id="quest" class="sys"><div class="qhead"><span class="head" data-i18n="questH"></span><span class="qhb"><button class="x qrec" data-act="qRec" id="qRecB">⭐</button><button class="x" id="toastLog"><span>📜</span></button><button class="x qtog" data-act="qtoggle" title="Tab">▾</button></span></div><div id="qtext"></div></div>
+      <div id="rcol"><div id="quest" class="sys"><div class="qhead"><span class="head" data-i18n="questH"></span><span class="qhb"><button class="x qrec" data-act="qRec" id="qRecB">⭐</button><button class="x" id="qmB">📖</button><button class="x" id="toastLog"><span>📜</span></button><button class="x qtog" data-act="qtoggle" title="Tab">▾</button></span></div><div id="qtext"></div></div>
       <canvas id="mini" class="sys" width="128" height="88" data-tip=""></canvas>
       <div id="partyW" class="sys" hidden><div class="qhead"><span class="head" id="pHead"></span><button class="x" data-act="pInv" id="pInvB"></button><button class="x" data-act="pRaid" id="pRaidB" hidden></button><button class="x" data-act="pRdy" id="pRdyB" hidden></button><button class="x" data-act="pLeave" data-i18n="pLeave"></button></div><div id="partyL"></div></div></div>
       <div id="boss" class="sys" hidden><div class="head" data-i18n="guardian"></div><div class="bar"><i id="bossb" style="background:linear-gradient(90deg,#8f1d17,#e2493a)"></i><span id="bosst"></span></div></div>
@@ -705,6 +706,10 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
       </div>
     </div>
 
+    <div id="qmW" class="sys panel center" hidden>
+      <div class="ptitle"><span class="head" data-i18n="qmTitle"></span><button class="x qmx">✕</button></div>
+      <div id="qmTabs"></div><input id="qmQ" type="search" autocomplete="off" spellcheck="false"><div id="qmL"></div>
+    </div>
     <div id="qdW" class="sys panel center" hidden>
       <div class="ptitle"><span class="head" id="qdT"></span><button class="x" data-act="closeQD">✕</button></div>
       <div id="qdB"></div>
@@ -1142,7 +1147,7 @@ zOut:'Bairan Outskirts (Lv 100+)',zPlains:'Central Plains',zSnow:'Northern Snowf
 };
 Object.assign(STR.ar,{soundB:'الصوت',volAmb:'أصوات العالم',volSoc:'أصوات اللاعيبة'});Object.assign(STR.en,{soundB:'Sound',volAmb:'World sounds',volSoc:'Other players'}); // SAT-ONLINE-101
 const t=(k,v)=>{let s=(k==='pname'&&S&&S.look&&S.look.n)?S.look.n:STR[lang][k]??STR.en[k]??k;if(v)for(const n in v)s=s.split('{'+n+'}').join(v[n]);return s;};
-function applyLang(){volUI();const kt=document.getElementById('kTML');if(kt)kt.textContent=t('kTab')+' / '+t('kM')+' / '+t('kL');UI.lang=lang;UI.dir=lang==='ar'?'rtl':'ltr';document.querySelectorAll('#ui [data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n);});{const qb=document.getElementById('qRecB');if(qb)qb.dataset.tip=t('qRecB');}try{if(NETQ==='online')netBtn();}catch(e){}hudDirty=true;}
+function applyLang(){volUI();const kt=document.getElementById('kTML');if(kt)kt.textContent=t('kTab')+' / '+t('kM')+' / '+t('kL');UI.lang=lang;UI.dir=lang==='ar'?'rtl':'ltr';document.querySelectorAll('#ui [data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n);});{const qb=document.getElementById('qRecB');if(qb)qb.dataset.tip=t('qRecB');}{const mb=document.getElementById('qmB');if(mb)mb.dataset.tip=t('qmB');}try{if(NETQ==='online')netBtn();}catch(e){}hudDirty=true;}
 
 /* ---------------- sprites ---------------- */
 function mk(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');fn(g);return c;}
@@ -5324,11 +5329,13 @@ function rsMenu(line){if(!S)return;const s=rsh(),r=crepOf(),o=[];
  o.push({l:t('rsCandy'),ic:'candy',st:t('rsCandyD',{n:5-s.c})+' · '+t('rsCost',{n:fmtN(RSCANDY)}),poor:r<RSCANDY||s.c>=5,f:()=>rsBuy('candy')});
  o.push(s.g?{l:t(s.w?'rsGlassOff':'rsGlassOn'),ic:'sgl',st:t('rsGlassD'),f:()=>{s.w=s.w?0:1;sbSig='';SFX.click();save(true);rsMenu(t(s.w?'rsGlassW':'rsGlassT'));}}
   :{l:t('rsGlass'),ic:'sgl',st:t('rsGlassD')+' · '+t('rsCost',{n:fmtN(RSGLASS)}),poor:r<RSGLASS,f:()=>rsBuy('sgl')});
+ if(!s.b)o.push({l:t('rsBook'),ic:'bbook',st:t('rsBookD')+' · '+t('rsCost',{n:fmtN(RSBOOK)}),poor:r<RSBOOK,f:()=>rsBuy('bbook')});
  o.push({l:t('rsDraw'),ic:'rsdraw',st:t('rsDrawD')+' · '+t('rsCost',{n:fmtN(RSDRAW)}),poor:r<RSDRAW,f:()=>rsBuy('draw')});
  o.push({l:t('oLeave'),f:rsLeave});
  dialog('rstore',[line||(RSC&&!RSC.seen?(RSC.seen=1,'rsIntro'):t('rsBal',{n:fmtN(r)}))],null,o);}
 function rsBuy(k){const s=rsh(),pay=n=>{if(crepOf()<n){SFX.deny();rsMenu(t('rsPoor',{n:fmtN(crepOf())}));return false;}S.crep-=n;return true;};
  if(k==='candy'){if(s.c>=5){SFX.deny();return rsMenu(t('rsCandyMax'));}if(!pay(RSCANDY))return;s.c++;addMat('candy',1);SFX.coin();save(true);return rsMenu(t('rsGot',{it:t('candy')}));}
+ if(k==='bbook'){if(s.b)return rsMenu();if(!pay(RSBOOK))return;s.b=1;SFX.legendary();save(true);return rsMenu(t('rsGot',{it:t('bbook')})+' '+t('rsBookW'));}
  if(k==='sgl'){if(s.g)return rsMenu();if(!pay(RSGLASS))return;s.g=1;s.w=1;sbSig='';SFX.coin();save(true);return rsMenu(t('rsGot',{it:t('sgl')})+' '+t('rsGlassW'));}
  if(!pay(RSDRAW))return;s.d++;let roll=rand()*1000,got='fail';for(const [it,w] of RSD){if(roll<w){got=it;break;}roll-=w;}
  SFX.tick(1.3);if(got==='fail'){SFX.deny();save(true);return rsMenu('rsFail');}
@@ -7246,6 +7253,7 @@ function onKey(c){if(c==="Escape"&&!$("updLog").hidden){updLogClose();return;}
  else if(mode==='qd'){if(c==='Escape'||c==='Tab')closeQD();}
  else if(mode==='status'){if(c==='Escape'||c==='KeyC')closeStatus();}
  else if(mode==='guild'){if(c==='Escape'||c==='KeyG')closeGuildW();}
+ else if(mode==='qm'){if(c==='Escape')closeQM();}
  else if(mode==='pause'){if(c==='Escape'){if(!$('settingsScreen').hidden)act('setBack');else resume();}}   // Esc in Settings goes back to the pause menu
  else if(mode==='controls'){if(c==='Escape')act('back');}
  else if(mode==='sound'){if(c==='Escape')act('sndBack');}
@@ -7960,7 +7968,7 @@ const qReady=id=>{const s=S.qs[id];return !!s&&s.st===1&&qCount(id)>=QD[id].obj.
    them able to repeat all story and side quests"): a finished story or side quest can be taken again. It stays finished
    for everything that follows it (qDone), pays a repeatable quest's experience (its cap), and no class, trial, epic or
    board task comes back. */
-function legRep(id){const q=QD[id],s=S&&S.qs[id];return !!q&&!!s&&s.st===2&&isLeg()&&!q.rg&&!q.cls&&!q.promo&&!q.hcls&&!q.hid&&!q.sw&&!q.rep&&!q.gen&&!q.adq&&!q.gr&&!q.mur;}
+function legRep(id){const q=QD[id],s=S&&S.qs[id];return !!q&&!!s&&s.st===2&&isLeg()&&!q.rg&&!q.cls&&!q.promo&&!q.hcls&&!q.hid&&!q.sw&&!q.rep&&!q.gen&&!q.adq&&!q.gr&&!q.mur&&!!lrdOf()&&!lrdOf()[id];}
 function qAvail(id){const q=QD[id];return (!S.qs[id]||legRep(id))&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2||q.cl2==='smith'&&S.cls==='pagma')&&(!q.sec||S.sec===q.sec)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||q.sw||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)))&&(!q.need||!!(QNEED[q.need]&&QNEED[q.need]()));}
 // owner 2026-10-23: a "kill it below 50% health" task can't be done when the monster is far under your level (it can't bring
 // your health down), so 20+ levels above it the health condition is waived and the task says so
@@ -7990,7 +7998,7 @@ function mkItem0(id,r,made){const rc=rcById(id);if(rc.fix!=null&&!(made&&rc.fix<
 const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.hpp)it.hpp=rc.hpp;if(rc.slot==='w'){it.atk=Math.round(rc.atk*MULT[r]);it.spd=rc.spd;}else if(rc.def)it.def=Math.round(rc.def*MULT[r]);
  for(const k of ['as','ms','dm'])if(rc[k])it[k]=+(rc[k]*(1+(MULT[r]-1)*.5)).toFixed(3);if(rc.mpb)it.mpb=Math.round(rc.mpb*MULT[r]);for(const k of ['agi','agp','cold','dsh'])if(rc[k])it[k]=rc[k];if(rc.slot==='w'&&r>=2)it.wp=wpRoll(r,it);return it;}
 function completeQ(id){if(!claimQ(id))return;bpGain(QD[id]&&QD[id].ms?.08:.04);   /* a blueprint fragment, 4% (8% the main story) (plan U280) */if(id==='sir1')sirFlute(1);if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else shTake(o.it,o.n,0);}if(o.give)giveItem(o.it);
- const rp=!!S.qs[id].rp;S.qs[id].st=2;delete S.qs[id].rp;if(q.rep)delete S.qs[id];
+ const rp=!!S.qs[id].rp;if(rp)lrdMark(id);S.qs[id].st=2;delete S.qs[id].rp;if(q.rep)delete S.qs[id];
  toast(t('qDone',{q:qName(id)}),'good');SFX.quest();jQuest(id);
  if(q.gold){S.gold+=pasOn('opers')?Math.round(q.gold*1.15):q.gold;coinFx(npcOf(q.by),q.gold);}if(q.kc)kcGain(q.kc);if(q.mat)addMat(q.mat[0],q.mat[1]);
  if(q.item){const it=mkItem(q.item,1);it.src='q:'+id;S.items.push(it);if(q.cls)S.eqW=it.uid;loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});}
@@ -8254,7 +8262,7 @@ window.__GTH={week:()=>thWeek(),spot:w=>thSpot(w||thWeek()),take:()=>thTake(),di
 function openBoard(){topBoard();const D=dlyS(),L=dailyList(),dn=L.filter(x=>D.done[x.k]).length,dr=L.some(x=>!D.done[x.k]&&(D.c[x.k]||0)>=x.n),
   br=Object.keys(S.qs).some(id=>QD[id]&&QD[id].by==='board'&&qReady(id));
  dialog('board',['bdMenu'],null,[{l:t('bMenuD',{n:dn,m:L.length})+(dr?' ❗':''),f:openDaily},{l:t('bMenuB',{n:S.bq.length})+(br?' ❗':''),f:openBQ},{l:thLbl(),f:thTake},{l:t('wcMenu')+(wcAny()?' ❗':''),f:wcMenu},...(pollOpen()?[{l:t('pollMenuL')+(POLLM[pollOpen()]==null?' ❗':''),f:pollMenu}]:[]),...(exSt()?[{l:t('exMenuL'),f:exMenu}]:[]),...(ntcList().length?[{l:t('ntcMenu',{n:ntcList().length}),f:ntcOpen}]:[]),{l:t('oLeave')}]);}
-function openDaily(){dialog('board',[dailyLines()],null,[...dailyOpts(),{l:t('oBack'),f:openBoard}]);}
+function openDaily(){if(QMX)return;dialog('board',[dailyLines()],null,[...dailyOpts(),{l:t('oBack'),f:openBoard}]);}
 function openBQ(){topBoard();const opts=[];
  Object.keys(S.qs).forEach(id=>{if(QD[id]&&QD[id].by==='board'&&qReady(id))opts.push({l:t('bTurn',{q:qName(id)}),f:()=>{completeQ(id);if(QD[id]&&QD[id].gen){delete S.bqa[id];delete QD[id];}openBQ();}});});
  const nAct=Object.keys(S.qs).filter(id=>QD[id]&&QD[id].gen&&S.qs[id].st===1).length;
@@ -8792,7 +8800,7 @@ Object.assign(STR.en,{sk_ssblade:'Body as a Blade',skd_ssblade:'Your body is tem
 function isLeg(c){return (LEGCL||[]).includes(c===undefined?S&&S.cls:c);}
 var LEGCL=['pagma','braham','saint','dslayer'];
 const ptsLv=()=>(isLeg()?15:PTS_LV)+sc2Pts(); // a second class: 2 more a level (the novel: 12 instead of 10)
-function legendReset(){S.cbase=null;S.church=null;S.lv=1;S.xp=0;S.st={str:10,sta:10,agi:10,int:10,dex:10};S.pts=0;S.adv=0;S.bonus=0;S.got={};S.lgfix=1;gearFit(); // owner 2026-10-22: the crafting bonus starts over too, so every stat is back to 10, and gear above Lv 1 comes off
+function legendReset(){S.lrd={c:S.cls,q:{}};S.cbase=null;S.church=null;S.lv=1;S.xp=0;S.st={str:10,sta:10,agi:10,int:10,dex:10};S.pts=0;S.adv=0;S.bonus=0;S.got={};S.lgfix=1;gearFit(); // owner 2026-10-22: the crafting bonus starts over too, so every stat is back to 10, and gear above Lv 1 comes off
  if(P){P.hp=maxHP();P.mp=maxMP();}hudDirty=true;}
 function becomeSaint(){const L=WS.legends||(WS.legends={});if(L.muller&&L.muller.pid!==pidOf())return;L.muller={pid:pidOf(),n:S.look.n};
  S.cls='saint';S.bar=null;legendReset();sbSig='';SFX.legendary();flash();hudDirty=true;save(true);
@@ -9409,7 +9417,7 @@ function cancelQ(){const id=qdId,s=id&&S.qs[id];if(!s||s.st!==1)return;const b=$
  if(!qdArm){qdArm=true;SFX.click();if(b){b.textContent=t('qCancelSure');b.classList.add('arm');}return;}
  if(QD[id]&&QD[id].gr){epFail(id);closeQD();return;}const nm=qName(id);if(s.rp)S.qs[id]={st:2,c:0};else delete S.qs[id];if(QD[id]&&QD[id].gen){if(S.bqa)delete S.bqa[id];if(S.adqa)delete S.adqa[id];delete QD[id];}
  toast(t('qCanceled',{q:nm}));hudDirty=true;save(true);closeQD();}
-function closeQD(){SFX.close();$('qdW').hidden=true;mode='play';}
+function closeQD(){SFX.close();$('qdW').hidden=true;mode='play';if(QMR){QMR=0;openQM();}}   // back to the quest book when it opened this
 window.__GQD={open:id=>openQD(id),close:()=>closeQD(),obj:id=>qObjText(id),nm:k=>itN(k),lang:l=>{lang=l;}}; // tests
 function closeLog(){SFX.close();$('logW').hidden=true;mode='play';}
 $('mbW').addEventListener('click',e=>{const tk=e.target.closest('[data-mbt]');if(tk){mbTrack(tk.dataset.mbt);return;}const f=e.target.closest('[data-mbf]');if(f){SFX.click();MBF=f.dataset.mbf;mbDraw();return;}const c=e.target.closest('[data-mb]');if(c){SFX.click();MBS=c.dataset.mb;mbDraw();}});
@@ -16398,6 +16406,81 @@ Object.assign(STR.en,{stableM:'Stable Master',stm_hi:'I keep mounts you won\'t f
  stm_uni:'The Unicorn (Lv 90): while you ride it, you and the party near you get 5% more of every stat.',stm_emb:'The Ember Steed (Lv 120): it burns the foes it runs past.',stm_peg:'The Pegasus (Lv 200): it flies over water, woods, rocks and cliffs. Only walls and buildings stop it.',
  mt_pegasus:'Pegasus',mt_ember:'Ember Steed',mt_unicorn:'Unicorn'});
 window.__GMNT={fly:()=>mtFlyOn(),uni:()=>UNIM.m,ride:()=>{if(!P.ride)toggleRide();return !!P.ride;},off:()=>dismount(),stat:k=>stat(k),water:()=>{const cx=P.x/TS|0,cy=P.y/TS|0;for(let d=1;d<80;d++)for(let y=cy-d;y<=cy+d;y++)for(let x=cx-d;x<=cx+d;x++)if(at(x,y)===WA&&at(x+1,y)===WA&&at(x,y+1)===WA){const px=x*TS+8,py=y*TS+8;return [hitBox(px,py,4),mtFlyBox(px,py,4)];}return null;},near:()=>{const m=mons.find(m=>!m.dead&&!MT[m.type].boss&&!m.tmp&&!inTown(m.x,m.y)&&m.y<WMH*TS);if(!m)return -1;P.x=m.x+8;P.y=monY(m);return mons.indexOf(m);},mhp:i=>mons[i].hp,jig:()=>{P.x+=P.x%2?-1:1;},give:k=>{S.mounts=S.mounts||{};S.mounts[k]=1;S.mount=k;},npc:()=>{const n=npcs.find(n=>n.id==='stableM');if(!n)return null;const x=n.x/TS|0,y=n.y/TS|0;return {x,y,solid:SOLID[at(x,y)]===1,reid:x>=REID.x0&&x<=REID.x1&&y>=REID.y0&&y<=REID.y1};}}; // tests
+/* ---------------- the quest book (the player Suki through the owner 2026-10-26: "a new quest menu where you can search up
+   and categorize quests based on tag ... main story, repeatable, completed, and side. In this menu, you can view quests you
+   haven't started or upcoming quests that have a level requirement. Quests with the repeatable tag may be started from the
+   quest menu. Upon obtaining a legendary class, all side quests and main story quests are given the repeatable tag once,
+   which will be removed once the quest is completed again." And the Reputation Store's Bounty Book: "a new tab ... called
+   bounties, where you can view today's bounties, accept board quests, and turn in board quests without interacting with
+   the quest board"). 📖 on the quest panel opens it. It lists the quests you carry, the ones a giver offers you now, the
+   ones waiting for your level (with the level), and the finished ones: never a hidden quest, a hidden class's quest or a
+   board task (board tasks are the Bounties tab). Nothing starts from the book (owner 2026-10-26: "put a marker that shows
+   you who gives it instead of taking it from the UI, so there's no abuse"): 📍 shows the giver on the map and the guide
+   arrow. A finished story or side quest comes back only when a legendary class starts you over at level 1 (legendReset
+   sets S.lrd: {c: the class, q: {quest: 1}}), once per quest per legendary class; a legend from before that has no replays.
+   Everything is the player's own save, so online needs nothing new. */
+var QMT='all',QMR=0,QMX=0;
+function lrdOf(){return S&&S.lrd&&S.lrd.c===S.cls?S.lrd.q:null;}
+function lrdMark(id){const q=lrdOf();if(q)q[id]=1;}
+const qmRep=id=>{const q=QD[id];return !!q&&(!!q.rep&&!q.gen||legRep(id)||!!(S.qs[id]&&S.qs[id].rp));};
+function qmTags(id){const q=QD[id],s=S.qs[id],T=[q.ms?'ms':'side'];if(qmRep(id))T.push('rep');if(s&&s.st===2&&!s.rp||!s&&qmRepN(id)>=QREP_MAX)T.push('done');return T;}
+// where a quest stands for you: carried, offered now, waiting for a level, finished
+const qmRepN=id=>QD[id]&&QD[id].rep&&!QD[id].gen?((dlyS().rq||{})[id]||0):0;
+function qmState(id){const s=S.qs[id];if(s&&s.st===1)return 'act';const av=qAvail(id);if(s&&s.st===2&&!av||!av&&qmRepN(id)>=QREP_MAX)return 'done';if(!av)return null;return S.lv<(QD[id].lv||1)?'up':s?'done':'av';}
+const qmCanStart=id=>qmRep(id)&&!(S.qs[id]&&S.qs[id].st===1)&&qAvail(id)&&S.lv>=(QD[id].lv||1);
+function qmList(){const o=[];for(const id in QD){const q=QD[id];if(!q||q.gen||q.by==='board'||q.hid||!q.obj)continue;const s=S.qs[id];if(!s&&(q.hcls||q.gr||q.mur))continue;
+  const st=qmState(id);if(st)o.push({id,st,tags:qmTags(id)});}
+ const ord={act:0,av:1,up:2,done:3};return o.sort((a,b)=>ord[a.st]-ord[b.st]||(QD[a.id].lv||1)-(QD[b.id].lv||1)||qName(a.id).localeCompare(qName(b.id)));}
+const qmBook=()=>!!(S&&S.rsh&&S.rsh.b);
+function openQM(tab){if(!S||S.__demo||!(mode==='play'||mode==='qm'))return;if(tab)QMT=tab;if(QMT==='bnt'&&!qmBook())QMT='all';SFX.open();mode='qm';$('qmW').hidden=false;$('hint').hidden=true;$('qmQ').placeholder=t('qmQ');qmDraw();}
+function closeQM(){SFX.close();$('qmW').hidden=true;$('qmQ').blur();if(mode==='qm')mode='play';}
+function qmDraw(){if($('qmW').hidden)return;const tabs=['all','ms','side','rep','done',...(qmBook()?['bnt']:[])];if(!tabs.includes(QMT))QMT='all';
+ $('qmTabs').innerHTML=tabs.map(k=>`<button data-qmt="${k}" class="${k===QMT?'on':''}">${t('qmT_'+k)}</button>`).join('');
+ $('qmQ').hidden=QMT==='bnt';if(QMT==='bnt'){$('qmL').innerHTML=qmBounties();return;}
+ const q=($('qmQ').value||'').trim().toLowerCase(),hit=id=>!q||qName(id).toLowerCase().includes(q)||String(t(QD[id].by)).toLowerCase().includes(q);
+ const L=qmList().filter(r=>(QMT==='all'||r.tags.includes(QMT))&&hit(r.id));let h='',g=null;
+ for(const r of L){const id=r.id,Q=QD[id];if(r.st!==g){g=r.st;h+=`<div class="ssec">${t('qmG_'+g)}</div>`;}
+  const tg=r.tags.map(k=>`<span class="qmtag qm-${k}">${t('qmT_'+k)}</span>`).join('')+(Q.gr?`<span class="qmtag qm-s">${esc(Q.gr)}</span>`:''),
+   sub=r.st==='act'?(qReady(id)?t('retTo',{w:t(Q.by)}):qObjText(id)):r.st==='up'?t('qNeedLv',{lv:Q.lv}):qmRepN(id)?t('qmRepN',{w:t(Q.by),n:qmRepN(id),m:QREP_MAX}):t('qdFrom',{w:t(Q.by)}),
+   trk=r.st!=='done'||qmCanStart(id),sp=trk&&!!qSpot(id),on=sp&&S.qTrk===id&&!S.qGOff;
+  h+=`<div class="qmr${r.st==='up'?' qmup':''}" data-qmd="${id}"><div><b>${esc(qName(id))}</b>${tg}<small>${t('qmLv',{lv:Q.lv||1})} · ${esc(sub)}</small></div>${sp?`<button class="qmtk${on?' on':''}" data-qmk="${id}" data-tip="${esc(t(on?'qgHide':'qmGo'))}">📍</button>`:''}</div>`;}
+ $('qmL').innerHTML=h||`<p class="qmnone">${t('qmNone')}</p>`;}
+// the giver's place on the map and the guide arrow (owner 2026-10-26: you take the quest from the giver, not from the book)
+function qmGo(id){if(!QD[id]||!qSpot(id)){SFX.deny();return;}qTrkT(id);qmDraw();}
+// the Bounty Book: today's bounties (the board's daily list) and the board's tasks, taken and turned in from anywhere
+function qmBounties(){const D=dlyS(),L=dailyList(),cl=L.filter(x=>!D.done[x.k]&&(D.c[x.k]||0)>=x.n);let h=`<div class="ssec">${t('qmBDaily',{s:D.streak||0})}</div>`;
+ h+=L.map(x=>{const i=cl.indexOf(x);return `<div class="qmr"><div><b>${esc(t(x.k))}</b><small>${esc(itN(x.it))} ${D.done[x.k]?'✓':`${Math.min(D.c[x.k]||0,x.n)}/${x.n}`}</small></div>${i>=0?`<button data-qmdl="${i}">${t('qmClaim')}</button>`:''}</div>`;}).join('');
+ topBoard();const mine=Object.keys(S.qs).filter(id=>QD[id]&&QD[id].by==='board'&&S.qs[id].st===1),nAct=Object.keys(S.qs).filter(id=>QD[id]&&QD[id].gen&&S.qs[id].st===1).length;
+ h+=`<div class="ssec">${t('qmBMine',{n:nAct})}</div>`+(mine.length?mine.map(id=>`<div class="qmr"><div><b>${esc(qName(id))}</b><small>${esc(qReady(id)?t('qmBReady'):qObjText(id))}</small></div>${qReady(id)?`<button data-qmbt="${id}">${t('qmTurn')}</button>`:''}</div>`).join(''):`<p class="qmnone">${t('qmBNone')}</p>`);
+ const offers=[...S.bq.map((d,i)=>({id:d.id,k:'qmbk',v:i,gen:1})),...Object.keys(QD).filter(id=>QD[id].by==='board'&&!QD[id].gen&&qAvail(id)&&S.lv>=(QD[id].lv||1)).map(id=>({id,k:'qmbq',v:id}))];
+ h+=`<div class="ssec">${t('qmBOffer')}</div>`+(nAct>=3?`<p class="qmnone">${t('bFull')}</p>`:'')+offers.map(o=>`<div class="qmr"><div><b>${esc(qName(o.id))}</b><small>${esc(qObjText(o.id))} · ${esc(qRewards(o.id).join(' · '))}</small></div>${o.gen&&nAct>=3?'':`<button data-${o.k}="${o.v}">${t('qmTake')}</button>`}</div>`).join('');
+ return h;}
+function qmBAct(k,v){if(!qmBook())return;
+ if(k==='qmdl'){const o=dailyOpts()[+v];if(!o)return;QMX=1;try{o.f();}finally{QMX=0;}}
+ else if(k==='qmbt'){if(!qReady(v))return;completeQ(v);if(QD[v]&&QD[v].gen){if(S.bqa)delete S.bqa[v];delete QD[v];}}
+ else if(k==='qmbk'){const d=S.bq[+v],nAct=Object.keys(S.qs).filter(id=>QD[id]&&QD[id].gen&&S.qs[id].st===1).length;if(!d||nAct>=3){SFX.deny();return;}S.bqa=S.bqa||{};S.bqa[d.id]=d;S.bq=S.bq.filter(x=>x!==d);acceptQ(d.id);topBoard();}
+ else if(k==='qmbq'){if(!QD[v]||!qAvail(v)||S.lv<(QD[v].lv||1))return;acceptQ(v);}
+ hudDirty=true;save(true);qmDraw();}
+$('qmW').addEventListener('click',e=>{if(e.target.closest('.qmx')){closeQM();return;}const tb=e.target.closest('[data-qmt]');if(tb){SFX.click();QMT=tb.dataset.qmt;qmDraw();$('qmL').scrollTop=0;return;}
+ const st=e.target.closest('[data-qmk]');if(st){qmGo(st.dataset.qmk);return;}
+ for(const k of ['qmdl','qmbt','qmbk','qmbq']){const b=e.target.closest('[data-'+k+']');if(b){SFX.click();qmBAct(k,b.dataset[k]);return;}}
+ const r=e.target.closest('[data-qmd]');if(r&&QD[r.dataset.qmd]){$('qmW').hidden=true;QMR=1;openQD(r.dataset.qmd);}});
+$('qmQ').addEventListener('input',()=>qmDraw());
+$('qmQ').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'||e.key==='Enter')e.target.blur();});$('qmQ').addEventListener('keyup',e=>e.stopPropagation());
+$('qmB').addEventListener('click',e=>{e.stopPropagation();if(mode==='qm')closeQM();else openQM();});
+WALKM.push('qm');WCLOSE.qm=()=>closeQM();
+// the Bounty Book in the Reputation Store
+const RSBOOK=15000;
+Object.assign(STR.ar,{qmB:'كتاب المهام',qmTitle:'كتاب المهام',qmQ:'دوّر بالاسم أو باللي بيديها…',qmT_all:'الكل',qmT_ms:'القصة',qmT_side:'جانبية',qmT_rep:'تتكرر',qmT_done:'خلصت',qmT_bnt:'المكافآت',
+ qmG_act:'شغال فيها',qmG_av:'متاحة دلوقتي',qmG_up:'جاية (محتاجة لفل)',qmG_done:'خلصتها',qmLv:'لفل {lv}',qmGo:'وريني مكان اللي بيديها',qmRepN:'من {w} · خلصتها النهارده {n}/{m}',qmNone:'مفيش مهام هنا.',
+ qmBDaily:'مكافآت النهارده (أيام ورا بعض: {s})',qmClaim:'استلم',qmBMine:'مهام اللوحة اللي معاك ({n}/3)',qmBNone:'مش واخد مهام من اللوحة.',qmBReady:'خلصت! سلّمها من هنا.',qmTurn:'سلّم',qmBOffer:'مهام اللوحة النهارده',qmTake:'خد',
+ bbook:'كتاب المكافآت',bbookD:'بيضيف تبويب «المكافآت» لكتاب المهام: تشوف مكافآت النهارده، وتاخد مهام اللوحة وتسلّمها من أي حتة.',rsBook:'كتاب المكافآت',rsBookD:'تبويب المكافآت في كتاب المهام (📖)',rsBookW:'افتح كتاب المهام 📖 وهتلاقي تبويب المكافآت.'});
+Object.assign(STR.en,{qmB:'Quest book',qmTitle:'Quest Book',qmQ:'Search by name or giver…',qmT_all:'All',qmT_ms:'Main story',qmT_side:'Side',qmT_rep:'Repeatable',qmT_done:'Completed',qmT_bnt:'Bounties',
+ qmG_act:'In progress',qmG_av:'Available now',qmG_up:'Upcoming (level needed)',qmG_done:'Completed',qmLv:'Lv {lv}',qmGo:'Show me who gives it',qmRepN:'From {w} · done today {n}/{m}',qmNone:'No quests here.',
+ qmBDaily:"Today's bounties (streak: {s} days)",qmClaim:'Claim',qmBMine:'Your board tasks ({n}/3)',qmBNone:'You carry no board tasks.',qmBReady:'Done! Turn it in from here.',qmTurn:'Turn in',qmBOffer:"Today's board tasks",qmTake:'Take',
+ bbook:'Bounty Book',bbookD:"Adds a Bounties tab to the quest book: see today's bounties, and take and turn in board tasks from anywhere.",rsBook:'Bounty Book',rsBookD:'A Bounties tab in the quest book (📖)',rsBookW:"Open the quest book 📖 and you'll find the Bounties tab."});
+window.__GQM={open:t=>openQM(t),close:()=>closeQM(),list:()=>qmList(),tags:id=>qmTags(id),go:id=>qmGo(id),can:id=>qmCanStart(id),trk:()=>S.qTrk,html:()=>$('qmL').innerHTML,tabs:()=>[...$('qmTabs').querySelectorAll('button')].map(b=>b.dataset.qmt),
+ bact:(k,v)=>qmBAct(k,v),book:()=>qmBook(),lrd:()=>lrdOf(),dly:()=>dlyS(),daily:()=>dailyList(),RSBOOK}; // tests
 window.__G={bag:()=>({GDROP,openSell,INVS,invClick,unitVal,itemVal,SHOPG,SHOPM,POT}),lines:()=>STR,chunks:()=>({g:gg.stats(),o:og.stats()}),chunkLayers:()=>({gg,og}),get CARD(){return CARD},get SM(){return SM},get allies(){return allies},get S(){return S},get P(){return P},get mode(){return mode},die:()=>die(),mons:()=>mons,get npcs(){return npcs},nodes,act,finishMG:()=>finishMG,startMG:id=>startMG(RC.find(r=>r.id===id)),get MG(){return MG},talkNPC:id=>talkNPC(id),completeQ:id=>completeQ(id),acceptQ:id=>acceptQ(id),useSlot:i=>useSlot(i),newGame:L=>newGame(L),QD,openMap:()=>openMap(),get proj(){return proj},gainXP:n=>gainXP(n),save:q=>save(q),openPick:s=>openPick(s),pickOpt:i=>pickOpt(i),advance:()=>advance(),get DL(){return DL},zoneAt,VT,chopped,tryAttack:(a,b)=>tryAttack(a,b),get KB(){return KB},ROOMS,PROPS,enterRoom:r=>enterRoom(r),openBoard:()=>openBoard(),openQD:id=>openQD(id),TOWNS,useProp:p=>useProp(p),at:(x,y)=>at(x,y),setT:(x,y,v)=>setT(x,y,v),eqx:{buyGear:(i,g,w)=>buyGear(i,g,w),equip:i=>equip(i),eqIt:s=>eqIt(s),defV:()=>defV(),atkV:()=>atkV(),atkCD:()=>atkCD(),maxMP:()=>maxMP(),repairAll:w=>repairAll(w),enhance:(i,w,x)=>enhance(i,w,x),enhPick:(i,w)=>enhPick(i,w),mkItem:(i,r)=>mkItem(i,r),openEquip:()=>openEquip(),wear:(i,p)=>wear(i,p),openForge:()=>openForge(),price:(w,g)=>price(w,g),addAff:(i,n)=>addAff(i,n),giveGift:(w,k)=>giveGift(w,k),townOfNpc:i=>townOfNpc(i),get ESC(){return ESC},solid:(x,y)=>solidT(x,y),DGATES,DUN,useGate:g=>useGate(g)}};
 // Read-only engine surface for the online layer and for content tests. Contract: docs/api/ENGINE_API.md
 const plain=o=>JSON.parse(JSON.stringify(o,(k,v)=>typeof v==='function'?{$fn:String(v)}:v));
@@ -18969,7 +19052,7 @@ addEventListener('pointermove',guiMove);addEventListener('pointerup',guiEnd);add
 // owner 2026-10-22: the bag moves: drag a window by its title bar (not its buttons) anywhere on the screen; the place is kept
 // per browser (satisfy_pmov, fractions of the screen) and the window opens there next time. The equipment and status
 // windows move the same way. The window keeps its pointer while you drag, so a press on it never reaches the game.
-const PMOV=['inv','equipW','statusW','guildW','forge','auW','creW','mapW','qdW','ixW','logW','updLog','styW','cfmW'],PMK='satisfy_pmov';let PMP=(()=>{try{return JSON.parse(localStorage.getItem(PMK)||'{}')||{};}catch(e){return {};}})(),pmDrag=null;
+const PMOV=['inv','equipW','statusW','guildW','forge','auW','creW','mapW','qdW','qmW','ixW','logW','updLog','styW','cfmW'],PMK='satisfy_pmov';let PMP=(()=>{try{return JSON.parse(localStorage.getItem(PMK)||'{}')||{};}catch(e){return {};}})(),pmDrag=null;
 function pmPlace(id){const el=$(id),g=PMP[id];if(!el||!g)return;const ui=document.getElementById('ui'),W=ui.clientWidth,H=ui.clientHeight;if(g.w&&g.h){el.style.width=Math.round(Math.min(W,Math.max(160,g.w*W)))+'px';el.style.height=Math.round(Math.min(H,Math.max(120,g.h*H)))+'px';el.style.maxHeight='none';el.style.maxWidth='none';el.style.overflow='auto';}
  if(g.x==null)return;const r=el.getBoundingClientRect(),w=r.width||200,h=r.height||200;
  const x=Math.max(0,Math.min(W-Math.min(w,W),g.x*W)),y=Math.max(0,Math.min(H-Math.min(h,H),g.y*H));Object.assign(el.style,{left:x+'px',top:y+'px',transform:'none',margin:'0'});}
@@ -19322,7 +19405,7 @@ $('ixQ').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'|
 WALKM.push('idx');WCLOSE.idx=()=>closeIdx();
 window.__GIX={open:()=>openIdx(),close:()=>closeIdx(),tab:(v,s)=>{IXV=v;IXS=s===undefined?null:s;IXD=null;ixDraw();},filt:f=>{if(IXV==='mat')IXMF=f;else IXF=f;IXS=null;ixDraw();},mats:()=>ixMats().map(e=>e.id),src:id=>ixMatSrc(id),data:()=>ixData(),see:id=>{const C=ixCls(),c=C.find(x=>x.id===id);IXHO=C.some(x=>x.k==='hid'&&ixMine(x.id));return !!c&&ixSee(c);},
  cards:()=>[...document.querySelectorAll('#ixG [data-ix]')].map(e=>e.dataset.ix),det:()=>$('ixD').textContent,ask:()=>ixAsk(),req:id=>ixReq(rcById(id)),odds:x=>ixOdds(x)}; // tests
-// plan batch 5b (U254, U257, U262, U276, U190): test hooks
+// plan batch 5b (U254, U257, U262, U190): test hooks
 window.__GP5B={rc:id=>rcById(id),odds:(rc,s)=>rateOdds(rc,s),oddsTip:rc=>oddsTip(rc),forgeB:rc=>forgeB(rc),roll:q=>Math.min(craftRate(q),maxRating()),
  kind:k=>auKind(k),shown:(L,o)=>{const v={...AUV};Object.assign(AUV,o||{});try{return auShown(L.slice()).map(l=>l.id);}finally{Object.assign(AUV,v);}},
  fogAll:()=>{if(FOG)FOG.fill(1);},

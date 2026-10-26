@@ -115,6 +115,8 @@
     'mgt',
     // Hell Gao's fire stone seams mined this appearance (v3.31): {a: his appearance, v: {seam: 1}}
     'hgv',
+    // a legend's quest replays done, once per legendary class (v3.32): {c: class, q: {quest: 1}}
+    'lrd',
     // the Vatican (v3.11): Goddess Rebecca's blessing, from Help the Rebecca Church!
     'vatB',
   ];
