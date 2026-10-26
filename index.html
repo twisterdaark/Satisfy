@@ -6087,7 +6087,8 @@ function sideXP(n){if(!S||S.__demo||!(n>0))return 0;const D=dlyS(),u=D.sdx||0;if
  // (v3.02 review) the day's share counts what you really get, after the XP potion, marriage and the Scholar; the fractions
  // of small grants carry over (D.sdxR), so a low level's herbs add up instead of rounding to nothing
  const k=(xpbOn()?1.2:1)*(MARN?1.1:1)*(1+secB('xp')),f=Math.min(n*SDXP*k,SDXC-u),X=xpNeed()*f+(D.sdxR||0),g=Math.floor(X);D.sdx=u+f;D.sdxR=X-g;return g>0?gainXP(g/k,1,'side'):0;}
-function lifeXP(k,n){if(S.pet==='cat')n=Math.round(n*(1+petB('cat')));sideXP(n);S.life=S.life||{};const l0=lifeLv(k);S.life[k]=(S.life[k]||0)+n;if(lifeLv(k)>l0){toast(t('lifeUp',{s:t('life_'+k),n:lifeLv(k)}),'good');SFX.level();}}
+function lifeXP(k,n){if(S.pet==='cat')n=Math.round(n*(1+petB('cat')));{const r=grB('lf');if(r>0)n=Math.round(n*(1+r));}   /* the guild's Field Guides (plan U237) */
+sideXP(n);S.life=S.life||{};const l0=lifeLv(k);S.life[k]=(S.life[k]||0)+n;if(lifeLv(k)>l0){toast(t('lifeUp',{s:t('life_'+k),n:lifeLv(k)}),'good');SFX.level();}}
 window.__GSDX={side:n=>sideXP(n),life:(k,n)=>lifeXP(k,n),C:SDXC,P:SDXP}; // tests
 // fishing: stand by the water and press E to cast, wait for the bite, press E again before it gets away
 /* ---------------- fishing feel (SAT-ONLINE-182; the owner, 2026-10-24: "improve the visuals and effects; make the game more
@@ -7022,7 +7023,7 @@ const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Mat
 // the golden ratio (novel ch 315, 1423): Strength and Agility kept 1:1. A hidden stat: always on, never shown in the status window
 const balanced=()=>!!(S&&S.st.str>=20&&S.st.agi>=20&&Math.abs(S.st.str-S.st.agi)<=Math.max(S.st.str,S.st.agi)*.1);
 const dodgeCost=()=>balanced()?20:25;
-function maxHP(){return Math.round((1+cpStat('hp'))*(1+achB('hp'))*(100+stat('sta')*10+(tlOn('chief')?60:0)+ttB('hp'))*(1+ttB('hpp'))*(balanced()?1.08:1)*(S.cls==='gknight'?1.15:S.cls==='knight'?1.2:S.cls==='paladin'?1.15:S.cls==='necro'?.9:S.cls==='orator'?.8:1)*(tlOn('purifier')?1.1:1)*(tlOn('climber')?1.05:1)*(P&&P.bmf==='bear'?1.3:P&&P.bmf==='lion'?1.15:1)*(1+gearSum('hpp'))*(P&&P.gjb2U>gTime?1.3:1));}
+function maxHP(){return Math.round((1+cpStat('hp'))*(1+achB('hp'))*(100+stat('sta')*10+(tlOn('chief')?60:0)+ttB('hp'))*(1+ttB('hpp'))*(balanced()?1.08:1)*(S.cls==='gknight'?1.15:S.cls==='knight'?1.2:S.cls==='paladin'?1.15:S.cls==='necro'?.9:S.cls==='orator'?.8:1)*(tlOn('purifier')?1.1:1)*(tlOn('climber')?1.05:1)*(P&&P.bmf==='bear'?1.3:P&&P.bmf==='lion'?1.15:1)*(1+gearSum('hpp'))*(P&&P.gjb2U>gTime?1.3:1)*(1+grB('hp')));}
 function maxST(){return 80+stat('sta')*2;}
 // mana (owner 2026-10-23, "like the novel"): 3 MP per Intelligence point, 6 after the Second Awakening (level 200). A skill's
 // cost is a share of a reference pool, not of your own mana: your Intelligence at 3 MP a point, capped at what 40% of your
@@ -7100,7 +7101,7 @@ function wear(i,p){p*=1-secB('wear');if(i&&i.slot==='w')p*=1-.05*edrLv(i);   /* 
  else if(i.dur===10||i.dur===5){announce(t('durCrit',{it:inm(i),n:i.dur}),1);SFX.deny();}
  else if(i.dur<=20&&gTime>durRemT){durRemT=gTime+40;toast(t('lowDur',{it:inm(i),n:i.dur}),'warn');}}
 function atkV(){return Math.round(iAtk(weapon())*dmgMult()*(P&&P.icb>0?icbM():1));}
-function defV(){let d=setBon('def')+cosB('def');for(const sl of GEAR){const i=eqIt(sl);if(i)d+=iDef(i);}return Math.round((1+cpStat('def'))*(d+Math.floor(stat('sta')*.15))*(P&&P.icb>0?icbM():1)*(1+setBon('dfp'))*(tlOn('oath')?1.05:1)*(S&&S.cls2==='sfarm'?1.1:1)*(S&&S.cls==='lknight'?1.2:1)*(P&&P.lkRU>gTime?1.3:1)*(patOn()?3:1)*(1+ssBl())*(P&&P.gjb2U>gTime?1.3:1)*(P&&P.shredT>gTime?MXSHR:1)*(S&&hlDeb()?.7:1));}
+function defV(){let d=setBon('def')+cosB('def');for(const sl of GEAR){const i=eqIt(sl);if(i)d+=iDef(i);}return Math.round((1+cpStat('def'))*(d+Math.floor(stat('sta')*.15))*(P&&P.icb>0?icbM():1)*(1+setBon('dfp'))*(tlOn('oath')?1.05:1)*(S&&S.cls2==='sfarm'?1.1:1)*(S&&S.cls==='lknight'?1.2:1)*(P&&P.lkRU>gTime?1.3:1)*(patOn()?3:1)*(1+ssBl())*(P&&P.gjb2U>gTime?1.3:1)*(P&&P.shredT>gTime?MXSHR:1)*(S&&hlDeb()?.7:1)*(1+grB('def')));}
 // spawns read the world as generated (GM0), not this player's copy with its chopped trees and stumps, so every
 // client places the same monsters at the same spots and shared monsters line up (owner report: half stayed local)
 let GM0=null;const at0=(x,y)=>(x<0||y<-YO||x>=GW||y>=MH)?CW:GM0[(y+YO)*GW+x],sol0=(x,y)=>SOLID[at0(x,y)]===1;
@@ -8415,7 +8416,7 @@ function guildPanel(){const g=myG();if(!g)return dialog('guild',['gNoneHint'],nu
  const info=t('gInfo',{g:gdEmb(g.emb)+gName(g.id),n:l,x:g.npc?'-':nx?`${g.xp}/${nx}`:t('gMax'),m:Object.keys(g.members).length,cap:l*25,c:me.c});
  const perks=t('gPerks',{x:Math.round(gXPB()*100),gd:Math.round(gGoldB()*100),t:TERR.filter(T=>ownsT(T.k)).map(T=>t(T.k)).join(' · ')||t('gNoTerr')});
  dialog('guild',[info,perks+(g.online&&GWK?' · '+gwLine():''),g.online?guildNoteLine():'',g.online?gtroLine(g.id):''].filter(Boolean),null,[{l:t('oDonGold',{g:1000,x:500}),f:donGold},{l:t('oDonMats'),f:donMats},{l:t('oTerrList'),f:()=>terrList(guildPanel)},
-  ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},...(hallSt()?[{l:t('ghHall'),f:hallMenu}]:[]),
+  ...(g.online&&GUILD?[{l:t('gdMembers',{n:Object.keys(g.members).length}),f:guildMembersD},{l:t('gdVault',{n:Object.keys(GUILD.vault()).length}),f:guildVaultD},{l:t('gdBld'),f:guildBldD},{l:t('gdRes',{n:GRS.filter((r,i)=>grHas(grM(),i)).length,m:GRS.length}),f:guildResD},...(hallSt()?[{l:t('ghHall'),f:hallMenu}]:[]),
    ...(geSt()?[{l:t('geList',{n:geCome(wNow()).length}),f:geListD},{l:t('gwGoal'),f:gwD}]:[]),...(galSt()?[{l:t('gdDip')+(galMo()&&Object.keys(GALA).length?' ('+Object.keys(GALA).length+')':''),f:galD}]:[]),...(gwrSt()?[{l:t('gdWar')+(galMo()&&Object.keys(GWRA).length?' ('+Object.keys(GWRA).length+')':''),f:gwrD}]:[]),
    ...(pdCan()?[{l:t('pdStartL'),f:pdStart}]:[]),
    ...(gCan('emblem')?[{l:t('gdBan'),f:guildBanD},{l:t('gpRights'),f:guildPermD}]:[]),
@@ -17985,7 +17986,7 @@ function guildEv(e){if(!S||S.__demo||gdFor!==S)return;gdSig='';
 function guildMirror(){const st=GUILD&&GUILD.state();if(!st||!st.gid||!st.guild||!WS||!S)return;const me=NET.uid,g=WS.guilds[st.gid]||{},mem={};
  for(const u in st.members){const m=st.members[u];mem[u===me?pidOf():'u:'+u]={n:m.n,rk:m.rk,c:m.c,uid:u};}
  WS.guilds[st.gid]=Object.assign(g,{id:st.gid,name:st.guild.name,master:st.guild.master===me?pidOf():'u:'+st.guild.master,lv:1,xp:st.xp,col:st.guild.col,emb:st.guild.emb|0,online:1,members:mem});
- if(gbFor!==st.gid)gbStart(st.gid);else guildMirrorB();
+ if(gbFor!==st.gid)gbStart(st.gid);else{guildMirrorB();guildMirrorR();}
  if(S.guild!==st.gid||S.gon!==st.gid){S.guild=st.gid;S.gon=st.gid;save(true);}hudDirty=true;}
 function guildDrop(gid){if(gbFor===gid)gbStop();if(gid&&WS&&WS.guilds[gid]&&WS.guilds[gid].online)delete WS.guilds[gid];if(S.guild===gid)S.guild='';if(S.gon===gid)S.gon='';hudDirty=true;save(true);}
 function guildPub(){const st=GUILD&&gdFor===S&&GUILD.state();return st&&st.gid&&st.members[NET.uid]?st.gid:null;}
@@ -18023,11 +18024,11 @@ Object.assign(STR.en,{gdBld:'Buildings',gbH:'Guild treasury: {g} gold. Any membe
 const GB={forge:{ic:'⚒',k:'q',v:.02},train:{ic:'⚔',k:'xp',v:.03},gold:{ic:'💰',k:'gd',v:.03}},GB_COST=[50000,150000,400000],GB_GIVE=[1000,10000,100000];
 var GBK=null,GBL=null,GBLOG=null,gbOff=null,gbFor=null,gbSeq=0; // var: guildMirror may run before this line when ?net=local starts during load
 function gbStart(gid){gbStop();if(!GDS||!gid||!GDS.watchBank)return;gbFor=gid;
- const o=[GDS.watchBank(gid,v=>{GBK=v&&typeof v==='object'?{in:+v.in||0,s:+v.s||0}:{in:0,s:0};}),GDS.watchBuild(gid,v=>{GBL=v&&typeof v==='object'?v:{};guildMirrorB();}),GDS.watchLog(gid,v=>{GBLOG=v&&typeof v==='object'?v:{};})];
+ const o=[GDS.watchBank(gid,v=>{GBK=v&&typeof v==='object'?{in:+v.in||0,s:+v.s||0}:{in:0,s:0};}),GDS.watchBuild(gid,v=>{GBL=v&&typeof v==='object'?v:{};guildMirrorB();}),...(GDS.watchRes?[GDS.watchRes(gid,v=>{GRL=typeof v==='number'?v:0;guildMirrorR();})]:[]),GDS.watchLog(gid,v=>{GBLOG=v&&typeof v==='object'?v:{};})];
  gbOff=()=>o.forEach(f=>{try{f();}catch(e){}});}
-function gbStop(){if(gbOff)gbOff();gbOff=null;GBK=GBL=GBLOG=null;gbFor=null;}
+function gbStop(){if(gbOff)gbOff();gbOff=null;GBK=GBL=GBLOG=null;GRL=null;gbFor=null;}
 function gbLv(b){const g=myG();return g&&g.online&&g.bld?Math.max(0,Math.min(3,g.bld[b]|0)):0;}
-function gbB(k){let n=0;for(const b in GB)if(GB[b].k===k)n+=gbLv(b)*GB[b].v;return n*(1+secB('gb'));}
+function gbB(k){let n=0;for(const b in GB)if(GB[b].k===k)n+=gbLv(b)*GB[b].v;return n*(1+secB('gb'))+grB(k);}   /* + the guild's research (plan U237) */
 // the buildings into the mirrored guild (what gXPB, gGoldB and crafting read); a level that went up is told
 function guildMirrorB(){const g=myG();if(!g||!g.online||!GBL)return;const was=g.bld||null;g.bld={};
  for(const b in GB){const l=Math.max(0,Math.min(3,GBL[b]|0));g.bld[b]=l;if(was&&l>(was[b]|0))toast(t('gbBuilt',{b:t('gb_'+b),l}),'good');}hudDirty=true;}
@@ -18041,12 +18042,35 @@ function gbBuild(b,tries){tries=tries|0;if(!GDS||!GUILD)return;const st=GUILD.st
  GDS.build(st.gid,NET.uid,netId||S.look.n,b,l+1,cost,gbLid()).then(()=>{SFX.level();},e=>{if(tries<2&&gbFail(e))setTimeout(()=>gbBuild(b,tries+1),300);else toast(t('gdFail'),'warn');});}
 function guildBldD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const st=GUILD.state(),k=GBK||{in:0,s:0},have=k.in-k.s,boss=gCan('spend');
  const L=[t('gbH',{g:have.toLocaleString()})];for(const b in GB){const l=gbLv(b);L.push(t('gbRow',{ic:GB[b].ic,b:t('gb_'+b),l,e:Math.round(l*GB[b].v*100),w:t('gbE_'+b),nx:l<3?t('gbNext',{g:GB_COST[l].toLocaleString()}):t('gbMax')}));}
- const log=Object.values(GBLOG||{}).filter(x=>x&&typeof x.t==='number').sort((a,b)=>b.t-a.t).slice(0,5).map(x=>{const n=Satisfy.chat.clean(x.n,24)||'?';return x.k==='build'&&GB[x.b]?t('gbLogB',{n,b:t('gb_'+x.b),l:x.l|0}):t('gbLogG',{n,g:(x.g|0).toLocaleString()});});
+ const log=Object.values(GBLOG||{}).filter(x=>x&&typeof x.t==='number').sort((a,b)=>b.t-a.t).slice(0,5).map(x=>{const n=Satisfy.chat.clean(x.n,24)||'?';return x.k==='build'&&GB[x.b]?t('gbLogB',{n,b:t('gb_'+x.b),l:x.l|0}):x.k==='res'&&GRS.some(r=>r[0]===x.b)?t('grLog',{n,b:t('gr_'+x.b)}):t('gbLogG',{n,g:(x.g|0).toLocaleString()});});
  if(log.length)L.push(log.join(' · '));
  const o=GB_GIVE.filter(g=>S.gold>=g).map(g=>({l:t('gbGive',{g:g.toLocaleString()}),f:()=>{gbGive(g);setTimeout(guildBldD,700);}}));
  if(boss)for(const b in GB){const l=gbLv(b);if(l<3)o.push({l:t('gbBuild',{b:t('gb_'+b),l:l+1,g:GB_COST[l].toLocaleString()}),poor:have<GB_COST[l],f:()=>{gbBuild(b);setTimeout(guildBldD,700);}});}
  dialog('guild',L,null,[...o,{l:t('oBack'),f:guildPanel}]);}
 window.__GBD={fb:()=>FB,store:()=>GDS,give:g=>gbGive(g),build:b=>gbBuild(b),bank:()=>GBK,lv:b=>gbLv(b),xpB:()=>gXPB(),goldB:()=>gGoldB(),q:()=>gbB('q'),open:()=>guildBldD(),log:()=>GBLOG}; // tests
+/* (plan U237) the guild research tree: nine nodes in three branches, bought from the treasury by those who may spend it
+   (as the buildings), each once, each after the one before it in its branch. guildResearch/{gid} holds them as bits; the
+   rules take a node's cost from the treasury in the same write and check the node before it. Every member's game applies
+   its guild's research: experience and gold from monsters and crafting quality (through gbB, beside the buildings), max
+   health, defence, and life skills' experience. G -> Research */
+Object.assign(STR.ar,{gdRes:'الأبحاث ({n}/{m})',grH:'أبحاث الجيلد بتتدفع من الخزينة ({g} دهب). كل فرع بيتفتح بالترتيب، واللي يقدر يصرف من الخزينة هو اللي يشتري',gr_grx1:'كتيبات التدريب',gr_grh:'تدريبات التحمل',gr_grx2:'كلية الحرب',gr_grg1:'دفاتر الحسابات',gr_grd:'مخزن السلاح',gr_grg2:'ميثاق التجارة',gr_grq1:'حجارة السن',gr_grl:'أدلة الحقول',gr_grq2:'روائع الصنعة',grE_xp:'خبرة',grE_gd:'دهب من الوحوش',grE_q:'جودة الصناعة',grE_hp:'صحة',grE_def:'دفاع',grE_lf:'خبرة مهارات الحياة',grRow:'{ic} {b}: +{e}% {w} · {st}',grDone:'✓ اتعمل',grCost:'{g} دهب',grNeeds:'محتاج {b} الأول',grBuy:'ابحث {b} ({g} دهب)',grGot:'الجيلد خلّص بحث {b}!',grLog:'{n} بحث {b}'});
+Object.assign(STR.en,{gdRes:'Research ({n}/{m})',grH:'Guild research is paid from the treasury ({g} gold). Each branch opens in order; whoever may spend the treasury buys',gr_grx1:'Training Manuals',gr_grh:'Endurance Drills',gr_grx2:'War College',gr_grg1:'Ledgers',gr_grd:'Armoury',gr_grg2:'Trade Charter',gr_grq1:'Whetstones',gr_grl:'Field Guides',gr_grq2:'Masterworks',grE_xp:'experience',grE_gd:'gold from monsters',grE_q:'crafting quality',grE_hp:'max health',grE_def:'defence',grE_lf:"life skills' experience",grRow:'{ic} {b}: +{e}% {w} · {st}',grDone:'✓ done',grCost:'{g} gold',grNeeds:'needs {b} first',grBuy:'Research {b} ({g} gold)',grGot:'The guild finished researching {b}!',grLog:'{n} researched {b}'});
+var GRS=[['grx1','📖','xp',.02,1e5,-1],['grg1','📒','gd',.02,1e5,-1],['grq1','🪨','q',.01,1e5,-1],['grh','💪','hp',.03,25e4,0],['grd','🛡','def',.03,25e4,1],['grl','🌿','lf',.1,25e4,2],['grx2','🏛','xp',.03,6e5,3],['grg2','📜','gd',.03,6e5,4],['grq2','⚒','q',.02,6e5,5]];   // [id, icon, what, how much, cost, the node before it]; a node is bit i (the rules' order)
+var GRL=null;   // var: guildMirrorR may run before this line, as the buildings' (gbStart)
+function grHas(m,i){return Math.floor((m|0)/2**i)%2===1;}
+function grM(){let g=null;try{g=myG();}catch(e){}return g&&g.online?g.res|0:0;}   /* declarations: maxHP and defV may ask before this line runs */
+function grB(k){const m=grM();if(!m||typeof GRS==='undefined'||!GRS)return 0;let n=0;GRS.forEach(([,,w,v],i)=>{if(w===k&&grHas(m,i))n+=v;});return n;}
+// the research into the mirrored guild (what grB reads); a node finished is told
+function guildMirrorR(){const g=myG();if(!g||!g.online||GRL==null)return;const was=g.res,m=Math.max(0,Math.min(511,GRL|0));if(was===m)return;g.res=m;
+ if(was!=null)GRS.forEach(([id],i)=>{if(grHas(m,i)&&!grHas(was,i))toast(t('grGot',{b:t('gr_'+id)}),'good');});hudDirty=true;}
+function grBuy(i,tries){tries=tries|0;if(!GDS||!GUILD||!GDS.research||!GRS[i])return;const st=GUILD.state(),m=grM(),[id,,,,c,req]=GRS[i];if(!st.gid||grHas(m,i)||req>=0&&!grHas(m,req)||!gCan('spend'))return;const k=GBK||{in:0,s:0};
+ if(k.in-k.s<c){toast(t('gbPoor'),'warn');return;}
+ GDS.research(st.gid,NET.uid,netId||S.look.n,id,i,c,gbLid()).then(()=>{SFX.level();},e=>{if(tries<2&&gbFail(e))setTimeout(()=>grBuy(i,tries+1),300);else toast(t('gdFail'),'warn');});}
+function guildResD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const k=GBK||{in:0,s:0},have=k.in-k.s,m=grM(),boss=gCan('spend');
+ const L=[t('grH',{g:have.toLocaleString()}),GRS.map(([id,ic,w,v,c,req],i)=>t('grRow',{ic,b:t('gr_'+id),e:Math.round(v*100),w:t('grE_'+w),st:grHas(m,i)?t('grDone'):req>=0&&!grHas(m,req)?t('grNeeds',{b:t('gr_'+GRS[req][0])}):t('grCost',{g:c.toLocaleString()})})).join('\n')];
+ const o=[];if(boss)GRS.forEach(([id,,,,c,req],i)=>{if(!grHas(m,i)&&(req<0||grHas(m,req)))o.push({l:t('grBuy',{b:t('gr_'+id),g:c.toLocaleString()}),poor:have<c,f:()=>{grBuy(i);setTimeout(guildResD,700);}});});
+ dialog('guild',L,null,[...o,{l:t('oBack'),f:guildPanel}]);}
+window.__GGR={GRS,b:k=>grB(k),m:()=>grM(),buy:i=>grBuy(i),open:()=>guildResD(),hp:()=>maxHP(),def:()=>defV(),life:(k,n)=>lifeXP(k,n)}; // tests
 function guildVaultD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const V=GUILD.vault(),ks=Object.keys(V).sort((a,b)=>V[b].t-V[a].t);
  const o=ks.slice(0,24).map(k=>{const e=V[k],can=GUILD.canTake(k);return {l:vaultName(e)+' · '+e.byN,ic:e.k,poor:!can,f:()=>can?dialog('guild',[t('gdTakeQ',{it:vaultName(e)})],null,[{l:t('gYes'),f:()=>guildTake(k)},{l:t('gNo'),f:guildVaultD}]):guildVaultD()};});
  dialog('guild',[t('gdVaultH',{n:ks.length,m:Satisfy.guild.C.VAULT_MAX}),ks.length?'':t('gdVaultEmpty')].filter(Boolean),null,[{l:t('gdPut'),f:guildPutD},...o,{l:t('oBack'),f:guildPanel}]);}

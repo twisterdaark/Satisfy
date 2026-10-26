@@ -588,6 +588,21 @@
           return up(u);
         });
       },
+      // plan U237: the research tree guildResearch/{gid} = a whole number, one bit a node (GR's order in the game); a node
+      // bought reads the treasury and the tree and writes both back with it (the rules: one new bit, its prerequisites'
+      // bits already there, its cost added to s), with a log line {k: 'res', b: node, g: cost}
+      watchRes: function (gid, cb) { return watch('guildResearch/' + gid, cb); },
+      research: function (gid, uid, n, node, bit, cost, lid) {
+        return Promise.all([D.get(at('guildBank/' + gid)), D.get(at('guildResearch/' + gid))]).then(function (r) {
+          var v = r[0].val(), m = +r[1].val() || 0; if (!v) throw new Error('empty');
+          if (Math.floor(m / Math.pow(2, bit)) % 2) throw new Error('done');
+          var u = {};
+          u['guildBank/' + gid] = { in: +v.in || 0, s: (+v.s || 0) + cost, lb: v.lb, lg: v.lg, t: SV() };
+          u['guildResearch/' + gid] = m + Math.pow(2, bit);
+          u['guildLog/' + gid + '/' + lid] = { by: uid, n: String(n || '?').slice(0, 24), k: 'res', g: cost, b: node, t: SV() };
+          return up(u);
+        });
+      },
       readGuild: function (gid) { return D.get(at('guilds/' + gid)).then(function (s) { return s.val(); }); },
       readMember: function (gid, uid) { return D.get(at('guildMembers/' + gid + '/' + uid)).then(function (s) { return !!s.val(); }); },
       // SAT-ONLINE-050: the vault; taking writes guildVaultTaken once in the same update, so one player gets a thing
