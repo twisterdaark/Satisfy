@@ -10,6 +10,7 @@
  *   unique and never changes, so the derived iid is the item's stable instance id, and what a
  *   server profile will key the item by (doc: "UID ... becomes legacy id").
  * - Request ids: uuid() (RFC 4122 v4) for every craft/kill/claim request (Satisfy.events).
+ * - Entity ids (plan U311): entity('m'|'n'|'p', key) for monsters, NPCs and players; see below.
  *
  * Firebase keys can't hold . # $ [ ] /, so every id is [a-z0-9_-] only.
  */
@@ -85,8 +86,26 @@
     return got;
   }
 
+  /* Entity ids (plan U311): one scheme for what stands in the world.
+   *   'm:' + the monster's network key (mobKey: kind@x,y, the shape the database rules take, made unique at the
+   *          world's build), the same on every screen and kept through respawns
+   *   'n:' + the NPC's id
+   *   'p:' + the player's network uid ('p:me' offline)
+   * entity(kind, key) builds one and throws on a bad kind or key; parseEntity(id) gives {kind, key} back, or null. */
+  var ENT_RE = /^[mnp]:[A-Za-z0-9_@,:-]{1,96}$/;   // NPC ids and Firebase uids carry upper case; monster keys '@', ',' and '-'
+  function entity(kind, key) {
+    if (kind !== 'm' && kind !== 'n' && kind !== 'p') throw new Error('bad entity kind: ' + kind);
+    if (key == null || key === '') throw new Error('no entity key');
+    var id = kind + ':' + String(key);
+    if (!ENT_RE.test(id)) throw new Error('bad entity key: ' + key);
+    return id;
+  }
+  function parseEntity(id) { return typeof id === 'string' && ENT_RE.test(id) ? { kind: id.charAt(0), key: id.slice(2) } : null; }
+
   var api = {
     uuid: uuid,
+    entity: entity,
+    parseEntity: parseEntity,
     charId: charId,
     itemId: itemId,
     legacyUid: legacyUid,

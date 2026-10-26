@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.52) |
+| | At the count | Now (v3.53) |
 |---|---|---|
-| Done | 233 | 284 |
-| Partly there (something left) | 92 | 46 |
+| Done | 233 | 285 |
+| Partly there (something left) | 92 | 45 |
 | Not started | 11 | 6 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **52** (46 + 6) |
+| **Left to build** | **103** (92 + 11) | **51** (45 + 6) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -34,6 +34,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.48 (batch 12, PR #294, merged by Claude-B after main's v3.47): U141 (the mimic's tell and the trapped chests), U105 (buy and sell contracts); U176 part (the Vampire Lord's branching fight; D3 left).
 - v3.51 (Claude-B): U114 (the Snow Rabbit, rabbit fur), U139 (the Antivenom).
 - v3.52 (Claude-B): U120 (the Frost Slime, the Gold Slime, slimes resist poison).
+- v3.53 (batch 13, PR #296, merged by Claude-B after main's v3.50-v3.52): U311 (every monster's network key its own, one entity id scheme).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -336,7 +337,7 @@ Four rows were set to ✅ by their own PRs (SAT-ONLINE-138: U026/U027; SAT-ONLIN
 | U262 | Market search UI | 🟡 | done (v3.34) | client | Unchanged in main (auction name search only, names escaped). Left: filters by rarity, price and item type in the auction window; the online market is U213's branch v3.32: the auction filters by kind (`auKind`) and a top price each, and sorts by cheapest each, cheapest in all or newest (`auShown`). Rarity doesn't apply: the auction holds materials, books and potions only (`regression/plan5b`). |
 | U308 | Extract state store | 🟡 | part | client | `src/core/state.js` only gains key lists (v3.13–v3.15). Left: route the `S` writes through the store a part at a time |
 | U309 | Extract world generator | 🟡 | part | client | Still inside `index.html` (`regression/worldparity` holds). Left: move it to `src/` |
-| U311 | Entity registry | 🟡 | part | client | `src/core/ids.js` unchanged since 2026-10-20. Left: one id scheme for monsters, NPCs and players, and a test that a respawn never reuses a live id |
+| U311 | Entity registry | 🟡 | done (v3.53) | client | `src/core/ids.js` unchanged since 2026-10-20. Left: one id scheme for monsters, NPCs and players, and a test that a respawn never reuses a live id v3.53: every monster's network key is its own: five pairs of a kind that the spawners' dice put on one tile shared a key, so online a follower saw one of each pair as a ghost; after the world's build the second of a key is renamed in build order a pixel lower (kind@x,y+1: the shape the database rules take, kept unique; `mobKeyDedupe`, the same on every screen), and a respawn keeps its key while local ids only grow. Every key now fits the rules (`mobs/…/m/$k`; the pillars, the warband and Ren's War's bosses by the hotfix v3.50, #295). One scheme for what stands in the world: `Satisfy.ids.entity('m'|'n'|'p', key)` and `parseEntity`, the game's `entId` (the fight log records its boss by it) (`unit/ids`, `regression/plan13`). |
 | U315 | Localization bundles | 🟡 | part | client | `STR.ar`/`STR.en` still in the page (`unit/i18n` guards the keys). Left: extract them into bundle files |
 | U327 | Staging deployment | ⏳ | wait | owner | Needs a second Firebase project; `?emu` covers local tests (U022) |
 | U335 | Content flags | 🟡 | part | client+rules | The `flags` rules allow only `chat`, `trade`, `duel`. Left: packs by region and player group (the season packs already load by date, U307) |

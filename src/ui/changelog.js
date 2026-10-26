@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26plan13', ver: '3.53', d: '2026-10-26',
+      ar: ["أونلاين: كان فيه 5 أزواج وحوش من نفس النوع واقفين على نفس المكان، وكانوا عند أعضاء البارتي وحش واحد (التاني واقف زي الخيال). دلوقتي كل وحش ليه اسمه على الشبكة."],
+      en: ["Online: five pairs of monsters of one kind stood on the same spot and were one monster on party members' screens (the other stood still like a ghost). Every monster now has a name of its own on the network."] },
     { v: '2026-10-26u120', ver: '3.52', d: '2026-10-26',
       ar: ["سلايم التلج: جنب بحيرات الجليد مع عناصر التلج (لفل 200+). بركه بتبرّد بدل ما تحرق، وبيقاوم الميه، والرعد بيكسره.",
         "السلايم الدهبي: واحد بس في المستنقع وسط السلايم الحمضي. مبيأذيش وبيهرب منك زي الأرنب الدهبي، وبيدفع كويس لو مسكته.",
