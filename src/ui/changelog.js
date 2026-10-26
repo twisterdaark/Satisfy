@@ -7,6 +7,16 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26u070', ver: '3.57', d: '2026-10-26',
+      ar: ["أمر قائد الحرب بقى بيوصل للبارتي: اللي في البارتي وقريبين منه (160 بكسل) بيضربوا أقوى 15% وبياخدوا ضرب أقل 10%.",
+        "الأورات اللي بتتراكب من كذا لاعب بقى ليها سقف: الضرر لحد ×1.6 مع بعض، والحماية لحد 30% ضرب أقل. أورات الأساطير نفسها برّه السقف.",
+        "رابط الحارس مبقاش بيشتغل من شريك ميت.",
+        "اختبار جديد لده."],
+      en: ["The War Commander's Order now reaches the party: members near him (160 px) deal 15% more and take 10% less.",
+        "Party auras stacked from several players are now capped: their damage at ×1.6 together, their protection at 30% less damage. A legend's own auras stay outside the cap.",
+        "Guard Link no longer holds from a dead partner.",
+        "A new test for this."],
+      hide: [3] },
     { v: '2026-10-26u127', ver: '3.56', d: '2026-10-26',
       ar: ["عنصر العاصفة: برقه بيضرب أقوى 30% في المطر أو العاصفة (طقس العالم، واحد عند الكل)، وهو بيتحرك أو بينطّ بياخد ضرب أكتر 25%.",
         "اختبار جديد لده."],

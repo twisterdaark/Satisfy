@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.56) |
+| | At the count | Now (v3.57) |
 |---|---|---|
-| Done | 233 | 288 |
-| Partly there (something left) | 92 | 42 |
+| Done | 233 | 289 |
+| Partly there (something left) | 92 | 41 |
 | Not started | 11 | 6 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **48** (42 + 6) |
+| **Left to build** | **103** (92 + 11) | **47** (41 + 6) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -38,6 +38,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.54 (batch 14, PR #297, merged by Claude-B after main's v3.53): U078 (the balance board checks the hybrid against the strongest pure class).
 - v3.55 (Claude-B): U135 (cultists raise skeletons).
 - v3.56 (Claude-B): U127 (the Storm Elemental conducts in the rain, weaker while moving).
+- v3.57 (Claude-B): U070 (the Order reaches the party, party auras capped, Guard Link needs a live partner).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -55,7 +56,7 @@ this plan's earlier copy (header comments "plan U072…" over the new class path
 | U067 | Berserker | done | Trial `c2b` (kills below half health). Rage is the novel's Berserk (v2.21, `bzkK`): from health lost, never from hits, so a dummy gives none; `c2Hurt`/`c2Hit` skip sparring partners. Nit: the 0.5% heal a hit (`c2Hit`) checks `m.spar` but not `m.tdum`, so it still works on the training dummy. `regression/classes2` "Berserker trial" |
 | U068 | Duelist | reject | Not a novel class. Its parry window is everyone's Guard: raised ≤0.12 s (Guardian Knight 0.18) before a blow it parries, stuns the attacker and gives 0.35 s untouchable; raising it again within 0.5 s spoils the timing (`guardOn`, `hurtPlayer0`). PvP has no parry (guard ×0.25); a server-timed one would need Blaze |
 | U069 | Lancer | done | Spear Knight (`c2l`): Thrust and Skewer run along `c2Line`, which stops at the first solid tile (plan C04); Spear Wall. A PvP blow needs line of sight too (`seeL` in `pvpSwing`). `regression/classes2` "Lancer corridor" |
-| U070 | Commander | part | War Commander pack (`warcmd`, Havis ch 1390, `src/content/classpacks.js`), but its Order and Hold the Line are self buffs (`cpFn` 'buff' sets `P.cpb` only). Party auras with a radius exist elsewhere: Guard Link 90 px, Blessing and Judar 120 px (`phNear`), Mercedes' codes 160 px, Sword Field, Morale Boost; they end with a dead source (`phMates` skips `anim==='dead'`) except Guard Link (`glinkNear` has no dead check). Left: Order to the party within a radius, a cap on stacked party buffs (Blessing ×0.9 × Judar ×0.85 … multiply), the dead check in `glinkNear` |
+| U070 | Commander | done (v3.57) | War Commander pack (`warcmd`, Havis ch 1390, `src/content/classpacks.js`), but its Order and Hold the Line are self buffs (`cpFn` 'buff' sets `P.cpb` only). Party auras with a radius exist elsewhere: Guard Link 90 px, Blessing and Judar 120 px (`phNear`), Mercedes' codes 160 px, Sword Field, Morale Boost; they end with a dead source (`phMates` skips `anim==='dead'`) except Guard Link (`glinkNear` has no dead check). Left: Order to the party within a radius, a cap on stacked party buffs (Blessing ×0.9 × Judar ×0.85 … multiply), the dead check in `glinkNear` v3.57: Order reaches party members within 160 px ('O' in the status the party reads: +15% damage, 10% less taken); the party auras' damage bonuses together are capped at ×1.6 and their protection at 30% (`PAUR`, `phAtk`, `phHurt`; Domination and Gaia outside); `glinkNear` skips a dead partner (`regression/u070`). |
 | U071 | Ranger | done | `c2r` (3 caches). Trap at your feet: yours only (local `C2.traps`), 3 at most, 30 s TTL, damage by `hitMon` from you, monsters only; Track: monsters within 400 px for 12 s, never players, the strongest marked +20%; Swift Volley; sees further exploring (`exR`). `regression/classes2` |
 | U072 | Sniper | done | `c2s`: Charged Shot aims 1.2 s standing still along a line stopped by walls; moving or a blow cancels it and nothing fires; Eagle Eye, Steady Aim. `regression/classes3` "Sniper" |
 | U073 | Bowmaster | done | `c2m`: Combo (5 stacks, +4% each), Arrow Chain, Arrow Storm; each arrow keeps its own hit list (`p.hit`), one hit a monster. `regression/classes3` "Bowmaster" |
