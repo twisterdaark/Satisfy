@@ -7,12 +7,12 @@ the rest below.
 
 | | At the count | Now (v3.25) |
 |---|---|---|
-| Done | 233 | 262 |
-| Partly there (something left) | 92 | 63 |
+| Done | 233 | 260 |
+| Partly there (something left) | 92 | 65 |
 | Not started | 11 | 11 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **74** (63 + 11) |
+| **Left to build** | **103** (92 + 11) | **76** (65 + 11) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -24,7 +24,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
     one player's fire is seared on their screen and the host's, not on a third player's. A herb is shared only while it
     stands on the same tile on both screens (a regrown herb moves at random on each). The ready check rides in the party
     chat, so a member's client trusts the leader's line as the chat does.
-- v3.25 (batch 5, PR for Claude-B's review): U285 (salvage), U254 (the map's circles), U257 (the forge's odds), U262 (the auction's filters), U124 (the golem's vein), U190 (Khan's steps), U380 (art provenance); U276 part (moving a gem).
+- v3.25 (batch 5b, PR for Claude-B's review; beside batch 5 on `claude-a/sat-online-256-plan5`, which has U285, U124, U141): U254 (the map's circles), U257 (the forge's odds), U262 (the auction's filters), U190 (Khan's steps), U380 (art provenance); U276 part (moving a gem).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -114,7 +114,7 @@ Checked against `/home/claude/satisfy-aud` at 8a2e4f1e (v3.15). The test files b
 | U121 | Orc raiders | part | Frostlight Orcs `forc` (war cry, charge, potion) and the Orc Chief. Orcs march into Patrian with its invasion (`EVT` `invP`). Wild monsters never engage you in a town; an invasion's do, by design (`m.evt`). Left: a roaming warband in the wild and an orc shield wall (only the Eternal Kingdom's soldiers lock shields: `ersol` ward ally) |
 | U122 | Troll healer | done (v3.21) | Trolls regenerate 2% a second (Troll Lord 1% plus a heal), capped at max HP (`monTick`: `Math.min(m.max, …)`). Left: fire or a disable stopping the regeneration (it runs no matter what hits it) |
 | U123 | Ogre crusher | done (v3.21) | Ogre: a slow telegraphed slam that pulls (ring reach 44, tele .8), a knock-back club, a wall charge. **Bug found:** the ring's hit test is a circle (`monAct`: `d<mv.reach+4`), but `drawTele` draws it 0.58 as tall. Straight above or below the monster, the blow lands outside the red ring: for the ogre, hits up to 48 px against 25 px drawn. That fails the plan's test, and it affects every `ring` move. The rain zones do it right (`ezIn` divides dy by .6) |
-| U124 | Stone Golem | done (v3.25) | The golems (Golem, Crystal Golem with its crystal-armour ward, Bog Golem, Braham's golems, the Stone Sentinel that can't be hurt until you're close) drop ore from one drop table per kill. Left: an ore node left where one falls (nodes are fixed when the world is built) v3.25: a fallen golem (`GOLK`: golem, cgolem, mgolem, ogolem, egolem) leaves an ore vein on its tile for 3 minutes, one dig, shared by tile like any vein (`golemNode`, `golemSweep`; `regression/plan5`). |
+| U124 | Stone Golem | part | The golems (Golem, Crystal Golem with its crystal-armour ward, Bog Golem, Braham's golems, the Stone Sentinel that can't be hurt until you're close) drop ore from one drop table per kill. Left: an ore node left where one falls (nodes are fixed when the world is built) |
 | U125 | Fire Elemental | done | Fire Elemental `felem` (Dran Valley): fire bolts and burning-ground rain with a fire DOT (3 s; it never takes the last HP: `mxTick`). The Red Phoenix breath takes 30% off its fire (`BEL.felem='fire'`, `bthHurt`). Purification clears the DOT (`cls2Clean`), and the 5 s death screen outlasts it. `p3world` |
 | U126 | Ice Elemental | done | Ice Elemental `ielem`: ice bolts slow you, and every hit chills (speed ×0.7 for 1.5 s, `p3Hurt`). Its slam stuns 0.4 s, then 2 s of stun immunity (`hitBy` `sImm`); roots have their own 1.5 s immunity (`mxOn` `rootI`); legends resist. Nothing freezes for good. `p3world` |
 | U127 | Storm Elemental | part | Storm Elemental `selem` around the Storm Temple: blinks, bolt fans, and a bolt stuns 0.25 s with immunity (`p3PHit`). In the temple, lightning strikes where you stand, and the Storm Lord's four rods shield it. Weather comes from the shared clock, so rain costs no bandwidth (`weather2`). Left: conductivity (rain or water making lightning worse) and a weakness when it moves |
@@ -229,7 +229,7 @@ Checked 2026-10-26 against `/home/claude/satisfy-aud` (main @ 8a2e4f1e, v3.15). 
 | U282 | Creator signatures | done (v3.21) | "Made by {n}" (`creBy`, `it.by`) on Creations, kept through a trade (`tradeItemIn` keeps short strings). Missing: it is the name, not a stable creator ID (a rename rewrites it, v2.74), and pieces forged from recipes carry no maker |
 | U283 | Item trade history | done (v3.22) | A per-item trade ledger `tradedItems/{iid}` (latest owner and trade, checked by the rules), the per-player `tradeLog` (U215), and a weapon's last 5 reforges (`rrl`). Missing: an append-only history of an item's owners, shown on its card |
 | U284 | Craft quality analytics | no | Searched `/economy`, `/net`, `/balance` and craft logs: there is no distribution of craft ratings and no alarm on impossible rates |
-| U285 | Salvaging | done (v3.25) | Taking items apart (`invSalv`, `salvYield`: part of what made it, a fee, a chance to fail; `regression/salvage`); a locked piece is refused (`ivLocked`). Missing: the plan's "traded item can't be salvaged" rule v3.25: a piece rebuilt from another player's (`tradeItemIn`: trade, guild vault, a pickup) is marked `tr` by the receiver, and `invSalv` refuses it; its tip says so (`regression/plan5`). |
+| U285 | Salvaging | part | Taking items apart (`invSalv`, `salvYield`: part of what made it, a fee, a chance to fail; `regression/salvage`); a locked piece is refused (`ivLocked`). Missing: the plan's "traded item can't be salvaged" rule |
 | U287 | Wardrobe gallery | done | Layla's outfit tab (`cosMenu`) lists every outfit; owned ones (`S.cos`) can be worn again for free; the rare ones only drop from bosses (`cosDrop`); 3 costumes give a title (`cos3`) (`regression/vanity`, `outfits40`). All drawn in code (sprites-original, ART_CONTRACT), no outside art |
 | U288 | Tavern social hub | done | SAT-ONLINE-193: no attack or skill in an inn's common room, seats, the innkeeper's party board (`regression/tavern`, which names U288); emotes (`regression/emote`) |
 
