@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26saint', ver: '3.13', d: '2026-10-26',
+      ar: ["سيد السيف خد «ابتكار فن السيف» من الرواية (فصل 571-572): بتبتكر تقنيات سيف بتاعتك. بتختار شكل (قطع، عبور، صاعقة، نابين) أو تبدأ زي كراوجل («شق السماء»، «عبور السماء»، «الصاعقة»، «ضربة الناب المزدوج»)، وبتوزّع 30 نقطة على ست عوامل (القوة والمدى والعرض والضربات والسرعة والتوفير)، وتسمّيها، وتبقى سكيل على شريطك بالسيف بس.",
+        "عدد المرات على قد لفل «إتقان السيف الكامل»، وده سلبي جديد بيعلى مع كل ضربة سيف بتصيب (ضرر السيف +2% كل لفل).",
+        "ست مهارات جديدة لسيد السيف: «الجسد كنصل» (دفاع وسرعة +15%، وتحت 30% صحة الكريتيكال الضعف)، و«إتقان السيف المتسامي» (سرعة الهجوم +1% لكل لفل، وكل خامس ضربة سيف موجة حواليك).",
+        "و«رد القمة» (1.2 ثانية الضربة متعملش حاجة وبترد 800% وتشلّ اللي ضربك)، و«قمة القتل» (خط 20 متر 2,500% ضرر ثابت، ومحدش بيعالج نفسه 6 ثواني)، و«ميدان السيف» (15 متر: الأعداء أبطأ، وإنت والفريق ضربكم +25% ومحدش يشلّكم)، و«عاصفة الألف سيف بلا ظل» (مع سيف التحكم: 20 قطعة 300% بتمزّق الدروع)."],
+      en: ["The Sword Saint has Swordsmanship Creation from the novel (ch 571-572): create sword techniques of your own. Pick a form (Split, Pass, Bolt, Fang) or begin as Kraugel did (Splitting the Sky, Passing the Sky, Thunderbolt, Twin Fang Strike), share 30 points over six factors (power, reach, breadth, strikes, swiftness, economy), name it, and it is a skill on your bar, with a sword only.",
+        "As many as Complete Sword Mastery's level: a new passive that rises with every sword strike that lands (sword damage +2% a level).",
+        "Six new Sword Saint skills: Body as a Blade (defence and speed +15%; under 30% health, double critical chance) and Transcendent Sword Mastery (attack speed +1% a level; every fifth sword strike sends a shockwave).",
+        "And Pinnacle Counter (for 1.2 s a blow does nothing and you answer for 800% and a stun), Kill Peak (a 20 m line of 2,500% fixed damage, and no healing for 6 s), Sword Field (15 m: foes slower, you and your party +25% and immune to crowd control) and the Shadowless Thousand Sword Storm (with Control Sword: 20 cuts of 300% that shred armour)."] },
     { v: '2026-10-26mats', ver: '3.12', d: '2026-10-26',
       ar: ["تبويب جديد في الفهرس (N): «🧱 الخامات». كل خامة بتدخل في أي وصفة (السندان، ومجوهرات إليزابيث، والخياطة، والطبخ، والكيميا، و«الإبداع»)، وتجيبها منين، وبتعمل إيه.",
         "«تجيبها منين»: العروق والأعشاب والشجر والمناطق اللي فيها، وأماكن الصيد، وحقل بيارو، والوحوش اللي بتوقّعها (فين بتعيش ولفلها والنسبة، واللي لسه ماقابلتهوش بيفضل ؟؟؟)، وصندوق البوس وأحجار البوسات، والمهمات والاكتشافات، والمحلات والسوق، وفك القطع.",

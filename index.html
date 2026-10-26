@@ -344,7 +344,7 @@ body.gdrag,body.gdrag *{user-select:none!important;cursor:grabbing!important}.gg
 #inv.sell{background:linear-gradient(180deg,rgba(40,34,12,.92),rgba(14,22,40,.95))}#inv.sell .itrash{display:none}
 #auW{width:calc(var(--u)*92);max-width:96vw;max-height:88%;overflow:auto;background:var(--sys2)}#auW .aub{display:grid;grid-template-columns:1fr 1.3fr;gap:calc(var(--u)*1.6)}#auW .auh{opacity:.8;margin-bottom:calc(var(--u)*.4)}#auBag .slotb.sel{outline:2px solid #ffd24a;box-shadow:0 0 calc(var(--u)*.8) rgba(255,210,74,.6)}#auW .igrid{grid-template-columns:repeat(6,1fr);max-height:34vh;overflow-y:auto}#auF{margin-top:calc(var(--u)*.8);padding-top:calc(var(--u)*.8);border-top:1px solid rgba(127,180,255,.25);display:grid;gap:calc(var(--u)*.5)}#auF label{display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*.8)}#auW input{width:calc(var(--u)*12);font:inherit;color:#fff;background:rgba(0,0,0,.35);border:1px solid rgba(143,216,255,.45);padding:calc(var(--u)*.3) calc(var(--u)*.6)}#auQ{width:100%!important;box-sizing:border-box;margin:calc(var(--u)*.5) 0}#auF small,#auL small{opacity:.75}.autabs{display:flex;gap:calc(var(--u)*.5)}.autabs button{width:auto;flex:1}.autabs button.on{background:rgba(143,216,255,.3);box-shadow:inset 0 -2px 0 #8fd8ff}#auL{max-height:44vh;overflow-y:auto}.aurow{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:calc(var(--u)*.8);padding:calc(var(--u)*.35) 0;border-bottom:1px solid rgba(143,216,255,.14)}.aurow img{width:calc(var(--u)*2.6);height:calc(var(--u)*2.6);image-rendering:pixelated}.aurow button,#auF button,#auC button{width:auto;padding:0 calc(var(--u)*1)}.aurow .pr{color:#f2c14e}.aurow.poor .pr{color:#ff8a7a}#auL .none{opacity:.7;padding:calc(var(--u)*1) 0;text-align:center}
 .inote{margin-top:calc(var(--u)*.6);color:var(--muted);font-size:calc(var(--u)*.9);text-align:center;min-height:1em}
-#creW{z-index:70;width:calc(var(--u)*46);max-height:92%;overflow:auto;text-align:center}
+#creW{z-index:70;width:calc(var(--u)*46);max-height:92%;overflow:auto;text-align:center}#swcW{z-index:70;width:calc(var(--u)*48);max-height:92%;overflow:auto;text-align:center}#swcW .cgrid{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.6);justify-content:center;margin:calc(var(--u)*.8) 0}#swcW .cgrid button{max-width:calc(var(--u)*21);white-space:normal}#swcW button.on{border-color:var(--gold);box-shadow:0 0 calc(var(--u)*.5) rgba(242,193,78,.5)}#swcW label{display:flex;align-items:center;gap:calc(var(--u)*.8);justify-content:space-between;margin:calc(var(--u)*.3) 0}#swcW label input{flex:1;min-width:0}#swcW .cst{color:#ffe7a8;margin:calc(var(--u)*.6) 0}#swcW small.sys{display:block;color:#bfe8ff;margin:calc(var(--u)*.4) 0;white-space:pre-line}
 /* Three Crowns, the inn's card game (SAT-ONLINE-181) */
 #cgW{z-index:70;width:calc(var(--u)*52);text-align:center;padding:calc(var(--u)*1.2) calc(var(--u)*1.6)}
 #cgW .cgsc{display:flex;justify-content:space-between;align-items:center;margin:calc(var(--u)*.4) 0;font-weight:700}
@@ -670,6 +670,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
     </div>
 
     <div id="creW" class="sys panel center" hidden></div>
+    <div id="swcW" class="sys panel center" hidden></div>
     <div id="cgW" class="sys panel center" hidden></div>
     <div id="ffW" class="sys" hidden></div>
     <div id="cfmW" class="sys panel center" hidden>
@@ -980,7 +981,7 @@ const SFX={
  buff:()=>[392,523,659].forEach((f,i)=>tone(f,.18,'triangle',.07,40,i*.06)),
  oar:()=>{noise(.22,.07,520,0,.6);noise(.14,.04,1500,.09,.5);}};   // an oar stroke in the water (owner 2026-10-22, boat effects)
 const SKSND={sjust:'holy',djudg:'holy',papbl:'holy',sstep:'power',sbind:'power',cbomb:'fire',mblast:'fire',iharv:'power',splow:'power',ujust:'holy',jhmj:'power',wise:'power',fireball:'fire',bmeteor:'fire',bolt:'zap',bchain:'zap',gflash:'zap',pflash:'zap',tillu:'zap',nova:'frost',bzero:'frost',
- rapid:'bow',pierce:'bow',rain:'bow',larrow:'bow',mcross:'power',mflash:'zap',mwind:'power',mheaven:'holy',sctl:'guardup',scloud:'magic',mheart:'buff',roar:'holy',
+ rapid:'bow',pierce:'bow',rain:'bow',larrow:'bow',mcross:'power',mflash:'zap',mwind:'power',mheaven:'holy',sctl:'guardup',scloud:'magic',mheart:'buff',sspc:'guardup',sskp:'power',ssfield:'holy',ssstorm:'zap',sscre:'buff',roar:'holy',
  strike:'power',smash:'power',kill:'power',wave:'power',revolve:'power',whirl:'power',charge:'power',rcut:'power',
  fort:'guardup',bash:'guardup',taunt:'guardup',nskel:'magic',sbdash:'power',sbrain:'fire',lsslash:'zap',lsstep:'zap',lsstorm:'zap',esboom:'fire',esrune:'magic',eswave:'fire',arel:'zap',aspr:'power',aleg:'buff',agrd:'guardup',asens:'cast',bbear:'buff',bwolf:'buff',beagle:'buff',blion:'buff',btiger:'buff',bleo:'buff',broar:'power',bhalf:'buff',blord:'power',ospite:'cast',oelo:'holy',ndrain:'magic',nexpl:'fire',tstealth:'magic',tsteal:'magic',tknife:'bow',aassn:'power',ashadow:'magic',apoison:'buff',pheal:'holy',pbless:'holy',plight:'holy',pdprot:'guardup',psmite:'power',pjudar:'holy',pdomin:'buff',prebec:'holy',kstance:'guardup',glink:'holy',bfury:'buff',cleave:'power',lstand:'buff',thrust:'power',skewer:'power',swall:'power',track:'buff',trap:'guardup',volley:'bow',rage:'buff',cry:'buff',bcry:'buff',focus:'buff',icomb:'buff',lrep:'buff',qmove:'buff',fly:'buff',
  // owner 2026-10-22: every skill its own kind of sound, no plain cast for the later classes
@@ -3568,7 +3569,7 @@ function phMates(r){if(!NET||!PARTY||!PARTY.id())return [];const pid=PARTY.id();
 function phNear(ch,r){for(const m of phMates(r)){const s=FXS.get(m.sid);if(s&&s.st&&s.st.indexOf(ch)>=0)return true;}return false;}
 // a blow from a monster and a blow on one
 function phHurt(d,src){if(!src||!src.type||src.spar)return d;if(P.ctlU>gTime&&P.ctlS){const s=P.ctlS.find(o=>o.st===0);if(s){d*=.6;if(!src.dead&&!src.ally){s.m=src;s.st=1;}}}if(P.bls>0||phNear('b',120))d*=.9;if(P.jud>0||phNear('j',120))d*=.85;if(P.pdv>0)d*=.6;if(phNear('G',150))d*=.55;return Math.max(1,Math.round(d));}
-function phAtk(m){if(m.spar)return 1;return (S.cls==='saint'||phNear('Q',60)?1.3:phNear('Q',150)?1.1:1)*(P.bls>0||phNear('b',120)?1.1:1)*(P.jud>0||phNear('j',120)?1.1:1)*(P.dom>0?1.25:1)*(phNear('G',150)?1.8:1);}
+function phAtk(m){if(m.spar)return 1;return (P.ssFU>gTime||phNear('W',SSFR)?1.25:1)*(S.cls==='saint'||phNear('Q',60)?1.3:phNear('Q',150)?1.1:1)*(P.bls>0||phNear('b',120)?1.1:1)*(P.jud>0||phNear('j',120)?1.1:1)*(P.dom>0?1.25:1)*(phNear('G',150)?1.8:1);}
 function phHeal(pm){const n=rlHeal(pm);p2Heal(n,phMates(150).length);if(P.stun>0)P.stun=0;for(const m of phMates(150))NET.send('raid.state',{to:m.uid,raid:'p|'+PARTY.id(),k:pm});return n;}
 function phRing(c){fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*20,y:P.y-4,vx:(rand()-.5)*14,vy:-26-rand()*16,t:.7,c,fl:1});}
 function phHoly(mul,r,o){let n=0;for(const m of mons){if(m.dead)continue;const d=Math.hypot(m.x-P.x,monY(m)-(P.y-6));if(d<r+MT[m.type].r&&hitMon(m,mul*(HOLYX.has(m.type)?2:1),{skill:1,...(o||{})}))n++;}return n;}
@@ -4911,6 +4912,14 @@ const P2ICO={
  wlrot:p=>{p(6,2,4,4,'#7ad04a');p(4,6,8,6,'#5a8a3a');p(6,8,1,1,'#fff');p(9,9,1,1,'#fff');p(7,12,2,2,'#7ad04a');},
  wlsiph:p=>{p(3,6,4,4,'#7ad04a');p(9,6,4,4,'#ff6a7a');p(7,7,2,2,'#fff');},
  ssaura:p=>{p(7,2,2,12,'#e8f4ff');p(4,11,8,2,'#c8a070');for(let i=0;i<8;i++)p(7+Math.cos(i*.79)*6|0,7+Math.sin(i*.79)*6|0,1,1,'#bfe0ff');},
+ sscre:p=>{p(7,1,2,10,'#e8f4ff');p(4,11,8,2,'#c8a070');p(2,3,3,1,'#ffe7a8');p(11,5,3,1,'#ffe7a8');p(3,8,2,1,'#ffe7a8');p(12,9,2,1,'#ffe7a8');},
+ sscsm:p=>{p(3,2,2,10,'#bfe0ff');p(7,1,2,11,'#e8f4ff');p(11,2,2,10,'#bfe0ff');p(2,12,12,2,'#c8a070');},
+ ssblade:p=>{p(7,1,2,11,'#e8f4ff');p(5,4,6,7,'#5a8ab8');p(7,4,2,7,'#cfe8ff');p(4,12,8,2,'#c8a070');},
+ sstsm:p=>{p(3,3,2,10,'#e8f4ff');p(7,2,2,11,'#ffffff');p(11,3,2,10,'#e8f4ff');p(2,12,12,2,'#c8a070');p(6,0,4,2,'#ffd24a');},
+ sspc:p=>{p(2,7,12,2,'#e8f4ff');p(7,2,2,12,'#9fd8ff');p(4,4,8,8,'#ffffff');p(6,6,4,4,'#101a33');},
+ sskp:p=>{p(1,8,14,1,'#ff9a9a');p(1,7,14,1,'#ffffff');p(11,4,3,8,'#ff5a5a');p(2,6,2,4,'#c8a070');},
+ ssfield:p=>{for(let i=0;i<12;i++)p(7+Math.cos(i*.52)*6|0,8+Math.sin(i*.52)*4|0,1,1,'#9fd8ff');p(7,3,2,9,'#e8f4ff');p(5,11,6,1,'#c8a070');},
+ ssstorm:p=>{for(let i=0;i<6;i++){const a=i*1.047;p(7+Math.cos(a)*5|0,7+Math.sin(a)*5|0,2,2,'#e8f4ff');}p(6,6,4,4,'#bfe0ff');p(7,7,2,2,'#ffffff');},
  sctl:p=>{p(10,1,2,9,'#e8f4ff');p(8,10,6,2,'#c8a070');p(10,12,2,2,'#7a5634');p(2,6,5,1,'#9fd8ff');p(2,9,4,1,'#9fd8ff');p(3,12,5,1,'#9fd8ff');},
  scloud:p=>{p(2,7,12,4,'#5ab8ff');p(4,5,5,3,'#bfe0ff');p(9,4,4,4,'#bfe0ff');p(3,11,10,1,'#fff');},
  mheart:p=>{p(4,4,3,3,'#ffd24a');p(9,4,3,3,'#ffd24a');p(4,7,8,3,'#ffd24a');p(6,10,4,2,'#ffd24a');p(7,12,2,1,'#ffd24a');p(5,5,1,1,'#fff');},
@@ -6764,7 +6773,7 @@ function dmgMult(){return (1+cpStat('atk'))*(1+ttB('dmg'))*(1+achB('dmg'))*(1+st
 // slightly faster attacks with that kind (level 1 at 15 hits, 10 at 1500, capped at 50)
 const mastLv=k=>Math.min(50,Math.floor(Math.sqrt(((S.mast||{})[k]||0)/15)));
 function trainMast(){const k=weapKind();S.mast=S.mast||{};const was=mastLv(k);S.mast[k]=(S.mast[k]||0)+1;const now=mastLv(k);if(now>was){toast(t('mastUp',{w:t('wk_'+k),n:now}),'good');SFX.level();}}
-function atkCD(){return (blNear()?1.25:1)*(auOn()?.3:weapon().spd)*hcAcd()*(1-Math.min(.35,stat('agi')*.0012))*(P.rage>0?.75:1)*(1-mastLv(weapKind())*.003)*(1-Math.min(.25,gearSum('as')))*(1-(P.gale||0)*.01)*(1-(P.qf||0)*.005)*(P.qm>0?.85:1)*(S.bh&&S.bh.wm?.99:1)*(S.cls==='tzudan'&&pasOn('tzweap')?.85:1)*(P&&P.kyGU>gTime?.67:1)/(1+bzkK()[1]);}
+function atkCD(){return (blNear()?1.25:1)*(auOn()?.3:weapon().spd)*hcAcd()*(1-Math.min(.35,stat('agi')*.0012))*(P.rage>0?.75:1)*(1-mastLv(weapKind())*.003)*(1-Math.min(.25,gearSum('as')))*(1-(P.gale||0)*.01)*(1-(P.qf||0)*.005)*(P.qm>0?.85:1)*(S.bh&&S.bh.wm?.99:1)*(S.cls==='tzudan'&&pasOn('tzweap')?.85:1)*(P&&P.kyGU>gTime?.67:1)/(1+bzkK()[1])/(1+ssAs());}
 // damage vs a higher-level monster falls off with the gap but never below 12%, so a big gap is a slow fight, not an immune wall
 // owner 2026-10-22: a Lv 1 killed a Lv 130 monster. Up to 50 levels above you, you still do at least 35%; past that the
 // floor falls fast, to 2% at 100 levels and more
@@ -6826,7 +6835,7 @@ function wear(i,p){p*=1-secB('wear');if(i&&i.slot==='w')p*=1-.05*edrLv(i);   /* 
  else if(i.dur===10||i.dur===5){announce(t('durCrit',{it:inm(i),n:i.dur}),1);SFX.deny();}
  else if(i.dur<=20&&gTime>durRemT){durRemT=gTime+40;toast(t('lowDur',{it:inm(i),n:i.dur}),'warn');}}
 function atkV(){return Math.round(iAtk(weapon())*dmgMult()*(P&&P.icb>0?icbM():1));}
-function defV(){let d=setBon('def')+cosB('def');for(const sl of GEAR){const i=eqIt(sl);if(i)d+=iDef(i);}return Math.round((1+cpStat('def'))*(d+Math.floor(stat('sta')*.15))*(P&&P.icb>0?icbM():1)*(1+setBon('dfp'))*(tlOn('oath')?1.05:1)*(S&&S.cls2==='sfarm'?1.1:1)*(S&&S.cls==='lknight'?1.2:1)*(P&&P.lkRU>gTime?1.3:1)*(patOn()?3:1));}
+function defV(){let d=setBon('def')+cosB('def');for(const sl of GEAR){const i=eqIt(sl);if(i)d+=iDef(i);}return Math.round((1+cpStat('def'))*(d+Math.floor(stat('sta')*.15))*(P&&P.icb>0?icbM():1)*(1+setBon('dfp'))*(tlOn('oath')?1.05:1)*(S&&S.cls2==='sfarm'?1.1:1)*(S&&S.cls==='lknight'?1.2:1)*(P&&P.lkRU>gTime?1.3:1)*(patOn()?3:1)*(1+ssBl()));}
 // spawns read the world as generated (GM0), not this player's copy with its chopped trees and stumps, so every
 // client places the same monsters at the same spots and shared monsters line up (owner report: half stayed local)
 let GM0=null;const at0=(x,y)=>(x<0||y<-YO||x>=GW||y>=MH)?CW:GM0[(y+YO)*GW+x],sol0=(x,y)=>SOLID[at0(x,y)]===1;
@@ -6928,7 +6937,7 @@ function load(){const r=STORE.read(),SCH=Satisfy.storage.SCHEMA;
  if(S.wv<3){S.wv=3;if(P.y>=OWH*TS)P.y+=SR*TS;}   // SAT-WORLD-003: the south took rows OWH..WMH-1, interiors and caves moved down SR rows
  if(S.wv<4){S.wv=4;if(P.y>=OS*TS)P.y+=(WMH-OS)*TS;}   // the map doubled: the far south took rows OS..WMH-1, interiors and caves moved down again
  S.bqa=S.bqa||{};for(const id in S.bqa)regBQ(S.bqa[id]);for(const id in S.adqa||{})regAD(S.adqa[id]);(S.bq||[]).forEach(regBQ);if(S.cls==='pagma'&&!S.pgMur&&S.qs.pg1&&(S.qs.pg1.c>=1||S.qs.pg1.st===2))S.pgMur=1;if(S.natR){const T=TOWNS.find(T=>T.k===S.natR)||TOWNS[1];P.x=T.rx*TS+8;P.y=T.ry*TS+10;delete S.natR;S.natJ=null;}if(S.tl&&S.tl.fking&&!S.king){delete S.tl.fking;if(S.title==='fking')S.title='';if(S.ach)delete S.ach.king;}if(isLeg()&&!S.lgfix){S.lgfix=1;S.bonus=0;S.got={};}if(!S.wpfix){S.wpfix=1;S.items.forEach(i=>{if(i.slot==='w'&&i.r>=2&&!i.wp)i.wp=wpRoll(i.r,i);});}
- if(!S.wpfix2){S.wpfix2=1;S.items.forEach(i=>{if(i.slot!=='w'||!i.wp)return;i.wp=i.wp.map(p=>p.k==='shock'&&!wpThunder(i)?Object.assign(wpOne(Math.max(2,i.r||0),i.wp.map(x=>x.k),i),p.h?{h:1}:{}):p.k==='dbl'&&!p.n?{...p,n:1+(rand()*wpDblMax(i)|0)}:p);});}gearFit();if(!isSm()){S.bonus=0;S.got={};S.patience=0;if(S.tl.smith){delete S.tl.smith;if(S.title==='smith')S.title='';}}S.vis=S.vis||{zWin:1};buildMe(S.look);Satisfy.ids.ensure(S);DEVT.reset();return true;}catch(e){STORE.backup('corrupt',r.raw);return false;}}
+ if(!S.wpfix2){S.wpfix2=1;S.items.forEach(i=>{if(i.slot!=='w'||!i.wp)return;i.wp=i.wp.map(p=>p.k==='shock'&&!wpThunder(i)?Object.assign(wpOne(Math.max(2,i.r||0),i.wp.map(x=>x.k),i),p.h?{h:1}:{}):p.k==='dbl'&&!p.n?{...p,n:1+(rand()*wpDblMax(i)|0)}:p);});}gearFit();if(!isSm()){S.bonus=0;S.got={};S.patience=0;if(S.tl.smith){delete S.tl.smith;if(S.title==='smith')S.title='';}}S.vis=S.vis||{zWin:1};buildMe(S.look);Satisfy.ids.ensure(S);DEVT.reset();swcReg();return true;}catch(e){STORE.backup('corrupt',r.raw);return false;}}
 
 /* ---------------- input ---------------- */
 const K={};
@@ -7050,7 +7059,7 @@ function flowNext(m){const F=flowGet(),cx=Math.floor(m.x/TS),cy=Math.floor(m.y/T
  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){if(!a&&!b)continue;const d=flowD(F,cx+a,cy+b);if(d<0||d>=bd)continue;if(a&&b&&(flowD(F,cx+a,cy)<0||flowD(F,cx,cy+b)<0))continue;bd=d;best=[cx+a,cy+b];}return best;}
 // chase: straight at the target while the way is open; when blocked, walk the flow field toward you (or a short grid
 // path when the target is something else) around trees, walls and water
-function chase(m,dx,dy,d,sp,mr,dt){if(m.slowU>gTime)sp*=.5;const ux=dx/d,uy=dy/d;m.pT=(m.pT||0)-dt;
+function chase(m,dx,dy,d,sp,mr,dt){if(m.slowU>gTime)sp*=.5;if(m.sfU>gTime)sp*=.6;const ux=dx/d,uy=dy/d;m.pT=(m.pT||0)-dt;
  if(m.fl){
   if(m.ret||Math.hypot(m.x+dx-P.x,m.y+dy-P.y)>48||m.pT<=0&&(m.pT=.5,lineClear(m,m.x+dx,m.y+dy,mr))){m.fl=0;return chase(m,dx,dy,d,sp,mr,0);}
   const nx=flowNext(m);if(!nx){m.fl=0;const ox=m.x,oy=m.y;move(m,ux*sp*dt,uy*sp*dt,mr);return;}
@@ -7092,16 +7101,16 @@ function tdEnd(){const d=tdDur(),v=tdDps();if(d>=TDMIN&&v>(S.dpsB||0)){S.dpsB=v;
 let TDUI='';function tdUI(){const w=$('tdW');if(!w)return;const on=!!TDM&&mode!=='title';const h=on?`${t('tdummy')} · ${tdDur().toFixed(1)} s · ${t('tdDmg')} <b>${TDM.dmg.toLocaleString('en')}</b> · DPS <b>${tdDps().toLocaleString('en')}</b> · ${t('tdHits',{n:TDM.hits,c:TDM.crits})}${S.dpsB?` <small>· ${t('tdBestL',{n:S.dpsB.toLocaleString('en')})}</small>`:''}`:'';
  if(h!==TDUI){TDUI=h;w.innerHTML=h;w.hidden=!on;}}
 window.__GTD={tick:dt=>tdTick(dt),hit:(m,d,c)=>tdHit(m,d,c),end:()=>tdEnd(),get M(){return TDM},dps:()=>tdDps(),dur:()=>tdDur(),TDSPOT,TDR,TDIDLE,TDMIN,ui:()=>$('tdW').textContent,shared:m=>mobOk(m),solid:(x,y)=>solidT(x,y)}; // tests
-function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}if(OGB&&OGB[m.type]&&ogImm(m,o))return 0;
- if(m.type==='kraugel'&&!m.st&&!(P.bdetU>gTime)&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
+function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(!o.pure&&brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(!o.pure&&m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}if(!o.pure&&OGB&&OGB[m.type]&&ogImm(m,o))return 0;
+ if(!o.pure&&m.type==='kraugel'&&!m.st&&!(P.bdetU>gTime)&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
  if(o.skill&&!o.spr&&P.sprW>gTime)bzSpray(m,mul); // Braham's Magic Spray
- let dmg=(o.aura?auAtkV():atkV())*mul*(o.skill&&P.cohW>gTime?3:1)*(o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv))*(.9+rand()*.2)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*eaAtk()*vtAtk(m)*(m.wardT>gTime?m.wardR||.4:1),crit=rand()<Math.min(.5,.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0));if(crit)dmg*=1.8*ttCdm();dmg*=rlAtk(m);let burn=false;const w=weapon();
+ let dmg=(o.aura?auAtkV():atkV())*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<Math.min(ssLow()?.9:.5,(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)));if(crit)dmg*=1.8*ttCdm();dmg*=rlAtk(m);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
- if(o.skill&&!o.dot&&SKC&&gTime-SKC.t<2.5){if((SKC.h=(SKC.h||0)+1)<=3&&!m.tdum)skUse(SKC.k,1);const L=skLv(SKC.k);if(skKind(SKC.k)==='atk'){dmg*=skDm(SKC.k);if(L>=5&&!crit&&rand()<.1){crit=true;dmg*=1.8;}if(L>=10&&!m.bl)m.bl={t:3,n:0};}}
+ if(o.skill&&!o.dot&&SKC&&gTime-SKC.t<2.5){if((SKC.h=(SKC.h||0)+1)<=3&&!m.tdum)skUse(SKC.k,1);const L=skLv(SKC.k);if(skKind(SKC.k)==='atk'){dmg*=skDm(SKC.k);if(L>=5&&!crit&&!o.pure&&rand()<.1){crit=true;dmg*=1.8;}if(L>=10&&!m.bl)m.bl={t:3,n:0};}}
  dmg=ipHit(m,dmg,crit,o);if(o.skill&&tlOn('duke'))dmg*=1.15;if(o.skill&&S.cls2==='bomb')dmg*=1.15;sc2Hit(m,o);if(o.skill&&S.cls==='braham'&&S.sk.bcont&&rand()<Math.min(.75,.3+.05*(skLv('bcont')-1))){dmg*=1.3;if(!o.dot&&rand()<.3)numPK(-30,'bcAmp','#d8c0ff',false);}dmg*=1+pasGen();if(P.shwU>gTime)dmg*=saEvil(m)?1.5:1.2;dmg=tzHit(m,dmg,o);if(!o.dot)kyArc(m);if(o.skill&&S.cls==='mumud'&&pasOn('mmreint'))dmg*=1+.15*pasM('mmreint');if(m.tw===1)twHit(m,crit,o);if(m.type==='gcrown'&&m.bh&&!crit&&!o.skill)dmg=1;if(o.skill&&S.bh&&S.bh.mm)dmg*=1.03;if(tlOn('hking')&&HKV.has(m.type))dmg*=1.15;dmg=ttHit(m,dmg,crit);
- let mblk=false;if(AIK[m.type]==='soldier'&&!m.tdum&&!o.skill&&!o.aura&&!(P.bdetU>gTime)&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
+ let mblk=false;if(AIK[m.type]==='soldier'&&!o.pure&&!m.tdum&&!o.skill&&!o.aura&&!(P.bdetU>gTime)&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
   mblk=true;dmg*=.2;crit=false;burn=false;m.grdT=.6;m.cd=Math.min(m.cd,.15);vfx('block',m.x+m.face*7,my-2,{angle:m.face>0?Math.PI:0});num(m.x,my-20,t('mBlock'),'#9fc8ff',false);SFX.hit();}
  dmg+=cpErode(m,o);dmg=Math.max(1,Math.round(dmg));if(!Number.isFinite(dmg))dmg=1;dmg=blRefl(m,dmg);if(OGB&&OGB[m.type])dmg=ogDmg(m,dmg,o);if(!m.tdum)ttRec(dmg);m.hp-=dmg;if(m.tdum)tdHit(m,dmg,crit);m.myd=(m.myd||0)+dmg;m.myT=gTime;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;if(!m.tdum)trainMast();if(!o.chain&&wearT!==gTime&&!m.tdum){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
  num(m.x,my-8,String(dmg),crit||burn?'#ffd24a':'#ffffff',crit||burn);
@@ -7110,7 +7119,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(brImm(m)){num(m.x,m
  if(burn&&!S.burnSeen){S.burnSeen=1;toast(t('burn'),'good');}else if(burn)num(m.x,my-18,lang==='ar'?'لهب!':'FLAME','#ff9a2a',false);
  c2Hit(m,o);p2Hit(m,o);p3Hit(m,dmg);rgHit(m,o);hcHit(m,o);fbHit(m,o);brHit(m,dmg);cpHit(m,dmg);epHit(m);if(!netHit(m,dmg)&&m.hp<=0)killMon(m);return crit||burn?2:1;}
 function tryAttack(ax,ay,mul){if(tavNoFight())return;spwOff();
- if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=atkCD();pressKey('kA');if(DUEL)duelSwing(ax,ay,mul,k);if(PVP)pvpSwing(ax,ay,mul,k);
+ if(P.acd>0||P.dash>0||P.stun>0||P.guard)return;const k=weapKind();P.acd=Math.max(.1,atkCD());pressKey('kA');/* (v3.13) ten swings a second at most: past that the frame rate decided */if(DUEL)duelSwing(ax,ay,mul,k);if(PVP)pvpSwing(ax,ay,mul,k);
  if(Math.abs(ax)>Math.abs(ay))P.dir=ax>0?2:3;else P.dir=ay>0?0:1;
  if((k==='bow'||k==='staff')&&!hcMelee()){if(k==='bow'&&ipOn('larrow')){shoot('magic',ax,ay,(mul||1)*1.1,{pierce:1});return;}shoot(k==='bow'?'arrow':'magic',ax,ay,mul||1);return;}
  if(P.bmf==='eagle')bmSwoop();
@@ -7119,7 +7128,8 @@ function tryAttack(ax,ay,mul){if(tavNoFight())return;spwOff();
  const rch=auOn()?16:k==='spear'?19:k==='dagger'?10:12,hx=P.x+ax*rch,hy=P.y-6+ay*rch;let res=0;
  for(const m of mons){if(m.dead)continue;if(Math.hypot(m.x-hx,monY(m)-hy)<(k==='spear'?16:14)+MT[m.type].r&&seeP(m))res=Math.max(res,hitMon(m,(mul||1)*(P.mul||1),{kx:ax,ky:ay,aura:auOn()}));}
  if(res)res===2?SFX.crit():SFX.hit();
- else{const tr=vtNear(hx,hy,18).find(tr=>Math.hypot(tr.x-hx,tr.y-8-hy)<18);if(tr&&(chopped.get(tr.k)||0)<=gTime)chop(tr);}
+ if(res&&k==='sword'){ssStrike();swcHit();}
+ else if(!res){const tr=vtNear(hx,hy,18).find(tr=>Math.hypot(tr.x-hx,tr.y-8-hy)<18);if(tr&&(chopped.get(tr.k)||0)<=gTime)chop(tr);}
 }
 // arrows (bow), magic bolts (staff) and fireballs fly as projectiles
 function shoot(kind,ax,ay,mul,o={}){const sp=kind==='arrow'?260:200;proj.push({kind,x:P.x+ax*6,y:P.y-8+ay*6,vx:ax*sp,vy:ay*sp,t:(o.range||(kind==='arrow'?.62:.65))*(kind==='arrow'&&P.sne>0?1.4:1)*(kind==='arrow'&&S.cls==='bowsaint'&&pasOn('bsclair')?1.5:1),mul,pierce:o.pierce,boom:o.boom,stun:o.stun,hit:new Set()});if(kind==='arrow')SFX.bow();else SFX.magic(kind==='fire'?.5:1);}
@@ -7201,7 +7211,7 @@ const HPBAD=window.__NANLOG=[];
 function hpGuardOn(o){for(const k of ['hp','mp','st','food']){let v=o[k];Object.defineProperty(o,k,{enumerable:true,configurable:true,get(){return v;},set(x){if(typeof x==='number'&&isFinite(x)){v=x;return;}
  if(HPBAD.length<8){HPBAD.push(k+'='+x+' '+String(new Error().stack||'').split('\n').slice(2,6).join(' | '));console.warn('P.'+k+' was set to',x,HPBAD[HPBAD.length-1]);}
  if(typeof v!=='number'||!isFinite(v))v=k==='hp'?maxHP():k==='mp'?maxMP():k==='st'?maxST():50;}});}}
-function hurtPlayer0(d,ml,src){P.hitT=gTime;if(P.spw)return 0;if(P.rvU>gTime){pgRevolve(d,src);return 0;}if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(rgEvade(src)||hcEvade(src)||mdEvade(src)||cpEvade()||nvBlock(src))return 0;d=bzShield(d);d=ttShield(d,src);if(d<=0)return 0;d/=1+pasGen();if(P.lkBU>gTime)d*=.3;if(src&&src.type&&lkSee())d*=1-.15*pasM('lkinsight');if(P.kyTU>gTime&&src&&src.type&&!src.dead){d*=.7;hitMon(src,.3,{skill:1,dot:1});}if(src&&src.type&&S.cls==='saintess'&&pasOn('sagrace')&&saEvil(src))d*=1-.2*pasM('sagrace');if(src&&src.dmul)d*=src.dmul;if(src&&src.fury>gTime)d*=1.25;if(src&&src.type)P.lastSrc=src.type;if(tlOn('hking')&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
+function hurtPlayer0(d,ml,src){P.hitT=gTime;if(P.spw)return 0;if(P.rvU>gTime){pgRevolve(d,src);return 0;}if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0)return 0;if(P.ssPc>gTime&&src&&src.type&&TFK!=='tick'&&mons.includes(src)){ssCounter(src);return 0;}if(rgEvade(src)||hcEvade(src)||mdEvade(src)||cpEvade()||nvBlock(src))return 0;d=bzShield(d);d=ttShield(d,src);if(d<=0)return 0;d/=1+pasGen();if(P.lkBU>gTime)d*=.3;if(src&&src.type&&lkSee())d*=1-.15*pasM('lkinsight');if(P.kyTU>gTime&&src&&src.type&&!src.dead){d*=.7;hitMon(src,.3,{skill:1,dot:1});}if(src&&src.type&&S.cls==='saintess'&&pasOn('sagrace')&&saEvil(src))d*=1-.2*pasM('sagrace');if(src&&src.dmul)d*=src.dmul;if(src&&src.fury>gTime)d*=1.25;if(src&&src.type)P.lastSrc=src.type;if(tlOn('hking')&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
  if(P.qm>0&&rand()<.3){numPK(-20,'ipEvade','#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
  d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,3.2)*150/(150+defV())*rlDef(src)));d=p3Hurt(p2Hurt(c2Hurt(d,src),src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=nvHurt(d,src);d=bthHurt(d,src);{const cr=gearSum('cold');if(cr&&P.y<0)d=Math.max(1,Math.round(d*(1-cr)));}d=dmHurt(d,src);d=mbHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
@@ -7234,7 +7244,7 @@ Object.assign(STR.en,{legNoDie:"A legend doesn't die easily. The life force is f
 // every legend resists status conditions (novel ch 182, 297, 778): stuns, paralysis and chills do not take
 function legResist(){if(!isLeg()&&!saImm()&&!mdCand())return false;if(gTime>(P.resT||0)){P.resT=gTime+1.5;num(P.x,P.y-30,t('legResist'),'#ffe08a',false);}return true;}
 Object.assign(STR.ar,{legResist:'[قاومت.]'});Object.assign(STR.en,{legResist:'[You have resisted.]'});
-function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;CKST=null;mdDie();if(BHR)bhDied();if(WCLOSE[mode])WCLOSE[mode]();['inv','statusW','equipW','eqPick','logW','mapW','qdW','mbW','guildW','auW','ixW','updLog','creW','cfmW','forge','pauseScreen','settingsScreen','soundScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});CRE=null;{const gb=$('gnBox');if(gb)gb.remove();}mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
+function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;CKST=null;mdDie();if(BHR)bhDied();if(WCLOSE[mode])WCLOSE[mode]();['inv','statusW','equipW','eqPick','logW','mapW','qdW','mbW','guildW','auW','ixW','updLog','creW','swcW','cfmW','forge','pauseScreen','settingsScreen','soundScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});CRE=null;{const gb=$('gnBox');if(gb)gb.remove();}mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
 // owner 2026-10-22: 1 to 172 took an hour, then 50 hours to 100 was far too long: now about 10 hours of own-level hunting to 100 and 14 to 200, before quests and bonuses (no per-kill cap)
 // owner 2026-10-23 ("I kill a Lv 340 at 339 and take 20% of a level; make it slower"): past level 100 each level asks 2% more
 // for every level above 100, and each advancement passed (101, 201...) another 15%. A foe of your level now gives about 2-3%
@@ -8283,7 +8293,7 @@ function sctlOn(){const n=sctlN();P.ctlU=gTime+SCTLT*skDur('sctl');P.ctlS=[];for
 // the nearest foe in reach, spreading the swords over several foes
 function sctlPick(){let best=null,bd=1e9;for(const m of mons){if(m.dead||m.ally)continue;const d=Math.hypot(m.x-P.x,m.y-P.y);if(d>SCTLR)continue;const k=d+P.ctlS.filter(o=>o.m===m).length*70;if(k<bd){bd=k;best=m;}}return best;}
 function sctlHit(m,s){const f=FXME;FXME=1;try{vfx('slash',m.x,monY(m),{angle:s.a-Math.PI/2,rarity:3});}finally{FXME=f;}hitMon(m,SCTLM,{skill:1});}
-function ssTick(dt){if(!P||!P.ctlS)return;if(!(P.ctlU>gTime)){P.ctlS=null;return;}if(mode!=='play')return;const L=P.ctlS,n=L.length;
+function ssTick(dt){ss2Tick(dt);if(!P||!P.ctlS)return;if(!(P.ctlU>gTime)){P.ctlS=null;return;}if(mode!=='play')return;const L=P.ctlS,n=L.length;
  L.forEach((s,i)=>{const oa=gTime*3+i*6.283/n,ox=P.x+Math.cos(oa)*18,oy=P.y-10+Math.sin(oa)*9;
   if(s.st===0){const k=Math.min(1,dt*12);s.x+=(ox-s.x)*k;s.y+=(oy-s.y)*k;s.a=oa+Math.PI;s.cd-=dt;if(s.cd<=0){const m=sctlPick();if(m){s.m=m;s.st=1;}else s.cd=.2;}return;}
   if(s.st===1){const m=s.m;if(!m||m.dead||Math.hypot(m.x-P.x,m.y-P.y)>SCTLR+60){s.st=2;return;}
@@ -8308,11 +8318,166 @@ function bufTick(dt){if(!P||mode!=='play')return;BUFT-=dt;if(BUFT>0)return;BUFT=
   else fx.push({x:P.x+(rand()-.5)*10,y:P.y-12,vx:0,vy:20,t:.4,c});}}
 function bufEnts(ents){if(!P||!BUFL.length||mode==='dead')return;const c=BUFL[0][0],k=.5+.5*Math.sin(gTime*6);
  ents.push({y:P.y-30,f:()=>{ctx.save();ctx.globalAlpha=.35+.3*k;ctx.strokeStyle=c;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(Math.round(P.x),Math.round(P.y),11+k*2,4+k,0,0,6.283);ctx.stroke();ctx.globalAlpha=.12+.1*k;ctx.fillStyle=c;ctx.fill();ctx.restore();}});}
-function ssEnts(ents){if(!(P&&P.ctlU>gTime&&P.ctlS))return;
+function ssEnts(ents){ss2Ents(ents);if(!(P&&P.ctlU>gTime&&P.ctlS))return;
  for(const s of P.ctlS)ents.push({y:s.st?s.y+10:P.y+(s.y<P.y-10?-1:1),f:()=>{ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));ctx.rotate(s.a);ctx.scale(1.4,1.4);ctx.fillStyle='rgba(120,190,255,.45)';ctx.fillRect(-2,-10,4,14);
   if(s.st===1){ctx.fillStyle='rgba(191,224,255,.35)';ctx.fillRect(-1,3,2,12);}
   ctx.fillStyle='#e8f4ff';ctx.fillRect(-1,-9,2,12);ctx.fillStyle='#ffffff';ctx.fillRect(0,-9,1,10);ctx.fillStyle='#c8a070';ctx.fillRect(-3,3,6,2);ctx.fillStyle='#7a5634';ctx.fillRect(-1,5,2,3);ctx.restore();}});}
 window.__GSS={legWin,ssqOpts,msEnd,wilV,legFoe,get SPAR(){return SPAR}}; // tests
+/* ---------------- The Sword Saint's new arts (v3.13; the owner 2026-10-26, his own design, GAME_ORIGINAL) ----------------
+   Two passives and four skills the owner wrote for the Sword Saint, with his numbers. A metre is a tile (16 px), as the Demon
+   Slayer's 26 m. Body as a Blade: defence and speed +15%; under 30% health the critical chance doubles and half of a raised
+   guard is ignored (the game's monsters have no elemental resistance; a ward is what they raise). Transcendent Sword Mastery:
+   attack speed +1% a character level; every fifth sword strike in a row (2 s between them at most) sends a 5 m shockwave of
+   150%. Pinnacle Counter: 1.2 s in which a blow does nothing and is answered by a spatial slash of 800% that stuns 1.5 s.
+   Kill Peak: 0.8 s, then a 20 m line of 2,500% fixed damage (no level gap, no guard, no immunity, no crit) that leaves the
+   Cleft for 6 s: no healing and no ward. Conqueror of the Mind (Sword Field): 10 s, 15 m round you; foes inside move 40%
+   slower and their attacks come back half as fast; you and your party inside deal 25% more and shrug off crowd control.
+   Shadowless Thousand Sword Storm: with Control Sword's swords out, 20 cuts of 300% over 3 s on a spot, each shredding 5% of
+   the foe's armour (the level gap's toll on your damage), up to all of it, for 10 s. */
+const SSM=16,SSFR=15*SSM,ssPas=k=>!!S&&!!P&&S.cls==='saint'&&pasOn(k);
+const ssBl=()=>ssPas('ssblade')?.15:0,ssLow=()=>ssPas('ssblade')&&P.hp>0&&P.hp<maxHP()*.3,ssWard=r=>ssLow()?1-(1-r)*.5:r;
+const ssAs=()=>ssPas('sstsm')?(S.lv||1)*.01:0;
+const ssShred=m=>m.shredU>gTime&&m.shred>0?(f=>f<1?Math.pow(f,-m.shred):1)(lvF(m.lv)):1;
+let SSN={n:0,t:-9},SSCL=[];
+function ssStrike(){if(!ssPas('sstsm'))return;if(gTime-SSN.t>2)SSN.n=0;SSN.t=gTime;if(++SSN.n<5)return;SSN.n=0;const R=5*SSM;
+ SFX.slam();shake=Math.max(shake,.12);fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.45});vfx('shock',P.x,P.y,{raw:1,radius:R,color:'#cfe8ff'});
+ for(const m of mons){if(m.dead||m.ally)continue;if(Math.hypot(m.x-P.x,monY(m)-(P.y-6))<R+MT[m.type].r)hitMon(m,1.5,{chain:1});}}
+function ssPcOn(){P.ssPc=gTime+1.2;SFX.notice();fx.push({ring:true,x:P.x,y:P.y-6,t:.4});toast(t('ssPcOn'),'good');}
+function ssCounter(src){P.ssPc=0;flash();SFX.crit();shake=.35;num(P.x,P.y-30,t('ssPcHit'),'#e8f4ff',true);
+ const m=src&&src.type&&!src.dead&&mons.includes(src)?src:null;if(!m)return;const a=Math.atan2(monY(m)-(P.y-6),m.x-P.x);
+ for(let i=0;i<10;i++)fx.push({x:P.x+(m.x-P.x)*i/10,y:P.y-6+(monY(m)-P.y+6)*i/10,vx:0,vy:0,t:.25+i*.02,c:i%2?'#bfe0ff':'#ffffff',fl:1});
+ vfx('slash',m.x,monY(m),{angle:a,rarity:4});vfx('xcut',m.x,monY(m),{raw:1,color:'#e8f4ff',big:1.2});hitMon(m,8,{skill:1,stun:1.5});}
+function ssKpOn(){P.ssKp={t:.8,v:fdir()};SFX.notice();toast(t('ssKpCh'));}
+function ssKillPeak(v){const L=Math.max(24,c2Line(v,20*SSM)),x0=P.x,y0=P.y-6,a=Math.atan2(v[1],v[0]);P.acd=0;flash();SFX.slam();SFX.crit();shake=.5;
+ for(let i=0;i<L;i+=8)fx.push({x:x0+v[0]*i,y:y0+v[1]*i,vx:-v[1]*8,vy:v[0]*8,t:.35+i/L*.2,c:i%16?'#ff9a9a':'#ffffff',fl:1});vfx('slash',x0+v[0]*L*.5,y0+v[1]*L*.5,{angle:a,rarity:4});
+ for(const m of mons){if(m.dead||m.ally)continue;const dx=m.x-x0,dy=monY(m)-y0,q=dx*v[0]+dy*v[1];if(q<-6||q>L+MT[m.type].r||Math.abs(dx*v[1]-dy*v[0])>=10+MT[m.type].r*.5)continue;
+  hitMon(m,25,{skill:1,pure:1});if(!m.dead){m.cleftU=gTime+6;m.clHp=m.hp;m.wardT=0;if(!SSCL.includes(m))SSCL.push(m);num(m.x,monY(m)-22,t('ssCleft'),'#ff9a9a',false);}}}
+function ssFdOn(){P.ssFU=gTime+10;SFX.legendary();flash();fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.7});toast(t('ssFdOn'),'good');}
+function ssStOn(){const v=fdir();let best=null,bd=200;for(const m of mons){if(m.dead||m.ally)continue;const dx=m.x-P.x,dy=m.y-P.y,d=Math.hypot(dx,dy);if(d<bd&&dx*v[0]+dy*v[1]>-10){bd=d;best=m;}}
+ P.ssSt={m:best,x:best?best.x:P.x+v[0]*70,y:best?monY(best):P.y-6+v[1]*70,t:0,i:0};SFX.notice();toast(t('ssStOn'),'good');
+ for(const s of P.ctlS||[])s.cd=3.2;}   // the swords leave your side for the storm
+function ssStCut(c){if(c.m&&!c.m.dead){c.x=c.m.x;c.y=monY(c.m);}const a=rand()*6.283,r=26;SFX.swing(1.2);
+ fx.push({bolt:[[c.x+Math.cos(a)*r,c.y+Math.sin(a)*r*.6],[c.x,c.y],[c.x-Math.cos(a)*r*.6,c.y-Math.sin(a)*r*.4]],t:.12,c:'#e8f4ff'});
+ for(const m of mons){if(m.dead||m.ally)continue;if(Math.hypot(m.x-c.x,monY(m)-c.y)>=26+MT[m.type].r)continue;m.shred=Math.min(1,(m.shredU>gTime?m.shred||0:0)+.05);m.shredU=gTime+10;hitMon(m,3,{skill:1,chain:1});}}
+function ss2Tick(dt){if(!P||!S)return;
+ if(P.ssKp){const c=P.ssKp;if(mode!=='play'||P.hp<=0)P.ssKp=null;else if((c.t-=dt)<=0){P.ssKp=null;ssKillPeak(c.v);}}
+ if(P.ssSt){const c=P.ssSt;if(mode!=='play'||P.hp<=0)P.ssSt=null;else{c.t+=dt;while(c.i<20&&c.t>=c.i*.15){c.i++;ssStCut(c);}if(c.i>=20)P.ssSt=null;}}
+ if(P.ssFU>gTime&&!RMO)for(let i=0;i<3;i++){const a=rand()*6.283;fx.push({x:P.x+Math.cos(a)*SSFR,y:P.y+Math.sin(a)*SSFR*.5,vx:0,vy:-18,t:.6,c:rand()<.5?'#cfe8ff':'#9fd8ff',fl:1});}   // the edge of the field
+ if(P.ssFU>gTime)for(const m of mons)if(!m.dead&&!m.ally&&Math.abs(m.x-P.x)<SSFR&&Math.abs(m.y-P.y)<SSFR&&Math.hypot(m.x-P.x,m.y-P.y)<SSFR)m.sfU=gTime+.3;
+ if(SSCL.length)SSCL=SSCL.filter(m=>{if(m.dead||!(m.cleftU>gTime))return false;if(MOBN&&MOBN.host&&NET&&MOBN.host!==NET.uid)return true;   // a monster another player hosts heals on the host's screen (no flicker here)
+  if(m.hp>m.clHp)m.hp=m.clHp;else m.clHp=m.hp;if(m.wardT>gTime)m.wardT=0;return true;});}
+function ss2Ents(ents){if(!P)return;
+ if(P.ssFU>gTime){const k=Math.min(1,(P.ssFU-gTime)/1.5);ents.push({y:P.y+1,f:()=>{ctx.save();ctx.globalAlpha=.05*k;ctx.fillStyle='#5aa8ff';ctx.beginPath();ctx.ellipse(Math.round(P.x),Math.round(P.y),SSFR,SSFR*.5,0,0,6.283);ctx.fill();
+  ctx.globalAlpha=.5*k;ctx.strokeStyle='#cfe8ff';ctx.lineWidth=1.5;ctx.setLineDash([6,5]);ctx.lineDashOffset=-gTime*20;ctx.stroke();ctx.restore();}});}
+ if(P.ssPc>gTime)ents.push({y:P.y+1,f:()=>{ctx.save();ctx.strokeStyle='#ffffff';ctx.globalAlpha=.6+.3*Math.sin(gTime*30);ctx.lineWidth=2;ctx.beginPath();ctx.arc(Math.round(P.x),Math.round(P.y-10),15,0,6.283);ctx.stroke();ctx.restore();}});
+ if(P.ssKp){const c=P.ssKp,L=c2Line(c.v,20*SSM),k=1-c.t/.8;ents.push({y:P.y+1,f:()=>{ctx.save();ctx.strokeStyle=`rgba(255,${90+k*120|0},90,${.3+k*.6})`;ctx.lineWidth=1+k;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(P.x,P.y-6);ctx.lineTo(P.x+c.v[0]*L,P.y-6+c.v[1]*L);ctx.stroke();ctx.restore();}});}}
+/* ---------------- Swordsmanship Creation (v3.13; CANON ch 571-572, the owner's wiki screenshot 2026-10-26) ----------------
+   "You can create new sword techniques. The number of times it can be created will increase every time the level of
+   'Complete Sword Mastery' increases. * The term sword techniques refers to skills that can be used when wearing sword type
+   weapons. * There are six factors that determine the power of the created sword technique. * Passive skills can't be
+   created." Kraugel made Splitting the Sky, Passing the Sky, Thunderbolt (ch 1320) and Twin Fang Strike with it.
+   Here (GAME_ORIGINAL): the skill opens a window; you pick one of four forms (Kraugel's four as their models), share 30
+   points over six factors (power, reach, breadth, strikes, swiftness, economy; 10 at most each), name it and make it. It is a
+   skill of your own on the bar (SKD 'swc_<id>', need a sword), yours alone, for good. You can make as many as Complete Sword
+   Mastery's level: it rises with your sword. */
+const SWCF={split:{k:1.6,r0:60,rs:14,w0:8,ws:2,cd:16,mp:40,col:'#bfe0ff',pre:[8,9,3,2,4,4]},pass:{k:1.4,r0:50,rs:10,w0:10,ws:2,cd:16,mp:40,col:'#e8f4ff',pre:[6,8,4,4,4,4]},
+ bolt:{k:1.5,r0:70,rs:12,w0:14,ws:3,cd:18,mp:45,col:'#fff3a0',pre:[9,6,5,3,3,4]},fang:{k:1.1,r0:22,rs:3,w0:14,ws:3,cd:12,mp:35,col:'#ffd0d0',pre:[7,3,4,8,5,3]}},
+ SWCK=['split','pass','bolt','fang'],SWCB=30,SWCN={split:'swcN_split',pass:'swcN_pass',bolt:'swcN_bolt',fang:'swcN_fang'};
+let SWC=null;
+const swcList=()=>S.swc=S.swc||[],swcMax=()=>S&&S.cls==='saint'&&S.sk&&S.sk.sscsm?skLv('sscsm'):0;
+function swcClose(){if(!SWC&&$('swcW').hidden)return;SWC=null;$('swcW').hidden=true;}
+// what the six factors make: [power, reach, breadth, strikes, swiftness, economy]
+function swcStats(c){const F=SWCF[c.fm],[pw,re,br,hs,sw,ec]=c.f,lv=c.L||1;
+ return {mul:+(F.k*(.6+.12*pw)*(1+.04*(lv-1))).toFixed(2),hits:1+Math.floor(hs/3),r:F.r0+re*F.rs,w:F.w0+br*F.ws,cd:Math.max(4,+(F.cd*(1-sw*.05)).toFixed(1)),mp:Math.max(8,Math.round(F.mp*(1-ec*.06)*(1+(pw+hs)/25)))};}
+function swcDescL(c,L){const st=swcStats(c),T=(k,v)=>{let x=STR[L][k]??STR.en[k];for(const n in v)x=x.split('{'+n+'}').join(v[n]);return x;};
+ return T('swcD_'+c.fm,{m:Math.round(st.mul*100),n:st.hits,r:(st.r/SSM).toFixed(1),w:(st.w/SSM).toFixed(1)})+' '+T('swcNeedS',{});}
+// every technique of this character becomes a skill; another character's are taken away
+function swcReg(){SKDN.t=-1;for(const k of Object.keys(SKD))if(SKD[k].swc&&!(S&&(S.swc||[]).some(c=>'swc_'+c.id===k))){delete SKD[k];delete SKF[k];}
+ if(!S||!Array.isArray(S.swc))return;S.swc=S.swc.filter(c=>c&&typeof c.id==='string'&&/^[a-z0-9]{1,16}$/.test(c.id)&&SWCF[c.fm]&&Array.isArray(c.f)&&c.f.length===6&&c.f.every(x=>Number.isFinite(x)&&x>=0&&x<=10));   // (review) a bad entry is dropped, not the save
+ for(const c of S.swc){c.nm=swcNmOk(c.nm)||'?';const id='swc_'+c.id,st=swcStats(c);SKD[id]={cls:'saint',lv:1,mp:st.mp,cd:st.cd,need:'sword',col:SWCF[c.fm].col,swc:c.id};
+  SKF[id]=()=>swcCast(c);for(const L of ['en','ar']){STR[L]['sk_'+id]=c.nm;STR[L]['skd_'+id]=swcDescL(c,L);}delete ICN['sk_'+id];}
+ SKDN.t=-1;}   // the class skills' cache counts SKD again
+// the cast, by form
+function swcCast(c){const st=swcStats(c),v=fdir(),a=Math.atan2(v[1],v[0]),F=c.fm;P.acd=0;SFX.slam();shake=.25;
+ const inLine=(m,x0,y0,L,W)=>{const dx=m.x-x0,dy=monY(m)-y0,q=dx*v[0]+dy*v[1];return q>-8&&q<L+MT[m.type].r&&Math.abs(dx*v[1]-dy*v[0])<W+MT[m.type].r*.5;};
+ const each=(f)=>{f(0);for(let i=1;i<st.hits;i++)setTimeout(()=>{if(mode!=='play'||!P)return;f(i);},i*120);};   // the first cut at once
+ if(F==='split'){const x0=P.x,y0=P.y-6,L=Math.max(20,c2Line(v,st.r));each(i=>{vfx('crescent',x0+v[0]*L*.5,y0+v[1]*L*.5,{raw:1,angle:a,big:1.6+st.w/30,color:'#cfe8ff'});
+   for(let d=0;d<L;d+=10)fx.push({x:x0+v[0]*d,y:y0+v[1]*d,vx:-v[1]*14,vy:v[0]*14,t:.25+d/L*.15,c:d%20?'#bfe0ff':'#ffffff',fl:1});
+   for(const m of mons)if(!m.dead&&!m.ally&&inLine(m,x0,y0,L,st.w))hitMon(m,st.mul,{skill:1,chain:i>0,kx:v[0],ky:v[1]});});return;}
+ if(F==='pass'){const x0=P.x,y0=P.y,L=Math.max(16,c2Line(v,st.r)-6);P.inv=Math.max(P.inv,.35);SFX.dodge();move(P,v[0]*L,v[1]*L,4);
+   for(let d=0;d<L;d+=8)fx.push({x:x0+v[0]*d,y:y0-8+v[1]*d,vx:0,vy:0,t:.3,c:'rgba(232,244,255,.7)',fl:1});
+   each(i=>{vfx('slash',(x0+P.x)/2,(y0+P.y)/2-7,{angle:a,rarity:4});for(const m of mons)if(!m.dead&&!m.ally&&inLine(m,x0,y0-6,L,st.w))hitMon(m,st.mul,{skill:1,chain:i>0});});return;}
+ if(F==='bolt'){const T=mons.filter(m=>!m.dead&&!m.ally&&Math.hypot(m.x-P.x,m.y-P.y)<st.r&&(m.x-P.x)*v[0]+(m.y-P.y)*v[1]>-10).sort((p,q)=>Math.hypot(p.x-P.x,p.y-P.y)-Math.hypot(q.x-P.x,q.y-P.y)).slice(0,2+Math.floor(st.w/12));
+   if(!T.length){toast(t('ssNoT'),'');return;}SFX.magic();each(i=>{for(const m of T){if(m.dead)continue;const y=monY(m);fx.push({bolt:[[m.x+(rand()-.5)*8,y-60],[m.x+(rand()-.5)*10,y-30],[m.x,y]],t:.14,c:'#fff3a0'});vfx('pillar',m.x,y+6,{raw:1,color:'#fff3a0',h:50,w:6});hitMon(m,st.mul,{skill:1,chain:i>0});}});return;}
+ /* fang */ const x0=P.x+v[0]*st.r*.5,y0=P.y-6+v[1]*st.r*.5;each(i=>{for(const s of [1,-1])vfx('slash',x0,y0,{angle:a+s*.7,rarity:3});
+   for(const m of mons)if(!m.dead&&!m.ally&&Math.hypot(m.x-x0,monY(m)-y0)<st.w+st.r*.5+MT[m.type].r){hitMon(m,st.mul,{skill:1,chain:i>0});if(!m.dead)hitMon(m,st.mul*.6,{skill:1,chain:1});}});}
+// the window
+function swcOpen(){if(mode!=='play'){SFX.deny();return;}if(swcList().length>=swcMax()){toast(t('swcFull',{n:swcMax()}),'warn');SFX.deny();return;}SWC={fm:null,f:[5,5,5,5,5,5],nm:'',pre:null};swcStep();}
+function swcLeft(c){return SWCB-c.f.reduce((a,b)=>a+b,0);}
+function swcStep(){const w=$('swcW'),c=SWC;w.hidden=false;SFX.open();const head=`<div class="head">${esc(t('sk_sscre'))} (${swcList().length}/${swcMax()})</div><small class="sys">${esc(t('swcSys',{a:swcList().length,b:swcMax()}))}</small>`;
+ if(!c.fm){w.innerHTML=head+`<div>${esc(t('swcQ1'))}</div><div class="cgrid">${SWCK.map(k=>`<button data-swfm="${k}"><b>${esc(t('swcF_'+k))}</b><br><small>${esc(t('swcFD_'+k))}</small></button>`).join('')}</div>`+
+   `<div>${esc(t('swcQ0'))}</div><div class="cgrid">${SWCK.map(k=>`<button data-swpre="${k}">${esc(t(SWCN[k]))}</button>`).join('')}</div><button data-swx="1">${esc(t('back'))}</button>`;return;}
+ if(!c.nm)c.nm=(c.pre?t(SWCN[c.pre]):t('swcDefNm',{n:t('pname'),f:t('swcF_'+c.fm)})).slice(0,24);
+ const lab=['swcP','swcR','swcB','swcH','swcS','swcE'],st=swcStats({fm:c.fm,f:c.f,L:skLv('sscsm')});
+ w.innerHTML=head+`<div>${esc(t('swcF_'+c.fm))} · ${esc(t('swcQ2',{n:swcLeft(c)}))}</div>`+lab.map((l,i)=>`<label>${esc(t(l))} <b>${c.f[i]}</b><input type="range" min="0" max="10" value="${c.f[i]}" data-swf="${i}"></label>`).join('')+
+  `<label>${esc(t('creNmL'))}<input id="swcNm" maxlength="24" value="${esc(c.nm)}"></label><div class="cst" id="swcS">${esc(swcStTxt(st))}</div>`+
+  `<div class="cfmbtns"><button data-swb="1">${esc(t('back'))}</button><button data-swgo="1">${esc(t('swcGo'))}</button></div>`;}
+const swcStTxt=st=>t('swcSt',{m:Math.round(st.mul*100),n:st.hits,r:(st.r/SSM).toFixed(1),w:(st.w/SSM).toFixed(1),c:st.cd,p:st.mp});
+const swcNmOk=v=>Satisfy.chat.clean(String(v||'').replace(/[<>&"'`]/g,''),24);   // (review) a name goes into the skill list's HTML
+function swcDone(){const c=SWC;if(!c||!c.fm)return;const nm=swcNmOk(($('swcNm')||{}).value)||t('swcDefNm',{n:t('pname'),f:t('swcF_'+c.fm)}).slice(0,24);c.nm=nm;
+ const st=swcStats({fm:c.fm,f:c.f,L:skLv('sscsm')});
+ cfm(t('swcSure'),`<b class="rt rt4">${esc(nm)}</b><br>${esc(swcStTxt(st))}<br><small>${esc(t('swcForever'))}</small>`,t('swcGo'),()=>{if(!SWC||swcList().length>=swcMax())return;
+  const o={id:Date.now().toString(36)+(rand()*1296|0).toString(36),fm:c.fm,f:c.f.slice(),L:skLv('sscsm'),nm};swcList().push(o);SWC=null;$('swcW').hidden=true;swcReg();sbSig='';checkSkills();
+  SFX.legendary();flash();toast(t('swcMade',{n:nm}),'good');hudDirty=true;save(true);});}   // swcMade: 'on your bar' (checkSkills puts it on a spare bar when the main one is full)
+document.addEventListener('click',e=>{const w=e.target.closest&&e.target.closest('#swcW');if(!w||!SWC)return;const b=e.target.closest('button');if(!b)return;SFX.click();const c=SWC;
+ if(b.dataset.swfm){c.fm=b.dataset.swfm;c.pre=null;c.nm='';swcStep();}
+ else if(b.dataset.swpre){const k=b.dataset.swpre;c.fm=k;c.pre=k;c.f=SWCF[k].pre.slice();c.nm='';swcStep();}
+ else if(b.dataset.swb){c.fm=null;c.pre=null;c.nm='';c.f=[5,5,5,5,5,5];swcStep();}
+ else if(b.dataset.swx){SWC=null;w.hidden=true;SFX.close();}else if(b.dataset.swgo)swcDone();});
+document.addEventListener('input',e=>{const i=e.target&&e.target.dataset&&e.target.dataset.swf;if(i===undefined||!SWC)return;const c=SWC,k=+i,v=Math.max(0,Math.min(10,+e.target.value||0)),rest=SWCB-(c.f.reduce((a,b)=>a+b,0)-c.f[k]);
+ c.f[k]=Math.min(v,rest);e.target.value=c.f[k];const lb=e.target.parentNode&&e.target.parentNode.querySelector('b');if(lb)lb.textContent=c.f[k];
+ const h=$('swcW').querySelector('.head+small+div');if(h)h.textContent=t('swcF_'+c.fm)+' · '+t('swcQ2',{n:swcLeft(c)});$('swcS').textContent=swcStTxt(swcStats({fm:c.fm,f:c.f,L:skLv('sscsm')}));});
+document.addEventListener('keydown',e=>{if(e.target&&e.target.id==='swcNm')e.stopPropagation();},true);
+// Complete Sword Mastery: the sword's own level (it rises with every sword strike that lands): sword damage +2% a level
+function swcHit(){if(S&&S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword')skUse('sscsm',.25);}
+window.__GSWC={open:()=>swcOpen(),reg:()=>swcReg(),stats:c=>swcStats(c),cast:c=>swcCast(c),max:()=>swcMax(),get W(){return SWC},done:()=>swcDone()}; // tests
+Object.assign(STR.ar,{sk_sscre:'ابتكار فن السيف',skd_sscre:'تقدر تبتكر تقنيات سيف جديدة. عدد المرات بيزيد كل ما لفل «إتقان السيف الكامل» يعلى. التقنية بتشتغل بالسيف بس، وفيه ست عوامل بتحدد قوتها، والمهارات السلبية مينفعش تتبتكر.',
+ sk_sscsm:'إتقان السيف الكامل',skd_sscsm:'السيف بقى جزء منك: ضرر السيف +2% لكل لفل. بيعلى مع كل ضربة سيف بتصيب، وكل لفل بيزوّد مرة من مرات «ابتكار فن السيف».',
+ swcSys:'[ابتكار فن السيف]\nعدد تقنيات السيف اللي ممكن تتبتكر: {a}/{b}',swcQ1:'اختار شكل التقنية:',swcQ0:'أو ابدأ زي ما كراوجل عمل:',swcQ2:'فاضلك {n} نقطة',
+ swcF_split:'قطع',swcFD_split:'نصل طاقة سيف بيطير لقدام ويقطع كل اللي في طريقه.',swcF_pass:'عبور',swcFD_pass:'بتعدّي المسافة في لمحة وبتقطع كل اللي عديت عليه.',
+ swcF_bolt:'صاعقة',swcFD_bolt:'طاقة السيف بتنزل من فوق على الأعداء اللي قدامك.',swcF_fang:'نابين',swcFD_fang:'قطعتين متقاطعتين قريب قدامك، وكل ضربة بنابين.',
+ swcN_split:'شق السماء',swcN_pass:'عبور السماء',swcN_bolt:'الصاعقة',swcN_fang:'ضربة الناب المزدوج',
+ swcP:'القوة',swcR:'المدى',swcB:'العرض',swcH:'الضربات',swcS:'السرعة',swcE:'التوفير',swcGo:'ابتكرها',swcSure:'تبتكر التقنية دي؟',swcForever:'التقنية بتفضل معاك على طول، ومينفعش ترجّع المرة.',
+ swcSt:'{m}% × {n} · مدى {r} م · عرض {w} م · {c} ث · {p} مانا',swcDefNm:'{f} {n}',swcMade:'ابتكرت «{n}»! بقت على شريطك.',swcFull:'استخدمت كل مرات الابتكار ({n}). علّي «إتقان السيف الكامل».',
+ swcNeedS:'(بالسيف بس)',needSword:'محتاج سيف في إيدك',
+ swcD_split:'نصل طاقة سيف لقدام {r} م بعرض {w} م: {m}% × {n} على كل اللي في طريقه.',swcD_pass:'بتعدّي {r} م في لمحة: {m}% × {n} على كل اللي عديت عليه.',
+ swcD_bolt:'طاقة السيف بتنزل على الأعداء اللي قدامك لحد {r} م: {m}% × {n} على كل واحد.',swcD_fang:'قطعتين متقاطعتين قدامك: {m}% وتانية أخف، × {n}.'});
+Object.assign(STR.en,{sk_sscre:'Swordsmanship Creation',skd_sscre:"You can create new sword techniques. The number of times it can be created increases every time the level of 'Complete Sword Mastery' increases. Sword techniques are skills used with sword type weapons; six factors determine a created technique's power; passive skills can't be created.",
+ sk_sscsm:'Complete Sword Mastery',skd_sscsm:'The sword is part of you: sword damage +2% a level. It rises with every sword strike that lands, and each level adds one use of Swordsmanship Creation.',
+ swcSys:'[Swordsmanship Creation]\nNumber of sword techniques that can be created: {a}/{b}',swcQ1:'Choose the form of the technique:',swcQ0:'Or begin as Kraugel did:',swcQ2:'{n} points left',
+ swcF_split:'Split',swcFD_split:'A blade of sword energy flies ahead and cuts all in its path.',swcF_pass:'Pass',swcFD_pass:'You cross the distance in a flash and cut all you pass.',
+ swcF_bolt:'Bolt',swcFD_bolt:'Sword energy falls from above on the foes ahead.',swcF_fang:'Fang',swcFD_fang:'Two crossing cuts close in front, two fangs a strike.',
+ swcN_split:'Splitting the Sky',swcN_pass:'Passing the Sky',swcN_bolt:'Thunderbolt',swcN_fang:'Twin Fang Strike',
+ swcP:'Power',swcR:'Reach',swcB:'Breadth',swcH:'Strikes',swcS:'Swiftness',swcE:'Economy',swcGo:'Create it',swcSure:'Create this technique?',swcForever:'The technique is yours for good, and the use can\'t be taken back.',
+ swcSt:'{m}% × {n} · reach {r} m · breadth {w} m · {c} s · {p} MP',swcDefNm:"{n}'s {f}",swcMade:'You created {n}! It is on your bar.',swcFull:'Every use of the Creation is spent ({n}). Raise Complete Sword Mastery.',
+ swcNeedS:'(with a sword only)',needSword:'You need a sword in your hand',
+ swcD_split:'A blade of sword energy {r} m ahead, {w} m wide: {m}% × {n} to all in its path.',swcD_pass:'Cross {r} m in a flash: {m}% × {n} to all you pass.',
+ swcD_bolt:'Sword energy falls on the foes ahead within {r} m: {m}% × {n} on each.',swcD_fang:'Two crossing cuts in front: {m}% and a lighter one, × {n}.'});
+window.__GSS2={cast:k=>castSk(k),hurt:(d,m)=>hurtPlayer(d,m&&m.lv,m),bl:()=>ssBl(),low:()=>ssLow(),as:()=>ssAs(),strike:()=>ssStrike(),counter:s=>ssCounter(s),kp:v=>ssKillPeak(v),tick:dt=>ss2Tick(dt),shred:m=>ssShred(m),get N(){return SSN},get CL(){return SSCL}}; // tests
+Object.assign(STR.ar,{sk_ssblade:'الجسد كنصل',skd_ssblade:'جسمك اتسقى بطاقة السيف: الدفاع وسرعة الحركة +15%. ولما صحتك تنزل تحت 30%، فرصة الضربة القاضية بتتضاعف وضربتك بتعدّي نص الحماية اللي الوحش رافعها.',
+ sk_sstsm:'إتقان السيف المتسامي',skd_sstsm:'قمة فن السيف: سرعة الهجوم +1% لكل لفل من لفلك. وكل خامس ضربة سيف ورا بعض بتطلّع موجة 150% على كل اللي حواليك في 5 متر.',
+ sk_sspc:'رد القمة',skd_sspc:'وقفة دفاع مطلق 1.2 ثانية: لو اتضربت فيها الضربة مبتعملش حاجة، وبترد على طول بقطعة في الفراغ 800% على اللي ضربك وبتشلّه 1.5 ثانية.',
+ sk_sskp:'قمة القتل',skd_sskp:'نية القتل كلها في ضربة واحدة: بعد 0.8 ثانية تحضير، خط مش باين قدامك 20 متر: 2,500% ضرر ثابت، مبيتأثرش بالحماية ولا بأي مناعة. واللي بيتقطع بيفضل «مشقوق» 6 ثواني: مبيقدرش يعالج نفسه ولا يرفع حماية.',
+ sk_ssfield:'غازي العقل: ميدان السيف',skd_ssfield:'عالمك الداخلي بيتحوّل لحقيقة حواليك 15 متر لمدة 10 ثواني: الأعداد جواه بيتحركوا أبطأ 40% وهجماتهم بترجع أبطأ بالنص، وإنت والفريق جواه ضربكم +25% ومحدش يقدر يشلّكم.',
+ sk_ssstorm:'عاصفة الألف سيف بلا ظل',skd_ssstorm:'محتاجة «سيف التحكم» شغال: كل السيوف بتتجمع على مكان واحد في عاصفة، 20 قطعة في 3 ثواني، 300% كل واحدة، وكل قطعة بتمزّق 5% من دروع العدو (لحد 100%) لمدة 10 ثواني.',
+ ssPcOn:'رد القمة: مستني الضربة',ssPcHit:'رد القمة!',ssKpCh:'قمة القتل: بتجمّع نية القتل...',ssCleft:'مشقوق!',ssFdOn:'ميدان السيف اتفتح',ssStOn:'عاصفة الألف سيف!',ssStNeed:'محتاج «سيف التحكم» شغال الأول'});
+Object.assign(STR.en,{sk_ssblade:'Body as a Blade',skd_ssblade:'Your body is tempered by relentless sword energy: defence and movement speed +15%. Under 30% health your critical chance doubles and your blows ignore half of the guard a monster raises.',
+ sk_sstsm:'Transcendent Sword Mastery',skd_sstsm:'The peak of swordsmanship: attack speed +1% for every character level. Every fifth sword strike in a row releases a shockwave of 150% on everything within 5 m.',
+ sk_sspc:'Pinnacle Counter',skd_sspc:'An absolute guard for 1.2 s: a blow that lands then does nothing, and a spatial slash answers it at once, 800% to the attacker and a 1.5 s stun.',
+ sk_sskp:'Kill Peak',skd_sskp:"The Sword Saint's lethal intent in one blow: after 0.8 s, an invisible line 20 m ahead deals 2,500% fixed damage that no guard or invulnerability stops. What it cuts is Cleft for 6 s: it can't heal or raise a guard.",
+ sk_ssfield:'Conqueror of the Mind: Sword Field',skd_ssfield:'Your mental realm becomes real for 15 m around you for 10 s: foes inside move 40% slower and attack half as often, and you and your party inside deal 25% more and shrug off crowd control.',
+ sk_ssstorm:'Shadowless Thousand Sword Storm',skd_ssstorm:'Needs Control Sword running: every sword converges on one spot in a tempest, 20 cuts over 3 s, 300% each, and each shreds 5% of the foe\'s armour (up to 100%) for 10 s.',
+ ssPcOn:'Pinnacle Counter: waiting for the blow',ssPcHit:'PINNACLE COUNTER!',ssKpCh:'Kill Peak: gathering lethal intent...',ssCleft:'CLEFT!',ssFdOn:'The Sword Field opens',ssStOn:'Thousand Sword Storm!',ssStNeed:'Control Sword must be running first'});
 
 // one Sword Saint per world, like Pagma and Braham: WS.legends.muller is the shared record
 // Twister 2026-10-19: taking a legendary class starts the character over at level 1 with base stats; legendary
@@ -9055,6 +9220,9 @@ const SKD={
  ssaura:{cls:'saint',lv:1,pas:1,col:'#bfe0ff'},mcross:{cls:'saint',lv:1,mp:30,cd:12,need:'melee',col:'#bfe0ff'},sctl:{cls:'saint',lv:1,qd:'ms1',mp:24,cd:20,col:'#e8f4ff'},
  mheaven:{cls:'saint',lv:160,qd:'ms2',mp:50,cd:60,col:'#9fd8ff'},mwind:{cls:'saint',lv:170,qd:'ms3',mp:45,cd:25,need:'melee',col:'#ff9a9a'},scloud:{cls:'saint',lv:220,mp:55,cd:30,col:'#5ab8ff'},
  mflash:{cls:'saint',lv:250,mp:60,cd:20,need:'melee',col:'#fff8a0'},mheart:{cls:'saint',lv:1,flag:'mheart',mp:0,cd:3600,col:'#ffd24a'},
+ sscre:{cls:'saint',lv:1,mp:0,cd:1,col:'#ffe7a8'},sscsm:{cls:'saint',lv:1,pas:1,col:'#bfe0ff'},
+ ssblade:{cls:'saint',lv:1,pas:1,col:'#cfe8ff'},sstsm:{cls:'saint',lv:1,pas:1,col:'#e8f4ff'},sspc:{cls:'saint',lv:1,mp:40,cd:15,col:'#e8f4ff'},
+ sskp:{cls:'saint',lv:1,mp:100,cd:90,need:'melee',col:'#ff5a5a'},ssfield:{cls:'saint',lv:1,mp:80,cd:60,col:'#9fd8ff'},ssstorm:{cls:'saint',lv:1,mp:70,cd:45,need:'melee',req:'ctl',col:'#bfe0ff'},
  wave:{cls:'pagma',lv:1,mur:1,mp:10,cd:6,need:'melee',col:'#ffe08a'},transcend:{cls:'pagma',lv:1,mur:1,mp:28,cd:150,need:'melee',col:'#fff4c0'},revolve:{cls:'pagma',lv:1,qd:'dp2',mp:30,cd:6,need:'melee',col:'#ffb85a'},pinnacle:{cls:'pagma',lv:1,qd:'dp2',mp:20,cd:9,need:'melee',col:'#ff6a3a'},
  // fusion skills (novel ch 143, 167, 388): two or three sword dances in a row fuse once, then the fusion is a skill of its own
  tlink:{cls:'pagma',lv:1,fus:'tlink',mp:30,cd:45,need:'melee',col:'#d8c0ff'},lkill:{cls:'pagma',lv:1,fus:'lkill',mp:20,mpf:.9,cd:180,need:'melee',col:'#ff9a6a'},lkwave:{cls:'pagma',lv:1,fus:'lkwave',mp:40,cd:60,need:'melee',col:'#ffd0a0'},pkill:{cls:'pagma',lv:1,fus:'pkill',mp:40,cd:15,need:'melee',col:'#ff4a2a'},
@@ -9235,7 +9403,7 @@ function skMig(){S.skv=2;const o=S.skx;if(!o)return;for(const k in o){let l=1,c=
 function skProg(k){if(S&&!S.skv)skMig();let l=1,c=((S&&S.skx)||{})[k]||0;while(l<SKMAX&&c>=skNeed(l)){c-=skNeed(l);l++;}return [l,c,l<SKMAX?skNeed(l):0];}
 // what a skill is, for its levels: 'atk' (the default), 'buff', 'heal' or 'util'; pack skills say it in their kind
 const SKK={};for(const [kd,l] of [['buff','bdetm bbarr bcoh bspray kstance glink lstand track sneye bgarmor wlsiph wlcurse dsseal dssum pbless pdprot pjudar pdomin tstealth apoison aleg agrd asens bbear bwolf beagle blion btiger bleo bhalf broar oelo fort taunt sctl transcend revolve restraint rage cry bcry qmove benc bdetect bassim sadisc sahw sasanc lkblock lkres kytrans kygod gkpow bshield bvalor bswift brest mheart gashield'],
- ['heal','sapray pheal prebec mkrev sahope gabreath gadesire salife'],['util','trap tsteal ashadow nskel dsleap btele fly ltshade bgrease bdecoy bwing bcrys bmasst']])for(const k of l.split(' '))SKK[k]=kd;
+ ['heal','sapray pheal prebec mkrev sahope gabreath gadesire salife'],['buff','sspc ssfield'],['util','sscre'],['util','trap tsteal ashadow nskel dsleap btele fly ltshade bgrease bdecoy bwing bcrys bmasst']])for(const k of l.split(' '))SKK[k]=kd;
 function skKind(k){if(SKO[k])return 'own';if(SKK[k])return SKK[k];const c=SKD[k]&&typeof CPK!=='undefined'&&CPK[SKD[k].cls],s=c&&(c.skills||[]).find(x=>x.id===k);return s&&(s.kind==='buff'||s.kind==='heal')?s.kind:'atk';}
 const skCdM=k=>skLv(k)>=10&&/^(buff|heal|util)$/.test(skKind(k))?.8:1,skMpM=k=>skLv(k)>=5&&/^(buff|util)$/.test(skKind(k))?.8:1;
 function skHealUp(k,h0){if(skKind(k)!=='heal'||!P||!(P.hp>h0))return;const L=skLv(k),m=.04*(L-1)+(L>=5?.25:0);if(m>0){P.hp=Math.min(maxHP(),P.hp+(P.hp-h0)*m);hudDirty=true;}}
@@ -9246,7 +9414,7 @@ const skLv=k=>skProg(k)[0],skDm=k=>1+.06*(skLv(k)-1),skCostM=k=>1-.03*(skLv(k)-1
    Lv 10): the class-pack passives' numbers and the ones in PASSC grow by it; a passive whose effect is a fixed rule (seeing
    demons, any weapon, homing arrows...) gives +1% damage and +1% defence a level instead (pasGen). The crafting passives
    (focus, scraft, stemp, lpat, lcre, beyes) keep their own levels at the anvil. */
-const PASSC=new Set(['bcont','dsbane','sagrace','mdsense','mmreint','gkrdr','tevade','bmcombo','snaim','nenh','lscharge','esburst','lfnat','lkinsight']),PASOWN=new Set(['focus','scraft','stemp','lpat','lcre','beyes']);
+const PASSC=new Set(['sscsm','bcont','dsbane','sagrace','mdsense','mmreint','gkrdr','tevade','bmcombo','snaim','nenh','lscharge','esburst','lfnat','lkinsight']),PASOWN=new Set(['focus','scraft','stemp','lpat','lcre','beyes']);
 const pasM=k=>1+.05*(skLv(k)-1),pasScaled=k=>PASSC.has(k)||!!(typeof CPAS!=='undefined'&&Object.values(CPAS).some(L=>L.some(s=>s.id===k)));
 function pasGen(){if(!S||!P)return 0;let v=0;for(const k of pasSkills())if(!PASOWN.has(k)&&!pasScaled(k))v+=.01*(skLv(k)-1);return v;}
 function pasKill(m){if(!S||!P||m.spar||m.mir)return;const n=MT[m.type]&&MT[m.type].boss?6:1;for(const k of pasSkills())if(!PASOWN.has(k))skUse(k,n);}
@@ -9272,7 +9440,7 @@ const barThing=k=>typeof k==='string'&&!SKD[k]&&(XGEAR(k)||XITEM(k)||!!(S.mats&&
 const barIco=k=>SKD[k]?skIcon(k):XGEAR(k)?(xGear(k)?icon(xGear(k).id):icon('slotX')):icon(k);
 function barSkills(){const cs=clsSkills().filter(skOK),a=Array.isArray(S.bar)&&S.bar.length>=5?S.bar.slice(0,NSK).map(k=>k&&(cs.includes(k)||barThing(k))?k:null):cs.slice(0,NSK);while(a.length<NSK)a.push(null);a.push(TLS[S.title]||null);return a;}
 // mur: learned at the mural behind Loran Falls (novel ch 78: the skills come the moment Grid sees it, before he reports to Khan)
-const skOK=k=>{const d=SKD[k];return d.title?S.title===d.title||!!d.sc2a&&S.cls2===d.sc2a:(!d.sc2||S.cls2===d.sc2)&&S.lv>=d.lv&&(!d.qd||qDone(d.qd))&&(!d.flag||!!S[d.flag])&&(!d.mur||!!S.pgMur||qDone('pg1'))&&(!d.fus||!!(S.fus&&S.fus[d.fus]));};
+const skOK=k=>{const d=SKD[k];if(d.swc&&!(S.swc||[]).some(c=>c.id===d.swc))return false;return d.title?S.title===d.title||!!d.sc2a&&S.cls2===d.sc2a:(!d.sc2||S.cls2===d.sc2)&&S.lv>=d.lv&&(!d.qd||qDone(d.qd))&&(!d.flag||!!S[d.flag])&&(!d.mur||!!S.pgMur||qDone('pg1'))&&(!d.fus||!!(S.fus&&S.fus[d.fus]));};
 const lockTxt=d=>d.fus&&!(S.fus&&S.fus[d.fus])?t('fusHow_'+d.fus):d.mur&&!S.pgMur&&!qDone('pg1')?t('skMural'):d.qd&&!qDone(d.qd)?t('skQuest',{q:qName(d.qd)}):t('skUnlock',{n:d.lv});
 const DEFKB=['Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','KeyR'];let KB=[...DEFKB];try{let k=JSON.parse(localStorage.getItem('satisfy_keys'));if(Array.isArray(k)&&k.length===6){if(k[5]==='Digit6'&&!k.includes('KeyR'))k[5]='KeyR';k=[...k.slice(0,5),...DEFKB.slice(5,NSK).map(c=>k.includes(c)?'':c),k[5]];}if(Array.isArray(k)&&k.length===NSK+1)KB=k;}catch(e){}
 const RESERVED=['KeyQ','KeyF','KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyJ','Space','KeyE','KeyI','KeyC','KeyU','KeyL','KeyM','Tab','Escape','Enter','KeyG','KeyH'];
@@ -9429,6 +9597,7 @@ const SKF={
   for(let i=0;i<8;i++)setTimeout(()=>{if(mode!=='play')return;const L=T.filter(m=>!m.dead);if(!L.length)return;const m=L[i%L.length],an=rand()*6.283,x=m.x+Math.cos(an)*16,y=m.y-8+Math.sin(an)*10;
    vfx('thrust',m.x-Math.cos(an)*30,m.y-8-Math.sin(an)*20,{raw:1,angle:Math.atan2(20*Math.sin(an),30*Math.cos(an)),len:32,color:'#fff8a0'});hitMon(m,2.2,{skill:1});fx.push({ring:true,x:m.x,y:m.y-6,t:.3});
    if(aoe(m.x,m.y-6,26,1,{skill:1}))SFX.hit();tone(880-i*40,.05,'square',.05);},i*70);},
+ sscre:()=>{vfx('mana',P.x,P.y-8);vfx('aura',P.x,P.y,{raw:1,color:'#ffe7a8'});fx.push({ring:true,x:P.x,y:P.y-8,t:.6});for(let i=0;i<24;i++)fx.push({x:P.x+Math.cos(i*.26)*14,y:P.y-8+Math.sin(i*.26)*8,vx:0,vy:-14,t:.9,c:i%2?'#ffe7a8':'#e8f4ff',fl:1});swcOpen();},sspc:()=>ssPcOn(),sskp:()=>ssKpOn(),ssfield:()=>ssFdOn(),ssstorm:()=>ssStOn(),   // v3.13 (the owner's design)
  // Matchless Heart Technique (ch 1130, 1254): Muller's sword-energy circulation; half your mana back at once. Once an hour
  mheart:()=>{P.mp=Math.min(maxMP(),P.mp+maxMP()*.5);fx.push({ring:true,big:1,x:P.x,y:P.y-8,t:.6});for(let i=0;i<16;i++)fx.push({x:P.x+(rand()-.5)*30,y:P.y,vx:0,vy:-40-rand()*30,t:.7,c:'#ffd24a',fl:1});hudDirty=true;},
  wave:()=>{P.acd=0;fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.4});SFX.swing();shake=.1;const near=fusTg(44);for(const m of near)if(hitMon(m,.62,{skill:1}))m.slowU=gTime+3;
@@ -9529,8 +9698,9 @@ function useSlot(i){spwOff();const k=barSkills()[i];if(!k){SFX.deny();return;}if
 function castSk(k,el){if(brSeal()){toast(t('brSealT'),'warn');SFX.deny();return;}if(TOW&&TOW.seal){toast(t('twSeal'),'warn');SFX.deny();return;}const d=SKD[k];
  if(!skOK(k)){toast(lockTxt(d),'warn');SFX.deny();return;}
  if((P.cd[k]||0)>0||P.dash>0){SFX.deny();return;}
- const wk=weapKind();if((d.need==='bow'&&wk!=='bow')||(d.need==='staff'&&wk!=='staff')||(d.need==='melee'&&(wk==='bow'||wk==='staff'))||(d.need==='spear'&&wk!=='spear')){toast(t(d.need==='bow'?'needBow':d.need==='staff'?'needStaff':d.need==='spear'?'needSpear':'needMelee'),'warn');SFX.deny();return;}
+ const wk=weapKind();if((d.need==='bow'&&wk!=='bow')||(d.need==='staff'&&wk!=='staff')||(d.need==='melee'&&(wk==='bow'||wk==='staff'))||(d.need==='spear'&&wk!=='spear')||(d.need==='sword'&&wk!=='sword')){toast(t(d.need==='bow'?'needBow':d.need==='staff'?'needStaff':d.need==='spear'?'needSpear':d.need==='sword'?'needSword':'needMelee'),'warn');SFX.deny();return;}
  if(P.mp<mpC(k)){toast(t('noMP'),'warn');SFX.deny();return;}
+ if(d.req==='ctl'&&!(P.ctlU>gTime&&P.ctlS)){toast(t('ssStNeed'),'warn');SFX.deny();return;}   // v3.13: the Thousand Sword Storm needs Control Sword's swords
  const FK=fusTry(k);P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k)*dsCdM(k)*skCdM(k);SKC={k,t:gTime};SKH.push(SKC);if((P.cohR||P.sprR)&&k!=='bcoh'&&k!=='bspray'&&d.need==='staff'&&!d.pas){if(P.cohR){P.cohR=0;P.cohW=gTime+2;}if(P.sprR){P.sprR=0;P.sprW=gTime+2;}}if(SKH.length>6)SKH.shift();skUse(k);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}if(FK){fusLearn(FK);hudDirty=true;return;}{const h0=P.hp;CURSK=k;CURSKN=0;CURSKD=0;try{skCarry(k,()=>SKF[k]());}finally{CURSK=null;}skHealUp(k,h0);}skSnd(k);skVfx(k);if(!CURSKN&&!skVfxHas(k))skSig(k);numPK(-34,'sk_'+k,d.col,false);hudDirty=true;}
 /* skill looks (owner 2026-10-24: "almost every skill and hit looks alike; fix the effects and hitboxes so each skill feels
    different; Space Sword is literally a bigger slash"). Each skill gets a look from its name and element: a wide crescent, a
@@ -10249,7 +10419,7 @@ function respawn(k){if(BHR&&BHR.dead)return bhRespawn();const bn=!k&&bindNpc(),b
 /* ---------------- menus ---------------- */
 // the title's buttons go the moment you press Play (owner 2026-10-24: 'the screen darkens a while and the buttons stay'), and come back with the title
 const tMenu=on=>{const m=document.querySelector('#titleScreen .menu');if(m)m.style.visibility=on?'':'hidden';};
-function showOnly(id){if(id==='titleScreen')tMenu(1);['langScreen','titleScreen','pauseScreen','settingsScreen','soundScreen','controlsScreen','end','create'].forEach(s=>$(s).hidden=s!==id);if(id!=='titleScreen'&&id!=='pauseScreen')$('updLog').hidden=true;else if(id==='titleScreen')updLogAuto();}
+function showOnly(id){swcClose();if(id==='titleScreen')tMenu(1);['langScreen','titleScreen','pauseScreen','settingsScreen','soundScreen','controlsScreen','end','create'].forEach(s=>$(s).hidden=s!==id);if(id!=='titleScreen'&&id!=='pauseScreen')$('updLog').hidden=true;else if(id==='titleScreen')updLogAuto();}
 // update log (owner request): src/ui/changelog.js; opens by itself once after an update, newest entry first
 const UPDL=Satisfy.CHANGELOG||[];
 // the version on the title screen (owner 2026-10-19: raise it with every update) is the newest entry's `ver` in the log
@@ -10262,7 +10432,7 @@ function updLogAuto(){const V=UPDV();if(!V[0])return;let seen=null;try{seen=loca
 Object.assign(STR.ar,{updLogB:'سجل التحديثات',updLogNew:'الجديد'});Object.assign(STR.en,{updLogB:'Update log',updLogNew:'New'});
 let ctrlBack='titleScreen';
 function toTitle(){if(RPLQ&&!RPL&&!SIM)setTimeout(rplStart,400);if(REC){recKeep();REC=null;}mode='title';showOnly('titleScreen');$('hud').hidden=true;$('contBtn').disabled=!hasSave();setTimeout(()=>$('titleScreen').querySelector('button:not(:disabled)').focus(),0);}
-function startGame(cont){if(!cont||!hasSave())return openCreate();const rs=recSave();tMenu(0);fadeTo(()=>{simBegin(rs);if(!load())freshState();innWakeSafe();creFix();S.raid=0;allies=[];proj=[];spawnWorld();qlendFix();showOnly(null);$('hud').hidden=false;mode='play';camSnap=true;hudDirty=true;sbSig='';applyLang();stage.focus();nmCheck();setTimeout(checkSkills,1500);});}
+function startGame(cont){if(!cont||!hasSave())return openCreate();const rs=recSave();tMenu(0);fadeTo(()=>{simBegin(rs);if(!load())freshState();innWakeSafe();creFix();swcReg();S.raid=0;allies=[];proj=[];spawnWorld();qlendFix();showOnly(null);$('hud').hidden=false;mode='play';camSnap=true;hudDirty=true;sbSig='';applyLang();stage.focus();nmCheck();setTimeout(checkSkills,1500);});}
 // character creation: name + look; the look is stored in S.look so another client could draw the same character
 let CL=null;
 function openCreate(){CL={...DEFLOOK,n:''};mode='create';showOnly('create');$('cname').value='';$('cerr').textContent='';renderCreate();setTimeout(()=>$('cname').focus(),60);}
@@ -10286,7 +10456,7 @@ function lookOk(k,i,g){const f=g===1;if(k==='hair'){const h=LOOK.hair[i];return 
 function lookFit(L){const g=L.g|0;if(!lookOk('hair',L.hair|0,g)){const n=LOOK.hair.length;for(let j=1;j<n;j++){const v=((L.hair|0)+j)%n;if(lookOk('hair',v,g)){L.hair=v;break;}}}
  for(const k of ['acc','acc2','sk','lip','bst'])if(L[k]&&!lookOk(k,L[k],g))delete L[k];if(L.cos&&!lookOk('cos',L.cos,g))delete L.cos;return L;}
 function drawPrev(){const g=$('cprev').getContext('2d');g.clearRect(0,0,16,24);const dir=[0,2,1,3][(gTime*.7|0)%4],r=SA.chars.rect(DIR4[dir],'walk',(gTime*9|0)%4),c=SH.me.canvas;if(r.flip){g.save();g.translate(16,0);g.scale(-1,1);g.drawImage(c,r.sx,r.sy,16,24,0,0,16,24);g.restore();}else g.drawImage(c,r.sx,r.sy,16,24,0,0,16,24);}
-function newGame(L){fadeTo(()=>{freshState();S.look={...L};buildMe(S.look);spawnWorld();allies=[];proj=[];sbSig='';showOnly(null);applyLang();$('hud').hidden=true;camSnap=true;
+function newGame(L){fadeTo(()=>{freshState();swcReg();S.look={...L};buildMe(S.look);spawnWorld();allies=[];proj=[];sbSig='';showOnly(null);applyLang();$('hud').hidden=true;camSnap=true;
  card([['w1'],['w2',{n:L.n}],['w3']],true).then(()=>{$('hud').hidden=false;mode='play';camSnap=true;hudDirty=true;stage.focus();save(true);setTimeout(()=>toast(t('introTip'),'good'),400);});});}
 // world map (M)
 const ZR=[['zPat',172,64,208,100],['zRuin',209,68,223,98],['zHigh',158,39,223,63],['zMarsh',158,101,223,119],['zQuarry',17,2,26,10],['zBai',2,2,27,41],['zGuard',50,2,63,20],['zGrey',28,2,63,43],['zWin',106,64,146,100],['zGrave',119,48,137,61],['zOrc',96,4,128,26],['zSnow',64,0,223,38],['zCanyon',106,102,155,119],['zHide',54,94,84,119],['zLake',76,86,108,113],['zOut',0,44,63,86],['zFields',100,39,159,119]];
@@ -10825,7 +10995,7 @@ function monTick(m,dt,safe){try{
   // a monster sleeps while nobody is within 900 px (owner 2026-10-23: frames dropped with many monsters). The far north and
   // south did this first; now the whole map does, so ~1,300 monsters out of sight no longer roll dice and walk each frame
   if(!(m.eng>0)&&(m.x-P.x)**2+(m.y-P.y)**2>810000&&!(MOBN&&MOBN.rs&&mobNearR(m)))return;
-  if(m.mvd)m.at=(m.at||0)+dt;m.mvd=0;m.t+=dt;if(m.grdT>0)m.grdT-=dt;m.cd-=dt;if(m.hurt>0)m.hurt-=dt;if(m.weak>0)m.weak-=dt;if(m.stun>0){m.stun-=dt;return;}
+  if(m.mvd)m.at=(m.at||0)+dt;m.mvd=0;m.t+=dt;if(m.grdT>0)m.grdT-=dt;m.cd-=m.sfU>gTime?dt*.5:dt;if(m.hurt>0)m.hurt-=dt;if(m.weak>0)m.weak-=dt;if(m.stun>0){m.stun-=dt;return;}
   if(MOBN&&MOBN.host===NET.uid&&MOBN.rs&&MOBN.rs.length){const tg=mobTarget(m);if(tg){MOBP=P;P=tg;}} // host: it may be after another player, a boss too (SAT-ONLINE-045: a boss chased and leashed by the host alone walked home and healed while someone else fought it)
   if(MOBN&&MOBN.host===NET.uid)m.tgU=P.remote||NET.uid; // SAT-ONLINE-042: the player it is after goes out with each action
   const dx=P.x-m.x,dy=P.y-m.y,d=Math.hypot(dx,dy),mr=m.type==='guardian'?10:Math.max(3,b.r-3);
@@ -10905,7 +11075,7 @@ function update(dt){
  if(TSV&&walk&&!(P.stun>0)){ix=TSV.x;iy=TSV.y;tsf=Math.max(.45,Math.min(1,Math.hypot(ix,iy)*1.3));}
  if(FOLLOW){if(ix||iy)folStop('folOff');else if(walk&&!(P.stun>0)&&!(P.dash>0)){const v=folDir(dt);if(v){ix=v[0];iy=v[1];}}} // SAT-ONLINE-068: your own keys stop it
  if(P.dash>0){P.dash-=dt;move(P,P.dx*230*dt,P.dy*230*dt,4);P.trail.push({x:P.x,y:P.y,dir:P.dir,frame:P.frame,t:.22,r:P.ride?myMt():0});}
- else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(tlOn('legend')?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*p3Spd()*vcSpd()*vpSpd()*mxSpd()*ttSpd()*p4Spd()*(1+Math.min(.3,gearSum('ms')))*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1)*roadSp();move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
+ else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(tlOn('legend')?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*p3Spd()*vcSpd()*vpSpd()*mxSpd()*ttSpd()*p4Spd()*(1+Math.min(.3,gearSum('ms')))*(1+ssBl())*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1)*roadSp();move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
  else P.frame=0;
  if(P.guard)P.dir=Math.abs(P.gx)>Math.abs(P.gy)?(P.gx>0?2:3):(P.gy>0?0:1);
  if(K.atk&&inp){const wk=weapKind(),v=(TOUCH&&tAim((wk==='bow'||wk==='staff')&&!hcMelee()?170:44))||[[0,1],[0,-1],[1,0],[-1,0]][P.dir];tryAttack(v[0],v[1]);}
@@ -14286,7 +14456,7 @@ const saEvil=m=>HOLYX.has(m.type)||DEMK.has(m.type)||/^v/.test(m.type)&&m.type!=
 let SANC=null; // the sanctuary she declared
 const saIn=()=>!!SANC&&SANC.u>gTime&&Math.hypot(P.x-SANC.x,P.y-SANC.y)<90;
 // Upright Heart, Discipline and the sanctuary: no abnormal condition takes hold
-const saImm=()=>!!S&&!!P&&((S.cls==='saintess'&&pasOn('sagrace'))||P.dscU>gTime||saIn());
+const saImm=()=>!!S&&!!P&&((S.cls==='saintess'&&pasOn('sagrace'))||P.dscU>gTime||saIn()||P.ssFU>gTime||phNear('W',SSFR));
 function saTick(dt){if(!P)return;
  if(P.sncC){if(Math.hypot(P.x-P.sncC.x,P.y-P.sncC.y)>3){P.sncC=null;toast(t('saSncBrk'),'warn');}else if(gTime>=P.sncC.u){SANC={x:P.x,y:P.y,u:gTime+20};P.sncC=null;P.inv=Math.max(P.inv,10);P.stun=0;flash();SFX.legendary();fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.8});toast(t('saSncOn'),'good');}
   else if(rand()<.5)fx.push({x:P.x+(rand()-.5)*40,y:P.y-6+(rand()-.5)*30,vx:0,vy:-30,t:.5,c:'#fff3b0',fl:1});}
@@ -15157,7 +15327,7 @@ const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(try
 // presence field: the events of the last 0.7 s, oldest first, within FXMAX characters (each one goes out in about 3 updates)
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
 // clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
-function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+vpSt()+nvSt():'';}
+function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(P.ssFU>gTime?'W':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+vpSt()+nvSt():'';}
 function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));{const w=weapon();if(w&&w.cw)tags.push(JSON.stringify('cw:'+w.cw));}const mr=marPub();if(mr)tags.push(JSON.stringify('mr:'+mr));const pd=pdPub();if(pd)tags.push(JSON.stringify('pd:'+pd));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
  let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it

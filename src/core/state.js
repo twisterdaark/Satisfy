@@ -105,6 +105,8 @@
     'mkt',
     // auto production on or off (v3.10)
     'autoP',
+    // the Sword Saint's created sword techniques (v3.13): [{id, fm, f, L, nm}]
+    'swc',
     // the Vatican (v3.11): Goddess Rebecca's blessing, from Help the Rebecca Church!
     'vatB',
   ];
