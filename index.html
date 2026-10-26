@@ -11339,7 +11339,7 @@ Object.assign(STR.en,{srcD:'Dropped by {n}',srcC:"From {n}'s chest",srcS:'Bought
    Titan's going east; U203's letter is one way to get there) is stopped, on foot, mounted or by coach, unless they pay
    a fine for a day's pass (BCDAY of world time). Everyone else passes freely, so the posts never stand in a newcomer's way.
    Teleports (scrolls, a summons) aren't stopped. */
-const BCDAY=864e5,bcSide=x=>x>=EX*TS?1:0,bcKey=sd=>sd?'zTitan':'zRein',bcFine=()=>Math.min(20000,2000+20*S.lv);let BCX=null,BCT=0;
+const BCDAY=864e5,bcSide=x=>x>=EX*TS?1:0,bcKey=sd=>sd?'zTitan':'zRein',bcFine=()=>Math.min(20000,2000+20*S.lv);let BCX=null,BCT=-1e9;
 function bcStop(sd){const k=bcKey(sd);return repOf(k)<0&&!((S.bpass||{})[k]>wNow())?k:null;}
 function bcAsk(k,then){const g=bcFine(),who=k==='zTitan'?'guardT':'guardRh';
  dialog(who,[t('bcHalt',{z:t(k),n:-repOf(k)})],null,[{l:t('bcPay',{g:fmtN(g)}),pr:g,poor:S.gold<g,f:()=>{if(S.gold<g){SFX.deny();return toast(t('noGold'),'warn');}S.gold-=g;(S.bpass=S.bpass||{})[k]=wNow()+BCDAY;SFX.coin();toast(t('bcPaid',{z:t(k)}),'good');hudDirty=true;save(true);if(then)then();}},{l:t('bcBack')}]);}
