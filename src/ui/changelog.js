@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26gear1', ver: '3.27', d: '2026-10-26',
+      ar: ["عند المصففة: \"شكل السلاح\" بـ 8,000 دهب بيلبّس السلاح اللي ماسكه شكل سلاح تاني من نفس النوع معاك، والقوة بتفضل زي ما هي، والكل بيشوف الشكل الجديد. وتقدر ترجّع شكله الأصلي.",
+          "وعند المصففة كمان: صبغة للدرع بـ 10 ألوان. كل لون بتشتريه مرة واحدة بـ 3,000 وبعدها ببلاش، وبيلوّن الخوذة والدرع والجوانتي والجزمة، والكل بيشوفه.",
+          "القطع بقى فيها من فتحة لـ 3 فتحات جواهر حسب ندرتها. الحداد بيحط الجوهرة في الفتحة اللي تختارها، أو يطلّعها بـ 2,000 دهب عشان تنقلها لقطعة تانية، وكل الجواهر بتتحسب.",
+          "أجزاء البلوبرنت: بتقع من مكافأة المهمات (4%، و8% في القصة الرئيسية) ومن الزعماء وانت في فريق (20%). خمسة منهم بيتجمعوا لكتاب وصفة نادرة لسه معندكش.",
+          "الأمر /craftstats بيوريك نسبة كل جودة في اللي صنعته.",
+          "القطعة اللي جتلك من تريد مينفعش تتفك."],
+      en: ["At the stylist: \"Weapon look\" for 8,000 gold gives the weapon you hold the look of another weapon of the same kind you have. Its stats stay the same and everyone sees the new look; it can go back to its own.",
+          "Also at the stylist: armour dyes in 10 colours. Each colour is bought once for 3,000, then free; it colours the helmet, armour, gloves and boots, and everyone sees it.",
+          "Pieces have 1 to 3 gem sockets by rating. The smith sets a gem in the socket you pick, or takes one out for 2,000 gold to move it to another piece; every gem counts.",
+          "Blueprint fragments drop from quest rewards (4%, 8% on the main story) and from bosses fought in a party (20%). Five make a rare recipe book you don't have yet.",
+          "/craftstats shows the share of each rating among what you made.",
+          "A piece that came to you through a trade can't be taken apart."] },
     { v: '2026-10-26soki1', ver: '3.26', d: '2026-10-26',
       ar: ["الوحوش والزعماء ممكن يطلعوا نسخة \"نخبة\": أقوى 50% في الصحة والضرب، وبيدّوا ضعف الخبرة. اسمهم دهبي وتحتهم دايرة دهب، وبيبانوا على الخريطة. 3% من الوحوش و10% من الزعماء، وبيتغيّروا مع كل ظهور. أونلاين كلكم بتشوفوا نفس النخبة.",
           "خبرة القصة الرئيسية والمهمات الملحمية بقت الضعف، والحد الأقصى بتاعها بقى الضعف كمان، فالزيادة بتبان في اللفلات العالية.",
