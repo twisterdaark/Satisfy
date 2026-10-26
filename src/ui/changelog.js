@@ -7,6 +7,16 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26u114', ver: '3.51', d: '2026-10-26',
+      ar: ["أرنب الثلج: أرانب جديدة في حقول الثلج الشمالية (لفل 48-52)، مسالمة زي أرانب المرعى.",
+        "الأرانب كلها بقت بتوقّع فرو أرنب، وبيتباع في المحلات.",
+        "جرعة ضد السم: كتابها عند بياعة الأعشاب (2,500 دهب)، وبتتعمل من عشبتين حمر وزهرة قمر. بتشيل السم على طول، ولمدة دقيقتين مفيش سم بيمسك فيك.",
+        "اختبار جديد لده."],
+      en: ["Snow Rabbits: new rabbits on the Northern Snowfields (Lv 48-52), passive like the meadow's.",
+        "Every rabbit now drops Rabbit Fur, which the shops buy.",
+        "Antivenom: its book is at the herbalist (2,500 gold), brewed from two Red Herbs and a Moonflower. It clears poison at once, and for 2 minutes no poison takes hold.",
+        "A new test for this."],
+      hide: [3] },
     { v: '2026-10-26mobkeys', ver: '3.50', d: '2026-10-26',
       ar: ["أونلاين: جنب أعمدة حارس الغابة وفرقة الأورك، وفي حرب رين، مشاركة الوحوش كانت بتقف للبارتي كلها (قاعدة البيانات كانت بترفض أساميهم). اتصلحت."],
       en: ["Online: by the Guardian of the Forest's pillars, the orc warband and in Ren's War, monster sharing stopped for the whole party (the database refused their names). Fixed."] },

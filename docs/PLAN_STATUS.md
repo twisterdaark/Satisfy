@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.48) |
+| | At the count | Now (v3.51) |
 |---|---|---|
-| Done | 233 | 281 |
-| Partly there (something left) | 92 | 49 |
+| Done | 233 | 283 |
+| Partly there (something left) | 92 | 47 |
 | Not started | 11 | 6 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **55** (49 + 6) |
+| **Left to build** | **103** (92 + 11) | **53** (47 + 6) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -32,6 +32,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.46 (batch 10, PR #292, merged by Claude-B after main's v3.43-v3.45): U150 (the warcamp, one copy per party), U300 (a room of your own).
 - v3.47 (batch 11, PR #293, merged by Claude-B after main's v3.45-v3.46): U124 (a golem's rubble), U186 (the boss fight log and replay); U040 part (three rated duels a day per opponent; D3 left), U220 part and U105 part (caravan commissions; D3 and buy/sell contracts left).
 - v3.48 (batch 12, PR #294, merged by Claude-B after main's v3.47): U141 (the mimic's tell and the trapped chests), U105 (buy and sell contracts); U176 part (the Vampire Lord's branching fight; D3 left).
+- v3.51 (Claude-B): U114 (the Snow Rabbit, rabbit fur), U139 (the Antivenom).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -111,7 +112,7 @@ Checked against `/home/claude/satisfy-aud` at 8a2e4f1e (v3.15). The test files b
 
 | U | Item | Status | Evidence (where in the code: function/feature/test) / what's left |
 |---|---|---|---|
-| U114 | Rabbit variants | part | `rabbit` (meadow, Lv 1–3, leather), Horned Rabbit `hrabbit` (horn charge), Golden Rabbit `grabbit` that runs and blinks away (`mpTick` flee, RKMV `B({away})`). Every hop kind breaks off once when hurt below 60% (`hitMon` `fledOnce`, 3 s). XP is fixed per kind (`MT.xp`), and quests count kills only, so a rabbit running away closes nothing (`mpack`). Left: a snow rabbit (Northern Snowfields) and a fur drop (rabbits drop leather, the golden one topaz) |
+| U114 | Rabbit variants | done (v3.51) | `rabbit` (meadow, Lv 1–3, leather), Horned Rabbit `hrabbit` (horn charge), Golden Rabbit `grabbit` that runs and blinks away (`mpTick` flee, RKMV `B({away})`). Every hop kind breaks off once when hurt below 60% (`hitMon` `fledOnce`, 3 s). XP is fixed per kind (`MT.xp`), and quests count kills only, so a rabbit running away closes nothing (`mpack`). Left: a snow rabbit (Northern Snowfields) and a fur drop (rabbits drop leather, the golden one topaz) v3.51: the Snow Rabbit `srabbit` on the Northern Snowfields (Lv 48–52, passive, 10 placed by `u114Spawn` with its own dice), and every rabbit drops Rabbit Fur `rfur` (sells for 10) (`regression/u114`). |
 | U115 | Goblin scouts | done (v3.35) | Goblin Scout `gobsc` (archer: darts that slow, jumps back) blows its horn once (`mpTick`: `m.horn=1`, host only via `!mpFol`) and alerts the goblins already within 240 px. It spawns nobody, so a duplicate event can't double a squad (`mpack` "the camp comes"). Left: patrol routes (wild monsters only wander around their spawn point: `monTick` idle branch) v3.33: scouts walk a round of four posts around their home at a scout's pace and look around at each (`PATROL`, `ptNext`); a post they can't reach is skipped, and seeing you still breaks the round (`regression/plan6`). |
 | U116 | Goblin chieftain phases | done (v3.23) | Phases at 66% and 33%, each entered once (`monTick`: `ph>(m.ph\|\|0)` → `bossPhase`; it resets only after a leash heal to full). Each phase opens moves (a charge at ph1, rock rain at ph2, RKMV `gchief`), all telegraphed, plus a war cry and a call for nearby goblins. Loot is rolled per player (`DROPG`; U057). Left: a stun (the chief has no stun move) |
 | U117 | Grey Wolves packs | done | Grey Wolf `wolf` (lunge): `packTick` picks a leader that switches the pack between pressing and falling back, with at most two winding up at once (`busyIn`). A howl calls the pack (C rng 280) and a bite hamstrings. Aggro fades over 4 s (`m.eng`); past 260 px from spawn a wolf walks home and heals (`m.ret`); no monster engages a player in a town (`eng` needs `!safe`). Pack size isn't fixed at 2–4, and the leash is distance from spawn, not the zone's edge |
@@ -136,7 +137,7 @@ Checked against `/home/claude/satisfy-aud` at 8a2e4f1e (v3.15). The test files b
 | U136 | Minotaur | reject | REJECT_NOT_CANON (§82/§90): an invented monster. Similar things exist: charges stop at a wall and stun the charger (`wall:1`), and the Tower of Wisdom's 4F is a maze |
 | U137 | Sea Kraken | done | The Kraken east of Cork Island (ferry or boat). Its six tentacles must fall before it surfaces for 15 s; under water it takes 10% (`p4Atk`). Tentacles are `tmp` adds with their own small drop; the boss reward pays once, on the Kraken. `p4world` |
 | U138 | Ancient Dragon | done | Trauka the Red Dragon is a world boss with a shared 30-minute timer (`worldboss`). The weekly world boss hunt is announced 10 minutes before and joined from the calendar only near the boss's level (not below 180 for Trauka; `hunt`, SAT-ONLINE-124). Below a region's level, walking in warns you (`oneShot`), and so does a gate (`dunWarn`) |
-| U139 | Sand Scorpion [PROPOSED] | part | Buried in the southern desert, far from towns; it bursts out within 64 px (`MPDORM`, `drawMound`, `mpack`) and its sting poisons. Left: a herb that counters venom (only Purification clears poison) |
+| U139 | Sand Scorpion [PROPOSED] | done (v3.51) | Buried in the southern desert, far from towns; it bursts out within 64 px (`MPDORM`, `drawMound`, `mpack`) and its sting poisons. Left: a herb that counters venom (only Purification clears poison) v3.51: the Antivenom `antidp` (the herbalist's book, 2,500 gold; two Red Herbs and a Moonflower) clears poison at once and keeps poison off for 2 minutes (`mxOn`, `DISH.cure`; `regression/u114`). |
 | U140 | Mirage Snake [PROPOSED] | reject | REJECT_NOT_CANON: an invented monster. Decoy clones exist (Hong Gildong's `egclone`, the Doppelganger's `dpcopy`), but each one gives 20,000 XP; worth knowing if "illusions give no XP" is wanted |
 | U141 | Swamp Mimic [PROPOSED] | done (v3.48) | Mimics in the marsh hold still as chests until you're within 30 px or hit them (`MPDORM`, `mpDorm`, `mpack`). Left: a tell you can read, and a real chest whose loot needs the trap solved (a mimic's loot is its kill drop) v3.48: a mimic gives itself away to whoever watches: every few seconds its lid lifts a crack on its teeth and it drools, and on the minimap and the map it's no monster (`mimTell`). Three real chests stand among them, drawn the same, each with a needle trap: E starts the needle's sweep, E inside the green opens it (gold, sometimes a gem), outside it poisons you and jams the lock for a minute; each refills for you every 20 minutes (`tchList`, `tchPress`, `S.tch`). E on a mimic wakes it (`regression/plan12`). |
 | U142 | Cave Bat [PROPOSED] | done (v3.23) | Cave bats on the highlands swoop and drink blood (`cbat` flyer). The Echo Bat Swarm is six bats that one blow only thins (`bswarm`, GAME_ORIGINAL). Flight is ordinary movement, interpolated online like any monster (`mobsync`). Left: hearing (aggro range changes only with stealth, fog or the eagle form) |

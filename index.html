@@ -6417,7 +6417,7 @@ Object.assign(STR.en,{cookHow:'Press E when it turns golden',brewHow:'Press E wh
 let CKAT=0;   // v3.04: the menu is the stove's (its name and line), kept across the dishes cooked at it
 function campMenu(st){if(st!==undefined)CKAT=st?1:0;if(CKAT&&!CKST)CKAT=0;dialog(CKAT?'pstove':'camp',[CKAT?'ckHi':'campHi'],null,[...Object.keys(COOK).map(k=>rbGate(k)?rbLock(k,campMenu):({l:t('oCook',{it:t(k),n:needTxt(COOK[k])}),ic:k,poor:!canMake(COOK[k]),st:t(k+'D'),f:()=>makeLife(k,false)})),
  ...Object.keys(BREW).map(k=>rbGate(k)?rbLock(k,campMenu):({l:t('oBrew',{it:t(k),n:needTxt(BREW[k])}),ic:k,poor:!canMake(BREW[k]),st:[DISH[k]&&STR.en[k+'D']?t(k+'D'):'',hFreshFor(k)?t('hFreshT'):''].filter(Boolean).join(' · ')||undefined,f:()=>makeLife(k,true)})),...autoOpt('cook',()=>campMenu()),{l:t('oLeave')}]);}   // (review) the switch last: the cursor starts on a dish
-function eatDish(k){const d=DISH[k];if(!(S.mats[k]>0))return;S.mats[k]--;if(!d.pot)vowBreak('fast');P.food=Math.min(100,P.food+d.food);if(d.hp)P.hp=Math.min(maxHP(),P.hp+maxHP()*d.hp);if(d.buf)P.buf={k:d.buf,t:d.bt};vfx('heal',P.x,P.y);toast(t('ateD',{it:t(k)}),'good');SFX.eat();hudDirty=true;}
+function eatDish(k){const d=DISH[k];if(!(S.mats[k]>0))return;S.mats[k]--;if(!d.pot)vowBreak('fast');P.food=Math.min(100,P.food+d.food);if(d.hp)P.hp=Math.min(maxHP(),P.hp+maxHP()*d.hp);if(d.buf)P.buf={k:d.buf,t:d.bt};if(d.cure&&P.dotC==='pois'&&P.dotT>gTime){P.dotT=0;P.dotP=0;}vfx('heal',P.x,P.y);toast(t('ateD',{it:t(k)}),'good');SFX.eat();hudDirty=true;}
 function updateLife(dt){if(!P)return;if(P.buf){P.buf.t-=dt;if(P.buf.k==='regen'&&P.hp>0&&!P.ghost&&!hellDeb())P.hp=Math.min(maxHP(),P.hp+maxHP()*.015*dt);if(P.buf.t<=0){P.buf=null;toast(t('bufEnd'));}}
  if(FISH){const F=FISH;F.t+=dt;if(Math.hypot(P.x-F.px,P.y-F.py)>3||mode==='dead'){FISH=null;return;}if(F.t>=F.bite&&!F.shown){F.shown=1;SFX.notice();fsBite(F);}if(F.t>F.bite+F.win){FISH=null;toast(t('fGone'),'warn');fsMiss(F);}}}
 function drawFish(){const F=FISH;if(!F)return;const bite=F.t>=F.bite,bx=F.x,by=F.y-2+(bite?2+Math.sin(gTime*30):Math.sin(gTime*3));ctx.strokeStyle='rgba(230,230,220,.8)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(P.x+(P.dir===3?-8:8),P.y-20);ctx.quadraticCurveTo((P.x+bx)/2,Math.min(P.y,by)-14,bx,by);ctx.stroke();
@@ -6455,7 +6455,7 @@ const MT={
  sellobu:{lv:[200,200],hp:450000,dmg:4500,spd:62,xp:27000,gold:0,aggro:170,r:6,oy:14,bhm:.45,bhd:1.3,drop:[]},
  foxmouse:{lv:[230,230],hp:1,dmg:1,spd:66,xp:27000,gold:0,aggro:0,r:5,oy:12,drop:[]},
  // the monster pack (v1.23)
- hrabbit:{lv:[4,6],hp:160,dmg:14,spd:56,xp:22,gold:2,aggro:60,r:5,oy:16,drop:[['leather',.6]]},
+ hrabbit:{lv:[4,6],hp:160,dmg:14,spd:56,xp:22,gold:2,aggro:60,r:5,oy:16,drop:[['leather',.6],['rfur',.3]]},
  grabbit:{lv:[5,5],hp:120,dmg:1,spd:84,xp:250,gold:300,aggro:100,r:5,oy:14,drop:[['topaz',.08]]},
  slime:{lv:[60,64],hp:6000,dmg:260,spd:36,xp:380,gold:10,aggro:80,r:7,oy:16,drop:[['mstone',.2]]},
  mslime:{lv:[56,58],hp:1800,dmg:150,spd:44,xp:120,gold:3,aggro:120,r:5,oy:10,drop:[]},
@@ -6506,7 +6506,7 @@ const MT={
  dk_gis:{lv:[430,430],hp:11000000,dmg:20000,spd:48,xp:2800000,gold:0,aggro:200,r:7,oy:34,boss:1,leash:480,slam:30000,slamR:48,sc:1.25,drop:[]},
  dk_povia:{lv:[440,440],hp:10000000,dmg:21000,spd:56,xp:2900000,gold:0,aggro:240,r:7,oy:34,boss:1,leash:480,slam:26000,slamR:44,sc:1.2,drop:[]},
  dk_madra:{lv:[460,460],hp:14000000,dmg:24000,spd:54,xp:4000000,gold:0,aggro:240,r:8,oy:40,boss:1,leash:480,slam:36000,slamR:56,sc:1.35,drop:[]},
- rabbit:{lv:[1,3],hp:70,dmg:6,spd:52,xp:10,gold:1,aggro:0,r:5,oy:14,drop:[['leather',.5]]},
+ rabbit:{lv:[1,3],hp:70,dmg:6,spd:52,xp:10,gold:1,aggro:0,r:5,oy:14,drop:[['leather',.5],['rfur',.25]]},
  boar:{lv:[3,6],hp:220,dmg:30,spd:50,xp:24,gold:2,aggro:60,r:7,oy:18,drop:[['leather',.55]]},
  goblin:{lv:[7,12],hp:450,dmg:50,spd:48,xp:45,gold:4,aggro:85,r:6,oy:28,drop:[['mstone',.2]]},
  gchief:{lv:[16,16],hp:6000,dmg:90,spd:40,xp:900,gold:80,aggro:110,r:9,oy:40,boss:1,leash:150,slam:200,slamR:36,sc:1.4,drop:[['mstone',1],['leather',1]]},
@@ -6688,6 +6688,7 @@ Object.assign(MT,{bkarrow:{lv:[205,212],hp:420000,dmg:5200,spd:58,xp:30000,gold:
  slaught:{lv:[215,215],hp:9000000,dmg:7000,spd:48,xp:1000000,gold:30000,aggro:170,r:12,oy:54,boss:1,leash:240,slam:10000,slamR:56,sc:1.9,drop:[['mith',10],['mstone',12]]}});
 // the Patrian farmer's rows and Piaro's field (tiles), for the burrowers and the secret quest (var: read when the first world is built)
 var FWF={x:373,y:96},PIF={x:290,y:68},O48L={dx:20,dy:-10},O48S=[],O48R=[],O48P=new Map();
+Object.assign(MT,{srabbit:{lv:[48,52],hp:1500,dmg:90,spd:58,xp:160,gold:6,aggro:0,r:5,oy:14,drop:[['rfur',.6],['leather',.3]]}});   // the Snow Rabbit (plan U114, u114Spawn)
 const SPAWN=[['rabbit',104,150,42,62,14],['rabbit',147,157,62,100,6],['boar',147,157,64,104,8],['boar',100,118,44,62,5],['goblin',109,152,105,116,14],['merman',80,106,88,112,12],['pwolf',64,100,42,90,12],
  ['outlaw',58,80,99,116,10],['forc',80,150,4,24,16],['gbear',66,156,26,37,12],['wolf',3,62,46,84,14],['bear',3,62,46,84,6],['golem',29,49,3,41,10],['cgolem',50,61,12,22,4],
  ['hwolf',160,221,40,62,14],['rboar',160,221,42,62,8],['deserter',160,221,103,118,12],['mgolem',160,221,104,118,6],['gbear',160,221,26,37,8]];
@@ -7093,7 +7094,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   // the 32nd Great Demon Belial at the gate of hell (major 7), after them for the same reason
   {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
-  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();wsSpawn();zbSpawn();hlSpawn();owbSpawn();gpSpawn();}   // owbSpawn: the orc warband (plan U121), gpSpawn: the Guardian's pillars (plan U119), last for the same reason
+  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();wsSpawn();zbSpawn();hlSpawn();owbSpawn();gpSpawn();u114Spawn();}   // owbSpawn: the orc warband (plan U121), gpSpawn: the Guardian's pillars (plan U119), last for the same reason
  for(const m of mons)eliteRoll(m);
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
@@ -13023,7 +13024,7 @@ const MXK={
   for(const o of mons)if(!o.dead&&(o===m||Math.hypot(o.x-m.x,o.y-m.y)<(mv.rng||150))){o.fury=gTime+(mv.t||6);if(!rep&&o!==m){o.sprT=2;o.cd=Math.min(o.cd,.4);}}}};
 // what a blow, a bolt or a pool leaves on you
 function mxOn(mv,m){if(!mv||!P||saIn())return;
- if(mv.dot&&!((P.dotT||0)>gTime&&(P.dotP||0)>mv.dot[0])){const k=mv.dot[2]||'pois';if(!((P.dotT||0)>gTime))numPK(-34,'mxDot_'+k,MXC[k]||'#7ad04a',false);P.dotT=gTime+mv.dot[1];P.dotP=mv.dot[0];P.dotC=k;}
+ if(mv.dot&&!((P.dotT||0)>gTime&&(P.dotP||0)>mv.dot[0])&&!((mv.dot[2]||'pois')==='pois'&&P.buf&&P.buf.k==='antid')){const k=mv.dot[2]||'pois';if(!((P.dotT||0)>gTime))numPK(-34,'mxDot_'+k,MXC[k]||'#7ad04a',false);P.dotT=gTime+mv.dot[1];P.dotP=mv.dot[0];P.dotC=k;}
  if(mv.slow){if(!((P.slowT||0)>gTime))numPK(-34,'mxSlow','#9fd8ff',false);P.slowT=Math.max(P.slowT||0,gTime+mv.slow);}
  if(mv.shred){if(!((P.shredT||0)>gTime))numPK(-34,'mxShred','#c8a050',false);P.shredT=Math.max(P.shredT||0,gTime+mv.shred);hudDirty=true;}   /* (plan U118) torn armour: 30% less defence for a while */
  if(mv.root&&!((P.rootI||0)>gTime)&&!legResist()){P.rootT=gTime+mv.root;P.rootI=P.rootT+1.5;numPK(-34,'mxRoot','#c8a050',false);SFX.clang();}
@@ -13489,7 +13490,7 @@ const RB=[
  {id:'rb_c_feast',c:'cook',k:['feast'],g:4000,shop:'fisher'},{id:'rb_c_fishpie',c:'cook',k:['fishpie'],g:3000,shop:'fisher'},
  {id:'rb_c_ppie',c:'cook',k:['ppie'],g:2500,shop:'baker'},{id:'rb_c_sjam',c:'cook',k:['sjam'],g:2000,shop:'baker'},
  {id:'rb_c_herbtea',c:'cook',k:['herbtea'],g:1500,shop:'herbW'},{id:'rb_c_gfeast',c:'cook',k:['gfeast'],boss:.02},
- {id:'rb_a_mightp',c:'alch',k:['mightp'],g:5000,shop:'herbW'},{id:'rb_a_stonep',c:'alch',k:['stonep'],g:3500,shop:'herbW'},{id:'rb_a_swiftp',c:'alch',k:['swiftp'],g:3000,shop:'herbW'},{id:'rb_a_regenp',c:'alch',k:['regenp'],boss:.02,mon:[['gshaman',.01]]},
+ {id:'rb_a_mightp',c:'alch',k:['mightp'],g:5000,shop:'herbW'},{id:'rb_a_stonep',c:'alch',k:['stonep'],g:3500,shop:'herbW'},{id:'rb_a_swiftp',c:'alch',k:['swiftp'],g:3000,shop:'herbW'},{id:'rb_a_antidp',c:'alch',k:['antidp'],g:2500,shop:'herbW'},{id:'rb_a_regenp',c:'alch',k:['regenp'],boss:.02,mon:[['gshaman',.01]]},
  {id:'rb_s_tBoots',c:'sew',k:['tBoots'],g:2000,shop:'stylist'},{id:'rb_s_tRobe',c:'sew',k:['tRobe'],g:3500,shop:'stylist'},
  {id:'rb_m_vwolf',c:'smith',k:['vwarmor','vwhelm','vwgloves','vwboots'],mon:[['vb15',.25],['vb14',.25]]}];
 const RBK={};for(const b of RB)for(const k of b.k)RBK[k]=b;
@@ -13503,6 +13504,18 @@ const rbGate=k=>!!RBK[k]&&!rbKn(RBK[k].id);
 Object.assign(COOK,{herbtea:{need:{herb:2,bherb:1},xp:10},fishpie:{need:{fish:2,wheat:2},alt:'sfish',xp:18},gfeast:{need:{gfish:2,melon:1,pumpk:1,bherb:2},xp:60}});
 Object.assign(BREW,{mightp:{need:{bherb:2,herb:2,mstone:1},xp:20},regenp:{need:{herb:4,vherb:1},xp:24}});
 Object.assign(BREW,{stonep:{need:{herb:2,ore:3},xp:18},swiftp:{need:{bherb:1,straw:3},xp:16}});Object.assign(DISH,{stonep:{food:0,buf:'stone',bt:240,pot:1},swiftp:{food:0,buf:'swift',bt:240,pot:1}});Object.assign(MATP,{stonep:160,swiftp:140});   /* (plan U098) */
+/* Plan U114 and U139 (2026-10-26). Rabbits drop their fur, and the Snow Rabbit lives on the Northern Snowfields (passive
+   like the meadow's, but a snowfield's level); rabbit fur sells at the shops. The Antivenom (the herbalist's book, 2,500 gold)
+   is brewed from Red Herbs and a Moonflower: it clears poison at once and keeps poison off for 2 minutes (the scorpions'
+   sting, the slimes' acid, a needle trap's is a needle, not a bite, and still gets you: tchPress). Until now only
+   Purification cleared poison. */
+Object.assign(NAMEK,{srabbit:'srabbitN'});Object.assign(RKMV,{srabbit:RKMV.rabbit});Object.assign(AIK,{srabbit:'hop'});Object.assign(P3D,{srabbit:{base:'rabbit',f:'grayscale(1) brightness(1.75) contrast(.9)',sc:1.05}});
+Object.assign(MATP,{rfur:10,antidp:120});
+Object.assign(BREW,{antidp:{need:{herb:2,bherb:1},xp:14}});Object.assign(DISH,{antidp:{food:0,buf:'antid',bt:120,pot:1,cure:1}});
+function u114Spawn(){const r=mulberry32(11414);let c=0,tr=0;while(c<10&&tr<3000){tr++;const x=110+(r()*70|0),y=6+(r()*18|0);if(solV0(x,y)||solV0(x+1,y))continue;const m=newMon('srabbit',x*TS+8,y*TS+8,r);m.far=1;mons.push(m);c++;}}
+Object.assign(STR.ar,{srabbitN:'أرنب الثلج',rfur:'فرو أرنب',antidp:'جرعة ضد السم',antidpD:'بتشيل السم على طول، ومفيش سم بيمسك فيك لمدة دقيقتين.'});
+Object.assign(STR.en,{srabbitN:'Snow Rabbit',rfur:'Rabbit Fur',antidp:'Antivenom',antidpD:'Clears poison at once, and no poison takes hold for 2 minutes.'});
+window.__GU114={spawn:()=>u114Spawn(),zone:(x,y)=>zoneAt(x,y),eat:k=>eatDish(k),drops:k=>MT[k].drop,gt:()=>gTime,price:k=>MATP[k],book:k=>RBK[k]&&RBK[k].shop}; // tests
 Object.assign(DISH,{herbtea:{food:20,hp:.25,buf:'regen',bt:150},fishpie:{food:70,hp:.25,buf:'might',bt:200},gfeast:{food:100,hp:.5,buf:'might',bt:600},
  mightp:{food:0,buf:'might',bt:300,pot:1},regenp:{food:0,hp:.2,buf:'regen',bt:300,pot:1}});
 Object.assign(MATP,{herbtea:20,fishpie:60,gfeast:400,mightp:150,regenp:200});
