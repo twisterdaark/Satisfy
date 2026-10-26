@@ -23,7 +23,7 @@ test('a golem leaves its rubble: a vein its killer digs once, gone in 90 s; rate
       const n0 = X.nodes().length, last = () => X.nodes()[X.nodes().length - 1];
       const m = X.newMon('golem', P.x + 40, P.y); X.killMon(m);
       const n = last(); o.added = X.nodes().length - n0; o.gol = n.gol > 0; o.kind = n.kind || 'ore'; o.at = Math.hypot(n.x - m.x, n.y - m.y) < 8;
-      const c = X.newMon('egolem', P.x - 40, P.y); X.killMon(c); o.mith = last().kind;
+      const c = X.newMon('egolem', P.x - 40, P.y); X.killMon(c); o.mith = last().kind || 'ore';
       const tm = X.newMon('golem', P.x, P.y + 40); tm.tmp = 1; X.killMon(tm); o.tmp = X.nodes().length - n0;   // a summoned one leaves nothing
       const w = X.newMon('wolf', P.x, P.y - 40); X.killMon(w); o.wolf = X.nodes().length - n0;
       // dig the first one
@@ -32,7 +32,7 @@ test('a golem leaves its rubble: a vein its killer digs once, gone in 90 s; rate
       return o;
     });
     assert.equal(r.added, 1); assert.equal(r.gol, true); assert.equal(r.kind, 'ore'); assert.equal(r.at, true, 'where it fell');
-    assert.equal(r.mith, 'mith', 'the Canyon Golem leaves mithril');
+    assert.equal(r.mith, 'ore', 'the Canyon Golem\'s rubble is ore too (its mithril stays its drop)');
     assert.equal(r.tmp, 2, 'a summoned golem leaves nothing'); assert.equal(r.wolf, 2, 'nor does a wolf');
     assert.ok(r.dug >= 1, 'ore dug: ' + r.dug); assert.equal(r.dep, true);
     await g.step(3);
@@ -62,22 +62,24 @@ test('the boss fight log: phases, damage, deaths and positions, kept on the devi
     await H.newGame(g);
     const r = await g.eval(() => {
       const G = window.__G, S = G.S, X = window.__GPB11, P = G.P, o = {};
-      X.resetRL(); try { localStorage.removeItem('satisfy_rlog'); } catch (e) {}
+      const key = 'satisfy_rlog:' + (S.pid || ''); X.resetRL(); try { localStorage.removeItem(key); } catch (e) {}
       const m = X.newMon('dcapt', P.x + 60, P.y); m.hp = Math.round(m.max * 0.9); m.myd = 0;
       X.bflTick(0.016); o.started = !!X.BFF && X.BFF.m === m;
       for (let i = 0; i < 24; i++) { X.addT(0.5); P.x += 2; m.x -= 1; m.hp -= Math.round(m.max * 0.02); m.myd += Math.round(m.max * 0.02); if (i === 10) { X.bflPhase(m, 2); P.hp -= 5; } X.bflTick(0.5); }
       m.dead = true; X.bflTick(0.016);
       const L = X.bflList(); o.n = L.length; const R = L[0];
       o.rec = { k: R.k, end: R.end, d: R.d >= 115, ph: R.ev.filter((e) => e[1] === 'ph').map((e) => e[2]), dealt: R.dealt > 0, tk: R.tk >= 5, samples: R.s.length >= 24, bag: /items|mats|gold/.test(JSON.stringify(R)) };
-      try { o.saved = JSON.parse(localStorage.getItem('satisfy_rlog')).k; } catch (e) { o.saved = null; }
+      try { o.saved = JSON.parse(localStorage.getItem(key)).k; } catch (e) { o.saved = null; }
       // the device keeps it through a reload: the list comes back from localStorage
       X.resetRL(); o.reloaded = X.bflList().length;
+      // a broken copy on the device is ignored
+      const keep = localStorage.getItem(key); localStorage.setItem(key, JSON.stringify({ k: 'dcapt', d: 5, end: 'down', s: [1], ev: [], who: [null] })); X.resetRL(); o.broken = X.bflList().length; localStorage.setItem(key, keep); X.resetRL(); X.bflList();
       return o;
     });
     assert.equal(r.started, true, 'a hurt boss near you starts the log');
     assert.equal(r.n, 1);
     assert.deepEqual(r.rec, { k: 'dcapt', end: 'down', d: true, ph: [2], dealt: true, tk: true, samples: true, bag: false });
-    assert.equal(r.saved, 'dcapt'); assert.equal(r.reloaded, 1);
+    assert.equal(r.saved, 'dcapt'); assert.equal(r.reloaded, 1); assert.equal(r.broken, 0);
 
     // the replay
     await g.eval(() => window.__GPB11.bflOpen());
@@ -132,6 +134,15 @@ test('a caravan commission: the deposit, the roads, the bandits, no teleports, a
     await closeDialogs(g);
 
     // a teleport out in the world loses the load and the deposit; a door into a house and back doesn't
+    const h = await g.eval(() => {
+      const G = window.__G, S = G.S, X = window.__GPB11, Z = window.__GPB10, P = G.P, o = {};
+      const keep = S.cvn; S.cvn = null; S.cvD.n = 0;
+      const shop = X.npcAt('merchantR'); P.x = shop.x; P.y = shop.y + 20; X.cvTake('merchantR', 'merchantRh', 1); o.inShop = !!Z.roomId(P.x, P.y); X.cvTick(0.016);
+      const inn = X.npcAt('innRh'); P.x = inn.x; P.y = inn.y + 20; X.cvTick(0.016); o.inInn = !!Z.roomId(P.x, P.y) && !!S.cvn;   // a Return Scroll to Reinhardt's inn
+      const B = X.cvPos('merchantRh'); P.x = B.x; P.y = B.y + 20; X.cvTick(0.016); o.lost = !S.cvn;   // out of its door
+      S.cvn = keep; S.cvD.n = 1; return o;
+    });
+    assert.deepEqual(h, { inShop: true, inInn: true, lost: true }, 'taken in the shop, a scroll leaves it behind');
     const t = await g.eval(() => {
       const G = window.__G, S = G.S, X = window.__GPB11, P = G.P, o = {};
       const A = X.cvPos('merchantR'); P.x = A.x; P.y = A.y + 20; X.cvTick(0.016);
@@ -153,27 +164,30 @@ test('a caravan commission: the deposit, the roads, the bandits, no teleports, a
       const steps = Math.ceil(Math.hypot(B.x - P.x, B.y - P.y) / 120), sx = P.x, sy = P.y;
       for (let i = 1; i <= steps; i++) { P.x = sx + (B.x - sx) * i / steps; P.y = sy + (B.y + 20 - sy) * i / steps; X.cvTick(0.016); }
       o.amb = X.mons().filter((m) => m.cv && !m.dead).length - n0; o.left = S.cvn ? S.cvn.amb.length : -1;
+      const rs = X.mons().filter((m) => m.cv && !m.dead); for (const m of rs.slice(1)) X.killMon(m); o.ra = S.cvn.ra;   // one left standing
       const g0 = S.gold, pay = S.cvn.pay, dep = S.cvn.dep;
-      const opt = X.cvOpts('merchantRh'); o.give = opt.map((x) => x.l); opt[0].f(); o.got = S.gold - g0 === pay + dep; o.done = !S.cvn;
+      const opt = X.cvOpts('merchantRh'); o.give = opt.map((x) => x.l); opt[0].f(); o.got = S.gold - g0 === Math.round(pay / 2) + dep; o.done = !S.cvn;
       o.today = S.cvD.n;
       return o;
     });
     assert.equal(d.risk, 1);
     assert.ok(d.amb >= 3, 'raiders came: ' + d.amb); assert.equal(d.left, 0, 'twice');
     assert.match(d.give[0], /^📦 Hand over the load/);
-    assert.equal(d.got, true, 'the pay and the deposit back'); assert.equal(d.done, true);
+    assert.equal(d.ra, 1); assert.equal(d.got, true, 'half the pay with a raider left standing, and the deposit back'); assert.equal(d.done, true);
     assert.equal(d.today, 2);
     await closeDialogs(g);
 
     // death loses it; four a day
     const e = await g.eval(() => {
       const G = window.__G, S = G.S, X = window.__GPB11, o = {};
+      X.cvTake('merchantR', 'merchantRo', 0); const g0 = S.gold, full = S.cvn.pay + S.cvn.dep; X.cvOpts('merchantRo')[0].f(); o.full = S.gold - g0 === full;   // the safe road, no raiders: the whole pay
       X.cvTake('merchantR', 'merchantRo', 0); X.die(); o.died = !S.cvn;
-      S.cvD.n = 4; X.cvMenu('merchantR'); o.cap = /loads a day/.test(G.DL.lines.join(' ')) && !(G.DL.opts || []).some((x) => /^To /.test(x.l));
+      X.cvMenu('merchantR'); o.cap = S.cvD.n === 4 && /loads a day/.test(G.DL.lines.join(' ')) && !(G.DL.opts || []).some((x) => /^To /.test(x.l));
+      X.cvTake('merchantR', 'merchantRo', 0); o.capTake = !S.cvn;
       return o;
     });
-    assert.equal(e.died, true, 'a death loses the load');
-    assert.equal(e.cap, true, 'four a day');
+    assert.equal(e.full, true, 'the whole pay'); assert.equal(e.died, true, 'a death loses the load');
+    assert.equal(e.cap, true, 'four a day'); assert.equal(e.capTake, true);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
