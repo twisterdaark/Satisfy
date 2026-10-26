@@ -36,7 +36,7 @@
       "aura": {"id":"aura","hidden":true,"rating":"rare","quest":"hau","cond":"parry","lv":20,"skills":["aweap","arel","aspr","aleg","agrd","asens"],"src":"PER_CODE"},
       "beast": {"id":"beast","hidden":true,"rating":"rare","quest":"hbm","cond":"beast","lv":25,"skills":["bbear","bwolf","beagle","blord","bhalf","blion","broar","btiger","bleo"],"src":"PER_CODE"},
       "orator": {"id":"orator","hidden":true,"rating":"rare","quest":"hor","cond":"talk","lv":15,"skills":["opers","ospite","oelo"],"src":"PER_CODE"},
-      "dslayer": {"id":"dslayer","hidden":true,"rating":"rare","quest":"hds","cond":"demon","lv":180,"skills":["dsweap","dscut","dsbane","dsbul","dsvind","dspure","dsend","dsint","dsseal","dsdest","dssum","dsleap"],"src":"PER_CODE"},
+      "dslayer": {"id":"dslayer","hidden":true,"rating":"rare","quest":"hds","cond":"demon","lv":180,"skills":["dsweap","dscut","dsbane","dsbul","dsvind","dspure","dsend","dsint","dsseal","dspred","dsdest","dssum","dsleap"],"src":"PER_CODE"},
       "saintess": {"id":"saintess","hidden":true,"rating":"rare","quest":"hsa","cond":"rescue","lv":40,"skills":["sapray","sagrace","salife"],"src":"PER_CODE"},
       "lsword": {"id":"lsword","hidden":true,"rating":"rare","source":"fogbook","skills":["lsslash","lsstep","lsstorm","lscharge"],"src":"PER_CODE"},
       "esorc": {"id":"esorc","hidden":true,"rating":"rare","source":"fogbook","skills":["esboom","esrune","eswave","esburst"],"src":"PER_CODE"}

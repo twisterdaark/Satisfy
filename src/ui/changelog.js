@@ -7,6 +7,16 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26legbuff2', ver: '3.39', d: '2026-10-26',
+      ar: ["القديس (سيد السيف) بقى أقوى: مهاراته بتضرب حوالي 30% أكتر (الصليب 650%، والسيوف المتحكم فيها 80%، وتجسيد الإرادة على 8 أعداء، وسيف القلب 13% من صحة الهدف، والسحاب الأزرق 130%، وسيف الجنون 290%، والدفاع المطلق بيرد 1,040%، ونية القتل 3,250%، وعاصفة السيوف 390%، والقطعة القصوى 1,040%، وموجة قمة فن السيف 200%).",
+        "قاتلة الشياطين بقت أقوى: سيف التألق 390%، ورصاصة الفناء 340%، والسيف الانتقامي 440%، و8 طلقات تطهير بدل 6، ونور النهاية 520%. نور الدمار فضل بأرقام الرواية.",
+        "مهارة جديدة لقاتلة الشياطين في لفل 300: مفترس الشياطين. الدرع الأبيض اللي من الجحيم بيتلبس عليك 30 ثانية: ضرر أقل 30% وضربك على الشياطين أقوى 25%.",
+        "اختبارات جديدة للقديس وقاتلة الشياطين."],
+      en: ["The Sword Saint is stronger: his skills hit about 30% harder (the Cross 650%, Control Sword 80%, Manifestation of Will on 8 foes, Heart Sword 13% of the target's health, True Clouds 130%, Frenzy Sword 290%, the absolute guard answers with 1,040%, Kill Peak 3,250%, Sword Storm 390%, the ultimate cut 1,040%, the peak of swordsmanship's shockwave 200%).",
+        "The Demon Slayer is stronger: Brilliance Sword 390%, Extinction Bullet 340%, Vindictive Sword 440%, eight Purification Bullets instead of six, Light of the End 520%. Light of Destruction keeps the novel's numbers.",
+        "New for the Demon Slayer at level 300: Demon Predator. The white armour from hell is summoned on you for 30 seconds: 30% less damage taken and 25% more against demons.",
+        "New tests for the Sword Saint and the Demon Slayer."],
+      hide: [3] },
     { v: '2026-10-26atlasnpc', ver: '3.38', d: '2026-10-26',
       ar: ["شخصيات جديدة من الرواية والمانهوا اتضافت للعالم: أعضاء أوفرجيرد في ريدان (يوفيمينا، يورا، بون، توبان، تون) ومعاهم براهام، وجود وكارين ويريم وروبي وبانمير وستينج.",
            "رانكرز في راينهارت (كريس، بلاند، كيكي، هيورنت، زيدنوس، آريس، آسوكا، باني باني، سيورون، كوك، ديك، فيوليت، كيرب، لاك، بلاك تيدي، سنيفر، شاي)، وفي رولينج وتيتان (فيرادين، ألباتينو، بوندري، إيبيلين، كاتز، أجنوس، زيركان، لاييلا).",
