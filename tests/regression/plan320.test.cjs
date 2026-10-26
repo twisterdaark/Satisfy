@@ -43,6 +43,10 @@ test('the plan, batch 1', async () => {
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'n', code: 'KeyN', bubbles: true }));
       const b = document.querySelector('#ixTabs [data-ixt="qst"]'); if (!b) return { tab: false }; b.click(); return { tab: true, has: document.getElementById('ixG').textContent.length > 0 }; });
     assert.ok(j && j.tab, 'U208: the Index has the journal tab'); assert.equal(j.has, true, 'and the finished quest is in it');
+    // U094: pickaxes at Khan's: the next one for sale, and a strike that costs less stamina
+    const px = await g.eval(() => { const G = window.__G, S = G.S, K = window.__GCK; S.pick = 0; S.gold = 1e6; const n0 = K.pick().length; K.buy('khan', 'pick', 1);
+      return { n0, pick: S.pick, gold: S.gold < 1e6, n1: K.pick().length, c: K.PX[3].c }; });
+    assert.deepEqual([px.n0, px.pick, px.gold, px.n1, px.c], [3, 1, true, 2, 0.7], 'U094: pickaxes');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
