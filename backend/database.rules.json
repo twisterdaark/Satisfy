@@ -986,7 +986,7 @@
     "commOrders": {
       ".read": "auth != null",
       "$oid": {
-        ".write": "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid) || (data.exists() && !newData.exists() && ((data.child('by').val() === auth.uid && (!root.child('commClaim').child($oid).exists() || now - root.child('commClaim').child($oid).child('t').val() > 600000)) || (root.child('commClaim').child($oid).child('s').val() === auth.uid && newData.parent().parent().child('commDone').child(data.child('by').val()).child($oid).child('by').val() === auth.uid))))",
+        ".write": "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid) || (data.exists() && !newData.exists() && ((data.child('by').val() === auth.uid && (!root.child('commClaim').child($oid).exists() || now - root.child('commClaim').child($oid).child('t').val() > 600000 || now - root.child('commClaim').child($oid).child('t0').val() > 1200000)) || (root.child('commClaim').child($oid).child('s').val() === auth.uid && newData.parent().parent().child('commDone').child(data.child('by').val()).child($oid).child('by').val() === auth.uid))))",
         ".validate": "$oid.matches(/^c_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['by', 'n', 'rc', 'fee', 't'])",
         "by": {
           ".validate": "newData.isString()"
@@ -1012,12 +1012,15 @@
       ".read": "auth != null",
       "$oid": {
         ".write": "auth != null && ((newData.exists() && root.child('commOrders').child($oid).exists() && root.child('commOrders').child($oid).child('by').val() !== auth.uid && (!data.exists() || now - data.child('t').val() > 600000)) || (!newData.exists() && !newData.parent().parent().child('commOrders').child($oid).exists() && (!data.exists() || data.child('s').val() === auth.uid || root.child('commOrders').child($oid).child('by').val() === auth.uid)))",
-        ".validate": "newData.hasChildren(['s', 't'])",
+        ".validate": "newData.hasChildren(['s', 't', 't0'])",
         "s": {
           ".validate": "newData.val() === auth.uid"
         },
         "t": {
           ".validate": "newData.val() === now"
+        },
+        "t0": {
+          ".validate": "newData.isNumber() && ((!data.exists() && newData.val() === now) || (data.exists() && newData.val() === data.val()))"
         },
         "$other": {
           ".validate": false
@@ -1034,7 +1037,7 @@
             ".validate": "newData.val() === root.child('commOrders').child($oid).child('rc').val()"
           },
           "json": {
-            ".validate": "newData.isString() && newData.val().length <= 600 && newData.val().contains('\"id\":\"' + root.child('commOrders').child($oid).child('rc').val() + '\"')"
+            ".validate": "newData.isString() && newData.val().length <= 600 && newData.val().beginsWith('{\"id\":\"' + root.child('commOrders').child($oid).child('rc').val() + '\",')"
           },
           "by": {
             ".validate": "newData.val() === auth.uid"

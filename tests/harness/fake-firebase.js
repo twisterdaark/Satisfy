@@ -621,7 +621,7 @@
       const O = (oid) => data.get('commOrders/' + oid), C = (oid) => data.get('commClaim/' + oid), stale = (c) => !c || now - c.t > 600000;
       if (seg[0] === 'commOrders') {
         if (seg.length !== 2 || !/^c_[A-Za-z0-9_-]{1,60}$/.test(seg[1])) return 'PERMISSION_DENIED: commOrders ' + p;
-        if (v === null) return old && ((old.by === me && stale(C(seg[1]))) || ((C(seg[1]) || {}).s === me && (after('commDone/' + old.by + '/' + seg[1]) || {}).by === me)) ? null : 'PERMISSION_DENIED: commOrders remove';
+        if (v === null) return old && ((old.by === me && (stale(C(seg[1])) || now - C(seg[1]).t0 > 1200000)) || ((C(seg[1]) || {}).s === me && (after('commDone/' + old.by + '/' + seg[1]) || {}).by === me)) ? null : 'PERMISSION_DENIED: commOrders remove';
         if (old || v.by !== me) return 'PERMISSION_DENIED: commOrders write';
         return Object.keys(v).sort().join(',') === 'by,fee,n,rc,t' && typeof v.n === 'string' && v.n.length <= 24 && typeof v.rc === 'string' && /^[a-z][a-z0-9_]{0,23}$/.test(v.rc) && isInt(v.fee, 1) && v.fee <= 1e7 && isSV(v.t) ? null : 'commOrders values';
       }
@@ -630,14 +630,14 @@
         const o = O(seg[1]);
         if (v === null) return after('commOrders/' + seg[1]) === null && (!old || old.s === me || (o && o.by === me)) ? null : 'PERMISSION_DENIED: commClaim remove';
         if (!o || o.by === me || !stale(old)) return 'PERMISSION_DENIED: commClaim write';
-        return Object.keys(v).sort().join(',') === 's,t' && v.s === me && isSV(v.t) ? null : 'commClaim values';
+        return Object.keys(v).sort().join(',') === 's,t,t0' && v.s === me && isSV(v.t) && (old ? v.t0 === old.t0 : isSV(v.t0)) ? null : 'commClaim values';
       }
       if (seg.length !== 3) return 'PERMISSION_DENIED: ' + seg[0] + ' ' + p;
       const o = O(seg[2]), c = C(seg[2]);
       if (seg[0] === 'commDone') {
         if (v === null) return seg[1] === me ? null : 'PERMISSION_DENIED: commDone remove';
         if (old || !o || o.by !== seg[1] || seg[1] === me || !c || c.s !== me || after('commOrders/' + seg[2]) !== null) return 'PERMISSION_DENIED: commDone write';
-        return Object.keys(v).sort().join(',') === 'by,fee,json,rc,sn,t' && v.rc === o.rc && typeof v.json === 'string' && v.json.length <= 600 && v.json.includes('"id":"' + o.rc + '"') && v.fee === o.fee && v.by === me && typeof v.sn === 'string' && v.sn.length <= 24 && isSV(v.t) ? null : 'commDone values';
+        return Object.keys(v).sort().join(',') === 'by,fee,json,rc,sn,t' && v.rc === o.rc && typeof v.json === 'string' && v.json.length <= 600 && v.json.startsWith('{"id":"' + o.rc + '",') && v.fee === o.fee && v.by === me && typeof v.sn === 'string' && v.sn.length <= 24 && isSV(v.t) ? null : 'commDone values';
       }
       if (seg[1] !== me) return 'PERMISSION_DENIED: commPaid ' + p;
       if (v === null) return old !== undefined ? null : 'PERMISSION_DENIED: commPaid remove';
