@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.41) |
+| | At the count | Now (v3.46) |
 |---|---|---|
-| Done | 233 | 275 |
-| Partly there (something left) | 92 | 53 |
+| Done | 233 | 277 |
+| Partly there (something left) | 92 | 51 |
 | Not started | 11 | 8 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **61** (53 + 8) |
+| **Left to build** | **103** (92 + 11) | **59** (51 + 8) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -29,6 +29,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.36 (batch 7, PR #289, merged by Claude-B after batch 6): U054 (a party summon), U119 (the Guardian's pillars), U121 (the orcs' shield wall and warband), U156 (fifty players within the frame budget).
 - v3.40 (batch 8, PR #290, merged by Claude-B after batch 7 and main's v3.37-v3.39): U151 (the spectators' ring), U098 (new brews, fresh herbs); U093 part (the helping step; Blaze left), U268 part (where a piece came from; the Myth rating left).
 - v3.41 (batch 9, PR #291, merged by Claude-B after batch 8): U203 (the courier's letter, a side and its cost), U158 (the border posts).
+- v3.46 (batch 10, PR #292, merged by Claude-B after main's v3.43-v3.45): U150 (the warcamp, one copy per party), U300 (a room of your own).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -144,7 +145,7 @@ Checked against `/home/claude/satisfy-aud` at 8a2e4f1e (v3.15). The test files b
 | U147 | Winston city gate | done | Winston has gates. Stepping out flips the badge to "Open PvP" with a flash and a notice before any hit can land (`pvphud`, SAT-ONLINE-204). The "Entered: {zone} · Recommended Lv" toast shows on crossing (`enterZ`, `townlv`) |
 | U148 | Bairan gate | wait | Needs a game server (D3). Bairan is in `SAFE_ZONES`, but that's a client policy (U026 is 🟡); the zone banner folds the Quarry into Bairan. Gates land on fixed open tiles, and anything stuck in a wall steps out (`freeNear`). Making it a server-held policy needs D3 |
 | U149 | Grey Forest trails | done | "Grey Forest (Lv 96+)". Walking in below level 90 warns "The monsters here are extremely high level!" (`oneShot`, `update`). The map shows each region's level, red when 10+ above yours (U254), and the quest arrow leads the way (`qguide`) |
-| U150 | Goblin warcamp | part | Goblin Canyon has the Goblin Chief; Goblin Canyon Depths has 3 floors, the Goblin Warlord and fixed counts per floor (`DSPAWN`). Left: one instance per party (`DUN` comment: "the space is shared for now") |
+| U150 | Goblin warcamp | done (v3.46) | Goblin Canyon has the Goblin Chief; Goblin Canyon Depths has 3 floors, the Goblin Warlord and fixed counts per floor (`DSPAWN`). Left: one instance per party (`DUN` comment: "the space is shared for now") v3.46: the warcamp's three floors are one copy per party: in it you see, share monsters with (`mobTick`'s group) and can be found by only your own party (`campMate` in `netSees`); a stranger there is in a copy of his own, on his own host. A stranger's ground drops there aren't in your copy (`dropIn`), and open PvP doesn't reach across on either side (`pvp.js` `apart`) (`regression/plan10`). |
 | U151 | Guardian Clearing | done (v3.40) | Guardian's Den with the Guardian; its health scales with the group (`bossscale`). Left: a spectator ring the boss never targets or reaches (it goes after the nearest player: `bosssync`) v3.40: a ring of white stones 230–300 px from his den (`gdRing`, flattened like the drawing): he never goes after anyone in it (alone: the leash sends him home; online: `mobTarget` skips them), none of his blows lands there (`hurtPlayer0`), and none of theirs lands on him (`hitMon`), so it's no archer's nest (`regression/plan8`). |
 | U152 | West Farm settlement | reject | Duplicate: Piaro's Field (8 plots, seasons, compost, the harvest fair), the Patrian farmer's rows, Winston Fields. §95 says don't duplicate the Harvest Fair |
 | U153 | Quarry Mine | done (v3.23) | The Quarry by Bairan, the Reidan mines' mithril veins, the Beware Dogs mine's veins. Left: shared nodes. Depletion is per screen (`n.dep`), so two players can each mine the same vein |
@@ -258,7 +259,7 @@ Checked against main `8a2e4f1e` (v3.15, 2026-10-26). Asgard is on a branch (HOLD
 | U293 | Dancing minigame | part | Patrian's stage (`p4DanceStart`/`p4Step`): ten arrows, the window shrinking from 0.9 to 0.45 s. The timing runs on the dancer's own screen and nothing is sent, so latency doesn't matter. Others see the dance emote (`EMO k:'dance'`) (`regression/p4world` "the stage"). Missing: the cooperative part, several players dancing one sequence together. It also pays gold (40 an arrow, ×2 for 10/10, once per 5 min), against §46's "social actions give no gold" |
 | U294 | Bard stage | done | The stage's 8 music pads ring under any player's feet, yours or another player's, quieter with distance (`P4.padOn`, `SFXV`). The Bard has three songs (`regression/p4world`). Each visitor turns the volume down or off on their own device under Sound (U321, `regression/mixer`). Note: the pads play in "game sounds", not in "other players" |
 | U298 | Library codex | done | SAT-ONLINE-188 (fea9d916): the Index's Lore tab keeps every plaque and shelf book you have read. Unread pages stay ??? (no name, no words, no search hit). Reading all of them gives Keeper of Lore (`regression/codex`) |
-| U300 | Housing rooms | part | The guild hall (U235, SAT-ONLINE-115) is a room of its own with 8 places. The master and officers furnish it and let guests in by account ID, and the rules check every edit (`guildHall`, `regression/guildhall`). Missing: a room of a player's own (searched `S.house`, `S.home`, "your house"/"your room": none) |
+| U300 | Housing rooms | done (v3.46) | The guild hall (U235, SAT-ONLINE-115) is a room of its own with 8 places. The master and officers furnish it and let guests in by account ID, and the rules check every edit (`guildHall`, `regression/guildhall`). Missing: a room of a player's own (searched `S.house`, `S.home`, "your house"/"your room": none) v3.46: any inn on the continent rents a room of your own once (5,000 gold); every inn there then opens its door to it, and its door brings you back to the inn you came from. Its eight places take the guild hall's house props (800 gold a piece), the furniture blocks the way, and a bed lets you sleep the day off once in 20 minutes; an inn's night is still the one that leaves you rested (`HOME`, `homeOpt`, `homeAct`, `S.home`). Nobody else is seen in yours, it has no shared monster host (`solo`), and a drop there stays off the network (`dropNet`); visits need rules and are left (`regression/plan10`). |
 | U301 | Mount racing | done (v3.23) | Winston's hourly horse race (`rcTick`, `rcBoard`, v0.94/0.95): two laps on the same race horse, the same stable riders on every screen, and the places shown to everyone (`regression/townlife`). The infield is trees and water, and leaving the course ends your race. Missing: checkpoints. Progress is each client's own sum of angles (`rcWrap`) sent in its fx tag, so nothing refuses a blink across the oval. The plan's "tracked by server" needs a game server (D3) |
 | U303 | Photo mode | done (v3.23) | F8 or the pause menu: the HUD hides and Enter/📷 saves a PNG. The game stays in `play`, so the online world goes on (`photoOn`/`photoShot`, `regression/mpack`). Missing: freezing the camera or moving it apart from the character (it still follows you) |
 | U305 | NPC daily schedule | part | Townsfolk and children walk set rounds as a pure function of the server clock (`tfAt(f, wNow)`, `regression/townsfolk`). The vampire cities' people hide by day (`p3Dark`), and NPC lines change with day and night (`NLD`). Missing: shopkeepers and guards stand in the same spot all day, with no opening hours and no shifts. The plan's test ("quests still reachable") holds only because nothing moves |
