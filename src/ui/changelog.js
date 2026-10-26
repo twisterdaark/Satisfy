@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26plan8', ver: '3.40', d: '2026-10-26',
+      ar: ["حواليين عرين حارس الغابة بقى فيه حلقة متفرجين من حجارة بيضا: اللي واقف فيها الحارس مش بيروحله ومش بيضربه، وهو كمان مش بيقدر يضرب الحارس من هناك.",
+        "كل قطعة بقت فاكرة جت منين: وقعت من مين، أو من صندوق زعيم، أو اتشرت من مين، أو مكافأة مهمة، أو غنايم غارة. بتبان تحت المواصفات وبتفضل معاها في التبادل.",
+        "جرعتين جداد عند عشّاب وينستون (كتبهم): جرعة جلد الحجر (أعشاب وحديد: ضرب أقل 15%) وجرعة السرعة (عشب أزرق وفراولة: مشي أسرع 12%). والأعشاب الطازة (متقطفة من أقل من 10 دقايق) بتطلّع جرعة زيادة.",
+        "اختبار الفلاح الأسطوري بقى فيه خطوة قبل الحقل الأسطوري: عيش للناس (20 قمح لعيلات باتريان)."],
+      en: ["A spectators' ring of white stones now circles the Guardian of the Forest's den: whoever stands in it isn't chased or hit by him, and can't strike him from there either.",
+        "Every piece now remembers where it came from: dropped by, a boss's chest, bought from, a quest's reward or raid loot. It shows under its stats and stays with it through trades.",
+        "Two new potions from their books at Winston's herbalist: the Stoneskin Potion (herbs and iron: 15% less damage) and the Swiftness Potion (a blue herb and strawberries: 12% faster on foot). Herbs picked in the last 10 minutes brew one more potion.",
+        "The Legendary Farmer's trial has a step before the Legendary Field: Bread for Others (20 wheat for Patrian's families)."] },
     { v: '2026-10-26legbuff2', ver: '3.39', d: '2026-10-26',
       ar: ["القديس (سيد السيف) بقى أقوى: مهاراته بتضرب حوالي 30% أكتر (الصليب 650%، والسيوف المتحكم فيها 80%، وتجسيد الإرادة على 8 أعداء، وسيف القلب 13% من صحة الهدف، والسحاب الأزرق 130%، وسيف الجنون 290%، والدفاع المطلق بيرد 1,040%، ونية القتل 3,250%، وعاصفة السيوف 390%، والقطعة القصوى 1,040%، وموجة قمة فن السيف 200%).",
         "قاتلة الشياطين بقت أقوى: سيف التألق 390%، ورصاصة الفناء 340%، والسيف الانتقامي 440%، و8 طلقات تطهير بدل 6، ونور النهاية 520%. نور الدمار فضل بأرقام الرواية.",

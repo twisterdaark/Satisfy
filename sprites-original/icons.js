@@ -264,7 +264,7 @@ const DRAW={
 // potions: round flask, cork, liquid with a highlight
 const flask=(liq,lt)=>I=>{I.rect(7,2,2,2,'#8a5a32');I.rect(6,4,4,1,'#c8d0dc');I.rect(7,5,2,2,'#c8d0dc');I.ell(8,10.5,4.5,4,'#c8d0dc');I.ell(8,11,3.5,3,liq);I.rect(5,9,6,1,lt);I.set(6,10,'#ffffff');I.set(6,11,lt);I.set(10,13,'#00000000'==='x'?lt:liq);};
 DRAW.respec=I=>{I.rect(3,3,10,10,'#e8d8a8');I.rect(3,3,10,1,'#b89858');I.rect(3,12,10,1,'#b89858');I.rect(2,2,2,12,'#9a7a48');I.rect(12,2,2,12,'#9a7a48');I.rect(5,5,6,1,'#5a4a8a');I.rect(5,7,5,1,'#5a4a8a');I.rect(5,9,6,1,'#5a4a8a');I.rect(7,10,2,2,'#c83a3a');};
-DRAW.hpot=flask('#d8283a','#ff7a8a');DRAW.mpot=flask('#2a5ad8','#7ab0ff');DRAW.mightp=flask('#e8801a','#ffc87a');DRAW.regenp=flask('#3aa84a','#9fe39a');
+DRAW.hpot=flask('#d8283a','#ff7a8a');DRAW.mpot=flask('#2a5ad8','#7ab0ff');DRAW.mightp=flask('#e8801a','#ffc87a');DRAW.regenp=flask('#3aa84a','#9fe39a');DRAW.stonep=flask('#7a7e88','#c8ccd6');DRAW.swiftp=flask('#1ab0c0','#a8f0f8');
 // recipe books, one cover for each craft (owner 2026-10-23): cooking, alchemy, sewing, smithing
 const rbook=(c,c2,mk)=>I=>{I.rect(3,2,10,12,c);I.rect(4,2,9,1,c2);I.rect(3,2,1,12,'#1a1220');I.rect(12,3,1,10,'#e8dcc0');I.rect(5,4,6,1,'#f2c14e');mk(I);};
 DRAW.rbookc=rbook('#8a4a1a','#b8702a',I=>{I.ell(8,10,3,1.6,'#2a2a34');I.rect(5,9,7,1,'#4a4a58');I.set(7,7,'#e8e8f0');I.set(9,6,'#e8e8f0');});
