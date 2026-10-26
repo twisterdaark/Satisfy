@@ -2771,9 +2771,10 @@ function renderAu(){if($('auW').hidden)return;const A=auWS(),me=pidOf(),ks=AUK.f
  document.querySelectorAll('#auW [data-autab]').forEach(b=>{b.classList.toggle('on',b.dataset.autab===AUV.tab);b.onclick=()=>{AUV.tab=b.dataset.autab;renderAu();};});
  const q=$('auQ');q.hidden=AUV.tab!=='list';q.placeholder=t('auFind');q.oninput=()=>renderAuL();
  const fl=$('auFl'),ki=$('auK'),mx=$('auMax'),so=$('auS');fl.hidden=AUV.tab!=='list';
- ki.innerHTML=AUKS.map(k=>`<option value="${k}"${AUV.k===k?' selected':''}>${t('auK_'+k)}</option>`).join('');
- so.innerHTML=['unit','total','new'].map(k=>`<option value="${k}"${AUV.s===k?' selected':''}>${t('auS_'+k)}</option>`).join('');
- mx.placeholder=t('auMaxH');mx.value=AUV.max>0?AUV.max:'';
+ const ae=document.activeElement;   /* a list that refreshes while a filter is in use leaves that filter as it is */
+ if(ae!==ki)ki.innerHTML=AUKS.map(k=>`<option value="${k}"${AUV.k===k?' selected':''}>${t('auK_'+k)}</option>`).join('');
+ if(ae!==so)so.innerHTML=['unit','total','new'].map(k=>`<option value="${k}"${AUV.s===k?' selected':''}>${t('auS_'+k)}</option>`).join('');
+ mx.placeholder=t('auMaxH');if(ae!==mx)mx.value=AUV.max>0?AUV.max:'';
  ki.onchange=()=>{AUV.k=ki.value;renderAuL();};so.onchange=()=>{AUV.s=so.value;renderAuL();};mx.oninput=()=>{AUV.max=Math.max(0,+mx.value||0);renderAuL();};renderAuL();}
 // what is listed and the gold waiting: the board's own updates draw only this, so a price being typed is left alone
 function renderAuL(){if($('auW').hidden)return;const A=auWS(),me=pidOf(),qs=$('auQ').value.trim().toLowerCase();
@@ -7076,7 +7077,7 @@ let ABIND={},KMAP=null,KSYN=0;try{const o=JSON.parse(localStorage.getItem('satis
 const actKey=a=>ABIND[a]||ACTD[a];
 function kmap(){if(KMAP)return KMAP;const m={};for(const [,a,d] of ACTK)if(actKey(a)!==d)m[d]='';for(const [,a,d] of ACTK){const c=actKey(a);if(c!==d)m[c]=d;}return KMAP=m;}
 const keyOf=c=>/^Key[A-Z]$/.test(c)?c.slice(3).toLowerCase():/^Digit\d$/.test(c)?c.slice(5):c==='Space'?' ':c;
-function kRemap(e){if(KSYN||!e.code||mode==='controls')return;const tg=e.target;if(tg&&(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'||tg.isContentEditable))return;
+function kRemap(e){if(KSYN||!e.code||mode==='controls')return;const tg=e.target;if(tg&&(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'||tg.tagName==='SELECT'||tg.isContentEditable))return;
  const m=kmap();if(!(e.code in m))return;const to=m[e.code];if(!to&&(KB.includes(e.code)||IKB.includes(e.code)))return;
  e.stopImmediatePropagation();e.preventDefault();if(!to)return;
  KSYN=1;try{(tg||window).dispatchEvent(new KeyboardEvent(e.type,{code:to,key:keyOf(to),bubbles:true,cancelable:true,repeat:e.repeat,shiftKey:e.shiftKey,ctrlKey:e.ctrlKey,altKey:e.altKey,metaKey:e.metaKey}));}finally{KSYN=0;}}
@@ -7085,7 +7086,7 @@ const KM={KeyW:'up',ArrowUp:'up',KeyS:'down',ArrowDown:'down',KeyA:'left',ArrowL
 addEventListener('keydown',e=>{
  if(mode==='controls'&&REB!=null){e.preventDefault();if(REB[0]==='x'){if(/^(Shift|Alt|Control|Meta)/.test(e.code))return;rebindTo(e.code==='Escape'?e.code:kCombo(e));}else rebindTo(e.code);return;} // an extra bar's key may carry Shift, Alt or Ctrl
  const rng=e.target&&e.target.type==='range'&&e.code==='Escape'; // a volume slider takes the arrows, not Escape
- if(e.target&&e.target.tagName==='INPUT'&&!rng)return;
+ if(e.target&&(e.target.tagName==='INPUT'&&!rng||e.target.tagName==='SELECT'&&e.code!=='Escape'))return;   /* a dropdown keeps its arrows and Space; Escape still closes the panel */
  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
  if(KM[e.code])K[KM[e.code]]=true;
  if(e.target&&e.target.tagName==='INPUT'&&!rng){if(e.code==='Enter'&&mode==='create')act('cStart');return;}
@@ -7853,7 +7854,7 @@ Object.assign(STR.ar,{qShTip:'فريقك بيشاركك: كل وحش يموّت�
 const qShareOn=()=>!!(NET&&PARTY&&PARTY.id()&&PARTY.members().length>1);
 window.__GQS={kill:k=>qShareKill(k),ok:id=>qShareOk(QD[id]),boss:k=>!!(MT[k]&&MT[k].boss)}; // tests
 function acceptQ(id){S.qs[id]={st:1,c:0};for(const k in SKD)if(SKD[k].qlend===id&&S.sk)delete S.sk[k];   // (review) a trial taken again lends its skill again, on the bar
- epAccept(id);if(QD[id].obj.t==='escort')setTimeout(()=>startEscort(id),300);toast(t('qNew',{q:qName(id)}),'good');SFX.quest();hudDirty=true;checkSkills();save(true);}
+ epAccept(id);if(QD[id].obj.t==='escort')setTimeout(()=>startEscort(id),300);toast(t('qNew',{q:qName(id)}),'good');if(QD[id].obj.t==='party'&&NET&&PARTY&&PARTY.id())qEvent('party','party');SFX.quest();hudDirty=true;checkSkills();save(true);}
 function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]);S.arrows[r]-=k;n-=k;}}
 function mkItem(id,r,made){const rc=rcById(id);if(rc.fix!=null&&!(made&&rc.fix<4))r=made?Math.min(rc.fix,legCap()):rc.fix;   // made: your own craft keeps the rating it came out at (owner 2026-10-22: a rare craft showed up unique); a breath piece is always legendary
 const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.hpp)it.hpp=rc.hpp;if(rc.slot==='w'){it.atk=Math.round(rc.atk*MULT[r]);it.spd=rc.spd;}else if(rc.def)it.def=Math.round(rc.def*MULT[r]);
@@ -8947,8 +8948,8 @@ function rateOf(q){return q<.5?0:q<.75?1:q<.9?2:q<.97?3:4;}
 function forgeB(rc){return undB(rc)+.025*(S.smith-1)+S.patience+(patOn()?(skLv('lpat')>=10?.08:.04):0)+(pasOn('focus')?(skLv('focus')>=5?.06:.04):0)+(pasOn('scraft')?(skLv('scraft')>=5?.03:.02):0)+gbB('q')+secB('q')+(rc.slot==='r'||rc.slot==='n'||rc.slot==='k'||rc.slot==='e'?secB('acc'):0);}
 // (plan U257) each rating's chance before forging, for a forge scoring s over its three stages: craftRate's rolls exactly,
 // the ±0.04 of the fire's luck in 41 steps, capped as finishMG caps it
-function rateOdds(rc,s){const p=[0,0,0,0,0],k=(isSm()?2:1)*(1+.04*((S.smith||1)-1)),b=forgeB(rc),cap=maxRating(),N=41;
- for(let i=0;i<N;i++){const q=b+s+(i/(N-1)-.5)*.08,w=1/N;if(q<.5){p[0]+=w;continue;}
+function rateOdds(rc,s){const p=[0,0,0,0,0],k=(isSm()?2:1)*(1+.04*((S.smith||1)-1)),b=forgeB(rc),cap=maxRating(),N=160;
+ for(let i=0;i<N;i++){const q=b+s+((i+.5)/N-.5)*.08,w=1/N;if(q<.5){p[0]+=w;continue;}
   const e=q>=.85?Math.min(1,(.025+(q-.85)*.35)*k):0,u=q>=.95?Math.min(1,(.025+(q-.95)*.5)*k):0,l=q>=.99?Math.min(1,.04*k):0;
   p[1]+=w*(1-e);p[2]+=w*e*(1-u);p[3]+=w*e*u*(1-l);p[4]+=w*e*u*l;}
  for(let r=4;r>cap;r--){p[cap]+=p[r];p[r]=0;}return p;}
@@ -9670,7 +9671,7 @@ function updateXbars(){renderXbars();const R=xRows();for(let b=0;b<XBN&&!TOUCH;b
  const n=xCount(k),pc=(k==='hpot'||k==='mpot')&&(P.pcd||0)>0;el.querySelector('.pn').textContent=k==='sgl'?'':n;el.classList.toggle('off',!n||pc);cdSet(el,pc?P.pcd:0,5);});}}
 // a bar's own key, before anything else hears it (a Shift+1 is not skill 1)
 addEventListener('keydown',e=>{if(document.body.classList.contains('skdrag')&&e.code!=='Escape'){e.preventDefault();e.stopImmediatePropagation();return;} // nothing fires while a slot is being dragged
- if(e.repeat||KSYN||!e.code||mode==='controls'||/^(Shift|Alt|Control|Meta)/.test(e.code))return;const tg=e.target;if(tg&&(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'||tg.isContentEditable))return;
+ if(e.repeat||KSYN||!e.code||mode==='controls'||/^(Shift|Alt|Control|Meta)/.test(e.code))return;const tg=e.target;if(tg&&(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'||tg.tagName==='SELECT'||tg.isContentEditable))return;
  const x=xOfKey(kCombo(e));if(!x)return;e.preventDefault();e.stopImmediatePropagation();if(mode==='play'||WALKM.includes(mode))xUse(x[0],x[1]);},true);
 let MSX=null,MSY=null;stage.addEventListener('mousemove',e=>{MSX=e.clientX;MSY=e.clientY;});
 // skills fire toward the mouse cursor (falls back to facing before the mouse has moved)
@@ -10997,7 +10998,7 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  // (plan U254) the intercontinental magic circles, Reinhardt's and the White Tree Forest's (ch 1283), and where the portal
  // scroll sets you down, once you have seen the place
  for(const [x,y,k] of [[ECW.x+.5,ECW.y+.5,'mapCirc'],[EACIRC.x+.5,EACIRC.y+.5,'mapCirc'],[EAPORT.x/TS,EAPORT.y/TS,'mapPort']])
-  if(inM(x,y)&&onS(X(x),Y(y))&&fogSeen(x,y)){MM.marker(g,k==='mapCirc'?'circle':'port',X(x),Y(y),u*1.2);MM.label(g,t(k),X(x),Y(y)-12*u,{size:Math.round(10*dpr),color:'#9feaff',font:F});}
+  if(inM(x,y)&&onS(X(x),Y(y))&&fogSeen(x,y)){MM.marker(g,k==='mapCirc'?'circle':'port',X(x),Y(y),u*1.2);MM.label(g,t(k),X(x),Y(y)+(k==='mapPort'?12:-12)*u,{size:Math.round(10*dpr),color:'#9feaff',font:F});}   /* the portal's label under its mark: the circle sits just above it */
  mons.forEach(m=>{if(m.dead||m.tdum||!inM(m.x/TS,m.y/TS)||!onS(X(m.x/TS),Y(m.y/TS))||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
  allies.forEach(a=>{if(!a.dead&&inM(a.x/TS,a.y/TS)&&onS(X(a.x/TS),Y(a.y/TS)))MM.marker(g,'ally',X(a.x/TS),Y(a.y/TS),u);});const coOn=!!COMPO&&inM(COMPO.x/TS,COMPO.y/TS);if(coOn)MM.marker(g,'ally',X(COMPO.x/TS),Y(COMPO.y/TS),u);
  if(MEET&&coOn)MM.label(g,t(gk(MEET.id,'meetMap'),{n:t(MEET.id)}),X(COMPO.x/TS),Y(COMPO.y/TS)-12*u,{size:Math.round(11*dpr),color:'#9fe39a',font:F,band:'rgba(6,24,10,.82)'});
@@ -18585,7 +18586,7 @@ window.__GIX={open:()=>openIdx(),close:()=>closeIdx(),tab:(v,s)=>{IXV=v;IXS=s===
 window.__GP5B={rc:id=>rcById(id),odds:(rc,s)=>rateOdds(rc,s),oddsTip:rc=>oddsTip(rc),forgeB:rc=>forgeB(rc),roll:q=>Math.min(craftRate(q),maxRating()),
  kind:k=>auKind(k),shown:(L,o)=>{const v={...AUV};Object.assign(AUV,o||{});try{return auShown(L.slice()).map(l=>l.id);}finally{Object.assign(AUV,v);}},
  gemMove:(a,b,w)=>gemMove(a,b,w),fogAll:()=>{if(FOG)FOG.fill(1);},
- circ:()=>({w:{x:ECW.x+.5,y:ECW.y+.5},e:{x:EACIRC.x+.5,y:EACIRC.y+.5},p:{x:EAPORT.x/TS,y:EAPORT.y/TS}}),dodge:()=>{P.dash=0;P.dcd=0;P.st=1e4;dodge();},avail:id=>qAvail(id),ready:id=>qReady(id),party:e=>{qEvent('party','party');}};
+ circ:()=>({w:{x:ECW.x+.5,y:ECW.y+.5},e:{x:EACIRC.x+.5,y:EACIRC.y+.5},p:{x:EAPORT.x/TS,y:EAPORT.y/TS}}),dodge:()=>{P.dash=0;P.dcd=0;P.st=1e4;dodge();},avail:id=>qAvail(id),ready:id=>qReady(id),party:e=>{qEvent('party','party');},accept:id=>acceptQ(id)};
 })();
 </script>
 </body></html>

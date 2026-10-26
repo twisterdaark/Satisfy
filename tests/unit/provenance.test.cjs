@@ -30,6 +30,6 @@ test('nothing shipped loads an image from outside; every outside host is listed'
     }
   }
   assert.deepEqual(images, [], 'images from outside');
-  const listed = M.external.map((e) => e.host).join(' ');
-  assert.deepEqual([...hosts].filter((h) => !listed.includes(h)), [], 'outside hosts not in docs/art/provenance.json');
+  const listed = new Set(M.external.map((e) => e.host));
+  assert.deepEqual([...hosts].filter((h) => !listed.has(h)), [], 'outside hosts not in docs/art/provenance.json (exact names)');
 });

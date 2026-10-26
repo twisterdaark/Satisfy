@@ -8,6 +8,15 @@ const H = require('../harness/game.cjs');
 
 test.after(() => H.closeBrowser());
 
+async function settle(...games) {
+  for (let i = 0; i < 8; i++) { for (const g of games) await g.step(7); await games[0].page.waitForTimeout(30); }
+}
+async function until(g, fn, ms = 5000) {
+  const end = Date.now() + ms;
+  while (Date.now() < end) { if (await g.eval(fn)) return; await g.step(3); await g.page.waitForTimeout(30); }
+  throw new Error('timed out waiting for ' + fn);
+}
+
 const labels = (g) => g.eval(() => {
   const G = window.__G, MM = window.SatArt.minimap, out = [], l0 = MM.label;
   MM.label = function (g2, text) { out.push(String(text)); return l0.apply(this, arguments); };
@@ -48,6 +57,15 @@ test('gems, the forge odds, the auction filters and Khan\'s steps', async () => 
       S.qs.kh3 = { st: 2 }; o.party = X.avail('khp'); return o; });
     assert.deepEqual(kh, { before: false, after: true, ready: true, party: false });
 
+    // (review) a dropdown keeps its own keys, and Escape on it still closes the auction
+    await g.eval(() => window.__G.talkNPC('auction')); await g.step(2);
+    assert.equal(await g.mode(), 'au');
+    await g.eval(() => { window.__selKeys = []; addEventListener('keydown', (e) => window.__selKeys.push([e.code, e.defaultPrevented])); document.getElementById('auK').focus(); });
+    await g.page.keyboard.press('ArrowDown'); await g.step(2);
+    assert.deepEqual(await g.eval(() => window.__selKeys), [['ArrowDown', false]], 'the arrow reaches the dropdown');
+    await g.page.keyboard.press('Escape'); await g.step(2);
+    assert.equal(await g.mode(), 'play', 'Escape closes the auction');
+
     // U254: the world map marks the magic circles and the portal's landing once seen (the West's circle at Reinhardt...)
     await g.eval(() => { window.__GP5B.fogAll(); });
     await g.page.keyboard.press('m'); await g.step(2);
@@ -72,4 +90,28 @@ test('the East map: the White Tree Forest\'s circle and the portal\'s landing', 
     assert.ok(E.includes('Portal landing'));
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
+});
+
+test('Khan\'s party step: a party joined after taking it, or one you are already in when you take it', async () => {
+  const ctx = await H.newContext({});
+  const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
+  const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
+  try {
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    await b.eval(() => { window.__G.P.x += 20; });
+    await settle(a, b);
+    const take = () => { const S = window.__G.S; S.qs.kh1 = { st: 2 }; S.qs.kh3 = { st: 2 }; window.__GP5B.accept('khp'); return window.__GP5B.ready('khp'); };
+    assert.equal(await b.eval(take), false, 'no party yet');
+    await a.page.keyboard.press('KeyP');
+    await settle(a, b);
+    await until(b, () => !document.getElementById('partyInv').hidden);
+    await b.page.keyboard.press('KeyY');
+    await settle(a, b);
+    await until(b, () => window.__GP5B.ready('khp'));
+    await until(a, () => ((Satisfy.local.net().party || {}).members || []).length === 2);
+    assert.equal(await a.eval(take), true, 'already in a party when taking the step');
+    assert.deepEqual(a.errors, []);
+    assert.deepEqual(b.errors, []);
+  } finally { await ctx.close(); }
 });

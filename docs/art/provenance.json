@@ -12,7 +12,7 @@
     { "path": "icons/icon-512.png", "origin": "The same app icon, larger. Added with icon-192.png.", "licence": "The game's own (to confirm with the owner)." }
   ],
   "external": [
-    { "what": "Fonts: Lalezar, Oswald, Tajawal, Pixelify Sans, Press Start 2P", "host": "fonts.googleapis.com (and fonts.gstatic.com, which it points to)", "licence": "SIL Open Font License 1.1" },
+    { "what": "Fonts: Lalezar, Oswald, Tajawal, Pixelify Sans, Press Start 2P", "host": "fonts.googleapis.com", "note": "its stylesheet loads the font files from fonts.gstatic.com", "licence": "SIL Open Font License 1.1" },
     { "what": "The Firebase SDK (code, no art)", "host": "www.gstatic.com", "licence": "Apache 2.0" },
     { "what": "The game's database (data, no art)", "host": "satisfy-online-8yjeix-default-rtdb.europe-west1.firebasedatabase.app", "licence": "-" },
     { "what": "The SVG namespace name (not a download)", "host": "www.w3.org", "licence": "-" }
