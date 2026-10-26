@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.54) |
+| | At the count | Now (v3.55) |
 |---|---|---|
-| Done | 233 | 286 |
-| Partly there (something left) | 92 | 44 |
+| Done | 233 | 287 |
+| Partly there (something left) | 92 | 43 |
 | Not started | 11 | 6 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **50** (44 + 6) |
+| **Left to build** | **103** (92 + 11) | **49** (43 + 6) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -36,6 +36,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.52 (Claude-B): U120 (the Frost Slime, the Gold Slime, slimes resist poison).
 - v3.53 (batch 13, PR #296, merged by Claude-B after main's v3.50-v3.52): U311 (every monster's network key its own, one entity id scheme).
 - v3.54 (batch 14, PR #297, merged by Claude-B after main's v3.53): U078 (the balance board checks the hybrid against the strongest pure class).
+- v3.55 (Claude-B): U135 (cultists raise skeletons).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -136,7 +137,7 @@ Checked against `/home/claude/satisfy-aud` at 8a2e4f1e (v3.15). The test files b
 | U132 | Vampire thrall | done | Thralls (cities 15 and 14) drain on hit through `mobHeal` (capped at max), and every vampire heals on what it deals, also capped (`p3Hurt`). Vampires hit 15% harder at night (`p3Hurt` `isNight`); surface vampires go indoors by day (`vpTick`). `p3world`, `vcity` |
 | U133 | Vampire lord | done | The Vampire Lord (city 13): phases at 66% and 33% (bats come, then a bleeding blood rain); it heals 2–4× what it deals. Loot is rolled per player; its chest pays once a day per account (`lockouts`, SAT-ONLINE-059); it is dead for an hour for everyone (`P3WB`, `WS.wb`) |
 | U134 | Succubus | done | Succubus (Belial's): a telegraphed dark bolt that roots you ("charms you still") for 1.4 s, then 1.5 s of immunity (`mxOn` `rootI`); legends resist. The Saintess's Purification clears it for her party within 8 m (`cls2Clean`, `phNear('U')`, v3.15) |
-| U135 | Necromancer cultist | part | Yatan cultists `cultist`: dark bolts, a root, a mend. Only bosses summon, and only a fixed number: `bossPhase` brings 1+phase adds once per phase (the Black Knight raises skeletons, `adds:'skel'`). Summons are `tmp`, leave when dead and are never saved, so a restart can't pile them up. Left: a cultist that raises skeletons |
+| U135 | Necromancer cultist | done (v3.55) | Yatan cultists `cultist`: dark bolts, a root, a mend. Only bosses summon, and only a fixed number: `bossPhase` brings 1+phase adds once per phase (the Black Knight raises skeletons, `adds:'skel'`). Summons are `tmp`, leave when dead and are never saved, so a restart can't pile them up. Left: a cultist that raises skeletons v3.55: a cultist in a fight raises a skeleton every 14 s, two at most (`cultRaise`, host-run in `mpTick`); a raised one is `tmp`, gives a quarter of the XP and no loot, and falls with its cultist or when the fight ends (`regression/u135`). |
 | U136 | Minotaur | reject | REJECT_NOT_CANON (§82/§90): an invented monster. Similar things exist: charges stop at a wall and stun the charger (`wall:1`), and the Tower of Wisdom's 4F is a maze |
 | U137 | Sea Kraken | done | The Kraken east of Cork Island (ferry or boat). Its six tentacles must fall before it surfaces for 15 s; under water it takes 10% (`p4Atk`). Tentacles are `tmp` adds with their own small drop; the boss reward pays once, on the Kraken. `p4world` |
 | U138 | Ancient Dragon | done | Trauka the Red Dragon is a world boss with a shared 30-minute timer (`worldboss`). The weekly world boss hunt is announced 10 minutes before and joined from the calendar only near the boss's level (not below 180 for Trauka; `hunt`, SAT-ONLINE-124). Below a region's level, walking in warns you (`oneShot`), and so does a gate (`dunWarn`) |

@@ -4976,6 +4976,8 @@ const mpFol=m=>!!(m.led&&MOBN&&MOBN.host&&NET&&MOBN.host!==NET.uid);
 function mpWake(m){m.dorm=0;m.agg=1;m.eng=4;vfx('dust',m.x,m.y,{n:m.type==='sscorp'?14:8});num(m.x,monY(m)-18,'!','#ff7a5a',true);SFX.hit();}
 function mpTick(dt){for(const m of mons){if(m.dead)continue;const ty=m.type;
   if(MPDORM[ty]){if(m.dorm===undefined)m.dorm=1;if(m.dorm&&(m.hp<m.max||Math.hypot(m.x-m.sx,m.y-m.sy)>3))m.dorm=0;}
+  else if(m.cult){const c=m.cult;if(c.dead||!mons.includes(c)||c.hp>=c.max&&!(c.eng>0)){m.dead=true;m.dying=.5;m.rt=1e9;vfx('death',m.x,m.y);}}   /* a raised skeleton falls with its cultist, or when the fight is over (plan U135) */
+  else if(ty==='cultist'){if(!mpFol(m)&&!m.tmp&&m.eng>0)cultRaise(m,dt);}
   else if(ty==='grabbit'||ty==='gslime'){if(Math.hypot(P.x-m.x,P.y-m.y)<130)m.flee=Math.max(m.flee||0,1.5);}
   else if(ty==='gobsc'&&!m.horn&&(m.agg||m.eng>0)&&!mpFol(m)){m.horn=1;num(m.x,monY(m)-24,t('hornT'),'#ffd24a',true);SFX.notice();
    for(const g of mons)if(g!==m&&!g.dead&&GOBK.has(g.type)&&Math.hypot(g.x-m.x,g.y-m.y)<240){g.agg=1;g.eng=4;g.prov=gTime+10;}}}}
@@ -13528,6 +13530,15 @@ function u120Spawn(){const r=mulberry32(12020),put=(type,x0,x1,y0,y1,n)=>{let c=
  put('fslime',430,590,-50,-12,8);put('gslime',350,410,102,118,1);}
 Object.assign(STR.ar,{fslimeN:'سلايم التلج',gslimeN:'السلايم الدهبي'});
 Object.assign(STR.en,{fslimeN:'Frost Slime',gslimeN:'Gold Slime'});
+/* Plan U135 (2026-10-26): Yatan's cultists raise the dead. In a fight a cultist raises a skeleton every CULR.CD seconds,
+   two standing at most; a raised one is a summons (tmp: never saved, leaves when dead), gives a quarter of the XP and no
+   loot, and falls when its cultist does or the fight ends. The host raises them; the others see them from its list. */
+const CULR={CD:14,N:2,R:24};
+function cultRaise(m,dt){m.raT=(m.raT??5)-dt;if(m.raT>0)return;m.raT=CULR.CD;m.rz=(m.rz||[]).filter(k=>!k.dead&&mons.includes(k));if(m.rz.length>=CULR.N)return;
+ const a=rand()*6.283,x=m.x+Math.cos(a)*CULR.R,y=m.y+Math.sin(a)*CULR.R*.7,f=hitBox(x,y,6)?freeNear(x,y,6):{x,y};if(!f)return;
+ const k=spawnMonX('skel',f.x,f.y);k.cult=m;k.noLoot=1;k.xmul=.25;k.agg=1;k.eng=4;m.rz.push(k);vfx('spawn',k.x,k.y,{color:'#a05aff'});num(m.x,monY(m)-18,t('cultRaise'),'#a05aff',false);}
+Object.assign(STR.ar,{cultRaise:'بيصحّي ميت!'});Object.assign(STR.en,{cultRaise:'Raises the dead!'});
+window.__GU135={raise:(m,dt)=>cultRaise(m,dt),C:CULR}; // tests
 window.__GU114={spawn:()=>u114Spawn(),zone:(x,y)=>zoneAt(x,y),eat:k=>eatDish(k),drops:k=>MT[k].drop,res:(k,el)=>monResK(k,el),gt:()=>gTime,price:k=>MATP[k],book:k=>RBK[k]&&RBK[k].shop}; // tests
 Object.assign(DISH,{herbtea:{food:20,hp:.25,buf:'regen',bt:150},fishpie:{food:70,hp:.25,buf:'might',bt:200},gfeast:{food:100,hp:.5,buf:'might',bt:600},
  mightp:{food:0,buf:'might',bt:300,pot:1},regenp:{food:0,hp:.2,buf:'regen',bt:300,pot:1}});

@@ -7,6 +7,12 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26u135', ver: '3.55', d: '2026-10-26',
+      ar: ["كهنة ياتان بقوا بيصحّوا الموتى: في القتال الكاهن بيقوّم هيكل عظمي كل 14 ثانية (اتنين بالكتير). الهيكل اللي اتصحّى بيدي ربع الخبرة ومبيوقّعش حاجة، وبيقع لما الكاهن يموت أو القتال يخلص.",
+        "اختبار جديد لده."],
+      en: ["Yatan's cultists now raise the dead: in a fight a cultist raises a skeleton every 14 seconds (two at most). A raised skeleton gives a quarter of the XP and no loot, and falls when its cultist dies or the fight ends.",
+        "A new test for this."],
+      hide: [1] },
     { v: '2026-10-26plan14', ver: '3.54', d: '2026-10-26',
       ar: ["لوحة التوازن بتاعة صاحب اللعبة بتراجع كل أسبوع إن السيّاف السحري (كلاس هجين) لسه أبطأ في القتل من أقوى كلاس صافي في نفس اللفل."],
       en: ["The game owner's balance board now checks each week that the Magic Swordsman (a hybrid) still kills slower than the strongest pure class of a like level."],
