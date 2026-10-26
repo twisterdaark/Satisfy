@@ -71,7 +71,7 @@ Owner: Claude-A · SAT-ONLINE-111 (2026-10-22) · from `backend/database.rules.j
 
 ## The world
 
-`world/satisfy/own` (who holds the castle and territories), `world/satisfy/legends` (the legendary classes taken), `world/satisfy/wb` (world boss rests), `world/satisfy/tax` (#140), `announce` (your announcements). All are kept and overwritten as they change.
+`world/satisfy/own` (who holds the castle and territories), `world/satisfy/legends` (the legendary classes taken), `world/satisfy/books` (the one copy of each legend book and the character holding it; freed with that character or with "Delete my online data"), `world/satisfy/wb` (world boss rests), `world/satisfy/tax` (#140), `announce` (your announcements). All are kept and overwritten as they change.
 
 ## The owner's (admins only)
 

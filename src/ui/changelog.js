@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26books', ver: '3.23', d: '2026-10-26',
+      ar: ["كتب الأساطير (كتاب سحر مومود، ويوميات المقاتل الأسطوري تزودان، والغمد القديم للملك الذي لا يُهزم) بقى من كل واحد نسخة واحدة بس في العالم كله. طول ما النسخة مع حد (في شنطته أو المخزن، أو قراها وشغال في الكويست، أو بقى الأسطورة) مفيش كتاب تاني بيوقع لأي حد.",
+        "النسخة دي بتتبدّل أو تتحط في المزاد بين اللعيبة (أونلاين) أو تتقري بس. مبقتش تتباع لتاجر ولا تترمي ولا توقع على الأرض. وأي نسخة تانية مش نسخة العالم (من قبل التحديث ده) مبتتقريش ولا بتتبدّل، بس التاجر بيشتريها.",
+        "لو صاحب الأسطورة مسح شخصيته (من «امسح» في شخصيات الحساب)، الأسطورة وكتابها بيرجعوا للعالم والناس تقدر تاخدها تاني. ولو اختبار مادرا فشل، الغمد بيرجع للعالم.",
+        "لما تبقى واحد من الأساطير الجديدة (مومود، وتزودان، ولانتير، وقديس القوس، ومادرا والباقيين) الأسطورة بتتحجز ليك في العالم كله الأول، فموظف الترتيب بيكتب اسمك على طول، ومينفعش اتنين ياخدوها. وخبرها بقى بيوصل لكل اللعيبة.",
+        "الكويست الأسطوري اللي شغال فيه بقى بيظهر في لوحة الكويستات. ولو حد تاني خد الأسطورة قبلك، اللوحة بتقول مين، وليتش مومود مبيطلعش، والنهاية بتقولك بدل ما متحصلش حاجة. ولو رفضت مومود أو مادرا، العرض بيرجعلك."],
+      en: ["Legend books (Mumud's Spellbook, Legendary Fighter Tzudan's Diary, the Undefeated King's Old Sheath) are now one copy each in the whole world. While that copy is with someone (in a bag or the stash, read with its quest on, or its legend taken), no other falls for anyone.",
+        "The copy can be traded, put up at the auction between players (online) or read. It can no longer be sold to a merchant, thrown away or dropped. Any other copy (from before this update) isn't the world's: it can't be read or passed on, but a merchant will buy it.",
+        "When a legend deletes his character (Delete in the account's characters), the legend and its book go back to the world and others can take them. A failed Madra trial gives the sheath back to the world too.",
+        "Becoming one of the newer legends (Mumud, Tzudan, Lantier, the Bow Saint, Madra and the others) now reserves it for the whole world first, so the Rankings clerk shows you at once and two players can't both take it. Its news now reaches every player.",
+        "The legendary quest you are on now shows in the quest panel. If someone else takes that legend first, the panel says who, Mumud's lich no longer appears, and the ending tells you instead of nothing happening. Decline Mumud or Madra and the offer comes back."] },
     { v: '2026-10-26plan2', ver: '3.22', d: '2026-10-26',
       ar: ["حدث عالمي جديد: «غزو الشياطين». جيش الشيطان الأعظم بيريث بيطلع من حصن تالرين وبيهجم على ريدان من بوابتها القبلية، موجة ورا موجة، ومع كل موجة فورفو.",
         "عواصف رملية في الصحاري (رمال غرب ريدان، والأراضي الحمرا، وصحرا بانجيا، ومملكة كايا): العاصفة هناك رملية، مش شايف بعيد والوحوش كمان مش شايفاك من بعيد، والمطر نادراً ما بينزل.",
