@@ -911,6 +911,36 @@
         "$other": { ".validate": false }
       }
     },
+    "auction": {
+      ".read": "auth != null",
+      "$lid": {
+        ".write": "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid) || (data.exists() && !newData.exists() && (data.child('by').val() === auth.uid || (data.child('t').val() > now - 1209600000 && newData.parent().parent().child('auctionPaid').child(data.child('by').val()).child($lid).child('by').val() === auth.uid))))",
+        ".validate": "$lid.matches(/^a_[A-Za-z0-9_-]{1,60}_[0-7]$/) && $lid.beginsWith('a_' + newData.child('by').val() + '_') && $lid.length === newData.child('by').val().length + 4 && newData.hasChildren(['by', 'n', 'it', 'q', 'price', 't'])",
+        "by": { ".validate": "newData.isString()" },
+        "n": { ".validate": "newData.isString() && newData.val().length <= 24" },
+        "it": { ".validate": "newData.isString() && newData.val().matches(/^[a-zA-Z0-9_]{2,16}$/)" },
+        "q": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 999" },
+        "price": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 1000000000" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "auctionPaid": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$lid": {
+          ".write": "auth != null && ((!data.exists() && newData.exists() && root.child('auction').child($lid).child('by').val() === $uid && $uid !== auth.uid && !newData.parent().parent().parent().child('auction').child($lid).exists()) || (auth.uid === $uid && data.exists() && !newData.exists()))",
+          ".validate": "newData.hasChildren(['g', 'by', 'bn', 'it', 'q', 't'])",
+          "g": { ".validate": "newData.val() === root.child('auction').child($lid).child('price').val()" },
+          "by": { ".validate": "newData.val() === auth.uid" },
+          "bn": { ".validate": "newData.isString() && newData.val().length <= 24" },
+          "it": { ".validate": "newData.val() === root.child('auction').child($lid).child('it').val()" },
+          "q": { ".validate": "newData.val() === root.child('auction').child($lid).child('q').val()" },
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
     "repairOrders": {
       ".read": "auth != null",
       "$oid": {

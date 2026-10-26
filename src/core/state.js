@@ -36,6 +36,8 @@
     'eq', 'bar', 'xbar', 'croot', 'aff', 'stash', 'rep', 'guild', 'comp', 'life',
     // repair orders posted to player smiths and not answered yet (SAT-ONLINE-096)
     'rord',
+    // an auction listing whose write hasn't answered yet: its goods are off the bag (v3.16)
+    'auPend',
     // Three Crowns at the inns: games won and played (SAT-ONLINE-181)
     'cg',
     // the heaviest fish of each kind you have caught (SAT-ONLINE-182); your fishing rod and the bait on your hook (v3.03); your forge hammer and spatula (v3.04)
