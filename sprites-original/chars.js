@@ -10,7 +10,7 @@ const FW=16,FH=24;
 // Built-up styles: len 0-4, a fringe (bang), a tail or bun, waves, and the outline details that keep any two apart
 // (owner 2026-10-23: clear differences between all the styles): vol 1 puffy / 3 messy crown, end flip / in / layer,
 // tip (lighter ends), streak, ahoge, hime side locks, and the fringes micro, blunt, curtain and swoop.
-const HAIRP={longS:{len:4,bang:'part',end:'in',peak:1},hime:{len:4,bang:'blunt',hime:1},bob:{len:2,bang:'full',end:'in',vol:1},bobS:{len:2,bang:'swoop',end:'flip',gloss:1},braid:{len:1,bang:'part',tail:'braid'},twinB:{len:1,bang:'full',tail:'twinb'},
+const HAIRP={neck:{len:1,bang:'part',end:'in'},spikyN:{len:1,bang:'spiky',end:'layer',vol:3},longS:{len:4,bang:'part',end:'in',peak:1},hime:{len:4,bang:'blunt',hime:1},bob:{len:2,bang:'full',end:'in',vol:1},bobS:{len:2,bang:'swoop',end:'flip',gloss:1},braid:{len:1,bang:'part',tail:'braid'},twinB:{len:1,bang:'full',tail:'twinb'},
  hbun:{len:1,bang:'side',tail:'hbun'},sidep:{len:1,bang:'side',tail:'sidep'},wavy:{len:3,bang:'part',wave:1},shoulder:{len:2,bang:'curtain',end:'flip',wave:1,peak:1},ponyH:{len:0,bang:'side',tail:'ponyL'},lowTw:{len:1,bang:'part',tail:'low2'},
  odango:{len:1,bang:'full',tail:'buns2'},emo:{len:1,bang:'emo'},undercut:{len:0,bang:'side',top:'tall',shave:1},slick:{len:0,bang:'none',back:1,peak:1,gloss:1},topknot:{len:0,bang:'none',tail:'knot',shave:1},afro:{top:'afro'},
  wolf:{len:1,bang:'side',back:2},spikyL:{len:3,bang:'spiky',end:'layer',vol:3},princess:{len:4,bang:'side',tail:'bunS',bow:1},

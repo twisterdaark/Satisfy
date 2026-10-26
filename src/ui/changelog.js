@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26npchair', ver: '3.45', d: '2026-10-26',
+      ar: ["شعر توبان وبراهام وجود وفيرادين وكاتز وجارام وبيرياش وزيدنوس وألباتينو بقى لحد الرقبة بس، وسيورون وبلاك تيدي شعرهم قصير ومحلوق من الجناب، ولبلاك تيدي دقن كاملة.",
+           "كاتز اترسم من جديد: شعر أسود قصير منكوش، ودرع ساموراي أحمر وأسود فوق رداء فاتح بحزام بنفسجي. ولاييلا شعرها بقى أطول ومموّج."],
+      en: ["Toban, Braham, Jude, Veradin, Katz, Garam, Beriache, Zednos and Albatino now wear their hair down to the neck only; Seuron and Black Teddy have short hair shaved at the sides, and Black Teddy a full beard.",
+           "Katz is redrawn: short messy black hair and red-and-black samurai armour over a pale robe with a purple sash. Laella's hair is longer and wavy."] },
     { v: '2026-10-26hgfix', ver: '3.44', d: '2026-10-26',
       ar: ["اتصلح خطأ كان بيظهر لما تقتل هيل جاو (ومارخوسياس ولِراجي وكلاب الجحيم): حجر النار بقى بيوقع كخامة عادي بدل ما اللعبة تحاول تعمله سلاح."],
       en: ["Fixed an error when killing Hell Gao (and Marchosias, Leraje and the hell keepers): the fire stone now drops as a material instead of the game trying to make it a piece of gear."] },
