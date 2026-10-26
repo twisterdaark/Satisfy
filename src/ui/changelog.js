@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26plan2', ver: '3.21', d: '2026-10-26',
+      ar: ["حدث عالمي جديد: «غزو الشياطين». جيش الشيطان الأعظم بيريث بيطلع من حصن تالرين وبيهجم على ريدان من بوابتها القبلية، موجة ورا موجة، ومع كل موجة فورفو.",
+        "عواصف رملية في الصحاري (رمال غرب ريدان، والأراضي الحمرا، وصحرا بانجيا، ومملكة كايا): العاصفة هناك رملية، مش شايف بعيد والوحوش كمان مش شايفاك من بعيد، والمطر نادراً ما بينزل.",
+        "لما تعالج فريقك وهو بيحارب، الوحوش اللي في الخناقة بتلف عليك، فالكاهن محتاج الفارس يشد الوحوش. (البوسات ليها قاعدتها.)",
+        "القطعة اللي بتبدلها مع حد بقت شايلة آخر 3 كانت معاهم، وبتبان في التلميح."],
+      en: ["A new world event: the Demon Invasion. The army of the great demon Berith comes out of Fort Taleren and attacks Reidan's south gate, wave after wave, with Furfu at its head.",
+        "Sandstorms in the deserts (Reidan's Western Sands, the Red Badlands, the Pangea Desert, Kaya): a storm there is of sand, you can't see far and neither can the monsters, and rain hardly falls.",
+        "Heal your party in a fight and the monsters in it turn toward you, so a priest needs the knight's taunt. (Bosses keep their own rule.)",
+        "A piece you trade now keeps the last three who held it, shown in its tooltip."] },
     { v: '2026-10-26plan1', ver: '3.20', d: '2026-10-26',
       ar: ["ضربات الحلقة (الأوجر والجولم والدببة والبوسات) بقت بتصيب جوه الحلقة الحمرا المرسومة بالظبط. قبل كده كانت بتوصل لفوق ولتحت أبعد من اللي باين.",
         "الترول ميعرفش يقفل جروحه وهو بيتحرق (أي ضرب نار) أو وهو مشلول. وميناء بيدرو بقى منطقة آمنة من القتال بين اللاعبين.",
