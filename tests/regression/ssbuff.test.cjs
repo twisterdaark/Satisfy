@@ -47,3 +47,27 @@ test('the Demon Slayer: Demon Predator at 300 takes 30% off every blow, the text
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// The Legendary Knight: Supreme Swordsmanship 4th Style at 300 (ch807) catches a blow bare-handed and answers it; Tzudan's arc.
+test('the Legendary Knight: the 4th Style catches a blow and answers it; Keen Insight 20%; Tzudan 340%', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g);
+    await g.step(3);
+    const r = await g.eval(() => { const G = window.__G, S = G.S, P = G.P, X = window.__GPG;
+      S.cls = 'lknight'; S.lv = 299; G.isk.checkSkills(); const out = { at299: !!S.sk.lkpalm };
+      S.lv = 300; G.isk.checkSkills(); out.at300 = !!S.sk.lkpalm;
+      for (const m of G.mons()) m.dead = true;
+      const m = G.spawnMon('wolf', P.x + 30, P.y); m.lv = 1; m.max = m.hp = 1e9; m.tmp = 0;
+      P.hp = P.mhp = 1e9; P.inv = 0; P.cd = {}; P.mp = 1e6; window.__GSS2.cast('lkpalm'); P.inv = 0; P.dash = 0;
+      const h0 = P.hp; out.taken = X.hurt(1000, m); out.lost = h0 - P.hp; out.struck = m.hp < 1e9;
+      out.second = X.hurt(1000, m) > 0;   // only the first blow is caught
+      out.txt = [window.__GSKF.info('lkinsight').desc, window.__GSKF.info('tzcleave').desc];
+      return out; });
+    assert.equal(r.at299, false); assert.equal(r.at300, true);
+    assert.equal(r.lost, 0, 'the blow caught does nothing'); assert.equal(r.struck, true, 'and the striker is answered');
+    assert.equal(r.second, true, 'only the first blow');
+    assert.match(r.txt[0], /\+20%/); assert.match(r.txt[1], /340%/);
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});

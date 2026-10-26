@@ -7,6 +7,16 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26legbuff3', ver: '3.42', d: '2026-10-26',
+      ar: ["الفارسة الأسطورية (مرسيدس) بقت أقوى: الأسلوب الأول 310%، والعاصفة الفضية 80% كل لفة، والأجنحة الفضية 360%، والسيفين 195% كل قطعة، والبصيرة الحادة بقت 20% في الاتجاهين.",
+        "مهارة جديدة للفارسة الأسطورية في لفل 300: فن السيف الأعلى، الأسلوب الرابع. لمدة 0.8 ثانية أول ضربة تيجي عليك بتمسكها بإيدك ومبتعملش حاجة، وبترد 400% وتشلّ اللي ضربك ثانية.",
+        "وريث تزودان: ضربة القوس 340%، وتقنية السلاح بقت +20% بأي سلاح و+40% بالسيف العظيم. الخطوات الخمسة فضلت زي الرواية.",
+        "اختبار جديد للفارسة الأسطورية وتزودان."],
+      en: ["The Legendary Knight (Mercedes) is stronger: 1st Style 310%, Fly Sword Energy 80% a turn, Silver Wings 360%, Twin Swords 195% a cut, and Keen Insight 20% each way.",
+        "New for the Legendary Knight at level 300: Supreme Swordsmanship, 4th Style. For 0.8 seconds the first blow that comes at you is caught in your palms and does nothing, and you answer with 400% and a 1 second stun.",
+        "Tzudan's Successor: the heavy arc 340%, and the Weapon Technique +20% with any weapon and +40% with a greatsword. Five Steps stays as in the novel.",
+        "A new test for the Legendary Knight and Tzudan."],
+      hide: [3] },
     { v: '2026-10-26plan9', ver: '3.41', d: '2026-10-26',
       ar: ["في نُزل رولينج فيه جواب لساعي مات: يا توديه لإيرل آدن في راينهارت، يا تبيعه لفرسان تيتان. اللي تختاره بيشكرك (+60 سمعة) والتاني مش بينسى (−60).",
         "على الحدود بين المملكة والإمبراطورية بقى فيه نقطة تفتيش من كل ناحية: لو سمعتك تحت الصفر عند اللي داخل عليه، بيوقفوك (ماشي أو راكب أو بالعربية) إلا لو دفعت غرامة لتصريح يوم. الباقي بيعدّي عادي."],
