@@ -1,7 +1,7 @@
 'use strict';
 // Plan batch 5b (owner 2026-10-26 19:41: "continue the document's updates"): U254 the magic circles and the portal's
-// landing on the world map; U257 the forge's odds before forging; U262 the auction's kinds, price cap and sort; U276
-// moving a gem; U190 Khan's dodge and party steps.
+// landing on the world map; U257 the forge's odds before forging; U262 the auction's kinds, price cap and sort; U190
+// Khan's dodge and party steps. (U276's gem moving is main's, from the plan-gear branch.)
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -24,19 +24,11 @@ const labels = (g) => g.eval(() => {
   return out;
 });
 
-test('gems, the forge odds, the auction filters and Khan\'s steps', async () => {
+test('the forge odds, the auction filters and Khan\'s steps', async () => {
   const g = await H.openGame({});
   try {
     await g.page.setViewportSize({ width: 1600, height: 900 });
     await H.newGame(g);
-    // U276: a gem moves from the worn sword to the worn armour for the setting's fee; the armour's old gem breaks
-    const gm = await g.eval(() => { const G = window.__G, S = G.S, X = window.__GP5B, E = G.eqx;
-      const w = E.mkItem('isword', 1), a = E.mkItem('larmor', 1); S.items.push(w, a); E.equip(w); E.equip(a); w.gem = 'ruby'; a.gem = 'topaz'; S.gold = 2000;
-      X.gemMove(w, a, 'khan'); const o = { w: w.gem || null, a: a.gem, gold: S.gold };
-      S.gold = 0; X.gemMove(a, w, 'khan'); o.poor = [w.gem || null, a.gem]; return o; });
-    assert.deepEqual(gm, { w: null, a: 'ruby', gold: 1500, poor: [null, 'ruby'] });
-    for (let i = 0; i < 8 && await g.eval(() => window.__G.mode) === 'dialog'; i++) { await g.eval(() => window.__G.advance()); await g.step(2); }
-
     // U257: the odds shown are what forging rolls (40,000 forgings at each score against the same function)
     const od = await g.eval(() => { const S = window.__G.S, X = window.__GP5B, rc = X.rc('isword'); S.smith = 10; const o = {};
       for (const s of [1, .84, .6]) { const p = X.odds(rc, s), b = X.forgeB(rc), c = [0, 0, 0, 0, 0], N = 40000;

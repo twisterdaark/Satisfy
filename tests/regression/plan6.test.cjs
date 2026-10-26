@@ -1,6 +1,6 @@
 'use strict';
 // Plan batch 6 (owner 2026-10-26 19:41: "continue the document's updates"): U090 plowing and watering Piaro's plots;
-// U280 torn recipe pages put together into a rare recipe book; U207 the weekly profession contracts and their ledger;
+// U207 the weekly profession contracts and their ledger (they pay one of main's U280 blueprint fragments);
 // U115 goblin scouts walking a round of posts.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -46,24 +46,15 @@ test('Piaro\'s plots: plow for one more crop, water once for a quicker crop; the
   } finally { await g.close(); }
 });
 
-test('torn recipe pages: four make a rare book you lack; boss quests give one once; the smithing contract\'s ledger', async () => {
+test('the weekly contracts: from level 20; the smithing contract\'s ledger, its pay, and the next week', async () => {
   const g = await H.openGame({});
   try {
     await H.newGame(g);
     const r = await g.eval(() => {
       const G = window.__G, S = G.S, X = window.__GPB6, RS = window.__GRS, o = {};
-      o.rare = X.bpRare(); o.chance = X.bpChance();
-      // bosses give at most BPDAY pages a day
-      S.mats.bpfrag = 0; for (let i = 0; i < 300; i++) X.bpBoss(); o.day = [S.mats.bpfrag, X.BPDAY(), X.dly().bp];
       // contracts start at level 20
       S.lv = 5; X.wcMenu(); o.low = G.DL.opts.map((x) => x.l); S.lv = 30;
-      S.mats.bpfrag = 3; RS.rsUse('bpfrag'); o.short = S.mats.bpfrag;
-      S.rbk = { rb_c_gfeast: 1 }; S.mats.rb_a_regenp = 1; S.mats.bpfrag = 4; RS.rsUse('bpfrag');
-      o.made = S.mats.rb_m_vwolf || 0; o.pages = S.mats.bpfrag;
-      S.rbk = { rb_c_gfeast: 1, rb_a_regenp: 1, rb_m_vwolf: 1 }; const n0 = o.rare.reduce((a, k) => a + (S.mats[k] || 0), 0); S.mats.bpfrag = 4; RS.rsUse('bpfrag');
-      o.any = o.rare.reduce((a, k) => a + (S.mats[k] || 0), 0) - n0;
-      const bq = X.bossQ(), pq = X.plainQ(); S.mats.bpfrag = 0; X.bpQuest(bq); X.bpQuest(bq); X.bpQuest(pq); o.quest = [bq, pq, S.mats.bpfrag];
-      // the smithing contract: each piece once, by its uid; turned in for gold, a page and smithing experience
+      // the smithing contract: each piece once, by its uid; turned in for gold, a blueprint fragment (main's U280) and smithing experience
       X.wcMenu(); G.DL.opts.find((x) => x.l.startsWith('Smithing:')).f();
       const N = X.wcN('smith'); X.wcEv('smith', 1, 9001); X.wcEv('smith', 1, 9001); o.once = X.wcS().c.smith;
       for (let i = 0; i < N; i++) X.wcEv('smith', 1, 9100 + i);
@@ -74,17 +65,10 @@ test('torn recipe pages: four make a rare book you lack; boss quests give one on
       X.wcTurn('smith'); o.twice = S.gold - g0 === X.wcGold('smith');
       X.wcMenu(); o.list = G.DL.opts.map((x) => x.l.split(':')[0]);
       S.wc.wk = 'w1'; o.next = JSON.stringify(X.wcS().on);
-      const I = window.SatArt.icons; o.icon = I.iconRGBA('bpfrag').join() !== I.iconRGBA('rusty').join(); o.kind = window.__GP5B.kind('bpfrag');
+      o.kind = window.__GP5B.kind('bpfrag');
       return o;
     });
-    assert.deepEqual(r.rare, ['rb_c_gfeast', 'rb_a_regenp', 'rb_m_vwolf'], 'the books no shop sells');
-    assert.equal(r.chance, 0.05, 'alone, a boss gives a page one time in twenty');
-    assert.deepEqual(r.day, [3, 3, 3], 'three pages a day from bosses');
     assert.deepEqual(r.low, ['Back'], 'no contracts under level 20');
-    assert.equal(r.short, 3, 'three pages make nothing');
-    assert.equal(r.made, 1, 'the one rare book you neither know nor carry'); assert.equal(r.pages, 0);
-    assert.equal(r.any, 1, 'knowing them all, any of them');
-    assert.ok(r.quest[0] && r.quest[1]); assert.equal(r.quest[2], 1, 'a boss quest gives one page, once; a plain one none');
     assert.equal(r.once, 1, 'the same piece counts once');
     assert.equal(r.capped, true);
     assert.equal(r.mark, true, 'the board marks a contract to turn in');
@@ -92,8 +76,7 @@ test('torn recipe pages: four make a rare book you lack; boss quests give one on
     assert.equal(r.twice, true, 'paid once');
     assert.deepEqual(r.list, ['✓ Smithing', 'Cooking', 'Brewing', 'Tailoring', 'Farming', 'Back']);
     assert.equal(r.next, '{}', 'a new week, new contracts');
-    assert.equal(r.icon, true, 'the page has its own icon');
-    assert.equal(r.kind, 'book', 'the auction files pages with the books');
+    assert.equal(r.kind, 'book', 'the auction files blueprint fragments with the books');
     await closeDialogs(g);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
