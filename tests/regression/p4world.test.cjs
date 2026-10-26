@@ -174,6 +174,8 @@ test('the stage: a pad sings under your feet; the dance takes ten arrows and pay
     assert.equal(await g.eval(() => window.__GP4.P4.padOn[0]), true);
     await g.eval(() => { const G = window.__G; G.S.gold = 0; G.mons().forEach((m) => { m.dead = true; m.rt = 1e9; }); window.__GP4.act({ k: 'p4stage' }); });
     assert.equal(await g.eval(() => window.__G.mode), 'dance');
+    assert.ok(await g.eval(() => window.__GP4.P4.dance.wait) > 0, 'it waits for the next beat (v3.24)');
+    await g.eval(() => { window.__GP4.P4.dance.wait = 0; });
     const KEY = { L: 'ArrowLeft', U: 'ArrowUp', R: 'ArrowRight', D: 'ArrowDown' };
     for (let i = 0; i < 10; i++) {
       // the pause between arrows runs out by itself (owner 2026-10-22: the dance froze the game, so the arrows never took)

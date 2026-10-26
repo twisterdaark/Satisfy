@@ -119,6 +119,13 @@
     'lrd',
     // the Vatican (v3.11): Goddess Rebecca's blessing, from Help the Rebecca Church!
     'vatB',
+    'pgTr',
+    // Restoring the West together (v3.24): your own count, and that you saw the West restored
+    'rw', 'rwSeen',
+    // a world boss's guild board (v3.24): when each one last paid your guild's place
+    'gbT',
+    // Regas's lesson before the Guardian (v3.24): done once
+    'les',
   ];
   var SESSION = ['hpk', 'hpkN', 'raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'ctPet', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk', 'natJ'];
   var META = ['v', 'wv', 'uid', 'pid'];
