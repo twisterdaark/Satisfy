@@ -4937,11 +4937,13 @@ const noRideAt=(x,y)=>!!(dunAt(x,y)||roomAt(x,y)||swampAt(x,y)||inBh(x,y)||inTw(
 const P2={rot:[]},P2NOT=['pagma','braham','saint','dslayer','saintess','aura','beast','orator','lsword','esorc'];
 HCQ.push('hds','hsa');
 const p2Still=()=>!(P.rmv>0)&&!(P.dash>0);
+const DSCAP=2;
 function p2Atk(m,o){if(m.spar)return 1;let k=1;const wk=weapKind();
  if(S.cls==='sniper'&&wk==='bow'){if(pasOn('snaim')&&p2Still())k*=1+.15*pasM('snaim');if(P.sne>0)k*=1.1;}
  if(S.cls==='bowmaster'&&wk==='bow'&&pasOn('bmcombo')&&P.bmM===m&&P.bmT>0)k*=1+.04*pasM('bmcombo')*(P.bmc||0);
  if(m.wlc>0)k*=1.15;
- if(S.cls==='dslayer'){if(DEMK.has(m.type)){let d=(pasOn('dsbane')?1.2:1)*(m.dss>0?1.2:1)*(o&&o.dem||1);k*=Math.min(1.6,d);}if(pasOn('dsweap'))k*=1.1;if(dsHell())k*=1.2;}
+ if(S.cls==='dslayer'){const dm=DEMK.has(m.type);let d=dm?Math.min(1.6,(pasOn('dsbane')?1.2:1)*(m.dss>0?1.2:1)*(o&&o.dem||1)):1;if(pasOn('dsweap'))d*=1.1;if(dsHell())d*=1.2;
+  if(dm){const v=vtAtk(m);d=Math.min(DSCAP,d*v)/v;}k*=d;}   /* (plan U087) on a demon, one cap over the Slayer's demon bonuses, his mastery and hell's, and the holy blessings on evil (vtAtk, applied after) */
  return k;}
 function p2Hit(m,o){if(S.cls==='bowmaster'&&weapKind()==='bow'&&!o.dot){if(P.bmM===m&&P.bmT>0)P.bmc=Math.min(5,(P.bmc||0)+1);else P.bmc=1;P.bmM=m;P.bmT=2;}}
 function p2Hurt(d,src){if(P.snc){P.snc=null;toast(t('snInt'),'warn');SFX.deny();}
