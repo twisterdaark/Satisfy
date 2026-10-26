@@ -7133,7 +7133,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   // the 32nd Great Demon Belial at the gate of hell (major 7), after them for the same reason
   {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
-  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();wsSpawn();zbSpawn();hlSpawn();owbSpawn();gpSpawn();mobKeyDedupe();}   // owbSpawn: the orc warband (plan U121), gpSpawn: the Guardian's pillars (plan U119), last for the same reason; then every monster's key made unique (plan U311)
+  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();wsSpawn();zbSpawn();hlSpawn();owbSpawn();gpSpawn();b4Spawn();mobKeyDedupe();}   // owbSpawn: the orc warband (plan U121), gpSpawn: the Guardian's pillars (plan U119), last for the same reason; then every monster's key made unique (plan U311)
  for(const m of mons)eliteRoll(m);
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
@@ -11131,7 +11131,7 @@ function qSpot0(id){const q=QD[id],o=q.obj;if(qReady(id)||!S.qs[id]){const n=npc
 const MHOME={};
 function monHome(k){if(!MT[k])return null;let b=null,bd=1e18;for(const m of mons){if(m.type!==k||m.sx==null||m.tmp)continue;const d=(m.sx-P.x)**2+(m.sy-P.y)**2;if(d<bd){bd=d;b=m;}}if(b)return wTile(b.sx,b.sy);
  const reg=(L,ph)=>{const r=(L||[]).find(r=>r[0]===k);return r?{x:ph?(r[1]+r[2])/2:wX((r[1]+r[2])/2),y:(r[3]+r[4])/2,area:1}:null;};
- const p=reg(SPAWN)||reg(BSPAWN,1)||reg(FSPAWN,1)||reg(DSPAWN,1)||reg(SDSPAWN,1);if(p)return p;
+ const p=reg(SPAWN)||reg(typeof B4SPAWN!=='undefined'&&B4SPAWN||[])||reg(BSPAWN,1)||reg(FSPAWN,1)||reg(DSPAWN,1)||reg(SDSPAWN,1);if(p)return p;
  const sb=SDBOSS.find(r=>r[0]===k);if(sb)return {x:sb[1]+.5,y:sb[2]+.5};const bs=BOSSES.find(r=>r[0]===k);if(bs)return {x:bs[1],y:bs[2]};
  const e=EVT.find(e=>e.x!=null&&((e.mob||[]).includes(k)||[].concat(e.cap||[]).includes(k)||e.k==='fboss'&&k==='warlord'));if(e)return {x:e.x+.5,y:e.y+.5};
  if(/^dk_/.test(k)||k==='bhclone'){const n=npcs.find(n=>n.id==='stickp');if(n)return wTile(n.x,n.y);}
@@ -12287,7 +12287,8 @@ Object.assign(RKMV,{srabbit:[{k:'leap',w:3,min:8,max:44,tele:.3,dashT:.2,mul:1,r
  fslime:[{k:'leap',w:3,min:8,max:44,tele:.3,dashT:.2,mul:1,rec:.5,cd:1.5},{k:'rain',w:2,min:20,max:110,tele:.6,pat:'on',n:1,zr:18,lin:3,sp:'ice',mul:.5,slow:2.5,fall:.8,rec:.4,cd:5},{k:'arc',w:3,max:20,tele:.22,reach:20,arc:1.4,mul:.7,rec:.3,cd:1.4}],
  gslime:[{k:'blink',w:4,min:0,max:60,tele:.25,away:70,rec:.2,cd:2.5},{k:'leap',w:2,min:8,max:40,tele:.3,dashT:.2,mul:1,rec:.5,cd:2}]});
 Object.assign(P3D,{srabbit:{base:'rabbit',f:'grayscale(1) brightness(1.7) contrast(.9)',sc:1.05},fslime:{base:'slime',f:'hue-rotate(95deg) saturate(1.1) brightness(1.2)',sc:1.05},gslime:{base:'slime',f:'sepia(1) saturate(3) hue-rotate(-12deg) brightness(1.25)',sc:.9}});
-SPAWN.push(['srabbit',182,238,6,24,10],['fslime',182,238,6,24,8],['gslime',350,410,102,118,1]);   /* deep in the snow, between the Frostlight Orcs' grounds */
+var B4SPAWN=[['srabbit',182,238,6,24,10],['fslime',182,238,6,24,8],['gslime',350,410,102,118,1]];   /* deep in the snow, between the Frostlight Orcs' grounds; placed by b4Spawn with dice of their own, so the world's other spawns (and Winston's view) stay where they were */
+function b4Spawn(){const L=typeof B4SPAWN!=='undefined'&&B4SPAWN||[],r=mulberry32(4114);for(const [type,x0,x1,y0,y1,n] of L){let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=wX(x0+(r()*(x1-x0)|0)),y=y0+(r()*(y1-y0)|0);if(!solW(x,y)&&!solW(x+1,y)&&atW(x,y)!==PA){mons.push(newMon(type,x*TS+8,y*TS+8,r));c++;}}}}
 MT.rabbit.drop.push(['fur',.3]);MT.hrabbit.drop.push(['fur',.4]);
 function rzKill(m){if(m.type!=='cultist')return;for(const o of mons)if(o.rzBy===m&&!o.dead){o.hp=0;o.dead=true;o.dying=.5;o.rt=1e9;vfx('death',o.x,o.y);}}
 /* (plan U127) conductivity: wet (rain or the temple's storm), lightning from the storm's creatures does 20% more to you; the
@@ -13782,7 +13783,7 @@ var OGD={fburrow:m=>{const st=ogBur(m);if(st==='up')return false;const x=Math.ro
 // with their own dice, each kind its own (moving one moves no other; older ids stay)
 function ogSpawn(){if(FQM)FQM.length=0;let r;const put=(type,n,cx,cy,rx,ry,z)=>{r=mulberry32(7301+type.charCodeAt(1)*31+type.length);let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=Math.round(cx+(r()*2-1)*rx),y=Math.round(cy+(r()*2-1)*ry);
   if(z&&zoneAt(x*TS+8,y*TS+8)!==z||inTown(x*TS+8,y*TS+8)||sol0(x,y)||sol0(x+1,y)||at0(x,y)===WA||at0(x,y+1)===WA||NPCS.some(n=>Math.abs(n.tx-x)<3&&Math.abs(n.ty-y)<3))continue;const m=newMon(type,x*TS+8,y*TS+8,r);mons.push(m);c++;}};
- const mid=k=>{const L=SPAWN.filter(s=>s[0]===k);if(!L.length)return null;const s=L[0];return [wX((s[1]+s[2])/2),(s[3]+s[4])/2,Math.max(4,(s[2]-s[1])/2),Math.max(3,(s[4]-s[3])/2)];};
+ const mid=k=>{const L=[...SPAWN,...(typeof B4SPAWN!=='undefined'&&B4SPAWN||[])].filter(s=>s[0]===k);if(!L.length)return null;const s=L[0];return [wX((s[1]+s[2])/2),(s[3]+s[4])/2,Math.max(4,(s[2]-s[1])/2),Math.max(3,(s[4]-s[3])/2)];};
  put('fburrow',10,FWF.x,FWF.y+9,13,4);
  {const o=mid('outlaw');if(o)put('bscout',5,o[0],o[1],o[2],o[3]);}
  put('bswarm',6,52,17,6,5);   // with the cave golems east of Bairan, in the mine (the quarry itself is inside the town)
