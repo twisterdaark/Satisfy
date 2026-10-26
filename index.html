@@ -4976,7 +4976,7 @@ const mpFol=m=>!!(m.led&&MOBN&&MOBN.host&&NET&&MOBN.host!==NET.uid);
 function mpWake(m){m.dorm=0;m.agg=1;m.eng=4;vfx('dust',m.x,m.y,{n:m.type==='sscorp'?14:8});num(m.x,monY(m)-18,'!','#ff7a5a',true);SFX.hit();}
 function mpTick(dt){for(const m of mons){if(m.dead)continue;const ty=m.type;
   if(MPDORM[ty]){if(m.dorm===undefined)m.dorm=1;if(m.dorm&&(m.hp<m.max||Math.hypot(m.x-m.sx,m.y-m.sy)>3))m.dorm=0;}
-  else if(ty==='grabbit'){if(Math.hypot(P.x-m.x,P.y-m.y)<130)m.flee=Math.max(m.flee||0,1.5);}
+  else if(ty==='grabbit'||ty==='gslime'){if(Math.hypot(P.x-m.x,P.y-m.y)<130)m.flee=Math.max(m.flee||0,1.5);}
   else if(ty==='gobsc'&&!m.horn&&(m.agg||m.eng>0)&&!mpFol(m)){m.horn=1;num(m.x,monY(m)-24,t('hornT'),'#ffd24a',true);SFX.notice();
    for(const g of mons)if(g!==m&&!g.dead&&GOBK.has(g.type)&&Math.hypot(g.x-m.x,g.y-m.y)<240){g.agg=1;g.eng=4;g.prov=gTime+10;}}}}
 // a dormant monster holds still; it wakes when you come within reach or hit it
@@ -6688,6 +6688,7 @@ Object.assign(MT,{bkarrow:{lv:[205,212],hp:420000,dmg:5200,spd:58,xp:30000,gold:
  slaught:{lv:[215,215],hp:9000000,dmg:7000,spd:48,xp:1000000,gold:30000,aggro:170,r:12,oy:54,boss:1,leash:240,slam:10000,slamR:56,sc:1.9,drop:[['mith',10],['mstone',12]]}});
 // the Patrian farmer's rows and Piaro's field (tiles), for the burrowers and the secret quest (var: read when the first world is built)
 var FWF={x:373,y:96},PIF={x:290,y:68},O48L={dx:20,dy:-10},O48S=[],O48R=[],O48P=new Map();
+Object.assign(MT,{fslime:{lv:[200,204],hp:380000,dmg:4200,spd:36,xp:24000,gold:110,aggro:90,r:7,oy:16,drop:[['iess',.15],['mstone',.5]]},gslime:{lv:[60,60],hp:9000,dmg:1,spd:70,xp:900,gold:900,aggro:120,r:6,oy:14,drop:[['topaz',.1]]}});   // the frost and gold slimes (plan U120, u120Spawn)
 Object.assign(MT,{srabbit:{lv:[48,52],hp:1500,dmg:90,spd:58,xp:160,gold:6,aggro:0,r:5,oy:14,drop:[['rfur',.6],['leather',.3]]}});   // the Snow Rabbit (plan U114, u114Spawn)
 const SPAWN=[['rabbit',104,150,42,62,14],['rabbit',147,157,62,100,6],['boar',147,157,64,104,8],['boar',100,118,44,62,5],['goblin',109,152,105,116,14],['merman',80,106,88,112,12],['pwolf',64,100,42,90,12],
  ['outlaw',58,80,99,116,10],['forc',80,150,4,24,16],['gbear',66,156,26,37,12],['wolf',3,62,46,84,14],['bear',3,62,46,84,6],['golem',29,49,3,41,10],['cgolem',50,61,12,22,4],
@@ -7094,7 +7095,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   // the 32nd Great Demon Belial at the gate of hell (major 7), after them for the same reason
   {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
-  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();wsSpawn();zbSpawn();hlSpawn();owbSpawn();gpSpawn();u114Spawn();}   // owbSpawn: the orc warband (plan U121), gpSpawn: the Guardian's pillars (plan U119), last for the same reason
+  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();wsSpawn();zbSpawn();hlSpawn();owbSpawn();gpSpawn();u114Spawn();u120Spawn();}   // owbSpawn: the orc warband (plan U121), gpSpawn: the Guardian's pillars (plan U119), last for the same reason
  for(const m of mons)eliteRoll(m);
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
@@ -13515,7 +13516,19 @@ Object.assign(BREW,{antidp:{need:{herb:2,bherb:1},xp:14}});Object.assign(DISH,{a
 function u114Spawn(){const r=mulberry32(11414);let c=0,tr=0;while(c<10&&tr<3000){tr++;const x=110+(r()*70|0),y=6+(r()*18|0);if(solV0(x,y)||solV0(x+1,y))continue;const m=newMon('srabbit',x*TS+8,y*TS+8,r);m.far=1;mons.push(m);c++;}}
 Object.assign(STR.ar,{srabbitN:'أرنب الثلج',rfur:'فرو أرنب',antidp:'جرعة ضد السم',antidpD:'بتشيل السم على طول، ومفيش سم بيمسك فيك لمدة دقيقتين.'});
 Object.assign(STR.en,{srabbitN:'Snow Rabbit',rfur:'Rabbit Fur',antidp:'Antivenom',antidpD:'Clears poison at once, and no poison takes hold for 2 minutes.'});
-window.__GU114={spawn:()=>u114Spawn(),zone:(x,y)=>zoneAt(x,y),eat:k=>eatDish(k),drops:k=>MT[k].drop,gt:()=>gTime,price:k=>MATP[k],book:k=>RBK[k]&&RBK[k].shop}; // tests
+/* Plan U120 (2026-10-26): the slimes' kinds. The Frost Slime lives by the glacier lakes with the ice elementals (Lv 200+):
+   its pools chill instead of burning, it resists water and thunder breaks it (monResK by its element). The Gold Slime is
+   one in the marsh among the acid slimes: it does no harm and runs from you like the golden rabbit, and pays well if
+   caught. Every slime resists poison by half (its element is poison). */
+Object.assign(NAMEK,{fslime:'fslimeN',gslime:'gslimeN'});Object.assign(AIK,{fslime:'hop',gslime:'hop'});
+Object.assign(MELX,{slime:'poison',mslime:'poison',gslime:'poison',fslime:'water'});
+Object.assign(RKMV,{fslime:RKMV.slime.map(mv=>mv.sp==='pois'?{...mv,sp:'ice',slow:2.5}:mv),gslime:RKMV.grabbit});
+Object.assign(P3D,{fslime:{base:'slime',f:'hue-rotate(95deg) saturate(.7) brightness(1.35)',sc:1.1},gslime:{base:'slime',f:'sepia(1) saturate(4) hue-rotate(5deg) brightness(1.15)',sc:.9}});
+function u120Spawn(){const r=mulberry32(12020),put=(type,x0,x1,y0,y1,n)=>{let c=0,tr=0;while(c<n&&tr<3000){tr++;const x=x0+(r()*(x1-x0)|0),y=y0+(r()*(y1-y0)|0);if(solV0(x,y)||solV0(x+1,y))continue;const m=newMon(type,x*TS+8,y*TS+8,r);m.far=1;mons.push(m);c++;}};
+ put('fslime',430,590,-50,-12,8);put('gslime',350,410,102,118,1);}
+Object.assign(STR.ar,{fslimeN:'سلايم التلج',gslimeN:'السلايم الدهبي'});
+Object.assign(STR.en,{fslimeN:'Frost Slime',gslimeN:'Gold Slime'});
+window.__GU114={spawn:()=>u114Spawn(),zone:(x,y)=>zoneAt(x,y),eat:k=>eatDish(k),drops:k=>MT[k].drop,res:(k,el)=>monResK(k,el),gt:()=>gTime,price:k=>MATP[k],book:k=>RBK[k]&&RBK[k].shop}; // tests
 Object.assign(DISH,{herbtea:{food:20,hp:.25,buf:'regen',bt:150},fishpie:{food:70,hp:.25,buf:'might',bt:200},gfeast:{food:100,hp:.5,buf:'might',bt:600},
  mightp:{food:0,buf:'might',bt:300,pot:1},regenp:{food:0,hp:.2,buf:'regen',bt:300,pot:1}});
 Object.assign(MATP,{herbtea:20,fishpie:60,gfeast:400,mightp:150,regenp:200});

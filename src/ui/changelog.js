@@ -7,6 +7,16 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26u120', ver: '3.52', d: '2026-10-26',
+      ar: ["سلايم التلج: جنب بحيرات الجليد مع عناصر التلج (لفل 200+). بركه بتبرّد بدل ما تحرق، وبيقاوم الميه، والرعد بيكسره.",
+        "السلايم الدهبي: واحد بس في المستنقع وسط السلايم الحمضي. مبيأذيش وبيهرب منك زي الأرنب الدهبي، وبيدفع كويس لو مسكته.",
+        "السلايم كله بقى بيقاوم السم بالنص.",
+        "اختبار جديد لده."],
+      en: ["Frost Slimes: by the glacier lakes with the ice elementals (Lv 200+). Their pools chill instead of burning, they resist water, and thunder breaks them.",
+        "The Gold Slime: just one in the marsh among the acid slimes. It does no harm and runs from you like the golden rabbit, and pays well if you catch it.",
+        "Every slime now resists poison by half.",
+        "A new test for this."],
+      hide: [3] },
     { v: '2026-10-26u114', ver: '3.51', d: '2026-10-26',
       ar: ["أرنب الثلج: أرانب جديدة في حقول الثلج الشمالية (لفل 48-52)، مسالمة زي أرانب المرعى.",
         "الأرانب كلها بقت بتوقّع فرو أرنب، وبيتباع في المحلات.",

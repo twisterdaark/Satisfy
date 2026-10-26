@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.51) |
+| | At the count | Now (v3.52) |
 |---|---|---|
-| Done | 233 | 283 |
-| Partly there (something left) | 92 | 47 |
+| Done | 233 | 284 |
+| Partly there (something left) | 92 | 46 |
 | Not started | 11 | 6 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **53** (47 + 6) |
+| **Left to build** | **103** (92 + 11) | **52** (46 + 6) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -33,6 +33,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.47 (batch 11, PR #293, merged by Claude-B after main's v3.45-v3.46): U124 (a golem's rubble), U186 (the boss fight log and replay); U040 part (three rated duels a day per opponent; D3 left), U220 part and U105 part (caravan commissions; D3 and buy/sell contracts left).
 - v3.48 (batch 12, PR #294, merged by Claude-B after main's v3.47): U141 (the mimic's tell and the trapped chests), U105 (buy and sell contracts); U176 part (the Vampire Lord's branching fight; D3 left).
 - v3.51 (Claude-B): U114 (the Snow Rabbit, rabbit fur), U139 (the Antivenom).
+- v3.52 (Claude-B): U120 (the Frost Slime, the Gold Slime, slimes resist poison).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -118,7 +119,7 @@ Checked against `/home/claude/satisfy-aud` at 8a2e4f1e (v3.15). The test files b
 | U117 | Grey Wolves packs | done | Grey Wolf `wolf` (lunge): `packTick` picks a leader that switches the pack between pressing and falling back, with at most two winding up at once (`busyIn`). A howl calls the pack (C rng 280) and a bite hamstrings. Aggro fades over 4 s (`m.eng`); past 260 px from spawn a wolf walks home and heals (`m.ret`); no monster engages a player in a town (`eng` needs `!safe`). Pack size isn't fixed at 2–4, and the leash is distance from spawn, not the zone's edge |
 | U118 | Forest Bears | done (v3.23) | Forest Bear `bear`: a bleeding swipe, a combo, a telegraphed ground slam, one heal. A dodge's i-frames beat any blow (`hurtPlayer0` `P.dash`). A player in town cancels a monster's wind-up and dash (`monTick` else branch). Left: the Forest Bear has no charge (the Giant Brown Bear `gbear` does, and stuns itself on a wall: `wall:1`), and no monster shreds armour |
 | U119 | Ancient Guardian rework | done (v3.36) | RKMV `guardian`: a vine ring that roots and crushes summons, rising thorn circles that bleed, a hook, and a heal in phase 2. Health scales with the group (`bossscale`, SAT-ONLINE-083). One shared HP on every screen (`mobsync`, `mobshare`, `bosssync`). Left: pillars v3.36: four Ancient Pillars stand around his den (`gpillar`, fixed ids `gpillar@0..3`); each standing pillar turns away 15% of every blow he takes (all four: he takes 40%, `gpAtk`), with a green thread to him. They don't fight back, give nothing broken (no kill on the books either), and rise again after 90 s with their ids; online their health is shared like any monster's (`regression/plan7`). |
-| U120 | Slime species | part | Acid slime `slime` (acid pools that slow). It splits into two Little Slimes that drop nothing (`mpKill`; `mslime` drop `[]`), so a split adds no loot (`mpack`). Left: frost and gold slimes, and resistances (monsters have none; `BEL` is only the element a kind hits with) |
+| U120 | Slime species | done (v3.52) | Acid slime `slime` (acid pools that slow). It splits into two Little Slimes that drop nothing (`mpKill`; `mslime` drop `[]`), so a split adds no loot (`mpack`). Left: frost and gold slimes, and resistances (monsters have none; `BEL` is only the element a kind hits with) v3.52: resistances were already there by element (`monResK`, since v1.x: 50% to its own, −30% to the one that beats it); the Frost Slime `fslime` by the glacier lakes (Lv 200–204, chilling pools, water) and one Gold Slime `gslime` in the marsh (harmless, flees like the golden rabbit, 900 gold); every slime resists poison by half (`MELX`, `u120Spawn`; `regression/u120`). |
 | U121 | Orc raiders | done (v3.36) | Frostlight Orcs `forc` (war cry, charge, potion) and the Orc Chief. Orcs march into Patrian with its invasion (`EVT` `invP`). Wild monsters never engage you in a town; an invasion's do, by design (`m.evt`). Left: a roaming warband in the wild and an orc shield wall (only the Eternal Kingdom's soldiers lock shields: `ersol` ward ally) v3.36: Frostlight orcs call a shield wall (`ward` with `wall`: every orc within 64 px takes 40% less for 3 s, not called again while held); a warband of five (`OWB`, ids `forc@wb0..4`) marches post to post across the orcs' land and back (posts on open ground, each reachable in a straight line from the last), waits while one of them fights or lags, puts back one stuck for 20 s, and one left behind out of sight catches up; a fallen one rises where the band is (`regression/plan7`). |
 | U122 | Troll healer | done (v3.21) | Trolls regenerate 2% a second (Troll Lord 1% plus a heal), capped at max HP (`monTick`: `Math.min(m.max, …)`). Left: fire or a disable stopping the regeneration (it runs no matter what hits it) |
 | U123 | Ogre crusher | done (v3.21) | Ogre: a slow telegraphed slam that pulls (ring reach 44, tele .8), a knock-back club, a wall charge. **Bug found:** the ring's hit test is a circle (`monAct`: `d<mv.reach+4`), but `drawTele` draws it 0.58 as tall. Straight above or below the monster, the blow lands outside the red ring: for the ogre, hits up to 48 px against 25 px drawn. That fails the plan's test, and it affects every `ring` move. The rain zones do it right (`ezIn` divides dy by .6) |
