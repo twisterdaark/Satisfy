@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26lwbuff1', ver: '3.29', d: '2026-10-26', hide: [3],
+      ar: ["محارب البرق الأسطوري بقى أقوى: التيار الكهربي بيضرب 70% بدل 40% وأسرع، ومن لفل 200 بينقل البرق لعدوين. كف القوة 320% وبيشلّ لحظة، ورماح البرق بقت 5، وظهور إله البرق أقوى وبيوصل لـ8 أعداء.",
+          "هيمنة إله البرق: 24 صاعقة أقوى ووقت أقل. تحول سرعة البرق بقى فعلًا أسرع 35% وبيقلل الضرر 40%. تحول إله البرق +60% وصاعقة كل ثانية على عدو قريب.",
+          "مهارة جديدة لمحارب البرق من لفل 300: عاصفة البرق، عاصفة حواليك 6 ثواني بتضرب لحد 3 أعداء كل 0.4 ثانية.",
+          "(للتطوير) جداول البيانات بقت بتقرا الناسك وكبير السحرة وسايس الإسطبل، والبرج بيتحط بعد كل المدن عشان أوض البيوت متتحركش."],
+      en: ["The Legendary Lightning Warrior is stronger: the Electric Current hits for 70% instead of 40% and more often, reaching two foes from level 200. Force Palm hits for 320% and stuns a moment, Electric Spears are 5, Lightning God Appearance hits harder and reaches 8 foes.",
+          "Lightning God Supremacy: 24 stronger bolts, a shorter cooldown. Lightning Speed Transformation now really makes you 35% faster and takes 40% off the damage. Lightning God Transformation: +60%, and a bolt on a nearby foe every second.",
+          "A new Lightning Warrior skill at level 300: Lightning Storm, a storm around you for 6 s striking up to 3 foes every 0.4 s.",
+          "(dev) The data tables read the Hermit, the Archmage and the Stable Master; the tower is placed after every town so no house room moves."] },
     { v: '2026-10-26mounts1', ver: '3.28', d: '2026-10-26',
       ar: ["3 ركايب جديدة عند سايس الإسطبل في ريدان: البيجاسوس (لفل 200) بيطير فوق المية والغابات والصخور والجبال، والحيطان والمباني بس هي اللي بتوقفه.",
           "حصان الجمر (لفل 120) بيحرق الأعداء اللي بيعدّي جنبهم وهو ماشي.",
