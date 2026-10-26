@@ -76,20 +76,24 @@ test('a merchant\'s contracts: a supply order paid on the spot, a pre-order pick
     await H.newGame(g);
     const r = await g.eval(() => {
       const G = window.__G, S = G.S, X = window.__GPB12, o = {};
-      o.low = X.spcOpts('merchantR').length;
+      S.pid = 'p_plan12fixedcharacter'; o.low = X.spcOpts('merchantR').length;   // the day's goods are by character: one fixed id (the harness's comes from crypto)
       S.lv = 100; S.gold = 100000;
       o.labels = X.spcOpts('merchantR').map((x) => x.l);
       const R = X.spcRoll('merchantR', 's'), R2 = X.spcRoll('merchantR', 's'); o.same = JSON.stringify(R) === JSON.stringify(R2);
       o.other = JSON.stringify(X.spcRoll('merchantRh', 's')) !== JSON.stringify(R) || JSON.stringify(X.spcRoll('merchantRo', 's')) !== JSON.stringify(R);
       // without the goods: refused
-      S.mats[R.k] = 0; X.spcOpts('merchantR')[0].f(); o.refused = S.gold === 100000;
-      S.mats[R.k] = R.n + 3; const g0 = S.gold; X.spcOpts('merchantR')[0].f(); o.supplied = [S.gold - g0 === R.g, S.mats[R.k]];
+      const ks = X.shKinds(R.k); for (const k of ks) S.mats[k] = 0; X.spcOpts('merchantR')[0].f(); o.refused = S.gold === 100000;
+      S.mats[ks[ks.length - 1]] = R.n + 3; const g0 = S.gold; X.spcOpts('merchantR')[0].f(); o.supplied = [S.gold - g0 === R.g, X.shHave(R.k)];
       o.after = X.spcOpts('merchantR').map((x) => x.l);
       // the pre-order
       const B = X.spcRoll('merchantR', 'b'), g1 = S.gold; X.spcOpts('merchantR')[0].f(); o.paid = g1 - S.gold === B.g; o.spo = S.spo.length;
       o.today = X.spcOpts('merchantR').length;
+      // a clock set back (the saved day ahead of the clock) doesn't reopen the day
+      S.spc.d += 1; for (const p of S.spo) p.d += 1; o.back = X.spcOpts('merchantR').length; S.spc.d -= 1; for (const p of S.spo) p.d -= 1;
       S.spo[0].d -= 1; const m0 = S.mats[B.k] || 0; const get = X.spcOpts('merchantR'); o.get = get.map((x) => x.l); get[0].f(); o.got = (S.mats[B.k] || 0) - m0 === B.n; o.left = S.spo.length;
       S.spc.d -= 1; o.tomorrow = X.spcOpts('merchantR').length;
+      // paid pre-orders are never dropped: past SPCQ waiting, a new one is refused
+      S.spo = Array.from({ length: X.SPCQ }, () => ({ w: 'merchantT', k: 'ore', n: 5, d: S.spc.d })); const g2 = S.gold; X.spcOpts('merchantR').find((x) => /Pre-order/.test(x.l)).f(); o.full = [S.gold === g2, S.spo.length];
       return o;
     });
     assert.equal(r.low, 0, 'not below level 30');
@@ -101,6 +105,8 @@ test('a merchant\'s contracts: a supply order paid on the spot, a pre-order pick
     assert.equal(r.paid, true); assert.equal(r.spo, 1); assert.equal(r.today, 0, 'nothing more today, and the order not yet in');
     assert.match(r.get[0], /^📦 Pick up your order: \d+ /); assert.equal(r.got, true); assert.equal(r.left, 0);
     assert.equal(r.tomorrow, 2, 'a new day, new contracts');
+    assert.deepEqual(r.full, [true, 8], 'a full order book refuses, keeps what was paid');
+    assert.equal(r.back, 0, 'a clock set back keeps the day done');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
