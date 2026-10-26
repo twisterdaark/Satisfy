@@ -30,7 +30,7 @@ test('counts match the audited baseline',()=>{
   const n=o=>Array.isArray(o)?o.length:Object.keys(o).length;
   assert.deepStrictEqual({MT:n(D.monsters.types),BOSSES:n(D.monsters.bosses),SPAWN:n(D.monsters.spawns),QD:n(D.quests.quests),RC:n(D.recipes.recipes),
     SKD:n(D.skills.skills),NPC:n(D.npcs.npcs),interior:Object.values(D.npcs.npcs).filter(x=>x.interior).length,ZR:n(D.zones.regions),TOWNS:n(D.zones.towns),classes:n(D.classes.classes)},
-    {MT: 178,BOSSES:5,SPAWN:19,QD:151,RC:27,SKD:145,NPC:141,interior:11,ZR:17,TOWNS:3,classes:29});});   // SAT-ONLINE-159: the East Continent's 22 monsters, 11 quests and 32 people; the 6th to 1st vampire cities' 7 (owner 2026-10-23); the Mage's switch to Necromancer (owner 2026-10-24) Winston Castle (v2.92): Earl Steim and Irene inside, Administrator Rabbit in Reidan; Earl Zebra before his keep (v2.94); Skunk at the Sword Grave (v2.95); Brinichi's fisherman and two Sirens under the sea (v2.96); Minor at the Beware Dogs mine (v2.99).
+    {MT: 178,BOSSES:5,SPAWN:19,QD:151,RC:27,SKD:145,NPC:146,interior:11,ZR:17,TOWNS:3,classes:29});});   // SAT-ONLINE-159: the East Continent's 22 monsters, 11 quests and 32 people; the 6th to 1st vampire cities' 7 (owner 2026-10-23); the Mage's switch to Necromancer (owner 2026-10-24) Winston Castle (v2.92): Earl Steim and Irene inside, Administrator Rabbit in Reidan; Earl Zebra before his keep (v2.94); Skunk at the Sword Grave (v2.95); Brinichi's fisherman and two Sirens under the sea (v2.96); Minor at the Beware Dogs mine (v2.99). The Vatican (v3.11): Isabel, Luna and a priest, Rin and Damian in the papal hall.
 
 // condition vocabulary (docs/content/CONTENT_SCHEMA.md)
 function checkCond(c,where){assert.ok(c&&typeof c==='object'&&!Array.isArray(c),where+': condition must be an object');
@@ -69,7 +69,7 @@ test('cross-references point at things that exist',()=>{
     if(q.title)assert.ok(D.skills.titleSkills[q.title],`quest ${q.id} title`);checkCond(q.offer,'quest '+q.id);}
   for(const s of Object.values(SK)){if(s.cls)assert.ok(s.cls==='any'||C[s.cls],`skill ${s.id} class`);if(s.need)assert.ok(['melee','bow','staff','spear'].includes(s.need));checkCond(s.unlock,'skill '+s.id);}
   for(const [t,k] of Object.entries(D.skills.titleSkills))assert.ok(SK[k]&&SK[k].title===t,`title ${t} -> ${k}`);
-  for(const n of Object.values(N)){if(n.interior)assert.ok(n.room&&Number.isInteger(n.room.bi),`npc ${n.id} room`);else assert.ok(n.tx>=0&&n.tx<MW&&n.ty>=-NR&&n.ty<(['vcenv','vprince','sirenE','sirenG'].includes(n.id)?D.zones.world.MH:WMH),`npc ${n.id} inside ${MW}x${WMH}`); // v2.07: the envoy and the prince wait underground; v2.96: the Sirens in their kingdom under the map
+  for(const n of Object.values(N)){if(n.interior)assert.ok(n.room&&Number.isInteger(n.room.bi),`npc ${n.id} room`);else assert.ok(n.tx>=0&&n.tx<MW&&n.ty>=-NR&&n.ty<(['vcenv','vprince','sirenE','sirenG','rin','damian'].includes(n.id)?D.zones.world.MH:WMH),`npc ${n.id} inside ${MW}x${WMH}`); // v2.07: the envoy and the prince wait underground; v2.96: the Sirens in their kingdom under the map; v3.11: Rin and Damian in the papal hall
     if(!n.obj)assert.ok(n.spr,`npc ${n.id} sprite`);assert.ok(n.dialog,`npc ${n.id} dialog`);}
   for(const z of [...D.zones.towns,...D.zones.regions])assert.ok(z.x0>=0&&z.x0<z.x1&&z.x1<MW&&z.y0>=-NR&&z.y0<z.y1&&z.y1<WMH,`zone ${z.id} inside map`);
   D.zones.regions.forEach((r,i)=>assert.strictEqual(r.order,i,'regions keep first-match order'));

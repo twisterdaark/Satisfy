@@ -105,6 +105,8 @@
     'mkt',
     // auto production on or off (v3.10)
     'autoP',
+    // the Vatican (v3.11): Goddess Rebecca's blessing, from Help the Rebecca Church!
+    'vatB',
   ];
   var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'ctPet', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk', 'natJ'];
   var META = ['v', 'wv', 'uid', 'pid'];
