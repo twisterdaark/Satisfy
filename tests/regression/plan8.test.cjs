@@ -7,8 +7,11 @@ const H = require('../harness/game.cjs');
 
 test.after(() => H.closeBrowser());
 
-const closeDialogs = async (g) => {
-  for (let i = 0; i < 10 && await g.eval(() => window.__G.mode) === 'dialog'; i++) { await g.eval(() => window.__G.advance()); await g.step(2); }
+const closeDialogs = async (g) => {   // a menu is left with Escape, a line by going on
+  for (let i = 0; i < 10 && await g.eval(() => window.__G.mode) === 'dialog'; i++) {
+    if (await g.eval(() => { const D = window.__G.DL; return !!(D && D.opts && D.opts.length); })) await g.page.keyboard.press('Escape'); else await g.eval(() => window.__G.advance());
+    await g.step(2);
+  }
 };
 
 test('the spectators\' ring: he never comes for you there, none of his blows lands on you, and none of yours on him', async () => {
@@ -22,7 +25,7 @@ test('the spectators\' ring: he never comes for you there, none of his blows lan
       const hp0 = gd.hp; o.hit = X.hitMon(gd, 1000, { pure: 1 }); o.hpSame = gd.hp === hp0;
       const ph = P.hp; Y.hurt(500, gd); o.safe = P.hp === ph;
       // he was coming for you; in the ring he goes home
-      gd.x = h.x + 120; gd.y = h.y; gd.eng = 4; gd.agg = 1; for (let i = 0; i < 60; i++) X.monTick(gd, 0.1); o.home = Math.round(Math.hypot(gd.x - gd.sx, gd.y - gd.sy));
+      gd.x = gd.sx + 40; gd.y = gd.sy; gd.eng = 4; gd.agg = 1; const dP0 = Math.hypot(P.x - gd.x, P.y - gd.y); for (let i = 0; i < 60; i++) X.monTick(gd, 0.1); o.home = Math.round(Math.hypot(gd.x - gd.sx, gd.y - gd.sy)); o.away = Math.hypot(P.x - gd.x, P.y - gd.y) >= dP0;
       // out of the ring it's a fight again
       P.x = h.x + 60; const ph2 = P.hp; Y.hurt(500, gd); o.hurtOut = P.hp < ph2;
       return o;
@@ -30,7 +33,7 @@ test('the spectators\' ring: he never comes for you there, none of his blows lan
     assert.deepEqual(r.where, [false, true, true, false], 'the ring, not the den or beyond');
     assert.equal(r.hit, 0); assert.equal(r.hpSame, true, 'no blow lands on him from the ring');
     assert.equal(r.safe, true, 'none of his lands on you');
-    assert.ok(r.home < 40, 'he goes back to his den: ' + r.home);
+    assert.ok(r.home < 10, 'he goes back to his den: ' + r.home); assert.equal(r.away, true, 'not toward the ring');
     assert.equal(r.hurtOut, true, 'out of the ring he hurts');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
@@ -72,8 +75,8 @@ test('the alchemist: Stoneskin and Swiftness potions from their books; fresh her
       S.hpk = Date.now(); o.fresh = brew('stonep'); o.swift = brew('swiftp');
       o.used = [S.mats.herb, S.mats.ore, S.mats.bherb, S.mats.straw];
       // the Stoneskin Potion: a blow does 15% less
-      G.P.buf = null; G.P.hp = 1e6; let h = G.P.hp; Y.hurt(1000, null); const plain = h - G.P.hp;
-      Y.eat('stonep'); o.buf = G.P.buf && G.P.buf.k; h = G.P.hp; Y.hurt(1000, null); o.ratio = Math.round((h - G.P.hp) / plain * 100) / 100;
+      G.P.buf = null; G.P.inv = 0; G.P.hp = 1e6; let h = G.P.hp; Y.hurt(1000, null); const plain = h - G.P.hp;
+      Y.eat('stonep'); o.buf = G.P.buf && G.P.buf.k; G.P.inv = 0; G.P.dash = 0; h = G.P.hp; Y.hurt(1000, null); o.ratio = Math.round((h - G.P.hp) / plain * 100) / 100;
       return o;
     });
     assert.deepEqual(r.stale, [2, 0], 'a perfect brew: two');
@@ -90,10 +93,11 @@ test('the alchemist: Stoneskin and Swiftness potions from their books; fresh her
       await g.page.keyboard.down('ArrowRight'); await g.step(30); await g.page.keyboard.up('ArrowRight'); await g.step(2);
       return (await g.eval(() => window.__G.P.x)) - x0;
     };
+    await g.page.waitForTimeout(1200);   // each brew's end brings the camp menu back after 700 ms of real time
     await closeDialogs(g);
-    await g.eval(() => { const G = window.__G; G.P.buf = null; G.S.mats.swiftp = 1; G.P.st = 1e4; });
+    await g.eval(() => { const G = window.__G; G.P.buf = null; G.S.mats.swiftp = 1; G.P.stun = 0; });
     const d0 = await walk();
-    await g.eval(() => { window.__GPB8.eat('swiftp'); window.__G.P.st = 1e4; });
+    await g.eval(() => { window.__GPB8.eat('swiftp'); window.__G.P.stun = 0; });
     const d1 = await walk();
     assert.ok(d0 > 30, 'it walked: ' + d0);
     assert.ok(Math.abs(d1 / d0 - 1.12) <= 0.03, '12% faster: ' + d0 + ' → ' + d1);
