@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27mobkeys', ver: '3.48', d: '2026-10-27',
+      ar: ["أونلاين: جنب أعمدة حارس الغابة وفرقة الأورك، وفي حرب رين، مشاركة الوحوش كانت بتقف للبارتي كلها (قاعدة البيانات كانت بترفض أساميهم). اتصلحت."],
+      en: ["Online: by the Guardian of the Forest's pillars, the orc warband and in Ren's War, monster sharing stopped for the whole party (the database refused their names). Fixed."] },
     { v: '2026-10-26plan11', ver: '3.47', d: '2026-10-26',
       ar: ["الجولم لما يقع بيسيب ركام فيه عرق خام مكانه: احفره مرة واحدة في 90 ثانية.",
         "سجل قتال الزعماء: دوس على رسالة القتال، أو زرار معارك الزعماء في السجل (L)، أو اكتب /raidlog، تشوف آخر 3 معارك (المراحل، ضربك، اللي وقعوا) وتتفرج عليها بتتعاد على خريطة صغيرة.",
