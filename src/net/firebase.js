@@ -894,7 +894,8 @@
       list: function () { return Promise.all([D.get(at('commOrders')), D.get(at('commClaim'))]).then(function (r) { return { o: r[0].val() || {}, c: r[1].val() || {} }; }); },
       post: function (oid, v) { var u = {}; u['commOrders/' + oid] = { by: v.by, n: String(v.n || '?').slice(0, 24), rc: v.rc, fee: v.fee, t: SV() }; return D.update(D.ref(db), u); },
       cancel: function (oid) { var u = {}; u['commOrders/' + oid] = null; u['commClaim/' + oid] = null; return D.update(D.ref(db), u); },
-      claim: function (oid, smith) { var u = {}; u['commClaim/' + oid] = { s: smith, t: SV() }; return D.update(D.ref(db), u); },
+      // t0: the first claim's time, kept by every claim after it (its owner can take the order off 20 minutes after it)
+      claim: function (oid, smith, t0) { var u = {}; u['commClaim/' + oid] = { s: smith, t: SV(), t0: t0 || SV() }; return D.update(D.ref(db), u); },
       forge: function (oid, o, smith, sn, json) {
         var u = {}; u['commOrders/' + oid] = null; u['commClaim/' + oid] = null;
         u['commDone/' + o.by + '/' + oid] = { rc: o.rc, json: json, by: smith, sn: String(sn || '?').slice(0, 24), fee: o.fee, t: SV() };
@@ -902,6 +903,7 @@
         return D.update(D.ref(db), u);
       },
       order: function (oid) { return D.get(at('commOrders/' + oid)).then(function (s) { return s.val(); }); },
+      left: function (uid, oid) { return Promise.all([D.get(at('commOrders/' + oid)), D.get(at('commDone/' + uid + '/' + oid))]).then(function (r) { return [r[0].val(), r[1].val()]; }); },
       watchDone: function (uid, cb) { return watch('commDone/' + uid, cb); },
       took: function (uid, oid) { return D.remove(at('commDone/' + uid + '/' + oid)); },
       watchPaid: function (uid, cb) { return watch('commPaid/' + uid, cb); },

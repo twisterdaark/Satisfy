@@ -1,9 +1,10 @@
 'use strict';
-// v3.57 (plan U219) crafting commissions over the fake Firebase with the rules' checks. Ahmed orders an Iron Sword at the
+// v3.60 (plan U219) crafting commissions over the fake Firebase with the rules' checks. Ahmed orders an Iron Sword at the
 // smithy: the fee and the sword's materials leave his bag. Carim is no smith and sees no work. Bassem the Blacksmith knows
 // the recipe: he claims the order and forges it with the order's materials (none of his own); while he works Ahmed can't
 // take it off. The sword arrives in Ahmed's bag with Bassem's mark, and Bassem collects the fee once. An order nobody holds
-// is taken off with its fee and materials back.
+// is taken off with its fee and materials back. A piece that comes broken (a changed client's) is the ordered one, plain:
+// an answered order is never refunded. An order the server never got is taken off at once.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -134,5 +135,46 @@ test('a commission: ordered with its fee and materials, forged by a player smith
       assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), [], 'no write refused');
       assert.deepEqual(g.errors, []);
     }
+  } finally { await ctx.close(); }
+});
+
+// a changed client's broken piece: the owner gets the ordered piece, plain, and no refund (the smith was paid); an order the
+// server never got (the page closed while it was sent) is taken off at once, with its fee and materials back
+test('a broken piece is the ordered one, plain, never a refund; an order the server never got comes back at once', async () => {
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  try {
+    const a = await signIn(ctx, 'a', 'gCmA1', 'Ahmed', { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    const b = await signIn(ctx, 'b', 'gCmB2', 'Bassem', { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    for (const g of [a, b]) await g.eval(() => { const S = window.__G.S; S.gold = 5000; S.mats = { ore: 5, wood: 1 }; });
+    await settle(a, b);
+    const name = await a.eval(() => window.__G.lines().en.isword);
+    const sw0 = await swords(a);
+    await board(a, /Order a piece forged/);
+    await pick(a, /^(\d+\.\s*)?Order a piece$/);
+    await pick(a, new RegExp('^(\\d+\\.\\s*)?' + name + ' \\('));
+    await pick(a, /^(\d+\.\s*)?600 gold$/);
+    await until([a], () => /Your order is up for the smiths/.test(window.__toastSeen));
+    const oid = (await orders(a))[0].split('/')[1];
+    await settle(a, b);
+    // Bassem's changed client claims it and answers with a piece whose last id is another
+    const r = await b.eval(async (oid) => {
+      const F = window.__GLD.fb(), D = F.m.database, SV = D.serverTimestamp(), me = Satisfy.local.net().uid, o = (await D.get(D.ref(F.db, 'commOrders/' + oid))).val();
+      const w = async (u) => { try { await D.update(D.ref(F.db), u); return 'ok'; } catch (e) { return 'no'; } };
+      const c = await w({ ['commClaim/' + oid]: { s: me, t: SV, t0: SV } });
+      const f = await w({ ['commOrders/' + oid]: null, ['commClaim/' + oid]: null, ['commDone/' + o.by + '/' + oid]: { rc: 'isword', json: '{"id":"isword","r":4,"id":"gsword"}', by: me, sn: 'Bassem', fee: 600, t: SV }, ['commPaid/' + me + '/' + oid]: { g: 600, t: SV } });
+      return [c, f];
+    }, oid);
+    assert.deepEqual(r, ['ok', 'ok'], 'the rules let it through: it begins with the order\'s recipe');
+    await until([a], () => /came broken/.test(window.__toastSeen), 15000);
+    const got = await a.eval(() => { const S = window.__G.S, L = S.items.filter((i) => i.id === 'isword'); return { n: L.length, r: L[L.length - 1].r, by: L[L.length - 1].by, gold: S.gold, ore: S.mats.ore | 0, cord: S.cord.length }; });
+    assert.deepEqual(got, { n: sw0 + 1, r: 0, by: 'Bassem', gold: 4400, ore: 0, cord: 0 }, 'the ordered sword, plain, with the smith\'s name; nothing refunded');
+
+    // an order in the save that the server never got
+    await a.eval(() => { const S = window.__G.S; S.gold -= 700; S.cord.push({ oid: 'c_gCmA1_lost1', rc: 'isword', fee: 700, m: { ore: 5, wood: 1 } }); });
+    await board(a, /Order a piece forged/);
+    await pick(a, new RegExp('^(\\d+\\.\\s*)?' + name + ' · '));
+    await until([a], () => /Order taken off: 700 gold and the materials back/.test(window.__toastSeen));
+    assert.deepEqual(await a.eval(() => { const S = window.__G.S; return [S.gold, S.mats.ore | 0, S.mats.wood | 0, S.cord.length]; }), [4400, 5, 1, 0]);
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
