@@ -866,27 +866,6 @@
     };
   }
 
-  // SAT-ONLINE-094: the auction house board. auction/{lid} {by, n, it, q, price, t}: a player's listing (materials and
-  // potions, as the auction house takes them); a sale is one update that removes it and writes auctionPaid/{seller}/{lid}
-  // {g, by, bn, it, q, t} (the rules: only for the listing as it is, by someone else); the seller removes what it collects.
-  function auctionStore(sdk) {
-    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, SV = function () { return D.serverTimestamp(); };
-    // a refused listener calls back with (null, true), so the game can watch again later
-    var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null, true); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
-    return {
-      watch: function (cb) { return watch('auction', cb); },
-      watchPaid: function (uid, cb) { return watch('auctionPaid/' + uid, cb); },
-      list: function (lid, v) { var u = {}; u['auction/' + lid] = { by: v.by, n: String(v.n || '?').slice(0, 24), it: v.it, q: v.q, price: v.price, t: SV() }; return D.update(D.ref(db), u); },
-      unlist: function (lid) { return D.remove(at('auction/' + lid)); },
-      buy: function (lid, v) {
-        var u = {}; u['auction/' + lid] = null;
-        u['auctionPaid/' + v.seller + '/' + lid] = { g: v.g, by: v.by, bn: String(v.bn || '?').slice(0, 24), it: v.it, q: v.q, t: SV() };
-        return D.update(D.ref(db), u);
-      },
-      collect: function (uid, lid) { return D.remove(at('auctionPaid/' + uid + '/' + lid)); },
-    };
-  }
-
   // SAT-ONLINE-073: the group finder, lfg/{uid} = {n, lv, cls, k, z, t}: yours only, gone when you leave (onDisconnect)
   function lfgStore(sdk) {
     var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
@@ -944,7 +923,6 @@
     lfgStore: lfgStore,
     fishFestStore: fishFestStore,
     repairStore: repairStore,
-    auctionStore: auctionStore,
     announceStore: announceStore,
     pollStore: pollStore,
     modStore: modStore,

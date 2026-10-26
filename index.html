@@ -2665,125 +2665,55 @@ const auMarket=k=>k==='hpot'?60:k==='mpot'?70:Math.round((MATP[k]||5)*2);
 const auHave=k=>k==='hpot'||k==='mpot'?S[k]||0:S.mats[k]||0;
 const auTake=(k,n)=>{if(k==='hpot'||k==='mpot')S[k]-=n;else S.mats[k]-=n;},auGive=(k,n)=>{if(k==='hpot'||k==='mpot')S[k]=(S[k]||0)+n;else addMat(k,n);};
 function auWS(){const A=WS.auction||(WS.auction={list:[],paid:{},npcAt:0,id:0});const now=Date.now();
- // the merchants come back every 20 minutes; a time further ahead than that (the device's clock moved back, or a save from
- // another device) or not a number would keep them away for good, so it refreshes them too
- if(!(A.npcAt>=now&&A.npcAt<=now+20*60000)){A.list=A.list.filter(l=>l.pid!=='npc');const pool=['mith','bherb','gfish','mstone','dscale','sfish','leather','herb'],r=mulberry32(now/1e5|0);
+ if(A.npcAt<now){A.list=A.list.filter(l=>l.pid!=='npc');const pool=['mith','bherb','gfish','mstone','dscale','sfish','leather','herb'],r=mulberry32(now/1e5|0);
   for(let i=0;i<6;i++){const k=pool[(r()*pool.length)|0],q=k==='dscale'?1:1+(r()*5|0);A.list.push({id:++A.id,pid:'npc',n:t('auNpc'),it:k,q,price:Math.round(auMarket(k)*q*(1.1+r()*.5)),t:now});}A.npcAt=now+20*60000;}
  return A;}
-/* the auction house online (SAT-ONLINE-094, plan U213/U214). Signed in, the players' listings are one board for everyone:
-   auction/{lid} {by, n, it, q, price, t}. A sale is one write that takes the listing off and pays the seller
-   (auctionPaid/{seller}/{lid} {g, by, bn, it, q, t}); the rules take it only for a listing still there and at its price, so
-   two buyers can't both get it. The seller is told of each sale while playing and collects the gold (less the 5% fee) at
-   the auction house. The merchants' listings, and listings made offline, stay on the device as before. */
-Object.assign(STR.ar,{auMax:'المزاد بياخد لحد {q} من الحاجة الواحدة ولحد {g} دهب',auPdFull:'أماكنك الـ8 محجوزة لحد ما تستلم فلوس اللي اتباع: استلمها الأول',auExpired:'{q}× {it} بتوعك مااتباعوش في 14 يوم ورجعولك',auSoldOn:'{b} اشترى {q}× {it} بتوعك بـ {g} دهب. استلمهم من المزاد',auOnFail:'المزاد مش متاح دلوقتي، جرّب تاني',auOffl:'المزاد مستني الاتصال يرجع: جرّب تاني لما تبقى أونلاين'});
-Object.assign(STR.en,{auMax:'The auction house takes up to {q} of a kind and up to {g} gold',auPdFull:'Your eight places are taken until you collect what sold: collect it first',auExpired:'Your {q}× {it} did not sell in 14 days and came back to you',auSoldOn:'{b} bought your {q}× {it} for {g} gold. Collect it at the auction house',auOnFail:'The auction house is not answering; try again',auOffl:'The auction house waits for the connection: try again once you are back online'});
-var AUON={},AUPD={},auOnOff=null,auPdSeen=null,auOnSeen=false,auBusy=0,auBackSeen=new Set(),auColl=new Set(),auPendLive=false;
-// what the rules take (Claude-B, #129): eight listings an account (slots a_{uid}_0 to _7), up to 999 of a kind for up to a
-// billion gold, bought for 14 days; after that the seller's game takes it back
-const AUQMAX=999,AUGMAX=1e9,AUDAYS=14*864e5;
-function aucOn(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&S&&!S.__demo);}
-function auSt(){return aucOn()&&Satisfy.firebase.auctionStore?Satisfy.firebase.auctionStore(FB):null;}
-// auction writes only while connected (review of the auction, v3.16): while reconnecting the database would queue them, and a queued
-// write lands late (gold spent meanwhile) or is lost with a reload (goods already off the bag)
-function auLive(){if(aucOn()&&netState==='ONLINE')return true;SFX.deny();toast(t('auOffl'),'warn');return false;}
-// the server's clock, as the listings' t is (a device clock far ahead would send every listing back as expired)
-const auNow=()=>Date.now()+(NETTR&&NETTR.serverOffset?NETTR.serverOffset()||0:0);
-// leaving or switching the account: the next account watches its own board and sales
-function auStop(){const f=auOnOff;auOnOff=null;if(f)try{f();}catch(e){}AUON={};AUPD={};auPdSeen=null;auOnSeen=false;auBusy=0;auBackSeen.clear();auColl.clear();auPendLive=false;}
-function auLost(){const f=auOnOff;auOnOff=null;if(f)try{f();}catch(e){}auOnSeen=false;auPdSeen=null;} // a listener refused: watch again next time
-// the board and your sales, watched from going online (or the first visit to the auction house, if that comes first)
-function auWatch(){const st=auSt();if(!st||auOnOff)return;const uid=NET.uid;
- const a=st.watch((v,err)=>{if(err)return auLost();const o={};for(const k in (v||{})){const e=v[k];if(/^a_[A-Za-z0-9_-]{1,60}$/.test(k)&&e&&typeof e==='object'&&AUK.includes(e.it)&&+e.q>0&&+e.price>0)o[k]={id:k,on:1,by:e.by,n:Satisfy.chat.clean(e.n,24)||'?',it:e.it,q:+e.q|0,price:+e.price|0,t:+e.t||0};}AUON=o;auOnSeen=true;auPendCheck();renderAuL();});
- const b=st.watchPaid(uid,(v,err)=>{if(err)return auLost();const o={};for(const k in (v||{})){const e=v[k];if(e&&typeof e==='object'&&+e.g>0&&AUK.includes(e.it))o[k]={g:+e.g|0,bn:Satisfy.chat.clean(e.bn,24)||'?',it:e.it,q:+e.q|0};}
-  // a sale being collected leaves for a moment and comes back if the collect is refused: that is not a new sale
-  if(auPdSeen)for(const k in o)if(!auPdSeen.has(k)&&!auColl.has(k)){toast(t('auSoldOn',{b:o[k].bn,q:o[k].q,it:t(o[k].it),g:Math.round(o[k].g*(1-AUFEE))}),'good');SFX.coin();}
-  for(const k in o)auColl.delete(k);auPdSeen=new Set(Object.keys(o));AUPD=o;auPendCheck();renderAuL();});
- auOnOff=()=>{a();b();};}
-// a listing whose write never came back (the page closed or reloaded on the way): once the board and your sales are read, it
-// stays off the bag if it is on the board or sold, and comes back otherwise
-function auPendCheck(){const p=S&&S.auPend;if(!p||auPendLive||!auOnSeen||!auPdSeen||!NET||!String(p.lid).startsWith('a_'+NET.uid+'_'))return;
- if(!(p.lid in AUON)&&!(p.lid in AUPD)){auGive(p.it,p.q);toast(t('auBack',{q:p.q,it:t(p.it)}));}delete S.auPend;hudDirty=true;save(true);renderAu();}
-function auExpire(l){const key=l.id+'@'+l.t;if(auBackSeen.has(key)||netState!=='ONLINE')return;auBackSeen.add(key);const st=auSt();if(!st)return;st.unlist(l.id).then(()=>{delete AUON[l.id];auGive(l.it,l.q);toast(t('auExpired',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);renderAu();},()=>auBackSeen.delete(key));}
-// the listings that can still be bought; your own past 14 days come back to you. Yours are the account's (any character)
-function auFresh(){const now=auNow(),me=NET.uid,L=[];for(const k in AUON){const l=AUON[k];l.pid=l.by===me?pidOf():'u:'+l.by;if(l.t>now-AUDAYS)L.push(l);else if(l.by===me)auExpire(l);}return L;}
-function auAll(){const A=auWS();return aucOn()?A.list.concat(auFresh()):A.list;}
-function auFind(id){return auAll().find(l=>String(l.id)===String(id));}
-function auPaidOn(){let g=0;for(const k in AUPD)g+=Math.round(AUPD[k].g*(1-AUFEE));return aucOn()?g:0;}
-function auMineN(){return auAll().filter(l=>l.pid===pidOf()).length;}
-// buy an online listing: the gold is held from the click (nothing else spends it on the way), the goods come once the
-// database took the sale, and the gold comes back if it didn't
-function auBuyOn(l,done){const st=auSt();if(!st||auBusy||!auLive())return;if(S.gold<l.price){SFX.deny();toast(t('noGold'),'warn');return;}auBusy=1;S.gold-=l.price;hudDirty=true;
- st.buy(l.id,{seller:l.by,g:l.price,by:NET.uid,bn:String(netId||S.look.n||'?').slice(0,24),it:l.it,q:l.q}).then(()=>{auBusy=0;auGive(l.it,l.q);delete AUON[l.id];SFX.coin();hudDirty=true;save(true);done(true);},
-  ()=>{auBusy=0;S.gold+=l.price;hudDirty=true;toast(t('auGone'),'warn');done(false);});}
-// a slot is taken while it is on the board and while its sale isn't collected (auctionPaid/{uid}/{slot} must be empty for
-// the next buyer: Claude-B's review of #129), so the slot is picked only once both have been read. The goods are off the bag
-// from the click, with a note in the save (S.auPend) until the write answers, so a reload on the way can't lose them
-function auListOn(k,q,price){const st=auSt();if(!st||auBusy||!auLive())return false;if(q>AUQMAX||price>AUGMAX){SFX.deny();toast(t('auMax',{q:AUQMAX,g:AUGMAX.toLocaleString('en')}),'warn');return false;}
- if(!auOnSeen||!auPdSeen){auWatch();SFX.deny();toast(t('auOnFail'),'warn');return false;}
- if(S.auPend){auPendCheck();if(S.auPend){SFX.deny();toast(t('auOnFail'),'warn');return false;}}
- const used=new Set(Object.keys(AUON).concat(Object.keys(AUPD))),slot=[0,1,2,3,4,5,6,7].find(i=>!used.has('a_'+NET.uid+'_'+i));if(slot==null){SFX.deny();toast(t(Object.keys(AUPD).length?'auPdFull':'auFull'),'warn');return false;}
- auBusy=1;auPendLive=true;const lid='a_'+NET.uid+'_'+slot;auTake(k,q);S.auPend={lid,it:k,q};hudDirty=true;save(true);
- st.list(lid,{by:NET.uid,n:String(netId||S.look.n||'?').slice(0,24),it:k,q,price}).then(()=>{auBusy=0;auPendLive=false;delete S.auPend;save(true);SFX.coin();toast(t('auListed',{q,it:t(k),g:price}),'good');renderAu();},
-  ()=>{auBusy=0;auPendLive=false;delete S.auPend;auGive(k,q);hudDirty=true;save(true);toast(t('auOnFail'),'warn');renderAu();});return true;}
-function auBackOn(l,done){const st=auSt();if(!st||auBusy||!auLive())return;auBusy=1;st.unlist(l.id).then(()=>{auBusy=0;delete AUON[l.id];auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);done();},()=>{auBusy=0;toast(t('auOnFail'),'warn');done();});}
-// each sale's gold is read before its write: the database drops the paid entry from AUPD (its listener) before .then runs
-function auCollectOn(){const st=auSt();if(!st||auBusy)return;const ks=Object.keys(AUPD);if(!ks.length||!auLive())return;auBusy=1;
- Promise.all(ks.map(k=>{const g=Math.round(AUPD[k].g*(1-AUFEE));auColl.add(k);return st.collect(NET.uid,k).then(()=>{auColl.delete(k);delete AUPD[k];S.gold+=g;return g;},()=>0);})).then(gs=>{const g=gs.reduce((a,b)=>a+b,0);if(g){SFX.coin();toast(t('auGot',{g}),'good');hudDirty=true;save(true);}}).finally(()=>{auBusy=0;renderAu();});}
-window.__GAU={get on(){return AUON},get paid(){return AUPD},all:()=>auAll(),watch:()=>auWatch(),store:()=>auSt(),get watching(){return !!auOnOff},switchAcc:()=>netSwitch()}; // tests
 /* the auction window (owner 2026-10-20: "like the shop when you sell: your bag, and you pick what to list"): your goods on
    the left, pick one, set how many and the price, List; on the right what is listed (search by name, Buy) and your own
    listings (Withdraw), and the gold waiting for you */
 let AUV={tab:'list',sel:null};
-function openAu(){auWatch();auPendCheck();SFX.open();mode='au';$('auW').hidden=false;$('hint').hidden=true;AUV.sel=null;$('auQ').value='';renderAu();}
+function openAu(){SFX.open();mode='au';$('auW').hidden=false;$('hint').hidden=true;AUV.sel=null;$('auQ').value='';renderAu();}
 function closeAu(){SFX.close();$('auW').hidden=true;mode='play';}
 function renderAu(){if($('auW').hidden)return;const A=auWS(),me=pidOf(),ks=AUK.filter(k=>auHave(k)>0);if(AUV.sel&&!auHave(AUV.sel))AUV.sel=null;
  let h='';for(let i=0,N=Math.max(18,Math.ceil(ks.length/6)*6);i<N;i++){const k=ks[i];h+=k?`<button class="slotb${AUV.sel===k?' sel':''}" data-auk="${k}" data-tip="${esc(`<b>${t(k)}</b><br><small>${t('auMkt',{g:auMarket(k)})}</small>`)}"><img src="${icon(k)}"><b>${auHave(k)}</b></button>`:'<div class="slotb e"></div>';}
  $('auBag').innerHTML=h;$('auGold').textContent=t('gold',{n:S.gold});
- const k=AUV.sel,F=$('auF');if(!k){F.dataset.k='';F.innerHTML=`<small>${t(ks.length?'auPick':'auNothing')}</small>`;}else{const hv=auHave(k);
-  const qm=aucOn()?Math.min(hv,AUQMAX):hv;
-  // the amount and price typed for this same item stay as they were when the window draws again (review of the auction, v3.16)
-  const was=F.dataset.k===k&&$('auN')?[$('auN').value,$('auP').value]:null;F.dataset.k=k;
-  F.innerHTML=`<b>${t(k)}</b><label>${t('auQtyH',{n:hv})}<input id="auN" type="number" min="1" max="${qm}" value="${Math.min(qm,5)}"></label><label>${t('auPriceH')}<input id="auP" type="number" min="1"${aucOn()?` max="${AUGMAX}"`:''}></label><small id="auHint"></small><button id="auGo">${t('auListB')}</button>`;
-  const n=$('auN'),pr=$('auP'),hint=()=>{const q=clamp(+n.value|0,1,qm),m=auMarket(k)*q;$('auHint').textContent=t('auHintT',{g:m,f:Math.round((+pr.value||0)*(1-AUFEE))});};
-  const fill=()=>{pr.value=Math.min(aucOn()?AUGMAX:Infinity,Math.round(auMarket(k)*clamp(+n.value|0,1,qm)*1.2));hint();};if(was){n.value=was[0];pr.value=was[1];hint();}else fill();n.oninput=fill;pr.oninput=hint;
-  $('auGo').onclick=()=>{const q=clamp(+n.value|0,1,qm),g=Math.max(1,Math.min(aucOn()?AUGMAX:2147483647,Math.floor(+pr.value)||0));if(auList(k,q,g)){AUV.sel=auHave(k)?k:null;renderAu();}};}
+ const k=AUV.sel,F=$('auF');if(!k)F.innerHTML=`<small>${t(ks.length?'auPick':'auNothing')}</small>`;else{const hv=auHave(k);
+  F.innerHTML=`<b>${t(k)}</b><label>${t('auQtyH',{n:hv})}<input id="auN" type="number" min="1" max="${hv}" value="${Math.min(hv,5)}"></label><label>${t('auPriceH')}<input id="auP" type="number" min="1"></label><small id="auHint"></small><button id="auGo">${t('auListB')}</button>`;
+  const n=$('auN'),pr=$('auP'),hint=()=>{const q=clamp(+n.value|0,1,hv),m=auMarket(k)*q;$('auHint').textContent=t('auHintT',{g:m,f:Math.round((+pr.value||0)*(1-AUFEE))});};
+  const fill=()=>{pr.value=Math.round(auMarket(k)*clamp(+n.value|0,1,hv)*1.2);hint();};fill();n.oninput=fill;pr.oninput=hint;
+  $('auGo').onclick=()=>{const q=clamp(+n.value|0,1,hv),g=Math.max(1,+pr.value|0);if(auList(k,q,g)){AUV.sel=auHave(k)?k:null;renderAu();}};}
  $('auBag').querySelectorAll('[data-auk]').forEach(b=>b.onclick=()=>{SFX.click();AUV.sel=b.dataset.auk;renderAu();});
  document.querySelectorAll('#auW [data-autab]').forEach(b=>{b.classList.toggle('on',b.dataset.autab===AUV.tab);b.onclick=()=>{AUV.tab=b.dataset.autab;renderAu();};});
- const q=$('auQ');q.hidden=AUV.tab!=='list';q.placeholder=t('auFind');q.oninput=()=>renderAuL();renderAuL();}
-// what is listed and the gold waiting: the board's own updates draw only this, so a price being typed is left alone
-function renderAuL(){if($('auW').hidden)return;const A=auWS(),me=pidOf(),qs=$('auQ').value.trim().toLowerCase();
- const L=AUV.tab==='list'?auAll().filter(l=>l.pid!==me&&(!qs||t(l.it).toLowerCase().includes(qs)||l.it.includes(qs))).sort((a,b)=>a.price/a.q-b.price/b.q):auAll().filter(l=>l.pid===me);
+ const q=$('auQ');q.hidden=AUV.tab!=='list';q.placeholder=t('auFind');q.oninput=()=>renderAu();const qs=q.value.trim().toLowerCase();
+ const L=AUV.tab==='list'?A.list.filter(l=>l.pid!==me&&(!qs||t(l.it).toLowerCase().includes(qs)||l.it.includes(qs))):A.list.filter(l=>l.pid===me);
  $('auL').innerHTML=L.length?L.map(l=>`<div class="aurow${AUV.tab==='list'&&S.gold<l.price?' poor':''}" data-tip="${esc(`<b>${t(l.it)}</b><br><small>${t('auMkt',{g:auMarket(l.it)})}</small>`)}"><img src="${icon(l.it)}"><span>${l.q}× ${esc(t(l.it))}<br><small>${esc(l.n||'')}</small></span><span class="pr">${l.price.toLocaleString('en')} ${t('auG')}</span><button data-aul="${l.id}">${t(AUV.tab==='list'?'auBuyB':'auBackB')}</button></div>`).join(''):`<div class="none">${t(AUV.tab==='list'?'auEmpty':'auNoMine')}</div>`;
- $('auL').querySelectorAll('[data-aul]').forEach(b=>b.onclick=()=>{const id=b.dataset.aul;if(AUV.tab==='list')auBuyW(id);else auBackW(id);});
- const pd=(A.paid[me]||0)+auPaidOn();$('auC').innerHTML=pd?`<button id="auCol">${t('oAuCollect',{g:pd})}</button>`:'';if(pd)$('auCol').onclick=()=>{auCollect();renderAu();};}
-function auBuyW(id){const A=auWS(),l=auFind(id);if(!l){toast(t('auGone'),'warn');return renderAu();}if(S.gold<l.price){SFX.deny();return toast(t('noGold'),'warn');}
- if(l.on)return auBuyOn(l,ok=>{if(ok)toast(t('auBought',{q:l.q,it:t(l.it),g:l.price}),'good');renderAu();});
+ $('auL').querySelectorAll('[data-aul]').forEach(b=>b.onclick=()=>{const id=+b.dataset.aul;if(AUV.tab==='list')auBuyW(id);else auBackW(id);});
+ const pd=A.paid[me]||0;$('auC').innerHTML=pd?`<button id="auCol">${t('oAuCollect',{g:pd})}</button>`:'';if(pd)$('auCol').onclick=()=>{auCollect();renderAu();};}
+function auBuyW(id){const A=auWS(),l=A.list.find(l=>l.id===id);if(!l){toast(t('auGone'),'warn');return renderAu();}if(S.gold<l.price){SFX.deny();return toast(t('noGold'),'warn');}
  S.gold-=l.price;A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);if(l.pid!=='npc')A.paid[l.pid]=(A.paid[l.pid]||0)+Math.round(l.price*(1-AUFEE));
  SFX.coin();toast(t('auBought',{q:l.q,it:t(l.it),g:l.price}),'good');hudDirty=true;save(true);renderAu();}
-function auBackW(id){const A=auWS(),l=auFind(id);if(!l||l.pid!==pidOf())return renderAu();if(l.on)return auBackOn(l,renderAu);A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);renderAu();}
-function auOpts(){auWatch();auPendCheck();const A=auWS(),pd=(A.paid[pidOf()]||0)+auPaidOn();return [{l:t('oAuBuy'),f:auBrowse},{l:t('oAuSell'),f:auSellMenu},{l:t('oAuMine'),f:auMine},...(pd?[{l:t('oAuCollect',{g:pd}),f:auCollect}]:[])];}
-function auBrowse(){const mine=pidOf(),L=auAll().filter(l=>l.pid!==mine).sort((a,b)=>a.price/a.q-b.price/b.q).slice(0,8);if(!L.length)return dialog('auction',['auEmpty']);
+function auBackW(id){const A=auWS(),l=A.list.find(l=>l.id===id&&l.pid===pidOf());if(!l)return renderAu();A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);renderAu();}
+function auOpts(){const A=auWS(),pd=A.paid[pidOf()]||0;return [{l:t('oAuBuy'),f:auBrowse},{l:t('oAuSell'),f:auSellMenu},{l:t('oAuMine'),f:auMine},...(pd?[{l:t('oAuCollect',{g:pd}),f:auCollect}]:[])];}
+function auBrowse(){const A=auWS(),mine=pidOf(),L=A.list.filter(l=>l.pid!==mine).slice(0,8);if(!L.length)return dialog('auction',['auEmpty']);
  dialog('auction',['auBrowseL'],null,[...L.map(l=>({l:t('auRow',{q:l.q,it:t(l.it),g:l.price,n:l.n}),ic:l.it,f:()=>auBuy(l.id)})),{l:t('oLeave')}]);if(DL&&DL.optOn)selOpt(L.length);}// Leave is preselected, so pressing E through the greeting never buys by accident
-function auBuy(id){const A=auWS(),l=auFind(id);if(!l)return toast(t('auGone'),'warn');if(S.gold<l.price){SFX.deny();return dialog('auction',[t('noGold')]);}
- if(l.on)return auBuyOn(l,ok=>{if(ok)dialog('auction',[t('auBought',{q:l.q,it:t(l.it),g:l.price})]);});
+function auBuy(id){const A=auWS(),l=A.list.find(l=>l.id===id);if(!l)return toast(t('auGone'),'warn');if(S.gold<l.price){SFX.deny();return dialog('auction',[t('noGold')]);}
  S.gold-=l.price;A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);if(l.pid!=='npc')A.paid[l.pid]=(A.paid[l.pid]||0)+Math.round(l.price*(1-AUFEE));
  SFX.coin();hudDirty=true;save(true);dialog('auction',[t('auBought',{q:l.q,it:t(l.it),g:l.price})]);}
 function auSellMenu(){const ks=AUK.filter(k=>auHave(k)>0).slice(0,8);if(!ks.length)return dialog('auction',['auNothing']);
  dialog('auction',['auSellL'],null,[...ks.map(k=>({l:t('auHaveRow',{it:t(k),n:auHave(k),g:auMarket(k)}),ic:k,f:()=>auQty(k)})),{l:t('oLeave')}]);}
-function auQty(k){const h=aucOn()?Math.min(auHave(k),AUQMAX):auHave(k),qs=[...new Set([1,5,h].filter(q=>q<=h))];dialog('auction',[t('auQtyL',{it:t(k)})],null,[...qs.map(q=>({l:t('auQty',{q}),f:()=>auPrice(k,q)})),{l:t('oLeave')}]);}
+function auQty(k){const h=auHave(k),qs=[...new Set([1,5,h].filter(q=>q<=h))];dialog('auction',[t('auQtyL',{it:t(k)})],null,[...qs.map(q=>({l:t('auQty',{q}),f:()=>auPrice(k,q)})),{l:t('oLeave')}]);}
 function auPrice(k,q){const m=auMarket(k)*q;dialog('auction',[t('auPriceL',{g:m})],null,[[.9,'auCheap'],[1.2,'auFair'],[1.8,'auHigh']].map(([f,lb])=>({l:t(lb,{g:Math.round(m*f)}),f:()=>auList(k,q,Math.round(m*f))})).concat([{l:t('oLeave')}]));}
-function auList(k,q,price){if(auHave(k)<q)return;if(aucOn())return auListOn(k,q,price); // online the eight slots of the account decide
- const A=auWS(),mine=auMineN();if(mine>=8){SFX.deny();toast(t('auFull'),'warn');return false;}
+function auList(k,q,price){if(auHave(k)<q)return;const A=auWS(),mine=A.list.filter(l=>l.pid===pidOf()).length;if(mine>=8){SFX.deny();toast(t('auFull'),'warn');return false;}
  auTake(k,q);const now=Date.now(),ratio=price/(auMarket(k)*q),wait=ratio>2.5||MKQ[k]?1e12:(60+540*clamp((ratio-.6)/1.4,0,1))*1000*(.7+rand()*.6); // fish and crops: their market has a daily quota
  A.list.push({id:++A.id,pid:pidOf(),n:S.look.n||t('pname'),it:k,q,price,t:now,sell:now+wait});SFX.coin();toast(t('auListed',{q,it:t(k),g:price}),'good');hudDirty=true;save(true);return true;}
-function auMine(){const A=auWS(),L=auAll().filter(l=>l.pid===pidOf());if(!L.length)return dialog('auction',['auNoMine']);
- dialog('auction',['auMineL'],null,[...L.map(l=>({l:t('auMineRow',{q:l.q,it:t(l.it),g:l.price}),ic:l.it,f:()=>{if(l.on)return auBackOn(l,auMine);A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));save(true);auMine();}})),{l:t('oLeave')}]);}
-function auCollect(){auCollectOn();const A=auWS(),g=A.paid[pidOf()]||0;if(!g)return;delete A.paid[pidOf()];S.gold+=g;SFX.coin();toast(t('auGot',{g}),'good');hudDirty=true;save(true);}
+function auMine(){const A=auWS(),L=A.list.filter(l=>l.pid===pidOf());if(!L.length)return dialog('auction',['auNoMine']);
+ dialog('auction',['auMineL'],null,[...L.map(l=>({l:t('auMineRow',{q:l.q,it:t(l.it),g:l.price}),ic:l.it,f:()=>{A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));save(true);auMine();}})),{l:t('oLeave')}]);}
+function auCollect(){const A=auWS(),g=A.paid[pidOf()]||0;if(!g)return;delete A.paid[pidOf()];S.gold+=g;SFX.coin();toast(t('auGot',{g}),'good');hudDirty=true;save(true);}
 // offline buyers: a listing sells when its time comes; online the server matches real buyers instead
 function auTick(){if(!WS||!WS.auction)return;const A=WS.auction,now=Date.now();let sold=0;
  for(const l of [...A.list])if(l.pid!=='npc'&&l.sell&&l.sell<=now){A.list=A.list.filter(x=>x!==l);A.paid[l.pid]=(A.paid[l.pid]||0)+Math.round(l.price*(1-AUFEE));if(l.pid===pidOf()){sold++;renderAu();toast(t('auSold',{q:l.q,it:t(l.it),g:Math.round(l.price*(1-AUFEE))}),'good');}}
  if(sold){SFX.coin();save(true);}}
-let auT=0;function updateAuction(dt){if((auT-=dt)<=0){auT=5;auTick();if(!auOnOff&&aucOn())auWatch();if(S&&S.auPend)auPendCheck();}} // watched while you play, so a seller hears of a sale anywhere
+let auT=0;function updateAuction(dt){if((auT-=dt)<=0){auT=5;auTick();}}
 
 /* ---------------- Trauka the Red Dragon (SAT-DRAGON-001) ---------------- */
 // A world boss on the peak north of Reinhardt. It breathes fire in a cone it telegraphs first, slams the ground, and once
@@ -4071,7 +4001,7 @@ function fbAim(max){const v=fdir();if(TOUCH){const m=!TAIM&&tNearM(max);if(m)ret
 const FBSK={
  sbdash:()=>{const [m,v]=hcFront(110);if(!m){toast(t('hcNoTgt'),'warn');return;}const d=Math.hypot(m.x-P.x,m.y-P.y),L=Math.max(0,Math.min(c2Line(v,d-8),d-8));P.x+=v[0]*L;P.y+=v[1]*L;P.inv=Math.max(P.inv,.25);
   vfx('dust',P.x,P.y,{n:10,angle:Math.atan2(-v[1],-v[0])});hitMon(m,1.2+Math.min(3,m.lv/100),{skill:1,kx:v[0],ky:v[1]});if(!m.dead)m.stun=Math.max(m.stun||0,.3);},
- sbrain:()=>{const [x,y]=fbAim(110);FOGB.rains.push({x,y,t:3,k:0});SFX.magic(.5);},
+ sbrain:()=>{const [x,y]=fbAim(110);FOGB.rains.push({x,y,t:3,k:0,el:'fire'});SFX.magic(.5);},
  lsslash:()=>{const [m,v]=hcFront(34);vfx('slash',P.x+v[0]*6,P.y-7+v[1]*6,{angle:Math.atan2(v[1],v[0]),rarity:3});if(!m)return;hitMon(m,1.7,{skill:1,kx:v[0],ky:v[1]});vfx('bolt',m.x,monY(m)-30,{x1:m.x,y1:monY(m)});lsChain(m,.9,2);SFX.crit();},
  lsstep:()=>{const v=fdir(),L=c2Line(v,64),x0=P.x,y0=P.y-6;let n=0;for(const m of mons){if(m.dead)continue;const dx=m.x-x0,dy=monY(m)-y0,k=dx*v[0]+dy*v[1];if(k<-4||k>L+6)continue;if(Math.abs(dx*v[1]-dy*v[0])<10+MT[m.type].r&&hitMon(m,1.3,{skill:1,stun:.4}))n++;}
   for(let d=0;d<L;d+=6)fx.push({x:x0+v[0]*d,y:y0+v[1]*d,vx:(rand()-.5)*30,vy:(rand()-.5)*30,t:.3,c:d%12?'#bfe0ff':'#fff',fl:1});P.x+=v[0]*L;P.y+=v[1]*L;P.inv=Math.max(P.inv,.3);if(n)shake=.1;},
@@ -4084,7 +4014,7 @@ function fbHit(m,o){if(o.skill&&!o.chain&&m.hp<=0&&S.cls==='esorc'&&pasOn('esbur
  if(!o.skill&&!o.dot&&!m.spar&&S.cls==='lsword'&&pasOn('lscharge')&&++FOGB.chg>=4){FOGB.chg=0;vfx('bolt',m.x,monY(m)-34,{x1:m.x,y1:monY(m)});if(m.hp>0)hitMon(m,.8*pasM('lscharge'),{skill:1,chain:1});lsChain(m,.5,1);}}
 function fbTick(dt){if(!S||!P)return;
  for(const r of FOGB.rains){r.t-=dt;r.k-=dt;for(let i=0;i<3;i++)if(rand()<dt*20)fx.push({x:r.x+(rand()-.5)*60,y:r.y-60+rand()*10,vx:6,vy:150,t:.38,c:rand()<.5?'#ff7a1a':'#ffd24a',fl:1});
-  if(r.k<=0){r.k=.3;const mul=.45*(1+Math.min(1.5,stat('int')*.004));for(const m of mons){if(m.dead)continue;if(Math.hypot(m.x-r.x,monY(m)-r.y)<34+MT[m.type].r)hitMon(m,mul,{skill:1,dot:1});}}}
+  if(r.k<=0){r.k=.3;const mul=.45*(1+Math.min(1.5,stat('int')*.004));for(const m of mons){if(m.dead)continue;if(Math.hypot(m.x-r.x,monY(m)-r.y)<34+MT[m.type].r)hitMon(m,mul,{skill:1,dot:1,el:r.el||null});}}}
  FOGB.rains=FOGB.rains.filter(r=>r.t>0);
  for(const u of FOGB.runes){if((u.t-=dt)<=0)esBlast(u.x,u.y-4,50,3.6);else if(rand()<dt*10)fx.push({x:u.x+(rand()-.5)*14,y:u.y-2,vx:0,vy:-12,t:.4,c:'#ff8a1e',fl:1});}
  FOGB.runes=FOGB.runes.filter(u=>u.t>0);
@@ -4741,10 +4671,10 @@ Object.assign(STR.ar,{mbMoves:'أسلوبه',mvCombo:'ضربات ورا بعض',
 Object.assign(STR.en,{mbMoves:'Fights',mvCombo:'combos',mvKnock:'knock-back blow',mvSwing:'close swing',mvLeap:'leaps at you',mvBack:'leaps back',mvSpin:'spins as it charges',mvRushX:'charges again and again',mvRush:'straight charge',mvStomp:'stomps all round',mvVines:'roots you with vines',mvPull:'pulls you in',mvHook:'hook that pulls you',mvRoot:'binding spell',mvShot:'ranged attack',mv_fan:'spread of shots',mv_burst:'shots all round',mvRain:'marked spots that erupt',mvPool:'lingering pools',mvPot:'drinks potions',mvRegen:'closes its wounds',mv_mend:'heals its friends',mvWard:'shields itself',mvWardA:'shields its friends',mv_call:'calls for help',mv_cry:'war cry',mv_buff:'howls: the pack speeds up',mvBehind:'vanishes and appears behind you',mvAway:'flees away',mvBlink:'vanishes and appears beside you',mvPh:'from phase {n}',mvDot_pois:'poison',mvDot_blood:'bleeding',mvDot_fire:'burning',mvDot_dark:'curse',mvSlowT:'slows you',mvDrain:'drains your life',mvStun:'stuns'});
 function mbDrops(k){const o=[];for(const [it] of (MT[k].drop||[]))if(!o.includes(it))o.push(it);for(const [it] of ((typeof NDROP!=='undefined'&&NDROP[k])||[]))if(!o.includes(it))o.push(it);return o;}
 function mbDetail(k){const b=MT[k],n=mbK(k),need=mbNeed(k);if(!n)return `<div class="mbd">${mbPicH(k,'mbpb un')}<div><b>???</b><small>${t('mbUnk')}</small></div></div>`;
- const lv=b.lv[0]===b.lv[1]?b.lv[0]:b.lv[0]+'–'+b.lv[1],el=typeof BEL!=='undefined'&&BEL[k],tags=[b.wb?t('mbWb'):b.boss?t('mbBoss'):'',el?t('mbEl_'+el):''].filter(Boolean).join(' · ');
+ const lv=b.lv[0]===b.lv[1]?b.lv[0]:b.lv[0]+'–'+b.lv[1],el=typeof monEl==='function'?monEl(k):BEL[k],tags=[b.wb?t('mbWb'):b.boss?t('mbBoss'):'',el?t('mbEl_'+el):''].filter(Boolean).join(' · ');
  const dr=n>=mbDropN(k)?(b.boss?`<small>${t('mbNorm')}</small>`:'')+(mbDrops(k).map(it=>`<span class="mbi"><img src="${icon(it)}">${esc(t(it))}</span>`).join('')||`<small>${t('mbNoDrop')}</small>`)+(b.boss&&!b.wb&&!b.mb1?`<small class="mbch">${t('mbChest')}</small>`:''):`<small>${t('mbDropAt',{n:mbDropN(k)})}</small>`;
  const pc=Math.min(100,n/need*100);
- return `<div class="mbd">${mbPicH(k,'mbpb')}<div><b>${esc(mbName(k))}</b> <button class="mbtrk${S.mbTrk===k?' on':''}" data-mbt="${k}">${t(S.mbTrk===k?'mbTrkOff':'mbTrk')}</button><small>${t('mbLv',{l:lv})}${tags?' · '+tags:''}</small><small>${t('mbStats',{h:b.hp.toLocaleString('en'),d:b.dmg.toLocaleString('en')})}</small><small class="mbmv">${t('mbMoves')}: ${esc(mbMoves(k))}</small>`+
+ return `<div class="mbd">${mbPicH(k,'mbpb')}<div><b>${esc(mbName(k))}</b> <button class="mbtrk${S.mbTrk===k?' on':''}" data-mbt="${k}">${t(S.mbTrk===k?'mbTrkOff':'mbTrk')}</button><small>${t('mbLv',{l:lv})}${tags?' · '+tags:''}</small><small>${t('mbStats',{h:b.hp.toLocaleString('en'),d:b.dmg.toLocaleString('en')})}</small><small class="mbres">${esc(mbResLine(k))}</small><small class="mbmv">${t('mbMoves')}: ${esc(mbMoves(k))}</small>`+
   `<div class="mbbar"><i style="width:${pc}%"></i><span>${mbMs(k)?t('mbMsT',{p:Math.round(mbB()*100)}):t('mbKills',{n:n.toLocaleString('en'),m:need})}</span></div><div class="mbdr">${dr}</div></div></div>`;}
 function mbDraw(){if(MBF==='lore')return cdxDraw(); // SAT-ONLINE-188: the codex
  const L=mbList(),f=MBF,q=($('mbQ').value||'').trim().toLowerCase(),vis=L.filter(k=>(f==='all'||(f==='seen'&&mbK(k)>0)||(f==='boss'&&MT[k].boss)||(f==='ms'&&mbMs(k)))&&(!q||mbK(k)>0&&mbHit(k,q)));
@@ -7176,7 +7106,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(!o.pure&&brImm(m)){
  if(!o.pure&&m.type==='kraugel'&&!m.st&&!(P.bdetU>gTime)&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
  if(o.skill&&!o.spr&&P.sprW>gTime)bzSpray(m,mul); // Braham's Magic Spray
  if(o.skill&&!o.chain&&!o.dot&&weapKind()==='sword')swEGain(.003);   // (v3.14) a skill's blow fills a little Sword Energy
- let dmg=(o.aura?auAtkV():atkV())*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.nolv||o.skill&&S.cls==='lantier'?Math.max(1,lvF(m.lv)):o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m)*cpPen(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(poemOn()?1.4:1)*(o.skill&&S.cls==='lknight'&&pasOn('lkse')&&weapKind()==='sword'?1+.15*pasM('lkse'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<Math.min(ssLow()?.9:.5,(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)+psCr()+(aEyes()?.08:0)));if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&m.expU>gTime){crit=true;dmg*=1.5;m.expU=0;}if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&P.morN>0){P.morN=0;crit=true;dmg*=1.5;num(P.x,P.y-30,t('oMorHit'),'#ffd24a',false);}if(crit)dmg*=1.8*ttCdm()*(1+psCd()+(aEyes()?.2:0));dmg*=rlAtk(m);let burn=false;const w=weapon();
+ let dmg=((o.aura?auAtkV():atkV())+(o.addAtk||0))*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.nolv||o.skill&&S.cls==='lantier'?Math.max(1,lvF(m.lv)):o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m)*cpPen(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(poemOn()?1.4:1)*(o.skill&&S.cls==='lknight'&&pasOn('lkse')&&weapKind()==='sword'?1+.15*pasM('lkse'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<Math.min(ssLow()?.9:.5,(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)+psCr()+(aEyes()?.08:0)));if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&m.expU>gTime){crit=true;dmg*=1.5;m.expU=0;}if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&P.morN>0){P.morN=0;crit=true;dmg*=1.5;num(P.x,P.y-30,t('oMorHit'),'#ffd24a',false);}if(crit)dmg*=1.8*ttCdm()*(1+psCd()+(aEyes()?.2:0));dmg*=rlAtk(m);if(!o.pure)dmg*=elDmg(m,o);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -7205,16 +7135,16 @@ function tryAttack(ax,ay,mul){if(tavNoFight())return;spwOff();
  else if(!res){const tr=vtNear(hx,hy,18).find(tr=>Math.hypot(tr.x-hx,tr.y-8-hy)<18);if(tr&&(chopped.get(tr.k)||0)<=gTime)chop(tr);}
 }
 // arrows (bow), magic bolts (staff) and fireballs fly as projectiles
-function shoot(kind,ax,ay,mul,o={}){const sp=kind==='arrow'?260:200;proj.push({kind,x:P.x+ax*6,y:P.y-8+ay*6,vx:ax*sp,vy:ay*sp,t:(o.range||(kind==='arrow'?.62:.65))*(kind==='arrow'&&P.sne>0?1.4:1)*(kind==='arrow'&&S.cls==='bowsaint'&&pasOn('bsclair')?1.5:1),mul,pierce:o.pierce,boom:o.boom,stun:o.stun,slow:o.slow,hit:new Set()});if(kind==='arrow')SFX.bow();else SFX.magic(kind==='fire'?.5:1);}
+function shoot(kind,ax,ay,mul,o={}){const sp=kind==='arrow'?260:200;proj.push({kind,x:P.x+ax*6,y:P.y-8+ay*6,vx:ax*sp,vy:ay*sp,t:(o.range||(kind==='arrow'?.62:.65))*(kind==='arrow'&&P.sne>0?1.4:1)*(kind==='arrow'&&S.cls==='bowsaint'&&pasOn('bsclair')?1.5:1),mul,pierce:o.pierce,boom:o.boom,stun:o.stun,slow:o.slow,el:o.el!==undefined?o.el:CURSK?skEl(CURSK):kind==='fire'?'fire':null,hit:new Set()});if(kind==='arrow')SFX.bow();else SFX.magic(kind==='fire'?.5:1);}
 // any hit that lands on a standing tree chops it, same as a melee swing (max caps how many one hit fells)
 function hitTrees(x,y,r,max){let n=0;for(const tr of vtNear(x,y,r+8)){if(n>=(max||1))break;if((chopped.get(tr.k)||0)>gTime)continue;if(Math.hypot(tr.x-x,tr.y-8-y)<r){chop(tr);n++;}}return n;}
-function boom(p){hitTrees(p.x,p.y,30,3);SFX.crit();shake=.15;vfx('fire',p.x,p.y);fx.push({ring:true,big:1,x:p.x,y:p.y,t:.5});for(let i=0;i<18;i++)fx.push({x:p.x,y:p.y,vx:(rand()-.5)*120,vy:(rand()-.5)*120,t:.4,c:rand()<.5?'#ff8a1e':'#ffd24a'});mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-p.x,monY(m)-p.y)<30)hitMon(m,p.mul,{});});}
+function boom(p){hitTrees(p.x,p.y,30,3);SFX.crit();shake=.15;vfx('fire',p.x,p.y);fx.push({ring:true,big:1,x:p.x,y:p.y,t:.5});for(let i=0;i<18;i++)fx.push({x:p.x,y:p.y,vx:(rand()-.5)*120,vy:(rand()-.5)*120,t:.4,c:rand()<.5?'#ff8a1e':'#ffd24a'});mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-p.x,monY(m)-p.y)<30)hitMon(m,p.mul,{el:p.el||null});});}
 function updateProj(dt){scTick(dt);proj=proj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.kind==='arrow'&&!p.mir)bsSteer(p,dt);if(p.kind!=='arrow'&&rand()<.7)fx.push({x:p.x,y:p.y,vx:0,vy:0,t:.25,c:p.c||(p.kind==='fire'?'#ff8a1e':p.kind==='wave'?'#ffe08a':'#9fd8ff'),fl:1});
  if(p.mir)return mirProj(p);
  if(p.ghost)return p.t>0&&!p4PSolid(Math.floor(p.x/TS),Math.floor((p.y+8)/TS)); // another player's shot, replayed: looks only
  if(p.kind!=='wave'&&hitTrees(p.x,p.y,10)){if(p.boom)boom(p);return false;}
  if(p.t<=0||p4PSolid(Math.floor(p.x/TS),Math.floor((p.y+8)/TS))){if(p.boom)boom(p);return false;}
- for(const m of mons){if(m.dead||p.hit.has(m))continue;if(Math.hypot(m.x-p.x,monY(m)-p.y)<MT[m.type].r+(p.kind==='wave'?13:5)){p.hit.add(m);if(p.boom){boom(p);return false;}if(hitMon(m,p.mul,{kx:Math.sign(p.vx)*.5,ky:Math.sign(p.vy)*.5,stun:p.stun,slow:p.slow,...(p.kind==='bullet'?{skill:1}:{})}))SFX.hit();if(p.pure&&!m.dead&&(DEMK.has(m.type)||voxOf(m.type)[0]==='dead'))m.weak=Math.max(m.weak||0,6);if(!p.pierce)return false;}}
+ for(const m of mons){if(m.dead||p.hit.has(m))continue;if(Math.hypot(m.x-p.x,monY(m)-p.y)<MT[m.type].r+(p.kind==='wave'?13:5)){p.hit.add(m);if(p.boom){boom(p);return false;}if(hitMon(m,p.mul,{kx:Math.sign(p.vx)*.5,ky:Math.sign(p.vy)*.5,stun:p.stun,slow:p.slow,el:p.el||null,...(p.kind==='bullet'?{skill:1}:{})}))SFX.hit();if(p.pure&&!m.dead&&(DEMK.has(m.type)||voxOf(m.type)[0]==='dead'))m.weak=Math.max(m.weak||0,6);if(!p.pierce)return false;}}
  return true;});}
 function dodge(){if(RCR&&RCR.in)return rcSpur();if(P.dash>0||P.dcd>0)return;P.guard=0;if(P.st<dodgeCost()){toast(t('tired'),'warn');SFX.deny();return;}let ix=(K.right?1:0)-(K.left?1:0),iy=(K.down?1:0)-(K.up?1:0);if(TSV){ix=TSV.x;iy=TSV.y;}if(!ix&&!iy){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];ix=v[0];iy=v[1];}const l=Math.hypot(ix,iy);P.dx=ix/l;P.dy=iy/l;P.dash=(P.ride?.24:.18)*(1+gearSum('dsh'));P.dcd=.7;P.inv=Math.max(P.inv,.3);P.st-=dodgeCost();pressKey('kD');SFX.dodge();vfx('dust',P.x,P.y,{n:P.ride?14:8,angle:Math.atan2(-P.dy,-P.dx)});
  for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*8,y:P.y,vx:-P.dx*40+(rand()-.5)*40,vy:-rand()*25,t:.35,c:rand()<.5?'#c8b48a':'#a89870'});fx.push({ring:true,x:P.x,y:P.y-6,t:.25});}
@@ -8537,14 +8467,14 @@ Object.assign(STR.en,{sk_sscre:'Swordsmanship Creation',skd_sscre:"You can creat
  swcD_split:'A blade of sword energy {r} m ahead, {w} m wide: {m}% × {n} to all in its path.',swcD_pass:'Cross {r} m in a flash: {m}% × {n} to all you pass.',
  swcD_bolt:'Sword energy falls on the foes ahead within {r} m: {m}% × {n} on each.',swcD_fang:'Two crossing cuts in front: {m}% and a lighter one, × {n}.'});
 window.__GSS2={cast:k=>castSk(k),hurt:(d,m)=>hurtPlayer(d,m&&m.lv,m),bl:()=>ssBl(),low:()=>ssLow(),as:()=>ssAs(),strike:()=>ssStrike(),counter:s=>ssCounter(s),kp:v=>ssKillPeak(v),tick:dt=>ss2Tick(dt),shred:m=>ssShred(m),get N(){return SSN},get CL(){return SSCL}}; // tests
-Object.assign(STR.ar,{sk_ssblade:'الجسد كنصل',skd_ssblade:'جسمك اتسقى بطاقة السيف: الدفاع وسرعة الحركة +15%. ولما صحتك تنزل تحت 30%، فرصة الضربة القاضية بتتضاعف وضربتك بتعدّي نص الحماية اللي الوحش رافعها.',
+Object.assign(STR.ar,{sk_ssblade:'الجسد كنصل',skd_ssblade:'جسمك اتسقى بطاقة السيف: الدفاع وسرعة الحركة +15%. ولما صحتك تنزل تحت 30%، فرصة الضربة القاضية بتتضاعف وسيفك بيتجاهل نص مقاومة العناصر بتاعة الوحش ونص الحماية اللي رافعها.',
  sk_sstsm:'إتقان السيف المتسامي',skd_sstsm:'قمة فن السيف: سرعة الهجوم +1% لكل لفل من لفلك. وكل خامس ضربة سيف ورا بعض بتطلّع موجة 150% على كل اللي حواليك في 5 متر.',
  sk_sspc:'رد القمة',skd_sspc:'وقفة دفاع مطلق 1.2 ثانية: لو اتضربت فيها الضربة مبتعملش حاجة، وبترد على طول بقطعة في الفراغ 800% على اللي ضربك وبتشلّه 1.5 ثانية.',
  sk_sskp:'قمة القتل',skd_sskp:'نية القتل كلها في ضربة واحدة: بعد 0.8 ثانية تحضير، خط مش باين قدامك 20 متر: 2,500% ضرر ثابت، مبيتأثرش بالحماية ولا بأي مناعة. واللي بيتقطع بيفضل «مشقوق» 6 ثواني: مبيقدرش يعالج نفسه ولا يرفع حماية.',
  sk_ssfield:'غازي العقل: ميدان السيف',skd_ssfield:'عالمك الداخلي بيتحوّل لحقيقة حواليك 15 متر لمدة 10 ثواني: الأعداد جواه بيتحركوا أبطأ 40% وهجماتهم بترجع أبطأ بالنص، وإنت والفريق جواه ضربكم +25% ومحدش يقدر يشلّكم.',
  sk_ssstorm:'عاصفة الألف سيف بلا ظل',skd_ssstorm:'محتاجة «سيف التحكم» شغال: كل السيوف بتتجمع على مكان واحد في عاصفة، 20 قطعة في 3 ثواني، 300% كل واحدة، وكل قطعة بتمزّق 5% من دروع العدو (لحد 100%) لمدة 10 ثواني.',
  ssPcOn:'رد القمة: مستني الضربة',ssPcHit:'رد القمة!',ssKpCh:'قمة القتل: بتجمّع نية القتل...',ssCleft:'مشقوق!',ssFdOn:'ميدان السيف اتفتح',ssStOn:'عاصفة الألف سيف!',ssStNeed:'محتاج «سيف التحكم» شغال الأول'});
-Object.assign(STR.en,{sk_ssblade:'Body as a Blade',skd_ssblade:'Your body is tempered by relentless sword energy: defence and movement speed +15%. Under 30% health your critical chance doubles and your blows ignore half of the guard a monster raises.',
+Object.assign(STR.en,{sk_ssblade:'Body as a Blade',skd_ssblade:'Your body is tempered by relentless sword energy: defence and movement speed +15%. Under 30% health your critical chance doubles and your sword ignores half of a monster\'s elemental resistance and half of the guard it raises.',
  sk_sstsm:'Transcendent Sword Mastery',skd_sstsm:'The peak of swordsmanship: attack speed +1% for every character level. Every fifth sword strike in a row releases a shockwave of 150% on everything within 5 m.',
  sk_sspc:'Pinnacle Counter',skd_sspc:'An absolute guard for 1.2 s: a blow that lands then does nothing, and a spatial slash answers it at once, 800% to the attacker and a 1.5 s stun.',
  sk_sskp:'Kill Peak',skd_sskp:"The Sword Saint's lethal intent in one blow: after 0.8 s, an invisible line 20 m ahead deals 2,500% fixed damage that no guard or invulnerability stops. What it cuts is Cleft for 6 s: it can't heal or raise a guard.",
@@ -12865,6 +12795,61 @@ for(const k of ['mercedes','eliz','irene','jishuka','dk_povia','betty','jessica'
 for(const n of ['vnoble','vb6','vb5','vb4','vb3','vmrose','vfenrir'])if(!SH[n])shLazy(n,()=>SA.chars.buildSheet(FIG[n]));   // owner 2026-10-23: they had looks but no sheet, so they were invisible
 Object.assign(NAMEK,{vnoble:'vnobleN',vb6:'vb6N',vb5:'vb5N',vb4:'vb4N',vb3:'vb3N',vmrose:'vmroseN',vfenrir:'vfenrirN',vwolf:'vwolfN',vjun:'vjunN',vint:'vintN',vtrue:'vtrueN',vguard:'vguardN',vskel:'vskelN',vhigh:'vhighN',lexi:'lexiN',vb15:'vb15N',vb14:'vb14N',velfin:'velfinN',vb12:'vb12N',vb11:'vb11N',vb10:'vb10N',vran:'vranN',vmount:'vmountN',vtira:'vtiraN',vlatina:'vlatinaN',vcray:'vcrayN',vyet:'vyetN',vruson:'vrusonN',vnoll:'vnollN'});
 Object.assign(BEL,{vskel:'dark',vlatina:'dark',vtira:'fire'});
+/* ---------------- Elemental resistance (v3.16; the owner 2026-10-26: "make elemental resistance as in the novel", "make the
+   game 1:1 with the novel as far as you can") ----------------
+   CANON: Satisfy's monsters carry an attribute and resist it (the Four Beasts, the elementals, the Red Phoenix's fire), the
+   undead and the demons are darkness and fear holy power, and skills and items deal attribute damage. The game's attributes
+   are BEL's: fire, water (ice is water here, as the Ice Elemental), thunder, earth, and wind, holy, dark, poison. Numbers
+   GAME_BALANCE:
+   - a monster resists its own attribute 50% (an elemental, made of it, 60%) and takes 30% more from the one that beats it
+     (water beats fire, thunder water, earth thunder, wind earth, fire wind);
+   - the undead, the demons and the vampires resist darkness 30% more and take 30% more holy damage;
+   - nothing resists more than 60% (the review: no class's whole kit may do nothing against a kind);
+   - a skill's attribute is what it is (its name: Fireball fire, Lightning Fist thunder, Holy Slash holy); a plain blow, a
+     buff and a heal have none. The Sword Saint's Body as a Blade (the owner's): under 30% health a sword ignores half of
+     it (and half of a raised guard, as before).
+   And a monster's defence (CANON: a stat; the Condemnation Sword hits for "attack power equivalent to 100% of the target's
+   defense", ch 772): half its attack unless the table says, shown in the Index. */
+const ELBEAT={fire:'water',water:'thunder',thunder:'earth',earth:'wind',wind:'fire'};
+const ELEMT=new Set(['felem','ielem','selem','efire','ethund','slord']);
+const MELX={tlord:'earth',eti:'water',cbear:'water',forc:'water',fochief:'water',warlord:'water',ilizard:'water',lizard:'water',lizw:'water',wyvern:'wind',wqueen:'wind',ebfly:'wind',hdrac:'fire',hdrac2:'fire',hdrac3:'fire'};
+const UNDK=/^(skel|wraith|vskel|bknight|eghost|ejiang|dk_|mshade|sdoll|pguard|aprison|redk|crevn)/,EVILX=new Set(['ypriest']);
+const ELS=['fire','water','thunder','earth','wind','holy','dark','poison'];
+const monEl=k=>BEL[k]||MELX[k]||null,monUnd=k=>UNDK.test(k)||PGUND.test(k),monEvil=k=>DEMK.has(k)||HOLYX.has(k)||EVILX.has(k)||/^v/.test(k)&&k!=='vpal'||monUnd(k);
+function monResK(k,el){if(!el||!k)return 0;const me=monEl(k);let r=0;
+ if(me){if(me===el)r+=ELEMT.has(k)?.6:.5;if(ELBEAT[me]===el)r-=.3;}
+ if(monEvil(k)){if(el==='dark')r+=.3;if(el==='holy')r-=.3;}
+ return Math.max(-.6,Math.min(.6,r));}   /* (review) never immune: 60% at most */
+const monDef=m=>{const b=MT[m&&m.type];return b?(b.def!=null?b.def:Math.round((b.dmg||0)*.5)):0;};
+// a skill's attribute: its own table, else its name (whole words)
+/* the Demon Slayer's skills and the Saintess' Holy Impact keep the novel's own numbers against evil (no extra weakness on top) */
+const SKELX={nexpl:'dark',plight:null,djudg:null,whirl:null,dspure:null,dsend:null,dsdest:null,dsseal:null,dsleap:null,dssum:null,sahi:null,bsevil:null};
+const SKELR=[['fire',/\b(fire|fireball|flame|flames|burn|burning|blaze|blazing|inferno|meteor|ember|lava|magma|explosion|scorch)\b/i],
+ ['water',/\b(ice|frost|frozen|freeze|snow|blizzard|cold|water|absolute zero|glacier|tide)\b/i],
+ ['thunder',/\b(lightning|thunder|thunderclap|electric|spark|bolt)\b/i],['wind',/\b(wind|gale|tornado|whirlwind|cyclone|tempest)\b/i],
+ ['earth',/\b(earth|stone|rock|quake)\b/i],['holy',/\b(holy|divine|sanctuary|purification|judgment|judgement|heaven|light of)\b/i],
+ ['dark',/\b(dark|shadow|shadows|curse|cursed|necro|corpse|death|soul|hell)\b/i],['poison',/\b(poison|venom|toxic|plague)\b/i]];
+const SKELC={};
+function skEl(k){if(!k)return null;if(k in SKELC)return SKELC[k];const d=SKD[k];let e=null;
+ if(d&&!d.pas&&!(typeof skKind==='function'&&skKind(k)!=='atk')){if(k in SKELX)e=SKELX[k];else{const n=String(STR.en['sk_'+k]||'');for(const [x,r] of SKELR)if(r.test(n)){e=x;break;}}}return SKELC[k]=e;}
+function elDmg(m,o){const el=o.el!==undefined?o.el:CURSK?skEl(CURSK):null;if(!el)return 1;let r=monResK(m.type,el);
+ if(r>0&&ssLow()&&weapKind()==='sword')r*=.5;   /* Body as a Blade */
+ if(r&&!o.dot&&!o.chain&&!((m.elT||0)>gTime)){m.elT=gTime+1.5;if(r>=.5)num(m.x,monY(m)-30,t('elRes',{e:t('mbEl_'+el)}),'#9aa6b8',false);else if(r<0)num(m.x,monY(m)-30,t('elWeak',{e:t('mbEl_'+el)}),'#ffb04a',false);}
+ return Math.max(0,1-r);}
+function mbResLine(k){const R=[],W=[];for(const e of ELS){const r=monResK(k,e);if(r>0)R.push(t('mbEl_'+e)+' '+Math.round(r*100)+'%');else if(r<0)W.push(t('mbEl_'+e)+' +'+Math.round(-r*100)+'%');}
+ return t('mbDef',{d:monDef({type:k}).toLocaleString('en')})+(R.length?' · '+t('mbResT')+': '+R.join(t('mbSep')):'')+(W.length?' · '+t('mbWeakT')+': '+W.join(t('mbSep')):'');}
+Object.assign(STR.ar,{mbEl_wind:'رياح',mbEl_holy:'مقدس',mbEl_dark:'ظلام',mbEl_poison:'سم',elRes:'مقاومة {e}',elWeak:'ضعيف قدام {e}!',mbDef:'الدفاع {d}',mbSep:'، ',mbResT:'بيقاوم',mbWeakT:'ضعيف قدام'});
+Object.assign(STR.en,{mbEl_wind:'Wind',mbEl_holy:'Holy',mbEl_dark:'Darkness',mbEl_poison:'Poison',elRes:'{e} resisted',elWeak:'Weak to {e}!',mbDef:'Defence {d}',mbSep:', ',mbResT:'Resists',mbWeakT:'Weak to'});
+/* The Sword Saint's Condemnation Sword (CANON ch 772: an ultimate, "attack power equivalent to 100% of the target's defense"; its
+   other numbers GAME_BALANCE): one cut, 800%, with your attack raised by the target's whole defence. */
+Object.assign(SKD,{sscond:{cls:'saint',lv:250,mp:90,cd:60,need:'sword',col:'#e8f4ff'}});
+Object.assign(SKF,{sscond:()=>{const v=fdir(),m=fusTg(50,1)[0];P.acd=0;SFX.crit();shake=.4;if(!m){vfx('slash',P.x+v[0]*20,P.y-7+v[1]*20,{angle:Math.atan2(v[1],v[0]),rarity:4});return;}
+  const y=monY(m);vfx('slash',m.x,y,{angle:Math.atan2(v[1],v[0]),rarity:4});vfx('xcut',m.x,y,{raw:1,color:'#e8f4ff',big:1.4});fx.push({ring:true,x:m.x,y,t:.5});hitMon(m,8,{skill:1,addAtk:monDef(m),kx:v[0],ky:v[1]});}});
+SKSND.sscond='power';
+P2ICO.sscond=p=>{p(7,1,2,11,'#e8f4ff');p(4,11,8,2,'#c8a070');p(2,4,12,1,'#ff6a5a');p(3,6,10,1,'#ff6a5a');};
+Object.assign(STR.ar,{sk_sscond:'سيف الإدانة',skd_sscond:'أقصى ما عند سيد السيف: قطعة واحدة 800%، وهجومك بيزيد بدفاع الهدف كله.'});
+Object.assign(STR.en,{sk_sscond:'Condemnation Sword',skd_sscond:"An ultimate of the Sword Saint: one cut of 800%, with your attack raised by the whole of the target's defence."});
+window.__GEL={res:(k,e)=>monResK(k,e),el:k=>skEl(k),def:k=>monDef({type:k}),line:k=>mbResLine(k)}; // tests
 Object.assign(NDROP,{vnoble:[['vring',.01]],vb6:[['vring',.3]],vb5:[['vring',.32]],vb4:[['avring',.2]],vb3:[['avring',.25]],vmrose:[['bunder',.06],['hvring',.3],['avring',.3]],vfenrir:[['hvring',.35],['avring',.35]],vtrue:[['jvring',.01]],lexi:[['jvring',.25]],vb15:[['jvring',.2]],vb14:[['jvring',.22]],velfin:[['iyarugt',.2],['elfin',.3]],vb12:[['jvring',.25]],vb11:[['vring',.15]],vb10:[['vring',.3]],
  vran:[['vring',.12]],vmount:[['vring',.12]],vtira:[['tirbelt',.25],['tirsh',.2]],vlatina:[['latneck',.25],['vpaj',.2]],vcray:[['craybr',.25]],vyet:[['yetgs',.2],['avring',.15]],vruson:[['avring',.2]],vnoll:[['hvring',.15]],
  vguard:[['avring',.003]],vhigh:[['avring',.004],['hvring',.002]]});
@@ -14492,13 +14477,13 @@ Object.assign(SKF,{
  btele:()=>{const v=fdir(),x0=P.x,y0=P.y;vfx('mana',x0,y0-8);move(P,v[0]*70,v[1]*70,4);P.inv=Math.max(P.inv,.25);vfx('mana',P.x,P.y-8);fx.push({bolt:[[x0,y0-8],[P.x,P.y-8]],t:.15,c:'#c89aff'});},
  benc:()=>{P.bencU=gTime+15;vfx('forge',P.x,P.y-8);fx.push({ring:true,x:P.x,y:P.y-6,t:.4});toast(t('brEncOn'),'good');},
  bdetect:()=>{P.bdetU=gTime+15;vfx('rage',P.x,P.y);fx.push({ring:true,x:P.x,y:P.y-6,t:.4});toast(t('brDetOn'),'good');},
- bwind:()=>{const v=fdir();proj.push({kind:'wave',x:P.x+v[0]*6,y:P.y-8+v[1]*6,vx:v[0]*230,vy:v[1]*230,t:.6,mul:1.8,pierce:1,hit:new Set(),c:'#c8ffd8'});tone(1200,.12,'triangle',.04,-600);},
+ bwind:()=>{const v=fdir();proj.push({kind:'wave',x:P.x+v[0]*6,y:P.y-8+v[1]*6,vx:v[0]*230,vy:v[1]*230,t:.6,mul:1.8,pierce:1,el:'wind',hit:new Set(),c:'#c8ffd8'});tone(1200,.12,'triangle',.04,-600);},
  blight:()=>{const m=bzAim(150);if(!m){const v=fdir();fx.push({bolt:[[P.x+v[0]*60,P.y-70],[P.x+v[0]*60,P.y-6]],t:.2});return;}bzBolt(m);flash();vfx('pillar',m.x,monY(m)+6,{raw:1,color:'#fff09a',h:70,w:7});vfx('shock',m.x,monY(m)+6,{raw:1,radius:26,color:'#fff4b0'});
    if(hitMon(m,3,{skill:1})&&!m.dead&&rand()<.25){m.stun=Math.max(m.stun||0,MT[m.type].boss?.6:2);num(m.x,monY(m)-16,t('brPara'),'#fff09a',false);}},
  bgrease:()=>{const v=fdir();BZG={x:P.x+v[0]*60,y:P.y+v[1]*60,u:gTime+6};fx.push({ring:true,x:BZG.x,y:BZG.y-6,t:.5});},
  bdetm:()=>{const ms=mons.filter(m=>!m.dead&&Math.hypot(m.x-P.x,m.y-P.y)<300);for(const m of ms)m.mk=Math.max(m.mk||0,8);fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.6});vfx('mana',P.x,P.y-8);
    const top=ms.slice().sort((a,b)=>b.lv-a.lv)[0];toast(top?t('brDetM',{n:ms.length,m:monNmB(top),lv:top.lv}):t('brDetM0'),'good');},
- bdark:()=>{const v=fdir();proj.push({kind:'wave',x:P.x+v[0]*6,y:P.y-8+v[1]*6,vx:v[0]*240,vy:v[1]*240,t:.6,mul:2.2,pierce:1,hit:new Set(),c:'#6a3aa8'});shoot('fire',v[0],v[1],1.2);tone(300,.15,'sawtooth',.04,-150);},
+ bdark:()=>{const v=fdir();proj.push({kind:'wave',x:P.x+v[0]*6,y:P.y-8+v[1]*6,vx:v[0]*240,vy:v[1]*240,t:.6,mul:2.2,pierce:1,el:'dark',hit:new Set(),c:'#6a3aa8'});shoot('fire',v[0],v[1],1.2);tone(300,.15,'sawtooth',.04,-150);},
  bdecoy:()=>{BZD={x:P.x,y:P.y-14,u:gTime+10,a:0};vfx('mana',P.x,P.y-12);toast(t('brDecoyOn'),'good');},
  bjam:()=>{fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});fx.push({ring:true,x:P.x,y:P.y-6,t:.8});let n=0;eproj=eproj.filter(p=>{if(Math.hypot(p.x-P.x,p.y-P.y)<120){vfx('dust',p.x,p.y+6,{n:3});n++;return false;}return true;});
    for(const m of mons){if(m.dead||Math.hypot(m.x-P.x,m.y-P.y)>120)continue;m.tele=0;m.st=null;m.stun=Math.max(m.stun||0,MT[m.type].boss?.5:1.5);n++;num(m.x,monY(m)-16,t('brJam'),'#b0a0ff',false);}
@@ -17719,7 +17704,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
 function netStop(){mobStop();if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(()=>{});}LFGK=null;try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
- if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();auStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
+ if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
 // what the game itself keeps online under the account, for "Delete my online data" (SAT-ONLINE-066): presence, the
 // rankings (055), this and last month's arena rating (053), the weekly lockouts (059), the group finder entry (073). A held legend is freed too.
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
@@ -17786,7 +17771,7 @@ function netCombat(fbtr,user){const R=Satisfy.combatRelay;if(!R||!Satisfy.transp
  catch(e){console.warn('combat relay',e&&e.message);return fbtr;}}
 window.__GNET={combat:()=>NETTR&&NETTR.combat?NETTR.combat.state():null};
 function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(user.uid);netSetState('JOINING');netBtn();
- const tr=NETTR=netCombat(Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',interest:NET_INTEREST,onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');if(up){netForce=true;setTimeout(auWatch,0);}netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)}),user);
+ const tr=NETTR=netCombat(Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',interest:NET_INTEREST,onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');if(up)netForce=true;netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)}),user);
  netStart(Satisfy.presence.create({transport:tr,uid:user.uid,world:Satisfy.local.world(),now:()=>performance.now(),config:{moveHz:5,idleHz:.2,expireMs:30000}})); // cost model: docs/online/COST_MODEL.md
  netLease=Satisfy.firebase.lease(sdk,user.uid,NET.sid,netReplace);
  // the account ID can read empty while the connection is still settling after a reload, so an empty answer is asked again twice
@@ -17798,7 +17783,7 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
 function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF=true; // from now on this tab never saves: the newer tab owns the save (review of #30)
- try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();auStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
+ try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
 // another Google account on this device (owner request): the chooser opens straight from the click, the new
