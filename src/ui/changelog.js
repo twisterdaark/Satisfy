@@ -7,6 +7,19 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26classes', ver: '3.15', d: '2026-10-26',
+      ar: ["باقي الكلاسات على الرواية. القديسة: «التطهير» (لفل 20) بيشيل كل الحالات عنك وعن فريقك في 8 متر، و«الصدمة المقدسة» 100% على كل كائن شرير في 5 متر، و«السلاح المقدس» بيوصل لسلاح فريقك اللي حواليك كمان.",
+        "البالادين بتاع كنيسة جودار: «بركة الإله جودار» (لفل 100): كل الإحصائيات +20% خمس دقايق، والصحة والدفاع +30% عشر دقايق. الساحر الأسود: «العاصفة السودا» (60) و«قيد الخوف» (80) و«الحاجز الماسي» (230).",
+        "الخطيب: «رفع الروح المعنوية» (40): أول ضربة لكل اللي في فريقك حواليك كريتيكال أكيد. الفارس الحارس: «كسر الضرر» (16) و«طبيعة الفارس الحارس» (20): لو ضربة واحدة خدت أكتر من 20% من صحتك، نصها بيرجعلك. الرامي: «الطلقات المتعددة» (14) سبع سهام. القاتل: «عيون القاتل» (30).",
+        "فنان القتال: «نقطة الضعف» و«قبضة البرق». متصوّف الجليد: «سجن الجليد»، وكل سكيل هجوم عنده بيبطّأ. والناسخ: تلات مرات في اليوم بتراقب سكيل (ممكن تفشل) وكل نسخة بتستعملها مرة واحدة.",
+        "وكيل الإلهة: «إتقان السيف» أعلى من البالادين، +12% بالسيف. مرسيدس: «طاقة السيف» (سكيلات السيف +15%) و«الدرع الطاير» (30)، و«قوانين الفروسية» بتوصل لفريقها في 10 متر: إحصائياتهم +10%. جيشوكا: «رد قريب» (20) و«سهام خفية» (50) مش محتاجة تصويب.",
+        "إصلاح: البطء اللي في سكيلات الكلاسات الإضافية مكانش بيمسك في الوحش. دلوقتي بيمسك."],
+      en: ["The rest of the classes by the novel. The Saintess: Purification (level 20) clears every condition from you and your party within 8 m, Holy Impact deals 100% to every evil being within 5 m, and Holy Weapon reaches the weapons of your party around you too.",
+        "The paladin of the Judar Church: God Judar's Blessing (level 100): all stats +20% for five minutes, and health and defence +30% for ten. The Black Magician: Dark Storm (60), the fear bind (80) and Diamond Barrier (230).",
+        "The Orator: Morale Boost (40): the next attack of everyone in your party around you is a sure critical. The Guardian Knight: Damage Break (16) and Guardian Knight's Nature (20): when one blow takes more than 20% of your health, half of it comes back. The Archer: Multi-shot (14), seven arrows. The Assassin: Assassin's Eyes (30).",
+        "The Martial Artist: Weak Point and Lightning Fist. The Ice Mystic: Ice Prison, and every attacking skill slows. And the Duplicator: three times a day you observe a skill (it can fail), and each copy is used once.",
+        "The Goddess' Agent: a Sword Mastery higher than a paladin's, +12% with a sword. Mercedes: Sword Energy (sword skills +15%) and Flying Shield (30), and her Chivalric Codes reach her party within 10 m: stats +10%. Jishuka: Close Counter (20) and Stealth Arrows (50) that need no aim.",
+        "A fix: the slow on the extra classes' skills never took hold on a monster. Now it does."] },
     { v: '2026-10-26legends', ver: '3.14', d: '2026-10-26',
       ar: ["الأسطوريين على الرواية. «طاقة السيف» (فصل 999 و1051 و1249): شريط جديد تحت المانا لوريث باغما وسيد السيف، 3 لكل لفل، بيتملى وإنت بتضرب بالسيف، والتقنيات الكبيرة بتصرف منه: دمج الخمس رقصات 100 والست رقصات 150.",
         "«رقصة سيف باغما» بقت سلبي كمان (فصل 79 و144): وإنت مش بترقص بالسيف بتاخد هجوم +30% وكريتيكال +20% وضرر كريتيكال +10% في لفل 2 وبيزيدوا. أي رقصة بتوقفها 10 ثواني، والرقصات زي ما هي.",

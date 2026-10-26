@@ -107,6 +107,8 @@
     'autoP',
     // the Sword Saint's created sword techniques (v3.13): [{id, fm, f, L, nm}]
     'swc',
+    // the Duplicator's one copied skill (v3.15)
+    'dpCopy',
     // the Vatican (v3.11): Goddess Rebecca's blessing, from Help the Rebecca Church!
     'vatB',
   ];
