@@ -21,7 +21,7 @@ const CURRENT_HTML = process.env.SATISFY_HTML ? path.resolve(process.env.SATISFY
 // Golden/render baseline: the main commit this branch is based on. Bump it when rebasing onto a
 // newer main (or set SATISFY_BASELINE=<sha> to compare with any other commit).
 // R0 history: ce29772 (pre-online), 1899cdb (+ #6 CSS hotfix), 6ef0595 (+ v2 art, #5), 6295a5f (+ Patrian, AI, wider map), 3c343ec (+ town quests, Piaro balance, Guardian Knight), fe34ae0 (+ equipment, guilds, WS world state, events), daaef26 (+ companions, dragon, auction, Yatan), 7d57d5f (+ siege, Muller), 1d8ed5d (v1.22), 7e7a02b (v1.28 monster pack), e9f66b6 (v1.38 + the merges: the quest guide arrow and the harbor are drawn), 9400850 (v1.82: slower leveling, weapon passives), ffea01c (v1.83: the per-kill XP cap gone, an easier curve), c7caaca (v1.84: wpfix2 in new saves), de7a67c (v2.28, SAT-ONLINE-160: monsters out of every player's reach sleep, so the ones near Winston roll other dice), 77014a1, c029fc8 (v2.68: every sword its own shape in the hand), 92f465c (v2.75), fc83aab (v2.92: Winston's hall drawn as Earl Steim's castle, his dot on the minimap).
-const BASELINE_SHA = process.env.SATISFY_BASELINE || '77e9fa72ee8d0927e927080923395fa925c2e75b';
+const BASELINE_SHA = process.env.SATISFY_BASELINE || '57f18bc1d5fbeced373b4fc7f449061e6bf79dc7';
 // the R0 baseline (before the safe saves and ids): the characterization tests document its bugs, so they keep it when
 // BASELINE_SHA moves on for the parity tests (it moved in aaa59ee, and the corrupt-save one failed since)
 const R0_SHA = '34b2ea5094d6d1597b4acb67d338d99d8765b745';
