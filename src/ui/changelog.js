@@ -7,6 +7,14 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26bossdmg', ver: '3.49', d: '2026-10-26',
+      ar: ["عداد ضرر الزعيم: تحت شريط صحة أي زعيم بتشوف كل واحد ضرب كام % من الضرر، وعلامة ✓ لو ضرب كفاية ياخد الـ credit (5% من صحة الزعيم) أو ✗ لو لسه.",
+        "مكافأة التعاون: الزعيم اللي بيتحارب مع ناس تانية (حد تاني ضربه معاك) بيدي +10% خبرة.",
+        "اختبار جديد للعداد والمكافأة."],
+      en: ["Boss damage meter: under any boss's health bar you see each player's share of the damage in %, with ✓ when they've done enough for the boss credit (5% of its health) or ✗ when not yet.",
+        "Co-op bonus: a boss fought with other people (someone else hit it with you) gives +10% XP.",
+        "A new test for the meter and the bonus."],
+      hide: [2] },
     { v: '2026-10-26plan12', ver: '3.48', d: '2026-10-26',
       ar: ["صناديق المستنقع: الميميك بيفضح نفسه لو بصيت كويس، كل كام ثانية غطاه بيتفتح شوية على سنانه وبيريّل. وفيه 3 صناديق حقيقية وسطهم، كل واحد فيه فخ إبرة: دوس E وبعدين E تاني والإبرة في الأخضر تفتحه (دهب وساعات جوهرة)، غير كده الإبرة تسمّك. بيتملي تاني كل 20 دقيقة.",
         "سيد مصاصين الدماء: أول ما يزأر بياخد طريق من اتنين حسب الساعة: بالليل خفافيش الضعف وأسرع، وبالنهار درع دم وعضّته بترجعله صحة أكتر.",
