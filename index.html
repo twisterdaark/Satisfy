@@ -554,7 +554,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
 
 .sk.eqd{box-shadow:inset 0 0 0 2px #9fe39a,0 0 calc(var(--u)*.6) rgba(159,227,154,.6)}
 .ptitle.pmov{cursor:move;touch-action:none}
-#qmW{width:calc(var(--u)*60);max-width:96%;height:84%;display:flex;flex-direction:column;overflow:hidden}#qmTabs{display:flex;gap:calc(var(--u)*.5);justify-content:center;flex-wrap:wrap;margin:calc(var(--u)*.4) 0}#qmTabs button{padding:calc(var(--u)*.4) calc(var(--u)*1.1);font-size:calc(var(--u)*1.3)}#qmTabs button.on{background:rgba(120,190,255,.35);border-color:#9fd8ff}#qmQ{display:block;width:60%;margin:calc(var(--u)*.3) auto calc(var(--u)*.5);padding:calc(var(--u)*.4) calc(var(--u)*.8);font:inherit;font-size:calc(var(--u)*1.2);color:#eaf4ff;background:rgba(6,14,32,.6);border:1px solid rgba(160,210,255,.35);border-radius:4px;outline:none}#qmL{flex:1;overflow-y:auto;padding-inline-end:calc(var(--u)*.3)}#qmL .ssec:first-child{margin-top:0;border-top:0}.qmr{display:flex;align-items:center;gap:calc(var(--u)*.8);padding:calc(var(--u)*.5) calc(var(--u)*.7);margin:calc(var(--u)*.3) 0;border:1px solid rgba(160,210,255,.22);background:rgba(8,20,44,.82);cursor:pointer}.qmr:hover{border-color:#9fd8ff}.qmr>div{flex:1;min-width:0}.qmr b{font-size:calc(var(--u)*1.35);color:#ffe9a8}.qmr small{display:block;font-size:calc(var(--u)*1.15);opacity:.85;margin-top:calc(var(--u)*.2)}.qmr button{flex:none;padding:calc(var(--u)*.35) calc(var(--u)*1);font-size:calc(var(--u)*1.2)}.qmup{opacity:.7}.qmtag{display:inline-block;margin-inline-start:calc(var(--u)*.5);padding:0 calc(var(--u)*.45);font-size:calc(var(--u)*1);border-radius:3px;background:rgba(120,190,255,.2);color:#bfe8ff;vertical-align:middle}.qm-ms{background:rgba(255,200,80,.22);color:#ffd27a}.qm-rep{background:rgba(120,230,140,.2);color:#9ff0a8}.qm-done{background:rgba(180,180,190,.18);color:#c8ccd4}.qm-s{background:rgba(220,120,255,.22);color:#e8b8ff}.qmnone{opacity:.7;text-align:center;font-size:calc(var(--u)*1.2)}
+#qmW{width:calc(var(--u)*60);max-width:96%;height:84%;display:flex;flex-direction:column;overflow:hidden}#qmTabs{display:flex;gap:calc(var(--u)*.5);justify-content:center;flex-wrap:wrap;margin:calc(var(--u)*.4) 0}#qmTabs button{padding:calc(var(--u)*.4) calc(var(--u)*1.1);font-size:calc(var(--u)*1.3)}#qmTabs button.on{background:rgba(120,190,255,.35);border-color:#9fd8ff}#qmQ{display:block;width:60%;margin:calc(var(--u)*.3) auto calc(var(--u)*.5);padding:calc(var(--u)*.4) calc(var(--u)*.8);font:inherit;font-size:calc(var(--u)*1.2);color:#eaf4ff;background:rgba(6,14,32,.6);border:1px solid rgba(160,210,255,.35);border-radius:4px;outline:none}#qmL{flex:1;overflow-y:auto;padding-inline-end:calc(var(--u)*.3)}#qmL .ssec:first-child{margin-top:0;border-top:0}.qmr{display:flex;align-items:center;gap:calc(var(--u)*.8);padding:calc(var(--u)*.5) calc(var(--u)*.7);margin:calc(var(--u)*.3) 0;border:1px solid rgba(160,210,255,.22);background:rgba(8,20,44,.82);cursor:pointer}.qmr:hover{border-color:#9fd8ff}.qmr>div{flex:1;min-width:0}.qmr b{font-size:calc(var(--u)*1.35);color:#ffe9a8}.qmr small{display:block;font-size:calc(var(--u)*1.15);opacity:.85;margin-top:calc(var(--u)*.2)}.qmr button.on{background:rgba(255,210,74,.3);border-color:#ffd24a}.qmr button{flex:none;padding:calc(var(--u)*.35) calc(var(--u)*1);font-size:calc(var(--u)*1.2)}.qmup{opacity:.7}.qmtag{display:inline-block;margin-inline-start:calc(var(--u)*.5);padding:0 calc(var(--u)*.45);font-size:calc(var(--u)*1);border-radius:3px;background:rgba(120,190,255,.2);color:#bfe8ff;vertical-align:middle}.qm-ms{background:rgba(255,200,80,.22);color:#ffd27a}.qm-rep{background:rgba(120,230,140,.2);color:#9ff0a8}.qm-done{background:rgba(180,180,190,.18);color:#c8ccd4}.qm-s{background:rgba(220,120,255,.22);color:#e8b8ff}.qmnone{opacity:.7;text-align:center;font-size:calc(var(--u)*1.2)}
 </style>
 
 <div id="rotW"><b>📱</b><span id="rotT">لف الموبايل بالعرض عشان تلعب<br>Turn your phone sideways to play</span></div>
@@ -7956,7 +7956,7 @@ const qReady=id=>{const s=S.qs[id];return !!s&&s.st===1&&qCount(id)>=QD[id].obj.
    them able to repeat all story and side quests"): a finished story or side quest can be taken again. It stays finished
    for everything that follows it (qDone), pays a repeatable quest's experience (its cap), and no class, trial, epic or
    board task comes back. */
-function legRep(id){const q=QD[id],s=S&&S.qs[id];return !!q&&!!s&&s.st===2&&isLeg()&&!q.cls&&!q.promo&&!q.hcls&&!q.hid&&!q.sw&&!q.rep&&!q.gen&&!q.adq&&!q.gr&&!q.mur&&!(lrdOf()||{})[id];}
+function legRep(id){const q=QD[id],s=S&&S.qs[id];return !!q&&!!s&&s.st===2&&isLeg()&&!q.cls&&!q.promo&&!q.hcls&&!q.hid&&!q.sw&&!q.rep&&!q.gen&&!q.adq&&!q.gr&&!q.mur&&!!lrdOf()&&!lrdOf()[id];}
 function qAvail(id){const q=QD[id];return (!S.qs[id]||legRep(id))&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2||q.cl2==='smith'&&S.cls==='pagma')&&(!q.sec||S.sec===q.sec)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||q.sw||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)))&&(!q.need||!!(QNEED[q.need]&&QNEED[q.need]()));}
 // owner 2026-10-23: a "kill it below 50% health" task can't be done when the monster is far under your level (it can't bring
 // your health down), so 20+ levels above it the health condition is waived and the task says so
@@ -8786,7 +8786,7 @@ Object.assign(STR.en,{sk_ssblade:'Body as a Blade',skd_ssblade:'Your body is tem
 function isLeg(c){return (LEGCL||[]).includes(c===undefined?S&&S.cls:c);}
 var LEGCL=['pagma','braham','saint','dslayer'];
 const ptsLv=()=>(isLeg()?15:PTS_LV)+sc2Pts(); // a second class: 2 more a level (the novel: 12 instead of 10)
-function legendReset(){S.cbase=null;S.church=null;S.lv=1;S.xp=0;S.st={str:10,sta:10,agi:10,int:10,dex:10};S.pts=0;S.adv=0;S.bonus=0;S.got={};S.lgfix=1;gearFit(); // owner 2026-10-22: the crafting bonus starts over too, so every stat is back to 10, and gear above Lv 1 comes off
+function legendReset(){S.lrd={c:S.cls,q:{}};S.cbase=null;S.church=null;S.lv=1;S.xp=0;S.st={str:10,sta:10,agi:10,int:10,dex:10};S.pts=0;S.adv=0;S.bonus=0;S.got={};S.lgfix=1;gearFit(); // owner 2026-10-22: the crafting bonus starts over too, so every stat is back to 10, and gear above Lv 1 comes off
  if(P){P.hp=maxHP();P.mp=maxMP();}hudDirty=true;}
 function becomeSaint(){const L=WS.legends||(WS.legends={});if(L.muller&&L.muller.pid!==pidOf())return;L.muller={pid:pidOf(),n:S.look.n};
  S.cls='saint';S.bar=null;legendReset();sbSig='';SFX.legendary();flash();hudDirty=true;save(true);
@@ -16261,17 +16261,20 @@ window.__GMNT={fly:()=>mtFlyOn(),uni:()=>UNIM.m,ride:()=>{if(!P.ride)toggleRide(
    bounties, where you can view today's bounties, accept board quests, and turn in board quests without interacting with
    the quest board"). 📖 on the quest panel opens it. It lists the quests you carry, the ones a giver offers you now, the
    ones waiting for your level (with the level), and the finished ones: never a hidden quest, a hidden class's quest or a
-   board task (board tasks are the Bounties tab). A repeatable quest (a repeatable task, or a legend's replay) starts from
-   here, except an escort, which needs its giver to walk with you. A legend replays each story and side quest once per
-   legendary class (S.lrd: {c: the class, q: {quest: 1}}). Everything is the player's own save, so online needs nothing new. */
+   board task (board tasks are the Bounties tab). Nothing starts from the book (owner 2026-10-26: "put a marker that shows
+   you who gives it instead of taking it from the UI, so there's no abuse"): 📍 shows the giver on the map and the guide
+   arrow. A finished story or side quest comes back only when a legendary class starts you over at level 1 (legendReset
+   sets S.lrd: {c: the class, q: {quest: 1}}), once per quest per legendary class; a legend from before that has no replays.
+   Everything is the player's own save, so online needs nothing new. */
 var QMT='all',QMR=0,QMX=0;
 function lrdOf(){return S&&S.lrd&&S.lrd.c===S.cls?S.lrd.q:null;}
-function lrdMark(id){if(!S.lrd||S.lrd.c!==S.cls)S.lrd={c:S.cls,q:{}};S.lrd.q[id]=1;}
+function lrdMark(id){const q=lrdOf();if(q)q[id]=1;}
 const qmRep=id=>{const q=QD[id];return !!q&&(!!q.rep&&!q.gen||legRep(id)||!!(S.qs[id]&&S.qs[id].rp));};
-function qmTags(id){const q=QD[id],s=S.qs[id],T=[q.ms?'ms':'side'];if(qmRep(id))T.push('rep');if(s&&s.st===2&&!s.rp)T.push('done');return T;}
+function qmTags(id){const q=QD[id],s=S.qs[id],T=[q.ms?'ms':'side'];if(qmRep(id))T.push('rep');if(s&&s.st===2&&!s.rp||!s&&qmRepN(id)>=QREP_MAX)T.push('done');return T;}
 // where a quest stands for you: carried, offered now, waiting for a level, finished
-function qmState(id){const s=S.qs[id];if(s&&s.st===1)return 'act';const av=qAvail(id);if(s&&s.st===2&&!av)return 'done';if(!av)return null;return S.lv<(QD[id].lv||1)?'up':s?'done':'av';}
-const qmCanStart=id=>qmRep(id)&&!(S.qs[id]&&S.qs[id].st===1)&&qAvail(id)&&S.lv>=(QD[id].lv||1)&&QD[id].obj.t!=='escort';
+const qmRepN=id=>QD[id]&&QD[id].rep&&!QD[id].gen?((dlyS().rq||{})[id]||0):0;
+function qmState(id){const s=S.qs[id];if(s&&s.st===1)return 'act';const av=qAvail(id);if(s&&s.st===2&&!av||!av&&qmRepN(id)>=QREP_MAX)return 'done';if(!av)return null;return S.lv<(QD[id].lv||1)?'up':s?'done':'av';}
+const qmCanStart=id=>qmRep(id)&&!(S.qs[id]&&S.qs[id].st===1)&&qAvail(id)&&S.lv>=(QD[id].lv||1);
 function qmList(){const o=[];for(const id in QD){const q=QD[id];if(!q||q.gen||q.by==='board'||q.hid||!q.obj)continue;const s=S.qs[id];if(!s&&(q.hcls||q.gr||q.mur))continue;
   const st=qmState(id);if(st)o.push({id,st,tags:qmTags(id)});}
  const ord={act:0,av:1,up:2,done:3};return o.sort((a,b)=>ord[a.st]-ord[b.st]||(QD[a.id].lv||1)-(QD[b.id].lv||1)||qName(a.id).localeCompare(qName(b.id)));}
@@ -16285,10 +16288,12 @@ function qmDraw(){if($('qmW').hidden)return;const tabs=['all','ms','side','rep',
  const L=qmList().filter(r=>(QMT==='all'||r.tags.includes(QMT))&&hit(r.id));let h='',g=null;
  for(const r of L){const id=r.id,Q=QD[id];if(r.st!==g){g=r.st;h+=`<div class="ssec">${t('qmG_'+g)}</div>`;}
   const tg=r.tags.map(k=>`<span class="qmtag qm-${k}">${t('qmT_'+k)}</span>`).join('')+(Q.gr?`<span class="qmtag qm-s">${esc(Q.gr)}</span>`:''),
-   sub=r.st==='act'?(qReady(id)?t('retTo',{w:t(Q.by)}):qObjText(id)):r.st==='up'?t('qNeedLv',{lv:Q.lv}):t('qdFrom',{w:t(Q.by)});
-  h+=`<div class="qmr${r.st==='up'?' qmup':''}" data-qmd="${id}"><div><b>${esc(qName(id))}</b>${tg}<small>${t('qmLv',{lv:Q.lv||1})} · ${esc(sub)}</small></div>${qmCanStart(id)?`<button data-qms="${id}">${t('qmStart')}</button>`:''}</div>`;}
+   sub=r.st==='act'?(qReady(id)?t('retTo',{w:t(Q.by)}):qObjText(id)):r.st==='up'?t('qNeedLv',{lv:Q.lv}):qmRepN(id)?t('qmRepN',{w:t(Q.by),n:qmRepN(id),m:QREP_MAX}):t('qdFrom',{w:t(Q.by)}),
+   trk=r.st!=='done'||qmCanStart(id),sp=trk&&!!qSpot(id),on=sp&&S.qTrk===id&&!S.qGOff;
+  h+=`<div class="qmr${r.st==='up'?' qmup':''}" data-qmd="${id}"><div><b>${esc(qName(id))}</b>${tg}<small>${t('qmLv',{lv:Q.lv||1})} · ${esc(sub)}</small></div>${sp?`<button class="qmtk${on?' on':''}" data-qmk="${id}" data-tip="${esc(t(on?'qgHide':'qmGo'))}">📍</button>`:''}</div>`;}
  $('qmL').innerHTML=h||`<p class="qmnone">${t('qmNone')}</p>`;}
-function qmStart(id){if(!qmCanStart(id)){SFX.deny();return;}acceptQ(id);qmDraw();}
+// the giver's place on the map and the guide arrow (owner 2026-10-26: you take the quest from the giver, not from the book)
+function qmGo(id){if(!QD[id]||!qSpot(id)){SFX.deny();return;}qTrkT(id);qmDraw();}
 // the Bounty Book: today's bounties (the board's daily list) and the board's tasks, taken and turned in from anywhere
 function qmBounties(){const D=dlyS(),L=dailyList(),cl=L.filter(x=>!D.done[x.k]&&(D.c[x.k]||0)>=x.n);let h=`<div class="ssec">${t('qmBDaily',{s:D.streak||0})}</div>`;
  h+=L.map(x=>{const i=cl.indexOf(x);return `<div class="qmr"><div><b>${esc(t(x.k))}</b><small>${esc(itN(x.it))} ${D.done[x.k]?'✓':`${Math.min(D.c[x.k]||0,x.n)}/${x.n}`}</small></div>${i>=0?`<button data-qmdl="${i}">${t('qmClaim')}</button>`:''}</div>`;}).join('');
@@ -16304,7 +16309,7 @@ function qmBAct(k,v){if(!qmBook())return;
  else if(k==='qmbq'){if(!QD[v]||!qAvail(v)||S.lv<(QD[v].lv||1))return;acceptQ(v);}
  hudDirty=true;save(true);qmDraw();}
 $('qmW').addEventListener('click',e=>{if(e.target.closest('.qmx')){closeQM();return;}const tb=e.target.closest('[data-qmt]');if(tb){SFX.click();QMT=tb.dataset.qmt;qmDraw();$('qmL').scrollTop=0;return;}
- const st=e.target.closest('[data-qms]');if(st){qmStart(st.dataset.qms);return;}
+ const st=e.target.closest('[data-qmk]');if(st){qmGo(st.dataset.qmk);return;}
  for(const k of ['qmdl','qmbt','qmbk','qmbq']){const b=e.target.closest('[data-'+k+']');if(b){SFX.click();qmBAct(k,b.dataset[k]);return;}}
  const r=e.target.closest('[data-qmd]');if(r&&QD[r.dataset.qmd]){$('qmW').hidden=true;QMR=1;openQD(r.dataset.qmd);}});
 $('qmQ').addEventListener('input',()=>qmDraw());
@@ -16314,14 +16319,14 @@ WALKM.push('qm');WCLOSE.qm=()=>closeQM();
 // the Bounty Book in the Reputation Store
 const RSBOOK=15000;
 Object.assign(STR.ar,{qmB:'كتاب المهام',qmTitle:'كتاب المهام',qmQ:'دوّر بالاسم أو باللي بيديها…',qmT_all:'الكل',qmT_ms:'القصة',qmT_side:'جانبية',qmT_rep:'تتكرر',qmT_done:'خلصت',qmT_bnt:'المكافآت',
- qmG_act:'شغال فيها',qmG_av:'متاحة دلوقتي',qmG_up:'جاية (محتاجة لفل)',qmG_done:'خلصتها',qmLv:'لفل {lv}',qmStart:'ابدأ',qmNone:'مفيش مهام هنا.',
+ qmG_act:'شغال فيها',qmG_av:'متاحة دلوقتي',qmG_up:'جاية (محتاجة لفل)',qmG_done:'خلصتها',qmLv:'لفل {lv}',qmGo:'وريني مكان اللي بيديها',qmRepN:'من {w} · خلصتها النهارده {n}/{m}',qmNone:'مفيش مهام هنا.',
  qmBDaily:'مكافآت النهارده (أيام ورا بعض: {s})',qmClaim:'استلم',qmBMine:'مهام اللوحة اللي معاك ({n}/3)',qmBNone:'مش واخد مهام من اللوحة.',qmBReady:'خلصت! سلّمها من هنا.',qmTurn:'سلّم',qmBOffer:'مهام اللوحة النهارده',qmTake:'خد',
  bbook:'كتاب المكافآت',bbookD:'بيضيف تبويب «المكافآت» لكتاب المهام: تشوف مكافآت النهارده، وتاخد مهام اللوحة وتسلّمها من أي حتة.',rsBook:'كتاب المكافآت',rsBookD:'تبويب المكافآت في كتاب المهام (📖)',rsBookW:'افتح كتاب المهام 📖 وهتلاقي تبويب المكافآت.'});
 Object.assign(STR.en,{qmB:'Quest book',qmTitle:'Quest Book',qmQ:'Search by name or giver…',qmT_all:'All',qmT_ms:'Main story',qmT_side:'Side',qmT_rep:'Repeatable',qmT_done:'Completed',qmT_bnt:'Bounties',
- qmG_act:'In progress',qmG_av:'Available now',qmG_up:'Upcoming (level needed)',qmG_done:'Completed',qmLv:'Lv {lv}',qmStart:'Start',qmNone:'No quests here.',
+ qmG_act:'In progress',qmG_av:'Available now',qmG_up:'Upcoming (level needed)',qmG_done:'Completed',qmLv:'Lv {lv}',qmGo:'Show me who gives it',qmRepN:'From {w} · done today {n}/{m}',qmNone:'No quests here.',
  qmBDaily:"Today's bounties (streak: {s} days)",qmClaim:'Claim',qmBMine:'Your board tasks ({n}/3)',qmBNone:'You carry no board tasks.',qmBReady:'Done! Turn it in from here.',qmTurn:'Turn in',qmBOffer:"Today's board tasks",qmTake:'Take',
  bbook:'Bounty Book',bbookD:"Adds a Bounties tab to the quest book: see today's bounties, and take and turn in board tasks from anywhere.",rsBook:'Bounty Book',rsBookD:'A Bounties tab in the quest book (📖)',rsBookW:"Open the quest book 📖 and you'll find the Bounties tab."});
-window.__GQM={open:t=>openQM(t),close:()=>closeQM(),list:()=>qmList(),tags:id=>qmTags(id),start:id=>qmStart(id),can:id=>qmCanStart(id),html:()=>$('qmL').innerHTML,tabs:()=>[...$('qmTabs').querySelectorAll('button')].map(b=>b.dataset.qmt),
+window.__GQM={open:t=>openQM(t),close:()=>closeQM(),list:()=>qmList(),tags:id=>qmTags(id),go:id=>qmGo(id),can:id=>qmCanStart(id),trk:()=>S.qTrk,html:()=>$('qmL').innerHTML,tabs:()=>[...$('qmTabs').querySelectorAll('button')].map(b=>b.dataset.qmt),
  bact:(k,v)=>qmBAct(k,v),book:()=>qmBook(),lrd:()=>lrdOf(),dly:()=>dlyS(),daily:()=>dailyList(),RSBOOK}; // tests
 window.__G={bag:()=>({GDROP,openSell,INVS,invClick,unitVal,itemVal,SHOPG,SHOPM,POT}),lines:()=>STR,chunks:()=>({g:gg.stats(),o:og.stats()}),chunkLayers:()=>({gg,og}),get CARD(){return CARD},get SM(){return SM},get allies(){return allies},get S(){return S},get P(){return P},get mode(){return mode},die:()=>die(),mons:()=>mons,get npcs(){return npcs},nodes,act,finishMG:()=>finishMG,startMG:id=>startMG(RC.find(r=>r.id===id)),get MG(){return MG},talkNPC:id=>talkNPC(id),completeQ:id=>completeQ(id),acceptQ:id=>acceptQ(id),useSlot:i=>useSlot(i),newGame:L=>newGame(L),QD,openMap:()=>openMap(),get proj(){return proj},gainXP:n=>gainXP(n),save:q=>save(q),openPick:s=>openPick(s),pickOpt:i=>pickOpt(i),advance:()=>advance(),get DL(){return DL},zoneAt,VT,chopped,tryAttack:(a,b)=>tryAttack(a,b),get KB(){return KB},ROOMS,PROPS,enterRoom:r=>enterRoom(r),openBoard:()=>openBoard(),openQD:id=>openQD(id),TOWNS,useProp:p=>useProp(p),at:(x,y)=>at(x,y),setT:(x,y,v)=>setT(x,y,v),eqx:{buyGear:(i,g,w)=>buyGear(i,g,w),equip:i=>equip(i),eqIt:s=>eqIt(s),defV:()=>defV(),atkV:()=>atkV(),atkCD:()=>atkCD(),maxMP:()=>maxMP(),repairAll:w=>repairAll(w),enhance:(i,w,x)=>enhance(i,w,x),enhPick:(i,w)=>enhPick(i,w),mkItem:(i,r)=>mkItem(i,r),openEquip:()=>openEquip(),wear:(i,p)=>wear(i,p),openForge:()=>openForge(),price:(w,g)=>price(w,g),addAff:(i,n)=>addAff(i,n),giveGift:(w,k)=>giveGift(w,k),townOfNpc:i=>townOfNpc(i),get ESC(){return ESC},solid:(x,y)=>solidT(x,y),DGATES,DUN,useGate:g=>useGate(g)}};
 // Read-only engine surface for the online layer and for content tests. Contract: docs/api/ENGINE_API.md
