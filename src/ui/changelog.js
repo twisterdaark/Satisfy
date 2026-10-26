@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26hgfix', ver: '3.44', d: '2026-10-26',
+      ar: ["اتصلح خطأ كان بيظهر لما تقتل هيل جاو (ومارخوسياس ولِراجي وكلاب الجحيم): حجر النار بقى بيوقع كخامة عادي بدل ما اللعبة تحاول تعمله سلاح."],
+      en: ["Fixed an error when killing Hell Gao (and Marchosias, Leraje and the hell keepers): the fire stone now drops as a material instead of the game trying to make it a piece of gear."] },
     { v: '2026-10-26legbuff4', ver: '3.43', d: '2026-10-26',
       ar: ["وريث مومود بقى أقوى: الميه والتلج 290%، وشعاع المانا 340%، وشجرة المانا فروعها بتضرب أقوى، وسحب المانا 160%.",
         "وريث الملك الذي لا يُهزم (مادرا): الحصار 650%، والحصار الأبعد 1,040%.",

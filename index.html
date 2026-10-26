@@ -14317,12 +14317,11 @@ Object.assign(STR.ar,{dpow:'القوة الشيطانية',tdpow:'تقدر تت�
 Object.assign(STR.en,{dpow:'Demonic Power',tdpow:'You can communicate with demonic beasts. The higher the number, the more likely you are to enter hell.'});
 /* the people, the beasts and the great demons */
 Object.assign(MT,{
- hellgao:{lv:[310,310],hp:90000000,dmg:15000,spd:44,xp:9000000,gold:120000,aggro:230,r:12,oy:60,boss:1,leash:340,slam:20000,slamR:70,wb:7200,sc:1.7,drop:[['mith',14],['mstone',20],['ruby',1]]},
- hkeep:{lv:[440,455],hp:8000000,dmg:22000,spd:72,xp:320000,gold:700,aggro:180,r:8,oy:22,regen:.006,drop:[['mstone',1.2],['mith',.4]]},
+ hellgao:{lv:[310,310],hp:90000000,dmg:15000,spd:44,xp:9000000,gold:120000,aggro:230,r:12,oy:60,boss:1,leash:340,slam:20000,slamR:70,wb:7200,sc:1.7,drop:[['mith',14],['mstone',20],['ruby',1],['fstone',.5]]},
+ hkeep:{lv:[440,455],hp:8000000,dmg:22000,spd:72,xp:320000,gold:700,aggro:180,r:8,oy:22,regen:.006,drop:[['mstone',1.2],['mith',.4],['fstone',.004]]},
  dbeast:{lv:[460,475],hp:12000000,dmg:25000,spd:66,xp:380000,gold:850,aggro:170,r:10,oy:24,drop:[['mstone',1.4],['mith',.5],['blue',.05]]},
- marcho:{lv:[500,500],hp:300000000,dmg:32000,spd:46,xp:30000000,gold:300000,aggro:200,r:22,oy:64,boss:1,leash:320,slam:60000,slamR:84,wb:3600,adds:'dbeast',drop:[['mith',26],['diam',3],['mstone',30],['blue',3]]},
- leraje:{lv:[530,530],hp:400000000,dmg:36000,spd:64,xp:40000000,gold:380000,aggro:230,r:8,oy:40,boss:1,leash:320,slam:60000,slamR:72,wb:3600,sc:1.5,drop:[['mith',30],['diam',4],['mstone',34],['blue',4]]}});
-Object.assign(NDROP,{hellgao:[['fstone',.5]],hkeep:[['fstone',.004]],marcho:[['fstone',.5]],leraje:[['fstone',1]]});
+ marcho:{lv:[500,500],hp:300000000,dmg:32000,spd:46,xp:30000000,gold:300000,aggro:200,r:22,oy:64,boss:1,leash:320,slam:60000,slamR:84,wb:3600,adds:'dbeast',drop:[['mith',26],['diam',3],['mstone',30],['blue',3],['fstone',.5]]},
+ leraje:{lv:[530,530],hp:400000000,dmg:36000,spd:64,xp:40000000,gold:380000,aggro:230,r:8,oy:40,boss:1,leash:320,slam:60000,slamR:72,wb:3600,sc:1.5,drop:[['mith',30],['diam',4],['mstone',34],['blue',4],['fstone',1]]}});
 Object.assign(AIK,{hkeep:'lunge',dbeast:'lunge'});
 // the keepers: hounds of hell in its colours; the 22nd army's beasts darker and bigger; Marchosias a hound the size of a hill, his skin stone
 Object.assign(P3D,{hkeep:{base:'hwolf',f:'sepia(1) saturate(5) hue-rotate(-35deg) brightness(.62)',sc:1.45},dbeast:{base:'hwolf',f:'grayscale(.7) brightness(.42) contrast(1.5)',sc:1.8},
