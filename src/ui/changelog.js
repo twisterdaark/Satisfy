@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26plan12', ver: '3.48', d: '2026-10-26',
+      ar: ["صناديق المستنقع: الميميك بيفضح نفسه لو بصيت كويس، كل كام ثانية غطاه بيتفتح شوية على سنانه وبيريّل. وفيه 3 صناديق حقيقية وسطهم، كل واحد فيه فخ إبرة: دوس E وبعدين E تاني والإبرة في الأخضر تفتحه (دهب وساعات جوهرة)، غير كده الإبرة تسمّك. بيتملي تاني كل 20 دقيقة.",
+        "سيد مصاصين الدماء: أول ما يزأر بياخد طريق من اتنين حسب الساعة: بالليل خفافيش الضعف وأسرع، وبالنهار درع دم وعضّته بترجعله صحة أكتر.",
+        "عقود التجار (ريدان ورينهارت ورولينج وتايتن): كل يوم طلب توريد (هات كمية من خامة وخد تقريبًا ضعف تمنها) وحجز (ادفع دلوقتي واستلم الخامة من بكرة)."],
+      en: ["The marsh's chests: a mimic gives itself away if you watch it, every few seconds its lid cracks open on its teeth and it drools. Three real chests stand among them, each with a needle trap: press E, then E again while the needle is in the green to open it (gold, sometimes a gem); miss and the needle poisons you. Each refills every 20 minutes.",
+        "The Vampire Lord takes one of two ways at his first roar, by the clock: by night twice the bats and faster; by day a blood shield, and his bites heal him more.",
+        "Merchants' contracts (Reidan, Reinhardt, Rolling and Titan): each day a supply order (bring a quantity of one material, paid well above its worth) and a pre-order (pay now, pick the material up from tomorrow)."] },
     { v: '2026-10-26plan11', ver: '3.47', d: '2026-10-26',
       ar: ["الجولم لما يقع بيسيب ركام فيه عرق خام مكانه: احفره مرة واحدة في 90 ثانية.",
         "سجل قتال الزعماء: دوس على رسالة القتال، أو زرار معارك الزعماء في السجل (L)، أو اكتب /raidlog، تشوف آخر 3 معارك (المراحل، ضربك، اللي وقعوا) وتتفرج عليها بتتعاد على خريطة صغيرة.",
