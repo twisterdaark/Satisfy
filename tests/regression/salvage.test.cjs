@@ -1,6 +1,6 @@
 'use strict';
 // Taking items apart (v1.00): any gear in the bag comes apart for part of what made it, at a smithy for a fee or at your
-// own anvil (more back with smithing level, a small chance of "[The disassembly has failed.]", which only scuffs it).
+// own anvil (more back with smithing level, a small chance of "[The disassembly has failed.]", which breaks the item with nothing back: owner 2026-10-26).
 // A blacksmith who takes a boss's named item apart gains understanding of it; at 100% its production method is learned.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -63,9 +63,9 @@ test('at the anvil: more back with smithing level, and a blacksmith learns a nam
     assert.match(await toasts(g), /Your understanding of Frostlight Orc Chief.s Helmet reached 100%\. You have learned how to make it!/);
     const k = await g.eval(() => { const rc = window.__GSV.rc('ochelm'); return [rc.unlock(), !!window.__G.S.rcK.ochelm, Object.keys(rc.need).sort()]; });
     assert.deepEqual(k, [true, true, ['blue', 'leather', 'mith', 'mstone']]);
-    // a failed take-apart only scuffs the item
-    const f = await g.eval(() => { const G = window.__G, S = G.S; S.smith = 1; for (let k = 0; k < 400; k++) { const it = G.eqx.mkItem('isword', 0); it.dur = 100; S.items.push(it); if (window.__GSV.doSalv(it, 'anvil') === false) return { kept: S.items.includes(it), dur: it.dur }; } return null; });
-    assert.deepEqual(f, { kept: true, dur: 80 });
+    // a failed take-apart breaks the item: nothing back (owner 2026-10-26: "i still kept it in my inventory")
+    const f = await g.eval(() => { const G = window.__G, S = G.S; S.smith = 1; for (let k = 0; k < 400; k++) { const it = G.eqx.mkItem('isword', 0); it.dur = 100; S.items.push(it); const m0 = JSON.stringify(S.mats); if (window.__GSV.doSalv(it, 'anvil') === false) return { kept: S.items.includes(it), same: JSON.stringify(S.mats) === m0 }; } return null; });
+    assert.deepEqual(f, { kept: false, same: true }, 'gone, and nothing came back');
     assert.match(await toasts(g), /\[The disassembly has failed\.\]/);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
