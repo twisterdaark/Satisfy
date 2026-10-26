@@ -17552,7 +17552,7 @@ if(TOUCH){document.body.classList.add('touch');fit();mzUI();const st=$('tStick')
    drops (NDROP) and the materials monsters carry, without the plain ones (wood, ore, leather, herbs, fish, crops) and
    without the gems, which have their own page. N in play, unless a party invitation or a duel waits for its answer (N is
    "no" there). */
-const IXTABS=['tr','cls','mon','drop','gem','smith','mag','fish'],IXPLAIN=new Set(['wood','ore','leather','herb','bherb','fish','sfish','gfish','wheat','straw','melon','bread']);
+const IXTABS=['tr','cls','mon','drop','mat','gem','smith','mag','fish'],IXPLAIN=new Set(['wood','ore','leather','herb','bherb','fish','sfish','gfish','wheat','straw','melon','bread']);
 const IXWK={sword:'isword',melee:'isword',spear:'spear',dagger:'dagger',bow:'bow',staff:'staff',hammer:'hammer'};
 let IXV='tr',IXS=null,IXF='gear',IXD=null;
 const ixHas=k=>STR.en[k]!=null||STR.ar[k]!=null;
@@ -17650,12 +17650,84 @@ const ixTkF=k=>{const W=FSW[k],r=S.fishR&&S.fishR[k];return `<li><img class="ixi
 function ixTkZone(z){const [c,r]=TKZ[z];return `<h3>${esc(t('tkZ_'+z))}</h3><p>${esc(t('tkZD_'+z))}</p><p class="ixh">${t('ixFiCom')}</p><ul class="ixl">${ixTkF(c)}</ul><p class="ixh">${t('ixFiRar')}</p><ul class="ixl">${tkSeen(r)?ixTkF(r):`<li><b>???</b> <small>${t('ixFiUnk')}</small></li>`}</ul><p><small>${t('ixFiGold')}</small></p>`;}
 function ixTkRods(){const cur=S.rod|0;return `<h3>${t('tkRodL')}</h3><ul class="ixl">`+TKR.map((R,i)=>`<li>${i?`<img class="ixi" src="${icon('tkrod'+i)}"> `:'🎣 '}<b>${esc(t('tkRod'+i))}</b>${i===cur?' <span class="ixchip">'+t('ixFiMine')+'</span>':''}<br><small>${tkRodD(i)}${i?' · '+t('ixFiCost',{g:R.g.toLocaleString('en')})+(R.fl>1?' · '+t('tkNeedFl',{n:R.fl}):''):''}</small></li>`).join('')+`</ul><p><small>${t('ixFi5',{n:ixNpc('merchant')})}</small></p>`;}
 function ixTkBait(){return `<h3>${t('tkBaitL')}</h3><ul class="ixl">`+Object.keys(TKB).map(k=>`<li><img class="ixi" src="${icon(k)}"> <b>${esc(t(k))}</b>${S.bait===k?' <span class="ixchip">'+t('ixFiMine')+'</span>':''}<br><small>${esc(t(k+'D'))} · ${t('ixFiCost',{g:TKB[k].g})}</small></li>`).join('')+`</ul><p><small>${t('ixFiBait')}</small></p>`;}
+// ---- Materials (v3.12; the owner 2026-10-26: "add to the index, Materials tab to know where to get each material for
+// crafting"). Every material a recipe asks for (the anvil's RC, Elizabeth's jewels, the tailor's TRC, the fire's COOK,
+// alchemy's BREW, the Creation's CREM), and where it comes from, read from the game's own tables where they say it: the veins,
+// herbs and trees with the regions they stand in, the waters, Piaro's field, the monsters that carry it (where they live and
+// the odds; ??? for one you haven't met), the quests and first discoveries that give it, the shops and the market, taking a
+// piece apart. What the tables don't hold (a boss's chest and stones, the day's tasks, the Tower, the world bosses' rewards...)
+// is IXMX, one line each, kept with the code it describes. Then what it makes.
+const IXMO=['wood','ore','leather','mith','blue','mstone','estone','pstone','bstone','tstone','dscale','ndiron','ndstone','vwleath','fess','iess','sess','bvial','wegg','kink','kpearl','bljewel','blhorn','brphx','brdrg','brtig','brtor','diam','ruby','topaz','emer','sapph','fish','sfish','gfish','herb','bherb','vherb','wheat','straw','melon','pumpk','fcab'],IXMN=12;
+let IXMF='all';
+const ixWb=k=>MT[k]?esc(mbName(k)):k;
+const IXMX={
+ estone:[['ixMsBossE'],['ixMsMonE'],['ixMsChest',()=>({n:'2–4'})],['ixMsDaily',()=>({n:1})],['ixMsTowerB',()=>({n:2})],['ixMsWB',()=>({b:ixWb('berith'),n:2,p:5})],['ixMsWB',()=>({b:ixWb('belial'),n:2,p:5})],['ixMsKill',()=>({b:ixWb('dbus'),n:10})]],
+ pstone:[['ixMsBossP',()=>({p:'12%'})],['ixMsChest',()=>({n:'50%'})]],
+ bstone:[['ixMsBossP',()=>({p:'25%'})],['ixMsChest',()=>({n:'60%'})]],
+ mstone:[['ixMsChest',()=>({n:'2–4'})],['ixMsDaily',()=>({n:3})],['ixMsTower',()=>({n:1,b:3})],['ixMsTreas',()=>({n:2})],['ixMsKill',()=>({b:ixWb('dbus'),n:3})],['ixMsAff',()=>({r:esc(t('aff3'))})]],
+ blue:[['ixMsChest',()=>({n:'50%'})],['ixMsTreas',()=>({n:1})],['ixMsWB',()=>({b:ixWb('berith'),n:1,p:20})]],
+ ore:[['ixMsChestR'],['ixMsRoom']],wood:[['ixMsChestR'],['ixMsRoom']],leather:[['ixMsChestR'],['ixMsRoom']],herb:[['ixMsDig',()=>({n:esc(t('piaro'))})]],
+ mith:[['ixMsWB',()=>({b:ixWb('berith'),n:10,p:5})]],
+ bljewel:[['ixMsWB',()=>({b:ixWb('belial'),n:1,p:5})]],blhorn:[['ixMsWB',()=>({b:ixWb('belial'),n:1,p:20})]],
+ dscale:[['ixMsHayate',()=>({n:esc(t('hayate')),z:esc(t('zWisdom'))})]],tstone:[['ixMsTbow',()=>({it:esc(t('tbow'))})]],wegg:[['ixMsEgg']],
+ brphx:[['ixMsEa5',()=>({q:ixHas('q_ea5')?esc(t('q_ea5')):'?'})]],
+ diam:[['ixMsGem',()=>({p:'10%'})],['ixMsWB',()=>({b:ixWb('berith'),n:2,p:20})],['ixMsWB',()=>({b:ixWb('belial'),n:2,p:20})]],
+ ruby:[['ixMsGem',()=>({p:'20%'})]],topaz:[['ixMsGem',()=>({p:'20%'})]],emer:[['ixMsGem',()=>({p:'20%'})]],sapph:[['ixMsGem',()=>({p:'20%'})]]};   // gemDrop: diamond 10%, thunder 11%, the other four alike
+const IXMNPC=['mith','bherb','gfish','mstone','dscale','sfish','leather','herb'];   // the merchants' own market listings (auWS)
+const IXMSHOP={ore:[['khan',8],['smith',8]]};   // buyMat, to a blacksmith only (isSm)
+const ixNodeZ=kind=>{const c=new Map();for(const n of nodes)if((n.kind||'ore')===kind){const z=zoneAt(n.x,n.y);if(z&&ixHas(z))c.set(z,(c.get(z)||0)+1);}return [...c.entries()].sort((a,b)=>b[1]-a[1]).map(x=>x[0]);};
+const ixZL=L=>L.length?` <small>(${L.slice(0,5).map(z=>esc(t(z))).join(t('ixAnd'))}${L.length>5?t('ixAnd')+t('ixMMore',{n:L.length-5}):''})</small>`:'';
+function ixMats(){const U=new Map(),add=(m,u)=>{if(!U.has(m))U.set(m,[]);const L=U.get(m);if(!L.some(x=>x.id===u.id&&x.k===u.k))L.push(u);};
+ for(const r of RC){if(!r.need||!ixHas(r.id))continue;const off=String(r.unlock||'').replace(/\s/g,'')==='()=>false';if(off&&!r.jw)continue;for(const m of Object.keys(r.need))add(m,{id:r.id,k:r.jw?'ez':'rc'});}
+ for(const r of TRC)if(r.need&&ixHas(r.id))for(const m of Object.keys(r.need))add(m,{id:r.id,k:'trc'});
+ for(const [k,r] of Object.entries(COOK))for(const m of Object.keys(r.need))add(m,{id:k,k:'cook'});
+ for(const [k,r] of Object.entries(BREW))for(const m of Object.keys(r.need))add(m,{id:k,k:'brew'});
+ for(const m of Object.keys(CREM))add(m,{id:'cre',k:'cre'});
+ const o=k=>{const i=IXMO.indexOf(k);return i<0?999:i;};
+ return [...U.keys()].filter(ixHas).sort((a,b)=>o(a)-o(b)||(t(a)<t(b)?-1:1)).map(id=>({id,use:U.get(id),by:ixMatBy(id)}));}
+// the monsters that carry it: where they live first, then by level
+function ixMatBy(id){const L=[];for(const [k,b] of Object.entries(MT))if(!MBX.has(k)){const d=(b.drop||[]).find(x=>x[0]===id);if(d)L.push({k,p:d[1],nm:0});}
+ const H=IXD&&IXD.home||{};return L.sort((a,b)=>((a.k in H)?0:1)-((b.k in H)?0:1)||MT[a.k].lv[0]-MT[b.k].lv[0]);}
+const IXGATH={ore:'ore',mith:'mith',herb:'herb',bherb:'bherb'};
+function ixMatSrc(id){const L=[],li=s=>L.push(s);
+ if(id==='ore'){li(t('ixMsVein')+ixZL(ixNodeZ('ore')));li(t('ixMsMithOre'));}
+ if(id==='mith')li(t('ixMsMith')+ixZL(ixNodeZ('mith')));
+ if(id==='herb')li(t('ixMsHerb')+ixZL(ixNodeZ('herb')));
+ if(id==='bherb')li(t('ixMsBherb')+ixZL(ixNodeZ('bherb')));
+ if(id==='vherb')li(t('ixMsVherb'));
+ if(id==='wood')li(t('ixMsTree'));
+ if(id==='ndiron'||id==='ndstone')li(t('ixMsBdv',{z:esc(t('zBdog')),l:BDLV,p:Math.round(BDP*100)+'%',m:esc((SECX.miner&&SECX.miner.n[lang==='ar'?1:0])||'Miner')}));
+ const W=Object.keys(TKZ).filter(w=>TKZ[w].includes(id));if(W.length)li(t('ixMsFish',{w:W.map(w=>esc(t('tkZ_'+w))).join(t('ixAnd'))}));
+ if(id==='gfish')li(t('ixMsGold'));
+ if(id==='fish')li(t('ixMsFishAny',{l:Object.values(TKZ).map(x=>esc(t(x[0]))).join(t('ixAnd'))}));
+ if(['wheat','straw','melon','pumpk','fcab'].includes(id))li(t('ixMsFarm',{n:esc(t('farm2N'))}));
+ if(GEMK.includes(id)&&id!=='thund')li(t('ixMsTowerG'));
+ for(const [k,a] of IXMX[id]||[])li(t(k,a?a():{}));
+ for(const [q,d] of Object.entries(QD))if(d.mat&&d.mat[0]===id&&!d.gen&&ixHas('q_'+q))li(t('ixMsQuest',{q:esc(t('q_'+q)),n:d.mat[1],by:d.by&&ixHas(d.by)?ixNpc(d.by):'?'}));
+ for(const d of Object.values(FD))if(d.mat&&d.mat[0]===id)li(t('ixMsFD',{l:d.lm&&ixHas(d.lm)?esc(t(d.lm)):t('ixMsFD0'),n:d.mat[1]}));
+ for(const [who,g] of IXMSHOP[id]||[])if(ixHas(who))li(t('ixMsShop',{n:ixNpc(who),g}));
+ if(HONS[id])li(t('ixMsHon',{r:esc(t('rep'+HONS[id].r)),g:HONS[id].g,n:HONS[id].n}));
+ for(const [k,n,c] of TWSHOP)if(k===id)li(t('ixMsTwShop',{who:esc(t('radwolf')),z:esc(t('zWisdom')),n,c}));
+ if(HFOOD[id])li(t('ixMsCoach',{g:HFOOD[id].g}));
+ if(AUK.includes(id))li(t(IXMNPC.includes(id)?'ixMsMarketN':'ixMsMarket'));
+ if(RC.some(r=>r.need&&r.need[id]>1&&!r.jw))li(t('ixMsSalv'));   // a forged piece gives back a part (a material it needed once, never)
+ if(CREM[id])li(t('ixMsSalvC'));   // creSalv: a Creation gives back all its materials
+ return L;}
+const ixMatKind=e=>[IXGATH[e.id]||['vherb','wood','ndiron','ndstone'].includes(e.id)?t('ixMS_g'):'',Object.values(TKZ).some(x=>x.includes(e.id))||e.id==='gfish'?t('ixMS_f'):'',['wheat','straw','melon','pumpk','fcab'].includes(e.id)?t('ixMS_p'):'',e.by.length?'🐾 '+e.by.length:''].filter(Boolean).join(' · ');
+const ixMatIn=(e,f)=>f==='all'||e.use.some(u=>f==='rc'?u.k==='rc'||u.k==='ez'||u.k==='cre':f==='trc'?u.k==='trc':u.k==='cook'||u.k==='brew');
+function ixMatD(e,D){const src=ixMatSrc(e.id),G={};for(const u of e.use)(G[u.k]=G[u.k]||[]).push(u.id);
+ return `<h3><img class="ixi" src="${icon(e.id)}"> ${esc(t(e.id))}</h3>`+(ixHas(e.id+'D')?`<p><small>${esc(t(e.id+'D'))}</small></p>`:'')+
+  `<p class="ixh">${t('ixMWhere')}</p>`+(src.length?`<ul class="ixl">${src.map(x=>`<li>${x}</li>`).join('')}</ul>`:e.by.length?'':`<p><small>${t('ixMNone')}</small></p>`)+
+  (e.by.length?`<p class="ixh">${t('ixDropBy')}</p><ul class="ixl">${e.by.slice(0,IXMN).map(x=>ixMon({...x,it:e.id},D)).join('')}</ul>`+(e.by.length>IXMN?`<p><small>${t('ixAndMore',{n:e.by.length-IXMN})}</small></p>`:''):'')+
+  `<p class="ixh">${t('ixUsed')}</p>`+(['mstone','estone','pstone','bstone'].includes(e.id)?`<p><small>${t('ixMUse_enh')}</small></p>`:'')+(Object.values(PEVO).some(x=>x.need[e.id])?`<p><small>${t('ixMUse_pet')}</small></p>`:'')+['rc','ez','trc','cook','brew','cre'].filter(k=>G[k]).map(k=>`<p><small>${t('ixMUse_'+k)}</small></p>`+(k==='cre'?'':`<div class="mbdr">${G[k].map(id=>`<span class="mbi"><img src="${icon(id)}">${esc(t(id))}</span>`).join('')}</div>`)).join('');}
+Object.assign(STR.ar,{"ixTab_mat": "🧱 الخامات", "ixMF_all": "الكل", "ixMF_rc": "الحدادة", "ixMF_trc": "الخياطة", "ixMF_life": "الطبخ والكيميا", "ixMWhere": "تجيبها منين", "ixMNone": "الوصف اللي فوق بيقول بتيجي منين.", "ixMMore": "و{n} كمان", "ixAndMore": "…و{n} وحوش كمان", "ixMS_g": "⛏ بتتجمع", "ixMS_f": "🎣 بتتصاد", "ixMS_p": "🌾 بتتزرع", "ixMUse_rc": "على السندان", "ixMUse_ez": "عند إليزابيث (المجوهرات)", "ixMUse_trc": "عند الخياط", "ixMUse_cook": "على النار (الطبخ)", "ixMUse_brew": "الكيميا (الجرعات)", "ixMUse_cre": "«الإبداع»: تصميم من عندك على السندان (سكيل الحداد ووريث باغما).", "ixMsVein": "عروق الحديد: اقف جنبها ودوس E، وبترجع تاني بعد شوية. اللي في القرية بترجع أسرع.", "ixMsMithOre": "عروق الميثريل بتدّي حديد كمان نص المرات.", "ixMsMith": "عروق الميثريل (الصخور اللي فيها لمعة زرقا): اقف جنبها ودوس E.", "ixMsHerb": "الأعشاب في الحقول: دوس E جنبها عشان تقطفها.", "ixMsBherb": "العشب الأزرق بيطلع جنب المية وفي التلج: دوس E جنبه عشان تقطفه.", "ixMsVherb": "ساعات بيطلع وإنت بتقطف أي عشب، وبيكتر كل ما لفل الأعشاب يعلى.", "ixMsTree": "الشجر: اقف جنب شجرة ودوس E. والشجرة اللي لسه مقطوعة تقدر تقلعها من جدرها وتاخد خشب أكتر.", "ixMsBdv": "العروق اللي على طول {z}، من لفل {l}: كل عرق مرة في اليوم، الطوب الأول وبعدين {p} إنها تطلع (و«{m}» بيلاقيها على طول).", "ixMsFish": "الصيد: {w}.", "ixMsGold": "الصيد في أي مية، كل فين وفين (وفي مهرجان الصيد تلات أضعاف).", "ixMsFishAny": "في الطبخ أي سمكة عادية بتنفع: {l}.", "ixMsFarm": "{n}: ازرعها واحصدها في موسمها.", "ixMsTowerG": "البرج: جوهرة عشوائية أول مرة تخلّص دور فيه بوس.", "ixMsBossE": "أي بوس لفل 20 أو أكتر: واحد، وواحد زيادة كل 50 لفل.", "ixMsMonE": "أي وحش تاني لفل 20 أو أكتر، كل فين وفين (لحد 8%، وبتزيد مع اللفل).", "ixMsBossP": "أي بوس لفل 20 أو أكتر: {p} من المرات.", "ixMsChest": "صندوق البوس (مرة في اليوم لكل بوس): {n}.", "ixMsChestR": "صندوق البوس: من 3 لـ6 حديد أو جلد أو خشب (واحد من التلاتة).", "ixMsDaily": "لما تخلّص كل مهمات اليوم: {n}.", "ixMsTower": "البرج: كل خامس دور تخلّصه لأول مرة بيدّيك {n} ({b} لو فيه بوس).", "ixMsTowerB": "البرج: كل عاشر دور (دور فيه بوس)، أول مرة تخلّصه: {n}.", "ixMsTreas": "صندوق خريطة الكنز: {n}.", "ixMsWB": "{b} (بوس العالم): {n} لو نصيبك من القتال {p}% أو أكتر.", "ixMsKill": "لما تهزم {b}: {n}.", "ixMsHayate": "مهمة {n} في {z}: 3.", "ixMsTbow": "الحداد بيفكّلك {it}: 3.", "ixMsEgg": "عش الوايفرن: خد بيضة (كل بيضة بترجع بعد عشر دقايق، والوايفرن مش هيعجبهم).", "ixMsEa5": "مهمة {q} في القارة الشرقية.", "ixMsQuest": "مهمة {q} ({by}): {n}.", "ixMsFD": "اكتشاف أول مرة، {l}: {n}.", "ixMsFD0": "مكان مستخبي", "ixMsShop": "{n} بيبيعها للحداد: {g} دهب للواحدة.", "ixMsMarket": "السوق: لاعيبة تانيين بيبيعوها.", "ixMsSalv": "لما تفك على السندان قطعة معمولة باتنين منها أو أكتر بيرجعلك حتة.", "ixMsGem": "أي وحش لفل 60 أو أكتر (0.4%) وأي بوس (30%) ممكن يوقّع جوهرة: دي بتطلع {p} من المرات.", "ixMsAff": "لما ودّك مع حد من أهل البلد يوصل «{r}»: 3.", "ixMsRoom": "صندوق في أوضة، مرة واحدة: ساعات 1 أو 2.", "ixMsDig": "لعبة الحفر عند {n}: لما تكسب بتاخد شوية (وأكتر كل ما يفضلك حفرات).", "ixMsHon": "تاجر أي مدينة بيبيعهولك لو إنت «{r}» فيها: {g} دهب، {n} في اليوم.", "ixMsTwShop": "محل {who} في {z}: {n} بـ{c} علامة.", "ixMsCoach": "العربجية بيبيعوه لأي حد عنده ركوبة: {g} دهب.", "ixMsMarketN": "السوق: التجار بيعرضوه كل شوية، ولاعيبة تانيين بيبيعوه.", "ixMsSalvC": "لما تفك «إبداع» معمول بيها بترجعلك كلها.", "ixMUse_enh": "تقوية القطع عند الحداد.", "ixMUse_pet": "تطوير الحيوان الأليف."});
+Object.assign(STR.en,{"ixTab_mat": "🧱 Materials", "ixMF_all": "All", "ixMF_rc": "Smithing", "ixMF_trc": "Sewing", "ixMF_life": "Cooking & alchemy", "ixMWhere": "Where to get it", "ixMNone": "Its description above says where it comes from.", "ixMMore": "{n} more", "ixAndMore": "…and {n} more monsters", "ixMS_g": "⛏ gathered", "ixMS_f": "🎣 fished", "ixMS_p": "🌾 grown", "ixMUse_rc": "At the anvil", "ixMUse_ez": "At Elizabeth's (jewels)", "ixMUse_trc": "At the tailor's", "ixMUse_cook": "At the fire (cooking)", "ixMUse_brew": "Alchemy (potions)", "ixMUse_cre": "The Creation: a design of your own at the anvil (a Blacksmith's or Pagma's Successor's skill).", "ixMsVein": "Iron veins: stand by one and press E; it comes back after a while. The ones in the village come back sooner.", "ixMsMithOre": "Mithril veins give an ore too, half the time.", "ixMsMith": "Mithril veins, the rocks with a blue glint: stand by one and press E.", "ixMsHerb": "Herbs in the fields: press E by one to pick it.", "ixMsBherb": "Blue herbs grow by water and in the snow: press E by one to pick it.", "ixMsVherb": "Now and then from picking any herb, more often as your Herbalism grows.", "ixMsTree": "Trees: stand by one and press E. A tree you just cut can be pulled up by the root for more wood.", "ixMsBdv": "The veins along the {z}, from Lv {l}: each once a day, its bricks first, then a {p} find (a {m} always finds it).", "ixMsFish": "Fishing: {w}.", "ixMsGold": "Fishing in any water, now and then (three times as often in the Fishing festival).", "ixMsFishAny": "In cooking any common fish counts: {l}.", "ixMsFarm": "{n}: plant it and harvest it, in its season.", "ixMsTowerG": "The Tower: a random gem the first time you clear a floor with a boss.", "ixMsBossE": "Every boss of Lv 20 and above: one, and one more for every 50 levels.", "ixMsMonE": "Any other monster of Lv 20 and above, now and then (up to 8%, more at higher levels).", "ixMsBossP": "Every boss of Lv 20 and above: {p} of the time.", "ixMsChest": "A boss's chest (each boss's once a day): {n}.", "ixMsChestR": "A boss's chest: 3 to 6 of ore, leather or wood (one of the three).", "ixMsDaily": "All of the day's tasks done: {n}.", "ixMsTower": "The Tower: every fifth floor you clear for the first time gives {n} ({b} with a boss).", "ixMsTowerB": "The Tower: every tenth floor (a boss floor), the first time you clear it: {n}.", "ixMsTreas": "A treasure map's chest: {n}.", "ixMsWB": "{b} (world boss): {n} if your part of the fight is {p}% or more.", "ixMsKill": "Defeating {b}: {n}.", "ixMsHayate": "{n}'s mission in the {z}: 3.", "ixMsTbow": "A smith takes a {it} apart for you: 3.", "ixMsEgg": "The wyvern nest: take an egg (each comes back after ten minutes, and the wyverns won't like it).", "ixMsEa5": "The quest {q}, on the East Continent.", "ixMsQuest": "The quest {q} ({by}): {n}.", "ixMsFD": "A first discovery, {l}: {n}.", "ixMsFD0": "a hidden spot", "ixMsShop": "{n} sells it to a blacksmith: {g} gold each.", "ixMsMarket": "The market: other players sell it.", "ixMsSalv": "Taking apart a piece made with two or more of it at an anvil gives some back.", "ixMsGem": "Any monster of Lv 60 and above (0.4%) and any boss (30%) can drop a gem: this one {p} of the time.", "ixMsAff": "Any townsperson your affinity reaches {r} with: 3.", "ixMsRoom": "A chest in a room, once: sometimes 1 or 2.", "ixMsDig": "{n}'s digging game: a win gives some (more for the digs you have left).", "ixMsHon": "A town's merchant sells it to one {r} in that town: {g} gold, {n} a day.", "ixMsTwShop": "{who}'s shop in the {z}: {n} for {c} marks.", "ixMsCoach": "The coachmen sell it to anyone who owns a mount: {g} gold.", "ixMsMarketN": "The market: the merchants list it now and then, and other players sell it.", "ixMsSalvC": "Taking apart a Creation made with it gives it all back.", "ixMUse_enh": "Enhancing gear at a smith.", "ixMUse_pet": "Evolving a pet."});
 // a page: its cards (filtered by the search) and the detail of the chosen one
 function ixDraw(){$('ixTabs').innerHTML=IXTABS.map(v=>`<button data-ixt="${v}" class="${v===IXV?'on':''}">${t('ixTab_'+v)}</button>`).join('');
  // the monsters: the Monster Book's own page (its search, filters, detail and grid, and its Lore)
  const mb=IXV==='mon';$('mbW').hidden=!mb;for(const id of ['ixQ','ixF','ixD','ixG'])$(id).hidden=mb;if(mb){$('ixD').innerHTML='';$('ixG').innerHTML='';$('mbQ').placeholder=t('mbQ');mbDraw();return;}
  const D=IXD||(IXD=ixData()),q=($('ixQ').value||'').trim().toLowerCase(),hit=s=>!q||String(s).toLowerCase().includes(q);let cards=[],det='';
- $('ixF').innerHTML=IXV==='drop'?['gear','mat'].map(f=>`<button data-ixf="${f}" class="${f===IXF?'on':''}">${t('ixF_'+f)}</button>`).join(''):'';
+ $('ixF').innerHTML=IXV==='drop'?['gear','mat'].map(f=>`<button data-ixf="${f}" class="${f===IXF?'on':''}">${t('ixF_'+f)}</button>`).join(''):IXV==='mat'?['all','rc','trc','life'].map(f=>`<button data-ixf="${f}" class="${f===IXMF?'on':''}">${t('ixMF_'+f)}</button>`).join(''):'';
  if(IXV==='tr'){const L=D.T.filter(r=>hit(t(r.id))||r.cls.some(c=>hit(t('cl_'+c.id)))||r.sec.some(k=>hit(t('sec_'+k))));if(!L.some(r=>r.id===IXS))IXS=L.length?L[0].id:null;
   cards=L.map(r=>{const c=r.cls[0];return ixCard(r.id,c?c.item||IXWK[c.mst&&c.mst[0]]||'':'🧰',esc(t(r.id)),esc(t(ixAt(r.id)||''))||'');});
   const r=L.find(x=>x.id===IXS);if(r)det=`<h3>${esc(t(r.id))}</h3><p>${t('ixWhere',{z:esc(t(ixAt(r.id)||'')||'?')})}</p>`+
@@ -17670,6 +17742,8 @@ function ixDraw(){$('ixTabs').innerHTML=IXTABS.map(v=>`<button data-ixt="${v}" c
   const ids=[...(xt?['xtra']:[]),...L.map(e=>e.id)];if(!ids.includes(IXS))IXS=ids[0]||null;
   cards=[...(xt?[ixCard('xtra','📦',t('ixXtra'),'')]:[]),...L.map(e=>{const rc=rcById(e.id);return ixCard(e.id,e.id,`<span class="rt rt${rc&&rc.fix!=null?rc.fix:0}">${esc(t(e.id))}</span>`,rc&&itLvr(rc)?t('ixLv',{n:itLvr(rc)}):t('ixFromN',{n:e.by.length}));})];
   const e=L.find(x=>x.id===IXS);if(IXS==='xtra')det=ixXtra();else if(e)det=ixItemD(e,D)+(IXF==='gear'?`<p><small>${t('ixChest')}</small></p>`:'');}
+ else if(IXV==='mat'){const M=D.M||(D.M=ixMats()),L=M.filter(e=>ixMatIn(e,IXMF)&&(hit(t(e.id))||e.by.some(x=>ixMet(x.k)&&hit(mbName(x.k)))));if(!L.some(e=>e.id===IXS))IXS=L.length?L[0].id:null;
+  cards=L.map(e=>ixCard(e.id,e.id,esc(t(e.id)),ixMatKind(e)));const e=L.find(x=>x.id===IXS);if(e)det=ixMatD(e,D);}
  else if(IXV==='gem'){const L=['guide',...GEMK.filter(g=>ixHas(g)&&hit(t(g)))];if(!L.includes(IXS))IXS='guide';
   cards=L.map(g=>g==='guide'?ixCard('guide','💍',t('ixGuideC'),''):ixCard(g,g,esc(t(g)),esc(t(g+'D').length>42?t(g+'D').slice(0,40)+'…':t(g+'D'))));
   if(IXS==='guide')det=ixGuide('gem');else{const by=ixGemBy(IXS),use=RC.filter(r=>r.need&&r.need[IXS]&&ixHas(r.id));det=`<h3><img class="ixi" src="${icon(IXS)}"> ${esc(t(IXS))}</h3><p>${esc(t(IXS+'D'))}</p>`+
@@ -17687,13 +17761,13 @@ function ixDraw(){$('ixTabs').innerHTML=IXTABS.map(v=>`<button data-ixt="${v}" c
 function openIdx(){if(mode!=='play'||!S||S.__demo)return;SFX.open();mode='idx';IXD=null;$('ixW').hidden=false;$('hint').hidden=true;$('ixQ').placeholder=t('ixQ');$('ixQ').value='';ixDraw();}
 function closeIdx(){SFX.close();$('ixW').hidden=true;$('ixQ').blur();if(mode==='idx')mode='play';IXD=null;}   // a dialog over it or death keeps its mode
 $('ixW').addEventListener('click',e=>{if(e.target.closest('.ixx')){closeIdx();return;}const tb=e.target.closest('[data-ixt]');if(tb){SFX.click();IXV=tb.dataset.ixt;IXS=null;$('ixQ').value='';ixDraw();$('ixG').scrollTop=0;return;}
- const f=e.target.closest('[data-ixf]');if(f){SFX.click();IXF=f.dataset.ixf;IXS=null;ixDraw();return;}
+ const f=e.target.closest('[data-ixf]');if(f){SFX.click();if(IXV==='mat')IXMF=f.dataset.ixf;else IXF=f.dataset.ixf;IXS=null;ixDraw();return;}
  const a=e.target.closest('[data-ixc]');if(a){SFX.click();IXV='cls';IXS=a.dataset.ixc;$('ixQ').value='';ixDraw();return;}
  const c=e.target.closest('#ixG [data-ix]');if(c){SFX.click();IXS=c.dataset.ix;ixDraw();$('ixD').scrollTop=0;}});
 $('ixQ').addEventListener('input',()=>{IXS=null;ixDraw();});
 $('ixQ').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'||e.key==='Enter')e.target.blur();});$('ixQ').addEventListener('keyup',e=>e.stopPropagation());
 WALKM.push('idx');WCLOSE.idx=()=>closeIdx();
-window.__GIX={open:()=>openIdx(),close:()=>closeIdx(),tab:(v,s)=>{IXV=v;IXS=s===undefined?null:s;IXD=null;ixDraw();},filt:f=>{IXF=f;IXS=null;ixDraw();},data:()=>ixData(),see:id=>{const C=ixCls(),c=C.find(x=>x.id===id);IXHO=C.some(x=>x.k==='hid'&&ixMine(x.id));return !!c&&ixSee(c);},
+window.__GIX={open:()=>openIdx(),close:()=>closeIdx(),tab:(v,s)=>{IXV=v;IXS=s===undefined?null:s;IXD=null;ixDraw();},filt:f=>{if(IXV==='mat')IXMF=f;else IXF=f;IXS=null;ixDraw();},mats:()=>ixMats().map(e=>e.id),src:id=>ixMatSrc(id),data:()=>ixData(),see:id=>{const C=ixCls(),c=C.find(x=>x.id===id);IXHO=C.some(x=>x.k==='hid'&&ixMine(x.id));return !!c&&ixSee(c);},
  cards:()=>[...document.querySelectorAll('#ixG [data-ix]')].map(e=>e.dataset.ix),det:()=>$('ixD').textContent,ask:()=>ixAsk(),req:id=>ixReq(rcById(id)),odds:x=>ixOdds(x)}; // tests
 })();
 </script>

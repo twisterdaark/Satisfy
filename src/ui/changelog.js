@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26mats', ver: '3.12', d: '2026-10-26',
+      ar: ["تبويب جديد في الفهرس (N): «🧱 الخامات». كل خامة بتدخل في أي وصفة (السندان، ومجوهرات إليزابيث، والخياطة، والطبخ، والكيميا، و«الإبداع»)، وتجيبها منين، وبتعمل إيه.",
+        "«تجيبها منين»: العروق والأعشاب والشجر والمناطق اللي فيها، وأماكن الصيد، وحقل بيارو، والوحوش اللي بتوقّعها (فين بتعيش ولفلها والنسبة، واللي لسه ماقابلتهوش بيفضل ؟؟؟)، وصندوق البوس وأحجار البوسات، والمهمات والاكتشافات، والمحلات والسوق، وفك القطع.",
+        "فلاتر: الكل، والحدادة، والخياطة، والطبخ والكيميا. والبحث بيلاقي الخامة باسمها، أو باسم وحش قابلته بيوقّعها."],
+      en: ["A new tab in the Index (N): 🧱 Materials. Every material any recipe asks for (the anvil, Elizabeth's jewels, sewing, cooking, alchemy, the Creation), where to get it, and what it makes.",
+        "Where to get it: the veins, herbs and trees and the regions they stand in, the fishing waters, Piaro's field, the monsters that drop it (where they live, their level and the odds; one you haven't met stays ???), a boss's chest and bosses' stones, quests and discoveries, shops and the market, and taking pieces apart.",
+        "Filters: All, Smithing, Sewing, Cooking & alchemy. The search finds a material by its name, or by the name of a monster you have met that drops it."] },
     { v: '2026-10-26vatican', ver: '3.11', d: '2026-10-26',
       ar: ["مكان جديد من الرواية: الفاتيكان، الكرسي المقدس لكنيسة ريبيكا، نص يوم جنوب رولينج في وادي دران شرق النهر. مدينة بسور وأبراج، وبوابة وطريق للطريق الجنوبي، والكاتدرائية الكبيرة، والحوش اللي وراها، وساحة فيها تمثالين للإلهة (الصلاة ليهم زي رولينج). وهي مدينة آمنة.",
         "بنات ريبيكا (فصل 118 و123): إيزابيل بتعيّط في الحوش، ولونا بدرع إيفرييل واقفة على باب الكاتدرائية، ورين بتتحاكم في قاعة البابا تحت. وداميان في القاعة، وكاهن الفاتيكان على الساحة.",
