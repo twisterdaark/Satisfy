@@ -1507,13 +1507,19 @@ const GEARS=['a','b','g','h']; // the order they go on: armour, then boots, glov
 // a worn piece's look: its own, or for an id with none the tier of before
 function gearLk(sl,id){if(!id)return null;const e=GEARL[id];if(e)return e;if(/^cw/.test(id))return cwLk(sl,id)||GEARL.larmor;if(sl==='a')return GEARL.larmor;const T=GLK[id[0]]||GLK.i;
  return sl==='h'?(T.cap?{hair:T.hair,cap:T.cap}:{hair:T.hair,hc:T.hc,hl:T.hl}):sl==='g'?{glove:T.glove}:{boots:T.boots};}
-function gearPut(c,ids){for(const sl of GEARS){const e=gearLk(sl,ids[sl]);if(e)Object.assign(c,e);}if(c.robe||c.robeL)delete c.skirt;return c;}
+function gearPut(c,ids,ad){for(const sl of GEARS){const e=gearLk(sl,ids[sl]);if(e)Object.assign(c,ad&&ADYE[ad]?dyeLk(e,ad):e);}if(c.robe||c.robeL)delete c.skirt;return c;}
 // the ids you show: what you wear, less a piece whose look you hide (the eye in the equipment window)
 const gearIds=()=>{const o={};for(const sl of GEARS){const i=eqIt(sl);o[sl]=i&&!vhOn(sl)?(i.cw?cwTok(i):i.id):null;}return o;};
 // the worn earrings (v2.45) show over everything, a costume too; they are in the sheet's key
 const earOn=c=>{const e=eqIt('e');if(e&&EARC[e.id]&&!vhOn('e'))c.ear=EARC[e.id];return c;};
-const gearSig=()=>{const o=gearIds(),e=eqIt('e');return GEARS.map(sl=>o[sl]||'-').join('.')+'.'+(e&&EARC[e.id]&&!vhOn('e')?e.id:'-');};
-function gearFig(L){if(L.cos)return earOn(lookFig(L,armorIt()&&!vhOn('a')?1:0));return earOn(gearPut(lookFig(L,0),gearIds()));} // a costume hides the gear, as before
+const gearSig=()=>{const o=gearIds(),e=eqIt('e');return GEARS.map(sl=>o[sl]||'-').join('.')+'.'+(e&&EARC[e.id]&&!vhOn('e')?e.id:'-')+(S&&S.look&&S.look.ad?'.d'+S.look.ad:'');};
+// armour dyes: the hue each turns the armour's colours to (keeping their light and dark), or black and white
+const ADYE=[null,{h:0},{h:28},{h:50},{h:125},{h:180},{h:215},{h:270},{h:325},{k:'b'},{k:'w'}],ADK=['','red','orange','gold','green','teal','blue','purple','pink','black','white'];
+function dyeHex(c,ad){const D=ADYE[ad];if(!D||typeof c!=='string'||!/^#[0-9a-f]{6}$/i.test(c))return c;const n=parseInt(c.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b);let l=(mx+mn)/2,sat=mx===mn?0:(l>.5?(mx-mn)/(2-mx-mn):(mx-mn)/(mx+mn));
+ let h=D.h/360;if(D.k==='b'){l*=.45;sat*=.3;}else if(D.k==='w'){l=.55+l*.45;sat*=.15;}else sat=Math.max(.45,sat);const q=l<.5?l*(1+sat):l+sat-l*sat,p=2*l-q,f=tt=>{tt=(tt+1)%1;return tt<1/6?p+(q-p)*6*tt:tt<.5?q:tt<2/3?p+(q-p)*(2/3-tt)*6:p;},x=v=>Math.round(Math.max(0,Math.min(1,v))*255).toString(16).padStart(2,'0');
+ return '#'+x(f(h+1/3))+x(f(h))+x(f(h-1/3));}
+const dyeLk=(e,ad)=>{const o={};for(const k in e)o[k]=dyeHex(e[k],ad);return o;};
+function gearFig(L){if(L.cos)return earOn(lookFig(L,armorIt()&&!vhOn('a')?1:0));return earOn(gearPut(lookFig(L,0),gearIds(),L.ad));} // a costume hides the gear, as before
 function gearOn(c,h,g,b){if(h){c.hair=h.hair;if(h.cap)c.cap=h.cap;else{c.hc=h.hc;c.hl=h.hl;}}if(g)c.glove=g.glove;if(b)c.boots=b.boots;return c;}
 buildMe();
 const DIR4=['d','u','s','l'],ANIM=new WeakMap();let HAND=null;
@@ -2920,6 +2926,14 @@ function styTabs(){const k=STYTAB;if(!k)return null;const G=STYG.find(([,ks])=>k
  const row=(items,cls)=>{const r=document.createElement('div');r.className=cls;for(const [key,lab,on] of items){const b=document.createElement('button');b.textContent=lab;if(on)b.className='on';b.onclick=e=>{e.stopPropagation();SFX.click();const prev=DL&&DL.prev;if(DL){DL=null;$('dialog').hidden=true;mode=prev||'play';}styGo(key);};r.appendChild(b);}d.appendChild(r);};
  row(STYG.map(([g,ks])=>[ks.find(x=>!(x==='bst'&&S.look.g===1))||ks[0],t('styG_'+g),g===G[0]]),'sttop');
  row(G[1].filter(x=>!(x==='bst'&&S.look.g===1)&&!((x==='sk'||x==='lip')&&S.look.g!==1)).map(x=>[x,x==='cos'?t('styCos'):t('styK_'+x)+(STYC[x]?' · '+STYC[x].toLocaleString('en'):''),x===k]),'stsub');return d;}
+function sknMenu(){const w=weapon(),k=w&&WSH[w.id]?WSH[w.id].k:null;if(!k)return dialog('stylist',[t('sknNoW')],styBack);
+ const ids=[...new Set(S.items.filter(i=>i.slot==='w'&&i!==w&&WSH[i.id]&&WSH[i.id].k===k&&i.id!==w.id).map(i=>i.id))];
+ const o=ids.map(id=>({l:t(id),ic:id,poor:S.gold<SKNC,f:()=>{if(S.gold<SKNC){SFX.deny();return dialog('stylist',[t('noGold')],styBack);}S.gold-=SKNC;w.skn=id;SFX.coin();toast(t('sknOk',{a:inm(w),b:t(id)}),'good');hudDirty=true;sbSig='';save(true);sknMenu();}}));
+ if(w.skn)o.push({l:t('sknOff'),f:()=>{delete w.skn;SFX.click();hudDirty=true;save(true);sknMenu();}});o.push({l:t('oBack'),f:styBack});
+ dialog('stylist',[ids.length?t('sknH',{it:inm(w)}):t('sknNone',{k:t('wk_'+k)})],null,o);}
+function dyeMenu(){S.adyes=S.adyes||{};const o=ADK.map((k,n)=>!n?{l:t('dyeNone'),f:()=>{delete S.look.ad;buildMe(S.look);hudDirty=true;save(true);dyeMenu();}}:{l:t('dye_'+k)+(S.look.ad===n?' ✓':S.adyes[n]?'':' · '+fmtN(ADC)),poor:!S.adyes[n]&&S.gold<ADC,
+  f:()=>{if(!S.adyes[n]){if(S.gold<ADC){SFX.deny();return dialog('stylist',[t('noGold')],styBack);}S.gold-=ADC;S.adyes[n]=1;SFX.coin();}S.look.ad=n;buildMe(S.look);hudDirty=true;sbSig='';save(true);dyeMenu();}});
+ o.push({l:t('oBack'),f:styBack});dialog('stylist',[t('dyeH')],null,o);}
 function styBack(){STYTAB=null;shopD('stylist','sty_hi');}
 // the stylist's mirror (owner 2026-10-23): you as you are, and as you would be with the option you're on, before you pay
 let STYDIR=-1;
@@ -2962,7 +2976,8 @@ function cosMenu(){STYTAB='cos';const own=S.cos||(S.cos={});const o=Object.keys(
 function cosPick(k){const c=COS[k],own=S.cos||(S.cos={});
  if(!own[k]){if(c.req&&!c.req())return dialog('stylist',[t('cosReq_'+k)],cosMenu);if(S.gold<c.g){toast(t('noGold'),'warn');SFX.deny();return cosMenu();}S.gold-=c.g;own[k]=1;SFX.coin();toast(t('cosGot',{c:t('cos_'+k)}),'good');}
  S.look.cos=k;buildMe(S.look);hudDirty=true;save(true);vfx('spawn',P.x,P.y,{color:'#f8b0c8'});cosMenu();}
-function styOpts(){return [{l:t('styHair',{g:STYC.hair}),f:()=>styList('hair')},{l:t('styHc',{g:STYC.hc}),f:()=>styList('hc')},{l:t('styTop',{g:STYC.top}),f:()=>styList('top')},
+const SKNC=8000,ADC=3000;
+function styOpts(){return [{l:t('stySkin',{g:SKNC}),f:sknMenu},{l:t('styDye',{g:ADC}),f:dyeMenu},{l:t('styHair',{g:STYC.hair}),f:()=>styList('hair')},{l:t('styHc',{g:STYC.hc}),f:()=>styList('hc')},{l:t('styTop',{g:STYC.top}),f:()=>styList('top')},
  {l:t('styCape',{g:STYC.cape}),f:()=>styList('cape')},{l:t('styPants',{g:STYC.pants}),f:()=>styList('pants')},{l:t('styCos'),f:cosMenu},
  ...['skin',...STYX].filter(k=>!(k==='bst'&&S.look.g===1)).map(k=>({l:t('styK_'+k)+' · '+t('rwGold',{n:STYC[k]}),f:()=>styList(k)}))];}   // every feature on the first menu (owner 2026-10-23)
 // body, face and accessories at the stylist (owner 2026-10-23)
@@ -4478,7 +4493,7 @@ function creApply(it,c,r){const st=creStats(c),g=1+(MULT[r]-1)*.5;for(const k of
  if(st.ip)it.ip=st.ip.slice();else delete it.ip;it.nm=c.nm;it.by=c.by;if(c.byId)it.byId=c.byId;if(creLvr(c))it.lvr=creLvr(c);else delete it.lvr;it.cr=c.id;it.cw=creCw(c);skUse('lcre',3);}
 // a creation's look, "ty.L.W.C.m1[.m2]": its kind, blueprint and its two strongest materials (drawn by A.blade)
 function creCw(c){const ms=Object.keys(creMats(c)).filter(k=>CREM[k]).sort((a,b)=>CREM[b].m-CREM[a].m);return [c.ty,c.L|0,c.W|0,c.C|0,ms[0]||'ore'].concat(ms[1]?[ms[1]]:[]).join('.');}
-const wKey=w=>w?(w.cw?'cw|'+w.cw:w.id):null,iIco=i=>icon(wKey(i));
+const wKey=w=>w?(w.skn&&WSH[w.skn]?w.skn:w.cw?'cw|'+w.cw:w.id):null,iIco=i=>icon(wKey(i));
 // creations made before this keep their kind and quality, their stats and look are made again from their recipe
 function creFix(){if(S&&S.items&&S.pid){const me0=S.look&&S.look.n&&Satisfy.chat.clean(S.look.n,24);if(me0)for(const it of [...S.items,...((S.stash||[]).map(x=>x&&x.it).filter(Boolean))])if(it.byId&&it.byId===S.pid)it.by=me0;}if(!S||!S.items||!S.cre)return;const me=S.look&&S.look.n&&Satisfy.chat.clean(S.look.n,24);if(me){for(const c of S.cre)c.by=me;for(const it of S.items)if(it.byId&&it.byId===S.pid)it.by=me;} // "Made by" follows a renamed character (owner 2026-10-24)
  for(const it of S.items){if(!it.cr)continue;const c=S.cre.find(x=>x.id===it.cr);if(!c||!CRET[c.ty])continue;it.by=c.by;
@@ -5218,7 +5233,7 @@ Object.assign(STR.en,{"zRace": "Winston Racecourse", "mt_rhorse": "Race horse", 
    rare stock, Town Hero (rank 4) adds an enchant stone a day and free rooms at the inn. */
 const CREPC=[0,30,80,300,1000],RSOPEN=3000,RSDRAW=999,RSCANDY=20000,RSGLASS=5000,
  RSD=[['fail',540],['hairpin',120],['dskewer',120],['choco',120],['blocks',92],['xpot',8]], // the draw: out of 1000, the potion under 1%
- RSUSE=['candy','xpot','dskewer','choco','hairpin','blocks','hfeed','vherb','rscroll','ecscr','nmtick'];
+ RSUSE=['bpfrag','candy','xpot','dskewer','choco','hairpin','blocks','hfeed','vherb','rscroll','ecscr','nmtick'];
 let RSC=null; // the golden carriage: {t, x, y, up} while it falls, waits and flies off
 const crepOf=()=>(S&&S.crep)||0,rsh=()=>S.rsh||(S.rsh={c:0,g:0,w:0,d:0});
 const fmtN=n=>Math.round(n).toLocaleString('en');
@@ -5264,7 +5279,7 @@ function rsUse(k){if(!(S.mats[k]>0))return;
  else if(HFOOD[k])return horseFeed(k);
  else if(k==='rscroll'||k==='ecscr')return scrollUse(k);
  else if(k==='nmtick')return nmTry();
- else if(k.startsWith('rb_'))return rbUse(k);else if(k==='tzbook')return tzUse();else if(BHBK.includes(k))return bkUse(k);else if(k==='mumbk')return mmUse();else if(k==='mdsheath')return mdUse();
+ else if(k.startsWith('rb_'))return rbUse(k);else if(k==='tzbook')return tzUse();else if(k==='bpfrag')return bpUse();else if(BHBK.includes(k))return bkUse(k);else if(k==='mumbk')return mmUse();else if(k==='mdsheath')return mdUse();
  else{toast(t(k+'Use'));SFX.click();return;}
  hudDirty=true;save(true);}
 // town ranks: the merchant's rare stock for the Honoured, an enchant stone a day for the Town Hero, free rooms for the Hero
@@ -6800,7 +6815,7 @@ function salvYield(it,w){const rc=rcById(it.id),o={};if(SALVX[it.id])Object.assi
  else if(rc&&rc.need&&!rc.drop){const f=Math.min(.95,(salvSelf(w)?Math.min(.8,.4+(S.smith||1)*.03):.3)+(it.r||0)*.1);let top='',tn=0;
   for(const k in rc.need){const n=Math.floor(rc.need[k]*f);if(n>0)o[k]=n;if(rc.need[k]>tn){tn=rc.need[k];top=k;}}if(top&&!o[top])o[top]=1;}
  else if((it.r||0)>0||rc&&rc.drop)Object.assign(o,SALVR[it.r||0]);
- if(it.en>=2)o.mstone=(o.mstone||0)+Math.floor(it.en/2);if(it.gem&&GEMS[it.gem])o[it.gem]=(o[it.gem]||0)+1;return o;}
+ if(it.en>=2)o.mstone=(o.mstone||0)+Math.floor(it.en/2);for(const g of gemsOf(it))o[g]=(o[g]||0)+1;return o;}
 const salvTxt=o=>Object.entries(o).map(([k,n])=>t(k)+' ×'+n).join(', ');
 const salvFee=(it,w)=>salvSelf(w)?0:price(w,40*(1+(it.r||0)*2));
 const salvFail=()=>Math.max(.03,.15-(S.smith||1)*.01);
@@ -6808,10 +6823,10 @@ const salvUnd=it=>{const rc=rcById(it.id);return !!(rc&&rc.drop&&isSm());};
 function salvTip(s){if(s.eq)return `<br><small style="color:#ff9a8a">${t('unEqFirst')}</small>`;const o=salvYield(s.it,INVX.salv),g=salvFee(s.it,INVX.salv);
  return `<br><small style="color:#f2c14e">${Object.keys(o).length?t('salvGet',{m:salvTxt(o)}):t('salvNothing')}${g?' · '+t('salvFeeT',{g}):''}</small>`+(salvSelf(INVX.salv)&&salvUnd(s.it)?`<br><small style="color:#bfe0ff">${t('undL',{n:undOf(s.it.id)})}</small>`:'');}
 function openSalv(who){INVX={salv:who||'anvil'};SFX.open();mode='inv';$('inv').hidden=false;$('hint').hidden=true;renderInv();}
-function invSalv(s){if(ivLocked(s))return;if(!s.it){toast(t('salvNo'),'warn');SFX.deny();return;}if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
+function invSalv(s){if(ivLocked(s))return;if(!s.it){toast(t('salvNo'),'warn');SFX.deny();return;}if(s.it.trd){toast(t('salvTrd'),'warn');SFX.deny();return;}if(s.eq){toast(t('unEqFirst'),'warn');SFX.deny();return;}
  const w=INVX.salv,it=s.it,o=salvYield(it,w),g=salvFee(it,w);if(!Object.keys(o).length){toast(t('salvNothing'),'warn');SFX.deny();return;}
  cfm(t('salvT'),t('salvQ',{it:`<b class="rt rt${it.r||0}">${esc(inm(it))}</b>`,m:esc(salvTxt(o))})+(g?'<br>'+t('salvFeeT',{g}):'')+(salvSelf(w)?'<br><small>'+t('salvRisk',{n:Math.round(salvFail()*100)})+'</small>':''),t('salvY'),()=>doSalv(it,w));}
-function doSalv(it,w){const i=S.items.indexOf(it);if(i<0||isEq(it))return;const o=salvYield(it,w),g=salvFee(it,w);
+function doSalv(it,w){const i=S.items.indexOf(it);if(i<0||isEq(it)||it.trd)return;const o=salvYield(it,w),g=salvFee(it,w);
  if(g){if(S.gold<g){SFX.deny();toast(t('salvPoor',{g}),'warn');return;}S.gold-=g;}
  if(salvSelf(w)&&rand()<salvFail()){S.items.splice(i,1);SFX.deny();vfx('dust',P.x,P.y-6,{n:8});toast(t('salvFail')+' '+t('salvLost',{it:inm(it)}),'warn');hudDirty=true;renderInv();save(true);return false;}
  S.items.splice(i,1);for(const k in o)addMat(k,o[k]);SFX.slam();vfx('forge',P.x,P.y-10);toast(t('salvDone',{it:inm(it),m:salvTxt(o)}),'good');
@@ -6852,6 +6867,16 @@ function doApr(it,w){if(!canApr()||!aprNeed(it))return null;const g=aprFee(it,w)
  hudDirty=true;if(!$('inv').hidden)renderInv();save(true);return has;}
 window.__GAP={need:it=>aprNeed(it),chance:it=>aprChance(it),roll:it=>hidRoll(it),bon:k=>hidBon(k),fee:(it,w)=>aprFee(it,w),doApr:(it,w)=>doApr(it,w),open:w=>openApr(w),tip:i=>itemTip(i),tin:j=>tradeItemIn(j)}; // tests
 Object.assign(STR.ar,{aprSxN:"+{n} خبرة حدادة"});Object.assign(STR.en,{aprSxN:"+{n} smithing XP"});
+Object.assign(STR.ar,{gemSo:'جواهر: {g} ({n}/{m} فتحات)',gemSoN:'{n}/{m} جواهر',gemSoH:'{it}: {m} فتحات. اختار فتحة تحط فيها جوهرة، أو طلّع جوهرة عشان تنقلها لقطعة تانية.',gemSlot:'الفتحة {n}: {g}',gemEmpty:'فاضية',gemOut:'طلّع {g} ({c} دهب)',gemOutOk:'طلّعت {g}. هي في شنطتك وتقدر تحطها في قطعة تانية',
+ salvTrd:'القطعة دي جت من تريد، فمينفعش تتفك',stySkin:'شكل السلاح · {g}',styDye:'صبغة الدرع · {g} للون',sknNoW:'امسك سلاح الأول',sknH:'اختار شكل سلاح تاني من نفس النوع تلبسه لـ {it}. القوة بتفضل زي ما هي.',sknNone:'معندكش سلاح {k} تاني تاخد شكله',sknOk:'{a} بقى شكله زي {b}',sknOff:'رجّع الشكل الأصلي',
+ dyeH:'صبغة لقطع الدرع اللي لابسها: الخوذة والدرع والجوانتي والجزمة. كل لون بتشتريه مرة واحدة وبعدها ببلاش.',dyeNone:'من غير صبغة',dye_red:'أحمر',dye_orange:'برتقالي',dye_gold:'دهبي',dye_green:'أخضر',dye_teal:'تركواز',dye_blue:'أزرق',dye_purple:'بنفسجي',dye_pink:'وردي',dye_black:'أسود',dye_white:'أبيض',
+ bpfrag:'جزء بلوبرنت',bpfragD:'جزء من وصفة نادرة. بيقع من المهمات ومن الزعماء وانت في فريق. خمسة منهم بيتجمعوا لكتاب وصفة نادرة معندكش. دوس عليه عشان تجمعهم.',bpGot:'لقيت جزء بلوبرنت ({n}/{m})',bpNeed:'محتاج {m} أجزاء (معاك {n})',bpMade:'جمعت الأجزاء: {b}',
+ crsNone:'لسه مصنعتش حاجة',crsH:'جودة اللي صنعته ({n} قطعة):',crsOk:'النسب طبيعية.',crsWarn:'⚠ النسب دي أعلى من اللي الفرن يقدر يديه.'});
+Object.assign(STR.en,{gemSo:'Gems: {g} ({n}/{m} sockets)',gemSoN:'{n}/{m} gems',gemSoH:'{it}: {m} sockets. Pick a socket to set a gem in, or take a gem out to move it to another piece.',gemSlot:'Socket {n}: {g}',gemEmpty:'empty',gemOut:'Take out {g} ({c} gold)',gemOutOk:'You took out {g}. It is in your bag, ready for another piece',
+ salvTrd:'This piece came through a trade, so it can\'t be taken apart',stySkin:'Weapon look · {g}',styDye:'Armour dye · {g} a colour',sknNoW:'Hold a weapon first',sknH:'Pick the look of another weapon of the same kind for {it}. Its stats stay as they are.',sknNone:'You have no other {k} to take the look of',sknOk:'{a} now looks like {b}',sknOff:'Back to its own look',
+ dyeH:'A dye for the armour pieces you wear: helmet, armour, gloves and boots. Each colour is bought once, then free.',dyeNone:'No dye',dye_red:'Red',dye_orange:'Orange',dye_gold:'Gold',dye_green:'Green',dye_teal:'Teal',dye_blue:'Blue',dye_purple:'Purple',dye_pink:'Pink',dye_black:'Black',dye_white:'White',
+ bpfrag:'Blueprint Fragment',bpfragD:'A piece of a rare recipe. It drops from quests and from bosses fought in a party. Five make a rare recipe book you don\'t have. Click it to put them together.',bpGot:'Blueprint fragment ({n}/{m})',bpNeed:'You need {m} fragments (you have {n})',bpMade:'The fragments come together: {b}',
+ crsNone:'You have not made anything yet',crsH:'The quality of what you made ({n} pieces):',crsOk:'The shares are normal.',crsWarn:'⚠ These shares are past what the forge can give.'});
 Object.assign(STR.ar,{"ringLock": "خانة خاتم مقفولة: بتتفتح في لفل {n}", "aprSx": "خبرة حدادة", "aprPg": "فحص القطع لوريث باجما بس", "oApr": "افحص قطعة", "fAprB": "فحص", "aprT": "فحص القطع", "aprNote": "دوس على قطعة عشان تفحصها وتكشف لو فيها خاصية مخفية.", "aprClick": "دوس عشان تفحصها", "aprNo": "القطعة دي مفيهاش حاجة تتفحص.", "aprDone": "القطعة دي اتفحصت قبل كده.", "aprUn": "لسه متفحصتش", "aprNone": "[مفيش خاصية مخفية.]", "aprHas": "[القطعة دي فيها خاصية مخفية.]", "aprUpd": "[معلومات {it} اتحدّثت.]", "hidL": "خاصية مخفية"});
 Object.assign(STR.en,{"ringLock": "Locked ring slot: opens at Lv {n}", "aprSx": "smithing XP", "aprPg": "Only Pagma's Successor can appraise items", "oApr": "Appraise an item", "fAprB": "Appraise", "aprT": "Appraise items", "aprNote": "Click a piece of gear to appraise it and find out whether it hides a function.", "aprClick": "Click to appraise", "aprNo": "There is nothing to appraise on this item.", "aprDone": "This item has already been appraised.", "aprUn": "Unappraised", "aprNone": "[A hidden function doesn't exist.]", "aprHas": "[This item has a hidden function.]", "aprUpd": "[The information of {it} has been updated.]", "hidL": "Hidden function"});
 Object.assign(STR.ar,{"oSalv": "فكّ قطعة", "fSalvB": "فكّ قطعة", "salvT": "فكّ القطع", "salvNote": "دوس على قطعة عشان تفكّها وتاخد جزء من خاماتها.", "salvGet": "بتطلّع: {m}", "salvNothing": "مفيش حاجة تطلع من القطعة دي.", "salvFeeT": "الأجرة {g} دهب", "salvNo": "الحاجات اللي بتتفك هي المعدات بس.", "salvQ": "تفكّ {it}؟ هتطلع منها: {m}.", "salvY": "فكّها", "salvRisk": "فرصة الفشل {n}% (لو فشل القطعة بتتكسر ومبيرجعش منها حاجة)", "salvLost": "{it} اتكسر ومرجعش منه حاجة.", "salvPoor": "الأجرة {g} دهب، ومعاكش.", "salvFail": "[الفك فشل.]", "salvDone": "{it} اتفكّت: {m}", "undL": "الفهم: {n}%", "undUp": "فهمك لـ{it} وصل {n}%.", "undDone": "فهمك لـ{it} وصل 100%. اتعلمت طريقة صنعها!", "rcHu": "فكّ القطعة دي على السندان لحد ما تفهمها 100%"});
@@ -6929,8 +6954,8 @@ function gearFit(){if(!S||!S.items)return;const ok=i=>lvrOk(itLvr(i));const w=S.
 function equip0(i){const lr=itLvr(i);if(lr&&!lvrOk(lr)){toast(t('needLv',{n:lr}),'warn');SFX.deny();return false;}if(i.slot==='w')S.eqW=i.uid;else if(i.slot==='a')S.eqA=i.uid;else{S.eq=S.eq||{};if(Object.values(S.eq).includes(i.uid))return;let sl=i.slot;if(sl==='k'&&S.eq.k&&RINGS.has(i.id)){const f=RSL.find(k=>!S.eq[k]&&ringOpen(k));if(f)sl=f;}S.eq[sl]=i.uid;}}
 const durOf=i=>i.dur===undefined?100:i.dur,durF=i=>durOf(i)<=0?.3:1,enF=i=>1+.06*(i.en||0);
 const iAtk=i=>Math.round((i.atk||0)*enF(i)*durF(i)*(i.sh?1.1:1)*pgPenF(i)),iDef=i=>Math.round((i.def||0)*enF(i)*durF(i)*(i.sh?1.1:1)*pgPenF(i));   // v3.05: shiny +10%
-function gearSum(k){let v=0;for(const sl of GEAR){const i=eqIt(sl);if(i&&i[k])v+=i[k]*durF(i)*enF(i);if(i&&i.gem&&GEMS[i.gem]&&GEMS[i.gem][k])v+=GEMS[i.gem][k];}
- const w=eqIt('w');if(w&&w.gem&&GEMS[w.gem]&&GEMS[w.gem][k])v+=GEMS[w.gem][k];return v+setBon(k)+cosB(k)+marB(k);}
+function gearSum(k){let v=0;for(const sl of GEAR){const i=eqIt(sl);if(i&&i[k])v+=i[k]*durF(i)*enF(i);if(i)for(const g of gemsOf(i))if(GEMS[g][k])v+=GEMS[g][k];}
+ const w=eqIt('w');if(w)for(const g of gemsOf(w))if(GEMS[g][k])v+=GEMS[g][k];return v+setBon(k)+cosB(k)+marB(k);}
 // the mass-produced Grid staff, bow, spear, dagger and hammer take the Grid sword's place in its set
 const MGW=['mgstaff','mgbow','mgspear','mgdagger','mghammer'],setId=id=>MGW.includes(id)?'mgsword':id,setOf=i=>i.cr?null:setId(i.id); // a creation is a piece of its own, in no set (owner 2026-10-26)
 function setCount(sk){const ids=['w',...GEAR].map(eqIt).filter(Boolean).map(setOf);return SETS[sk].it.filter(x=>ids.includes(x)).length;}
@@ -7039,7 +7064,11 @@ function hasSave(){return STORE.exists();}
 const DEVT=Satisfy.events.create({uuid:Satisfy.ids.uuid,pid:()=>S&&!S.__demo?S.pid:null,now:()=>S?S.playT:0});
 function gameEv(type,payload,key){if(!S||S.__demo)return null;try{if(!S.pid)Satisfy.ids.ensure(S);return DEVT.emit(type,payload,key==null?null:S.pid+':'+key);}catch(e){return null;}}
 // called from qEvent(): kills and crafts become monster.kill / craft.item.created
-function domainEv(type,key,r,slot){try{if(type==='kill'){const n=S.kills[key]||0;gameEv('monster.kill',{monster:key,n},'kill:'+key+':'+n);}
+// the plan's U284: the share of each rating among what you made, and an alarm past what the forge's rolls allow
+// (legendary only for Pagma's Successor; more than a third epic or better over 50 pieces is past any honest streak)
+function crsShow(){const C=S.crs||[0,0,0,0,0],n=C.reduce((a,b)=>a+b,0);if(!n)return toast(t('crsNone'));const pc=i=>Math.round(C[i]*1000/n)/10;
+ const warn=(C[4]>0&&S.cls!=='pagma')||(n>=50&&(C[3]+C[4])/n>.34);dialog('bhSys',[t('crsH',{n}),[0,1,2,3,4].map(i=>t('r'+i)+': '+C[i]+' ('+pc(i)+'%)').join('\n'),t(warn?'crsWarn':'crsOk')]);}
+function domainEv(type,key,r,slot){try{if(type==='craft'&&slot!=='x'&&S){const C=S.crs=S.crs||[0,0,0,0,0];C[Math.max(0,Math.min(4,r|0))]++;}if(type==='kill'){const n=S.kills[key]||0;gameEv('monster.kill',{monster:key,n},'kill:'+key+':'+n);}
  else if(type==='craft'){if(slot==='x'){gameEv('craft.item.created',{recipe:key,r,slot,itemId:null},'craft:arrows:'+S.arrowsMade);return;}
   const it=S.items.reduce((a,i)=>i.id===key&&(!a||i.uid>a.uid)?i:a,null);if(!it)return;Satisfy.ids.ensure(S);gameEv('craft.item.created',{recipe:key,r,slot,itemId:it.iid},'craft:item:'+it.uid);}}catch(e){}}
 // A quest reward is paid once: the quest must still be active and ready when the turn-in callback runs
@@ -7442,7 +7471,7 @@ const DROPM=['msword','mstaff','mbow','mspear','mdagger','mhammer','marmor','mhe
 const dropTier=k=>{const lv=MT[k]&&MT[k].lv?MT[k].lv[0]:0;return lv>=220?DROPMG:lv>=120?DROPM:DROPG;};
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.55:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const L=b.boss?dropTier(m.type):DROPG,id=L[rand()*L.length|0],r=rand()<(b.boss?.1:.04)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.dead=true;lpSrc(m);if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}pasKill(m);balKill(m);dmeKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh&&!m.noLoot)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);pxpKill(m,b);eaKill(m);if(NET&&b.boss&&!m.bh&&!m.noLoot)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!m.noLoot&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh&&!m.noLoot){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else if(!m.noLoot)bossChest(m,b);{let xg=Math.round(b.xp*(m.xmul||1)*pxpKF(m)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(P.buf&&P.buf.k==='sage'?.25:0)+(evOn('gold')?.5:0)+petB('owl')+(tlOn('veteran')?.05:0)+ttB('xp')+(tlOn('viscount')?.05:0)+(tlOn('pioneer')?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));const xs=xpSrcOf(m,1),got=xs===null?0:gainXP(xg,0,xs,1);jKill(m,got);twKill(m);if(got>0){num(m.x,m.y-36,'+'+got.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',got,t('lootXP'),{ic:null,cls:'xp'});}}if(b.gold&&!m.bh&&!m.noLoot){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(tlOn('explorer')?.05:0)+ttB('gold')+(tlOn('dandy')?.05:0)+(tlOn('shero')?.05:0)+(tlOn('baron')?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.dead=true;if(b.boss&&!m.tmp&&!m.bh&&!m.arena&&PARTY&&PARTY.members().length>1)bpGain(.2);   /* a boss fought in a party: a blueprint fragment, 20% (plan U280) */lpSrc(m);if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}pasKill(m);balKill(m);dmeKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh&&!m.noLoot)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);pxpKill(m,b);eaKill(m);if(NET&&b.boss&&!m.bh&&!m.noLoot)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!m.noLoot&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh&&!m.noLoot){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else if(!m.noLoot)bossChest(m,b);{let xg=Math.round(b.xp*(m.xmul||1)*pxpKF(m)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(P.buf&&P.buf.k==='sage'?.25:0)+(evOn('gold')?.5:0)+petB('owl')+(tlOn('veteran')?.05:0)+ttB('xp')+(tlOn('viscount')?.05:0)+(tlOn('pioneer')?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));const xs=xpSrcOf(m,1),got=xs===null?0:gainXP(xg,0,xs,1);jKill(m,got);twKill(m);if(got>0){num(m.x,m.y-36,'+'+got.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',got,t('lootXP'),{ic:null,cls:'xp'});}}if(b.gold&&!m.bh&&!m.noLoot){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(tlOn('explorer')?.05:0)+ttB('gold')+(tlOn('dandy')?.05:0)+(tlOn('shero')?.05:0)+(tlOn('baron')?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh&&!m.noLoot)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,RCKEY.includes(k)?1:p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p*(1+secB('drop')))addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill (a divine beast's breath is one)
  if(!m.bh&&!m.noLoot&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}if(!m.noLoot){rbBossDrop(m,b);cosDrop(m,b);}
@@ -7846,10 +7875,12 @@ window.__GQS={kill:k=>qShareKill(k),ok:id=>qShareOk(QD[id]),boss:k=>!!(MT[k]&&MT
 function acceptQ(id){S.qs[id]={st:1,c:0};for(const k in SKD)if(SKD[k].qlend===id&&S.sk)delete S.sk[k];   // (review) a trial taken again lends its skill again, on the bar
  epAccept(id);if(QD[id].obj.t==='escort')setTimeout(()=>startEscort(id),300);toast(t('qNew',{q:qName(id)}),'good');SFX.quest();hudDirty=true;checkSkills();save(true);}
 function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]);S.arrows[r]-=k;n-=k;}}
-function mkItem(id,r,made){const rc=rcById(id);if(rc.fix!=null&&!(made&&rc.fix<4))r=made?Math.min(rc.fix,legCap()):rc.fix;   // made: your own craft keeps the rating it came out at (owner 2026-10-22: a rare craft showed up unique); a breath piece is always legendary
+const SOR=mulberry32(0x50cce7);
+function mkItem(id,r,made){const _it=mkItem0(id,r,made);if(_it&&(_it.slot==='w'||GEAR.includes(_it.slot))&&!_it.so){const L=GEMSO[Math.max(0,Math.min(4,_it.r|0))];_it.so=L[(SOR()*L.length)|0];}return _it;}
+function mkItem0(id,r,made){const rc=rcById(id);if(rc.fix!=null&&!(made&&rc.fix<4))r=made?Math.min(rc.fix,legCap()):rc.fix;   // made: your own craft keeps the rating it came out at (owner 2026-10-22: a rare craft showed up unique); a breath piece is always legendary
 const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.hpp)it.hpp=rc.hpp;if(rc.slot==='w'){it.atk=Math.round(rc.atk*MULT[r]);it.spd=rc.spd;}else if(rc.def)it.def=Math.round(rc.def*MULT[r]);
  for(const k of ['as','ms','dm'])if(rc[k])it[k]=+(rc[k]*(1+(MULT[r]-1)*.5)).toFixed(3);if(rc.mpb)it.mpb=Math.round(rc.mpb*MULT[r]);for(const k of ['agi','agp','cold','dsh'])if(rc[k])it[k]=rc[k];if(rc.slot==='w'&&r>=2)it.wp=wpRoll(r,it);return it;}
-function completeQ(id){if(!claimQ(id))return;if(id==='sir1')sirFlute(1);if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else shTake(o.it,o.n,0);}if(o.give)giveItem(o.it);
+function completeQ(id){bpGain(QD[id]&&QD[id].ms?.08:.04);if(!claimQ(id))return;if(id==='sir1')sirFlute(1);if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else shTake(o.it,o.n,0);}if(o.give)giveItem(o.it);
  S.qs[id].st=2;if(q.rep)delete S.qs[id];
  toast(t('qDone',{q:qName(id)}),'good');SFX.quest();jQuest(id);
  if(q.gold){S.gold+=pasOn('opers')?Math.round(q.gold*1.15):q.gold;coinFx(npcOf(q.by),q.gold);}if(q.kc)kcGain(q.kc);if(q.mat)addMat(q.mat[0],q.mat[1]);
@@ -8779,12 +8810,18 @@ function repairAll(who){const g=repairCost(who);if(!g)return dialog(who,['arNoRe
  S.gold-=g;S.items.forEach(i=>{if(i.slot!=='x'){const d=100-durOf(i);i.dur=100;edrRep(i,d);}});SFX.coin();vfx('forge',P.x,P.y-8);num(P.x,P.y-26,'-'+g+'G','#f2c14e',false);toast(t('repDone'),'good');hudDirty=true;svcBack(who);}
 // Gems (SAT-GEM-001): rare drops from monsters of level 60 and up (bosses drop one a third of the time). Any smith sets one
 // gem in a piece of gear for GEMC gold; setting a new one breaks the old. Gem stats ignore durability and enhancement.
+const GEMSO=[[1],[1],[1,1,2],[2,2,3],[2,3]];   // sockets by rating, picked at random when the piece is made
+const gemsOf=i=>i?[i.gem,...(Array.isArray(i.gx)?i.gx:[])].filter(g=>g&&GEMS[g]):[],soOf=i=>Math.max(1,Math.min(3,(i&&i.so)|0||1));
 function gemDrop(m,b){if(!b||b.lv[0]<60||m.tmp&&!b.boss||rand()>=(b.boss?.3:.004))return;const g=rand()<.1?'diam':rand()<.12?'thund':GEMK[(rand()*4)|0];addMat(g,1);toast(t('gemDrop',{g:t(g)}),'good');SFX.rare();}
 function gemMenu(who){const list=['w',...GEAR].map(eqIt).filter((i,n,a)=>i&&a.indexOf(i)===n);if(!list.length)return dialog(who,['arNoEq'],()=>svcBack(who));
- dialog(who,['gemHi'],null,[...list.map(i=>({l:`${inm(i)}${i.gem?' · '+t(i.gem):''}`,ic:i.id,f:()=>gemPick(i,who)})),{l:t('oBack'),f:()=>svcBack(who)}]);}
-function gemPick(i,who){const own=GEMK.filter(g=>S.mats[g]>0);if(!own.length)return dialog(who,['gemNone'],()=>gemMenu(who));
- dialog(who,[i.gem?t('gemRep',{g:t(i.gem)}):'gemPickL'],null,[...own.map(g=>({l:t('oGemSet',{g:t(g),n:S.mats[g],d:t(g+'D')}),ic:g,poor:S.gold<GEMC,f:()=>{if(S.gold<GEMC){SFX.deny();return dialog(who,['arNo']);}
-  S.gold-=GEMC;S.mats[g]--;i.gem=g;SFX.level();vfx('loot',P.x,P.y,{rarity:3});toast(t('gemSet',{g:t(g),it:inm(i)}),'good');hudDirty=true;save(true);gemMenu(who);}})),{l:t('oBack'),f:()=>gemMenu(who)}]);}
+ dialog(who,['gemHi'],null,[...list.map(i=>({l:`${inm(i)} · ${t('gemSoN',{n:gemsOf(i).length,m:soOf(i)})}`,ic:i.id,f:()=>soOf(i)>1?gemSock(i,who):gemPick(i,who,0)})),{l:t('oBack'),f:()=>svcBack(who)}]);}
+// the piece's sockets: what each holds; set a gem in one, or take its gem out to move it (owner's plan U276)
+const GEMOUT=2000;
+function gemSock(i,who){const so=soOf(i),gs=[i.gem,...(i.gx||[])],o=[];for(let n=0;n<so;n++){const g=gs[n];o.push({l:t('gemSlot',{n:n+1,g:g&&GEMS[g]?t(g):t('gemEmpty')}),ic:g&&GEMS[g]?g:'slotX',f:()=>gemPick(i,who,n)});if(g&&GEMS[g])o.push({l:t('gemOut',{g:t(g),c:GEMOUT}),poor:S.gold<GEMOUT,f:()=>{if(S.gold<GEMOUT){SFX.deny();return dialog(who,['arNo']);}S.gold-=GEMOUT;if(n===0)delete i.gem;else{i.gx[n-1]=null;}i.gx=(i.gx||[]).filter(Boolean);addMat(g,1);SFX.coin();toast(t('gemOutOk',{g:t(g)}),'good');hudDirty=true;save(true);gemSock(i,who);}});}
+ o.push({l:t('oBack'),f:()=>gemMenu(who)});dialog(who,[t('gemSoH',{it:inm(i),m:so})],null,o);}
+function gemPick(i,who,sk=0){const own=GEMK.filter(g=>S.mats[g]>0);if(!own.length)return dialog(who,['gemNone'],()=>gemMenu(who));const cur=sk?(i.gx||[])[sk-1]:i.gem;
+ dialog(who,[cur?t('gemRep',{g:t(cur)}):'gemPickL'],null,[...own.map(g=>({l:t('oGemSet',{g:t(g),n:S.mats[g],d:t(g+'D')}),ic:g,poor:S.gold<GEMC,f:()=>{if(S.gold<GEMC){SFX.deny();return dialog(who,['arNo']);}
+  S.gold-=GEMC;S.mats[g]--;if(sk){i.gx=Array.isArray(i.gx)?i.gx:[];while(i.gx.length<sk-1)i.gx.push(null);i.gx[sk-1]=g;}else i.gem=g;SFX.level();vfx('loot',P.x,P.y,{rarity:3});toast(t('gemSet',{g:t(g),it:inm(i)}),'good');hudDirty=true;save(true);gemMenu(who);}})),...(cur&&GEMS[cur]?[{l:t('gemOut',{g:t(cur),c:GEMOUT}),poor:S.gold<GEMOUT,f:()=>{if(S.gold<GEMOUT){SFX.deny();return dialog(who,['arNo']);}S.gold-=GEMOUT;if(sk){i.gx[sk-1]=null;i.gx=i.gx.filter(Boolean);}else delete i.gem;addMat(cur,1);SFX.coin();toast(t('gemOutOk',{g:t(cur)}),'good');hudDirty=true;save(true);gemMenu(who);}}]:[]),{l:t('oBack'),f:()=>gemMenu(who)}]);}
 const ENHP=[.85,.75,.65,.55,.45,.35,.25,.18,.12,.08];
 const enhCost=i=>{const n=i.en||0;return {g:300*(n+1)*(n+1)*(1+i.r),m:1+n,e:1+(n>>1),p:ENHP[Math.min(9,n)]};};
 function enhMenu(who){const worn=['w',...GEAR].map(eqIt).filter((i,n,a)=>i&&a.indexOf(i)===n),list=[...worn,...S.items.filter(i=>['w',...GEAR].includes(i.slot)&&!worn.includes(i)).sort((a,b)=>(b.en||0)-(a.en||0)||b.r-a.r)];if(!list.length)return dialog(who,['arNoEq'],()=>svcBack(who));
@@ -9031,7 +9068,7 @@ function openInv(){SFX.open();mode='inv';INVX=null;$('invQ').value='';$('inv').h
 function closeInv(){SFX.close();$('inv').hidden=true;$('invQ').value='';$('cfmW').hidden=true;INVX=null;mode='play';}
 // one line of an item's numbers (rc = a recipe, i.e. the base values, when cur is not given)
 function statShort(i){const a=[];if(i.atk)a.push(`${t('atk')} ${i.uid?iAtk(i):i.atk}`);if(i.def)a.push(`${t('def')} ${i.uid?iDef(i):i.def}`);
- if(i.as)a.push(`${t('gAs')} +${Math.round(i.as*enF(i)*100)}%`);if(i.ms)a.push(`${t('gMs')} +${Math.round(i.ms*enF(i)*100)}%`);if(i.dm)a.push(`${t('gDm')} +${Math.round(i.dm*enF(i)*100)}%`);if(i.mpb)a.push(`${t('gMp')} +${Math.round(i.mpb*enF(i))}`);if(i.hpp)a.push(`${t('gHp')} +${Math.round(i.hpp*enF(i)*100)}%`);if(i.agi)a.push(`${t('agi')} +${i.agi}`);if(i.agp)a.push(`${t('agi')} ${Math.round(i.agp*100)}%`);if(i.cold)a.push(t('gCold',{n:Math.round(i.cold*100)}));if(i.dsh)a.push(t('gDsh',{n:Math.round(i.dsh*100)}));if(i.gem)a.push(t('gemIn',{g:t(i.gem)}));return a.join(' · ');}
+ if(i.as)a.push(`${t('gAs')} +${Math.round(i.as*enF(i)*100)}%`);if(i.ms)a.push(`${t('gMs')} +${Math.round(i.ms*enF(i)*100)}%`);if(i.dm)a.push(`${t('gDm')} +${Math.round(i.dm*enF(i)*100)}%`);if(i.mpb)a.push(`${t('gMp')} +${Math.round(i.mpb*enF(i))}`);if(i.hpp)a.push(`${t('gHp')} +${Math.round(i.hpp*enF(i)*100)}%`);if(i.agi)a.push(`${t('agi')} +${i.agi}`);if(i.agp)a.push(`${t('agi')} ${Math.round(i.agp*100)}%`);if(i.cold)a.push(t('gCold',{n:Math.round(i.cold*100)}));if(i.dsh)a.push(t('gDsh',{n:Math.round(i.dsh*100)}));{const gs=gemsOf(i),so=soOf(i);if(gs.length||so>1)a.push(t('gemSo',{g:gs.map(g=>t(g)).join(', ')||'-',n:gs.length,m:Math.max(so,gs.length)}));}return a.join(' · ');}
 function setTip(i){const sk=Object.keys(SETS).find(k=>SETS[k].it.includes(setOf(i)));if(!sk)return '';const n=setCount(sk),c=setTier(sk);
  return `<br><small style="color:#9fe39a">${t('set_'+sk)} (${n}/${SETS[sk].it.length})</small>`+Object.keys(SETS[sk].b).map(k=>`<br><small style="color:${+k===c?'#9fe39a':'#8a96a8'}">${t('setPc',{n:k})}: ${t('setD_'+sk+k)}</small>`).join('');}
 function itemTip(i){const st=statShort(i),d=durOf(i);return `<b class="rt rt${i.r}">${esc(inm(i))}</b><br>${t('r'+i.r)} · ${st}<br>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:''}${itLvr(i)?`<small style="color:${lvrOk(itLvr(i))?'#9fb4c8':'#ff8a7a'}">${t('needLvT',{n:itLvr(i)})}</small><br>`:''}${Array.isArray(i.hist)&&i.hist.length?`<small style="color:#9fb4c8">${esc(t('itHist',{h:i.hist.join(' → ')}))}</small><br>`:''}${pgPenF(i)<1?`<small style="color:#ffb04a">${t('pgPenT',{p:Math.round((1-pgPenF(i))*100),u:undOf(i.id)})}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+' '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+(i.sh?`<br><small style="color:#ffe7a8">${t('shGear')}</small>`:'')+edrTip(i)+vtTip(i)+hidTip(i)+wpTip(i)+setTip(i)+itemSkillTip(i);}
@@ -10021,7 +10058,7 @@ const WPK={xdm:[.05,.15],boss:[.1,.25],crit:[.03,.08],cdm:[.15,.4],ls:[.01,.03],
 // owner 2026-10-22: shock only on a weapon that has to do with lightning (made with the Blue Dragon's breath) or holds a
 // Thunder Stone; the extra strikes grow with the grade and the materials: 1, +1 unique, +1 legendary, +1 blue orichalcum
 // or a divine beast's breath, +1 more for the breath, at most 4, each weapon rolling between 1 and its most
-const wpThunder=it=>!!it&&(it.gem==='thund'||!!((rcById(it.id)||{}).need||{}).brdrg);
+const wpThunder=it=>!!it&&(gemsOf(it).includes('thund')||!!((rcById(it.id)||{}).need||{}).brdrg);
 function wpDblMax(it){const r=it&&it.r||0,nd=it&&(rcById(it.id)||{}).need||{},br=Object.keys(nd).some(k=>/^br(phx|drg|tig|tor)$/.test(k));
  return Math.min(4,1+(r>=3?1:0)+(r>=4?1:0)+(nd.blue||br?1:0)+(br?1:0));}
 function wpOne(r,not,it){const ks=Object.keys(WPK).filter(k=>!not.includes(k)&&(k!=='shock'||wpThunder(it))),k=ks[rand()*ks.length|0],[a,b]=WPK[k],q=Math.min(1,rand()*.8+r*.05);
@@ -13151,6 +13188,11 @@ const RB=[
  {id:'rb_s_tBoots',c:'sew',k:['tBoots'],g:2000,shop:'stylist'},{id:'rb_s_tRobe',c:'sew',k:['tRobe'],g:3500,shop:'stylist'},
  {id:'rb_m_vwolf',c:'smith',k:['vwarmor','vwhelm','vwgloves','vwboots'],mon:[['vb15',.25],['vb14',.25]]}];
 const RBK={};for(const b of RB)for(const k of b.k)RBK[k]=b;
+const BPN=5,bpRare=()=>RB.filter(b=>!b.g);
+function bpGain(p){if(!S||S.__demo||rand()>=p)return;addMat('bpfrag',1);toast(t('bpGot',{n:S.mats.bpfrag,m:BPN}),'good');SFX.rare();}
+function bpUse(){if((S.mats.bpfrag||0)<BPN)return toast(t('bpNeed',{n:S.mats.bpfrag||0,m:BPN}),'warn');const L=bpRare(),un=L.filter(b=>!rbKn(b.id)&&!(S.mats[b.id]>0)),b=(un.length?un:L)[(rand()*(un.length?un:L).length)|0];if(!b)return;
+ S.mats.bpfrag-=BPN;addMat(b.id,1);SFX.legendary();toast(t('bpMade',{b:t(b.id)}),'good');hudDirty=true;save(true);}
+window.__GBP={use:()=>bpUse(),gain:p=>bpGain(p)}; // tests
 function rbKn(id){return !!(S&&S.rbk&&S.rbk[id]);}
 const rbGate=k=>!!RBK[k]&&!rbKn(RBK[k].id);
 Object.assign(COOK,{herbtea:{need:{herb:2,bherb:1},xp:10},fishpie:{need:{fish:2,wheat:2},alt:'sfish',xp:18},gfeast:{need:{gfish:2,melon:1,pumpk:1,bherb:2},xp:60}});
@@ -15666,7 +15708,7 @@ Satisfy.local=Object.freeze({api:1,
  zoneAt:(x,y)=>netZone(x,y), // 'void' where the world defines nothing (SAT-ONLINE-019)
  roomAt:(x,y)=>{const R=roomAt(x,y);return R?{id:R.id,kind:R.kind,zone:R.z}:null;},
  inGame:()=>!!S&&!S.__demo,
- playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,wp:(()=>{const w=weapon();return w&&WSH[w.id]?w.id+':'+Math.max(0,Math.min(9,w.r|0))+(w.en>0?':'+Math.min(99,w.en|0):''):null;})(),fx:fxPub(),gu:guPub(),zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null}),
+ playerPublic:ctx=>!S||S.__demo?null:Satisfy.net.toPlayerPublic(S,P,{...ctx,handle:netId||undefined,hideLv:HIDELV,wp:(()=>{const w=weapon();return w&&WSH[w.id]?(w.skn&&WSH[w.skn]?w.skn:w.id)+':'+Math.max(0,Math.min(9,w.r|0))+(w.en>0?':'+Math.min(99,w.en|0):''):null;})(),fx:fxPub(),gu:guPub(),zone:netZone(P.x,P.y),room:(roomAt(P.x,P.y)||{}).id||null,mv:mapV(),hp:100*Math.max(0,P.hp)/maxHP(),em:emoNow(),role:PARTY&&PARTY.id()?ROLE:null}),
  backups:()=>STORE.backups(),
  profile:()=>!S||S.__demo?null:Satisfy.state.profileOf(S),
  events:()=>DEVT.log(),
@@ -15857,14 +15899,14 @@ function bdOf(v){if(!/^[0-9a-z]{10,16}$/.test(v||''))return null;const o={};BDK.
 function lkOf(v){const m=/^(\d{0,2})\.(\d{0,2})\.([a-z0-9]{0,12})\.([a-z-]{3})$/.exec(v||'');if(!m)return null;const o={g:[...m[4]].map(ch=>GLK[ch]?ch:'-').join('')};
  if(m[1]!==''&&DYE[+m[1]])o.cape=+m[1];if(m[2]!==''&&DYE[+m[2]])o.pants=+m[2];if(m[3]&&COS[m[3]])o.cos=m[3];return o;}
 // another player's figure, built the way yours is (gearFig): base look, armour, dyes, costume, worn tiers, glasses
-function remoteFig(L,arm,sg,lk,bd,gr){const ix=(a,i)=>i>=0&&i<a.length?i:0,K={hair:ix(LOOK.hair,L.hair),hc:ix(LOOK.hc,L.hc),skin:ix(LOOK.skin,L.skin),top:ix(LOOK.top,L.top)},x=lkOf(lk);{const B=bdOf(bd)||{};if(B.hh){K.hair=ix(LOOK.hair,(L.hair&31)+B.hh*32);delete B.hh;}Object.assign(K,B);}
+function remoteFig(L,arm,sg,lk,bd,gr,ad){const ix=(a,i)=>i>=0&&i<a.length?i:0,K={hair:ix(LOOK.hair,L.hair),hc:ix(LOOK.hc,L.hc),skin:ix(LOOK.skin,L.skin),top:ix(LOOK.top,L.top)},x=lkOf(lk);{const B=bdOf(bd)||{};if(B.hh){K.hair=ix(LOOK.hair,(L.hair&31)+B.hh*32);delete B.hh;}Object.assign(K,B);}
  if(x){if(x.cape!=null)K.cape=x.cape;if(x.pants!=null)K.pants=x.pants;if(x.cos)K.cos=x.cos;}const G=!K.cos&&grOf(gr),c=lookFig(K,arm&&!G?1:0);
- if(G)gearPut(c,G);else if(x&&!K.cos)gearOn(c,...[...x.g].map(ch=>GLK[ch]||null));if(sg)c.sg=1;return c;}
-function remoteSpr(L,arm,sg,lk,bd,gr){const x=lkOf(lk),ix=(a,i)=>i>=0&&i<a.length?i:0;bd=bdOf(bd)?bd:'';gr=grOf(gr)&&!(x&&x.cos)?gr:'';
- const k='rp_'+ix(LOOK.hair,L.hair)+'_'+ix(LOOK.hc,L.hc)+'_'+ix(LOOK.skin,L.skin)+'_'+ix(LOOK.top,L.top)+'_'+(arm?1:0)+(sg?'g':'')+(x?'_'+(x.cape??'')+'.'+(x.pants??'')+'.'+(x.cos||'')+'.'+(x.cos?'---':x.g):'')+(bd?'_'+bd:'')+(gr?'_'+gr:'');
- if(!SH[k])SH[k]=SA.chars.buildSheet(remoteFig(L,arm,sg,lk,bd,gr));return k;}
+ if(G)gearPut(c,G,ADYE[ad]?ad:0);else if(x&&!K.cos)gearOn(c,...[...x.g].map(ch=>GLK[ch]||null));if(sg)c.sg=1;return c;}
+function remoteSpr(L,arm,sg,lk,bd,gr,ad){ad=ADYE[ad|0]?ad|0:0;const x=lkOf(lk),ix=(a,i)=>i>=0&&i<a.length?i:0;bd=bdOf(bd)?bd:'';gr=grOf(gr)&&!(x&&x.cos)?gr:'';
+ const k='rp_'+ix(LOOK.hair,L.hair)+'_'+ix(LOOK.hc,L.hc)+'_'+ix(LOOK.skin,L.skin)+'_'+ix(LOOK.top,L.top)+'_'+(arm?1:0)+(sg?'g':'')+(x?'_'+(x.cape??'')+'.'+(x.pants??'')+'.'+(x.cos||'')+'.'+(x.cos?'---':x.g):'')+(bd?'_'+bd:'')+(gr?'_'+gr:'')+(ad?'_d'+ad:'');
+ if(!SH[k])SH[k]=SA.chars.buildSheet(remoteFig(L,arm,sg,lk,bd,gr,ad));return k;}
 window.__GLOOK={FIG:()=>FIG,fig:(L,a)=>lookFig(L,a),create:()=>openCreate(),sty:k=>styList(k),bd:()=>bdPub(),bdOf:v=>bdOf(v),LOOK,EYEC,LIPC,ACCC,BST,ACCK}; // tests
-window.__GLK={pub:()=>lkPub(),of:v=>lkOf(v),gr:()=>grPub(),grOf:v=>grOf(v),GEARL,lk:(sl,id)=>gearLk(sl,id),ids:()=>[...RC,...TRC].filter(r=>GEARS.includes(r.slot)).map(r=>[r.slot,r.id]),sig:()=>gearSig(),sheet:()=>SH[pSpr()].canvas,wsh:()=>WSH,mine:()=>{const c=gearFig(S.look||DEFLOOK);if(S.rsh&&S.rsh.g&&S.rsh.w)c.sg=1;return c;},theirs:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return remoteFig(r.look,r.arm,fs.gl,fs.lk,fs.bd,fs.gr);},spr:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return remoteSpr(r.look,r.arm,fs.gl,fs.lk,fs.bd,fs.gr);},st:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return fs.st;},mySt:()=>stPub()}; // tests
+window.__GLK={pub:()=>lkPub(),of:v=>lkOf(v),gr:()=>grPub(),grOf:v=>grOf(v),GEARL,lk:(sl,id)=>gearLk(sl,id),ids:()=>[...RC,...TRC].filter(r=>GEARS.includes(r.slot)).map(r=>[r.slot,r.id]),sig:()=>gearSig(),sheet:()=>SH[pSpr()].canvas,wsh:()=>WSH,mine:()=>{const c=gearFig(S.look||DEFLOOK);if(S.rsh&&S.rsh.g&&S.rsh.w)c.sg=1;return c;},theirs:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return remoteFig(r.look,r.arm,fs.gl,fs.lk,fs.bd,fs.gr);},spr:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return remoteSpr(r.look,r.arm,fs.gl,fs.lk,fs.bd,fs.gr,fs.ad);},st:uid=>{const r=NET&&NET.remotes().find(x=>x.uid===uid);if(!r)return null;const fs=fxSt(r.sid);fxIn(r,fs);return fs.st;},mySt:()=>stPub()}; // tests
 /* 1:1 effects (SAT-ONLINE-026, owner feedback 9/10): whatever your own attack, dash or skill draws is recorded while it runs
    (each vfx call with its seed, the fx particles, rings and bolts it adds, its projectiles, the weapon swing and the dash
    trail) and published with presence as offsets from you. The others replay the same calls at your position, so they see
@@ -15906,13 +15948,13 @@ const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(try
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
 // clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
 function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(S&&S.cls==='saintess'&&sncIn(P.x,P.y)?'Z':'')+(P.hrgU>gTime?'R':'')+(P.ssFU>gTime?'W':'')+(P.shwU>gTime?'D':'')+(lkCodes()?'C':'')+(P.purP>gTime?'U':'')+(P.morP>gTime?'M':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+vpSt()+nvSt():'';}
-function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));{const w=weapon();if(w&&w.cw)tags.push(JSON.stringify('cw:'+w.cw));}const mr=marPub();if(mr)tags.push(JSON.stringify('mr:'+mr));const pd=pdPub();if(pd)tags.push(JSON.stringify('pd:'+pd));const mn=mnPub();if(mn)tags.push(JSON.stringify('mn:'+mn));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
+function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));if(S&&S.look&&ADYE[S.look.ad|0]&&gr)tags.push(JSON.stringify('ad:'+(S.look.ad|0)));{const w=weapon();if(w&&w.cw&&!w.skn)tags.push(JSON.stringify('cw:'+w.cw));}const mr=marPub();if(mr)tags.push(JSON.stringify('mr:'+mr));const pd=pdPub();if(pd)tags.push(JSON.stringify('pd:'+pd));const mn=mnPub();if(mn)tags.push(JSON.stringify('mn:'+mn));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
  let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
 function guPub(){if(!P||!P.guard)return null;const a=Math.atan2(P.gy,P.gx);return 1+((Math.round(a/(2*Math.PI)*64)%64+64)%64)+(P.fort>0?64:0)+(P.gT<.22?128:0);}
 function fxSt(sid){let s=FXS.get(sid);if(!s)FXS.set(sid,s={last:-1,off:null,raw:'',sw:null,du:0,tr:[],lt:0});return s;}
 function fxIn(r,s){if(!r.fx){s.pt=null;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';s.mr='';return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
- s.pt=null;s.inT=0;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';s.mr='';s.cw='';for(const ev of a)if(typeof ev==='string'){const cwm=/^cw:([a-z]{2}\.\d{1,3}\.\d{1,3}\.\d{1,3}\.[a-z]{2,8}(?:\.[a-z]{2,8})?)$/.exec(ev);if(cwm)s.cw=cwm[1];const mrm=/^mr:([pmd][A-Za-z0-9_:.-]{4,64})$/.exec(ev);if(mrm)s.mr=mrm[1];const grm=/^gr:(\S{7,67})$/.exec(ev);if(grm&&grOf(grm[1]))s.gr=grm[1];const bdm=/^bd:([0-9a-z]{10,16})$/.exec(ev);if(bdm)s.bd=bdm[1];const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}const q=/^st:([A-Za-z]{1,24})$/.exec(ev);/* capitals too: a saint's Q, a vampire's V and X (SAT-ONLINE-155: the whole tag was dropped for them) */if(q)s.st=q[1];const w=/^tl:([a-z0-9.]{1,40})$/.exec(ev);if(w)s.tl=w[1];if(ev==='gl:1')s.gl=1;const lk=/^lk:(\S{5,32})$/.exec(ev);if(lk)s.lk=lk[1];const mnm=/^mn:([0-9a-z_.-]{5,90})$/.exec(ev);if(mnm)mnIn(mnm[1],r);} // pet, mount and when they got to this place ride along in fx (fxPub)
+ s.pt=null;s.inT=0;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';s.mr='';s.ad=0;s.cw='';for(const ev of a)if(typeof ev==='string'){const cwm=/^cw:([a-z]{2}\.\d{1,3}\.\d{1,3}\.\d{1,3}\.[a-z]{2,8}(?:\.[a-z]{2,8})?)$/.exec(ev);if(cwm)s.cw=cwm[1];const mrm=/^mr:([pmd][A-Za-z0-9_:.-]{4,64})$/.exec(ev);if(mrm)s.mr=mrm[1];const grm=/^gr:(\S{7,67})$/.exec(ev);if(grm&&grOf(grm[1]))s.gr=grm[1];const adm=/^ad:(\d{1,2})$/.exec(ev);if(adm&&ADYE[+adm[1]])s.ad=+adm[1];const bdm=/^bd:([0-9a-z]{10,16})$/.exec(ev);if(bdm)s.bd=bdm[1];const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}const q=/^st:([A-Za-z]{1,24})$/.exec(ev);/* capitals too: a saint's Q, a vampire's V and X (SAT-ONLINE-155: the whole tag was dropped for them) */if(q)s.st=q[1];const w=/^tl:([a-z0-9.]{1,40})$/.exec(ev);if(w)s.tl=w[1];if(ev==='gl:1')s.gl=1;const lk=/^lk:(\S{5,32})$/.exec(ev);if(lk)s.lk=lk[1];const mnm=/^mn:([0-9a-z_.-]{5,90})$/.exec(ev);if(mnm)mnIn(mnm[1],r);} // pet, mount and when they got to this place ride along in fx (fxPub)
  for(const ev of a){if(!Array.isArray(ev)||!(ev[0]>s.last)||typeof ev[1]!=='number')continue;s.last=ev[0];const lat=now-ev[1];
   // the sender's clock: keep the lowest delay seen (creeping up slowly) so steps of one skill keep their spacing
   if(s.off==null||lat<s.off)s.off=lat;else s.off+=(lat-s.off)*.02;FXQ.push({at:ev[1]+s.off,sid:r.sid,ev});}
@@ -15931,7 +15973,7 @@ function fxPlay(ev,x,y,s){const n=v=>+v||0,ty=ev[2];
 function fxRun(seen){const now=performance.now();for(let i=0;i<FXQ.length;){const q=FXQ[i];if(q.at>now){i++;continue;}FXQ.splice(i,1);const r=seen.get(q.sid);if(r)try{fxPlay(q.ev,r.x,r.y,fxSt(q.sid));}catch(e){}}}
 function netEnts(ents){faultAt('netEnts');const myRoom=(roomAt(P.x,P.y)||{}).id||null,F=lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald';netDrawn=0;const seen=new Map(),now=performance.now(),near=mode==='play'&&!PCTX?partyNear():null; // near: the one T opens (SAT-ONLINE-036)
  for(const r of (NRS=NET.remotes())){if(!netSees(r,myRoom))continue;const am=ranim(r),fs=fxSt(r.sid);fxIn(r,fs);remLife(r,fs);if(fs.st&&fs.st.indexOf('f')>=0&&rand()<.23)fx.push({x:r.x+(rand()-.5)*14,y:r.y-4,vx:(rand()-.5)*20,vy:20,t:.4,c:'#c8e8ff',fl:1});if(fs.st&&fs.st.indexOf('g')>=0&&rand()<.12)fx.push({x:r.x+(rand()-.5)*24,y:r.y-6,vx:0,vy:-16,t:.6,c:'#ffe08a',fl:1});if(fs.st&&/[bj]/.test(fs.st)&&rand()<.1)fx.push({x:r.x+(rand()-.5)*28,y:r.y-4,vx:0,vy:-18,t:.7,c:fs.st.indexOf('j')>=0?'#9fd8ff':'#fff3b0',fl:1});/* their flight, as yours (updateItemFx) */if(fs.st&&fs.st.indexOf('X')>=0&&rand()<.5)sunFx(r);if(r.x<camX-24||r.x>camX+VW+24||r.y<camY-8||r.y>camY+VH+40)continue;seen.set(r.sid,r);
-  const k=remoteSpr(r.look,r.arm,fs.gl,fs.lk,fs.bd,fs.gr),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
+  const k=remoteSpr(r.look,r.arm,fs.gl,fs.lk,fs.bd,fs.gr,fs.ad),fr=r.anim==='walk'?1:0;netDrawn++; // no entity: drawChar picks walk/idle from fr
   // their weapon in hand and each swing once, the way your own is drawn (SAT-ONLINE-026, owner feedback 7): a swing starts when
   // their anim turns to 'attack' and plays 0.14 s on this clock, however long the state stays up
   // drawn the way your own character is (the player draw in render): dash trail, enhancement glow, weapon in hand or the
@@ -16293,7 +16335,7 @@ Object.assign(STR.ar,{pcRk:'الأرينا: {r} ({w} فوز / {l} خسارة)',p
 Object.assign(STR.en,{pcRk:'Arena: {r} ({w} won / {l} lost)',pcRkNone:'No arena duels this season'});
 var PCRK=new Map();
 function pcPic(r){const c=$('pctxPic'),L=r&&r.look;if(!L||typeof L!=='object'){c.hidden=true;return;}const fs=r.sid?(FXS.get(r.sid)||{}):{};let k;
- try{k=remoteSpr(L,r.arm,fs.gl,fs.lk,fs.bd,fs.gr);}catch(e){c.hidden=true;return;}const sh=SH[k];if(!sh){c.hidden=true;return;}c.hidden=false;
+ try{k=remoteSpr(L,r.arm,fs.gl,fs.lk,fs.bd,fs.gr,fs.ad);}catch(e){c.hidden=true;return;}const sh=SH[k];if(!sh){c.hidden=true;return;}c.hidden=false;
  if(c.dataset.k===k)return;c.dataset.k=k;const g=c.getContext('2d'),q=SA.chars.rect('d','idle',0);g.clearRect(0,0,48,72);g.imageSmoothingEnabled=false;
  g.drawImage(sh.canvas,q.sx,q.sy,16,24,0,0,48,72);}
 function pcRank(r){const e=$('pctxRk'),se=typeof rnkSeason==='function'?rnkSeason():'',key=se+'|'+r.uid,c=PCRK.get(key),now=performance.now();
@@ -16452,7 +16494,7 @@ function trMatIn(o){if(!o||!o.mat||!trMatOk(o.id))return 0;const n=Math.max(0,Ma
 // an item from the other side, rebuilt from plain values only, as a new item of yours (a new uid; ids.ensure gives the iid)
 function tradeItemIn(json){let o;try{o=JSON.parse(json);}catch(e){return null;}if(!o||typeof o!=='object'||typeof o.id!=='string')return null;const rc=rcById(o.id);if(!rc)return null;
  const it={};for(const k in o){const v=o[k];if(k==='uid'||k==='iid'||k==='__proto__')continue;if((typeof v==='number'&&isFinite(v))||(typeof v==='string'&&v.length<=40)||typeof v==='boolean')it[k]=v;}
- it.id=o.id;it.slot=rc.slot;it.r=Math.max(0,Math.min(4,it.r|0));it.dur=Math.max(0,Math.min(100,typeof it.dur==='number'?it.dur:100));if(it.gem&&!(typeof GEMS!=='undefined'&&GEMS[it.gem]))delete it.gem;
+ it.id=o.id;it.slot=rc.slot;it.r=Math.max(0,Math.min(4,it.r|0));it.dur=Math.max(0,Math.min(100,typeof it.dur==='number'?it.dur:100));if(it.gem&&!(typeof GEMS!=='undefined'&&GEMS[it.gem]))delete it.gem;if(Array.isArray(o.gx))it.gx=o.gx.filter(g=>typeof g==='string'&&GEMS[g]).slice(0,2);it.so=Math.max(1,Math.min(3,it.so|0||1));it.trd=1;
  const h=o.hid;if(h&&typeof h==='object'&&HIDK.includes(h.k)&&typeof h.v==='number'&&isFinite(h.v))it.hid={k:h.k,v:Math.max(0,Math.min(h.k==='hpp'?.12:h.k==='as'?.09:63,h.v))}; // a known hidden function goes with the item (v1.03)
  if('bls' in it){if(it.slot==='w'&&it.bls)it.bls=1;else delete it.bls;}   // v3.11: the Vatican's blessing on a weapon
  if('edr' in it)it.edr=Math.max(0,Math.min(EDRMAX,Math.round(it.edr)||0));   // v3.07
@@ -17541,7 +17583,8 @@ function admCmd(v){let m;
  if(/^\/economy\s*$/i.test(v)){admOnly(admEco);return true;}
  if(/^\/season(\s|$)/i.test(v)){const x=/^\/season(?:\s+(\d{4}-(?:0[1-9]|1[0-2])))?\s*$/i.exec(v);if(!x){toast(t('ssnBad'),'warn');return true;}const ym=x[1]||ssnLast();admOnly(st=>admSeason(st,ym));return true;}
  if(/^\/balance\s*$/i.test(v)){admOnly(admBal);return true;}
- if(/^\/fightlog\s*$/i.test(v)){flogShow();return true;} // anyone's (SAT-ONLINE-150)
+ if(/^\/fightlog\s*$/i.test(v)){flogShow();return true;}
+ if(/^\/craftstats\s*$/i.test(v)){crsShow();return true;}   // anyone's own (plan U284) // anyone's (SAT-ONLINE-150)
  if(/^\/admin\s*$/i.test(v)){admOnly(()=>toast(t('admHelp')));return true;}
  if((m=/^\/mute\s+(\S+)\s+(\d{1,3})\s*([\s\S]*)$/i.exec(v))){const id=m[1],h=Math.max(1,Math.min(720,+m[2])),why=m[3].trim().slice(0,60);admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}const until=wNow()+h*3600000;return st.mute(u,until,why,NET.uid).then(()=>toast(t('admMuted',{n:id,l:calTime(until)}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
  if((m=/^\/unmute\s+(\S+)\s*$/i.exec(v))){const id=m[1];admOnly(st=>st.uidOf(id).then(u=>{if(!u){toast(t('admNoId',{n:id}),'warn');return;}return st.unmute(u).then(()=>toast(t('admUnmuted',{n:id}),'good'));}).catch(()=>toast(t('gdFail'),'warn')));return true;}
