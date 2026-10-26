@@ -7933,8 +7933,17 @@ lfa2:{by:'piaro',sec:'farmer',pre:'lfa1h',lv:30,ot:'o_lfa2',obj:{t:'visit',it:'l
  // (plan U190) two more steps from Khan beside his chain, never in its way: dodge (after the wood), and find a party
  // (after the sword, offered only when you play online). No quote marks in comments here: data/tools reads this table
  khd:{by:'khan',pre:'kh1',obj:{t:'dodge',it:'dodge',n:3},xp:30,gold:10},
- khp:{by:'khan',pre:'kh3',need:'online',obj:{t:'party',it:'party',n:1},xp:80,gold:20}
+ khp:{by:'khan',pre:'kh3',need:'online',obj:{t:'party',it:'party',n:1},xp:80,gold:20},
+ // plan U203: a courier letter found at the Rolling inn goes to the Kingdom or to the Empire; one side thanks you, the other remembers
+ fcA:{by:'innRo',lv:150,need:'fcA',obj:{t:'deliver',it:'aden',n:1},xp:90000,gold:6000,rg:['zRein',60],rc:['zTitan',60]},
+ fcB:{by:'innRo',lv:150,need:'fcB',obj:{t:'deliver',it:'knightT',n:1},xp:90000,gold:6000,rg:['zTitan',60],rc:['zRein',60]}
 };
+Object.assign(STR.ar,{q_fcA:'جواب للإيرل',fcA_o:'ساعي وقع عندي في النُزل ومات، وفي شنطته جواب مختوم لإيرل آدن في راينهارت. لو وصلته، المملكة هتشكرك (+60 سمعة في راينهارت)، والإمبراطورية مش هتنسى (−60 في تيتان). ولو ودّيته لفرسان تيتان، العكس.\nشروط إنهاء المهمة: سلّم الجواب لإيرل آدن في راينهارت',fcA_w:'الجواب لسه معاك؟ آدن مستني.',fcA_dl:'ختم المملكة سليم. أحسنت يا مغامر، راينهارت مش هتنسى.',fcA_d:'وصلته؟ ربنا يستر. التجار من تيتان مش هيبصوا لك زي الأول.',
+ q_fcB:'جواب لتيتان',fcB_o:'الجواب ده نفسه، فرسان تيتان هيدفعوا فيه كويس. لو ودّيته لهم، الإمبراطورية هتشكرك (+60 سمعة في تيتان)، والمملكة مش هتنسى (−60 في راينهارت).\nشروط إنهاء المهمة: سلّم الجواب لفارس تيتان',fcB_w:'الجواب لسه معاك؟ الفرسان مستنيين.',fcB_dl:'جواب من راينهارت؟ الإمبراطور هيعرف إن فيه ناس عندها عقل.',fcB_d:'خلاص، اتباع. بلاش تقرب من بوابة راينهارت كتير.',
+ repDown:'{z} مش هتنسى: سمعتك هناك −{n}'});
+Object.assign(STR.en,{q_fcA:"The Earl's Letter",fcA_o:"A courier died at my inn, and his satchel holds a sealed letter for Earl Aden in Reinhardt. Take it there and the Kingdom will thank you (+60 reputation in Reinhardt), and the Empire will remember (−60 in Titan). Take it to Titan's knights instead and it goes the other way.\nQuest Clear Conditions: Deliver the letter to Earl Aden in Reinhardt",fcA_w:"Still carrying the letter? Aden is waiting.",fcA_dl:"The Kingdom's seal is unbroken. Well done, adventurer: Reinhardt won't forget.",fcA_d:"You delivered it? Then mind yourself: the traders from Titan won't look at you the same.",
+ q_fcB:'A Letter for Titan',fcB_o:"The same letter, and Titan's knights would pay well for it. Take it to them and the Empire will thank you (+60 reputation in Titan), and the Kingdom will remember (−60 in Reinhardt).\nQuest Clear Conditions: Deliver the letter to a knight of Titan",fcB_w:"Still carrying the letter? The knights are waiting.",fcB_dl:"A letter from Reinhardt? The Emperor will hear that some people have sense.",fcB_d:"So it's sold. Don't go near Reinhardt's gate too often.",
+ repDown:'{z} will remember: your reputation there −{n}'});
 Object.assign(STR.ar,{q_khd:'اتعلم تتفادى',khd_o:'قبل ما تمسك سيف، اتعلم تبعد عن الضربة. اتفادى 3 مرات (Space أو زرار التفادي)، والبس الخطوة دي في دماغك.',khd_w:'لسه متفادتش كفاية. اتفادى 3 مرات.',khd_d:'كده. اللي بيعرف يبعد بيعيش أكتر من اللي بيضرب جامد.',o_dodge:'اتفادى: {c}/{n}',
  q_khp:'لاقي بارتي',khp_o:'الوحوش الكبيرة مبتتقتلش لوحدك. لاقي حد تلعب معاه: ادخل بارتي (اعزم لاعب أو اطلب تدخل بارتي حد).',khp_w:'لسه مدخلتش بارتي.',khp_d:'كويس. الحداد الشاطر بيعرف يشتغل مع غيره.',o_party:'ادخل بارتي: {c}/{n}'});
 Object.assign(STR.en,{q_khd:'Learn to Dodge',khd_o:"Before you hold a sword, learn to get out of the way. Dodge 3 times (Space or the dodge button), and remember the step.",khd_w:"You haven't dodged enough yet. Dodge 3 times.",khd_d:'There. One who knows how to step aside lives longer than one who only hits hard.',o_dodge:'Dodge: {c}/{n}',
@@ -7988,7 +7997,7 @@ function completeQ(id){if(!claimQ(id))return;bpGain(QD[id]&&QD[id].ms?.08:.04); 
  if(q.promo){promoDone(q);phDone(q);}if(q.hcls)hcDone(q);
  if(q.cls&&(S.cls==='novice'||q.sw)){S.cls=q.cls;sbSig='';SFX.legendary();flash();setTimeout(()=>toast(t('clsGot',{c:t('cl_'+q.cls)}),'good'),400);checkSkills();}
  if(q.title||q.tl)giveTitle(q.title||q.tl);if(!rp){epDone(id);msDone(id);}p5Done(id);eaDone(id);vtDone(id);
- addAff(q.by,12);{const rn=10+Math.min(15,Math.floor((q.xp||0)/200));addRep(townOfNpc(q.by),rn);crepAdd(rn*3);}
+ addAff(q.by,12);{const rn=10+Math.min(15,Math.floor((q.xp||0)/200));addRep(townOfNpc(q.by),rn);crepAdd(rn*3);}if(q.rg)addRep(q.rg[0],q.rg[1]);if(q.rc){addRep(q.rc[0],-q.rc[1]);setTimeout(()=>toast(t('repDown',{z:t(q.rc[0]),n:q.rc[1]}),'warn'),900);}   /* (plan U203) a side taken, and the other's memory */
  if(q.xp&&!(q.hcls&&isLeg(q.hcls))){gainXP(pasOn('opers')?qXP(q)*1.15:qXP(q),0,rp?'rquest':qSrc(q));gContrib(q.xp*.1);}if(q.adq)adqFin(id);else if(q.rep&&!q.gen){const D=dlyS();D.rq=D.rq||{};D.rq[id]=(D.rq[id]||0)+1;}checkSkills();hudDirty=true;save(true);}
 // craft-for quests hand over one crafted piece: the least valuable unequipped one (an equipped one is taken off first)
 function giveItem(id){const c=S.items.filter(i=>i.id===id).sort((a,b)=>isEq(a)-isEq(b)||a.r-b.r);const it=c[0];if(!it)return;
@@ -8166,7 +8175,7 @@ Object.assign(STR.en,{oblv:'Hermit of Oblivion',oblv_hi:'Everyone carries someth
  oblvCharQ2:'Last time: there is no way back.',oblvCharY2:'Wipe it for good',oblvCharDone:'Your character was wiped. A new beginning.'});
 window.__GOBLV={npc:()=>{const n=npcs.find(n=>n.id==='oblv');if(!n)return null;const x=n.x/TS|0,y=n.y/TS|0;return {x,y,solid:SOLID[at(x,y)]===1,below:SOLID[at(x,y+1)]===1,reid:x>=REID.x0&&x<=REID.x1&&y>=REID.y0&&y<=REID.y1};},cls:()=>oblvClsDo(),go:a=>legLetGo(a),wipe:()=>oblvCharDo()}; // tests
 function cOpts(who){return Object.keys(CTOWN).filter(k=>k!==who&&!(who==='coachW'&&k==='coachP')&&!(who==='coachP'&&k==='coachW')).map(k=>{const g=cFare(who,k);return {l:t(g?'oCoachTo':'oCoachFree',{z:t(CTOWN[k]),g}),f:()=>cGo(k,who)};});}
-function cGo(dest,who){const g=cFare(who,dest);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;if(g)SFX.coin();
+function cGo(dest,who){const g=cFare(who,dest);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}{const c=npcOf(dest),k=c&&bcSide(P.x)!==bcSide(c.x)?bcStop(bcSide(c.x)):null;if(k)return bcAsk(k,()=>cGo(dest,who));}S.gold-=g;if(g)SFX.coin();
  fadeTo(()=>{const c=npcOf(dest);P.x=c.x+18;P.y=c.y-2;camSnap=true;vfx('spawn',P.x,P.y);allies=[];S.raid=0;hudDirty=true;toast(t('arrived',{z:t(CTOWN[dest])}),'good');save(true);});}
 // shop options shared by the Winston and Patrian merchants
 // stat reset scroll (owner request): very expensive; reading it returns every distributed point to spend again
@@ -11325,6 +11334,20 @@ function srcTxt(s){const [k,v]=String(s).split(':'),mn=x=>t(x==='guardian'?'guar
  return k==='d'?t('srcD',{n:mn(v)}):k==='c'?t('srcC',{n:mn(v)}):k==='s'?t('srcS',{n:t(v)}):k==='q'?t('srcQ',{q:QD[v]?qName(v):'?'}):k==='r'?t('srcR'):'';}
 Object.assign(STR.ar,{srcD:'وقعت من {n}',srcC:'من صندوق {n}',srcS:'اتشرت من {n}',srcQ:'مكافأة: {q}',srcR:'من غنايم غارة'});
 Object.assign(STR.en,{srcD:'Dropped by {n}',srcC:"From {n}'s chest",srcS:'Bought from {n}',srcQ:'Reward: {q}',srcR:'Raid loot'});
+/* Plan U158 (2026-10-26): the frontier between the Eternal Kingdom and the Saharan Empire (the line at column EX) has a
+   border post on each side. Whoever has a reputation below zero with the side they're entering (Reinhardt's going west,
+   Titan's going east; U203's letter is one way to get there) is stopped, on foot, mounted or by coach, unless they pay
+   a fine for a day's pass (BCDAY of world time). Everyone else passes freely, so the posts never stand in a newcomer's way.
+   Teleports (scrolls, a summons) aren't stopped. */
+const BCDAY=864e5,bcSide=x=>x>=EX*TS?1:0,bcKey=sd=>sd?'zTitan':'zRein',bcFine=()=>Math.min(20000,2000+20*S.lv);let BCX=null,BCT=0;
+function bcStop(sd){const k=bcKey(sd);return repOf(k)<0&&!((S.bpass||{})[k]>wNow())?k:null;}
+function bcAsk(k,then){const g=bcFine(),who=k==='zTitan'?'guardT':'guardRh';
+ dialog(who,[t('bcHalt',{z:t(k),n:-repOf(k)})],null,[{l:t('bcPay',{g:fmtN(g)}),pr:g,poor:S.gold<g,f:()=>{if(S.gold<g){SFX.deny();return toast(t('noGold'),'warn');}S.gold-=g;(S.bpass=S.bpass||{})[k]=wNow()+BCDAY;SFX.coin();toast(t('bcPaid',{z:t(k)}),'good');hudDirty=true;save(true);if(then)then();}},{l:t('bcBack')}]);}
+function bcTick(dt){if(!P||mode!=='play'||P.y<0||P.y>=WMH*TS){BCX=null;return;}const x0=BCX;BCX=P.x;if(x0==null||Math.abs(P.x-x0)>64)return;   // a teleport isn't a crossing
+ const s0=bcSide(x0),s1=bcSide(P.x);if(s0===s1)return;const k=bcStop(s1);if(!k)return;
+ P.x=s1?EX*TS-3:EX*TS+3;BCX=P.x;if(P.ride&&P.vx!=null){P.vx=0;P.vy=0;}if(gTime-BCT>4){BCT=gTime;bcAsk(k);}}
+Object.assign(STR.ar,{bcHalt:'قف! سمعتك في {z} تحت الصفر بـ{n}. مينفعش تعدّي من هنا من غير تصريح يوم.',bcPay:'ادفع الغرامة ({g} دهب): تصريح يوم',bcPaid:'معاك تصريح يوم لـ{z}.',bcBack:'ارجع'});
+Object.assign(STR.en,{bcHalt:"Halt! Your reputation in {z} is {n} below zero. You don't cross here without a day's pass.",bcPay:"Pay the fine ({g} gold): a day's pass",bcPaid:"You have a day's pass for {z}.",bcBack:'Turn back'});
 /* Plan U151 (2026-10-26): the Guardian's clearing has a spectator ring, a circle of white stones between GDR0 and GDR1 from
    his den (past his leash and the reach of his thorns). Whoever stands in it watches: he never goes after them (alone, on
    the host's screen, or as the one he'd pick next), none of his blows or thorns lands on them, and none of theirs lands on
@@ -11503,7 +11526,7 @@ function update(dt){
  if(P.food<20&&!P.hungryT){P.hungryT=true;toast(t('hungry'),'warn');}if(P.food>=25)P.hungryT=false;
  if(pain&&!P.painT){P.painT=true;toast(t('pain'),'warn');}if(!pain)P.painT=false;
  // monsters
- tfTick(dt);tlTick(dt);c2Tick(dt);owbTick(dt);p2Tick(dt);p3Tick(dt);p4Tick(dt);p5Tick(dt);eaTick(dt);p6Tick(dt);phTick(dt);rgTick(dt);necTick(dt);hcTick(dt);fbTick(dt);dvTick(dt);lpTick(dt);eyTick(dt);brTick(dt);epTick();const safe=!!inTown(P.x,P.y);
+ tfTick(dt);tlTick(dt);c2Tick(dt);owbTick(dt);bcTick(dt);p2Tick(dt);p3Tick(dt);p4Tick(dt);p5Tick(dt);eaTick(dt);p6Tick(dt);phTick(dt);rgTick(dt);necTick(dt);hcTick(dt);fbTick(dt);dvTick(dt);lpTick(dt);eyTick(dt);brTick(dt);epTick();const safe=!!inTown(P.x,P.y);
  monsTick(dt,safe);
  if(P.rmv>0)P.rmv-=dt;else if(P.rsp)P.rsp=Math.max(0,P.rsp-dt*2);horseRegen(dt);if(P.ride&&!(RCR&&RCR.in)&&noRideAt(P.x,P.y)){dismount();toast(t('rideOffHere'));} // walked into a no-ride place: off the horse at once
  updateEProj(dt);updateAllies(dt);updateEscort(dt);updateTerr(dt);updateLife(dt);karmaTick(dt);updateEvents(dt);updateSiege(dt);achTick(dt);ttTick(dt);sc2Tick(dt);updateWeather(dt);fogTick(dt);updateComp(dt);updateItemFx(dt);updateGDrop();updatePet(dt);updateArena(dt);updateTower(dt);updateBehen(dt);updateTowerW(dt);updateDragon(dt);updateBeasts(dt);mpTick(dt);dsTick(dt);updateBelial(dt);updateAuction(dt);
@@ -12538,7 +12561,7 @@ function ecShopOpt(o){o.push({l:t('bhEcs',{p:fmtN(ECCP)}),f:()=>bhBuy(ECCP,()=>{
 Object.assign(STR.ar,{bhGoShop:'عربية المتجر (متجر الأرخبيل)'});Object.assign(STR.en,{bhGoShop:'The carriage store (the Archipelago shop)'});
 // the people of the East
 // named conditions for QD[id].need (the quest tables stay data)
-var QNEED={online:()=>!!(NET&&netUser),sm5:()=>(S.smith||1)>=5,eaCap:()=>EAS().ar==='cap',eaJail:()=>eaJail(),necSw:()=>S.cls==='mage'&&!Object.keys(S.qs).some(k=>QD[k]&&(QD[k].promo||QD[k].cls)&&S.qs[k].st===1)};
+var QNEED={fcA:()=>!S.qs.fcB,fcB:()=>!S.qs.fcA,online:()=>!!(NET&&netUser),sm5:()=>(S.smith||1)>=5,eaCap:()=>EAS().ar==='cap',eaJail:()=>eaJail(),necSw:()=>S.cls==='mage'&&!Object.keys(S.qs).some(k=>QD[k]&&(QD[k].promo||QD[k].cls)&&S.qs[k].st===1)};
 // Han Seokbong is taken to the Lava Prison for hiding you (ch 633) once Arube's story is over, until you free him
 const eaJail=()=>!!EAS().ar&&(EAS().ar==='kill'||qDone('ea3'))&&!qDone('ea4');
 function eaNpcVis(){if(!npcs.length)return;const j=eaJail();for(const n of npcs){if(n.id==='hanS'||n.id==='hanD')n.hidden=j;else if(n.id==='hanS2'||n.id==='hanD2')n.hidden=!j;}}
@@ -19306,6 +19329,7 @@ window.__GPB6={p4S:()=>p4S(),plotAct:i=>p4PlotAct(i),plow:i=>p4Plow(i),water:i=>
  wcS:()=>wcS(),wcN:k=>wcN(k),wcEv:(k,n,u)=>wcEv(k,n,u),wcMenu:()=>wcMenu(),wcTurn:k=>wcTurn(k),wcGold:k=>wcGold(k),board:()=>openBoard(),
  mons:()=>mons,monTick:(m,dt)=>monTick(m,dt),post:(m,i)=>ptPost(m,PATROL[m.type],i),PATROL}; // tests (plan batch 6)
 window.__GPB7={get WB(){return OWB},wbTick:dt=>owbTick(dt),wbSpawn:()=>owbSpawn(),gps:()=>GPS,gpAtk:m=>gpAtk(m),hitMon:(m,mul,o)=>hitMon(m,mul,o),kill:m=>killMon(m),mons:()=>mons,monTick:(m,dt)=>monTick(m,dt),moves:k=>RKMV[k],gdRing:(x,y)=>gdRing(x,y),srcTxt:s=>srcTxt(s),itemTip:i=>itemTip(i),tradeIn:j=>tradeItemIn(j),rareDrop:(m,b)=>rareDrop(m,b),namedDrop:m=>namedDrop(m),gdHome:()=>gdHome(),hurt:(d,src)=>hurtPlayer0(d,1,src),mobTarget:m=>mobTarget(m),mxk:(k,m,mv)=>MXK[k](m,MT[m.type],mv,0,0,0,0),gt:()=>gTime}; // tests (plan batch 7)
+window.__GPB9={bcSide:x=>bcSide(x),bcStop:sd=>bcStop(sd),bcTick:dt=>bcTick(dt),bcFine:()=>bcFine(),cGo:(d,w)=>cGo(d,w),get EX(){return EX},avail:id=>qAvail(id),accept:id=>acceptQ(id),complete:id=>completeQ(id),repOf:k=>repOf(k),npcTalk:id=>talkNPC(id)}; // tests (plan batch 9)
 window.__GPB8={eat:k=>eatDish(k),hFresh:()=>hFresh(),make:(k,b)=>makeLife(k,b),mixEnd:r=>mixEnd(r),buy:(id,g,w)=>buyGear(id,g,w),avail:id=>qAvail(id),ready:id=>qReady(id),accept:id=>acceptQ(id),complete:id=>completeQ(id),hurt:(d,src)=>hurtPlayer0(d,1,src),get MIXG(){return MIXG}}; // tests (plan batch 8)
 })();
 </script>
