@@ -111,6 +111,8 @@
     'swc', 'dmEss', 'sanc', 'sncCd',
     // the Duplicator's one copied skill (v3.15)
     'dpCopy',
+    // the Mage Tower's spells learned from the Archmage (v3.26): {skill: 1}
+    'mgt',
     // the Vatican (v3.11): Goddess Rebecca's blessing, from Help the Rebecca Church!
     'vatB',
   ];

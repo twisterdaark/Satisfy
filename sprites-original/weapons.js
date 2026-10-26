@@ -82,6 +82,9 @@ Object.assign(DEF,{oakst:()=>staff(['#3a7a3a','#7ac87a','#d8ffd8'],'#6a4a2a'),fr
 // the crafted mithril and mass-produced Grid tiers, the Spiral Quick Fire Bow and the Dragon Hammer
 Object.assign(DEF,{mstaff:()=>staff(['#4a90c0','#c8e8f4','#ffffff'],'#7aa0b8',1),mgstaff:()=>staff(['#2a3a6a','#e0e4ec','#ffffff'],'#3a4a7a',1),mbow:()=>bow(['#7aa0b8','#4a7890','#c8e8f4'],'#ffffff'),mgbow:()=>bow(['#e0e4ec','#2a3a6a','#ffffff'],'#2a3a6a'),sqfbow:()=>bow(['#c87a2a','#7a3a10','#ffd27a'],'#ff8a3a'),
  mhammer:()=>hammer(['#c8e8f4','#7aa0b8','#ffffff'],true),ndhammer:()=>hammer(['#5a1a2a','#2a0a14','#d83a5a'],true),mghammer:()=>hammer(['#e0e4ec','#2a3a6a','#ffffff'],true),dhammer:()=>hammer(['#8a1a1a','#4a0a0a','#e8c050'],true),mspear:()=>spearS(['#4a6a8a','#c8e8f4','#ffffff','#4a90c0'],0),mgspear:()=>spearS(['#2a3a6a','#e0e4ec','#ffffff','#5a6a9a'],0)});
+// the Mage Tower's tomes (2026-10-26): a book held closed, cover, spine, page edge and clasp
+function tome(c){const I=Img(8,10);I.rect(1,1,6,8,c[0]);I.vline(1,1,8,c[1]);I.rect(2,1,5,1,c[2]);I.vline(6,2,8,'#f0e8d0');I.rect(3,4,2,2,c[3]);I.set(3,4,'#ffffff');return {I,gx:4,gy:7};}
+Object.assign(DEF,{tome1:()=>tome(['#6a4a2a','#3a2414','#9a7a4a','#c8a050']),tome2:()=>tome(['#a83a1a','#5a1a0a','#e8703a','#ffd27a']),tome3:()=>tome(['#1a5aa8','#0a2a5a','#6aa8ff','#c8e8f4']),tome4:()=>tome(['#5a3aa8','#2a1a5a','#a88aff','#fff07a']),tome5:()=>tome(['#e8c040','#8a6a1a','#fff3b0','#ffffff'])});
 const CACHE={};
 // sprite(id, rarity) -> {canvas, gx, gy, w, h}; null for an unknown id
 function sprite(id,r){const k=id+'|'+(r||0);if(CACHE[k])return CACHE[k];const f=String(id).startsWith('cw|')?()=>cwDef(id):A.blade&&BLADED.includes(id)?()=>fromBlade(A.blade.BSPEC[id]):DEF[id];if(!f)return null;const o=f();if(!o)return null;const {I,gx,gy}=o;

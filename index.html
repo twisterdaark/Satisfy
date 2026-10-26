@@ -2090,7 +2090,7 @@ function vtNear(px,py,rad){const o=[],cx=Math.floor(px/TS),cy=Math.floor(py/TS),
  for(let y=80;y<=85;y++)setT(x0,y,y===82||y===83?PA:GR);
  // south gate where the main road meets the wall (owner report: invaders spawned south of a closed wall)
  for(let x=535;x<=540;x++)setT(x,y1,x===537||x===538?PA:GR);for(let y=y1+1;y<=y1+4;y++){setT(537,y,PA);setT(538,y,PA);}
- const B=[{x:518,y:65,w:6,h:5,k:'house'},{x:528,y:65,w:7,h:5,k:'forge'},{x:542,y:65,w:6,h:5,k:'shop'},{x:518,y:88,w:7,h:5,k:'inn'},{x:542,y:88,w:6,h:5,k:'house'},{x:550,y:76,w:6,h:5,k:'house'}];
+ const B=[{x:518,y:65,w:6,h:5,k:'house'},{x:528,y:65,w:7,h:5,k:'forge'},{x:542,y:65,w:6,h:5,k:'shop'},{x:518,y:88,w:7,h:5,k:'inn'},{x:542,y:88,w:6,h:5,k:'house'},{x:550,y:76,w:6,h:5,k:'house'},{x:528,y:94,w:6,h:5,k:'tower'}];
  B.forEach(b=>{b.lx=b.x;buildings.push(b);for(let y=b.y+2;y<b.y+b.h;y++)for(let x=b.x;x<b.x+b.w;x++)setT(x,y,BL);});
  ANVILS.push({id:'anvR',tx:536,ty:71,own:'smithR',perm:'fo1'});WELLS.push({tx:533,ty:79,ph:1});setT(533,79,BL);
  for(let y=REID.my-1;y<=REID.my+2;y++)for(let x=REID.mx-1;x<=REID.mx+1;x++)setT(x,y,PA);
@@ -3663,7 +3663,7 @@ function vowBreak(kind){const s=S&&S.qs.cp;if(!s||s.st!==1)return;const had=s.c>
 function phMates(r){if(!NET||!PARTY||!PARTY.id())return [];const pid=PARTY.id();return NET.remotes().filter(m=>m.party===pid&&m.anim!=='dead'&&Math.hypot(m.x-P.x,m.y-P.y)<r);}
 function phNear(ch,r){for(const m of phMates(r)){const s=FXS.get(m.sid);if(s&&s.st&&s.st.indexOf(ch)>=0)return true;}return false;}
 // a blow from a monster and a blow on one
-function phHurt(d,src){if(!src||!src.type||src.spar)return d;if(P.ctlU>gTime&&P.ctlS){const s=P.ctlS.find(o=>o.st===0);if(s){d*=.6;if(!src.dead&&!src.ally){s.m=src;s.st=1;}}}if(P.bls>0||phNear('b',120))d*=.9;if(P.jud>0||phNear('j',120))d*=.85;if(P.pdv>0)d*=.6;if(phNear('G',150))d*=.55;return Math.max(1,Math.round(d));}
+function phHurt(d,src){if(!src||!src.type||src.spar)return d;if(P.ctlU>gTime&&P.ctlS){const s=P.ctlS.find(o=>o.st===0);if(s){d*=.6;if(!src.dead&&!src.ally){s.m=src;s.st=1;}}}if(P.bls>0||phNear('b',120))d*=.9;if(P.jud>0||phNear('j',120))d*=.85;if(P.pdv>0)d*=.6;if(P.mtw>0)d*=.8;if(phNear('G',150))d*=.55;return Math.max(1,Math.round(d));}
 function phAtk(m){if(m.spar)return 1;return (P.ssFU>gTime||phNear('W',SSFR)?1.25:1)*(S.cls==='saint'||phNear('Q',60)?1.3:phNear('Q',150)?1.1:1)*(P.bls>0||phNear('b',120)?1.1:1)*(P.jud>0||phNear('j',120)?1.1:1)*(P.dom>0?1.25:1)*(phNear('G',150)?1.8:1);}
 function phHeal(pm){const n=rlHeal(pm);if(phMates(150).length){P.healT=gTime;healAggro();}p2Heal(n,phMates(150).length);if(P.stun>0)P.stun=0;for(const m of phMates(150))NET.send('raid.state',{to:m.uid,raid:'p|'+PARTY.id(),k:pm});return n;}
 function phRing(c){fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*20,y:P.y-4,vx:(rand()-.5)*14,vy:-26-rand()*16,t:.7,c,fl:1});}
@@ -3693,7 +3693,7 @@ function casOpts(){const o=[],pq=['cp','cpmonk'].find(q=>S.qs[q]&&S.qs[q].st===1
  o.push({l:t('oHire',{g:hirePrice()}),f:()=>{const g=hirePrice();if(S.gold<g){SFX.deny();return dialog('cassus',[t('noGold')]);}S.gold-=g;PH.hire={t:300,x:P.x-14,y:P.y,hk:2,dir:0,fr:0};hudDirty=true;SFX.coin&&SFX.coin();dialog('cassus',[t('hireOk')]);}});
  return o;}
 function phDone(q){if(q.promo==='paladin')setTimeout(phChurch,600);}
-function phTick(dt){if(!S||!P)return;for(const k of ['bls','jud','dom','pdv'])if(P[k]>0)P[k]-=dt;
+function phTick(dt){if(!S||!P)return;for(const k of ['bls','jud','dom','pdv','mtw'])if(P[k]>0)P[k]-=dt;
  const pr=PH.pray;if(pr){if(mode!=='play'&&mode!=='dialog'){PH.pray=null;}else if(Math.hypot(P.x-pr.x,P.y-pr.y)>3){PH.pray=null;toast(t('prayMoved'),'warn');}else if((pr.t-=dt)<=0){PH.pray=null;qEvent('pray','altar');SFX.quest();phRing('#fff3b0');}
   else if(rand()<dt*14)fx.push({x:P.x+(rand()-.5)*16,y:P.y-2,vx:0,vy:-20-rand()*10,t:.9,c:'#fff3b0',fl:1});}
  const h=PH.hire;if(h){if((h.t-=dt)<=0||P.hp<=0||P.ghost){PH.hire=null;if(P.hp>0)toast(t('hireEnd'));return;}
@@ -9596,7 +9596,7 @@ function skProg(k){if(S&&!S.skv)skMig();let l=1,c=((S&&S.skx)||{})[k]||0;while(l
 const SKK={};for(const [kd,l] of [['buff','bdetm bbarr bcoh bspray kstance glink lstand track sneye bgarmor wlsiph wlcurse dsseal dssum pbless pdprot pjudar pdomin tstealth apoison aleg agrd asens bbear bwolf beagle blion btiger bleo bhalf broar oelo fort taunt sctl transcend revolve restraint rage cry bcry qmove benc bdetect bassim sadisc sahw sasanc lkblock lkres kytrans kygod gkpow bshield bvalor bswift brest mheart gashield'],
  ['heal','sapray pheal prebec mkrev sahope gabreath gadesire salife'],['buff','sspc ssfield'],['util','sscre'],['util','trap tsteal ashadow nskel dsleap btele fly ltshade bgrease bdecoy bwing bcrys bmasst']])for(const k of l.split(' '))SKK[k]=kd;
 function skKind(k){if(SKO[k])return 'own';if(SKK[k])return SKK[k];const c=SKD[k]&&typeof CPK!=='undefined'&&CPK[SKD[k].cls],s=c&&(c.skills||[]).find(x=>x.id===k);return s&&(s.kind==='buff'||s.kind==='heal')?s.kind:'atk';}
-const skCdM=k=>skLv(k)>=10&&/^(buff|heal|util)$/.test(skKind(k))?.8:1,skMpM=k=>skLv(k)>=5&&/^(buff|util)$/.test(skKind(k))?.8:1;
+const skCdM=k=>(skLv(k)>=10&&/^(buff|heal|util)$/.test(skKind(k))?.8:1)*tomeCdM(),skMpM=k=>skLv(k)>=5&&/^(buff|util)$/.test(skKind(k))?.8:1;
 function skHealUp(k,h0){if(skKind(k)!=='heal'||!P||!(P.hp>h0))return;const L=skLv(k),m=.04*(L-1)+(L>=5?.25:0);if(m>0){P.hp=Math.min(maxHP(),P.hp+(P.hp-h0)*m);hudDirty=true;}}
 const skLv=k=>skProg(k)[0],skDm=k=>1+.06*(skLv(k)-1),skCostM=k=>1-.03*(skLv(k)-1),skDur=k=>1+.05*(skLv(k)-1),icbM=()=>skLv('icomb')>=5?1.3:1.2;
 /* passive levels (owner 2026-10-23: "make sure every passive levels, and say how to use and level it"): a passive has no
@@ -9617,14 +9617,14 @@ window.__GSL={kind:k=>skKind(k),opt:(k,l)=>skOptTxt(k,l),mp:k=>mpC(k),cdm:k=>skC
 // with these inputs (and the table, counted once a frame), so the answer is kept until one of them moves. Callers only read it.
 let CSKM={k:null,r:null},SKDN={t:-1,n:0};
 const skdN=()=>{if(SKDN.t!==gTime){SKDN.t=gTime;let n=0;for(const k in SKD)n++;SKDN.n=n;}return SKDN.n;};
-const clsSkills=()=>{const sb=S.bh&&S.bh.sb,k=[S.cls,S.cbase,S.church,S.sec,S.title,S.cls2,!!S.mdsk,sb?Object.keys(sb).filter(x=>sb[x]).join(','):'',typeof LGB!=='undefined'&&LGB?LGB[S.cls]:'',skdN(),qlendK()].join('|');
+const clsSkills=()=>{const sb=S.bh&&S.bh.sb,k=[S.cls,S.cbase,S.church,S.sec,S.title,S.cls2,!!S.mdsk,sb?Object.keys(sb).filter(x=>sb[x]).join(','):'',typeof LGB!=='undefined'&&LGB?LGB[S.cls]:'',skdN(),qlendK(),mgtKey()].join('|');
  if(CSKM.k!==k||CSKM.s!==S){CSKM={k,s:S,r:clsSkills0()};}return CSKM.r;};
 // (owner 2026-10-26: "it asks me to steal from monsters but doesn't give me the skill") a class trial lends the skill it asks
 // for while it is yours: SKD[k].qlend is the quest (A Light Hand lends Steal); the class keeps it after
 let QLEND=null;const qlendQ=()=>QLEND||(QLEND=[...new Set(Object.keys(SKD).map(k=>SKD[k].qlend).filter(Boolean))]),qlendOn=q=>!!(S.qs[q]&&S.qs[q].st===1)&&(!QD[q]||!QD[q].cls||S.cls==='novice'),qlendK=()=>qlendQ().map(q=>qlendOn(q)?1:0).join('');
 // a save opened while a trial is yours: its lent skill on the bar (a save from before v3.08 never got it), nothing else touched
 function qlendFix(){if(!S)return;for(const k of Object.keys(SKD))if(SKD[k].qlend&&qlendOn(SKD[k].qlend)&&skOK(k)&&!(S.sk&&S.sk[k]))checkSkills();}
-const clsSkills0=()=>Object.keys(SKD).filter(k=>!SKD[k].pas&&(!SKD[k].ncls||SKD[k].ncls!==S.cls)&&(!SKD[k].church||SKD[k].church===S.church)&&(!SKD[k].sec||SKD[k].sec===S.sec)&&(!SKD[k].sc2||SKD[k].sc2===S.cls2)&&(!SKD[k].bk||!!(S.bh&&S.bh.sb&&S.bh.sb[SKD[k].bk]))).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior'||typeof LGB!=='undefined'&&LGB&&LGB[S.cls]===SKD[k].cls||k==='mdarmy'&&!!S.mdsk||!!SKD[k].title&&(S.title===SKD[k].title||!!SKD[k].sc2a&&S.cls2===SKD[k].sc2a)||!!SKD[k].qlend&&qlendOn(SKD[k].qlend));
+const clsSkills0=()=>Object.keys(SKD).filter(k=>!SKD[k].pas&&(!SKD[k].ncls||SKD[k].ncls!==S.cls)&&(!SKD[k].church||SKD[k].church===S.church)&&(!SKD[k].sec||SKD[k].sec===S.sec)&&(!SKD[k].sc2||SKD[k].sc2===S.cls2)&&(!SKD[k].bk||!!(S.bh&&S.bh.sb&&S.bh.sb[SKD[k].bk]))).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior'||typeof LGB!=='undefined'&&LGB&&LGB[S.cls]===SKD[k].cls||k==='mdarmy'&&!!S.mdsk||!!SKD[k].title&&(S.title===SKD[k].title||!!SKD[k].sc2a&&S.cls2===SKD[k].sc2a)||!!SKD[k].qlend&&qlendOn(SKD[k].qlend)||!!SKD[k].mgt&&mgtKnown(k)&&clsFam('mage'));
 const NSK=8; // skill slots on the bar (keys 1-8); the title slot comes after them
 // owner 2026-10-22: gear (rings, weapons, armour) and things you use go on the main bar too, as on the extra bars
 const barThing=k=>typeof k==='string'&&!SKD[k]&&(XGEAR(k)||XITEM(k)||!!(S.mats&&k in S.mats));
@@ -15720,6 +15720,125 @@ const PXE=(()=>{const D={
  try{new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')swap(m.target);else for(const n of m.addedNodes)walk(n);}}).observe(document.body,{subtree:true,childList:true,characterData:true});walk(document.body);}catch(e){}
  return {url,M,D,walk};})();
 
+/* ---------------- the Mage Tower in Reidan (Soki's list, owner 2026-10-26: "add 10 spells, that any mage class can learn
+   regardless of their specialization... a new mage tower that may teach these spells to any mage... He may also sell tomes now,
+   which are a new type of weapon. They provide less cool down time than staff to all your skills but less damage overall")
+   The Archmage stands at the tower's door, south-west of the well. Any mage (the Magician, its classes, a legend grown from one)
+   buys a spell once it is high enough for it; each spell is a blow and a help at once. The learned ones are S.mgt[k]: they
+   follow the player through a class change and show only while the class is a mage's. Tomes are held like a staff (staff skills,
+   staff mastery) and every skill comes back 25% sooner, for about three quarters of a staff's attack at the same level.
+   Online: the blows go through hitMon like any skill (shared monsters stay host-authoritative), the heals through phHeal (the
+   party's raid.state channel) and Blessing through the status tag 'b', so no rules change. ---------------- */
+Object.assign(FIG,{archm:{hair:'hat',hc:'#e8e4f0',hl:'#ffffff',hat:'#4a1a7a',skin:'#eec39a',sk2:'#cf9f76',top:'#4a1a7a',top2:'#2e0f50',sleeves:true,robe:1,beard:'#ece8e0',beard2:'#bdb7ad',longBeard:1,collar:'#9ad8ff',belt:'#e8c040',cape:'#1a2850',pants:'#2e0f50',boots:'#1a1222'}});
+if(!SH.archm)shLazy('archm',()=>SA.chars.buildSheet(FIG.archm));
+NPCS.push({id:'archm',spr:'archm',tx:530.5,ty:99.4,ph:1,dir:0});
+// the ten spells, in the order they open, with what each costs to learn
+const MGT=['mtspark','mtward','mtrain','mtchain','mtburst','mtgrav','mtmeteor','mtlink','mtwarp','mtstar'],
+ MGTG={mtspark:2000,mtward:8000,mtrain:18000,mtchain:32000,mtburst:50000,mtgrav:72000,mtmeteor:100000,mtlink:140000,mtwarp:180000,mtstar:260000};
+Object.assign(SKD,{
+ mtspark:{cls:'mgt',mgt:1,lv:30,mp:12,cd:4,need:'staff',col:'#8ab8ff'},
+ mtward:{cls:'mgt',mgt:1,lv:60,mp:30,cd:20,need:'staff',col:'#bfefff'},
+ mtrain:{cls:'mgt',mgt:1,lv:90,mp:40,cd:18,need:'staff',col:'#7dffc8'},
+ mtchain:{cls:'mgt',mgt:1,lv:120,mp:45,cd:12,need:'staff',col:'#fff07a'},
+ mtburst:{cls:'mgt',mgt:1,lv:150,mp:55,cd:14,need:'staff',col:'#d08aff'},
+ mtgrav:{cls:'mgt',mgt:1,lv:180,mp:60,cd:20,need:'staff',col:'#6a5aff'},
+ mtmeteor:{cls:'mgt',mgt:1,lv:220,mp:70,cd:16,need:'staff',col:'#ff8a3a'},
+ mtlink:{cls:'mgt',mgt:1,lv:260,mp:80,cd:22,need:'staff',col:'#9affd8'},
+ mtwarp:{cls:'mgt',mgt:1,lv:300,mp:100,cd:45,need:'staff',col:'#e8e4ff'},
+ mtstar:{cls:'mgt',mgt:1,lv:360,mp:140,cd:40,need:'staff',col:'#fff3b0'}});
+const mgtKnown=k=>!!(S&&S.mgt&&S.mgt[k]),mgtKey=()=>S&&S.mgt?Object.keys(S.mgt).join(','):'';
+// the foes in a circle, nearest first
+function mgtNear(x,y,r,n){return mons.filter(m=>!m.dead&&Math.hypot(m.x-x,monY(m)-y)<r+MT[m.type].r&&seeL(x,y,m.x,monY(m))).sort((a,b)=>Math.hypot(a.x-x,monY(a)-y)-Math.hypot(b.x-x,monY(b)-y)).slice(0,n||99);}
+function mgtMana(f){const v=Math.round(maxMP()*f);if(v<=0)return;P.mp=Math.min(maxMP(),P.mp+v);numP(-26,'+'+v,'#7ab0ff',false);}
+function mgtSparks(x,y,c,n){for(let i=0;i<(n||12);i++)fx.push({x,y,vx:(rand()-.5)*120,vy:(rand()-.5)*120,t:.4,c,fl:1});}
+Object.assign(SKF,{
+ // Mana Spark: a blue spark that bursts on the first foe; a little mana comes back
+ mtspark:()=>{const v=fdir();shoot('fire',v[0],v[1],1.9,{boom:1});mgtMana(.04);mgtSparks(P.x,P.y-8,'#8ab8ff',8);},
+ // Frost Ward: a ring of frost chills those around you; for 8 s every blow on you is a fifth lighter
+ mtward:()=>{SFX.slam();fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});mgtSparks(P.x,P.y-6,'#cfefff',16);for(const m of mgtNear(P.x,P.y-6,52)){hitMon(m,1.1,{skill:1});m.slowU=gTime+3;}P.mtw=8*skDur('mtward');phRing('#bfefff');},
+ // Healing Rain: rain falls ahead, hurting the foes under it, and heals you and the party near you
+ mtrain:()=>{const v=fdir(),x=P.x+v[0]*50,y=P.y-6+v[1]*50;for(let i=0;i<18;i++)fx.push({x:x+(rand()-.5)*80,y:y-40-rand()*20,vx:0,vy:120,t:.4,c:'#7dffc8',fl:1});aoe(x,y,64,1.5,{skill:1});phHeal(150);phRing('#7dffc8');},
+ // Chain Spark: a spark leaps between up to five foes; for 6 s you carry Blessing (the party near you: -10% damage taken, +10% dealt)
+ mtchain:()=>{let x=P.x,y=P.y-8;const hit=new Set();for(let i=0;i<5;i++){const m=mons.filter(o=>!o.dead&&!hit.has(o)&&Math.hypot(o.x-x,monY(o)-y)<110&&seeL(x,y,o.x,monY(o))).sort((a,b)=>Math.hypot(a.x-x,monY(a)-y)-Math.hypot(b.x-x,monY(b)-y))[0];if(!m)break;hit.add(m);const pts=[];for(let j=0;j<=5;j++)pts.push([x+(m.x-x)*j/5+(rand()-.5)*5,y+(monY(m)-y)*j/5+(rand()-.5)*5]);fx.push({bolt:pts,t:.2});hitMon(m,2.2,{skill:1});x=m.x;y=monY(m);}
+  if(hit.size)shake=.1;P.bls=Math.max(P.bls||0,6);},
+ // Arcane Burst: a violet blast throws the foes around you back; it shakes off a stun and wards you for 3 s
+ mtburst:()=>{SFX.slam();shake=.15;fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});mgtSparks(P.x,P.y-6,'#d08aff',20);for(const m of mgtNear(P.x,P.y-6,64)){const dx=m.x-P.x,dy=monY(m)-P.y,d=Math.hypot(dx,dy)||1;hitMon(m,3,{skill:1,kx:dx/d,ky:dy/d});}P.stun=0;P.mtw=Math.max(P.mtw||0,3);},
+ // Gravity Well: a well ahead pulls the foes into it and holds them (stunned 1.2 s, then slowed), so they don't reach your friends
+ mtgrav:()=>{const v=fdir(),x=P.x+v[0]*60,y=P.y-6+v[1]*60;fx.push({ring:true,big:1,x,y,t:.6});for(let i=0;i<14;i++){const a=i/14*6.283;fx.push({x:x+Math.cos(a)*60,y:y+Math.sin(a)*40,vx:-Math.cos(a)*110,vy:-Math.sin(a)*75,t:.5,c:'#6a5aff',fl:1});}
+  for(const m of mgtNear(x,y,90)){const dx=x-m.x,dy=y-monY(m),d=Math.hypot(dx,dy)||1;if(!m.boss&&!MT[m.type].boss){m.x+=dx/d*Math.min(d,30);m.y+=dy/d*Math.min(d,30);}hitMon(m,2.2,{skill:1,stun:1.2});m.slowU=gTime+4;}},
+ // Meteor Shard: a shard falls ahead for a heavy blow; each foe it hits gives back 10% of your mana (up to 30%)
+ mtmeteor:()=>{const v=fdir(),x=P.x+v[0]*80,y=P.y-6+v[1]*80;for(let i=0;i<10;i++)fx.push({x:x-30+i*3,y:y-60+i*6,vx:60,vy:120,t:.3,c:'#ff8a3a',fl:1});vfx('fire',x,y);SFX.slam();shake=.18;const n=aoe(x,y,48,4.2,{skill:1});mgtMana(Math.min(3,n)*.1);},
+ // Spirit Link: a beam ahead drains the foes in its line, and what it drains heals you and the party near you
+ mtlink:()=>{const v=fdir(),pts=[];for(let i=0;i<=8;i++)pts.push([P.x+v[0]*15*i,P.y-8+v[1]*15*i]);fx.push({bolt:pts,t:.25});let n=0;
+  mons.forEach(m=>{if(m.dead)return;const dx=m.x-P.x,dy=monY(m)-(P.y-8),al=dx*v[0]+dy*v[1],pp=Math.abs(dx*v[1]-dy*v[0]);if(al>0&&al<125&&pp<14&&hitMon(m,3,{skill:1}))n++;});phHeal(60+30*Math.min(4,n));phRing('#9affd8');},
+ // Time Warp: time slows around you (foes slowed 5 s) and your other skills come back 3 s sooner
+ mtwarp:()=>{fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.8});mgtSparks(P.x,P.y-6,'#e8e4ff',20);for(const m of mgtNear(P.x,P.y-6,80)){hitMon(m,1.5,{skill:1});m.slowU=gTime+5;}for(const k in P.cd)if(k!=='mtwarp'&&P.cd[k]>0)P.cd[k]=Math.max(0,P.cd[k]-3);hudDirty=true;},
+ // Starfall: stars fall on up to eight foes around you; you carry Blessing for 12 s and you and the party near you are healed
+ mtstar:()=>{const T=mgtNear(P.x,P.y-6,110,8);for(const m of T){for(let i=0;i<5;i++)fx.push({x:m.x-12+i*3,y:monY(m)-50+i*8,vx:40,vy:150,t:.3,c:'#fff3b0',fl:1});hitMon(m,2.6,{skill:1});}if(T.length){SFX.crit();shake=.15;}P.bls=Math.max(P.bls||0,12);phHeal(200);phRing('#fff3b0');}});
+Object.assign(SKICO,{
+ mtspark:p=>{p(7,2,2,12);p(2,7,12,2);p(5,5,6,6);p(7,7,2,2,'#fff');},
+ mtward:p=>{for(let i=0;i<12;i++){const a=i*.524;p(8+Math.cos(a)*6|0,8+Math.sin(a)*6|0,2,2);}p(7,4,2,8,'#fff');p(4,7,8,2,'#fff');},
+ mtrain:p=>{for(let i=0;i<5;i++)p(2+i*3,2+(i%2)*3,1,5);p(6,10,4,2);p(7,9,2,4);p(7,10,2,2,'#fff');},
+ mtchain:p=>{p(2,2,3,3);p(5,5,2,2);p(7,7,3,3);p(10,10,2,2);p(12,12,3,3);p(8,8,1,1,'#fff');},
+ mtburst:p=>{for(let i=0;i<8;i++){const a=i*.785;p(8+Math.cos(a)*6|0,8+Math.sin(a)*6|0,2,2);}p(6,6,4,4);p(7,7,2,2,'#fff');},
+ mtgrav:p=>{p(4,4,8,8);p(6,6,4,4,'#101a33');p(7,7,2,2,'#fff');p(1,8,2,1);p(13,7,2,1);p(8,1,1,2);p(7,13,1,2);},
+ mtmeteor:p=>{p(3,2,2,2);p(5,4,2,2);p(7,6,3,3);p(9,9,4,4);p(10,10,2,2,'#fff');},
+ mtlink:p=>{p(1,7,14,2);p(2,4,3,3);p(11,9,3,3);p(3,5,1,1,'#fff');p(12,10,1,1,'#fff');},
+ mtwarp:p=>{for(let i=0;i<10;i++){const a=i*.628;p(8+Math.cos(a)*6|0,8+Math.sin(a)*6|0,1,1);}p(7,3,2,6);p(7,7,4,2);p(7,7,2,2,'#fff');},
+ mtstar:p=>{p(7,1,2,14);p(1,7,14,2);p(4,4,8,8);p(6,6,4,4,'#fff');p(2,2,1,1);p(13,13,1,1);p(13,2,1,1);}});
+// tomes: shop-only, never crafted or dropped
+const TOMES=['tome1','tome2','tome3','tome4','tome5'],TOMEG={tome1:2000,tome2:15000,tome3:60000,tome4:150000,tome5:400000},TOMECD=.75;
+RC.push(
+ {id:'tome1',slot:'w',atk:60,spd:.5,mpb:20,lvr:20,unlock:()=>false},
+ {id:'tome2',slot:'w',atk:150,spd:.5,mpb:50,lvr:80,unlock:()=>false},
+ {id:'tome3',slot:'w',atk:220,spd:.5,mpb:80,lvr:180,unlock:()=>false},
+ {id:'tome4',slot:'w',atk:300,spd:.5,mpb:110,lvr:280,unlock:()=>false},
+ {id:'tome5',slot:'w',atk:380,spd:.5,mpb:140,lvr:380,unlock:()=>false});
+Object.assign(WSH,{tome1:{l:6,c:'#6a4a2a',k:'staff',tome:1},tome2:{l:6,c:'#a83a1a',k:'staff',tome:1},tome3:{l:6,c:'#1a5aa8',k:'staff',tome:1},tome4:{l:6,c:'#5a3aa8',k:'staff',tome:1},tome5:{l:6,c:'#e8c040',k:'staff',tome:1}});
+Object.assign(SHOPG,TOMEG);
+const tomeOn=()=>{const w=typeof weapon==='function'&&S&&weapon();return !!(w&&WSH[w.id]&&WSH[w.id].tome);},tomeCdM=()=>tomeOn()?TOMECD:1;
+function mgtLearn(k){const d=SKD[k],g=price('archm',MGTG[k]);if(!clsFam('mage')){SFX.deny();return dialog('archm',['mtNoMage']);}
+ if(mgtKnown(k))return mtMenu();if(S.lv<d.lv){SFX.deny();return dialog('archm',[t('mtLow',{lv:d.lv})],()=>mtMenu());}
+ if(S.gold<g){SFX.deny();return dialog('archm',['arNo'],()=>mtMenu());}
+ S.gold-=g;(S.mgt||(S.mgt={}))[k]=1;SFX.legendary();vfx('heal',P.x,P.y);checkSkills();save();hudDirty=true;dialog('archm',[t('mtGot',{s:t('sk_'+k)})],()=>mtMenu());}
+function mtMenu(){const back={l:t('oBack'),f:()=>shopD('archm','archm_hi')};
+ if(!clsFam('mage'))return dialog('archm',['mtNoMage'],null,[back]);
+ dialog('archm',['mtList'],null,[...MGT.map(k=>{const d=SKD[k],g=price('archm',MGTG[k]),kn=mgtKnown(k);
+  return {l:kn?t('mtKnown',{s:t('sk_'+k)}):t('mtBuy',{s:t('sk_'+k),lv:d.lv,g}),ic:'sk_'+k,st:t('skd_'+k),poor:!kn&&(S.gold<g||S.lv<d.lv),f:()=>mgtLearn(k)};}),back]);}
+function mtTomes(){const back={l:t('oBack'),f:()=>shopD('archm','archm_hi')};
+ dialog('archm',['mtTomeL'],null,[...TOMES.map(id=>{const g=price('archm',TOMEG[id]);return {l:t('oBuyGear',{it:t(id),g}),ic:id,st:gearCmp(id),poor:S.gold<g,f:()=>buyGear(id,g,'archm')};}),back]);}
+NPCT.archm={hi:'archm_hi',idle:()=>clsFam('mage')?'archm_idle':'archm_no',opts:()=>[{l:t('oMtLearn'),f:mtMenu},{l:t('oMtTome'),f:mtTomes}]};
+Object.assign(STR.ar,{archm:'كبير السحرة',archm_hi:'أهلًا بيك في برج السحرة. أي ساحر، أيًا كان طريقه، يقدر يتعلم هنا.',archm_idle:'السحر مالوش طريق واحد. اتعلم اللي يقويك ويحمي اللي معاك.',archm_no:'البرج ده للسحرة. بس الكتب ممكن تعجب أي حد.',
+ oMtLearn:'اتعلم تعاويذ البرج',oMtTome:'اشتري كتب (Tome)',mtList:'كل تعويذة فيها ضربة ومساعدة. كل ما لفلك يعلى، تعويذة جديدة بتفتح.',mtBuy:'{s} (لفل {lv}) · {g} دهب',mtKnown:'{s} ✓ اتعلمتها',
+ mtNoMage:'التعاويذ دي للسحرة بس: الساحر وكلاساته، أو أسطورة طالعة منه.',mtLow:'لسه بدري عليك. ارجعلي لما توصل لفل {lv}.',mtGot:'اتعلمت {s}! هتلاقيها في مهاراتك.',
+ mtTomeL:'الكتاب بيتمسك زي العصاية، وكل مهاراتك بترجع أسرع بربع الوقت، بس ضربته أخف من عصاية من نفس اللفل.',
+ tome1:'كتاب المبتدئ',tome2:'كتاب الجمر',tome3:'كتاب المد',tome4:'كتاب العواصف',tome5:'مخطوطة كبير السحرة',
+ sk_mtspark:'شرارة المانا',skd_mtspark:'شرارة زرقا بتنفجر في أول عدو قدامك بـ190%، وبترجعلك 4% من المانا.',
+ sk_mtward:'درع الصقيع',skd_mtward:'حلقة صقيع حواليك بتضرب 110% وبتبطّأ الأعداء، ولمدة 8 ثواني أي ضربة عليك بتخف الخُمس.',
+ sk_mtrain:'مطر الشفاء',skd_mtrain:'مطر بينزل قدامك بيضرب الأعداء تحته 150%، وبيعالجك انت والبارتي اللي جنبك.',
+ sk_mtchain:'الشرارة المتسلسلة',skd_mtchain:'شرارة بتنط بين 5 أعداء بـ220% لكل واحد، وبتاخد بركة لمدة 6 ثواني (البارتي جنبك ياخد ضرر أقل 10% ويضرب أكتر 10%).',
+ sk_mtburst:'الانفجار الغامض',skd_mtburst:'انفجار بنفسجي بيضرب اللي حواليك 300% وبيرميهم لورا، وبيفكّ عنك الشلل وبيحميك 3 ثواني.',
+ sk_mtgrav:'بئر الجاذبية',skd_mtgrav:'بئر قدامك بيشد الأعداء جواه ويضربهم 220% ويشلّهم ثانية وشوية، عشان مايوصلوش لصحابك.',
+ sk_mtmeteor:'شظية النيزك',skd_mtmeteor:'شظية بتنزل قدامك بضربة تقيلة 420%، وكل عدو بتصيبه بيرجعلك 10% مانا (لحد 30%).',
+ sk_mtlink:'رابطة الروح',skd_mtlink:'شعاع قدامك بيمتص الأعداء اللي في طريقه 300%، واللي بيمتصه بيعالجك انت والبارتي.',
+ sk_mtwarp:'التواء الزمن',skd_mtwarp:'الزمن بيبطأ حواليك: الأعداء بيتبطّأوا 5 ثواني وبياخدوا 150%، وباقي مهاراتك بترجع أسرع بـ3 ثواني.',
+ sk_mtstar:'سقوط النجوم',skd_mtstar:'نجوم بتنزل على 8 أعداء حواليك بـ260% لكل واحد، وبتاخد بركة 12 ثانية، وبتعالجك انت والبارتي.'});
+Object.assign(STR.en,{archm:'The Archmage',archm_hi:'Welcome to the Mage Tower. Any mage, whatever the path, can learn here.',archm_idle:'Magic has no single road. Learn what makes you stronger and guards those beside you.',archm_no:'This tower is for mages. The tomes, though, might please anyone.',
+ oMtLearn:'Learn the tower\'s spells',oMtTome:'Buy tomes',mtList:'Every spell is a blow and a help together. A new one opens as your level rises.',mtBuy:'{s} (Lv {lv}) · {g} gold',mtKnown:'{s} ✓ learned',
+ mtNoMage:'These spells are for mages only: the Magician and its classes, or a legend grown from one.',mtLow:'It is too early for you. Come back at level {lv}.',mtGot:'You learned {s}! You will find it among your skills.',
+ mtTomeL:'A tome is held like a staff, and all your skills come back a quarter sooner, but it hits lighter than a staff of the same level.',
+ tome1:'Apprentice\'s Tome',tome2:'Tome of Embers',tome3:'Tome of the Tide',tome4:'Tome of Storms',tome5:'Archmage\'s Grimoire',
+ sk_mtspark:'Mana Spark',skd_mtspark:'A blue spark that bursts on the first foe ahead for 190%, and gives back 4% of your mana.',
+ sk_mtward:'Frost Ward',skd_mtward:'A ring of frost hits those around you for 110% and slows them; for 8 s every blow on you is a fifth lighter.',
+ sk_mtrain:'Healing Rain',skd_mtrain:'Rain falls ahead, hitting the foes under it for 150%, and heals you and the party near you.',
+ sk_mtchain:'Chain Spark',skd_mtchain:'A spark leaps between up to 5 foes for 220% each, and you carry Blessing for 6 s (the party near you takes 10% less damage and deals 10% more).',
+ sk_mtburst:'Arcane Burst',skd_mtburst:'A violet blast hits those around you for 300% and throws them back; it shakes off a stun and wards you for 3 s.',
+ sk_mtgrav:'Gravity Well',skd_mtgrav:'A well ahead pulls the foes in, hits them for 220% and holds them a moment, so they don\'t reach your friends.',
+ sk_mtmeteor:'Meteor Shard',skd_mtmeteor:'A shard falls ahead for a heavy 420% blow; each foe it hits gives back 10% of your mana (up to 30%).',
+ sk_mtlink:'Spirit Link',skd_mtlink:'A beam ahead drains the foes in its line for 300%, and what it drains heals you and the party near you.',
+ sk_mtwarp:'Time Warp',skd_mtwarp:'Time slows around you: foes are slowed for 5 s and take 150%, and your other skills come back 3 s sooner.',
+ sk_mtstar:'Starfall',skd_mtstar:'Stars fall on up to 8 foes around you for 260% each; you carry Blessing for 12 s, and you and the party near you are healed.'});
+window.__GMGT={L:MGT,G:MGTG,T:TOMES,learn:k=>mgtLearn(k),known:k=>mgtKnown(k),cdM:()=>tomeCdM(),skills:()=>clsSkills(),cast:k=>{SKF[k]();return {mp:P.mp,bls:P.bls,mtw:P.mtw||0};},tome:id=>{const it=mkItem(id,0);S.items.push(it);equip(it);return weapon().id;},npc:()=>{const n=npcs.find(n=>n.id==='archm');if(!n)return null;const x=n.x/TS|0,y=n.y/TS|0;return {x,y,solid:SOLID[at(x,y)]===1,reid:x>=REID.x0&&x<=REID.x1&&y>=REID.y0&&y<=REID.y1};}}; // tests
 window.__G={bag:()=>({GDROP,openSell,INVS,invClick,unitVal,itemVal,SHOPG,SHOPM,POT}),lines:()=>STR,chunks:()=>({g:gg.stats(),o:og.stats()}),chunkLayers:()=>({gg,og}),get CARD(){return CARD},get SM(){return SM},get allies(){return allies},get S(){return S},get P(){return P},get mode(){return mode},die:()=>die(),mons:()=>mons,get npcs(){return npcs},nodes,act,finishMG:()=>finishMG,startMG:id=>startMG(RC.find(r=>r.id===id)),get MG(){return MG},talkNPC:id=>talkNPC(id),completeQ:id=>completeQ(id),acceptQ:id=>acceptQ(id),useSlot:i=>useSlot(i),newGame:L=>newGame(L),QD,openMap:()=>openMap(),get proj(){return proj},gainXP:n=>gainXP(n),save:q=>save(q),openPick:s=>openPick(s),pickOpt:i=>pickOpt(i),advance:()=>advance(),get DL(){return DL},zoneAt,VT,chopped,tryAttack:(a,b)=>tryAttack(a,b),get KB(){return KB},ROOMS,PROPS,enterRoom:r=>enterRoom(r),openBoard:()=>openBoard(),openQD:id=>openQD(id),TOWNS,useProp:p=>useProp(p),at:(x,y)=>at(x,y),setT:(x,y,v)=>setT(x,y,v),eqx:{buyGear:(i,g,w)=>buyGear(i,g,w),equip:i=>equip(i),eqIt:s=>eqIt(s),defV:()=>defV(),atkV:()=>atkV(),atkCD:()=>atkCD(),maxMP:()=>maxMP(),repairAll:w=>repairAll(w),enhance:(i,w,x)=>enhance(i,w,x),enhPick:(i,w)=>enhPick(i,w),mkItem:(i,r)=>mkItem(i,r),openEquip:()=>openEquip(),wear:(i,p)=>wear(i,p),openForge:()=>openForge(),price:(w,g)=>price(w,g),addAff:(i,n)=>addAff(i,n),giveGift:(w,k)=>giveGift(w,k),townOfNpc:i=>townOfNpc(i),get ESC(){return ESC},solid:(x,y)=>solidT(x,y),DGATES,DUN,useGate:g=>useGate(g)}};
 // Read-only engine surface for the online layer and for content tests. Contract: docs/api/ENGINE_API.md
 const plain=o=>JSON.parse(JSON.stringify(o,(k,v)=>typeof v==='function'?{$fn:String(v)}:v));
