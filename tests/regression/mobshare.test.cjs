@@ -347,6 +347,21 @@ test("a monster B makes from the host's list (one B never spawned) takes B's hit
   } finally { await ctx.close(); }
 });
 
+test("(plan U122, U130) one player's fire on a monster reaches the host's copy: a troll stops closing its wounds there too", async () => {
+  const { ctx, a, b } = await pair();
+  try {
+    const [k] = await nearest(b, 1);
+    for (const g of [a, b]) await on(g, (k) => { const m = by(k); m.max = m.hp = 1e6; m.agg = 0; m.eng = 0; m.rgOffU = 0; }, k);
+    await frames([a, b], 30);
+    const off = (g) => on(g, (k) => (by(k).rgOffU || 0) > window.__GANIM.t() / 1000, k);
+    assert.equal(await off(a), false);
+    assert.equal(await on(b, (k) => { const m = by(k); window.__GMX3.fireOn(m); return !!m.led; }, k), true, "B follows the host's copy");
+    await frames([a, b], 30);
+    assert.equal(await off(a), true, "B's fire is on the host's copy");
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
 test("a weakness or a slow one player's skill gives a monster is on the host's copy, so it holds for everyone, both ways", async () => {
   const { ctx, a, b } = await pair();
   try {

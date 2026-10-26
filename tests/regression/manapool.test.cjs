@@ -11,7 +11,7 @@ test('mana: 3 a point, 6 from level 200; skill costs from a capped reference poo
   try {
     await H.newGame(g);
     await g.step(3);
-    const r = await g.eval(() => { const G = window.__G, S = G.S, M = window.__GMP; S.st.int = 100; S.lv = 50;
+    const r = await g.eval(() => { const G = window.__G, S = G.S, M = window.__GMANA; S.st.int = 100; S.lv = 50;
       const lo = { max: M.max(), per: M.per(), strike: M.cost('strike') };
       S.lv = 450; S.st.int = 2500; const hi = { max: M.max(), per: M.per(), ref: M.ref(), strike: M.cost('strike') };
       S.st.int = 30; const war = { max: M.max(), strike: M.cost('strike') };
