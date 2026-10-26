@@ -1561,6 +1561,16 @@
             "$other": { ".validate": false }
           }
         },
+        "rw": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && newData.exists() && (!data.exists() || now - data.child('t').val() >= 20000)",
+            ".validate": "newData.hasChildren(['n', 't'])",
+            "n": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000 && (data.exists() ? newData.val() >= data.val() && newData.val() <= data.val() + 300 : newData.val() <= 300)" },
+            "t": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        },
         "tax": {
           ".read": "auth != null",
           ".write": "auth != null && newData.exists() && $world === 'satisfy' && root.child('world').child($world).child('own').child('castle').child('g').val() === newData.child('g').val() && root.child('guilds').child(newData.child('g').val()).child('master').val() === auth.uid && (!data.exists() || data.child('g').val() !== newData.child('g').val() || data.child('t').val() < now - 3600000)",
