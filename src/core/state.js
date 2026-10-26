@@ -41,7 +41,7 @@
     // Three Crowns at the inns: games won and played (SAT-ONLINE-181)
     'cg',
     // the heaviest fish of each kind you have caught (SAT-ONLINE-182); your fishing rod and the bait on your hook (v3.03); your forge hammer and spatula (v3.04)
-    'fishR', 'rod', 'bait', 'smh', 'spt',
+    'fishR', 'rod', 'bait', 'smh', 'spt', 'pick',
     // the Blacksmith expo seasons this character's entry won (SAT-ONLINE-174)
     'exw',
     // the fishing festivals this character won (SAT-ONLINE-183)
@@ -108,7 +108,7 @@
     // auto production on or off (v3.10)
     'autoP',
     // the Sword Saint's created sword techniques (v3.13): [{id, fm, f, L, nm}]
-    'swc',
+    'swc', 'dmEss', 'sanc', 'sncCd',
     // the Duplicator's one copied skill (v3.15)
     'dpCopy',
     // the Vatican (v3.11): Goddess Rebecca's blessing, from Help the Rebecca Church!

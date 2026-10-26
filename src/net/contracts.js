@@ -82,7 +82,7 @@
   // tests/regression/party.test.cjs checks this list against Satisfy.local.world().towns so a new town can't be left out.
   // The East Continent's towns (owner 2026-10-23): Pangea, Kars, the capitals of Xing, Kaya and Pa, and Cho's farming village.
   // The Vatican (zVatican, v3.11), the Holy See of the Rebecca Church.
-  var SAFE_ZONES = ['zBai', 'zWin', 'zPat', 'zReid', 'zRein', 'zTitan', 'zButin', 'zEaPangea', 'zEaKars', 'zEaXingC', 'zEaKayaC', 'zEaPaC', 'zEaFarm', 'zVatican'];
+  var SAFE_ZONES = ['zBai', 'zWin', 'zPat', 'zReid', 'zRein', 'zTitan', 'zButin', 'zEaPangea', 'zEaKars', 'zEaXingC', 'zEaKayaC', 'zEaPaC', 'zEaFarm', 'zVatican', 'zHarbor'];
   // 'void' (or no zone): a position the world doesn't define, e.g. the interior strip between rooms. The game's
   // own zoneAt falls back to Winston there (doc §59 C06); online that must never count as a safe town, nor as a
   // field where players may fight, so it is `known: false` and callers refuse both.
