@@ -32,7 +32,7 @@ test('weather by the server clock, herbs on the same spots, a knocked-out townsp
     // an invasion of Winston running on both (the server clock moved to a minute in, for both pages)
     for (const g of [a, b]) await g.eval(() => {
       const EVS = 15 * 60 * 1000, base = Date.now() + (Satisfy.local.net() ? 0 : 0);
-      let slot = Math.floor((Date.now() + (window.__fakeRTDB.serverOffset || 0)) / EVS) + 1; while (((slot * 2654435761) >>> 0) % 8 !== 0) slot++;
+      let slot = Math.floor((Date.now() + (window.__fakeRTDB.serverOffset || 0)) / EVS) + 1; const E = window.__GU.EVT; while (((slot * 2654435761) >>> 0) % E.length !== 0) slot++;
       const want = slot * EVS + 60000, real = Date.now.bind(Date), cur = Date.now() + (window.__fakeRTDB.serverOffset || 0), d = want - cur;
       Date.now = () => real() + d; void base;
     });
