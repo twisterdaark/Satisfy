@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26plan6', ver: '3.27', d: '2026-10-26',
+      ar: ["أرض بيارو: تقدر تحرت الأرض قبل ما تزرع (محصول زيادة من الزرعة دي)، وتسقي الزرعة وهي بتكبر مرة واحدة من برميل بيارو (بتطلع أسرع). الأرض المحروتة والمتسقية بتبان على الحتة.",
+        "ورق الوصفات المقطوع: بيقع من الزعما (أكتر لما تبقى في بارتي)، وكل مهمة زعيم بتديك ورقة. 4 ورقات مع بعض (دوس عليهم في الشنطة) بيعملوا كتاب وصفة نادر مش بيتباع في أي محل، واحد لسه متعرفوش.",
+        "العقود الأسبوعية في لوحة المهام: عقد كل أسبوع لكل صنعة (الحدادة، والطبخ، والجرعات، والخياطة، والزراعة). اللي تعمله بعد ما تاخده بيتحسب، وكل قطعة مرة واحدة. بيدفع دهب وخبرة وورقة وصفة.",
+        "كشافين الجوبلن بقوا بيلفوا على أربع نقط حوالين معسكرهم بدل ما يتمشوا على أي حتة."],
+      en: ["Piaro's Field: plow a plot before you sow it for one more crop, and water a growing crop once from Piaro's barrel to have it sooner. Plowed and watered plots show it.",
+        "Torn recipe pages: bosses drop them (more often when you fight in a party), and every boss quest gives one. Four together (click them in the bag) make a rare recipe book that no shop sells, one you don't know yet.",
+        "Weekly contracts at the quest board: one a week for each craft (smithing, cooking, brewing, tailoring, farming). What you make after taking one counts, each piece once. Each pays gold, experience and a torn recipe page.",
+        "Goblin scouts now walk a round of four posts around their camp instead of wandering anywhere."] },
     { v: '2026-10-26crearmor', ver: '3.25', d: '2026-10-26',
       ar: ["الدروع والخوذ والجوانتيات والبوتات اللي بيخلقها وريث باغما (مهارة الخلق) بقت ليها صورة مرسومة بألوان خاماتها زي الأسلحة، بدل ما كانت بتظهر كأنها رمح. ولما تلبسها شكلها على الشخصية بيبقى بألوان خاماتها بدل الحديد العادي، والتانيين بيشوفوها زيك.",
         "المعدات المخلوقة بقت قطعة لوحدها: مبقتش بتتحسب في أي طقم (سِت) ولا بيظهر عليها تأثير الطقم.",

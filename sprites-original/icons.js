@@ -306,6 +306,8 @@ Object.assign(DRAW,{
  rscroll:I=>{I.rect(3,4,10,8,'#e8d8a8');I.rect(3,4,10,1,'#fff2c8');I.ell(3,8,1.6,4,'#c8b080');I.ell(13,8,1.6,4,'#c8b080');I.rect(7,4,2,8,'#3a7ad8');I.ell(8,8,2,2,'#bfe8ff');I.set(8,8,'#ffffff');I.line(5,6,6,6,'#a08a60');I.line(10,10,11,10,'#a08a60');},
  blocks:I=>{I.rect(2,9,5,5,'#d83a3a');I.rect(8,9,5,5,'#3a7ad8');I.rect(5,3,5,5,'#e8b030');I.set(3,10,'#ff8a8a');I.set(9,10,'#9ac0ff');I.set(6,4,'#fff0a0');I.rect(3,8,1,1,'#d83a3a');I.rect(9,8,1,1,'#3a7ad8');}});
 DRAW.jaffa=DRAW.arrows;
+// a torn recipe page (plan U280): parchment with a ragged right edge, ink lines and a corner of a drawn blade
+DRAW.bpfrag=I=>{I.rect(3,2,9,12,'#e8d8a8');I.rect(3,2,9,1,'#fff2c8');for(let y=3;y<14;y+=2)I.set(12,y,'#e8d8a8');for(let y=4;y<14;y+=3)I.set(11,y,'#c8b080');I.rect(3,13,9,1,'#c8b080');for(let y=5;y<12;y+=2)I.line(5,y,9,y,'#8a7050');I.line(5,4,7,4,'#3a7ad8');I.line(9,10,11,8,'#6a6a7a');I.set(8,11,'#8a6a3a');};
 const SLOT={slotW:I=>{for(let i=0;i<8;i++)I.set(5+i,10-i,'#bfe0ff');I.line(3,10,5,12,'#bfe0ff');I.set(3,12,'#bfe0ff');},slotA:I=>{I.rect(4,3,8,10,'#bfe0ff');I.rect(2,3,3,4,'#bfe0ff');I.rect(11,3,3,4,'#bfe0ff');},
  slotH:I=>{I.rect(4,4,8,7,'#bfe0ff');I.rect(3,8,10,2,'#bfe0ff');},slotG:I=>{I.rect(4,5,7,8,'#bfe0ff');I.rect(11,7,2,3,'#bfe0ff');},slotB:I=>{I.rect(5,3,4,9,'#bfe0ff');I.rect(5,10,8,3,'#bfe0ff');},slotX:I=>{I.rect(6,3,4,4,'#bfe0ff');I.rect(7,7,2,6,'#bfe0ff');}};
 
