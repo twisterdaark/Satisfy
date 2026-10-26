@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26soki1', ver: '3.26', d: '2026-10-26',
+      ar: ["الوحوش والزعماء ممكن يطلعوا نسخة \"نخبة\": أقوى 50% في الصحة والضرب، وبيدّوا ضعف الخبرة. اسمهم دهبي وتحتهم دايرة دهب، وبيبانوا على الخريطة. 3% من الوحوش و10% من الزعماء، وبيتغيّروا مع كل ظهور. أونلاين كلكم بتشوفوا نفس النخبة.",
+          "خبرة القصة الرئيسية والمهمات الملحمية بقت الضعف، والحد الأقصى بتاعها بقى الضعف كمان، فالزيادة بتبان في اللفلات العالية.",
+          "اللي ياخد كلاس أسطوري يقدر يعيد مهمات القصة والمهمات الجانبية اللي خلّصها. الإعادة بتدّي خبرة المهمات المتكررة، ومبتعيدش الكلاسات ولا الاختبارات ولا الملحمات.",
+          "في ريدان فيه ناسك جديد اسمه \"ناسك النسيان\": يمسحلك الكلاس (من لفل 100 وطالع: بتخسر 100 لفل، وبترجع مبتدئ، ونقطك بترجعلك توزعها تاني) أو يمسح شخصيتك كلها وتبدأ من الأول. لو كلاسك أسطوري، الأسطورة وكتابها بيرجعوا للعالم وأي حد يقدر ياخدهم من الأول.",
+          "لما تمسح شخصية أسطورية من قايمة الشخصيات، الأسطورة بقت بترجع للعالم فعلًا، ومبقتش اللعبة بتاخدها تاني لوحدها من شاشة البداية."],
+      en: ["Monsters and bosses may spawn as an \"Elite\": 50% more health and harder blows, double the experience. Their name is gold with a gold ring under them, and the map marks them. 3% of monsters and 10% of bosses, rolled again at every spawn. Online you all see the same elites.",
+          "The main story's quests and the graded epics give twice the experience, with twice the cap, so it shows at high levels too.",
+          "A player with a legendary class can take finished story and side quests again. A replay gives a repeatable quest's experience; classes, trials and epics don't come back.",
+          "A new \"Hermit of Oblivion\" in Reidan wipes your class (Lv 100 and up: you lose 100 levels, go back to Novice and get your stat points back to spend) or your whole character. A legendary class goes back to the world with its book, for anyone to earn from the start.",
+          "Deleting a legendary character from the character list now really frees the legend: the game no longer takes it back by itself on the title screen."] },
     { v: '2026-10-26crearmor', ver: '3.25', d: '2026-10-26',
       ar: ["الدروع والخوذ والجوانتيات والبوتات اللي بيخلقها وريث باغما (مهارة الخلق) بقت ليها صورة مرسومة بألوان خاماتها زي الأسلحة، بدل ما كانت بتظهر كأنها رمح. ولما تلبسها شكلها على الشخصية بيبقى بألوان خاماتها بدل الحديد العادي، والتانيين بيشوفوها زيك.",
         "المعدات المخلوقة بقت قطعة لوحدها: مبقتش بتتحسب في أي طقم (سِت) ولا بيظهر عليها تأثير الطقم.",

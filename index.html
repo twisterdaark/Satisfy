@@ -6994,6 +6994,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
   p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();wsSpawn();zbSpawn();}
+ for(const m of mons)eliteRoll(m);
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
  {const now=Date.now(),D=(S&&S.mrt)||{};for(const m of mons){const u=D[mobKey(m)];if(u>now){m.dead=true;m.dying=0;m.rt=(u-now)/1000;}}}
@@ -7005,6 +7006,23 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
 // to undefined instead of being deleted (owner 2026-10-24, the lag: delete left each monster that came back in V8's slow
 // "dictionary" mode for good, so every pass over the monsters got slower the longer you played)
 function monFresh(m,nm){for(const k in m)if(!(k in nm))m[k]=undefined;return Object.assign(m,nm);}
+/* elites (the player Suki through the owner 2026-10-26: "bosses and monsters may spawn as an elite version, 50% stronger,
+   double the experience"). A world monster rolls when it spawns and at every respawn: 3% a monster, 10% a boss. Online the
+   client the others follow decides (flag 4096 in its list, mobEntry) and the others take it, so everyone fights the same
+   elite: its health comes with the host's full health, the harder blows and the double experience with the flag here. */
+const ELITE={P:.03,PB:.1,HP:1.5,DMG:1.5,XP:2};
+function eliteSet(m,on,follow){on=!!on;if(!!m.elite===on)return;const f=on?1:-1;m.elite=on?1:0;
+ m.dmul=(m.dmul||1)*Math.pow(ELITE.DMG,f);m.xmul=(m.xmul||1)*Math.pow(ELITE.XP,f);
+ if(!follow){const sh=m.max>0?m.hp/m.max:1;m.max=Math.max(1,Math.round(m.max*Math.pow(ELITE.HP,f)));m.hp=Math.max(1,Math.round(m.max*sh));}}
+// the dice are the spawn's key and the ten minutes it (re)spawns in, not rand: every client gets the same answer without a
+// word (and the world's shared spawn dice stay where they were); the host's flag still decides a shared one
+function eliteDie(k){let h=0x811c9dc5;k=String(k);for(let i=0;i<k.length;i++){h^=k.charCodeAt(i);h=Math.imul(h,0x01000193);}h^=h>>>15;h=Math.imul(h,0x2c1b3c6d);h^=h>>>12;return (h>>>0)/4294967296;}
+function eliteRoll(m){if(!m||m.tmp||m.bh||m.tower||m.evt||m.spar||m.tdum||m.ek||m.mlich||!MT[m.type])return;eliteSet(m,eliteDie(mobKey(m)+'#'+Math.floor(Date.now()/6e5))<(MT[m.type].boss?ELITE.PB:ELITE.P));}
+// a gold ring under it that breathes, and its name in gold with "Elite" before it
+function eliteAura(m){const k=.5+.5*Math.sin(gTime*4+(m.sx|0)),r=(MT[m.type].boss?16:9)*(MT[m.type].sc||1);ctx.save();ctx.globalAlpha*=.35+.25*k;ctx.strokeStyle='#ffd25a';ctx.lineWidth=1.5;
+ ctx.beginPath();ctx.ellipse(m.x,m.y+1,r+2*k,(r+2*k)*.45,0,0,7);ctx.stroke();ctx.globalAlpha*=.4;ctx.fillStyle='#ffd25a';ctx.fill();ctx.restore();}
+Object.assign(STR.ar,{eliteP:'نخبة'});Object.assign(STR.en,{eliteP:'Elite'});
+window.__GELITE={set:(m,on,f)=>eliteSet(m,on,f),roll:m=>eliteRoll(m),die:k=>eliteDie(k),C:ELITE,list:()=>mons.filter(m=>m.elite&&!m.dead).map(m=>[m.type,m.x|0,m.y|0])}; // tests
 function newMon(type,x,y,rg=rand){const b=MT[type];const vr=VARY[type]!==undefined?(MID+1)%4:0;const lv=b.lv[0]+(rg()*(b.lv[1]-b.lv[0]+1)|0),hp=Math.round(b.hp*(1+(lv-b.lv[0])*.03));return{id:'m'+(++MID),type,lv,x,y,sx:x,sy:y,hp,max:hp,vr,dead:false,rt:0,cd:0,face:1,t:rg()*6,hurt:0,wt:0,wx:0,wy:0,tele:0,scd:2};}
 
 /* ---------------- save ---------------- */
@@ -7044,7 +7062,7 @@ function domainEv(type,key,r,slot){try{if(type==='kill'){const n=S.kills[key]||0
   const it=S.items.reduce((a,i)=>i.id===key&&(!a||i.uid>a.uid)?i:a,null);if(!it)return;Satisfy.ids.ensure(S);gameEv('craft.item.created',{recipe:key,r,slot,itemId:it.iid},'craft:item:'+it.uid);}}catch(e){}}
 // A quest reward is paid once: the quest must still be active and ready when the turn-in callback runs
 // (a second click, or materials sold while the dialog was open, used to pay again or go negative).
-function claimQ(id){const q=QD[id];if(!q||!qReady(id))return false;gameEv('quest.reward.claimed',{quest:id,gold:q.gold||0,xp:q.xp||0,item:q.item||null,cls:q.cls||null},q.rep?null:'claim:'+id);return true;}
+function claimQ(id){const q=QD[id];if(!q||!qReady(id))return false;gameEv('quest.reward.claimed',{quest:id,gold:q.gold||0,xp:q.xp||0,item:q.item||null,cls:q.cls||null},q.rep?null:'claim:'+id+(S.qs[id]&&S.qs[id].rp?':r'+Date.now():''));return true;}
 // A save that cannot be loaded, or one from another schema or map layout, is copied to a backup key
 // before anything can write over it (the autosave runs every 20 s).
 function load(){const r=STORE.read(),SCH=Satisfy.storage.SCHEMA;
@@ -7386,7 +7404,10 @@ const XPMUL=1.2;
    from level 400 (70%, about what a boss gives today) to their level-480 value, so there is no wall at 480. Nothing is raised:
    a reward under its cap is what it was. A boss's kill counts once: the same boss again within 45 s (a reconnect, a late kill
    message) gives no XP. Exact grants (a whole level from a story, a legendary restart) are not capped. */
-const XPC={mob:[[480,.008],[400,.009],[300,.011],[200,.015],[100,.02]],at480:{elite:.025,boss1:.10,bossR:.015,rquest:.02,squest:.08,weekly:.12,disc:.015},EASE:[400,1],ELITE:3.125,BOSS_DUP_MS:45000};
+// the story (the main story's chapters and the graded epics) gives twice its experience, and its cap is twice a quest's (the
+// player Suki through the owner 2026-10-26: "buff all story exp gains by 100%"; the owner: the experience must really grow)
+const qStory=q=>!!q&&!!(q.ms||q.gr&&!q.rep),qXP=q=>(q.xp||0)*(qStory(q)?2:1),qSrc=q=>q.rep||q.gen?'rquest':qStory(q)?'story':'squest';
+const XPC={mob:[[480,.008],[400,.009],[300,.011],[200,.015],[100,.02]],at480:{elite:.025,boss1:.10,bossR:.015,rquest:.02,squest:.08,story:.16,weekly:.12,disc:.015},EASE:[400,1],ELITE:3.125,BOSS_DUP_MS:45000};
 const xpNeedL=L=>Math.round((50+L*30+L*L*3.5+L**3*.025)*(1+Math.max(0,L-100)*.02)*(1+.15*Math.floor(Math.max(0,L-1)/100)));
 function xpCapP(src,L){if(src==='mob'||src==='elite'){const r=XPC.mob.find(([l])=>L>=l);return r?r[1]*(src==='elite'?XPC.ELITE:1):0;}const v=XPC.at480[src];if(!v)return 0;if(L>=480)return v;const [l0,p0]=XPC.EASE;return L<l0?0:v*Math.pow(p0/v,(480-L)/(480-l0));}
 const xpCap=src=>{const p=src?xpCapP(src,S.lv|0):0;return p?p*xpNeed():0;};
@@ -7818,12 +7839,17 @@ const QD={
 const NAMEK={hrabbit:'hrabbitN',grabbit:'grabbitN',slime:'slimeN',mslime:'mslimeN',cbat:'cbatN',sscorp:'sscorpN',mimic:'mimicN',gobsc:'gobscN',bibanm:'bibanmN',abellm:'abellmN',sellobu:'sellobuN',foxmouse:'foxmouseN',lizw:'lizwN',gcrown:'gcrownN',tlord:'tlordN',furfu:'furfuN',bhclone:'bhcloneN',dk_lant:'dk_lantN',dk_alex:'dk_alexN',dk_krug:'dk_krugN',dk_gis:'dk_gisN',dk_povia:'dk_poviaN',dk_madra:'dk_madraN',fgiant:'fgiantN',kraider:'kraiderN',kshaman:'kshamanN',kbandit:'kbanditN',mshade:'mshadeN',sknight:'sknightN',scmd:'scmdN',cultist:'cultistN',demon:'demonN',redk:'redkN',dbus:'dbusN',asmo:'asmoN',berith:'berithN',hdemon:'hdemonN',ypriest:'ypriestN',trauka:'traukaN',belial:'belialN',succ:'succN',sdrag:'sdragN',stiger:'stigerN',sbird:'sbirdN',stort:'stortN',huroi:'huroiN',peaks:'peaksN',zibal:'zibalN',kraugel:'kraugelN',skel:'skelN',wraith:'wraithN',bknight:'bknightN',warlord:'warlordN',lizard:'lizardN',gsold:'gsoldN',kobold:'koboldN',kking:'kkingN',cgob:'cgobN',gshaman:'gshamanN',gwar:'gwarN',grave:'graveN',goblin:'goblinN',rabbit:'rabbitN',gchief:'gchiefN',wolf:'wolfN',bear:'bearN',boar:'boarN',merman:'mermanN',pwolf:'pwolfN',gbear:'gbearN',outlaw:'outlawN',praga:'pragaN',forc:'forcN',fochief:'fochiefN',golem:'golemN',cgolem:'cgolemN',hwolf:'hwolfN',rboar:'rboarN',deserter:'deserterN',mgolem:'mgolemN',dcapt:'dcaptN',fboar:'fboarN',gscout:'gscoutN',gknight:'gknightN',smerman:'smermanN',eti:'etiN',ogolem:'ogolemN',sdoll:'sdollN',aweapon:'aweaponN',troll:'trollN',ogre:'ogreN',gargoyle:'gargoyleN',salamander:'salamanderN',ilizard:'ilizardN',pguard:'pguardN',aprison:'aprisonN',hydra:'hydraN',cwolf:'cwolfN',cbear:'cbearN',cboar:'cboarN',hdrac:'hdracN',hdrac2:'hdrac2N',hdrac3:'hdrac3N',sanju1:'sanju1N',sanju2:'sanju2N',sanju3:'sanju3N',sanju4:'sanju4N'};
 const itN=k=>t(NAMEK[k]||k);
 const qName=id=>{const q=QD[id];return q&&q.nm?t(q.nm,q.nv&&q.obj&&q.obj.it?{...q.nv,it:itN(q.obj.it)}:q.nv):t('q_'+id)+(q&&q.gr?' ('+q.gr+')':'');};   // names re-read in the current language
-function qRewards(id){const q=QD[id],o=[];if(q.xp){const c=xpCap(q.rep||q.gen?'rquest':'squest');o.push(t('rwXP',{n:Math.round(c?Math.min(q.xp*XPMUL,c):q.xp*XPMUL)}));}if(q.gold)o.push(t('rwGold',{n:q.gold}));if(q.item)o.push(t(q.item));if(q.mat)o.push(t('got',{n:q.mat[1],item:t(q.mat[0])}));if(q.title||q.tl)o.push(t('tl_'+(q.title||q.tl)));if(q.cls)o.push(t('rwCls',{c:t('cl_'+q.cls)}));if(q.promo)o.push(t('rwCls',{c:t('cl_'+q.promo)}));if(q.hcls)o.push(t('rwCls',{c:t('cl_'+q.hcls)}));if(q.rx)q.rx.forEach(k=>o.push(t(k)));return o;}
-const qDone=id=>!!S.qs[id]&&S.qs[id].st===2;
+function qRewards(id){const q=QD[id],o=[];if(q.xp){const c=xpCap(qSrc(q));o.push(t('rwXP',{n:Math.round(c?Math.min(qXP(q)*XPMUL,c):qXP(q)*XPMUL)}));}if(q.gold)o.push(t('rwGold',{n:q.gold}));if(q.item)o.push(t(q.item));if(q.mat)o.push(t('got',{n:q.mat[1],item:t(q.mat[0])}));if(q.title||q.tl)o.push(t('tl_'+(q.title||q.tl)));if(q.cls)o.push(t('rwCls',{c:t('cl_'+q.cls)}));if(q.promo)o.push(t('rwCls',{c:t('cl_'+q.promo)}));if(q.hcls)o.push(t('rwCls',{c:t('cl_'+q.hcls)}));if(q.rx)q.rx.forEach(k=>o.push(t(k)));return o;}
+const qDone=id=>!!S.qs[id]&&(S.qs[id].st===2||!!S.qs[id].rp);
 const arrowN=()=>S.arrows.reduce((a,b)=>a+b,0);
 function qCount(id){const o=QD[id].obj,s=S.qs[id];if(!s)return 0;if(o.t==='have')return shHave(o.it);return s.c||0;}
 const qReady=id=>{const s=S.qs[id];return !!s&&s.st===1&&qCount(id)>=QD[id].obj.n;};
-function qAvail(id){const q=QD[id];return !S.qs[id]&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2||q.cl2==='smith'&&S.cls==='pagma')&&(!q.sec||S.sec===q.sec)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||q.sw||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)))&&(!q.need||!!(QNEED[q.need]&&QNEED[q.need]()));}
+/* a legend replays the road (the player Suki through the owner 2026-10-26: "after a player obtains a legendary class, make
+   them able to repeat all story and side quests"): a finished story or side quest can be taken again. It stays finished
+   for everything that follows it (qDone), pays a repeatable quest's experience (its cap), and no class, trial, epic or
+   board task comes back. */
+function legRep(id){const q=QD[id],s=S&&S.qs[id];return !!q&&!!s&&s.st===2&&isLeg()&&!q.cls&&!q.promo&&!q.hcls&&!q.hid&&!q.sw&&!q.rep&&!q.gen&&!q.adq&&!q.gr&&!q.mur;}
+function qAvail(id){const q=QD[id];return (!S.qs[id]||legRep(id))&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2||q.cl2==='smith'&&S.cls==='pagma')&&(!q.sec||S.sec===q.sec)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||q.sw||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)))&&(!q.need||!!(QNEED[q.need]&&QNEED[q.need]()));}
 // owner 2026-10-23: a "kill it below 50% health" task can't be done when the monster is far under your level (it can't bring
 // your health down), so 20+ levels above it the health condition is waived and the task says so
 // a below-X%-health kill on a monster 20+ levels under you (owner 2026-10-24): any monster near your level counts instead
@@ -7843,22 +7869,22 @@ function qShareKill(type){if(!S||S.__demo)return 0;let n=0;for(const id in S.qs)
 Object.assign(STR.ar,{qShTip:'فريقك بيشاركك: كل وحش يموّته حد من فريقك جنبك بيتحسب لك هنا'});Object.assign(STR.en,{qShTip:'Shared with your party: each one a party member kills near you counts here too'});
 const qShareOn=()=>!!(NET&&PARTY&&PARTY.id()&&PARTY.members().length>1);
 window.__GQS={kill:k=>qShareKill(k),ok:id=>qShareOk(QD[id]),boss:k=>!!(MT[k]&&MT[k].boss)}; // tests
-function acceptQ(id){S.qs[id]={st:1,c:0};for(const k in SKD)if(SKD[k].qlend===id&&S.sk)delete S.sk[k];   // (review) a trial taken again lends its skill again, on the bar
+function acceptQ(id){S.qs[id]=legRep(id)?{st:1,c:0,rp:1}:{st:1,c:0};for(const k in SKD)if(SKD[k].qlend===id&&S.sk)delete S.sk[k];   // (review) a trial taken again lends its skill again, on the bar
  epAccept(id);if(QD[id].obj.t==='escort')setTimeout(()=>startEscort(id),300);toast(t('qNew',{q:qName(id)}),'good');SFX.quest();hudDirty=true;checkSkills();save(true);}
 function takeArrows(n){for(let r=4;r>=0&&n>0;r--){const k=Math.min(n,S.arrows[r]);S.arrows[r]-=k;n-=k;}}
 function mkItem(id,r,made){const rc=rcById(id);if(rc.fix!=null&&!(made&&rc.fix<4))r=made?Math.min(rc.fix,legCap()):rc.fix;   // made: your own craft keeps the rating it came out at (owner 2026-10-22: a rare craft showed up unique); a breath piece is always legendary
 const it={uid:++S.uid,id,slot:rc.slot,r,dur:100};if(rc.hpp)it.hpp=rc.hpp;if(rc.slot==='w'){it.atk=Math.round(rc.atk*MULT[r]);it.spd=rc.spd;}else if(rc.def)it.def=Math.round(rc.def*MULT[r]);
  for(const k of ['as','ms','dm'])if(rc[k])it[k]=+(rc[k]*(1+(MULT[r]-1)*.5)).toFixed(3);if(rc.mpb)it.mpb=Math.round(rc.mpb*MULT[r]);for(const k of ['agi','agp','cold','dsh'])if(rc[k])it[k]=rc[k];if(rc.slot==='w'&&r>=2)it.wp=wpRoll(r,it);return it;}
 function completeQ(id){if(!claimQ(id))return;if(id==='sir1')sirFlute(1);if(id==='ya3')setTimeout(()=>giveTitle('purifier'),300);const q=QD[id],o=q.obj;if(o.take){if(o.it==='jaffa')takeArrows(o.n);else shTake(o.it,o.n,0);}if(o.give)giveItem(o.it);
- S.qs[id].st=2;if(q.rep)delete S.qs[id];
+ const rp=!!S.qs[id].rp;S.qs[id].st=2;delete S.qs[id].rp;if(q.rep)delete S.qs[id];
  toast(t('qDone',{q:qName(id)}),'good');SFX.quest();jQuest(id);
  if(q.gold){S.gold+=pasOn('opers')?Math.round(q.gold*1.15):q.gold;coinFx(npcOf(q.by),q.gold);}if(q.kc)kcGain(q.kc);if(q.mat)addMat(q.mat[0],q.mat[1]);
  if(q.item){const it=mkItem(q.item,1);S.items.push(it);if(q.cls)S.eqW=it.uid;loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});}
  if(q.promo){promoDone(q);phDone(q);}if(q.hcls)hcDone(q);
  if(q.cls&&(S.cls==='novice'||q.sw)){S.cls=q.cls;sbSig='';SFX.legendary();flash();setTimeout(()=>toast(t('clsGot',{c:t('cl_'+q.cls)}),'good'),400);checkSkills();}
- if(q.title||q.tl)giveTitle(q.title||q.tl);epDone(id);msDone(id);p5Done(id);eaDone(id);vtDone(id);
+ if(q.title||q.tl)giveTitle(q.title||q.tl);if(!rp){epDone(id);msDone(id);}p5Done(id);eaDone(id);vtDone(id);
  addAff(q.by,12);{const rn=10+Math.min(15,Math.floor((q.xp||0)/200));addRep(townOfNpc(q.by),rn);crepAdd(rn*3);}
- if(q.xp&&!(q.hcls&&isLeg(q.hcls))){gainXP(pasOn('opers')?q.xp*1.15:q.xp,0,q.rep||q.gen?'rquest':'squest');gContrib(q.xp*.1);}if(q.adq)adqFin(id);else if(q.rep&&!q.gen){const D=dlyS();D.rq=D.rq||{};D.rq[id]=(D.rq[id]||0)+1;}checkSkills();hudDirty=true;save(true);}
+ if(q.xp&&!(q.hcls&&isLeg(q.hcls))){gainXP(pasOn('opers')?qXP(q)*1.15:qXP(q),0,rp?'rquest':qSrc(q));gContrib(q.xp*.1);}if(q.adq)adqFin(id);else if(q.rep&&!q.gen){const D=dlyS();D.rq=D.rq||{};D.rq[id]=(D.rq[id]||0)+1;}checkSkills();hudDirty=true;save(true);}
 // craft-for quests hand over one crafted piece: the least valuable unequipped one (an equipped one is taken off first)
 function giveItem(id){const c=S.items.filter(i=>i.id===id).sort((a,b)=>isEq(a)-isEq(b)||a.r-b.r);const it=c[0];if(!it)return;
  if(it.uid===S.eqW)S.eqW=(S.items.find(i=>i!==it&&WSH[i.id])||{}).uid||0;if(it.uid===S.eqA)S.eqA=0;for(const k in S.eq||{})if(S.eq[k]===it.uid)delete S.eq[k];S.items.splice(S.items.indexOf(it),1);toast(t('gaveIt',{it:inm(it)}));}
@@ -7996,6 +8022,44 @@ function cFare(a,b){if(S.cls==='novice')return 0;const A=npcOf(a),B=npcOf(b);ret
 function necWay(){if(!S)return;const q=['cn','cnm'].find(k=>S.qs[k]&&S.qs[k].st===1)||['cn','cnm'].find(k=>qAvail(k));
  if(!q){toast(t('necWayAt'));return;}S.qTrk=q;S.qGOff=0;S.mbTrk=null;QGC.t=0;qLast='';hudDirty=true;SFX.click();toast(t('necWayOn'),'good');}
 window.__GNW=Object.assign(()=>necWay(),window.__GNW||{},{npc:()=>{const n=npcs.find(n=>n.id==='nec');return n&&wTile(n.x,n.y);}}); // tests
+/* the Hermit of Oblivion in Reidan (the player Suki through the owner 2026-10-26; GAME_ORIGINAL, no novel person): he makes
+   you forget your class, at the cost of 100 levels (from Lv 100 only), or your whole character. A legend forgotten goes back
+   to the world (owner 16:39: "the others can get the class again from the start instead of it being lost"), its book too.
+   Your class's skills, trials and promotion go; the second class, gear, gold and everything else stay. The stat points of
+   the lost levels go and the rest come back to spend again. */
+NPCS.push({id:'oblv',spr:'scholar',tx:520.5,ty:87.4,ph:1,dir:0});
+NPCT.oblv={hi:'oblv_hi',idle:()=>'oblv_idle',opts:()=>[{l:t('oOblvCls'),f:oblvCls},{l:t('oOblvChar'),f:oblvChar}]};
+// the legend you hold back to the world (online the record first: a failure stops what asked for it), and its book
+function legLetGo(all){if(!S||S.__demo)return Promise.resolve(true);const c=S.cls,L=WS.legends||{},on=legOnline(),u={};
+ if(on&&!LEGS&&isLeg(c))return Promise.resolve(false); // the world's list not read yet
+ for(const k in LEGK)if(LEGK[k]===c){if(on&&LEGS&&LEGS[k]&&LEGS[k].uid===NET.uid)u['world/satisfy/legends/'+k]=null;}
+ const fin=()=>{for(const k in LEGK)if(LEGK[k]===c&&L[k]&&L[k].pid===pidOf())delete L[k];for(const k in UQL)if(UQL[k]===c||all)bkFree(k);return true;};
+ if(!Object.keys(u).length)return Promise.resolve(fin());const D=FB.m.database;return D.update(D.ref(FB.db),u).then(fin,()=>false);}
+function oblvCls(){if(S.cls==='novice')return dialog('oblv',['oblvNone']);if(S.lv<100)return dialog('oblv',['oblvLow']);
+ const lv=Math.max(1,S.lv-100);cfm(t('oblvClsT'),t('oblvClsQ',{c:t('cl_'+S.cls),lv}),t('oblvClsY'),()=>legLetGo(0).then(ok=>{if(!ok){SFX.deny();return toast(t('lgDelFail'),'warn');}oblvClsDo();}));}
+function oblvClsDo(){const was=S.cls,tot=Math.max(0,['str','sta','agi','int','dex'].reduce((a,k)=>a+S.st[k],0)-50+(S.pts||0)-100*ptsLv());
+ for(const k in S.sk)if(SKD[k]&&SKD[k].cls&&SKD[k].cls!=='any')delete S.sk[k];
+ for(const id in S.qs){const q=QD[id];if(q&&(q.cls||q.promo||q.hcls))delete S.qs[id];}
+ S.cls='novice';S.cbase=null;S.croot=null;S.church=null;S.bar=null;S.lv=Math.max(1,S.lv-100);S.xp=0;S.st={str:10,sta:10,agi:10,int:10,dex:10};S.pts=tot;
+ sbSig='';gearFit();checkSkills();if(P){P.hp=maxHP();P.mp=Math.min(P.mp,maxMP());}SFX.legendary();flash();hudDirty=true;save(true);
+ dialog('oblv',[t('oblvClsDone',{c:t('cl_'+was),lv:S.lv})]);}
+function oblvChar(){cfm(t('oblvCharT'),t('oblvCharQ',{n:esc(S.look.n||t('pname'))}),t('oblvCharY'),()=>cfm(t('oblvCharT'),t('oblvCharQ2'),t('oblvCharY2'),()=>legLetGo(1).then(ok=>{if(!ok){SFX.deny();return toast(t('lgDelFail'),'warn');}oblvCharDo();})));}
+// a new character in this one's place: the same name, look and save (the cloud keeps one, by pid), level 1 at Winston
+function oblvCharDo(){const L={...S.look},pid=S.pid,ws=WS;fadeTo(()=>{freshState();WS=ws;S.look=L;if(pid)S.pid=pid;swcReg();buildMe(S.look);spawnWorld();allies=[];proj=[];sbSig='';camSnap=true;hudDirty=true;
+ mode='play';save(true);toast(t('oblvCharDone'),'good');});}
+Object.assign(STR.ar,{oblv:'ناسك النسيان',oblv_hi:'كل واحد شايل حاجة نفسه ينساها. أنا بساعد في ده، بس النسيان ليه تمن.',oblv_idle:'الذاكرة تقيلة. لو عايز تخففها، أنا هنا.',
+ oOblvCls:'انسى الكلاس بتاعي (-100 لفل)',oOblvChar:'امسح شخصيتي كلها وابدأ من الأول',oblvNone:'إنت لسه ملكش كلاس تنساه.',oblvLow:'النسيان بياخد 100 لفل. ارجعلي لما توصل لفل 100.',
+ oblvClsT:'نسيان الكلاس',oblvClsQ:'هتنسى {c}: مهاراته واختباراته وترقيته. هترجع من غير كلاس وتنزل للفل {lv}، ونقط الستاتس بتاعة الـ 100 لفل دول هتروح، والباقي يرجعلك توزعه من تاني. لو كلاس أسطوري، هيرجع للعالم وأي حد يقدر ياخده. متأكد؟',oblvClsY:'انسى الكلاس',
+ oblvClsDone:'{c} راح من ذاكرتك. إنت دلوقتي من غير كلاس، لفل {lv}. روح لأي مدرّب واختار طريق جديد.',
+ oblvCharT:'مسح الشخصية',oblvCharQ:'هتمسح {n} كلها: اللفل والكلاس والمعدات والدهب والمهمات، وتبدأ من لفل 1 بنفس الاسم والشكل. لو معاك كلاس أسطوري أو كتاب أسطوري، هيرجعوا للعالم.',oblvCharY:'أيوه، امسحها',
+ oblvCharQ2:'آخر مرة: ده مفيهوش رجوع.',oblvCharY2:'امسحها نهائي',oblvCharDone:'شخصيتك اتمسحت. بداية جديدة.'});
+Object.assign(STR.en,{oblv:'Hermit of Oblivion',oblv_hi:'Everyone carries something they wish to forget. I help with that, but forgetting has a price.',oblv_idle:'Memories weigh. If you want yours lighter, I am here.',
+ oOblvCls:'Forget my class (-100 levels)',oOblvChar:'Wipe my whole character and start over',oblvNone:'You have no class to forget yet.',oblvLow:'Forgetting costs 100 levels. Come back at level 100.',
+ oblvClsT:'Forget your class',oblvClsQ:"You will forget {c}: its skills, trials and promotion. You go back to no class at level {lv}; those 100 levels' stat points go and the rest come back to spend again. A legendary class goes back to the world for anyone to take. Are you sure?",oblvClsY:'Forget the class',
+ oblvClsDone:'{c} is gone from your memory. You have no class now, level {lv}. Go to any trainer and pick a new road.',
+ oblvCharT:'Wipe the character',oblvCharQ:'You will wipe {n} entirely: level, class, gear, gold and quests, starting at level 1 with the same name and look. A legendary class or legend book you hold goes back to the world.',oblvCharY:'Yes, wipe it',
+ oblvCharQ2:'Last time: there is no way back.',oblvCharY2:'Wipe it for good',oblvCharDone:'Your character was wiped. A new beginning.'});
+window.__GOBLV={npc:()=>{const n=npcs.find(n=>n.id==='oblv');if(!n)return null;const x=n.x/TS|0,y=n.y/TS|0;return {x,y,solid:SOLID[at(x,y)]===1,below:SOLID[at(x,y+1)]===1,reid:x>=REID.x0&&x<=REID.x1&&y>=REID.y0&&y<=REID.y1};},cls:()=>oblvClsDo(),go:a=>legLetGo(a),wipe:()=>oblvCharDo()}; // tests
 function cOpts(who){return Object.keys(CTOWN).filter(k=>k!==who&&!(who==='coachW'&&k==='coachP')&&!(who==='coachP'&&k==='coachW')).map(k=>{const g=cFare(who,k);return {l:t(g?'oCoachTo':'oCoachFree',{z:t(CTOWN[k]),g}),f:()=>cGo(k,who)};});}
 function cGo(dest,who){const g=cFare(who,dest);if(S.gold<g){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g;if(g)SFX.coin();
  fadeTo(()=>{const c=npcOf(dest);P.x=c.x+18;P.y=c.y-2;camSnap=true;vfx('spawn',P.x,P.y);allies=[];S.raid=0;hudDirty=true;toast(t('arrived',{z:t(CTOWN[dest])}),'good');save(true);});}
@@ -9207,7 +9271,7 @@ function openQD(id){const q=QD[id];if(!q)return;qdId=id;qdArm=false;SFX.open();m
 // The first click arms the button, the second one cancels (the game has no confirm dialogs).
 function cancelQ(){const id=qdId,s=id&&S.qs[id];if(!s||s.st!==1)return;const b=$('qdCancel');
  if(!qdArm){qdArm=true;SFX.click();if(b){b.textContent=t('qCancelSure');b.classList.add('arm');}return;}
- if(QD[id]&&QD[id].gr){epFail(id);closeQD();return;}const nm=qName(id);delete S.qs[id];if(QD[id]&&QD[id].gen){if(S.bqa)delete S.bqa[id];if(S.adqa)delete S.adqa[id];delete QD[id];}
+ if(QD[id]&&QD[id].gr){epFail(id);closeQD();return;}const nm=qName(id);if(s.rp)S.qs[id]={st:2,c:0};else delete S.qs[id];if(QD[id]&&QD[id].gen){if(S.bqa)delete S.bqa[id];if(S.adqa)delete S.adqa[id];delete QD[id];}
  toast(t('qCanceled',{q:nm}));hudDirty=true;save(true);closeQD();}
 function closeQD(){SFX.close();$('qdW').hidden=true;mode='play';}
 window.__GQD={open:id=>openQD(id),close:()=>closeQD(),obj:id=>qObjText(id),nm:k=>itN(k),lang:l=>{lang=l;}}; // tests
@@ -9250,7 +9314,7 @@ function updateHUD(){if(PHOTO&&mode!=='play')photoOff();const mh=maxHP();P.hp=Ma
  $('xpb').style.width=(S.xp/xpNeed()*100)+'%';stx($('goldt'),jGold());
  const qsh=qShareOn(),[qs,qfH]=qFilt(Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1)),qh=qfH+(qs.length?(qPage=Math.min(qPage,Math.ceil(qs.length/3)-1),qs.slice(qPage*3,qPage*3+3)).map(id=>{const r=qReady(id);const on=QGC.g&&QGC.g.id===id,sp=!!qSpot(id);return `<div class="qi${r?' ret':''}" data-qd="${id}" data-tip="${esc(t('qdHint'))}"><button class="x qtk${on?' on':''}" data-qtk="${id}"${sp?'':' disabled'} data-tip="${esc(t(sp?(on?'qgHide':'qgFollow'):'qgNo'))}">📍</button><b>${esc(qName(id))}</b><span>${esc(r?t('retTo',{w:t(QD[id].by)}):qObjText(id))}${!r&&qsh&&qShareOk(QD[id])?`<i class="qsh" data-tip="${esc(t('qShTip'))}">👥</i>`:''}</span></div>`;}).join('')+(qs.length>3?`<div class="qn qpg"><button class="x" data-qp="-1">‹</button><span>${qPage+1} / ${Math.ceil(qs.length/3)}</span><button class="x" data-qp="1">›</button></div>`:''):`<div class="qn">${esc(t('noQuest'))}</div>`);{const bq=BHR?bhHud():TOW?twHud():'',qx=msHud()+lgHud()+(bq?`<div class="qi ret"><b>${esc(bq)}</b></div>`+qh:qh);if(qx!==qLast){qLast=qx;$('qtext').innerHTML=qx;}}
  stx($('stats').querySelector('.nm span'),t('pname'));
- const g=mons.find(m=>MT[m.type].boss&&!m.dead&&Math.hypot(P.x-m.sx,P.y-m.sy)<MT[m.type].leash+(m.prov>gTime?280:0)&&Math.hypot(m.x-P.x,m.y-P.y)<(m.prov>gTime?360:220));shd($('boss'),!g);if(g){jBoss(g);stx($('boss').querySelector('.head'),t(g.type==='guardian'?'guardian':NAMEK[g.type]||g.type));{const gf=blGauge(g);$('bossb').style.width=(gf*100)+'%';stx($('bosst'),`${Math.ceil(gf*g.max)}/${g.max}`);}}
+ const g=mons.find(m=>MT[m.type].boss&&!m.dead&&Math.hypot(P.x-m.sx,P.y-m.sy)<MT[m.type].leash+(m.prov>gTime?280:0)&&Math.hypot(m.x-P.x,m.y-P.y)<(m.prov>gTime?360:220));shd($('boss'),!g);if(g){jBoss(g);stx($('boss').querySelector('.head'),(g.elite?t('eliteP')+' ':'')+t(g.type==='guardian'?'guardian':NAMEK[g.type]||g.type));{const gf=blGauge(g);$('bossb').style.width=(gf*100)+'%';stx($('bosst'),`${Math.ceil(gf*g.max)}/${g.max}`);}}
  if(mode==='play'){const n=nearest();const h=$('hint');if(n){shd(h,false);stx(h,n.hint?t(n.hint):n.k==='npc'?t(n.o.obj?'hRead':'hTalk'):n.k==='anvil'?t('hAnvil'):n.k==='tree'?((chopped.get(n.o.k)||0)>gTime?t(treeBound(n.o.tx,n.o.ty)?'hChopW':'hUproot'):t('hChop')):(n.o.dep>0?t('hEmpty'):t('hMine')));}else if(ctNear()){shd(h,false);stx(h,t('hPet'));}else shd(h,true);}}
 
 /* ---------------- fx helpers, keybinds, status window ---------------- */
@@ -10912,7 +10976,7 @@ function qgToggle(){if(!S)return;S.qGOff=S.qGOff?0:1;toast(t(S.qGOff?'qgOff2':'q
 /* the recommended quest (owner 2026-10-23, from a player's "Recommended quest" button): of the quests you can take now on
    your continent, the story first, then the one nearest your level (at most 15 under it), then the nearest giver. The
    arrow then leads to its giver. With none, the board's daily tasks are suggested. */
-function qRec(){if(!S||!P)return null;const ok=q=>{const d=QD[q];if(!d||d.gen||d.gr||d.sw||!qAvail(q)||(d.lv||1)>S.lv||S.lv-(d.lv||1)>15&&!d.ms)return false;const n=npcs.find(n=>n.id===d.by&&!n.hidden);return !!n&&(n.x/TS>=EAX)===(P.x/TS>=EAX)&&n.y/TS<WMH;};
+function qRec(){if(!S||!P)return null;const ok=q=>{const d=QD[q];if(!d||d.gen||d.gr||d.sw||S.qs[q]||!qAvail(q)||(d.lv||1)>S.lv||S.lv-(d.lv||1)>15&&!d.ms)return false;const n=npcs.find(n=>n.id===d.by&&!n.hidden);return !!n&&(n.x/TS>=EAX)===(P.x/TS>=EAX)&&n.y/TS<WMH;};
  const dist=q=>{const n=npcs.find(n=>n.id===QD[q].by);return Math.hypot(n.x-P.x,n.y-P.y);};
  return Object.keys(QD).filter(ok).sort((a,b)=>(QD[a].ms?0:1)-(QD[b].ms?0:1)||(S.lv-(QD[a].lv||1))-(S.lv-(QD[b].lv||1))||dist(a)-dist(b))[0]||null;}
 function qRecGo(){SFX.click();const q=qRec();if(!q){toast(t('qRecNo'),'warn');return;}S.qTrk=q;S.qGOff=0;S.mbTrk=null;QGC.t=0;qLast='';hudDirty=true;
@@ -10962,7 +11026,7 @@ function drawMapNow(){if(mapRAF){cancelAnimationFrame(mapRAF);mapRAF=0;}const c=
  [...ZL.map(([k,x,y])=>[k,wX(x),y]),['zRoadW',wX(104)-40,74],['zRoadE',wX(158)-55,74],['zNHigh',32,-40],['zFrostP',150,-46],['zWPine',330,-46],['zGlac',510,-46],['zGiantL',620,-14],['zGHold',GHOLD.bx,-52],['zSMead',90,150],['zSWood',270,128],['zSDes',450,150],['zWSand',492,66],['zZebra',870,150],['zVatican',VAT.cat.x+VAT.cat.w/2,VAT.y0-3],['zSwordG',538,-26],['zBrin',575,247],['zDrav',932,-14],['zTaleren',487,131],['zSFen',630,128],['zSuaz',SUAZ.cx,40],['zRolling',ROLL.cx,68],['zDran',DRAN(150)-24,150],['zTatur',816,20],['zTitan',TITAN.gx,32],['zAsmo',ASMO.gx,ASMO.y0-2],['zAbyss',ABYSS.x,ABYSS.y-ABYSS.ry-4],['zButin',BUTIN.x0+18,BUTIN.y0-3],...EAL].forEach(([k,x,y])=>{if(!(inM(x,y)&&onS(X(x),Y(y),240*dpr)))return;MM.label(g,t(k)+(S.exc&&S.exc[k]?' ✓':''),X(x),Y(y),{size:Math.round((11+MV.z*1.6)*dpr),color:'#ffe7a8',font:F,weight:700,spacing:lang==='ar'?'0px':`${dpr}px`});
   const tl=townLv(k);if(tl)MM.label(g,t('townLv',{n:tl}),X(x),Y(y)-(13+MV.z*2.4)*dpr,{size:Math.round((9+MV.z)*dpr),color:tl>S.lv+10?'#ff9a8a':'#9fe0ff',font:F,weight:600});});   // the town's recommended level above its name (under it, it sat on the townsfolk's names)
  ANVILS.forEach(a=>{if(inM(a.tx,a.ty)&&onS(X(a.tx+.5),Y(a.ty+.5)))MM.marker(g,'anvil',X(a.tx+.5),Y(a.ty+.5),u*1.2);});
- mons.forEach(m=>{if(m.dead||m.tdum||!inM(m.x/TS,m.y/TS)||!onS(X(m.x/TS),Y(m.y/TS))||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
+ mons.forEach(m=>{if(m.dead||m.tdum||!inM(m.x/TS,m.y/TS)||!onS(X(m.x/TS),Y(m.y/TS))||!fogSeen(m.x/TS,m.y/TS))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.elite||m.lv-S.lv>8?'elite':'mon',X(m.x/TS),Y(m.y/TS),u);if(b.boss)MM.label(g,t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),X(m.x/TS),Y(m.y/TS)-13*u,{size:Math.round(11*dpr),color:'#e8c8ff',font:F,band:'rgba(30,10,44,.8)',edge:'rgba(192,80,255,.6)'});});
  allies.forEach(a=>{if(!a.dead&&inM(a.x/TS,a.y/TS)&&onS(X(a.x/TS),Y(a.y/TS)))MM.marker(g,'ally',X(a.x/TS),Y(a.y/TS),u);});const coOn=!!COMPO&&inM(COMPO.x/TS,COMPO.y/TS);if(coOn)MM.marker(g,'ally',X(COMPO.x/TS),Y(COMPO.y/TS),u);
  if(MEET&&coOn)MM.label(g,t(gk(MEET.id,'meetMap'),{n:t(MEET.id)}),X(COMPO.x/TS),Y(COMPO.y/TS)-12*u,{size:Math.round(11*dpr),color:'#9fe39a',font:F,band:'rgba(6,24,10,.82)'});
  {const T=EV&&EV.e.tw&&TOWNS.find(T=>T.k===EV.e.tw);if(T&&inM(T.rx,T.ry))invMark(g,x=>X(x/TS),y=>Y(y/TS),u,sc,Math.round(13*dpr),F);}
@@ -11121,7 +11185,7 @@ function monsTick(dt,safe){VXF++;const on=!!MOBN;for(let i=0;i<mons.length;i++){
 function monTick(m,dt,safe){try{
   const b=MT[m.type];if(m.tdum){m.x=m.sx;m.y=m.sy;m.vx=0;m.vy=0;m.lv=S.lv;m.hp=m.max;m.stun=0;m.st=null;m.tele=0;m.face=P.x>m.x?1:-1;m.nm=t('tdummy');return;}if(Math.abs(m.x-P.x)<SFXR+300&&Math.abs(m.y-P.y)<SFXR+300)monVox(m,b,dt); // (2026-10-24, the lag) only those near enough to be heard soon: the other 2,000 took 90 KB of memory a frame
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))return; // shared monsters: another player's copy leads this one
-  if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy,fa=m.far;monFresh(m,newMon(ty,ox,oy));if(fa)m.far=1;vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}return;}
+  if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy,fa=m.far;monFresh(m,newMon(ty,ox,oy));if(fa)m.far=1;eliteRoll(m);vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}return;}
   if(BZD&&bzLure(m,b,dt))return; // Braham's Decoy
   // a monster sleeps while nobody is within 900 px (owner 2026-10-23: frames dropped with many monsters). The far north and
   // south did this first; now the whole map does, so ~1,300 monsters out of sight no longer roll dice and walk each frame
@@ -11541,13 +11605,13 @@ function render(dt){DRAWN=0;netDrawn=0;
   // (2026-10-24, the lag) the test first, then the drawing for the ones on screen: the drawing's closures cost each of the
   // 2,000 monsters a bit of memory every frame while it was all one function
   const monEnt=m=>{drawTele(m);if(m.wardT>gTime&&!m.dead)drawWard(m);if(MT[m.type].boss&&!m.dead&&m.tele>0&&!m.st){const k=1-m.tele/.9,SR=MT[m.type].slamR;ctx.fillStyle=`rgba(255,60,40,${.15+k*.25})`;ctx.beginPath();ctx.ellipse(m.x,m.y,Math.max(1,SR*k+4),Math.max(1,SR*.58*k+3),0,0,7);ctx.fill();ctx.strokeStyle='rgba(255,120,90,.9)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(m.x,m.y,SR,SR*.58,0,0,7);ctx.stroke();}
-   ents.push({y:m.y,f:()=>{if(m.dead)ctx.globalAlpha=Math.max(0,m.dying/.5);if(m.stun>0){const a=gTime*8;R(ctx,m.x+Math.cos(a)*6,m.y-22+Math.sin(a)*2,2,2,'#ffe07a');R(ctx,m.x-Math.cos(a)*6,m.y-22-Math.sin(a)*2,2,2,'#ffe07a');}drawMon(m);ctx.globalAlpha=1;if(m.dead)return;
+   ents.push({y:m.y,f:()=>{if(m.dead)ctx.globalAlpha=Math.max(0,m.dying/.5);if(m.elite&&!m.dead)eliteAura(m);if(m.stun>0){const a=gTime*8;R(ctx,m.x+Math.cos(a)*6,m.y-22+Math.sin(a)*2,2,2,'#ffe07a');R(ctx,m.x-Math.cos(a)*6,m.y-22-Math.sin(a)*2,2,2,'#ffe07a');}drawMon(m);ctx.globalAlpha=1;if(m.dead)return;
     const oy=MT[m.type].oy,hf=m.hp/m.max,hl=hpLag(m,hf,'hl');if(!MT[m.type].boss&&(hf<1||hl>hf))txBar(m.x,m.y-oy+2,16,hf,HPC,hl);
     // owner 2026-10-20: the name with the level, always together (close by or under the mouse): "name" over "Lv n",
     // coloured by how dangerous it is for you (grey far weaker, white even, orange stronger, red deadly)
     const md=Math.hypot(m.x-P.x,m.y-P.y),hov=MWP&&Math.abs(MWP[0]-m.x)<14&&MWP[1]>m.y-oy-6&&MWP[1]<m.y+6;
     if((md<140||hov||m.trk>0)&&monLit(m)&&!m.dorm){const dl=m.lv-S.lv,c=dl>8?'#ff6a5a':dl>3?'#ffb04a':dl<-8?'#a8b0b8':'#ffe07a';TX.push({s:'Lv'+m.lv,x:m.x,y:m.y-oy-3,f:'{s}px "Press Start 2P", monospace',z:6,c});
-     TX.push({s:m.nm||t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type),x:m.x,y:m.y-oy-12,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:dl>8?'#ff8a7a':dl>3?'#ffc070':dl<-8?'#b8c0c8':'#f2f2f2'});}}});};
+     TX.push({s:(m.elite?t('eliteP')+' ':'')+(m.nm||t(m.type==='guardian'?'guardian':NAMEK[m.type]||m.type)),x:m.x,y:m.y-oy-12,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:m.elite?'#ffd25a':dl>8?'#ff8a7a':dl>3?'#ffc070':dl<-8?'#b8c0c8':'#f2f2f2'});}}});};
   for(let mI=0;mI<mons.length;mI++){const m=mons[mI];if(!(m.dead&&!(m.dying>0)||offV(m.x,m.y,MT[m.type].boss?260:0)))monEnt(m);};
   if(!titleCam&&mode!=='dead'&&!P.ghost)if(PET)ents.push({y:PET.y,f:()=>drawPet(PET)});
   if(LP.length){LPDT=dt;ents.push({y:P.y+999,f:lpDraw});} // SAT-ONLINE-185: loot pops, over the scene
@@ -11797,7 +11861,7 @@ function drawMini(){const c=$('mini');const show=!miniOff&&S&&!$('hud').hidden;c
  g.fillStyle='#0a1220';g.fillRect(0,0,256,176);miniDraw(g,Math.round(ox*4)/4,Math.round((oy+NR)*4)/4,64,44,0,0,256,176);miniAhead(ox,oy+NR);
  const sx=x=>(x/TS-ox)*4,sy=y=>(y/TS-oy)*4,on=(x,y,k)=>x>-k&&x<256+k&&y>-k&&y<176+k; // on: only what lands on the 256x176 piece (it drew every monster and person of the world, 5 times a second)
  ANVILS.forEach(a=>MM.marker(g,'anvil',(a.tx+.5-ox)*4,(a.ty+.5-oy)*4,u*.8));
- mons.forEach(m=>{if(m.dead||m.tdum)return;const x=sx(m.x),y=sy(m.y);if(!on(x,y,16))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.lv-S.lv>8?'elite':'mon',x,y,b.boss?u*.7:u);});
+ mons.forEach(m=>{if(m.dead||m.tdum)return;const x=sx(m.x),y=sy(m.y);if(!on(x,y,16))return;const b=MT[m.type];MM.marker(g,b.boss?'boss':m.elite||m.lv-S.lv>8?'elite':'mon',x,y,b.boss?u*.7:u);});
  allies.forEach(a=>{if(!a.dead)MM.marker(g,'ally',sx(a.x),sy(a.y),u);});if(COMPO)MM.marker(g,'ally',sx(COMPO.x),sy(COMPO.y),u);
  npcs.forEach(n=>{if(n.hidden)return;const w=wTile(n.x,n.y),x=(w.x-ox)*4,y=(w.y-oy)*4;if(!on(x,y,40))return;MM.marker(g,'npc',x,y,u);const mk=npcMark(n.id);if(mk)MM.label(g,mk[0],x,y-9*u,{size:13,color:mk[1],weight:700,font:'Oswald, sans-serif'});});
  Object.keys(S.qs).filter(k=>QD[k]&&S.qs[k].st===1).forEach(id=>{const p=qSpot(id);if(p)MM.marker(g,p.ret?'ret':'quest',(p.x-ox)*4,(p.y-oy)*4,u*.85);});
@@ -17886,7 +17950,7 @@ function mobAdopt(k,v,u){const w=v.split(','),n=w.slice(0,5).map(Number);if(![5,
  if(!used&&(now||m.dead||m.eng>0||m.hp<m.max||Math.hypot(m.x-P.x,m.y-P.y)<320))return;
  if(!live){if(!m.dead){m.dead=true;m.dying=0;m.rt=mobRt(m);}MOBN.fast=1;return;}
  let fresh=false;if(m.dead){fresh=true;const keep={ek:m.ek,tmp:m.tmp,evt:m.evt,sg:m.sg,nk:m.nk,far:m.far},ty=m.type,ox=m.sx,oy=m.sy;monFresh(m,newMon(ty,ox,oy));for(const q in keep)if(keep[q]!==undefined)m[q]=keep[q];m.lv=lv;m.max=mx||mobBaseMax(m);}
- const nh=Math.max(1,Math.round(m.max*hp/1000));m.hp=fresh?nh:Math.min(m.hp,nh);
+ eliteSet(m,fl&4096,1);const nh=Math.max(1,Math.round(m.max*hp/1000));m.hp=fresh?nh:Math.min(m.hp,nh);
  if(!now){m.x=x;m.y=y;m.face=fl&4?-1:1;if(fl&2){m.eng=4;m.agg=1;m.prov=gTime+10;m.provU=u;}}
  if(hp<1000)mobHitBy(m,u);MOBN.fast=1;}
 /* bosses scale with the group fighting them (SAT-ONLINE-083, plan U188). Online, the client the others follow (the mob
@@ -17919,7 +17983,7 @@ function mobList(rs){const o={},pts=[P].concat(rs);let n=0;
 // fields), then (SAT-ONLINE-149) the full health in base 36 when it isn't the one the level gives: 5, 6, 12 or 13 fields
 function mobBaseMax(m){const b=MT[m.type];return Math.max(1,Math.round(b.hp*(1+((m.lv|0)-b.lv[0])*.03)));}
 const mobMaxOf=s=>{const v=parseInt(s,36);return v>=1&&v<1e13?v:0;};
-function mobEntry(m,act){const mx=Math.round(m.max);return Math.round(m.x)+','+Math.round(m.y)+','+(m.dead?0:Math.max(1,Math.round(1000*m.hp/m.max)))+','+((m.dead?1:0)|(m.eng>0?2:0)|(m.face<0?4:0)|(m.stun>0&&!m.dead?8:0)|(m.wardT>gTime&&!m.dead?16|Math.max(1,Math.min(31,Math.round((m.wardR||.4)*20)))<<5:0)|(m.weak>0&&!m.dead?1024:0)|(m.slowU>gTime&&!m.dead?2048:0))+','+(m.lv|0)+(act?mobActS(m):'')+(mx>=1&&mx<1e13&&mx!==mobBaseMax(m)?','+mx.toString(36):'');}
+function mobEntry(m,act){const mx=Math.round(m.max);return Math.round(m.x)+','+Math.round(m.y)+','+(m.dead?0:Math.max(1,Math.round(1000*m.hp/m.max)))+','+((m.dead?1:0)|(m.eng>0?2:0)|(m.face<0?4:0)|(m.stun>0&&!m.dead?8:0)|(m.wardT>gTime&&!m.dead?16|Math.max(1,Math.min(31,Math.round((m.wardR||.4)*20)))<<5:0)|(m.weak>0&&!m.dead?1024:0)|(m.slowU>gTime&&!m.dead?2048:0)|(m.elite&&!m.dead?4096:0))+','+(m.lv|0)+(act?mobActS(m):'')+(mx>=1&&mx<1e13&&mx!==mobBaseMax(m)?','+mx.toString(36):'');}
 /* SAT-ONLINE-042 (owner 2026-10-19: the red attack zone showed for some players and not others; a monster could chase one
    player on one screen and bite another on the other). The host's copy is the only one that thinks; each listed monster now
    also carries what it is doing: ",n,s,i,t,a,l,g" = action number (a new one at every move, slam or bite), state (t
@@ -17962,7 +18026,7 @@ function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))ret
  if(fl&1){if(!m.dead){if(m.myHit&&mobEarn(m)){m.mobKill=1;m.hp=0;killMon(m);m.mobKill=0;m.noLoot=0;}else if(m.dead){}else{m.dead=true;m.dying=.5;m.rt=mobRt(m);vfx('death',m.x,m.y);}mobLife(key);}return true;}
  if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mkN:m.mkN,sg:m.sg,nk:m.nk,boss:m.boss,far:m.far},hid=m.hidN;monFresh(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
  mobLocal(m,key); /* anything this player's skill gave it since: to the host first */m.lv=lv;m.max=mx||mobBaseMax(m);m.stun=m.stunH=fl&8?.15:0;if(fl&16){m.wardT=gTime+.5;m.wardR=((fl>>5)&31)/20||.4;}else m.wardT=0; // a shield is the host's
- m.weak=m.weakH=fl&1024?.5:0;m.slowU=m.slowUH=fl&2048?gTime+.5:0; // weak and slow while the host's copy is // the host's full health and stun, not this copy's
+ m.weak=m.weakH=fl&1024?.5:0;m.slowU=m.slowUH=fl&2048?gTime+.5:0;eliteSet(m,fl&4096,1); // weak and slow while the host's copy is // the host's full health and stun, not this copy's
  if(b.boss){const ph=hp<330?2:hp<660?1:0;if(hp>=1000)m.ph=0;else if(ph>(m.ph||0)){m.ph=ph;shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='dopp')toast(t('dpSplit'),'warn');else if(m.type!=='belial')toast(t('bossPh'+ph+(ph===1&&!(MT[m.type]||{}).adds?'n':''),{b:itN(m.type)}),'warn');}} // SAT-ONLINE-045
  const nh=Math.max(1,Math.round(m.max*hp/1000)),mine=m.pendT&&performance.now()-m.pendT<1500;
  if(nh<m.hp){if(!mine&&m.hp-nh>=1){m.hurt=.12;num(m.x,monY(m)-8,String(m.hp-nh),'#d8c8ff',false);vfx('hit',m.x,monY(m),{angle:0});}m.hp=nh;}else if(!mine)m.hp=nh; // another player's hit: its number shows here too
