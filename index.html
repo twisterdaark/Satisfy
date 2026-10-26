@@ -8345,7 +8345,7 @@ function legClaim(k){const D=FB.m.database,u={};u['world/satisfy/legends/'+k]={u
 function legApply(){if(!LEGS||!WS||!S||S.__demo||!NET)return;legW=WS;const L=WS.legends||(WS.legends={});
  for(const k in LEGK){const v=LEGS[k];
   if(v&&typeof v.uid==='string')L[k]={pid:v.uid===NET.uid?pidOf():'u:'+v.uid,n:Satisfy.chat.clean(v.n,24)||'?'};
-  else if(L[k]&&L[k].pid===pidOf()){if(S.cls===LEGK[k])legClaim(k).catch(()=>{});} // ours from offline: online now, if still free
+  else if(L[k]&&L[k].pid===pidOf()){if(S.cls===LEGK[k]&&mode!=='title')legClaim(k).catch(()=>{});} // ours from offline: online now, if still free (not from the title screen: a character deleted there must not take its legend back, owner 2026-10-26)
   else if(L[k])delete L[k];}} // freed online
 function legTick(){if(!legOff&&legOnline())legSub();if(LEGS&&legW!==WS)legApply();exTick();}
 // taking a legendary class online: the database record first (once per world), then the class itself
@@ -14928,7 +14928,7 @@ function legDel(c,list){if(!FB||!netUser)return Promise.resolve();const D=FB.m.d
   // the copy was this character's if the newest save shows it, or there is no save at all to look at (the record says so)
   const holds=(x,k)=>(x.mats[k]|0)>0||(Array.isArray(x.stash)?x.stash:[]).some(o=>o&&!o.it&&o.k===k&&o.n>0)||k==='mumbk'&&(x.mmq===1||x.mmq===2)||k==='mdsheath'&&!!x.mdq&&(x.mdq.st===1||x.mdq.st===2);
   const had=k=>gone.has(UQL[k])||cls.has(UQL[k])||!saves.length||saves.some(x=>holds(x,k));
-  return (Object.keys(lu).length?D.update(D.ref(FB.db),lu):Promise.resolve()).then(()=>Promise.all(Object.keys(UQL).filter(k=>B[k]&&B[k].uid===me&&(B[k].p===c.pid&&had(k)||gone.has(UQL[k])))
+  return (Object.keys(lu).length?D.update(D.ref(FB.db),lu):Promise.resolve()).then(()=>{if(WS&&WS.legends)for(const k of gone)if(WS.legends[k]&&(WS.legends[k].pid===c.pid||same))delete WS.legends[k];}).then(()=>Promise.all(Object.keys(UQL).filter(k=>B[k]&&B[k].uid===me&&(B[k].p===c.pid&&had(k)||gone.has(UQL[k])))
    .map(k=>D.update(D.ref(FB.db),{['world/satisfy/books/'+k]:null}).catch(()=>{}))));},e=>fail()).catch(e=>{throw e&&e.message===t('lgDelFail')?e:new Error(t('lgDelFail'));});}
 Object.assign(STR.ar,{lgDelFail:'مقدرناش نرجّع الأسطورة أو الكتاب للعالم دلوقتي، فالشخصية ماتمسحتش. جرّب تاني.'});Object.assign(STR.en,{lgDelFail:"The legend or the book couldn't go back to the world just now, so the character wasn't deleted. Try again."});
 // a declined Mumud or Madra (they have no one to ask again) is offered once a session while the legend is free
