@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26dslayer', ver: '3.17', d: '2026-10-26',
+      ar: ["قاتلة الشياطين على الرواية. «قفزة الجحيم» بقت خطوة برق (فصل 1536): بتعدّي لحد 9 متر في لحظة، جنب العدو اللي قدامك، ومحدش يلمسك ساعتها. مبقتش رحلة للجحيم.",
+        "«تنظيم الجحيم» (فصل 573 و1490): 20 ثانية حواليك في 10 متر، سحر الشياطين بيتقسم نصين (ضربهم النص) وباقي الأعداء أضعف 20%، وإنت وفريقك ضربكم +20%، وقوانين الجحيم بتقف عليك.",
+        "«الجوهر الشيطاني» (فصل 574): كل شيطان بتساعد في قتله بيسيبلك جوهر (الزعيم 20)، لحد 500، وبيتحفظ. شريط جديد تحت المانا. و«نور الدمار» محتاج 5 على الأقل وبيصرف لحد 500، وكل جوهر بيزوّد 10%."],
+      en: ["The Demon Slayer by the novel. Hell Leap is a flash step now (ch 1536): you cross up to 9 m at once, beside the foe ahead, untouchable for that moment. No more trip to hell.",
+        "Hell Regulation (ch 573, 1490): for 20 s within 10 m of you, demons' magic is halved (their blows by half) and other foes are 20% weaker, you and your party strike 20% harder, and hell's laws stop for you.",
+        "Demonic Essence (ch 574): every demon you help kill leaves one (a boss 20), up to 500, kept in your save, on a new bar under mana. Light of Destruction needs 5 and spends up to 500, each adding 10%."] },
     { v: '2026-10-26elements', ver: '3.16', d: '2026-10-26',
       ar: ["مقاومة العناصر زي الرواية. كل وحش ليه عنصره وبيقاومه بالنص (وعناصر النار والجليد والعاصفة، اللي معمولة منه، 80%)، وبياخد 30% زيادة من العنصر اللي بيغلبه (الميه بتغلب النار، والرعد الميه، والأرض الرعد، والرياح الأرض، والنار الرياح).",
         "الأموات والشياطين ومصاصين الدماء بيقاوموا الظلام النص وبياخدوا 40% زيادة من الضرر المقدس، والأموات والجولم والعناصر مبيتأثروش بالسم. والسكيلات ليها عنصرها: كرة النار نار، وقبضة البرق رعد، والصدمة المقدسة مقدس. والضربة العادية من غير عنصر.",
