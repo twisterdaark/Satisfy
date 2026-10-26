@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26anvil', ver: '3.19', d: '2026-10-26',
+      ar: ["وريث باغما على الرواية (فصل 3 و4 و16): بيلبس أي عتاد من غير شروط، بس لو القطعة لفلها أعلى منك فيه عقوبة على حسب الريتنج: العادي 10% لحد الأسطوري 50% والميثي 60% من هجومها ودفاعها. وكل ما تفهم القطعة أكتر (بالتفكيك والتقييم) العقوبة بتقل، ولما تفهمها 100% بتختفي. والتلميح بيوريك العقوبة.",
+        "سكيلات الحداد الأسطوري بأساميها: «حِرفية الحداد الأسطوري» (فصل 97 و442): اللي بتصنعه إحصائياته +12% في لفل 2 لحد +20% في لفل 8. و«تقييم الحداد الأسطوري» (فصل 13 و244): بيلاقي الميزة المخفية. و«تفكيك الحداد الأسطوري»: بتفهم القطعة أسرع من أي حد."],
+      en: ["Pagma's Successor by the novel (ch 3, 4, 16): he wears any gear unconditionally, but a piece above his level carries a penalty by its rating: from 10% for normal to 50% for legendary and 60% for myth, off its attack and defence. The better he understands the piece (by taking it apart and appraising it), the smaller it is, and at 100% it's gone. The tooltip shows it.",
+        "The Legendary Blacksmith's skills by name: Legendary Blacksmith's Craftsmanship (ch 97, 442), what he forges +12% at Lv 2 up to +20% at Lv 8; Legendary Blacksmith's Appraisal (ch 13, 244), it finds the hidden feature; and Legendary Blacksmith's Disassembly, he understands a piece faster than anyone."] },
     { v: '2026-10-26sanctuary', ver: '3.18', d: '2026-10-26',
       ar: ["القديسة على الرواية (فصل 1461 و1463): «إعلان الحرم» بياخد ساعة بناء من غير ما تتحركي ولا تضربي، والمانا بتخلص شوية بشوية، وسحر أساسي بس مرة كل 3 دقايق. خطوة واحدة والحرم ما بيتعملش.",
         "وبعدها الحرم بيقف 3 ساعات (100 متر)، وبيتحفظ لو قفلتي اللعبة. جواه أي قانون انتي ماسمحتيش بيه ملوش لازمة: لا حالات، ولا سم الوحوش وتقييدهم وشفطهم، ولا قوانين الجحيم. وفريقك اللي جوه معاكي. حرم جديد جوه القديم بيكبّره لحد 900 متر. الكولداون ساعتين ونص.",
