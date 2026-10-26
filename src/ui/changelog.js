@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26auction', ver: '3.16', d: '2026-10-26',
+      ar: ["المزاد بقى بين اللاعيبة: وإنت أونلاين، كل اللي اللاعيبة بيعرضوه بيظهر للكل في نفس اللوحة («المعروض»)، مترتب من الأرخص للقطعة، وتقدر تدور بالاسم. قبل كده كل جهاز كان شايف عروضه هو والتجار بس",
+        "البيعة بتحصل مرة واحدة: لو اتنين داسوا شرا في نفس اللحظة واحد بس بياخدها، والتاني بيتقاله إنها اتباعت. فلوسك وحاجتك بيتغيروا بس لما السيرفر يقبل البيعة",
+        "البايع بيتبلغ وهو بيلعب في أي حتة إن حاجته اتباعت، وبيستلم الفلوس (ناقص 5%) من زرار «استلم» في المزاد. لكل حساب 8 عروض (شخصياته كلها مع بعض)، لحد 999 من الحاجة الواحدة ولحد مليار دهب، والعرض اللي مااتباعش في 14 يوم بيرجعلك",
+        "وإنت بتعيد الاتصال المزاد بيستنى لحد ما ترجع أونلاين، ولو الصفحة اتقفلت وانت بتعرض حاجة بترجعلك لو العرض مانزلش",
+        "عروض التجار المتجولين بقت بتتجدد صح كل 20 دقيقة حتى لو ساعة الجهاز اتغيرت"],
+      en: ["The auction house is between players now: online, everything players list is on one board for everyone (Listed), cheapest per piece first, and you can search it by name. Before, each device saw only its own and the merchants' listings",
+        "A sale happens once: if two players buy at the same moment only one gets it, and the other is told it has sold. Your gold and goods change only once the server took the sale",
+        "The seller is told wherever they are playing and collects the gold (less 5%) with Collect at the auction house. Eight listings an account (all its characters together), up to 999 of a kind for up to a billion gold, and a listing that hasn't sold in 14 days comes back to you",
+        "While you reconnect the auction house waits until you are back online, and if the page closes while you list something, it comes back to you unless the listing went up",
+        "The traveling merchants' listings refresh every 20 minutes again even if the device's clock moved"] },
     { v: '2026-10-26classes', ver: '3.15', d: '2026-10-26',
       ar: ["باقي الكلاسات على الرواية. القديسة: «التطهير» (لفل 20) بيشيل كل الحالات عنك وعن فريقك في 8 متر، و«الصدمة المقدسة» 100% على كل كائن شرير في 5 متر، و«السلاح المقدس» بيوصل لسلاح فريقك اللي حواليك كمان.",
         "البالادين بتاع كنيسة جودار: «بركة الإله جودار» (لفل 100): كل الإحصائيات +20% خمس دقايق، والصحة والدفاع +30% عشر دقايق. الساحر الأسود: «العاصفة السودا» (60) و«قيد الخوف» (80) و«الحاجز الماسي» (230).",
