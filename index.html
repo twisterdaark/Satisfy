@@ -1812,6 +1812,8 @@ const REID={x0:514,x1:561,y0:62,y1:102,mx:556,my:69},PEAK={x:628,y:17,rx:22,ry:1
  BDOG={gx:934,gy:-8,in:{x0:1180,x1:1240,y0:WMH+13,y1:WMH+24,cy:WMH+18}};   // BDOG: the Beware Dogs mine (v2.99), its mouth in the Dravian Mountains' rocks
 // VAT: the Vatican (v3.11), half a day south of Rolling across Dran Valley; k0: the first row of its lane from the road; the papal hall under the map
 const VAT={x0:817,x1:851,y0:196,y1:228,gx:822,k0:188,cat:{x:829,y:203,w:16,h:9},hall:{x0:1252,x1:1292,y0:WMH+11,y1:WMH+25,cy:WMH+18}};
+// CORKD: Cork Island's dungeon (v3.31): its mouth on the island, its four floors under the map east of the Vatican's hall
+const CORKD={gx:648,gy:259,F:[0,1,2,3].map(i=>({k:'zCorkD'+(i+1),x0:1310+i*62,x1:1310+i*62+(i===3?72:54),y0:WMH+3,y1:WMH+24,cy:WMH+13}))};
 // the kinds of a region of its own (the Western Sands, Earl Zebra's castle): they set no town's recommended level and no invasion's strength
 var APART=new Set(['gworm','dtoad','gwnest','bkarrow','slaught']);   // WSAND: Reidan's Western Sands (v2.93), the nest below the rocks at its north-west
 const DSPAWN=[['cgob',236,284,WMH+4,WMH+19,12],['cgob',294,342,WMH+4,WMH+19,7],['gshaman',294,342,WMH+4,WMH+19,6],['gshaman',352,384,WMH+4,WMH+19,4],['kobold',414,462,WMH+4,WMH+19,12],['kobold',472,500,WMH+4,WMH+19,6],['golem',530,572,WMH+4,WMH+19,8],['cgolem',550,572,WMH+4,WMH+19,3],['cgolem',588,630,WMH+4,WMH+19,6],['skel',646,690,WMH+4,WMH+19,8],['wraith',662,690,WMH+4,WMH+19,5]],DBOSS=[['gwar',394,WMH+11],['kking',512,WMH+11],['bknight',682,WMH+11]],
@@ -2001,7 +2003,7 @@ function bChestGive(g){g.open=1;const b=MT[g.b];(S.bch||(S.bch={}))[g.b]=today()
 function bossChest(m,b){if(!b.boss||m.tmp||m.arena||m.evt||m.sg||m.bh||m.spar||m.fake||m.mob||ARN||TWR||bchUsed(m.type))return;const til=gTime+120;
  DGATES.push({x:m.x-14,y:m.y+4,to:{x:m.x,y:m.y},hint:'hBChest',tmp:1,chest:1,til,b:m.type,lv:0});setTimeout(()=>toast(t('bcHas',{b:itN(m.type)}),'good'),800);}
 Object.assign(STR.ar,{"bcToday": "صندوق {b} اتفتح النهارده. بيرجع بكرة، والدروب العادي بينزل كل مرة.", "bcHas": "{b} ساب صندوقه اليومي! افتحه قبل ما يختفي.", "mbChest": "صندوق الزعيم (مرة في اليوم): قطعة مضمونة بتقييم أعلى، وخاماته كاملة، وأحجار تقوية وأحجار نادرة", "mbNorm": "الدروب العادي (كل مرة):"});Object.assign(STR.en,{"bcToday": "You opened {b}'s chest today. It comes back tomorrow; the normal drops fall every time.", "bcHas": "{b} left its daily chest! Open it before it fades.", "mbChest": "Boss chest (once a day): a guaranteed item of a higher rating, all its materials, enhancement and rare stones", "mbNorm": "Normal drops (every kill):"});
-function useGate(g){if(g.swg&&!swgDone()){toast(t('swgSealed'),'warn');return;}if(g.thr&&!rdyGate())return;if(g.sir&&(roomFade||!sirGate(g)))return;if(g.bh)return bhUse(g);if(g.tw)return twUse(g);if(g.chest)return openBChest(g);if(roomFade)return;if(g.vc&&!vcGate(g))return;if(g.vat&&!vtGate(g))return;if(P.ride)dismount();if(g.lv&&!g.ant&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
+function useGate(g){if(g.chk&&!g.chk(g))return;if(g.swg&&!swgDone()){toast(t('swgSealed'),'warn');return;}if(g.thr&&!rdyGate())return;if(g.sir&&(roomFade||!sirGate(g)))return;if(g.bh)return bhUse(g);if(g.tw)return twUse(g);if(g.chest)return openBChest(g);if(roomFade)return;if(g.vc&&!vcGate(g))return;if(g.vat&&!vtGate(g))return;if(P.ride)dismount();if(g.lv&&!g.ant&&S.lv<g.lv)toast(t('dunWarn',{n:g.lv}),'warn');roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=g.to.x;P.y=g.to.y;P.dir=g.hint==='hUp'?0:2;camSnap=true;hudDirty=true;vfx('spawn',P.x,P.y);});}
 const ROOMS=[],PROPS=[];
 function genRoom(b,bi,kind,rx,ry,z){const R={id:'r'+bi,bi,b,kind,rx,ry,z,dx:b.x*TS+b.w*8,dy:(b.y+b.h)*TS+8};ROOMS.push(R);
   for(let y=ry;y<ry+8;y++)for(let x=rx;x<rx+12;x++)setT(x,y,(y<ry+2||y===ry+7||x===rx||x===rx+11)?IW:FW);
@@ -2275,6 +2277,10 @@ const catIn=(tx,ty)=>false;
 // contain Marie Rose and the 1st city, which is estimated to have the highest level of difficulty" (ch 760); Marquis Fenrir,
 // second in the vampire ranks with three of Beriache's powers, holds the 1st here.
 const VCY0=326,VCN=[15,14,13,12,11,10,9,8,7,6,5,4,3,2,1],VC=VCN.map((n,i)=>{const b=i<9?0:1,x0=6+(i-b*9)*106,y=VCY0+b*36;return {n,i,x0,x1:x0+99,y0:y+2,y1:y+33,ym:y+17,mx:x0+76};}),VCANT={x:530,y:128};
+// HELL (v3.31): the hells under the map east of Cork Island's dungeon, below the Behen rows, side by side from the village;
+// HLG: hell's gate on the Fourth Ridge beside Belial; hlCastle: the castle in the 25th and the 10th
+const HELL={y0:VCY0+3,y1:MH-4,cy:VCY0+35,C:[['zHellV',1300,1379],['zHell30',1380,1509],['zHell29',1510,1639],['zHell25',1640,1769],['zHell10',1770,1899],['zHell9',1900,1999]].map(([k,x0,x1])=>({k,x0,x1}))},HLG={x:470,y:-152};
+const hlCastle=k=>{const C=HELL.C.find(c=>c.k===k);return {x0:C.x1-34,x1:C.x1-4,y0:HELL.cy-13,y1:HELL.cy+13};};
 const vcAt=(tx,ty)=>ty<VCY0?null:VC.find(C=>tx>=C.x0&&tx<=C.x1&&ty>=C.y0&&ty<=C.y1)||null;
 const vcCity=n=>VC.find(C=>C.n===n);
 const vcHall=(C,tx,ty)=>tx>=C.mx&&tx<=C.x1&&ty>=(C.n===7?C.y0+3:C.y0+5)&&ty<=(C.n===7?C.y1-3:C.y1-5);
@@ -2671,10 +2677,51 @@ var VAT0=null;
  const px=(x,y)=>({x:x*TS+8,y:y*TS+10});
  DGATES.push({...px(BDOG.gx,BDOG.gy),to:px(K.x0+3,K.cy),hint:'hBdog'});
  DGATES.push({...px(K.x0+1,K.cy),to:px(BDOG.gx,BDOG.gy-2),hint:'hUp'});})();
+// Cork Island's dungeon (v3.31, ch 161-169): a mouth north of the island's middle, then four floors of rock under the map,
+// each one's stairs down at its east end; the fourth a wide hall with ten seams of fire stone in its walls, Hell Gao's lair
+(function genCorkD(){const r=mulberry32(2910),px=(x,y)=>({x:x*TS+8,y:y*TS+10}),K=CORKD;
+ for(let y=K.gy-1;y<=K.gy+2;y++)for(let x=K.gx-1;x<=K.gx+1;x++)setT(x,y,DR);
+ K.F.forEach((F,i)=>{for(let y=F.y0;y<=F.y1;y++)for(let x=F.x0;x<=F.x1;x++){const e=Math.min(x-F.x0,F.x1-x,y-F.y0,F.y1-y),lane=Math.abs(y-F.cy)<=1;setT(x,y,e<1?CW:(!lane&&e>1&&r()<(i===3?.025:.06)?RK:DR));}
+  DUN.push({k:F.k,x0:F.x0,x1:F.x1,y0:F.y0,y1:F.y1});
+  DGATES.push({...px(F.x0+1,F.cy),to:i?px(K.F[i-1].x1-3,K.F[i-1].cy):px(K.gx,K.gy+2),hint:'hUp'});
+  if(i<3)DGATES.push({...px(F.x1-1,F.cy),to:px(K.F[i+1].x0+3,K.F[i+1].cy),hint:'hCkDown',lv:[205,210,300][i]});});
+ DGATES.push({...px(K.gx,K.gy),to:px(K.F[0].x0+3,K.F[0].cy),hint:'hCkIn',lv:190});})();
+// Hell (v3.31): six lands side by side under the map, joined by passages through the rock. The village is grass, a stream,
+// macaroon trees and 20 shacks (ch 301); the hells are scorched ground with pools of fire, the 25th with its castle of black
+// crystals (ch 1420) and the 10th with Leraje's castle (ch 1418); the 9th holds the empty throne and the sealed way to the
+// heart of hell. The way in is a gate beside Belial on the Fourth Ridge, where her summoning tore hell open.
+(function genHell(){
+ // the gate's spot: the nearest open ground east of Belial (at 480,-160), with room for the way back below it
+ {let b=null;for(let r=0;r<40&&!b;r++)for(let j=-r;j<=r&&!b;j++)for(let i=-r;i<=r&&!b;i++){const x=490+i,y=-160+j;let ok=1;for(let v=-1;v<=3&&ok;v++)for(let u=-1;u<=1;u++)if(SOLID[at(x+u,y+v)]||at(x+u,y+v)===WA){ok=0;break;}if(ok)b=[x,y];}if(b){HLG.x=b[0];HLG.y=b[1];}}
+ const r=mulberry32(6660),H=HELL,px=(x,y)=>({x:x*TS+8,y:y*TS+10}),L=H.C.length;
+ H.C.forEach((C,i)=>{const v=C.k==='zHellV';
+  for(let y=H.y0;y<=H.y1;y++)for(let x=C.x0;x<=C.x1;x++){const e=Math.min(x-C.x0,C.x1-x,y-H.y0,H.y1-y),lane=Math.abs(y-H.cy)<=1,door=lane&&(x===C.x0&&i>0||x===C.x1&&i<L-1);
+   setT(x,y,door?(v?GR:DR):e<1?CW:v?GR:(!lane&&e>2&&r()<.04?RK:DR));}
+  DUN.push({k:C.k,x0:C.x0,x1:C.x1,y0:H.y0,y1:H.y1,hl:1});
+  if(v)return;
+  // pools of hellfire, away from the passage
+  for(let n=0;n<5;n++){const cx=C.x0+12+(r()*(C.x1-C.x0-60)|0),cy=H.y0+8+(r()*(H.y1-H.y0-16)|0),rx=3+(r()*4|0),ry=2+(r()*3|0);if(Math.abs(cy-H.cy)<ry+3)continue;
+   for(let y=cy-ry;y<=cy+ry;y++)for(let x=cx-rx;x<=cx+rx;x++)if(((x-cx)/rx)**2+((y-cy)/ry)**2<1)setT(x,y,WA);}});
+ // the village: a stream down its east side, macaroon trees, four rows of five shacks
+ {const V=H.C[0];for(let y=H.y0+1;y<=H.y1-1;y++){if(Math.abs(y-H.cy)<=1)continue;const sx=V.x1-10+Math.round(Math.sin(y*.3)*2);setT(sx,y,WA);setT(sx+1,y,WA);}
+  for(let n=0;n<26;n++){const x=V.x0+3+(r()*(V.x1-V.x0-16)|0),y=H.y0+3+(r()*(H.y1-H.y0-6)|0);if(Math.abs(y-H.cy)>2)setT(x,y,TR);}
+  for(let row=0;row<4;row++)for(let c=0;c<5;c++){const x=V.x0+8+c*11,y=H.y0+6+row*15+(row>1?6:0);for(let j=0;j<3;j++)for(let k=0;k<4;k++)setT(x+k,y+j,j===2&&k===1?GR:BL);}
+  DGATES.push({...px(V.x0+2,H.cy),to:px(HLG.x,HLG.y+2),hint:'hHellUp'});}
+ // the castles: black crystal walls round a hall, open to the west
+ for(const k of ['zHell25','zHell10']){const K=hlCastle(k);for(let y=K.y0;y<=K.y1;y++)for(let x=K.x0;x<=K.x1;x++){const e=Math.min(x-K.x0,K.x1-x,y-K.y0,K.y1-y),gate=x<=K.x0+1&&Math.abs(y-H.cy)<=2;setT(x,y,gate?DR:e<2?BL:PA);}}
+ // the 9th Hell: the throne on its dais, and the sealed gate on the east wall
+ {const T=H.C[5];for(let y=H.cy-3;y<=H.cy+3;y++)for(let x=T.x1-14;x<=T.x1-10;x++)setT(x,y,Math.abs(y-H.cy)<=1&&x===T.x1-14?FW:BL);
+  DGATES.push({...px(T.x1-2,H.cy),to:px(T.x1-4,H.cy),hint:'hHellDeep',deep:1});}
+ // the gate on the Fourth Ridge, on open ground beside Belial
+ DGATES.push({...px(HLG.x,HLG.y),to:px(H.C[0].x0+4,H.cy),hint:'hHellGo',lv:440,hell:1});})();
 // Haalrune Swamp: a murky wash over the ground, with reeds
 {const r=mulberry32(3131);for(const [cx,cy,rx,ry] of SWAMP){for(const k of [1.08,.96,.84])blob(gg,cx*TS+8,cy*TS+8,rx*TS*k,ry*TS*k,'rgba(46,66,38,.2)');for(let i=0;i<rx*ry*2;i++){const a=r()*6.28,d=Math.sqrt(r()),x=(cx+Math.cos(a)*rx*d)*TS,y=(cy+Math.sin(a)*ry*d)*TS;if(at(x/TS|0,y/TS|0)===WA)continue;R(gg,x,y-5,1,6,'#6a8a3a');R(gg,x+2,y-3,1,4,'#4e6e2c');R(gg,x,y-6,1,1,'#8a6a3a');}}}
 // the poison swamps of the Chaos Mountains: a sickly violet wash, dead reeds
 {const r=mulberry32(3232);for(const [cx,cy,rx,ry] of CSW){for(const k of [1.06,.94,.8])blob(gg,cx*TS+8,cy*TS+8,rx*TS*k,ry*TS*k,'rgba(74,40,86,.22)');for(let i=0;i<rx*ry*1.5;i++){const a=r()*6.28,d=Math.sqrt(r()),x=(cx+Math.cos(a)*rx*d)*TS,y=(cy+Math.sin(a)*ry*d)*TS;if(at(x/TS|0,y/TS|0)===WA)continue;R(gg,x,y-5,1,6,'#5a4a3a');R(gg,x+2,y-3,1,4,'#4a3a46');R(gg,x,y-6,1,1,'#8a5aa0');}}}
+// hell's ground (v3.31): scorched red over the hells and their pools of fire lit, the village left green
+{const H=HELL;for(const C of H.C){if(C.k==='zHellV')continue;R(gg,C.x0*TS,H.y0*TS,(C.x1-C.x0+1)*TS,(H.y1-H.y0+1)*TS,'rgba(110,18,8,.3)');
+  for(let y=H.y0;y<=H.y1;y++)for(let x=C.x0;x<=C.x1;x++)if(at(x,y)===WA){R(gg,x*TS,y*TS,TS,TS,(x+y)%3?'#b8300a':'#e8601a');if((x*7+y*3)%5===0)R(gg,x*TS+5,y*TS+6,3,2,'#ffd24a');}}
+ for(const k of ['zHell25','zHell10']){const K=hlCastle(k);for(let y=K.y0;y<=K.y1;y++)for(let x=K.x0;x<=K.x1;x++)if(at(x,y)===BL)R(gg,x*TS,y*TS,TS,TS,k==='zHell25'?((x+y)%2?'#1a1424':'#2e2440'):((x+y)%2?'#14200e':'#24361a'));else R(gg,x*TS,y*TS,TS,TS,k==='zHell25'?'rgba(30,20,50,.45)':'rgba(20,30,14,.45)');}}
 
 // buildings and props from sprites-original/buildings.js (same footprints, doors and over/under layers)
 buildings.forEach(b=>SA.buildings.drawBuilding({gg,og},b));
@@ -4941,7 +4988,7 @@ const noRideAt=(x,y)=>!!(dunAt(x,y)||roomAt(x,y)||swampAt(x,y)||inBh(x,y)||inTw(
 const P2={rot:[]},P2NOT=['pagma','braham','saint','dslayer','saintess','aura','beast','orator','lsword','esorc'];
 HCQ.push('hds','hsa');
 const p2Still=()=>!(P.rmv>0)&&!(P.dash>0);
-function p2Atk(m,o){if(m.spar)return 1;let k=1;const wk=weapKind();
+function p2Atk(m,o){if(m.spar)return 1;let k=hlDeb()?.7:1;if(P.hgDeb>gTime)k*=.8;const wk=weapKind();
  if(S.cls==='sniper'&&wk==='bow'){if(pasOn('snaim')&&p2Still())k*=1+.15*pasM('snaim');if(P.sne>0)k*=1.1;}
  if(S.cls==='bowmaster'&&wk==='bow'&&pasOn('bmcombo')&&P.bmM===m&&P.bmT>0)k*=1+.04*pasM('bmcombo')*(P.bmc||0);
  if(m.wlc>0)k*=1.15;
@@ -5057,7 +5104,7 @@ const P2ICO={
    (Belial's or Berith's field, or her own summoned one) damage +20%, cooldowns -20%, regeneration +50%.
    Not here yet: the magic gun (no gun weapon in the game; her bullets are mana) and the black magic power resource. */
 const DSH={f:null,lp:null,it:0};
-const dsHell=()=>S&&S.cls==='dslayer'&&pasOn('dsbane')&&(brHell()||!!(DSH.f&&Math.hypot(P.x-DSH.f.x,P.y-DSH.f.y)<150));
+const dsHell=()=>S&&S.cls==='dslayer'&&pasOn('dsbane')&&(brHell()||hlZ()||!!(DSH.f&&Math.hypot(P.x-DSH.f.x,P.y-DSH.f.y)<150));
 const dsCdM=k=>SKD[k]&&SKD[k].cls==='dslayer'&&dsHell()?(k==='dsdest'?.5:.8):1;
 function hellDeb(){return brHell()&&!(P.hreg>0)&&!saIn();}
 function dsBurn(m){m.rot={t:4,k:1};if(!P2.rot.includes(m))P2.rot.push(m);}
@@ -5373,7 +5420,7 @@ Object.assign(STR.en,{hPet:'E: Pet your cat',ctPet1:'Your cat purrs and closes i
 window.__GCT={near:()=>ctNear(),pet:()=>ctPet(),get PET(){return PET},get petted(){return !!(PET&&PET.pt>gTime)}}; // tests
 // pets that grow (SAT-PETLV-001): the pet out with you earns XP from your kills (S.petx), or eat fish from your bag. Every
 // level raises its passive by a tenth of the base, at 5 it grows up and at 15 it reaches its final form; from 10 it joins
-// your fights. Noe, the nightmare child, drops from the Yatan high priest and grows into a great black beast.
+// your fights. Noe, the memphis, hatches from the egg Hell Gao drops (v3.31) and grows into a great black beast.
 const PLMAX=20,petNeed=l=>15*l*l;
 // owner 2026-10-23 ("why would a doppelganger eat fish?"): only the animals eat fish. As the novel has it, Noe grows by eating
 // what he defeats ("have Noe eat Elfin Stone's stats") and Randy by copying your skills ("have Randy copy some of Elfin
@@ -5384,8 +5431,7 @@ function petRest(k){let x=(S.petx||{})[k]||0,l=1;while(l<PLMAX&&x>=petNeed(l)){x
 const petB=k=>S.pet===k&&(S.pets||{})[k]&&!petDead(k)?PETS[k].b*(pEvo(k)?2:1)*(1+(petLv(k)-1)*.1)*(tlOn('tamer')?1.25:1)*(1+secB('pet')):0;
 function petXP(k,n){if(!k||!(S.pets||{})[k]||n<=0)return;const l0=petLv(k);S.petx=S.petx||{};S.petx[k]=(S.petx[k]||0)+n;const l1=petLv(k);
  if(l1>l0){toast(t(l1===5||l1===15?'petGrow':'petUp',{n:t('pt_'+k),l:l1}),'good');SFX.level();if(PET)vfx('spawn',PET.x,PET.y,{color:'#f2c14e'});if(l1===10&&!pEvo(k))setTimeout(()=>toast(t('petFight',{n:t('pt_'+k)}),'good'),600);if(l1>=PLMAX&&pEvoOk(k))setTimeout(()=>toast(t('peReady',{n:t('pt_'+k),m:pEvoNeed(k)}),'good'),1200);hudDirty=true;sbSig='';}}
-function petKill(m,b){if(!S.pet)return;petXP(S.pet,Math.max(1,Math.round(m.lv/10))*(b.boss?10:1)*(tlOn('beastf')?1.5:1)*(S.pet==='noe'?2:1));
- if(m.type==='ypriest'&&!m.tower&&!(S.pets||{}).noe&&rand()<.05){S.pets=S.pets||{};S.pets.noe=1;annW('noeDrop');SFX.legendary();setTimeout(()=>setPet('noe'),800);}}
+function petKill(m,b){if(!S.pet)return;petXP(S.pet,Math.max(1,Math.round(m.lv/10))*(b.boss?10:1)*(tlOn('beastf')?1.5:1)*(S.pet==='noe'?2:1));}   // Noe hatches from Memphis' Egg, Hell Gao's drop (v3.31, ch 167-169), no more from the Yatan high priest
 function petFeed(k){if(PETX[k])return;const f=(S.mats.gfish||0)>0?'gfish':TKC.find(k=>(S.mats[k]||0)>0)||null;if(!f){SFX.deny();return toast(t('petNoFish'),'warn');}S.mats[f]--;petXP(k,f==='gfish'?150:25);toast(t('petAte',{n:t('pt_'+k)}),'good');save(true);}
 // owner 2026-10-23 ("let the ones like Randy, the owl and Noe die and have a health bar, as in the novel; not always there
 // for nothing"): a pet has its own health, from yours and its level (Noe and Randy more, an evolved one twice), and shows a
@@ -6920,7 +6966,7 @@ function dmgMult(){return (1+cpStat('atk'))*(1+ttB('dmg'))*(1+achB('dmg'))*(1+st
 // slightly faster attacks with that kind (level 1 at 15 hits, 10 at 1500, capped at 50)
 const mastLv=k=>Math.min(50,Math.floor(Math.sqrt(((S.mast||{})[k]||0)/15)));
 function trainMast(){const k=weapKind();S.mast=S.mast||{};const was=mastLv(k);S.mast[k]=(S.mast[k]||0)+1;const now=mastLv(k);if(now>was){toast(t('mastUp',{w:t('wk_'+k),n:now}),'good');SFX.level();}}
-function atkCD(){return (blNear()?1.25:1)*(auOn()?.3:weapon().spd)*hcAcd()*(1-Math.min(.35,stat('agi')*.0012))*(1-mastLv(weapKind())*.003)*(1-Math.min(.25,gearSum('as')))*(1-(P.gale||0)*.01)*(1-(P.qf||0)*.005)*(P.qm>0?.85:1)*(S.bh&&S.bh.wm?.99:1)*(S.cls==='tzudan'&&pasOn('tzweap')?.85:1)*(P&&P.kyGU>gTime?.67:1)/(1+bzkK()[1])/(1+ssAs())/(poemOn()?1.2:1);}
+function atkCD(){return (blNear()?1.25:1)*(hlDeb()?1.3:1)*(auOn()?.3:weapon().spd)*hcAcd()*(1-Math.min(.35,stat('agi')*.0012))*(1-mastLv(weapKind())*.003)*(1-Math.min(.25,gearSum('as')))*(1-(P.gale||0)*.01)*(1-(P.qf||0)*.005)*(P.qm>0?.85:1)*(S.bh&&S.bh.wm?.99:1)*(S.cls==='tzudan'&&pasOn('tzweap')?.85:1)*(P&&P.kyGU>gTime?.67:1)/(1+bzkK()[1])/(1+ssAs())/(poemOn()?1.2:1);}
 // damage vs a higher-level monster falls off with the gap but never below 12%, so a big gap is a slow fight, not an immune wall
 // owner 2026-10-22: a Lv 1 killed a Lv 130 monster. Up to 50 levels above you, you still do at least 35%; past that the
 // floor falls fast, to 2% at 100 levels and more
@@ -6982,7 +7028,7 @@ function wear(i,p){p*=1-secB('wear');if(i&&i.slot==='w')p*=1-.05*edrLv(i);   /* 
  else if(i.dur===10||i.dur===5){announce(t('durCrit',{it:inm(i),n:i.dur}),1);SFX.deny();}
  else if(i.dur<=20&&gTime>durRemT){durRemT=gTime+40;toast(t('lowDur',{it:inm(i),n:i.dur}),'warn');}}
 function atkV(){return Math.round(iAtk(weapon())*dmgMult()*(P&&P.icb>0?icbM():1));}
-function defV(){let d=setBon('def')+cosB('def');for(const sl of GEAR){const i=eqIt(sl);if(i)d+=iDef(i);}return Math.round((1+cpStat('def'))*(d+Math.floor(stat('sta')*.15))*(P&&P.icb>0?icbM():1)*(1+setBon('dfp'))*(tlOn('oath')?1.05:1)*(S&&S.cls2==='sfarm'?1.1:1)*(S&&S.cls==='lknight'?1.2:1)*(P&&P.lkRU>gTime?1.3:1)*(patOn()?3:1)*(1+ssBl())*(P&&P.gjb2U>gTime?1.3:1)*(P&&P.shredT>gTime?MXSHR:1));}
+function defV(){let d=setBon('def')+cosB('def');for(const sl of GEAR){const i=eqIt(sl);if(i)d+=iDef(i);}return Math.round((1+cpStat('def'))*(d+Math.floor(stat('sta')*.15))*(P&&P.icb>0?icbM():1)*(1+setBon('dfp'))*(tlOn('oath')?1.05:1)*(S&&S.cls2==='sfarm'?1.1:1)*(S&&S.cls==='lknight'?1.2:1)*(P&&P.lkRU>gTime?1.3:1)*(patOn()?3:1)*(1+ssBl())*(P&&P.gjb2U>gTime?1.3:1)*(P&&P.shredT>gTime?MXSHR:1)*(S&&hlDeb()?.7:1));}
 // spawns read the world as generated (GM0), not this player's copy with its chopped trees and stumps, so every
 // client places the same monsters at the same spots and shared monsters line up (owner report: half stayed local)
 let GM0=null;const at0=(x,y)=>(x<0||y<-YO||x>=GW||y>=MH)?CW:GM0[(y+YO)*GW+x],sol0=(x,y)=>SOLID[at0(x,y)]===1;
@@ -7018,7 +7064,7 @@ function spawnWorld(){if(!GM0)GM0=GM.slice();
   // the 32nd Great Demon Belial at the gate of hell (major 7), after them for the same reason
   {const d=newMon('belial',BLL.x*TS+8,BLL.y*TS+8,rf),u=WS&&WS.wb&&WS.wb.belial;d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);}
   // the Storm Temple, the wyvern nest and the Vampire City (third batch, patch 3), last for the same reason
-  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();wsSpawn();zbSpawn();}
+  p3Spawn();p4Spawn();p5Spawn();vcSpawn();eaSpawn();ogSpawn();o48Spawn();og2Spawn();wsSpawn();zbSpawn();hlSpawn();}
  for(const m of mons)eliteRoll(m);
  // monsters you killed stay dead through a save and quit until their respawn time (owner 2026-10-19: quitting and
  // coming back brought them all back at once, an easy way to farm); S.mrt = {spawn key: wall-clock ms}
@@ -7283,7 +7329,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(!o.pure&&brImm(m)){
  let mblk=false;if(AIK[m.type]==='soldier'&&!o.pure&&!m.tdum&&!o.skill&&!o.aura&&!(P.bdetU>gTime)&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
   mblk=true;dmg*=.2;crit=false;burn=false;m.grdT=.6;m.cd=Math.min(m.cd,.15);vfx('block',m.x+m.face*7,my-2,{angle:m.face>0?Math.PI:0});num(m.x,my-20,t('mBlock'),'#9fc8ff',false);SFX.hit();}
  if(o.raw>0){dmg=o.raw*Math.min(1,p3Atk(m)*p4Atk(m)*p5Atk(m)*epAtk(m)*vcAtk(m)*(m.wardT>gTime?ssWard(m.wardR||.4):1));crit=true;mblk=false;}   // (v3.14) a share of the target's own health: no attack, no defence; a boss's shield and a guard still hold
- dmg+=cpErode(m,o);dmg=Math.max(1,Math.round(dmg));if(!Number.isFinite(dmg))dmg=1;dmg=blRefl(m,dmg);if(OGB&&OGB[m.type])dmg=ogDmg(m,dmg,o);if(!m.tdum&&!o.raw)ttRec(dmg);m.hp-=dmg;if(m.tdum)tdHit(m,dmg,crit);m.myd=(m.myd||0)+dmg;m.myT=gTime;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;if(!m.tdum)trainMast();if(!o.chain&&wearT!==gTime&&!m.tdum){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(o.slow>0)m.slowU=Math.max(m.slowU||0,gTime+o.slow);/* (v3.15) a skill's slow took no hold before */if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
+ dmg+=cpErode(m,o);dmg=Math.max(1,Math.round(dmg));if(!Number.isFinite(dmg))dmg=1;dmg=blRefl(m,dmg);if(OGB&&OGB[m.type])dmg=ogDmg(m,dmg,o);if(!m.tdum&&!o.raw)ttRec(dmg);m.hp-=dmg;if(m.tdum)tdHit(m,dmg,crit);m.myd=(m.myd||0)+dmg;if(m.type==='hellgao')hgHit(m,dmg,crit);m.myT=gTime;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;if(!m.tdum)trainMast();if(!o.chain&&wearT!==gTime&&!m.tdum){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(o.slow>0)m.slowU=Math.max(m.slowU||0,gTime+o.slow);/* (v3.15) a skill's slow took no hold before */if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
  num(m.x,my-8,String(dmg),crit||burn?'#ffd24a':'#ffffff',crit||burn);
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(crit&&!RMO)shake=Math.max(shake,.07);if(burn){fireOn(m);vfx('fire',m.x,my);};if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
@@ -7492,7 +7538,7 @@ const DROPM=['msword','mstaff','mbow','mspear','mdagger','mhammer','marmor','mhe
 const dropTier=k=>{const lv=MT[k]&&MT[k].lv?MT[k].lv[0]:0;return lv>=220?DROPMG:lv>=120?DROPM:DROPG;};
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.55:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const L=b.boss?dropTier(m.type):DROPG,id=L[rand()*L.length|0],r=rand()<(b.boss?.1:.04)?3:2,it=mkItem(id,r);S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.dead=true;if(b.boss&&!m.tmp&&!m.bh&&!m.arena&&!m.spar&&PARTY&&PARTY.members().length>1)bpGain(.2);   /* a boss fought in a party: a blueprint fragment, 20% (plan U280) */lpSrc(m);if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}pasKill(m);balKill(m);dmeKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh&&!m.noLoot)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);epKill(m);huntKill(m);pxpKill(m,b);eaKill(m);if(NET&&b.boss&&!m.bh&&!m.noLoot)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!m.noLoot&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh&&!m.noLoot){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else if(!m.noLoot)bossChest(m,b);{let xg=Math.round(b.xp*(m.xmul||1)*pxpKF(m)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(P.buf&&P.buf.k==='sage'?.25:0)+(evOn('gold')?.5:0)+petB('owl')+(tlOn('veteran')?.05:0)+ttB('xp')+(tlOn('viscount')?.05:0)+(tlOn('pioneer')?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));const xs=xpSrcOf(m,1),got=xs===null?0:gainXP(xg,0,xs,1);jKill(m,got);twKill(m);if(got>0){num(m.x,m.y-36,'+'+got.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',got,t('lootXP'),{ic:null,cls:'xp'});}}if(b.gold&&!m.bh&&!m.noLoot){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(tlOn('explorer')?.05:0)+ttB('gold')+(tlOn('dandy')?.05:0)+(tlOn('shero')?.05:0)+(tlOn('baron')?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.dead=true;if(b.boss&&!m.tmp&&!m.bh&&!m.arena&&!m.spar&&PARTY&&PARTY.members().length>1)bpGain(.2);   /* a boss fought in a party: a blueprint fragment, 20% (plan U280) */lpSrc(m);if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}pasKill(m);balKill(m);dmeKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh&&!m.noLoot)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);if(HLK.has(m.type))hlDown(m);if(hlHuman(m)&&!m.tmp)hgSoul();epKill(m);huntKill(m);pxpKill(m,b);eaKill(m);if(NET&&b.boss&&!m.bh&&!m.noLoot)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!m.noLoot&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:25;if(!m.bh&&!m.noLoot){rareDrop(m,b);namedDrop(m);}petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else if(!m.noLoot)bossChest(m,b);{let xg=Math.round(b.xp*(m.xmul||1)*pxpKF(m)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(P.buf&&P.buf.k==='sage'?.25:0)+(evOn('gold')?.5:0)+petB('owl')+(tlOn('veteran')?.05:0)+ttB('xp')+(tlOn('viscount')?.05:0)+(tlOn('pioneer')?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)));const xs=xpSrcOf(m,1),got=xs===null?0:gainXP(xg,0,xs,1);jKill(m,got);twKill(m);if(got>0){num(m.x,m.y-36,'+'+got.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',got,t('lootXP'),{ic:null,cls:'xp'});}}if(b.gold&&!m.bh&&!m.noLoot){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(tlOn('explorer')?.05:0)+ttB('gold')+(tlOn('dandy')?.05:0)+(tlOn('shero')?.05:0)+(tlOn('baron')?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh&&!m.noLoot)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,RCKEY.includes(k)?1:p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p*(1+secB('drop')))addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill (a divine beast's breath is one)
  if(!m.bh&&!m.noLoot&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}if(!m.noLoot){rbBossDrop(m,b);cosDrop(m,b);}
@@ -7539,6 +7585,7 @@ function nearest0(){let best=null,bd=26;const px=P.x,py=P.y,c=(k,o,x,y,h)=>{cons
  for(const o of exNear())c('cache',o,o.x,o.y,'hCache');
  for(const q of swgNear())c(q.k,q.o,q.o.x,q.o.y,q.k==='swgs'?'hSwgTurn':'hSwgCoffin');
  for(const v of bdNear())c('bdv',v,v.x,v.y,bdSt(v)?'hBdMine':'hBdBrick');
+ for(const v of hgNear())c('hgv',v,v.x,v.y,'hHgMine');
  for(const f of tfNear())c('folk',f,f.x,f.y,'hTalk');
  for(const g of DGATES)if(!(g.hide&&g.bh!=='key'&&!(g.tw&&Math.hypot(g.x-px,g.y-py)<22))&&!g.got&&!g.out&&!g.gone&&!(g.tw==='enter'&&!(S.wis&&S.wis.map)))c('gate',g,g.x,g.y,g.hint);
  for(const T of TERR)c('banner',T,T.x,T.y-4,'hBanner');
@@ -7546,7 +7593,7 @@ function nearest0(){let best=null,bd=26;const px=P.x,py=P.y,c=(k,o,x,y,h)=>{cons
  if(COMPO)c('npc',COMPO,COMPO.x,COMPO.y,NH);const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache'&&best.k!=='swgs')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
  if(!best&&CKST)c('stove',CKST,CKST.x,CKST.y,'hStove');   // v3.04: your portable stove, when nothing else is in reach
  if(!best||best.k==='tree'){const w=nearWater();if(w)best={k:'water',o:w,x:w.x,y:w.y,hint:FISH?'hReel':'hFish'};}return best;}
-function interact(){if(FISH){fishAct();return;}const n=nearest(1);if(!n){if(ctNear())return ctPet();SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu(0);return;}if(n.k==='stove'){ckCook();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='swgs')swgTurn(n.o);else if(n.k==='swgc')swgCoffin();else if(n.k==='bdv')bdVein(n.o);else if(n.k==='treasure')thDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
+function interact(){if(FISH){fishAct();return;}const n=nearest(1);if(!n){if(ctNear())return ctPet();SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu(0);return;}if(n.k==='stove'){ckCook();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='swgs')swgTurn(n.o);else if(n.k==='swgc')swgCoffin();else if(n.k==='bdv')bdVein(n.o);else if(n.k==='hgv')hgVein(n.o);else if(n.k==='treasure')thDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
 let roomFade=false;
 function enterRoom(Rm){if(roomFade)return;if(P.ride)dismount();roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=(Rm.rx+6)*TS+8;P.y=(Rm.ry+6)*TS+10;P.dir=1;camSnap=true;hudDirty=true;});}
 // "get unstuck" in the Esc menu: walks you out of a house, or takes you back to the nearest town square (once a minute)
@@ -10574,7 +10621,7 @@ function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,ti
  h+=`<div class="ssec">${t('basic')}<span class="sptc${S.pts>0?' on':''}">${t('pts',{n:S.pts})}${S.pts>1?` <input class="stn" id="stAmt" type="number" inputmode="numeric" min="1" max="${S.pts}" value="${STAMT||''}" placeholder="${esc(t('stNumPh'))}" data-tip="${esc(t('stNumTip'))}">`:''}</span></div><div class="sgrid stq">`+['str','sta','agi','int','dex'].map(k=>row(t(k),stat(k),t('t'+k),S.pts>0?`<button data-stat="${k}">+</button>${S.pts>=5?`<button class="p5" data-stat="${k}" data-n="5" data-tip="${esc(t('p5Tip'))}">+5</button>`:''}${TOUCH&&S.pts>5?`<button class="p5" data-stat="${k}" data-n="all">${t('ptsAllB')}</button>`:''}`:'',stat(k)!==S.st[k]?` <em data-tip="${esc(t('stBaseTip'))}">(${t('stBase',{n:S.st[k]})})</em>`:'',k)).join('')+'</div>';
  if(S.respec>0)h+=`<div class="note"><button data-respec="1" data-tip="${esc(t('respecD'))}">${t('respecUse',{n:S.respec})}</button></div>`;
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
- h+=`<div class="ssec">${t('special')}</div><div class="sgrid">`+['comp','indom','dign','insi',...(S.hid.pers?['pers']:[])].map(k=>row(t(k),S.hid[k],t('t'+k)+'<br><small>'+t('noDist')+'</small>')).join('')+'</div>';
+ h+=`<div class="ssec">${t('special')}</div><div class="sgrid">`+['comp','indom','dign','insi',...(S.hid.pers?['pers']:[]),...(S.hid.dpow!=null?['dpow']:[])].map(k=>row(t(k),S.hid[k],t('t'+k)+'<br><small>'+t('noDist')+'</small>')).join('')+'</div>';
  h+=`<div class="pts" id="ptsT">${t('pts',{n:S.pts})}</div>`+(S.pts>0?`<div class="note">${t('ptsHint')}</div>`:'');
  h='<div class="scol"><div>'+h+'</div><div>';const own=['smith','krage','forest','chief','hunter','champ','dslayer','purifier','slayer','explorer','veteran','helper','climber','dandy','tamer','hking','pioneer','bibanF','paint','echo','duke','oath','senses','beastf','tenth','natChamp','pathfinder','cartog','savior','sonlaw','shero','yslay','dbeast','four','blslay','lfarm','mbook','rdef','whunt','arnReg','arnTop','arnChamp','pgstar','phxg','btprot','cardsh','cardk','expoc','angler','kheir','ffield','pguest','dshadow','wcastle','ifriend','rclerk',...TTOWN].filter(id=>S.tl[id]);
  const tlSk=id=>Object.keys(SKD).filter(k=>SKD[k].title===id||TLS[id]===k).filter((k,i,a)=>a.indexOf(k)===i);own.sort((x,y)=>(tlSk(y).length>0)-(tlSk(x).length>0));   // owner 2026-10-24: titles that give a skill come first
@@ -10645,7 +10692,7 @@ function spwOff(){if(P&&P.spw){P.spw=0;P.spwM=0;}}
 function spwTick(dt){if(!P||!P.spw||mode!=='play')return;const d=Math.hypot(P.x-P.spwX,P.y-P.spwY);P.spwX=P.x;P.spwY=P.y;if(d>.2&&d<64)P.spwM+=dt;if(P.spwM>=SPWT)spwOff();}
 function spwDraw(){const a=.25+.12*Math.sin(gTime*6),y=P.y-10-(P.ride?9:0);ctx.save();ctx.globalAlpha=a;ctx.fillStyle='#8fd8ff';ctx.beginPath();ctx.ellipse(P.x,y,13,15,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=a+.35;ctx.strokeStyle='#d8f4ff';ctx.lineWidth=1;ctx.stroke();ctx.restore();}
 window.__GSPW={on:()=>spwOn(),get P(){return P},set:v=>{SPWON=!!v;}}; // tests
-function respawn(k){if(BHR&&BHR.dead)return bhRespawn();const bn=!k&&bindNpc(),bz=bn&&townOfNpc(S.bind);const T=TOWNS.find(T=>T.k===(k||bz))||nearTown();const lost=Math.floor(S.gold*.1);S.gold-=lost;P.hp=Math.round(maxHP()*.5);P.food=Math.max(P.food,50);if(bn){P.x=bn.x;P.y=bn.y+18;}else{P.x=T.rx*TS+8;P.y=T.ry*TS+10;}P.inv=2;spwOn();camSnap=true;vfx('spawn',P.x,P.y);cvs.classList.remove('dead');$('deathW').hidden=true;mode='play';toast(t('died',{g:lost,z:t(T.k)}),'warn');SFX.quest();
+function respawn(k){if(BHR&&BHR.dead)return bhRespawn();const bn=!k&&bindNpc(),bz=bn&&townOfNpc(S.bind);const T=TOWNS.find(T=>T.k===(k||bz))||nearTown();const lost=Math.floor(S.gold*.1);S.gold-=lost;P.hp=Math.round(maxHP()*.5);P.food=Math.max(P.food,50);if(bn){P.x=bn.x;P.y=bn.y+18;}else{P.x=T.rx*TS+8;P.y=T.ry*TS+10;}if(!k)hlFall();P.inv=2;spwOn();camSnap=true;vfx('spawn',P.x,P.y);cvs.classList.remove('dead');$('deathW').hidden=true;mode='play';toast(t('died',{g:lost,z:t(T.k)}),'warn');SFX.quest();
  mons.forEach(m=>{if(MT[m.type].boss&&!m.dead&&!(MOBN&&MOBN.host&&mobOk(m))){m.hp=m.max;m.x=m.sx;m.y=m.sy;}});if(S.raid){S.raid=0;allies=[];}hudDirty=true;}
 
 /* ---------------- menus ---------------- */
@@ -10714,7 +10761,7 @@ function sahZone(tx,ty){const T=TITAN,B=BUTIN,R=ROLL,A=ABYSS;
  if(ty>96&&tx<854)return 'zDran';
  if(asmoIn(tx,ty))return 'zAsmo';if(ty<T.y0-2&&tx>=846)return 'zSahHills';
  return tx<856&&ty<=78?'zTatur':'zSahFarm';}
-function zoneAt(x,y){if(y>=VCY0*TS){const C=vcAt(x/TS,y/TS);return C?'zVc'+C.n:'void';}if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;if(inRace(x,y))return 'zRace';return (roomAt(x,y)||{}).z||'zWin';}if(x>=WMW*TS)return eaReg(x/TS|0,y/TS|0);if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS,pz=p3Zone(tx,y/TS)||p4Zone(tx,y/TS)||p5Zone(tx,y/TS);if(pz)return pz;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';if(tx>=SWG.x0&&tx<SWG.x1+1&&ty>=SWG.y0&&ty<SWG.y1+1)return 'zSwordG';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=WSAND.x0*TS&&x<(WSAND.x1+1)*TS&&y>=WSAND.y0*TS&&y<(WSAND.y1+1)*TS)return 'zWSand';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
+function zoneAt(x,y){if(y>=VCY0*TS){const C=vcAt(x/TS,y/TS);return C?'zVc'+C.n:((dunAt(x,y)||{}).k||'void');}if(y>=BHY0*TS)return x<TWX1*TS?'zWisdom':'zBehen';if(y>=WMH*TS){const D=dunAt(x,y);if(D)return D.k;if(inRace(x,y))return 'zRace';return (roomAt(x,y)||{}).z||'zWin';}if(x>=WMW*TS)return eaReg(x/TS|0,y/TS|0);if(y<-ON*TS){const k=ridgeAt(x/TS,y/TS);return k<0?'zNWall':'zChaos'+(k+1);}if(x>=EX*TS)return sahZone(x/TS,y/TS);if(y>=OS*TS){const tx=x/TS,pz=p3Zone(tx,y/TS)||p4Zone(tx,y/TS)||p5Zone(tx,y/TS);if(pz)return pz;return y/TS>=COAST(tx|0)-6?'zSSea':tx<GBORD?'zPedro':'zGauss';}if(y<0){const tx=x/TS,ty=y/TS,G=GHOLD;if(tx>=G.x0&&tx<G.x1+1&&ty>=G.y0&&ty<G.y1+1)return 'zGHold';if(tx>=SWG.x0&&tx<SWG.x1+1&&ty>=SWG.y0&&ty<SWG.y1+1)return 'zSwordG';return tx<BW?'zNHigh':tx<240?'zFrostP':tx<420?'zWPine':tx<600?'zGlac':'zGiantL';}if(y>=OWH*TS){const tx=x/TS;if(taleIn(tx,y/TS))return 'zTaleren';return tx<180?'zSMead':tx<360?'zSWood':tx<540?'zSDes':'zSFen';}const ty=y/TS,tx=lX(x/TS);if(tx<0){const bi=beltAt(x/TS);if(bi===2&&x>=CAST.x0*TS&&x<(CAST.x1+1)*TS&&y>=CAST.y0*TS&&y<(CAST.y1+1)*TS)return 'zCastle';if(bi===2&&x>=KESAN.x0*TS&&x<(KESAN.x1+1)*TS&&y>=KESAN.y0*TS&&y<(KESAN.y1+1)*TS)return 'zKesan';if(bi===2&&x>=YATAN.x0*TS&&x<(YATAN.x1+1)*TS&&y>=YATAN.y0*TS&&y<(YATAN.y1+1)*TS)return 'zYatan';if(bi===2&&x>=WSAND.x0*TS&&x<(WSAND.x1+1)*TS&&y>=WSAND.y0*TS&&y<(WSAND.y1+1)*TS)return 'zWSand';if(bi===2&&x>=REID.x0*TS&&y>=REID.y0*TS&&y<(REID.y1+1)*TS)return 'zReid';if(bi===3){if(x>=REIN.x0*TS&&y>=REIN.y0*TS&&y<(REIN.y1+1)*TS)return 'zRein';if(Math.hypot((x/TS-MULL.x)/MULL.rx,(y/TS-MULL.y)/MULL.ry)<1.2)return 'zMull';if(Math.hypot((x/TS-PEAK.x)/PEAK.rx,(y/TS-PEAK.y)/PEAK.ry)<1.2)return 'zPeak';return swampAt(x,y)?'zSwamp':'zRoadK';}return snowAt(x/TS|0,ty|0)?'zSnow':bi===0?'zRoadW':bi===1?'zRoadE':'zRoadR';}for(const [k,x0,y0,x1,y1] of ZR)if(tx>=x0&&tx<x1+1&&ty>=y0&&ty<y1+1)return k;return 'zPlains';}
 /* fog of war (Nitro's feedback): the map shows only what you have seen, in cells of FOGC tiles, saved in S.fog. A paper map
    (sold at inns) draws the whole land in sepia, but no monsters, people or quests where you haven't been yourself. */
 const FOGC=8,FOGW=Math.ceil(MW/FOGC),FOGH=Math.ceil((WMH+NR)/FOGC);let FOG=null,fogT=0,fogV=0;
@@ -10907,7 +10954,8 @@ function closeMap(){SFX.close();$('mapW').hidden=true;mode='play';}
 // gate stands in, until one stands where you are or on the surface; with several ways in, the one nearest you
 // owner 2026-10-23 ("the City 13 lord takes me to the sea"): each vampire city is a place of its own too, reached by the
 // ant hill and the ways down from the city before it
-const ugArea=(x,y)=>{if(y<WMH*TS)return 'w';const r=dunAt(x,y)||roomAt(x,y);if(r)return r;const C=vcAt(Math.floor(x/TS),Math.floor(y/TS));return C?'vc'+C.n:null;};
+const ugArea=(x,y)=>{if(y<WMH*TS)return 'w';const r=dunAt(x,y)||roomAt(x,y);if(r)return r.hl?HELL:r;   // the hells are one place, joined by passages (v3.31)
+ const C=vcAt(Math.floor(x/TS),Math.floor(y/TS));return C?'vc'+C.n:null;};
 function wSurf(x,y){if(y<WMH*TS)return {x,y};const pa=ugArea(P.x,P.y),a=ugArea(x,y);if(a&&a===pa||!a&&pa!=='w'&&Math.hypot(x-P.x,y-P.y)<40*TS)return {x,y};
  // back from the place along the gates into it, fewest steps first, until a gate stands where you are
  const GS=DGATES.filter(g=>g.to&&!g.exit&&!g.tmp),seen=new Set([a]),dP=g=>Math.hypot(g.x-P.x,g.y-P.y);let lv=a?GS.filter(g=>ugArea(g.to.x,g.to.y)===a):GS.filter(g=>Math.hypot(g.to.x-x,g.to.y-y)<60*TS),top=null;
@@ -11313,14 +11361,14 @@ function update(dt){
  else P.frame=0;
  if(P.guard)P.dir=Math.abs(P.gx)>Math.abs(P.gy)?(P.gx>0?2:3):(P.gy>0?0:1);
  if(K.atk&&inp&&!PHOTO){const wk=weapKind(),v=(TOUCH&&tAim((wk==='bow'||wk==='staff')&&!hcMelee()?170:44))||[[0,1],[0,-1],[1,0],[-1,0]][P.dir];tryAttack(v[0],v[1]);}
- P.acd-=dt;P.inv-=dt;P.dcd-=dt;P.pcd=(P.pcd||0)-dt;S.immT-=dt;P.scd-=dt;for(const k in P.cd)P.cd[k]-=dt;S.playT+=dt;{const sx=P.x===P.mx0&&P.y===P.my0;P.mx0=P.x;P.my0=P.y;P.stillT=sx?(P.stillT||0)+dt:0;}P.mp=Math.min(maxMP(),P.mp+(1.5+maxMP()*.012)*(gTime-(P.hitT??-99)>5?(P.stillT>2?4:1.6):1)*dt*(S.cls==='braham'?2.5:1)*(ipOn('absurd')?2:1)*(hellDeb()?0:1)*(P.sncC?0:1)*(P.bga>0?0:1));if(P.rage>0){P.rage-=dt;if(rand()<dt*20)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*16,vx:0,vy:-30,t:.5,c:'#ff5a3a',fl:1});}if(P.slash){P.slash.t-=dt;if(P.slash.t<=0)P.slash=null;}
+ P.acd-=dt;P.inv-=dt;P.dcd-=dt;P.pcd=(P.pcd||0)-dt;S.immT-=dt;P.scd-=dt;for(const k in P.cd)P.cd[k]-=dt;S.playT+=dt;{const sx=P.x===P.mx0&&P.y===P.my0;P.mx0=P.x;P.my0=P.y;P.stillT=sx?(P.stillT||0)+dt:0;}P.mp=Math.min(maxMP(),P.mp+(1.5+maxMP()*.012)*(gTime-(P.hitT??-99)>5?(P.stillT>2?4:1.6):1)*dt*(S.cls==='braham'?2.5:1)*(ipOn('absurd')?2:1)*(hellDeb()?0:1)*(hlDeb()?.5:1)*(P.sncC?0:1)*(P.bga>0?0:1));if(P.rage>0){P.rage-=dt;if(rand()<dt*20)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*16,vx:0,vy:-30,t:.5,c:'#ff5a3a',fl:1});}if(P.slash){P.slash.t-=dt;if(P.slash.t<=0)P.slash=null;}
  P.lcd=(P.lcd||0)-dt;if(P.lbT>0)P.lbT-=dt;else P.st=Math.min(maxST(),P.st+(P.food<20?8:20)*(balanced()?1.25:1)*(S.wis&&S.wis.mht?1.5:1)*dt);
  // Second Wind (balanced body): below 35% health, recover 3% of max HP per second for 5 s; once a minute
  if(balanced()&&P.hp>0&&P.hp<mh*.35&&(S.swT||0)<=S.playT){S.swT=S.playT+60;P.sw=5;vfx('heal',P.x,P.y);toast(t('secondWind'),'good');SFX.notice();}
  if(P.sw>0){P.sw-=dt;P.hp=Math.min(mh,P.hp+mh*.03*dt);if(rand()<dt*6)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*14,vx:0,vy:-24,t:.5,c:'#7ae07a',fl:1});}
  // hunger only drops while you do something (Twister 2026-10-19): walking, riding, attacking, dodging or guarding
  {const busy=Math.abs(P.x-(P.fqx??P.x))+Math.abs(P.y-(P.fqy??P.y))>.01||P.acd>0||P.dash>0||P.guard;P.fqx=P.x;P.fqy=P.y;if(busy)P.food=Math.max(0,P.food-dt/5*(1-Math.min(.5,(S.hid.pers||0)*.02)));}
- updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);wcTick();swgTick(dt);sirTick();bdTick();vtTick(dt);ckTick();autoTick(dt);o48Tick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
+ updateProj(dt);mxTick(dt);vcTick(dt);fqTick(dt);wcTick();swgTick(dt);sirTick();bdTick();hlTick(dt);vtTick(dt);ckTick();autoTick(dt);o48Tick(dt);pgTick(dt);bzTick(dt);saTick(dt);lgTick(dt);nvTick(dt);mdTick(dt);lfTick(dt);nlTick(dt);
  // world events and zone banners
  if(!S.ev.grid&&S.playT>480){S.ev.grid=1;annW('annGrid');SFX.notice();}
  {let z=zoneAt(P.x,P.y);if(z==='zQuarry')z='zBai';if(z!==P.zc){P.zc=z;P.zt=0;}else P.zt=(P.zt||0)+dt;
@@ -11332,7 +11380,7 @@ function update(dt){
  {const Rm=roomAt(P.x,P.y);if(Rm&&P.y>=(Rm.ry+7)*TS+5)leaveRoom(Rm);}
  hallTick();
  npcs.forEach(n=>{if(n.hidden||n.obj)return;if(n.d0===undefined)n.d0=n.dir;const dx=P.x-n.x,dy=P.y-n.y;n.dir=!P.ghost&&Math.hypot(dx,dy)<40?(Math.abs(dx)>Math.abs(dy)?(dx>0?2:3):(dy>0?0:1)):n.d0;});
- if(P.food>30)P.hp=Math.min(mh,P.hp+.7*dt);
+ if(P.food>30&&!hlDeb())P.hp=Math.min(mh,P.hp+.7*dt);
  if(P.food<=0){P.hp-=1.2*dt;if(!P.starveT){P.starveT=true;toast(t('starving'),'warn');}if(P.hp<=0)die();}else P.starveT=false;
  if(P.food<20&&!P.hungryT){P.hungryT=true;toast(t('hungry'),'warn');}if(P.food>=25)P.hungryT=false;
  if(pain&&!P.painT){P.painT=true;toast(t('pain'),'warn');}if(!pain)P.painT=false;
@@ -11623,7 +11671,7 @@ function render(dt){DRAWN=0;netDrawn=0;
   for(const m of TFB){const st=TFS.get(m);if(st&&st.t>gTime&&!m.dead)TX.push({s:st.s,x:m.x,y:m.y-(MT[m.type].oy||16)-24,f:lang==='ar'?'bold {s}px Tajawal':'500 {s}px Oswald',z:7,c:'#ff9a8a'});}
   for(const c of exNear()){ents.push({y:c.y-6,f:()=>drawCache(c)});ents.push({y:c.y+400,f:()=>drawCacheG(c)});}
   for(const l of lmList())if(l.x>camX-20&&l.x<camX+VW+20&&l.y>camY-10&&l.y<camY+VH+40)ents.push({y:l.y,f:()=>drawLm(l)});
-  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});if(rm===HALL)hallEnts(ents);swgEnts(ents);sirEnts(ents);bdEnts(ents);vtEnts(ents);ckEnts(ents);}
+  {const rm=P&&roomAt(P.x,P.y);if(rm)for(const p of PROPS)if(p.cv&&p.room===rm.id)ents.push({y:p.ty*TS+8,f:()=>ctx.drawImage(p.cv,p.tx*TS-4,p.ty*TS-20)});if(rm===HALL)hallEnts(ents);swgEnts(ents);sirEnts(ents);bdEnts(ents);hlEnts(ents);vtEnts(ents);ckEnts(ents);}
   if(COMPO){const a=COMPO;ents.push({y:a.y,f:()=>{if(a.hide>0)return;drawChar(a.spr,a.x,a.y,a.dir,a.frame||0,false,0,a);}});}
   allies.forEach(a=>{if(a.dead||a.go)return;ents.push({y:a.y,f:()=>{drawChar(a.id,a.x,a.y,a.dir,a.frame||0,false,0,a);R(ctx,a.x-7,a.y-30,14,2,'#000');R(ctx,a.x-7,a.y-30,14*a.hp/a.max,2,'#5ad06a');}});});
   for(const g of DGATES){if(g.hide||g.bhg&&!['next','exit','goal','box'].includes(g.bh)||g.tw&&!['up','down','exit'].includes(g.tw))continue;if(g.x<camX-30||g.x>camX+VW+30||g.y<camY-30||g.y>camY+VH+30)continue;ents.push({y:g.y-14,f:()=>drawGate(g)});}
@@ -13026,6 +13074,13 @@ Object.assign(P3D,{vwolf:{base:'hwolf',f:'saturate(.4) brightness(.55) sepia(.6)
   vmrose:[A({max:34,tele:.24,reach:32,mul:1.35,combo:3,drain:.05}),Rn({min:0,max:240,n:8,zr:18,pat:'ring',dot:BL,cd:5}),S({min:40,max:240,tele:.4,spd:280,mul:1.3,root:1.5,cd:3}),G({max:130,tele:.9,reach:110,mul:1.1,cd:6,pull:60,ph:1}),U({max:140,n:20,spd:170,mul:.75,cd:6,ph:2}),H({hpb:.35,pct:.1,once:50})],   // Blood Thorn webs over everything (ch 1086), the second coming of Beriache
   vfenrir:[A({max:36,tele:.24,reach:34,arc:1.4,mul:1.4,combo:3}),S({min:40,max:240,tele:.36,spd:300,mul:1.35,cd:2.6}),N({min:40,max:170,tele:.42,dash:320,dashT:.34,mul:1.7}),F({min:30,max:220,n:6,sprd:1,spd:260,mul:.85,cd:3.2,ph:1}),H({hpb:.5,pct:.15,once:40}),H({hpb:.25,pct:.15,once:40})],   // blood spears, and his wounds close in an instant (ch 1086)
   vnoll:[M({pct:.12,rng:220,cd:4}),W({ally:1,rng:220,t:5,red:.5,cd:8}),S({min:40,max:200,tele:.5,spd:200,sp:'dark',mul:.8,slow:3,cd:4}),Rn({min:0,max:220,n:6,zr:20,pat:'line',lin:3,mul:1,cd:7,ph:1}),A({max:30,tele:.3,reach:28,mul:1,drain:.06,cd:1.4})]});   // Blood Donation, Direct Suppression, blood tsunamis; heals himself with what he deals (ch 726-730)
+  // Cork Island and hell (v3.31): Hell Gao's hot wind from his staff, his pillars of fire and his sea of fire; the keepers'
+  // flames, ice and poison; the 22nd army's beasts; Marchosias' rockfalls and his body turned to stone; Leraje's arrows
+  const PO=[.012,4,'pois'];Object.assign(RKMV,{hellgao:[F({min:30,max:220,n:5,sprd:.9,spd:200,sp:'fire',mul:.85,dot:FI,cd:3.2}),Rn({min:0,max:220,n:7,zr:18,sp:'fire',mul:1.1,dot:FI,cd:5}),A({max:34,tele:.4,reach:34,arc:1.2,mul:1.2,cd:1.6,combo:2}),G({max:70,tele:.9,reach:66,mul:1.2,cd:6,ph:1}),Rn({min:0,max:260,n:10,zr:20,pat:'line',lin:3,sp:'fire',mul:1.2,dot:FI,cd:6,ph:2})],
+  hkeep:[F({min:20,max:150,n:3,sprd:.6,spd:180,sp:'fire',mul:.7,dot:FI,cd:4}),F({min:20,max:150,n:3,sprd:.6,spd:170,sp:'ice',mul:.6,slow:2,cd:5,w:1}),S({min:30,max:150,tele:.5,spd:170,sp:'pois',mul:.7,dot:PO,cd:4,w:1}),L({min:30,max:110,tele:.35,dashT:.28,mul:1.2}),A({max:28,tele:.26,reach:26,mul:1,cd:1.1,combo:2})],
+  dbeast:[L({min:30,max:120,tele:.36,dashT:.28,mul:1.3}),A({max:30,tele:.26,reach:28,mul:1.1,cd:1.1,combo:3}),G({max:40,tele:.7,reach:38,mul:1.2,cd:4.5})],
+  marcho:[A({max:40,tele:.4,reach:38,arc:1.3,mul:1.3,cd:1.6,combo:2}),Rn({min:0,max:240,n:8,zr:20,sp:'rock',mul:1.2,cd:5}),W({t:8,red:.7,cd:14}),N({min:40,max:180,tele:.55,dash:280,dashT:.45,mul:1.6,cd:4,ph:1}),C({kin:['dbeast'],once:30,ph:1}),W({t:8,red:.85,cd:12,ph:2}),Rn({min:0,max:280,n:12,zr:22,pat:'line',lin:3,sp:'rock',mul:1.3,cd:6,ph:2})],
+  leraje:[S({min:40,max:260,tele:.4,spd:300,sp:'rarrow',mul:1.1,cd:1.6}),F({min:40,max:240,n:5,sprd:.7,spd:280,sp:'rarrow',mul:.8,cd:3.5}),B({min:40,max:200,tele:.24,mul:1.3,cd:3}),A({max:30,tele:.24,reach:30,mul:1.2,combo:3,cd:1.3}),N({min:30,max:160,tele:.36,dash:320,dashT:.3,mul:1.6,cd:3.5,ph:1}),U({max:140,n:14,spd:200,sp:'rarrow',mul:.6,cd:6,ph:2})]});
 })();
 // the 6th to 1st cities' people, added here so the FIG table keeps its snapshot (Fenrir: "his blond hair fell to his shoulders", ch 1086)
 Object.assign(FIG,{vnoble:{hair:'side',hc:'#d8d0e0',hl:'#ffffff',skin:'#ece2ec',sk2:'#c4b6c8',eye:'#ff1a2a',top:'#2a0a18',top2:'#16060e',sleeves:true,collar:'#e8c860',sash:'#e8c860',cape:'#5a0a2a',pants:'#16060e',boots:'#0a0408'},
@@ -13937,6 +13992,215 @@ RC.push({id:'ndhammer',slot:'w',atk:460,spd:.52,fix:3,lvr:290,need:{ndiron:5,nds
 Object.assign(WSH,{ndhammer:{l:9,c:'#5a1a2a',k:'hammer'}});
 Object.assign(FD,{bdog:{need:()=>true,p:.015,mat:['mith',6]}});
 window.__GBDG={K:BDOG,V:BDV,P:BDP,rnd:f=>{BDR=f;},st:v=>bdSt(v),vein:v=>bdVein(v),inside:()=>bdIn(),tick:()=>bdTick(),near:()=>bdNear()}; // tests
+/* ---------------- Cork Island's dungeon, Hell Gao, Noe's egg and hell (owner 2026-10-26, v3.31) ----------------
+   Owner: "add hell for the Demon Slayer and the other regions like it we are missing, the Hell Gao raid, Noe the pet, and
+   anything iconic like them". From the novel:
+   - ch 161: "Cork Island's dungeon was fully controlled by the Silver Knights Guild, and the boss monster, Hell Gao, appeared
+     on the 4th floor every two weeks"; ch 163: "After three minutes, Hell Gao would appear and this place would turn into a
+     sea of fire"; ch 164: "[Hell Gao, the owner of Hellfire has appeared.] [Hell Gao's roar has applied fear, chaos and
+     debilitating effects.] [Hell Gao's fire reduces heat resistance by 50%.] [Fire pillars have risen to cover you.]", "a
+     hot wind emerged from the staff that Hell Gao waved"; ch 165: "[The black fires of hell have attached to your body.]";
+     ch 166: "[You have cut both wrists of Hell Gao ... his attack power and attack speed will be greatly reduced.]"; ch 167:
+     "[You have defeated Hell Gao, the master of hellfire, who seizes human souls.] [Memphis' Egg has been acquired.]", "The
+     two fire stones that hadn't been mined yet exploded at Hell Gao's disappearance"; ch 168: "Why does this mineral only
+     appear when the boss mob is present?"; ch 169: "[A memphis, the first demonic beast of hell, has hatched due to his greed
+     for human souls.] [Title, 'Man who has Touched Hell' has been acquired.] [Health has increased by 3,000 points.] [Demonic
+     power stat has opened.]", "[Your demonic power has increased by one.] [Demonic Power] You can communicate with demonic
+     beasts. The higher the number, the more likely you are to enter hell." Ch 1385: Hell Gao is the 9th great demon, whose
+     9th Hell stands empty "once Hell Gao lost his body".
+   - Hell: ch 301 (Grid falls into hell with 401 demonic power and wakes in a village of "20 shacks, macaroon trees, and a
+     small stream" under "a blue sky and warm breezes", where demonkin farmers kneel to Noe: "M-Memphis!" "The best demonic
+     beast of hell!"); ch 425 "[You have entered hell.] [You are affected by a strong evil energy.] [Your body is exhausted.
+     Attack power, defense, and agility will decrease by 30%.] [Health won't recover naturally.] [You have received a mental
+     blow. Mana regeneration rate will slow by 50%.]" and "this was a class that exerted its true power in hell" (the Demon
+     Slayer); ch 1325-1331 the 29th Hell of Marchosias, who petrifies his body and calls the demonic beasts of the 22nd army;
+     ch 1420 the 25th Hell's castle of black crystals that makes you sick; ch 1418 the 10th great demon Leraje's castle, "the
+     final gateway to entering the heart of hell"; ch 1380 "Leraje, the great demon of struggle ... The more she won, the
+     stronger she became".
+   Here: Hell Gao is a shared world boss with two hours' rest (WS.wb, the most the rules take; the novel's two weeks), the
+   fire stones are seams in his hall that only give while he is up, once each per player per appearance; whoever dealt 3% of
+   his health gets a fire stone and a one in four chance of Memphis' Egg (none for a player who already has Noe or an egg).
+   The egg hatches when you next kill a human (a player or a human foe): Noe, the title, the Demonic Power stat. While Noe is
+   out, every human you kill adds one demonic power. Hell is entered through the gate Belial's summoning tore open on the
+   Fourth Ridge, by the Demon Slayer, by 100 demonic power, or from level 450 ("Recently, humans had been traveling freely to
+   hell", ch 1640); 400 demonic power or more and death takes you there instead of a town (ch 301), and lifts hell's penalties
+   (ch 305: "if his demonic power was high enough to allow him entry to hell, he had already become a demon"). The penalties
+   are ch 425's, Hell Regulation and the Saintess's sanctuary lift them as they do the hell fields; the Demon Slayer counts
+   hell as her stage (dsHell). The numbers, the layout and the 25th Hell's sickness (slower steps) are the game's. */
+const HLK=new Set(['hellgao','marcho','leraje']),HGL={burn:300,roarR:260,blackT:8,blackCd:12,egg:.25,share:.03,seam:.5};
+const hgOf=()=>monsOf('hellgao')[0];
+const hlZ=()=>!!P&&P.y>=VCY0*TS&&P.x>=HELL.C[0].x0*TS&&/^zHell(?!V)/.test(S.zone||'');
+const hlDp=()=>(S&&S.hid&&S.hid.dpow)|0;
+const hlDeb=()=>hlZ()&&!(P.hreg>0)&&!saIn()&&hlDp()<400;
+const hgIn=()=>!!P&&P.y>=WMH*TS&&zoneAt(P.x,P.y)==='zCorkD4';
+// the seams of fire stone in the fourth floor walls
+const HGV=[];{const F=CORKD.F[3];for(let i=0;i<10;i++){const x=F.x0+6+i*6,y=i%2?F.y1-1:F.y0+1;HGV.push({i,tx:x,ty:y,x:x*TS+8,y:y*TS+10,up:!(i%2)});}}
+const hgUp=()=>{const m=hgOf();return !!(m&&!m.dead&&m.hgA);};
+const hgSt=v=>{const m=hgOf(),H=S&&S.hgv;return m&&H&&H.a===m.hgA?(H.v[v.i]|0):0;};
+function hgNear(){if(!S||!P||!hgIn()||!hgUp())return [];return HGV.filter(v=>!hgSt(v)&&Math.hypot(v.x-P.x,v.y-P.y)<34);}
+let HGR=null;   // the tests' dice
+function hgVein(v){const m=hgOf();if(!m||m.dead||!m.hgA){SFX.deny();return toast(t('hgNoSeam'),'warn');}
+ if(!S.hgv||S.hgv.a!==m.hgA)S.hgv={a:m.hgA,v:{}};if(S.hgv.v[v.i]){SFX.deny();return;}S.hgv.v[v.i]=1;
+ vfx('dust',v.x,v.y,{n:8});SFX.slam&&SFX.slam();
+ if(S.sec==='miner'||(HGR||rand)()<HGL.seam){addMat('fstone',1);vfx('loot',v.x,v.y,{rarity:3});toast(t('hgGot'),'good');}else toast(t('hgFail'),'warn');hudDirty=true;save(true);}
+// a hit on him: what lands counts toward your part; a critical blow while he winds up a spell cuts a wrist, and with both cut
+// his blows and his speed fall for the rest of his life
+function hgHit(m,dmg,crit){m.hgMy=(m.hgMy||0)+dmg;if(!crit||!(m.tele>0)||(m.hgW|0)>=2)return;m.hgW=(m.hgW|0)+1;
+ if(m.hgW===2){m.dmul=(m.dmul||1)*.6;m.hgSlow=1;toast(t('hgWrists'),'good');SFX.slam&&SFX.slam();shake=Math.max(shake,.4);}else toast(t('hgWrist1'),'good');
+ vfx('blood',m.x,monY(m)-20,{});}
+// the black fires of hell: a burn that keeps eating you until it goes out
+function hgBlack(){if(P.inv>0||mode==='dead'||legResist())return;P.hgBF=gTime+HGL.blackT;toast(t('hgBlackT'),'warn');SFX.notice();}
+function hgTick(dt,m){
+ if(m.dead){if(m.hgA){m.hgA=0;m.hgW=0;m.hgSlow=0;if(hgIn()){const left=HGV.filter(v=>!hgSt(v)).length;if(left)setTimeout(()=>toast(t('hgBurst',{n:left}),'warn'),900);}}return;}
+ if(!m.hgA){m.hgA=Date.now();m.hgMy=0;m.hgW=0;}
+ if(m.hgSlow&&m.tele>0)m.tele+=dt*.5;   // his casting crawls with both wrists cut
+ if(!hgIn()){P.hgR=0;return;}
+ const d=Math.hypot(m.x-P.x,m.y-P.y);
+ if(d<HGL.roarR&&P.hgR!==m.hgA&&mode!=='dead'){P.hgR=m.hgA;toast(t('hgAppear'),'warn');SFX.slam&&SFX.slam();shake=Math.max(shake,.6);
+  setTimeout(()=>toast(t('hgRoar'),'warn'),700);setTimeout(()=>toast(t('hgHeat'),'warn'),1400);setTimeout(()=>toast(t('hgPillar'),'warn'),2100);
+  if(!(P.sImm>0)&&!legResist()){P.stun=Math.max(P.stun||0,1);P.sImm=3;vfx('stun',P.x,P.y-24,{life:1});}P.hgDeb=gTime+15;}
+ // the sea of fire around him: a share of your health every second
+ if(m.eng>0&&d<HGL.burn&&!(P.inv>0)&&mode!=='dead'){P.hgB=(P.hgB||0)+maxHP()*.005*dt;if(P.hgB>=1){const n=Math.floor(P.hgB);P.hgB-=n;P.hp-=n;hudDirty=true;if(P.hp<=0){P.hp=0;die();return;}}}
+ if(m.eng>0&&d<HGL.burn){m.hgBc=(m.hgBc===undefined?HGL.blackCd:m.hgBc)-dt;if(m.hgBc<=0){m.hgBc=HGL.blackCd+rand()*4;hgBlack();}}}
+function hgDown(m){WS.wb=WS.wb||{};WS.wb.hellgao=Date.now()+MT.hellgao.wb*1000;wbPut('hellgao');
+ const c=Math.min(1,(m.hgMy||0)/m.max);setTimeout(()=>{toast(t('hgWin'),'good');SFX.legendary();},400);
+ if(c>=HGL.share){addMat('fstone',1);const pets=S.pets||{};if(!pets.noe&&!(S.mats.megg>0)&&(HGR||rand)()<HGL.egg){addMat('megg',1);setTimeout(()=>{toast(t('hgEgg'),'good');annW('hgEggN');},1400);}}
+ setTimeout(()=>annW('hgDownN'),600);save(true);}
+// a human soul: the egg hatches on the first; with Noe out, demonic power grows by one
+const HUMX=new Set([...DEMK,'hellgao','marcho','leraje','hkeep','dbeast']);
+const hlHuman=m=>!!m&&!!FIG[m.type]&&!HUMX.has(m.type)&&!TTVAMP.has(m.type)&&!/^(v|dp)/.test(m.type)&&!m.tdum&&!m.spar;
+function hgSoul(){if(!S||S.__demo)return;S.pets=S.pets||{};
+ if(!S.pets.noe&&(S.mats.megg|0)>0){S.mats.megg--;S.pets.noe=1;S.hid.dpow=S.hid.dpow|0;giveTitle('thell');annW('noeHatchN');
+  toast(t('noeHatch'),'good');setTimeout(()=>toast(t('noeHatch2'),'good'),900);setTimeout(()=>toast(t('noeDpOpen'),'good'),1800);SFX.legendary();setTimeout(()=>setPet('noe'),2400);save(true);return;}
+ if(S.pet==='noe'&&S.pets.noe&&!petDead('noe')&&S.hid.dpow!=null){S.hid.dpow++;toast(t('noeDpUp',{n:S.hid.dpow}),'warn');sbSig='';save(true);}}
+/* hell's gate on the Fourth Ridge and the falls */
+function hlGateOk(){if(S.cls==='dslayer'||hlDp()>=100||S.lv>=450)return true;SFX.deny();toast(t('hlShut'),'warn');return false;}
+function hlFall(){if(hlDp()<400||ARN||TWR||TOW||BHR)return false;const V=HELL.C[0];P.x=(V.x0+8)*TS+8;P.y=HELL.cy*TS+10;camSnap=true;
+ setTimeout(()=>toast(t('hlFallT'),'warn'),800);setTimeout(()=>toast(t('hlFallT2'),'warn'),1700);return true;}
+// on entering a hell: ch 425's windows; in the village, the demonkin and Noe
+let HLWAS='',HLDV=0,HLDD=false;
+function hlTick(dt){const m=hgOf();if(m)hgTick(dt,m);
+ const dead=mode==='dead';if(dead&&!HLDD){const l=monsOf('leraje')[0];if(l&&!l.dead&&l.eng>0&&Math.hypot(l.x-P.x,l.y-P.y)<420)lrWin(l);}HLDD=dead;
+ if(hlSick()){P.slowT=Math.max(P.slowT||0,.3);if(!P.hlSk){P.hlSk=1;toast(t('hlSickT'),'warn');}}else P.hlSk=0;
+ if(P.hgBF>gTime&&mode!=='dead'&&!(P.inv>0)){P.hgBb=(P.hgBb||0)+maxHP()*.012*dt;if(P.hgBb>=1){const n=Math.floor(P.hgBb);P.hgBb-=n;P.hp-=n;hudDirty=true;if(rand()<dt*8)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*18,vx:0,vy:-26,t:.5,c:rand()<.5?'#1a0a14':'#6a1a3a',fl:1});if(P.hp<=0){P.hp=0;die();}}}
+ const z=P.y>=VCY0*TS&&P.x>=HELL.C[0].x0*TS?S.zone:'';if(z===HLWAS)return;const was=HLWAS;HLWAS=z;
+ if(/^zHell(?!V)/.test(z)&&!/^zHell(?!V)/.test(was)&&!S.__demo){toast(t('hlIn1'),'warn');setTimeout(()=>toast(t(hlDeb()?'hlIn2':'hlIn0'),hlDeb()?'warn':'good'),900);if(hlDeb())setTimeout(()=>toast(t('hlIn3'),'warn'),1800);if(S.cls==='dslayer')setTimeout(()=>toast(t('hlDsT'),'good'),2700);setTimeout(()=>fdClaim('hell'),600);}
+ if(z==='zHellV'&&!S.__demo){toast(t('hlVill'),'good');if(S.pet==='noe'&&PET&&!HLDV){HLDV=1;setTimeout(()=>toast(t('hlKneel'),'good'),1200);setTimeout(()=>toast(t('hlKneel2'),'good'),2200);}}}
+// the 25th Hell's castle of black crystals: the light in them makes you sick and your steps slow
+const hlSick=()=>{if(!P||S.zone!=='zHell25')return false;const K=hlCastle('zHell25'),x=P.x/TS,y=P.y/TS;return x>=K.x0&&x<=K.x1&&y>=K.y0&&y<=K.y1;};
+// what is drawn: the seams (bright while he is up), the flames around him, his staff's heat
+function hlEnts(ents){if(!P)return;
+ if(hgIn()){const up=hgUp();for(const v of HGV){const st=hgSt(v),x=v.x,y=v.y+(v.up?-6:6);ents.push({y:v.y-4,f:()=>{R(ctx,x-7,y-4,14,8,'#2a0a06');
+   if(up&&!st){const a=.6+.4*Math.sin(gTime*5+v.i);ctx.globalAlpha=a;R(ctx,x-4,y-2,4,3,'#ff6a1a');R(ctx,x+1,y,3,2,'#ffb02a');R(ctx,x-1,y+1,1,1,'#ffffff');ctx.globalAlpha=1;}
+   else{R(ctx,x-5,y+1,2,2,'#4a2a1a');R(ctx,x+2,y-1,2,2,'#4a2a1a');}}});}
+  const m=hgOf();if(m&&!m.dead)ents.push({y:m.y-1,f:()=>hgAura(m)});if(m&&!m.dead&&m.eng>0)ents.push({y:m.y-220,f:()=>{ctx.save();const p=.5+Math.sin(gTime*3)*.5;ctx.globalAlpha=.1+p*.06;ctx.fillStyle='#ff4a0a';ctx.beginPath();ctx.ellipse(m.x,m.y,HGL.burn,HGL.burn*.5,0,0,7);ctx.fill();ctx.restore();
+   if(rand()<.6)fx.push({x:m.x+(rand()-.5)*HGL.burn*1.6,y:m.y+(rand()-.5)*HGL.burn*.8,vx:0,vy:-30-rand()*20,t:.7,c:rand()<.6?'#ff6a1a':'#ffd24a',fl:1});}});}
+ if(P.hgBF>gTime)ents.push({y:P.y+1,f:()=>{ctx.save();ctx.globalAlpha=.35+Math.sin(gTime*12)*.1;ctx.fillStyle='#1a0610';ctx.beginPath();ctx.ellipse(P.x,P.y-8,9,14,0,0,7);ctx.fill();ctx.restore();}});}
+// his flames: a ring of fire that never goes out on him, wherever he is drawn
+function hgAura(m){if(m.dead)return;const k=MT.hellgao.sc;ctx.save();for(let i=0;i<7;i++){const a=gTime*3+i*.9,h=10+6*Math.sin(gTime*9+i);ctx.globalAlpha=.55;ctx.fillStyle=i%2?'#ff6a1a':'#ffb02a';
+ ctx.beginPath();ctx.ellipse(m.x+Math.cos(a)*9*k,m.y-4-h*k*.6,3*k,h*k*.5,0,0,7);ctx.fill();}ctx.restore();}
+// the down of a great demon of hell: the world's clock, so the server and every screen agree
+function hlDown(m){if(m.type==='hellgao')return hgDown(m);WS.wb=WS.wb||{};WS.wb[m.type]=Date.now()+MT[m.type].wb*1000;wbPut(m.type);setTimeout(()=>annW(m.type==='marcho'?'mcDownN':'lrDownN'),600);
+ if(m.type==='leraje')giveTitle('lrslay');}
+// Leraje grows with every win: each fighter she fells makes her blows 5% harder until she falls (at most +50%)
+function lrWin(src){if(src&&src.type==='leraje'&&!src.dead){src.lrN=Math.min(10,(src.lrN|0)+1);src.dmul=(src.dmul||1)*1.05;}}
+// demonic power in the status window, beside the other stats no one can raise by hand
+Object.assign(STR.ar,{dpow:'القوة الشيطانية',tdpow:'تقدر تتواصل مع الوحوش الشيطانية. كل ما الرقم يعلى، كل ما فرصتك تدخل الجحيم تزيد.'});
+Object.assign(STR.en,{dpow:'Demonic Power',tdpow:'You can communicate with demonic beasts. The higher the number, the more likely you are to enter hell.'});
+/* the people, the beasts and the great demons */
+Object.assign(MT,{
+ hellgao:{lv:[310,310],hp:90000000,dmg:15000,spd:44,xp:9000000,gold:120000,aggro:230,r:12,oy:60,boss:1,leash:340,slam:20000,slamR:70,wb:7200,sc:1.7,drop:[['mith',14],['mstone',20],['ruby',1]]},
+ hkeep:{lv:[440,455],hp:8000000,dmg:22000,spd:72,xp:320000,gold:700,aggro:180,r:8,oy:22,regen:.006,drop:[['mstone',1.2],['mith',.4]]},
+ dbeast:{lv:[460,475],hp:12000000,dmg:25000,spd:66,xp:380000,gold:850,aggro:170,r:10,oy:24,drop:[['mstone',1.4],['mith',.5],['blue',.05]]},
+ marcho:{lv:[500,500],hp:300000000,dmg:32000,spd:46,xp:30000000,gold:300000,aggro:200,r:22,oy:64,boss:1,leash:320,slam:60000,slamR:84,wb:3600,adds:'dbeast',drop:[['mith',26],['diam',3],['mstone',30],['blue',3]]},
+ leraje:{lv:[530,530],hp:400000000,dmg:36000,spd:64,xp:40000000,gold:380000,aggro:230,r:8,oy:40,boss:1,leash:320,slam:60000,slamR:72,wb:3600,sc:1.5,drop:[['mith',30],['diam',4],['mstone',34],['blue',4]]}});
+Object.assign(NDROP,{hellgao:[['fstone',.5]],hkeep:[['fstone',.004]],marcho:[['fstone',.5]],leraje:[['fstone',1]]});
+Object.assign(AIK,{hkeep:'lunge',dbeast:'lunge'});
+// the keepers: hounds of hell in its colours; the 22nd army's beasts darker and bigger; Marchosias a hound the size of a hill, his skin stone
+Object.assign(P3D,{hkeep:{base:'hwolf',f:'sepia(1) saturate(5) hue-rotate(-35deg) brightness(.62)',sc:1.45},dbeast:{base:'hwolf',f:'grayscale(.7) brightness(.42) contrast(1.5)',sc:1.8},
+ marcho:{base:'hwolf',f:'grayscale(1) sepia(.25) brightness(.78) contrast(1.35)',sc:3.6}});
+// Hell Gao: "the staff-wielding boss monster enshrouded in flames" (ch 163); Leraje in the green of her house
+Object.assign(FIG,{hellgao:{hair:'spiky',hc:'#ff5a1a',hl:'#ffd24a',skin:'#7a1a0a',sk2:'#4a0e06',horns:'#1a0a06',eye:'#ffe060',top:'#2a0804',top2:'#140402',sleeves:true,robeL:1,collar:'#ff7a1a',sash:'#ff5a1a',cape:'#4a0e06',pants:'#140402',boots:'#2a0804'},
+ leraje:{fem:1,hair:'long',hc:'#1a3a1a',hl:'#4a7a3a',skin:'#c8d8b8',sk2:'#a0b090',horns:'#2a1a10',eye:'#ffd24a',top:'#1a3a14',top2:'#0e2008',sleeves:true,collar:'#c8a050',belt:'#c8a050',cape:'#0e2008',pants:'#0e2008',boots:'#1a1008'}});
+for(const n of ['hellgao','leraje'])if(!SH[n])shLazy(n,()=>SA.chars.buildSheet(FIG[n]));
+Object.assign(MWPN,{hellgao:()=>{R(ctx,6,-30,2,32,'#3a1a0a');R(ctx,6,-30,2,2,'#ff7a1a');R(ctx,4,-34,6,5,'#ff5a1a');R(ctx,5,-33,4,3,'#ffd24a');},
+ leraje:()=>{R(ctx,7,-20,1,22,'#4a2a10');R(ctx,6,-20,1,2,'#c8a050');R(ctx,6,0,1,2,'#c8a050');R(ctx,8,-18,1,18,'#e8e0c8');}});
+Object.assign(NAMEK,{hellgao:'hellgaoN',hkeep:'hkeepN',dbeast:'dbeastN',marcho:'marchoN',leraje:'lerajeN'});
+DEMK.add('hellgao');DEMK.add('hkeep');DEMK.add('dbeast');DEMK.add('marcho');DEMK.add('leraje');
+/* the materials: the fire stone (ch 158: "It had high affinity with the fire attribute, magic swords of the fire attribute
+   could be used as a materials or armor against fire") and Memphis' Egg */
+Object.assign(MATP,{fstone:800,megg:0});AUK.push('fstone');
+Object.assign(CREM,{fstone:{m:2.8,q:3,f:'dm',v:.09}});
+// the titles: ch 169, and the one for whoever brings down the great demon of struggle
+Object.assign(TTX,{thell:{hp:3000},lrslay:{st:{all:15}}});TTOWN.push('thell','lrslay');
+// the fourth floor's seams and the way down: hints; the gates' own checks
+Object.assign(FD,{corkd:{need:()=>true,p:.015,mat:['fstone',1]},hell:{need:()=>true,p:.02,mat:['mith',8]}});
+LMD.push(['lmCorkD',CORKD.gx+3,CORKD.gy,1],['lmHellV',HELL.C[0].x0+20,HELL.cy-6,1],['lmHellM',HELL.C[2].x0+10,HELL.cy-6,1],['lmHellC',HELL.C[3].x0+10,HELL.cy-6,1],['lmHellL',HELL.C[4].x0+10,HELL.cy-6,1],['lmHellT',HELL.C[5].x0+30,HELL.cy-4,1]);
+Object.assign(STR.ar,{
+ zCorkD1:'زنزانة جزيرة كورك: الدور الأول (لفل 190+)',zCorkD2:'زنزانة جزيرة كورك: الدور التاني (لفل 205+)',zCorkD3:'زنزانة جزيرة كورك: الدور التالت (لفل 210+)',zCorkD4:'زنزانة جزيرة كورك: الدور الرابع، عرين هيل جاو (لفل 310)',
+ zHellV:'الجحيم: قرية الديمونكن',zHell30:'الجحيم الـ30 (لفل 440+)',zHell29:'الجحيم الـ29: أرض ماركوسياس (لفل 460+)',zHell25:'الجحيم الـ25: القلعة اللي متتكسرش (لفل 450+)',zHell10:'الجحيم الـ10: قلعة ليراجي (لفل 470+)',zHell9:'الجحيم الـ9: العرش الفاضي',
+ hCkIn:'E: انزل زنزانة كورك',hCkDown:'E: انزل الدور اللي تحت',hHgMine:'E: اكسر حجر النار',hHellGo:'E: ادخل بوابة الجحيم',hHellUp:'E: ارجع لعالم البشر',hHellDeep:'E: البوابة لقلب الجحيم',
+ hellgaoN:'هيل جاو، سيد نار الجحيم',hkeepN:'حارس الجحيم',dbeastN:'وحش شيطاني من الجيش الـ22',marchoN:'الشيطان العظيم رقم 29 ماركوسياس',lerajeN:'الشيطان العظيم رقم 10 ليراجي',
+ fstone:'حجر النار',fstoneD:'معدن ليه انسجام عالي مع عنصر النار. بيطلع بس لما هيل جاو، صاحب نار الجحيم، يطلع من الجحيم.\nبيدخل في صنع سيوف النار والدروع اللي بتصد النار.',
+ megg:'بيضة ميمفيس',meggD:'بيضة سودا سخنة، جواها حاجة بتتحرك وجعانة.\nبتفقس على أول روح بشرية تتاكل جنبها.',
+ hgNoSeam:'حجر النار مبيطلعش غير وهيل جاو موجود',hgGot:'طلّعت حجر نار!',hgFail:'الحجر اتفتت في إيدك',hgBurst:'{n} من أحجار النار اللي ماتطلعتش انفجرت مع اختفاء هيل جاو',
+ hgAppear:'[هيل جاو، صاحب نار الجحيم، ظهر.]',hgRoar:'[زئير هيل جاو عمل خوف وفوضى وضعف.]',hgHeat:'[نار هيل جاو بتقلل مقاومة الحرارة 50%.]',hgPillar:'[أعمدة نار طلعت تغطيك.]',
+ hgBlackT:'[نار الجحيم السودا لزقت في جسمك.]',hgWrist1:'قطعت معصم من معاصم هيل جاو!',hgWrists:'[قطعت معصمين هيل جاو. حركته اتقيدت وهجومه وسرعته قلّوا جدًا.]',
+ hgWin:'[هزمت هيل جاو، سيد نار الجحيم، اللي بيخطف أرواح البشر.]',hgEgg:'[حصلت على بيضة ميمفيس.]',hgEggN:'{n} حصل على بيضة ميمفيس من هيل جاو!',hgDownN:'{n} وقع هيل جاو، سيد نار الجحيم، في زنزانة جزيرة كورك!',
+ noeHatch:'[ميمفيس، أول وحش شيطاني من الجحيم، فقس عشان جوعه لأرواح البشر.]',noeHatch2:'[إنت أول واحد يبقى سيد وحش شيطاني من الجحيم!] [حصلت على لقب "اللي لمس الجحيم".]',noeDpOpen:'[الصحة زادت 3,000.] [إحصائية القوة الشيطانية اتفتحت.]',noeHatchN:'بيضة ميمفيس بتاعة {n} فقست: نوي!',
+ noeDpUp:'[القوة الشيطانية زادت واحد.] ({n})',
+ hlShut:'البوابة مبتفتحش لإنسان عادي. محتاج تكون صياد شياطين، أو قوتك الشيطانية 100، أو لفل 450.',hlFallT:'[فشلت في إنك تبعت رسالة للنقابة. الجحيم مقطوع عن عالم البشر.]',hlFallT2:'"ده الجحيم! أنا وقعت في الجحيم!"',
+ hlIn1:'[دخلت الجحيم.] [طاقة شريرة قوية بتأثر عليك.]',hlIn2:'[جسمك مرهق. الهجوم والدفاع والرشاقة هيقلوا 30%.]',hlIn3:'[الصحة مش هترجع لوحدها.] [اتعرضت لضربة نفسية. سرعة رجوع المانا هتقل 50%.]',hlIn0:'قوتك الشيطانية عالية لدرجة إن الجحيم بيعاملك زي أهله: مفيش عقوبات.',
+ hlDsT:'الجحيم هو المسرح الحقيقي لصياد الشياطين.',hlVill:'سما زرقا ونسمة دافية... ده الجحيم؟',hlKneel:'"م-ميمفيس!" "أحسن وحش شيطاني في الجحيم!"',hlKneel2:'الديمونكن ركعوا قدام نوي. نوي: "شايف يا سيدي؟ أنا عظيم أوي!"',hlSickT:'النور في الكريستال الأسود بيعكس ويتكسر: دخت ورجليك تقلت.',hlDeep:'قلب الجحيم مقفول. الجحيم الأول بتاع بعل، ومحدش من البشر وصله.',
+ mcDownN:'{n} وقع الشيطان العظيم رقم 29 ماركوسياس في الجحيم!',lrDownN:'{n} وقع الشيطان العظيم رقم 10 ليراجي في قلعتها!',
+ tl_thell:'اللي لمس الجحيم',tl_thellD:'الصحة +3,000.',tl_lrslay:'اللي غلب شيطان الصراع',tl_lrslayD:'كل الإحصائيات +15.',
+ lmCorkD:'زنزانة جزيرة كورك',lmCorkD1:'"زنزانة جزيرة كورك كانت تحت سيطرة نقابة الفرسان الفضيين بالكامل، ووحش الزعيم، هيل جاو، كان بيظهر في الدور الرابع كل أسبوعين."',lmCorkD2:'توبان: "عرفت طريقة جمع أحجار النار من وثايق قديمة. أحجار النار بتطلع لما هيل جاو، صاحب نار الجحيم، يطلع من الجحيم."',
+ lmHellV:'قرية في الجحيم',lmHellV1:'"مكانش فيه محل في القرية. كان فيه بس 20 كوخ، وشجر ماكرون، وجدول صغير."',lmHellV2:'"الجحيم مكان فيه سما زرقا ونسمة دافية؟ مش المفروض الجحيم يبقى أضلم ومليان حمم؟"',
+ lmHellM:'الجحيم الـ29',lmHellM1:'"الشيطان العظيم رقم 29، ماركوسياس، في وقت من الأوقات كان بيستمتع بالصراع... بس اتهزم من المتجول زيبار وخسر الجحيم الـ29 لفترة."',lmHellM2:'"وحوش الجيش الـ22 الشيطانية كان دورها إنها تقطع وتلتهم أعداء ماركوسياس."',
+ lmHellC:'القلعة اللي متتكسرش',lmHellC1:'"قلعة الجحيم الـ25 كانت مميزة. كانت قلعة أكبر من جبل، معمولة من كريستال أسود. من بعيد كانت غامضة وحلوة جدًا."',lmHellC2:'"بس لما قربوا، كانت فظيعة. سطح الكريستال كان بيعكس ويكسر النور، فبيعمل دوخة. توازنهم راح والغثيان ظهر."',
+ lmHellL:'قلعة ليراجي',lmHellL1:'"قلعة الشيطان العظيم رقم 10، ليراجي. دي كانت آخر بوابة لدخول قلب الجحيم، ومن أهم النقط الاستراتيجية في الجحيم."',lmHellL2:'"ليراجي، شيطان الصراع العظيم: لازم تحارب ولازم تكسب. كل ما تكسب أكتر، كل ما تبقى أقوى."',
+ lmHellT:'العرش الفاضي',lmHellT1:'"كروتشا كان أصلًا قائد جيش الجحيم الـ9. ولما هيل جاو خسر جسمه، ساب الجحيم الـ9."',lmHellT2:'"كان خايف من هيل جاو، ومش عارف هيرجع إمتى، فمطمعش في الكرسي الفاضي بتاع الجحيم الـ9."',
+ fd_corkd:'زنزانة جزيرة كورك',fd_hell:'الجحيم'});
+Object.assign(STR.en,{
+ zCorkD1:'Cork Island Dungeon: 1st Floor (Lv 190+)',zCorkD2:'Cork Island Dungeon: 2nd Floor (Lv 205+)',zCorkD3:'Cork Island Dungeon: 3rd Floor (Lv 210+)',zCorkD4:"Cork Island Dungeon: 4th Floor, Hell Gao's Lair (Lv 310)",
+ zHellV:'Hell: the Demonkin Village',zHell30:'The 30th Hell (Lv 440+)',zHell29:'The 29th Hell: Marchosias’ Land (Lv 460+)',zHell25:'The 25th Hell: the Indestructible Castle (Lv 450+)',zHell10:'The 10th Hell: Leraje’s Castle (Lv 470+)',zHell9:'The 9th Hell: the Empty Throne',
+ hCkIn:'E: Go down into the Cork dungeon',hCkDown:'E: Go down a floor',hHgMine:'E: Break out the fire stone',hHellGo:'E: Enter the gate of hell',hHellUp:'E: Go back to the human world',hHellDeep:'E: The gate to the heart of hell',
+ hellgaoN:'Hell Gao, Master of Hellfire',hkeepN:'Hell’s Keeper',dbeastN:'Demonic Beast of the 22nd Army',marchoN:'29th Great Demon Marchosias',lerajeN:'10th Great Demon Leraje',
+ fstone:'Fire Stone',fstoneD:'A mineral with high affinity with the fire attribute. It pops up only when Hell Gao, the owner of hellfire, emerges from hell.\nMagic swords of the fire attribute and armour against fire are made with it.',
+ megg:'Memphis’ Egg',meggD:'A warm black egg. Something inside it moves, and it is hungry.\nIt hatches on the first human soul eaten near it.',
+ hgNoSeam:'Fire stones only appear while Hell Gao is present',hgGot:'You mined a fire stone!',hgFail:'The stone crumbled in your hand',hgBurst:'{n} fire stones that were not mined exploded at Hell Gao’s disappearance',
+ hgAppear:'[Hell Gao, the owner of Hellfire has appeared.]',hgRoar:'[Hell Gao’s roar has applied fear, chaos and debilitating effects.]',hgHeat:'[Hell Gao’s fire reduces heat resistance by 50%.]',hgPillar:'[Fire pillars have risen to cover you.]',
+ hgBlackT:'[The black fires of hell have attached to your body.]',hgWrist1:'You cut one of Hell Gao’s wrists!',hgWrists:'[You have cut both wrists of Hell Gao. His actions will be limited and his attack power and attack speed will be greatly reduced.]',
+ hgWin:'[You have defeated Hell Gao, the master of hellfire, who seizes human souls.]',hgEgg:'[Memphis’ Egg has been acquired.]',hgEggN:'{n} took Memphis’ Egg from Hell Gao!',hgDownN:'{n} brought down Hell Gao, the master of hellfire, in Cork Island’s dungeon!',
+ noeHatch:'[A memphis, the first demonic beast of hell, has hatched due to his greed for human souls.]',noeHatch2:'[You are the first user in Satisfy to become the master of a demonic beast from hell!] [Title, ‘Man who has Touched Hell’ has been acquired.]',noeDpOpen:'[Health has increased by 3,000 points.] [Demonic power stat has opened.]',noeHatchN:'{n}’s Memphis’ Egg hatched: Noe!',
+ noeDpUp:'[Your demonic power has increased by one.] ({n})',
+ hlShut:'It is impossible for ordinary humans to enter hell. You need to be a Demon Slayer, have 100 demonic power, or be level 450.',hlFallT:'[You have failed to send a message to the guild. Hell is disconnected from the human world.]',hlFallT2:'"This is hell! I fell down into hell!"',
+ hlIn1:'[You have entered hell.] [You are affected by a strong evil energy.]',hlIn2:'[Your body is exhausted. Attack power, defense, and agility will decrease by 30%.]',hlIn3:'[Health won’t recover naturally.] [You have received a mental blow. Mana regeneration rate will slow by 50%.]',hlIn0:'Your demonic power is so high that hell takes you for one of its own: no penalties.',
+ hlDsT:'Hell is the Demon Slayer’s true stage.',hlVill:'A blue sky and warm breezes... this is hell?',hlKneel:'"M-Memphis!" "The best demonic beast of hell!"',hlKneel2:'The demonkin knelt before Noe. Noe: "Do you see, Master? This body is so great!"',hlSickT:'The crystals reflect and refract the light: motion sickness, your balance goes and your steps slow.',hlDeep:'The heart of hell is sealed. The 1st Hell is Baal’s, and no human has reached it.',
+ mcDownN:'{n} brought down the 29th Great Demon Marchosias in hell!',lrDownN:'{n} brought down the 10th Great Demon Leraje in her castle!',
+ tl_thell:'Man who has Touched Hell',tl_thellD:'Max health +3,000.',tl_lrslay:'Victor over the Demon of Struggle',tl_lrslayD:'All stats +15.',
+ lmCorkD:'Cork Island’s Dungeon',lmCorkD1:'"Cork Island’s dungeon was fully controlled by the Silver Knights Guild, and the boss monster, Hell Gao, appeared on the 4th floor every two weeks."',lmCorkD2:'Toban: "I have found out how to collect the fire stones from old documents. Fire stones pop up when Hell Gao, the owner of hellfire, emerges from hell."',
+ lmHellV:'A Village in Hell',lmHellV1:'"There wasn’t a general store in the village. There were just 20 shacks, macaroon trees, and a small stream."',lmHellV2:'"Hell was a place with a blue sky and warm breezes? Shouldn’t hell be darker and filled with lava?"',
+ lmHellM:'The 29th Hell',lmHellM1:'"The 29th Great Demon, Marchosias—at one time, he enjoyed the struggle... However, he was defeated by the wanderer, Zepar, and briefly lost the 29th Hell."',lmHellM2:'"The demonic beasts of the 22nd army played the role of tearing and devouring Marchosias’ enemies."',
+ lmHellC:'The Indestructible Castle',lmHellC1:'"The castle of the 25th hell was special. It was a castle larger than a mountain that was made of black crystals. From a distance, it was very mysterious and beautiful."',lmHellC2:'"Then once they came close up, it was horrible. It was because the cross-section of the crystals reflected and refracted light, causing motion sickness. Their balance was lost and nausea appeared."',
+ lmHellL:'Leraje’s Castle',lmHellL1:'"The castle of the 10th great demon, Leraje. This was the final gateway to entering the heart of hell and was one of the most important strategic points in hell."',lmHellL2:'"Leraje, the great demon of struggle—she had to fight and she had to win. The more she won, the stronger she became."',
+ lmHellT:'The Empty Throne',lmHellT1:'"Krucha was originally the leader of the 9th Hell Army. Once Hell Gao lost his body, he abandoned the 9th Hell."',lmHellT2:'"He was afraid of Hell Gao, whom he wasn’t sure when would return, so he didn’t aim for the vacant seat of the 9th Hell."',
+ fd_corkd:'Cork Island’s Dungeon',fd_hell:'Hell'});
+window.__GHELL={HGL,HGV,CORKD,HELL,HLG,of:()=>hgOf(),inCork:()=>hgIn(),up:()=>hgUp(),near:()=>hgNear(),vein:v=>hgVein(v),st:v=>hgSt(v),rnd:f=>{HGR=f;},hit:(m,d,c)=>hgHit(m,d,c),down:m=>hlDown(m),
+ soul:()=>hgSoul(),human:m=>hlHuman(m),z:()=>hlZ(),deb:()=>hlDeb(),gate:()=>hlGateOk(),fall:()=>hlFall(),tick:dt=>hlTick(dt),sick:()=>hlSick(),win:m=>lrWin(m)}; // tests
+// the gates' own checks: hell's gate wants a Demon Slayer, demonic power or a high level; the way to its heart stays shut
+for(const g of DGATES){if(g.hell)g.chk=()=>hlGateOk();if(g.deep)g.chk=()=>{SFX.deny();toast(t('hlDeep'),'warn');return false;};}
+// the dungeon's floors and the hells, spawned last with their own dice so every older monster keeps its id and spot
+function hlSpawn(){if(!MT.hellgao)return;   // the title screen's world is spawned before these tables load
+ const r=mulberry32(6661),Y0=HELL.y0,Y1=HELL.y1;
+ const put=(F,y0,y1,type,n,ok)=>{let c=0,tr=0;while(c<n&&tr<4000){tr++;const x=F.x0+4+(r()*(F.x1-F.x0-8)|0),y=y0+2+(r()*(y1-y0-4)|0);if(sol0(x,y)||sol0(x+1,y)||ok&&!ok(x,y))continue;const m=newMon(type,x*TS+8,y*TS+8,r);m.far=1;mons.push(m);c++;}};
+ const [f1,f2,f3,f4]=CORKD.F;put(f1,f1.y0,f1.y1,'salamander',14);put(f2,f2.y0,f2.y1,'felem',14);put(f3,f3.y0,f3.y1,'felem',8);put(f3,f3.y0,f3.y1,'salamander',8);
+ const wb=(ty,x,y)=>{const d=newMon(ty,x*TS+8,y*TS+8,r),u=WS&&WS.wb&&WS.wb[ty];d.far=1;if(u&&u>Date.now()){d.dead=true;d.rt=(u-Date.now())/1000;}mons.push(d);};
+ wb('hellgao',f4.x1-14,f4.cy);
+ const C=k=>HELL.C.find(c=>c.k===k),out=k=>{const K=hlCastle(k);return (x,y)=>!(x>=K.x0-1&&x<=K.x1+1&&y>=K.y0-1&&y<=K.y1+1);};
+ for(const [k,list] of [['zHell30',[['hkeep',16],['hdemon',10],['succ',6]]],['zHell29',[['dbeast',22],['hkeep',8]]],['zHell25',[['succ',10],['hdemon',10],['hkeep',10]]],['zHell10',[['hkeep',12],['dbeast',10],['hdemon',8]]]])
+  for(const [ty,n] of list)put(C(k),Y0,Y1,ty,n,k==='zHell25'||k==='zHell10'?out(k):null);
+ wb('marcho',C('zHell29').x1-16,HELL.cy);wb('leraje',hlCastle('zHell10').x1-8,HELL.cy);}
 /* ---------------- Auto production (v3.10; the player Suki through the owner 2026-10-26: "Add the Auto Production Button for
    Blacksmith, and for Production Classes just like the webnovel so you don't always have to do stuff with your own hand (But
    maybe make it get lower quality or lower rarity stuff so doing stuff yourself is still more valuable and valid)"). The novel,
@@ -16650,7 +16914,7 @@ function karmaTick(dt){if(!S||S.__demo||mode!=='play'||karma()>=0)return;S.karT=
 function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
   room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo,zoneAt:(x,y)=>netZone(x,y)});
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
-  else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);balPvp(true);const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
+  else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);balPvp(true);hgSoul();const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
    if(v&&warOf(v)){gwrKill(v.gd);return;} // a guild war (SAT-ONLINE-086): it counts for the guild, no karma lost
    if(v&&v.ol){S.karma=Math.min(KARMA_MAX,karma()+1);netForce=true;save(true);toast(t('kaJust',{n,k:S.karma}),'good');SFX.quest&&SFX.quest();return;} // an outlaw: justice
    S.karma=Math.max(KARMA_MIN,karma()-1);S.karT=0;const ms=Math.round(Satisfy.pvp.C.OUTLAW_MS*(1+Math.max(0,-S.karma-1)*.5));

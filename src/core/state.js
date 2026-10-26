@@ -113,6 +113,8 @@
     'dpCopy',
     // the Mage Tower's spells learned from the Archmage (v3.26): {skill: 1}
     'mgt',
+    // Hell Gao's fire stone seams mined this appearance (v3.31): {a: his appearance, v: {seam: 1}}
+    'hgv',
     // the Vatican (v3.11): Goddess Rebecca's blessing, from Help the Rebecca Church!
     'vatB',
   ];
