@@ -39,7 +39,7 @@ The game's way (GAME_ORIGINAL):
 
 | Skill | MP / cooldown | In the game |
 |---|---|---|
-| Body as a Blade (`ssblade`, passive) | | defence and movement speed +15%; under 30% health the critical chance doubles (its cap from 50% to 90%) and half of a raised guard (`wardR`) is ignored. The game's monsters have no elemental resistance; a guard is the resistance they raise. |
+| Body as a Blade (`ssblade`, passive) | | defence and movement speed +15%; under 30% health the critical chance doubles (its cap from 50% to 90%) and a sword ignores half of a monster's elemental resistance (v3.16, `elDmg`; until v3.16 the game had no resistances and it ignored half of a raised guard) |
 | Transcendent Sword Mastery (`sstsm`, passive) | | attack speed +1% for every character level (`atkCD / (1 + Lv/100)`; every attack waits 0.1 s at least, ten swings a second, as the frame rate decided past that); every fifth sword strike in a row (at most 2 s apart) sends a 5 m shockwave of 150% |
 | Pinnacle Counter (`sspc`) | 40 / 15 s | 1.2 s: the first monster's blow that lands does nothing (not a tick, a fall, the weather, a reflection or a blow you'd have dodged anyway), and a spatial slash answers it, 800% and a 1.5 s stun on the attacker |
 | Kill Peak (`sskp`) | 100 / 90 s | 0.8 s, then a 20 m line (to the first wall) of 2,500% fixed damage: no level gap, no guard, no immunity (`o.pure`), no crit, no spread. What it cuts is Cleft for 6 s: it can't heal (`clHp`) or raise a guard. Online, on a monster another player hosts, the Cleft holds on the host's screen only. |

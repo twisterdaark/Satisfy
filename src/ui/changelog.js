@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26elements', ver: '3.16', d: '2026-10-26',
+      ar: ["مقاومة العناصر زي الرواية. كل وحش ليه عنصره وبيقاومه بالنص (وعناصر النار والجليد والعاصفة، اللي معمولة منه، 80%)، وبياخد 30% زيادة من العنصر اللي بيغلبه (الميه بتغلب النار، والرعد الميه، والأرض الرعد، والرياح الأرض، والنار الرياح).",
+        "الأموات والشياطين ومصاصين الدماء بيقاوموا الظلام النص وبياخدوا 40% زيادة من الضرر المقدس، والأموات والجولم والعناصر مبيتأثروش بالسم. والسكيلات ليها عنصرها: كرة النار نار، وقبضة البرق رعد، والصدمة المقدسة مقدس. والضربة العادية من غير عنصر.",
+        "لما تضرب وحش بعنصر بيقاومه بيظهر «مقاومة»، ولما يكون ضعيف قدامه «ضعيف!». وفي الفهرس، صفحة كل وحش فيها دفاعه وبيقاوم إيه وضعيف قدام إيه.",
+        "سيد السيف: «الجسد كنصل» تحت 30% صحة بقى بيتجاهل نص مقاومة العناصر بسيفك. وسكيل جديد في لفل 250: «سيف الإدانة» (فصل 772): قطعة 800% وهجومك بيزيد بدفاع الهدف كله."],
+      en: ["Elemental resistance as in the novel. Every monster has its attribute and resists it by half (the elementals, made of it, 80%), and takes 30% more from the one that beats it (water beats fire, thunder water, earth thunder, wind earth, fire wind).",
+        "The undead, demons and vampires resist darkness by half and take 40% more holy damage; the undead, golems and elementals shrug off poison. Skills carry their attribute: Fireball is fire, Lightning Fist thunder, Holy Impact holy. A plain blow has none.",
+        "Strike a monster with an attribute it resists and it shows \"resisted\"; one it is weak to, \"Weak!\". In the Index, every monster's page shows its defence, what it resists and what it is weak to.",
+        "The Sword Saint: Body as a Blade, under 30% health, now ignores half of the elemental resistance with your sword. And a new skill at level 250: the Condemnation Sword (ch 772), a cut of 800% with your attack raised by the target's whole defence."] },
     { v: '2026-10-26classes', ver: '3.15', d: '2026-10-26',
       ar: ["باقي الكلاسات على الرواية. القديسة: «التطهير» (لفل 20) بيشيل كل الحالات عنك وعن فريقك في 8 متر، و«الصدمة المقدسة» 100% على كل كائن شرير في 5 متر، و«السلاح المقدس» بيوصل لسلاح فريقك اللي حواليك كمان.",
         "البالادين بتاع كنيسة جودار: «بركة الإله جودار» (لفل 100): كل الإحصائيات +20% خمس دقايق، والصحة والدفاع +30% عشر دقايق. الساحر الأسود: «العاصفة السودا» (60) و«قيد الخوف» (80) و«الحاجز الماسي» (230).",

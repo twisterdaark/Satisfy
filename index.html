@@ -4674,7 +4674,7 @@ function mbDetail(k){const b=MT[k],n=mbK(k),need=mbNeed(k);if(!n)return `<div cl
  const lv=b.lv[0]===b.lv[1]?b.lv[0]:b.lv[0]+'–'+b.lv[1],el=typeof BEL!=='undefined'&&BEL[k],tags=[b.wb?t('mbWb'):b.boss?t('mbBoss'):'',el?t('mbEl_'+el):''].filter(Boolean).join(' · ');
  const dr=n>=mbDropN(k)?(b.boss?`<small>${t('mbNorm')}</small>`:'')+(mbDrops(k).map(it=>`<span class="mbi"><img src="${icon(it)}">${esc(t(it))}</span>`).join('')||`<small>${t('mbNoDrop')}</small>`)+(b.boss&&!b.wb&&!b.mb1?`<small class="mbch">${t('mbChest')}</small>`:''):`<small>${t('mbDropAt',{n:mbDropN(k)})}</small>`;
  const pc=Math.min(100,n/need*100);
- return `<div class="mbd">${mbPicH(k,'mbpb')}<div><b>${esc(mbName(k))}</b> <button class="mbtrk${S.mbTrk===k?' on':''}" data-mbt="${k}">${t(S.mbTrk===k?'mbTrkOff':'mbTrk')}</button><small>${t('mbLv',{l:lv})}${tags?' · '+tags:''}</small><small>${t('mbStats',{h:b.hp.toLocaleString('en'),d:b.dmg.toLocaleString('en')})}</small><small class="mbmv">${t('mbMoves')}: ${esc(mbMoves(k))}</small>`+
+ return `<div class="mbd">${mbPicH(k,'mbpb')}<div><b>${esc(mbName(k))}</b> <button class="mbtrk${S.mbTrk===k?' on':''}" data-mbt="${k}">${t(S.mbTrk===k?'mbTrkOff':'mbTrk')}</button><small>${t('mbLv',{l:lv})}${tags?' · '+tags:''}</small><small>${t('mbStats',{h:b.hp.toLocaleString('en'),d:b.dmg.toLocaleString('en')})}</small><small class="mbres">${esc(mbResLine(k))}</small><small class="mbmv">${t('mbMoves')}: ${esc(mbMoves(k))}</small>`+
   `<div class="mbbar"><i style="width:${pc}%"></i><span>${mbMs(k)?t('mbMsT',{p:Math.round(mbB()*100)}):t('mbKills',{n:n.toLocaleString('en'),m:need})}</span></div><div class="mbdr">${dr}</div></div></div>`;}
 function mbDraw(){if(MBF==='lore')return cdxDraw(); // SAT-ONLINE-188: the codex
  const L=mbList(),f=MBF,q=($('mbQ').value||'').trim().toLowerCase(),vis=L.filter(k=>(f==='all'||(f==='seen'&&mbK(k)>0)||(f==='boss'&&MT[k].boss)||(f==='ms'&&mbMs(k)))&&(!q||mbK(k)>0&&mbHit(k,q)));
@@ -7106,7 +7106,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(!o.pure&&brImm(m)){
  if(!o.pure&&m.type==='kraugel'&&!m.st&&!(P.bdetU>gTime)&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
  if(o.skill&&!o.spr&&P.sprW>gTime)bzSpray(m,mul); // Braham's Magic Spray
  if(o.skill&&!o.chain&&!o.dot&&weapKind()==='sword')swEGain(.003);   // (v3.14) a skill's blow fills a little Sword Energy
- let dmg=(o.aura?auAtkV():atkV())*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.nolv||o.skill&&S.cls==='lantier'?Math.max(1,lvF(m.lv)):o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m)*cpPen(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(poemOn()?1.4:1)*(o.skill&&S.cls==='lknight'&&pasOn('lkse')&&weapKind()==='sword'?1+.15*pasM('lkse'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<Math.min(ssLow()?.9:.5,(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)+psCr()+(aEyes()?.08:0)));if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&m.expU>gTime){crit=true;dmg*=1.5;m.expU=0;}if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&P.morN>0){P.morN=0;crit=true;dmg*=1.5;num(P.x,P.y-30,t('oMorHit'),'#ffd24a',false);}if(crit)dmg*=1.8*ttCdm()*(1+psCd()+(aEyes()?.2:0));dmg*=rlAtk(m);let burn=false;const w=weapon();
+ let dmg=(o.aura?auAtkV():atkV()+(o.addAtk||0))*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.nolv||o.skill&&S.cls==='lantier'?Math.max(1,lvF(m.lv)):o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m)*cpPen(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(poemOn()?1.4:1)*(o.skill&&S.cls==='lknight'&&pasOn('lkse')&&weapKind()==='sword'?1+.15*pasM('lkse'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<Math.min(ssLow()?.9:.5,(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)+psCr()+(aEyes()?.08:0)));if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&m.expU>gTime){crit=true;dmg*=1.5;m.expU=0;}if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&P.morN>0){P.morN=0;crit=true;dmg*=1.5;num(P.x,P.y-30,t('oMorHit'),'#ffd24a',false);}if(crit)dmg*=1.8*ttCdm()*(1+psCd()+(aEyes()?.2:0));dmg*=rlAtk(m);if(!o.pure)dmg*=elDmg(m,o);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -7135,7 +7135,7 @@ function tryAttack(ax,ay,mul){if(tavNoFight())return;spwOff();
  else if(!res){const tr=vtNear(hx,hy,18).find(tr=>Math.hypot(tr.x-hx,tr.y-8-hy)<18);if(tr&&(chopped.get(tr.k)||0)<=gTime)chop(tr);}
 }
 // arrows (bow), magic bolts (staff) and fireballs fly as projectiles
-function shoot(kind,ax,ay,mul,o={}){const sp=kind==='arrow'?260:200;proj.push({kind,x:P.x+ax*6,y:P.y-8+ay*6,vx:ax*sp,vy:ay*sp,t:(o.range||(kind==='arrow'?.62:.65))*(kind==='arrow'&&P.sne>0?1.4:1)*(kind==='arrow'&&S.cls==='bowsaint'&&pasOn('bsclair')?1.5:1),mul,pierce:o.pierce,boom:o.boom,stun:o.stun,slow:o.slow,hit:new Set()});if(kind==='arrow')SFX.bow();else SFX.magic(kind==='fire'?.5:1);}
+function shoot(kind,ax,ay,mul,o={}){const sp=kind==='arrow'?260:200;proj.push({kind,x:P.x+ax*6,y:P.y-8+ay*6,vx:ax*sp,vy:ay*sp,t:(o.range||(kind==='arrow'?.62:.65))*(kind==='arrow'&&P.sne>0?1.4:1)*(kind==='arrow'&&S.cls==='bowsaint'&&pasOn('bsclair')?1.5:1),mul,pierce:o.pierce,boom:o.boom,stun:o.stun,slow:o.slow,el:o.el!==undefined?o.el:CURSK?skEl(CURSK):kind==='fire'?'fire':null,hit:new Set()});if(kind==='arrow')SFX.bow();else SFX.magic(kind==='fire'?.5:1);}
 // any hit that lands on a standing tree chops it, same as a melee swing (max caps how many one hit fells)
 function hitTrees(x,y,r,max){let n=0;for(const tr of vtNear(x,y,r+8)){if(n>=(max||1))break;if((chopped.get(tr.k)||0)>gTime)continue;if(Math.hypot(tr.x-x,tr.y-8-y)<r){chop(tr);n++;}}return n;}
 function boom(p){hitTrees(p.x,p.y,30,3);SFX.crit();shake=.15;vfx('fire',p.x,p.y);fx.push({ring:true,big:1,x:p.x,y:p.y,t:.5});for(let i=0;i<18;i++)fx.push({x:p.x,y:p.y,vx:(rand()-.5)*120,vy:(rand()-.5)*120,t:.4,c:rand()<.5?'#ff8a1e':'#ffd24a'});mons.forEach(m=>{if(!m.dead&&Math.hypot(m.x-p.x,monY(m)-p.y)<30)hitMon(m,p.mul,{});});}
@@ -7144,7 +7144,7 @@ function updateProj(dt){scTick(dt);proj=proj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y
  if(p.ghost)return p.t>0&&!p4PSolid(Math.floor(p.x/TS),Math.floor((p.y+8)/TS)); // another player's shot, replayed: looks only
  if(p.kind!=='wave'&&hitTrees(p.x,p.y,10)){if(p.boom)boom(p);return false;}
  if(p.t<=0||p4PSolid(Math.floor(p.x/TS),Math.floor((p.y+8)/TS))){if(p.boom)boom(p);return false;}
- for(const m of mons){if(m.dead||p.hit.has(m))continue;if(Math.hypot(m.x-p.x,monY(m)-p.y)<MT[m.type].r+(p.kind==='wave'?13:5)){p.hit.add(m);if(p.boom){boom(p);return false;}if(hitMon(m,p.mul,{kx:Math.sign(p.vx)*.5,ky:Math.sign(p.vy)*.5,stun:p.stun,slow:p.slow,...(p.kind==='bullet'?{skill:1}:{})}))SFX.hit();if(p.pure&&!m.dead&&(DEMK.has(m.type)||voxOf(m.type)[0]==='dead'))m.weak=Math.max(m.weak||0,6);if(!p.pierce)return false;}}
+ for(const m of mons){if(m.dead||p.hit.has(m))continue;if(Math.hypot(m.x-p.x,monY(m)-p.y)<MT[m.type].r+(p.kind==='wave'?13:5)){p.hit.add(m);if(p.boom){boom(p);return false;}if(hitMon(m,p.mul,{kx:Math.sign(p.vx)*.5,ky:Math.sign(p.vy)*.5,stun:p.stun,slow:p.slow,el:p.el||null,...(p.kind==='bullet'?{skill:1}:{})}))SFX.hit();if(p.pure&&!m.dead&&(DEMK.has(m.type)||voxOf(m.type)[0]==='dead'))m.weak=Math.max(m.weak||0,6);if(!p.pierce)return false;}}
  return true;});}
 function dodge(){if(RCR&&RCR.in)return rcSpur();if(P.dash>0||P.dcd>0)return;P.guard=0;if(P.st<dodgeCost()){toast(t('tired'),'warn');SFX.deny();return;}let ix=(K.right?1:0)-(K.left?1:0),iy=(K.down?1:0)-(K.up?1:0);if(TSV){ix=TSV.x;iy=TSV.y;}if(!ix&&!iy){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];ix=v[0];iy=v[1];}const l=Math.hypot(ix,iy);P.dx=ix/l;P.dy=iy/l;P.dash=(P.ride?.24:.18)*(1+gearSum('dsh'));P.dcd=.7;P.inv=Math.max(P.inv,.3);P.st-=dodgeCost();pressKey('kD');SFX.dodge();vfx('dust',P.x,P.y,{n:P.ride?14:8,angle:Math.atan2(-P.dy,-P.dx)});
  for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*8,y:P.y,vx:-P.dx*40+(rand()-.5)*40,vy:-rand()*25,t:.35,c:rand()<.5?'#c8b48a':'#a89870'});fx.push({ring:true,x:P.x,y:P.y-6,t:.25});}
@@ -8338,7 +8338,7 @@ window.__GSS={legWin,ssqOpts,msEnd,wilV,legFoe,get SPAR(){return SPAR}}; // test
    Shadowless Thousand Sword Storm: with Control Sword's swords out, 20 cuts of 300% over 3 s on a spot, each shredding 5% of
    the foe's armour (the level gap's toll on your damage), up to all of it, for 10 s. */
 const SSM=16,SSFR=15*SSM,ssPas=k=>!!S&&!!P&&S.cls==='saint'&&pasOn(k);
-const ssBl=()=>ssPas('ssblade')?.15:0,ssLow=()=>ssPas('ssblade')&&P.hp>0&&P.hp<maxHP()*.3,ssWard=r=>ssLow()?1-(1-r)*.5:r;
+const ssBl=()=>ssPas('ssblade')?.15:0,ssLow=()=>ssPas('ssblade')&&P.hp>0&&P.hp<maxHP()*.3,ssWard=r=>r;
 const ssAs=()=>ssPas('sstsm')?(S.lv||1)*.01:0;
 const ssShred=m=>m.shredU>gTime&&m.shred>0?(f=>f<1?Math.pow(f,-m.shred):1)(lvF(m.lv)):1;
 let SSN={n:0,t:-9},SSCL=[];
@@ -8467,14 +8467,14 @@ Object.assign(STR.en,{sk_sscre:'Swordsmanship Creation',skd_sscre:"You can creat
  swcD_split:'A blade of sword energy {r} m ahead, {w} m wide: {m}% × {n} to all in its path.',swcD_pass:'Cross {r} m in a flash: {m}% × {n} to all you pass.',
  swcD_bolt:'Sword energy falls on the foes ahead within {r} m: {m}% × {n} on each.',swcD_fang:'Two crossing cuts in front: {m}% and a lighter one, × {n}.'});
 window.__GSS2={cast:k=>castSk(k),hurt:(d,m)=>hurtPlayer(d,m&&m.lv,m),bl:()=>ssBl(),low:()=>ssLow(),as:()=>ssAs(),strike:()=>ssStrike(),counter:s=>ssCounter(s),kp:v=>ssKillPeak(v),tick:dt=>ss2Tick(dt),shred:m=>ssShred(m),get N(){return SSN},get CL(){return SSCL}}; // tests
-Object.assign(STR.ar,{sk_ssblade:'الجسد كنصل',skd_ssblade:'جسمك اتسقى بطاقة السيف: الدفاع وسرعة الحركة +15%. ولما صحتك تنزل تحت 30%، فرصة الضربة القاضية بتتضاعف وضربتك بتعدّي نص الحماية اللي الوحش رافعها.',
+Object.assign(STR.ar,{sk_ssblade:'الجسد كنصل',skd_ssblade:'جسمك اتسقى بطاقة السيف: الدفاع وسرعة الحركة +15%. ولما صحتك تنزل تحت 30%، فرصة الضربة القاضية بتتضاعف وسيفك بيتجاهل نص مقاومة العناصر بتاعة الوحش.',
  sk_sstsm:'إتقان السيف المتسامي',skd_sstsm:'قمة فن السيف: سرعة الهجوم +1% لكل لفل من لفلك. وكل خامس ضربة سيف ورا بعض بتطلّع موجة 150% على كل اللي حواليك في 5 متر.',
  sk_sspc:'رد القمة',skd_sspc:'وقفة دفاع مطلق 1.2 ثانية: لو اتضربت فيها الضربة مبتعملش حاجة، وبترد على طول بقطعة في الفراغ 800% على اللي ضربك وبتشلّه 1.5 ثانية.',
  sk_sskp:'قمة القتل',skd_sskp:'نية القتل كلها في ضربة واحدة: بعد 0.8 ثانية تحضير، خط مش باين قدامك 20 متر: 2,500% ضرر ثابت، مبيتأثرش بالحماية ولا بأي مناعة. واللي بيتقطع بيفضل «مشقوق» 6 ثواني: مبيقدرش يعالج نفسه ولا يرفع حماية.',
  sk_ssfield:'غازي العقل: ميدان السيف',skd_ssfield:'عالمك الداخلي بيتحوّل لحقيقة حواليك 15 متر لمدة 10 ثواني: الأعداد جواه بيتحركوا أبطأ 40% وهجماتهم بترجع أبطأ بالنص، وإنت والفريق جواه ضربكم +25% ومحدش يقدر يشلّكم.',
  sk_ssstorm:'عاصفة الألف سيف بلا ظل',skd_ssstorm:'محتاجة «سيف التحكم» شغال: كل السيوف بتتجمع على مكان واحد في عاصفة، 20 قطعة في 3 ثواني، 300% كل واحدة، وكل قطعة بتمزّق 5% من دروع العدو (لحد 100%) لمدة 10 ثواني.',
  ssPcOn:'رد القمة: مستني الضربة',ssPcHit:'رد القمة!',ssKpCh:'قمة القتل: بتجمّع نية القتل...',ssCleft:'مشقوق!',ssFdOn:'ميدان السيف اتفتح',ssStOn:'عاصفة الألف سيف!',ssStNeed:'محتاج «سيف التحكم» شغال الأول'});
-Object.assign(STR.en,{sk_ssblade:'Body as a Blade',skd_ssblade:'Your body is tempered by relentless sword energy: defence and movement speed +15%. Under 30% health your critical chance doubles and your blows ignore half of the guard a monster raises.',
+Object.assign(STR.en,{sk_ssblade:'Body as a Blade',skd_ssblade:'Your body is tempered by relentless sword energy: defence and movement speed +15%. Under 30% health your critical chance doubles and your sword ignores half of a monster\'s elemental resistance.',
  sk_sstsm:'Transcendent Sword Mastery',skd_sstsm:'The peak of swordsmanship: attack speed +1% for every character level. Every fifth sword strike in a row releases a shockwave of 150% on everything within 5 m.',
  sk_sspc:'Pinnacle Counter',skd_sspc:'An absolute guard for 1.2 s: a blow that lands then does nothing, and a spatial slash answers it at once, 800% to the attacker and a 1.5 s stun.',
  sk_sskp:'Kill Peak',skd_sskp:"The Sword Saint's lethal intent in one blow: after 0.8 s, an invisible line 20 m ahead deals 2,500% fixed damage that no guard or invulnerability stops. What it cuts is Cleft for 6 s: it can't heal or raise a guard.",
@@ -12795,6 +12795,61 @@ for(const k of ['mercedes','eliz','irene','jishuka','dk_povia','betty','jessica'
 for(const n of ['vnoble','vb6','vb5','vb4','vb3','vmrose','vfenrir'])if(!SH[n])shLazy(n,()=>SA.chars.buildSheet(FIG[n]));   // owner 2026-10-23: they had looks but no sheet, so they were invisible
 Object.assign(NAMEK,{vnoble:'vnobleN',vb6:'vb6N',vb5:'vb5N',vb4:'vb4N',vb3:'vb3N',vmrose:'vmroseN',vfenrir:'vfenrirN',vwolf:'vwolfN',vjun:'vjunN',vint:'vintN',vtrue:'vtrueN',vguard:'vguardN',vskel:'vskelN',vhigh:'vhighN',lexi:'lexiN',vb15:'vb15N',vb14:'vb14N',velfin:'velfinN',vb12:'vb12N',vb11:'vb11N',vb10:'vb10N',vran:'vranN',vmount:'vmountN',vtira:'vtiraN',vlatina:'vlatinaN',vcray:'vcrayN',vyet:'vyetN',vruson:'vrusonN',vnoll:'vnollN'});
 Object.assign(BEL,{vskel:'dark',vlatina:'dark',vtira:'fire'});
+/* ---------------- Elemental resistance (v3.16; the owner 2026-10-26: "make elemental resistance as in the novel", "make the
+   game 1:1 with the novel as far as you can") ----------------
+   CANON: Satisfy's monsters carry an attribute and resist it (the Four Beasts, the elementals, the Red Phoenix's fire), the
+   undead and the demons are darkness and fear holy power, and skills and items deal attribute damage. The game's attributes
+   are BEL's: fire, water (ice is water here, as the Ice Elemental), thunder, earth, and wind, holy, dark, poison. Numbers
+   GAME_BALANCE:
+   - a monster resists its own attribute 50% (an elemental, made of it, 80%) and takes 30% more from the one that beats it
+     (water beats fire, thunder water, earth thunder, wind earth, fire wind);
+   - the undead, the demons and the vampires resist darkness 50% and take 40% more holy damage; the undead, golems and
+     elementals shrug off poison;
+   - a skill's attribute is what it is (its name: Fireball fire, Lightning Fist thunder, Holy Impact holy); a plain blow has
+     none. The Sword Saint's Body as a Blade (the owner's): under 30% health a sword ignores half of it.
+   And a monster's defence (CANON: a stat; the Condemnation Sword hits for "attack power equivalent to 100% of the target's
+   defense", ch 772): half its attack unless the table says, shown in the Index. */
+const ELBEAT={fire:'water',water:'thunder',thunder:'earth',earth:'wind',wind:'fire'};
+const ELEMT=new Set(['felem','ielem','selem','efire','ethund','slord']);
+const MELX={eti:'water',cbear:'water',forc:'water',fochief:'water',warlord:'water',ilizard:'water',lizard:'water',lizw:'water',wyvern:'wind',wqueen:'wind',ebfly:'wind',hdrac:'fire',hdrac2:'fire',hdrac3:'fire'};
+const UNDK=/^(skel|wraith|vskel|bknight|eghost|ejiang|dk_|mshade|sdoll|pguard|aprison|redk)/;
+const ELS=['fire','water','thunder','earth','wind','holy','dark','poison'];
+const monEl=k=>BEL[k]||MELX[k]||null,monUnd=k=>UNDK.test(k)||PGUND.test(k),monEvil=k=>DEMK.has(k)||HOLYX.has(k)||/^v/.test(k)&&k!=='vpal'||monUnd(k);
+function monResK(k,el){if(!el||!k)return 0;const me=monEl(k);let r=0;
+ if(me){if(me===el)r+=ELEMT.has(k)?.8:.5;if(ELBEAT[me]===el)r-=.3;}
+ if(monEvil(k)){if(el==='dark')r+=.5;if(el==='holy')r-=.4;}
+ if(el==='poison'&&(monUnd(k)||/golem|gargoyle/.test(k)||ELEMT.has(k)))r=1;
+ return Math.max(-.6,Math.min(1,r));}
+const monDef=m=>{const b=MT[m&&m.type];return b?(b.def!=null?b.def:Math.round((b.dmg||0)*.5)):0;};
+// a skill's attribute: its own table, else its name (whole words)
+/* the Demon Slayer's skills and the Saintess' Holy Impact keep the novel's own numbers against evil (no extra weakness on top) */
+const SKELX={nexpl:'dark',dspure:null,dsend:null,dsdest:null,dsseal:null,dsleap:null,dssum:null,sahi:null,bsevil:null};
+const SKELR=[['fire',/\b(fire|fireball|flame|flames|burn|burning|blaze|blazing|inferno|meteor|ember|lava|magma|explosion|scorch)\b/i],
+ ['water',/\b(ice|frost|frozen|freeze|snow|blizzard|cold|water|absolute zero|glacier|tide)\b/i],
+ ['thunder',/\b(lightning|thunder|thunderclap|electric|spark|bolt)\b/i],['wind',/\b(wind|gale|tornado|whirlwind|cyclone|tempest)\b/i],
+ ['earth',/\b(earth|stone|rock|quake)\b/i],['holy',/\b(holy|divine|sanctuary|purification|judgment|judgement|heaven|light of)\b/i],
+ ['dark',/\b(dark|shadow|shadows|curse|cursed|necro|corpse|death|soul|hell)\b/i],['poison',/\b(poison|venom|toxic|plague)\b/i]];
+const SKELC={};
+function skEl(k){if(!k)return null;if(k in SKELC)return SKELC[k];const d=SKD[k];let e=null;
+ if(d&&!d.pas){if(k in SKELX)e=SKELX[k];else{const n=String(STR.en['sk_'+k]||'');for(const [x,r] of SKELR)if(r.test(n)){e=x;break;}}}return SKELC[k]=e;}
+function elDmg(m,o){const el=o.el!==undefined?o.el:CURSK?skEl(CURSK):null;if(!el)return 1;let r=monResK(m.type,el);
+ if(r>0&&ssLow()&&weapKind()==='sword')r*=.5;   /* Body as a Blade */
+ if(r&&!o.dot&&!o.chain&&!((m.elT||0)>gTime)){m.elT=gTime+1.5;if(r>=.5)num(m.x,monY(m)-30,t('elRes',{e:t('mbEl_'+el)}),'#9aa6b8',false);else if(r<0)num(m.x,monY(m)-30,t('elWeak',{e:t('mbEl_'+el)}),'#ffb04a',false);}
+ return Math.max(0,1-r);}
+function mbResLine(k){const R=[],W=[];for(const e of ELS){const r=monResK(k,e);if(r>0)R.push(t('mbEl_'+e)+' '+Math.round(r*100)+'%');else if(r<0)W.push(t('mbEl_'+e)+' +'+Math.round(-r*100)+'%');}
+ return t('mbDef',{d:monDef({type:k}).toLocaleString('en')})+(R.length?' · '+t('mbResT')+': '+R.join(', '):'')+(W.length?' · '+t('mbWeakT')+': '+W.join(', '):'');}
+Object.assign(STR.ar,{mbEl_wind:'رياح',mbEl_holy:'مقدس',mbEl_dark:'ظلام',mbEl_poison:'سم',elRes:'مقاومة {e}',elWeak:'ضعيف قدام {e}!',mbDef:'الدفاع {d}',mbResT:'بيقاوم',mbWeakT:'ضعيف قدام'});
+Object.assign(STR.en,{mbEl_wind:'Wind',mbEl_holy:'Holy',mbEl_dark:'Darkness',mbEl_poison:'Poison',elRes:'{e} resisted',elWeak:'Weak to {e}!',mbDef:'Defence {d}',mbResT:'Resists',mbWeakT:'Weak to'});
+/* The Sword Saint's Condemnation Sword (CANON ch 772: an ultimate, "attack power equivalent to 100% of the target's defense"; its
+   other numbers GAME_BALANCE): one cut, 800%, with your attack raised by the target's whole defence. */
+Object.assign(SKD,{sscond:{cls:'saint',lv:250,mp:90,cd:60,need:'sword',col:'#e8f4ff'}});
+Object.assign(SKF,{sscond:()=>{const v=fdir(),m=fusTg(50,1)[0];P.acd=0;SFX.crit();shake=.4;if(!m){vfx('slash',P.x+v[0]*20,P.y-7+v[1]*20,{angle:Math.atan2(v[1],v[0]),rarity:4});return;}
+  const y=monY(m);vfx('slash',m.x,y,{angle:Math.atan2(v[1],v[0]),rarity:4});vfx('xcut',m.x,y,{raw:1,color:'#e8f4ff',big:1.4});fx.push({ring:true,x:m.x,y,t:.5});hitMon(m,8,{skill:1,addAtk:monDef(m),kx:v[0],ky:v[1]});}});
+SKSND.sscond='power';
+P2ICO.sscond=p=>{p(7,1,2,11,'#e8f4ff');p(4,11,8,2,'#c8a070');p(2,4,12,1,'#ff6a5a');p(3,6,10,1,'#ff6a5a');};
+Object.assign(STR.ar,{sk_sscond:'سيف الإدانة',skd_sscond:'أقصى ما عند سيد السيف: قطعة واحدة 800%، وهجومك بيزيد بدفاع الهدف كله.'});
+Object.assign(STR.en,{sk_sscond:'Condemnation Sword',skd_sscond:"An ultimate of the Sword Saint: one cut of 800%, with your attack raised by the whole of the target's defence."});
+window.__GEL={res:(k,e)=>monResK(k,e),el:k=>skEl(k),def:k=>monDef({type:k}),line:k=>mbResLine(k)}; // tests
 Object.assign(NDROP,{vnoble:[['vring',.01]],vb6:[['vring',.3]],vb5:[['vring',.32]],vb4:[['avring',.2]],vb3:[['avring',.25]],vmrose:[['bunder',.06],['hvring',.3],['avring',.3]],vfenrir:[['hvring',.35],['avring',.35]],vtrue:[['jvring',.01]],lexi:[['jvring',.25]],vb15:[['jvring',.2]],vb14:[['jvring',.22]],velfin:[['iyarugt',.2],['elfin',.3]],vb12:[['jvring',.25]],vb11:[['vring',.15]],vb10:[['vring',.3]],
  vran:[['vring',.12]],vmount:[['vring',.12]],vtira:[['tirbelt',.25],['tirsh',.2]],vlatina:[['latneck',.25],['vpaj',.2]],vcray:[['craybr',.25]],vyet:[['yetgs',.2],['avring',.15]],vruson:[['avring',.2]],vnoll:[['hvring',.15]],
  vguard:[['avring',.003]],vhigh:[['avring',.004],['hvring',.002]]});
