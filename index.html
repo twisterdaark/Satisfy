@@ -2763,7 +2763,7 @@ let AUV={tab:'list',sel:null,k:'all',max:0,s:'unit'};
 // price per unit, cheapest per unit, cheapest in all, or newest first
 const AUKD={gem:['diam','ruby','topaz','emer','sapph','bljewel','kpearl'],metal:['mith','ore','ndiron','ndstone','mstone','estone','dscale'],
  beast:['brphx','brdrg','brtig','brtor','blhorn','fess','iess','sess','bvial','wegg','leather','vwleath','kink'],pot:['hpot','mpot']};
-function auKind(k){const b=typeof SHK!=='undefined'&&SHK[k]||k;if(/^(rb_|bk_)/.test(b)||b==='tzbook'||b==='mumbk'||b==='mdsheath')return 'book';
+function auKind(k){const b=typeof SHK!=='undefined'&&SHK[k]||k;if(/^(rb_|bk_)/.test(b)||b==='tzbook'||b==='mumbk'||b==='mdsheath'||b==='bpfrag')return 'book';
  for(const g in AUKD)if(AUKD[g].includes(b))return g;return 'farm';} // the rest: fish, herbs, crops and wood
 const AUKS=['all','gem','metal','beast','farm','book','pot'];
 function auShown(L){const mx=AUV.max>0?AUV.max:Infinity;L=L.filter(l=>(AUV.k==='all'||auKind(l.it)===AUV.k)&&l.price/l.q<=mx);
@@ -13288,31 +13288,32 @@ function rbUse(id){const b=RB.find(x=>x.id===id);if(!b||!(S.mats[id]>0))return;i
 // a boss sometimes drops one of the rare books
 function rbBossDrop(m,b){if(!b.boss||m.tmp||m.bh)return;for(const r of RB)if(r.boss&&rand()<r.boss){addMat(r.id,1);setTimeout(()=>toast(t('rbDrop',{it:t(r.id)}),'good'),600);}}
 /* Plan U280 (2026-10-26): rare blueprints from fragments. A torn recipe page (bpfrag) comes from a raid (a boss killed with
-   a party member near: BPRAID; alone: BPSOLO), once from each boss quest you finish, and from a finished weekly contract
-   (U207). BPN pages put together (click them in the bag) make one of the rare books that no shop sells, one you don't know
+   a party member near: BPRAID; alone: BPSOLO; at most BPDAY a day from bosses), once from each boss quest you finish, and
+   from a finished weekly contract (U207). BPN pages put together (click them in the bag) make one of the rare books that no shop sells, one you don't know
    and don't carry if there is one. Pages and books trade and sell like any book. */
-const BPN=4,BPRAID=.35,BPSOLO=.05,bpRare=()=>RB.filter(b=>!b.g);
+const BPN=4,BPRAID=.35,BPSOLO=.05,BPDAY=3,bpRare=()=>RB.filter(b=>!b.g);
 function bpGive(n,why){addMat('bpfrag',n);setTimeout(()=>{toast(t(why||'bpDrop'),'good');SFX.rare();},700);}
 const bpChance=()=>phMates(600).length?BPRAID:BPSOLO;
-function bpBossDrop(m,b){if(!b.boss||m.tmp||m.bh)return;if(rand()<bpChance())bpGive(1);}
+function bpBossDrop(m,b){if(!b.boss||m.tmp||m.bh)return;const D=dlyS();if((D.bp|0)>=BPDAY||rand()>=bpChance())return;D.bp=(D.bp|0)+1;bpGive(1);}
 function bpQuest(id){const q=QD[id],o=q&&q.obj;if(!o||q.gen||q.rep||o.t!=='kill'||!MT[o.it]||!MT[o.it].boss)return;S.bpq=S.bpq||{};if(S.bpq[id])return;S.bpq[id]=1;bpGive(1,'bpQuestT');}
 function bpUse(){const n=S.mats.bpfrag||0;if(n<BPN){SFX.deny();return toast(t('bpNeed',{n,m:BPN}),'warn');}
  const all=bpRare(),fresh=all.filter(b=>!rbKn(b.id)&&!(S.mats[b.id]>0)),pool=fresh.length?fresh:all;if(!pool.length)return;
  const b=pool[(rand()*pool.length)|0];S.mats.bpfrag-=BPN;addMat(b.id,1);SFX.legendary();vfx('levelup',P.x,P.y);toast(t('bpMade',{it:t(b.id)}),'good');hudDirty=true;save(true);if(!$('inv').hidden)renderInv();}
-RSUSE.push('bpfrag');AUK.push('bpfrag');MATP.bpfrag=600;
+RSUSE.push('bpfrag');AUK.push('bpfrag');MATP.bpfrag=400;   /* a fifth of a rare book's price: four pages sell for less than the book they make */
 /* Plan U207 (2026-10-26): a weekly contract for each craft, at the quest board. The week is the server's (lockWeek), and
    each character's contract is fixed for the week. What you make after you take a contract counts toward it: a forged
    piece rated rare or better, a sewn piece, dishes, potions, Piaro's crops. A piece counts once, by its uid (the ledger,
    S.wc.led), and auto production doesn't count. A finished contract pays gold, the craft's experience and a torn recipe
-   page (U280); the next one comes with the next week. Guild supply orders are left: they need the database's rules. */
-const WCK=['smith','cook','alch','sew','farm'],WCN={smith:[3,5],cook:[10,16],alch:[8,12],sew:[3,5],farm:[20,30]},WCX={smith:150,cook:80,alch:80,sew:80,farm:80};
+   page (U280); the next one comes with the next week. Contracts start at WCLV, and each character's are fixed by its id
+   (a new name doesn't change them). Guild supply orders are left: they need the database's rules. */
+const WCLV=20,WCK=['smith','cook','alch','sew','farm'],WCN={smith:[3,5],cook:[10,16],alch:[8,12],sew:[3,5],farm:[20,30]},WCX={smith:150,cook:80,alch:80,sew:80,farm:80};
 function wcS(){const w=lockWeek();if(!S.wc||S.wc.wk!==w)S.wc={wk:w,on:{},c:{},done:{},led:{}};return S.wc;}
-function wcN(k){const [a,b]=WCN[k],r=mulberry32(strH(wcS().wk+'|'+k+'|'+(S.look.n||'')));return a+((r()*(b-a+1))|0);}
+function wcN(k){const [a,b]=WCN[k],r=mulberry32(strH(wcS().wk+'|'+k+'|'+pidOf()));return a+((r()*(b-a+1))|0);}
 const wcGold=k=>Math.round((300+S.lv*12)*(k==='smith'?1.5:1)),wcName=k=>t(k==='smith'?'wcSmith':'life_'+k);
-const wcReady=k=>{const W=wcS();return !!W.on[k]&&!W.done[k]&&(W.c[k]||0)>=wcN(k);},wcAny=()=>!!S&&WCK.some(wcReady);
+const wcReady=k=>{const W=wcS();return S.lv>=WCLV&& !!W.on[k]&&!W.done[k]&&(W.c[k]||0)>=wcN(k);},wcAny=()=>!!S&&WCK.some(wcReady);
 function wcEv(k,n,uid){if(!S||S.__demo||typeof AUTOQ!=='undefined'&&AUTOQ)return;const W=wcS();if(!W.on[k]||W.done[k])return;
  if(uid!=null){if(W.led[uid])return;W.led[uid]=1;}const m=wcN(k),c0=W.c[k]||0;W.c[k]=Math.min(m,c0+n);if(c0<m&&W.c[k]>=m)setTimeout(()=>{toast(t('wcDone',{c:wcName(k)}),'good');SFX.quest();},400);}
-function wcMenu(){const W=wcS(),o=[];
+function wcMenu(){if(S.lv<WCLV)return dialog('board',[t('wcLow',{n:WCLV})],null,[{l:t('oBack'),f:openBoard}]);const W=wcS(),o=[];
  for(const k of WCK){const n=wcN(k),c=W.c[k]||0,task=t('wcT_'+k,{n}),rw=[t('rwGold',{n:wcGold(k)}),t('wcRwX',{n:WCX[k],c:wcName(k)}),t('bpfrag')].join(' · ');
   if(W.done[k])o.push({l:`✓ ${wcName(k)}: ${task}`,st:t('wcPaid'),f:wcMenu});
   else if(wcReady(k))o.push({l:`❗ ${t('wcTurn',{c:wcName(k)})}`,st:rw,f:()=>wcTurn(k)});
@@ -13325,11 +13326,11 @@ function wcTurn(k){if(!wcReady(k))return wcMenu();const W=wcS();W.done[k]=1;S.go
 Object.assign(STR.ar,{wcMenu:'العقود الأسبوعية',wcSmith:'الحدادة',wcHi:'عقد واحد كل أسبوع لكل صنعة. اللي تعمله بعد ما تاخد العقد هو اللي بيتحسب، وكل قطعة مرة واحدة بس. كل عقد بيدفع دهب وخبرة في الصنعة وورقة وصفة مقطوعة.',
  wcT_smith:'اعمل {n} قطع في الفرن نادرة أو أحسن',wcT_cook:'اطبخ {n} أكلات',wcT_alch:'حضّر {n} جرعات',wcT_sew:'خيّط {n} قطع',wcT_farm:'احصد {n} محصول من أرض بيارو',
  wcRwX:'{n} خبرة {c}',wcTook:'خدت عقد {c} بتاع الأسبوع ده.',wcDone:'عقد {c} خلص! سلّمه عند لوحة المهام.',wcTurn:'سلّم عقد {c}',wcPaid:'اتسلّم الأسبوع ده. اللي بعده مع الأسبوع الجاي.',
- wcPaidT:'سلّمت عقد {c}: {g} دهب.',wcPage:'ومعاه ورقة وصفة مقطوعة.'});
+ wcPaidT:'سلّمت عقد {c}: {g} دهب.',wcLow:'العقود الأسبوعية من لفل {n}.',wcPage:'ومعاه ورقة وصفة مقطوعة.'});
 Object.assign(STR.en,{wcMenu:'Weekly contracts',wcSmith:'Smithing',wcHi:'One contract a week for each craft. What you make after you take one counts toward it, each piece once. Each pays gold, experience in the craft and a torn recipe page.',
  wcT_smith:'Forge {n} pieces rated rare or better',wcT_cook:'Cook {n} dishes',wcT_alch:'Brew {n} potions',wcT_sew:'Sew {n} pieces',wcT_farm:"Harvest {n} crops at Piaro's Field",
  wcRwX:'{n} {c} experience',wcTook:"You took this week's {c} contract.",wcDone:'{c} contract complete! Turn it in at the quest board.',wcTurn:'Turn in the {c} contract',wcPaid:'Turned in this week. The next one comes next week.',
- wcPaidT:'{c} contract turned in: {g} gold.',wcPage:'It came with a torn recipe page.'});
+ wcPaidT:'{c} contract turned in: {g} gold.',wcLow:'Weekly contracts start at level {n}.',wcPage:'It came with a torn recipe page.'});
 Object.assign(STR.ar,{bpfrag:'ورقة وصفة مقطوعة',bpfragD:'4 ورقات منها مع بعض بيعملوا كتاب وصفة نادر مش بيتباع في أي محل، واحد لسه متعرفوش لو فيه. بتقع من الزعما، أكتر لما تبقى في بارتي، وكل مهمة زعيم بتديك واحدة، وكمان العقد الأسبوعي.',
  bpDrop:'لقيت ورقة وصفة مقطوعة!',bpQuestT:'من ضمن المكافأة: ورقة وصفة مقطوعة.',bpNeed:'معاك {n} من {m} ورقات. محتاج {m} عشان تكمّل كتاب.',bpMade:'الورق اتجمع وبقى {it}!'});
 Object.assign(STR.en,{bpfrag:'Torn Recipe Page',bpfragD:"Four of these together make a rare recipe book that no shop sells, one you don't know yet if there is one. Bosses drop them, more often when you fight in a party; every boss quest gives one, and so does a weekly contract.",
@@ -18669,8 +18670,8 @@ window.__GP5B={rc:id=>rcById(id),odds:(rc,s)=>rateOdds(rc,s),oddsTip:rc=>oddsTip
  kind:k=>auKind(k),shown:(L,o)=>{const v={...AUV};Object.assign(AUV,o||{});try{return auShown(L.slice()).map(l=>l.id);}finally{Object.assign(AUV,v);}},
  gemMove:(a,b,w)=>gemMove(a,b,w),fogAll:()=>{if(FOG)FOG.fill(1);},
  circ:()=>({w:{x:ECW.x+.5,y:ECW.y+.5},e:{x:EACIRC.x+.5,y:EACIRC.y+.5},p:{x:EAPORT.x/TS,y:EAPORT.y/TS}}),dodge:()=>{P.dash=0;P.dcd=0;P.st=1e4;dodge();},avail:id=>qAvail(id),ready:id=>qReady(id),party:e=>{qEvent('party','party');},accept:id=>acceptQ(id)};
-window.__GP6={p4S:()=>p4S(),plotAct:i=>p4PlotAct(i),plow:i=>p4Plow(i),water:i=>p4Water(i),plant:(i,c)=>p4Plant(i,c),harvest:i=>p4Harvest(i),ready:p=>p4Ready(p),
- bpUse:()=>bpUse(),bpQuest:id=>bpQuest(id),bpChance:()=>bpChance(),bpRare:()=>bpRare().map(b=>b.id),
+window.__GPB6={p4S:()=>p4S(),plotAct:i=>p4PlotAct(i),plow:i=>p4Plow(i),water:i=>p4Water(i),plant:(i,c)=>p4Plant(i,c),harvest:i=>p4Harvest(i),ready:p=>p4Ready(p),
+ bpUse:()=>bpUse(),bpQuest:id=>bpQuest(id),bpChance:()=>bpChance(),bpBoss:()=>bpBossDrop({},{boss:1}),BPDAY:()=>BPDAY,dly:()=>dlyS(),bpRare:()=>bpRare().map(b=>b.id),
  bossQ:()=>Object.keys(QD).find(id=>{const q=QD[id],o=q.obj;return !q.gen&&!q.rep&&o.t==='kill'&&MT[o.it]&&MT[o.it].boss;}),plainQ:()=>Object.keys(QD).find(id=>{const q=QD[id],o=q.obj;return !q.gen&&!q.rep&&o.t==='kill'&&MT[o.it]&&!MT[o.it].boss;}),
  wcS:()=>wcS(),wcN:k=>wcN(k),wcEv:(k,n,u)=>wcEv(k,n,u),wcMenu:()=>wcMenu(),wcTurn:k=>wcTurn(k),wcGold:k=>wcGold(k),board:()=>openBoard(),
  mons:()=>mons,monTick:(m,dt)=>monTick(m,dt),post:(m,i)=>ptPost(m,PATROL[m.type],i),PATROL}; // tests (plan batch 6)
