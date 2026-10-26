@@ -33,6 +33,21 @@ test('auction window: list from the bag, see it under My listings, withdraw it, 
   assert.equal(after.rows, before.rows - 1);
   await g.page.keyboard.press('Escape'); await g.step(2);
   assert.equal(await g.mode(), 'play');
+  // owner 2026-10-26 (a screenshot with nothing listed): the merchants' next visit far in the future (the device's clock
+  // moved back, or a save from another device) or not a number kept them away for good; it refreshes them now
+  for (const at of [Date.now() + 1e12, NaN, null]) {
+    await g.eval((x) => { const A = window.__GU.WS.auction; A.list = A.list.filter((l) => l.pid !== 'npc'); A.npcAt = x; }, at);
+    await g.eval(() => window.__G.talkNPC('auction')); await g.step(2);
+    const m = await g.eval(() => ({ rows: document.querySelectorAll('#auL [data-aul]').length, at: window.__GU.WS.auction.npcAt - Date.now() }));
+    assert.ok(m.rows >= 6, 'the merchants are back (npcAt was ' + at + '): ' + m.rows);
+    assert.ok(m.at > 19 * 60000 && m.at <= 20 * 60000, 'next visit in 20 minutes: ' + m.at);
+    await g.page.keyboard.press('Escape'); await g.step(2);
+  }
+  // and inside the 20 minutes they stay as they are (no new merchants on every visit)
+  const ids = await g.eval(() => window.__GU.WS.auction.list.filter((l) => l.pid === 'npc').map((l) => l.id).join());
+  await g.eval(() => window.__G.talkNPC('auction')); await g.step(2);
+  assert.equal(await g.eval(() => window.__GU.WS.auction.list.filter((l) => l.pid === 'npc').map((l) => l.id).join()), ids);
+  await g.page.keyboard.press('Escape'); await g.step(2);
   assert.deepEqual(g.errors, []);
   await g.close();
 });

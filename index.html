@@ -2665,55 +2665,125 @@ const auMarket=k=>k==='hpot'?60:k==='mpot'?70:Math.round((MATP[k]||5)*2);
 const auHave=k=>k==='hpot'||k==='mpot'?S[k]||0:S.mats[k]||0;
 const auTake=(k,n)=>{if(k==='hpot'||k==='mpot')S[k]-=n;else S.mats[k]-=n;},auGive=(k,n)=>{if(k==='hpot'||k==='mpot')S[k]=(S[k]||0)+n;else addMat(k,n);};
 function auWS(){const A=WS.auction||(WS.auction={list:[],paid:{},npcAt:0,id:0});const now=Date.now();
- if(A.npcAt<now){A.list=A.list.filter(l=>l.pid!=='npc');const pool=['mith','bherb','gfish','mstone','dscale','sfish','leather','herb'],r=mulberry32(now/1e5|0);
+ // the merchants come back every 20 minutes; a time further ahead than that (the device's clock moved back, or a save from
+ // another device) or not a number would keep them away for good, so it refreshes them too
+ if(!(A.npcAt>=now&&A.npcAt<=now+20*60000)){A.list=A.list.filter(l=>l.pid!=='npc');const pool=['mith','bherb','gfish','mstone','dscale','sfish','leather','herb'],r=mulberry32(now/1e5|0);
   for(let i=0;i<6;i++){const k=pool[(r()*pool.length)|0],q=k==='dscale'?1:1+(r()*5|0);A.list.push({id:++A.id,pid:'npc',n:t('auNpc'),it:k,q,price:Math.round(auMarket(k)*q*(1.1+r()*.5)),t:now});}A.npcAt=now+20*60000;}
  return A;}
+/* the auction house online (SAT-ONLINE-094, plan U213/U214). Signed in, the players' listings are one board for everyone:
+   auction/{lid} {by, n, it, q, price, t}. A sale is one write that takes the listing off and pays the seller
+   (auctionPaid/{seller}/{lid} {g, by, bn, it, q, t}); the rules take it only for a listing still there and at its price, so
+   two buyers can't both get it. The seller is told of each sale while playing and collects the gold (less the 5% fee) at
+   the auction house. The merchants' listings, and listings made offline, stay on the device as before. */
+Object.assign(STR.ar,{auMax:'المزاد بياخد لحد {q} من الحاجة الواحدة ولحد {g} دهب',auPdFull:'أماكنك الـ8 محجوزة لحد ما تستلم فلوس اللي اتباع: استلمها الأول',auExpired:'{q}× {it} بتوعك مااتباعوش في 14 يوم ورجعولك',auSoldOn:'{b} اشترى {q}× {it} بتوعك بـ {g} دهب. استلمهم من المزاد',auOnFail:'المزاد مش متاح دلوقتي، جرّب تاني',auOffl:'المزاد مستني الاتصال يرجع: جرّب تاني لما تبقى أونلاين'});
+Object.assign(STR.en,{auMax:'The auction house takes up to {q} of a kind and up to {g} gold',auPdFull:'Your eight places are taken until you collect what sold: collect it first',auExpired:'Your {q}× {it} did not sell in 14 days and came back to you',auSoldOn:'{b} bought your {q}× {it} for {g} gold. Collect it at the auction house',auOnFail:'The auction house is not answering; try again',auOffl:'The auction house waits for the connection: try again once you are back online'});
+var AUON={},AUPD={},auOnOff=null,auPdSeen=null,auOnSeen=false,auBusy=0,auBackSeen=new Set(),auColl=new Set(),auPendLive=false;
+// what the rules take (Claude-B, #129): eight listings an account (slots a_{uid}_0 to _7), up to 999 of a kind for up to a
+// billion gold, bought for 14 days; after that the seller's game takes it back
+const AUQMAX=999,AUGMAX=1e9,AUDAYS=14*864e5;
+function aucOn(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&S&&!S.__demo);}
+function auSt(){return aucOn()&&Satisfy.firebase.auctionStore?Satisfy.firebase.auctionStore(FB):null;}
+// auction writes only while connected (review of the auction, v3.16): while reconnecting the database would queue them, and a queued
+// write lands late (gold spent meanwhile) or is lost with a reload (goods already off the bag)
+function auLive(){if(aucOn()&&netState==='ONLINE')return true;SFX.deny();toast(t('auOffl'),'warn');return false;}
+// the server's clock, as the listings' t is (a device clock far ahead would send every listing back as expired)
+const auNow=()=>Date.now()+(NETTR&&NETTR.serverOffset?NETTR.serverOffset()||0:0);
+// leaving or switching the account: the next account watches its own board and sales
+function auStop(){const f=auOnOff;auOnOff=null;if(f)try{f();}catch(e){}AUON={};AUPD={};auPdSeen=null;auOnSeen=false;auBusy=0;auBackSeen.clear();auColl.clear();auPendLive=false;}
+function auLost(){const f=auOnOff;auOnOff=null;if(f)try{f();}catch(e){}auOnSeen=false;auPdSeen=null;} // a listener refused: watch again next time
+// the board and your sales, watched from going online (or the first visit to the auction house, if that comes first)
+function auWatch(){const st=auSt();if(!st||auOnOff)return;const uid=NET.uid;
+ const a=st.watch((v,err)=>{if(err)return auLost();const o={};for(const k in (v||{})){const e=v[k];if(/^a_[A-Za-z0-9_-]{1,60}$/.test(k)&&e&&typeof e==='object'&&AUK.includes(e.it)&&+e.q>0&&+e.price>0)o[k]={id:k,on:1,by:e.by,n:Satisfy.chat.clean(e.n,24)||'?',it:e.it,q:+e.q|0,price:+e.price|0,t:+e.t||0};}AUON=o;auOnSeen=true;auPendCheck();renderAuL();});
+ const b=st.watchPaid(uid,(v,err)=>{if(err)return auLost();const o={};for(const k in (v||{})){const e=v[k];if(e&&typeof e==='object'&&+e.g>0&&AUK.includes(e.it))o[k]={g:+e.g|0,bn:Satisfy.chat.clean(e.bn,24)||'?',it:e.it,q:+e.q|0};}
+  // a sale being collected leaves for a moment and comes back if the collect is refused: that is not a new sale
+  if(auPdSeen)for(const k in o)if(!auPdSeen.has(k)&&!auColl.has(k)){toast(t('auSoldOn',{b:o[k].bn,q:o[k].q,it:t(o[k].it),g:Math.round(o[k].g*(1-AUFEE))}),'good');SFX.coin();}
+  for(const k in o)auColl.delete(k);auPdSeen=new Set(Object.keys(o));AUPD=o;auPendCheck();renderAuL();});
+ auOnOff=()=>{a();b();};}
+// a listing whose write never came back (the page closed or reloaded on the way): once the board and your sales are read, it
+// stays off the bag if it is on the board or sold, and comes back otherwise
+function auPendCheck(){const p=S&&S.auPend;if(!p||auPendLive||!auOnSeen||!auPdSeen||!NET||!String(p.lid).startsWith('a_'+NET.uid+'_'))return;
+ if(!(p.lid in AUON)&&!(p.lid in AUPD)){auGive(p.it,p.q);toast(t('auBack',{q:p.q,it:t(p.it)}));}delete S.auPend;hudDirty=true;save(true);renderAu();}
+function auExpire(l){const key=l.id+'@'+l.t;if(auBackSeen.has(key)||netState!=='ONLINE')return;auBackSeen.add(key);const st=auSt();if(!st)return;st.unlist(l.id).then(()=>{delete AUON[l.id];auGive(l.it,l.q);toast(t('auExpired',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);renderAu();},()=>auBackSeen.delete(key));}
+// the listings that can still be bought; your own past 14 days come back to you. Yours are the account's (any character)
+function auFresh(){const now=auNow(),me=NET.uid,L=[];for(const k in AUON){const l=AUON[k];l.pid=l.by===me?pidOf():'u:'+l.by;if(l.t>now-AUDAYS)L.push(l);else if(l.by===me)auExpire(l);}return L;}
+function auAll(){const A=auWS();return aucOn()?A.list.concat(auFresh()):A.list;}
+function auFind(id){return auAll().find(l=>String(l.id)===String(id));}
+function auPaidOn(){let g=0;for(const k in AUPD)g+=Math.round(AUPD[k].g*(1-AUFEE));return aucOn()?g:0;}
+function auMineN(){return auAll().filter(l=>l.pid===pidOf()).length;}
+// buy an online listing: the gold is held from the click (nothing else spends it on the way), the goods come once the
+// database took the sale, and the gold comes back if it didn't
+function auBuyOn(l,done){const st=auSt();if(!st||auBusy||!auLive())return;if(S.gold<l.price){SFX.deny();toast(t('noGold'),'warn');return;}auBusy=1;S.gold-=l.price;hudDirty=true;
+ st.buy(l.id,{seller:l.by,g:l.price,by:NET.uid,bn:String(netId||S.look.n||'?').slice(0,24),it:l.it,q:l.q}).then(()=>{auBusy=0;auGive(l.it,l.q);delete AUON[l.id];SFX.coin();hudDirty=true;save(true);done(true);},
+  ()=>{auBusy=0;S.gold+=l.price;hudDirty=true;toast(t('auGone'),'warn');done(false);});}
+// a slot is taken while it is on the board and while its sale isn't collected (auctionPaid/{uid}/{slot} must be empty for
+// the next buyer: Claude-B's review of #129), so the slot is picked only once both have been read. The goods are off the bag
+// from the click, with a note in the save (S.auPend) until the write answers, so a reload on the way can't lose them
+function auListOn(k,q,price){const st=auSt();if(!st||auBusy||!auLive())return false;if(q>AUQMAX||price>AUGMAX){SFX.deny();toast(t('auMax',{q:AUQMAX,g:AUGMAX.toLocaleString('en')}),'warn');return false;}
+ if(!auOnSeen||!auPdSeen){auWatch();SFX.deny();toast(t('auOnFail'),'warn');return false;}
+ if(S.auPend){auPendCheck();if(S.auPend){SFX.deny();toast(t('auOnFail'),'warn');return false;}}
+ const used=new Set(Object.keys(AUON).concat(Object.keys(AUPD))),slot=[0,1,2,3,4,5,6,7].find(i=>!used.has('a_'+NET.uid+'_'+i));if(slot==null){SFX.deny();toast(t(Object.keys(AUPD).length?'auPdFull':'auFull'),'warn');return false;}
+ auBusy=1;auPendLive=true;const lid='a_'+NET.uid+'_'+slot;auTake(k,q);S.auPend={lid,it:k,q};hudDirty=true;save(true);
+ st.list(lid,{by:NET.uid,n:String(netId||S.look.n||'?').slice(0,24),it:k,q,price}).then(()=>{auBusy=0;auPendLive=false;delete S.auPend;save(true);SFX.coin();toast(t('auListed',{q,it:t(k),g:price}),'good');renderAu();},
+  ()=>{auBusy=0;auPendLive=false;delete S.auPend;auGive(k,q);hudDirty=true;save(true);toast(t('auOnFail'),'warn');renderAu();});return true;}
+function auBackOn(l,done){const st=auSt();if(!st||auBusy||!auLive())return;auBusy=1;st.unlist(l.id).then(()=>{auBusy=0;delete AUON[l.id];auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);done();},()=>{auBusy=0;toast(t('auOnFail'),'warn');done();});}
+// each sale's gold is read before its write: the database drops the paid entry from AUPD (its listener) before .then runs
+function auCollectOn(){const st=auSt();if(!st||auBusy)return;const ks=Object.keys(AUPD);if(!ks.length||!auLive())return;auBusy=1;
+ Promise.all(ks.map(k=>{const g=Math.round(AUPD[k].g*(1-AUFEE));auColl.add(k);return st.collect(NET.uid,k).then(()=>{auColl.delete(k);delete AUPD[k];S.gold+=g;return g;},()=>0);})).then(gs=>{const g=gs.reduce((a,b)=>a+b,0);if(g){SFX.coin();toast(t('auGot',{g}),'good');hudDirty=true;save(true);}}).finally(()=>{auBusy=0;renderAu();});}
+window.__GAU={get on(){return AUON},get paid(){return AUPD},all:()=>auAll(),watch:()=>auWatch(),store:()=>auSt(),get watching(){return !!auOnOff},switchAcc:()=>netSwitch()}; // tests
 /* the auction window (owner 2026-10-20: "like the shop when you sell: your bag, and you pick what to list"): your goods on
    the left, pick one, set how many and the price, List; on the right what is listed (search by name, Buy) and your own
    listings (Withdraw), and the gold waiting for you */
 let AUV={tab:'list',sel:null};
-function openAu(){SFX.open();mode='au';$('auW').hidden=false;$('hint').hidden=true;AUV.sel=null;$('auQ').value='';renderAu();}
+function openAu(){auWatch();auPendCheck();SFX.open();mode='au';$('auW').hidden=false;$('hint').hidden=true;AUV.sel=null;$('auQ').value='';renderAu();}
 function closeAu(){SFX.close();$('auW').hidden=true;mode='play';}
 function renderAu(){if($('auW').hidden)return;const A=auWS(),me=pidOf(),ks=AUK.filter(k=>auHave(k)>0);if(AUV.sel&&!auHave(AUV.sel))AUV.sel=null;
  let h='';for(let i=0,N=Math.max(18,Math.ceil(ks.length/6)*6);i<N;i++){const k=ks[i];h+=k?`<button class="slotb${AUV.sel===k?' sel':''}" data-auk="${k}" data-tip="${esc(`<b>${t(k)}</b><br><small>${t('auMkt',{g:auMarket(k)})}</small>`)}"><img src="${icon(k)}"><b>${auHave(k)}</b></button>`:'<div class="slotb e"></div>';}
  $('auBag').innerHTML=h;$('auGold').textContent=t('gold',{n:S.gold});
- const k=AUV.sel,F=$('auF');if(!k)F.innerHTML=`<small>${t(ks.length?'auPick':'auNothing')}</small>`;else{const hv=auHave(k);
-  F.innerHTML=`<b>${t(k)}</b><label>${t('auQtyH',{n:hv})}<input id="auN" type="number" min="1" max="${hv}" value="${Math.min(hv,5)}"></label><label>${t('auPriceH')}<input id="auP" type="number" min="1"></label><small id="auHint"></small><button id="auGo">${t('auListB')}</button>`;
-  const n=$('auN'),pr=$('auP'),hint=()=>{const q=clamp(+n.value|0,1,hv),m=auMarket(k)*q;$('auHint').textContent=t('auHintT',{g:m,f:Math.round((+pr.value||0)*(1-AUFEE))});};
-  const fill=()=>{pr.value=Math.round(auMarket(k)*clamp(+n.value|0,1,hv)*1.2);hint();};fill();n.oninput=fill;pr.oninput=hint;
-  $('auGo').onclick=()=>{const q=clamp(+n.value|0,1,hv),g=Math.max(1,+pr.value|0);if(auList(k,q,g)){AUV.sel=auHave(k)?k:null;renderAu();}};}
+ const k=AUV.sel,F=$('auF');if(!k){F.dataset.k='';F.innerHTML=`<small>${t(ks.length?'auPick':'auNothing')}</small>`;}else{const hv=auHave(k);
+  const qm=aucOn()?Math.min(hv,AUQMAX):hv;
+  // the amount and price typed for this same item stay as they were when the window draws again (review of the auction, v3.16)
+  const was=F.dataset.k===k&&$('auN')?[$('auN').value,$('auP').value]:null;F.dataset.k=k;
+  F.innerHTML=`<b>${t(k)}</b><label>${t('auQtyH',{n:hv})}<input id="auN" type="number" min="1" max="${qm}" value="${Math.min(qm,5)}"></label><label>${t('auPriceH')}<input id="auP" type="number" min="1"${aucOn()?` max="${AUGMAX}"`:''}></label><small id="auHint"></small><button id="auGo">${t('auListB')}</button>`;
+  const n=$('auN'),pr=$('auP'),hint=()=>{const q=clamp(+n.value|0,1,qm),m=auMarket(k)*q;$('auHint').textContent=t('auHintT',{g:m,f:Math.round((+pr.value||0)*(1-AUFEE))});};
+  const fill=()=>{pr.value=Math.min(aucOn()?AUGMAX:Infinity,Math.round(auMarket(k)*clamp(+n.value|0,1,qm)*1.2));hint();};if(was){n.value=was[0];pr.value=was[1];hint();}else fill();n.oninput=fill;pr.oninput=hint;
+  $('auGo').onclick=()=>{const q=clamp(+n.value|0,1,qm),g=Math.max(1,Math.min(aucOn()?AUGMAX:2147483647,Math.floor(+pr.value)||0));if(auList(k,q,g)){AUV.sel=auHave(k)?k:null;renderAu();}};}
  $('auBag').querySelectorAll('[data-auk]').forEach(b=>b.onclick=()=>{SFX.click();AUV.sel=b.dataset.auk;renderAu();});
  document.querySelectorAll('#auW [data-autab]').forEach(b=>{b.classList.toggle('on',b.dataset.autab===AUV.tab);b.onclick=()=>{AUV.tab=b.dataset.autab;renderAu();};});
- const q=$('auQ');q.hidden=AUV.tab!=='list';q.placeholder=t('auFind');q.oninput=()=>renderAu();const qs=q.value.trim().toLowerCase();
- const L=AUV.tab==='list'?A.list.filter(l=>l.pid!==me&&(!qs||t(l.it).toLowerCase().includes(qs)||l.it.includes(qs))):A.list.filter(l=>l.pid===me);
+ const q=$('auQ');q.hidden=AUV.tab!=='list';q.placeholder=t('auFind');q.oninput=()=>renderAuL();renderAuL();}
+// what is listed and the gold waiting: the board's own updates draw only this, so a price being typed is left alone
+function renderAuL(){if($('auW').hidden)return;const A=auWS(),me=pidOf(),qs=$('auQ').value.trim().toLowerCase();
+ const L=AUV.tab==='list'?auAll().filter(l=>l.pid!==me&&(!qs||t(l.it).toLowerCase().includes(qs)||l.it.includes(qs))).sort((a,b)=>a.price/a.q-b.price/b.q):auAll().filter(l=>l.pid===me);
  $('auL').innerHTML=L.length?L.map(l=>`<div class="aurow${AUV.tab==='list'&&S.gold<l.price?' poor':''}" data-tip="${esc(`<b>${t(l.it)}</b><br><small>${t('auMkt',{g:auMarket(l.it)})}</small>`)}"><img src="${icon(l.it)}"><span>${l.q}× ${esc(t(l.it))}<br><small>${esc(l.n||'')}</small></span><span class="pr">${l.price.toLocaleString('en')} ${t('auG')}</span><button data-aul="${l.id}">${t(AUV.tab==='list'?'auBuyB':'auBackB')}</button></div>`).join(''):`<div class="none">${t(AUV.tab==='list'?'auEmpty':'auNoMine')}</div>`;
- $('auL').querySelectorAll('[data-aul]').forEach(b=>b.onclick=()=>{const id=+b.dataset.aul;if(AUV.tab==='list')auBuyW(id);else auBackW(id);});
- const pd=A.paid[me]||0;$('auC').innerHTML=pd?`<button id="auCol">${t('oAuCollect',{g:pd})}</button>`:'';if(pd)$('auCol').onclick=()=>{auCollect();renderAu();};}
-function auBuyW(id){const A=auWS(),l=A.list.find(l=>l.id===id);if(!l){toast(t('auGone'),'warn');return renderAu();}if(S.gold<l.price){SFX.deny();return toast(t('noGold'),'warn');}
+ $('auL').querySelectorAll('[data-aul]').forEach(b=>b.onclick=()=>{const id=b.dataset.aul;if(AUV.tab==='list')auBuyW(id);else auBackW(id);});
+ const pd=(A.paid[me]||0)+auPaidOn();$('auC').innerHTML=pd?`<button id="auCol">${t('oAuCollect',{g:pd})}</button>`:'';if(pd)$('auCol').onclick=()=>{auCollect();renderAu();};}
+function auBuyW(id){const A=auWS(),l=auFind(id);if(!l){toast(t('auGone'),'warn');return renderAu();}if(S.gold<l.price){SFX.deny();return toast(t('noGold'),'warn');}
+ if(l.on)return auBuyOn(l,ok=>{if(ok)toast(t('auBought',{q:l.q,it:t(l.it),g:l.price}),'good');renderAu();});
  S.gold-=l.price;A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);if(l.pid!=='npc')A.paid[l.pid]=(A.paid[l.pid]||0)+Math.round(l.price*(1-AUFEE));
  SFX.coin();toast(t('auBought',{q:l.q,it:t(l.it),g:l.price}),'good');hudDirty=true;save(true);renderAu();}
-function auBackW(id){const A=auWS(),l=A.list.find(l=>l.id===id&&l.pid===pidOf());if(!l)return renderAu();A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);renderAu();}
-function auOpts(){const A=auWS(),pd=A.paid[pidOf()]||0;return [{l:t('oAuBuy'),f:auBrowse},{l:t('oAuSell'),f:auSellMenu},{l:t('oAuMine'),f:auMine},...(pd?[{l:t('oAuCollect',{g:pd}),f:auCollect}]:[])];}
-function auBrowse(){const A=auWS(),mine=pidOf(),L=A.list.filter(l=>l.pid!==mine).slice(0,8);if(!L.length)return dialog('auction',['auEmpty']);
+function auBackW(id){const A=auWS(),l=auFind(id);if(!l||l.pid!==pidOf())return renderAu();if(l.on)return auBackOn(l,renderAu);A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));hudDirty=true;save(true);renderAu();}
+function auOpts(){auWatch();auPendCheck();const A=auWS(),pd=(A.paid[pidOf()]||0)+auPaidOn();return [{l:t('oAuBuy'),f:auBrowse},{l:t('oAuSell'),f:auSellMenu},{l:t('oAuMine'),f:auMine},...(pd?[{l:t('oAuCollect',{g:pd}),f:auCollect}]:[])];}
+function auBrowse(){const mine=pidOf(),L=auAll().filter(l=>l.pid!==mine).sort((a,b)=>a.price/a.q-b.price/b.q).slice(0,8);if(!L.length)return dialog('auction',['auEmpty']);
  dialog('auction',['auBrowseL'],null,[...L.map(l=>({l:t('auRow',{q:l.q,it:t(l.it),g:l.price,n:l.n}),ic:l.it,f:()=>auBuy(l.id)})),{l:t('oLeave')}]);if(DL&&DL.optOn)selOpt(L.length);}// Leave is preselected, so pressing E through the greeting never buys by accident
-function auBuy(id){const A=auWS(),l=A.list.find(l=>l.id===id);if(!l)return toast(t('auGone'),'warn');if(S.gold<l.price){SFX.deny();return dialog('auction',[t('noGold')]);}
+function auBuy(id){const A=auWS(),l=auFind(id);if(!l)return toast(t('auGone'),'warn');if(S.gold<l.price){SFX.deny();return dialog('auction',[t('noGold')]);}
+ if(l.on)return auBuyOn(l,ok=>{if(ok)dialog('auction',[t('auBought',{q:l.q,it:t(l.it),g:l.price})]);});
  S.gold-=l.price;A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);if(l.pid!=='npc')A.paid[l.pid]=(A.paid[l.pid]||0)+Math.round(l.price*(1-AUFEE));
  SFX.coin();hudDirty=true;save(true);dialog('auction',[t('auBought',{q:l.q,it:t(l.it),g:l.price})]);}
 function auSellMenu(){const ks=AUK.filter(k=>auHave(k)>0).slice(0,8);if(!ks.length)return dialog('auction',['auNothing']);
  dialog('auction',['auSellL'],null,[...ks.map(k=>({l:t('auHaveRow',{it:t(k),n:auHave(k),g:auMarket(k)}),ic:k,f:()=>auQty(k)})),{l:t('oLeave')}]);}
-function auQty(k){const h=auHave(k),qs=[...new Set([1,5,h].filter(q=>q<=h))];dialog('auction',[t('auQtyL',{it:t(k)})],null,[...qs.map(q=>({l:t('auQty',{q}),f:()=>auPrice(k,q)})),{l:t('oLeave')}]);}
+function auQty(k){const h=aucOn()?Math.min(auHave(k),AUQMAX):auHave(k),qs=[...new Set([1,5,h].filter(q=>q<=h))];dialog('auction',[t('auQtyL',{it:t(k)})],null,[...qs.map(q=>({l:t('auQty',{q}),f:()=>auPrice(k,q)})),{l:t('oLeave')}]);}
 function auPrice(k,q){const m=auMarket(k)*q;dialog('auction',[t('auPriceL',{g:m})],null,[[.9,'auCheap'],[1.2,'auFair'],[1.8,'auHigh']].map(([f,lb])=>({l:t(lb,{g:Math.round(m*f)}),f:()=>auList(k,q,Math.round(m*f))})).concat([{l:t('oLeave')}]));}
-function auList(k,q,price){if(auHave(k)<q)return;const A=auWS(),mine=A.list.filter(l=>l.pid===pidOf()).length;if(mine>=8){SFX.deny();toast(t('auFull'),'warn');return false;}
+function auList(k,q,price){if(auHave(k)<q)return;if(aucOn())return auListOn(k,q,price); // online the eight slots of the account decide
+ const A=auWS(),mine=auMineN();if(mine>=8){SFX.deny();toast(t('auFull'),'warn');return false;}
  auTake(k,q);const now=Date.now(),ratio=price/(auMarket(k)*q),wait=ratio>2.5||MKQ[k]?1e12:(60+540*clamp((ratio-.6)/1.4,0,1))*1000*(.7+rand()*.6); // fish and crops: their market has a daily quota
  A.list.push({id:++A.id,pid:pidOf(),n:S.look.n||t('pname'),it:k,q,price,t:now,sell:now+wait});SFX.coin();toast(t('auListed',{q,it:t(k),g:price}),'good');hudDirty=true;save(true);return true;}
-function auMine(){const A=auWS(),L=A.list.filter(l=>l.pid===pidOf());if(!L.length)return dialog('auction',['auNoMine']);
- dialog('auction',['auMineL'],null,[...L.map(l=>({l:t('auMineRow',{q:l.q,it:t(l.it),g:l.price}),ic:l.it,f:()=>{A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));save(true);auMine();}})),{l:t('oLeave')}]);}
-function auCollect(){const A=auWS(),g=A.paid[pidOf()]||0;if(!g)return;delete A.paid[pidOf()];S.gold+=g;SFX.coin();toast(t('auGot',{g}),'good');hudDirty=true;save(true);}
+function auMine(){const A=auWS(),L=auAll().filter(l=>l.pid===pidOf());if(!L.length)return dialog('auction',['auNoMine']);
+ dialog('auction',['auMineL'],null,[...L.map(l=>({l:t('auMineRow',{q:l.q,it:t(l.it),g:l.price}),ic:l.it,f:()=>{if(l.on)return auBackOn(l,auMine);A.list=A.list.filter(x=>x!==l);auGive(l.it,l.q);toast(t('auBack',{q:l.q,it:t(l.it)}));save(true);auMine();}})),{l:t('oLeave')}]);}
+function auCollect(){auCollectOn();const A=auWS(),g=A.paid[pidOf()]||0;if(!g)return;delete A.paid[pidOf()];S.gold+=g;SFX.coin();toast(t('auGot',{g}),'good');hudDirty=true;save(true);}
 // offline buyers: a listing sells when its time comes; online the server matches real buyers instead
 function auTick(){if(!WS||!WS.auction)return;const A=WS.auction,now=Date.now();let sold=0;
  for(const l of [...A.list])if(l.pid!=='npc'&&l.sell&&l.sell<=now){A.list=A.list.filter(x=>x!==l);A.paid[l.pid]=(A.paid[l.pid]||0)+Math.round(l.price*(1-AUFEE));if(l.pid===pidOf()){sold++;renderAu();toast(t('auSold',{q:l.q,it:t(l.it),g:Math.round(l.price*(1-AUFEE))}),'good');}}
  if(sold){SFX.coin();save(true);}}
-let auT=0;function updateAuction(dt){if((auT-=dt)<=0){auT=5;auTick();}}
+let auT=0;function updateAuction(dt){if((auT-=dt)<=0){auT=5;auTick();if(!auOnOff&&aucOn())auWatch();if(S&&S.auPend)auPendCheck();}} // watched while you play, so a seller hears of a sale anywhere
 
 /* ---------------- Trauka the Red Dragon (SAT-DRAGON-001) ---------------- */
 // A world boss on the peak north of Reinhardt. It breathes fire in a cone it telegraphs first, slams the ground, and once
@@ -17704,7 +17774,7 @@ let CLOUD=null,cloudProfT=-1e9,netLease=null;
 // public profile, presence, inbox and the session lease. The local save stays. Presence stops first so
 // nothing is written again after the erase.
 function netStop(){mobStop();if(LFGK){const L=lfgSt();if(L)L.off(NET.uid).catch(()=>{});}LFGK=null;try{if(netLease)netLease.off();}catch(e){}netLease=null;try{if(NET)NET.close();}catch(e){}
- if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
+ if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;NETTR=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();auStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;EMO=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','emoW','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);}
 // what the game itself keeps online under the account, for "Delete my online data" (SAT-ONLINE-066): presence, the
 // rankings (055), this and last month's arena rating (053), the weekly lockouts (059), the group finder entry (073). A held legend is freed too.
 function netErasePaths(uid){const d=new Date(wNow()),se=(y,m)=>'s'+y+String(m+1).padStart(2,'0'),y=d.getUTCFullYear(),m=d.getUTCMonth();
@@ -17771,7 +17841,7 @@ function netCombat(fbtr,user){const R=Satisfy.combatRelay;if(!R||!Satisfy.transp
  catch(e){console.warn('combat relay',e&&e.message);return fbtr;}}
 window.__GNET={combat:()=>NETTR&&NETTR.combat?NETTR.combat.state():null};
 function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(user.uid);netSetState('JOINING');netBtn();
- const tr=NETTR=netCombat(Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',interest:NET_INTEREST,onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');if(up)netForce=true;netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)}),user);
+ const tr=NETTR=netCombat(Satisfy.firebase.transport(sdk,{uid:user.uid,world:Satisfy.net.WORLD_ID,shard:'main',interest:NET_INTEREST,onConnection:up=>{netSetState(up?'ONLINE':'RECONNECTING');if(up){netForce=true;setTimeout(auWatch,0);}netBtn();},onError:e=>console.warn('presence write failed',e&&e.code)}),user);
  netStart(Satisfy.presence.create({transport:tr,uid:user.uid,world:Satisfy.local.world(),now:()=>performance.now(),config:{moveHz:5,idleHz:.2,expireMs:30000}})); // cost model: docs/online/COST_MODEL.md
  netLease=Satisfy.firebase.lease(sdk,user.uid,NET.sid,netReplace);
  // the account ID can read empty while the connection is still settling after a reload, so an empty answer is asked again twice
@@ -17783,7 +17853,7 @@ function netConnect(sdk,user){if(NET||netReplaced)return;netUser=user;acctStore(
 Object.assign(STR.ar,{netRepT:'حسابك شغال على جهاز أو تبويب تاني دلوقتي',netRepBtn:'العب هنا',netRep:'شغال في مكان تاني'});
 Object.assign(STR.en,{netRepT:'Your account is now playing on another device or tab',netRepBtn:'Play here',netRep:'Playing elsewhere'});
 function netReplace(){if(netReplaced)return;save(true);netReplaced=true;SAVE_OFF=true; // from now on this tab never saves: the newer tab owns the save (review of #30)
- try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
+ try{NETTR.release();}catch(e){}if(typeof ownOff==='function')ownOff();ownOff=null;OWN=null;NET=null;PARTY=null;DUEL=null;PVP=null;if(typeof bntOff==='function')bntOff();bntOff=null;BNT=null;BNTS={};frStop();annStop();auStop();ANNM=null;modStop();TRADE=null;dropStop();if(GUILD)GUILD.stop();GUILD=null;if(gdChatOff)gdChatOff();gdChatOff=null;gdChatG=null;PRAID=null;CHAT=null;PCTX=null;['partyW','partyInv','duelW','duelInv','chatW','pctx','plW','tradeW','tradeInv','guildInv'].forEach(i=>$(i).hidden=true);
  netSetState('OFFLINE');netBtn();const w=$('netRepW');w.hidden=false;$('netRepT').textContent=t('netRepT');$('netRepBtn').textContent=t('netRepBtn');const b=$('netB');b.hidden=false;b.textContent=t('netRep');}
 function netTakeBack(){location.reload();} // reload reads the newest save; saving here would overwrite the other tab's
 // another Google account on this device (owner request): the chooser opens straight from the click, the new
