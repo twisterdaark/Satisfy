@@ -59,7 +59,7 @@ test('the Reputation Store: the golden carriage falls, Sweet Candy (+30% all sta
     assert.match(d.text, /Introducing the luxurious goods to our guest!/);
     await toOpts(g);
     d = await dl(g);
-    assert.deepEqual(d.opts, ['Sweet Candy', 'Good-looking Sunglasses', 'Draw! Draw! Draw everything!', 'Leave']);
+    assert.deepEqual(d.opts, ['Sweet Candy', 'Good-looking Sunglasses', 'Bounty Book', 'Draw! Draw! Draw everything!', 'Leave']);
     // Sweet Candy: 20,000, into the bag; in the mouth all stats rise by 30%
     const s0 = await g.eval(() => window.__GRS.stat('str'));
     await g.eval(() => window.__G.pickOpt(0));
