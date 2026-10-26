@@ -41,6 +41,11 @@ test('Cork Island dungeon, Hell Gao, the egg and hell', async () => {
     assert.equal(c.egg, 1); assert.equal(c.fs, 2); assert.equal(c.human, true); assert.equal(c.demon, false);
     assert.equal(c.noe, true); assert.equal(c.tl, true); assert.equal(c.dp0, 0); assert.equal(c.eggLeft, 0);
     assert.equal(c.dp, 2, 'with Noe out each human soul is one demonic power');
+    // a named drop is always a piece of gear: a material there (the fire stone was) threw on Hell Gao's fall (owner 2026-10-26)
+    const bad = await g.eval(() => { const X = window.__G.eqx, N = window.__GUND.NDROP, L = [];
+      for (const [k, d] of Object.entries(N)) for (const [id] of d) { try { X.mkItem(id, 0); } catch (e) { L.push(k + ':' + id); } }
+      return L; });
+    assert.deepEqual(bad, []);
     // hell's gate, its penalties, and the fall
     const d = await g.eval(() => { const G = window.__G, X = window.__GHELL, S = G.S, P = G.P;
       S.lv = 100; S.cls = 'knight'; const shut = X.gate(); S.hid.dpow = 120; const open = X.gate(); S.hid.dpow = 0; S.cls = 'dslayer'; const ds = X.gate(); S.cls = 'knight';
