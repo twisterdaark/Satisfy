@@ -58,3 +58,28 @@ test('U135 raised skeletons, U139 the Antidote Herb, U127 conductivity', async (
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+// U114 the Snow Rabbit and fur; U120 the Frost Slime (water, slowing frost pools) and the rare Gold Slime that blinks away
+test('U114 the Snow Rabbit and fur, U120 the Frost and Gold Slimes', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await g.step(3);
+    const r = await g.eval(() => {
+      const G = window.__G, MT = G.isk.MT, X = window.__GMX3, E = window.__GEL, c = {};
+      for (const m of G.mons()) if (['srabbit', 'fslime', 'gslime'].includes(m.type)) c[m.type] = (c[m.type] || 0) + 1;
+      const snow = G.mons().filter((m) => m.type === 'srabbit').every((m) => m.y < 36 * 16);
+      return { c, snow, fur: [MT.srabbit.drop[0][0], MT.rabbit.drop.some((d) => d[0] === 'fur'), MT.hrabbit.drop.some((d) => d[0] === 'fur')],
+        frost: [E.res('fslime', 'water'), X.movesOf({ type: 'fslime' }).some((v) => v.k === 'rain' && v.slow > 0 && v.sp === 'ice')],
+        gold: [MT.gslime.gold, X.movesOf({ type: 'gslime' }).some((v) => v.k === 'blink' && v.away)],
+        names: ['srabbitN', 'fslimeN', 'gslimeN', 'fur', 'furD'].every((k) => !!G.lines().en[k] && !!G.lines().ar[k]), pics: window.__GMON.missing() };
+    });
+    assert.deepEqual(r.c, { srabbit: 10, fslime: 8, gslime: 1 }, 'they live in the world');
+    assert.equal(r.snow, true, 'the Snow Rabbits in the snow');
+    assert.deepEqual(r.fur, ['fur', true, true], 'fur from rabbits');
+    assert.deepEqual(r.frost, [0.5, true], 'the Frost Slime resists water and leaves slowing frost');
+    assert.deepEqual(r.gold, [600, true], 'the Gold Slime pays and blinks away');
+    assert.equal(r.names, true); assert.deepEqual(r.pics, [], 'every monster has a picture');
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});

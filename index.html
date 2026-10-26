@@ -1211,7 +1211,6 @@ chuckB:{hair:'helm',hc:'#d8dce4',hl:'#ffffff',skin:'#e0aa7a',sk2:'#bf8758',top:'
  vantner:{hair:'bald',hc:'#8a5a32',hl:'#a8743f',skin:'#b07a4a',sk2:'#8a5a32',beard:'#4a3020',beard2:'#2e1c10',top:'#9aa6b8',top2:'#6a7688',sleeves:true,pad:'#c8d0dc',pad2:'#8a96a8',belt:'#4a3a2a',cape:'#2a4a7a',pants:'#5a6270',boots:'#3a3e48'},
  faker:{hair:'short',hc:'#1a1a22',hl:'#34343e',skin:'#e0b088',sk2:'#c08c66',top:'#2a2a36',top2:'#1a1a24',sleeves:true,belt:'#4a2a3a',cape:'#14141c',pants:'#22222c',boots:'#14141a'},
  skel:{bone:1,hair:'bald',hc:'#d8d4c4',hl:'#f0ece0',skin:'#d8d4c4',sk2:'#a8a494',top:'#4a4a52',top2:'#323238',sleeves:false,belt:'#3a2a1e',shorts:'#323238',pants:'#323238',boots:'#a8a494'},
- rskel:{bone:1,hair:'bald',hc:'#d8d4c4',hl:'#f0ece0',skin:'#c8c0d8',sk2:'#9890a8',top:'#4a2a6a',top2:'#321a4a',sleeves:false,belt:'#a05aff',shorts:'#321a4a',pants:'#321a4a',boots:'#9890a8'},
  wraith:{hair:'hat',hc:'#3a2a4a',hl:'#5a4a6a',hat:'#2a1a3a',skin:'#9aa0b8',sk2:'#767c94',top:'#2a1a3a',top2:'#1a0e28',sleeves:true,cape:'#140a20',pants:'#1a0e28',boots:'#140a20'},
  bknight:{hair:'helm',hc:'#2a2a34',hl:'#4a4a58',mask:'skull',maskC:'#c8c4b4',eye:'#b06aff',plume:'#5a3a7a',plumeL:1,skin:'#6a6a7a',sk2:'#4a4a5a',top:'#22222c',top2:'#14141c',sleeves:true,pad:'#5a3a7a',pad2:'#3a2458',spike:'#8a8a9a',chest:'#3a2458',belt:'#3a2458',cape:'#3a1a5a',pants:'#1a1a22',boots:'#2a2a34'},
  herald:{hair:'hat',hc:'#c8a050',hl:'#e8c878',hat:'#8a1f2a',skin:'#f1c193',sk2:'#d3a070',top:'#8a1f2a',top2:'#5e1420',sleeves:true,belt:'#d8b860',cape:'#d8b860',pants:'#2a2a34',boots:'#3a2a1e'},
@@ -1323,6 +1322,7 @@ const SA=window.SatArt,SH={};
 // a big part of the black screen on phones); the key is there from the start, so the name lists stay the same
 const shLazy=(k,f)=>Object.defineProperty(SH,k,{configurable:true,enumerable:true,get(){const v=f();Object.defineProperty(SH,k,{value:v,writable:true,configurable:true,enumerable:true});return v;},set(v){Object.defineProperty(SH,k,{value:v,writable:true,configurable:true,enumerable:true});}});
 for(const n in FIG)shLazy(n,()=>SA.chars.buildSheet(FIG[n]));
+shLazy('rskel',()=>SA.chars.buildSheet({...FIG.skel,skin:'#c8c0d8',sk2:'#9890a8',top:'#4a2a6a',top2:'#321a4a',belt:'#a05aff',shorts:'#321a4a',pants:'#321a4a',boots:'#9890a8'}));   /* (plan U135) a Raised Skeleton: bones in the cultist's violet (FIG and its sprite snapshot stay as they are) */
 // monster looks vary: three extra sheets per humanoid kind. People get their own hair, skin and clothes; goblins, kobolds,
 // lizards and the like only change clothes. Each monster picks one when it spawns (m.vr)
 const VARY={outlaw:1,huroi:1,zibal:1,peaks:1,erarch:1,merman:0,goblin:0,cgob:0,gobsc:0,gshaman:0,kobold:0,lizard:0,forc:0,skel:0,deserter:2,gsold:2,kraider:2,cultist:2,kshaman:2,vthrall:2,sknight:2,gknight:2,ersol:2,pguard:2};
@@ -11946,6 +11946,18 @@ function hyBurn(m){m.hst=0;num(m.x,monY(m)-50,t('hyBurn'),'#ffb04a',false);vfx('
 /* (plan U135) a Yatan cultist raises the dead: two Raised Skeletons at a time, three at most, worth nothing; they crumble with him */
 const RZMAX=3;
 Object.assign(MT,{rskel:{lv:[175,182],hp:60000,dmg:2200,spd:50,xp:0,gold:0,aggro:170,r:6,oy:28,drop:[]}});Object.assign(AIK,{rskel:'soldier'});Object.assign(NAMEK,{rskel:'rskelN'});
+/* (plan U114, U120) the Snow Rabbit of the Northern Snowfields, the Frost Slime there too, and the rare Gold Slime among the acid
+   slimes, which runs and blinks off like the Golden Rabbit. Rabbits now drop fur (the Snow Rabbit most) */
+Object.assign(MT,{srabbit:{lv:[110,116],hp:40000,dmg:600,spd:62,xp:3000,gold:6,aggro:70,r:5,oy:16,drop:[['fur',.8],['leather',.3]]},
+ fslime:{lv:[118,124],hp:52000,dmg:900,spd:36,xp:4800,gold:10,aggro:80,r:7,oy:16,drop:[['mstone',.25],['bherb',.2]]},
+ gslime:{lv:[60,64],hp:5000,dmg:1,spd:70,xp:900,gold:600,aggro:100,r:6,oy:14,drop:[['topaz',.12]]}});
+Object.assign(AIK,{srabbit:'hop',fslime:'hop',gslime:'hop'});Object.assign(NAMEK,{srabbit:'srabbitN',fslime:'fslimeN',gslime:'gslimeN'});
+Object.assign(RKMV,{srabbit:[{k:'leap',w:3,min:8,max:44,tele:.3,dashT:.2,mul:1,rec:.5,cd:1.6},{k:'arc',w:3,max:20,tele:.22,reach:20,arc:1.05,mul:.8,rec:.3,cd:1.3}],
+ fslime:[{k:'leap',w:3,min:8,max:44,tele:.3,dashT:.2,mul:1,rec:.5,cd:1.5},{k:'rain',w:2,min:20,max:110,tele:.6,pat:'on',n:1,zr:18,lin:3,sp:'ice',mul:.5,slow:2.5,fall:.8,rec:.4,cd:5},{k:'arc',w:3,max:20,tele:.22,reach:20,arc:1.4,mul:.7,rec:.3,cd:1.4}],
+ gslime:[{k:'blink',w:4,min:0,max:60,tele:.25,away:70,rec:.2,cd:2.5},{k:'leap',w:2,min:8,max:40,tele:.3,dashT:.2,mul:1,rec:.5,cd:2}]});
+Object.assign(P3D,{srabbit:{base:'rabbit',f:'grayscale(1) brightness(1.7) contrast(.9)',sc:1.05},fslime:{base:'slime',f:'hue-rotate(95deg) saturate(1.1) brightness(1.2)',sc:1.05},gslime:{base:'slime',f:'sepia(1) saturate(3) hue-rotate(-12deg) brightness(1.25)',sc:.9}});
+SPAWN.push(['srabbit',182,238,6,24,10],['fslime',182,238,6,24,8],['gslime',350,410,102,118,1]);   /* deep in the snow, between the Frostlight Orcs' grounds */
+MT.rabbit.drop.push(['fur',.3]);MT.hrabbit.drop.push(['fur',.4]);
 function rzKill(m){if(m.type!=='cultist')return;for(const o of mons)if(o.rzBy===m&&!o.dead){o.hp=0;o.dead=true;o.dying=.5;o.rt=1e9;vfx('death',o.x,o.y);}}
 /* (plan U127) conductivity: wet (rain or the temple's storm), lightning from the storm's creatures does 20% more to you; the
    Storm Elemental moving (a blink, a dash, a step) is open: 25% more from every blow */
@@ -12819,8 +12831,8 @@ Object.assign(P3SP,{dark:p=>{blob(ctx,p.x,p.y,3,3,'#4a1a6a');R(ctx,p.x-1,p.y-1,2
  holy:p=>{blob(ctx,p.x,p.y,3,3,'#fff2a8');R(ctx,p.x-1,p.y-1,2,2,'#ffffff');if(rand()<.3)fx.push({x:p.x,y:p.y,vx:0,vy:-6,t:.3,c:'#fff2a8',fl:1});},
  water:p=>{blob(ctx,p.x,p.y,3,3,'#3a7ad0');R(ctx,p.x-1,p.y-1,2,2,'#bfe0ff');}});
 window.__GMV={RKMV,AIK,MOVES,XMOVES,BOSSX,MXK,mxOn,mxSpd,rainPts,movesOf,mbMoves,mbName,get ezone(){return ezone},monAct:(m,dx)=>{const b=MT[m.type],d=Math.hypot(P.x-m.x,P.y-m.y);monAct(m,b,b.boss?'boss':AIK[m.type],P.x-m.x,P.y-m.y,d,Math.max(3,b.r-3),dx||1/60);}};
-Object.assign(STR.ar,{mxPot:'شرب جرعة!',mxRegen:'بيلم جروحه',mxCall:'بينادي على صحابه!',mxCry:'صرخة حرب!',mxRoot:'اتقيدت!',mxSlow:'بقيت بطيء!',mxShred:'درعك اتقطع!',mxRaise:'بيصحّي الميتين!',rskelN:'هيكل عظمي متصحّي',antUse:'عشبة ضد السم!',antLeft:'عشبة ضد السم وقفت السم، ومش هيلزق فيك 20 ثانية. فاضل {n}.',antherb:'عشبة ضد السم',antherbD:'لو معاك بتوقف أول سم يلزق فيك، ومش بيلزق فيك تاني لمدة 20 ثانية. بتلاقيها وانت بتلم أعشاب.',mv_raise:'بيصحّي هياكل عظمية',hyCut:'راس وقعت! احرق مكانها بالنار قبل {s} ثواني',hyBurn:'مكان الراس اتكوى، مش هتطلع تاني',hyGrow:'طلع مكانها راسين!',wyLandT:'نزل على الأرض! اضرب',mxDot_pois:'اتسممت!',mxDot_blood:'بتنزف!',mxDot_fire:'بتتحرق!',mxDot_dark:'لعنة!',mxDot_ice:'بتتجمد!'});
-Object.assign(STR.en,{mxPot:'Drinks a potion!',mxRegen:'Closes its wounds',mxCall:'Calls for help!',mxCry:'War cry!',mxRoot:'Rooted!',mxSlow:'Slowed!',mxShred:'Armour torn!',mxRaise:'Raises the dead!',rskelN:'Raised Skeleton',antUse:'Antidote Herb!',antLeft:'An Antidote Herb stopped the venom; no poison takes for 20 s. {n} left.',antherb:'Antidote Herb',antherbD:'Carried, it stops the next venom and keeps poison off you for 20 s. Herb pickers find it among the herbs.',mv_raise:'raises skeletons',hyCut:'A head falls! Sear the stump with fire within {s} s',hyBurn:'The stump is seared: no head grows there',hyGrow:'Two heads grow from the stump!',wyLandT:'Landed! Strike now',mxDot_pois:'Poisoned!',mxDot_blood:'Bleeding!',mxDot_fire:'Burning!',mxDot_dark:'Cursed!',mxDot_ice:'Freezing!'});
+Object.assign(STR.ar,{mxPot:'شرب جرعة!',mxRegen:'بيلم جروحه',mxCall:'بينادي على صحابه!',mxCry:'صرخة حرب!',mxRoot:'اتقيدت!',mxSlow:'بقيت بطيء!',mxShred:'درعك اتقطع!',mxRaise:'بيصحّي الميتين!',srabbitN:'أرنب التلج',fslimeN:'سلايم التلج',gslimeN:'سلايم الدهب',fur:'فرو',furD:'فرو ناعم من أرانب السهول، وأحسنه من أرنب التلج. التجار بيشتروه.',rskelN:'هيكل عظمي متصحّي',antUse:'عشبة ضد السم!',antLeft:'عشبة ضد السم وقفت السم، ومش هيلزق فيك 20 ثانية. فاضل {n}.',antherb:'عشبة ضد السم',antherbD:'لو معاك بتوقف أول سم يلزق فيك، ومش بيلزق فيك تاني لمدة 20 ثانية. بتلاقيها وانت بتلم أعشاب.',mv_raise:'بيصحّي هياكل عظمية',hyCut:'راس وقعت! احرق مكانها بالنار قبل {s} ثواني',hyBurn:'مكان الراس اتكوى، مش هتطلع تاني',hyGrow:'طلع مكانها راسين!',wyLandT:'نزل على الأرض! اضرب',mxDot_pois:'اتسممت!',mxDot_blood:'بتنزف!',mxDot_fire:'بتتحرق!',mxDot_dark:'لعنة!',mxDot_ice:'بتتجمد!'});
+Object.assign(STR.en,{mxPot:'Drinks a potion!',mxRegen:'Closes its wounds',mxCall:'Calls for help!',mxCry:'War cry!',mxRoot:'Rooted!',mxSlow:'Slowed!',mxShred:'Armour torn!',mxRaise:'Raises the dead!',srabbitN:'Snow Rabbit',fslimeN:'Frost Slime',gslimeN:'Gold Slime',fur:'Fur',furD:'Soft fur from the plains\' rabbits, the best from the Snow Rabbit. Merchants buy it.',rskelN:'Raised Skeleton',antUse:'Antidote Herb!',antLeft:'An Antidote Herb stopped the venom; no poison takes for 20 s. {n} left.',antherb:'Antidote Herb',antherbD:'Carried, it stops the next venom and keeps poison off you for 20 s. Herb pickers find it among the herbs.',mv_raise:'raises skeletons',hyCut:'A head falls! Sear the stump with fire within {s} s',hyBurn:'The stump is seared: no head grows there',hyGrow:'Two heads grow from the stump!',wyLandT:'Landed! Strike now',mxDot_pois:'Poisoned!',mxDot_blood:'Bleeding!',mxDot_fire:'Burning!',mxDot_dark:'Cursed!',mxDot_ice:'Freezing!'});
 // ---- every kind's style and moves, one by one (owner 2026-10-23). Styles: hop, lunge, charge, brute, slam, soldier, archer,
 // caster, flyer, and boss for every boss. tests/content/moves.test.cjs checks that no two kinds share a move set.
 (()=>{const A=o=>({k:'arc',w:3,max:28,tele:.3,reach:26,arc:1.05,mul:1,rec:.3,cd:1.2,...o}),L=o=>({k:'leap',w:3,min:30,max:110,tele:.42,dashT:.3,mul:1.2,rec:.5,cd:2,...o}),
@@ -13047,6 +13059,7 @@ Object.assign(BEL,{vskel:'dark',vlatina:'dark',vtira:'fire'});
 const ELBEAT={fire:'water',water:'thunder',thunder:'earth',earth:'wind',wind:'fire'};
 const ELEMT=new Set(['felem','ielem','selem','efire','ethund','slord']);
 const MELX={tlord:'earth',eti:'water',cbear:'water',forc:'water',fochief:'water',warlord:'water',ilizard:'water',lizard:'water',lizw:'water',wyvern:'wind',wqueen:'wind',ebfly:'wind',hdrac:'fire',hdrac2:'fire',hdrac3:'fire'};
+Object.assign(MELX,{fslime:'water',srabbit:'water'});
 const UNDK=/^(skel|wraith|vskel|bknight|eghost|ejiang|dk_|mshade|sdoll|pguard|aprison|redk|crevn)/,EVILX=new Set(['ypriest']);
 const ELS=['fire','water','thunder','earth','wind','holy','dark','poison'];
 const monEl=k=>BEL[k]||MELX[k]||null,monUnd=k=>UNDK.test(k)||PGUND.test(k),monEvil=k=>DEMK.has(k)||HOLYX.has(k)||EVILX.has(k)||/^v/.test(k)&&k!=='vpal'||monUnd(k);
@@ -13902,7 +13915,7 @@ Object.assign(NLD,{minor:{town:null,src:'Minor of the Overgeared Guild at the Be
 // Khan on the insane dragon iron (ch 623), once you carry some
 if(NLD.khan&&NLD.khan.topics)NLD.khan.topics.push({id:'ndiron',tier:0,when:()=>!!S&&((S.mats.ndiron||0)+(S.mats.ndstone||0))>0,say:['nkh_nd1','nkh_nd2']});
 // the materials and the hammer a smith makes of them, as much stone as iron
-Object.assign(MATP,{antherb:40});Object.assign(MATP,{ndiron:500,ndstone:500});
+Object.assign(MATP,{antherb:40,fur:35});Object.assign(MATP,{ndiron:500,ndstone:500});
 Object.assign(CREM,{ndiron:{m:3.2,q:2,f:'dm',v:.08},ndstone:{m:3.2,q:2,f:'hpp',v:.08,d:1}});   // the Creation takes them too, as the icons' palette says
 RC.push({id:'ndhammer',slot:'w',atk:460,spd:.52,fix:3,lvr:290,need:{ndiron:5,ndstone:5,mith:10},unlock:()=>isSm()&&S.smith>=8,diff:1.6,strikes:9});
 Object.assign(WSH,{ndhammer:{l:9,c:'#5a1a2a',k:'hammer'}});
