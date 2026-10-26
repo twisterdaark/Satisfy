@@ -34,9 +34,10 @@ test('Sword Saint: Piaro\'s quest, the spar against a legend, the class, the kit
       P.inv = 1e9; P.hp = 1e9; P.mp = 1e6; P.x = 90 * 16; P.y = 60 * 16; P.dir = 2;
       for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } const m = G.spawnMon('forc', P.x + 30, P.y); m.max = m.hp = 1e9; m.lv = 260; m.tmp = 0; window.__m = m;
       const Y = window.__GPH, a0 = Y.atk(m), h0 = Y.hurt(100, m); X.sk('sctl'); const h1 = Y.hurt(100, m);
-      for (const c of ['mcross', 'mheaven', 'mwind', 'scloud', 'mflash']) X.sk(c);
-      return { a0, h0, h1, slow: m.slowU > 0, weak: m.weak > 0, stun: m.stun > 0, lost: m.hp < m.max, wil: window.__GSS.wilV() }; });
-    assert.equal(k.a0, 1.3, 'the aura'); assert.equal(k.h1, Math.round(k.h0 * .6), 'a sword catches the hit'); assert.ok(k.slow && k.weak, 'Space Sword leaves irreparable damage');
+      X.sk('mcross'); const weak = m.irrU > 0 && m.expU > 0;   /* (v3.14) the next hit takes the exposed weakness */
+      for (const c of ['mheaven', 'mwind', 'scloud', 'mflash']) X.sk(c);
+      return { a0, h0, h1, slow: m.slowU > 0, weak, stun: m.stun > 0, lost: m.hp < m.max, wil: window.__GSS.wilV() }; });
+    assert.equal(k.a0, 1.3, 'the aura'); assert.equal(k.h1, Math.round(k.h0 * .6), 'a sword catches the hit'); assert.ok(k.slow && k.weak, 'Space Sword leaves irreversible damage and exposes the weakness (v3.14, ch 1045)');
     assert.ok(k.stun, 'True Clouds holds the foe'); assert.ok(k.lost); assert.equal(k.wil, 520);
     // the swords fly out and cut on their own
     for (let i = 0; i < 12 && await g.eval(() => window.__G.mode) === 'dialog'; i++) { await g.page.keyboard.press('Space'); await g.step(20); }

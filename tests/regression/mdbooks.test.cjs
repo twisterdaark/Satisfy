@@ -34,7 +34,9 @@ test("the diary's chapters, its two swordsmanship books, the incomplete skills, 
     assert.deepEqual(await g.eval(() => { window.__G.S.cls = 'madra'; const r = window.__GC2.cls().filter((k) => /^ma/.test(k)); window.__G.S.cls = 'warrior'; return r; }), ['mamass']);
     // Crushing breaks an attack being readied; the recoil is 10% + 10% for each one broken
     const e = await g.eval(() => { const G = window.__G, P = G.P; G.mons().forEach((m) => { m.dead = true; }); P.dir = 2; P.hp = window.__G.eqx ? P.hp : P.hp; const m = G.spawnMon('wolf', P.x + 40, P.y); m.max = m.hp = 1e9; m.st = 'tele'; m.mv = { k: 'arc' }; m.tele = 1;
-      const h0 = P.hp, mx = h0; window.__GFB.sk('macrush'); return { st: m.st, dmg: 1e9 - m.hp, lost: h0 - P.hp, h0 }; });
+      const h0 = P.hp; window.__GFB.sk('macrush'); window.__mdM = m; return { st: m.st, lost: h0 - P.hp, h0 }; });
+    await g.step(30);   /* the cuts land a moment later (setTimeout) */
+    e.dmg = await g.eval(() => 1e9 - window.__mdM.hp);
     assert.equal(e.st, null); assert.ok(e.dmg > 0, JSON.stringify(e)); assert.ok(e.lost > 0, 'the recoil: ' + JSON.stringify(e));
     const bl = await g.eval(() => { const G = window.__G, P = G.P; G.mons().forEach((m) => { m.dead = true; }); const m = G.spawnMon('wolf', P.x + 30, P.y); m.max = m.hp = 1e9; window.__GFB.sk('mablock'); return m.stun; });
     assert.ok(bl >= 3, 'blockaded 3 s');

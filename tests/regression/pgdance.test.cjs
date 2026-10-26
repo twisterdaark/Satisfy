@@ -1,7 +1,7 @@
 'use strict';
 // Pagma's sword dances as in the novel (owner: "1:1 with the novel"; legends/legend-audit.md §1), on one scale: the
-// novel's damage x0.4 and its cooldowns /20. Link is a flurry on one target, Kill bleeds and brings despair for half your
-// stamina, Wave rings out and slows, Restraint keeps all but the undead away, Transcend doubles attack and sends your cuts
+// novel's damage x0.4 and its cooldowns /20. Link is a flurry on one target, Kill bleeds and brings despair for a fifth of your
+// stamina (v3.14, ch 394), Wave rings out and slows, Restraint keeps all but the undead away, Transcend doubles attack and sends your cuts
 // flying, Revolve sends a blow back, Pinnacle ignores 60% of the armour (here: of the level gap).
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -16,7 +16,7 @@ const mon = (g, dx, dy, type) => g.eval(([dx, dy, type]) => { const G = window._
 const hp = (g, i) => g.eval((i) => 1e9 - window.__pgM[i].hp, i);
 const cast = (g, k) => g.eval((k) => { window.__G.P.mp = 1e6; window.__G.P.acd = 0; window.__GSKF.cast(k); }, k);
 
-test('Link is a flurry on one target; Kill bleeds, brings despair and costs half your stamina', async () => {
+test('Link is a flurry on one target; Kill bleeds, brings despair and costs a fifth of your stamina', async () => {
   const g = await H.openGame();
   try {
     await H.newGame(g, LOOK); await setup(g);
@@ -26,7 +26,7 @@ test('Link is a flurry on one target; Kill bleeds, brings despair and costs half
     const st0 = await g.eval(() => { const P = window.__G.P; P.st = 100; return P.st; });
     await cast(g, 'kill'); await g.step(2);
     const r = await g.eval(() => ({ bl: !!window.__pgM[0].bl, weak: window.__pgM[0].weak > 0, st: window.__G.P.st }));
-    assert.equal(r.bl, true); assert.equal(r.weak, true); assert.ok(r.st <= st0 - 40, 'stamina ' + r.st);
+    assert.equal(r.bl, true); assert.equal(r.weak, true); const ms = await g.eval(() => window.__GLG3.ms()); assert.ok(Math.abs(st0 - r.st - ms * 0.2) < 2, 'stamina: 20% (v3.14, ch 394): ' + r.st + ' of ' + ms);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
