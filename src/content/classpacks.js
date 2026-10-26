@@ -86,11 +86,11 @@
       obj: { t: 'kill', it: 'sknight', n: 40 }, xp: 300000, gold: 10000,
       q: q(['Years of Service', 'سنين الخدمة'], ['Rank comes from service and from deeds. Break forty skeleton knights and the army will follow you.', 'الرتبة بتيجي من الخدمة والأفعال. اكسر أربعين فارس هيكل عظمي والجيش هيمشي وراك.'], ['The men do not trust you yet.', 'الرجالة لسه مش واثقين فيك.'], ['Captain of tens, of hundreds, of thousands, and now general: you are a War Commander.', 'قائد عشرة، وميّة، وألف، ودلوقتي جنرال: انت قائد الحرب.']),
       skills: [
-        sk('wcorder', 'Order', 'الأمر', 'An order to the army: +25% damage, +15% defence for 20 s, to you and your party within 10 m.', 'أمر للجيش: +25% ضرر و+15% دفاع لمدة 20 ثانية، ليك ولفريقك اللي في حدود 10 متر.', 120, 'buff', { stat: 'atk', pct: 0.25, dur: 20, also: [{ stat: 'def', pct: 0.15 }], mp: 30, cd: 45, party: 'O' }),
+        sk('wcorder', 'Order', 'الأمر', 'An order to the army: +25% damage, +15% defence for 20 s.', 'أمر للجيش: +25% ضرر و+15% دفاع لمدة 20 ثانية.', 120, 'buff', { stat: 'atk', pct: 0.25, dur: 20, also: [{ stat: 'def', pct: 0.15 }], mp: 30, cd: 45 }),
         sk('wcinsight', 'Insight', 'البصيرة', 'The commander sees the field: +8% critical chance.', 'القائد شايف الميدان: +8% فرصة كريتيكال.', 120, 'pas', { stat: 'crit', pct: 0.08 }),
         sk('wcarmy', 'Army Capacity', 'سعة الجيش', '+15% health.', '+15% صحة.', 120, 'pas', { stat: 'hp', pct: 0.15 }),
         sk('wcsweep', 'Commander\'s Sweep', 'كنسة القائد', 'A wide cut in front.', 'ضربة عريضة قدامك.', 130, 'cone', { r: 65, mul: 2.2, mp: 18, cd: 7 }),
-        sk('wchold', 'Hold the Line', 'اثبتوا', '+30% defence for 15 s, to you and your party within 10 m.', '+30% دفاع لمدة 15 ثانية، ليك ولفريقك اللي في حدود 10 متر.', 150, 'buff', { stat: 'def', pct: 0.3, dur: 15, mp: 24, cd: 40, party: 'Y' })
+        sk('wchold', 'Hold the Line', 'اثبتوا', '+30% defence for 15 s.', '+30% دفاع لمدة 15 ثانية.', 150, 'buff', { stat: 'def', pct: 0.3, dur: 15, mp: 24, cd: 40 })
       ] },
     // Katz (ch181, 421, 470): the epic Blood Warrior; Blood-Sucking, Blood of One Thousand People, more blood more power
     { id: 'bloodw', n: { en: 'Blood Warrior', ar: 'محارب الدم' }, root: 'warrior', from: ['warrior', 'berserker', 'knight'], by: 'tw', lv: 150, mst: ['sword', 6], col: '#b0102a',
