@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.56) |
+| | At the count | Now (v3.57) |
 |---|---|---|
-| Done | 233 | 297 |
+| Done | 233 | 298 |
 | Partly there (something left) | 92 | 34 |
-| Not started | 11 | 5 |
+| Not started | 11 | 4 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **39** (34 + 5) |
+| **Left to build** | **103** (92 + 11) | **38** (34 + 4) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -38,6 +38,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.54 (batch 14, PR #297, merged by Claude-B after main's v3.53): U078 (the balance board checks the hybrid against the strongest pure class).
 - v3.55 (Claude-B): U135 (cultists raise skeletons).
 - v3.56 (batch 4, taken over from the earlier Claude-A session's WIP; its U114, U120, U135 and U139 gave way to main's): U070 (the War Commander's orders reach the party, party buffs capped), U087 (one cap on the Demon Slayer's demon bonuses), U127 (conductivity), U179 (the Storm Temple's rods shared), U192 (Regas's lesson), U293 (the group dance), U305 (guards' and shopkeepers' nights), U354 (the sword dance trial), U364 (a world boss's guild board), U365 (restoring the West together; needs the rules' `world/satisfy/rw`).
+- v3.57 (batch 15): U219 (crafting commissions; needs the rules' `commOrders`, `commClaim`, `commDone` and `commPaid`).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -325,7 +326,7 @@ Four rows were set to ✅ by their own PRs (SAT-ONLINE-138: U026/U027; SAT-ONLIN
 | U186 | Raid replay | ❌ | done (v3.47) | client | Only the duel and open-PvP fight logs (`/fightlog`, U039) and the offline replay recorder (U323). Left: a raid boss fight log on each client (phases, hits, deaths, no bag data) and a ghost playback v3.47: each client logs its last three boss fights of 10 s or more (when and how they ended, the boss's health and phases, your damage and what you took, who fell, where everyone stood every half second; no bag data), keeps each character's last on the device, and plays it back as ghosts on a small map with a timeline (the fight's toast, the log window's button or "/raidlog"; `bflTick`, `bflDraw`; `regression/plan11`). |
 | U213 | Auction market | 🟡 | part | client+rules | Still the NPC auction house in main. A players' auction (SAT-ONLINE-094, v3.16) is on the branch `claude-a/sat-online-094-auction-v3` (2026-10-26), not merged; its rules are on `rules-next` |
 | U214 | Searchable item market | 🟡 | part | client+rules | Same as U213 (local search by name only in main) |
-| U219 | Crafting commissions | ❌ | no | client+rules | Only repair orders (U225, `repairOrders`). Left: a commission the same way: the materials and fee held by an order, the crafter forges, the piece goes to the owner with the crafter's "Made by" |
+| U219 | Crafting commissions | ❌ | done (v3.57) | client+rules | Only repair orders (U225, `repairOrders`). Left: a commission the same way: the materials and fee held by an order, the crafter forges, the piece goes to the owner with the crafter's "Made by" v3.57: an order at any smithy holds its fee and the recipe's materials (`S.cord`); a player smith who knows the recipe claims it (`commClaim`, 10 minutes), forges it at the anvil with the order's materials, and one update gives the piece to its owner as a trade carries it (`commDone`, `tradeItemIn`) and pays the smith (`commPaid`) (`comD`, `comTake`, `comDeliver`; `regression/plan15`, `unit/rules-comm`). The rating is the smith's roll, as every forged piece's (D3). |
 | U220 | Region merchant caravans | ❌ | part | client, D3 | Caravans exist only as the Saintess's escort trial. Left: a trade route between towns with opt-in risk; the plan's "server proof" of the route is D3 v3.47: caravan commissions: a merchant's load to another town (from level 30, four a day), a deposit back on delivery, a time limit, and the road chosen: safe, or the bandits' (twice the pay, raiders twice on the way). On foot or horseback only: coaches and boats refuse it, a teleport or a death loses it (the last spot out in the world is kept with the load, from the shop's door on), and raiders past their level band grow with you; any left standing take half the pay (`cvOpts`, `cvTick`, `S.cvn`; `regression/plan11`). Left: the plan's server proof of the route (D3). |
 | U222 | Fish market | ❌ | done | – | SAT-ONLINE-190 (v2.62, 2bebdd34): a species price up to the day's quota, less past it, nothing past five quotas, only what is in the bag sells, and the counts are kept in the save (`regression/market`) |
 | U223 | Crop wholesale market | ❌ | done | – | Same as U222 for crops (16 watermelons a day and so on); the plan's check ("farming cannot print infinite gold") holds. No spoilage |

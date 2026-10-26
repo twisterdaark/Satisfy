@@ -866,6 +866,34 @@
     };
   }
 
+  // Plan U219: crafting commissions. commOrders/{oid} {by, n, rc, fee, t}: a piece to be forged (a recipe's id) for a fee;
+  // its owner paid the fee and the recipe's materials into it. A player smith claims it first (commClaim/{oid} {s, t}; a
+  // claim older than 10 minutes can be taken again, and only then can the owner take the order off), forges it, and
+  // answers in one update that removes the order and the claim, gives the piece to its owner (commDone/{owner}/{oid}
+  // {rc, json, by, sn, fee, t}: the piece as a trade carries it) and pays the smith (commPaid/{smith}/{oid} {g, t}). The
+  // owner and the smith each remove what they took.
+  function commStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, SV = function () { return D.serverTimestamp(); };
+    var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
+    return {
+      list: function () { return Promise.all([D.get(at('commOrders')), D.get(at('commClaim'))]).then(function (r) { return { o: r[0].val() || {}, c: r[1].val() || {} }; }); },
+      post: function (oid, v) { var u = {}; u['commOrders/' + oid] = { by: v.by, n: String(v.n || '?').slice(0, 24), rc: v.rc, fee: v.fee, t: SV() }; return D.update(D.ref(db), u); },
+      cancel: function (oid) { var u = {}; u['commOrders/' + oid] = null; u['commClaim/' + oid] = null; return D.update(D.ref(db), u); },
+      claim: function (oid, smith) { var u = {}; u['commClaim/' + oid] = { s: smith, t: SV() }; return D.update(D.ref(db), u); },
+      forge: function (oid, o, smith, sn, json) {
+        var u = {}; u['commOrders/' + oid] = null; u['commClaim/' + oid] = null;
+        u['commDone/' + o.by + '/' + oid] = { rc: o.rc, json: json, by: smith, sn: String(sn || '?').slice(0, 24), fee: o.fee, t: SV() };
+        u['commPaid/' + smith + '/' + oid] = { g: o.fee, t: SV() };
+        return D.update(D.ref(db), u);
+      },
+      order: function (oid) { return D.get(at('commOrders/' + oid)).then(function (s) { return s.val(); }); },
+      watchDone: function (uid, cb) { return watch('commDone/' + uid, cb); },
+      took: function (uid, oid) { return D.remove(at('commDone/' + uid + '/' + oid)); },
+      watchPaid: function (uid, cb) { return watch('commPaid/' + uid, cb); },
+      collect: function (uid, oid) { return D.remove(at('commPaid/' + uid + '/' + oid)); },
+    };
+  }
+
   // SAT-ONLINE-094: the auction house board. auction/{lid} {by, n, it, q, price, t}: a player's listing (materials and
   // potions, as the auction house takes them); a sale is one update that removes it and writes auctionPaid/{seller}/{lid}
   // {g, by, bn, it, q, t} (the rules: only for the listing as it is, by someone else); the seller removes what it collects.
@@ -944,6 +972,7 @@
     lfgStore: lfgStore,
     fishFestStore: fishFestStore,
     repairStore: repairStore,
+    commStore: commStore,
     auctionStore: auctionStore,
     announceStore: announceStore,
     pollStore: pollStore,

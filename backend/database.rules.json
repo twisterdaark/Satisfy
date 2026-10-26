@@ -983,6 +983,95 @@
         }
       }
     },
+    "commOrders": {
+      ".read": "auth != null",
+      "$oid": {
+        ".write": "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid) || (data.exists() && !newData.exists() && ((data.child('by').val() === auth.uid && (!root.child('commClaim').child($oid).exists() || now - root.child('commClaim').child($oid).child('t').val() > 600000)) || (root.child('commClaim').child($oid).child('s').val() === auth.uid && newData.parent().parent().child('commDone').child(data.child('by').val()).child($oid).child('by').val() === auth.uid))))",
+        ".validate": "$oid.matches(/^c_[A-Za-z0-9_-]{1,60}$/) && newData.hasChildren(['by', 'n', 'rc', 'fee', 't'])",
+        "by": {
+          ".validate": "newData.isString()"
+        },
+        "n": {
+          ".validate": "newData.isString() && newData.val().length <= 24"
+        },
+        "rc": {
+          ".validate": "newData.isString() && newData.val().matches(/^[a-z][a-z0-9_]{0,23}$/)"
+        },
+        "fee": {
+          ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 10000000"
+        },
+        "t": {
+          ".validate": "newData.val() === now"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "commClaim": {
+      ".read": "auth != null",
+      "$oid": {
+        ".write": "auth != null && ((newData.exists() && root.child('commOrders').child($oid).exists() && root.child('commOrders').child($oid).child('by').val() !== auth.uid && (!data.exists() || now - data.child('t').val() > 600000)) || (!newData.exists() && !newData.parent().parent().child('commOrders').child($oid).exists() && (!data.exists() || data.child('s').val() === auth.uid || root.child('commOrders').child($oid).child('by').val() === auth.uid)))",
+        ".validate": "newData.hasChildren(['s', 't'])",
+        "s": {
+          ".validate": "newData.val() === auth.uid"
+        },
+        "t": {
+          ".validate": "newData.val() === now"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "commDone": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$oid": {
+          ".write": "auth != null && ((!data.exists() && newData.exists() && root.child('commOrders').child($oid).child('by').val() === $uid && root.child('commClaim').child($oid).child('s').val() === auth.uid && $uid !== auth.uid && !newData.parent().parent().parent().child('commOrders').child($oid).exists()) || (auth.uid === $uid && !newData.exists()))",
+          ".validate": "newData.hasChildren(['rc', 'json', 'by', 'sn', 'fee', 't'])",
+          "rc": {
+            ".validate": "newData.val() === root.child('commOrders').child($oid).child('rc').val()"
+          },
+          "json": {
+            ".validate": "newData.isString() && newData.val().length <= 600 && newData.val().contains('\"id\":\"' + root.child('commOrders').child($oid).child('rc').val() + '\"')"
+          },
+          "by": {
+            ".validate": "newData.val() === auth.uid"
+          },
+          "sn": {
+            ".validate": "newData.isString() && newData.val().length <= 24"
+          },
+          "fee": {
+            ".validate": "newData.val() === root.child('commOrders').child($oid).child('fee').val()"
+          },
+          "t": {
+            ".validate": "newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "commPaid": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$oid": {
+          ".write": "auth != null && auth.uid === $uid && ((!data.exists() && newData.exists() && root.child('commClaim').child($oid).child('s').val() === $uid && root.child('commOrders').child($oid).child('by').val() !== $uid && newData.parent().parent().parent().child('commDone').child(root.child('commOrders').child($oid).child('by').val()).child($oid).child('by').val() === $uid) || (data.exists() && !newData.exists()))",
+          ".validate": "newData.hasChildren(['g', 't'])",
+          "g": {
+            ".validate": "newData.val() === root.child('commOrders').child($oid).child('fee').val()"
+          },
+          "t": {
+            ".validate": "newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
     "presence": {
       "$world": {
         ".validate": "$world === 'satisfy'",

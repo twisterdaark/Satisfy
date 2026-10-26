@@ -7,6 +7,11 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27plan15', ver: '3.57', d: '2026-10-27',
+      ar: ["طلبات تصنيع للحدادين: عند أي حداد اطلب قطعة (سيف، درع، خوذة...) يصنعها لك حداد لاعب. الأجرة والخامات بتطلع من شنطتك وبترجع لو شلت الطلب. الحداد (كلاس الحداد أو وريث باغما) اللي يعرف الوصفة بياخد الطلب ويصنعه في السندان بخامات الطلب، والقطعة بتوصلك وعليها اسمه، وهو بياخد أجرته من عند الحداد.",
+        "لو حداد بدأ يشتغل على طلبك، مش هتقدر تشيله غير بعد 10 دقايق."],
+      en: ["Commissions for player smiths: at any smithy, order a piece (a sword, armour, a helm...) forged by a player smith. The fee and the materials leave your bag and come back if you take the order off. A smith who knows the recipe (the Blacksmith class or Pagma's Successor) takes the order and forges it at the anvil with the order's materials; the piece reaches you with their mark, and they collect the fee at the smithy.",
+        "Once a smith is at work on your order, it can be taken off only after 10 minutes."] },
     { v: '2026-10-27plan4', ver: '3.56', d: '2026-10-27',
       ar: ["اختبار رقصات السيف عند جدارية باغما: السيّاف اللي على الجدارية بيقولك رقصاتك واحدة ورا التانية، وكل واحدة لازم تيجي في ثانيتين. بتاخد تقدير (S لحد C)، ولو الرقصات اندمجت في 9 ثواني بتتعلم الدمج الجديد.",
         "الحراس بالليل بيلفّوا في دورية قصيرة وفي إيدهم فانوس، والتجار اللي برة بيقفلوا الشبابيك ويولّعوا لمبة، بس لسه بيبيعوا من الشباك.",
