@@ -34,7 +34,7 @@ test('the marsh chests: three real ones with a needle trap, and a mimic that bit
     });
     assert.equal(r.n, 3); assert.equal(r.inMarsh, true); assert.equal(r.apart, true); assert.equal(r.notMons, true); assert.equal(r.same, true);
     assert.equal(r.trap, true, 'E starts the needle\'s sweep');
-    assert.equal(r.gold, 200 + 1 * 10, 'disarmed and opened'); assert.ok(r.cd >= 19 && r.cd <= 20, 'refills in 20 min: ' + r.cd);
+    assert.equal(r.gold, 100 + 1 * 4, 'disarmed and opened'); assert.ok(r.cd >= 19 && r.cd <= 20, 'refills in 20 min: ' + r.cd);
     assert.equal(r.empty, true, 'empty until then');
     assert.deepEqual(r.needle, [true, true, 'pois', 60], 'the needle poisons, the lock jams a minute');
     assert.equal(r.woke, true, 'a mimic wakes');

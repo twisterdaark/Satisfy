@@ -16771,7 +16771,7 @@ function tchOpen(o){if(!o.real){if(o.dorm){mpWake(o);toast(t('tchBite'),'warn');
  TCT={o,t0:gTime};SFX.notice();toast(t('tchTrap'),'info');}
 function tchPress(){const T=TCT;TCT=null;if(!T)return;const o=T.o;if(Math.hypot(P.x-o.x,P.y-o.y)>40)return;S.tch=S.tch||{};
  const v=((gTime-T.t0)*1.3)%2,pos=v<1?v:2-v;
- if(pos>=TCHW[0]&&pos<=TCHW[1]){S.tch[o.i]=wNow()+TCHCD;const g=200+S.lv*10;S.gold+=g;coinFx(o,g);SFX.coin();let gem='';if(rand()<.15){gem=['emer','ruby','topaz','sapph'][rand()*4|0];addMat(gem,1);}
+ if(pos>=TCHW[0]&&pos<=TCHW[1]){S.tch[o.i]=wNow()+TCHCD;const g=100+S.lv*4;S.gold+=g;coinFx(o,g);SFX.coin();let gem='';if(rand()<.15){gem=['emer','ruby','topaz','sapph'][rand()*4|0];addMat(gem,1);}
   toast(t('tchOpen',{g:fmtN(g)})+(gem?' + '+t(gem):''),'good');}
  else{S.tch[o.i]=wNow()+TCHJ;P.dotT=gTime+6;P.dotP=.02;P.dotC='pois';P.dotK=0;SFX.hit();toast(t('tchNeedle'),'warn');}
  hudDirty=true;save(true);}
