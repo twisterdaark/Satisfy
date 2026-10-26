@@ -117,7 +117,7 @@ body.photo #ui>*:not(#photoBar){visibility:hidden!important}body.photo #photoBar
 .tgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:calc(var(--u)*.35);direction:ltr;max-height:calc(var(--u)*22);overflow-y:auto;margin-top:calc(var(--u)*.5)}
 .tgrid .slotb.on{outline:2px solid #ffe7a8;box-shadow:0 0 calc(var(--u)*.8) rgba(255,231,168,.6)}
 .slotb i{position:absolute;left:calc(var(--u)*.2);top:0;font-style:normal;font-family:"Press Start 2P",monospace;font-size:calc(var(--u)*.7);color:#ffe7a8;text-shadow:0 0 2px #000,0 0 2px #000}.itabs button.on,.qflt button.on{background:rgba(120,190,255,.35);border-color:#9fd8ff}#rlist button[data-act="fAuto"].on{background:rgba(120,190,255,.35);border-color:#9fd8ff}.qflt{display:flex;gap:calc(var(--u)*.4);flex-wrap:wrap;margin-bottom:calc(var(--u)*.4)}.qflt button{padding:calc(var(--u)*.15) calc(var(--u)*.7);font-size:calc(var(--u)*1.15)}
-#lootW,#partyInv,#tradeInv,#guildInv,#duelInv,#rdyBox,#smnBox{z-index:57}#rdyBox,#smnBox{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*21);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto;border-color:#7ae07a}#rdyBox .row,#smnBox .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}#deathW{z-index:85}#netRepW{z-index:86}
+#lootW,#partyInv,#tradeInv,#guildInv,#duelInv,#rdyBox,#smnBox{z-index:57}#rdyBox,#smnBox{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*21);padding:calc(var(--u)*1) calc(var(--u)*1.6);text-align:center;font-size:calc(var(--u)*1.7);pointer-events:auto;border-color:#7ae07a}#rdyBox .row,#smnBox .row{display:flex;gap:calc(var(--u)*1);justify-content:center;margin-top:calc(var(--u)*.8)}#smnBox{bottom:calc(var(--u)*29)}#deathW{z-index:85}#netRepW{z-index:86}
 #toasts{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*3.8);z-index:55;pointer-events:none;display:grid;gap:calc(var(--u)*.4);justify-items:center;width:80%;max-width:max(36%,calc(100% - var(--u)*62))}   /* (qdopen) between the stats and the quests, so a long notice never covers a quest row */
 #toasts .toast{pointer-events:auto;cursor:pointer}.qhb{display:flex;align-items:stretch;gap:calc(var(--u)*.45)}#toastLog{padding:0 calc(var(--u)*.6);font-size:calc(var(--u)*1.1);display:flex;align-items:center;justify-content:center}#toastLog>span{font-size:.8em;line-height:1}.qhb>button{width:calc(var(--u)*2.4);padding:0;justify-content:center}#toastLog{position:relative}span.pxt{font-size:0;line-height:0;opacity:0}img.pxe{height:1.05em;width:auto;image-rendering:pixelated;vertical-align:-.14em;margin:0 .08em}#creW .cwic{width:calc(var(--u)*3.2);height:calc(var(--u)*3.2);image-rendering:pixelated;float:inline-start;margin-inline-end:6px}.panel>.prez{position:absolute;right:2px;bottom:2px;width:calc(var(--u)*1.4);height:calc(var(--u)*1.4);cursor:nwse-resize;z-index:5;background:linear-gradient(135deg,transparent 0 45%,rgba(166,214,246,.7) 45% 52%,transparent 52% 64%,rgba(166,214,246,.7) 64% 71%,transparent 71% 83%,rgba(166,214,246,.7) 83% 90%,transparent 90%);opacity:.75}.panel>.prez:hover{opacity:1}#toastLog[data-n]::after{content:attr(data-n);position:absolute;top:calc(var(--u)*-.45);inset-inline-end:calc(var(--u)*-.35);min-width:calc(var(--u)*1);padding:0 calc(var(--u)*.2);border-radius:calc(var(--u)*.6);background:#d8343a;color:#fff;font:600 calc(var(--u)*.7)/calc(var(--u)*1) sans-serif;text-align:center;pointer-events:none}
 .toast{background:rgba(8,14,30,.85);border:1px solid rgba(127,180,255,.5);padding:calc(var(--u)*.3) calc(var(--u)*1.1);border-radius:calc(var(--u)*.4);font-weight:700;animation:tin .25s ease-out}
@@ -7463,6 +7463,7 @@ function killMon(m){const b=MT[m.type];m.dead=true;if(b.obj){m.noLoot=1;gpFall(m
  if(!m.bh&&!m.noLoot)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,RCKEY.includes(k)?1:p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p*(1+secB('drop')))addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill (a divine beast's breath is one)
  if(!m.bh&&!m.noLoot&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}if(!m.noLoot){rbBossDrop(m,b);bpBossDrop(m,b);cosDrop(m,b);}
  if(m.lv>=20&&!m.tmp&&!m.noLoot){if(b.boss){addMat('estone',1+(m.lv/50|0));if(rand()<.12)addMat('pstone',1);if(rand()<.25)addMat('bstone',1);}else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
+ if(b.obj){hudDirty=true;return;}   /* (plan U119) a pillar: no kill for the book, titles or quests */
  crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;sc2Kill(m);mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);p4Kill(m);p5Kill(m);fdwKill(m);rbcKill(m);wsKill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);if(KCON[m.type])kcGain(KCON[m.type],m);
  if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;annW('annGuard',{lv:S.lv});}giveTitle('forest');S.raid=0;}
  if(m.type==='gchief'){shake=.3;giveTitle('chief');}
@@ -11194,13 +11195,22 @@ Object.assign(STR.ar,{gpFallT:'العمود وقع! الحارس بقى أضعف
    land (OWB.pts, open ground picked once from its own dice) and back, at a walk; the march waits while any of them fights
    or lags. One that falls rises where the band is by then, and one left behind out of sight catches up. Their ids are
    fixed (wb0..wb4), so every screen and the save know them. Online the host's band is the one that moves (mobDrive). */
-const OWBN=5,OWBSPD=18,owOff=i=>[((i%3)-1)*18,((i/3)|0)*16-8];let OWB=null;
-function owbSpawn(){OWB=null;const r=mulberry32(121),pts=[];
- for(const lx of [86,122,158,194,230,266,302,338])for(let k=0;k<120;k++){const x=wX(lx+((r()*10)|0)),y=6+((r()*16)|0);if(!solW(x,y)&&!solW(x+1,y)&&!solW(x,y+1)&&atW(x,y)!==PA){pts.push({x:x*TS+8,y:y*TS+8});break;}}
- if(pts.length<2)return;OWB={pts,i:1,dir:1,x:pts[0].x,y:pts[0].y,ms:[],seen:0};
+const OWBN=5,OWBSPD=18,OWBR=[82,150,8,4,24],owOff=i=>[((i%3)-1)*18,((i/3)|0)*16-8];let OWB=null;
+function owbSpawn(){OWB=null;const r=mulberry32(121),R=OWBR,ok=(x,y)=>!solW(x,y)&&!solW(x+1,y)&&!solW(x,y+1)&&atW(x,y)!==PA,
+  walk=(a,b)=>{const n=Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/6);for(let i=1;i<n;i++){const x=a.x+(b.x-a.x)*i/n,y=a.y+(b.y-a.y)*i/n;if(!ok(Math.floor(x/TS),Math.floor(y/TS))||hitBox(x,y,5))return false;}return true;};
+ // posts from west to east across the orcs' land (in map columns: it spans a wilderness belt), each reachable in a straight
+ // line from the last, since a band can't find its way round a wood; the longest of a few tries is the route
+ let pts=[];const X0=wX(R[0]),X1=wX(R[1]),cand=x0=>{const c=[];for(let k=0;k<60&&c.length<10;k++){const x=x0+((r()*R[2])|0),y=R[3]+((r()*(R[4]-R[3]))|0),p={x:x*TS+8,y:y*TS+8};if(ok(x,y)&&!hitBox(p.x,p.y,5))c.push(p);}return c;},cols=[];
+ for(let x=X0;x<=X1;x+=R[2])cols.push(cand(x));
+ {const N=cols.flat().sort((a,b)=>a.x-b.x),F=N.map(n=>({s:n.x,pv:-1}));let bi=0;
+  for(let i=0;i<N.length;i++){for(let j=i-1;j>=0&&N[i].x-N[j].x<=16*TS;j--)if(N[i].x>N[j].x&&F[j].s<F[i].s&&walk(N[j],N[i])){F[i].s=F[j].s;F[i].pv=j;}if(N[i].x-F[i].s>N[bi].x-F[bi].s)bi=i;}
+  for(let i=bi;i>=0;i=F[i].pv)pts.unshift(N[i]);
+  for(let i=0;i+2<pts.length;)if(walk(pts[i],pts[i+2]))pts.splice(i+1,1);else i++;}   /* a post it can walk straight past is dropped */
+ if(pts.length<2)return;OWB={pts,i:1,dir:1,x:pts[0].x,y:pts[0].y,ms:[],seen:0,wait:0};
  for(let i=0;i<OWBN;i++){const [ox,oy]=owOff(i),m=newMon('forc',OWB.x+ox,OWB.y+oy,r);m.band=1;m.bi=i;m.nk='forc@wb'+i;OWB.ms.push(m);mons.push(m);}}
-function owbTick(dt){if(!OWB||!P)return;const live=OWB.ms.filter(m=>!m.dead),lead=!(MOBN&&MOBN.host&&NET&&MOBN.host!==NET.uid);
- if(live.length&&!live.some(m=>m.eng>0||m.ret)&&live.every(m=>Math.hypot(m.x-m.sx,m.y-m.sy)<90)){const p=OWB.pts[OWB.i],dx=p.x-OWB.x,dy=p.y-OWB.y,d=Math.hypot(dx,dy),st=OWBSPD*dt;
+function owbTick(dt){if(!OWB||!P)return;OWB.ms.forEach((m,i)=>{m.band=1;m.bi=i;m.nk='forc@wb'+i;});const live=OWB.ms.filter(m=>!m.dead),lead=!(MOBN&&MOBN.host&&NET&&MOBN.host!==NET.uid),fight=live.some(m=>m.eng>0||m.ret);
+ if(!fight&&live.length&&!live.every(m=>Math.hypot(m.x-m.sx,m.y-m.sy)<90)){OWB.wait+=dt;if(lead&&OWB.wait>20)for(const m of live){m.x=m.sx;m.y=m.sy;m.path=null;OWB.wait=0;}}else OWB.wait=0;   /* one stuck on a rock for 20 s is put back in line */
+ if(live.length&&!fight&&live.every(m=>Math.hypot(m.x-m.sx,m.y-m.sy)<90)){const p=OWB.pts[OWB.i],dx=p.x-OWB.x,dy=p.y-OWB.y,d=Math.hypot(dx,dy),st=OWBSPD*dt;
   if(d<=st){OWB.x=p.x;OWB.y=p.y;if(OWB.i+OWB.dir<0||OWB.i+OWB.dir>=OWB.pts.length)OWB.dir=-OWB.dir;OWB.i+=OWB.dir;}else{OWB.x+=dx/d*st;OWB.y+=dy/d*st;}}
  for(const m of OWB.ms){const [ox,oy]=owOff(m.bi);m.sx=OWB.x+ox;m.sy=OWB.y+oy;
   if(lead&&!m.dead&&!(m.eng>0)&&!m.ret&&Math.hypot(m.x-m.sx,m.y-m.sy)>220&&Math.hypot(m.x-P.x,m.y-P.y)>520){m.x=m.sx;m.y=m.sy;m.path=null;}}
@@ -11214,7 +11224,7 @@ function ptNext(m,b,pr){const i=(m.pi|0)%4,[tx,ty]=ptPost(m,pr,i),dx=tx-m.x,dy=t
 function monTick(m,dt,safe){try{
   const b=MT[m.type];if(m.tdum){m.x=m.sx;m.y=m.sy;m.vx=0;m.vy=0;m.lv=S.lv;m.hp=m.max;m.stun=0;m.st=null;m.tele=0;m.face=P.x>m.x?1:-1;m.nm=t('tdummy');return;}if(Math.abs(m.x-P.x)<SFXR+300&&Math.abs(m.y-P.y)<SFXR+300)monVox(m,b,dt); // (2026-10-24, the lag) only those near enough to be heard soon: the other 2,000 took 90 KB of memory a frame
   if(MOBN&&MOBN.host&&mobDrive(m,b,dt,safe))return; // shared monsters: another player's copy leads this one
-  if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy,fa=m.far,bd=m.band?{band:1,bi:m.bi,nk:m.nk}:null;monFresh(m,newMon(ty,ox,oy));if(fa)m.far=1;if(bd)Object.assign(m,bd);vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}return;}
+  if(m.dead){m.rt-=dt;if(m.rt<=0&&Math.hypot(m.sx-P.x,m.sy-P.y)>140){const ty=m.type,ox=m.sx,oy=m.sy,fa=m.far,bd=m.band?{band:1,bi:m.bi,nk:m.nk}:{nk:m.nk};monFresh(m,newMon(ty,ox,oy));if(fa)m.far=1;Object.assign(m,bd);vfx('spawn',m.x,m.y,{color:MT[m.type].boss?'#ff7a5a':'#c8a0ff'});}return;}
   if(b.obj){m.x=m.sx;m.y=m.sy;m.vx=0;m.vy=0;m.eng=0;m.agg=0;m.st=null;m.tele=0;return;}   // (plan U119) a pillar: it stands, and is only broken
   if(BZD&&bzLure(m,b,dt))return; // Braham's Decoy
   // a monster sleeps while nobody is within 900 px (owner 2026-10-23: frames dropped with many monsters). The far north and
@@ -11546,7 +11556,7 @@ function drawMon(m){if(m.tdum)return drawDummy(m);if(m.type==='gpillar')return d
   const wp=MWPN[m.vr?m.type+'~'+m.vr:m.type]||MWPN[m.type];if(wp){ctx.save();ctx.translate(x,y);ctx.scale((m.face>0?1:-1)*(sc||1),sc||1);wp();ctx.restore();}}}
 // every monster has a picture (owner 2026-10-23: some, like the Blood Earl, drew nothing): the types drawMon can't draw
 window.__GTLV={lv:k=>townLv(k),towns:()=>TOWNS.map(T=>T.k)};window.__GLOW={kill:k=>qEvent('kill',k),hp:f=>{P.hp=Math.max(1,Math.floor(maxHP()*f));},text:id=>qObjText(id),get MT(){return MT}};
-window.__GMON={missing:()=>[...Object.keys(MT).filter(k=>!(['trauka','berith','belial','bhclone'].includes(k)||BEAST[k]||MSH[k]||P3D[k]||SH[k])),...Object.keys(VARY).filter(k=>MT[k]&&!MSH[k]&&!P3D[k]&&!BEAST[k]&&[1,2,3].some(v=>!SH[k+'~'+v])).map(k=>k+'~')]}; // tests
+window.__GMON={missing:()=>[...Object.keys(MT).filter(k=>!(['trauka','berith','belial','bhclone'].includes(k)||MT[k].obj||BEAST[k]||MSH[k]||P3D[k]||SH[k])),...Object.keys(VARY).filter(k=>MT[k]&&!MSH[k]&&!P3D[k]&&!BEAST[k]&&[1,2,3].some(v=>!SH[k+'~'+v])).map(k=>k+'~')]}; // tests
 // weapons in the hands of the Saharan Empire's humanoid monsters (drawn facing right, scaled with the body)
 const MWPN={bibanm:()=>{R(ctx,6,-22,1,20,'#e8eef8');R(ctx,7,-21,1,18,'#9aa4b4');R(ctx,4,-3,5,1,'#c8a050');R(ctx,6,-2,1,3,'#3a2a1e');},abellm:()=>{R(ctx,6,-16,1,14,'#8a5a2a');R(ctx,5,-19,3,3,'#e84a6a');},lizw:()=>{R(ctx,6,-24,1,22,'#7a5a2a');R(ctx,5,-27,3,4,'#c8d0dc');R(ctx,6,-29,1,2,'#ffffff');},tlord:()=>{R(ctx,6,-20,3,18,'#4a2a14');R(ctx,4,-25,7,7,'#5a3a1e');R(ctx,4,-25,7,1,'#7a5228');},
 dk_lant:()=>{R(ctx,6,-14,1,8,'#e8eef8');R(ctx,7,-13,1,6,'#9aa4b4');R(ctx,5,-6,3,1,'#a81a1a');},dk_alex:()=>{R(ctx,4,-12,10,2,'#4a5a7a');R(ctx,4,-12,10,1,'#9ab0d0');R(ctx,13,-13,3,1,'#e8eef8');R(ctx,5,-10,2,3,'#3a2a1e');},
@@ -12791,7 +12801,7 @@ const MXK={
  rain(m,b,mv,d,dx,dy,rep){for(const [x,y,dl] of rainPts(m,mv))ezone.push({x,y,r:mv.zr||16,t:(mv.fall||.8)+dl,T:(mv.fall||.8)+dl,lin:mv.lin||0,m,mv});SFX.notice();},
  heal(m,b,mv,d,dx,dy,rep){vfx('heal',m.x,m.y);num(m.x,m.y-40,t(mv.say||(mv.pot?'mxPot':'mxRegen')),'#9fe39a',false);if(rep)return;const h=Math.round(m.max*(mv.pct||.2));m.hp=Math.min(m.max,m.hp+h);num(m.x,m.y-30,'+'+h.toLocaleString('en'),'#7ae07a',false);},
  mend(m,b,mv,d,dx,dy,rep){const o=mxHurt(m,mv.rng||150,.95);if(!o)return;mxBeam(m,o,'#9fe39a');vfx('heal',o.x,o.y);if(rep)return;const h=Math.round(o.max*(mv.pct||.2));o.hp=Math.min(o.max,o.hp+h);num(o.x,o.y-30,'+'+h.toLocaleString('en'),'#7ae07a',false);},
- ward(m,b,mv,d,dx,dy,rep){if(mv.wall){let n=0;for(const o of mons)if(!o.dead&&(o===m||mv.kin.includes(o.type))&&Math.hypot(o.x-m.x,o.y-m.y)<(mv.rng||64)){n++;if(!rep){o.wardT=gTime+(mv.t||3);o.wardR=mv.red||.4;}}   /* (plan U121) every one of his kind beside him raises his shield too */
+ ward(m,b,mv,d,dx,dy,rep){if(mv.wall){if(m.wardT>gTime)return;let n=0;for(const o of mons)if(!o.dead&&(o===m||mv.kin.includes(o.type))&&Math.hypot(o.x-m.x,o.y-m.y)<(mv.rng||64)){n++;if(!rep){o.wardT=gTime+(mv.t||3);o.wardR=mv.red||.4;}}   /* (plan U121) every one of his kind beside him raises his shield too */
   if(n>1)num(m.x,m.y-40,t('mxWall'),'#9fd8ff',false);SFX.clang();return;}
   const o=mv.ally&&mxHurt(m,mv.rng||150,1.01)||m;if(o!==m)mxBeam(m,o,'#9fd8ff');if(!rep){o.wardT=gTime+(mv.t||5);o.wardR=mv.red||.45;}SFX.clang();},
  call(m,b,mv,d,dx,dy,rep){vfx('rage',m.x,m.y);SFX.notice();num(m.x,m.y-40,t('mxCall'),'#ffb04a',false);if(rep)return;for(const o of mons)if(o!==m&&!o.dead&&(mv.kin?mv.kin.includes(o.type):o.type===m.type)&&Math.hypot(o.x-m.x,o.y-m.y)<(mv.rng||300)){o.eng=4;o.agg=1;o.sprT=2.5;o.tired=0;o.prov=gTime+8;}},
@@ -12882,7 +12892,7 @@ Object.assign(STR.en,{mxPot:'Drinks a potion!',mxRegen:'Closes its wounds',mxCal
   cbear:[A({max:32,tele:.44,reach:30,arc:1.2,mul:1.3,cd:1.7}),F({min:20,max:110,n:5,sprd:.9,spd:150,sp:'ice',mul:.6,slow:2.5,cd:4}),G({max:42,tele:.8,reach:42,mul:1.4,cd:4.5,slow:2})],   // frost breath
   outlaw:[A({max:26,tele:.3,reach:26,mul:1,cd:1.1}),S({min:50,max:140,tele:.45,spd:190,sp:'knife',mul:.8,cd:2.2}),H({}),S({min:20,max:80,tele:.35,spd:160,sp:'rock',mul:.3,slow:2,cd:6,w:1})],   // throws sand
   deserter:[A({max:28,tele:.32,reach:27,mul:1,cd:1.1}),S({min:50,max:140,tele:.42,spd:200,sp:'knife',mul:.85,cd:2.2}),W({t:3,red:.5,cd:9}),H({pct:.22})],   // raises his shield, drinks
-  forc:[A({max:30,tele:.4,reach:28,arc:1.1,mul:1.2,cd:1.4}),Y({kin:ORC}),N({min:30,max:100,tele:.5,dash:230,dashT:.35,mul:1.3,cd:2.6}),H({hpb:.35,pct:.2,once:30}),W({wall:1,kin:ORC,rng:64,t:3,cd:11,red:.4})],   // (plan U121) a shield wall with the orcs beside him
+  forc:[A({max:30,tele:.4,reach:28,arc:1.1,mul:1.2,cd:1.4}),Y({kin:ORC}),N({min:30,max:100,tele:.5,dash:230,dashT:.35,mul:1.3,cd:2.6}),H({hpb:.35,pct:.2,once:30}),W({wall:1,kin:ORC,rng:64,t:3,cd:12,red:.6})],   // (plan U121) a shield wall with the orcs beside him
   golem:[G({max:36,tele:.8,reach:34,mul:1.45,cd:2.3}),A({max:28,tele:.4,reach:26,arc:.8,mul:1.1,cd:1.4,kb:18}),S({min:50,max:160,tele:.8,spd:130,mul:1.4,cd:3.2,sp:'rock',stun:.5})],   // throws a boulder
   cgolem:[F({min:30,max:160,n:5,sprd:1,spd:170,sp:'ice',mul:.6,cd:3.2}),G({max:38,tele:.8,reach:36,mul:1.4,cd:3}),W({t:4,red:.4,cd:10})],   // crystal shards, crystal armour
   mgolem:[Rn({min:20,max:140,pat:'on',n:1,zr:22,lin:4,sp:'pois',mul:.6,slow:2,cd:6}),G({max:36,tele:.8,reach:34,mul:1.3,cd:2.6}),A({max:28,tele:.42,reach:26,mul:1.1,cd:1.5})],   // mud pools
@@ -16175,31 +16185,31 @@ function rdyKey(c){if(!RDY||RDY.me!==0||c!=='KeyY'&&c!=='KeyN')return false;rdyA
    the one who travels). Nobody is summoned from or to where a Return Scroll can't go (the arena, a tower, a race, a duel, the
    siege's castle, Behen, a vampire city: scrollBlock), into a dungeon or a room, nor across the sea to the other continent.
    The one who asked hears the answer. */
-const SMNT=30000,SMNCD=20000,SMNQ='⇲? ',smnFee=()=>Math.min(3000,500+15*S.lv),smnTag=u=>String(u||'').slice(-6);let SMN=null,SMNA=null,SMNP=-1e9;
-function smnWhere(x,y){return dunAt(x,y)||roomAt(x,y)||y>=WMH*TS;}
+const SMNT=30000,SMNCD=20000,SMNHIT=5,SMNQ='⇲? ',smnFee=()=>Math.min(3000,500+15*S.lv),smnTag=u=>String(u||'').slice(-6);let SMN=null,SMNA=null,SMNP=-1e9;
+function smnWhere(x,y){return dunAt(x,y)||roomAt(x,y)||y>=WMH*TS||y<8-NR*TS||x<8||x>MW*TS-8||SG&&inCastle({x,y})||!!vcAt(x/TS,y/TS);}
 function smnAsk(uid){const m=PARTY&&PARTY.id()?PARTY.members().find(x=>!x.self&&x.uid===uid):null;if(!NET||!m)return false;
- if(scrollBlock()||smnWhere(P.x,P.y)){SFX.deny();toast(t('smnHere'),'warn');return false;}
+ if(scrollBlock()||smnWhere(P.x,P.y)){SFX.deny();toast(t('smnHere'),'warn');return false;}if(gTime-(P.hitT??-99)<SMNHIT){SFX.deny();toast(t('smnHurt'),'warn');return false;}
  if(performance.now()-SMNP<SMNCD){toast(t('smnSoon'));return false;}SMNP=performance.now();SMNA={uid:m.uid,until:performance.now()+SMNT+5000};
  rdySay(SMNQ+(m.handle||'?').slice(0,16)+' #'+smnTag(m.uid)+' @'+Math.round(P.x)+','+Math.round(P.y));toast(t('smnSent',{n:m.handle||'?'}),'good');return true;}
 function smnLine(L){if(!L||L.type!=='line'||L.ch!=='party'||typeof L.text!=='string'||L.self||!PARTY||!PARTY.id()||!NET)return;const tx=L.text;
- if(tx.startsWith(SMNQ)){const q=/#([A-Za-z0-9_-]{1,6}) @(\d{1,6}),(\d{1,6})$/.exec(tx);if(!q||q[1]!==smnTag(NET.uid))return;
+ if(tx.startsWith(SMNQ)){const q=/#([A-Za-z0-9_-]{1,6}) @(-?\d{1,6}),(-?\d{1,6})$/.exec(tx);if(!q||q[1]!==smnTag(NET.uid))return;
   SMN={from:L.from,n:L.handle||'?',x:+q[2],y:+q[3],until:performance.now()+SMNT};const z=zoneAt(SMN.x,SMN.y);
   $('smnT').textContent=t('smnAskT',{n:SMN.n,z:z?t(z):'?',g:fmtN(smnFee())});$('smnBox').hidden=false;SFX.notice();return;}
- if((tx==='⇲✓'||tx==='⇲✗')&&SMNA&&L.from===SMNA.uid&&performance.now()<SMNA.until){SMNA=null;toast(t(tx==='⇲✓'?'smnYes':'smnNo',{n:L.handle||'?'}),tx==='⇲✓'?'good':'warn');}}   /* only the one who asked hears it */
-function smnAns(y){const R=SMN;SMN=null;$('smnBox').hidden=true;if(!R)return;if(!y){rdySay('⇲✗');return;}
- const g=smnFee(),why=scrollBlock()?'smnHere':S.gold<g?'smnPoor':smnWhere(R.x,R.y)||R.x<8||R.x>MW*TS-8||R.y<8?'smnThere':eaSide(R.x)!==eaSide(outPos().x)?'smnSea':null;
+ const an=/^⇲([✓✗]) #([A-Za-z0-9_-]{1,6})$/.exec(tx);if(an&&an[2]===smnTag(NET.uid)&&SMNA&&L.from===SMNA.uid&&performance.now()<SMNA.until){SMNA=null;toast(t(an[1]==='✓'?'smnYes':'smnNo',{n:L.handle||'?'}),an[1]==='✓'?'good':'warn');}}   /* only the one who asked hears it */
+function smnAns(y){const R=SMN;SMN=null;$('smnBox').hidden=true;if(!R)return;const re=' #'+smnTag(R.from);if(!y){rdySay('⇲✗'+re);return;}
+ const g=smnFee(),why=scrollBlock()?'smnHere':gTime-(P.hitT??-99)<SMNHIT?'smnHurt':S.gold<g?'smnPoor':smnWhere(R.x,R.y)?'smnThere':eaSide(R.x)!==eaSide(outPos().x)?'smnSea':null;
  let to=why?null:{x:R.x+10,y:R.y+4};if(to&&hitBox(to.x,to.y,6))to=freeNear(to.x,to.y,6);
- if(why||!to){SFX.deny();toast(t(why||'smnThere',{g:fmtN(g)}),'warn');rdySay('⇲✗');return;}
+ if(why||!to){SFX.deny();toast(t(why||'smnThere',{g:fmtN(g)}),'warn');rdySay('⇲✗'+re);return;}
  S.gold-=g;if(P.ride)dismount();vfx('spawn',P.x,P.y);P.x=to.x;P.y=to.y;P.inv=1;camSnap=true;netForce=true;vfx('spawn',P.x,P.y);SFX.quest();
- toast(t('smnGo',{n:R.n,g:fmtN(g)}),'good');rdySay('⇲✓');hudDirty=true;save(true);}
+ toast(t('smnGo',{n:R.n,g:fmtN(g)}),'good');rdySay('⇲✓'+re);hudDirty=true;save(true);}
 function smnKey(c){if(!SMN||c!=='KeyY'&&c!=='KeyN')return false;smnAns(c==='KeyY');return true;}
 function smnTick(){if(SMN&&performance.now()>SMN.until){SMN=null;$('smnBox').hidden=true;}}
 Object.assign(STR.ar,{smnTip:'استدعي {n} لعندك (لو وافق بيدفع هو التمن)',smnY:'✓ روح (Y)',smnN:'✗ لأ (N)',smnHere:'مينفعش استدعاء من هنا ولا لهنا.',smnSoon:'استنى شوية قبل استدعاء تاني.',
  smnSent:'بعت لـ{n} إنك عايزه يجيلك.',smnAskT:'{n} عايز يستدعيك لـ{z}. هتدفع {g} دهب لو رحت.',smnYes:'{n} وافق وجاي.',smnNo:'{n} مش جاي.',smnPoor:'معاكش {g} دهب للاستدعاء.',
- smnThere:'المكان اللي عايز يستدعيك ليه مينفعش.',smnSea:'مينفعش استدعاء من قارة للتانية: البوابة بس.',smnGo:'رحت لـ{n} ودفعت {g} دهب.'});
+ smnThere:'المكان اللي عايز يستدعيك ليه مينفعش.',smnHurt:'مينفعش استدعاء وانت لسه بتتضرب.',smnSea:'مينفعش استدعاء من قارة للتانية: البوابة بس.',smnGo:'رحت لـ{n} ودفعت {g} دهب.'});
 Object.assign(STR.en,{smnTip:'Summon {n} to you (they pay the fee if they accept)',smnY:'✓ Go (Y)',smnN:'✗ No (N)',smnHere:"Nobody can be summoned from here or to here.",smnSoon:'Wait a little before summoning again.',
  smnSent:'You asked {n} to come to you.',smnAskT:'{n} wants to summon you to {z}. Going costs {g} gold.',smnYes:'{n} accepted and is on the way.',smnNo:"{n} isn't coming.",smnPoor:"You don't have the {g} gold the summons costs.",
- smnThere:"You can't be summoned to that place.",smnSea:"Nobody can be summoned across to the other continent: only the portal crosses.",smnGo:'You went to {n} and paid {g} gold.'});
+ smnThere:"You can't be summoned to that place.",smnHurt:"No summons while you're still being hit.",smnSea:"Nobody can be summoned across to the other continent: only the portal crosses.",smnGo:'You went to {n} and paid {g} gold.'});
 window.__GSMN={ask:u=>smnAsk(u),line:L=>smnLine(L),ans:y=>smnAns(y),get R(){return SMN},fee:()=>smnFee(),tag:u=>smnTag(u),cd:()=>{SMNP=-1e9;}}; // tests
 window.__GRDY={gate:()=>rdyGate(),ask:w=>rdyAsk(w),get R(){return RDY},ok:()=>performance.now()<RDYOK}; // tests
 function partyUI(live){if(!PARTY)return;const inv=live?PARTY.pendingInvite():null,mem=live?PARTY.members():[];
@@ -18074,7 +18084,7 @@ function mobAdopt(k,v,u){const w=v.split(','),n=w.slice(0,5).map(Number);if(![5,
  const now=!m.dead&&m.prov>gTime&&m.provU===NET.uid;
  if(!used&&(now||m.dead||m.eng>0||m.hp<m.max||Math.hypot(m.x-P.x,m.y-P.y)<320))return;
  if(!live){if(!m.dead){m.dead=true;m.dying=0;m.rt=mobRt(m);}MOBN.fast=1;return;}
- let fresh=false;if(m.dead){fresh=true;const keep={ek:m.ek,tmp:m.tmp,evt:m.evt,sg:m.sg,nk:m.nk,far:m.far},ty=m.type,ox=m.sx,oy=m.sy;monFresh(m,newMon(ty,ox,oy));for(const q in keep)if(keep[q]!==undefined)m[q]=keep[q];m.lv=lv;m.max=mx||mobBaseMax(m);}
+ let fresh=false;if(m.dead){fresh=true;const keep={ek:m.ek,tmp:m.tmp,evt:m.evt,sg:m.sg,nk:m.nk,far:m.far,band:m.band,bi:m.bi},ty=m.type,ox=m.sx,oy=m.sy;monFresh(m,newMon(ty,ox,oy));for(const q in keep)if(keep[q]!==undefined)m[q]=keep[q];m.lv=lv;m.max=mx||mobBaseMax(m);}
  const nh=Math.max(1,Math.round(m.max*hp/1000));m.hp=fresh?nh:Math.min(m.hp,nh);
  if(!now){m.x=x;m.y=y;m.face=fl&4?-1:1;if(fl&2){m.eng=4;m.agg=1;m.prov=gTime+10;m.provU=u;}}
  if(hp<1000)mobHitBy(m,u);MOBN.fast=1;}
@@ -18149,7 +18159,7 @@ function mobDrive(m,b,dt,safe){m.led=false;if(MOBN.host===NET.uid||!mobOk(m))ret
  // SAT-ONLINE-149: dead on the host's list. If you hit it, it's your kill too: from the host's message or from this, whichever
  // comes first (the message alone could be lost); if not, it just dies
  if(fl&1){if(!m.dead){if(m.myHit&&mobEarn(m)){m.mobKill=1;m.hp=0;killMon(m);m.mobKill=0;m.noLoot=0;}else if(m.dead){}else{m.dead=true;m.dying=.5;m.rt=mobRt(m);vfx('death',m.x,m.y);}mobLife(key);}return true;}
- if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mkN:m.mkN,sg:m.sg,nk:m.nk,boss:m.boss,far:m.far},hid=m.hidN;monFresh(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
+ if(m.dead){if(m.ek&&!m.hidN)return true;const ty=m.type,ox=m.sx,oy=m.sy,keep={ek:m.ek,tmp:m.tmp,evt:m.evt,mkN:m.mkN,sg:m.sg,nk:m.nk,boss:m.boss,far:m.far,band:m.band,bi:m.bi},hid=m.hidN;monFresh(m,newMon(ty,ox,oy));for(const k in keep)if(keep[k]!==undefined)m[k]=keep[k];m.led=true;m.x=x;m.y=y;if(!hid)vfx('spawn',m.x,m.y,{color:'#c8a0ff'});}
  mobLocal(m,key); /* anything this player's skill gave it since: to the host first */m.lv=lv;m.max=mx||mobBaseMax(m);m.stun=m.stunH=fl&8?.15:0;if(fl&16){m.wardT=gTime+.5;m.wardR=((fl>>5)&31)/20||.4;}else m.wardT=0; // a shield is the host's
  m.weak=m.weakH=fl&1024?.5:0;m.slowU=m.slowUH=fl&2048?gTime+.5:0; // weak and slow while the host's copy is // the host's full health and stun, not this copy's
  if(b.boss){const ph=hp<330?2:hp<660?1:0;if(hp>=1000)m.ph=0;else if(ph>(m.ph||0)){m.ph=ph;shake=.5;SFX.slam();vfx('rage',m.x,m.y);if(m.type==='dopp')toast(t('dpSplit'),'warn');else if(m.type!=='belial')toast(t('bossPh'+ph+(ph===1&&!(MT[m.type]||{}).adds?'n':''),{b:itN(m.type)}),'warn');}} // SAT-ONLINE-045

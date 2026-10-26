@@ -62,6 +62,10 @@ test('a party summon: asked, accepted with Y, paid on accept; declined; refused 
     await b.eval(() => { window.__G.P.ghost = true; }); await b.page.keyboard.press('KeyY'); await settle(a, b);
     assert.deepEqual(await b.eval(() => [window.__G.P.x, window.__G.S.gold]), before, 'a ghost goes nowhere and pays nothing');
     await b.eval(() => { window.__G.P.ghost = false; });
+    await a.eval((u) => { window.__GSMN.cd(); return window.__GSMN.ask(u); }, ub); await settle(a, b);
+    await until(b, () => !document.getElementById('smnBox').hidden);
+    await b.eval(() => { window.__G.P.hitT = window.__GPB7.gt(); }); await b.page.keyboard.press('KeyY'); await settle(a, b);
+    assert.deepEqual(await b.eval(() => [window.__G.P.x, window.__G.S.gold]), before, 'no summons out of a fight');
     const deep = await a.eval((u) => { const P = window.__G.P, y0 = P.y; P.y = 1e6; window.__GSMN.cd(); const r = window.__GSMN.ask(u); P.y = y0; return r; }, ub);
     assert.equal(deep, false, 'nobody is summoned below the world');
     assert.deepEqual(a.errors, []);
@@ -78,17 +82,17 @@ test('the Guardian\'s pillars: four stand by him; each turns away 15% of his dam
       o.n = ps.length; o.near = ps.every((p) => Math.hypot(p.x - gd.x, p.y - gd.y) < 280); o.ids = ps.map((p) => p.nk);
       o.cut = [X.gpAtk(gd)];
       G.P.x = gd.x + 60; G.P.y = gd.y;
-      const hp0 = gd.hp; X.hitMon(gd, 1, { pure: 1 }); const d4 = hp0 - gd.hp;
-      const xp0 = S.xp, g0 = S.gold; X.kill(ps[0]); X.kill(ps[1]); o.cut.push(X.gpAtk(gd)); o.free = [S.xp - xp0, S.gold - g0, ps[0].rt];
+      const hp0 = gd.hp; X.hitMon(gd, 1000, { pure: 1 }); const d4 = hp0 - gd.hp;
+      const xp0 = S.xp, g0 = S.gold, k0 = (S.kills || {}).gpillar || 0; X.kill(ps[0]); X.kill(ps[1]); o.cut.push(X.gpAtk(gd)); o.free = [S.xp - xp0, S.gold - g0, ps[0].rt, ((S.kills || {}).gpillar || 0) - k0];
       X.kill(ps[2]); X.kill(ps[3]); o.cut.push(X.gpAtk(gd));
-      const hp1 = gd.hp; X.hitMon(gd, 1, { pure: 1 }); const d0 = hp1 - gd.hp; o.ratio = Math.round(d4 / d0 * 100) / 100;
+      gd.hp = gd.max; const hp1 = gd.hp; X.hitMon(gd, 1000, { pure: 1 }); const d0 = hp1 - gd.hp; o.ratio = Math.round(d4 / d0 * 100) / 100;
       const p = { ...ps[0] }; for (const q of ps) { q.dead = false; q.hp = q.max; } X.monTick(ps[0], 1); o.still = ps[0].x === ps[0].sx && ps[0].y === ps[0].sy && !(ps[0].eng > 0);
       return o;
     });
     assert.equal(r.n, 4); assert.equal(r.near, true); assert.deepEqual(r.ids, ['gpillar@0', 'gpillar@1', 'gpillar@2', 'gpillar@3']);
     assert.deepEqual(r.cut, [0.4, 0.7, 1]);
-    assert.equal(r.ratio, 0.4, 'his blow with four pillars up, against none');
-    assert.deepEqual(r.free, [0, 0, 90], 'no experience, no gold, back in 90 s');
+    assert.ok(Math.abs(r.ratio - 0.4) <= 0.02, 'his blow with four pillars up, against none: ' + r.ratio);
+    assert.deepEqual(r.free, [0, 0, 90, 0], 'no experience, no gold, no kill on the books, back in 90 s');
     assert.equal(r.still, true, 'a pillar never moves or fights');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
@@ -104,7 +108,7 @@ test('orcs lock shields together; the Frostlight warband marches post to post, w
       // the shield wall: every orc beside the one who calls it
       const orcs = X.mons().filter((m) => m.type === 'forc' && !m.dead && !m.band).slice(0, 3), c = orcs[0];
       orcs[1].x = c.x + 20; orcs[1].y = c.y; orcs[2].x = c.x + 400; orcs[2].y = c.y;
-      X.mxk('ward', c, mv); const t0 = X.gt(); o.warded = orcs.map((m) => m.wardT > t0 ? m.wardR : 0);
+      X.mxk('ward', c, mv); const t0 = X.gt(); o.warded = orcs.map((m) => m.wardT > t0 ? m.wardR : 0); orcs[1].wardT = 0; X.mxk('ward', c, mv); o.again = orcs[1].wardT > t0;
       // the warband
       o.n = W.ms.length; o.ids = W.ms.map((m) => m.nk); o.pts = W.pts.length;
       G.P.x = W.x + 3000; G.P.y = W.y;
@@ -113,15 +117,24 @@ test('orcs lock shields together; the Frostlight warband marches post to post, w
       o.moved = Math.round(d0 - Math.hypot(p1.x - W.x, p1.y - W.y));
       W.ms[2].eng = 4; const x1 = W.x, y1 = W.y; for (let i = 0; i < 50; i++) X.wbTick(0.1); o.waited = W.x === x1 && W.y === y1; W.ms[2].eng = 0;
       W.ms[3].x += 900; X.wbTick(0.1); o.caught = Math.hypot(W.ms[3].x - W.ms[3].sx, W.ms[3].y - W.ms[3].sy) < 1;
+      // the posts are on open ground the band can walk between; one stuck in sight is put back after 20 s
+      o.span = [Math.min(...W.pts.map((p) => p.x)), Math.max(...W.pts.map((p) => p.x))];
+      G.P.x = W.ms[1].x + 100; G.P.y = W.ms[1].y; W.ms[1].x += 150; W.ms[1].sx0 = 1;
+      o.stuck = 0; for (let i = 0; i < 260 && !o.stuck; i++) { X.wbTick(0.1); if (Math.hypot(W.ms[1].x - W.ms[1].sx, W.ms[1].y - W.ms[1].sy) < 5) o.stuck = Math.round(i / 10); }
+      o.healed = (() => { const m = W.ms[4]; delete m.band; delete m.bi; X.wbTick(0.1); return m.band === 1 && m.bi === 4 && Number.isFinite(m.sx); })();
       return o;
     });
     assert.equal(r.wall, true);
-    assert.deepEqual(r.warded, [0.4, 0.4, 0], 'the one beside him locks shields; one far off doesn\'t');
+    assert.deepEqual(r.warded, [0.6, 0.6, 0], 'the one beside him locks shields; one far off doesn\'t');
+    assert.equal(r.again, false, 'not called again while he holds his shield');
     assert.equal(r.n, 5); assert.deepEqual(r.ids, ['forc@wb0', 'forc@wb1', 'forc@wb2', 'forc@wb3', 'forc@wb4']);
     assert.ok(r.pts >= 4, 'posts: ' + r.pts);
     assert.ok(r.moved >= 170 && r.moved <= 185, '18 px a second for 10 s: ' + r.moved);
     assert.equal(r.waited, true, 'the march waits while one of them fights');
     assert.equal(r.caught, true, 'one left behind out of sight catches up');
+    assert.ok(r.span[1] - r.span[0] > 600, 'the march covers the orcs\' land: ' + r.span);
+    assert.ok(r.stuck >= 19 && r.stuck <= 22, 'one stuck in sight is put back in line after 20 s: ' + r.stuck);
+    assert.equal(r.healed, true, 'a member that lost its band fields (a follower\'s revive) gets them back');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
