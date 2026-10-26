@@ -53,7 +53,8 @@ test('wiki classes: installed with trials; every skill casts; the pack stats wor
     const d = await g.eval(() => { const G = window.__G, S = G.S, P = G.P; S.cls = 'acrobat'; P.inv = 0; P.dash = 0; P.cpb = { eva: { v: 0.6, until: 1e12 } };
       let n = 0; for (let i = 0; i < 400; i++) { P.hp = G.maxHP(); P.inv = 0; const h = P.hp; window.__GCP.hurt(5); if (P.hp === h) n++; } P.inv = 1e9; return n / 400; });
     assert.ok(d > 0.45 && d < 0.75, 'about 60% of the blows slip: ' + d);
-    const u = await g.eval(() => { const G = window.__G, S = G.S, P = G.P; S.cls = 'dupl'; P.mp = 1e6; const n0 = window.__GSKF.fx(); window.__GSKF.cast('dpdup'); return window.__GSKF.fx() > n0 || !!document.querySelector('#toasts')?.textContent.match(/Duplicated/); });
+    const u = await g.eval(() => { const G = window.__G, S = G.S, P = G.P; S.cls = 'dupl'; P.mp = 1e6; S.dpCopy = 'strike';   /* (v3.15) a copy is made by an observation first */
+      const n0 = window.__GSKF.fx(); window.__GSKF.cast('dpdup'); return window.__GSKF.fx() > n0 || !!document.querySelector('#toasts')?.textContent.match(/Duplicated/); });
     assert.equal(u, true, 'Duplication casts something');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }

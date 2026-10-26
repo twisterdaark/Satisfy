@@ -26,6 +26,9 @@
         sk('makick', 'Lightning Aura Kicks', 'ركلات هالة البرق', 'Kicks wrapped in golden lightning sweep what is in front and knock it down.', 'ركلات ملفوفة ببرق دهبي بتكنس اللي قدامك وتوقعه.', 50, 'cone', { r: 55, mul: 1.8, stun: 0.8, mp: 18, cd: 9, col: '#fff4a0' }),
         sk('mashift', 'Shifting Strikes', 'ضربات متقلبة', 'Fists and feet change their path mid-blow: +10% critical chance.', 'القبضة والرجل بيغيروا طريقهم وسط الضربة: +10% فرصة كريتيكال.', 40, 'pas', { stat: 'crit', pct: 0.1 }),
         sk('mabody', 'Trained Body', 'جسم متدرب', '+10% damage.', '+10% ضرر.', 80, 'pas', { stat: 'atk', pct: 0.1 }),
+        // v3.15 (the class audit): ch 12 "Martial artists ignore defense to attack the weak point"; ch 1309 the Asura Halle's Lightning Fist
+        sk('maweak', 'Weak Point', 'نقطة الضعف', 'Martial artists ignore defence to strike the weak point: 40% of the level gap\'s toll on your damage is undone.', 'فنان القتال بيتجاهل الدفاع وبيضرب نقطة الضعف: 40% من اللي فرق اللفل بياخده من ضربك بيرجع.', 40, 'pas', { stat: 'pen', pct: 0.4 }),
+        sk('mafist', 'Lightning Fist', 'قبضة البرق', 'A fast straight punch that electrocutes what it hits.', 'لكمة مستقيمة سريعة بتكهرب اللي بتضربه.', 60, 'line', { r: 36, mul: 2.2, stun: 0.3, mp: 12, cd: 4, col: '#fff4a0' }),
         sk('masura', 'Sura Charge', 'اندفاعة الأسورا', 'The Asura\'s charge: dash through every foe on the way.', 'اندفاعة الأسورا: تندفع وتضرب كل اللي في سكتك.', 120, 'dash', { r: 90, mul: 3, stun: 0.6, mp: 30, cd: 14 })
       ] },
     // Med (ch171): the temple of Boris; Reverse Origin and Origin Opportunity; a club and cloth
@@ -105,10 +108,12 @@
       q: q(['Still Water', 'الميّه الراكدة'], ['Ice is water that has learned patience. Freeze twenty-five mermen with your staff.', 'التلج ميّه اتعلمت الصبر. جمّد خمسة وعشرين رجل سمكة بعصايتك.'], ['Your water still runs.', 'الميّه بتاعتك لسه بتجري.'], ['You bind and you shield. You are an Ice Mystic.', 'انت بتقيّد وبتحمي. انت دلوقتي متصوّف الجليد.']),
       skills: [
         sk('imaff', 'Water Affinity', 'ألفة الميّه', 'Near water: +20% damage.', 'جنب الميّه: +20% ضرر.', 40, 'pas', { stat: 'atk', pct: 0.2, cond: 'water' }),
-        sk('imweb', 'Ice Spider Web', 'شبكة عنكبوت الجليد', 'Webs of ice from four sides hold everything around you.', 'شبك تلج من أربع نواحي بيمسك كل اللي حواليك.', 40, 'nova', { r: 70, mul: 1, stun: 1.5, mp: 18, cd: 12 }),
+        sk('imweb', 'Ice Spider Web', 'شبكة عنكبوت الجليد', 'Webs of ice from four sides hold everything around you, and they stay slow after.', 'شبك تلج من أربع نواحي بيمسك كل اللي حواليك، ويفضلوا بطيئين بعدها.', 40, 'nova', { r: 70, mul: 1, stun: 1.5, slow: 2, mp: 18, cd: 12 }),
         sk('imbar', 'Ice Barrier', 'حاجز الجليد', 'The strongest shield against blows: +100% defence for 4 s.', 'أقوى درع ضد الضرب: +100% دفاع لمدة 4 ثواني.', 40, 'buff', { stat: 'def', pct: 1, dur: 4, mp: 20, cd: 18 }),
         sk('imfield', 'Ice Field', 'حقل الجليد', 'The ground freezes far around you and every foe slows.', 'الأرض بتتجمد لمسافة بعيدة حواليك وكل عدو بيبطأ.', 60, 'nova', { r: 110, mul: 0.8, slow: 3, mp: 24, cd: 15 }),
-        sk('imzero', 'Absolute Zero', 'الصفر المطلق', 'A bolt of utter cold that freezes its target.', 'شعاع برد تام بيجمّد هدفه.', 100, 'proj', { proj: 'magic', mul: 3, stun: 3, mp: 40, cd: 30, col: '#e8f8ff' })
+        // v3.15 (ch 181): Ice Prison; every attacking skill slows ("all attacking skills cause slowness and frost")
+        sk('imprison', 'Ice Prison', 'سجن الجليد', 'A prison of ice closes on the foe ahead: frozen in place for 4 s.', 'سجن تلج بيقفل على العدو اللي قدامك: متجمد مكانه 4 ثواني.', 70, 'proj', { proj: 'magic', mul: 1.5, stun: 4, slow: 3, mp: 30, cd: 20, col: '#cfefff' }),
+        sk('imzero', 'Absolute Zero', 'الصفر المطلق', 'A bolt of utter cold that freezes its target.', 'شعاع برد تام بيجمّد هدفه.', 100, 'proj', { proj: 'magic', mul: 3, stun: 3, slow: 3, mp: 40, cd: 30, col: '#e8f8ff' })
       ] },
     // Laella (ch475): first of the fire magicians; Fire Shield, five fire arrows at once; Fire Wall (ch414)
     { id: 'firemag', n: { en: 'Fire Magician', ar: 'ساحر النار' }, root: 'mage', from: ['mage'], by: 'tm', lv: 40, mst: ['staff', 4], col: '#ff7a3a',
@@ -175,8 +180,9 @@
       obj: { t: 'kill', it: 'mimic', n: 30, wk: 'staff' }, xp: 300000, gold: 10000,
       q: q(['The Copy', 'النسخة'], ['Mimics copy what they see. Kill thirty and learn the trick from them.', 'الميميك بيقلدوا اللي بيشوفوه. اقتل تلاتين واتعلم منهم الحيلة.'], ['You still only watch.', 'لسه بتتفرج وبس.'], ['An epic hidden class: Duplicator. What you see, you can do; nothing above epic.', 'كلاس مخفي إيبك: الناسخ. اللي بتشوفه بتقدر تعمله، بس مفيش حاجة فوق الإيبك.']),
       skills: [
-        sk('dpobs', 'Skill Observation', 'مراقبة السكيل', 'Read the foe: +15% damage for 20 s.', 'تقرا العدو: +15% ضرر لمدة 20 ثانية.', 120, 'buff', { stat: 'atk', pct: 0.15, dur: 20, mp: 16, cd: 30 }),
-        sk('dpdup', 'Duplication', 'النسخ', 'Cast a skill of another class you have seen, at once and without a chant.', 'تعمل سكيل من كلاس تاني شفته، في ساعتها ومن غير تعويذة.', 120, 'dup', { mp: 30, cd: 20 }),
+        // v3.15 (ch 48, 201): three copies a day, each used once, after an observation that can fail (index.html replaces these two casts)
+        sk('dpobs', 'Skill Observation', 'مراقبة السكيل', 'Observe a skill to copy it (it can fail): three copies a day, one kept at a time.', 'بتراقب سكيل عشان تنسخه (ممكن تفشل): تلات نسخ في اليوم، ونسخة واحدة معاك في المرة.', 120, 'buff', { stat: 'atk', pct: 0, dur: 1, mp: 16, cd: 30 }),
+        sk('dpdup', 'Duplication', 'النسخ', 'Use the skill you observed, at once and with no conditions: once, then the copy is gone.', 'تستخدم السكيل اللي راقبته، في ساعتها ومن غير شروط: مرة واحدة والنسخة بتروح.', 120, 'dup', { mp: 30, cd: 5 }),
         sk('dpbody', 'Frail Body', 'جسم ضعيف', 'A magician\'s body: -10% health.', 'جسم ساحر: -10% صحة.', 120, 'pas', { stat: 'hp', pct: -0.1 }),
         sk('dpbliz', 'Copied Blizzard', 'العاصفة الثلجية المنسوخة', 'The great magic Blizzard, copied: everything around freezes and slows.', 'السحر العظيم العاصفة الثلجية، منسوخ: كل اللي حواليك بيتجمد ويبطأ.', 150, 'nova', { r: 120, mul: 2.4, slow: 3, mp: 50, cd: 40 })
       ] },
@@ -221,6 +227,8 @@
         sk('gadesire', 'Heart\'s Desire', 'رغبة القلب', 'The dead are resurrected on the spot: every fallen party member near you rises with full health. Players only.', 'الميتين بيقوموا في مكانهم: كل حد من البارتي وقع جنبك بيقوم بصحة كاملة. للاعيبة بس.', 170, 'heal', { pct: 0, mp: 40, cd: 600 }),
         sk('gabreath', 'Goddess\' Breath', 'نَفَس الإلهة', 'All your health back, and 70% of it to your party nearby.', 'كل صحتك بترجع، و70% منها للبارتي اللي جنبك.', 150, 'heal', { pct: 1, mp: 30, cd: 300 }),
         sk('gashield', 'Goddess\' Protection', 'حماية الإلهة', 'A shield of absolute defence: the next blow you take, within 30 s, does nothing.', 'درع دفاع مطلق: الضربة الجاية اللي هتاخدها، في خلال 30 ثانية، مش هتعمل حاجة.', 160, 'heal', { pct: 0, mp: 20, cd: 120 }),
+        // v3.15 (ch 357): "As Goddess' Agent, Damian was still a paladin" who "was able to learn a higher Sword Mastery skill than general paladins"
+        sk('gaswm', 'Sword Mastery', 'إتقان السيف', 'Higher than an ordinary paladin\'s: +12% damage with a sword.', 'أعلى من بتاع البالادين العادي: +12% ضرر بالسيف.', 150, 'pas', { stat: 'atk', pct: 0.12, cond: 'sword' }),
         sk('gaprot', 'Divine Protection', 'الحماية الإلهية', '+20% defence for 3 minutes.', '+20% دفاع لمدة 3 دقايق.', 200, 'buff', { stat: 'def', pct: 0.2, dur: 180, mp: 40, cd: 300 })
       ] }
   );
