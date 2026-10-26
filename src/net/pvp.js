@@ -20,10 +20,12 @@
  * player it really hit in the last KILL_MS. A modified client could ignore hits or hide its mark; Trusted Combat on a
  * server (R5) closes that later.
  *
- * Exposes `Satisfy.pvp.create({ presence, uid, now?, pos, zone, room?, party, ally?, busy?, alive?, policy?, zoneAt? })`.
+ * Exposes `Satisfy.pvp.create({ presence, uid, now?, pos, zone, room?, party, ally?, busy?, alive?, policy?, zoneAt?, apart? })`.
  *   pos(): {x, y} of the local player; zone(): its zone id; room(): its house interior id or null; party(): its party id or null;
  *   ally(r): true when remote r is in a guild allied with ours; busy(): true while in a duel; alive(): false while dead.
  *   zoneAt(x, y) (optional): the zone id at a world position, from the local map (the game's netZone).
+ *   apart(r) (optional): true when remote r is somewhere we can't see, though in the same room (plan U150: another
+ *   party's copy of the goblin warcamp; U300: everyone's own room). Checked on both sides, like the room.
  */
 (function (root) {
   'use strict';
@@ -42,6 +44,7 @@
     var busy = o.busy || function () { return false; }, alive = o.alive || function () { return true; };
     var zoneAt = typeof o.zoneAt === 'function' ? o.zoneAt : null;
     var ally = o.ally || function () { return false; };
+    var apart = o.apart || function () { return false; };
     var policy = o.policy || (root.Satisfy && root.Satisfy.net && root.Satisfy.net.zonePolicy) || function () { return { safe: false }; };
     var listeners = [], hitsIn = new Map(), hitsOut = [], hitN = 0;
     var struck = new Map(); // uid -> last time we hit them (a kill report only counts for those)
@@ -55,7 +58,7 @@
     // why a hit between us and remote r can't happen, or null
     function why(r) {
       if (!r || !r.uid || r.uid === self) return 'bad';
-      if ((r.room || null) !== (room() || null)) return 'room';
+      if ((r.room || null) !== (room() || null) || apart(r)) return 'room';
       if (noFight(zone()) || noFight(r.zone)) return 'safe';
       if (zoneAt && typeof r.x === 'number' && typeof r.y === 'number' && noFight(zoneAt(r.x, r.y))) return 'safe'; // where it really is, on our map
       if (mate(r)) return 'mate';

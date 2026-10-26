@@ -2033,7 +2033,7 @@ function genRoom(b,bi,kind,rx,ry,z){const R={id:'r'+bi,bi,b,kind,rx,ry,z,dx:b.x*
 var HALLB=null,HALLV=null,HOMEB=null;
 const HALL=(()=>{const rx=218,ry=WMH+16,W0=TOWNS.find(z=>z.k==='zWin')||TOWNS[0],R={id:'rGH',bi:-1,b:null,kind:'hall',rx,ry,z:'zWin',dx:W0.rx*TS+8,dy:W0.ry*TS+6};
  for(let y=ry;y<ry+8;y++)for(let x=rx;x<rx+12;x++)setT(x,y,(y<ry+2||y===ry+7||x===rx||x===rx+11)?IW:FW);setT(rx+6,ry+7,FW);ROOMS.push(R);return R;})();
-const HOME=(()=>{const rx=966,ry=WMH+23,R={id:'rHome',bi:-2,b:null,kind:'home',rx,ry,z:'zWin',dx:0,dy:0};   // plan U300: a room of your own
+const HOME=(()=>{const rx=966,ry=WMH+18,R={id:'rHome',bi:-2,b:null,kind:'home',rx,ry,z:'zWin',dx:0,dy:0};   // plan U300: a room of your own (rows 290–297: above Behen's, which start at BHY0)
  for(let y=ry;y<ry+8;y++)for(let x=rx;x<rx+12;x++)setT(x,y,(y<ry+2||y===ry+7||x===rx||x===rx+11)?IW:FW);setT(rx+6,ry+7,FW);ROOMS.push(R);return R;})();
 const roomAt=(x,y)=>y<WMH*TS?null:ROOMS.find(R=>x>=R.rx*TS&&x<(R.rx+12)*TS&&y>=R.ry*TS&&y<(R.ry+8)*TS);
 const doorOf=b=>({x:b.x*TS+b.w*8,y:(b.y+b.h)*TS+2});
@@ -7630,7 +7630,7 @@ function unstuck(){if(!S||!P||mode==='dead')return;if(BHR||inBh(P.x,P.y)){resume
  const left=Math.ceil((S.unstT||0)-S.playT);if(left>0){toast(t('unstuckWait',{n:left}),'warn');SFX.deny();return;}
  const T=TOWNS.reduce((a,b)=>Math.hypot(b.rx*TS-P.x,b.ry*TS-P.y)<Math.hypot(a.rx*TS-P.x,a.ry*TS-P.y)?b:a);S.unstT=S.playT+60;resume();
  fadeTo(()=>{P.x=T.rx*TS+8;P.y=T.ry*TS+10;P.dir=0;P.guard=0;camSnap=true;vfx('spawn',P.x,P.y);hudDirty=true;toast(t('unstuckDone',{z:t(T.k)}),'good');});}
-function leaveRoom(Rm){if(roomFade)return;roomFade=true;SFX.close();fadeTo(()=>{roomFade=false;P.x=Rm.dx;P.y=Rm.dy+4;P.dir=0;camSnap=true;hudDirty=true;});}
+function leaveRoom(Rm){if(roomFade)return;if(Rm===HOME)homeSync();roomFade=true;SFX.close();fadeTo(()=>{roomFade=false;P.x=Rm.dx;P.y=Rm.dy+4;P.dir=0;if(Rm===HOME&&hitBox(P.x,P.y,4)){const f=freeNear(P.x,P.y,4);if(f){P.x=f.x;P.y=f.y;}}camSnap=true;hudDirty=true;});}
 const BOOKS=['bk1','bk2','bk3','bk4','bk5','bk6'];
 function useProp(p){if(dcTab(p))return dcOpen();if(p.k==='bed'){toast(t(roomAt(P.x,P.y)?.kind==='inn'?'bedInn':'bedNo'));return;}
  S.chest=S.chest||{};S.books=S.books||{};
@@ -8824,7 +8824,7 @@ function becomeBraham(){const L=WS.legends||(WS.legends={});if(L.braham&&L.braha
 function becomePagma(){const L=WS.legends||(WS.legends={});if(L.pagma&&L.pagma.pid!==pidOf())return;L.pagma={pid:pidOf(),n:S.look.n};
  S.cls='pagma';S.bar=null;legendReset();sbSig='';SFX.legendary();flash();hudDirty=true;save(true);
  dialog('pbookN',['pgS1','pgS2','legReset','pgPerk'],()=>{annW('annPagma');checkSkills();});}
-function drawShrine(o){if(o.nl)return nlDraw(o);if(o.ea)return eaDrawShrine(o);if(o.k==='god')return drawGod(o);if(o.k==='irene')return drawIrene(o);const x=Math.round(o.x),y=Math.round(o.y),pul=.5+Math.sin(gTime*3)*.5;
+function drawShrine(o){if(o.hm)return drawHomeSpot(o);if(o.nl)return nlDraw(o);if(o.ea)return eaDrawShrine(o);if(o.k==='god')return drawGod(o);if(o.k==='irene')return drawIrene(o);const x=Math.round(o.x),y=Math.round(o.y),pul=.5+Math.sin(gTime*3)*.5;
  if(o.k==='msword'){const has=!(WS&&WS.legends&&WS.legends.muller);ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(x-11,y-1,22,2);R(ctx,x-10,y-7,20,7,'#6a6e78');R(ctx,x-10,y-7,20,1,'#8a909a');R(ctx,x-7,y-10,14,3,'#7a808a');
   if(has){ctx.globalAlpha=.2+pul*.25;ctx.fillStyle='#bfe0ff';ctx.beginPath();ctx.ellipse(x,y-22,8,16,0,0,7);ctx.fill();ctx.globalAlpha=1;R(ctx,x-1,y-34,3,24,'#dfe8f2');R(ctx,x,y-34,1,24,'#ffffff');R(ctx,x-5,y-36,11,2,'#c8a050');R(ctx,x-1,y-42,3,6,'#6a4a2a');R(ctx,x-1,y-43,3,1,'#c8a050');if(rand()<.2)fx.push({x:x+(rand()-.5)*10,y:y-30,vx:0,vy:-12,t:.6,c:'#bfe0ff',fl:1});}
   else R(ctx,x-2,y-12,4,2,'#3a3e48');return;}
@@ -9348,10 +9348,12 @@ function dropStart(){if(typeof dropOff==='function')dropOff();dropOff=null;DROPS
 function dropStop(){if(typeof dropOff==='function')dropOff();dropOff=null;DROPS=null;for(let i=GDROP.length-1;i>=0;i--)if(GDROP[i].rem)GDROP.splice(i,1);}
 function dropKindOk(k,r){return !!(POT[k]||k==='bread'||(k==='arrows'&&ARROWG[r]!=null)||MATP[k]!==undefined||(typeof DISH!=='undefined'&&DISH[k]));}
 function dropItemOk(js){try{const o=JSON.parse(js);return o&&typeof o.id==='string'&&rcById(o.id)?o:null;}catch(e){return null;}}
-function dropPut(d){if(!DROPS||!NET||!S||S.__demo)return;const o=d.o,v={o:NET.uid,x:Math.max(0,d.x),y:d.y,k:String(o.k||''),n:o.n|0||1,r:o.r|0};if(!/^[a-z0-9_]{1,24}$/.test(v.k))return;
+const dropNet=(x,y)=>roomAt(x,y)!==HOME;   /* (plan U300) everyone's room is the same place: a drop there stays yours, off the network */
+function dropPut(d){if(!DROPS||!NET||!S||S.__demo||!dropNet(d.x,d.y))return;const o=d.o,v={o:NET.uid,x:Math.max(0,d.x),y:d.y,k:String(o.k||''),n:o.n|0||1,r:o.r|0};if(!/^[a-z0-9_]{1,24}$/.test(v.k))return;
  if(o.it){const j={};for(const q in o.it)if(q!=='uid'&&q!=='iid')j[q]=o.it[q];const js=JSON.stringify(j);if(js.length>600)return;v.it=js;}
  const did='d_'+NET.uid+'_'+Date.now().toString(36)+(++dropSeq).toString(36);d.did=did;d.own=1;DROPS.put(did,v).catch(()=>{d.did=null;d.own=0;});}
 function dropIn(did,v){if(!v||!S||S.__demo||!NET||GDROP.some(d=>d.did===did))return;
+ if(inCamp(+v.x,+v.y)&&v.o!==NET.uid&&!(PARTY&&PARTY.id()&&PARTY.members().some(m=>m.uid===v.o)))return;   // (plan U150) another party's warcamp is another copy
  const left=(+v.t||0)+60000-wNow();if(left<=0){if(left<-120000)DROPS.remove(did).catch(()=>{});return;} // a stale drop anyone may clear
  let o;if(typeof v.it==='string'){const it=dropItemOk(v.it);if(!it)return;o={json:v.it,k:v.k,n:1,r:it.r|0};}
  else if(dropKindOk(v.k,v.r|0))o={k:v.k,n:Math.max(1,Math.min(99999,v.n|0)),r:v.r|0};else return;
@@ -16644,28 +16646,31 @@ function netZone(x,y){return y>=WMH*TS&&!dunAt(x,y)&&!roomAt(x,y)?'void':zoneAt(
    guild hall uses (HALLS, HALLK), HMPIECE gold a piece, a place cleared for free; a bed in it lets you sleep the day off
    (health, mana and stamina back). It's yours on your own screen; letting other players visit needs the database's
    rules, and is left. */
-const HMRENT=5000,HMPIECE=800;
+const HMRENT=5000,HMPIECE=800,HMSLP=20*60000;   /* the bed: once in 20 minutes; an inn's night is still the one that leaves you rested (innWake) */
 function homeBlock(){const sl=S&&S.home&&S.home.slots;if(!sl){HOMEB=null;return;}const B=new Set();for(const k in sl){const i=+k.slice(1),e=sl[k];if(!HALLS[i]||!e||!HALLK.includes(e.k))continue;const [x,y]=HALLS[i],w=HALLW[e.k]||1;for(let j=0;j<w;j++)B.add((HOME.rx+x+j)*1000+HOME.ry+y);}HOMEB=B;}
 function homeOpt(id){const n=npcOf(id);if(!n||eaSide(n.x)!==eaSide(HOME.rx*TS))return [];
- if(!S.home)return [{l:t('hmRent',{g:fmtN(HMRENT)}),pr:HMRENT,poor:S.gold<HMRENT,f:()=>{if(S.gold<HMRENT){SFX.deny();return toast(t('noGold'),'warn');}S.gold-=HMRENT;S.home={slots:{}};SFX.coin();toast(t('hmRented'),'good');save(true);homeGo(id);}}];
+ if(!S.home)return [{l:t('hmRent',{g:fmtN(HMRENT)}),pr:HMRENT,poor:S.gold<HMRENT,f:()=>{if(S.home)return homeGo(id);if(S.gold<HMRENT){SFX.deny();return toast(t('noGold'),'warn');}S.gold-=HMRENT;S.home={slots:{}};SFX.coin();toast(t('hmRented'),'good');save(true);homeGo(id);}}];
  return [{l:t('hmGo'),f:()=>homeGo(id)}];}
-function homeGo(id){const n=npcOf(id);if(!n||!S.home)return;Object.assign(S.home,{dx:n.x,dy:n.y+14,z:townOfNpc(id)||'zWin'});HOME.dx=n.x;HOME.dy=n.y+14;HOME.z=S.home.z;homeBlock();enterRoom(HOME);}
-function homeTick(){if(!P||!S)return;const inH=roomAt(P.x,P.y)===HOME;if(!inH)return;if(!HOMEB)homeBlock();if(!HOME.dx){const h=S.home||{};const T=TOWNS.find(z=>z.k==='zWin')||TOWNS[0];HOME.dx=+h.dx||T.rx*TS+8;HOME.dy=+h.dy||T.ry*TS+6;HOME.z=h.z||'zWin';}}   /* a reload inside: the door still leads back */
+function homeGo(id){const n=npcOf(id);if(!n||!S.home)return;Object.assign(S.home,{dx:n.x,dy:n.y+14,z:townOfNpc(id)||'zWin'});HOMEOF=null;homeSync();enterRoom(HOME);}
+let HOMEOF=null;   /* the door and the furniture are this character's: taken again from S.home whenever it changes (a reload, another character) */
+function homeSync(){const h=S&&S.home||null;if(h===HOMEOF&&HOME.dx)return;HOMEOF=h;homeBlock();const T=TOWNS.find(z=>z.k==='zWin')||TOWNS[0];HOME.dx=h&&+h.dx||T.rx*TS+8;HOME.dy=h&&+h.dy||T.ry*TS+6;HOME.z=h&&h.z||'zWin';}
+function homeTick(){if(!P||!S)return;homeSync();}
 function homeAct(){if(!S.home)return;const sl=S.home.slots||(S.home.slots={}),bed=Object.values(sl).some(e=>e&&e.k==='bed');
- dialog('hmRoom',[t('hmHi',{n:Object.keys(sl).length,m:HALLS.length})],null,[{l:t('hmArr'),f:homeArr},...(bed?[{l:t('hmSleep'),f:()=>{P.hp=maxHP();P.mp=maxMP();P.st=100;SFX.quest();vfx('heal',P.x,P.y);toast(t('hmSlept'),'good');hudDirty=true;save(true);}}]:[]),{l:t('oClose')}]);}
+ dialog('hmRoom',[t('hmHi',{n:Object.keys(sl).length,m:HALLS.length})],null,[{l:t('hmArr'),f:homeArr},...(bed?[{l:t('hmSleep'),f:()=>{const w=wNow(),z=+S.home.sl||0;if(w>=z&&w-z<HMSLP){SFX.deny();return toast(t('hmTired',{m:Math.ceil((HMSLP-(w-z))/60000)}),'warn');}S.home.sl=w;P.hp=maxHP();P.mp=maxMP();P.st=maxST();SFX.quest();vfx('heal',P.x,P.y);toast(t('hmSlept'),'good');hudDirty=true;save(true);}}]:[]),{l:t('oClose')}]);}
 function homeArr(){const sl=S.home.slots;dialog('hmRoom',[t('hmArrQ')],null,[...HALLS.map((_,i)=>{const e=sl['s'+i];return {l:t('ghSlot',{n:i+1,k:e?t('hk_'+e.k):t('ghEmpty')}),f:()=>homePick(i)};}),{l:t('oBack'),f:homeAct}]);}
 function homePick(i){const sl=S.home.slots,e=sl['s'+i];dialog('hmRoom',[t('hmPickQ',{n:i+1,g:fmtN(HMPIECE)})],null,[...HALLK.map(k=>({l:t('hk_'+k),pr:HMPIECE,poor:S.gold<HMPIECE,f:()=>homePlace(i,k)})),...(e?[{l:t('ghClear'),f:()=>homePlace(i,null)}]:[]),{l:t('oBack'),f:homeArr}]);}
 function homePlace(i,k){const sl=S.home.slots;if(k){if(S.gold<HMPIECE){SFX.deny();toast(t('noGold'),'warn');return homeArr();}
   const [x,y]=HALLS[i],w=HALLW[k]||1;for(let j=0;j<w;j++){const tx=HOME.rx+x+j,ty=HOME.ry+y;if(Math.floor(P.x/TS)===tx&&Math.floor(P.y/TS)===ty){SFX.deny();toast(t('hmStand'),'warn');return homeArr();}}
   S.gold-=HMPIECE;sl['s'+i]={k};SFX.coin();toast(t('ghPlaced'),'good');}else{delete sl['s'+i];toast(t('ghCleared'));}
  homeBlock();hudDirty=true;save(true);homeArr();}
+function drawHomeSpot(o){const x=Math.round(o.x),y=Math.round(o.y);ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(x-8,y-1,16,2);ctx.fillStyle='#5a3a1e';ctx.fillRect(x-7,y-19,14,18);ctx.fillStyle='#8a5a2e';ctx.fillRect(x-6,y-18,5,16);ctx.fillRect(x+1,y-18,5,16);ctx.fillStyle='#e0b050';ctx.fillRect(x-2,y-11,1,2);ctx.fillRect(x+1,y-11,1,2);}   /* your room's wardrobe: E to arrange it */
 SHRINES.push({k:'home',hm:1,x:(HOME.rx+6)*TS+8,y:(HOME.ry+2)*TS+10,hint:'hHome'});
-Object.assign(STR.ar,{hmRoom:'أوضتك',hmRent:'أجّر أوضة ليك ({g} دهب، مرة واحدة)',hmRented:'بقى ليك أوضة! أي نُزل في القارة دي هيفتحلك بابها.',hmGo:'روح أوضتك',hHome:'E: رتّب أوضتك',hmHi:'أوضتك. فيها {n} من {m} حتة.',hmArr:'رتّب العفش',hmArrQ:'أنهي مكان؟',hmPickQ:'إيه اللي تحطه في المكان {n}؟ ({g} دهب للحتة)',hmSleep:'نام في سريرك',hmSlept:'نمت كويس: صحتك وطاقتك رجعوا.',hmStand:'انت واقف في المكان ده. اتحرك الأول.'});
-Object.assign(STR.en,{hmRoom:'Your room',hmRent:'Rent a room of your own ({g} gold, once)',hmRented:'You have a room of your own! Any inn on this continent will open its door for you.',hmGo:'Go to your room',hHome:'E: arrange your room',hmHi:'Your room. {n} of its {m} places are furnished.',hmArr:'Arrange the furniture',hmArrQ:'Which place?',hmPickQ:'What goes in place {n}? ({g} gold a piece)',hmSleep:'Sleep in your bed',hmSlept:'You slept well: health, mana and stamina are back.',hmStand:"You're standing there. Step aside first."});
+Object.assign(STR.ar,{hmRoom:'أوضتك',hmRent:'أجّر أوضة ليك ({g} دهب، مرة واحدة)',hmRented:'بقى ليك أوضة! أي نُزل في القارة دي هيفتحلك بابها.',hmGo:'روح أوضتك',hHome:'E: رتّب أوضتك',hmHi:'أوضتك. فيها {n} من {m} حتة.',hmArr:'رتّب العفش',hmArrQ:'أنهي مكان؟',hmPickQ:'إيه اللي تحطه في المكان {n}؟ ({g} دهب للحتة)',hmSleep:'نام في سريرك',hmSlept:'نمت كويس: صحتك وطاقتك رجعوا.',hmStand:'انت واقف في المكان ده. اتحرك الأول.',hmTired:'لسه صاحي من شوية. ارجع نام بعد {m} دقيقة.'});
+Object.assign(STR.en,{hmRoom:'Your room',hmRent:'Rent a room of your own ({g} gold, once)',hmRented:'You have a room of your own! Any inn on this continent will open its door for you.',hmGo:'Go to your room',hHome:'E: arrange your room',hmHi:'Your room. {n} of its {m} places are furnished.',hmArr:'Arrange the furniture',hmArrQ:'Which place?',hmPickQ:'What goes in place {n}? ({g} gold a piece)',hmSleep:'Sleep in your bed',hmSlept:'You slept well: health, mana and stamina are back.',hmStand:"You're standing there. Step aside first.",hmTired:'You only just got up. Sleep again in {m} min.'});
 /* Plan U150 (2026-10-26): the goblin warcamp (Goblin Canyon Depths, its three floors) is one copy per party. In it, or with
    someone in it, you see, share monsters with (the host's group, mobTick) and can be found by only your own party; anyone
    else there is in a copy of their own, on its own host. Alone, you have it to yourself. */
-const inCamp=(x,y)=>{const D=dunAt(x,y);return !!D&&/^zDun[123]$/.test(D.k);};
+function inCamp(x,y){const D=dunAt(x,y);return !!D&&/^zDun[123]$/.test(D.k);}
 function campMate(r){if(!P||!(inCamp(P.x,P.y)||typeof r.x==='number'&&inCamp(r.x,r.y)))return true;const pid=PARTY&&PARTY.id();return !!pid&&r.party===pid;}
 let CAMPIN=0;function campTick(){const c=!!P&&inCamp(P.x,P.y);if(c&&!CAMPIN)toast(t(PARTY&&PARTY.id()?'campInP':'campIn'),'good');CAMPIN=c?1:0;}
 Object.assign(STR.ar,{campIn:'معسكر الجوبلن: المكان ده ليك لوحدك. البارتي بتاعك بس هو اللي يقدر يبقى معاك هنا.',campInP:'معسكر الجوبلن: المكان ده ليك انت والبارتي بتاعك بس.'});
@@ -17266,7 +17271,7 @@ function olPub(){return outlaw()?(karma()<=MURDER?2:1):0;}
 window.__GK={karma:()=>karma(),set:k=>{S.karma=k;},ol:()=>olPub(),respawn:()=>respawn()}; // test hook
 function karmaTick(dt){if(!S||S.__demo||mode!=='play'||karma()>=0)return;S.karT=(S.karT||0)+dt;if(S.karT>=KARMA_BACK){S.karT=0;S.karma=karma()+1;toast(t('kaBack',{k:S.karma}),'good');netForce=true;}}
 function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
-  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo,zoneAt:(x,y)=>netZone(x,y)});
+  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo,zoneAt:(x,y)=>netZone(x,y),apart:r=>!campMate(r)||!!P&&roomAt(P.x,P.y)===HOME});
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
   else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);balPvp(true);hgSoul();const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
    if(v&&warOf(v)){gwrKill(v.gd);return;} // a guild war (SAT-ONLINE-086): it counts for the guild, no karma lost
@@ -18724,7 +18729,7 @@ function mobGroup(cand){const g=[],q=[{x:P.x,y:P.y}],rest=cand.slice();while(q.l
    same place (outdoors, the same cave or mine, the same house) and near each other are one group. Its host is whoever has
    been in that place longest (each publishes when it got there, as an "in:" tag in fx), so a friend who walks in later
    takes over the monsters as the first one left them; ties go to the lowest uid. The arena and the tower stay solo. */
-const solo=(x,y)=>{if(inBh(x,y)||inTw(x,y))return true;const D=DUN[8];return !!D&&x>=D.x0*TS&&x<(D.x1+1)*TS&&y>=D.y0*TS&&y<(D.y1+1)*TS;};
+const solo=(x,y)=>{if(inBh(x,y)||inTw(x,y))return true;if(roomAt(x,y)===HOME)return true;const D=DUN[8];return !!D&&x>=D.x0*TS&&x<(D.x1+1)*TS&&y>=D.y0*TS&&y<(D.y1+1)*TS;};
 let SPIN={k:null,t:0};function spaceKey(){const R=roomAt(P.x,P.y);if(R)return 'r'+R.id;const D=dunAt(P.x,P.y);if(D)return 'd'+DUN.indexOf(D);return P.y>=WMH*TS?'v':'o';}
 function spaceIn(){const k=spaceKey();if(k!==SPIN.k)SPIN={k,t:Math.floor(wNow()/1000)};return SPIN.t;}
 function mobTick(live){if(!MOBN)return;const out=!!(live&&P&&!ARN&&!TWR&&!solo(P.x,P.y));const me=out?spaceIn():0,room=out?(roomAt(P.x,P.y)||{}).id||null:null;
@@ -19457,7 +19462,7 @@ window.__GPB6={p4S:()=>p4S(),plotAct:i=>p4PlotAct(i),plow:i=>p4Plow(i),water:i=>
  wcS:()=>wcS(),wcN:k=>wcN(k),wcEv:(k,n,u)=>wcEv(k,n,u),wcMenu:()=>wcMenu(),wcTurn:k=>wcTurn(k),wcGold:k=>wcGold(k),board:()=>openBoard(),
  mons:()=>mons,monTick:(m,dt)=>monTick(m,dt),post:(m,i)=>ptPost(m,PATROL[m.type],i),PATROL}; // tests (plan batch 6)
 window.__GPB7={get WB(){return OWB},wbTick:dt=>owbTick(dt),wbSpawn:()=>owbSpawn(),gps:()=>GPS,gpAtk:m=>gpAtk(m),hitMon:(m,mul,o)=>hitMon(m,mul,o),kill:m=>killMon(m),mons:()=>mons,monTick:(m,dt)=>monTick(m,dt),moves:k=>RKMV[k],gdRing:(x,y)=>gdRing(x,y),srcTxt:s=>srcTxt(s),itemTip:i=>itemTip(i),tradeIn:j=>tradeItemIn(j),rareDrop:(m,b)=>rareDrop(m,b),namedDrop:m=>namedDrop(m),gdHome:()=>gdHome(),hurt:(d,src)=>hurtPlayer0(d,1,src),mobTarget:m=>mobTarget(m),mxk:(k,m,mv)=>MXK[k](m,MT[m.type],mv,0,0,0,0),gt:()=>gTime}; // tests (plan batch 7)
-window.__GPB10={HOME,homeOpt:id=>homeOpt(id),homeGo:id=>homeGo(id),homeAct:()=>homeAct(),homePlace:(i,k)=>homePlace(i,k),homeTick:()=>homeTick(),solidT:(x,y)=>solidT(x,y),HALLS,inCamp:(x,y)=>inCamp(x,y),campMate:r=>campMate(r),netSees:(r,room)=>netSees(r,room||null),dun:k=>DUN.find(D=>D.k===k),rooms:()=>ROOMS.map(R=>[R.id,R.rx,R.ry]),at:(x,y)=>at(x,y),get GW(){return GW},get MH(){return MH},get WMH(){return WMH}}; // tests (plan batch 10)
+window.__GPB10={HOME,homeOpt:id=>homeOpt(id),homeGo:id=>homeGo(id),homeAct:()=>homeAct(),homePlace:(i,k)=>homePlace(i,k),homeTick:()=>homeTick(),solidT:(x,y)=>solidT(x,y),HALLS,inCamp:(x,y)=>inCamp(x,y),campMate:r=>campMate(r),netSees:(r,room)=>netSees(r,room||null),dun:k=>DUN.find(D=>D.k===k),rooms:()=>ROOMS.map(R=>[R.id,R.rx,R.ry]),at:(x,y)=>at(x,y),get GW(){return GW},get MH(){return MH},get WMH(){return WMH},inBh:(x,y)=>inBh(x,y),zoneAt:(x,y)=>zoneAt(x,y),solo:(x,y)=>solo(x,y),dunAt:(x,y)=>dunAt(x,y),roomId:(x,y)=>(roomAt(x,y)||{}).id||null,dropIn:(did,v)=>dropIn(did,v),dropNet:(x,y)=>dropNet(x,y),gdropN:()=>GDROP.length,pvpWhy:r=>PVP?PVP.why(r):'off',maxST:()=>maxST(),get BHR(){return BHR}}; // tests (plan batch 10)
 window.__GPB9={bcSide:x=>bcSide(x),bcStop:sd=>bcStop(sd),bcTick:dt=>bcTick(dt),bcFine:()=>bcFine(),cGo:(d,w)=>cGo(d,w),get EX(){return EX},avail:id=>qAvail(id),accept:id=>acceptQ(id),complete:id=>completeQ(id),repOf:k=>repOf(k),npcTalk:id=>talkNPC(id)}; // tests (plan batch 9)
 window.__GPB8={eat:k=>eatDish(k),hFresh:()=>hFresh(),make:(k,b)=>makeLife(k,b),mixEnd:r=>mixEnd(r),buy:(id,g,w)=>buyGear(id,g,w),avail:id=>qAvail(id),ready:id=>qReady(id),accept:id=>acceptQ(id),complete:id=>completeQ(id),hurt:(d,src)=>hurtPlayer0(d,1,src),get MIXG(){return MIXG}}; // tests (plan batch 8)
 })();

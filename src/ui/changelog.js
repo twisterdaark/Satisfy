@@ -9,9 +9,9 @@
   ns.CHANGELOG = [
     { v: '2026-10-26plan10', ver: '3.40', d: '2026-10-26',
       ar: ["معسكر الجوبلن (أدوار وادي الجوبلن الثلاثة) بقى نسخة لكل بارتي: جوه بتشوف وبتحارب مع البارتي بتاعك بس، واللي برا البارتي في نسخة لوحده.",
-        "أوضة ليك: أجّرها مرة واحدة من أي نُزل (5,000 دهب)، وأي نُزل في القارة يفتحلك بابها. رتّب فيها 8 حتت عفش (800 دهب للحتة)، ونام في سريرك ترجعلك صحتك وطاقتك."],
+        "أوضة ليك: أجّرها مرة واحدة من أي نُزل (5,000 دهب)، وأي نُزل في القارة يفتحلك بابها. رتّب فيها 8 حتت عفش (800 دهب للحتة)، ونام في سريرك ترجعلك صحتك وطاقتك (مرة كل 20 دقيقة)."],
       en: ["The goblin warcamp (the three floors of Goblin Canyon Depths) is now one copy per party: inside, you see and fight beside only your own party, and anyone else is in a copy of their own.",
-        "A room of your own: rent it once at any inn (5,000 gold), and every inn on that continent opens its door to it. Furnish its eight places (800 gold a piece), and sleep in your bed to get your health and stamina back."] },
+        "A room of your own: rent it once at any inn (5,000 gold), and every inn on that continent opens its door to it. Furnish its eight places (800 gold a piece), and sleep in your bed to get your health and stamina back (once every 20 minutes)."] },
     { v: '2026-10-26plan9', ver: '3.39', d: '2026-10-26',
       ar: ["في نُزل رولينج فيه جواب لساعي مات: يا توديه لإيرل آدن في راينهارت، يا تبيعه لفرسان تيتان. اللي تختاره بيشكرك (+60 سمعة) والتاني مش بينسى (−60).",
         "على الحدود بين المملكة والإمبراطورية بقى فيه نقطة تفتيش من كل ناحية: لو سمعتك تحت الصفر عند اللي داخل عليه، بيوقفوك (ماشي أو راكب أو بالعربية) إلا لو دفعت غرامة لتصريح يوم. الباقي بيعدّي عادي."],
