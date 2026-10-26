@@ -3650,8 +3650,9 @@ const C2={traps:[],walls:[],trk:0,trkL:[]};
 const clsIs=c=>!!S&&(S.cls===c||S.cbase===c);
 // a class's root (owner 2026-10-22: "a warlock or battlemage still branched from the magician"): a legendary class asks for
 // the whole family, second classes, hidden classes and fog-book classes taken from it included (S.croot keeps the root
-// a hidden or fog-book class came from, since those clear S.cbase)
-const CROOT={knight:'warrior',berserker:'warrior',lancer:'warrior',gknight:'warrior',lsword:'warrior',dslayer:'warrior',aura:'warrior',bmage:'mage',warlock:'mage',necro:'mage',esorc:'mage',
+// a hidden or fog-book class came from, since those clear S.cbase); Braham's and Muller's legends name their family here,
+// since their own class changes keep no root (owner 2026-10-26: Braham's Successor could not learn the Archmage's spells)
+const CROOT={braham:'mage',saint:'warrior',knight:'warrior',berserker:'warrior',lancer:'warrior',gknight:'warrior',lsword:'warrior',dslayer:'warrior',aura:'warrior',bmage:'mage',warlock:'mage',necro:'mage',esorc:'mage',
  ranger:'archer',sniper:'archer',bowmaster:'archer',paladin:'priest',saintess:'priest',assassin:'thief'};
 const clsRoot=c=>CROOT[c]||c,clsFam=c=>!!S&&(clsIs(c)||clsRoot(S.cls)===c||clsRoot(S.cbase)===c||S.croot===c);
 const mstOk=q=>{const [k,n]=q.mst||['',0];return (k==='melee'?Math.max(...['sword','spear','dagger','hammer'].map(mastLv)):mastLv(k))>=n;};

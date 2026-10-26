@@ -7,6 +7,14 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26braham', ver: '3.58', d: '2026-10-26',
+      ar: ["إصلاح: وريث براهام بقى يقدر يتعلم تعاويذ الأرشميج في برج السحرة ويستخدم كتبه، زي أي ساحر.",
+        "وكمان وريث مولر (قديس السيف) بقى محسوب من عيلة المحارب في الكويستات والحاجات اللي بتطلب محارب.",
+        "اختبار جديد لده."],
+      en: ["Fix: Braham's Successor can now learn the Archmage's spells at the Mage Tower and use them, like any mage.",
+        "Muller's Successor (the Sword Saint) now counts as the warrior family too, for quests and anything that asks for a warrior.",
+        "A new test for this."],
+      hide: [2] },
     { v: '2026-10-26u070', ver: '3.57', d: '2026-10-26',
       ar: ["أمر قائد الحرب بقى بيوصل للبارتي: اللي في البارتي وقريبين منه (160 بكسل) بيضربوا أقوى 15% وبياخدوا ضرب أقل 10%.",
         "الأورات اللي بتتراكب من كذا لاعب بقى ليها سقف: الضرر لحد ×1.6 مع بعض، والحماية لحد 30% ضرب أقل. أورات الأساطير نفسها برّه السقف.",
