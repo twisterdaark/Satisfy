@@ -12,7 +12,7 @@ the rest below.
 | Not started | 11 | 8 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **61** (53 + 8) |
+| **Left to build** | **103** (92 + 11) | **59** (51 + 8) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
