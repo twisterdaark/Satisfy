@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26plan1', ver: '3.20', d: '2026-10-26',
+      ar: ["ضربات الحلقة (الأوجر والجولم والدببة والبوسات) بقت بتصيب جوه الحلقة الحمرا المرسومة بالظبط. قبل كده كانت بتوصل لفوق ولتحت أبعد من اللي باين.",
+        "الترول ميعرفش يقفل جروحه وهو بيتحرق (أي ضرب نار) أو وهو مشلول. وميناء بيدرو بقى منطقة آمنة من القتال بين اللاعبين.",
+        "القديس اللي بيعالج فريقه في الخناقة بقى بياخد نصيبه من الغنايم، مش الخبرة بس. وفي الفهرس (N) تبويب جديد: «📜 المهمات اللي خلصتها»، القصة الأول.",
+        "اللي بتصنعه عند السندان بقى عليه علامتك («صنع: اسمك»)، وبتمشي مع اسمك لو غيرته. والأسماء البذيئة مبتتقبلش للقطع اللي بتبتكرها."],
+      en: ["Ring slams (ogres, golems, bears, bosses) now land inside the red ring as it is drawn. Before, straight above or below they reached further than it showed.",
+        "A troll can't close its wounds while it burns (any fire blow) or while it is stunned. And Pedro Harbor is safe from fights between players.",
+        "A priest who heals the party through a fight now gets a share of the loot, not just the XP. And a new tab in the Index (N): 📜 Quests done, the story first.",
+        "What you forge at the anvil carries your mark (\"Made by\" you), and it follows your name if you change it. Insults aren't accepted as the name of a piece you create."] },
     { v: '2026-10-26anvil', ver: '3.19', d: '2026-10-26',
       ar: ["وريث باغما على الرواية (فصل 3 و4 و16): بيلبس أي عتاد من غير شروط، بس لو القطعة لفلها أعلى منك فيه عقوبة على حسب الريتنج: العادي 10% لحد الأسطوري 50% والميثي 60% من هجومها ودفاعها. وكل ما تفهم القطعة أكتر (بالتفكيك والتقييم) العقوبة بتقل، ولما تفهمها 100% بتختفي. والتلميح بيوريك العقوبة.",
         "سكيلات الحداد الأسطوري بأساميها: «حِرفية الحداد الأسطوري» (فصل 97 و442): اللي بتصنعه إحصائياته +12% في لفل 2 لحد +20% في لفل 8. و«تقييم الحداد الأسطوري» (فصل 13 و244): بيلاقي الميزة المخفية. و«تفكيك الحداد الأسطوري»: بتفهم القطعة أسرع من أي حد."],
