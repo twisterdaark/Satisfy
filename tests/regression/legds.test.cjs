@@ -45,6 +45,9 @@ test('Demon Slayer: the hidden quest ends in the legend at level 1, one per worl
     // Hell Leap (v3.17, ch 1536): a flash step, not a trip
     const l = await g.eval(() => { const G = window.__G, P = G.P, x0 = P.x, y0 = P.y; window.__m.dead = true; P.inv = 0; P.dir = 2; window.__GP2.sk('dsleap'); const far = Math.hypot(P.x - x0, P.y - y0); return [far > 40 && far <= 150, P.inv > 0, !window.__GDSL.DSH.lp, Math.round(far)]; });
     assert.deepEqual(l.slice(0, 3), [true, true, true], 'Hell Leap: a flash step of up to 9 m: ' + JSON.stringify(l));
+    // (review) a foe behind isn't a target: facing right, the leap still goes right
+    const lb = await g.eval(() => { const G = window.__G, P = G.P; P.x = 90 * 16; P.y = 60 * 16; const w = G.spawnMon('wolf', P.x - 60, P.y); w.max = w.hp = 1e9; w.tmp = 0; P.inv = 0; P.dir = 2; P.cd = {}; const x0 = P.x; window.__GP2.sk('dsleap'); w.dead = true; return P.x - x0; });
+    assert.ok(lb > 40, 'Hell Leap goes ahead, not to a foe behind: ' + lb);
     // Light of Destruction does nothing to a wolf and gives most of its cooldown back
     const w = await g.eval(() => { const G = window.__G, P = G.P; window.__m.dead = true; const m = G.spawnMon('wolf', P.x + 30, P.y); m.max = m.hp = 1e6; m.tmp = 0; const h = m.hp; P.cd.dsdest = 900; G.S.dmEss = 50; window.__GP2.sk('dsdest'); return [m.hp === h, P.cd.dsdest, G.S.dmEss]; });
     assert.equal(w[0], true); assert.ok(w[1] <= 20); assert.equal(w[2], 50, 'no demon hit, no essence spent');

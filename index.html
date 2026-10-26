@@ -4877,9 +4877,9 @@ const P2SK={
  dspure:()=>{const v=fdir(),a=Math.atan2(v[1],v[0]);for(let i=0;i<6;i++)(i?f=>setTimeout(f,i*90):f=>f())(()=>{if(mode!=='play')return;const b=a+(rand()-.5)*.12;proj.push({kind:'bullet',x:P.x+Math.cos(b)*6,y:P.y-8+Math.sin(b)*6,vx:Math.cos(b)*380,vy:Math.sin(b)*380,t:.6,mul:.8,hit:new Set(),c:'#5ab8ff',pure:1});SFX.zap&&SFX.zap();});},
  // Light of the End (ch 372): a golden blast that shakes the air where you aim
  dsend:()=>{const v=fdir(),L=c2Line(v,70),cx=P.x+v[0]*L,cy=P.y-6+v[1]*L;fx.push({ring:true,big:1,x:cx,y:cy,t:.5});vfx('pillar',cx,cy+6,{raw:1,color:'#ffd24a',h:90,w:14});vfx('shock',cx,cy+6,{raw:1,radius:46,color:'#ffe08a'});for(let i=0;i<18;i++)fx.push({x:cx,y:cy,vx:(rand()-.5)*160,vy:(rand()-.5)*120,t:.5,c:rand()<.5?'#ffd24a':'#fff4c0',fl:1});flash();shake=.3;SFX.slam();aoe(cx,cy,44,4,{skill:1,dem:1.3});},
- // Hell Regulation (ch 572, 1053): the hell's laws stop for 20 s (regeneration comes back) and its demons are held and weakened
+ // Hell Regulation (ch 572, 1053; v3.17 ch 573, 1490): a field for 20 s, demons' magic halved, the party +20%, hell's laws stop
  dsseal:()=>{P.hreg=20;P.hrgU=gTime+20;fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.5});let n=0;for(const m of mons)if(!m.dead&&DEMK.has(m.type)&&Math.hypot(m.x-P.x,m.y-P.y)<DSRR){n++;vfx('curse',m.x,monY(m));}
-  toast(t('dsRegOn',{n}),'good');SFX.clang();},
+  toast(n?t('dsRegOn',{n}):t('dsRegOn0'),'good');SFX.clang();},
  // Light of Destruction (ch 573-574): demonkin only; a beam through up to five in a line; they lose half their strength and cannot heal for 3 minutes
  dsdest:()=>{if((S.dmEss||0)<5){toast(t('dmeNo'),'warn');SFX.deny();P.cd.dsdest=0;return;}const v=fdir(),L=c2Line(v,220);let n=0;const hit=mons.filter(m=>{if(m.dead||!DEMK.has(m.type))return false;const dx=m.x-P.x,dy=monY(m)-(P.y-6),k=dx*v[0]+dy*v[1];return k>-6&&k<L+6&&Math.abs(dx*v[1]-dy*v[0])<12+MT[m.type].r;}).sort((a,b)=>Math.hypot(a.x-P.x,a.y-P.y)-Math.hypot(b.x-P.x,b.y-P.y)).slice(0,5);
   for(let d=0;d<L;d+=4){fx.push({x:P.x+v[0]*d,y:P.y-6+v[1]*d,vx:(rand()-.5)*20,vy:(rand()-.5)*20,t:.6,c:d%8?'#fff4c0':'#ffd24a',fl:1});}flash();shake=.5;SFX.legendary();
@@ -4888,7 +4888,7 @@ const P2SK={
  // Hell Summoning (ch 754, 902): the ground around you becomes hell for 40 s, the Demon Slayer's true stage
  dssum:()=>{DSH.f={x:P.x,y:P.y,t:40};fx.push({ring:true,big:1,x:P.x,y:P.y-4,t:.7});for(let i=0;i<24;i++)fx.push({x:P.x+(rand()-.5)*120,y:P.y+(rand()-.5)*60,vx:0,vy:-30-rand()*40,t:.9,c:rand()<.5?'#c81a2a':'#ff6a3a',fl:1});shake=.35;SFX.slam();toast(t('dsSumOn'),'good');},
  // Hell Leap (v3.17, CANON ch 1536: "She used Hell Leap very quickly and aggressively ... reminded people of Shunpo"): a flash step of up to 9 m, beside the foe ahead if one is in reach
- dsleap:()=>{if(DSH.lp){dsBack();return;}const v=fdir(),m=fusTg(150,1)[0];let dx=v[0]*144,dy=v[1]*144;if(m){const ex=m.x-P.x,ey=m.y-P.y,d=Math.hypot(ex,ey)||1;dx=ex-ex/d*14;dy=ey-ey/d*14;}
+ dsleap:()=>{if(DSH.lp){dsBack();return;}const v=fdir(),m=fusTg(150).find(q=>(q.x-P.x)*v[0]+(q.y-P.y)*v[1]>0);let dx=v[0]*144,dy=v[1]*144;if(m){const ex=m.x-P.x,ey=m.y-P.y,d=Math.hypot(ex,ey)||1,L=Math.min(144,Math.max(0,d-14));dx=ex/d*L;dy=ey/d*L;}
   const x0=P.x,y0=P.y;vfx('shadow',P.x,P.y);{const n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/8));for(let i=0;i<n;i++){const bx=P.x,by=P.y;move(P,dx/n,dy/n,4);if(P.x===bx&&P.y===by)break;}}for(let i=1;i<8;i++){const q=i/8;fx.push({x:x0+(P.x-x0)*q,y:y0-6+(P.y-y0)*q,vx:0,vy:-6,t:.3,c:i%2?'#c81a2a':'#2a0a14',fl:1});}P.inv=Math.max(P.inv||0,.35);vfx('spawn',P.x,P.y,{color:'#c81a2a'});SFX.dodge();},
  sapray:()=>{phHeal(Math.min(600,250+Math.round(stat('int')*.5)));phRing('#fff3b0');}};
 function p2Tick(dt){if(!S||!P)return;for(const k of ['sne','bga','wls','bmT','hreg'])if(P[k]>0)P[k]-=dt;dslTick(dt);
@@ -4987,8 +4987,8 @@ const DMEMAX=500,DSRR=160;
 const dsRegIn=()=>!!P&&(P.hrgU>gTime||phNear('R',DSRR));
 function dmeKill(m){if(!S||S.cls!=='dslayer'||!m||!DEMK.has(m.type)||!(m.myd>0))return;const g=MT[m.type].boss?20:1,b=S.dmEss||0;S.dmEss=Math.min(DMEMAX,b+g);if(S.dmEss>b){hudDirty=true;num(P.x,P.y-30,'+'+(S.dmEss-b)+' '+t('dmeT'),'#ff8a8a',false);}}
 function dmeSpend(){const u=Math.min(DMEMAX,S.dmEss||0);S.dmEss=(S.dmEss||0)-u;hudDirty=true;if(u)num(P.x,P.y-34,t('dmeUse',{n:u}),'#ff8a8a',false);return u;}
-Object.assign(STR.ar,{dmeT:'جوهر شيطاني',dmeUse:'{n} جوهر شيطاني',dmeNo:'نور الدمار محتاج 5 جواهر شيطانية على الأقل',dsRegOn:'تنظيم الجحيم: {n} شيطان سحرهم اتقسم نصين'});
-Object.assign(STR.en,{dmeT:'Demonic Essence',dmeUse:'{n} Demonic Essence',dmeNo:'Light of Destruction needs 5 Demonic Essence at least',dsRegOn:'Hell Regulation: {n} demons, their magic halved'});
+Object.assign(STR.ar,{dmeT:'جوهر شيطاني',dmeUse:'{n} جوهر شيطاني',dmeNo:'نور الدمار محتاج 5 جواهر شيطانية على الأقل',dsRegOn:'تنظيم الجحيم: {n} شيطان سحرهم اتقسم نصين',dsRegOn0:'تنظيم الجحيم: الميدان حواليك 20 ثانية'});
+Object.assign(STR.en,{dmeT:'Demonic Essence',dmeUse:'{n} Demonic Essence',dmeNo:'Light of Destruction needs 5 Demonic Essence at least',dsRegOn:'Hell Regulation: {n} demons, their magic halved',dsRegOn0:'Hell Regulation: the field around you for 20 s'});
 window.__GDSL={DSH,reg:()=>dsRegIn(),ess:()=>S.dmEss||0,kill:m=>dmeKill(m),hell:()=>dsHell(),cdm:k=>dsCdM(k),back:()=>dsBack(),resist:()=>legResist()}; // tests
 window.__GP2={P2,atk:(m,o)=>p2Atk(m,o||{}),hurt:(d,src)=>p2Hurt(d,src),tick:dt=>p2Tick(dt),offerK:()=>p2OfferK(),kill:m=>p2Kill(m),sk:k=>SKF[k](),still:()=>p2Still()};
 Object.assign(STR.ar,{"cl_sniper": "سنايبر", "cl_bowmaster": "بو ماستر", "cl_bmage": "السيّاف السحري", "cl_warlock": "الساحر الأسود", "cl_dslayer": "صياد الشياطين", "cl_saintess": "القديسة", "prHi_ta": "الصيد الحقيقي بيبدأ قبل السهم. الأثر والفخ والصبر للرينجر، النيشان من بعيد للسنايبر، والسهام ورا بعض للبو ماستر. تختار مين؟", "prHi_tm": "السحر مش بس كور نار من بعيد. فيه اللي بيمسك العصاية ويدخل في النص، وفيه اللي بيلعن عدوه ويسيبه يدوب. طريق واحد بس.", "q_c2s": "اختبار السنايبر", "c2s_o": "السنايبر بيضرب من مكان محدش شايفه. اقتل 15 خارج عن القانون بالقوس.", "c2s_w": "لسه. خد نفس وانشن.", "c2s_d": "إيدك بقت ثابتة زي الصخر. إنت سنايبر.", "q_c2m": "اختبار البو ماستر", "c2m_o": "البو ماستر مابيسيبش فرصة لعدوه يتنفس. اقتل 25 عفريت كهف بالقوس.", "c2m_w": "لسه. أسرع.", "c2m_d": "سهامك بقت مطر. إنت بو ماستر.", "q_c2g": "اختبار السيّاف السحري", "c2g_o": "الساحر اللي بيخاف من القرب بيموت. اقتل 20 عفريت كهف بالعصاية.", "c2g_w": "لسه. ادخل أقرب.", "c2g_d": "العصاية بقت سيف في إيدك. إنت السيّاف السحري.", "q_c2w": "اختبار الساحر الأسود", "c2w_o": "اللعنة أقوى من النار. اقتل 15 شامان عفاريت بالعصاية.", "c2w_w": "لسه. خليهم يدوبوا.", "c2w_d": "الضلمة بقت بتسمع كلامك. إنت الساحر الأسود.", "q_hds": "صيد في الجحيم", "hcMet_hds": "[اتحقق شرط مخفي]\nقتلت شياطين كتير. دمهم بقى ريحته على سلاحك، وهما بقوا بيخافوا منك.", "hds_o": "[★ كويست كلاس مخفي: صيد في الجحيم]\n\"اللي بيصطاد الشياطين لازم يعرف ريحتهم.\" اقتل 30 شيطان كمان، وبعدها روح الشيطان الأعظم هتكلمك.", "q_hsa": "طريق القديسة", "hcMet_hsa": "[اتحقق شرط مخفي]\nرجّعت ناس كانوا تايهين لبيوتهم بأمان. ريبيكا شايفة قلبك.", "hsa_o": "[★ كويست كلاس مخفي: طريق القديسة]\n\"اللي بيعالج غيره بيعالج نفسه.\" عالج نفسك أو أصحابك 40 مرة بالصلاة.", "hcGot_dslayer": "[الكويست 'صيد في الجحيم' خلص.]\n[حصلت على الكلاس الأسطوري 'صياد الشياطين'.]\n[إنت دلوقتي لفل 1.]", "hcPerk_dslayer": "سيف التألق والطلقات وسيف الانتقام ونور النهاية من الأول، وبعدين تنظيم الجحيم ونور الدمار واستدعاء الجحيم وقفزة الجحيم. وكأسطورة: بتقاوم الصعق والشلل، والأسطورة لا تموت.", "hcGot_saintess": "[اتحولت للكلاس المخفي النادر 'القديسة'.]\n* ريبيكا اختارتك.", "hcPerk_saintess": "صلاة القديسة بتعالجك إنت والبارتي اللي جنبك، والنعمة بتعالجك بالراحة، والحياة التانية بتقومك مرة كل 10 دقايق.", "o_demon": "اقتل شياطين: {c}/{n}", "o_saheal": "عالج بالصلاة: {c}/{n}", "sk_snshot": "الطلقة المشحونة", "skd_snshot": "بتنشن 1.2 ثانية على خط لحد أول حيطة وبعدين طلقة 500% بتخترق كل اللي في الخط. لو اتحركت أو اتضربت بتبوظ ومفيش ضرر.", "sk_sneye": "عين النسر", "skd_sneye": "10 ثواني سهامك بتروح أبعد 40% وبتضرب أقوى 10%.", "sk_snaim": "النيشان الثابت", "skd_snaim": "وإنت واقف مكانك ضربات القوس بتاعتك أقوى 15%.", "sk_bmcombo": "الكومبو", "skd_bmcombo": "كل ضربة على نفس الوحش في خلال ثانيتين بتزود ضربك 4%، لحد 5 مرات.", "sk_bmchain": "سلسلة السهام", "skd_bmchain": "3 دفعات ورا بعض، كل دفعة سهمين. كل سهم بيصيب الوحش مرة واحدة بس.", "sk_bmstorm": "عاصفة السهام", "skd_bmstorm": "10 سهام في 1.2 ثانية قدامك.", "sk_bgblade": "نصل المانا", "skd_bgblade": "ضربة بالعصاية 230% قدامك، وكل وحش بتصيبه بيرجعلك 3 مانا (9 بالكتير).", "sk_bgarmor": "الدرع السحري", "skd_bgarmor": "10 ثواني بتاخد ضرر أقل 20%، بس المانا مابتتملاش وبتخلص بالراحة.", "sk_bgslam": "ضربة السحر", "skd_bgslam": "بتنط لقدام وتفجر اللي حواليك 260% وتدوخهم ثانية.", "sk_wlcurse": "اللعنة", "skd_wlcurse": "الوحوش اللي قدامك بتتلعن 10 ثواني: بتاخد ضرر أكتر 15% وبتضرب أقل 20%. البوس بيفك اللعنة لما يدخل مرحلة جديدة.", "sk_wlrot": "العفن", "skd_wlrot": "أقرب وحش قدامك بياخد 45% كل ثانية لمدة 8 ثواني. بيقف لو دخل مدينة.", "sk_wlsiph": "امتصاص الروح", "skd_wlsiph": "6 ثواني العفن بتاعك بيعالجك 30% من ضرره.", "sk_dscut": "سيف التألق", "skd_dscut": "ضربة سيف مولعة 300% قدامك، أقوى على الشياطين. اللي بتضربه بيفضل يولع 4 ثواني.", "sk_dsseal": "تنظيم الجحيم", "skd_dsseal": "20 ثانية حواليك (10 متر): ضرب الشياطين بيقل للنص وضرب باقي الأعداء 20%، وإنت وفريقك ضربكم +20%، وقوانين الجحيم بتقف عليك.", "sk_dsbane": "الجحيم هو مسرح صياد الشياطين", "skd_dsbane": "بتاخد من الشياطين ضرر أقل 25% وبتضربهم أقوى 20% (كل زيادات الشياطين مع بعض لحد +60%). جوه الجحيم: ضررك +20%، والكولداون أقل 20%، وتجديد الصحة والمانا +50%.", "sk_sapray": "النور الرحيم", "skd_sapray": "نور بيعالجك ويعالج البارتي اللي جنبك: 25% صحة وكمان على قد ذكائك.", "sk_sagrace": "القلب المستقيم", "skd_sagrace": "باسيف: مفيش حالة غريبة بتمسك فيكي (شلل، تجميد، بطء). والكائنات الفاسدة بتخاف منك.", "sk_salife": "التضحية", "skd_salife": "بتدّي كل اللي عندك: صحتك ومانتك بينزلوا لـ1، وكل كائن فاسد حواليكي (شياطين، أموات، مصاصين دما) بياخد 1500%.", "snCharge": "بتنشن... متتحركش", "snInt": "النيشان باظ!", "sneOn": "عين النسر شغالة", "bgArmOn": "الدرع السحري شغال", "bgArmOff": "المانا خلصت والدرع وقع", "wlCurseOn": "لعنت {n}", "wlSiphOn": "امتصاص الروح شغال", "wlCleanse": "فك اللعنة!", "dsSealOn": "ختمت {n} شيطان", "saLifeT": "الحياة التانية! ريبيكا رجعتك", "noTarget": "مفيش هدف قدامك"});
@@ -7138,7 +7138,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(!o.pure&&brImm(m)){
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
  if(o.skill&&!o.dot&&SKC&&gTime-SKC.t<2.5){if((SKC.h=(SKC.h||0)+1)<=3&&!m.tdum)skUse(SKC.k,1);const L=skLv(SKC.k);if(skKind(SKC.k)==='atk'){dmg*=skDm(SKC.k);if(L>=5&&!crit&&!o.pure&&rand()<.1){crit=true;dmg*=1.8;}if(L>=10&&!m.bl)m.bl={t:3,n:0};}}
- dmg=ipHit(m,dmg,crit,o);if(o.skill&&tlOn('duke'))dmg*=1.15;if(o.skill&&S.cls2==='bomb')dmg*=1.15;sc2Hit(m,o);if(o.skill&&S.cls==='braham'&&S.sk.bcont&&rand()<Math.min(.75,.3+.05*(skLv('bcont')-1))){dmg*=1.3;if(!o.dot&&rand()<.3)numPK(-30,'bcAmp','#d8c0ff',false);}dmg*=1+pasGen();if(P.shwU>gTime||phNear('D',SAHWR))dmg+=Math.round(SAHWD*Math.max(0,1-monResK(m.type,'holy')));dmg=tzHit(m,dmg,o);if(!o.dot)kyArc(m);if(o.skill&&S.cls==='mumud'&&pasOn('mmreint'))dmg*=1+.15*pasM('mmreint');if(m.tw===1)twHit(m,crit,o);if(m.type==='gcrown'&&m.bh&&!crit&&!o.skill)dmg=1;if(o.skill&&S.bh&&S.bh.mm)dmg*=1.03;if(tlOn('hking')&&HKV.has(m.type))dmg*=1.15;dmg=ttHit(m,dmg,crit);
+ dmg=ipHit(m,dmg,crit,o);if(o.skill&&tlOn('duke'))dmg*=1.15;if(o.skill&&S.cls2==='bomb')dmg*=1.15;sc2Hit(m,o);if(o.skill&&S.cls==='braham'&&S.sk.bcont&&rand()<Math.min(.75,.3+.05*(skLv('bcont')-1))){dmg*=1.3;if(!o.dot&&rand()<.3)numPK(-30,'bcAmp','#d8c0ff',false);}dmg*=1+pasGen();if(!o.dot&&!o.aura&&(P.shwU>gTime||phNear('D',SAHWR)))dmg+=Math.round(SAHWD*Math.max(0,1-monResK(m.type,'holy')));dmg=tzHit(m,dmg,o);if(!o.dot)kyArc(m);if(o.skill&&S.cls==='mumud'&&pasOn('mmreint'))dmg*=1+.15*pasM('mmreint');if(m.tw===1)twHit(m,crit,o);if(m.type==='gcrown'&&m.bh&&!crit&&!o.skill)dmg=1;if(o.skill&&S.bh&&S.bh.mm)dmg*=1.03;if(tlOn('hking')&&HKV.has(m.type))dmg*=1.15;dmg=ttHit(m,dmg,crit);
  let mblk=false;if(AIK[m.type]==='soldier'&&!o.pure&&!m.tdum&&!o.skill&&!o.aura&&!(P.bdetU>gTime)&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
   mblk=true;dmg*=.2;crit=false;burn=false;m.grdT=.6;m.cd=Math.min(m.cd,.15);vfx('block',m.x+m.face*7,my-2,{angle:m.face>0?Math.PI:0});num(m.x,my-20,t('mBlock'),'#9fc8ff',false);SFX.hit();}
  if(o.raw>0){dmg=o.raw*Math.min(1,p3Atk(m)*p4Atk(m)*p5Atk(m)*epAtk(m)*vcAtk(m)*(m.wardT>gTime?ssWard(m.wardR||.4):1));crit=true;mblk=false;}   // (v3.14) a share of the target's own health: no attack, no defence; a boss's shield and a guard still hold
@@ -9725,7 +9725,7 @@ Object.assign(SKF,{
 });
 function useSlot(i){spwOff();const k=barSkills()[i];if(!k){SFX.deny();return;}if(!SKD[k])return thingUse(k,$('skillbar').children[i]);if(tavNoFight())return;castSk(k,$('skillbar').children[i]);}
 // one skill cast, from the main bar or an extra bar (el: the button that flashes)
-function castSk(k,el){if(P&&P.sncC&&k!=='sasanc'){if(!SABASIC.has(k)||gTime<(P.sncC.nb||0)){toast(t('saSncOnly',{s:Math.max(0,Math.ceil((P.sncC.nb||0)-gTime))}),'warn');SFX.deny();return;}P.sncC.nb=gTime+180;}if(brSeal()){toast(t('brSealT'),'warn');SFX.deny();return;}if(TOW&&TOW.seal){toast(t('twSeal'),'warn');SFX.deny();return;}const d=SKD[k];
+function castSk(k,el){if(P&&P.sncC&&k!=='sasanc'){if(!SABASIC.has(k)||gTime<(P.sncC.nb||0)){toast(t('saSncOnly',{s:Math.max(0,Math.ceil((P.sncC.nb||0)-gTime))}),'warn');SFX.deny();return;}}if(k==='dsdest'&&(S.dmEss||0)<5){toast(t('dmeNo'),'warn');SFX.deny();return;}if(brSeal()){toast(t('brSealT'),'warn');SFX.deny();return;}if(TOW&&TOW.seal){toast(t('twSeal'),'warn');SFX.deny();return;}const d=SKD[k];
  if(!skOK(k)){toast(lockTxt(d),'warn');SFX.deny();return;}
  if((P.cd[k]||0)>0&&P.divN>0&&DIVK.has(k)){P.cd[k]=0;P.divN--;toast(t('pgDivUse',{n:P.divN}),'good');}   // (v3.14) Divinity
  if((P.cd[k]||0)>0||P.dash>0){SFX.deny();return;}
@@ -9734,7 +9734,7 @@ function castSk(k,el){if(P&&P.sncC&&k!=='sasanc'){if(!SABASIC.has(k)||gTime<(P.s
  if(d.req==='ctl'&&!(P.ctlU>gTime&&P.ctlS)){toast(t('ssStNeed'),'warn');SFX.deny();return;}   // v3.13: the Thousand Sword Storm needs Control Sword's swords
  const sec=seCost(k);if(sec>0&&(!swEOn()||(P.swE||0)<sec)){toast(t('swENo',{n:Math.ceil(sec)}),'warn');SFX.deny();return;}if(sec>0){P.swE-=sec;hudDirty=true;}   // (v3.14) Sword Energy
  if(d.cls==='pagma'&&(d.mur||d.fus))P.psOffU=gTime+10;   // the Sword Dance's own effect stops while you dance
- const FK=fusTry(k);P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k)*dsCdM(k)*skCdM(k);SKC={k,t:gTime};SKH.push(SKC);if((P.cohR||P.sprR)&&k!=='bcoh'&&k!=='bspray'&&d.need==='staff'&&!d.pas){if(P.cohR){P.cohR=0;P.cohW=gTime+2;}if(P.sprR){P.sprR=0;P.sprW=gTime+2;}}if(SKH.length>6)SKH.shift();skUse(k);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}if(FK){fusLearn(FK);hudDirty=true;return;}{const h0=P.hp;CURSK=k;CURSKN=0;CURSKD=0;try{skCarry(k,()=>SKF[k]());}finally{CURSK=null;}skHealUp(k,h0);}skSnd(k);skVfx(k);if(!CURSKN&&!skVfxHas(k))skSig(k);numPK(-34,'sk_'+k,d.col,false);hudDirty=true;}
+ const FK=fusTry(k);P.mp-=mpC(k);if(P.sncC&&k!=='sasanc')P.sncC.nb=gTime+180;P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k)*dsCdM(k)*skCdM(k);SKC={k,t:gTime};SKH.push(SKC);if((P.cohR||P.sprR)&&k!=='bcoh'&&k!=='bspray'&&d.need==='staff'&&!d.pas){if(P.cohR){P.cohR=0;P.cohW=gTime+2;}if(P.sprR){P.sprR=0;P.sprW=gTime+2;}}if(SKH.length>6)SKH.shift();skUse(k);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}if(FK){fusLearn(FK);hudDirty=true;return;}{const h0=P.hp;CURSK=k;CURSKN=0;CURSKD=0;try{skCarry(k,()=>SKF[k]());}finally{CURSK=null;}skHealUp(k,h0);}skSnd(k);skVfx(k);if(!CURSKN&&!skVfxHas(k))skSig(k);numPK(-34,'sk_'+k,d.col,false);hudDirty=true;}
 /* skill looks (owner 2026-10-24: "almost every skill and hit looks alike; fix the effects and hitboxes so each skill feels
    different; Space Sword is literally a bigger slash"). Each skill gets a look from its name and element: a wide crescent, a
    thrust, a cross cut, a cut in space, falling swords, flying blades, petals, a dragon, a pillar of light, a vortex, lightning
@@ -9891,7 +9891,7 @@ let IKB=['KeyZ','KeyX'];try{const k=JSON.parse(localStorage.getItem('satisfy_ike
 const eqAll=()=>['w','h','b','k','g','a'].map(eqIt).filter(Boolean);
 const ipOn=k=>eqAll().some(i=>{const rc=rcById(i.id);if(i.ip&&i.ip.includes(k))return true;return rc&&rc.ip&&rc.ip.includes(k)&&!(rc.lvr&&!lvrOk(rc.lvr));});
 function itemSkills(){const a=[];for(const i of eqAll()){const rc=rcById(i.id);if(!rc||!rc.isk||rc.lvr&&!lvrOk(rc.lvr))continue;for(const k of rc.isk)if(a.length<2&&!a.includes(k))a.push(k);}while(a.length<2)a.push(null);return a;}
-function useISlot(j){if(TOW&&TOW.seal){toast(t('twSeal'),'warn');SFX.deny();return;}const k=itemSkills()[j];if(!k){SFX.deny();toast(t('iskNone'),'warn');return;}const d=SKD[k];
+function useISlot(j){if(P&&P.sncC){toast(t('saSncOnly',{s:0}),'warn');SFX.deny();return;}if(TOW&&TOW.seal){toast(t('twSeal'),'warn');SFX.deny();return;}const k=itemSkills()[j];if(!k){SFX.deny();toast(t('iskNone'),'warn');return;}const d=SKD[k];
  if((P.cd[k]||0)>0||P.dash>0){SFX.deny();return;}if(P.mp<mpC(k)){toast(t('noMP'),'warn');SFX.deny();return;}
  if(k==='fly'&&(roomAt(P.x,P.y)||dunAt(P.x,P.y)||ARN||TWR)){toast(t('flyNo'),'warn');SFX.deny();return;}
  P.mp-=mpC(k);P.cd[k]=d.cd*(ipOn('cdr')?.8:1)*skCostM(k)*dsCdM(k)*skCdM(k);SKC={k,t:gTime};skUse(k);const el=$('isk'+j);if(el){el.classList.add('press');setTimeout(()=>el.classList.remove('press'),110);}{const h0=P.hp;SKF[k]();skHealUp(k,h0);}numPK(-34,'sk_'+k,d.col,false);hudDirty=true;}
@@ -11112,7 +11112,7 @@ function update(dt){
  else P.frame=0;
  if(P.guard)P.dir=Math.abs(P.gx)>Math.abs(P.gy)?(P.gx>0?2:3):(P.gy>0?0:1);
  if(K.atk&&inp){const wk=weapKind(),v=(TOUCH&&tAim((wk==='bow'||wk==='staff')&&!hcMelee()?170:44))||[[0,1],[0,-1],[1,0],[-1,0]][P.dir];tryAttack(v[0],v[1]);}
- P.acd-=dt;P.inv-=dt;P.dcd-=dt;P.pcd=(P.pcd||0)-dt;S.immT-=dt;P.scd-=dt;for(const k in P.cd)P.cd[k]-=dt;S.playT+=dt;{const sx=P.x===P.mx0&&P.y===P.my0;P.mx0=P.x;P.my0=P.y;P.stillT=sx?(P.stillT||0)+dt:0;}P.mp=Math.min(maxMP(),P.mp+(1.5+maxMP()*.012)*(gTime-(P.hitT??-99)>5?(P.stillT>2?4:1.6):1)*dt*(S.cls==='braham'?2.5:1)*(ipOn('absurd')?2:1)*(hellDeb()?0:1)*(P.bga>0?0:1));if(P.rage>0){P.rage-=dt;if(rand()<dt*20)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*16,vx:0,vy:-30,t:.5,c:'#ff5a3a',fl:1});}if(P.slash){P.slash.t-=dt;if(P.slash.t<=0)P.slash=null;}
+ P.acd-=dt;P.inv-=dt;P.dcd-=dt;P.pcd=(P.pcd||0)-dt;S.immT-=dt;P.scd-=dt;for(const k in P.cd)P.cd[k]-=dt;S.playT+=dt;{const sx=P.x===P.mx0&&P.y===P.my0;P.mx0=P.x;P.my0=P.y;P.stillT=sx?(P.stillT||0)+dt:0;}P.mp=Math.min(maxMP(),P.mp+(1.5+maxMP()*.012)*(gTime-(P.hitT??-99)>5?(P.stillT>2?4:1.6):1)*dt*(S.cls==='braham'?2.5:1)*(ipOn('absurd')?2:1)*(hellDeb()?0:1)*(P.sncC?0:1)*(P.bga>0?0:1));if(P.rage>0){P.rage-=dt;if(rand()<dt*20)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*16,vx:0,vy:-30,t:.5,c:'#ff5a3a',fl:1});}if(P.slash){P.slash.t-=dt;if(P.slash.t<=0)P.slash=null;}
  P.lcd=(P.lcd||0)-dt;if(P.lbT>0)P.lbT-=dt;else P.st=Math.min(maxST(),P.st+(P.food<20?8:20)*(balanced()?1.25:1)*(S.wis&&S.wis.mht?1.5:1)*dt);
  // Second Wind (balanced body): below 35% health, recover 3% of max HP per second for 5 s; once a minute
  if(balanced()&&P.hp>0&&P.hp<mh*.35&&(S.swT||0)<=S.playT){S.swT=S.playT+60;P.sw=5;vfx('heal',P.x,P.y);toast(t('secondWind'),'good');SFX.notice();}
@@ -14537,20 +14537,20 @@ Object.assign(STR.en,{"sk_sahope": "Hope", "skd_sahope": "Heals you for 10 to 30
    Hope, Discipline, Benevolent Light, Upright Heart and Sacrifice from the class change, then Holy Weapon, Holy Impact and,
    at level 380, Sanctuary Declaration. Corrupt beings (demons, the undead, vampires) fear her. */
 const SAK={sahope:{lv:1,mpf:.1,cd:9,col:'#ffe8a0',snd:'holy'},sadisc:{lv:1,mp:20,cd:30,col:'#fff8d0',snd:'buff'},sahw:{lv:100,mp:20,cd:40,col:'#ffd27a',snd:'holy'},
- sahi:{lv:150,mp:25,cd:12,col:'#fff3b0',snd:'holy'},sasanc:{lv:380,mp:50,cd:9000,col:'#ffffff',snd:'holy'}};
+ sahi:{lv:150,mp:25,cd:12,col:'#fff3b0',snd:'holy'},sasanc:{lv:380,mp:50,cd:1,col:'#ffffff',snd:'holy'}};
 for(const k in SAK){const b=SAK[k];SKD[k]={cls:'saintess',lv:b.lv,col:b.col,cd:b.cd,...(b.mpf?{mp:10,mpf:b.mpf}:{mp:b.mp})};SKSND[k]=b.snd;}
 SKSND.salife=SKSND.salife||'holy';
 /* (v3.15, CANON ch 495, 497, 1871) the Saintess gives Holy Weapon to her allies' weapons: the party within 10 m shares it ('D') */
 const SAHWR=160;
 const saEvil=m=>HOLYX.has(m.type)||DEMK.has(m.type)||/^v/.test(m.type)&&m.type!=='vpal'||PGUND.test(m.type);   // vpal: the Vatican's paladins, not vampires
 let SANC=null; // the sanctuary she declared
-const saIn=()=>!!P&&(!!SANC&&SANC.u>gTime&&Math.hypot(P.x-SANC.x,P.y-SANC.y)<SANC.r||phNear('Z',SNCR0));
+const saIn=()=>!!P&&(sncIn(P.x,P.y)||phNear('Z',SNCMATE));
 // Upright Heart, Discipline and the sanctuary: no abnormal condition takes hold
 const saImm=()=>!!S&&!!P&&((S.cls==='saintess'&&pasOn('sagrace'))||P.dscU>gTime||saIn()||P.ssFU>gTime||phNear('W',SSFR));
 function saTick(dt){if(!P)return;
- if(S){if(S.sanc&&!SANC)sncLoad();else if(SANC&&!S.sanc)SANC=null;}
+ if(S){if(S.sanc&&(!SANC||SANC.pid!==S.pid))sncLoad();else if(SANC&&!S.sanc)SANC=null;if(SANC&&S.sanc&&wNow()>=S.sanc.end){SANC=null;S.sanc=null;}}
  if(P.sncC)sncTick(dt);
- if(SANC&&SANC.u>gTime){if(rand()<.6){const a=rand()*6.28,rr=Math.min(SANC.r,220);fx.push({x:P.x+Math.cos(a)*rr,y:P.y-6+Math.sin(a)*rr*.6,vx:0,vy:-14,t:.6,c:'#fff8d0',fl:1});}}else if(SANC){SANC=null;if(S)S.sanc=null;}
+ if(SANC&&saIn()){if(rand()<.6){const a=rand()*6.28,rr=Math.min(SANC.r,220);fx.push({x:P.x+Math.cos(a)*rr,y:P.y-6+Math.sin(a)*rr*.6,vx:0,vy:-14,t:.6,c:'#fff8d0',fl:1});}}
  if(P.shwU>gTime&&rand()<.3)fx.push({x:P.x+(rand()-.5)*12,y:P.y-8-rand()*8,vx:0,vy:-18,t:.35,c:'#ffd27a',fl:1});}
 Object.assign(SKF,{
  // Hope: 10 to 30% of the health of you and the nearest of your party
@@ -14559,7 +14559,7 @@ Object.assign(SKF,{
  sahw:()=>{P.shwU=gTime+20;vfx('forge',P.x,P.y-8);phRing('#ffd27a');toast(t('saHwOn'),'good');},
  sahi:()=>{fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.45});flash();let n=0;for(const m of fusTg(80)){if(!saEvil(m))continue;if(hitMon(m,1,{skill:1})){n++;vfx('levelup',m.x,monY(m));}}if(n)shake=.15;},   /* (v3.15, ch 495/497) 100% to evil within 5 m */
  sasanc:()=>{if(P.sncC){P.sncC=null;toast(t('saSncStop'),'warn');return;}if(S.sncCd&&wNow()<S.sncCd){const w=Math.ceil((S.sncCd-wNow())/1000);P.cd.sasanc=w;toast(t('saSncWait',{m:Math.ceil(w/60)}),'warn');SFX.deny();return;}
-   P.sncC={x:P.x,y:P.y,u:gTime+SNCBUILD,t0:gTime,nb:0,lm:0};fx.push({ring:true,x:P.x,y:P.y-6,t:.5});toast(t('saSncCh',{m:Math.round(SNCBUILD/60)}),'good');},
+   P.sncC={x:P.x,y:P.y,e:0,nb:0,lm:0};S.sncCd=wNow()+SNCCD;fx.push({ring:true,x:P.x,y:P.y-6,t:.5});toast(t('saSncCh',{m:Math.round(SNCBUILD/60)}),'good');},
  // Sacrifice: everything she has, down to 1, against the corrupt
  salife:()=>{P.hp=1;P.mp=1;flash();SFX.legendary();fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.7});for(let i=0;i<24;i++)fx.push({x:P.x,y:P.y-8,vx:(rand()-.5)*180,vy:(rand()-.5)*140,t:.6,c:rand()<.5?'#fff3b0':'#ffffff'});
    for(const m of fusTg(90))if(saEvil(m)){vfx('levelup',m.x,monY(m));hitMon(m,15,{skill:1});}toast(t('saSacT'),'warn');hudDirty=true;}});
@@ -14572,19 +14572,23 @@ Object.assign(SKF,{
    inside shares it (the 'Z' status). Radius 100 m, +100 m a join: GAME_BALANCE.
    Holy Weapon (CANON ch 495): "+500 divine damage" a hit, holy (the undead and demons take 40% more, as v3.16's
    resistances say), for her and her party within 10 m. */
-const SNCBUILD=3600,SNCLIFE=10800,SNCCD=9000*1000,SNCR0=1600,SNCRMAX=14400,SAHWD=500;
+const SNCBUILD=3600,SNCLIFE=10800,SNCCD=9000*1000,SNCR0=1600,SNCRMAX=14400,SAHWD=500,SNCMATE=400;   /* a mate shares it within 25 m of her, inside it */
 const SABASIC=new Set(['sapray','sahope','sadisc']);
+function sncBreak(k){P.sncC=null;if(S)S.sncCd=0;toast(t(k),'warn');}   /* a build that breaks gives its cooldown back */
 function sncTick(dt){const C=P.sncC;
- if(Math.hypot(P.x-C.x,P.y-C.y)>3||mode==='dead'){P.sncC=null;toast(t('saSncBrk'),'warn');return;}
- const dr=maxMP()*.0002*dt;if(P.mp<dr){P.sncC=null;toast(t('saSncMp'),'warn');return;}P.mp-=dr;
- const left=Math.ceil((C.u-gTime)/60);if(left!==C.lm&&left>0){C.lm=left;if(left%10===0||left<=3)toast(t('saSncLeft',{m:left}),'good');}
+ if(Math.hypot(P.x-C.x,P.y-C.y)>3||mode==='dead'||S.cls!=='saintess')return sncBreak('saSncBrk');
+ const dr=maxMP()*.0002*dt;if(P.mp<dr)return sncBreak('saSncMp');P.mp-=dr;C.e=(C.e||0)+dt;   /* its own time: a frozen window doesn't build it */
+ const left=Math.ceil((SNCBUILD-C.e)/60);if(left!==C.lm&&left>0){C.lm=left;if(left%10===0||left<=3)toast(t('saSncLeft',{m:left}),'good');}
  if(rand()<.5)fx.push({x:P.x+(rand()-.5)*40,y:P.y-6+(rand()-.5)*30,vx:0,vy:-30,t:.5,c:'#fff3b0',fl:1});
- if(gTime>=C.u){P.sncC=null;const old=SANC&&SANC.u>gTime&&Math.hypot(P.x-SANC.x,P.y-SANC.y)<SANC.r?SANC:null;
-  SANC=old?{x:old.x,y:old.y,r:Math.min(SNCRMAX,old.r+SNCR0),u:gTime+SNCLIFE}:{x:P.x,y:P.y,r:SNCR0,u:gTime+SNCLIFE};
-  S.sanc={x:SANC.x,y:SANC.y,r:SANC.r,end:wNow()+SNCLIFE*1000};S.sncCd=wNow()+SNCCD;P.cd.sasanc=SNCCD/1000;
+ if(C.e>=SNCBUILD){P.sncC=null;const old=SANC&&sncIn(P.x,P.y)?SANC:null;
+  SANC=old?{x:old.x,y:old.y,r:Math.min(SNCRMAX,old.r+SNCR0),u:1e18,pid:S.pid}:{x:P.x,y:P.y,r:SNCR0,u:1e18,pid:S.pid};
+  S.sanc={x:SANC.x,y:SANC.y,r:SANC.r,end:wNow()+SNCLIFE*1000};P.cd.sasanc=Math.max(1,(S.sncCd-wNow())/1000);
   P.inv=Math.max(P.inv,10);P.stun=0;flash();SFX.legendary();fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.8});toast(t(old?'saSncJoin':'saSncOn',{r:Math.round(SANC.r/16)}),'good');save(true);}}
 // a sanctuary kept in the save stands again for what is left of its 3 hours
-function sncLoad(){SANC=null;const z=S&&S.sanc;if(!z)return;const left=(z.end-wNow())/1000;if(left>0)SANC={x:z.x,y:z.y,r:z.r,u:gTime+left};else S.sanc=null;}
+function sncLoad(){SANC=null;const z=S&&S.sanc,n=wNow();if(S&&S.sncCd>n+SNCCD)S.sncCd=n+SNCCD;if(!z)return;if(z.end>n+SNCLIFE*1000)z.end=n+SNCLIFE*1000;if(z.end>n)SANC={x:z.x,y:z.y,r:z.r,u:1e18,pid:S.pid};else S.sanc=null;}
+// inside: within its circle, on the same plane (the same room or dungeon, the same continent)
+const sncPlane=(x,y)=>((roomAt(x,y)||{}).id||'')+'|'+((typeof dunAt==='function'&&dunAt(x,y)||{}).k||'')+'|'+(eaSide(x)?1:0);
+function sncIn(x,y){return !!SANC&&Math.hypot(x-SANC.x,y-SANC.y)<SANC.r&&sncPlane(x,y)===sncPlane(SANC.x,SANC.y);}
 Object.assign(STR.ar,{saSncCh:'إعلان الحرم: ساعة ({m} دقيقة) من غير ما تتحركي ولا تضربي، والمانا بتخلص شوية بشوية. سحر أساسي بس، مرة كل 3 دقايق.',saSncLeft:'الحرم: فاضل {m} دقيقة',saSncMp:'المانا خلصت، الحرم ما اتعملش',saSncStop:'وقفتي إعلان الحرم',
  saSncWait:'الحرم محتاج {m} دقيقة كمان',saSncOnly:'وانتي بتعلني الحرم: سحر أساسي بس، مرة كل 3 دقايق ({s} ثانية)',saSncOn:'[تم إعلان الحرم.] {r} متر، 3 ساعات: أي قانون انتي ماسمحتيش بيه ملوش لازمة جواه.',saSncJoin:'[الحرم اتضم للحرم القديم.] بقى {r} متر، 3 ساعات تانية.'});
 Object.assign(STR.en,{saSncCh:'Declaring a sanctuary: an hour ({m} min) without moving or striking, your mana slowly draining. Basic magic only, one spell every 3 minutes.',saSncLeft:'Sanctuary: {m} min left',saSncMp:'Your mana ran out; the sanctuary did not form',saSncStop:'You stopped declaring the sanctuary',
@@ -15658,7 +15662,7 @@ const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(try
 // presence field: the events of the last 0.7 s, oldest first, within FXMAX characters (each one goes out in about 3 updates)
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
 // clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
-function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(S&&S.cls==='saintess'&&SANC&&SANC.u>gTime&&Math.hypot(P.x-SANC.x,P.y-SANC.y)<SANC.r?'Z':'')+(P.hrgU>gTime?'R':'')+(P.ssFU>gTime?'W':'')+(P.shwU>gTime?'D':'')+(lkCodes()?'C':'')+(P.purP>gTime?'U':'')+(P.morP>gTime?'M':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+vpSt()+nvSt():'';}
+function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(S&&S.cls==='saintess'&&sncIn(P.x,P.y)?'Z':'')+(P.hrgU>gTime?'R':'')+(P.ssFU>gTime?'W':'')+(P.shwU>gTime?'D':'')+(lkCodes()?'C':'')+(P.purP>gTime?'U':'')+(P.morP>gTime?'M':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+vpSt()+nvSt():'';}
 function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));{const w=weapon();if(w&&w.cw)tags.push(JSON.stringify('cw:'+w.cw));}const mr=marPub();if(mr)tags.push(JSON.stringify('mr:'+mr));const pd=pdPub();if(pd)tags.push(JSON.stringify('pd:'+pd));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
  let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
