@@ -3708,7 +3708,7 @@ function casOpts(){const o=[],pq=['cp','cpmonk'].find(q=>S.qs[q]&&S.qs[q].st===1
  o.push({l:t('oHire',{g:hirePrice()}),f:()=>{const g=hirePrice();if(S.gold<g){SFX.deny();return dialog('cassus',[t('noGold')]);}S.gold-=g;PH.hire={t:300,x:P.x-14,y:P.y,hk:2,dir:0,fr:0};hudDirty=true;SFX.coin&&SFX.coin();dialog('cassus',[t('hireOk')]);}});
  return o;}
 function phDone(q){if(q.promo==='paladin')setTimeout(phChurch,600);}
-function phTick(dt){if(!S||!P)return;for(const k of ['bls','jud','dom','pdv','mtw'])if(P[k]>0)P[k]-=dt;
+function phTick(dt){if(!S||!P)return;for(const k of ['bls','jud','dom','pdv','mtw'])if(P[k]>0)P[k]-=dt;mtTick(dt);
  const pr=PH.pray;if(pr){if(mode!=='play'&&mode!=='dialog'){PH.pray=null;}else if(Math.hypot(P.x-pr.x,P.y-pr.y)>3){PH.pray=null;toast(t('prayMoved'),'warn');}else if((pr.t-=dt)<=0){PH.pray=null;qEvent('pray','altar');SFX.quest();phRing('#fff3b0');}
   else if(rand()<dt*14)fx.push({x:P.x+(rand()-.5)*16,y:P.y-2,vx:0,vy:-20-rand()*10,t:.9,c:'#fff3b0',fl:1});}
  const h=PH.hire;if(h){if((h.t-=dt)<=0||P.hp<=0||P.ghost){PH.hire=null;if(P.hp>0)toast(t('hireEnd'));return;}
@@ -5409,7 +5409,7 @@ function setPet(k){S.pet=k||null;PET=null;if(k){toast(t('petGot',{n:t('pt_'+k)})
 function toggleRide(){if(RCR&&RCR.in)return;if(P.boat){toast(t('boatNoRide'),'warn');return;}if(P.ride){dismount();return;}if(!S.mount||!(S.mounts||{})[S.mount]){SFX.deny();return toast(t('noMount'),'warn');}
  if(S.mdead&&S.mdead[S.mount]){SFX.deny();return toast(t('rideIsDead',{n:t('mt_'+S.mount)}),'warn');}
  if(noRideAt(P.x,P.y)){SFX.deny();return toast(t('noRideHere'),'warn');}P.ride=1;P.rsp=0;P.guard=0;vfx('dust',P.x,P.y,{n:8});noise(.12,.12,600);hudDirty=true;}
-function dismount(){if(!P.ride)return;P.ride=0;P.rsp=0;vfx('dust',P.x,P.y,{n:6});hudDirty=true;}
+function dismount(){if(!P.ride)return;P.ride=0;P.rsp=0;mtLand();vfx('dust',P.x,P.y,{n:6});hudDirty=true;}
 const rhpMax=k=>Math.round(maxHP()*((MOUNTS[k]||{}).hpk||1)*(1+(mtLv(k)-1)*.05));
 const rhp=k=>{S.mhp=S.mhp||{};if(S.mhp[k]===undefined)S.mhp[k]=rhpMax(k);return S.mhp[k];};
 function horseHit(d){const k=S.mount;const hd=Math.round(d*.7);S.mhp[k]=rhp(k)-hd;num(P.x+10,P.y-8,'-'+hd,'#e8a060',false);
@@ -5466,7 +5466,7 @@ function hFront(g,ox,oy,f,M,back){const r=(a,b,w,h,c)=>{g.fillStyle=c;g.fillRect
 function hHead(g,ox,oy,f,M){const r=(a,b,w,h,c)=>{g.fillStyle=c;g.fillRect(ox+a,oy+b,w,h);},b=[0,0,-1,0,1][f];
  r(-2,-22+b,4,9,M.b);r(-2,-14+b,4,2,M.d);r(-1,-13+b,2,1,hMix(M.d,-.3));r(-2,-19+b,1,1,M.eye||'#101010');r(1,-19+b,1,1,M.eye||'#101010');r(-3,-24+b,1,2,M.d);r(2,-24+b,1,2,M.d);r(-1,-24+b,2,3,M.m);}
 function horseSheet(k,M){if(HSH[k])return HSH[k];const c=document.createElement('canvas');c.width=HFW*5;c.height=HFH*3;const g=c.getContext('2d');
- for(let f=0;f<5;f++){hSide(g,f*HFW+16,HFH-1,f,M);hFront(g,f*HFW+16,HFH*2-1,f,M,false);hFront(g,f*HFW+16,HFH*3-1,f,M,true);}return HSH[k]=c;}
+ for(let f=0;f<5;f++){hSide(g,f*HFW+16,HFH-1,f,M);hFront(g,f*HFW+16,HFH*2-1,f,M,false);hFront(g,f*HFW+16,HFH*3-1,f,M,true);if(M.wing||M.horn||M.burn){hExtra(g,f*HFW+16,HFH-1,f,M,0);hExtra(g,f*HFW+16,HFH*2-1,f,M,1);hExtra(g,f*HFW+16,HFH*3-1,f,M,2);}}return HSH[k]=c;}
 // dir 0 down, 1 up, 2 right, 3 left; f 0 stands, 1-4 gallop. part 'head' redraws the head over a front-facing rider
 function drawHorse(x,y,dir,f,M,g=ctx,part){x=Math.round(x);y=Math.round(y);const k=Object.keys(MOUNTS).find(k=>MOUNTS[k]===M)||'horse',sh=horseSheet(k,M);
  if(part==='head'){if(dir===0){g.save();g.beginPath();g.rect(x-4,y-26,8,14);g.clip();g.drawImage(sh,f*HFW,HFH,HFW,HFH,x-16,y-HFH+1,HFW,HFH);g.restore();}return;}
@@ -6898,7 +6898,7 @@ function freshState(){
 // Advancements (SAT-CLASS-002): every 100 levels the body breaks through a limit. Each one adds +10 to every stat and
 // multiplies all stats by a further 5% (first at 100, second at 200, ...).
 const advN=()=>Math.min(9,Math.floor((S&&S.lv||1)/100));
-const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Math.round((S.st[k]+S.bonus+(S.undfN||0)+a*10+(tlOn('sonlaw')?20:0)+ttSt(k)+(k==='agi'?gearSum('agi'):0))*(1+a*.05)*bhStat(k)*(k==='agi'?1+gearSum('agp'):1)*(tlOn('paint')?1.03:1)*ttStM(k)*(candyOn()?1.3:1)*(P&&P.gjbU>gTime?1.2:1)*lkCodeM()*((k==='sta'||k==='dex')&&patOn()?3:1)*(eaPen(k)?.9:1))+setBon(k);};
+const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Math.round((S.st[k]+S.bonus+(S.undfN||0)+a*10+(tlOn('sonlaw')?20:0)+ttSt(k)+(k==='agi'?gearSum('agi'):0))*(1+a*.05)*bhStat(k)*(k==='agi'?1+gearSum('agp'):1)*(tlOn('paint')?1.03:1)*ttStM(k)*(candyOn()?1.3:1)*(P&&P.gjbU>gTime?1.2:1)*lkCodeM()*((k==='sta'||k==='dex')&&patOn()?3:1)*(eaPen(k)?.9:1)*(UNIM&&UNIM.m||1))+setBon(k);};
 // Piaro's lesson (manhwa): keep Strength and Stamina at 1:1. Once learned, while the two stay within 10% of each other the
 // body is balanced: +8% damage and max HP, faster stamina recovery, cheaper dodges, and Second Wind when health runs low.
 // the golden ratio (novel ch 315, 1423): Strength and Agility kept 1:1. A hidden stat: always on, never shown in the status window
@@ -7201,7 +7201,7 @@ function freeNear(x,y,r){for(let rad=4;rad<=96;rad+=6)for(let a=0;a<16;a++){cons
 const flyOn=()=>P.bmf==='eagle'&&P.y<WMH*TS&&!roomAt(P.x,P.y);
 const flySolid=(tx,ty)=>{const v=at(tx,ty);return v!==WA&&v!==TR&&solidT(tx,ty);};
 function flyBox(x,y,r){return flySolid(Math.floor((x-r)/TS),Math.floor((y-3)/TS))||flySolid(Math.floor((x+r)/TS),Math.floor((y-3)/TS))||flySolid(Math.floor((x-r)/TS),Math.floor((y+2)/TS))||flySolid(Math.floor((x+r)/TS),Math.floor((y+2)/TS));}
-function move(e,dx,dy,r){if(e===P&&eaSide(e.x+dx)!==eaSide(e.x))return;if(e===P&&P.boat){p4BoatMove(dx,dy);return;}if(e===P&&flyOn()){if(dx&&!flyBox(e.x+dx,e.y,r)){e.x+=dx;e.mvd=1;}if(dy&&!flyBox(e.x,e.y+dy,r)){e.y+=dy;e.mvd=1;}return;}if(e===P&&P.fly>0){const nx=e.x+dx,ny=e.y+dy;if(nx>8&&ny>8&&nx<MW*TS-8&&ny<WMH*TS-8){e.x=nx;e.y=ny;e.mvd=1;}return;}if(hitBox(e.x,e.y,r)){if(!hitBox(e.x+dx,e.y+dy,r)){e.x+=dx;e.y+=dy;e.mvd=1;return;}const f=freeNear(e.x,e.y,r);if(f){const d=Math.hypot(f.x-e.x,f.y-e.y)||1,k=Math.min(d,Math.hypot(dx,dy));e.x+=(f.x-e.x)/d*k;e.y+=(f.y-e.y)/d*k;e.mvd=1;}return;}if(dx&&!hitBox(e.x+dx,e.y,r)){e.x+=dx;e.mvd=1;}if(dy&&!hitBox(e.x,e.y+dy,r)){e.y+=dy;e.mvd=1;}}
+function move(e,dx,dy,r){if(e===P&&eaSide(e.x+dx)!==eaSide(e.x))return;if(e===P&&P.boat){p4BoatMove(dx,dy);return;}if(e===P&&flyOn()){if(dx&&!flyBox(e.x+dx,e.y,r)){e.x+=dx;e.mvd=1;}if(dy&&!flyBox(e.x,e.y+dy,r)){e.y+=dy;e.mvd=1;}return;}if(e===P&&mtFlyOn()){if(dx&&!mtFlyBox(e.x+dx,e.y,r)){e.x+=dx;e.mvd=1;}if(dy&&!mtFlyBox(e.x,e.y+dy,r)){e.y+=dy;e.mvd=1;}return;}if(e===P&&P.fly>0){const nx=e.x+dx,ny=e.y+dy;if(nx>8&&ny>8&&nx<MW*TS-8&&ny<WMH*TS-8){e.x=nx;e.y=ny;e.mvd=1;}return;}if(hitBox(e.x,e.y,r)){if(!hitBox(e.x+dx,e.y+dy,r)){e.x+=dx;e.y+=dy;e.mvd=1;return;}const f=freeNear(e.x,e.y,r);if(f){const d=Math.hypot(f.x-e.x,f.y-e.y)||1,k=Math.min(d,Math.hypot(dx,dy));e.x+=(f.x-e.x)/d*k;e.y+=(f.y-e.y)/d*k;e.mvd=1;}return;}if(dx&&!hitBox(e.x+dx,e.y,r)){e.x+=dx;e.mvd=1;}if(dy&&!hitBox(e.x,e.y+dy,r)){e.y+=dy;e.mvd=1;}}
 // short grid path (BFS up to R tiles out) to the target tile, or to the reachable tile nearest it
 function gridPath(sx,sy,tx,ty,R){const W2=R*2+1,ox=sx-R,oy=sy-R,prev=new Int32Array(W2*W2).fill(-1),q=[sx-ox+(sy-oy)*W2];prev[q[0]]=q[0];let h=0,best=q[0],bd=1e9;
  while(h<q.length){const c=q[h++],cx=c%W2+ox,cy=(c/W2|0)+oy,dd=Math.abs(cx-tx)+Math.abs(cy-ty);if(dd<bd){bd=dd;best=c;if(!dd)break;}
@@ -15881,6 +15881,45 @@ Object.assign(STR.en,{archm:'The Archmage',archm_hi:'Welcome to the Mage Tower. 
  sk_mtwarp:'Time Warp',skd_mtwarp:'Time slows around you: foes are slowed for 5 s and take 150%, and your other skills come back 3 s sooner.',
  sk_mtstar:'Starfall',skd_mtstar:'Stars fall on up to 8 foes around you for 260% each; you carry Blessing for 12 s, and you and the party near you are healed.'});
 window.__GMGT={L:MGT,G:MGTG,T:TOMES,learn:k=>mgtLearn(k),known:k=>mgtKnown(k),cdM:()=>tomeCdM(),skills:()=>clsSkills(),cast:k=>{SKF[k]();return {mp:P.mp,bls:P.bls,mtw:P.mtw||0};},tome:id=>{const it=mkItem(id,0);S.items.push(it);equip(it);return weapon().id;},npc:()=>{const n=npcs.find(n=>n.id==='archm');if(!n)return null;const x=n.x/TS|0,y=n.y/TS|0;return {x,y,solid:SOLID[at(x,y)]===1,reid:x>=REID.x0&&x<=REID.x1&&y>=REID.y0&&y<=REID.y1};}}; // tests
+/* ---------------- three new mounts (Soki's list, owner 2026-10-26: "three new mounts. One that may fly over terrain, one that is
+   able to damage enemies, one that boost you and your parties stats by small increments"), sold by the Stable Master in Reidan.
+   The Pegasus flies over water, woods, rocks and cliffs (walls and buildings still stop it; on landing you step to firm ground).
+   The Ember Steed burns the foes it runs through. The Unicorn gives you and the party near you +5% to every stat, the party
+   seeing it through the status tag 'N', so no rules change. Each is drawn from the horse with its own wings, flames or horn. ---------------- */
+Object.assign(MOUNTS,{
+ pegasus:{sp:2.2,hpk:1.2,lv:200,g:600000,b:'#f4f6ff',d:'#c8d0e8',m:'#9ad8ff',h:'#e8c040',fly:1,wing:'#ffffff',wing2:'#bfe0ff'},
+ ember:{sp:2.2,hpk:1.4,lv:120,g:200000,b:'#3a1a14',d:'#22100c',m:'#ff6a1a',h:'#ff9a3a',eye:'#ffd27a',burn:1},
+ unicorn:{sp:2,hpk:1.2,lv:90,g:120000,b:'#fffaf0',d:'#e0d8e8',m:'#f0b8ff',h:'#c8a0e8',horn:'#ffe08a',aura:1}});
+var UNIM={m:1,t:0},EMB={t:0,x:0,y:0};
+const mtOf=()=>P&&P.ride&&MOUNTS[myMt()]||null,mtFlyOn=()=>{const M=mtOf();return !!(M&&M.fly)&&P.y<WMH*TS&&!roomAt(P.x,P.y);};
+const mtFlySolid=(tx,ty)=>{const v=at(tx,ty);return v!==WA&&v!==TR&&v!==RK&&v!==CF&&v!==IW&&solidT(tx,ty);};
+function mtFlyBox(x,y,r){return mtFlySolid(Math.floor((x-r)/TS),Math.floor((y-3)/TS))||mtFlySolid(Math.floor((x+r)/TS),Math.floor((y-3)/TS))||mtFlySolid(Math.floor((x-r)/TS),Math.floor((y+2)/TS))||mtFlySolid(Math.floor((x+r)/TS),Math.floor((y+2)/TS));}
+function mtLand(){if(hitBox(P.x,P.y,4)){const f=freeNear(P.x,P.y,4);if(f){P.x=f.x;P.y=f.y;}}}
+// every frame from phTick: the Unicorn's blessing (looked at twice a second) and the Ember Steed's flames
+function mtTick(dt){if(!S||!P)return;const M=mtOf();
+ if((UNIM.t-=dt)<=0){UNIM.t=.5;UNIM.m=M&&M.aura||phNear('N',150)?1.05:1;}
+ const mv=Math.hypot(P.x-EMB.x,P.y-EMB.y)>.3;EMB.x=P.x;EMB.y=P.y;
+ if(M&&M.burn&&mv&&mode==='play'){if(rand()<dt*14)fx.push({x:P.x+(rand()-.5)*16,y:P.y-2-rand()*6,vx:(rand()-.5)*10,vy:-24-rand()*16,t:.4,c:rand()<.5?'#ff6a1a':'#ffd27a',fl:1});
+  if((EMB.t-=dt)<=0){EMB.t=.5;for(const m of mons){if(m.dead||m.ally||m.spar)continue;if(Math.hypot(m.x-P.x,monY(m)-P.y)<20+MT[m.type].r&&hitMon(m,.6,{skill:1}))fx.push({x:m.x,y:monY(m)-6,vx:0,vy:-30,t:.35,c:'#ff9a3a',fl:1});}}}}
+// the sheet's extras over the horse: wings (flap with the gallop), a horn, flames in the mane and tail. view 0 side, 1 front, 2 back
+function hExtra(g,ox,oy,f,M,view){const r=(a,b,w,h,c)=>{g.fillStyle=c;g.fillRect(ox+a,oy+b,w,h);},b=[0,0,-1,0,1][f],up=f===1||f===3;
+ if(M.wing){const w=M.wing,w2=M.wing2;
+  if(view===0){if(up){r(-6,-21+b,9,3,w);r(-8,-25+b,8,4,w);r(-9,-28+b,6,3,w2);r(-10,-30+b,3,2,w2);}else if(f){r(-7,-18+b,10,3,w);r(-9,-16+b,7,3,w2);r(-10,-14+b,4,2,w2);}else{r(-6,-19+b,9,3,w);r(-8,-18+b,4,2,w2);}}
+  else{const s=up?-3:0;r(-12,-19+b+s,7,3,w);r(-14,-21+b+s*2,5,3,w2);r(5,-19+b+s,7,3,w);r(9,-21+b+s*2,5,3,w2);}}
+ if(M.horn){if(view===0){r(13,-24+b,1,2,M.horn);r(14,-26+b,1,2,M.horn);r(15,-27+b,1,1,'#ffffff');}else if(view===1){r(0,-26+b,1,2,M.horn);r(0,-28+b,1,2,'#ffffff');}}
+ if(M.burn){const y='#ffd27a';if(view===0){r(5,-23+b,1,2,y);r(3,-21+b,1,1,y);r(7,-24+b,1,1,y);r(-13,-17+b,2,1,y);r(-15,-16+b,1,1,'#ff3a1a');}else if(view===1){r(-1,-24+b,2,1,y);}else{r(-1,-15+b,2,1,y);r(0,-5+b,1,1,'#ff3a1a');}}}
+// the Stable Master by Reidan's south wall
+Object.assign(FIG,{stableM:{hair:'hat',hc:'#3a2a1a',hl:'#5a4a3a',hat:'#6a3a1a',skin:'#d8a070',sk2:'#b8804e',top:'#7a5a2a',top2:'#5a401a',sleeves:true,belt:'#c8a050',pants:'#3a3028',boots:'#22180f'}});
+if(!SH.stableM)shLazy('stableM',()=>SA.chars.buildSheet(FIG.stableM));
+NPCS.push({id:'stableM',spr:'stableM',tx:548.5,ty:99.4,ph:1,dir:0});
+NPCT.stableM={hi:'stm_hi',idle:()=>'stm_idle',opts:()=>[...rideOpt('unicorn'),...rideOpt('ember'),...rideOpt('pegasus'),...healOpt(),{l:t('oStmWhat'),f:()=>dialog('stableM',['stm_uni','stm_emb','stm_peg'])}]};
+Object.assign(STR.ar,{stableM:'سايس الإسطبل',stm_hi:'عندي ركايب مش هتلاقيها في أي حتة تانية. اختار اللي يناسبك.',stm_idle:'الحصان العادي بيوصّلك، بس ركايبي بتعمل أكتر من كده.',oStmWhat:'إيه الفرق بينهم؟',
+ stm_uni:'الحصان أبو قرن (لفل 90): وانت راكبه، انت والبارتي اللي جنبك بتاخدوا 5% زيادة في كل الإحصائيات.',stm_emb:'حصان الجمر (لفل 120): بيحرق الأعداء اللي بيعدّي جنبهم وهو ماشي.',stm_peg:'البيجاسوس (لفل 200): بيطير فوق المية والغابات والصخور والجبال. الحيطان والمباني بس هي اللي بتوقفه.',
+ mt_pegasus:'بيجاسوس',mt_ember:'حصان الجمر',mt_unicorn:'الحصان أبو قرن'});
+Object.assign(STR.en,{stableM:'Stable Master',stm_hi:'I keep mounts you won\'t find anywhere else. Pick the one that suits you.',stm_idle:'A plain horse gets you there. Mine do more than that.',oStmWhat:'How are they different?',
+ stm_uni:'The Unicorn (Lv 90): while you ride it, you and the party near you get 5% more of every stat.',stm_emb:'The Ember Steed (Lv 120): it burns the foes it runs past.',stm_peg:'The Pegasus (Lv 200): it flies over water, woods, rocks and cliffs. Only walls and buildings stop it.',
+ mt_pegasus:'Pegasus',mt_ember:'Ember Steed',mt_unicorn:'Unicorn'});
+window.__GMNT={fly:()=>mtFlyOn(),uni:()=>UNIM.m,ride:()=>{if(!P.ride)toggleRide();return !!P.ride;},off:()=>dismount(),stat:k=>stat(k),water:()=>{const cx=P.x/TS|0,cy=P.y/TS|0;for(let d=1;d<80;d++)for(let y=cy-d;y<=cy+d;y++)for(let x=cx-d;x<=cx+d;x++)if(at(x,y)===WA&&at(x+1,y)===WA&&at(x,y+1)===WA){const px=x*TS+8,py=y*TS+8;return [hitBox(px,py,4),mtFlyBox(px,py,4)];}return null;},near:()=>{const m=mons.find(m=>!m.dead&&!MT[m.type].boss&&!m.tmp&&!inTown(m.x,m.y)&&m.y<WMH*TS);if(!m)return -1;P.x=m.x+8;P.y=monY(m);return mons.indexOf(m);},mhp:i=>mons[i].hp,jig:()=>{P.x+=P.x%2?-1:1;},give:k=>{S.mounts=S.mounts||{};S.mounts[k]=1;S.mount=k;},npc:()=>{const n=npcs.find(n=>n.id==='stableM');if(!n)return null;const x=n.x/TS|0,y=n.y/TS|0;return {x,y,solid:SOLID[at(x,y)]===1,reid:x>=REID.x0&&x<=REID.x1&&y>=REID.y0&&y<=REID.y1};}}; // tests
 window.__G={bag:()=>({GDROP,openSell,INVS,invClick,unitVal,itemVal,SHOPG,SHOPM,POT}),lines:()=>STR,chunks:()=>({g:gg.stats(),o:og.stats()}),chunkLayers:()=>({gg,og}),get CARD(){return CARD},get SM(){return SM},get allies(){return allies},get S(){return S},get P(){return P},get mode(){return mode},die:()=>die(),mons:()=>mons,get npcs(){return npcs},nodes,act,finishMG:()=>finishMG,startMG:id=>startMG(RC.find(r=>r.id===id)),get MG(){return MG},talkNPC:id=>talkNPC(id),completeQ:id=>completeQ(id),acceptQ:id=>acceptQ(id),useSlot:i=>useSlot(i),newGame:L=>newGame(L),QD,openMap:()=>openMap(),get proj(){return proj},gainXP:n=>gainXP(n),save:q=>save(q),openPick:s=>openPick(s),pickOpt:i=>pickOpt(i),advance:()=>advance(),get DL(){return DL},zoneAt,VT,chopped,tryAttack:(a,b)=>tryAttack(a,b),get KB(){return KB},ROOMS,PROPS,enterRoom:r=>enterRoom(r),openBoard:()=>openBoard(),openQD:id=>openQD(id),TOWNS,useProp:p=>useProp(p),at:(x,y)=>at(x,y),setT:(x,y,v)=>setT(x,y,v),eqx:{buyGear:(i,g,w)=>buyGear(i,g,w),equip:i=>equip(i),eqIt:s=>eqIt(s),defV:()=>defV(),atkV:()=>atkV(),atkCD:()=>atkCD(),maxMP:()=>maxMP(),repairAll:w=>repairAll(w),enhance:(i,w,x)=>enhance(i,w,x),enhPick:(i,w)=>enhPick(i,w),mkItem:(i,r)=>mkItem(i,r),openEquip:()=>openEquip(),wear:(i,p)=>wear(i,p),openForge:()=>openForge(),price:(w,g)=>price(w,g),addAff:(i,n)=>addAff(i,n),giveGift:(w,k)=>giveGift(w,k),townOfNpc:i=>townOfNpc(i),get ESC(){return ESC},solid:(x,y)=>solidT(x,y),DGATES,DUN,useGate:g=>useGate(g)}};
 // Read-only engine surface for the online layer and for content tests. Contract: docs/api/ENGINE_API.md
 const plain=o=>JSON.parse(JSON.stringify(o,(k,v)=>typeof v==='function'?{$fn:String(v)}:v));
@@ -16130,7 +16169,7 @@ const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(try
 // presence field: the events of the last 0.7 s, oldest first, within FXMAX characters (each one goes out in about 3 updates)
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
 // clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
-function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(S&&S.cls==='saintess'&&sncIn(P.x,P.y)?'Z':'')+(P.hrgU>gTime?'R':'')+(P.ssFU>gTime?'W':'')+(P.shwU>gTime?'D':'')+(lkCodes()?'C':'')+(P.purP>gTime?'U':'')+(P.morP>gTime?'M':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(P.jud>0?'j':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+vpSt()+nvSt():'';}
+function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(S&&S.cls==='saintess'&&sncIn(P.x,P.y)?'Z':'')+(P.hrgU>gTime?'R':'')+(P.ssFU>gTime?'W':'')+(P.shwU>gTime?'D':'')+(lkCodes()?'C':'')+(P.purP>gTime?'U':'')+(P.morP>gTime?'M':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(mtOf()&&mtOf().aura?'N':'')+(P.jud>0?'j':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+vpSt()+nvSt():'';}
 function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));if(S&&S.look&&ADYE[S.look.ad|0]&&gr)tags.push(JSON.stringify('ad:'+(S.look.ad|0)));{const w=weapon();if(w&&w.cw&&!w.skn)tags.push(JSON.stringify('cw:'+w.cw));}const mr=marPub();if(mr)tags.push(JSON.stringify('mr:'+mr));const pd=pdPub();if(pd)tags.push(JSON.stringify('pd:'+pd));const mn=mnPub();if(mn)tags.push(JSON.stringify('mn:'+mn));if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
  let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
