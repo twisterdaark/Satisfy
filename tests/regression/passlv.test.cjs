@@ -12,7 +12,7 @@ test('every passive levels from kills, grows by its level, and says how it works
     await H.newGame(g);
     await g.step(3);
     const r = await g.eval(() => { const G = window.__G, S = G.S, X = window.__GPS, out = { stuck: [], txt: [], noKey: [] }; S.lv = 500;
-      const own = new Set(['focus', 'scraft', 'stemp', 'lpat', 'lcre', 'beyes']);
+      const own = new Set(['focus', 'scraft', 'stemp', 'lpat', 'lcre', 'beyes', 'lcraft', 'lappr', 'ldisas']);   // these level by their own use (PASOWN), not kills
       for (const k of X.list()) { if (own.has(k)) continue; S.cls = X.cls(k); S.sk[k] = 1; S.skx = S.skx || {}; S.skx[k] = 0;
         if (!X.on().includes(k)) { out.stuck.push(k + ' (not active as ' + S.cls + ')'); continue; }
         for (let i = 0; i < 10; i++) X.kill({ type: 'wolf' }); if (!(S.skx[k] > 0)) out.stuck.push(k + '@' + S.cls);
