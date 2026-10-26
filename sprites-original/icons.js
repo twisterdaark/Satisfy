@@ -28,13 +28,13 @@ const BSPEC={vipdag:{len:6,w:2,p:'kat',cv:.8,c:['#7ac83a','#3a6a1a','#d8ffa8'],g
  ssword:{len:11,w:3,p:'taper',c:['#dfe6ee','#8a94a4','#ffffff'],f:'#b8c4d4',g:['cross','#d8b04a'],gr:['#3a2a5a','#5a4a7a'],pm:'#d8b04a',gl:3},
  gsword:{len:14,w:3,p:'str',c:['#6ab0ff','#2a5ab0','#d0e8ff'],f:'#9fd0ff',g:['wing','#c8a050'],gm:'#2a5ab0',gr:['#5a3a18','#8a5a32'],pm:'#c8a050',gl:4},
  msword:{len:11,w:3,p:'leaf',c:['#c8e8f4','#7aa0b8','#ffffff'],f:'#e8f8ff',g:['disc','#4a90c0'],gr:['#2a4a6a','#4a6a8a'],pm:'#4a90c0',gl:3},
- failure:{len:13,w:3,p:'saw',c:['#5a6a7a','#2e3a48','#a8b8c8'],g:['bar','#3a4450'],gr:['#2a2a32','#4a4a52'],pm:'#3a4450',gl:4},
+ failure:{len:14,w:3,p:'saw',c:['#c8dcec','#7a96b0','#f4fbff'],g:['wing','#8aa4bc'],gm:'#e8f4ff',gr:['#4a5a6a','#8aa4bc'],pm:'#c8dcec',gl:4},
  dains:{len:12,w:3,p:'taper',c:['#e8c050','#9a7418','#fff4c0'],rn:'#fff4c0',g:['wing','#6a4a18'],gm:'#c8282a',gr:['#3a2410','#6a4a18'],pm:'#e8c050',gl:3},
  iyarugt:{len:12,w:2,p:'kat',cv:1,c:['#c8282a','#6a0a0e','#ff7a6a'],rn:'#ff3a2a',g:['disc','#2a0a0e'],gr:['#2a0a0e','#5a1a1e'],pm:'#c8282a',gl:4},
  wisdom:{len:11,w:3,p:'str',c:['#e8f4ff','#7a9ab8','#ffffff'],rn:'#4a90ff',g:['wing','#d8b04a'],gm:'#4a90ff',gr:['#e8e4d8','#c8c0a8'],pm:'#d8b04a',gl:3},
  pgwork:{len:13,w:3,p:'str',c:['#d8e0f0','#7a8494','#ffffff'],f:'#a8b8d0',rn:'#bfe6ff',g:['cross','#8a929e'],gm:'#bfe6ff',gr:['#3a2a1e','#5a4230'],pm:'#8a929e',gl:4},   // Pagma's Late Work (v2.95): a plain master's blade, frost in its runes
  yetgs:{len:14,w:4,p:'cleaver',c:['#9aa0ac','#4a4e58','#e8eef8'],f:'#6a0a1a',g:['wing','#5a0a1a'],gm:'#ff2a3a',gr:['#1a1018','#3a1a28'],pm:'#8a0a1a',gl:4},
- dpgs:{len:14,w:3,p:'wave',c:['#5ac8a0','#1e6a50','#d8fff0'],f:'#d8fff0',g:['cross','#2a4a40'],gm:'#d8fff0',gr:['#1a2a24','#2a4a40'],pm:'#5ac8a0',gl:4},
+ dpgs:{len:15,w:3,p:'str',c:['#d0d8e0','#8a96a4','#ffffff'],f:'#eef4fa',g:['wing','#d8b04a'],gm:'#fff0b0',gr:['#5a4020','#d8b04a'],pm:'#d8b04a',gl:4},
  mgsword:{len:10,w:2,p:'str',c:['#e0e4ec','#2a3a6a','#ffffff'],g:['bar','#2a3a6a'],gr:['#2a3a6a','#3a4a7a'],pm:'#2a3a6a',gl:3},
  lantd:{len:6,w:2,p:'taper',c:['#e8eef8','#8a94a4','#ffffff'],g:['cross','#a81a1a'],gr:['#2a1a1a','#4a2a2a'],pm:'#a81a1a',gl:2},
  ideal:{len:6,w:2,p:'leaf',c:['#bfe8ff','#5a8ab0','#ffffff'],g:['bar','#4a90c0'],gr:['#2a4a6a','#4a6a8a'],pm:'#bfe8ff',gl:2},
@@ -105,7 +105,7 @@ function staff(I,k){const orb=STAFFC[k]||(k==='sstaff'?['#7a4ab0','#b07aff','#e8
 const HAMC={};
 function hammer(I,k){const h=HAMC[k]||(k==='shammer'?['#c8ccd6','#8a909a','#ffffff']:['#9aa0aa','#6a707a','#d0d4dc']);
  I.line(3,14,9,8,'#7a5634');I.line(4,14,10,8,'#5a3a20');I.rect(8,2,6,5,h[0]);I.rect(8,2,6,1,h[2]);I.rect(13,3,1,4,h[1]);I.rect(8,6,6,1,h[1]);I.set(10,4,h[1]);}
-const ARMC={flarmor:['#e8e4d8','#ffffff','#a89878'],tirsh:['#1a2034','#8a0a1a','#c8a050'],vpaj:['#24142e','#5a3a6a','#a05aff'],vwarmor:['#3a3036','#5a4a52','#8a0a1a'],rparmor:['#c82a1a','#ff7a3a','#ffd24a'],tgarmor:['#e8e4d8','#ffffff','#2a2a2a'],dgarmor:['#2a6ab8','#5ac8ff','#c8e8ff'],ttshell:['#1a2a3a','#3a5a6a','#5ad8c8']};
+const ARMC={flarmor:['#e8e4d8','#ffffff','#a89878'],tirsh:['#1a2034','#8a0a1a','#c8a050'],vpaj:['#f2f0f4','#ffffff','#b8b4c4'],vwarmor:['#3a3036','#5a4a52','#8a0a1a'],rparmor:['#c82a1a','#ff7a3a','#ffd24a'],tgarmor:['#e8e4d8','#ffffff','#2a2a2a'],dgarmor:['#2a6ab8','#5ac8ff','#c8e8ff'],ttshell:['#1a2a3a','#3a5a6a','#5ad8c8']};
 function armor(I,k){const a=ARMC[k]||(k==='larmor'?['#8a5a32','#a8743f','#5a3a20']:k==='parmor'?['#9aa4b4','#c8d0dc','#5a6474']:k==='marmor'?['#a8d0e4','#e0f2fa','#4a7890']:k==='ocarmor'?['#d8dce4','#ffffff','#7a8494']:k==='emarmor'?['#3a3e4a','#6a7080','#c8a050']:k==='mgarmor'?['#c8d0dc','#eef2f8','#2a3a6a']:['#dfe2ea','#f2f4f8','#7a3a2c']);
  I.rect(4,3,8,10,a[0]);I.rect(2,3,3,4,a[1]);I.rect(11,3,3,4,a[1]);I.rect(6,3,4,2,'#2a1a10');I.set(6,5,'#2a1a10');I.set(9,5,'#2a1a10');I.rect(4,9,8,1,a[2]);I.rect(7,5,1,7,a[2]);I.rect(5,13,6,1,a[2]);
  if(k==='larmor')for(let y=6;y<12;y+=2){I.set(5,y,a[1]);I.set(10,y,a[1]);}
@@ -242,8 +242,8 @@ const DRAW={
  // a rainbow potato (the Patrian fields, owner 2026-10-25): a potato in every colour at once
  rpotato:I=>{I.ell(8,9,5.5,4.5,'#a8743f');I.ell(6,8,2,2,'#e85a4a');I.ell(10,8,2,2,'#5ac85a');I.ell(8,11,2,1.5,'#5a8ae8');I.ell(11,11,1.5,1.5,'#e8c84a');I.ell(5,11,1.5,1.2,'#a05ae8');I.set(7,6,'#fff4c0');I.set(4,9,'#6b4428');I.set(12,9,'#6b4428');},
  vwleath:I=>{I.ell(8,9,6,5,'#3a3036');I.ell(8,9,4.5,3.5,'#5a4a52');I.rect(3,5,2,2,'#3a3036');I.rect(11,5,2,2,'#3a3036');I.rect(3,12,2,2,'#3a3036');I.rect(11,12,2,2,'#3a3036');I.set(6,7,'#8a0a1a');I.set(10,11,'#8a0a1a');I.set(7,8,'#7a6a70');},
- bboots:I=>{boot(I,['#2a2a34','#5a5a6a','#1a1a20']);I.set(6,4,'#d8dce8');I.set(8,6,'#d8dce8');I.set(7,8,'#d8dce8');I.rect(5,9,5,1,'#4a4a58');},
- ochelm:I=>{helm(I,['#d8dce4','#ffffff','#7a8494'],1);I.set(3,5,'#d8dce4');I.set(12,5,'#d8dce4');I.set(2,4,'#ffffff');I.set(13,4,'#ffffff');I.set(6,8,'#c8282a');I.set(9,8,'#c8282a');},
+ bboots:I=>{boot(I,['#3a3e6e','#6a6ea8','#1e2040']);I.rect(4,2,7,2,'#4a4e86');I.set(6,5,'#f0f0ff');I.set(7,6,'#f0f0ff');I.set(8,5,'#f0f0ff');I.set(6,9,'#f0f0ff');I.set(7,10,'#c8a8ff');I.rect(5,11,3,1,'#6a6ea8');},
+ ochelm:I=>{for(const [x,y] of [[2,6],[3,4],[4,3],[11,3],[12,4],[13,6],[1,8],[14,8],[2,10],[13,10]])I.rect(x,y,2,3,'#b8bcc8');I.ell(8,8,4.5,5,'#e8dcc0');I.rect(5,11,6,3,'#e8dcc0');I.rect(5,7,2,2,'#2a1a1a');I.rect(9,7,2,2,'#2a1a1a');I.set(6,8,'#ff2a2a');I.set(10,8,'#ff2a2a');I.set(8,10,'#5a4a3a');for(let x=5;x<11;x+=2)I.set(x,13,'#5a4a3a');I.line(9,4,11,1,'#f4ecd8');I.set(10,2,'#c8bca0');I.rect(6,4,2,1,'#fff8e8');},
  book:I=>{I.rect(3,2,10,12,'#7a2a26');I.rect(4,2,9,1,'#a03a34');I.rect(3,2,1,12,'#4a1a18');I.rect(12,3,1,10,'#e8dcc0');I.rect(6,6,4,1,'#f2c14e');I.rect(6,8,4,1,'#f2c14e');I.rect(11,7,2,2,'#c8a050');},
  // the death knights' gear from the Behen Archipelago, and the cure for Sticks
  lantd:I=>{for(let i=0;i<5;i++){I.set(7+i,8-i,'#e8eef8');I.set(8+i,8-i,'#8a94a4');I.set(7+i,7-i,'#ffffff');}I.line(5,7,8,10,'#a81a1a');I.line(4,11,6,9,'#3a2a1e');I.set(3,12,'#a81a1a');},
@@ -329,10 +329,12 @@ const NWI={oakst:['st',['#3a7a3a','#7ac87a','#d8ffd8']],frstaff:['st',['#2a5ab0'
  knspear:['sp',['#7a5634','#c4c8d0','#eef0f4']],trident:['sp',['#2a4a6a','#5ac8c8','#e8ffff']],skyspear:['sp',['#e8e4d8','#ffd23a','#fff8c0']],
  // the crafted mithril and mass-produced Grid tiers, the Spiral Quick Fire Bow and the Dragon Hammer
  mstaff:['st',['#4a90c0','#c8e8f4','#ffffff']],mgstaff:['st',['#2a3a6a','#e0e4ec','#ffffff']],mbow:['bw',['#7aa0b8','#4a7890','#c8e8f4']],mgbow:['bw',['#e0e4ec','#2a3a6a','#ffffff']],sqfbow:['bw',['#c87a2a','#7a3a10','#ffd27a']],
- mhammer:['hm',['#c8e8f4','#7aa0b8','#ffffff']],ndhammer:['hm',['#5a1a2a','#2a0a14','#d83a5a']],mghammer:['hm',['#e0e4ec','#2a3a6a','#ffffff']],dhammer:['hm',['#8a1a1a','#4a0a0a','#e8c050']],mspear:['sp',['#4a6a8a','#c8e8f4','#ffffff']],mgspear:['sp',['#2a3a6a','#e0e4ec','#ffffff']]};
+ mhammer:['hm',['#c8e8f4','#7aa0b8','#ffffff']],mghammer:['hm',['#e0e4ec','#2a3a6a','#ffffff']],dhammer:['hm',['#8a1a1a','#4a0a0a','#e8c050']],mspear:['sp',['#4a6a8a','#c8e8f4','#ffffff']],mgspear:['sp',['#2a3a6a','#e0e4ec','#ffffff']]};
 function nwIcon(I,k){const [t,c]=NWI[k];if(t==='bw'){BOWC[k]=c;return bow(I,k);}if(t==='st'){STAFFC[k]=c;return staff(I,k);}if(t==='hm'){HAMC[k]=c;return hammer(I,k);}
  I.line(2,14,11,5,c[0]);I.line(3,14,12,5,shade0(c[0]));I.set(6,10,c[1]);I.rect(11,3,2,2,c[1]);I.set(13,2,c[2]);I.set(14,1,c[2]);I.set(12,2,c[1]);
  if(k==='trident'){I.line(10,2,12,0,c[1]);I.line(13,5,15,3,c[1]);}if(k==='skyspear'){I.set(10,6,c[2]);I.set(14,2,c[2]);I.set(9,5,c[1]);I.set(14,6,c[1]);}}
+// the Insane Dragon Hammer (atlas F055): a blocky dark iron head, a curved pick behind it, a long iron haft with a spike
+DRAW.ndhammer=I=>{I.line(2,14,10,6,'#4a4e58');I.line(3,14,11,6,'#2a2c34');I.set(1,15,'#8a909c');I.rect(8,2,5,5,'#5a5e6a');I.rect(8,2,5,1,'#8a909c');I.rect(12,2,1,5,'#3a3c46');I.rect(9,7,3,1,'#3a3c46');I.line(7,4,4,2,'#6a6e7a');I.set(3,1,'#9aa0ac');I.set(10,4,'#c8282a');};
 const shade0=c=>'#'+hex(c).map(v=>Math.max(0,v-50).toString(16).padStart(2,'0')).join('');
 function iconRGBA(k){const I=Img();if(typeof k==='string'&&k.startsWith('cw|')){cwIcon(I,k);return finish(I,false);}
  if(SLOT[k]){SLOT[k](I);for(let i=3;i<I.d.length;i+=4)if(I.d[i])I.d[i]=64;return finish(I,true);}

@@ -7,6 +7,13 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26atlas', ver: '3.30', d: '2026-10-26',
+      ar: ["شخصيات اتعاد رسمها زي المانهوا: جريد (درع فضي وكتافات جلد حمرا وشعر بني)، فيكر (عباية بقلنسوة)، هوروي (درع تركواز وكوفية حمرا)، جيشوكا، كراوجل (شعر بني محمر وعباية فاتحة)، لاويل (معطف أبيض وياقة كحلي)، بيك سورد، ريجاس (شعر أشقر وصدر عريان وبنطلون أزرق)، فانتنر، زيبال (درع فضي كامل)، دوران، أسموفيل، أشور، أصلان، تشاكسلي، دارك بوس، إلفين ستون، فيريل، داميان وسكانك.",
+        "الإبرة المدرعة بقت قاتل بقبعة قش وقناع ودرع زرد بدل العقرب الرمادي، والدريك بقى تنين أحمر بجناحات بدل السحلية، والدودة العملاقة بقت دودة بحلقات وأنياب مقوسة.",
+        "سيف Failure بقى فضي مزرق بحافة مسننة، وسيف الدوبلجنجر بقى نصل فضي طويل بواقي دهبي، ومطرقة التنين المجنون بقت راس حديد غامق بمنقار، وخوذة زعيم الأورك بقت جمجمة بقرن وشعر رمادي، وبوت براهام كحلي بنقوش بيضا، وبيجامة الفامباير بقت قميص نوم أبيض."],
+      en: ["Characters redrawn after the manhwa: Grid (silver plate, red leather pauldrons, brown hair), Faker (a hooded cloak), Huroi (teal armour, crimson scarf), Jishuka, Kraugel (auburn hair, a pale cloak), Lauel (a white coat with a navy collar), Peak Sword, Regas (sandy hair, bare chest, blue trousers), Vantner, Zibal (full silver plate), Doran, Asmophel, Ashur, Aslan, Chucksley, Dark Bus, Elfin Stone, Ferrell, Damian and Skunk.",
+        "The Armored Needle is now a masked assassin under a straw hat in chainmail instead of a grey scorpion, the Drake a red winged dragon instead of a lizard, and the Giant Worm a ringed worm with curved mandibles.",
+        "Failure is pale silver-blue with a jagged edge, the Doppelganger's Greatsword a long silver blade with a gold guard, the Insane Dragon Hammer a dark iron head with a pick, the Frostlight Orc Chief's Helmet a horned skull under a grey mane, Braham's Boots navy with white swirls, and the Direct Vampire's Pajamas a white nightgown."] },
     { v: '2026-10-26lwbuff1', ver: '3.29', d: '2026-10-26', hide: [3],
       ar: ["محارب البرق الأسطوري بقى أقوى: التيار الكهربي بيضرب 70% بدل 40% وأسرع، ومن لفل 200 بينقل البرق لعدوين. كف القوة 320% وبيشلّ لحظة، ورماح البرق بقت 5، وظهور إله البرق أقوى وبيوصل لـ8 أعداء.",
           "هيمنة إله البرق: 24 صاعقة أقوى ووقت أقل. تحول سرعة البرق بقى فعلًا أسرع 35% وبيقلل الضرر 40%. تحول إله البرق +60% وصاعقة كل ثانية على عدو قريب.",
