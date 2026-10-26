@@ -4,7 +4,7 @@
 const test=require('node:test'),assert=require('node:assert'),fs=require('fs'),path=require('path'),vm=require('vm');
 const repo=path.join(__dirname,'..','..'),dataDir=path.join(repo,'data');
 const FILES=['monsters','quests','recipes','skills','npcs','zones','classes'];
-const MATS=['wheat','fess','iess','sess','bvial','vwleath','wegg','ore','wood','leather','blue','mstone','mith','fish','sfish','gfish','herb','bherb','cfish','stew','feast','dscale','ruby','topaz','emer','sapph','diam','brphx','brdrg','brtig','brtor','bljewel','blhorn','kink','kpearl'];
+const MATS=['wheat','fess','iess','sess','bvial','vwleath','wegg','ore','wood','leather','blue','mstone','mith','fish','sfish','gfish','herb','bherb','cfish','stew','feast','dscale','ruby','topaz','emer','sapph','diam','brphx','brdrg','brtig','brtor','bljewel','blhorn','kink','kpearl','rfur'];
 const VISIT_TARGETS=['grave','mural','yaltar','irene','lfk','lfield','myfc','eagate','phxseal','btshrine']; // landmarks with their own trigger in the engine (visitGrave)
 
 // unique items index.html adds with a later RC.push (the data build reads only the first RC table)
