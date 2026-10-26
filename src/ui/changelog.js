@@ -7,6 +7,15 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-26plan11', ver: '3.47', d: '2026-10-26',
+      ar: ["الجولم لما يقع بيسيب ركام فيه عرق خام مكانه: احفره مرة واحدة في 90 ثانية.",
+        "سجل قتال الزعماء: دوس على رسالة القتال، أو زرار معارك الزعماء في السجل (L)، أو اكتب /raidlog، تشوف آخر 3 معارك (المراحل، ضربك، اللي وقعوا) وتتفرج عليها بتتعاد على خريطة صغيرة.",
+        "توصيلات القوافل عند تجار ريدان ورينهارت ورولينج وتايتن (من لفل 30، 4 في اليوم): تأمين بيرجع لما توصّل، ووقت، وتختار الطريق: الأمان، أو طريق قطاع الطرق بالضعف وهيهجموا عليك مرتين. على رجلك أو حصانك بس: العربيات والمراكب مش بتشيلها، والانتقال أو الموت بيضيّعها، وقطاع الطرق اللي تسيبهم عايشين بياخدوا نص الأجرة.",
+        "مبارزات الساحة: 3 مبارزات بس في اليوم مع نفس الشخص بتتحسب في التقييم، والباقي ودّي."],
+      en: ["A golem that falls leaves its rubble where it fell, with a vein of ore in it: dig it once within 90 seconds.",
+        "A boss fight log: click the fight's message, the Boss fights button in the log (L), or type /raidlog to see your last three boss fights (phases, your damage, who fell) and watch them play back on a small map.",
+        "Caravan commissions from the merchants of Reidan, Reinhardt, Rolling and Titan (from level 30, four a day): a deposit back on delivery, a time limit, and your choice of road: the safe one, or the bandits' for twice the pay and two ambushes. On foot or horseback only: coaches and boats won't take the load, a teleport or a death loses it, and bandits you leave standing take half the pay.",
+        "Arena duels: only three a day against the same player count for your rating; the rest are friendly."] },
     { v: '2026-10-26plan10', ver: '3.46', d: '2026-10-26',
       ar: ["معسكر الجوبلن (أدوار وادي الجوبلن الثلاثة) بقى نسخة لكل بارتي: جوه بتشوف وبتحارب مع البارتي بتاعك بس، واللي برا البارتي في نسخة لوحده.",
         "أوضة ليك: أجّرها مرة واحدة من أي نُزل (5,000 دهب)، وأي نُزل في القارة يفتحلك بابها. رتّب فيها 8 حتت عفش (800 دهب للحتة)، ونام في سريرك ترجعلك صحتك وطاقتك (مرة كل 20 دقيقة)."],
