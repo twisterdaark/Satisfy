@@ -7,7 +7,7 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
-    { v: '2026-10-27plan4', ver: '3.63', d: '2026-10-27',
+    { v: '2026-10-27plan4', ver: '3.64', d: '2026-10-27',
       ar: ["اختبار رقصات السيف عند جدارية باغما: السيّاف اللي على الجدارية بيقولك رقصاتك واحدة ورا التانية، وكل واحدة لازم تيجي في ثانيتين. بتاخد تقدير (S لحد C)، ولو الرقصات اندمجت في 9 ثواني بتتعلم الدمج الجديد.",
         "الحراس بالليل بيلفّوا في دورية قصيرة وفي إيدهم فانوس، والتجار اللي برة بيقفلوا الشبابيك ويولّعوا لمبة، بس لسه بيبيعوا من الشباك.",
         "لوحة النقابات على وحوش العالم (التنين ترواكا وغيره): بيتحسب ضرر كل نقابة، ولما الوحش يموت نقابتك على حسب مركزها بتاخد نصيب من دهبه (الأول 100% لحد الخامس 15%).",
@@ -18,6 +18,16 @@
         "A guild board on the world bosses (Trauka and the rest): each guild's damage counts, and at the kill your guild's place pays you a share of the boss's gold (1st 100% down to 5th 15%).",
         "Restoring the West together: every giant worm and nest in the Western Sands counts for the whole world, and the green creeps west from Reidan's wall until all the sands are green at 3,000. Ask Rabbit \"How is the West?\".",
         "The Demon Slayer on demons: all his bonuses with the holy blessings on evil share one limit, twice the damage (the Demon Predator skill comes on top)."] },
+    { v: '2026-10-27chatlink', ver: '3.63', d: '2026-10-27',
+      ar: ["بقيت تقدر تبعت أيتم أو كويست في الشات زي ليج أوف ليجيندز: في الشنطة دوس 💬 وبعدين أي حاجة، أو 💬 جنب المهمة في كتاب المهام.",
+        "اللينك بيظهر في الشات باسم الحاجة ولون ندرتها، واللي يقف عليه (أو يدوس مطوّل على الموبايل) بيشوف تفاصيلها: الستاتس والباسيف والجواهر واللي صنعها.",
+        "لو اللينك اتبعت من أكتر من دقيقة وانت مكنتش شايفه، أو صاحبه مش أونلاين، بيورّي الاسم والندرة والستاتس الأساسية بس.",
+        "اختبار جديد لده."],
+      en: ["You can now link an item or a quest in the chat, like League of Legends: in the bag press 💬 and then anything, or 💬 beside a quest in the Quest Book.",
+        "The link shows in the chat by its name and rarity colour; hovering it (a long press on a phone) shows its details: stats, passives, gems and its maker.",
+        "If the link was sent more than a minute before you saw it, or its owner is offline, it shows only its name, rarity and base stats.",
+        "A new test for this."],
+      hide: [3] },
     { v: '2026-10-26u180', ver: '3.62', d: '2026-10-26',
       ar: ["بيض الوايفرن المسروق من العش بقى مربوط باللي سرقه: يتباع للتجار ويدخل في الصناعة، بس مايتحطش في المزاد ولا خزنة النقابة.",
         "البيض اللي بيقع من ملكة الوايفرن يفضل حر زي ما هو.",
