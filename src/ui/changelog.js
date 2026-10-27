@@ -7,6 +7,18 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27races', ver: '3.64', d: '2026-10-27',
+      ar: ["أعراق جديدة تتفتح: العين الشريرة، العملاق، النص دراكوني، اليانجبان (نص إله)، والديمونكن (نص شيطان). كل عرق ليه اختبار بيعرضه عليك النظام في مكانه من الرواية، ولما تخلّصه عرقك الحالي بيتشال ويتبدل بالجديد (حتى لو مصاص دماء).",
+        "العين الشريرة: في زنزانة «احترس من الكلاب» (لفل 250). العملاق: في أرض العمالقة (لفل 200). النص دراكوني: في الحافة الرابعة من جبال الفوضى (لفل 440). اليانجبان: عند طريق مملكة هوان في غابة الخوخ (لفل 400 لحد 450، تلات خطوات). الديمونكن: في قرية الديمونكن في الجحيم (لفل 400، تلات خطوات وقوة شيطانية 400). اليانجبان والديمونكن هما الأصعب.",
+        "لما تاخد العرق بيتحدد دمك مرة واحدة: 15% سلالة نادرة و5% سلالة أندر، كل واحدة ليها زيادات وباسيف خاص (زي سلالة الملك وعين السيد الأعلى، عملاق الصقيع والتايتن القديم، أمير الجحيم...).",
+        "كل عرق ليه باسيف وسكيل بيتحط على البار: عين الدمار، تحطيم الأرض، نفَس التنين، وقفة تشييو القتالية، وأوفردرايف نار الجحيم. شوف العرق والسلالة في نافذة الحالة.",
+        "اختبار جديد لده."],
+      en: ["New unlockable races: Evil Eye, Giant, Half-Draconian, Yangban (Half-God) and Demonkin (Half-Demon). Each has a trial the system offers where the novel puts that people; finishing it replaces your current race (a vampire too).",
+        "Evil Eye: in the Beware Dogs dungeon (Lv 250). Giant: in the Giants' Land (Lv 200). Half-Draconian: on the Fourth Ridge of the Chaos Mountains (Lv 440). Yangban: at the path to the Hwan Kingdom in the peach forest (Lv 400 to 450, three steps). Demonkin: in the demonkin village of hell (Lv 400, three steps and 400 demonic power). The Yangban and the Demonkin are the hardest.",
+        "Taking the race rolls your bloodline once: 15% an uncommon lineage and 5% a rare one, each with its own bonuses and passive (King's Lineage and Overlord's Eye, Frost Giant and Ancient Titan, Hell Prince...).",
+        "Every race has its passive and a skill for the bar: Eye of Destruction, Earth Shatter, Dragon Breath, Chiyou's Martial Stance and Hellfire Overdrive. Your race and bloodline show in the status window.",
+        "A new test for this."],
+      hide: [4] },
     { v: '2026-10-27chatlink', ver: '3.63', d: '2026-10-27',
       ar: ["بقيت تقدر تبعت أيتم أو كويست في الشات زي ليج أوف ليجيندز: في الشنطة دوس 💬 وبعدين أي حاجة، أو 💬 جنب المهمة في كتاب المهام.",
         "اللينك بيظهر في الشات باسم الحاجة ولون ندرتها، واللي يقف عليه (أو يدوس مطوّل على الموبايل) بيشوف تفاصيلها: الستاتس والباسيف والجواهر واللي صنعها.",
