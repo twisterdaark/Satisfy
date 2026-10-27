@@ -417,6 +417,7 @@
         u['guildNames/' + g.nk] = gid;
         u['guildMembers/' + gid + '/' + uid] = member(m);
         u['guildResearch/' + gid] = null;   // plan U237: research an older client's disband left behind goes with a new guild
+        u['guildSupply/' + gid] = null;     // plan U207: and supply orders
         return up(u);
       },
       invite: function (uid, gid, v) { var u = {}; u['guildInv/' + uid + '/' + gid] = { n: v.n, by: v.by, byN: String(v.byN || '').slice(0, 24), t: SV() }; return up(u); },
@@ -433,7 +434,7 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildResearch/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; u['guildWar/' + gid] = null; u['guildWarAsk/' + gid] = null; u['guildWarKill/' + gid] = null; u['guildHall/' + gid] = null; u['guildHallGuest/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildResearch/' + gid] = null; u['guildSupply/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; u['guildWar/' + gid] = null; u['guildWarAsk/' + gid] = null; u['guildWarKill/' + gid] = null; u['guildHall/' + gid] = null; u['guildHallGuest/' + gid] = null; return up(u); },
       // SAT-ONLINE-081 the weekly goal: guildWeek/{gid}/{wk}/{uid} {n, k, t}: each member's own kills this week (only upward,
       // at most 1,500); guildWeekPaid/{gid}/{wk}/{uid}/{tier} {t}: a tier's reward, taken once
       watchWeek: function (gid, wk, cb) { return watch('guildWeek/' + gid + '/' + wk, cb); },
@@ -602,6 +603,25 @@
           u['guildResearch/' + gid] = m + Math.pow(2, bit);
           u['guildLog/' + gid + '/' + lid] = { by: uid, n: String(n || '?').slice(0, 24), k: 'res', g: cost, b: node, t: SV() };
           return up(u);
+        });
+      },
+      // plan U207: supply orders guildSupply/{gid}/{s0|s1|s2} = {k, n, p, d, id, by, at}: those who may spend the treasury ask
+      // for n of material k at p gold a piece; a member delivers once to an order (any amount up to what is left): one
+      // update puts the pieces in the vault as guildVault/{gid}/v_{slot}_{id}_{uid}, raises d by as many, and takes their
+      // pay from the treasury (the rules check all three together)
+      watchSupply: function (gid, cb) { return watch('guildSupply/' + gid, cb); },
+      supPost: function (gid, slot, v) { var u = {}; u['guildSupply/' + gid + '/' + slot] = { k: v.k, n: v.n, p: v.p, d: 0, id: v.id, by: v.by, at: SV() }; return up(u); },
+      supCancel: function (gid, slot) { return D.remove(at('guildSupply/' + gid + '/' + slot)); },
+      supply: function (gid, slot, uid, byN, q) {
+        return Promise.all([D.get(at('guildBank/' + gid)), D.get(at('guildSupply/' + gid + '/' + slot))]).then(function (r) {
+          var b = r[0].val(), o = r[1].val(); if (!b || !o) throw new Error('gone');
+          q = Math.min(q, o.n - o.d); if (!(q > 0)) throw new Error('full');
+          var g = q * o.p; if ((+b.in || 0) - (+b.s || 0) < g) throw new Error('poor');
+          var u = {};
+          u['guildBank/' + gid] = { in: +b.in || 0, s: (+b.s || 0) + g, lb: b.lb, lg: b.lg, t: SV() };
+          u['guildSupply/' + gid + '/' + slot] = { k: o.k, n: o.n, p: o.p, d: o.d + q, id: o.id, by: o.by, at: o.at };
+          u['guildVault/' + gid + '/v_' + slot + '_' + o.id + '_' + uid] = { k: o.k, n: q, r: 0, by: uid, byN: String(byN || '?').slice(0, 24), t: SV() };
+          return up(u).then(function () { return { q: q, g: g, k: o.k }; });
         });
       },
       readGuild: function (gid) { return D.get(at('guilds/' + gid)).then(function (s) { return s.val(); }); },

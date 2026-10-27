@@ -7,6 +7,9 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27plan18', ver: '3.68', d: '2026-10-27',
+      ar: ["طلبات التوريد للجيلد: من قائمة الجيلد (G) ← طلبات التوريد، اللي يقدر يصرف من الخزينة بيطلب خامة (كام قطعة وبكام الواحدة)، وتلات طلبات في المرة. كل عضو بيورّد للطلب مرة واحدة: الخامات بتروح خزنة الجيلد وتمنها بيجيله من الخزينة."],
+      en: ["Guild supply orders: in the guild menu (G) → Supply orders, whoever may spend the treasury asks for a material (how many, and the pay for each), three orders at a time. Each member delivers to an order once: the materials go into the guild vault and the pay comes from the treasury."] },
     { v: '2026-10-27plan17', ver: '3.67', d: '2026-10-27',
       ar: ["لوحة التوازن بتاعة صاحب اللعبة بقت بتوري عدالة الـPvP: المبارزات لوحدها والقتال المفتوح لوحده، وقت قتل لاعب، وكام ثانية الواحد بيصمد بعد ما يتضرب، والفوز والخسارة على حسب تقييم العدة، وزمن الرد (p95).",
         "‎/craftstats all لصاحب اللعبة: جودة الصناعة عند كل اللاعبين الأسبوع ده، والحسابات اللي نسبها أعلى من اللي الفرن يقدر يديه."],

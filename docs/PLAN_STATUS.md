@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.67) |
+| | At the count | Now (v3.68) |
 |---|---|---|
-| Done | 233 | 301 |
-| Partly there (something left) | 92 | 31 |
+| Done | 233 | 302 |
+| Partly there (something left) | 92 | 30 |
 | Not started | 11 | 4 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **35** (31 + 4) |
+| **Left to build** | **103** (92 + 11) | **34** (30 + 4) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -49,6 +49,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.65 (batch 15): U219 (crafting commissions; needs the rules' `commOrders`, `commClaim`, `commDone` and `commPaid`).
 - v3.66 (batch 16): U237 (the guild research tree; needs the rules' `guildResearch`, the treasury's spend for it, and one building a write).
 - v3.67 (batch 17): U045 (PvP fairness on the owner's board; the thresholds before ranked are the owner's), U284 (crafting quality across players); the rules' `balance` takes the new fields.
+- v3.68 (batch 18): U207 (guild supply orders and their ledger; needs the rules' `guildSupply` and the treasury's pay for a delivery).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -234,7 +235,7 @@ Checked 2026-10-26 against `/home/claude/satisfy-aud` (main @ 8a2e4f1e, v3.15). 
 | U204 | Party expedition storyline | part | A party kill counts once for each member's kill quests (`qShareOk`, `regression/qshare`); a raid boss pays each fighter once (`regression/raid`) and its roll is made once (`regression/raidloot`). Missing: a party story with shared flags. The storyline itself would be invented (§82) |
 | U205 | World event quest | done | World events run on the server clock (`EVT`, `wNow`). The event bar `#evbar` shows the name, time left, waves and kills; the contribution is paid at the end, and nothing is left after it ends. Story quests also target event monsters (gj7/gj8, Defense War II) |
 | U206 | Daily missions | done | Three daily bounties seeded by the UTC date (`dailyList`, `today()` on `wNow`, documented in ENGINE_API "api 1, fix" SAT-ONLINE-130), with a bonus counted over 7 days (`regression/dailyweek`). Earl Aden's tasks vary, at most 4 a day (`regression/royal`). Repeatable XP is capped (v2.87) |
-| U207 | Weekly profession contract | part | Earl Aden's royal tasks include "make {n} rare or better pieces" (`adq_craftR`, daily, at most 4); the National Competition has a production round. Missing: a weekly contract, guild supply orders, and a ledger that accepts each supply once v3.33: a weekly contract for each craft at the quest board from level 20 (`wcMenu`: forge rare+ pieces, cook, brew, sew, harvest at Piaro's), fixed per character id for the server's week (`lockWeek`); what you make after taking it counts, each piece once by its uid (`S.wc.led`), auto production not; it pays gold, the craft's experience and a blueprint fragment (U280's) (`regression/plan6`). Left: guild supply orders and a shared ledger (they need rules). |
+| U207 | Weekly profession contract | done (v3.68) | Earl Aden's royal tasks include "make {n} rare or better pieces" (`adq_craftR`, daily, at most 4); the National Competition has a production round. Missing: a weekly contract, guild supply orders, and a ledger that accepts each supply once v3.33: a weekly contract for each craft at the quest board from level 20 (`wcMenu`: forge rare+ pieces, cook, brew, sew, harvest at Piaro's), fixed per character id for the server's week (`lockWeek`); what you make after taking it counts, each piece once by its uid (`S.wc.led`), auto production not; it pays gold, the craft's experience and a blueprint fragment (U280's) (`regression/plan6`). Left: guild supply orders and a shared ledger (they need rules). v3.68: guild supply orders (`guildSupply/{gid}/{s0..s2}`): whoever may spend the treasury asks for a material at a pay a piece; a member delivers once to an order, the pieces into the vault (`v_{slot}_{id}_{uid}`, the ledger) and the pay from the treasury in one write the rules check (`guildSupD`, `supGive`; `regression/plan18`, `unit/rules-supply`). |
 | U208 | Quest journal filters | done (v3.21) | The quest panel filters by All/Story/S/Daily/Side (`qCat`, `qFilt`, `regression/mpack`, which names U208), and a finished quest stays done (`S.qs` st 2). Missing: profession, party and world categories, and a journal of finished quests (no such view: searched "journal", done lists) |
 | U209 | Lore spoiler protection | done | Lore pages show ??? until read (U298, `regression/codex`). A monster's page opens at its first kill, and the materials index keeps unmet monsters as ??? (`regression/mbook`, v3.12). Story chapter pages open at their first giver (`regression/story`) |
 | U268 | Weapon rarity extension | part | Five ratings (`MULT`, normal to legendary); weapon passives by rating (`wpRoll`: epic 1, unique 2, legendary 3, plus a hidden one by appraisal; `regression/wpass`, `appraise`); the reforge (U286). Missing: rolled on the client (server D3); no record of where a piece came from (only Creations carry `by`); no Myth rating v3.40: every piece remembers where it came from (`src`: dropped by, a boss's chest, bought from, a quest's reward, raid loot; forged and sewn pieces carry their maker), shown on its tip and kept through trades in its own shape only (`regression/plan8`). Left: the Myth rating (the owner's), and a server roll (D3). |
