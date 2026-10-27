@@ -30,7 +30,7 @@ test('counts match the audited baseline',()=>{
   const n=o=>Array.isArray(o)?o.length:Object.keys(o).length;
   assert.deepStrictEqual({MT:n(D.monsters.types),BOSSES:n(D.monsters.bosses),SPAWN:n(D.monsters.spawns),QD:n(D.quests.quests),RC:n(D.recipes.recipes),
     SKD:n(D.skills.skills),NPC:n(D.npcs.npcs),interior:Object.values(D.npcs.npcs).filter(x=>x.interior).length,ZR:n(D.zones.regions),TOWNS:n(D.zones.towns),classes:n(D.classes.classes)},
-    {MT: 179,BOSSES:5,SPAWN:19,QD:156,RC:27,SKD:154,NPC:193,interior:11,ZR:17,TOWNS:3,classes:29});});   // SAT-ONLINE-159: the East Continent's 22 monsters, 11 quests and 32 people; the 6th to 1st vampire cities' 7 (owner 2026-10-23); the Mage's switch to Necromancer (owner 2026-10-24) Winston Castle (v2.92): Earl Steim and Irene inside, Administrator Rabbit in Reidan; Earl Zebra before his keep (v2.94); Skunk at the Sword Grave (v2.95); Brinichi's fisherman and two Sirens under the sea (v2.96); Minor at the Beware Dogs mine (v2.99). The Vatican (v3.11): Isabel, Luna and a priest, Rin and Damian in the papal hall. The Sword Saint (v3.13): eight skills, Swordsmanship Creation, Complete Sword Mastery and the owner's six.
+    {MT: 179,BOSSES:5,SPAWN:19,QD:157,RC:27,SKD:154,NPC:193,interior:11,ZR:17,TOWNS:3,classes:29});});   // SAT-ONLINE-159: the East Continent's 22 monsters, 11 quests and 32 people; the 6th to 1st vampire cities' 7 (owner 2026-10-23); the Mage's switch to Necromancer (owner 2026-10-24) Winston Castle (v2.92): Earl Steim and Irene inside, Administrator Rabbit in Reidan; Earl Zebra before his keep (v2.94); Skunk at the Sword Grave (v2.95); Brinichi's fisherman and two Sirens under the sea (v2.96); Minor at the Beware Dogs mine (v2.99). The Vatican (v3.11): Isabel, Luna and a priest, Rin and Damian in the papal hall. The Sword Saint (v3.13): eight skills, Swordsmanship Creation, Complete Sword Mastery and the owner's six. The drill with Regas (plan U192).
 
 // condition vocabulary (docs/content/CONTENT_SCHEMA.md)
 function checkCond(c,where){assert.ok(c&&typeof c==='object'&&!Array.isArray(c),where+': condition must be an object');
@@ -62,6 +62,7 @@ test('cross-references point at things that exist',()=>{
     else if(o.t==='pray')assert.strictEqual(o.it,'altar',`quest ${q.id} prays`);
     else if(o.t==='cache')assert.strictEqual(o.it,'cache',`quest ${q.id} digs caches`);
     else if(o.t==='block')assert.strictEqual(o.it,'guard',`quest ${q.id} blocks with the guard`);
+    else if(o.t==='drill')assert.strictEqual(o.it,'regas',`quest ${q.id} drills`);   // (plan U192) Regas's drill
     else if(o.t==='dodge'||o.t==='party')assert.strictEqual(o.it,o.t,`quest ${q.id} ${o.t}`);   // (plan U190) Khan's steps
     else if(o.t==='deliver')assert.ok(N[o.it]&&o.it!==q.by,`quest ${q.id} delivers to ${o.it}`);
     else if(o.t==='escort')assert.ok(Array.isArray(o.to)&&o.to.length===2&&o.hp>0&&typeof o.it==='string',`quest ${q.id} escort`);
