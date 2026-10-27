@@ -1,5 +1,5 @@
 'use strict';
-// v3.64 (plan U219) crafting commissions over the fake Firebase with the rules' checks. Ahmed orders an Iron Sword at the
+// v3.65 (plan U219) crafting commissions over the fake Firebase with the rules' checks. Ahmed orders an Iron Sword at the
 // smithy: the fee and the sword's materials leave his bag. Carim is no smith and sees no work. Bassem the Blacksmith knows
 // the recipe: he claims the order and forges it with the order's materials (none of his own); while he works Ahmed can't
 // take it off. The sword arrives in Ahmed's bag with Bassem's mark, and Bassem collects the fee once. An order nobody holds
