@@ -416,6 +416,7 @@
         u['guilds/' + gid] = { name: g.name, nk: g.nk, master: uid, col: g.col, t: SV() };
         u['guildNames/' + g.nk] = gid;
         u['guildMembers/' + gid + '/' + uid] = member(m);
+        u['guildResearch/' + gid] = null;   // plan U237: research an older client's disband left behind goes with a new guild
         return up(u);
       },
       invite: function (uid, gid, v) { var u = {}; u['guildInv/' + uid + '/' + gid] = { n: v.n, by: v.by, byN: String(v.byN || '').slice(0, 24), t: SV() }; return up(u); },
@@ -432,7 +433,7 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; u['guildWar/' + gid] = null; u['guildWarAsk/' + gid] = null; u['guildWarKill/' + gid] = null; u['guildHall/' + gid] = null; u['guildHallGuest/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildResearch/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; u['guildWar/' + gid] = null; u['guildWarAsk/' + gid] = null; u['guildWarKill/' + gid] = null; u['guildHall/' + gid] = null; u['guildHallGuest/' + gid] = null; return up(u); },
       // SAT-ONLINE-081 the weekly goal: guildWeek/{gid}/{wk}/{uid} {n, k, t}: each member's own kills this week (only upward,
       // at most 1,500); guildWeekPaid/{gid}/{wk}/{uid}/{tier} {t}: a tier's reward, taken once
       watchWeek: function (gid, wk, cb) { return watch('guildWeek/' + gid + '/' + wk, cb); },
@@ -585,6 +586,21 @@
           u['guildBank/' + gid] = { in: +v.in || 0, s: (+v.s || 0) + cost, lb: v.lb, lg: v.lg, t: SV() };
           u['guildBuild/' + gid + '/' + b] = l;
           u['guildLog/' + gid + '/' + lid] = { by: uid, n: String(n || '?').slice(0, 24), k: 'build', g: cost, b: b, l: l, t: SV() };
+          return up(u);
+        });
+      },
+      // plan U237: the research tree guildResearch/{gid} = a whole number, one bit a node (GRS's order in the game); a node
+      // bought reads the treasury and the tree and writes both back with it (the rules: one new bit, its prerequisites'
+      // bits already there, its cost added to s), with a log line {k: 'res', b: node, g: cost}
+      watchRes: function (gid, cb) { return watch('guildResearch/' + gid, cb); },
+      research: function (gid, uid, n, node, bit, cost, lid) {
+        return Promise.all([D.get(at('guildBank/' + gid)), D.get(at('guildResearch/' + gid))]).then(function (r) {
+          var v = r[0].val(), m = +r[1].val() || 0; if (!v) throw new Error('empty');
+          if (Math.floor(m / Math.pow(2, bit)) % 2) throw new Error('done');
+          var u = {};
+          u['guildBank/' + gid] = { in: +v.in || 0, s: (+v.s || 0) + cost, lb: v.lb, lg: v.lg, t: SV() };
+          u['guildResearch/' + gid] = m + Math.pow(2, bit);
+          u['guildLog/' + gid + '/' + lid] = { by: uid, n: String(n || '?').slice(0, 24), k: 'res', g: cost, b: node, t: SV() };
           return up(u);
         });
       },
@@ -866,6 +882,36 @@
     };
   }
 
+  // Plan U219: crafting commissions. commOrders/{oid} {by, n, rc, fee, t}: a piece to be forged (a recipe's id) for a fee;
+  // its owner paid the fee and the recipe's materials into it. A player smith claims it first (commClaim/{oid} {s, t}; a
+  // claim older than 10 minutes can be taken again, and only then can the owner take the order off), forges it, and
+  // answers in one update that removes the order and the claim, gives the piece to its owner (commDone/{owner}/{oid}
+  // {rc, json, by, sn, fee, t}: the piece as a trade carries it) and pays the smith (commPaid/{smith}/{oid} {g, t}). The
+  // owner and the smith each remove what they took.
+  function commStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, SV = function () { return D.serverTimestamp(); };
+    var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
+    return {
+      list: function () { return Promise.all([D.get(at('commOrders')), D.get(at('commClaim'))]).then(function (r) { return { o: r[0].val() || {}, c: r[1].val() || {} }; }); },
+      post: function (oid, v) { var u = {}; u['commOrders/' + oid] = { by: v.by, n: String(v.n || '?').slice(0, 24), rc: v.rc, fee: v.fee, t: SV() }; return D.update(D.ref(db), u); },
+      cancel: function (oid) { var u = {}; u['commOrders/' + oid] = null; u['commClaim/' + oid] = null; return D.update(D.ref(db), u); },
+      // t0: the first claim's time, kept by every claim after it (its owner can take the order off 20 minutes after it)
+      claim: function (oid, smith, t0) { var u = {}; u['commClaim/' + oid] = { s: smith, t: SV(), t0: t0 || SV() }; return D.update(D.ref(db), u); },
+      forge: function (oid, o, smith, sn, json) {
+        var u = {}; u['commOrders/' + oid] = null; u['commClaim/' + oid] = null;
+        u['commDone/' + o.by + '/' + oid] = { rc: o.rc, json: json, by: smith, sn: String(sn || '?').slice(0, 24), fee: o.fee, t: SV() };
+        u['commPaid/' + smith + '/' + oid] = { g: o.fee, t: SV() };
+        return D.update(D.ref(db), u);
+      },
+      order: function (oid) { return D.get(at('commOrders/' + oid)).then(function (s) { return s.val(); }); },
+      left: function (uid, oid) { return Promise.all([D.get(at('commOrders/' + oid)), D.get(at('commDone/' + uid + '/' + oid))]).then(function (r) { return [r[0].val(), r[1].val()]; }); },
+      watchDone: function (uid, cb) { return watch('commDone/' + uid, cb); },
+      took: function (uid, oid) { return D.remove(at('commDone/' + uid + '/' + oid)); },
+      watchPaid: function (uid, cb) { return watch('commPaid/' + uid, cb); },
+      collect: function (uid, oid) { return D.remove(at('commPaid/' + uid + '/' + oid)); },
+    };
+  }
+
   // SAT-ONLINE-094: the auction house board. auction/{lid} {by, n, it, q, price, t}: a player's listing (materials and
   // potions, as the auction house takes them); a sale is one update that removes it and writes auctionPaid/{seller}/{lid}
   // {g, by, bn, it, q, t} (the rules: only for the listing as it is, by someone else); the seller removes what it collects.
@@ -944,6 +990,7 @@
     lfgStore: lfgStore,
     fishFestStore: fishFestStore,
     repairStore: repairStore,
+    commStore: commStore,
     auctionStore: auctionStore,
     announceStore: announceStore,
     pollStore: pollStore,

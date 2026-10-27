@@ -36,6 +36,9 @@
     'eq', 'bar', 'xbar', 'croot', 'aff', 'stash', 'rep', 'guild', 'comp', 'life',
     // repair orders posted to player smiths and not answered yet (SAT-ONLINE-096)
     'rord',
+    // crafting commissions (plan U219): your orders up (their fee and materials, for a refund) and pieces you forged that
+    // haven't reached their owner yet
+    'cord', 'cpend',
     // an auction listing whose write hasn't answered yet: its goods are off the bag (v3.16)
     'auPend',
     // Three Crowns at the inns: games won and played (SAT-ONLINE-181)
@@ -119,6 +122,11 @@
     'lrd',
     // the Vatican (v3.11): Goddess Rebecca's blessing, from Help the Rebecca Church!
     'vatB',
+    'pgTr',
+    // Restoring the West together (v3.24): your own count, and that you saw the West restored
+    'rw', 'rwSeen',
+    // a world boss's guild board (v3.24): when each one last paid your guild's place
+    'gbT',
   ];
   var SESSION = ['hpk', 'hpkN', 'raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'ctPet', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk', 'natJ'];
   var META = ['v', 'wv', 'uid', 'pid'];
