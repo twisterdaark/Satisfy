@@ -33,6 +33,10 @@ mage."
   `#mbSum`, `#mbQ`, `#mbF`, `#mbD`, `#mbG`, and the Lore filter), so `mbDraw`, its search, filters, tracking and portraits
   are as before; the Index hides its own search, detail and grid there. The separate window and its HUD key are gone; B opens
   the Index on this page (`openMB`), and B there closes it.
+- **🧬 Races** (v3.71; owner 2026-10-27: "Please add all races to the index and variants, for players to see what each one
+  offers. Give a vague explanation or one may find the quest giver"): page `race`, built by `rvkIx`. Every race and kind (the
+  vampire too), what it gives, its racial skill, how it is had, and its two bloodlines with their odds and their keepers, as a
+  vague hint until you have met the keeper. Details: `docs/content/BLOODLINES.md`.
 - Search by name on every page. Arabic and English.
 
 Test: `tests/regression/index.test.cjs` (2).

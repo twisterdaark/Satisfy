@@ -7,6 +7,16 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-28bloodkeepers', ver: '3.71', d: '2026-10-28',
+      ar: ["كل سلالة ليها حارس واقف في حتة في العالم، بدل قايمة نافذة الحالة (🩸 اتشالت): عشرين حارس، كل واحد في مكان يناسب سلالته (برج المراقبة القديم، تل مولر، غابة الصنوبر الأبيض، الساحل الشرقي، مناجم ريدان، قرية أورك الصقيع، الهاوية، الجحيم، وغيرهم). الحارس بيدّي الكويست لعرقه بس، من لفلها، وبترجعله لما تخلص.",
+        "السلالات النادرة بقت أصعب: كويستين بدل واحدة، والحارس بتاعها أبعد. الكويست التانية جديدة (بوسات أعلى من لفلك، تفادي وبوس قريب منك، الكراكن مرتين، حتت فريدة من صنعك، عملاق الصقيع تلات مرات، الوحوش الأربعة المقدسة، وغيرها). لو كنت شايل كويست سلالة نادرة من القايمة القديمة، تقدمك بيتحسب للأولى.",
+        "صفحة «الأعراق» في الفهرس (N): كل عرق ونوع (والفامباير)، بيدّي إيه، سكيله، بيتاخد إزاي، وسلالتين كل عرق بفرصتهم، مع تلميح غامض عن مكان الحارس. لما تقابل الحارس، الصفحة بتقولك هو فين. ولما دمك يقدر يصحى، بيوصلك همس إن فيه حد عارف سلالتك، من غير ما يقول فين.",
+        "اختبار جديد لده."],
+      en: ["Every bloodline has a keeper standing somewhere in the world instead of the status window's menu (🩸 is gone): twenty keepers, each where its bloodline belongs (the Old Watchtower, Muller's hill, the Whitepine Forest, the East Coast, the Reidan mines, the Frostlight Orc Village, the Abyss, hell and more). A keeper offers its quest to its own race only, from its level, and takes it back when you are done.",
+        "Rare bloodlines are harder now: two quests instead of one, and their keepers stand further out. The second quest is new (bosses above your level, dodging with a boss close, the Kraken twice, unique pieces of your own make, the Frost Giant three times, the Four Auspicious Beasts and more). If you carried a rare bloodline's quest from the old menu, your progress counts for the first.",
+        "The Index (N) has a Races page: every race and kind (the vampire too), what it gives, its skill, how it is had, and each race's two bloodlines with their odds, and a vague hint where the keeper stands. Once you meet the keeper, the page says where. When your blood could wake, a whisper tells you someone knows of your bloodline, not where.",
+        "A new test for this."],
+      hide: [3] },
     { v: '2026-10-27humanon', ver: '3.70', d: '2026-10-27',
       ar: ["البشري بياخد مميزاته (+10% خبرة، +5% للخصائص، النفَس التاني، وفرصة السلالة) من أول ما يدخل، من غير ما يستخدم الاختيار المجاني. الاختيار المجاني فاضل لو عايز تغيّر عرقك.",
         "اختبار متعدّل لده."],

@@ -148,8 +148,10 @@ test('base races: one free switch, the skin others see, the numbers, the skills 
         G.S.race = r; G.S.rsub = sub || ''; G.P.mp = 1e6; G.P.cd = {}; Z.cast(k); o.cast[k] = (G.P.cd[k] || 0) > 0;
       }
       // a bloodline quest awakens its bloodline
-      G.S.race = 'dwarf'; G.S.rsub = ''; G.S.rv = ''; window.__GPB9.accept('rvdw2');
-      for (let i = 0; i < 300; i++)window.__GRZ.ev('fire'); Z.tick(1); o.rv = G.S.rv;
+      // (v3.71) a bloodline quest goes back to its keeper in the world, and a rare bloodline is two quests
+      G.S.race = 'dwarf'; G.S.rsub = ''; G.S.rv = ''; G.S.qs.rvdw2a = { st: 2, c: 300 }; window.__GPB9.accept('rvdw2');
+      G.S.qs.rvdw2.c = 3; Z.tick(1); document.getElementById('dialog').hidden = true; G.talkNPC('rvkDw2');
+      for (let i = 0; i < 40 && G.DL; i++)G.advance(); o.rv = G.S.rv;
       return o;
     });
     assert.equal(s.race, 'elf'); assert.equal(s.sub, 'dark');

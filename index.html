@@ -7422,7 +7422,7 @@ function updateProj(dt){scTick(dt);proj=proj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y
  if(p.t<=0||p4PSolid(Math.floor(p.x/TS),Math.floor((p.y+8)/TS))){if(p.boom)boom(p);return false;}
  for(const m of mons){if(m.dead||p.hit.has(m))continue;if(Math.hypot(m.x-p.x,monY(m)-p.y)<MT[m.type].r+(p.kind==='wave'?13:5)){p.hit.add(m);if(p.boom){boom(p);return false;}if(hitMon(m,p.mul,{kx:Math.sign(p.vx)*.5,ky:Math.sign(p.vy)*.5,stun:p.stun,slow:p.slow,el:p.el||null,...(p.kind==='bullet'?{skill:1}:{})}))SFX.hit();if(p.pure&&!m.dead&&(DEMK.has(m.type)||voxOf(m.type)[0]==='dead'))m.weak=Math.max(m.weak||0,6);if(!p.pierce)return false;}}
  return true;});}
-function dodge(){if(PHOTO)return;if(RCR&&RCR.in)return rcSpur();if(P.dash>0||P.dcd>0)return;P.guard=0;if(P.st<dodgeCost()){toast(t('tired'),'warn');SFX.deny();return;}let ix=(K.right?1:0)-(K.left?1:0),iy=(K.down?1:0)-(K.up?1:0);if(TSV){ix=TSV.x;iy=TSV.y;}if(!ix&&!iy){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];ix=v[0];iy=v[1];}const l=Math.hypot(ix,iy);P.dx=ix/l;P.dy=iy/l;P.dash=(P.ride?.24:.18)*(1+gearSum('dsh'));P.dcd=.7;P.inv=Math.max(P.inv,.3);rzPhase();P.st-=dodgeCost();pressKey('kD');SFX.dodge();qEvent('dodge','dodge');vfx('dust',P.x,P.y,{n:P.ride?14:8,angle:Math.atan2(-P.dy,-P.dx)});
+function dodge(){if(PHOTO)return;if(RCR&&RCR.in)return rcSpur();if(P.dash>0||P.dcd>0)return;P.guard=0;if(P.st<dodgeCost()){toast(t('tired'),'warn');SFX.deny();return;}let ix=(K.right?1:0)-(K.left?1:0),iy=(K.down?1:0)-(K.up?1:0);if(TSV){ix=TSV.x;iy=TSV.y;}if(!ix&&!iy){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];ix=v[0];iy=v[1];}const l=Math.hypot(ix,iy);P.dx=ix/l;P.dy=iy/l;P.dash=(P.ride?.24:.18)*(1+gearSum('dsh'));P.dcd=.7;P.inv=Math.max(P.inv,.3);rzPhase();P.st-=dodgeCost();pressKey('kD');SFX.dodge();qEvent('dodge','dodge');rvkDodge();vfx('dust',P.x,P.y,{n:P.ride?14:8,angle:Math.atan2(-P.dy,-P.dx)});
  for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*8,y:P.y,vx:-P.dx*40+(rand()-.5)*40,vy:-rand()*25,t:.35,c:rand()<.5?'#c8b48a':'#a89870'});fx.push({ring:true,x:P.x,y:P.y-6,t:.25});}
 // guard (SAT-COMBAT-002): hold right click to raise a guard toward the cursor. Hits from the front lose most of their damage
 // and wear the guard gauge down; an empty gauge breaks the guard and stuns you. Raising it just before a hit parries:
@@ -8007,7 +8007,7 @@ const qReady=id=>{const s=S.qs[id];return !!s&&s.st===1&&qCount(id)>=QD[id].obj.
    for everything that follows it (qDone), pays a repeatable quest's experience (its cap), and no class, trial, epic or
    board task comes back. */
 function legRep(id){const q=QD[id],s=S&&S.qs[id];return !!q&&!!s&&s.st===2&&isLeg()&&!q.rg&&!q.cls&&!q.promo&&!q.hcls&&!q.hid&&!q.sw&&!q.rep&&!q.gen&&!q.adq&&!q.gr&&!q.mur&&!!lrdOf()&&!lrdOf()[id];}
-function qAvail(id){const q=QD[id];return (!S.qs[id]||legRep(id))&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2||q.cl2==='smith'&&S.cls==='pagma')&&(!q.sec||S.sec===q.sec)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||q.sw||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)))&&(!q.need||!!(QNEED[q.need]&&QNEED[q.need]()));}
+function qAvail(id){const q=QD[id];return (!S.qs[id]||legRep(id))&&!(q.rep&&!q.gen&&((dlyS().rq||{})[id]||0)>=QREP_MAX)&&(!q.pre||qDone(q.pre))&&(!q.cl2||S.cls===q.cl2||q.cl2==='smith'&&S.cls==='pagma')&&(!q.sec||S.sec===q.sec)&&(!q.from||q.from.includes(S.cls)&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].promo&&S.qs[k].st===1))&&(!q.cls||q.sw||(S.cls==='novice'&&!Object.keys(S.qs).some(k=>QD[k]&&QD[k].cls&&S.qs[k].st===1)))&&(!q.need||!!(QNEED[q.need]&&QNEED[q.need]()))&&(!(q.rv||q.rvp)||rvkOk(q));}
 // owner 2026-10-23: a "kill it below 50% health" task can't be done when the monster is far under your level (it can't bring
 // your health down), so 20+ levels above it the health condition is waived and the task says so
 // a below-X%-health kill on a monster 20+ levels under you (owner 2026-10-24): any monster near your level counts instead
@@ -8349,7 +8349,7 @@ function talkNPC(id){if(id==='board')return openBoard();if(id==='auction'&&!npcK
  shopD(id,ac?qLn(ac,'_w'):line);}
 // a generated quest (Earl Aden's royal tasks) has no lines of its own: a shared one with its name and progress (owner 2026-10-22)
 const qLn=(q,s)=>QD[q]&&QD[q].gen?t('genQ'+s,{q:qName(q),p:qObjText(q)}):q+s;
-function offerQ(id,av){const n=NPCT[id]||{},lines=[];if(n.hi&&!S.met[id])lines.push(n.hi);S.met[id]=1;lines.push((QD[av].gr?epLines(av)+'\n':'')+t(av+'_o')+'\n'+t('rwLine',{r:qRewards(av).join(' · ')}));const alt=QALT[av]&&qAvail(QALT[av])?[{l:t(QALT[av]+'_alt'),f:()=>acceptQ(QALT[av])}]:[];   /* (plan U203) a quest with another side offers both */
+function offerQ(id,av){const n=NPCT[id]||{},lines=[];if(n.hi&&!S.met[id])lines.push(n.hi);S.met[id]=1;lines.push((QD[av].gr?epLines(av)+'\n':'')+t(av+'_o')+rvkWarn(av)+'\n'+t('rwLine',{r:qRewards(av).join(' · ')}));const alt=QALT[av]&&qAvail(QALT[av])?[{l:t(QALT[av]+'_alt'),f:()=>acceptQ(QALT[av])}]:[];   /* (plan U203) a quest with another side offers both */
  return dialog(id,lines,null,[{l:t('qAccept'),f:()=>acceptQ(av)},...alt,{l:t('qDecline')}]);}
 const QALT={fcA:'fcB',fcB:'fcA'};
 function buyMat(who,k,g){const n=buyCount(99,g);if(!n){SFX.deny();return dialog(who,[t('noGold')]);}S.gold-=g*n;S.mats[k]=(S.mats[k]||0)+n;boughtFx(k,n,g*n);shopD(who,isSm()&&who!=='merchant'?'kh_s3':'mHi');}
@@ -11105,7 +11105,7 @@ function qSpot0(id){const q=QD[id],o=q.obj;if(qReady(id)||!S.qs[id]){const n=npc
  if(o.t==='visit'||o.t==='pray'){const s=SHRINES.find(s=>s.k===o.it);if(s)return wTile(s.x,s.y);}
  if(o.t==='kill'&&MT[o.it])return qNear([o.it])||monHome(o.it);
  if(o.t==='have'){const ty=Object.keys(MT).filter(k=>(MT[k].drop||[]).some(d=>d[0]===o.it));const p=ty.length?qNear(ty)||ty.map(monHome).find(Boolean):null;if(p)return p;}
- if(q.rz||q.rv){const p=rzSpot(q,o);if(p)return p;}   // a race's trial or bloodline: its place, else the nearest monster
+ if(q.rz||q.rv||q.rvp){const p=rzSpot(q,o);if(p)return p;}   // a race's trial or bloodline: its place, else the nearest monster
  return qOther(q,o);}
 // owner 2026-10-23 ("let there be tracking for things like these"): every quest points somewhere. A monster with none
 // alive is looked for where it lives: its own spawn point even while it waits to come back, the spawn tables (open world,
@@ -12521,24 +12521,25 @@ function rzSt(){if(!S||!P)return '';return (rzV('cmd')?'A':'')+(P.rzHwU>gTime?(r
 const rzSub=()=>S&&S.rsub?t('rzs_'+myRace()+'_'+S.rsub):'';
 function rzName(){const r=myRace(),b=rzSub()||t('race_'+r);return b+(rzR()&&S.rv?' · '+t('rzv_'+r+'_'+S.rv):'');}
 function rzDesc(){const r=myRace();return t('raceD_'+r)+(rzR()&&S.rv?' '+t('rzvD_'+r+'_'+S.rv):'');}
-const rzAct=it=>Object.keys(S.qs||{}).some(id=>QD[id]&&(QD[id].rz||QD[id].rv)&&S.qs[id].st===1&&QD[id].obj.it===it);
+const rzAct=it=>Object.keys(S.qs||{}).some(id=>QD[id]&&(QD[id].rz||QD[id].rv||QD[id].rvp)&&S.qs[id].st===1&&QD[id].obj.it===it);
 function rzEv(it,key){if(!S||S.__demo||!rzAct(it))return;if(key){S.rzq=S.rzq||{};const L=S.rzq[it]||(S.rzq[it]=[]);if(L.includes(key))return;L.push(key);}qEvent('rz',it);}
 function rzKill(m){if(!S||m.tmp||m.spar||m.tdum)return;const k=m.type,b=MT[k]||{},z=zoneAt(m.x,m.y);
  if(RZHDR.has(k))rzEv('hdr');if(RZSB.has(k))rzEv('sbeast',k);if(RZHL.has(k))rzEv('hll',k);
  if(/^zHell(?!V)/.test(z)&&!b.boss)rzEv('hlm');if(/^zEa/.test(z))rzEv('east');if(z==='zGiantL'||z==='zGHold')rzEv('gland');
  if(b.boss){rzEv('boss');if((m.lv|0)>=300)rzEv('boss3');}if((m.lv|0)>S.lv)rzEv('hilv');if(rzNature())rzEv('nat');if(rzWet())rzEv('wet');
- if(monEl(k)==='fire')rzEv('fire');if(monUnd(k)||monEvil(k))rzEv('spirit');if(RZNORTH.test(z))rzEv('north');}
+ if(monEl(k)==='fire')rzEv('fire');if(monUnd(k)||monEvil(k))rzEv('spirit');if(RZNORTH.test(z))rzEv('north');
+ if(b.boss&&(m.lv|0)>S.lv)rzEv('bosshi');if(b.boss&&(monUnd(k)||monEvil(k)))rzEv('spboss');if(RZSB.has(k))rzEv('sbeast2',k);if(RZHL.has(k))rzEv('hll2',k);}
 // the system's line for each race step (every written quest has one, in both languages)
 Object.assign(STR.ar,{rze1_o:"حيطان المنطقة 8: احفر عروق حديد التنين المجنون في زنزانة «احترس من الكلاب»",rze2_o:"تار الشياطين الكبار: اقتل شياطين",rzg1_o:"عملاق الصقيع: اهزم عملاق الصقيع في حصن العمالقة",rzg2_o:"أرض العمالقة: اقتل وحوش في أرض العمالقة",rzd1_o:"دم بون وهيل: اقتل نص دراكونيين في جبال الفوضى",rzd2_o:"دم تنين حقيقي: اهزم تراوكا التنين الأحمر",rzy1_o:"الوحوش الأربعة المقدسة: اهزم الوحوش الأربعة المقدسة (كل واحد مرة)",rzy2_o:"اختبار الشرق: اقتل وحوش في القارة الشرقية",rzy3_o:"اللص الشهم: اهزم هوانج جيلدونج",rzh1_o:"البقاء للأقوى: اقتل وحوش في الجحيم",rzh2_o:"أسياد الجحيم: اهزم ماركوسياس وليراجي",rzh3_o:"جسم شيطان: وصّل قوتك الشيطانية لـ400",rvhu1_o:"دم الملوك: اهزم بوسات",rvhu2_o:"ما بعد الحدود: اقتل وحوش أعلى من لفلك",rvel1_o:"غابات شجرة العالم: اقتل وحوش في الطبيعة (برا المدن)",rvel2_o:"رقصة الفراغ: اتفادى",rvme1_o:"أغنية السيرين: اقتل وحوش في الماية أو تحت المطر",rvme2_o:"وحش الأعماق: اهزم الكراكن",rvdw1_o:"يد الرونات: اصنع حاجات نادرة أو أحسن",rvdw2_o:"قلب البركان: اقتل وحوش نار",rvor1_o:"جدار القبيلة: صد أو بارِي ضربات",rvor2_o:"أرواح الأجداد: اقتل أوندد أو أرواح شريرة",rvee1_o:"نظرة الملك: اقتل شياطين",rvee2_o:"عين فوق الشياطين: اهزم بيليال",rvgi1_o:"الشمال المتجمد: اقتل وحوش في الشمال المتجمد",rvgi2_o:"خطوات التايتن: اهزم بوسات لفل 300 أو أكتر",rvdr1_o:"النار القديمة: اهزم تراوكا",rvdr2_o:"تنين حقيقي: اهزم التنين الأزرق",rvya1_o:"موظف السما: اقتل وحوش في القارة الشرقية",rvya2_o:"طريق إله القتال: صد أو بارِي ضربات",rvde1_o:"الجلالة الجهنمية: اقتل وحوش في الجحيم",rvde2_o:"أمير الجحيم: اهزم ماركوسياس"});
 Object.assign(STR.en,{rze1_o:"Zone 8's Walls: Dig the insane dragon veins of the Beware Dogs dungeon",rze2_o:"Revenge on the Great Demons: Slay demons",rzg1_o:"The Frost Giant: Defeat the Frost Giant in the Giant's Hold",rzg2_o:"The Giants' Land: Slay monsters in the Giants' Land",rzd1_o:"Bun and Hel's Blood: Slay half-draconians in the Chaos Mountains",rzd2_o:"A Real Dragon's Blood: Defeat Trauka the red dragon",rzy1_o:"The Four Auspicious Beasts: Defeat the Four Auspicious Beasts (each once)",rzy2_o:"Trial of the East: Slay monsters on the East Continent",rzy3_o:"The Chivalrous Robber: Defeat Hwang Gildong",rzh1_o:"Survival of the Fittest: Slay monsters in hell",rzh2_o:"The Lords of Hell: Defeat Marchosias and Leraje",rzh3_o:"A Demon's Body: Raise your demonic power to 400",rvhu1_o:"Blood of Kings: Defeat bosses",rvhu2_o:"Beyond the Limits: Slay monsters above your level",rvel1_o:"Woods of the World Tree: Slay monsters in nature (outside towns)",rvel2_o:"Dance of the Void: Dodge",rvme1_o:"The Siren's Song: Slay monsters in water or under the rain",rvme2_o:"Beast of the Deep: Defeat the Kraken",rvdw1_o:"The Rune Hand: Craft pieces of rare rating or better",rvdw2_o:"Heart of the Volcano: Slay fire monsters",rvor1_o:"Wall of the Tribe: Block or parry blows",rvor2_o:"Spirits of the Ancestors: Slay undead or evil spirits",rvee1_o:"The King's Gaze: Slay demons",rvee2_o:"An Eye above Demons: Defeat Belial",rvgi1_o:"The Frozen North: Slay monsters in the frozen north",rvgi2_o:"The Titan's Steps: Defeat bosses of level 300 or more",rvdr1_o:"The Old Fire: Defeat Trauka",rvdr2_o:"A True Dragon: Defeat the Blue Dragon",rvya1_o:"Official of Heaven: Slay monsters on the East Continent",rvya2_o:"The Martial God's Road: Block or parry blows",rvde1_o:"Infernal Majesty: Slay monsters in hell",rvde2_o:"Prince of Hell: Defeat Marchosias"});
 Object.assign(SKLK,{rzwind:'heal',rzhowl:'wave'});   // their own looks (the guard look was already taken by forty skills)
 // where a race's step points (every quest points somewhere): its monsters, its land, else the nearest monster or person
-function rzSpot(q,o){const it=o.it,b=m=>MT[m.type]||{},foe=m=>!b(m).boss&&b(m).aggro!==undefined,set={hdr:RZHDR,sbeast:RZSB,hll:RZHL}[it];
+function rzSpot(q,o){const it=o.it,b=m=>MT[m.type]||{},foe=m=>!b(m).boss&&b(m).aggro!==undefined,set={hdr:RZHDR,sbeast:RZSB,hll:RZHL,sbeast2:RZSB,hll2:RZHL}[it];
  if(set){const p=qNearIf(m=>set.has(m.type));if(p)return p;for(const k of set){const h=monHome(k);if(h)return h;}}
  if(it==='bdv'){const v=BDV[0];return v?{x:v.tx+.5,y:v.ty+.5}:{x:BDOG.gx+.5,y:BDOG.gy+.5};}
  if(it==='hlm'||it==='hdp'){const c=HELL.C[it==='hdp'?0:1];return{x:(c.x0+c.x1)/2,y:HELL.cy,area:1};}
  if(it==='gland')return{x:620,y:-14,area:1};if(it==='north')return qNearIf(m=>foe(m)&&RZNORTH.test(zoneAt(m.x,m.y)))||{x:330,y:-46,area:1};
- const f={boss:m=>b(m).boss,boss3:m=>b(m).boss&&(m.lv|0)>=300,hilv:m=>(m.lv|0)>S.lv,fire:m=>monEl(m.type)==='fire',spirit:m=>monUnd(m.type)||monEvil(m.type),east:m=>/^zEa/.test(zoneAt(m.x,m.y))}[it];
+ const f={boss:m=>b(m).boss,boss3:m=>b(m).boss&&(m.lv|0)>=300,hilv:m=>(m.lv|0)>S.lv,fire:m=>monEl(m.type)==='fire',spirit:m=>monUnd(m.type)||monEvil(m.type),east:m=>/^zEa/.test(zoneAt(m.x,m.y)),bosshi:m=>b(m).boss&&(m.lv|0)>S.lv,spboss:m=>b(m).boss&&(monUnd(m.type)||monEvil(m.type)),bdodge:m=>b(m).boss}[it];
  return f&&qNearIf(f)||qNearIf(foe)||nearNpc();}
 const rzStepOf=r=>RZQ[r].find(id=>S.qs[id]&&S.qs[id].st===1);
 // the system's offer: what the race is, what it gives, and what becomes of your race now
@@ -12558,16 +12559,10 @@ function rzGain(r,sub){if(!RZ[r])return;const was=rzName(),old=myRace(),pv=rzPv(
  checkSkills();save(true);}
 // a bloodline quest done: that bloodline is yours (it replaces the one you had)
 function rzVarGain(q){const [r,v]=q.rv;if(myRace()!==r)return;S.rv=v;sbSig='';hudDirty=true;SFX.legendary();flash();announce(t('rzAnn',{r:rzName()}),1);dialog('sysN',[t('rzVarQ',{v:t('rzv_'+r+'_'+v)}),t('rzvD_'+r+'_'+v)]);save(true);}
-// the bloodline quests of your race, from the status window (a toast tells you when one opens)
-const rzVarOk=id=>!!id&&!S.qs[id]&&S.lv>=QD[id].lv&&S.rv!==QD[id].rv[1];
-function rzVarList(){const r=myRace(),Q=RVQ[r];if(!Q){dialog('sysN',[t('rzVarNone')]);return;}
- const o=['v1','v2'].map(v=>{const id=Q[v],s=S.qs[id],own=S.rv===v,lv=QD[id].lv;return {l:t('rzv_'+r+'_'+v)+' · '+(own?t('rzVarOwn'):s&&s.st===2?t('rzVarDone'):s?t('rzVarOn'):S.lv<lv?t('rzVarLv',{n:lv}):t('rzVarGo')),
-  f:()=>{if(!rzVarOk(id))return;dialog('sysN',[t('rzvD_'+r+'_'+v),qObjText0(id)+(S.rv?'\n'+t('rzVarW',{v:t('rzv_'+r+'_'+S.rv)}):'')],null,[{l:t('qAccept'),f:()=>{if(qAvail(id)&&rzVarOk(id))acceptQ(id);}},{l:t('qDecline')}]);}};});
- dialog('sysN',[t('rzVarHead',{r:rzName()})],null,[...o,{l:t('rzLater')}]);}
-function rzVarOffer(){const r=myRace(),Q=RVQ[r];if(!Q||!rzR())return false;for(const v of ['v1','v2']){const id=Q[v];if(!rzVarOk(id)||RZT[id]>gTime)continue;RZT[id]=gTime+1800;toast(t('rzVarTip',{v:t('rzv_'+r+'_'+v)}),'good');return true;}return false;}
-// the status window: the free switch and the bloodline quests
-function rzStRow(){if(!S)return '';return `<div class="srow rzb">${S.brf?'':`<button data-rzp="1">🧬 ${esc(t('rzPickB'))}</button> `}${RVQ[myRace()]&&rzR()?`<button data-rzv="1">🩸 ${esc(t('rzVarB'))}</button>`:''}</div>`;}
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-rzp],[data-rzv]');if(!b||!S)return;if(mode==='status')closeStatus();if(b.dataset.rzp)rzPickOpen();else rzVarList();});
+// (v3.71) the bloodline quests are given by their keepers in the world (RVK, below), not from the status window
+// the status window: the free switch
+function rzStRow(){if(!S)return '';return `<div class="srow rzb">${S.brf?'':`<button data-rzp="1">🧬 ${esc(t('rzPickB'))}</button> `}</div>`;}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-rzp]');if(!b||!S)return;if(mode==='status')closeStatus();rzPickOpen();});
 const qObjText0=id=>{try{return String(qObjText(id)).replace(/\s*\d[\d,]*\s*\/\s*/,' 0/');}catch(e){return '';}};
 // the one free switch of base race
 function rzPickOpen(){if(!S||S.__demo)return;if(S.brf){dialog('sysN',[t('rzPickUsed')]);return;}
@@ -12588,10 +12583,9 @@ function rzTick(dt){if(!S||!P||S.__demo)return;
  if(rzAct('hdp')&&hlDp()>=400)rzEv('hdp');
  for(const r in RZQ)for(let i=0;i<RZQ[r].length;i++){const id=RZQ[r][i];if(!qReady(id))continue;completeQ(id);const nx=RZQ[r][i+1];if(nx&&qAvail(nx)&&S.lv>=QD[nx].lv)setTimeout(()=>{if(S&&qAvail(nx))acceptQ(nx);},1200);}
  for(const r in RZQ){const nx=RZQ[r].find((id,i)=>i>0&&!S.qs[id]&&qDone(RZQ[r][i-1]));if(nx&&qAvail(nx)&&S.lv>=QD[nx].lv&&!rzStepOf(r))acceptQ(nx);}   // a step that waited for your level
- for(const r in RVQ)for(const v in RVQ[r])if(qReady(RVQ[r][v]))completeQ(RVQ[r][v]);
+ rvkTick();   // the bloodline keepers (v3.71): a quest ready to take back, old saves, the whisper
  if(!S.brf&&!(RZT.pick>gTime)&&mode==='play'){RZT.pick=gTime+1800;setTimeout(()=>toast(t('rzPickTip'),'good'),4000);}   // the free switch: a reminder, never a window in your way
- if(mode==='play'&&$('dialog').hidden){for(const r in RZZ)if(RZZ[r].test(S.zone||'')&&!(RZT[r]>gTime)){RZT[r]=gTime+600;if(rzOffer(r))return;}
-  rzVarOffer();}}
+ if(mode==='play'&&$('dialog').hidden){for(const r in RZZ)if(RZZ[r].test(S.zone||'')&&!(RZT[r]>gTime)){RZT[r]=gTime+600;if(rzOffer(r))return;}}}
 // the racial skills
 const rzTg=(R,ok)=>mons.filter(m=>!m.dead&&!m.spar&&ok(m)&&Math.hypot(m.x-P.x,monY(m)-(P.y-6))<R+(MT[m.type].r||6)&&seeL(P.x,P.y-6,m.x,monY(m)));
 const rzLine=(L,w)=>{const v=fdir(),ox=P.x,oy=P.y-8;return rzTg(L,m=>{const dx=m.x-ox,dy=monY(m)-oy,a=dx*v[0]+dy*v[1];return a>=0&&Math.abs(dx*v[1]-dy*v[0])<w+(MT[m.type].r||6);});};
@@ -12626,7 +12620,7 @@ Object.assign(SKF,{
  // Battle Howl: 12 s of +20% physical attack for you and your party near you (a War Chief's: +30%), and their blows break guards
  rzhowl:()=>{P.rzHwU=gTime+12;fx.push({ring:true,x:P.x,y:P.y-6,t:.5});shake=.2;SFX.crit();toast(t('rzHowlOn'),'good');}});
 window.__GRZ={RZ,RZQ,RVQ,RZSK0,v:k=>rzV(k),name:()=>rzName(),desc:()=>rzDesc(),gain:(r,s)=>rzGain(r,s),offer:(r,h)=>rzOffer(r,h),tick:dt=>rzTick(dt),ev:(i,k)=>rzEv(i,k),kill:m=>rzKill(m),atk:(m,o)=>rzAtk(m,o||{}),hurt:(d,s)=>rzHurt(d,s),dodge:(d,s)=>rzDodge(d,s),cc:()=>rzCC(),omni:()=>rzOmni(),stM:k=>rzStM(k),cast:k=>castSk(k),skills:()=>clsSkills(),sure:m=>rzSure(m),rg:m=>rzRgM(m),
- pick:()=>rzPickOpen(),varList:()=>rzVarList(),row:()=>rzStRow(),pickAsk:(r,s)=>rzPickAsk(r,s),varOffer:()=>rzVarOffer(),st:()=>rzSt(),spd:()=>rzSpd(),xp:()=>rzXpM(),fig:L=>{const c={};rzFig(c,L);return c;},skOf:()=>rzSkOf()}; // tests
+ pick:()=>rzPickOpen(),row:()=>rzStRow(),pickAsk:(r,s)=>rzPickAsk(r,s),st:()=>rzSt(),spd:()=>rzSpd(),xp:()=>rzXpM(),fig:L=>{const c={};rzFig(c,L);return c;},skOf:()=>rzSkOf()}; // tests
 Object.assign(STR.ar,{race_evileye:'عين شريرة',race_giant:'عملاق',race_draco:'نص دراكوني',race_yangban:'يانجبان (نص إله)',race_demon:'ديمونكن (نص شيطان)',
  raceD_evileye:'قوة سحر +25%، فرصة كريتيكال +15%، دفاع فيزيائي -10%. باسيف «الحدس»: 15% تفادي للضربة اللي كانت هتموّتك. سكيل «عين الدمار»: نظرة مستمرة بتضرب ضرر سحري تقيل وبتقفل سكيلات الأعداء.',
  raceD_giant:'قوة جسدية +30%، صحة +25%، سرعة الضرب والمشي -20%. باسيف «الوزن العملاق»: ضربتك العادية بتوصل 20% منها للي جنب الهدف ومحدش يقدر يصدّها. سكيل «تحطيم الأرض»: خبطة في الأرض بتوقّع الأعداء وبتقطّع دروعهم.',
@@ -12777,6 +12771,569 @@ Object.assign(STR.en,{race_elf:'Elf',race_merfolk:'Water Clan (Merfolk)',race_dw
  sk_rzsurge:'Aquatic Surge',skd_rzsurge:'Racial skill: a torrent of water ahead, 180%, that slows for 3 s, and your attacks 25% faster for 8 s.',
  sk_rzforge:'Mastercraft Stance',skd_rzforge:'Racial skill: 10 s of skin as hard as iron: physical blows 40% softer and a guard that barely gives.',
  sk_rzhowl:'Battle Howl',skd_rzhowl:'Racial skill: 12 s of +20% physical attack for you and your party near you (a War Chief\'s: +30%), and your blows break guards.'});
+/* ---------------- Bloodline keepers (v3.71; the owner 2026-10-27 23:50: "Bloodline Quest for each race should be separated into
+   their own npc, so it's not all a part of the menu and people have to explore. Please add all races to the index and variants,
+   for players to see what each one offers. Give a vague explanation or one may find the quest giver. For rare variants make the
+   quest harder.")
+   Every bloodline has a keeper of its own, standing somewhere in the world that fits it: GAME_ORIGINAL people at the game's places,
+   none of them credited to the novel. The status window's bloodline menu is gone. A keeper offers its quest only to its own race,
+   from its level, and takes it back when it is done (it was finished by itself before). A rare bloodline (v2) is two quests, and its
+   keeper stands further out; its first quest is the old one, the second is new. The Index's Races page (rvkIx, in ixDraw) says what
+   every race and bloodline gives and hints, vaguely, where its keeper stands; once you have met the keeper it says where. Numbers
+   are GAME_BALANCE. Each keeper: id, race, bloodline, tile x, y, its quests in order. */
+const RVK=[['rvkHu1','human','v1',403.5,69.4,['rvhu1']],['rvkHu2','human','v2',588.5,27.4,['rvhu2a','rvhu2']],
+ ['rvkEl1','elf','v1',330.5,-29.6,['rvel1']],['rvkEl2','elf','v2',342.5,137.4,['rvel2a','rvel2']],
+ ['rvkMe1','merfolk','v1',880.5,245.4,['rvme1']],['rvkMe2','merfolk','v2',120.5,246.4,['rvme2a','rvme2']],
+ ['rvkDw1','dwarf','v1',443.5,283.4,['rvdw1']],['rvkDw2','dwarf','v2',477.5,131.4,['rvdw2a','rvdw2']],
+ ['rvkOr1','orc','v1',205.5,24.4,['rvor1']],['rvkOr2','orc','v2',210.5,52.4,['rvor2a','rvor2']],
+ ['rvkEe1','evileye','v1',433.5,101.4,['rvee1']],['rvkEe2','evileye','v2',919.5,283.4,['rvee2a','rvee2']],
+ ['rvkGi1','giant','v1',480.5,-40.6,['rvgi1']],['rvkGi2','giant','v2',712.5,-34.6,['rvgi2a','rvgi2']],
+ ['rvkDr1','draco','v1',644.5,15.4,['rvdr1']],['rvkDr2','draco','v2',698.5,-155.6,['rvdr2a','rvdr2']],
+ ['rvkYa1','yangban','v1',1420.5,160.4,['rvya1']],['rvkYa2','yangban','v2',1706.5,-142.6,['rvya2a','rvya2']],
+ ['rvkDe1','demon','v1',1345.5,360.4,['rvde1']],['rvkDe2','demon','v2',1950.5,360.4,['rvde2a','rvde2']]];
+const RVKO={};for(const K of RVK)RVKO[K[0]]=K;
+const rvkOf=(r,v)=>RVK.find(K=>K[1]===r&&K[2]===v);
+NPCS.push({id:'rvkHu1',spr:'rvkHu1',tx:403.5,ty:69.4,ph:1,dir:0},{id:'rvkHu2',spr:'rvkHu2',tx:588.5,ty:27.4,ph:1,dir:3},{id:'rvkEl1',spr:'rvkEl1',tx:330.5,ty:-29.6,ph:1,dir:0},{id:'rvkEl2',spr:'rvkEl2',tx:342.5,ty:137.4,ph:1,dir:2},
+ {id:'rvkMe1',spr:'rvkMe1',tx:880.5,ty:245.4,ph:1,dir:0},{id:'rvkMe2',spr:'rvkMe2',tx:120.5,ty:246.4,ph:1,dir:0},{id:'rvkDw1',spr:'rvkDw1',tx:443.5,ty:283.4,ph:1,dir:0},{id:'rvkDw2',spr:'rvkDw2',tx:477.5,ty:131.4,ph:1,dir:3},
+ {id:'rvkOr1',spr:'rvkOr1',tx:205.5,ty:24.4,ph:1,dir:0},{id:'rvkOr2',spr:'rvkOr2',tx:210.5,ty:52.4,ph:1,dir:2},{id:'rvkEe1',spr:'rvkEe1',tx:433.5,ty:101.4,ph:1,dir:0},{id:'rvkEe2',spr:'rvkEe2',tx:919.5,ty:283.4,ph:1,dir:2},
+ {id:'rvkGi1',spr:'rvkGi1',tx:480.5,ty:-40.6,ph:1,dir:0},{id:'rvkGi2',spr:'rvkGi2',tx:712.5,ty:-34.6,ph:1,dir:3},{id:'rvkDr1',spr:'rvkDr1',tx:644.5,ty:15.4,ph:1,dir:2},{id:'rvkDr2',spr:'rvkDr2',tx:698.5,ty:-155.6,ph:1,dir:0},
+ {id:'rvkYa1',spr:'rvkYa1',tx:1420.5,ty:160.4,ph:1,dir:0},{id:'rvkYa2',spr:'rvkYa2',tx:1706.5,ty:-142.6,ph:1,dir:3},{id:'rvkDe1',spr:'rvkDe1',tx:1345.5,ty:360.4,ph:1,dir:0},{id:'rvkDe2',spr:'rvkDe2',tx:1950.5,ty:360.4,ph:1,dir:0});
+Object.assign(FIG,{
+ rvkHu1:{hair:'helm',hc:'#8a8e98',hl:'#b8bcc6',skin:'#e0b48e',sk2:'#c09070',beard:'#8a8a8a',beard2:'#6a6a6a',top:'#5a6070',top2:'#3a3e4a',sleeves:true,chest:'#7a8090',pad:'#9aa0ac',pad2:'#6a707c',cape:'#7a2a2a',belt:'#4a3a2a',pants:'#3a3e4a',boots:'#2a2a30'},
+ rvkHu2:{hair:'messy',hc:'#2a2420',hl:'#4a4038',skin:'#d8a47a',sk2:'#b8845a',scar:1,top:'#e8e4da',top2:'#c8c2b4',sleeves:true,sash:'#3a3a3a',belt:'#3a3a3a',pants:'#4a4a52',boots:'#2a2420'},
+ rvkEl1:{hair:'long',fem:1,ears:1,hc:'#e8e8d8',hl:'#ffffff',skin:'#f4e0cc',sk2:'#dcc4ac',eye:'#5ac88a',top:'#3a6a4a',top2:'#24482e',sleeves:true,robeL:1,trim:'#c8b060',belt:'#c8b060',pants:'#2a4a32',boots:'#3a3020'},
+ rvkEl2:{hood:'#2a2234',ears:1,hc:'#c8c8e0',hl:'#e8e8f8',skin:'#6e5c8e',sk2:'#4e406a',eye:'#ff4a6a',top:'#2a2234',top2:'#18141e',sleeves:true,cape:'#120e18',belt:'#4a3a5a',pants:'#18141e',boots:'#120e18'},
+ rvkMe1:{hair:'long',fem:1,ears:'gob',hc:'#3aa8b8',hl:'#8ae0e8',skin:'#7ac8c8',sk2:'#56a2a6',eye:'#2ae0ff',top:'#2a7a9a',top2:'#1a5a74',sleeves:true,robeL:1,collar:'#e8d890',belt:'#e8d890',pants:'#2a7a9a',boots:'#1a5a74'},
+ rvkMe2:{hair:'bald',beard:'#4a6a6a',beard2:'#2a4a4a',ears:'gob',skin:'#5a9aa0',sk2:'#3a7a80',eye:'#9ae8ff',top:'#2a3a4a',top2:'#1a2430',sleeves:true,robe:1,trim:'#c8a050',belt:'#c8a050',pants:'#1a2430',boots:'#121a22'},
+ rvkDw1:{hair:'bald',nose:1,beard:'#c8c8c8',beard2:'#9a9a9a',skin:'#d89a78',sk2:'#b07656',top:'#6a4a2a',top2:'#4a3018',sleeves:true,apron:'#3a3a3e',apron2:'#24242a',belt:'#2a1a10',pants:'#4a3a2a',boots:'#2a1a10'},
+ rvkDw2:{hair:'short',nose:1,hc:'#3a3a3a',hl:'#5a5a5a',beard:'#6a6a6a',beard2:'#3a3a3a',skin:'#a88a78',sk2:'#866a5a',eye:'#ff8a2a',top:'#3a2a24',top2:'#24180f',sleeves:true,apron:'#5a2a1a',apron2:'#3a1a10',belt:'#1a1210',pants:'#2a1a14',boots:'#120c0a'},
+ rvkOr1:{hair:'mohawk',ears:'gob',tusk:1,hc:'#d8d8d8',hl:'#ffffff',skin:'#8aa8b8',sk2:'#6a8698',eye:'#9ae8ff',top:'#6a5a4a',top2:'#4a3a2a',sleeves:true,pad:'#e8e8e8',pad2:'#b8b8b8',cape:'#d8d0c0',belt:'#3a2a1a',pants:'#4a3a2a',boots:'#2a1a10'},
+ rvkOr2:{hood:'#4a3a2a',ears:'gob',tusk:1,skin:'#6a8a4a',sk2:'#4e6a34',eye:'#e8d84a',top:'#4a3a2a',top2:'#2a2018',sleeves:true,robe:1,trim:'#e8e0c8',belt:'#e8e0c8',pants:'#2a2018',boots:'#1a1410'},
+ rvkEe1:{hair:'long',fem:1,hc:'#2a1a3a',hl:'#4a3a5a',skin:'#c8b8e8',sk2:'#a898c8',eye:'#ff2a6a',top:'#3a2a4a',top2:'#24182e',sleeves:true,robeL:1,collar:'#8a3a8a',belt:'#8a3a8a',pants:'#24182e',boots:'#18101e'},
+ rvkEe2:{hood:'#1a1a22',skin:'#a898c8',sk2:'#887aa8',eye:'#ffffff',mask:'#1a1a22',top:'#1a1a22',top2:'#0e0e14',sleeves:true,robeL:1,trim:'#5a2a6a',belt:'#5a2a6a',pants:'#0e0e14',boots:'#0a0a0e'},
+ rvkGi1:{hair:'spiky',hc:'#bfe8ff',hl:'#ffffff',beard:'#bfe8ff',beard2:'#8ac8e8',skin:'#a8b8c8',sk2:'#8898a8',eye:'#7ad8ff',top:'#6a7a8a',top2:'#4a5a6a',sleeves:true,pad:'#d8f0ff',pad2:'#a8c8e8',belt:'#3a4a5a',pants:'#4a5a6a',boots:'#2a3a4a'},
+ rvkGi2:{hair:'long',hc:'#6a6a6a',hl:'#8a8a8a',beard:'#7a7a7a',beard2:'#5a5a5a',skin:'#a89a8a',sk2:'#86786a',top:'#5a4a3a',top2:'#3a2e24',sleeves:true,chest:'#7a6a5a',belt:'#2a2018',pants:'#3a2e24',boots:'#1a1410'},
+ rvkDr1:{hair:'bald',drac:1,beard:'#e8e0c8',beard2:'#c8c0a8',skin:'#d8a070',sk2:'#b07a4c',top:'#8a2a1a',top2:'#5a1a10',sleeves:true,robe:1,trim:'#ffc84a',belt:'#ffc84a',pants:'#5a1a10',boots:'#2a120a'},
+ rvkDr2:{hair:'spiky',drac:1,tail:1,hc:'#3a5a8a',hl:'#5a7aaa',skin:'#d8a070',sk2:'#b07a4c',top:'#2a3a5a',top2:'#1a2440',sleeves:true,pad:'#4a6a9a',pad2:'#2a4a7a',cape:'#1a2440',belt:'#c8a050',pants:'#1a2440',boots:'#121a2a'},
+ rvkYa1:{hair:'bun',hc:'#1a1a1a',hl:'#3a3a3a',skin:'#f6e2b8',sk2:'#dcc296',eye:'#ffd24a',top:'#e8e0c8',top2:'#c8bea4',sleeves:true,robeL:1,collar:'#c8302a',belt:'#c8302a',pants:'#e8e0c8',boots:'#3a2a1a',halo:1},
+ rvkYa2:{hair:'pony',hc:'#1a1a1a',hl:'#3a3a3a',skin:'#f6e2b8',sk2:'#dcc296',eye:'#ffd24a',top:'#3a3a3e',top2:'#24242a',sleeves:true,sash:'#ffd24a',belt:'#ffd24a',pants:'#24242a',boots:'#1a1a1e'},
+ rvkDe1:{hair:'long',fem:1,horns:'#2a1a1a',hc:'#1a0a0e',hl:'#3a1a22',skin:'#c86a6a',sk2:'#a04c4c',eye:'#ffd24a',top:'#3a0a14',top2:'#24060c',sleeves:true,robeL:1,collar:'#c8a050',belt:'#c8a050',pants:'#24060c',boots:'#140306'},
+ rvkDe2:{hair:'helm',horns:'#1a1010',hc:'#2a1a1a',hl:'#4a2a2a',skin:'#c86a6a',sk2:'#a04c4c',eye:'#ffd24a',top:'#2a1a1a',top2:'#140a0a',sleeves:true,chest:'#4a2a2a',pad:'#5a2a2a',pad2:'#3a1a1a',cape:'#6a0a14',belt:'#1a0a0a',pants:'#140a0a',boots:'#0a0505'}});
+for(const K of RVK)if(!SH[K[0]])shLazy(K[0],()=>SA.chars.buildSheet(FIG[K[0]]));
+// the keepers' quests: the old bloodline quests move to them, and every rare bloodline gets a first quest before its old one
+Object.assign(QD,{
+ rvhu2a:{by:'rvkHu2',lv:300,hid:1,rvp:['human','v2'],obj:{t:'rz',it:'hilv',n:500},ot:'o_rvhu2a',xp:1500000},
+ rvel2a:{by:'rvkEl2',lv:250,hid:1,rvp:['elf','v2'],obj:{t:'dodge',it:'dodge',n:300},ot:'o_rvel2a',xp:750000},
+ rvme2a:{by:'rvkMe2',lv:300,hid:1,rvp:['merfolk','v2'],obj:{t:'rz',it:'wet',n:500},ot:'o_rvme2a',xp:1500000},
+ rvdw2a:{by:'rvkDw2',lv:250,hid:1,rvp:['dwarf','v2'],obj:{t:'rz',it:'fire',n:300},ot:'o_rvdw2a',xp:750000},
+ rvor2a:{by:'rvkOr2',lv:300,hid:1,rvp:['orc','v2'],obj:{t:'rz',it:'spirit',n:500},ot:'o_rvor2a',xp:1500000},
+ rvee2a:{by:'rvkEe2',lv:480,hid:1,rvp:['evileye','v2'],obj:{t:'demon',it:'demon',n:1000},ot:'o_rvee2a',xp:7500000},
+ rvgi2a:{by:'rvkGi2',lv:350,hid:1,rvp:['giant','v2'],obj:{t:'rz',it:'boss3',n:10},ot:'o_rvgi2a',xp:3000000},
+ rvdr2a:{by:'rvkDr2',lv:480,hid:1,rvp:['draco','v2'],obj:{t:'rz',it:'hdr',n:300},ot:'o_rvdr2a',xp:7500000},
+ rvya2a:{by:'rvkYa2',lv:480,hid:1,rvp:['yangban','v2'],obj:{t:'block',it:'guard',n:500},ot:'o_rvya2a',xp:7500000},
+ rvde2a:{by:'rvkDe2',lv:480,hid:1,rvp:['demon','v2'],obj:{t:'rz',it:'hll2',n:2},ot:'o_rvde2a',xp:10000000}});
+for(const K of RVK)for(const q of K[5])if(QD[q])QD[q].by=K[0];
+// the second quests of the rare bloodlines: harder than the one quest they were (the objective a first quest now has, then more)
+Object.assign(QD.rvhu2,{pre:'rvhu2a',obj:{t:'rz',it:'bosshi',n:3}});Object.assign(QD.rvel2,{pre:'rvel2a',obj:{t:'rz',it:'bdodge',n:60}});
+Object.assign(QD.rvme2,{pre:'rvme2a',obj:{t:'kill',it:'kraken',n:2}});Object.assign(QD.rvdw2,{pre:'rvdw2a',obj:{t:'craftR',it:'craft',n:3,r:3}});
+Object.assign(QD.rvor2,{pre:'rvor2a',obj:{t:'rz',it:'spboss',n:5}});Object.assign(QD.rvee2,{pre:'rvee2a'});
+Object.assign(QD.rvgi2,{pre:'rvgi2a',obj:{t:'kill',it:'fgiant',n:3}});Object.assign(QD.rvdr2,{pre:'rvdr2a',obj:{t:'kill',it:'sdrag',n:2}});
+Object.assign(QD.rvya2,{pre:'rvya2a',obj:{t:'rz',it:'sbeast2',n:4}});Object.assign(QD.rvde2,{pre:'rvde2a'});
+// a save that carried a rare bloodline's quest from the old menu: its progress counts for the first quest when that is the same task
+const RVMV={rvhu2:'rvhu2a',rvel2:'rvel2a',rvdw2:'rvdw2a',rvor2:'rvor2a',rvgi2:'rvgi2a',rvya2:'rvya2a'};
+function rvkMig(){if(!S||!S.qs)return;for(const id in RVMV){const s=S.qs[id],a=RVMV[id];if(s&&s.st===1&&!S.qs[a]){S.qs[a]={st:1,c:s.c|0};delete S.qs[id];hudDirty=true;}}}
+// a keeper's quest is for its own race only (its race's powers awake), never the bloodline you already have, and a first quest
+// only while its second was not taken
+function rvkOk(q){const [r,v]=q.rv||q.rvp;if(!rzR()||myRace()!==r||S.rv===v)return false;return !q.rvp||!S.qs[RVQ[r]&&RVQ[r][v]];}
+const rvkWarn=id=>{const q=QD[id];return q&&(q.rv||q.rvp)&&S.rv&&rzR()?'\n'+t('rzVarW',{v:t('rzv_'+myRace()+'_'+S.rv)}):'';};
+// what a keeper says: its first words, then to its own race a word on its level or its blood; to the others a word on the blood
+function rvkLvOf(id){const K=RVKO[id];return K?Math.min(...K[5].filter(q=>QD[q]&&qAvail(q)).map(q=>QD[q].lv||1).concat([1e9])):1e9;}
+function rvkIdle(id){const K=RVKO[id];if(!K||!S)return 'oLeave';if(myRace()===K[1]&&rzR()&&S.rv===K[2])return t('rvkMine',{v:t('rzv_'+K[1]+'_'+K[2])});return 'rvkId_'+id;}
+function rvkLow(id){const n=rvkLvOf(id);return n<1e9?t('rvkLow',{n}):rvkIdle(id);}
+NPCT.rvkHu1={hi:'rvkHi_rvkHu1',idle:()=>rvkIdle('rvkHu1'),low:()=>rvkLow('rvkHu1'),noGift:1};
+NPCT.rvkHu2={hi:'rvkHi_rvkHu2',idle:()=>rvkIdle('rvkHu2'),low:()=>rvkLow('rvkHu2'),noGift:1};
+NPCT.rvkEl1={hi:'rvkHi_rvkEl1',idle:()=>rvkIdle('rvkEl1'),low:()=>rvkLow('rvkEl1'),noGift:1};
+NPCT.rvkEl2={hi:'rvkHi_rvkEl2',idle:()=>rvkIdle('rvkEl2'),low:()=>rvkLow('rvkEl2'),noGift:1};
+NPCT.rvkMe1={hi:'rvkHi_rvkMe1',idle:()=>rvkIdle('rvkMe1'),low:()=>rvkLow('rvkMe1'),noGift:1};
+NPCT.rvkMe2={hi:'rvkHi_rvkMe2',idle:()=>rvkIdle('rvkMe2'),low:()=>rvkLow('rvkMe2'),noGift:1};
+NPCT.rvkDw1={hi:'rvkHi_rvkDw1',idle:()=>rvkIdle('rvkDw1'),low:()=>rvkLow('rvkDw1'),noGift:1};
+NPCT.rvkDw2={hi:'rvkHi_rvkDw2',idle:()=>rvkIdle('rvkDw2'),low:()=>rvkLow('rvkDw2'),noGift:1};
+NPCT.rvkOr1={hi:'rvkHi_rvkOr1',idle:()=>rvkIdle('rvkOr1'),low:()=>rvkLow('rvkOr1'),noGift:1};
+NPCT.rvkOr2={hi:'rvkHi_rvkOr2',idle:()=>rvkIdle('rvkOr2'),low:()=>rvkLow('rvkOr2'),noGift:1};
+NPCT.rvkEe1={hi:'rvkHi_rvkEe1',idle:()=>rvkIdle('rvkEe1'),low:()=>rvkLow('rvkEe1'),noGift:1};
+NPCT.rvkEe2={hi:'rvkHi_rvkEe2',idle:()=>rvkIdle('rvkEe2'),low:()=>rvkLow('rvkEe2'),noGift:1};
+NPCT.rvkGi1={hi:'rvkHi_rvkGi1',idle:()=>rvkIdle('rvkGi1'),low:()=>rvkLow('rvkGi1'),noGift:1};
+NPCT.rvkGi2={hi:'rvkHi_rvkGi2',idle:()=>rvkIdle('rvkGi2'),low:()=>rvkLow('rvkGi2'),noGift:1};
+NPCT.rvkDr1={hi:'rvkHi_rvkDr1',idle:()=>rvkIdle('rvkDr1'),low:()=>rvkLow('rvkDr1'),noGift:1};
+NPCT.rvkDr2={hi:'rvkHi_rvkDr2',idle:()=>rvkIdle('rvkDr2'),low:()=>rvkLow('rvkDr2'),noGift:1};
+NPCT.rvkYa1={hi:'rvkHi_rvkYa1',idle:()=>rvkIdle('rvkYa1'),low:()=>rvkLow('rvkYa1'),noGift:1};
+NPCT.rvkYa2={hi:'rvkHi_rvkYa2',idle:()=>rvkIdle('rvkYa2'),low:()=>rvkLow('rvkYa2'),noGift:1};
+NPCT.rvkDe1={hi:'rvkHi_rvkDe1',idle:()=>rvkIdle('rvkDe1'),low:()=>rvkLow('rvkDe1'),noGift:1};
+NPCT.rvkDe2={hi:'rvkHi_rvkDe2',idle:()=>rvkIdle('rvkDe2'),low:()=>rvkLow('rvkDe2'),noGift:1};
+// dodging with a great foe at arm's length (the Void Elf's second quest)
+function rvkDodge(){if(!S||!P||!rzAct('bdodge'))return;if(mons.some(m=>!m.dead&&!m.spar&&MT[m.type]&&MT[m.type].boss&&Math.hypot(m.x-P.x,m.y-P.y)<160))rzEv('bdodge');}
+// every half second with the races: the old saves' quests, a keeper's quest ready to give back (once a session), and a whisper
+// when your blood could wake, until you have met its keeper (every 30 minutes; it names no place: the Index's Races page hints)
+function rvkTick(){if(!S||S.__demo)return;rvkMig();const r=myRace();
+ for(const K of RVK)for(const id of K[5]){const s=S.qs[id];if(s&&s.st===1&&qReady(id)&&!RZT['rd'+id]){RZT['rd'+id]=1;toast(t('retTo',{w:t(K[0])}),'good');SFX.quest();}}
+ if(mode!=='play'||!rzR())return;for(const v of ['v1','v2']){const K=rvkOf(r,v);if(!K||S.met[K[0]]||S.rv===v)continue;const id=K[5].find(q=>qAvail(q));
+  if(!id||S.lv<(QD[id].lv||1)||RZT['wh'+K[0]]>gTime)continue;RZT['wh'+K[0]]=gTime+1800;toast(t('rvkWh',{v:t('rzv_'+r+'_'+v)}),'good');return;}}
+// the Index's Races page: every race and kind, what it gives, its racial skill, how it is had, and its two bloodlines with their
+// keepers (a hint until met, then where they stand)
+const RVIX=[['human',''],['elf',''],['elf','dark'],['merfolk',''],['dwarf',''],['orc','twi'],['orc','frost'],['evileye',''],['giant',''],['draco',''],['yangban',''],['demon',''],['vampire','']];
+const RVIC={human:'👤',elf:'🧝',elf_dark:'🌑',merfolk:'🧜',dwarf:'⛏️',orc_twi:'🪓',orc_frost:'❄️',evileye:'👁️',giant:'🗿',draco:'🐉',yangban:'☯️',demon:'😈',vampire:'🦇'};
+const rvIxId=([r,s])=>r+(s?'_'+s:''),rvIxN=([r,s])=>s?t('rzs_'+r+'_'+s):t('race_'+r),rvIxK=r=>r==='vampire'?'cur':RZBASE.includes(r)?'base':'unl';
+function rvIxSk(r,s){if(r==='vampire')return '';const k=r==='elf'&&s==='dark'?'rzshadow':RZ[r]&&RZ[r].sk;return k?`<p class="ixh">${t('rvIxSk')}</p><ul class="ixl"><li><b>${esc(t('sk_'+k))}</b><br><small>${esc(t('skd_'+k))}</small></li></ul>`:'';}
+function rvIxBl(r){if(!RZ[r])return '';const pv=rzPv(r),me=myRace()===r;
+ return `<p class="ixh">${t('rvIxBl')}</p><ul class="ixl">`+['v1','v2'].map((v,i)=>{const K=rvkOf(r,v),met=K&&S&&S.met&&S.met[K[0]],own=me&&S.rv===v,lv=K?Math.min(...K[5].map(q=>QD[q]?QD[q].lv||1:1e9)):0;
+  return `<li><b>${esc(t('rzv_'+r+'_'+v))}</b>${own?' <span class="ixchip">'+t('rzVarOwn')+'</span>':''} <small>${t(i?'rvIxRare':'rvIxUnc',{p:Math.round(pv[i]*1000)/10})}</small><br><small>${esc(t('rzvD_'+r+'_'+v).replace(/^\(|\)$/g,''))}</small>`+
+   (K?`<br><small>🧭 ${met?t('rvIxMet',{n:esc(t(K[0])),z:esc(t(ixAt(K[0])||'')||'?')}):esc(t('rvkH_'+K[0]))}</small><br><small>${t(K[5].length>1?'rvIxQ2':'rvIxQ1',{n:lv})}</small>`:'')+'</li>';}).join('')+'</ul>';}
+function rvIxHow(r){const k=rvIxK(r);return `<p class="ixh">${t('rvIxHow')}</p><p><small>${k==='base'?t('rvIxBase'):k==='cur'?esc(t('rzH_vampire')):esc(t('rzH_'+r))+(RZL[r]?' · '+t('ixLv',{n:RZL[r]}):'')}</small></p>`;}
+function rvkIx(hit){const L=RVIX.filter(x=>hit(rvIxN(x))||RZ[x[0]]&&['v1','v2'].some(v=>hit(t('rzv_'+x[0]+'_'+v)))),ids=L.map(rvIxId);if(!ids.includes(IXS))IXS=ids.find(id=>id===(myRace()+(S.rsub?'_'+S.rsub:'')))||ids[0]||null;
+ const cards=L.map(x=>{const id=rvIxId(x);return ixCard(id,RVIC[id],esc(rvIxN(x)),t('rvIxK_'+rvIxK(x[0])),myRace()===x[0]&&(S.rsub||'')===(x[1]||'')?' ms':'');});
+ const x=L.find(y=>rvIxId(y)===IXS);let det='';if(x){const [r,s]=x;det=`<h3>${RVIC[rvIxId(x)]} ${esc(rvIxN(x))}</h3><p><small>${t('rvIxK_'+rvIxK(r))}</small></p><p>${esc(t('raceD_'+r))}</p>`+rvIxSk(r,s)+rvIxHow(r)+rvIxBl(r);}
+ return {cards,det};}
+window.__GRVK={RVK,ok:id=>!!QD[id]&&qAvail(id),tick:()=>rvkTick(),mig:()=>rvkMig(),dodge:()=>rvkDodge(),ix:()=>rvkIx(()=>true),lv:id=>rvkLvOf(id),idle:id=>rvkIdle(id)}; // tests
+Object.assign(STR.ar,{"rvkHu1":"آخر فارس في برج المراقبة",
+ "rvkHi_rvkHu1":"بيتي وقع من زمان، وأنا فضلت في الحراسة برضه. الأبراج بتفتكر الملوك، والدم كمان.",
+ "rvkId_rvkHu1":"دم الملوك لسه بيجري في شوية بشر. خفيف، بس مخلصش.",
+ "rvkH_rvkHu1":"برج مراقبة قديم جنب مدينة ليها سور، لسه فيه حارس واحد مسابش مكانه.",
+ "rvhu1_o":"فيك دم تاج، حتى لو خفيف. وقّع عشرة من حكّام البرية، الوحوش الكبيرة اللي ماسكة أراضيها، وساعتها هيصحى.",
+ "rvhu1_w":"عشرة من حكّام البرية. الدم مبيصحاش غير في القتال.",
+ "rvhu1_d":"أهو. حاسس بيه؟ الناس هتمشي وراك من غير ما تعرف ليه.",
+ "rvkHu2":"السيّاف اللي عدّى حدوده",
+ "rvkHi_rvkHu2":"مولر وقف على التل ده زمان. أنا جيت أدوّر البني آدم بيقف فين. ولسه ملقيتش.",
+ "rvkId_rvkHu2":"البني آدم ملوش سقف، غير اللي بيبنيه لنفسه.",
+ "rvkH_rvkHu2":"على تل اتساب فيه سيف مشهور، فيه حد لسه بيدوّر على آخر حدود البني آدم.",
+ "rvhu2a_o":"متحاربش غير اللي أقوى منك. خمسمية مرة. وبعدين نتكلم عن الحدود.",
+ "rvhu2a_w":"أقوى منك. دايمًا أقوى منك.",
+ "rvhu2a_d":"كويس. ده كان النص السهل.",
+ "rvhu2_o":"تلاتة من أسياد أراضيهم، كل واحد فيهم لفله أعلى منك. اكسبهم، ومفيش حاجة في دمك هتوقفك تاني.",
+ "rvhu2_w":"تلاتة أسياد، كل واحد أعلى منك.",
+ "rvhu2_d":"روحت مكان معظم البشر عمرهم ما يوصلوله. هو ده معنى إنك تتخطى.",
+ "q_rvhu2a":"فوق السقف",
+ "o_rvhu2a":"اقتل وحوش أعلى من لفلك {c}/{n}",
+ "o_rvhu2":"اهزم بوسات أعلى من لفلك {c}/{n}",
+ "rvkEl1":"حكيمة غابة الصنوبر الأبيض",
+ "rvkHi_rvkEl1":"الصنوبر بيتكلم يا ابني. قليل من الإلف لسه بيسمعوه.",
+ "rvkId_rvkEl1":"جدور شجرة العالم واصلة لحد هنا، تحت التلج.",
+ "rvkH_rvkEl1":"في المكان اللي التلج بينزل فيه على الصنوبر الأبيض، فيه حكيمة قاعدة بتسمع الشجر.",
+ "rvel1_o":"فيك دم عالي نايم. اصطاد وسط الكاينات الحية، في الغابات والغيطان والبرية، عمرك ما تصطاد في المدن. أربعمية مرة، وشجرة العالم هتسمعك.",
+ "rvel1_w":"في البرية. المدن طرشة.",
+ "rvel1_d":"شجرة العالم ردّت عليك. المانا بتاعتك عمرها ما هتعطش تاني.",
+ "rvkEl2":"ضل الغابة السودا",
+ "rvkHi_rvkEl2":"لقيتني. ده كان أول درس في العدم.",
+ "rvkId_rvkEl2":"بين الخطوة واللي بعدها مفيش حاجة. فيه إلف بيتعلموا يعيشوا هناك.",
+ "rvkH_rvkEl2":"في أضلم غابة في الجنوب، فيه ضل مستني اللي يقدر يلاقيه.",
+ "rvel2a_o":"اتحرك. تلتمية مرة، وعمرك ما تكون مكان ما الضربة بتنزل.",
+ "rvel2a_w":"تلتمية خطوة. عمرك ما تكون مكان الضربة.",
+ "rvel2a_d":"كويس. دلوقتي ارقص في المكان اللي يفرق.",
+ "rvel2_o":"ستين خطوة بعيد عن الموت نفسه، وكل مرة يكون فيه عدو كبير على بُعد دراع. وساعتها العدم هيعرفك.",
+ "rvel2_w":"ستين خطوة، وعدو كبير قريب لدرجة إنك تلمسه.",
+ "rvel2_d":"دلوقتي انت عايش بين الخطوات. انت إلف العدم.",
+ "q_rvel2a":"خطوة في العدم",
+ "o_rvel2a":"اتفادى {c}/{n}",
+ "o_rvel2":"اتفادى وبوس قريب منك {c}/{n}",
+ "rvkMe1":"وصيفة السيرينات",
+ "rvkHi_rvkMe1":"البحر بعتك؟ ده نادرًا ما بيبعتلي حد.",
+ "rvkId_rvkMe1":"كل موجة على الشط ده كانت ملك ملكة من ملكات العمق.",
+ "rvkH_rvkMe1":"على الساحل الشرقي، فيه وصيفة من السيرينات بتغني للموج.",
+ "rvme1_o":"في دمك غنوة ملكية، بس عمرها ما اتغنّت. حارب مكان ما الماية موجودة: في البحر، في المستنقع، تحت المطر. تلتمية مرة.",
+ "rvme1_w":"مكان ما الماية موجودة. المطر بيتحسب.",
+ "rvme1_d":"اسمع... البحر بيغنيلك. انت سيرين ملكية.",
+ "rvkMe2":"حارس الجرس الغرقان",
+ "rvkHi_rvkMe2":"سامعه؟ الجرس. بيرن تحت، في المكان اللي النور بيخلص فيه.",
+ "rvkId_rvkMe2":"فيه من عشيرة الماية اللي اتولدوا للمية الضحلة، وفيه اللي اتولدوا للعمق.",
+ "rvkH_rvkMe2":"بعيد في الغرب على البحر الجنوبي، فيه جرس بيرن تحت الماية، وحد على الشط بيحرسه.",
+ "rvme2a_o":"العمق مبياخدش الضعيف. حارب في الماية وتحت المطر، خمسمية مرة، لحد ما الضغط يبقى زي البيت.",
+ "rvme2a_w":"خمسمية. لحد ما الضغط يبقى زي البيت.",
+ "rvme2a_d":"انت جاهز تسمع الجرس بيرن ليه.",
+ "rvme2_o":"وحش الأعماق. مرتين. مرة علشان تقابله، ومرة علشان تثبت إن الأولى مكانتش صدفة.",
+ "rvme2_w":"الكراكن، مرتين.",
+ "rvme2_d":"الجرس سكت. كان بيرن علشانك. ليفياثان الهاوية.",
+ "q_rvme2a":"لحد ما النور يخلص",
+ "o_rvme2a":"اقتل وحوش في الماية أو تحت المطر {c}/{n}",
+ "rvkDw1":"نحّات الرونات العجوز",
+ "rvkHi_rvkDw1":"خلي بالك من الحيطان. كل رونة عليها بتاعتي، وكل واحدة خدت سنة.",
+ "rvkId_rvkDw1":"الرونات مبيفرقش معاها مين بينحتها. بس بترد على إيدين أسرع من غيرها.",
+ "rvkH_rvkDw1":"جوه مناجم مدينة كبيرة، فيه نحّات عجوز لسه بينحت رونات في الصخر.",
+ "rvdw1_o":"إيديك اتخلقت للشغلانة دي. اعمل عشر حتت كويسة، ملحمية أو أحسن، والرونات هتبدأ ترد عليك.",
+ "rvdw1_w":"عشر حتت كويسة. ملحمية أو أحسن.",
+ "rvdw1_d":"شايف؟ الشاكوش بيسمع كلامك دلوقتي. انت نحّات رونات.",
+ "o_rvdw1":"اصنع حاجات ملحمية أو أحسن {c}/{n}",
+ "rvkDw2":"الحداد أبو دقن رماد",
+ "rvkHi_rvkDw2":"مفيش حاجة بتطلع هنا. أحسن. مفيش حاجة تتحرق غير الفرن.",
+ "rvkId_rvkDw2":"فيه دوارف طلعوا من الجبل، وفيه اللي طلعوا من النار.",
+ "rvkH_rvkDw2":"في الأراضي الحمرا، فيه شاكوش حداد بيرن في مكان مفيهوش أي زرع.",
+ "rvdw2a_o":"النار في دمك، مش في فرنك. اقتل تلتمية حاجة معمولة من نار واتعلم هي بتحارب إزاي.",
+ "rvdw2a_w":"تلتمية حاجة معمولة من نار.",
+ "rvdw2a_d":"دلوقتي اعمل حاجة تستاهل الحرارة دي.",
+ "rvdw2_o":"تلات حتت فريدة أو أحسن، من إيدك انت. وساعتها البركان هيعتبرك منه.",
+ "rvdw2_w":"تلات حتت، فريدة أو أحسن.",
+ "rvdw2_d":"دم منصهر. انت دوارف ضلمة دلوقتي، والنار مش هتنسى.",
+ "q_rvdw2a":"دم الجمر",
+ "o_rvdw2a":"اقتل وحوش نار {c}/{n}",
+ "o_rvdw2":"اصنع حاجات فريدة أو أحسن {c}/{n}",
+ "rvkOr1":"الزعيم العجوز",
+ "rvkHi_rvkOr1":"اقعد لو انت من القبيلة. اقف لو مش منها.",
+ "rvkId_rvkOr1":"الزعيم مش اللي بيضرب أقوى. الزعيم اللي لسه واقف قدام.",
+ "rvkH_rvkOr1":"الزعيم العجوز في قرية الصقيع فاكر كل حروب القبايل.",
+ "rvor1_o":"الزعما بيقفوا قدام. صد أو بارِي تلتمية ضربة، ودم القبيلة هيناديك يا زعيم.",
+ "rvor1_w":"تلتمية ضربة. وانت قدام.",
+ "rvor1_d":"يا زعيم. القبيلة هتسمع صرختك من بعيد.",
+ "rvkOr2":"اللي بيكلّم العضم",
+ "rvkHi_rvkOr2":"هس. بيتكلموا. العضم دايمًا بيتكلم على التل ده.",
+ "rvkId_rvkOr2":"الأجداد عمرهم ما بيمشوا. بس الناس بتبطّل تسمعهم.",
+ "rvkH_rvkOr2":"على تل مقابر في الشمال، فيه حد قاعد بيكلّم العضم.",
+ "rvor2a_o":"الميتين اللي مبيرتاحوش لازم حد يريّحهم. خمسمية منهم، أوندد أو أرواح شريرة.",
+ "rvor2a_w":"خمسمية ميت مبيرتاحش.",
+ "rvor2a_d":"الأجداد بيسمعوا دلوقتي. خليهم يتفرجوا عليك وانت بتحارب.",
+ "rvor2_o":"خمسة كبار: بوسات أوندد أو شريرة. لما يقعوا، الأجداد هيمشوا جنبك.",
+ "rvor2_w":"خمس بوسات أوندد أو شريرة.",
+ "rvor2_d":"حاسس بيهم ورا ضهرك؟ شامان الأجداد. عمرهم ما هيسيبوك تقع.",
+ "q_rvor2a":"أصوات تحت الأرض",
+ "o_rvor2a":"اقتل أوندد أو أرواح شريرة {c}/{n}",
+ "o_rvor2":"اهزم بوسات أوندد أو شريرة {c}/{n}",
+ "rvkEe1":"العرّافة المنفية",
+ "rvkHi_rvkEe1":"شفتك جاي من تلات أيام. اتأخرت.",
+ "rvkId_rvkEe1":"العيون الشريرة اتطردوا من الجحيم. فيه مننا لسه فاكر ليه.",
+ "rvkH_rvkEe1":"في وادي محرّم، فيه عرّافة منفية بتراقب الطريق مستنية حد من نوعها.",
+ "rvee1_o":"فيه سلالة ملك ورا عينيك. اقتل خمسمية شيطان، وهتبص من خلالهم.",
+ "rvee1_w":"خمسمية شيطان.",
+ "rvee1_d":"دلوقتي نظرتك بتمسك. سلالة الملك.",
+ "rvkEe2":"المراقب الأعمى",
+ "rvkHi_rvkEe2":"أنا اللي شلت عينيا بإيدي. هنا تحت، كانت بتعطّلني بس.",
+ "rvkId_rvkEe2":"أعلى العيون الشريرة بيشوفوا من غير ما يبصّوا.",
+ "rvkH_rvkEe2":"في آخر قاع الهاوية، فيه حاجة عامية بتراقب.",
+ "rvee2a_o":"ألف شيطان. اتفرج على كل واحد وهو بيقع، واتعلم هو بيشوف إيه.",
+ "rvee2a_w":"ألف شيطان.",
+ "rvee2a_d":"كويس. دلوقتي اللي طردنا.",
+ "rvee2_o":"بيليال. بص في عينه واكسب، وعينك هتبقى فوق عين كل شيطان.",
+ "rvee2_w":"بيليال.",
+ "rvee2_d":"عين السيد الأعلى. مفيش حاجة تقدر تستخبى منك دلوقتي. ولا حتى أنا.",
+ "q_rvee2a":"النظرة اللي تحت",
+ "o_rvee2a":"اقتل شياطين {c}/{n}",
+ "rvkGi1":"العملاق اللي عليه صقيع",
+ "rvkHi_rvkGi1":"...وقفت ساكت كتير. التلج طلع عليا. مش مهم.",
+ "rvkId_rvkGi1":"عمالقة الصقيع مبيحسوش بالبرد. هما البرد نفسه.",
+ "rvkH_rvkGi1":"جنب البحيرات المتجمدة، فيه عملاق واقف ساكت لدرجة إن التلج طلع عليه.",
+ "rvgi1_o":"الشمال هيعتبرك منه، لو حاربت فيه. تلتمية معركة في الشمال المتجمد.",
+ "rvgi1_w":"تلتمية معركة في الشمال.",
+ "rvgi1_d":"دلوقتي انت شايل البرد معاك. عملاق الصقيع.",
+ "rvkGi2":"التايتن اللي بينام واقف",
+ "rvkHi_rvkGi2":"ممم. واحد صغير. صوتك أعلى من الجبال.",
+ "rvkId_rvkGi2":"أول العمالقة مشيوا والأرض لسه طرية. خطاويهم لسه فيها.",
+ "rvkH_rvkGi2":"في آخر أرض العمالقة، فيه تايتن نايم وهو واقف.",
+ "rvgi2a_o":"امشي الخطاوي القديمة: عشر أعداء كبار لفلهم تلتمية أو أكتر.",
+ "rvgi2a_w":"عشر أعداء كبار، تلتمية أو أكتر.",
+ "rvgi2a_d":"دلوقتي اللي حاكم الصقيع هنا.",
+ "rvgi2_o":"عملاق الصقيع اللي في الحصن. تلات مرات. الأرض لازم تحس بيك وانت ماشي.",
+ "rvgi2_w":"عملاق الصقيع، تلات مرات.",
+ "rvgi2_d":"الأرض اتهزت. التايتن القديم. مفيش حاجة هتزحزحك تاني.",
+ "q_rvgi2a":"خطاوي زمان",
+ "o_rvgi2a":"اهزم بوسات لفل 300 أو أكتر {c}/{n}",
+ "o_rvgi2":"اهزم عملاق الصقيع {c}/{n}",
+ "rvkDr1":"ناسك الجمر",
+ "rvkHi_rvkDr1":"النار دي والعة من أول ما التنين الأحمر عشّش هنا. أنا اللي بحرسها.",
+ "rvkId_rvkDr1":"النص دراكوني نص حاجة. السؤال أنهي نص اللي هيصحى.",
+ "rvkH_rvkDr1":"على جبل التنين الأحمر، فيه ناسك بيرعى نار عمرها ما بتطفى.",
+ "rvdr1_o":"حراشيفك فاكرة نار أقدم. وقّع تراوكا تلات مرات، وهتفتكرها بصوت عالي.",
+ "rvdr1_w":"تراوكا، تلات مرات.",
+ "rvdr1_d":"نفَسك بيحرق أوسع دلوقتي. دم التنين العجوز.",
+ "rvkDr2":"الرحّال أبو حراشيف",
+ "rvkHi_rvkDr2":"هنا فوق الهوا خفيف والتنانين صريحة.",
+ "rvkId_rvkDr2":"دم التنين الحقيقي مبيختلطش. بيكسب.",
+ "rvkH_rvkDr2":"على أعلى سلسلة في جبال الفوضى، فيه رحّال حراشيفه واصلة لعينيه.",
+ "rvdr2a_o":"ولاد بونهيلير في كل حتة على السلاسل دي. تلتمية منهم. اثبت إنك أكتر منهم.",
+ "rvdr2a_w":"تلتمية نص دراكوني.",
+ "rvdr2a_d":"دلوقتي تنين بجد.",
+ "rvdr2_o":"التنين الأزرق. مرتين. دم التنين الحقيقي مبيردش غير على وقوع تنين حقيقي.",
+ "rvdr2_w":"التنين الأزرق، مرتين.",
+ "rvdr2_d":"دمك كسب. سليل التنين الحقيقي.",
+ "q_rvdr2a":"ولاد بونهيلير",
+ "o_rvdr2a":"اقتل نص دراكونيين {c}/{n}",
+ "rvkYa1":"مبعوث السما",
+ "rvkHi_rvkYa1":"السما بعتتني أراقب الطرق. انت أول حاجة تستاهل المراقبة.",
+ "rvkId_rvkYa1":"اليانجبان ولاد السما. وفيه منهم لسه شغالين عندها.",
+ "rvkH_rvkYa1":"في برية مملكة تشو، فيه مبعوث من السما مستني جنب الطريق.",
+ "rvya1_o":"مكتب السما مفتوحلك. احفظ سلام الشرق: ألفين وحش على القارة دي.",
+ "rvya1_w":"ألفين وحش في الشرق.",
+ "rvya1_d":"التكليف بتاعك. موظف السما.",
+ "rvkYa2":"ناسك القتال",
+ "rvkHi_rvkYa2":"اقف هناك. لأ، هناك. الريح جاية من على اليسار.",
+ "rvkId_rvkYa2":"إله القتال مبيتولدش. هو اللي بيفضل بعد ما كل حاجة تانية تروح بالتدريب.",
+ "rvkH_rvkYa2":"بعيد في مملكة شينج، فيه ناسك بيقضي يومه بيحارب الريح.",
+ "rvya2a_o":"الأول، بطّل تاخد ضرب. صد أو بارِي خمسمية ضربة.",
+ "rvya2a_w":"خمسمية ضربة، مصدودة.",
+ "rvya2a_d":"دلوقتي الأربعة اللي بيحرسوا السما.",
+ "rvya2_o":"الوحوش الأربعة المقدسة، كل واحد بإيدك. وساعتها طريق إله القتال هيتفتح.",
+ "rvya2_w":"الوحوش الأربعة، كل واحد مرة.",
+ "rvya2_d":"إله القتال. تشييو نفسه كان هيوطّي راسه.",
+ "q_rvya2a":"طريق الحديد",
+ "o_rvya2a":"صد أو بارِي ضربات {c}/{n}",
+ "o_rvya2":"اهزم الوحوش الأربعة المقدسة (كل واحد مرة) {c}/{n}",
+ "rvkDe1":"الست أم قرون",
+ "rvkHi_rvkDe1":"واحد كمان مننا، طالع من تحت؟ اقعد. ريحتك ريحة الدنيا اللي فوق.",
+ "rvkId_rvkDe1":"كل ديمونكن في دمه شيطان كبير في حتة. أغلبهم عمرهم ما بيقابلوه.",
+ "rvkH_rvkDe1":"في قرية الديمونكن في الجحيم، فيه ست أم قرون عارفة كل سلالة.",
+ "rvde1_o":"دمك دم كبير شياطين. الجحيم لازم يدوقه الأول: ألف وخمسمية من وحوشه.",
+ "rvde1_w":"ألف وخمسمية وحش من الجحيم.",
+ "rvde1_d":"أهو. دم كبير الشياطين.",
+ "rvkDe2":"حارس العرش الفاضي",
+ "rvkHi_rvkDe2":"العرش فاضي. وأنا بحرسه برضه. لازم حد يكون هنا لما حد يقعد عليه.",
+ "rvkId_rvkDe2":"أمرا الجحيم مبيتولدوش. هما اللي بيفضلوا واقفين قدام العرش.",
+ "rvkH_rvkDe2":"قدام عرش فاضي في عمق الجحيم، فيه حد لسه بيحرس.",
+ "rvde2a_o":"أسياد الجحيم: ماركوسياس وليراجي، كل واحد بإيدك.",
+ "rvde2a_w":"ماركوسياس وليراجي.",
+ "rvde2a_d":"دلوقتي خلّي ماركوسياس يفتكر اسمك.",
+ "rvde2_o":"ماركوسياس، تلات مرات. الأمير هو اللي السيد بيتعلم يخاف منه.",
+ "rvde2_w":"ماركوسياس، تلات مرات.",
+ "rvde2_d":"أمير الجحيم. العرش خد باله منك.",
+ "q_rvde2a":"أسياد الجحيم",
+ "o_rvde2a":"اهزم ماركوسياس وليراجي (كل واحد مرة) {c}/{n}",
+ "rvkLow":"لسه مش جاهز. ارجعلي في لفل {n}.",
+ "rvkMine":"دم «{v}» صاحي فيك. شيله كويس.",
+ "rvkWh":"دمك بيتحرك: في حتة في العالم، فيه حد عارف سلالة «{v}». (الفهرس ← الأعراق)",
+ "rzVars":"وانت بتاخد العرق، {p1}% يطلعلك «{a}» و{p2}% «{b}». ولكل سلالة حارس في حتة في العالم يقدر يصحّيها.",
+ "ixTab_race":"🧬 الأعراق",
+ "rvIxSk":"سكيل العرق",
+ "rvIxBl":"السلالات",
+ "rvIxUnc":"مش منتشرة · {p}% وانت بتاخد العرق",
+ "rvIxRare":"نادرة · {p}% وانت بتاخد العرق",
+ "rvIxMet":"الحارس: {n}، في {z}",
+ "rvIxQ1":"كويست الحارس: من لفل {n}",
+ "rvIxQ2":"كويستين الحارس: من لفل {n} (السلالة النادرة بتطلب أكتر)",
+ "rvIxHow":"بتتاخد إزاي",
+ "rvIxBase":"عرق أساسي: كل لاعب بيبدأ بشري، ويقدر يغيّر مرة واحدة ببلاش من نافذة الحالة (🧬).",
+ "rvIxK_base":"عرق أساسي",
+ "rvIxK_unl":"عرق بيتفتح",
+ "rvIxK_cur":"لعنة دم",
+ "rzH_evileye":"السيستم بيكلّم ولاد جنسهم في المكان اللي تنين مجنون عمل فيه عشه زمان، في مناجم الجبال القديمة.",
+ "rzH_giant":"في أرض العمالقة، أو في حصن اللي حاكم صقيعها.",
+ "rzH_draco":"على أعلى سلسلة في جبال الفوضى.",
+ "rzH_yangban":"في المكان اللي فيه طريق طالع ناحية السما في القارة الشرقية.",
+ "rzH_demon":"في قرية ناس بقرون، تحت الدنيا.",
+ "rzH_vampire":"تحت رملة الإمبراطورية، فيه أمير بيدّي دمه الأبدي للي يدخل في عهده."});
+Object.assign(STR.en,{"rvkHu1":"The Watchtower's Last Knight",
+ "rvkHi_rvkHu1":"My house fell long ago, and I kept the watch anyway. Towers remember kings. So does blood.",
+ "rvkId_rvkHu1":"Kings' blood still runs in some humans. Thin, but not gone.",
+ "rvkH_rvkHu1":"An old watchtower near a walled city still has one guard who never left his post.",
+ "rvhu1_o":"There's a crown's blood in you, faint as it is. Bring down ten rulers of the wild, the great beasts that hold their lands, and it will wake.",
+ "rvhu1_w":"Ten rulers of the wild. The blood wakes only in battle.",
+ "rvhu1_d":"There. Do you feel it? People will follow you now without knowing why.",
+ "rvkHu2":"The Swordsman Past His Limits",
+ "rvkHi_rvkHu2":"Muller stood on this hill once. I came to find where a human stops. I still haven't found it.",
+ "rvkId_rvkHu2":"A human has no ceiling, only the ones they build for themselves.",
+ "rvkH_rvkHu2":"On a hill where a famous sword was left, someone is still looking for the limit of a human.",
+ "rvhu2a_o":"Fight only what is stronger than you. Five hundred times. Then we'll talk about limits.",
+ "rvhu2a_w":"Stronger than you. Always stronger.",
+ "rvhu2a_d":"Good. That was the easy half.",
+ "rvhu2_o":"Three masters of their lands, each one above your level. Win, and nothing in your blood will hold you back again.",
+ "rvhu2_w":"Three masters, each one above you.",
+ "rvhu2_d":"You went where most humans never go. That is what transcendent means.",
+ "q_rvhu2a":"Past the Ceiling",
+ "o_rvhu2a":"Slay monsters above your level {c}/{n}",
+ "o_rvhu2":"Defeat bosses above your level {c}/{n}",
+ "rvkEl1":"Elder of the Whitepine",
+ "rvkHi_rvkEl1":"The pines speak, child. Few elves still listen.",
+ "rvkId_rvkEl1":"The World Tree's roots reach even here, under the snow.",
+ "rvkH_rvkEl1":"Where snow falls on the white pines, an elder sits and listens to the trees.",
+ "rvel1_o":"High blood sleeps in you. Hunt among living things, in forests and fields and wild places, never in towns. Four hundred times, and the World Tree will hear you.",
+ "rvel1_w":"Wild places. The towns are deaf.",
+ "rvel1_d":"The World Tree has answered. Your mana will never go thirsty again.",
+ "rvkEl2":"The Shade of the Darkwood",
+ "rvkHi_rvkEl2":"You found me. That was the first lesson of the void.",
+ "rvkId_rvkEl2":"Between one step and the next there is nothing. Some elves learn to live there.",
+ "rvkH_rvkEl2":"In the darkest wood of the south, a shade waits for the one who can find it.",
+ "rvel2a_o":"Move. Three hundred times, and never where the blow falls.",
+ "rvel2a_w":"Three hundred steps. Never where the blow falls.",
+ "rvel2a_d":"Good. Now dance where it matters.",
+ "rvel2_o":"Sixty steps away from death itself, with a great foe at arm's length each time. Then the void will know you.",
+ "rvel2_w":"Sixty steps, with a great foe close enough to touch.",
+ "rvel2_d":"Now you live between the steps. You are a Void Elf.",
+ "q_rvel2a":"Step into Nothing",
+ "o_rvel2a":"Dodge {c}/{n}",
+ "o_rvel2":"Dodge with a boss close to you {c}/{n}",
+ "rvkMe1":"The Sirens' Handmaid",
+ "rvkHi_rvkMe1":"The sea sent you? It sends me so few visitors.",
+ "rvkId_rvkMe1":"Every wave on this shore once belonged to a queen of the deep.",
+ "rvkH_rvkMe1":"On the eastern coast, a handmaid of the sirens sings to the waves.",
+ "rvme1_o":"A royal song is in your blood, but it has never been sung. Fight where the water is: at sea, in the marsh, under the rain. Three hundred times.",
+ "rvme1_w":"Where the water is. The rain counts.",
+ "rvme1_d":"Listen... the sea is singing back to you. You are a Royal Siren.",
+ "rvkMe2":"The Drowned Bell-Keeper",
+ "rvkHi_rvkMe2":"Do you hear it? The bell. It rings down there, where the light ends.",
+ "rvkId_rvkMe2":"Some of the Water Clan were born for the shallows. Some for the deep.",
+ "rvkH_rvkMe2":"Far west along the southern sea, a bell rings under the water, and someone on the shore keeps it.",
+ "rvme2a_o":"The deep does not take the weak. Fight in the water and under the rain, five hundred times, until the pressure feels like home.",
+ "rvme2a_w":"Five hundred. Until the pressure feels like home.",
+ "rvme2a_d":"You're ready to hear what the bell rings for.",
+ "rvme2_o":"The beast of the deep. Twice. Once to meet it, once to prove the first was no accident.",
+ "rvme2_w":"The Kraken, twice.",
+ "rvme2_d":"The bell is silent. It was ringing for you. Abyssal Leviathan.",
+ "q_rvme2a":"Where the Light Ends",
+ "o_rvme2a":"Slay monsters in water or under the rain {c}/{n}",
+ "rvkDw1":"The Old Rune Carver",
+ "rvkHi_rvkDw1":"Mind the walls. Every rune on them is mine, and every one took a year.",
+ "rvkId_rvkDw1":"Runes don't care who carves them. But they answer some hands faster.",
+ "rvkH_rvkDw1":"Deep in the mines of a great city, an old carver still cuts runes into the rock.",
+ "rvdw1_o":"Your hands were made for this. Make ten good pieces, epic or better, and the runes will start answering you.",
+ "rvdw1_w":"Ten good pieces. Epic or better.",
+ "rvdw1_d":"See? The hammer listens to you now. You're a Runesmith.",
+ "o_rvdw1":"Craft pieces of epic rating or better {c}/{n}",
+ "rvkDw2":"The Ash-Bearded Smith",
+ "rvkHi_rvkDw2":"Nothing grows out here. Good. Nothing to burn but the forge.",
+ "rvkId_rvkDw2":"Some dwarves came out of the mountain. Some came out of the fire.",
+ "rvkH_rvkDw2":"Out in the red badlands, a smith's hammer rings where nothing grows.",
+ "rvdw2a_o":"Fire is in your blood, not your forge. Kill three hundred things made of fire and learn how it fights.",
+ "rvdw2a_w":"Three hundred things made of fire.",
+ "rvdw2a_d":"Now make something worth that heat.",
+ "rvdw2_o":"Three pieces of unique rating or better, from your own hands. Then the volcano will call you its own.",
+ "rvdw2_w":"Three pieces, unique or better.",
+ "rvdw2_d":"Molten blood. You're a Dark Dwarf now, and the fire won't forget it.",
+ "q_rvdw2a":"Ember Blood",
+ "o_rvdw2a":"Slay fire monsters {c}/{n}",
+ "o_rvdw2":"Craft pieces of unique rating or better {c}/{n}",
+ "rvkOr1":"The Old Chief",
+ "rvkHi_rvkOr1":"Sit, if you're tribe. Stand, if you're not.",
+ "rvkId_rvkOr1":"A chief isn't the one who hits hardest. It's the one still standing in front.",
+ "rvkH_rvkOr1":"The old chief of a frost village remembers every war of the tribes.",
+ "rvor1_o":"Chiefs stand in front. Block or parry three hundred blows, and the tribe's blood will call you chief.",
+ "rvor1_w":"Three hundred blows. In front.",
+ "rvor1_d":"Chief. The tribe will hear your howl a long way off.",
+ "rvkOr2":"The Bone-Talker",
+ "rvkHi_rvkOr2":"Shh. They're talking. The bones always talk on this hill.",
+ "rvkId_rvkOr2":"The ancestors never leave. People just stop hearing them.",
+ "rvkH_rvkOr2":"On a northern hill of graves, someone sits and talks to the bones.",
+ "rvor2a_o":"The dead who don't rest have to be put down. Five hundred of them, undead or evil spirits.",
+ "rvor2a_w":"Five hundred restless dead.",
+ "rvor2a_d":"The ancestors are listening now. Let them watch you fight.",
+ "rvor2_o":"Five great ones: bosses who are undead or evil. When they fall, the ancestors will walk with you.",
+ "rvor2_w":"Five undead or evil bosses.",
+ "rvor2_d":"Do you feel them at your back? Ancestral Shaman. They'll never let you fall.",
+ "q_rvor2a":"Voices Underground",
+ "o_rvor2a":"Slay undead or evil spirits {c}/{n}",
+ "o_rvor2":"Defeat undead or evil bosses {c}/{n}",
+ "rvkEe1":"The Exiled Seer",
+ "rvkHi_rvkEe1":"I saw you coming three days ago. You're late.",
+ "rvkId_rvkEe1":"Evil eyes were cast out of hell. Some of us still remember why.",
+ "rvkH_rvkEe1":"In a forbidden canyon, an exiled seer watches the road for her own kind.",
+ "rvee1_o":"There's a king's lineage behind your eyes. Slay five hundred demons, and it will look out through them.",
+ "rvee1_w":"Five hundred demons.",
+ "rvee1_d":"Now your gaze holds. King's Lineage.",
+ "rvkEe2":"The Blind Overseer",
+ "rvkHi_rvkEe2":"I took my own eyes. Down here, they only got in the way.",
+ "rvkId_rvkEe2":"The highest of the evil eyes see without looking.",
+ "rvkH_rvkEe2":"At the very bottom of the Abyss, something blind is watching.",
+ "rvee2a_o":"A thousand demons. Watch each one fall, and learn what they see.",
+ "rvee2a_w":"A thousand demons.",
+ "rvee2a_d":"Good. Now the one who cast us out.",
+ "rvee2_o":"Belial. Look him in the eye and win, and yours will be above every demon's.",
+ "rvee2_w":"Belial.",
+ "rvee2_d":"Overlord's Eye. Nothing can hide from you now. Not even me.",
+ "q_rvee2a":"The Gaze Below",
+ "o_rvee2a":"Slay demons {c}/{n}",
+ "rvkGi1":"The Ice-Rimed Giant",
+ "rvkHi_rvkGi1":"...I stood still too long. The ice grew. It doesn't matter.",
+ "rvkId_rvkGi1":"Frost giants don't feel the cold. They are the cold.",
+ "rvkH_rvkGi1":"By the frozen lakes, a giant stands so still that ice has grown on him.",
+ "rvgi1_o":"The north will make you one of its own, if you fight in it. Three hundred battles in the frozen north.",
+ "rvgi1_w":"Three hundred battles in the north.",
+ "rvgi1_d":"Now you carry the cold with you. Frost Giant.",
+ "rvkGi2":"The Titan Who Sleeps Standing",
+ "rvkHi_rvkGi2":"Mm. A small one. You're louder than the mountains.",
+ "rvkId_rvkGi2":"The first giants walked when the land was soft. Their steps are still in it.",
+ "rvkH_rvkGi2":"At the far end of the giants' land, a titan sleeps standing up.",
+ "rvgi2a_o":"Walk the old steps: ten great foes of level three hundred or more.",
+ "rvgi2a_w":"Ten great foes, three hundred or more.",
+ "rvgi2a_d":"Now the one who rules the frost here.",
+ "rvgi2_o":"The Frost Giant of the hold. Three times. The land must feel you walk.",
+ "rvgi2_w":"The Frost Giant, three times.",
+ "rvgi2_d":"The ground shook. Ancient Titan. Nothing will move you again.",
+ "q_rvgi2a":"Steps of Old",
+ "o_rvgi2a":"Defeat bosses of level 300 or more {c}/{n}",
+ "o_rvgi2":"Defeat the Frost Giant {c}/{n}",
+ "rvkDr1":"The Ember Hermit",
+ "rvkHi_rvkDr1":"This fire has burned since the red dragon first nested here. I keep it.",
+ "rvkId_rvkDr1":"Half-draconians are half something. The question is which half wakes.",
+ "rvkH_rvkDr1":"On the red dragon's mountain, a hermit tends a fire that never goes out.",
+ "rvdr1_o":"Your scales remember an older fire. Bring down Trauka three times, and they'll remember it out loud.",
+ "rvdr1_w":"Trauka, three times.",
+ "rvdr1_d":"Your breath burns wider now. Elder Drake.",
+ "rvkDr2":"The Scaled Wanderer",
+ "rvkHi_rvkDr2":"Up here the air is thin and the dragons are honest.",
+ "rvkId_rvkDr2":"A true dragon's blood doesn't mix. It wins.",
+ "rvkH_rvkDr2":"On the highest ridge of the Chaos Mountains walks a wanderer with scales up to his eyes.",
+ "rvdr2a_o":"Bunhelier's children are everywhere on these ridges. Three hundred of them. Prove you are more than they are.",
+ "rvdr2a_w":"Three hundred half-draconians.",
+ "rvdr2a_d":"Now a real dragon.",
+ "rvdr2_o":"The Blue Dragon. Twice. A true dragon's blood answers only a true dragon's fall.",
+ "rvdr2_w":"The Blue Dragon, twice.",
+ "rvdr2_d":"Your blood won. True Dragonkin.",
+ "q_rvdr2a":"Kin of Bunhelier",
+ "o_rvdr2a":"Slay half-draconians {c}/{n}",
+ "rvkYa1":"The Envoy of Heaven",
+ "rvkHi_rvkYa1":"Heaven sent me to watch the roads. You are the first thing worth watching.",
+ "rvkId_rvkYa1":"The yangbans are heaven's children. Some of them still work for it.",
+ "rvkH_rvkYa1":"In the wilds of the Kingdom of Cho, an envoy of heaven waits by the road.",
+ "rvya1_o":"Heaven's office is open to you. Keep the peace of the East: two thousand monsters on this continent.",
+ "rvya1_w":"Two thousand monsters of the East.",
+ "rvya1_d":"The mandate is yours. Heavenly Official.",
+ "rvkYa2":"The Martial Hermit",
+ "rvkHi_rvkYa2":"Stand there. No, there. The wind comes from the left.",
+ "rvkId_rvkYa2":"A martial god is not born. It's what remains when everything else is trained away.",
+ "rvkH_rvkYa2":"Far in the Kingdom of Xing, a hermit spends his days fighting the wind.",
+ "rvya2a_o":"First, stop being hit. Block or parry five hundred blows.",
+ "rvya2a_w":"Five hundred blows, turned aside.",
+ "rvya2a_d":"Now the four who guard the heavens.",
+ "rvya2_o":"The Four Auspicious Beasts, each one by your hand. Then the road of the martial god is open.",
+ "rvya2_w":"The four beasts, each once.",
+ "rvya2_d":"Martial Deity. Chiyou himself would bow.",
+ "q_rvya2a":"The Iron Road",
+ "o_rvya2a":"Block or parry blows {c}/{n}",
+ "o_rvya2":"Defeat the Four Auspicious Beasts (each once) {c}/{n}",
+ "rvkDe1":"The Horned Matron",
+ "rvkHi_rvkDe1":"Another one of ours, up from below? Sit. You smell like the surface.",
+ "rvkId_rvkDe1":"Every demonkin has a great demon somewhere in their blood. Most never meet it.",
+ "rvkH_rvkDe1":"In the demonkin's village in hell, a horned matron knows every bloodline.",
+ "rvde1_o":"Your blood is an archdemon's. Hell has to taste it first: fifteen hundred of its monsters.",
+ "rvde1_w":"Fifteen hundred monsters of hell.",
+ "rvde1_d":"There it is. Archdemon Blood.",
+ "rvkDe2":"The Throne-Watcher",
+ "rvkHi_rvkDe2":"The throne is empty. I watch it anyway. Someone should be here when it's filled.",
+ "rvkId_rvkDe2":"Princes of hell aren't born. They're whatever is left standing before the throne.",
+ "rvkH_rvkDe2":"Before an empty throne deep in hell, someone still keeps watch.",
+ "rvde2a_o":"The lords of hell: Marchosias and Leraje, each by your hand.",
+ "rvde2a_w":"Marchosias and Leraje.",
+ "rvde2a_d":"Now make Marchosias remember your name.",
+ "rvde2_o":"Marchosias, three times. A prince is someone a lord learns to fear.",
+ "rvde2_w":"Marchosias, three times.",
+ "rvde2_d":"Hell Prince. The throne noticed you.",
+ "q_rvde2a":"Lords of Hell",
+ "o_rvde2a":"Defeat Marchosias and Leraje (each once) {c}/{n}",
+ "rvkLow":"You're not ready yet. Come back at level {n}.",
+ "rvkMine":"The {v} blood is awake in you. Carry it well.",
+ "rvkWh":"Your blood stirs: somewhere in the world, someone knows of the {v} bloodline. (Index → Races)",
+ "rzVars":"As you take the race: a {p1}% chance of \"{a}\" and {p2}% of \"{b}\". Each bloodline also has a keeper somewhere in the world who can awaken it.",
+ "ixTab_race":"🧬 Races",
+ "rvIxSk":"Racial skill",
+ "rvIxBl":"Bloodlines",
+ "rvIxUnc":"uncommon · {p}% when the race is taken",
+ "rvIxRare":"rare · {p}% when the race is taken",
+ "rvIxMet":"Keeper: {n}, in {z}",
+ "rvIxQ1":"Its keeper's quest: from Lv {n}",
+ "rvIxQ2":"Its keeper's two quests: from Lv {n} (a rare bloodline asks more)",
+ "rvIxHow":"How it is had",
+ "rvIxBase":"A base race: every player starts Human, and may switch once, for free, from the status window (🧬).",
+ "rvIxK_base":"Base race",
+ "rvIxK_unl":"Unlockable race",
+ "rvIxK_cur":"A curse of blood",
+ "rzH_evileye":"The system speaks to their kin where an insane dragon once made his nest, in the mountains' old mines.",
+ "rzH_giant":"In the land of the giants, or in the hold of the one who rules its frost.",
+ "rzH_draco":"On the highest ridge of the Chaos Mountains.",
+ "rzH_yangban":"Where a path climbs toward heaven on the East Continent.",
+ "rzH_demon":"In a village of horned folk, below the world.",
+ "rzH_vampire":"Under the sand of the empire, a prince offers his eternal blood to those who join his covenant."});
 /* ---------------- Farming 2, Pedro Harbor and the Kraken, the bard and the stage (owner 2026-10-21: third batch, patch 4) ----------------
    Seasons turn every two days of the world clock, the same for every player. Piaro's new field has eight plots: buy seed,
    plant it and come back when it has grown (it grows while you are away). A crop out of season grows at half speed and gives
@@ -20240,7 +20797,7 @@ if(TOUCH){document.body.classList.add('touch');fit();mzUI();const st=$('tStick')
    drops (NDROP) and the materials monsters carry, without the plain ones (wood, ore, leather, herbs, fish, crops) and
    without the gems, which have their own page. N in play, unless a party invitation or a duel waits for its answer (N is
    "no" there). */
-const IXTABS=['tr','cls','mon','drop','mat','gem','smith','mag','fish','qst'],IXPLAIN=new Set(['wood','ore','leather','herb','bherb','fish','sfish','gfish','wheat','straw','melon','bread']);
+const IXTABS=['tr','cls','race','mon','drop','mat','gem','smith','mag','fish','qst'],IXPLAIN=new Set(['wood','ore','leather','herb','bherb','fish','sfish','gfish','wheat','straw','melon','bread']);
 const IXWK={sword:'isword',melee:'isword',spear:'spear',dagger:'dagger',bow:'bow',staff:'staff',hammer:'hammer'};
 let IXV='tr',IXS=null,IXF='gear',IXD=null;
 const ixHas=k=>STR.en[k]!=null||STR.ar[k]!=null;
@@ -20440,6 +20997,7 @@ function ixDraw(){$('ixTabs').innerHTML=IXTABS.map(v=>`<button data-ixt="${v}" c
  else if(IXV==='smith'){const L=D.R.filter(x=>hit(t(x.rc.id)));const ids=['guide',...L.map(x=>x.rc.id)];if(!ids.includes(IXS))IXS='guide';
   cards=[ixCard('guide','🔨',t('ixGuideC'),''),...L.map(x=>ixCard(x.rc.id,x.rc.id,`<span class="rt rt${x.rc.fix!=null?x.rc.fix:0}">${esc(t(x.rc.id))}</span>`,[x.q.bs?t('ixBsS'):'',x.q.sm?t('ixSm',{n:x.q.sm}):'',x.q.und?t('ixUndS'):''].filter(Boolean).join(' · ')))];
   if(IXS==='guide')det=ixGuide('smith');else{const x=L.find(y=>y.rc.id===IXS);if(x)det=ixRcD(x);}}
+ else if(IXV==='race'){const o=rvkIx(hit);cards=o.cards;det=o.det;}
  else if(IXV==='qst'){/* (v3.20, plan U208) the journal: every quest you finished, the story first */const ic={ms:'📖',s:'⭐',day:'📅',side:'📜'},ord=['ms','s','side','day'];
   const ids=Object.keys(S.qs||{}).filter(k=>QD[k]&&S.qs[k].st===2&&hit(qName(k))).sort((a,b)=>ord.indexOf(qCat(a))-ord.indexOf(qCat(b)));if(!ids.includes(IXS))IXS=ids[0]||null;
   cards=ids.map(id=>ixCard(id,ic[qCat(id)],esc(qName(id)),t('qf_'+qCat(id))));let ob='';try{ob=IXS?String(qObjText(IXS)).replace(/\s*\d[\d,]*\s*\/\s*\d[\d,]*\s*$/,' ✓'):'';}catch(e){ob='';}
