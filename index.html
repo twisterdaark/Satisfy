@@ -3390,7 +3390,7 @@ function bhDK(m,dt){const R=BHR,k=R.o.dk,d=Math.hypot(P.x-m.x,P.y-m.y);m.ck=(m.c
    for(let i=0;i<14;i++)fx.push({arc:1,x:s.x+(rand()-.5)*s.r*1.6,y:s.y+(rand()-.5)*s.r,a:rand()*6.28,t:.25});if(Math.hypot(P.x-s.x,(P.y-s.y)*1.4)<s.r)hurtPlayer(MT.dk_madra.dmg*3,m.lv,m);},1100);}}
 const BHDKI={lant:[['lantd']],alex:[['alexb'],['alexg']],krug:[['kcloth']],gis:[['gisp']],povia:[['povt'],['wtneck']],madra:[]};
 function bhDKDown(){const R=BHR,b=bhS(),n=R.n,k=R.o.dk;if(R.ph==='done')return;b.dk[n]=1;
- for(const [id] of BHDKI[k]){const it=mkItem(id,0);S.items.push(it);loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});setTimeout(()=>toast(t('bhGotIt',{it:inm(it)}),'good'),300);}
+ for(const [id] of BHDKI[k]){const it=egoDrop(mkItem(id,0));S.items.push(it);loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});setTimeout(()=>toast(t('bhGotIt',{it:inm(it)}),'good'),300);}
  if(k==='madra'){R.ph='done';bhPurify();return;}
  S.xp=0;gainXP(xpNeed(),1);setTimeout(()=>toast(t('bhDKLv'),'good'),800);
  if(n===65)setTimeout(()=>annW('bhFinal'),1200);
@@ -4412,7 +4412,7 @@ const epClock=ms=>{const s=Math.ceil(ms/1000);return (s/60|0)+':'+String(s%60).p
 // the lines of a graded quest, written as its window in the novel
 function epLines(id){const q=QD[id],o=[t('epGr',{g:q.gr})];if(q.lim)o.push(t('epLim',{m:q.lim}));if(q.fl)o.push(t('epFl',{n:q.fl}));return o.join('\n');}
 function epAccept(id){const s=S.qs[id];if(s&&QD[id].lim)s.t0=Date.now();}
-function epLvDown(n){for(let i=0;i<n&&S.lv>1;i++){S.lv--;let k=PTS_LV;const u=Math.min(S.pts,k);S.pts-=u;k-=u;while(k-->0){const st=['str','sta','agi','int','dex'].reduce((a,b)=>S.st[b]>S.st[a]?b:a);if(S.st[st]>1)S.st[st]--;}}
+function epLvDown(n,per){for(let i=0;i<n&&S.lv>1;i++){S.lv--;let k=per||PTS_LV;const u=Math.min(S.pts,k);S.pts-=u;k-=u;while(k-->0){const st=['str','sta','agi','int','dex'].reduce((a,b)=>S.st[b]>S.st[a]?b:a);if(S.st[st]>1)S.st[st]--;}}
  S.xp=Math.min(S.xp,Math.max(0,xpNeed()-1));if(P)P.hp=Math.min(P.hp,maxHP());}
 function epFail(id){const q=QD[id];if(!q||!epAct(id))return;S.qs[id]={st:3};if(ESC&&ESC.q===id)ESC=null;
  toast(t('epFailT'),'warn');SFX.deny();if(q.fl){epLvDown(q.fl);setTimeout(()=>toast(t('epLvT',{n:q.fl}),'warn'),700);}
@@ -7390,7 +7390,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(m.type==='guardian'
  dmg=ipHit(m,dmg,crit,o);if(o.skill&&tlOn('duke'))dmg*=1.15;if(o.skill&&S.cls2==='bomb')dmg*=1.15;sc2Hit(m,o);if(o.skill&&S.cls==='braham'&&S.sk.bcont&&rand()<Math.min(.85,.4+.05*(skLv('bcont')-1))){dmg*=1.4;if(!o.dot&&rand()<.3)numPK(-30,'bcAmp','#d8c0ff',false);}dmg*=1+pasGen();if(!o.dot&&!o.aura&&(P.shwU>gTime||phNear('D',SAHWR)))dmg+=Math.round(SAHWD*Math.max(0,1-monResK(m.type,'holy')));dmg=tzHit(m,dmg,o);if(!o.dot)kyArc(m);if(o.skill&&S.cls==='mumud'&&pasOn('mmreint'))dmg*=1+.15*pasM('mmreint');if(m.tw===1)twHit(m,crit,o);if(m.type==='gcrown'&&m.bh&&!crit&&!o.skill)dmg=1;if(o.skill&&S.bh&&S.bh.mm)dmg*=1.03;if(tlOn('hking')&&HKV.has(m.type))dmg*=1.15;dmg=ttHit(m,dmg,crit);
  let mblk=false;if(AIK[m.type]==='soldier'&&!o.pure&&!m.tdum&&!o.skill&&!o.aura&&!rzNoBlk(o)&&!egoGb(o)&&!(P.bdetU>gTime)&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
   mblk=true;dmg*=.2;crit=false;burn=false;m.grdT=.6;m.cd=Math.min(m.cd,.15);vfx('block',m.x+m.face*7,my-2,{angle:m.face>0?Math.PI:0});num(m.x,my-20,t('mBlock'),'#9fc8ff',false);SFX.hit();}
- if(o.raw>0){dmg=o.raw*Math.min(1,p3Atk(m)*p4Atk(m)*p5Atk(m)*epAtk(m)*vcAtk(m)*(m.wardT>gTime?ssWard(m.wardR||.4):1));crit=true;mblk=false;}   // (v3.14) a share of the target's own health: no attack, no defence; a boss's shield and a guard still hold
+ if(o.raw>0){dmg=o.raw*(EGOE?.5:1)*Math.min(1,p3Atk(m)*p4Atk(m)*p5Atk(m)*epAtk(m)*vcAtk(m)*(m.wardT>gTime?ssWard(m.wardR||.4):1));crit=true;mblk=false;}   // (v3.14) a share of the target's own health: no attack, no defence; a boss's shield and a guard still hold
  dmg+=cpErode(m,o);dmg=Math.max(1,Math.round(dmg));if(!Number.isFinite(dmg))dmg=1;dmg=blRefl(m,dmg);dmg=egoExec(m,dmg,o);if(OGB&&OGB[m.type])dmg=ogDmg(m,dmg,o);if(!m.tdum&&!o.raw)ttRec(dmg);m.hp-=dmg;if(m.tdum)tdHit(m,dmg,crit);m.myd=(m.myd||0)+dmg;if(m.type==='hellgao')hgHit(m,dmg,crit);m.myT=gTime;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;if(!m.tdum)trainMast();if(!o.chain&&wearT!==gTime&&!m.tdum){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun*rzCcD());if(o.slow>0)m.slowU=Math.max(m.slowU||0,gTime+o.slow*rzCcD());/* (v3.15) a skill's slow took no hold before */if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
  num(m.x,my-8,String(dmg),crit||burn?'#ffd24a':'#ffffff',crit||burn);
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(crit&&!RMO)shake=Math.max(shake,.07);if(burn){fireOn(m);vfx('fire',m.x,my);};if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
@@ -7420,7 +7420,7 @@ function updateProj(dt){scTick(dt);proj=proj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y
  if(p.ghost)return p.t>0&&!p4PSolid(Math.floor(p.x/TS),Math.floor((p.y+8)/TS)); // another player's shot, replayed: looks only
  if(p.kind!=='wave'&&hitTrees(p.x,p.y,10)){if(p.boom)boom(p);return false;}
  if(p.t<=0||p4PSolid(Math.floor(p.x/TS),Math.floor((p.y+8)/TS))){if(p.boom)boom(p);return false;}
- for(const m of mons){if(m.dead||p.hit.has(m))continue;if(Math.hypot(m.x-p.x,monY(m)-p.y)<MT[m.type].r+(p.kind==='wave'?13:5)){p.hit.add(m);if(p.boom){boom(p);return false;}if(hitMon(m,p.mul,{kx:Math.sign(p.vx)*.5,ky:Math.sign(p.vy)*.5,stun:p.stun,slow:p.slow,el:p.el||null,...(p.kind==='bullet'?{skill:1}:{})}))SFX.hit();if(p.pure&&!m.dead&&(DEMK.has(m.type)||voxOf(m.type)[0]==='dead'))m.weak=Math.max(m.weak||0,6);if(!p.pierce)return false;}}
+ for(const m of mons){if(m.dead||p.hit.has(m))continue;if(Math.hypot(m.x-p.x,monY(m)-p.y)<MT[m.type].r+(p.kind==='wave'?13:5)){p.hit.add(m);if(p.boom){boom(p);return false;}if(hitMon(m,p.mul,{kx:Math.sign(p.vx)*.5,ky:Math.sign(p.vy)*.5,stun:p.stun,slow:p.slow,el:p.el||null,kd:p.kd,...(p.kind==='bullet'?{skill:1}:{})}))SFX.hit();if(p.pure&&!m.dead&&(DEMK.has(m.type)||voxOf(m.type)[0]==='dead'))m.weak=Math.max(m.weak||0,6);if(!p.pierce)return false;}}
  return true;});}
 function dodge(){if(PHOTO)return;if(RCR&&RCR.in)return rcSpur();if(P.dash>0||P.dcd>0)return;P.guard=0;if(P.st<dodgeCost()){toast(t('tired'),'warn');SFX.deny();return;}let ix=(K.right?1:0)-(K.left?1:0),iy=(K.down?1:0)-(K.up?1:0);if(TSV){ix=TSV.x;iy=TSV.y;}if(!ix&&!iy){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];ix=v[0];iy=v[1];}const l=Math.hypot(ix,iy);P.dx=ix/l;P.dy=iy/l;P.dash=(P.ride?.24:.18)*(1+gearSum('dsh'));P.dcd=.7;P.inv=Math.max(P.inv,.3);rzPhase();P.st-=dodgeCost();pressKey('kD');SFX.dodge();qEvent('dodge','dodge');rvkDodge();vfx('dust',P.x,P.y,{n:P.ride?14:8,angle:Math.atan2(-P.dy,-P.dx)});
  for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*8,y:P.y,vx:-P.dx*40+(rand()-.5)*40,vy:-rand()*25,t:.35,c:rand()<.5?'#c8b48a':'#a89870'});fx.push({ring:true,x:P.x,y:P.y-6,t:.25});}
@@ -9287,7 +9287,7 @@ function finishMG(){const rc=MG.rc;
  hudDirty=true;save(true);}
 // Legendary Blacksmith's Creation: name the unique/legendary item yourself
 function askName(it){const box=document.createElement('div');box.id='nameBox';box.innerHTML=`<div class="rt rt${it.r}">${t('creation')}</div>`;const inp=document.createElement('input');inp.id='nameIn';inp.maxLength=24;inp.value=t(it.id);const b=document.createElement('button');b.id='nameOk';b.textContent=t('nameOk');b.onclick=()=>{const v=inp.value.trim();if(v){it.nm=v;const nm=$('rname');if(nm)nm.textContent=v;}SFX.notice();box.remove();save(true);};box.append(inp,' ',b);$('rextra').prepend(box);setTimeout(()=>{inp.focus();inp.select();},50);inp.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')b.click();});}
-const inm=i=>(i.sh?'✨ ':'')+(i.ego&&EGOIC[i.ego]?EGOIC[i.ego]+' ':'')+(i.nm||t(i.id))+(i.en?' \u202a+'+i.en+'\u202c':'');
+const inm=i=>(i.sh?'✨ ':'')+(i.ego&&egoK(i.ego)?EGOIC[i.ego]+' ':'')+(i.nm||t(i.id))+(i.en?' \u202a+'+i.en+'\u202c':'');
 function afterCraft(rc){checkSkills();}
 
 /* ---------------- inventory ---------------- */
@@ -12267,7 +12267,7 @@ function p3Hurt(d,src){if(d>0&&P3.ch){P3.ch=null;toast(t('rodInt'),'warn');}if(!
 function p3PHit(p){if(p.sp==='ice'){if(!legResist())P3.chill=2;}else if(p.sp==='bolt'&&!(P.sImm>0)&&!legResist()){P.stun=Math.max(P.stun||0,.25);P.sImm=2.25;}}
 const p3Spd=()=>P3.chill>0?.7:1;
 function p3Kill(m){const k=m.type;if(P3WB.includes(k)&&!m.tmp){WS.wb=WS.wb||{};WS.wb[k]=Date.now()+MT[k].wb*1000;wbPut(k);setTimeout(()=>annW(k+'Dn'),400);save(true);}if(k==='slord')P3.rod=[0,0,0,0];}
-function p3Tick(dt){if(!S||!P||S.__demo)return;vpTick(dt);rzTick(dt);awkTick(dt);const s=p3S();P3.ls=Math.max(0,P3.ls-maxHP()*.06*dt);P3.chill=Math.max(0,P3.chill-dt);
+function p3Tick(dt){if(!S||!P||S.__demo)return;vpTick(dt);rzTick(dt);awkTick(dt);egoFix();const s=p3S();P3.ls=Math.max(0,P3.ls-maxHP()*.06*dt);P3.chill=Math.max(0,P3.chill-dt);
  if(qDone('vc3')&&!s.ring){s.ring=1;S.items.push(mkItem('vring',3));toast(t('got',{n:1,item:t('vring')}),'good');SFX.rare();save(true);}
  if(qDone('vc2')&&s.cov===undefined){s.cov=1;setTimeout(()=>{announce(t('covJoin'),1);SFX.legendary();},300);save(true);}
  if(P3.ch){if(P.rmv>0||mode!=='play'){P3.ch=null;toast(t('rodInt'),'warn');}else if((P3.ch.t-=dt)<=0){const i=P3.ch.i;P3.ch=null;P3.rod[i]=1;const p=p3RodXY(i);vfx('bolt',p.x,p.y-20);SFX.zap();const n=p3RodN();
@@ -13454,7 +13454,8 @@ const EGO={greed:{dm:.20,lsc:.15,exe:.15},aegis:{def:.25,blk:.15},reaper:{cdm:.2
 const EGOK=Object.keys(EGO),EGOP=.005,EGOLV=50,EGOIC={greed:'💰',aegis:'🛡️',reaper:'💀',frost:'❄️',arch:'📜',dragon:'🐉',stalker:'👤',monarch:'👑'};
 var EGORNG=mulberry32(((Date.now()>>>0)^0x6e60c0de)>>>0);   // reseeded with a recorded run's seed (simBegin)
 let EGOE=0;   // an Auto-Cast Reflex echo is running: its blows deal half
-function egoOf(){if(!S||!S.items)return null;const w=weapon();return w&&w.slot==='w'&&EGO[w.ego]?w.ego:null;}
+const egoK=k=>typeof k==='string'&&Object.prototype.hasOwnProperty.call(EGO,k);
+function egoOf(){if(!S||!S.items)return null;const w=weapon();return w&&w.slot==='w'&&egoK(w.ego)?w.ego:null;}
 function egoV(k){const e=egoOf();return e?EGO[e][k]||0:0;}
 const egoStM=k=>k==='str'?1+egoV('str'):1,egoDmM=()=>1+egoV('dm'),egoDefM=()=>1+egoV('def'),egoAsM=()=>1/(1+egoV('as')),egoCdM=()=>1-egoV('cd'),egoSpd=()=>1+egoV('ms'),egoCdm=()=>egoV('cdm');
 // Sentient Precision: +2% critical chance for each hit after the first on the same foe, up to +20%
@@ -13465,16 +13466,17 @@ function egoAtk(m,o){let k=EGOE?.5:1;if(m&&m.egDefU>gTime)k*=1.2;const e=egoOf()
  if(E.mag&&mag)k*=1+E.mag;if(E.cold&&el==='water')k*=1+E.cold;
  if(E.pen&&!o.pure&&!o.raw&&!o.nolv){const f=lvF(m.lv);if(f<1&&f>0)k*=Math.pow(f,-E.pen);}return k;}
 // Gluttonous Instinct: a blow that leaves an ordinary foe under 10% health takes the rest, 15% of the time
-function egoExec(m,dmg,o){if(egoOf()!=='greed'||o.dot||o.chain||m.tdum||m.spar)return dmg;const b=MT[m.type];if(!b||b.boss||b.obj)return dmg;
+function egoExec(m,dmg,o){if(egoOf()!=='greed'||o.dot||o.chain||m.tdum||m.spar)return dmg;const b=MT[m.type];if(!b||b.boss||b.obj||b.wb||m.max>=5e6||m.type==='gcrown')return dmg;
  const left=m.hp-dmg;if(left<=0||left>=m.max*.1||EGORNG()>=EGO.greed.exe)return dmg;num(m.x,monY(m)-24,t('egExeT'),'#ffd24a',true);return Math.ceil(m.hp);}
 // after a blow lands: Greed's life on a critical hit, Frostfang's stacks, the Iron Monarch's knockdown
 function egoHit(m,dmg,crit,o){const e=egoOf();if(!e||o.dot||o.chain||m.spar)return;
  if(e==='greed'&&crit&&dmg>0&&P.hp>0){const h=lsCap(dmg*EGO.greed.lsc);if(h>0){P.hp=Math.min(maxHP(),P.hp+h);hudDirty=true;}}
  if(e==='frost'){if(P.egoTg===m)P.egoPS=Math.min(10,(P.egoPS||0)+1);else{P.egoTg=m;P.egoPS=0;}}
- if(e==='monarch'&&P.egoKD&&!o.skill&&!o.aura&&!o.raw&&!m.dead&&m.hp>0&&!m.tdum){const b=MT[m.type];m.stun=Math.max(m.stun||0,b.boss?.4:1.5);m.st=null;m.tele=0;m.combo=0;
+ if(e==='monarch'&&(P.egoKD&&P.egoKDT===gTime||o.kd)&&!o.skill&&!o.aura&&!o.raw&&!m.dead&&m.hp>0&&!m.tdum){const b=MT[m.type];
+  if(b.boss){if(m.egKdT>gTime)return;m.egKdT=gTime+8;m.stun=Math.max(m.stun||0,.4);}else{m.stun=Math.max(m.stun||0,1.5);m.st=null;m.tele=0;m.combo=0;}   // a boss staggers (its attack goes on), once in 8 s
   vfx('dust',m.x,m.y,{n:10});num(m.x,monY(m)-22,t('egKdT'),'#e8c070',false);}}
 // every basic swing: the Iron Monarch's every third one is the one that knocks down
-function egoSwing(){P.egoN=(P.egoN||0)+1;P.egoKD=egoOf()==='monarch'&&P.egoN%3===0;}
+function egoSwing(){P.egoN=(P.egoN||0)+1;P.egoKD=egoOf()==='monarch'&&P.egoN%3===0;P.egoKDT=gTime;if(P.egoKD){const n0=proj.length;queueMicrotask(()=>{for(let i=n0;i<proj.length;i++)if(proj[i])proj[i].kd=1;});}}   // that swing's own blows (this frame) and the shots it let fly
 // Crushing Weight's other half: +20% guard break (a foe's guard fails a fifth of the time)
 function egoGb(o){return egoOf()==='monarch'&&!o.skill&&EGORNG()<EGO.monarch.gb;}
 // the Aegis: a parry a little more often while you guard; a blow blocked by itself 15% of the time when you don't; and
@@ -13482,7 +13484,7 @@ function egoGb(o){return egoOf()==='monarch'&&!o.skill&&EGORNG()<EGO.monarch.gb;
 function egoPar(){return egoOf()==='aegis'&&EGORNG()<EGO.aegis.blk;}
 function egoGuard(src){if(egoOf()!=='aegis'||!src||!src.type||!MT[src.type]||src.dead||TFK==='tick')return 0;
  const dv=[[0,1],[0,-1],[1,0],[-1,0]][P.dir]||[0,1],sx=src.x-P.x,sy=src.y-P.y,sl=Math.hypot(sx,sy)||1,ang=Math.atan2(sy,sx);
- if((sx*dv[0]+sy*dv[1])/sl<.5&&gTime>=(P.egoDfT||0)){P.egoDfT=gTime+15;vfx('block',P.x+sx/sl*10,P.y-8+sy/sl*10,{angle:ang});numP(-24,t('egDflT'),'#9fe3ff',false);SFX.crit();P.inv=Math.max(P.inv,.35);
+ if(sl>4&&(sx*dv[0]+sy*dv[1])/sl<.5&&gTime>=(P.egoDfT||0)){P.egoDfT=gTime+15;vfx('block',P.x+sx/sl*10,P.y-8+sy/sl*10,{angle:ang});numP(-24,t('egDflT'),'#9fe3ff',false);SFX.crit();P.inv=Math.max(P.inv,.35);
   if(mons.includes(src))hitMon(src,1,{kx:sx/sl,ky:sy/sl});return 2;}
  if(!P.guard&&EGORNG()<EGO.aegis.blk){vfx('block',P.x+sx/sl*10,P.y-8+sy/sl*10,{angle:ang});numP(-22,t('egBlkT'),'#9fc8ff',false);return 1;}return 0;}
 // Shadow Guard: a killing blow, 12% of the time, finds you gone: stealth and 1.5 s that nothing touches you (once every 3 minutes)
@@ -13493,26 +13495,35 @@ function egoDodge(d,src){if(egoOf()!=='stalker'||!(d>=P.hp)||gTime<(P.egoSgT||0)
 function egoEchoRun(k,f0){const st0=window.setTimeout,half=n0=>{for(let i=n0;i<proj.length;i++){const p=proj[i];if(p&&p.mul&&!p.ech){p.mul*=.5;p.ech=1;}}};
  const pt=(f,ms,...a)=>st0(()=>{const e0=EGOE,n0=proj.length;EGOE=1;try{if(typeof f==='function')f(...a);}finally{EGOE=e0;half(n0);}},ms);
  const n0=proj.length;EGOE=1;window.setTimeout=pt;CURSK=k;CURSKN=0;CURSKD=0;try{skCarry(k,f0||(()=>SKF[k]()));}catch(e){}finally{CURSK=null;window.setTimeout=st0;EGOE=0;half(n0);}}
-function egoEcho(k){const d=SKD[k];if(egoOf()!=='arch'||EGOE||!d||d.pas||!SKF[k]||d.cls==='ego'||skKind(k)!=='atk'||EGORNG()>=EGO.arch.echo)return;
- setTimeout(()=>{if(!S||!P||P.hp<=0||mode!=='play'&&mode!=='idx'||egoOf()!=='arch')return;egoEchoRun(k);numP(-34,t('egEchoT',{s:t('sk_'+k)}),'#c8a8ff',false);try{skVfx(k);}catch(e){}},350);}
+const EGOSAFE={},EGOHIT=/\b(hitMon|aoe|shoot|rzLine|rzTg|mgtNear|fusTg)\(|proj\.push\(/,EGOUNSAFE=/\bP\.[a-zA-Z0-9_]+\s*(=(?!=)|[-+*\/]=|\+\+|--)|\bP\.cd\[|\bS\.[a-zA-Z0-9_]+\s*(=(?!=)|[-+*\/]=|\+\+|--)|move\(P|mgtMana|addMat|gainXP|toast\(|\bdialog\(|acceptQ|completeQ|pgRun|ssStOn/;
+// a skill echoes only if it strikes by itself (a blow, a blast or a shot in its own body) and touches nothing of yours: no step,
+// no health, mana or stamina, no timed state, no cooldown, no state of the game (a skill that hands its work to another function
+// can't be read, so it doesn't echo)
+const egoSafe=k=>{if(k in EGOSAFE)return EGOSAFE[k];const f=SKF[k],b=f?String(f):'';return EGOSAFE[k]=!!f&&EGOHIT.test(b)&&!EGOUNSAFE.test(b);};
+function egoEcho(k){const d=SKD[k];if(egoOf()!=='arch'||EGOE||!d||d.pas||!SKF[k]||d.cls==='ego'||skKind(k)!=='atk'||!egoSafe(k)||EGORNG()>=EGO.arch.echo)return;
+ setTimeout(()=>{if(!S||!P||P.hp<=0||mode!=='play'&&mode!=='idx'||egoOf()!=='arch')return;const cd0=P.cd[k];egoEchoRun(k);if(cd0!=null)P.cd[k]=Math.max(cd0,P.cd[k]||0);numP(-34,t('egEchoT',{s:t('sk_'+k)}),'#c8a8ff',false);try{skVfx(k);}catch(e){}},350);}
 // making one: the rating raised to Unique (a quarter of the time Legendary), the numbers recomputed for it, the spirit bound
-function egoRate(it,r){if((it.r|0)>=r)return;const rc=rcById(it.id);it.r=r;if(!rc)return;if(rc.atk)it.atk=Math.round(rc.atk*MULT[r]);
- for(const k of ['as','ms','dm'])if(rc[k])it[k]=+(rc[k]*(1+(MULT[r]-1)*.5)).toFixed(3);if(rc.mpb)it.mpb=Math.round(rc.mpb*MULT[r]);
- const n=Math.min(3,r-1);if(!Array.isArray(it.wp)||it.wp.length<n)it.wp=wpRoll(r,it);}
+function egoRate(it,r){const o=Math.max(0,Math.min(4,it.r|0));if(o>=r)return;const f=MULT[r]/MULT[o],g=(1+(MULT[r]-1)*.5)/(1+(MULT[o]-1)*.5);it.r=r;
+ if(it.atk)it.atk=Math.round(it.atk*f);if(it.mpb)it.mpb=Math.round(it.mpb*f);for(const k of ['as','ms','dm'])if(it[k])it[k]=+(it[k]*g).toFixed(3);
+ const n=Math.min(3,r-1),W=Array.isArray(it.wp)?it.wp:(it.wp=[]);while(W.length<n)W.push(wpOne(r,W.map(x=>x.k),it));
+ const L=GEMSO[r];if(!(it.so>=L[0]))it.so=L[0];}
 function egoMake(it,k){if(!it||it.slot!=='w'||!EGO[k])return it;egoRate(it,Math.max(3,it.r|0));if((it.r|0)<4&&EGORNG()<.25)egoRate(it,4);it.ego=k;return it;}
 // a weapon drop: 0.5% of the time it is a sentient one
 function egoDrop(it){if(!it||it.slot!=='w'||it.ego||!S||S.__demo||EGORNG()>=EGOP)return it;egoMake(it,EGOK[EGORNG()*EGOK.length|0]);
- setTimeout(()=>{announce(t('egDropA',{e:t('egN_'+it.ego),w:inm(it)}),1);SFX.legendary();flash();},500);logMsg(t('egDropA',{e:t('egN_'+it.ego),w:inm(it)}));return it;}
+ setTimeout(()=>{announce(t('egDropA',{e:t('egN_'+it.ego),w:inm(it)}),1);SFX.legendary();flash();},500);return it;}
 // Pagma's Successor at the anvil: one of your weapons, the spirit you choose, and 50 of your levels
 function egoForge(){if(!S||S.cls!=='pagma')return;if(S.lv<=EGOLV){dialog('sysN',[t('egFLow',{n:EGOLV+1})]);return;}
  const W=S.items.filter(i=>i.slot==='w'&&!i.ego).sort((a,b)=>(b.r|0)-(a.r|0)||(b.atk||0)-(a.atk||0)).slice(0,10);if(!W.length){dialog('sysN',[t('egFNone')]);return;}
- dialog('sysN',[t('egF1',{n:EGOLV})],null,[...W.map(i=>({l:inm(i),st:t('r'+(i.r|0))+(isEq(i)?' · '+t('egFEq'):''),r:i.r|0,f:()=>setTimeout(()=>egoForgeK(i.uid),30)})),{l:t('rzLater')}]);}
-function egoForgeK(uid){const it=itemByUid(uid);if(!it)return;dialog('sysN',[t('egF2',{w:inm(it)})],null,[...EGOK.map(k=>({l:EGOIC[k]+' '+t('egN_'+k),st:t('egS_'+k),f:()=>setTimeout(()=>egoForgeY(uid,k),30)})),{l:t('rzLater')}]);}
+ dialog('sysN',[t('egF1',{n:EGOLV})],null,[...W.map(i=>({l:inm(i),ic:i.id,st:esc(t('r'+(i.r|0))+(isEq(i)?' · '+t('egFEq'):'')),r:i.r|0,f:()=>egoForgeK(i.uid)})),{l:t('rzLater')}]);}
+function egoForgeK(uid){const it=itemByUid(uid);if(!it)return;dialog('sysN',[t('egF2',{w:inm(it)})],null,[...EGOK.map(k=>({l:EGOIC[k]+' '+t('egN_'+k),ic:it.id,st:esc(t('egS_'+k)),f:()=>egoForgeY(uid,k)})),{l:t('rzLater')}]);}
 function egoForgeY(uid,k){const it=itemByUid(uid);if(!it)return;dialog('sysN',[t('egD_'+k),t('egF3',{e:t('egN_'+k),w:inm(it),a:S.lv,b:S.lv-EGOLV})],null,[{l:t('egFY'),f:()=>egoCraft(uid,k)},{l:t('rzLater')}]);}
 function egoCraft(uid,k){const it=itemByUid(uid);if(!it||it.slot!=='w'||it.ego||!S||S.cls!=='pagma'||S.lv<=EGOLV||!EGO[k])return false;
- epLvDown(EGOLV);egoMake(it,k);it.egc=1;sbSig='';hudDirty=true;checkSkills();SFX.legendary();flash();announce(t('egFDone',{e:t('egN_'+k),w:inm(it)}),1);save(true);return true;}
+ epLvDown(EGOLV,ptsLv());egoMake(it,k);it.egc=1;   // the stat points as they came: 15 a level for a legendary class (+2 with a second class)
+sbSig='';hudDirty=true;checkSkills();SFX.legendary();flash();announce(t('egFDone',{e:t('egN_'+k),w:inm(it)}),1);save(true);return true;}
+// an old save's piece of the rating that does not exist (a boss chest could roll 5; its attack was no number): back to Legendary
+let EGOFS=null;function egoFix(){if(!S||S===EGOFS||!S.items)return;EGOFS=S;for(const it of S.items){if(!it||!((it.r|0)>4))continue;it.r=4;const rc=rcById(it.id);if(rc&&rc.atk&&!Number.isFinite(it.atk))it.atk=Math.round(rc.atk*MULT[4]);if(rc&&rc.def&&!Number.isFinite(it.def))it.def=Math.round(rc.def*MULT[4]);}}
 // the tooltip line
-function egoTip(i){return i&&i.ego&&EGO[i.ego]?`<br><small style="color:#e0b0ff">${EGOIC[i.ego]} <b>${esc(t('egN_'+i.ego))}</b>: ${esc(t('egD_'+i.ego))}${i.egc?' '+esc(t('egCraftT')):''}</small>`:'';}
+function egoTip(i){return i&&egoK(i.ego)?`<br><small style="color:#e0b0ff">${EGOIC[i.ego]} <b>${esc(t('egN_'+i.ego))}</b>: ${esc(t('egD_'+i.ego))}${i.egc?' '+esc(t('egCraftT')):''}</small>`:'';}
 // the actives, on the bar while that spirit is in your hand
 Object.assign(SKD,{egreap:{cls:'ego',ego:'reaper',lv:1,mp:40,cd:60,col:'#8a3ac8'},egdrag:{cls:'ego',ego:'dragon',lv:1,mp:50,cd:90,col:'#5ac8ff'}});
 Object.assign(SKICO,{egreap:(p,c)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-8.5);if(d<7.6&&d>6.2&&y>3)p(x,y,1,1,'#6a3a9a');}p(5,3,6,6,'#e8e0f0');p(4,5,1,3,'#e8e0f0');p(11,5,1,3,'#e8e0f0');p(6,5,1,2,'#101a33');p(9,5,1,2,'#101a33');p(7,8,2,1,'#101a33');p(6,9,4,2,'#c8c0d8');p(6,10,1,1,'#101a33');p(9,10,1,1,'#101a33');p(2,12,3,1,c);p(11,12,3,1,c);},egdrag:(p,c)=>{for(let i=0;i<10;i++){p(2+i,9-(i>>2)+(i%4==1?1:0),2,2,c);}p(11,4,3,3,c);p(13,3,2,1,'#d8f4ff');p(12,5,1,1,'#101a33');p(14,6,2,1,'#d8f4ff');p(1,12,14,1,'#2a7ac8');for(const [x,y] of [[3,13],[7,14],[11,13]])p(x,y,1,1,'#d8f4ff');}});
@@ -13522,7 +13533,7 @@ Object.assign(SKF,{
   for(const m of rzTg(84,()=>true)){hitMon(m,3.5,{skill:1,el:'dark'});if(m.dead)continue;if(MT[m.type].boss)m.stun=Math.max(m.stun||0,.6);else{m.flee=5;m.fear=gTime+5;m.st=null;m.tele=0;m.combo=0;}}},
  // Dragon Spirit Strike: a spectral dragon down the line, 300% through every foe on it, and their defences down 20% for 8 s
  egdrag:()=>{SFX.swing();for(const m of rzLine(240,10)){hitMon(m,3,{skill:1});if(!m.dead)m.egDefU=gTime+8;}rzLineFx(240,['#5ac8ff','#d8f4ff','#2a7ac8']);shake=.15;}});
-window.__GEGO={EGO,EGOK,of:()=>egoOf(),v:k=>egoV(k),make:(it,k)=>egoMake(it,k),drop:it=>egoDrop(it),craft:(u,k)=>egoCraft(u,k),forge:()=>egoForge(),atk:(m,o)=>egoAtk(m,o||{}),exec:(m,d,o)=>egoExec(m,d,o||{}),
+window.__GEGO={EGO,EGOK,safe:k=>egoSafe(k),src:k=>String(SKF[k]),fix:()=>{EGOFS=null;egoFix();},of:()=>egoOf(),v:k=>egoV(k),make:(it,k)=>egoMake(it,k),drop:it=>egoDrop(it),craft:(u,k)=>egoCraft(u,k),forge:()=>egoForge(),atk:(m,o)=>egoAtk(m,o||{}),exec:(m,d,o)=>egoExec(m,d,o||{}),
  hit:(m,d,c,o)=>egoHit(m,d,c,o||{}),guard:s=>egoGuard(s),dodge:(d,s)=>egoDodge(d,s),cr:()=>egoCr(),echo:(k,f)=>egoEchoRun(k,f),tip:i=>egoTip(i),rng:()=>EGORNG(),get E(){return EGOE;}}; // tests
 Object.assign(STR.ar,{"egN_greed":"روح الجشع",
  "egN_aegis":"روح الدرع",

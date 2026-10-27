@@ -71,7 +71,7 @@ test('the spirits in combat: execute, life on crits, precision, knockdown, defle
       // Frostfang: +2% for each hit after the first on the same foe, to 20%
       wear('frost'); const m1 = mob(), m2 = mob(); for (let i = 0; i < 4; i++)E.hit(m1, 1, false, {}); o.cr4 = E.cr(); for (let i = 0; i < 20; i++)E.hit(m1, 1, false, {}); o.crMax = E.cr(); E.hit(m2, 1, false, {}); o.crNew = E.cr();
       // the Iron Monarch: every third swing knocks down
-      wear('monarch'); const kd = []; for (let i = 0; i < 6; i++) { P.egoN = i; P.egoKD = (i + 1) % 3 === 0; const m = mob({ stun: 0 }); E.hit(m, 1, false, {}); kd.push(m.stun > 1); } o.kd = kd;
+      wear('monarch'); const kd = []; for (let i = 0; i < 6; i++) { P.egoN = i; P.egoKD = (i + 1) % 3 === 0; const m = mob({ stun: 0 }); E.hit(m, 1, false, { kd: P.egoKD ? 1 : 0 }); kd.push(m.stun > 1); } o.kd = kd;
       // the Aegis: a blow from behind is deflected once in 15 s
       wear('aegis'); P.dir = 2; P.egoDfT = 0; const back = mob({ x: P.x - 30, y: P.y, dead: false }); o.dfl = E.guard(back); o.dfl2 = E.guard(back) === 2;
       // the Phantom Stalker: a killing blow, 12%, finds you gone
@@ -139,6 +139,36 @@ test("Pagma's Successor binds a spirit at the anvil for 50 levels", async () => 
     assert.equal(r.pts, 0, 'unspent points go first'); assert.ok(r.stDown, 'then stat points');
     assert.equal(r.again, false, 'one spirit to a weapon');
     assert.ok(r.btn, 'the anvil has the button');
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});
+
+test('the review: a boss only staggers once in 8 s, the points of a legendary level, a crafted bonus kept, safe echoes, no false spirit', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, LOOK);
+    const r = await g.eval(() => {
+      const G = window.__G, S = G.S, P = G.P, E = window.__GEGO, X = G.eqx, o = {};
+      const wear = (k) => { const x = X.mkItem('isword', 3); E.make(x, k); S.items.push(x); X.equip(x); return x; };
+      wear('monarch'); const boss = { type: 'dcapt', lv: S.lv, x: P.x + 20, y: P.y, hp: 1e5, max: 1e5, stun: 0, st: { k: 'slam' } };
+      P.egoKD = true; E.hit(boss, 1, false, { kd: 1 }); o.b1 = [boss.stun, !!boss.st];
+      boss.stun = 0; E.hit(boss, 1, false, { kd: 1 }); o.b2 = boss.stun;
+      // a legendary class gives back 15 points a level
+      const it = X.mkItem('isword', 1); S.items.push(it); S.cls = 'pagma'; S.lv = 120; S.pts = 0; S.st = { str: 500, sta: 500, agi: 500, int: 500, dex: 500 }; const st0 = Object.values(S.st).reduce((a, b) => a + b, 0);
+      E.craft(it.uid, 'greed'); o.lost = st0 - Object.values(S.st).reduce((a, b) => a + b, 0);
+      // a higher rating scales what the piece already has
+      const c = X.mkItem('isword', 1); c.atk = 1000; S.items.push(c); E.make(c, 'frost'); o.atk = c.atk; o.r = c.r;
+      // echoes: a plain strike may, a dash or a dance may not
+      o.safe = ['bash', 'fireball'].map((k) => E.safe(k)); o.unsafe = ['sbdash', 'pgdragon', 'dsdest', 'mwind'].map((k) => E.safe(k));
+      // a spirit's name that is no spirit
+      const z = X.mkItem('isword', 3); z.ego = 'constructor'; S.items.push(z); X.equip(z); o.false = [E.of(), E.tip(z)];
+      return o;
+    });
+    assert.ok(r.b1[0] > 0.3 && r.b1[1], 'a boss staggers and its attack goes on'); assert.equal(r.b2, 0, 'not again within 8 s');
+    assert.equal(r.lost, 50 * 15, 'fifty levels of a legendary class: 750 points');
+    assert.ok(r.r >= 3 && r.atk > 1000 * 1.2, 'the crafted attack scaled, not rebuilt: ' + r.atk);
+    assert.deepEqual(r.safe, [true, true]); assert.deepEqual(r.unsafe, [false, false, false, false]);
+    assert.deepEqual(r.false, [null, '']);
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
