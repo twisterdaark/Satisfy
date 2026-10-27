@@ -30,3 +30,21 @@ test('the status window and the bag wear the manhwa indigo, rod bars and crest',
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+test("an item's tooltip is the manhwa item card, and notices and titles lose the whole-line brackets", async () => {
+  const g = await H.openGame({});
+  try {
+    await H.newGame(g);
+    const r = await g.eval(() => {
+      const X = window.__G.eqx, it = X.mkItem('isword', 2), d = document.createElement('div');
+      d.innerHTML = window.__G.isk.itemTip(it);
+      return { head: d.querySelector('.ichd') && d.querySelector('.ichd').textContent, img: !!d.querySelector('.icard .icimg.rb2 img'), name: d.querySelector('.icard b.rt') && d.querySelector('.icard b.rt').textContent, cls: /Class: /.test(d.textContent), title: window.__G.lines().en.statusT };
+    });
+    assert.equal(r.head, 'Item');
+    assert.ok(r.img, 'a framed picture in the rarity colour');
+    assert.match(r.name, /^\[.+\]$/, 'the name in brackets');
+    assert.ok(r.cls, 'the class (rarity) line');
+    assert.equal(r.title, 'Status Window');
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});

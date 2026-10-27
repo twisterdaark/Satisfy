@@ -7,6 +7,16 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27uicard', ver: '3.68', d: '2026-10-27',
+      ar: ["النوافذ بقت نسخة أقرب من المانهوا: بقت سادة مش شفافة، وكل كلام النظام بالإنجليزي بقى حروف كبيرة عريضة زي خط المانهوا.",
+        "التولتيب بتاع أي أيتم بقى كارت الأيتم بتاع المانهوا: «أيتم» فوق، صورة الأيتم في إطار بلون الندرة، والاسم بين قوسين [ ]، والفئة والستاتس، وبعدين المتانة والباقي.",
+        "الإشعارات بقت نوافذ صغيرة بين البارين المنوّرين، والأقواس اللي كانت حوالين السطر كله اتشالت (الأقواس بقت حوالين الأسامي بس زي المانهوا)، وكمان من عناوين النوافذ زي «نافذة الحالة».",
+        "اختبار متعدّل لده."],
+      en: ["The windows are a closer copy of the manhwa: solid instead of see-through, and every English system line is in bold capitals like the manhwa's lettering.",
+        "An item's tooltip is the manhwa's item card: ITEM on top, the item's picture in a frame of its rarity colour, its [name] in brackets, its class and stats, then durability and the rest.",
+        "Notices are small windows between the glowing rods; the brackets around the whole line are gone (brackets go around names only, as in the manhwa), from window titles like Status Window too.",
+        "A test updated for this."],
+      hide: [3] },
     { v: '2026-10-27uiskin', ver: '3.67', d: '2026-10-27',
       ar: ["شكل النوافذ اتعاد رسمه عشان يبقى أقرب لنوافذ النظام في المانهوا: لون نيلي غامق منوّر من النص بحواف أغمق بدل الأزرق الرمادي، بارين فوق وتحت شبه القضيب المزدوج المنوّر، والتاج المجنّح الثلجي اتعاد رسمه، وخطوط مضيئة بين أقسام نافذة الحالة.",
         "الزراير والإشعارات (التوستات واللوت) بقت بنفس الألوان.",
