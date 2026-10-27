@@ -70,7 +70,7 @@ test('each race changes the numbers it says and its skill works; bloodlines roll
     await H.newGame(g, LOOK);
     const r = await g.eval(() => {
       const G = window.__G, Z = window.__GRZ, B = window.__GPB11, o = {};
-      G.P.inv = 1e9; G.S.lv = 300; const hp0 = G.maxHP(), m = B.newMon('wolf', G.P.x + 20, G.P.y);
+      G.P.inv = 1e9; G.S.lv = 300; G.S.race = 'vampire'; G.S.rv = ''; const hp0 = G.maxHP(), m = B.newMon('wolf', G.P.x + 20, G.P.y);
       const a0 = Z.atk(m, {});
       G.S.race = 'giant'; G.S.rv = ''; o.giantHp = G.maxHP() / hp0; o.str = Z.stM('str');
       G.S.rv = 'v2'; o.titanCC = Z.cc(); G.S.rv = '';
@@ -79,7 +79,7 @@ test('each race changes the numbers it says and its skill works; bloodlines roll
       G.S.race = 'evileye'; G.S.rv = 'v2'; o.omni = Z.omni(); G.S.rv = '';
       G.S.race = 'demon'; G.P.rzHfU = 1e9; m.rgOffU = 1e9; o.sure = Z.sure(m); G.P.rzHfU = 0;
       G.S.rv = 'v2'; m.rzCor = 10; o.rg = Z.rg(m); G.S.rv = '';
-      G.S.race = 'human'; o.human = [Z.atk(m, {}), Z.hurt(1000, m), Z.stM('str')];
+      G.S.race = 'vampire'; G.S.rv = ''; o.human = [Z.atk(m, {}), Z.hurt(1000, m), Z.stM('str')];
       // the skills, cast for real
       o.cast = {};
       for (const [r, k] of [['evileye', 'rzeye'], ['giant', 'rzquake'], ['draco', 'rzbreath'], ['yangban', 'rzchiyou'], ['demon', 'rzhell']]) {
@@ -102,11 +102,75 @@ test('each race changes the numbers it says and its skill works; bloodlines roll
     assert.equal(r.omni, true);
     assert.equal(r.sure, true, 'Hellfire Overdrive: a sure critical on a burning foe');
     assert.ok(Math.abs(r.rg - 0.8) < 1e-9, 'ten stacks of corruption cut healing by 20%');
-    assert.deepEqual(r.human, [1, 1000, 1], 'a human is untouched');
+    assert.deepEqual(r.human, [1, 1000, 1], 'a vampire has none of these');
     assert.deepEqual(r.cast, { rzeye: true, rzquake: true, rzbreath: true, rzchiyou: true, rzhell: true }, 'every racial skill casts');
     assert.ok(r.stance && r.ccNow, 'the stance makes you immune to stuns');
     assert.ok(r.p1 > 0.12 && r.p1 < 0.18, 'the uncommon bloodline about 15%: ' + r.p1);
     assert.ok(r.p2 > 0.03 && r.p2 < 0.07, 'the rare one about 5%: ' + r.p2);
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});
+
+test('base races: one free switch, the skin others see, the numbers, the skills and a bloodline quest', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, LOOK);
+    const r = await g.eval(() => {
+      const G = window.__G, Z = window.__GRZ, C = window.__GPB9, B = window.__GPB11, o = {};
+      G.P.inv = 1e9; G.S.lv = 320; G.S.rv = '';
+      o.hum0 = [Z.xp(), Z.stM('dex')]; // a Human who has not chosen yet plays as before
+      G.S.brf = 1; o.hum = [Z.xp(), Z.stM('dex')]; G.S.brf = 0;
+      o.row = Z.row();
+      G.S.look.skin = 3; Z.pickAsk('elf', 'dark');
+      const yes = [...document.querySelectorAll('#dialog button, #dialog .opt, #dialog [data-i]')];
+      o.btns = yes.length;
+      return o;
+    });
+    assert.deepEqual(r.hum0, [1, 1], 'no race powers before the choice');
+    assert.ok(Math.abs(r.hum[0] - 1.1) < 1e-9 && Math.abs(r.hum[1] - 1.05) < 1e-9, 'a Human: +10% experience, +5% attributes ' + r.hum);
+    assert.ok(/data-rzp/.test(r.row), 'the status window offers the free switch');
+    const s = await g.eval(() => {
+      const G = window.__G, Z = window.__GRZ, o = {};
+      G.S.brf = 1; Z.gain('elf', 'dark'); Z.tick(1);
+      o.race = G.S.race; o.sub = G.S.rsub; o.name = Z.name(); o.skin = G.S.look.skin; o.hsk = G.S.look.hsk; o.fig = Z.fig(G.S.look);
+      o.sk = Z.skills().filter((k) => /^rz/.test(k)); o.dex = Z.stM('dex'); o.row = Z.row();
+      // a second switch is refused
+      document.getElementById('dialog').hidden = true; Z.pick(); o.used = document.getElementById('dialog').textContent;
+      // the dwarf, the orc, the merfolk
+      G.S.rv = ''; Z.gain('dwarf'); o.dwSkin = G.S.look.skin; o.dwSpd = Z.spd(); o.dwHurt = Z.hurt(1000, { type: 'wolf', x: G.P.x + 300, y: G.P.y });
+      G.S.rv = ''; Z.gain('orc', 'frost'); o.orFig = Z.fig(G.S.look); G.P.hp = 1; o.orAtk = Z.atk({ type: 'wolf', lv: G.S.lv }, {}); G.P.hp = 1e9;
+      G.P.rzHwU = 1e9; o.st = Z.st(); G.P.rzHwU = 0;
+      G.S.rv = ''; Z.gain('merfolk'); o.meIce = Z.atk({ type: 'wolf', lv: G.S.lv }, { el: 'water', skill: 1 });
+      // back to human: the old skin returns
+      G.S.rv = ''; Z.gain('human'); Z.tick(1); o.back = G.S.look.skin;
+      // every new racial skill casts
+      o.cast = {};
+      for (const [r, k, sub] of [['human', 'rzwind'], ['elf', 'rzspirit'], ['elf', 'rzshadow', 'dark'], ['merfolk', 'rzsurge'], ['dwarf', 'rzforge'], ['orc', 'rzhowl']]) {
+        G.S.race = r; G.S.rsub = sub || ''; G.P.mp = 1e6; G.P.cd = {}; Z.cast(k); o.cast[k] = (G.P.cd[k] || 0) > 0;
+      }
+      // a bloodline quest awakens its bloodline
+      G.S.race = 'dwarf'; G.S.rsub = ''; G.S.rv = ''; window.__GPB9.accept('rvdw2');
+      for (let i = 0; i < 300; i++)window.__GRZ.ev('fire'); Z.tick(1); o.rv = G.S.rv;
+      return o;
+    });
+    assert.equal(s.race, 'elf'); assert.equal(s.sub, 'dark');
+    assert.ok(/Dark Elf|دارك إلف/.test(s.name), s.name);
+    assert.ok(s.skin >= 12, 'a skin of its own: ' + s.skin); assert.equal(s.hsk, 3, 'the old skin is kept for later');
+    assert.ok(s.fig.ears, 'drawn with pointed ears');
+    assert.deepEqual(s.sk, ['rzshadow'], 'a Dark Elf has Shadow Step, not Spirit Arrow');
+    assert.ok(Math.abs(s.dex - 1.2) < 1e-9);
+    assert.ok(!/data-rzp/.test(s.row), 'the free switch is gone');
+    assert.ok(/new character|شخصية جديدة/.test(s.used), 'a second switch is refused');
+    assert.ok(s.dwSkin >= 12 && s.dwSkin !== s.skin);
+    assert.ok(Math.abs(s.dwSpd - 0.85) < 0.2 && s.dwSpd < 1, 'dwarves are slower: ' + s.dwSpd);
+    assert.ok(s.dwHurt < 1000 * 0.91, 'Stout Physique: ' + s.dwHurt);
+    assert.ok(s.orFig.tusk && s.orFig.ears, 'an orc has tusks');
+    assert.ok(s.orAtk > 1.25, 'Honor of the Tribe at low health: ' + s.orAtk);
+    assert.ok(/B/.test(s.st), 'the howl rides in the st tag');
+    assert.ok(s.meIce >= 1.2, 'merfolk water magic +20%: ' + s.meIce);
+    assert.equal(s.back, 3, 'a Human gets the old skin back');
+    assert.deepEqual(s.cast, { rzwind: true, rzspirit: true, rzshadow: true, rzsurge: true, rzforge: true, rzhowl: true });
+    assert.equal(s.rv, 'v2', 'Heart of the Volcano makes a Dark Dwarf');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });

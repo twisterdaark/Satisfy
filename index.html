@@ -1460,7 +1460,7 @@ Object.assign(STR.en,{cosReq_paladin:"The paladin armour is for those who reache
 window.__GCOS={COS,CODROP,drop:(m,b)=>cosDrop(m,b),menu:()=>cosMenu(),pick:k=>cosPick(k),b:k=>cosB(k)}; // tests
 function lookFig(L,arm){const c={hair:LOOK.hair[L.hair],hc:LOOK.hc[L.hc][0],hl:LOOK.hc[L.hc][1],skin:LOOK.skin[L.skin][0],sk2:LOOK.skin[L.skin][1],top:LOOK.top[L.top][0],top2:LOOK.top[L.top][1],sleeves:true,belt:'#4a3424',pants:'#33323c',boots:'#4a3424',hfx:1};if(arm)Object.assign(c,{pad:'#a8743f',pad2:'#7a5030',chest:'#8a5a32',belt:'#3a2414',boots:'#5a3a20'});
  if(L.cape!=null&&DYE[L.cape])c.cape=DYE[L.cape];if(L.pants!=null&&DYE[L.pants])c.pants=DYE[L.pants];
- lookMore(c,L);const cs=L.cos&&COS[L.cos];if(cs){delete c.pad;delete c.pad2;delete c.chest;Object.assign(c,cs.f);}if((L.sk||cs&&cs.sk)&&!c.robe&&!c.robeL)c.skirt=c.pants;return c;}
+ lookMore(c,L);rzFig(c,L);const cs=L.cos&&COS[L.cos];if(cs){delete c.pad;delete c.pad2;delete c.chest;Object.assign(c,cs.f);}if((L.sk||cs&&cs.sk)&&!c.robe&&!c.robeL)c.skirt=c.pants;return c;}
 /* more of the look (owner 2026-10-23): body (L.g 1 = a girl: softer face, lashes, no jaw line, a narrower waist), eye colour,
    beard style, freckles and a scar, lip colour, two accessories with their colours, a skirt (L.sk), and gear whose look you
    hide (L.vh: 1 helmet, 2 gloves, 4 boots, 8 armour; the stats stay). Index 0 is always "none" or the old default. */
@@ -3063,7 +3063,7 @@ function styTick(){const on=!!(DL&&DL.who==='stylist'&&S&&!$('dialog').hidden),w
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-sdir]');if(!b)return;e.stopPropagation();const d=+b.dataset.sdir;STYDIR=d===0?-1:((STYDIR<0?0:STYDIR)+d+4)%4;SFX.click();},true);
 function stySet(k,i){const g=STYC[k];if((S.look[k]|0)===(i|0)&&(i!=null||S.look[k]==null))return styList(k);if(S.gold<g){toast(t('noGold'),'warn');SFX.deny();return styList(k);}
  S.gold-=g;if(i==null||(!i&&STYX.includes(k)))delete S.look[k];else S.look[k]=i;if(k==='g'&&i===1)delete S.look.bst;if(k==='g')lookFit(S.look);buildMe(S.look);hudDirty=true;save(true);SFX.coin();vfx('spawn',P.x,P.y,{color:'#f8b0c8'});toast(t('sty_done'),'good');styList(k);}
-function styList(k){STYTAB=k;const names=k==='hair'?LOOK.hair.map(h=>t('h_'+h)):k==='hc'?LOOK.hc.map((c,i)=>t('hc'+i)):k==='top'?LOOK.top.map((c,i)=>t('top'+i)):CYK[k]?Array.from({length:CYK[k]},(_,i)=>cyName(k,i)):k==='eye'?EYEC.map((c,i)=>t('eye'+i)):k==='lip'?LIPC.map((c,i)=>t('lip'+i)):k==='acol'||k==='acol2'?ACCC.map((c,i)=>t('acn'+i)):k==='skin'?LOOK.skin.map((c,i)=>t('skn',{n:i+1})):DYE.map((c,i)=>t('dye'+i));
+function styList(k){STYTAB=k;const names=k==='hair'?LOOK.hair.map(h=>t('h_'+h)):k==='hc'?LOOK.hc.map((c,i)=>t('hc'+i)):k==='top'?LOOK.top.map((c,i)=>t('top'+i)):CYK[k]?Array.from({length:CYK[k]},(_,i)=>cyName(k,i)):k==='eye'?EYEC.map((c,i)=>t('eye'+i)):k==='lip'?LIPC.map((c,i)=>t('lip'+i)):k==='acol'||k==='acol2'?ACCC.map((c,i)=>t('acn'+i)):k==='skin'?LOOK.skin.slice(0,RZSK0||LOOK.skin.length).map((c,i)=>t('skn',{n:i+1})):DYE.map((c,i)=>t('dye'+i));
  const o=names.map((n,i)=>{const on=(S.look[k]|0)===i&&(S.look[k]!=null||STYX.includes(k)),L=k==='g'?lookFit({...S.look,[k]:i}):{...S.look,[k]:i};if(!on&&!lookOk(k,i,S.look.g|0))return null;return {l:(on?'✓ ':'')+n,nm:n,cell:1,eq:on,lk:L,hd:!['top','cape','pants','sk'].includes(k),zm:['eye','face','ex','lip','acc','acol','acc2','acol2'].includes(k),hr:k==='hair',pv:{look:L},f:()=>stySet(k,i)};}).filter(Boolean);if(k==='cape'||k==='pants'){const L={...S.look};delete L[k];o.push({l:t(k==='cape'?'styNoCape':'styPantsDef'),nm:t(k==='cape'?'styNoCape':'styPantsDef'),cell:1,eq:S.look[k]==null,lk:L,pv:{look:L},f:()=>stySet(k,null)});}
  o.push({l:t('oBack'),f:styBack});dialog('stylist',[t('styPick',{g:STYC[k]})],null,o);}
 function cosMenu(){STYTAB='cos';const own=S.cos||(S.cos={});const o=Object.keys(COS).filter(k=>S.look.cos===k||lookOk('cos',k,S.look.g|0)).map(k=>{const c=COS[k],ok=!c.req||c.req(),on=S.look.cos===k;
@@ -7027,7 +7027,7 @@ function dmgMult(){return (1+cpStat('atk'))*(1+ttB('dmg'))*(1+achB('dmg'))*(1+st
 // slightly faster attacks with that kind (level 1 at 15 hits, 10 at 1500, capped at 50)
 const mastLv=k=>Math.min(50,Math.floor(Math.sqrt(((S.mast||{})[k]||0)/15)));
 function trainMast(){const k=weapKind();S.mast=S.mast||{};const was=mastLv(k);S.mast[k]=(S.mast[k]||0)+1;const now=mastLv(k);if(now>was){toast(t('mastUp',{w:t('wk_'+k),n:now}),'good');SFX.level();}}
-function atkCD(){return rzAcd()*(blNear()?1.25:1)*(hlDeb()?1.3:1)*(auOn()?.3:weapon().spd)*hcAcd()*(1-Math.min(.35,stat('agi')*.0012))*(1-mastLv(weapKind())*.003)*(1-Math.min(.25,gearSum('as')))*(1-(P.gale||0)*.01)*(1-(P.qf||0)*.005)*(P.qm>0?.85:1)*(S.bh&&S.bh.wm?.99:1)*(S.cls==='tzudan'&&pasOn('tzweap')?.85:1)*(P&&P.kyGU>gTime?.67:1)/(1+bzkK()[1])/(1+ssAs())/(poemOn()?1.2:1);}
+function atkCD(){return rzAcd()*(blNear()?1.25:1)*(hlDeb()?1.3:1)*(auOn()?.3:weapon().spd)*hcAcd()*(1-Math.min(.35*rzCapM(),stat('agi')*.0012))*(1-mastLv(weapKind())*.003)*(1-Math.min(.25,gearSum('as')))*(1-(P.gale||0)*.01)*(1-(P.qf||0)*.005)*(P.qm>0?.85:1)*(S.bh&&S.bh.wm?.99:1)*(S.cls==='tzudan'&&pasOn('tzweap')?.85:1)*(P&&P.kyGU>gTime?.67:1)/(1+bzkK()[1])/(1+ssAs())/(poemOn()?1.2:1);}
 // damage vs a higher-level monster falls off with the gap but never below 12%, so a big gap is a slow fight, not an immune wall
 // owner 2026-10-22: a Lv 1 killed a Lv 130 monster. Up to 50 levels above you, you still do at least 35%; past that the
 // floor falls fast, to 2% at 100 levels and more
@@ -7382,7 +7382,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(m.type==='guardian'
  if(!o.pure&&m.type==='kraugel'&&!m.st&&!(P.bdetU>gTime)&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
  if(o.skill&&!o.spr&&P.sprW>gTime)bzSpray(m,mul); // Braham's Magic Spray
  if(o.skill&&!o.chain&&!o.dot&&weapKind()==='sword')swEGain(.003);   // (v3.14) a skill's blow fills a little Sword Energy
- let dmg=((o.aura?auAtkV():atkV())+(o.addAtk||0))*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.nolv||o.skill&&S.cls==='lantier'?Math.max(1,lvF(m.lv)):o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m)*cpPen(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(poemOn()?1.4:1)*(dsRegIn()?1.2:1)*(o.skill&&S.cls==='lknight'&&pasOn('lkse')&&weapKind()==='sword'?1+.15*pasM('lkse'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*wyAtk(m,o)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*gpAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*rzAtk(m,o)*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<Math.min(ssLow()?.9:.5,(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)+psCr()+(aEyes()?.08:0)+rzCr()));if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&m.expU>gTime){crit=true;dmg*=1.5;m.expU=0;}if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&P.morN>0){P.morN=0;crit=true;dmg*=1.5;num(P.x,P.y-30,t('oMorHit'),'#ffd24a',false);}if(!crit&&!o.pure&&!o.raw&&rzSure(m))crit=true;if(crit)dmg*=1.8*ttCdm()*(1+psCd()+(aEyes()?.2:0));dmg*=rlAtk(m);if(!o.pure)dmg*=elDmg(m,o);let burn=false;const w=weapon();
+ let dmg=((o.aura?auAtkV():atkV())+(o.addAtk||0))*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.nolv||o.skill&&S.cls==='lantier'?Math.max(1,lvF(m.lv)):o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m)*cpPen(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(poemOn()?1.4:1)*(dsRegIn()?1.2:1)*(o.skill&&S.cls==='lknight'&&pasOn('lkse')&&weapKind()==='sword'?1+.15*pasM('lkse'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*wyAtk(m,o)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*gpAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*rzAtk(m,o)*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<Math.min(ssLow()?.9:.5*rzCapM(),(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)+psCr()+(aEyes()?.08:0)+rzCr()));if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&m.expU>gTime){crit=true;dmg*=1.5;m.expU=0;}if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&P.morN>0){P.morN=0;crit=true;dmg*=1.5;num(P.x,P.y-30,t('oMorHit'),'#ffd24a',false);}if(!crit&&!o.pure&&!o.raw&&rzSure(m))crit=true;if(crit)dmg*=1.8*ttCdm()*(1+psCd()+(aEyes()?.2:0)+rzV('cdmg'));dmg*=rlAtk(m);if(!o.pure)dmg*=elDmg(m,o);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -7391,7 +7391,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(m.type==='guardian'
  let mblk=false;if(AIK[m.type]==='soldier'&&!o.pure&&!m.tdum&&!o.skill&&!o.aura&&!rzNoBlk(o)&&!(P.bdetU>gTime)&&!m.st&&!(m.stun>0)&&!m.dead&&(m.grdT>0||rand()<.2)&&(Math.sign(P.x-m.x)||m.face)===m.face){
   mblk=true;dmg*=.2;crit=false;burn=false;m.grdT=.6;m.cd=Math.min(m.cd,.15);vfx('block',m.x+m.face*7,my-2,{angle:m.face>0?Math.PI:0});num(m.x,my-20,t('mBlock'),'#9fc8ff',false);SFX.hit();}
  if(o.raw>0){dmg=o.raw*Math.min(1,p3Atk(m)*p4Atk(m)*p5Atk(m)*epAtk(m)*vcAtk(m)*(m.wardT>gTime?ssWard(m.wardR||.4):1));crit=true;mblk=false;}   // (v3.14) a share of the target's own health: no attack, no defence; a boss's shield and a guard still hold
- dmg+=cpErode(m,o);dmg=Math.max(1,Math.round(dmg));if(!Number.isFinite(dmg))dmg=1;dmg=blRefl(m,dmg);if(OGB&&OGB[m.type])dmg=ogDmg(m,dmg,o);if(!m.tdum&&!o.raw)ttRec(dmg);m.hp-=dmg;if(m.tdum)tdHit(m,dmg,crit);m.myd=(m.myd||0)+dmg;if(m.type==='hellgao')hgHit(m,dmg,crit);m.myT=gTime;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;if(!m.tdum)trainMast();if(!o.chain&&wearT!==gTime&&!m.tdum){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun);if(o.slow>0)m.slowU=Math.max(m.slowU||0,gTime+o.slow);/* (v3.15) a skill's slow took no hold before */if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
+ dmg+=cpErode(m,o);dmg=Math.max(1,Math.round(dmg));if(!Number.isFinite(dmg))dmg=1;dmg=blRefl(m,dmg);if(OGB&&OGB[m.type])dmg=ogDmg(m,dmg,o);if(!m.tdum&&!o.raw)ttRec(dmg);m.hp-=dmg;if(m.tdum)tdHit(m,dmg,crit);m.myd=(m.myd||0)+dmg;if(m.type==='hellgao')hgHit(m,dmg,crit);m.myT=gTime;if(!m.fh)m.fh=gTime||1e-3;m.hurt=mblk?0:.15;if(!m.tdum)trainMast();if(!o.chain&&wearT!==gTime&&!m.tdum){wearT=gTime;wear(w,.04);}m.agg=1;m.prov=gTime+10;m.provU=NET?NET.uid:null;dsStun(m,b);if(AIK[m.type]&&!b.boss&&!m.fledOnce&&m.hp>0&&m.hp<m.max*(AIK[m.type]==='hop'?.6:.28)&&rand()<.75){m.fledOnce=1;m.flee=AIK[m.type]==='hop'?3:2.4;m.st=null;m.tele=0;m.combo=0;vfx('dust',m.x,m.y,{n:6});}m.eng=4;if(AIK[m.type]==='lunge'||AIK[m.type]==='soldier')for(const o of mons)if(o!==m&&!o.dead&&o.type===m.type&&Math.hypot(o.x-m.x,o.y-m.y)<90)o.eng=4;if(o.stun)m.stun=Math.max(m.stun||0,o.stun*rzCcD());if(o.slow>0)m.slowU=Math.max(m.slowU||0,gTime+o.slow*rzCcD());/* (v3.15) a skill's slow took no hold before */if(!b.boss&&o.kx!==undefined)move(m,o.kx*6,o.ky*6,Math.max(3,b.r-2));
  num(m.x,my-8,String(dmg),crit||burn?'#ffd24a':'#ffffff',crit||burn);
  const ang=o.kx!==undefined?Math.atan2(o.ky,o.kx):0;vfx(crit?'crit':'hit',m.x,my,{angle:ang});if(crit&&!RMO)shake=Math.max(shake,.07);if(burn){fireOn(m);vfx('fire',m.x,my);};if(!MT[m.type].boss&&/wolf|bear|boar|rabbit/.test(m.type))vfx('blood',m.x,my,{angle:ang});
  for(let i=0;i<(burn?14:6);i++)fx.push({x:m.x,y:my,vx:(rand()-.5)*90,vy:(rand()-.8)*90,t:.4,c:burn?(rand()<.5?'#ff7a1a':'#ffd24a'):'#ffffff'});
@@ -7422,7 +7422,7 @@ function updateProj(dt){scTick(dt);proj=proj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y
  if(p.t<=0||p4PSolid(Math.floor(p.x/TS),Math.floor((p.y+8)/TS))){if(p.boom)boom(p);return false;}
  for(const m of mons){if(m.dead||p.hit.has(m))continue;if(Math.hypot(m.x-p.x,monY(m)-p.y)<MT[m.type].r+(p.kind==='wave'?13:5)){p.hit.add(m);if(p.boom){boom(p);return false;}if(hitMon(m,p.mul,{kx:Math.sign(p.vx)*.5,ky:Math.sign(p.vy)*.5,stun:p.stun,slow:p.slow,el:p.el||null,...(p.kind==='bullet'?{skill:1}:{})}))SFX.hit();if(p.pure&&!m.dead&&(DEMK.has(m.type)||voxOf(m.type)[0]==='dead'))m.weak=Math.max(m.weak||0,6);if(!p.pierce)return false;}}
  return true;});}
-function dodge(){if(PHOTO)return;if(RCR&&RCR.in)return rcSpur();if(P.dash>0||P.dcd>0)return;P.guard=0;if(P.st<dodgeCost()){toast(t('tired'),'warn');SFX.deny();return;}let ix=(K.right?1:0)-(K.left?1:0),iy=(K.down?1:0)-(K.up?1:0);if(TSV){ix=TSV.x;iy=TSV.y;}if(!ix&&!iy){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];ix=v[0];iy=v[1];}const l=Math.hypot(ix,iy);P.dx=ix/l;P.dy=iy/l;P.dash=(P.ride?.24:.18)*(1+gearSum('dsh'));P.dcd=.7;P.inv=Math.max(P.inv,.3);P.st-=dodgeCost();pressKey('kD');SFX.dodge();qEvent('dodge','dodge');vfx('dust',P.x,P.y,{n:P.ride?14:8,angle:Math.atan2(-P.dy,-P.dx)});
+function dodge(){if(PHOTO)return;if(RCR&&RCR.in)return rcSpur();if(P.dash>0||P.dcd>0)return;P.guard=0;if(P.st<dodgeCost()){toast(t('tired'),'warn');SFX.deny();return;}let ix=(K.right?1:0)-(K.left?1:0),iy=(K.down?1:0)-(K.up?1:0);if(TSV){ix=TSV.x;iy=TSV.y;}if(!ix&&!iy){const v=[[0,1],[0,-1],[1,0],[-1,0]][P.dir];ix=v[0];iy=v[1];}const l=Math.hypot(ix,iy);P.dx=ix/l;P.dy=iy/l;P.dash=(P.ride?.24:.18)*(1+gearSum('dsh'));P.dcd=.7;P.inv=Math.max(P.inv,.3);rzPhase();P.st-=dodgeCost();pressKey('kD');SFX.dodge();qEvent('dodge','dodge');vfx('dust',P.x,P.y,{n:P.ride?14:8,angle:Math.atan2(-P.dy,-P.dx)});
  for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*8,y:P.y,vx:-P.dx*40+(rand()-.5)*40,vy:-rand()*25,t:.35,c:rand()<.5?'#c8b48a':'#a89870'});fx.push({ring:true,x:P.x,y:P.y-6,t:.25});}
 // guard (SAT-COMBAT-002): hold right click to raise a guard toward the cursor. Hits from the front lose most of their damage
 // and wear the guard gauge down; an empty gauge breaks the guard and stuns you. Raising it just before a hit parries:
@@ -7493,13 +7493,13 @@ function hpGuardOn(o){for(const k of ['hp','mp','st','food']){let v=o[k];Object.
 function hurtPlayer0(d,ml,src){if(src&&src.type==='guardian'&&gdRing(P.x,P.y))return 0;P.hitT=gTime;if(P.spw)return 0;if(P.rvU>gTime){pgRevolve(d,src);return 0;}if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0){if((P.dash>0||P.dcd>.35)&&rgdOn(src))rgdCount('dg');return 0;}if((P.ssPc>gTime||P.bsPc>gTime)&&src&&src.type&&TFK!=='tick'&&mons.includes(src)){ssCounter(src);return 0;}if(P.lkPc>gTime&&src&&src.type&&TFK!=='tick'&&mons.includes(src)){lkPalm(src);return 0;}if(rgEvade(src)||hcEvade(src)||mdEvade(src)||cpEvade()||nvBlock(src))return 0;d=bzShield(d);d=wlDiaHurt(d);d=ttShield(d,src);if(d<=0)return 0;d/=1+pasGen();if(P.buf&&P.buf.k==='stone')d*=.85;if(P.lkBU>gTime)d*=.3;if(P.dpU>gTime)d*=.7;if(src&&src.type&&lkSee())d*=1-.2*pasM('lkinsight');if(P.kyTU>gTime&&src&&src.type&&!src.dead){d*=.6;hitMon(src,.5,{skill:1,dot:1});}if(src&&src.type&&S.cls==='saintess'&&pasOn('sagrace')&&saEvil(src))d*=1-.2*pasM('sagrace');if(src&&src.dmul)d*=src.dmul;if(src&&src.irrU>gTime)d*=.8;if(src&&src.type&&dsRegIn())d*=DEMK.has(src.type)?.5:.8;if(src&&src.fury>gTime)d*=1.25;if(src&&src.type)P.lastSrc=src.type;if(tlOn('hking')&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
  if(P.qm>0&&rand()<.3){numPK(-20,'ipEvade','#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
- d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,3.2)*150/(150+defV())*rlDef(src)));d=p3Hurt(p2Hurt(c2Hurt(d,src),src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=nvHurt(d,src);d=bthHurt(d,src);{const cr=gearSum('cold');if(cr&&P.y<0)d=Math.max(1,Math.round(d*(1-cr)));}d=dmHurt(d,src);d=mbHurt(d,src);d=rzHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
+ d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,3.2)*150/(150+defV())*rlDef(src)));d=p3Hurt(p2Hurt(c2Hurt(d,src),src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=nvHurt(d,src);d=bthHurt(d,src);{const cr=gearSum('cold')+rzV('cold');if(cr&&P.y<0)d=Math.max(1,Math.round(d*(1-cr)));}d=dmHurt(d,src);d=mbHurt(d,src);d=rzHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
  d=threatFloor(d,ml,src);
  if(P.guard&&src){const sx=src.x-P.x,sy=src.y-P.y,sl=Math.hypot(sx,sy)||1;
   const GK=S.cls==='gknight';if(P.fort>0||(sx*P.gx+sy*P.gy)/sl>-.15){const ang=Math.atan2(sy,sx),bx=P.x+sx/sl*10,by=P.y-8+sy/sl*10;vfx('block',bx,by,{angle:ang});
    if(!src.hv&&P.gT<(GK?.18:.12)*clamp(1-((ml||S.lv)-S.lv)*.015,.6,1)){vfx('crit',bx,by);hcParry();if(rgdOn(src))rgdCount('pr');qEvent('block','guard');numPK(-24,'parry','#9fe3ff',false);SFX.crit();P.inv=.35;P.gd=Math.min(100,P.gd+15);
     const mb=src.type&&MT[src.type];if(mb&&!src.dead){src.st=null;src.tele=0;src.combo=0;src.stun=mb.boss?.5:1.3;src.cd=Math.max(src.cd||0,1);vfx('stun',src.x,src.y-(mb.oy||16),{life:src.stun});}return 0;}
-   P.gd-=P.fort>0?0:(18+70*d/maxHP())*(GK?.6:1);qEvent('block','guard');
+   P.gd-=P.fort>0?0:(18+70*d/maxHP())*(GK?.6:1)*rzGdM();qEvent('block','guard');
    if(P.gd<=0){P.gd=0;P.guard=0;P.gdT=1.6;d=Math.round(d*.6);P.stun=1;vfx('stun',P.x,P.y-24,{life:1});toast(t('guardBreak'),'warn');}
    else{P.gdT=.8;d=Math.max(1,Math.round(d*(P.fort>0?.1:GK?.15:.25)));blk=1;}}}
  if(P.prov>0)d=Math.max(1,Math.round(d*.8));
@@ -7558,7 +7558,7 @@ function xpBossSrc(type,claim){const now=Date.now(),T=S.bkt||(S.bkt={});if(T[typ
  if(claim){T[type]=now;if(first)F[type]=1;}return first?'boss1':'bossR';}
 function xpSrcOf(m,claim){const k=xpKind(m.type);return k==='boss'?xpBossSrc(m.type,claim):k==='mob'&&(m.cap||m.elite)?'elite':k;}
 // what gainXP gives after its multipliers; rest: the inn's rest doubles it while it lasts, as far as the cap leaves room
-function gainXP(n,exact,src,rest){if(!Number.isFinite(n)||n<=0)return 0;const k=(exact?1:XPMUL)*(xpbOn()?1.2:1)*(MARN?1.1:1)*(1+secB('xp'));n*=k;const cap=xpCap(src);if(cap&&n>cap)n=cap;
+function gainXP(n,exact,src,rest){if(!Number.isFinite(n)||n<=0)return 0;const k=(exact?1:XPMUL)*(xpbOn()?1.2:1)*(MARN?1.1:1)*(1+secB('xp'))*rzXpM();n*=k;const cap=xpCap(src);if(cap&&n>cap)n=cap;
  if(rest&&S.rx>0){const b=Math.max(0,Math.floor(Math.min(S.rx,Math.round(n/k),cap?(cap-n)/k:Infinity)));if(b>0){S.rx-=b;n+=b*k;}if(S.rx<=0){S.rx=0;setTimeout(()=>toast(t('innDone'),'info'),300);}}
  n=Math.round(n);S.xp+=n;while(S.xp>=xpNeed()){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}),1);flash();SFX.rare();if(P)asMe(()=>vfx('levelup',P.x,P.y));},600);}P.hp=maxHP();if(P)asMe(()=>vfx('levelup',P.x,P.y));toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();jLv();checkSkills();}hudDirty=true;return n;}
 // loot feed: what you just gained slides in at the side as a system box (+n name icon); the same thing again within a few
@@ -7600,7 +7600,7 @@ const DROPM=['msword','mstaff','mbow','mspear','mdagger','mhammer','marmor','mhe
 const dropTier=k=>{const lv=MT[k]&&MT[k].lv?MT[k].lv[0]:0;return lv>=220?DROPMG:lv>=120?DROPM:DROPG;};
 function rareDrop(m,b){const D=dunAt(m.x,m.y),p=(b.boss?.55:D?.03:0)*(D&&D.k.startsWith('zDun')&&ownsT('tCanyon')?1.5:1);if(!p||rand()>=p)return;const L=b.boss?dropTier(m.type):DROPG,id=L[rand()*L.length|0],r=rand()<(b.boss?.1:.04)?3:2,it=mkItem(id,r);it.src='d:'+m.type;S.items.push(it);
  vfx('loot',m.x,m.y,{rarity:r});SFX.legendary();loot('it'+it.uid,1,inm(it),{ic:it.id,r});logMsg(t('rareDrop',{it:inm(it),r:t('r'+r)}));}
-function killMon(m){const b=MT[m.type];m.coop=b.boss&&!m.tmp&&!m.arena&&!m.spar?bdmCoop(m):0;m.dead=true;if(b.obj){m.noLoot=1;gpFall(m);}if(b.boss&&!m.tmp&&!m.bh&&!m.arena&&!m.spar&&PARTY&&PARTY.members().length>1)bpGain(.2);   /* a boss fought in a party: a blueprint fragment, 20% (plan U280) */lpSrc(m);if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}pasKill(m);balKill(m);dmeKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh&&!m.noLoot)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);if(HLK.has(m.type))hlDown(m);if(hlHuman(m)&&!m.tmp)hgSoul();epKill(m);huntKill(m);pxpKill(m,b);eaKill(m);if(NET&&b.boss&&!m.bh&&!m.noLoot)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!m.noLoot&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:b.rt||25;if(!m.bh&&!m.noLoot){rareDrop(m,b);namedDrop(m);golRubble(m);}if(m.cv&&S.cvn&&S.cvn.ra>0)S.cvn.ra--;petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else if(!m.noLoot)bossChest(m,b);{let xg=Math.round(b.xp*(m.xmul||1)*pxpKF(m)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(P.buf&&P.buf.k==='sage'?.25:0)+(evOn('gold')?.5:0)+petB('owl')+(tlOn('veteran')?.05:0)+ttB('xp')+(tlOn('viscount')?.05:0)+(tlOn('pioneer')?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)+(m.coop?BDM.COOP:0)));if(m.coop)setTimeout(()=>toast(t('bdmCoop'),'good'),400);const xs=xpSrcOf(m,1),got=xs===null?0:gainXP(xg,0,xs,1);jKill(m,got);twKill(m);if(got>0){num(m.x,m.y-36,'+'+got.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',got,t('lootXP'),{ic:null,cls:'xp'});}}if(b.gold&&!m.bh&&!m.noLoot){const gd=Math.round(b.gold*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(tlOn('explorer')?.05:0)+ttB('gold')+(tlOn('dandy')?.05:0)+(tlOn('shero')?.05:0)+(tlOn('baron')?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
+function killMon(m){const b=MT[m.type];m.coop=b.boss&&!m.tmp&&!m.arena&&!m.spar?bdmCoop(m):0;m.dead=true;if(b.obj){m.noLoot=1;gpFall(m);}if(b.boss&&!m.tmp&&!m.bh&&!m.arena&&!m.spar&&PARTY&&PARTY.members().length>1)bpGain(.2);   /* a boss fought in a party: a blueprint fragment, 20% (plan U280) */lpSrc(m);if(m.spar){if(SPAR&&SPAR.m===m)SPAR.won=1;return;}pasKill(m);balKill(m);dmeKill(m);if(PRAID&&b.boss&&!m.praidKill)PRAID.killed(praidKey(m));if(MOBN&&!m.mobKill)mobKilled(m);if(!m.bh&&!m.noLoot)gemDrop(m,b);dailyKill(m.type);if(S.ssq&&/^dk_/.test(m.type))setTimeout(legWin,600);lgKill(m);mdKill(m);nlKill(m);if(m.type==='mshade'){S.mtr=1;if(S.cls==='saint')S.mtr2=1;setTimeout(()=>toast(t('msTrialW'),'good'),500);}if(m.evt&&EV){EV.kills++;EV.xp+=b.xp*(m.xmul||1);if(m.cap)toast(t('evCapDown'),'good');}if(m.type==='trauka')dragonDown(m);if(m.type==='berith')brDown(m);if(BEAST[m.type])beastDown(m);if(m.type==='belial')blDown(m);if(HLK.has(m.type))hlDown(m);if(hlHuman(m)&&!m.tmp)hgSoul();epKill(m);huntKill(m);pxpKill(m,b);eaKill(m);if(NET&&b.boss&&!m.bh&&!m.noLoot)lootKilled(m);if(m.type==='bknight'&&!m.bh&&!m.noLoot&&!(S.mounts||{}).nhorse&&rand()<.1)setTimeout(()=>gainMount('nhorse',1),600);if(m.type==='warlord'&&!m.bh)setTimeout(()=>annW('evBossDown'),400);m.rt=m.tmp?1e9:b.wb?b.wb:b.boss?90:b.rt||25;if(!m.bh&&!m.noLoot){rareDrop(m,b);namedDrop(m);golRubble(m);}if(m.cv&&S.cvn&&S.cvn.ra>0)S.cvn.ra--;petKill(m,b);if(DBK.has(m.type)&&dunAt(m.x,m.y)){dunBossDown(m);dtClear(m);}else if(!m.noLoot)bossChest(m,b);{let xg=Math.round(b.xp*(m.xmul||1)*pxpKF(m)*(1+gXPB()+achB('xp')+dvB('xp')+dtXP(m)+(P.buf&&P.buf.k==='might'?.1:0)+(P.buf&&P.buf.k==='sage'?.25:0)+(evOn('gold')?.5:0)+petB('owl')+(tlOn('veteran')?.05:0)+ttB('xp')+(tlOn('viscount')?.05:0)+(tlOn('pioneer')?.1:0)+(ownsT('tWay')&&beltAt(m.x/TS|0)===2?.1:0)+(m.coop?BDM.COOP:0)));if(m.coop)setTimeout(()=>toast(t('bdmCoop'),'good'),400);const xs=xpSrcOf(m,1),got=xs===null?0:gainXP(xg,0,xs,1);jKill(m,got);twKill(m);if(got>0){num(m.x,m.y-36,'+'+got.toLocaleString('en')+' '+t('lootXP'),'#8fd8ff',false);loot('xp',got,t('lootXP'),{ic:null,cls:'xp'});}}if(b.gold&&!m.bh&&!m.noLoot){const gd=Math.round(b.gold*rzGoldM()*(1+gGoldB()+achB('gold')+dvB('gold')+dtGold(m)+(evOn('gold')?.5:0)+petB('dog')+(tlOn('explorer')?.05:0)+ttB('gold')+(tlOn('dandy')?.05:0)+(tlOn('shero')?.05:0)+(tlOn('baron')?.05:0)));S.gold+=gd;num(m.x,m.y-24,'+'+gd+'G','#f2c14e',false);loot('coin',gd,t('lootGold'),{cls:'gd'});SFX.coin();}
  m.dying=.5;vfx('death',m.x,m.y);dissolve(m.x,m.y-(m.type==='guardian'?20:6),['#ffffff','#bfe8ff',{wolf:'#9a9aa6',bear:'#a07a54',rabbit:'#c8b49a',goblin:'#6aa84a',gchief:'#4f8a36',boar:'#5a4030',merman:'#4aa08a',pwolf:'#a08a5a',outlaw:'#5a4a3a',praga:'#7a1a1a',forc:'#e8eef4',fochief:'#c8d4e0',golem:'#7a7068',cgolem:'#7ab8d8',hwolf:'#6e6258',rboar:'#7a3a2a',deserter:'#5a4a3a',mgolem:'#5a6a4a',dcapt:'#8a1f2a'}[m.type]||'#7cc672'],b.boss?60:24);
  if(!m.bh&&!m.noLoot)(b.drop||[]).forEach(([k,p])=>{if(b.boss)addMat(k,RCKEY.includes(k)?1:p>=1?Math.max(1,Math.round(p*(.25+rand()*.25))):rand()<Math.min(1,p*1.5)?1:0);else if(rand()<p*(1+secB('drop')))addMat(k,1);});   // owner 2026-10-23: a boss drops its loot every kill (a divine beast's breath is one)
  if(!m.bh&&!m.noLoot&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}if(!m.noLoot){rbBossDrop(m,b);cosDrop(m,b);}
@@ -8040,7 +8040,7 @@ function completeQ(id){if(!claimQ(id))return;bpGain(QD[id]&&QD[id].ms?.08:.04); 
  toast(t('qDone',{q:qName(id)}),'good');SFX.quest();jQuest(id);
  if(q.gold){S.gold+=pasOn('opers')?Math.round(q.gold*1.15):q.gold;coinFx(npcOf(q.by),q.gold);}if(q.kc)kcGain(q.kc);if(q.mat)addMat(q.mat[0],q.mat[1]);
  if(q.item){const it=mkItem(q.item,1);it.src='q:'+id;S.items.push(it);if(q.cls)S.eqW=it.uid;loot('it'+it.uid,1,inm(it),{ic:it.id,r:it.r});}
- if(q.promo){promoDone(q);phDone(q);}if(q.hcls)hcDone(q);if(q.race)rzGain(q.race);
+ if(q.promo){promoDone(q);phDone(q);}if(q.hcls)hcDone(q);if(q.race)rzGain(q.race);if(q.rv)rzVarGain(q);
  if(q.cls&&(S.cls==='novice'||q.sw)){S.cls=q.cls;sbSig='';SFX.legendary();flash();setTimeout(()=>toast(t('clsGot',{c:t('cl_'+q.cls)}),'good'),400);checkSkills();}
  if(q.title||q.tl)giveTitle(q.title||q.tl);if(!rp){epDone(id);msDone(id);}p5Done(id);eaDone(id);vtDone(id);
  addAff(q.by,12);{const rn=10+Math.min(15,Math.floor((q.xp||0)/200));addRep(townOfNpc(q.by),rn);crepAdd(rn*3);}if(q.rg)addRep(q.rg[0],q.rg[1]);if(q.rc){addRep(q.rc[0],-q.rc[1]);setTimeout(()=>toast(t('repDown',{z:t(q.rc[0]),n:q.rc[1]}),'warn'),900);}   /* (plan U203) a side taken, and the other's memory */
@@ -9036,7 +9036,7 @@ function gemPick(i,who,sk=0){const own=GEMK.filter(g=>S.mats[g]>0);if(!own.lengt
  dialog(who,[cur?t('gemRep',{g:t(cur)}):'gemPickL'],null,[...own.map(g=>({l:t('oGemSet',{g:t(g),n:S.mats[g],d:t(g+'D')}),ic:g,poor:S.gold<GEMC,f:()=>{if(S.gold<GEMC){SFX.deny();return dialog(who,['arNo']);}
   S.gold-=GEMC;S.mats[g]--;if(sk){i.gx=Array.isArray(i.gx)?i.gx:[];while(i.gx.length<sk-1)i.gx.push(null);i.gx[sk-1]=g;}else i.gem=g;SFX.level();vfx('loot',P.x,P.y,{rarity:3});toast(t('gemSet',{g:t(g),it:inm(i)}),'good');hudDirty=true;save(true);gemMenu(who);}})),...(cur&&GEMS[cur]?[{l:t('gemOut',{g:t(cur),c:GEMOUT}),poor:S.gold<GEMOUT,f:()=>{if(S.gold<GEMOUT){SFX.deny();return dialog(who,['arNo']);}S.gold-=GEMOUT;if(sk){i.gx[sk-1]=null;i.gx=i.gx.filter(Boolean);}else delete i.gem;addMat(cur,1);SFX.coin();toast(t('gemOutOk',{g:t(cur)}),'good');hudDirty=true;save(true);gemMenu(who);}}]:[]),{l:t('oBack'),f:()=>gemMenu(who)}]);}
 const ENHP=[.85,.75,.65,.55,.45,.35,.25,.18,.12,.08];
-const enhCost=i=>{const n=i.en||0;return {g:300*(n+1)*(n+1)*(1+i.r),m:1+n,e:1+(n>>1),p:ENHP[Math.min(9,n)]};};
+const enhCost=i=>{const n=i.en||0;return {g:300*(n+1)*(n+1)*(1+i.r),m:1+n,e:1+(n>>1),p:Math.min(.95,ENHP[Math.min(9,n)]*rzEnhM())};};
 function enhMenu(who){const worn=['w',...GEAR].map(eqIt).filter((i,n,a)=>i&&a.indexOf(i)===n),list=[...worn,...S.items.filter(i=>['w',...GEAR].includes(i.slot)&&!worn.includes(i)).sort((a,b)=>(b.en||0)-(a.en||0)||b.r-a.r)];if(!list.length)return dialog(who,['arNoEq'],()=>svcBack(who));
  // shown as a bag-style grid (owner request): the cost and odds sit in each item's tooltip, and the grid scrolls
  const cell=(i,x)=>({cell:1,ic:i.id,r:i.r,eq:worn.includes(i),badge:i.en?'+'+i.en:'',...x,tip:itemTip(i)+'<br>'+x.tip+(worn.includes(i)?'':`<br><small>${t('enhBag')}</small>`)});
@@ -9169,7 +9169,7 @@ function lockNext(){MG.lock=true;setTimeout(()=>{if(!MG)return;MG.lock=false;MG.
 function qStart(){if(MG.hold||MG.lock)return;MG.hold=true;noise(1.4,.09,4200,0,.6);}
 function qRelease(){if(MG&&MG.stage===0){MG.hold=false;return;}if(!MG||MG.stage!==2||!MG.hold||MG.lock)return;MG.hold=false;const s=MG.p>=1?.12:scoreAt();MG.sc[2]=s;noise(.7,.28,5200,0,.4);noise(.9,.12,900,.1);for(let i=0;i<14;i++)MG.steam.push({x:56+rand()*20,y:46,vy:-10-rand()*20,vx:(rand()-.5)*14,t:1.2});fbShow(s===1?'perfect':s>.5?'good':'miss',s===1?'':s>.5?'g':'m');if(s===1)SFX.rare();lockNext();}
 function mgScore(){const a=MG.res.length?MG.res.reduce((x,y)=>x+y,0)/MG.res.length:.5;return (MG.sc[0]??.5)*.2+a*.6+(MG.sc[2]??.5)*.2;}
-function zoneW(){/* v3.04: the forge hammer widens both parts */const hot=MG.heat<30?.6:1,f=(pasOn('focus')?1.25+.02*(skLv('focus')-1):pasOn('scraft')?1.1+.01*(skLv('scraft')-1)+(skLv('scraft')>=10?.05:0):1)*ckHam().f;return{p:Math.min(.22,Math.min(.16,.075+.006*(S.smith-1)+stat('dex')*.0004)*hot*f),g:Math.min(.34,.22*hot*f)};}   // never wider than the bar can draw
+function zoneW(){/* v3.04: the forge hammer widens both parts */const hot=MG.heat<30?.6:1,f=(pasOn('focus')?1.25+.02*(skLv('focus')-1):pasOn('scraft')?1.1+.01*(skLv('scraft')-1)+(skLv('scraft')>=10?.05:0):1)*ckHam().f*rzCraftM();return{p:Math.min(.22,Math.min(.16,.075+.006*(S.smith-1)+stat('dex')*.0004)*hot*f),g:Math.min(.34,.22*hot*f)};}   // never wider than the bar can draw
 function newZone(){MG.center=.18+rand()*.64;}
 function renderDots(){const d=$('dots');d.innerHTML='';for(let i=0;i<MG.rc.strikes;i++){const r=MG.res[i];const e=document.createElement('i');if(r!==undefined)e.className=r===1?'p':r>.5?'g':'m';d.appendChild(e);}}
 const RCOL=['#d9d9d9','#5aa2ff','#b07bff','#ff9a3d','#ffc21a'];
@@ -9192,7 +9192,7 @@ function oddsTip(rc){if(rc.fix>=4)return `<b>${t('oddsT')}</b><br><span class="r
 // work. Owner 2026-10-22: epic, unique and legendary all rarer. At a perfect score a normal crafter sees epic about
 // 1 in 13, unique about 1 in 260 and legendary about 1 in 6,500; a smith rolls twice as well (unique about 1 in 65,
 // legendary about 1 in 800) and grows with smithing level (top smith: about 1 in 35 and 1 in 330). Unique and legendary gear is announced to the world.
-function craftRate(q){const k=(isSm()?2:1)*(1+.04*((S.smith||1)-1));let r=q<.5?0:1;
+function craftRate(q){const k=(isSm()?2:1)*(1+.04*((S.smith||1)-1))*rzCraftM();let r=q<.5?0:1;
  if(q>=.85&&rand()<(.025+(q-.85)*.35)*k){r=2;if(q>=.95&&rand()<(.025+(q-.95)*.5)*k){r=3;if(q>=.99&&rand()<.04*k)r=4;}}return r;}
 function sparks(n,col){const bar=document.querySelector('.mgbar');const x=MG.p*bar.clientWidth;for(let i=0;i<n;i++){const e=document.createElement('i');e.className='spk';e.style.left=x+'px';e.style.top='40%';e.style.background=col[i%col.length];const a=rand()*Math.PI*2,d=20+rand()*70;e.style.setProperty('--dx',Math.cos(a)*d+'px');e.style.setProperty('--dy',(Math.sin(a)*d-30)+'px');bar.appendChild(e);setTimeout(()=>e.remove(),560);}}
 function strike(){if(!MG||MG.done||MG.lock)return;if(MG.stage===0){if(!MG.hold){MG.hold=true;noise(.3,.08,600);}return;}if(MG.stage===2)return qStart();if(MG.reh>0)return;MG.sq=.15;const z=zoneW(),d=Math.abs(MG.p-MG.center);let s,k,c;if(d<z.p/2){s=1;k='perfect';c='';}else if(d<z.g/2){s=.6;k='good';c='g';}else{s=.12;k='miss';c='m';}
@@ -9811,7 +9811,7 @@ const PASSC=new Set(['sscsm','bcont','dsbane','sagrace','mdsense','mmreint','gkr
 const pasM=k=>1+.05*(skLv(k)-1),pasScaled=k=>PASSC.has(k)||!!(typeof CPAS!=='undefined'&&Object.values(CPAS).some(L=>L.some(s=>s.id===k)));
 function pasGen(){if(!S||!P)return 0;let v=0;for(const k of pasSkills())if(!PASOWN.has(k)&&!pasScaled(k))v+=.01*(skLv(k)-1);return v;}
 function pasKill(m){if(!S||!P||m.spar||m.mir)return;const n=MT[m.type]&&MT[m.type].boss?6:1;for(const k of pasSkills())if(!PASOWN.has(k))skUse(k,n);}
-function skUse(k,xp=2){S.skx=S.skx||{};if(xp===2&&S.pet==='randy'&&S.lastSk!==k){S.lastSk=k;petXP('randy',3);}const was=skLv(k);S.skx[k]=(S.skx[k]||0)+xp;const now=skLv(k);if(now>was){sbSig='';setTimeout(()=>{toast(t('skLvUp',{s:t('sk_'+k),n:now})+((now===5||now===10)&&(!SKD[k].pas||SKO[k])?' '+t('skOpen',{o:skOptTxt(k,now)}):''),'good');SFX.level();},300);}}
+function skUse(k,xp=2){S.skx=S.skx||{};if(xp===2&&S.pet==='randy'&&S.lastSk!==k){S.lastSk=k;petXP('randy',3);}const was=skLv(k);S.skx[k]=(S.skx[k]||0)+(xp>0?xp*rzSkL():xp);const now=skLv(k);if(now>was){sbSig='';setTimeout(()=>{toast(t('skLvUp',{s:t('sk_'+k),n:now})+((now===5||now===10)&&(!SKD[k].pas||SKO[k])?' '+t('skOpen',{o:skOptTxt(k,now)}):''),'good');SFX.level();},300);}}
 const skOptTxt=(k,l)=>{const d=skKind(k);return t('skO'+l+'_'+(SKO[k]||(d==='atk'?'any':d)));};
 function skLvTxt(k){const [l,c,nx]=skProg(k),nxO=l<5?5:l<10?10:0;if(SKD[k]&&SKD[k].pas&&!PASOWN.has(k))return `<br><small style="color:#ffe08a">${t('skLvT',{n:l})}${nx?` · ${t('skUses',{p:Math.floor(c/nx*100)})}`:` · ${t('skMax')}`}</small><br><small style="color:#9fb8d8">${t('pasHow')} ${t('pasLvHow')}</small><br><small style="color:#9fb8d8">${pasScaled(k)?t('pasPerS',{m:pasM(k).toFixed(2)}):t('pasPerG',{n:l-1})}</small>`;return `<br><small style="color:#ffe08a">${t('skLvT',{n:l})}${nx?` · ${t('skUses',{p:Math.floor(c/nx*100)})}`:` · ${t('skMax')}`}</small>`+(SKO[k]?'':`<br><small style="color:#9fb8d8">${t('skPer_'+skKind(k))}</small>`)+(nxO?`<br><small style="color:#9fb8d8">${t('skNext',{n:nxO,o:skOptTxt(k,nxO)})}</small>`:'')+(l>=5?`<br><small style="color:#9fe39a">✓ ${skOptTxt(k,5)}</small>`:'')+(l>=10?`<br><small style="color:#9fe39a">✓ ${skOptTxt(k,10)}</small>`:'');}
 window.__GSL={kind:k=>skKind(k),opt:(k,l)=>skOptTxt(k,l),mp:k=>mpC(k),cdm:k=>skCdM(k),txt:k=>skLvTxt(k),heal:(k,h)=>skHealUp(k,h)}; // tests
@@ -9819,14 +9819,14 @@ window.__GSL={kind:k=>skKind(k),opt:(k,l)=>skOptTxt(k,l),mp:k=>mpC(k),cdm:k=>skC
 // with these inputs (and the table, counted once a frame), so the answer is kept until one of them moves. Callers only read it.
 let CSKM={k:null,r:null},SKDN={t:-1,n:0};
 const skdN=()=>{if(SKDN.t!==gTime){SKDN.t=gTime;let n=0;for(const k in SKD)n++;SKDN.n=n;}return SKDN.n;};
-const clsSkills=()=>{const sb=S.bh&&S.bh.sb,k=[S.cls,S.cbase,S.church,S.sec,S.title,S.cls2,!!S.mdsk,sb?Object.keys(sb).filter(x=>sb[x]).join(','):'',typeof LGB!=='undefined'&&LGB?LGB[S.cls]:'',skdN(),qlendK(),mgtKey(),myRace()].join('|');
+const clsSkills=()=>{const sb=S.bh&&S.bh.sb,k=[S.cls,S.cbase,S.church,S.sec,S.title,S.cls2,!!S.mdsk,sb?Object.keys(sb).filter(x=>sb[x]).join(','):'',typeof LGB!=='undefined'&&LGB?LGB[S.cls]:'',skdN(),qlendK(),mgtKey(),myRace(),S.rsub||'',S.brf|0].join('|');
  if(CSKM.k!==k||CSKM.s!==S){CSKM={k,s:S,r:clsSkills0()};}return CSKM.r;};
 // (owner 2026-10-26: "it asks me to steal from monsters but doesn't give me the skill") a class trial lends the skill it asks
 // for while it is yours: SKD[k].qlend is the quest (A Light Hand lends Steal); the class keeps it after
 let QLEND=null;const qlendQ=()=>QLEND||(QLEND=[...new Set(Object.keys(SKD).map(k=>SKD[k].qlend).filter(Boolean))]),qlendOn=q=>!!(S.qs[q]&&S.qs[q].st===1)&&(!QD[q]||!QD[q].cls||S.cls==='novice'),qlendK=()=>qlendQ().map(q=>qlendOn(q)?1:0).join('');
 // a save opened while a trial is yours: its lent skill on the bar (a save from before v3.08 never got it), nothing else touched
 function qlendFix(){if(!S)return;for(const k of Object.keys(SKD))if(SKD[k].qlend&&qlendOn(SKD[k].qlend)&&skOK(k)&&!(S.sk&&S.sk[k]))checkSkills();}
-const clsSkills0=()=>Object.keys(SKD).filter(k=>!SKD[k].pas&&(!SKD[k].ncls||SKD[k].ncls!==S.cls)&&(!SKD[k].church||SKD[k].church===S.church)&&(!SKD[k].sec||SKD[k].sec===S.sec)&&(!SKD[k].sc2||SKD[k].sc2===S.cls2)&&(!SKD[k].bk||!!(S.bh&&S.bh.sb&&S.bh.sb[SKD[k].bk]))).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior'||typeof LGB!=='undefined'&&LGB&&LGB[S.cls]===SKD[k].cls||k==='mdarmy'&&!!S.mdsk||!!SKD[k].title&&(S.title===SKD[k].title||!!SKD[k].sc2a&&S.cls2===SKD[k].sc2a)||!!SKD[k].qlend&&qlendOn(SKD[k].qlend)||!!SKD[k].mgt&&mgtKnown(k)&&clsFam('mage')||!!SKD[k].race&&SKD[k].race===myRace());
+const clsSkills0=()=>Object.keys(SKD).filter(k=>!SKD[k].pas&&(!SKD[k].ncls||SKD[k].ncls!==S.cls)&&(!SKD[k].church||SKD[k].church===S.church)&&(!SKD[k].sec||SKD[k].sec===S.sec)&&(!SKD[k].sc2||SKD[k].sc2===S.cls2)&&(!SKD[k].bk||!!(S.bh&&S.bh.sb&&S.bh.sb[SKD[k].bk]))).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior'||typeof LGB!=='undefined'&&LGB&&LGB[S.cls]===SKD[k].cls||k==='mdarmy'&&!!S.mdsk||!!SKD[k].title&&(S.title===SKD[k].title||!!SKD[k].sc2a&&S.cls2===SKD[k].sc2a)||!!SKD[k].qlend&&qlendOn(SKD[k].qlend)||!!SKD[k].mgt&&mgtKnown(k)&&clsFam('mage')||!!SKD[k].race&&SKD[k].race===myRace()&&!!rzR()&&(SKD[k].rsub===undefined||SKD[k].rsub===(S.rsub||'')));
 const NSK=8; // skill slots on the bar (keys 1-8); the title slot comes after them
 // owner 2026-10-22: gear (rings, weapons, armour) and things you use go on the main bar too, as on the extra bars
 const barThing=k=>typeof k==='string'&&!SKD[k]&&(XGEAR(k)||XITEM(k)||!!(S.mats&&k in S.mats));
@@ -10738,7 +10738,7 @@ function barPlace(k,i){const a=barSkills().slice(0,NSK),j=a.indexOf(k),prev=a[i]
 function closeStatus(){BPICK=null;SFX.close();$('statusW').hidden=true;mode='play';hudDirty=true;}
 let STAB='main';
 function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,tip,btn,extra,id)=>`<div class="srow"${tip?` data-tip="${esc(tip)}"`:''}><span>${k}</span><span>${extra?'<span class="sv">':''}<b${id?` id="sv_${id}"`:''}>${v}</b>${extra?extra+'</span>':''}${btn||''}</span></div>`;
- const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+(S.__demo?'':row(t('sdxL'),t('sdxV',{p:Math.round(((S.dly&&S.dly.day===today()?S.dly.sdx:0)||0)*1000+1e-6)/10,c:Math.round(SDXC*100)}),t('sdxD',{c:Math.round(SDXC*100)})))+row(t('cls'),t('cl_'+S.cls)+(S.cls2?` (${t('sc2_'+S.cls2)})`:''),S.cls2?t('sc2D_'+S.cls2):'')+row(t('raceL'),rzName(),rzDesc())+(S.cls==='aura'?row(t('auRateL'),t('auR'+auR())):'')+(S.vatB?row(t('vtBL'),t('vtBV'),t('vtBD')):'')+(dvOn()?row(t('dvL'),t('dvRow',{g:t('godN_'+S.dv.g),n:Math.ceil((S.dv.until-Date.now())/60000)})):'')+(patOn()?row(t('lpatL'),t('lpatRow',{n:Math.ceil((S.pat1-Date.now())/60000)})):'')+(S.cls==='smith'&&(!S.sec||S.sec==='smith')?'':row(t('secL'),S.sec?t('sec_'+S.sec):t('none'),S.sec?t('sec_'+S.sec+'D'):t('secTabD',{g:SEC_SWAP.toLocaleString('en')})))+(S.bank?row(t('bankL'),S.bank.toLocaleString('en')):'')+(marOn()?row(t('marL'),esc(S.mar.n)+(MARN?' ♥':''),t('marTip'),` <button data-act="marGo">${t('marGoB')}</button>`):'')+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+(S.rx>0?row(t('innRxL'),S.rx.toLocaleString('en'),t('innRxD')):'')+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
+ const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+(S.__demo?'':row(t('sdxL'),t('sdxV',{p:Math.round(((S.dly&&S.dly.day===today()?S.dly.sdx:0)||0)*1000+1e-6)/10,c:Math.round(SDXC*100)}),t('sdxD',{c:Math.round(SDXC*100)})))+row(t('cls'),t('cl_'+S.cls)+(S.cls2?` (${t('sc2_'+S.cls2)})`:''),S.cls2?t('sc2D_'+S.cls2):'')+row(t('raceL'),rzName(),rzDesc())+rzStRow()+(S.cls==='aura'?row(t('auRateL'),t('auR'+auR())):'')+(S.vatB?row(t('vtBL'),t('vtBV'),t('vtBD')):'')+(dvOn()?row(t('dvL'),t('dvRow',{g:t('godN_'+S.dv.g),n:Math.ceil((S.dv.until-Date.now())/60000)})):'')+(patOn()?row(t('lpatL'),t('lpatRow',{n:Math.ceil((S.pat1-Date.now())/60000)})):'')+(S.cls==='smith'&&(!S.sec||S.sec==='smith')?'':row(t('secL'),S.sec?t('sec_'+S.sec):t('none'),S.sec?t('sec_'+S.sec+'D'):t('secTabD',{g:SEC_SWAP.toLocaleString('en')})))+(S.bank?row(t('bankL'),S.bank.toLocaleString('en')):'')+(marOn()?row(t('marL'),esc(S.mar.n)+(MARN?' ♥':''),t('marTip'),` <button data-act="marGo">${t('marGoB')}</button>`):'')+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+(S.rx>0?row(t('innRxL'),S.rx.toLocaleString('en'),t('innRxD')):'')+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
  h+=`<div class="ssec">${t('basic')}<span class="sptc${S.pts>0?' on':''}">${t('pts',{n:S.pts})}${S.pts>1?` <input class="stn" id="stAmt" type="number" inputmode="numeric" min="1" max="${S.pts}" value="${STAMT||''}" placeholder="${esc(t('stNumPh'))}" data-tip="${esc(t('stNumTip'))}">`:''}</span></div><div class="sgrid stq">`+['str','sta','agi','int','dex'].map(k=>row(t(k),stat(k),t('t'+k),S.pts>0?`<button data-stat="${k}">+</button>${S.pts>=5?`<button class="p5" data-stat="${k}" data-n="5" data-tip="${esc(t('p5Tip'))}">+5</button>`:''}${TOUCH&&S.pts>5?`<button class="p5" data-stat="${k}" data-n="all">${t('ptsAllB')}</button>`:''}`:'',stat(k)!==S.st[k]?` <em data-tip="${esc(t('stBaseTip'))}">(${t('stBase',{n:S.st[k]})})</em>`:'',k)).join('')+'</div>';
  if(S.respec>0)h+=`<div class="note"><button data-respec="1" data-tip="${esc(t('respecD'))}">${t('respecUse',{n:S.respec})}</button></div>`;
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
@@ -11105,6 +11105,7 @@ function qSpot0(id){const q=QD[id],o=q.obj;if(qReady(id)||!S.qs[id]){const n=npc
  if(o.t==='visit'||o.t==='pray'){const s=SHRINES.find(s=>s.k===o.it);if(s)return wTile(s.x,s.y);}
  if(o.t==='kill'&&MT[o.it])return qNear([o.it])||monHome(o.it);
  if(o.t==='have'){const ty=Object.keys(MT).filter(k=>(MT[k].drop||[]).some(d=>d[0]===o.it));const p=ty.length?qNear(ty)||ty.map(monHome).find(Boolean):null;if(p)return p;}
+ if(q.rz||q.rv){const p=rzSpot(q,o);if(p)return p;}   // a race's trial or bloodline: its place, else the nearest monster
  return qOther(q,o);}
 // owner 2026-10-23 ("let there be tracking for things like these"): every quest points somewhere. A monster with none
 // alive is looked for where it lives: its own spawn point even while it waits to come back, the spawn tables (open world,
@@ -11308,7 +11309,7 @@ function act(a){
  else if(a==='resume')resume();else if(a==='unstuck')unstuck();else if(a==='guiReset')guiReset();else if(a==='quit'){save(true);fadeTo(toTitle);}
  else if(a==='closeForge')closeForge();else if(a==='fRepair'){closeForge();repairAll('anvil');}else if(a==='fEnh'){closeForge();enhMenu('anvil');}else if(a==='fStr'){closeForge();edrMenu('anvil');}else if(a==='fAuto'){if(autoNo('smith')){toast(t('autoPagma'),'warn');SFX.deny();}else{autoSet(!autoOn());renderRecipes();}}else if(a==='fGem'){closeForge();gemMenu('anvil');}else if(a==='mgReheat'){reheat();}else if(a==='fSalv'){closeForge();openSalv('anvil');}else if(a==='fCre'){creOpen();}else if(a==='fApr'){closeForge();openApr('anvil');}else if(a==='closeInv')closeInv();else if(a==='closeAu')closeAu();else if(a==='closeStatus')closeStatus();else if(a==='closeGuildW')closeGuildW();else if(a==='closeEquip')closeEquip();else if(a==='closeLog')closeLog();else if(a==='bflFromLog'){closeLog();bflOpen();}else if(a==='photo'){act('resume');setTimeout(photoOn,0);}else if(a==='photoSave')photoShot();else if(a==='photoExit')photoOff();else if(a==='closeMB')closeMB();else if(a==='closeQD')closeQD();else if(a==='mapIn')mapZoom(1.25);else if(a==='mapOut')mapZoom(.8);else if(a==='mapMe')mapCenter();else if(a==='cancelQ')cancelQ();else if(a==='qgFollow')qgFollow();else if(a==='qtoggle')toggleQuest();
  else if(a==='cardNext'){if(CARD)CARD('next');}else if(a==='cardSkip'){if(CARD)CARD('skip');}
- else if(a==='cRand'){CL.hair=rand()*LOOK.hair.length|0;CL.hc=rand()*LOOK.hc.length|0;CL.skin=rand()*LOOK.skin.length|0;CL.top=rand()*LOOK.top.length|0;CL.eye=rand()*EYEC.length|0;if(CL.g===1)CL.lip=rand()*LIPC.length|0;else CL.bst=rand()<.4?rand()*BST.length|0:0;CL.acc=rand()<.5?rand()*ACCK.length|0:0;CL.acol=rand()*ACCC.length|0;lookFit(CL);renderCreate();}
+ else if(a==='cRand'){CL.hair=rand()*LOOK.hair.length|0;CL.hc=rand()*LOOK.hc.length|0;CL.skin=rand()*(RZSK0||LOOK.skin.length)|0;CL.top=rand()*LOOK.top.length|0;CL.eye=rand()*EYEC.length|0;if(CL.g===1)CL.lip=rand()*LIPC.length|0;else CL.bst=rand()<.4?rand()*BST.length|0:0;CL.acc=rand()<.5?rand()*ACCK.length|0:0;CL.acol=rand()*ACCC.length|0;lookFit(CL);renderCreate();}
  else if(a==='cStart'){const n=$('cname').value.trim();if(n.length<2||n.length>12){$('cerr').textContent=t('cNameErr');SFX.deny();$('cname').focus();return;}if(Satisfy.chat.badName(n)){$('cerr').textContent=t('nameNo');SFX.deny();$('cname').focus();return;}CL.n=n;newGame(CL);}
  else if(a==='cBack')toTitle();else if(a==='closeMap')closeMap();else if(a==='closePick'){$('eqPick').hidden=true;}
  else if(a==='resetKeys'){KB=[...DEFKB];IKB=['KeyZ','KeyX'];ABIND={};XKB=XDEF.map(r=>[...r]);REB=null;rbSave();try{localStorage.removeItem('satisfy_keys');localStorage.removeItem('satisfy_ikeys');localStorage.removeItem('satisfy_binds');}catch(e){}renderRebind();}
@@ -11571,7 +11572,7 @@ function update(dt){
  if(TSV&&walk&&!(P.stun>0)){ix=TSV.x;iy=TSV.y;tsf=Math.max(.45,Math.min(1,Math.hypot(ix,iy)*1.3));}
  if(FOLLOW){if(ix||iy)folStop('folOff');else if(walk&&!(P.stun>0)&&!(P.dash>0)){const v=folDir(dt);if(v){ix=v[0];iy=v[1];}}} // SAT-ONLINE-068: your own keys stop it
  if(P.dash>0){P.dash-=dt;move(P,P.dx*230*dt,P.dy*230*dt,4);P.trail.push({x:P.x,y:P.y,dir:P.dir,frame:P.frame,t:.22,r:P.ride?myMt():0});}
- else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(tlOn('legend')?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.buf&&P.buf.k==='swift'&&!P.ride?1.12:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*p3Spd()*vcSpd()*vpSpd()*rzSpd()*mxSpd()*ttSpd()*p4Spd()*(1+Math.min(.3,gearSum('ms')))*(P.kyTU>gTime?1.35:1)*(1+ssBl())*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1)*roadSp();move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
+ else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(tlOn('legend')?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.buf&&P.buf.k==='swift'&&!P.ride?1.12:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*p3Spd()*vcSpd()*vpSpd()*rzSpd()*mxSpd()*ttSpd()*p4Spd()*(1+Math.min(.3*rzCapM(),gearSum('ms')))*(P.kyTU>gTime?1.35:1)*(1+ssBl())*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1)*roadSp();move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
  else P.frame=0;
  if(P.guard)P.dir=Math.abs(P.gx)>Math.abs(P.gy)?(P.gx>0?2:3):(P.gy>0?0:1);
  if(K.atk&&inp&&!PHOTO){const wk=weapKind(),v=(TOUCH&&tAim((wk==='bow'||wk==='staff')&&!hcMelee()?170:44))||[[0,1],[0,-1],[1,0],[-1,0]][P.dir];tryAttack(v[0],v[1]);}
@@ -12371,13 +12372,35 @@ Object.assign(STR.en,{"vprince": "Vampire Crown Prince", "vpr_hi": "I am the Cro
    bloodline once: 5% the rare one, 15% the uncommon one, else the plain race. The Yangban and the Demonkin are the hardest.
    Online: everything is yours, in S (race, rv, rzq): no presence field, no rules change. */
 var RZ;
+/* (v3.65, owner 2026-10-27, the tester's second list) the base races: Human, Elf and Dark Elf, the Water Clan (Merfolk), Dwarf,
+   and Orc (Twilight or Frostlight). Everyone starts Human; every player may switch to another base race once for free (a new
+   character gets the same one choice); after that only a new character changes it. Every bloodline also has a quest of its own
+   that awakens it, besides the roll when the race is taken (pv: the uncommon and the rare chances). Each race has its own skin
+   (a skin colour index of its own, 12 and up, with ears, tusks, horns or scales drawn from it), so others see it online with no
+   new field. Party effects (Commanding Aura, Battle Howl) ride in the fx st tag as A, B and E. All numbers GAME_BALANCE. */
 RZ={
+ human:{sk:'rzwind',b:{xp:.10,core:.05,adapt:.15},v1:{core:.05,gold:.10,cmd:1},v2:{xp:.10,core:.05,cap:.10}},
+ elf:{sk:'rzspirit',b:{dexagi:.20,emag:.15,nat:.15,amp:1},v1:{emag:.10,cd:.05,mpx:1},v2:{apen:.15,cdmg:.10,phase:.10}},
+ merfolk:{sk:'rzsurge',b:{wet:.25,ice:.20,breath:1,hydro:.10},v1:{ice:.10,ccd:.10,lure:.08},v2:{hp:.15,pdef:.10,press:1}},
+ dwarf:{sk:'rzforge',b:{pdef:.20,hp:.20,craft:.25,ms:-.15,pres:.10},v1:{eres:.10,enh:.15,runic:.08},v2:{fres:.15,apen:.10,molten:.15}},
+ orc:{sk:'rzhowl',pv:[.05,.01],b:{str:.20,cold:.15,honor:.30},v1:{str:.10,ten:.10,warl:1},v2:{emag:.15,ls:.10,totem:1}},
  evileye:{sk:'rzeye',b:{mag:.25,cr:.15,pdef:-.10},v1:{mag:.10,cr:.05,gslow:.3},v2:{mag:.15,tpen:.10,omni:1}},
  giant:{sk:'rzquake',b:{str:.30,hp:.25,as:-.20,ms:-.20,splash:.20},v1:{ice:.15,hp:.10,chill:1},v2:{str:.15,asfix:1,unst:1}},
  draco:{sk:'rzbreath',b:{pres:.20,fres:.20,atk:.15,apen:.10,refl:.10},v1:{fres:.10,apen:.05,ember:.25},v2:{atk:.15,eres:.15,aura:.10}},
  yangban:{sk:'rzchiyou',b:{core:.15,skp:.20,cd:.10,regen:.02},v1:{core:.05,skp:.10,mand:.10},v2:{core:.10,cd:.05,poise:1,reset:.20}},
  demon:{sk:'rzhell',b:{df:.20,sls:.05,dpool:1},v1:{df:.10,ls:.05,dpm:.20},v2:{df:.15,ls:.10,corr:1}}};
-RACES.push(...Object.keys(RZ));
+RACES.push(...Object.keys(RZ).filter(k=>!RACES.includes(k)));
+const RZBASE=['human','elf','merfolk','dwarf','orc'];
+// the base race picker: race and kind (an Elf or a Dark Elf, a Twilight or a Frostlight Orc)
+const RZPICK=[['human',''],['elf',''],['elf','dark'],['merfolk',''],['dwarf',''],['orc','twi'],['orc','frost']];
+// each race's own skin (index into LOOK.skin from 12) and what is drawn with it
+var RZSK0=LOOK.skin.length;
+LOOK.skin.push(['#fbe6d4','#e2c4ae'],['#6e5c8e','#4e406a'],['#7ac8c8','#56a2a6'],['#d89a78','#b07656'],['#6a8a4a','#4e6a34'],['#8aa8b8','#6a8698'],
+ ['#c8b8e8','#a898c8'],['#a89a8a','#86786a'],['#d8a070','#b07a4c'],['#f6e2b8','#dcc296'],['#c86a6a','#a04c4c']);
+var RZSKF=[{ears:1},{ears:1,eye:'#ff4a6a'},{ears:'gob',eye:'#2ae0ff'},{nose:1},{ears:'gob',tusk:1},{ears:'gob',tusk:1,eye:'#9ae8ff'},
+ {eye:'#ff2a6a'},{nose:1},{drac:1},{eye:'#ffd24a'},{horns:'#2a1a1a',eye:'#ffd24a'}];
+const rzSkOf=()=>{const r=myRace(),s=S&&S.rsub||'';const i={elf:s==='dark'?1:0,merfolk:2,dwarf:3,orc:s==='frost'?5:4,evileye:6,giant:7,draco:8,yangban:9,demon:10}[r];return i==null?-1:RZSK0+i;};
+function rzFig(c,L){if(!RZSKF)return;const i=(L&&L.skin|0)-RZSK0;if(i>=0&&RZSKF[i])Object.assign(c,RZSKF[i]);}
 // the trial steps of each race, in order; the last one gives the race
 const RZQ={evileye:['rze1','rze2'],giant:['rzg1','rzg2'],draco:['rzd1','rzd2'],yangban:['rzy1','rzy2','rzy3'],demon:['rzh1','rzh2','rzh3']};
 const RZZ={evileye:/^z(Bdog|Drav)$/,giant:/^z(GiantL|GHold)$/,draco:/^zChaos4$/,demon:/^zHellV$/};   // where the system offers it (the Yangban: at the path to the Hwan Kingdom)
@@ -12385,6 +12408,7 @@ const RZL={evileye:250,giant:200,draco:440,yangban:400,demon:400};
 const RZHDR=new Set(['hdrac','hdrac2','hdrac3']),RZSB=new Set(['stiger','sbird','stort','sdrag']),RZHL=new Set(['marcho','leraje']);
 // CANON: "The Four Auspicious Beasts are gods": the Heavenly Official's mandate is against everything else
 const RZGOD=RZSB;
+const RZWETZ=/^z(ESea|EaSea|SSea|Lake|Harbor|Siren|Kraken|Marsh|Swamp|EaRedSea|SFen|Pedro)$/,RZNORTH=/^z(NHigh|FrostP|WPine|Glac|GiantL|GHold)$/;
 Object.assign(QD,{
  rze1:{by:'sys',lv:250,hid:1,rz:'evileye',obj:{t:'rz',it:'bdv',n:20},ot:'o_rze1',xp:1500000},
  rze2:{by:'sys',lv:250,hid:1,rz:'evileye',pre:'rze1',obj:{t:'demon',it:'demon',n:100},ot:'o_rze2',xp:3000000,race:'evileye'},
@@ -12397,33 +12421,76 @@ Object.assign(QD,{
  rzy3:{by:'sys',lv:450,hid:1,rz:'yangban',pre:'rzy2',obj:{t:'kill',it:'gildong',n:1},ot:'o_rzy3',xp:15000000,race:'yangban'},
  rzh1:{by:'sys',lv:400,hid:1,rz:'demon',obj:{t:'rz',it:'hlm',n:600},ot:'o_rzh1',xp:30000000},
  rzh2:{by:'sys',lv:400,hid:1,rz:'demon',pre:'rzh1',obj:{t:'rz',it:'hll',n:2},ot:'o_rzh2',xp:30000000},
- rzh3:{by:'sys',lv:400,hid:1,rz:'demon',pre:'rzh2',obj:{t:'rz',it:'hdp',n:1},ot:'o_rzh3',xp:10000000,race:'demon'}});
+ rzh3:{by:'sys',lv:400,hid:1,rz:'demon',pre:'rzh2',obj:{t:'rz',it:'hdp',n:1},ot:'o_rzh3',xp:10000000,race:'demon'},
+ // the bloodline quests: one for each uncommon and rare bloodline, offered to that race only
+ rvhu1:{by:'sys',lv:100,hid:1,rv:['human','v1'],obj:{t:'rz',it:'boss',n:10},ot:'o_rvhu1',xp:300000},
+ rvhu2:{by:'sys',lv:300,hid:1,rv:['human','v2'],obj:{t:'rz',it:'hilv',n:500},ot:'o_rvhu2',xp:3000000},
+ rvel1:{by:'sys',lv:120,hid:1,rv:['elf','v1'],obj:{t:'rz',it:'nat',n:400},ot:'o_rvel1',xp:400000},
+ rvel2:{by:'sys',lv:250,hid:1,rv:['elf','v2'],obj:{t:'dodge',it:'dodge',n:300},ot:'o_rvel2',xp:1500000},
+ rvme1:{by:'sys',lv:200,hid:1,rv:['merfolk','v1'],obj:{t:'rz',it:'wet',n:300},ot:'o_rvme1',xp:1000000},
+ rvme2:{by:'sys',lv:300,hid:1,rv:['merfolk','v2'],obj:{t:'kill',it:'kraken',n:1},ot:'o_rvme2',xp:3000000},
+ rvdw1:{by:'sys',lv:100,hid:1,rv:['dwarf','v1'],obj:{t:'craftR',it:'craft',n:10,r:2},ot:'o_rvdw1',xp:300000},
+ rvdw2:{by:'sys',lv:250,hid:1,rv:['dwarf','v2'],obj:{t:'rz',it:'fire',n:300},ot:'o_rvdw2',xp:1500000},
+ rvor1:{by:'sys',lv:150,hid:1,rv:['orc','v1'],obj:{t:'block',it:'guard',n:300},ot:'o_rvor1',xp:600000},
+ rvor2:{by:'sys',lv:300,hid:1,rv:['orc','v2'],obj:{t:'rz',it:'spirit',n:500},ot:'o_rvor2',xp:3000000},
+ rvee1:{by:'sys',lv:280,hid:1,rv:['evileye','v1'],obj:{t:'demon',it:'demon',n:500},ot:'o_rvee1',xp:3000000},
+ rvee2:{by:'sys',lv:480,hid:1,rv:['evileye','v2'],obj:{t:'kill',it:'belial',n:1},ot:'o_rvee2',xp:15000000},
+ rvgi1:{by:'sys',lv:220,hid:1,rv:['giant','v1'],obj:{t:'rz',it:'north',n:300},ot:'o_rvgi1',xp:1500000},
+ rvgi2:{by:'sys',lv:350,hid:1,rv:['giant','v2'],obj:{t:'rz',it:'boss3',n:10},ot:'o_rvgi2',xp:6000000},
+ rvdr1:{by:'sys',lv:450,hid:1,rv:['draco','v1'],obj:{t:'kill',it:'trauka',n:3},ot:'o_rvdr1',xp:10000000},
+ rvdr2:{by:'sys',lv:480,hid:1,rv:['draco','v2'],obj:{t:'kill',it:'sdrag',n:1},ot:'o_rvdr2',xp:15000000},
+ rvya1:{by:'sys',lv:450,hid:1,rv:['yangban','v1'],obj:{t:'rz',it:'east',n:2000},ot:'o_rvya1',xp:15000000},
+ rvya2:{by:'sys',lv:480,hid:1,rv:['yangban','v2'],obj:{t:'block',it:'guard',n:500},ot:'o_rvya2',xp:15000000},
+ rvde1:{by:'sys',lv:420,hid:1,rv:['demon','v1'],obj:{t:'rz',it:'hlm',n:1500},ot:'o_rvde1',xp:15000000},
+ rvde2:{by:'sys',lv:480,hid:1,rv:['demon','v2'],obj:{t:'kill',it:'marcho',n:3},ot:'o_rvde2',xp:20000000}});
+const RVQ={};for(const id in QD)if(QD[id]&&QD[id].rv){const [r,v]=QD[id].rv;(RVQ[r]=RVQ[r]||{})[v]=id;}
 Object.assign(SKD,{rzeye:{cls:'race',race:'evileye',lv:1,mp:40,cd:20,col:'#c040ff'},rzquake:{cls:'race',race:'giant',lv:1,mp:45,cd:24,col:'#a08060'},
- rzbreath:{cls:'race',race:'draco',lv:1,mp:50,cd:20,col:'#ff6a2a'},rzchiyou:{cls:'race',race:'yangban',lv:1,mp:60,cd:70,col:'#ffd24a'},rzhell:{cls:'race',race:'demon',lv:1,mp:60,cd:60,col:'#c0203a'}});
-SKK.rzchiyou='buff';SKK.rzhell='buff';
-const RZS={t:0,lb:'',cor:0,fx:0},RZT={};
-// your race's numbers: the race and its bloodline added up (0 for a Human or a Vampire)
-function rzR(){return RZ&&S&&RZ[S.race]?RZ[S.race]:null;}
+ rzbreath:{cls:'race',race:'draco',lv:1,mp:50,cd:20,col:'#ff6a2a'},rzchiyou:{cls:'race',race:'yangban',lv:1,mp:60,cd:70,col:'#ffd24a'},rzhell:{cls:'race',race:'demon',lv:1,mp:60,cd:60,col:'#c0203a'},
+ rzwind:{cls:'race',race:'human',lv:1,mp:20,cd:45,col:'#9fe39a'},rzspirit:{cls:'race',race:'elf',rsub:'',lv:1,mp:30,cd:12,col:'#7af0a0'},rzshadow:{cls:'race',race:'elf',rsub:'dark',lv:1,mp:30,cd:14,col:'#8a5ac8'},
+ rzsurge:{cls:'race',race:'merfolk',lv:1,mp:40,cd:22,col:'#3ab8e8'},rzforge:{cls:'race',race:'dwarf',lv:1,mp:30,cd:40,col:'#c8a050'},rzhowl:{cls:'race',race:'orc',lv:1,mp:30,cd:45,col:'#c85a2a'}});
+SKK.rzchiyou='buff';SKK.rzhell='buff';SKK.rzwind='buff';SKK.rzforge='buff';SKK.rzhowl='buff';
+const RZS={t:0,lb:'',cor:0,fx:0,pr:0},RZT={};
+// your race's numbers: the race and its bloodline added up (0 for a Vampire)
+function rzR(){if(!RZ||!S)return null;const r=myRace();return r==='human'&&!S.brf?null:RZ[r]||null;}   // a Human's race wakes when it is chosen (the free pick): a character who has not chosen plays as before
+const RZRNG=mulberry32(((Date.now()>>>0)^0x5a17c0de)>>>0);   // its own stream: the rolls never shift the game's rand
 function rzV(k){const r=rzR();if(!r)return 0;const v=S.rv&&r[S.rv];return (r.b[k]||0)+(v&&v[k]||0);}
-function rzStM(k){if(!rzR())return 1;return 1+rzV('core')+(k==='str'?rzV('str'):0);}
+const rzPv=r=>RZ[r]&&RZ[r].pv||[.15,.05];
+function rzStM(k){if(!rzR())return 1;return 1+rzV('core')+(k==='str'?rzV('str'):0)+(k==='dex'||k==='agi'?rzV('dexagi'):0);}
 function rzHpM(){return rzR()?1+rzV('hp'):1;}
 function rzMpM(){return rzR()?1+rzV('dpm'):1;}
 function rzDefM(){return rzR()?1+rzV('pdef'):1;}
-function rzSpd(){return rzR()?1+rzV('ms'):1;}
-function rzAcd(){if(!rzR())return 1;const a=rzV('asfix')?0:rzV('as');return 1/(1+a)/(P&&P.rzStU>gTime?1.3:1);}
+function rzWet(){if(!P||!S)return false;if(P.boat||RZWETZ.test(S.zone||''))return true;try{return /rain|storm/.test(wxHere());}catch(e){return false;}}
+function rzNature(){return !!P&&!!S&&outdoors()&&!roomAt(P.x,P.y)&&!TOWNS.some(T=>T.k===S.zone);}
+function rzSpd(){if(!rzR())return 1;return (1+rzV('ms'))*(rzV('nat')&&rzNature()?1+rzV('nat'):1)*(rzV('wet')&&rzWet()?1+rzV('wet'):1);}
+function rzAcd(){if(!rzR())return 1;const a=rzV('asfix')?0:rzV('as');return 1/(1+a)/(P&&P.rzStU>gTime?1.3:1)/(P&&P.rzAqU>gTime?1.25:1);}
 function rzCdM(){return rzR()?Math.max(.5,1-rzV('cd')):1;}
 function rzCr(){return rzR()?rzV('cr'):0;}
-function rzMpR(){return rzV('dpool')?.5:1;}   // Demonic Power fills when you strike, not by itself
+function rzCapM(){return 1+rzV('cap');}   // Limit Breaker: the caps on critical chance, attack speed and move speed from gear go 10% higher
+function rzMpR(){return (rzV('dpool')?.5:1)*(rzV('mpx')?2:1);}   // Demonic Power fills when you strike, not by itself; the World Tree doubles it
+function rzXpM(){return 1+rzV('xp');}
+function rzGoldM(){return 1+rzV('gold');}
+function rzSkL(){return 1+rzV('adapt');}
+function rzCraftM(){return 1+rzV('craft');}
+function rzEnhM(){return 1+rzV('enh');}
+function rzCcD(){return 1+rzV('ccd');}
+function rzGdM(){return P&&P.rzMcU>gTime?.3:1;}   // Mastercraft Stance: a guard barely gives
 function rzRgM(m){return m&&m.rzCor>0?1-.02*Math.min(10,m.rzCor):1;}
 function rzOmni(){return rzV('omni')>0;}
-function rzCC(){return rzV('unst')>0||rzV('poise')>0||!!(P&&P.rzStU>gTime);}
+function rzCC(){return rzV('unst')>0||rzV('poise')>0||!!(P&&P.rzStU>gTime)||rzV('ten')>0&&rand()<rzV('ten');}
 function rzEl(m){if(!(P&&P.rzHfU>gTime)||!m)return null;return monResK(m.type,'dark')<=monResK(m.type,'fire')?'dark':'fire';}
 function rzSure(m){return !!(P&&P.rzHfU>gTime&&m&&m.rgOffU>gTime);}   // Hellfire Overdrive: a burning target takes a sure critical hit
-function rzNoBlk(o){return rzV('splash')>0&&!o.skill;}   // Titanic Weight: a guard does not hold a giant's blow
-function rzAtk(m,o){if(!rzR())return 1;let k=1+rzV('atk');const el=o.el!==undefined?o.el:CURSK?skEl(CURSK):rzEl(m),mag=!!o.rzMag||!!o.skill&&(clsFam('mage')||!!el);
- if(mag)k*=1+rzV('mag');if(o.skill)k*=1+rzV('skp');if(el==='water')k*=1+rzV('ice');if(el==='fire'||el==='dark')k*=1+rzV('df');
+const rzHowl=()=>P&&P.rzHwU>gTime?(rzV('warl')?.3:.2):0,rzPHowl=()=>{try{return phNear('E',150)?.3:phNear('B',150)?.2:0;}catch(e){return 0;}};
+function rzNoBlk(o){return !o.skill&&(rzV('splash')>0||rzHowl()>0);}   // Titanic Weight, and the Battle Howl breaks guards
+const rzOwn=()=>{const w=weapon();try{return !!(w&&w.by&&w.by===Satisfy.chat.clean(t('pname'),24));}catch(e){return false;}};
+function rzAtk(m,o){let k=1;try{if(phNear('A',150))k*=1.05;}catch(e){}   // a Royal Blood in your party: Commanding Aura
+ const el0=o.el!==undefined?o.el:CURSK?skEl(CURSK):rzEl(m);if(!el0&&!o.rzMag){const h=Math.max(rzHowl(),rzPHowl());if(h)k*=1+h;}
+ if(!rzR())return k;k*=1+rzV('atk');const el=el0,mag=!!o.rzMag||!!o.skill&&(clsFam('mage')||!!el);
+ if(mag)k*=1+rzV('mag');if(o.skill)k*=1+rzV('skp');if(el&&(mag||o.el!==undefined))k*=1+rzV('emag');if(el==='water')k*=1+rzV('ice');if(el==='fire'||el==='dark')k*=1+rzV('df');
+ if(mag&&rzV('lure')&&Math.hypot(m.x-P.x,m.y-P.y)<110)k*=1+rzV('lure');
  if(rzV('mand')&&!RZGOD.has(m.type))k*=1+rzV('mand');if(P.rzStU>gTime&&!mag)k*=1.5;
- const p=rzV('apen')+rzV('tpen');if(p>0){const f=lvF(m.lv);if(f<1)k*=Math.pow(f,-Math.min(1,p));}return k;}
+ if(rzV('honor'))k*=1+rzV('honor')*Math.max(0,1-P.hp/maxHP());   // Honor of the Tribe
+ if(rzV('runic')&&rzOwn())k*=1+rzV('runic');
+ const p=rzV('apen')+rzV('tpen')+(o.rzPen||0);if(p>0){const f=lvF(m.lv);if(f<1)k*=Math.pow(f,-Math.min(1,p));}return k;}
 // after a blow lands: life drawn, Demonic Power, corruption, the splash of a giant's blow, Chiyou's Favor
 function rzHit(m,dmg,crit,o){if(!rzR()||m.spar)return;P.rzCt=gTime;
  const ls=(o.skill?rzV('sls'):0)+rzV('ls');if(ls>0&&dmg>0&&P.hp>0){const h=lsCap(dmg*ls);if(h>0){P.hp=Math.min(maxHP(),P.hp+h);hudDirty=true;}}
@@ -12431,52 +12498,109 @@ function rzHit(m,dmg,crit,o){if(!rzR()||m.spar)return;P.rzCt=gTime;
  if(rzV('corr')&&!o.dot&&!m.tdum){m.rzCor=Math.min(10,(m.rzCor||0)+1);m.rzCorU=gTime+6;}
  if(rzV('splash')&&!o.skill&&!o.chain&&!o.dot&&!o.raw)for(const x of mons)if(x!==m&&!x.dead&&!x.spar&&!x.tdum&&Math.hypot(x.x-m.x,x.y-m.y)<34+(MT[x.type].r||6))hitMon(x,0,{raw:Math.max(1,dmg*rzV('splash')),chain:1});
  if(crit&&rzV('reset')&&gTime>(P.rzRsT||0)&&rand()<rzV('reset')){P.rzRsT=gTime+4;for(const k in P.cd)P.cd[k]=0;numP(-30,t('rzReset'),'#ffd24a',false);sbSig='';}}
-// a blow taken: scales and resistances, Dragon's Presence, Glacial Armor, Dragon Scale
-function rzHurt(d,src){if(!rzR()||!src||!src.type||!MT[src.type])return d;const b=MT[src.type],el=monEl(src.type),ph=!el;
- if(ph)d*=1-rzV('pres');if(el==='fire')d*=1-rzV('fres');if(el)d*=1-rzV('eres');
- if(rzV('aura')&&!b.boss&&Math.hypot(src.x-P.x,src.y-P.y)<110)d*=1-rzV('aura');
+// a blow taken: the Hydro-Shield, scales and resistances, Dragon's Presence, Glacial Armor, Dragon Scale, Molten Blood, Mastercraft Stance
+function rzHurt(d,src){if(!rzR())return d;if(P.rzBar>0&&P.rzBarU>gTime){const a=Math.min(d,P.rzBar);d-=a;P.rzBar-=a;if(d<=0){numP(-20,t('rzBarT'),'#7ad8ff',false);return 0;}}
+ if(!src||!src.type||!MT[src.type])return d;const b=MT[src.type],el=monEl(src.type),ph=!el,near=Math.hypot(src.x-P.x,src.y-P.y);
+ if(ph)d*=1-rzV('pres');if(ph&&P.rzMcU>gTime)d*=.6;if(el==='fire')d*=1-rzV('fres');if(el)d*=1-rzV('eres');
+ if(rzV('aura')&&!b.boss&&near<110)d*=1-rzV('aura');
+ if(el&&rzV('hydro')){P.rzBar=Math.min(maxHP()*.2,(P.rzBarU>gTime?P.rzBar||0:0)+d*rzV('hydro'));P.rzBarU=gTime+8;}
  if(ph&&rzV('chill')&&gTime>(P.rzChT||0)){P.rzChT=gTime+1;for(const m of mons)if(!m.dead&&Math.hypot(m.x-P.x,m.y-P.y)<60+(MT[m.type].r||6))m.slowU=Math.max(m.slowU||0,gTime+2);
   for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*50,y:P.y-rand()*24,vx:(rand()-.5)*20,vy:-10,t:.5,c:i%2?'#bfe8ff':'#ffffff',fl:1});}
- if(ph&&rzV('refl')&&mons.includes(src)&&!src.dead&&!src.spar&&gTime>(P.rzRfT||0)){P.rzRfT=gTime+.25;hitMon(src,0,{raw:Math.max(1,d*rzV('refl')),chain:1,dot:1});}
+ const live=mons.includes(src)&&!src.dead&&!src.spar;
+ if(ph&&rzV('refl')&&live&&gTime>(P.rzRfT||0)){P.rzRfT=gTime+.25;hitMon(src,0,{raw:Math.max(1,d*rzV('refl')),chain:1,dot:1});}
+ if(rzV('molten')&&live&&near<40+(b.r||6)&&gTime>(P.rzMoT||0)){P.rzMoT=gTime+.25;hitMon(src,0,{raw:Math.max(1,d*rzV('molten')),chain:1,dot:1,el:'fire'});}
  return d;}
-// Premonition: a blow that would end you misses, one time in seven or so
-function rzDodge(d,src){if(!S||S.race!=='evileye'||!src||!src.type||!(d>=P.hp)||rand()>=.15)return false;numP(-20,t('rzPrem'),'#d8a0ff',false);P.inv=.4;return true;}
-function rzName(){const r=myRace();return t('race_'+r)+(rzR()&&S.rv?' · '+t('rzv_'+r+'_'+S.rv):'');}
+// the last word before a blow lands: Premonition (an Evil Eye dodges a killing blow, 15%) and Totemic Will (once every 5 minutes)
+function rzDodge(d,src){if(!S||!P)return false;
+ if(rzV('totem')&&P.hp-d<maxHP()*.05&&gTime>(P.rzToT||-1)){P.rzToT=gTime+300;P.rzBar=maxHP()*.3;P.rzBarU=gTime+8;P.inv=.8;numP(-24,t('rzTotT'),'#9fe39a',true);SFX.legendary();return true;}
+ if(S.race!=='evileye'||!src||!src.type||!(d>=P.hp)||rand()>=.15)return false;numP(-20,t('rzPrem'),'#d8a0ff',false);P.inv=.4;return true;}
+// Phase Drift: a dodge that turns you intangible
+function rzPhase(){if(rzV('phase')&&rand()<rzV('phase')){P.inv=Math.max(P.inv,1);numP(-22,t('rzPhT'),'#c0a0ff',false);for(let i=0;i<8;i++)fx.push({x:P.x+(rand()-.5)*14,y:P.y-rand()*20,vx:0,vy:-16,t:.5,c:'#8a5ac8',fl:1});}}
+// the fx st letters others read: A a Royal Blood's Commanding Aura, B a Battle Howl, E a War Chief's howl
+function rzSt(){if(!S||!P)return '';return (rzV('cmd')?'A':'')+(P.rzHwU>gTime?(rzV('warl')?'E':'B'):'');}
+const rzSub=()=>S&&S.rsub?t('rzs_'+myRace()+'_'+S.rsub):'';
+function rzName(){const r=myRace(),b=rzSub()||t('race_'+r);return b+(rzR()&&S.rv?' · '+t('rzv_'+r+'_'+S.rv):'');}
 function rzDesc(){const r=myRace();return t('raceD_'+r)+(rzR()&&S.rv?' '+t('rzvD_'+r+'_'+S.rv):'');}
-const rzAct=it=>Object.keys(S.qs||{}).some(id=>QD[id]&&QD[id].rz&&S.qs[id].st===1&&QD[id].obj.it===it);
+const rzAct=it=>Object.keys(S.qs||{}).some(id=>QD[id]&&(QD[id].rz||QD[id].rv)&&S.qs[id].st===1&&QD[id].obj.it===it);
 function rzEv(it,key){if(!S||S.__demo||!rzAct(it))return;if(key){S.rzq=S.rzq||{};const L=S.rzq[it]||(S.rzq[it]=[]);if(L.includes(key))return;L.push(key);}qEvent('rz',it);}
-function rzKill(m){if(!S||m.tmp||m.spar||m.tdum)return;const k=m.type,z=zoneAt(m.x,m.y);
+function rzKill(m){if(!S||m.tmp||m.spar||m.tdum)return;const k=m.type,b=MT[k]||{},z=zoneAt(m.x,m.y);
  if(RZHDR.has(k))rzEv('hdr');if(RZSB.has(k))rzEv('sbeast',k);if(RZHL.has(k))rzEv('hll',k);
- if(/^zHell(?!V)/.test(z)&&!MT[k].boss)rzEv('hlm');if(/^zEa/.test(z))rzEv('east');if(z==='zGiantL'||z==='zGHold')rzEv('gland');}
+ if(/^zHell(?!V)/.test(z)&&!b.boss)rzEv('hlm');if(/^zEa/.test(z))rzEv('east');if(z==='zGiantL'||z==='zGHold')rzEv('gland');
+ if(b.boss){rzEv('boss');if((m.lv|0)>=300)rzEv('boss3');}if((m.lv|0)>S.lv)rzEv('hilv');if(rzNature())rzEv('nat');if(rzWet())rzEv('wet');
+ if(monEl(k)==='fire')rzEv('fire');if(monUnd(k)||monEvil(k))rzEv('spirit');if(RZNORTH.test(z))rzEv('north');}
+// the system's line for each race step (every written quest has one, in both languages)
+Object.assign(STR.ar,{rze1_o:"حيطان المنطقة 8: احفر عروق حديد التنين المجنون في زنزانة «احترس من الكلاب»",rze2_o:"تار الشياطين الكبار: اقتل شياطين",rzg1_o:"عملاق الصقيع: اهزم عملاق الصقيع في حصن العمالقة",rzg2_o:"أرض العمالقة: اقتل وحوش في أرض العمالقة",rzd1_o:"دم بون وهيل: اقتل نص دراكونيين في جبال الفوضى",rzd2_o:"دم تنين حقيقي: اهزم تراوكا التنين الأحمر",rzy1_o:"الوحوش الأربعة المقدسة: اهزم الوحوش الأربعة المقدسة (كل واحد مرة)",rzy2_o:"اختبار الشرق: اقتل وحوش في القارة الشرقية",rzy3_o:"اللص الشهم: اهزم هوانج جيلدونج",rzh1_o:"البقاء للأقوى: اقتل وحوش في الجحيم",rzh2_o:"أسياد الجحيم: اهزم ماركوسياس وليراجي",rzh3_o:"جسم شيطان: وصّل قوتك الشيطانية لـ400",rvhu1_o:"دم الملوك: اهزم بوسات",rvhu2_o:"ما بعد الحدود: اقتل وحوش أعلى من لفلك",rvel1_o:"غابات شجرة العالم: اقتل وحوش في الطبيعة (برا المدن)",rvel2_o:"رقصة الفراغ: اتفادى",rvme1_o:"أغنية السيرين: اقتل وحوش في الماية أو تحت المطر",rvme2_o:"وحش الأعماق: اهزم الكراكن",rvdw1_o:"يد الرونات: اصنع حاجات نادرة أو أحسن",rvdw2_o:"قلب البركان: اقتل وحوش نار",rvor1_o:"جدار القبيلة: صد أو بارِي ضربات",rvor2_o:"أرواح الأجداد: اقتل أوندد أو أرواح شريرة",rvee1_o:"نظرة الملك: اقتل شياطين",rvee2_o:"عين فوق الشياطين: اهزم بيليال",rvgi1_o:"الشمال المتجمد: اقتل وحوش في الشمال المتجمد",rvgi2_o:"خطوات التايتن: اهزم بوسات لفل 300 أو أكتر",rvdr1_o:"النار القديمة: اهزم تراوكا",rvdr2_o:"تنين حقيقي: اهزم التنين الأزرق",rvya1_o:"موظف السما: اقتل وحوش في القارة الشرقية",rvya2_o:"طريق إله القتال: صد أو بارِي ضربات",rvde1_o:"الجلالة الجهنمية: اقتل وحوش في الجحيم",rvde2_o:"أمير الجحيم: اهزم ماركوسياس"});
+Object.assign(STR.en,{rze1_o:"Zone 8's Walls: Dig the insane dragon veins of the Beware Dogs dungeon",rze2_o:"Revenge on the Great Demons: Slay demons",rzg1_o:"The Frost Giant: Defeat the Frost Giant in the Giant's Hold",rzg2_o:"The Giants' Land: Slay monsters in the Giants' Land",rzd1_o:"Bun and Hel's Blood: Slay half-draconians in the Chaos Mountains",rzd2_o:"A Real Dragon's Blood: Defeat Trauka the red dragon",rzy1_o:"The Four Auspicious Beasts: Defeat the Four Auspicious Beasts (each once)",rzy2_o:"Trial of the East: Slay monsters on the East Continent",rzy3_o:"The Chivalrous Robber: Defeat Hwang Gildong",rzh1_o:"Survival of the Fittest: Slay monsters in hell",rzh2_o:"The Lords of Hell: Defeat Marchosias and Leraje",rzh3_o:"A Demon's Body: Raise your demonic power to 400",rvhu1_o:"Blood of Kings: Defeat bosses",rvhu2_o:"Beyond the Limits: Slay monsters above your level",rvel1_o:"Woods of the World Tree: Slay monsters in nature (outside towns)",rvel2_o:"Dance of the Void: Dodge",rvme1_o:"The Siren's Song: Slay monsters in water or under the rain",rvme2_o:"Beast of the Deep: Defeat the Kraken",rvdw1_o:"The Rune Hand: Craft pieces of rare rating or better",rvdw2_o:"Heart of the Volcano: Slay fire monsters",rvor1_o:"Wall of the Tribe: Block or parry blows",rvor2_o:"Spirits of the Ancestors: Slay undead or evil spirits",rvee1_o:"The King's Gaze: Slay demons",rvee2_o:"An Eye above Demons: Defeat Belial",rvgi1_o:"The Frozen North: Slay monsters in the frozen north",rvgi2_o:"The Titan's Steps: Defeat bosses of level 300 or more",rvdr1_o:"The Old Fire: Defeat Trauka",rvdr2_o:"A True Dragon: Defeat the Blue Dragon",rvya1_o:"Official of Heaven: Slay monsters on the East Continent",rvya2_o:"The Martial God's Road: Block or parry blows",rvde1_o:"Infernal Majesty: Slay monsters in hell",rvde2_o:"Prince of Hell: Defeat Marchosias"});
+Object.assign(SKLK,{rzwind:'heal',rzhowl:'wave'});   // their own looks (the guard look was already taken by forty skills)
+// where a race's step points (every quest points somewhere): its monsters, its land, else the nearest monster or person
+function rzSpot(q,o){const it=o.it,b=m=>MT[m.type]||{},foe=m=>!b(m).boss&&b(m).aggro!==undefined,set={hdr:RZHDR,sbeast:RZSB,hll:RZHL}[it];
+ if(set){const p=qNearIf(m=>set.has(m.type));if(p)return p;for(const k of set){const h=monHome(k);if(h)return h;}}
+ if(it==='bdv'){const v=BDV[0];return v?{x:v.tx+.5,y:v.ty+.5}:{x:BDOG.gx+.5,y:BDOG.gy+.5};}
+ if(it==='hlm'||it==='hdp'){const c=HELL.C[it==='hdp'?0:1];return{x:(c.x0+c.x1)/2,y:HELL.cy,area:1};}
+ if(it==='gland')return{x:620,y:-14,area:1};if(it==='north')return qNearIf(m=>foe(m)&&RZNORTH.test(zoneAt(m.x,m.y)))||{x:330,y:-46,area:1};
+ const f={boss:m=>b(m).boss,boss3:m=>b(m).boss&&(m.lv|0)>=300,hilv:m=>(m.lv|0)>S.lv,fire:m=>monEl(m.type)==='fire',spirit:m=>monUnd(m.type)||monEvil(m.type),east:m=>/^zEa/.test(zoneAt(m.x,m.y))}[it];
+ return f&&qNearIf(f)||qNearIf(foe)||nearNpc();}
 const rzStepOf=r=>RZQ[r].find(id=>S.qs[id]&&S.qs[id].st===1);
 // the system's offer: what the race is, what it gives, and what becomes of your race now
 function rzOffer(r,here){if(!S||S.__demo||mode!=='play')return false;const Q=RZQ[r][0];if(myRace()===r||rzStepOf(r)||S.qs[Q])return false;
  if(S.lv<RZL[r]){if(here){dialog('sysN',[t('rzL1_'+r),t('rzLow',{n:RZL[r],r:t('race_'+r)})]);return true;}return false;}
- const cur=myRace(),warn=cur==='human'?t('rzWarnH'):t('rzWarn',{r:rzName()});
- dialog('sysN',[t('rzL1_'+r),t('rzL2_'+r),t('rzOffer',{r:t('race_'+r)})+'\n'+t('raceD_'+r),t('rzVars',{a:t('rzv_'+r+'_v1'),b:t('rzv_'+r+'_v2')})+'\n'+warn],null,
+ const cur=myRace(),warn=cur==='human'&&!S.rv?t('rzWarnH'):t('rzWarn',{r:rzName()});
+ dialog('sysN',[t('rzL1_'+r),t('rzL2_'+r),t('rzOffer',{r:t('race_'+r)})+'\n'+t('raceD_'+r),t('rzVars',{a:t('rzv_'+r+'_v1'),b:t('rzv_'+r+'_v2'),p1:Math.round(rzPv(r)[0]*100),p2:Math.round(rzPv(r)[1]*100)})+'\n'+warn],null,
   [{l:t('qAccept'),f:()=>{if(!qAvail(Q)||rzStepOf(r))return;acceptQ(Q);}},{l:t('qDecline'),f:()=>{RZT[r]=gTime+600;}}]);return true;}
-function rzGain(r){if(!RZ[r])return;const was=rzName(),old=myRace(),x=rand(),v=x<.05?'v2':x<.20?'v1':'';
- S.race=r;S.rv=v;VPS.sun=0;sbSig='';hudDirty=true;SFX.legendary();flash();announce(t('rzAnn',{r:rzName()}),1);
+// the race's skin goes on (and comes off for a Human or a Vampire: back to the skin you had)
+function rzSkin(){if(!S||!S.look)return;const want=rzSkOf(),L=S.look;
+ if(want>=0){if(L.skin!==want){if(!((L.skin|0)>=RZSK0))L.hsk=L.skin|0;L.skin=want;buildMe(L);}}
+ else if((L.skin|0)>=RZSK0){L.skin=L.hsk!=null&&L.hsk<RZSK0?L.hsk:0;buildMe(L);}}
+function rzGain(r,sub){if(!RZ[r])return;const was=rzName(),old=myRace(),pv=rzPv(r),x=RZRNG(),v=x<pv[1]?'v2':x<pv[0]+pv[1]?'v1':'';
+ S.race=r;S.rv=v;S.rsub=sub||'';S.rzr=1;VPS.sun=0;sbSig='';hudDirty=true;rzSkin();SFX.legendary();flash();announce(t('rzAnn',{r:rzName()}),1);
  for(let i=0;i<30;i++)fx.push({x:P.x+(rand()-.5)*34,y:P.y-rand()*34,vx:(rand()-.5)*40,vy:-30-rand()*30,t:.9,c:SKD[RZ[r].sk].col,fl:1});
- dialog('sysN',[t('rzGot',{r:t('race_'+r)}),v?t('rzVar',{v:t('rzv_'+r+'_'+v),p:v==='v2'?5:15})+'\n'+t('rzvD_'+r+'_'+v):t('rzVarNo'),...(old!=='human'?[t('rzLost',{r:was})]:[])],()=>checkSkills());
+ dialog('sysN',[t('rzGot',{r:rzSub()||t('race_'+r)}),v?t('rzVar',{v:t('rzv_'+r+'_'+v),p:Math.round(pv[v==='v2'?1:0]*100)})+'\n'+t('rzvD_'+r+'_'+v):t('rzVarNo'),...(old!==r&&(old!=='human'||was!==t('race_human'))?[t('rzLost',{r:was})]:[])],()=>checkSkills());
  checkSkills();save(true);}
+// a bloodline quest done: that bloodline is yours (it replaces the one you had)
+function rzVarGain(q){const [r,v]=q.rv;if(myRace()!==r)return;S.rv=v;sbSig='';hudDirty=true;SFX.legendary();flash();announce(t('rzAnn',{r:rzName()}),1);dialog('sysN',[t('rzVarQ',{v:t('rzv_'+r+'_'+v)}),t('rzvD_'+r+'_'+v)]);save(true);}
+// the bloodline quests of your race, from the status window (a toast tells you when one opens)
+const rzVarOk=id=>!!id&&!S.qs[id]&&S.lv>=QD[id].lv&&S.rv!==QD[id].rv[1];
+function rzVarList(){const r=myRace(),Q=RVQ[r];if(!Q){dialog('sysN',[t('rzVarNone')]);return;}
+ const o=['v1','v2'].map(v=>{const id=Q[v],s=S.qs[id],own=S.rv===v,lv=QD[id].lv;return {l:t('rzv_'+r+'_'+v)+' · '+(own?t('rzVarOwn'):s&&s.st===2?t('rzVarDone'):s?t('rzVarOn'):S.lv<lv?t('rzVarLv',{n:lv}):t('rzVarGo')),
+  f:()=>{if(!rzVarOk(id))return;dialog('sysN',[t('rzvD_'+r+'_'+v),qObjText0(id)+(S.rv?'\n'+t('rzVarW',{v:t('rzv_'+r+'_'+S.rv)}):'')],null,[{l:t('qAccept'),f:()=>{if(qAvail(id)&&rzVarOk(id))acceptQ(id);}},{l:t('qDecline')}]);}};});
+ dialog('sysN',[t('rzVarHead',{r:rzName()})],null,[...o,{l:t('rzLater')}]);}
+function rzVarOffer(){const r=myRace(),Q=RVQ[r];if(!Q||!rzR())return false;for(const v of ['v1','v2']){const id=Q[v];if(!rzVarOk(id)||RZT[id]>gTime)continue;RZT[id]=gTime+1800;toast(t('rzVarTip',{v:t('rzv_'+r+'_'+v)}),'good');return true;}return false;}
+// the status window: the free switch and the bloodline quests
+function rzStRow(){if(!S)return '';return `<div class="srow rzb">${S.brf?'':`<button data-rzp="1">🧬 ${esc(t('rzPickB'))}</button> `}${RVQ[myRace()]&&rzR()?`<button data-rzv="1">🩸 ${esc(t('rzVarB'))}</button>`:''}</div>`;}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-rzp],[data-rzv]');if(!b||!S)return;if(mode==='status')closeStatus();if(b.dataset.rzp)rzPickOpen();else rzVarList();});
+const qObjText0=id=>{try{return String(qObjText(id)).replace(/\s*\d[\d,]*\s*\/\s*/,' 0/');}catch(e){return '';}};
+// the one free switch of base race
+function rzPickOpen(){if(!S||S.__demo)return;if(S.brf){dialog('sysN',[t('rzPickUsed')]);return;}
+ dialog('sysN',[t('rzPick1'),t('rzPick2')],null,[...RZPICK.map(([r,s])=>({l:s?t('rzs_'+r+'_'+s):t('race_'+r),f:()=>rzPickAsk(r,s)})),{l:t('rzLater')}]);}
+function rzPickAsk(r,s){const nm=s?t('rzs_'+r+'_'+s):t('race_'+r),pv=rzPv(r);
+ dialog('sysN',[t('raceD_'+r),t('rzVars',{a:t('rzv_'+r+'_v1'),b:t('rzv_'+r+'_v2'),p1:Math.round(pv[0]*100),p2:Math.round(pv[1]*100)}),t('rzPickW',{r:nm,c:rzName()})],null,
+  [{l:t('rzPickY',{r:nm}),f:()=>{if(S.brf)return;S.brf=1;rzGain(r,s);}},{l:t('rzPickBack'),f:()=>setTimeout(rzPickOpen,50)}]);}
 function rzTick(dt){if(!S||!P||S.__demo)return;
  if(rzV('regen')&&P.hp>0&&gTime-Math.max(P.hitT??-99,P.rzCt??-99)<5){const mh=maxHP(),mm=maxMP();P.hp=Math.min(mh,P.hp+mh*rzV('regen')*dt);P.mp=Math.min(mm,P.mp+mm*rzV('regen')*dt);hudDirty=true;}   // Taoist Breath
- if((P.rzStU>gTime||P.rzHfU>gTime)&&(RZS.fx-=dt)<=0){RZS.fx=.08;const st=P.rzStU>gTime;fx.push({x:P.x+(rand()-.5)*16,y:P.y-4-rand()*20,vx:(rand()-.5)*8,vy:-28,t:.5,c:st?(rand()<.5?'#ffd24a':'#fff2b0'):(rand()<.5?'#ff3a1a':'#5a0a2a'),fl:1});}
- if((RZS.cor-=dt)<=0){RZS.cor=1;for(const m of mons)if(m.rzCorU>gTime&&m.rzCor>0&&!m.dead&&Math.abs(m.x-P.x)<VW&&Math.abs(m.y-P.y)<VH)hitMon(m,.04*m.rzCor,{dot:1,el:'fire'});}   // Soul Corruption burns
+ if(rzV('amp')&&P.hp>0){const mm=maxMP();if(P.mp<mm){P.mp=Math.min(mm,P.mp+mm*.006*(rzV('mpx')?2:1)*dt);hudDirty=true;}}   // Elemental Affinity: mana from the air around you
+ if((P.rzStU>gTime||P.rzHfU>gTime||P.rzHwU>gTime||P.rzMcU>gTime)&&(RZS.fx-=dt)<=0){RZS.fx=.08;const c=P.rzStU>gTime?['#ffd24a','#fff2b0']:P.rzHfU>gTime?['#ff3a1a','#5a0a2a']:P.rzHwU>gTime?['#ff7a3a','#c85a2a']:['#c8a050','#8a8a9a'];fx.push({x:P.x+(rand()-.5)*16,y:P.y-4-rand()*20,vx:(rand()-.5)*8,vy:-28,t:.5,c:c[rand()*2|0],fl:1});}
+ if((RZS.cor-=dt)<=0){RZS.cor=1;for(const m of mons)if(m.rzCorU>gTime&&m.rzCor>0&&!m.dead&&Math.abs(m.x-P.x)<VW&&Math.abs(m.y-P.y)<VH)hitMon(m,.04*m.rzCor,{dot:1,el:'fire'});   // Soul Corruption burns
+  if(rzV('press'))for(const m of mons)if(!m.dead&&!m.spar&&!m.tdum&&Math.hypot(m.x-P.x,m.y-P.y)<56+(MT[m.type].r||6)){m.slowU=Math.max(m.slowU||0,gTime+1.2);hitMon(m,.06,{dot:1,el:'water'});}}   // Pressure Depth
  if((RZS.t-=dt)>0)return;RZS.t=.5;
+ rzSkin();
+ if(!S.rzr&&rzR()){S.rzr=1;if(myRace()==='human'){const pv=rzPv('human'),x=RZRNG();S.rv=x<pv[1]?'v2':x<pv[0]+pv[1]?'v1':'';if(S.rv)setTimeout(()=>toast(t('rzVarHum',{v:t('rzv_human_'+S.rv)}),'good'),1500);save(true);}}   // a Human's bloodline rolls once
  const lb=rzV('dpool')?'DP':'MP';if(lb!==RZS.lb){RZS.lb=lb;const e=document.querySelector('.sb.mp em');if(e)e.textContent=lb;}
  if(rzAct('hdp')&&hlDp()>=400)rzEv('hdp');
  for(const r in RZQ)for(let i=0;i<RZQ[r].length;i++){const id=RZQ[r][i];if(!qReady(id))continue;completeQ(id);const nx=RZQ[r][i+1];if(nx&&qAvail(nx)&&S.lv>=QD[nx].lv)setTimeout(()=>{if(S&&qAvail(nx))acceptQ(nx);},1200);}
  for(const r in RZQ){const nx=RZQ[r].find((id,i)=>i>0&&!S.qs[id]&&qDone(RZQ[r][i-1]));if(nx&&qAvail(nx)&&S.lv>=QD[nx].lv&&!rzStepOf(r))acceptQ(nx);}   // a step that waited for your level
- if(mode==='play'&&$('dialog').hidden)for(const r in RZZ)if(RZZ[r].test(S.zone||'')&&!(RZT[r]>gTime)){RZT[r]=gTime+600;if(rzOffer(r))break;}}
+ for(const r in RVQ)for(const v in RVQ[r])if(qReady(RVQ[r][v]))completeQ(RVQ[r][v]);
+ if(!S.brf&&!(RZT.pick>gTime)&&mode==='play'){RZT.pick=gTime+1800;setTimeout(()=>toast(t('rzPickTip'),'good'),4000);}   // the free switch: a reminder, never a window in your way
+ if(mode==='play'&&$('dialog').hidden){for(const r in RZZ)if(RZZ[r].test(S.zone||'')&&!(RZT[r]>gTime)){RZT[r]=gTime+600;if(rzOffer(r))return;}
+  rzVarOffer();}}
 // the racial skills
 const rzTg=(R,ok)=>mons.filter(m=>!m.dead&&!m.spar&&ok(m)&&Math.hypot(m.x-P.x,monY(m)-(P.y-6))<R+(MT[m.type].r||6)&&seeL(P.x,P.y-6,m.x,monY(m)));
+const rzLine=(L,w)=>{const v=fdir(),ox=P.x,oy=P.y-8;return rzTg(L,m=>{const dx=m.x-ox,dy=monY(m)-oy,a=dx*v[0]+dy*v[1];return a>=0&&Math.abs(dx*v[1]-dy*v[0])<w+(MT[m.type].r||6);});};
+const rzLineFx=(L,c)=>{const v=fdir();for(let j=0;j<14;j++){const s=rand()*L;fx.push({x:P.x+v[0]*s,y:P.y-8+v[1]*s,vx:0,vy:0,t:.2,c:c[j%c.length],fl:1});}};
 Object.assign(SKF,{
  // Eye of Destruction: a gaze held for a second and a half, 55% ten times along a line, and the foes it touches cannot use their skills for 4 s
- rzeye:()=>{let i=0;SFX.crit();const f=()=>{if(mode!=='play'||!P)return;const v=fdir(),ox=P.x,oy=P.y-8,L=150;
-   for(const m of rzTg(L,m=>{const dx=m.x-ox,dy=monY(m)-oy,a=dx*v[0]+dy*v[1];return a>=0&&Math.abs(dx*v[1]-dy*v[0])<8+(MT[m.type].r||6);})){hitMon(m,.55,{skill:1,rzMag:1});m.rzSealU=gTime+4;if(rzV('gslow'))m.slowU=Math.max(m.slowU||0,gTime+1.5);}
-   for(let j=0;j<12;j++){const s=rand()*L;fx.push({x:ox+v[0]*s,y:oy+v[1]*s,vx:0,vy:0,t:.16,c:j%3?'#ff3a6a':'#d060ff',fl:1});}if(++i<10)setTimeout(f,150);};f();},
+ rzeye:()=>{let i=0;SFX.crit();const f=()=>{if(mode!=='play'||!P)return;
+   for(const m of rzLine(150,8)){hitMon(m,.55,{skill:1,rzMag:1});m.rzSealU=gTime+4;if(rzV('gslow'))m.slowU=Math.max(m.slowU||0,gTime+1.5);}
+   rzLineFx(150,['#ff3a6a','#d060ff','#ff3a6a']);if(++i<10)setTimeout(f,150);};f();},
  // Earth Shatter: 240% around you, knocked down 1.5 s (a boss 0.4 s), armour torn for 8 s (they take 25% more)
  rzquake:()=>{shake=.35;SFX.slam();fx.push({ring:true,x:P.x,y:P.y-6,t:.4});for(const m of rzTg(64,()=>true)){hitMon(m,2.4,{skill:1,el:rzV('ice')?'water':'earth',stun:MT[m.type].boss?.4:1.5});m.weak=Math.max(m.weak||0,8);vfx('dust',m.x,m.y,{n:8});}},
  // Dragon Breath: a cone of fire, 50% six times (Roaring Ember: a quarter wider and stronger), and the burnt armour gives way for 6 s
@@ -12486,8 +12610,23 @@ Object.assign(SKF,{
  // Chiyou's Martial Stance: 12 s that nothing stuns, your blows half again as strong and your swings 30% faster
  rzchiyou:()=>{P.rzStU=gTime+12;fx.push({ring:true,x:P.x,y:P.y-6,t:.5});SFX.crit();toast(t('rzStOn'),'good');},
  // Hellfire Overdrive: 12 s that every blow burns with dark or fire (whichever the foe resists less), a sure critical on a burning foe
- rzhell:()=>{P.rzHfU=gTime+12;fx.push({ring:true,x:P.x,y:P.y-6,t:.5});SFX.crit();toast(t('rzHfOn'),'good');}});
-window.__GRZ={RZ,RZQ,v:k=>rzV(k),name:()=>rzName(),desc:()=>rzDesc(),gain:r=>rzGain(r),offer:(r,h)=>rzOffer(r,h),tick:dt=>rzTick(dt),ev:(i,k)=>rzEv(i,k),kill:m=>rzKill(m),atk:(m,o)=>rzAtk(m,o||{}),hurt:(d,s)=>rzHurt(d,s),dodge:(d,s)=>rzDodge(d,s),cc:()=>rzCC(),omni:()=>rzOmni(),stM:k=>rzStM(k),cast:k=>castSk(k),skills:()=>clsSkills(),sure:m=>rzSure(m),rg:m=>rzRgM(m)}; // tests
+ rzhell:()=>{P.rzHfU=gTime+12;fx.push({ring:true,x:P.x,y:P.y-6,t:.5});SFX.crit();toast(t('rzHfOn'),'good');},
+ // Second Wind: every stun and slow on you ends, and a fifth of your stamina and mana comes back
+ rzwind:()=>{P.stun=0;P.kst=0;P.sImm=Math.max(P.sImm||0,2);P.st=Math.min(maxST(),P.st+maxST()*.2);P.mp=Math.min(maxMP(),P.mp+maxMP()*.2);fx.push({ring:true,x:P.x,y:P.y-6,t:.4});vfx('dust',P.x,P.y,{n:10});toast(t('rzWindOn'),'good');hudDirty=true;},
+ // Spirit Arrow: one shot of wind spirit, 280%, through every foe on the line, and it pierces 30% of a stronger foe's level gap
+ rzspirit:()=>{SFX.swing();for(const m of rzLine(220,6))hitMon(m,2.8,{skill:1,el:'wind',rzPen:.3});rzLineFx(220,['#7af0a0','#e8fff0','#3ac878']);},
+ // Shadow Step: into the shadow behind the nearest foe, and a backstab of 300% that is a sure critical hit
+ rzshadow:()=>{const m=rzTg(130,()=>true).sort((a,b)=>Math.hypot(a.x-P.x,a.y-P.y)-Math.hypot(b.x-P.x,b.y-P.y))[0];if(!m){toast(t('rzNoTg'),'warn');return;}
+   const d=Math.hypot(m.x-P.x,m.y-P.y)||1,nx=m.x+(m.x-P.x)/d*14,ny=m.y+(m.y-P.y)/d*14;vfx('shadow',P.x,P.y-6);if(!solidT(Math.floor(nx/TS),Math.floor(ny/TS))){P.x=nx;P.y=ny;}
+   m.expU=gTime+.5;hitMon(m,3,{skill:1,el:'dark'});vfx('shadow',P.x,P.y-6);SFX.crit();},
+ // Aquatic Surge: a torrent of water ahead, 180%, that slows for 3 s, and your attacks 25% faster for 8 s
+ rzsurge:()=>{SFX.swing();for(const m of rzLine(120,14)){hitMon(m,1.8,{skill:1,el:'water',slow:3});}rzLineFx(120,['#3ab8e8','#bfefff','#2a7ac8']);P.rzAqU=gTime+8;},
+ // Mastercraft Stance: 10 s of skin as hard as iron: physical blows 40% softer, and a guard that barely gives
+ rzforge:()=>{P.rzMcU=gTime+10;fx.push({ring:true,x:P.x,y:P.y-6,t:.4});SFX.clang&&SFX.clang();toast(t('rzForgeOn'),'good');},
+ // Battle Howl: 12 s of +20% physical attack for you and your party near you (a War Chief's: +30%), and their blows break guards
+ rzhowl:()=>{P.rzHwU=gTime+12;fx.push({ring:true,x:P.x,y:P.y-6,t:.5});shake=.2;SFX.crit();toast(t('rzHowlOn'),'good');}});
+window.__GRZ={RZ,RZQ,RVQ,RZSK0,v:k=>rzV(k),name:()=>rzName(),desc:()=>rzDesc(),gain:(r,s)=>rzGain(r,s),offer:(r,h)=>rzOffer(r,h),tick:dt=>rzTick(dt),ev:(i,k)=>rzEv(i,k),kill:m=>rzKill(m),atk:(m,o)=>rzAtk(m,o||{}),hurt:(d,s)=>rzHurt(d,s),dodge:(d,s)=>rzDodge(d,s),cc:()=>rzCC(),omni:()=>rzOmni(),stM:k=>rzStM(k),cast:k=>castSk(k),skills:()=>clsSkills(),sure:m=>rzSure(m),rg:m=>rzRgM(m),
+ pick:()=>rzPickOpen(),varList:()=>rzVarList(),row:()=>rzStRow(),pickAsk:(r,s)=>rzPickAsk(r,s),varOffer:()=>rzVarOffer(),st:()=>rzSt(),spd:()=>rzSpd(),xp:()=>rzXpM(),fig:L=>{const c={};rzFig(c,L);return c;},skOf:()=>rzSkOf()}; // tests
 Object.assign(STR.ar,{race_evileye:'عين شريرة',race_giant:'عملاق',race_draco:'نص دراكوني',race_yangban:'يانجبان (نص إله)',race_demon:'ديمونكن (نص شيطان)',
  raceD_evileye:'قوة سحر +25%، فرصة كريتيكال +15%، دفاع فيزيائي -10%. باسيف «الحدس»: 15% تفادي للضربة اللي كانت هتموّتك. سكيل «عين الدمار»: نظرة مستمرة بتضرب ضرر سحري تقيل وبتقفل سكيلات الأعداء.',
  raceD_giant:'قوة جسدية +30%، صحة +25%، سرعة الضرب والمشي -20%. باسيف «الوزن العملاق»: ضربتك العادية بتوصل 20% منها للي جنب الهدف ومحدش يقدر يصدّها. سكيل «تحطيم الأرض»: خبطة في الأرض بتوقّع الأعداء وبتقطّع دروعهم.',
@@ -12562,6 +12701,82 @@ Object.assign(STR.en,{race_evileye:'Evil Eye',race_giant:'Giant',race_draco:'Hal
  sk_rzbreath:'Dragon Breath',skd_rzbreath:'Racial skill: a cone of flame ahead, 50% six times; the burnt armour gives way for 6 s.',
  sk_rzchiyou:"Chiyou's Martial Stance",skd_rzchiyou:'Racial skill: for 12 s no stun takes hold of you, your physical blows are 50% stronger and you attack 30% faster.',
  sk_rzhell:'Hellfire Overdrive',skd_rzhell:'Racial skill: for 12 s every blow is dark or fire (whichever the foe resists less), and a burning foe takes a sure critical hit.'});
+Object.assign(STR.ar,{race_elf:'إلف',race_merfolk:'عشيرة الماية (ميرفولك)',race_dwarf:'دوارف',race_orc:'أورك',rzs_elf_dark:'دارك إلف',rzs_orc_twi:'أورك الشفق',rzs_orc_frost:'أورك الصقيع',
+ raceD_human:'خبرة +10%، كل الصفات +5%. باسيف «التكيّف»: السكيلات بتتعلّم أسرع 15%. سكيل «النفَس التاني»: بيشيل الشلل والتبطيء ويرجّعلك 20% ستامينا ومانا.',
+ raceD_elf:'DEX وAGI +20%، السحر العنصري +15%، سرعة مشي +15% في الطبيعة. باسيف «ألفة العناصر»: المانا بتتملي لوحدها من الجو. سكيل الإلف «سهم الروح»: طلقة ريح بتخترق كل اللي على الخط. سكيل الدارك إلف «خطوة الضل»: بتنط ورا أقرب عدو وتطعنه كريتيكال مضمون.',
+ raceD_merfolk:'سرعة +25% في الماية والأماكن المبلولة (والمطر)، ضرر سحر الماية +20%، وبتتنفّس تحت الماية (مملكة السيرين من غير ناي ولا وقت). باسيف «درع الماية»: 10% من الضرر السحري اللي بياخدك بيبقى حاجز مؤقت. سكيل «اندفاع الماية»: سيل ماية بيبطّأ الأعداء ويسرّع ضربك.',
+ raceD_dwarf:'دفاع فيزيائي وصحة +20%، الصناعة أسهل وجودتها أعلى 25%، سرعة مشي -15%. باسيف «الجسم المتين»: الضرر الفيزيائي أقل 10%. سكيل «وقفة الصانع الماهر»: جلدك بيتقسّى، الضربات الفيزيائية أضعف 40% والجارد بالكاد بيتهز.',
+ raceD_orc:'قوة جسدية +20%، مقاومة البرد +15%. باسيف «شرف القبيلة»: قوة هجومك بتزيد كل ما صحتك تقل (لحد +30%). سكيل «صرخة الحرب»: انت والفريق اللي جنبك ضربكم الفيزيائي +20% وبيكسر الجارد لفترة.',
+ rzv_human_v1:'الدم الملكي',rzv_human_v2:'الإنسان المتسامي',rzv_elf_v1:'الإلف العالي',rzv_elf_v2:'إلف الفراغ',rzv_merfolk_v1:'السيرين الملكية',rzv_merfolk_v2:'ليفياثان الأعماق',
+ rzv_dwarf_v1:'دوارف الرونات',rzv_dwarf_v2:'الدوارف المظلم',rzv_orc_v1:'زعيم الحرب',rzv_orc_v2:'شامان الأجداد',
+ rzvD_human_v1:'(الدم الملكي: كل الصفات +5%، جولد +10%، و«هالة القيادة»: ضرر أعضاء فريقك اللي جنبك +5%.)',
+ rzvD_human_v2:'(الإنسان المتسامي: خبرة +10%، كل الصفات +5%، و«كاسر الحدود»: حدود الكريتيكال وسرعة الضرب وسرعة المشي أعلى 10%.)',
+ rzvD_elf_v1:'(الإلف العالي: السحر العنصري +10%، الكولداون -5%، و«بركة شجرة العالم»: المانا بتتملي الضعف.)',
+ rzvD_elf_v2:'(إلف الفراغ: اختراق دروع +15%، ضرر الكريتيكال +10%، و«انجراف الطور»: 10% وانت بتتفادى إنك تبقى مش ملموس لثانية.)',
+ rzvD_merfolk_v1:'(السيرين الملكية: سحر الماية والتلج +10%، مدة الشلل والتبطيء اللي بتعمله +10%، و«الإغراء»: الأعداء اللي حواليك بياخدوا من سحرك 8% أكتر.)',
+ rzvD_merfolk_v2:'(ليفياثان الأعماق: صحة +15%، دفاع فيزيائي +10%، و«ضغط الأعماق»: الأعداء اللي لازقين فيك بيبطّأوا وبياخدوا ضرر سحق خفيف.)',
+ rzvD_dwarf_v1:'(دوارف الرونات: مقاومة السحر +10%، نجاح التطوير +15%، و«النقش الروني»: السلاح اللي انت صنعته بيضرب أقوى 8%.)',
+ rzvD_dwarf_v2:'(الدوارف المظلم: مقاومة النار والحمم +15%، اختراق دروع +10%، و«الدم المنصهر»: اللي يضربك من قريب بيتحرق.)',
+ rzvD_orc_v1:'(زعيم الحرب: قوة جسدية +10%، مقاومة الشلل +10%، و«سيد الحرب»: صرخة الحرب أقوى 50% (+30%).)',
+ rzvD_orc_v2:'(شامان الأجداد: سحر الأرواح والعناصر +15%، سرقة حياة +10%، و«إرادة الطوطم»: مرة كل 5 دقايق لما صحتك تنزل تحت 5% بيطلع حاجز ينقذك من الموت.)',
+ rzVars:'وانت بتاخد العرق، {p1}% يطلعلك «{a}» و{p2}% «{b}». ولكل سلالة كويست بيصحّيها لو مطلعتش.',
+ rzPick1:'[اختيار العرق الأساسي]',rzPick2:'تقدر تختار عرقك الأساسي مرة واحدة ببلاش (حتى لو هتفضل إنسان): قدرات العرق بتصحى أول ما تختار. بعد كده مفيش تغيير تاني غير بشخصية جديدة.',rzPickUsed:'[استخدمت تغيير العرق المجاني خلاص. عشان تغيّره تاني لازم تبدأ بشخصية جديدة.]',
+ rzLater:'بعدين',rzPickW:'متأكد إنك عايز تبقى {r}؟ ده التغيير المجاني الوحيد، وعرقك الحالي ({c}) هيتشال.',rzPickY:'أيوه، أبقى {r}',rzPickBack:'لا، ارجع',
+ rzPickTip:'اختار عرقك الأساسي مرة ببلاش عشان قدراته تصحى (الإنسان كمان): نافذة الحالة ← 🧬',rzPickB:'اختار العرق الأساسي (مرة ببلاش)',rzVarB:'كويستات السلالة',
+ rzVarNone:'[عرقك معندوش سلالات.]',rzVarOwn:'دي سلالتك',rzVarDone:'خلصت',rzVarOn:'شغّال',rzVarLv:'لفل {n}',rzVarGo:'متاح',rzVarHead:'[سلالات {r}]',
+ rzVarTip:'كويست سلالة «{v}» اتفتح: نافذة الحالة ← 🩸',rzVarW:'تحذير: السلالة الجديدة هتحل محل «{v}».',rzVarQ:'[دمك صحي: بقيت {v}!]',rzVarHum:'دمك طلع نادر: {v}!',
+ rzBarT:'حاجز!',rzTotT:'إرادة الطوطم!',rzPhT:'انجراف!',rzWindOn:'النفَس التاني: رجعت',rzNoTg:'مفيش عدو قريب',rzForgeOn:'وقفة الصانع: جلدك بقى حديد',rzHowlOn:'صرخة الحرب!',
+ q_rvhu1:'دم الملوك',q_rvhu2:'ما بعد الحدود',q_rvel1:'غابات شجرة العالم',q_rvel2:'رقصة الفراغ',q_rvme1:'أغنية السيرين',q_rvme2:'وحش الأعماق',q_rvdw1:'يد الرونات',q_rvdw2:'قلب البركان',
+ q_rvor1:'جدار القبيلة',q_rvor2:'أرواح الأجداد',q_rvee1:'نظرة الملك',q_rvee2:'عين فوق الشياطين',q_rvgi1:'الشمال المتجمد',q_rvgi2:'خطوات التايتن',q_rvdr1:'النار القديمة',q_rvdr2:'تنين حقيقي',
+ q_rvya1:'موظف السما',q_rvya2:'طريق إله القتال',q_rvde1:'الجلالة الجهنمية',q_rvde2:'أمير الجحيم',
+ o_rvhu1:'اهزم بوسات {c}/{n}',o_rvhu2:'اقتل وحوش أعلى من لفلك {c}/{n}',o_rvel1:'اقتل وحوش في الطبيعة (برا المدن) {c}/{n}',o_rvel2:'اتفادى {c}/{n}',o_rvme1:'اقتل وحوش في الماية أو تحت المطر {c}/{n}',
+ o_rvme2:'اهزم الكراكن {c}/{n}',o_rvdw1:'اصنع حاجات نادرة أو أحسن {c}/{n}',o_rvdw2:'اقتل وحوش نار {c}/{n}',o_rvor1:'صد أو بارِي ضربات {c}/{n}',o_rvor2:'اقتل أوندد أو أرواح شريرة {c}/{n}',
+ o_rvee1:'اقتل شياطين {c}/{n}',o_rvee2:'اهزم بيليال {c}/{n}',o_rvgi1:'اقتل وحوش في الشمال المتجمد {c}/{n}',o_rvgi2:'اهزم بوسات لفل 300 أو أكتر {c}/{n}',o_rvdr1:'اهزم تراوكا {c}/{n}',
+ o_rvdr2:'اهزم التنين الأزرق {c}/{n}',o_rvya1:'اقتل وحوش في القارة الشرقية {c}/{n}',o_rvya2:'صد أو بارِي ضربات {c}/{n}',o_rvde1:'اقتل وحوش في الجحيم {c}/{n}',o_rvde2:'اهزم ماركوسياس {c}/{n}',
+ sk_rzwind:'النفَس التاني',skd_rzwind:'سكيل العرق: بيشيل الشلل والتبطيء من عليك ويرجّعلك 20% ستامينا و20% مانا.',
+ sk_rzspirit:'سهم الروح',skd_rzspirit:'سكيل العرق: طلقة روح ريح 280% بتعدي في كل الأعداء اللي على الخط، وبتخترق 30% من فرق اللفل.',
+ sk_rzshadow:'خطوة ضل الدارك إلف',skd_rzshadow:'سكيل العرق: بتدخل في الضل ورا أقرب عدو وتطعنه 300% كريتيكال مضمون.',
+ sk_rzsurge:'اندفاع الماية',skd_rzsurge:'سكيل العرق: سيل ماية قدامك 180% بيبطّأ 3 ثواني، وسرعة ضربك +25% لمدة 8 ثواني.',
+ sk_rzforge:'وقفة الصانع الماهر',skd_rzforge:'سكيل العرق: 10 ثواني جلدك حديد: الضربات الفيزيائية أضعف 40% والجارد بالكاد بيتهز.',
+ sk_rzhowl:'صرخة الحرب',skd_rzhowl:'سكيل العرق: 12 ثانية انت والفريق اللي جنبك ضربكم الفيزيائي +20% (زعيم الحرب: +30%) وبيكسر الجارد.'});
+Object.assign(STR.en,{race_elf:'Elf',race_merfolk:'Water Clan (Merfolk)',race_dwarf:'Dwarf',race_orc:'Orc',rzs_elf_dark:'Dark Elf',rzs_orc_twi:'Twilight Orc',rzs_orc_frost:'Frostlight Orc',
+ raceD_human:'+10% experience, +5% to every attribute. Adaptability: skills learn 15% faster. Second Wind: ends any stun or slow on you and gives back 20% stamina and mana.',
+ raceD_elf:'+20% DEX and AGI, +15% elemental magic, +15% move speed in nature. Elemental Affinity: mana fills by itself from the air. An Elf\'s Spirit Arrow: a shot of wind through everything on the line. A Dark Elf\'s Shadow Step: behind the nearest foe and a backstab that is a sure critical hit.',
+ raceD_merfolk:'+25% speed in water and wet places (and the rain), +20% water magic damage, and you breathe under water (the Siren kingdom without a flute or a clock). Hydro-Shield: 10% of the magic damage you take becomes a short barrier. Aquatic Surge: a torrent that slows foes and quickens your attacks.',
+ raceD_dwarf:'+20% physical defence and health, crafting 25% easier and better, -15% move speed. Stout Physique: 10% less physical damage. Mastercraft Stance: skin as hard as iron, physical blows 40% softer and a guard that barely gives.',
+ raceD_orc:'+20% strength, +15% cold resistance. Honor of the Tribe: your attack rises as your health falls (up to +30%). Battle Howl: you and your party near you hit 20% harder and break guards for a while.',
+ rzv_human_v1:'Royal Blood',rzv_human_v2:'Transcendent Human',rzv_elf_v1:'High Elf',rzv_elf_v2:'Void Elf',rzv_merfolk_v1:'Royal Siren',rzv_merfolk_v2:'Abyssal Leviathan',
+ rzv_dwarf_v1:'Runesmith Dwarf',rzv_dwarf_v2:'Dark Dwarf',rzv_orc_v1:'War Chief',rzv_orc_v2:'Ancestral Shaman Orc',
+ rzvD_human_v1:'(Royal Blood: +5% to every attribute, +10% gold, and Commanding Aura: your party members near you deal 5% more damage.)',
+ rzvD_human_v2:'(Transcendent Human: +10% experience, +5% to every core stat, and Limit Breaker: the caps on critical chance, attack speed and move speed go 10% higher.)',
+ rzvD_elf_v1:'(High Elf: +10% elemental magic, -5% cooldowns, and World Tree Blessing: mana fills twice as fast.)',
+ rzvD_elf_v2:'(Void Elf: +15% armour penetration, +10% critical damage, and Phase Drift: a 10% chance to turn intangible for a second as you dodge.)',
+ rzvD_merfolk_v1:'(Royal Siren: +10% water and ice magic, your stuns and slows last 10% longer, and Lure: the foes around you take 8% more from your magic.)',
+ rzvD_merfolk_v2:'(Abyssal Leviathan: +15% health, +10% physical defence, and Pressure Depth: the foes pressed against you slow and take a little crushing damage.)',
+ rzvD_dwarf_v1:'(Runesmith Dwarf: +10% magic resistance, +15% enhancement success, and Runic Carving: a weapon you made yourself hits 8% harder.)',
+ rzvD_dwarf_v2:'(Dark Dwarf: +15% fire and lava resistance, +10% armour penetration, and Molten Blood: whoever strikes you up close burns.)',
+ rzvD_orc_v1:'(War Chief: +10% strength, +10% resistance to stuns, and Bloodline Warlord: the Battle Howl 50% stronger, +30%.)',
+ rzvD_orc_v2:'(Ancestral Shaman Orc: +15% spirit and elemental magic, +10% life steal, and Totemic Will: once every 5 minutes, falling under 5% health raises a barrier that cheats death.)',
+ rzVars:'As you take the race: a {p1}% chance of "{a}" and {p2}% of "{b}". Each bloodline also has a quest that awakens it if it did not come.',
+ rzPick1:'[Base race]',rzPick2:'You may choose your base race once for free (staying Human counts): the race\'s powers wake when you choose. After that only a new character changes it.',rzPickUsed:'[You have used your free change of race. To change it again you must start a new character.]',
+ rzLater:'Later',rzPickW:'Become {r}? This is your only free change, and your current race ({c}) will be replaced.',rzPickY:'Yes, become {r}',rzPickBack:'No, go back',
+ rzPickTip:'Choose your base race once for free to wake its powers (Humans too): status window → 🧬',rzPickB:'Choose base race (free, once)',rzVarB:'Bloodline quests',
+ rzVarNone:'[Your race has no bloodlines.]',rzVarOwn:'yours',rzVarDone:'done',rzVarOn:'in progress',rzVarLv:'Lv {n}',rzVarGo:'open',rzVarHead:'[Bloodlines of the {r}]',
+ rzVarTip:'The bloodline quest "{v}" is open: status window → 🩸',rzVarW:'Warning: the new bloodline replaces "{v}".',rzVarQ:'[Your blood has awakened: you are now {v}!]',rzVarHum:'Your blood is rare: {v}!',
+ rzBarT:'BARRIER!',rzTotT:'TOTEMIC WILL!',rzPhT:'PHASE!',rzWindOn:'Second Wind: you are back on your feet',rzNoTg:'No foe near you',rzForgeOn:'Mastercraft Stance: your skin is iron',rzHowlOn:'BATTLE HOWL!',
+ q_rvhu1:'Blood of Kings',q_rvhu2:'Beyond the Limits',q_rvel1:'Woods of the World Tree',q_rvel2:'Dance of the Void',q_rvme1:"The Siren's Song",q_rvme2:'Beast of the Deep',q_rvdw1:'The Rune Hand',q_rvdw2:'Heart of the Volcano',
+ q_rvor1:'Wall of the Tribe',q_rvor2:'Spirits of the Ancestors',q_rvee1:"The King's Gaze",q_rvee2:'An Eye above Demons',q_rvgi1:'The Frozen North',q_rvgi2:"The Titan's Steps",q_rvdr1:'The Old Fire',q_rvdr2:'A True Dragon',
+ q_rvya1:'Official of Heaven',q_rvya2:"The Martial God's Road",q_rvde1:'Infernal Majesty',q_rvde2:'Prince of Hell',
+ o_rvhu1:'Defeat bosses {c}/{n}',o_rvhu2:'Slay monsters above your level {c}/{n}',o_rvel1:'Slay monsters in nature (outside towns) {c}/{n}',o_rvel2:'Dodge {c}/{n}',o_rvme1:'Slay monsters in water or under the rain {c}/{n}',
+ o_rvme2:'Defeat the Kraken {c}/{n}',o_rvdw1:'Craft pieces of rare rating or better {c}/{n}',o_rvdw2:'Slay fire monsters {c}/{n}',o_rvor1:'Block or parry blows {c}/{n}',o_rvor2:'Slay undead or evil spirits {c}/{n}',
+ o_rvee1:'Slay demons {c}/{n}',o_rvee2:'Defeat Belial {c}/{n}',o_rvgi1:'Slay monsters in the frozen north {c}/{n}',o_rvgi2:'Defeat bosses of level 300 or more {c}/{n}',o_rvdr1:'Defeat Trauka {c}/{n}',
+ o_rvdr2:'Defeat the Blue Dragon {c}/{n}',o_rvya1:'Slay monsters on the East Continent {c}/{n}',o_rvya2:'Block or parry blows {c}/{n}',o_rvde1:'Slay monsters in hell {c}/{n}',o_rvde2:'Defeat Marchosias {c}/{n}',
+ sk_rzwind:'Second Wind',skd_rzwind:'Racial skill: ends any stun or slow on you and gives back 20% of your stamina and 20% of your mana.',
+ sk_rzspirit:'Spirit Arrow',skd_rzspirit:'Racial skill: a shot of wind spirit, 280%, through every foe on the line; it pierces 30% of a stronger foe\'s level gap.',
+ sk_rzshadow:"Dark Elf's Shadow Step",skd_rzshadow:'Racial skill: into the shadow behind the nearest foe, and a backstab of 300% that is a sure critical hit.',
+ sk_rzsurge:'Aquatic Surge',skd_rzsurge:'Racial skill: a torrent of water ahead, 180%, that slows for 3 s, and your attacks 25% faster for 8 s.',
+ sk_rzforge:'Mastercraft Stance',skd_rzforge:'Racial skill: 10 s of skin as hard as iron: physical blows 40% softer and a guard that barely gives.',
+ sk_rzhowl:'Battle Howl',skd_rzhowl:'Racial skill: 12 s of +20% physical attack for you and your party near you (a War Chief\'s: +30%), and your blows break guards.'});
 /* ---------------- Farming 2, Pedro Harbor and the Kraken, the bard and the stage (owner 2026-10-21: third batch, patch 4) ----------------
    Seasons turn every two days of the world clock, the same for every player. Piaro's new field has eight plots: buy seed,
    plant it and come back when it has grown (it grows while you are away). A crop out of season grows at half speed and gives
@@ -14437,9 +14652,9 @@ function sirIn(){return !!P&&P.y>=WMH*TS&&zoneAt(P.x,P.y)==='zSiren';}
 // the gate shows on the night of the two moons; inside, the flute's 25 minutes
 function sirTick(){if(!SIRG)SIRG=DGATES.find(g=>g.sir);if(SIRG)SIRG.hide=!dmoonNight();if(!S||!P)return;
  if(!sirIn()){SIRW=0;return;}S.books=S.books||{};const left=(S.books.lfB||0)-Date.now();
- if(left<=0){if(mode==='dialog'||mode==='cut'||mode==='dead')return;if(WCLOSE[mode])WCLOSE[mode]();const u=DGATES.find(g=>g.hint==='hUp'&&dunAt(g.x,g.y)&&dunAt(g.x,g.y).k==='zSiren');if(u){P.x=u.to.x;P.y=u.to.y;camSnap=true;}toast(t(S.books.lfB?'sirOut':'sirNoFl'),'warn');return;}
+ if(left<=0&&myRace()!=='merfolk'){if(mode==='dialog'||mode==='cut'||mode==='dead')return;if(WCLOSE[mode])WCLOSE[mode]();const u=DGATES.find(g=>g.hint==='hUp'&&dunAt(g.x,g.y)&&dunAt(g.x,g.y).k==='zSiren');if(u){P.x=u.to.x;P.y=u.to.y;camSnap=true;}toast(t(S.books.lfB?'sirOut':'sirNoFl'),'warn');return;}
  const m=Math.ceil(left/60000);if((m===5||m===1)&&SIRW!==m){SIRW=m;toast(t('sirLeft'+m),'warn');}}
-function sirGate(g){if(!dmoonNight()){toast(t('sirShut'),'warn');return false;}if(!sirFl()){toast(t('sirNoFl'),'warn');return false;}
+function sirGate(g){if(!dmoonNight()){toast(t('sirShut'),'warn');return false;}if(!sirFl()&&myRace()!=='merfolk'){toast(t('sirNoFl'),'warn');return false;}
  S.books=S.books||{};S.books.lfB=Date.now()+SIRB;toast(t('sirPlay'),'good');setTimeout(()=>{if(fdClaim('siren'))toast(t('sirFirst'),'good');},600);save(true);return true;}
 // the flute: the fisherman's, for the fish of his errand
 function sirFlute(q){S.books=S.books||{};if(S.books.lflute)return;S.books.lflute=Date.now();const f=()=>{toast(t('sirGotFl'),'good');SFX.rare&&SFX.rare();hudDirty=true;};
@@ -17397,7 +17612,7 @@ const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(try
 // presence field: the events of the last 0.7 s, oldest first, within FXMAX characters (each one goes out in about 3 updates)
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
 // clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
-function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(S&&S.cls==='saintess'&&sncIn(P.x,P.y)?'Z':'')+(P.hrgU>gTime?'R':'')+(P.ssFU>gTime?'W':'')+(P.shwU>gTime?'D':'')+(lkCodes()?'C':'')+(P.purP>gTime?'U':'')+(P.morP>gTime?'M':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(mtOf()&&mtOf().aura?'N':'')+(P.jud>0?'j':'')+(P.wco>gTime?'O':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+p4DSt()+vpSt()+nvSt()+p3RodSt():'';}
+function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(S&&S.cls==='saintess'&&sncIn(P.x,P.y)?'Z':'')+(P.hrgU>gTime?'R':'')+(P.ssFU>gTime?'W':'')+(P.shwU>gTime?'D':'')+(lkCodes()?'C':'')+(P.purP>gTime?'U':'')+(P.morP>gTime?'M':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(mtOf()&&mtOf().aura?'N':'')+(P.jud>0?'j':'')+(P.wco>gTime?'O':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+p4DSt()+vpSt()+rzSt()+nvSt()+p3RodSt():'';}
 function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));if(S&&S.look&&ADYE[S.look.ad|0]&&gr)tags.push(JSON.stringify('ad:'+(S.look.ad|0)));{const w=weapon();if(w&&w.cw&&!w.skn)tags.push(JSON.stringify('cw:'+w.cw));}const mr=marPub();if(mr)tags.push(JSON.stringify('mr:'+mr));const pd=pdPub();if(pd)tags.push(JSON.stringify('pd:'+pd));const mn=mnPub();if(mn)tags.push(JSON.stringify('mn:'+mn));{const ln=lnkPub();if(ln)tags.push(JSON.stringify(ln));}if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
  let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it

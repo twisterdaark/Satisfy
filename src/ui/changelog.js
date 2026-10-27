@@ -7,6 +7,20 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27baseraces', ver: '3.69', d: '2026-10-27',
+      ar: ["أعراق أساسية جديدة: بشري، إلف أو دارك إلف، عشيرة الماية (ميرفولك)، دوارف، وأورك (الشفق أو الصقيع). كل عرق ليه أرقامه وباسيف وسكيل على البار (النفَس التاني، سهم الروح، خطوة الضل، اندفاع الماية، وقفة الصانع الماهر، صرخة الحرب).",
+        "كل لاعب يقدر يغيّر عرقه الأساسي مرة واحدة ببلاش من نافذة الحالة (🧬). بعد كده مفيش تغيير غير بشخصية جديدة. قدرات العرق بتصحى أول ما تختار (حتى لو اخترت تفضل بشري)، وساعتها سلالتك بتتحدد مرة.",
+        "كل عرق ليه سكين: لون بشرة خاص بيه، وودان الإلف، وأنياب الأورك، وزعانف الميرفولك، وقرون الديمونكن، وحراشيف النص دراكوني. اللاعبين التانيين بيشوفوه أونلاين.",
+        "كل سلالة (حتى سلالات الأعراق اللي بتتفتح) ليها كويست بيصحّيها، غير فرصة إنها تطلعلك وانت بتاخد العرق. شوفها من نافذة الحالة (🩸). الأورك: زعيم الحرب 5% وشامان الأجداد 1%.",
+        "الميرفولك بيتنفسوا تحت الماية: مملكة السيرين من غير ناي ولا وقت. هالة الدم الملكي وصرخة الحرب بيوصلوا لأعضاء فريقك أونلاين.",
+        "اختبار جديد لده."],
+      en: ["New base races: Human, Elf or Dark Elf, the Water Clan (Merfolk), Dwarf, and Orc (Twilight or Frostlight). Each race has its numbers, a passive and a skill for the bar (Second Wind, Spirit Arrow, Shadow Step, Aquatic Surge, Mastercraft Stance, Battle Howl).",
+        "Every player may change base race once for free from the status window (🧬). After that only a new character changes it. The race's powers wake when you choose (staying Human counts too), and your bloodline rolls then.",
+        "Every race has its skin: a skin colour of its own, an elf's ears, an orc's tusks, a merfolk's fins, a demonkin's horns, a half-draconian's scales. Other players see it online.",
+        "Every bloodline (the unlockable races' too) has a quest that awakens it, besides the chance of rolling it as you take the race. See them in the status window (🩸). Orcs: War Chief 5% and Ancestral Shaman 1%.",
+        "Merfolk breathe under water: the Siren kingdom without a flute or a clock. Royal Blood's aura and the Battle Howl reach your party members online.",
+        "A new test for this."],
+      hide: [5] },
     { v: '2026-10-27uicard', ver: '3.68', d: '2026-10-27',
       ar: ["النوافذ بقت نسخة أقرب من المانهوا: بقت سادة مش شفافة، وكل كلام النظام بالإنجليزي بقى حروف كبيرة عريضة زي خط المانهوا.",
         "التولتيب بتاع أي أيتم بقى كارت الأيتم بتاع المانهوا: «أيتم» فوق، صورة الأيتم في إطار بلون الندرة، والاسم بين قوسين [ ]، والفئة والستاتس، وبعدين المتانة والباقي.",
