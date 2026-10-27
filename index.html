@@ -1579,7 +1579,7 @@ const WSH={blstaff:{l:12,c:'#8a1a4a',k:'staff'},dpgs:{l:14,c:'#5ac8a0',w:1,k:'sw
 function weapPix(g,hx,hy,w,dir){if(!w||!WSH[w.id]||dir===1)return;const k=WSH[w.id].k,tilt=k==='sword'||k==='hammer'||k==='dagger'?.35:k==='spear'?.2:0;SA.weapons.draw(g,wKey(w),w.r,hx,hy,dir===3?-tilt:tilt,dir===3);}
 const ICN={},ICC={};
 
-function iconC(k){if(typeof k==='string'&&/^rb_[cams]_/.test(k))k='rbook'+k[3];if(k==='ecscr')return ICC[k]||(ICC[k]=ecIcon());if(k==='nmtick')return ICC[k]||(ICC[k]=nmIcon());return ICC[k]||(ICC[k]=SA.icons.iconCanvas(k));}
+function iconC(k){if(typeof k==='string'&&/^rl_[a-z]+$/.test(k))return ICC[k]||(ICC[k]=rqIcon(k.slice(3)));if(typeof k==='string'&&/^rb_[cams]_/.test(k))k='rbook'+k[3];if(k==='ecscr')return ICC[k]||(ICC[k]=ecIcon());if(k==='nmtick')return ICC[k]||(ICC[k]=nmIcon());return ICC[k]||(ICC[k]=SA.icons.iconCanvas(k));}
 function icon(k){return ICN[k]||(ICN[k]=iconC(k).toDataURL());}
 
 /* ---------------- map ---------------- */
@@ -4979,7 +4979,7 @@ const CMPK=[['atk',i=>i.uid?iAtk(i):i.atk||0],['def',i=>i.uid?iDef(i):i.def||0],
 function cmpTip(i){const w=cmpWorn(i);if(!w)return i&&i.slot&&!isEq(i)&&i.slot!=='x'?`<br><small style="color:#7ae07a">${t('cmpNone')}</small>`:'';const r=[];
  for(const [lb,f] of CMPK){const a=f(i),b=f(w);if(!a&&!b)continue;const d=a-b;r.push(`<span style="color:${d>0?'#7ae07a':d<0?'#ff6a5a':'#9fb4c8'}">${t(lb)} ${a}${d>0?' ↑+'+d:d<0?' ↓'+d:' ='}</span>`);}
  return r.length?`<br><small>${t('cmpVs',{it:esc(inm(w))})}</small><br><small>${r.join(' · ')}</small>`:'';}
-const ivLocked=s=>{if(s&&s.it&&s.it.lock){toast(t('ivLockedT'),'warn');SFX.deny();return true;}return false;};
+const ivLocked=s=>{if(s&&s.it&&s.it.slot==='rl'){toast(t('rqKeep'),'warn');SFX.deny();return true;}if(s&&s.it&&s.it.lock){toast(t('ivLockedT'),'warn');SFX.deny();return true;}return false;};
 function ivMark(s,k){if(!s.it){toast(t('ivGearOnly'),'warn');SFX.deny();return;}s.it[k]=s.it[k]?0:1;SFX.click();toast(t((k==='fav'?'ivFav':'ivLock')+(s.it[k]?'On':'Off'),{it:inm(s.it)}),s.it[k]?'good':undefined);save(true);}
 // owner 2026-10-22: search the bag (and the trade window) by name, in the language shown
 const bagQ=(a,q)=>{q=(q||'').trim().toLowerCase();return q?a.filter(s=>(s.it?inm(s.it):t(s.k)).toLowerCase().includes(q)):a;};
@@ -6332,7 +6332,7 @@ const TRC=[
  // Northern Underwear: cold resistance +5% (damage taken in the frozen north), agility -5%, lower body skills -10% (the dodge)
  {id:'cunder',slot:'u',def:5,agi:1,need:{leather:1,herb:1},xp:8,n:5},
  {id:'nunder',slot:'u',def:4,cold:.05,agp:-.05,dsh:-.1,need:{leather:2,herb:2},xp:10,n:6}];
-const rcById=id=>RC.find(x=>x.id===id)||TRC.find(x=>x.id===id);
+const rcById=id=>RC.find(x=>x.id===id)||TRC.find(x=>x.id===id)||(RLC&&RLC.find(x=>x.id===id));   // (v3.74) a relic is no recipe: RLC
 // the first underwear of unique grade or better a tailor (or Pagma's Successor) sews: all stats +2 for good, reputation +30
 function undFirst(it){if(it.slot!=='u'||it.r<3)return;S.undf=S.undf||{};if(S.undf[it.id])return;S.undf[it.id]=1;S.undfN=(S.undfN||0)+2;crepAdd(30);setTimeout(()=>toast(t('undFirst',{it:t(it.id)}),'good'),500);SFX.legendary();}
 window.__GUND={first:it=>undFirst(it),stat:k=>stat(k),hurt:(d,ml)=>hurtPlayer(d,ml,null),dodge:()=>dodge(),get P(){return P},get NDROP(){return NDROP},sewOk:()=>NPCT.stylist.opts().some(o=>o.l===t('oSew'))};
@@ -7005,13 +7005,13 @@ function freshState(){
 // Advancements (SAT-CLASS-002): every 100 levels the body breaks through a limit. Each one adds +10 to every stat and
 // multiplies all stats by a further 5% (first at 100, second at 200, ...).
 const advN=()=>Math.min(9,Math.floor((S&&S.lv||1)/100));
-const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Math.round((S.st[k]+S.bonus+(S.undfN||0)+a*10+(tlOn('sonlaw')?20:0)+ttSt(k)+(k==='agi'?gearSum('agi'):0))*(1+a*.05)*bhStat(k)*(k==='agi'?1+gearSum('agp'):1)*(tlOn('paint')?1.03:1)*ttStM(k)*(candyOn()?1.3:1)*(P&&P.gjbU>gTime?1.2:1)*lkCodeM()*((k==='sta'||k==='dex')&&patOn()?3:1)*(eaPen(k)?.9:1)*(UNIM&&UNIM.m||1)*rzStM(k)*awkStM()*egoStM(k))+setBon(k);};
+const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Math.round((S.st[k]+S.bonus+(S.undfN||0)+a*10+(tlOn('sonlaw')?20:0)+ttSt(k)+(k==='agi'?gearSum('agi'):0))*(1+a*.05)*bhStat(k)*(k==='agi'?1+gearSum('agp'):1)*(tlOn('paint')?1.03:1)*ttStM(k)*(candyOn()?1.3:1)*(P&&P.gjbU>gTime?1.2:1)*lkCodeM()*((k==='sta'||k==='dex')&&patOn()?3:1)*(eaPen(k)?.9:1)*(UNIM&&UNIM.m||1)*rzStM(k)*awkStM()*egoStM(k)*rqStM())+setBon(k);};
 // Piaro's lesson (manhwa): keep Strength and Stamina at 1:1. Once learned, while the two stay within 10% of each other the
 // body is balanced: +8% damage and max HP, faster stamina recovery, cheaper dodges, and Second Wind when health runs low.
 // the golden ratio (novel ch 315, 1423): Strength and Agility kept 1:1. A hidden stat: always on, never shown in the status window
 const balanced=()=>!!(S&&S.st.str>=20&&S.st.agi>=20&&Math.abs(S.st.str-S.st.agi)<=Math.max(S.st.str,S.st.agi)*.1);
 const dodgeCost=()=>balanced()?20:25;
-function maxHP(){return Math.round((1+cpStat('hp'))*(1+achB('hp'))*(100+stat('sta')*10+(tlOn('chief')?60:0)+ttB('hp'))*(1+ttB('hpp'))*(balanced()?1.08:1)*(S.cls==='gknight'?1.15:S.cls==='knight'?1.2:S.cls==='paladin'?1.15:S.cls==='necro'?.9:S.cls==='orator'?.8:1)*(tlOn('purifier')?1.1:1)*(tlOn('climber')?1.05:1)*(P&&P.bmf==='bear'?1.3:P&&P.bmf==='lion'?1.15:1)*(1+gearSum('hpp'))*(P&&P.gjb2U>gTime?1.3:1)*rzHpM());}
+function maxHP(){return Math.round((1+cpStat('hp'))*(1+achB('hp'))*(100+stat('sta')*10+(tlOn('chief')?60:0)+ttB('hp'))*(1+ttB('hpp'))*(balanced()?1.08:1)*(S.cls==='gknight'?1.15:S.cls==='knight'?1.2:S.cls==='paladin'?1.15:S.cls==='necro'?.9:S.cls==='orator'?.8:1)*(tlOn('purifier')?1.1:1)*(tlOn('climber')?1.05:1)*(P&&P.bmf==='bear'?1.3:P&&P.bmf==='lion'?1.15:1)*(1+gearSum('hpp'))*(P&&P.gjb2U>gTime?1.3:1)*rzHpM()*rqHpM());}
 function maxST(){return 80+stat('sta')*2;}
 // mana (owner 2026-10-23, "like the novel"): 3 MP per Intelligence point, 6 after the Second Awakening (level 200). A skill's
 // cost is a share of a reference pool, not of your own mana: your Intelligence at 3 MP a point, capped at what 40% of your
@@ -7027,7 +7027,7 @@ function dmgMult(){return awkAtkM()*egoDmM()*(1+cpStat('atk'))*(1+ttB('dmg'))*(1
 // slightly faster attacks with that kind (level 1 at 15 hits, 10 at 1500, capped at 50)
 const mastLv=k=>Math.min(50,Math.floor(Math.sqrt(((S.mast||{})[k]||0)/15)));
 function trainMast(){const k=weapKind();S.mast=S.mast||{};const was=mastLv(k);S.mast[k]=(S.mast[k]||0)+1;const now=mastLv(k);if(now>was){toast(t('mastUp',{w:t('wk_'+k),n:now}),'good');SFX.level();}}
-function atkCD(){return rzAcd()*egoAsM()*(blNear()?1.25:1)*(hlDeb()?1.3:1)*(auOn()?.3:weapon().spd)*hcAcd()*(1-Math.min(.35*rzCapM(),stat('agi')*.0012))*(1-mastLv(weapKind())*.003)*(1-Math.min(.25,gearSum('as')))*(1-(P.gale||0)*.01)*(1-(P.qf||0)*.005)*(P.qm>0?.85:1)*(S.bh&&S.bh.wm?.99:1)*(S.cls==='tzudan'&&pasOn('tzweap')?.85:1)*(P&&P.kyGU>gTime?.67:1)/(1+bzkK()[1])/(1+ssAs())/(poemOn()?1.2:1);}
+function atkCD(){return rzAcd()*egoAsM()*rqAsM()*(blNear()?1.25:1)*(hlDeb()?1.3:1)*(auOn()?.3:weapon().spd)*hcAcd()*(1-Math.min(.35*rzCapM(),stat('agi')*.0012))*(1-mastLv(weapKind())*.003)*(1-Math.min(.25,gearSum('as')))*(1-(P.gale||0)*.01)*(1-(P.qf||0)*.005)*(P.qm>0?.85:1)*(S.bh&&S.bh.wm?.99:1)*(S.cls==='tzudan'&&pasOn('tzweap')?.85:1)*(P&&P.kyGU>gTime?.67:1)/(1+bzkK()[1])/(1+ssAs())/(poemOn()?1.2:1);}
 // damage vs a higher-level monster falls off with the gap but never below 12%, so a big gap is a slow fight, not an immune wall
 // owner 2026-10-22: a Lv 1 killed a Lv 130 monster. Up to 50 levels above you, you still do at least 35%; past that the
 // floor falls fast, to 2% at 100 levels and more
@@ -7382,7 +7382,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(m.type==='guardian'
  if(!o.pure&&m.type==='kraugel'&&!m.st&&!(P.bdetU>gTime)&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
  if(o.skill&&!o.spr&&P.sprW>gTime)bzSpray(m,mul); // Braham's Magic Spray
  if(o.skill&&!o.chain&&!o.dot&&weapKind()==='sword')swEGain(.003);   // (v3.14) a skill's blow fills a little Sword Energy
- let dmg=((o.aura?auAtkV():atkV())+(o.addAtk||0))*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.nolv||o.skill&&S.cls==='lantier'?Math.max(1,lvF(m.lv)):o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m)*cpPen(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(poemOn()?1.4:1)*(dsRegIn()?1.2:1)*(o.skill&&S.cls==='lknight'&&pasOn('lkse')&&weapKind()==='sword'?1+.15*pasM('lkse'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*wyAtk(m,o)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*gpAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*rzAtk(m,o)*awkAtk(m,o)*egoAtk(m,o)*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<Math.min(ssLow()?.9:.5*rzCapM(),(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)+psCr()+(aEyes()?.08:0)+rzCr()+awkCr()+egoCr()));if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&m.expU>gTime){crit=true;dmg*=1.5;m.expU=0;}if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&P.morN>0){P.morN=0;crit=true;dmg*=1.5;num(P.x,P.y-30,t('oMorHit'),'#ffd24a',false);}if(!crit&&!o.pure&&!o.raw&&rzSure(m))crit=true;if(crit)dmg*=1.8*ttCdm()*(1+psCd()+(aEyes()?.2:0)+rzV('cdmg')+egoCdm());dmg*=rlAtk(m);if(!o.pure)dmg*=elDmg(m,o);let burn=false;const w=weapon();
+ let dmg=((o.aura?auAtkV():atkV())+(o.addAtk||0))*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.nolv||o.skill&&S.cls==='lantier'?Math.max(1,lvF(m.lv)):o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m)*cpPen(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(poemOn()?1.4:1)*(dsRegIn()?1.2:1)*(o.skill&&S.cls==='lknight'&&pasOn('lkse')&&weapKind()==='sword'?1+.15*pasM('lkse'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*wyAtk(m,o)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*gpAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*rzAtk(m,o)*awkAtk(m,o)*egoAtk(m,o)*rqAtk(m,o)*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<Math.min(ssLow()?.9:.5*rzCapM(),(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)+psCr()+(aEyes()?.08:0)+rzCr()+awkCr()+egoCr()+rqCr()));if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&m.expU>gTime){crit=true;dmg*=1.5;m.expU=0;}if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&P.morN>0){P.morN=0;crit=true;dmg*=1.5;num(P.x,P.y-30,t('oMorHit'),'#ffd24a',false);}if(!crit&&!o.pure&&!o.raw&&rzSure(m))crit=true;if(crit)dmg*=1.8*ttCdm()*(1+psCd()+(aEyes()?.2:0)+rzV('cdmg')+egoCdm());dmg*=rlAtk(m);if(!o.pure)dmg*=elDmg(m,o);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -7490,10 +7490,10 @@ const HPBAD=window.__NANLOG=[];
 function hpGuardOn(o){for(const k of ['hp','mp','st','food']){let v=o[k];Object.defineProperty(o,k,{enumerable:true,configurable:true,get(){return v;},set(x){if(typeof x==='number'&&isFinite(x)){v=x;return;}
  if(HPBAD.length<8){HPBAD.push(k+'='+x+' '+String(new Error().stack||'').split('\n').slice(2,6).join(' | '));console.warn('P.'+k+' was set to',x,HPBAD[HPBAD.length-1]);}
  if(typeof v!=='number'||!isFinite(v))v=k==='hp'?maxHP():k==='mp'?maxMP():k==='st'?maxST():50;}});}}
-function hurtPlayer0(d,ml,src){if(src&&src.type==='guardian'&&gdRing(P.x,P.y))return 0;P.hitT=gTime;if(P.spw)return 0;if(P.rvU>gTime){pgRevolve(d,src);return 0;}if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0){if((P.dash>0||P.dcd>.35)&&rgdOn(src))rgdCount('dg');return 0;}if((P.ssPc>gTime||P.bsPc>gTime)&&src&&src.type&&TFK!=='tick'&&mons.includes(src)){ssCounter(src);return 0;}if(P.lkPc>gTime&&src&&src.type&&TFK!=='tick'&&mons.includes(src)){lkPalm(src);return 0;}if(rgEvade(src)||hcEvade(src)||mdEvade(src)||cpEvade()||nvBlock(src))return 0;d=bzShield(d);d=wlDiaHurt(d);d=ttShield(d,src);if(d<=0)return 0;d/=1+pasGen();if(P.buf&&P.buf.k==='stone')d*=.85;if(P.lkBU>gTime)d*=.3;if(P.dpU>gTime)d*=.7;if(src&&src.type&&lkSee())d*=1-.2*pasM('lkinsight');if(P.kyTU>gTime&&src&&src.type&&!src.dead){d*=.6;hitMon(src,.5,{skill:1,dot:1});}if(src&&src.type&&S.cls==='saintess'&&pasOn('sagrace')&&saEvil(src))d*=1-.2*pasM('sagrace');if(src&&src.dmul)d*=src.dmul;if(src&&src.irrU>gTime)d*=.8;if(src&&src.type&&dsRegIn())d*=DEMK.has(src.type)?.5:.8;if(src&&src.fury>gTime)d*=1.25;if(src&&src.type)P.lastSrc=src.type;if(tlOn('hking')&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
+function hurtPlayer0(d,ml,src){if(src&&src.type==='guardian'&&gdRing(P.x,P.y))return 0;P.hitT=gTime;if(P.spw)return 0;if(P.rvU>gTime){pgRevolve(d,src);return 0;}if(P.inv>0||P.dash>0||ARN&&ARN.wait>0||TWR&&TWR.wait>0){if((P.dash>0||P.dcd>.35)&&rgdOn(src))rgdCount('dg');return 0;}if((P.ssPc>gTime||P.bsPc>gTime)&&src&&src.type&&TFK!=='tick'&&mons.includes(src)){ssCounter(src);return 0;}if(P.lkPc>gTime&&src&&src.type&&TFK!=='tick'&&mons.includes(src)){lkPalm(src);return 0;}if(rgEvade(src)||hcEvade(src)||mdEvade(src)||cpEvade()||nvBlock(src)||rqEvade(src))return 0;d=bzShield(d);d=wlDiaHurt(d);d=ttShield(d,src);if(d<=0)return 0;d/=1+pasGen();if(P.buf&&P.buf.k==='stone')d*=.85;if(P.lkBU>gTime)d*=.3;if(P.dpU>gTime)d*=.7;if(src&&src.type&&lkSee())d*=1-.2*pasM('lkinsight');if(P.kyTU>gTime&&src&&src.type&&!src.dead){d*=.6;hitMon(src,.5,{skill:1,dot:1});}if(src&&src.type&&S.cls==='saintess'&&pasOn('sagrace')&&saEvil(src))d*=1-.2*pasM('sagrace');if(src&&src.dmul)d*=src.dmul;if(src&&src.irrU>gTime)d*=.8;if(src&&src.type&&dsRegIn())d*=DEMK.has(src.type)?.5:.8;if(src&&src.fury>gTime)d*=1.25;if(src&&src.type)P.lastSrc=src.type;if(tlOn('hking')&&src&&HKV.has(src.type))d*=.85;d*=1-petB('randy');
  if(P.qm>0&&rand()<.3){numPK(-20,'ipEvade','#9fe39a',false);P.inv=.3;return 0;}
  const low=P.hp/maxHP()<.3;if(rand()<S.hid.indom*.004*(low?2:1)){numP(-20,lang==='ar'?'تجاهل!':'IGNORED','#9fe39a',false);P.inv=.4;return 0;}
- d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,3.2)*150/(150+defV())*rlDef(src)));d=p3Hurt(p2Hurt(c2Hurt(d,src),src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=nvHurt(d,src);d=bthHurt(d,src);{const cr=gearSum('cold')+rzV('cold');if(cr&&P.y<0)d=Math.max(1,Math.round(d*(1-cr)));}d=dmHurt(d,src);d=mbHurt(d,src);d=rzHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
+ d=Math.max(1,Math.round(d*1.5*clamp(1+((ml||S.lv)-S.lv)*.04,.5,3.2)*150/(150+defV()*rqPdM(src))*rlDef(src)));d=p3Hurt(p2Hurt(c2Hurt(d,src),src),src);d=phHurt(d,src);d=hcHurt(d,src);d=dvHurt(d,src);d=brHurt(d,src);d=nvHurt(d,src);d=bthHurt(d,src);{const cr=gearSum('cold')+rzV('cold');if(cr&&P.y<0)d=Math.max(1,Math.round(d*(1-cr)));}d=dmHurt(d,src);d=mbHurt(d,src);d=rzHurt(d,src);d=rqHurt(d,src);if(COMPO&&COMPO.id==='vantner'&&Math.hypot(COMPO.x-P.x,COMPO.y-P.y)<70)d=Math.max(1,Math.round(d*.8));let blk=0;
  d=threatFloor(d,ml,src);
  {const eg=egoGuard(src);if(eg===2)return 0;if(eg===1&&!P.guard){d=Math.max(1,Math.round(d*.25));blk=1;}}   // (v3.73) the Aegis
  if(P.guard&&src){const sx=src.x-P.x,sy=src.y-P.y,sl=Math.hypot(sx,sy)||1;
@@ -7504,7 +7504,7 @@ function hurtPlayer0(d,ml,src){if(src&&src.type==='guardian'&&gdRing(P.x,P.y))re
    if(P.gd<=0){P.gd=0;P.guard=0;P.gdT=1.6;d=Math.round(d*.6);P.stun=1;vfx('stun',P.x,P.y-24,{life:1});toast(t('guardBreak'),'warn');}
    else{P.gdT=.8;d=Math.max(1,Math.round(d*(P.fort>0?.1:GK?.15:.25)));blk=1;}}}
  if(P.prov>0)d=Math.max(1,Math.round(d*.8));
- if(rzDodge(d,src)||egoDodge(d,src))return 0;if(!Number.isFinite(d))d=1;if(P.ride&&S.mount)d=horseHit(d);P.hp-=d;jHurt(d);ipHurt(d);ttHurt(d);gkNature(d);if(P.rcast){P.rcast=0;toast(t('rsCancel'),'warn');SFX.deny();}if(wpV('abs'))P.absB=Math.min(maxHP()*.5,(P.absB||0)+d*wpV('abs'));P.inv=blk?.35:.7;{const gs=GEAR.map(eqIt).filter(Boolean);if(gs.length)wear(gs[rand()*gs.length|0],.07);}
+ if(rzDodge(d,src)||egoDodge(d,src))return 0;if(!Number.isFinite(d))d=1;if(P.ride&&S.mount)d=horseHit(d);P.hp-=d;jHurt(d);rqStruck(d);ipHurt(d);ttHurt(d);gkNature(d);if(P.rcast){P.rcast=0;toast(t('rsCancel'),'warn');SFX.deny();}if(wpV('abs'))P.absB=Math.min(maxHP()*.5,(P.absB||0)+d*wpV('abs'));P.inv=blk?.35:.7;{const gs=GEAR.map(eqIt).filter(Boolean);if(gs.length)wear(gs[rand()*gs.length|0],.07);}
  if(!blk){shake=.18;vfx('blood',P.x,P.y-10,{});if(d>=maxHP()*.4&&P.hp>0&&!(P.sImm>0)&&!legResist()){P.stun=1;P.sImm=3;vfx('stun',P.x,P.y-24,{life:1});toast(t('stunned'),'warn');}SFX.hurt();}else SFX.hit();
  numP(-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);
  if(P.hp<1&&P.lst>0)P.hp=1;
@@ -7608,7 +7608,7 @@ function killMon(m){const b=MT[m.type];m.coop=b.boss&&!m.tmp&&!m.arena&&!m.spar?
  if(!m.bh&&!m.noLoot&&!m.tmp&&rand()<(b.boss?.08:.002)){addMat('rscroll',1);setTimeout(()=>toast(t('rsDrop'),'good'),500);}if(!m.noLoot){rbBossDrop(m,b);cosDrop(m,b);}
  if(m.lv>=20&&!m.tmp&&!m.noLoot){if(b.boss){addMat('estone',1+(m.lv/50|0));if(rand()<.12)addMat('pstone',1);if(rand()<.25)addMat('bstone',1);}else if(rand()<Math.min(.08,m.lv/2500))addMat('estone',1);}
  if(b.obj){hudDirty=true;return;}   /* (plan U119) a pillar: no kill for the book, titles or quests */
- crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;sc2Kill(m);mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);p4Kill(m);p5Kill(m);fdwKill(m);rbcKill(m);wsKill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);rzKill(m);if(KCON[m.type])kcGain(KCON[m.type],m);
+ crepBoss(m,b);S.kills[m.type]=(S.kills[m.type]||0)+1;sc2Kill(m);mbUp(m.type);mpKill(m);necCorpse(m);hcKill(m);p2Kill(m);p3Kill(m);p4Kill(m);p5Kill(m);fdwKill(m);rbcKill(m);wsKill(m);RG.kAsn=!!m.asn;qEvent('kill',m.type);rzKill(m);rqKill(m);if(KCON[m.type])kcGain(KCON[m.type],m);
  if(m.type==='guardian'){shake=.5;if(!S.guardDown){S.guardDown=true;annW('annGuard',{lv:S.lv});}giveTitle('forest');S.raid=0;}
  if(m.type==='gchief'){shake=.3;giveTitle('chief');}
  if((S.kills.rabbit||0)+(S.kills.goblin||0)>=40)giveTitle('hunter');
@@ -7620,7 +7620,7 @@ function tlOn(k){return !!(S&&S.tl&&S.tl[k]);}
 function giveTitle(id){if(S.tl[id])return;S.tl[id]=1;if(!S.title&&TLS[id])S.title=id;sbSig='';setTimeout(()=>{toast(t('newTitleX',{t:t('tl_'+id)}),'good');SFX.notice();},900);}
 // potions: Q heals 40% HP, F restores 50% MP; a shared 5 s cooldown keeps them from replacing dodging
 const POT={hpot:{key:'KeyQ',price:30,f:()=>{const h=Math.round(maxHP()*.4);P.hp=Math.min(maxHP(),P.hp+h);numP(-26,'+'+h,'#7ae07a',false);asMe(()=>vfx('heal',P.x,P.y));}},mpot:{key:'KeyF',price:25,f:()=>{const v=Math.round(maxMP()*.5);P.mp=Math.min(maxMP(),P.mp+v);numP(-26,'+'+v,'#7ab0ff',false);asMe(()=>vfx('mana',P.x,P.y-8));}}};
-function drink(k){if(!S||mode==='dead')return;if(blNear()){toast(t('blNoPot'),'warn');SFX.deny();return;}if(TOW&&TOW.seal){toast(t('twSeal'),'warn');SFX.deny();return;}const n=S[k]||0;if(n<=0){toast(t('noPot',{p:t(k)}),'warn');SFX.deny();return;}if((P.pcd||0)>0){SFX.deny();return;}if(k==='hpot'?P.hp>=maxHP():P.mp>=maxMP()){toast(t(k==='hpot'?'hpFull':'mpFull'),'warn');SFX.deny();return;}S[k]=n-1;P.pcd=5;POT[k].f();if(k==='hpot'&&secB('pot'))P.hp=Math.min(maxHP(),Math.round(P.hp+maxHP()*secB('pot')));SFX.eat();hudDirty=true;sbSig='';}
+function drink(k){if(!S||mode==='dead')return;if(blNear()){toast(t('blNoPot'),'warn');SFX.deny();return;}if(TOW&&TOW.seal){toast(t('twSeal'),'warn');SFX.deny();return;}const n=S[k]||0;if(n<=0){toast(t('noPot',{p:t(k)}),'warn');SFX.deny();return;}if((P.pcd||0)>0){SFX.deny();return;}if(k==='hpot'?P.hp>=maxHP():P.mp>=maxMP()){toast(t(k==='hpot'?'hpFull':'mpFull'),'warn');SFX.deny();return;}S[k]=n-1;P.pcd=5;{const h0=P.hp,m0=P.mp;POT[k].f();rqPot(h0,m0);}if(k==='hpot'&&secB('pot'))P.hp=Math.min(maxHP(),Math.round(P.hp+maxHP()*secB('pot')));SFX.eat();hudDirty=true;sbSig='';}
 // owner 2026-10-20: Shift with the click (or the number key) buys 10, Ctrl buys as many as fit and you can pay for
 let BUYQ=1;const buyQ=e=>{BUYQ=e.ctrlKey||e.metaKey?999:e.shiftKey?10:TOUCH?TBQ:1;};addEventListener('pointerdown',buyQ,true);addEventListener('keydown',buyQ,true);
 const buyCount=(room,g)=>Math.max(0,Math.min(BUYQ,room,Math.floor(S.gold/g)));
@@ -7655,10 +7655,11 @@ function nearest0(){let best=null,bd=26;const px=P.x,py=P.y,c=(k,o,x,y,h)=>{cons
  for(const g of DGATES)if(!(g.hide&&g.bh!=='key'&&!(g.tw&&Math.hypot(g.x-px,g.y-py)<22))&&!g.got&&!g.out&&!g.gone&&!(g.tw==='enter'&&!(S.wis&&S.wis.map)))c('gate',g,g.x,g.y,g.hint);
  for(const T of TERR)c('banner',T,T.x,T.y-4,'hBanner');
  for(const o of SHRINES)if(epVis(o))c('shrine',o,o.x,o.y,o.hint);
+ for(const o of rqNear())c('relic',o,o.x,o.y,'hRelic');   // (v3.74) the relics' old stones
  if(COMPO)c('npc',COMPO,COMPO.x,COMPO.y,NH);const tr=nearTree();if(tr){const d=Math.hypot(tr.x-P.x,tr.y-P.y)-6;if(!best||d<bd&&best.k!=='grave'&&best.k!=='lm'&&best.k!=='cache'&&best.k!=='swgs')best={k:'tree',o:tr,x:tr.x,y:tr.y};} // the grave stands among trees: it wins once you are by it
  if(!best&&CKST)c('stove',CKST,CKST.x,CKST.y,'hStove');   // v3.04: your portable stove, when nothing else is in reach
  if(!best||best.k==='tree'){const w=nearWater();if(w)best={k:'water',o:w,x:w.x,y:w.y,hint:FISH?'hReel':'hFish'};}return best;}
-function interact(){if(FISH){fishAct();return;}if(TCT){tchPress();return;}const n=nearest(1);if(!n){if(ctNear())return ctPet();SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu(0);return;}if(n.k==='stove'){ckCook();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tchest')tchOpen(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='swgs')swgTurn(n.o);else if(n.k==='swgc')swgCoffin();else if(n.k==='bdv')bdVein(n.o);else if(n.k==='hgv')hgVein(n.o);else if(n.k==='treasure')thDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);}
+function interact(){if(FISH){fishAct();return;}if(TCT){tchPress();return;}const n=nearest(1);if(!n){if(ctNear())return ctPet();SFX.deny();return;}if(n.k==='water'){startFish(n.o);return;}if(n.k==='camp'){campMenu(0);return;}if(n.k==='stove'){ckCook();return;}pressKey('kE');if(n.k==='npc'){if(!n.o.obj)n.o.dir=Math.abs(P.x-n.o.x)>Math.abs(P.y-n.o.y)?(P.x>n.o.x?2:3):(P.y>n.o.y?0:1);hcTalk(n.o.id);talkNPC(n.o.id);}else if(n.k==='anvil')tryForge(n.o);else if(n.k==='node')mine(n.o);else if(n.k==='tchest')tchOpen(n.o);else if(n.k==='tree')chop(n.o);else if(n.k==='door')enterRoom(n.o);else if(n.k==='prop')useProp(n.o);else if(n.k==='grave')visitGrave();else if(n.k==='lm')lmRead(n.o);else if(n.k==='cache')exDig(n.o);else if(n.k==='swgs')swgTurn(n.o);else if(n.k==='swgc')swgCoffin();else if(n.k==='bdv')bdVein(n.o);else if(n.k==='hgv')hgVein(n.o);else if(n.k==='treasure')thDig(n.o);else if(n.k==='folk'){hcTalk(n.o.id);tfTalk(n.o);}else if(n.k==='gate')useGate(n.o);else if(n.k==='banner')bannerAct(n.o);else if(n.k==='shrine')shrineAct(n.o);else if(n.k==='relic')rqUse(n.o);}
 let roomFade=false;
 function enterRoom(Rm){if(roomFade)return;if(P.ride)dismount();roomFade=true;SFX.open();fadeTo(()=>{roomFade=false;P.x=(Rm.rx+6)*TS+8;P.y=(Rm.ry+6)*TS+10;P.dir=1;camSnap=true;hudDirty=true;});}
 // "get unstuck" in the Esc menu: walks you out of a house, or takes you back to the nearest town square (once a minute)
@@ -9038,7 +9039,7 @@ function gemPick(i,who,sk=0){const own=GEMK.filter(g=>S.mats[g]>0);if(!own.lengt
  dialog(who,[cur?t('gemRep',{g:t(cur)}):'gemPickL'],null,[...own.map(g=>({l:t('oGemSet',{g:t(g),n:S.mats[g],d:t(g+'D')}),ic:g,poor:S.gold<GEMC,f:()=>{if(S.gold<GEMC){SFX.deny();return dialog(who,['arNo']);}
   S.gold-=GEMC;S.mats[g]--;if(sk){i.gx=Array.isArray(i.gx)?i.gx:[];while(i.gx.length<sk-1)i.gx.push(null);i.gx[sk-1]=g;}else i.gem=g;SFX.level();vfx('loot',P.x,P.y,{rarity:3});toast(t('gemSet',{g:t(g),it:inm(i)}),'good');hudDirty=true;save(true);gemMenu(who);}})),...(cur&&GEMS[cur]?[{l:t('gemOut',{g:t(cur),c:GEMOUT}),poor:S.gold<GEMOUT,f:()=>{if(S.gold<GEMOUT){SFX.deny();return dialog(who,['arNo']);}S.gold-=GEMOUT;if(sk){i.gx[sk-1]=null;i.gx=i.gx.filter(Boolean);}else delete i.gem;addMat(cur,1);SFX.coin();toast(t('gemOutOk',{g:t(cur)}),'good');hudDirty=true;save(true);gemMenu(who);}}]:[]),{l:t('oBack'),f:()=>gemMenu(who)}]);}
 const ENHP=[.85,.75,.65,.55,.45,.35,.25,.18,.12,.08];
-const enhCost=i=>{const n=i.en||0;return {g:300*(n+1)*(n+1)*(1+i.r),m:1+n,e:1+(n>>1),p:Math.min(.95,ENHP[Math.min(9,n)]*rzEnhM())};};
+const enhCost=i=>{const n=i.en||0;return {g:300*(n+1)*(n+1)*(1+i.r),m:1+n,e:1+(n>>1),p:Math.min(.95,ENHP[Math.min(9,n)]*rzEnhM()*rqEnhM())};};
 function enhMenu(who){const worn=['w',...GEAR].map(eqIt).filter((i,n,a)=>i&&a.indexOf(i)===n),list=[...worn,...S.items.filter(i=>['w',...GEAR].includes(i.slot)&&!worn.includes(i)).sort((a,b)=>(b.en||0)-(a.en||0)||b.r-a.r)];if(!list.length)return dialog(who,['arNoEq'],()=>svcBack(who));
  // shown as a bag-style grid (owner request): the cost and odds sit in each item's tooltip, and the grid scrolls
  const cell=(i,x)=>({cell:1,ic:i.id,r:i.r,eq:worn.includes(i),badge:i.en?'+'+i.en:'',...x,tip:itemTip(i)+'<br>'+x.tip+(worn.includes(i)?'':`<br><small>${t('enhBag')}</small>`)});
@@ -9194,7 +9195,7 @@ function oddsTip(rc){if(rc.fix>=4)return `<b>${t('oddsT')}</b><br><span class="r
 // work. Owner 2026-10-22: epic, unique and legendary all rarer. At a perfect score a normal crafter sees epic about
 // 1 in 13, unique about 1 in 260 and legendary about 1 in 6,500; a smith rolls twice as well (unique about 1 in 65,
 // legendary about 1 in 800) and grows with smithing level (top smith: about 1 in 35 and 1 in 330). Unique and legendary gear is announced to the world.
-function craftRate(q){const k=(isSm()?2:1)*(1+.04*((S.smith||1)-1))*rzCraftM();let r=q<.5?0:1;
+function craftRate(q){const k=(isSm()?2:1)*(1+.04*((S.smith||1)-1))*rzCraftM()*rqCraftM();let r=q<.5?0:1;
  if(q>=.85&&rand()<(.025+(q-.85)*.35)*k){r=2;if(q>=.95&&rand()<(.025+(q-.95)*.5)*k){r=3;if(q>=.99&&rand()<.04*k)r=4;}}return r;}
 function sparks(n,col){const bar=document.querySelector('.mgbar');const x=MG.p*bar.clientWidth;for(let i=0;i<n;i++){const e=document.createElement('i');e.className='spk';e.style.left=x+'px';e.style.top='40%';e.style.background=col[i%col.length];const a=rand()*Math.PI*2,d=20+rand()*70;e.style.setProperty('--dx',Math.cos(a)*d+'px');e.style.setProperty('--dy',(Math.sin(a)*d-30)+'px');bar.appendChild(e);setTimeout(()=>e.remove(),560);}}
 function strike(){if(!MG||MG.done||MG.lock)return;if(MG.stage===0){if(!MG.hold){MG.hold=true;noise(.3,.08,600);}return;}if(MG.stage===2)return qStart();if(MG.reh>0)return;MG.sq=.15;const z=zoneW(),d=Math.abs(MG.p-MG.center);let s,k,c;if(d<z.p/2){s=1;k='perfect';c='';}else if(d<z.g/2){s=.6;k='good';c='g';}else{s=.12;k='miss';c='m';}
@@ -9300,7 +9301,7 @@ function statShort(i){const a=[];if(i.atk)a.push(`${t('atk')} ${i.uid?iAtk(i):i.
  if(i.as)a.push(`${t('gAs')} +${Math.round(i.as*enF(i)*100)}%`);if(i.ms)a.push(`${t('gMs')} +${Math.round(i.ms*enF(i)*100)}%`);if(i.dm)a.push(`${t('gDm')} +${Math.round(i.dm*enF(i)*100)}%`);if(i.mpb)a.push(`${t('gMp')} +${Math.round(i.mpb*enF(i))}`);if(i.hpp)a.push(`${t('gHp')} +${Math.round(i.hpp*enF(i)*100)}%`);if(i.agi)a.push(`${t('agi')} +${i.agi}`);if(i.agp)a.push(`${t('agi')} ${Math.round(i.agp*100)}%`);if(i.cold)a.push(t('gCold',{n:Math.round(i.cold*100)}));if(i.dsh)a.push(t('gDsh',{n:Math.round(i.dsh*100)}));{const gs=gemsOf(i),so=soOf(i);if(gs.length||so>1)a.push(t('gemSo',{g:gs.map(g=>t(g)).join(', ')||'-',n:gs.length,m:Math.max(so,gs.length)}));}return a.join(' · ');}
 function setTip(i){const sk=Object.keys(SETS).find(k=>SETS[k].it.includes(setOf(i)));if(!sk)return '';const n=setCount(sk),c=setTier(sk);
  return `<br><small style="color:#9fe39a">${t('set_'+sk)} (${n}/${SETS[sk].it.length})</small>`+Object.keys(SETS[sk].b).map(k=>`<br><small style="color:${+k===c?'#9fe39a':'#8a96a8'}">${t('setPc',{n:k})}: ${t('setD_'+sk+k)}</small>`).join('');}
-function itemTip(i){const st=statShort(i),d=durOf(i);return `<div class="ichd">${t('icItem')}</div><div class="icard"><span class="icimg rb${i.r|0}"><img src="${icon(i.id)}" alt=""></span><div><b class="rt rt${i.r}">[${esc(inm(i))}]</b><br>${t('icCls')}: <span class="rt rt${i.r}">${t('r'+i.r)}</span>${st?'<br>'+st.split(' · ').join('<br>'):''}</div></div>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:i.src&&srcTxt(i.src)?`<small style="color:#c8d4e0">${esc(srcTxt(i.src))}</small><br>`:''}${itLvr(i)?`<small style="color:${lvrOk(itLvr(i))?'#9fb4c8':'#ff8a7a'}">${t('needLvT',{n:itLvr(i)})}</small><br>`:''}${Array.isArray(i.hist)&&i.hist.length?`<small style="color:#9fb4c8">${esc(t('itHist',{h:i.hist.join(' → ')}))}</small><br>`:''}${pgPenF(i)<1?`<small style="color:#ffb04a">${t('pgPenT',{p:Math.round((1-pgPenF(i))*100),u:undOf(i.id)})}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+': '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+(i.sh?`<br><small style="color:#ffe7a8">${t('shGear')}</small>`:'')+edrTip(i)+vtTip(i)+hidTip(i)+wpTip(i)+egoTip(i)+setTip(i)+itemSkillTip(i);}
+function itemTip(i){const st=statShort(i),d=durOf(i);return `<div class="ichd">${t('icItem')}</div><div class="icard"><span class="icimg rb${i.r|0}"><img src="${icon(i.id)}" alt=""></span><div><b class="rt rt${i.r}">[${esc(inm(i))}]</b><br>${t('icCls')}: <span class="rt rt${i.r}">${t('r'+i.r)}</span>${st?'<br>'+st.split(' · ').join('<br>'):''}</div></div>${i.by?`<small style="color:#ffe7a8">${esc(t('creBy',{n:i.by}))}</small><br>`:i.src&&srcTxt(i.src)?`<small style="color:#c8d4e0">${esc(srcTxt(i.src))}</small><br>`:''}${itLvr(i)?`<small style="color:${lvrOk(itLvr(i))?'#9fb4c8':'#ff8a7a'}">${t('needLvT',{n:itLvr(i)})}</small><br>`:''}${Array.isArray(i.hist)&&i.hist.length?`<small style="color:#9fb4c8">${esc(t('itHist',{h:i.hist.join(' → ')}))}</small><br>`:''}${pgPenF(i)<1?`<small style="color:#ffb04a">${t('pgPenT',{p:Math.round((1-pgPenF(i))*100),u:undOf(i.id)})}</small><br>`:''}<small style="color:${d<=0?'#ff6a5a':d<=25?'#f2c14e':'#9fb4c8'}">${d<=0?t('broken'):t('durL')+': '+d+'/100'}</small>`+(i.slot==='w'&&WSH[i.id]?`<br><small>${t('wk_'+WSH[i.id].k)}</small>`:'')+(i.sh?`<br><small style="color:#ffe7a8">${t('shGear')}</small>`:'')+edrTip(i)+vtTip(i)+hidTip(i)+wpTip(i)+egoTip(i)+rqTip(i)+setTip(i)+itemSkillTip(i);}
 function renderInv(){const a=[];if(S.bread)a.push({k:'bread',n:S.bread,tip:`<b>${t('bread')}</b><br><small>${t('clickEat')}</small>`});['hpot','mpot'].forEach(k=>{if(S[k])a.push({k,n:S[k],tip:`<b>${t(k)}</b><br>${t(k+'D')}<br><small>${t('clickDrink',{k:keyName(POT[k].key)})}</small>`});});
  LIFEM.forEach(k=>{if(S.mats[k]>0)a.push({k,n:S.mats[k],tip:`<b>${t(k)}</b><br><small>${TKF.includes(SHK[k]||k)?tkTip(SHK[k]||k):t('lifeMD')}</small>`+(SHK[k]?`<br><small style="color:#ffe7a8">${t('shTip')}</small>`:'')});});
  if(S.mats.pstove>0)a.push({k:'pstove',n:1,hook:!!CKST,tip:`<b>${t('pstove')}</b><br>${t('pstoveD')}<br><small>${t(CKST?'ckOnT':'ckUseT')}</small>`});   // v3.04
@@ -9325,7 +9326,7 @@ function invClick(i,all){if(TOUCH&&INVX&&INVX.who&&TBQ>1)all=true;const s=INVS[i
    anything in the bag to a merchant from a window like the bag instead of one dialog line per material. Each asks first. */
 let INVX=null,INVDR=null;const GDROP=[];
 const sName=s=>s.it?inm(s.it):t(s.k);
-function slotOut(s,all){const n=all?s.n:1;if(s.it){const i=S.items.indexOf(s.it);if(i<0||isEq(s.it))return null;S.items.splice(i,1);return {it:s.it,k:s.k,n:1,r:s.r};}
+function slotOut(s,all){const n=all?s.n:1;if(s.it){if(s.it.slot==='rl'){toast(t('rqKeep'),'warn');SFX.deny();return null;}const i=S.items.indexOf(s.it);if(i<0||isEq(s.it))return null;S.items.splice(i,1);return {it:s.it,k:s.k,n:1,r:s.r};}
  if(s.k==='bread')S.bread-=n;else if(POT[s.k])S[s.k]-=n;else if(s.k==='arrows')S.arrows[s.r]-=n;else S.mats[s.k]=(S.mats[s.k]||0)-n;hudDirty=true;return {k:s.k,n,r:s.r};}
 function slotIn(o){if(o.it)S.items.push(o.it);else if(o.k==='bread')S.bread+=o.n;else if(POT[o.k])S[o.k]=(S[o.k]||0)+o.n;else if(o.k==='arrows')S.arrows[o.r]+=o.n;else S.mats[o.k]=(S.mats[o.k]||0)+o.n;hudDirty=true;}
 // what a shop sells, at its lowest list price: the sell window pays about 30% of it (owner 2026-10-20: sell prices)
@@ -9401,7 +9402,7 @@ function dropStart(){if(typeof dropOff==='function')dropOff();dropOff=null;DROPS
  dropOff=DROPS.watch(dropIn,did=>{const i=GDROP.findIndex(d=>d.did===did);if(i>=0){const d=GDROP[i];GDROP.splice(i,1);if(!d.got)vfx('dust',d.x,d.y,{n:4});}});}
 function dropStop(){if(typeof dropOff==='function')dropOff();dropOff=null;DROPS=null;for(let i=GDROP.length-1;i>=0;i--)if(GDROP[i].rem)GDROP.splice(i,1);}
 function dropKindOk(k,r){return !!(POT[k]||k==='bread'||(k==='arrows'&&ARROWG[r]!=null)||MATP[k]!==undefined||(typeof DISH!=='undefined'&&DISH[k]));}
-function dropItemOk(js){try{const o=JSON.parse(js);return o&&typeof o.id==='string'&&rcById(o.id)?o:null;}catch(e){return null;}}
+function dropItemOk(js){try{const o=JSON.parse(js);return o&&typeof o.id==='string'&&rcById(o.id)&&rcById(o.id).slot!=='rl'?o:null;}catch(e){return null;}}
 const dropNet=(x,y)=>roomAt(x,y)!==HOME;   /* (plan U300) everyone's room is the same place: a drop there stays yours, off the network */
 function dropPut(d){if(!DROPS||!NET||!S||S.__demo||!dropNet(d.x,d.y))return;const o=d.o,v={o:NET.uid,x:Math.max(0,d.x),y:d.y,k:String(o.k||''),n:o.n|0||1,r:o.r|0};if(!/^[a-z0-9_]{1,24}$/.test(v.k))return;
  if(o.it){const j={};for(const q in o.it)if(q!=='uid'&&q!=='iid')j[q]=o.it[q];const js=JSON.stringify(j);if(js.length>600)return;v.it=js;}
@@ -9428,12 +9429,12 @@ function eqSlot(it,ph,lbl,sl){const tip=it?itemTip(it)+`<br><small>${t('pickT',{
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-vis]');if(!b||!S||!S.look)return;e.stopPropagation();S.look.vh=(S.look.vh|0)^VHB[b.dataset.vis];if(!S.look.vh)delete S.look.vh;buildMe(S.look);SFX.click();save(true);renderEquip();hudDirty=true;},true);
 function renderEquip(){const w=weapon(),a=armorIt(),wi=w&&WSH[w.id]?w:null;
  $('eqL').innerHTML=eqSlot(eqIt('h'),'slotH','helm','h')+eqSlot(a,'slotA','armor','a')+eqSlot(eqIt('g'),'slotG','gloves','g')+eqSlot(eqIt('n'),'slotN','neckS','n')+eqSlot(eqIt('u'),'slotU','underS','u');
- $('eqR').innerHTML=eqSlot(wi,'slotW','weapon','w')+eqSlot(eqIt('b'),'slotB','bootsS','b')+eqSlot(eqIt('k'),'slotX','acc','k')+eqSlot(eqIt('r'),'slotR','braceS','r')+eqSlot(eqIt('e'),'slotE','earS','e');
+ $('eqR').innerHTML=eqSlot(wi,'slotW','weapon','w')+eqSlot(eqIt('b'),'slotB','bootsS','b')+eqSlot(eqIt('k'),'slotX','acc','k')+eqSlot(eqIt('r'),'slotR','braceS','r')+eqSlot(eqIt('e'),'slotE','earS','e')+eqSlot(eqIt('rl'),'slotX','relicS','rl');
  $('eqRing').innerHTML=RSL.map(k=>ringOpen(k)?eqSlot(eqIt(k),'slotX','ringS',k):`<div><button class="slotb lock" data-tip="${esc(t('ringLock',{n:ringNeed(k)}))}"><img src="${icon('slotX')}"></button></div>`).join('');
  const g=$('pview').getContext('2d');g.clearRect(0,0,16,24);g.drawImage(SH[pSpr()].canvas,0,0,16,24,0,0,16,24);weapPix(g,13,17,wi,0);
- $('eqInfo').innerHTML=`<div class="eqstats"><span>${t('atk')}<b>${atkV()}</b></span><span>${t('def')}<b>${defV()}</b></span><span>${t('cls')}<b>${t('cl_'+S.cls)}</b></span></div><div class="note">${t('wk_'+weapKind())}</div>${awkEqRow()}`;}
+ $('eqInfo').innerHTML=`<div class="eqstats"><span>${t('atk')}<b>${atkV()}</b></span><span>${t('def')}<b>${defV()}</b></span><span>${t('cls')}<b>${t('cl_'+S.cls)}</b></span></div><div class="note">${t('wk_'+weapKind())}</div>${awkEqRow()}${rqEqRow()}`;}
 // clicking a gear slot opens a picker of what in the bag fits it
-const SLN={w:'weapon',a:'armor',h:'helm',g:'gloves',b:'bootsS',k:'acc',n:'neckS',r:'braceS',e:'earS',u:'underS'};for(const k of RSL)SLN[k]='ringS';
+const SLN={w:'weapon',a:'armor',h:'helm',g:'gloves',b:'bootsS',k:'acc',n:'neckS',r:'braceS',e:'earS',u:'underS',rl:'relicS'};for(const k of RSL)SLN[k]='ringS';
 function openPick(sl){const box=$('eqPick'),cur=eqIt(sl),pw=i=>(i.atk?iAtk(i):0)+(i.def?iDef(i):0)+(i.r||0)*.01,list=S.items.filter(i=>(RSL.includes(sl)?i.slot==='k'&&RINGS.has(i.id):i.slot===sl)&&(sl!=='w'||WSH[i.id])).sort((a,b)=>(b===cur)-(a===cur)||(a!==cur&&isEq(a))-(b!==cur&&isEq(b))||pw(b)-pw(a));SFX.open();
  let h=`<div class="ptitle"><span class="head" style="font-size:calc(var(--u)*1.7)">${t('pickT',{s:t(SLN[sl])})}</span><button class="x" data-act="closePick">✕</button></div>`;
 h+='<div class="pkl">';h+=list.length?list.map(i=>`<button class="pk${i===cur?' eq':isEq(i)?' eqo':''}" data-pick="${i.uid}" data-tip="${esc(itemTip(i))}"><img src="${iIco(i)}"><span class="rt rt${i.r}">${esc(inm(i))}</span><small>${statShort(i)}${durOf(i)<=0?' · '+t('broken'):''}${i===cur?' · '+t('equipped'):isEq(i)?' · '+t('eqElse'):''}</small></button>`).join(''):`<div class="note">${t('nothingFit')}</div>`;
@@ -9801,7 +9802,7 @@ const SKK={};for(const [kd,l] of [['buff','bemag bdetm bbarr bcoh bspray kstance
  ['heal','sapray pheal prebec mkrev sahope gabreath gadesire salife'],['buff','sspc ssfield'],['util','sscre'],['util','trap tsteal ashadow nskel dsleap btele fly ltshade bgrease bdecoy bwing bcrys bmasst']])for(const k of l.split(' '))SKK[k]=kd;
 function skKind(k){if(SKO[k])return 'own';if(SKK[k])return SKK[k];const c=SKD[k]&&typeof CPK!=='undefined'&&CPK[SKD[k].cls],s=c&&(c.skills||[]).find(x=>x.id===k);return s&&(s.kind==='buff'||s.kind==='heal')?s.kind:'atk';}
 const skCdM=k=>(skLv(k)>=10&&/^(buff|heal|util)$/.test(skKind(k))?.8:1)*tomeCdM()*(bemOn(k)?.5:1)*rzCdM()*awkCdM()*egoCdM(),skMpM=k=>(skLv(k)>=5&&/^(buff|util)$/.test(skKind(k))?.8:1)*(bemOn(k)?0:1);
-function skHealUp(k,h0){if(skKind(k)!=='heal'||!P||!(P.hp>h0))return;const L=skLv(k),m=.04*(L-1)+(L>=5?.25:0);if(m>0){P.hp=Math.min(maxHP(),P.hp+(P.hp-h0)*m);hudDirty=true;}}
+function skHealUp(k,h0){if(skKind(k)!=='heal'||!P||!(P.hp>h0))return;const L=skLv(k),m=.04*(L-1)+(L>=5?.25:0)+rqHealB();if(m>0){P.hp=Math.min(maxHP(),P.hp+(P.hp-h0)*m);hudDirty=true;}}
 const skLv=k=>skProg(k)[0],skDm=k=>1+.06*(skLv(k)-1),skCostM=k=>1-.03*(skLv(k)-1),skDur=k=>1+.05*(skLv(k)-1),icbM=()=>skLv('icomb')>=5?1.3:1.2;
 /* passive levels (owner 2026-10-23: "make sure every passive levels, and say how to use and level it"): a passive has no
    button, so it learns while you fight with it: every monster you kill gives each passive you have 1 (a boss 6), and one that
@@ -9821,14 +9822,14 @@ window.__GSL={kind:k=>skKind(k),opt:(k,l)=>skOptTxt(k,l),mp:k=>mpC(k),cdm:k=>skC
 // with these inputs (and the table, counted once a frame), so the answer is kept until one of them moves. Callers only read it.
 let CSKM={k:null,r:null},SKDN={t:-1,n:0};
 const skdN=()=>{if(SKDN.t!==gTime){SKDN.t=gTime;let n=0;for(const k in SKD)n++;SKDN.n=n;}return SKDN.n;};
-const clsSkills=()=>{const sb=S.bh&&S.bh.sb,k=[S.cls,S.cbase,S.church,S.sec,S.title,S.cls2,!!S.mdsk,sb?Object.keys(sb).filter(x=>sb[x]).join(','):'',typeof LGB!=='undefined'&&LGB?LGB[S.cls]:'',skdN(),qlendK(),mgtKey(),myRace(),S.rsub||'',S.brf|0,awkTier(),egoOf()||''].join('|');
+const clsSkills=()=>{const sb=S.bh&&S.bh.sb,k=[S.cls,S.cbase,S.church,S.sec,S.title,S.cls2,!!S.mdsk,sb?Object.keys(sb).filter(x=>sb[x]).join(','):'',typeof LGB!=='undefined'&&LGB?LGB[S.cls]:'',skdN(),qlendK(),mgtKey(),myRace(),S.rsub||'',S.brf|0,awkTier(),egoOf()||'',rqOn()||''].join('|');
  if(CSKM.k!==k||CSKM.s!==S){CSKM={k,s:S,r:clsSkills0()};}return CSKM.r;};
 // (owner 2026-10-26: "it asks me to steal from monsters but doesn't give me the skill") a class trial lends the skill it asks
 // for while it is yours: SKD[k].qlend is the quest (A Light Hand lends Steal); the class keeps it after
 let QLEND=null;const qlendQ=()=>QLEND||(QLEND=[...new Set(Object.keys(SKD).map(k=>SKD[k].qlend).filter(Boolean))]),qlendOn=q=>!!(S.qs[q]&&S.qs[q].st===1)&&(!QD[q]||!QD[q].cls||S.cls==='novice'),qlendK=()=>qlendQ().map(q=>qlendOn(q)?1:0).join('');
 // a save opened while a trial is yours: its lent skill on the bar (a save from before v3.08 never got it), nothing else touched
 function qlendFix(){if(!S)return;for(const k of Object.keys(SKD))if(SKD[k].qlend&&qlendOn(SKD[k].qlend)&&skOK(k)&&!(S.sk&&S.sk[k]))checkSkills();}
-const clsSkills0=()=>Object.keys(SKD).filter(k=>!SKD[k].pas&&(!SKD[k].ncls||SKD[k].ncls!==S.cls)&&(!SKD[k].church||SKD[k].church===S.church)&&(!SKD[k].sec||SKD[k].sec===S.sec)&&(!SKD[k].sc2||SKD[k].sc2===S.cls2)&&(!SKD[k].bk||!!(S.bh&&S.bh.sb&&S.bh.sb[SKD[k].bk]))).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior'||typeof LGB!=='undefined'&&LGB&&LGB[S.cls]===SKD[k].cls||k==='mdarmy'&&!!S.mdsk||!!SKD[k].title&&(S.title===SKD[k].title||!!SKD[k].sc2a&&S.cls2===SKD[k].sc2a)||!!SKD[k].qlend&&qlendOn(SKD[k].qlend)||!!SKD[k].mgt&&mgtKnown(k)&&clsFam('mage')||!!SKD[k].race&&SKD[k].race===myRace()&&!!rzR()&&(SKD[k].rsub===undefined||SKD[k].rsub===(S.rsub||''))||!!SKD[k].awk&&awkTier()>=SKD[k].awk||!!SKD[k].ego&&SKD[k].ego===egoOf());
+const clsSkills0=()=>Object.keys(SKD).filter(k=>!SKD[k].pas&&(!SKD[k].ncls||SKD[k].ncls!==S.cls)&&(!SKD[k].church||SKD[k].church===S.church)&&(!SKD[k].sec||SKD[k].sec===S.sec)&&(!SKD[k].sc2||SKD[k].sc2===S.cls2)&&(!SKD[k].bk||!!(S.bh&&S.bh.sb&&S.bh.sb[SKD[k].bk]))).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior'||typeof LGB!=='undefined'&&LGB&&LGB[S.cls]===SKD[k].cls||k==='mdarmy'&&!!S.mdsk||!!SKD[k].title&&(S.title===SKD[k].title||!!SKD[k].sc2a&&S.cls2===SKD[k].sc2a)||!!SKD[k].qlend&&qlendOn(SKD[k].qlend)||!!SKD[k].mgt&&mgtKnown(k)&&clsFam('mage')||!!SKD[k].race&&SKD[k].race===myRace()&&!!rzR()&&(SKD[k].rsub===undefined||SKD[k].rsub===(S.rsub||''))||!!SKD[k].awk&&awkTier()>=SKD[k].awk||!!SKD[k].ego&&SKD[k].ego===egoOf()||!!SKD[k].relic&&SKD[k].relic===rqOn());
 const NSK=8; // skill slots on the bar (keys 1-8); the title slot comes after them
 // owner 2026-10-22: gear (rings, weapons, armour) and things you use go on the main bar too, as on the extra bars
 const barThing=k=>typeof k==='string'&&!SKD[k]&&(XGEAR(k)||XITEM(k)||!!(S.mats&&k in S.mats));
@@ -11567,18 +11568,18 @@ function update(dt){
  if(!LIVE||!S||S.__demo&&mode!=='play')return;const inp=mode==='play';
  // player
  const mh=maxHP(),pain=P.hp/mh<.25;
- if(P.sImm>0)P.sImm-=dt;if(P.stun>0){P.stun-=dt*(S&&S.cls==='pagma'?3:1);P.frame=0;}
+ if(P.sImm>0)P.sImm-=dt;if(P.stun>0){P.stun-=dt*(S&&S.cls==='pagma'?3:1)*rqStunM();P.frame=0;}
  if(P.gd==null)P.gd=100;if(P.fort>0)P.fort-=dt;if(P.prov>0)P.prov-=dt;if(P.guard){if(!inp||P.stun>0||P.dash>0)P.guard=0;else{P.gT+=dt;const v=guardDir();if(v){P.gx=v[0];P.gy=v[1];}}}if(!P.guard){P.gdT=(P.gdT||0)-dt;if(P.gdT<=0)P.gd=Math.min(100,P.gd+35*dt);}
  if(PHOTO&&PHC){let cx=(K.right?1:0)-(K.left?1:0),cy=(K.down?1:0)-(K.up?1:0);if(TSV){cx=TSV.x;cy=TSV.y;}PHC.x+=cx*PHCV*dt;PHC.y+=cy*PHCV*dt;const dx=PHC.x-P.x,dy=PHC.y-P.y+8,dd=Math.hypot(dx,dy);if(dd>PHCR){PHC.x=P.x+dx/dd*PHCR;PHC.y=P.y-8+dy/dd*PHCR;}}
  const walk=(inp||WALKM.includes(mode))&&!PHOTO;let ix=P.stun>0||!walk?0:(K.right?1:0)-(K.left?1:0),iy=P.stun>0||!walk?0:(K.down?1:0)-(K.up?1:0),tsf=1;
  if(TSV&&walk&&!(P.stun>0)){ix=TSV.x;iy=TSV.y;tsf=Math.max(.45,Math.min(1,Math.hypot(ix,iy)*1.3));}
  if(FOLLOW){if(ix||iy)folStop('folOff');else if(walk&&!(P.stun>0)&&!(P.dash>0)){const v=folDir(dt);if(v){ix=v[0];iy=v[1];}}} // SAT-ONLINE-068: your own keys stop it
  if(P.dash>0){P.dash-=dt;move(P,P.dx*230*dt,P.dy*230*dt,4);P.trail.push({x:P.x,y:P.y,dir:P.dir,frame:P.frame,t:.22,r:P.ride?myMt():0});}
- else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(tlOn('legend')?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.buf&&P.buf.k==='swift'&&!P.ride?1.12:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*p3Spd()*vcSpd()*vpSpd()*rzSpd()*awkSpd()*egoSpd()*mxSpd()*ttSpd()*p4Spd()*(1+Math.min(.3*rzCapM(),gearSum('ms')))*(P.kyTU>gTime?1.35:1)*(1+ssBl())*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1)*roadSp();move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
+ else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(tlOn('legend')?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.buf&&P.buf.k==='swift'&&!P.ride?1.12:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*p3Spd()*vcSpd()*vpSpd()*rzSpd()*awkSpd()*egoSpd()*rqSpd()*mxSpd()*ttSpd()*p4Spd()*(1+Math.min(.3*rzCapM(),gearSum('ms')))*(P.kyTU>gTime?1.35:1)*(1+ssBl())*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1)*roadSp();move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
  else P.frame=0;
  if(P.guard)P.dir=Math.abs(P.gx)>Math.abs(P.gy)?(P.gx>0?2:3):(P.gy>0?0:1);
  if(K.atk&&inp&&!PHOTO){const wk=weapKind(),v=(TOUCH&&tAim((wk==='bow'||wk==='staff')&&!hcMelee()?170:44))||[[0,1],[0,-1],[1,0],[-1,0]][P.dir];tryAttack(v[0],v[1]);}
- P.acd-=dt;P.inv-=dt;P.dcd-=dt;P.pcd=(P.pcd||0)-dt;S.immT-=dt;P.scd-=dt;for(const k in P.cd)P.cd[k]-=dt;S.playT+=dt;{const sx=P.x===P.mx0&&P.y===P.my0;P.mx0=P.x;P.my0=P.y;P.stillT=sx?(P.stillT||0)+dt:0;}P.mp=Math.min(maxMP(),P.mp+(1.5+maxMP()*.012)*(gTime-(P.hitT??-99)>5?(P.stillT>2?4:1.6):1)*dt*(S.cls==='braham'?2.5:1)*(ipOn('absurd')?2:1)*(hellDeb()?0:1)*(hlDeb()?.5:1)*rzMpR()*(P.sncC?0:1)*(P.bga>0?0:1));if(P.rage>0){P.rage-=dt;if(rand()<dt*20)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*16,vx:0,vy:-30,t:.5,c:'#ff5a3a',fl:1});}if(P.slash){P.slash.t-=dt;if(P.slash.t<=0)P.slash=null;}
+ P.acd-=dt;P.inv-=dt;P.dcd-=dt;P.pcd=(P.pcd||0)-dt;S.immT-=dt;P.scd-=dt;for(const k in P.cd)P.cd[k]-=dt;S.playT+=dt;{const sx=P.x===P.mx0&&P.y===P.my0;P.mx0=P.x;P.my0=P.y;P.stillT=sx?(P.stillT||0)+dt:0;}P.mp=Math.min(maxMP(),P.mp+(1.5+maxMP()*.012)*(gTime-(P.hitT??-99)>5?(P.stillT>2?4:1.6):1)*dt*rqMpR()*(S.cls==='braham'?2.5:1)*(ipOn('absurd')?2:1)*(hellDeb()?0:1)*(hlDeb()?.5:1)*rzMpR()*(P.sncC?0:1)*(P.bga>0?0:1));if(P.rage>0){P.rage-=dt;if(rand()<dt*20)fx.push({x:P.x+(rand()-.5)*10,y:P.y-rand()*16,vx:0,vy:-30,t:.5,c:'#ff5a3a',fl:1});}if(P.slash){P.slash.t-=dt;if(P.slash.t<=0)P.slash=null;}
  P.lcd=(P.lcd||0)-dt;if(P.lbT>0)P.lbT-=dt;else P.st=Math.min(maxST(),P.st+(P.food<20?8:20)*(balanced()?1.25:1)*(S.wis&&S.wis.mht?1.5:1)*dt);
  // Second Wind (balanced body): below 35% health, recover 3% of max HP per second for 5 s; once a minute
  if(balanced()&&P.hp>0&&P.hp<mh*.35&&(S.swT||0)<=S.playT){S.swT=S.playT+60;P.sw=5;vfx('heal',P.x,P.y);toast(t('secondWind'),'good');SFX.notice();}
@@ -11657,7 +11658,7 @@ function monHash(m){let h=0;for(const ch of m.id)h=(h*31+ch.charCodeAt(0))|0;ret
 function pickMove(m,d){if(m.rzSealU>gTime)return -1;const L=movesOf(m);m.once=m.once||{};let tot=0;
  const c=L.map((v,i)=>{const ok=d>=(v.min||0)&&d<=v.max&&!((m.once[i]||0)>gTime)&&mxCan(m,v);const w=ok?v.w*(m.last===i?.35:1):0;tot+=w;return w;});
  if(!tot)return -1;let x=rand()*tot;for(let i=0;i<c.length;i++){x-=c[i];if(x<0)return i;}return -1;}
-function hitBy(m,b,mv){if(!seeP(m))return 0;m.hv=mv.k==='ring'||mv.mul>=1.4||mv.k==='line'||mv.k==='leap';TFK=m.hv?'heavy':'light';TFM=mv.mul||1;let r;try{r=hurtPlayer(b.dmg*mv.mul,m.lv,m);}finally{TFK=null;TFM=1;}m.hv=0;if(r===2){mxOn(mv,m);if(mv.kb&&P.dash<=0)move(P,m.ax*mv.kb,m.ay*mv.kb,4);if(mv.stun&&!(P.sImm>0)&&!legResist()){P.stun=Math.max(P.stun||0,mv.stun);P.sImm=mv.stun+2;vfx('stun',P.x,P.y-24,{life:mv.stun});}}return r;}
+function hitBy(m,b,mv){if(!seeP(m))return 0;m.hv=mv.k==='ring'||mv.mul>=1.4||mv.k==='line'||mv.k==='leap';TFK=m.hv?'heavy':'light';TFM=mv.mul||1;let r;try{r=hurtPlayer(b.dmg*mv.mul,m.lv,m);}finally{TFK=null;TFM=1;}m.hv=0;if(r===2){mxOn(mv,m);if(mv.kb&&P.dash<=0&&!rqNoKb())move(P,m.ax*mv.kb,m.ay*mv.kb,4);if(mv.stun&&!(P.sImm>0)&&!legResist()){P.stun=Math.max(P.stun||0,mv.stun);P.sImm=mv.stun+2;vfx('stun',P.x,P.y-24,{life:mv.stun});}}return r;}
 // owner 2026-10-21: no moonwalking. A monster stepping away faster than a shuffle turns its back and runs that way
 function monTurn(m,b,ox,dt){const vx=m.x-ox;if(!m.st&&Math.abs(vx)>b.spd*dt*.3&&(vx>0?1:-1)!==(m.face||1))m.face=vx>0?1:-1;}
 function monAct(m,b,AI,dx,dy,d,mr,dt){m.atkT=Math.max(0,(m.atkT||0)-dt);
@@ -11677,7 +11678,7 @@ function monAct(m,b,AI,dx,dy,d,mr,dt){m.atkT=Math.max(0,(m.atkT||0)-dt);
    m.mv={k:'arc',tele:.16,reach:26,arc:1.3,mul:mv.mul,rec:mv.rec,cd:mv.cd,blk:1};m.st='tele';m.stT=m.tele=.16;mobActN(m);return;}
   m.atkT=.25;
   if(MXK[mv.k]){MXK[mv.k](m,b,mv,d,dx,dy,0);if((m.combo||0)>1){m.combo--;m.stT=m.tele=mv.tele*.6;mobActN(m);return;}}
-  else if(mv.k==='ring'){if(mv.crush)slamAllies(m);shake=Math.max(shake,.2);SFX.slam();vfx('dust',m.x,m.y,{n:14});for(let k=0;k<16;k++){const a=k/16*6.28;fx.push({x:m.x+Math.cos(a)*mv.reach*.8,y:m.y+Math.sin(a)*mv.reach*.45,vx:Math.cos(a)*30,vy:-rand()*50,t:.45,c:'#8a8f99'});}if(ringIn(m,mv.reach+4))hitBy(m,b,mv);   /* (plan U123) inside the drawn ring, not a circle */if(mv.pull&&d<mv.reach*1.6&&seeP(m)&&P.dash<=0)move(P,-fx_*Math.min(mv.pull,d-8),-fy_*Math.min(mv.pull,d-8),4);}
+  else if(mv.k==='ring'){if(mv.crush)slamAllies(m);shake=Math.max(shake,.2);SFX.slam();vfx('dust',m.x,m.y,{n:14});for(let k=0;k<16;k++){const a=k/16*6.28;fx.push({x:m.x+Math.cos(a)*mv.reach*.8,y:m.y+Math.sin(a)*mv.reach*.45,vx:Math.cos(a)*30,vy:-rand()*50,t:.45,c:'#8a8f99'});}if(ringIn(m,mv.reach+4))hitBy(m,b,mv);   /* (plan U123) inside the drawn ring, not a circle */if(mv.pull&&d<mv.reach*1.6&&seeP(m)&&P.dash<=0&&!rqNoKb())move(P,-fx_*Math.min(mv.pull,d-8),-fy_*Math.min(mv.pull,d-8),4);}
   else if(mv.k==='arc'){const ang=Math.atan2(dy,dx)-Math.atan2(m.ay,m.ax),da=Math.abs(Math.atan2(Math.sin(ang),Math.cos(ang)));vfx('slash',m.x+m.ax*8,m.y-8+m.ay*8,{angle:Math.atan2(m.ay,m.ax),rarity:0});if(d<mv.reach+6&&da<mv.arc)hitBy(m,b,mv);
    if((m.combo||0)>1){m.combo--;m.stT=m.tele=mv.tele*.6;mobActN(m);return;}}
   else if(mv.k==='shot'){eproj.push({x:m.x+m.ax*8,y:m.y-10+m.ay*8,vx:m.ax*mv.spd,vy:m.ay*mv.spd,t:mv.max/mv.spd+.3,m,mv,sp:mv.sp,a:Math.atan2(m.ay,m.ax)});SFX.dodge();}
@@ -11721,7 +11722,7 @@ function monAct(m,b,AI,dx,dy,d,mr,dt){m.atkT=Math.max(0,(m.atkT||0)-dt);
 function bcBreak(p){if(!S||S.cls!=='braham'||!S.sk.bcont||!pasOn('bcont')||(P.bcT||0)>gTime||P.inv>0)return false;const L=skLv('bcont');if(rand()>=Math.min(.95,.5+.05*(L-1)))return false;
  P.bcT=gTime+3;skUse('bcont',1);vfx('mana',p.x,p.y);if(p.m&&!p.m.dead&&rand()<.04+.005*(L-1)){hitMon(p.m,1.5,{skill:1});numPK(-30,'bcRefl','#d8c0ff',false);}else numPK(-30,'bcBrk','#d8c0ff',false);return true;}
 function updateEProj(dt){eproj=eproj.filter(p=>{p.t-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.t<=0||p4PSolid(p.x/TS|0,(p.y+8)/TS|0)){vfx('dust',p.x,p.y+6,{n:3});return false;}
- if(mode!=='dead'&&Math.hypot(P.x-p.x,P.y-8-p.y)<8){if(bcBreak(p))return false;TFK='proj';TFM=p.mv.mul||1;let r;try{r=hurtPlayer(MT[p.m.type].dmg*p.mv.mul,p.m.lv,{x:p.x,y:p.y+8,dmul:p.m.dmul,fury:p.m.fury,type:p.m.type});}finally{TFK=null;TFM=1;}if(r){p3PHit(p);p4PHit(p);}if(r===2)mxOn(p.mv,p.m);return false;}return true;});ezTick(dt);}
+ if(mode!=='dead'&&Math.hypot(P.x-p.x,P.y-8-p.y)<8){if(bcBreak(p)||rqHandBlock(p))return false;TFK='proj';TFM=p.mv.mul||1;let r;try{r=hurtPlayer(MT[p.m.type].dmg*p.mv.mul,p.m.lv,{x:p.x,y:p.y+8,dmul:p.m.dmul,fury:p.m.fury,type:p.m.type});}finally{TFK=null;TFM=1;}if(r){p3PHit(p);p4PHit(p);}if(r===2)mxOn(p.mv,p.m);return false;}return true;});ezTick(dt);}
 // gates: a dark cave mouth with a rock rim outdoors; glowing stairs inside (down) or a pale shaft of light (up)
 // enhanced weapons shine like the manhwa's: a glint from +4, a coloured aura from +7 (blue, violet, gold, crimson as it climbs),
 // rising sparks from +9 and two orbiting lights at +10. Kept subtle and short-lived (Twister: too much was irritating)
@@ -11922,7 +11923,7 @@ function render(dt){DRAWN=0;netDrawn=0;
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(hcHand(hx,hy,P.dir,P.slash)){}else if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,wKey(w),w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
   // SAT-ONLINE-117 (plan U324): each part that adds to the scene is its own boundary, the other players' part (netEnts) above
   // all: a bad message or a bug in one part costs that part this frame, never the whole world
-  if(BHR)entsOf(bhEnts,ents);if(S&&S.wis)entsOf(twEnts,ents);if(S){entsOf(c2Ents,ents);entsOf(p2Ents,ents);entsOf(p3Ents,ents);entsOf(p4Ents,ents);entsOf(gdEnts,ents);entsOf(homeEnts,ents);entsOf(phEnts,ents);entsOf(necEnts,ents);entsOf(hcEnts,ents);entsOf(fbEnts,ents);entsOf(brEnts,ents);entsOf(blEnts,ents);entsOf(nvEnts,ents);}if(SKA)entsOf(tAimEnts,ents);if(S)entsOf(tlEnts,ents);if(NET&&!titleCam)entsOf(netEnts,ents);}
+  if(BHR)entsOf(bhEnts,ents);if(S&&S.wis)entsOf(twEnts,ents);if(S){entsOf(c2Ents,ents);entsOf(p2Ents,ents);entsOf(p3Ents,ents);entsOf(p4Ents,ents);entsOf(gdEnts,ents);entsOf(homeEnts,ents);entsOf(phEnts,ents);entsOf(necEnts,ents);entsOf(hcEnts,ents);entsOf(fbEnts,ents);entsOf(brEnts,ents);entsOf(blEnts,ents);entsOf(nvEnts,ents);}if(SKA)entsOf(tAimEnts,ents);if(S)entsOf(tlEnts,ents);if(S&&!titleCam)entsOf(rqEnts,ents);if(NET&&!titleCam)entsOf(netEnts,ents);}
  entsOf(decEnts,ents); // SAT-ONLINE-179: the season's decorations
  // one broken drawing (a stale sprite file after an update) must not hide the player and everything after it
  ents.sort((a,b)=>a.y-b.y).forEach(e=>{try{e.f();DRAWN++;}catch(err){ctx.globalAlpha=1;gameErr(err);}});
@@ -12267,7 +12268,7 @@ function p3Hurt(d,src){if(d>0&&P3.ch){P3.ch=null;toast(t('rodInt'),'warn');}if(!
 function p3PHit(p){if(p.sp==='ice'){if(!legResist())P3.chill=2;}else if(p.sp==='bolt'&&!(P.sImm>0)&&!legResist()){P.stun=Math.max(P.stun||0,.25);P.sImm=2.25;}}
 const p3Spd=()=>P3.chill>0?.7:1;
 function p3Kill(m){const k=m.type;if(P3WB.includes(k)&&!m.tmp){WS.wb=WS.wb||{};WS.wb[k]=Date.now()+MT[k].wb*1000;wbPut(k);setTimeout(()=>annW(k+'Dn'),400);save(true);}if(k==='slord')P3.rod=[0,0,0,0];}
-function p3Tick(dt){if(!S||!P||S.__demo)return;vpTick(dt);rzTick(dt);awkTick(dt);const s=p3S();P3.ls=Math.max(0,P3.ls-maxHP()*.06*dt);P3.chill=Math.max(0,P3.chill-dt);
+function p3Tick(dt){if(!S||!P||S.__demo)return;vpTick(dt);rzTick(dt);awkTick(dt);rqTick(dt);const s=p3S();P3.ls=Math.max(0,P3.ls-maxHP()*.06*dt);P3.chill=Math.max(0,P3.chill-dt);
  if(qDone('vc3')&&!s.ring){s.ring=1;S.items.push(mkItem('vring',3));toast(t('got',{n:1,item:t('vring')}),'good');SFX.rare();save(true);}
  if(qDone('vc2')&&s.cov===undefined){s.cov=1;setTimeout(()=>{announce(t('covJoin'),1);SFX.legendary();},300);save(true);}
  if(P3.ch){if(P.rmv>0||mode!=='play'){P3.ch=null;toast(t('rodInt'),'warn');}else if((P3.ch.t-=dt)<=0){const i=P3.ch.i;P3.ch=null;P3.rod[i]=1;const p=p3RodXY(i);vfx('bolt',p.x,p.y-20);SFX.zap();const n=p3RodN();
@@ -12496,7 +12497,7 @@ function rzAtk(m,o){let k=1;try{if(phNear('A',150))k*=1.05;}catch(e){}   // a Ro
 // after a blow lands: life drawn, Demonic Power, corruption, the splash of a giant's blow, Chiyou's Favor
 function rzHit(m,dmg,crit,o){if(!rzR()||m.spar)return;P.rzCt=gTime;
  const ls=(o.skill?rzV('sls'):0)+rzV('ls');if(ls>0&&dmg>0&&P.hp>0){const h=lsCap(dmg*ls);if(h>0){P.hp=Math.min(maxHP(),P.hp+h);hudDirty=true;}}
- if(rzV('dpool')&&!o.dot&&!o.chain){P.mp=Math.min(maxMP(),P.mp+maxMP()*(o.skill?.004:.012)*(1+rzV('dpm')));hudDirty=true;}
+ if(rzV('dpool')&&!o.dot&&!o.chain){P.mp=Math.min(maxMP(),P.mp+maxMP()*(o.skill?.004:.012)*(1+rzV('dpm'))*rqMpR());hudDirty=true;}
  if(rzV('corr')&&!o.dot&&!m.tdum){m.rzCor=Math.min(10,(m.rzCor||0)+1);m.rzCorU=gTime+6;}
  if(rzV('splash')&&!o.skill&&!o.chain&&!o.dot&&!o.raw)for(const x of mons)if(x!==m&&!x.dead&&!x.spar&&!x.tdum&&Math.hypot(x.x-m.x,x.y-m.y)<34+(MT[x.type].r||6))hitMon(x,0,{raw:Math.max(1,dmg*rzV('splash')),chain:1});
  if(crit&&rzV('reset')&&gTime>(P.rzRsT||0)&&rand()<rzV('reset')){P.rzRsT=gTime+4;for(const k in P.cd)P.cd[k]=0;numP(-30,t('rzReset'),'#ffd24a',false);sbSig='';}}
@@ -12505,7 +12506,7 @@ function rzHurt(d,src){if(!rzR())return d;if(P.rzBar>0&&P.rzBarU>gTime){const a=
  if(!src||!src.type||!MT[src.type])return d;const b=MT[src.type],el=monEl(src.type),ph=!el,near=Math.hypot(src.x-P.x,src.y-P.y);
  if(ph)d*=1-rzV('pres');if(ph&&P.rzMcU>gTime)d*=.6;if(el==='fire')d*=1-rzV('fres');if(el)d*=1-rzV('eres');
  if(rzV('aura')&&!b.boss&&near<110)d*=1-rzV('aura');
- if(el&&rzV('hydro')){P.rzBar=Math.min(maxHP()*.2,(P.rzBarU>gTime?P.rzBar||0:0)+d*rzV('hydro'));P.rzBarU=gTime+8;}
+ if(el&&rzV('hydro')){P.rzBar=Math.min(maxHP()*.2*rqShM(),(P.rzBarU>gTime?P.rzBar||0:0)+d*rzV('hydro'));P.rzBarU=gTime+8;}
  if(ph&&rzV('chill')&&gTime>(P.rzChT||0)){P.rzChT=gTime+1;for(const m of mons)if(!m.dead&&Math.hypot(m.x-P.x,m.y-P.y)<60+(MT[m.type].r||6))m.slowU=Math.max(m.slowU||0,gTime+2);
   for(let i=0;i<10;i++)fx.push({x:P.x+(rand()-.5)*50,y:P.y-rand()*24,vx:(rand()-.5)*20,vy:-10,t:.5,c:i%2?'#bfe8ff':'#ffffff',fl:1});}
  const live=mons.includes(src)&&!src.dead&&!src.spar;
@@ -12514,7 +12515,7 @@ function rzHurt(d,src){if(!rzR())return d;if(P.rzBar>0&&P.rzBarU>gTime){const a=
  return d;}
 // the last word before a blow lands: Premonition (an Evil Eye dodges a killing blow, 15%) and Totemic Will (once every 5 minutes)
 function rzDodge(d,src){if(!S||!P)return false;
- if(rzV('totem')&&P.hp-d<maxHP()*.05&&gTime>(P.rzToT||-1)){P.rzToT=gTime+300;P.rzBar=maxHP()*.3;P.rzBarU=gTime+8;P.inv=.8;numP(-24,t('rzTotT'),'#9fe39a',true);SFX.legendary();return true;}
+ if(rzV('totem')&&P.hp-d<maxHP()*.05&&gTime>(P.rzToT||-1)){P.rzToT=gTime+300;P.rzBar=maxHP()*.3*rqShM();P.rzBarU=gTime+8;P.inv=.8;numP(-24,t('rzTotT'),'#9fe39a',true);SFX.legendary();return true;}
  if(S.race!=='evileye'||!src||!src.type||!(d>=P.hp)||rand()>=.15)return false;numP(-20,t('rzPrem'),'#d8a0ff',false);P.inv=.4;return true;}
 // Phase Drift: a dodge that turns you intangible
 function rzPhase(){if(rzV('phase')&&rand()<rzV('phase')){P.inv=Math.max(P.inv,1);numP(-22,t('rzPhT'),'#c0a0ff',false);for(let i=0;i<8;i++)fx.push({x:P.x+(rand()-.5)*14,y:P.y-rand()*20,vx:0,vy:-16,t:.5,c:'#8a5ac8',fl:1});}}
@@ -13615,6 +13616,465 @@ Object.assign(STR.en,{"egN_greed":"Spirit of Greed",
  "skd_egreap":"Spirit of the Reaper: the spirit sweeps out around you, 350% dark damage, and ordinary foes flee in fear for 5 s (a boss staggers). 60 s cooldown.",
  "sk_egdrag":"Dragon Spirit Strike",
  "skd_egdrag":"Spirit of the Dragon King: a spectral dragon down the line, 300% to every foe on it, and their defences drop 20% for 8 s. 90 s cooldown."});
+/* ---------------- Relics (v3.74; the owner 2026-10-27 23:50): "New Equippable items, Relics. Relics are unique accessories that are
+   hard to find, only one copy of the relic exist. A player may only have one relic equipped at the time. If they have one they are
+   not elligible to gain or even have in their inventory another. Please make the steps to get the relics complicated. not just one
+   quest npc.. a questline that leads across the map and doesn't give much hints. or possibly hard puzzles in the overworld for
+   players to solve in order to have a chance at finding one."
+   Eight relics, each an item of the slot rl (one slot in the equipment window). One copy of each in the world: the legend books'
+   record, world/satisfy/books/rl_<k> (the same rule, no rules change; offline the device's world, WS.books). Whoever holds a relic
+   can have no other (it is never given, and none comes in by trade: a relic never leaves its holder's bag but by being let go,
+   which frees its record for the world). Each relic is found at the end of a chain of old stones across the map (RQST): no quest
+   giver, no quest in the book, no marker. Each stone wants something (a time of day, the weather, an offering, blood, a hunt, a
+   minute of stillness, stones touched in an order a riddle gives) and answers with one sign and a hint toward the next stone; the
+   last is a vault whose dial wants the chain's three signs in order (a wrong turn locks it for ten minutes). Even then the vault
+   gives the relic only if no one holds it. Everything here is GAME_ORIGINAL and its numbers GAME_BALANCE, the relics' own numbers
+   the owner's. */
+const RQK=['godhand','baal','rebecca','giant','evilking','dragon','gourd','core'],RQID=k=>'rl_'+k;
+var RLC=RQK.map(k=>({id:RQID(k),slot:'rl',fix:4}));   // what rcById finds for a relic (never a recipe: not in RC)
+const RQG=['⚒','✋','☀','☾','✶','♆','✧','☘','✠','❄','⚔','☗','◉','☉','♛','♨','✦','⚚','☯','☁','✿','⚙','⚡','⚛'];
+// the stones: tile x, y and how each is drawn
+const RQSITE={gh1:[20,6,'stele'],gh2:[496,284,'ruin'],gh3:[869,-28,'ruin'],gh4:[1123,152,'vault'],
+ ba1:[202,58,'ruin'],ba2:[809,282,'stele'],ba3:[1320,345,'stele'],ba4:[1704,362,'vault'],
+ re1:[350,99,'stele'],re2:[340,26,'stele'],re3:[859,241,'ruin'],re4:[455,27,'vault'],
+ gi1:[153,-31,'print'],gi1a:[147,-35,'stone'],gi1b:[159,-35,'stone'],gi1c:[147,-26,'stone'],gi1d:[159,-26,'stone'],gi2:[640,-20,'ruin'],gi3:[560,-40,'stele'],gi4:[32,-29,'vault'],
+ ek1:[424,112,'stele'],ek2a:[595,142,'pool'],ek2b:[600,138,'pool'],ek2c:[605,142,'pool'],ek3:[869,285,'ruin'],ek4:[903,279,'vault'],
+ dr1:[612,20,'shell'],dr3:[444,137,'pool'],dr4:[513,-158,'vault'],
+ go1:[1449,162,'stone'],go2:[1601,-140,'stone'],go3a:[1846,54,'stone'],go3b:[1852,58,'stone'],go3c:[1850,65,'stone'],go3d:[1842,65,'stone'],go3e:[1840,58,'stone'],go4:[1201,-129,'vault'],
+ co1:[492,72,'machine'],co2:[811,166,'machine'],co3a:[807,10,'pylon'],co3b:[813,10,'pylon'],co3c:[819,10,'pylon'],co4:[750,145,'vault']};
+// each relic's chain: the stone, what it wants, the sign it gives
+const RQST={
+ godhand:[{s:'gh1',t:'pay',gold:50000,g:0},{s:'gh2',t:'wep',en:7,g:1},{s:'gh3',t:'day',g:2},{s:'gh4',t:'dial'}],
+ baal:[{s:'ba1',t:'night',g:3},{s:'ba2',t:'kill',mon:'demon',n:30,g:4},{s:'ba3',t:'blood',g:5},{s:'ba4',t:'dial'}],
+ rebecca:[{s:'re1',t:'dawn',g:6},{s:'re2',t:'pay',mats:{herb:20,bherb:10},g:7},{s:'re3',t:'peace',g:8},{s:'re4',t:'dial'}],
+ giant:[{s:'gi1',t:'seq',sites:['gi1a','gi1b','gi1c','gi1d'],order:['gi1b','gi1d','gi1a','gi1c'],g:9},{s:'gi2',t:'kill',mon:'fgiant',n:1,g:10},{s:'gi3',t:'wx',g:11},{s:'gi4',t:'dial'}],
+ evilking:[{s:'ek1',t:'night',g:12},{s:'ek2a',t:'seq',sites:['ek2a','ek2b','ek2c'],order:['ek2b','ek2c','ek2a'],g:13},{s:'ek3',t:'kill',mon:'boss',n:3,g:14},{s:'ek4',t:'dial'}],
+ dragon:[{s:'dr1',t:'pay',mats:{dscale:3},g:15},{s:'dr1',t:'kill',mon:'trauka',n:1,g:16},{s:'dr3',t:'noon',g:17},{s:'dr4',t:'dial'}],
+ gourd:[{s:'go1',t:'pay',mats:{wood:10,fess:1,ore:10,mith:3,fish:10},g:18},{s:'go2',t:'still',sec:60,g:19},{s:'go3a',t:'seq',sites:['go3a','go3b','go3c','go3d','go3e'],order:['go3c','go3e','go3a','go3d','go3b'],g:20},{s:'go4',t:'dial'}],
+ core:[{s:'co1',t:'pay',mats:{mstone:20},g:21},{s:'co2',t:'kill',mon:'golem',n:20,g:22},{s:'co3a',t:'seq',sites:['co3a','co3b','co3c'],order:['co3c','co3a','co3b'],g:23},{s:'co4',t:'dial'}]};
+const RQOF={};for(const k of RQK)RQST[k].forEach((st,i)=>{for(const s of new Set([st.s,...(st.sites||[])]))(RQOF[s]=RQOF[s]||[]).push([k,i]);});   // which chain and step each stone belongs to
+const RQS={kt:-1e9,t:0,st:null,rt:0},RQP={};   // the last kill, the half-second tick, a stillness under way, the rumour; records being written
+// the relic in your bag (there is never more than one), and the one that works: in the relic slot and the world's copy
+const rqItem=()=>S&&S.items?S.items.find(i=>i&&i.slot==='rl'&&RQK.includes(i.id.slice(3))):null;
+const rqHeld=()=>!!rqItem();
+function rqLive(it){if(!it)return false;if(!bkNet()||!bkReady())return true;return bkMine(bkRec(it.id));}
+function rqOn(){if(!S||!S.items)return null;const it=eqIt('rl');return it&&it.slot==='rl'&&rqLive(it)?it.id.slice(3):null;}
+const rqIs=k=>rqOn()===k;
+// the numbers
+const rqStM=()=>rqIs('gourd')?1.1:1,rqHpM=()=>rqIs('giant')?1.15:1,rqAsM=()=>rqIs('godhand')?1/1.1:1,rqSpd=()=>rqIs('giant')?.9:1,rqCr=()=>rqIs('evilking')?.1:0;
+const rqCraftM=()=>rqIs('godhand')?1.05:1,rqEnhM=()=>rqIs('godhand')?1.05:1,rqMpR=()=>rqIs('baal')?1.15:1,rqHealB=()=>rqIs('rebecca')?.15:0,rqShM=()=>rqIs('core')?1.2:1;
+const rqNoKb=()=>rqIs('giant'),rqStunM=()=>rqIs('giant')?1/.7:1,rqPdM=src=>rqIs('giant')&&src&&src.type&&MT[src.type]&&!monEl(src.type)?1.25:1;
+// a blow you strike: dark magic (Baal), magic (the Evil King), penetration (the Dragon), physical (the Core), the Draconic Roar
+function rqAtk(m,o){const k=rqOn();let r=k==='dragon'&&P&&P.rqRoarU>gTime?1.12:1;if(!k)return r;
+ const el=o.el!==undefined?o.el:CURSK?skEl(CURSK):null,mag=!!o.rzMag||!!o.skill&&(clsFam('mage')||!!el);
+ if(k==='baal'&&mag&&el==='dark')r*=1.2;if(k==='evilking'&&mag)r*=1.15;if(k==='core'&&!mag)r*=1.1;
+ if(k==='dragon'&&!o.pure&&!o.raw&&!o.nolv){const f=lvF(m.lv);if(f<1&&f>0)r*=Math.pow(f,-.1);}return r;}
+// a blow taken: holy (Rebecca) and fire (the Dragon) resisted, the Overdrive Barrier first
+function rqHurt(d,src){const k=rqOn();if(!k)return d;
+ if(P.rqBar>0&&P.rqBarU>gTime){const a=Math.min(d,P.rqBar);d-=a;P.rqBar-=a;if(d<=0){numP(-20,t('rqBarT'),'#7ae8ff',false);return 0;}}
+ const el=src&&src.type&&MT[src.type]?monEl(src.type):null;if(k==='rebecca'&&el==='holy')d*=.9;if(k==='dragon'&&el==='fire')d*=.85;return d;}
+// True Perception: five dodges kept ready, one back every 20 s
+function rqEvade(src){if(!rqIs('evilking')||!src||!src.type||TFK==='tick'||!((P.rqEyeN|0)>0))return false;P.rqEyeN--;P.inv=Math.max(P.inv,.3);numP(-22,t('rqEyeT',{n:P.rqEyeN}),'#d8a0ff',false);return true;}
+// Greed's Reflex: 10% of the blows that land call a golden hand for 6 s, and it catches every shot thrown at you
+function rqStruck(d){if(rqIs('godhand')&&d>0&&P.hp>0&&rand()<.1&&!(P.rqHandU>gTime)){P.rqHandU=gTime+6;numP(-28,t('rqHandT'),'#ffd24a',false);SFX.legendary();}}
+function rqHandBlock(p){if(!(P.rqHandU>gTime)||!rqIs('godhand'))return false;vfx('block',p.x,p.y,{});num(p.x,p.y-10,t('rqHandB'),'#ffd24a',false);return true;}
+// potions 15% stronger (the Gourd): 15% more of what the potion gave
+function rqPot(h0,m0){if(!rqIs('gourd'))return;if(P.hp>h0)P.hp=Math.min(maxHP(),P.hp+(P.hp-h0)*.15);if(P.mp>m0)P.mp=Math.min(maxMP(),P.mp+(P.mp-m0)*.15);hudDirty=true;}
+// every half second and every frame: the relic's own passives, the stillness, a record to write, the whisper
+function rqTick(dt){if(!S||!P||S.__demo)return;const k=rqOn(),now=gTime,fight=now-Math.max(P.hitT??-99,P.awkCt??-99)<5;
+ if(k==='gourd'&&!fight&&P.hp>0){P.hp=Math.min(maxHP(),P.hp+maxHP()*.015*dt);P.mp=Math.min(maxMP(),P.mp+maxMP()*.015*dt);hudDirty=true;}   // Five Elements Harmony
+ if(k==='evilking'){if(P.rqEyeN==null){P.rqEyeN=5;P.rqEyeT=now;}if(P.rqEyeN<5&&now-(P.rqEyeT||0)>=20){P.rqEyeN++;P.rqEyeT=now;}else if(P.rqEyeN>=5)P.rqEyeT=now;}else P.rqEyeN=null;
+ if(k==='rebecca'&&P.hp>0){if(P.rqDbT==null)P.rqDbT=now+60;if(now>=P.rqDbT){P.rqDbT=now+60;cls2Clean();P.hp=Math.min(maxHP(),P.hp+maxHP()*.05);numP(-26,t('rqDbT'),'#fff2b0',false);}}else P.rqDbT=null;   // Divine Blessing
+ if(RQS.st){const s=RQS.st;if(Math.hypot(P.x-s.x,P.y-s.y)>40||(P.hitT??-99)>s.t0||mode==='dead'){RQS.st=null;toast(t('rqStillNo'),'warn');}else if(now-s.t0>=s.n){RQS.st=null;rqDone(s.k,s.i);}}
+ if((RQS.t-=dt)>0)return;RQS.t=.5;
+ const it=rqItem();if(it&&bkNet()&&bkReady()&&!bkRec(it.id)&&!RQP[it.id]&&gTime>RQS.rt){RQP[it.id]=1;bkTake(it.id,true).then(ok=>{RQP[it.id]=0;if(!ok)RQS.rt=gTime+30;});}   // a relic found signed out: its record goes up (refused if another came out first: then this one sleeps)
+ for(const id in S.rqgp||{})if(!RQP[id]&&bkReady()){const r=bkRec(id);delete S.rqgp[id];if(bkMine(r)&&!rqHeld())rqAdd(id.slice(3));save(true);}   // the world gave it, the page closed first
+ if(!S.rqw&&S.lv>=100&&mode==='play'){S.rqw=1;setTimeout(()=>dialog('sysN',[t('rqRumor')]),2500);save(true);}}   // one whisper, once
+// a kill: the hunts the stones asked for, and the time of your last kill (the chapel wants you in peace)
+function rqKill(m){if(!S||m.tmp||m.spar||m.tdum)return;RQS.kt=gTime;for(const k of RQK){const st=RQST[k][S.rqs&&S.rqs[k]|0],x=S.rqx&&S.rqx[k];if(!st||st.t!=='kill'||!x||!x.go||x.c>=st.n)continue;
+ const T=m.type,b=MT[T]||{},hit=st.mon==='demon'?DEMK.has(T):st.mon==='boss'?!!b.boss:st.mon==='golem'?/golem/.test(T):T===st.mon;if(!hit)continue;x.c=(x.c|0)+1;if(x.c>=st.n)toast(t('rqKillDone'),'good');}}
+// the stones near you (what nearest0 offers as "examine")
+function rqNear(){const o=[];if(!P)return o;for(const id in RQSITE){const s=RQSITE[id],x=s[0]*TS+8,y=s[1]*TS+8;if(Math.abs(x-P.x)<40&&Math.abs(y-P.y)<40)o.push({id,x,y});}return o;}
+// where a chain stands for this character
+const rqStep=k=>(S.rqs&&S.rqs[k])|0,rqX=k=>(S.rqx||(S.rqx={}))[k]||(S.rqx[k]={});
+function rqDone(k,i){(S.rqs||(S.rqs={}))[k]=i+1;(S.rqx||(S.rqx={}))[k]={};SFX.quest();flash();dialog('sysN',[t('rq_'+k+'_'+i)]);save(true);}
+// examining a stone
+function rqUse(o){if(!S||S.__demo)return;const id=o.id,look=RQSITE[id][2],own=RQOF[id]||[];
+ const cur=own.find(([k,i])=>rqStep(k)===i&&(RQST[k][i].s===id||(RQST[k][i].sites||[]).includes(id)));
+ if(!cur){const done=own.some(([k,i])=>rqStep(k)>i);return dialog('sysN',[t(done?'rqSpent':'rqSeen_'+look)]);}
+ const [k,i]=cur,st=RQST[k][i],x=rqX(k),K='rq_'+k+'_'+i;
+ if(st.t==='seq')return st.sites.includes(id)?rqSeq(k,i,id):dialog('sysN',[t(K+'n')]);
+ if(st.t==='dial')return rqVault(k,i);
+ if(st.t==='kill'){if(!x.go){x.go=1;x.c=0;save(true);return dialog('sysN',[t(K+'g')]);}if((x.c|0)<st.n)return dialog('sysN',[t(K+'w')]);return rqDone(k,i);}
+ if(st.t==='still'){if(RQS.st)return;return dialog('sysN',[t(K+'n')],null,[{l:t('rqStillB'),f:()=>{RQS.st={k,i,x:P.x,y:P.y,t0:gTime,n:st.sec};toast(t('rqStillOn',{n:st.sec}),'good');}},{l:t('rzLater')}]);}
+ if(st.t==='pay'){const need=Object.entries(st.mats||{}),have=need.every(([m,n])=>(S.mats[m]|0)>=n)&&S.gold>=(st.gold|0),list=[st.gold?t('gold',{n:st.gold.toLocaleString('en')}):'',...need.map(([m,n])=>t(m)+' ×'+n)].filter(Boolean).join(', ');
+  return dialog('sysN',[t(K+'n')],null,[{l:t('rqPayB',{l:list}),poor:!have,f:()=>{if(!(need.every(([m,n])=>(S.mats[m]|0)>=n)&&S.gold>=(st.gold|0))){SFX.deny();return toast(t('rqPayNo'),'warn');}S.gold-=st.gold|0;for(const [m,n] of need)S.mats[m]-=n;hudDirty=true;setTimeout(()=>rqDone(k,i),30);}},{l:t('rzLater')}]);}
+ if(st.t==='blood'){return dialog('sysN',[t(K+'n')],null,[{l:t('rqBloodB'),f:()=>{if(P.hp<maxHP()*.8){SFX.deny();return toast(t('rqBloodNo'),'warn');}P.hp=Math.max(1,Math.round(P.hp*.5));hudDirty=true;vfx('blood',P.x,P.y-10,{});setTimeout(()=>rqDone(k,i),30);}},{l:t('rzLater')}]);}
+ const h=dnHour(),w=wxHere(),ok=st.t==='night'?isNight():st.t==='day'?!isNight():st.t==='dawn'?h>=5&&h<8:st.t==='noon'?h>=11&&h<14:st.t==='wx'?/snow|storm/.test(w):st.t==='peace'?gTime-RQS.kt>=300:st.t==='wep'?((weapon()||{}).en|0)>=st.en:true;
+ if(!ok)return dialog('sysN',[t(K+'n')]);rqDone(k,i);}
+// stones touched in order: each shows its mark and may be touched; a wrong one silences them all
+function rqSeq(k,i,id){const st=RQST[k][i],x=rqX(k),K='rq_'+k+'_'+i;
+ dialog('sysN',[t(K+'_'+id)],null,[{l:t('rqTouchB'),f:()=>{x.q=(x.q||[]).concat(id);const n=x.q.length;
+  if(x.q.some((s,j)=>st.order[j]!==s)){x.q=[];SFX.deny();toast(t('rqSeqNo'),'warn');save(true);return;}
+  if(n>=st.order.length){x.q=[];setTimeout(()=>rqDone(k,i),30);return;}SFX.click();numP(-24,t('rqSeqOk'),'#cfe8ff',false);save(true);}},{l:t('rzLater')}]);}
+// the vault: three rings of signs; the chain's three in order open it (once open, it stays open for you)
+const rqSigns=k=>RQST[k].filter(s=>s.g!=null).map(s=>s.g);
+function rqDialSet(k){const own=rqSigns(k),j=RQK.indexOf(k),dec=[];for(let n=1;dec.length<6;n++){const g=(own[0]+n*5+j)%RQG.length;if(!own.includes(g)&&!dec.includes(g))dec.push(g);}
+ const all=own.concat(dec),r=mulberry32(0x5e1c+j*77);for(let a=all.length-1;a>0;a--){const b=r()*(a+1)|0;[all[a],all[b]]=[all[b],all[a]];}return all;}
+function rqVault(k,i){const K='rq_'+k+'_v';if((S.rqo||{})[k])return rqClaim(k);
+ const L=(S.rqL||{})[k]||0;if(L>Date.now())return dialog('sysN',[t(K),t('rqDialLock',{n:Math.ceil((L-Date.now())/60000)})]);
+ dialog('sysN',[t(K)],null,[{l:t('rqDialB'),f:()=>setTimeout(()=>rqRing(k,[]),30)},{l:t('rzLater')}]);}
+function rqRing(k,picks){const own=rqSigns(k),n=own.length;if(picks.length>=n){
+  if(picks.every((g,j)=>g===own[j])){(S.rqo||(S.rqo={}))[k]=1;SFX.legendary();save(true);return setTimeout(()=>rqClaim(k),30);}
+  (S.rqL||(S.rqL={}))[k]=Date.now()+600000;SFX.deny();save(true);return dialog('sysN',[t('rqDialNo')]);}
+ dialog('sysN',[t('rqRing',{i:picks.length+1,n,p:picks.map(g=>RQG[g]).join(' ')||'—'})],null,[...rqDialSet(k).map(g=>({l:RQG[g],f:()=>setTimeout(()=>rqRing(k,picks.concat(g)),30)})),{l:t('rzLater')}]);}
+// the vault is open: the relic if the world's copy is in it and your hands are empty
+function rqClaim(k){const id=RQID(k),it=rqItem();
+ if(it)return dialog('sysN',[t('rqVaultOpen'),t(it.id===id?'rqHaveThis':'rqHaveOne',{r:t(it.id)})]);
+ if(!bkReady()||RQP[id])return toast(t('lgWait'),'');
+ if(bkRec(id))return dialog('sysN',[t('rqVaultOpen'),t('rqTaken',{r:t(id)})]);
+ rqGive(k);}
+function rqAdd(k){const it={uid:++S.uid,id:RQID(k),slot:'rl',r:4,dur:100,src:'rl'};S.items.push(it);equip(it);sbSig='';hudDirty=true;checkSkills();
+ announce(t('rqGot',{r:t(it.id)}),1);flash();SFX.legendary();setTimeout(()=>dialog('sysN',[t('rqGotD',{r:t(it.id)}),t('rqD_'+k)]),600);return it;}
+function rqGive(k){const id=RQID(k),s0=S;if(rqHeld()||bkRec(id)||RQP[id])return false;
+ if(!bkNet()){bkTake(id,true);rqAdd(k);save(true);return true;}
+ RQP[id]=1;(S.rqgp||(S.rqgp={}))[id]=1;save(true);
+ bkTake(id,true).then(ok=>{RQP[id]=0;if(S!==s0)return;delete S.rqgp[id];if(ok&&bkMine(bkRec(id))&&!rqHeld())rqAdd(k);else dialog('sysN',[t('rqTaken',{r:t(id)})]);save(true);});return true;}
+// letting it go: the relic leaves you and goes back to its vault (its record freed), and you may seek another
+function rqRelease(){const it=rqItem();if(!it)return;dialog('sysN',[t('rqRelQ',{r:t(it.id)})],null,[{l:t('rqRelY'),f:()=>{const j=S.items.indexOf(it);if(j<0)return;if(S.eq&&S.eq.rl===it.uid)delete S.eq.rl;S.items.splice(j,1);bkFree(it.id);
+  P.rqBar=0;P.rqHandU=0;P.rqRoarU=0;sbSig='';hudDirty=true;checkSkills();SFX.deny();toast(t('rqRelDone',{r:t(it.id)}),'warn');save(true);if(!$('equipW').hidden)renderEquip();}},{l:t('rzLater')}]);}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-rqrel]');if(!b||!S)return;e.stopPropagation();if(mode==='equip')closeEquip();rqRelease();},true);
+function rqEqRow(){const it=rqItem();if(!it)return '';const live=rqLive(it);return `<div class="note">🔮 <b class="rt rt4">${esc(t(it.id))}</b>${live?'':' · '+esc(t('rqSleep'))} <button data-rqrel="1" data-tip="${esc(t('rqRelT'))}">${t('rqRelB')}</button></div>`;}
+// a relic can't be sold, thrown away, dropped, stored, traded or put in the guild vault
+const rqBound=s=>!!(s&&s.it&&s.it.slot==='rl');
+function rqTip(i){if(!i||i.slot!=='rl')return '';const k=i.id.slice(3);return `<br><small style="color:#ffb0e0">🔮 ${t('rqTipL')}</small><br><small>${esc(t('rqD_'+k))}</small>`+(rqLive(i)?'':`<br><small style="color:#ff8a7a">${esc(t('rqSleep'))}</small>`);}
+// the stones, drawn where they stand (a faint glimmer now and then on every one)
+function rqEnts(ents){if(!P||!S||S.__demo)return;for(const id in RQSITE){const s=RQSITE[id],x=s[0]*TS+8,y=s[1]*TS+8;if(Math.abs(x-P.x)>420||Math.abs(y-P.y)>300)continue;
+ ents.push({y:y+4,f:()=>rqDraw(x,y,s[2],id)});if(rand()<.004)fx.push({x:x+(rand()-.5)*10,y:y-6-rand()*10,vx:0,vy:-8,t:.9,c:'#fff6c8',fl:1});}
+ if(P.rqHandU>gTime)ents.push({y:P.y+1,f:()=>{const hx=Math.round(P.x+12),hy=Math.round(P.y-22+Math.sin(gTime*4)*2);R(ctx,hx-3,hy,7,6,'#ffd24a');for(let f=0;f<4;f++)R(ctx,hx-3+f*2,hy-4,1,4,'#ffd24a');R(ctx,hx+4,hy+1,2,3,'#ffd24a');R(ctx,hx-2,hy+1,5,1,'#fff2b0');}});
+ if(P.rqBar>0&&P.rqBarU>gTime)ents.push({y:P.y+2,f:()=>{ctx.save();ctx.globalAlpha=.25+Math.sin(gTime*6)*.08;ctx.strokeStyle='#7ae8ff';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(P.x,P.y-10,12,16,0,0,7);ctx.stroke();ctx.restore();}});}
+function rqDraw(x,y,look,id){const r=(a,b,w,h,c)=>R(ctx,x+a,y+b,w,h,c);
+ if(look==='stele'){r(-4,-16,8,20,'#8a8478');r(-4,-16,8,2,'#a8a294');r(-3,-12,6,1,'#5a564c');r(-2,-9,4,1,'#5a564c');r(-3,-6,6,1,'#5a564c');r(-5,3,10,2,'#5a564c');}
+ else if(look==='stone'){r(-6,-6,12,9,'#7a776e');r(-5,-7,10,2,'#9a978c');r(-6,2,12,2,'#55524a');if(id.startsWith('gi1')){const n={gi1a:3,gi1b:1,gi1c:4,gi1d:2}[id];for(let j=0;j<n;j++)r(-4+j*3,-3,1,3,'#3a372f');}}
+ else if(look==='pool'){r(-8,-2,16,6,'#3a4a5a');r(-7,-3,14,1,'#5a6a7a');r(-6,-1,12,3,id==='ek2b'||id==='dr3'?'#2a0a12':'#5a8ab0');if(id==='ek2c')r(-6,-2,12,4,'#6a665e');}
+ else if(look==='vault'){r(-7,-10,14,13,'#6a6058');r(-7,-10,14,2,'#8a8074');r(-3,-6,6,6,'#c8a050');r(-2,-5,4,4,'#3a3028');r(-1,-4,2,2,'#c8a050');}
+ else if(look==='machine'){r(-7,-9,14,12,'#5a5a62');r(-7,-9,14,2,'#7a7a84');r(-4,-6,8,6,'#2a2a30');r(-1,-4,2,2,'#c88a3a');r(-7,1,14,2,'#3a3a40');}
+ else if(look==='pylon'){r(-2,-20,4,23,'#6a6a74');r(-3,-22,6,3,'#8a8a96');r(-1,-21,2,1,['#7ae8ff','#bff4ff','#3ab8e8'][((gTime*2)|0)%3]);}
+ else if(look==='shell'){const W=[4,6,8,10,10,12,12,12,12,10,8];W.forEach((w,j)=>r(-w/2,-12+j,w,1,j<3?'#e8dcc0':'#d8c8a8'));r(-1,-10,1,3,'#6a5a4a');r(0,-7,2,1,'#6a5a4a');r(1,-6,1,3,'#6a5a4a');r(-5,-1,10,1,'#a89878');r(-7,0,14,2,'#6a5a4a');}
+ else if(look==='print'){r(-12,-6,24,12,'#a8c8d8');r(-10,-4,20,8,'#c8e0ec');for(let j=0;j<5;j++)r(-10+j*5,-9,3,3,'#a8c8d8');}
+ else{r(-6,-12,4,15,'#7a7468');r(2,-7,4,10,'#7a7468');r(-7,2,14,2,'#55524a');r(-1,-2,3,3,'#6a645a');}}
+// the three skills: Soul Contract (Baal), Draconic Roar (the Dragon), Overdrive Barrier (the Core)
+Object.assign(SKD,{rqsoul:{cls:'relic',relic:'baal',lv:1,mp:0,cd:90,col:'#c0203a'},rqroar:{cls:'relic',relic:'dragon',lv:1,mp:40,cd:60,col:'#ff7a2a'},rqover:{cls:'relic',relic:'core',lv:1,mp:40,cd:90,col:'#7ae8ff'}});
+SKK.rqsoul='buff';SKK.rqroar='buff';SKK.rqover='buff';
+Object.assign(SKF,{
+ rqsoul:()=>{P.hp=Math.max(1,Math.round(P.hp*.85));for(const k in P.cd)if(k!=='rqsoul')P.cd[k]=0;sbSig='';hudDirty=true;vfx('blood',P.x,P.y-10,{});fx.push({ring:true,x:P.x,y:P.y-6,t:.5});SFX.crit();toast(t('rqSoulOn'),'good');},
+ rqroar:()=>{shake=.3;SFX.slam();fx.push({ring:true,big:1,x:P.x,y:P.y-6,t:.6});P.rqRoarU=gTime+10;for(const m of rzTg(90,()=>true)){if(MT[m.type].boss)continue;m.flee=3;m.fear=gTime+3;m.st=null;m.tele=0;m.combo=0;}toast(t('rqRoarOn'),'good');},
+ rqover:()=>{P.rqBar=Math.round(maxHP()*.25*rqShM());P.rqBarU=gTime+8;fx.push({ring:true,x:P.x,y:P.y-6,t:.5});SFX.legendary();toast(t('rqOverOn',{n:P.rqBar}),'good');}});
+Object.assign(SKICO,{rqsoul:(p,c)=>{p(4,2,8,11,'#e8dcc0');p(4,2,8,1,'#c8b898');p(5,4,6,1,'#6a5a4a');p(5,6,5,1,'#6a5a4a');p(5,8,6,1,'#6a5a4a');p(6,10,4,2,c);p(7,12,2,2,c);},
+ rqroar:(p,c)=>{p(2,5,7,7,c);p(8,4,4,3,c);p(11,5,2,1,'#ffd24a');p(9,8,4,1,'#101a33');for(let i=0;i<3;i++){p(12,3+i*4,3,1,'#ffd24a');}},
+ rqover:(p,c)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-7.5);if(d<7.5&&d>6.3)p(x,y,1,1,c);}p(6,5,4,6,'#5a5a62');p(7,7,2,2,'#c88a3a');}});
+// the relics' icons in the bag
+function rqIcon(k){const c=document.createElement('canvas');c.width=c.height=16;const g=c.getContext('2d'),p=(x,y,w,h,cc)=>R(g,x,y,w,h,cc);
+ ({godhand:()=>{p(4,6,8,8,'#ffd24a');for(let i=0;i<4;i++)p(4+i*2,2,1,4,'#ffd24a');p(12,8,2,4,'#ffd24a');p(5,7,6,1,'#fff2b0');p(4,13,8,1,'#a87e18');},
+  baal:()=>{p(3,2,10,12,'#d8c8a8');p(3,2,10,1,'#a8987a');p(3,13,10,1,'#a8987a');p(5,5,6,1,'#5a0a14');p(5,8,6,1,'#5a0a14');p(6,10,4,2,'#c0203a');},
+  rebecca:()=>{p(3,3,10,11,'#f0ece4');p(3,3,1,11,'#c8b070');p(7,5,2,6,'#c8a050');p(5,7,6,2,'#c8a050');p(12,3,1,11,'#c8b070');},
+  giant:()=>{p(4,4,8,8,'#a83a3a');p(3,6,10,4,'#a83a3a');p(5,5,3,2,'#e86a6a');p(7,12,2,2,'#7a2a2a');p(6,2,4,2,'#8a8478');},
+  evilking:()=>{p(2,6,12,5,'#2a1a3a');p(3,5,10,7,'#c8b8e8');p(6,6,4,5,'#ff2a6a');p(7,7,2,3,'#101a33');p(2,8,1,1,'#2a1a3a');p(13,8,1,1,'#2a1a3a');},
+  dragon:()=>{p(6,1,4,3,'#8a8478');p(5,4,6,10,'#d8e4ec');p(6,6,4,7,'#c8202a');p(6,6,1,3,'#ff6a5a');},
+  gourd:()=>{p(6,2,4,1,'#6a4a2a');p(5,3,6,4,'#c8a050');p(4,7,8,7,'#c8a050');p(5,8,2,3,'#e8c870');p(7,6,2,1,'#8a6a2a');},
+  core:()=>{p(3,3,10,10,'#5a5a62');p(4,4,8,8,'#2a2a30');p(6,6,4,4,'#7ae8ff');p(7,7,2,2,'#e8ffff');p(2,7,1,2,'#c88a3a');p(13,7,1,2,'#c88a3a');}}[k]||(()=>p(4,4,8,8,'#fff')))();return c;}
+window.__GRQ={RQK,RQST,RQSITE,on:()=>rqOn(),item:()=>rqItem(),use:id=>rqUse({id}),near:()=>rqNear(),give:k=>rqGive(k),claim:k=>rqClaim(k),ring:(k,p)=>rqRing(k,p),signs:k=>rqSigns(k),dial:k=>rqDialSet(k),
+ tick:dt=>rqTick(dt),kill:m=>rqKill(m),atk:(m,o)=>rqAtk(m,o||{}),hurt:(d,s)=>rqHurt(d,s),evade:s=>rqEvade(s),struck:d=>rqStruck(d),hand:p=>rqHandBlock(p),release:()=>rqRelease(),row:()=>rqEqRow(),tip:i=>rqTip(i),bound:s=>rqBound(s),G:RQG,S:RQS}; // tests
+Object.assign(STR.ar,{"rl_godhand":"مجسّم يد الإله",
+ "rl_baal":"رق بعل",
+ "rl_rebecca":"الكتاب المقدس لريبيكا",
+ "rl_giant":"قلب العملاق القديم",
+ "rl_evilking":"عين الملك الشرير",
+ "rl_dragon":"قارورة دم التنين",
+ "rl_gourd":"قرعة الطاوي المقدسة",
+ "rl_core":"قلب الآلة السحرية",
+ "rqD_godhand":"+10% سرعة ضرب، +5% نجاح الصناعة والتطوير، و«رد فعل الجشع»: 10% فرصة لما تاخد ضرر إن إيد دهبية تطلع وتمسك كل المقذوفات اللي جاية عليك لمدة 6 ثواني.",
+ "rqD_baal":"+20% ضرر سحر الظلام، +15% رجوع المانا (القوة الشيطانية)، و«عقد الروح»: تدفع 15% من صحتك الحالية والكولداون بتاع كل السكيلات التانية يرجع صفر (كولداون 90 ثانية).",
+ "rqD_rebecca":"+15% علاج، +10% مقاومة للمقدس، و«البركة الإلهية»: كل 60 ثانية، كل التأثيرات الوحشة اللي عليك بتتشال و5% من صحتك بترجع.",
+ "rqD_giant":"+25% دفاع فيزيائي، +15% صحة، -10% سرعة مشي، و«الثبات»: مفيش حاجة تزقك أو تشدك، والشلل عليك بيقل 30%.",
+ "rqD_evilking":"+15% قوة سحر، +10% فرصة كريتيكال، و«الإدراك الحقيقي»: خمس تفاديات جاهزة لأي ضربة (واحدة بترجع كل 20 ثانية).",
+ "rqD_dragon":"+15% مقاومة نار، +10% اختراق دروع، و«زئير التنين»: موجة بتخلي الأعداء العاديين اللي حواليك يهربوا 3 ثواني وبتزوّد هجومك 12% لمدة 10 ثواني (كولداون 60 ثانية).",
+ "rqD_gourd":"+10% لكل الستاتس الأساسية، +15% قوة الجرعات، و«تناغم العناصر الخمسة»: 1.5% صحة ومانا كل ثانية وانت برا القتال.",
+ "rqD_core":"+20% سعة الدرع، +10% ضرر فيزيائي، و«حاجز الأوفردرايف»: درع بـ 25% من صحتك لمدة 8 ثواني (كولداون 90 ثانية).",
+ "relicS":"أثر",
+ "hRelic":"E: افحص",
+ "rqTipL":"أثر · مفيش غير واحد في العالم · مبيسيبكش غير لو انت سبته",
+ "rqSleep":"نايم: حد تاني ماسك نسخة العالم، فالنسخة دي مبتدّيش حاجة.",
+ "rqKeep":"الأثر مبيسيبكش: مينفعش يتباع أو يترمي أو يتساب على الأرض أو يتخزن أو يتبدّل. (تقدر تسيبه من نافذة المعدات.)",
+ "rqRelB":"سيبه",
+ "rqRelT":"الأثر بيرجع مكان ما لقيته، والعالم ممكن يدّيه لحد تاني. وساعتها تقدر تدوّر على أثر تاني.",
+ "rqRelQ":"تسيب {r}؟ هيرجع لخزنته، وأي حد يفتح الخزنة ممكن ياخده.",
+ "rqRelY":"سيبه",
+ "rqRelDone":"{r} رجع لخزنته.",
+ "rqRumor":"[قول قديم بيوصلك: فيه تمن آثار نايمين في العالم، من كل واحد نسخة واحدة، والحجارة القديمة فاكرة الطريق ليهم. اللي ماسك أثر ميقدرش يمسك غيره.]",
+ "rqGot":"أثر! {r} بقى بتاعك.",
+ "rqGotD":"[{r} صحي في إيدك. مفيش زيه تاني في العالم.]",
+ "rqVaultOpen":"[الخزنة مفتوحة.]",
+ "rqHaveThis":"فاضية: {r} معاك أصلاً.",
+ "rqHaveOne":"إيدك ماسكة أثر أصلاً، {r}. الخزنة مش هتدّي تاني.",
+ "rqTaken":"فاضية. فيه حد في العالم ماسك {r}. لو سابه في يوم، هيرجع هنا.",
+ "rqDialB":"لف الحلقات",
+ "rqRing":"[الحلقة {i} من {n}] لحد دلوقتي: {p}",
+ "rqDialNo":"[الحلقات اتحكّت في بعض واتقفلت. الخزنة مش هتلف تاني لمدة عشر دقايق.]",
+ "rqDialLock":"[الحلقات مقفولة. ({n} دقيقة)]",
+ "rqSpent":"[الحجر ساكت دلوقتي. إدّالك اللي كان عنده.]",
+ "rqSeen_stele":"[حجر قايم قديم. نقوشه اتمسحت تقريبًا.]",
+ "rqSeen_stone":"[صخرة دابت من الجو.]",
+ "rqSeen_pool":"[بركة صغيرة ساكتة.]",
+ "rqSeen_vault":"[خزنة حجر قديمة، مقفولة بحلقات عليها رموز. مبتتحركش.]",
+ "rqSeen_machine":"[آلة صدّت، ميتة من زمان.]",
+ "rqSeen_pylon":"[عمود معدن. بيطنّ بصوت واطي.]",
+ "rqSeen_ruin":"[حجارة مكسورة من حاجة أقدم من الطرق.]",
+ "rqSeen_shell":"[قشرة باردة مشروخة، قد عجلة العربية.]",
+ "rqSeen_print":"[حفرة كبيرة مطبوعة في الأرض المتجمدة.]",
+ "rqPayB":"قدّم: {l}",
+ "rqPayNo":"معندكش اللي بيطلبه.",
+ "rqBloodB":"ادفع بالدم (نص صحتك)",
+ "rqBloodNo":"ارجع وانت سليم: مبياخدش غير من اللي مش متعوّر.",
+ "rqTouchB":"حط إيدك عليه",
+ "rqSeqOk":"...بيرد",
+ "rqSeqNo":"الحجارة سكتت. ابدأ من الأول.",
+ "rqStillB":"اقعد واهدى",
+ "rqStillOn":"اهدى {n} ثانية. متتحركش، ومتخليش حاجة تلمسك.",
+ "rqStillNo":"الهدوء اتكسر.",
+ "rqKillDone":"بعيد، فيه حاجة اتبسطت.",
+ "rqBarT":"حاجز",
+ "rqEyeT":"اتشاف ({n})",
+ "rqHandT":"الإيد الدهبية!",
+ "rqHandB":"اتمسكت",
+ "rqDbT":"البركة الإلهية",
+ "rqSoulOn":"عقد الروح: كل السكيلات جاهزة تاني",
+ "rqRoarOn":"زئير التنين!",
+ "rqOverOn":"حاجز الأوفردرايف: درع {n}",
+ "sk_rqsoul":"عقد الروح",
+ "skd_rqsoul":"رق بعل: تدّي 15% من صحتك الحالية، والكولداون بتاع كل السكيلات التانية يرجع صفر. كولداون 90 ثانية.",
+ "sk_rqroar":"زئير التنين",
+ "skd_rqroar":"قارورة دم التنين: الأعداء العاديين اللي حواليك بيهربوا 3 ثواني، وهجومك بيزيد 12% لمدة 10 ثواني. كولداون 60 ثانية.",
+ "sk_rqover":"حاجز الأوفردرايف",
+ "skd_rqover":"قلب الآلة السحرية: درع بـ 25% من صحتك (و20% زيادة من القلب) لمدة 8 ثواني. كولداون 90 ثانية.",
+ "rq_godhand_0n":"[حجر قايم من حجر المحجر الفاتح. فيه إيد منحوتة طالعة منه، كفها لفوق، وحواليها: «املا الإيد.»]",
+ "rq_godhand_0":"[⚒] الدهب غرق في الحجر زي الماية في الرملة. وطلع كلام جديد مكانه: «الإيد اللي صنعتني ارتاحت آخر مرة في المكان اللي الكلاب الصغيرة توّجت فيه ملك، تحت مدينة القلعة القديمة. هاتلها سلاح اتضرب صح سبع مرات.»",
+ "rq_godhand_1n":"[سندان مشقوق نصه مدفون في الأرض. فيه تجويف على شكل إيد متآكل في وشه. مفيش حاجة في إيدك بتركب فيه.]",
+ "rq_godhand_1":"[✋] حطيت سلاحك في التجويف. السندان رن مرة، رغم إن محدش خبطه. ومخربش تحته: «باعها لتجار الإمبراطورية. دوّر على حجره على التلال اللي شمال العاصمة، وبس والشمس شايفاك.»",
+ "rq_godhand_2n":"[كومة حجارة بتاعة تاجر، فيها عملات محطوطة في الملاط. في النور ده هي مجرد معدن باهت.]",
+ "rq_godhand_2":"[☀] في نور الشمس كل العملات في الكومة لمعت مرة واحدة، والنور كتب آخر سطر على الحجارة: «ورا البحر الأحمر، في بلد التجار، فيه صندوق في الحيطة فاكر التلات رموز اللي اتورّوا لك.»",
+ "rq_godhand_v":"[صندوق متثبت في الحيطة. تلات حلقات عليها رموز بتلف حوالين قفله.]",
+ "rq_baal_0n":"[مقبرة مشروخة على التل. في النهار هي مجرد حجر.]",
+ "rq_baal_0":"[☾] تحت القمر الشرخ اللي في المقبرة نوّر أحمر، وحاجة جواها اتكلمت: «الرق اتقطع من إيد بعل واتدفن في المكان اللي الهاوية بتبدأ تتفتح فيه. أكّل الضلمة اللي تحت تلاتين شيطان من شياطينها، وهتسيبك تقرا أكتر.»",
+ "rq_baal_1g":"[مذبح أسود. رماد بيطلع منه ومبينزلش في أي حتة. صوت: «تلاتين شيطان. وبعدين ارجعلي.»]",
+ "rq_baal_1w":"[الرماد لسه طاير. لسه مكلش.]",
+ "rq_baal_1":"[✶] الرماد نزل وكتب حروف على المذبح: «تحت الدنيا، في المكان اللي أصحاب القرون عاملين فيه قريتهم، فيه منبر مبياخدش تمن غير الدم.»",
+ "rq_baal_2n":"[منبر حديد أسود في طرفه نصل. منحوت عليه: «تعالالي سليم.»]",
+ "rq_baal_2":"[♆] دمك جري في حزوز المنبر وبقى حبر: «في الجحيم الخامس والعشرين فيه قلعة مفيش حاجة بتكسرها. بوابتها ليها تلات حلقات. وانت شفت التلات رموز.»",
+ "rq_baal_v":"[باب مقفول في أساسات القلعة. تلات حلقات عليها رموز بتلف حوالين قفله.]",
+ "rq_rebecca_0n":"[مقام صغير لريبيكا جنب الطريق. شمعته خلصت من زمان.]",
+ "rq_rebecca_0":"[✧] والشمس طالعة الشمعة ولّعت لوحدها، ودعا حاج مكتوب في نورها: «في المكان اللي التلج عمره ما بيسيب الشمال، تمثال الإلهة بردان. هاتلها ألوان الغيطان: عشرين عشبة حمرا وعشر زهرات قمر.»",
+ "rq_rebecca_1n":"[تمثال الإلهة، متغطي بالتلج. إيديها المفتوحة فاضية.]",
+ "rq_rebecca_1":"[☘] التلج داب مكان ما الأعشاب لمسته، وإيدها الحجر لفت وشاورت ناحية الجنوب الشرقي، ورا مزارع الإمبراطورية: «خدامي كانوا بيصلّوا برا أسوار المدينة المقدسة. تعالالهم في سلام، من غير دم على إيدك آخر خمس دقايق.»",
+ "rq_rebecca_2n":"[كنيسة خربانة. صوت: «فيه دم جديد على إيدك. ارتاح شوية، وبعدين ارجع.»]",
+ "rq_rebecca_2":"[✠] جرس الكنيسة رن، رغم إن ملوش حبل: «الكتاب اتخبى في المكان الوحيد اللي مفيش كاهن هيدوّر فيه: معبد ياتان، الإله اللي حاربته. أختامه التلاتة هي الرموز اللي اتدّت لك.»",
+ "rq_rebecca_v":"[صندوق آثار مقفول وسط ردم المعبد. تلات حلقات عليها رموز بتلف حوالين قفله.]",
+ "rq_giant_0n":"[أثر رجل قد البيت، مطبوع في السهل المتجمد. حواليه أربع صخور، كل واحدة فيها حزوز. كلام في التلج: «صحّونا من الأصغر للأكبر.»]",
+ "rq_giant_0_gi1a":"[صخرة فيها تلات حزوز.]",
+ "rq_giant_0_gi1b":"[صخرة فيها حز واحد.]",
+ "rq_giant_0_gi1c":"[صخرة فيها أربع حزوز.]",
+ "rq_giant_0_gi1d":"[صخرة فيها حزين.]",
+ "rq_giant_0":"[❄] الأربع صخور ردّوا مع بعض والأثر اتملا نور فاتح: «في أرض العمالقة، فيه عرش من الصخر لسه مستني ملكه. روحله.»",
+ "rq_giant_1g":"[عرش من الصخر، أكبر من أي بني آدم. صوت طالع من الحجر: «ملك الصقيع اللي في الحصن قاعد مكاني. وقّعه، وبعدين ارجع.»]",
+ "rq_giant_1w":"[العرش مستني. ملك الصقيع لسه واقف.]",
+ "rq_giant_1":"[⚔] «كويس.» العرش اتشق من النص. «دلوقتي البحيرة اللي عمرها ما بتسيح. روح لما السما تبقى بيضا من التلج أو سودا من العاصفة.»",
+ "rq_giant_2n":"[مقام من التلج الأزرق على الشط. تحت سما صافية هو مجرد تلج.]",
+ "rq_giant_2":"[☗] التلج اتجمّع على المقام على شكل قلب، وصوت عملاق قال: «في أقصى غرب الشمال، المرتفعات اللي أول واحد فينا رقد فيها. تلات رموز بتفتحني.»",
+ "rq_giant_v":"[صندوق حجر كبير نصه غرقان في أرض المرتفعات. تلات حلقات عليها رموز بتلف حوالين قفله.]",
+ "rq_evilking_0n":"[عين منحوتة في حيطة الوادي، جفنها الحجر مقفول.]",
+ "rq_evilking_0":"[◉] بالليل العين المنحوتة فتحت، ونظرتها لفت ناحية الجنوب الشرقي: «فيه تلات عيون في المستنقع الغرقان. افتحهم بالترتيب: اللي بتعيط، واللي نايمة، واللي شايفة.»",
+ "rq_evilking_1_ek2a":"[بركة ساكتة. السما باينة فيها بوضوح لدرجة إنها كأنها بتبصلك.]",
+ "rq_evilking_1_ek2b":"[بركة ماية سودا. بتنزل من على حافتها الحجر في خطوط رفيعة، زي الدموع.]",
+ "rq_evilking_1_ek2c":"[بركة مقفولة تحت غطا حجر، كأنها نايمة.]",
+ "rq_evilking_1":"[☉] التلات برك رمشوا مع بعض. «عين الملك اتفرجت على حكام بيقعوا. في الدور التاني من الهاوية، فيه تاج من العضم مستني يتفرج تاني.»",
+ "rq_evilking_2g":"[تاج من العضم على حجر. صوت: «تلات حكام. أي تلاتة. سيبني أتفرج عليهم وهما بيقعوا، وبعدين ارجع.»]",
+ "rq_evilking_2w":"[التاج مستني. لسه مشافش كفاية.]",
+ "rq_evilking_2":"[♛] «كفاية.» التاج بقى تراب. «في أعمق دور في الهاوية، عين الملك اتقفل عليها. تلات رموز.»",
+ "rq_evilking_v":"[باب حديد صغير في الصخر. تلات حلقات عليها رموز بتلف حوالين قفله.]",
+ "rq_dragon_0n":"[بيضة تنين مشروخة، باردة زي الحجر. ناقص من نقشها تلات حراشيف.]",
+ "rq_dragon_0":"[♨] الحراشيف ركبت في الأماكن الفاضية والقشرة سخنت: «دم تراوكا هو دمي. خليه يقع مرة كمان، وبعدين ارجعلي.»",
+ "rq_dragon_1g":"[القشرة سخنة. «تراوكا. مرة كمان.»]",
+ "rq_dragon_1w":"[القشرة مستنية تراوكا يقع.]",
+ "rq_dragon_1":"[✦] البيضة اتشرخت أكتر؛ جواها نقطة دم ناشفة. «خد ريحتي جنوب للأراضي الحمرا، ودوّر على البركة الناشفة لما الشمس تبقى فوقها بالظبط.»",
+ "rq_dragon_2n":"[بقعة غامقة على الصخر الأحمر، ناشفة ومشققة.]",
+ "rq_dragon_2":"[⚚] الضهر البقعة رجعت مبلولة وحمرا تاني، والشمس اللي من غير ضل ورّت طريق: «أعلى سلسلة في جبال الفوضى. تلات رموز.»",
+ "rq_dragon_v":"[خزنة منحوتة في السلسلة، سخنة لما تلمسها. تلات حلقات عليها رموز بتلف حوالين قفلها.]",
+ "rq_gourd_0n":"[صخرة على شكل قرعة. حوالين قاعدتها خمس تجاويف، كل واحد عليه كلمة قديمة: خشب، نار، أرض، معدن، ماية.]",
+ "rq_gourd_0":"[☯] التجاويف الخمسة اتملت والصخرة طنّت: «طاوي قعد في مملكة شينج لحد ما الريح وقفت علشانه. اقعد مكان ما قعد دقيقة كاملة، ومتخليش حاجة تلمسك.»",
+ "rq_gourd_1n":"[حجر مسطح، اتنعّم من حد قعد عليه وقت طويل أوي.]",
+ "rq_gourd_1":"[☁] الريح وقفت. وفي الهدوء سمعت: «في أراضي كايا، فيه خمس حجارة واقفين في دايرة. صحّيهم بالترتيب اللي كل واحد فيه بيولد اللي بعده.»",
+ "rq_gourd_2_go3a":"[حجر عادي من تراب مضغوط.]",
+ "rq_gourd_2_go3b":"[حجر دايمًا مبلول.]",
+ "rq_gourd_2_go3c":"[حجر طالع عليه زرع أخضر.]",
+ "rq_gourd_2_go3d":"[حجر فيه عروق حديد.]",
+ "rq_gourd_2_go3e":"[حجر متفحم وسخن لما تلمسه.]",
+ "rq_gourd_2":"[✿] دايرة الحجارة لفت مرة حواليك. «جبال با شايلة القرعة. تلات رموز بتفتح سدادتها.»",
+ "rq_gourd_v":"[مدخل مغارة مقفول بحجر مدوّر. تلات حلقات عليها رموز بتلف حواليه.]",
+ "rq_core_0n":"[آلة نصها مدفون في الرملة، لوح صدرها مفتوح وفاضي. عشرين خانة على قد أحجار المانا.]",
+ "rq_core_0":"[⚙] الآلة صحيت لحظة: «القلب... اتاخد... من رجالة الحجر. دوّر على المحرك الميت... في وادي دران.»",
+ "rq_core_1g":"[محرك ميت من حجر ونحاس. «الجولمات خدوا أجزائي. كسّر عشرين منهم، وبعدين ارجع.»]",
+ "rq_core_1w":"[المحرك لسه ناقصه أجزاءه.]",
+ "rq_core_1":"[⚡] المحرك كح واشتغل: «أجزاء كفاية. في سهول تاتوران فيه تلات أعمدة لسه بتطن. صحّيهم من أوطى نغمة لأعلى نغمة.»",
+ "rq_core_2_co3a":"[عمود بيطن بنغمة متوسطة.]",
+ "rq_core_2_co3b":"[عمود بيغني بنغمة عالية ورفيعة.]",
+ "rq_core_2_co3c":"[عمود بيزن بنغمة واطية وتقيلة.]",
+ "rq_core_2":"[⚛] التلات نغمات بقوا نغمة واحدة. «القلب مقفول عليه في جبال سواز. تلات رموز.»",
+ "rq_core_v":"[فتحة صلب في جنب الجبل. تلات حلقات عليها رموز بتلف حوالين قفلها.]"});
+Object.assign(STR.en,{"rl_godhand":"God Hand Miniature",
+ "rl_baal":"Parchment of Baal",
+ "rl_rebecca":"Sacred Scripture of Rebecca",
+ "rl_giant":"Heart of the Ancient Giant",
+ "rl_evilking":"Eye of the Evil King",
+ "rl_dragon":"Dragon Blood Vial",
+ "rl_gourd":"Taoist's Sacred Gourd",
+ "rl_core":"Magic Machine Core",
+ "rqD_godhand":"+10% attack speed, +5% crafting and enhancement success, and Greed's Reflex: a 10% chance when you take damage to call a golden hand that catches every projectile thrown at you for 6 s.",
+ "rqD_baal":"+20% dark magic damage, +15% mana (Demonic Power) regeneration, and Soul Contract: give 15% of your current health to reset the cooldown of every other skill (90 s cooldown).",
+ "rqD_rebecca":"+15% healing, +10% holy resistance, and Divine Blessing: every 60 s, every harmful effect on you is cleansed and 5% of your health comes back.",
+ "rqD_giant":"+25% physical defence, +15% health, -10% move speed, and Unshakeable: nothing knocks or pulls you back, and stuns on you last 30% less.",
+ "rqD_evilking":"+15% magic power, +10% critical chance, and True Perception: five dodges kept ready against any blow (one comes back every 20 s).",
+ "rqD_dragon":"+15% fire resistance, +10% armour penetration, and Draconic Roar: a wave that sends the ordinary foes around you fleeing for 3 s and raises your attack 12% for 10 s (60 s cooldown).",
+ "rqD_gourd":"+10% to every core stat, +15% potion strength, and Five Elements Harmony: 1.5% health and mana a second while out of combat.",
+ "rqD_core":"+20% shield capacity, +10% physical damage, and Overdrive Barrier: a shield of 25% of your health for 8 s (90 s cooldown).",
+ "relicS":"Relic",
+ "hRelic":"E: Examine",
+ "rqTipL":"Relic · there is only one in the world · it never leaves you unless you let it go",
+ "rqSleep":"Asleep: another holds the world's copy, so this one gives nothing.",
+ "rqKeep":"A relic never leaves you: it can't be sold, thrown away, dropped, stored or traded. (Let it go from the equipment window.)",
+ "rqRelB":"Let it go",
+ "rqRelT":"The relic goes back to where it was found, and the world may give it to someone else. You may then seek another.",
+ "rqRelQ":"Let the {r} go? It returns to its vault, and anyone who opens the vault may take it.",
+ "rqRelY":"Let it go",
+ "rqRelDone":"The {r} is gone back to its vault.",
+ "rqRumor":"[An old saying reaches you: eight relics sleep in the world, one of each, and old stones remember the way to them. Whoever holds one can hold no other.]",
+ "rqGot":"A relic! The {r} is yours.",
+ "rqGotD":"[The {r} wakes in your hands. There is no other like it in the world.]",
+ "rqVaultOpen":"[The vault stands open.]",
+ "rqHaveThis":"It is empty: the {r} is already with you.",
+ "rqHaveOne":"Your hands already hold a relic, the {r}. The vault will not give a second.",
+ "rqTaken":"It is empty. Someone in the world holds the {r}. If it is ever let go, it comes back here.",
+ "rqDialB":"Turn the rings",
+ "rqRing":"[Ring {i} of {n}] So far: {p}",
+ "rqDialNo":"[The rings grind and lock. The vault will not turn again for ten minutes.]",
+ "rqDialLock":"[The rings are locked. ({n} min)]",
+ "rqSpent":"[The stone is silent now. It has given you what it had.]",
+ "rqSeen_stele":"[An old standing stone. Its carvings are worn almost smooth.]",
+ "rqSeen_stone":"[A weathered boulder.]",
+ "rqSeen_pool":"[A small, still pool.]",
+ "rqSeen_vault":"[An old vault of stone, locked with rings of signs. It does not move.]",
+ "rqSeen_machine":"[A rusted machine, long dead.]",
+ "rqSeen_pylon":"[A metal pylon. It hums faintly.]",
+ "rqSeen_ruin":"[Broken stones of something older than the roads.]",
+ "rqSeen_shell":"[A cold, cracked shell, as big as a cart wheel.]",
+ "rqSeen_print":"[A great hollow pressed into the frozen ground.]",
+ "rqPayB":"Offer: {l}",
+ "rqPayNo":"You don't have what it asks.",
+ "rqBloodB":"Pay in blood (half your health)",
+ "rqBloodNo":"Come back whole: it takes only from the unwounded.",
+ "rqTouchB":"Lay your hand on it",
+ "rqSeqOk":"...it answers",
+ "rqSeqNo":"The stones fall silent. Begin again.",
+ "rqStillB":"Sit and be still",
+ "rqStillOn":"Be still for {n} s. Don't move, and let nothing touch you.",
+ "rqStillNo":"The stillness breaks.",
+ "rqKillDone":"Far away, something is satisfied.",
+ "rqBarT":"BARRIER",
+ "rqEyeT":"PERCEIVED ({n})",
+ "rqHandT":"GOLDEN HAND!",
+ "rqHandB":"CAUGHT",
+ "rqDbT":"DIVINE BLESSING",
+ "rqSoulOn":"Soul Contract: every skill is ready again",
+ "rqRoarOn":"DRACONIC ROAR!",
+ "rqOverOn":"Overdrive Barrier: a shield of {n}",
+ "sk_rqsoul":"Soul Contract",
+ "skd_rqsoul":"Parchment of Baal: give 15% of your current health, and every other skill's cooldown resets. 90 s cooldown.",
+ "sk_rqroar":"Draconic Roar",
+ "skd_rqroar":"Dragon Blood Vial: ordinary foes around you flee for 3 s, and your attack rises 12% for 10 s. 60 s cooldown.",
+ "sk_rqover":"Overdrive Barrier",
+ "skd_rqover":"Magic Machine Core: a shield of 25% of your health (and 20% more from the Core) for 8 s. 90 s cooldown.",
+ "rq_godhand_0n":"[A stele of pale quarry stone. A carved hand juts from its face, palm up, and around it: 'Fill the hand.']",
+ "rq_godhand_0":"[⚒] The gold sinks into the stone like water into sand. New words rise where it went: 'The hand that made me last rested where the little dogs crowned a king, beneath the city of the old castle. Bring it a weapon that has been struck true seven times.'",
+ "rq_godhand_1n":"[A split anvil half buried in the floor. A hollow the shape of a hand is worn into its face. Nothing you hold fits it.]",
+ "rq_godhand_1":"[✋] You lay your weapon in the hollow. The anvil rings once, though nothing struck it. Scratched beneath: 'He sold it to the empire's merchants. Look for his stone on the hills north of the capital, and only while the sun can see you.'",
+ "rq_godhand_2n":"[A merchant's cairn, coins pressed into its mortar. In this light they are only dull metal.]",
+ "rq_godhand_2":"[☀] In the sunlight every coin in the cairn flashes at once, and the light spells a last line across the stones: 'Across the Red Sea, in the town of traders, a strongbox in the wall remembers the three signs you were shown.'",
+ "rq_godhand_v":"[A strongbox set into the wall. Three rings of signs turn around its lock.]",
+ "rq_baal_0n":"[A cracked tomb on the hill. In daylight it is only stone.]",
+ "rq_baal_0":"[☾] Under the moon the crack in the tomb glows red, and something inside speaks: 'The parchment was torn from Baal's hand and buried where the Abyss first opens. Feed the dark below thirty of its demons, and it will let you read further.'",
+ "rq_baal_1g":"[A black altar. Ash drifts up from it and settles nowhere. A voice: 'Thirty demons. Then come back to me.']",
+ "rq_baal_1w":"[The ash still drifts. It is not fed yet.]",
+ "rq_baal_1":"[✶] The ash settles and forms letters on the altar: 'Below the world, where the horned ones keep their village, a lectern takes payment only in blood.'",
+ "rq_baal_2n":"[A lectern of black iron with a blade set in its edge. Carved on it: 'Come to me whole.']",
+ "rq_baal_2":"[♆] Your blood runs into the grooves of the lectern and becomes ink: 'In the twenty-fifth hell stands a castle nothing breaks. Its gate has three rings. You have seen all three signs.'",
+ "rq_baal_v":"[A sealed door in the castle's foundations. Three rings of signs turn around its lock.]",
+ "rq_rebecca_0n":"[A small roadside shrine to Rebecca. Its candle burned out long ago.]",
+ "rq_rebecca_0":"[✧] As the sun rises the candle lights by itself, and a pilgrim's prayer is written in its light: 'Where the snow never leaves the north, the goddess's statue is cold. Bring her the colours of the fields: twenty red herbs and ten moonflowers.'",
+ "rq_rebecca_1n":"[A statue of the goddess, sheathed in ice. Her open hands are empty.]",
+ "rq_rebecca_1":"[☘] The ice melts where the herbs touch it, and her stone hand turns to point south-east, past the empire's farms: 'My servants once prayed outside the holy city's walls. Come to them in peace, with no blood on your hands for the last five minutes.'",
+ "rq_rebecca_2n":"[A ruined chapel. A voice: 'There is fresh blood on your hands. Rest a while, then come back.']",
+ "rq_rebecca_2":"[✠] The chapel's bell rings, though it has no rope: 'The scripture was hidden in the one place no priest would look: the temple of Yatan, the god she fought. Its three seals are the signs you were given.'",
+ "rq_rebecca_v":"[A reliquary sealed in the temple's rubble. Three rings of signs turn around its lock.]",
+ "rq_giant_0n":"[A footprint the size of a house, pressed into the frozen plain. Four boulders stand around it, each cut with notches. Words in the ice: 'Wake us from the youngest to the eldest.']",
+ "rq_giant_0_gi1a":"[A boulder with three notches cut into it.]",
+ "rq_giant_0_gi1b":"[A boulder with one notch cut into it.]",
+ "rq_giant_0_gi1c":"[A boulder with four notches cut into it.]",
+ "rq_giant_0_gi1d":"[A boulder with two notches cut into it.]",
+ "rq_giant_0":"[❄] The four stones answer together and the footprint fills with pale light: 'In the giants' land, a throne of rock still waits for its king. Go to it.'",
+ "rq_giant_1g":"[A throne of rock, too big for any man. A voice from the stone: 'The frost king of the hold sits where I should. Bring him down, then come back.']",
+ "rq_giant_1w":"[The throne waits. The frost king still stands.]",
+ "rq_giant_1":"[⚔] 'Good.' The throne cracks down the middle. 'Now the lake that never thaws. Go when the sky is white with snow or black with storm.'",
+ "rq_giant_2n":"[A shrine of blue ice on the shore. Under a clear sky it is only ice.]",
+ "rq_giant_2":"[☗] Snow gathers on the shrine into the shape of a heart, and a giant's voice says: 'In the far west of the north, the highlands where the first of us lay down. Three signs open me.'",
+ "rq_giant_v":"[A great stone chest half sunk in the highland earth. Three rings of signs turn around its lock.]",
+ "rq_evilking_0n":"[An eye carved into the canyon wall, its stone lid shut.]",
+ "rq_evilking_0":"[◉] At night the carved eye opens, and its gaze turns south-east: 'Three eyes lie in the drowned fen. Open them in order: the one that weeps, the one that sleeps, the one that sees.'",
+ "rq_evilking_1_ek2a":"[A still pool. The sky is reflected in it so clearly that it seems to look back at you.]",
+ "rq_evilking_1_ek2b":"[A pool of black water. It seeps over its stone rim in thin streams, like tears.]",
+ "rq_evilking_1_ek2c":"[A pool shut under a stone lid, as if asleep.]",
+ "rq_evilking_1":"[☉] The three pools blink together. 'The king's eye watched rulers fall. On the Abyss's second floor, a crown of bone waits to watch again.'",
+ "rq_evilking_2g":"[A crown of bone on a stone. A voice: 'Three rulers. Any three. Let me watch them fall, then come back.']",
+ "rq_evilking_2w":"[The crown waits. It has not seen enough.]",
+ "rq_evilking_2":"[♛] 'Enough.' The crown turns to dust. 'On the Abyss's deepest floor, the king's eye was locked away. Three signs.'",
+ "rq_evilking_v":"[A small iron door in the rock. Three rings of signs turn around its lock.]",
+ "rq_dragon_0n":"[A cracked dragon egg, cold as stone. Three scales are missing from its pattern.]",
+ "rq_dragon_0":"[♨] The scales fit the empty places and the shell warms: 'Trauka's blood is my blood. Let him fall once more, then come back to me.'",
+ "rq_dragon_1g":"[The shell is warm. 'Trauka. Once more.']",
+ "rq_dragon_1w":"[The shell waits for Trauka's fall.]",
+ "rq_dragon_1":"[✦] The egg cracks wider; inside is one dried drop of blood. 'Take my scent south to the red badlands, and find the dried pool when the sun stands straight above it.'",
+ "rq_dragon_2n":"[A dark stain on the red rock, dry and cracked.]",
+ "rq_dragon_2":"[⚚] At noon the stain turns wet and red again, and the shadowless sun shows a path: 'The highest ridge of the Chaos Mountains. Three signs.'",
+ "rq_dragon_v":"[A vault cut into the ridge, warm to the touch. Three rings of signs turn around its lock.]",
+ "rq_gourd_0n":"[A rock shaped like a gourd. Five hollows ring its base, each marked with an old word: wood, fire, earth, metal, water.]",
+ "rq_gourd_0":"[☯] The five hollows fill and the rock hums: 'A Taoist sat in the Kingdom of Xing until the wind stopped for him. Sit where he sat for a full minute, and let nothing touch you.'",
+ "rq_gourd_1n":"[A flat stone, worn smooth by someone who sat here for a very long time.]",
+ "rq_gourd_1":"[☁] The wind stops. In the quiet you hear: 'In the lands of Kaya, five stones stand in a ring. Wake them in the order in which each gives birth to the next.'",
+ "rq_gourd_2_go3a":"[A plain stone of packed earth.]",
+ "rq_gourd_2_go3b":"[A stone that is always wet.]",
+ "rq_gourd_2_go3c":"[A stone overgrown with green shoots.]",
+ "rq_gourd_2_go3d":"[A stone veined with iron.]",
+ "rq_gourd_2_go3e":"[A stone blackened and warm to the touch.]",
+ "rq_gourd_2":"[✿] The ring of stones turns once around you. 'The mountains of Pa keep the gourd. Three signs open its stopper.'",
+ "rq_gourd_v":"[A cave mouth sealed with a round stone. Three rings of signs turn around it.]",
+ "rq_core_0n":"[A machine half buried in the sand, its chest plate open and empty. Twenty sockets sized for mana stones.]",
+ "rq_core_0":"[⚙] The machine wakes for a moment: 'Core... taken... by the stone men. Find the dead engine... in Dran Valley.'",
+ "rq_core_1g":"[A dead engine of stone and brass. 'The golems took my parts. Break twenty of them, then come back.']",
+ "rq_core_1w":"[The engine is still missing its parts.]",
+ "rq_core_1":"[⚡] The engine coughs into life: 'Enough parts. On the Taturan plains three pylons still hum. Wake them from the lowest note to the highest.'",
+ "rq_core_2_co3a":"[A pylon humming at a middle note.]",
+ "rq_core_2_co3b":"[A pylon singing a high, thin note.]",
+ "rq_core_2_co3c":"[A pylon droning a deep, low note.]",
+ "rq_core_2":"[⚛] The three notes join into one. 'The core is sealed in the Suaz Mountains. Three signs.'",
+ "rq_core_v":"[A steel hatch in the mountainside. Three rings of signs turn around its lock.]"});
 /* ---------------- Farming 2, Pedro Harbor and the Kraken, the bard and the stage (owner 2026-10-21: third batch, patch 4) ----------------
    Seasons turn every two days of the world clock, the same for every player. Piaro's new field has eight plots: buy seed,
    plant it and come back when it has grown (it grows while you are away). A crop out of season grows at half speed and gives
@@ -16840,7 +17300,7 @@ function legDel(c,list){if(!FB||!netUser)return Promise.resolve();const D=FB.m.d
   const holds=(x,k)=>(x.mats[k]|0)>0||(Array.isArray(x.stash)?x.stash:[]).some(o=>o&&!o.it&&o.k===k&&o.n>0)||k==='mumbk'&&(x.mmq===1||x.mmq===2)||k==='mdsheath'&&!!x.mdq&&(x.mdq.st===1||x.mdq.st===2);
   const had=k=>gone.has(UQL[k])||cls.has(UQL[k])||!saves.length||saves.some(x=>holds(x,k));
   return (Object.keys(lu).length?D.update(D.ref(FB.db),lu):Promise.resolve()).then(()=>{if(WS&&WS.legends)for(const k of gone)if(WS.legends[k]&&(WS.legends[k].pid===c.pid||same))delete WS.legends[k];}).then(()=>Promise.all(Object.keys(UQL).filter(k=>B[k]&&B[k].uid===me&&(B[k].p===c.pid&&had(k)||gone.has(UQL[k])))
-   .map(k=>D.update(D.ref(FB.db),{['world/satisfy/books/'+k]:null}).catch(()=>{}))));},e=>fail()).catch(e=>{throw e&&e.message===t('lgDelFail')?e:new Error(t('lgDelFail'));});}
+   .map(k=>D.update(D.ref(FB.db),{['world/satisfy/books/'+k]:null}).catch(()=>{})).concat(Object.keys(B).filter(k=>/^rl_[a-z]+$/.test(k)&&B[k]&&B[k].uid===me&&B[k].p===c.pid).map(k=>D.update(D.ref(FB.db),{['world/satisfy/books/'+k]:null}).catch(()=>{})))));},e=>fail()).catch(e=>{throw e&&e.message===t('lgDelFail')?e:new Error(t('lgDelFail'));});}
 Object.assign(STR.ar,{lgDelFail:'مقدرناش نرجّع الأسطورة أو الكتاب للعالم دلوقتي، فالشخصية ماتمسحتش. جرّب تاني.'});Object.assign(STR.en,{lgDelFail:"The legend or the book couldn't go back to the world just now, so the character wasn't deleted. Try again."});
 // a declined Mumud or Madra (they have no one to ask again) is offered once a session while the legend is free
 let lgReT=0;function lgReoffer(){if(!S||S.__demo||mode!=='play'||!$('dialog').hidden)return;if(!lgReT){lgReT=gTime+60;return;}if(gTime<lgReT)return;lgReT=Infinity;
@@ -19157,7 +19617,7 @@ Object.assign(STR.en,{pcTrade:'Trade',trYes:'Trade',trFrom:'{n} wants to trade',
  trSAcc:'Accepted',trSConf:'Confirmed',trSWait:'Waiting…',trNone:'Nothing',trSwapped:'Trade with {n} done',trDeclined:'{n} declined the trade',trCancelled:'The trade was cancelled',trFailed:'The trade did not go through: something changed, or an item is no longer theirs',trFar:'The trade was cancelled: you walked apart',trMatT:'Materials & books',trNL:'Amount'});
 var trSig='';
 // what you may give: bag items that aren't worn, of a kind every client knows (so the other side can take them)
-function tradeBag(){if(!S||S.__demo)return [];const w=weapon();return S.items.filter(i=>i&&i.iid&&!isEq(i)&&i!==w&&rcById(i.id)).map(i=>{const o={};for(const k in i)if(k!=='uid'&&k!=='iid')o[k]=i[k];o.hist=[...(Array.isArray(i.hist)?i.hist:[]),Satisfy.chat.clean(t('pname'),16)||'?'].slice(-3);return {iid:i.iid,json:JSON.stringify(o),it:i};}).concat(trMatBag()).filter(x=>x.json.length<=Satisfy.trade.C.ITEM_MAX);}
+function tradeBag(){if(!S||S.__demo)return [];const w=weapon();return S.items.filter(i=>i&&i.iid&&!isEq(i)&&i!==w&&i.slot!=='rl'&&rcById(i.id)).map(i=>{const o={};for(const k in i)if(k!=='uid'&&k!=='iid')o[k]=i[k];o.hist=[...(Array.isArray(i.hist)?i.hist:[]),Satisfy.chat.clean(t('pname'),16)||'?'].slice(-3);return {iid:i.iid,json:JSON.stringify(o),it:i};}).concat(trMatBag()).filter(x=>x.json.length<=Satisfy.trade.C.ITEM_MAX);}
 // owner 2026-10-24 ("any item in the bag can be given in a trade; I can't give this book"): the bag's stacks (books,
 // materials, potions) go too. A stack offered gets an item id of its own for this trade (it_<pid>_<new uid>, as the
 // trade and its rules expect), and the amount set in the box beside the search when it was picked (TRMN)
@@ -19166,7 +19626,7 @@ function trMatBag(){if(!S||!S.mats||!S.pid)return [];const out=[];for(const k in
   const n=Math.min(c,TRMN[iid]||Math.max(1,Math.min(c,+($('trN')&&$('trN').value)||1)));out.push({iid,json:JSON.stringify({id:k,mat:1,n}),it:{id:k,mat:1,n,r:0}});}return out;}
 function trMatIn(o){if(!o||!o.mat||!trMatOk(o.id))return 0;const n=Math.max(0,Math.min(1e7,o.n|0));if(n){addMat(o.id,n);bkGot(o.id);}return n;}
 // an item from the other side, rebuilt from plain values only, as a new item of yours (a new uid; ids.ensure gives the iid)
-function tradeItemIn(json){let o;try{o=JSON.parse(json);}catch(e){return null;}if(!o||typeof o!=='object'||typeof o.id!=='string')return null;const rc=rcById(o.id);if(!rc)return null;
+function tradeItemIn(json){let o;try{o=JSON.parse(json);}catch(e){return null;}if(!o||typeof o!=='object'||typeof o.id!=='string')return null;const rc=rcById(o.id);if(!rc||rc.slot==='rl')return null;
  const it={};for(const k in o){const v=o[k];if(k==='uid'||k==='iid'||k==='__proto__')continue;if((typeof v==='number'&&isFinite(v))||(typeof v==='string'&&v.length<=40)||typeof v==='boolean')it[k]=v;}
  it.id=o.id;it.slot=rc.slot;it.r=Math.max(0,Math.min(4,it.r|0));it.dur=Math.max(0,Math.min(100,typeof it.dur==='number'?it.dur:100));if(it.gem&&!(typeof GEMS!=='undefined'&&GEMS[it.gem]))delete it.gem;if(Array.isArray(o.gx))it.gx=o.gx.filter(g=>typeof g==='string'&&GEMS[g]).slice(0,2);it.so=Math.max(1,Math.min(3,it.so|0||1));it.trd=1;
  const h=o.hid;if(h&&typeof h==='object'&&HIDK.includes(h.k)&&typeof h.v==='number'&&isFinite(h.v))it.hid={k:h.k,v:Math.max(0,Math.min(h.k==='hpp'?.12:h.k==='as'?.09:63,h.v))}; // a known hidden function goes with the item (v1.03)
