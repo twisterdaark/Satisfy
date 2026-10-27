@@ -17482,14 +17482,18 @@ function rdyKey(c){if(!RDY||RDY.me!==0||c!=='KeyY'&&c!=='KeyN')return false;rdyA
    asked sees who and where, and accepts with Y (or the button) within SMNT; only then is the fee taken, from them (they're
    the one who travels). Nobody is summoned from or to where a Return Scroll can't go (the arena, a tower, a race, a duel, the
    siege's castle, Behen, a vampire city: scrollBlock), into a dungeon or a room, nor across the sea to the other continent.
-   The one who asked hears the answer. */
+   The one who asked hears the answer.
+   (owner 2026-10-27: "only for the knight summon, never public like this") no party member can summon another: the ⇲ button
+   is gone and a request is neither sent nor heard while SMNK is off. The mechanism waits for the novel's Summon Knights (a
+   lord calling his sworn knights to his side), which isn't in the game yet */
+var SMNK=false;
 const SMNT=30000,SMNCD=20000,SMNHIT=5,SMNQ='⇲? ',smnFee=()=>Math.min(3000,500+15*S.lv),smnTag=u=>String(u||'').slice(-6);let SMN=null,SMNA=null,SMNP=-1e9;
 function smnWhere(x,y){return dunAt(x,y)||roomAt(x,y)||y>=WMH*TS||y<8-NR*TS||x<8||x>MW*TS-8||SG&&inCastle({x,y})||!!vcAt(x/TS,y/TS);}
-function smnAsk(uid){const m=PARTY&&PARTY.id()?PARTY.members().find(x=>!x.self&&x.uid===uid):null;if(!NET||!m)return false;
+function smnAsk(uid){const m=PARTY&&PARTY.id()?PARTY.members().find(x=>!x.self&&x.uid===uid):null;if(!NET||!m||!SMNK)return false;
  if(scrollBlock()||smnWhere(P.x,P.y)){SFX.deny();toast(t('smnHere'),'warn');return false;}if(gTime-(P.hitT??-99)<SMNHIT){SFX.deny();toast(t('smnHurt'),'warn');return false;}
  if(performance.now()-SMNP<SMNCD){toast(t('smnSoon'));return false;}SMNP=performance.now();SMNA={uid:m.uid,until:performance.now()+SMNT+5000};
  rdySay(SMNQ+(m.handle||'?').slice(0,16)+' #'+smnTag(m.uid)+' @'+Math.round(P.x)+','+Math.round(P.y));toast(t('smnSent',{n:m.handle||'?'}),'good');return true;}
-function smnLine(L){if(!L||L.type!=='line'||L.ch!=='party'||typeof L.text!=='string'||L.self||!PARTY||!PARTY.id()||!NET)return;const tx=L.text;
+function smnLine(L){if(!SMNK||!L||L.type!=='line'||L.ch!=='party'||typeof L.text!=='string'||L.self||!PARTY||!PARTY.id()||!NET)return;const tx=L.text;
  if(tx.startsWith(SMNQ)){const q=/#([A-Za-z0-9_-]{1,6}) @(-?\d{1,6}),(-?\d{1,6})$/.exec(tx);if(!q||q[1]!==smnTag(NET.uid))return;
   SMN={from:L.from,n:L.handle||'?',x:+q[2],y:+q[3],until:performance.now()+SMNT};const z=zoneAt(SMN.x,SMN.y);
   $('smnT').textContent=t('smnAskT',{n:SMN.n,z:z?t(z):'?',g:fmtN(smnFee())});$('smnBox').hidden=false;SFX.notice();return;}
@@ -17508,7 +17512,7 @@ Object.assign(STR.ar,{smnTip:'استدعي {n} لعندك (لو وافق بيد�
 Object.assign(STR.en,{smnTip:'Summon {n} to you (they pay the fee if they accept)',smnY:'✓ Go (Y)',smnN:'✗ No (N)',smnHere:"Nobody can be summoned from here or to here.",smnSoon:'Wait a little before summoning again.',
  smnSent:'You asked {n} to come to you.',smnAskT:'{n} wants to summon you to {z}. Going costs {g} gold.',smnYes:'{n} accepted and is on the way.',smnNo:"{n} isn't coming.",smnPoor:"You don't have the {g} gold the summons costs.",
  smnThere:"You can't be summoned to that place.",smnHurt:"No summons while you're still being hit.",smnSea:"Nobody can be summoned across to the other continent: only the portal crosses.",smnGo:'You went to {n} and paid {g} gold.'});
-window.__GSMN={ask:u=>smnAsk(u),line:L=>smnLine(L),ans:y=>smnAns(y),get R(){return SMN},fee:()=>smnFee(),tag:u=>smnTag(u),cd:()=>{SMNP=-1e9;}}; // tests
+window.__GSMN={knight:v=>{SMNK=!!v;partySig='';},ask:u=>smnAsk(u),line:L=>smnLine(L),ans:y=>smnAns(y),get R(){return SMN},fee:()=>smnFee(),tag:u=>smnTag(u),cd:()=>{SMNP=-1e9;}}; // tests
 window.__GRDY={gate:()=>rdyGate(),ask:w=>rdyAsk(w),get R(){return RDY},ok:()=>performance.now()<RDYOK}; // tests
 function partyUI(live){if(!PARTY)return;const inv=live?PARTY.pendingInvite():null,mem=live?PARTY.members():[];
  const hpOf=m=>m.self?Math.round(20*Math.max(0,P.hp)/maxHP())*5:m.hp;
@@ -17518,7 +17522,7 @@ function partyUI(live){if(!PARTY)return;const inv=live?PARTY.pendingInvite():nul
  $('partyInv').hidden=!inv;if(inv)$('partyInvT').textContent=inv.by?t('pInvBy',{b:inv.by,n:inv.handle||'?'}):t('pInvFrom',{n:inv.handle});
  $('partyW').hidden=mem.length<2;{const b=$('pInvB');b.textContent='＋';b.dataset.tip=t(lead?'pInvTip':'pInvTipM');}$('pHead').textContent=rd?t('pRaidT',{n:mem.length,m:Satisfy.party.RAID_MAX}):t('pTitle');
  {const b=$('pRdyB');b.hidden=!lead;b.textContent='✓?';b.dataset.tip=t('rdyTip');}{const b=$('pRaidB');b.hidden=!lead;b.textContent=rd?t('pRaidOff'):t('pRaidOn');b.dataset.tip=rd?t('pPartyTip',{m:Satisfy.party.MAX}):t('pRaidTip',{m:Satisfy.party.RAID_MAX});}
- $('partyL').innerHTML=mem.map(m=>`<div class="${m.leader?'ld':''}${!m.self&&m.age>PSTALE?' stale':''}"><span>${m.self?`<button class="role" data-tip="${esc(t(rd?'rlTip':'roleTip'))}">${ROLE_B[ROLE]||'＋'}</button> `:roleOf(m)?`<span class="role" title="${esc(t('role_'+roleOf(m)))}">${ROLE_B[roleOf(m)]}</span> `:''}${m.leader?'★ ':''}${esc(m.self?netId||S.look.n:m.handle||'?')}</span><span>${t('lv',{n:m.self?S.lv:lvTxt(m.lv)})}${m.self?'':`${lead?` <button class="mkld" data-uid="${esc(m.uid)}" data-tip="${esc(t('pMkLead',{n:m.handle||'?'}))}">👑</button> <button class="kick" data-uid="${esc(m.uid)}" data-tip="${esc(t('pKick'))}">${esc(t('pKick'))}</button>`:''} <button class="smn" data-uid="${esc(m.uid)}" data-tip="${esc(t('smnTip',{n:m.handle||'?'}))}">⇲</button> <button class="blk" data-uid="${esc(m.uid)}" data-tip="${esc(t('pBlock'))}">⊘</button>`}</span></div>${lead&&!m.self&&KICKQ===m.uid?`<div class="kq"><span>${esc(t('pKickQ',{n:m.handle||'?'}))}</span><span><button class="kyes" data-uid="${esc(m.uid)}">${esc(t('pKickYes'))}</button> <button class="kno">${esc(t('pKickNo'))}</button></span></div>`:''}${pSub(m)?`<small class="psub${m.age>PSTALE?' stale':''}">${esc(pSub(m))}</small>`:''}${hpOf(m)==null?'':`<i class="php${!m.self&&m.age>PSTALE?' stale':''}" data-hp="${hpOf(m)}"><b style="width:${hpOf(m)}%"></b></i>`}`).join('');}
+ $('partyL').innerHTML=mem.map(m=>`<div class="${m.leader?'ld':''}${!m.self&&m.age>PSTALE?' stale':''}"><span>${m.self?`<button class="role" data-tip="${esc(t(rd?'rlTip':'roleTip'))}">${ROLE_B[ROLE]||'＋'}</button> `:roleOf(m)?`<span class="role" title="${esc(t('role_'+roleOf(m)))}">${ROLE_B[roleOf(m)]}</span> `:''}${m.leader?'★ ':''}${esc(m.self?netId||S.look.n:m.handle||'?')}</span><span>${t('lv',{n:m.self?S.lv:lvTxt(m.lv)})}${m.self?'':`${lead?` <button class="mkld" data-uid="${esc(m.uid)}" data-tip="${esc(t('pMkLead',{n:m.handle||'?'}))}">👑</button> <button class="kick" data-uid="${esc(m.uid)}" data-tip="${esc(t('pKick'))}">${esc(t('pKick'))}</button>`:''}${SMNK?` <button class="smn" data-uid="${esc(m.uid)}" data-tip="${esc(t('smnTip',{n:m.handle||'?'}))}">⇲</button>`:''} <button class="blk" data-uid="${esc(m.uid)}" data-tip="${esc(t('pBlock'))}">⊘</button>`}</span></div>${lead&&!m.self&&KICKQ===m.uid?`<div class="kq"><span>${esc(t('pKickQ',{n:m.handle||'?'}))}</span><span><button class="kyes" data-uid="${esc(m.uid)}">${esc(t('pKickYes'))}</button> <button class="kno">${esc(t('pKickNo'))}</button></span></div>`:''}${pSub(m)?`<small class="psub${m.age>PSTALE?' stale':''}">${esc(pSub(m))}</small>`:''}${hpOf(m)==null?'':`<i class="php${!m.self&&m.age>PSTALE?' stale':''}" data-hp="${hpOf(m)}"><b style="width:${hpOf(m)}%"></b></i>`}`).join('');}
 addEventListener('keydown',e=>{if(!PARTY||mode!=='play'||e.repeat||!KSYN&&KB.includes(e.code))return;
  if(e.target&&e.target.tagName==='INPUT')return; // typing in the chat line
  if(e.code==='Enter'){chatOpen();return;}

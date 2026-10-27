@@ -33,6 +33,11 @@ test('a party summon: asked, accepted with Y, paid on accept; declined; refused 
     await b.page.keyboard.press('KeyY'); await settle(a, b);
     for (const g of [a, b]) await until(g, () => ((Satisfy.local.net().party || {}).members || []).length === 2);
     const ub = await b.eval(() => Satisfy.local.net().uid);
+    // (owner 2026-10-27) no public party summon: no ⇲ in the panel, and a request goes nowhere
+    assert.equal(await a.eval(() => document.querySelectorAll('#partyL button.smn').length), 0, 'no summon button');
+    assert.equal(await a.eval((u) => window.__GSMN.ask(u), ub), false, 'no summons between party members');
+    // the mechanism, kept for the knight summon
+    for (const g of [a, b]) await g.eval(() => window.__GSMN.knight(true));
     // B walks off; A asks; nothing is paid until B says yes
     await b.eval(() => { const P = window.__G.P; P.x += 600; window.__G.S.gold = 50000; });
     await settle(a, b);

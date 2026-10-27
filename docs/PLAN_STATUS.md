@@ -5,7 +5,7 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.63) |
+| | At the count | Now (v3.65) |
 |---|---|---|
 | Done | 233 | 292 |
 | Partly there (something left) | 92 | 38 |
@@ -45,6 +45,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.61 (Claude-B): U192 (Regas's parry and dodge drill).
 - v3.62 (Claude-B): U180 bind rule (stolen wyvern eggs bound to the thief).
 - v3.63 (Claude-B): owner request: chat links for bag items, stacks and quests (not a plan row).
+- v3.65 (Claude-B): owner fix: the party summon taken out of the party panel (knight summon only).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -326,7 +327,7 @@ Four rows were set to ✅ by their own PRs (SAT-ONLINE-138: U026/U027; SAT-ONLIN
 | U043 | PvP guild skirmish | 🟡 | part | client+rules | Unchanged; the plan's check (a peaceful guild can't be attacked in a town) holds, since towns are safe for everyone. Left: a war contract before the siege or banner capture (only guilds at war may fight there) |
 | U044 | PvP anti-exploit suite | 🟡 | part | rules or D3 | Unchanged (`unit/antiexploit`). Left: forged arena ratings within ±64 are still believed. A result both sides write and the rules match is client+rules; a real check is D3 |
 | U045 | PvP fairness telemetry | 🟡 | part | client+rules, owner | Unchanged: the `balance/{uid}` rules allow only kills, time, wins and losses. Left: PvP time to kill and deaths, duels apart from open PvP, gear bands, the round-trip p95 (already measured in `net().link`) as new fields, plus thresholds the owner publishes before ranked |
-| U054 | Party summon | ⏳ | done (v3.36) | client | Not built (searched summon/teleport in the changelog). The ledger's reason is stale: the game already moves players itself (Return Scroll, the hunt's free trip, the magic circles, return stones). Left: a request, the target's consent, zone checks (no arena, tower, siege or race) and a fee taken only on accept v3.36: ⇲ by a member in the party panel asks to bring them over; it rides the party chat like the ready check (`smnAsk`, `smnLine`), so no rules change. The one asked sees who and where and accepts with Y within 30 s; only then is the fee (500 + 15 a level, at most 3,000) taken, from them. Refused within 5 s of being hit, from or to where a Return Scroll can't go (`scrollBlock`; the siege's castle and the vampire cities as destinations too), into a dungeon or a room, or across to the other continent; the answer names the asker, and only they hear it (`regression/plan7`). |
+| U054 | Party summon | ⏳ | done (v3.36) | client | Not built (searched summon/teleport in the changelog). The ledger's reason is stale: the game already moves players itself (Return Scroll, the hunt's free trip, the magic circles, return stones). Left: a request, the target's consent, zone checks (no arena, tower, siege or race) and a fee taken only on accept v3.36: ⇲ by a member in the party panel asks to bring them over; it rides the party chat like the ready check (`smnAsk`, `smnLine`), so no rules change. The one asked sees who and where and accepts with Y within 30 s; only then is the fee (500 + 15 a level, at most 3,000) taken, from them. Refused within 5 s of being hit, from or to where a Return Scroll can't go (`scrollBlock`; the siege's castle and the vampire cities as destinations too), into a dungeon or a room, or across to the other continent; the answer names the asker, and only they hear it (`regression/plan7`). v3.65 (owner 2026-10-27: "only for the knight summon, never public like this"): no party member can summon another any more; the ⇲ button is gone and the mechanism is kept off (`SMNK`) for the novel's Summon Knights, not yet in the game. |
 | U057 | Personal loot | 🟡 | done | – | SAT-ONLINE-141 (c87debb4, in main): each fighter's game pays its own share once per encounter, and the one who landed the last blow gets the same boss gold as the rest (`regression/raid`). The ✅ was lost in a merge; the server ledger is D3 |
 | U058 | Need/Greed loot | 🟡 | done | – | SAT-ONLINE-141: one piece per roll, a result announced twice makes nothing more, and a boss reported killed again within the minute starts no second roll (`regression/raidloot`). The ✅ was lost in a merge; the server random is D3 |
 | U186 | Raid replay | ❌ | done (v3.47) | client | Only the duel and open-PvP fight logs (`/fightlog`, U039) and the offline replay recorder (U323). Left: a raid boss fight log on each client (phases, hits, deaths, no bag data) and a ghost playback v3.47: each client logs its last three boss fights of 10 s or more (when and how they ended, the boss's health and phases, your damage and what you took, who fell, where everyone stood every half second; no bag data), keeps each character's last on the device, and plays it back as ghosts on a small map with a timeline (the fight's toast, the log window's button or "/raidlog"; `bflTick`, `bflDraw`; `regression/plan11`). |
