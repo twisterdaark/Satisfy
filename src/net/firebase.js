@@ -416,6 +416,7 @@
         u['guilds/' + gid] = { name: g.name, nk: g.nk, master: uid, col: g.col, t: SV() };
         u['guildNames/' + g.nk] = gid;
         u['guildMembers/' + gid + '/' + uid] = member(m);
+        u['guildResearch/' + gid] = null;   // plan U237: research an older client's disband left behind goes with a new guild
         return up(u);
       },
       invite: function (uid, gid, v) { var u = {}; u['guildInv/' + uid + '/' + gid] = { n: v.n, by: v.by, byN: String(v.byN || '').slice(0, 24), t: SV() }; return up(u); },
@@ -432,7 +433,7 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; u['guildWar/' + gid] = null; u['guildWarAsk/' + gid] = null; u['guildWarKill/' + gid] = null; u['guildHall/' + gid] = null; u['guildHallGuest/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildResearch/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; u['guildWar/' + gid] = null; u['guildWarAsk/' + gid] = null; u['guildWarKill/' + gid] = null; u['guildHall/' + gid] = null; u['guildHallGuest/' + gid] = null; return up(u); },
       // SAT-ONLINE-081 the weekly goal: guildWeek/{gid}/{wk}/{uid} {n, k, t}: each member's own kills this week (only upward,
       // at most 1,500); guildWeekPaid/{gid}/{wk}/{uid}/{tier} {t}: a tier's reward, taken once
       watchWeek: function (gid, wk, cb) { return watch('guildWeek/' + gid + '/' + wk, cb); },
@@ -588,7 +589,7 @@
           return up(u);
         });
       },
-      // plan U237: the research tree guildResearch/{gid} = a whole number, one bit a node (GR's order in the game); a node
+      // plan U237: the research tree guildResearch/{gid} = a whole number, one bit a node (GRS's order in the game); a node
       // bought reads the treasury and the tree and writes both back with it (the rules: one new bit, its prerequisites'
       // bits already there, its cost added to s), with a log line {k: 'res', b: node, g: cost}
       watchRes: function (gid, cb) { return watch('guildResearch/' + gid, cb); },

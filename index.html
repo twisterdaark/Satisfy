@@ -18050,7 +18050,7 @@ function gbBuild(b,tries){tries=tries|0;if(!GDS||!GUILD)return;const st=GUILD.st
  GDS.build(st.gid,NET.uid,netId||S.look.n,b,l+1,cost,gbLid()).then(()=>{SFX.level();},e=>{if(tries<2&&gbFail(e))setTimeout(()=>gbBuild(b,tries+1),300);else toast(t('gdFail'),'warn');});}
 function guildBldD(){if(!GUILD||!GUILD.state().gid)return guildPanel();const st=GUILD.state(),k=GBK||{in:0,s:0},have=k.in-k.s,boss=gCan('spend');
  const L=[t('gbH',{g:have.toLocaleString()})];for(const b in GB){const l=gbLv(b);L.push(t('gbRow',{ic:GB[b].ic,b:t('gb_'+b),l,e:Math.round(l*GB[b].v*100),w:t('gbE_'+b),nx:l<3?t('gbNext',{g:GB_COST[l].toLocaleString()}):t('gbMax')}));}
- const log=Object.values(GBLOG||{}).filter(x=>x&&typeof x.t==='number').sort((a,b)=>b.t-a.t).slice(0,5).map(x=>{const n=Satisfy.chat.clean(x.n,24)||'?';return x.k==='build'&&GB[x.b]?t('gbLogB',{n,b:t('gb_'+x.b),l:x.l|0}):x.k==='res'&&GRS.some(r=>r[0]===x.b)?t('grLog',{n,b:t('gr_'+x.b)}):t('gbLogG',{n,g:(x.g|0).toLocaleString()});});
+ const log=Object.values(GBLOG||{}).filter(x=>x&&typeof x.t==='number'&&(x.k==='give'||x.k==='build'&&GB[x.b]||x.k==='res'&&GRS.some(r=>r[0]===x.b))).sort((a,b)=>b.t-a.t).slice(0,5).map(x=>{const n=Satisfy.chat.clean(x.n,24)||'?';return x.k==='build'&&GB[x.b]?t('gbLogB',{n,b:t('gb_'+x.b),l:x.l|0}):x.k==='res'&&GRS.some(r=>r[0]===x.b)?t('grLog',{n,b:t('gr_'+x.b)}):t('gbLogG',{n,g:(x.g|0).toLocaleString()});});
  if(log.length)L.push(log.join(' · '));
  const o=GB_GIVE.filter(g=>S.gold>=g).map(g=>({l:t('gbGive',{g:g.toLocaleString()}),f:()=>{gbGive(g);setTimeout(guildBldD,700);}}));
  if(boss)for(const b in GB){const l=gbLv(b);if(l<3)o.push({l:t('gbBuild',{b:t('gb_'+b),l:l+1,g:GB_COST[l].toLocaleString()}),poor:have<GB_COST[l],f:()=>{gbBuild(b);setTimeout(guildBldD,700);}});}

@@ -344,17 +344,18 @@
     }
     if (seg[0] === 'guildBank' || seg[0] === 'guildBuild' || seg[0] === 'guildLog' || seg[0] === 'guildResearch') { // SAT-ONLINE-065: the treasury, the buildings, the log; plan U237 the research tree
       const gid = seg[1], member = data.has('guildMembers/' + gid + '/' + me), master = (data.get('guilds/' + gid) || {}).master === me, boss = right(gid, 'spend');
-      if (seg.length === 2 && v === null) return master && gone(gid) ? null : 'PERMISSION_DENIED: ' + seg[0] + ' remove';
+      if (seg.length === 2 && v === null) return master && gone(gid) || (seg[0] === 'guildResearch' && gid === 'g_' + me && !data.has('guilds/' + gid)) ? null : 'PERMISSION_DENIED: ' + seg[0] + ' remove';   // research an older client's disband left: cleared by the next founding
       if (seg[0] === 'guildBank') {
         if (seg.length !== 2 || !member) return 'PERMISSION_DENIED: guildBank ' + path;
         if (Object.keys(v).sort().join(',') !== 'in,lb,lg,s,t' || !isInt(v.in, 0) || !isInt(v.s, 0) || !isInt(v.lg, 1) || v.lg > 1e6 || typeof v.lb !== 'string' || !isSV(v.t) || v.s > v.in) return 'guildBank fields';
         const give = old ? v.s === old.s && v.in === old.in + v.lg && v.lb === me : v.s === 0 && v.in === v.lg && v.lb === me;
-        const spend = !!old && v.in === old.in && v.s > old.s && boss && ['forge', 'train', 'gold'].some((b) => { const n = after('guildBuild/' + gid + '/' + b), o = data.get('guildBuild/' + gid + '/' + b); return n != null && (o == null || n > o); }) || (() => { const n = after('guildResearch/' + gid), o = data.get('guildResearch/' + gid); return n != null && (o == null || n > o); })(); // only with a building raised (Claude-B's review of #99) or a research node bought
+        const spend = !!old && v.in === old.in && v.s > old.s && boss && (['forge', 'train', 'gold'].some((b) => { const n = after('guildBuild/' + gid + '/' + b), o = data.get('guildBuild/' + gid + '/' + b); return n != null && (o == null || n > o); }) || (() => { const n = after('guildResearch/' + gid), o = data.get('guildResearch/' + gid); return n != null && (o == null || n > o); })()); // only with a building raised (Claude-B's review of #99) or a research node bought
         return give || spend ? null : 'PERMISSION_DENIED: guildBank stale or not yours';
       }
       if (seg[0] === 'guildBuild') {
         if (seg.length !== 3 || !boss || !['forge', 'train', 'gold'].includes(seg[2])) return 'PERMISSION_DENIED: guildBuild ' + path;
         if (!(isInt(v, 1) && v <= 3 && v === (old || 0) + 1)) return 'guildBuild level';
+        if (['forge', 'train', 'gold'].some((b) => b !== seg[2] && after('guildBuild/' + gid + '/' + b) !== (data.has('guildBuild/' + gid + '/' + b) ? data.get('guildBuild/' + gid + '/' + b) : null))) return 'PERMISSION_DENIED: guildBuild one a write';
         const s0 = (data.get('guildBank/' + gid) || {}).s, s1 = (after('guildBank/' + gid) || {}).s;
         return s1 === s0 + [0, 50000, 150000, 400000][v] ? null : 'PERMISSION_DENIED: guildBuild cost';
       }
