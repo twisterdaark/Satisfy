@@ -5,7 +5,7 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.65) |
+| | At the count | Now (v3.66) |
 |---|---|---|
 | Done | 233 | 292 |
 | Partly there (something left) | 92 | 38 |
@@ -46,6 +46,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.62 (Claude-B): U180 bind rule (stolen wyvern eggs bound to the thief).
 - v3.63 (Claude-B): owner request: chat links for bag items, stacks and quests (not a plan row).
 - v3.65 (Claude-B): owner fix: the party summon taken out of the party panel (knight summon only).
+- v3.66 (Claude-B): knights from the novel (owner card "both"): Earl Aden titles up to viscount, the castle king names earls and dukes; nobles appoint friends as knights (1/3/5/8/12), 500 gold a month, Summon Knights with consent, over whispers (no rules deploy).
 
 ## U066–U113 (checked 2026-10-26)
 

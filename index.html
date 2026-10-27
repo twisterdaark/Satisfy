@@ -621,7 +621,7 @@ body.touch #tStick.on{opacity:1}body.touch #hint{pointer-events:auto}
       <div id="loot"></div>
       <div id="evbar" class="sys" hidden></div><div id="tlbar" class="sys" hidden></div>
       <div id="sgbar" class="sys" hidden></div><div id="natbar" class="sys" hidden></div>
-      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plBnt" data-act="plBnt" data-i18n="bntBoard"></button><button id="plRnk" data-act="plRnk" data-i18n="rnkBoard"></button><button id="plFr" data-act="plFr" data-i18n="frBoard"></button><button id="plLfg" data-act="plLfg" data-i18n="lfgBoard"></button><button id="plNat" data-act="plNat" data-i18n="natBoard"></button><button id="plCal" data-act="plCal" data-i18n="calBoard"></button></div></div>
+      <div id="netB" class="sys" hidden></div><div id="plW" class="sys" hidden><div class="qhead"><span class="head" id="plH"></span><button class="x" data-act="plClose">✕</button></div><div id="plL"></div><div class="row"><button id="plHide" data-act="plHide"></button><button id="plBnt" data-act="plBnt" data-i18n="bntBoard"></button><button id="plRnk" data-act="plRnk" data-i18n="rnkBoard"></button><button id="plFr" data-act="plFr" data-i18n="frBoard"></button><button id="plKn" data-act="plKn" data-i18n="knBoard"></button><button id="plLfg" data-act="plLfg" data-i18n="lfgBoard"></button><button id="plNat" data-act="plNat" data-i18n="natBoard"></button><button id="plCal" data-act="plCal" data-i18n="calBoard"></button></div></div>
       <div id="netRepW" class="sys" hidden><div id="netRepT"></div><div class="row"><button id="netRepBtn" data-act="netTakeBack"></button></div></div>
       <div id="duelInv" class="sys" hidden><div id="duelInvT"></div><div class="row"><button id="duelBtnA" data-act="dAccept"></button><button id="duelBtnB" data-act="dDecline"></button><button id="duelBtnC" class="blk" data-act="dBlock" data-i18n="pBlock"></button></div></div>
       <div id="duelW" class="sys" hidden><div id="duelT"></div><div class="bars"><div><div id="duelMeN"></div><div class="bar"><i id="duelMeB"></i></div></div><div><div id="duelFoeN"></div><div class="bar"><i id="duelFoeB"></i></div></div></div><div id="duelCd"></div><button class="x" id="duelYield" data-act="dYield"></button></div>
@@ -11264,6 +11264,7 @@ function act(a){
  else if(a==='gdYes'||a==='gdNo')guildAct(a);
  else if(a==='plBnt')bntBoard();
  else if(a==='plFr')frBoard();
+ else if(a==='plKn')knBoard();
  else if(a==='plLfg')lfgBoard();
  else if(a==='plNat')natBoard();
  else if(a==='plCal')calBoard();
@@ -17275,7 +17276,7 @@ function netWatch(){const ids=PARTY?PARTY.follow():[],w=ids.join(' ');if(NETTR.w
 function netTick(){faultAt('netTick');NET.tick();pxpSeen();marTick();const live=netLive();
  if(PARTY)PARTY.tick();
  if(NETTR&&NETTR.party)netWatch();
- if(DUEL)duelTick(live);rdyTick();smnTick();
+ if(DUEL)duelTick(live);rdyTick();smnTick();if(S&&S.kn&&performance.now()>KNPT){KNPT=performance.now()+10000;knPay();}
  if(TRADE)TRADE.tick();
  if(TRADE&&S&&S.trPend)trRecTick();
  rlTick();
@@ -17496,9 +17497,9 @@ function smnAsk(uid){const m=PARTY&&PARTY.id()?PARTY.members().find(x=>!x.self&&
 function smnLine(L){if(!SMNK||!L||L.type!=='line'||L.ch!=='party'||typeof L.text!=='string'||L.self||!PARTY||!PARTY.id()||!NET)return;const tx=L.text;
  if(tx.startsWith(SMNQ)){const q=/#([A-Za-z0-9_-]{1,6}) @(-?\d{1,6}),(-?\d{1,6})$/.exec(tx);if(!q||q[1]!==smnTag(NET.uid))return;
   SMN={from:L.from,n:L.handle||'?',x:+q[2],y:+q[3],until:performance.now()+SMNT};const z=zoneAt(SMN.x,SMN.y);
-  $('smnT').textContent=t('smnAskT',{n:SMN.n,z:z?t(z):'?',g:fmtN(smnFee())});$('smnBox').hidden=false;SFX.notice();return;}
+  $('smnT').textContent=t('smnAskT',{n:SMN.n,z:z?t(z):'?',g:fmtN(smnFee())});$('smnBox').querySelector('[data-act="smnY"]').textContent=t('smnY');$('smnBox').hidden=false;SFX.notice();return;}
  const an=/^⇲([✓✗]) #([A-Za-z0-9_-]{1,6})$/.exec(tx);if(an&&an[2]===smnTag(NET.uid)&&SMNA&&L.from===SMNA.uid&&performance.now()<SMNA.until){SMNA=null;toast(t(an[1]==='✓'?'smnYes':'smnNo',{n:L.handle||'?'}),an[1]==='✓'?'good':'warn');}}   /* only the one who asked hears it */
-function smnAns(y){const R=SMN;SMN=null;$('smnBox').hidden=true;if(!R)return;const re=' #'+smnTag(R.from);if(!y){rdySay('⇲✗'+re);return;}
+function smnAns(y){const R=SMN;SMN=null;$('smnBox').hidden=true;if(!R)return;if(R.kind)return knAns(R,y);const re=' #'+smnTag(R.from);if(!y){rdySay('⇲✗'+re);return;}
  const g=smnFee(),why=scrollBlock()?'smnHere':gTime-(P.hitT??-99)<SMNHIT?'smnHurt':S.gold<g?'smnPoor':smnWhere(R.x,R.y)?'smnThere':eaSide(R.x)!==eaSide(outPos().x)?'smnSea':null;
  let to=why?null:{x:R.x+10,y:R.y+4};if(to&&hitBox(to.x,to.y,6))to=freeNear(to.x,to.y,6);
  if(why||!to){SFX.deny();toast(t(why||'smnThere',{g:fmtN(g)}),'warn');rdySay('⇲✗'+re);return;}
@@ -17513,6 +17514,106 @@ Object.assign(STR.en,{smnTip:'Summon {n} to you (they pay the fee if they accept
  smnSent:'You asked {n} to come to you.',smnAskT:'{n} wants to summon you to {z}. Going costs {g} gold.',smnYes:'{n} accepted and is on the way.',smnNo:"{n} isn't coming.",smnPoor:"You don't have the {g} gold the summons costs.",
  smnThere:"You can't be summoned to that place.",smnHurt:"No summons while you're still being hit.",smnSea:"Nobody can be summoned across to the other continent: only the portal crosses.",smnGo:'You went to {n} and paid {g} gold.'});
 window.__GSMN={knight:v=>{SMNK=!!v;partySig='';},ask:u=>smnAsk(u),line:L=>smnLine(L),ans:y=>smnAns(y),get R(){return SMN},fee:()=>smnFee(),tag:u=>smnTag(u),cd:()=>{SMNP=-1e9;}}; // tests
+/* Knights (owner 2026-10-27: "a new system from the novel, read the details first"; card: titles from both, reputation up to
+   viscount at Earl Aden, the king names earls and dukes). Canon (ch 128, 160, 184, 625): only a noble appoints knights, a
+   viscount three (Grid as a duke had eight); the one offered accepts or refuses; the lord pays each knight at least 500 gold a
+   month; Summon Knights brings the knights who accept to the lord's side from any distance, but not where a quest limits who
+   may enter or teleporting is barred. The king is the master of the guild that holds Reidan Castle: he makes a viscount an
+   earl and an earl a duke, at most KNG of each. Knights per rank KNC (viscount 3 canon, the others the owner's plan).
+   Everything rides whispers between friends (whisper/{to}: the rules take them only from a friend, and `from` is the
+   writer's own uid), so nothing new is needed on the server: "⚜<kind> <time> <arg>", hidden from the chat and dropped when
+   older than KN.OLD (whispers come back for five minutes after a reload). Titles stay when the castle changes hands. */
+const KN={OLD:30000,ASK:30000,CD:600000,PAY:500,MON:30*864e5,Q:'⚜'},NBR=['baron','viscount','earlK','dukeK'],KNC={baron:1,viscount:3,earlK:5,dukeK:8,king:12},KNG={earlK:6,dukeK:3};
+let KNO={},KNPT=0,KNT={send:null,king:undefined};
+const knS=()=>S.kn||(S.kn={k:[],lord:null,pay:0,rpay:0,scd:0}),knG=()=>S.kng||(S.kng={earlK:{},dukeK:{}});
+function isKing(){const o=WS&&WS.castle&&WS.castle.own,g=o&&WS.guilds[o];return !!(NET&&g&&!g.npc&&g.online&&g.master===pidOf()&&S.guild===o);}
+function nbRank(){if(isKing())return 'king';for(let i=NBR.length-1;i>=0;i--)if(S.tl[NBR[i]])return NBR[i];return null;}
+const knCap=()=>KNC[nbRank()]||0,knRn=r=>t(r==='king'?'knKingT':'tl_'+r),knHid=l=>!!l&&l.ch==='w'&&typeof l.text==='string'&&l.text.startsWith(KN.Q);
+function knSay(uid,k,arg,n=0){const s=KN.Q+k+' '+Math.round(wNow()).toString(36)+(arg?' '+arg:'');if(KNT.send)return KNT.send(uid,s),true;
+ if(!CHAT||!FRL[uid])return false;const r=CHAT.sayTo(uid,FRL[uid].n,s);if(r==='tooFast'&&n<8){setTimeout(()=>knSay(uid,k,arg,n+1),1200);return true;}return r==='sent';}
+// the one who sent a "T?" must be the master of the guild holding the castle, read from the database, not from the line
+function knKingIs(u){if(KNT.king!==undefined)return Promise.resolve(KNT.king===u);const o=WS&&WS.castle&&WS.castle.own;
+ if(!o||!FB||!/^g_[A-Za-z0-9]{1,128}$/.test(o))return Promise.resolve(false);const D=FB.m.database;return D.get(D.ref(FB.db,'guilds/'+o+'/master')).then(s=>s.val()===u,()=>false);}
+function knAsk(R,txt){SMN=Object.assign(R,{until:performance.now()+SMNT});$('smnT').textContent=txt;const B=$('smnBox');
+ B.querySelector('[data-act="smnY"]').textContent=t(R.kind==='S'?'smnY':'knYesB');B.querySelector('[data-act="smnN"]').textContent=t('smnN');B.hidden=false;SFX.notice();}
+function knLine(L){if(!knHid(L)||L.self||!S)return;const q=/^⚜([A-Z][?✓✗]?) ([0-9a-z]{1,12})(?: (\S{1,40}))?$/.exec(L.text);if(!q||Math.abs(wNow()-parseInt(q[2],36))>KN.OLD)return;
+ const k=q[1],a=q[3]||'',u=L.from,n=Satisfy.chat.clean(L.handle,24)||'?',K=knS(),busy=!!SMN;
+ if(k==='K?'){if(K.lord||busy||!KNC[a]||K.k.some(x=>x.u===u))return knSay(u,'K✗');knAsk({kind:'K',from:u,n,r:a},t('knAskT',{n,t:knRn(a)}));}
+ else if(k==='K✓'||k==='K✗'){if(!KNO[u]||performance.now()>KNO[u])return;delete KNO[u];if(k==='K✗')return toast(t('knNo',{n}),'warn');
+  if(K.k.length>=knCap()||K.k.some(x=>x.u===u)){knSay(u,'D');return toast(t('knFull'),'warn');}
+  K.k.push({u,n});if(!K.pay)K.pay=wNow();toast(t('knYes',{n}),'good');SFX.quest();save(true);}
+ else if(k==='D'){if(K.lord&&K.lord.u===u){K.lord=null;K.rpay=0;toast(t('knFreed',{n}),'warn');save(true);}
+  else{const i=K.k.findIndex(x=>x.u===u);if(i>=0){K.k.splice(i,1);toast(t('knLeft',{n}),'warn');save(true);}}}
+ else if(k==='S?'){const p=/^(-?\d{1,6}),(-?\d{1,6})$/.exec(a);if(!K.lord||K.lord.u!==u||!p)return;if(busy)return knSay(u,'S✗');
+  const R={kind:'S',from:u,n,x:+p[1],y:+p[2]},z=zoneAt(R.x,R.y);knAsk(R,t('knSumT',{n,z:z?t(z):'?'}));}
+ else if(k==='S✓'||k==='S✗'){if(K.k.some(x=>x.u===u))toast(t(k==='S✓'?'smnYes':'smnNo',{n}),k==='S✓'?'good':'warn');}
+ else if(k==='T?'){if(!KNG[a]||S.tl[a]||!S.tl[a==='earlK'?'viscount':'earlK']||busy)return knSay(u,'T✗');
+  knKingIs(u).then(ok=>{if(!ok)return;if(SMN)return knSay(u,'T✗');knAsk({kind:'T',from:u,n,r:a},t('knTAskT',{n,t:knRn(a)}));});}
+ else if(k==='T✓'||k==='T✗'){const o=KNO['T'+u];if(!o||performance.now()>o.until)return;delete KNO['T'+u];
+  if(k==='T✗')return toast(t('knTNo',{n,t:knRn(o.r)}),'warn');knG()[o.r][u]=n;toast(t('knTYes',{n,t:knRn(o.r)}),'good');SFX.quest();save(true);}}
+function knAns(R,y){const u=R.from,K=knS();
+ if(R.kind==='K'){if(!y||K.lord)return knSay(u,'K✗');K.lord={u,n:R.n};K.rpay=wNow();knSay(u,'K✓');toast(t('knSworn',{n:R.n}),'good');SFX.quest();save(true);return;}
+ if(R.kind==='T'){if(!y||S.tl[R.r])return knSay(u,'T✗');giveTitle(R.r);knSay(u,'T✓');SFX.legendary();save(true);return;}
+ if(!y)return knSay(u,'S✗');
+ const why=scrollBlock()?'smnHere':gTime-(P.hitT??-99)<SMNHIT?'smnHurt':smnWhere(R.x,R.y)?'smnThere':eaSide(R.x)!==eaSide(outPos().x)?'smnSea':null;
+ let to=why?null:{x:R.x+10,y:R.y+4};if(to&&hitBox(to.x,to.y,6))to=freeNear(to.x,to.y,6);
+ if(why||!to){SFX.deny();toast(t(why||'smnThere'),'warn');return knSay(u,'S✗');}
+ if(P.ride)dismount();vfx('spawn',P.x,P.y);P.x=to.x;P.y=to.y;P.inv=1;camSnap=true;netForce=true;vfx('spawn',P.x,P.y);SFX.quest();
+ toast(t('knWent',{n:R.n}),'good');knSay(u,'S✓');save(true);}
+const knOn=u=>!!(FRP[u]||KNT.send);
+function knOffer(u){const K=knS(),r=nbRank(),n=(FRL[u]||{}).n||'?';if(!r){SFX.deny();return toast(t('knNotNoble'),'warn');}
+ if(K.k.length>=knCap()){SFX.deny();return toast(t('knFull'),'warn');}if(K.k.some(x=>x.u===u)||K.lord&&K.lord.u===u)return;
+ KNO[u]=performance.now()+SMNT+5000;knSay(u,'K?',r);toast(t('knSent',{n}),'good');}
+function knTitle(u,r){if(!isKing()||!KNG[r])return;const n=(FRL[u]||{}).n||'?';if(Object.keys(knG()[r]).length>=KNG[r]){SFX.deny();return toast(t('knTFull',{t:knRn(r),m:KNG[r]}),'warn');}
+ KNO['T'+u]={until:performance.now()+SMNT+5000,r};knSay(u,'T?',r);toast(t('knTSent',{n,t:knRn(r)}),'good');}
+function knDrop(u){const K=knS();if(K.lord&&K.lord.u===u){toast(t('knQuit',{n:K.lord.n}));K.lord=null;K.rpay=0;}
+ else{const i=K.k.findIndex(x=>x.u===u);if(i<0)return;toast(t('knRel',{n:K.k[i].n}));K.k.splice(i,1);if(!K.k.length)K.pay=0;}knSay(u,'D');save(true);}
+function knSummon(list){const K=knS(),on=(list||K.k).filter(x=>knOn(x.u));if(!on.length){SFX.deny();toast(t('knNoneOn'),'warn');return false;}
+ if(scrollBlock()||smnWhere(P.x,P.y)){SFX.deny();toast(t('smnHere'),'warn');return false;}
+ if(wNow()<(K.scd||0)){SFX.deny();toast(t('knCd',{m:Math.ceil((K.scd-wNow())/60000)}),'warn');return false;}
+ K.scd=wNow()+KN.CD;const a=Math.round(P.x)+','+Math.round(P.y);on.forEach((x,i)=>i?setTimeout(()=>knSay(x.u,'S?',a),i*1300):knSay(x.u,'S?',a));
+ vfx('spawn',P.x,P.y);SFX.notice();toast(t('knCalled',{n:on.length}),'good');save(true);return true;}
+// the salary: every month the lord pays KN.PAY a knight (what the purse holds when it can't), and the knight gets it
+function knPay(){if(!S||!S.kn)return;const K=S.kn,now=wNow();
+ if(K.k.length&&K.pay){const m=Math.floor((now-K.pay)/KN.MON);if(m>0){K.pay+=m*KN.MON;const g=m*K.k.length*KN.PAY,p=Math.min(S.gold,g);S.gold-=p;
+  toast(t(p<g?'knPayShort':'knPaid',{g:fmtN(g),n:K.k.length}),p<g?'warn':'good');hudDirty=true;save(true);}}
+ if(K.lord&&K.rpay){const m=Math.floor((now-K.rpay)/KN.MON);if(m>0){K.rpay+=m*KN.MON;S.gold+=m*KN.PAY;toast(t('knSalary',{g:fmtN(m*KN.PAY),n:K.lord.n}),'good');hudDirty=true;save(true);}}}
+function knBoard(sub){if(!S)return;plOpen(false);const K=knS(),r=nbRank(),on=K.k.filter(x=>knOn(x.u)),fr=Object.keys(FRL).filter(knOn),back={l:t('knBack'),f:()=>knBoard()},o=[];
+ if(sub==='add'){for(const u of fr)if(!K.k.some(x=>x.u===u)&&!(K.lord&&K.lord.u===u))o.push({l:t('knOfferB',{n:FRL[u].n}),f:()=>knOffer(u)});
+  return dialog('knN',[t('knAddH',{n:K.k.length,m:knCap()}),o.length?t('knAddR'):t('knAddNone')],null,[...o,back]);}
+ if(sub==='rel'){for(const x of K.k)o.push({l:t('knRelB',{n:x.n}),f:()=>{knDrop(x.u);knBoard('rel');}});return dialog('knN',[t('knRelH')],null,[...o,back]);}
+ if(sub==='king'){const G=knG();for(const u of fr)for(const tr of ['earlK','dukeK'])if(!G[tr][u])o.push({l:t('knTB',{n:FRL[u].n,t:knRn(tr)}),f:()=>knTitle(u,tr)});
+  return dialog('knN',[t('knKingH',{e:Object.keys(G.earlK).length,E:KNG.earlK,d:Object.keys(G.dukeK).length,D:KNG.dukeK}),t('knKingR')],null,[...o,back]);}
+ const L=[r?t('knH',{t:knRn(r),n:K.k.length,m:knCap()}):t('knHNo')];if(K.k.length)L.push(K.k.map(x=>(knOn(x.u)?'● ':'○ ')+x.n).join(' · '));
+ if(K.lord)L.push(t('knLord',{n:K.lord.n}));L.push(t('knRule'));
+ if(on.length){const cd=Math.max(0,(K.scd||0)-wNow());o.push({l:cd?t('knSumCd',{m:Math.ceil(cd/60000)}):t('knSumAll',{n:on.length}),f:()=>knSummon()});if(on.length>1&&!cd)for(const x of on)o.push({l:t('knSumOne',{n:x.n}),f:()=>knSummon([x])});}
+ if(r&&K.k.length<knCap())o.push({l:t('knAddB'),f:()=>knBoard('add')});if(K.k.length)o.push({l:t('knRelM'),f:()=>knBoard('rel')});
+ if(isKing())o.push({l:t('knKingB'),f:()=>knBoard('king')});if(K.lord)o.push({l:t('knQuitB',{n:K.lord.n}),f:()=>knDrop(K.lord.u)});
+ dialog('knN',L,null,[...o,{l:t('oClose')}]);}
+Object.assign(STR.ar,{knN:'الفرسان',knBoard:'⚜ الفرسان',knKingT:'ملك المملكة الخالدة',tl_earlK:'إيرل المملكة الخالدة',tl_dukeK:'دوق المملكة الخالدة',knYesB:'✓ موافق (Y)',
+ knH:'لقبك: {t}. فرسانك {n} من {m}.',knHNo:'إنت مش نبيل. البارون والفايكونت من الإيرل آدن بالمساهمة، والإيرل والدوق بيعيّنهم الملك (ماستر الجيلد اللي ماسكة قلعة ريدان).',
+ knLord:'إنت فارس عند {n}.',knRule:'النبيل بس يعيّن فرسان: بارون 1، فايكونت 3، إيرل 5، دوق 8، ملك 12. الفارس لازم يكون صاحبك ويوافق، وبتدفعله 500 دهب كل شهر. "استدعاء الفرسان" بيجيبهم جنبك من أي مكان لو وافقوا، ومبيشتغلش في الأماكن اللي التليبورت مقفول فيها.',
+ knSumAll:'⚜ استدعاء الفرسان ({n} أونلاين)',knSumOne:'استدعي {n} بس',knSumCd:'استدعاء الفرسان بعد {m} دقيقة',knAddB:'عيّن فارس…',knRelM:'اعفي فارس…',knKingB:'عيّن نبلاء (الملك)…',knQuitB:'سيب خدمة {n}',knBack:'رجوع',
+ knAddH:'فرسانك {n} من {m}. اختار صاحب أونلاين:',knAddR:'هيوصله عرض ويوافق أو يرفض.',knAddNone:'مفيش أصحاب أونلاين ينفع تعيّنهم.',knOfferB:'اعرض على {n} يبقى فارسك',
+ knRelH:'مين تعفيه من الفرسان؟',knRelB:'اعفي {n}',knKingH:'الإيرلات {e} من {E} · الدوقات {d} من {D}',knKingR:'الإيرل لازم يكون فايكونت، والدوق لازم يكون إيرل. اللقب بيفضل معاه حتى لو القلعة راحت.',knTB:'اعمل {n} {t}',
+ knAskT:'{n} ({t}) عايز يعيّنك فارس عنده. هياخدك تحت حمايته ويدفعلك 500 دهب كل شهر. توافق؟',knSumT:'سيدك {n} بيستدعيك لـ{z}. تروح؟',knTAskT:'الملك {n} عايز يدّيك لقب {t}. توافق؟',
+ knSent:'بعت لـ{n} عرض الفروسية.',knYes:'{n} وافق وبقى فارسك.',knNo:'{n} رفض يبقى فارسك.',knFull:'عدد فرسانك كامل للقبك.',knSworn:'بقيت فارس عند {n}.',knFreed:'{n} أعفاك من خدمته.',knLeft:'{n} ساب خدمتك.',
+ knQuit:'سبت خدمة {n}.',knRel:'أعفيت {n}.',knNotNoble:'لازم تبقى نبيل الأول.',knNoneOn:'مفيش ولا فارس من فرسانك أونلاين.',knCd:'استدعاء الفرسان بعد {m} دقيقة.',knCalled:'ناديت {n} من فرسانك.',knWent:'رحت لسيدك {n}.',
+ knTSent:'بعت لـ{n} لقب {t}.',knTYes:'{n} بقى {t}.',knTNo:'{n} مخدش لقب {t} (رفض أو لسه مش مستحق).',knTFull:'وصلت للحد: {m} بلقب {t}.',
+ knPaid:'دفعت مرتب الفرسان: {g} دهب لـ{n} فارس.',knPayShort:'مكانش معاك كفاية لمرتب الفرسان ({g} دهب)، ودفعت اللي معاك.',knSalary:'وصلك مرتبك من {n}: {g} دهب.'});
+Object.assign(STR.en,{knN:'Knights',knBoard:'⚜ Knights',knKingT:'King of the Eternal Kingdom',tl_earlK:'Earl of the Eternal Kingdom',tl_dukeK:'Duke of the Eternal Kingdom',knYesB:'✓ Accept (Y)',
+ knH:'Your title: {t}. Knights {n} of {m}.',knHNo:'You are not a noble. Earl Aden grants baron and viscount for contribution; the king (the master of the guild holding Reidan Castle) names earls and dukes.',
+ knLord:'You are a knight of {n}.',knRule:'Only a noble appoints knights: baron 1, viscount 3, earl 5, duke 8, king 12. A knight must be your friend and accept, and you pay each 500 gold a month. Summon Knights brings them to your side from anywhere if they accept; it fails where teleporting is barred.',
+ knSumAll:'⚜ Summon Knights ({n} online)',knSumOne:'Summon only {n}',knSumCd:'Summon Knights in {m} min',knAddB:'Appoint a knight…',knRelM:'Release a knight…',knKingB:'Name nobles (king)…',knQuitB:'Leave the service of {n}',knBack:'Back',
+ knAddH:'Knights {n} of {m}. Pick a friend who is online:',knAddR:'They get an offer and accept or refuse.',knAddNone:'No friend online you can appoint.',knOfferB:'Offer {n} knighthood',
+ knRelH:'Release which knight?',knRelB:'Release {n}',knKingH:'Earls {e} of {E} · Dukes {d} of {D}',knKingR:'An earl must be a viscount and a duke an earl. The title stays even if the castle falls.',knTB:'Make {n} {t}',
+ knAskT:'{n} ({t}) wants to appoint you as a knight: protection, and 500 gold a month. Accept?',knSumT:'Your lord {n} summons you to {z}. Go?',knTAskT:'King {n} offers you the title of {t}. Accept?',
+ knSent:'You offered {n} knighthood.',knYes:'{n} accepted and is your knight.',knNo:'{n} refused to be your knight.',knFull:'Your title has no room for more knights.',knSworn:'You are now a knight of {n}.',knFreed:'{n} released you from service.',knLeft:'{n} left your service.',
+ knQuit:'You left the service of {n}.',knRel:'You released {n}.',knNotNoble:'You must be a noble first.',knNoneOn:'None of your knights is online.',knCd:'Summon Knights in {m} min.',knCalled:'You called {n} of your knights.',knWent:'You went to your lord {n}.',
+ knTSent:'You offered {n} the title of {t}.',knTYes:'{n} is now {t}.',knTNo:'{n} did not take the title of {t} (refused or not yet eligible).',knTFull:'At the limit: {m} with the title {t}.',
+ knPaid:"You paid the knights' salary: {g} gold for {n} knights.",knPayShort:"You didn't have the knights' salary ({g} gold) and paid what you had.",knSalary:'Your salary from {n} arrived: {g} gold.'});
+window.__GKN={line:L=>knLine(L),ans:y=>smnAns(y),offer:u=>knOffer(u),title:(u,r)=>knTitle(u,r),drop:u=>knDrop(u),summon:l=>knSummon(l),pay:()=>knPay(),board:s=>knBoard(s),rank:()=>nbRank(),cap:()=>knCap(),king:()=>isKing(),
+ S:()=>knS(),G:()=>knG(),get R(){return SMN},T:KNT,N:KN,fr:(u,n)=>{FRL[u]={n};}}; // tests
 window.__GRDY={gate:()=>rdyGate(),ask:w=>rdyAsk(w),get R(){return RDY},ok:()=>performance.now()<RDYOK}; // tests
 function partyUI(live){if(!PARTY)return;const inv=live?PARTY.pendingInvite():null,mem=live?PARTY.members():[];
  const hpOf=m=>m.self?Math.round(20*Math.max(0,P.hp)/maxHP())*5:m.hp;
@@ -17543,7 +17644,7 @@ function isBlocked(uid){return BLK.has(uid);}
    corner (it used to sit under the right column, where the HUD covered it). Tabs pick what you read and where Enter sends;
    Tab in the chat line switches. A tab you aren't looking at gets a dot when a line arrives. */
 let CHCH='all',chatWasP=false; // joining a party switches Enter to the party chat, as before
-function chatStart(){CHAT=Satisfy.chat.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,world:NETTR&&NETTR.sayWorld?NETTR:null,guild:NETTR&&NETTR.kind==='firebase'?GCH:null,whisper:NETTR&&NETTR.kind==='firebase'?WCH:null,filter:()=>CHATF,handle:()=>netId||(S&&S.look.n)||''});CHAT.on(()=>{chatSig='';});CHAT.on(rdyLine);CHAT.on(smnLine);}
+function chatStart(){CHAT=Satisfy.chat.create({presence:NET,party:PARTY,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,world:NETTR&&NETTR.sayWorld?NETTR:null,guild:NETTR&&NETTR.kind==='firebase'?GCH:null,whisper:NETTR&&NETTR.kind==='firebase'?WCH:null,filter:()=>CHATF,handle:()=>netId||(S&&S.look.n)||''});CHAT.on(()=>{chatSig='';});CHAT.on(rdyLine);CHAT.on(smnLine);CHAT.on(knLine);}
 function chatInParty(){return !!(PARTY&&PARTY.members().length>=2);}
 function chatInGuild(){return !!(GCH&&GCH.inGuild());}
 function chatCh(c){CHCH=c==='party'&&chatInParty()?'party':c==='guild'&&chatInGuild()?'guild':'all';$('chatIn').placeholder=t(CHCH==='party'?'chatPh':CHCH==='guild'?'chatPhGuild':'chatPhAll');chatSig='';}
@@ -17568,10 +17669,10 @@ $('chatIn').addEventListener('blur',()=>{if(!$('chatIn').hidden&&!$('chatIn').va
 $('chatTabs').addEventListener('pointerdown',e=>e.preventDefault());$('chatTabs').addEventListener('mousedown',e=>e.preventDefault());
 $('chatTabs').addEventListener('click',e=>{const b=e.target.closest('button[data-ch]');if(!b)return;chatCh(b.dataset.ch);if($('chatIn').hidden)chatOpen();else $('chatIn').focus();});
 function chatUI(live){const W=$('chatW'),on=!!(live&&CHAT),bar=$('chatBar');if(!on){bar.hidden=true;if(!W.hidden){W.hidden=true;chatClose();}return;}
- if(CHATMIN&&$('chatIn').hidden){W.hidden=true;const n=CHAT.log().filter(l=>!l.self&&l.t>chatMinT).length;bar.hidden=false;const s2='💬 '+t('chatAll')+(n?' ('+n+')':'');if(bar.textContent!==s2){bar.textContent=s2;bar.classList.toggle('new',n>0);}return;}bar.hidden=true;
+ if(CHATMIN&&$('chatIn').hidden){W.hidden=true;const n=CHAT.log().filter(l=>!l.self&&l.t>chatMinT&&!knHid(l)).length;bar.hidden=false;const s2='💬 '+t('chatAll')+(n?' ('+n+')':'');if(bar.textContent!==s2){bar.textContent=s2;bar.classList.toggle('new',n>0);}return;}bar.hidden=true;
  const inP=chatInParty(),inG=chatInGuild();if(inP&&!chatWasP)chatCh('party');else if(!inP&&CHCH==='party')chatCh('all');else if(!inG&&CHCH==='guild')chatCh('all');chatWasP=inP;
  // one list for both (owner): everyone's lines and the party's, party ones in green; Tab picks where Enter sends
- const all=CHAT.log(),now=performance.now(),lines=all.slice(-7),nw=false;
+ const all=CHAT.log().filter(l=>!knHid(l)),now=performance.now(),lines=all.slice(-7),nw=false;
  const sig=lang+'|'+CHCH+'|'+inP+'|'+inG+'|'+lines.map(l=>l.n+':'+(now-l.t>20000?1:0)).join(',')+'|'+$('chatIn').hidden+(LNKMISS?'|'+(now/2000|0):'');   /* a linked piece whose details haven't come yet: look again every 2 s */
  // nothing to read and the line closed: no box at all (owner: don't crowd the screen); it comes back with a new line or Enter
  const fresh=all.some(l=>now-l.t<30000);W.hidden=!fresh&&$('chatIn').hidden;

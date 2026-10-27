@@ -99,6 +99,8 @@
     'mrt',
     // kingdom contribution from royal quests and the Defense War's golems (major #3)
     'kc',
+    // knights (2026-10-27): your knights, your lord, the salary clocks, Summon Knights' cooldown; the earls and dukes a king named
+    'kn', 'kng',
     // the Behen Archipelago (major #4): island, save point, best island, Challenger Points, masteries, statue worship
     'bh',
     // the Tower of Wisdom (major #5): map, Tower's Mission, basic tests, members' tests, Dragon Pills, Matchless Heart, 10th Seat

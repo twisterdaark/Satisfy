@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27knights', ver: '3.66', d: '2026-10-27', hide: [4],
+      ar: ["نظام الفرسان من الرواية: النبيل بس هو اللي يعيّن فرسان. البارون 1، الفايكونت 3 (زي الرواية)، الإيرل 5، الدوق 8، الملك 12.",
+        "الألقاب: البارون والفايكونت من الإيرل آدن بالمساهمة زي الأول. الإيرل والدوق بيعيّنهم الملك، وهو ماستر الجيلد اللي ماسكة قلعة ريدان (الإيرل لازم يكون فايكونت، والدوق لازم يكون إيرل).",
+        "زرار «⚜ الفرسان» في قايمة اللاعيبة (O): اعرض الفروسية على صاحب أونلاين، ولو وافق يبقى فارسك. بتدفع لكل فارس 500 دهب في الشهر، والفارس بياخدهم.",
+        "«استدعاء الفرسان»: كل فارس يوافق بيظهر جنبك من أي مكان. مبيشتغلش في الأماكن اللي التليبورت مقفول فيها، وليه انتظار 10 دقايق.",
+        "اختبار جديد للفرسان."],
+      en: ["Knights from the novel: only a noble appoints knights. Baron 1, viscount 3 (as in the novel), earl 5, duke 8, king 12.",
+        "Titles: Earl Aden still grants baron and viscount for contribution. Earls and dukes are named by the king, the master of the guild holding Reidan Castle (an earl must be a viscount, a duke an earl).",
+        "The «⚜ Knights» button in the player list (O): offer an online friend knighthood; if they accept they are your knight. You pay each knight 500 gold a month and they receive it.",
+        "Summon Knights: every knight who accepts appears beside you from anywhere. It fails where teleporting is barred and has a 10 minute cooldown.",
+        "A new test for knights."] },
     { v: '2026-10-27nosmn', ver: '3.65', d: '2026-10-27',
       ar: ["زرار الاستدعاء (⇲) اتشال من شباك البارتي: مفيش لاعب في البارتي يقدر يستدعي التاني. الاستدعاء هيبقى لاستدعاء الفرسان بس.",
         "اختبار متعدّل لده."],
