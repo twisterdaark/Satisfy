@@ -5,7 +5,7 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.62) |
+| | At the count | Now (v3.63) |
 |---|---|---|
 | Done | 233 | 292 |
 | Partly there (something left) | 92 | 38 |
@@ -44,6 +44,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.60 (Claude-B): U293 (dancing together on Patrian's stage).
 - v3.61 (Claude-B): U192 (Regas's parry and dodge drill).
 - v3.62 (Claude-B): U180 bind rule (stolen wyvern eggs bound to the thief).
+- v3.63 (Claude-B): owner request: chat links for bag items, stacks and quests (not a plan row).
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -234,7 +235,7 @@ Checked 2026-10-26 against `/home/claude/satisfy-aud` (main @ 8a2e4f1e, v3.15). 
 | U209 | Lore spoiler protection | done | Lore pages show ??? until read (U298, `regression/codex`). A monster's page opens at its first kill, and the materials index keeps unmet monsters as ??? (`regression/mbook`, v3.12). Story chapter pages open at their first giver (`regression/story`) |
 | U268 | Weapon rarity extension | part | Five ratings (`MULT`, normal to legendary); weapon passives by rating (`wpRoll`: epic 1, unique 2, legendary 3, plus a hidden one by appraisal; `regression/wpass`, `appraise`); the reforge (U286). Missing: rolled on the client (server D3); no record of where a piece came from (only Creations carry `by`); no Myth rating v3.40: every piece remembers where it came from (`src`: dropped by, a boss's chest, bought from, a quest's reward, raid loot; forged and sewn pieces carry their maker), shown on its tip and kept through trades in its own shape only (`regression/plan8`). Left: the Myth rating (the owner's), and a server roll (D3). |
 | U270 | Rings | done | Ten rings: the accessory slot and 9 ring slots opened by level (half the level for a legend), each ring worn once (`regression/rings10`). Named rings carry skills (v0.32). Stacking is bounded by the slots |
-| U271 | Amulets | part | Necklace and bracelet slots made by Elizabeth, with two-piece sets (`regression/jewelry`); the elemental necklaces (v1.30); stats count only while worn. Missing: binding rules (nothing in the game binds an item: searched bound/untradable) |
+| U271 | Amulets | part | Necklace and bracelet slots made by Elizabeth, with two-piece sets (`regression/jewelry`); the elemental necklaces (v1.30); stats count only while worn. Missing: binding rules (nothing in the game binds an item: searched bound/untradable) 2026-10-27: the owner chose to bind only stolen wyvern eggs (U180), so amulets and bracelets stay tradable; the binding row is the owner's call. |
 | U272 | Weapon skins | done (plan-gear) | The stylist puts the look of another weapon of the same kind you own on the one you hold (8,000 gold), and back; the stats stay. Everyone sees it: the presence field sends the look id (`sknMenu`, `wKey`, `regression/plangear`) |
 | U273 | Armor dyes | done (plan-gear) | Ten armour dyes at the stylist (red to white), each bought once (3,000) and then free; they recolour the worn helmet, armour, gloves and boots keeping their light and dark, and the others see it (an `ad:` presence tag) (`dyeMenu`, `dyeHex`, `regression/plangear`) |
 | U274 | Named creation | done (v3.21) | The Creation's name field (`creNm`, maxlength 24, `Satisfy.chat.clean`) is shown escaped (`esc` in `itemTip`), so no HTML gets in (`regression/creation`). Missing: the insult filter (`Satisfy.chat.badName`) is not applied to item names, and there is no uniqueness check |

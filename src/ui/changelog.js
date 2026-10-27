@@ -7,6 +7,16 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27chatlink', ver: '3.63', d: '2026-10-27',
+      ar: ["بقيت تقدر تبعت أيتم أو كويست في الشات زي ليج أوف ليجيندز: في الشنطة دوس 💬 وبعدين أي حاجة، أو 💬 جنب المهمة في كتاب المهام.",
+        "اللينك بيظهر في الشات باسم الحاجة ولون ندرتها، واللي يقف عليه (أو يدوس مطوّل على الموبايل) بيشوف تفاصيلها: الستاتس والباسيف والجواهر واللي صنعها.",
+        "لو اللينك اتبعت من أكتر من دقيقة وانت مكنتش شايفه، أو صاحبه مش أونلاين، بيورّي الاسم والندرة والستاتس الأساسية بس.",
+        "اختبار جديد لده."],
+      en: ["You can now link an item or a quest in the chat, like League of Legends: in the bag press 💬 and then anything, or 💬 beside a quest in the Quest Book.",
+        "The link shows in the chat by its name and rarity colour; hovering it (a long press on a phone) shows its details: stats, passives, gems and its maker.",
+        "If the link was sent more than a minute before you saw it, or its owner is offline, it shows only its name, rarity and base stats.",
+        "A new test for this."],
+      hide: [3] },
     { v: '2026-10-26u180', ver: '3.62', d: '2026-10-26',
       ar: ["بيض الوايفرن المسروق من العش بقى مربوط باللي سرقه: يتباع للتجار ويدخل في الصناعة، بس مايتحطش في المزاد ولا خزنة النقابة.",
         "البيض اللي بيقع من ملكة الوايفرن يفضل حر زي ما هو.",
