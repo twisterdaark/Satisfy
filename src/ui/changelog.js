@@ -7,6 +7,18 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-28ego', ver: '3.73', d: '2026-10-28',
+      ar: ["الأسلحة الواعية (الإيجو): تمن أرواح ممكن تصحى في أي سلاح، والسلاح اللي فيه روح دايمًا فريد أو أسطوري. روح الجشع، الدرع، الحاصد، ناب الصقيع، الساحر الأعظم الهامس، ملك التنانين، المتربّص الشبح، والملك الحديدي. كل روح ليها زيادات وباسيف، والحاصد وملك التنانين ليهم سكيل على البار.",
+        "أي سلاح بيقع (دروب نادر، دروب باسم، صندوق البوس، قرعة الفريق) عنده فرصة 0.5% يطلع سلاح واعي. سلاح واعي واحد بس في إيدك في المرة، والروح بتشتغل بس وهو في إيدك.",
+        "خليفة باجما يقدر يربط روح في سلاح من أسلحته عند السندان، والتمن 50 لفل (ونقط الستاتس اللي معاهم).",
+        "إصلاح: صندوق البوس كان ممكن يطلّع حاجة بتقييم مش موجود وهجومها مش رقم.",
+        "اختبار جديد لده."],
+      en: ["Sentient weapons (egos): eight spirits that can wake in any weapon, and a weapon with a spirit is always Unique or Legendary. The Spirit of Greed, the Aegis, the Reaper, Frostfang, the Whispering Archmage, the Dragon King, the Phantom Stalker and the Iron Monarch. Each has its boosts and passive; the Reaper and the Dragon King add a skill to the bar.",
+        "Any weapon that drops (a rare drop, a named drop, a boss chest, a party roll) has a 0.5% chance to be a sentient one. Only one sentient weapon is in your hand at a time, and a spirit works only while it is.",
+        "Pagma's Successor can bind a spirit into one of their weapons at the anvil, for 50 levels (and the stat points that came with them).",
+        "Fix: a boss chest could give an item of a rating that does not exist, with an attack that was not a number.",
+        "A new test for this."],
+      hide: [4] },
     { v: '2026-10-28awaken', ver: '3.72', d: '2026-10-28',
       ar: ["الصحوات: في لفل 100 و200 و300 و400 وأقصى لفل (999)، جسمك بيصحى صحوة جديدة. كل صحوة زيادة صغيرة ودايمة، وبتفضل معاك حتى لو خسرت لفل.",
         "الأولى: +5% للخصائص، +5% سرعة مشي، وحيوية القتال (1 صحة و1 مانا كل ثانية في القتال). التانية: +5% هجوم، -5% كولداون، وكسر الحدود (8% تتجاهل الشلل). التالتة: +5% للستاتس، -10% مانا السكيلات، والثبات الأعلى (الجارد بيخسر 10% أقل). الرابعة: +8% للستاتس والهالة الطاغية (الأعداء حواليك بيخسروا 5% دفاع). المطلقة: +5% ضرر حقيقي على كل ضربة، وسكيل «عالم التخطي» (+25% سرعة و+15% كريتيكال 4 ثواني، كل 3 دقايق).",
