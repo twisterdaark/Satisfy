@@ -1,5 +1,5 @@
 'use strict';
-// v3.65 (plan U237) the guild research tree online, over the fake Firebase with the rules' checks. A founds a guild and B
+// v3.66 (plan U237) the guild research tree online, over the fake Firebase with the rules' checks. A founds a guild and B
 // joins; A fills the treasury and researches Training Manuals, then Endurance Drills after it (each taken from the
 // treasury); B's game applies both (experience, max health) and the research board shows them done; B, a member, can't
 // research, nor can a node be bought out of its branch's order or twice.
