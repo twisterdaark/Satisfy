@@ -13396,6 +13396,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 const awkTip=()=>{const T=awkTier();return Array.from({length:T},(_,i)=>`<b>${esc(t('awkN'+(i+1)))}</b>: ${esc(t('awkD'+(i+1)))}`).join('<br>');};
 // World of Transcendence, the absolute awakening's skill
 Object.assign(SKD,{awkworld:{cls:'awk',awk:5,lv:1,mp:0,cd:180,col:'#fff2b0'}});SKK.awkworld='buff';
+Object.assign(SKICO,{awkworld:(p,c)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-7.5);if(d<7.5&&d>5.6)p(x,y,1,1,'#ffd24a');if(d<3.2)p(x,y,1,1,'#fff2b0');}p(7,0,2,4,'#fff');p(7,12,2,4,'#fff');p(0,7,4,2,'#fff');p(12,7,4,2,'#fff');p(7,7,2,2,'#fff');}});   // a sun breaking open
 Object.assign(SKF,{awkworld:()=>{P.awkWU=gTime+4;fx.push({ring:true,x:P.x,y:P.y-6,t:.5});SFX.legendary();toast(t('awkWOn'),'good');}});
 window.__GAWK={tier:()=>awkTier(),lvT:L=>awkLvT(L),stM:()=>awkStM(),spd:()=>awkSpd(),atkM:()=>awkAtkM(),cdM:()=>awkCdM(),mpM:()=>awkMpM(),gdM:()=>awkGdM(),cr:()=>awkCr(),atk:(m,o)=>awkAtk(m,o||{}),tick:dt=>awkTick(dt),pub:()=>awkPub(),row:()=>awkEqRow(),tip:()=>awkTip(),fxIn:(r,st)=>{fxIn(r,st);return st;},draw:(x,y,T,h)=>awkDraw(x,y,T,h),LVMAX}; // tests
 Object.assign(STR.ar,{"awkL":"الصحوة",
