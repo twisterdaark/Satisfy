@@ -94,8 +94,31 @@ test('Combat Vitality, the aura online, the switch in the equipment window, the 
     assert.equal(r.pub, 'ak:3' + (200).toString(36));
     assert.equal(r.rem.ak, 3); assert.equal(r.rem.akh, 200);
     assert.equal(r.bad.ak, 0, 'a bad tag is ignored');
-    assert.ok(r.row); assert.equal(r.hid, 1); assert.equal(r.pubHid, '', 'a hidden aura is not published');
+    assert.ok(r.row); assert.equal(r.hid, 1); assert.equal(r.pubHid, r.pub, 'only what you see: others still see yours');
     assert.ok(/hidden/.test(r.label)); assert.ok(r.shown);
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});
+
+test('kept the moment it is reached, even mid-fight; announced later; a hidden level hides the aura from others', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, LOOK);
+    const r = await g.eval(() => {
+      const G = window.__G, S = G.S, P = G.P, A = window.__GAWK, o = {};
+      delete window.__awkPlain;
+      S.lv = 200; P.hitT = 1e9; A.tick(.5); o.mid = [S.awk, S.awkA | 0, typeof S.awc, !!G.DL];
+      S.lv = 150; o.kept = A.tier();
+      P.hitT = -99; P.awkCt = -99; A.tick(.5); o.ann = [S.awkA, !!G.DL && /Second Awakening/.test(G.DL.lines.join(' '))];
+      for (let i = 0; i < 20 && G.DL; i++)G.advance();
+      o.pub = A.pub(); window.__G.S.lv = 999; o.xp = window.__GXP.gain(1e6, true);
+      return o;
+    });
+    assert.deepEqual(r.mid, [2, 0, 'number', false], 'recorded at once, no window mid-fight');
+    assert.equal(r.kept, 2, 'a level lost in that fight keeps it');
+    assert.deepEqual(r.ann, [2, true], 'announced once out of combat');
+    assert.ok(/^ak:2/.test(r.pub));
+    assert.equal(r.xp, 0, 'no experience at the max level');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
