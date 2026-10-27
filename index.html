@@ -7005,7 +7005,7 @@ function freshState(){
 // Advancements (SAT-CLASS-002): every 100 levels the body breaks through a limit. Each one adds +10 to every stat and
 // multiplies all stats by a further 5% (first at 100, second at 200, ...).
 const advN=()=>Math.min(9,Math.floor((S&&S.lv||1)/100));
-const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Math.round((S.st[k]+S.bonus+(S.undfN||0)+a*10+(tlOn('sonlaw')?20:0)+ttSt(k)+(k==='agi'?gearSum('agi'):0))*(1+a*.05)*bhStat(k)*(k==='agi'?1+gearSum('agp'):1)*(tlOn('paint')?1.03:1)*ttStM(k)*(candyOn()?1.3:1)*(P&&P.gjbU>gTime?1.2:1)*lkCodeM()*((k==='sta'||k==='dex')&&patOn()?3:1)*(eaPen(k)?.9:1)*(UNIM&&UNIM.m||1)*rzStM(k))+setBon(k);};
+const stat=k=>{if(TOW&&TOW.st300&&k!=='dex')return 300;const a=advN();return Math.round((S.st[k]+S.bonus+(S.undfN||0)+a*10+(tlOn('sonlaw')?20:0)+ttSt(k)+(k==='agi'?gearSum('agi'):0))*(1+a*.05)*bhStat(k)*(k==='agi'?1+gearSum('agp'):1)*(tlOn('paint')?1.03:1)*ttStM(k)*(candyOn()?1.3:1)*(P&&P.gjbU>gTime?1.2:1)*lkCodeM()*((k==='sta'||k==='dex')&&patOn()?3:1)*(eaPen(k)?.9:1)*(UNIM&&UNIM.m||1)*rzStM(k)*awkStM())+setBon(k);};
 // Piaro's lesson (manhwa): keep Strength and Stamina at 1:1. Once learned, while the two stay within 10% of each other the
 // body is balanced: +8% damage and max HP, faster stamina recovery, cheaper dodges, and Second Wind when health runs low.
 // the golden ratio (novel ch 315, 1423): Strength and Agility kept 1:1. A hidden stat: always on, never shown in the status window
@@ -7022,7 +7022,7 @@ const mpRef=()=>(Math.min(stat('int'),10+4*S.lv)*3+mpGear())*(1+.1*Math.min(2,(S
 function maxMP(){return Math.round((stat('int')*mpPer()+mpGear())*(1+.1*Math.min(2,(S.wis&&S.wis.pill)||0))*(tlOn('echo')?1.08:1)*rzMpM());}
 const weapKind=()=>(WSH[weapon().id]||{}).k||'sword';
 const mainStat=()=>({bow:'dex',staff:'int',dagger:'dex'})[weapKind()]||'str';
-function dmgMult(){return (1+cpStat('atk'))*(1+ttB('dmg'))*(1+achB('dmg'))*(1+stat(mainStat())*.008)*(1+mastLv(weapKind())*.01)*(balanced()?1.08:1)*(tlOn('smith')?1.1:1)*(isLeg()?1.2:1)*(P.buf&&P.buf.k==='might'?1.1:1)*(P.rage>0?1.1:1)*(1+psAt())*(tlOn('forest')?1.15:1)*(tlOn('hunter')?1.1:1)*(tlOn('champ')?1.05:1)*(1+petB('noe'))*(tlOn('dslayer')?1.08:1)*(tlOn('four')?1.05:1)*(tlOn('slayer')?1.03:1)*(tlOn('savior')?1.03:1)*(1+gearSum('dm'))*(S.bh&&S.bh.wm?1.02:1)*(tlOn('bibanF')&&weapKind()==='sword'?1.05:1)*c2Dmg()*(P.trcU>gTime?2:1)*(P.bencU>gTime?1.5:1)*(P.basU>gTime?1.5:1)*(P.ltU>gTime?1.5:1)*lfNat()*(P.lkRU>gTime?1.3:1)*(lkSee()?1+.2*pasM('lkinsight'):1)*(P.kyGU>gTime?1.6:1)*(S.cls==='lknight'&&S.lv>=400?1.2:1)*(S.cls==='tzudan'&&pasOn('tzweap')?((WSH[weapon().id]||{}).w?1.4:1.2):1);}
+function dmgMult(){return awkAtkM()*(1+cpStat('atk'))*(1+ttB('dmg'))*(1+achB('dmg'))*(1+stat(mainStat())*.008)*(1+mastLv(weapKind())*.01)*(balanced()?1.08:1)*(tlOn('smith')?1.1:1)*(isLeg()?1.2:1)*(P.buf&&P.buf.k==='might'?1.1:1)*(P.rage>0?1.1:1)*(1+psAt())*(tlOn('forest')?1.15:1)*(tlOn('hunter')?1.1:1)*(tlOn('champ')?1.05:1)*(1+petB('noe'))*(tlOn('dslayer')?1.08:1)*(tlOn('four')?1.05:1)*(tlOn('slayer')?1.03:1)*(tlOn('savior')?1.03:1)*(1+gearSum('dm'))*(S.bh&&S.bh.wm?1.02:1)*(tlOn('bibanF')&&weapKind()==='sword'?1.05:1)*c2Dmg()*(P.trcU>gTime?2:1)*(P.bencU>gTime?1.5:1)*(P.basU>gTime?1.5:1)*(P.ltU>gTime?1.5:1)*lfNat()*(P.lkRU>gTime?1.3:1)*(lkSee()?1+.2*pasM('lkinsight'):1)*(P.kyGU>gTime?1.6:1)*(S.cls==='lknight'&&S.lv>=400?1.2:1)*(S.cls==='tzudan'&&pasOn('tzweap')?((WSH[weapon().id]||{}).w?1.4:1.2):1);}
 // weapon mastery (SAT-CLASS-003): every hit trains the kind of weapon in your hand; each mastery level is +1% damage and
 // slightly faster attacks with that kind (level 1 at 15 hits, 10 at 1500, capped at 50)
 const mastLv=k=>Math.min(50,Math.floor(Math.sqrt(((S.mast||{})[k]||0)/15)));
@@ -7382,7 +7382,7 @@ function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(m.type==='guardian'
  if(!o.pure&&m.type==='kraugel'&&!m.st&&!(P.bdetU>gTime)&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
  if(o.skill&&!o.spr&&P.sprW>gTime)bzSpray(m,mul); // Braham's Magic Spray
  if(o.skill&&!o.chain&&!o.dot&&weapKind()==='sword')swEGain(.003);   // (v3.14) a skill's blow fills a little Sword Energy
- let dmg=((o.aura?auAtkV():atkV())+(o.addAtk||0))*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.nolv||o.skill&&S.cls==='lantier'?Math.max(1,lvF(m.lv)):o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m)*cpPen(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(poemOn()?1.4:1)*(dsRegIn()?1.2:1)*(o.skill&&S.cls==='lknight'&&pasOn('lkse')&&weapKind()==='sword'?1+.15*pasM('lkse'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*wyAtk(m,o)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*gpAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*rzAtk(m,o)*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<Math.min(ssLow()?.9:.5*rzCapM(),(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)+psCr()+(aEyes()?.08:0)+rzCr()));if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&m.expU>gTime){crit=true;dmg*=1.5;m.expU=0;}if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&P.morN>0){P.morN=0;crit=true;dmg*=1.5;num(P.x,P.y-30,t('oMorHit'),'#ffd24a',false);}if(!crit&&!o.pure&&!o.raw&&rzSure(m))crit=true;if(crit)dmg*=1.8*ttCdm()*(1+psCd()+(aEyes()?.2:0)+rzV('cdmg'));dmg*=rlAtk(m);if(!o.pure)dmg*=elDmg(m,o);let burn=false;const w=weapon();
+ let dmg=((o.aura?auAtkV():atkV())+(o.addAtk||0))*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.nolv||o.skill&&S.cls==='lantier'?Math.max(1,lvF(m.lv)):o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m)*cpPen(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(poemOn()?1.4:1)*(dsRegIn()?1.2:1)*(o.skill&&S.cls==='lknight'&&pasOn('lkse')&&weapKind()==='sword'?1+.15*pasM('lkse'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*wyAtk(m,o)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*gpAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*rzAtk(m,o)*awkAtk(m,o)*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<Math.min(ssLow()?.9:.5*rzCapM(),(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)+psCr()+(aEyes()?.08:0)+rzCr()+awkCr()));if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&m.expU>gTime){crit=true;dmg*=1.5;m.expU=0;}if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&P.morN>0){P.morN=0;crit=true;dmg*=1.5;num(P.x,P.y-30,t('oMorHit'),'#ffd24a',false);}if(!crit&&!o.pure&&!o.raw&&rzSure(m))crit=true;if(crit)dmg*=1.8*ttCdm()*(1+psCd()+(aEyes()?.2:0)+rzV('cdmg'));dmg*=rlAtk(m);if(!o.pure)dmg*=elDmg(m,o);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -7499,7 +7499,7 @@ function hurtPlayer0(d,ml,src){if(src&&src.type==='guardian'&&gdRing(P.x,P.y))re
   const GK=S.cls==='gknight';if(P.fort>0||(sx*P.gx+sy*P.gy)/sl>-.15){const ang=Math.atan2(sy,sx),bx=P.x+sx/sl*10,by=P.y-8+sy/sl*10;vfx('block',bx,by,{angle:ang});
    if(!src.hv&&P.gT<(GK?.18:.12)*clamp(1-((ml||S.lv)-S.lv)*.015,.6,1)){vfx('crit',bx,by);hcParry();if(rgdOn(src))rgdCount('pr');qEvent('block','guard');numPK(-24,'parry','#9fe3ff',false);SFX.crit();P.inv=.35;P.gd=Math.min(100,P.gd+15);
     const mb=src.type&&MT[src.type];if(mb&&!src.dead){src.st=null;src.tele=0;src.combo=0;src.stun=mb.boss?.5:1.3;src.cd=Math.max(src.cd||0,1);vfx('stun',src.x,src.y-(mb.oy||16),{life:src.stun});}return 0;}
-   P.gd-=P.fort>0?0:(18+70*d/maxHP())*(GK?.6:1)*rzGdM();qEvent('block','guard');
+   P.gd-=P.fort>0?0:(18+70*d/maxHP())*(GK?.6:1)*rzGdM()*awkGdM();qEvent('block','guard');
    if(P.gd<=0){P.gd=0;P.guard=0;P.gdT=1.6;d=Math.round(d*.6);P.stun=1;vfx('stun',P.x,P.y-24,{life:1});toast(t('guardBreak'),'warn');}
    else{P.gdT=.8;d=Math.max(1,Math.round(d*(P.fort>0?.1:GK?.15:.25)));blk=1;}}}
  if(P.prov>0)d=Math.max(1,Math.round(d*.8));
@@ -7521,13 +7521,14 @@ function legSave(){const c=isLeg();if(!(c||tlOn('legend'))||S.immT>0||mode==='de
 Object.assign(STR.ar,{legNoDie:'الأسطورة لا تموت بسهولة. الحياة اتثبتت على الحد الأدنى. مقاومة لكل الهجمات لمدة 5 ثواني',legNoDieN:'الأسطورة لا تموت',legNoDieD:'لما تاخد ضربة كانت هتقتلك، صحتك بتفضل 1 ومفيش حاجة بتأذيك 5 ثواني. وكمان بتقاوم أي صعق أو شلل أو تجميد. مرة كل {c} ثانية',legNoDieW:'جاهزة بعد {s} ثانية'});
 Object.assign(STR.en,{legNoDie:"A legend doesn't die easily. The life force is fixed to a minimum. Resistant to all attacks for 5 seconds",legNoDieN:'A Legend Does Not Die',legNoDieD:'A blow that would kill you leaves you at 1 HP, and nothing harms you for 5 seconds. You also resist every stun, paralysis and chill. Once every {c} seconds',legNoDieW:'Ready in {s} s'});
 // every legend resists status conditions (novel ch 182, 297, 778): stuns, paralysis and chills do not take
-function legResist(){if(!isLeg()&&!saImm()&&!mdCand()&&!rzCC())return false;if(gTime>(P.resT||0)){P.resT=gTime+1.5;num(P.x,P.y-30,t('legResist'),'#ffe08a',false);}return true;}
+function legResist(){if(!isLeg()&&!saImm()&&!mdCand()&&!rzCC()&&!awkCC())return false;if(gTime>(P.resT||0)){P.resT=gTime+1.5;num(P.x,P.y-30,t('legResist'),'#ffe08a',false);}return true;}
 Object.assign(STR.ar,{legResist:'[قاومت.]'});Object.assign(STR.en,{legResist:'[You have resisted.]'});
 function die(){if(legSave()||kySave())return;if(ARN){arenaLose();return;}if(TWR){towerLose();return;}if(TOW&&twDied())return;if(mode==='dead')return;bflDie();cvDie();CKST=null;mdDie();if(BHR)bhDied();if(WCLOSE[mode])WCLOSE[mode]();['inv','statusW','equipW','eqPick','logW','mapW','qdW','mbW','guildW','auW','ixW','updLog','creW','swcW','cfmW','forge','pauseScreen','settingsScreen','soundScreen','controlsScreen'].forEach(id=>{const e=$(id);if(e)e.hidden=true;});CRE=null;{const gb=$('gnBox');if(gb)gb.remove();}mode='dead';P.deadT=5;P.dpen=deathPenalty();hudDirty=true;save(true);P.hp=0;P.slash=null;SFX.slam();tone(196,1.4,'sine',.1,-90,.1);dissolve(P.x,P.y-8,['#bfe8ff','#ffffff','#7fc8ff'],46);shake=.3;cvs.classList.add('dead');$('hint').hidden=true;$('dialog').hidden=true;setTimeout(()=>{if(mode==='dead')$('deathW').hidden=false;},800);}
 // owner 2026-10-22: 1 to 172 took an hour, then 50 hours to 100 was far too long: now about 10 hours of own-level hunting to 100 and 14 to 200, before quests and bonuses (no per-kill cap)
 // owner 2026-10-23 ("I kill a Lv 340 at 339 and take 20% of a level; make it slower"): past level 100 each level asks 2% more
 // for every level above 100, and each advancement passed (101, 201...) another 15%. A foe of your level now gives about 2-3%
 // of a level at 300+ (it was 10-20%); below 100 nothing changes.
+const LVMAX=999;   // (v3.72) the max level: the database and the network contracts already stopped at it; gainXP now does too
 const xpNeed=()=>Math.round((50+S.lv*30+S.lv*S.lv*3.5+S.lv**3*.025)*(1+Math.max(0,S.lv-100)*.02)*(1+.15*Math.floor(Math.max(0,S.lv-1)/100)));
 const PTS_LV=10; // stat points per level-up (canon)
 // all character XP x1.2 (owner 2026-10-24, from a player: "feels like I'm going nowhere"); exact rewards (a whole level, a share of one) stay as they are
@@ -7560,7 +7561,7 @@ function xpSrcOf(m,claim){const k=xpKind(m.type);return k==='boss'?xpBossSrc(m.t
 // what gainXP gives after its multipliers; rest: the inn's rest doubles it while it lasts, as far as the cap leaves room
 function gainXP(n,exact,src,rest){if(!Number.isFinite(n)||n<=0)return 0;const k=(exact?1:XPMUL)*(xpbOn()?1.2:1)*(MARN?1.1:1)*(1+secB('xp'))*rzXpM();n*=k;const cap=xpCap(src);if(cap&&n>cap)n=cap;
  if(rest&&S.rx>0){const b=Math.max(0,Math.floor(Math.min(S.rx,Math.round(n/k),cap?(cap-n)/k:Infinity)));if(b>0){S.rx-=b;n+=b*k;}if(S.rx<=0){S.rx=0;setTimeout(()=>toast(t('innDone'),'info'),300);}}
- n=Math.round(n);S.xp+=n;while(S.xp>=xpNeed()){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}),1);flash();SFX.rare();if(P)asMe(()=>vfx('levelup',P.x,P.y));},600);}P.hp=maxHP();if(P)asMe(()=>vfx('levelup',P.x,P.y));toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();jLv();checkSkills();}hudDirty=true;return n;}
+ n=Math.round(n);S.xp+=n;while(S.xp>=xpNeed()&&S.lv<LVMAX){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}),1);flash();SFX.rare();if(P)asMe(()=>vfx('levelup',P.x,P.y));},600);}P.hp=maxHP();if(P)asMe(()=>vfx('levelup',P.x,P.y));toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();jLv();checkSkills();}if(S.lv>=LVMAX)S.xp=Math.min(S.xp,xpNeed()-1);hudDirty=true;return n;}
 // loot feed: what you just gained slides in at the side as a system box (+n name icon); the same thing again within a few
 // seconds adds to its box instead of stacking a new one
 const LOOT={};
@@ -9429,7 +9430,7 @@ function renderEquip(){const w=weapon(),a=armorIt(),wi=w&&WSH[w.id]?w:null;
  $('eqR').innerHTML=eqSlot(wi,'slotW','weapon','w')+eqSlot(eqIt('b'),'slotB','bootsS','b')+eqSlot(eqIt('k'),'slotX','acc','k')+eqSlot(eqIt('r'),'slotR','braceS','r')+eqSlot(eqIt('e'),'slotE','earS','e');
  $('eqRing').innerHTML=RSL.map(k=>ringOpen(k)?eqSlot(eqIt(k),'slotX','ringS',k):`<div><button class="slotb lock" data-tip="${esc(t('ringLock',{n:ringNeed(k)}))}"><img src="${icon('slotX')}"></button></div>`).join('');
  const g=$('pview').getContext('2d');g.clearRect(0,0,16,24);g.drawImage(SH[pSpr()].canvas,0,0,16,24,0,0,16,24);weapPix(g,13,17,wi,0);
- $('eqInfo').innerHTML=`<div class="eqstats"><span>${t('atk')}<b>${atkV()}</b></span><span>${t('def')}<b>${defV()}</b></span><span>${t('cls')}<b>${t('cl_'+S.cls)}</b></span></div><div class="note">${t('wk_'+weapKind())}</div>`;}
+ $('eqInfo').innerHTML=`<div class="eqstats"><span>${t('atk')}<b>${atkV()}</b></span><span>${t('def')}<b>${defV()}</b></span><span>${t('cls')}<b>${t('cl_'+S.cls)}</b></span></div><div class="note">${t('wk_'+weapKind())}</div>${awkEqRow()}`;}
 // clicking a gear slot opens a picker of what in the bag fits it
 const SLN={w:'weapon',a:'armor',h:'helm',g:'gloves',b:'bootsS',k:'acc',n:'neckS',r:'braceS',e:'earS',u:'underS'};for(const k of RSL)SLN[k]='ringS';
 function openPick(sl){const box=$('eqPick'),cur=eqIt(sl),pw=i=>(i.atk?iAtk(i):0)+(i.def?iDef(i):0)+(i.r||0)*.01,list=S.items.filter(i=>(RSL.includes(sl)?i.slot==='k'&&RINGS.has(i.id):i.slot===sl)&&(sl!=='w'||WSH[i.id])).sort((a,b)=>(b===cur)-(a===cur)||(a!==cur&&isEq(a))-(b!==cur&&isEq(b))||pw(b)-pw(a));SFX.open();
@@ -9589,7 +9590,7 @@ window.__GRMO={on:()=>RMO,set:v=>rmoSet(v),shake:()=>RMOS.slice(),FX:RMOFX,VXC:R
 function pressKey(id){const k=$(id);if(!k)return;k.classList.add('press');setTimeout(()=>k.classList.remove('press'),110);}
 function dissolve(x,y,cols,n){for(let i=0;i<n;i++)fx.push({x:x+(rand()-.5)*12,y:y+(rand()-.5)*16,vx:(rand()-.5)*24,vy:-15-rand()*45,t:.7+rand()*.9,c:cols[i%cols.length],fl:1});}
 // Skills are data (SKD); the bar holds up to five class skills plus the worn title's skill in slot 6. Keys are rebindable per device.
-const mpC=k=>SKD[k]&&SKD[k].pas?0:Math.round((SKD[k].mpf?maxMP()*SKD[k].mpf:Math.max(SKD[k].mp*1.5,(S?mpRef():0)*SKD[k].mp/100))*(S&&ipOn('absurd')?.5:1)*(S?skCostM(k)*skMpM(k):1));
+const mpC=k=>SKD[k]&&SKD[k].pas?0:Math.round((SKD[k].mpf?maxMP()*SKD[k].mpf:Math.max(SKD[k].mp*1.5,(S?mpRef():0)*SKD[k].mp/100))*(S&&ipOn('absurd')?.5:1)*(S?skCostM(k)*skMpM(k)*awkMpM():1));
 window.__GPS={list:()=>Object.keys(SKD).filter(k=>SKD[k].pas),m:k=>pasM(k),gen:()=>pasGen(),kill:m=>pasKill(m),scaled:k=>pasScaled(k),txt:k=>skLvTxt(k),bc:p=>bcBreak(p),cls:k=>SKD[k].cls,on:()=>pasSkills()}; // tests
 Object.assign(STR.ar,{pasHow:'باسيف: شغال لوحده على طول، مش محتاج تدوس عليه ولا تحطه في البار.',pasLvHow:'بيعلى لفله مع كل وحش تقتله (البوس بـ6)، وكل مرة يشتغل فيها.',pasPerS:'كل لفل: +5% لتأثيره (دلوقتي ×{m}).',pasPerG:'كل لفل: +1% ضرر و+1% دفاع (دلوقتي +{n}%).',bcAmp:'تأمل!',bcBrk:'السحر اتكسر',bcRefl:'السحر ارتد!'});
 Object.assign(STR.en,{pasHow:'Passive: always on by itself, nothing to press or put on the bar.',pasLvHow:'It levels up with every monster you kill (a boss counts 6) and each time it fires.',pasPerS:'Each level: +5% to its effect (now ×{m}).',pasPerG:'Each level: +1% damage and +1% defence (now +{n}%).',bcAmp:'Contemplation!',bcBrk:'Spell broken',bcRefl:'Spell reflected!'});window.__GMANA={max:()=>maxMP(),ref:()=>mpRef(),cost:k=>mpC(k),per:()=>mpPer(),cap:()=>POTCAP}; // tests
@@ -9798,7 +9799,7 @@ function skProg(k){if(S&&!S.skv)skMig();let l=1,c=((S&&S.skx)||{})[k]||0;while(l
 const SKK={};for(const [kd,l] of [['buff','bemag bdetm bbarr bcoh bspray kstance glink lstand track sneye bgarmor wlsiph wlcurse dsseal dssum pbless pdprot pjudar pdomin tstealth apoison aleg agrd asens bbear bwolf beagle blion btiger bleo bhalf broar oelo fort taunt sctl transcend revolve restraint rage cry bcry qmove benc bdetect bassim sadisc sahw sasanc lkblock lkres kytrans kygod gkpow bshield bvalor bswift brest mheart gashield'],
  ['heal','sapray pheal prebec mkrev sahope gabreath gadesire salife'],['buff','sspc ssfield'],['util','sscre'],['util','trap tsteal ashadow nskel dsleap btele fly ltshade bgrease bdecoy bwing bcrys bmasst']])for(const k of l.split(' '))SKK[k]=kd;
 function skKind(k){if(SKO[k])return 'own';if(SKK[k])return SKK[k];const c=SKD[k]&&typeof CPK!=='undefined'&&CPK[SKD[k].cls],s=c&&(c.skills||[]).find(x=>x.id===k);return s&&(s.kind==='buff'||s.kind==='heal')?s.kind:'atk';}
-const skCdM=k=>(skLv(k)>=10&&/^(buff|heal|util)$/.test(skKind(k))?.8:1)*tomeCdM()*(bemOn(k)?.5:1)*rzCdM(),skMpM=k=>(skLv(k)>=5&&/^(buff|util)$/.test(skKind(k))?.8:1)*(bemOn(k)?0:1);
+const skCdM=k=>(skLv(k)>=10&&/^(buff|heal|util)$/.test(skKind(k))?.8:1)*tomeCdM()*(bemOn(k)?.5:1)*rzCdM()*awkCdM(),skMpM=k=>(skLv(k)>=5&&/^(buff|util)$/.test(skKind(k))?.8:1)*(bemOn(k)?0:1);
 function skHealUp(k,h0){if(skKind(k)!=='heal'||!P||!(P.hp>h0))return;const L=skLv(k),m=.04*(L-1)+(L>=5?.25:0);if(m>0){P.hp=Math.min(maxHP(),P.hp+(P.hp-h0)*m);hudDirty=true;}}
 const skLv=k=>skProg(k)[0],skDm=k=>1+.06*(skLv(k)-1),skCostM=k=>1-.03*(skLv(k)-1),skDur=k=>1+.05*(skLv(k)-1),icbM=()=>skLv('icomb')>=5?1.3:1.2;
 /* passive levels (owner 2026-10-23: "make sure every passive levels, and say how to use and level it"): a passive has no
@@ -9819,14 +9820,14 @@ window.__GSL={kind:k=>skKind(k),opt:(k,l)=>skOptTxt(k,l),mp:k=>mpC(k),cdm:k=>skC
 // with these inputs (and the table, counted once a frame), so the answer is kept until one of them moves. Callers only read it.
 let CSKM={k:null,r:null},SKDN={t:-1,n:0};
 const skdN=()=>{if(SKDN.t!==gTime){SKDN.t=gTime;let n=0;for(const k in SKD)n++;SKDN.n=n;}return SKDN.n;};
-const clsSkills=()=>{const sb=S.bh&&S.bh.sb,k=[S.cls,S.cbase,S.church,S.sec,S.title,S.cls2,!!S.mdsk,sb?Object.keys(sb).filter(x=>sb[x]).join(','):'',typeof LGB!=='undefined'&&LGB?LGB[S.cls]:'',skdN(),qlendK(),mgtKey(),myRace(),S.rsub||'',S.brf|0].join('|');
+const clsSkills=()=>{const sb=S.bh&&S.bh.sb,k=[S.cls,S.cbase,S.church,S.sec,S.title,S.cls2,!!S.mdsk,sb?Object.keys(sb).filter(x=>sb[x]).join(','):'',typeof LGB!=='undefined'&&LGB?LGB[S.cls]:'',skdN(),qlendK(),mgtKey(),myRace(),S.rsub||'',S.brf|0,awkTier()].join('|');
  if(CSKM.k!==k||CSKM.s!==S){CSKM={k,s:S,r:clsSkills0()};}return CSKM.r;};
 // (owner 2026-10-26: "it asks me to steal from monsters but doesn't give me the skill") a class trial lends the skill it asks
 // for while it is yours: SKD[k].qlend is the quest (A Light Hand lends Steal); the class keeps it after
 let QLEND=null;const qlendQ=()=>QLEND||(QLEND=[...new Set(Object.keys(SKD).map(k=>SKD[k].qlend).filter(Boolean))]),qlendOn=q=>!!(S.qs[q]&&S.qs[q].st===1)&&(!QD[q]||!QD[q].cls||S.cls==='novice'),qlendK=()=>qlendQ().map(q=>qlendOn(q)?1:0).join('');
 // a save opened while a trial is yours: its lent skill on the bar (a save from before v3.08 never got it), nothing else touched
 function qlendFix(){if(!S)return;for(const k of Object.keys(SKD))if(SKD[k].qlend&&qlendOn(SKD[k].qlend)&&skOK(k)&&!(S.sk&&S.sk[k]))checkSkills();}
-const clsSkills0=()=>Object.keys(SKD).filter(k=>!SKD[k].pas&&(!SKD[k].ncls||SKD[k].ncls!==S.cls)&&(!SKD[k].church||SKD[k].church===S.church)&&(!SKD[k].sec||SKD[k].sec===S.sec)&&(!SKD[k].sc2||SKD[k].sc2===S.cls2)&&(!SKD[k].bk||!!(S.bh&&S.bh.sb&&S.bh.sb[SKD[k].bk]))).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior'||typeof LGB!=='undefined'&&LGB&&LGB[S.cls]===SKD[k].cls||k==='mdarmy'&&!!S.mdsk||!!SKD[k].title&&(S.title===SKD[k].title||!!SKD[k].sc2a&&S.cls2===SKD[k].sc2a)||!!SKD[k].qlend&&qlendOn(SKD[k].qlend)||!!SKD[k].mgt&&mgtKnown(k)&&clsFam('mage')||!!SKD[k].race&&SKD[k].race===myRace()&&!!rzR()&&(SKD[k].rsub===undefined||SKD[k].rsub===(S.rsub||'')));
+const clsSkills0=()=>Object.keys(SKD).filter(k=>!SKD[k].pas&&(!SKD[k].ncls||SKD[k].ncls!==S.cls)&&(!SKD[k].church||SKD[k].church===S.church)&&(!SKD[k].sec||SKD[k].sec===S.sec)&&(!SKD[k].sc2||SKD[k].sc2===S.cls2)&&(!SKD[k].bk||!!(S.bh&&S.bh.sb&&S.bh.sb[SKD[k].bk]))).filter(k=>SKD[k].cls==='any'||SKD[k].cls===S.cls||S.cbase&&SKD[k].cls===S.cbase||(SKD[k].also||[]).includes(S.cls)||S.cls==='braham'&&SKD[k].cls==='mage'||S.cls==='saint'&&SKD[k].cls==='warrior'||typeof LGB!=='undefined'&&LGB&&LGB[S.cls]===SKD[k].cls||k==='mdarmy'&&!!S.mdsk||!!SKD[k].title&&(S.title===SKD[k].title||!!SKD[k].sc2a&&S.cls2===SKD[k].sc2a)||!!SKD[k].qlend&&qlendOn(SKD[k].qlend)||!!SKD[k].mgt&&mgtKnown(k)&&clsFam('mage')||!!SKD[k].race&&SKD[k].race===myRace()&&!!rzR()&&(SKD[k].rsub===undefined||SKD[k].rsub===(S.rsub||''))||!!SKD[k].awk&&awkTier()>=SKD[k].awk);
 const NSK=8; // skill slots on the bar (keys 1-8); the title slot comes after them
 // owner 2026-10-22: gear (rings, weapons, armour) and things you use go on the main bar too, as on the extra bars
 const barThing=k=>typeof k==='string'&&!SKD[k]&&(XGEAR(k)||XITEM(k)||!!(S.mats&&k in S.mats));
@@ -10738,7 +10739,7 @@ function barPlace(k,i){const a=barSkills().slice(0,NSK),j=a.indexOf(k),prev=a[i]
 function closeStatus(){BPICK=null;SFX.close();$('statusW').hidden=true;mode='play';hudDirty=true;}
 let STAB='main';
 function renderStatus(pop){if(STAB!=='main')return renderTab();const row=(k,v,tip,btn,extra,id)=>`<div class="srow"${tip?` data-tip="${esc(tip)}"`:''}><span>${k}</span><span>${extra?'<span class="sv">':''}<b${id?` id="sv_${id}"`:''}>${v}</b>${extra?extra+'</span>':''}${btn||''}</span></div>`;
- const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+(S.__demo?'':row(t('sdxL'),t('sdxV',{p:Math.round(((S.dly&&S.dly.day===today()?S.dly.sdx:0)||0)*1000+1e-6)/10,c:Math.round(SDXC*100)}),t('sdxD',{c:Math.round(SDXC*100)})))+row(t('cls'),t('cl_'+S.cls)+(S.cls2?` (${t('sc2_'+S.cls2)})`:''),S.cls2?t('sc2D_'+S.cls2):'')+row(t('raceL'),rzName(),rzDesc())+rzStRow()+(S.cls==='aura'?row(t('auRateL'),t('auR'+auR())):'')+(S.vatB?row(t('vtBL'),t('vtBV'),t('vtBD')):'')+(dvOn()?row(t('dvL'),t('dvRow',{g:t('godN_'+S.dv.g),n:Math.ceil((S.dv.until-Date.now())/60000)})):'')+(patOn()?row(t('lpatL'),t('lpatRow',{n:Math.ceil((S.pat1-Date.now())/60000)})):'')+(S.cls==='smith'&&(!S.sec||S.sec==='smith')?'':row(t('secL'),S.sec?t('sec_'+S.sec):t('none'),S.sec?t('sec_'+S.sec+'D'):t('secTabD',{g:SEC_SWAP.toLocaleString('en')})))+(S.bank?row(t('bankL'),S.bank.toLocaleString('en')):'')+(marOn()?row(t('marL'),esc(S.mar.n)+(MARN?' ♥':''),t('marTip'),` <button data-act="marGo">${t('marGoB')}</button>`):'')+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+(S.rx>0?row(t('innRxL'),S.rx.toLocaleString('en'),t('innRxD')):'')+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+'</div>';
+ const mh=maxHP();let h='<div class="sgrid">'+row(t('sName'),esc(t('pname')))+row(t('sLevel'),S.lv)+(S.__demo?'':row(t('sdxL'),t('sdxV',{p:Math.round(((S.dly&&S.dly.day===today()?S.dly.sdx:0)||0)*1000+1e-6)/10,c:Math.round(SDXC*100)}),t('sdxD',{c:Math.round(SDXC*100)})))+row(t('cls'),t('cl_'+S.cls)+(S.cls2?` (${t('sc2_'+S.cls2)})`:''),S.cls2?t('sc2D_'+S.cls2):'')+row(t('raceL'),rzName(),rzDesc())+rzStRow()+(S.cls==='aura'?row(t('auRateL'),t('auR'+auR())):'')+(S.vatB?row(t('vtBL'),t('vtBV'),t('vtBD')):'')+(dvOn()?row(t('dvL'),t('dvRow',{g:t('godN_'+S.dv.g),n:Math.ceil((S.dv.until-Date.now())/60000)})):'')+(patOn()?row(t('lpatL'),t('lpatRow',{n:Math.ceil((S.pat1-Date.now())/60000)})):'')+(S.cls==='smith'&&(!S.sec||S.sec==='smith')?'':row(t('secL'),S.sec?t('sec_'+S.sec):t('none'),S.sec?t('sec_'+S.sec+'D'):t('secTabD',{g:SEC_SWAP.toLocaleString('en')})))+(S.bank?row(t('bankL'),S.bank.toLocaleString('en')):'')+(marOn()?row(t('marL'),esc(S.mar.n)+(MARN?' ♥':''),t('marTip'),` <button data-act="marGo">${t('marGoB')}</button>`):'')+row(t('title'),S.title?t('tl_'+S.title):t('none'))+row(t('hpL'),`${Math.ceil(P.hp)}/${mh}`)+row(t('mpL'),`${Math.floor(P.mp)}/${maxMP()}`)+row(t('xpL'),`${S.xp}/${xpNeed()}`)+(S.rx>0?row(t('innRxL'),S.rx.toLocaleString('en'),t('innRxD')):'')+row(t('atk')+' / '+t('def'),`${atkV()} / ${defV()}`)+(advN()?row(t('advL'),t('ord'+advN()),t('advD',{n:advN()*10,p:advN()*5})):'')+(awkTier()?row(t('awkL'),esc(t('awkN'+awkTier())),awkTip()):'')+'</div>';
  h+=`<div class="ssec">${t('basic')}<span class="sptc${S.pts>0?' on':''}">${t('pts',{n:S.pts})}${S.pts>1?` <input class="stn" id="stAmt" type="number" inputmode="numeric" min="1" max="${S.pts}" value="${STAMT||''}" placeholder="${esc(t('stNumPh'))}" data-tip="${esc(t('stNumTip'))}">`:''}</span></div><div class="sgrid stq">`+['str','sta','agi','int','dex'].map(k=>row(t(k),stat(k),t('t'+k),S.pts>0?`<button data-stat="${k}">+</button>${S.pts>=5?`<button class="p5" data-stat="${k}" data-n="5" data-tip="${esc(t('p5Tip'))}">+5</button>`:''}${TOUCH&&S.pts>5?`<button class="p5" data-stat="${k}" data-n="all">${t('ptsAllB')}</button>`:''}`:'',stat(k)!==S.st[k]?` <em data-tip="${esc(t('stBaseTip'))}">(${t('stBase',{n:S.st[k]})})</em>`:'',k)).join('')+'</div>';
  if(S.respec>0)h+=`<div class="note"><button data-respec="1" data-tip="${esc(t('respecD'))}">${t('respecUse',{n:S.respec})}</button></div>`;
  h+=`<div class="ssec">${t('mastH')}</div><div class="sgrid">`+['sword','spear','dagger','bow','staff','hammer'].map(k=>{const L=mastLv(k),x=(S.mast||{})[k]||0,nx=Math.min(50,L+1)**2*15;return row(t('wk_'+k),L,t('mastD'),'',L<50?` <em>(${x}/${nx})</em>`:'');}).join('')+'</div>';
@@ -11572,7 +11573,7 @@ function update(dt){
  if(TSV&&walk&&!(P.stun>0)){ix=TSV.x;iy=TSV.y;tsf=Math.max(.45,Math.min(1,Math.hypot(ix,iy)*1.3));}
  if(FOLLOW){if(ix||iy)folStop('folOff');else if(walk&&!(P.stun>0)&&!(P.dash>0)){const v=folDir(dt);if(v){ix=v[0];iy=v[1];}}} // SAT-ONLINE-068: your own keys stop it
  if(P.dash>0){P.dash-=dt;move(P,P.dx*230*dt,P.dy*230*dt,4);P.trail.push({x:P.x,y:P.y,dir:P.dir,frame:P.frame,t:.22,r:P.ride?myMt():0});}
- else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(tlOn('legend')?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.buf&&P.buf.k==='swift'&&!P.ride?1.12:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*p3Spd()*vcSpd()*vpSpd()*rzSpd()*mxSpd()*ttSpd()*p4Spd()*(1+Math.min(.3*rzCapM(),gearSum('ms')))*(P.kyTU>gTime?1.35:1)*(1+ssBl())*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1)*roadSp();move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
+ else if(ix||iy){const l=Math.hypot(ix,iy);const sp=RCR&&RCR.in?rcSp():66*(1+Math.min(.4,stat('agi')*.0012))*(pain?(tlOn('legend')?.82:.7)+S.hid.comp*.005:1)*(P.food<=0?.85:1)*(P.buf&&P.buf.k==='swift'&&!P.ride?1.12:1)*(P.guard?.45:1)*(P.kst>0?.7:1)*(P.stl>0?.8:1)*hcSpd()*p3Spd()*vcSpd()*vpSpd()*rzSpd()*awkSpd()*mxSpd()*ttSpd()*p4Spd()*(1+Math.min(.3*rzCapM(),gearSum('ms')))*(P.kyTU>gTime?1.35:1)*(1+ssBl())*(swampAt(P.x,P.y)?.6:1)*(P.qm>0?1.2:1)*(P.fly>0?1.3:1)*(P.ride&&MOUNTS[myMt()]?1+(mtSp(myMt())-1)*(P.rsp=Math.min(1,(P.rsp||0)+dt*.9)):1)*roadSp();move(P,ix/l*sp*tsf*dt,iy/l*sp*tsf*dt,4);P.at+=dt;P.rmv=.12;if(P.ride){P.rgT=(P.rgT||0)+dt*(.6+P.rsp*.8);horseFx(dt);mtRide(sp*tsf*dt);}P.frame=(P.at*7|0)%2;if(Math.abs(ix)>Math.abs(iy))P.dir=ix>0?2:3;else P.dir=iy>0?0:1;}
  else P.frame=0;
  if(P.guard)P.dir=Math.abs(P.gx)>Math.abs(P.gy)?(P.gx>0?2:3):(P.gy>0?0:1);
  if(K.atk&&inp&&!PHOTO){const wk=weapKind(),v=(TOUCH&&tAim((wk==='bow'||wk==='staff')&&!hcMelee()?170:44))||[[0,1],[0,-1],[1,0],[-1,0]][P.dir];tryAttack(v[0],v[1]);}
@@ -11916,7 +11917,7 @@ function render(dt){DRAWN=0;netDrawn=0;
   for(let mI=0;mI<mons.length;mI++){const m=mons[mI];if(!(m.dead&&!(m.dying>0)||offV(m.x,m.y,MT[m.type].boss?260:0)))monEnt(m);};
   if(!titleCam&&mode!=='dead'&&!P.ghost)if(PET)ents.push({y:PET.y,f:()=>drawPet(PET)});
   if(LP.length){LPDT=dt;ents.push({y:P.y+999,f:lpDraw});} // SAT-ONLINE-185: loot pops, over the scene
-  ents.push({y:P.y,f:()=>{if(P.spw)spwDraw();P.trail.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;const am=a.r&&MOUNTS[a.r];if(am){drawHorse(a.x,a.y,a.dir,2,am);drawRider(a.x,a.y,a.dir,2,P);drawHorse(a.x,a.y,a.dir,2,am,ctx,'head');}else drawChar(pSpr(),a.x,a.y,a.dir,a.frame,false);});ctx.globalAlpha=1;const rd=P.ride&&MOUNTS[myMt()];const hf=rd&&P.rmv>0?1+((P.rgT||0)*10|0)%4:0,blk=P.inv>0&&((gTime*20|0)%2===0)&&P.dash<=0;if(rd)drawHorse(P.x,P.y,P.dir,hf,rd);const wen=(weapon()||{}).en||0;if(wen>=7)drawEnh(P.x,P.y-(rd?9:0),wen,0);if(rd){if(!blk)drawRider(P.x,P.y,P.dir,hf,P);drawHorse(P.x,P.y,P.dir,hf,rd,ctx,'head');const hm=rhpMax(S.mount),hh=rhp(S.mount);if(hh<hm&&!(RCR&&RCR.in)){R(ctx,P.x-9,P.y-37,18,3,'#000');R(ctx,P.x-8,P.y-36,16*hh/hm,1,'#e8a060');}}else{if(P.stl>0)ctx.globalAlpha=.35;if(P.boat&&!P.bmf)boatSit(pSpr(),P.x,P.y,P.dir,blk,P);else if(P.sit&&!P.bmf)tavSitDraw(pSpr(),P.x,P.y,P.dir,blk,P);else if(!bmDraw(P.bmf,'me',P.x,P.y,P.dir,P.rmv>0,blk,!!P.slash)){drawChar(pSpr(),P.x,P.y,P.dir,P.frame,blk,0,P);if(P.bmH>0&&!blk)bmHalfDraw(P.x,P.y,P.dir);if(NV.eye>0&&!blk)nvEyes(P.x,P.y,P.dir);}ctx.globalAlpha=1;}if(wen>=4)drawEnh(P.x,P.y-(rd?9:0),wen,1);
+  ents.push({y:P.y,f:()=>{if(P.spw)spwDraw();P.trail.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;const am=a.r&&MOUNTS[a.r];if(am){drawHorse(a.x,a.y,a.dir,2,am);drawRider(a.x,a.y,a.dir,2,P);drawHorse(a.x,a.y,a.dir,2,am,ctx,'head');}else drawChar(pSpr(),a.x,a.y,a.dir,a.frame,false);});ctx.globalAlpha=1;const rd=P.ride&&MOUNTS[myMt()];const hf=rd&&P.rmv>0?1+((P.rgT||0)*10|0)%4:0,blk=P.inv>0&&((gTime*20|0)%2===0)&&P.dash<=0;awkMe();if(rd)drawHorse(P.x,P.y,P.dir,hf,rd);const wen=(weapon()||{}).en||0;if(wen>=7)drawEnh(P.x,P.y-(rd?9:0),wen,0);if(rd){if(!blk)drawRider(P.x,P.y,P.dir,hf,P);drawHorse(P.x,P.y,P.dir,hf,rd,ctx,'head');const hm=rhpMax(S.mount),hh=rhp(S.mount);if(hh<hm&&!(RCR&&RCR.in)){R(ctx,P.x-9,P.y-37,18,3,'#000');R(ctx,P.x-8,P.y-36,16*hh/hm,1,'#e8a060');}}else{if(P.stl>0)ctx.globalAlpha=.35;if(P.boat&&!P.bmf)boatSit(pSpr(),P.x,P.y,P.dir,blk,P);else if(P.sit&&!P.bmf)tavSitDraw(pSpr(),P.x,P.y,P.dir,blk,P);else if(!bmDraw(P.bmf,'me',P.x,P.y,P.dir,P.rmv>0,blk,!!P.slash)){drawChar(pSpr(),P.x,P.y,P.dir,P.frame,blk,0,P);if(P.bmH>0&&!blk)bmHalfDraw(P.x,P.y,P.dir);if(NV.eye>0&&!blk)nvEyes(P.x,P.y,P.dir);}ctx.globalAlpha=1;}if(wen>=4)drawEnh(P.x,P.y-(rd?9:0),wen,1);
    const w=weapon(),hx=HAND?HAND.x:Math.round(P.x)+(P.dir===3?-6:5),hy=HAND?HAND.y:Math.round(P.y)-7;if(hcHand(hx,hy,P.dir,P.slash)){}else if(!P.slash)weapPix(ctx,hx,hy,w,P.dir);else if(w&&WSH[w.id]){const k=1-P.slash.t/.14,a=P.slash.a-1.1+2.2*k;SA.weapons.draw(ctx,wKey(w),w.r,hx,hy,a+Math.PI/2,Math.cos(P.slash.a)<0);}drawGuard();}});
   // SAT-ONLINE-117 (plan U324): each part that adds to the scene is its own boundary, the other players' part (netEnts) above
   // all: a bad message or a bug in one part costs that part this frame, never the whole world
@@ -12265,7 +12266,7 @@ function p3Hurt(d,src){if(d>0&&P3.ch){P3.ch=null;toast(t('rodInt'),'warn');}if(!
 function p3PHit(p){if(p.sp==='ice'){if(!legResist())P3.chill=2;}else if(p.sp==='bolt'&&!(P.sImm>0)&&!legResist()){P.stun=Math.max(P.stun||0,.25);P.sImm=2.25;}}
 const p3Spd=()=>P3.chill>0?.7:1;
 function p3Kill(m){const k=m.type;if(P3WB.includes(k)&&!m.tmp){WS.wb=WS.wb||{};WS.wb[k]=Date.now()+MT[k].wb*1000;wbPut(k);setTimeout(()=>annW(k+'Dn'),400);save(true);}if(k==='slord')P3.rod=[0,0,0,0];}
-function p3Tick(dt){if(!S||!P||S.__demo)return;vpTick(dt);rzTick(dt);const s=p3S();P3.ls=Math.max(0,P3.ls-maxHP()*.06*dt);P3.chill=Math.max(0,P3.chill-dt);
+function p3Tick(dt){if(!S||!P||S.__demo)return;vpTick(dt);rzTick(dt);awkTick(dt);const s=p3S();P3.ls=Math.max(0,P3.ls-maxHP()*.06*dt);P3.chill=Math.max(0,P3.chill-dt);
  if(qDone('vc3')&&!s.ring){s.ring=1;S.items.push(mkItem('vring',3));toast(t('got',{n:1,item:t('vring')}),'good');SFX.rare();save(true);}
  if(qDone('vc2')&&s.cov===undefined){s.cov=1;setTimeout(()=>{announce(t('covJoin'),1);SFX.legendary();},300);save(true);}
  if(P3.ch){if(P.rmv>0||mode!=='play'){P3.ch=null;toast(t('rodInt'),'warn');}else if((P3.ch.t-=dt)<=0){const i=P3.ch.i;P3.ch=null;P3.rod[i]=1;const p=p3RodXY(i);vfx('bolt',p.x,p.y-20);SFX.zap();const n=p3RodN();
@@ -13335,6 +13336,105 @@ Object.assign(STR.en,{"rvkHu1":"The Watchtower's Last Knight",
  "rzH_yangban":"Where a path climbs toward heaven on the East Continent.",
  "rzH_demon":"In a village of horned folk, below the world.",
  "rzH_vampire":"Under the sand of the empire, a prince offers his eternal blood to those who join his covenant."});
+/* ---------------- Awakenings (v3.72; the owner 2026-10-27 23:50): "Awakenings are major progression milestones that permanently
+   boost character growth ... tiny buffs to make them reflect their power. Each awakening gives players an aura around themselves.
+   The color is randomized tho the appearance is different for each higher awakening, growing in size and effect. Add a toggle to
+   disable the aura (Visually) for anyone who does not like it, in the equipment menu."
+   Lv 100, 200, 300, 400 and the max level (LVMAX, 999: the level the database and the network contracts already stop at, and now
+   gainXP too). An awakening, once reached, is kept (S.awk): a death that costs a level or a legendary class's new Lv 1 keeps it.
+   Its numbers are the owner's, added together (+5% attributes at the first, +5% more at the third, +8% at the fourth: +18%);
+   "1 HP/MP per second in combat" is taken as written, one point of each. The aura's hue is rolled at each awakening (S.awc) from
+   its own random stream, so no game dice move; it is drawn from the clock, never from rand(). Others see it through fx (ak:),
+   unless you hide it: S.awh hides every awakening aura on your screen and stops publishing yours (the buffs stay). The test
+   harness keeps the older tests' numbers with window.__awkPlain (as __rzPlain does for races). */
+const AWKL=[0,100,200,300,400,LVMAX];
+const AWKRNG=mulberry32(((Date.now()>>>0)^0x2a77e1c3)>>>0);
+const awkLvT=L=>L>=LVMAX?5:Math.min(4,Math.floor(Math.max(0,L|0)/100));
+function awkTier(){if(!S||S.__demo||window.__awkPlain)return 0;return Math.max(S.awk|0,awkLvT(S.lv));}
+function awkStM(){const T=awkTier();return 1+(T>=1?.05:0)+(T>=3?.05:0)+(T>=4?.08:0);}
+function awkSpd(){const T=awkTier();return (T>=1?1.05:1)*(P&&P.awkWU>gTime?1.25:1);}
+function awkAtkM(){return awkTier()>=2?1.05:1;}
+function awkCdM(){return awkTier()>=2?.95:1;}
+function awkMpM(){return awkTier()>=3?.9:1;}
+function awkGdM(){return awkTier()>=3?.9:1;}
+function awkCr(){return P&&P.awkWU>gTime?.15:0;}
+// Limit Break: 8% to shrug off a stun, a root or a chill (wherever legResist is asked); its own dice
+function awkCC(){return awkTier()>=2&&AWKRNG()<.08;}
+// every blow you strike: you are in combat; Overwhelming Aura (a foe within 110 px takes 5% more: 5% of its defence gone);
+// Absolute Awakening's true damage (5% of the blow as if there were no level gap)
+function awkAtk(m,o){if(!S||!P)return 1;P.awkCt=gTime;const T=awkTier();if(!T)return 1;let k=1;
+ if(T>=4&&m&&Math.hypot(m.x-P.x,m.y-P.y)<110)k*=1.05;
+ if(T>=5){const f=o&&(o.pure||o.raw||o.nolv)?1:Math.max(.05,lvF(m.lv));k*=1+.05/f;}return k;}
+// the awakening itself: announced once, the highest reached if several came at once, with every new one's numbers
+function awkTick(dt){if(!S||!P||S.__demo||window.__awkPlain)return;const L=awkLvT(S.lv);
+ if(L>(S.awk|0)&&mode==='play'&&$('dialog').hidden&&gTime-Math.max(P.hitT??-99,P.awkCt??-99)>5){const was=S.awk|0;S.awk=L;S.awc=(AWKRNG()*360)|0;sbSig='';hudDirty=true;
+  announce(t('awkAnn',{n:t('awkN'+L)}),1);flash();SFX.legendary();checkSkills();
+  dialog('sysN',[t('awkGot',{n:t('awkN'+L),d:Array.from({length:L-was},(_,i)=>t('awkD'+(was+1+i))).join('\n')})]);save(true);}
+ // Combat Vitality: one health and one mana a second while you strike or are struck (within 5 s)
+ const T=awkTier();if(T>=1&&P.hp>0&&gTime-Math.max(P.hitT??-99,P.awkCt??-99)<5){P.hp=Math.min(maxHP(),P.hp+dt);P.mp=Math.min(maxMP(),P.mp+dt);hudDirty=true;}}
+// the aura: a glow at the feet; from the second a ring and motes rising; from the third a circle of sparks turning; from the
+// fourth a light up the body; the absolute one a pillar and a second, faster circle. Drawn under the character, from gTime only.
+function awkDraw(x,y,T,h,al){if(!T||!ctx||S&&S.awh)return;const tm=gTime,R=[0,8,10,12,15,18][T],pul=.75+Math.sin(tm*3)*.25,hs=(l,a)=>`hsla(${h},95%,${l}%,${a})`;
+ ctx.save();ctx.globalAlpha*=al==null?1:al;ctx.globalCompositeOperation='lighter';
+ const g=ctx.createRadialGradient(x,y,1,x,y,R*1.6);g.addColorStop(0,hs(65,.38*pul));g.addColorStop(1,hs(50,0));ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(x,y,R*1.6,R*.7,0,0,7);ctx.fill();
+ if(T>=2){ctx.strokeStyle=hs(72,.55*pul);ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(x,y,R,R*.42,0,0,7);ctx.stroke();
+  const n=[0,0,5,8,12,16][T];for(let i=0;i<n;i++){const ph=(tm*.6+i/n)%1,a=i*2.399+tm*.4,rr=R*(.35+.55*((i*37)%10)/10),s=T>=4?2:1;ctx.fillStyle=hs(70+T*4,(1-ph)*.85);ctx.fillRect(Math.round(x+Math.cos(a)*rr),Math.round(y-2-ph*(12+T*5)),s,s);}}
+ if(T>=3){const m=T*4,sp=T>=4?1.2:.8;ctx.fillStyle=hs(82,.75);for(let i=0;i<m;i++){const a=i/m*6.283+tm*sp;ctx.fillRect(Math.round(x+Math.cos(a)*R*1.25),Math.round(y+Math.sin(a)*R*.5),1,1);}}
+ if(T>=4){const H=30+(T-4)*10,W=9+(T-4)*3,g2=ctx.createLinearGradient(x,y,x,y-H);g2.addColorStop(0,hs(62,.24*pul));g2.addColorStop(1,hs(62,0));ctx.fillStyle=g2;ctx.beginPath();ctx.ellipse(x,y-H/2,W,H/2,0,0,7);ctx.fill();}
+ if(T>=5){const g3=ctx.createLinearGradient(x,y,x,y-70);g3.addColorStop(0,hs(85,.3*pul));g3.addColorStop(1,hs(85,0));ctx.fillStyle=g3;ctx.fillRect(Math.round(x-2),Math.round(y-70),4,70);
+  ctx.fillStyle=hs(90,.8);for(let i=0;i<8;i++){const a=-i/8*6.283-tm*2.2;ctx.fillRect(Math.round(x+Math.cos(a)*R*1.7),Math.round(y+Math.sin(a)*R*.72),2,1);}}
+ ctx.restore();}
+// yours, under you (dimmed while you are stealthed, the way you see yourself)
+function awkMe(){if(!P||!S)return;const T=awkTier();if(T)awkDraw(P.x,P.y,T,S.awc|0,P.stl>0?.35:1);}
+// what others see: the tier and the hue (none while hidden or stealthed)
+function awkPub(){const T=awkTier();return T&&!S.awh&&!(P&&P.stl>0)?'ak:'+T+((S.awc|0)%360).toString(36):'';}
+// the equipment window: the awakening reached and the aura switch
+function awkEqRow(){const T=awkTier();return `<div class="note awkrow">${T?`✨ <b>${esc(t('awkN'+T))}</b> · `:''}<button data-awkv="1" data-tip="${esc(t('awkAuraTip'))}">${t(S.awh?'awkAuraOff':'awkAuraOn')}</button></div>`;}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-awkv]');if(!b||!S)return;e.stopPropagation();if(S.awh)delete S.awh;else S.awh=1;SFX.click();save(true);if(!$('equipW').hidden)renderEquip();},true);
+// the status window's line: the awakening, and every one's numbers in its tip
+const awkTip=()=>{const T=awkTier();return Array.from({length:T},(_,i)=>`<b>${esc(t('awkN'+(i+1)))}</b>: ${esc(t('awkD'+(i+1)))}`).join('<br>');};
+// World of Transcendence, the absolute awakening's skill
+Object.assign(SKD,{awkworld:{cls:'awk',awk:5,lv:1,mp:0,cd:180,col:'#fff2b0'}});SKK.awkworld='buff';
+Object.assign(SKF,{awkworld:()=>{P.awkWU=gTime+4;fx.push({ring:true,x:P.x,y:P.y-6,t:.5});SFX.legendary();toast(t('awkWOn'),'good');}});
+window.__GAWK={tier:()=>awkTier(),lvT:L=>awkLvT(L),stM:()=>awkStM(),spd:()=>awkSpd(),atkM:()=>awkAtkM(),cdM:()=>awkCdM(),mpM:()=>awkMpM(),gdM:()=>awkGdM(),cr:()=>awkCr(),atk:(m,o)=>awkAtk(m,o||{}),tick:dt=>awkTick(dt),pub:()=>awkPub(),row:()=>awkEqRow(),tip:()=>awkTip(),fxIn:(r,st)=>{fxIn(r,st);return st;},draw:(x,y,T,h)=>awkDraw(x,y,T,h),LVMAX}; // tests
+Object.assign(STR.ar,{"awkL":"الصحوة",
+ "awkN1":"الصحوة الأولى",
+ "awkN2":"الصحوة التانية",
+ "awkN3":"الصحوة التالتة",
+ "awkN4":"الصحوة الرابعة",
+ "awkN5":"الصحوة المطلقة",
+ "awkD1":"+5% لكل الخصائص، +5% سرعة مشي، و«حيوية القتال»: 1 صحة و1 مانا كل ثانية وانت في قتال.",
+ "awkD2":"+5% هجوم فيزيائي وسحري، -5% كولداون السكيلات، و«كسر الحدود»: 8% فرصة إنك تتجاهل الشلل أو التثبيت أو التجميد.",
+ "awkD3":"+5% لكل الستاتس الأساسية، -10% مانا السكيلات، و«الثبات الأعلى»: الجارد بيخسر 10% أقل مع كل ضربة.",
+ "awkD4":"+8% لكل الستاتس الأساسية، و«الهالة الطاغية»: الأعداء اللي حواليك بيخسروا 5% من دفاعهم (بياخدوا منك 5% زيادة).",
+ "awkD5":"+5% ضرر حقيقي على كل ضربة (مبيتأثرش بفرق اللفل)، و«عالم التخطي»: سكيل بيدّي +25% سرعة مشي و+15% فرصة كريتيكال لمدة 4 ثواني (كولداون 3 دقايق).",
+ "awkAnn":"{n}! قوتك طلعت للنور.",
+ "awkGot":"[{n}]\n{d}\nهالة بلونك بقت حواليك. تقدر تخفي الهالات من نافذة المعدات.",
+ "awkAuraOn":"هالات الصحوة: ظاهرة",
+ "awkAuraOff":"هالات الصحوة: مخفية",
+ "awkAuraTip":"بيخفي كل هالات الصحوة من على شاشتك، حتى هالتك، والناس التانية مش هتشوف هالتك. الزيادات بتفضل.",
+ "sk_awkworld":"عالم التخطي",
+ "skd_awkworld":"الصحوة المطلقة: لمدة 4 ثواني، +25% سرعة مشي و+15% فرصة كريتيكال. كولداون 3 دقايق.",
+ "awkWOn":"عالم التخطي!"});
+Object.assign(STR.en,{"awkL":"Awakening",
+ "awkN1":"First Awakening",
+ "awkN2":"Second Awakening",
+ "awkN3":"Third Awakening",
+ "awkN4":"Fourth Awakening",
+ "awkN5":"Absolute Awakening",
+ "awkD1":"+5% to every attribute, +5% move speed, and Combat Vitality: 1 health and 1 mana a second in combat.",
+ "awkD2":"+5% physical and magic attack, -5% skill cooldowns, and Limit Break: an 8% chance to shrug off a stun, a root or a chill.",
+ "awkD3":"+5% to every core stat, -10% skill mana costs, and Supreme Poise: your guard gives 10% less to each blow.",
+ "awkD4":"+8% to every core stat, and Overwhelming Aura: the foes around you lose 5% of their defence (they take 5% more from you).",
+ "awkD5":"+5% true damage on every attack (it ignores the level gap), and World of Transcendence: a skill for +25% move speed and +15% critical chance for 4 seconds (3-minute cooldown).",
+ "awkAnn":"{n}! Your power breaks into the open.",
+ "awkGot":"[{n}]\n{d}\nAn aura of your own colour surrounds you now. You can hide auras in the equipment window.",
+ "awkAuraOn":"Awakening auras: shown",
+ "awkAuraOff":"Awakening auras: hidden",
+ "awkAuraTip":"Hides every awakening aura on your screen, yours too, and others stop seeing yours. The buffs stay.",
+ "sk_awkworld":"World of Transcendence",
+ "skd_awkworld":"Absolute Awakening: for 4 s, +25% move speed and +15% critical chance. 3-minute cooldown.",
+ "awkWOn":"World of Transcendence!"});
 /* ---------------- Farming 2, Pedro Harbor and the Kraken, the bard and the stage (owner 2026-10-21: third batch, patch 4) ----------------
    Seasons turn every two days of the world clock, the same for every player. Piaro's new field has eight plots: buy seed,
    plant it and come back when it has grown (it grows while you are away). A crop out of season grows at half speed and gives
@@ -18171,13 +18271,13 @@ const meWrap=f=>function(){return meRun(f,this,arguments);};tryAttack=meWrap(try
 // SAT-ONLINE-045: an ongoing effect on you rides along as its own "st:" string (f: flying on an item skill), which older
 // clients skip; the "in:" tag stays exactly as it was, since the host choice reads it
 function stPub(){return P?(S&&S.cls==='saint'?'Q':'')+(S&&S.cls==='saintess'&&sncIn(P.x,P.y)?'Z':'')+(P.hrgU>gTime?'R':'')+(P.ssFU>gTime?'W':'')+(P.shwU>gTime?'D':'')+(lkCodes()?'C':'')+(P.purP>gTime?'U':'')+(P.morP>gTime?'M':'')+(P.fly>0?'f':'')+(P.glk>0?'g':'')+(P.bls>0?'b':'')+(mtOf()&&mtOf().aura?'N':'')+(P.jud>0?'j':'')+(P.wco>gTime?'O':'')+(P.stl>0?'s':'')+(NEC.min.length?'k':'')+hcSt()+p4St()+p4DSt()+vpSt()+rzSt()+nvSt()+p3RodSt():'';}
-function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));if(S&&S.look&&ADYE[S.look.ad|0]&&gr)tags.push(JSON.stringify('ad:'+(S.look.ad|0)));{const w=weapon();if(w&&w.cw&&!w.skn)tags.push(JSON.stringify('cw:'+w.cw));}const mr=marPub();if(mr)tags.push(JSON.stringify('mr:'+mr));const pd=pdPub();if(pd)tags.push(JSON.stringify('pd:'+pd));const mn=mnPub();if(mn)tags.push(JSON.stringify('mn:'+mn));{const ln=lnkPub();if(ln)tags.push(JSON.stringify(ln));}if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
+function fxPub(){const now=performance.now();while(FXOUT.length&&now-FXOUT[0][1]>FXWIN)FXOUT.shift();const pt=ptPub(),st=stPub(),tags=[JSON.stringify((pt?'pt:'+pt+' ':'')+'in:'+(SPIN.t||0))];if(st)tags.push(JSON.stringify('st:'+st));{const ak=awkPub();if(ak)tags.push(JSON.stringify(ak));}const tl=tlPub();if(tl)tags.push(JSON.stringify('tl:'+tl));const lk=lkPub();if(lk)tags.push(JSON.stringify('lk:'+lk));const bd=bdPub();if(bd)tags.push(JSON.stringify('bd:'+bd));const gr=grPub();if(gr)tags.push(JSON.stringify('gr:'+gr));if(S&&S.look&&ADYE[S.look.ad|0]&&gr)tags.push(JSON.stringify('ad:'+(S.look.ad|0)));{const w=weapon();if(w&&w.cw&&!w.skn)tags.push(JSON.stringify('cw:'+w.cw));}const mr=marPub();if(mr)tags.push(JSON.stringify('mr:'+mr));const pd=pdPub();if(pd)tags.push(JSON.stringify('pd:'+pd));const mn=mnPub();if(mn)tags.push(JSON.stringify('mn:'+mn));{const ln=lnkPub();if(ln)tags.push(JSON.stringify(ln));}if(S&&S.rsh&&S.rsh.g&&S.rsh.w)tags.push(JSON.stringify('gl:1'));if(!FXOUT.length)return '['+tags.join(',')+']';
  let out=tags.slice(),len=2+tags.join(',').length+1;for(let i=FXOUT.length-1;i>=0;i--){const j=JSON.stringify(FXOUT[i]);if(len+j.length+1>FXMAX)break;len+=j.length+1;out.splice(tags.length,0,j);}return '['+out.join(',')+']';}
 // presence field gu: the raised guard, 1 + direction (64 steps) + 64 fortress + 128 fresh (parry window), as drawGuard draws it
 function guPub(){if(!P||!P.guard)return null;const a=Math.atan2(P.gy,P.gx);return 1+((Math.round(a/(2*Math.PI)*64)%64+64)%64)+(P.fort>0?64:0)+(P.gT<.22?128:0);}
 function fxSt(sid){let s=FXS.get(sid);if(!s)FXS.set(sid,s={last:-1,off:null,raw:'',sw:null,du:0,tr:[],lt:0});return s;}
-function fxIn(r,s){if(!r.fx){s.pt=null;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';s.mr='';return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
- s.pt=null;s.inT=0;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';s.mr='';s.ad=0;s.cw='';for(const ev of a)if(typeof ev==='string'){const cwm=/^cw:([a-z]{2}\.\d{1,3}\.\d{1,3}\.\d{1,3}\.[a-z]{2,8}(?:\.[a-z]{2,8})?)$/.exec(ev);if(cwm)s.cw=cwm[1];const mrm=/^mr:([pmd][A-Za-z0-9_:.-]{4,64})$/.exec(ev);if(mrm)s.mr=mrm[1];const grm=/^gr:(\S{7,67})$/.exec(ev);if(grm&&grOf(grm[1]))s.gr=grm[1];const adm=/^ad:(\d{1,2})$/.exec(ev);if(adm&&ADYE[+adm[1]])s.ad=+adm[1];const bdm=/^bd:([0-9a-z]{10,16})$/.exec(ev);if(bdm)s.bd=bdm[1];const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}const q=/^st:([A-Za-z]{1,24})$/.exec(ev);/* capitals too: a saint's Q, a vampire's V and X (SAT-ONLINE-155: the whole tag was dropped for them) */if(q)s.st=q[1];const w=/^tl:([a-z0-9.]{1,40})$/.exec(ev);if(w)s.tl=w[1];if(ev==='gl:1')s.gl=1;const lk=/^lk:(\S{5,32})$/.exec(ev);if(lk)s.lk=lk[1];const mnm=/^mn:([0-9a-z_.-]{5,90})$/.exec(ev);if(mnm)mnIn(mnm[1],r);} // pet, mount and when they got to this place ride along in fx (fxPub)
+function fxIn(r,s){if(!r.fx){s.pt=null;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';s.mr='';s.ak=0;s.akh=0;return;}if(r.fx===s.raw)return;s.raw=r.fx;let a;try{a=JSON.parse(r.fx);}catch(e){return;}if(!Array.isArray(a))return;const now=performance.now();
+ s.pt=null;s.inT=0;s.st='';s.tl='';s.gl=0;s.lk='';s.bd='';s.gr='';s.mr='';s.ad=0;s.cw='';s.ak=0;s.akh=0;for(const ev of a)if(typeof ev==='string'){const cwm=/^cw:([a-z]{2}\.\d{1,3}\.\d{1,3}\.\d{1,3}\.[a-z]{2,8}(?:\.[a-z]{2,8})?)$/.exec(ev);if(cwm)s.cw=cwm[1];const mrm=/^mr:([pmd][A-Za-z0-9_:.-]{4,64})$/.exec(ev);if(mrm)s.mr=mrm[1];const grm=/^gr:(\S{7,67})$/.exec(ev);if(grm&&grOf(grm[1]))s.gr=grm[1];const adm=/^ad:(\d{1,2})$/.exec(ev);if(adm&&ADYE[+adm[1]])s.ad=+adm[1];const bdm=/^bd:([0-9a-z]{10,16})$/.exec(ev);if(bdm)s.bd=bdm[1];const p=/^(?:pt:(\S{1,24}) )?in:(\d{1,12})$/.exec(ev);if(p){s.pt=p[1]||null;s.inT=+p[2];}const q=/^st:([A-Za-z]{1,24})$/.exec(ev);/* capitals too: a saint's Q, a vampire's V and X (SAT-ONLINE-155: the whole tag was dropped for them) */if(q)s.st=q[1];const w=/^tl:([a-z0-9.]{1,40})$/.exec(ev);if(w)s.tl=w[1];if(ev==='gl:1')s.gl=1;const akm=/^ak:([1-5])([0-9a-z]{1,2})$/.exec(ev);if(akm){s.ak=+akm[1];s.akh=parseInt(akm[2],36)%360;}const lk=/^lk:(\S{5,32})$/.exec(ev);if(lk)s.lk=lk[1];const mnm=/^mn:([0-9a-z_.-]{5,90})$/.exec(ev);if(mnm)mnIn(mnm[1],r);} // pet, mount and when they got to this place ride along in fx (fxPub)
  for(const ev of a){if(!Array.isArray(ev)||!(ev[0]>s.last)||typeof ev[1]!=='number')continue;s.last=ev[0];const lat=now-ev[1];
   // the sender's clock: keep the lowest delay seen (creeping up slowly) so steps of one skill keep their spacing
   if(s.off==null||lat<s.off)s.off=lat;else s.off+=(lat-s.off)*.02;FXQ.push({at:ev[1]+s.off,sid:r.sid,ev});}
@@ -18206,7 +18306,7 @@ function netEnts(ents){faultAt('netEnts');const myRoom=(roomAt(P.x,P.y)||{}).id|
   const swk=fs.sw?(now-fs.sw.t)/140:-1,sw=swk>=0&&swk<1?swk:-1,gu=Number.isInteger(r.gu)&&r.gu>=1&&r.gu<=256?r.gu-1:-1;
   const pt=ptRemote(r,fs,ft),rd=pt.ride,hf=rd&&fr?1+((now/100)|0)%4:0,rsea=typeof p4Sea==='function'&&p4Sea(Math.floor(r.x/TS),Math.floor(r.y/TS));if(rsea&&fr){const lx=fs.bx??r.x,ly=fs.by??r.y;if(Math.hypot(r.x-lx,r.y-ly)>.05)boatFx(r,r.x-lx,r.y-ly,fs);}fs.bx=r.x;fs.by=r.y;if(rd&&fr)horseFxR(r,fs,ft);if(pt.pet){const a=pt.pet;ents.push({y:a.y,f:()=>drawPet(a)});}necRemote(ents,r,fs);
   const bob=emoBob(r.em);ents.push({y:r.y,f:()=>{fs.tr.forEach(a=>{ctx.globalAlpha=a.t/.22*.45;drawChar(k,a.x,a.y,a.dir,1,false);});ctx.globalAlpha=1;
-   if(r.anim==='dead')ctx.globalAlpha=.45;else if(fs.st&&fs.st.indexOf('s')>=0)ctx.globalAlpha=rzOmni()?.75:.3;if(wen>=7)drawEnh(r.x,r.y-bob,wen,0,r.dir);
+   if(r.anim==='dead')ctx.globalAlpha=.45;else if(fs.st&&fs.st.indexOf('s')>=0)ctx.globalAlpha=rzOmni()?.75:.3;if(r.anim!=='dead'&&!(fs.st&&fs.st.indexOf('s')>=0&&!rzOmni()))awkDraw(r.x,r.y,fs.ak|0,fs.akh|0);if(wen>=7)drawEnh(r.x,r.y-bob,wen,0,r.dir);
    if(rd){const b=[0,0,-1,0,1][hf],ry=Math.round(r.y)-9+b;drawHorse(r.x,r.y,r.dir,hf,rd);ctx.save();ctx.beginPath();ctx.rect(Math.round(r.x)-9,ry-25,18,17);ctx.clip();drawChar(k,r.x,ry,r.dir,0,false);ctx.restore();drawHorse(r.x,r.y,r.dir,hf,rd,ctx,'head');}
    else{const bl=am.blink(gTime*1000),fm=hcFormOf(fs.st);if(!fm&&rsea)boatSit(k,r.x,r.y,r.dir,bl);else if(!bmDraw(fm,r.sid,r.x,r.y-bob,r.dir,fr,bl,sw>=0)){drawChar(k,r.x,r.y-bob,r.dir,fr,bl);if((fs.st||'').indexOf('H')>=0&&!bl)bmHalfDraw(r.x,r.y-bob,r.dir);}}if(wen>=4&&!rd)drawEnh(r.x,r.y-bob,wen,1,r.dir);
    if(hcHandR(r,fs,bob,sw)){}else if(wi&&r.anim!=='dead'){const hx=Math.round(r.x)+(r.dir===3?-6:5),hy=Math.round(r.y-bob)-7;if(sw<0)weapPix(ctx,hx,hy,wi,r.dir);else SA.weapons.draw(ctx,wKey(wi),wi.r,hx,hy,fs.sw.a-1.1+2.2*sw+Math.PI/2,Math.cos(fs.sw.a)<0);}

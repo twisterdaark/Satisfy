@@ -26,6 +26,8 @@
   var DURABLE = [
     // identity and progress
     'look', 'cls', 'lv', 'xp', 'adv', 'title', 'tl', 'hitRec', 'cls2', 'cls2lv', 'sc2k', 'th', 'ffHide', 'inn', 'svT', 'rx', 'dpsB', 'st', 'pts', 'hid', 'sk', 'mast', 'balK', 'playT', 'race', 'rv', 'rzq', 'rsub', 'rzr', 'brf', 'rvkM', 'bch', 'rsT',
+    // awakenings (v3.72): the highest reached, its aura's hue, every aura hidden on this screen
+    'awk', 'awc', 'awh',
     // wallet and inventory
     'gold', 'bread', 'hpot', 'mpot', 'mats', 'arrows', 'arrowsMade', 'sold', 'items', 'eqW', 'eqA',
     // crafting (the Blacksmith's ladder)

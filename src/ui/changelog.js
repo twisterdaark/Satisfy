@@ -7,6 +7,18 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-28awaken', ver: '3.72', d: '2026-10-28',
+      ar: ["الصحوات: في لفل 100 و200 و300 و400 وأقصى لفل (999)، جسمك بيصحى صحوة جديدة. كل صحوة زيادة صغيرة ودايمة، وبتفضل معاك حتى لو خسرت لفل.",
+        "الأولى: +5% للخصائص، +5% سرعة مشي، وحيوية القتال (1 صحة و1 مانا كل ثانية في القتال). التانية: +5% هجوم، -5% كولداون، وكسر الحدود (8% تتجاهل الشلل). التالتة: +5% للستاتس، -10% مانا السكيلات، والثبات الأعلى (الجارد بيخسر 10% أقل). الرابعة: +8% للستاتس والهالة الطاغية (الأعداء حواليك بيخسروا 5% دفاع). المطلقة: +5% ضرر حقيقي على كل ضربة، وسكيل «عالم التخطي» (+25% سرعة و+15% كريتيكال 4 ثواني، كل 3 دقايق).",
+        "كل صحوة بتدّيك هالة حواليك بلون عشوائي، وشكلها بيكبر ويتغير مع كل صحوة أعلى. اللاعبين التانيين بيشوفوها أونلاين. تقدر تخفي الهالات من نافذة المعدات، والزيادات بتفضل.",
+        "أقصى لفل بقى 999 في اللعبة نفسها كمان (كان الأونلاين بس اللي بيقف عنده).",
+        "اختبار جديد لده."],
+      en: ["Awakenings: at Lv 100, 200, 300, 400 and the max level (999) your body awakens again. Each is a small, permanent boost, kept even if you lose a level.",
+        "First: +5% attributes, +5% move speed, and Combat Vitality (1 health and 1 mana a second in combat). Second: +5% attack, -5% cooldowns, and Limit Break (8% to shrug off a stun). Third: +5% stats, -10% skill mana, and Supreme Poise (your guard gives 10% less). Fourth: +8% stats and Overwhelming Aura (the foes around you lose 5% defence). Absolute: +5% true damage on every blow, and the skill World of Transcendence (+25% speed and +15% critical for 4 s, every 3 minutes).",
+        "Every awakening surrounds you with an aura of a random colour, bigger and different with each higher one. Other players see it online. You can hide auras in the equipment window; the boosts stay.",
+        "The max level is 999 in the game itself now too (only the online side stopped there before).",
+        "A new test for this."],
+      hide: [4] },
     { v: '2026-10-28bloodkeepers', ver: '3.71', d: '2026-10-28',
       ar: ["كل سلالة ليها حارس واقف في حتة في العالم، بدل قايمة نافذة الحالة (🩸 اتشالت): عشرين حارس، كل واحد في مكان يناسب سلالته (برج المراقبة القديم، تل مولر، غابة الصنوبر الأبيض، الساحل الشرقي، مناجم ريدان، قرية أورك الصقيع، الهاوية، الجحيم، وغيرهم). الحارس بيدّي الكويست لعرقه بس، من لفلها، وبترجعله لما تخلص.",
         "السلالات النادرة بقت أصعب: كويستين بدل واحدة، والحارس بتاعها أبعد. الكويست التانية جديدة (بوسات أعلى من لفلك، تفادي وبوس قريب منك، الكراكن مرتين، حتت فريدة من صنعك، عملاق الصقيع تلات مرات، الوحوش الأربعة المقدسة، وغيرها). لو كنت شايل كويست سلالة نادرة من القايمة القديمة، تقدمك بيتحسب للأولى.",

@@ -33,6 +33,8 @@ const INIT_SCRIPT = `(() => {
   // the pre-race baseline (v3.69): a Human who has not used the free race pick has no race strengths here, so the
   // numbers the older tests pin stay as they were; races.test.cjs deletes it to test the Human as players have it
   window.__rzPlain = 1;
+  // (v3.72) the same for awakenings: none in the older tests, whatever level they set; awaken.test.cjs deletes it
+  window.__awkPlain = 1;
   let a = 0x5eed1234 | 0;
   Math.random = function () {
     a = (a + 0x6D2B79F5) | 0;
