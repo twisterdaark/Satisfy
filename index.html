@@ -13452,7 +13452,7 @@ Object.assign(STR.en,{"awkL":"Awakening",
 const EGO={greed:{dm:.20,lsc:.15,exe:.15},aegis:{def:.25,blk:.15},reaper:{cdm:.20,pen:.10,sk:'egreap'},frost:{as:.20,cold:.15},
  arch:{mag:.25,cd:.10,echo:.10},dragon:{dm:.20,pen:.15,sk:'egdrag'},stalker:{ms:.25},monarch:{str:.30,gb:.20}};
 const EGOK=Object.keys(EGO),EGOP=.005,EGOLV=50,EGOIC={greed:'💰',aegis:'🛡️',reaper:'💀',frost:'❄️',arch:'📜',dragon:'🐉',stalker:'👤',monarch:'👑'};
-const EGORNG=mulberry32(((Date.now()>>>0)^0x6e60c0de)>>>0);
+var EGORNG=mulberry32(((Date.now()>>>0)^0x6e60c0de)>>>0);   // reseeded with a recorded run's seed (simBegin)
 let EGOE=0;   // an Auto-Cast Reflex echo is running: its blows deal half
 function egoOf(){if(!S||!S.items)return null;const w=weapon();return w&&w.slot==='w'&&EGO[w.ego]?w.ego:null;}
 function egoV(k){const e=egoOf();return e?EGO[e][k]||0:0;}
@@ -13515,6 +13515,7 @@ function egoCraft(uid,k){const it=itemByUid(uid);if(!it||it.slot!=='w'||it.ego||
 function egoTip(i){return i&&i.ego&&EGO[i.ego]?`<br><small style="color:#e0b0ff">${EGOIC[i.ego]} <b>${esc(t('egN_'+i.ego))}</b>: ${esc(t('egD_'+i.ego))}${i.egc?' '+esc(t('egCraftT')):''}</small>`:'';}
 // the actives, on the bar while that spirit is in your hand
 Object.assign(SKD,{egreap:{cls:'ego',ego:'reaper',lv:1,mp:40,cd:60,col:'#8a3ac8'},egdrag:{cls:'ego',ego:'dragon',lv:1,mp:50,cd:90,col:'#5ac8ff'}});
+Object.assign(SKICO,{egreap:(p,c)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-8.5);if(d<7.6&&d>6.2&&y>3)p(x,y,1,1,'#6a3a9a');}p(5,3,6,6,'#e8e0f0');p(4,5,1,3,'#e8e0f0');p(11,5,1,3,'#e8e0f0');p(6,5,1,2,'#101a33');p(9,5,1,2,'#101a33');p(7,8,2,1,'#101a33');p(6,9,4,2,'#c8c0d8');p(6,10,1,1,'#101a33');p(9,10,1,1,'#101a33');p(2,12,3,1,c);p(11,12,3,1,c);},egdrag:(p,c)=>{for(let i=0;i<10;i++){p(2+i,9-(i>>2)+(i%4==1?1:0),2,2,c);}p(11,4,3,3,c);p(13,3,2,1,'#d8f4ff');p(12,5,1,1,'#101a33');p(14,6,2,1,'#d8f4ff');p(1,12,14,1,'#2a7ac8');for(const [x,y] of [[3,13],[7,14],[11,13]])p(x,y,1,1,'#d8f4ff');}});
 Object.assign(SKF,{
  // Reaper's Command: the spirit sweeps out from you, 350% dark to everything within reach, and fear: ordinary foes flee for 5 s (a boss staggers)
  egreap:()=>{SFX.crit();shake=.25;fx.push({ring:true,x:P.x,y:P.y-6,t:.5});for(let i=0;i<28;i++){const a=i/28*6.283;fx.push({x:P.x+Math.cos(a)*14,y:P.y-6+Math.sin(a)*8,vx:Math.cos(a)*160,vy:Math.sin(a)*90,t:.45,c:i%2?'#3a1a4a':'#a060e0',fl:1});}
@@ -18031,7 +18032,7 @@ const recClock=s=>{const sp=1000/60;return [()=>s.t0+FSTEPS*sp,()=>s.p0+FSTEPS*s
 function simBegin(raw){if(SIM||!FIXT)return;let s;
  if(RPL)s={seed:RPL.seed,t0:RPL.t0,p0:RPL.p0,gt:RPL.gt};else if(recOn()&&raw)s={seed:(VRAND()*4294967296)>>>0,t0:Date.now(),p0:performance.now(),gt:gTime};else return;
  SIM=Object.assign(s,{tq:[],tid:0,rnd:mulberry32(s.seed)});FSTEPS=0;facc=0;gTime=s.gt;
- const [dn,pn]=recClock(SIM);Date.now=dn;performance.now=pn;Math.random=SIM.rnd;rand=SIM.rnd;AWKRNG=mulberry32((s.seed^0x2a77e1c3)>>>0);
+ const [dn,pn]=recClock(SIM);Date.now=dn;performance.now=pn;Math.random=SIM.rnd;rand=SIM.rnd;AWKRNG=mulberry32((s.seed^0x2a77e1c3)>>>0);EGORNG=mulberry32((s.seed^0x6e60c0de)>>>0);
  window.setTimeout=(f,ms,...a)=>simTimer(f,ms,a,0);window.setInterval=(f,ms,...a)=>simTimer(f,ms,a,1);window.clearTimeout=window.clearInterval=id=>{if(typeof id==='string'&&id[0]==='v')SIM.tq=SIM.tq.filter(x=>x.id!==id);else{T_CT(id);T_CI(id);}};
  if(RPL){RPL.at=0;RPL.bad=-1;}else REC={v:1,seed:s.seed,t0:s.t0,p0:s.p0,gt:s.gt,save:raw,kb:KB.slice(),ev:[],cp:[]};rplLabel();}
 function simTimer(f,ms,a,rep){const n=Math.max(1,Math.ceil((+ms||0)/(1000/60))),id='v'+(++SIM.tid);SIM.tq.push({id,at:FSTEPS+n,n,rep,f:typeof f==='function'?f:()=>{},a});return id;}

@@ -15,7 +15,9 @@ keep it (`tradeItemIn` copies strings of 40 characters or less). An item that na
 - **Rating.** A weapon that takes an ego is raised to Unique (3) at least, and a quarter of the time to Legendary (4)
   (`egoMake`). `egoRate` recomputes the rating's numbers from the recipe: attack, `as`/`ms`/`dm`, `mpb`, and the weapon
   passives if it had fewer than the rating gives.
-- **Its own dice.** `EGORNG`, so no other roll in the game moves.
+- **Its own dice.** `EGORNG`, so no other roll in the game moves. A recorded run (`simBegin`) reseeds it from the run's seed, so
+  a replay stays in step.
+- **Icons.** Reaper's Command and Dragon Spirit Strike have their own skill icons (`SKICO`).
 
 ## The eight spirits (the owner's numbers)
 
