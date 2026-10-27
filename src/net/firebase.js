@@ -91,8 +91,8 @@
     // so a step sends {x, y, dir, anim, seq, t} instead of the whole public profile (COST_MODEL.md).
     var sent = null;
     // Round trip (doc U015): how long the server takes to acknowledge a presence write, smoothed.
-    var rtt = null, writes = 0, fails = 0;
-    function acked(t0) { return function () { var ms = Date.now() - t0; rtt = rtt == null ? ms : Math.round(rtt * 0.8 + ms * 0.2); }; }
+    var rtt = null, writes = 0, fails = 0, acks = []; // acks: the last 32 raw round trips (plan U045's p95)
+    function acked(t0) { return function () { var ms = Date.now() - t0; rtt = rtt == null ? ms : Math.round(rtt * 0.8 + ms * 0.2); acks.push(ms); if (acks.length > 32) acks.shift(); acked.n = (acked.n | 0) + 1; }; }
     var DIRECTED = /^(party\.(invite|accept|decline|kick|ping)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say)|pvp\.(hit|kill)|trade\.(ask|accept|decline|cancel))$/;
     // exactly the fields the inbox rules accept: party {to, party}, duel {to, duel, k?, n?}, raid {to, raid, k?, n?},
     // chat {to, party, text}
@@ -225,7 +225,7 @@
     return {
       kind: 'firebase',
       /** {rtt: smoothed ms for the server to acknowledge a presence write (null until the first), writes, fails} */
-      netStats: function () { return { rtt: rtt, writes: writes, fails: fails }; },
+      netStats: function () { return { rtt: rtt, writes: writes, fails: fails, acks: acks.slice(), acked: acked.n | 0 }; },
       send: function (env) {
         if (closed || !env) return;
         if (env.type === 'presence.state') {

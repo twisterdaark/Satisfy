@@ -18962,15 +18962,15 @@ Object.assign(STR.ar,{ecoFlow:'الأسبوع ده ({n} لاعب): دخل {i} د
 Object.assign(STR.en,{ecoFlow:'This week ({n} players): {i} gold came in and {o} went out, {d}',ecoWarn:'⚠ {r} times as much comes in as goes out'});
 Object.assign(STR.ar,{admBalHyb:'⚠ {c} (هجين) بيقتل أسرع من أقوى كلاس صافي: {s} ث للوحش قدام {bs} ث لـ{b} (أسرع بـ{p}%)',admBalHybOk:'✓ {c} (هجين) لسه تحت أقوى كلاس صافي: {s} ث للوحش قدام {bs} ث لـ{b}'});
 Object.assign(STR.en,{admBalHyb:'⚠ {c} (a hybrid) kills faster than the strongest pure class: {s} s a monster against {bs} s for {b} ({p}% faster)',admBalHybOk:'✓ {c} (a hybrid) stays under the strongest pure class: {s} s a monster against {bs} s for {b}'});
-Object.assign(STR.ar,{admBalPvp:' · مبارزات {dw}–{dl}، مفتوح {ow}–{ol} · قتل لاعب في {k} ث، صمود {v} ث',admBalBand:'تقييم العدة {b}: {p} لاعب · PvP {w}–{l} ({r}%)',admBalRtt:'زمن الرد p95: الوسط {m} م.ث، الأسوأ {x} م.ث ({n} لاعب)',crsAllH:'جودة الصناعة عند كل اللاعبين ({w}): {n} قطعة من {p} لاعب',crsAllOk:'مفيش حساب نسبه أعلى من اللي الفرن يقدر يديه.',crsAllWarn:'⚠ {n} حساب نسبهم أعلى من اللي الفرن يقدر يديه:',crsAllRow:'{h} ({c}): {n} قطعة، {e} {r3}، {l} {r4}'});
-Object.assign(STR.en,{admBalPvp:' · duels {dw}–{dl}, open {ow}–{ol} · a player killed in {k} s, lasted {v} s',admBalBand:'Gear band {b}: {p} players · PvP {w}–{l} ({r}%)',admBalRtt:'Round trip p95: median {m} ms, worst {x} ms ({n} players)',crsAllH:'Crafting quality across all players ({w}): {n} pieces from {p} players',crsAllOk:'No account is past what the forge can give.',crsAllWarn:'⚠ {n} accounts are past what the forge can give:',crsAllRow:'{h} ({c}): {n} pieces, {e} {r3}, {l} {r4}'});
+Object.assign(STR.ar,{admBalPvp:' · مبارزات {dw}–{dl}، مفتوح {ow}–{ol} · قتل لاعب في {k} ث، صمود {v} ث',admBalBand:'تقييم العدة {b}: {p} لاعب · PvP {w}–{l} ({r}%)',admBalRtt:'زمن الرد p95: الوسط {m} م.ث، الأسوأ {x} م.ث ({n} لاعب)',crsAllH:'جودة الصناعة عند كل اللاعبين ({w}): {n} قطعة من {p} لاعب',crsAllOk:'مفيش حساب نسبه أعلى من اللي الفرن يقدر يديه.',crsAllNone:'محدش صنع حاجة الأسبوع ده',crsAllWarn:'⚠ {n} حساب نسبهم أعلى من اللي الفرن يقدر يديه:',crsAllRow:'{h} ({c}): {n} قطعة، {e} {r3}، {l} {r4}'});
+Object.assign(STR.en,{admBalPvp:' · duels {dw}–{dl}, open {ow}–{ol} · a player killed in {k} s, lasted {v} s',admBalBand:'Gear band {b}: {p} players · PvP {w}–{l} ({r}%)',admBalRtt:'Round trip p95: median {m} ms, worst {x} ms ({n} players)',crsAllH:'Crafting quality across all players ({w}): {n} pieces from {p} players',crsAllOk:'No account is past what the forge can give.',crsAllNone:'Nobody has made anything this week',crsAllWarn:'⚠ {n} accounts are past what the forge can give:',crsAllRow:'{h} ({c}): {n} pieces, {e} {r3}, {l} {r4}'});
 Object.assign(STR.en,{admBal:'Balance ({w}, {n} players)',admBalRow:'{c}: {p} players (Lv {lv}) · {k} kills, {s} s each · PvP {w}–{l} ({r})',admBalNone:'No numbers this week yet'});
 var BAL=null,balT=0,balSig='',balS=null,balG=0,balDirty=0;
 const balKey=()=>'satisfy_bal@'+(NET&&NET.uid||'');
 function balOn(){return !!(NETTR&&NETTR.kind==='firebase'&&FB&&netUser&&NET&&S&&!S.__demo);}
 // this week's numbers for this account on this device (a new week starts again at 0)
 function balGet(){const wk=lockWeek();if(!BAL||BAL.k!==balKey()){let v=null;try{v=JSON.parse(localStorage.getItem(balKey())||'null');}catch(e){}BAL={k:balKey(),v:v&&typeof v==='object'?v:null};}
- if(!BAL.v||BAL.v.wk!==wk)BAL.v={wk,n:0,s:0,w:0,l:0,gi:0,go:0};for(const k of BALX)BAL.v[k]=+BAL.v[k]||0;return BAL.v;}
+ if(!BAL.v||BAL.v.wk!==wk)BAL.v={wk,n:0,s:0,w:0,l:0,gi:0,go:0};for(const k of ['gi','go',...BALX])BAL.v[k]=+BAL.v[k]||0;return BAL.v;}
 function balSave(){try{localStorage.setItem(balKey(),JSON.stringify(BAL.v));}catch(e){}}
 // a monster we hit died: the time since our first hit (up to 10 min counts)
 function balKill(m){const f=m.fh;m.fh=0;if(!f||m.mobKill||!balOn())return;const d=Math.max(0,gTime-f);if(d>600)return;const v=balGet();v.n++;v.s=Math.round((v.s+d)*10)/10;balSave();}
@@ -18981,13 +18981,14 @@ function balPvp(win,duel){if(!balOn())return;const v=balGet();v[win?'w':'l']++;i
    and the round trip's p95 (rt ms, from the presence writes' acknowledgements, sampled every 10 s). Plan U284: each week's
    pieces by rating (c0..c4), for the alarm across all players */
 const BALX=['dw','dl','pn','pk','pd','ps','c0','c1','c2','c3','c4'];const PVPF=new Map();let BALRT=[],balRtT=0;
-function balHitP(uid){const n=performance.now(),f=PVPF.get(uid);if(!f||n-f.l>30000)PVPF.set(uid,{f:n,l:n});else f.l=n;}
+function balHitP(uid){const n=performance.now(),f=PVPF.get(uid);for(const [u,x] of PVPF)if(n-x.l>60000)PVPF.delete(u);if(!f||n-f.l>30000)PVPF.set(uid,{f:n,l:n});else f.l=n;}
 function balPvpKill(uid){const f=PVPF.get(uid);PVPF.delete(uid);if(!balOn()||!f)return;const d=(performance.now()-f.f)/1000;if(d>60)return;const v=balGet();v.pn++;v.pk=Math.round((v.pk+d)*10)/10;balSave();}
 function balPvpDied(ms){if(!balOn())return;const v=balGet();v.pd++;v.ps=Math.round((v.ps+Math.max(0,Math.min(60000,ms|0))/1000)*10)/10;balSave();}
 function balCraft(r){if(!balOn())return;const v=balGet();v['c'+Math.max(0,Math.min(4,r|0))]++;balDirty=1;}
 const balGb=()=>{const w=weapon(),a=armorIt();return Math.max(0,Math.min(4,Math.round(((w?w.r|0:0)+(a?a.r|0:0))/2)));};
-function balRtt(){const n=performance.now();if(n-balRtT<10000)return;balRtT=n;const L=NETTR&&NETTR.netStats?NETTR.netStats():null;if(L&&L.rtt>0){BALRT.push(Math.min(60000,Math.round(L.rtt)));if(BALRT.length>90)BALRT.shift();}}
-const balP95=()=>{if(!BALRT.length)return 0;const a=[...BALRT].sort((x,y)=>x-y);return a[Math.min(a.length-1,Math.floor(a.length*.95))];};
+function balRtt(){const n=performance.now();if(n-balRtT<10000)return;balRtT=n;const L=NETTR&&NETTR.netStats?NETTR.netStats():null;if(!L)return;const A=Array.isArray(L.acks)?L.acks:[];   /* the raw acknowledgements since the last look (not the smoothed rtt) */
+ for(const x of A.slice(Math.max(0,A.length-Math.max(0,(L.acked|0)-(balRtt.w|0))))){if(x>0)BALRT.push(Math.min(60000,Math.round(x)));}balRtt.w=L.acked|0;while(BALRT.length>90)BALRT.shift();}
+const balP95=()=>{if(!BALRT.length)return 0;const a=[...BALRT].sort((x,y)=>x-y);return a[Math.max(0,Math.ceil(a.length*.95)-1)];};
 /* SAT-ONLINE-093 (plan U334): the gold that came in and went out this week, from every change of the bag's gold (a new or
    loaded character starts the count again) */
 // signed out, the count forgets where gold was: gold made or spent offline is not counted as one jump at the next sign-in
@@ -19012,9 +19013,9 @@ const BALHYB=['bmage'],BALMIN=30;
 /* (plan U284) the owner's /craftstats all: this week's pieces by rating across every player, and the accounts past what the
    forge allows (a legendary off Pagma's Successor, or over a third epic or better in 50 pieces or more: crsShow's alarm) */
 function crsFlag(e){const C=[0,1,2,3,4].map(i=>+e['c'+i]||0),n=C.reduce((a,b)=>a+b,0);return n&&((C[4]>0&&e.cls!=='pagma')||(n>=50&&(C[3]+C[4])/n>.34))?{h:typeof e.h==='string'?e.h:'?',cls:e.cls,C,n}:null;}
-function crsAll(all,wk){const T=[0,0,0,0,0];let p=0;const F=[];for(const k in (all||{})){const e=all[k];if(!e||e.wk!==wk)continue;const C=[0,1,2,3,4].map(i=>+e['c'+i]||0);if(!C.some(x=>x>0))continue;p++;C.forEach((x,i)=>T[i]+=x);const f=crsFlag(e);if(f)F.push(f);}
+function crsAll(all,wk){const T=[0,0,0,0,0];let p=0;const F=[];for(const k in (all||{})){const e=all[k];if(!e||e.wk!==wk)continue;const C=[0,1,2,3,4].map(i=>+e['c'+i]||0);if(!C.some(x=>x>0))continue;p++;C.forEach((x,i)=>T[i]+=x);const f=crsFlag(e);if(f){if(f.h==='?')f.h=String(k).slice(0,12);F.push(f);}}
  return {T,n:T.reduce((a,b)=>a+b,0),p,F:F.sort((a,b)=>b.C[4]-a.C[4]||b.n-a.n)};}
-function admCrs(st){st.balance().then(all=>{const wk=lockWeek(),A=crsAll(all,wk);if(!A.n){toast(t('crsNone'));return;}const pc=i=>Math.round(A.T[i]*1000/A.n)/10;
+function admCrs(st){st.balance().then(all=>{const wk=lockWeek(),A=crsAll(all,wk);if(!A.n){toast(t('crsAllNone'));return;}const pc=i=>Math.round(A.T[i]*1000/A.n)/10;
  dialog('bhSys',[t('crsAllH',{n:A.n,p:A.p,w:wk}),[0,1,2,3,4].map(i=>t('r'+i)+': '+A.T[i]+' ('+pc(i)+'%)').join('\n'),A.F.length?t('crsAllWarn',{n:A.F.length})+'\n'+A.F.slice(0,6).map(f=>t('crsAllRow',{h:Satisfy.chat.clean(f.h,24)||'?',c:t('cl_'+f.cls),n:f.n,e:f.C[3],l:f.C[4],r3:t('r3'),r4:t('r4')})).join('\n'):t('crsAllOk')]);},()=>toast(t('gdFail'),'warn'));}
 window.__GBAL={stats:(a,w)=>balStats(a,w),bands:(a,w)=>balBands(a,w),crs:(a,w)=>crsAll(a,w),get v(){return balGet()},p95:()=>balP95(),gb:()=>balGb(),hit:u=>balHitP(u),kill:u=>balPvpKill(u),died:ms=>balPvpDied(ms),pvp:(w,d)=>balPvp(w,d),tick:()=>balTick(true,true),craft:(id,r)=>domainEv('craft',id,r,'w'),board:()=>admBal({balance:()=>Satisfy.firebase.modStore(FB).balance()}),rtt:L=>{BALRT=L.slice();}}; // tests
 function balHyb(L){const out=[];for(const h of L){if(!BALHYB.includes(h.c)||h.n<BALMIN||!(h.ttk>0))continue;const peers=L.filter(c=>!BALHYB.includes(c.c)&&c.n>=BALMIN&&c.ttk>0&&Math.abs(c.lv-h.lv)<=20);if(!peers.length)continue;

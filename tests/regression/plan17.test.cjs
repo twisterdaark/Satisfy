@@ -59,6 +59,7 @@ test('the owner\'s board: PvP fairness by class and gear band, the round trip, a
     assert.equal(r.pn, 1); assert.ok(r.pk >= 2.5 && r.pk < 10, 'the kill took about 3 s: ' + r.pk);
     assert.deepEqual([r.pd, r.ps, r.dw, r.w, r.l, r.gb, r.p95], [1, 4.2, 1, 2, 1, 2, 300]);
     assert.deepEqual(r.c, [1, 0, 1, 0, 1]);
+    assert.equal(await b.eval(() => { const X = window.__GBAL; X.rtt(Array.from({ length: 20 }, (_, i) => i + 1)); const p = X.p95(); X.rtt([100, 110, 120, 130, 140, 150, 160, 170, 180, 300]); return p; }), 19, 'p95 by nearest rank: the 19th of 20');
     await until([b], () => { const e = window.__fakeRTDB.data.get('balance/gBlB2'); return !!e && e.c4 === 1; });
     const rec = await b.eval(() => window.__fakeRTDB.data.get('balance/gBlB2'));
     assert.deepEqual([rec.dw, rec.dl, rec.pn, rec.pd, rec.ps, rec.gb, rec.rt, rec.c0, rec.c2, rec.c4, rec.h], [1, undefined, 1, 1, 4.2, 2, 300, 1, 1, 1, 'Bassem']);
@@ -84,7 +85,10 @@ test('the owner\'s board: PvP fairness by class and gear band, the round trip, a
     assert.match(cs, /⚠ 1 accounts are past what the forge can give:/);
     assert.match(cs, /Bassem \(Magician\): 3 pieces, 0 Unique, 1 Legendary/);
     // a player who isn't an admin: no board
+    await b.eval(() => { window.__toastSeen = ''; const box = document.getElementById('toasts'); new MutationObserver(() => { window.__toastSeen += '|' + box.textContent; }).observe(box, { childList: true, subtree: true, characterData: true }); });
     await type(b, '/craftstats all');
+    await until([b], () => /Only the game's owner can do that/.test(window.__toastSeen));
+    assert.equal(await b.eval(() => window.__G.mode), 'play', 'no board for a player');
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
