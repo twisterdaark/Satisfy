@@ -118,15 +118,14 @@ test('base races: one free switch, the skin others see, the numbers, the skills 
     const r = await g.eval(() => {
       const G = window.__G, Z = window.__GRZ, C = window.__GPB9, B = window.__GPB11, o = {};
       G.P.inv = 1e9; G.S.lv = 320; G.S.rv = '';
-      o.hum0 = [Z.xp(), Z.stM('dex')]; // a Human who has not chosen yet plays as before
-      G.S.brf = 1; o.hum = [Z.xp(), Z.stM('dex')]; G.S.brf = 0;
+      delete window.__rzPlain; // the Human as players have it: the strengths from the start, before any pick
+      o.hum = [Z.xp(), Z.stM('dex')];
       o.row = Z.row();
       G.S.look.skin = 3; Z.pickAsk('elf', 'dark');
       const yes = [...document.querySelectorAll('#dialog button, #dialog .opt, #dialog [data-i]')];
       o.btns = yes.length;
       return o;
     });
-    assert.deepEqual(r.hum0, [1, 1], 'no race powers before the choice');
     assert.ok(Math.abs(r.hum[0] - 1.1) < 1e-9 && Math.abs(r.hum[1] - 1.05) < 1e-9, 'a Human: +10% experience, +5% attributes ' + r.hum);
     assert.ok(/data-rzp/.test(r.row), 'the status window offers the free switch');
     const s = await g.eval(() => {

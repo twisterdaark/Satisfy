@@ -12451,7 +12451,7 @@ Object.assign(SKD,{rzeye:{cls:'race',race:'evileye',lv:1,mp:40,cd:20,col:'#c040f
 SKK.rzchiyou='buff';SKK.rzhell='buff';SKK.rzwind='buff';SKK.rzforge='buff';SKK.rzhowl='buff';
 const RZS={t:0,lb:'',cor:0,fx:0,pr:0},RZT={};
 // your race's numbers: the race and its bloodline added up (0 for a Vampire)
-function rzR(){if(!RZ||!S)return null;const r=myRace();return r==='human'&&!S.brf?null:RZ[r]||null;}   // a Human's race wakes when it is chosen (the free pick): a character who has not chosen plays as before
+function rzR(){if(!RZ||!S)return null;const r=myRace();return r==='human'&&!S.brf&&window.__rzPlain?null:RZ[r]||null;}   // every Human has the Human strengths from the start (owner 2026-10-27); only the tests' pre-race baseline (__rzPlain, set by the harness) plays a Human who has not chosen as before
 const RZRNG=mulberry32(((Date.now()>>>0)^0x5a17c0de)>>>0);   // its own stream: the rolls never shift the game's rand
 function rzV(k){const r=rzR();if(!r)return 0;const v=S.rv&&r[S.rv];return (r.b[k]||0)+(v&&v[k]||0);}
 const rzPv=r=>RZ[r]&&RZ[r].pv||[.15,.05];
@@ -12720,9 +12720,9 @@ Object.assign(STR.ar,{race_elf:'إلف',race_merfolk:'عشيرة الماية (�
  rzvD_orc_v1:'(زعيم الحرب: قوة جسدية +10%، مقاومة الشلل +10%، و«سيد الحرب»: صرخة الحرب أقوى 50% (+30%).)',
  rzvD_orc_v2:'(شامان الأجداد: سحر الأرواح والعناصر +15%، سرقة حياة +10%، و«إرادة الطوطم»: مرة كل 5 دقايق لما صحتك تنزل تحت 5% بيطلع حاجز ينقذك من الموت.)',
  rzVars:'وانت بتاخد العرق، {p1}% يطلعلك «{a}» و{p2}% «{b}». ولكل سلالة كويست بيصحّيها لو مطلعتش.',
- rzPick1:'[اختيار العرق الأساسي]',rzPick2:'تقدر تختار عرقك الأساسي مرة واحدة ببلاش (حتى لو هتفضل إنسان): قدرات العرق بتصحى أول ما تختار. بعد كده مفيش تغيير تاني غير بشخصية جديدة.',rzPickUsed:'[استخدمت تغيير العرق المجاني خلاص. عشان تغيّره تاني لازم تبدأ بشخصية جديدة.]',
+ rzPick1:'[اختيار العرق الأساسي]',rzPick2:'تقدر تغيّر عرقك الأساسي مرة واحدة ببلاش. بعد كده مفيش تغيير تاني غير بشخصية جديدة.',rzPickUsed:'[استخدمت تغيير العرق المجاني خلاص. عشان تغيّره تاني لازم تبدأ بشخصية جديدة.]',
  rzLater:'بعدين',rzPickW:'متأكد إنك عايز تبقى {r}؟ ده التغيير المجاني الوحيد، وعرقك الحالي ({c}) هيتشال.',rzPickY:'أيوه، أبقى {r}',rzPickBack:'لا، ارجع',
- rzPickTip:'اختار عرقك الأساسي مرة ببلاش عشان قدراته تصحى (الإنسان كمان): نافذة الحالة ← 🧬',rzPickB:'اختار العرق الأساسي (مرة ببلاش)',rzVarB:'كويستات السلالة',
+ rzPickTip:'تقدر تغيّر عرقك الأساسي مرة ببلاش: نافذة الحالة ← 🧬',rzPickB:'اختار العرق الأساسي (مرة ببلاش)',rzVarB:'كويستات السلالة',
  rzVarNone:'[عرقك معندوش سلالات.]',rzVarOwn:'دي سلالتك',rzVarDone:'خلصت',rzVarOn:'شغّال',rzVarLv:'لفل {n}',rzVarGo:'متاح',rzVarHead:'[سلالات {r}]',
  rzVarTip:'كويست سلالة «{v}» اتفتح: نافذة الحالة ← 🩸',rzVarW:'تحذير: السلالة الجديدة هتحل محل «{v}».',rzVarQ:'[دمك صحي: بقيت {v}!]',rzVarHum:'دمك طلع نادر: {v}!',
  rzBarT:'حاجز!',rzTotT:'إرادة الطوطم!',rzPhT:'انجراف!',rzWindOn:'النفَس التاني: رجعت',rzNoTg:'مفيش عدو قريب',rzForgeOn:'وقفة الصانع: جلدك بقى حديد',rzHowlOn:'صرخة الحرب!',
@@ -12758,9 +12758,9 @@ Object.assign(STR.en,{race_elf:'Elf',race_merfolk:'Water Clan (Merfolk)',race_dw
  rzvD_orc_v1:'(War Chief: +10% strength, +10% resistance to stuns, and Bloodline Warlord: the Battle Howl 50% stronger, +30%.)',
  rzvD_orc_v2:'(Ancestral Shaman Orc: +15% spirit and elemental magic, +10% life steal, and Totemic Will: once every 5 minutes, falling under 5% health raises a barrier that cheats death.)',
  rzVars:'As you take the race: a {p1}% chance of "{a}" and {p2}% of "{b}". Each bloodline also has a quest that awakens it if it did not come.',
- rzPick1:'[Base race]',rzPick2:'You may choose your base race once for free (staying Human counts): the race\'s powers wake when you choose. After that only a new character changes it.',rzPickUsed:'[You have used your free change of race. To change it again you must start a new character.]',
+ rzPick1:'[Base race]',rzPick2:'You may change your base race once for free. After that only a new character changes it.',rzPickUsed:'[You have used your free change of race. To change it again you must start a new character.]',
  rzLater:'Later',rzPickW:'Become {r}? This is your only free change, and your current race ({c}) will be replaced.',rzPickY:'Yes, become {r}',rzPickBack:'No, go back',
- rzPickTip:'Choose your base race once for free to wake its powers (Humans too): status window → 🧬',rzPickB:'Choose base race (free, once)',rzVarB:'Bloodline quests',
+ rzPickTip:'You may change your base race once for free: status window → 🧬',rzPickB:'Choose base race (free, once)',rzVarB:'Bloodline quests',
  rzVarNone:'[Your race has no bloodlines.]',rzVarOwn:'yours',rzVarDone:'done',rzVarOn:'in progress',rzVarLv:'Lv {n}',rzVarGo:'open',rzVarHead:'[Bloodlines of the {r}]',
  rzVarTip:'The bloodline quest "{v}" is open: status window → 🩸',rzVarW:'Warning: the new bloodline replaces "{v}".',rzVarQ:'[Your blood has awakened: you are now {v}!]',rzVarHum:'Your blood is rare: {v}!',
  rzBarT:'BARRIER!',rzTotT:'TOTEMIC WILL!',rzPhT:'PHASE!',rzWindOn:'Second Wind: you are back on your feet',rzNoTg:'No foe near you',rzForgeOn:'Mastercraft Stance: your skin is iron',rzHowlOn:'BATTLE HOWL!',
