@@ -28,6 +28,8 @@
     'look', 'cls', 'lv', 'xp', 'adv', 'title', 'tl', 'hitRec', 'cls2', 'cls2lv', 'sc2k', 'th', 'ffHide', 'inn', 'svT', 'rx', 'dpsB', 'st', 'pts', 'hid', 'sk', 'mast', 'balK', 'playT', 'race', 'rv', 'rzq', 'rsub', 'rzr', 'brf', 'rvkM', 'bch', 'rsT',
     // awakenings (v3.72): the highest reached, the highest announced, its aura's hue, every aura hidden on this screen
     'awk', 'awkA', 'awc', 'awh',
+    // relics (v3.74): each chain's step and its progress, the vaults' locks and the ones opened, a relic the world gave while the page closed, the rumour heard
+    'rqs', 'rqx', 'rqL', 'rqo', 'rqgp', 'rqw',
     // wallet and inventory
     'gold', 'bread', 'hpot', 'mpot', 'mats', 'arrows', 'arrowsMade', 'sold', 'items', 'eqW', 'eqA',
     // crafting (the Blacksmith's ladder)

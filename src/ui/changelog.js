@@ -7,6 +7,18 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-28relics', ver: '3.74', d: '2026-10-28',
+      ar: ["الآثار: تمن حاجات فريدة بتتلبس في خانة جديدة (الأثر) في نافذة المعدات، ومن كل أثر نسخة واحدة بس في العالم كله. مجسّم يد الإله، رق بعل، الكتاب المقدس لريبيكا، قلب العملاق القديم، عين الملك الشرير، قارورة دم التنين، قرعة الطاوي المقدسة، وقلب الآلة السحرية.",
+        "مفيش حد بيدّيك أثر ولا كويست. كل أثر مستني في آخر سلسلة حجارة قديمة على الخريطة: كل حجر عايز حاجة (وقت معيّن من اليوم، جو معيّن، تقدمة، دم، صيد، دقيقة هدوء، أو حجارة تتلمس بترتيب بيقوله لغز)، وبيدّيك رمز وتلميح للحجر اللي بعده. آخر حاجة خزنة بتتفتح بالتلات رموز بالترتيب، والغلط بيقفلها عشر دقايق.",
+        "اللي ماسك أثر ميقدرش ياخد غيره ولا حتى يشيله في شنطته. الأثر مبيتباعش ولا بيترمي ولا بيتبدّل؛ تقدر تسيبه من نافذة المعدات فيرجع لخزنته، وأي حد يفتحها ياخده.",
+        "لما توصل لفل 100 بيوصلك قول قديم عن الآثار. باقي الطريق عليك.",
+        "اختبار جديد لده."],
+      en: ["Relics: eight unique things worn in a new slot (Relic) in the equipment window, with only one copy of each in the whole world. The God Hand Miniature, the Parchment of Baal, the Sacred Scripture of Rebecca, the Heart of the Ancient Giant, the Eye of the Evil King, the Dragon Blood Vial, the Taoist's Sacred Gourd and the Magic Machine Core.",
+        "No one gives you a relic or a quest for one. Each waits at the end of a chain of old stones across the map: every stone wants something (a time of day, the weather, an offering, blood, a hunt, a still minute, or stones touched in the order a riddle tells), and gives a sign and a hint toward the next. Last is a vault that opens to the three signs in order; a wrong turn locks it for ten minutes.",
+        "Whoever holds a relic can't take another or even carry one. A relic can't be sold, thrown away or traded; you can let it go from the equipment window, and it goes back to its vault for anyone who opens it.",
+        "At Lv 100 an old saying about the relics reaches you. The rest of the way is yours to find.",
+        "A new test for this."],
+      hide: [4] },
     { v: '2026-10-28ego', ver: '3.73', d: '2026-10-28',
       ar: ["الأسلحة الواعية (الإيجو): تمن أرواح ممكن تصحى في أي سلاح، والسلاح اللي فيه روح دايمًا فريد أو أسطوري. روح الجشع، الدرع، الحاصد، ناب الصقيع، الساحر الأعظم الهامس، ملك التنانين، المتربّص الشبح، والملك الحديدي. كل روح ليها زيادات وباسيف، والحاصد وملك التنانين ليهم سكيل على البار.",
         "أي سلاح بيقع (دروب نادر، دروب باسم، صندوق البوس، قرعة الفريق) عنده فرصة 0.5% يطلع سلاح واعي. سلاح واعي واحد بس في إيدك في المرة، والروح بتشتغل بس وهو في إيدك.",
