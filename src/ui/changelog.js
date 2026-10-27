@@ -7,6 +7,12 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27plan17', ver: '3.67', d: '2026-10-27',
+      ar: ["لوحة التوازن بتاعة صاحب اللعبة بقت بتوري عدالة الـPvP: المبارزات لوحدها والقتال المفتوح لوحده، وقت قتل لاعب، وكام ثانية الواحد بيصمد بعد ما يتضرب، والفوز والخسارة على حسب تقييم العدة، وزمن الرد (p95).",
+        "‎/craftstats all لصاحب اللعبة: جودة الصناعة عند كل اللاعبين الأسبوع ده، والحسابات اللي نسبها أعلى من اللي الفرن يقدر يديه."],
+      en: ["The game owner's balance board now shows PvP fairness: duels apart from open PvP, the time to kill a player, how long one lasts once hit, wins and losses by gear rating, and the round trip's p95.",
+        "/craftstats all, for the game's owner: this week's crafting quality across all players, and the accounts past what the forge can give."],
+      hide: 1 },
     { v: '2026-10-27plan16', ver: '3.66', d: '2026-10-27',
       ar: ["أبحاث الجيلد: من قائمة الجيلد (G) ← الأبحاث، تسع أبحاث في تلات فروع بتتدفع من الخزينة: كتيبات التدريب وتدريبات التحمل وكلية الحرب (خبرة وصحة)، دفاتر الحسابات ومخزن السلاح وميثاق التجارة (دهب ودفاع)، وحجارة السن وأدلة الحقول وروائع الصنعة (جودة الصناعة وخبرة مهارات الحياة). كل فرع بيتفتح بالترتيب، وكل بحث بيتعمل مرة واحدة، والزيادات بتشتغل لكل أعضاء الجيلد."],
       en: ["Guild research: in the guild menu (G) → Research, nine nodes in three branches, paid from the treasury: Training Manuals, Endurance Drills and War College (experience, health); Ledgers, Armoury and Trade Charter (gold, defence); Whetstones, Field Guides and Masterworks (crafting quality, life skills' experience). Each branch opens in order, each node is bought once, and the bonuses apply to every member."] },

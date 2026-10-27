@@ -5,14 +5,14 @@ many are left ("قلي لسا كام ابديت متعملوش"). Every one was 
 U184–U189, U210–U263, U308–U348 and U368–U387 in `docs/online/NET_BACKLOG.md` (its 42 open ones re-checked below), and
 the rest below.
 
-| | At the count | Now (v3.66) |
+| | At the count | Now (v3.67) |
 |---|---|---|
-| Done | 233 | 299 |
-| Partly there (something left) | 92 | 33 |
+| Done | 233 | 301 |
+| Partly there (something left) | 92 | 31 |
 | Not started | 11 | 4 |
 | Waiting for a game server, Firebase Blaze or the owner | 9 | 9 |
 | Cancelled by the plan itself (§82, §90: invented content, or a copy of what the game has) | 42 | 42 |
-| **Left to build** | **103** (92 + 11) | **37** (33 + 4) |
+| **Left to build** | **103** (92 + 11) | **35** (31 + 4) |
 
 Released since the count (the rows below say "done (v…)"; their text is still the audit's, with what was left then):
 - v3.21: U094, U122, U123, U165, U200, U208, U274, U282.
@@ -48,6 +48,7 @@ Released since the count (the rows below say "done (v…)"; their text is still 
 - v3.64 (batch 4, taken over from the earlier Claude-A session's WIP; its U070, U114, U120, U127, U135, U139, U179, U192 and U293 gave way to main's): U087 (one cap on the Demon Slayer's demon bonuses), U305 (guards' and shopkeepers' nights), U354 (the sword dance trial), U364 (a world boss's guild board), U365 (restoring the West together; needs the rules' `world/satisfy/rw`).
 - v3.65 (batch 15): U219 (crafting commissions; needs the rules' `commOrders`, `commClaim`, `commDone` and `commPaid`).
 - v3.66 (batch 16): U237 (the guild research tree; needs the rules' `guildResearch`, the treasury's spend for it, and one building a write).
+- v3.67 (batch 17): U045 (PvP fairness on the owner's board; the thresholds before ranked are the owner's), U284 (crafting quality across players); the rules' `balance` takes the new fields.
 
 ## U066–U113 (checked 2026-10-26)
 
@@ -251,7 +252,7 @@ Checked 2026-10-26 against `/home/claude/satisfy-aud` (main @ 8a2e4f1e, v3.15). 
 | U281 | Artifact quests | done | The Sword Grave's twelve-sword puzzle leads to Pagma's Late Work, a Legendary sword given once (`regression/swordgrave`). Madra's diary is read chapter by chapter and gives the 100,000/200,000 Army Swordsmanship books (`regression/mdbooks`). Appraisal finds hidden functions (`regression/appraise`) |
 | U282 | Creator signatures | done (v3.21) | "Made by {n}" (`creBy`, `it.by`) on Creations, kept through a trade (`tradeItemIn` keeps short strings). Missing: it is the name, not a stable creator ID (a rename rewrites it, v2.74), and pieces forged from recipes carry no maker |
 | U283 | Item trade history | done (v3.22) | A per-item trade ledger `tradedItems/{iid}` (latest owner and trade, checked by the rules), the per-player `tradeLog` (U215), and a weapon's last 5 reforges (`rrl`). Missing: an append-only history of an item's owners, shown on its card |
-| U284 | Craft quality analytics | part (plan-gear) | `/craftstats`: the share of each rating among what you made, with an alarm past what the forge allows (legendary off Pagma, over a third epic+ in 50 pieces). Left: the same across all players, which needs a record online |
+| U284 | Craft quality analytics | done (v3.67) | `/craftstats`: the share of each rating among what you made, with an alarm past what the forge allows (legendary off Pagma, over a third epic+ in 50 pieces). Left: the same across all players, which needs a record online v3.67: each player's pieces by rating this week (`c0`–`c4` in `balance/{uid}`); the owner's `/craftstats all` sums them and lists the accounts past the forge's odds (`admCrs`, `crsFlag`; `regression/plan17`). |
 | U285 | Salvaging | done (plan-gear) | A piece received in a trade is marked and can't be taken apart (`tradeItemIn` sets `trd`, `invSalv`/`doSalv` refuse it; `regression/plangear`) |
 | U287 | Wardrobe gallery | done | Layla's outfit tab (`cosMenu`) lists every outfit; owned ones (`S.cos`) can be worn again for free; the rare ones only drop from bosses (`cosDrop`); 3 costumes give a title (`cos3`) (`regression/vanity`, `outfits40`). All drawn in code (sprites-original, ART_CONTRACT), no outside art |
 | U288 | Tavern social hub | done | SAT-ONLINE-193: no attack or skill in an inn's common room, seats, the innkeeper's party board (`regression/tavern`, which names U288); emotes (`regression/emote`) |
@@ -328,7 +329,7 @@ Four rows were set to ✅ by their own PRs (SAT-ONLINE-138: U026/U027; SAT-ONLIN
 | U040 | PvP rank season | 🟡 | part | client+rules | Unchanged (the rules bound one result at a time, ±64). Client work left: a cap on rated duels against the same opponent (e.g. 3 a day, the rest unrated); a server check is D3 v3.47: at most 3 rated duels a day against the same opponent (the server's day), the rest fought unrated, said as the duel starts (`rnkCount`, `S.rnkD`; `regression/plan11`). Left: the server check (D3). |
 | U043 | PvP guild skirmish | 🟡 | part | client+rules | Unchanged; the plan's check (a peaceful guild can't be attacked in a town) holds, since towns are safe for everyone. Left: a war contract before the siege or banner capture (only guilds at war may fight there) |
 | U044 | PvP anti-exploit suite | 🟡 | part | rules or D3 | Unchanged (`unit/antiexploit`). Left: forged arena ratings within ±64 are still believed. A result both sides write and the rules match is client+rules; a real check is D3 |
-| U045 | PvP fairness telemetry | 🟡 | part | client+rules, owner | Unchanged: the `balance/{uid}` rules allow only kills, time, wins and losses. Left: PvP time to kill and deaths, duels apart from open PvP, gear bands, the round-trip p95 (already measured in `net().link`) as new fields, plus thresholds the owner publishes before ranked |
+| U045 | PvP fairness telemetry | 🟡 | done (v3.67) | client+rules, owner | Unchanged: the `balance/{uid}` rules allow only kills, time, wins and losses. Left: PvP time to kill and deaths, duels apart from open PvP, gear bands, the round-trip p95 (already measured in `net().link`) as new fields, plus thresholds the owner publishes before ranked v3.67: duels apart from open PvP (`dw`, `dl`), open PvP's time to kill and survival (`pk`/`pn`, `ps`/`pd`), the gear band (`gb`) and the round trip's p95 (`rt`) in `balance/{uid}`, shown by class and by gear band on `/balance` (`balPvpKill`, `balPvpDied`, `balBands`; `regression/plan17`, `unit/rules-balance2`). Left: the thresholds the owner publishes before ranked. |
 | U054 | Party summon | ⏳ | done (v3.36) | client | Not built (searched summon/teleport in the changelog). The ledger's reason is stale: the game already moves players itself (Return Scroll, the hunt's free trip, the magic circles, return stones). Left: a request, the target's consent, zone checks (no arena, tower, siege or race) and a fee taken only on accept v3.36: ⇲ by a member in the party panel asks to bring them over; it rides the party chat like the ready check (`smnAsk`, `smnLine`), so no rules change. The one asked sees who and where and accepts with Y within 30 s; only then is the fee (500 + 15 a level, at most 3,000) taken, from them. Refused within 5 s of being hit, from or to where a Return Scroll can't go (`scrollBlock`; the siege's castle and the vampire cities as destinations too), into a dungeon or a room, or across to the other continent; the answer names the asker, and only they hear it (`regression/plan7`). |
 | U057 | Personal loot | 🟡 | done | – | SAT-ONLINE-141 (c87debb4, in main): each fighter's game pays its own share once per encounter, and the one who landed the last blow gets the same boss gold as the rest (`regression/raid`). The ✅ was lost in a merge; the server ledger is D3 |
 | U058 | Need/Greed loot | 🟡 | done | – | SAT-ONLINE-141: one piece per roll, a result announced twice makes nothing more, and a boss reported killed again within the minute starts no second roll (`regression/raidloot`). The ✅ was lost in a merge; the server random is D3 |
