@@ -30,6 +30,9 @@ test('twenty keepers stand in the world, one for each bloodline, at their places
       o.names = K.RVK.every((k) => G.lines().en[k[0]] && G.lines().ar[k[0]]);
       o.quests = K.RVK.every((k) => k[5].every((q) => G.QD[q] && G.QD[q].by === k[0]));
       o.rare = K.RVK.filter((k) => k[2] === 'v2').every((k) => k[5].length === 2 && G.QD[k[5][1]].pre === k[5][0]);
+      // every keeper's look builds (a halo is a colour: a number threw on every frame)
+      o.sheetErr = K.RVK.map((k) => { try { const c = window.__GU.SH[k[0]]; return c && c.canvas ? '' : k[0] + ':none'; } catch (e) { return k[0] + ':' + e.message; } }).filter(Boolean);
+      o.npcIdx = G.npcs.findIndex((n) => /^rvk/.test(n.id)); o.npcN = G.npcs.filter((n) => !n.hidden).length; o.after = G.npcs.slice(o.npcIdx).filter((n) => !/^rvk/.test(n.id) && !n.hidden).map((n) => n.id);
       return o;
     });
     assert.equal(r.n, 20); assert.equal(r.ids, 20, 'one keeper for each race and bloodline');
@@ -39,6 +42,8 @@ test('twenty keepers stand in the world, one for each bloodline, at their places
     assert.ok(r.names, 'every keeper has a name in both languages');
     assert.ok(r.quests, 'every bloodline quest is given by its keeper');
     assert.ok(r.rare, 'a rare bloodline is two quests, the second after the first');
+    assert.deepEqual(r.sheetErr, [], 'every keeper is drawn');
+    assert.deepEqual(r.after, [], 'the keepers come after every other NPC (indices travel online)');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
@@ -116,7 +121,7 @@ test('old saves, the new counts, and the whisper', async () => {
       // the whisper: a merfolk at the level of its keeper, who has not met it, is told the blood stirs, not where
       S.race = 'merfolk'; S.rv = ''; S.lv = 210; G.S.met = G.S.met || {}; delete S.met.rvkMe1;
       const toasts = []; const T = document.getElementById('toasts') || document.body;
-      K.tick(); o.toast = [...document.querySelectorAll('.toast')].map((e) => e.textContent).join(' | ');
+      K.wh(); K.tick(); o.toast = [...document.querySelectorAll('.toast')].map((e) => e.textContent).join(' | ');
       return o;
     });
     assert.deepEqual(r.mig, [120, false], 'the old progress moved to the first quest');
@@ -153,6 +158,27 @@ test('the Index has a Races page: every race and kind, its bloodlines, hints unt
     assert.ok(/Martial Deity/.test(r.yang) && /two quests/.test(r.yang), 'a rare bloodline asks more: ' + r.yang);
     assert.ok(/path climbs toward heaven/.test(r.yang), 'where the yangban trial is, vaguely');
     assert.ok(/Keeper: The Old Chief, in Frostlight Orc Village/.test(r.met), 'once met, where: ' + r.met.slice(0, 400));
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});
+
+test('a rare bloodline is never traded down; a quest of another race waits at its keeper', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, LOOK);
+    await g.eval(HELP);
+    const r = await g.eval(() => {
+      const G = window.__G, S = G.S, B = window.__bk, Z = window.__GRZ, en = G.lines().en, o = {};
+      S.brf = 1; S.race = 'human'; S.rsub = ''; S.rv = 'v2'; S.lv = 200;
+      o.v1 = window.__GRVK.ok('rvhu1'); B.talk('rvkHu1'); B.drain(); o.q = !!S.qs.rvhu1;
+      S.race = 'elf'; S.rv = ''; S.lv = 300; S.qs.rvel2a = { st: 2, c: 300 }; G.acceptQ('rvel2'); S.qs.rvel2.c = 60;
+      S.race = 'giant'; B.talk('rvkEl2'); B.drain(); o.wait = S.qs.rvel2.st; o.rv = S.rv;
+      S.race = 'elf'; B.talk('rvkEl2'); B.drain(); o.done = S.qs.rvel2.st; o.rv2 = S.rv;
+      return o;
+    });
+    assert.equal(r.v1, false, 'a Transcendent Human is not offered Royal Blood'); assert.equal(r.q, false);
+    assert.equal(r.wait, 1, 'a giant cannot turn in the Void Elf\'s quest'); assert.equal(r.rv, '');
+    assert.equal(r.done, 2); assert.equal(r.rv2, 'v2');
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });

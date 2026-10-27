@@ -35,22 +35,25 @@ game's own places; none of them is credited to the novel. Their dialogs are `NPC
 | The Horned Matron | Demonkin · Archdemon Blood | Hell, the Demonkin Village (`zHellV`) | rvde1 |
 | The Throne-Watcher | Demonkin · Hell Prince | Hell, the Empty Throne (`zHell9`) | rvde2a → rvde2 |
 
-Every spot is open ground, reachable, at least 14 tiles from a boss, and far from Winston (the title's camera and minimap). The
-keepers were added after the map's NPC clearing, so no tile changes; `ogSpawn`'s "no monster within 3 tiles of an NPC" check
-is outside every keeper's area.
+Every spot is open ground and reachable. Each is at least 13 tiles from a boss's spawn and at least 6 from any monster's
+spawn point, and far from Winston (the title's camera and minimap). The keepers are added after the map's NPC clearing, so no
+tile changes; `ogSpawn`'s "no monster within 3 tiles of an NPC" check is outside every keeper's area. They join `NPCS` at
+the very end of the script, after every other NPC: an NPC's index travels online (`npcKOSay`), so no NPC before them moves.
 
 ## How a keeper's quest works
 
 - **Offered** by `talkNPC` like any quest. `qAvail` has one more condition for a quest with `rv` (the last quest of a bloodline) or
   `rvp` (a rare bloodline's first quest): `rvkOk(q)`, your own race with its powers awake (`rzR()`), not the bloodline you have,
-  and for a first quest, its second not taken yet. Under its level a keeper says when to come back (`rvkLow`); to another race it
+  never the uncommon one if you have the rare one, and for a first quest, its second not taken yet. Under its level a keeper says when to come back (`rvkLow`); to another race it
   speaks of the blood (`rvkId_*`).
-- **Taken back** at the keeper (`*_d`, then `completeQ`). The races' tick no longer finishes them by itself. The quests stay
+- **Taken back** at the keeper (`*_d`, then `completeQ`), and only from its own race (`rvkTurn`): if you changed race
+  meanwhile, the quest waits. The races' tick no longer finishes them by itself. The quests stay
   `hid:1` (not in the quest book), so `rvkTick` toasts "Return to …" once a session when one is ready.
 - **The last quest** keeps `rv`, so `completeQ` still calls `rzVarGain`. A keeper warns you, in the offer, when the new bloodline
   would replace yours (`rvkWarn`).
-- **A whisper**: when your race could take a bloodline's quest at your level and you have not met its keeper, a toast every 30
-  minutes says someone knows of it, and points to the Index, not to a place.
+- **A whisper**: when your race could take a bloodline's quest at your level and you have not met its keeper, a toast says
+  someone knows of it, and points to the Index, not to a place. One whisper every 30 minutes for all bloodlines, the first 5
+  minutes into a session.
 
 ## The rare bloodlines' two quests
 
@@ -64,17 +67,19 @@ The first quest is the old one (its objective), the second is new and harder (GA
 | Dark Dwarf | 300 fire monsters | 3 pieces of unique rating or better |
 | Ancestral Shaman Orc | 500 undead or evil spirits | 5 undead or evil bosses (`spboss`) |
 | Overlord's Eye | 1,000 demons | Belial |
-| Ancient Titan | 10 bosses of Lv 300+ | the Frost Giant 3 times |
+| Ancient Titan | 10 bosses of Lv 300+ | 5 bosses of Lv 400+ (`boss4`) |
 | True Dragonkin | 300 half-draconians | the Blue Dragon twice |
 | Martial Deity | 500 blocks or parries | each of the Four Auspicious Beasts (`sbeast2`) |
 | Hell Prince | Marchosias and Leraje, each once (`hll2`) | Marchosias 3 times |
 
 `sbeast2` and `hll2` keep their own distinct-kill lists in `S.rzq`, so a Yangban who did the race trial (`sbeast`) or a demonkin
-who did `rzh2` (`hll`) still counts them again.
+who did `rzh2` (`hll`) still counts them again. The quest pointer leads to one not yet counted.
 
-**Old saves** (`rvkMig`): a rare bloodline's quest carried from the old menu, when its old objective is now the first quest's,
-becomes the first quest with its progress (Transcendent, Void Elf, Dark Dwarf, Ancestral Shaman, Ancient Titan, Martial Deity). The
-others keep their quest as it is.
+**Old saves** (`rvkMig`, once a character: `S.rvkM`):
+- A rare bloodline's quest carried from the old menu, when its old objective is now the first quest's, becomes the first quest
+  with its progress (Transcendent, Void Elf, Dark Dwarf, Ancestral Shaman, Ancient Titan, Martial Deity).
+- If the first quest already exists, the second starts from zero.
+- The others keep their quest, but its count starts again, because their objective changed.
 
 The Runesmith's objective line said "rare rating or better" while it asked for epic (`r:2`); it says epic now.
 
@@ -86,4 +91,4 @@ an unlockable race's trial place as a vague hint, `rzH_*`, with its level; the v
 give, their odds as the race is taken (`rzPv`), how many quests and from which level, and the keeper as a vague hint
 (`rvkH_*`) until you have met it (`S.met`), then by name and zone. Search finds races and bloodlines by name.
 
-Test: `tests/regression/bloodkeepers.test.cjs` (5). `races.test.cjs`'s bloodline step now goes back to its keeper.
+Test: `tests/regression/bloodkeepers.test.cjs` (6). `races.test.cjs`'s bloodline step now goes back to its keeper.

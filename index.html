@@ -8338,7 +8338,7 @@ function talkNPC(id){if(id==='board')return openBoard();if(id==='auction'&&!npcK
  for(const q in S.qs){const s=S.qs[q],o=QD[q]&&QD[q].obj;if(o&&o.t==='deliver'&&o.it===id&&s.st===1&&!s.c){s.c=1;addAff(id,6);SFX.quest();toast(t('retTo',{w:t(QD[q].by)}),'good');hudDirty=true;save(true);return dialog(id,[QD[q].adq?'adq_dl':q+'_dl']);}}
  {const eq=Object.keys(S.qs).find(q=>QD[q]&&QD[q].by===id&&QD[q].obj.t==='escort'&&S.qs[q].st===1);if(eq&&(!ESC||ESC.q!==eq))return dialog(id,[qLn(eq,'_w')],()=>startEscort(eq));}
  if(isSm()&&(id==='khan'||id==='smith')){const ch=id==='khan'?['kh1','kh2']:['sm1','sm2'];const sk=ch.filter(q=>!qDone(q));if(sk.length){sk.forEach(q=>S.qs[q]={st:2,c:0});S.met[id]=1;save(true);return dialog(id,[id==='khan'?'kh_sk':'sm_sk']);}}const n=NPCT[id]||{},mine=Object.keys(QD).filter(q=>QD[q].by===id);
- const rd=mine.find(qReady);if(rd)return dialog(id,[QD[rd].gen?'genQ_d':rd+'_d'],()=>completeQ(rd));
+ const rd=mine.find(q=>qReady(q)&&rvkTurn(q));if(rd)return dialog(id,[QD[rd].gen?'genQ_d':rd+'_d'],()=>completeQ(rd));
  if(promoTalk(id))return;
  const qok=q=>qAvail(q)&&S.lv>=(QD[q].lv||1),av=mine.find(q=>QD[q].ms&&qok(q))||mine.find(qok); // the story first
  if(av&&msTalk(id,av))return;
@@ -12528,18 +12528,18 @@ function rzKill(m){if(!S||m.tmp||m.spar||m.tdum)return;const k=m.type,b=MT[k]||{
  if(/^zHell(?!V)/.test(z)&&!b.boss)rzEv('hlm');if(/^zEa/.test(z))rzEv('east');if(z==='zGiantL'||z==='zGHold')rzEv('gland');
  if(b.boss){rzEv('boss');if((m.lv|0)>=300)rzEv('boss3');}if((m.lv|0)>S.lv)rzEv('hilv');if(rzNature())rzEv('nat');if(rzWet())rzEv('wet');
  if(monEl(k)==='fire')rzEv('fire');if(monUnd(k)||monEvil(k))rzEv('spirit');if(RZNORTH.test(z))rzEv('north');
- if(b.boss&&(m.lv|0)>S.lv)rzEv('bosshi');if(b.boss&&(monUnd(k)||monEvil(k)))rzEv('spboss');if(RZSB.has(k))rzEv('sbeast2',k);if(RZHL.has(k))rzEv('hll2',k);}
+ if(b.boss&&(m.lv|0)>S.lv)rzEv('bosshi');if(b.boss&&(monUnd(k)||monEvil(k)))rzEv('spboss');if(RZSB.has(k))rzEv('sbeast2',k);if(RZHL.has(k))rzEv('hll2',k);if(b.boss&&(m.lv|0)>=400)rzEv('boss4');}
 // the system's line for each race step (every written quest has one, in both languages)
 Object.assign(STR.ar,{rze1_o:"حيطان المنطقة 8: احفر عروق حديد التنين المجنون في زنزانة «احترس من الكلاب»",rze2_o:"تار الشياطين الكبار: اقتل شياطين",rzg1_o:"عملاق الصقيع: اهزم عملاق الصقيع في حصن العمالقة",rzg2_o:"أرض العمالقة: اقتل وحوش في أرض العمالقة",rzd1_o:"دم بون وهيل: اقتل نص دراكونيين في جبال الفوضى",rzd2_o:"دم تنين حقيقي: اهزم تراوكا التنين الأحمر",rzy1_o:"الوحوش الأربعة المقدسة: اهزم الوحوش الأربعة المقدسة (كل واحد مرة)",rzy2_o:"اختبار الشرق: اقتل وحوش في القارة الشرقية",rzy3_o:"اللص الشهم: اهزم هوانج جيلدونج",rzh1_o:"البقاء للأقوى: اقتل وحوش في الجحيم",rzh2_o:"أسياد الجحيم: اهزم ماركوسياس وليراجي",rzh3_o:"جسم شيطان: وصّل قوتك الشيطانية لـ400",rvhu1_o:"دم الملوك: اهزم بوسات",rvhu2_o:"ما بعد الحدود: اقتل وحوش أعلى من لفلك",rvel1_o:"غابات شجرة العالم: اقتل وحوش في الطبيعة (برا المدن)",rvel2_o:"رقصة الفراغ: اتفادى",rvme1_o:"أغنية السيرين: اقتل وحوش في الماية أو تحت المطر",rvme2_o:"وحش الأعماق: اهزم الكراكن",rvdw1_o:"يد الرونات: اصنع حاجات نادرة أو أحسن",rvdw2_o:"قلب البركان: اقتل وحوش نار",rvor1_o:"جدار القبيلة: صد أو بارِي ضربات",rvor2_o:"أرواح الأجداد: اقتل أوندد أو أرواح شريرة",rvee1_o:"نظرة الملك: اقتل شياطين",rvee2_o:"عين فوق الشياطين: اهزم بيليال",rvgi1_o:"الشمال المتجمد: اقتل وحوش في الشمال المتجمد",rvgi2_o:"خطوات التايتن: اهزم بوسات لفل 300 أو أكتر",rvdr1_o:"النار القديمة: اهزم تراوكا",rvdr2_o:"تنين حقيقي: اهزم التنين الأزرق",rvya1_o:"موظف السما: اقتل وحوش في القارة الشرقية",rvya2_o:"طريق إله القتال: صد أو بارِي ضربات",rvde1_o:"الجلالة الجهنمية: اقتل وحوش في الجحيم",rvde2_o:"أمير الجحيم: اهزم ماركوسياس"});
 Object.assign(STR.en,{rze1_o:"Zone 8's Walls: Dig the insane dragon veins of the Beware Dogs dungeon",rze2_o:"Revenge on the Great Demons: Slay demons",rzg1_o:"The Frost Giant: Defeat the Frost Giant in the Giant's Hold",rzg2_o:"The Giants' Land: Slay monsters in the Giants' Land",rzd1_o:"Bun and Hel's Blood: Slay half-draconians in the Chaos Mountains",rzd2_o:"A Real Dragon's Blood: Defeat Trauka the red dragon",rzy1_o:"The Four Auspicious Beasts: Defeat the Four Auspicious Beasts (each once)",rzy2_o:"Trial of the East: Slay monsters on the East Continent",rzy3_o:"The Chivalrous Robber: Defeat Hwang Gildong",rzh1_o:"Survival of the Fittest: Slay monsters in hell",rzh2_o:"The Lords of Hell: Defeat Marchosias and Leraje",rzh3_o:"A Demon's Body: Raise your demonic power to 400",rvhu1_o:"Blood of Kings: Defeat bosses",rvhu2_o:"Beyond the Limits: Slay monsters above your level",rvel1_o:"Woods of the World Tree: Slay monsters in nature (outside towns)",rvel2_o:"Dance of the Void: Dodge",rvme1_o:"The Siren's Song: Slay monsters in water or under the rain",rvme2_o:"Beast of the Deep: Defeat the Kraken",rvdw1_o:"The Rune Hand: Craft pieces of rare rating or better",rvdw2_o:"Heart of the Volcano: Slay fire monsters",rvor1_o:"Wall of the Tribe: Block or parry blows",rvor2_o:"Spirits of the Ancestors: Slay undead or evil spirits",rvee1_o:"The King's Gaze: Slay demons",rvee2_o:"An Eye above Demons: Defeat Belial",rvgi1_o:"The Frozen North: Slay monsters in the frozen north",rvgi2_o:"The Titan's Steps: Defeat bosses of level 300 or more",rvdr1_o:"The Old Fire: Defeat Trauka",rvdr2_o:"A True Dragon: Defeat the Blue Dragon",rvya1_o:"Official of Heaven: Slay monsters on the East Continent",rvya2_o:"The Martial God's Road: Block or parry blows",rvde1_o:"Infernal Majesty: Slay monsters in hell",rvde2_o:"Prince of Hell: Defeat Marchosias"});
 Object.assign(SKLK,{rzwind:'heal',rzhowl:'wave'});   // their own looks (the guard look was already taken by forty skills)
 // where a race's step points (every quest points somewhere): its monsters, its land, else the nearest monster or person
 function rzSpot(q,o){const it=o.it,b=m=>MT[m.type]||{},foe=m=>!b(m).boss&&b(m).aggro!==undefined,set={hdr:RZHDR,sbeast:RZSB,hll:RZHL,sbeast2:RZSB,hll2:RZHL}[it];
- if(set){const p=qNearIf(m=>set.has(m.type));if(p)return p;for(const k of set){const h=monHome(k);if(h)return h;}}
+ if(set){const got=S.rzq&&S.rzq[it]||[],p=qNearIf(m=>set.has(m.type)&&!got.includes(m.type));if(p)return p;for(const k of set)if(!got.includes(k)){const h=monHome(k);if(h)return h;}}
  if(it==='bdv'){const v=BDV[0];return v?{x:v.tx+.5,y:v.ty+.5}:{x:BDOG.gx+.5,y:BDOG.gy+.5};}
  if(it==='hlm'||it==='hdp'){const c=HELL.C[it==='hdp'?0:1];return{x:(c.x0+c.x1)/2,y:HELL.cy,area:1};}
  if(it==='gland')return{x:620,y:-14,area:1};if(it==='north')return qNearIf(m=>foe(m)&&RZNORTH.test(zoneAt(m.x,m.y)))||{x:330,y:-46,area:1};
- const f={boss:m=>b(m).boss,boss3:m=>b(m).boss&&(m.lv|0)>=300,hilv:m=>(m.lv|0)>S.lv,fire:m=>monEl(m.type)==='fire',spirit:m=>monUnd(m.type)||monEvil(m.type),east:m=>/^zEa/.test(zoneAt(m.x,m.y)),bosshi:m=>b(m).boss&&(m.lv|0)>S.lv,spboss:m=>b(m).boss&&(monUnd(m.type)||monEvil(m.type)),bdodge:m=>b(m).boss}[it];
+ const f={boss:m=>b(m).boss,boss3:m=>b(m).boss&&(m.lv|0)>=300,hilv:m=>(m.lv|0)>S.lv,fire:m=>monEl(m.type)==='fire',spirit:m=>monUnd(m.type)||monEvil(m.type),east:m=>/^zEa/.test(zoneAt(m.x,m.y)),bosshi:m=>b(m).boss&&(m.lv|0)>S.lv,boss4:m=>b(m).boss&&(m.lv|0)>=400,spboss:m=>b(m).boss&&(monUnd(m.type)||monEvil(m.type)),bdodge:m=>b(m).boss}[it];
  return f&&qNearIf(f)||qNearIf(foe)||nearNpc();}
 const rzStepOf=r=>RZQ[r].find(id=>S.qs[id]&&S.qs[id].st===1);
 // the system's offer: what the race is, what it gives, and what becomes of your race now
@@ -12561,7 +12561,7 @@ function rzGain(r,sub){if(!RZ[r])return;const was=rzName(),old=myRace(),pv=rzPv(
 function rzVarGain(q){const [r,v]=q.rv;if(myRace()!==r)return;S.rv=v;sbSig='';hudDirty=true;SFX.legendary();flash();announce(t('rzAnn',{r:rzName()}),1);dialog('sysN',[t('rzVarQ',{v:t('rzv_'+r+'_'+v)}),t('rzvD_'+r+'_'+v)]);save(true);}
 // (v3.71) the bloodline quests are given by their keepers in the world (RVK, below), not from the status window
 // the status window: the free switch
-function rzStRow(){if(!S)return '';return `<div class="srow rzb">${S.brf?'':`<button data-rzp="1">🧬 ${esc(t('rzPickB'))}</button> `}</div>`;}
+function rzStRow(){if(!S||S.brf)return '';return `<div class="srow rzb">${S.brf?'':`<button data-rzp="1">🧬 ${esc(t('rzPickB'))}</button> `}</div>`;}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-rzp]');if(!b||!S)return;if(mode==='status')closeStatus();rzPickOpen();});
 const qObjText0=id=>{try{return String(qObjText(id)).replace(/\s*\d[\d,]*\s*\/\s*/,' 0/');}catch(e){return '';}};
 // the one free switch of base race
@@ -12784,20 +12784,16 @@ Object.assign(STR.en,{race_elf:'Elf',race_merfolk:'Water Clan (Merfolk)',race_dw
 const RVK=[['rvkHu1','human','v1',403.5,69.4,['rvhu1']],['rvkHu2','human','v2',588.5,27.4,['rvhu2a','rvhu2']],
  ['rvkEl1','elf','v1',330.5,-29.6,['rvel1']],['rvkEl2','elf','v2',342.5,137.4,['rvel2a','rvel2']],
  ['rvkMe1','merfolk','v1',880.5,245.4,['rvme1']],['rvkMe2','merfolk','v2',120.5,246.4,['rvme2a','rvme2']],
- ['rvkDw1','dwarf','v1',443.5,283.4,['rvdw1']],['rvkDw2','dwarf','v2',477.5,131.4,['rvdw2a','rvdw2']],
- ['rvkOr1','orc','v1',205.5,24.4,['rvor1']],['rvkOr2','orc','v2',210.5,52.4,['rvor2a','rvor2']],
- ['rvkEe1','evileye','v1',433.5,101.4,['rvee1']],['rvkEe2','evileye','v2',919.5,283.4,['rvee2a','rvee2']],
- ['rvkGi1','giant','v1',480.5,-40.6,['rvgi1']],['rvkGi2','giant','v2',712.5,-34.6,['rvgi2a','rvgi2']],
+ ['rvkDw1','dwarf','v1',454.5,290.4,['rvdw1']],['rvkDw2','dwarf','v2',477.5,131.4,['rvdw2a','rvdw2']],
+ ['rvkOr1','orc','v1',206.5,25.4,['rvor1']],['rvkOr2','orc','v2',210.5,52.4,['rvor2a','rvor2']],
+ ['rvkEe1','evileye','v1',423.5,102.4,['rvee1']],['rvkEe2','evileye','v2',919.5,283.4,['rvee2a','rvee2']],
+ ['rvkGi1','giant','v1',476.5,-41.6,['rvgi1']],['rvkGi2','giant','v2',712.5,-27.6,['rvgi2a','rvgi2']],
  ['rvkDr1','draco','v1',644.5,15.4,['rvdr1']],['rvkDr2','draco','v2',698.5,-155.6,['rvdr2a','rvdr2']],
  ['rvkYa1','yangban','v1',1420.5,160.4,['rvya1']],['rvkYa2','yangban','v2',1706.5,-142.6,['rvya2a','rvya2']],
  ['rvkDe1','demon','v1',1345.5,360.4,['rvde1']],['rvkDe2','demon','v2',1950.5,360.4,['rvde2a','rvde2']]];
 const RVKO={};for(const K of RVK)RVKO[K[0]]=K;
 const rvkOf=(r,v)=>RVK.find(K=>K[1]===r&&K[2]===v);
-NPCS.push({id:'rvkHu1',spr:'rvkHu1',tx:403.5,ty:69.4,ph:1,dir:0},{id:'rvkHu2',spr:'rvkHu2',tx:588.5,ty:27.4,ph:1,dir:3},{id:'rvkEl1',spr:'rvkEl1',tx:330.5,ty:-29.6,ph:1,dir:0},{id:'rvkEl2',spr:'rvkEl2',tx:342.5,ty:137.4,ph:1,dir:2},
- {id:'rvkMe1',spr:'rvkMe1',tx:880.5,ty:245.4,ph:1,dir:0},{id:'rvkMe2',spr:'rvkMe2',tx:120.5,ty:246.4,ph:1,dir:0},{id:'rvkDw1',spr:'rvkDw1',tx:443.5,ty:283.4,ph:1,dir:0},{id:'rvkDw2',spr:'rvkDw2',tx:477.5,ty:131.4,ph:1,dir:3},
- {id:'rvkOr1',spr:'rvkOr1',tx:205.5,ty:24.4,ph:1,dir:0},{id:'rvkOr2',spr:'rvkOr2',tx:210.5,ty:52.4,ph:1,dir:2},{id:'rvkEe1',spr:'rvkEe1',tx:433.5,ty:101.4,ph:1,dir:0},{id:'rvkEe2',spr:'rvkEe2',tx:919.5,ty:283.4,ph:1,dir:2},
- {id:'rvkGi1',spr:'rvkGi1',tx:480.5,ty:-40.6,ph:1,dir:0},{id:'rvkGi2',spr:'rvkGi2',tx:712.5,ty:-34.6,ph:1,dir:3},{id:'rvkDr1',spr:'rvkDr1',tx:644.5,ty:15.4,ph:1,dir:2},{id:'rvkDr2',spr:'rvkDr2',tx:698.5,ty:-155.6,ph:1,dir:0},
- {id:'rvkYa1',spr:'rvkYa1',tx:1420.5,ty:160.4,ph:1,dir:0},{id:'rvkYa2',spr:'rvkYa2',tx:1706.5,ty:-142.6,ph:1,dir:3},{id:'rvkDe1',spr:'rvkDe1',tx:1345.5,ty:360.4,ph:1,dir:0},{id:'rvkDe2',spr:'rvkDe2',tx:1950.5,ty:360.4,ph:1,dir:0});
+// (the keepers join NPCS at the end of the script, after every other NPC: an NPC's index travels online, npcKOSay)
 Object.assign(FIG,{
  rvkHu1:{hair:'helm',hc:'#8a8e98',hl:'#b8bcc6',skin:'#e0b48e',sk2:'#c09070',beard:'#8a8a8a',beard2:'#6a6a6a',top:'#5a6070',top2:'#3a3e4a',sleeves:true,chest:'#7a8090',pad:'#9aa0ac',pad2:'#6a707c',cape:'#7a2a2a',belt:'#4a3a2a',pants:'#3a3e4a',boots:'#2a2a30'},
  rvkHu2:{hair:'messy',hc:'#2a2420',hl:'#4a4038',skin:'#d8a47a',sk2:'#b8845a',scar:1,top:'#e8e4da',top2:'#c8c2b4',sleeves:true,sash:'#3a3a3a',belt:'#3a3a3a',pants:'#4a4a52',boots:'#2a2420'},
@@ -12810,12 +12806,12 @@ Object.assign(FIG,{
  rvkOr1:{hair:'mohawk',ears:'gob',tusk:1,hc:'#d8d8d8',hl:'#ffffff',skin:'#8aa8b8',sk2:'#6a8698',eye:'#9ae8ff',top:'#6a5a4a',top2:'#4a3a2a',sleeves:true,pad:'#e8e8e8',pad2:'#b8b8b8',cape:'#d8d0c0',belt:'#3a2a1a',pants:'#4a3a2a',boots:'#2a1a10'},
  rvkOr2:{hood:'#4a3a2a',ears:'gob',tusk:1,skin:'#6a8a4a',sk2:'#4e6a34',eye:'#e8d84a',top:'#4a3a2a',top2:'#2a2018',sleeves:true,robe:1,trim:'#e8e0c8',belt:'#e8e0c8',pants:'#2a2018',boots:'#1a1410'},
  rvkEe1:{hair:'long',fem:1,hc:'#2a1a3a',hl:'#4a3a5a',skin:'#c8b8e8',sk2:'#a898c8',eye:'#ff2a6a',top:'#3a2a4a',top2:'#24182e',sleeves:true,robeL:1,collar:'#8a3a8a',belt:'#8a3a8a',pants:'#24182e',boots:'#18101e'},
- rvkEe2:{hood:'#1a1a22',skin:'#a898c8',sk2:'#887aa8',eye:'#ffffff',mask:'#1a1a22',top:'#1a1a22',top2:'#0e0e14',sleeves:true,robeL:1,trim:'#5a2a6a',belt:'#5a2a6a',pants:'#0e0e14',boots:'#0a0a0e'},
+ rvkEe2:{hood:'#1a1a22',skin:'#a898c8',sk2:'#887aa8',eye:'#ffffff',mask:'veil',maskC:'#1a1a22',top:'#1a1a22',top2:'#0e0e14',sleeves:true,robeL:1,trim:'#5a2a6a',belt:'#5a2a6a',pants:'#0e0e14',boots:'#0a0a0e'},
  rvkGi1:{hair:'spiky',hc:'#bfe8ff',hl:'#ffffff',beard:'#bfe8ff',beard2:'#8ac8e8',skin:'#a8b8c8',sk2:'#8898a8',eye:'#7ad8ff',top:'#6a7a8a',top2:'#4a5a6a',sleeves:true,pad:'#d8f0ff',pad2:'#a8c8e8',belt:'#3a4a5a',pants:'#4a5a6a',boots:'#2a3a4a'},
- rvkGi2:{hair:'long',hc:'#6a6a6a',hl:'#8a8a8a',beard:'#7a7a7a',beard2:'#5a5a5a',skin:'#a89a8a',sk2:'#86786a',top:'#5a4a3a',top2:'#3a2e24',sleeves:true,chest:'#7a6a5a',belt:'#2a2018',pants:'#3a2e24',boots:'#1a1410'},
+ rvkGi2:{hair:'long',hc:'#6a6a6a',hl:'#8a8a8a',beard:'#7a7a7a',beard2:'#5a5a5a',skin:'#a89a8a',sk2:'#86786a',top:'#5a4a3a',top2:'#3a2e24',sleeves:true,chest:'#7a6a5a',pad:'#6a5a4a',pad2:'#4a3a2a',belt:'#2a2018',pants:'#3a2e24',boots:'#1a1410'},
  rvkDr1:{hair:'bald',drac:1,beard:'#e8e0c8',beard2:'#c8c0a8',skin:'#d8a070',sk2:'#b07a4c',top:'#8a2a1a',top2:'#5a1a10',sleeves:true,robe:1,trim:'#ffc84a',belt:'#ffc84a',pants:'#5a1a10',boots:'#2a120a'},
  rvkDr2:{hair:'spiky',drac:1,tail:1,hc:'#3a5a8a',hl:'#5a7aaa',skin:'#d8a070',sk2:'#b07a4c',top:'#2a3a5a',top2:'#1a2440',sleeves:true,pad:'#4a6a9a',pad2:'#2a4a7a',cape:'#1a2440',belt:'#c8a050',pants:'#1a2440',boots:'#121a2a'},
- rvkYa1:{hair:'bun',hc:'#1a1a1a',hl:'#3a3a3a',skin:'#f6e2b8',sk2:'#dcc296',eye:'#ffd24a',top:'#e8e0c8',top2:'#c8bea4',sleeves:true,robeL:1,collar:'#c8302a',belt:'#c8302a',pants:'#e8e0c8',boots:'#3a2a1a',halo:1},
+ rvkYa1:{hair:'bun',hc:'#1a1a1a',hl:'#3a3a3a',skin:'#f6e2b8',sk2:'#dcc296',eye:'#ffd24a',top:'#e8e0c8',top2:'#c8bea4',sleeves:true,robeL:1,collar:'#c8302a',belt:'#c8302a',pants:'#e8e0c8',boots:'#3a2a1a',halo:'#ffd24a'},
  rvkYa2:{hair:'pony',hc:'#1a1a1a',hl:'#3a3a3a',skin:'#f6e2b8',sk2:'#dcc296',eye:'#ffd24a',top:'#3a3a3e',top2:'#24242a',sleeves:true,sash:'#ffd24a',belt:'#ffd24a',pants:'#24242a',boots:'#1a1a1e'},
  rvkDe1:{hair:'long',fem:1,horns:'#2a1a1a',hc:'#1a0a0e',hl:'#3a1a22',skin:'#c86a6a',sk2:'#a04c4c',eye:'#ffd24a',top:'#3a0a14',top2:'#24060c',sleeves:true,robeL:1,collar:'#c8a050',belt:'#c8a050',pants:'#24060c',boots:'#140306'},
  rvkDe2:{hair:'helm',horns:'#1a1010',hc:'#2a1a1a',hl:'#4a2a2a',skin:'#c86a6a',sk2:'#a04c4c',eye:'#ffd24a',top:'#2a1a1a',top2:'#140a0a',sleeves:true,chest:'#4a2a2a',pad:'#5a2a2a',pad2:'#3a1a1a',cape:'#6a0a14',belt:'#1a0a0a',pants:'#140a0a',boots:'#0a0505'}});
@@ -12837,14 +12833,16 @@ for(const K of RVK)for(const q of K[5])if(QD[q])QD[q].by=K[0];
 Object.assign(QD.rvhu2,{pre:'rvhu2a',obj:{t:'rz',it:'bosshi',n:3}});Object.assign(QD.rvel2,{pre:'rvel2a',obj:{t:'rz',it:'bdodge',n:60}});
 Object.assign(QD.rvme2,{pre:'rvme2a',obj:{t:'kill',it:'kraken',n:2}});Object.assign(QD.rvdw2,{pre:'rvdw2a',obj:{t:'craftR',it:'craft',n:3,r:3}});
 Object.assign(QD.rvor2,{pre:'rvor2a',obj:{t:'rz',it:'spboss',n:5}});Object.assign(QD.rvee2,{pre:'rvee2a'});
-Object.assign(QD.rvgi2,{pre:'rvgi2a',obj:{t:'kill',it:'fgiant',n:3}});Object.assign(QD.rvdr2,{pre:'rvdr2a',obj:{t:'kill',it:'sdrag',n:2}});
+Object.assign(QD.rvgi2,{pre:'rvgi2a',obj:{t:'rz',it:'boss4',n:5}});Object.assign(QD.rvdr2,{pre:'rvdr2a',obj:{t:'kill',it:'sdrag',n:2}});
 Object.assign(QD.rvya2,{pre:'rvya2a',obj:{t:'rz',it:'sbeast2',n:4}});Object.assign(QD.rvde2,{pre:'rvde2a'});
 // a save that carried a rare bloodline's quest from the old menu: its progress counts for the first quest when that is the same task
 const RVMV={rvhu2:'rvhu2a',rvel2:'rvel2a',rvdw2:'rvdw2a',rvor2:'rvor2a',rvgi2:'rvgi2a',rvya2:'rvya2a'};
-function rvkMig(){if(!S||!S.qs)return;for(const id in RVMV){const s=S.qs[id],a=RVMV[id];if(s&&s.st===1&&!S.qs[a]){S.qs[a]={st:1,c:s.c|0};delete S.qs[id];hudDirty=true;}}}
+function rvkMig(){if(!S||!S.qs||S.rvkM)return;S.rvkM=1;for(const id in RVMV){const s=S.qs[id],a=RVMV[id];if(!s||s.st!==1)continue;if(!S.qs[a]){S.qs[a]={st:1,c:s.c|0};delete S.qs[id];}else s.c=0;hudDirty=true;}
+ for(const id of ['rvme2','rvgi2','rvdr2','rvya2','rvde2','rvee2'])if(S.qs[id]&&S.qs[id].st===1&&!S.qs[QD[id].pre])S.qs[id].c=0;}   // the others' objectives changed: an old one under way starts again
 // a keeper's quest is for its own race only (its race's powers awake), never the bloodline you already have, and a first quest
 // only while its second was not taken
-function rvkOk(q){const [r,v]=q.rv||q.rvp;if(!rzR()||myRace()!==r||S.rv===v)return false;return !q.rvp||!S.qs[RVQ[r]&&RVQ[r][v]];}
+function rvkOk(q){const [r,v]=q.rv||q.rvp;if(!rzR()||myRace()!==r||S.rv===v||S.rv==='v2'&&v==='v1')return false;   // a rare bloodline is never traded down for the uncommon one
+return !q.rvp||!S.qs[RVQ[r]&&RVQ[r][v]];}
 const rvkWarn=id=>{const q=QD[id];return q&&(q.rv||q.rvp)&&S.rv&&rzR()?'\n'+t('rzVarW',{v:t('rzv_'+myRace()+'_'+S.rv)}):'';};
 // what a keeper says: its first words, then to its own race a word on its level or its blood; to the others a word on the blood
 function rvkLvOf(id){const K=RVKO[id];return K?Math.min(...K[5].filter(q=>QD[q]&&qAvail(q)).map(q=>QD[q].lv||1).concat([1e9])):1e9;}
@@ -12870,14 +12868,17 @@ NPCT.rvkYa1={hi:'rvkHi_rvkYa1',idle:()=>rvkIdle('rvkYa1'),low:()=>rvkLow('rvkYa1
 NPCT.rvkYa2={hi:'rvkHi_rvkYa2',idle:()=>rvkIdle('rvkYa2'),low:()=>rvkLow('rvkYa2'),noGift:1};
 NPCT.rvkDe1={hi:'rvkHi_rvkDe1',idle:()=>rvkIdle('rvkDe1'),low:()=>rvkLow('rvkDe1'),noGift:1};
 NPCT.rvkDe2={hi:'rvkHi_rvkDe2',idle:()=>rvkIdle('rvkDe2'),low:()=>rvkLow('rvkDe2'),noGift:1};
+// a keeper takes its quest back only from its own race (a race changed meanwhile: the quest waits)
+function rvkTurn(id){const q=QD[id],rv=q&&(q.rv||q.rvp);return !rv||myRace()===rv[0]&&!!rzR();}
 // dodging with a great foe at arm's length (the Void Elf's second quest)
 function rvkDodge(){if(!S||!P||!rzAct('bdodge'))return;if(mons.some(m=>!m.dead&&!m.spar&&MT[m.type]&&MT[m.type].boss&&Math.hypot(m.x-P.x,m.y-P.y)<160))rzEv('bdodge');}
 // every half second with the races: the old saves' quests, a keeper's quest ready to give back (once a session), and a whisper
 // when your blood could wake, until you have met its keeper (every 30 minutes; it names no place: the Index's Races page hints)
 function rvkTick(){if(!S||S.__demo)return;rvkMig();const r=myRace();
- for(const K of RVK)for(const id of K[5]){const s=S.qs[id];if(s&&s.st===1&&qReady(id)&&!RZT['rd'+id]){RZT['rd'+id]=1;toast(t('retTo',{w:t(K[0])}),'good');SFX.quest();}}
- if(mode!=='play'||!rzR())return;for(const v of ['v1','v2']){const K=rvkOf(r,v);if(!K||S.met[K[0]]||S.rv===v)continue;const id=K[5].find(q=>qAvail(q));
-  if(!id||S.lv<(QD[id].lv||1)||RZT['wh'+K[0]]>gTime)continue;RZT['wh'+K[0]]=gTime+1800;toast(t('rvkWh',{v:t('rzv_'+r+'_'+v)}),'good');return;}}
+ for(const K of RVK)for(const id of K[5]){const s=S.qs[id];if(s&&s.st===1&&qReady(id)&&rvkTurn(id)&&!RZT['rd'+id]){RZT['rd'+id]=1;toast(t('retTo',{w:t(K[0])}),'good');SFX.quest();}}
+ if(mode!=='play'||!rzR())return;if(RZT.rvkwh==null)RZT.rvkwh=gTime+300;if(RZT.rvkwh>gTime)return;   // one whisper at a time, never at once on load
+ for(const v of ['v1','v2']){const K=rvkOf(r,v);if(!K||S.met[K[0]]||S.rv===v)continue;const id=K[5].find(q=>qAvail(q));
+  if(!id||S.lv<(QD[id].lv||1))continue;RZT.rvkwh=gTime+1800;toast(t('rvkWh',{v:t('rzv_'+r+'_'+v)}),'good');return;}}
 // the Index's Races page: every race and kind, what it gives, its racial skill, how it is had, and its two bloodlines with their
 // keepers (a hint until met, then where they stand)
 const RVIX=[['human',''],['elf',''],['elf','dark'],['merfolk',''],['dwarf',''],['orc','twi'],['orc','frost'],['evileye',''],['giant',''],['draco',''],['yangban',''],['demon',''],['vampire','']];
@@ -12893,7 +12894,7 @@ function rvkIx(hit){const L=RVIX.filter(x=>hit(rvIxN(x))||RZ[x[0]]&&['v1','v2'].
  const cards=L.map(x=>{const id=rvIxId(x);return ixCard(id,RVIC[id],esc(rvIxN(x)),t('rvIxK_'+rvIxK(x[0])),myRace()===x[0]&&(S.rsub||'')===(x[1]||'')?' ms':'');});
  const x=L.find(y=>rvIxId(y)===IXS);let det='';if(x){const [r,s]=x;det=`<h3>${RVIC[rvIxId(x)]} ${esc(rvIxN(x))}</h3><p><small>${t('rvIxK_'+rvIxK(r))}</small></p><p>${esc(t('raceD_'+r))}</p>`+rvIxSk(r,s)+rvIxHow(r)+rvIxBl(r);}
  return {cards,det};}
-window.__GRVK={RVK,ok:id=>!!QD[id]&&qAvail(id),tick:()=>rvkTick(),mig:()=>rvkMig(),dodge:()=>rvkDodge(),ix:()=>rvkIx(()=>true),lv:id=>rvkLvOf(id),idle:id=>rvkIdle(id)}; // tests
+window.__GRVK={RVK,ok:id=>!!QD[id]&&qAvail(id),tick:()=>rvkTick(),wh:()=>{RZT.rvkwh=0;},mig:()=>rvkMig(),dodge:()=>rvkDodge(),ix:()=>rvkIx(()=>true),lv:id=>rvkLvOf(id),idle:id=>rvkIdle(id)}; // tests
 Object.assign(STR.ar,{"rvkHu1":"آخر فارس في برج المراقبة",
  "rvkHi_rvkHu1":"بيتي وقع من زمان، وأنا فضلت في الحراسة برضه. الأبراج بتفتكر الملوك، والدم كمان.",
  "rvkId_rvkHu1":"دم الملوك لسه بيجري في شوية بشر. خفيف، بس مخلصش.",
@@ -13027,12 +13028,12 @@ Object.assign(STR.ar,{"rvkHu1":"آخر فارس في برج المراقبة",
  "rvgi2a_o":"امشي الخطاوي القديمة: عشر أعداء كبار لفلهم تلتمية أو أكتر.",
  "rvgi2a_w":"عشر أعداء كبار، تلتمية أو أكتر.",
  "rvgi2a_d":"دلوقتي اللي حاكم الصقيع هنا.",
- "rvgi2_o":"عملاق الصقيع اللي في الحصن. تلات مرات. الأرض لازم تحس بيك وانت ماشي.",
- "rvgi2_w":"عملاق الصقيع، تلات مرات.",
+ "rvgi2_o":"دلوقتي أتقل خطاوي: خمس أعداء كبار لفلهم أربعمية أو أكتر. الأرض لازم تحس بيك وانت ماشي.",
+ "rvgi2_w":"خمس أعداء كبار، أربعمية أو أكتر.",
  "rvgi2_d":"الأرض اتهزت. التايتن القديم. مفيش حاجة هتزحزحك تاني.",
  "q_rvgi2a":"خطاوي زمان",
  "o_rvgi2a":"اهزم بوسات لفل 300 أو أكتر {c}/{n}",
- "o_rvgi2":"اهزم عملاق الصقيع {c}/{n}",
+ "o_rvgi2":"اهزم بوسات لفل 400 أو أكتر {c}/{n}",
  "rvkDr1":"ناسك الجمر",
  "rvkHi_rvkDr1":"النار دي والعة من أول ما التنين الأحمر عشّش هنا. أنا اللي بحرسها.",
  "rvkId_rvkDr1":"النص دراكوني نص حاجة. السؤال أنهي نص اللي هيصحى.",
@@ -13247,12 +13248,12 @@ Object.assign(STR.en,{"rvkHu1":"The Watchtower's Last Knight",
  "rvgi2a_o":"Walk the old steps: ten great foes of level three hundred or more.",
  "rvgi2a_w":"Ten great foes, three hundred or more.",
  "rvgi2a_d":"Now the one who rules the frost here.",
- "rvgi2_o":"The Frost Giant of the hold. Three times. The land must feel you walk.",
- "rvgi2_w":"The Frost Giant, three times.",
+ "rvgi2_o":"Now the heaviest steps: five great foes of level four hundred or more. The land must feel you walk.",
+ "rvgi2_w":"Five great foes, four hundred or more.",
  "rvgi2_d":"The ground shook. Ancient Titan. Nothing will move you again.",
  "q_rvgi2a":"Steps of Old",
  "o_rvgi2a":"Defeat bosses of level 300 or more {c}/{n}",
- "o_rvgi2":"Defeat the Frost Giant {c}/{n}",
+ "o_rvgi2":"Defeat bosses of level 400 or more {c}/{n}",
  "rvkDr1":"The Ember Hermit",
  "rvkHi_rvkDr1":"This fire has burned since the red dragon first nested here. I keep it.",
  "rvkId_rvkDr1":"Half-draconians are half something. The question is which half wakes.",
@@ -21032,6 +21033,12 @@ window.__GPB10={HOME,homeOpt:id=>homeOpt(id),homeGo:id=>homeGo(id),homeAct:()=>h
 window.__GPB11={golRubble:m=>golRubble(m),nodes:()=>nodes,mine:n=>mine(n),killMon:m=>killMon(m),mons:()=>mons,newMon:(k,x,y)=>{const m=newMon(k,x,y);mons.push(m);return m;},rnkCount:f=>rnkCount(f),rnkUsed:f=>rnkUsed(f),RNKCAP,bflTick:dt=>bflTick(dt),bflPhase:(m,p)=>bflPhase(m,p),bflOpen:()=>bflOpen(),bflAct:a=>bflAct(a),bflList:()=>bflList(),get BFF(){return BFF},get BFV(){return BFV},resetRL:()=>{BFS=null;BFF=null;},cvOpts:w=>cvOpts(w),cvMenu:w=>cvMenu(w),cvTake:(a,b,r)=>cvTake(a,b,r),cvTick:dt=>cvTick(dt),cvPos:id=>cvPos(id),cvPay:(a,b,r)=>cvPay(a,b,r),cvDep:(a,b)=>cvDep(a,b),cGo:(d,w)=>cGo(d,w),die:()=>die(),npcAt:id=>{const n=npcOf(id);return {x:n.x,y:n.y};},gTime:()=>gTime,addT:x=>{gTime+=x;}}; // tests (plan batch 11)
 window.__GPB12={tchList:()=>tchList(),tchOpen:o=>tchOpen(o),tchPress:()=>tchPress(),get TCT(){return TCT},setT0:x=>{if(TCT)TCT.t0=x;},TCHW,MIMP,mimTell:m=>mimTell(m),vlBranch:m=>vlBranch(m),bossPhase:(m,ph)=>bossPhase(m,MT[m.type],ph),p3Atk:m=>p3Atk(m),p3Hurt:(d,m)=>p3Hurt(d,m),DNF,entId:e=>entId(e),mobKey:m=>mobKey(m),balStats:(a,w)=>balStats(a,w),balHyb:L=>balHyb(L),npcObj:id=>npcs.find(n=>n.id===id),spcOpts:w=>spcOpts(w),spcRoll:(w,k)=>spcRoll(w,k),spcCollect:w=>spcCollect(w),shKinds:k=>shKinds(k),shHave:k=>shHave(k),SPCQ}; // tests (plan batch 12)
 window.__GPB9={bcSide:x=>bcSide(x),bcStop:sd=>bcStop(sd),bcTick:dt=>bcTick(dt),bcFine:()=>bcFine(),cGo:(d,w)=>cGo(d,w),get EX(){return EX},avail:id=>qAvail(id),accept:id=>acceptQ(id),complete:id=>completeQ(id),repOf:k=>repOf(k),npcTalk:id=>talkNPC(id)}; // tests (plan batch 9)
+// (v3.71) the bloodline keepers, last of all the NPCs so no NPC before them changes its index (online knock-outs go by index)
+NPCS.push({id:'rvkHu1',spr:'rvkHu1',tx:403.5,ty:69.4,ph:1,dir:0},{id:'rvkHu2',spr:'rvkHu2',tx:588.5,ty:27.4,ph:1,dir:3},{id:'rvkEl1',spr:'rvkEl1',tx:330.5,ty:-29.6,ph:1,dir:0},{id:'rvkEl2',spr:'rvkEl2',tx:342.5,ty:137.4,ph:1,dir:2},
+ {id:'rvkMe1',spr:'rvkMe1',tx:880.5,ty:245.4,ph:1,dir:0},{id:'rvkMe2',spr:'rvkMe2',tx:120.5,ty:246.4,ph:1,dir:0},{id:'rvkDw1',spr:'rvkDw1',tx:454.5,ty:290.4,ph:1,dir:0},{id:'rvkDw2',spr:'rvkDw2',tx:477.5,ty:131.4,ph:1,dir:3},
+ {id:'rvkOr1',spr:'rvkOr1',tx:206.5,ty:25.4,ph:1,dir:0},{id:'rvkOr2',spr:'rvkOr2',tx:210.5,ty:52.4,ph:1,dir:2},{id:'rvkEe1',spr:'rvkEe1',tx:423.5,ty:102.4,ph:1,dir:0},{id:'rvkEe2',spr:'rvkEe2',tx:919.5,ty:283.4,ph:1,dir:2},
+ {id:'rvkGi1',spr:'rvkGi1',tx:476.5,ty:-41.6,ph:1,dir:0},{id:'rvkGi2',spr:'rvkGi2',tx:712.5,ty:-27.6,ph:1,dir:3},{id:'rvkDr1',spr:'rvkDr1',tx:644.5,ty:15.4,ph:1,dir:2},{id:'rvkDr2',spr:'rvkDr2',tx:698.5,ty:-155.6,ph:1,dir:0},
+ {id:'rvkYa1',spr:'rvkYa1',tx:1420.5,ty:160.4,ph:1,dir:0},{id:'rvkYa2',spr:'rvkYa2',tx:1706.5,ty:-142.6,ph:1,dir:3},{id:'rvkDe1',spr:'rvkDe1',tx:1345.5,ty:360.4,ph:1,dir:0},{id:'rvkDe2',spr:'rvkDe2',tx:1950.5,ty:360.4,ph:1,dir:0});
 window.__GPB8={eat:k=>eatDish(k),hFresh:()=>hFresh(),make:(k,b)=>makeLife(k,b),mixEnd:r=>mixEnd(r),buy:(id,g,w)=>buyGear(id,g,w),avail:id=>qAvail(id),ready:id=>qReady(id),accept:id=>acceptQ(id),complete:id=>completeQ(id),hurt:(d,src)=>hurtPlayer0(d,1,src),get MIXG(){return MIXG}}; // tests (plan batch 8)
 })();
 </script>
