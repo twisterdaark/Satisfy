@@ -7,6 +7,14 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27uiskin', ver: '3.67', d: '2026-10-27',
+      ar: ["شكل النوافذ اتعاد رسمه عشان يبقى أقرب لنوافذ النظام في المانهوا: لون نيلي غامق منوّر من النص بحواف أغمق بدل الأزرق الرمادي، بارين فوق وتحت شبه القضيب المزدوج المنوّر، والتاج المجنّح الثلجي اتعاد رسمه، وخطوط مضيئة بين أقسام نافذة الحالة.",
+        "الزراير والإشعارات (التوستات واللوت) بقت بنفس الألوان.",
+        "اختبار جديد لده."],
+      en: ["The windows are redrawn closer to the manhwa's system windows: deep indigo lit from the centre with a darker rim instead of slate blue, glowing double-rod bars top and bottom, a redrawn icy winged crest, and glowing rules between the status window's sections.",
+        "Buttons and notices (toasts and loot) match the new colours.",
+        "A new test for this."],
+      hide: [2] },
     { v: '2026-10-27knights', ver: '3.66', d: '2026-10-27', hide: [4],
       ar: ["نظام الفرسان من الرواية: النبيل بس هو اللي يعيّن فرسان. البارون 1، الفايكونت 3 (زي الرواية)، الإيرل 5، الدوق 8، الملك 12.",
         "الألقاب: البارون والفايكونت من الإيرل آدن بالمساهمة زي الأول. الإيرل والدوق بيعيّنهم الملك، وهو ماستر الجيلد اللي ماسكة قلعة ريدان (الإيرل لازم يكون فايكونت، والدوق لازم يكون إيرل).",
