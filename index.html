@@ -7559,7 +7559,7 @@ function xpBossSrc(type,claim){const now=Date.now(),T=S.bkt||(S.bkt={});if(T[typ
  if(claim){T[type]=now;if(first)F[type]=1;}return first?'boss1':'bossR';}
 function xpSrcOf(m,claim){const k=xpKind(m.type);return k==='boss'?xpBossSrc(m.type,claim):k==='mob'&&(m.cap||m.elite)?'elite':k;}
 // what gainXP gives after its multipliers; rest: the inn's rest doubles it while it lasts, as far as the cap leaves room
-function gainXP(n,exact,src,rest){if(!Number.isFinite(n)||n<=0)return 0;const k=(exact?1:XPMUL)*(xpbOn()?1.2:1)*(MARN?1.1:1)*(1+secB('xp'))*rzXpM();n*=k;const cap=xpCap(src);if(cap&&n>cap)n=cap;
+function gainXP(n,exact,src,rest){if(!Number.isFinite(n)||n<=0||S.lv>=LVMAX)return 0;const k=(exact?1:XPMUL)*(xpbOn()?1.2:1)*(MARN?1.1:1)*(1+secB('xp'))*rzXpM();n*=k;const cap=xpCap(src);if(cap&&n>cap)n=cap;
  if(rest&&S.rx>0){const b=Math.max(0,Math.floor(Math.min(S.rx,Math.round(n/k),cap?(cap-n)/k:Infinity)));if(b>0){S.rx-=b;n+=b*k;}if(S.rx<=0){S.rx=0;setTimeout(()=>toast(t('innDone'),'info'),300);}}
  n=Math.round(n);S.xp+=n;while(S.xp>=xpNeed()&&S.lv<LVMAX){S.xp-=xpNeed();S.lv++;S.pts+=ptsLv();if(S.lv%100===0&&S.lv<=900&&(S.adv||0)<S.lv/100){S.adv=S.lv/100;setTimeout(()=>{announce(t('advT',{n:t('ord'+S.adv)}),1);flash();SFX.rare();if(P)asMe(()=>vfx('levelup',P.x,P.y));},600);}P.hp=maxHP();if(P)asMe(()=>vfx('levelup',P.x,P.y));toast(t('levelUp',{n:S.lv,p:ptsLv()}),'good');SFX.level();jLv();checkSkills();}if(S.lv>=LVMAX)S.xp=Math.min(S.xp,xpNeed()-1);hudDirty=true;return n;}
 // loot feed: what you just gained slides in at the side as a system box (+n name icon); the same thing again within a few
@@ -13344,11 +13344,11 @@ Object.assign(STR.en,{"rvkHu1":"The Watchtower's Last Knight",
    gainXP too). An awakening, once reached, is kept (S.awk): a death that costs a level or a legendary class's new Lv 1 keeps it.
    Its numbers are the owner's, added together (+5% attributes at the first, +5% more at the third, +8% at the fourth: +18%);
    "1 HP/MP per second in combat" is taken as written, one point of each. The aura's hue is rolled at each awakening (S.awc) from
-   its own random stream, so no game dice move; it is drawn from the clock, never from rand(). Others see it through fx (ak:),
-   unless you hide it: S.awh hides every awakening aura on your screen and stops publishing yours (the buffs stay). The test
+   its own random stream, so no game dice move; it is drawn from the clock, never from rand(). Others see it through fx (ak:).
+   S.awh hides every awakening aura on your screen, yours too: only what you see (others still see yours; the buffs stay). The test
    harness keeps the older tests' numbers with window.__awkPlain (as __rzPlain does for races). */
 const AWKL=[0,100,200,300,400,LVMAX];
-const AWKRNG=mulberry32(((Date.now()>>>0)^0x2a77e1c3)>>>0);
+var AWKRNG=mulberry32(((Date.now()>>>0)^0x2a77e1c3)>>>0);   // reseeded with a recorded run's seed (simBegin)
 const awkLvT=L=>L>=LVMAX?5:Math.min(4,Math.floor(Math.max(0,L|0)/100));
 function awkTier(){if(!S||S.__demo||window.__awkPlain)return 0;return Math.max(S.awk|0,awkLvT(S.lv));}
 function awkStM(){const T=awkTier();return 1+(T>=1?.05:0)+(T>=3?.05:0)+(T>=4?.08:0);}
@@ -13364,12 +13364,14 @@ function awkCC(){return awkTier()>=2&&AWKRNG()<.08;}
 // Absolute Awakening's true damage (5% of the blow as if there were no level gap)
 function awkAtk(m,o){if(!S||!P)return 1;P.awkCt=gTime;const T=awkTier();if(!T)return 1;let k=1;
  if(T>=4&&m&&Math.hypot(m.x-P.x,m.y-P.y)<110)k*=1.05;
- if(T>=5){const f=o&&(o.pure||o.raw||o.nolv)?1:Math.max(.05,lvF(m.lv));k*=1+.05/f;}return k;}
+ if(T>=5){const f=o&&(o.pure||o.raw||o.nolv)?1:Math.max(.05,lvF(m.lv));k*=1+.05*Math.max(1,1/f);}return k;}
 // the awakening itself: announced once, the highest reached if several came at once, with every new one's numbers
 function awkTick(dt){if(!S||!P||S.__demo||window.__awkPlain)return;const L=awkLvT(S.lv);
- if(L>(S.awk|0)&&mode==='play'&&$('dialog').hidden&&gTime-Math.max(P.hitT??-99,P.awkCt??-99)>5){const was=S.awk|0;S.awk=L;S.awc=(AWKRNG()*360)|0;sbSig='';hudDirty=true;
-  announce(t('awkAnn',{n:t('awkN'+L)}),1);flash();SFX.legendary();checkSkills();
-  dialog('sysN',[t('awkGot',{n:t('awkN'+L),d:Array.from({length:L-was},(_,i)=>t('awkD'+(was+1+i))).join('\n')})]);save(true);}
+ // kept the moment it is reached (a level lost in the same fight keeps it), with a new hue; announced (S.awkA) out of combat
+ if(L>(S.awk|0)){S.awk=L;S.awc=(AWKRNG()*360)|0;sbSig='';hudDirty=true;checkSkills();save(true);}
+ const A=S.awk|0;if(A>(S.awkA|0)&&mode==='play'&&$('dialog').hidden&&gTime-Math.max(P.hitT??-99,P.awkCt??-99)>5){const was=S.awkA|0;S.awkA=A;
+  announce(t('awkAnn',{n:t('awkN'+A)}),1);flash();SFX.legendary();
+  dialog('sysN',[t('awkGot',{n:t('awkN'+A),d:Array.from({length:A-was},(_,i)=>t('awkD'+(was+1+i))).join('\n')})]);save(true);}
  // Combat Vitality: one health and one mana a second while you strike or are struck (within 5 s)
  const T=awkTier();if(T>=1&&P.hp>0&&gTime-Math.max(P.hitT??-99,P.awkCt??-99)<5){P.hp=Math.min(maxHP(),P.hp+dt);P.mp=Math.min(maxMP(),P.mp+dt);hudDirty=true;}}
 // the aura: a glow at the feet; from the second a ring and motes rising; from the third a circle of sparks turning; from the
@@ -13385,9 +13387,9 @@ function awkDraw(x,y,T,h,al){if(!T||!ctx||S&&S.awh)return;const tm=gTime,R=[0,8,
   ctx.fillStyle=hs(90,.8);for(let i=0;i<8;i++){const a=-i/8*6.283-tm*2.2;ctx.fillRect(Math.round(x+Math.cos(a)*R*1.7),Math.round(y+Math.sin(a)*R*.72),2,1);}}
  ctx.restore();}
 // yours, under you (dimmed while you are stealthed, the way you see yourself)
-function awkMe(){if(!P||!S)return;const T=awkTier();if(T)awkDraw(P.x,P.y,T,S.awc|0,P.stl>0?.35:1);}
-// what others see: the tier and the hue (none while hidden or stealthed)
-function awkPub(){const T=awkTier();return T&&!S.awh&&!(P&&P.stl>0)?'ak:'+T+((S.awc|0)%360).toString(36):'';}
+function awkMe(){if(!P||!S||P.hp<=0||mode==='dead')return;const T=awkTier();if(T)awkDraw(P.x,P.y,T,S.awc|0,P.stl>0?.35:1);}
+// what others see: the tier and the hue (none while stealthed, or while you hide your level from others: the tier would tell it)
+function awkPub(){const T=awkTier();return T&&!HIDELV&&!(P&&P.stl>0)?'ak:'+T+((S.awc|0)%360).toString(36):'';}
 // the equipment window: the awakening reached and the aura switch
 function awkEqRow(){const T=awkTier();return `<div class="note awkrow">${T?`✨ <b>${esc(t('awkN'+T))}</b> · `:''}<button data-awkv="1" data-tip="${esc(t('awkAuraTip'))}">${t(S.awh?'awkAuraOff':'awkAuraOn')}</button></div>`;}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-awkv]');if(!b||!S)return;e.stopPropagation();if(S.awh)delete S.awh;else S.awh=1;SFX.click();save(true);if(!$('equipW').hidden)renderEquip();},true);
@@ -13412,7 +13414,7 @@ Object.assign(STR.ar,{"awkL":"الصحوة",
  "awkGot":"[{n}]\n{d}\nهالة بلونك بقت حواليك. تقدر تخفي الهالات من نافذة المعدات.",
  "awkAuraOn":"هالات الصحوة: ظاهرة",
  "awkAuraOff":"هالات الصحوة: مخفية",
- "awkAuraTip":"بيخفي كل هالات الصحوة من على شاشتك، حتى هالتك، والناس التانية مش هتشوف هالتك. الزيادات بتفضل.",
+ "awkAuraTip":"بيخفي كل هالات الصحوة من على شاشتك بس، حتى هالتك. الناس التانية لسه بتشوف هالتك، والزيادات بتفضل.",
  "sk_awkworld":"عالم التخطي",
  "skd_awkworld":"الصحوة المطلقة: لمدة 4 ثواني، +25% سرعة مشي و+15% فرصة كريتيكال. كولداون 3 دقايق.",
  "awkWOn":"عالم التخطي!"});
@@ -13431,7 +13433,7 @@ Object.assign(STR.en,{"awkL":"Awakening",
  "awkGot":"[{n}]\n{d}\nAn aura of your own colour surrounds you now. You can hide auras in the equipment window.",
  "awkAuraOn":"Awakening auras: shown",
  "awkAuraOff":"Awakening auras: hidden",
- "awkAuraTip":"Hides every awakening aura on your screen, yours too, and others stop seeing yours. The buffs stay.",
+ "awkAuraTip":"Hides every awakening aura on your screen only, yours too. Others still see yours, and the boosts stay.",
  "sk_awkworld":"World of Transcendence",
  "skd_awkworld":"Absolute Awakening: for 4 s, +25% move speed and +15% critical chance. 3-minute cooldown.",
  "awkWOn":"World of Transcendence!"});
@@ -17851,7 +17853,7 @@ const recClock=s=>{const sp=1000/60;return [()=>s.t0+FSTEPS*sp,()=>s.p0+FSTEPS*s
 function simBegin(raw){if(SIM||!FIXT)return;let s;
  if(RPL)s={seed:RPL.seed,t0:RPL.t0,p0:RPL.p0,gt:RPL.gt};else if(recOn()&&raw)s={seed:(VRAND()*4294967296)>>>0,t0:Date.now(),p0:performance.now(),gt:gTime};else return;
  SIM=Object.assign(s,{tq:[],tid:0,rnd:mulberry32(s.seed)});FSTEPS=0;facc=0;gTime=s.gt;
- const [dn,pn]=recClock(SIM);Date.now=dn;performance.now=pn;Math.random=SIM.rnd;rand=SIM.rnd;
+ const [dn,pn]=recClock(SIM);Date.now=dn;performance.now=pn;Math.random=SIM.rnd;rand=SIM.rnd;AWKRNG=mulberry32((s.seed^0x2a77e1c3)>>>0);
  window.setTimeout=(f,ms,...a)=>simTimer(f,ms,a,0);window.setInterval=(f,ms,...a)=>simTimer(f,ms,a,1);window.clearTimeout=window.clearInterval=id=>{if(typeof id==='string'&&id[0]==='v')SIM.tq=SIM.tq.filter(x=>x.id!==id);else{T_CT(id);T_CI(id);}};
  if(RPL){RPL.at=0;RPL.bad=-1;}else REC={v:1,seed:s.seed,t0:s.t0,p0:s.p0,gt:s.gt,save:raw,kb:KB.slice(),ev:[],cp:[]};rplLabel();}
 function simTimer(f,ms,a,rep){const n=Math.max(1,Math.ceil((+ms||0)/(1000/60))),id='v'+(++SIM.tid);SIM.tq.push({id,at:FSTEPS+n,n,rep,f:typeof f==='function'?f:()=>{},a});return id;}
