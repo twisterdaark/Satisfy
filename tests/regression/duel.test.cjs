@@ -84,7 +84,7 @@ for (const mode of ['local', 'online', 'ws']) {
       const hpA = await a.eval(() => window.__G.P.hp);
       await startFight(a, b);
       assert.equal(await shown(a, 'duelW'), true);
-      // A swings until B's health is gone (v3.76: each landed hit is A's real blow off B's real health, a third at most)
+      // A swings until B's health is gone (v3.76: each landed hit is A's real blow off B's real health; v3.77: no cap)
       for (let i = 0; i < 40 && (await duel(b)).phase === 'fight'; i++) {
         await a.eval(() => { window.__G.P.acd = 0; window.__G.tryAttack(1, 0); });
         await a.step(16);
