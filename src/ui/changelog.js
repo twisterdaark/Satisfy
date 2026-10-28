@@ -7,6 +7,20 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27plan17', ver: '3.78', d: '2026-10-28',
+      ar: ["لوحة التوازن بتاعة صاحب اللعبة بقت بتوري عدالة الـPvP: المبارزات لوحدها والقتال المفتوح لوحده، وقت قتل لاعب، وكام ثانية الواحد بيصمد بعد ما يتضرب، والفوز والخسارة على حسب تقييم العدة، وزمن الرد (p95).",
+        "‎/craftstats all لصاحب اللعبة: جودة الصناعة عند كل اللاعبين الأسبوع ده، والحسابات اللي نسبها أعلى من اللي الفرن يقدر يديه."],
+      en: ["The game owner's balance board now shows PvP fairness: duels apart from open PvP, the time to kill a player, how long one lasts once hit, wins and losses by gear rating, and the round trip's p95.",
+        "/craftstats all, for the game's owner: this week's crafting quality across all players, and the accounts past what the forge can give."],
+      hide: 1 },
+    { v: '2026-10-27plan16', ver: '3.77', d: '2026-10-28',
+      ar: ["أبحاث الجيلد: من قائمة الجيلد (G) ← الأبحاث، تسع أبحاث في تلات فروع بتتدفع من الخزينة: كتيبات التدريب وتدريبات التحمل وكلية الحرب (خبرة وصحة)، دفاتر الحسابات ومخزن السلاح وميثاق التجارة (دهب ودفاع)، وحجارة السن وأدلة الحقول وروائع الصنعة (جودة الصناعة وخبرة مهارات الحياة). كل فرع بيتفتح بالترتيب، وكل بحث بيتعمل مرة واحدة، والزيادات بتشتغل لكل أعضاء الجيلد."],
+      en: ["Guild research: in the guild menu (G) → Research, nine nodes in three branches, paid from the treasury: Training Manuals, Endurance Drills and War College (experience, health); Ledgers, Armoury and Trade Charter (gold, defence); Whetstones, Field Guides and Masterworks (crafting quality, life skills' experience). Each branch opens in order, each node is bought once, and the bonuses apply to every member."] },
+    { v: '2026-10-27plan15', ver: '3.76', d: '2026-10-28',
+      ar: ["طلبات تصنيع للحدادين: عند أي حداد اطلب قطعة (سيف، درع، خوذة...) يصنعها لك حداد لاعب. الأجرة والخامات بتطلع من شنطتك وبترجع لو شلت الطلب. الحداد (كلاس الحداد أو وريث باغما) اللي يعرف الوصفة بياخد الطلب ويصنعه في السندان بخامات الطلب، والقطعة بتوصلك وعليها اسمه، وهو بياخد أجرته من عند الحداد.",
+        "لو حداد بدأ يشتغل على طلبك، مش هتقدر تشيله غير بعد 10 دقايق."],
+      en: ["Commissions for player smiths: at any smithy, order a piece (a sword, armour, a helm...) forged by a player smith. The fee and the materials leave your bag and come back if you take the order off. A smith who knows the recipe (the Blacksmith class or Pagma's Successor) takes the order and forges it at the anvil with the order's materials; the piece reaches you with their mark, and they collect the fee at the smithy.",
+        "Once a smith is at work on your order, it can be taken off only after 10 minutes."] },
     { v: '2026-10-27plan4', ver: '3.75', d: '2026-10-28',
       ar: ["اختبار رقصات السيف عند جدارية باغما: السيّاف اللي على الجدارية بيقولك رقصاتك واحدة ورا التانية، وكل واحدة لازم تيجي في ثانيتين. بتاخد تقدير (S لحد C)، ولو الرقصات اندمجت في 9 ثواني بتتعلم الدمج الجديد.",
         "الحراس بالليل بيلفّوا في دورية قصيرة وفي إيدهم فانوس، والتجار اللي برة بيقفلوا الشبابيك ويولّعوا لمبة، بس لسه بيبيعوا من الشباك.",
