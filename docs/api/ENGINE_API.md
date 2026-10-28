@@ -159,14 +159,14 @@ In the game, near another player: `P` invites, `Y`/`N` answers, and the party pa
 
 ## `Satisfy.duel` (SAT-ONLINE-006, doc §09 R4)
 
-Consent-based duels on top of presence, no server. `create({ presence, uid, now?, pos, zone, policy? })`:
+Consent-based duels on top of presence, no server. `create({ presence, uid, now?, pos, zone, policy?, hurt?, hp? })`:
 
 | Member | Notes |
 |---|---|
 | `challenge(remote)` | `'sent'` or `'bad'`/`'busy'`/`'safe'` (either side in a safe zone)/`'far'` (> `C.CHALLENGE_R` px). |
 | `pendingChallenge()`, `accept(id)`, `decline(id)` | Answering a challenge. Accepting inside a town declines it. |
 | `ready()` | Ready check; the `C.COUNTDOWN_MS` countdown starts when both sides are ready. |
-| `hit(power)` | The game's attack reached the opponent; sends `duel.hit` with `k` = clamp(power, `MIN_HIT`, `MAX_HIT`). Returns the damage or 0. |
+| `hit(power)` | The game's attack reached the opponent; sends `duel.hit` with `k` = clamp(power, `MIN_HIT`, `MAX_HIT`), or with `hurt` the real blow (1..`C.REAL_MAX`). Returns the damage or 0. |
 | `yield(why?)` | Surrender (or cancel before the fight). |
 | `state()` | `{ phase: idle|asking|ready|countdown|fight|over, duel, foe, handle, hp, foeHp, meReady, foeReady, arena:{x,y,r}, countdown, last }`; `last` = the latest `{ result: win|lose, why }`. |
 | `locked()` | True during countdown and fight. |
@@ -175,8 +175,10 @@ Consent-based duels on top of presence, no server. `create({ presence, uid, now?
 Messages (`payload: { to, duel, k?, n? }`): `duel.challenge`, `duel.accept`, `duel.decline`, `duel.ready`,
 `duel.hit` (k = damage, n = hit number), `duel.hp` (k = defender's duel HP, ≤ 5/s), `duel.yield`, `duel.end`.
 Each side owns its own duel HP (100) and checks every hit for rate (at most `C.HITS_PER_S` in any second, so jitter that bunches hits doesn't drop one) and range
-(`C.HIT_RANGE` from its real position). A duel moves no gold, items, materials, durability, real HP or
+(`C.HIT_RANGE` from its real position). A duel moves no gold, items, materials, durability or
 quest credit; the result goes to `S.duels = { w, l }`.
+
+With `hurt(k)` (owner 2026-10-22) a hit carries the attacker's real blow and the defender turns it into a share of its health (0..100, 0 = a dodge). With `hp()` as well (v3.76, owner 2026-10-28: "use your health") the duel bar *is* the defender's real health as a share of 100: read when the fight starts, after each hit, and whenever it moves by `C.HP_STEP` (a `self {hp}` log event); `hurt` takes the blow off real health and returns `C.HP` for the blow that loses the duel; reports of the foe's bar may go up as well as down. The game passes both: a duel takes real HP, and the losing blow leaves 1 HP (a duel never kills).
 
 In the game: `K` challenges the nearest player outside towns, `Y`/`N` answer and `Y` is the ready
 check; a bar at the top shows both duel HPs and the countdown, with a **Yield** button; the arena is a
@@ -324,7 +326,7 @@ await g.close(); await H.closeBrowser();
 - **api 1, additive** (SAT-ONLINE-151, plan U044): `presence.jumped(sid)` → when that remote last jumped (a move faster than `jumpPx` 160 + `jumpPxS` 400 px a second since its last snapshot, or into another room), or 0. Duel and PvP hits from a remote that jumped in the last `C.JUMP_MS` (1 s) are turned down (`rejected {why: 'jump'}`); a duel's `duel.hp` above the last one is turned down (`rejected {why: 'hp'}`). No rules change.
 - **api 1, additive** (SAT-ONLINE-150, plan U039): fight logs. A duel's side records `{e, at}` events (`cd`, `fight`, `out {k}`, `in {k, hp}` (k 0 = a dodge), `rej {why}`, `foe {hp}`, `end {result, why, hp, foeHp}`), at most `Satisfy.duel.LOG_MAX` (400); `state().last.log`. `Satisfy.duel.report(log)` → `{result, why, ms, hp, foeHp, taken, dealt, hitsIn, dodged, hitsOut, rejected, biggest, ok, lines}` from the log alone (`ok`: it rebuilds the duel's own end). `pvp.recap()` → `{pm, ms, by: [{uid, handle, hits, pm, last}], lines}` for the hits taken in the last `C.RECAP_MS` (15 s). The game: `/fightlog`; hook `window.__GFLOG`. No rules change.
 - **api 1, additive** (SAT-ONLINE-014): interest management (doc U009). Online, presence comes from a range query on `x` (±800 px, re-centred every 400 px) plus each party member's node; `net().interest`, `transport.watch/interest`. Rules add `.indexOn: ["x"]` on `presence/{world}/{shard}` (redeploy; without it the query still works but downloads the whole shard).
-- **api 1, additive** (SAT-ONLINE-038, owner 2026-10-19): open PvP outside towns. `Satisfy.pvp` (src/net/pvp.js): `create({presence, uid, pos, zone, room, party, busy, alive})` → `why(remote)`, `hit(remote, pow)`, `died(uid)`, events `hurt {pm, uid, handle}`, `kill {uid, handle}`, `rejected {why}`; `C` (`MIN_HIT`/`MAX_HIT` per mille of the victim's max HP, `HITS_PER_S`, `HIT_RANGE`, `KILL_MS`, `OUTLAW_MS`). Inbox `pvp.hit {to, k, n}`, `pvp.kill {to, k: 0}`. `PlayerPublic.ol` = 1 while an outlaw (red name); `S.olT` (durable) = outlaw until, wall-clock ms. **Rules change (deploy before merge).**
+- **api 1, additive** (SAT-ONLINE-038, owner 2026-10-19): open PvP outside towns. `Satisfy.pvp` (src/net/pvp.js): `create({presence, uid, pos, zone, room, party, busy, alive, hurt?})` → `why(remote)`, `hit(remote, pow)`, `died(uid)`, events `hurt {pm, uid, handle}` (with `hurt`: `k` is the attacker's real blow, `hurt(k)` returns the per mille of max HP it takes, 0 for a dodge, and the event adds `dmg`; v3.76), `kill {uid, handle}`, `rejected {why}`; `C` (`MIN_HIT`/`MAX_HIT` per mille of the victim's max HP, `HITS_PER_S`, `HIT_RANGE`, `KILL_MS`, `OUTLAW_MS`). Inbox `pvp.hit {to, k, n}`, `pvp.kill {to, k: 0}`. `PlayerPublic.ol` = 1 while an outlaw (red name); `S.olT` (durable) = outlaw until, wall-clock ms. **Rules change (deploy before merge).**
 - **api 1, additive** (SAT-ONLINE-043, owner 2026-10-19): presence `fx` event `['n', text, colour, big, dy]`: a number over your own player (damage taken, a heal, a parry, a skill name; not gold), replayed over you on the others' screens. Being hit or healed, potions and the level-up glow are recorded like your actions' effects (`asMe`). No rules change.
 - **api 1, fix** (SAT-ONLINE-044, owner 2026-10-19): online the weather (`wxNow`) and a knocked-out townsperson (`npcKO`) go by the server clock (`wNow`); herbs are placed from the UTC day (the same for everyone, a new layout each day). News kind `npcKO` (`p.f` townsperson index, `p.lv` event slot % 100000): whoever's monster knocks one out tells everyone. No rules change. Test hook `window.__GW`; the fake takes `__fakeRTDB.serverOffset`.
 - **api 1, additive** (SAT-ONLINE-013): `PlayerPublic.duel` = `"<duel id>:<duel HP>"` while in a duel's countdown/fight (null otherwise); other players see an HP bar over each duelist and a ring between them (doc U034). Presence + rules field (rules redeploy).

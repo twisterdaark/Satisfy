@@ -36,9 +36,9 @@ Owner: Claude-A · written with SAT-ONLINE-009, updated through SAT-ONLINE-075 (
 | U030 | Duel request UI | ✅ | SAT-ONLINE-006 (K, Y/N prompt) |
 | U031 | Duel countdown | ✅ | SAT-ONLINE-006 |
 | U032 | Duel arena ring | ✅ | SAT-ONLINE-006 |
-| U033 | Duel normalized mode | ✅ | SAT-ONLINE-006 (4–18 of 100 duel HP per hit) |
+| U033 | Duel normalized mode | ✅ | SAT-ONLINE-006 (4–18 of 100 duel HP per hit); since v3.76 (owner 2026-10-28) a duel uses the real blow and the defender's real health instead, a third of max HP at most per blow, and the losing blow leaves 1 HP |
 | U034 | Duel spectator | ✅ | SAT-ONLINE-013: `PlayerPublic.duel` ("id:HP"), bars over both duelists and a ring for everyone nearby |
-| U035 | Open PvP toggle | 🟡 | SAT-ONLINE-038 (#72, owner 2026-10-19): open PvP outside towns, capped hits (3–9% of max HP) applied by the victim's own client, the victim checks rate and range; not cheat-proof until Trusted Combat (D3) |
+| U035 | Open PvP toggle | 🟡 | SAT-ONLINE-038 (#72, owner 2026-10-19): open PvP outside towns, hits applied by the victim's own client (v3.76: the attacker's real blow through the victim's defence, a third of max HP at most; before, 3–9% of max HP), the victim checks rate and range; not cheat-proof until Trusted Combat (D3) |
 | U036 | Party friendly fire | ✅ | SAT-ONLINE-038: no hits inside a party, checked by the attacker and again by the victim (`unit/pvp`, `regression/pvp`) |
 | U037 | Outlaw flag | ✅ | SAT-ONLINE-038: a kill makes the killer an outlaw for 10 min (`PlayerPublic.ol`, red name for everyone, `S.olT` kept across a reload); the kill counts only from a real, recent hit |
 | U038 | Bounty board | ✅ | SAT-ONLINE-051 (#84): gold on an outlaw's head from its card, paid once to its PvP killer through the victim's own kill record (`bountyPaid`), taken back from the board; karma (SAT-ONLINE-052, #85): murders cost points and lengthen the red name, -5 is a murderer. SAT-ONLINE-136: the plan's check, the same bounty never paid twice: a second claim, by the killer or anyone else, and taking a claim away to claim again are refused (`regression/bounty`). Left for a server (D3): the kill record is the victim's own |

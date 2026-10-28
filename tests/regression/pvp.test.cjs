@@ -1,7 +1,8 @@
 'use strict';
-// SAT-ONLINE-038 (owner 2026-10-19): open PvP outside towns, the way duels work: a capped share of the victim's max HP per
-// hit, applied by the victim's own client; no friendly fire in a party; no fighting in a town; dying to a player costs the
-// normal death penalty only; the killer gets a red "outlaw" name for a while.
+// SAT-ONLINE-038 (owner 2026-10-19): open PvP outside towns, the way duels work, applied by the victim's own client; no
+// friendly fire in a party; no fighting in a town; dying to a player costs the normal death penalty only; the killer gets
+// a red "outlaw" name for a while. Since v3.76 (owner 2026-10-28: "PvP uses your health and your damage, as normal") a hit
+// is the attacker's real blow off the victim's real health, through its defence and guard, at most a third of its max HP.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -27,7 +28,7 @@ async function strike(a, b) {
 }
 const place = (g, dx, x = 90 * 16, y = 60 * 16) => g.eval(([d, X, Y]) => { const G = window.__G; G.P.x = X + d; G.P.y = Y; G.P.inv = 0; for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } }, [dx, x, y]);
 
-test('outside town a hit takes a capped share of HP; a party or a town stops it; a kill makes an outlaw', async () => {
+test('outside town a hit is your real damage off real HP; a party or a town stops it; a kill makes an outlaw', async () => {
   const ctx = await H.newContext();
   try {
     const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
@@ -44,7 +45,11 @@ test('outside town a hit takes a capped share of HP; a party or a town stops it;
     await strike(a, b);
     const hp1 = await b.eval(() => window.__G.P.hp);
     assert.ok(hp1 < maxB, 'the hit landed on B: ' + hp1 + '/' + maxB);
-    assert.ok(maxB - hp1 <= Math.ceil(maxB * 0.09) + 1, 'capped to 9% of max HP: ' + (maxB - hp1));
+    // A's real blow (attack x 0.9..1.1, x its critical damage on a crit; 1.5 more room for passives) through B's defence,
+    // at most a third of B's max HP
+    const atkA = await a.eval(() => window.__G.eqx.atkV()), cdA = await a.eval(() => window.__GPVP.critD()), defB = await b.eval(() => window.__G.eqx.defV());
+    const lo = Math.max(1, Math.round(atkA * 0.9 * 150 / (150 + defB)) - 1), hi = Math.min(Math.round(maxB / 3), Math.round(atkA * 1.1 * cdA * 1.5 * 150 / (150 + defB)) + 1);
+    assert.ok(maxB - hp1 >= Math.min(lo, Math.round(maxB / 3)) && maxB - hp1 <= hi, 'real damage: ' + (maxB - hp1) + ' in ' + lo + '..' + hi + ' (attack ' + atkA + ', defence ' + defB + ')');
     assert.match(await toasts(b), /Grid is attacking you!/);
 
     // a party: no friendly fire
@@ -214,8 +219,9 @@ test('online: the hits, the kill report and the outlaw mark pass the database ru
 
 // plan U041 (PvP CC immunity: "the target is never locked beyond the limit"). A modified page puts hits straight on the
 // channel the pages talk on, as fast as B takes them, each with a stun, a root, a slow and a knockback added: B takes the
-// damage and nothing else. It walks as far as without them, and is never stunned, rooted, slowed or pushed.
-const forgeCC = (g, to, n) => g.eval(([u, k]) => { const me = Satisfy.local.net(), ch = new BroadcastChannel('satisfy-net-v1'); ch.postMessage(Satisfy.net.envelope('pvp.hit', { to: u, k: 60, n: k, stun: 9000, root: 9000, slow: 9000, kb: 400, pull: 400, kx: 300, ky: 0 }, { sessionId: me.sid, seq: 2e9 + k })); ch.close(); }, [to, n]);
+// damage and nothing else. It walks as far as without them, and is never stunned, rooted, slowed or pushed. (v3.76: k is a
+// real blow now, so a small one keeps B alive through the walk.)
+const forgeCC = (g, to, n) => g.eval(([u, k]) => { const me = Satisfy.local.net(), ch = new BroadcastChannel('satisfy-net-v1'); ch.postMessage(Satisfy.net.envelope('pvp.hit', { to: u, k: 4, n: k, stun: 9000, root: 9000, slow: 9000, kb: 400, pull: 400, kx: 300, ky: 0 }, { sessionId: me.sid, seq: 2e9 + k })); ch.close(); }, [to, n]);
 test("U041: a burst of hits with crowd control forged on them never locks the victim: it walks on as before", async () => {
   const ctx = await H.newContext();
   try {
@@ -246,5 +252,72 @@ test("U041: a burst of hits with crowd control forged on them never locks the vi
     assert.equal(hit.locked, 0, 'never stunned, rooted or slowed');
     assert.ok(hit.dx >= free.dx * 0.9 && hit.dx <= free.dx * 1.1, 'as far as without them, not pushed: ' + hit.dx + ' / ' + free.dx);
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+// v3.76 (owner 2026-10-28: "PvP uses your health and your damage, as normal"): a hit carries the attacker's real blow, and the
+// victim takes it off its real health through its own defence (k*150/(150+def)), a raised guard (a quarter) and a dodge
+// (nothing), never more than a third of its max health in one blow. Hits are forged with a known blow, one at a time
+// (their seq stays under 2^31: it travels as an int32).
+const forgeK = (g, to, n, k) => g.eval(([u, i, v]) => { const me = Satisfy.local.net(), ch = new BroadcastChannel('satisfy-net-v1'); ch.postMessage(Satisfy.net.envelope('pvp.hit', { to: u, k: v, n: i }, { sessionId: me.sid, seq: 2.1e9 + i })); ch.close(); }, [to, n, k]);
+test('v3.76: a hit is the real blow off real health: defence, guard, dodge, a third at most, and no one-shot', async () => {
+  const ctx = await H.newContext();
+  try {
+    const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
+    const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    const ub = await b.eval(() => Satisfy.local.net().uid);
+    await place(a, 0); await place(b, 18); await settle(a, b); await settle(a, b);
+    const maxB = await b.eval(() => window.__G.maxHP()), defB = await b.eval(() => window.__G.eqx.defV()), cap = Math.round(maxB / 3);
+    let n = 0;
+    const take = async (k, set) => {
+      await b.eval((g) => { const G = window.__G; G.P.hp = G.maxHP(); G.P.guard = g.guard ? 1 : 0; G.P.dash = g.dash ? 0.5 : 0; }, set || {});
+      const h0 = await b.eval(() => window.__G.P.hp);
+      await forgeK(a, ub, ++n, k);
+      for (let i = 0; i < 3; i++) { await b.page.waitForTimeout(40); await b.eval(() => {}); }
+      const lost = h0 - (await b.eval(() => window.__G.P.hp));
+      await b.eval(() => { const G = window.__G; G.P.guard = 0; G.P.dash = 0; });
+      await settle(a, b);
+      return lost;
+    };
+    const small = 40, d = Math.max(1, Math.round(small * 150 / (150 + defB)));
+    assert.ok(d < cap, 'a blow under the cap: ' + d + ' < ' + cap);
+    assert.equal(await take(small), d, 'the real blow through B\'s defence ' + defB);
+    assert.equal(await take(small, { guard: 1 }), Math.max(1, Math.round(d * 0.25)), 'a raised guard takes a quarter');
+    assert.equal(await take(small, { dash: 1 }), 0, 'a dodge takes nothing');
+    assert.equal(await take(1e8), cap, 'a huge blow takes a third of max HP, no more');
+    // the same huge blows, one after another: the first leaves B standing
+    await b.eval(() => { const G = window.__G; G.P.hp = G.maxHP(); G.S.tl = G.S.tl || {}; G.S.tl.legend = false; });
+    await b.page.waitForTimeout(1100); // past the second the rate check counts
+    await forgeK(a, ub, ++n, 1e8);
+    for (let i = 0; i < 3; i++) { await b.page.waitForTimeout(40); await b.eval(() => {}); }
+    assert.equal(await b.eval(() => window.__G.mode), 'play', 'nobody falls to a single blow');
+    assert.equal(await b.eval(() => Math.round(window.__G.P.hp)), maxB - cap);
+    for (let i = 0; i < 6 && (await b.eval(() => window.__G.mode)) !== 'dead'; i++) { await b.page.waitForTimeout(300); await forgeK(a, ub, ++n, 1e8); await settle(a, b); }
+    assert.equal(await b.eval(() => window.__G.mode), 'dead', 'enough blows kill');
+    // the death recap counts the health each blow took, in per mille of max HP
+    const R = await b.eval(() => window.__GFLOG.pvp && window.__GFLOG.pvp.r), pm = (x) => x / maxB * 1000;
+    assert.ok(R && R.lines.length >= 3, 'recap: ' + JSON.stringify(R));
+    assert.ok(Math.abs(R.lines[R.lines.length - 1].pm - pm(cap)) < 0.01, 'the last blow took a third: ' + JSON.stringify(R.lines));
+    assert.ok(R.lines.some((l) => Math.abs(l.pm - pm(d)) < 0.01), 'the small blow is there as it landed: ' + JSON.stringify(R.lines));
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+// the attacker's side: the blow sent is its attack (with its own critical damage on a crit), and the number shown over the
+// target is that blow, not a percentage
+test('v3.76: the blow sent is the attacker\'s real damage', async () => {
+  const ctx = await H.newContext();
+  try {
+    const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    const r = await a.eval(() => { const atk = window.__G.eqx.atkV(), cd = window.__GPVP.critD(), L = []; for (let i = 0; i < 200; i++) L.push(window.__GPVP.pow(2)); return { atk, cd, L }; });
+    for (const x of r.L) {
+      const base = x.pow / (x.crit ? r.cd : 1) / 2;
+      assert.ok(base >= r.atk * 0.9 - 1 && base <= r.atk * 1.1 * 1.5 + 1, 'attack x skill x spread: ' + JSON.stringify(x) + ' atk ' + r.atk);
+    }
+    assert.ok(r.L.some((x) => !x.crit), 'most blows are not critical');
+    assert.deepEqual(a.errors, []);
   } finally { await ctx.close(); }
 });

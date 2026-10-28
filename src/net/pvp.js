@@ -1,7 +1,8 @@
 /* Satisfy — open PvP outside towns (SAT-ONLINE-038, owner 2026-10-19). Runs on a Satisfy.presence client.
  *
  * Any two players can hurt each other outside safe zones, the same way duels work, with no challenge first:
- *   pvp.hit   attacker → victim: k = damage in per-mille of the victim's max HP (MIN_HIT..MAX_HIT), n = hit number
+ *   pvp.hit   attacker → victim: k = damage in per-mille of the victim's max HP (MIN_HIT..MAX_HIT), n = hit number;
+ *             with o.hurt, k = the attacker's real blow (1..REAL_MAX)
  *   pvp.kill  victim → attacker: that hit killed me (k = 0); the attacker is an outlaw for OUTLAW_MS
  * Every message carries payload.to (recipient uid).
  *
@@ -9,7 +10,10 @@
  * no friendly fire inside a party or between allied guilds (SAT-ONLINE-085: o.ally(r) says r is in a guild allied with
  * ours); nobody in a duel is part of open PvP (the duel has its own hits); a dead player
  * takes no hits. Damage is capped: each hit is MIN_HIT..MAX_HIT per mille of the victim's max HP whatever the levels,
- * so nobody dies to one blow. Dying to a player costs the normal death penalty only (the game's die()); nothing
+ * so nobody dies to one blow. With o.hurt (owner 2026-10-28: "PvP uses your health and your damage, as normal") a hit
+ * carries the attacker's real blow instead, and the victim's o.hurt(k) turns it into health with its own defence, guard
+ * and dodge and returns the per mille of its max health that it takes (0 for a dodge: nothing lands or is recorded);
+ * the game caps one blow there, and takes it off when the 'hurt' event comes. Dying to a player costs the normal death penalty only (the game's die()); nothing
  * changes hands.
  *
  * Trust model (no server yet, as for duels): the victim applies the hits it receives after checking the rate (at
@@ -26,6 +30,7 @@
  *   zoneAt(x, y) (optional): the zone id at a world position, from the local map (the game's netZone).
  *   apart(r) (optional): true when remote r is somewhere we can't see, though in the same room (plan U150: another
  *   party's copy of the goblin warcamp; U300: everyone's own room). Checked on both sides, like the room.
+ *   hurt(k) (optional): real damage, as above; the 'hurt' event then carries dmg (the blow received) and pm (what it took).
  */
 (function (root) {
   'use strict';
@@ -33,6 +38,7 @@
   var C = Object.freeze({
     MIN_HIT: 30, MAX_HIT: 90, HITS_PER_S: 4, HIT_RANGE: 200, KILL_MS: 8000, OUTLAW_MS: 10 * 60 * 1000,
     RECAP_MS: 15000, RECAP_MAX: 60, // SAT-ONLINE-150: the hits a death recap shows
+    REAL_MAX: 1e9, // with o.hurt: the largest real blow a hit carries (the inbox rules allow k up to 1e9)
     JUMP_MS: 1000, // SAT-ONLINE-151 (plan U044): no hit lands from an attacker who jumped (a teleport) this long ago
     COMBAT_MS: 10000, // SAT-ONLINE-204 (plan U250): "in combat" this long after the last hit we sent or took
   });
@@ -45,6 +51,7 @@
     var zoneAt = typeof o.zoneAt === 'function' ? o.zoneAt : null;
     var ally = o.ally || function () { return false; };
     var apart = o.apart || function () { return false; };
+    var hurt = typeof o.hurt === 'function' ? o.hurt : null;
     var policy = o.policy || (root.Satisfy && root.Satisfy.net && root.Satisfy.net.zonePolicy) || function () { return { safe: false }; };
     var listeners = [], hitsIn = new Map(), hitsOut = [], hitN = 0;
     var struck = new Map(); // uid -> last time we hit them (a kill report only counts for those)
@@ -85,11 +92,18 @@
         var list = (hitsIn.get(from.uid) || []).filter(function (x) { return t - x < 1000; });
         if (list.length >= C.HITS_PER_S) { emit({ type: 'rejected', why: 'rate' }); return; }
         list.push(t); hitsIn.set(from.uid, list);
-        k = Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(k)));
+        var dmg = 0;
+        if (hurt) {
+          dmg = Math.max(1, Math.min(C.REAL_MAX, Math.round(k)));
+          k = Math.max(0, Math.min(1000, +hurt(dmg) || 0));
+          if (!(k > 0)) return; // a dodge
+        } else k = Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(k)));
         taken.push({ at: t, uid: from.uid, handle: from.handle || '', pm: k });
         if (taken.length > C.RECAP_MAX) taken.shift();
         fought = t;
-        emit({ type: 'hurt', pm: k, uid: from.uid, handle: from.handle || '' });
+        var ev = { type: 'hurt', pm: k, uid: from.uid, handle: from.handle || '' };
+        if (hurt) ev.dmg = dmg;
+        emit(ev);
       } else if (env.type === 'pvp.kill') {
         var at = struck.get(from.uid);
         if (at == null || t - at > C.KILL_MS) return; // we didn't hit them: not our kill
@@ -101,14 +115,14 @@
     var api = {
       /** Can the local player hit remote r right now? Returns null, or why not: bad, room, safe, mate, ally, duel, dead. */
       why: why,
-      /** Send one hit of power pow (game units). Returns the per-mille sent (0 when it can't land or is too fast). */
+      /** Send one hit of power pow (game units). Returns the per-mille sent, or with o.hurt the real blow (0 when it can't land or is too fast). */
       hit: function (r, pow) {
         if (why(r)) return 0;
         var t = now();
         hitsOut = hitsOut.filter(function (x) { return t - x < 1000; });
         if (hitsOut.length >= C.HITS_PER_S) return 0;
         hitsOut.push(t);
-        var k = Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(pow * 4)));
+        var k = hurt ? Math.max(1, Math.min(C.REAL_MAX, Math.round(+pow || 0))) : Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(pow * 4)));
         struck.set(r.uid, t); fought = t;
         P.send('pvp.hit', { to: r.uid, k: k, n: ++hitN });
         return k;

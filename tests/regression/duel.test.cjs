@@ -76,14 +76,15 @@ async function startFight(a, b) {
 }
 
 for (const mode of ['local', 'online', 'ws']) {
-  test(`[${mode}] K challenges, Y accepts and readies, A wins on HP; nothing else changes`, async () => {
+  test(`[${mode}] K challenges, Y accepts and readies, A wins on real HP; B keeps 1 HP and nothing else changes`, async () => {
     const s0 = relay.stats();
     const { ctx, a, b } = await pair(mode);
     try {
       const before = await b.eval(() => { const S = window.__G.S; return { gold: S.gold, items: JSON.stringify(S.items), mats: JSON.stringify(S.mats), hp: window.__G.P.hp }; });
+      const hpA = await a.eval(() => window.__G.P.hp);
       await startFight(a, b);
       assert.equal(await shown(a, 'duelW'), true);
-      // A swings until B's duel HP is gone (each landed hit is 4..18 duel HP)
+      // A swings until B's health is gone (v3.76: each landed hit is A's real blow off B's real health, a third at most)
       for (let i = 0; i < 40 && (await duel(b)).phase === 'fight'; i++) {
         await a.eval(() => { window.__G.P.acd = 0; window.__G.tryAttack(1, 0); });
         await a.step(16);
@@ -94,7 +95,9 @@ for (const mode of ['local', 'online', 'ws']) {
       assert.deepEqual(await a.eval(() => window.__G.S.duels), { w: 1, l: 0 });
       assert.deepEqual(await b.eval(() => window.__G.S.duels), { w: 0, l: 1 });
       const after = await b.eval(() => { const S = window.__G.S; return { gold: S.gold, items: JSON.stringify(S.items), mats: JSON.stringify(S.mats), hp: window.__G.P.hp }; });
-      assert.deepEqual(after, before, 'a duel costs no gold, items, materials, durability or real HP');
+      assert.ok(after.hp >= 1 && after.hp < before.hp / 10, 'the last blow left B on 1 HP, and it has only regenerated since (v3.76: a duel takes real health, and never kills): ' + after.hp);
+      assert.deepEqual({ ...after, hp: before.hp }, before, 'a duel costs no gold, items, materials or durability');
+      assert.ok((await a.eval(() => window.__G.P.hp)) >= hpA, 'A was never hit');
       assert.equal(await b.eval(() => window.__G.mode), 'play', 'losing a duel is not a death');
       // SAT-ONLINE-150 (plan U039): each side's fight log, from "/fightlog"
       const logOf = (g) => g.eval(() => {
@@ -107,7 +110,8 @@ for (const mode of ['local', 'online', 'ws']) {
       assert.match(la[1], /^Your hits: \d+ \(100 of their HP\) · theirs: 0 /);
       assert.ok(la.some((l) => /s · You hit Faker$/.test(l)), la.join(' | '));
       assert.match(lb[0], /^You lost the duel against Grid in \d+\.\d s$/);
-      assert.match(lb[1], /· theirs: \d+ \(100 of yours\)/);
+      assert.match(lb[1], /· theirs: \d+ \((\d+(\.\d)?) of yours\)/);
+      assert.ok(+lb[1].match(/\((\d+(?:\.\d)?) of yours\)/)[1] >= 99.9, 'all of B\'s health (and what it healed): ' + lb[1]);
       assert.ok(lb.some((l) => /s · Grid hit you -[\d.]+ \(you have 0\)$/.test(l)), lb.join(' | '));
       if (mode !== 'local') {
         assert.deepEqual(await a.eval(() => window.__fakeRTDB.rejected), []);
@@ -192,5 +196,33 @@ test('U034: a third player sees both duelists\' HP and the ring', async () => {
     assert.equal(seen.find((x) => x[0] === 'Grid')[1], 100, 'A was not hit');
     assert.ok(seen.find((x) => x[0] === 'Faker')[1] < 100, 'B took a hit');
     assert.deepEqual(c.errors, []);
+  } finally { await ctx.close(); }
+});
+
+// v3.76 (owner 2026-10-28: "use your health"): the duel bar is real health. B starts the fight on half its health, so its
+// bar starts at 50 for both sides; A's blow takes real HP off B; when B heals, A sees the bar go back up.
+test('v3.76: the duel bar is real health, from the start, and it heals', async () => {
+  const { ctx, a, b } = await pair('local');
+  try {
+    await b.eval(() => { const G = window.__G; G.P.hp = Math.round(G.maxHP() / 2); });
+    await startFight(a, b);
+    const half = await b.eval(() => window.__G.P.hp / window.__G.maxHP() * 100);
+    assert.ok(Math.abs((await duel(b)).hp - half) < 1.01, 'B\'s bar is its health: ' + (await duel(b)).hp + ' vs ' + half);
+    await until(a, () => Satisfy.local.net().duel.foeHp < 60, 8000);
+    const h0 = await b.eval(() => window.__G.P.hp);
+    for (let i = 0; i < 10 && (await b.eval(() => window.__G.P.hp)) >= h0; i++) {
+      await a.eval(() => { window.__G.P.acd = 0; window.__G.tryAttack(1, 0); });
+      await a.step(16);
+      await settle(a, b);
+    }
+    const h1 = await b.eval(() => window.__G.P.hp);
+    assert.ok(h1 < h0, 'A\'s blow took B\'s real health: ' + h0 + ' -> ' + h1);
+    // B heals to full: its bar follows, and A sees it
+    await b.eval(() => { const G = window.__G; G.P.hp = G.maxHP(); });
+    await settle(a, b);
+    await until(a, () => Satisfy.local.net().duel.foeHp > 99, 8000);
+    assert.equal((await duel(a)).phase, 'fight');
+    assert.deepEqual(a.errors, []);
+    assert.deepEqual(b.errors, []);
   } finally { await ctx.close(); }
 });
