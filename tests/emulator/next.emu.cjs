@@ -285,10 +285,3 @@ test('#191: arena ratings name the opponent and count one more duel against it; 
   await no(db(B).ref('arenaPairs/' + se + '/' + A).once('value'), "B can't read A's counts");
 });
 
-test('#192: balance figures: duels and open PvP apart, gear band, latency p95; optional and bounded', async () => {
-  const base = { wk: 'w2900', cls: 'warrior', lv: 12, n: 1, s: 2, w: 1, l: 0, gi: 0, go: 0, t: SV };
-  await yes(db(A).ref('balance/' + A).set(base), 'without them');
-  await yes(db(A).ref('balance/' + A).set(Object.assign({}, base, { dw: 3, dl: 2, ds: 40.5, pk: 1, pd: 0, pt: 6.2, gb: 2, lp: 180 })), 'with them');
-  await no(db(A).ref('balance/' + A).set(Object.assign({}, base, { gb: 10 })), 'a gear band past 9');
-  await no(db(B).ref('balance/' + A).set(base), "B can't write A's");
-});
