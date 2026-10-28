@@ -40,6 +40,9 @@
     'eq', 'bar', 'xbar', 'croot', 'aff', 'stash', 'rep', 'guild', 'comp', 'life',
     // repair orders posted to player smiths and not answered yet (SAT-ONLINE-096)
     'rord',
+    // crafting commissions (plan U219): your orders up (their fee and materials, for a refund) and pieces you forged that
+    // haven't reached their owner yet
+    'cord', 'cpend',
     // an auction listing whose write hasn't answered yet: its goods are off the bag (v3.16)
     'auPend',
     // Three Crowns at the inns: games won and played (SAT-ONLINE-181)
