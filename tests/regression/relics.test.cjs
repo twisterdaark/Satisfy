@@ -163,3 +163,39 @@ test("the relics' powers", async () => {
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
+
+test('the review: a record and its relic agree, spent dodges stay spent, the whisper waits for an empty screen, the cycle from any stone', async () => {
+  const g = await H.openGame();
+  try {
+    await H.newGame(g, LOOK);
+    await g.eval(HELP);
+    const r = await g.eval(async () => {
+      const G = window.__G, S = G.S, P = G.P, Q = window.__GRQ, B = window.__rq, o = {};
+      // a record of yours and no relic in the bag (a save behind its record): the relic comes back
+      Q.give('core'); const it = Q.item(); S.items.splice(S.items.indexOf(it), 1); delete S.eq.rl; o.gone = !!Q.item();
+      Q.mend(); o.back = (Q.item() || {}).id;
+      // spent dodges stay spent when it is taken off and on again
+      return o;
+    });
+    assert.equal(r.gone, false); assert.equal(r.back, 'rl_core', 'its record gives it back');
+    const r2 = await g.eval(async () => {
+      const G = window.__G, S = G.S, P = G.P, Q = window.__GRQ, B = window.__rq, X = G.eqx, o = {};
+      // let the core go, then the evil king
+      if (Q.item()) { Q.release(); B.pick(/Let it go/); }
+      Q.S.rel = {}; Q.give('evilking'); const it = Q.item(); Q.tick(.016); const src = { type: 'wolf', x: P.x + 10, y: P.y };
+      for (let i = 0; i < 5; i++)Q.evade(src); o.spent = P.rqEyeN;
+      delete S.eq.rl; Q.tick(.016); X.equip(it); Q.tick(.016); o.again = P.rqEyeN;
+      // the whisper: not over an open dialog
+      S.rqw = 0; S.lv = 120; G.talkNPC('smith'); const who0 = G.DL && G.DL.who; Q.tick(1); await B.wait(2800); o.rumorOver = !S.rqw && !!G.DL && G.DL.who === who0; o.dbg = [S.rqw, who0, G.DL && G.DL.who, G.mode, G.DL && G.DL.lines.join(' / ').slice(0, 200)];
+      for (let i = 0; i < 40 && G.DL; i++) { if (G.DL.optOn) { G.pickOpt(G.DL.opts.length - 1); break; } G.advance(); }
+      // the five stones may begin with any element, in the cycle
+      S.rqs = S.rqs || {}; S.rqx = S.rqx || {}; S.rqs.gourd = 2; S.rqx.gourd = {}; const touch = (id) => { B.use(id); B.pick(/Lay your hand/); };
+      for (const id of ['go3a', 'go3d', 'go3b', 'go3c', 'go3e'])touch(id); await B.wait(); o.cycle = S.rqs.gourd;
+      return o;
+    });
+    assert.equal(r2.spent, 0); assert.equal(r2.again, 0, 'no refill by taking it off');
+    assert.ok(r2.rumorOver, 'the whisper waits: ' + JSON.stringify(r2.dbg));
+    assert.equal(r2.cycle, 3, 'earth, metal, water, wood, fire is the cycle too');
+    assert.deepEqual(g.errors, []);
+  } finally { await g.close(); }
+});

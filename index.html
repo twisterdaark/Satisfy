@@ -6949,7 +6949,7 @@ window.__GSV={yield:(it,w)=>salvYield(it,w),fee:(it,w)=>salvFee(it,w),doSalv:(it
    (and gains 10% understanding of a named item, 17% for Pagma's Descendant), anyone else pays a smithy. The hidden
    function is found when it is appraised and works only once it is known. Each player's own items; nothing shared. */
 const HIDK=['str','agi','sta','int','dex','def','hpp','as'];
-const aprNeed=it=>!!(it&&it.slot&&!it.apr&&((it.r||0)>0||(rcById(it.id)||{}).drop));
+const aprNeed=it=>!!(it&&it.slot&&it.slot!=='rl'&&!it.apr&&((it.r||0)>0||(rcById(it.id)||{}).drop));
 // the rarer the piece, the likelier it hides something (owner 2026-10-24), drops a little above made pieces of their rarity
 const APRC=[0,.15,.28,.45,.65,.82],aprChance=it=>{const r=Math.min(5,it.r||0);return (rcById(it.id)||{}).drop?Math.min(.9,.35+r*.11):APRC[r];};
 function hidRoll(it){const r=it.r||0,k=HIDK[Math.floor(rand()*HIDK.length)],q=.6+rand()*.8;
@@ -11687,7 +11687,7 @@ function monAct(m,b,AI,dx,dy,d,mr,dt){m.atkT=Math.max(0,(m.atkT||0)-dt);
  if(m.st==='dash'&&mv){m.stT-=dt;const ox=m.x,oy=m.y,step=m.dsp*dt;if(mv.k==='leap')m.hop=Math.sin(Math.min(1,1-m.stT/mv.dashT)*Math.PI)*Math.min(14,(m.lL||40)*.14);move(m,m.ax*step,m.ay*step,mr);
   const moved=Math.hypot(m.x-ox,m.y-oy);
   if(mv.spin){m.spT=(m.spT||0)-dt;if(m.spT<=0&&Math.hypot(P.x-m.x,P.y-m.y)<(mv.reach||b.r+14)&&seeP(m)){m.spT=.22;vfx('slash',m.x,m.y-8,{angle:gTime*9,rarity:0});hitBy(m,b,mv);}}
-  else if(!m.hitDone&&Math.hypot(P.x-m.x,P.y-m.y)<b.r+9&&seeP(m)){m.hitDone=1;const r=hurtPlayer(b.dmg*mv.mul,m.lv,m);if(r===2)mxOn(mv,m);if(mv.wall&&r===2&&P.dash<=0)move(P,m.ax*14,m.ay*14,4);}
+  else if(!m.hitDone&&Math.hypot(P.x-m.x,P.y-m.y)<b.r+9&&seeP(m)){m.hitDone=1;const r=hurtPlayer(b.dmg*mv.mul,m.lv,m);if(r===2)mxOn(mv,m);if(mv.wall&&r===2&&P.dash<=0&&!rqNoKb())move(P,m.ax*14,m.ay*14,4);}
   if(mv.wall&&moved<step*.35){m.st=null;m.stun=1.3;m.cd=mv.cd;shake=Math.max(shake,.12);SFX.slam();vfx('stun',m.x,m.y-b.oy,{life:1.3});return;}
   if(m.stT<=0){m.hop=0;if((m.combo||0)>1&&seeP(m)){m.combo--;m.st='tele';m.stT=m.tele=mv.tele*.5;m.ax=fx_;m.ay=fy_;m.lL=Math.min(mv.max,d)+14;mobActN(m);return;}m.st='rec';m.stT=mv.rec;if(mv.k==='leap'){vfx('dust',m.x,m.y,{n:6});wyLand(m);}}return;}
  if(m.st==='rec'){m.stT-=dt;if(m.stT<=0){m.st=null;m.cd=(mv?mv.cd:1)*(.8+rand()*.4)*(1-(m.ph||0)*.12);}return;}
@@ -13662,14 +13662,14 @@ const RQST={
  giant:[{s:'gi1',t:'seq',sites:['gi1a','gi1b','gi1c','gi1d'],order:['gi1b','gi1d','gi1a','gi1c'],g:9},{s:'gi2',t:'kill',mon:'fgiant',n:1,g:10},{s:'gi3',t:'wx',g:11},{s:'gi4',t:'dial'}],
  evilking:[{s:'ek1',t:'night',g:12},{s:'ek2a',t:'seq',sites:['ek2a','ek2b','ek2c'],order:['ek2b','ek2c','ek2a'],g:13},{s:'ek3',t:'kill',mon:'boss',n:3,g:14},{s:'ek4',t:'dial'}],
  dragon:[{s:'dr1',t:'pay',mats:{dscale:3},g:15},{s:'dr1',t:'kill',mon:'trauka',n:1,g:16},{s:'dr3',t:'noon',g:17},{s:'dr4',t:'dial'}],
- gourd:[{s:'go1',t:'pay',mats:{wood:10,fess:1,ore:10,mith:3,fish:10},g:18},{s:'go2',t:'still',sec:60,g:19},{s:'go3a',t:'seq',sites:['go3a','go3b','go3c','go3d','go3e'],order:['go3c','go3e','go3a','go3d','go3b'],g:20},{s:'go4',t:'dial'}],
+ gourd:[{s:'go1',t:'pay',mats:{wood:10,fess:1,ore:10,mith:3,fish:10},g:18},{s:'go2',t:'still',sec:60,g:19},{s:'go3a',t:'seq',sites:['go3a','go3b','go3c','go3d','go3e'],order:['go3c','go3e','go3a','go3d','go3b'],cyc:1,g:20},{s:'go4',t:'dial'}],
  core:[{s:'co1',t:'pay',mats:{mstone:20},g:21},{s:'co2',t:'kill',mon:'golem',n:20,g:22},{s:'co3a',t:'seq',sites:['co3a','co3b','co3c'],order:['co3c','co3a','co3b'],g:23},{s:'co4',t:'dial'}]};
 const RQOF={};for(const k of RQK)RQST[k].forEach((st,i)=>{for(const s of new Set([st.s,...(st.sites||[])]))(RQOF[s]=RQOF[s]||[]).push([k,i]);});   // which chain and step each stone belongs to
-const RQS={kt:-1e9,t:0,st:null,rt:0},RQP={};   // the last kill, the half-second tick, a stillness under way, the rumour; records being written
+const RQS={kt:-1e9,t:0,st:null,rt:0,s:null,lv:{},rel:{}},RQP={};   // the last kill, the half-second tick, a stillness under way, the rumour; records being written
 // the relic in your bag (there is never more than one), and the one that works: in the relic slot and the world's copy
 const rqItem=()=>S&&S.items?S.items.find(i=>i&&i.slot==='rl'&&RQK.includes(i.id.slice(3))):null;
 const rqHeld=()=>!!rqItem();
-function rqLive(it){if(!it)return false;if(!bkNet()||!bkReady())return true;return bkMine(bkRec(it.id));}
+function rqLive(it){if(!it)return false;if(!bkNet())return true;if(bkReady()){const v=bkMine(bkRec(it.id));RQS.lv[it.id]=v;return v;}return RQS.lv[it.id]!==false;}   // the records not read (yet, or a drop): the last answer stands
 function rqOn(){if(!S||!S.items)return null;const it=eqIt('rl');return it&&it.slot==='rl'&&rqLive(it)?it.id.slice(3):null;}
 const rqIs=k=>rqOn()===k;
 // the numbers
@@ -13693,15 +13693,16 @@ function rqHandBlock(p){if(!(P.rqHandU>gTime)||!rqIs('godhand'))return false;vfx
 // potions 15% stronger (the Gourd): 15% more of what the potion gave
 function rqPot(h0,m0){if(!rqIs('gourd'))return;if(P.hp>h0)P.hp=Math.min(maxHP(),P.hp+(P.hp-h0)*.15);if(P.mp>m0)P.mp=Math.min(maxMP(),P.mp+(P.mp-m0)*.15);hudDirty=true;}
 // every half second and every frame: the relic's own passives, the stillness, a record to write, the whisper
-function rqTick(dt){if(!S||!P||S.__demo)return;const k=rqOn(),now=gTime,fight=now-Math.max(P.hitT??-99,P.awkCt??-99)<5;
+function rqTick(dt){if(!S||!P||S.__demo)return;if(RQS.s!==S){RQS.s=S;RQS.kt=gTime;RQS.st=null;RQS.lv={};}const k=rqOn(),now=gTime,fight=now-Math.max(P.hitT??-99,P.awkCt??-99)<5;
  if(k==='gourd'&&!fight&&P.hp>0){P.hp=Math.min(maxHP(),P.hp+maxHP()*.015*dt);P.mp=Math.min(maxMP(),P.mp+maxMP()*.015*dt);hudDirty=true;}   // Five Elements Harmony
- if(k==='evilking'){if(P.rqEyeN==null){P.rqEyeN=5;P.rqEyeT=now;}if(P.rqEyeN<5&&now-(P.rqEyeT||0)>=20){P.rqEyeN++;P.rqEyeT=now;}else if(P.rqEyeN>=5)P.rqEyeT=now;}else P.rqEyeN=null;
+ if(P.rqEyeN==null){P.rqEyeN=5;P.rqEyeT=now;}if(k==='evilking'){if(P.rqEyeN<5&&now-(P.rqEyeT||0)>=20){P.rqEyeN++;P.rqEyeT=now;}else if(P.rqEyeN>=5)P.rqEyeT=now;}   // spent dodges stay spent while it is off (no refill by taking it off)
  if(k==='rebecca'&&P.hp>0){if(P.rqDbT==null)P.rqDbT=now+60;if(now>=P.rqDbT){P.rqDbT=now+60;cls2Clean();P.hp=Math.min(maxHP(),P.hp+maxHP()*.05);numP(-26,t('rqDbT'),'#fff2b0',false);}}else P.rqDbT=null;   // Divine Blessing
  if(RQS.st){const s=RQS.st;if(Math.hypot(P.x-s.x,P.y-s.y)>40||(P.hitT??-99)>s.t0||mode==='dead'){RQS.st=null;toast(t('rqStillNo'),'warn');}else if(now-s.t0>=s.n){RQS.st=null;rqDone(s.k,s.i);}}
  if((RQS.t-=dt)>0)return;RQS.t=.5;
  const it=rqItem();if(it&&bkNet()&&bkReady()&&!bkRec(it.id)&&!RQP[it.id]&&gTime>RQS.rt){RQP[it.id]=1;bkTake(it.id,true).then(ok=>{RQP[it.id]=0;if(!ok)RQS.rt=gTime+30;});}   // a relic found signed out: its record goes up (refused if another came out first: then this one sleeps)
- for(const id in S.rqgp||{})if(!RQP[id]&&bkReady()){const r=bkRec(id);delete S.rqgp[id];if(bkMine(r)&&!rqHeld())rqAdd(id.slice(3));save(true);}   // the world gave it, the page closed first
- if(!S.rqw&&S.lv>=100&&mode==='play'){S.rqw=1;setTimeout(()=>dialog('sysN',[t('rqRumor')]),2500);save(true);}}   // one whisper, once
+ for(const id in S.rqgp||{})if(!RQP[id]&&bkReady()){const r=bkRec(id);delete S.rqgp[id];if(bkMine(r)){if(!rqHeld())rqAdd(id.slice(3));else if(rqItem().id!==id)bkFree(id);}save(true);}   // the world gave it, the page closed first
+ if(!S.rqw&&S.lv>=100&&mode==='play'&&$('dialog').hidden&&!RQS.wq){RQS.wq=1;setTimeout(()=>{RQS.wq=0;if(!S||S.rqw||mode!=='play'||!$('dialog').hidden)return;S.rqw=1;dialog('sysN',[t('rqRumor')]);save(true);},2500);}
+ rqMend();}   // one whisper, once
 // a kill: the hunts the stones asked for, and the time of your last kill (the chapel wants you in peace)
 function rqKill(m){if(!S||m.tmp||m.spar||m.tdum)return;RQS.kt=gTime;for(const k of RQK){const st=RQST[k][S.rqs&&S.rqs[k]|0],x=S.rqx&&S.rqx[k];if(!st||st.t!=='kill'||!x||!x.go||x.c>=st.n)continue;
  const T=m.type,b=MT[T]||{},hit=st.mon==='demon'?DEMK.has(T):st.mon==='boss'?!!b.boss:st.mon==='golem'?/golem/.test(T):T===st.mon;if(!hit)continue;x.c=(x.c|0)+1;if(x.c>=st.n)toast(t('rqKillDone'),'good');}}
@@ -13709,7 +13710,7 @@ function rqKill(m){if(!S||m.tmp||m.spar||m.tdum)return;RQS.kt=gTime;for(const k 
 function rqNear(){const o=[];if(!P)return o;for(const id in RQSITE){const s=RQSITE[id],x=s[0]*TS+8,y=s[1]*TS+8;if(Math.abs(x-P.x)<40&&Math.abs(y-P.y)<40)o.push({id,x,y});}return o;}
 // where a chain stands for this character
 const rqStep=k=>(S.rqs&&S.rqs[k])|0,rqX=k=>(S.rqx||(S.rqx={}))[k]||(S.rqx[k]={});
-function rqDone(k,i){(S.rqs||(S.rqs={}))[k]=i+1;(S.rqx||(S.rqx={}))[k]={};SFX.quest();flash();dialog('sysN',[t('rq_'+k+'_'+i)]);save(true);}
+function rqDone(k,i){if(rqStep(k)!==i)return;(S.rqs||(S.rqs={}))[k]=i+1;(S.rqx||(S.rqx={}))[k]={};SFX.quest();flash();dialog('sysN',[t('rq_'+k+'_'+i)]);save(true);}
 // examining a stone
 function rqUse(o){if(!S||S.__demo)return;const id=o.id,look=RQSITE[id][2],own=RQOF[id]||[];
  const cur=own.find(([k,i])=>rqStep(k)===i&&(RQST[k][i].s===id||(RQST[k][i].sites||[]).includes(id)));
@@ -13726,40 +13727,49 @@ function rqUse(o){if(!S||S.__demo)return;const id=o.id,look=RQSITE[id][2],own=RQ
  if(!ok)return dialog('sysN',[t(K+'n')]);rqDone(k,i);}
 // stones touched in order: each shows its mark and may be touched; a wrong one silences them all
 function rqSeq(k,i,id){const st=RQST[k][i],x=rqX(k),K='rq_'+k+'_'+i;
- dialog('sysN',[t(K+'_'+id)],null,[{l:t('rqTouchB'),f:()=>{x.q=(x.q||[]).concat(id);const n=x.q.length;
-  if(x.q.some((s,j)=>st.order[j]!==s)){x.q=[];SFX.deny();toast(t('rqSeqNo'),'warn');save(true);return;}
+ dialog('sysN',[t(K+'_'+id)],null,[{l:t('rqTouchB'),f:()=>{x.q=(x.q||[]).concat(id);const n=x.q.length,j0=st.cyc?Math.max(0,st.order.indexOf(x.q[0])):0,ord=st.order.slice(j0).concat(st.order.slice(0,j0));   // a cycle may start anywhere
+  if(x.q.some((s,j)=>ord[j]!==s)){x.q=[];SFX.deny();toast(t('rqSeqNo'),'warn');save(true);return;}
   if(n>=st.order.length){x.q=[];setTimeout(()=>rqDone(k,i),30);return;}SFX.click();numP(-24,t('rqSeqOk'),'#cfe8ff',false);save(true);}},{l:t('rzLater')}]);}
 // the vault: three rings of signs; the chain's three in order open it (once open, it stays open for you)
 const rqSigns=k=>RQST[k].filter(s=>s.g!=null).map(s=>s.g);
 function rqDialSet(k){const own=rqSigns(k),j=RQK.indexOf(k),dec=[];for(let n=1;dec.length<6;n++){const g=(own[0]+n*5+j)%RQG.length;if(!own.includes(g)&&!dec.includes(g))dec.push(g);}
  const all=own.concat(dec),r=mulberry32(0x5e1c+j*77);for(let a=all.length-1;a>0;a--){const b=r()*(a+1)|0;[all[a],all[b]]=[all[b],all[a]];}return all;}
 function rqVault(k,i){const K='rq_'+k+'_v';if((S.rqo||{})[k])return rqClaim(k);
- const L=(S.rqL||{})[k]||0;if(L>Date.now())return dialog('sysN',[t(K),t('rqDialLock',{n:Math.ceil((L-Date.now())/60000)})]);
+ const L=(S.rqL||{})[k]||0,now=wNow();if(L>now)return dialog('sysN',[t(K),t('rqDialLock',{n:Math.ceil((L-now)/60000)})]);
  dialog('sysN',[t(K)],null,[{l:t('rqDialB'),f:()=>setTimeout(()=>rqRing(k,[]),30)},{l:t('rzLater')}]);}
 function rqRing(k,picks){const own=rqSigns(k),n=own.length;if(picks.length>=n){
   if(picks.every((g,j)=>g===own[j])){(S.rqo||(S.rqo={}))[k]=1;SFX.legendary();save(true);return setTimeout(()=>rqClaim(k),30);}
-  (S.rqL||(S.rqL={}))[k]=Date.now()+600000;SFX.deny();save(true);return dialog('sysN',[t('rqDialNo')]);}
+  (S.rqL||(S.rqL={}))[k]=wNow()+600000;SFX.deny();save(true);return dialog('sysN',[t('rqDialNo')]);}
  dialog('sysN',[t('rqRing',{i:picks.length+1,n,p:picks.map(g=>RQG[g]).join(' ')||'—'})],null,[...rqDialSet(k).map(g=>({l:RQG[g],f:()=>setTimeout(()=>rqRing(k,picks.concat(g)),30)})),{l:t('rzLater')}]);}
 // the vault is open: the relic if the world's copy is in it and your hands are empty
 function rqClaim(k){const id=RQID(k),it=rqItem();
  if(it)return dialog('sysN',[t('rqVaultOpen'),t(it.id===id?'rqHaveThis':'rqHaveOne',{r:t(it.id)})]);
- if(!bkReady()||RQP[id])return toast(t('lgWait'),'');
+ if(!bkReady()||Object.keys(RQP).some(x=>RQP[x])||Object.keys(S.rqgp||{}).length)return toast(t('lgWait'),'');   // one give at a time
+ if(bkMine(bkRec(id))){rqAdd(k);save(true);return;}   // its record is yours already: the relic comes back
  if(bkRec(id))return dialog('sysN',[t('rqVaultOpen'),t('rqTaken',{r:t(id)})]);
+ if(rqAcct())return dialog('sysN',[t('rqVaultOpen'),t('rqHaveAcct')]);
  rqGive(k);}
-function rqAdd(k){const it={uid:++S.uid,id:RQID(k),slot:'rl',r:4,dur:100,src:'rl'};S.items.push(it);equip(it);sbSig='';hudDirty=true;checkSkills();
- announce(t('rqGot',{r:t(it.id)}),1);flash();SFX.legendary();setTimeout(()=>dialog('sysN',[t('rqGotD',{r:t(it.id)}),t('rqD_'+k)]),600);return it;}
+// one relic to a player: signed in, another character of the account that holds one counts
+function rqAcct(){if(!bkNet()||!LBOOKS||!NET)return false;return Object.keys(LBOOKS).some(x=>/^rl_[a-z]+$/.test(x)&&LBOOKS[x]&&LBOOKS[x].uid===NET.uid&&LBOOKS[x].p!==S.pid);}
+// the records and the bag agree: a record of yours with no relic in the bag gives it back (a save that lagged behind the record);
+// a record of yours beside another relic you hold goes back to the world. Never while a give or a letting go is under way.
+function rqMend(){if(!bkReady()||Object.keys(RQP).some(x=>RQP[x])||Object.keys(S.rqgp||{}).length)return;const R=bkNet()?LBOOKS||{}:WS&&WS.books||{},it=rqItem();
+ for(const id in R){if(!/^rl_[a-z]+$/.test(id)||!RQK.includes(id.slice(3))||!bkMine(R[id])||RQS.rel[id]>gTime||(S.bkfp||{})[id])continue;
+  if(!it){rqAdd(id.slice(3));save(true);return;}if(it.id!==id){bkFree(id);RQS.rel[id]=gTime+30;}}}
+function rqAdd(k){const it={uid:++S.uid,id:RQID(k),slot:'rl',r:4,dur:100,src:'rl',apr:1};S.items.push(it);equip(it);sbSig='';hudDirty=true;checkSkills();
+ announce(t('rqGot',{r:t(it.id)}),1);flash();SFX.legendary();setTimeout(()=>{if(mode==='play'&&$('dialog').hidden)dialog('sysN',[t('rqGotD',{r:t(it.id)}),t('rqD_'+k)]);},600);return it;}   // never over an open dialog
 function rqGive(k){const id=RQID(k),s0=S;if(rqHeld()||bkRec(id)||RQP[id])return false;
  if(!bkNet()){bkTake(id,true);rqAdd(k);save(true);return true;}
  RQP[id]=1;(S.rqgp||(S.rqgp={}))[id]=1;save(true);
- bkTake(id,true).then(ok=>{RQP[id]=0;if(S!==s0)return;delete S.rqgp[id];if(ok&&bkMine(bkRec(id))&&!rqHeld())rqAdd(k);else dialog('sysN',[t('rqTaken',{r:t(id)})]);save(true);});return true;}
+ bkTake(id,true).then(ok=>{RQP[id]=0;if(S!==s0)return;delete S.rqgp[id];const mine=ok&&bkMine(bkRec(id));if(mine&&!rqHeld())rqAdd(k);else if(mine)bkFree(id);else dialog('sysN',[t('rqTaken',{r:t(id)})]);save(true);});return true;}
 // letting it go: the relic leaves you and goes back to its vault (its record freed), and you may seek another
-function rqRelease(){const it=rqItem();if(!it)return;dialog('sysN',[t('rqRelQ',{r:t(it.id)})],null,[{l:t('rqRelY'),f:()=>{const j=S.items.indexOf(it);if(j<0)return;if(S.eq&&S.eq.rl===it.uid)delete S.eq.rl;S.items.splice(j,1);bkFree(it.id);
+function rqRelease(){const it=rqItem();if(!it)return;dialog('sysN',[t('rqRelQ',{r:t(it.id)})],null,[{l:t('rqRelY'),f:()=>{const j=S.items.indexOf(it);if(j<0)return;if(S.eq&&S.eq.rl===it.uid)delete S.eq.rl;S.items.splice(j,1);bkFree(it.id);RQS.rel[it.id]=gTime+30;
   P.rqBar=0;P.rqHandU=0;P.rqRoarU=0;sbSig='';hudDirty=true;checkSkills();SFX.deny();toast(t('rqRelDone',{r:t(it.id)}),'warn');save(true);if(!$('equipW').hidden)renderEquip();}},{l:t('rzLater')}]);}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-rqrel]');if(!b||!S)return;e.stopPropagation();if(mode==='equip')closeEquip();rqRelease();},true);
 function rqEqRow(){const it=rqItem();if(!it)return '';const live=rqLive(it);return `<div class="note">🔮 <b class="rt rt4">${esc(t(it.id))}</b>${live?'':' · '+esc(t('rqSleep'))} <button data-rqrel="1" data-tip="${esc(t('rqRelT'))}">${t('rqRelB')}</button></div>`;}
 // a relic can't be sold, thrown away, dropped, stored, traded or put in the guild vault
 const rqBound=s=>!!(s&&s.it&&s.it.slot==='rl');
-function rqTip(i){if(!i||i.slot!=='rl')return '';const k=i.id.slice(3);return `<br><small style="color:#ffb0e0">🔮 ${t('rqTipL')}</small><br><small>${esc(t('rqD_'+k))}</small>`+(rqLive(i)?'':`<br><small style="color:#ff8a7a">${esc(t('rqSleep'))}</small>`);}
+function rqTip(i){if(!i||i.slot!=='rl')return '';const k=i.id.slice(3);return `<br><small style="color:#ffb0e0">🔮 ${t('rqTipL')}</small><br><small>${esc(t('rqD_'+k))}</small>`+(!S||!S.items||!S.items.includes(i)||rqLive(i)?'':`<br><small style="color:#ff8a7a">${esc(t('rqSleep'))}</small>`);}
 // the stones, drawn where they stand (a faint glimmer now and then on every one)
 function rqEnts(ents){if(!P||!S||S.__demo)return;for(const id in RQSITE){const s=RQSITE[id],x=s[0]*TS+8,y=s[1]*TS+8;if(Math.abs(x-P.x)>420||Math.abs(y-P.y)>300)continue;
  ents.push({y:y+4,f:()=>rqDraw(x,y,s[2],id)});if(rand()<.004)fx.push({x:x+(rand()-.5)*10,y:y-6-rand()*10,vx:0,vy:-8,t:.9,c:'#fff6c8',fl:1});}
@@ -13795,7 +13805,7 @@ function rqIcon(k){const c=document.createElement('canvas');c.width=c.height=16;
   dragon:()=>{p(6,1,4,3,'#8a8478');p(5,4,6,10,'#d8e4ec');p(6,6,4,7,'#c8202a');p(6,6,1,3,'#ff6a5a');},
   gourd:()=>{p(6,2,4,1,'#6a4a2a');p(5,3,6,4,'#c8a050');p(4,7,8,7,'#c8a050');p(5,8,2,3,'#e8c870');p(7,6,2,1,'#8a6a2a');},
   core:()=>{p(3,3,10,10,'#5a5a62');p(4,4,8,8,'#2a2a30');p(6,6,4,4,'#7ae8ff');p(7,7,2,2,'#e8ffff');p(2,7,1,2,'#c88a3a');p(13,7,1,2,'#c88a3a');}}[k]||(()=>p(4,4,8,8,'#fff')))();return c;}
-window.__GRQ={RQK,RQST,RQSITE,on:()=>rqOn(),item:()=>rqItem(),use:id=>rqUse({id}),near:()=>rqNear(),give:k=>rqGive(k),claim:k=>rqClaim(k),ring:(k,p)=>rqRing(k,p),signs:k=>rqSigns(k),dial:k=>rqDialSet(k),
+window.__GRQ={RQK,RQST,RQSITE,mend:()=>rqMend(),on:()=>rqOn(),item:()=>rqItem(),use:id=>rqUse({id}),near:()=>rqNear(),give:k=>rqGive(k),claim:k=>rqClaim(k),ring:(k,p)=>rqRing(k,p),signs:k=>rqSigns(k),dial:k=>rqDialSet(k),
  tick:dt=>rqTick(dt),kill:m=>rqKill(m),atk:(m,o)=>rqAtk(m,o||{}),hurt:(d,s)=>rqHurt(d,s),evade:s=>rqEvade(s),struck:d=>rqStruck(d),hand:p=>rqHandBlock(p),release:()=>rqRelease(),row:()=>rqEqRow(),tip:i=>rqTip(i),bound:s=>rqBound(s),G:RQG,S:RQS}; // tests
 Object.assign(STR.ar,{"rl_godhand":"مجسّم يد الإله",
  "rl_baal":"رق بعل",
@@ -13829,6 +13839,7 @@ Object.assign(STR.ar,{"rl_godhand":"مجسّم يد الإله",
  "rqVaultOpen":"[الخزنة مفتوحة.]",
  "rqHaveThis":"فاضية: {r} معاك أصلاً.",
  "rqHaveOne":"إيدك ماسكة أثر أصلاً، {r}. الخزنة مش هتدّي تاني.",
+ "rqHaveAcct":"شخصية تانية من شخصياتك ماسكة أثر أصلاً. أثر واحد للاعب: الخزنة مش هتدّي تاني.",
  "rqTaken":"فاضية. فيه حد في العالم ماسك {r}. لو سابه في يوم، هيرجع هنا.",
  "rqDialB":"لف الحلقات",
  "rqRing":"[الحلقة {i} من {n}] لحد دلوقتي: {p}",
@@ -13974,6 +13985,7 @@ Object.assign(STR.en,{"rl_godhand":"God Hand Miniature",
  "rqVaultOpen":"[The vault stands open.]",
  "rqHaveThis":"It is empty: the {r} is already with you.",
  "rqHaveOne":"Your hands already hold a relic, the {r}. The vault will not give a second.",
+ "rqHaveAcct":"Another of your characters already holds a relic. One relic to a player: the vault will not give a second.",
  "rqTaken":"It is empty. Someone in the world holds the {r}. If it is ever let go, it comes back here.",
  "rqDialB":"Turn the rings",
  "rqRing":"[Ring {i} of {n}] So far: {p}",
@@ -14821,7 +14833,7 @@ function mxOn(mv,m){if(!mv||!P||saIn())return;
  if(mv.root&&!((P.rootI||0)>gTime)&&!legResist()){P.rootT=gTime+mv.root;P.rootI=P.rootT+1.5;numPK(-34,'mxRoot','#c8a050',false);SFX.clang();}
  if(!m||m.dead)return;
  if(mv.drain){const h=Math.round(m.max*mv.drain);mobHeal(m,h);num(m.x,m.y-26,'+'+h.toLocaleString('en'),'#ff5a7a',false);mxBeam(P,m,'#d8283a');}
- if(mv.hook&&!(P.dash>0)){const hx=m.x-P.x,hy=m.y-P.y,hl=Math.hypot(hx,hy)||1,s=Math.max(0,Math.min(mv.hook,hl-16));move(P,hx/hl*s,hy/hl*s,4);}
+ if(mv.hook&&!(P.dash>0)&&!rqNoKb()){const hx=m.x-P.x,hy=m.y-P.y,hl=Math.hypot(hx,hy)||1,s=Math.max(0,Math.min(mv.hook,hl-16));move(P,hx/hl*s,hy/hl*s,4);}
  if(mv.focus||mv.root)for(const o of mons)if(o!==m&&!o.dead&&o.eng>0&&Math.hypot(o.x-m.x,o.y-m.y)<170){o.cd=Math.min(o.cd,.05);o.sprT=1.6;o.tired=0;}}
 function mxTick(dt){if(!P||mode==='dead')return;
  if(P.dotT>gTime){P.dotK=(P.dotK||0)-dt;if(P.dotK<=0){P.dotK=.5;const n=Math.max(1,Math.round(maxHP()*P.dotP*.5));if(P.hp>n){P.hp-=n;numP(-20,'-'+n,MXC[P.dotC]||'#7ad04a',false);hudDirty=true;}}

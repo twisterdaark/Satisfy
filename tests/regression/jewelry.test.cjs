@@ -36,7 +36,7 @@ test('Elizabeth: her window, what she asks for, and the Guardian set worn in the
     await g.eval(() => { const G = window.__G; G.DL = null; document.getElementById('dialog').hidden = true; G.eqx.openEquip(); });
     await g.step(2);
     const eq = await g.eval(() => [...document.querySelectorAll('#equipW [data-eq]')].map((b) => b.dataset.eq).sort().join(''));
-    assert.equal(eq, 'abeghkk1k2k3nruw'); // v1.95: nine more ring slots; v2.02: at level 120 the first three are open; v2.45 earrings, v2.48 underwear
+    assert.equal(eq, 'abeghkk1k2k3nrrluw'); // v1.95: nine more ring slots; v2.02: at level 120 the first three are open; v2.45 earrings, v2.48 underwear; v3.74 the relic slot (rl)
     assert.match(await g.eval(() => document.getElementById('equipW').textContent), /Necklace[\s\S]*Bracelet|Bracelet[\s\S]*Necklace/);
     if (process.env.SHOT) await g.page.screenshot({ path: process.env.SHOT + '-jewelry.png' });
     assert.deepEqual(g.errors, []);
