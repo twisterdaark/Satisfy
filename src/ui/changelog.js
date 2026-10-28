@@ -7,6 +7,18 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-28realpvp', ver: '3.76', d: '2026-10-28',
+      ar: ["الـ PvP بقى بدمجك الحقيقي وهيلث الخصم الحقيقية، في المبارزة وفي الـ PK برة المدن: هجومك × قوة المهارة، بالكريتيكال بتاعك (نسبته وضربته زي ما بتضرب الوحوش)، والخصم بيقللها بالدفاع بتاعه، والجارد بياخد ربعها، والتفادي بيلغيها. الرقم اللي بيطلع هو ضربتك الحقيقية مش نسبة.",
+        "قبل كده ضربة الـ PK كانت بتاخد 3 لـ 9% من الهيلث مهما كان دمجك، والمبارزة كانت بتنزّل شريط لوحده والهيلث نفسها مبتتحركش.",
+        "المبارزة دلوقتي بتنزّل من الهيلث بتاعتك نفسها: الشريط هو الهيلث، والبوشنات والريجين والوحوش بيأثروا فيها. الضربة اللي كانت هتموّتك بتسيبك على 1 هيلث وبتخسر المبارزة، فالمبارزة عمرها ما بتموّت.",
+        "ضربة واحدة متقدرش تاخد أكتر من تلت الهيلث القصوى للخصم، فمحدش بيموت من ضربة واحدة.",
+        "اختبار جديد لده."],
+      en: ["PvP now uses your real damage and the target's real health, in duels and in open PvP outside towns: your attack × the skill's strength, with your own critical chance and critical damage (the same as against monsters); the target's defence lowers it, a raised guard takes a quarter, and a dodge takes none. The number you see is your real hit, not a percentage.",
+        "Before, an open PvP hit took 3-9% of the target's health whatever your damage, and a duel moved a bar of its own while health itself stayed put.",
+        "A duel now takes your real health: the bar is your health, and potions, regeneration and monsters move it too. The blow that would kill you leaves you on 1 HP and loses the duel, so a duel never kills.",
+        "One hit can take at most a third of the target's max health, so nobody falls to a single blow.",
+        "A new test for this."],
+      hide: [4] },
     { v: '2026-10-27plan4', ver: '3.75', d: '2026-10-28',
       ar: ["اختبار رقصات السيف عند جدارية باغما: السيّاف اللي على الجدارية بيقولك رقصاتك واحدة ورا التانية، وكل واحدة لازم تيجي في ثانيتين. بتاخد تقدير (S لحد C)، ولو الرقصات اندمجت في 9 ثواني بتتعلم الدمج الجديد.",
         "الحراس بالليل بيلفّوا في دورية قصيرة وفي إيدهم فانوس، والتجار اللي برة بيقفلوا الشبابيك ويولّعوا لمبة، بس لسه بيبيعوا من الشباك.",

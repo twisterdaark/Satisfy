@@ -7410,11 +7410,15 @@ function tdEnd(){const d=tdDur(),v=tdDps();if(d>=TDMIN&&v>(S.dpsB||0)){S.dpsB=v;
 let TDUI='';function tdUI(){const w=$('tdW');if(!w)return;const on=!!TDM&&mode!=='title';const h=on?`${t('tdummy')} · ${tdDur().toFixed(1)} s · ${t('tdDmg')} <b>${TDM.dmg.toLocaleString('en')}</b> · DPS <b>${tdDps().toLocaleString('en')}</b> · ${t('tdHits',{n:TDM.hits,c:TDM.crits})}${S.dpsB?` <small>· ${t('tdBestL',{n:S.dpsB.toLocaleString('en')})}</small>`:''}`:'';
  if(h!==TDUI){TDUI=h;w.innerHTML=h;w.hidden=!on;}}
 window.__GTD={tick:dt=>tdTick(dt),hit:(m,d,c)=>tdHit(m,d,c),end:()=>tdEnd(),get M(){return TDM},dps:()=>tdDps(),dur:()=>tdDur(),TDSPOT,TDR,TDIDLE,TDMIN,ui:()=>$('tdW').textContent,shared:m=>mobOk(m),solid:(x,y)=>solidT(x,y)}; // tests
+/* your critical chance and critical damage, one pair for a monster and for a player (v3.76, owner 2026-10-28: PvP with your
+   real damage). hitMon's own numbers, moved here unchanged; both are pure (no dice). */
+function critP(){return Math.min(ssLow()?.9:.5*rzCapM(),(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)+psCr()+(aEyes()?.08:0)+rzCr()+awkCr()+egoCr()+rqCr()));}
+function critD(){return 1.8*ttCdm()*(1+psCd()+(aEyes()?.2:0)+rzV('cdmg')+egoCdm());}
 function hitMon(m,mul,o={}){const b=MT[m.type],my=monY(m);if(m.type==='guardian'&&gdRing(P.x,P.y)){if(gTime-(P.gdMsg||-9)>2){P.gdMsg=gTime;num(P.x,P.y-30,t('gdNoHit'),'#cfe8ff',false);}return 0;}if(!o.pure&&brImm(m)){num(m.x,my-14,t('brImmT'),'#ffd24a',false);SFX.clang();return 0;}if(!o.pure&&m.bh&&m.inv>0){num(m.x,my-14,t('bhImm'),'#cfe8ff',false);SFX.clang();return 0;}if(!o.pure&&OGB&&OGB[m.type]&&ogImm(m,o))return 0;
  if(!o.pure&&m.type==='kraugel'&&!m.st&&!(P.bdetU>gTime)&&rand()<.3){num(m.x,my-14,lang==='ar'?'تفادي':'EVADE','#cfe8ff',false);vfx('dust',m.x,m.y,{n:5});move(m,(rand()-.5)*44,(rand()-.5)*30,Math.max(3,b.r-3));return 0;}
  if(o.skill&&!o.spr&&P.sprW>gTime)bzSpray(m,mul); // Braham's Magic Spray
  if(o.skill&&!o.chain&&!o.dot&&weapKind()==='sword')swEGain(.003);   // (v3.14) a skill's blow fills a little Sword Energy
- let dmg=((o.aura?auAtkV():atkV())+(o.addAtk||0))*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.nolv||o.skill&&S.cls==='lantier'?Math.max(1,lvF(m.lv)):o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m)*cpPen(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(poemOn()?1.4:1)*(dsRegIn()?1.2:1)*(o.skill&&S.cls==='lknight'&&pasOn('lkse')&&weapKind()==='sword'?1+.15*pasM('lkse'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*wyAtk(m,o)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*gpAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*rzAtk(m,o)*awkAtk(m,o)*egoAtk(m,o)*rqAtk(m,o)*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<Math.min(ssLow()?.9:.5*rzCapM(),(ssLow()?2:1)*(.05+cpStat('crit')+(S.cls==='tzudan'&&pasOn('tzweap')?.1:0)+(P.bdetU>gTime?.1:0)+(tlOn('senses')?.03:0)+(ipOn('vspot')?.08:0)+stat('dex')*.001+(weapKind()==='dagger'?.1:0)+psCr()+(aEyes()?.08:0)+rzCr()+awkCr()+egoCr()+rqCr()));if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&m.expU>gTime){crit=true;dmg*=1.5;m.expU=0;}if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&P.morN>0){P.morN=0;crit=true;dmg*=1.5;num(P.x,P.y-30,t('oMorHit'),'#ffd24a',false);}if(!crit&&!o.pure&&!o.raw&&rzSure(m))crit=true;if(crit)dmg*=1.8*ttCdm()*(1+psCd()+(aEyes()?.2:0)+rzV('cdmg')+egoCdm());dmg*=rlAtk(m);if(!o.pure)dmg*=elDmg(m,o);let burn=false;const w=weapon();
+ let dmg=((o.aura?auAtkV():atkV())+(o.addAtk||0))*mul*(o.skill&&P.cohW>gTime?3:1)*(o.pure?1:o.nolv||o.skill&&S.cls==='lantier'?Math.max(1,lvF(m.lv)):o.aura?Math.max(.6,lvF(m.lv)):lvF(m.lv)*ssShred(m)*cpPen(m))*(o.pure?1:.9+rand()*.2)*(S.cls==='saint'&&S.sk&&S.sk.sscsm&&weapKind()==='sword'?1+.02*skLv('sscsm'):1)*(poemOn()?1.4:1)*(dsRegIn()?1.2:1)*(o.skill&&S.cls==='lknight'&&pasOn('lkse')&&weapKind()==='sword'?1+.15*pasM('lkse'):1)*(m.weak>0?1.25:1)*(m.mk>0?1.2:1)*wyAtk(m,o)*phAtk(m)*rgAtk(m)*hcAtk(m,o)*p2Atk(m,o)*p3Atk(m)*vcAtk(m)*p4Atk(m)*p5Atk(m)*p6Atk(m)*dvAtk(m)*epAtk(m)*gpAtk(m)*(tlOn('blslay')&&DEMK.has(m.type)?1.05:1)*mbAtk(m)*vpAtk()*rzAtk(m,o)*awkAtk(m,o)*egoAtk(m,o)*rqAtk(m,o)*eaAtk()*vtAtk(m)*(m.wardT>gTime&&!o.pure?ssWard(m.wardR||.4):1),crit=!o.pure&&rand()<critP();if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&m.expU>gTime){crit=true;dmg*=1.5;m.expU=0;}if(!o.pure&&!o.raw&&!o.dot&&!o.chain&&P.morN>0){P.morN=0;crit=true;dmg*=1.5;num(P.x,P.y-30,t('oMorHit'),'#ffd24a',false);}if(!crit&&!o.pure&&!o.raw&&rzSure(m))crit=true;if(crit)dmg*=critD();dmg*=rlAtk(m);if(!o.pure)dmg*=elDmg(m,o);let burn=false;const w=weapon();
  if(w.id==='gsword'&&w.r===4&&!o.skill){S.hits++;if(S.hits%4===0){dmg*=2;burn=true;}}
  // humanoid enemies raise a guard now and then: a blocked hit does a fifth of the damage, and they answer at once.
  // Once the guard is up it stays up for a moment, so mashing attack into it does little; circle round or use a skill.
@@ -19618,7 +19622,7 @@ function olPub(){return outlaw()?(karma()<=MURDER?2:1):0;}
 window.__GK={karma:()=>karma(),set:k=>{S.karma=k;},ol:()=>olPub(),respawn:()=>respawn()}; // test hook
 function karmaTick(dt){if(!S||S.__demo||mode!=='play'||karma()>=0)return;S.karT=(S.karT||0)+dt;if(S.karT>=KARMA_BACK){S.karT=0;S.karma=karma()+1;toast(t('kaBack',{k:S.karma}),'good');netForce=true;}}
 function pvpStart(){PVP=Satisfy.pvp.create({presence:NET,uid:NET.uid,now:()=>performance.now(),pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',
-  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo,zoneAt:(x,y)=>netZone(x,y),apart:r=>!campMate(r)||!!P&&roomAt(P.x,P.y)===HOME});
+  room:()=>P?(roomAt(P.x,P.y)||{}).id||null:null,party:()=>PARTY&&PARTY.id(),ally:r=>!!(r&&r.gd&&galOf(r.gd)&&guildOf(r)),busy:()=>!!(DUEL&&DUEL.locked()),alive:()=>mode!=='dead'&&!!S&&!S.__demo,zoneAt:(x,y)=>netZone(x,y),apart:r=>!campMate(r)||!!P&&roomAt(P.x,P.y)===HOME,hurt:pvpDmg});
  PVP.on(e=>{if(e.type==='hurt')pvpHurt(e);
   else if(e.type==='kill'&&S&&!S.__demo){bntClaim(e.uid,0);balPvp(true);hgSoul();const n=Satisfy.chat.clean(e.handle,24)||'?',v=NET.remotes().find(r=>r.uid===e.uid);
    if(v&&warOf(v)){gwrKill(v.gd);return;} // a guild war (SAT-ONLINE-086): it counts for the guild, no karma lost
@@ -19662,10 +19666,21 @@ window.__GB={all:()=>BNTS,on:uid=>bntOn(uid),post:(uid,g)=>{const r=NET.remotes(
 function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoom=(roomAt(P.x,P.y)||{}).id||null,l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';let best=null,bd=1e9;
  for(const r of NET.remotes()){if(!netSees(r,myRoom)||PVP.why(r)||!seeL(P.x,P.y-4,r.x,r.y-4))continue;const dx=r.x-P.x,dy=(r.y-8)-(P.y-6),d=Math.hypot(dx,dy);
   if(ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):(d>30||(dx*ax+dy*ay)/(d*l||1)<-.2))continue;if(d<bd){bd=d;best=r;}}
- if(!best)return;const crit=rand()<.12,pow=(8+rand()*5)*(crit?1.5:1)*Math.min(1.5,mul||1),pm=PVP.hit(best,pow);
- if(pm){num(best.x,best.y-24,'-'+Math.max(1,Math.round(pm/10))+'%',crit?'#ffd24a':'#ffffff',crit);vfx(crit?'crit':'hit',best.x,best.y-10,{angle:Math.atan2(best.y-P.y,best.x-P.x)});}}
-// a hit from another player, already checked by pvp.js: a share of our max HP; a dodge's frames avoid it, a raised guard
-// takes a quarter. The lethal one goes back to the attacker as a kill.
+ if(!best)return;const R=pvpPow(mul),sent=PVP.hit(best,R.pow);
+ if(sent){num(best.x,best.y-24,'-'+sent,R.crit?'#ffd24a':'#ffffff',R.crit);vfx(R.crit?'crit':'hit',best.x,best.y-10,{angle:Math.atan2(best.y-P.y,best.x-P.x)});}}
+/* PvP with your real damage and health (v3.76, owner 2026-10-28: "PvP uses your health and your damage, as normal, in a duel
+   and in PK"). Before, an open PvP hit took a fixed 3-9% of the victim's max health whatever the damage, and a duel
+   only moved a bar of its own. Now a blow to a player is your blow as a monster takes it: attack (buffs and awakening
+   in it), the skill's strength, your passives, a 0.9-1.1 spread and your own critical chance and damage (critP/critD).
+   The one hit takes it through its own defence (k*150/(150+def)), a raised guard (a quarter) and a dodge (nothing),
+   and loses at most a third of its max health to one blow, so nobody falls to a single hit. Both modes share it. */
+function pvpPow(mul){const crit=rand()<critP(),pow=atkV()*(mul||1)*(1+pasGen())*(.9+rand()*.2)*(crit?critD():1);return {pow:Math.max(1,Math.round(pow)),crit};}
+function pvpTake(k){let d=Math.max(1,Math.round(k*150/(150+defV())));if(P.guard){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}return Math.min(d,Math.max(1,Math.round(maxHP()/3)));}
+// a hit from another player, already checked by pvp.js: pvpDmg works out the health it takes (PVPD) and its per mille of
+// max health for the death recap; pvpHurt then takes it off. The lethal one goes back to the attacker as a kill.
+let PVPD=0;
+function pvpDmg(k){PVPD=0;if(!S||S.__demo||mode==='dead'||!P||P.dash>0||P.spw)return 0;PVPD=pvpTake(k);return PVPD/maxHP()*1000;}
+window.__GPVP={critP:()=>critP(),critD:()=>critD(),take:k=>pvpTake(k),pow:m=>pvpPow(m)}; // tests
 /* PvP gear damage (SAT-ONLINE-152, plan U042 "limited wear and a repair cost, no item dropped; acceptance: no item lost on a
    crash or a duplicate result"). Dying to a player in open PvP costs every piece you wear (weapon, armour, rings) PVP_WEAR
    durability, but never takes one below PVP_WEAR_MIN, so PvP alone never breaks gear; the smith repairs it as any wear.
@@ -19675,9 +19690,9 @@ const PVP_WEAR=5,PVP_WEAR_MIN=10;
 function pvpWear(){let n=0;const seen=new Set();for(const it of [weapon(),...GEAR.map(eqIt)]){if(!it||seen.has(it))continue;seen.add(it);const d=durOf(it);if(d<=PVP_WEAR_MIN)continue;it.dur=Math.max(PVP_WEAR_MIN,d-PVP_WEAR);n++;}if(n)hudDirty=true;return n;}
 Object.assign(STR.ar,{pvpWearT:'معداتك اللي لابسها خسرت {n} من متانتها (PvP).'});
 Object.assign(STR.en,{pvpWearT:'The gear you wear lost {n} durability (PvP).'});
-function pvpHurt(e){if(!S||S.__demo||mode==='dead'||P.dash>0||P.spw)return;const n=Satisfy.chat.clean(e.handle,24)||'?',now=performance.now();
+function pvpHurt(e){const d=PVPD;PVPD=0;if(!d||!S||S.__demo||mode==='dead'||P.dash>0||P.spw)return;const n=Satisfy.chat.clean(e.handle,24)||'?',now=performance.now();
  if(!pvpFrom.has(e.uid)||now-pvpFrom.get(e.uid)>15000)toast(t('pvpHit',{n}),'warn');pvpFrom.set(e.uid,now);
- let d=Math.max(1,Math.round(maxHP()*e.pm/1000));const blk=!!P.guard;if(blk){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}
+ const blk=!!P.guard;
  P.hp-=d;numP(-20,'-'+d,blk?'#9fc8ff':'#ff6a5a',false);if(blk)SFX.hit();else{SFX.hurt();asMe(()=>vfx('blood',P.x,P.y-10,{}));shake=.12;}hudDirty=true;
  if(P.hp<=0){if(legSave())return;
   const R=PVP.recap?PVP.recap():null;if(R)FLOG.pvp={n:e.handle,r:R};
@@ -20355,17 +20370,19 @@ function gwClaim(k){const st=gwSt();if(!st||!GWK||gwTier()<k||GWPAID[k])return g
  st.weekClaim(gid,wk,NET.uid,k).then(()=>{if(GWK!==key)return;GWPAID[k]={t:wNow()};const r=GW_G[k-1];S.gold+=r;gContrib(r);toast(t('gwPaid',{t:k,r:r.toLocaleString('en-US')}),'good');SFX.quest();save(true);hudDirty=true;gwD();},()=>{toast(t('gdFail'),'warn');gwD();});}
 window.__GWK={get key(){return GWK},get mine(){return GWMine},get total(){return gwTotal()},get tier(){return gwTier()},get paid(){return GWPAID},kill:ty=>gwKill(ty),open:()=>gwD(),claim:k=>gwClaim(k),store:()=>GDS}; // tests
 /* duels (SAT-ONLINE-006, doc §09 R4): K challenges the nearest player outside towns; Y/N answers, Y is the ready check.
-   Damage is normalized (src/net/duel.js) and only touches duel HP: no gold, items, durability or quest credit. */
+   Since v3.76 a duel hit is your real damage off the foe's real health (duelHurt); the loser keeps 1 HP, and no gold,
+   items, durability or quest credit change hands. */
 Object.assign(STR.ar,{dHint:'[K] مبارزة',dSent:'اتبعت تحدي مبارزة لـ{n}',dFrom:'{n} بيتحداك في مبارزة',dReadyQ:'مبارزة مع {n}: جاهز؟',dReady:'جاهز (Y)',dWait:'مستني {n}…',dNone:'مفيش حد قريب كفاية للمبارزة',dSafe:'ممنوع المبارزة جوه المدن',dBusy:'{n} مشغول دلوقتي',dFar:'قرّب من {n} الأول',dDeclined:'{n} رفض المبارزة',dCancel:'المبارزة اتلغت',dFight:'ابدأ!',dOut:'ارجع للحلبة وإلا هتخسر!',dWin:'كسبت المبارزة ضد {n} {w}',dLose:'خسرت المبارزة ضد {n} {w}',dYield:'استسلام',dYou:'إنت',dTitle:'مبارزة ضد {n}',dRec:'المبارزات: {w} فوز · {l} خسارة',dw_yield:'(استسلام)',dw_arena:'(خرج من الحلبة)',dw_teleport:'(ساب القتال)',dw_safe:'(دخل مدينة)',dw_gone:'(الخصم مشي)',dw_death:'(مات)',dw_hp:''});
 Object.assign(STR.en,{dHint:'[K] Duel',dSent:'Duel challenge sent to {n}',dFrom:'{n} challenges you to a duel',dReadyQ:'Duel with {n}: ready?',dReady:'Ready (Y)',dWait:'Waiting for {n}…',dNone:'Nobody close enough to duel',dSafe:'No duels inside towns',dBusy:'{n} is busy right now',dFar:'Get closer to {n} first',dDeclined:'{n} declined the duel',dCancel:'Duel cancelled',dFight:'Fight!',dOut:'Back to the arena or you forfeit!',dWin:'You won the duel against {n} {w}',dLose:'You lost the duel against {n} {w}',dYield:'Yield',dYou:'You',dTitle:'Duel with {n}',dRec:'Duels: {w} won · {l} lost',dw_yield:'(surrender)',dw_arena:'(left the arena)',dw_teleport:'(left the fight)',dw_safe:'(entered a town)',dw_gone:'(opponent left)',dw_death:'(died)',dw_hp:''});
-// duels with your real damage and health (owner 2026-10-22: "the duel numbers are made up"): the attacker sends its real
-// hit (attack, crit, skills' strength); the defender takes it through its own defence, a raised guard (a quarter) and a
-// dodge (nothing), at most a third of its max health in one blow, and loses that share of its duel bar. Health itself is
-// untouched: a duel never kills or costs anything.
-function duelHurt(k){if(!P||P.dash>0)return 0;let d=Math.max(1,Math.round(k*150/(150+defV())));if(P.guard){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}
- const mh=maxHP();d=Math.min(d,Math.round(mh/3));DUELD=d;return d/mh*100;}
+// duels with your real damage and health (owner 2026-10-22, and v3.76, owner 2026-10-28: "use your health"): the attacker
+// sends its real blow (pvpPow); the defender takes it as an open PvP hit (pvpTake) off its real health, and the duel bar is
+// that health (duelHp). The blow that would kill leaves 1 HP and loses the duel: a duel never kills, and costs nothing
+// else. Monsters, potions and regeneration move the same health while it runs.
+function duelHurt(k){if(!P||!S||mode==='dead'||P.dash>0)return 0;const mh=maxHP(),d=pvpTake(k);DUELD=d;hudDirty=true;
+ if(P.hp-d<1){P.hp=1;return 100;}P.hp-=d;return d/mh*100;}
+function duelHp(){return P&&S&&!S.__demo?Math.max(0,Math.min(100,P.hp/maxHP()*100)):0;}
 let DUELD=0;
-function duelStart(){rnkStart();DUEL=Satisfy.duel.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',hurt:duelHurt});
+function duelStart(){rnkStart();DUEL=Satisfy.duel.create({presence:NET,uid:NET.uid,now:()=>performance.now(),blocked:isBlocked,pos:()=>P?{x:P.x,y:P.y}:{x:0,y:0},zone:()=>P?netZone(P.x,P.y):'',hurt:duelHurt,hp:duelHp});
  DUEL.on(e=>{const n=e.handle||((DUEL.state().handle)||'?');duelSig='';
   if(e.type==='challenge'){SFX.notice();}
   else if(e.type==='declined')toast(t('dDeclined',{n}),'warn');
@@ -20373,7 +20390,7 @@ function duelStart(){rnkStart();DUEL=Satisfy.duel.create({presence:NET,uid:NET.u
   else if(e.type==='safeHere')toast(t('dSafe'),'warn');
   else if(e.type==='fight'){toast(t('dFight'),'good');SFX.notice();rnkSnap(DUEL.state().foe);}
   else if(e.type==='outside')toast(t('dOut'),'warn');
-  else if(e.type==='hurt'){numP(-20,'-'+(DUELD||Math.round(e.dmg)),'#ff6a5a',false);SFX.hit();}
+  else if(e.type==='hurt'){numP(-20,'-'+(DUELD||Math.round(e.dmg)),P.guard?'#9fc8ff':'#ff6a5a',false);SFX.hit();if(!P.guard)asMe(()=>vfx('blood',P.x,P.y-10,{}));}
   else if(e.type==='result'){const win=e.result==='win';if(S&&!S.__demo){S.duels=S.duels||{w:0,l:0};S.duels[win?'w':'l']++;balPvp(win);}
    toast(t(win?'dWin':'dLose',{n,w:t('dw_'+e.why)}),win?'good':'warn');if(win)SFX.quest();rnkResult(win,e.foe);natDuel(win,e.foe);if(win&&legFoe(e.foe))setTimeout(legWin,600);if(win&&legFoe(e.foe)&&S.bsq)setTimeout(()=>lgWon('bowsaint'),600);
    if(S&&S.duels)setTimeout(()=>toast(t('dRec',S.duels)),500);}});}
@@ -20924,12 +20941,12 @@ function lfgPut(k){const L=lfgSt();if(!L||!S)return;L.put(NET.uid,{n:netId||S.lo
 function lfgStop(){const L=lfgSt();if(!L)return;L.off(NET.uid).then(()=>{LFGK=null;toast(t('lfgOffT'));},()=>toast(t('lfgFail'),'warn'));}
 window.__GLF={get F(){return LFGF},filters:()=>lfgFilters(),board:()=>lfgBoard(),put:k=>lfgPut(k),stop:()=>lfgStop(),out:()=>netSignOut(false),fb:()=>FB,get k(){return LFGK}}; // tests
 window.__GR={season:()=>rnkSeason(),mine:()=>RNK?RNK.get(rnkSeason(),NET.uid):null,top:()=>RNK?RNK.top(rnkSeason(),10):[]}; // test hook
-// The local attack reaches the opponent: melee within reach, bow/staff along the aim. Power is a normalized roll.
+// The local attack reaches the opponent: melee within reach, bow/staff along the aim. Power is your real blow (pvpPow).
 function duelSwing(ax,ay,mul,k){if(DUEL.state().phase!=='fight')return;const f=DUEL.foe();if(!f)return;
  const dx=f.x-P.x,dy=(f.y-8)-(P.y-6),d=Math.hypot(dx,dy),l=Math.hypot(ax,ay)||1,ranged=k==='bow'||k==='staff';
  if((ranged?(d>170||(dx*ax+dy*ay)/(d*l||1)<.8):d>30)||!seeL(P.x,P.y-4,f.x,f.y-4))return;
- const crit=rand()<Math.min(.5,.05+stat('dex')*.001+(k==='dagger'?.1:0)),pow=atkV()*(mul||1)*(.9+rand()*.2)*(crit?1.8:1),dmg=DUEL.hit(pow);
- if(dmg){num(f.x,f.y-24,'-'+dmg,crit?'#ffd24a':'#ffffff',crit);if(crit)vfx('crit',f.x,f.y-10);}}
+ const R=pvpPow(mul),dmg=DUEL.hit(R.pow);
+ if(dmg){num(f.x,f.y-24,'-'+dmg,R.crit?'#ffd24a':'#ffffff',R.crit);vfx(R.crit?'crit':'hit',f.x,f.y-10);}}
 // U034 spectators: while fighting, each duelist publishes "<duel id>:<duel HP>"; everyone else sees a bar over
 // each duelist and a dashed ring between the two
 function duelPublic(){if(!DUEL||!DUEL.locked())return null;const s=DUEL.state();return s.duel+':'+Math.max(0,Math.min(100,s.hp|0));}
@@ -20960,7 +20977,7 @@ function flogSum(){const D=flogDuel();return D&&D.r.ms!=null?t('flSum',{s:(D.r.m
 function flogShow(){const out=[],D=flogDuel(),nm=x=>Satisfy.chat.clean(x||'',24)||'?',sec=ms=>((ms||0)/1000).toFixed(1);
  if(D){const {L,r}=D,n=nm(L.handle);out.push(t(r.result==='win'?'flDWin':'flDLose',{n,w:t('dw_'+r.why),s:sec(r.ms)}).replace(/ {2,}/g,' '));
   out.push(t('flDTot',{o:r.hitsOut,d:flN(r.dealt),i:r.hitsIn,k:flN(r.taken),g:r.dodged,j:r.rejected}));
-  for(const l of r.lines.filter(l=>l.e!=='cd').slice(-10))out.push(sec(l.ms)+'s · '+(l.e==='out'?t('flOut',{n}):l.e==='in'?(l.k>0?t('flIn',{n,k:flN(l.k),hp:flN(l.hp)}):t('flDodge',{n})):l.e==='foe'?t('flFoe',{n,hp:flN(l.hp)}):l.e==='rej'?t('flRej',{w:t('flW_'+l.why)}):l.e==='fight'?t('flStart'):t('flEnd')));}
+  for(const l of r.lines.filter(l=>l.e!=='cd'&&l.e!=='self').slice(-10))out.push(sec(l.ms)+'s · '+(l.e==='out'?t('flOut',{n}):l.e==='in'?(l.k>0?t('flIn',{n,k:flN(l.k),hp:flN(l.hp)}):t('flDodge',{n})):l.e==='foe'?t('flFoe',{n,hp:flN(l.hp)}):l.e==='rej'?t('flRej',{w:t('flW_'+l.why)}):l.e==='fight'?t('flStart'):t('flEnd')));}
  if(FLOG.pvp){const R=FLOG.pvp.r;out.push(t('flPvp',{n:nm(FLOG.pvp.n),h:R.lines.length,s:sec(R.ms)}));for(const b of R.by.slice(0,5))out.push(t('flBy',{n:nm(b.handle),h:b.hits,p:Math.round(b.pm/10)}));}
  if(!out.length)out.push(t('flNone'));dialog('guild',out,null,[{l:t('oClose')}]);}
 window.__GFLOG={show:()=>flogShow(),get pvp(){return FLOG.pvp},sum:()=>flogSum()}; // tests
@@ -20975,13 +20992,13 @@ Object.assign(STR.en,{flSum:'{s} s · you hit {o} times, took {i} · biggest {b}
 function duelTick(live){DUEL.tick();const st=DUEL.state();
  if(DUEL.locked()&&(mode==='dead'||!live))DUEL.yield(mode==='dead'?'death':'teleport');
  const inv=live?DUEL.pendingChallenge():null,cd=Math.ceil(st.countdown/1000);
- const sig=lang+'|'+(inv?inv.duel:'')+'|'+st.phase+'|'+st.hp+'|'+st.foeHp+'|'+st.meReady+'|'+st.foeReady+'|'+cd+'|'+live;if(sig===duelSig)return;duelSig=sig;
+ const sig=lang+'|'+(inv?inv.duel:'')+'|'+st.phase+'|'+st.hp+'|'+(P?Math.ceil(P.hp):0)+'|'+st.foeHp+'|'+st.meReady+'|'+st.foeReady+'|'+cd+'|'+live;if(sig===duelSig)return;duelSig=sig;
  const ask=inv||(live&&st.phase==='ready');$('duelInv').hidden=!ask;
  if(inv){$('duelInvT').textContent=t('dFrom',{n:inv.handle});$('duelBtnA').textContent=t('pAccept');$('duelBtnB').textContent=t('pDecline');$('duelBtnA').hidden=false;$('duelBtnC').hidden=false;}
  else if(ask){$('duelInvT').textContent=st.meReady?t('dWait',{n:st.handle}):t('dReadyQ',{n:st.handle});$('duelBtnA').textContent=t('dReady');$('duelBtnA').hidden=st.meReady;$('duelBtnB').textContent=t('pDecline');$('duelBtnC').hidden=true;}
  const on=live&&(st.phase==='countdown'||st.phase==='fight'||st.phase==='over');$('duelW').hidden=!on;if(!on)return;
- $('duelT').textContent=t('dTitle',{n:st.handle||'?'});$('duelMeN').textContent=t('dYou')+' '+st.hp;$('duelFoeN').textContent=(st.handle||'?')+' '+st.foeHp;
- $('duelMeB').style.width=st.hp+'%';$('duelFoeB').style.width=st.foeHp+'%';$('duelCd').textContent=st.phase==='countdown'?String(cd||''):st.phase==='over'?flogSum():'';
+ $('duelT').textContent=t('dTitle',{n:st.handle||'?'});$('duelMeN').textContent=t('dYou')+' '+Math.max(0,Math.ceil(P.hp))+'/'+maxHP();$('duelFoeN').textContent=(st.handle||'?')+' '+Math.ceil(st.foeHp)+'%';
+ $('duelMeB').style.width=(st.phase==='over'?st.hp:duelHp())+'%';$('duelFoeB').style.width=st.foeHp+'%';$('duelCd').textContent=st.phase==='countdown'?String(cd||''):st.phase==='over'?flogSum():'';
  $('duelYield').textContent=t('dYield');$('duelYield').hidden=st.phase==='over';}
 /* party raid (SAT-ONLINE-009, doc §10 R6): in a party, the leader's copy of a boss is the one that counts. Members'
    hits go to the leader, everyone sees the leader's boss HP, and its death kills every hitter's copy with that
