@@ -1409,6 +1409,16 @@
             "$other": { ".validate": false }
           }
         },
+        "rw": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && newData.exists() && (!data.exists() || now - data.child('t').val() >= 30000)",
+            ".validate": "newData.hasChildren(['n', 't'])",
+            "n": { ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000 && (data.exists() ? newData.val() >= data.val() && newData.val() <= data.val() + 50 : newData.val() <= 50)" },
+            "t": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        },
         "$other": { ".validate": false }
       }
     },

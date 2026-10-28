@@ -7,6 +7,17 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-27plan4', ver: '3.75', d: '2026-10-28',
+      ar: ["اختبار رقصات السيف عند جدارية باغما: السيّاف اللي على الجدارية بيقولك رقصاتك واحدة ورا التانية، وكل واحدة لازم تيجي في ثانيتين. بتاخد تقدير (S لحد C)، ولو الرقصات اندمجت في 9 ثواني بتتعلم الدمج الجديد.",
+        "الحراس بالليل بيلفّوا في دورية قصيرة وفي إيدهم فانوس، والتجار اللي برة بيقفلوا الشبابيك ويولّعوا لمبة، بس لسه بيبيعوا من الشباك.",
+        "لوحة النقابات على وحوش العالم (التنين ترواكا وغيره): بيتحسب ضرر كل نقابة، ولما الوحش يموت نقابتك على حسب مركزها بتاخد نصيب من دهبه (الأول 100% لحد الخامس 15%).",
+        "نرجّع الغرب سوا: كل دودة عملاقة وكل عش في الرمال الغربية بيتحسب للعالم كله، والخضرة بتزحف من سور ريدان ناحية الغرب لحد ما الرمال كلها تخضر عند 3000. اسأل رابيت «الغرب عامل إيه؟».",
+        "قاتل الشياطين على الشياطين: كل زياداته مع البركات المقدسة على الشر ليها حد واحد، الضعف (ومهارة مفترس الشياطين بتيجي فوقهم)."],
+      en: ["The sword dance trial at Pagma's mural: the swordsman on it calls your dances one by one, each within 2 s. You get a grade (S to C), and dances that fuse inside 9 s teach you the new fusion.",
+        "At night the guards walk a short beat with a lantern, and the shopkeepers outdoors shutter their counters and light a lamp, still selling through the hatch.",
+        "A guild board on the world bosses (Trauka and the rest): each guild's damage counts, and at the kill your guild's place pays you a share of the boss's gold (1st 100% down to 5th 15%).",
+        "Restoring the West together: every giant worm and nest in the Western Sands counts for the whole world, and the green creeps west from Reidan's wall until all the sands are green at 3,000. Ask Rabbit \"How is the West?\".",
+        "The Demon Slayer on demons: all his bonuses with the holy blessings on evil share one limit, twice the damage (the Demon Predator skill comes on top)."] },
     { v: '2026-10-28relics', ver: '3.74', d: '2026-10-28',
       ar: ["الآثار: تمن حاجات فريدة بتتلبس في خانة جديدة (الأثر) في نافذة المعدات، ومن كل أثر نسخة واحدة بس في العالم كله. مجسّم يد الإله، رق بعل، الكتاب المقدس لريبيكا، قلب العملاق القديم، عين الملك الشرير، قارورة دم التنين، قرعة الطاوي المقدسة، وقلب الآلة السحرية.",
         "مفيش حد بيدّيك أثر ولا كويست. كل أثر مستني في آخر سلسلة حجارة قديمة على الخريطة: كل حجر عايز حاجة (وقت معيّن من اليوم، جو معيّن، تقدمة، دم، صيد، دقيقة هدوء، أو حجارة تتلمس بترتيب بيقوله لغز)، وبيدّيك رمز وتلميح للحجر اللي بعده. آخر حاجة خزنة بتتفتح بالتلات رموز بالترتيب، والغلط بيقفلها عشر دقايق.",
