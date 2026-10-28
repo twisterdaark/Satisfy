@@ -19673,9 +19673,10 @@ function pvpSwing(ax,ay,mul,k){if(!NET||(DUEL&&DUEL.locked()))return;const myRoo
    only moved a bar of its own. Now a blow to a player is your blow as a monster takes it: attack (buffs and awakening
    in it), the skill's strength, your passives, a 0.9-1.1 spread and your own critical chance and damage (critP/critD).
    The one hit takes it through its own defence (k*150/(150+def)), a raised guard (a quarter) and a dodge (nothing),
-   and loses at most a third of its max health to one blow, so nobody falls to a single hit. Both modes share it. */
+   and takes all of it: no cap (v3.77, owner 2026-10-28: the third of max health a blow could take at most is gone, so
+   a blow bigger than your health kills in open PvP; in a duel it leaves 1 HP). Both modes share it. */
 function pvpPow(mul){const crit=rand()<critP(),pow=atkV()*(mul||1)*(1+pasGen())*(.9+rand()*.2)*(crit?critD():1);return {pow:Math.max(1,Math.round(pow)),crit};}
-function pvpTake(k){let d=Math.max(1,Math.round(k*150/(150+defV())));if(P.guard){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}return Math.min(d,Math.max(1,Math.round(maxHP()/3)));}
+function pvpTake(k){let d=Math.max(1,Math.round(k*150/(150+defV())));if(P.guard){d=Math.max(1,Math.round(d*.25));asMe(()=>vfx('block',P.x,P.y-10,{}));}return d;}
 // a hit from another player, already checked by pvp.js: pvpDmg works out the health it takes (PVPD) and its per mille of
 // max health for the death recap; pvpHurt then takes it off. The lethal one goes back to the attacker as a kill.
 let PVPD=0;
