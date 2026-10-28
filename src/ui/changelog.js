@@ -7,6 +7,12 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-28ixfit', ver: '3.78', d: '2026-10-28',
+      ar: ["إصلاح: في الإندكس، صفحة الوحوش: كارت الوحش كان بيطوّل لحد ما يزقّ ليستة الوحوش تحته لشريط رفيع ميتعملش فيه سكرول. دلوقتي الكارت ليه حد وبيعمل سكرول لوحده زي باقي صفحات الإندكس، والليستة تحته باينة وبتعمل سكرول، على الكمبيوتر وعلى الموبايل.",
+        "اختبار جديد لده."],
+      en: ["Fix: on the Index's Monsters page, a monster's card grew until it squeezed the list under it into a thin strip that couldn't scroll. Now the card has a limit and scrolls on its own, like the Index's other pages, and the list under it shows and scrolls, on a computer and on a phone.",
+        "A new test for this."],
+      hide: [1] },
     { v: '2026-10-28pvpnocap', ver: '3.77', d: '2026-10-28',
       ar: ["مفيش حد أقصى للضربة في الـ PvP: ضربتك بتاخد كل اللي يعدّي من دفاع الخصم، حتى لو أكتر من الهيلث بتاعته كلها. في الـ PK ده معناه إن ضربة واحدة ممكن تموّت، وفي المبارزة بتسيبه على 1 هيلث ويخسر.",
         "اختبار جديد لده."],
