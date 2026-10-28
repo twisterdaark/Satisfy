@@ -36,7 +36,7 @@ test('a broken part of the frame costs only that part: the world, the HUD and th
     await until([b], () => Satisfy.local.net().remotes.length === 1);
     await b.step(2);
     const n0 = await drawn(b);
-    assert.ok(n0 > 100, 'the world is drawn: ' + n0);
+    assert.ok(n0 > 15, 'the world is drawn: ' + n0); // what is on screen (SAT-ONLINE-160: off-screen monsters, people and nodes aren't drawn)
     assert.equal(await others(b), 1, 'and the other player');
 
     // the other players' part breaks: everything else still draws, every frame
@@ -44,7 +44,7 @@ test('a broken part of the frame costs only that part: the world, the HUD and th
     for (let i = 0; i < 5; i++) {
       await b.step(1);
       const n = await drawn(b);
-      assert.ok(n > n0 - 20, `frame ${i}: the world without the other player (${n}, before ${n0})`);
+      assert.ok(n > n0 - 6, `frame ${i}: the world without the other player (${n}, before ${n0})`);
       assert.equal(await others(b), 0, `frame ${i}: the other player is not`);
     }
     assert.ok((await b.eval(() => window.__GFAULT.errs)).includes('fault: netEnts'), 'told');
@@ -60,7 +60,7 @@ test('a broken part of the frame costs only that part: the world, the HUD and th
     for (const k of ['netTick', 'mini']) {
       await b.eval((x) => window.__GFAULT.on(x), k);
       for (let i = 0; i < 15; i++) await b.step(1);
-      assert.ok(await drawn(b) > n0 - 20, k + ': the world still draws');
+      assert.ok(await drawn(b) > n0 - 6, k + ': the world still draws');
       assert.ok((await b.eval(() => window.__GFAULT.errs)).includes('fault: ' + k));
       await b.eval((x) => window.__GFAULT.off(x), k);
     }

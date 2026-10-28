@@ -45,7 +45,7 @@ function run(interest, WARM, RUN) {
   }
   for (const p of ps) if (p.party && interest) p.tr.party([p.party]);
   let down0 = 0, ev0 = 0, steps = 0;
-  const t1 = process.hrtime.bigint();
+  const c1 = process.cpuUsage(); // CPU time, not wall time (Claude-B's review of #147: a loaded machine's wall time fails it)
   for (let s = 0; (s * TICK) < WARM + RUN; s++) {
     if (s * TICK === WARM) { down0 = db.clients.reduce((n, c) => n + c.down, 0); ev0 = db.clients.reduce((n, c) => n + c.events, 0); }
     t += TICK;
@@ -61,7 +61,7 @@ function run(interest, WARM, RUN) {
     }
     steps++;
   }
-  const cpuMs = Number(process.hrtime.bigint() - t1) / 1e6;
+  const cu = process.cpuUsage(c1), cpuMs = (cu.user + cu.system) / 1000;
   const down = db.clients.reduce((n, c) => n + c.down, 0) - down0, events = db.clients.reduce((n, c) => n + c.events, 0) - ev0;
   return { ps, db, kbPerSec: down / (RUN / 1000) / 1000, eventsPerSec: events / (RUN / 1000), cpuMs, steps };
 }

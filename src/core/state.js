@@ -25,17 +25,34 @@
 
   var DURABLE = [
     // identity and progress
-    'look', 'cls', 'lv', 'xp', 'adv', 'title', 'tl', 'st', 'pts', 'hid', 'sk', 'mast', 'balK', 'playT',
+    'look', 'cls', 'lv', 'xp', 'adv', 'title', 'tl', 'hitRec', 'cls2', 'cls2lv', 'sc2k', 'th', 'ffHide', 'inn', 'svT', 'rx', 'dpsB', 'st', 'pts', 'hid', 'sk', 'mast', 'balK', 'playT', 'race', 'rv', 'rzq', 'rsub', 'rzr', 'brf', 'rvkM', 'bch', 'rsT',
+    // awakenings (v3.72): the highest reached, the highest announced, its aura's hue, every aura hidden on this screen
+    'awk', 'awkA', 'awc', 'awh',
+    // relics (v3.74): each chain's step and its progress, the vaults' locks and the ones opened, a relic the world gave while the page closed, the rumour heard
+    'rqs', 'rqx', 'rqL', 'rqo', 'rqgp', 'rqw',
     // wallet and inventory
     'gold', 'bread', 'hpot', 'mpot', 'mats', 'arrows', 'arrowsMade', 'sold', 'items', 'eqW', 'eqA',
     // crafting (the Blacksmith's ladder)
     'made', 'smith', 'sxp', 'patience', 'bonus', 'got', 'firstLeg',
     // quests, NPC memory, world flags, discovery
-    'qs', 'bqa', 'adqa', 'adqO', 'adqT', 'adqK', 'exd', 'exc', 'exf','cbase','church','hc','dv','dt','ms','rc','dcb','crep','rsh','cdy','xpb','pevo','mxp','und','pat1','patD','eyes','cre', 'qOff', 'p3', 'p4', 'kills', 'met', 'ev', 'guardDown', 'vis', 'books', 'chest', 'chops', 'hag', 'burnSeen',
+    'qs', 'bqa', 'adqa', 'adqO', 'adqT', 'adqK', 'wc', 'bpass', 'home', 'rnkD', 'cvn', 'cvD', 'tch', 'spc', 'spo', 'exd', 'exc', 'exf','cbase','church','hc','dv','dt','ms','rc','dcb','crep','rsh','cdy','xpb','pevo','mxp','und','pat1','patD','eyes','cre','adyes','crs', 'qOff', 'p3', 'p4', 'vc', 'ea', 'bkt', 'bfc', 'rbk', 'undA', 'undf', 'undfN', 'mar', 'marD', 'marCd', 'king', 'ltq', 'bsq', 'bsqL', 'tzq', 'mmq', 'bkfp', 'bkgp', 'bkrx', 'lantierW', 'bowsaintW', 'mumudW', 'mdq', 'dth', 'mdsk', 'madraW', 'mdMsg', 'lfq', 'lfarmerW', 'lkq', 'lknightW', 'kyq', 'lwarriorW', 'lkC', 'kills', 'met', 'ev', 'guardDown', 'vis', 'books', 'chest', 'chops', 'hag', 'burnSeen',
     // equipment slots, skill bar, NPC affinity and town reputation, guild membership, companion, life skills
-    'eq', 'bar', 'aff', 'rep', 'guild', 'comp', 'life',
+    'eq', 'bar', 'xbar', 'croot', 'aff', 'stash', 'rep', 'guild', 'comp', 'life',
     // repair orders posted to player smiths and not answered yet (SAT-ONLINE-096)
     'rord',
+    // crafting commissions (plan U219): your orders up (their fee and materials, for a refund) and pieces you forged that
+    // haven't reached their owner yet
+    'cord', 'cpend',
+    // an auction listing whose write hasn't answered yet: its goods are off the bag (v3.16)
+    'auPend',
+    // Three Crowns at the inns: games won and played (SAT-ONLINE-181)
+    'cg',
+    // the heaviest fish of each kind you have caught (SAT-ONLINE-182); your fishing rod and the bait on your hook (v3.03); your forge hammer and spatula (v3.04)
+    'fishR', 'rod', 'bait', 'smh', 'spt', 'pick',
+    // the Blacksmith expo seasons this character's entry won (SAT-ONLINE-174)
+    'exw',
+    // the fishing festivals this character won (SAT-ONLINE-183)
+    'ffw',
     // mounts and pets owned/active (SAT-MOUNT), the daily arena lockout (a date, so it must sync)
     'mounts', 'mount', 'pets', 'pet', 'arenaDay',
     // achievements earned (SAT-ACH-001), arena wins and the highest level ever reached (SAT-RANK-001),
@@ -44,13 +61,16 @@
     // the days (UTC dates, the last 7) you cleared all three daily bounties (SAT-ONLINE-130)
     'dlyW',
     // costumes owned (SAT-STYLE-001), pet growth (SAT-PETLV-001), best Tower of Trials floor (SAT-TOWER-001)
-    'cos', 'petx', 'twB',
+    'cos', 'petx', 'php', 'pdead', 'lastSk', 'twB',
     // the inn you are bound to respawn at (main 6991032)
     'bind',
     // mount health and fallen mounts (main 5173f0f), field encounters met (main e68e501)
     'mhp', 'mdead', 'meetN',
     // Muller's trial done (SAT-MULLER-001)
     'mtr',
+    // Sword Saint (novel pass 2026-10-22): Piaro's quest taken / a legend beaten, the class quest at Muller's sword
+    // (shade beaten as the Sword Saint, 1 learned or 2 refused Muller's technique, learned skill), bonus Willpower
+    'ssq', 'ssqW', 'mtr2', 'mq', 'mheart', 'wilB',
     // duel record (SAT-ONLINE-006): {w, l}; party-raid encounters already paid (SAT-ONLINE-009);
     // outlaw until (wall-clock ms) after killing a player in open PvP (SAT-ONLINE-038), kept across a reload;
     // the online guild's id (SAT-ONLINE-046): the guild itself lives in the database
@@ -67,10 +87,17 @@
     'karma', 'karT',
     // the National Competition (SAT-ONLINE-064) this character scored in and is still to be paid for (its id)
     'natIn',
+    // Pagma's Successor saw the mural behind Loran Falls (the five sword techniques)
+    'pgMur',
+    'fus',
+    'wpfix',
+    'wpfix2',
+    // the town to go back to from the competition grounds, kept so a reload mid-competition lands there (owner 2026-10-22)
+    'natR',
     // the guild hall being visited (SAT-ONLINE-115, plan U013): {gid, name, guest, dx, dy}, so a reload inside goes on there
     'hall',
     // recipes learned and recipe use counts (main rcLearn)
-    'rcK', 'rcN',
+    'rcK', 'rcN', 'lgfix',
     // divine-beast breaths ever held, which open their set recipes (owner 2026-10-22)
     'kmat',
     // map cells seen (fog of war, Nitro's feedback): base64 bitset
@@ -81,12 +108,36 @@
     'mrt',
     // kingdom contribution from royal quests and the Defense War's golems (major #3)
     'kc',
+    // knights (2026-10-27): your knights, your lord, the salary clocks, Summon Knights' cooldown; the earls and dukes a king named
+    'kn', 'kng',
     // the Behen Archipelago (major #4): island, save point, best island, Challenger Points, masteries, statue worship
     'bh',
     // the Tower of Wisdom (major #5): map, Tower's Mission, basic tests, members' tests, Dragon Pills, Matchless Heart, 10th Seat
     'wis',
+    // today's fish and produce sold to the market (SAT-ONLINE-190): {d: world day, n: {kind: count}}
+    'mkt',
+    // auto production on or off (v3.10)
+    'autoP',
+    // the Sword Saint's created sword techniques (v3.13): [{id, fm, f, L, nm}]
+    'swc', 'dmEss', 'sanc', 'sncCd',
+    // the Duplicator's one copied skill (v3.15)
+    'dpCopy',
+    // the Mage Tower's spells learned from the Archmage (v3.26): {skill: 1}
+    'mgt',
+    // Hell Gao's fire stone seams mined this appearance (v3.31): {a: his appearance, v: {seam: 1}}
+    'hgv',
+    // a legend's quest replays done, once per legendary class (v3.32): {c: class, q: {quest: 1}}
+    'lrd',
+    // the Vatican (v3.11): Goddess Rebecca's blessing, from Help the Rebecca Church!
+    'vatB',
+    // the sword dance trial at Pagma's mural (v3.75, plan U354): the best grade
+    'pgTr',
+    // Restoring the West together (v3.75, plan U365): your own count, and that you saw the West restored
+    'rw', 'rwSeen',
+    // a world boss's guild board (v3.75, plan U364): when each one last paid your guild's place
+    'gbT',
   ];
-  var SESSION = ['raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk'];
+  var SESSION = ['hpk', 'hpkN', 'raid', 'hits', 'focus', 'zone', 'immT', 'swT', 'unstT', 'giftT', 'ctPet', 'bq', 'bqT', 'qTrk', 'qGOff', 'mbTrk', 'natJ'];
   var META = ['v', 'wv', 'uid', 'pid'];
   // Never saved: set on the title-screen demo state only.
   var TRANSIENT = ['__demo'];

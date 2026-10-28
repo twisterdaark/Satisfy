@@ -59,7 +59,7 @@ test('the Reputation Store: the golden carriage falls, Sweet Candy (+30% all sta
     assert.match(d.text, /Introducing the luxurious goods to our guest!/);
     await toOpts(g);
     d = await dl(g);
-    assert.deepEqual(d.opts, ['Sweet Candy', 'Good-looking Sunglasses', 'Draw! Draw! Draw everything!', 'Leave']);
+    assert.deepEqual(d.opts, ['Sweet Candy', 'Good-looking Sunglasses', 'Bounty Book', 'Draw! Draw! Draw everything!', 'Leave']);
     // Sweet Candy: 20,000, into the bag; in the mouth all stats rise by 30%
     const s0 = await g.eval(() => window.__GRS.stat('str'));
     await g.eval(() => window.__G.pickOpt(0));
@@ -104,7 +104,7 @@ test('the Reputation Store: the golden carriage falls, Sweet Candy (+30% all sta
     await g.eval(() => { window.__G.S.mats.xpot = 1; window.__GRS.rsUse('xpot'); });
     assert.equal(await g.eval(() => window.__GRS.xpbOn()), true);
     const xp = await g.eval(() => { const S = window.__G.S; S.xp = 0; window.__G.gainXP(10); return S.xp; });
-    assert.equal(xp, 12);
+    assert.equal(xp, 14, 'x1.2 (every XP, v2.80) and x1.2 (the potion)');
     // the hairpin: a woman is delighted (double)
     const aff = await g.eval(() => { const G = window.__G, S = G.S; S.mats.hairpin = 2; const a0 = (S.aff || {}).stylist || 0; G.eqx.giveGift('stylist', 'hairpin'); return ((S.aff || {}).stylist || 0) - a0; });
     assert.equal(aff, 24);
@@ -125,7 +125,7 @@ test('town ranks: the Honoured buy rare stock from the merchant, the Town Hero s
     assert.equal(got, 3);
     await g.eval(() => { window.__G.S.rep.zWin = 800; });
     m = await g.eval(() => window.__GRS.merch('merchant'));
-    assert.equal(m.filter((l) => /Honoured stock/.test(l)).length, 2, m.join(' / '));
+    assert.equal(m.filter((l) => /Honoured stock/.test(l)).length, 4, m.join(' / ')); // + the blessing and protection stones (v1.82)
     const inn = await g.eval(() => window.__GRS.inn('inn'));
     assert.ok(inn.includes('A free room (Town Hero)'), inn.join(' / '));
   } finally { await g.close(); }

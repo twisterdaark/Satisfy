@@ -10,9 +10,10 @@ test.after(() => H.closeBrowser());
 async function settle(...games) {
   for (let i = 0; i < 6; i++) { for (const g of games) await g.step(4); await games[0].page.waitForTimeout(30); }
 }
-// the strings drawn on the game canvas, from now on
+// the strings drawn on the game canvas, from now on (also those stamped from cached sprites since SAT-ONLINE-160, which a
+// fillText spy misses: the game lists each frame's strings for tests in __GTX.seen)
 async function spy(g) {
-  await g.eval(() => { window.__drawn = []; const f = CanvasRenderingContext2D.prototype.fillText; if (!f.__spy) { CanvasRenderingContext2D.prototype.fillText = function (s, ...r) { (window.__drawn || []).push(String(s)); return f.call(this, s, ...r); }; CanvasRenderingContext2D.prototype.fillText.__spy = 1; } });
+  await g.eval(() => { window.__drawn = []; window.__GTX = { seen: window.__drawn }; const f = CanvasRenderingContext2D.prototype.fillText; if (!f.__spy) { CanvasRenderingContext2D.prototype.fillText = function (s, ...r) { (window.__drawn || []).push(String(s)); return f.call(this, s, ...r); }; CanvasRenderingContext2D.prototype.fillText.__spy = 1; } });
 }
 
 test('a heal over B shows over B on A\'s screen too, once', async () => {

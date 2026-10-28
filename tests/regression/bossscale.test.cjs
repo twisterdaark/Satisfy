@@ -29,6 +29,9 @@ test('a boss has the health of the group near it, the same share on every screen
     await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
     const b = await online(ctx, 'b', 'gBsB2', 'Bassem'); // arrives second: A hosts
     await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    // no hero met fighting it: which boss one fights comes from the wall clock (8-minute slots) and the list of bosses, so on
+    // some slots it was this one, chipping it (the share moved)
+    for (const g of [a, b]) await g.eval(() => window.__GMEET.stop());
     // A at the chief (frozen, so it can't fight), B 450 px away: one group (520), but not near the boss (600 px)
     const spot = await a.eval(() => { const G = window.__G, m = G.mons().find((x) => x.type === 'gchief' && !x.dead); m.stun = 1e9; G.P.x = m.sx - 40; G.P.y = m.sy; G.P.inv = 1e9; return { x: m.sx, y: m.sy }; });
     await b.eval((s) => { const G = window.__G, m = G.mons().find((x) => x.type === 'gchief' && !x.dead); if (m) m.stun = 1e9; G.P.x = s.x - 40 - 650; G.P.y = s.y; G.P.inv = 1e9; }, spot);

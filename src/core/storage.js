@@ -132,6 +132,14 @@
         if (cur != null && cur !== raw && !this.backup(reason || ('replaced-' + Date.now()), cur)) return false;
         return set(key, raw);
       },
+      /** Delete the save and its backups (deleting the account, owner 2026-10-24). */
+      erase: function () {
+        try {
+          var ks = [];
+          for (var i = 0; i < store.length; i++) { var k = store.key(i); if (k === key || (k && k.indexOf(prefix) === 0)) ks.push(k); }
+          ks.forEach(function (k) { store.removeItem(k); });
+        } catch (e) { /* ignore */ }
+      },
       backups: function () {
         var out = {};
         try {

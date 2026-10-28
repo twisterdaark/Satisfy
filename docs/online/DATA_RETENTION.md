@@ -56,7 +56,7 @@ Owner: Claude-A · SAT-ONLINE-111 (2026-10-22) · from `backend/database.rules.j
 
 ## Guilds (kept while the guild stands, cleared when it is disbanded)
 
-`guilds`, `guildNames`, `guildMembers`, `guildInv`, `guildChat` (lines may go after a day), `guildVault`, `guildVaultTaken` (after a day), `guildBank`, `guildBuild` (buildings and, with #139, research), `guildLog`, `guildNote`, `guildRecruit`, `guildApply`/`guildRej` (refusals matter for a week), `guildEvents`/`guildEventSign`, `guildWeek`/`guildWeekPaid`, `guildAlly*`, `guildDiplo`, `guildWar*`, `guildTrophy` (#126), `guildTax` (#140), `capSlot` (#130, kept after a disband so a guild made again under the same id still counts its week).
+`guilds`, `guildNames`, `guildMembers`, `guildInv`, `guildChat` (lines may go after a day), `guildVault`, `guildVaultTaken` (after a day), `guildBank`, `guildBuild` (buildings), `guildResearch` (the research tree, plan U237; a new guild also clears any an older client's disband left), `guildLog`, `guildNote`, `guildRecruit`, `guildApply`/`guildRej` (refusals matter for a week), `guildEvents`/`guildEventSign`, `guildWeek`/`guildWeekPaid`, `guildAlly*`, `guildDiplo`, `guildWar*`, `guildTrophy` (#126), `guildTax` (#140), `capSlot` (#130, kept after a disband so a guild made again under the same id still counts its week).
 - With #138, these go only together with the guild in one disband write. Before, a master could clear the weekly rewards taken and take them again.
 
 ## Markets and orders
@@ -71,7 +71,7 @@ Owner: Claude-A · SAT-ONLINE-111 (2026-10-22) · from `backend/database.rules.j
 
 ## The world
 
-`world/satisfy/own` (who holds the castle and territories), `world/satisfy/legends` (the legendary classes taken), `world/satisfy/wb` (world boss rests), `world/satisfy/tax` (#140), `announce` (your announcements). All are kept and overwritten as they change.
+`world/satisfy/own` (who holds the castle and territories), `world/satisfy/legends` (the legendary classes taken), `world/satisfy/books` (the one copy of each legend book and the character holding it; freed with that character or with "Delete my online data"), `world/satisfy/wb` (world boss rests), `world/satisfy/tax` (#140), `announce` (your announcements). All are kept and overwritten as they change.
 
 ## The owner's (admins only)
 

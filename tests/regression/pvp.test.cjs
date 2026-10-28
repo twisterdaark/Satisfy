@@ -71,12 +71,30 @@ test('outside town a hit takes a capped share of HP; a party or a town stops it;
     await settle(a, b);
     const goldA = await a.eval(() => window.__G.S.gold), itemsA = await a.eval(() => window.__G.S.items.length);
     await b.eval(() => { window.__G.P.hp = 1; window.__G.S.tl = window.__G.S.tl || {}; window.__G.S.tl.legend = false; });
+    // SAT-ONLINE-152 (plan U042): B's worn gear, one piece already worn down near the floor
+    const worn = (g) => g.eval(() => { const G = window.__G, S = G.S, w = S.items.find((i) => i.uid === S.eqW) || S.items[0]; return { n: S.items.length, w: w.dur === undefined ? 100 : w.dur, ids: S.items.map((i) => i.uid) }; });
+    await b.eval(() => { const G = window.__G, S = G.S, ar = G.eqx.mkItem('parmor', 1); ar.dur = 12; S.items.push(ar); S.eqA = ar.uid; }); // armour nearly worn out
+    const before = await worn(b);
     await strike(a, b);
     for (let i = 0; i < 3 && (await b.eval(() => window.__G.mode)) !== 'dead'; i++) await strike(a, b);
     assert.equal(await b.eval(() => window.__G.mode), 'dead');
     assert.ok(await b.eval(() => !!window.__G.P.dpen), 'the normal death penalty');
+    const after = await worn(b);
+    assert.equal(after.w, before.w - 5, 'the weapon lost 5 durability');
+    assert.equal(await b.eval(() => { const S = window.__G.S; return S.items.find((i) => i.uid === S.eqA).dur; }), 10, 'the armour stops at 10: PvP alone never breaks gear');
+    assert.deepEqual([after.n, after.ids], [before.n, before.ids], 'no item dropped or lost');
+    assert.match(await b.eval(() => window.__G.P.dpen), /The gear you wear lost 5 durability \(PvP\)\./);
+    await strike(a, b); await strike(a, b); // more hits on the dead: nothing more
+    assert.equal((await worn(b)).w, after.w, 'once a death');
+    assert.equal(await b.eval(() => { const S = JSON.parse(localStorage.getItem('satisfy_proto_v4@b')).S, w = S.items.find((i) => i.uid === S.eqW) || S.items[0]; return w.dur; }), after.w, 'saved at once');
     await settle(a, b);
     assert.match(await toasts(b), /Grid killed you/);
+    // SAT-ONLINE-150 (plan U039): who hit B before it died, and when
+    assert.match(await toasts(b), /\d+ hits in \d+\.\d s · type \/fightlog to see who hit you/);
+    const rc = await b.eval(() => window.__GFLOG.pvp);
+    assert.equal(rc.n, 'Grid');
+    assert.deepEqual(rc.r.by.map((x) => x.handle), ['Grid'], 'only Grid hit B');
+    assert.ok(rc.r.by[0].hits >= 2 && rc.r.lines.length === rc.r.by[0].hits);
     assert.match(await toasts(a), /You killed Faker: you are an outlaw for 10 minutes/);
     assert.ok(await a.eval(() => window.__G.S.olT > Date.now()));
     assert.equal(await a.eval(() => window.__G.S.gold), goldA, 'no gold changes hands');
@@ -89,6 +107,81 @@ test('outside town a hit takes a capped share of HP; a party or a town stops it;
     await settle(a, b); await settle(a, b);
     assert.match(await toasts(a), /You are no longer an outlaw/);
     assert.equal(await b.eval((u) => Satisfy.local.net().remotes.find((r) => r.uid === u).ol, ua), null);
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+// plan U026/U027 (Safe Bairan, Safe Winston): from inside a town no player damage can be received, also from a modified
+// client. A skips the game's own checks and puts hits straight on the channel the pages talk on, as a changed page could:
+// B in Winston takes none of them; outside, the same hits land, so it is the town that stops them.
+const forge = (g, to, n) => g.eval(([u, k]) => { const me = Satisfy.local.net(), ch = new BroadcastChannel('satisfy-net-v1'); ch.postMessage(Satisfy.net.envelope('pvp.hit', { to: u, k: 90, n: k }, { sessionId: me.sid, seq: 1e9 + k })); ch.close(); }, [to, n]);
+test("in a town a modified client's hits do not land; outside the same hits do", async () => {
+  const ctx = await H.newContext();
+  try {
+    const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
+    const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    const town = await b.eval(() => ({ x: window.__G.P.x, y: window.__G.P.y }));
+    await toasts(b);
+    const ub = await b.eval(() => Satisfy.local.net().uid);
+    let n = 0;
+    for (const [where, x, y] of [['Winston', town.x, town.y], ['the plains', 90 * 16, 60 * 16]]) {
+      await place(a, 0, x, y); await place(b, 18, x, y);
+      await settle(a, b); await settle(a, b);
+      await b.eval(() => { window.__G.P.hp = window.__G.maxHP(); });
+      const hp = await b.eval(() => window.__G.P.hp), inTown = where === 'Winston';
+      assert.equal((await b.eval(() => Satisfy.local.world().towns)).includes(await b.eval(() => Satisfy.local.zoneAt(window.__G.P.x, window.__G.P.y))), inTown, 'B is in ' + where);
+      for (let i = 0; i < 3; i++) { await forge(a, ub, ++n); await settle(a, b); }
+      const hp2 = await b.eval(() => window.__G.P.hp);
+      if (inTown) {
+        assert.ok(hp2 >= hp, 'no damage in a town: ' + hp + ' -> ' + hp2);
+        assert.doesNotMatch(await toasts(b), /attacking you/);
+      } else {
+        assert.ok(hp2 < hp, 'outside, the forged hits land: ' + hp + ' -> ' + hp2);
+        assert.match(await toasts(b), /Grid is attacking you!/);
+      }
+    }
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+// plan U029 (projectile boundary): an arrow shot from outside a town doesn't hurt a target inside it. A stands on the
+// plains just outside Winston with a bow and shoots B, who stands just inside, 120 px away; then both step out the same
+// way and the same shot lands.
+test('an arrow from outside a town does not hurt a target inside it; outside it does', async () => {
+  const ctx = await H.newContext();
+  try {
+    const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
+    const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    await toasts(b);
+    // the town's edge, walking west from the start: the last spot of Winston and the first of the land outside
+    const edge = await a.eval(() => {
+      const L = Satisfy.local, P = window.__G.P, towns = L.world().towns, z0 = L.zoneAt(P.x, P.y);
+      for (let x = P.x; x > 0; x -= 4) { const z = L.zoneAt(x, P.y); if (z !== z0) return { x, y: P.y, inTown: towns.includes(z), z, z0 }; }
+      return null;
+    });
+    assert.ok(edge && !edge.inTown && edge.z !== 'void', 'an edge to open land: ' + JSON.stringify(edge));
+    await a.eval(() => { const G = window.__G, S = G.S, w = G.eqx.mkItem('tbow', 0); S.items.push(w); S.eqW = w.uid; S.arrows = [99, 0, 0, 0, 0]; });
+    const shoot = async (ax, bx, y) => {
+      await place(a, 0, ax, y); await place(b, 0, bx, y);
+      await settle(a, b); await settle(a, b);
+      await b.eval(() => { window.__G.P.hp = window.__G.maxHP(); });
+      const hp = await b.eval(() => window.__G.P.hp);
+      for (let i = 0; i < 3; i++) { await a.eval(() => { const G = window.__G; G.P.acd = 0; G.tryAttack(1, 0); }); await settle(a, b); }
+      return { hp, after: await b.eval(() => window.__G.P.hp), inB: await b.eval(() => Satisfy.local.zoneAt(window.__G.P.x, window.__G.P.y)), inA: await a.eval(() => Satisfy.local.zoneAt(window.__G.P.x, window.__G.P.y)) };
+    };
+    // B 40 px inside, A 80 px outside, shooting east at B
+    const r1 = await shoot(edge.x - 80, edge.x + 40, edge.y);
+    assert.deepEqual([r1.inA === edge.z0, r1.inB], [false, edge.z0], 'A outside, B inside: ' + JSON.stringify(r1));
+    assert.ok(r1.after >= r1.hp, 'no harm inside the town: ' + r1.hp + ' -> ' + r1.after);
+    assert.doesNotMatch(await toasts(b), /attacking you/);
+    // both 120 px further west, B now just outside: the same shot lands
+    const r2 = await shoot(edge.x - 200, edge.x - 80, edge.y);
+    assert.ok(r2.inB !== edge.z0, 'B outside now');
+    assert.ok(r2.after < r2.hp, 'outside, the arrow lands: ' + r2.hp + ' -> ' + r2.after);
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
@@ -115,6 +208,43 @@ test('online: the hits, the kill report and the outlaw mark pass the database ru
     for (let i = 0; i < 20 && !(await b.eval(() => (Satisfy.local.net().remotes[0] || {}).ol === 1)); i++) await settle(a, b);
     assert.equal(await b.eval(() => (Satisfy.local.net().remotes[0] || {}).ol), 1);
     for (const g of [a, b]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
+    for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+// plan U041 (PvP CC immunity: "the target is never locked beyond the limit"). A modified page puts hits straight on the
+// channel the pages talk on, as fast as B takes them, each with a stun, a root, a slow and a knockback added: B takes the
+// damage and nothing else. It walks as far as without them, and is never stunned, rooted, slowed or pushed.
+const forgeCC = (g, to, n) => g.eval(([u, k]) => { const me = Satisfy.local.net(), ch = new BroadcastChannel('satisfy-net-v1'); ch.postMessage(Satisfy.net.envelope('pvp.hit', { to: u, k: 60, n: k, stun: 9000, root: 9000, slow: 9000, kb: 400, pull: 400, kx: 300, ky: 0 }, { sessionId: me.sid, seq: 2e9 + k })); ch.close(); }, [to, n]);
+test("U041: a burst of hits with crowd control forged on them never locks the victim: it walks on as before", async () => {
+  const ctx = await H.newContext();
+  try {
+    const a = await H.openGame({ ctx, query: '?net=local&slot=a' });
+    const b = await H.openGame({ ctx, query: '?net=local&slot=b' });
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await H.newGame(b, { n: 'Faker', hair: 3, hc: 0, skin: 2, top: 1 });
+    const ub = await b.eval(() => Satisfy.local.net().uid);
+    const walk = async (hits) => {
+      await place(a, 0); await place(b, 18); await settle(a, b);
+      await b.eval(() => { const G = window.__G; G.P.hp = G.maxHP(); });
+      const x0 = await b.eval(() => window.__G.P.x), hp0 = await b.eval(() => window.__G.P.hp);
+      await b.page.keyboard.down('KeyD');
+      let n = 0, locked = 0;
+      for (let i = 0; i < 8; i++) {
+        if (hits) await forgeCC(a, ub, 100 * hits + i);
+        await b.step(15); await b.page.waitForTimeout(20);
+        if (await b.eval(() => { const P = window.__G.P, t = window.__GANIM.t() / 1000; return (P.stun || 0) > 0 || (P.rootT || 0) > t || (P.slowT || 0) > t; })) locked++;
+        n++;
+      }
+      await b.page.keyboard.up('KeyD');
+      return { dx: (await b.eval(() => window.__G.P.x)) - x0, lost: hp0 - (await b.eval(() => window.__G.P.hp)), locked, n };
+    };
+    const free = await walk(0);
+    assert.ok(free.dx > 60, 'B walks: ' + free.dx);
+    const hit = await walk(1);
+    assert.ok(hit.lost > 0, 'the hits land: ' + hit.lost + ' HP');
+    assert.equal(hit.locked, 0, 'never stunned, rooted or slowed');
+    assert.ok(hit.dx >= free.dx * 0.9 && hit.dx <= free.dx * 1.1, 'as far as without them, not pushed: ' + hit.dx + ' / ' + free.dx);
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });

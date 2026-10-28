@@ -14,19 +14,27 @@
  *
  * Trust model (no server yet, as for duels): the victim applies the hits it receives after checking the rate (at
  * most HITS_PER_S in any second), the range (attacker within HIT_RANGE of the victim's real position), the zones and
- * the party. The outlaw mark is set by the killer's own client when the victim reports the kill, and only for a
+ * the party. The victim's own zone is the one that counts for it (U026/U027: inside a town no hit is taken, whatever a
+ * modified attacker sends or says about itself), and with o.zoneAt the attacker's reported spot is checked on the
+ * victim's own map too, so one standing in a town can't hit out by naming another zone. The outlaw mark is set by the killer's own client when the victim reports the kill, and only for a
  * player it really hit in the last KILL_MS. A modified client could ignore hits or hide its mark; Trusted Combat on a
  * server (R5) closes that later.
  *
- * Exposes `Satisfy.pvp.create({ presence, uid, now?, pos, zone, room?, party, ally?, busy?, alive?, policy? })`.
+ * Exposes `Satisfy.pvp.create({ presence, uid, now?, pos, zone, room?, party, ally?, busy?, alive?, policy?, zoneAt?, apart? })`.
  *   pos(): {x, y} of the local player; zone(): its zone id; room(): its house interior id or null; party(): its party id or null;
  *   ally(r): true when remote r is in a guild allied with ours; busy(): true while in a duel; alive(): false while dead.
+ *   zoneAt(x, y) (optional): the zone id at a world position, from the local map (the game's netZone).
+ *   apart(r) (optional): true when remote r is somewhere we can't see, though in the same room (plan U150: another
+ *   party's copy of the goblin warcamp; U300: everyone's own room). Checked on both sides, like the room.
  */
 (function (root) {
   'use strict';
 
   var C = Object.freeze({
     MIN_HIT: 30, MAX_HIT: 90, HITS_PER_S: 4, HIT_RANGE: 200, KILL_MS: 8000, OUTLAW_MS: 10 * 60 * 1000,
+    RECAP_MS: 15000, RECAP_MAX: 60, // SAT-ONLINE-150: the hits a death recap shows
+    JUMP_MS: 1000, // SAT-ONLINE-151 (plan U044): no hit lands from an attacker who jumped (a teleport) this long ago
+    COMBAT_MS: 10000, // SAT-ONLINE-204 (plan U250): "in combat" this long after the last hit we sent or took
   });
   var TYPES = ['pvp.hit', 'pvp.kill'];
 
@@ -34,10 +42,14 @@
     var P = o.presence, self = o.uid, now = o.now || function () { return Date.now(); };
     var pos = o.pos, zone = o.zone, party = o.party || function () { return null; }, room = o.room || function () { return null; };
     var busy = o.busy || function () { return false; }, alive = o.alive || function () { return true; };
+    var zoneAt = typeof o.zoneAt === 'function' ? o.zoneAt : null;
     var ally = o.ally || function () { return false; };
+    var apart = o.apart || function () { return false; };
     var policy = o.policy || (root.Satisfy && root.Satisfy.net && root.Satisfy.net.zonePolicy) || function () { return { safe: false }; };
     var listeners = [], hitsIn = new Map(), hitsOut = [], hitN = 0;
     var struck = new Map(); // uid -> last time we hit them (a kill report only counts for those)
+    var taken = []; // SAT-ONLINE-150 (plan U039): the hits we took, after our checks: {at, uid, handle, pm}
+    var fought = -1e15; // SAT-ONLINE-204: when we last sent or took a hit (now() units)
 
     function emit(e) { for (var i = 0; i < listeners.length; i++) { try { listeners[i](e); } catch (x) { /* ignore */ } } }
     function noFight(z) { var p = policy(z) || {}; return !!p.safe || p.known === false; }
@@ -46,8 +58,9 @@
     // why a hit between us and remote r can't happen, or null
     function why(r) {
       if (!r || !r.uid || r.uid === self) return 'bad';
-      if ((r.room || null) !== (room() || null)) return 'room';
+      if ((r.room || null) !== (room() || null) || apart(r)) return 'room';
       if (noFight(zone()) || noFight(r.zone)) return 'safe';
+      if (zoneAt && typeof r.x === 'number' && typeof r.y === 'number' && noFight(zoneAt(r.x, r.y))) return 'safe'; // where it really is, on our map
       if (mate(r)) return 'mate';
       if (ally(r)) return 'ally';
       if (busy() || r.duel) return 'duel';
@@ -68,10 +81,14 @@
         var no = why(from);
         if (no) { emit({ type: 'rejected', why: no }); return; }
         if (dist(pos(), from) > C.HIT_RANGE) { emit({ type: 'rejected', why: 'range' }); return; }
+        if (P.jumped && t - (P.jumped(ev.sid) || -1e12) < C.JUMP_MS) { emit({ type: 'rejected', why: 'jump' }); return; }
         var list = (hitsIn.get(from.uid) || []).filter(function (x) { return t - x < 1000; });
         if (list.length >= C.HITS_PER_S) { emit({ type: 'rejected', why: 'rate' }); return; }
         list.push(t); hitsIn.set(from.uid, list);
         k = Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(k)));
+        taken.push({ at: t, uid: from.uid, handle: from.handle || '', pm: k });
+        if (taken.length > C.RECAP_MAX) taken.shift();
+        fought = t;
         emit({ type: 'hurt', pm: k, uid: from.uid, handle: from.handle || '' });
       } else if (env.type === 'pvp.kill') {
         var at = struck.get(from.uid);
@@ -92,10 +109,23 @@
         if (hitsOut.length >= C.HITS_PER_S) return 0;
         hitsOut.push(t);
         var k = Math.min(C.MAX_HIT, Math.max(C.MIN_HIT, Math.round(pow * 4)));
-        struck.set(r.uid, t);
+        struck.set(r.uid, t); fought = t;
         P.send('pvp.hit', { to: r.uid, k: k, n: ++hitN });
         return k;
       },
+      /**
+       * SAT-ONLINE-150 (plan U039): who hurt us in the last RECAP_MS, for a death recap. {pm: per mille of max HP in all,
+       * ms: from the first hit to the last, by: [{uid, handle, hits, pm, last}] most hits first, lines: [{ms, uid, handle, pm}]}
+       */
+      recap: function () {
+        var t = now(), L = taken.filter(function (e) { return t - e.at <= C.RECAP_MS; }), by = {}, out = [], pm = 0;
+        L.forEach(function (e) { var b = by[e.uid] || (by[e.uid] = { uid: e.uid, handle: e.handle, hits: 0, pm: 0, last: 0 }); b.hits++; b.pm += e.pm; b.last = e.at; if (e.handle) b.handle = e.handle; pm += e.pm; });
+        for (var u in by) out.push(by[u]);
+        out.sort(function (x, y) { return y.hits - x.hits || y.pm - x.pm || y.last - x.last; });
+        return { pm: pm, ms: L.length ? L[L.length - 1].at - L[0].at : 0, by: out, lines: L.map(function (e) { return { ms: e.at - L[0].at, uid: e.uid, handle: e.handle, pm: e.pm }; }) };
+      },
+      /** SAT-ONLINE-204 (plan U250): ms of the combat flag left (COMBAT_MS after the last hit we sent or took), 0 when out of combat. */
+      combat: function () { return Math.max(0, fought + C.COMBAT_MS - now()); },
       /** The local player died to a hit from uid: tell them (they turn outlaw). */
       died: function (uid) { if (uid && uid !== self) P.send('pvp.kill', { to: uid, k: 0 }); },
       on: function (fn) { listeners.push(fn); },

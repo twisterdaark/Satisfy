@@ -5,9 +5,9 @@ const assert = require('node:assert/strict');
 const { loadModules } = require('../harness/load-module.cjs');
 
 const N = loadModules('src/net/natcomp.js').natcomp, C = N.C;
-const T0 = Date.UTC(2026, 9, 20, 4, 0, 0); // 04:00 UTC, a start
+const T0 = Date.UTC(2026, 9, 20, 6, 0, 0); // 06:00 UTC, a start
 
-test('every two hours, three ten-minute stages: hunting, production, arena; then the wait for the next', () => {
+test('every six hours, three ten-minute stages: hunting, production, arena; then the wait for the next', () => {
   const at = (ms) => N.now(T0 + ms);
   assert.deepEqual([at(0).running, at(0).stage, at(0).kind], [true, 0, 'hunt']);
   assert.equal(at(0).id, 'n' + Math.floor(T0 / C.PERIOD));

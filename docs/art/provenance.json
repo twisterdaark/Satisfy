@@ -1,0 +1,20 @@
+{
+  "about": "(plan U380) Where every piece of the game's art comes from, and its licence. tests/unit/provenance.test.cjs fails if an art file is missing here, or if a shipped file loads an image from outside the repository.",
+  "updated": "2026-10-26",
+  "files": [
+    { "path": "sprites-original/*.js", "origin": "Drawn in code for this game: canvas painters (characters, monsters, tiles, buildings, icons, weapons, effects, the map) and their legacy snapshots.", "licence": "The game's own." },
+    { "path": "sprites-original/preview.html", "origin": "Local page that shows the painters side by side; not loaded by the game.", "licence": "The game's own." },
+    { "path": "sprites-original/tools/*.cjs", "origin": "Script that renders the sheets from the painters (Playwright).", "licence": "The game's own." },
+    { "path": "sprites-original/sheets/*.png", "origin": "Rendered from sprites-original/*.js by tools/export-sheets.cjs.", "licence": "The game's own." },
+    { "path": "sprites-original/sheets/monsters/*.png", "origin": "Rendered from sprites-original/monsters.js by tools/export-sheets.cjs.", "licence": "The game's own." },
+    { "path": "sprites-original/sheets/manifest.json", "origin": "Written by tools/export-sheets.cjs beside the sheets.", "licence": "The game's own." },
+    { "path": "icons/icon-192.png", "origin": "The app icon: a sword on navy in the game's interface colours. Added with the mobile port (a49f3dd8, v0.76); the script that drew it isn't in the repository.", "licence": "The game's own (to confirm with the owner)." },
+    { "path": "icons/icon-512.png", "origin": "The same app icon, larger. Added with icon-192.png.", "licence": "The game's own (to confirm with the owner)." }
+  ],
+  "external": [
+    { "what": "Fonts: Lalezar, Oswald, Tajawal, Pixelify Sans, Press Start 2P", "host": "fonts.googleapis.com", "note": "its stylesheet loads the font files from fonts.gstatic.com", "licence": "SIL Open Font License 1.1" },
+    { "what": "The Firebase SDK (code, no art)", "host": "www.gstatic.com", "licence": "Apache 2.0" },
+    { "what": "The game's database (data, no art)", "host": "satisfy-online-8yjeix-default-rtdb.europe-west1.firebasedatabase.app", "licence": "-" },
+    { "what": "The SVG namespace name (not a download)", "host": "www.w3.org", "licence": "-" }
+  ]
+}

@@ -17,6 +17,8 @@
     expireMs: 5000,   // drop a remote player not heard from for this long
     interpMs: 100,    // draw remotes this far in the past, between two snapshots
     snapPx: 64,       // a jump larger than this (door, teleport) is not interpolated
+    jumpPx: 160,      // SAT-ONLINE-151: a move past jumpPx + jumpPxS px a second since the last snapshot is a jump (a teleport,
+    jumpPxS: 400,     // a door, a cheat; not a blink skill or a dash); jumped(sid) says when, for duel and PvP hits to wait it out
     maxPerSec: 30,    // per-sender message budget
     maxRemotes: 64,
     bufLen: 8,
@@ -73,8 +75,10 @@
       var t = now();
       var r = remotes.get(env.sessionId);
       // presence and directed messages may travel different paths (Firebase: presence node vs inbox),
-      // so order is only guaranteed within a channel; replay checks are per channel
+      // so order is only guaranteed within a channel; replay checks are per channel. A transport made of two (SAT-ONLINE-148:
+      // combat through a WebSocket relay) names the channel of each type (chanOf: 'seq', 'mseq' or 'cseq').
       var chan = (env.type === 'presence.state' || env.type === 'presence.leave') ? 'seq' : 'mseq';
+      if (chan === 'mseq' && transport.chanOf && transport.chanOf(env.type) === 'cseq') chan = 'cseq';
       if (r) {
         r.win = r.win.filter(function (x) { return t - x < 1000; });
         if (r.win.length >= cfg.maxPerSec) return drop();
@@ -86,7 +90,7 @@
       }
       if (env.type !== 'presence.state') {
         if (!r) return drop(); // other messages only from players we can see
-        r.win.push(t); r.mseq = env.seq;
+        r.win.push(t); r[chan] = env.seq;
         emit({ type: 'message', sid: env.sessionId, env: env });
         return;
       }
@@ -95,12 +99,14 @@
       var fresh = !r;
       if (fresh) {
         if (remotes.size >= cfg.maxRemotes) return drop();
-        r = { sid: env.sessionId, buf: [], win: [], seq: -1, mseq: -1 };
+        r = { sid: env.sessionId, buf: [], win: [], seq: -1, mseq: -1, cseq: -1 };
         remotes.set(env.sessionId, r);
       }
       r.win.push(t);
       r.seq = env.seq;
-      if (r.pp && r.pp.room !== pp.room) r.buf = [];
+      var lb = r.buf[r.buf.length - 1];
+      if (r.pp && r.pp.room !== pp.room) { r.buf = []; r.jumpT = t; }
+      else if (lb && Math.hypot(pp.x - lb.x, pp.y - lb.y) > cfg.jumpPx + cfg.jumpPxS * Math.max(0, t - lb.t) / 1000) r.jumpT = t;
       r.pp = pp;
       r.seen = t;
       r.buf.push({ t: t, x: pp.x, y: pp.y });
@@ -155,11 +161,18 @@
           var p = sample(r.buf, t, cfg.snapPx), o = {};
           for (var f in r.pp) o[f] = r.pp[f];
           o.x = p.x; o.y = p.y;
+          // a name that is an insult shows as "Player" and a number (owner 2026-10-24)
+          var CH = root.Satisfy && root.Satisfy.chat;
+          if (CH && CH.badName && typeof o.handle === 'string' && CH.badName(o.handle)) o.handle = CH.name(o.handle, o.uid || o.sid);
           out.push(o);
         });
         return out;
       },
       get: function (id) { var r = remotes.get(id); return r ? r.pp : null; },
+      /** How long ago (ms) remote session id was last heard from, or -1 if unknown (SAT-ONLINE-203: the party panel). */
+      age: function (id) { var r = remotes.get(id); return r ? Math.max(0, now() - r.seen) : -1; },
+      /** When remote session id last jumped (teleported, went through a door), or 0. */
+      jumped: function (id) { var r = remotes.get(id); return r && r.jumpT || 0; },
       count: function () { return remotes.size; },
       on: function (fn) { listeners.push(fn); },
       stats: function () { return { sent: stats.sent, recv: stats.recv, dropped: stats.dropped }; },

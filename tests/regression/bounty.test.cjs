@@ -70,6 +70,23 @@ test('online: a bounty on an outlaw goes to the player who kills it, once; a bou
     await until([a], () => /Carim claimed a 500 gold bounty on an outlaw/.test(window.__toastLog.join(' | ') + document.body.textContent), 10000);
     await settle(a, b, c);
     assert.equal(await c.eval(() => window.__G.S.gold), 500, 'paid once');
+    // plan U038 "the same bounty is never paid twice" (SAT-ONLINE-136): the rules refuse a second claim, by anyone
+    const write = (g, u) => g.eval(async (x) => { const F = window.__GLD.fb(), D = F.m.database; for (const k in x) if (x[k] && x[k].t === 'SV') x[k].t = D.serverTimestamp(); try { await D.update(D.ref(F.db), x); return 'ok'; } catch (e) { return 'no'; } }, u);
+    const paid = await c.eval(() => { for (const [k, v] of window.__fakeRTDB.data) if (/^bountyPaid\//.test(k)) return { bid: k.split('/')[1], v }; return null; });
+    assert.ok(paid && paid.v.by === 'gBnC3' && paid.v.g === 500, JSON.stringify(paid));
+    for (const [g, uid] of [[c, 'gBnC3'], [a, 'gBnA1']]) assert.equal(await write(g, { ['bountyPaid/' + paid.bid]: { by: uid, kid: paid.v.kid, g: 500, t: 'SV' } }), 'no', 'a second claim by ' + uid);
+    assert.equal(await write(c, { ['bountyPaid/' + paid.bid]: null }), 'no', 'nor is the claim taken away to claim again');
+    // and the claim itself is written once (Claude-B): with the bounty put up again under the same id, the second claim
+    // still fails, on bountyPaid alone
+    const B0 = await a.eval((bid) => { for (const [k, v] of window.__fakeRTDB.data) if (k === 'bountyPaid/' + bid) return v; return null; }, paid.bid);
+    assert.ok(B0, 'the first claim is kept');
+    assert.equal(await write(a, { ['bounties/' + paid.bid]: { by: 'gBnA1', byN: 'Ahmed', tu: 'gBnB2', tN: 'Bassem', g: 500, t: 'SV' } }), 'ok', 'the same id up again');
+    await a.page.waitForTimeout(20);
+    assert.equal(await write(b, { 'kills/gBnB2/k_again1': { k: 'gBnC3', t: 'SV' } }), 'ok', 'and a new kill by C after it');
+    await until([c], (bid) => window.__fakeRTDB.data.has('bounties/' + bid) && window.__fakeRTDB.data.has('kills/gBnB2/k_again1'), 10000, paid.bid);
+    assert.equal(await write(c, { ['bountyPaid/' + paid.bid]: { by: 'gBnC3', kid: 'k_again1', g: 500, t: 'SV' }, ['bounties/' + paid.bid]: null }), 'no', 'claimed once, whatever the board and the kills say');
+    assert.ok((await c.eval(() => window.__fakeRTDB.rejected.slice(-1)[0])).startsWith('PERMISSION_DENIED: bountyPaid bountyPaid/'), 'refused for being claimed already');
+    assert.equal(await write(a, { ['bounties/' + paid.bid]: null }), 'ok', 'taken back');
 
     // A sets another one and takes it back from the board: the gold comes back
     assert.equal(await a.eval(() => window.__GB.post('gBnB2', 100)), true);
@@ -81,7 +98,9 @@ test('online: a bounty on an outlaw goes to the player who kills it, once; a bou
     await a.step(1);
     await a.eval(() => window.__G.pickOpt(0));
     await until([a], () => window.__G.S.gold === 1500 && window.__GB.on('gBnB2') === 0);
-    for (const g of [a, b, c]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
+    // nothing refused but the second claims of that one bounty above (Claude-B's review of #172: not every bountyPaid write)
+    for (const g of [a, b, c]) assert.deepEqual(await g.eval((bid) => window.__fakeRTDB.rejected.filter((x) => !(/bountyPaid/.test(x) && x.includes('bountyPaid/' + bid))), paid.bid), []);
+    assert.ok((await c.eval(() => window.__fakeRTDB.rejected.filter((x) => /bountyPaid/.test(x)).length)) >= 3, 'the three refused above on C');
     for (const g of [a, b, c]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });

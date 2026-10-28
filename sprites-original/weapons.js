@@ -52,6 +52,11 @@ const DEF={
  dgspear:()=>{const I=Img(7,22);I.vline(3,5,21,'#2a4a7a');I.vline(3,12,13,'#c8e8ff');I.set(3,0,'#ffffff');I.rect(2,1,3,3,'#5ac8ff');I.vline(3,1,3,'#e8f8ff');I.set(4,3,'#2a6aff');I.set(3,4,'#5ac8ff');I.set(1,4,'#5ac8ff');I.set(5,4,'#5ac8ff');return {I,gx:3,gy:15};},
  ttthorn:()=>sword(5,2,['#3a5a6a','#1a2a3a','#5ad8c8'],'#1a3a3a',(I,cx,top)=>{I.set(cx,top+2,'#ffffff');}),
  blstaff:()=>staff(['#2a0614','#8a1a4a','#ff8ac8'],'#1a0a10',1),
+ // SAT-ONLINE-165 (Claude-A): the three that drew nothing in the hand: the Doppelganger's and Yetima's greatswords, and the
+ // Mass-produced Grid Sword (the colours of their icons)
+ dpgs:()=>sword(14,3,['#5ac8a0','#1e6a50','#d8fff0'],'#2a4a40',(I,cx,top,len)=>{for(let y=top+3;y<top+len-1;y+=3)I.set(cx,y,'#d8fff0');I.set(cx-1,top+len-3,'#1e6a50');}),
+ yetgs:()=>sword(14,3,['#9aa0ac','#4a4e58','#e8eef8'],'#8a6a3a',(I,cx,top,len)=>{I.rect(cx-3,top+len,7,1,'#8a6a3a');for(let y=top+4;y<top+len-2;y+=4)I.set(cx+1,y,'#e8eef8');}),
+ mgsword:()=>sword(10,2,['#e0e4ec','#2a3a6a','#ffffff'],'#2a3a6a',(I,cx,top,len)=>{I.set(cx,top+len-3,'#2a3a6a');}),
  gisp:()=>{const I=Img(11,16);I.vline(5,3,15,'#6a4a2a');I.vline(5,8,8,'#4a3020');I.rect(1,1,9,2,'#8a9aa8');I.set(0,3,'#8a9aa8');I.set(10,3,'#8a9aa8');I.rect(1,1,9,1,'#c8d0dc');return {I,gx:5,gy:11};}};
 function bow(w,tip){const I=Img(8,18);for(let i=0;i<=14;i++){const a=i/14*Math.PI,x=Math.round(2+Math.sin(a)*3.4);I.set(x,1+i,w[0]);I.set(x+1,1+i,i<3||i>11?w[0]:w[1]);if(i===7){I.set(x,1+i,w[2]);I.set(x+1,1+i,w[2]);}}
  I.vline(2,1,15,'#e8e0d0');I.set(2,1,tip||w[2]);I.set(2,15,tip||w[2]);I.rect(5,7,2,3,'#3a2414');return {I,gx:5,gy:8};}
@@ -61,9 +66,29 @@ function staff(orb,wood,prong){const I=Img(9,20);I.vline(4,5,18,wood);I.vline(5,
 function hammer(h,silver){const I=Img(10,16);I.vline(4,4,14,'#7a5634');I.vline(4,9,9,'#5a3a20');I.set(4,15,'#5a3a20');
  I.rect(1,1,8,4,h[0]);I.rect(1,1,8,1,h[2]);I.rect(1,4,8,1,h[1]);I.rect(8,1,1,4,h[1]);if(silver){I.set(3,2,'#ffffff');I.rect(1,1,1,4,'#d8b04a');}return {I,gx:4,gy:11};}
 
+// swords drawn from their shape (icons.js A.blade): each its own length, width, line, guard and grip (owner 2026-10-24)
+function fromBlade(sp){const B=A.blade.bladeHeld(sp),I=Img(B.w,B.h);for(const [x,y,c] of B.px)I.set(x,y,c);return {I,gx:B.gx,gy:B.gy};}
+const BLADED=['vipdag','shdag','bldag','mdagger','mgdagger','rusty','isword','ssword','gsword','msword','failure','dains','iyarugt','wisdom','yetgs','dpgs','mgsword','lantd','ideal','ttthorn','dagger','pgwork'];
+// a creation (cw|ty.L.W.C.m1.m2): a sword from its blueprint, or a spear, bow, staff or hammer in its materials' colours
+function cwDef(k){const B=A.blade,o=B&&B.cwParse(k);if(!o)return null;const P=B.MATP[o.m1][0],Q=o.m2?B.MATP[o.m2][0]:P,L=o.L/100;
+ if(o.ty==='gs'||o.ty==='sw'||o.ty==='dg')return fromBlade(B.cwSpec(o));
+ if(o.ty==='bw')return bow([P[0],P[1],Q[2]],Q[2]);if(o.ty==='st')return staff([Q[1],Q[0],Q[2]],P[1],B.MATP[o.m1]&&o.L>60);if(o.ty==='hm')return hammer(P,o.W>60);
+ const h=20+Math.round(L*6),I=Img(7,h+1);I.vline(3,5,h,P[1]);I.vline(3,12,13,Q[2]);I.set(3,0,P[2]);I.rect(2,1,3,3,P[0]);I.vline(3,1,3,P[2]);I.set(4,3,P[1]);I.set(3,4,Q[0]);if(o.W>50){I.set(1,3,P[0]);I.set(5,3,P[0]);}return {I,gx:3,gy:15};}
+// spears for the new weapons: shaft, head, light, trim; 0 a lance, 1 a trident, 2 a winged spear
+function spearS(c,kind){const I=Img(9,24);I.vline(4,6,23,c[0]);I.vline(4,13,14,c[3]);if(kind===1){for(const x of [2,4,6])I.vline(x,0,4,c[1]);I.rect(2,4,5,1,c[1]);I.set(2,0,c[2]);I.set(4,0,c[2]);I.set(6,0,c[2]);}
+ else{I.set(4,0,c[2]);I.rect(3,1,3,4,c[1]);I.vline(4,1,4,c[2]);I.set(5,4,shadeHex(c[1]));if(kind===2){I.set(1,5,c[3]);I.set(7,5,c[3]);I.set(2,4,c[3]);I.set(6,4,c[3]);I.rect(2,5,5,1,c[3]);}else I.rect(3,5,3,1,c[3]);}return {I,gx:4,gy:16};}
+const shadeHex=c=>'#'+hex(c).map(v=>Math.max(0,v-60).toString(16).padStart(2,'0')).join('');
+Object.assign(DEF,{oakst:()=>staff(['#3a7a3a','#7ac87a','#d8ffd8'],'#6a4a2a'),frstaff:()=>staff(['#2a5ab0','#9fe0ff','#ffffff'],'#c8d8e8',1),stormst:()=>staff(['#4a2a9a','#b08aff','#fff07a'],'#3a3a5a',1),abyssst:()=>staff(['#120814','#5a1a8a','#c86aff'],'#1a0a1a',1),hunbow:()=>bow(['#6a4a2a','#4a3018','#a8743f'],'#d0d4dc'),wyvbow:()=>bow(['#d8d0b8','#8a7a5a','#ffffff'],'#c8282a'),moonbow:()=>bow(['#c8d8ff','#5a6ab0','#ffffff'],'#fff4c0'),knspear:()=>spearS(['#7a5634','#c4c8d0','#eef0f4','#c8a050'],0),trident:()=>spearS(['#2a4a6a','#5ac8c8','#e8ffff','#3a8aa8'],1),skyspear:()=>spearS(['#e8e4d8','#ffd23a','#fff8c0','#ffffff'],2),warhm:()=>hammer(['#7a7a86','#4a4a56','#b8b8c4'],true),thhm:()=>hammer(['#4a6ab0','#2a3a70','#fff07a'],true),giantm:()=>hammer(['#5a4a3a','#3a2a1a','#9a8a6a'])});
+// the crafted mithril and mass-produced Grid tiers, the Spiral Quick Fire Bow and the Dragon Hammer
+Object.assign(DEF,{mstaff:()=>staff(['#4a90c0','#c8e8f4','#ffffff'],'#7aa0b8',1),mgstaff:()=>staff(['#2a3a6a','#e0e4ec','#ffffff'],'#3a4a7a',1),mbow:()=>bow(['#7aa0b8','#4a7890','#c8e8f4'],'#ffffff'),mgbow:()=>bow(['#e0e4ec','#2a3a6a','#ffffff'],'#2a3a6a'),sqfbow:()=>bow(['#c87a2a','#7a3a10','#ffd27a'],'#ff8a3a'),
+ mhammer:()=>hammer(['#c8e8f4','#7aa0b8','#ffffff'],true),ndhammer:()=>{const I=Img(12,20);I.vline(5,5,19,'#4a4e58');I.vline(6,6,18,'#2a2c34');I.set(5,19,'#9aa0ac');I.rect(3,0,6,5,'#5a5e6a');I.rect(3,0,6,1,'#8a909c');I.rect(8,0,1,5,'#3a3c46');I.rect(0,1,3,2,'#6a6e7a');I.set(0,3,'#9aa0ac');I.set(5,2,'#c8282a');return {I,gx:5,gy:13};},   // atlas F055: dark iron head with a pick
+ mghammer:()=>hammer(['#e0e4ec','#2a3a6a','#ffffff'],true),dhammer:()=>hammer(['#8a1a1a','#4a0a0a','#e8c050'],true),mspear:()=>spearS(['#4a6a8a','#c8e8f4','#ffffff','#4a90c0'],0),mgspear:()=>spearS(['#2a3a6a','#e0e4ec','#ffffff','#5a6a9a'],0)});
+// the Mage Tower's tomes (2026-10-26): a book held closed, cover, spine, page edge and clasp
+function tome(c){const I=Img(8,10);I.rect(1,1,6,8,c[0]);I.vline(1,1,8,c[1]);I.rect(2,1,5,1,c[2]);I.vline(6,2,8,'#f0e8d0');I.rect(3,4,2,2,c[3]);I.set(3,4,'#ffffff');return {I,gx:4,gy:7};}
+Object.assign(DEF,{tome1:()=>tome(['#6a4a2a','#3a2414','#9a7a4a','#c8a050']),tome2:()=>tome(['#a83a1a','#5a1a0a','#e8703a','#ffd27a']),tome3:()=>tome(['#1a5aa8','#0a2a5a','#6aa8ff','#c8e8f4']),tome4:()=>tome(['#5a3aa8','#2a1a5a','#a88aff','#fff07a']),tome5:()=>tome(['#e8c040','#8a6a1a','#fff3b0','#ffffff'])});
 const CACHE={};
 // sprite(id, rarity) -> {canvas, gx, gy, w, h}; null for an unknown id
-function sprite(id,r){const k=id+'|'+(r||0);if(CACHE[k])return CACHE[k];const f=DEF[id];if(!f)return null;const {I,gx,gy}=f();
+function sprite(id,r){const k=id+'|'+(r||0);if(CACHE[k])return CACHE[k];const f=String(id).startsWith('cw|')?()=>cwDef(id):A.blade&&BLADED.includes(id)?()=>fromBlade(A.blade.BSPEC[id]):DEF[id];if(!f)return null;const o=f();if(!o)return null;const {I,gx,gy}=o;
  r=r||0;if(r>=2){let ty=0;for(let y=0;y<I.h&&!ty;y++)for(let x=0;x<I.w;x++)if(I.d[(y*I.w+x)*4+3]){ty=y;I.set(x,y,RAR[r]);break;}}
  outline(I);
  if(r>=3){const d=I.d,c=hex(RAR[r]);for(let i=0;i<d.length;i+=4)if(d[i+3]===230&&d[i]===OUT[0]&&d[i+1]===OUT[1]){d[i]=c[0]*.55|0;d[i+1]=c[1]*.55|0;d[i+2]=c[2]*.55|0;}}

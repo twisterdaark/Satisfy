@@ -20,8 +20,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const CURRENT_HTML = process.env.SATISFY_HTML ? path.resolve(process.env.SATISFY_HTML) : path.join(ROOT, 'index.html');
 // Golden/render baseline: the main commit this branch is based on. Bump it when rebasing onto a
 // newer main (or set SATISFY_BASELINE=<sha> to compare with any other commit).
-// R0 history: ce29772 (pre-online), 1899cdb (+ #6 CSS hotfix), 6ef0595 (+ v2 art, #5), 6295a5f (+ Patrian, AI, wider map), 3c343ec (+ town quests, Piaro balance, Guardian Knight), fe34ae0 (+ equipment, guilds, WS world state, events), daaef26 (+ companions, dragon, auction, Yatan), 7d57d5f (+ siege, Muller), 1d8ed5d (v1.22), 7e7a02b (v1.28 monster pack), e9f66b6 (v1.38 + the merges: the quest guide arrow and the harbor are drawn).
-const BASELINE_SHA = process.env.SATISFY_BASELINE || 'e9f66b6fba62cb7c951ebe0953029775f7e4ac91';
+// R0 history: ce29772 (pre-online), 1899cdb (+ #6 CSS hotfix), 6ef0595 (+ v2 art, #5), 6295a5f (+ Patrian, AI, wider map), 3c343ec (+ town quests, Piaro balance, Guardian Knight), fe34ae0 (+ equipment, guilds, WS world state, events), daaef26 (+ companions, dragon, auction, Yatan), 7d57d5f (+ siege, Muller), 1d8ed5d (v1.22), 7e7a02b (v1.28 monster pack), e9f66b6 (v1.38 + the merges: the quest guide arrow and the harbor are drawn), 9400850 (v1.82: slower leveling, weapon passives), ffea01c (v1.83: the per-kill XP cap gone, an easier curve), c7caaca (v1.84: wpfix2 in new saves), de7a67c (v2.28, SAT-ONLINE-160: monsters out of every player's reach sleep, so the ones near Winston roll other dice), 77014a1, c029fc8 (v2.68: every sword its own shape in the hand), 92f465c (v2.75), fc83aab (v2.92: Winston's hall drawn as Earl Steim's castle, his dot on the minimap), fd5609c (v3.68: the HUD's English lettering in capitals, like the manhwa).
+const BASELINE_SHA = process.env.SATISFY_BASELINE || 'fd5609c763c5dbeb0ae2f160458479078461ddb5';
 // the R0 baseline (before the safe saves and ids): the characterization tests document its bugs, so they keep it when
 // BASELINE_SHA moves on for the parity tests (it moved in aaa59ee, and the corrupt-save one failed since)
 const R0_SHA = '34b2ea5094d6d1597b4acb67d338d99d8765b745';
@@ -30,6 +30,11 @@ const FAKE_FIREBASE = path.join(__dirname, 'fake-firebase.js');
 
 // Runs before the game script. Must not change gameplay, only make it reproducible.
 const INIT_SCRIPT = `(() => {
+  // the pre-race baseline (v3.69): a Human who has not used the free race pick has no race strengths here, so the
+  // numbers the older tests pin stay as they were; races.test.cjs deletes it to test the Human as players have it
+  window.__rzPlain = 1;
+  // (v3.72) the same for awakenings: none in the older tests, whatever level they set; awaken.test.cjs deletes it
+  window.__awkPlain = 1;
   let a = 0x5eed1234 | 0;
   Math.random = function () {
     a = (a + 0x6D2B79F5) | 0;
@@ -105,11 +110,12 @@ async function openGame(opts = {}) {
     if (m.type() !== 'error') return;
     if (/^Failed to load resource/.test(m.text())) return; // aborted external request, tracked in `external`
     // the same in WebKit's words; and Firefox's for a request a reload cut short (SAT-ONLINE-107: CI runs both)
-    if (/^Origin null is not allowed by Access-Control-Allow-Origin/.test(m.text()) || /InvalidStateError: Navigated away from page/.test(m.text())) return;
+    // WebKit and Firefox only (Claude-B's review of #141): under Chromium these would be real errors, so they still count there
+    if ((process.env.SATISFY_BROWSER || 'chromium') !== 'chromium' && (/^Origin null is not allowed by Access-Control-Allow-Origin/.test(m.text()) || /InvalidStateError: Navigated away from page/.test(m.text()))) return;
     errors.push('console: ' + m.text());
   });
   const url = pathToFileURL(html).href + (opts.query || '');
-  const storage = { satisfy_lang: 'en', satisfy_tw: '0', ...(opts.storage || {}) }; // satisfy_tw: dialog lines show at once
+  const storage = { satisfy_lang: 'en', satisfy_tw: '0', satisfy_spw: '0', ...(opts.storage || {}) }; // satisfy_tw: dialog lines show at once; satisfy_spw: no spawn protection
   // Seed localStorage from an empty file:// page first (all file: URLs share one storage origin),
   // then load the game once. This used to be goto(game) + seed + reload: two full boots.
   // A page in a shared context (two tabs) keeps what the other tab stored.
@@ -196,7 +202,7 @@ async function continueGame(g) {
 }
 
 // Durable state minus clocks that depend on how many frames ran.
-const VOLATILE_S = ['playT', 'bqT', 'immT', 'fog', 'mrt', 'wv']; // fog: map cells seen, grows with every step (and baselines before it have none); mrt: wall-clock respawn times of killed monsters; wv: map layout version (4 since the map doubled, the baseline has 3)
+const VOLATILE_S = ['playT', 'bqT', 'immT', 'fog', 'mrt', 'wv', 'svT']; // fog: map cells seen, grows with every step (and baselines before it have none); mrt: wall-clock respawn times of killed monsters; wv: map layout version (4 since the map doubled, the baseline has 3); svT: the wall-clock time of the last save (the inn's rest, U289)
 // Random per character (SAT-ONLINE-005): S.pid and the item ids derived from it. Baseline builds only
 // make a pid on a guild join, so golden/rollback comparisons drop them; tests/regression/ids.test.cjs checks them.
 const IDENTITY_S = ['pid'];

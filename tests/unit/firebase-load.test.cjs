@@ -102,9 +102,29 @@ test('the emulator switch: only ?emu on a local page; the public site never poin
   assert.equal(configAt('localhost', '?net=online').firebaseEmulator, null, 'not asked for');
   for (const h of ['twisterdaark.github.io', 'example.com', 'localhost.evil.com', '192.168.1.5', '']) assert.equal(configAt(h, '?net=online&emu').firebaseEmulator, null, h || 'file://');
   assert.equal(configAt('localhost', '?emu=a/b').firebaseEmulator, null, 'a host name only');
+  // Claude-B's review of #155: this computer or the local network, never a host on the internet
+  for (const e of ['localhost', '127.0.0.2', '10.0.0.7', '172.16.4.1', '172.31.255.254', '192.168.1.20', 'DevBox.local']) assert.ok(configAt('localhost', '?emu=' + e).firebaseEmulator, e);
+  assert.equal(configAt('localhost', '?emu=DevBox.local').firebaseEmulator.host, 'devbox.local');
+  for (const e of ['example.com', 'evil.local.example.com', 'devbox', '8.8.8.8', '172.32.0.1', '172.15.0.1', '192.169.0.1', '11.0.0.1', '10.0.0.256', '0x7f.0.0.1', '1.local.x'])
+    assert.equal(configAt('localhost', '?emu=' + e).firebaseEmulator, null, e);
   const C = configAt('twisterdaark.github.io', '').firebaseConfig;
   assert.match(C.databaseURL, /^https:\/\/satisfy-online-8yjeix-default-rtdb\.[a-z0-9-]+\.firebasedatabase\.app$/, 'the real project');
   assert.equal(JSON.stringify(C).match(/localhost|127\.0\.0\.1|demo-|emulator/i), null, 'nothing local in the shipped config');
+});
+
+// SAT-ONLINE-148 (plan U025): ?combat names a WebSocket relay for duels, PvP and raid hits, the same way and as narrowly
+test('the combat relay switch: only ?combat=ws://… on a local page, to this computer or the local network', () => {
+  assert.equal(configAt('localhost', '?net=online&combat=ws://127.0.0.1:8787').combatRelay, 'ws://127.0.0.1:8787');
+  assert.equal(configAt('127.0.0.1', '?combat=ws://DevBox.local:9000/&net=online').combatRelay, 'ws://devbox.local:9000');
+  assert.equal(configAt('localhost', '?combat=wss://192.168.1.20').combatRelay, 'wss://192.168.1.20');
+  assert.equal(configAt('localhost', '?net=online').combatRelay, null, 'not asked for');
+  for (const h of ['twisterdaark.github.io', 'example.com', 'localhost.evil.com', '']) assert.equal(configAt(h, '?combat=ws://127.0.0.1:8787').combatRelay, null, h || 'file://');
+  for (const q of ['?combat=ws://example.com:8787', '?combat=http://127.0.0.1:8787', '?combat=ws://127.0.0.1:8787/evil', '?combat=ws://8.8.8.8', '?combat=ws://user@127.0.0.1'])
+    assert.equal(configAt('localhost', q).combatRelay, null, q);
+  // a value set before the file loads (a test) is kept
+  const file = path.join(__dirname, '..', '..', 'src/net/firebase-config.js'), prev = globalThis.Satisfy;
+  try { globalThis.Satisfy = { combatRelay: 'ws://127.0.0.1:1' }; vm.runInThisContext(fs.readFileSync(file, 'utf8'), { filename: file }); assert.equal(globalThis.Satisfy.combatRelay, 'ws://127.0.0.1:1'); }
+  finally { if (prev === undefined) delete globalThis.Satisfy; else globalThis.Satisfy = prev; }
 });
 
 test('load() connects to the emulators when the switch says so, and only then', async () => {
@@ -128,6 +148,13 @@ test('load() connects to the emulators when the switch says so, and only then', 
       const r2 = await S2.firebase.load(S2.firebaseConfig);
       assert.deepEqual(calls, [['db', '127.0.0.1', 9000], ['auth', 'http://127.0.0.1:9099', true]]);
       assert.equal(r2.emulator, true);
+      // Claude-B's review of #155: an SDK without the connect calls stays on the real project and says so
+      globalThis.__SATISFY_FIREBASE_LOADER__ = () => Promise.resolve(sdk([]));
+      const S3 = loadModules('src/net/firebase-config.js', 'src/net/firebase.js');
+      S3.firebaseEmulator = { host: '127.0.0.1', dbPort: 9000, authUrl: 'http://127.0.0.1:9099' };
+      globalThis.Satisfy = S3;
+      const r3 = await S3.firebase.load(S3.firebaseConfig);
+      assert.equal(r3.emulator, false, 'not on the emulators unless both connect calls ran');
     } finally { if (prev === undefined) delete globalThis.Satisfy; else globalThis.Satisfy = prev; }
   } finally { delete globalThis.__SATISFY_FIREBASE_LOADER__; }
 });

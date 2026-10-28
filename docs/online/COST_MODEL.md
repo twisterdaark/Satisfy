@@ -67,6 +67,7 @@ parties of three are scattered.
 
 - **The model holds.** It counts bytes the same way: the same framing, and a change costs the fields written. So the run checks the code's side of the model: how often it sends, how many players hear each one, and how often queries re-centre. The model is within 1% with interest and about 5% without.
 - **Town crowds raise k** from the table's 10 to 14. A full 100-player shard is then about 1.9 GB an hour, about 5 hours a month on Spark.
+- **So Spark is for testing** (Claude-B's review of #147): its 10 GB a month is about 5 hours of a full 100-player shard, or about 24 hours of a full 20-player one. Before opening the game to more than a few friends at a time, the project needs the Blaze plan (pay as you go: about $1 per GB downloaded) or the server (D3), and a budget alert in the Firebase console.
 - **Everyone sees who they should.** Everyone within 350 px is seen, nobody past 1,250 px is, and every party member is seen wherever they are. Each client holds at most 7 listeners (3 for the range, 3 for the party, 1 for the inbox), and the run takes about 4 s of CPU.
 
 ## Next steps

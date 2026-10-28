@@ -36,7 +36,7 @@ test('Elizabeth: her window, what she asks for, and the Guardian set worn in the
     await g.eval(() => { const G = window.__G; G.DL = null; document.getElementById('dialog').hidden = true; G.eqx.openEquip(); });
     await g.step(2);
     const eq = await g.eval(() => [...document.querySelectorAll('#equipW [data-eq]')].map((b) => b.dataset.eq).sort().join(''));
-    assert.equal(eq, 'abghknrw');
+    assert.equal(eq, 'abeghkk1k2k3nrrluw'); // v1.95: nine more ring slots; v2.02: at level 120 the first three are open; v2.45 earrings, v2.48 underwear; v3.74 the relic slot (rl)
     assert.match(await g.eval(() => document.getElementById('equipW').textContent), /Necklace[\s\S]*Bracelet|Bracelet[\s\S]*Necklace/);
     if (process.env.SHOT) await g.page.screenshot({ path: process.env.SHOT + '-jewelry.png' });
     assert.deepEqual(g.errors, []);
@@ -48,7 +48,7 @@ test('the Black Jewel set: Belial’s jewels, legendary rating, and the set bonu
   try {
     await H.newGame(g);
     await g.step(3);
-    const r = await g.eval(() => { const G = window.__G, S = G.S, X = G.eqx, E = window.__GEZ; S.lv = 460; S.gold = 1e6; Object.assign(S.mats, { bljewel: 2, diam: 4, mith: 40 });
+    const r = await g.eval(() => { const G = window.__G, S = G.S, X = G.eqx, E = window.__GEZ; S.lv = 460; S.gold = 2.6e6; Object.assign(S.mats, { bljewel: 4, diam: 8, mith: 80, estone: 20 });   // v3.11: pricier and harder
       const dm0 = window.__GSET.bon('dm'), n = E.make('bjneck'), b = E.make('bjbrace'); X.equip(n); X.equip(b);
       return { r: [n.r, b.r], gold: S.gold, bl: S.mats.bljewel, dm: +(window.__GSET.bon('dm') - dm0).toFixed(3), hpp: window.__GSET.bon('hpp'), more: E.has('bjneck') }; });
     assert.deepEqual(r.r, [4, 4]); assert.equal(r.gold, 200000); assert.equal(r.bl, 0);

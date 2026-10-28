@@ -1,0 +1,35 @@
+# QA (Claude-A): the whole regression set, on demand (Actions → "regression (full)" → Run workflow, on main or any branch).
+# The tests workflow runs a smoke set on every push; this one runs every file, in 8 shards, one file at a time in each, so a
+# loaded machine doesn't make tests fail that pass alone. Not scheduled: the repository is private and Actions minutes count
+# (a full run is about 8 × 20 minutes). A failing shard lists its failed tests as annotations, as the tests workflow does.
+name: regression (full)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: regression-full-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  shard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # the golden tests export the baseline commit with git archive
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: shard ${{ matrix.shard }} of 8
+        run: |
+          set -o pipefail
+          files=$(node .github/scripts/shard.cjs ${{ matrix.shard }} 8)
+          echo "$files" | tr ' ' '\n'
+          node --test --test-concurrency=1 $files 2>&1 | tee test.log || { node .github/scripts/annotate.cjs test.log; exit 1; }

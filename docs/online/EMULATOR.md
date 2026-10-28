@@ -29,6 +29,6 @@ Owner: Claude-A · SAT-ONLINE-120 · بالعربي للمالك. الأوامر
 **لما تخلص:** اقفل الـ PowerShell الاتنين (Ctrl+C). كل داتا المحاكي بتتمسح.
 
 ## For the agents
-- **The switch:** `Satisfy.firebaseEmulator` (`src/net/firebase-config.js`) is set only on `localhost`, `127.0.0.1` or `::1`, with `?emu` (127.0.0.1) or `?emu=<host>`. In that case `Satisfy.firebase.load()` calls `connectDatabaseEmulator(db, host, 9000)` and `connectAuthEmulator(auth, 'http://host:9099')`. The result carries `emulator: true`, and the net badge says so.
+- **The switch:** `Satisfy.firebaseEmulator` (`src/net/firebase-config.js`) is set only on `localhost`, `127.0.0.1` or `::1`, with `?emu` (127.0.0.1) or `?emu=<host>`. The host must be this computer or one on the local network (`localhost`, `127.x`, `10.x`, `172.16.x`–`172.31.x`, `192.168.x`, or a `.local` name); any other host is ignored. In that case `Satisfy.firebase.load()` calls `connectDatabaseEmulator(db, host, 9000)` and `connectAuthEmulator(auth, 'http://host:9099')`. The result carries `emulator: true` only when both calls ran, and the net badge says so.
 - **The rules:** the emulator reads them from `firebase.json` (`backend/database.rules.json`) and reloads them when the file changes.
 - **CI:** CI runs the rules on the emulator separately: `tests/emulator/rules.emu.cjs` (SAT-ONLINE-116).

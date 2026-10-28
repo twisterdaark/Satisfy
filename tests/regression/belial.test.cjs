@@ -19,10 +19,11 @@ test('the gate of hell: her field, the fake gauge, the Mirror Shield, succubi an
     const at = await g.eval(() => { const m = window.__GBL.of(); return { lv: m.lv, z: window.__G.zoneAt(m.x, m.y), boss: window.__G.mons().filter((x) => x.type === 'belial').length }; });
     assert.deepEqual(at, { lv: 480, z: 'zChaos4', boss: 1 });
     assert.deepEqual(await g.eval(() => window.__G.monNames().filter(([k]) => k === 'belial' || k === 'succ').map(([, n]) => n)), ['32nd Great Demon Belial', 'Succubus']);
-    await g.eval(() => { const G = window.__G; G.S.lv = 450; G.S.hpot = 3; });
+    // level 450 would make this character the first at 400, and the Pioneer title's dialog opens 1.2 s (real time) later,
+    // in the middle of the test: it has the title already
+    await g.eval(() => { const G = window.__G; G.S.lv = 450; G.S.hpot = 3; G.S.tl.pioneer = 1; });
     await near(g);
     await g.step(2);
-    // level 450 makes this character the first at 400: the Pioneer title's dialog opens, and keys wait for it to close
     for (let i = 0; i < 6 && await g.eval(() => window.__G.mode === 'dialog'); i++) { await g.eval(() => window.__G.advance()); await g.step(2); }
     assert.equal(await g.eval(() => window.__G.mode), 'play');
     // the hell field: potions do nothing, attacks are slower
@@ -47,10 +48,10 @@ test('the gate of hell: her field, the fake gauge, the Mirror Shield, succubi an
     assert.deepEqual(mr, { on: true, d: 300, hurt: true, my: 300 });
     assert.match(await g.eval(() => window.__GDB.log()), /\[Mirror Shield\] Only 30% of your hits will land/);
     // 75%: two succubi (Lv 320) come to this screen
-    const s0 = await g.eval(() => window.__G.mons().filter((x) => x.type === 'succ' && !x.dead).length);
+    const s0 = await g.eval(() => window.__G.mons().filter((x) => x.type === 'succ' && x.tmp && !x.dead).length);
     await g.eval(() => { const m = window.__GBL.of(); m.hp = m.max * 0.7; });
     await g.step(1);
-    const s1 = await g.eval(() => window.__G.mons().filter((x) => x.type === 'succ' && !x.dead).map((x) => x.lv));
+    const s1 = await g.eval(() => window.__G.mons().filter((x) => x.type === 'succ' && x.tmp && !x.dead).map((x) => x.lv));
     assert.deepEqual([s0, s1], [0, [320, 320]]);
     // a quarter: the gauge was fake, and her final form
     await g.eval(() => { const m = window.__GBL.of(); m.hp = m.max * 0.2; });
@@ -83,7 +84,7 @@ test('her meteor falls where you stand; the raid pays by your part, and her succ
     await g.eval(() => { const G = window.__G, m = window.__GBL.of(); m.blMy = m.max * 0.1; G.P.x = m.x - 300; m.hp = 0; window.__GB2.kill(m); });
     await g.page.waitForTimeout(2600);
     await g.step(2);
-    const r = await g.eval(() => { const G = window.__G, S = G.S, W = window.__GU.WS; return { dead: window.__GBL.of().dead, wb: Math.round((W.wb.belial - Date.now()) / 60000), tl: !!S.tl.blslay, jewel: S.mats.bljewel || 0, horn: S.mats.blhorn || 0, succ: G.mons().filter((x) => x.type === 'succ' && !x.dead).length }; });
+    const r = await g.eval(() => { const G = window.__G, S = G.S, W = window.__GU.WS; return { dead: window.__GBL.of().dead, wb: Math.round((W.wb.belial - Date.now()) / 60000), tl: !!S.tl.blslay, jewel: S.mats.bljewel || 0, horn: S.mats.blhorn || 0, succ: G.mons().filter((x) => x.type === 'succ' && x.tmp && !x.dead).length }; });
     assert.deepEqual(r, { dead: true, wb: 120, tl: true, jewel: 1, horn: 0, succ: 0 });
     const log = await g.eval(() => window.__GDB.log());
     assert.match(log, /\[The soul of the 32nd Great Demon Belial has been destroyed\.\.\.\]/);

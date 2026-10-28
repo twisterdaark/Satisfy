@@ -54,7 +54,7 @@ test('guild banners: picked by the master from a fixed set, seen by others, kept
 
     // A picks the dragon in G -> Guild banner
     await a.eval(() => window.__GBAN.open()); await a.step(2);
-    await a.eval(() => [...document.querySelectorAll('#dopts button')].find((x) => x.textContent.includes('🐉')).click());
+    await a.eval(() => [...document.querySelectorAll('#dopts button, #gwB .gwopts button')].find((x) => x.textContent.includes('🐉')).click());
     await until([a], () => (window.__fakeRTDB.data.get('guilds/g_gBnA1') || {}).emb === 3);
     // C, outside the guild, sees it under A's and B's names (another guild's name and banner are read again after a minute)
     await c.step(3700); await settle(a, b, c);
@@ -63,8 +63,8 @@ test('guild banners: picked by the master from a fixed set, seen by others, kept
     assert.equal(await seen(), true, "C sees B's banner");
     assert.equal(await c.eval(() => { const x = window.__GBAN.of('gBnA1'); return x && x.emb; }), 3);
     // in G for the members
-    await b.page.keyboard.press('KeyG'); await b.step(2);
-    assert.match(await b.eval(() => document.getElementById('dtext').textContent), /🐉 Dragons/);
+    await b.page.keyboard.press('KeyG'); await b.step(2); await b.eval(() => window.__GDW.tab('x')); await b.step(2);
+    assert.match(await b.eval(() => (window.__GDW.on() ? window.__GDW.text() : document.getElementById('dtext').textContent)), /🐉 Dragons/);
     await b.page.keyboard.press('Escape'); await b.step(2);
     // a member can't change it; nobody can set one outside the set
     await assert.rejects(b.eval(() => window.__GBAN.set(5)), /rank/);

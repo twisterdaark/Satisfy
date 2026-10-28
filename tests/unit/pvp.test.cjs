@@ -17,7 +17,7 @@ function world(n, o = {}) {
     const uid = 'u' + i;
     const p = { uid, name: 'P' + i, x: 4000 + i * 20, y: 1500, zone: o.zone || 'zPlains', room: null, party: null, duel: false, dead: false, allies: [], events: [] };
     p.pres = SN.presence.create({ transport: hub.connect(), now, world: WORLD, net: SN.net, uid, sid: 'sess' + i + 'xxxxxxxx' });
-    p.pvp = SN.pvp.create({ presence: p.pres, uid, now, pos: () => ({ x: p.x, y: p.y }), zone: () => p.zone, room: () => p.room, party: () => p.party, ally: (r) => p.allies.includes(r.uid), busy: () => p.duel, alive: () => !p.dead, policy: SN.net.zonePolicy });
+    p.pvp = SN.pvp.create({ presence: p.pres, uid, now, pos: () => ({ x: p.x, y: p.y }), zone: () => p.zone, room: () => p.room, party: () => p.party, ally: (r) => p.allies.includes(r.uid), busy: () => p.duel, alive: () => !p.dead, policy: SN.net.zonePolicy, zoneAt: o.zoneAt });
     p.pvp.on((e) => p.events.push(e));
     players.push(p);
   }
@@ -82,6 +82,32 @@ test('no hits in a town (either side), in another room, inside a party, during a
   assert.equal(b.events.at(-1).why, 'ally');
 });
 
+// plan U026/U027 (Safe Bairan, Safe Winston): from inside a town no player damage can be received. The victim's client
+// applies hits, and its own zone is the one it checks: a modified attacker that skips its checks gets nowhere.
+test('in a town no hit lands, whatever a modified attacker sends or says about where it is', () => {
+  const town = (x) => (x < 4010 ? 'zWin' : 'zPlains'); // a town's edge between the two, on everyone's map
+  const w = world(2, { zoneAt: town }), [a, b] = w.players;
+  // B inside Winston, A outside: A skips its own checks and sends hits straight away
+  b.zone = 'zWin'; b.x = 4000; a.x = 4030; w.advance(200);
+  for (let i = 0; i < 3; i++) a.pres.send('pvp.hit', { to: 'u1', k: 90, n: 100 + i });
+  assert.equal(w.hurts(b).length, 0, 'nothing taken in town');
+  assert.equal(b.events.at(-1).why, 'safe');
+  // nor when A also says it is in the town with B, or anywhere else
+  a.zone = 'zWin'; a.x = 4005; w.advance(200);
+  a.pres.send('pvp.hit', { to: 'u1', k: 90, n: 200 });
+  assert.equal(w.hurts(b).length, 0);
+  // A standing in the town names the field as its zone: B, outside, checks where A really is on its own map
+  b.zone = 'zPlains'; b.x = 4030; a.zone = 'zPlains'; a.x = 4000; w.advance(200);
+  assert.equal(b.pvp.why(w.remote(b, a)), 'safe', 'A is in the town on B\'s map');
+  a.pres.send('pvp.hit', { to: 'u1', k: 90, n: 300 });
+  assert.equal(w.hurts(b).length, 0, 'no hitting out of a town');
+  assert.equal(b.events.at(-1).why, 'safe');
+  // both outside: the same hit lands (the check above is the zone, nothing else)
+  a.x = 4020; w.advance(200);
+  a.pres.send('pvp.hit', { to: 'u1', k: 90, n: 400 });
+  assert.equal(w.hurts(b).length, 1);
+});
+
 test('the victim rejects hits from too far and more than HITS_PER_S a second', () => {
   const w = world(2), [a, b] = w.players;
   for (let i = 0; i < C.HITS_PER_S + 3; i++) a.pres.send('pvp.hit', { to: 'u1', k: 40, n: i + 1 });
@@ -123,4 +149,57 @@ test('PlayerPublic.ol is 1 (an outlaw), 2 (a murderer, SAT-ONLINE-052) or null',
   assert.ok(SN.net.validatePlayerPublic(pp(true)).ok);
   assert.ok(SN.net.validatePlayerPublic(pp(2)).ok);
   assert.deepEqual(SN.net.validatePlayerPublic({ ...pp(true), ol: 3 }).errors, ['ol']);
+});
+
+// plan U041 (PvP CC immunity; acceptance: "the target is never locked beyond the limit"). No crowd control crosses between
+// players: a hit is its damage and nothing else, whatever a modified attacker adds to it, so the limit is zero. Should a stun,
+// a root or a knockback ever travel with a player's hit, it has to come through here and be given diminishing returns.
+test('U041: a hit carries only its damage; stun, root, slow or knockback added by a modified attacker never reach the victim', () => {
+  const w = world(2), [a, b] = w.players;
+  const forged = { to: 'u1', k: 60, n: 7, stun: 9000, root: 9000, slow: 9000, kb: 400, pull: 400, kx: 300, ky: 300, cc: 'lock', x: 0, y: 0 };
+  a.pres.send('pvp.hit', forged);
+  const h = w.hurts(b);
+  assert.equal(h.length, 1, 'the damage lands');
+  assert.deepEqual(Object.keys(h[0]).sort(), ['handle', 'pm', 'type', 'uid'], 'and is all that does: ' + JSON.stringify(h[0]));
+  assert.equal(h[0].pm, 60);
+  // the duel's hit is the same: damage and the HP after it, nothing more
+  const D = loadModules('src/net/contracts.js', 'src/net/presence.js', 'src/net/transport-local.js', 'src/net/duel.js');
+  const hub = D.transports.hub(); let t = 1000; const now = () => t, ev = [];
+  const mk = (i) => { const p = { uid: 'd' + i, x: 4000 + i * 30, y: 1500 }; p.pres = D.presence.create({ transport: hub.connect(), now, world: WORLD, net: D.net, uid: p.uid, sid: 'dsess' + i + 'xxxxxxx' }); p.duel = D.duel.create({ presence: p.pres, uid: p.uid, now, pos: () => ({ x: p.x, y: p.y }), zone: () => 'zPlains', policy: D.net.zonePolicy }); return p; };
+  const x = mk(0), y = mk(1);
+  const sync = () => { for (const p of [x, y]) p.pres.publish(D.net.toPlayerPublic({ look: { n: p.uid }, cls: 'novice', lv: 2, title: '' }, { x: p.x, y: p.y, dir: 0 }, { zone: 'zPlains', uid: p.uid, sid: p.pres.sid }), true); for (const p of [x, y]) { p.pres.tick(); p.duel.tick(); } };
+  const adv = (ms) => { for (let k = 0; k < ms; k += 100) { t += 100; sync(); } };
+  y.duel.on((e) => ev.push(e));
+  sync(); adv(300);
+  x.duel.challenge(x.pres.remotes().find((r) => r.uid === 'd1')); y.duel.accept(y.duel.pendingChallenge().duel); x.duel.ready(); y.duel.ready();
+  adv(100); adv(D.duel.C.COUNTDOWN_MS + 100);
+  assert.equal(y.duel.state().phase, 'fight');
+  x.pres.send('duel.hit', { to: 'd1', duel: x.duel.state().duel, k: 20, n: 1, stun: 9000, root: 9000, kb: 400 });
+  const hd = ev.filter((e) => e.type === 'hurt');
+  assert.equal(hd.length, 1);
+  assert.deepEqual(Object.keys(hd[0]).sort(), ['dmg', 'hp', 'type'], JSON.stringify(hd[0]));
+});
+
+test('U250: the combat flag lasts COMBAT_MS after a hit sent or taken; a hit that does not land sets nothing', () => {
+  const w = world(3), [a, b, c] = w.players;
+  assert.equal(a.pvp.combat(), 0, 'out of combat at first');
+  // a refused hit (B in a town) sets no flag on either side
+  b.zone = 'zWin'; w.advance(300);
+  assert.equal(a.pvp.hit(w.remote(a, b), 10), 0);
+  assert.equal(a.pvp.combat(), 0); assert.equal(b.pvp.combat(), 0);
+  b.zone = 'zPlains'; w.advance(300);
+  a.pvp.hit(w.remote(a, b), 10);
+  assert.equal(a.pvp.combat(), C.COMBAT_MS, 'the attacker');
+  assert.equal(b.pvp.combat(), C.COMBAT_MS, 'the victim');
+  assert.equal(c.pvp.combat(), 0, 'a bystander');
+  w.advance(4000);
+  assert.equal(a.pvp.combat(), C.COMBAT_MS - 4000);
+  b.pvp.hit(w.remote(b, a), 10); // a hit back starts it again on both
+  assert.equal(a.pvp.combat(), C.COMBAT_MS); assert.equal(b.pvp.combat(), C.COMBAT_MS);
+  w.advance(C.COMBAT_MS);
+  assert.equal(a.pvp.combat(), 0); assert.equal(b.pvp.combat(), 0);
+  // a hit the victim rejects (too far) leaves the victim out of combat
+  b.x += C.HIT_RANGE * 3; w.advance(300);
+  a.pvp.hit(w.remote(a, b), 10);
+  assert.equal(b.pvp.combat(), 0, 'rejected: not in combat');
 });

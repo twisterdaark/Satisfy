@@ -9,8 +9,8 @@
   'use strict';
 
   var C = Object.freeze({
-    PERIOD: 2 * 3600000,   // one competition every two hours (server time) ...
-    OFFSET: 0,             // ... at 00:00, 02:00, 04:00 UTC: the castle siege is at the odd hours (SIEGO 1 h)
+    PERIOD: 6 * 3600000,   // one competition every six hours (server time; owner 2026-10-22: was every two) ...
+    OFFSET: 0,             // ... at 00:00, 06:00, 12:00, 18:00 UTC: the castle siege is at the odd hours (SIEGO 1 h)
     STAGE: 10 * 60000,     // three stages of ten minutes
     STAGES: ['hunt', 'craft', 'duel'],
     HUNT_LV: 5,            // a kill scores its monster's level / HUNT_LV (at least 1) ...

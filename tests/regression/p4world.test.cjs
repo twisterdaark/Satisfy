@@ -69,7 +69,7 @@ test('Legendary Farmer: four kinds harvested, then the Legendary Field with four
       return { c1, opt, left, lf: F.lf, c2, tl: S.tl.lfarm, f: X.grow('wheat', 0) / (X.CROPS.wheat.m * 60000 * (X.CROPS.wheat.s.includes(X.season()) ? 1 : 2)) };
     });
     assert.equal(r.c1, 4);
-    assert.equal(r.opt, 2, 'Piaro offers the season and the Legendary Field');
+    assert.equal(r.opt, 3, 'Piaro offers the season, the Legendary Field and the harvest fair');
     assert.deepEqual([r.left, r.lf], [4, 1]);
     assert.equal(r.c2, 1);
     assert.equal(r.tl, 1);

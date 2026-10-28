@@ -65,6 +65,15 @@ test('rules evaluator: a write is granted on its own path only, never by the rul
   assert.equal(E.write(rules, state, { 'a/x': null, 'a/y': null }).ok, true, 'a multi-location update of the children is');
 });
 
+test("rules evaluator: a parent's .validate holds a write to a child (Claude-B's review of #136)", () => {
+  const rules = { '.read': false, '.write': false, a: { $k: { '.write': 'true', '.validate': "newData.hasChildren(['x', 'y'])", x: { '.validate': 'newData.isNumber()' }, y: { '.validate': 'newData.isNumber()' } } } };
+  assert.equal(E.write(rules, {}, { 'a/k/x': 1 }).ok, false, 'x alone leaves a/k without y');
+  assert.equal(E.write(rules, {}, { 'a/k': { x: 1, y: 2 } }).ok, true);
+  assert.equal(E.write(rules, { a: { k: { x: 1, y: 2 } } }, { 'a/k/x': 3 }).ok, true, 'a/k still has both');
+  assert.equal(E.write(rules, { a: { k: { x: 1, y: 2 } } }, { 'a/k/y': null }).ok, false, 'removing y leaves it without');
+  assert.equal(E.write(rules, { a: { k: { x: 1, y: 2 } } }, { 'a/k': null }).ok, true, 'a location left empty is not validated');
+});
+
 test('fuzz: nobody signed out writes anything, in any state, also inside a multi-location update', () => {
   const bad = [];
   for (let i = 0; i < 6000; i++) {
@@ -194,89 +203,4 @@ test('real rules (SAT-ONLINE-104): the ranks\' rights the master sets, and a gui
   assert.equal(D.w('uA', { ['guildWeekPaid/' + G]: null }), 'no', 'the weekly rewards taken stay taken');
   assert.equal(D.w('uA', { ['guildLog/' + G]: null }), 'no', 'the log stays');
   assert.equal(D.w('uA', { ['guilds/' + G]: null, 'guildNames/rights': null, ['guildMembers/' + G]: null, ['guildVault/' + G]: null, ['guildWeekPaid/' + G]: null, ['guildNote/' + G]: null, ['guildLog/' + G]: null }), 'ok', 'all of it with the guild');
-});
-
-test('real rules (SAT-ONLINE-105): a research is paid once, in order, exactly its cost; never negative or short', () => {
-  const D = db(), G = 'g_uA';
-  D.set({
-    guilds: { [G]: { name: 'Scholars', nk: 'scholars', master: 'uA', col: '#5aa0ff', t: NOW } }, guildNames: { scholars: G },
-    guildMembers: { [G]: { uA: { rk: 'm', n: 'Ahmed', c: 0, on: NOW }, uB: { rk: 'o', n: 'Bassem', c: 0, on: NOW }, uC: { rk: 'r', n: 'Carim', c: 0, on: NOW } } },
-    guildBank: { [G]: { in: 900000, s: 0, lb: 'uA', lg: 100000, t: NOW } },
-  });
-  const go = (uid, node, cost, v = 1, b = node) => { const k = D.st.guildBank[G]; return D.w(uid, { ['guildBuild/' + G + '/' + node]: v, ['guildBank/' + G]: { in: k.in, s: k.s + cost, lb: k.lb, lg: k.lg, b, t: SV } }); };
-  assert.equal(go('uB', 'xp2', 120000), 'no', 'not before what it needs');
-  assert.equal(go('uB', 'xp1', 29999), 'no', 'not short');
-  assert.equal(go('uB', 'xp1', -30000), 'no', 'never negative');
-  assert.equal(go('uB', 'xp1', 30001), 'no', 'not more either');
-  assert.equal(go('uC', 'xp1', 30000), 'no', 'a member without "spend"');
-  assert.equal(go('uB', 'xp1', 30000, 2), 'no', 'one level');
-  assert.equal(go('uB', 'zz', 30000), 'no', 'only the seven');
-  assert.equal(D.w('uB', { ['guildBuild/' + G + '/xp1']: 1 }), 'no', 'not free');
-  // Claude-B's review of #139: one update buys one node, the one the treasury names
-  { const k = D.st.guildBank[G]; assert.equal(D.w('uB', { ['guildBuild/' + G + '/xp1']: 1, ['guildBuild/' + G + '/gd1']: 1, ['guildBuild/' + G + '/q1']: 1, ['guildBank/' + G]: { in: k.in, s: k.s + 30000, lb: k.lb, lg: k.lg, b: 'xp1', t: SV } }), 'no', 'three for the price of one'); }
-  assert.equal(go('uB', 'xp1', 30000, 1, 'gd1'), 'no', 'the treasury names another one');
-  assert.equal(go('uB', 'xp1', 30000, 1, 'xp1x'), 'no', 'or something else');
-  assert.equal(go('uB', 'xp1', 30000), 'ok');
-  assert.equal(go('uB', 'xp1', 30000), 'no', 'once');
-  assert.equal(D.w('uB', { ['guildBuild/' + G + '/xp1']: null }), 'no', 'nothing bought is taken away (validate does not run on a delete)');
-  assert.equal(D.w('uA', { ['guildBuild/' + G + '/xp1']: null }), 'no', 'not by the master either');
-  for (const [n, c] of [['gd1', 30000], ['q1', 30000], ['xp2', 120000], ['gd2', 120000]]) assert.equal(go('uB', n, c), 'ok', n);
-  assert.equal(go('uB', 'all', 400000), 'no', 'the top needs all three below it');
-  assert.equal(go('uB', 'hp1', 120000), 'ok');
-  assert.equal(go('uA', 'all', 400000), 'ok');
-  assert.equal(D.st.guildBank[G].s, 850000);
-  // the treasury never spends more than was given
-  assert.equal(D.w('uA', { ['guildBuild/' + G + '/forge']: 1, ['guildBank/' + G]: { in: 900000, s: 900001, lb: 'uA', lg: 100000, b: 'forge', t: SV } }), 'no');
-  // buildings too: one level of one building an update
-  { const k = D.st.guildBank[G]; assert.equal(D.w('uA', { ['guildBuild/' + G + '/forge']: 1, ['guildBuild/' + G + '/train']: 1, ['guildBank/' + G]: { in: k.in + 0, s: k.s + 50000, lb: k.lb, lg: k.lg, b: 'forge', t: SV } }), 'no', 'two buildings for the price of one'); }
-});
-
-test('real rules (SAT-ONLINE-106): the castle city tax is at most 10%, set once an hour by the castle guild\'s master; its entries collected once', () => {
-  const D = db(), G = 'g_uA';
-  D.set({
-    guilds: { [G]: { name: 'Crown', nk: 'crown', master: 'uA', col: '#5aa0ff', t: NOW } }, guildNames: { crown: G },
-    guildMembers: { [G]: { uA: { rk: 'm', n: 'Ahmed', c: 0, on: NOW }, uC: { rk: 'r', n: 'Carim', c: 0, on: NOW } } },
-    world: { satisfy: { own: { castle: { g: G, n: 'Crown', c: '#5aa0ff', h: 'Ahmed', uid: 'uA', t: NOW } } } },
-  });
-  const tax = (r, by = 'uA', g = G) => ({ 'world/satisfy/tax': { g, r, by, t: SV } });
-  assert.equal(D.w('uA', tax(11)), 'no', 'never more than 10%');
-  assert.equal(D.w('uA', tax(100)), 'no', 'never 100%');
-  assert.equal(D.w('uA', tax(-1)), 'no', 'never negative');
-  assert.equal(D.w('uA', tax(2.5)), 'no', 'whole percents');
-  assert.equal(D.w('uC', tax(5, 'uC')), 'no', 'the master only');
-  assert.equal(D.w('uA', tax(10)), 'ok');
-  assert.equal(D.w('uA', tax(5), NOW + 60000), 'no', 'once an hour');
-  assert.equal(D.w('uA', tax(5), NOW + 3600001), 'ok', 'an hour later');
-  const e = (by, g, n = 'Bassem') => ({ ['guildTax/' + G + '/x_' + by + '_1']: { g, by, n, t: SV } });
-  assert.equal(D.w('uC', e('uC', 500, 'Carim')), 'no', "a member doesn't make tax for its own guild");
-  assert.equal(D.w('uB', e('uB', 0)), 'no', 'at least 1');
-  assert.equal(D.w('uB', e('uB', 100001)), 'no', 'at most 100,000');
-  assert.equal(D.w('uB', e('uB', 50)), 'ok');
-  const k = 'x_uB_1', bank = (inc, by = 'uC') => ({ ['guildTax/' + G + '/' + k]: null, ['guildBank/' + G]: { in: inc, s: 0, lb: by, lg: inc, tx: k, t: SV } });
-  assert.equal(D.w('uB', { ['guildTax/' + G + '/' + k]: null }), 'no', 'not off without the treasury');
-  assert.equal(D.w('uC', bank(51)), 'no', 'its own amount');
-  assert.equal(D.w('uB', bank(50, 'uB')), 'no', 'a member collects');
-  assert.equal(D.w('uC', bank(50)), 'ok');
-  assert.equal(D.w('uC', bank(50)), 'no', 'once');
-  assert.equal(D.st.guildBank[G].in, 50);
-});
-
-test("real rules (Claude-B's review of #140): who holds the castle is written only by that guild's member, or by the guild it was taken from", () => {
-  const D = db(), G = 'g_uA', G2 = 'g_uB';
-  D.set({
-    guilds: { [G]: { name: 'Crown', nk: 'crown', master: 'uA', col: '#5aa0ff', t: NOW }, [G2]: { name: 'Wolves', nk: 'wolves', master: 'uB', col: '#e05a5a', t: NOW } },
-    guildNames: { crown: G, wolves: G2 },
-    guildMembers: { [G]: { uA: { rk: 'm', n: 'Ahmed', c: 0, on: NOW } }, [G2]: { uB: { rk: 'm', n: 'Bassem', c: 0, on: NOW } } },
-    world: { satisfy: { own: { castle: { g: G, n: 'Crown', c: '#5aa0ff', h: 'Ahmed', uid: 'uA', t: NOW } } } },
-  });
-  const own = (g, uid, n = 'X') => ({ 'world/satisfy/own/castle': { g, n, c: '#5aa0ff', h: 'h', uid, t: SV } });
-  assert.equal(D.w('uB', own(G, 'uB')), 'no', "Bassem can't write the castle to a guild he isn't in");
-  assert.equal(D.w('uC', own(G2, 'uC')), 'no', 'nor can a player in no guild');
-  assert.equal(D.w('uB', tax(G2, 'uB')), 'no', 'nor set the tax before his guild holds it');
-  assert.equal(D.w('uB', own(G2, 'uB')), 'ok', 'his own guild takes it (a capture: the client says so, as before)');
-  // a canon guild's raid or siege takes it from the guild holding it, written by that guild's member
-  assert.equal(D.w('uA', own('bd', 'uA')), 'no', 'not by a guild that lost it before');
-  assert.equal(D.w('uB', own('bd', 'uB')), 'ok', 'by the guild it is taken from');
-  assert.equal(D.w('uC', own('rt', 'uC')), 'no', "and not by anyone else");
-  function tax(g, by) { return { 'world/satisfy/tax': { g, r: 10, by, t: SV } }; }
 });

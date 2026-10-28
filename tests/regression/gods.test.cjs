@@ -14,9 +14,11 @@ test('seven statues by their people; E at one and Pray gives the blessing; once 
   try {
     await H.newGame(g);
     await g.step(3);
-    const L = await g.eval(() => { const D = window.__GDV, G = window.__G; return D.list().map((o) => { const id = D.GODS.find((x) => x[0] === o.g)[1], n = G.npcs.find((n) => n.id === id); return { g: o.g, d: Math.hypot(n.tx * 16 + 8 - o.x, n.ty * 16 + 12 - o.y) }; }); });
+    const L = await g.eval(() => { const D = window.__GDV, G = window.__G; return D.list().filter((o) => !o.vat).map((o) => { const id = D.GODS.find((x) => x[0] === o.g)[1], n = G.npcs.find((n) => n.id === id); return { g: o.g, d: Math.hypot(n.tx * 16 + 8 - o.x, n.ty * 16 + 12 - o.y) }; }); });
     assert.deepEqual(L.map((o) => o.g).sort(), ['debirion', 'dominion', 'garion', 'hexetia', 'judar', 'rebecca', 'venice']);
     assert.ok(L.every((o) => o.d < 16 * 7), JSON.stringify(L));
+    // v3.11: and two more of Rebecca on the Vatican's square, by her cathedral
+    assert.deepEqual(await g.eval(() => window.__GDV.list().filter((o) => o.vat).map((o) => o.g)), ['rebecca', 'rebecca']);
     // walk up to Judar's statue and press E
     await g.eval(() => { const G = window.__G, o = window.__GDV.list().find((o) => o.g === 'judar'); for (const m of G.mons()) { m.dead = true; m.rt = 1e9; } G.P.x = o.x; G.P.y = o.y + 10; G.P.dir = 1; });
     await g.step(2);

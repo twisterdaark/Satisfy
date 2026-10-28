@@ -31,8 +31,9 @@
   var PROTOCOL_VERSION = 1;
   var WORLD_ID = 'satisfy';
   // posX/posY: pixel bounds the database accepts for x/y (backend/database.rules.json). They are
-  // headroom over the map (724 tiles wide, rows -172..295 after the map doubled north and south, owner 2026-10-19).
-  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 4096, shard: 999, posX: 16384, posY: 8192, posYMin: -4096 });
+  // headroom over the map (1224 tiles wide with the Saharan Empire, the Red Sea and the East Continent, owner 2026-10-23;
+  // rows -172..361 after the map doubled north and south, owner 2026-10-19).
+  var LIMITS = Object.freeze({ handle: 24, title: 32, envelopeBytes: 4096, shard: 999, posX: 32768, posY: 8192, posYMin: -4096 });
   var ANIMS = ['idle', 'walk', 'attack', 'dodge', 'dead'];
   // PlayerPublic.em (SAT-ONLINE-022, doc §35 U061): an emote from a fixed list, never free text
   var EMOTES = ['wave', 'dance', 'point', 'cheer'];
@@ -79,7 +80,9 @@
   // Every town is safe: Patrian (zPat) joined with SAT-CONTENT-002, Reidan (zReid) with SAT-REIDAN-001,
   // Reinhardt (zRein) with SAT-GUILD-001, Titan (zTitan) and the Butin Barony (zButin) with the Saharan Empire.
   // tests/regression/party.test.cjs checks this list against Satisfy.local.world().towns so a new town can't be left out.
-  var SAFE_ZONES = ['zBai', 'zWin', 'zPat', 'zReid', 'zRein', 'zTitan', 'zButin'];
+  // The East Continent's towns (owner 2026-10-23): Pangea, Kars, the capitals of Xing, Kaya and Pa, and Cho's farming village.
+  // The Vatican (zVatican, v3.11), the Holy See of the Rebecca Church.
+  var SAFE_ZONES = ['zBai', 'zWin', 'zPat', 'zReid', 'zRein', 'zTitan', 'zButin', 'zEaPangea', 'zEaKars', 'zEaXingC', 'zEaKayaC', 'zEaPaC', 'zEaFarm', 'zVatican', 'zHarbor'];
   // 'void' (or no zone): a position the world doesn't define, e.g. the interior strip between rooms. The game's
   // own zoneAt falls back to Winston there (doc §59 C06); online that must never count as a safe town, nor as a
   // field where players may fight, so it is `known: false` and callers refuse both.
@@ -129,7 +132,8 @@
       uid: ctx.uid || null,
       sid: ctx.sid || null,
       handle: str(ctx.handle || L.n, LIMITS.handle), // online: the account ID (SAT-ONLINE-026); otherwise the character name
-      look: { hair: L.hair | 0, hc: L.hc | 0, skin: L.skin | 0, top: L.top | 0 },
+      look: { hair: (L.hair | 0) & 31, // past 31 the rest rides in fx (bd: hh)
+                hc: L.hc | 0, skin: L.skin | 0, top: L.top | 0 },
       cls: str(S.cls || 'novice', 16),
       lv: ctx.hideLv ? 0 : S.lv | 0, // 0 = the player hides their level (SAT-ONLINE-026)
       title: str(S.title, LIMITS.title),

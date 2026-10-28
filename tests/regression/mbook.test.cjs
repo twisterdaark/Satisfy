@@ -18,7 +18,8 @@ test('the book: B opens it, unknown pages stay dark, kills fill a page and maste
     await g.eval(() => { const S = window.__G.S; S.kills = { wolf: 12, goblin: 100, trauka: 1, sdrag: 1, belial: 1, berith: 1 }; });
     await g.page.keyboard.press('KeyB');
     await g.step(2);
-    assert.equal(await g.eval(() => window.__G.mode), 'mb');
+    // the Monster Book is the Index's monsters' page now (owner 2026-10-25)
+    assert.deepEqual(await g.eval(() => [window.__G.mode, document.getElementById('ixW').hidden, document.getElementById('mbW').hidden, document.getElementById('ixG').hidden, document.querySelector('#ixTabs .on').dataset.ixt]), ['idx', false, false, true, 'mon']);
     const L = await g.eval(() => window.__GMB.list().length);
     assert.ok(L >= 90, 'pages ' + L);
     assert.match(await g.eval(() => document.getElementById('mbSum').textContent), new RegExp(`Discovered 6/${L} · Mastered 5 · Mastery: \\+3% damage`));
@@ -56,7 +57,7 @@ test('mastery: the toasts, the damage both ways, the achievements and the Monste
       for (const ty of ['rabbit', 'wolf', 'wolf']) { const m = G.spawnMon(ty, G.P.x + 30, G.P.y); m.tmp = 0; m.hp = 0; window.__GB2.kill(m); } });
     await g.step(2);
     const t = await toasts(g);
-    assert.match(t, /New page in the Monster Encyclopedia: Wild Rabbit/);
+    assert.match(t, /New page in the Index's Monsters: Wild Rabbit/);
     assert.match(t, /\[You have mastered Grey Wolf!\] \+3% damage to it, −3% damage from it/);
     const r = await g.eval(() => { const B = window.__GMB; return [B.atk({ type: 'wolf' }), B.atk({ type: 'rabbit' }), B.hurt(1000, { type: 'wolf' }), B.hurt(1000, { type: 'rabbit' }), B.hurt(1000, null)]; });
     assert.deepEqual(r, [1.03, 1, 970, 1000, 1000]);

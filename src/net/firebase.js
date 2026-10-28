@@ -39,11 +39,13 @@
       var keep = m.auth.setPersistence && m.auth.browserLocalPersistence ? m.auth.setPersistence(auth, m.auth.browserLocalPersistence).catch(function () { /* the default stays */ }) : null;
       var db = m.database.getDatabase(app, cfg.databaseURL), emu = root.Satisfy && root.Satisfy.firebaseEmulator;
       // SAT-ONLINE-120: the local emulators instead of the project, only as firebase-config.js allows (a local page with ?emu)
+      var onEmu = false; // true only once both connect calls ran (Claude-B's review of #155)
       if (emu && m.database.connectDatabaseEmulator && m.auth.connectAuthEmulator) {
         m.database.connectDatabaseEmulator(db, emu.host, emu.dbPort);
         m.auth.connectAuthEmulator(auth, emu.authUrl, { disableWarnings: true });
+        onEmu = true;
       }
-      return Promise.resolve(keep).then(function () { return { m: m, app: app, auth: auth, db: db, emulator: !!emu }; });
+      return Promise.resolve(keep).then(function () { return { m: m, app: app, auth: auth, db: db, emulator: onEmu }; });
     });
     cache.catch(function () { cache = null; });
     return cache;
@@ -81,7 +83,7 @@
     var base = 'presence/' + o.world + '/' + o.shard;
     var mine = D.ref(db, base + '/' + o.uid), list = D.ref(db, base);
     var inbox = D.ref(db, 'inbox/' + o.uid);
-    var handler = null, offs = [], lastSeq = {}, closed = false, offset = 0;
+    var handler = null, offs = [], lastSeq = {}, closed = false, offset = 0, offOk = false;
     var MOB_FULL_MS = 5000;
     var mobs = { offs: null, all: {}, zone: null, last: null, fullT: 0 }; // shared monsters (SAT-ONLINE-026)
     // The node as the server last stored it, or null when it must be written in full (first send,
@@ -89,8 +91,8 @@
     // so a step sends {x, y, dir, anim, seq, t} instead of the whole public profile (COST_MODEL.md).
     var sent = null;
     // Round trip (doc U015): how long the server takes to acknowledge a presence write, smoothed.
-    var rtt = null, writes = 0, fails = 0;
-    function acked(t0) { return function () { var ms = Date.now() - t0; rtt = rtt == null ? ms : Math.round(rtt * 0.8 + ms * 0.2); }; }
+    var rtt = null, writes = 0, fails = 0, acks = []; // acks: the last 32 raw round trips (plan U045's p95)
+    function acked(t0) { return function () { var ms = Date.now() - t0; rtt = rtt == null ? ms : Math.round(rtt * 0.8 + ms * 0.2); acks.push(ms); if (acks.length > 32) acks.shift(); acked.n = (acked.n | 0) + 1; }; }
     var DIRECTED = /^(party\.(invite|accept|decline|kick|ping)|duel\.(challenge|accept|decline|ready|hit|hp|yield|end)|raid\.(hit|state|kill)|chat\.(say)|pvp\.(hit|kill)|trade\.(ask|accept|decline|cancel))$/;
     // exactly the fields the inbox rules accept: party {to, party}, duel {to, duel, k?, n?}, raid {to, raid, k?, n?},
     // chat {to, party, text}
@@ -100,6 +102,9 @@
         o.party = String(p.party || '');
         if (type === 'party.ping') { o.k = Math.max(0, Math.min(1000000000, Math.round(+p.k || 0))); o.n = Math.max(-4096, Math.min(1000000000, Math.round(+p.n || 0))); }
         if (type === 'party.kick' && p.k === 1) o.k = 1; // a kick by the leader, not the leader leaving (SAT-ONLINE-037)
+        if (type === 'party.kick' && (p.k === 2 || p.k === 3)) o.k = p.k; // too late or full (SAT-ONLINE-126); the lead handed over (owner 2026-10-23)
+        if (type === 'party.invite' && (p.k === 4 || p.k === 5 || p.k === 6)) o.k = p.k; // a member's invite and its note to the leader (owner 2026-10-23)
+        if (type === 'party.accept' && p.k === 5) o.k = 5; // the accept of a member's invite
         return o;
       }
       if (type.indexOf('chat.') === 0) { o.party = String(p.party || ''); o.text = String(p.text || ''); return o; }
@@ -198,7 +203,7 @@
       });
     }
     if (!R) listen(0); // whole shard, as before
-    offs.push(D.onValue(D.ref(db, '.info/serverTimeOffset'), function (s) { offset = +s.val() || 0; }));
+    offs.push(D.onValue(D.ref(db, '.info/serverTimeOffset'), function (s) { offset = +s.val() || 0; offOk = true; }));
     offs.push(D.onChildAdded(inbox, function (s) {
       var m = s.val();
       D.remove(D.ref(db, 'inbox/' + o.uid + '/' + s.key)).catch(function () { /* ignore */ });
@@ -220,7 +225,7 @@
     return {
       kind: 'firebase',
       /** {rtt: smoothed ms for the server to acknowledge a presence write (null until the first), writes, fails} */
-      netStats: function () { return { rtt: rtt, writes: writes, fails: fails }; },
+      netStats: function () { return { rtt: rtt, writes: writes, fails: fails, acks: acks.slice(), acked: acked.n | 0 }; },
       send: function (env) {
         if (closed || !env) return;
         if (env.type === 'presence.state') {
@@ -255,6 +260,8 @@
        */
       /** Server time minus this device's clock (ms), from .info/serverTimeOffset: world events use it so every client agrees. */
       serverOffset: function () { return offset; },
+      /** True once the server's offset has arrived (until then serverOffset() is 0, the device's own clock). */
+      offsetOk: function () { return offOk; },
       interest: function () { return { radius: R, centre: cx, party: pq.ids[0] || null, parties: pq.ids.slice(), watched: Object.keys(pq.keys) }; },
       /** Follow everyone whose presence is in party `id` (or any of an array of ids; null or []: stop), on top of the range query. */
       party: partyQuery,
@@ -288,6 +295,8 @@
        * Shared monsters (SAT-ONLINE-026): mobs/{world}/{zone}/{host uid} = {t, m: {"<type>@<sx>,<sy>": "x,y,hp,flags,lv"}}.
        * The zone's host writes its monsters near players; the others follow them. mobsOn(zone, fn) calls fn with
        * {hostUid: {t, m}} on every change (null zone: stop); mobsPut(zone, m) writes this client's node (null m: remove it).
+       * SAT-ONLINE-149: a follower's node in the same zone carries its damage totals ("h<life>.<damage>...") and, just after
+       * it joins, the monsters it was fighting; the host reads them from the same fn.
        */
       mobsOn: function (zone, fn) {
         if (mobs.offs) mobs.offs.forEach(off);
@@ -407,6 +416,7 @@
         u['guilds/' + gid] = { name: g.name, nk: g.nk, master: uid, col: g.col, t: SV() };
         u['guildNames/' + g.nk] = gid;
         u['guildMembers/' + gid + '/' + uid] = member(m);
+        u['guildResearch/' + gid] = null;   // plan U237: research an older client's disband left behind goes with a new guild
         return up(u);
       },
       invite: function (uid, gid, v) { var u = {}; u['guildInv/' + uid + '/' + gid] = { n: v.n, by: v.by, byN: String(v.byN || '').slice(0, 24), t: SV() }; return up(u); },
@@ -423,7 +433,7 @@
       },
       // the heartbeat rewrites the entry with the rank as this client knows it (a stale one is refused; the next beat has it)
       beat: function (gid, uid, p) { var u = {}; u['guildMembers/' + gid + '/' + uid] = member(p); return up(u); },
-      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; u['guildWar/' + gid] = null; u['guildWarAsk/' + gid] = null; u['guildWarKill/' + gid] = null; u['guildTax/' + gid] = null; u['guildHall/' + gid] = null; u['guildHallGuest/' + gid] = null; return up(u); },
+      disband: function (gid, nk) { var u = {}; u['guilds/' + gid] = null; u['guildNames/' + nk] = null; u['guildMembers/' + gid] = null; u['guildChat/' + gid] = null; u['guildVault/' + gid] = null; u['guildVaultTaken/' + gid] = null; u['guildBank/' + gid] = null; u['guildBuild/' + gid] = null; u['guildResearch/' + gid] = null; u['guildLog/' + gid] = null; u['guildNote/' + gid] = null; u['guildRecruit/' + gid] = null; u['guildApply/' + gid] = null; u['guildRej/' + gid] = null; u['guildEvents/' + gid] = null; u['guildEventSign/' + gid] = null; u['guildWeek/' + gid] = null; u['guildWeekPaid/' + gid] = null; u['guildAlly/' + gid] = null; u['guildAllyAsk/' + gid] = null; u['guildDiplo/' + gid] = null; u['guildWar/' + gid] = null; u['guildWarAsk/' + gid] = null; u['guildWarKill/' + gid] = null; u['guildHall/' + gid] = null; u['guildHallGuest/' + gid] = null; return up(u); },
       // SAT-ONLINE-081 the weekly goal: guildWeek/{gid}/{wk}/{uid} {n, k, t}: each member's own kills this week (only upward,
       // at most 1,500); guildWeekPaid/{gid}/{wk}/{uid}/{tier} {t}: a tier's reward, taken once
       watchWeek: function (gid, wk, cb) { return watch('guildWeek/' + gid + '/' + wk, cb); },
@@ -554,7 +564,7 @@
       setNote: function (gid, n) { var u = {}; u['guildNote/' + gid] = { s: n.s, by: n.by, n: n.n, v: n.v, t: SV() }; return up(u); },
       // SAT-ONLINE-076: every guild and its members, for the guild rankings (read once when the board opens)
       readAll: function () { return Promise.all([D.get(at('guilds')), D.get(at('guildMembers'))]).then(function (r) { return { guilds: r[0].val() || {}, members: r[1].val() || {} }; }); },
-      // SAT-ONLINE-065: the treasury guildBank/{gid} = {in, s, lb, lg, b?, t} (in: all gold given, s: all spent on buildings; lb,
+      // SAT-ONLINE-065: the treasury guildBank/{gid} = {in, s, lb, lg, t} (in: all gold given, s: all spent on buildings; lb,
       // lg: the last gift's giver and amount, which the rules add to in), the buildings guildBuild/{gid}/{b} = level and
       // guildLog/{gid}/{id} = {by, n, k, g, b?, l?, t}. A gift or a build reads the treasury and writes it back with the
       // change: one written meanwhile makes the rules refuse it (the caller tries again).
@@ -573,10 +583,24 @@
         return D.get(at('guildBank/' + gid)).then(function (s) {
           var v = s.val(); if (!v) throw new Error('empty');
           var u = {};
-          // b: the one building or study this spend buys; the rules let each node written match it, so one update buys one
-          u['guildBank/' + gid] = { in: +v.in || 0, s: (+v.s || 0) + cost, lb: v.lb, lg: v.lg, b: b, t: SV() };
+          u['guildBank/' + gid] = { in: +v.in || 0, s: (+v.s || 0) + cost, lb: v.lb, lg: v.lg, t: SV() };
           u['guildBuild/' + gid + '/' + b] = l;
           u['guildLog/' + gid + '/' + lid] = { by: uid, n: String(n || '?').slice(0, 24), k: 'build', g: cost, b: b, l: l, t: SV() };
+          return up(u);
+        });
+      },
+      // plan U237: the research tree guildResearch/{gid} = a whole number, one bit a node (GRS's order in the game); a node
+      // bought reads the treasury and the tree and writes both back with it (the rules: one new bit, its prerequisites'
+      // bits already there, its cost added to s), with a log line {k: 'res', b: node, g: cost}
+      watchRes: function (gid, cb) { return watch('guildResearch/' + gid, cb); },
+      research: function (gid, uid, n, node, bit, cost, lid) {
+        return Promise.all([D.get(at('guildBank/' + gid)), D.get(at('guildResearch/' + gid))]).then(function (r) {
+          var v = r[0].val(), m = +r[1].val() || 0; if (!v) throw new Error('empty');
+          if (Math.floor(m / Math.pow(2, bit)) % 2) throw new Error('done');
+          var u = {};
+          u['guildBank/' + gid] = { in: +v.in || 0, s: (+v.s || 0) + cost, lb: v.lb, lg: v.lg, t: SV() };
+          u['guildResearch/' + gid] = m + Math.pow(2, bit);
+          u['guildLog/' + gid + '/' + lid] = { by: uid, n: String(n || '?').slice(0, 24), k: 'res', g: cost, b: node, t: SV() };
           return up(u);
         });
       },
@@ -654,25 +678,30 @@
     };
   }
 
-  // SAT-ONLINE-125 bug reports (plan U343): bugs/{id} {s, v, z?, n?, by, t}, a player's own, one every 2 minutes (bugLast/{uid}
-  // {t} goes in the same update, and the rules want the last one 2 minutes old); admins read and clear them. bugTriage/{key}
-  // {s: new | act | fixed | no | dup, dup?, note?, by, t}: an admin's tag on a report, or on a group of crash reports (key
-  // 'c_' + the hash of its message, Satisfy.triage)
-  function bugStore(sdk) {
-    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, up = function (u) { return D.update(D.ref(db), u); };
-    var all = function (p) { return D.get(at(p)).then(function (s) { return s.val() || {}; }); };
+  // SAT-ONLINE-174 (plan U290): the Blacksmith expo, a 30-day season on the server's clock. expo/{season}/{uid} = one
+  // creation an account enters (its shape and materials, so every page draws the same stats); expoVotes/{season}/{uid}
+  // = the entry voted for, once, read by that account alone; expoTally/{season}/{entry} = its count, raised by one in the
+  // same write as the vote. firstSeen/{uid} = the server's time this account was first seen online: an account made
+  // during a season votes from the next one (the rules check it, with the account ID and a level 10 profile).
+  function expoStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    var val = function (p) { return D.get(at(p)).then(function (s) { var v = s.val(); return v === undefined ? null : v; }); };
     return {
-      send: function (id, uid, v) {
-        var u = {}, e = { s: String(v.s).slice(0, 300), v: String(v.v || '').slice(0, 16), by: uid, t: D.serverTimestamp() };
-        if (v.z) e.z = String(v.z).slice(0, 24);
-        if (v.n) e.n = String(v.n).slice(0, 24);
-        u['bugs/' + id] = e; u['bugLast/' + uid] = { t: D.serverTimestamp() };
-        return up(u);
+      season: function (p) { return Promise.all([val('expo/' + p), val('expoTally/' + p)]).then(function (r) { return { e: r[0] || {}, t: r[1] || {} }; }); },
+      mine: function (p, uid) { return val('expoVotes/' + p + '/' + uid).catch(function () { return null; }); },
+      enter: function (p, uid, e) { var o = {}; for (var k in e) o[k] = e[k]; o.t = D.serverTimestamp(); return D.set(at('expo/' + p + '/' + uid), o); },
+      // the vote and the count go together: if someone voted in between, the count is read again and it is tried again
+      vote: function (p, uid, e) {
+        var go = function (n) { return D.get(at('expoTally/' + p + '/' + e)).then(function (s) { var u = {}; u['expoVotes/' + p + '/' + uid] = e; u['expoTally/' + p + '/' + e] = (s.val() | 0) + 1; return D.update(D.ref(db), u).catch(function (x) { if (n > 0) return go(n - 1); throw x; }); }); };
+        return go(3);
       },
-      all: function () { return Promise.all([all('crashes'), all('bugs'), all('bugTriage')]).then(function (r) { return { crashes: r[0], bugs: r[1], triage: r[2] }; }); },
-      tag: function (key, s, by, dup, note) { var u = {}, e = { s: s, by: by, t: D.serverTimestamp() }; if (dup) e.dup = dup; if (note) e.note = String(note).slice(0, 120); u['bugTriage/' + key] = e; return up(u); },
-      // at most 500 in one update; each report's own tag goes with it
-      clear: function (ids) { var u = {}; ids.slice(0, 500).forEach(function (id) { u['bugs/' + id] = null; u['bugTriage/' + id] = null; }); return ids.length ? up(u) : Promise.resolve(); },
+      // this account's first time online (written the first time it is asked): the server's time
+      seen: function (uid) {
+        return val('firstSeen/' + uid).then(function (v) {
+          if (typeof v === 'number') return v;
+          return D.set(at('firstSeen/' + uid), D.serverTimestamp()).then(function () { return val('firstSeen/' + uid); });
+        }).catch(function () { return null; });
+      },
     };
   }
 
@@ -738,6 +767,29 @@
   // SAT-ONLINE-079: announcements from the game's owner. admins/{uid} = true is set by the owner in the Firebase console
   // (the rules let nobody write it); announce/{id} = {k: 'msg' | 'maint', ar, en, at? (maintenance time), by, t}, written only
   // by an admin, read by every signed-in player
+  // SAT-ONLINE-173 (plan U306): community polls. polls/{id} = {q: {ar, en}, o: {0..3: {ar, en}}, end, by, t}, written by an
+  // admin; pollVotes/{id}/{uid} = the option ('0' to '3'), written once by that account and read by it alone; pollTally/{id}/{option}
+  // = the count, raised by one in the same write as a vote (the rules check both), read by everyone. Nobody else sees
+  // who voted for what.
+  function pollStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    var on = function (ref, cb) { var off = null; try { off = D.onValue(ref, function (s) { cb(s.val() || {}); }, function () { cb({}); }); } catch (e) { cb({}); } return function () { try { if (off) off(); } catch (e) { /* ignore */ } }; };
+    return {
+      watch: function (cb) { var ref = at('polls'); return on(D.limitToLast ? D.query(ref, D.limitToLast(3)) : ref, cb); },
+      tally: function (id, cb) { return on(at('pollTally/' + id), cb); },
+      mine: function (id, uid) { return D.get(at('pollVotes/' + id + '/' + uid)).then(function (s) { var v = s.val(); return v === null || v === undefined ? null : v; }, function () { return null; }); },
+      // the vote and the count go together: if someone voted in between, the count is read again and it is tried again
+      vote: function (id, uid, i) {
+        var go = function (n) { return D.get(at('pollTally/' + id + '/' + i)).then(function (s) { var u = {}; u['pollVotes/' + id + '/' + uid] = String(i); u['pollTally/' + id + '/' + i] = (s.val() | 0) + 1; return D.update(D.ref(db), u).catch(function (e) { if (n > 0) return go(n - 1); throw e; }); }); };
+        return go(3);
+      },
+      post: function (v) {
+        var o = {}; v.o.forEach(function (x, i) { o[i] = { ar: String(x).slice(0, 60), en: String(x).slice(0, 60) }; });
+        return D.push(at('polls'), { q: { ar: String(v.q).slice(0, 120), en: String(v.q).slice(0, 120) }, o: o, end: v.end, by: v.by, t: D.serverTimestamp() });
+      },
+    };
+  }
+
   function announceStore(sdk) {
     var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
     return {
@@ -755,6 +807,17 @@
         if (v.k === 'maint') e.at = v.at;
         return D.push(at('announce'), e);
       },
+    };
+  }
+
+  // SAT-ONLINE-183 (plan U291): the fishing festival's board, fishFest/{slot}/{uid} = {s, w (tenths of a kg), k, n, t}: your
+  // heaviest catch of that festival; the rules take it only during its slot, only heavier, at most every 15 s
+  function fishFestStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
+    return {
+      post: function (s, uid, e) { var o = { s: e.s, w: e.w, k: e.k, n: e.n, t: D.serverTimestamp() }; return D.set(at('fishFest/' + s + '/' + uid), o); },
+      watch: function (s, cb) { var off = null; try { off = D.onValue(at('fishFest/' + s), function (v) { cb(v.val() || {}); }, function () { cb({}); }); } catch (e) { cb({}); } return function () { try { if (off) off(); } catch (e) { /* ignore */ } }; },
+      read: function (s) { return D.get(at('fishFest/' + s)).then(function (v) { return v.val() || {}; }, function () { return {}; }); },
     };
   }
 
@@ -819,6 +882,57 @@
     };
   }
 
+  // Plan U219: crafting commissions. commOrders/{oid} {by, n, rc, fee, t}: a piece to be forged (a recipe's id) for a fee;
+  // its owner paid the fee and the recipe's materials into it. A player smith claims it first (commClaim/{oid} {s, t}; a
+  // claim older than 10 minutes can be taken again, and only then can the owner take the order off), forges it, and
+  // answers in one update that removes the order and the claim, gives the piece to its owner (commDone/{owner}/{oid}
+  // {rc, json, by, sn, fee, t}: the piece as a trade carries it) and pays the smith (commPaid/{smith}/{oid} {g, t}). The
+  // owner and the smith each remove what they took.
+  function commStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, SV = function () { return D.serverTimestamp(); };
+    var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
+    return {
+      list: function () { return Promise.all([D.get(at('commOrders')), D.get(at('commClaim'))]).then(function (r) { return { o: r[0].val() || {}, c: r[1].val() || {} }; }); },
+      post: function (oid, v) { var u = {}; u['commOrders/' + oid] = { by: v.by, n: String(v.n || '?').slice(0, 24), rc: v.rc, fee: v.fee, t: SV() }; return D.update(D.ref(db), u); },
+      cancel: function (oid) { var u = {}; u['commOrders/' + oid] = null; u['commClaim/' + oid] = null; return D.update(D.ref(db), u); },
+      // t0: the first claim's time, kept by every claim after it (its owner can take the order off 20 minutes after it)
+      claim: function (oid, smith, t0) { var u = {}; u['commClaim/' + oid] = { s: smith, t: SV(), t0: t0 || SV() }; return D.update(D.ref(db), u); },
+      forge: function (oid, o, smith, sn, json) {
+        var u = {}; u['commOrders/' + oid] = null; u['commClaim/' + oid] = null;
+        u['commDone/' + o.by + '/' + oid] = { rc: o.rc, json: json, by: smith, sn: String(sn || '?').slice(0, 24), fee: o.fee, t: SV() };
+        u['commPaid/' + smith + '/' + oid] = { g: o.fee, t: SV() };
+        return D.update(D.ref(db), u);
+      },
+      order: function (oid) { return D.get(at('commOrders/' + oid)).then(function (s) { return s.val(); }); },
+      left: function (uid, oid) { return Promise.all([D.get(at('commOrders/' + oid)), D.get(at('commDone/' + uid + '/' + oid))]).then(function (r) { return [r[0].val(), r[1].val()]; }); },
+      watchDone: function (uid, cb) { return watch('commDone/' + uid, cb); },
+      took: function (uid, oid) { return D.remove(at('commDone/' + uid + '/' + oid)); },
+      watchPaid: function (uid, cb) { return watch('commPaid/' + uid, cb); },
+      collect: function (uid, oid) { return D.remove(at('commPaid/' + uid + '/' + oid)); },
+    };
+  }
+
+  // SAT-ONLINE-094: the auction house board. auction/{lid} {by, n, it, q, price, t}: a player's listing (materials and
+  // potions, as the auction house takes them); a sale is one update that removes it and writes auctionPaid/{seller}/{lid}
+  // {g, by, bn, it, q, t} (the rules: only for the listing as it is, by someone else); the seller removes what it collects.
+  function auctionStore(sdk) {
+    var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); }, SV = function () { return D.serverTimestamp(); };
+    // a refused listener calls back with (null, true), so the game can watch again later
+    var watch = function (p, cb) { var off = D.onValue(at(p), function (s) { cb(s.val()); }, function () { cb(null, true); }); return function () { try { off(); } catch (e) { /* ignore */ } }; };
+    return {
+      watch: function (cb) { return watch('auction', cb); },
+      watchPaid: function (uid, cb) { return watch('auctionPaid/' + uid, cb); },
+      list: function (lid, v) { var u = {}; u['auction/' + lid] = { by: v.by, n: String(v.n || '?').slice(0, 24), it: v.it, q: v.q, price: v.price, t: SV() }; return D.update(D.ref(db), u); },
+      unlist: function (lid) { return D.remove(at('auction/' + lid)); },
+      buy: function (lid, v) {
+        var u = {}; u['auction/' + lid] = null;
+        u['auctionPaid/' + v.seller + '/' + lid] = { g: v.g, by: v.by, bn: String(v.bn || '?').slice(0, 24), it: v.it, q: v.q, t: SV() };
+        return D.update(D.ref(db), u);
+      },
+      collect: function (uid, lid) { return D.remove(at('auctionPaid/' + uid + '/' + lid)); },
+    };
+  }
+
   // SAT-ONLINE-073: the group finder, lfg/{uid} = {n, lv, cls, k, z, t}: yours only, gone when you leave (onDisconnect)
   function lfgStore(sdk) {
     var D = sdk.m.database, db = sdk.db, at = function (p) { return D.ref(db, p); };
@@ -870,12 +984,16 @@
     dropStore: dropStore,
     bountyStore: bountyStore,
     arenaStore: arenaStore,
-    bugStore: bugStore,
+    expoStore: expoStore,
     friendStore: friendStore,
     reportStore: reportStore,
     lfgStore: lfgStore,
+    fishFestStore: fishFestStore,
     repairStore: repairStore,
+    commStore: commStore,
+    auctionStore: auctionStore,
     announceStore: announceStore,
+    pollStore: pollStore,
     modStore: modStore,
     natStore: natStore,
     SDK_VERSION: SDK_VERSION,

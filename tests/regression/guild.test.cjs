@@ -147,3 +147,28 @@ test('online guilds: found, invite from the card, join, ranks, remove, disband; 
     for (const g of [a, b, c]) assert.deepEqual(g.errors, []);
   } finally { await ctx.close(); }
 });
+
+// SAT-ONLINE-144: founding is paid when asked, before the database answers, and given back if it says no. It was paid on
+// the answer: gold spent meanwhile (the price was checked at the click) took the bag below zero.
+test('founding a guild: paid at the click, never below zero, given back when the name is taken', async () => {
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE] });
+  try {
+    const a = await H.openGame({ ctx, query: '?net=online&slot=a' });
+    await a.eval(([u, n]) => { window.__fakeRTDB.data.set('accountIds/' + u, n); window.__fakeRTDB.nextName = n; window.__fakeRTDB.nextUid = u; document.getElementById('onlineBtn').click(); }, ['gGfA1', 'Ahmed']);
+    await until([a], () => !!Satisfy.local.net() && Satisfy.local.net().state === 'ONLINE', 15000);
+    await H.newGame(a, { n: 'Grid', hair: 1, hc: 2, skin: 1, top: 3 });
+    await settle(a);
+    await until([a], () => !!window.__GG.state(), 10000); // the online guilds are up (offline, a guild is made on this device)
+    // a name another guild holds in the database (not known to this page yet): refused, the 5,000 given back
+    await a.eval(() => { const S = window.__G.S; S.lv = 60; S.gold = 6000; window.__fakeRTDB.data.set('guildNames/old guard', 'g_someone'); window.__GG.create('Old Guard'); });
+    assert.equal(await a.eval(() => window.__G.S.gold), 1000, 'paid at the click');
+    await until([a], () => window.__G.S.gold === 6000, 10000);
+    assert.equal(await a.eval(() => window.__G.S.guild || null), null);
+    // founded, with a purchase tried while the database answers: what is left after the price can't pay 1,500
+    await a.eval(() => { const S = window.__G.S; window.__GG.create('Swift Hawks'); if (S.gold >= 1500) S.gold -= 1500; });
+    await until([a], () => { const s = window.__GG.state(); return !!s && s.rank === 'm'; });
+    assert.equal(await a.eval(() => window.__G.S.gold), 1000, 'never below zero: ' + await a.eval(() => window.__G.S.gold));
+    assert.equal(await a.eval(() => window.__G.S.guild), 'g_gGfA1');
+    assert.deepEqual(a.errors, []);
+  } finally { await ctx.close(); }
+});

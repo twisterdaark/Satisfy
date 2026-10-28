@@ -42,7 +42,7 @@ test('monster manifest matches the exported PNGs and anchors sit on the feet lin
  const cols=Math.max(...mm.rows.map(r=>r.frames));assert.strictEqual(mm.rows.length,M.POSES.length);
  for(const k of M.KINDS){const s=mm.sheets[k];assert.ok(s,'missing '+k);const sz=pngSize(path.join(dir,s.file));
   assert.deepStrictEqual(sz,{w:s.frame.w*cols,h:s.frame.h*mm.rows.length},k);assert.ok(s.anchor.y>=s.frame.h-2&&s.anchor.y<=s.frame.h,k+' anchor y on the feet line');assert.ok(s.anchor.x>0&&s.anchor.x<s.frame.w,k+' anchor x');
-  assert.strictEqual(s.scale,M.PAL[k]?M.PAL[k][3]:1,k+' scale');}
+  assert.strictEqual(s.scale,M.PAL[k]?M.PAL[k][3]:M.XSCALE[k]||1,k+' scale');}
  const r=M.rect('wolf',36,22,'atk',1);assert.strictEqual(r.sx,36);assert.strictEqual(r.sy,22*2);});
 
 test('terrain v2 keeps the game tile ids and the legacy snapshot matches index.html',()=>{const html=fs.readFileSync(path.join(__dirname,'..','..','index.html'),'utf8');

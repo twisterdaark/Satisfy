@@ -21,13 +21,13 @@ test('the three places are on the map with their monsters and bosses, and the ne
       return { z: [z(85, 212), z(240, 216), z(640, 212), z(700, 222), z(300, 212)], n, sh: ['wyvern', 'drake', 'wqueen'].map((k) => +X.sheet(k).scale.toFixed(2)),
         envoy: G.npcs.some((p) => p.id === 'vcenv') };
     });
-    assert.deepEqual(r.z, ['zStorm', 'zWyvern', 'zVamp', 'zCata', null]);
+    assert.deepEqual(r.z, ['zStorm', 'zWyvern', null, null, null]); // v2.07: the Vampire City went under the sand (vcity.test)
     for (const k of ['felem', 'ielem', 'selem', 'wyvern', 'drake', 'vthrall', 'vknight']) assert.ok(r.n[k] >= 8, k + ' ' + r.n[k]);
     for (const k of ['slord', 'wqueen', 'vlord']) assert.equal(r.n[k], 1, k);
-    assert.deepEqual(r.sh, [0.42, 1.69, 0.68]);
+    assert.deepEqual(r.sh, [0.42, 0.46, 0.68]);   // the drake is a small red dragon now (atlas 2026-10-26), not a big salamander
     assert.ok(r.envoy);
     // a walk through each place draws without errors
-    for (const [x, y] of [[88, 214], [240, 208], [642, 212], [702, 222]]) { await at(g, x, y); await g.step(20); }
+    for (const [x, y] of [[88, 214], [240, 208], [642, 212], [12, 340]]) { await at(g, x, y); await g.step(20); }
     assert.deepEqual(g.errors, []);
   } finally { await g.close(); }
 });
@@ -79,7 +79,9 @@ test('vampires heal on what they hit; the Covenant takes you after the envoy\'s 
   const g = await H.openGame();
   try {
     await H.newGame(g, LOOK);
-    await at(g, 640, 212);
+    await g.eval(() => window.__GVP.force(22)); // owner 2026-10-22: at night the thralls hit 15% harder
+    await at(g, 30, 343);
+    await g.step(40);
     const r = await g.eval(() => {
       const G = window.__G, X = window.__GP3, C = window.__GC2, m = G.mons().find((v) => v.type === 'vthrall'); m.hp = m.max - 5000;
       const plain = X.hurt(1000, m), healed = m.max - m.hp;
@@ -87,10 +89,10 @@ test('vampires heal on what they hit; the Covenant takes you after the envoy\'s 
       const cov = G.S.p3.cov, soft = X.hurt(1000, m); G.P.hp = 100; X.P3.ls = 0; X.hit(m, 10000); const back = G.P.hp - 100;
       return { plain, healed, cov, soft, back, want: Math.min(300, window.__GP3.mh() * .02), bv: G.S.mats.bvial, env: X.env().length };
     });
-    assert.equal(r.plain, 1000);
-    assert.equal(r.healed, 4000, 'the thrall drank 1000');
+    assert.equal(r.plain, 1150);
+    assert.equal(r.healed, 3850, 'the thrall drank 1150');
     assert.equal(r.cov, 1);
-    assert.equal(r.soft, 850);
+    assert.equal(r.soft, 978);
     assert.ok(Math.abs(r.back - r.want) < 1e-6, '3% of 10000 comes back, at most 2% of your health: ' + JSON.stringify(r));
     assert.equal(r.bv, 0, 'the vials were taken');
     assert.equal(r.env, 1, 'the envoy offers to leave');

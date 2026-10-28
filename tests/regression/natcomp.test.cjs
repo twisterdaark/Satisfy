@@ -1,6 +1,6 @@
 'use strict';
 // SAT-ONLINE-064 (Claude-B #13 item 25): the National Competition online, over the fake Firebase with the rules' checks.
-// A forced competition: A hunts in stage 1, B crafts in stage 2, both duel in stage 3 (three a foe count); the scores
+// A forced competition: both join and go to the grounds; A hunts in stage 1, B crafts in stage 2, both duel in stage 3 (three a foe count); the scores
 // reach the database; at the end each is paid once by its rank, A (first) gets the title and B hears it.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -40,6 +40,13 @@ test('online: a National Competition in three stages; scores in the database; ea
     await force([a, b], 0);
     await until([a, b], () => /Stage 1\/3: Hunting/.test(document.getElementById('natbar').textContent) && !document.getElementById('natbar').hidden);
     const id = await a.eval(() => window.__GNC.now().id);
+    // taking part is a choice (owner 2026-10-22): a kill before joining scores nothing; Join takes you to the grounds
+    assert.equal(await a.eval(() => { const G = window.__G, m = G.mons().find((m) => !m.dead && !m.tmp); m.hp = 0; window.__GB2.kill(m); return window.__GNC.sc().h; }), 0, 'not joined: no points');
+    for (const g of [a, b]) await g.eval(() => document.querySelector('#natbar [data-nat=join]').click());
+    await until([a, b], () => window.__GNC.here() && window.__G.mode === 'play', 10000);
+    assert.match(await bar(a), /Leave/);
+    await a.step(190); // the first ones come 3 s of the game's clock after joining, which moves only when the test steps it
+    await until([a], () => window.__G.mons().some((m) => m.nat && !m.dead), 10000); // the hunting stage sends monsters to the grounds
 
     // stage 1: A kills three monsters; B's kills would count too, but B hunts nothing
     const hunt = await a.eval(() => {
@@ -72,6 +79,7 @@ test('online: a National Competition in three stages; scores in the database; ea
     const want = await a.eval((o) => ({ a: Satisfy.natcomp.reward(o.sA > o.sB ? 1 : 2, o.sA), b: Satisfy.natcomp.reward(o.sA > o.sB ? 2 : 1, o.sB) }), { sA, sB });
     await force([a, b], 30 * MIN + 31000);
     await until([a, b], () => document.getElementById('natbar').hidden);
+    await until([a, b], () => !window.__GNC.here() && !window.__GNC.joined(), 10000); // back in town when it ends
     await until([a], (g) => window.__G.S.gold === g, 15000, g0.a + want.a);
     await until([b], (g) => window.__G.S.gold === g, 15000, g0.b + want.b);
     assert.equal(await a.eval((id) => window.__fakeRTDB.data.get('natPaid/' + id + '/gNcA1').g, id), want.a);
@@ -88,5 +96,20 @@ test('online: a National Competition in three stages; scores in the database; ea
     assert.match(await a.eval(() => document.getElementById('dialog').textContent), /1\. Ahmed: \d+ \(hunt \d+ · craft 0 · arena 150\) · 2\. Bassem: \d+ \(hunt 0 · craft \d+ · arena 10\)/);
     for (const g of [a, b]) assert.deepEqual(await g.eval(() => window.__fakeRTDB.rejected), []);
     for (const g of [a, b]) assert.deepEqual(g.errors, []);
+  } finally { await ctx.close(); }
+});
+
+test('online: alone in the world the National Competition waits for a second player, and nothing scores', async () => {
+  const ctx = await H.newContext({ scripts: [H.FAKE_FIREBASE, H.fixedClock()] });
+  try {
+    const a = await H.openGame({ ctx, query: '?net=online&slot=a' });
+    await a.eval(() => { window.__fakeRTDB.data.set('accountIds/gNcS1', 'Solo'); window.__fakeRTDB.nextName = 'Solo'; window.__fakeRTDB.nextUid = 'gNcS1'; document.getElementById('onlineBtn').click(); });
+    await until([a], () => !!Satisfy.local.net() && Satisfy.local.net().state === 'ONLINE', 15000);
+    await H.newGame(a, { n: 'Solo', hair: 1, hc: 2, skin: 1, top: 3 });
+    await force([a], 0);
+    await until([a], () => window.__GNC.pl() === 1 && /waiting for at least two players/.test(document.getElementById('natbar').textContent));
+    assert.equal(await a.eval(() => !!document.querySelector('#natbar [data-nat=join]')), false, 'no Join while alone');
+    assert.equal(await a.eval(() => window.__GNC.sc()), null, 'nothing scores');
+    assert.deepEqual(a.errors, []);
   } finally { await ctx.close(); }
 });

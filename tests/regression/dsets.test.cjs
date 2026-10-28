@@ -18,7 +18,10 @@ test('made at the anvil from a breath by a blacksmith at level 9, always legenda
     const u = await g.eval(() => { const S = window.__G.S, r = window.__GSET.rc('rpbow'); S.cls = 'warrior'; S.smith = 9; const a = r.unlock(); S.cls = 'smith'; S.smith = 8; const b = r.unlock(); S.smith = 9; return [a, b, r.unlock()]; });
     assert.deepEqual(u, [false, false, true]);
     const it = await g.eval(() => { const G = window.__G, S = G.S; S.lv = 330; Object.assign(S.mats, { brphx: 3, mith: 20, wood: 10, topaz: 1 }); G.startMG('rpbow'); G.finishMG()(); const it = S.items[S.items.length - 1]; return { id: it.id, r: it.r, left: S.mats.brphx, mith: S.mats.mith }; });
-    assert.deepEqual(it, { id: 'rpbow', r: 4, left: 1, mith: 10 });
+    // (owner 2026-10-26) Legendary by Pagma's Successor's hands alone: a blacksmith's comes out Unique
+    assert.deepEqual(it, { id: 'rpbow', r: 3, left: 1, mith: 10 });
+    const pg = await g.eval(() => { const G = window.__G, S = G.S; S.cls = 'pagma'; G.startMG('rpbow'); G.finishMG()(); const it = S.items[S.items.length - 1]; return { id: it.id, r: it.r, left: S.mats.brphx }; });
+    assert.deepEqual(pg, { id: 'rpbow', r: 4, left: 0 });
     // every piece is legendary and needs its own beast's breath; the recipe hint says where that comes from
     const all = await g.eval(() => { const ids = ['rpbow', 'rparmor', 'rphelm', 'rpboots', 'tgarmor', 'tghelm', 'tggloves', 'tgboots', 'dgspear', 'dggaunt', 'dgarmor', 'dghelm', 'ttthorn', 'ttshell', 'tthelm', 'ttboots'], br = { rp: 'brphx', tg: 'brtig', dg: 'brdrg', tt: 'brtor' };
       return ids.filter((id) => { const r = window.__GSET.rc(id); return !(r.fix === 4 && r.need[br[id.slice(0, 2)]] >= 1 && window.__G.eqx.mkItem(id, 0).r === 4); }); });

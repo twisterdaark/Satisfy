@@ -55,10 +55,11 @@ test('the test fake enforces the same required fields', () => {
 test('position bounds cover the whole map, and the fake uses the same bounds', () => {
   // Read the map size from index.html so a wider map fails here, not in a live Winston write.
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-  const m = /TS=(\d+),LW=(\d+),GAPS=(\[\[[\d,\[\]]*\]\]),(?:EX=.*?,EW=(\d+),)?MW=.*?,MH=(\d+)/.exec(html);
+  const m = /TS=(\d+),LW=(\d+),GAPS=(\[\[[\d,\[\]]*\]\]),(?:EX=.*?,EW=(\d+),)?(?:WMW=.*?,RSW=(\d+),EAX=.*?,EAW=(\d+),)?MW=.*?,MH=(\d+)/.exec(html);
   assert.ok(m, 'map constants found in index.html');
-  const [ts, lw, gaps, ew, mh] = [+m[1], +m[2], JSON.parse(m[3]), +(m[4] || 0), +m[5]];
-  const mw = lw + gaps.reduce((a, g) => a + g[1], 0) + ew;   // + the Saharan Empire east of the logical map
+  const [ts, lw, gaps, ew, rsw, eaw, mh] = [+m[1], +m[2], JSON.parse(m[3]), +(m[4] || 0), +(m[5] || 0), +(m[6] || 0), +m[7]];
+  // + the Saharan Empire east of the logical map, then the Red Sea and the East Continent (owner 2026-10-23)
+  const mw = lw + gaps.reduce((a, g) => a + g[1], 0) + ew + rsw + eaw;
   assert.ok(mw * ts <= N.LIMITS.posX, `map width ${mw * ts}px fits under ${N.LIMITS.posX}`);
   assert.ok(mh * ts <= N.LIMITS.posY, `map height ${mh * ts}px fits under ${N.LIMITS.posY}`);
   // the north (SAT-WORLD-003) is rows -NR..-1: y goes down to -NR*TS
@@ -257,6 +258,18 @@ test('legends (SAT-ONLINE-054): a legend is taken once, then only its holder cha
   assert.match(k['.write'], /!data\.exists\(\) && newData\.child\('uid'\)\.val\(\) === auth\.uid/);
   assert.match(k['.write'], /data\.exists\(\) && data\.child\('uid'\)\.val\(\) === auth\.uid/);
   assert.equal(k.uid['.validate'], 'newData.val() === auth.uid');
+  assert.equal(k.$other['.validate'], false);
+});
+
+test('legend books (owner 2026-10-26): one copy, taken once; whoever receives it keeps its g; only its holder frees it', () => {
+  const B = rules.world.$world.books, k = B.$k;
+  assert.equal(B['.read'], 'auth != null');
+  // a write puts yourself as the holder; over an existing copy only with that copy's g (a second drop can't replace it)
+  assert.equal(k['.write'], "auth != null && (newData.exists() ? newData.child('uid').val() === auth.uid && (!data.exists() || newData.child('g').val() === data.child('g').val()) : data.child('uid').val() === auth.uid)");
+  assert.match(k['.validate'], /newData\.hasChildren\(\['uid', 'p', 'g', 't'\]\)/);
+  assert.equal(k.uid['.validate'], 'newData.val() === auth.uid');
+  assert.match(k.p['.validate'], /\^\[a-z0-9_\]\{4,40\}\$/);
+  assert.equal(k.t['.validate'], 'newData.val() === now');
   assert.equal(k.$other['.validate'], false);
 });
 
@@ -566,6 +579,20 @@ test('repair orders (SAT-ONLINE-096): your own order; mended by someone else, wh
   assert.equal(P.g['.validate'], 'newData.val() === ' + o + ".child('fee').val()", 'its fee');
   assert.equal(rules.repairDone.$uid['.read'], 'auth != null && auth.uid === $uid');
   assert.ok(P['.write'].endsWith("|| (data.exists() && !newData.exists()))"), 'a fee collected once (Claude-B, #131)');
+});
+
+test('the auction board (SAT-ONLINE-094): your own listing; taken off only by its seller or a buyer who pays its price', () => {
+  const A = rules.auction, P = rules.auctionPaid.$uid;
+  assert.equal(A['.read'], 'auth != null');
+  assert.equal(A.$lid['.write'], "auth != null && ((!data.exists() && newData.child('by').val() === auth.uid) || (data.exists() && !newData.exists() && (data.child('by').val() === auth.uid || (data.child('t').val() > now - 1209600000 && newData.parent().parent().child('auctionPaid').child(data.child('by').val()).child($lid).child('by').val() === auth.uid))))");
+  assert.equal(P['.read'], 'auth != null && auth.uid === $uid', "the seller's gold is the seller's");
+  assert.ok(P.$lid['.write'].includes("root.child('auction').child($lid).child('by').val() === $uid && $uid !== auth.uid && !newData.parent().parent().parent().child('auction').child($lid).exists()"), 'paid to its seller, by someone else, with the listing gone in the same write');
+  for (const k of ['price', 'it', 'q']) assert.equal(P.$lid[k === 'price' ? 'g' : k]['.validate'], "newData.val() === root.child('auction').child($lid).child('" + k + "').val()", k);
+  assert.equal(A.$lid.price['.validate'], 'newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 1000000000');
+  // Claude-B's review: bought only for 14 days, eight slots a seller, collected once
+  assert.ok(A.$lid['.write'].includes("data.child('t').val() > now - 1209600000"), 'a buyer only within 14 days');
+  assert.ok(A.$lid['.validate'].startsWith("$lid.matches(/^a_[A-Za-z0-9_-]{1,60}_[0-7]$/) && $lid.beginsWith('a_' + newData.child('by').val() + '_') && $lid.length === newData.child('by').val().length + 4"), "the seller's own eight slots");
+  assert.ok(P.$lid['.write'].endsWith("(auth.uid === $uid && data.exists() && !newData.exists()))"), 'collected once');
 });
 
 test('no key appears twice in one object of the rules file', () => {

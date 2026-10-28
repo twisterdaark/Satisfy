@@ -60,6 +60,7 @@ test('party raid: one boss HP, one death, one reward each, nothing paid twice', 
     const a0 = await boss(a), b0 = await boss(b);
     assert.equal(a0.key, b0.key, 'the same boss on both clients');
     const before = await b.eval(() => ({ gold: window.__G.S.gold, xp: window.__G.S.xp, lv: window.__G.S.lv }));
+    const beforeA = await a.eval(() => ({ gold: window.__G.S.gold, items: window.__G.S.items.length }));
 
     // B swings: its own copy keeps its HP, the leader's copy loses it
     await swing(b);
@@ -74,6 +75,11 @@ test('party raid: one boss HP, one death, one reward each, nothing paid twice', 
     await until(b, () => !window.__G.mons().some((x) => x.type === 'gchief' && !x.dead), 5000);
     const after = await b.eval(() => ({ gold: window.__G.S.gold, xp: window.__G.S.xp, lv: window.__G.S.lv, done: window.__G.S.raidDone }));
     assert.ok(after.gold > before.gold || after.lv > before.lv || after.xp > before.xp, 'B got the kill rewards');
+    // plan U057, personal loot: each fighter's own game pays it its own share, so nobody gets ahead of another. The one who
+    // landed the last blow gets the same gold for it as the one who didn't, and B's rewards took nothing from A's
+    const afterA = await a.eval(() => ({ gold: window.__G.S.gold, items: window.__G.S.items.length }));
+    assert.ok(after.gold - before.gold > 0, 'B: the boss gold');
+    assert.equal(afterA.gold - beforeA.gold, after.gold - before.gold, 'the same boss gold for A, who killed it, and B');
     // paid once. Since the shared monsters (5f0a7e2) the group's host runs the boss and its kill message pays each hitter
     // (raid.state, once per death); the party raid's claim (S.raidDone) is only for members too far apart to be one group
     await settle(a, b); await settle(a, b);

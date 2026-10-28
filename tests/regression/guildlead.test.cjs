@@ -72,15 +72,14 @@ test('online guilds: notice, rankings, handing over, taking over from an absent 
     await until([a], () => (window.__GLD.note() || {}).v === 2);
     assert.equal(await a.eval(() => window.__GLD.note().n), 'Bassem', 'an officer writes it too');
     // in G: the notice is the panel's last line, with "Write the guild notice"; B's card offers A the handover
-    await a.page.keyboard.press('KeyG'); await a.step(2);
-    for (let i = 0; i < 2; i++) { await a.eval(() => window.__G.advance()); await a.step(2); }
-    assert.equal(await a.eval(() => document.getElementById('dtext').textContent), '📌 Raid moved to 10 pm (Bassem)');
-    const opts = await a.eval(() => [...document.querySelectorAll('#dopts button')].map((x) => x.textContent.replace(/^\d+\.\s*/, '')));
+    await a.page.keyboard.press('KeyG'); await a.step(2); await a.eval(() => window.__GDW.tab('x')); await a.step(2);
+    assert.ok((await a.eval(() => window.__GDW.lines())).includes('📌 Raid moved to 10 pm (Bassem)'), 'the notice is one of the lines in the guild window');
+    const opts = await a.eval(() => [...document.querySelectorAll('#dopts button, #gwB .gwopts button')].map((x) => x.textContent.replace(/^\d+\.\s*/, '')));
     assert.ok(opts.includes('Write the guild notice') && opts.includes('Guild rankings'), opts.join(' | '));
     await a.eval(() => window.__GG.members()); await a.step(2);
-    for (let i = 0; i < 3 && await a.eval(() => document.getElementById('dopts').hidden); i++) { await a.eval(() => window.__G.advance()); await a.step(2); }
-    await a.eval(() => [...document.querySelectorAll('#dopts button')].find((x) => /Bassem/.test(x.textContent)).click()); await a.step(2);
-    assert.ok((await a.eval(() => [...document.querySelectorAll('#dopts button')].map((x) => x.textContent).join('|'))).includes('Hand the guild to Bassem'));
+    for (let i = 0; i < 3 && await a.eval(() => (document.getElementById('dopts').hidden && !document.querySelector('#gwB .gwopts button'))); i++) { await a.eval(() => window.__G.advance()); await a.step(2); }
+    await a.eval(() => [...document.querySelectorAll('#dopts button, #gwB .gwopts button')].find((x) => /Bassem/.test(x.textContent)).click()); await a.step(2);
+    assert.ok((await a.eval(() => [...document.querySelectorAll('#dopts button, #gwB .gwopts button')].map((x) => x.textContent).join('|'))).includes('Hand the guild to Bassem'));
     await a.page.keyboard.press('Escape'); await a.step(2);
 
     // rankings: Leaders (5,000 contributed, Lv 2) and C's new guild among the canon ones, a star on your own

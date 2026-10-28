@@ -52,3 +52,14 @@ test('every crafted or dropped item has its own name', () => {
 test('skill and item texts do not cite the novel', () => {
   assert.doesNotMatch(html, /\((?:الرواية|Novel)[^)]*\)|\(novel\)/);
 });
+
+// owner 2026-10-22: six exploring achievements showed their raw key (achD_zones30) for a description
+test('every achievement has a name and a description in both languages', () => {
+  const ks = new Set([...html.matchAll(/\{k:'(\w+)',c:/g)].map((m) => m[1]));
+  assert.ok(ks.size > 30);
+  const has = (key) => (html.match(new RegExp(`["']?\\b${key}["']?\\s*:\\s*["'\`]`, 'g')) || []).length >= 2;
+  for (const k of ks) {
+    assert.ok(has('ach_' + k), `ach_${k} needs an Arabic and an English name`);
+    assert.ok(has('achD_' + k), `achD_${k} needs an Arabic and an English description`);
+  }
+});

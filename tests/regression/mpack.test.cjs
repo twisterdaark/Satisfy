@@ -1,6 +1,6 @@
 'use strict';
 // Owner 2026-10-21, patch 1 of the third batch: the monster pack (plan U114, U115, U120, U139, U141, U142) and the bag
-// tabs, quest filters and photo mode (U255, U208, U303).
+// tabs, quest filters and photo mode with its free camera (U255, U208, U303).
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const H = require('../harness/game.cjs');
@@ -95,6 +95,16 @@ test('bag tabs, quest filters and photo mode', async () => {
     assert.equal(await g.eval(() => [window.__GUX.photo, document.body.classList.contains('photo'), getComputedStyle(document.querySelector('#photoBar button')).visibility].join()), 'true,true,visible');
     assert.equal(await g.eval(() => getComputedStyle(document.getElementById('skillbar')).visibility), 'hidden', 'the HUD hides');
     assert.match(await g.eval(() => window.__GUX.shot()), /^data:image\/png;base64,/);
+    // U303: the arrows move the camera away from you, you stand still; C brings it back
+    const x0 = await g.eval(() => window.__G.P.x);
+    await g.page.keyboard.down('ArrowRight'); await g.step(30); await g.page.keyboard.up('ArrowRight'); await g.step(2);
+    const cam = await g.eval(() => [window.__GUX.phc.x, window.__G.P.x]);
+    assert.ok(cam[0] > 20, 'the camera moved: ' + cam[0]); assert.equal(cam[1], x0, 'and you did not');
+    await g.page.keyboard.press('KeyC'); await g.step(2);
+    assert.deepEqual(await g.eval(() => window.__GUX.phc), { x: 0, y: 0 }, 'C brings the camera back');
+    // (review) nor a dodge: Space with an arrow held moves nothing
+    await g.page.keyboard.down('ArrowRight'); await g.page.keyboard.press('Space'); await g.step(20); await g.page.keyboard.up('ArrowRight'); await g.step(2);
+    assert.equal(await g.eval(() => window.__G.P.x), x0, 'no dodge in photo mode');
     await g.page.keyboard.press('Escape'); await g.step(3);
     assert.equal(await g.eval(() => window.__GUX.photo), false);
     assert.equal(await g.eval(() => window.__G.mode), 'play', 'Esc leaves photo mode, not the game');

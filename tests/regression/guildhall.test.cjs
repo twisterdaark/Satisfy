@@ -33,12 +33,12 @@ async function signIn(ctx, k, uid, name, look) {
   return g;
 }
 async function opts(g) {
-  for (let i = 0; i < 4 && await g.eval(() => document.getElementById('dopts').hidden); i++) { await g.eval(() => window.__G.advance()); await g.step(2); }
-  return g.eval(() => [...document.querySelectorAll('#dopts button')].map((x) => x.textContent.replace(/^\d+\.\s*/, '')));
+  for (let i = 0; i < 4 && await g.eval(() => (document.getElementById('dopts').hidden && !document.querySelector('#gwB .gwopts button'))); i++) { await g.eval(() => window.__G.advance()); await g.step(2); }
+  return g.eval(() => [...document.querySelectorAll('#dopts button, #gwB .gwopts button')].map((x) => x.textContent.replace(/^\d+\.\s*/, '')));
 }
 async function pick(g, re) {
   await opts(g);
-  await g.eval((src) => { const r = new RegExp(src); const b = [...document.querySelectorAll('#dopts button')].find((x) => r.test(x.textContent.replace(/^\d+\.\s*/, ''))); if (!b) throw new Error('no option ' + src); b.click(); }, re.source);
+  await g.eval((src) => { const r = new RegExp(src); const b = [...document.querySelectorAll('#dopts button, #gwB .gwopts button')].find((x) => r.test(x.textContent.replace(/^\d+\.\s*/, ''))); if (!b) throw new Error('no option ' + src); b.click(); }, re.source);
   await g.step(2);
 }
 const GID = 'g_gHlA1';
@@ -67,9 +67,9 @@ test('the guild hall: furnished by the master, members and invited guests only, 
     await settle(a, b, c);
 
     // G -> Guild hall: the master furnishes place 1 with a table
-    await a.page.keyboard.press('KeyG'); await a.step(2);
+    await a.page.keyboard.press('KeyG'); await a.step(2); await a.eval(() => window.__GDW.tab('x')); await a.step(2);
     await pick(a, /^Guild hall$/);
-    await until([a], () => /The guild hall: 0 of 8 places furnished/.test(document.getElementById('dtext').textContent));
+    await until([a], () => /The guild hall: 0 of 8 places furnished/.test((window.__GDW.on() ? window.__GDW.text() : document.getElementById('dtext').textContent)));
     assert.deepEqual(await opts(a), ['Go in', 'Furnish the hall', 'Guests', "Other guilds' halls you may visit", 'Back']);
     await pick(a, /Furnish the hall/);
     await pick(a, /^Place 1: empty$/);
@@ -79,14 +79,14 @@ test('the guild hall: furnished by the master, members and invited guests only, 
     assert.deepEqual([s0.k, s0.by, s0.n, typeof s0.t], ['table', 'gHlA1', 'Ahmed', 'number'], 'who placed it and when');
     assert.deepEqual((await opts(a)).slice(0, 2), ['Place 1: Table', 'Place 2: empty']);
     await pick(a, /^Place 1: Table$/);
-    assert.match(await a.eval(() => document.getElementById('dtext').textContent), /Place 1 · now: Table \(by Ahmed\)/);
+    assert.match(await a.eval(() => (window.__GDW.on() ? window.__GDW.text() : document.getElementById('dtext').textContent)), /Place 1 · now: Table \(by Ahmed\)/);
     await pick(a, /^Back$/); await pick(a, /^Back$/); await pick(a, /^Back$/);
     await a.page.keyboard.press('Escape'); await a.step(2);
 
     // a member can't furnish, nor can anyone write a piece outside the list
-    await b.page.keyboard.press('KeyG'); await b.step(2);
+    await b.page.keyboard.press('KeyG'); await b.step(2); await b.eval(() => window.__GDW.tab('x')); await b.step(2);
     await pick(b, /^Guild hall$/);
-    await until([b], () => /The guild hall: 1 of 8 places furnished/.test(document.getElementById('dtext').textContent));
+    await until([b], () => /The guild hall: 1 of 8 places furnished/.test((window.__GDW.on() ? window.__GDW.text() : document.getElementById('dtext').textContent)));
     assert.deepEqual(await opts(b), ['Go in', "Other guilds' halls you may visit", 'Back']);
     assert.equal(await write(b, 'guildHall/' + GID + '/s1', { k: 'bed', by: 'gHlB2', n: 'Bassem', t: { '.sv': 'timestamp' } }), 'no');
     assert.equal(await write(a, 'guildHall/' + GID + '/s1', { k: 'throne', by: 'gHlA1', n: 'Ahmed', t: { '.sv': 'timestamp' } }), 'no');
@@ -112,29 +112,29 @@ test('the guild hall: furnished by the master, members and invited guests only, 
 
     // C, outside the guild, can't read it and has no invitation
     assert.equal(await read(c, 'guildHall/' + GID), 'no');
-    await c.page.keyboard.press('KeyG'); await c.step(2);
+    await c.page.keyboard.press('KeyG'); await c.step(2); await c.eval(() => window.__GDW.tab('x')); await c.step(2);
     await pick(c, /Other guilds' halls you may visit/);
-    await until([c], () => /No guild has let you in yet/.test(document.getElementById('dtext').textContent));
+    await until([c], () => /No guild has let you in yet/.test((window.__GDW.on() ? window.__GDW.text() : document.getElementById('dtext').textContent)));
     await pick(c, /^Back$/); await c.page.keyboard.press('Escape'); await c.step(2);
 
     // the master lets C in by account ID (each page set its own ID in its copy of the fake: the others' copies learn it here)
     for (const g of [a, b, c]) await g.eval(() => { const D = window.__fakeRTDB.data; [['gHlA1', 'Ahmed'], ['gHlB2', 'Bassem'], ['gHlC3', 'Carim']].forEach(([u, n]) => { D.set('accountIds/' + u, n); D.set('handles/' + n.toLowerCase(), u); }); });
     await a.eval(() => window.__GHALL.menu()); await a.step(2);
     await pick(a, /^Guests$/);
-    await until([a], () => /No guests yet/.test(document.getElementById('dtext').textContent));
+    await until([a], () => /No guests yet/.test((window.__GDW.on() ? window.__GDW.text() : document.getElementById('dtext').textContent)));
     await pick(a, /Let a player in/);
     await a.eval(() => { document.getElementById('lineIn').value = 'carim'; document.querySelector('#gnBox button').click(); });
     await until([a], () => /Carim may visit the hall now/.test(window.__toastSeen));
     assert.equal(await a.eval((gid) => window.__fakeRTDB.data.get('guildHallGuest/' + gid + '/gHlC3').n, GID), 'Carim');
     assert.equal(await a.eval((gid) => window.__fakeRTDB.data.get('hallInv/gHlC3/' + gid).g, GID), 'Dragons');
-    await until([a], () => /Guests who may come in: Carim/.test(document.getElementById('dtext').textContent));
+    await until([a], () => /Guests who may come in: Carim/.test((window.__GDW.on() ? window.__GDW.text() : document.getElementById('dtext').textContent)));
     await pick(a, /^Back$/); await a.page.keyboard.press('Escape'); await a.step(2);
 
     // C finds it in the guild panel, goes in, sees the table and the members, and still can't furnish
     const cx0 = await c.eval(() => [Math.round(window.__G.P.x), Math.round(window.__G.P.y)]);
-    await c.page.keyboard.press('KeyG'); await c.step(2);
+    await c.page.keyboard.press('KeyG'); await c.step(2); await c.eval(() => window.__GDW.tab('x')); await c.step(2);
     await pick(c, /Other guilds' halls you may visit/);
-    await until([c], () => /Guild halls you may visit:/.test(document.getElementById('dtext').textContent));
+    await until([c], () => /Guild halls you may visit:/.test((window.__GDW.on() ? window.__GDW.text() : document.getElementById('dtext').textContent)));
     await pick(c, /^The hall of Dragons$/);
     await pick(c, /^Go in$/);
     await until([c], () => window.__GHALL.inside() && !!window.__GHALL.v && !!window.__GHALL.v.slots.s0);
