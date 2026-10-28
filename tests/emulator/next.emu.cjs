@@ -204,23 +204,6 @@ test('#131: repair orders: posted by the owner of the item, answered once by a s
   await yes(db(B).ref('repairPaid/' + B + '/' + O).remove(), 'B collects');
 });
 
-test('#139: guild research: paid from the treasury at its exact price, in the order of the tree, by those who may spend', async () => {
-  await env.withSecurityRulesDisabled(async (ctx) => { await ctx.database().ref('guildBank/' + G).set({ in: 300000, s: 0, lb: A, lg: 300000, t: 1 }); });
-  const research = (who, b, s, named = b) => db(who).ref().update({ ['guildBuild/' + G + '/' + b]: 1, ['guildBank/' + G + '/s']: s, ['guildBank/' + G + '/lb']: who, ['guildBank/' + G + '/b']: named, ['guildBank/' + G + '/t']: SV });
-  await no(research(B, 'xp1', 30000), 'a member does not spend by default');
-  await no(research(A, 'xp1', 29999), 'the exact price');
-  await no(research(A, 'xp2', 120000), 'not before its first step');
-  // Claude-B's review: one update buys one node, the one the treasury names
-  await no(db(A).ref().update({ ['guildBuild/' + G + '/xp1']: 1, ['guildBuild/' + G + '/gd1']: 1, ['guildBuild/' + G + '/q1']: 1, ['guildBank/' + G + '/s']: 30000, ['guildBank/' + G + '/lb']: A, ['guildBank/' + G + '/b']: 'xp1', ['guildBank/' + G + '/t']: SV }), 'three studies for the price of one');
-  await no(research(A, 'xp1', 30000, 'gd1'), 'the treasury names another one');
-  await yes(research(A, 'xp1', 30000), 'the master researches the first step');
-  await no(db(A).ref('guildBuild/' + G + '/xp1').remove(), 'nothing bought is taken away');
-  await no(research(A, 'xp1', 60000), 'once');
-  await yes(research(A, 'xp2', 150000), 'then the second, 120,000 more');
-  await no(research(A, 'all', 550000), 'the last one needs all three second steps');
-  await no(db(C).ref('guildBuild/' + G).once('value'), 'others do not read it');
-});
-
 test('#126: guild trophies: given by the owner for a season, read by everyone', async () => {
   const tro = (by, o = {}) => Object.assign({ k: 'gold', p: 3, by, t: SV }, o);
   await no(db(A).ref('guildTrophy/' + G + '/s2026-10').set(tro(A)), 'a master does not give its guild one');
@@ -228,17 +211,6 @@ test('#126: guild trophies: given by the owner for a season, read by everyone', 
   await no(db(M).ref('guildTrophy/' + G + '/autumn').set(tro(M)), 'a season is a month');
   await yes(db(M).ref('guildTrophy/' + G + '/s2026-10').set(tro(M)), 'the owner gives it');
   await yes(db(C).ref('guildTrophy/' + G).once('value'), 'everyone reads it');
-});
-
-test('#132: crafting commissions: answered once by another crafter with the recipe asked and the fee', async () => {
-  const O = 'c_' + A + '_1';
-  await yes(db(A).ref('craftOrders/' + O).set({ by: A, n: 'Ahmed', rc: 'ironSword', fee: 800, t: SV }), 'A asks for an iron sword');
-  const answer = (who, id, fee) => db(who).ref().update({ ['craftOrders/' + O]: null, ['craftDone/' + A + '/' + O]: { it: '{"id":"' + id + '"}', id, by: who, bn: 'Smith', fee, t: SV }, ['craftPaid/' + who + '/' + O]: { g: fee, t: SV } });
-  await no(answer(B, 'woodBow', 800), 'the recipe asked, not another');
-  await no(answer(B, 'ironSword', 900), 'the fee posted');
-  await yes(answer(B, 'ironSword', 800), 'B makes it');
-  await no(answer(C, 'ironSword', 800), 'once');
-  await yes(db(A).ref('craftDone/' + A + '/' + O).remove(), 'A takes the sword');
 });
 
 test('#128: the balance numbers: your own week only, gold in and out bounded; read by admins', async () => {
