@@ -2,7 +2,7 @@
 
 Status: **art only, not loaded by the game.** It was drawn on 2026-10-29 for the Roblox port's opening. The owner felt it suits this web game better than Roblox, so it is kept here to be added to Satisfy later instead of being lost. Nothing in `index.html` or `src/` uses it yet.
 
-All files live in `sprites-original/opening/` (listed in `docs/art/provenance.json`). It is 16:9 2D pixel art drawn by PIL scripts, exported at 2x.
+All files live in `sprites-original/opening/` (listed in `docs/art/provenance.json`). It is 2D pixel art drawn by PIL scripts at 480x270 and exported at 2x (nearest), so the scenes are 960x540 (16:9). Two exceptions: `in_legend.png` is a 400x400 square, and the walk frames are 64x112 (exported at 4x).
 
 ## The files
 
@@ -14,10 +14,10 @@ Six full-frame layers, bottom to top (every layer above the sky has transparency
 |---|---|
 | `ts_sky.png` | Night sky gradient, stars, the full moon with a dithered halo |
 | `ts_mtn.png` | Snow-tipped purple mountains |
-| `ts_castle.png` | The castle on its hill, lit windows and orange flags |
+| `ts_castle.png` | The castle on its hill, lit windows, red-and-gold flags and a lantern path up the hill |
 | `ts_trees.png` | The pine forest line in front of the castle |
 | `ts_fog.png` | A dithered fog band over the forest |
-| `ts_front.png` | Dark foreground pines and ground (closest layer) |
+| `ts_front.png` | Dark grassy rise with big pines at the edges and fireflies (closest layer) |
 
 `previews/ts_preview.png` and `previews/ts_preview2.png` show the layers composed.
 
@@ -25,11 +25,11 @@ Six full-frame layers, bottom to top (every layer above the sky has transparency
 
 | File | Scene |
 |---|---|
-| `in_grid.png` | VR boot: a blue perspective grid going to the horizon, where a player counter fits (Satisfy's "over 2 billion players") |
+| `in_grid.png` | VR boot: a light-blue perspective grid going to the horizon (transparent above it), where a player counter fits (Satisfy's "over 2 billion players") |
 | `in_gate.png` | Winston's gate at dawn: town wall, banners, torches, the open lit gate, a dirt road |
 | `in_walk1.png`, `in_walk2.png` | Two walk frames of the new player on that road, walking into the gate |
-| `in_rumor.png` | A hooded smith (Grid) at a glowing forge, hammer up, sparks |
-| `in_legend.png` | A legendary-class silhouette with glowing eyes inside a gold dithered aura |
+| `in_rumor.png` | A hooded smith (Grid) at a glowing forge and anvil, hammer up, glowing eyes, sparks |
+| `in_legend.png` | A legendary-class silhouette (cloaked, holding a long blade) with glowing eyes inside a gold dithered aura; square, transparent outside the aura |
 
 `previews/in_preview.png` shows the four scenes in a 2x2 grid.
 
