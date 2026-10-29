@@ -8,6 +8,9 @@
     { "path": "sprites-original/sheets/*.png", "origin": "Rendered from sprites-original/*.js by tools/export-sheets.cjs.", "licence": "The game's own." },
     { "path": "sprites-original/sheets/monsters/*.png", "origin": "Rendered from sprites-original/monsters.js by tools/export-sheets.cjs.", "licence": "The game's own." },
     { "path": "sprites-original/sheets/manifest.json", "origin": "Written by tools/export-sheets.cjs beside the sheets.", "licence": "The game's own." },
+    { "path": "sprites-original/opening/*.png", "origin": "Opening art drawn for the Roblox port's title and intro (PIL generators in sprites-original/opening/tools), kept here for the web game; not loaded by the game yet. See docs/art/OPENING_ART.md.", "licence": "The game's own." },
+    { "path": "sprites-original/opening/previews/*.png", "origin": "Previews of the opening art (title scene composed, the 4 intro shots in a grid).", "licence": "The game's own." },
+    { "path": "sprites-original/opening/tools/*.py", "origin": "PIL scripts that draw the opening art.", "licence": "The game's own." },
     { "path": "icons/icon-192.png", "origin": "The app icon: a sword on navy in the game's interface colours. Added with the mobile port (a49f3dd8, v0.76); the script that drew it isn't in the repository.", "licence": "The game's own (to confirm with the owner)." },
     { "path": "icons/icon-512.png", "origin": "The same app icon, larger. Added with icon-192.png.", "licence": "The game's own (to confirm with the owner)." }
   ],
