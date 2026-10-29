@@ -7,6 +7,14 @@
 (function (root) {
   var ns = root.Satisfy = root.Satisfy || {};
   ns.CHANGELOG = [
+    { v: '2026-10-29openart', ver: '3.79', d: '2026-10-29',
+      ar: ["شاشة البداية اتغيّرت: منظر بيكسل بالليل بالقمر والجبال والقلعة والغابة والضباب، وكل طبقة بتتحرك بسرعتها (بارالاكس) ورا اللوجو والأزرار. اللوجو والبريق والشرار زي ما هم.",
+        "مقدمة اللعبة الجديدة بقت بصور: «ساتيسفاي» فوق شبكة الواقع الافتراضي وعداد لاعبين بيعد لحد ملياري لاعب، ودخولك وينستون وإنت ماشي ناحية البوابة، والشائعة عن جريد عند الفرن وبعدين صورة الكلاس الأسطوري. «كمّل» بيوديك للصورة اللي بعدها و«تخطي المقدمة» زي ما هو.",
+        "اختبار جديد لده."],
+      en: ["A new title screen: a pixel night scene with the moon, mountains, a castle, a forest and fog, each layer drifting at its own speed (parallax) behind the logo and buttons. The logo float, shine and embers stay.",
+        "The new-game intro has pictures now: Satisfy over a VR grid with a player counter counting up to two billion, your first login in Winston walking up to the gate, and the rumour of Grid at a forge fading into a legendary class. Continue goes to the next shot and Skip intro works as before.",
+        "A new test for this."],
+      hide: [2] },
     { v: '2026-10-28ixfit', ver: '3.78', d: '2026-10-28',
       ar: ["إصلاح: في الإندكس، صفحة الوحوش: كارت الوحش كان بيطوّل لحد ما يزقّ ليستة الوحوش تحته لشريط رفيع ميتعملش فيه سكرول. دلوقتي الكارت ليه حد وبيعمل سكرول لوحده زي باقي صفحات الإندكس، والليستة تحته باينة وبتعمل سكرول، على الكمبيوتر وعلى الموبايل.",
         "اختبار جديد لده."],

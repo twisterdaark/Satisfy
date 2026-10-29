@@ -1,6 +1,6 @@
-# Opening art: title scene and intro shots (TODO, not wired in)
+# Opening art: title scene and intro shots
 
-Status: **art only, not loaded by the game.** It was drawn on 2026-10-29 for the Roblox port's opening. The owner felt it suits this web game better than Roblox, so it is kept here to be added to Satisfy later instead of being lost. Nothing in `index.html` or `src/` uses it yet.
+Status: **wired in since v3.79** (title parallax behind `#titleScreen`, intro shots in `#cardP` via `card(keys, skippable, pics)` and `cardShot()` in `index.html`; test `tests/regression/opening.test.cjs`). It was drawn on 2026-10-29 for the Roblox port's opening. The owner felt it suits this web game better than Roblox, so it was kept here and added to Satisfy.
 
 All files live in `sprites-original/opening/` (listed in `docs/art/provenance.json`). It is 2D pixel art drawn by PIL scripts at 480x270 and exported at 2x (nearest), so the scenes are 960x540 (16:9). Two exceptions: `in_legend.png` is a 400x400 square, and the walk frames are 64x112 (exported at 4x).
 
@@ -46,10 +46,12 @@ Six full-frame layers, bottom to top (every layer above the sky has transparency
    - `w3` (the rumour about Grid's legendary class) over `in_rumor`, then a fade to `in_legend`.
 3. Skip and click-to-advance stay as they are now.
 
-## TODO to add it
+As built: the intro is one shot per text (Continue / Enter / Space goes to the next shot and closes on the last, Skip or Escape closes at once); the counter runs 0 to 2,000,000,000 in 3 s and then keeps ticking; the walker goes from the road's foot to the gate in 5 s; the rumour fades to the legend after 2.8 s. Layers drift by CSS animation only (no mouse parallax); reduced motion stops the drift.
 
-- [ ] Load the images from the repository (no outside hosts; `tests/unit/provenance.test.cjs` checks this).
-- [ ] Title: stack the six layers in `#titleScreen` with `image-rendering: pixelated`, scaled to cover; parallax by CSS animation (or by mouse position on PC).
-- [ ] Intro: show each card's picture above its text; cross-fades between shots; the walk frames swap about every 0.25 s.
-- [ ] Mobile: the scenes are 16:9, so crop from the centre on tall screens.
-- [ ] Changelog entry (Arabic and English) when it ships.
+## TODO to add it (done in v3.79)
+
+- [x] Load the images from the repository (no outside hosts; `tests/unit/provenance.test.cjs` checks this).
+- [x] Title: stack the six layers in `#titleScreen` with `image-rendering: pixelated`, scaled to cover; parallax by CSS animation (or by mouse position on PC).
+- [x] Intro: show each card's picture above its text; cross-fades between shots; the walk frames swap about every 0.25 s.
+- [x] Mobile: the scenes are 16:9, so crop from the centre on tall screens.
+- [x] Changelog entry (Arabic and English) when it ships.
